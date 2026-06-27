@@ -1,0 +1,80 @@
+# BioF3 Local — Electron Builder 配置
+
+appId: com.biof3.local
+productName: BioF3
+copyright: Copyright © 2026 BioF3
+
+directories:
+  output: dist
+  buildResources: resources
+
+# 打包进安装包的文件（R/Python Runtime 在 resources/ 下）
+files:
+  - src/**/*
+  - resources/r-server/**/*
+  - resources/site/**/*
+  - resources/R/**/*
+  - resources/Python/**/*
+  - resources/fonts/**/*
+  - package.json
+
+# macOS 特定
+mac:
+  category: public.app-category.education
+  icon: icons/icon.icns
+  target:
+    - target: dmg
+      arch:
+        - arm64
+        - x64
+  hardenedRuntime: true
+  # v1 不签名，用户需右键打开；v3 买 Apple Developer 账号后启用
+  # identity: null
+  # notarize: false
+
+# Windows 特定
+win:
+  icon: icons/icon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+  # v1 不签名；v3 买代码签名证书后启用
+  # certificateFile: ''
+  # signAndEditExecutable: false
+
+# NSIS 安装器配置
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  installerIcon: icons/icon.ico
+  uninstallerIcon: icons/icon.ico
+  installerHeaderIcon: icons/icon.ico
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: BioF3
+
+# 压缩
+compression: maximum
+
+# 不打包 node_modules（r-server 自己有 node_modules，单独处理）
+extraResources:
+  - from: ../r-server
+    to: r-server
+    filter:
+      - "**/*"
+      - "!node_modules/**"
+      - "!node_modules"
+  - from: ../py-server
+    to: py-server
+    filter:
+      - "**/*"
+      - "!node_modules/**"
+      - "!node_modules"
+  - from: ../shared-backend
+    to: shared-backend
+    filter:
+      - "**/*"
+      - "!node_modules/**"
+      - "!node_modules"
