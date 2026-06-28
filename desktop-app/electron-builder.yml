@@ -8,15 +8,11 @@ directories:
   output: dist
   buildResources: resources
 
-# 打包进安装包的文件（R/Python Runtime 在 resources/ 下）
+# 打包进 Electron app bundle 的文件
 files:
   - src/**/*
-  - resources/r-server/**/*
-  - resources/site/**/*
-  - resources/R/**/*
-  - resources/Python/**/*
-  - resources/fonts/**/*
   - package.json
+  - "!**/.DS_Store"
 
 # macOS 特定
 mac:
@@ -26,11 +22,10 @@ mac:
     - target: dmg
       arch:
         - arm64
-        - x64
   hardenedRuntime: true
-  # v1 不签名，用户需右键打开；v3 买 Apple Developer 账号后启用
-  # identity: null
-  # notarize: false
+  # v1 不签名，用户需右键打开
+  identity: null
+  notarize: false
 
 # Windows 特定
 win:
@@ -39,18 +34,12 @@ win:
     - target: nsis
       arch:
         - x64
-  # v1 不签名；v3 买代码签名证书后启用
-  # certificateFile: ''
-  # signAndEditExecutable: false
 
 # NSIS 安装器配置
 nsis:
   oneClick: false
   perMachine: false
   allowToChangeInstallationDirectory: true
-  installerIcon: icons/icon.ico
-  uninstallerIcon: icons/icon.ico
-  installerHeaderIcon: icons/icon.ico
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: BioF3
@@ -58,23 +47,45 @@ nsis:
 # 压缩
 compression: maximum
 
-# 不打包 node_modules（r-server 自己有 node_modules，单独处理）
+# 额外资源：r-server / py-server / shared-backend / 前端 build 产物 / 内置插件
+# r-server 和 py-server 作为子进程 spawn，需要带上各自的 node_modules
+#
+# R/Python Runtime 已移除 — 改为插件商店按需下载（~200MB 初始包）
+# 打包脚本: scripts/build-runtime-plugins.sh → 上传 OSS → manifest.json 注册
+# 用户首次启动后在插件商店下载 R/Python Runtime 到 ~/Documents/BioF3-Local/runtimes/
 extraResources:
   - from: ../r-server
     to: r-server
     filter:
       - "**/*"
-      - "!node_modules/**"
-      - "!node_modules"
+      - "!**/.DS_Store"
+      - "!**/*.log"
+      - "!**/test*"
   - from: ../py-server
     to: py-server
     filter:
       - "**/*"
-      - "!node_modules/**"
-      - "!node_modules"
+      - "!**/.DS_Store"
+      - "!**/*.log"
+      - "!**/test*"
   - from: ../shared-backend
     to: shared-backend
     filter:
       - "**/*"
-      - "!node_modules/**"
-      - "!node_modules"
+      - "!**/.DS_Store"
+  - from: ../build
+    to: build
+    filter:
+      - "**/*"
+      - "!**/.DS_Store"
+      # 排除 exports/（629MB 静态报告页，桌面版不需要，web 版专用）
+      - "!**/exports/**"
+  # 内置插件（插件商店默认可用，无需联网）
+  - from: ./resources/built-in-plugins
+    to: built-in-plugins
+    filter:
+      - "**/*"
+      - "!**/.DS_Store"
+  # fix-r-paths.sh — R Runtime 安装时调用（修正 dylib 路径）
+  - from: ./scripts/fix-r-paths.sh
+    to: scripts/fix-r-paths.sh

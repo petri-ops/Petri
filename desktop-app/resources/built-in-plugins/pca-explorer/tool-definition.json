@@ -1,0 +1,37 @@
+{
+  "id": "pca-explorer",
+  "title": "PCA 可视化",
+  "subtitle": "降维分析",
+  "category": "机器学习",
+  "language": "python",
+  "description": "PCA 降维 + 散点图",
+  "inputs": [
+    {
+      "id": "expr_matrix",
+      "label": "表达矩阵 (CSV: 行=样本, 列=基因)",
+      "type": "file",
+      "required": true,
+      "accept": ".csv"
+    },
+    {
+      "id": "group_file",
+      "label": "分组文件 (CSV: sample, group)，可选",
+      "type": "file",
+      "required": false,
+      "accept": ".csv",
+      "hint": "不提供则按样本顺序均分两组"
+    },
+    {
+      "id": "n_components",
+      "label": "主成分数量",
+      "type": "number",
+      "default": 2,
+      "hint": "默认 2（绘制 PC1 vs PC2）"
+    }
+  ],
+  "outputs": [
+    { "id": "pca_plot", "type": "plot", "label": "PCA 散点图" },
+    { "id": "variance_table", "type": "table", "label": "方差贡献表" }
+  ],
+  "estimatedMinutes": 2
+}

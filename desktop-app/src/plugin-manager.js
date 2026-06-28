@@ -19,11 +19,39 @@ const https = require('https');
 const crypto = require('crypto');
 const { execFile } = require('child_process');
 
+// 注册 R/Python 执行器（plugin-manager 在 Electron 主进程跑，不经过 r-server
+// 的 init 流程，必须自己调 initSharedBackend 注册执行器，否则 getExecutor 抛
+// "未注册执行器" 导致 runtime 校验/装包静默失败）
+const SHARED_BACKEND_DIR = fs.existsSync(path.join(__dirname, '..', '..', 'shared-backend'))
+  ? path.join(__dirname, '..', '..', 'shared-backend')
+  : path.join(process.resourcesPath || path.join(__dirname, '..'), 'shared-backend');
+try {
+  require(path.join(SHARED_BACKEND_DIR, 'init')).initSharedBackend();
+} catch (e) {
+  console.warn('[plugin] initSharedBackend failed:', e.message);
+}
+
 // ── 路径 ───────────────────────────────────────────────────────
 const USER_DATA_DIR = path.join(app.getPath('documents'), 'BioF3-Local');
 const PLUGINS_DIR = path.join(USER_DATA_DIR, 'plugins');
+const RUNTIMES_DIR = path.join(USER_DATA_DIR, 'runtimes');
 const INSTALLED_FILE = path.join(PLUGINS_DIR, 'installed.json');
 const RESOURCES_PATH = process.resourcesPath || path.join(__dirname, '..', 'resources');
+
+// fix-r-paths.sh 路径（打包在 resources/scripts/ 下，开发模式在 scripts/ 下）
+function getFixRPathsScript() {
+  if (
+    process.resourcesPath &&
+    fs.existsSync(path.join(process.resourcesPath, 'scripts', 'fix-r-paths.sh'))
+  ) {
+    return path.join(process.resourcesPath, 'scripts', 'fix-r-paths.sh');
+  }
+  // 开发模式
+  return path.join(__dirname, '..', 'scripts', 'fix-r-paths.sh');
+}
+
+// 内置插件目录（打包在 resources/built-in-plugins/）
+const BUILT_IN_PLUGINS_DIR = path.join(RESOURCES_PATH, 'built-in-plugins');
 
 // 远程 manifest URL（插件商店清单）
 const MANIFEST_URL =
@@ -58,10 +86,32 @@ function removeInstalledPlugin(pluginId) {
   saveInstalledPlugins(list);
 }
 
-// ── 远程 manifest ──────────────────────────────────────────────
+// ── 远程 manifest（含本地内置 fallback）─────────────────────────
 
+// 读取本地内置 manifest（打包在 resources/built-in-plugins/manifest.json）
+function getBuiltInManifest() {
+  try {
+    const p = path.join(BUILT_IN_PLUGINS_DIR, 'manifest.json');
+    if (fs.existsSync(p)) {
+      return JSON.parse(fs.readFileSync(p, 'utf8'));
+    }
+  } catch (e) {
+    console.warn('[plugin] built-in manifest read failed:', e.message);
+  }
+  return { plugins: {} };
+}
+
+// 合并远程 + 内置 manifest（内置插件标记 _builtIn: true）
 async function getRemoteManifest() {
-  return new Promise((resolve) => {
+  const builtIn = getBuiltInManifest();
+  const builtInPlugins = {};
+  if (builtIn.plugins) {
+    for (const [id, info] of Object.entries(builtIn.plugins)) {
+      builtInPlugins[id] = { ...info, _builtIn: true };
+    }
+  }
+  // 尝试远程
+  const remote = await new Promise((resolve) => {
     let buf = '';
     const req = https.get(MANIFEST_URL, { timeout: 15000 }, (res) => {
       if (res.statusCode !== 200) {
@@ -84,6 +134,9 @@ async function getRemoteManifest() {
       resolve({ plugins: {} });
     });
   });
+  // 合并：远程优先（同 id 时远程覆盖内置，便于未来推送更新）
+  const merged = { plugins: { ...builtInPlugins, ...(remote.plugins || {}) } };
+  return merged;
 }
 
 // ── 平台检测 ───────────────────────────────────────────────────
@@ -140,13 +193,18 @@ function downloadFile(url, destPath, onProgress) {
 // ── SHA256 校验 ────────────────────────────────────────────────
 
 function verifyChecksum(filePath, expectedSha256) {
+  // 兼容 "sha256:<hex>" 和纯 "<hex>" 两种格式
+  const expected = String(expectedSha256)
+    .replace(/^sha256:/i, '')
+    .trim()
+    .toLowerCase();
   return new Promise((resolve) => {
     const hash = crypto.createHash('sha256');
     const stream = fs.createReadStream(filePath);
     stream.on('data', (data) => hash.update(data));
     stream.on('end', () => {
-      const actual = hash.digest('hex');
-      resolve(actual === expectedSha256);
+      const actual = hash.digest('hex').toLowerCase();
+      resolve(actual === expected);
     });
     stream.on('error', () => resolve(false));
   });
@@ -168,18 +226,23 @@ function extractZip(zipPath, destDir) {
           '-Command',
           `Expand-Archive -Path "${zipPath}" -DestinationPath "${destDir}" -Force`,
         ],
-        { timeout: 120000 },
+        { timeout: 120000, maxBuffer: 64 * 1024 * 1024 },
         (err) => {
           if (err) reject(new Error('解压失败: ' + err.message));
           else resolve(destDir);
         }
       );
     } else {
-      // macOS/Linux: 用系统 unzip
-      execFile('unzip', ['-o', zipPath, '-d', destDir], { timeout: 120000 }, (err) => {
-        if (err) reject(new Error('解压失败: ' + err.message));
-        else resolve(destDir);
-      });
+      // macOS/Linux: 用系统 unzip（-q 安静模式，避免大插件 stdout 撑爆默认 1MB maxBuffer）
+      execFile(
+        'unzip',
+        ['-q', '-o', zipPath, '-d', destDir],
+        { timeout: 120000, maxBuffer: 64 * 1024 * 1024 },
+        (err) => {
+          if (err) reject(new Error('解压失败: ' + err.message));
+          else resolve(destDir);
+        }
+      );
     }
   });
 }
@@ -196,13 +259,152 @@ async function installPlugin(pluginId, onProgress) {
     throw new Error(`插件不支持当前平台 ${platform}`);
   }
 
-  // 1. 下载
+  // Runtime 类型走特殊安装路径（下载 → 解压到 runtimes/ → R 修路径 → 更新 env）
+  if (plugin.type === 'runtime') {
+    return installRuntime(pluginId, plugin, onProgress);
+  }
+
+  const isBuiltIn = !!plugin._builtIn;
+  const pluginDir = path.join(PLUGINS_DIR, pluginId);
+  fs.mkdirSync(PLUGINS_DIR, { recursive: true });
+
+  if (isBuiltIn) {
+    // 内置插件：从 resources/built-in-plugins/{id} 复制（不下载）
+    const srcDir = path.join(BUILT_IN_PLUGINS_DIR, pluginId);
+    if (!fs.existsSync(srcDir)) {
+      throw new Error(`内置插件源目录不存在: ${srcDir}`);
+    }
+    console.log(`[plugin] copying built-in ${pluginId} from ${srcDir}`);
+    if (fs.existsSync(pluginDir)) {
+      fs.rmSync(pluginDir, { recursive: true, force: true });
+    }
+    copyDirSync(srcDir, pluginDir);
+  } else {
+    // 远程插件：下载 → 校验 → 解压
+    const zipPath = path.join(PLUGINS_DIR, `${pluginId}-${plugin.version}.zip`);
+    console.log(`[plugin] downloading ${pluginId} from ${plugin.url}`);
+    await downloadFile(plugin.url, zipPath, onProgress);
+
+    if (plugin.checksum) {
+      const ok = await verifyChecksum(zipPath, plugin.checksum);
+      if (!ok) {
+        try {
+          fs.unlinkSync(zipPath);
+        } catch {}
+        throw new Error('校验失败，文件可能损坏');
+      }
+    }
+
+    if (fs.existsSync(pluginDir)) {
+      fs.rmSync(pluginDir, { recursive: true, force: true });
+    }
+    await extractZip(zipPath, pluginDir);
+    try {
+      fs.unlinkSync(zipPath);
+    } catch {}
+
+    // zip 内顶层目录通常是 <plugin-id>-plugin/，解压后会多套一层。
+    // 检测单一嵌套子目录，把内容上提到 pluginDir 根。
+    const entries = fs.readdirSync(pluginDir);
+    if (
+      entries.length === 1 &&
+      fs.statSync(path.join(pluginDir, entries[0])).isDirectory() &&
+      !fs.existsSync(path.join(pluginDir, 'plugin.json'))
+    ) {
+      const nested = path.join(pluginDir, entries[0]);
+      const nestedEntries = fs.readdirSync(nested);
+      for (const e of nestedEntries) {
+        fs.renameSync(path.join(nested, e), path.join(pluginDir, e));
+      }
+      fs.rmdirSync(nested);
+      console.log(`[plugin] flattened nested dir: ${entries[0]}`);
+    }
+  }
+
+  // 读取 plugin.json
+  const metaPath = path.join(pluginDir, 'plugin.json');
+  if (!fs.existsSync(metaPath)) {
+    throw new Error('plugin.json 不存在: ' + metaPath);
+  }
+  const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+  console.log(`[plugin] read plugin.json: id=${meta.id} lang=${meta.language}`);
+
+  // 校验 Runtime 版本
+  const language = meta.language;
+  if (meta.runtime && meta.runtime[language]) {
+    console.log(`[plugin] checking runtime ${language} >= ${meta.runtime[language]}`);
+    const { getExecutor } = require(path.join(SHARED_BACKEND_DIR, 'executors'));
+    const executor = getExecutor(language);
+    if (!executor.checkRuntimeVersion(meta.runtime[language])) {
+      throw new Error(`需要 ${language} >= ${meta.runtime[language]}，当前版本不满足`);
+    }
+    console.log(`[plugin] runtime OK`);
+  }
+
+  // 安装语言包（内置插件通常不带 packages/，跳过）
+  const pkgDir = path.join(pluginDir, 'packages', language);
+  if (fs.existsSync(pkgDir)) {
+    console.log(`[plugin] installing packages from ${pkgDir}`);
+    const { getExecutor } = require(path.join(SHARED_BACKEND_DIR, 'executors'));
+    const executor = getExecutor(language);
+    executor.installPackages(pkgDir);
+    console.log(`[plugin] packages installed for ${pluginId}`);
+  } else {
+    console.log(`[plugin] no packages dir at ${pkgDir}, skipping`);
+  }
+
+  // 校验关键包可加载
+  if (meta.packages && meta.packages[language]) {
+    const { getExecutor } = require(path.join(SHARED_BACKEND_DIR, 'executors'));
+    const executor = getExecutor(language);
+    for (const pkgName of Object.keys(meta.packages[language])) {
+      if (!executor.checkPackageInstalled(pkgName)) {
+        console.warn(`[plugin] 包 ${pkgName} 安装后检查失败（可能需要重启）`);
+      }
+    }
+  }
+
+  // 注册插件到 r-server
+  registerPluginInServer(pluginDir, meta);
+
+  // 记录已装
+  addInstalledPlugin({
+    id: pluginId,
+    version: plugin.version,
+    installedAt: new Date().toISOString(),
+    platform,
+    language,
+    builtIn: isBuiltIn,
+  });
+
+  console.log(
+    `[plugin] installed: ${pluginId} v${plugin.version}${isBuiltIn ? ' (built-in)' : ''}`
+  );
+}
+
+// ── 安装 Runtime（R/Python 基础运行时）──────────────────────────
+// Runtime 赟特殊路径：
+//   1. 下载 zip → 校验 → 解压到 runtimes/{R|Python}/
+//   2. R 需要跑 fix-r-paths.sh 修 dylib 路径；Python 不需要
+//   3. 更新 process.env 让当前 r-server/py-server 立即用上新 Runtime
+//   4. 记录到 installed.json（type: 'runtime'）
+//   5. 不走 registerPluginInServer（Runtime 不是工具插件）
+
+async function installRuntime(pluginId, plugin, onProgress) {
+  const lang = plugin.language; // 'r' or 'python'
+  if (!lang) throw new Error('Runtime 插件缺少 language 字段');
+
+  const runtimeName = lang === 'r' ? 'R' : 'Python';
+  const runtimeDir = path.join(RUNTIMES_DIR, runtimeName);
+  fs.mkdirSync(RUNTIMES_DIR, { recursive: true });
+
+  // 下载 zip
   const zipPath = path.join(PLUGINS_DIR, `${pluginId}-${plugin.version}.zip`);
   fs.mkdirSync(PLUGINS_DIR, { recursive: true });
-  console.log(`[plugin] downloading ${pluginId} from ${plugin.url}`);
+  console.log(`[plugin] downloading runtime ${pluginId} from ${plugin.url}`);
   await downloadFile(plugin.url, zipPath, onProgress);
 
-  // 2. 校验
+  // SHA256 校验
   if (plugin.checksum) {
     const ok = await verifyChecksum(zipPath, plugin.checksum);
     if (!ok) {
@@ -213,68 +415,96 @@ async function installPlugin(pluginId, onProgress) {
     }
   }
 
-  // 3. 解压
-  const pluginDir = path.join(PLUGINS_DIR, pluginId);
-  if (fs.existsSync(pluginDir)) {
-    fs.rmSync(pluginDir, { recursive: true, force: true });
-  }
-  await extractZip(zipPath, pluginDir);
-
-  // 4. 读取 plugin.json
-  const metaPath = path.join(pluginDir, 'plugin.json');
-  if (!fs.existsSync(metaPath)) {
-    throw new Error('plugin.json 不存在');
-  }
-  const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
-
-  // 5. 校验 Runtime 版本
-  const language = meta.language;
-  if (meta.runtime && meta.runtime[language]) {
-    const { getExecutor } = require(path.join(RESOURCES_PATH, 'shared-backend', 'executors'));
-    const executor = getExecutor(language);
-    if (!executor.checkRuntimeVersion(meta.runtime[language])) {
-      throw new Error(`需要 ${language} >= ${meta.runtime[language]}，当前版本不满足`);
-    }
+  // 清旧 Runtime
+  if (fs.existsSync(runtimeDir)) {
+    fs.rmSync(runtimeDir, { recursive: true, force: true });
   }
 
-  // 6. 安装语言包
-  const pkgDir = path.join(pluginDir, 'packages', language);
-  if (fs.existsSync(pkgDir)) {
-    const { getExecutor } = require(path.join(RESOURCES_PATH, 'shared-backend', 'executors'));
-    const executor = getExecutor(language);
-    executor.installPackages(pkgDir);
-    console.log(`[plugin] packages installed for ${pluginId}`);
-  }
-
-  // 7. 校验关键包可加载
-  if (meta.packages && meta.packages[language]) {
-    const { getExecutor } = require(path.join(RESOURCES_PATH, 'shared-backend', 'executors'));
-    const executor = getExecutor(language);
-    for (const pkgName of Object.keys(meta.packages[language])) {
-      if (!executor.checkPackageInstalled(pkgName)) {
-        console.warn(`[plugin] 包 ${pkgName} 安装后检查失败（可能需要重启）`);
-      }
-    }
-  }
-
-  // 8. 注册插件到 r-server
-  registerPluginInServer(pluginDir, meta);
-
-  // 9. 记录已装
-  addInstalledPlugin({
-    id: pluginId,
-    version: plugin.version,
-    installedAt: new Date().toISOString(),
-    platform,
-    language,
-  });
-
-  // 10. 清理 zip
+  // 解压到 runtimes/{R|Python}/
+  await extractZip(zipPath, runtimeDir);
   try {
     fs.unlinkSync(zipPath);
   } catch {}
 
-  console.log(`[plugin] installed: ${pluginId} v${plugin.version}`);
+  // 检测并展开嵌套顶层目录（zip 内可能套一层 R/ 或 Python/）
+  const entries = fs.readdirSync(runtimeDir);
+  if (
+    entries.length === 1 &&
+    fs.statSync(path.join(runtimeDir, entries[0])).isDirectory() &&
+    !fs.existsSync(path.join(runtimeDir, 'bin'))
+  ) {
+    const nested = path.join(runtimeDir, entries[0]);
+    const nestedEntries = fs.readdirSync(nested);
+    for (const e of nestedEntries) {
+      fs.renameSync(path.join(nested, e), path.join(runtimeDir, e));
+    }
+    fs.rmdirSync(nested);
+    console.log(`[plugin] flattened nested runtime dir: ${entries[0]}`);
+  }
+
+  // R 需要修 dylib 路径
+  if (lang === 'r') {
+    const fixScript = getFixRPathsScript();
+    if (!fs.existsSync(fixScript)) {
+      console.warn('[plugin] fix-r-paths.sh not found, R may not start:', fixScript);
+    } else {
+      console.log('[plugin] running fix-r-paths.sh for R runtime...');
+      await new Promise((resolve, reject) => {
+        execFile(
+          'bash',
+          [fixScript, runtimeDir],
+          {
+            timeout: 120000,
+            maxBuffer: 8 * 1024 * 1024,
+          },
+          (err, stdout, stderr) => {
+            if (stdout) console.log(stdout.trim());
+            if (stderr) console.error(stderr.trim());
+            if (err) reject(new Error('R 路径修正失败: ' + err.message));
+            else resolve();
+          }
+        );
+      });
+      console.log('[plugin] R runtime paths fixed');
+    }
+  }
+
+  // 更新当前进程环境变量（让 r-server/py-server 立即用上新 Runtime）
+  if (lang === 'r') {
+    process.env.BIOF3_R_HOME = runtimeDir;
+  } else {
+    process.env.BIOF3_PY_HOME = runtimeDir;
+  }
+
+  // 记录到 installed.json
+  addInstalledPlugin({
+    id: pluginId,
+    version: plugin.version,
+    installedAt: new Date().toISOString(),
+    platform: detectPlatform(),
+    language: lang,
+    type: 'runtime',
+  });
+
+  console.log(`[plugin] runtime installed: ${pluginId} v${plugin.version} → ${runtimeDir}`);
+  console.log('[plugin] ⚠️  restart app to activate new runtime');
+}
+
+// ── Runtime 状态查询 ───────────────────────────────────────────
+
+function getRuntimeStatus() {
+  const rDir = path.join(RUNTIMES_DIR, 'R');
+  const pyDir = path.join(RUNTIMES_DIR, 'Python');
+  return {
+    r: {
+      installed: fs.existsSync(path.join(rDir, 'bin', 'Rscript')),
+      path: fs.existsSync(rDir) ? rDir : null,
+    },
+    python: {
+      installed: fs.existsSync(path.join(pyDir, 'bin', 'python3')),
+      path: fs.existsSync(pyDir) ? pyDir : null,
+    },
+  };
 }
 
 // ── 注册插件到 r-server ────────────────────────────────────────
@@ -297,6 +527,13 @@ function registerPluginInServer(pluginDir, meta) {
 // ── 卸载插件 ───────────────────────────────────────────────────
 
 async function uninstallPlugin(pluginId) {
+  // Runtime 类型走特殊卸载路径
+  const installed = getInstalledPlugins();
+  const plug = installed.find((p) => p.id === pluginId);
+  if (plug && plug.type === 'runtime') {
+    return uninstallRuntime(pluginId, plug);
+  }
+
   const pluginDir = path.join(PLUGINS_DIR, pluginId);
   if (!fs.existsSync(pluginDir)) {
     throw new Error(`插件 ${pluginId} 未安装`);
@@ -331,6 +568,29 @@ async function uninstallPlugin(pluginId) {
   removeInstalledPlugin(pluginId);
 
   console.log(`[plugin] uninstalled: ${pluginId}`);
+}
+
+// ── 卸载 Runtime ───────────────────────────────────────────────
+
+async function uninstallRuntime(pluginId, plug) {
+  const lang = plug.language;
+  const runtimeName = lang === 'r' ? 'R' : 'Python';
+  const runtimeDir = path.join(RUNTIMES_DIR, runtimeName);
+
+  if (fs.existsSync(runtimeDir)) {
+    fs.rmSync(runtimeDir, { recursive: true, force: true });
+    console.log(`[plugin] removed runtime dir: ${runtimeDir}`);
+  }
+
+  // 清环境变量（回退到打包内嵌或 null）
+  if (lang === 'r') {
+    delete process.env.BIOF3_R_HOME;
+  } else {
+    delete process.env.BIOF3_PY_HOME;
+  }
+
+  removeInstalledPlugin(pluginId);
+  console.log(`[plugin] runtime uninstalled: ${pluginId}`);
 }
 
 function removePackage(executor, language, pkgName) {
@@ -377,6 +637,21 @@ async function checkUpdates() {
 async function loadAllPlugins() {
   const installed = getInstalledPlugins();
   for (const plug of installed) {
+    // Runtime 类型：只恢复环境变量，不走 registerPluginInServer
+    if (plug.type === 'runtime') {
+      const runtimeName = plug.language === 'r' ? 'R' : 'Python';
+      const runtimeDir = path.join(RUNTIMES_DIR, runtimeName);
+      if (fs.existsSync(runtimeDir)) {
+        if (plug.language === 'r') process.env.BIOF3_R_HOME = runtimeDir;
+        else process.env.BIOF3_PY_HOME = runtimeDir;
+        console.log(`[plugin] runtime loaded: ${plug.id} → ${runtimeDir}`);
+      } else {
+        console.warn(`[plugin] runtime ${plug.id} directory missing, skipping`);
+      }
+      continue;
+    }
+
+    // 普通工具插件
     const pluginDir = path.join(PLUGINS_DIR, plug.id);
     if (!fs.existsSync(pluginDir)) {
       console.warn(`[plugin] ${plug.id} directory missing, skipping`);
@@ -393,6 +668,21 @@ async function loadAllPlugins() {
 }
 
 // ── helpers ────────────────────────────────────────────────────
+
+// 递归复制目录（用于内置插件安装）
+function copyDirSync(src, dest) {
+  if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+  const entries = fs.readdirSync(src, { withFileTypes: true });
+  for (const entry of entries) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+    if (entry.isDirectory()) {
+      copyDirSync(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
+}
 
 function parseVersion(v) {
   return v.split('.').map((x) => parseInt(x, 10) || 0);
@@ -418,5 +708,7 @@ module.exports = {
   checkUpdates,
   loadAllPlugins,
   detectPlatform,
+  getRuntimeStatus,
   PLUGINS_DIR,
+  RUNTIMES_DIR,
 };

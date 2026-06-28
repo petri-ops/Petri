@@ -1,0 +1,39 @@
+{
+  "id": "gene-correlation",
+  "title": "基因相关性热图",
+  "subtitle": "共表达分析",
+  "category": "功能富集",
+  "language": "r",
+  "description": "计算 top N 基因的相关性热图",
+  "inputs": [
+    {
+      "id": "expr_matrix",
+      "label": "表达矩阵 (CSV: 行=基因, 列=样本)",
+      "type": "file",
+      "required": true,
+      "accept": ".csv"
+    },
+    {
+      "id": "top_n",
+      "label": "选取方差 top N 基因",
+      "type": "number",
+      "default": 30,
+      "hint": "按方差排序取前 N 个基因计算相关性，默认 30"
+    },
+    {
+      "id": "method",
+      "label": "相关系数方法",
+      "type": "select",
+      "default": "pearson",
+      "options": [
+        { "value": "pearson", "label": "Pearson（线性相关）" },
+        { "value": "spearman", "label": "Spearman（秩相关）" }
+      ]
+    }
+  ],
+  "outputs": [
+    { "id": "heatmap", "type": "plot", "label": "相关性热图" },
+    { "id": "corr_matrix", "type": "table", "label": "相关系数矩阵" }
+  ],
+  "estimatedMinutes": 2
+}

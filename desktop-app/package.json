@@ -9,15 +9,16 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
-    "build:win": "electron-builder --win --x64",
-    "build:mac": "electron-builder --mac --arm64 --x64",
-    "build:mac-arm64": "electron-builder --mac --arm64",
-    "build:mac-x64": "electron-builder --mac --x64",
+    "prebuild": "node --check src/main.js && node --check src/preload.js",
+    "build:site": "cd .. && npm run build:desktop",
+    "build:win": "npm run prebuild && npm run build:site && electron-builder --win --x64",
+    "build:mac": "npm run prebuild && npm run build:site && electron-builder --mac --arm64 --x64",
+    "build:mac-arm64": "npm run prebuild && npm run build:site && electron-builder --mac --arm64",
+    "build:mac-x64": "npm run prebuild && npm run build:site && electron-builder --mac --x64",
     "check": "node --check src/main.js && node --check src/preload.js"
   },
-  "dependencies": {},
   "devDependencies": {
-    "electron": "^30.0.0",
+    "electron": "30.5.1",
     "electron-builder": "^24.13.0"
   },
   "engines": {
