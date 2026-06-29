@@ -16,6 +16,18 @@ const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
 
+// ── 自动更新（electron-updater）─────────────────────────────
+// 打包模式下加载 electron-updater；开发模式下跳过（npm start 无打包元数据）
+let autoUpdater = null;
+if (!process.env.ELECTRON_IS_DEV && app.isPackaged) {
+  try {
+    autoUpdater = require('electron-updater');
+    if (autoUpdater.autoUpdater) autoUpdater = autoUpdater.autoUpdater;
+  } catch (e) {
+    console.warn('[desktop] electron-updater not installed — auto-update disabled');
+  }
+}
+
 // ── 路径解析（开发模式 vs 打包模式）────────────────────────────
 // 开发模式（npm start）：r-server/py-server/shared-backend 在项目根目录
 // 打包模式（.exe/.dmg）：在 process.resourcesPath 下
@@ -465,6 +477,81 @@ function setupRuntimeIpc() {
   });
 }
 
+// ── IPC：自动更新（electron-updater）──────────────────────────
+function setupAutoUpdateIpc() {
+  if (!autoUpdater) {
+    // 打包时未安装 electron-updater：所有 IPC 返回 disabled
+    ipcMain.handle('updater:check', async () => ({ ok: false, error: 'auto-update disabled' }));
+    ipcMain.handle('updater:download', async () => ({ ok: false, error: 'auto-update disabled' }));
+    ipcMain.handle('updater:install', async () => ({ ok: false, error: 'auto-update disabled' }));
+    return;
+  }
+
+  autoUpdater.autoDownload = false; // 手动控制下载（用户点"下载"才下）
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  let _updateInfo = null;
+
+  autoUpdater.on('update-available', (info) => {
+    _updateInfo = info;
+    if (mainWindow)
+      mainWindow.webContents.send('updater:update-available', {
+        version: info.version,
+        releaseDate: info.releaseDate,
+        releaseNotes: info.releaseNotes,
+      });
+  });
+
+  autoUpdater.on('update-not-available', () => {
+    if (mainWindow) mainWindow.webContents.send('updater:update-not-available');
+  });
+
+  autoUpdater.on('download-progress', (progress) => {
+    if (mainWindow)
+      mainWindow.webContents.send('updater:download-progress', {
+        percent: progress.percent,
+        transferred: progress.transferred,
+        total: progress.total,
+      });
+  });
+
+  autoUpdater.on('update-downloaded', () => {
+    if (mainWindow) mainWindow.webContents.send('updater:update-downloaded');
+  });
+
+  autoUpdater.on('error', (err) => {
+    console.error('[updater] error:', err.message);
+    if (mainWindow) mainWindow.webContents.send('updater:error', err.message);
+  });
+
+  ipcMain.handle('updater:check', async () => {
+    try {
+      const result = await autoUpdater.checkForUpdates();
+      return { ok: true, hasUpdate: !!_updateInfo, info: _updateInfo };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle('updater:download', async () => {
+    try {
+      await autoUpdater.downloadUpdate();
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle('updater:install', async () => {
+    try {
+      autoUpdater.quitAndInstall();
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+}
+
 // ── IPC：文件对话框（preload 暴露的 files.saveDialog/openDialog）─────────
 function setupFileDialogIpc() {
   ipcMain.handle('file:save-dialog', async (event, defaultName) => {
@@ -515,6 +602,7 @@ async function main() {
   setupPluginIpc();
   setupRuntimeIpc();
   setupFileDialogIpc();
+  setupAutoUpdateIpc();
 
   // 5. 创建窗口
   createWindow();

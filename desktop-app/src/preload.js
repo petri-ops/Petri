@@ -70,4 +70,37 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     saveDialog: (defaultName) => ipcRenderer.invoke('file:save-dialog', defaultName),
     openDialog: (filters) => ipcRenderer.invoke('file:open-dialog', filters),
   },
+
+  // 自动更新（electron-updater）
+  updater: {
+    check: () => ipcRenderer.invoke('updater:check'),
+    download: () => ipcRenderer.invoke('updater:download'),
+    install: () => ipcRenderer.invoke('updater:install'),
+    // 事件监听（前端订阅更新通知）
+    onUpdateAvailable: (cb) => {
+      const handler = (_e, info) => cb(info);
+      ipcRenderer.on('updater:update-available', handler);
+      return () => ipcRenderer.removeListener('updater:update-available', handler);
+    },
+    onUpdateNotAvailable: (cb) => {
+      const handler = () => cb();
+      ipcRenderer.on('updater:update-not-available', handler);
+      return () => ipcRenderer.removeListener('updater:update-not-available', handler);
+    },
+    onDownloadProgress: (cb) => {
+      const handler = (_e, progress) => cb(progress);
+      ipcRenderer.on('updater:download-progress', handler);
+      return () => ipcRenderer.removeListener('updater:download-progress', handler);
+    },
+    onUpdateDownloaded: (cb) => {
+      const handler = () => cb();
+      ipcRenderer.on('updater:update-downloaded', handler);
+      return () => ipcRenderer.removeListener('updater:update-downloaded', handler);
+    },
+    onError: (cb) => {
+      const handler = (_e, msg) => cb(msg);
+      ipcRenderer.on('updater:error', handler);
+      return () => ipcRenderer.removeListener('updater:error', handler);
+    },
+  },
 });
