@@ -1,6 +1,6 @@
 {
-  "version": "1.1.0",
-  "updated": "2026-06-28",
+  "version": "1.2.0",
+  "updated": "2026-06-29",
   "plugins": {
     "biof3-r-runtime": {
       "title": "R 运行时（基础环境）",
@@ -83,78 +83,235 @@
         "python": ">=3.10.0"
       }
     },
-    "figcode-r-extra": {
-      "title": "FigCode R 扩展包（轨迹/质控/统计/荟萃）",
+    "figcode-volcano-animated": {
+      "title": "FigCode · 动画火山图",
       "version": "1.0.0",
-      "type": "figcode-pack",
+      "type": "figcode-card",
       "language": "r",
-      "description": "FigCode 部分卡片所需的额外 R 包：monocle3（轨迹）、scDblFinder（双胞质控）、CytoTRACE（分化潜能）、qqman（曼哈顿图）、pwr（功效分析）、metafor（荟萃分析）、gifski（动画导出）。约 80MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-r-extra/1.0.0/macos-arm64.zip",
-      "size": 80000000,
+      "figcodeCardId": "volcano-animated",
+      "description": "动画火山图卡片所需依赖：gifski（GIF 导出）。约 5MB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-volcano-animated/1.0.0/macos-arm64.zip",
+      "size": 5242880,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": {
-        "r": ["monocle3", "scDblFinder", "CytoTRACE", "qqman", "pwr", "metafor", "gifski"]
-      },
-      "figcodeCards": [
-        "trajectory-branch",
-        "sc-doublet",
-        "cytotrace",
-        "qq-plot",
-        "manhattan",
-        "power-curve",
-        "meta-forest",
-        "volcano-animated"
-      ]
+      "packages": { "r": ["gifski"] }
     },
-    "figcode-py-spatial": {
-      "title": "FigCode Python 空间组学扩展包",
+    "figcode-trajectory-branch": {
+      "title": "FigCode · 轨迹分支图",
       "version": "1.0.0",
-      "type": "figcode-pack",
-      "language": "python",
-      "description": "FigCode 空间组学卡片所需的额外 Python 包：squidpy（空间分析）、scvelo（RNA velocity）、liana（细胞通讯）。约 200MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-py-spatial/1.0.0/macos-arm64.zip",
-      "size": 200000000,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": {
-        "python": ["squidpy", "scvelo", "liana"]
-      },
-      "figcodeCards": [
-        "spatial-cluster",
-        "spatial-deconv-c2l",
-        "feature-spatial",
-        "spatial-svg-moran",
-        "squidpy-neighbors",
-        "spatial-lr-liana",
-        "scvelo-stream"
-      ]
-    },
-    "figcode-py-ml": {
-      "title": "FigCode Python 机器学习扩展包",
-      "version": "1.0.0",
-      "type": "figcode-pack",
-      "language": "python",
-      "description": "FigCode 机器学习卡片所需的额外 Python 包：xgboost（梯度提升）、shap（模型解释）。约 120MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-py-ml/1.0.0/macos-arm64.zip",
-      "size": 120000000,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": {
-        "python": ["xgboost", "shap"]
-      },
-      "figcodeCards": ["shap-summary"]
-    },
-    "figcode-r-genome": {
-      "title": "FigCode R 基因组数据包（BSgenome hg19）",
-      "version": "1.0.0",
-      "type": "figcode-pack",
+      "type": "figcode-card",
       "language": "r",
-      "description": "突变签名分析所需的 BSgenome.Hsapiens.UCSC.hg19 基因组参考数据。约 2.5GB，仅突变签名相关卡片需要。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-r-genome/1.0.0/macos-arm64.zip",
+      "figcodeCardId": "trajectory-branch",
+      "description": "单细胞轨迹推断卡片所需依赖：monocle3。约 40MB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-trajectory-branch/1.0.0/macos-arm64.zip",
+      "size": 41943040,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": { "r": ["monocle3"] }
+    },
+    "figcode-sc-doublet": {
+      "title": "FigCode · 双胞检测 QC",
+      "version": "1.0.0",
+      "type": "figcode-card",
+      "language": "r",
+      "figcodeCardId": "sc-doublet",
+      "description": "双胞检测质控卡片所需依赖：scDblFinder。约 15MB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-sc-doublet/1.0.0/macos-arm64.zip",
+      "size": 15728640,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": { "r": ["scDblFinder"] }
+    },
+    "figcode-cytotrace": {
+      "title": "FigCode · 分化潜能 CytoTRACE",
+      "version": "1.0.0",
+      "type": "figcode-card",
+      "language": "r",
+      "figcodeCardId": "cytotrace",
+      "description": "CytoTRACE 分化潜能预测卡片所需依赖：CytoTRACE。约 10MB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-cytotrace/1.0.0/macos-arm64.zip",
+      "size": 10485760,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": { "r": ["CytoTRACE"] }
+    },
+    "figcode-qq-plot": {
+      "title": "FigCode · QQ 图",
+      "version": "1.0.0",
+      "type": "figcode-card",
+      "language": "r",
+      "figcodeCardId": "qq-plot",
+      "description": "QQ 图卡片所需依赖：qqman。约 3MB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-qq-plot/1.0.0/macos-arm64.zip",
+      "size": 3145728,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": { "r": ["qqman"] }
+    },
+    "figcode-manhattan": {
+      "title": "FigCode · 曼哈顿图",
+      "version": "1.0.0",
+      "type": "figcode-card",
+      "language": "r",
+      "figcodeCardId": "manhattan",
+      "description": "GWAS 曼哈顿图卡片所需依赖：qqman。约 3MB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-manhattan/1.0.0/macos-arm64.zip",
+      "size": 3145728,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": { "r": ["qqman"] }
+    },
+    "figcode-power-curve": {
+      "title": "FigCode · 功效分析曲线",
+      "version": "1.0.0",
+      "type": "figcode-card",
+      "language": "r",
+      "figcodeCardId": "power-curve",
+      "description": "样本量功效分析卡片所需依赖：pwr。约 2MB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-power-curve/1.0.0/macos-arm64.zip",
+      "size": 2097152,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": { "r": ["pwr"] }
+    },
+    "figcode-meta-forest": {
+      "title": "FigCode · 荟萃分析森林图",
+      "version": "1.0.0",
+      "type": "figcode-card",
+      "language": "r",
+      "figcodeCardId": "meta-forest",
+      "description": "荟萃分析森林图卡片所需依赖：metafor。约 8MB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-meta-forest/1.0.0/macos-arm64.zip",
+      "size": 8388608,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": { "r": ["metafor"] }
+    },
+    "figcode-mut-signature": {
+      "title": "FigCode · 突变签名分析",
+      "version": "1.0.0",
+      "type": "figcode-card",
+      "language": "r",
+      "figcodeCardId": "mut-signature",
+      "description": "突变签名分析卡片，需要 BSgenome hg19 数据包。约 5MB（不含数据包）。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-mut-signature/1.0.0/macos-arm64.zip",
+      "size": 5242880,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": { "r": [] },
+      "dependencies": ["figcode-data-bsgenome-hg19"]
+    },
+    "figcode-lego-plot": {
+      "title": "FigCode · 突变乐高图",
+      "version": "1.0.0",
+      "type": "figcode-card",
+      "language": "r",
+      "figcodeCardId": "lego-plot",
+      "description": "突变三核苷酸乐高图卡片，需要 BSgenome hg19 数据包。约 5MB（不含数据包）。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-lego-plot/1.0.0/macos-arm64.zip",
+      "size": 5242880,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": { "r": [] },
+      "dependencies": ["figcode-data-bsgenome-hg19"]
+    },
+    "figcode-spatial-cluster": {
+      "title": "FigCode · 空间聚类",
+      "version": "1.0.0",
+      "type": "figcode-card",
+      "language": "python",
+      "figcodeCardId": "spatial-cluster",
+      "description": "空间转录组聚类卡片所需依赖：squidpy。约 120MB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-cluster/1.0.0/macos-arm64.zip",
+      "size": 125829120,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": { "python": ["squidpy"] }
+    },
+    "figcode-spatial-deconv-c2l": {
+      "title": "FigCode · 空间解卷积 Cell2location",
+      "version": "1.0.0",
+      "type": "figcode-card",
+      "language": "python",
+      "figcodeCardId": "spatial-deconv-c2l",
+      "description": "空间解卷积卡片所需依赖：squidpy。约 120MB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-deconv-c2l/1.0.0/macos-arm64.zip",
+      "size": 125829120,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": { "python": ["squidpy"] }
+    },
+    "figcode-feature-spatial": {
+      "title": "FigCode · 空间基因表达",
+      "version": "1.0.0",
+      "type": "figcode-card",
+      "language": "python",
+      "figcodeCardId": "feature-spatial",
+      "description": "空间基因表达卡片所需依赖：squidpy。约 120MB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-feature-spatial/1.0.0/macos-arm64.zip",
+      "size": 125829120,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": { "python": ["squidpy"] }
+    },
+    "figcode-spatial-svg-moran": {
+      "title": "FigCode · 空间高变基因 SVG",
+      "version": "1.0.0",
+      "type": "figcode-card",
+      "language": "python",
+      "figcodeCardId": "spatial-svg-moran",
+      "description": "空间自相关 SVG 检验卡片所需依赖：squidpy。约 120MB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-svg-moran/1.0.0/macos-arm64.zip",
+      "size": 125829120,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": { "python": ["squidpy"] }
+    },
+    "figcode-squidpy-neighbors": {
+      "title": "FigCode · 空间邻居网络",
+      "version": "1.0.0",
+      "type": "figcode-card",
+      "language": "python",
+      "figcodeCardId": "squidpy-neighbors",
+      "description": "空间邻居网络卡片所需依赖：squidpy。约 120MB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-squidpy-neighbors/1.0.0/macos-arm64.zip",
+      "size": 125829120,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": { "python": ["squidpy"] }
+    },
+    "figcode-spatial-lr-liana": {
+      "title": "FigCode · 空间细胞通讯 LIANA",
+      "version": "1.0.0",
+      "type": "figcode-card",
+      "language": "python",
+      "figcodeCardId": "spatial-lr-liana",
+      "description": "空间细胞通讯卡片所需依赖：squidpy + liana。约 150MB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-lr-liana/1.0.0/macos-arm64.zip",
+      "size": 157286400,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": { "python": ["squidpy", "liana"] }
+    },
+    "figcode-scvelo-stream": {
+      "title": "FigCode · RNA Velocity 流图",
+      "version": "1.0.0",
+      "type": "figcode-card",
+      "language": "python",
+      "figcodeCardId": "scvelo-stream",
+      "description": "RNA velocity 流图卡片所需依赖：scvelo。约 80MB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-scvelo-stream/1.0.0/macos-arm64.zip",
+      "size": 83886080,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": { "python": ["scvelo"] }
+    },
+    "figcode-shap-summary": {
+      "title": "FigCode · SHAP 特征重要性",
+      "version": "1.0.0",
+      "type": "figcode-card",
+      "language": "python",
+      "figcodeCardId": "shap-summary",
+      "description": "SHAP 模型解释卡片所需依赖：xgboost + shap。约 120MB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-shap-summary/1.0.0/macos-arm64.zip",
+      "size": 125829120,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": { "python": ["xgboost", "shap"] }
+    },
+    "figcode-data-bsgenome-hg19": {
+      "title": "FigCode 数据包 · BSgenome hg19（突变签名用）",
+      "version": "1.0.0",
+      "type": "figcode-data",
+      "language": "r",
+      "description": "BSgenome.Hsapiens.UCSC.hg19 基因组参考数据，mut-signature 和 lego-plot 卡片需要。约 2.5GB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-data-bsgenome-hg19/1.0.0/macos-arm64.zip",
       "size": 2500000000,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": {
-        "r": ["BSgenome.Hsapiens.UCSC.hg19"]
-      },
-      "figcodeCards": ["mut-signature", "lego-plot"],
+      "packages": { "r": ["BSgenome.Hsapiens.UCSC.hg19"] },
+      "figcodeCardIds": ["mut-signature", "lego-plot"],
       "optional": true
     }
   }

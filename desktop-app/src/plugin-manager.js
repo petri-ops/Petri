@@ -287,8 +287,8 @@ async function installPlugin(pluginId, onProgress) {
     return installRuntime(pluginId, plugin, onProgress);
   }
 
-  // FigCode 扩展包类型：下载 → 解压 → 装包到 runtime library，不走工具注册
-  if (plugin.type === 'figcode-pack') {
+  // FigCode 卡片/数据包类型：下载 → 解压 → 装包到 runtime library，不走工具注册
+  if (plugin.type === 'figcode-card' || plugin.type === 'figcode-data') {
     return installFigcodePack(pluginId, plugin, onProgress);
   }
 
@@ -518,18 +518,18 @@ async function installRuntime(pluginId, plugin, onProgress) {
   console.log('[plugin] ⚠️  restart app to activate new runtime');
 }
 
-// ── 安装 FigCode 扩展包 ───────────────────────────────────────
-// FigCode 扩展包安装路径：
+// ── 安装 FigCode 卡片/数据包插件 ──────────────────────────────
+// FigCode 卡片插件安装路径：
 //   1. 下载 zip → 校验 → 解压到 plugins/{pluginId}/
 //   2. 把 packages/{language}/ 下的预编译包复制到 runtime library
 //      R: runtimes/R/library/  Python: runtimes/Python/site-packages/
-//   3. 记录到 installed.json（type: 'figcode-pack'）
-//   4. 不走 registerPluginInServer（扩展包不是工具插件，不注册 tool-definition）
+//   3. 记录到 installed.json（type: 'figcode-card' 或 'figcode-data'）
+//   4. 不走 registerPluginInServer（不是工具插件，不注册 tool-definition）
 //   5. 不需要重启 — 包复制到 library 后立即可用
 
 async function installFigcodePack(pluginId, plugin, onProgress) {
   const lang = plugin.language;
-  if (!lang) throw new Error('FigCode 扩展包缺少 language 字段');
+  if (!lang) throw new Error('FigCode 插件缺少 language 字段');
 
   const platform = detectPlatform();
   const pluginDir = path.join(PLUGINS_DIR, pluginId);
