@@ -28,6 +28,39 @@ if (!process.env.ELECTRON_IS_DEV && app.isPackaged) {
   }
 }
 
+// ── 日志收集（诊断包用）──────────────────────────────────────
+// 子进程 stdout/stderr 同时写入 logs/ 下的滚动日志文件
+const _logStreams = {}; // { r-server: WriteStream, py-server: WriteStream, main: WriteStream }
+
+function _getLogDir() {
+  const dir = process.env.BIOF3_LOCAL_DATA_DIR
+    ? path.join(process.env.BIOF3_LOCAL_DATA_DIR, 'logs')
+    : path.join(app.getPath('documents'), 'BioF3-Local', 'logs');
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+  } catch {}
+  return dir;
+}
+
+function _createLogStream(name) {
+  const dir = _getLogDir();
+  const file = path.join(dir, `${name}.log`);
+  const stream = fs.createWriteStream(file, { flags: 'a' });
+  _logStreams[name] = stream;
+  // 写入分隔线标记新会话
+  stream.write(`\n=== ${new Date().toISOString()} — session start ===\n`);
+  return stream;
+}
+
+function _writeLog(name, text) {
+  const stream = _logStreams[name];
+  if (stream) {
+    try {
+      stream.write(text + '\n');
+    } catch {}
+  }
+}
+
 // ── 路径解析（开发模式 vs 打包模式）────────────────────────────
 // 开发模式（npm start）：r-server/py-server/shared-backend 在项目根目录
 // 打包模式（.exe/.dmg）：在 process.resourcesPath 下
@@ -181,13 +214,20 @@ function startRServer() {
     }
   );
 
+  _createLogStream('r-server');
   rServerProc.stdout.on('data', (d) => {
     const text = d.toString().trim();
-    if (text) console.log(`[r-server] ${text}`);
+    if (text) {
+      console.log(`[r-server] ${text}`);
+      _writeLog('r-server', `[r-server] ${text}`);
+    }
   });
   rServerProc.stderr.on('data', (d) => {
     const text = d.toString().trim();
-    if (text) console.error(`[r-server] ${text}`);
+    if (text) {
+      console.error(`[r-server] ${text}`);
+      _writeLog('r-server', `[r-server:ERR] ${text}`);
+    }
   });
   rServerProc.on('exit', (code) => {
     console.log(`[desktop] r-server exited: ${code}`);
@@ -217,13 +257,20 @@ function startPyServer() {
     stdio: ['ignore', 'pipe', 'pipe'],
   });
 
+  _createLogStream('py-server');
   pyServerProc.stdout.on('data', (d) => {
     const text = d.toString().trim();
-    if (text) console.log(`[py-server] ${text}`);
+    if (text) {
+      console.log(`[py-server] ${text}`);
+      _writeLog('py-server', `[py-server] ${text}`);
+    }
   });
   pyServerProc.stderr.on('data', (d) => {
     const text = d.toString().trim();
-    if (text) console.error(`[py-server] ${text}`);
+    if (text) {
+      console.error(`[py-server] ${text}`);
+      _writeLog('py-server', `[py-server:ERR] ${text}`);
+    }
   });
   pyServerProc.on('exit', (code) => {
     console.log(`[desktop] py-server exited: ${code}`);
@@ -582,6 +629,113 @@ function setupFileDialogIpc() {
   });
 }
 
+// ── IPC：诊断日志导出 ─────────────────────────────────────────
+function setupDiagnosticIpc() {
+  // 导出诊断包：收集 r-server/py-server/main 日志 + 系统信息，打包成 zip
+  ipcMain.handle('diagnostic:export', async (event, targetPath) => {
+    try {
+      const logDir = _getLogDir();
+      const { createWriteStream } = fs;
+      const zlib = require('zlib');
+
+      // 如果用户没指定路径，弹保存对话框
+      let outPath = targetPath;
+      if (!outPath && mainWindow) {
+        const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+        const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
+          defaultPath: `biof3-diagnostic-${ts}.zip`,
+          filters: [{ name: 'ZIP', extensions: ['zip'] }],
+        });
+        if (canceled) return { ok: false, error: 'cancelled' };
+        outPath = filePath;
+      }
+      if (!outPath) return { ok: false, error: 'no output path' };
+
+      // 先 flush 日志流
+      for (const s of Object.values(_logStreams)) {
+        try {
+          s.write('');
+        } catch {}
+      }
+
+      // 收集系统信息
+      const sysInfo = {
+        platform: process.platform,
+        arch: process.arch,
+        electronVersion: process.versions.electron,
+        nodeVersion: process.versions.node,
+        appVersion: app.getVersion(),
+        isPackaged: app.isPackaged,
+        timestamp: new Date().toISOString(),
+        rHome: process.env.BIOF3_R_HOME || '(not set)',
+        pyHome: process.env.BIOF3_PY_HOME || '(not set)',
+        dataDir: process.env.BIOF3_LOCAL_DATA_DIR || '(not set)',
+      };
+
+      // 用简单的方式打包：逐文件写入 zip（避免额外依赖）
+      // 如果有 archiver 就用，没有就用 tar.gz
+      let usedArchiver = false;
+      try {
+        const archiver = require('archiver');
+        const output = createWriteStream(outPath);
+        const archive = archiver('zip', { zlib: { level: 6 } });
+        output.on('close', () => {});
+        archive.pipe(output);
+
+        // 添加日志文件
+        for (const name of ['r-server', 'py-server']) {
+          const logFile = path.join(logDir, `${name}.log`);
+          if (fs.existsSync(logFile)) {
+            archive.file(logFile, { name: `${name}.log` });
+          }
+        }
+        // 添加系统信息
+        archive.append(JSON.stringify(sysInfo, null, 2), { name: 'system-info.json' });
+        // 添加 installed plugins
+        try {
+          const { getInstalledPlugins } = require('./plugin-manager');
+          archive.append(JSON.stringify(getInstalledPlugins(), null, 2), {
+            name: 'installed-plugins.json',
+          });
+        } catch {}
+
+        await archive.finalize();
+        usedArchiver = true;
+      } catch {
+        // archiver 不可用 — 用 tar.gz fallback
+      }
+
+      if (!usedArchiver) {
+        // fallback: 写一个简单的 .txt 包（日志拼接 + 系统信息）
+        const lines = [];
+        lines.push('=== BioF3 Diagnostic Package ===');
+        lines.push(JSON.stringify(sysInfo, null, 2));
+        lines.push('');
+        for (const name of ['r-server', 'py-server']) {
+          const logFile = path.join(logDir, `${name}.log`);
+          lines.push(`\n=== ${name}.log ===`);
+          try {
+            lines.push(fs.readFileSync(logFile, 'utf8').slice(-5000)); // 最后 5000 字符
+          } catch {
+            lines.push('(log file not found)');
+          }
+        }
+        try {
+          const { getInstalledPlugins } = require('./plugin-manager');
+          lines.push('\n=== installed-plugins.json ===');
+          lines.push(JSON.stringify(getInstalledPlugins(), null, 2));
+        } catch {}
+        fs.writeFileSync(outPath, lines.join('\n'));
+      }
+
+      return { ok: true, path: outPath };
+    } catch (e) {
+      console.error('[diagnostic] export failed:', e.message);
+      return { ok: false, error: e.message };
+    }
+  });
+}
+
 // ── 应用生命周期 ───────────────────────────────────────────────
 async function main() {
   setupDesktopEnv();
@@ -603,6 +757,7 @@ async function main() {
   setupRuntimeIpc();
   setupFileDialogIpc();
   setupAutoUpdateIpc();
+  setupDiagnosticIpc();
 
   // 5. 创建窗口
   createWindow();

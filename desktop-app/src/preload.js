@@ -71,6 +71,11 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     openDialog: (filters) => ipcRenderer.invoke('file:open-dialog', filters),
   },
 
+  // 诊断日志导出
+  diagnostic: {
+    export: (targetPath) => ipcRenderer.invoke('diagnostic:export', targetPath),
+  },
+
   // 自动更新（electron-updater）
   updater: {
     check: () => ipcRenderer.invoke('updater:check'),
