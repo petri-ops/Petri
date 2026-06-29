@@ -127,6 +127,9 @@ function startStaticServer(buildDir) {
     res.writeHead(200, {
       'Content-Type': mime,
       'Content-Length': stat.size,
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      Pragma: 'no-cache',
+      Expires: '0',
     });
     fs.createReadStream(fullPath).pipe(res);
   });

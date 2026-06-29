@@ -22,13 +22,32 @@ const { execFile } = require('child_process');
 // 注册 R/Python 执行器（plugin-manager 在 Electron 主进程跑，不经过 r-server
 // 的 init 流程，必须自己调 initSharedBackend 注册执行器，否则 getExecutor 抛
 // "未注册执行器" 导致 runtime 校验/装包静默失败）
-const SHARED_BACKEND_DIR = fs.existsSync(path.join(__dirname, '..', '..', 'shared-backend'))
-  ? path.join(__dirname, '..', '..', 'shared-backend')
-  : path.join(process.resourcesPath || path.join(__dirname, '..'), 'shared-backend');
+//
+// 路径解析策略（Electron 开发模式 vs 打包模式）：
+//   - 开发模式 (app.isPackaged=false): shared-backend 在项目根目录
+//     __dirname = .../desktop-app/src/ → ../../shared-backend = 项目根/shared-backend
+//   - 打包模式 (app.isPackaged=true): shared-backend 在 extraResources 中
+//     process.resourcesPath = .../BioF3.app/Contents/Resources/
+function resolveSharedBackendDir() {
+  // 开发模式：从 desktop-app/src/ 向上两级到项目根
+  if (app && !app.isPackaged) {
+    const devPath = path.resolve(__dirname, '..', '..', 'shared-backend');
+    if (fs.existsSync(devPath)) return devPath;
+  }
+  // 打包模式：extraResources 会复制到 app bundle 的 Resources/ 下
+  if (process.resourcesPath) {
+    const pkgPath = path.join(process.resourcesPath, 'shared-backend');
+    if (fs.existsSync(pkgPath)) return pkgPath;
+  }
+  // 兜底：回退到开发模式路径（即使 fs.existsSync 失败，让 require 抛错更明确）
+  return path.resolve(__dirname, '..', '..', 'shared-backend');
+}
+
+const SHARED_BACKEND_DIR = resolveSharedBackendDir();
 try {
   require(path.join(SHARED_BACKEND_DIR, 'init')).initSharedBackend();
 } catch (e) {
-  console.warn('[plugin] initSharedBackend failed:', e.message);
+  console.warn('[plugin] initSharedBackend failed:', e.message, '| path:', SHARED_BACKEND_DIR);
 }
 
 // ── 路径 ───────────────────────────────────────────────────────
