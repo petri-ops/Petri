@@ -1,0 +1,16 @@
+{
+  "id": "figcode-r-genome",
+  "title": "FigCode R 基因组数据包（BSgenome hg19）",
+  "version": "1.0.0",
+  "type": "figcode-pack",
+  "language": "r",
+  "description": "突变签名分析所需的 BSgenome.Hsapiens.UCSC.hg19 基因组参考数据。约 2.5GB，仅突变签名相关卡片需要。",
+  "packages": {
+    "r": ["BSgenome.Hsapiens.UCSC.hg19"]
+  },
+  "runtime": {
+    "r": ">=4.4.0"
+  },
+  "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+  "optional": true
+}

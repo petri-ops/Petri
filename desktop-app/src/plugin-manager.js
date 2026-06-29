@@ -287,6 +287,11 @@ async function installPlugin(pluginId, onProgress) {
     return installRuntime(pluginId, plugin, onProgress);
   }
 
+  // FigCode 扩展包类型：下载 → 解压 → 装包到 runtime library，不走工具注册
+  if (plugin.type === 'figcode-pack') {
+    return installFigcodePack(pluginId, plugin, onProgress);
+  }
+
   const isBuiltIn = !!plugin._builtIn;
   const pluginDir = path.join(PLUGINS_DIR, pluginId);
   fs.mkdirSync(PLUGINS_DIR, { recursive: true });
@@ -513,6 +518,119 @@ async function installRuntime(pluginId, plugin, onProgress) {
   console.log('[plugin] ⚠️  restart app to activate new runtime');
 }
 
+// ── 安装 FigCode 扩展包 ───────────────────────────────────────
+// FigCode 扩展包安装路径：
+//   1. 下载 zip → 校验 → 解压到 plugins/{pluginId}/
+//   2. 把 packages/{language}/ 下的预编译包复制到 runtime library
+//      R: runtimes/R/library/  Python: runtimes/Python/site-packages/
+//   3. 记录到 installed.json（type: 'figcode-pack'）
+//   4. 不走 registerPluginInServer（扩展包不是工具插件，不注册 tool-definition）
+//   5. 不需要重启 — 包复制到 library 后立即可用
+
+async function installFigcodePack(pluginId, plugin, onProgress) {
+  const lang = plugin.language;
+  if (!lang) throw new Error('FigCode 扩展包缺少 language 字段');
+
+  const platform = detectPlatform();
+  const pluginDir = path.join(PLUGINS_DIR, pluginId);
+  fs.mkdirSync(PLUGINS_DIR, { recursive: true });
+
+  // FigCode 扩展包总是从远程下载（包体积大，不内置在 app bundle 中）
+  // manifest 中的 _builtIn 标记只让它在插件商店可见，实际包从 OSS 下载
+  const zipPath = path.join(PLUGINS_DIR, `${pluginId}-${plugin.version}.zip`);
+  console.log(`[plugin] downloading figcode-pack ${pluginId} from ${plugin.url}`);
+  await downloadFile(plugin.url, zipPath, onProgress);
+
+  if (plugin.checksum) {
+    const ok = await verifyChecksum(zipPath, plugin.checksum);
+    if (!ok) {
+      try {
+        fs.unlinkSync(zipPath);
+      } catch {}
+      throw new Error('校验失败，文件可能损坏');
+    }
+  }
+
+  if (fs.existsSync(pluginDir)) {
+    fs.rmSync(pluginDir, { recursive: true, force: true });
+  }
+  await extractZip(zipPath, pluginDir);
+  try {
+    fs.unlinkSync(zipPath);
+  } catch {}
+
+  // 展开嵌套顶层目录
+  const entries = fs.readdirSync(pluginDir);
+  if (
+    entries.length === 1 &&
+    fs.statSync(path.join(pluginDir, entries[0])).isDirectory() &&
+    !fs.existsSync(path.join(pluginDir, 'plugin.json'))
+  ) {
+    const nested = path.join(pluginDir, entries[0]);
+    const nestedEntries = fs.readdirSync(nested);
+    for (const e of nestedEntries) {
+      fs.renameSync(path.join(nested, e), path.join(pluginDir, e));
+    }
+    fs.rmdirSync(nested);
+    console.log(`[plugin] flattened nested dir: ${entries[0]}`);
+  }
+
+  // 读取 plugin.json
+  const metaPath = path.join(pluginDir, 'plugin.json');
+  if (!fs.existsSync(metaPath)) {
+    throw new Error('plugin.json 不存在: ' + metaPath);
+  }
+  const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+  console.log(`[plugin] read plugin.json: id=${meta.id} lang=${meta.language}`);
+
+  // 把预编译包复制到 runtime library
+  const pkgDir = path.join(pluginDir, 'packages', lang);
+  if (fs.existsSync(pkgDir)) {
+    console.log(`[plugin] installing figcode packages from ${pkgDir}`);
+    const { getExecutor } = require(path.join(SHARED_BACKEND_DIR, 'executors'));
+    const executor = getExecutor(lang);
+
+    // R: 复制到 runtimes/R/library/  Python: 复制到 runtimes/Python/site-packages/
+    let targetDir;
+    if (lang === 'r') {
+      targetDir = path.join(RUNTIMES_DIR, 'R', 'library');
+    } else {
+      targetDir = path.join(RUNTIMES_DIR, 'Python', 'site-packages');
+    }
+
+    executor.installPackages(pkgDir, targetDir);
+    console.log(`[plugin] figcode packages installed → ${targetDir}`);
+  } else {
+    console.log(`[plugin] no packages dir at ${pkgDir}, skipping`);
+  }
+
+  // 校验关键包可加载
+  if (meta.packages && meta.packages[lang]) {
+    const { getExecutor } = require(path.join(SHARED_BACKEND_DIR, 'executors'));
+    const executor = getExecutor(lang);
+    const pkgList = Array.isArray(meta.packages[lang])
+      ? meta.packages[lang]
+      : Object.keys(meta.packages[lang]);
+    for (const pkgName of pkgList) {
+      if (!executor.checkPackageInstalled(pkgName)) {
+        console.warn(`[plugin] 包 ${pkgName} 安装后检查失败（可能需要重启）`);
+      }
+    }
+  }
+
+  // 记录已装（type: 'figcode-pack'，不走 registerPluginInServer）
+  addInstalledPlugin({
+    id: pluginId,
+    version: plugin.version,
+    installedAt: new Date().toISOString(),
+    platform,
+    language: lang,
+    type: 'figcode-pack',
+  });
+
+  console.log(`[plugin] figcode-pack installed: ${pluginId} v${plugin.version}`);
+}
+
 // ── Runtime 状态查询 ───────────────────────────────────────────
 
 function getRuntimeStatus() {
@@ -574,7 +692,11 @@ async function uninstallPlugin(pluginId) {
   if (meta.packages && meta.packages[language]) {
     const { getExecutor } = require(path.join(RESOURCES_PATH, 'shared-backend', 'executors'));
     const executor = getExecutor(language);
-    for (const pkgName of Object.keys(meta.packages[language])) {
+    // packages 可能是 array（figcode-pack）或 object（工具插件）
+    const pkgList = Array.isArray(meta.packages[language])
+      ? meta.packages[language]
+      : Object.keys(meta.packages[language]);
+    for (const pkgName of pkgList) {
       removePackage(executor, language, pkgName);
     }
   }

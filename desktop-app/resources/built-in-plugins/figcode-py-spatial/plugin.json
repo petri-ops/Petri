@@ -1,0 +1,15 @@
+{
+  "id": "figcode-py-spatial",
+  "title": "FigCode Python 空间组学扩展包",
+  "version": "1.0.0",
+  "type": "figcode-pack",
+  "language": "python",
+  "description": "FigCode 空间组学卡片所需的额外 Python 包：squidpy（空间分析）、scvelo（RNA velocity）、liana（细胞通讯）。",
+  "packages": {
+    "python": ["squidpy", "scvelo", "liana"]
+  },
+  "runtime": {
+    "python": ">=3.10.0"
+  },
+  "platform": ["macos-arm64", "macos-x64", "windows-x64"]
+}
