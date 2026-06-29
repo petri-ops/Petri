@@ -524,6 +524,128 @@ function setupRuntimeIpc() {
   });
 }
 
+// ── IPC：FigCode 包检测 ───────────────────────────────────────
+// 检查一组 R/Python 包是否已安装（通过已装 figcode-pack 或基础 runtime 覆盖）
+function setupFigcodeIpc() {
+  ipcMain.handle('figcode:check-packages', async (event, { language, packages }) => {
+    try {
+      if (!Array.isArray(packages) || packages.length === 0) {
+        return { ok: true, missing: [], missingPacks: [] };
+      }
+
+      const { getInstalledPlugins, getRemoteManifest } = require('./plugin-manager');
+      const installed = getInstalledPlugins();
+      const remote = await getRemoteManifest().catch(() => ({ plugins: {} }));
+      const allPlugins = remote.plugins || {};
+
+      // 收集已装 figcode-pack 提供的包
+      const installedPacks = installed.filter((p) => {
+        const meta = allPlugins[p.id];
+        return meta && meta.type === 'figcode-pack';
+      });
+
+      const providedPackages = new Set();
+      for (const pack of installedPacks) {
+        const meta = allPlugins[pack.id];
+        if (!meta) continue;
+        const pkgList = meta.packages?.[language] || [];
+        for (const pkg of pkgList) providedPackages.add(pkg);
+      }
+
+      // 基础 runtime 自带的包（硬编码常见包，避免每次启动 R 检测）
+      const baseR = new Set([
+        'ggplot2',
+        'dplyr',
+        'tidyr',
+        'reshape2',
+        'data.table',
+        'pheatmap',
+        'ggrepel',
+        'RColorBrewer',
+        'patchwork',
+        'cowplot',
+        'plotly',
+        'igraph',
+        'ggraph',
+        'tidygraph',
+        'circlize',
+        'ComplexHeatmap',
+        'UpSetR',
+        'ggalluvial',
+        'treemap',
+        'networkD3',
+        'Seurat',
+        'SingleCellExperiment',
+        'MOFA2',
+        'CellChat',
+        'WGCNA',
+        'maftools',
+        'clusterProfiler',
+        'enrichplot',
+        'DOSE',
+        'org.Hs.eg.db',
+        'survival',
+        'survminer',
+        'rms',
+        'pROC',
+        'glmnet',
+        'caret',
+        'timeROC',
+        'PRROC',
+        'dcurves',
+        'scatterpie',
+        'Rtsne',
+        'STRINGdb',
+        'gganimate',
+      ]);
+      const basePy = new Set([
+        'matplotlib',
+        'numpy',
+        'pandas',
+        'scanpy',
+        'anndata',
+        'scikit-learn',
+        'seaborn',
+        'scipy',
+      ]);
+      const baseSet = language === 'python' ? basePy : baseR;
+
+      // 检查每个包
+      const missing = [];
+      for (const pkg of packages) {
+        if (!providedPackages.has(pkg) && !baseSet.has(pkg)) {
+          missing.push(pkg);
+        }
+      }
+
+      // 找出哪些 figcode-pack 能补齐 missing
+      const missingPacks = [];
+      if (missing.length > 0) {
+        for (const [pid, meta] of Object.entries(allPlugins)) {
+          if (meta.type !== 'figcode-pack' || meta.language !== language) continue;
+          const pkgList = meta.packages?.[language] || [];
+          const provides = new Set(pkgList);
+          const covers = missing.some((p) => provides.has(p));
+          const alreadyInstalled = installed.some((i) => i.id === pid);
+          if (covers && !alreadyInstalled) {
+            missingPacks.push({
+              id: pid,
+              title: meta.title,
+              description: meta.description,
+              size: meta.size,
+            });
+          }
+        }
+      }
+
+      return { ok: true, missing, missingPacks };
+    } catch (e) {
+      console.error('[figcode] check-packages error:', e.message);
+      return { ok: false, error: e.message, missing: [], missingPacks: [] };
+    }
+  });
+}
+
 // ── IPC：自动更新（electron-updater）──────────────────────────
 function setupAutoUpdateIpc() {
   if (!autoUpdater) {
@@ -758,6 +880,7 @@ async function main() {
   setupFileDialogIpc();
   setupAutoUpdateIpc();
   setupDiagnosticIpc();
+  setupFigcodeIpc();
 
   // 5. 创建窗口
   createWindow();

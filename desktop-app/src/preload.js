@@ -76,6 +76,12 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     export: (targetPath) => ipcRenderer.invoke('diagnostic:export', targetPath),
   },
 
+  // FigCode 包检测
+  figcode: {
+    checkPackages: (language, packages) =>
+      ipcRenderer.invoke('figcode:check-packages', { language, packages }),
+  },
+
   // 自动更新（electron-updater）
   updater: {
     check: () => ipcRenderer.invoke('updater:check'),

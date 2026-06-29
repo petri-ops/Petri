@@ -82,6 +82,80 @@
       "runtime": {
         "python": ">=3.10.0"
       }
+    },
+    "figcode-r-extra": {
+      "title": "FigCode R 扩展包（轨迹/质控/统计/荟萃）",
+      "version": "1.0.0",
+      "type": "figcode-pack",
+      "language": "r",
+      "description": "FigCode 部分卡片所需的额外 R 包：monocle3（轨迹）、scDblFinder（双胞质控）、CytoTRACE（分化潜能）、qqman（曼哈顿图）、pwr（功效分析）、metafor（荟萃分析）、gifski（动画导出）。约 80MB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-r-extra/1.0.0/macos-arm64.zip",
+      "size": 80000000,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": {
+        "r": ["monocle3", "scDblFinder", "CytoTRACE", "qqman", "pwr", "metafor", "gifski"]
+      },
+      "figcodeCards": [
+        "trajectory-branch",
+        "sc-doublet",
+        "cytotrace",
+        "qq-plot",
+        "manhattan",
+        "power-curve",
+        "meta-forest",
+        "volcano-animated"
+      ]
+    },
+    "figcode-py-spatial": {
+      "title": "FigCode Python 空间组学扩展包",
+      "version": "1.0.0",
+      "type": "figcode-pack",
+      "language": "python",
+      "description": "FigCode 空间组学卡片所需的额外 Python 包：squidpy（空间分析）、scvelo（RNA velocity）、liana（细胞通讯）。约 200MB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-py-spatial/1.0.0/macos-arm64.zip",
+      "size": 200000000,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": {
+        "python": ["squidpy", "scvelo", "liana"]
+      },
+      "figcodeCards": [
+        "spatial-cluster",
+        "spatial-deconv-c2l",
+        "feature-spatial",
+        "spatial-svg-moran",
+        "squidpy-neighbors",
+        "spatial-lr-liana",
+        "scvelo-stream"
+      ]
+    },
+    "figcode-py-ml": {
+      "title": "FigCode Python 机器学习扩展包",
+      "version": "1.0.0",
+      "type": "figcode-pack",
+      "language": "python",
+      "description": "FigCode 机器学习卡片所需的额外 Python 包：xgboost（梯度提升）、shap（模型解释）。约 120MB。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-py-ml/1.0.0/macos-arm64.zip",
+      "size": 120000000,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": {
+        "python": ["xgboost", "shap"]
+      },
+      "figcodeCards": ["shap-summary"]
+    },
+    "figcode-r-genome": {
+      "title": "FigCode R 基因组数据包（BSgenome hg19）",
+      "version": "1.0.0",
+      "type": "figcode-pack",
+      "language": "r",
+      "description": "突变签名分析所需的 BSgenome.Hsapiens.UCSC.hg19 基因组参考数据。约 2.5GB，仅突变签名相关卡片需要。",
+      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-r-genome/1.0.0/macos-arm64.zip",
+      "size": 2500000000,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "packages": {
+        "r": ["BSgenome.Hsapiens.UCSC.hg19"]
+      },
+      "figcodeCards": ["mut-signature", "lego-plot"],
+      "optional": true
     }
   }
 }

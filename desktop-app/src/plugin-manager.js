@@ -55,7 +55,11 @@ const USER_DATA_DIR = path.join(app.getPath('documents'), 'BioF3-Local');
 const PLUGINS_DIR = path.join(USER_DATA_DIR, 'plugins');
 const RUNTIMES_DIR = path.join(USER_DATA_DIR, 'runtimes');
 const INSTALLED_FILE = path.join(PLUGINS_DIR, 'installed.json');
-const RESOURCES_PATH = process.resourcesPath || path.join(__dirname, '..', 'resources');
+// 开发模式：desktop-app/resources/；打包模式：process.resourcesPath
+const RESOURCES_PATH =
+  app && app.isPackaged && process.resourcesPath
+    ? process.resourcesPath
+    : path.join(__dirname, '..', 'resources');
 
 // fix-r-paths.sh 路径（打包在 resources/scripts/ 下，开发模式在 scripts/ 下）
 function getFixRPathsScript() {
