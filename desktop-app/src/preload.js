@@ -8,6 +8,27 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 // ============================================================
+// 桌面版布局：隐藏顶栏 + body 右移让出 dock 64px
+// ============================================================
+if (typeof document !== 'undefined') {
+  const applyLayout = () => {
+    document.body.style.paddingLeft = '64px';
+    document.body.style.boxSizing = 'border-box';
+
+    // 隐藏 Docusaurus 顶栏（桌面软件不需要网页式导航栏）
+    const style = document.createElement('style');
+    style.id = 'biof3-desktop-hide-navbar';
+    style.textContent = '.navbar--fixed-top { display: none !important; }';
+    document.head.appendChild(style);
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyLayout);
+  } else {
+    applyLayout();
+  }
+}
+
+// ============================================================
 // 注入 process.env.BIOF3_DESKTOP = '1' 到渲染进程
 // ============================================================
 // 前端代码（Docusaurus build 产物）通过
