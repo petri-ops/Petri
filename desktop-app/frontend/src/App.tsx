@@ -7,6 +7,7 @@ import { DesktopToolbar } from '@/components/desktop/DesktopToolbar';
 import { DesktopOnboarding } from '@/components/desktop/DesktopOnboarding';
 import ToolsPage from '@/pages/tools';
 import FigCodePage from '@/pages/figcode';
+import SingleCellPage from '@/pages/single-cell';
 
 const ONBOARDING_FLAG = 'biof3-onboarding-completed';
 
@@ -39,7 +40,8 @@ export default function App(): React.ReactElement {
           <Route path="/" element={<PlaceholderHome />} />
           <Route path="/tools" element={<ToolsPage />} />
           <Route path="/tools/:toolId" element={<ToolsPage />} />
-          <Route path="/single-cell" element={<PlaceholderPage title="单细胞" />} />
+          <Route path="/single-cell" element={<SingleCellPage />} />
+          <Route path="/single-cell/*" element={<SingleCellPage />} />
           <Route path="/spatial" element={<PlaceholderPage title="空间组学" />} />
           <Route path="/figcode" element={<FigCodePage />} />
           <Route path="/figcode/:cardId" element={<FigCodePage />} />
