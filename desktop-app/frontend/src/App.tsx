@@ -13,6 +13,8 @@ import AlgorithmsPage from '@/pages/algorithms';
 import SkillsPage from '@/pages/skills';
 import AdminPage from '@/pages/admin';
 import HomePage from '@/pages/home';
+import DocsFrame from '@/pages/docs-frame';
+import BlogFrame from '@/pages/blog-frame';
 
 const ONBOARDING_FLAG = 'biof3-onboarding-completed';
 
@@ -56,23 +58,14 @@ export default function App(): React.ReactElement {
           <Route path="/skills" element={<SkillsPage />} />
           <Route path="/skills/:skillId" element={<SkillsPage />} />
           <Route path="/admin" element={<AdminPage />} />
-          <Route path="/docs/*" element={<PlaceholderPage title="文档" />} />
-          <Route path="/blog/*" element={<PlaceholderPage title="博客" />} />
+          <Route path="/docs/*" element={<DocsFrame />} />
+          <Route path="/docs" element={<DocsFrame />} />
+          <Route path="/blog/*" element={<BlogFrame />} />
+          <Route path="/blog" element={<BlogFrame />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
       <DesktopOnboardingMount />
     </>
-  );
-}
-
-function PlaceholderPage({ title }: { title: string }): React.ReactElement {
-  return (
-    <div style={{ padding: '40px 48px' }}>
-      <h1 style={{ fontSize: '1.5rem', marginBottom: '12px' }}>{title}</h1>
-      <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
-        该页面将在阶段 2 从 Docusaurus 移植过来（docs/blog 原生渲染）。
-      </p>
-    </div>
   );
 }
