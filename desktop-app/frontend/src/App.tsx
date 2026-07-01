@@ -10,6 +10,7 @@ import FigCodePage from '@/pages/figcode';
 import SingleCellPage from '@/pages/single-cell';
 import SpatialPage from '@/pages/spatial';
 import AlgorithmsPage from '@/pages/algorithms';
+import SkillsPage from '@/pages/skills';
 
 const ONBOARDING_FLAG = 'biof3-onboarding-completed';
 
@@ -50,6 +51,8 @@ export default function App(): React.ReactElement {
           <Route path="/figcode/:cardId" element={<FigCodePage />} />
           <Route path="/algorithms" element={<AlgorithmsPage />} />
           <Route path="/algorithms/:algoId" element={<AlgorithmsPage />} />
+          <Route path="/skills" element={<SkillsPage />} />
+          <Route path="/skills/:skillId" element={<SkillsPage />} />
           <Route path="/docs/*" element={<PlaceholderPage title="文档" />} />
           <Route path="/blog/*" element={<PlaceholderPage title="博客" />} />
           <Route path="*" element={<Navigate to="/" replace />} />
