@@ -13,5 +13,8 @@
   "runtime": {
     "r": ">=4.3.0"
   },
+  "builtAgainst": {
+    "r": "4.5"
+  },
   "platform": ["macos-arm64", "macos-x64", "windows-x64"]
 }

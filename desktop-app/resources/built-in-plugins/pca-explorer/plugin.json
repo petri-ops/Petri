@@ -14,5 +14,8 @@
   "runtime": {
     "python": ">=3.10.0"
   },
+  "builtAgainst": {
+    "python": "3.11"
+  },
   "platform": ["macos-arm64", "macos-x64", "windows-x64"]
 }

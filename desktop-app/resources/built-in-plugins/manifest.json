@@ -44,6 +44,9 @@
       },
       "runtime": {
         "r": ">=4.3.0"
+      },
+      "builtAgainst": {
+        "r": "4.5"
       }
     },
     "gene-correlation": {
@@ -62,6 +65,9 @@
       },
       "runtime": {
         "r": ">=4.3.0"
+      },
+      "builtAgainst": {
+        "r": "4.5"
       }
     },
     "pca-explorer": {
@@ -81,6 +87,9 @@
       },
       "runtime": {
         "python": ">=3.10.0"
+      },
+      "builtAgainst": {
+        "python": "3.11"
       }
     },
     "figcode-volcano-animated": {
@@ -93,7 +102,12 @@
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-volcano-animated/1.0.0/macos-arm64.zip",
       "size": 5242880,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": { "r": ["gifski"] }
+      "packages": {
+        "r": ["gifski"]
+      },
+      "builtAgainst": {
+        "r": "4.5"
+      }
     },
     "figcode-trajectory-branch": {
       "title": "FigCode · 轨迹分支图",
@@ -105,7 +119,12 @@
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-trajectory-branch/1.0.0/macos-arm64.zip",
       "size": 41943040,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": { "r": ["monocle3"] }
+      "packages": {
+        "r": ["monocle3"]
+      },
+      "builtAgainst": {
+        "r": "4.5"
+      }
     },
     "figcode-sc-doublet": {
       "title": "FigCode · 双胞检测 QC",
@@ -117,7 +136,12 @@
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-sc-doublet/1.0.0/macos-arm64.zip",
       "size": 15728640,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": { "r": ["scDblFinder"] }
+      "packages": {
+        "r": ["scDblFinder"]
+      },
+      "builtAgainst": {
+        "r": "4.5"
+      }
     },
     "figcode-cytotrace": {
       "title": "FigCode · 分化潜能 CytoTRACE",
@@ -129,7 +153,12 @@
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-cytotrace/1.0.0/macos-arm64.zip",
       "size": 10485760,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": { "r": ["CytoTRACE"] }
+      "packages": {
+        "r": ["CytoTRACE"]
+      },
+      "builtAgainst": {
+        "r": "4.5"
+      }
     },
     "figcode-qq-plot": {
       "title": "FigCode · QQ 图",
@@ -141,7 +170,12 @@
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-qq-plot/1.0.0/macos-arm64.zip",
       "size": 3145728,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": { "r": ["qqman"] }
+      "packages": {
+        "r": ["qqman"]
+      },
+      "builtAgainst": {
+        "r": "4.5"
+      }
     },
     "figcode-manhattan": {
       "title": "FigCode · 曼哈顿图",
@@ -153,7 +187,12 @@
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-manhattan/1.0.0/macos-arm64.zip",
       "size": 3145728,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": { "r": ["qqman"] }
+      "packages": {
+        "r": ["qqman"]
+      },
+      "builtAgainst": {
+        "r": "4.5"
+      }
     },
     "figcode-power-curve": {
       "title": "FigCode · 功效分析曲线",
@@ -165,7 +204,12 @@
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-power-curve/1.0.0/macos-arm64.zip",
       "size": 2097152,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": { "r": ["pwr"] }
+      "packages": {
+        "r": ["pwr"]
+      },
+      "builtAgainst": {
+        "r": "4.5"
+      }
     },
     "figcode-meta-forest": {
       "title": "FigCode · 荟萃分析森林图",
@@ -177,7 +221,12 @@
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-meta-forest/1.0.0/macos-arm64.zip",
       "size": 8388608,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": { "r": ["metafor"] }
+      "packages": {
+        "r": ["metafor"]
+      },
+      "builtAgainst": {
+        "r": "4.5"
+      }
     },
     "figcode-mut-signature": {
       "title": "FigCode · 突变签名分析",
@@ -189,8 +238,13 @@
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-mut-signature/1.0.0/macos-arm64.zip",
       "size": 5242880,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": { "r": [] },
-      "dependencies": ["figcode-data-bsgenome-hg19"]
+      "packages": {
+        "r": []
+      },
+      "dependencies": ["figcode-data-bsgenome-hg19"],
+      "builtAgainst": {
+        "r": "4.5"
+      }
     },
     "figcode-lego-plot": {
       "title": "FigCode · 突变乐高图",
@@ -202,8 +256,13 @@
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-lego-plot/1.0.0/macos-arm64.zip",
       "size": 5242880,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": { "r": [] },
-      "dependencies": ["figcode-data-bsgenome-hg19"]
+      "packages": {
+        "r": []
+      },
+      "dependencies": ["figcode-data-bsgenome-hg19"],
+      "builtAgainst": {
+        "r": "4.5"
+      }
     },
     "figcode-spatial-cluster": {
       "title": "FigCode · 空间聚类",
@@ -215,7 +274,12 @@
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-cluster/1.0.0/macos-arm64.zip",
       "size": 125829120,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": { "python": ["squidpy"] }
+      "packages": {
+        "python": ["squidpy"]
+      },
+      "builtAgainst": {
+        "python": "3.11"
+      }
     },
     "figcode-spatial-deconv-c2l": {
       "title": "FigCode · 空间解卷积 Cell2location",
@@ -227,7 +291,12 @@
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-deconv-c2l/1.0.0/macos-arm64.zip",
       "size": 125829120,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": { "python": ["squidpy"] }
+      "packages": {
+        "python": ["squidpy"]
+      },
+      "builtAgainst": {
+        "python": "3.11"
+      }
     },
     "figcode-feature-spatial": {
       "title": "FigCode · 空间基因表达",
@@ -239,7 +308,12 @@
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-feature-spatial/1.0.0/macos-arm64.zip",
       "size": 125829120,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": { "python": ["squidpy"] }
+      "packages": {
+        "python": ["squidpy"]
+      },
+      "builtAgainst": {
+        "python": "3.11"
+      }
     },
     "figcode-spatial-svg-moran": {
       "title": "FigCode · 空间高变基因 SVG",
@@ -251,7 +325,12 @@
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-svg-moran/1.0.0/macos-arm64.zip",
       "size": 125829120,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": { "python": ["squidpy"] }
+      "packages": {
+        "python": ["squidpy"]
+      },
+      "builtAgainst": {
+        "python": "3.11"
+      }
     },
     "figcode-squidpy-neighbors": {
       "title": "FigCode · 空间邻居网络",
@@ -263,7 +342,12 @@
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-squidpy-neighbors/1.0.0/macos-arm64.zip",
       "size": 125829120,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": { "python": ["squidpy"] }
+      "packages": {
+        "python": ["squidpy"]
+      },
+      "builtAgainst": {
+        "python": "3.11"
+      }
     },
     "figcode-spatial-lr-liana": {
       "title": "FigCode · 空间细胞通讯 LIANA",
@@ -275,7 +359,12 @@
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-lr-liana/1.0.0/macos-arm64.zip",
       "size": 157286400,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": { "python": ["squidpy", "liana"] }
+      "packages": {
+        "python": ["squidpy", "liana"]
+      },
+      "builtAgainst": {
+        "python": "3.11"
+      }
     },
     "figcode-scvelo-stream": {
       "title": "FigCode · RNA Velocity 流图",
@@ -287,7 +376,12 @@
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-scvelo-stream/1.0.0/macos-arm64.zip",
       "size": 83886080,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": { "python": ["scvelo"] }
+      "packages": {
+        "python": ["scvelo"]
+      },
+      "builtAgainst": {
+        "python": "3.11"
+      }
     },
     "figcode-shap-summary": {
       "title": "FigCode · SHAP 特征重要性",
@@ -299,7 +393,12 @@
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-shap-summary/1.0.0/macos-arm64.zip",
       "size": 125829120,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": { "python": ["xgboost", "shap"] }
+      "packages": {
+        "python": ["xgboost", "shap"]
+      },
+      "builtAgainst": {
+        "python": "3.11"
+      }
     },
     "figcode-data-bsgenome-hg19": {
       "title": "FigCode 数据包 · BSgenome hg19（突变签名用）",
@@ -310,7 +409,9 @@
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-data-bsgenome-hg19/1.0.0/macos-arm64.zip",
       "size": 2500000000,
       "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": { "r": ["BSgenome.Hsapiens.UCSC.hg19"] },
+      "packages": {
+        "r": ["BSgenome.Hsapiens.UCSC.hg19"]
+      },
       "figcodeCardIds": ["mut-signature", "lego-plot"],
       "optional": true
     }

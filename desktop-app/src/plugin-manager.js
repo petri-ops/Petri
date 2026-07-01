@@ -369,6 +369,26 @@ async function installPlugin(pluginId, onProgress) {
     console.log(`[plugin] runtime OK`);
   }
 
+  // 校验 builtAgainst：插件包给哪个 major.minor 编译的，必须与当前 Runtime 一致
+  // （R 4.4 编译的包装到 R 4.5 会报 "package built under R 4.4"；Python C 扩展跨 minor ABI 不兼容）
+  if (meta.builtAgainst && meta.builtAgainst[language]) {
+    const { getExecutor } = require(path.join(SHARED_BACKEND_DIR, 'executors'));
+    const executor = getExecutor(language);
+    if (typeof executor.checkBuiltAgainst === 'function') {
+      const req = meta.builtAgainst[language];
+      console.log(`[plugin] checking builtAgainst ${language} = ${req}`);
+      const result = executor.checkBuiltAgainst(req);
+      if (!result.ok) {
+        const langLabel = language === 'r' ? 'R' : 'Python';
+        throw new Error(
+          `插件需要 ${langLabel} ${req} 编译的包，当前是 ${langLabel} ${result.current}（major.minor 不匹配）。` +
+            `请等插件更新，或安装匹配的 ${langLabel} ${req} Runtime。`
+        );
+      }
+      console.log(`[plugin] builtAgainst OK (current ${result.current})`);
+    }
+  }
+
   // 安装语言包（内置插件通常不带 packages/，跳过）
   const pkgDir = path.join(pluginDir, 'packages', language);
   if (fs.existsSync(pkgDir)) {
