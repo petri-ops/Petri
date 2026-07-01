@@ -12,7 +12,8 @@
 
 set -euo pipefail
 
-PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# 脚本在 desktop-app/scripts/，往上两级到项目根
+PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 DESKTOP_APP="$PROJECT_ROOT/desktop-app"
 FRONTEND="$DESKTOP_APP/frontend"
 BUILD_DIR="$PROJECT_ROOT/build"
