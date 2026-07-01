@@ -12,6 +12,7 @@ import SpatialPage from '@/pages/spatial';
 import AlgorithmsPage from '@/pages/algorithms';
 import SkillsPage from '@/pages/skills';
 import AdminPage from '@/pages/admin';
+import HomePage from '@/pages/home';
 
 const ONBOARDING_FLAG = 'biof3-onboarding-completed';
 
@@ -40,8 +41,8 @@ export default function App(): React.ReactElement {
       <DesktopToolbar />
       <main className="biof3-spa-main">
         <Routes>
-          {/* 阶段 1：tools 页已移植 */}
-          <Route path="/" element={<PlaceholderHome />} />
+          {/* 阶段 1：8 个应用页面全部移植完成 */}
+          <Route path="/" element={<HomePage />} />
           <Route path="/tools" element={<ToolsPage />} />
           <Route path="/tools/:toolId" element={<ToolsPage />} />
           <Route path="/single-cell" element={<SingleCellPage />} />
@@ -65,26 +66,12 @@ export default function App(): React.ReactElement {
   );
 }
 
-function PlaceholderHome(): React.ReactElement {
-  return (
-    <div style={{ padding: '40px 48px' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '12px' }}>BioF3 桌面版</h1>
-      <p style={{ color: '#64748b', fontSize: '1rem' }}>
-        Vite SPA 原生 shell — 阶段 1 进行中。tools 页已移植，其他页面待搬。
-      </p>
-      <p style={{ color: '#94a3b8', fontSize: '0.88rem', marginTop: '24px' }}>
-        点击 dock「导航」或访问 <code>/tools</code> 查看已移植的工具页。
-      </p>
-    </div>
-  );
-}
-
 function PlaceholderPage({ title }: { title: string }): React.ReactElement {
   return (
     <div style={{ padding: '40px 48px' }}>
       <h1 style={{ fontSize: '1.5rem', marginBottom: '12px' }}>{title}</h1>
       <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
-        该页面将在阶段 1 后续从 Docusaurus 移植过来。
+        该页面将在阶段 2 从 Docusaurus 移植过来（docs/blog 原生渲染）。
       </p>
     </div>
   );
