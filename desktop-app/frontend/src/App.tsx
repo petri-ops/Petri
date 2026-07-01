@@ -6,6 +6,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { DesktopToolbar } from '@/components/desktop/DesktopToolbar';
 import { DesktopOnboarding } from '@/components/desktop/DesktopOnboarding';
 import ToolsPage from '@/pages/tools';
+import FigCodePage from '@/pages/figcode';
 
 const ONBOARDING_FLAG = 'biof3-onboarding-completed';
 
@@ -40,7 +41,8 @@ export default function App(): React.ReactElement {
           <Route path="/tools/:toolId" element={<ToolsPage />} />
           <Route path="/single-cell" element={<PlaceholderPage title="单细胞" />} />
           <Route path="/spatial" element={<PlaceholderPage title="空间组学" />} />
-          <Route path="/figcode" element={<PlaceholderPage title="FigCode 绘图" />} />
+          <Route path="/figcode" element={<FigCodePage />} />
+          <Route path="/figcode/:cardId" element={<FigCodePage />} />
           <Route path="/docs/*" element={<PlaceholderPage title="文档" />} />
           <Route path="/blog/*" element={<PlaceholderPage title="博客" />} />
           <Route path="*" element={<Navigate to="/" replace />} />

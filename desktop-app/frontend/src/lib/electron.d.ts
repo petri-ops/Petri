@@ -60,6 +60,19 @@ declare global {
           missingPlugins: Array<{ id: string; title?: string }>;
           cardInstalled: boolean;
         }>;
+        cardStatus: (cardIds: string[]) => Promise<{
+          ok: boolean;
+          statuses: Record<
+            string,
+            {
+              installed: boolean;
+              needsPlugin: boolean;
+              pluginId?: string;
+              title?: string;
+              size?: number;
+            }
+          >;
+        }>;
       };
       data: {
         info: () => Promise<{
