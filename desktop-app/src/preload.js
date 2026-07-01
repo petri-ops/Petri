@@ -97,6 +97,12 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     export: (targetPath) => ipcRenderer.invoke('diagnostic:export', targetPath),
   },
 
+  // 数据目录管理（卸载数据保留）
+  data: {
+    info: () => ipcRenderer.invoke('data:info'),
+    openDir: () => ipcRenderer.invoke('data:open-dir'),
+  },
+
   // FigCode 包检测
   figcode: {
     checkPackages: (language, packages, cardId) =>
