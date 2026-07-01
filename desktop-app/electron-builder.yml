@@ -59,6 +59,9 @@ compression: maximum
 # 额外资源：r-server / py-server / shared-backend / 前端 build 产物 / 内置插件
 # r-server 和 py-server 作为子进程 spawn，需要带上各自的 node_modules
 #
+# 阶段 3（desktop-spa）：前端 build 产物改为 Vite SPA（frontend/dist）
+# Docusaurus build 仍保留（docs/blog iframe 过渡，阶段 2 后移除）
+#
 # R/Python Runtime 已移除 — 改为插件商店按需下载（~200MB 初始包）
 # 打包脚本: scripts/build-runtime-plugins.sh → 上传 OSS → manifest.json 注册
 # 用户首次启动后在插件商店下载 R/Python Runtime 到 ~/Documents/BioF3-Local/runtimes/
@@ -82,6 +85,13 @@ extraResources:
     filter:
       - "**/*"
       - "!**/.DS_Store"
+  # Vite SPA build 产物 — 主窗口加载（阶段 3 起）
+  - from: ./frontend/dist
+    to: desktop-app/frontend/dist
+    filter:
+      - "**/*"
+      - "!**/.DS_Store"
+  # Docusaurus build 产物 — docs/blog iframe 过渡（阶段 2 后移除）
   - from: ../build
     to: build
     filter:

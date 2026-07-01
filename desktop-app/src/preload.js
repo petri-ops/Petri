@@ -3,45 +3,19 @@
  *
  * 通过 contextBridge 暴露安全的 API 给 webview 前端调用。
  * 前端通过 window.biof3Desktop 访问这些 API。
+ *
+ * 阶段 3（desktop-spa）：主窗口加载 Vite SPA，不再需要隐藏 Docusaurus
+ * navbar（SPA 没有 navbar）。body padding 由 DesktopToolbar 组件自己管理。
  */
 
 const { contextBridge, ipcRenderer } = require('electron');
 
 // ============================================================
-// 桌面版布局：隐藏顶栏 + body 右移让出 dock 64px
-// ============================================================
-if (typeof document !== 'undefined') {
-  const applyLayout = () => {
-    document.body.style.paddingLeft = '64px';
-    document.body.style.boxSizing = 'border-box';
-
-    // 隐藏 Docusaurus 顶栏（桌面软件不需要网页式导航栏）
-    const style = document.createElement('style');
-    style.id = 'biof3-desktop-hide-navbar';
-    style.textContent = '.navbar--fixed-top { display: none !important; }';
-    document.head.appendChild(style);
-  };
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', applyLayout);
-  } else {
-    applyLayout();
-  }
-}
-
-// ============================================================
 // 注入 process.env.BIOF3_DESKTOP = '1' 到渲染进程
 // ============================================================
-// 前端代码（Docusaurus build 产物）通过
-//   typeof process && process.env && process.env.BIOF3_DESKTOP === '1'
+// 前端代码通过 typeof process && process.env && process.env.BIOF3_DESKTOP
 // 检测桌面版，但 contextIsolation:true + nodeIntegration:false 下
-// 渲染进程没有 process 对象，导致 IS_DESKTOP 永远为 false。
-//
-// 后果：Waline 评论、analytics 心跳等本应禁用的云端功能依然运行：
-//   - Waline 尝试连接 https://biof3.com，登录时 window.open() 打开新窗口
-//   - 新 Electron 窗口不继承 setWindowOpenHandler，加载失败 → SPA fallback
-//     → 又加载完整应用 → 又触发 Waline → 级联弹窗直到卡死
-//
-// 通过 contextBridge 暴露 process 对象，让前端的 typeof process 检测通过。
+// 渲染进程没有 process 对象。通过 contextBridge 暴露让其检测通过。
 contextBridge.exposeInMainWorld('process', {
   env: {
     BIOF3_DESKTOP: '1',

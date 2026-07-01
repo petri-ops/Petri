@@ -11,10 +11,12 @@
     "dev": "electron . --dev",
     "prebuild": "node --check src/main.js && node --check src/preload.js",
     "build:site": "cd .. && npm run build:desktop",
-    "build:win": "npm run prebuild && npm run build:site && electron-builder --win --x64",
-    "build:mac": "npm run prebuild && npm run build:site && electron-builder --mac --arm64 --x64",
-    "build:mac-arm64": "npm run prebuild && npm run build:site && electron-builder --mac --arm64",
-    "build:mac-x64": "npm run prebuild && npm run build:site && electron-builder --mac --x64",
+    "build:spa": "cd frontend && npm run build",
+    "build:all": "npm run build:spa && npm run build:site",
+    "build:win": "npm run prebuild && npm run build:all && electron-builder --win --x64",
+    "build:mac": "npm run prebuild && npm run build:all && electron-builder --mac --arm64 --x64",
+    "build:mac-arm64": "npm run prebuild && npm run build:all && electron-builder --mac --arm64",
+    "build:mac-x64": "npm run prebuild && npm run build:all && electron-builder --mac --x64",
     "check": "node --check src/main.js && node --check src/preload.js"
   },
   "dependencies": {

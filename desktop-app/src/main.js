@@ -343,16 +343,42 @@ function startContentSync() {
 let mainWindow = null;
 
 function createWindow() {
-  const buildDir = resolveResource('build');
-  const sitePath = path.join(buildDir, 'index.html');
+  // 阶段 3（desktop-spa）：主窗口加载 Vite SPA build 产物
+  // Vite SPA 在 frontend/dist，base './'，无 baseUrl 前缀
+  const spaBuildDir = resolveResource('desktop-app', 'frontend', 'dist');
+  const spaIndexPath = path.join(spaBuildDir, 'index.html');
+  const spaServerUrl = 'http://localhost:3002/';
 
-  // 启动本地静态文件服务器（Docusaurus 的 baseUrl=/BioF3/ 需要 HTTP 协议）
-  const staticServerUrl = 'http://localhost:3002/BioF3/';
+  // Docusaurus build 产物（docs/blog iframe 过渡用）
+  const docusaurusBuildDir = resolveResource('build');
+  const docusaurusServerUrl = 'http://localhost:3003/BioF3/';
+
+  // 启动 Vite SPA 静态服务器（:3002，无 baseUrl 前缀，SPA fallback）
   try {
     const { startStaticServer } = require('./static-server');
-    startStaticServer(buildDir);
+    startStaticServer(spaBuildDir, {
+      port: 3002,
+      baseUrl: '/',
+      label: 'spa-server',
+      spaFallback: true,
+    });
   } catch (e) {
-    console.warn('[desktop] static server failed:', e.message);
+    console.warn('[desktop] SPA static server failed:', e.message);
+  }
+
+  // 启动 Docusaurus 静态服务器（:3003，baseUrl=/BioF3/，供 docs/blog iframe）
+  if (fs.existsSync(docusaurusBuildDir)) {
+    try {
+      const { startStaticServer } = require('./static-server');
+      startStaticServer(docusaurusBuildDir, {
+        port: 3003,
+        baseUrl: '/BioF3/',
+        label: 'docs-server',
+        spaFallback: true,
+      });
+    } catch (e) {
+      console.warn('[desktop] docs static server failed:', e.message);
+    }
   }
 
   mainWindow = new BrowserWindow({
@@ -368,9 +394,12 @@ function createWindow() {
     },
   });
 
-  // 加载本地静态站（通过 HTTP 服务器，解决 baseUrl=/BioF3/ 路径问题）
-  if (fs.existsSync(sitePath)) {
-    mainWindow.loadURL(staticServerUrl);
+  // 加载 Vite SPA（优先）；不存在则回退 Docusaurus build；再否则 dev server
+  if (fs.existsSync(spaIndexPath)) {
+    mainWindow.loadURL(spaServerUrl);
+  } else if (fs.existsSync(path.join(docusaurusBuildDir, 'index.html'))) {
+    // 兼容：SPA 未构建时回退 Docusaurus build
+    mainWindow.loadURL(docusaurusServerUrl);
   } else {
     // 开发模式：加载 Docusaurus dev server
     mainWindow.loadURL('http://localhost:3000');
@@ -387,11 +416,11 @@ function createWindow() {
     return { action: 'deny' };
   });
 
-  // 拦截主窗口导航：只允许在 static-server 范围内跳转，防止意外导航到
+  // 拦截主窗口导航：只允许在本地服务器范围内跳转，防止意外导航到
   // 外部 URL 或 file:// 导致白屏/弹窗
   mainWindow.webContents.on('will-navigate', (event, url) => {
-    const allowed = staticServerUrl.replace(/\/$/, '');
-    if (!url.startsWith(allowed) && !url.startsWith('http://localhost:3000')) {
+    const allowed = ['http://localhost:3002', 'http://localhost:3003', 'http://localhost:3000'];
+    if (!allowed.some((a) => url.startsWith(a))) {
       event.preventDefault();
       if (url.startsWith('http://') || url.startsWith('https://')) {
         shell.openExternal(url);
