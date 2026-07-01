@@ -1,0 +1,131 @@
+/* ============================================================
+ * PageHeader — 自定义页面顶部标题条
+ *
+ * 复用 --biof3-* 调色板，padding 与 Docusaurus 内容区对齐。
+ * 桌面版下 main-wrapper 已右移 64px，本组件无需额外处理。
+ * ============================================================ */
+
+.biof3-page-header {
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200, #e2e8f0);
+  margin-bottom: 18px;
+  background: var(--ifm-background-color, transparent);
+}
+
+/* 桌面版：去面包屑后收紧间距，更接近软件标题条 */
+.biof3-page-header--desktop {
+  padding: 14px 24px 10px;
+  margin-bottom: 12px;
+}
+
+[data-theme='dark'] .biof3-page-header {
+  border-bottom-color: rgba(148, 163, 184, 0.2);
+}
+
+/* ---- 面包屑 ---- */
+.biof3-page-header__breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+}
+
+.biof3-page-header__crumb-wrap {
+  display: inline-flex;
+  align-items: center;
+}
+
+.biof3-page-header__crumb {
+  color: var(--ifm-color-emphasis-600, #475569);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+a.biof3-page-header__crumb:hover {
+  color: var(--biof3-teal, #0f766e);
+  text-decoration: none;
+}
+
+.biof3-page-header__crumb--current {
+  color: var(--ifm-color-emphasis-800, #1e293b);
+  font-weight: 600;
+}
+
+[data-theme='dark'] .biof3-page-header__crumb {
+  color: var(--ifm-color-emphasis-500, #94a3b8);
+}
+
+[data-theme='dark'] .biof3-page-header__crumb--current {
+  color: var(--ifm-color-emphasis-200, #cbd5e1);
+}
+
+.biof3-page-header__sep {
+  margin: 0 8px;
+  color: var(--ifm-color-emphasis-300, #cbd5e1);
+  user-select: none;
+}
+
+/* ---- 主标题区 ---- */
+.biof3-page-header__main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.biof3-page-header__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #e4f4ee;
+  color: var(--biof3-teal, #0f766e);
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .biof3-page-header__icon {
+  background: rgba(67, 209, 174, 0.14);
+  color: #8ff0d6;
+}
+
+.biof3-page-header__titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.biof3-page-header__title {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ifm-heading-color, var(--ifm-color-emphasis-900, #0f172a));
+}
+
+.biof3-page-header__subtitle {
+  margin: 4px 0 0;
+  font-size: 0.88rem;
+  color: var(--ifm-color-emphasis-600, #475569);
+  line-height: 1.5;
+}
+
+[data-theme='dark'] .biof3-page-header__subtitle {
+  color: var(--ifm-color-emphasis-500, #94a3b8);
+}
+
+/* 移动端：缩小标题、减少 padding */
+@media (max-width: 768px) {
+  .biof3-page-header {
+    padding: 14px 16px 10px;
+  }
+  .biof3-page-header__title {
+    font-size: 1.15rem;
+  }
+  .biof3-page-header__icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+  }
+}

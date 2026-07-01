@@ -49,6 +49,18 @@ declare global {
       diagnostic: {
         export: (targetPath?: string) => Promise<{ ok: boolean; path?: string; error?: string }>;
       };
+      figcode: {
+        checkPackages: (
+          language: string,
+          packages: string[],
+          cardId?: string
+        ) => Promise<{
+          ok: boolean;
+          missing: string[];
+          missingPlugins: Array<{ id: string; title?: string }>;
+          cardInstalled: boolean;
+        }>;
+      };
       data: {
         info: () => Promise<{
           ok: boolean;

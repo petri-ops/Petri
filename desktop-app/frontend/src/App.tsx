@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { DesktopToolbar } from '@/components/desktop/DesktopToolbar';
 import { DesktopOnboarding } from '@/components/desktop/DesktopOnboarding';
+import ToolsPage from '@/pages/tools';
 
 const ONBOARDING_FLAG = 'biof3-onboarding-completed';
 
@@ -33,9 +34,10 @@ export default function App(): React.ReactElement {
       <DesktopToolbar />
       <main className="biof3-spa-main">
         <Routes>
-          {/* 阶段 0：占位路由，阶段 1 填入真实页面 */}
+          {/* 阶段 1：tools 页已移植 */}
           <Route path="/" element={<PlaceholderHome />} />
-          <Route path="/tools" element={<PlaceholderPage title="工具" />} />
+          <Route path="/tools" element={<ToolsPage />} />
+          <Route path="/tools/:toolId" element={<ToolsPage />} />
           <Route path="/single-cell" element={<PlaceholderPage title="单细胞" />} />
           <Route path="/spatial" element={<PlaceholderPage title="空间组学" />} />
           <Route path="/figcode" element={<PlaceholderPage title="FigCode 绘图" />} />
@@ -54,10 +56,10 @@ function PlaceholderHome(): React.ReactElement {
     <div style={{ padding: '40px 48px' }}>
       <h1 style={{ fontSize: '2rem', marginBottom: '12px' }}>BioF3 桌面版</h1>
       <p style={{ color: '#64748b', fontSize: '1rem' }}>
-        Vite SPA 原生 shell — 阶段 0 骨架已就绪。dock + 路由 + 首次启动引导可用。
+        Vite SPA 原生 shell — 阶段 1 进行中。tools 页已移植，其他页面待搬。
       </p>
       <p style={{ color: '#94a3b8', fontSize: '0.88rem', marginTop: '24px' }}>
-        阶段 1 将搬入 tools / single-cell / spatial / figcode 等应用页面。
+        点击 dock「导航」或访问 <code>/tools</code> 查看已移植的工具页。
       </p>
     </div>
   );
@@ -68,7 +70,7 @@ function PlaceholderPage({ title }: { title: string }): React.ReactElement {
     <div style={{ padding: '40px 48px' }}>
       <h1 style={{ fontSize: '1.5rem', marginBottom: '12px' }}>{title}</h1>
       <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
-        该页面将在阶段 1 从 Docusaurus 移植过来。
+        该页面将在阶段 1 后续从 Docusaurus 移植过来。
       </p>
     </div>
   );
