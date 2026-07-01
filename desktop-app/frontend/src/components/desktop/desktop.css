@@ -1,0 +1,1703 @@
+/* ============================================================
+ * Desktop UI — 桌面版左下角 dock + 浮动面板
+ *
+ * 仅桌面版渲染（组件层 IS_DESKTOP 短路），但样式全局可用。
+ * 复用 --biof3-* 调色板，与 LoginModal 同款模态风格。
+ * ============================================================ */
+
+/* ---- 左侧垂直 dock（置顶 + 可收缩） ---- */
+.biof3-desktop-dock {
+  position: fixed;
+  top: 0; /* 置顶：从窗口最顶部开始 */
+  left: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 6px;
+  background: #f8fafc;
+  border-right: 1px solid #e2e8f0;
+  width: 64px;
+  box-sizing: border-box;
+  transition:
+    width 0.25s ease,
+    padding 0.25s ease;
+}
+
+/* 收缩状态：宽度压缩到只留一个 toggle 按钮 */
+.biof3-desktop-dock--collapsed {
+  width: 28px;
+  padding: 8px 2px;
+}
+
+/* 收缩时隐藏按钮文字/标签，只保留图标区域 */
+.biof3-desktop-dock--collapsed .biof3-desktop-dock__btn {
+  width: 24px;
+  height: 24px;
+}
+.biof3-desktop-dock--collapsed .biof3-desktop-dock__btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+[data-theme='dark'] .biof3-desktop-dock {
+  background: #0f172a;
+  border-right-color: rgba(148, 163, 184, 0.15);
+}
+
+/* ---- dock 底部固定项（主题切换 + 收缩 toggle） ---- */
+.biof3-desktop-dock__footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  margin-top: auto; /* 推到底部 */
+  padding-top: 4px;
+  flex-shrink: 0;
+}
+
+/* 收缩/展开 toggle */
+.biof3-desktop-dock__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+.biof3-desktop-dock__toggle:hover {
+  background: #f1f5f9;
+  color: #0f766e;
+}
+[data-theme='dark'] .biof3-desktop-dock__toggle {
+  color: #64748b;
+}
+[data-theme='dark'] .biof3-desktop-dock__toggle:hover {
+  background: rgba(148, 163, 184, 0.12);
+  color: #8ff0d6;
+}
+
+.biof3-desktop-dock__bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+/* 主题切换按钮 — dock 底部固定项，复用 dock btn 样式 */
+.biof3-desktop-dock__theme-toggle {
+  flex-shrink: 0;
+}
+
+.biof3-desktop-dock__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: #475569;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.biof3-desktop-dock__btn:hover {
+  background: #f1f5f9;
+  color: #0f766e;
+}
+
+.biof3-desktop-dock__btn.active {
+  background: #e4f4ee;
+  color: #0f766e;
+}
+
+[data-theme='dark'] .biof3-desktop-dock__btn {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .biof3-desktop-dock__btn:hover {
+  background: rgba(148, 163, 184, 0.12);
+  color: #8ff0d6;
+}
+
+[data-theme='dark'] .biof3-desktop-dock__btn.active {
+  background: rgba(67, 209, 174, 0.14);
+  color: #8ff0d6;
+}
+
+/* ---- 浮动面板（通用） ---- */
+.biof3-desktop-panel {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  color: #1e293b;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+[data-theme='dark'] .biof3-desktop-panel {
+  background: #1e293b;
+  color: #f1f5f9;
+}
+
+/* ---- 工作区容器（dock 右侧） ---- */
+.biof3-desktop-workarea {
+  position: fixed;
+  top: 0; /* 顶栏已隐藏，面板从顶部开始 */
+  left: 64px; /* dock 右侧 */
+  bottom: 0;
+  z-index: 9998;
+  background: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.biof3-desktop-workarea--narrow {
+  width: 360px;
+}
+
+.biof3-desktop-workarea--wide {
+  width: 520px;
+}
+
+/* 插件商店等需要多列网格的面板：内容区扣掉侧栏后约 800px，可放 3 列卡片。
+   注意：不加 position:relative —— 基类 .biof3-desktop-workarea 的 position:fixed
+   已是绝对定位子元素（拖拽手柄）的包含块；若改成 relative 会覆盖 fixed，面板会
+   回到正常文档流并跟着 DesktopToolbar 渲染进导航栏内部。 */
+.biof3-desktop-workarea--xwide {
+  width: 960px;
+}
+
+/* 右边缘拖拽手柄：鼠标拖动调整面板宽度 */
+.biof3-desktop-workarea__resize-handle {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 10;
+  background: transparent;
+  transition: background 0.15s;
+}
+
+.biof3-desktop-workarea__resize-handle:hover,
+.biof3-desktop-workarea__resize-handle:active {
+  background: rgba(15, 118, 110, 0.25);
+}
+
+[data-theme='dark'] .biof3-desktop-workarea__resize-handle:hover,
+[data-theme='dark'] .biof3-desktop-workarea__resize-handle:active {
+  background: rgba(67, 209, 174, 0.3);
+}
+
+[data-theme='dark'] .biof3-desktop-workarea {
+  background: #1e293b;
+  border-right-color: rgba(148, 163, 184, 0.15);
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25);
+}
+
+/* dock 收缩时 workarea 左对齐到收缩后的 dock 右侧 */
+html.biof3-desktop-dock-collapsed .biof3-desktop-workarea {
+  left: 28px;
+}
+
+/* ---- 面板 Header ---- */
+.biof3-desktop-panel__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .biof3-desktop-panel__header {
+  border-bottom-color: rgba(148, 163, 184, 0.2);
+}
+
+.biof3-desktop-panel__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #e4f4ee;
+  color: #0f766e;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .biof3-desktop-panel__icon {
+  background: rgba(67, 209, 174, 0.14);
+  color: #8ff0d6;
+}
+
+.biof3-desktop-panel__titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.biof3-desktop-panel__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.biof3-desktop-panel__subtitle {
+  margin: 2px 0 0;
+  font-size: 0.76rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme='dark'] .biof3-desktop-panel__subtitle {
+  color: #94a3b8;
+}
+
+.biof3-desktop-panel__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  flex-shrink: 0;
+}
+
+.biof3-desktop-panel__close:hover {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+[data-theme='dark'] .biof3-desktop-panel__close:hover {
+  background: rgba(148, 163, 184, 0.12);
+  color: #cbd5e1;
+}
+
+/* ---- 面板 Body ---- */
+.biof3-desktop-panel__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 18px;
+}
+
+/* ---- 面板 Footer ---- */
+.biof3-desktop-panel__footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-top: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .biof3-desktop-panel__footer {
+  border-top-color: rgba(148, 163, 184, 0.2);
+}
+
+.biof3-desktop-panel__footer .biof3-saved-toast {
+  margin-right: auto;
+}
+
+.biof3-desktop-panel__footer .biof3-update-section {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ---- 插件商店面板（工作区内全宽全高） ---- */
+.biof3-plugin-store-panel {
+  width: 100%;
+  height: 100%;
+}
+
+/* 插件商店面板复用 .biof3-plugin-store__* 样式 */
+.biof3-plugin-store-panel .biof3-plugin-store__header {
+  padding: 14px 20px;
+}
+
+.biof3-plugin-store-panel .biof3-plugin-store__body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.biof3-plugin-store-panel .biof3-plugin-store__content {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 18px;
+  overflow-y: auto;
+}
+
+.biof3-plugin-store-panel .biof3-plugin-store__footer {
+  padding: 10px 20px;
+}
+
+@keyframes biof3-desktop-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ---- 表单字段 ---- */
+.biof3-field {
+  margin-bottom: 18px;
+}
+
+.biof3-field__label {
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--ifm-color-emphasis-800, #1e293b);
+}
+
+[data-theme='dark'] .biof3-field__label {
+  color: var(--ifm-color-emphasis-700, #cbd5e1);
+}
+
+.biof3-field__hint {
+  margin: 5px 0 0;
+  font-size: 0.76rem;
+  color: var(--ifm-color-emphasis-500, #94a3b8);
+  line-height: 1.5;
+}
+
+.biof3-field__result {
+  margin: 7px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.biof3-field__result--ok {
+  color: #10b981;
+}
+.biof3-field__result--err {
+  color: #ef4444;
+}
+
+.biof3-input,
+.biof3-select {
+  width: 100%;
+  padding: 9px 11px;
+  border-radius: 8px;
+  border: 1px solid var(--ifm-color-emphasis-300, #cbd5e1);
+  background: var(--ifm-background-color, #fff);
+  color: var(--ifm-font-color-base, #12342f);
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+
+.biof3-input:focus,
+.biof3-select:focus {
+  outline: none;
+  border-color: var(--biof3-teal, #0f766e);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+}
+
+[data-theme='dark'] .biof3-input,
+[data-theme='dark'] .biof3-select {
+  background: #0f172a;
+  border-color: rgba(148, 163, 184, 0.25);
+  color: #f1f5f9;
+}
+
+.biof3-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.biof3-input-row .biof3-input {
+  flex: 1;
+}
+
+.biof3-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+/* ---- 按钮 ---- */
+.biof3-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    opacity 0.15s ease;
+  white-space: nowrap;
+}
+
+.biof3-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.biof3-btn--primary {
+  background: var(--biof3-teal, #0f766e);
+  color: #fff;
+}
+.biof3-btn--primary:hover:not(:disabled) {
+  background: var(--biof3-teal-dark, #13523f);
+}
+
+.biof3-btn--ghost {
+  background: transparent;
+  color: var(--ifm-color-emphasis-700, #475569);
+  border: 1px solid var(--ifm-color-emphasis-300, #cbd5e1);
+}
+.biof3-btn--ghost:hover:not(:disabled) {
+  background: var(--ifm-color-emphasis-100, #f1f5f9);
+}
+
+[data-theme='dark'] .biof3-btn--ghost {
+  color: var(--ifm-color-emphasis-600, #cbd5e1);
+  border-color: rgba(148, 163, 184, 0.3);
+}
+[data-theme='dark'] .biof3-btn--ghost:hover:not(:disabled) {
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.biof3-btn--danger-ghost {
+  background: transparent;
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+.biof3-btn--danger-ghost:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.biof3-btn--sm {
+  padding: 6px 12px;
+  font-size: 0.82rem;
+}
+
+.biof3-btn--icon {
+  padding: 8px;
+  width: 36px;
+  height: 36px;
+}
+
+/* ---- 空状态 / 保存提示 / 更新进度 ---- */
+.biof3-empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--ifm-color-emphasis-500, #94a3b8);
+  font-size: 0.86rem;
+  border: 1px dashed var(--ifm-color-emphasis-200, #e2e8f0);
+  border-radius: 10px;
+}
+
+.biof3-saved-toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #10b981;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.biof3-update-section {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.biof3-update-progress {
+  font-size: 0.82rem;
+  color: var(--biof3-teal, #0f766e);
+  font-weight: 600;
+}
+
+/* ---- 数据目录管理（卸载数据保留）---- */
+.biof3-data-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  margin-top: 8px;
+  border-radius: 10px;
+  border: 1px solid var(--ifm-color-emphasis-200, #e2e8f0);
+  background: var(--ifm-color-emphasis-100, #f8fafc);
+}
+[data-theme='dark'] .biof3-data-section {
+  background: rgba(148, 163, 184, 0.08);
+}
+.biof3-data-dir-path {
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+  font-size: 0.76rem;
+  color: var(--ifm-color-emphasis-600, #475569);
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--ifm-background-color, #fff);
+  border: 1px solid var(--ifm-color-emphasis-200, #e2e8f0);
+  word-break: break-all;
+  user-select: all;
+}
+[data-theme='dark'] .biof3-data-dir-path {
+  color: var(--ifm-color-emphasis-500, #94a3b8);
+}
+.biof3-data-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.biof3-data-breakdown-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  padding: 3px 0;
+}
+.biof3-data-breakdown-name {
+  color: var(--ifm-color-emphasis-600, #475569);
+}
+.biof3-data-breakdown-size {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-700, #334155);
+}
+.biof3-data-breakdown-row--total {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--ifm-color-emphasis-200, #e2e8f0);
+  font-weight: 700;
+}
+
+/* ============================================================
+ * 插件商店 — 左侧导航 + 右侧卡片网格
+ * ============================================================ */
+
+/* ---- Header ---- */
+.biof3-plugin-store__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 22px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .biof3-plugin-store__header {
+  border-bottom-color: rgba(148, 163, 184, 0.2);
+}
+
+.biof3-plugin-store__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: #e4f4ee;
+  color: #0f766e;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .biof3-plugin-store__icon {
+  background: rgba(67, 209, 174, 0.14);
+  color: #8ff0d6;
+}
+
+.biof3-plugin-store__title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.biof3-plugin-store__search {
+  flex: 1;
+  max-width: 240px;
+  margin-left: auto;
+}
+
+.biof3-plugin-store__search input {
+  width: 100%;
+  padding: 7px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  background: #f8fafc;
+  color: #1e293b;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.biof3-plugin-store__search input:focus {
+  border-color: #0f766e;
+  background: #fff;
+}
+
+[data-theme='dark'] .biof3-plugin-store__search input {
+  background: #283548;
+  border-color: rgba(148, 163, 184, 0.2);
+  color: #f1f5f9;
+}
+
+[data-theme='dark'] .biof3-plugin-store__search input:focus {
+  border-color: #43d1ae;
+  background: #334155;
+}
+
+.biof3-plugin-store__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  flex-shrink: 0;
+}
+
+.biof3-plugin-store__close:hover {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+[data-theme='dark'] .biof3-plugin-store__close:hover {
+  background: rgba(148, 163, 184, 0.12);
+  color: #cbd5e1;
+}
+
+/* ---- Body: sidebar + content ---- */
+.biof3-plugin-store__body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+/* ---- Sidebar ---- */
+.biof3-plugin-store__sidebar {
+  width: 160px;
+  flex-shrink: 0;
+  padding: 12px 8px;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+}
+
+[data-theme='dark'] .biof3-plugin-store__sidebar {
+  border-right-color: rgba(148, 163, 184, 0.2);
+}
+
+.biof3-plugin-store__nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #475569;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    color 0.12s;
+  text-align: left;
+  font-family: inherit;
+}
+
+.biof3-plugin-store__nav-item:hover {
+  background: #f1f5f9;
+  color: #0f766e;
+}
+
+.biof3-plugin-store__nav-item.active {
+  background: #e4f4ee;
+  color: #0f766e;
+  font-weight: 700;
+}
+
+[data-theme='dark'] .biof3-plugin-store__nav-item {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .biof3-plugin-store__nav-item:hover {
+  background: rgba(148, 163, 184, 0.1);
+  color: #8ff0d6;
+}
+
+[data-theme='dark'] .biof3-plugin-store__nav-item.active {
+  background: rgba(67, 209, 174, 0.14);
+  color: #8ff0d6;
+}
+
+.biof3-plugin-store__nav-label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.biof3-plugin-store__nav-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  background: #f1f5f9;
+  padding: 1px 7px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.biof3-plugin-store__nav-item.active .biof3-plugin-store__nav-count {
+  background: rgba(15, 118, 110, 0.15);
+  color: #0f766e;
+}
+
+[data-theme='dark'] .biof3-plugin-store__nav-count {
+  background: rgba(148, 163, 184, 0.15);
+  color: #64748b;
+}
+
+[data-theme='dark'] .biof3-plugin-store__nav-item.active .biof3-plugin-store__nav-count {
+  background: rgba(67, 209, 174, 0.2);
+  color: #8ff0d6;
+}
+
+/* ---- Content ---- */
+.biof3-plugin-store__content {
+  flex: 1;
+  min-width: 0;
+  padding: 16px 20px;
+  overflow-y: auto;
+}
+
+.biof3-plugin-store__hint {
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: #92400e;
+}
+
+[data-theme='dark'] .biof3-plugin-store__hint {
+  background: rgba(251, 191, 36, 0.1);
+  border-color: rgba(251, 191, 36, 0.3);
+  color: #fbbf24;
+}
+
+/* ---- Runtime list (非卡片，保留行式) ---- */
+.biof3-plugin-store__runtime-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.biof3-plugin-store__runtime-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  transition: border-color 0.15s;
+}
+
+.biof3-plugin-store__runtime-item.installed {
+  background: #e8f5e9;
+  border-color: #a5d6a7;
+}
+
+[data-theme='dark'] .biof3-plugin-store__runtime-item {
+  background: #283548;
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+[data-theme='dark'] .biof3-plugin-store__runtime-item.installed {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.biof3-plugin-store__runtime-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  background: #e4f4ee;
+  color: #0f766e;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .biof3-plugin-store__runtime-icon {
+  background: rgba(67, 209, 174, 0.14);
+  color: #8ff0d6;
+}
+
+.biof3-plugin-store__runtime-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.biof3-plugin-store__runtime-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.biof3-plugin-store__badge-ok {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+[data-theme='dark'] .biof3-plugin-store__badge-ok {
+  color: #34d399;
+}
+
+.biof3-plugin-store__runtime-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 0.76rem;
+  color: #64748b;
+}
+
+.biof3-plugin-store__runtime-meta span {
+  display: inline-flex;
+  align-items: center;
+}
+
+.biof3-plugin-store__badge-required {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+[data-theme='dark'] .biof3-plugin-store__badge-required {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+}
+
+.biof3-plugin-store__runtime-desc {
+  font-size: 0.78rem;
+  color: #475569;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+[data-theme='dark'] .biof3-plugin-store__runtime-desc {
+  color: #94a3b8;
+}
+
+.biof3-plugin-store__runtime-action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+/* ---- 卡片网格 ---- */
+.biof3-plugin-store__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.biof3-plugin-card {
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.biof3-plugin-card:hover {
+  border-color: #c8d8d2;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.biof3-plugin-card.installed {
+  border-color: #a5d6a7;
+  background: #f6fbf7;
+}
+
+[data-theme='dark'] .biof3-plugin-card {
+  background: #283548;
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+[data-theme='dark'] .biof3-plugin-card:hover {
+  border-color: rgba(67, 209, 174, 0.3);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme='dark'] .biof3-plugin-card.installed {
+  border-color: rgba(16, 185, 129, 0.25);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.biof3-plugin-card__top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.biof3-plugin-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #e4f4ee;
+  color: #0f766e;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .biof3-plugin-card__icon {
+  background: rgba(67, 209, 174, 0.14);
+  color: #8ff0d6;
+}
+
+.biof3-plugin-card__name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.biof3-plugin-card__badge {
+  font-size: 0.76rem;
+  color: #2e7d32;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .biof3-plugin-card__badge {
+  color: #34d399;
+}
+
+/* 有更新可用的卡片徽章 + 高亮 */
+.biof3-plugin-card__badge-update {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--biof3-teal, #0f766e);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  animation: biof3UpdatePulse 1.8s ease-in-out infinite;
+}
+
+@keyframes biof3UpdatePulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(15, 118, 110, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0);
+  }
+}
+
+.biof3-plugin-card.has-update {
+  border-color: rgba(15, 118, 110, 0.35);
+}
+
+/* 已装插件的操作按钮纵向堆叠（更新 + 卸载） */
+.biof3-plugin-store__action-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
+/* footer 更新提示 */
+.biof3-plugin-store__footer-updates {
+  color: var(--biof3-teal, #0f766e);
+}
+.biof3-plugin-store__refresh-btn {
+  background: none;
+  border: none;
+  color: var(--biof3-teal, #0f766e);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  font-size: inherit;
+  font-family: inherit;
+}
+.biof3-plugin-store__refresh-btn:hover:not(:disabled) {
+  text-decoration: underline;
+}
+.biof3-plugin-store__refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.biof3-plugin-card__desc {
+  font-size: 0.76rem;
+  color: #64748b;
+  line-height: 1.45;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.2em;
+}
+
+[data-theme='dark'] .biof3-plugin-card__desc {
+  color: #94a3b8;
+}
+
+.biof3-plugin-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-bottom: 10px;
+}
+
+.biof3-plugin-card__meta span {
+  display: inline-flex;
+  align-items: center;
+}
+
+.biof3-plugin-card__meta .lang-r {
+  color: #1976d2;
+  font-weight: 600;
+}
+
+.biof3-plugin-card__meta .lang-python {
+  color: #d97706;
+  font-weight: 600;
+}
+
+.biof3-plugin-card__meta .tag-data {
+  background: #ede9fe;
+  color: #6d28d9;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.biof3-plugin-card__meta .tag-optional {
+  background: #f1f5f9;
+  color: #64748b;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+[data-theme='dark'] .biof3-plugin-card__meta .tag-data {
+  background: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
+}
+
+[data-theme='dark'] .biof3-plugin-card__meta .tag-optional {
+  background: rgba(148, 163, 184, 0.12);
+  color: #94a3b8;
+}
+
+.biof3-plugin-card__action {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 32px;
+}
+
+/* ---- 进度条 ---- */
+.biof3-plugin-store__progress {
+  width: 100%;
+}
+
+.biof3-plugin-store__progress-text {
+  font-size: 0.7rem;
+  color: #64748b;
+  margin-bottom: 3px;
+  text-align: center;
+}
+
+[data-theme='dark'] .biof3-plugin-store__progress-text {
+  color: #94a3b8;
+}
+
+.biof3-plugin-store__progress-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.biof3-plugin-store__progress-bar > div {
+  height: 100%;
+  background: #0f766e;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+[data-theme='dark'] .biof3-plugin-store__progress-bar {
+  background: rgba(148, 163, 184, 0.2);
+}
+
+[data-theme='dark'] .biof3-plugin-store__progress-bar > div {
+  background: #43d1ae;
+}
+
+/* ---- Footer ---- */
+.biof3-plugin-store__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 22px;
+  border-top: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .biof3-plugin-store__footer {
+  border-top-color: rgba(148, 163, 184, 0.2);
+}
+
+.biof3-plugin-store__footer-info {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+[data-theme='dark'] .biof3-plugin-store__footer-info {
+  color: #94a3b8;
+}
+
+/* ============================================================
+ * 导航面板 — 模块启动器
+ * ============================================================ */
+
+.biof3-nav-panel {
+  width: 100%;
+  height: 100%;
+}
+
+.biof3-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 10px;
+}
+
+.biof3-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ifm-color-emphasis-800, #1e293b);
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+  text-align: left;
+}
+
+.biof3-nav-item:hover {
+  background: #f1f5f9;
+  color: #0f766e;
+}
+
+.biof3-nav-item__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #e4f4ee;
+  color: #0f766e;
+  flex-shrink: 0;
+}
+
+.biof3-nav-item:hover .biof3-nav-item__icon {
+  background: #d1f0e8;
+}
+
+.biof3-nav-item__label {
+  flex: 1;
+  min-width: 0;
+}
+
+.biof3-nav-item__arrow {
+  color: #94a3b8;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.biof3-nav-item:hover .biof3-nav-item__arrow {
+  color: #0f766e;
+}
+
+/* dark */
+[data-theme='dark'] .biof3-nav-item {
+  color: var(--ifm-color-emphasis-600, #cbd5e1);
+}
+
+[data-theme='dark'] .biof3-nav-item:hover {
+  background: rgba(148, 163, 184, 0.12);
+  color: #8ff0d6;
+}
+
+[data-theme='dark'] .biof3-nav-item__icon {
+  background: rgba(67, 209, 174, 0.14);
+  color: #8ff0d6;
+}
+
+[data-theme='dark'] .biof3-nav-item:hover .biof3-nav-item__icon {
+  background: rgba(67, 209, 174, 0.22);
+}
+
+[data-theme='dark'] .biof3-nav-item__arrow {
+  color: #64748b;
+}
+
+[data-theme='dark'] .biof3-nav-item:hover .biof3-nav-item__arrow {
+  color: #8ff0d6;
+}
+
+/* ============================================================
+ * 搜索面板
+ * ============================================================ */
+.biof3-search-panel {
+  width: 100%;
+  height: 100%;
+}
+
+.biof3-search-bar-wrap {
+  padding: 8px 0;
+}
+
+.biof3-search-bar-wrap .DocSearch-Button {
+  width: 100%;
+  justify-content: flex-start;
+  margin: 0;
+}
+
+.biof3-search-hint {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  text-align: center;
+}
+
+[data-theme='dark'] .biof3-search-hint {
+  color: #64748b;
+}
+
+/* ============================================================
+ * dock 按钮拖拽排序样式
+ * ============================================================ */
+.biof3-desktop-dock__draggable {
+  cursor: grab;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.biof3-desktop-dock__draggable:active {
+  cursor: grabbing;
+}
+
+.biof3-desktop-dock__draggable.dragging {
+  opacity: 0.4;
+  transform: scale(0.95);
+}
+
+.biof3-desktop-dock__draggable.drag-over {
+  position: relative;
+}
+
+/* 拖拽经过时的视觉反馈：在上方显示一条高亮横线 */
+.biof3-desktop-dock__draggable.drag-over::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 4px;
+  right: 4px;
+  height: 2px;
+  background: #0f766e;
+  border-radius: 1px;
+  z-index: 1;
+}
+
+[data-theme='dark'] .biof3-desktop-dock__draggable.drag-over::before {
+  background: #43d1ae;
+}
+
+/* ============================================================
+ * DesktopOnboarding — 首次启动引导向导
+ * ============================================================ */
+.biof3-onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  animation: runModalFadeIn 0.2s ease;
+}
+
+.biof3-onboarding {
+  width: 560px;
+  max-width: 92vw;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  color: #1e293b;
+  border-radius: 14px;
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+  animation: runModalSlideUp 0.25s ease;
+}
+[data-theme='dark'] .biof3-onboarding {
+  background: #1e293b;
+  color: #f1f5f9;
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme='dark'] .biof3-onboarding {
+  background: #0f172a;
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.5);
+}
+
+/* 进度指示器 */
+.biof3-onboarding__steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200, #e2e8f0);
+}
+.biof3-onboarding__step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  color: var(--ifm-color-emphasis-500, #94a3b8);
+  font-size: 0.85rem;
+}
+.biof3-onboarding__step + .biof3-onboarding__step::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--ifm-color-emphasis-300, #cbd5e1);
+  margin-right: 8px;
+}
+.biof3-onboarding__step.active {
+  color: var(--biof3-teal, #0f766e);
+  font-weight: 600;
+}
+.biof3-onboarding__step.done {
+  color: var(--biof3-teal, #0f766e);
+}
+.biof3-onboarding__step-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--ifm-color-emphasis-100, #f1f5f9);
+  flex-shrink: 0;
+}
+.biof3-onboarding__step.active .biof3-onboarding__step-icon {
+  background: var(--biof3-teal, #0f766e);
+  color: #fff;
+}
+.biof3-onboarding__step.done .biof3-onboarding__step-icon {
+  background: var(--biof3-teal, #0f766e);
+  color: #fff;
+}
+[data-theme='dark'] .biof3-onboarding__step-icon {
+  background: rgba(148, 163, 184, 0.15);
+}
+
+/* 步骤内容 */
+.biof3-onboarding__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+.biof3-onboarding__title {
+  margin: 0 0 6px;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.biof3-onboarding__subtitle {
+  margin: 0 0 18px;
+  color: var(--ifm-color-emphasis-600, #475569);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+[data-theme='dark'] .biof3-onboarding__subtitle {
+  color: var(--ifm-color-emphasis-500, #94a3b8);
+}
+
+/* Step 1: 环境检测 */
+.biof3-onboarding__env-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.biof3-onboarding__env-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--ifm-color-emphasis-200, #e2e8f0);
+  background: var(--ifm-background-color, #fff);
+}
+.biof3-onboarding__env-row.ok {
+  border-color: rgba(16, 118, 110, 0.3);
+  background: rgba(16, 118, 110, 0.05);
+}
+.biof3-onboarding__env-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--ifm-color-emphasis-100, #f1f5f9);
+  color: var(--biof3-teal, #0f766e);
+  flex-shrink: 0;
+}
+.biof3-onboarding__env-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.biof3-onboarding__env-name {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+.biof3-onboarding__env-desc {
+  font-size: 0.78rem;
+  color: var(--ifm-color-emphasis-500, #94a3b8);
+}
+.biof3-onboarding__env-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-500, #94a3b8);
+}
+.biof3-onboarding__env-row.ok .biof3-onboarding__env-status {
+  color: var(--biof3-teal, #0f766e);
+}
+.biof3-onboarding__hint {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--ifm-color-emphasis-100, #f1f5f9);
+  font-size: 0.8rem;
+  color: var(--ifm-color-emphasis-600, #475569);
+}
+
+/* Step 3: 插件提示 */
+.biof3-onboarding__plugin-tips {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.biof3-onboarding__tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--ifm-color-emphasis-200, #e2e8f0);
+}
+.biof3-onboarding__tip > svg:first-child,
+.biof3-onboarding__tip > span:first-child {
+  color: var(--biof3-teal, #0f766e);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.biof3-onboarding__tip strong {
+  font-size: 0.9rem;
+}
+.biof3-onboarding__tip p {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: var(--ifm-color-emphasis-500, #94a3b8);
+}
+
+/* 底部按钮 */
+.biof3-onboarding__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  border-top: 1px solid var(--ifm-color-emphasis-200, #e2e8f0);
+}
+.biof3-onboarding__footer-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ============================================================
+ * Docs 目录面板 — DocSidebar portal host（桌面版）
+ * DocSidebar 被 portal 到 #biof3-docs-sidebar-host，由 dock 的
+ * "目录"按钮 toggle html.biof3-desktop-docs-sidebar-open 控制显隐
+ * ============================================================ */
+#biof3-docs-sidebar-host {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 64px; /* 紧贴 dock 右侧 */
+  width: 320px;
+  z-index: 9998;
+  background: var(--ifm-background-color, #fff);
+  border-right: 1px solid var(--ifm-color-emphasis-200, #e2e8f0);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08);
+  transform: translateX(-110%); /* 默认隐藏：往左滑出被 dock 遮住 */
+  transition: transform 0.22s ease;
+  overflow: hidden auto;
+  visibility: hidden;
+}
+html.biof3-desktop.biof3-desktop-docs-sidebar-open #biof3-docs-sidebar-host {
+  transform: translateX(0);
+  visibility: visible;
+}
+/* dock 收缩时 host 贴紧收缩后的 dock */
+html.biof3-desktop.biof3-desktop-dock-collapsed #biof3-docs-sidebar-host {
+  left: 28px;
+}
+[data-theme='dark'] #biof3-docs-sidebar-host {
+  background: #0f172a;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
+  border-right-color: rgba(148, 163, 184, 0.2);
+}
+
+/* host 内的 DocSidebar 去掉原 aside 的固定宽高/负 margin，撑满 host */
+#biof3-docs-sidebar-host .theme-doc-sidebar-container {
+  width: 100% !important;
+  height: 100% !important;
+  margin-top: 0 !important;
+  border-right: none !important;
+  display: block !important;
+}
+#biof3-docs-sidebar-host .theme-doc-sidebar-container > div {
+  position: static !important;
+  top: auto !important;
+  height: 100% !important;
+  max-height: 100vh !important;
+}
+#biof3-docs-sidebar-host .menu {
+  padding: 12px 8px;
+  background: transparent;
+}
+/* 隐藏原 DocSidebar 里的 Logo（桌面版 dock 已有品牌区）和折叠按钮（用 dock 控制） */
+#biof3-docs-sidebar-host .sidebarLogo,
+#biof3-docs-sidebar-host .collapseButton {
+  display: none !important;
+}
