@@ -614,7 +614,7 @@ export default function RunModal({
             setOutput(`Error: ${errMsg || '绘图失败'}`);
           }
         } catch (e: unknown) {
-          setOutput(`连接 R 服务失败: ${e.message}`);
+          setOutput(`连接 R 服务失败: ${e instanceof Error ? e.message : String(e)}`);
           setElapsed(Date.now() - start);
         } finally {
           runningRef.current = false;
@@ -645,7 +645,7 @@ export default function RunModal({
         }
       } catch (err) {
         setOutput(
-          `连接 ${language === 'python' ? 'Python' : 'R'} Server 失败: ${e.message}\n\n请求地址: ${getApiPrefix(language)}/run`
+          `连接 ${language === 'python' ? 'Python' : 'R'} Server 失败: ${err instanceof Error ? err.message : String(err)}\n\n请求地址: ${getApiPrefix(language)}/run`
         );
         setElapsed(Date.now() - start);
       } finally {
