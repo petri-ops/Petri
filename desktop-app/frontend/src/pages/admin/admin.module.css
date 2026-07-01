@@ -1,0 +1,447 @@
+.wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+.title {
+  font-size: 24px;
+  margin: 0 0 24px;
+  color: #1f2937;
+}
+[data-theme='dark'] .title {
+  color: #f3f4f6;
+}
+
+.notice {
+  max-width: 600px;
+  margin: 80px auto;
+  padding: 32px;
+  text-align: center;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+[data-theme='dark'] .notice {
+  background: #1f2937;
+  color: #f3f4f6;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+[data-theme='dark'] .tabs {
+  border-bottom-color: #374151;
+}
+
+.tabBtn {
+  background: none;
+  border: none;
+  padding: 10px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  color: #6b7280;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+}
+.tabBtn:hover {
+  color: #1f2937;
+}
+.tabBtnActive {
+  color: #047857;
+  border-bottom-color: #10b981;
+  font-weight: 600;
+}
+[data-theme='dark'] .tabBtn {
+  color: #9ca3af;
+}
+[data-theme='dark'] .tabBtn:hover {
+  color: #f3f4f6;
+}
+[data-theme='dark'] .tabBtnActive {
+  color: #6ee7b7;
+  border-bottom-color: #10b981;
+}
+
+.tabContent {
+  min-height: 400px;
+}
+
+.loading,
+.muted {
+  color: #6b7280;
+  padding: 16px;
+  font-size: 13px;
+}
+[data-theme='dark'] .loading,
+[data-theme='dark'] .muted {
+  color: #9ca3af;
+}
+
+.error {
+  color: #ef4444;
+  padding: 16px;
+  background: #fef2f2;
+  border-radius: 8px;
+}
+
+/* ---- Stat cards ---- */
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+[data-theme='dark'] .stat {
+  background: #111827;
+  border-color: #374151;
+}
+
+.statEmphasis {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border-color: #6ee7b7;
+}
+[data-theme='dark'] .statEmphasis {
+  background: linear-gradient(135deg, #064e3b30 0%, #065f4630 100%);
+  border-color: #047857;
+}
+
+.statValue {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.1;
+}
+[data-theme='dark'] .statValue {
+  color: #f3f4f6;
+}
+.statEmphasis .statValue {
+  color: #047857;
+}
+[data-theme='dark'] .statEmphasis .statValue {
+  color: #6ee7b7;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+  font-weight: 500;
+}
+[data-theme='dark'] .statLabel {
+  color: #9ca3af;
+}
+
+.statHint {
+  font-size: 11px;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+/* ---- Section ---- */
+.section {
+  margin-top: 24px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+[data-theme='dark'] .section {
+  background: #111827;
+  border-color: #374151;
+}
+
+.section h3 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: #1f2937;
+}
+[data-theme='dark'] .section h3 {
+  color: #f3f4f6;
+}
+
+/* ---- Table ---- */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.table th {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #1f2937;
+}
+[data-theme='dark'] .table th {
+  border-bottom-color: #374151;
+  color: #9ca3af;
+}
+[data-theme='dark'] .table td {
+  border-bottom-color: #1f2937;
+  color: #f3f4f6;
+}
+
+.path,
+.pathSmall {
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  color: #6b7280;
+}
+.pathSmall {
+  margin-top: 2px;
+}
+.rate {
+  color: #6b7280;
+  font-size: 11px;
+}
+
+.refreshHint {
+  margin-top: 16px;
+  font-size: 11px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+/* ---- Controls ---- */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #6b7280;
+}
+.controls select {
+  padding: 4px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #ffffff;
+  font-size: 13px;
+}
+[data-theme='dark'] .controls select {
+  background: #1f2937;
+  border-color: #374151;
+  color: #f3f4f6;
+}
+
+.btn {
+  padding: 4px 12px;
+  border: 1px solid #10b981;
+  background: #10b981;
+  color: white;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.btn:hover {
+  background: #059669;
+  border-color: #059669;
+}
+
+.bigLink {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 10px 16px;
+  background: #10b981;
+  color: white !important;
+  text-decoration: none !important;
+  border-radius: 8px;
+  font-weight: 600;
+}
+.bigLink:hover {
+  background: #059669;
+}
+
+/* ---- Chart ---- */
+.chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 160px;
+  padding: 8px 0;
+  overflow-x: auto;
+}
+.chartCol {
+  flex: 1;
+  min-width: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+.chartBarWrap {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.chartBar {
+  width: 70%;
+  min-height: 2px;
+  border-radius: 3px 3px 0 0;
+  transition: height 0.3s;
+}
+.chartLabel {
+  font-size: 9px;
+  color: #9ca3af;
+  margin-top: 4px;
+  white-space: nowrap;
+}
+.chartValue {
+  font-size: 10px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+/* ---- Funnel ---- */
+.funnel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.funnelRow {
+  display: grid;
+  grid-template-columns: 120px 1fr 60px;
+  align-items: center;
+  gap: 12px;
+}
+.funnelLabel {
+  font-size: 13px;
+  color: #1f2937;
+  font-weight: 500;
+}
+[data-theme='dark'] .funnelLabel {
+  color: #f3f4f6;
+}
+.funnelBar {
+  background: #f3f4f6;
+  border-radius: 6px;
+  height: 28px;
+  overflow: hidden;
+}
+[data-theme='dark'] .funnelBar {
+  background: #1f2937;
+}
+.funnelFill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  transition: width 0.4s;
+  min-width: 30px;
+}
+.funnelValue {
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+}
+.funnelRate {
+  font-size: 13px;
+  color: #6b7280;
+  text-align: right;
+}
+
+/* ---- Grouped tab layout ---- */
+.tabsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+[data-theme='dark'] .tabsContainer {
+  border-bottom-color: #374151;
+}
+
+.tabGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tabGroupTitle {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: #9ca3af;
+}
+
+/* Override .tabs from earlier — use chip-style buttons */
+.tabsContainer .tabs {
+  display: flex;
+  gap: 4px;
+  border: none;
+  margin: 0;
+}
+.tabsContainer .tabBtn {
+  padding: 6px 12px;
+  font-size: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #6b7280;
+  margin: 0;
+}
+.tabsContainer .tabBtn:hover {
+  border-color: #10b981;
+  color: #047857;
+}
+.tabsContainer .tabBtnActive {
+  background: #10b981;
+  border-color: #10b981;
+  color: white;
+  font-weight: 600;
+}
+[data-theme='dark'] .tabsContainer .tabBtn {
+  background: #1f2937;
+  border-color: #374151;
+  color: #9ca3af;
+}
+[data-theme='dark'] .tabsContainer .tabBtnActive {
+  background: #10b981;
+  color: white;
+}
+
+/* ---- Embedded admin panel (governance tabs from single-cell) ---- */
+:global(.sc-admin-embedded) {
+  background: transparent;
+}
+:global(.sc-admin-embedded) :global(.sc-modal-body) {
+  padding: 0;
+  max-height: none;
+  overflow: visible;
+}
+:global(.sc-admin-embedded) :global(.sc-modal-footer) {
+  padding: 12px 0 0;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 16px;
+}
+[data-theme='dark'] :global(.sc-admin-embedded) :global(.sc-modal-footer) {
+  border-top-color: #374151;
+}
