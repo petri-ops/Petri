@@ -15,8 +15,8 @@ import 'highlight.js/styles/github.css';
 import '@/styles/docs.css';
 
 // 收集 docs 目录所有 md/mdx（eager 收集路径，lazy 加载内容）
-// 路径形如 '/docs/intro.md' → '../../../docs/intro.md'
-const docModules = import.meta.glob('/../../../docs/**/*.{md,mdx}');
+// 路径从 Vite 项目根(frontend/)出发：/../../docs/ = repo root/docs/
+const docModules = import.meta.glob('/../../docs/**/*.{md,mdx}');
 
 // 路径 → docId 映射：/docs/single-cell/module01.md → single-cell/module01
 function pathToDocId(p: string): string {

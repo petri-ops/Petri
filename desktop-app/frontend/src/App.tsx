@@ -14,7 +14,7 @@ import SkillsPage from '@/pages/skills';
 import AdminPage from '@/pages/admin';
 import HomePage from '@/pages/home';
 import DocsPage from '@/pages/docs';
-import BlogFrame from '@/pages/blog-frame';
+import BlogPage from '@/pages/blog';
 
 const ONBOARDING_FLAG = 'biof3-onboarding-completed';
 
@@ -60,8 +60,8 @@ export default function App(): React.ReactElement {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/docs/*" element={<DocsPage />} />
           <Route path="/docs" element={<DocsPage />} />
-          <Route path="/blog/*" element={<BlogFrame />} />
-          <Route path="/blog" element={<BlogFrame />} />
+          <Route path="/blog/*" element={<BlogPage />} />
+          <Route path="/blog" element={<BlogPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
