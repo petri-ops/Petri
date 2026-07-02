@@ -1,33 +1,25 @@
 /* BioF3 桌面版原生 shell — 全局样式 */
-/* 替代 Docusaurus 的 Infima CSS 变量体系，只保留桌面版需要的 */
+/* 复刻 Docusaurus 设计系统：Infima token + custom.css 覆盖，
+   但结构走桌面化（无 navbar/footer，dock 浮动侧边栏）。
+   - infima default.css：~200 个设计 token（颜色/间距/圆角/阴影/字号/z-index）
+   - 仓库根 custom.css：BioF3 brand palette + primary 色阶覆盖 + markdown 排版
+   - 下方桌面版覆盖：body 字体、滚动条、dock 让位 */
+@import '../../../../node_modules/infima/dist/css/default/default.css';
+@import '../../../../src/css/custom.css';
 
 :root {
-  /* 主题色 */
-  --biof3-teal: #0f766e;
-  --biof3-teal-dark: #13523f;
-  --ifm-color-emphasis-100: #f1f5f9;
-  --ifm-color-emphasis-200: #e2e8f0;
-  --ifm-color-emphasis-300: #cbd5e1;
-  --ifm-color-emphasis-500: #94a3b8;
-  --ifm-color-emphasis-600: #475569;
-  --ifm-color-emphasis-700: #334155;
-  --ifm-background-color: #ffffff;
-  --ifm-toc-border-color: #e2e8f0;
-  --ifm-transition-fast: 100ms;
-
-  /* 桌面版基础 */
+  /* 桌面版基础（覆盖 infima 的 web 站点默认） */
   --ifm-navbar-height: 0px; /* 桌面版无 navbar */
+  /* infima 默认 background-color: transparent（靠 body），桌面版给实色 */
+  --ifm-background-color: #ffffff;
+  /* 桌面版内容区更紧凑的阅读宽度 */
+  --ifm-font-size-base: 15.5px;
+  --ifm-line-height-base: 1.65;
 }
 
 [data-theme='dark'] {
-  --ifm-color-emphasis-100: rgba(148, 163, 184, 0.08);
-  --ifm-color-emphasis-200: rgba(148, 163, 184, 0.2);
-  --ifm-color-emphasis-300: rgba(148, 163, 184, 0.3);
-  --ifm-color-emphasis-500: #94a3b8;
-  --ifm-color-emphasis-600: #cbd5e1;
-  --ifm-color-emphasis-700: #e2e8f0;
   --ifm-background-color: #0f172a;
-  --ifm-toc-border-color: rgba(148, 163, 184, 0.2);
+  --ifm-background-surface-color: #0f172a;
 }
 
 * {
@@ -95,4 +87,46 @@ body {
   height: 100%;
   border: none;
   display: block;
+}
+
+/* ────────────────────────────────────────────────────────────
+ * 桌面版基线覆盖 — 修正 infima 对裸元素的 Web 站点风格副作用
+ * 仅作用于未被 .biof3-docs-content 重新定义的页面（应用页）。
+ * docs/blog 页有自己的 .biof3-docs-content 规则，优先级更高，不受影响。
+ * ──────────────────────────────────────────────────────────── */
+
+/* inline code：去掉 infima 的硬边框（暗色下难看），保留淡背景 */
+code {
+  border: none;
+  background-color: var(--ifm-color-emphasis-100);
+}
+/* pre 代码块：去掉 infima 默认背景，让应用页自己的代码块样式生效；
+   docs/blog 的 .biof3-docs-content pre 会重新给深色背景 */
+pre {
+  background-color: transparent;
+  padding: 0;
+  margin: 0;
+}
+pre code {
+  background-color: transparent;
+}
+
+/* 链接：应用页用次级色 + hover 主色，避免满屏绿色 link 抢视觉 */
+a {
+  color: var(--ifm-color-primary);
+}
+a:hover {
+  color: var(--ifm-color-primary-dark);
+  text-decoration: underline;
+}
+
+/* 列表：infima 的 2rem 左 padding 偏大，收紧到 1.5rem */
+ul,
+ol {
+  padding-left: 1.5rem;
+}
+
+/* 暗色模式：inline code 背景用半透明，避免亮灰块刺眼 */
+[data-theme='dark'] code {
+  background-color: var(--ifm-color-emphasis-200);
 }
