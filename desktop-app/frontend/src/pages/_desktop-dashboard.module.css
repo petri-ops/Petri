@@ -150,20 +150,27 @@
   background: var(--ifm-background-color);
   text-decoration: none !important;
   color: inherit !important;
-  transition: all 0.15s ease;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
 }
 .toolCard:hover {
-  border-color: rgba(15, 118, 110, 0.35);
-  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.08);
-  transform: translateY(-1px);
+  border-color: rgba(15, 118, 110, 0.4);
+  box-shadow: var(--ifm-global-shadow-md);
+  transform: translateY(-2px);
+}
+.toolCard:active {
+  transform: translateY(0);
+  box-shadow: var(--ifm-global-shadow-lw);
 }
 [data-theme='dark'] .toolCard {
   background: var(--ifm-background-color);
   border-color: var(--ifm-color-emphasis-300);
 }
 [data-theme='dark'] .toolCard:hover {
-  border-color: rgba(67, 209, 174, 0.35);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  border-color: rgba(67, 209, 174, 0.4);
+  box-shadow: var(--ifm-global-shadow-md);
 }
 
 .toolCover {
@@ -231,10 +238,13 @@
   border: 1px solid var(--ifm-color-emphasis-200);
   text-decoration: none !important;
   color: inherit !important;
-  transition: background 0.12s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
 }
 .jobItem:hover {
   background: var(--ifm-color-emphasis-100);
+  border-color: var(--ifm-color-emphasis-300);
 }
 [data-theme='dark'] .jobItem {
   background: var(--ifm-background-color);
@@ -335,18 +345,27 @@
   background: var(--ifm-background-color);
   text-decoration: none !important;
   color: inherit !important;
-  transition: all 0.15s ease;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
 }
 .tutorialCard:hover {
-  border-color: rgba(15, 118, 110, 0.35);
-  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.06);
+  border-color: rgba(15, 118, 110, 0.4);
+  box-shadow: var(--ifm-global-shadow-md);
+  transform: translateY(-2px);
+}
+.tutorialCard:active {
+  transform: translateY(0);
+  box-shadow: var(--ifm-global-shadow-lw);
 }
 [data-theme='dark'] .tutorialCard {
   background: var(--ifm-background-color);
   border-color: var(--ifm-color-emphasis-300);
 }
 [data-theme='dark'] .tutorialCard:hover {
-  border-color: rgba(67, 209, 174, 0.35);
+  border-color: rgba(67, 209, 174, 0.4);
+  box-shadow: var(--ifm-global-shadow-md);
 }
 
 .tutorialTag {
