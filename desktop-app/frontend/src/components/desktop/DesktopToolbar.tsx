@@ -9,7 +9,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Icon, type IconName } from '@/components/icons/Icon';
 import { DesktopSettingsPanel } from './DesktopSettingsPanel';
 import { PluginStorePanel } from './PluginStorePanel';
@@ -61,10 +61,65 @@ interface DockItemConfig {
   kind: PanelKind;
   icon: IconName;
   label: string;
+  // 有 to：点一次直接跳转（高频入口）；无 to：走 kind 伞面板（设置/插件等低频）
+  to?: string;
+  // 路由前缀匹配（用于 active 高亮，如 /docs 匹配 /docs/intro）
+  matchPrefix?: string;
 }
 
+// 高频页面直接上 dock，点一次到位；设置/插件为伞按钮（低频，弹面板）
 const DEFAULT_DOCK_ORDER: DockItemConfig[] = [
-  { id: 'nav', kind: 'nav', icon: 'sidebar', label: '导航' },
+  { id: 'home', kind: null, icon: 'book-marked', label: '首页', to: '/', matchPrefix: '/' },
+  { id: 'docs', kind: null, icon: 'book', label: '教程', to: '/docs/intro', matchPrefix: '/docs' },
+  { id: 'blog', kind: null, icon: 'calendar', label: '博客', to: '/blog', matchPrefix: '/blog' },
+  {
+    id: 'tools',
+    kind: null,
+    icon: 'bar-chart',
+    label: '分析工具',
+    to: '/tools',
+    matchPrefix: '/tools',
+  },
+  {
+    id: 'single-cell',
+    kind: null,
+    icon: 'dna',
+    label: '单细胞',
+    to: '/single-cell',
+    matchPrefix: '/single-cell',
+  },
+  {
+    id: 'spatial',
+    kind: null,
+    icon: 'sparkles',
+    label: '空间组学',
+    to: '/spatial',
+    matchPrefix: '/spatial',
+  },
+  {
+    id: 'figcode',
+    kind: null,
+    icon: 'image',
+    label: 'FigCode',
+    to: '/figcode',
+    matchPrefix: '/figcode',
+  },
+  {
+    id: 'skills',
+    kind: null,
+    icon: 'study',
+    label: 'Skills 库',
+    to: '/skills',
+    matchPrefix: '/skills',
+  },
+  {
+    id: 'algorithms',
+    kind: null,
+    icon: 'brain',
+    label: '算法卡片',
+    to: '/algorithms',
+    matchPrefix: '/algorithms',
+  },
   { id: 'settings', kind: 'settings', icon: 'settings', label: '设置' },
   { id: 'plugins', kind: 'plugins', icon: 'puzzle', label: '插件商店' },
 ];
@@ -102,8 +157,15 @@ function DesktopToolbarInner(): React.ReactElement {
   });
 
   const location = useLocation();
-  // docs 目录按钮仅在 docs 页显示
-  const isDocsPage = location.pathname.startsWith('/docs');
+  const navigate = useNavigate();
+  const currentPath = location.pathname;
+
+  // dock 项是否处于 active：直接跳转类看路由前缀，伞类看 activePanel
+  const isDockActive = (item: DockItemConfig): boolean => {
+    if (item.kind) return activePanel === item.kind;
+    if (item.to === '/') return currentPath === '/';
+    return item.matchPrefix ? currentPath.startsWith(item.matchPrefix) : false;
+  };
 
   // 跟随系统主题
   useEffect(() => {
@@ -291,7 +353,6 @@ function DesktopToolbarInner(): React.ReactElement {
       <div className={`biof3-desktop-dock ${dockCollapsed ? 'biof3-desktop-dock--collapsed' : ''}`}>
         <div className="biof3-desktop-dock__bar">
           {dockOrder.map((item) => {
-            if (item.kind === 'docs' && !isDocsPage) return null;
             const isDragging = draggingId === item.id;
             const isOver = dragOverId === item.id;
             return (
@@ -309,8 +370,15 @@ function DesktopToolbarInner(): React.ReactElement {
                     itemRefs.current[item.id] = el;
                   }}
                   type="button"
-                  className={`biof3-desktop-dock__btn ${activePanel === item.kind ? 'active' : ''}`}
-                  onClick={() => item.kind && togglePanel(item.kind)}
+                  className={`biof3-desktop-dock__btn ${isDockActive(item) ? 'active' : ''}`}
+                  onClick={() => {
+                    if (item.to) {
+                      navigate(item.to);
+                      setActivePanel(null); // 跳转时关掉任何打开的伞面板
+                    } else if (item.kind) {
+                      togglePanel(item.kind);
+                    }
+                  }}
                   aria-label={item.label}
                   title={item.label}
                 >

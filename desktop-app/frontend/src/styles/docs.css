@@ -236,3 +236,104 @@
 [data-theme='dark'] .biof3-docs-content pre {
   background: #0f172a;
 }
+
+/* ────────────────────────────────────────────────────────────
+ * Blog 页样式（复用 docs 设计语言）
+ * ──────────────────────────────────────────────────────────── */
+
+/* 返回链接（详情页） */
+.biof3-docs-back-link {
+  display: inline-block;
+  margin-bottom: 16px;
+  color: var(--biof3-teal, #0f766e);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+.biof3-docs-back-link:hover {
+  text-decoration: underline;
+}
+
+/* 文章元信息（详情页标题下方：日期 + 标签） */
+.biof3-blog-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: -8px 0 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200, #e2e8f0);
+  max-width: 820px;
+  font-size: 0.84rem;
+  color: var(--ifm-color-emphasis-500, #94a3b8);
+}
+.biof3-blog-meta-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* 标签胶囊（列表页 + 详情页共用） */
+.biof3-blog-tag {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 10px;
+  background: var(--ifm-color-emphasis-100, #f1f5f9);
+  color: var(--ifm-color-emphasis-600, #475569);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+/* 博客列表页容器 */
+.biof3-blog-list {
+  max-width: 820px;
+}
+
+/* 博客卡片 */
+.biof3-blog-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.biof3-blog-card {
+  display: block;
+  padding: 18px 22px;
+  border-radius: 10px;
+  border: 1px solid var(--ifm-color-emphasis-200, #e2e8f0);
+  background: var(--ifm-background-surface-color, #fff);
+  text-decoration: none;
+  color: inherit;
+  transition:
+    box-shadow 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
+}
+.biof3-blog-card:hover {
+  border-color: var(--biof3-teal, #0f766e);
+  box-shadow: var(--ifm-global-shadow-lw, 0 1px 2px 0 rgba(0, 0, 0, 0.1));
+  transform: translateY(-1px);
+}
+.biof3-blog-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--ifm-color-emphasis-900, #1e293b);
+}
+.biof3-blog-card-desc {
+  font-size: 0.9rem;
+  color: var(--ifm-color-emphasis-600, #475569);
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+.biof3-blog-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.78rem;
+  color: var(--ifm-color-emphasis-500, #94a3b8);
+}
+.biof3-blog-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
