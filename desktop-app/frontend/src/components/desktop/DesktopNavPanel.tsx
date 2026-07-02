@@ -23,7 +23,6 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: '首页', to: '/', icon: 'book' },
   { label: '教程', to: '/docs/intro', icon: 'book' },
-  { label: '博客', to: '/blog', icon: 'calendar' },
   { label: 'FigCode', to: '/figcode', icon: 'image' },
   { label: '分析工具', to: '/tools', icon: 'bar-chart' },
   { label: '单细胞', to: '/single-cell', icon: 'dna' },

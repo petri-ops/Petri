@@ -10,62 +10,7 @@ import fs from 'fs';
 
 // BioF3 桌面版原生前端 — Vite SPA
 // 脱离 Docusaurus，纯客户端渲染，无 SSG/hydration
-// 阶段 2：MDX 原生渲染 docs/blog（替代 iframe）
-
-// 解析单篇 blog frontmatter（build 时跑，Node 环境）
-function parseBlogFrontmatter(source: string, fallbackSlug: string, fallbackDate = '') {
-  const meta = {
-    slug: fallbackSlug,
-    title: fallbackSlug,
-    date: fallbackDate,
-    authors: [] as string[],
-    tags: [] as string[],
-    description: '',
-  };
-  const fm = source.match(/^---\n([\s\S]*?)\n---/);
-  if (!fm) return meta;
-  const body = fm[1];
-  const get = (key: string): string => {
-    const m = body.match(new RegExp(`^${key}:\\s*(.+)$`, 'm'));
-    return m ? m[1].trim().replace(/^['"]|['"]$/g, '') : '';
-  };
-  meta.slug = get('slug') || fallbackSlug;
-  meta.title = get('title') || fallbackSlug;
-  meta.date = get('date') || fallbackDate;
-  meta.description = get('description');
-  const authorsMatch = body.match(/^authors:\s*\[([^\]]*)\]/m);
-  if (authorsMatch)
-    meta.authors = authorsMatch[1].split(',').map((s) => s.trim().replace(/['"]/g, ''));
-  const tagsMatch = body.match(/^tags:\s*\[([^\]]*)\]/m);
-  if (tagsMatch) meta.tags = tagsMatch[1].split(',').map((s) => s.trim().replace(/['"]/g, ''));
-  return meta;
-}
-
-// 虚拟模块：build 时扫描 blog/ 目录，导出所有文章元数据（避免 ?raw 与 mdx 插件冲突）
-function blogMetaPlugin() {
-  const virtualId = 'virtual:biof3-blog-meta';
-  const resolvedId = '\0' + virtualId;
-  return {
-    name: 'biof3-blog-meta',
-    resolveId(id: string) {
-      if (id === virtualId) return resolvedId;
-    },
-    load(id: string) {
-      if (id !== resolvedId) return;
-      const blogDir = path.resolve(__dirname, '..', '..', 'blog');
-      const files = fs.readdirSync(blogDir).filter((f) => /\.mdx?$/.test(f));
-      const metas = files
-        .map((f) => {
-          const raw = fs.readFileSync(path.join(blogDir, f), 'utf-8');
-          const dateMatch = f.match(/^(\d{4}-\d{2}-\d{2})-/);
-          const fallbackSlug = f.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/\.(md|mdx)$/, '');
-          return parseBlogFrontmatter(raw, fallbackSlug, dateMatch?.[1] || '');
-        })
-        .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-      return `export default ${JSON.stringify(metas)};`;
-    },
-  };
-}
+// 阶段 2：MDX 原生渲染 docs（替代 iframe）；blog 已从桌面端移除
 
 // 从 md/mdx 源码提取标题：frontmatter title → 正文第一个 H1 → 文件名兜底
 function extractDocTitle(source: string, fallbackId: string): string {
@@ -194,7 +139,6 @@ function docsSidebarPlugin() {
 
 export default defineConfig({
   plugins: [
-    blogMetaPlugin(),
     docsSidebarPlugin(),
     // MDX 插件必须在 react 之前，让 .mdx/.md 能被转成 JSX
     mdx({

@@ -71,7 +71,6 @@ interface DockItemConfig {
 const DEFAULT_DOCK_ORDER: DockItemConfig[] = [
   { id: 'home', kind: null, icon: 'book-marked', label: '首页', to: '/', matchPrefix: '/' },
   { id: 'docs', kind: null, icon: 'book', label: '教程', to: '/docs/intro', matchPrefix: '/docs' },
-  { id: 'blog', kind: null, icon: 'calendar', label: '博客', to: '/blog', matchPrefix: '/blog' },
   {
     id: 'tools',
     kind: null,
