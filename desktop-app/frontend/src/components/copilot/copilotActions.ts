@@ -77,7 +77,11 @@ export function parseActionsFromMarkdown(md: string): ParsedReply {
       lastIdx = m.index + m[0].length;
       continue;
     }
-    if (parsed && typeof parsed === 'object' && typeof parsed.type === 'string') {
+    if (
+      parsed &&
+      typeof parsed === 'object' &&
+      typeof (parsed as Record<string, unknown>).type === 'string'
+    ) {
       const idx = actions.length;
       actions.push(parsed as CopilotAction);
       out += `\n\n[[ACTION:${idx}]]\n\n`;

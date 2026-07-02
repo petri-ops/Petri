@@ -94,7 +94,7 @@ registerCopilotAct({
       await navigator.clipboard.writeText(text);
       // Lightweight toast
       const div = document.createElement('div');
-      div.textContent = note || '已复制到剪贴板';
+      div.textContent = typeof note === 'string' && note ? note : '已复制到剪贴板';
       div.style.cssText =
         'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#10b981;color:white;padding:8px 14px;border-radius:8px;font-size:13px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15)';
       document.body.appendChild(div);
@@ -151,7 +151,7 @@ registerCopilotAct({
     try {
       await navigator.clipboard.writeText(window.location.href);
       const div = document.createElement('div');
-      div.textContent = note || '已复制当前视图链接';
+      div.textContent = typeof note === 'string' && note ? note : '已复制当前视图链接';
       div.style.cssText =
         'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#10b981;color:white;padding:8px 14px;border-radius:8px;font-size:13px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15)';
       document.body.appendChild(div);

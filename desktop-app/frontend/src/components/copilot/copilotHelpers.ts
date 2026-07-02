@@ -58,7 +58,7 @@ export function loadHistory(): UIMessage[] {
     if (!Array.isArray(arr)) return [];
     return arr
       .slice(-MAX_HISTORY_MESSAGES)
-      .map((m: Record<string, unknown>) => ({ ...m, autoActionsFired: true }));
+      .map((m: Record<string, unknown>) => ({ ...m, autoActionsFired: true }) as UIMessage);
   } catch {
     return [];
   }

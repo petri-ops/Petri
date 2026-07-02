@@ -83,7 +83,7 @@ export function LoginModal({
       if (mode === 'login') {
         result = await login(username.trim(), password);
       } else {
-        result = await register(username.trim(), password);
+        result = await register({ username: username.trim(), password });
       }
       if (result.ok) {
         if (mode === 'register') {

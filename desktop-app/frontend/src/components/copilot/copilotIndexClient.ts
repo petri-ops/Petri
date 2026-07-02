@@ -91,7 +91,9 @@ export async function lookupCopilotEntry(url: string): Promise<{
   if (doc) return { kind: 'doc', entry: doc };
   const fig = (idx.figcode || []).find((f) => f.url === norm);
   if (fig) return { kind: 'figcode', entry: fig };
-  const blog = (idx.blog || []).find((b: Record<string, unknown>) => b.url === norm);
+  const blog = (idx.blog || []).find(
+    (b) => typeof b === 'object' && b !== null && (b as { url?: string }).url === norm
+  );
   if (blog) return { kind: 'blog', entry: blog };
   return null;
 }

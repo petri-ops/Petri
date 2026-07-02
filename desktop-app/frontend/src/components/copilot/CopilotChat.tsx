@@ -538,14 +538,15 @@ export function CopilotChat(): React.ReactElement | null {
       // Append a recovered ActExecution to the latest assistant message
       const recovered: ActExecution[] = recent.map((it) => {
         seenUndoTokens.current.add(it.undo_token);
+        const r = (it.result || {}) as { message?: string; analysisId?: string };
         return {
           actType: it.action,
-          message: (it.result && it.result.message) || '已自动执行（SSE 断流后恢复）',
+          message: r.message || '已自动执行（SSE 断流后恢复）',
           undoToken: it.undo_token,
           // Allow undo for the remaining window — server caps at 30s, but the
           // act was committed at it.ts; compute precise expiry.
           undoableUntil: new Date(it.ts).getTime() + 30_000,
-          analysisId: it.result && it.result.analysisId,
+          analysisId: r.analysisId,
         };
       });
       setMessages((prev) => {
@@ -819,7 +820,11 @@ export function CopilotChat(): React.ReactElement | null {
               try {
                 const onToolsPage = window.location.pathname.startsWith('/tools');
                 // KILLER_USE_CASE_1_v1 — pass autofill payload through
-                const detail: unknown = { toolId: e.toolId };
+                const detail: {
+                  toolId?: string;
+                  autofillFromJobId?: unknown;
+                  autofillSourceTool?: unknown;
+                } = { toolId: e.toolId };
                 if (e.autofillFromJobId) {
                   detail.autofillFromJobId = e.autofillFromJobId;
                   detail.autofillSourceTool = e.autofillSourceTool;
@@ -1109,10 +1114,10 @@ export function CopilotChat(): React.ReactElement | null {
           content: m.content,
           meta: m.meta
             ? {
-                page: m.meta.page,
-                pageTitle: m.meta.pageTitle,
-                datasetId: m.meta.datasetId,
-                analysisId: m.meta.analysisId,
+                page: typeof m.meta.page === 'string' ? m.meta.page : undefined,
+                pageTitle: typeof m.meta.pageTitle === 'string' ? m.meta.pageTitle : undefined,
+                datasetId: typeof m.meta.datasetId === 'string' ? m.meta.datasetId : undefined,
+                analysisId: typeof m.meta.analysisId === 'string' ? m.meta.analysisId : undefined,
                 ts: m.ts,
               }
             : { ts: m.ts },

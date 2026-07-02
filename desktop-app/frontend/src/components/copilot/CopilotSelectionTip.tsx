@@ -83,7 +83,7 @@ export function CopilotSelectionTip() {
     document.addEventListener('keydown', onKey);
     return () => {
       document.removeEventListener('mouseup', onMouseUp);
-      window.removeEventListener('scroll', onScroll, true as unknown);
+      window.removeEventListener('scroll', onScroll, true);
       document.removeEventListener('keydown', onKey);
     };
   }, []);

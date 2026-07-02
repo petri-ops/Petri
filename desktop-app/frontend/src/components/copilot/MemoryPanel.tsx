@@ -508,7 +508,7 @@ export function MemoryPanel({
                   清空全部
                 </button>
               </div>
-              {(searchHits || memories).map((m: Record<string, unknown>) => (
+              {(searchHits || memories).map((m: MemoryVector & { sim?: number }) => (
                 <div key={m.id} className="cp-mem-vec">
                   <div className="cp-mem-vec-head">
                     <span className="cp-mem-vec-kind">

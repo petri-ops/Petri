@@ -122,8 +122,10 @@ export function ActionCard({
     return null;
   }
 
-  const params = (action as Record<string, unknown>).params as Record<string, unknown> | undefined;
-  const rationale = (action as Record<string, unknown>).rationale as string | undefined;
+  const params = (action as unknown as Record<string, unknown>).params as
+    | Record<string, unknown>
+    | undefined;
+  const rationale = (action as unknown as Record<string, unknown>).rationale as string | undefined;
   const needsConfirm = !AUTO_EXEC_TYPES.has(action.type);
 
   return (

@@ -19,7 +19,9 @@
 // so every page boot includes the full registry.
 
 export type CopilotActResult = void | { ok?: boolean; error?: string };
-export type CopilotActHandler = (payload: unknown) => CopilotActResult | Promise<CopilotActResult>;
+export type CopilotActHandler = (
+  payload: Record<string, unknown>
+) => CopilotActResult | Promise<CopilotActResult>;
 
 export interface CopilotActDefinition {
   /** Stable id — must match what the LLM sends. snake_case_with_underscores */
@@ -93,8 +95,8 @@ export function getRegistrySnapshot(): string {
   if (_stableSnapshotJson) return _stableSnapshotJson;
   const obj = listCopilotActs().reduce<Record<string, Omit<CopilotActDefinition, 'handler'>>>(
     (acc, d) => {
-      const { handler: _h, ...rest } = d as Record<string, unknown>;
-      acc[d.id] = rest;
+      const { handler: _h, ...rest } = d as unknown as Record<string, unknown>;
+      acc[d.id] = rest as Omit<CopilotActDefinition, 'handler'>;
       return acc;
     },
     {}
@@ -116,7 +118,9 @@ export async function invokeCopilotAct(
     return { ok: false, error: 'unknown_handler:' + id };
   }
   try {
-    const r = await entry.handler(payload);
+    const r = await entry.handler(
+      (payload && typeof payload === 'object' ? payload : {}) as Record<string, unknown>
+    );
     if (r && typeof r === 'object' && 'error' in r && r.error) {
       return { ok: false, error: String(r.error) };
     }
