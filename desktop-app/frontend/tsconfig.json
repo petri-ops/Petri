@@ -17,7 +17,9 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@site/src/*": ["./src/*"],
+      "@docusaurus/useBaseUrl": ["./src/lib/useBaseUrl-mock.ts"]
     }
   },
   "include": ["src"]

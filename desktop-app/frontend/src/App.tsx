@@ -14,6 +14,9 @@ import SkillsPage from '@/pages/skills';
 import AdminPage from '@/pages/admin';
 import HomePage from '@/pages/home';
 import DocsPage from '@/pages/docs';
+import { CopilotChat } from '@/components/copilot/CopilotChat';
+import { CopilotSelectionTip } from '@/components/copilot/CopilotSelectionTip';
+import '@/components/copilot/copilotActRegistryBoot';
 
 const ONBOARDING_FLAG = 'biof3-onboarding-completed';
 
@@ -62,6 +65,8 @@ export default function App(): React.ReactElement {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+      <CopilotChat />
+      <CopilotSelectionTip />
       <DesktopOnboardingMount />
     </>
   );

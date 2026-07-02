@@ -166,6 +166,10 @@ export default defineConfig({
       ),
       '@site/src/components/TryOnline': path.resolve(__dirname, 'src/components/mdx/TryOnline'),
       '@site/src/components/FigInline': path.resolve(__dirname, 'src/components/mdx/FigInline'),
+      // Copilot 等组件从 Web 版原样移植，import '@site/src/...' 整体映射到桌面版 src
+      '@site/src': path.resolve(__dirname, 'src'),
+      // CopilotChat 用 useBaseUrl（Docusaurus），桌面版 SPA 无 baseUrl，mock 成恒等
+      '@docusaurus/useBaseUrl': path.resolve(__dirname, 'src/lib/useBaseUrl-mock.ts'),
     },
   },
   build: {
