@@ -17,7 +17,7 @@
   align-items: center;
   gap: 4px;
   padding: 8px 6px;
-  background: var(--ifm-color-emphasis-100);
+  background: var(--biof3-surface-dim);
   border-right: 1px solid var(--ifm-color-emphasis-200);
   width: 64px;
   box-sizing: border-box;

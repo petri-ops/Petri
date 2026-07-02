@@ -37,11 +37,16 @@
   --biof3-space-4: 12px;
   --biof3-space-5: 16px;
   --biof3-space-6: 24px;
+
+  /* dock/面板表面色 — 亮色浅灰（与正文白底微区分），暗色蓝灰深底（保持品牌冷调，
+     非 infima emphasis 的纯灰） */
+  --biof3-surface-dim: #f8fafc;
 }
 
 [data-theme='dark'] {
   --ifm-background-color: #0f172a;
   --ifm-background-surface-color: #0f172a;
+  --biof3-surface-dim: #0f172a;
 }
 
 * {
