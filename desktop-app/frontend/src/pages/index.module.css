@@ -502,7 +502,7 @@
 .bubbleAi {
   align-self: flex-start;
   background: #eef2f1;
-  color: #1f2937;
+  color: var(--ifm-color-emphasis-900);
   border-bottom-left-radius: 4px;
 }
 
@@ -520,7 +520,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #9aa6a2;
+  background: var(--ifm-color-emphasis-500);
   animation: chatBlink 1.2s infinite ease-in-out;
 }
 .chatMockTyping span:nth-child(2) {
