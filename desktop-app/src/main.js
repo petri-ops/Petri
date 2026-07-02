@@ -74,6 +74,25 @@ function resolveResource(...parts) {
   return path.join(process.resourcesPath, ...parts);
 }
 
+// ── 解析用来跑 r-server/py-server 的 node 可执行文件 ────────────
+// 开发模式：用系统 node（如 v23），避免 Electron 内置 node（v20/131）
+// 与 better-sqlite3（按系统 node 编译，137）版本不匹配导致崩溃。
+// PATH 查找不可靠（Electron 子进程 PATH 不含用户自定义 node 路径），
+// 所以用 execFileSync('which node') 拿绝对路径。
+// 打包模式：用 Electron 自带 node（better-sqlite3 在打包时按 Electron node 重编译）。
+function resolveNodeBin() {
+  if (!IS_DEV) return process.execPath;
+  try {
+    const { execFileSync } = require('child_process');
+    const bin = execFileSync('which', ['node'], { encoding: 'utf-8', timeout: 3000 }).trim();
+    if (bin && fs.existsSync(bin)) return bin;
+  } catch {
+    /* fallback */
+  }
+  return 'node'; // 兜底走 PATH（可能命中 Electron node，但至少不崩 spawn）
+}
+const NODE_BIN = resolveNodeBin();
+
 // ── 系统检测：开发模式下找系统安装的 R / Python ────────────────
 function _detectSystemR() {
   const { execFileSync } = require('child_process');
@@ -205,14 +224,10 @@ function startRServer() {
     return;
   }
 
-  rServerProc = spawn(
-    process.execPath.includes('Electron') ? 'node' : process.execPath,
-    [rServerPath],
-    {
-      env: { ...process.env },
-      stdio: ['ignore', 'pipe', 'pipe'],
-    }
-  );
+  rServerProc = spawn(NODE_BIN, [rServerPath], {
+    env: { ...process.env },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
 
   _createLogStream('r-server');
   rServerProc.stdout.on('data', (d) => {
@@ -252,7 +267,7 @@ function startPyServer() {
     return;
   }
 
-  pyServerProc = spawn('node', [pyServerPath], {
+  pyServerProc = spawn(NODE_BIN, [pyServerPath], {
     env: { ...process.env },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
