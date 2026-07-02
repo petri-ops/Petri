@@ -121,7 +121,18 @@ export function CopilotChat(): React.ReactElement | null {
       const raw = localStorage.getItem('biof3_copilot_panel_pos');
       if (raw) {
         const p = JSON.parse(raw);
-        if (p && typeof p.right === 'number' && typeof p.top === 'number') return p;
+        // 边界 clamp：panel 至少 360x380，留 80px 余量。超出视口视为无效残留。
+        if (
+          p &&
+          typeof p.right === 'number' &&
+          typeof p.top === 'number' &&
+          p.right < window.innerWidth - 80 &&
+          p.top < window.innerHeight - 80 &&
+          p.right >= -10 &&
+          p.top >= -10
+        ) {
+          return p;
+        }
       }
     } catch {}
     return null;
@@ -132,7 +143,19 @@ export function CopilotChat(): React.ReactElement | null {
       const raw = localStorage.getItem('biof3_copilot_fab_pos');
       if (raw) {
         const p = JSON.parse(raw);
-        if (p && typeof p.right === 'number' && typeof p.top === 'number') return p;
+        if (
+          p &&
+          typeof p.right === 'number' &&
+          typeof p.top === 'number' &&
+          // 边界 clamp：FAB 52x52，至少留 60px 余量。超出当前视口视为无效残留
+          // （比如窗口缩小后旧坐标跑到屏外），丢弃回默认位置。
+          p.right < window.innerWidth - 60 &&
+          p.top < window.innerHeight - 60 &&
+          p.right >= -10 &&
+          p.top >= -10
+        ) {
+          return p;
+        }
       }
     } catch {}
     return null;
