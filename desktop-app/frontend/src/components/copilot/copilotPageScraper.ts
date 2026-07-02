@@ -7,10 +7,13 @@ import type { CopilotContext } from './copilotContext';
 
 const MAX_CONTENT_CHARS = 4000;
 
-/** Find the most plausible main content container. Prefers <article>, then theme-doc/blog containers, then <main>. */
+/** Find the most plausible main content container. Prefers desktop SPA classes, then Docusaurus theme markers. */
 function findMainElement(): HTMLElement | null {
-  // Docusaurus theme markers (most specific first)
   const selectors = [
+    // 桌面版自渲染 docs（含 .biof3-docs-title + article.biof3-docs-content）
+    '.biof3-docs-main',
+    '.biof3-docs-content',
+    // Docusaurus theme markers（Web 版，保留兼容）
     'article',
     '[class*="docMainContainer"] article',
     '[class*="docItemContainer"]',
