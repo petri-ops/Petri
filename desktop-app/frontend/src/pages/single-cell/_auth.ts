@@ -48,17 +48,22 @@ export async function ensureGuestLogin(): Promise<User | null> {
   const existing = getStoredUser();
   if (existing && getToken()) return existing;
   // Silent login as test user
-  const data = await authFetch('/auth/login', {
-    username: GUEST_USERNAME,
-    password: GUEST_PASSWORD,
-  });
-  if (data.status === 'ok') {
-    setToken(data.token);
-    setStoredUser(data.user);
-    setGuestFlag(true);
-    return data.user;
+  try {
+    const data = await authFetch('/auth/login', {
+      username: GUEST_USERNAME,
+      password: GUEST_PASSWORD,
+    });
+    if (data.status === 'ok') {
+      setToken(data.token);
+      setStoredUser(data.user);
+      setGuestFlag(true);
+      return data.user;
+    }
+    return null;
+  } catch {
+    // 后端未启动/网络错误 — 返回 null，让调用方走未登录分支（只读 + LoginModal）
+    return null;
   }
-  return null;
 }
 
 /**
