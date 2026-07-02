@@ -44,6 +44,15 @@ function resolveSharedBackendDir() {
 }
 
 const SHARED_BACKEND_DIR = resolveSharedBackendDir();
+
+// 项目根（r-server/py-server/shared-backend 平级目录所在）：
+// 开发模式 = desktop-app/ 上两级 = 仓库根；打包模式 = process.resourcesPath
+// 用于 require r-server/py-server 的模块（它们不在 resources/ 下，而在项目根）
+function resolveProjectRoot() {
+  if (app && app.isPackaged && process.resourcesPath) return process.resourcesPath;
+  return path.resolve(__dirname, '..', '..');
+}
+const PROJECT_ROOT = resolveProjectRoot();
 try {
   require(path.join(SHARED_BACKEND_DIR, 'init')).initSharedBackend();
 } catch (e) {
@@ -710,7 +719,7 @@ async function uninstallPlugin(pluginId) {
   // 删除专属包（不删共享包）
   const language = meta.language;
   if (meta.packages && meta.packages[language]) {
-    const { getExecutor } = require(path.join(RESOURCES_PATH, 'shared-backend', 'executors'));
+    const { getExecutor } = require(path.join(SHARED_BACKEND_DIR, 'executors'));
     const executor = getExecutor(language);
     // packages 可能是 array（figcode-pack）或 object（工具插件）
     const pkgList = Array.isArray(meta.packages[language])
@@ -760,7 +769,7 @@ async function uninstallRuntime(pluginId, plug) {
 
 function removePackage(executor, language, pkgName) {
   try {
-    const cfg = require(path.join(RESOURCES_PATH, `${language}-server`, 'config'));
+    const cfg = require(path.join(PROJECT_ROOT, `${language}-server`, 'config'));
     const libDir =
       language === 'r'
         ? path.join(cfg.rHome || '', 'library')
