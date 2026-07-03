@@ -103,13 +103,125 @@ export interface StreamChatOptions {
  * Stream a chat completion. Talks to /api/ai/agent (multi-turn tool calling),
  * falls back gracefully — server emits OpenAI-style choices.delta.content
  * plus extra `event` markers for tool_call / tool_result / iter.
+ *
+ * AGENT_TASK_MODE_v1：默认 task 模式（POST 提交拿 taskId → GET 订阅事件流，支持断线重连）。
+ * env VITE_AGENT_TASK_MODE=legacy 或 ?legacy 回退到直连 SSE。
  */
 export async function streamChat(opts: StreamChatOptions): Promise<void> {
-  const {
-    messages,
-    context,
-    conversationId,
+  const useTaskMode = (import.meta.env.VITE_AGENT_TASK_MODE || 'task') !== 'legacy';
+  if (useTaskMode) {
+    return streamChatViaTask(opts);
+  }
+  return streamChatLegacy(opts);
+}
+
+/** task 模式：提交拿 taskId → 订阅事件流 */
+async function streamChatViaTask(opts: StreamChatOptions): Promise<void> {
+  const { onDone } = opts;
+  try {
+    const taskId = await submitAgentTask(opts);
+    // 存 localStorage 供重连发现（CopilotChat mount 时检查）
+    try {
+      localStorage.setItem(
+        'biof3_agent_task_' + taskId,
+        JSON.stringify({ taskId, ts: Date.now() })
+      );
+    } catch {}
+    await subscribeAgentTask(taskId, opts, 0);
+  } catch (err: unknown) {
+    if ((err as Error)?.name === 'AbortError') return;
+    // task 模式失败时回退到 legacy（兼容期保护）
+    try {
+      return await streamChatLegacy(opts);
+    } catch {
+      opts.onError?.(err instanceof Error ? err : new Error(String(err)));
+    }
+  }
+}
+
+/** POST /ai/agent 提交，返回 taskId */
+async function submitAgentTask(opts: StreamChatOptions): Promise<string> {
+  const { messages, context, conversationId, signal } = opts;
+  const resp = await fetch(getApiPrefix() + '/ai/agent', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    body: JSON.stringify({ messages, context, conversationId }),
     signal,
+  });
+  if (!resp.ok) {
+    let errText = `HTTP ${resp.status}`;
+    try {
+      const j = await resp.json();
+      errText = j?.message ? `${j.error || errText}: ${j.message}` : String(j?.error || errText);
+    } catch {}
+    throw new Error(errText);
+  }
+  const data = await resp.json();
+  if (!data?.taskId) throw new Error('未返回 taskId');
+  return data.taskId as string;
+}
+
+/** GET /ai/agent/task/:taskId 订阅事件流（afterSeq 支持续传） */
+export async function subscribeAgentTask(
+  taskId: string,
+  opts: StreamChatOptions,
+  afterSeq = 0
+): Promise<void> {
+  const { signal, onDone } = opts;
+  // token 放 query（fetch 也能带 header，但 query 兼容 EventSource 未来切换）
+  const authHeader = getAuthHeader();
+  const token = authHeader.Authorization?.replace('Bearer ', '');
+  const url = `${getApiPrefix()}/ai/agent/task/${taskId}?afterSeq=${afterSeq}${token ? '&token=' + encodeURIComponent(token) : ''}`;
+  const resp = await fetch(url, { method: 'GET', headers: { ...authHeader }, signal });
+  if (!resp.ok || !resp.body) {
+    let errText = `HTTP ${resp.status}`;
+    try {
+      const t = await resp.text();
+      if (t) errText += ': ' + t.slice(0, 200);
+    } catch {}
+    throw new Error(errText);
+  }
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder('utf-8');
+  let buffer = '';
+  let lastSeq = afterSeq;
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    let sepIdx;
+    while ((sepIdx = buffer.indexOf('\n\n')) !== -1) {
+      const rawEvent = buffer.slice(0, sepIdx);
+      buffer = buffer.slice(sepIdx + 2);
+      for (const line of rawEvent.split('\n')) {
+        const m = line.match(/^data:\s?(.*)$/);
+        if (!m) continue;
+        const data = m[1];
+        if (data === '[DONE]') {
+          onDone?.();
+          try {
+            localStorage.removeItem('biof3_agent_task_' + taskId);
+          } catch {}
+          return;
+        }
+        try {
+          const obj = JSON.parse(data);
+          // task 模式事件包成 {seq, eventType, payload}，取 payload 走原解析
+          const evt = obj.payload ? obj.payload : obj;
+          if (typeof obj.seq === 'number') lastSeq = obj.seq;
+          _handleSseEvent(evt, opts);
+        } catch {
+          // Bad JSON — ignore
+        }
+      }
+    }
+  }
+  onDone?.();
+}
+
+/** 处理单个 SSE 事件对象（原 streamChat 的解析逻辑，task/legacy 共用） */
+function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
+  const {
     onDelta,
     onDone,
     onError,
@@ -119,6 +231,74 @@ export async function streamChat(opts: StreamChatOptions): Promise<void> {
     onConversation,
     onTopicShift,
   } = opts;
+  if (obj.error) {
+    onError?.(new Error(obj.error));
+    return;
+  }
+  if (obj.event === 'conversation') {
+    onConversation?.({ conversationId: obj.conversationId, title: obj.title });
+    return;
+  }
+  if (obj.event === 'topic_shift') {
+    onTopicShift?.({ conversationId: obj.conversationId, reason: obj.reason || '' });
+    return;
+  }
+  if (obj.event === 'iter') {
+    onIter?.(obj.n || 1);
+    return;
+  }
+  if (obj.event === 'tool_call') {
+    onToolCall?.({ name: obj.name, args: obj.args || {} });
+    return;
+  }
+  if (obj.event === 'tool_result') {
+    onToolResult?.({
+      name: obj.name,
+      summary: obj.summary || '',
+      actType: obj.actType,
+      message: obj.message,
+      undoToken: obj.undoToken,
+      undoableUntil: obj.undoableUntil,
+      actError: obj.actError,
+      analysisId: obj.analysisId,
+      taskId: obj.taskId,
+      figcodeCode: obj.figcodeCode,
+      figcodeAutoRun: obj.figcodeAutoRun,
+      scTab: obj.scTab,
+      scCluster: obj.scCluster,
+      scGene: obj.scGene,
+      scColumnFilters: obj.scColumnFilters,
+      scSubsetName: obj.scSubsetName,
+      scLabelKey: obj.scLabelKey,
+      scLabelValue: obj.scLabelValue,
+      scDatasetIds: obj.scDatasetIds,
+      scMergeName: obj.scMergeName,
+      scOpenReplotForAnalysis: obj.scOpenReplotForAnalysis,
+      scUploadHint: obj.scUploadHint,
+      figcardId: obj.figcardId,
+      toolId: obj.toolId,
+      autofillFromJobId: obj.autofillFromJobId,
+      autofillSourceTool: obj.autofillSourceTool,
+      planId: obj.planId,
+      allDone: obj.allDone,
+      ackToken: obj.ackToken,
+      handlerId: obj.handlerId,
+      payload: obj.payload,
+    });
+    return;
+  }
+  if (obj.event === 'done') {
+    return;
+  }
+  const delta = obj?.choices?.[0]?.delta?.content;
+  if (typeof delta === 'string' && delta.length > 0) {
+    onDelta(delta);
+  }
+}
+
+/** 老路径：直连 SSE（fallback） */
+async function streamChatLegacy(opts: StreamChatOptions): Promise<void> {
+  const { messages, context, conversationId, signal, onDelta, onDone, onError } = opts;
   try {
     const resp = await fetch(getApiPrefix() + '/ai/agent', {
       method: 'POST',
@@ -150,13 +330,10 @@ export async function streamChat(opts: StreamChatOptions): Promise<void> {
       const { value, done } = await reader.read();
       if (done) break;
       buffer += decoder.decode(value, { stream: true });
-
-      // Process complete SSE events separated by \n\n
       let sepIdx;
       while ((sepIdx = buffer.indexOf('\n\n')) !== -1) {
         const rawEvent = buffer.slice(0, sepIdx);
         buffer = buffer.slice(sepIdx + 2);
-        // Lines starting with "data: "
         for (const line of rawEvent.split('\n')) {
           const m = line.match(/^data:\s?(.*)$/);
           if (!m) continue;
@@ -167,71 +344,9 @@ export async function streamChat(opts: StreamChatOptions): Promise<void> {
           }
           try {
             const obj = JSON.parse(data);
-            if (obj.error) {
-              throw new Error(obj.error);
-            }
-            // Agent server sends {event: 'iter'|'tool_call'|'tool_result'|'done'|'conversation'}
-            if (obj.event === 'conversation') {
-              onConversation?.({ conversationId: obj.conversationId, title: obj.title });
-              continue;
-            }
-            if (obj.event === 'topic_shift') {
-              onTopicShift?.({ conversationId: obj.conversationId, reason: obj.reason || '' });
-              continue;
-            }
-            if (obj.event === 'iter') {
-              onIter?.(obj.n || 1);
-              continue;
-            }
-            if (obj.event === 'tool_call') {
-              onToolCall?.({ name: obj.name, args: obj.args || {} });
-              continue;
-            }
-            if (obj.event === 'tool_result') {
-              onToolResult?.({
-                name: obj.name,
-                summary: obj.summary || '',
-                actType: obj.actType,
-                message: obj.message,
-                undoToken: obj.undoToken,
-                undoableUntil: obj.undoableUntil,
-                actError: obj.actError,
-                analysisId: obj.analysisId,
-                taskId: obj.taskId,
-                figcodeCode: obj.figcodeCode,
-                figcodeAutoRun: obj.figcodeAutoRun,
-                scTab: obj.scTab,
-                scCluster: obj.scCluster,
-                scGene: obj.scGene,
-                scColumnFilters: obj.scColumnFilters,
-                scSubsetName: obj.scSubsetName,
-                scLabelKey: obj.scLabelKey,
-                scLabelValue: obj.scLabelValue,
-                scDatasetIds: obj.scDatasetIds,
-                scMergeName: obj.scMergeName,
-                scOpenReplotForAnalysis: obj.scOpenReplotForAnalysis,
-                scUploadHint: obj.scUploadHint,
-                figcardId: obj.figcardId,
-                toolId: obj.toolId,
-                autofillFromJobId: obj.autofillFromJobId,
-                autofillSourceTool: obj.autofillSourceTool,
-                planId: obj.planId,
-                allDone: obj.allDone,
-                ackToken: obj.ackToken,
-                handlerId: obj.handlerId,
-                payload: obj.payload,
-              });
-              continue;
-            }
-            if (obj.event === 'done') {
-              continue;
-            }
-            const delta = obj?.choices?.[0]?.delta?.content;
-            if (typeof delta === 'string' && delta.length > 0) {
-              onDelta(delta);
-            }
+            _handleSseEvent(obj, opts);
           } catch {
-            // Bad JSON — ignore individual line
+            // Bad JSON — ignore
           }
         }
       }
