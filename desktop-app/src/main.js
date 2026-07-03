@@ -11,7 +11,7 @@
  * 7. 外部链接走系统浏览器
  */
 
-const { app, BrowserWindow, shell, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, shell, ipcMain, dialog, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
@@ -554,6 +554,33 @@ function setupPluginIpc() {
       return [];
     }
   });
+}
+
+// ── M1-2：CSP 加固 ─────────────────────────────────────────────
+// 禁用 unsafe-eval，限制资源来源。connect-src 放开 localhost:* 覆盖
+// r-server(3001)/py-server(3004)/plumber(8787)/dev server(3000)/SSE。
+// frame-src 放开 localhost:* 供 figcode iframe 用。
+// 不回退 unsafe-eval——Vite 生产构建已无 eval 需求。
+function setupCsp() {
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': [
+          "default-src 'self'; " +
+            "script-src 'self'; " +
+            "style-src 'self' 'unsafe-inline'; " +
+            "img-src 'self' data: blob: http://localhost:* ; " +
+            "connect-src 'self' http://localhost:* ws://localhost:* ; " +
+            "frame-src 'self' http://localhost:* ; " +
+            "font-src 'self' data: ; " +
+            "worker-src 'self' blob: ; " +
+            "object-src 'none';",
+        ],
+      },
+    });
+  });
+  console.log('[desktop] CSP hardened (unsafe-eval disabled)');
 }
 
 // ── IPC：Runtime 状态查询 ──────────────────────────────────────
@@ -1175,6 +1202,10 @@ async function main() {
   setupDataManagementIpc();
 
   // 5. 创建窗口
+  // M1-2：CSP 加固——禁用 unsafe-eval，限制资源来源到 self + localhost（后端/SSE/dev server）
+  setupCsp();
+
+  // 6. 创建窗口
   createWindow();
 }
 
