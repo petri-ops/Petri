@@ -60,6 +60,11 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     status: () => ipcRenderer.invoke('runtime:status'),
   },
 
+  // M1-1：后端就绪感知（聚合 runtime + health + 子进程存活）
+  backend: {
+    status: () => ipcRenderer.invoke('backend:status'),
+  },
+
   // 文件系统（有限暴露）
   files: {
     saveDialog: (defaultName) => ipcRenderer.invoke('file:save-dialog', defaultName),

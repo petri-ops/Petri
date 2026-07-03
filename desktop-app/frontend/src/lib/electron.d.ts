@@ -2,6 +2,17 @@
 // 桌面版前端通过 window.biof3Desktop 访问 Electron IPC
 // （从 desktop-app/src/preload.js 暴露的 API）
 
+// M1-1：后端就绪感知层返回结构
+export interface BackendStatus {
+  rRuntime: boolean;
+  pyRuntime: boolean;
+  rServerUp: boolean;
+  pyServerUp: boolean;
+  plumberUp: boolean;
+  isReady: boolean;
+  downReason: string | null;
+}
+
 declare global {
   interface Window {
     biof3Desktop?: {
@@ -37,6 +48,10 @@ declare global {
           r: { installed: boolean; path: string | null };
           python: { installed: boolean; path: string | null };
         }>;
+      };
+      // M1-1：后端就绪感知层
+      backend: {
+        status: () => Promise<BackendStatus>;
       };
       files: {
         saveDialog: (

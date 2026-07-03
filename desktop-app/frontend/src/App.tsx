@@ -5,6 +5,8 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { DesktopToolbar } from '@/components/desktop/DesktopToolbar';
 import { DesktopOnboarding } from '@/components/desktop/DesktopOnboarding';
+import { BackendStatusProvider } from '@/components/backend/BackendStatusProvider';
+import { BackendDownBanner } from '@/components/backend/BackendDownBanner';
 import ToolsPage from '@/pages/tools';
 import FigCodePage from '@/pages/figcode';
 import SingleCellPage from '@/pages/single-cell';
@@ -41,7 +43,8 @@ function DesktopOnboardingMount(): React.ReactElement | null {
 
 export default function App(): React.ReactElement {
   return (
-    <>
+    <BackendStatusProvider>
+      <BackendDownBanner />
       <DesktopToolbar />
       <main className="biof3-spa-main">
         <Routes>
@@ -68,6 +71,6 @@ export default function App(): React.ReactElement {
       <CopilotChat />
       <CopilotSelectionTip />
       <DesktopOnboardingMount />
-    </>
+    </BackendStatusProvider>
   );
 }
