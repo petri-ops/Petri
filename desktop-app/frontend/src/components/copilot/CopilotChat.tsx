@@ -5,7 +5,14 @@
 import { errMsg } from '@/lib/error';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import { streamChat, type ChatMessage, ackAct, getApiPrefix } from './copilotClient';
+import {
+  streamChat,
+  subscribeAgentTask,
+  findResumableAgentTask,
+  type ChatMessage,
+  ackAct,
+  getApiPrefix,
+} from './copilotClient';
 import {
   addTrace,
   clearTrace,
@@ -343,6 +350,135 @@ export function CopilotChat(): React.ReactElement | null {
   useEffect(() => {
     migrateLegacyHistory();
     setMessages(loadHistory());
+  }, []);
+
+  // AGENT_TASK_MODE_v1 — mount 时若发现上次有未完成的 agent task（页面刷新/崩溃），
+  // 重建一个 pending assistant 消息并重新订阅事件流，实现"关页面再回来继续接"。
+  useEffect(() => {
+    const taskId = findResumableAgentTask();
+    if (!taskId) return;
+    setMessages((prev) => {
+      const last = prev[prev.length - 1];
+      if (last && last.role === 'assistant' && last.pending) return prev;
+      return [...prev, { role: 'assistant', content: '', pending: true, meta: undefined }];
+    });
+    setStreaming(true);
+    const ctrl = new AbortController();
+    abortRef.current = ctrl;
+    let acc = '';
+    const stepsRef: AgentStep[] = [];
+    const pushStep = (step: AgentStep) => {
+      stepsRef.push(step);
+      setMessages((prev) => {
+        const copy = prev.slice();
+        const lastIdx = copy.length - 1;
+        if (lastIdx >= 0 && copy[lastIdx].role === 'assistant') {
+          copy[lastIdx] = { ...copy[lastIdx], steps: [...stepsRef] };
+        }
+        return copy;
+      });
+    };
+    subscribeAgentTask(
+      taskId,
+      {
+        messages: [],
+        signal: ctrl.signal,
+        onConversation: (info) => {
+          if (info.conversationId && info.conversationId !== activeConvId) {
+            setActiveConvId(info.conversationId);
+          }
+          if (info.title) setActiveConvTitle(info.title);
+        },
+        onToolCall: (e) => {
+          addTrace({
+            kind: 'tool_call',
+            label: e.name,
+            detail: JSON.stringify(e.args).slice(0, 200),
+          });
+          pushStep({
+            kind: 'tool_call',
+            name: e.name,
+            detail: JSON.stringify(e.args || {}),
+            ts: Date.now(),
+          });
+        },
+        onToolResult: (e) => {
+          addTrace({
+            kind: 'tool_result',
+            label: (e.actType || e.name) + ': ' + (e.summary || ''),
+            detail: e.message,
+          });
+          pushStep({
+            kind: 'tool_result',
+            name: e.name,
+            detail: e.summary || '',
+            ts: Date.now(),
+          });
+        },
+        onDelta: (d) => {
+          acc += d;
+          setMessages((prev) => {
+            const copy = prev.slice();
+            const lastIdx = copy.length - 1;
+            if (lastIdx >= 0 && copy[lastIdx].role === 'assistant') {
+              copy[lastIdx] = { ...copy[lastIdx], content: acc };
+            }
+            return copy;
+          });
+        },
+        onDone: () => {
+          setMessages((prev) => {
+            const copy = prev.slice();
+            const lastIdx = copy.length - 1;
+            if (lastIdx >= 0 && copy[lastIdx].role === 'assistant') {
+              copy[lastIdx] = { ...copy[lastIdx], pending: false };
+            }
+            saveHistory(copy);
+            return copy;
+          });
+          setStreaming(false);
+          abortRef.current = null;
+        },
+        onError: (err) => {
+          setMessages((prev) => {
+            const copy = prev.slice();
+            const lastIdx = copy.length - 1;
+            if (lastIdx >= 0 && copy[lastIdx].role === 'assistant') {
+              copy[lastIdx] = {
+                ...copy[lastIdx],
+                pending: false,
+                error: err.message || '重连失败',
+                content: copy[lastIdx].content || '',
+              };
+            }
+            return copy;
+          });
+          setStreaming(false);
+          abortRef.current = null;
+        },
+      },
+      0
+    ).catch((err) => {
+      try {
+        localStorage.removeItem('biof3_agent_task_' + taskId);
+      } catch {}
+      setMessages((prev) => {
+        const copy = prev.slice();
+        const lastIdx = copy.length - 1;
+        if (lastIdx >= 0 && copy[lastIdx].role === 'assistant' && copy[lastIdx].pending) {
+          if (!copy[lastIdx].content) copy.splice(lastIdx, 1);
+          else copy[lastIdx] = { ...copy[lastIdx], pending: false };
+        }
+        return copy;
+      });
+      setStreaming(false);
+      abortRef.current = null;
+      if ((err as Error)?.name === 'AbortError') return;
+    });
+    return () => {
+      ctrl.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Load conversation list when panel opens; also resolve activeConvId title

@@ -115,6 +115,39 @@ export async function streamChat(opts: StreamChatOptions): Promise<void> {
   return streamChatLegacy(opts);
 }
 
+/**
+ * 扫描 localStorage 找出尚未完成的 agent task（页面刷新/崩溃恢复用）。
+ * 返回 taskId（取最新一个）。streamChat 在提交时写入 key，订阅 [DONE] 或
+ * onDone 时删除；若 mount 时 key 仍在 = 上次没跑完，需重新订阅。
+ */
+export function findResumableAgentTask(): string | null {
+  if (typeof window === 'undefined') return null;
+  let latest: { taskId: string; ts: number } | null = null;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key || !key.startsWith('biof3_agent_task_')) continue;
+      try {
+        const obj = JSON.parse(localStorage.getItem(key) || '{}');
+        if (obj?.taskId && typeof obj.ts === 'number') {
+          if (!latest || obj.ts > latest.ts) latest = { taskId: obj.taskId, ts: obj.ts };
+        }
+      } catch {
+        try {
+          localStorage.removeItem(key);
+        } catch {}
+      }
+    }
+  } catch {}
+  if (latest && Date.now() - latest.ts > 60 * 60 * 1000) {
+    try {
+      localStorage.removeItem('biof3_agent_task_' + latest.taskId);
+    } catch {}
+    return null;
+  }
+  return latest?.taskId ?? null;
+}
+
 /** task 模式：提交拿 taskId → 订阅事件流 */
 async function streamChatViaTask(opts: StreamChatOptions): Promise<void> {
   const { onDone } = opts;
