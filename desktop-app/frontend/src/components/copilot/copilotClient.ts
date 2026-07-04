@@ -20,6 +20,63 @@ function getAuthHeader(): Record<string, string> {
   }
 }
 
+// ============================================================
+// M2-5 Copilot 离线降级提示（E3）
+// 在发起 AI 请求前先做网络探测：navigator.onLine + 一次轻量 fetch。
+// 离线时抛 OfflineError，调用方据此显示"离线模式"占位而非裸 fetch 堆栈。
+// ============================================================
+
+/** 离线错误 —— UI 层据此渲染友好占位，区别于普通请求失败。 */
+export class OfflineError extends Error {
+  readonly isOffline = true;
+  constructor(message = '离线模式，AI 暂不可用') {
+    super(message);
+    this.name = 'OfflineError';
+  }
+}
+
+/** 判断一个错误是否为离线错误（用于 UI 层区分降级占位 vs 普通报错）。 */
+export function isOfflineError(err: unknown): boolean {
+  return err instanceof OfflineError || (err as { isOffline?: boolean })?.isOffline === true;
+}
+
+/**
+ * 探测网络是否可用：navigator.onLine + 一次 HEAD/GET 探测 fetch。
+ * - navigator.onLine 为 false → 直接判定离线（不发包）。
+ * - 否则对 API 根路径发一次 cache-busting 探测；fetch 抛错或返回
+ *   status=0 视为离线。成功（含 4xx/5xx，只要有响应）即视为在线。
+ * - 探测请求带 AbortSignal，避免长时间挂起。
+ */
+export async function checkOnline(timeoutMs = 4000): Promise<boolean> {
+  if (typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean') {
+    if (!navigator.onLine) return false;
+  }
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+    // 用 API 前缀根路径探测（同源、相对路径，避免 CORS），加 no-cache 防假在线。
+    const url = getApiPrefix() + '/health?_t=' + Date.now();
+    const resp = await fetch(url, {
+      method: 'GET',
+      signal: ctrl.signal,
+      cache: 'no-store',
+      headers: { ...getAuthHeader() },
+    });
+    clearTimeout(timer);
+    // status === 0 通常表示请求未真正发出（被拦截/网络层失败）
+    return resp.status !== 0;
+  } catch {
+    // 探测失败可能是 abort（慢）或网络错误 —— 统一视为离线
+    return false;
+  }
+}
+
+/** 离线时抛出友好错误；在线则静默返回，调用方继续真实请求。 */
+async function ensureOnlineOrThrow(): Promise<void> {
+  const ok = await checkOnline();
+  if (!ok) throw new OfflineError();
+}
+
 export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -175,6 +232,8 @@ async function streamChatViaTask(opts: StreamChatOptions): Promise<void> {
 /** POST /ai/agent 提交，返回 taskId */
 async function submitAgentTask(opts: StreamChatOptions): Promise<string> {
   const { messages, context, conversationId, signal } = opts;
+  // M2-5: 提交前先探测网络，离线时直接抛 OfflineError，避免裸 fetch 报错
+  await ensureOnlineOrThrow();
   const resp = await fetch(getApiPrefix() + '/ai/agent', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
@@ -333,6 +392,8 @@ function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
 async function streamChatLegacy(opts: StreamChatOptions): Promise<void> {
   const { messages, context, conversationId, signal, onDelta, onDone, onError } = opts;
   try {
+    // M2-5: 离线探测，先于 fetch 触发，避免裸 fetch 报错
+    await ensureOnlineOrThrow();
     const resp = await fetch(getApiPrefix() + '/ai/agent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...getAuthHeader() },

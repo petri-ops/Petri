@@ -12,6 +12,7 @@ import {
   type ChatMessage,
   ackAct,
   getApiPrefix,
+  isOfflineError,
 } from './copilotClient';
 import {
   addTrace,
@@ -81,6 +82,12 @@ export function CopilotChat(): React.ReactElement | null {
     return () => window.removeEventListener('keydown', onKey);
   }, [lightbox]);
   const [streaming, setStreaming] = useState(false);
+  // M2-5 Copilot 离线降级（E3）：监听 navigator 在线状态，离线时显示占位。
+  // 联网恢复自动清掉降级标记，无需重新加载。
+  const [online, setOnline] = useState<boolean>(() => {
+    if (typeof navigator === 'undefined') return true;
+    return navigator.onLine !== false;
+  });
   const [_summary, setSummary] = useState<SummaryInfo | null>(null);
   const [showSummary, setShowSummary] = useState(false);
   const [showTrace, setShowTrace] = useState(false);
@@ -209,6 +216,20 @@ export function CopilotChat(): React.ReactElement | null {
     try {
       setOpen(localStorage.getItem(OPEN_KEY) === '1');
     } catch {}
+  }, []);
+
+  // M2-5 Copilot 离线降级（E3）：监听浏览器 online/offline 事件，自动切换状态。
+  // 联网恢复时自动清掉离线标记，AI 重新可用；不重新加载页面。
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onOnline = () => setOnline(true);
+    const onOffline = () => setOnline(false);
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+    return () => {
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+    };
   }, []);
 
   // DOCK_MODE_v1 — reflect docked state onto <body> so global CSS can push the
@@ -440,6 +461,7 @@ export function CopilotChat(): React.ReactElement | null {
           abortRef.current = null;
         },
         onError: (err) => {
+          if (isOfflineError(err)) setOnline(false);
           setMessages((prev) => {
             const copy = prev.slice();
             const lastIdx = copy.length - 1;
@@ -447,7 +469,7 @@ export function CopilotChat(): React.ReactElement | null {
               copy[lastIdx] = {
                 ...copy[lastIdx],
                 pending: false,
-                error: err.message || '重连失败',
+                error: isOfflineError(err) ? undefined : err.message || '重连失败',
                 content: copy[lastIdx].content || '',
               };
             }
@@ -703,6 +725,11 @@ export function CopilotChat(): React.ReactElement | null {
       const imgs = pendingImages;
       // Allow sending with only images (no text) when a multimodal model is on.
       if ((!trimmed && imgs.length === 0) || streaming) return;
+      // M2-5: 离线时拒绝发送，避免必然失败的请求
+      if (!online) {
+        setOnline(false);
+        return;
+      }
       if (trimmed) {
         const h = inputHistoryRef.current;
         if (h[h.length - 1] !== trimmed) {
@@ -1067,6 +1094,8 @@ export function CopilotChat(): React.ReactElement | null {
           });
         },
         onError: (err) => {
+          // M2-5: 离线错误 → 切到离线降级占位，不渲染裸 fetch 堆栈
+          if (isOfflineError(err)) setOnline(false);
           setMessages((prev) => {
             const copy = prev.slice();
             const lastIdx = copy.length - 1;
@@ -1074,7 +1103,7 @@ export function CopilotChat(): React.ReactElement | null {
               copy[lastIdx] = {
                 ...copy[lastIdx],
                 pending: false,
-                error: err.message || '请求失败',
+                error: isOfflineError(err) ? undefined : err.message || '请求失败',
                 content: copy[lastIdx].content || '',
               };
             }
@@ -1084,12 +1113,14 @@ export function CopilotChat(): React.ReactElement | null {
           abortRef.current = null;
           // Recovery: SSE may have dropped tool_result events while acts were already
           // committed server-side. Pull recent audit log and append any unseen ones.
-          setTimeout(() => recoverDroppedActs(), 500);
+          if (!isOfflineError(err)) {
+            setTimeout(() => recoverDroppedActs(), 500);
+          }
         },
       });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [messages, streaming, ctx, pendingImages]
+    [messages, streaming, ctx, pendingImages, online]
   );
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -1766,7 +1797,14 @@ export function CopilotChat(): React.ReactElement | null {
               }
             }}
           />
-          {messages.length === 0 && (
+          {messages.length === 0 && !online && (
+            <div className="cp-offline-placeholder">
+              <div className="cp-offline-icon">📴</div>
+              <div className="cp-offline-title">离线模式</div>
+              <div className="cp-offline-text">AI 暂不可用。网络恢复后将自动重新可用。</div>
+            </div>
+          )}
+          {messages.length === 0 && online && (
             <div className="cp-welcome">
               <div className="cp-welcome-text">{welcomeFor(ctx)}</div>
               <div className="cp-quick-grid">
@@ -1776,6 +1814,12 @@ export function CopilotChat(): React.ReactElement | null {
                   </button>
                 ))}
               </div>
+            </div>
+          )}
+          {messages.length > 0 && !online && (
+            <div className="cp-offline-banner">
+              <span className="cp-offline-banner-icon">📴</span>
+              <span>离线模式，AI 暂不可用 · 网络恢复后自动重连</span>
             </div>
           )}
           {messages.map((m, i) => {
@@ -1946,8 +1990,8 @@ export function CopilotChat(): React.ReactElement | null {
             <button
               className="cp-send-btn"
               onClick={() => send(input)}
-              disabled={(!input.trim() && pendingImages.length === 0) || imgUploading}
-              title="发送"
+              disabled={(!input.trim() && pendingImages.length === 0) || imgUploading || !online}
+              title={online ? '发送' : '离线，网络恢复后可发送'}
             >
               ➤
             </button>
