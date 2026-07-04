@@ -1180,6 +1180,22 @@ function setupDataManagementIpc() {
 async function main() {
   setupDesktopEnv();
 
+  // M1-4 (H3)：启动 r-server 前跑 db migration，防升级 schema 错乱
+  try {
+    const { runMigrations, getAppliedVersion } = require('./migration-runner');
+    const migDir = path.join(__dirname, 'migrations');
+    const dbPath = process.env.BIOF3_DB_PATH;
+    if (dbPath) {
+      // 确保 db 目录存在
+      fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+      const ver = await runMigrations(dbPath, migDir);
+      console.log('[desktop] migrations applied, version =', ver);
+    }
+  } catch (e) {
+    console.error('[desktop] migration failed:', e.message);
+    // 不阻断启动——r-server 的 initSchema() 仍会兜底建表
+  }
+
   // 1. 启动后端服务
   await startRServer();
   await startPyServer();
