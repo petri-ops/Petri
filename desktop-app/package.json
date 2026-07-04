@@ -21,6 +21,7 @@
     "check": "node --check src/main.js && node --check src/preload.js"
   },
   "dependencies": {
+    "@electron/notarize": "^2.5.0",
     "archiver": "^7.0.1",
     "better-sqlite3": "^12.11.1",
     "electron-updater": "^6.8.9"

@@ -50,6 +50,31 @@ declare global {
           Array<{ id: string; currentVersion: string; latestVersion: string }>
         >;
       };
+      // M2-9：content-plugin 文档桥（docs.tsx 运行时拉取已装教程插件）
+      contentPlugins: {
+        list: () => Promise<
+          Array<{
+            id: string;
+            contentType: string;
+            omics: string;
+            version: string;
+            title: string;
+          }>
+        >;
+        listDocs: (pluginId: string) => Promise<
+          Array<{
+            id: string;
+            title: string;
+            position: number;
+            relativePath: string;
+            pluginId: string;
+          }>
+        >;
+        read: (
+          pluginId: string,
+          relativePath: string
+        ) => Promise<{ ok: boolean; content?: string; error?: string }>;
+      };
       runtime: {
         status: () => Promise<{
           r: { installed: boolean; path: string | null };

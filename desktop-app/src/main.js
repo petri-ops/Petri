@@ -695,6 +695,38 @@ function setupPluginIpc() {
       return [];
     }
   });
+
+  // ── M2-9：content-plugin 文档桥 ──────────────────────────────
+  // docs.tsx 运行时通过这些 IPC 拉取已装 content-plugin 的文档树与正文
+  ipcMain.handle('content-plugin:list', async () => {
+    try {
+      const { listAllContentPlugins } = require('./plugin-manager');
+      return listAllContentPlugins();
+    } catch (e) {
+      console.warn('[desktop] content-plugin:list failed:', e.message);
+      return [];
+    }
+  });
+
+  ipcMain.handle('content-plugin:list-docs', async (_event, pluginId) => {
+    try {
+      const { listContentPluginDocs } = require('./plugin-manager');
+      return listContentPluginDocs(pluginId);
+    } catch (e) {
+      console.warn('[desktop] content-plugin:list-docs failed:', e.message);
+      return [];
+    }
+  });
+
+  ipcMain.handle('content-plugin:read', async (_event, pluginId, relativePath) => {
+    try {
+      const { readContentPluginDoc } = require('./plugin-manager');
+      return { ok: true, content: readContentPluginDoc(pluginId, relativePath) };
+    } catch (e) {
+      console.warn('[desktop] content-plugin:read failed:', e.message);
+      return { ok: false, error: e.message };
+    }
+  });
 }
 
 // ── M1-2：CSP 加固 ─────────────────────────────────────────────

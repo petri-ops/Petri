@@ -301,6 +301,11 @@ async function installPlugin(pluginId, onProgress) {
     return installFigcodePack(pluginId, plugin, onProgress);
   }
 
+  // Content 插件类型：下载/解压 → 注册 docsDir → 不装包不走工具注册
+  if (plugin.type === 'content-plugin') {
+    return installContentPlugin(pluginId, plugin, onProgress);
+  }
+
   const isBuiltIn = !!plugin._builtIn;
   const pluginDir = path.join(PLUGINS_DIR, pluginId);
   fs.mkdirSync(PLUGINS_DIR, { recursive: true });
@@ -437,6 +442,95 @@ async function installPlugin(pluginId, onProgress) {
   console.log(
     `[plugin] installed: ${pluginId} v${plugin.version}${isBuiltIn ? ' (built-in)' : ''}`
   );
+}
+
+// ── 安装 Content 插件（教程/文档）──────────────────────────────
+// Content 插件安装路径：
+//   1. 内置则从 resources/built-in-plugins/{id} 复制；远程则下载 zip 校验解压
+//   2. 读取 plugin.json 校验 type === 'content-plugin' + contentType + omics
+//   3. 注册 docsDir 到 globalThis._biof3ContentPlugins
+//   4. 不装语言包、不走工具注册、不需要重启
+
+async function installContentPlugin(pluginId, plugin, onProgress) {
+  const platform = detectPlatform();
+  const pluginDir = path.join(PLUGINS_DIR, pluginId);
+  fs.mkdirSync(PLUGINS_DIR, { recursive: true });
+
+  const isBuiltIn = !!plugin._builtIn;
+  if (isBuiltIn) {
+    const srcDir = path.join(BUILT_IN_PLUGINS_DIR, pluginId);
+    if (!fs.existsSync(srcDir)) {
+      throw new Error(`内置插件源目录不存在: ${srcDir}`);
+    }
+    console.log(`[plugin] copying built-in content-plugin ${pluginId} from ${srcDir}`);
+    if (fs.existsSync(pluginDir)) fs.rmSync(pluginDir, { recursive: true, force: true });
+    copyDirSync(srcDir, pluginDir);
+  } else {
+    const zipPath = path.join(PLUGINS_DIR, `${pluginId}-${plugin.version}.zip`);
+    console.log(`[plugin] downloading content-plugin ${pluginId} from ${plugin.url}`);
+    await downloadFile(plugin.url, zipPath, onProgress);
+    if (plugin.checksum) {
+      const ok = await verifyChecksum(zipPath, plugin.checksum);
+      if (!ok) {
+        try {
+          fs.unlinkSync(zipPath);
+        } catch {}
+        throw new Error('校验失败，文件可能损坏');
+      }
+    }
+    if (fs.existsSync(pluginDir)) fs.rmSync(pluginDir, { recursive: true, force: true });
+    await extractZip(zipPath, pluginDir);
+    try {
+      fs.unlinkSync(zipPath);
+    } catch {}
+    // 展开嵌套顶层目录
+    const entries = fs.readdirSync(pluginDir);
+    if (
+      entries.length === 1 &&
+      fs.statSync(path.join(pluginDir, entries[0])).isDirectory() &&
+      !fs.existsSync(path.join(pluginDir, 'plugin.json'))
+    ) {
+      const nested = path.join(pluginDir, entries[0]);
+      for (const e of fs.readdirSync(nested)) {
+        fs.renameSync(path.join(nested, e), path.join(pluginDir, e));
+      }
+      fs.rmdirSync(nested);
+      console.log(`[plugin] flattened nested dir: ${entries[0]}`);
+    }
+  }
+
+  // 读取 plugin.json
+  const metaPath = path.join(pluginDir, 'plugin.json');
+  if (!fs.existsSync(metaPath)) {
+    throw new Error('plugin.json 不存在: ' + metaPath);
+  }
+  const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+  if (meta.type !== 'content-plugin') {
+    throw new Error(`plugin.json type 不是 content-plugin: ${meta.type}`);
+  }
+  if (!meta.contentType || !meta.omics) {
+    throw new Error('content-plugin manifest 必须包含 contentType 与 omics');
+  }
+  console.log(
+    `[plugin] content-plugin meta: id=${meta.id} contentType=${meta.contentType} omics=${meta.omics}`
+  );
+
+  // 注册 docsDir 到全局桥
+  registerContentPlugin(pluginDir, meta);
+
+  // 记录已装
+  addInstalledPlugin({
+    id: pluginId,
+    version: plugin.version,
+    installedAt: new Date().toISOString(),
+    platform,
+    type: 'content-plugin',
+    contentType: meta.contentType,
+    omics: meta.omics,
+    builtIn: isBuiltIn,
+  });
+
+  console.log(`[plugin] content-plugin installed: ${pluginId} v${plugin.version}`);
 }
 
 // ── 安装 Runtime（R/Python 基础运行时）──────────────────────────
@@ -694,6 +788,143 @@ function registerPluginInServer(pluginDir, meta) {
   }
 }
 
+// ── Content 插件注册 ───────────────────────────────────────────
+// content-plugin 是教程/文档类插件，不走工具注册（r-server），而是
+// 把 docsDir 路径挂到 globalThis._biof3ContentPlugins，供 docs.tsx 在
+// 运行时通过 IPC 拉取 md 文本并 react-markdown 渲染。
+//
+// manifest 约定（plugin.json）：
+//   {
+//     "id": "single-cell-tutorial",
+//     "type": "content-plugin",
+//     "contentType": "tutorial",      // 'tutorial' | 'guide' | ...
+//     "omics": "single-cell",         // 'single-cell' | 'rna-seq' | ...
+//     "version": "1.0.0",
+//     "docsDir": "docs",              // 插件内文档子目录（相对 pluginDir），默认 'docs'
+//     "title": "单细胞教程"
+//   }
+
+function registerContentPlugin(pluginDir, meta) {
+  try {
+    if (!globalThis._biof3ContentPlugins) globalThis._biof3ContentPlugins = new Map();
+    const docsDir = path.join(pluginDir, meta.docsDir || 'docs');
+    globalThis._biof3ContentPlugins.set(meta.id, {
+      id: meta.id,
+      contentType: meta.contentType || 'tutorial',
+      omics: meta.omics || 'general',
+      version: meta.version,
+      title: meta.title || meta.id,
+      pluginDir,
+      docsDir,
+    });
+    console.log(`[plugin] content-plugin registered: ${meta.id} → ${docsDir}`);
+  } catch (e) {
+    console.warn(`[plugin] content-plugin register failed: ${e.message}`);
+  }
+}
+
+function unregisterContentPlugin(pluginId) {
+  if (globalThis._biof3ContentPlugins) {
+    globalThis._biof3ContentPlugins.delete(pluginId);
+  }
+}
+
+// 列出某 content-plugin 的文档树（递归扫 docsDir 下的 .md/.mdx）
+// 返回 [{ id, title, position, relativePath }]
+function listContentPluginDocs(pluginId) {
+  const entry = globalThis._biof3ContentPlugins && globalThis._biof3ContentPlugins.get(pluginId);
+  if (!entry) return [];
+  const items = [];
+  try {
+    const walk = (dir, relPrefix) => {
+      if (!fs.existsSync(dir)) return;
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const e of entries) {
+        if (e.isDirectory()) {
+          walk(path.join(dir, e.name), relPrefix ? `${relPrefix}/${e.name}` : e.name);
+        } else if (/\.mdx?$/.test(e.name) && !e.name.startsWith('_')) {
+          const fullPath = path.join(dir, e.name);
+          const relativePath = relPrefix ? `${relPrefix}/${e.name}` : e.name;
+          const docId = relativePath.replace(/\.(md|mdx)$/, '').replace(/\/index$/, '');
+          let raw = '';
+          try {
+            raw = fs.readFileSync(fullPath, 'utf8');
+          } catch {}
+          items.push({
+            id: `${pluginId}/${docId}`,
+            title: extractMdTitle(raw) || docId,
+            position: extractSidebarPos(raw),
+            relativePath,
+            pluginId,
+          });
+        }
+      }
+    };
+    walk(entry.docsDir, '');
+    items.sort((a, b) => a.position - b.position);
+  } catch (e) {
+    console.warn(`[plugin] listContentPluginDocs ${pluginId} failed: ${e.message}`);
+  }
+  return items;
+}
+
+// 读取 content-plugin 内某文档的 md 文本（按 relativePath）
+function readContentPluginDoc(pluginId, relativePath) {
+  const entry = globalThis._biof3ContentPlugins && globalThis._biof3ContentPlugins.get(pluginId);
+  if (!entry) throw new Error(`content-plugin ${pluginId} 未注册`);
+  // 防止路径穿越：解析后必须在 docsDir 内
+  const resolved = path.resolve(entry.docsDir, relativePath);
+  if (!resolved.startsWith(entry.docsDir + path.sep) && resolved !== entry.docsDir) {
+    throw new Error('非法文档路径: ' + relativePath);
+  }
+  if (!/\.mdx?$/.test(resolved)) throw new Error('仅支持 .md/.mdx');
+  if (!fs.existsSync(resolved)) throw new Error('文档不存在: ' + relativePath);
+  return fs.readFileSync(resolved, 'utf8');
+}
+
+// 列出所有已注册 content-plugin 元数据（供前端 sidebar 顶层分类用）
+function listAllContentPlugins() {
+  if (!globalThis._biof3ContentPlugins) return [];
+  const out = [];
+  for (const [, e] of globalThis._biof3ContentPlugins) {
+    out.push({
+      id: e.id,
+      contentType: e.contentType,
+      omics: e.omics,
+      version: e.version,
+      title: e.title,
+      pluginDir: e.pluginDir,
+      docsDir: e.docsDir,
+    });
+  }
+  return out;
+}
+
+// 从 md frontmatter / 首个 H1 提取标题
+function extractMdTitle(raw) {
+  if (!raw) return '';
+  // frontmatter title
+  const fm = raw.match(/^---\n([\s\S]*?)\n---/);
+  if (fm) {
+    const t = fm[1].match(/^title:\s*(.+)$/m);
+    if (t) return t[1].replace(/^["']|["']$/g, '');
+  }
+  const h1 = raw.match(/^#\s+(.+)$/m);
+  if (h1) return h1[1].trim();
+  return '';
+}
+
+// 从 md frontmatter 提取 sidebar_position（默认 999）
+function extractSidebarPos(raw) {
+  if (!raw) return 999;
+  const fm = raw.match(/^---\n([\s\S]*?)\n---/);
+  if (fm) {
+    const p = fm[1].match(/^sidebar_position:\s*(\d+)/m);
+    if (p) return parseInt(p[1], 10);
+  }
+  return 999;
+}
+
 // ── 卸载插件 ───────────────────────────────────────────────────
 
 async function uninstallPlugin(pluginId) {
@@ -702,6 +933,16 @@ async function uninstallPlugin(pluginId) {
   const plug = installed.find((p) => p.id === pluginId);
   if (plug && plug.type === 'runtime') {
     return uninstallRuntime(pluginId, plug);
+  }
+
+  // Content 插件类型：删目录 + 注销 globalThis 桥 + 记录
+  if (plug && plug.type === 'content-plugin') {
+    const pluginDir = path.join(PLUGINS_DIR, pluginId);
+    if (fs.existsSync(pluginDir)) fs.rmSync(pluginDir, { recursive: true, force: true });
+    unregisterContentPlugin(pluginId);
+    removeInstalledPlugin(pluginId);
+    console.log(`[plugin] content-plugin uninstalled: ${pluginId}`);
+    return;
   }
 
   const pluginDir = path.join(PLUGINS_DIR, pluginId);
@@ -825,6 +1066,23 @@ async function loadAllPlugins() {
       continue;
     }
 
+    // Content 插件：恢复 docsDir 注册到 globalThis._biof3ContentPlugins
+    if (plug.type === 'content-plugin') {
+      const pluginDir = path.join(PLUGINS_DIR, plug.id);
+      if (!fs.existsSync(pluginDir)) {
+        console.warn(`[plugin] content-plugin ${plug.id} directory missing, skipping`);
+        continue;
+      }
+      const metaPath = path.join(pluginDir, 'plugin.json');
+      try {
+        const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+        registerContentPlugin(pluginDir, meta);
+      } catch (e) {
+        console.warn(`[plugin] content-plugin ${plug.id} load failed: ${e.message}`);
+      }
+      continue;
+    }
+
     // 普通工具插件
     const pluginDir = path.join(PLUGINS_DIR, plug.id);
     if (!fs.existsSync(pluginDir)) {
@@ -885,4 +1143,7 @@ module.exports = {
   getRuntimeStatus,
   PLUGINS_DIR,
   RUNTIMES_DIR,
+  listAllContentPlugins,
+  listContentPluginDocs,
+  readContentPluginDoc,
 };

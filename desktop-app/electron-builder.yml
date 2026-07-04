@@ -8,6 +8,9 @@ directories:
   output: dist
   buildResources: resources
 
+# M2-11 (H4)：签名后 notarize + staple（需 CI 注入 APPLE_ID/APP_PASSWORD/NOTARIZE_TEAM_ID）
+afterSign: build/afterSign.js
+
 # 打包进 Electron app bundle 的文件
 files:
   - src/**/*
@@ -23,9 +26,14 @@ mac:
       arch:
         - arm64
   hardenedRuntime: true
-  # v1 不签名，用户需右键打开
+  # M2-11 (H4)：mac 签名 + notarization
+  # 有证书时：CI 注入 CSC_LINK/CSC_KEY_PASSWORD → identity 自动匹配
+  # 无证书时：identity: null，用户需右键打开（v1 过渡）
   identity: null
-  notarize: false
+  notarize:
+    teamId: ${NOTARIZE_TEAM_ID}
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
 
 # Windows 特定
 win:

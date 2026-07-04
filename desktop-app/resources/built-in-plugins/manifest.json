@@ -400,6 +400,17 @@
         "python": "3.11"
       }
     },
+    "single-cell-tutorial": {
+      "title": "单细胞教程（试点插件）",
+      "version": "1.0.0",
+      "type": "content-plugin",
+      "contentType": "tutorial",
+      "omics": "single-cell",
+      "description": "M2-9 content-plugin 试点：演示教程插件如何通过 plugin-manager 注册到 docs 页面（manifest + 示例 md，无语言包）。",
+      "url": "built-in://single-cell-tutorial",
+      "size": 0,
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"]
+    },
     "figcode-data-bsgenome-hg19": {
       "title": "FigCode 数据包 · BSgenome hg19（突变签名用）",
       "version": "1.0.0",

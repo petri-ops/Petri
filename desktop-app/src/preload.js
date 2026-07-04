@@ -55,6 +55,14 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     checkUpdates: () => ipcRenderer.invoke('plugin:check-updates'),
   },
 
+  // M2-9：content-plugin 文档桥（docs.tsx 运行时拉取已装教程插件）
+  contentPlugins: {
+    list: () => ipcRenderer.invoke('content-plugin:list'),
+    listDocs: (pluginId) => ipcRenderer.invoke('content-plugin:list-docs', pluginId),
+    read: (pluginId, relativePath) =>
+      ipcRenderer.invoke('content-plugin:read', pluginId, relativePath),
+  },
+
   // Runtime 状态（R/Python 基础运行时是否已安装）
   runtime: {
     status: () => ipcRenderer.invoke('runtime:status'),
