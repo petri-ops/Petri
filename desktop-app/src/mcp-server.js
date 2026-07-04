@@ -17,18 +17,29 @@ async function startMcpServer() {
   const { StdioServerTransport } = await import('@modelcontextprotocol/sdk/server/stdio.js');
   const { ListToolsRequestSchema, CallToolRequestSchema } =
     await import('@modelcontextprotocol/sdk/types.js');
+  const { listTools, callTool } = require('./mcp-tool-registry');
 
   const server = new Server(
     { name: 'biof3-mcp', version: '0.1.0' },
     { capabilities: { tools: {} } }
   );
 
-  // 骨架阶段：无注册工具
-  server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: [] }));
+  // tools/list：返回插件工具 + 单细胞步骤的合并列表
+  server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: await listTools() }));
 
+  // tools/call：Task 3-4 实现执行通道，当前 registry.callTool 抛 not_implemented
   server.setRequestHandler(CallToolRequestSchema, async (req) => {
     const name = req?.params?.name ?? '<unknown>';
-    throw new Error(`unknown_tool: ${name}`);
+    const args = req?.params?.arguments ?? {};
+    try {
+      return await callTool(name, args);
+    } catch (e) {
+      // MCP 约定：工具错误返回 isError 内容，而非抛异常
+      return {
+        content: [{ type: 'text', text: `Error: ${e.message}` }],
+        isError: true,
+      };
+    }
   });
 
   return server;
