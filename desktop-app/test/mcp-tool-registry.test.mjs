@@ -101,9 +101,48 @@ test('listTools 合并插件工具 + 单细胞步骤', async () => {
   }
 });
 
-test('callTool 在 Task 2 阶段是 stub（抛 not_implemented）', async () => {
-  await assert.rejects(
-    () => callTool('volcano-plot', {}),
-    (err) => /not_implemented|未实现/i.test(err.message ?? String(err)),
-  );
+test('callTool 对未知工具返回 isError', async () => {
+  globalThis._biof3Plugins = new Map(); // 清空，确保 volcano-plot 未注册
+  const result = await callTool('nonexistent_tool_xyz', {});
+  assert.equal(result.isError, true);
+  assert.match(result.content[0].text, /unknown_tool/i);
+});
+
+// 真实跑 volcano-plot（需本地 R + ggplot2/ggrepel）。
+// 无 R 环境时跳过（RUN_MCP_LIVE=1 才跑，与项目 RUN_LIVE_AI 模式一致）。
+const RUN_LIVE = process.env.RUN_MCP_LIVE === '1';
+test('callTool 跑通 volcano-plot 出 PNG（live）', { skip: !RUN_LIVE }, async () => {
+  // 注册 built-in volcano-plot 插件（指向 resources/built-in-plugins/volcano-plot）
+  const builtInDir = resolve(__dirname, '..', 'resources', 'built-in-plugins', 'volcano-plot');
+  const demoCsv = path.join(builtInDir, 'demo-data', 'demo_deg.csv');
+  globalThis._biof3Plugins = new Map();
+  globalThis._biof3Plugins.set('volcano-plot', {
+    id: 'volcano-plot',
+    version: '1.0.0',
+    language: 'r',
+    pluginDir: builtInDir,
+    scriptPath: path.join(builtInDir, 'scripts'),
+  });
+  try {
+    const result = await callTool('volcano-plot', {
+      deg_table: demoCsv,
+      fc_threshold: 1,
+      pval_threshold: 1.3,
+      top_n: 10,
+    });
+    assert.equal(result.isError, false, `应成功，实际: ${result.content[0].text}`);
+    const summary = JSON.parse(result.content[0].text);
+    assert.ok(summary.jobDir, '应返回 jobDir');
+    // manifest 应含 volcano 图输出
+    const outputs = summary.outputs || [];
+    const volcano = outputs.find((o) => o.id === 'volcano');
+    assert.ok(volcano, 'manifest 应含 volcano 输出');
+    // PNG 文件应真实存在
+    const fs2 = await import('node:fs');
+    assert.ok(fs2.existsSync(volcano.path), `PNG 应存在: ${volcano.path}`);
+    // manifest summary 应有 up/down 计数
+    assert.ok(summary.manifest?.summary?.up >= 0, 'manifest.summary.up 应存在');
+  } finally {
+    globalThis._biof3Plugins = new Map();
+  }
 });

@@ -29,7 +29,7 @@ test('MCP server tools/list 返回单细胞步骤（至少 10 个）', async () 
   }
 });
 
-test('MCP server tools/call 对未实现工具返回 isError（Task 2 阶段）', async () => {
+test('MCP server tools/call 对未注册工具返回 isError', async () => {
   const transport = new StdioClientTransport({
     command: 'node',
     args: [SERVER_PATH],
@@ -37,10 +37,10 @@ test('MCP server tools/call 对未实现工具返回 isError（Task 2 阶段）'
   const client = new Client({ name: 'biof3-mcp-test', version: '1.0.0' });
   await client.connect(transport);
   try {
+    // mcp-server 子进程未注册任何插件，volcano-plot 走 unknown_tool 分支
     const result = await client.callTool({ name: 'volcano-plot', arguments: {} });
-    // Task 2 阶段 callTool 是 stub，返回 isError + not_implemented 文案
     assert.equal(result.isError, true);
-    assert.match(result.content[0].text, /not_implemented|未实现/i);
+    assert.match(result.content[0].text, /unknown_tool|未找到|脚本未找到/i);
   } finally {
     await client.close();
   }
