@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { figThemes, layoutThemes, applyBothThemes, getRecommendedParams } from '@/pages/_themes';
-import { IS_DESKTOP } from '@/lib/authClient';
 
 // 桌面版无 Docusaurus baseUrl，useBaseUrl 直接返回原路径
 function useBaseUrl(path: string): string {
@@ -401,14 +400,9 @@ export default function RunModal({
     return () => document.removeEventListener('keydown', handleKey);
   }, [isOpen, onClose, lightboxSrc]);
 
-  // Lock body scroll when modal is open (桌面端抽屉式不锁滚动)
+  // 桌面端抽屉式不锁滚动（SPA 恒为桌面版，原 web 锁滚动逻辑已移除）
   useEffect(() => {
-    if (!isOpen || IS_DESKTOP) return;
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = prevOverflow;
-    };
+    if (!isOpen) return;
   }, [isOpen]);
 
   // FIGCODE_ACT_v1: listen for AI-driven code replacement events
@@ -725,12 +719,12 @@ export default function RunModal({
   }, []);
   if (!isOpen) return null;
 
-  // 桌面端：右栏抽屉式（非阻塞），Web 端：居中全屏模态
-  const overlayCls = `run-modal-overlay${IS_DESKTOP ? ' run-modal-overlay--desktop' : ''}`;
-  const modalCls = `run-modal${IS_DESKTOP ? ' run-modal--desktop' : ''}`;
+  // 桌面端：右栏抽屉式（非阻塞，点击 overlay 不关闭）
+  const overlayCls = 'run-modal-overlay run-modal-overlay--desktop';
+  const modalCls = 'run-modal run-modal--desktop';
 
   return (
-    <div className={overlayCls} onClick={IS_DESKTOP ? undefined : onClose}>
+    <div className={overlayCls}>
       <div className={modalCls} ref={modalRef} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="run-modal-header">

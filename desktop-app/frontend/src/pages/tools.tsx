@@ -12,7 +12,6 @@ import { Link } from 'react-router-dom';
 import { tools as staticTools, toolCategories } from '@/pages/_data';
 import type { Tool } from '@/pages/_data';
 import { TOOL_IMAGES } from '@/pages/_tool-images';
-import { IS_DESKTOP } from '@/lib/authClient';
 import { WorkbenchEmpty } from '@/components/ui/WorkbenchEmpty';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Lightbox } from '@/components/ui/Lightbox';
@@ -688,21 +687,13 @@ function ToolsInner() {
   // 桌面版：已装插件工具（从后端 /api/tools/manifest 动态拉取）
   const [pluginTools, setPluginTools] = useState<Tool[]>([]);
 
-  // 工具列表：
-  // 桌面版 = 只显示已装插件（未安装的工具不出现在界面，符合插件化设计）
-  // web 版 = 静态工具 + 插件（插件覆盖同 id 静态工具）
+  // 工具列表：桌面版只显示已装插件（未安装的工具不出现，符合插件化设计）
   const tools: Tool[] = useMemo(() => {
-    if (IS_DESKTOP) {
-      return pluginTools;
-    }
-    if (pluginTools.length === 0) return staticTools;
-    const ids = new Set(pluginTools.map((t) => t.id));
-    return [...staticTools.filter((t) => !ids.has(t.id)), ...pluginTools];
+    return pluginTools;
   }, [pluginTools]);
 
   // 桌面版启动时拉取已装插件工具定义
   useEffect(() => {
-    if (!IS_DESKTOP) return;
     if (typeof window === 'undefined') return;
     let cancelled = false;
     (async () => {
