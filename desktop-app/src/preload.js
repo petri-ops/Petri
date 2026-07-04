@@ -65,6 +65,16 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     status: () => ipcRenderer.invoke('backend:status'),
   },
 
+  // M2-7：py-server / plumber 按需启停（lazy，idle 5min 自动停）
+  py: {
+    start: () => ipcRenderer.invoke('py:start'),
+    stop: () => ipcRenderer.invoke('py:stop'),
+  },
+  plumber: {
+    start: () => ipcRenderer.invoke('plumber:start'),
+    stop: () => ipcRenderer.invoke('plumber:stop'),
+  },
+
   // 文件系统（有限暴露）
   files: {
     saveDialog: (defaultName) => ipcRenderer.invoke('file:save-dialog', defaultName),
@@ -74,6 +84,11 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
   // 诊断日志导出
   diagnostic: {
     export: (targetPath) => ipcRenderer.invoke('diagnostic:export', targetPath),
+  },
+
+  // M2-3：可选错误遥测（默认关闭，用户主动开启后才会上报）
+  telemetry: {
+    report: (payload) => ipcRenderer.invoke('telemetry:report', payload),
   },
 
   // 数据目录管理（卸载数据保留）

@@ -3,6 +3,7 @@
 // ============================================================
 
 import { errMsg } from '@/lib/error';
+import { classifyError } from '@/components/backend/errorClassifier';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import {
@@ -1096,6 +1097,17 @@ export function CopilotChat(): React.ReactElement | null {
         onError: (err) => {
           // M2-5: 离线错误 → 切到离线降级占位，不渲染裸 fetch 堆栈
           if (isOfflineError(err)) setOnline(false);
+          // M2-3: 可选错误遥测——仅上报分类+摘要，不含用户数据/路径。
+          // 主进程会在发送前再次校验 telemetry_enabled 开关（默认关闭）。
+          try {
+            const classified = classifyError(err);
+            window.biof3Desktop?.telemetry?.report({
+              category: classified.category,
+              errorSummary: classified.humanReason,
+            });
+          } catch {
+            /* 遥测自身异常不影响业务 */
+          }
           setMessages((prev) => {
             const copy = prev.slice();
             const lastIdx = copy.length - 1;

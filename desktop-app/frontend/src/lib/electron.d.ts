@@ -13,6 +13,13 @@ export interface BackendStatus {
   downReason: string | null;
 }
 
+// M2-3：可选错误遥测 payload（最小化，隐私优先）
+// 仅含 category + errorSummary；appVersion/timestamp 由主进程补全
+export interface TelemetryPayload {
+  category?: string;
+  errorSummary?: string;
+}
+
 declare global {
   interface Window {
     biof3Desktop?: {
@@ -53,6 +60,25 @@ declare global {
       backend: {
         status: () => Promise<BackendStatus>;
       };
+      // M2-7：py-server / plumber 按需启停（lazy，idle 5min 自动停）
+      py: {
+        start: () => Promise<{
+          ok: boolean;
+          alreadyRunning?: boolean;
+          pid?: number;
+          error?: string;
+        }>;
+        stop: () => Promise<{ ok: boolean; wasRunning?: boolean }>;
+      };
+      plumber: {
+        start: () => Promise<{
+          ok: boolean;
+          alreadyRunning?: boolean;
+          pid?: number;
+          error?: string;
+        }>;
+        stop: () => Promise<{ ok: boolean; wasRunning?: boolean }>;
+      };
       files: {
         saveDialog: (
           defaultName?: string
@@ -63,6 +89,11 @@ declare global {
       };
       diagnostic: {
         export: (targetPath?: string) => Promise<{ ok: boolean; path?: string; error?: string }>;
+      };
+      // M2-3：可选错误遥测（默认关闭，用户主动开启后才会上报）
+      // payload 仅含 category + errorSummary，不含用户数据/路径/文件名
+      telemetry: {
+        report: (payload: TelemetryPayload) => Promise<{ ok: boolean; reason?: string }>;
       };
       figcode: {
         checkPackages: (

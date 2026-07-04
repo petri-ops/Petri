@@ -247,6 +247,8 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   const [dashscopeKey, setDashscopeKey] = useState('');
   const [chatProvider, setChatProvider] = useState('deepseek');
   const [embedProvider, setEmbedProvider] = useState('dashscope');
+  // M2-3：错误遥测开关（默认关闭）
+  const [telemetryEnabled, setTelemetryEnabled] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -258,6 +260,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     setSettings(s);
     setChatProvider((s.chat_provider as string) || 'deepseek');
     setEmbedProvider((s.embed_provider as string) || 'dashscope');
+    setTelemetryEnabled(s.telemetry_enabled === true);
   }
 
   async function handleSave() {
@@ -269,6 +272,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
       dashscope_api_key: dashscopeKey || undefined,
       llm_provider: chatProvider,
       embed_provider: embedProvider,
+      telemetry_enabled: telemetryEnabled,
     });
     setSaving(false);
     setSaved(true);
@@ -276,6 +280,23 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     setDashscopeKey('');
     setTimeout(() => setSaved(false), 3000);
     loadSettings();
+  }
+
+  // M2-3：遥测开关即时保存（无需点"保存"按钮，切了立即生效）
+  async function handleToggleTelemetry(next: boolean) {
+    setTelemetryEnabled(next);
+    if (!window.biof3Desktop) return;
+    try {
+      await window.biof3Desktop.aiSettings.save({
+        ...settings,
+        telemetry_enabled: next,
+      });
+      // 同步本地 settings 缓存
+      setSettings((prev) => ({ ...prev, telemetry_enabled: next }));
+    } catch {
+      // 保存失败回滚 UI 状态
+      setTelemetryEnabled(!next);
+    }
   }
 
   async function handleTest(provider: string, key: string) {
@@ -417,6 +438,27 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         </div>
 
         <DataManagement />
+
+        {/* M2-3：可选错误遥测开关（默认关闭，用户主动开启） */}
+        <div className="biof3-field">
+          <label className="biof3-field__label">开启错误反馈</label>
+          <div className="biof3-toggle-row">
+            <input
+              type="checkbox"
+              id="biof3-telemetry-toggle"
+              className="biof3-toggle"
+              checked={telemetryEnabled}
+              onChange={(e) => handleToggleTelemetry(e.target.checked)}
+            />
+            <label htmlFor="biof3-telemetry-toggle" className="biof3-toggle-label">
+              {telemetryEnabled ? '已开启' : '已关闭'}
+            </label>
+          </div>
+          <p className="biof3-field__hint">
+            开启后，分析出错时仅上报错误分类与应用版本（不含任何用户数据、文件路径或文件名），
+            用于改进工具稳定性。可随时关闭。
+          </p>
+        </div>
       </div>
 
       <div className="biof3-desktop-panel__footer">

@@ -446,6 +446,49 @@ html.biof3-desktop-dock-collapsed .biof3-desktop-workarea {
   flex: 1;
 }
 
+/* ---- M2-3 遥测开关 ---- */
+.biof3-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.biof3-toggle {
+  appearance: none;
+  width: 38px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--ifm-color-emphasis-300, #cbd5e1);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+  margin: 0;
+}
+.biof3-toggle:checked {
+  background: var(--ifm-color-primary, #10b981);
+}
+.biof3-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s ease;
+}
+.biof3-toggle:checked::after {
+  transform: translateX(16px);
+}
+.biof3-toggle-label {
+  font-size: 0.82rem;
+  color: var(--ifm-color-content-secondary, #64748b);
+  cursor: pointer;
+  user-select: none;
+}
+
 .biof3-badge {
   display: inline-flex;
   align-items: center;

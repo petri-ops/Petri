@@ -252,25 +252,62 @@ function startRServer() {
   console.log('[desktop] r-server spawned (pid=' + rServerProc.pid + ') on :3001');
 }
 
-// ── 启动 py-server（子进程 spawn）──────────────────────────────
+// ── 启动 py-server（子进程 spawn，按需启停）──────────────────
+// M2-7：py-server 改为 lazy——仅在用 Python 工具时通过 IPC py:start 启动，
+// 5 分钟无调用自动 stop，释放内存（idle 超时）。
 let pyServerProc = null;
-function startPyServer() {
+let pyIdleTimer = null;
+const PY_IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5 分钟无调用自动停
+
+function _clearPyIdleTimer() {
+  if (pyIdleTimer) {
+    clearTimeout(pyIdleTimer);
+    pyIdleTimer = null;
+  }
+}
+
+function _resetPyIdleTimer() {
+  _clearPyIdleTimer();
+  pyIdleTimer = setTimeout(() => {
+    console.log('[desktop] py-server idle timeout (5min), stopping');
+    stopPyServer('idle-timeout');
+  }, PY_IDLE_TIMEOUT_MS);
+}
+
+/**
+ * 启动 py-server（若已运行则不重复 spawn）。
+ * @param {string} reason - 调用来源（'ipc' / 'manual' 等，仅日志）
+ * @returns {{ ok: boolean, alreadyRunning?: boolean, error?: string, pid?: number }}
+ */
+function startPyServer(reason = 'ipc') {
+  // 已在运行 — 重置 idle 计时并返回
+  if (pyServerProc && !pyServerProc.killed) {
+    _resetPyIdleTimer();
+    return { ok: true, alreadyRunning: true, pid: pyServerProc.pid };
+  }
+
   // Runtime 未安装时跳过启动（不崩溃，前端会提示安装）
   if (!process.env.BIOF3_PY_HOME || !fs.existsSync(process.env.BIOF3_PY_HOME)) {
     console.warn('[desktop] py-server skipped — Python runtime not installed');
-    return;
+    return { ok: false, error: 'Python runtime not installed' };
   }
 
   const pyServerPath = resolveResource('py-server', 'server.js');
   if (!fs.existsSync(pyServerPath)) {
     console.error('[desktop] py-server not found:', pyServerPath);
-    return;
+    return { ok: false, error: 'py-server script not found' };
   }
 
-  pyServerProc = spawn(NODE_BIN, [pyServerPath], {
-    env: { ...process.env },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
+  try {
+    pyServerProc = spawn(NODE_BIN, [pyServerPath], {
+      env: { ...process.env },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+  } catch (e) {
+    console.error('[desktop] py-server spawn failed:', e.message);
+    pyServerProc = null;
+    return { ok: false, error: e.message };
+  }
 
   _createLogStream('py-server');
   pyServerProc.stdout.on('data', (d) => {
@@ -290,37 +327,127 @@ function startPyServer() {
   pyServerProc.on('exit', (code) => {
     console.log(`[desktop] py-server exited: ${code}`);
     pyServerProc = null;
+    _clearPyIdleTimer();
   });
 
-  console.log('[desktop] py-server spawned (pid=' + pyServerProc.pid + ') on :3004');
+  _resetPyIdleTimer();
+  console.log(`[desktop] py-server spawned (pid=${pyServerProc.pid}) on :3004 — reason=${reason}`);
+  return { ok: true, pid: pyServerProc.pid };
 }
 
-// ── 启动 R plumber replot 服务（spawn 子进程）──────────────────
-let plumberProc = null;
-function startPlumber() {
-  const rBin = path.join(process.env.BIOF3_R_HOME, 'bin', 'Rscript');
+/**
+ * 停止 py-server（kill 子进程，清 idle 计时）。
+ * @param {string} reason - 调用来源（'ipc' / 'idle-timeout' / 'shutdown' 等）
+ * @returns {{ ok: boolean, wasRunning?: boolean }}
+ */
+function stopPyServer(reason = 'ipc') {
+  _clearPyIdleTimer();
+  if (!pyServerProc || pyServerProc.killed) {
+    pyServerProc = null;
+    return { ok: true, wasRunning: false };
+  }
+  try {
+    pyServerProc.kill();
+    console.log(`[desktop] py-server stopped — reason=${reason}`);
+  } catch (e) {
+    console.error('[desktop] py-server stop failed:', e.message);
+  }
+  // 注意：exit handler 会把 pyServerProc 置 null，这里不重复清
+  return { ok: true, wasRunning: true };
+}
 
+// ── 启动 R plumber replot 服务（按需启停）──────────────────────
+// M2-7：plumber 改为 lazy——仅在 figcode 重绘时通过 IPC plumber:start 启动。
+let plumberProc = null;
+let plumberIdleTimer = null;
+const PLUMBER_IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5 分钟无调用自动停
+
+function _clearPlumberIdleTimer() {
+  if (plumberIdleTimer) {
+    clearTimeout(plumberIdleTimer);
+    plumberIdleTimer = null;
+  }
+}
+
+function _resetPlumberIdleTimer() {
+  _clearPlumberIdleTimer();
+  plumberIdleTimer = setTimeout(() => {
+    console.log('[desktop] plumber idle timeout (5min), stopping');
+    stopPlumber('idle-timeout');
+  }, PLUMBER_IDLE_TIMEOUT_MS);
+}
+
+/**
+ * 启动 plumber（若已运行则不重复 spawn）。
+ * @param {string} reason - 调用来源（仅日志）
+ * @returns {{ ok: boolean, alreadyRunning?: boolean, error?: string, pid?: number }}
+ */
+function startPlumber(reason = 'ipc') {
+  if (plumberProc && !plumberProc.killed) {
+    _resetPlumberIdleTimer();
+    return { ok: true, alreadyRunning: true, pid: plumberProc.pid };
+  }
+
+  if (!process.env.BIOF3_R_HOME || !fs.existsSync(process.env.BIOF3_R_HOME)) {
+    console.warn('[desktop] plumber skipped — R runtime not installed');
+    return { ok: false, error: 'R runtime not installed' };
+  }
+
+  const rBin = path.join(process.env.BIOF3_R_HOME, 'bin', 'Rscript');
   if (!fs.existsSync(rBin)) {
     console.warn('[desktop] Rscript not found, plumber skipped:', rBin);
-    return;
+    return { ok: false, error: 'Rscript not found' };
   }
 
   // plumber 脚本路径（r-server 里有 replot 服务脚本）
   const plumberScript = resolveResource('r-server', 'replot.R');
   if (!fs.existsSync(plumberScript)) {
     console.warn('[desktop] plumber script not found, replot disabled');
-    return;
+    return { ok: false, error: 'plumber script not found' };
   }
 
-  plumberProc = spawn(rBin, [plumberScript, '--port', '8787'], {
-    env: { ...process.env, R_HOME: process.env.BIOF3_R_HOME },
-    stdio: 'pipe',
-  });
+  try {
+    plumberProc = spawn(rBin, [plumberScript, '--port', '8787'], {
+      env: { ...process.env, R_HOME: process.env.BIOF3_R_HOME },
+      stdio: 'pipe',
+    });
+  } catch (e) {
+    console.error('[desktop] plumber spawn failed:', e.message);
+    plumberProc = null;
+    return { ok: false, error: e.message };
+  }
+
   plumberProc.stdout.on('data', (d) => console.log('[plumber]', d.toString().trim()));
   plumberProc.stderr.on('data', (d) => console.error('[plumber]', d.toString().trim()));
-  plumberProc.on('exit', (code) => console.log('[desktop] plumber exited:', code));
+  plumberProc.on('exit', (code) => {
+    console.log(`[desktop] plumber exited: ${code}`);
+    plumberProc = null;
+    _clearPlumberIdleTimer();
+  });
 
-  console.log('[desktop] plumber started on :8787');
+  _resetPlumberIdleTimer();
+  console.log(`[desktop] plumber started on :8787 — reason=${reason}`);
+  return { ok: true, pid: plumberProc.pid };
+}
+
+/**
+ * 停止 plumber。
+ * @param {string} reason - 调用来源
+ * @returns {{ ok: boolean, wasRunning?: boolean }}
+ */
+function stopPlumber(reason = 'ipc') {
+  _clearPlumberIdleTimer();
+  if (!plumberProc || plumberProc.killed) {
+    plumberProc = null;
+    return { ok: true, wasRunning: false };
+  }
+  try {
+    plumberProc.kill();
+    console.log(`[desktop] plumber stopped — reason=${reason}`);
+  } catch (e) {
+    console.error('[desktop] plumber stop failed:', e.message);
+  }
+  return { ok: true, wasRunning: true };
 }
 
 // ── 加载已安装插件 ─────────────────────────────────────────────
@@ -500,6 +627,20 @@ function setupAiSettingsIpc() {
   });
 }
 
+// ── IPC：M2-3 可选错误遥测（V3）─────────────────────────────────
+// 默认关闭；用户在设置页主动开启后才会上报。payload 仅含 category/version/摘要。
+function setupTelemetryIpc() {
+  ipcMain.handle('telemetry:report', async (_event, payload) => {
+    try {
+      const { reportError } = require('./telemetry');
+      return await reportError(payload);
+    } catch (e) {
+      // 遥测自身异常绝不能影响业务——静默
+      return { ok: false, reason: 'internal' };
+    }
+  });
+}
+
 // ── IPC：插件管理 ──────────────────────────────────────────────
 function setupPluginIpc() {
   ipcMain.handle('plugin:list-installed', async () => {
@@ -606,6 +747,43 @@ function setupRuntimeIpc() {
       });
     } catch (e) {
       return { isReady: false, downReason: '状态查询失败: ' + e.message };
+    }
+  });
+}
+
+// ── IPC：M2-7 按需启停 py-server / plumber ──────────────────────
+// 前端在用 Python 工具前调 biof3Desktop.py.start()，用完调 .stop()；
+// plumber 在 figcode 重绘前调 .start()。未调用时 5min idle 自动 stop。
+function setupBackendLifecycleIpc() {
+  ipcMain.handle('py:start', async () => {
+    try {
+      return startPyServer('ipc');
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle('py:stop', async () => {
+    try {
+      return stopPyServer('ipc');
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle('plumber:start', async () => {
+    try {
+      return startPlumber('ipc');
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle('plumber:stop', async () => {
+    try {
+      return stopPlumber('ipc');
+    } catch (e) {
+      return { ok: false, error: e.message };
     }
   });
 }
@@ -995,27 +1173,33 @@ function setupFileDialogIpc() {
   });
 }
 
-// ── IPC：诊断日志导出 ─────────────────────────────────────────
+// ── IPC：诊断日志导出 / 数据备份（M2-8）─────────────────────────
 function setupDiagnosticIpc() {
-  // 导出诊断包：收集 r-server/py-server/main 日志 + 系统信息，打包成 zip
+  // 导出包：收集 r-server/py-server/main 日志 + 系统信息 + 整个数据目录
+  // （db + results + uploads），打包成 zip 供用户备份。
   ipcMain.handle('diagnostic:export', async (event, targetPath) => {
     try {
       const logDir = _getLogDir();
       const { createWriteStream } = fs;
       const zlib = require('zlib');
 
-      // 如果用户没指定路径，弹保存对话框
+      // M2-8 备份/导出闭环：默认保存对话框提示用户选导出路径
       let outPath = targetPath;
       if (!outPath && mainWindow) {
         const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
         const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
-          defaultPath: `biof3-diagnostic-${ts}.zip`,
+          title: '导出我的数据',
+          defaultPath: `biof3-backup-${ts}.zip`,
           filters: [{ name: 'ZIP', extensions: ['zip'] }],
         });
         if (canceled) return { ok: false, error: 'cancelled' };
         outPath = filePath;
       }
       if (!outPath) return { ok: false, error: 'no output path' };
+
+      // M2-8：数据目录（db + results + uploads）
+      const dataDir =
+        process.env.BIOF3_LOCAL_DATA_DIR || path.join(app.getPath('documents'), 'BioF3-Local');
 
       // 先 flush 日志流
       for (const s of Object.values(_logStreams)) {
@@ -1065,6 +1249,24 @@ function setupDiagnosticIpc() {
           });
         } catch {}
 
+        // M2-8 备份/导出闭环：打包整个数据目录（db + results + uploads）
+        // 跳过 tmp 目录避免打包临时文件
+        if (fs.existsSync(dataDir)) {
+          try {
+            for (const entry of fs.readdirSync(dataDir, { withFileTypes: true })) {
+              if (entry.name === 'tmp') continue; // 临时目录不打包
+              const full = path.join(dataDir, entry.name);
+              if (entry.isDirectory()) {
+                archive.directory(full, entry.name);
+              } else if (entry.isFile()) {
+                archive.file(full, { name: entry.name });
+              }
+            }
+          } catch (e) {
+            console.warn('[diagnostic] add data dir failed:', e.message);
+          }
+        }
+
         await archive.finalize();
         usedArchiver = true;
       } catch {
@@ -1091,6 +1293,8 @@ function setupDiagnosticIpc() {
           lines.push('\n=== installed-plugins.json ===');
           lines.push(JSON.stringify(getInstalledPlugins(), null, 2));
         } catch {}
+        lines.push('\n=== data-dir note ===');
+        lines.push(`数据目录位于 ${dataDir}（archiver 不可用，未打包；请手动复制该目录进行备份）`);
         fs.writeFileSync(outPath, lines.join('\n'));
       }
 
@@ -1197,9 +1401,10 @@ async function main() {
   }
 
   // 1. 启动后端服务
+  // M2-7：r-server 是硬底座常驻；py-server / plumber 改为 lazy 按需启停
+  // （通过 IPC py:start / plumber:start 触发，5min idle 自动 stop）
   await startRServer();
-  await startPyServer();
-  startPlumber();
+  // startPyServer / startPlumber 不在启动时调用 — 由前端按需触发
 
   // 2. 加载已安装插件
   await loadInstalledPlugins();
@@ -1211,11 +1416,13 @@ async function main() {
   setupAiSettingsIpc();
   setupPluginIpc();
   setupRuntimeIpc();
+  setupBackendLifecycleIpc();
   setupFileDialogIpc();
   setupAutoUpdateIpc();
   setupDiagnosticIpc();
   setupFigcodeIpc();
   setupDataManagementIpc();
+  setupTelemetryIpc();
 
   // 5. 创建窗口
   // M1-2：CSP 加固——禁用 unsafe-eval，限制资源来源到 self + localhost（后端/SSE/dev server）
@@ -1228,7 +1435,9 @@ async function main() {
 app.whenReady().then(main);
 
 app.on('window-all-closed', () => {
-  // 清理所有子进程
+  // 清理 idle 计时 + 所有子进程（M2-7：py/plumber 按需起的也要 stop）
+  _clearPyIdleTimer();
+  _clearPlumberIdleTimer();
   for (const proc of [rServerProc, pyServerProc, plumberProc]) {
     if (proc) {
       try {
