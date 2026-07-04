@@ -146,3 +146,41 @@ test('callTool 跑通 volcano-plot 出 PNG（live）', { skip: !RUN_LIVE }, asyn
     globalThis._biof3Plugins = new Map();
   }
 });
+
+// 真实跑已装的 deseq2（需本地 R + DESeq2 + deseq2 插件已装）。
+// 验证 file-input 复制到 jobDir 约定 + output/ 子目录 manifest 读取。
+test('callTool 跑通 deseq2 全流程出图（live）', { skip: !RUN_LIVE }, async () => {
+  const os = await import('node:os');
+  const demoDir = path.join(os.homedir(), 'Documents', 'BioF3-Local', 'plugins', 'deseq2', 'demo-data');
+  const fs2 = await import('node:fs');
+  const hasDemo = fs2.existsSync(path.join(demoDir, 'demo-counts.csv'));
+  if (!hasDemo) {
+    console.log('跳过：deseq2 demo 数据不存在');
+    return;
+  }
+  // 用真实已装的 deseq2 插件（loadPluginsFromDisk 已注册到 globalThis）
+  globalThis._biof3Plugins = new Map();
+  const pluginLoaderFresh = await import(R_SERVER + '/plugin-loader.js');
+  pluginLoaderFresh.loadPluginsFromDisk();
+  try {
+    const result = await callTool('deseq2', {
+      counts: path.join(demoDir, 'demo-counts.csv'),
+      coldata: path.join(demoDir, 'demo-coldata.csv'),
+      design: 'condition',
+      contrast_ref: 'Control',
+      contrast_treat: 'Treatment',
+    });
+    assert.equal(result.isError, false, `应成功，实际: ${result.content[0].text.slice(0, 500)}`);
+    const summary = JSON.parse(result.content[0].text);
+    assert.ok(summary.outputDir, '应返回 outputDir');
+    // deseq2 manifest 用 files[] 格式（name 字段）
+    const outputs = summary.outputs || [];
+    const volcano = outputs.find((o) => (o.name || o.id) === 'volcano' || (o.filename || o.name) === 'volcano.png');
+    assert.ok(volcano, '应含 volcano 图');
+    assert.ok(fs2.existsSync(volcano.path), `volcano PNG 应存在: ${volcano.path}`);
+    // manifest.summary 应有差异基因计数
+    assert.ok(summary.manifest?.summary?.sig_genes >= 0, 'manifest.summary.sig_genes 应存在');
+  } finally {
+    globalThis._biof3Plugins = new Map();
+  }
+});

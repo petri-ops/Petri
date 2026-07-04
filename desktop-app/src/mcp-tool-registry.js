@@ -94,10 +94,45 @@ function _runPluginScript(plugin, scriptPath, args) {
     // 1. 写 params.json（脚本从 args[1]=jobDir 读它）
     fs.writeFileSync(path.join(jobDir, 'params.json'), JSON.stringify(args || {}));
 
+    // 1b. file 类型输入：复制文件到 jobDir/<input_id>。
+    // BioF3 工具脚本有两种读文件约定：
+    //   (a) volcano-plot: 从 params$deg_table 读绝对路径
+    //   (b) deseq2: list.files(job_dir, pattern="^counts") 在 jobDir 找文件
+    // 为兼容两者，file input 既保留在 params（路径），又复制到 jobDir/<id>。
+    // 复刻 tools-executor.js:572-578 的 files 写入约定（文件名 = input id）。
+    const toolDef = pluginLoader.getToolDefinition(plugin.id);
+    if (toolDef && Array.isArray(toolDef.inputs)) {
+      for (const inp of toolDef.inputs) {
+        if (inp.type !== 'file' || !inp.id) continue;
+        const srcPath = args && args[inp.id];
+        if (typeof srcPath !== 'string' || !fs.existsSync(srcPath)) continue;
+        const ext = path.extname(srcPath);
+        // 文件名 = input id（+ 原扩展名），deseq2 的 list.files("^counts") 才能命中
+        fs.copyFileSync(srcPath, path.join(jobDir, inp.id + ext));
+      }
+    }
+
     // 2. 复制脚本到 jobDir（run-script.R），避免污染插件原脚本目录
     const scriptExt = plugin.language === 'r' ? '.R' : '.py';
     const runScript = path.join(jobDir, 'run-script' + scriptExt);
     fs.copyFileSync(scriptPath, runScript);
+
+    // 2b. R 工具：复制 _biof3-theme.R 到 jobDir（脚本顶部 source 它）。
+    // 复刻 tools-executor.js:361-374：插件脚本目录优先（build-plugin.sh 已复制），
+    // 其次 r-server/tool-scripts/。漏这步会导致 source("_biof3-theme.R") 找不到文件。
+    if (plugin.language === 'r') {
+      const helperSearchDirs = [
+        path.dirname(scriptPath), // 插件 scripts/ 目录
+        path.join(R_SERVER, 'tool-scripts'), // 内置工具脚本目录
+      ];
+      for (const dir of helperSearchDirs) {
+        const src = path.join(dir, '_biof3-theme.R');
+        if (fs.existsSync(src)) {
+          fs.copyFileSync(src, path.join(jobDir, '_biof3-theme.R'));
+          break;
+        }
+      }
+    }
 
     // 3. 构造执行命令（local 模式）
     const { getExecutor } = require(path.join(SHARED_BACKEND, 'executors'));
@@ -141,24 +176,39 @@ function _runPluginScript(plugin, scriptPath, args) {
             _jobDir: jobDir,
           });
         }
-        // 5. 读 manifest.json + 列输出文件
-        const manifestPath = path.join(jobDir, 'manifest.json');
+        // 5. 读 manifest.json + 列输出文件。
+        // 产物位置有两种约定：(a) output/ 子目录（deseq2，tools-executor 标准）
+        // (b) jobDir 根（volcano-plot 等独立插件脚本，setwd(jobDir) 后直接写）。
+        // 先查 output/，再查 jobDir 根。
+        let manifestPath = path.join(outputDir, 'manifest.json');
+        let resultDir = outputDir;
+        if (!fs.existsSync(manifestPath)) {
+          manifestPath = path.join(jobDir, 'manifest.json');
+          resultDir = jobDir;
+        }
         let manifest = null;
         try {
           if (fs.existsSync(manifestPath)) {
             manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
           }
         } catch {}
-        const outFiles = fs.existsSync(jobDir)
+        // manifest 有两种格式：(a) {outputs:[{id,filename,...}]} (b) {files:[{name,type,...}]}
+        const manifestItems = manifest?.outputs || manifest?.files || [];
+        const outFiles = fs.existsSync(resultDir)
           ? fs
-              .readdirSync(jobDir)
-              .filter((f) => !['params.json', 'run-script.R', 'run-script.py'].includes(f))
+              .readdirSync(resultDir)
+              .filter(
+                (f) =>
+                  !['params.json', 'run-script.R', 'run-script.py', '_biof3-theme.R'].includes(f)
+              )
           : [];
         const summary = {
           jobDir,
-          outputs: (manifest?.outputs || []).map((o) => ({
+          outputDir,
+          resultDir,
+          outputs: manifestItems.map((o) => ({
             ...o,
-            path: path.join(jobDir, o.filename),
+            path: path.join(resultDir, o.filename || o.name || ''),
           })),
           files: outFiles,
           manifest: manifest,
