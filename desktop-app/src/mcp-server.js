@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * desktop-app/src/mcp-server.js — BioF3 桌面版 MCP stdio server
  *

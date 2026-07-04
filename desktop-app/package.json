@@ -6,11 +6,15 @@
   "author": "BioF3",
   "license": "MIT",
   "main": "src/main.js",
+  "bin": {
+    "biof3-mcp": "src/mcp-server.js"
+  },
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
     "prebuild": "node --check src/main.js && node --check src/preload.js",
     "test": "node --test test/",
+    "mcp:server": "node src/mcp-server.js",
     "build:site": "cd .. && npm run build:desktop",
     "build:spa": "cd frontend && npm run build",
     "build:all": "npm run build:spa && npm run build:site",
