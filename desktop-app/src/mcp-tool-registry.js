@@ -50,6 +50,15 @@ try {
   console.warn('[mcp-registry] initSharedBackend failed:', e.message);
 }
 
+// 启动时自动加载用户已装插件（~/Documents/BioF3-Local/plugins/）。
+// mcp-server 子进程与 Electron 主进程不共享 globalThis，必须自己 load。
+// 失败不致命（无 installed.json = 没装过插件，正常），listTools 仍返回 10 个单细胞步骤。
+try {
+  pluginLoader.loadPluginsFromDisk();
+} catch (e) {
+  console.warn('[mcp-registry] loadPluginsFromDisk failed:', e.message);
+}
+
 // MCP 工具 jobDir 根（local 模式，复用 tools.js 的 JOBS_DIR 约定）
 const MCP_JOBS_DIR = path.join(
   config.localResultsDir || path.join(os.homedir(), 'Documents', 'BioF3-Local', 'results'),
