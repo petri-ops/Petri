@@ -15,6 +15,7 @@ import { Icon } from '@/components/icons/Icon';
 import { tools, toolCategories } from '@/pages/_data';
 import type { Tool } from '@/pages/_data';
 import { TOOL_IMAGES } from '@/pages/_tool-images';
+import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
 import styles from './_desktop-dashboard.module.css';
 
 interface Job {
@@ -67,7 +68,11 @@ function statusClass(s: string): string {
 export function DesktopDashboard(): React.ReactElement {
   const [recentJobs, setRecentJobs] = useState<Job[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
+  const [dataDir, setDataDir] = useState<string>('');
+  const [hasUpdate, setHasUpdate] = useState(false);
+  const [updateVersion, setUpdateVersion] = useState('');
   const user = getStoredUser();
+  const backendStatus = useBackendStatus();
 
   const fetchRecentJobs = useCallback(async () => {
     if (!isLoggedIn()) {
@@ -91,6 +96,33 @@ export function DesktopDashboard(): React.ReactElement {
     }
   }, []);
 
+  // M2-1：拉数据目录信息
+  useEffect(() => {
+    (async () => {
+      try {
+        const info = await window.biof3Desktop?.data?.info();
+        if (info?.ok && info.dataDir) setDataDir(info.dataDir);
+      } catch {
+        // ignore
+      }
+    })();
+  }, []);
+
+  // M2-1：启动时检查更新
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await window.biof3Desktop?.updater?.check();
+        if (r?.ok && r.hasUpdate) {
+          setHasUpdate(true);
+          setUpdateVersion(r.info?.version || r.version || '');
+        }
+      } catch {
+        // ignore
+      }
+    })();
+  }, []);
+
   useEffect(() => {
     fetchRecentJobs();
     const id = setInterval(fetchRecentJobs, 30_000);
@@ -98,6 +130,14 @@ export function DesktopDashboard(): React.ReactElement {
   }, [fetchRecentJobs]);
 
   const quickToolList = tools.filter((t) => QUICK_TOOLS.includes(t.id));
+
+  // M2-1：就绪灯颜色
+  const readyColor = backendStatus.isReady
+    ? '#16a34a'
+    : backendStatus.downReason
+      ? '#dc2626'
+      : '#f59e0b';
+  const readyLabel = backendStatus.isReady ? '后端就绪' : backendStatus.downReason || '检测中…';
 
   return (
     <div className={styles.dashboard}>
@@ -107,6 +147,80 @@ export function DesktopDashboard(): React.ReactElement {
           <p className={styles.subtitle}>继续上次的分析，或探索新的工具</p>
         </div>
         <div className={styles.headerSearch}>
+          {/* M2-1：顶栏状态条——就绪灯 / 数据目录 / 更新红点 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginRight: '12px' }}>
+            <span
+              title={readyLabel}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '12px',
+                color: 'var(--biof3-text-muted, #5c6b64)',
+              }}
+            >
+              <span
+                style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: readyColor,
+                  display: 'inline-block',
+                  boxShadow: `0 0 6px ${readyColor}`,
+                }}
+              />
+              {readyLabel}
+            </span>
+            {dataDir && (
+              <button
+                type="button"
+                onClick={() => window.biof3Desktop?.data?.openDir()}
+                title={dataDir}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '12px',
+                  color: 'var(--biof3-text-muted, #5c6b64)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                  maxWidth: '160px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                📁 {dataDir.split('/').pop()}
+              </button>
+            )}
+            {hasUpdate && (
+              <Link
+                to="/admin"
+                title={`有新版本 ${updateVersion}，点击查看`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '12px',
+                  color: '#dc2626',
+                  fontWeight: 600,
+                }}
+              >
+                <span
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: '#dc2626',
+                    display: 'inline-block',
+                  }}
+                />
+                有更新
+              </Link>
+            )}
+          </div>
           <button
             className={styles.searchBtn}
             onClick={() => window.dispatchEvent(new CustomEvent('biof3:open-search'))}
@@ -192,6 +306,34 @@ export function DesktopDashboard(): React.ReactElement {
           </div>
         )}
       </section>
+
+      {/* M2-1：未装运行时引导 */}
+      {!backendStatus.rRuntime && (
+        <section className={styles.section}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '16px',
+              background: 'var(--biof3-surface-warn, #fef3c7)',
+              borderRadius: '10px',
+              border: '1px solid #f59e0b',
+            }}
+          >
+            <span style={{ fontSize: '20px' }}>⚠️</span>
+            <div style={{ flex: 1 }}>
+              <strong style={{ display: 'block', marginBottom: '4px' }}>R 运行时未安装</strong>
+              <span style={{ fontSize: '13px', color: 'var(--biof3-text-muted, #5c6b64)' }}>
+                分析工具需要 R 运行时，去插件商店安装后即可开始
+              </span>
+            </div>
+            <Link className={styles.emptyCta} to="/admin" style={{ flexShrink: 0 }}>
+              去插件商店 →
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* 推荐教程 */}
       <section className={styles.section}>
