@@ -6,6 +6,7 @@
 import { errMsg } from '@/lib/error';
 import React, { useEffect, useState } from 'react';
 import { getApiPrefix } from './copilotClient';
+import type { ActExecution } from './copilotTypes';
 
 function getAuthHeader(): Record<string, string> {
   if (typeof window === 'undefined') return {};
@@ -25,15 +26,6 @@ const ACT_LABELS: Record<string, string> = {
   rename_analysis: '✏ 已重命名分析',
   update_analysis_params: '🔧 已更新参数',
 };
-
-export interface ActExecution {
-  actType: string;
-  message?: string;
-  undoToken?: string;
-  undoableUntil?: number;
-  error?: string;
-  analysisId?: string;
-}
 
 export function ActResultCard({ act }: { act: ActExecution }) {
   const [secondsLeft, setSecondsLeft] = useState<number>(() => {
