@@ -268,6 +268,7 @@ function _runPluginScript(plugin, scriptPath, args, userId = 'agent') {
               )
           : [];
         const summary = {
+          toolJobId,
           jobDir,
           outputDir,
           resultDir,
