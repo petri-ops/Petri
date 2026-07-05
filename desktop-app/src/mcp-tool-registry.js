@@ -59,6 +59,27 @@ try {
   console.warn('[mcp-registry] loadPluginsFromDisk failed:', e.message);
 }
 
+// 自动发现 built-in 插件（resources/built-in-plugins/），不依赖 install。
+// 让外部 agent 即使没装任何插件也能看到/调用 built-in 工具（volcano-plot 等）。
+// 已装版本优先（loadBuiltInPlugins 内部去重）。
+function resolveBuiltInPluginsDir() {
+  // dev 模式：desktop-app/src/ → desktop-app/resources/built-in-plugins/
+  const devPath = path.resolve(__dirname, '..', 'resources', 'built-in-plugins');
+  if (fs.existsSync(devPath)) return devPath;
+  // 打包模式：app bundle 的 Resources/built-in-plugins/
+  if (process.resourcesPath) {
+    const pkgPath = path.join(process.resourcesPath, 'built-in-plugins');
+    if (fs.existsSync(pkgPath)) return pkgPath;
+  }
+  return null;
+}
+try {
+  const builtInDir = resolveBuiltInPluginsDir();
+  if (builtInDir) pluginLoader.loadBuiltInPlugins(builtInDir);
+} catch (e) {
+  console.warn('[mcp-registry] loadBuiltInPlugins failed:', e.message);
+}
+
 // MCP 工具 jobDir 根（local 模式，复用 tools.js 的 JOBS_DIR 约定）
 const MCP_JOBS_DIR = path.join(
   config.localResultsDir || path.join(os.homedir(), 'Documents', 'BioF3-Local', 'results'),

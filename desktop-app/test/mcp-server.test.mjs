@@ -37,10 +37,10 @@ test('MCP server tools/call 对未注册工具返回 isError', async () => {
   const client = new Client({ name: 'biof3-mcp-test', version: '1.0.0' });
   await client.connect(transport);
   try {
-    // mcp-server 子进程未注册任何插件，volcano-plot 走 unknown_tool 分支
-    const result = await client.callTool({ name: 'volcano-plot', arguments: {} });
+    // 用绝对不存在的工具名，走 unknown_tool 分支
+    const result = await client.callTool({ name: 'nonexistent_tool_xyz', arguments: {} });
     assert.equal(result.isError, true);
-    assert.match(result.content[0].text, /unknown_tool|未找到|脚本未找到/i);
+    assert.match(result.content[0].text, /unknown_tool/i);
   } finally {
     await client.close();
   }
