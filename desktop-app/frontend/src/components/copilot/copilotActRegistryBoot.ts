@@ -25,6 +25,7 @@
 
 import { errMsg } from '@/lib/error';
 import { registerCopilotAct, uploadActRegistry } from './copilotActRegistry';
+import { setCopilotContext } from './copilotContext';
 
 // ============================================================
 // Built-in / demo handlers
@@ -218,15 +219,17 @@ registerCopilotAct({
 });
 
 /**
- * open_result — agent-led Task 3：run_tool 跑完后把结果展示给用户。
+ * open_result — agent-led Task 3/2：run_tool 跑完后把结果展示给用户。
  * 收 toolJobId（bulk 工具，run_tool 返回）或 analysisId（单细胞，start_analysis 返回）。
- * bulk 工具：导航到 /tools，触发 tools 页按 jobId 加载结果（复用 loadJobResult）。
+ * bulk 工具（阶段2 Task2 改造）：不再 window.location.href 跳 /tools，改为把 toolJobId
+ *   推到 copilotContext.activeResultJobId，Copilot 内嵌结果面板订阅后 fetch status 渲染。
+ *   用户不离会话即可看图。tools 页若正好开着，仍 dispatch 事件让它同步高亮该 job。
  * 单细胞：复用现有 open_replot 通道（analysisId）。
  */
 registerCopilotAct({
   id: 'open_result',
   description:
-    '把分析结果展示给用户。run_tool 跑完出图后调用，payload 传 toolJobId（bulk 工具）。agent 跑完工具后用这个把结果推到主面板，用户不用自己点。',
+    '把分析结果展示给用户。run_tool 跑完出图后调用，payload 传 toolJobId（bulk 工具）。agent 跑完工具后用这个把结果推到 Copilot 面板，用户不用自己点。',
   pages: '*',
   payloadSchema: {
     toolJobId: {
@@ -248,17 +251,12 @@ registerCopilotAct({
         window.dispatchEvent(new CustomEvent('biof3:sc-open-replot', { detail: { analysisId } }));
         return { ok: true, channel: 'analysis' };
       }
-      // bulk 工具分支：导航到 /tools + 触发按 jobId 加载结果
+      // bulk 工具分支：推到 copilotContext，Copilot 内嵌面板订阅渲染（不跳页）
       if (!toolJobId) return { error: 'missing toolJobId or analysisId' };
-      const onToolsPage = window.location.pathname.startsWith('/tools');
-      if (onToolsPage) {
+      setCopilotContext({ activeResultJobId: String(toolJobId) });
+      // tools 页若开着，同步触发它的高亮/加载（兼容老通道）
+      if (window.location.pathname.startsWith('/tools')) {
         window.dispatchEvent(new CustomEvent('biof3:tools-open-result', { detail: { toolJobId } }));
-      } else {
-        // 跨页：stash jobId，tools 页 mount 后消费
-        try {
-          sessionStorage.setItem('biof3_pending_tool_result', String(toolJobId));
-        } catch {}
-        window.location.href = '/tools#result=' + encodeURIComponent(String(toolJobId));
       }
       return { ok: true, channel: 'tool_job' };
     } catch (e: unknown) {

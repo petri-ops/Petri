@@ -45,6 +45,7 @@ import { MemoryPanel } from './MemoryPanel';
 import { invokeCopilotAct } from './copilotActRegistry';
 import { listPlans } from './copilotPlansClient';
 import PlanInlineCard from './PlanInlineCard';
+import { CopilotResultPanel } from './CopilotResultPanel';
 import { Icon } from '@site/src/components/icons/Icon';
 
 // Extracted types and helpers
@@ -1785,6 +1786,8 @@ export function CopilotChat(): React.ReactElement | null {
 
       {!showSummary && !showTrace && (
         <div className="cp-messages" ref={listRef}>
+          {/* agent-led 阶段2 Task2：内嵌结果面板，agent run_tool 跑完自动展示图 */}
+          <CopilotResultPanel />
           {/* PLAN_INLINE_v1 — sticky plan card at top of message list */}
           <PlanInlineCard
             planId={activePlanId}
