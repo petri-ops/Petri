@@ -49,6 +49,13 @@ try {
 } catch (e) {
   console.warn('[mcp-registry] db.js require failed, tool_jobs 记录不可用:', e.message);
 }
+// helpers/plans.js：tool_jobs 状态变化同步 plan step（agent-led Task 2）
+let plans = null;
+try {
+  plans = require(path.join(R_SERVER, 'helpers', 'plans.js'));
+} catch (e) {
+  console.warn('[mcp-registry] plans.js require failed, plan step 同步不可用:', e.message);
+}
 
 // 注册 R/Python 执行器（plugin-manager 同款，主进程子进程都要自己 init）
 try {
@@ -219,6 +226,8 @@ function _runPluginScript(plugin, scriptPath, args) {
                 error: errText,
                 completedAt: Date.now(),
               });
+              // 同步 plan step 状态（方案 C，agent-led Task 2）
+              if (plans) plans.syncPlanStepStatusFromToolJob(toolJobId, 'failed', errText);
             } catch (e) {
               console.warn('[mcp-registry] updateToolJob(failed) failed:', e.message);
             }
@@ -276,6 +285,8 @@ function _runPluginScript(plugin, scriptPath, args) {
               resultJson: summary,
               completedAt: Date.now(),
             });
+            // 同步 plan step 状态（方案 C，agent-led Task 2）
+            if (plans) plans.syncPlanStepStatusFromToolJob(toolJobId, 'completed');
           } catch (e) {
             console.warn('[mcp-registry] updateToolJob(completed) failed:', e.message);
           }

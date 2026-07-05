@@ -5,15 +5,17 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve, join } from 'node:path';
+import { createRequire } from 'node:module';
 import fs from 'node:fs';
 import os from 'node:os';
 
 const path = { join };
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const R_SERVER = resolve(__dirname, '..', '..', 'r-server');
+const req = createRequire(import.meta.url);
 
-// db.js 默认走 SQLite（无 DATABASE_URL），桌面版同款，无需 PG
-const db = await import(R_SERVER + '/db.js');
+// db.js 是 CJS，用 createRequire 拿到 module.exports 的具名函数（await import 只能拿 default）
+const db = req(R_SERVER + '/db.js');
 const { callTool } = await import(resolve(__dirname, '..', 'src', 'mcp-tool-registry.js'));
 
 // === DB 层单测：createToolJob/updateToolJob/getToolJob（非 live，默认跑）===
@@ -85,4 +87,81 @@ test('callTool 跑通 volcano-plot 返回 toolJobId（live）', { skip: !RUN_LIV
   } finally {
     globalThis._biof3Plugins = new Map();
   }
+});
+
+// === plan step 关联 toolJobId 联动（非 live，默认跑）===
+
+test('syncPlanStepStatusFromToolJob 把绑定的 step 变 done', async () => {
+  const plans = req(R_SERVER + '/helpers/plans.js');
+  // 造 plan + 1 个 step（直接用 db.js 的 sqlite）
+  const sqlite = db.getSqliteForLegacyModules();
+  const planId = 'testplan_' + Date.now();
+  sqlite
+    .prepare(
+      'INSERT INTO copilot_plans (id, user_id, title, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
+    )
+    .run(planId, 'test-user', 'test plan', 'active', new Date().toISOString(), new Date().toISOString());
+  sqlite
+    .prepare(
+      'INSERT INTO copilot_plan_steps (plan_id, n, title, status, ts) VALUES (?, ?, ?, ?, ?)'
+    )
+    .run(planId, 1, '跑 volcano-plot', 'pending', new Date().toISOString());
+
+  // 造 tool_job，绑到 step
+  const job = db.createToolJob({ toolId: 'volcano-plot', status: 'running' });
+  sqlite
+    .prepare('UPDATE copilot_plan_steps SET tool_job_id=? WHERE plan_id=? AND n=?')
+    .run(job.id, planId, 1);
+
+  // tool_job 完成 → 同步 step
+  db.updateToolJob(job.id, { status: 'completed', resultJson: { ok: true }, completedAt: Date.now() });
+  plans.syncPlanStepStatusFromToolJob(job.id, 'completed');
+
+  // step 应变 done
+  const step = sqlite
+    .prepare('SELECT status, result FROM copilot_plan_steps WHERE plan_id=? AND n=?')
+    .get(planId, 1);
+  assert.equal(step.status, 'done', 'step 应被同步为 done');
+  assert.match(step.result, /任务完成/, 'step result 应为"任务完成"');
+
+  // 清理
+  sqlite.prepare('DELETE FROM copilot_plan_steps WHERE plan_id=?').run(planId);
+  sqlite.prepare('DELETE FROM copilot_plans WHERE id=?').run(planId);
+  sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(job.id);
+});
+
+test('syncPlanStepStatusFromToolJob failed 分支写错误信息', async () => {
+  const plans = req(R_SERVER + '/helpers/plans.js');
+  const sqlite = db.getSqliteForLegacyModules();
+  const planId = 'testplan2_' + Date.now();
+  sqlite
+    .prepare(
+      'INSERT INTO copilot_plans (id, user_id, title, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
+    )
+    .run(planId, 'test-user', 'test plan 2', 'active', new Date().toISOString(), new Date().toISOString());
+  sqlite
+    .prepare(
+      'INSERT INTO copilot_plan_steps (plan_id, n, title, status, ts) VALUES (?, ?, ?, ?, ?)'
+    )
+    .run(planId, 1, '跑 deseq2', 'running', new Date().toISOString());
+
+  const job = db.createToolJob({ toolId: 'deseq2', status: 'running' });
+  sqlite
+    .prepare('UPDATE copilot_plan_steps SET tool_job_id=? WHERE plan_id=? AND n=?')
+    .run(job.id, planId, 1);
+
+  const errText = 'DESeq2 包未安装';
+  db.updateToolJob(job.id, { status: 'failed', error: errText, completedAt: Date.now() });
+  plans.syncPlanStepStatusFromToolJob(job.id, 'failed', errText);
+
+  const step = sqlite
+    .prepare('SELECT status, result FROM copilot_plan_steps WHERE plan_id=? AND n=?')
+    .get(planId, 1);
+  assert.equal(step.status, 'failed', 'step 应被同步为 failed');
+  assert.match(step.result, /任务失败.*DESeq2 包未安装/, 'step result 应含错误信息');
+
+  // 清理
+  sqlite.prepare('DELETE FROM copilot_plan_steps WHERE plan_id=?').run(planId);
+  sqlite.prepare('DELETE FROM copilot_plans WHERE id=?').run(planId);
+  sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(job.id);
 });
