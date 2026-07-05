@@ -12,6 +12,7 @@ import {
   findResumableAgentTask,
   type ChatMessage,
   ackAct,
+  ackRunTool,
   getApiPrefix,
   isOfflineError,
 } from './copilotClient';
@@ -118,6 +119,12 @@ export function CopilotChat(): React.ReactElement | null {
   // PLAN_INLINE_v1 — track active plan id and bump key to refresh card
   const [activePlanId, setActivePlanId] = useState<string | null>(null);
   const [planRefreshKey, setPlanRefreshKey] = useState(0);
+  // TOOL_JOB_APPROVAL_v1（阶段2 Task3）：run_tool 重操作待确认
+  const [pendingApproval, setPendingApproval] = useState<{
+    ackToken: string;
+    toolJobId?: string;
+    message?: string;
+  } | null>(null);
   const [size, setSize] = useState<{ w: number; h: number }>(() => {
     if (typeof window === 'undefined') return { w: 420, h: 620 };
     try {
@@ -437,6 +444,14 @@ export function CopilotChat(): React.ReactElement | null {
             detail: e.summary || '',
             ts: Date.now(),
           });
+          // TOOL_JOB_APPROVAL_v1（阶段2 Task3）：run_tool 重操作需用户确认（recovery 路径）
+          if (e.name === 'run_tool' && e.needApproval && e.ackToken) {
+            setPendingApproval({
+              ackToken: e.ackToken,
+              toolJobId: e.toolJobId,
+              message: e.message,
+            });
+          }
         },
         onDelta: (d) => {
           acc += d;
@@ -862,6 +877,14 @@ export function CopilotChat(): React.ReactElement | null {
             }
             // Always bump refresh key so card re-fetches (covers update_step too)
             setPlanRefreshKey((k) => k + 1);
+          }
+          // TOOL_JOB_APPROVAL_v1（阶段2 Task3）：run_tool 重操作需用户确认
+          if (e.name === 'run_tool' && e.needApproval && e.ackToken) {
+            setPendingApproval({
+              ackToken: e.ackToken,
+              toolJobId: e.toolJobId,
+              message: e.message,
+            });
           }
           // If this was an act, append an ActExecution to the assistant message
           if (e.name === 'act' && e.actType) {
@@ -1788,6 +1811,40 @@ export function CopilotChat(): React.ReactElement | null {
         <div className="cp-messages" ref={listRef}>
           {/* agent-led 阶段2 Task2：内嵌结果面板，agent run_tool 跑完自动展示图 */}
           <CopilotResultPanel />
+          {/* agent-led 阶段2 Task3：重操作确认卡，run_tool 返回 needApproval 时弹 */}
+          {pendingApproval && (
+            <div className="cp-approval-card">
+              <div className="cp-approval-title">⚠️ 重操作确认</div>
+              <div className="cp-approval-msg">
+                {pendingApproval.message || 'agent 准备执行一个重操作，是否开始？'}
+              </div>
+              <div className="cp-approval-actions">
+                <button
+                  className="cp-approval-btn cp-approval-approve"
+                  onClick={async () => {
+                    await ackRunTool(pendingApproval.ackToken, true);
+                    setPendingApproval(null);
+                    // 通知 agent 用户已确认，请重调 run_tool(ackToken) 续跑
+                    send(
+                      `用户已确认开始（ackToken=${pendingApproval.ackToken}）。请重调 run_tool(op=run, toolId, params, ackToken="${pendingApproval.ackToken}") 续跑该重操作。`
+                    );
+                  }}
+                >
+                  ✓ 开始
+                </button>
+                <button
+                  className="cp-approval-btn cp-approval-cancel"
+                  onClick={async () => {
+                    await ackRunTool(pendingApproval.ackToken, false);
+                    setPendingApproval(null);
+                    send('用户取消了该重操作，不要重试。');
+                  }}
+                >
+                  ✕ 取消
+                </button>
+              </div>
+            </div>
+          )}
           {/* PLAN_INLINE_v1 — sticky plan card at top of message list */}
           <PlanInlineCard
             planId={activePlanId}

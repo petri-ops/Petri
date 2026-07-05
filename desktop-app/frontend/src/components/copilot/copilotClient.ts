@@ -130,6 +130,9 @@ export interface ToolResultEvent {
   allDone?: boolean;
   /** ACK token to confirm UI handler fired */
   ackToken?: string;
+  /** TOOL_JOB_APPROVAL_v1（阶段2 Task3）：run_tool 重操作需用户确认 */
+  needApproval?: boolean;
+  toolJobId?: string;
   /** ACT_GENERIC_v1 — generic handler dispatch */
   handlerId?: string;
   payload?: Record<string, unknown>;
@@ -374,6 +377,8 @@ function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
       planId: obj.planId,
       allDone: obj.allDone,
       ackToken: obj.ackToken,
+      needApproval: obj.needApproval,
+      toolJobId: obj.toolJobId,
       handlerId: obj.handlerId,
       payload: obj.payload,
     });
@@ -467,6 +472,22 @@ export async function ackAct(
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
       body: JSON.stringify(info || { ok: true }),
+    });
+  } catch {
+    // best-effort
+  }
+}
+
+// TOOL_JOB_APPROVAL_v1（阶段2 Task3）：重操作 run_tool 确认/取消。
+// approve=true 落 ack_status=approved，agent 下轮重调 run_tool(ackToken) 续跑；
+// approve=false 落 rejected，agent 收到 user_rejected 取消。
+export async function ackRunTool(token: string, approve: boolean): Promise<void> {
+  if (!token) return;
+  try {
+    await fetch(getApiPrefix() + '/ai/run-tool-ack/' + encodeURIComponent(token), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+      body: JSON.stringify({ approve }),
     });
   } catch {
     // best-effort
