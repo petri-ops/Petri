@@ -16,6 +16,18 @@ const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
 
+// ── EPIPE / stdout 兜底 ─────────────────────────────────────
+// console.log 写 stdout 时若管道已关（子进程退出/重定向）会抛 EPIPE，
+// 被当 Uncaught Exception 弹对话框。吞掉 EPIPE，不让它中断主进程。
+process.stdout?.on?.('error', (err) => {
+  if (err && err.code === 'EPIPE') return;
+  throw err;
+});
+process.stderr?.on?.('error', (err) => {
+  if (err && err.code === 'EPIPE') return;
+  throw err;
+});
+
 // ── 自动更新（electron-updater）─────────────────────────────
 // 打包模式下加载 electron-updater；开发模式下跳过（npm start 无打包元数据）
 let autoUpdater = null;
