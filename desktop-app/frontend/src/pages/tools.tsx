@@ -1510,6 +1510,57 @@ function ToolsInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectTool]);
 
+  // agent-led Task 3：open_result handler 触发，按 jobId 加载结果。
+  // 收 toolJobId → fetch /tools/status/:id 拿 tool_id + status → 构造 Job 调 loadJobResult。
+  const openResultByJobId = useCallback(
+    async (toolJobId: string) => {
+      const token = getToken();
+      try {
+        const resp = await fetch(
+          getApiPrefix() + '/tools/status/' + encodeURIComponent(toolJobId),
+          {
+            headers: token ? { Authorization: 'Bearer ' + token } : {},
+          }
+        );
+        const data = await resp.json();
+        if (!data || data.error) return;
+        // status 端点返回 toolId（驼峰），构造 Job 适配 snake_case 字段
+        const job: Job = {
+          id: String(toolJobId),
+          tool_id: data.toolId || data.tool_id || '',
+          status: data.status || 'completed',
+          created_at: data.createdAt ? new Date(data.createdAt).getTime() : Date.now(),
+          completed_at: data.completedAt ? new Date(data.completedAt).getTime() : undefined,
+          error: data.error,
+        };
+        loadJobResult(job);
+      } catch {}
+    },
+    [loadJobResult]
+  );
+
+  // 同页：直接监听事件
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.toolJobId) openResultByJobId(String(detail.toolJobId));
+    };
+    window.addEventListener('biof3:tools-open-result', handler);
+    return () => window.removeEventListener('biof3:tools-open-result', handler);
+  }, [openResultByJobId]);
+
+  // 跨页：从 sessionStorage 消费 pending result（open_result handler 跨页导航时 stash）
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = sessionStorage.getItem('biof3_pending_tool_result');
+      if (!raw) return;
+      sessionStorage.removeItem('biof3_pending_tool_result');
+      // 延迟一拍等 tools 列表加载完，loadJobResult 内部 find 才能命中 tool
+      setTimeout(() => openResultByJobId(raw), 600);
+    } catch {}
+  }, [openResultByJobId]);
+
   // KILLER_USE_CASE_1_v1 — autofill recipes describe how to import data from
   // a source tool's job into a target tool's input slot. Same logic as the
   // manual <select> dropdowns the user can use, just driven by the AI.

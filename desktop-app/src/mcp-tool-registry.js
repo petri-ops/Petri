@@ -118,7 +118,7 @@ async function listTools() {
  *   - 插件包注入 R_LIBS_USER（pluginDir/packages/r 优先）
  *   - 结果读 jobDir/manifest.json（脚本写）+ 列 jobDir 下输出文件
  */
-function _runPluginScript(plugin, scriptPath, args) {
+function _runPluginScript(plugin, scriptPath, args, userId = 'agent') {
   return new Promise((resolve) => {
     const jobId = 'mcp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
     const jobDir = path.join(MCP_JOBS_DIR, jobId);
@@ -127,12 +127,14 @@ function _runPluginScript(plugin, scriptPath, args) {
     config.mkdirSandbox(outputDir);
 
     // 方案 C（agent-led Task 1）：跑前建 tool_jobs 记录，跑完更新状态。
-    // user_id 用 'agent' 占位（bulk 工具 agent 跑，无用户上下文）。
+    // user_id 用调用方传入的 userId（agent 登录态下跑 = 真实用户 id，
+    // 这样用户能在 history 看到、open_result 能按 jobId 加载）。
     let toolJobId = null;
     if (db) {
       try {
         const job = db.createToolJob({
           toolId: plugin.id,
+          userId,
           params: args,
           status: 'running',
           name: `${plugin.id} via agent`,
@@ -306,7 +308,11 @@ function _runPluginScript(plugin, scriptPath, args) {
  * 执行工具。插件分支（Task 3）；单细胞步骤分支（Task 4）。
  * @returns {Promise<{content: Array, isError: boolean}>}
  */
-async function callTool(name, args) {
+async function callTool(name, args, opts = {}) {
+  // opts.userId：归属用户（agent 在登录态下跑，写进 tool_jobs.user_id，
+  // 这样用户能在 history 看到、open_result 能按 jobId 加载结果）。
+  // 兜底 'agent'（无用户上下文，如 MCP 直连场景）。
+  const userId = (opts && opts.userId) || 'agent';
   // 插件分支
   const plugin = pluginLoader.getPlugin(name);
   if (plugin) {
@@ -317,7 +323,7 @@ async function callTool(name, args) {
         isError: true,
       };
     }
-    return _runPluginScript(plugin, scriptPath, args);
+    return _runPluginScript(plugin, scriptPath, args, userId);
   }
 
   // 单细胞步骤分支（Task 4）

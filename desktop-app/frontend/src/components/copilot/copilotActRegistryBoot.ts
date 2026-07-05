@@ -217,6 +217,56 @@ registerCopilotAct({
   },
 });
 
+/**
+ * open_result — agent-led Task 3：run_tool 跑完后把结果展示给用户。
+ * 收 toolJobId（bulk 工具，run_tool 返回）或 analysisId（单细胞，start_analysis 返回）。
+ * bulk 工具：导航到 /tools，触发 tools 页按 jobId 加载结果（复用 loadJobResult）。
+ * 单细胞：复用现有 open_replot 通道（analysisId）。
+ */
+registerCopilotAct({
+  id: 'open_result',
+  description:
+    '把分析结果展示给用户。run_tool 跑完出图后调用，payload 传 toolJobId（bulk 工具）。agent 跑完工具后用这个把结果推到主面板，用户不用自己点。',
+  pages: '*',
+  payloadSchema: {
+    toolJobId: {
+      type: 'string',
+      description: 'bulk 工具的 tool_job id（run_tool 返回的 toolJobId）',
+      required: false,
+    },
+    analysisId: {
+      type: 'string',
+      description: '单细胞分析的 analysis id（start_analysis 返回，复用 open_replot 通道）',
+      required: false,
+    },
+  },
+  example: { toolJobId: 'tj_xxx' },
+  handler: ({ toolJobId, analysisId }) => {
+    try {
+      // 单细胞分支：复用 open_replot 通道
+      if (analysisId) {
+        window.dispatchEvent(new CustomEvent('biof3:sc-open-replot', { detail: { analysisId } }));
+        return { ok: true, channel: 'analysis' };
+      }
+      // bulk 工具分支：导航到 /tools + 触发按 jobId 加载结果
+      if (!toolJobId) return { error: 'missing toolJobId or analysisId' };
+      const onToolsPage = window.location.pathname.startsWith('/tools');
+      if (onToolsPage) {
+        window.dispatchEvent(new CustomEvent('biof3:tools-open-result', { detail: { toolJobId } }));
+      } else {
+        // 跨页：stash jobId，tools 页 mount 后消费
+        try {
+          sessionStorage.setItem('biof3_pending_tool_result', String(toolJobId));
+        } catch {}
+        window.location.href = '/tools#result=' + encodeURIComponent(String(toolJobId));
+      }
+      return { ok: true, channel: 'tool_job' };
+    } catch (e: unknown) {
+      return { error: errMsg(e) || 'open_result failed' };
+    }
+  },
+});
+
 // ============================================================
 // Auto-upload registry to server on app boot (and again later).
 // ============================================================
