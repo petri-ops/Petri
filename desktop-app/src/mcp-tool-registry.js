@@ -42,6 +42,13 @@ const SHARED_BACKEND = resolveSharedBackend();
 const pluginLoader = require(path.join(R_SERVER, 'plugin-loader.js'));
 const taskScripts = require(path.join(R_SERVER, 'task-scripts-gen', 'index.js'));
 const config = require(path.join(R_SERVER, 'config.js'));
+// db.js 双驱动（SQLite/PG）：callTool 跑完写 tool_jobs 记录（方案 C，agent-led Task 1）
+let db = null;
+try {
+  db = require(path.join(R_SERVER, 'db.js'));
+} catch (e) {
+  console.warn('[mcp-registry] db.js require failed, tool_jobs 记录不可用:', e.message);
+}
 
 // 注册 R/Python 执行器（plugin-manager 同款，主进程子进程都要自己 init）
 try {
@@ -111,6 +118,23 @@ function _runPluginScript(plugin, scriptPath, args) {
     const outputDir = path.join(jobDir, 'output');
     config.mkdirSandbox(jobDir);
     config.mkdirSandbox(outputDir);
+
+    // 方案 C（agent-led Task 1）：跑前建 tool_jobs 记录，跑完更新状态。
+    // user_id 用 'agent' 占位（bulk 工具 agent 跑，无用户上下文）。
+    let toolJobId = null;
+    if (db) {
+      try {
+        const job = db.createToolJob({
+          toolId: plugin.id,
+          params: args,
+          status: 'running',
+          name: `${plugin.id} via agent`,
+        });
+        toolJobId = job && job.id;
+      } catch (e) {
+        console.warn('[mcp-registry] createToolJob failed:', e.message);
+      }
+    }
 
     // 1. 写 params.json（脚本从 args[1]=jobDir 读它）
     fs.writeFileSync(path.join(jobDir, 'params.json'), JSON.stringify(args || {}));
@@ -186,15 +210,24 @@ function _runPluginScript(plugin, scriptPath, args) {
       { timeout: 300000, maxBuffer: 10 * 1024 * 1024, env: runEnv },
       (err, stdout, stderr) => {
         if (err) {
+          const errText = `执行失败: ${err.killed ? '超时（>300s）' : stderr || err.message}\n\nSTDOUT:\n${stdout || ''}`;
+          // 失败：更新 tool_jobs 状态
+          if (db && toolJobId) {
+            try {
+              db.updateToolJob(toolJobId, {
+                status: 'failed',
+                error: errText,
+                completedAt: Date.now(),
+              });
+            } catch (e) {
+              console.warn('[mcp-registry] updateToolJob(failed) failed:', e.message);
+            }
+          }
           return resolve({
-            content: [
-              {
-                type: 'text',
-                text: `执行失败: ${err.killed ? '超时（>300s）' : stderr || err.message}\n\nSTDOUT:\n${stdout || ''}`,
-              },
-            ],
+            content: [{ type: 'text', text: errText }],
             isError: true,
             _jobDir: jobDir,
+            toolJobId,
           });
         }
         // 5. 读 manifest.json + 列输出文件。
@@ -235,10 +268,23 @@ function _runPluginScript(plugin, scriptPath, args) {
           manifest: manifest,
           stdout: (stdout || '').slice(-2000),
         };
+        // 成功：更新 tool_jobs 状态 + 写 result_json
+        if (db && toolJobId) {
+          try {
+            db.updateToolJob(toolJobId, {
+              status: 'completed',
+              resultJson: summary,
+              completedAt: Date.now(),
+            });
+          } catch (e) {
+            console.warn('[mcp-registry] updateToolJob(completed) failed:', e.message);
+          }
+        }
         resolve({
           content: [{ type: 'text', text: JSON.stringify(summary, null, 2) }],
           isError: false,
           _jobDir: jobDir,
+          toolJobId,
         });
       }
     );
