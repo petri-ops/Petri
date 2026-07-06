@@ -74,39 +74,33 @@ compression: maximum
 # 打包脚本: scripts/build-runtime-plugins.sh → 上传 OSS → manifest.json 注册
 # 用户首次启动后在插件商店下载 R/Python Runtime 到 ~/Documents/BioF3-Local/runtimes/
 extraResources:
-  - from: ../r-server
-    to: r-server
+  # 断点5：core 仓作为 git submodule 在 vendor/biof3-core/
+  # 打包时把 core 的 r-server/py-server/shared-backend 复制到 resources/core/
+  - from: ./vendor/biof3-core/r-server
+    to: core/r-server
     filter:
       - "**/*"
       - "!**/.DS_Store"
       - "!**/*.log"
       - "!**/test*"
-  - from: ../py-server
-    to: py-server
+  - from: ./vendor/biof3-core/py-server
+    to: core/py-server
     filter:
       - "**/*"
       - "!**/.DS_Store"
       - "!**/*.log"
       - "!**/test*"
-  - from: ../shared-backend
-    to: shared-backend
+  - from: ./vendor/biof3-core/shared-backend
+    to: core/shared-backend
     filter:
       - "**/*"
       - "!**/.DS_Store"
-  # Vite SPA build 产物 — 主窗口加载（阶段 3 起）
+  # Vite SPA build 产物 — 主窗口加载
   - from: ./frontend/dist
-    to: desktop-app/frontend/dist
+    to: frontend/dist
     filter:
       - "**/*"
       - "!**/.DS_Store"
-  # Docusaurus build 产物 — docs/blog iframe 过渡（阶段 2 后移除）
-  - from: ../build
-    to: build
-    filter:
-      - "**/*"
-      - "!**/.DS_Store"
-      # 排除 exports/（629MB 静态报告页，桌面版不需要，web 版专用）
-      - "!**/exports/**"
   # 内置插件（插件商店默认可用，无需联网）
   - from: ./resources/built-in-plugins
     to: built-in-plugins

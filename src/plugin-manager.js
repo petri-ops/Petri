@@ -23,34 +23,34 @@ const { execFile } = require('child_process');
 // 的 init 流程，必须自己调 initSharedBackend 注册执行器，否则 getExecutor 抛
 // "未注册执行器" 导致 runtime 校验/装包静默失败）
 //
-// 路径解析策略（Electron 开发模式 vs 打包模式）：
-//   - 开发模式 (app.isPackaged=false): shared-backend 在项目根目录
-//     __dirname = .../desktop-app/src/ → ../../shared-backend = 项目根/shared-backend
-//   - 打包模式 (app.isPackaged=true): shared-backend 在 extraResources 中
+// 路径解析策略（desktop 仓分仓后，断点5）：
+//   - core 仓作为 git submodule 在 vendor/biof3-core/
+//   - 开发模式 (app.isPackaged=false): shared-backend 在 vendor/biof3-core/shared-backend
+//     __dirname = .../src/ → ../vendor/biof3-core/shared-backend
+//   - 打包模式 (app.isPackaged=true): core 在 extraResources/core 下
 //     process.resourcesPath = .../BioF3.app/Contents/Resources/
 function resolveSharedBackendDir() {
-  // 开发模式：从 desktop-app/src/ 向上两级到项目根
+  // 开发模式：从 src/ 向上一级到 desktop 仓根，再进 vendor/biof3-core/shared-backend
   if (app && !app.isPackaged) {
-    const devPath = path.resolve(__dirname, '..', '..', 'shared-backend');
+    const devPath = path.resolve(__dirname, '..', 'vendor', 'biof3-core', 'shared-backend');
     if (fs.existsSync(devPath)) return devPath;
   }
-  // 打包模式：extraResources 会复制到 app bundle 的 Resources/ 下
+  // 打包模式：core 在 extraResources/core 下
   if (process.resourcesPath) {
-    const pkgPath = path.join(process.resourcesPath, 'shared-backend');
+    const pkgPath = path.join(process.resourcesPath, 'core', 'shared-backend');
     if (fs.existsSync(pkgPath)) return pkgPath;
   }
   // 兜底：回退到开发模式路径（即使 fs.existsSync 失败，让 require 抛错更明确）
-  return path.resolve(__dirname, '..', '..', 'shared-backend');
+  return path.resolve(__dirname, '..', 'vendor', 'biof3-core', 'shared-backend');
 }
 
 const SHARED_BACKEND_DIR = resolveSharedBackendDir();
 
-// 项目根（r-server/py-server/shared-backend 平级目录所在）：
-// 开发模式 = desktop-app/ 上两级 = 仓库根；打包模式 = process.resourcesPath
-// 用于 require r-server/py-server 的模块（它们不在 resources/ 下，而在项目根）
+// core 仓根（r-server/py-server/shared-backend 平级目录所在）：
+// 开发模式 = desktop 仓根/vendor/biof3-core；打包模式 = resourcesPath/core
 function resolveProjectRoot() {
-  if (app && app.isPackaged && process.resourcesPath) return process.resourcesPath;
-  return path.resolve(__dirname, '..', '..');
+  if (app && app.isPackaged && process.resourcesPath) return path.join(process.resourcesPath, 'core');
+  return path.resolve(__dirname, '..', 'vendor', 'biof3-core');
 }
 const PROJECT_ROOT = resolveProjectRoot();
 try {

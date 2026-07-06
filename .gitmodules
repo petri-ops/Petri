@@ -1,0 +1,3 @@
+[submodule "vendor/biof3-core"]
+	path = vendor/biof3-core
+	url = /Users/zhangdiandian/Documents/1.WorkDir/BioinfoTools/BioF3

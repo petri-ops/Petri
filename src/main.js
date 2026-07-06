@@ -74,16 +74,33 @@ function _writeLog(name, text) {
 }
 
 // ── 路径解析（开发模式 vs 打包模式）────────────────────────────
-// 开发模式（npm start）：r-server/py-server/shared-backend 在项目根目录
-// 打包模式（.exe/.dmg）：在 process.resourcesPath 下
+// desktop 仓分仓后（断点5）：
+//   - desktop 自己的资源（frontend/dist, build, resources/）在 desktop 仓根
+//   - core 资源（r-server, py-server, shared-backend）在 git submodule vendor/biof3-core/
+// 开发模式：PROJECT_ROOT = desktop 仓根（src/../..），CORE_ROOT = PROJECT_ROOT/vendor/biof3-core
+// 打包模式：desktop 资源在 process.resourcesPath，core 资源在 process.resourcesPath/core（electron-builder extraResources）
 const PROJECT_ROOT = path.join(__dirname, '..', '..');
 const IS_DEV = !app.isPackaged;
 
+// core 仓根（submodule）。dev: vendor/biof3-core；pack: resourcesPath/core
+function resolveCoreRoot() {
+  if (IS_DEV) {
+    return path.join(PROJECT_ROOT, 'vendor', 'biof3-core');
+  }
+  return path.join(process.resourcesPath, 'core');
+}
+
+// desktop 自己的资源（frontend/dist 等）
 function resolveResource(...parts) {
   if (IS_DEV) {
     return path.join(PROJECT_ROOT, ...parts);
   }
   return path.join(process.resourcesPath, ...parts);
+}
+
+// core 仓的资源（r-server/py-server/shared-backend）
+function resolveCore(...parts) {
+  return path.join(resolveCoreRoot(), ...parts);
 }
 
 // ── 解析用来跑 r-server/py-server 的 node 可执行文件 ────────────
@@ -230,7 +247,7 @@ function startRServer() {
     return;
   }
 
-  const rServerPath = resolveResource('r-server', 'server.js');
+  const rServerPath = resolveCore('r-server', 'server.js');
   if (!fs.existsSync(rServerPath)) {
     console.error('[desktop] r-server not found:', rServerPath);
     return;
@@ -304,7 +321,7 @@ function startPyServer(reason = 'ipc') {
     return { ok: false, error: 'Python runtime not installed' };
   }
 
-  const pyServerPath = resolveResource('py-server', 'server.js');
+  const pyServerPath = resolveCore('py-server', 'server.js');
   if (!fs.existsSync(pyServerPath)) {
     console.error('[desktop] py-server not found:', pyServerPath);
     return { ok: false, error: 'py-server script not found' };
@@ -412,7 +429,7 @@ function startPlumber(reason = 'ipc') {
   }
 
   // plumber 脚本路径（r-server 里有 replot 服务脚本）
-  const plumberScript = resolveResource('r-server', 'replot.R');
+  const plumberScript = resolveCore('r-server', 'replot.R');
   if (!fs.existsSync(plumberScript)) {
     console.warn('[desktop] plumber script not found, replot disabled');
     return { ok: false, error: 'plumber script not found' };
@@ -499,7 +516,7 @@ let mainWindow = null;
 function createWindow() {
   // 阶段 3（desktop-spa）：主窗口加载 Vite SPA build 产物
   // Vite SPA 在 frontend/dist，base './'，无 baseUrl 前缀
-  const spaBuildDir = resolveResource('desktop-app', 'frontend', 'dist');
+  const spaBuildDir = resolveResource('frontend', 'dist');
   const spaIndexPath = path.join(spaBuildDir, 'index.html');
   const spaServerUrl = 'http://localhost:3002/';
 
@@ -612,7 +629,7 @@ function createWindow() {
 function setupAiSettingsIpc() {
   ipcMain.handle('ai-settings:get', async () => {
     try {
-      const { getAiSettings } = require(resolveResource('r-server', 'helpers', 'ai-settings.js'));
+      const { getAiSettings } = require(resolveCore('r-server', 'helpers', 'ai-settings.js'));
       return getAiSettings();
     } catch (e) {
       return {};
@@ -621,7 +638,7 @@ function setupAiSettingsIpc() {
 
   ipcMain.handle('ai-settings:save', async (event, settings) => {
     try {
-      const { saveAiSettings } = require(resolveResource('r-server', 'helpers', 'ai-settings.js'));
+      const { saveAiSettings } = require(resolveCore('r-server', 'helpers', 'ai-settings.js'));
       saveAiSettings(settings);
       return { ok: true };
     } catch (e) {
@@ -631,7 +648,7 @@ function setupAiSettingsIpc() {
 
   ipcMain.handle('ai-settings:test', async (event, provider, apiKey) => {
     try {
-      const { testApiKey } = require(resolveResource('r-server', 'helpers', 'ai-settings.js'));
+      const { testApiKey } = require(resolveCore('r-server', 'helpers', 'ai-settings.js'));
       return await testApiKey(provider, apiKey);
     } catch (e) {
       return { ok: false, message: e.message };

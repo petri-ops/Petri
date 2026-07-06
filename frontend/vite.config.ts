@@ -171,7 +171,8 @@ export default defineConfig({
       // CopilotChat 用 useBaseUrl（Docusaurus），桌面版 SPA 无 baseUrl，mock 成恒等
       '@docusaurus/useBaseUrl': path.resolve(__dirname, 'src/lib/useBaseUrl-mock.ts'),
       // 双前端收敛（agent-led 阶段2 Task1）：Copilot 纯逻辑层共享包
-      '@biof3/shared': path.resolve(__dirname, '..', '..', 'packages', 'shared-copilot'),
+      // 断点5：@biof3/shared 在 core 仓 vendor/biof3-core/packages/shared-copilot
+      '@biof3/shared': path.resolve(__dirname, '..', 'vendor', 'biof3-core', 'packages', 'shared-copilot'),
     },
   },
   build: {
