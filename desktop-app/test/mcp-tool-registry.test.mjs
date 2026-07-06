@@ -12,7 +12,7 @@ const R_SERVER = resolve(__dirname, '..', '..', 'r-server');
 
 const pluginLoader = await import(R_SERVER + '/plugin-loader.js');
 const taskScripts = await import(R_SERVER + '/task-scripts-gen/index.js');
-const { listTools, callTool } = await import(resolve(__dirname, '..', 'src', 'mcp-tool-registry.js'));
+const { listTools, callTool } = await import(resolve(__dirname, '..', '..', 'r-server', 'mcp', 'registry.js'));
 
 // helper：注册一个 mock 插件到 globalThis._biof3Plugins
 function mockPlugin(id, def) {

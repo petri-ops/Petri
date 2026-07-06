@@ -11,7 +11,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const R_SERVER = resolve(__dirname, '..', '..', 'r-server');
 
 const pluginLoader = await import(R_SERVER + '/plugin-loader.js');
-const { listTools } = await import(resolve(__dirname, '..', 'src', 'mcp-tool-registry.js'));
+const { listTools } = await import(resolve(__dirname, '..', '..', 'r-server', 'mcp', 'registry.js'));
 
 test('loadPluginsFromDisk 从 installed.json 注册插件，listTools 含该插件', async () => {
   // 构造临时 pluginsDir：installed.json + my-tool/plugin.json + tool-definition.json

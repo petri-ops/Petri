@@ -13,7 +13,7 @@ const req = createRequire(import.meta.url);
 
 const db = req(R_SERVER + '/db.js');
 const { tool_read_image } = req(R_SERVER + '/agent-tools/vision-tools.js');
-const { callTool } = await import(resolve(__dirname, '..', 'src', 'mcp-tool-registry.js'));
+const { callTool } = await import(resolve(__dirname, '..', '..', 'r-server', 'mcp', 'registry.js'));
 
 const RUN_LIVE = process.env.RUN_VISION_LIVE === '1';
 
