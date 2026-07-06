@@ -18,7 +18,7 @@ async function startMcpServer() {
   const { StdioServerTransport } = await import('@modelcontextprotocol/sdk/server/stdio.js');
   const { ListToolsRequestSchema, CallToolRequestSchema } =
     await import('@modelcontextprotocol/sdk/types.js');
-  const { listTools, callTool } = require('./mcp-tool-registry');
+  const { listTools, callTool } = require('../../r-server/mcp/registry');
 
   const server = new Server(
     { name: 'biof3-mcp', version: '0.1.0' },
