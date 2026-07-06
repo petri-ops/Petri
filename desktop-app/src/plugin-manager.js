@@ -59,6 +59,17 @@ try {
   console.warn('[plugin] initSharedBackend failed:', e.message, '| path:', SHARED_BACKEND_DIR);
 }
 
+// 断点1（分仓前置）：注入 config 让执行器/storage 读到真 config（不走 env fallback）。
+// plugin-manager 在 Electron 主进程跑，调执行器做 runtime 校验/装包，需要正确 execMode/rHome。
+// ai-usage 桌面版主进程不写库，不注入（helper no-op）。
+try {
+  require(SHARED_BACKEND_DIR).configure({
+    getConfig: () => require(path.join(PROJECT_ROOT, 'r-server', 'config')),
+  });
+} catch (e) {
+  console.warn('[plugin] shared-backend configure failed:', e.message);
+}
+
 // ── 路径 ───────────────────────────────────────────────────────
 const USER_DATA_DIR = path.join(app.getPath('documents'), 'BioF3-Local');
 const PLUGINS_DIR = path.join(USER_DATA_DIR, 'plugins');

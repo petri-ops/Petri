@@ -64,6 +64,17 @@ try {
   console.warn('[mcp-registry] initSharedBackend failed:', e.message);
 }
 
+// 断点1（分仓前置）：注入 config 让执行器/storage 读到真 config（不走 env fallback）。
+// 桌面版 mcp-tool-registry 在 stdio 子进程跑，不经 r-server/server.js 的注入，
+// 必须自己注入。ai-usage 桌面版不写库（无用户上下文），不注入（helper no-op）。
+try {
+  require(SHARED_BACKEND).configure({
+    getConfig: () => config,
+  });
+} catch (e) {
+  console.warn('[mcp-registry] shared-backend configure failed:', e.message);
+}
+
 // 启动时自动加载用户已装插件（~/Documents/BioF3-Local/plugins/）。
 // mcp-server 子进程与 Electron 主进程不共享 globalThis，必须自己 load。
 // 失败不致命（无 installed.json = 没装过插件，正常），listTools 仍返回 10 个单细胞步骤。
