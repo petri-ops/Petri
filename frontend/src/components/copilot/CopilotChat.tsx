@@ -120,11 +120,29 @@ export function CopilotChat({ embedded = false }: { embedded?: boolean } = {}): 
   const [activePlanId, setActivePlanId] = useState<string | null>(null);
   const [planRefreshKey, setPlanRefreshKey] = useState(0);
   // TOOL_JOB_APPROVAL_v1（阶段2 Task3）：run_tool 重操作待确认
+  // 6.4 — 扩展为参数确认卡片，携带 params 供用户审阅/微调
   const [pendingApproval, setPendingApproval] = useState<{
     ackToken: string;
     toolJobId?: string;
+    toolId?: string;
     message?: string;
+    params?: Record<string, unknown>;
   } | null>(null);
+  // 6.4 — 用户可微调的参数草稿（从 pendingApproval.params 初始化）
+  const [paramDraft, setParamDraft] = useState<Record<string, string>>({});
+
+  // 当 pendingApproval 变化时，把 params 拷贝成可编辑的 string 草稿
+  useEffect(() => {
+    if (pendingApproval?.params) {
+      const draft: Record<string, string> = {};
+      for (const [k, v] of Object.entries(pendingApproval.params)) {
+        draft[k] = typeof v === 'string' ? v : JSON.stringify(v);
+      }
+      setParamDraft(draft);
+    } else {
+      setParamDraft({});
+    }
+  }, [pendingApproval]);
   const [size, setSize] = useState<{ w: number; h: number }>(() => {
     if (typeof window === 'undefined') return { w: 420, h: 620 };
     try {
@@ -445,11 +463,14 @@ export function CopilotChat({ embedded = false }: { embedded?: boolean } = {}): 
             ts: Date.now(),
           });
           // TOOL_JOB_APPROVAL_v1（阶段2 Task3）：run_tool 重操作需用户确认（recovery 路径）
+          // 6.4 — 扩展：携带 toolId + params 供参数确认卡片展示/微调
           if (e.name === 'run_tool' && e.needApproval && e.ackToken) {
             setPendingApproval({
               ackToken: e.ackToken,
               toolJobId: e.toolJobId,
+              toolId: (e as { toolId?: string }).toolId,
               message: e.message,
+              params: (e as { params?: Record<string, unknown> }).params,
             });
           }
         },
@@ -1654,22 +1675,53 @@ export function CopilotChat({ embedded = false }: { embedded?: boolean } = {}): 
             <CopilotResultPanel />
             {pendingApproval && (
               <div className="cp-approval-card">
-                <div className="cp-approval-title">⚠️ 重操作确认</div>
+                <div className="cp-approval-title">⚠️ 参数确认</div>
+                {pendingApproval.toolId && (
+                  <div className="cp-approval-tool">工具：{pendingApproval.toolId}</div>
+                )}
                 <div className="cp-approval-msg">
-                  {pendingApproval.message || 'agent 准备执行一个重操作，是否开始？'}
+                  {pendingApproval.message || 'agent 准备执行一个重操作，请确认以下参数：'}
                 </div>
+                {pendingApproval.params && Object.keys(pendingApproval.params).length > 0 && (
+                  <div className="cp-approval-params">
+                    {Object.entries(pendingApproval.params).map(([k]) => (
+                      <label key={k} className="cp-approval-param-row">
+                        <span className="cp-approval-param-key">{k}</span>
+                        <input
+                          className="cp-approval-param-input"
+                          value={paramDraft[k] ?? ''}
+                          onChange={(e) =>
+                            setParamDraft((prev) => ({ ...prev, [k]: e.target.value }))
+                          }
+                        />
+                      </label>
+                    ))}
+                  </div>
+                )}
                 <div className="cp-approval-actions">
                   <button
                     className="cp-approval-btn cp-approval-approve"
                     onClick={async () => {
+                      // 6.4 — 把用户微调后的参数回传给 agent
+                      const mergedParams = pendingApproval.params
+                        ? { ...pendingApproval.params }
+                        : {};
+                      for (const [k, v] of Object.entries(paramDraft)) {
+                        // 尝试解析 JSON，失败则保留字符串
+                        try {
+                          mergedParams[k] = JSON.parse(v);
+                        } catch {
+                          mergedParams[k] = v;
+                        }
+                      }
                       await ackRunTool(pendingApproval.ackToken, true);
                       setPendingApproval(null);
                       send(
-                        `用户已确认开始（ackToken=${pendingApproval.ackToken}）。请重调 run_tool(op=run, toolId, params, ackToken="${pendingApproval.ackToken}") 续跑该重操作。`
+                        `用户已确认开始（ackToken=${pendingApproval.ackToken}）。请重调 run_tool(op=run, toolId="${pendingApproval.toolId ?? ''}", params=${JSON.stringify(mergedParams)}, ackToken="${pendingApproval.ackToken}") 续跑该重操作。`
                       );
                     }}
                   >
-                    ✓ 开始
+                    ✓ 确认开始
                   </button>
                   <button
                     className="cp-approval-btn cp-approval-cancel"
@@ -2191,26 +2243,54 @@ export function CopilotChat({ embedded = false }: { embedded?: boolean } = {}): 
         <div className="cp-messages" ref={listRef}>
           {/* agent-led 阶段2 Task2：内嵌结果面板，agent run_tool 跑完自动展示图 */}
           <CopilotResultPanel />
-          {/* agent-led 阶段2 Task3：重操作确认卡，run_tool 返回 needApproval 时弹 */}
+          {/* agent-led 阶段2 Task3 / 6.4：参数确认卡，run_tool 返回 needApproval 时弹 */}
           {pendingApproval && (
             <div className="cp-approval-card">
-              <div className="cp-approval-title">⚠️ 重操作确认</div>
+              <div className="cp-approval-title">⚠️ 参数确认</div>
+              {pendingApproval.toolId && (
+                <div className="cp-approval-tool">工具：{pendingApproval.toolId}</div>
+              )}
               <div className="cp-approval-msg">
-                {pendingApproval.message || 'agent 准备执行一个重操作，是否开始？'}
+                {pendingApproval.message || 'agent 准备执行一个重操作，请确认以下参数：'}
               </div>
+              {pendingApproval.params && Object.keys(pendingApproval.params).length > 0 && (
+                <div className="cp-approval-params">
+                  {Object.entries(pendingApproval.params).map(([k]) => (
+                    <label key={k} className="cp-approval-param-row">
+                      <span className="cp-approval-param-key">{k}</span>
+                      <input
+                        className="cp-approval-param-input"
+                        value={paramDraft[k] ?? ''}
+                        onChange={(e) =>
+                          setParamDraft((prev) => ({ ...prev, [k]: e.target.value }))
+                        }
+                      />
+                    </label>
+                  ))}
+                </div>
+              )}
               <div className="cp-approval-actions">
                 <button
                   className="cp-approval-btn cp-approval-approve"
                   onClick={async () => {
+                    const mergedParams = pendingApproval.params
+                      ? { ...pendingApproval.params }
+                      : {};
+                    for (const [k, v] of Object.entries(paramDraft)) {
+                      try {
+                        mergedParams[k] = JSON.parse(v);
+                      } catch {
+                        mergedParams[k] = v;
+                      }
+                    }
                     await ackRunTool(pendingApproval.ackToken, true);
                     setPendingApproval(null);
-                    // 通知 agent 用户已确认，请重调 run_tool(ackToken) 续跑
                     send(
-                      `用户已确认开始（ackToken=${pendingApproval.ackToken}）。请重调 run_tool(op=run, toolId, params, ackToken="${pendingApproval.ackToken}") 续跑该重操作。`
+                      `用户已确认开始（ackToken=${pendingApproval.ackToken}）。请重调 run_tool(op=run, toolId="${pendingApproval.toolId ?? ''}", params=${JSON.stringify(mergedParams)}, ackToken="${pendingApproval.ackToken}") 续跑该重操作。`
                     );
                   }}
                 >
-                  ✓ 开始
+                  ✓ 确认开始
                 </button>
                 <button
                   className="cp-approval-btn cp-approval-cancel"

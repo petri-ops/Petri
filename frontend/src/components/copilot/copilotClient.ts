@@ -133,6 +133,8 @@ export interface ToolResultEvent {
   /** TOOL_JOB_APPROVAL_v1（阶段2 Task3）：run_tool 重操作需用户确认 */
   needApproval?: boolean;
   toolJobId?: string;
+  /** 6.4 — 参数确认卡片：agent 返回的参数供用户审阅/微调 */
+  params?: Record<string, unknown>;
   /** ACT_GENERIC_v1 — generic handler dispatch */
   handlerId?: string;
   payload?: Record<string, unknown>;
@@ -379,6 +381,7 @@ function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
       ackToken: obj.ackToken,
       needApproval: obj.needApproval,
       toolJobId: obj.toolJobId,
+      params: obj.params,
       handlerId: obj.handlerId,
       payload: obj.payload,
     });
