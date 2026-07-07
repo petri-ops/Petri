@@ -8,7 +8,7 @@
  * - 全局搜索快捷方式
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getToken, getApiPrefix, getStoredUser, isLoggedIn } from '@/lib/authClient';
 import { Icon } from '@/components/icons/Icon';
@@ -28,6 +28,34 @@ interface Job {
   completed_at?: number;
   error?: string;
   name?: string;
+  project_id?: string | null;
+}
+
+/**
+ * 2.3 — 将 job 列表按时间段分组（今天/昨天/本周/更早）
+ */
+function groupJobsByTime(jobs: Job[]): { label: string; jobs: Job[] }[] {
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const yesterdayStart = todayStart - 86_400_000;
+  const weekStart = todayStart - 7 * 86_400_000;
+
+  const buckets: { label: string; jobs: Job[] }[] = [
+    { label: '今天', jobs: [] },
+    { label: '昨天', jobs: [] },
+    { label: '本周', jobs: [] },
+    { label: '更早', jobs: [] },
+  ];
+
+  for (const job of jobs) {
+    const ts = job.created_at;
+    if (ts >= todayStart) buckets[0].jobs.push(job);
+    else if (ts >= yesterdayStart) buckets[1].jobs.push(job);
+    else if (ts >= weekStart) buckets[2].jobs.push(job);
+    else buckets[3].jobs.push(job);
+  }
+
+  return buckets.filter((b) => b.jobs.length > 0);
 }
 
 const QUICK_TOOLS: string[] = [
@@ -597,11 +625,11 @@ export function DesktopDashboard(): React.ReactElement {
         </div>
       </section>
 
-      {/* 最近任务 */}
+      {/* 最近活动时间线 — 2.3 */}
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>
           <Icon name="clock" size={18} />
-          最近运行
+          最近活动
           <Link className={styles.sectionLink} to="/tools">
             查看全部 →
           </Link>
@@ -619,25 +647,47 @@ export function DesktopDashboard(): React.ReactElement {
             </Link>
           </div>
         ) : (
-          <div className={styles.jobList}>
-            {recentJobs.map((job) => {
-              const tool = tools.find((t) => t.id === job.tool_id);
-              return (
-                <Link key={job.id} className={styles.jobItem} to={`/tools#${job.tool_id}`}>
-                  <span
-                    className={`${styles.jobDot} ${statusClass(job.status)}`}
-                    title={statusLabel(job.status)}
-                  />
-                  <div className={styles.jobInfo}>
-                    <span className={styles.jobName}>{job.name || tool?.title || job.tool_id}</span>
-                    <span className={styles.jobTime}>{formatTime(job.created_at)}</span>
-                  </div>
-                  <span className={`${styles.jobStatusBadge} ${statusClass(job.status)}`}>
-                    {statusLabel(job.status)}
-                  </span>
-                </Link>
-              );
-            })}
+          <div className={styles.timeline}>
+            {groupJobsByTime(recentJobs).map((group) => (
+              <div key={group.label} className={styles.timelineGroup}>
+                <div className={styles.timelineDateLabel}>{group.label}</div>
+                <div className={styles.timelineItems}>
+                  {group.jobs.map((job) => {
+                    const tool = tools.find((t) => t.id === job.tool_id);
+                    const project = job.project_id
+                      ? projects.find((p) => p.id === job.project_id)
+                      : null;
+                    return (
+                      <Link
+                        key={job.id}
+                        className={styles.timelineItem}
+                        to={project ? `/project/${project.id}` : `/tools#${job.tool_id}`}
+                        title={project ? `项目：${project.name}` : undefined}
+                      >
+                        <span
+                          className={`${styles.timelineDot} ${statusClass(job.status)}`}
+                          title={statusLabel(job.status)}
+                        />
+                        <div className={styles.timelineContent}>
+                          <span className={styles.timelineTitle}>
+                            {job.name || tool?.title || job.tool_id}
+                          </span>
+                          <span className={styles.timelineMeta}>
+                            {formatTime(job.created_at)}
+                            {project ? ` · ${project.name}` : ''}
+                          </span>
+                        </div>
+                        <span
+                          className={`${styles.jobStatusBadge} ${statusClass(job.status)}`}
+                        >
+                          {statusLabel(job.status)}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </section>

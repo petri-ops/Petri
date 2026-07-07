@@ -512,6 +512,103 @@
   color: var(--ifm-color-danger);
 }
 
+/* ---- 2.3 活动时间线 ---- */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.timelineGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.timelineDateLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--biof3-text-muted, #5c6b64);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding-left: 4px;
+}
+.timelineItems {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  padding-left: 8px;
+}
+.timelineItems::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--biof3-border, #e2e8f0);
+  border-radius: 1px;
+}
+.timelineItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s ease;
+  position: relative;
+}
+.timelineItem:hover {
+  background: var(--biof3-surface-hover, rgba(0, 0, 0, 0.04));
+}
+.timelineDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  z-index: 1;
+  background: var(--ifm-color-emphasis-300);
+  box-shadow: 0 0 0 3px var(--ifm-background-color, #fff);
+}
+/* statusClass() 返回 statusCompleted/statusFailed/statusRunning，
+   用复合选择器提高优先级覆盖默认 background */
+.timelineDot.statusCompleted {
+  background: var(--ifm-color-success);
+}
+.timelineDot.statusFailed {
+  background: var(--ifm-color-danger);
+}
+.timelineDot.statusRunning {
+  background: var(--ifm-color-warning);
+  animation: tl-pulse 1.4s ease-in-out infinite;
+}
+@keyframes tl-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.timelineContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.timelineTitle {
+  font-size: 0.88rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.timelineMeta {
+  font-size: 0.76rem;
+  color: var(--biof3-text-muted, #5c6b64);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* ---- Responsive ---- */
 @media screen and (max-width: 768px) {
   .dashboard {
