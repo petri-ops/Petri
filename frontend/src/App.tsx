@@ -19,6 +19,10 @@ import DocsPage from '@/pages/docs';
 import { CopilotChat } from '@/components/copilot/CopilotChat';
 import { CopilotSelectionTip } from '@/components/copilot/CopilotSelectionTip';
 import '@/components/copilot/copilotActRegistryBoot';
+// 断点6：注入平台 API 给 @biof3/shared 渲染层组件（ActResultCard/CopilotResultPanel/copilotActRegistry）
+import { configureApi } from '../../vendor/biof3-core/packages/shared-copilot/api-inject';
+import { getApiPrefix, getToken } from '@/lib/authClient';
+configureApi({ getApiPrefix: () => getApiPrefix(), getToken });
 
 const ONBOARDING_FLAG = 'biof3-onboarding-completed';
 

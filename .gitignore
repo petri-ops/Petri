@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Electron packaging output
+release/
+out/
+
+# Cache
+.cache/
+.vite/
+
+# Misc
+.DS_Store
+*.log
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/

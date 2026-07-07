@@ -61,6 +61,11 @@ function docsSidebarPlugin() {
         position: number;
         items: DocItem[];
       }
+      // 分仓后 docs/ 可能不在本仓（教程内容已移至 tutorials 仓）。
+      // 构建时找不到 docs 目录则返回空树，docs 页仅靠运行时 content-plugin 提供内容。
+      if (!fs.existsSync(docsDir)) {
+        return 'export default { root: [], categories: [] };';
+      }
       // 非组学教程目录（工程/运维内部文档），不进 sidebar 也不编译
       const EXCLUDED_DIRS = ['dev', 'ops'];
       // docs 根目录下的工程/运维文档（非组学教程），同样排除

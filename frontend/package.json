@@ -15,6 +15,8 @@
     "@mdx-js/react": "^3.1.1",
     "@mdx-js/rollup": "^3.1.1",
     "highlight.js": "^11.11.1",
+    "infima": "^0.2.0-alpha.45",
+    "jspdf": "^3.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^9.1.0",

@@ -4,11 +4,11 @@
    - infima default.css：~200 个设计 token（颜色/间距/圆角/阴影/字号/z-index）
    - 仓库根 custom.css：BioF3 brand palette + primary 色阶覆盖 + markdown 排版
    - 下方桌面版覆盖：body 字体、滚动条、dock 让位 */
-@import '../../../../node_modules/infima/dist/css/default/default.css';
-@import '../../../../src/css/custom.css';
+@import 'infima/dist/css/default/default.css';
+@import './custom.css';
 /* 单细胞/空间工作台（sc-* 前缀全局类）+ Copilot 浮窗样式，Docusaurus 版全局 CSS */
-@import '../../../../src/css/single-cell.css';
-@import '../../../../src/css/copilot.css';
+@import './single-cell.css';
+@import './copilot.css';
 
 :root {
   /* 桌面版基础（覆盖 infima 的 web 站点默认） */
