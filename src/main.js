@@ -77,9 +77,11 @@ function _writeLog(name, text) {
 // desktop 仓分仓后（断点5）：
 //   - desktop 自己的资源（frontend/dist, build, resources/）在 desktop 仓根
 //   - core 资源（r-server, py-server, shared-backend）在 git submodule vendor/biof3-core/
-// 开发模式：PROJECT_ROOT = desktop 仓根（src/../..），CORE_ROOT = PROJECT_ROOT/vendor/biof3-core
+// 开发模式：PROJECT_ROOT = desktop 仓根（src/..），CORE_ROOT = PROJECT_ROOT/vendor/biof3-core
 // 打包模式：desktop 资源在 process.resourcesPath，core 资源在 process.resourcesPath/core（electron-builder extraResources）
-const PROJECT_ROOT = path.join(__dirname, '..', '..');
+// 注意：分仓前 main.js 在 desktop-app/src/main.js，往上两层到仓库根；
+//       分仓后 main.js 在 src/main.js，只需往上一层到 desktop 仓根。
+const PROJECT_ROOT = path.join(__dirname, '..');
 const IS_DEV = !app.isPackaged;
 
 // core 仓根（submodule）。dev: vendor/biof3-core；pack: resourcesPath/core
