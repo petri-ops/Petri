@@ -622,8 +622,36 @@ function HistoryPanel({
 }
 
 // ============================================================
-// ToolboxPanel — right column (Phase7: tool catalog)
+// ToolboxPanel — right column (Phase7: tool catalog + 7.3 plugin list)
 // ============================================================
+
+/** Minimal remote plugin info (mirrors PluginStorePanel / electron.d.ts) */
+interface RemotePluginInfo {
+  title?: string;
+  version?: string;
+  language?: string;
+  size?: number;
+  description?: string;
+  type?: string;
+  figcodeCardId?: string;
+  dependencies?: string[];
+  optional?: boolean;
+}
+
+interface InstalledPluginInfo {
+  id: string;
+  version: string;
+  installedAt?: string;
+  type?: string;
+  language?: string;
+}
+
+const PLUGIN_TYPE_LABELS: Record<string, string> = {
+  runtime: '运行时',
+  tool: '工具',
+  'figcode-card': '绘图',
+  'figcode-data': '数据',
+};
 
 function ToolboxPanel({
   onAskAgent,
@@ -632,6 +660,15 @@ function ToolboxPanel({
 }): React.ReactElement {
   const [query, setQuery] = useState('');
   const [activeCat, setActiveCat] = useState<string>('全部');
+  const [tab, setTab] = useState<'tools' | 'plugins'>('tools');
+
+  // --- Plugin state ---
+  const [installed, setInstalled] = useState<InstalledPluginInfo[]>([]);
+  const [remotePlugins, setRemotePlugins] = useState<Record<string, RemotePluginInfo>>({});
+  const [installing, setInstalling] = useState<string | null>(null);
+  const [uninstalling, setUninstalling] = useState<string | null>(null);
+  const [pluginError, setPluginError] = useState<string | null>(null);
+  const [pluginLoaded, setPluginLoaded] = useState(false);
 
   // Group tools by category
   const categories = useMemo(() => {
@@ -653,6 +690,78 @@ function ToolboxPanel({
     });
   }, [query, activeCat]);
 
+  // --- Load plugins when tab is first activated ---
+  useEffect(() => {
+    if (tab !== 'plugins' || pluginLoaded) return;
+    loadPlugins();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab]);
+
+  async function loadPlugins() {
+    if (!window.biof3Desktop?.plugins) return;
+    setPluginError(null);
+    try {
+      const [inst, rem] = await Promise.all([
+        window.biof3Desktop.plugins.listInstalled(),
+        window.biof3Desktop.plugins.listRemote(),
+      ]);
+      setInstalled(inst);
+      setRemotePlugins(rem.plugins ?? {});
+      setPluginLoaded(true);
+    } catch (e) {
+      setPluginError(e instanceof Error ? e.message : '加载插件失败');
+    }
+  }
+
+  async function handleInstall(pluginId: string) {
+    if (!window.biof3Desktop?.plugins) return;
+    setInstalling(pluginId);
+    setPluginError(null);
+    try {
+      const result = await window.biof3Desktop.plugins.install(pluginId);
+      if (result.ok) {
+        await loadPlugins();
+      } else {
+        setPluginError(result.error || '安装失败');
+      }
+    } catch (e) {
+      setPluginError(e instanceof Error ? e.message : '安装失败');
+    } finally {
+      setInstalling(null);
+    }
+  }
+
+  async function handleUninstall(pluginId: string) {
+    if (!window.biof3Desktop?.plugins) return;
+    if (!confirm(`确定卸载插件「${pluginId}」？`)) return;
+    setUninstalling(pluginId);
+    setPluginError(null);
+    try {
+      const result = await window.biof3Desktop.plugins.uninstall(pluginId);
+      if (result.ok) {
+        await loadPlugins();
+      } else {
+        setPluginError(result.error || '卸载失败');
+      }
+    } catch (e) {
+      setPluginError(e instanceof Error ? e.message : '卸载失败');
+    } finally {
+      setUninstalling(null);
+    }
+  }
+
+  const installedIds = useMemo(() => new Set(installed.map((p) => p.id)), [installed]);
+
+  const availablePlugins = useMemo(() => {
+    return Object.entries(remotePlugins)
+      .filter(([id]) => !installedIds.has(id))
+      .sort((a, b) => {
+        const ta = a[1].title ?? a[0];
+        const tb = b[1].title ?? b[0];
+        return ta.localeCompare(tb);
+      });
+  }, [remotePlugins, installedIds]);
+
   return (
     <div className={styles.panelInner}>
       <div className={styles.panelSection}>
@@ -660,60 +769,162 @@ function ToolboxPanel({
           <Icon name="wrench" size={14} /> 工具箱
         </h3>
 
-        {/* Search box */}
-        <input
-          className={styles.toolSearch}
-          type="text"
-          placeholder="搜索工具…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-
-        {/* Category chips */}
-        <div className={styles.toolCats}>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              className={`${styles.toolCat} ${
-                activeCat === cat ? styles.toolCatActive : ''
-              }`}
-              onClick={() => setActiveCat(cat)}
-            >
-              {cat}
-            </button>
-          ))}
+        {/* Tab switcher */}
+        <div className={styles.toolboxTabs}>
+          <button
+            className={`${styles.toolboxTab} ${tab === 'tools' ? styles.toolboxTabActive : ''}`}
+            onClick={() => setTab('tools')}
+          >
+            工具
+          </button>
+          <button
+            className={`${styles.toolboxTab} ${tab === 'plugins' ? styles.toolboxTabActive : ''}`}
+            onClick={() => setTab('plugins')}
+          >
+            插件
+            {installed.length > 0 && (
+              <span className={styles.toolboxTabBadge}>{installed.length}</span>
+            )}
+          </button>
         </div>
 
-        {/* Tool list */}
-        <ul className={styles.toolList}>
-          {filteredTools.map((tool) => (
-            <li
-              key={tool.id}
-              className={styles.toolItem}
-              onClick={() =>
-                onAskAgent(
-                  `请帮我使用工具「${tool.title}」(${tool.id}) 进行分析。`
-                )
-              }
-              title={tool.description}
-            >
-              <span
-                className={styles.toolDot}
-                style={{ background: tool.color }}
-              />
-              <div className={styles.toolMeta}>
-                <span className={styles.toolName}>{tool.title}</span>
-                <span className={styles.toolSub}>{tool.subtitle}</span>
-              </div>
-              {tool.comingSoon && (
-                <span className={styles.toolBadge}>即将上线</span>
+        {tab === 'tools' ? (
+          <>
+            {/* Search box */}
+            <input
+              className={styles.toolSearch}
+              type="text"
+              placeholder="搜索工具…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+
+            {/* Category chips */}
+            <div className={styles.toolCats}>
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  className={`${styles.toolCat} ${
+                    activeCat === cat ? styles.toolCatActive : ''
+                  }`}
+                  onClick={() => setActiveCat(cat)}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Tool list */}
+            <ul className={styles.toolList}>
+              {filteredTools.map((tool) => (
+                <li
+                  key={tool.id}
+                  className={styles.toolItem}
+                  onClick={() =>
+                    onAskAgent(
+                      `请帮我使用工具「${tool.title}」(${tool.id}) 进行分析。`
+                    )
+                  }
+                  title={tool.description}
+                >
+                  <span
+                    className={styles.toolDot}
+                    style={{ background: tool.color }}
+                  />
+                  <div className={styles.toolMeta}>
+                    <span className={styles.toolName}>{tool.title}</span>
+                    <span className={styles.toolSub}>{tool.subtitle}</span>
+                  </div>
+                  {tool.comingSoon && (
+                    <span className={styles.toolBadge}>即将上线</span>
+                  )}
+                </li>
+              ))}
+              {filteredTools.length === 0 && (
+                <p className={styles.panelEmpty}>没有匹配的工具</p>
               )}
-            </li>
-          ))}
-          {filteredTools.length === 0 && (
-            <p className={styles.panelEmpty}>没有匹配的工具</p>
-          )}
-        </ul>
+            </ul>
+          </>
+        ) : (
+          <>
+            {pluginError && (
+              <p className={styles.pluginError}>{pluginError}</p>
+            )}
+
+            {/* Installed plugins */}
+            <div className={styles.pluginSection}>
+              <h4 className={styles.pluginSectionTitle}>
+                已安装 ({installed.length})
+              </h4>
+              {installed.length === 0 ? (
+                <p className={styles.panelEmpty}>暂无已安装插件</p>
+              ) : (
+                <ul className={styles.toolList}>
+                  {installed.map((p) => {
+                    const info = remotePlugins[p.id];
+                    const label = PLUGIN_TYPE_LABELS[p.type ?? ''] ?? p.type ?? '插件';
+                    return (
+                      <li key={p.id} className={styles.pluginItem}>
+                        <div className={styles.pluginMeta}>
+                          <span className={styles.pluginName}>
+                            {info?.title ?? p.id}
+                          </span>
+                          <span className={styles.pluginSub}>
+                            v{p.version} · {label}
+                            {p.language ? ` · ${p.language}` : ''}
+                          </span>
+                        </div>
+                        <button
+                          className={styles.pluginBtnUninstall}
+                          disabled={uninstalling === p.id}
+                          onClick={() => handleUninstall(p.id)}
+                        >
+                          {uninstalling === p.id ? '…' : '卸载'}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+
+            {/* Available (remote) plugins */}
+            <div className={styles.pluginSection}>
+              <h4 className={styles.pluginSectionTitle}>
+                可用 ({availablePlugins.length})
+              </h4>
+              {availablePlugins.length === 0 ? (
+                <p className={styles.panelEmpty}>所有插件均已安装</p>
+              ) : (
+                <ul className={styles.toolList}>
+                  {availablePlugins.map(([id, info]) => {
+                    const label = PLUGIN_TYPE_LABELS[info.type ?? ''] ?? info.type ?? '插件';
+                    return (
+                      <li key={id} className={styles.pluginItem}>
+                        <div className={styles.pluginMeta}>
+                          <span className={styles.pluginName}>
+                            {info.title ?? id}
+                          </span>
+                          <span className={styles.pluginSub}>
+                            {info.version ? `v${info.version} · ` : ''}{label}
+                            {info.language ? ` · ${info.language}` : ''}
+                          </span>
+                        </div>
+                        <button
+                          className={styles.pluginBtnInstall}
+                          disabled={installing === id}
+                          onClick={() => handleInstall(id)}
+                        >
+                          {installing === id ? '…' : '安装'}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

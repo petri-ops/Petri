@@ -1055,6 +1055,147 @@
   flex-shrink: 0;
 }
 
+/* ---- 7.3: Toolbox tabs (tools / plugins) ---- */
+.toolboxTabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--biof3-border, #e2e8f0);
+}
+
+.toolboxTab {
+  padding: 4px 12px;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--biof3-text-secondary, #64748b);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.toolboxTab:hover {
+  color: var(--biof3-text, #1e293b);
+}
+
+.toolboxTabActive {
+  color: var(--biof3-accent, #0d9488);
+  border-bottom-color: var(--biof3-accent, #0d9488);
+}
+
+.toolboxTabBadge {
+  font-size: 9px;
+  padding: 0 5px;
+  border-radius: 8px;
+  background: var(--biof3-accent, #0d9488);
+  color: #fff;
+  line-height: 14px;
+}
+
+/* ---- 7.3: Plugin list items ---- */
+.pluginSection {
+  margin-bottom: 10px;
+}
+
+.pluginSectionTitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--biof3-text-secondary, #64748b);
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pluginItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.pluginItem:hover {
+  background: var(--biof3-hover, #f1f5f9);
+}
+
+.pluginMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pluginName {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--biof3-text, #1e293b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pluginSub {
+  font-size: 10px;
+  color: var(--biof3-text-tertiary, #94a3b8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pluginBtnInstall,
+.pluginBtnUninstall {
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--biof3-border, #e2e8f0);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.pluginBtnInstall {
+  background: var(--biof3-accent, #0d9488);
+  color: #fff;
+  border-color: var(--biof3-accent, #0d9488);
+}
+
+.pluginBtnInstall:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.pluginBtnUninstall {
+  background: transparent;
+  color: var(--biof3-text-secondary, #64748b);
+}
+
+.pluginBtnUninstall:hover:not(:disabled) {
+  background: var(--biof3-hover, #f1f5f9);
+  color: var(--biof3-text, #1e293b);
+}
+
+.pluginBtnInstall:disabled,
+.pluginBtnUninstall:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pluginError {
+  font-size: 11px;
+  color: var(--biof3-danger, #dc2626);
+  background: var(--biof3-danger-bg, #fef2f2);
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
 /* ============================================================
  * Phase 8: Chain recommendations (below result view)
  * ============================================================ */
