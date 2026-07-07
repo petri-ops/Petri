@@ -7,7 +7,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
-import { getProject, listProjectJobs, listDatasetsByProject } from '@/lib/project-store';
+import { getProject, listProjectJobs, listDatasetsByProject, listProjects } from '@/lib/project-store';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 import { tools as staticTools } from '@/pages/_data';
@@ -33,6 +33,34 @@ export function ProjectWorkspace(): React.ReactElement {
 
   // Selected result tab
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
+
+  // 4.5 — Project switcher dropdown
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
+  const [switcherOpen, setSwitcherOpen] = useState(false);
+  const [switcherQuery, setSwitcherQuery] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const list = await listProjects();
+        if (!cancelled) setAllProjects(list);
+      } catch { /* ignore */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const filteredProjects = useMemo(() => {
+    const q = switcherQuery.trim().toLowerCase();
+    if (!q) return allProjects;
+    return allProjects.filter((p) => p.name.toLowerCase().includes(q));
+  }, [allProjects, switcherQuery]);
+
+  const switchToProject = useCallback((id: string) => {
+    setSwitcherOpen(false);
+    setSwitcherQuery('');
+    if (id !== projectId) navigate(`/project/${id}`);
+  }, [navigate, projectId]);
 
   const fetchData = useCallback(async () => {
     if (!projectId) return;
@@ -107,6 +135,55 @@ export function ProjectWorkspace(): React.ReactElement {
           {project.modality && (
             <span className={styles.modalityBadge}>{project.modality}</span>
           )}
+          {/* 4.5 — Project switcher dropdown */}
+          <div className={styles.switcherWrap}>
+            <button
+              className={styles.switcherBtn}
+              onClick={() => setSwitcherOpen((v) => !v)}
+              title="切换项目"
+            >
+              <Icon name="chevron-down" size={14} />
+            </button>
+            {switcherOpen && (
+              <>
+                <div className={styles.switcherOverlay} onClick={() => setSwitcherOpen(false)} />
+                <div className={styles.switcherDropdown}>
+                  <input
+                    className={styles.switcherSearch}
+                    placeholder="搜索项目…"
+                    value={switcherQuery}
+                    onChange={(e) => setSwitcherQuery(e.target.value)}
+                    autoFocus
+                  />
+                  <div className={styles.switcherList}>
+                    {filteredProjects.length === 0 ? (
+                      <div className={styles.switcherEmpty}>无匹配项目</div>
+                    ) : (
+                      filteredProjects.map((p) => (
+                        <button
+                          key={p.id}
+                          className={`${styles.switcherItem} ${p.id === projectId ? styles.switcherItemActive : ''}`}
+                          onClick={() => switchToProject(p.id)}
+                        >
+                          <span className={styles.switcherItemName}>{p.name}</span>
+                          {p.modality && (
+                            <span className={styles.switcherItemBadge}>{p.modality}</span>
+                          )}
+                        </button>
+                      ))
+                    )}
+                  </div>
+                  <Link
+                    className={styles.switcherNewProject}
+                    to="/"
+                    onClick={() => setSwitcherOpen(false)}
+                  >
+                    + 新建项目
+                  </Link>
+                </div>
+              </>
+            )}
+          </div>
         </div>
         <div className={styles.headerRight}>
           <button
