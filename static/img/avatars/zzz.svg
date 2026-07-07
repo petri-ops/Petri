@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- 背景 -->
+  <circle cx="100" cy="100" r="100" fill="#DC2626"/>
+  
+  <!-- 头部 -->
+  <circle cx="100" cy="80" r="35" fill="#FEE2E2"/>
+  
+  <!-- 身体 -->
+  <ellipse cx="100" cy="150" rx="45" ry="55" fill="#FEE2E2"/>
+  
+  <!-- 眼睛 -->
+  <circle cx="90" cy="75" r="4" fill="#7F1D1D"/>
+  <circle cx="110" cy="75" r="4" fill="#7F1D1D"/>
+  
+  <!-- 微笑 -->
+  <path d="M 85 85 Q 100 95 115 85" stroke="#7F1D1D" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- 细胞装饰 -->
+  <g opacity="0.3">
+    <circle cx="170" cy="50" r="12" fill="none" stroke="#FEE2E2" stroke-width="2"/>
+    <circle cx="170" cy="50" r="6" fill="#FEE2E2"/>
+    <circle cx="165" cy="70" r="8" fill="none" stroke="#FEE2E2" stroke-width="2"/>
+    <circle cx="165" cy="70" r="4" fill="#FEE2E2"/>
+  </g>
+  
+  <!-- 字母 Z -->
+  <text x="100" y="190" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#FEE2E2" text-anchor="middle">Z</text>
+</svg>

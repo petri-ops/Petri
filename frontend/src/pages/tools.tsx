@@ -2183,9 +2183,12 @@ function ToolsInner() {
                   </button>
                 )}
                 {selectedTool && (
-                  <Link to={selectedTool.tutorialUrl} className={styles.tutorialLink}>
-                    查看教程 →
-                  </Link>
+                  <span className={styles.tutorialLink} style={{ opacity: 0.5, pointerEvents: 'none' }}>
+                    {/* 桌面端已移除教程入口，"查看教程"链接已禁用。如需恢复取消下面注释即可。 */}
+                    {/* <Link to={selectedTool.tutorialUrl} className={styles.tutorialLink}>
+                      查看教程 →
+                    </Link> */}
+                  </span>
                 )}
               </div>
             </div>
@@ -2765,12 +2768,13 @@ function DemoTabs({
                 <td>预计耗时</td>
                 <td>~{tool.estimatedMinutes} 分钟</td>
               </tr>
-              <tr>
+              {/* 桌面端已移除教程入口，"关联教程"行已删除。如需恢复取消下面注释即可。 */}
+              {/* <tr>
                 <td>关联教程</td>
                 <td>
                   <a href={tool.tutorialUrl}>{tool.tutorialUrl}</a>
                 </td>
-              </tr>
+              </tr> */}
             </tbody>
           </table>
           <p style={{ fontSize: 12, color: '#6b7280', marginTop: 12 }}>{tool.longDescription}</p>

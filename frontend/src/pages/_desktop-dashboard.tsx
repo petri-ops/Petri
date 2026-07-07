@@ -9,13 +9,15 @@
  */
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getToken, getApiPrefix, getStoredUser, isLoggedIn } from '@/lib/authClient';
 import { Icon } from '@/components/icons/Icon';
 import { tools, toolCategories } from '@/pages/_data';
 import type { Tool } from '@/pages/_data';
 import { TOOL_IMAGES } from '@/pages/_tool-images';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
+import { listProjects, createProject } from '@/lib/project-store';
+import type { Project } from '@/lib/project-types';
 import styles from './_desktop-dashboard.module.css';
 
 interface Job {
@@ -68,6 +70,12 @@ function statusClass(s: string): string {
 export function DesktopDashboard(): React.ReactElement {
   const [recentJobs, setRecentJobs] = useState<Job[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loadingProjects, setLoadingProjects] = useState(true);
+  const [showNewProject, setShowNewProject] = useState(false);
+  const [newProjectName, setNewProjectName] = useState('');
+  const [newProjectDesc, setNewProjectDesc] = useState('');
+  const [creatingProject, setCreatingProject] = useState(false);
   const [dataDir, setDataDir] = useState<string>('');
   const [hasUpdate, setHasUpdate] = useState(false);
   const [updateVersion, setUpdateVersion] = useState('');
@@ -84,6 +92,7 @@ export function DesktopDashboard(): React.ReactElement {
   const [backupPromptDismissed, setBackupPromptDismissed] = useState(false);
   const user = getStoredUser();
   const backendStatus = useBackendStatus();
+  const navigate = useNavigate();
 
   const fetchRecentJobs = useCallback(async () => {
     if (!isLoggedIn()) {
@@ -106,6 +115,38 @@ export function DesktopDashboard(): React.ReactElement {
       setLoadingJobs(false);
     }
   }, []);
+
+  const fetchProjects = useCallback(async () => {
+    try {
+      const list = await listProjects();
+      setProjects(list);
+    } catch {
+      // ignore — may not be logged in
+    } finally {
+      setLoadingProjects(false);
+    }
+  }, []);
+
+  const handleCreateProject = useCallback(async () => {
+    if (!newProjectName.trim()) return;
+    setCreatingProject(true);
+    try {
+      const p = await createProject({
+        name: newProjectName.trim(),
+        description: newProjectDesc.trim() || undefined,
+        modality: 'general',
+      });
+      setProjects((prev) => [p, ...prev]);
+      setShowNewProject(false);
+      setNewProjectName('');
+      setNewProjectDesc('');
+      navigate(`/project/${p.id}`);
+    } catch (e) {
+      // ignore
+    } finally {
+      setCreatingProject(false);
+    }
+  }, [newProjectName, newProjectDesc, navigate]);
 
   // M2-1：拉数据目录信息
   useEffect(() => {
@@ -229,6 +270,10 @@ export function DesktopDashboard(): React.ReactElement {
     const id = setInterval(fetchRecentJobs, 30_000);
     return () => clearInterval(id);
   }, [fetchRecentJobs]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   const quickToolList = tools.filter((t) => QUICK_TOOLS.includes(t.id));
 
@@ -414,6 +459,114 @@ export function DesktopDashboard(): React.ReactElement {
         </div>
       )}
 
+      {/* 我的项⽬ — UI-REFACTOR Phase2：项目制⾸⻚ */}
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>
+          <Icon name="folder" size={18} />
+          我的项⽬
+          <button
+            type="button"
+            className={styles.emptyCta}
+            style={{ marginLeft: 'auto', fontSize: '13px', padding: '4px 12px' }}
+            onClick={() => setShowNewProject(true)}
+          >
+            + 新建项⽬
+          </button>
+        </h2>
+        {loadingProjects ? (
+          <div className={styles.emptyState}><p>加载中…</p></div>
+        ) : projects.length === 0 ? (
+          <div className={styles.emptyState}>
+            <p>还没有项⽬，创建⼀个开始你的分析旅程</p>
+            <button className={styles.emptyCta} onClick={() => setShowNewProject(true)}>
+              创建第⼀个项⽬ →
+            </button>
+          </div>
+        ) : (
+          <div className={styles.toolGrid}>
+            {projects.map((p) => (
+              <Link
+                key={p.id}
+                className={styles.toolCard}
+                to={`/project/${p.id}`}
+                title={p.description || p.name}
+              >
+                <div
+                  className={styles.toolIconCircle}
+                  style={{ background: 'var(--biof3-accent, #0d9488)' }}
+                >
+                  <Icon name="folder" size={24} />
+                </div>
+                <div className={styles.toolMeta}>
+                  <span className={styles.toolName}>{p.name}</span>
+                  <span className={styles.toolDesc}>
+                    {p.description || p.modality || '⼀般分析'}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* 新建项⽬对话框 */}
+      {showNewProject && (
+        <div
+          className={styles.updOverlay}
+          onClick={() => !creatingProject && setShowNewProject(false)}
+        >
+          <div className={styles.updModal} onClick={(e) => e.stopPropagation()}>
+            <h3 className={styles.updTitle}>新建项⽬</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
+              <input
+                type="text"
+                placeholder="项⽬名称"
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--biof3-border, #e2e8f0)',
+                  fontSize: '14px',
+                }}
+                autoFocus
+              />
+              <textarea
+                placeholder="项⽬描述（可选）"
+                value={newProjectDesc}
+                onChange={(e) => setNewProjectDesc(e.target.value)}
+                rows={3}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--biof3-border, #e2e8f0)',
+                  fontSize: '14px',
+                  resize: 'vertical',
+                }}
+              />
+            </div>
+            <div className={styles.updActions}>
+              <button
+                type="button"
+                className={styles.updBtn}
+                onClick={() => setShowNewProject(false)}
+                disabled={creatingProject}
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                className={`${styles.updBtn} ${styles.updBtnPrimary}`}
+                onClick={handleCreateProject}
+                disabled={creatingProject || !newProjectName.trim()}
+              >
+                {creatingProject ? '创建中…' : '创建'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 快捷工具 */}
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>
@@ -517,7 +670,9 @@ export function DesktopDashboard(): React.ReactElement {
         </section>
       )}
 
-      {/* 推荐教程 */}
+      {/* 推荐教程 — 桌面端已移除教程入口，此区块已删除。
+          如需恢复，取消下面注释即可。 */}
+      {/*
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>
           <Icon name="book" size={18} />
@@ -537,6 +692,7 @@ export function DesktopDashboard(): React.ReactElement {
           ))}
         </div>
       </section>
+      */}
 
       {/* M2-6 / E4：下载并重启对话框 */}
       {updOpen && (

@@ -24,7 +24,6 @@ const PANEL_WIDTH_CONFIG: Record<ResizablePanel, { min: number; max: number; def
   settings: { min: 360, max: 760, default: 380 },
   plugins: { min: 520, max: 1600, default: 960 },
   user: { min: 380, max: 640, default: 420 },
-  docs: { min: 280, max: 480, default: 320 },
 };
 
 const PANEL_WIDTHS_KEY = 'biof3-panel-widths';
@@ -54,7 +53,7 @@ function readPanelWidths(): Record<ResizablePanel, number> {
   }
 }
 
-type PanelKind = 'settings' | 'plugins' | 'nav' | 'search' | 'user' | 'docs' | null;
+type PanelKind = 'settings' | 'plugins' | 'nav' | 'search' | 'user' | null;
 
 interface DockItemConfig {
   id: string;
@@ -70,7 +69,6 @@ interface DockItemConfig {
 // 高频页面直接上 dock，点一次到位；设置/插件为伞按钮（低频，弹面板）
 const DEFAULT_DOCK_ORDER: DockItemConfig[] = [
   { id: 'home', kind: null, icon: 'book-marked', label: '首页', to: '/', matchPrefix: '/' },
-  { id: 'docs', kind: null, icon: 'book', label: '教程', to: '/docs/intro', matchPrefix: '/docs' },
   {
     id: 'tools',
     kind: null,
@@ -211,17 +209,6 @@ function DesktopToolbarInner(): React.ReactElement {
   const startWRef = useRef(0);
 
   const togglePanel = (kind: PanelKind) => {
-    if (kind === 'docs') {
-      const html = document.documentElement;
-      const isOpen = html.classList.contains('biof3-desktop-docs-sidebar-open');
-      if (isOpen) html.classList.remove('biof3-desktop-docs-sidebar-open');
-      else html.classList.add('biof3-desktop-docs-sidebar-open');
-      setActivePanel(isOpen ? null : 'docs');
-      return;
-    }
-    if (activePanel === 'docs') {
-      document.documentElement.classList.remove('biof3-desktop-docs-sidebar-open');
-    }
     setActivePanel((prev) => (prev === kind ? null : kind));
   };
 
@@ -269,14 +256,10 @@ function DesktopToolbarInner(): React.ReactElement {
 
   // ESC 关闭
   useEffect(() => {
-    if (!activePanel) {
-      document.documentElement.classList.remove('biof3-desktop-docs-sidebar-open');
-      return;
-    }
+    if (!activePanel) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setActivePanel(null);
-        document.documentElement.classList.remove('biof3-desktop-docs-sidebar-open');
       }
     };
     window.addEventListener('keydown', onKey);
@@ -295,11 +278,8 @@ function DesktopToolbarInner(): React.ReactElement {
       workareas.forEach((w) => {
         if (w.contains(target)) insideWorkarea = true;
       });
-      const docsHost = document.getElementById('biof3-docs-sidebar-host');
-      const insideDocsHost = docsHost && docsHost.contains(target);
-      if (!insideDock && !insideWorkarea && !insideDocsHost) {
+      if (!insideDock && !insideWorkarea) {
         setActivePanel(null);
-        document.documentElement.classList.remove('biof3-desktop-docs-sidebar-open');
       }
     };
     const timer = setTimeout(() => {

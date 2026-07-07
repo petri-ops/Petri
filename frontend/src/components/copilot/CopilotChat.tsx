@@ -66,8 +66,8 @@ import {
 
 // (Types and helpers moved to copilotTypes.ts and copilotHelpers.ts)
 
-export function CopilotChat(): React.ReactElement | null {
-  const [open, setOpen] = useState(false);
+export function CopilotChat({ embedded = false }: { embedded?: boolean } = {}): React.ReactElement | null {
+  const [open, setOpen] = useState(embedded);
   const [ctx, setCtx] = useState<CopilotContext>(() => getCopilotContext());
   const [messages, setMessages] = useState<UIMessage[]>([]);
   const [input, setInput] = useState('');
@@ -605,17 +605,26 @@ export function CopilotChat(): React.ReactElement | null {
   }, [open]);
 
   // Listen for "Ask Copilot about this selection" events from the page tip
+  // or "Ask Copilot with a prompt" events from the toolbox panel.
   useEffect(() => {
     const onAsk = (e: Event) => {
       const detail = (e as CustomEvent).detail || {};
+      // Mode 1: toolbox / workspace sends a ready-to-send prompt
+      const prompt: string = (detail.prompt || '').trim();
+      if (prompt) {
+        setOpen(true);
+        setTimeout(() => send(prompt), 60);
+        return;
+      }
+      // Mode 2: page-tip sends a text selection to prefill
       const selection: string = (detail.selection || '').trim();
       if (!selection) return;
       setOpen(true);
       // Compose a prompt referencing the selection
-      const prompt = `针对当前页面我选中的这段内容，请帮我解释一下：\n\n> ${selection.replace(/\n/g, '\n> ')}`;
+      const prefilled = `针对当前页面我选中的这段内容，请帮我解释一下：\n\n> ${selection.replace(/\n/g, '\n> ')}`;
       // Pre-fill input so user can edit before sending, OR auto-send
       // We'll prefill + focus, let the user hit Enter (less intrusive than auto-send)
-      setInput(prompt);
+      setInput(prefilled);
       setTimeout(() => {
         if (taRef.current) {
           taRef.current.focus();
@@ -626,6 +635,7 @@ export function CopilotChat(): React.ReactElement | null {
     };
     window.addEventListener('biof3:copilot-ask', onAsk as EventListener);
     return () => window.removeEventListener('biof3:copilot-ask', onAsk as EventListener);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // STUDY_WITH_COPILOT_v1 — "🎓 让 AI 带我实战这一篇" entry point.
@@ -1484,8 +1494,8 @@ export function CopilotChat(): React.ReactElement | null {
 
   const quick = QUICK_PROMPTS[ctx.page] || QUICK_PROMPTS.home;
 
-  // Floating button only
-  if (!open) {
+  // Floating button only (skip in embedded mode — always show content)
+  if (!open && !embedded) {
     const fabStyle: React.CSSProperties = fabPos
       ? { right: fabPos.right, top: fabPos.top, transform: 'none' }
       : {};
@@ -1513,6 +1523,376 @@ export function CopilotChat(): React.ReactElement | null {
           <img className="cp-fab-icon" src={logoUrl} alt="BioF3" draggable={false} />
         </button>
       </>
+    );
+  }
+
+  // ── Embedded mode: render a stripped-down container (no FAB, no floating chrome) ──
+  if (embedded) {
+    return (
+      <div className="cp-embedded" role="region" aria-label="AI Copilot">
+        {/* Compact header: conversation switcher + clear only */}
+        <div className="cp-embedded-header">
+          <div className="cp-header-text" style={{ position: 'relative' }}>
+            <button
+              className="cp-conv-trigger"
+              onClick={() => setShowConvDropdown((s) => !s)}
+              title="切换会话 / 新对话"
+            >
+              <span className="cp-header-title">{activeConvTitle || 'BioF3 Copilot'}</span>
+              <span className="cp-conv-arrow">▾</span>
+            </button>
+            <div className="cp-header-sub">{contextLabel(ctx)}</div>
+            {showConvDropdown && (
+              <div className="cp-conv-dropdown" onClick={(e) => e.stopPropagation()}>
+                <button className="cp-conv-new" onClick={startNewConversation}>
+                  ➕ 开始新对话
+                </button>
+                <div className="cp-conv-list">
+                  {conversations.length === 0 ? (
+                    <div className="cp-conv-empty">还没有其他会话</div>
+                  ) : (
+                    conversations.map((c) => (
+                      <button
+                        key={c.id}
+                        className={`cp-conv-item ${c.id === activeConvId ? 'active' : ''}`}
+                        onClick={() => switchToConversation(c.id)}
+                        title={c.title}
+                      >
+                        <span className="cp-conv-item-title">{c.title}</span>
+                        <span className="cp-conv-item-meta">
+                          {c.message_count} 条 ·{' '}
+                          {new Date(c.updated_at).toLocaleDateString('zh-CN')}
+                        </span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="cp-header-actions">
+            <button
+              className={`cp-icon-btn ${showSummary ? 'cp-icon-btn-active' : ''}`}
+              onClick={() => setShowSummary((s) => !s)}
+              title="长期记忆 (事实档案 / 对话摘要)"
+              aria-label="长期记忆"
+            >
+              <Icon name="archive" size={14} />
+            </button>
+            <button className="cp-icon-btn" onClick={clearHistory} title="清空当前对话">
+              ↻
+            </button>
+          </div>
+        </div>
+
+        {showSummary && (
+          <MemoryPanel
+            onClose={() => setShowSummary(false)}
+            onChange={() => {
+              fetchSummary().then(setSummary);
+              listConversations('active').then(setConversations);
+            }}
+            activeConvId={activeConvId}
+            onSwitchConversation={(id) => {
+              if (id) switchToConversation(id);
+              else startNewConversation();
+            }}
+          />
+        )}
+
+        {showTrace && (
+          <div className="cp-trace-panel">
+            <div className="cp-trace-head">
+              <span className="cp-trace-title">🐞 Agent Trace · {trace.length} 步</span>
+              <button
+                className="cp-trace-action"
+                onClick={() => {
+                  const text = formatTraceForCopy(trace);
+                  navigator.clipboard.writeText(text).catch(() => {});
+                }}
+                title="复制全部到剪贴板"
+              >
+                📋 复制
+              </button>
+              <button className="cp-trace-action" onClick={() => clearTrace()} title="清空">
+                清空
+              </button>
+              <button className="cp-mem-close" onClick={() => setShowTrace(false)} title="收起">
+                ×
+              </button>
+            </div>
+            <div className="cp-trace-body">
+              {trace.length === 0 ? (
+                <div className="cp-trace-empty">
+                  暂无步骤。和 Copilot 互动后这里会记录每个工具调用 / ACK / 错误。
+                </div>
+              ) : (
+                trace
+                  .slice()
+                  .reverse()
+                  .map((e, i) => (
+                    <div key={i} className={`cp-trace-row cp-trace-${e.kind}`}>
+                      <span className="cp-trace-time">
+                        {new Date(e.ts).toLocaleTimeString('zh-CN', { hour12: false })}
+                      </span>
+                      <span className={`cp-trace-kind cp-trace-kind-${e.kind}`}>{e.kind}</span>
+                      <span className="cp-trace-label">{e.label}</span>
+                      {e.detail && (
+                        <span className="cp-trace-detail" title={e.detail}>
+                          {e.detail.slice(0, 80)}
+                        </span>
+                      )}
+                    </div>
+                  ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {!showSummary && !showTrace && (
+          <div className="cp-messages" ref={listRef}>
+            <CopilotResultPanel />
+            {pendingApproval && (
+              <div className="cp-approval-card">
+                <div className="cp-approval-title">⚠️ 重操作确认</div>
+                <div className="cp-approval-msg">
+                  {pendingApproval.message || 'agent 准备执行一个重操作，是否开始？'}
+                </div>
+                <div className="cp-approval-actions">
+                  <button
+                    className="cp-approval-btn cp-approval-approve"
+                    onClick={async () => {
+                      await ackRunTool(pendingApproval.ackToken, true);
+                      setPendingApproval(null);
+                      send(
+                        `用户已确认开始（ackToken=${pendingApproval.ackToken}）。请重调 run_tool(op=run, toolId, params, ackToken="${pendingApproval.ackToken}") 续跑该重操作。`
+                      );
+                    }}
+                  >
+                    ✓ 开始
+                  </button>
+                  <button
+                    className="cp-approval-btn cp-approval-cancel"
+                    onClick={async () => {
+                      await ackRunTool(pendingApproval.ackToken, false);
+                      setPendingApproval(null);
+                      send('用户取消了该重操作，不要重试。');
+                    }}
+                  >
+                    ✕ 取消
+                  </button>
+                </div>
+              </div>
+            )}
+            <PlanInlineCard
+              planId={activePlanId}
+              refreshKey={planRefreshKey}
+              onStepChanged={(planId, stepN, status, allDone) => {
+                if (allDone) {
+                  send(
+                    `我已完成整个 plan 的所有步骤(plan ${planId.slice(0, 12)}…)。请现在调用 verify_understanding 出 1-3 道理解题验证我学懂了没,答完后用 record_learning_signal 记录我表现弱的概念到复习队列。`
+                  );
+                } else if (status === 'done' || status === 'skipped') {
+                  const verb = status === 'done' ? '完成' : '跳过';
+                  send(
+                    `我已${verb}了 plan(${planId.slice(0, 12)}…) 的第 ${stepN} 步,请继续陪我做下一步。`
+                  );
+                }
+              }}
+            />
+            {messages.length === 0 && !online && (
+              <div className="cp-offline-placeholder">
+                <div className="cp-offline-icon">📴</div>
+                <div className="cp-offline-title">离线模式</div>
+                <div className="cp-offline-text">AI 暂不可用。网络恢复后将自动重新可用。</div>
+              </div>
+            )}
+            {messages.length === 0 && online && (
+              <div className="cp-welcome">
+                <div className="cp-welcome-text">{welcomeFor(ctx)}</div>
+                <div className="cp-quick-grid">
+                  {quick.map((q, i) => (
+                    <button key={i} className="cp-quick-btn" onClick={() => send(q)}>
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {messages.length > 0 && !online && (
+              <div className="cp-offline-banner">
+                <span className="cp-offline-banner-icon">📴</span>
+                <span>离线模式，AI 暂不可用 · 网络恢复后自动重连</span>
+              </div>
+            )}
+            {messages.map((m, i) => {
+              const prevMeta = i > 0 ? messages[i - 1].meta : undefined;
+              const showCtxBadge =
+                m.role === 'user' && m.meta?.page && m.meta.page !== prevMeta?.page;
+              return (
+                <div key={i} className={`cp-msg cp-msg-${m.role}`}>
+                  <div className="cp-msg-avatar">{m.role === 'user' ? '你' : 'AI'}</div>
+                  <div className="cp-msg-bubble">
+                    {showCtxBadge && (
+                      <div className="cp-msg-ctx-badge" title={m.meta?.pageTitle || ''}>
+                        {pageBadgeLabel(m.meta!)}
+                      </div>
+                    )}
+                    {m.role === 'assistant' ? (
+                      <>
+                        {m.steps && m.steps.length > 0 && (
+                          <div className="cp-steps">
+                            {(() => {
+                              const calls: Array<{
+                                name: string;
+                                args: string;
+                                result?: string;
+                                idx: number;
+                              }> = [];
+                              m.steps.forEach((s, idx) => {
+                                if (s.kind === 'tool_call') {
+                                  calls.push({ name: s.name, args: s.detail, idx });
+                                } else if (s.kind === 'tool_result') {
+                                  for (let j = calls.length - 1; j >= 0; j--) {
+                                    if (calls[j].name === s.name && calls[j].result === undefined) {
+                                      calls[j].result = s.detail;
+                                      break;
+                                    }
+                                  }
+                                }
+                              });
+                              return calls.map((c, j) => (
+                                <div
+                                  key={j}
+                                  className={`cp-step ${c.result === undefined ? 'cp-step-pending' : ''}`}
+                                >
+                                  <span className="cp-step-icon">🔧</span>
+                                  <span className="cp-step-name">{c.name}</span>
+                                  <span className="cp-step-args">
+                                    {truncate(c.args.replace(/[{}"]/g, ''), 60)}
+                                  </span>
+                                  {c.result !== undefined ? (
+                                    <span className="cp-step-ok">✓ {truncate(c.result, 32)}</span>
+                                  ) : (
+                                    <span className="cp-step-spin"></span>
+                                  )}
+                                </div>
+                              ));
+                            })()}
+                          </div>
+                        )}
+                        {m.acts && m.acts.length > 0 && (
+                          <div className="cp-acts">
+                            {m.acts.map((a, j) => (
+                              <ActResultCard key={j} act={a} />
+                            ))}
+                          </div>
+                        )}
+                        {m.content ? (
+                          (() => {
+                            const parsed = parseActionsFromMarkdown(m.content);
+                            return (
+                              <CopilotMarkdown
+                                text={parsed.text}
+                                actions={parsed.actions}
+                                suppressAutoExec={!!m.autoActionsFired}
+                              />
+                            );
+                          })()
+                        ) : m.pending && (!m.steps || m.steps.length === 0) ? (
+                          <span className="cp-typing">
+                            <span />
+                            <span />
+                            <span />
+                          </span>
+                        ) : null}
+                        {m.error && <div className="cp-msg-error">⚠ {m.error}</div>}
+                      </>
+                    ) : (
+                      <>
+                        {m.images && m.images.length > 0 && (
+                          <div className="cp-msg-images">
+                            {m.images.map((u, j) => (
+                              <img
+                                key={j}
+                                src={u}
+                                alt={`图片${j + 1}`}
+                                onClick={() => setLightbox(u)}
+                                title="点击放大"
+                              />
+                            ))}
+                          </div>
+                        )}
+                        {m.content}
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            {imgUploading && <div className="cp-pending-thumb cp-pending-loading">上传中</div>}
+          </div>
+        )}
+        <div className="cp-input-row">
+          <label
+            className="cp-img-btn"
+            title="添加图片（也可直接 Ctrl/Cmd+V 粘贴）"
+            aria-label="添加图片"
+          >
+            <Icon name="image" size={16} />
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              style={{ display: 'none' }}
+              disabled={imgUploading}
+              onChange={(e) => {
+                const files = e.target.files;
+                if (files) Array.from(files).forEach((f) => void uploadCopilotImage(f));
+                e.currentTarget.value = '';
+              }}
+            />
+          </label>
+          <textarea
+            ref={taRef}
+            className="cp-input"
+            rows={1}
+            value={input}
+            placeholder="向 Copilot 提问… (Enter 发送, Shift+Enter 换行)"
+            onChange={onInputChange}
+            onKeyDown={onKeyDown}
+            onPaste={onInputPaste}
+            disabled={false}
+          />
+          {streaming ? (
+            <button className="cp-send-btn cp-stop-btn" onClick={stop} title="停止">
+              ■
+            </button>
+          ) : (
+            <button
+              className="cp-send-btn"
+              onClick={() => send(input)}
+              disabled={(!input.trim() && pendingImages.length === 0) || imgUploading || !online}
+              title={online ? '发送' : '离线，网络恢复后可发送'}
+            >
+              ➤
+            </button>
+          )}
+        </div>
+
+        {lightbox && (
+          <div
+            className="cp-lightbox"
+            onClick={() => setLightbox(null)}
+            role="dialog"
+            aria-label="图片预览"
+          >
+            <button className="cp-lightbox-close" onClick={() => setLightbox(null)} aria-label="关闭">
+              ×
+            </button>
+            <img src={lightbox} alt="预览" onClick={(e) => e.stopPropagation()} />
+          </div>
+        )}
+      </div>
     );
   }
 

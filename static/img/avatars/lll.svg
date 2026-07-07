@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- 背景 -->
+  <circle cx="100" cy="100" r="100" fill="#059669"/>
+  
+  <!-- 头部 -->
+  <circle cx="100" cy="80" r="35" fill="#D1FAE5"/>
+  
+  <!-- 身体 -->
+  <ellipse cx="100" cy="150" rx="45" ry="55" fill="#D1FAE5"/>
+  
+  <!-- 眼睛 -->
+  <circle cx="90" cy="75" r="4" fill="#064E3B"/>
+  <circle cx="110" cy="75" r="4" fill="#064E3B"/>
+  
+  <!-- 微笑 -->
+  <path d="M 85 85 Q 100 95 115 85" stroke="#064E3B" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- 基因组装饰 -->
+  <g opacity="0.3">
+    <rect x="160" y="40" width="8" height="20" fill="#D1FAE5" rx="2"/>
+    <rect x="170" y="35" width="8" height="25" fill="#D1FAE5" rx="2"/>
+    <rect x="160" y="65" width="8" height="15" fill="#D1FAE5" rx="2"/>
+    <rect x="170" y="65" width="8" height="18" fill="#D1FAE5" rx="2"/>
+  </g>
+  
+  <!-- 字母 L -->
+  <text x="100" y="190" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#D1FAE5" text-anchor="middle">L</text>
+</svg>

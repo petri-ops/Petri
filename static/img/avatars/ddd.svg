@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- 背景 -->
+  <circle cx="100" cy="100" r="100" fill="#4F46E5"/>
+  
+  <!-- 头部 -->
+  <circle cx="100" cy="80" r="35" fill="#E0E7FF"/>
+  
+  <!-- 身体 -->
+  <ellipse cx="100" cy="150" rx="45" ry="55" fill="#E0E7FF"/>
+  
+  <!-- 眼睛 -->
+  <circle cx="90" cy="75" r="4" fill="#1E1B4B"/>
+  <circle cx="110" cy="75" r="4" fill="#1E1B4B"/>
+  
+  <!-- 微笑 -->
+  <path d="M 85 85 Q 100 95 115 85" stroke="#1E1B4B" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- DNA 螺旋装饰 -->
+  <g opacity="0.3">
+    <path d="M 30 30 Q 40 40 30 50 Q 20 60 30 70" stroke="#E0E7FF" stroke-width="3" fill="none"/>
+    <circle cx="30" cy="30" r="3" fill="#E0E7FF"/>
+    <circle cx="30" cy="50" r="3" fill="#E0E7FF"/>
+    <circle cx="30" cy="70" r="3" fill="#E0E7FF"/>
+  </g>
+  
+  <!-- 字母 D -->
+  <text x="100" y="190" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#E0E7FF" text-anchor="middle">D</text>
+</svg>

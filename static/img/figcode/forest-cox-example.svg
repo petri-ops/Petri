@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400">
+  <rect width="600" height="400" fill="#ffffff"/>
+<text x="20"  y="35" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#1f2937">Variable</text>
+<text x="160" y="35" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#1f2937">HR (95% CI)</text>
+<text x="540" y="35" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#1f2937" text-anchor="end">P-value</text>
+<line x1="280" y1="55" x2="280" y2="350" stroke="#94a3b8" stroke-dasharray="3,3"/>
+<text x="20" y="84" font-family="-apple-system,sans-serif" font-size="12" fill="#374151">Risk score</text>
+<text x="160" y="84" font-family="-apple-system,sans-serif" font-size="11" fill="#6b7280">1.85 (1.40-2.45)</text>
+<line x1="304.0" y1="80" x2="367.0" y2="80" stroke="#dc2626" stroke-width="1.5"/>
+<line x1="304.0" y1="76" x2="304.0" y2="84" stroke="#dc2626" stroke-width="1.5"/>
+<line x1="367.0" y1="76" x2="367.0" y2="84" stroke="#dc2626" stroke-width="1.5"/>
+<rect x="326.0" y="75" width="10" height="10" fill="#dc2626"/>
+<text x="540" y="84" font-family="-apple-system,sans-serif" font-size="11" fill="#374151" text-anchor="end">< 0.001</text>
+<text x="20" y="134" font-family="-apple-system,sans-serif" font-size="12" fill="#374151">Age (>60)</text>
+<text x="160" y="134" font-family="-apple-system,sans-serif" font-size="11" fill="#6b7280">1.32 (1.05-1.66)</text>
+<line x1="283.0" y1="130" x2="319.6" y2="130" stroke="#374151" stroke-width="1.5"/>
+<line x1="283.0" y1="126" x2="283.0" y2="134" stroke="#374151" stroke-width="1.5"/>
+<line x1="319.6" y1="126" x2="319.6" y2="134" stroke="#374151" stroke-width="1.5"/>
+<rect x="294.2" y="125" width="10" height="10" fill="#374151"/>
+<text x="540" y="134" font-family="-apple-system,sans-serif" font-size="11" fill="#374151" text-anchor="end">0.018</text>
+<text x="20" y="184" font-family="-apple-system,sans-serif" font-size="12" fill="#374151">Stage III-IV</text>
+<text x="160" y="184" font-family="-apple-system,sans-serif" font-size="11" fill="#6b7280">2.10 (1.55-2.85)</text>
+<line x1="313.0" y1="180" x2="391.0" y2="180" stroke="#dc2626" stroke-width="1.5"/>
+<line x1="313.0" y1="176" x2="313.0" y2="184" stroke="#dc2626" stroke-width="1.5"/>
+<line x1="391.0" y1="176" x2="391.0" y2="184" stroke="#dc2626" stroke-width="1.5"/>
+<rect x="341.0" y="175" width="10" height="10" fill="#dc2626"/>
+<text x="540" y="184" font-family="-apple-system,sans-serif" font-size="11" fill="#374151" text-anchor="end">< 0.001</text>
+<text x="20" y="234" font-family="-apple-system,sans-serif" font-size="12" fill="#374151">Male</text>
+<text x="160" y="234" font-family="-apple-system,sans-serif" font-size="11" fill="#6b7280">1.18 (0.92-1.51)</text>
+<line x1="275.2" y1="230" x2="310.6" y2="230" stroke="#374151" stroke-width="1.5"/>
+<line x1="275.2" y1="226" x2="275.2" y2="234" stroke="#374151" stroke-width="1.5"/>
+<line x1="310.6" y1="226" x2="310.6" y2="234" stroke="#374151" stroke-width="1.5"/>
+<rect x="285.8" y="225" width="10" height="10" fill="#374151"/>
+<text x="540" y="234" font-family="-apple-system,sans-serif" font-size="11" fill="#374151" text-anchor="end">0.190</text>
+<text x="20" y="284" font-family="-apple-system,sans-serif" font-size="12" fill="#374151">Grade 3</text>
+<text x="160" y="284" font-family="-apple-system,sans-serif" font-size="11" fill="#6b7280">1.46 (1.10-1.94)</text>
+<line x1="286.0" y1="280" x2="336.4" y2="280" stroke="#dc2626" stroke-width="1.5"/>
+<line x1="286.0" y1="276" x2="286.0" y2="284" stroke="#dc2626" stroke-width="1.5"/>
+<line x1="336.4" y1="276" x2="336.4" y2="284" stroke="#dc2626" stroke-width="1.5"/>
+<rect x="302.6" y="275" width="10" height="10" fill="#dc2626"/>
+<text x="540" y="284" font-family="-apple-system,sans-serif" font-size="11" fill="#374151" text-anchor="end">0.009</text>
+<line x1="180" y1="365" x2="500" y2="365" stroke="#374151"/>
+<line x1="250.0" y1="365" x2="250.0" y2="370" stroke="#374151"/>
+<text x="250.0" y="382" font-family="-apple-system,sans-serif" font-size="10" fill="#374151" text-anchor="middle">0.5</text>
+<line x1="280" y1="365" x2="280" y2="370" stroke="#374151"/>
+<text x="280" y="382" font-family="-apple-system,sans-serif" font-size="10" fill="#374151" text-anchor="middle">1</text>
+<line x1="340" y1="365" x2="340" y2="370" stroke="#374151"/>
+<text x="340" y="382" font-family="-apple-system,sans-serif" font-size="10" fill="#374151" text-anchor="middle">2</text>
+<line x1="400" y1="365" x2="400" y2="370" stroke="#374151"/>
+<text x="400" y="382" font-family="-apple-system,sans-serif" font-size="10" fill="#374151" text-anchor="middle">3</text>
+<line x1="460" y1="365" x2="460" y2="370" stroke="#374151"/>
+<text x="460" y="382" font-family="-apple-system,sans-serif" font-size="10" fill="#374151" text-anchor="middle">4</text>
+</svg>

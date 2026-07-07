@@ -15,10 +15,13 @@ import AlgorithmsPage from '@/pages/algorithms';
 import SkillsPage from '@/pages/skills';
 import AdminPage from '@/pages/admin';
 import HomePage from '@/pages/home';
-import DocsPage from '@/pages/docs';
+// DocsPage 原生渲染组件保留在 pages/docs.tsx，但桌面端不再挂载教程路由。
+// 如需恢复内置教程，取消下面注释并加回 /docs 路由即可。
+// import DocsPage from '@/pages/docs';
 import { CopilotChat } from '@/components/copilot/CopilotChat';
 import { CopilotSelectionTip } from '@/components/copilot/CopilotSelectionTip';
 import '@/components/copilot/copilotActRegistryBoot';
+import { ProjectWorkspace } from '@/pages/project-workspace';
 // 断点6：注入平台 API 给 @biof3/shared 渲染层组件（ActResultCard/CopilotResultPanel/copilotActRegistry）
 import { configureApi } from '../../vendor/biof3-core/packages/shared-copilot/api-inject';
 import { getApiPrefix, getToken } from '@/lib/authClient';
@@ -54,6 +57,7 @@ export default function App(): React.ReactElement {
         <Routes>
           {/* 阶段 1：8 个应用页面全部移植完成 */}
           <Route path="/" element={<HomePage />} />
+          <Route path="/project/:projectId" element={<ProjectWorkspace />} />
           <Route path="/tools" element={<ToolsPage />} />
           <Route path="/tools/:toolId" element={<ToolsPage />} />
           <Route path="/single-cell" element={<SingleCellPage />} />
@@ -67,8 +71,11 @@ export default function App(): React.ReactElement {
           <Route path="/skills" element={<SkillsPage />} />
           <Route path="/skills/:skillId" element={<SkillsPage />} />
           <Route path="/admin" element={<AdminPage />} />
-          <Route path="/docs/*" element={<DocsPage />} />
-          <Route path="/docs" element={<DocsPage />} />
+          {/* 教程路由已移除 — 桌面端不再内置教程入口。
+              原生渲染组件（pages/docs.tsx / docs-frame.tsx / mdx/）保留在代码库中，
+              如需恢复：import DocsPage 并加回下面两行路由即可。 */}
+          {/* <Route path="/docs/*" element={<DocsPage />} /> */}
+          {/* <Route path="/docs" element={<DocsPage />} /> */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

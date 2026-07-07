@@ -48,7 +48,21 @@ export type IconName =
   | 'key'
   | 'cpu'
   | 'sun'
-  | 'moon';
+  | 'moon'
+  | 'zap'
+  | 'clock'
+  | 'folder'
+  | 'file'
+  | 'database'
+  | 'terminal'
+  | 'arrow-left'
+  | 'panel-left'
+  | 'panel-right'
+  | 'chevron-down'
+  | 'chevron-right'
+  | 'wrench'
+  | 'layout-grid'
+  | 'plus';
 
 interface IconProps {
   name: IconName;
@@ -312,6 +326,84 @@ const paths: Record<IconName, React.ReactNode> = {
   ),
   // Moon — dark mode (Lucide moon)
   moon: <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />,
+  // Zap — quick start / lightning (Lucide zap)
+  zap: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />,
+  // Clock — recent runs (Lucide clock)
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </>
+  ),
+  // Folder — project / resource (Lucide folder)
+  folder: <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" />,
+  // File — generic file (Lucide file)
+  file: (
+    <>
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+    </>
+  ),
+  // Database — dataset / storage (Lucide database)
+  database: (
+    <>
+      <ellipse cx="12" cy="5" rx="9" ry="3" />
+      <path d="M3 5v14a9 3 0 0 0 18 0V5" />
+      <path d="M3 12a9 3 0 0 0 18 0" />
+    </>
+  ),
+  // Terminal — agent / console (Lucide terminal)
+  terminal: (
+    <>
+      <polyline points="4 17 10 11 4 5" />
+      <line x1="12" y1="19" x2="20" y2="19" />
+    </>
+  ),
+  // Arrow left — back navigation (Lucide arrow-left)
+  'arrow-left': (
+    <>
+      <line x1="19" y1="12" x2="5" y2="12" />
+      <polyline points="12 19 5 12 12 5" />
+    </>
+  ),
+  // Panel left — toggle left sidebar (Lucide panel-left)
+  'panel-left': (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <line x1="9" y1="3" x2="9" y2="21" />
+    </>
+  ),
+  // Panel right — toggle right sidebar (Lucide panel-right)
+  'panel-right': (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <line x1="15" y1="3" x2="15" y2="21" />
+    </>
+  ),
+  // Chevron down — collapse (Lucide chevron-down)
+  'chevron-down': <polyline points="6 9 12 15 18 9" />,
+  // Chevron right — expand (Lucide chevron-right)
+  'chevron-right': <polyline points="9 18 15 12 9 6" />,
+  // Wrench — tool / toolbox (Lucide wrench)
+  wrench: (
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+  ),
+  // Layout grid — toolbox grid (Lucide layout-grid)
+  'layout-grid': (
+    <>
+      <rect x="3" y="3" width="7" height="7" />
+      <rect x="14" y="3" width="7" height="7" />
+      <rect x="14" y="14" width="7" height="7" />
+      <rect x="3" y="14" width="7" height="7" />
+    </>
+  ),
+  // Plus — new item (Lucide plus)
+  plus: (
+    <>
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </>
+  ),
 };
 
 export function Icon({

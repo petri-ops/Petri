@@ -337,9 +337,10 @@ function RightPanel({ card }: { card: FigCard | null }) {
           </pre>
         </div>
 
-        <TutorialLinkSection card={card} />
-
-        <OnlineToolSection card={card} />
+        {/* 桌面端已移除教程入口，TutorialLinkSection / OnlineToolSection 不再渲染。
+            组件定义保留在文件中，如需恢复取消下面注释即可。 */}
+        {/* <TutorialLinkSection card={card} /> */}
+        {/* <OnlineToolSection card={card} /> */}
       </div>
     </aside>
   );

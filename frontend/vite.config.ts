@@ -157,9 +157,10 @@ export default defineConfig({
     react(),
   ],
   base: './',
-  // 静态资源根：指向仓库根 static/，让 docs/blog 里的 /img/... 路径
+  // 静态资源根：指向 desktop 仓根 static/，让 docs/blog 里的 /img/... 路径
   // 直接解析到 static/img/...（Docusaurus 的 static 目录约定）
-  publicDir: path.resolve(__dirname, '..', '..', 'static'),
+  // 分仓后 frontend/ 在 desktop/frontend/（一层深），只需往上一层到 desktop/
+  publicDir: path.resolve(__dirname, '..', 'static'),
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),

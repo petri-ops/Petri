@@ -121,14 +121,15 @@ export function AlgorithmDetailPanel({ card, onClose }: Props) {
                   🧪 在线体验
                 </a>
               )}
-              {card.related_tutorial && (
+              {/* 桌面端已移除教程入口，"看教程"链接已删除。如需恢复取消下面注释即可。 */}
+              {/* {card.related_tutorial && (
                 <a
                   href={card.related_tutorial}
                   className={`${styles.relatedLink} ${styles.relatedLinkTutorial}`}
                 >
                   📖 看教程
                 </a>
-              )}
+              )} */}
               {card.related_code && (
                 <a
                   href={`/${card.related_code}`}

@@ -152,7 +152,8 @@ export function LoginModal({
                   <small>跑通第一个 DESeq2 分析</small>
                 </span>
               </a>
-              <a
+              {/* 桌面端已移除教程入口，"浏览教程"链接已删除。如需恢复取消下面注释即可。 */}
+              {/* <a
                 href="/docs"
                 className="biof3-login-modal__welcome-link"
                 onClick={() => {
@@ -165,7 +166,7 @@ export function LoginModal({
                   <strong>浏览教程</strong>
                   <small>65 篇中文组学教程</small>
                 </span>
-              </a>
+              </a> */}
               <a
                 href="/tools"
                 className="biof3-login-modal__welcome-link"

@@ -3309,3 +3309,267 @@
 .cp-approval-cancel:hover {
   background: #e5e7eb;
 }
+
+/* ============================================================
+ * Phase 6: Embedded CopilotChat — renders inside project workspace
+ * agent bar (bottom of center column) instead of floating FAB/panel.
+ * ============================================================ */
+.cp-embedded {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--ifm-background-color, #fff);
+  border-top: 1px solid var(--ifm-color-emphasis-200, #e5e7eb);
+  font-size: 13px;
+}
+.cp-embedded-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 10px;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200, #e5e7eb);
+  background: var(--ifm-color-emphasis-100, #f9fafb);
+  flex-shrink: 0;
+}
+.cp-embedded .cp-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.cp-embedded .cp-conv-trigger {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-800, #1f2937);
+}
+.cp-embedded .cp-conv-trigger:hover {
+  background: var(--ifm-color-emphasis-200, #f3f4f6);
+}
+.cp-embedded .cp-conv-arrow {
+  font-size: 10px;
+  color: var(--ifm-color-emphasis-500, #6b7280);
+}
+.cp-embedded .cp-header-sub {
+  font-size: 10px;
+  color: var(--ifm-color-emphasis-500, #9ca3af);
+  padding: 0 6px;
+}
+.cp-embedded .cp-header-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.cp-embedded .cp-icon-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  color: var(--ifm-color-emphasis-600, #6b7280);
+  font-size: 14px;
+  line-height: 1;
+}
+.cp-embedded .cp-icon-btn:hover {
+  background: var(--ifm-color-emphasis-200, #f3f4f6);
+}
+.cp-embedded .cp-icon-btn-active {
+  color: var(--ifm-color-primary, #2e8555);
+  background: var(--ifm-color-emphasis-200, #f3f4f6);
+}
+.cp-embedded .cp-conv-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  background: #fff;
+  border: 1px solid var(--ifm-color-emphasis-200, #e5e7eb);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+  min-width: 220px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.cp-embedded .cp-conv-new {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200, #e5e7eb);
+  background: var(--ifm-color-emphasis-100, #f9fafb);
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--ifm-color-primary, #2e8555);
+  font-weight: 600;
+}
+.cp-embedded .cp-conv-new:hover {
+  background: var(--ifm-color-emphasis-200, #f3f4f6);
+}
+.cp-embedded .cp-conv-list {
+  padding: 4px 0;
+}
+.cp-embedded .cp-conv-empty {
+  padding: 10px 12px;
+  font-size: 11px;
+  color: var(--ifm-color-emphasis-500, #9ca3af);
+}
+.cp-embedded .cp-conv-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.cp-embedded .cp-conv-item:hover {
+  background: var(--ifm-color-emphasis-100, #f9fafb);
+}
+.cp-embedded .cp-conv-item.active {
+  background: var(--ifm-color-emphasis-200, #f3f4f6);
+}
+.cp-embedded .cp-conv-item-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ifm-color-emphasis-800, #1f2937);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cp-embedded .cp-conv-item-meta {
+  font-size: 10px;
+  color: var(--ifm-color-emphasis-500, #9ca3af);
+}
+
+/* Embedded messages area — fills available height */
+.cp-embedded .cp-messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px 10px;
+}
+
+/* Embedded trace panel */
+.cp-embedded .cp-trace-panel {
+  flex-shrink: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200, #e5e7eb);
+}
+
+/* Embedded input row — sticks to bottom */
+.cp-embedded .cp-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  padding: 6px 10px;
+  border-top: 1px solid var(--ifm-color-emphasis-200, #e5e7eb);
+  background: var(--ifm-background-color, #fff);
+  flex-shrink: 0;
+}
+.cp-embedded .cp-input {
+  flex: 1;
+  resize: none;
+  border: 1px solid var(--ifm-color-emphasis-200, #e5e7eb);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  max-height: 120px;
+  overflow-y: auto;
+  font-family: inherit;
+  background: var(--ifm-background-color, #fff);
+  color: var(--ifm-color-emphasis-800, #1f2937);
+}
+.cp-embedded .cp-input:focus {
+  outline: none;
+  border-color: var(--ifm-color-primary, #2e8555);
+}
+.cp-embedded .cp-img-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--ifm-color-emphasis-500, #6b7280);
+  flex-shrink: 0;
+}
+.cp-embedded .cp-img-btn:hover {
+  background: var(--ifm-color-emphasis-200, #f3f4f6);
+}
+.cp-embedded .cp-send-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: var(--ifm-color-primary, #2e8555);
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.cp-embedded .cp-send-btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+.cp-embedded .cp-send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.cp-embedded .cp-stop-btn {
+  background: #ef4444;
+}
+
+/* Embedded welcome / quick prompts */
+.cp-embedded .cp-welcome {
+  padding: 16px 10px;
+}
+.cp-embedded .cp-welcome-text {
+  font-size: 13px;
+  color: var(--ifm-color-emphasis-700, #374151);
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+.cp-embedded .cp-quick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.cp-embedded .cp-quick-btn {
+  padding: 8px 10px;
+  border: 1px solid var(--ifm-color-emphasis-200, #e5e7eb);
+  border-radius: 8px;
+  background: var(--ifm-color-emphasis-100, #f9fafb);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+  color: var(--ifm-color-emphasis-700, #374151);
+}
+.cp-embedded .cp-quick-btn:hover {
+  background: var(--ifm-color-emphasis-200, #f3f4f6);
+  border-color: var(--ifm-color-primary, #2e8555);
+}
+
+/* Embedded offline / error states */
+.cp-embedded .cp-offline-placeholder,
+.cp-embedded .cp-offline-banner {
+  padding: 10px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--ifm-color-emphasis-500, #9ca3af);
+}
