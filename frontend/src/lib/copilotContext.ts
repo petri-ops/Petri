@@ -18,6 +18,9 @@ export type CopilotPage =
   | 'docs'
   | 'blog'
   | 'home'
+  // 6.3 — desktop 项目工作台
+  | 'desktop-project'
+  | 'desktop-home'
   | 'unknown';
 
 export interface CopilotContext {
@@ -51,6 +54,17 @@ export interface CopilotContext {
   toolName?: string;
   toolResult?: unknown;
   availableTools?: string[];
+  // 6.3 — desktop project workspace context
+  /** Current project name (desktop workspace) */
+  projectName?: string;
+  /** Project modality: single-cell / spatial / genome / etc. */
+  projectModality?: string;
+  /** Dataset summaries in current project (id + name + type + rows) */
+  projectDatasets?: { id: string; name: string; type?: string; rows?: number }[];
+  /** Recent job summaries in current project (id + tool + status + time) */
+  projectJobs?: { id: string; toolId: string; status: string; name?: string; createdAt: number }[];
+  /** Current active job id being viewed */
+  activeJobId?: string;
 }
 
 let current: CopilotContext = { page: 'unknown' };
@@ -101,6 +115,13 @@ export function detectPageFromUrl(url: string, title?: string): CopilotContext {
         return { page: 'spatial-project', pageTitle: title, currentModule: 'spatial' };
       return { page: 'spatial-projects', pageTitle: title, currentModule: 'spatial' };
     }
+    // 6.3 — desktop project workspace
+    if (path.startsWith('/project/')) {
+      return { page: 'desktop-project', pageTitle: title };
+    }
+    if (path === '/' || path === '') {
+      return { page: 'desktop-home', pageTitle: title };
+    }
     if (path.startsWith('/figcode') || path.includes('/figcode/')) {
       return { page: 'figcode', pageTitle: title };
     }
@@ -109,9 +130,6 @@ export function detectPageFromUrl(url: string, title?: string): CopilotContext {
     }
     if (path.startsWith('/docs') || path.includes('/docs/')) {
       return { page: 'docs', pageTitle: title };
-    }
-    if (path === '/' || path === '') {
-      return { page: 'home', pageTitle: title };
     }
     return { page: 'unknown', pageTitle: title };
   } catch {

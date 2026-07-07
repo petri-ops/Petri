@@ -13,6 +13,7 @@ import { getApiPrefix, getToken } from '@/lib/authClient';
 import { tools as staticTools } from '@/pages/_data';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { CopilotChat } from '@/components/copilot/CopilotChat';
+import { setCopilotContext } from '@/lib/copilotContext';
 import { getNextSteps, buildChainPrompt, type ResolvedJob } from '@/lib/workflow-chains';
 import styles from './project-workspace.module.css';
 
@@ -90,6 +91,31 @@ export function ProjectWorkspace(): React.ReactElement {
     const id = setInterval(fetchData, 15_000);
     return () => clearInterval(id);
   }, [fetchData]);
+
+  // 6.3 — Inject project context into CopilotChat
+  useEffect(() => {
+    if (!project) return;
+    setCopilotContext({
+      page: 'desktop-project',
+      pageTitle: project.name,
+      projectName: project.name,
+      projectModality: project.modality,
+      projectDatasets: datasets.map((d) => ({
+        id: d.id,
+        name: d.name,
+        type: d.nCells != null ? 'single-cell' : undefined,
+        rows: d.nCells,
+      })),
+      projectJobs: jobs.map((j) => ({
+        id: j.id,
+        toolId: j.tool_id,
+        status: j.status,
+        name: j.name,
+        createdAt: j.created_at,
+      })),
+      activeJobId: activeJobId ?? undefined,
+    });
+  }, [project, datasets, jobs, activeJobId]);
 
   const activeJob = useMemo(
     () => jobs.find((j) => j.id === activeJobId) || null,
