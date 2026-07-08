@@ -392,7 +392,7 @@ function ResourcePanel({
   const [fileTree, setFileTree] = useState<FileEntry[]>([]);
   const [expandedDirs, setExpandedDirs] = useState<Set<string>>(new Set());
   const [storageBytes, setStorageBytes] = useState<number>(0);
-  const [activeTab, setActiveTab] = useState<'datasets' | 'files' | 'info'>('datasets');
+  const [activeTab, setActiveTab] = useState<'datasets' | 'files'>('datasets');
 
   // Fetch storage usage
   useEffect(() => {
@@ -433,96 +433,95 @@ function ResourcePanel({
   }, []);
 
   return (
-    <div className={styles.panelInner}>
-      {/* Tab switcher */}
-      <div className={styles.tabBar}>
-        <button
-          className={`${styles.tabBtn} ${activeTab === 'datasets' ? styles.tabBtnActive : ''}`}
-          onClick={() => setActiveTab('datasets')}
-        >
-          数据集
-        </button>
-        <button
-          className={`${styles.tabBtn} ${activeTab === 'files' ? styles.tabBtnActive : ''}`}
-          onClick={() => setActiveTab('files')}
-        >
-          文件
-        </button>
-        <button
-          className={`${styles.tabBtn} ${activeTab === 'info' ? styles.tabBtnActive : ''}`}
-          onClick={() => setActiveTab('info')}
-        >
-          信息
-        </button>
+    <div className={styles.leftPanelWrap}>
+      {/* Top section — datasets / files */}
+      <div className={styles.leftTopSection}>
+        <div className={styles.leftMiniTabBar}>
+          <button
+            className={`${styles.leftMiniTab} ${activeTab === 'datasets' ? styles.leftMiniTabActive : ''}`}
+            onClick={() => setActiveTab('datasets')}
+          >
+            <Icon name="database" size={13} /> 数据集
+          </button>
+          <button
+            className={`${styles.leftMiniTab} ${activeTab === 'files' ? styles.leftMiniTabActive : ''}`}
+            onClick={() => setActiveTab('files')}
+          >
+            <Icon name="folder" size={13} /> 文件
+          </button>
+        </div>
+        <div className={styles.leftTopContent}>
+          {activeTab === 'datasets' && (
+            <div className={styles.panelSection}>
+              {datasets.length === 0 ? (
+                <p className={styles.panelEmpty}>暂无数据集</p>
+              ) : (
+                <ul className={styles.itemList}>
+                  {datasets.map((d) => (
+                    <li key={d.id} className={styles.itemRow}>
+                      <Icon name="file" size={14} />
+                      <div className={styles.itemMeta}>
+                        <span className={styles.itemName}>{d.name}</span>
+                        <span className={styles.itemSub}>
+                          {d.nCells ? `${d.nCells} cells · ` : ''}
+                          {formatSize(d.size)}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+          {activeTab === 'files' && (
+            <div className={styles.panelSection}>
+              {fileTree.length === 0 ? (
+                <p className={styles.panelEmpty}>暂无文件</p>
+              ) : (
+                <FileTreeList
+                  entries={fileTree}
+                  prefix=""
+                  expandedDirs={expandedDirs}
+                  onToggleDir={toggleDir}
+                  onFetchDir={fetchDir}
+                />
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
-      {activeTab === 'datasets' && (
-        <div className={styles.panelSection}>
-          {datasets.length === 0 ? (
-            <p className={styles.panelEmpty}>暂无数据集</p>
-          ) : (
-            <ul className={styles.itemList}>
-              {datasets.map((d) => (
-                <li key={d.id} className={styles.itemRow}>
-                  <Icon name="file" size={14} />
-                  <div className={styles.itemMeta}>
-                    <span className={styles.itemName}>{d.name}</span>
-                    <span className={styles.itemSub}>
-                      {d.nCells ? `${d.nCells} cells · ` : ''}
-                      {formatSize(d.size)}
-                    </span>
-                  </div>
-                </li>
-              ))}
-            </ul>
+      {/* Bottom section — project info */}
+      <div className={styles.leftBottomSection}>
+        <div className={styles.leftBottomHeader}>
+          <Icon name="layers" size={14} />
+          <span>项目</span>
+        </div>
+        <div className={styles.leftBottomBody}>
+          <p className={styles.infoRow}>
+            <span className={styles.infoLabel}>名称</span>
+            <span className={styles.infoValue}>{project.name}</span>
+          </p>
+          {project.description && (
+            <p className={styles.infoRow}>
+              <span className={styles.infoLabel}>描述</span>
+              <span className={styles.infoValue}>{project.description}</span>
+            </p>
           )}
+          <p className={styles.infoRow}>
+            <span className={styles.infoLabel}>创建</span>
+            <span className={styles.infoValue}>{formatDate(project.createdAt)}</span>
+          </p>
+          <p className={styles.infoRow}>
+            <span className={styles.infoLabel}>分析数</span>
+            <span className={styles.infoValue}>{jobs.length}</span>
+          </p>
+          <p className={styles.infoRow}>
+            <span className={styles.infoLabel}>存储</span>
+            <span className={styles.infoValue}>{formatSize(storageBytes)}</span>
+          </p>
         </div>
-      )}
-
-      {activeTab === 'files' && (
-        <div className={styles.panelSection}>
-          {fileTree.length === 0 ? (
-            <p className={styles.panelEmpty}>暂无文件</p>
-          ) : (
-            <FileTreeList
-              entries={fileTree}
-              prefix=""
-              expandedDirs={expandedDirs}
-              onToggleDir={toggleDir}
-              onFetchDir={fetchDir}
-            />
-          )}
-        </div>
-      )}
-
-      {activeTab === 'info' && (
-        <div className={styles.panelSection}>
-          <div className={styles.infoBlock}>
-            <p className={styles.infoRow}>
-              <span className={styles.infoLabel}>名称</span>
-              <span className={styles.infoValue}>{project.name}</span>
-            </p>
-            {project.description && (
-              <p className={styles.infoRow}>
-                <span className={styles.infoLabel}>描述</span>
-                <span className={styles.infoValue}>{project.description}</span>
-              </p>
-            )}
-            <p className={styles.infoRow}>
-              <span className={styles.infoLabel}>创建</span>
-              <span className={styles.infoValue}>{formatDate(project.createdAt)}</span>
-            </p>
-            <p className={styles.infoRow}>
-              <span className={styles.infoLabel}>分析数</span>
-              <span className={styles.infoValue}>{jobs.length}</span>
-            </p>
-            <p className={styles.infoRow}>
-              <span className={styles.infoLabel}>存储</span>
-              <span className={styles.infoValue}>{formatSize(storageBytes)}</span>
-            </p>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
