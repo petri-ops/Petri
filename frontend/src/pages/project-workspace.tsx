@@ -4,7 +4,7 @@
 // Collapsible panels. Route: /project/:projectId
 // ============================================================
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { getProject, listProjectJobs, listDatasetsByProject, listProjects } from '@/lib/project-store';
@@ -29,11 +29,47 @@ export function ProjectWorkspace(): React.ReactElement {
 
   // Panel collapse state
   const [leftOpen, setLeftOpen] = useState(true);
-  const [rightOpen, setRightOpen] = useState(false); // results panel, default collapsed
+  const [rightOpen, setRightOpen] = useState(true); // file tree + results panel
   const [settingsOpen, setSettingsOpen] = useState(false); // settings sidebar overlay
 
   // Selected result tab
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
+
+  // Resizable panel dimensions
+  const [leftWidth, setLeftWidth] = useState(220);
+  const [rightWidth, setRightWidth] = useState(340);
+  const [inputHeight, setInputHeight] = useState(120);
+  const [rightTab, setRightTab] = useState<'files' | 'results'>('files');
+
+  // Drag-to-resize handler factory
+  const startResize = useCallback((which: 'left' | 'right' | 'input') => (e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startLeft = leftWidth;
+    const startRight = rightWidth;
+    const startInput = inputHeight;
+
+    const onMove = (ev: MouseEvent) => {
+      if (which === 'left') {
+        setLeftWidth(Math.max(160, Math.min(420, startLeft + ev.clientX - startX)));
+      } else if (which === 'right') {
+        setRightWidth(Math.max(240, Math.min(600, startRight - (ev.clientX - startX))));
+      } else if (which === 'input') {
+        setInputHeight(Math.max(60, Math.min(400, startInput - (ev.clientY - startY))));
+      }
+    };
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    document.body.style.cursor = which === 'input' ? 'ns-resize' : 'ew-resize';
+    document.body.style.userSelect = 'none';
+  }, [leftWidth, rightWidth, inputHeight]);
 
   // 4.5 — Project switcher dropdown
   const [allProjects, setAllProjects] = useState<Project[]>([]);
@@ -258,49 +294,73 @@ export function ProjectWorkspace(): React.ReactElement {
 
         {/* Left column — Resources */}
         {leftOpen && (
-          <aside className={styles.leftCol}>
-            <ResourcePanel
-              project={project}
-              datasets={datasets}
-              jobs={jobs}
-              onSelectJob={(id) => {
-                setActiveJobId(id);
-                setRightOpen(true);
-              }}
-            />
-          </aside>
+          <>
+            <aside className={styles.leftCol} style={{ width: leftWidth }}>
+              <ResourcePanel
+                project={project}
+                datasets={datasets}
+                jobs={jobs}
+                onSelectJob={(id) => {
+                  setActiveJobId(id);
+                  setRightOpen(true);
+                  setRightTab('results');
+                }}
+              />
+            </aside>
+            <div className={styles.resizeHandleV} onMouseDown={startResize('left')} />
+          </>
         )}
 
         {/* Center column — Agent main interaction area */}
         <main className={styles.centerCol}>
           <div className={styles.agentMain}>
-            <CopilotChat embedded />
+            <CopilotChat embedded inputHeight={inputHeight} />
           </div>
+          <div className={styles.resizeHandleH} onMouseDown={startResize('input')} />
         </main>
 
-        {/* Right column — Results detail panel */}
+        {/* Right column — File tree + Results panel */}
         {rightOpen && (
-          <aside className={styles.rightCol}>
-            <div className={styles.resultPanel}>
-              <div className={styles.resultPanelHeader}>
-                <span className={styles.resultPanelTitle}>结果展示</span>
-                <button
-                  className={styles.iconBtn}
-                  onClick={() => setRightOpen(false)}
-                  title="收起结果栏"
-                >
-                  <Icon name="x" size={16} />
-                </button>
+          <>
+            <div className={styles.resizeHandleV} onMouseDown={startResize('right')} />
+            <aside className={styles.rightCol} style={{ width: rightWidth }}>
+              <div className={styles.resultPanel}>
+                {/* Tab switcher: files / results */}
+                <div className={styles.resultPanelHeader}>
+                  <div className={styles.rightTabBar}>
+                    <button
+                      className={`${styles.rightTabBtn} ${rightTab === 'files' ? styles.rightTabBtnActive : ''}`}
+                      onClick={() => setRightTab('files')}
+                    >
+                      <Icon name="folder" size={14} /> 文件
+                    </button>
+                    <button
+                      className={`${styles.rightTabBtn} ${rightTab === 'results' ? styles.rightTabBtnActive : ''}`}
+                      onClick={() => setRightTab('results')}
+                    >
+                      <Icon name="bar-chart" size={14} /> 结果
+                    </button>
+                  </div>
+                  <button
+                    className={styles.iconBtn}
+                    onClick={() => setRightOpen(false)}
+                    title="收起面板"
+                  >
+                    <Icon name="x" size={16} />
+                  </button>
+                </div>
+                <div className={styles.resultPanelBody}>
+                  {rightTab === 'files' ? (
+                    <RightFileTree project={project} />
+                  ) : activeJob ? (
+                    <ResultView job={activeJob} onAskAgent={handleAskAgent} />
+                  ) : (
+                    <EmptyResult project={project} />
+                  )}
+                </div>
               </div>
-              <div className={styles.resultPanelBody}>
-                {activeJob ? (
-                  <ResultView job={activeJob} onAskAgent={handleAskAgent} />
-                ) : (
-                  <EmptyResult project={project} />
-                )}
-              </div>
-            </div>
-          </aside>
+            </aside>
+          </>
         )}
       </div>
     </div>
@@ -577,6 +637,65 @@ function FileTreeItem({
         />
       )}
     </li>
+  );
+}
+
+// ============================================================
+// RightFileTree — file tree for the right panel (current workspace)
+// ============================================================
+
+function RightFileTree({ project }: { project: Project }): React.ReactElement {
+  const [tree, setTree] = useState<FileEntry[]>([]);
+  const [expandedDirs, setExpandedDirs] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+
+  const fetchDir = useCallback(async (prefix: string) => {
+    try {
+      const resp = await fetch(
+        getApiPrefix() + `/files-tree?prefix=${encodeURIComponent(prefix)}`
+      );
+      const data = await resp.json();
+      if (data.ok) return data.entries as FileEntry[];
+    } catch { /* ignore */ }
+    return [];
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchDir('').then((entries) => {
+      setTree(entries);
+      setLoading(false);
+    });
+  }, [fetchDir, project.id]);
+
+  const toggleDir = useCallback(async (dirPath: string) => {
+    setExpandedDirs((prev) => {
+      const next = new Set(prev);
+      if (next.has(dirPath)) next.delete(dirPath);
+      else next.add(dirPath);
+      return next;
+    });
+  }, []);
+
+  if (loading) {
+    return <p className={styles.panelEmpty}>加载文件树…</p>;
+  }
+
+  if (tree.length === 0) {
+    return <p className={styles.panelEmpty}>当前工作区暂无文件</p>;
+  }
+
+  return (
+    <div className={styles.panelSection}>
+      <FileTreeList
+        entries={tree}
+        prefix=""
+        expandedDirs={expandedDirs}
+        onToggleDir={toggleDir}
+        onFetchDir={fetchDir}
+        depth={0}
+      />
+    </div>
   );
 }
 

@@ -66,7 +66,7 @@ import {
 
 // (Types and helpers moved to copilotTypes.ts and copilotHelpers.ts)
 
-export function CopilotChat({ embedded = false }: { embedded?: boolean } = {}): React.ReactElement | null {
+export function CopilotChat({ embedded = false, inputHeight }: { embedded?: boolean; inputHeight?: number } = {}): React.ReactElement | null {
   const [open, setOpen] = useState(embedded);
   const [ctx, setCtx] = useState<CopilotContext>(() => getCopilotContext());
   const [messages, setMessages] = useState<UIMessage[]>([]);
@@ -1914,6 +1914,7 @@ export function CopilotChat({ embedded = false }: { embedded?: boolean } = {}): 
             onKeyDown={onKeyDown}
             onPaste={onInputPaste}
             disabled={false}
+            style={embedded && inputHeight ? { height: inputHeight, maxHeight: inputHeight } : undefined}
           />
           {streaming ? (
             <button className="cp-send-btn cp-stop-btn" onClick={stop} title="停止">

@@ -223,7 +223,6 @@
   background: var(--biof3-surface, #ffffff);
   border-right: 1px solid var(--biof3-border, #e2e8f0);
   overflow-y: auto;
-  transition: width 0.25s ease;
 }
 
 /* Center column — Agent main interaction area */
@@ -251,7 +250,6 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: width 0.25s ease;
 }
 
 .resultPanel {
@@ -280,6 +278,69 @@
   flex: 1;
   overflow-y: auto;
   padding: 16px;
+}
+
+/* Right panel tab bar */
+.rightTabBar {
+  display: flex;
+  gap: 4px;
+}
+
+.rightTabBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--biof3-text-tertiary, #94a3b8);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.rightTabBtn:hover {
+  color: var(--biof3-text-secondary, #64748b);
+  background: var(--biof3-bg-hover, #f1f5f9);
+}
+
+.rightTabBtnActive {
+  color: var(--biof3-accent, #0d9488);
+  background: var(--biof3-accent-bg, #f0fdfa);
+  border-color: var(--biof3-accent-border, #ccfbf1);
+}
+
+/* Resize handles */
+.resizeHandleV {
+  width: 5px;
+  flex-shrink: 0;
+  cursor: ew-resize;
+  background: transparent;
+  position: relative;
+  z-index: 5;
+  transition: background 0.15s ease;
+}
+
+.resizeHandleV:hover,
+.resizeHandleV:active {
+  background: var(--biof3-accent, #0d9488);
+}
+
+.resizeHandleH {
+  height: 5px;
+  flex-shrink: 0;
+  cursor: ns-resize;
+  background: transparent;
+  position: relative;
+  z-index: 5;
+  transition: background 0.15s ease;
+}
+
+.resizeHandleH:hover,
+.resizeHandleH:active {
+  background: var(--biof3-accent, #0d9488);
 }
 
 /* Settings sidebar overlay */
