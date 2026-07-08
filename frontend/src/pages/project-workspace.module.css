@@ -288,7 +288,7 @@
   flex-shrink: 0;
   border-top: 1px solid var(--biof3-border, #e2e8f0);
   background: var(--biof3-bg, #f8fafc);
-  max-height: 240px;
+  max-height: 280px;
   overflow-y: auto;
 }
 
@@ -304,11 +304,62 @@
   color: var(--biof3-text-secondary, #94a3b8);
 }
 
-.leftBottomBody {
-  padding: 0 12px 12px;
+.projectListBody {
+  padding: 0 8px 8px;
+}
+
+.projectList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px;
+}
+
+.projectItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  color: var(--biof3-text-secondary, #475569);
+}
+
+.projectItem:hover {
+  background: var(--biof3-bg-hover, #f1f5f9);
+}
+
+.projectItemActive {
+  background: var(--biof3-accent-bg, #f0fdfa);
+  color: var(--biof3-accent, #0d9488);
+  font-weight: 500;
+}
+
+.projectItemMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.projectItemName {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.projectItemSub {
+  font-size: 10px;
+  color: var(--biof3-text-tertiary, #94a3b8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Center column — Agent main interaction area */

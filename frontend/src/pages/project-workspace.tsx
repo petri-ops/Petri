@@ -300,6 +300,9 @@ export function ProjectWorkspace(): React.ReactElement {
                 project={project}
                 datasets={datasets}
                 jobs={jobs}
+                allProjects={allProjects}
+                currentProjectId={projectId}
+                onSwitchProject={switchToProject}
                 onSelectJob={(id) => {
                   setActiveJobId(id);
                   setRightOpen(true);
@@ -383,11 +386,17 @@ function ResourcePanel({
   datasets,
   jobs,
   onSelectJob,
+  allProjects,
+  currentProjectId,
+  onSwitchProject,
 }: {
   project: Project;
   datasets: Dataset[];
   jobs: ToolJob[];
   onSelectJob: (id: string) => void;
+  allProjects: Project[];
+  currentProjectId: string;
+  onSwitchProject: (id: string) => void;
 }): React.ReactElement {
   const [fileTree, setFileTree] = useState<FileEntry[]>([]);
   const [expandedDirs, setExpandedDirs] = useState<Set<string>>(new Set());
@@ -491,35 +500,35 @@ function ResourcePanel({
         </div>
       </div>
 
-      {/* Bottom section — project info */}
+      {/* Bottom section — my projects (switchable) */}
       <div className={styles.leftBottomSection}>
         <div className={styles.leftBottomHeader}>
           <Icon name="layers" size={14} />
-          <span>项目</span>
+          <span>我的项目</span>
         </div>
-        <div className={styles.leftBottomBody}>
-          <p className={styles.infoRow}>
-            <span className={styles.infoLabel}>名称</span>
-            <span className={styles.infoValue}>{project.name}</span>
-          </p>
-          {project.description && (
-            <p className={styles.infoRow}>
-              <span className={styles.infoLabel}>描述</span>
-              <span className={styles.infoValue}>{project.description}</span>
-            </p>
+        <div className={styles.projectListBody}>
+          {allProjects.length === 0 ? (
+            <p className={styles.panelEmpty}>暂无项目</p>
+          ) : (
+            <ul className={styles.projectList}>
+              {allProjects.map((p) => (
+                <li
+                  key={p.id}
+                  className={`${styles.projectItem} ${p.id === currentProjectId ? styles.projectItemActive : ''}`}
+                  onClick={() => onSwitchProject(p.id)}
+                  title={p.description || p.name}
+                >
+                  <Icon name="folder" size={14} />
+                  <div className={styles.projectItemMeta}>
+                    <span className={styles.projectItemName}>{p.name}</span>
+                    {p.modality && (
+                      <span className={styles.projectItemSub}>{p.modality}</span>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
           )}
-          <p className={styles.infoRow}>
-            <span className={styles.infoLabel}>创建</span>
-            <span className={styles.infoValue}>{formatDate(project.createdAt)}</span>
-          </p>
-          <p className={styles.infoRow}>
-            <span className={styles.infoLabel}>分析数</span>
-            <span className={styles.infoValue}>{jobs.length}</span>
-          </p>
-          <p className={styles.infoRow}>
-            <span className={styles.infoLabel}>存储</span>
-            <span className={styles.infoValue}>{formatSize(storageBytes)}</span>
-          </p>
         </div>
       </div>
     </div>
