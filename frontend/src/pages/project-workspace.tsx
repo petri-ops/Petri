@@ -29,8 +29,8 @@ export function ProjectWorkspace(): React.ReactElement {
 
   // Panel collapse state
   const [leftOpen, setLeftOpen] = useState(true);
-  const [rightOpen, setRightOpen] = useState(true);
-  const [agentOpen, setAgentOpen] = useState(true);
+  const [rightOpen, setRightOpen] = useState(false); // results panel, default collapsed
+  const [settingsOpen, setSettingsOpen] = useState(false); // settings sidebar overlay
 
   // Selected result tab
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
@@ -125,8 +125,7 @@ export function ProjectWorkspace(): React.ReactElement {
   /** Dispatch a copilot-ask event so the embedded CopilotChat picks it up */
   const handleAskAgent = useCallback((prompt: string) => {
     window.dispatchEvent(new CustomEvent('biof3:copilot-ask', { detail: { prompt } }));
-    if (!agentOpen) setAgentOpen(true);
-  }, [agentOpen]);
+  }, []);
 
   if (loading) {
     return (
@@ -222,14 +221,41 @@ export function ProjectWorkspace(): React.ReactElement {
           <button
             className={styles.iconBtn}
             onClick={() => setRightOpen((v) => !v)}
-            title="切换历史栏"
+            title="切换结果栏"
           >
             <Icon name="panel-right" size={18} />
+          </button>
+          <button
+            className={`${styles.iconBtn} ${settingsOpen ? styles.iconBtnActive : ''}`}
+            onClick={() => setSettingsOpen((v) => !v)}
+            title="设置 / 技能助手"
+          >
+            <Icon name="settings" size={18} />
           </button>
         </div>
       </header>
 
       <div className={styles.workspaceBody}>
+        {/* Settings sidebar overlay — slides in from left */}
+        {settingsOpen && (
+          <>
+            <div className={styles.settingsOverlay} onClick={() => setSettingsOpen(false)} />
+            <aside className={styles.settingsSider}>
+              <div className={styles.settingsSiderHeader}>
+                <span className={styles.settingsSiderTitle}>设置</span>
+                <button
+                  className={styles.iconBtn}
+                  onClick={() => setSettingsOpen(false)}
+                  title="关闭"
+                >
+                  <Icon name="x" size={16} />
+                </button>
+              </div>
+              <ToolboxPanel onAskAgent={handleAskAgent} />
+            </aside>
+          </>
+        )}
+
         {/* Left column — Resources */}
         {leftOpen && (
           <aside className={styles.leftCol}>
@@ -237,58 +263,43 @@ export function ProjectWorkspace(): React.ReactElement {
               project={project}
               datasets={datasets}
               jobs={jobs}
-              onSelectJob={(id) => setActiveJobId(id)}
+              onSelectJob={(id) => {
+                setActiveJobId(id);
+                setRightOpen(true);
+              }}
             />
           </aside>
         )}
 
-        {/* Center column — Results + Agent */}
+        {/* Center column — Agent main interaction area */}
         <main className={styles.centerCol}>
-          <div className={styles.resultArea}>
-            {activeJob ? (
-              <ResultView job={activeJob} onAskAgent={handleAskAgent} />
-            ) : (
-              <EmptyResult project={project} />
-            )}
+          <div className={styles.agentMain}>
+            <CopilotChat embedded />
           </div>
-          {agentOpen && (
-            <div className={styles.agentBar}>
-              <div className={styles.agentHeader}>
-                <span className={styles.agentTitle}>
-                  <Icon name="terminal" size={14} /> Agent
-                </span>
-                <button
-                  className={styles.iconBtn}
-                  onClick={() => setAgentOpen(false)}
-                  title="收起 Agent"
-                >
-                  <Icon name="chevron-down" size={14} />
-                </button>
-              </div>
-              <div className={styles.agentBody}>
-                <CopilotChat embedded />
-              </div>
-            </div>
-          )}
-          {!agentOpen && (
-            <button
-              className={styles.agentReopen}
-              onClick={() => setAgentOpen(true)}
-            >
-              <Icon name="terminal" size={14} /> 展开 Agent
-            </button>
-          )}
         </main>
 
-        {/* Right column — History + Toolbox */}
+        {/* Right column — Results detail panel */}
         {rightOpen && (
           <aside className={styles.rightCol}>
-            <HistoryPanel
-              jobs={jobs}
-              activeJobId={activeJobId}
-              onSelectJob={(id) => setActiveJobId(id)}
-            />
-            <ToolboxPanel onAskAgent={handleAskAgent} />
+            <div className={styles.resultPanel}>
+              <div className={styles.resultPanelHeader}>
+                <span className={styles.resultPanelTitle}>结果展示</span>
+                <button
+                  className={styles.iconBtn}
+                  onClick={() => setRightOpen(false)}
+                  title="收起结果栏"
+                >
+                  <Icon name="x" size={16} />
+                </button>
+              </div>
+              <div className={styles.resultPanelBody}>
+                {activeJob ? (
+                  <ResultView job={activeJob} onAskAgent={handleAskAgent} />
+                ) : (
+                  <EmptyResult project={project} />
+                )}
+              </div>
+            </div>
           </aside>
         )}
       </div>
