@@ -227,7 +227,7 @@
   flex-direction: column;
 }
 
-/* Left panel — top/bottom split layout (AionUi style) */
+/* Left panel — project tree (AionUi style) */
 .leftPanelWrap {
   display: flex;
   flex-direction: column;
@@ -235,128 +235,124 @@
   overflow: hidden;
 }
 
-.leftTopSection {
-  flex: 1;
+.leftPanelHeader {
   display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  min-height: 0;
-}
-
-.leftMiniTabBar {
-  display: flex;
-  gap: 0;
-  padding: 0 8px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px 8px;
+  flex-shrink: 0;
   border-bottom: 1px solid var(--biof3-border, #e2e8f0);
-  flex-shrink: 0;
 }
 
-.leftMiniTab {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 8px 4px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--biof3-text-secondary, #64748b);
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
-}
-
-.leftMiniTab:hover {
-  color: var(--biof3-text, #1e293b);
-}
-
-.leftMiniTabActive {
-  color: var(--biof3-accent, #0d9488);
-  border-bottom-color: var(--biof3-accent, #0d9488);
-}
-
-.leftTopContent {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px 12px;
-  min-height: 0;
-}
-
-.leftBottomSection {
-  flex-shrink: 0;
-  border-top: 1px solid var(--biof3-border, #e2e8f0);
-  background: var(--biof3-bg, #f8fafc);
-  max-height: 280px;
-  overflow-y: auto;
-}
-
-.leftBottomHeader {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 12px 6px;
-  font-size: 12px;
+.leftPanelTitle {
+  font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--biof3-text-secondary, #94a3b8);
 }
 
-.projectListBody {
-  padding: 0 8px 8px;
+.projectTreeScroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+  min-height: 0;
 }
 
-.projectList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.projectTreeNode {
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
-.projectItem {
+.projectTreeRow {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 8px;
-  border-radius: 6px;
+  gap: 4px;
+  padding: 6px 10px;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background 0.12s ease;
   color: var(--biof3-text-secondary, #475569);
+  user-select: none;
 }
 
-.projectItem:hover {
+.projectTreeRow:hover {
   background: var(--biof3-bg-hover, #f1f5f9);
 }
 
-.projectItemActive {
+.projectTreeRowActive {
   background: var(--biof3-accent-bg, #f0fdfa);
   color: var(--biof3-accent, #0d9488);
   font-weight: 500;
 }
 
-.projectItemMeta {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  overflow: hidden;
-  min-width: 0;
-}
-
-.projectItemName {
-  font-size: 12px;
-  font-weight: 500;
+.projectTreeName {
+  flex: 1;
+  font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.projectItemSub {
-  font-size: 10px;
+.projectTreeAddBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
   color: var(--biof3-text-tertiary, #94a3b8);
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.projectTreeRow:hover .projectTreeAddBtn {
+  opacity: 1;
+}
+
+.projectTreeAddBtn:hover {
+  background: var(--biof3-accent, #0d9488);
+  color: #fff;
+}
+
+.convList {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 4px 0;
+}
+
+.convEmpty {
+  padding: 4px 10px 4px 36px;
+  font-size: 12px;
+  color: var(--biof3-text-tertiary, #94a3b8);
+}
+
+.convItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px 5px 28px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--biof3-text-secondary, #64748b);
+  transition: background 0.12s ease;
+  user-select: none;
+}
+
+.convItem:hover {
+  background: var(--biof3-bg-hover, #f1f5f9);
+}
+
+.convItemActive {
+  background: var(--biof3-accent-bg, #f0fdfa);
+  color: var(--biof3-accent, #0d9488);
+  font-weight: 500;
+}
+
+.convItemTitle {
+  flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

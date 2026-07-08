@@ -1,0 +1,226 @@
+/* ============================================================
+   SimpleChat — lightweight conversation-only chat styles
+   ============================================================ */
+
+.sc-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--biof3-surface, #ffffff);
+}
+
+/* Header */
+.sc-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--biof3-border, #e2e8f0);
+  flex-shrink: 0;
+}
+
+.sc-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--biof3-text, #1e293b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Messages area */
+.sc-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+.sc-loading {
+  text-align: center;
+  padding: 24px;
+  font-size: 13px;
+  color: var(--biof3-text-tertiary, #94a3b8);
+}
+
+.sc-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 8px;
+  color: var(--biof3-text-tertiary, #94a3b8);
+}
+
+.sc-empty-icon {
+  opacity: 0.4;
+  margin-bottom: 4px;
+}
+
+.sc-empty p {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0;
+  color: var(--biof3-text-secondary, #64748b);
+}
+
+.sc-empty span {
+  font-size: 13px;
+}
+
+/* Message row */
+.sc-msg {
+  display: flex;
+  gap: 10px;
+  max-width: 100%;
+}
+
+.sc-msg-avatar {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--biof3-bg, #f1f5f9);
+  color: var(--biof3-text-secondary, #64748b);
+}
+
+.sc-msg-user .sc-msg-avatar {
+  background: var(--biof3-accent, #0d9488);
+  color: #fff;
+}
+
+.sc-msg-assistant .sc-msg-avatar {
+  background: var(--biof3-accent-bg, #f0fdfa);
+  color: var(--biof3-accent, #0d9488);
+}
+
+.sc-msg-body {
+  flex: 1;
+  min-width: 0;
+  padding-top: 3px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--biof3-text, #1e293b);
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.sc-msg-body p {
+  margin: 0 0 8px;
+}
+
+.sc-msg-body p:last-child {
+  margin-bottom: 0;
+}
+
+.sc-msg-body pre {
+  background: var(--biof3-bg, #f8fafc);
+  border: 1px solid var(--biof3-border, #e2e8f0);
+  border-radius: 6px;
+  padding: 10px 12px;
+  overflow-x: auto;
+  font-size: 13px;
+  margin: 8px 0;
+}
+
+.sc-msg-body code {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 13px;
+}
+
+.sc-msg-body :not(pre) > code {
+  background: var(--biof3-bg, #f1f5f9);
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.sc-msg-text {
+  white-space: pre-wrap;
+}
+
+/* Input area */
+.sc-input-area {
+  flex-shrink: 0;
+  border-top: 1px solid var(--biof3-border, #e2e8f0);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--biof3-surface, #ffffff);
+}
+
+.sc-input {
+  width: 100%;
+  resize: none;
+  border: 1px solid var(--biof3-border, #e2e8f0);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.5;
+  color: var(--biof3-text, #1e293b);
+  background: var(--biof3-bg, #f8fafc);
+  transition: border-color 0.15s ease;
+  outline: none;
+  overflow-y: auto;
+}
+
+.sc-input:focus {
+  border-color: var(--biof3-accent, #0d9488);
+  background: #fff;
+}
+
+.sc-input::placeholder {
+  color: var(--biof3-text-tertiary, #94a3b8);
+}
+
+.sc-input-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.sc-send-btn,
+.sc-stop-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sc-send-btn {
+  background: var(--biof3-accent, #0d9488);
+  color: #fff;
+}
+
+.sc-send-btn:hover:not(:disabled) {
+  background: var(--biof3-accent-hover, #0f766e);
+}
+
+.sc-send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sc-stop-btn {
+  background: var(--biof3-danger, #ef4444);
+  color: #fff;
+}
+
+.sc-stop-btn:hover {
+  background: #dc2626;
+}

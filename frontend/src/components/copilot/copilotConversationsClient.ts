@@ -26,6 +26,7 @@ export interface ConversationSummary {
   updated_at: string;
   last_topic_shift_at?: string | null;
   last_topic_shift_reason?: string | null;
+  project_id?: string | null;
 }
 
 export interface ConversationMessage {
@@ -37,10 +38,13 @@ export interface ConversationMessage {
 }
 
 export async function listConversations(
-  status: ConversationStatus | 'all' = 'active'
+  status: ConversationStatus | 'all' = 'active',
+  projectId?: string
 ): Promise<ConversationSummary[]> {
   try {
-    const resp = await fetch(getApiPrefix() + '/ai/conversations?status=' + status, {
+    let url = getApiPrefix() + '/ai/conversations?status=' + status;
+    if (projectId) url += '&project_id=' + encodeURIComponent(projectId);
+    const resp = await fetch(url, {
       headers: getAuthHeader(),
     });
     if (!resp.ok) return [];
@@ -53,13 +57,14 @@ export async function listConversations(
 
 export async function createConversation(
   title?: string,
-  lastPage?: string
+  lastPage?: string,
+  projectId?: string
 ): Promise<ConversationSummary | null> {
   try {
     const resp = await fetch(getApiPrefix() + '/ai/conversations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-      body: JSON.stringify({ title: title || '新对话', lastPage: lastPage || null }),
+      body: JSON.stringify({ title: title || '新对话', lastPage: lastPage || null, project_id: projectId || null }),
     });
     if (!resp.ok) return null;
     const data = await resp.json();

@@ -13,6 +13,8 @@ import { getApiPrefix, getToken } from '@/lib/authClient';
 import { tools as staticTools } from '@/pages/_data';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { CopilotChat } from '@/components/copilot/CopilotChat';
+import { SimpleChat } from '@/components/copilot/SimpleChat';
+import { listConversations, createConversation, type ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import { setCopilotContext } from '@/lib/copilotContext';
 import { getNextSteps, buildChainPrompt, type ResolvedJob } from '@/lib/workflow-chains';
 import styles from './project-workspace.module.css';
@@ -35,8 +37,13 @@ export function ProjectWorkspace(): React.ReactElement {
   // Selected result tab
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
 
+  // Conversation state — current project's conversations + active conversation
+  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  const [activeConvId, setActiveConvId] = useState<string | null>(null);
+  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set([projectId || '']));
+
   // Resizable panel dimensions
-  const [leftWidth, setLeftWidth] = useState(220);
+  const [leftWidth, setLeftWidth] = useState(240);
   const [rightWidth, setRightWidth] = useState(340);
   const [inputHeight, setInputHeight] = useState(120);
   const [rightTab, setRightTab] = useState<'files' | 'results'>('files');
@@ -98,6 +105,60 @@ export function ProjectWorkspace(): React.ReactElement {
     setSwitcherQuery('');
     if (id !== projectId) navigate(`/project/${id}`);
   }, [navigate, projectId]);
+
+  // Load conversations for current project
+  const refreshConversations = useCallback(async () => {
+    if (!projectId) return;
+    const list = await listConversations('active', projectId);
+    setConversations(list);
+    // Auto-select most recent conversation if none active
+    if (!activeConvId && list.length > 0) {
+      setActiveConvId(list[0].id);
+    }
+  }, [projectId]);
+
+  useEffect(() => {
+    setActiveConvId(null);
+    setConversations([]);
+    refreshConversations();
+  }, [refreshConversations]);
+
+  // Create new conversation in current project
+  const handleNewConversation = useCallback(async () => {
+    if (!projectId) return;
+    const conv = await createConversation('新对话', undefined, projectId);
+    if (conv) {
+      setActiveConvId(conv.id);
+      refreshConversations();
+    }
+  }, [projectId, refreshConversations]);
+
+  // Switch conversation
+  const handleSwitchConversation = useCallback((convId: string) => {
+    setActiveConvId(convId);
+  }, []);
+
+  // Toggle project expansion in left panel
+  const toggleProjectExpand = useCallback((pid: string) => {
+    setExpandedProjects((prev) => {
+      const next = new Set(prev);
+      if (next.has(pid)) next.delete(pid);
+      else next.add(pid);
+      return next;
+    });
+  }, []);
+
+  // Load conversations for other projects when expanded
+  const [projectConversations, setProjectConversations] = useState<Record<string, ConversationSummary[]>>({});
+  useEffect(() => {
+    expandedProjects.forEach((pid) => {
+      if (pid === projectId) return; // current project uses `conversations`
+      if (projectConversations[pid]) return; // already loaded
+      listConversations('active', pid).then((list) => {
+        setProjectConversations((prev) => ({ ...prev, [pid]: list }));
+      });
+    });
+  }, [expandedProjects, projectId, projectConversations]);
 
   const fetchData = useCallback(async () => {
     if (!projectId) return;
@@ -292,32 +353,99 @@ export function ProjectWorkspace(): React.ReactElement {
           </>
         )}
 
-        {/* Left column — Resources */}
+        {/* Left column — Project list + conversations (AionUi style) */}
         {leftOpen && (
           <>
             <aside className={styles.leftCol} style={{ width: leftWidth }}>
-              <ResourcePanel
-                project={project}
-                datasets={datasets}
-                jobs={jobs}
-                allProjects={allProjects}
-                currentProjectId={projectId}
-                onSwitchProject={switchToProject}
-                onSelectJob={(id) => {
-                  setActiveJobId(id);
-                  setRightOpen(true);
-                  setRightTab('results');
-                }}
-              />
+              <div className={styles.leftPanelWrap}>
+                <div className={styles.leftPanelHeader}>
+                  <span className={styles.leftPanelTitle}>项目</span>
+                  <button
+                    className={styles.iconBtn}
+                    onClick={() => setSwitcherOpen(true)}
+                    title="新建项目"
+                  >
+                    <Icon name="plus" size={16} />
+                  </button>
+                </div>
+                <div className={styles.projectTreeScroll}>
+                  {allProjects.map((p) => {
+                    const isCurrent = p.id === projectId;
+                    const isExpanded = expandedProjects.has(p.id);
+                    const convs = isCurrent ? conversations : (projectConversations[p.id] || []);
+                    return (
+                      <div key={p.id} className={styles.projectTreeNode}>
+                        <div
+                          className={`${styles.projectTreeRow} ${isCurrent ? styles.projectTreeRowActive : ''}`}
+                          onClick={() => {
+                            if (!isCurrent) switchToProject(p.id);
+                            toggleProjectExpand(p.id);
+                          }}
+                        >
+                          <Icon
+                            name={isExpanded ? 'chevron-down' : 'chevron-right'}
+                            size={12}
+                          />
+                          <Icon name="folder" size={14} />
+                          <span className={styles.projectTreeName}>{p.name}</span>
+                          <button
+                            className={styles.projectTreeAddBtn}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (isCurrent) {
+                                handleNewConversation();
+                              } else {
+                                switchToProject(p.id);
+                                setTimeout(() => handleNewConversation(), 300);
+                              }
+                            }}
+                            title="新建对话"
+                          >
+                            <Icon name="plus" size={12} />
+                          </button>
+                        </div>
+                        {isExpanded && (
+                          <ul className={styles.convList}>
+                            {convs.length === 0 && (
+                              <li className={styles.convEmpty}>暂无对话</li>
+                            )}
+                            {convs.map((c) => (
+                              <li
+                                key={c.id}
+                                className={`${styles.convItem} ${isCurrent && c.id === activeConvId ? styles.convItemActive : ''}`}
+                                onClick={() => {
+                                  if (!isCurrent) switchToProject(p.id);
+                                  handleSwitchConversation(c.id);
+                                }}
+                                title={c.title}
+                              >
+                                <Icon name="message-circle" size={12} />
+                                <span className={styles.convItemTitle}>{c.title}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </aside>
             <div className={styles.resizeHandleV} onMouseDown={startResize('left')} />
           </>
         )}
 
-        {/* Center column — Agent main interaction area */}
+        {/* Center column — Simple chat (conversation-driven) */}
         <main className={styles.centerCol}>
           <div className={styles.agentMain}>
-            <CopilotChat embedded inputHeight={inputHeight} />
+            {project && (
+              <SimpleChat
+                projectId={projectId}
+                conversationId={activeConvId}
+                onConversationChange={setActiveConvId}
+                inputHeight={inputHeight}
+              />
+            )}
           </div>
           <div className={styles.resizeHandleH} onMouseDown={startResize('input')} />
         </main>
