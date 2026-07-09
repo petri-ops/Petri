@@ -10,7 +10,12 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
-import { Icon } from '@/components/icons/Icon';
+import { Icon, type IconName } from '@/components/icons/Icon';
+import { useBackendStatus } from '@/hooks/useBackendStatus';
+import { BottomTerminal } from '@/components/workspace-panels/BottomTerminal';
+import { CenterPanel, type CenterPanelContext } from '@/components/workspace-panels/CenterPanel';
+import { LeftPanel, type LeftPanelContext } from '@/components/workspace-panels/LeftPanel';
+import { RightPanel, type RightPanelContext } from '@/components/workspace-panels/RightPanel';
 import { getProject, listProjectJobs, listDatasetsByProject, listProjects, updateProject, createProject } from '@/lib/project-store';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
@@ -25,6 +30,7 @@ import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel'
 import { DesktopDashboard } from '@/pages/_desktop-dashboard';
 import ToolsPage from '@/pages/tools';
 import FigCodePage from '@/pages/figcode';
+import type { BackendStatus } from '@/lib/electron';
 import styles from './project-workspace.module.css';
 import 'highlight.js/styles/github.css';
 
@@ -54,6 +60,32 @@ interface ActiveWorkspaceFile {
   size?: number;
 }
 
+interface BackendServiceItem {
+  key: string;
+  label: string;
+  status: string;
+}
+
+interface BackendSummary {
+  readyLabel: string;
+  serviceItems: BackendServiceItem[];
+}
+
+interface JobStats {
+  running: number;
+  failed: number;
+  done: number;
+  pending: number;
+}
+
+export type {
+  ActiveArtifact,
+  ActiveWorkspaceFile,
+  BackendServiceItem,
+  BackendSummary,
+  JobStats,
+};
+
 type WorkspaceMode =
   | 'cloud'
   | 'chat'
@@ -63,6 +95,17 @@ type WorkspaceMode =
   | 'figcode'
   | 'plugins'
   | 'settings';
+
+export type RightPanelMode = 'home' | 'results' | 'files' | 'terminal' | 'browser' | 'chat';
+
+export const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconName }> = [
+  { id: 'home', label: '工作台', icon: 'layout-grid' },
+  { id: 'results', label: '结果', icon: 'bar-chart' },
+  { id: 'files', label: '文件', icon: 'folder' },
+  { id: 'terminal', label: '后端', icon: 'cpu' },
+  { id: 'browser', label: '浏览器', icon: 'globe' },
+  { id: 'chat', label: '聊天', icon: 'sidebar' },
+];
 
 const WORKSPACE_MODES: WorkspaceMode[] = [
   'cloud',
@@ -115,18 +158,40 @@ export function ProjectWorkspace(): React.ReactElement {
   const [creatingProjectInline, setCreatingProjectInline] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDesc, setNewProjectDesc] = useState('');
+  const [newProjectWorkspacePath, setNewProjectWorkspacePath] = useState('');
   const [creatingProject, setCreatingProject] = useState(false);
   const [creatingConversationFor, setCreatingConversationFor] = useState<string | null>(null);
   const [newConversationTitle, setNewConversationTitle] = useState('');
   const [creatingConversation, setCreatingConversation] = useState(false);
   const [workspaceSearchQuery, setWorkspaceSearchQuery] = useState('');
+  const [sidebarQuery, setSidebarQuery] = useState('');
   const [searchConversationIndex, setSearchConversationIndex] = useState<Record<string, ConversationSummary[]>>({});
+  const [backendStatus, setBackendStatus] = useState<BackendStatus | null>(null);
+  const polledBackendStatus = useBackendStatus();
+  // Sync the polled value into the local state so the rest of the component
+  // can keep reading `backendStatus`. (Will be removed when the ProjectWorkspace
+  // body is decomposed in PR-3.)
+  useEffect(() => {
+    setBackendStatus(polledBackendStatus);
+  }, [polledBackendStatus]);
+  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [summarySize, setSummarySize] = useState({ width: 320, height: 296 });
 
   // Resizable panel dimensions
   const [leftWidth, setLeftWidth] = useState(240);
   const [rightWidth, setRightWidth] = useState(340);
   const [inputHeight, setInputHeight] = useState(120);
-  const [rightTab, setRightTab] = useState<'files' | 'results'>('files');
+  const [bottomTerminalOpen, setBottomTerminalOpen] = useState(false);
+  const [bottomTerminalHeight, setBottomTerminalHeight] = useState(240);
+  const [rightTab, setRightTab] = useState<RightPanelMode>('home');
+  const [openRightTabs, setOpenRightTabs] = useState<RightPanelMode[]>(['home']);
+  const [rightToolMenuOpen, setRightToolMenuOpen] = useState(false);
+  const [browserUrl, setBrowserUrl] = useState('https://biof3.com/');
+  const centerColRef = useRef<HTMLElement | null>(null);
+  const sessionFrameRef = useRef<HTMLDivElement | null>(null);
+  const [centerColWidth, setCenterColWidth] = useState(0);
+  const [sessionFrameWidth, setSessionFrameWidth] = useState(0);
+  const [sessionFrameHeight, setSessionFrameHeight] = useState(0);
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 960px)');
@@ -144,9 +209,43 @@ export function ProjectWorkspace(): React.ReactElement {
   }, []);
 
   useEffect(() => {
+    const element = centerColRef.current;
+    if (!element) return;
+    const updateWidth = () => setCenterColWidth(element.getBoundingClientRect().width || 0);
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
+
+  useEffect(() => {
+    const element = sessionFrameRef.current;
+    if (!element) return;
+    const updateSize = () => {
+      const rect = element.getBoundingClientRect();
+      setSessionFrameWidth(rect.width || 0);
+      setSessionFrameHeight(rect.height || 0);
+    };
+    updateSize();
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(updateSize);
+    observer?.observe(element);
+    window.addEventListener('resize', updateSize);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', updateSize);
+    };
+  }, []);
+
+  useEffect(() => {
     const nextMode = parseWorkspaceMode(searchParams.get('mode')) || 'chat';
     setWorkspaceMode((current) => (current === nextMode ? current : nextMode));
   }, [searchParams]);
+
+  const summaryVisibility = useMemo<'hidden' | 'compact' | 'expanded'>(() => {
+    if (sessionFrameWidth === 0) return 'expanded';
+    if (sessionFrameWidth >= 1120) return 'expanded';
+    if (sessionFrameWidth >= 780) return 'compact';
+    return 'hidden';
+  }, [sessionFrameWidth]);
 
   const updateWorkspaceMode = useCallback((nextMode: WorkspaceMode, replace = true) => {
     setWorkspaceMode(nextMode);
@@ -156,27 +255,26 @@ export function ProjectWorkspace(): React.ReactElement {
     setSearchParams(nextParams, { replace });
   }, [searchParams, setSearchParams]);
 
-  const toggleLeftPanel = useCallback(() => {
-    setLeftOpen((open) => {
-      const next = !open;
-      if (next && compactLayout) setRightOpen(false);
-      return next;
-    });
-  }, [compactLayout]);
-
-  const toggleRightPanel = useCallback(() => {
-    setRightOpen((open) => {
-      const next = !open;
-      if (next && compactLayout) setLeftOpen(false);
-      return next;
-    });
-  }, [compactLayout]);
-
-  const openRightPanel = useCallback((tab: 'files' | 'results') => {
+  const openRightPanel = useCallback((tab: RightPanelMode) => {
     if (compactLayout) setLeftOpen(false);
+    setOpenRightTabs((current) => current.includes(tab) ? current : [...current, tab]);
     setRightTab(tab);
     setRightOpen(true);
   }, [compactLayout]);
+
+  const closeRightPanelTab = useCallback((tab: RightPanelMode) => {
+    setOpenRightTabs((current) => {
+      if (current.length <= 1) return current;
+      const closingIndex = current.indexOf(tab);
+      const next = current.filter((item) => item !== tab);
+      setRightTab((active) => (
+        active === tab
+          ? next[Math.min(Math.max(closingIndex, 0), next.length - 1)] || next[0]
+          : active
+      ));
+      return next;
+    });
+  }, []);
 
   // Drag-to-resize handler factory
   const startResize = useCallback((which: 'left' | 'right' | 'input') => (e: React.MouseEvent) => {
@@ -208,10 +306,76 @@ export function ProjectWorkspace(): React.ReactElement {
     document.body.style.userSelect = 'none';
   }, [leftWidth, rightWidth, inputHeight]);
 
-  // 4.5 — Project switcher dropdown
+  const startSummaryResize = useCallback((e: React.PointerEvent | React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const target = e.currentTarget as HTMLElement & { setPointerCapture?: (pointerId: number) => void };
+    if ('pointerId' in e && typeof target.setPointerCapture === 'function') {
+      try {
+        target.setPointerCapture(e.pointerId);
+      } catch {
+        /* ignore */
+      }
+    }
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startWidth = summarySize.width;
+    const startHeight = summarySize.height;
+    const minWidth = 288;
+    const minHeight = 236;
+    const maxWidth = Math.max(minWidth, sessionFrameWidth - 36);
+    const maxHeight = Math.max(minHeight, sessionFrameHeight - 36);
+
+    const onMove = (ev: MouseEvent | PointerEvent) => {
+      const deltaX = ev.clientX - startX;
+      const deltaY = ev.clientY - startY;
+      const nextWidth = Math.min(maxWidth, Math.max(minWidth, startWidth - deltaX));
+      const nextHeight = Math.min(maxHeight, Math.max(minHeight, startHeight + deltaY));
+      setSummarySize({ width: nextWidth, height: nextHeight });
+    };
+    const onUp = () => {
+      document.removeEventListener('pointermove', onMove as unknown as EventListener);
+      document.removeEventListener('pointerup', onUp as unknown as EventListener);
+      document.removeEventListener('pointercancel', onUp as unknown as EventListener);
+      if ('pointerId' in e && typeof target.releasePointerCapture === 'function') {
+        try {
+          target.releasePointerCapture(e.pointerId);
+        } catch {
+          /* ignore */
+        }
+      }
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    document.addEventListener('pointermove', onMove as unknown as EventListener);
+    document.addEventListener('pointerup', onUp as unknown as EventListener);
+    document.addEventListener('pointercancel', onUp as unknown as EventListener);
+    document.body.style.cursor = 'nesw-resize';
+    document.body.style.userSelect = 'none';
+  }, [sessionFrameHeight, sessionFrameWidth, summarySize.height, summarySize.width]);
+
+  const startBottomTerminalResize = useCallback((event: React.MouseEvent) => {
+    event.preventDefault();
+    const startY = event.clientY;
+    const startHeight = bottomTerminalHeight;
+    const onMove = (moveEvent: MouseEvent) => {
+      setBottomTerminalHeight(
+        Math.min(520, Math.max(140, startHeight - (moveEvent.clientY - startY)))
+      );
+    };
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    document.body.style.cursor = 'ns-resize';
+    document.body.style.userSelect = 'none';
+  }, [bottomTerminalHeight]);
+
   const [allProjects, setAllProjects] = useState<Project[]>([]);
-  const [switcherOpen, setSwitcherOpen] = useState(false);
-  const [switcherQuery, setSwitcherQuery] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -223,12 +387,6 @@ export function ProjectWorkspace(): React.ReactElement {
     })();
     return () => { cancelled = true; };
   }, []);
-
-  const filteredProjects = useMemo(() => {
-    const q = switcherQuery.trim().toLowerCase();
-    if (!q) return allProjects;
-    return allProjects.filter((p) => p.name.toLowerCase().includes(q));
-  }, [allProjects, switcherQuery]);
 
   const workspacePath = project?.workspacePath || '';
   const compactWorkspacePath = useMemo(() => {
@@ -244,8 +402,6 @@ export function ProjectWorkspace(): React.ReactElement {
   }, [workspacePath]);
 
   const switchToProject = useCallback((id: string) => {
-    setSwitcherOpen(false);
-    setSwitcherQuery('');
     if (id !== projectId) navigate(`/project/${id}`);
   }, [navigate, projectId]);
 
@@ -316,6 +472,7 @@ export function ProjectWorkspace(): React.ReactElement {
   }, [updateWorkspaceMode]);
 
   const handleShowCloud = useCallback(() => updateWorkspaceMode('cloud'), [updateWorkspaceMode]);
+  const handleShowChat = useCallback(() => updateWorkspaceMode('chat'), [updateWorkspaceMode]);
   const handleShowSearch = useCallback(() => {
     updateWorkspaceMode('search');
   }, [updateWorkspaceMode]);
@@ -330,6 +487,23 @@ export function ProjectWorkspace(): React.ReactElement {
   const handleShowSettings = useCallback(() => updateWorkspaceMode('settings'), [updateWorkspaceMode]);
 
   const handleShowPlugins = useCallback(() => updateWorkspaceMode('plugins'), [updateWorkspaceMode]);
+
+  const handleOpenRightTerminal = useCallback(() => {
+    openRightPanel('terminal');
+  }, [openRightPanel]);
+
+  const handleOpenRightBrowser = useCallback(() => {
+    openRightPanel('browser');
+  }, [openRightPanel]);
+
+  const handleOpenRightFiles = useCallback(() => {
+    setRightOpen(true);
+    openRightPanel('files');
+  }, [openRightPanel]);
+
+  const handleOpenRightChat = useCallback(() => {
+    openRightPanel('chat');
+  }, [openRightPanel]);
 
   const ensureSearchConversationIndex = useCallback(async () => {
     const targets = allProjects.filter((item) => !searchConversationIndex[item.id]);
@@ -350,8 +524,14 @@ export function ProjectWorkspace(): React.ReactElement {
     setCreatingProjectInline(true);
     setNewProjectName('');
     setNewProjectDesc('');
+    setNewProjectWorkspacePath('');
     if (compactLayout) setLeftOpen(true);
   }, [compactLayout]);
+
+  const chooseWorkspaceDirectory = useCallback(async () => {
+    const selected = await window.biof3Desktop?.files?.openDirectoryDialog?.();
+    return selected || '';
+  }, []);
 
   const submitProjectCreator = useCallback(async () => {
     const name = newProjectName.trim();
@@ -362,6 +542,7 @@ export function ProjectWorkspace(): React.ReactElement {
         name,
         description: newProjectDesc.trim() || undefined,
         modality: 'general',
+        workspacePath: newProjectWorkspacePath.trim() || undefined,
       });
       setAllProjects((prev) => [created, ...prev.filter((item) => item.id !== created.id)]);
       setExpandedProjects((prev) => {
@@ -372,11 +553,12 @@ export function ProjectWorkspace(): React.ReactElement {
       setCreatingProjectInline(false);
       setNewProjectName('');
       setNewProjectDesc('');
+      setNewProjectWorkspacePath('');
       navigate(`/project/${created.id}`);
     } finally {
       setCreatingProject(false);
     }
-  }, [creatingProject, navigate, newProjectDesc, newProjectName]);
+  }, [creatingProject, navigate, newProjectDesc, newProjectName, newProjectWorkspacePath]);
 
   const openConversationCreator = useCallback((targetProjectId = projectId) => {
     if (!targetProjectId) return;
@@ -436,6 +618,35 @@ export function ProjectWorkspace(): React.ReactElement {
     });
   }, [expandedProjects, projectId, projectConversations]);
 
+  const normalizedSidebarQuery = sidebarQuery.trim().toLowerCase();
+  const projectMatchesSidebarQuery = useCallback(
+    (item: Project) => {
+      if (!normalizedSidebarQuery) return true;
+      const projectText = [item.name, item.description || '', item.modality || '']
+        .join(' ')
+        .toLowerCase();
+      if (projectText.includes(normalizedSidebarQuery)) return true;
+      const projectConversationList =
+        item.id === projectId ? conversations : projectConversations[item.id] || [];
+      return projectConversationList.some((conversation) =>
+        String(conversation.title || '').toLowerCase().includes(normalizedSidebarQuery)
+      );
+    },
+    [conversations, normalizedSidebarQuery, projectConversations, projectId]
+  );
+
+  const matchesConversationQuery = useCallback(
+    (conversation: ConversationSummary) =>
+      !normalizedSidebarQuery ||
+      String(conversation.title || '').toLowerCase().includes(normalizedSidebarQuery),
+    [normalizedSidebarQuery]
+  );
+
+  const visibleProjects = useMemo(() => {
+    if (!normalizedSidebarQuery) return allProjects;
+    return allProjects.filter(projectMatchesSidebarQuery);
+  }, [allProjects, normalizedSidebarQuery, projectMatchesSidebarQuery]);
+
   const fetchData = useCallback(async () => {
     if (!projectId) return;
     try {
@@ -469,7 +680,7 @@ export function ProjectWorkspace(): React.ReactElement {
 
   const handleChangeWorkspacePath = useCallback(async () => {
     if (!projectId) return;
-    const selected = await window.biof3Desktop?.files?.openDirectoryDialog?.();
+    const selected = await chooseWorkspaceDirectory();
     if (!selected) return;
     const next = await updateProject(projectId, { workspacePath: selected });
     if (next) {
@@ -482,7 +693,7 @@ export function ProjectWorkspace(): React.ReactElement {
     } else {
       setWorkspaceNotice('工作目录更新失败');
     }
-  }, [projectId]);
+  }, [chooseWorkspaceDirectory, projectId]);
 
   useEffect(() => {
     fetchData();
@@ -543,6 +754,77 @@ export function ProjectWorkspace(): React.ReactElement {
     () => jobs.find((j) => j.id === activeJobId) || null,
     [jobs, activeJobId]
   );
+
+  const jobStats = useMemo(() => {
+    let running = 0;
+    let failed = 0;
+    let done = 0;
+    let pending = 0;
+    jobs.forEach((job) => {
+      if (job.status === 'running') running += 1;
+      else if (job.status === 'failed') failed += 1;
+      else if (job.status === 'done') done += 1;
+      else pending += 1;
+    });
+    return { running, failed, done, pending };
+  }, [jobs]);
+
+  const liveJobsPreview = useMemo(
+    () =>
+      jobs
+        .filter((job) => job.status === 'running' || job.status === 'pending')
+        .slice(0, 3),
+    [jobs]
+  );
+
+  const openScheduledResults = useCallback(() => {
+    if (activeJobId || jobs.length > 0) {
+      setActiveJobId((current) => current || jobs[0]?.id || null);
+    }
+    updateWorkspaceMode('scheduled');
+    openRightPanel('results');
+  }, [activeJobId, jobs, openRightPanel, updateWorkspaceMode]);
+
+  const backendSummary = useMemo(() => {
+    const readyLabel = backendStatus?.isReady
+      ? '后端就绪'
+      : backendStatus?.downReason || '后端检测中…';
+    const serviceItems = [
+      {
+        key: 'r-runtime',
+        label: 'R',
+        status: backendStatus
+          ? backendStatus.rRuntime
+            ? 'runtime'
+            : 'offline'
+          : 'loading',
+      },
+      {
+        key: 'py-runtime',
+        label: 'Python',
+        status: backendStatus
+          ? backendStatus.pyRuntime
+            ? 'runtime'
+            : 'offline'
+          : 'loading',
+      },
+      {
+        key: 'plumber',
+        label: 'Plumber',
+        status: backendStatus
+          ? backendStatus.plumberUp
+            ? 'online'
+            : 'offline'
+          : 'loading',
+      },
+    ];
+    return { readyLabel, serviceItems };
+  }, [backendStatus]);
+
+  const showPinnedSummary = workspaceMode === 'chat' || workspaceMode === 'scheduled';
+  const summaryOpenWidth = Math.min(summarySize.width, Math.max(288, sessionFrameWidth - 36));
+  const summaryOpenHeight = Math.min(summarySize.height, Math.max(236, sessionFrameHeight - 36));
+  const summaryCardOpen = summaryVisibility !== 'hidden' && summaryOpen;
 
   const normalizeToolStatus = useCallback((status: unknown): ToolJob['status'] => {
     if (status === 'completed' || status === 'done') return 'done';
@@ -616,121 +898,150 @@ export function ProjectWorkspace(): React.ReactElement {
     );
   }
 
+  // CenterPanel ctx — bundles every piece of state/handler the middle column
+  // needs to render its 8 workspaceMode layouts. ProjectWorkspace remains the
+  // single source of truth; CenterPanel is a pure renderer.
+  const centerPanelCtx: CenterPanelContext = {
+    project: project as Project,
+    projectId,
+    allProjects,
+    activeConvId,
+    conversations,
+    projectConversations,
+    searchConversationIndex,
+    workspaceMode,
+    workspaceSearchQuery,
+    showPinnedSummary,
+    centerColRef: centerColRef as React.RefObject<HTMLElement>,
+    sessionFrameRef: sessionFrameRef as React.RefObject<HTMLDivElement>,
+    bottomTerminalOpen,
+    bottomTerminalHeight,
+    rightOpen,
+    inputHeight,
+    summaryCardOpen,
+    summaryVisibility,
+    summaryOpenWidth,
+    summaryOpenHeight,
+    compactWorkspacePath,
+    activeJob,
+    activeArtifact,
+    activeJobId,
+    backendSummary,
+    liveJobsPreview,
+    jobStats,
+    jobs,
+    datasets,
+    updateWorkspaceMode,
+    setWorkspaceSearchQuery,
+    openRightPanel,
+    switchToProject,
+    navigate,
+    setActiveConvId,
+    setActiveJobId,
+    setActiveArtifact,
+    setBottomTerminalOpen,
+    setRightOpen,
+    setSummaryOpen,
+    handleShowTools,
+    handleShowFigCode,
+    handleShowPlugins,
+    handleOpenResult,
+    handleAskAgent,
+    handleOpenWorkspacePath,
+    openScheduledResults,
+    startResize,
+    startSummaryResize,
+  };
+
+  const leftPanelCtx: LeftPanelContext = {
+    width: leftWidth,
+    project: project as Project,
+    workspacePath,
+    compactWorkspacePath,
+    workspaceNotice,
+    sidebarQuery,
+    normalizedSidebarQuery,
+    setSidebarQuery,
+    visibleProjects,
+    projectConversations,
+    projectId,
+    conversations,
+    activeConvId,
+    expandedProjects,
+    projectMatchesSidebarQuery,
+    matchesConversationQuery,
+    creatingProjectInline,
+    newProjectName,
+    newProjectDesc,
+    newProjectWorkspacePath,
+    creatingProject,
+    setCreatingProjectInline,
+    setNewProjectName,
+    setNewProjectDesc,
+    setNewProjectWorkspacePath,
+    openProjectCreator,
+    submitProjectCreator,
+    chooseWorkspaceDirectory,
+    creatingConversationFor,
+    newConversationTitle,
+    creatingConversation,
+    setCreatingConversationFor,
+    setNewConversationTitle,
+    openConversationCreator,
+    submitConversationCreator,
+    workspaceMode,
+    handleShowCloud,
+    handleShowSearch,
+    handleShowScheduled,
+    handleShowTools,
+    handleShowFigCode,
+    handleShowPlugins,
+    handleShowSettings,
+    switchToProject,
+    handleSwitchConversation,
+    toggleProjectExpand,
+    handleOpenWorkspacePath,
+    handleChangeWorkspacePath,
+  };
+
+  const rightPanelCtx: RightPanelContext = {
+    width: rightWidth,
+    bottomTerminalOpen,
+    bottomTerminalHeight,
+    project: project as Project,
+    projectId,
+    activeConvId,
+    openRightTabs,
+    rightTab,
+    rightToolMenuOpen,
+    setRightTab,
+    setRightToolMenuOpen,
+    openRightPanel,
+    closeRightPanelTab,
+    activeJob,
+    activeArtifact,
+    setActiveArtifact,
+    openWorkspaceFiles,
+    activeWorkspaceFile,
+    setActiveWorkspaceFile,
+    backendStatus,
+    browserUrl,
+    setBottomTerminalOpen,
+    setRightOpen,
+    setActiveConvId,
+    handleAskAgent,
+    handleOpenWorkspaceFile,
+    handleCloseWorkspaceFile,
+    handleOpenResult,
+    handleOpenRightTerminal,
+    handleOpenRightBrowser,
+    handleOpenRightFiles,
+    handleOpenRightChat,
+    setBrowserUrl,
+  };
+
   return (
     <div className={styles.workspaceRoot}>
-      {/* Header bar */}
-      <header className={styles.workspaceHeader}>
-        <div className={styles.headerLeft}>
-          <button
-            className={styles.iconBtn}
-            onClick={() => navigate('/')}
-            title="返回首页"
-          >
-            <Icon name="arrow-left" size={18} />
-          </button>
-          <h1 className={styles.projectTitle}>{project.name}</h1>
-          {project.modality && (
-            <span className={styles.modalityBadge}>{project.modality}</span>
-          )}
-          {/* 4.5 — Project switcher dropdown */}
-          <div className={styles.switcherWrap}>
-            <button
-              className={styles.switcherBtn}
-              onClick={() => setSwitcherOpen((v) => !v)}
-              title="切换项目"
-            >
-              <Icon name="chevron-down" size={14} />
-            </button>
-            {switcherOpen && (
-              <>
-                <div className={styles.switcherOverlay} onClick={() => setSwitcherOpen(false)} />
-                <div className={styles.switcherDropdown}>
-                  <input
-                    className={styles.switcherSearch}
-                    placeholder="搜索项目…"
-                    value={switcherQuery}
-                    onChange={(e) => setSwitcherQuery(e.target.value)}
-                    autoFocus
-                  />
-                  <div className={styles.switcherList}>
-                    {filteredProjects.length === 0 ? (
-                      <div className={styles.switcherEmpty}>无匹配项目</div>
-                    ) : (
-                      filteredProjects.map((p) => (
-                        <button
-                          key={p.id}
-                          className={`${styles.switcherItem} ${p.id === projectId ? styles.switcherItemActive : ''}`}
-                          onClick={() => switchToProject(p.id)}
-                        >
-                          <span className={styles.switcherItemName}>{p.name}</span>
-                          {p.modality && (
-                            <span className={styles.switcherItemBadge}>{p.modality}</span>
-                          )}
-                        </button>
-                      ))
-                    )}
-                  </div>
-                  <Link
-                    className={styles.switcherNewProject}
-                    to="#"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      setSwitcherOpen(false);
-                      openProjectCreator();
-                    }}
-                  >
-                    + 新建项目
-                  </Link>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-        <div className={styles.workspacePathBar} title={workspacePath || undefined}>
-          <Icon name="folder" size={14} />
-          <span className={styles.workspacePathLabel}>Workspace</span>
-          <button
-            className={styles.workspacePathText}
-            onClick={handleOpenWorkspacePath}
-            disabled={!workspacePath}
-            title={workspacePath ? '在 Finder 中打开工作目录' : '工作目录初始化中'}
-          >
-            {compactWorkspacePath}
-          </button>
-          <button
-            className={styles.workspacePathAction}
-            onClick={handleChangeWorkspacePath}
-            title="更改项目工作目录"
-          >
-            更改
-          </button>
-          {workspaceNotice && <span className={styles.workspacePathNotice}>{workspaceNotice}</span>}
-        </div>
-        <div className={styles.headerRight}>
-          <button
-            className={styles.iconBtn}
-            onClick={toggleLeftPanel}
-            title="切换资源栏"
-          >
-            <Icon name="panel-left" size={18} />
-          </button>
-          <button
-            className={styles.iconBtn}
-            onClick={toggleRightPanel}
-            title="切换结果栏"
-          >
-            <Icon name="panel-right" size={18} />
-          </button>
-          <button
-            className={`${styles.iconBtn} ${workspaceMode === 'settings' ? styles.iconBtnActive : ''}`}
-            onClick={handleShowSettings}
-            title="设置"
-          >
-            <Icon name="settings" size={18} />
-          </button>
-        </div>
-      </header>
-
       <div className={styles.workspaceBody}>
         {compactLayout && (leftOpen || rightOpen) && (
           <button
@@ -746,544 +1057,28 @@ export function ProjectWorkspace(): React.ReactElement {
         {/* Left column — Project list + conversations (AionUi style) */}
         {leftOpen && (
           <>
-            <aside className={styles.leftCol} style={{ width: leftWidth }}>
-              <div className={styles.leftPanelWrap}>
-                <div className={styles.leftQuickActions}>
-                  <div className={styles.leftQuickSectionLabel}>工作台</div>
-                  <button
-                    className={`${styles.leftQuickAction} ${workspaceMode === 'cloud' ? styles.leftQuickActionActive : ''}`}
-                    onClick={handleShowCloud}
-                    title="云平台"
-                  >
-                    <Icon name="layout-grid" size={15} />
-                    <span>云平台</span>
-                  </button>
-                  <button
-                    className={`${styles.leftQuickAction} ${workspaceMode === 'chat' ? styles.leftQuickActionActive : ''}`}
-                    onClick={() => openConversationCreator()}
-                    title="新对话"
-                  >
-                    <Icon name="plus" size={15} />
-                    <span>新对话</span>
-                  </button>
-                  <button
-                    className={`${styles.leftQuickAction} ${workspaceMode === 'search' ? styles.leftQuickActionActive : ''}`}
-                    onClick={handleShowSearch}
-                    title="搜索项目"
-                  >
-                    <Icon name="search" size={15} />
-                    <span>搜索</span>
-                  </button>
-                  <button
-                    className={`${styles.leftQuickAction} ${workspaceMode === 'scheduled' ? styles.leftQuickActionActive : ''}`}
-                    onClick={handleShowScheduled}
-                    title="查看已安排/运行记录"
-                  >
-                    <Icon name="clock" size={15} />
-                    <span>已安排</span>
-                  </button>
-                  <button
-                    className={`${styles.leftQuickAction} ${workspaceMode === 'tools' ? styles.leftQuickActionActive : ''}`}
-                    onClick={handleShowTools}
-                    title="分析工具"
-                  >
-                    <Icon name="bar-chart" size={15} />
-                    <span>分析工具</span>
-                  </button>
-                  <button
-                    className={`${styles.leftQuickAction} ${workspaceMode === 'figcode' ? styles.leftQuickActionActive : ''}`}
-                    onClick={handleShowFigCode}
-                    title="FigCode"
-                  >
-                    <Icon name="image" size={15} />
-                    <span>FigCode</span>
-                  </button>
-                  <button
-                    className={`${styles.leftQuickAction} ${workspaceMode === 'plugins' ? styles.leftQuickActionActive : ''}`}
-                    onClick={handleShowPlugins}
-                    title="插件"
-                  >
-                    <Icon name="puzzle" size={15} />
-                    <span>插件</span>
-                  </button>
-                  <button
-                    className={`${styles.leftQuickAction} ${workspaceMode === 'settings' ? styles.leftQuickActionActive : ''}`}
-                    onClick={handleShowSettings}
-                    title="设置"
-                  >
-                    <Icon name="settings" size={15} />
-                    <span>设置</span>
-                  </button>
-                </div>
-                <div className={styles.leftPanelHeader}>
-                  <span className={styles.leftPanelTitle}>项目</span>
-                  <button
-                    className={styles.iconBtn}
-                    onClick={openProjectCreator}
-                    title="新建项目"
-                  >
-                    <Icon name="plus" size={16} />
-                  </button>
-                </div>
-                <div className={styles.projectTreeScroll}>
-                  {creatingProjectInline && (
-                    <div className={styles.inlineCreateCard}>
-                      <input
-                        className={styles.inlineCreateInput}
-                        placeholder="项目名称"
-                        value={newProjectName}
-                        onChange={(event) => setNewProjectName(event.target.value)}
-                        autoFocus
-                      />
-                      <textarea
-                        className={styles.inlineCreateTextarea}
-                        placeholder="项目描述（可选）"
-                        value={newProjectDesc}
-                        onChange={(event) => setNewProjectDesc(event.target.value)}
-                        rows={3}
-                      />
-                      <div className={styles.inlineCreateActions}>
-                        <button
-                          className={styles.inlineCreateBtn}
-                          onClick={() => {
-                            setCreatingProjectInline(false);
-                            setNewProjectName('');
-                            setNewProjectDesc('');
-                          }}
-                          disabled={creatingProject}
-                        >
-                          取消
-                        </button>
-                        <button
-                          className={`${styles.inlineCreateBtn} ${styles.inlineCreateBtnPrimary}`}
-                          onClick={submitProjectCreator}
-                          disabled={creatingProject || !newProjectName.trim()}
-                        >
-                          {creatingProject ? '创建中…' : '创建项目'}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  {allProjects.map((p) => {
-                    const isCurrent = p.id === projectId;
-                    const isExpanded = expandedProjects.has(p.id);
-                    const convs = isCurrent ? conversations : (projectConversations[p.id] || []);
-                    return (
-                      <div key={p.id} className={styles.projectTreeNode}>
-                        <div
-                          className={`${styles.projectTreeRow} ${isCurrent ? styles.projectTreeRowActive : ''}`}
-                          onClick={() => {
-                            if (!isCurrent) switchToProject(p.id);
-                            toggleProjectExpand(p.id);
-                          }}
-                        >
-                          <Icon
-                            name={isExpanded ? 'chevron-down' : 'chevron-right'}
-                            size={12}
-                          />
-                          <Icon name="folder" size={14} />
-                          <span className={styles.projectTreeName}>{p.name}</span>
-                          <button
-                            className={styles.projectTreeAddBtn}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openConversationCreator(p.id);
-                            }}
-                            title="新建对话"
-                          >
-                            <Icon name="plus" size={12} />
-                          </button>
-                        </div>
-                        {isExpanded && (
-                          <ul className={styles.convList}>
-                            {creatingConversationFor === p.id && (
-                              <li className={styles.convCreateItem}>
-                                <input
-                                  className={styles.convCreateInput}
-                                  placeholder="对话标题（可选）"
-                                  value={newConversationTitle}
-                                  onChange={(event) => setNewConversationTitle(event.target.value)}
-                                  autoFocus
-                                  onKeyDown={(event) => {
-                                    if (event.key === 'Enter') {
-                                      event.preventDefault();
-                                      submitConversationCreator(p.id);
-                                    }
-                                    if (event.key === 'Escape') {
-                                      setCreatingConversationFor(null);
-                                      setNewConversationTitle('');
-                                    }
-                                  }}
-                                />
-                                <div className={styles.convCreateActions}>
-                                  <button
-                                    className={styles.convCreateBtn}
-                                    onClick={() => {
-                                      setCreatingConversationFor(null);
-                                      setNewConversationTitle('');
-                                    }}
-                                    disabled={creatingConversation}
-                                  >
-                                    取消
-                                  </button>
-                                  <button
-                                    className={`${styles.convCreateBtn} ${styles.convCreateBtnPrimary}`}
-                                    onClick={() => submitConversationCreator(p.id)}
-                                    disabled={creatingConversation}
-                                  >
-                                    {creatingConversation ? '创建中…' : '创建'}
-                                  </button>
-                                </div>
-                              </li>
-                            )}
-                            {convs.length === 0 && (
-                              <li className={styles.convEmpty}>暂无对话</li>
-                            )}
-                            {convs.map((c) => (
-                              <li
-                                key={c.id}
-                                className={`${styles.convItem} ${isCurrent && c.id === activeConvId ? styles.convItemActive : ''}`}
-                                onClick={() => {
-                                  if (!isCurrent) switchToProject(p.id);
-                                  handleSwitchConversation(c.id);
-                                }}
-                                title={c.title}
-                              >
-                                <Icon name="message-circle" size={12} />
-                                <span className={styles.convItemTitle}>{c.title}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </aside>
+            <LeftPanel ctx={leftPanelCtx} />
             <div className={styles.resizeHandleV} onMouseDown={startResize('left')} />
           </>
         )}
 
         {/* Center column — Simple chat (conversation-driven) */}
-        <main className={styles.centerCol}>
-          {workspaceMode === 'cloud' && (
-            <div className={styles.workspaceEmbeddedPage}>
-              <DesktopDashboard embedded activeProject={project} />
-            </div>
-          )}
-          {workspaceMode === 'search' && (
-            <WorkspaceSearchPanel
-              query={workspaceSearchQuery}
-              onQueryChange={setWorkspaceSearchQuery}
-              projects={allProjects}
-              currentProjectId={projectId || ''}
-              conversations={Object.entries({
-                ...searchConversationIndex,
-                ...projectConversations,
-                ...(projectId ? { [projectId]: conversations } : {}),
-              }).flatMap(([pid, list]) => list.map((item) => ({ ...item, project_id: item.project_id || pid })))}
-              jobs={jobs}
-              datasets={datasets}
-              onOpenProject={(id) => {
-                switchToProject(id);
-                updateWorkspaceMode('chat');
-              }}
-              onOpenConversation={(pid, convId) => {
-                if (pid && pid !== projectId) {
-                  navigate(`/project/${pid}`);
-                }
-                updateWorkspaceMode('chat');
-                setActiveConvId(convId);
-              }}
-              onOpenScheduled={(jobId) => {
-                setActiveJobId(jobId);
-                updateWorkspaceMode('scheduled');
-                openRightPanel('results');
-              }}
-              onOpenTools={handleShowTools}
-              onOpenFigCode={handleShowFigCode}
-              onOpenPlugins={handleShowPlugins}
-            />
-          )}
-          {workspaceMode === 'chat' && (
-            <>
-              <div className={styles.agentMain}>
-                {project && projectId && (
-                  <SimpleChat
-                    projectId={projectId}
-                    conversationId={activeConvId}
-                    onConversationChange={setActiveConvId}
-                    onOpenResult={handleOpenResult}
-                    inputHeight={inputHeight}
-                  />
-                )}
-              </div>
-              <div className={styles.resizeHandleH} onMouseDown={startResize('input')} />
-            </>
-          )}
-          {workspaceMode === 'scheduled' && (
-            <ScheduledWorkspacePanel
-              project={project}
-              jobs={jobs}
-              activeJobId={activeJobId}
-              activeArtifact={activeArtifact}
-              onSelectJob={(jobId) => {
-                setActiveJobId(jobId);
-                openRightPanel('results');
-              }}
-              onActiveArtifactChange={setActiveArtifact}
-              onAskAgent={handleAskAgent}
-              onBackToChat={() => updateWorkspaceMode('chat')}
-            />
-          )}
-          {workspaceMode === 'tools' && (
-            <div className={styles.workspaceEmbeddedPage}>
-              <ToolsPage />
-            </div>
-          )}
-          {workspaceMode === 'figcode' && (
-            <div className={styles.workspaceEmbeddedPage}>
-              <FigCodePage />
-            </div>
-          )}
-          {workspaceMode === 'plugins' && (
-            <div className={styles.workspaceModeSurface}>
-              <PluginStorePanel onClose={() => updateWorkspaceMode('chat')} />
-            </div>
-          )}
-          {workspaceMode === 'settings' && (
-            <div className={styles.workspaceModeSurface}>
-              <DesktopSettingsPanel onClose={() => updateWorkspaceMode('chat')} />
-            </div>
-          )}
-        </main>
+        <CenterPanel ctx={centerPanelCtx} />
 
-        {/* Right column — File tree + Results panel */}
-        {rightOpen && (
-          <>
-            <div className={styles.resizeHandleV} onMouseDown={startResize('right')} />
-            <aside className={styles.rightCol} style={{ width: rightWidth }}>
-              <div className={styles.resultPanel}>
-                {/* Tab switcher: files / results */}
-                <div className={styles.resultPanelHeader}>
-                  <div className={styles.rightTabBar}>
-                    <button
-                      className={`${styles.rightTabBtn} ${rightTab === 'files' ? styles.rightTabBtnActive : ''}`}
-                      onClick={() => setRightTab('files')}
-                    >
-                      <Icon name="folder" size={14} /> 文件
-                    </button>
-                    <button
-                      className={`${styles.rightTabBtn} ${rightTab === 'results' ? styles.rightTabBtnActive : ''}`}
-                      onClick={() => setRightTab('results')}
-                    >
-                      <Icon name="bar-chart" size={14} /> 结果
-                    </button>
-                  </div>
-                  <button
-                    className={styles.iconBtn}
-                    onClick={() => setRightOpen(false)}
-                    title="收起面板"
-                  >
-                    <Icon name="x" size={16} />
-                  </button>
-                </div>
-                <div className={styles.resultPanelBody}>
-                  {rightTab === 'files' ? (
-                    <RightFileTree
-                      project={project}
-                      openFiles={openWorkspaceFiles}
-                      activeFile={activeWorkspaceFile}
-                      onOpenFile={handleOpenWorkspaceFile}
-                      onSelectFile={setActiveWorkspaceFile}
-                      onCloseFile={handleCloseWorkspaceFile}
-                    />
-                  ) : activeJob ? (
-                    <ResultView
-                      job={activeJob}
-                      activeArtifact={activeArtifact}
-                      onActiveArtifactChange={setActiveArtifact}
-                      onAskAgent={handleAskAgent}
-                    />
-                  ) : (
-                    <EmptyResult project={project} />
-                  )}
-                </div>
-              </div>
-            </aside>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ============================================================
-// ResourcePanel — left column (Phase4: file tree + datasets + storage)
-// ============================================================
-
-interface FileEntry {
-  name: string;
-  type: 'file' | 'dir';
-  size?: number;
-  mtime?: number;
-}
-
-function ResourcePanel({
-  project,
-  datasets,
-  jobs,
-  onSelectJob,
-  allProjects,
-  currentProjectId,
-  onSwitchProject,
-}: {
-  project: Project;
-  datasets: Dataset[];
-  jobs: ToolJob[];
-  onSelectJob: (id: string) => void;
-  allProjects: Project[];
-  currentProjectId: string;
-  onSwitchProject: (id: string) => void;
-}): React.ReactElement {
-  const [fileTree, setFileTree] = useState<FileEntry[]>([]);
-  const [expandedDirs, setExpandedDirs] = useState<Set<string>>(new Set());
-  const [storageBytes, setStorageBytes] = useState<number>(0);
-  const [activeTab, setActiveTab] = useState<'datasets' | 'files'>('datasets');
-
-  // Fetch storage usage
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const resp = await fetch(getApiPrefix() + '/storage-usage');
-        const data = await resp.json();
-        if (!cancelled && data.ok) setStorageBytes(data.totalBytes || 0);
-      } catch { /* ignore */ }
-    })();
-    return () => { cancelled = true; };
-  }, []);
-
-  // Fetch file tree (root level)
-  const fetchDir = useCallback(async (prefix: string) => {
-    try {
-      const resp = await fetch(
-        getApiPrefix() + `/workspaces/${encodeURIComponent(project.id)}/tree?prefix=${encodeURIComponent(prefix)}`
-      );
-      const data = await resp.json();
-      if (data.ok) return data.entries as FileEntry[];
-    } catch { /* ignore */ }
-    return [];
-  }, [project.id]);
-
-  useEffect(() => {
-    if (activeTab === 'files') fetchDir('').then(setFileTree);
-  }, [activeTab, fetchDir]);
-
-  const toggleDir = useCallback(async (dirPath: string) => {
-    setExpandedDirs((prev) => {
-      const next = new Set(prev);
-      if (next.has(dirPath)) next.delete(dirPath);
-      else next.add(dirPath);
-      return next;
-    });
-  }, []);
-
-  return (
-    <div className={styles.leftPanelWrap}>
-      {/* Top section — datasets / files */}
-      <div className={styles.leftTopSection}>
-        <div className={styles.leftMiniTabBar}>
-          <button
-            className={`${styles.leftMiniTab} ${activeTab === 'datasets' ? styles.leftMiniTabActive : ''}`}
-            onClick={() => setActiveTab('datasets')}
-          >
-            <Icon name="database" size={13} /> 数据集
-          </button>
-          <button
-            className={`${styles.leftMiniTab} ${activeTab === 'files' ? styles.leftMiniTabActive : ''}`}
-            onClick={() => setActiveTab('files')}
-          >
-            <Icon name="folder" size={13} /> 文件
-          </button>
-        </div>
-        <div className={styles.leftTopContent}>
-          {activeTab === 'datasets' && (
-            <div className={styles.panelSection}>
-              {datasets.length === 0 ? (
-                <p className={styles.panelEmpty}>暂无数据集</p>
-              ) : (
-                <ul className={styles.itemList}>
-                  {datasets.map((d) => (
-                    <li key={d.id} className={styles.itemRow}>
-                      <Icon name="file" size={14} />
-                      <div className={styles.itemMeta}>
-                        <span className={styles.itemName}>{d.name}</span>
-                        <span className={styles.itemSub}>
-                          {d.nCells ? `${d.nCells} cells · ` : ''}
-                          {formatSize(d.size)}
-                        </span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
-          {activeTab === 'files' && (
-            <div className={styles.panelSection}>
-              {fileTree.length === 0 ? (
-                <p className={styles.panelEmpty}>暂无文件</p>
-              ) : (
-                <FileTreeList
-                  entries={fileTree}
-                  prefix=""
-                  expandedDirs={expandedDirs}
-                  onToggleDir={toggleDir}
-                  onFetchDir={fetchDir}
-                  fileUrlFor={(path) =>
-                    getApiPrefix() + `/workspaces/${encodeURIComponent(project.id)}/file?path=${encodeURIComponent(path)}`
-                  }
-                  onOpenFile={() => {}}
-                  activePath={null}
-                />
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Bottom section — my projects (switchable) */}
-      <div className={styles.leftBottomSection}>
-        <div className={styles.leftBottomHeader}>
-          <Icon name="folder" size={14} />
-          <span>我的项目</span>
-        </div>
-        <div className={styles.projectListBody}>
-          {allProjects.length === 0 ? (
-            <p className={styles.panelEmpty}>暂无项目</p>
-          ) : (
-            <ul className={styles.projectList}>
-              {allProjects.map((p) => (
-                <li
-                  key={p.id}
-                  className={`${styles.projectItem} ${p.id === currentProjectId ? styles.projectItemActive : ''}`}
-                  onClick={() => onSwitchProject(p.id)}
-                  title={p.description || p.name}
-                >
-                  <Icon name="folder" size={14} />
-                  <div className={styles.projectItemMeta}>
-                    <span className={styles.projectItemName}>{p.name}</span>
-                    {p.modality && (
-                      <span className={styles.projectItemSub}>{p.modality}</span>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <RightPanel
+          ctx={rightPanelCtx}
+          visible={rightOpen}
+          workspaceMode={workspaceMode}
+          onResize={startResize('right')}
+        />
+        <BottomTerminal
+          open={bottomTerminalOpen}
+          height={bottomTerminalHeight}
+          leftOffset={leftOpen ? leftWidth + 5 : 0}
+          workspacePath={project.workspacePath}
+          onResize={startBottomTerminalResize}
+          onClose={() => setBottomTerminalOpen(false)}
+        />
       </div>
     </div>
   );
@@ -1292,6 +1087,13 @@ function ResourcePanel({
 // ============================================================
 // FileTreeList — recursive file tree rendering
 // ============================================================
+
+interface FileEntry {
+  name: string;
+  type: 'file' | 'dir';
+  size?: number;
+  mtime?: number;
+}
 
 function FileTreeList({
   entries,
@@ -1496,7 +1298,7 @@ function formatPreviewText(name: string, text: string): string {
   return text;
 }
 
-function RightFileTree({
+export function RightFileTree({
   project,
   openFiles,
   activeFile,
@@ -1514,8 +1316,8 @@ function RightFileTree({
   const [tree, setTree] = useState<FileEntry[]>([]);
   const [expandedDirs, setExpandedDirs] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
-  const [treeOpen, setTreeOpen] = useState(!activeFile);
-  const [treeWidth, setTreeWidth] = useState(320);
+  const [treeOpen, setTreeOpen] = useState(true);
+  const [treeWidth, setTreeWidth] = useState(220);
 
   const fetchDir = useCallback(async (prefix: string) => {
     try {
@@ -1547,19 +1349,14 @@ function RightFileTree({
 
   const handleOpenFile = useCallback((file: ActiveWorkspaceFile) => {
     onOpenFile(file);
-    setTreeOpen(false);
   }, [onOpenFile]);
-
-  useEffect(() => {
-    if (!activeFile && openFiles.length === 0) setTreeOpen(true);
-  }, [activeFile, openFiles.length]);
 
   const startTreeResize = useCallback((event: React.MouseEvent) => {
     event.preventDefault();
     const startX = event.clientX;
     const startWidth = treeWidth;
     const onMove = (moveEvent: MouseEvent) => {
-      setTreeWidth(Math.max(96, startWidth - (moveEvent.clientX - startX)));
+      setTreeWidth(Math.min(320, Math.max(96, startWidth - (moveEvent.clientX - startX))));
     };
     const onUp = () => {
       document.removeEventListener('mousemove', onMove);
@@ -1620,8 +1417,16 @@ function RightFileTree({
           <Icon name={treeOpen ? 'chevron-down' : 'chevron-right'} size={13} />
           <Icon name="folder" size={14} />
         </button>
+      </div>
+      <div className={styles.workspaceFilesMain}>
+        <div className={styles.workspaceFilePreviewPane}>
+          <WorkspaceFilePreview file={activeFile} />
+        </div>
         {treeOpen && (
-          <div className={styles.workspaceFileTreePopover} style={{ width: treeWidth }}>
+          <aside
+            className={styles.workspaceFileTreePaneWrap}
+            style={{ width: treeWidth, maxWidth: '65%' }}
+          >
             <div
               className={styles.workspaceFileTreeResize}
               onMouseDown={startTreeResize}
@@ -1648,11 +1453,8 @@ function RightFileTree({
                 />
               )}
             </div>
-          </div>
+          </aside>
         )}
-      </div>
-      <div className={styles.workspaceFilesMain}>
-        <WorkspaceFilePreview file={activeFile} />
       </div>
     </div>
   );
@@ -1760,7 +1562,7 @@ function WorkspaceFilePreview({ file }: { file: ActiveWorkspaceFile | null }): R
 // WorkspaceSearchPanel — center column global search view
 // ============================================================
 
-function WorkspaceSearchPanel({
+export function WorkspaceSearchPanel({
   query,
   onQueryChange,
   projects,
@@ -2018,7 +1820,7 @@ function SearchResultSection({
 // ScheduledWorkspacePanel — center column scheduled/jobs view
 // ============================================================
 
-function ScheduledWorkspacePanel({
+export function ScheduledWorkspacePanel({
   project,
   jobs,
   activeJobId,
@@ -2110,6 +1912,8 @@ function ScheduledWorkspacePanel({
     </div>
   );
 }
+
+// WorkspaceSummaryCard moved to @/components/workspace-panels/WorkspaceSummaryCard (PR-3.1)
 
 // ============================================================
 // HistoryPanel — right column (Phase7)
@@ -2511,7 +2315,7 @@ function artifactName(file: JobResultFile): string {
   return file.name || file.filename || '';
 }
 
-function ResultView({
+export function ResultView({
   job,
   activeArtifact,
   onActiveArtifactChange,
@@ -2991,17 +2795,380 @@ function ChainRecommendations({
   );
 }
 
-function EmptyResult({ project }: { project: Project }): React.ReactElement {
+function normalizeBrowserUrl(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return 'https://biof3.com/';
+  if (/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(trimmed)) return trimmed;
+  if (trimmed.startsWith('localhost') || trimmed.startsWith('127.0.0.1')) {
+    return `http://${trimmed}`;
+  }
+  return `https://${trimmed}`;
+}
+
+// EmbeddedTerminalPanel moved to @/components/workspace-panels/BottomTerminal (PR-3.1)
+
+export function TerminalPanel({
+  project,
+  backendStatus,
+}: {
+  project: Project;
+  backendStatus: BackendStatus | null;
+}): React.ReactElement {
+  const [snapshot, setSnapshot] = useState<{
+    ok: boolean;
+    logDir?: string;
+    dataDir?: string;
+    processes?: Array<{
+      id: string;
+      label: string;
+      command: string;
+      status: 'running' | 'stopped';
+      pid?: number | null;
+      logPath?: string;
+      output: string;
+    }>;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await window.biof3Desktop?.terminal?.snapshot?.();
+      setSnapshot(result || null);
+    } catch {
+      setSnapshot(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    refresh();
+    const timer = window.setInterval(refresh, 5000);
+    return () => window.clearInterval(timer);
+  }, [refresh]);
+
+  return (
+    <div className={styles.terminalPanel}>
+      <div className={styles.terminalPanelHead}>
+        <div className={styles.terminalPanelTitleWrap}>
+          <div className={styles.terminalPanelTitle}>后端</div>
+          <div className={styles.terminalPanelMeta}>
+            {project.workspacePath || '当前项目'} · {backendStatus?.isReady ? '后端在线' : '后端检查中'}
+          </div>
+        </div>
+        <div className={styles.terminalPanelActions}>
+          <button type="button" className={styles.terminalPanelActionBtn} onClick={refresh}>
+            刷新
+          </button>
+          <button
+            type="button"
+            className={styles.terminalPanelActionBtn}
+            onClick={() => window.biof3Desktop?.terminal?.openLogDir?.()}
+          >
+            打开日志
+          </button>
+          <button
+            type="button"
+            className={styles.terminalPanelActionBtn}
+            onClick={() => window.biof3Desktop?.terminal?.openShell?.(project.workspacePath)}
+          >
+            系统终端
+          </button>
+        </div>
+      </div>
+
+      {backendStatus?.downReason && (
+        <div className={styles.terminalPanelHint}>{backendStatus.downReason}</div>
+      )}
+
+      <div className={styles.terminalPanelList}>
+        {loading && !snapshot && <div className={styles.panelEmpty}>加载后端状态…</div>}
+        {(snapshot?.processes || []).map((proc) => (
+          <details key={proc.id} className={styles.terminalProcessCard} open>
+            <summary className={styles.terminalProcessSummary}>
+              <span className={styles.terminalProcessName}>
+                <span
+                  className={styles.terminalProcessDot}
+                  data-status={proc.status}
+                />
+                {proc.label}
+              </span>
+              <span className={styles.terminalProcessMeta}>
+                {proc.status === 'running' ? '运行中' : '未运行'}
+                {proc.pid ? ` · PID ${proc.pid}` : ''}
+              </span>
+            </summary>
+            <div className={styles.terminalProcessCommand}>{proc.command}</div>
+            <pre className={styles.terminalProcessOutput}>
+              {loading && !snapshot ? '加载后端状态…' : proc.output || '暂无日志输出'}
+            </pre>
+          </details>
+        ))}
+        {!loading && snapshot && (snapshot.processes || []).length === 0 && (
+          <div className={styles.panelEmpty}>没有可显示的后端状态</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function BrowserPanel({
+  initialUrl,
+  onUrlChange,
+  obscured = false,
+}: {
+  initialUrl: string;
+  onUrlChange: (url: string) => void;
+  obscured?: boolean;
+}): React.ReactElement {
+  const startUrlRef = useRef(normalizeBrowserUrl(initialUrl));
+  const hostRef = useRef<HTMLDivElement | null>(null);
+  const webviewRef = useRef<any>(null);
+  const [inputUrl, setInputUrl] = useState(() => normalizeBrowserUrl(initialUrl));
+  const [title, setTitle] = useState('浏览器');
+  const [loading, setLoading] = useState(true);
+  const [browserError, setBrowserError] = useState('');
+
+  useEffect(() => {
+    if (!webviewRef.current) return;
+    webviewRef.current.style.visibility = obscured ? 'hidden' : 'visible';
+    webviewRef.current.style.pointerEvents = obscured ? 'none' : 'auto';
+  }, [obscured]);
+
+  const navigate = useCallback(
+    (value: string) => {
+      const nextUrl = normalizeBrowserUrl(value);
+      setInputUrl(nextUrl);
+      onUrlChange(nextUrl);
+      if (webviewRef.current) {
+        try {
+          webviewRef.current.loadURL(nextUrl);
+        } catch {
+          webviewRef.current.src = nextUrl;
+        }
+      }
+    },
+    [onUrlChange]
+  );
+
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!host) return;
+    host.innerHTML = '';
+
+    const webview = document.createElement('webview') as any;
+    webview.style.width = '100%';
+    webview.style.height = '100%';
+    webview.style.border = '0';
+    webview.style.display = 'block';
+    webview.setAttribute('partition', 'persist:biof3-browser');
+    webview.setAttribute('allowpopups', 'true');
+    webview.src = startUrlRef.current;
+
+    const syncState = () => {
+      try {
+        const current = typeof webview.getURL === 'function' ? webview.getURL() : webview.src;
+        if (current) {
+          setInputUrl(current);
+          onUrlChange(current);
+        }
+        if (typeof webview.getTitle === 'function') {
+          setTitle(webview.getTitle() || '浏览器');
+        }
+      } catch {
+        /* noop */
+      }
+    };
+
+    const onStart = () => {
+      setLoading(true);
+      setBrowserError('');
+      webview.style.visibility = obscured ? 'hidden' : 'visible';
+    };
+    const onStop = () => {
+      setLoading(false);
+      syncState();
+    };
+    const onTitle = (event: any) => {
+      setTitle(String(event?.title || '浏览器'));
+    };
+    const onFail = (event: any) => {
+      if (Number(event?.errorCode) === -3) return;
+      setLoading(false);
+      setBrowserError(String(event?.errorDescription || '网页加载失败'));
+      webview.style.visibility = 'hidden';
+    };
+    const onNewWindow = (event: any) => {
+      event.preventDefault?.();
+      const next = String(event?.url || event?.targetURL || '').trim();
+      if (next) navigate(next);
+    };
+
+    webview.addEventListener('did-start-loading', onStart);
+    webview.addEventListener('did-stop-loading', onStop);
+    webview.addEventListener('did-navigate', onStop);
+    webview.addEventListener('did-navigate-in-page', onStop);
+    webview.addEventListener('page-title-updated', onTitle);
+    webview.addEventListener('did-fail-load', onFail);
+    webview.addEventListener('new-window', onNewWindow);
+
+    host.appendChild(webview);
+    webviewRef.current = webview;
+    setTitle('浏览器');
+    setLoading(true);
+
+    return () => {
+      try {
+        webview.removeEventListener('did-start-loading', onStart);
+        webview.removeEventListener('did-stop-loading', onStop);
+        webview.removeEventListener('did-navigate', onStop);
+        webview.removeEventListener('did-navigate-in-page', onStop);
+        webview.removeEventListener('page-title-updated', onTitle);
+        webview.removeEventListener('did-fail-load', onFail);
+        webview.removeEventListener('new-window', onNewWindow);
+      } catch {}
+      host.innerHTML = '';
+      webviewRef.current = null;
+    };
+  }, [navigate, onUrlChange, startUrlRef]);
+
+  const goBack = useCallback(() => {
+    try {
+      webviewRef.current?.canGoBack?.() && webviewRef.current.goBack();
+    } catch {}
+  }, []);
+
+  const goForward = useCallback(() => {
+    try {
+      webviewRef.current?.canGoForward?.() && webviewRef.current.goForward();
+    } catch {}
+  }, []);
+
+  const reload = useCallback(() => {
+    try {
+      webviewRef.current?.reload?.();
+    } catch {}
+  }, []);
+
+  const submitUrl = useCallback(
+    (event: React.FormEvent) => {
+      event.preventDefault();
+      navigate(inputUrl);
+    },
+    [inputUrl, navigate]
+  );
+
+  return (
+    <div className={`${styles.browserPanel} ${obscured ? styles.browserPanelObscured : ''}`}>
+      <div className={styles.browserPanelHead}>
+        <div className={styles.browserPanelControls}>
+          <button type="button" className={styles.browserControlBtn} onClick={goBack} title="后退">
+            <Icon name="arrow-left" size={14} />
+          </button>
+          <button type="button" className={styles.browserControlBtn} onClick={goForward} title="前进">
+            <Icon name="chevron-right" size={14} />
+          </button>
+          <button type="button" className={styles.browserControlBtn} onClick={reload} title="刷新">
+            <Icon name="refresh" size={14} />
+          </button>
+        </div>
+        <form className={styles.browserUrlBar} onSubmit={submitUrl}>
+          <input
+            value={inputUrl}
+            onChange={(event) => setInputUrl(event.target.value)}
+            placeholder="输入网址或搜索词"
+            spellCheck={false}
+          />
+          <button type="submit" className={styles.browserGoBtn}>
+            打开
+          </button>
+        </form>
+      </div>
+      <div className={styles.browserMetaRow}>
+        <span>{title}</span>
+        {loading && <span>加载中…</span>}
+      </div>
+      <div className={styles.browserHost} ref={hostRef} />
+      {browserError && (
+        <div className={styles.browserError}>
+          <Icon name="globe" size={22} />
+          <strong>无法打开网页</strong>
+          <span>{browserError}</span>
+          <button type="button" onClick={reload}>重新加载</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function EmptyAnalysisResult(): React.ReactElement {
   return (
     <div className={styles.emptyResult}>
       <div className={styles.emptyResultIcon}>
-        <Icon name="zap" size={48} />
+        <Icon name="bar-chart" size={34} />
       </div>
-      <h2 className={styles.emptyResultTitle}>开始分析</h2>
+      <h2 className={styles.emptyResultTitle}>暂无分析结果</h2>
       <p className={styles.emptyResultDesc}>
-        在右侧历史栏选择分析结果，或通过底部 Agent 对话框启动新分析。
+        从会话中运行分析，或从历史记录打开一个任务后，结果会显示在这里。
       </p>
-      <p className={styles.emptyResultProject}>当前项目：{project.name}</p>
+    </div>
+  );
+}
+
+export function EmptyResult({
+  project,
+  onOpenTerminal,
+  onOpenBrowser,
+  onOpenFiles,
+  onOpenChat,
+}: {
+  project: Project;
+  onOpenTerminal?: () => void;
+  onOpenBrowser?: () => void;
+  onOpenFiles?: () => void;
+  onOpenChat?: () => void;
+}): React.ReactElement {
+  return (
+    <div className={styles.emptyResult}>
+      <div className={styles.emptyResultIcon}>
+        <Icon name="zap" size={40} />
+      </div>
+      <h2 className={styles.emptyResultTitle}>开始工作</h2>
+      <p className={styles.emptyResultDesc}>
+        打开后端、浏览器、文件或侧边聊天，继续当前项目的分析与协作。
+      </p>
+      <p className={styles.emptyResultProject}>项目：{project.name}</p>
+      <div className={styles.emptyResultLaunchpad}>
+        <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenTerminal} disabled={!onOpenTerminal}>
+          <Icon name="terminal" size={16} />
+          <div className={styles.emptyResultLaunchText}>
+            <span>后端</span>
+            <small>查看服务状态与日志</small>
+          </div>
+        </button>
+        <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenBrowser} disabled={!onOpenBrowser}>
+          <Icon name="globe" size={16} />
+          <div className={styles.emptyResultLaunchText}>
+            <span>浏览器</span>
+            <small>打开网页或本地站点</small>
+          </div>
+        </button>
+        <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenFiles} disabled={!onOpenFiles}>
+          <Icon name="folder" size={16} />
+          <div className={styles.emptyResultLaunchText}>
+            <span>文件</span>
+            <small>浏览项目目录</small>
+          </div>
+        </button>
+        <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenChat} disabled={!onOpenChat}>
+          <Icon name="sidebar" size={16} />
+          <div className={styles.emptyResultLaunchText}>
+            <span>侧边聊天</span>
+            <small>打开右侧会话面板</small>
+          </div>
+        </button>
+      </div>
     </div>
   );
 }
