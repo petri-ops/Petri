@@ -17,8 +17,6 @@ import HomePage from '@/pages/home';
 // DocsPage 原生渲染组件保留在 pages/docs.tsx，但桌面端不再挂载教程路由。
 // 如需恢复内置教程，取消下面注释并加回 /docs 路由即可。
 // import DocsPage from '@/pages/docs';
-import { CopilotChat } from '@/components/copilot/CopilotChat';
-import { CopilotSelectionTip } from '@/components/copilot/CopilotSelectionTip';
 import '@/components/copilot/copilotActRegistryBoot';
 import { ProjectWorkspace } from '@/pages/project-workspace';
 import '@/components/desktop/desktop.css';
@@ -115,8 +113,6 @@ export default function App(): React.ReactElement {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      <CopilotChat />
-      <CopilotSelectionTip />
       <DesktopOnboardingMount />
     </BackendStatusProvider>
   );

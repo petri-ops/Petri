@@ -6,9 +6,9 @@
    - 下方桌面版覆盖：body 字体、滚动条、dock 让位 */
 @import 'infima/dist/css/default/default.css';
 @import './custom.css';
-/* 单细胞/空间工作台（sc-* 前缀全局类）+ Copilot 浮窗样式，Docusaurus 版全局 CSS */
+/* 单细胞/空间工作台（sc-* 前缀全局类）— Docusaurus 版全局 CSS 还在，
+   是 plan 1.6/§4.10 的 legacy removal 候选，先保留。 */
 @import './single-cell.css';
-@import './copilot.css';
 
 :root {
   /* 桌面版基础（覆盖 infima 的 web 站点默认） */
