@@ -189,19 +189,8 @@ function DesktopToolbarInner(): React.ReactElement {
   useEffect(() => {
     const html = document.documentElement;
     html.classList.add('biof3-desktop');
-    if (isProjectWorkspace) {
-      html.classList.remove('biof3-desktop-dock-collapsed');
-      document.body.style.paddingLeft = '0';
-      document.body.style.boxSizing = 'border-box';
-      return;
-    }
-    if (dockCollapsed) {
-      html.classList.add('biof3-desktop-dock-collapsed');
-      document.body.style.paddingLeft = '28px';
-    } else {
-      html.classList.remove('biof3-desktop-dock-collapsed');
-      document.body.style.paddingLeft = '64px';
-    }
+    html.classList.remove('biof3-desktop-dock-collapsed');
+    document.body.style.paddingLeft = '0';
     document.body.style.boxSizing = 'border-box';
   }, [dockCollapsed, isProjectWorkspace]);
 

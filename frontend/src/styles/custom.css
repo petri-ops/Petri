@@ -35,6 +35,64 @@
   --biof3-mint: #e4f4ee;
   --biof3-mint-bright: #8ff0d6;
   --biof3-frost: #eef8f4;
+
+  /* ===== BioF3 semantic surface tokens (light mode) =====
+     --biof3-bg-canvas  : 页面级最外层背景（最暗一层）
+     --biof3-bg-surface : 卡片/面板/抽屉表面（比 canvas 亮一档）
+     --biof3-bg-subtle  : 次级容器（侧栏 / list 行 / 浅底）
+     --biof3-bg-elevated: 浮层（菜单 / popover）
+     --biof3-border         : 通用边框
+     --biof3-border-strong  : 重点边框
+     --biof3-text           : 主要文字
+     --biof3-text-secondary : 次要文字
+     --biof3-text-tertiary  : 弱化文字
+     --biof3-text-muted     : 最弱文字
+     --biof3-accent         : 品牌色（teal）
+     --biof3-accent-bg      : 品牌色弱化背景
+     --biof3-hover          : 通用 hover 高亮
+  */
+  --biof3-bg-canvas: #f8fafc;
+  --biof3-bg-surface: #ffffff;
+  --biof3-bg-subtle: #f1f5f9;
+  --biof3-bg-elevated: #ffffff;
+  --biof3-border: #e2e8f0;
+  --biof3-border-strong: #cbd5e1;
+  --biof3-text: #0f172a;
+  --biof3-text-secondary: #475569;
+  --biof3-text-tertiary: #64748b;
+  --biof3-text-muted: #94a3b8;
+  --biof3-accent: #0d9488;
+  --biof3-accent-bg: #f0fdfa;
+  --biof3-hover: #eef2f7;
+  --biof3-surface-dim: #f1f5f9;
+  --biof3-accent-hover: #0f766e;
+  --biof3-danger: #ef4444;
+  --biof3-bg-terminal: #ffffff;
+  --biof3-text-terminal: #334155;
+  --biof3-text-terminal-strong: #0f172a;
+  --biof3-text-terminal-muted: #64748b;
+  --biof3-text-terminal-prompt: #0d9488;
+
+  /* ===== 状态语义色（light mode） ===== */
+  --biof3-status-online: #22c55e;
+  --biof3-status-loading: #f59e0b;
+  --biof3-status-warning: #f97316;
+  --biof3-status-error: #ef4444;
+  --biof3-status-info: #3b82f6;
+
+  /* ===== 状态卡背景（light mode） ===== */
+  --biof3-status-success-bg: #ecfdf5;
+  --biof3-status-error-bg: #fef2f2;
+  --biof3-status-warning-bg: #fef3c7;
+  --biof3-status-danger-bg: #fffafa;
+
+  /* 状态卡前景文字（light） */
+  --biof3-status-success-fg: #059669;
+  --biof3-status-error-fg: #dc2626;
+  --biof3-status-warning-fg: #b45309;
+  --biof3-status-danger-fg: #991b1b;
+  --biof3-accent-orange: #ea580c;
+  --biof3-accent-orange-bg: rgba(249, 115, 22, 0.08);
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -52,6 +110,62 @@
   --biof3-ink: #eef8f4;
   --biof3-mint: rgba(67, 209, 174, 0.14);
   --biof3-mint-bright: #8ff0d6;
+
+  /* ===== BioF3 semantic surface tokens (dark mode) =====
+     暗色下：canvas 最深、surface 抬高一档、subtle 更亮一档；
+     文字由浅到深对应层次；accent 提亮为更鲜艳的 teal。
+  */
+  --biof3-bg-canvas: #0b1220;
+  --biof3-bg-surface: #111a2e;
+  --biof3-bg-subtle: #182339;
+  --biof3-bg-elevated: #1d2945;
+  --biof3-border: #243149;
+  --biof3-border-strong: #324466;
+  --biof3-text: #e6edf3;
+  --biof3-text-secondary: #b1bac4;
+  --biof3-text-tertiary: #8b98ad;
+  --biof3-text-muted: #6b7689;
+  --biof3-accent: #2dd4bf;
+  --biof3-accent-bg: rgba(45, 212, 191, 0.14);
+  --biof3-hover: rgba(148, 163, 184, 0.14);
+  --biof3-surface-dim: #111a2e;
+  --biof3-accent-hover: #14b8a6;
+  --biof3-danger: #f87171;
+  --biof3-bg-terminal: #050a16;
+  --biof3-text-terminal: #cbd5e1;
+
+  /* ===== 状态语义色（dark mode） ===== */
+  --biof3-status-online: #4ade80;
+  --biof3-status-loading: #fbbf24;
+  --biof3-status-warning: #fb923c;
+  --biof3-status-error: #f87171;
+  --biof3-status-info: #60a5fa;
+
+  /* ===== 状态卡背景（dark mode） ===== */
+  --biof3-status-success-bg: rgba(34, 197, 94, 0.16);
+  --biof3-status-error-bg: rgba(239, 68, 68, 0.16);
+  --biof3-status-warning-bg: rgba(245, 158, 11, 0.16);
+  --biof3-status-danger-bg: rgba(239, 68, 68, 0.12);
+
+  /* 状态卡前景文字（dark） */
+  --biof3-status-success-fg: #4ade80;
+  --biof3-status-error-fg: #f87171;
+  --biof3-status-warning-fg: #fbbf24;
+  --biof3-status-danger-fg: #fca5a5;
+  --biof3-accent-orange: #fb923c;
+  --biof3-accent-orange-bg: rgba(251, 146, 60, 0.16);
+
+  /* Infima emphasis overrides — 让 ifm 颜色也跟 biof3 深色对齐 */
+  --ifm-background-color: var(--biof3-bg-canvas);
+  --ifm-background-surface-color: var(--biof3-bg-surface);
+  --ifm-color-emphasis-100: var(--biof3-bg-subtle);
+  --ifm-color-emphasis-200: var(--biof3-border);
+  --ifm-color-emphasis-300: var(--biof3-border-strong);
+  --ifm-color-emphasis-500: var(--biof3-text-muted);
+  --ifm-color-emphasis-600: var(--biof3-text-tertiary);
+  --iff-color-emphasis-700: var(--biof3-text-secondary);
+  --ifm-color-emphasis-800: var(--biof3-text-secondary);
+  --ifm-color-emphasis-900: var(--biof3-text);
 }
 
 /* Compact documentation reading density */
@@ -1947,16 +2061,12 @@ button.DocSearch-Button .DocSearch-Button-Keys,
   pointer-events: none;
 }
 
-/* ===== 桌面版：dock 占左侧 64px，Docusaurus 布局整体右移 ===== */
+/* ===== 桌面版：取消 dock 让位，页面保持全宽 ===== */
 html.biof3-desktop {
-  /* 给 html 本身预留 64px，这样所有 fixed 定位元素（包括面板）都有统一基准 */
-  padding-left: 64px;
-}
-html.biof3-desktop.biof3-desktop-dock-collapsed {
-  padding-left: 28px;
+  padding-left: 0;
 }
 
-/* 文档页左侧侧边栏右移，避免被 dock 遮挡 */
+/* 文档页保持全宽 */
 html.biof3-desktop .theme-doc-sidebar-container {
   margin-left: 0 !important;
 }
@@ -1966,7 +2076,7 @@ html.biof3-desktop .navbar__inner {
   padding-left: 0;
 }
 
-/* 非文档页的主内容 wrapper 也右移 */
+/* 非文档页的主内容 wrapper 保持全宽 */
 html.biof3-desktop .main-wrapper {
   margin-left: 0;
 }

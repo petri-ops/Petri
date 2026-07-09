@@ -113,6 +113,28 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     openDir: () => ipcRenderer.invoke('data:open-dir'),
   },
 
+  // 右侧工具栏
+  terminal: {
+    snapshot: () => ipcRenderer.invoke('terminal:snapshot'),
+    openLogDir: () => ipcRenderer.invoke('terminal:open-log-dir'),
+    openShell: (targetPath) => ipcRenderer.invoke('terminal:open-shell', targetPath),
+    startSession: (targetPath) => ipcRenderer.invoke('terminal:session-start', targetPath),
+    writeSession: (input) => ipcRenderer.invoke('terminal:session-write', input),
+    resizeSession: (cols, rows) =>
+      ipcRenderer.invoke('terminal:session-resize', { cols, rows }),
+    stopSession: () => ipcRenderer.invoke('terminal:session-stop'),
+    onData: (callback) => {
+      const handler = (_event, data) => callback(data);
+      ipcRenderer.on('terminal:data', handler);
+      return () => ipcRenderer.removeListener('terminal:data', handler);
+    },
+    onExit: (callback) => {
+      const handler = (_event, data) => callback(data);
+      ipcRenderer.on('terminal:exit', handler);
+      return () => ipcRenderer.removeListener('terminal:exit', handler);
+    },
+  },
+
   // FigCode 包检测
   figcode: {
     checkPackages: (language, packages, cardId) =>

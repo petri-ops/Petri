@@ -3,7 +3,7 @@
 .biof3-docs-layout {
   display: flex;
   min-height: 100vh;
-  margin-left: 64px; /* 让出 dock */
+  margin-left: 0;
 }
 
 .biof3-docs-sidebar {

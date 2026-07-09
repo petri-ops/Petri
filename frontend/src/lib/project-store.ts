@@ -114,6 +114,7 @@ export async function createDataset(input: {
   ossUrl: string;
   size: number;
   description?: string;
+  sourceDatasetIds?: string[];
 }): Promise<Dataset> {
   const data = await api('/datasets', { method: 'POST', body: JSON.stringify(input) });
   return mapDataset(data.dataset);
@@ -173,5 +174,26 @@ function mapDataset(d: Record<string, unknown>): Dataset {
     metaUrl: d.meta_url ? String(d.meta_url) : undefined,
     featuresUrl: d.features_url ? String(d.features_url) : undefined,
     parentDatasetId: d.parent_dataset_id ? String(d.parent_dataset_id) : undefined,
+    sourceDatasetIds: parseSourceDatasetIds(d.source_dataset_ids),
   };
+}
+
+function parseSourceDatasetIds(raw: unknown): string[] | undefined {
+  if (raw == null) return undefined;
+  if (Array.isArray(raw)) {
+    return raw.map((item) => String(item)).filter((item) => item.length > 0);
+  }
+  if (typeof raw === 'string') {
+    const trimmed = raw.trim();
+    if (!trimmed) return undefined;
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => String(item)).filter((item) => item.length > 0);
+      }
+    } catch {
+      // Not JSON — fall through.
+    }
+  }
+  return undefined;
 }

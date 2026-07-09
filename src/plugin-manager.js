@@ -71,7 +71,8 @@ try {
 }
 
 // ── 路径 ───────────────────────────────────────────────────────
-const USER_DATA_DIR = path.join(app.getPath('documents'), 'BioF3-Local');
+const USER_DATA_DIR =
+  process.env.BIOF3_LOCAL_DATA_DIR || path.join(app.getPath('documents'), 'BioF3-Local');
 const PLUGINS_DIR = path.join(USER_DATA_DIR, 'plugins');
 const RUNTIMES_DIR = path.join(USER_DATA_DIR, 'runtimes');
 const INSTALLED_FILE = path.join(PLUGINS_DIR, 'installed.json');

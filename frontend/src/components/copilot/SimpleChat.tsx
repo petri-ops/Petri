@@ -103,6 +103,8 @@ export function SimpleChat({
   const [modelPresets, setModelPresets] = useState<ChatModelPreset[]>(DEFAULT_MODEL_PRESETS);
   const [activeModelId, setActiveModelId] = useState(DEFAULT_MODEL_PRESETS[0].id);
   const [modelMenuOpen, setModelMenuOpen] = useState(false);
+  const [accessMenuOpen, setAccessMenuOpen] = useState(false);
+  const [accessMode, setAccessMode] = useState<'full' | 'read'>('full');
   const taRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -380,8 +382,8 @@ export function SimpleChat({
   // Expose via ref-like pattern through props is not needed here;
   // parent controls conversationId directly.
 
-  const currentConv = conversations.find((c) => c.id === conversationId);
   const activeModel = modelPresets.find((p) => p.id === activeModelId) || modelPresets[0];
+  const accessModeLabel = accessMode === 'full' ? '完全访问' : '只读模式';
   const selectModel = useCallback(async (preset: ChatModelPreset) => {
     setActiveModelId(preset.id);
     setModelMenuOpen(false);
@@ -397,130 +399,176 @@ export function SimpleChat({
 
   return (
     <div className="sc-root">
-      {/* Header — conversation title */}
-      <div className="sc-header">
-        <span className="sc-title">
-          {currentConv?.title || '新对话'}
-        </span>
-        <div className="sc-model-picker">
-          <button
-            type="button"
-            className="sc-model-btn"
-            onClick={() => setModelMenuOpen((value) => !value)}
-            title="选择会话模型"
-          >
-            <Icon name="cpu" size={15} />
-            <span>{activeModel?.label || activeModel?.model || 'DeepSeek Chat'}</span>
-            <Icon name="chevron-down" size={13} />
-          </button>
-          {modelMenuOpen && (
-            <>
-              <div className="sc-model-overlay" onClick={() => setModelMenuOpen(false)} />
-              <div className="sc-model-menu">
-                {modelPresets.map((preset) => (
-                  <button
-                    type="button"
-                    key={preset.id}
-                    className={`sc-model-option ${preset.id === activeModelId ? 'sc-model-option-active' : ''}`}
-                    onClick={() => selectModel(preset)}
-                  >
-                    <span className="sc-model-option-title">{preset.label || preset.model}</span>
-                    <span className="sc-model-option-meta">{preset.provider} · {preset.model}</span>
-                  </button>
-                ))}
+      <div className="sc-body">
+        <div className="sc-messages" ref={scrollRef}>
+          {loading && <div className="sc-loading">加载会话…</div>}
+          {!loading && messages.length === 0 && (
+            <div className="sc-empty">
+              <div className="sc-empty-icon">
+                <Icon name="message-circle" size={32} />
               </div>
-            </>
+              <p>开始新的对话</p>
+              <span>在下方输入框中提问</span>
+            </div>
+          )}
+          {messages.map((m, i) => (
+            <div key={i} className={`sc-msg sc-msg-${m.role}`}>
+              <div className="sc-msg-avatar">
+                {m.role === 'user' ? (
+                  <Icon name="user" size={16} />
+                ) : (
+                  <Icon name="cpu" size={16} />
+                )}
+              </div>
+              <div className="sc-msg-body">
+                {m.role === 'assistant' ? (
+                  <>
+                    <CopilotMarkdown text={m.content || (m.pending ? '…' : '')} />
+                    {m.resultCards?.map((card) => (
+                      <ResultCard
+                        key={card.jobId}
+                        card={card}
+                        disabled={streaming}
+                        onOpenResult={onOpenResult}
+                        onContinue={() => {
+                          if (card.status === 'failed') {
+                            send(`这个分析任务失败了：${card.title}（toolJobId=${card.jobId}）。错误信息：${card.error || '未知错误'}。请帮我定位原因，给出可恢复方案，并告诉我应该如何调整参数后重试。`);
+                          } else {
+                            send(`请基于刚完成的 ${card.title}（toolJobId=${card.jobId}）解释结果，并推荐下一步分析。`);
+                          }
+                        }}
+                      />
+                    ))}
+                  </>
+                ) : (
+                  <div className="sc-msg-text">{m.content}</div>
+                )}
+              </div>
+            </div>
+          ))}
+          {pendingApproval && (
+            <ApprovalCard
+              approval={pendingApproval}
+              paramDraft={paramDraft}
+              disabled={streaming}
+              onParamChange={(key, value) =>
+                setParamDraft((prev) => ({ ...prev, [key]: value }))
+              }
+              onApprove={approvePending}
+              onReject={rejectPending}
+            />
           )}
         </div>
-      </div>
 
-      {/* Messages */}
-      <div className="sc-messages" ref={scrollRef}>
-        {loading && <div className="sc-loading">加载会话…</div>}
-        {!loading && messages.length === 0 && (
-          <div className="sc-empty">
-            <div className="sc-empty-icon">
-              <Icon name="message-circle" size={32} />
+        <div className="sc-input-area">
+          <div className="sc-composer">
+            <div className="sc-composer-body">
+              <textarea
+                ref={taRef}
+                className="sc-input"
+                rows={1}
+                value={input}
+                placeholder="输入消息… (Enter 发送, Shift+Enter 换行)"
+                onChange={onInputChange}
+                onKeyDown={onKeyDown}
+                style={{ height: inputHeight, maxHeight: inputHeight }}
+              />
             </div>
-            <p>开始新的对话</p>
-            <span>在下方输入框中提问</span>
+            <div className="sc-composer-bar">
+              <div className="sc-composer-left">
+                <button type="button" className="sc-composer-icon-btn" title="添加内容">
+                  <Icon name="plus" size={20} />
+                </button>
+                <div className="sc-access-picker">
+                  <button
+                    type="button"
+                    className="sc-access-btn"
+                    onClick={() => setAccessMenuOpen((value) => !value)}
+                    title="选择访问模式"
+                  >
+                    <Icon name="shield" size={14} />
+                    <span>{accessModeLabel}</span>
+                    <Icon name="chevron-down" size={12} />
+                  </button>
+                  {accessMenuOpen && (
+                    <>
+                      <div className="sc-access-overlay" onClick={() => setAccessMenuOpen(false)} />
+                      <div className="sc-access-menu">
+                        <button
+                          type="button"
+                          className={`sc-access-option ${accessMode === 'full' ? 'sc-access-option-active' : ''}`}
+                          onClick={() => {
+                            setAccessMode('full');
+                            setAccessMenuOpen(false);
+                          }}
+                        >
+                          <span className="sc-access-option-title">完全访问</span>
+                          <span className="sc-access-option-sub">可执行受控操作与工具调用</span>
+                        </button>
+                        <button
+                          type="button"
+                          className={`sc-access-option ${accessMode === 'read' ? 'sc-access-option-active' : ''}`}
+                          onClick={() => {
+                            setAccessMode('read');
+                            setAccessMenuOpen(false);
+                          }}
+                        >
+                          <span className="sc-access-option-title">只读模式</span>
+                          <span className="sc-access-option-sub">仅浏览、解释和建议</span>
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div className="sc-composer-right">
+                <div className="sc-model-picker sc-model-picker-footer">
+                  <button
+                    type="button"
+                    className="sc-model-btn"
+                    onClick={() => setModelMenuOpen((value) => !value)}
+                    title="选择会话模型"
+                  >
+                    <span className="sc-model-btn-dot" />
+                    <span>{activeModel?.label || activeModel?.model || 'DeepSeek Chat'}</span>
+                    <Icon name="chevron-down" size={12} />
+                  </button>
+                  {modelMenuOpen && (
+                    <>
+                      <div className="sc-model-overlay" onClick={() => setModelMenuOpen(false)} />
+                      <div className="sc-model-menu">
+                        {modelPresets.map((preset) => (
+                          <button
+                            type="button"
+                            key={preset.id}
+                            className={`sc-model-option ${preset.id === activeModelId ? 'sc-model-option-active' : ''}`}
+                            onClick={() => selectModel(preset)}
+                          >
+                            <span className="sc-model-option-title">{preset.label || preset.model}</span>
+                            <span className="sc-model-option-meta">{preset.provider} · {preset.model}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+                {streaming ? (
+                  <button className="sc-send-cta sc-send-cta-stop" onClick={stop} title="停止生成">
+                    <Icon name="square" size={14} />
+                  </button>
+                ) : (
+                  <button
+                    className="sc-send-cta sc-send-cta-send"
+                    onClick={() => send(input)}
+                    disabled={!input.trim()}
+                    title="发送消息"
+                  >
+                    <Icon name="send" size={15} />
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
-        )}
-        {messages.map((m, i) => (
-          <div key={i} className={`sc-msg sc-msg-${m.role}`}>
-            <div className="sc-msg-avatar">
-              {m.role === 'user' ? (
-                <Icon name="user" size={16} />
-              ) : (
-                <Icon name="cpu" size={16} />
-              )}
-            </div>
-            <div className="sc-msg-body">
-              {m.role === 'assistant' ? (
-                <>
-                  <CopilotMarkdown text={m.content || (m.pending ? '…' : '')} />
-                  {m.resultCards?.map((card) => (
-                    <ResultCard
-                      key={card.jobId}
-                      card={card}
-                      disabled={streaming}
-                      onOpenResult={onOpenResult}
-                      onContinue={() => {
-                        if (card.status === 'failed') {
-                          send(`这个分析任务失败了：${card.title}（toolJobId=${card.jobId}）。错误信息：${card.error || '未知错误'}。请帮我定位原因，给出可恢复方案，并告诉我应该如何调整参数后重试。`);
-                        } else {
-                          send(`请基于刚完成的 ${card.title}（toolJobId=${card.jobId}）解释结果，并推荐下一步分析。`);
-                        }
-                      }}
-                    />
-                  ))}
-                </>
-              ) : (
-                <div className="sc-msg-text">{m.content}</div>
-              )}
-            </div>
-          </div>
-        ))}
-        {pendingApproval && (
-          <ApprovalCard
-            approval={pendingApproval}
-            paramDraft={paramDraft}
-            disabled={streaming}
-            onParamChange={(key, value) =>
-              setParamDraft((prev) => ({ ...prev, [key]: value }))
-            }
-            onApprove={approvePending}
-            onReject={rejectPending}
-          />
-        )}
-      </div>
-
-      {/* Input */}
-      <div className="sc-input-area">
-        <textarea
-          ref={taRef}
-          className="sc-input"
-          rows={1}
-          value={input}
-          placeholder="输入消息… (Enter 发送, Shift+Enter 换行)"
-          onChange={onInputChange}
-          onKeyDown={onKeyDown}
-          style={{ height: inputHeight, maxHeight: inputHeight }}
-        />
-        <div className="sc-input-actions">
-          {streaming ? (
-            <button className="sc-stop-btn" onClick={stop}>
-              <Icon name="square" size={14} /> 停止
-            </button>
-          ) : (
-            <button
-              className="sc-send-btn"
-              onClick={() => send(input)}
-              disabled={!input.trim()}
-            >
-              <Icon name="send" size={14} /> 发送
-            </button>
-          )}
         </div>
       </div>
     </div>

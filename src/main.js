@@ -16,6 +16,14 @@ const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
 
+if (process.env.BIOF3_ELECTRON_USER_DATA_DIR) {
+  try {
+    app.setPath('userData', process.env.BIOF3_ELECTRON_USER_DATA_DIR);
+  } catch (e) {
+    console.warn('[desktop] failed to override userData path:', e.message);
+  }
+}
+
 // ── EPIPE / stdout 兜底 ─────────────────────────────────────
 // console.log 写 stdout 时若管道已关（子进程退出/重定向）会抛 EPIPE，
 // 被当 Uncaught Exception 弹对话框。吞掉 EPIPE，不让它中断主进程。
@@ -73,6 +81,17 @@ function _writeLog(name, text) {
   }
 }
 
+function _readLogTail(filePath, maxLines = 120) {
+  try {
+    if (!fs.existsSync(filePath)) return '';
+    const raw = fs.readFileSync(filePath, 'utf8');
+    const lines = raw.split(/\r?\n/);
+    return lines.slice(Math.max(0, lines.length - maxLines)).join('\n').trim();
+  } catch {
+    return '';
+  }
+}
+
 // ── 路径解析（开发模式 vs 打包模式）────────────────────────────
 // desktop 仓分仓后（断点5）：
 //   - desktop 自己的资源（frontend/dist, build, resources/）在 desktop 仓根
@@ -123,6 +142,64 @@ function resolveNodeBin() {
   return 'node'; // 兜底走 PATH（可能命中 Electron node，但至少不崩 spawn）
 }
 const NODE_BIN = resolveNodeBin();
+
+// ── 基础 Runtime 自带包集合 ─────────────────────────────────────
+// figcode:check-packages 和 figcode:card-status 共用
+const BASE_R_PACKAGES = new Set([
+  'ggplot2',
+  'dplyr',
+  'tidyr',
+  'reshape2',
+  'data.table',
+  'pheatmap',
+  'ggrepel',
+  'RColorBrewer',
+  'patchwork',
+  'cowplot',
+  'plotly',
+  'igraph',
+  'ggraph',
+  'tidygraph',
+  'circlize',
+  'ComplexHeatmap',
+  'UpSetR',
+  'ggalluvial',
+  'treemap',
+  'networkD3',
+  'Seurat',
+  'SingleCellExperiment',
+  'MOFA2',
+  'CellChat',
+  'WGCNA',
+  'maftools',
+  'clusterProfiler',
+  'enrichplot',
+  'DOSE',
+  'org.Hs.eg.db',
+  'survival',
+  'survminer',
+  'rms',
+  'pROC',
+  'glmnet',
+  'caret',
+  'timeROC',
+  'PRROC',
+  'dcurves',
+  'scatterpie',
+  'Rtsne',
+  'STRINGdb',
+  'gganimate',
+]);
+const BASE_PY_PACKAGES = new Set([
+  'matplotlib',
+  'numpy',
+  'pandas',
+  'scanpy',
+  'anndata',
+  'scikit-learn',
+  'seaborn',
+  'scipy',
+]);
 
 // ── 系统检测：开发模式下找系统安装的 R / Python ────────────────
 function _detectSystemR() {
@@ -192,7 +269,8 @@ function setupDesktopEnv() {
   process.env.BIOF3_SITE_DIR = resolveResource('build');
 
   // 用户数据目录（先确定，resolveRuntime 要用）
-  const userDataDir = path.join(app.getPath('documents'), 'BioF3-Local');
+  const userDataDir =
+    process.env.BIOF3_LOCAL_DATA_DIR || path.join(app.getPath('documents'), 'BioF3-Local');
   process.env.BIOF3_LOCAL_DATA_DIR = userDataDir;
   process.env.BIOF3_LOCAL_RESULTS_DIR = path.join(userDataDir, 'results');
   process.env.BIOF3_LOCAL_UPLOADS_DIR = path.join(userDataDir, 'uploads');
@@ -575,6 +653,7 @@ async function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
+      webviewTag: true,
     },
   });
 
@@ -909,62 +988,7 @@ function setupFigcodeIpc() {
       }
 
       // 基础 runtime 自带的包
-      const baseR = new Set([
-        'ggplot2',
-        'dplyr',
-        'tidyr',
-        'reshape2',
-        'data.table',
-        'pheatmap',
-        'ggrepel',
-        'RColorBrewer',
-        'patchwork',
-        'cowplot',
-        'plotly',
-        'igraph',
-        'ggraph',
-        'tidygraph',
-        'circlize',
-        'ComplexHeatmap',
-        'UpSetR',
-        'ggalluvial',
-        'treemap',
-        'networkD3',
-        'Seurat',
-        'SingleCellExperiment',
-        'MOFA2',
-        'CellChat',
-        'WGCNA',
-        'maftools',
-        'clusterProfiler',
-        'enrichplot',
-        'DOSE',
-        'org.Hs.eg.db',
-        'survival',
-        'survminer',
-        'rms',
-        'pROC',
-        'glmnet',
-        'caret',
-        'timeROC',
-        'PRROC',
-        'dcurves',
-        'scatterpie',
-        'Rtsne',
-        'STRINGdb',
-        'gganimate',
-      ]);
-      const basePy = new Set([
-        'matplotlib',
-        'numpy',
-        'pandas',
-        'scanpy',
-        'anndata',
-        'scikit-learn',
-        'seaborn',
-        'scipy',
-      ]);
-      const baseSet = language === 'python' ? basePy : baseR;
+      const baseSet = language === 'python' ? BASE_PY_PACKAGES : BASE_R_PACKAGES;
 
       // 检查每个包
       const missing = [];
@@ -1063,63 +1087,6 @@ function setupFigcodeIpc() {
 
       // 已装插件 ID 集合
       const installedIds = new Set(installed.map((p) => p.id));
-
-      // 基础 runtime 包集合
-      const baseR = new Set([
-        'ggplot2',
-        'dplyr',
-        'tidyr',
-        'reshape2',
-        'data.table',
-        'pheatmap',
-        'ggrepel',
-        'RColorBrewer',
-        'patchwork',
-        'cowplot',
-        'plotly',
-        'igraph',
-        'ggraph',
-        'tidygraph',
-        'circlize',
-        'ComplexHeatmap',
-        'UpSetR',
-        'ggalluvial',
-        'treemap',
-        'networkD3',
-        'Seurat',
-        'SingleCellExperiment',
-        'MOFA2',
-        'CellChat',
-        'WGCNA',
-        'maftools',
-        'clusterProfiler',
-        'enrichplot',
-        'DOSE',
-        'org.Hs.eg.db',
-        'survival',
-        'survminer',
-        'rms',
-        'pROC',
-        'glmnet',
-        'caret',
-        'timeROC',
-        'PRROC',
-        'dcurves',
-        'scatterpie',
-        'Rtsne',
-        'STRINGdb',
-        'gganimate',
-      ]);
-      const basePy = new Set([
-        'matplotlib',
-        'numpy',
-        'pandas',
-        'scanpy',
-        'anndata',
-        'scikit-learn',
-        'seaborn',
-        'scipy',
-      ]);
 
       const statuses = {};
       for (const cardId of cardIds) {
@@ -1495,6 +1462,188 @@ function setupDataManagementIpc() {
   });
 }
 
+// ── IPC：终端/日志面板 ───────────────────────────────────────
+function setupTerminalIpc() {
+  let shellProc = null;
+  let disposeShellData = null;
+  let disposeShellExit = null;
+
+  const sendTerminalEvent = (channel, payload) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send(channel, payload);
+    }
+  };
+
+  ipcMain.handle('terminal:snapshot', async () => {
+    try {
+      const logDir = _getLogDir();
+      const processes = [
+        {
+          id: 'r-server',
+          label: 'R 后端',
+          command: `${NODE_BIN} ${resolveCore('r-server', 'server.js')}`,
+          status: rServerProc && !rServerProc.killed ? 'running' : 'stopped',
+          pid: rServerProc?.pid || null,
+          logPath: path.join(logDir, 'r-server.log'),
+          output: _readLogTail(path.join(logDir, 'r-server.log')),
+        },
+        {
+          id: 'py-server',
+          label: 'Python 后端',
+          command: `${NODE_BIN} ${resolveCore('py-server', 'server.js')}`,
+          status: pyServerProc && !pyServerProc.killed ? 'running' : 'stopped',
+          pid: pyServerProc?.pid || null,
+          logPath: path.join(logDir, 'py-server.log'),
+          output: _readLogTail(path.join(logDir, 'py-server.log')),
+        },
+        {
+          id: 'plumber',
+          label: 'R plumber',
+          command: process.env.BIOF3_R_HOME
+            ? `${path.join(process.env.BIOF3_R_HOME, 'bin', 'Rscript')} ${resolveCore(
+                'r-server',
+                'replot.R'
+              )} --port 8787`
+            : 'Rscript replot.R --port 8787',
+          status: plumberProc && !plumberProc.killed ? 'running' : 'stopped',
+          pid: plumberProc?.pid || null,
+          logPath: path.join(logDir, 'plumber.log'),
+          output: _readLogTail(path.join(logDir, 'plumber.log')),
+        },
+      ];
+      return {
+        ok: true,
+        logDir,
+        dataDir: process.env.BIOF3_LOCAL_DATA_DIR || null,
+        processes,
+      };
+    } catch (e) {
+      return { ok: false, error: e.message, processes: [] };
+    }
+  });
+
+  ipcMain.handle('terminal:open-log-dir', async () => {
+    try {
+      const logDir = _getLogDir();
+      if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
+      const error = await shell.openPath(logDir);
+      return error ? { ok: false, error } : { ok: true, path: logDir };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle('terminal:open-shell', async (_event, targetPath) => {
+    try {
+      const cwd =
+        typeof targetPath === 'string' && targetPath.trim()
+          ? targetPath.trim()
+          : process.env.BIOF3_LOCAL_DATA_DIR || PROJECT_ROOT;
+      if (process.platform === 'darwin') {
+        const escaped = cwd.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+        spawn(
+          'osascript',
+          ['-e', `tell application "Terminal" to do script "cd \\"${escaped}\\"; clear"`],
+          { detached: true, stdio: 'ignore' }
+        ).unref();
+        return { ok: true, path: cwd };
+      }
+      if (process.platform === 'win32') {
+        spawn('cmd.exe', ['/c', 'start', 'cmd', '/k', `cd /d "${cwd}"`], {
+          detached: true,
+          stdio: 'ignore',
+          windowsHide: true,
+        }).unref();
+        return { ok: true, path: cwd };
+      }
+      const terminals = ['x-terminal-emulator', 'gnome-terminal', 'konsole', 'xfce4-terminal'];
+      for (const terminal of terminals) {
+        try {
+          spawn(terminal, ['--working-directory', cwd], {
+            detached: true,
+            stdio: 'ignore',
+          }).unref();
+          return { ok: true, path: cwd };
+        } catch {}
+      }
+      return { ok: false, error: '未找到可用的系统终端' };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle('terminal:session-start', async (_event, targetPath) => {
+    try {
+      if (shellProc) {
+        return { ok: true, pid: shellProc.pid, reused: true };
+      }
+      const requestedCwd =
+        typeof targetPath === 'string' && targetPath.trim() ? targetPath.trim() : '';
+      const cwd =
+        requestedCwd && fs.existsSync(requestedCwd)
+          ? requestedCwd
+          : process.env.BIOF3_LOCAL_DATA_DIR || PROJECT_ROOT;
+      const shellPath =
+        process.platform === 'win32'
+          ? process.env.COMSPEC || 'cmd.exe'
+          : process.env.SHELL || '/bin/zsh';
+      const args = process.platform === 'win32' ? [] : ['-l'];
+      const pty = require('node-pty');
+      shellProc = pty.spawn(shellPath, args, {
+        name: 'xterm-256color',
+        cols: 100,
+        rows: 28,
+        cwd,
+        env: { ...process.env, TERM: 'xterm-256color', COLORTERM: 'truecolor' },
+      });
+      disposeShellData = shellProc.onData((data) => sendTerminalEvent('terminal:data', data));
+      disposeShellExit = shellProc.onExit(({ exitCode, signal }) => {
+        sendTerminalEvent('terminal:exit', { code: exitCode, signal });
+        disposeShellData?.dispose();
+        disposeShellExit?.dispose();
+        disposeShellData = null;
+        disposeShellExit = null;
+        shellProc = null;
+      });
+      return { ok: true, pid: shellProc.pid, cwd, shell: shellPath };
+    } catch (e) {
+      shellProc = null;
+      return { ok: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle('terminal:session-write', async (_event, input) => {
+    if (!shellProc) {
+      return { ok: false, error: '终端会话未启动' };
+    }
+    const text = typeof input === 'string' ? input : '';
+    if (text.length > 32_768) return { ok: false, error: '输入内容过长' };
+    shellProc.write(text);
+    return { ok: true };
+  });
+
+  ipcMain.handle('terminal:session-resize', async (_event, dimensions) => {
+    if (!shellProc) return { ok: false, error: '终端会话未启动' };
+    const cols = Math.max(2, Math.min(500, Number(dimensions?.cols) || 80));
+    const rows = Math.max(1, Math.min(200, Number(dimensions?.rows) || 24));
+    shellProc.resize(cols, rows);
+    return { ok: true };
+  });
+
+  ipcMain.handle('terminal:session-stop', async () => {
+    if (!shellProc) return { ok: true, wasRunning: false };
+    shellProc.kill();
+    shellProc = null;
+    return { ok: true, wasRunning: true };
+  });
+
+  app.once('before-quit', () => {
+    try {
+      shellProc?.kill();
+    } catch {}
+  });
+}
+
 // ── 应用生命周期 ───────────────────────────────────────────────
 async function main() {
   setupDesktopEnv();
@@ -1533,6 +1682,7 @@ async function main() {
   setupRuntimeIpc();
   setupBackendLifecycleIpc();
   setupFileDialogIpc();
+  setupTerminalIpc();
   setupAutoUpdateIpc();
   setupDiagnosticIpc();
   setupFigcodeIpc();

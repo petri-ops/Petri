@@ -54,14 +54,17 @@ export type IconName =
   | 'folder'
   | 'file'
   | 'database'
+  | 'globe'
   | 'terminal'
   | 'arrow-left'
   | 'panel-left'
   | 'panel-right'
+  | 'panel-bottom'
   | 'chevron-down'
   | 'chevron-right'
   | 'wrench'
   | 'layout-grid'
+  | 'list-details'
   | 'plus'
   | 'message-circle'
   | 'send'
@@ -355,6 +358,15 @@ const paths: Record<IconName, React.ReactNode> = {
       <path d="M3 12a9 3 0 0 0 18 0" />
     </>
   ),
+  // Globe — browser / web surface
+  globe: (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M2 12h20" />
+      <path d="M12 2c3.5 3.5 3.5 16.5 0 20" />
+      <path d="M12 2c-3.5 3.5-3.5 16.5 0 20" />
+    </>
+  ),
   // Terminal — agent / console (Lucide terminal)
   terminal: (
     <>
@@ -383,6 +395,13 @@ const paths: Record<IconName, React.ReactNode> = {
       <line x1="15" y1="3" x2="15" y2="21" />
     </>
   ),
+  // Panel bottom — toggle embedded terminal
+  'panel-bottom': (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <line x1="3" y1="15" x2="21" y2="15" />
+    </>
+  ),
   // Chevron down — collapse (Lucide chevron-down)
   'chevron-down': <polyline points="6 9 12 15 18 9" />,
   // Chevron right — expand (Lucide chevron-right)
@@ -398,6 +417,17 @@ const paths: Record<IconName, React.ReactNode> = {
       <rect x="14" y="3" width="7" height="7" />
       <rect x="14" y="14" width="7" height="7" />
       <rect x="3" y="14" width="7" height="7" />
+    </>
+  ),
+  // List details — Codex-style session summary
+  'list-details': (
+    <>
+      <circle cx="6" cy="6" r="2.25" />
+      <circle cx="6" cy="12" r="2.25" />
+      <circle cx="6" cy="18" r="2.25" />
+      <line x1="11" y1="6" x2="20" y2="6" />
+      <line x1="11" y1="12" x2="20" y2="12" />
+      <line x1="11" y1="18" x2="20" y2="18" />
     </>
   ),
   // Plus — new item (Lucide plus)

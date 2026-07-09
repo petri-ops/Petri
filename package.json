@@ -12,7 +12,7 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
-    "prebuild": "node --check src/main.js && node --check src/preload.js",
+    "prebuild": "bash scripts/sync-vendor.sh check && node --check src/main.js && node --check src/preload.js",
     "test": "node --test test/*.test.mjs",
     "mcp:server": "node src/mcp-server.js",
     "build:site": "cd .. && npm run build:desktop",
@@ -22,14 +22,15 @@
     "build:mac": "npm run prebuild && npm run build:all && electron-builder --mac --arm64 --x64",
     "build:mac-arm64": "npm run prebuild && npm run build:all && electron-builder --mac --arm64",
     "build:mac-x64": "npm run prebuild && npm run build:all && electron-builder --mac --x64",
-    "check": "node --check src/main.js && node --check src/preload.js"
+    "check": "bash scripts/sync-vendor.sh check && node --check src/main.js && node --check src/preload.js"
   },
   "dependencies": {
     "@electron/notarize": "^2.5.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "archiver": "^7.0.1",
     "better-sqlite3": "^12.11.1",
-    "electron-updater": "^6.8.9"
+    "electron-updater": "^6.8.9",
+    "node-pty": "1.1.0-beta34"
   },
   "devDependencies": {
     "@electron/rebuild": "^4.1.0",

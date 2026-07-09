@@ -195,7 +195,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    port: 3000,
     strictPort: true,
     // docs/ 和 blog/ 在仓库根（frontend 的上上层），需放行 dev 模式 HTTP 访问
     // 否则浏览器懒加载 MDX 时被 403 Restricted 拦截

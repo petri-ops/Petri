@@ -20,7 +20,8 @@ const CONTENT_BASE =
   process.env.BIOF3_CONTENT_BASE ||
   'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/desktop/content/';
 
-const USER_DATA_DIR = path.join(app.getPath('documents'), 'BioF3-Local');
+const USER_DATA_DIR =
+  process.env.BIOF3_LOCAL_DATA_DIR || path.join(app.getPath('documents'), 'BioF3-Local');
 const LOCAL_CONTENT_DIR = path.join(USER_DATA_DIR, 'content');
 const LOCAL_HASH_FILE = path.join(LOCAL_CONTENT_DIR, 'file-hash.json');
 

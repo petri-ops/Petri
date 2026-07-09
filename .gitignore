@@ -22,3 +22,6 @@ out/
 # IDE
 .vscode/
 .idea/
+
+# Local aionui CLI symlink (points to ~/.aionui/builtin-skills/...)
+.aionrs/

@@ -152,6 +152,39 @@ declare global {
         }>;
         openDir: () => Promise<{ ok: boolean; error?: string }>;
       };
+      terminal: {
+        snapshot: () => Promise<{
+          ok: boolean;
+          logDir?: string;
+          dataDir?: string;
+          processes?: Array<{
+            id: string;
+            label: string;
+            command: string;
+            status: 'running' | 'stopped';
+            pid?: number | null;
+            logPath?: string;
+            output: string;
+          }>;
+        }>;
+        openLogDir: () => Promise<{ ok: boolean; path?: string; error?: string }>;
+        openShell: (targetPath?: string) => Promise<{ ok: boolean; path?: string; error?: string }>;
+        startSession: (targetPath?: string) => Promise<{
+          ok: boolean;
+          pid?: number;
+          cwd?: string;
+          shell?: string;
+          reused?: boolean;
+          error?: string;
+        }>;
+        writeSession: (input: string) => Promise<{ ok: boolean; error?: string }>;
+        resizeSession: (cols: number, rows: number) => Promise<{ ok: boolean; error?: string }>;
+        stopSession: () => Promise<{ ok: boolean; wasRunning?: boolean }>;
+        onData: (callback: (data: string) => void) => () => void;
+        onExit: (
+          callback: (data: { code?: number | null; signal?: string | null }) => void
+        ) => () => void;
+      };
       updater: {
         check: () => Promise<{
           ok: boolean;
