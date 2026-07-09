@@ -13,7 +13,7 @@ import styles from './WorkbenchEmpty.module.css';
 
 interface WorkbenchEmptyProps {
   title?: string;
-  desc: string;
+  desc: React.ReactNode;
   primaryLabel?: string;
   onPrimary?: () => void;
   hint?: React.ReactNode;

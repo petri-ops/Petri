@@ -378,7 +378,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
         govDataCache.ossStats = r2.stats;
       }
       void diskPromise;
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(`获取统计失败: ${e.message}`);
     } finally {
       setLoading(false);
@@ -405,7 +405,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
           setReport(data.report);
           if (!dryRun) await fetchStats(true);
         } else alert(`清理失败: ${data.error}`);
-      } catch (e: unknown) {
+      } catch (e: any) {
         alert(`清理失败: ${e.message}`);
       } finally {
         setLoading(false);
@@ -423,7 +423,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
         setComputeHealth(data);
         govDataCache.computeHealth = data;
       } else alert(`获取算力健康失败: ${data.error}`);
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(`获取算力健康失败: ${e.message}`);
     } finally {
       setLoading(false);
@@ -439,7 +439,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
         setAssetInspection(data.assets);
         govDataCache.assetInspection = data.assets;
       } else alert(`获取资产巡检失败: ${data.error}`);
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(`获取资产巡检失败: ${e.message}`);
     } finally {
       setLoading(false);
@@ -464,7 +464,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
           setReport(data.report);
           if (!dryRun) await fetchStats(true);
         } else alert(`清理失败: ${data.error}`);
-      } catch (e: unknown) {
+      } catch (e: any) {
         alert(`清理失败: ${e.message}`);
       } finally {
         setLoading(false);
@@ -482,7 +482,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
         setBackups(data.backups);
         govDataCache.backups = data.backups;
       } else alert(`获取备份列表失败: ${data.error}`);
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(`获取备份列表失败: ${e.message}`);
     } finally {
       setLoading(false);
@@ -499,7 +499,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
         setErrors(sorted); // newest first
         govDataCache.errors = sorted;
       } else alert(`获取错误日志失败: ${data.error}`);
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(`获取错误日志失败: ${e.message}`);
     } finally {
       setLoading(false);
@@ -523,7 +523,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
         setGuestPerms(guestData.permissions);
         govDataCache.guestPerms = guestData.permissions;
       }
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(`获取用户列表失败: ${e.message}`);
     } finally {
       setLoading(false);
@@ -547,7 +547,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
           /* ignore */
         }
       } else alert(`保存失败: ${data.error}`);
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(e.message);
     } finally {
       setGuestPermsSaving(false);
@@ -583,7 +583,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
           body: JSON.stringify({ role }),
         });
         fetchUsers();
-      } catch (e: unknown) {
+      } catch (e: any) {
         alert(e.message);
       }
     },
@@ -603,7 +603,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
           return;
         }
         fetchUsers();
-      } catch (e: unknown) {
+      } catch (e: any) {
         alert(`请求失败: ${e.message}`);
       }
     },
@@ -618,7 +618,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
           body: JSON.stringify({ enabled }),
         });
         fetchUsers();
-      } catch (e: unknown) {
+      } catch (e: any) {
         alert(e.message);
       }
     },
@@ -661,7 +661,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
           return;
         }
         fetchUsers();
-      } catch (e: unknown) {
+      } catch (e: any) {
         alert(`请求失败: ${e.message}`);
       }
     },
@@ -682,7 +682,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
       } else {
         alert(`获取 AI 用量失败: ${data.error}`);
       }
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(`获取 AI 用量失败: ${e.message}`);
     } finally {
       setLoading(false);
@@ -700,7 +700,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
       const data = await resp.json();
       if (data.status === 'ok') setAiAudit(data.audit);
       else alert(`获取审计失败: ${data.error}`);
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(`获取审计失败: ${e.message}`);
     } finally {
       setLoading(false);
@@ -717,7 +717,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
         const data = await resp.json();
         if (data.status === 'ok') fetchAiOverview(true);
         else alert(`操作失败: ${data.error}`);
-      } catch (e: unknown) {
+      } catch (e: any) {
         alert(e.message);
       }
     },
@@ -745,7 +745,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
       } else {
         alert(`操作失败: ${data.error}`);
       }
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(e.message);
     }
   }, [globalPaused]);
@@ -777,7 +777,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
       } else {
         alert(`切换失败: ${data.error}`);
       }
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(e.message);
     }
   }, []);
@@ -795,7 +795,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
         const data = await resp.json();
         if (data.status === 'ok') setUsageStats(data);
         else alert(`获取用量统计失败: ${data.error}`);
-      } catch (e: unknown) {
+      } catch (e: any) {
         alert(e.message);
       } finally {
         setLoading(false);
@@ -817,7 +817,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
       } else {
         alert(`备份失败: ${data.error || data.result?.error}`);
       }
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(`备份失败: ${e.message}`);
     } finally {
       setBackingUp(false);
@@ -835,7 +835,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
       } else {
         alert(`下载失败: ${data.error}`);
       }
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(`下载失败: ${e.message}`);
     }
   }, []);
@@ -1530,7 +1530,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                     >
                       {backingUp ? '备份中...' : '立即备份'}
                     </button>
-                    <button className="sc-btn" onClick={fetchBackups} disabled={loading}>
+                    <button className="sc-btn" onClick={() => fetchBackups()} disabled={loading}>
                       刷新列表
                     </button>
                   </div>
@@ -1675,7 +1675,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                       </div>
                       <button
                         className="sc-btn sc-btn-sm"
-                        onClick={fetchUsers}
+                        onClick={() => fetchUsers()}
                         disabled={loading || guestPermsSaving}
                       >
                         刷新
@@ -1782,7 +1782,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                       >
                         + 新增用户
                       </button>
-                      <button className="sc-btn sc-btn-sm" onClick={fetchUsers} disabled={loading}>
+                      <button className="sc-btn sc-btn-sm" onClick={() => fetchUsers()} disabled={loading}>
                         刷新
                       </button>
                     </div>
@@ -2253,10 +2253,10 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                                 style={{
                                   padding: '6px',
                                   textAlign: 'right',
-                                  color: u.undone_count > 0 ? '#dc2626' : '#9ca3af',
+                                  color: u.undone_n > 0 ? '#dc2626' : '#9ca3af',
                                 }}
                               >
-                                {u.undone_count}
+                                {u.undone_n}
                               </td>
                               <td
                                 style={{

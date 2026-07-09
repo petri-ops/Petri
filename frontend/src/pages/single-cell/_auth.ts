@@ -125,7 +125,7 @@ export function isLoggedIn(): boolean {
 async function authFetch(
   path: string,
   body: Record<string, unknown>
-): Promise<Record<string, unknown>> {
+): Promise<any> {
   const resp = await fetch(getApiPrefix().replace('/data', '') + path, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

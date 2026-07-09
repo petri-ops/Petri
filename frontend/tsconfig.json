@@ -19,7 +19,24 @@
     "paths": {
       "@/*": ["./src/*"],
       "@site/src/*": ["./src/*"],
-      "@docusaurus/useBaseUrl": ["./src/lib/useBaseUrl-mock.ts"]
+      "@docusaurus/useBaseUrl": ["./src/lib/useBaseUrl-mock.ts"],
+      "@biof3/shared": ["../vendor/biof3-core/packages/shared-copilot/index.ts"],
+      "@biof3/shared/types": ["../vendor/biof3-core/packages/shared-copilot/types.ts"],
+      "@biof3/shared/context": ["../vendor/biof3-core/packages/shared-copilot/context.ts"],
+      "@biof3/shared/trace": ["../vendor/biof3-core/packages/shared-copilot/trace.ts"],
+      "@biof3/shared/helpers": ["../vendor/biof3-core/packages/shared-copilot/helpers.ts"],
+      "@biof3/shared/actions": ["../vendor/biof3-core/packages/shared-copilot/actions.ts"],
+      "@biof3/shared/actionBus": ["../vendor/biof3-core/packages/shared-copilot/actionBus.ts"],
+      "@biof3/shared/error": ["../vendor/biof3-core/packages/shared-copilot/error.ts"],
+      "@biof3/shared/api-inject": ["../vendor/biof3-core/packages/shared-copilot/api-inject.ts"],
+      "@biof3/shared/copilotMarkdown": ["../vendor/biof3-core/packages/shared-copilot/copilotMarkdown.tsx"],
+      "@biof3/shared/ActResultCard": ["../vendor/biof3-core/packages/shared-copilot/ActResultCard.tsx"],
+      "@biof3/shared/CopilotResultPanel": ["../vendor/biof3-core/packages/shared-copilot/CopilotResultPanel.tsx"],
+      "@biof3/shared/MemoryPanel": ["../vendor/biof3-core/packages/shared-copilot/MemoryPanel.tsx"],
+      "@biof3/shared/ActionCard": ["../vendor/biof3-core/packages/shared-copilot/ActionCard.tsx"],
+      "@biof3/shared/copilotActRegistry": ["../vendor/biof3-core/packages/shared-copilot/copilotActRegistry.ts"],
+      "@biof3/shared/copilotActRegistryBoot": ["../vendor/biof3-core/packages/shared-copilot/copilotActRegistryBoot.ts"],
+      "@biof3/shared/copilotPageScraper": ["../vendor/biof3-core/packages/shared-copilot/copilotPageScraper.ts"]
     }
   },
   "include": ["src"]

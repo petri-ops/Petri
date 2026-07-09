@@ -101,7 +101,7 @@ export function NewAnalysisModal({
             setParent(sorted[0]);
           }
         }
-      } catch (err) {
+      } catch (err: any) {
         /* ignore */
       }
       if (parentAnalysisId) {
@@ -111,7 +111,7 @@ export function NewAnalysisModal({
             setParent(p);
             setSelectedParentId(parentAnalysisId);
           }
-        } catch (err) {
+        } catch (err: any) {
           /* ignore */
         }
       }
@@ -231,7 +231,7 @@ export function NewAnalysisModal({
       });
 
       onCreated(analysis);
-    } catch (err) {
+    } catch (err: any) {
       alert(`提交失败: ${err.message}`);
     } finally {
       setSubmitting(false);
@@ -424,7 +424,7 @@ export function NewAnalysisModal({
                       <label>物种</label>
                       <select
                         value={species}
-                        onChange={(e) => setSpecies(e.target.value as string)}
+                        onChange={(e) => setSpecies(e.target.value as any)}
                       >
                         <option value="human">Human</option>
                         <option value="mouse">Mouse</option>
@@ -434,7 +434,7 @@ export function NewAnalysisModal({
                       <label>标准化</label>
                       <select
                         value={normMethod}
-                        onChange={(e) => setNormMethod(e.target.value as string)}
+                        onChange={(e) => setNormMethod(e.target.value as any)}
                       >
                         <option value="LogNormalize">LogNormalize</option>
                         <option value="SCTransform">SCTransform</option>
@@ -548,7 +548,7 @@ export function NewAnalysisModal({
                       <label>统计方法</label>
                       <select
                         value={degMethod}
-                        onChange={(e) => setDegMethod(e.target.value as string)}
+                        onChange={(e) => setDegMethod(e.target.value as any)}
                       >
                         <option value="DESeq2">DESeq2 (bulk)</option>
                         <option value="wilcox">Wilcoxon (sc)</option>
@@ -629,7 +629,7 @@ export function NewAnalysisModal({
                     <label>物种</label>
                     <select
                       value={enrichOrganism}
-                      onChange={(e) => setEnrichOrganism(e.target.value as string)}
+                      onChange={(e) => setEnrichOrganism(e.target.value as any)}
                     >
                       <option value="human">Human</option>
                       <option value="mouse">Mouse</option>
@@ -639,7 +639,7 @@ export function NewAnalysisModal({
                     <label>类型</label>
                     <select
                       value={enrichType}
-                      onChange={(e) => setEnrichType(e.target.value as string)}
+                      onChange={(e) => setEnrichType(e.target.value as any)}
                     >
                       <option value="both">GO + KEGG</option>
                       <option value="GO">仅 GO</option>
@@ -687,7 +687,7 @@ export function NewAnalysisModal({
                     <label>标签粒度</label>
                     <select
                       value={annotLevel}
-                      onChange={(e) => setAnnotLevel(e.target.value as string)}
+                      onChange={(e) => setAnnotLevel(e.target.value as any)}
                     >
                       <option value="main">Main</option>
                       <option value="fine">Fine</option>
@@ -703,7 +703,7 @@ export function NewAnalysisModal({
                     <label>方法</label>
                     <select
                       value={integMethod}
-                      onChange={(e) => setIntegMethod(e.target.value as string)}
+                      onChange={(e) => setIntegMethod(e.target.value as any)}
                     >
                       <option value="harmony">Harmony</option>
                       <option value="cca">CCA</option>
@@ -773,7 +773,7 @@ export function NewAnalysisModal({
                     <label>物种</label>
                     <select
                       value={commOrganism}
-                      onChange={(e) => setCommOrganism(e.target.value as string)}
+                      onChange={(e) => setCommOrganism(e.target.value as any)}
                     >
                       <option value="human">Human</option>
                       <option value="mouse">Mouse</option>

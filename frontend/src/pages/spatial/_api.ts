@@ -70,7 +70,7 @@ export async function submitSpatialTask(
   throw new Error(data.error || '提交失败');
 }
 
-export async function getSpatialTaskStatus(taskId: string): Promise<Record<string, unknown>> {
+export async function getSpatialTaskStatus(taskId: string): Promise<any> {
   const resp = await fetch(getPyApiPrefix() + `/task/${taskId}`, {
     headers: getJsonAuthHeaders(),
   });

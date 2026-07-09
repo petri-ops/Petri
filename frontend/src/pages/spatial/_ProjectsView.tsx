@@ -139,13 +139,13 @@ export function ProjectsView({ navigate }: { navigate: (r: Route) => void }) {
         list.map(async (p) => {
           try {
             map[p.id] = await getProjectStats(p.id);
-          } catch (err) {
+          } catch (err: any) {
             map[p.id] = { datasets: 0, analyses: 0 };
           }
         })
       );
       setStatsMap(map);
-    } catch (e) {
+    } catch (e: any) {
       console.error('加载空间组学项目列表失败', e);
       setLoading(false);
     }
@@ -165,7 +165,7 @@ export function ProjectsView({ navigate }: { navigate: (r: Route) => void }) {
         setNewDesc('');
         setShowNewModal(false);
         navigate({ name: 'project', projectId: p.id });
-      } catch (e: unknown) {
+      } catch (e: any) {
         alert(`创建失败: ${e.message}`);
       }
     },
@@ -180,7 +180,7 @@ export function ProjectsView({ navigate }: { navigate: (r: Route) => void }) {
         try {
           await deleteProject(id);
           reload();
-        } catch (err) {
+        } catch (err: any) {
           alert(`删除失败: ${err.message}`);
         }
       }
@@ -211,7 +211,7 @@ export function ProjectsView({ navigate }: { navigate: (r: Route) => void }) {
       await updateProject(renamingId, { name: trimmed });
       setRenamingId(null);
       reload();
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(`重命名失败: ${e.message}`);
       setRenamingId(null);
     }

@@ -85,7 +85,7 @@ export function DatasetView({
         // Mirror single-cell: auto-redirect to latest done standard analysis result page,
         // where the right-side tool card lives (sc-data-tools-layout in ResultView's preview tab)
         const doneStandard = aList
-          .filter((a) => a.type === 'spatial_standard' && a.status === 'done')
+          .filter((a) => (a.type as string) === 'spatial_standard' && a.status === 'done')
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         if (doneStandard.length > 0) {
           navigate({ name: 'result', analysisId: doneStandard[0].id });
@@ -207,7 +207,7 @@ export function DatasetView({
         try {
           await deleteAnalysis(id);
           reload();
-        } catch (err) {
+        } catch (err: any) {
           alert(`删除失败: ${err.message}`);
         }
       }
@@ -234,7 +234,7 @@ export function DatasetView({
       await updateDataset(dataset.id, { name: renameValue.trim() });
       setRenaming(false);
       reload();
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(`重命名失败: ${e.message}`);
     }
   }, [dataset, renameValue, reload]);
@@ -377,7 +377,7 @@ export function DatasetView({
                 !dataset.featuresUrl &&
                 !analyses.some(
                   (a) =>
-                    a.type === 'spatial_standard' && (a.status === 'done' || a.status === 'running')
+                    (a.type as string) === 'spatial_standard' && (a.status === 'done' || a.status === 'running')
                 ) ? (
                   <div className="sc-data-preview-hint">
                     <div style={{ fontSize: 12, color: '#9ca3af' }}>
@@ -496,7 +496,7 @@ export function DatasetView({
                   const elapsed = a.finishedAt
                     ? (new Date(a.finishedAt).getTime() - new Date(a.createdAt).getTime()) / 1000
                     : 0;
-                  const firstPlot = a.results?.plots?.[0]?.url || null;
+                  const firstPlot = (a.results?.plots as any)?.[0]?.url || null;
                   const stats = getSpatialAnalysisStats(a);
                   return (
                     <div

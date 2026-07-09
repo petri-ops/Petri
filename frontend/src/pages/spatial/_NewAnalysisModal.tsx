@@ -80,7 +80,7 @@ export function NewAnalysisModal({
     (async () => {
       try {
         const list = await listAnalysesByDataset(dataset.id);
-        const done = list.filter((a) => a.type === 'spatial_standard' && a.status === 'done');
+        const done = list.filter((a) => (a.type as string) === 'spatial_standard' && a.status === 'done');
         if (cancelled) return;
         setParentAnalyses(done);
         if (!parentAnalysisId && done.length > 0) {
@@ -91,7 +91,7 @@ export function NewAnalysisModal({
           setSelectedParentId(sorted[0].id);
           setParent(sorted[0]);
         }
-      } catch (err) {
+      } catch (err: any) {
         /* ignore */
       }
 
@@ -102,7 +102,7 @@ export function NewAnalysisModal({
             setParent(p);
             setSelectedParentId(parentAnalysisId);
           }
-        } catch (err) {
+        } catch (err: any) {
           /* ignore */
         }
       }
@@ -189,7 +189,7 @@ export function NewAnalysisModal({
       const analysis = await createAnalysis({
         datasetId: dataset.id,
         taskId,
-        type: type as string,
+        type: type as any,
         name: finalName,
         // spatial_standard is root; child types record parent for sidebar tree
         parentAnalysisId: type === 'spatial_standard' ? undefined : parent?.id || parentAnalysisId,
@@ -198,7 +198,7 @@ export function NewAnalysisModal({
       });
 
       onCreated(analysis);
-    } catch (err) {
+    } catch (err: any) {
       alert(`提交失败: ${err.message}`);
     } finally {
       setSubmitting(false);
@@ -444,7 +444,7 @@ export function NewAnalysisModal({
                   <label>coordType</label>
                   <select
                     value={coordType}
-                    onChange={(e) => setCoordType(e.target.value as string)}
+                    onChange={(e) => setCoordType(e.target.value as any)}
                   >
                     <option value="generic">generic（任意坐标）</option>
                     <option value="grid">grid（Visium 六角网格）</option>
@@ -597,7 +597,7 @@ export function NewAnalysisModal({
                   <label>label 字段</label>
                   <select
                     value={deconvRefLabelKey}
-                    onChange={(e) => setDeconvRefLabelKey(e.target.value as string)}
+                    onChange={(e) => setDeconvRefLabelKey(e.target.value as any)}
                   >
                     <option value="cell_subclass">
                       cell_subclass（细致：L5 IT / Vip / Pvalb / Sst ...）
@@ -642,7 +642,7 @@ export function NewAnalysisModal({
                   <label>resource</label>
                   <select
                     value={lrResourceName}
-                    onChange={(e) => setLrResourceName(e.target.value as string)}
+                    onChange={(e) => setLrResourceName(e.target.value as any)}
                   >
                     <option value="mouseconsensus">mouseconsensus（小鼠综合，默认）</option>
                     <option value="consensus">consensus（人综合）</option>
@@ -660,7 +660,7 @@ export function NewAnalysisModal({
                   <label>local metric</label>
                   <select
                     value={lrLocalName}
-                    onChange={(e) => setLrLocalName(e.target.value as string)}
+                    onChange={(e) => setLrLocalName(e.target.value as any)}
                   >
                     <option value="cosine">cosine（推荐）</option>
                     <option value="jaccard">jaccard</option>

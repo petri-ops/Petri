@@ -23,12 +23,18 @@ import {
   formatTraceForCopy,
   type TraceEntry,
 } from './copilotTrace';
-import {
-  listConversations,
-  getConversationMessages,
-  dismissTopicShift,
-  type ConversationSummary,
-} from './copilotConversationsClient';
+import { listConversations, getConversationMessages, dismissTopicShift, type ConversationSummary } from './copilotConversationsClient';
+
+// ActExecution — 一次 Act 调用的执行结果（嵌入到 assistant message 里）
+// 与 vendor @biof3/shared/types 的 ActExecution 字段一致，方便兼容。
+interface ActExecution {
+  actType: string;
+  message?: string;
+  undoToken?: string;
+  undoableUntil?: number;
+  error?: string;
+  analysisId?: string;
+}
 import {
   detectPageFromUrl,
   getCopilotContext,
@@ -38,7 +44,7 @@ import {
 } from './copilotContext';
 import { CopilotMarkdown } from './copilotMarkdown';
 import { parseActionsFromMarkdown } from './copilotActions';
-import { ActResultCard, type ActExecution } from './ActResultCard';
+import { ActResultCard } from './ActResultCard';
 import { scrapePage } from './copilotPageScraper';
 import { fetchSummary, type SummaryInfo } from './copilotSummaryClient';
 import { fetchRecentAgentActs } from './copilotPrivacyClient';
@@ -117,7 +123,7 @@ export function CopilotChat({ embedded = false, inputHeight }: { embedded?: bool
     reason: string;
   } | null>(null);
   const conversationProjectId =
-    ctx.page === 'desktop-project' && ctx.projectId ? ctx.projectId : undefined;
+    (ctx.page as string) === 'desktop-project' && ctx.projectId ? ctx.projectId : undefined;
   const conversationStorageKey = conversationProjectId
     ? `biof3_copilot_active_conv:${conversationProjectId}`
     : 'biof3_copilot_active_conv';

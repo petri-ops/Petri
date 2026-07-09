@@ -158,7 +158,7 @@ function RealtimeTab() {
       } else {
         setErr(j.error || '加载失败');
       }
-    } catch (e: unknown) {
+    } catch (e: any) {
       setErr(e.message || '网络错误');
     } finally {
       setLoading(false);
@@ -245,7 +245,7 @@ function TrendsTab() {
         } else {
           setLoadErr(r1.error || r2.error || '加载失败');
         }
-      } catch (e: unknown) {
+      } catch (e: any) {
         setLoadErr(errMsg(e) || '网络错误');
       } finally {
         setLoading(false);
@@ -359,7 +359,7 @@ function RetentionTab() {
       } else {
         setLoadErr(j.error || '加载失败');
       }
-    } catch (e: unknown) {
+    } catch (e: any) {
       setLoadErr(errMsg(e) || '网络错误');
     } finally {
       setLoading(false);
@@ -430,7 +430,7 @@ function ContentTab() {
         } else {
           setLoadErr(j.error || '加载失败');
         }
-      } catch (e: unknown) {
+      } catch (e: any) {
         setLoadErr(errMsg(e) || '网络错误');
       } finally {
         setLoading(false);
@@ -511,7 +511,7 @@ function FunnelTab() {
       } else {
         setLoadErr(j.error || '加载失败');
       }
-    } catch (e: unknown) {
+    } catch (e: any) {
       setLoadErr(errMsg(e) || '网络错误');
     } finally {
       setLoading(false);
@@ -556,7 +556,7 @@ function referrerHost(referrer: string | null | undefined): string {
       ? referrer
       : `https://placeholder${referrer.startsWith('/') ? '' : '/'}${referrer}`;
     return new URL(u).hostname || '-';
-  } catch (e) {
+  } catch (e: any) {
     return referrer.length > 40 ? referrer.slice(0, 40) + '…' : referrer;
   }
 }
@@ -592,7 +592,7 @@ function VisitorsTab() {
         } else {
           setLoadErr(j.error || '加载失败');
         }
-      } catch (e: unknown) {
+      } catch (e: any) {
         setLoadErr(errMsg(e) || '网络错误');
       } finally {
         setLoading(false);
@@ -902,7 +902,7 @@ function FeedbacksTab() {
   const cached = adminDataCache.feedbacks;
   const [filter, setFilter] = useState<string>(cached?.filter || '');
   const [items, setItems] = useState<FeedbackRow[] | null>(
-    cached?.filter === filter ? cached.items : null
+    (cached?.filter === filter ? (cached.items as any) : null)
   );
   const [counts, setCounts] = useState<Record<string, number>>(
     cached?.filter === filter ? cached.counts : {}
@@ -924,7 +924,7 @@ function FeedbacksTab() {
         } else {
           console.warn('[feedbacks] load failed:', j.error);
         }
-      } catch (e) {
+      } catch (e: any) {
         console.warn('[feedbacks] network error:', e.message);
       } finally {
         setBusy(false);
@@ -946,7 +946,7 @@ function FeedbacksTab() {
           body: JSON.stringify({ status }),
         });
         load(true);
-      } catch (e) {
+      } catch (e: any) {
         alert(e.message);
       }
     },
@@ -961,7 +961,7 @@ function FeedbacksTab() {
           body: JSON.stringify({ adminNotes }),
         });
         load(true);
-      } catch (e) {
+      } catch (e: any) {
         alert(e.message);
       }
     },

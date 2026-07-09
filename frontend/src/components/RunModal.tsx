@@ -342,7 +342,7 @@ export default function RunModal({
   const handleCopyCode = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(code);
-    } catch (err) {
+    } catch (err: any) {
       const ta = document.createElement('textarea');
       ta.value = code;
       document.body.appendChild(ta);
@@ -361,7 +361,7 @@ export default function RunModal({
         const resp = await fetch(dataHref);
         const text = await resp.text();
         setDataPreview(text.split('\n').slice(0, 20).join('\n'));
-      } catch (err) {
+      } catch (err: any) {
         setDataPreview('gene,value\nError,无法加载');
       }
     }
@@ -534,7 +534,7 @@ export default function RunModal({
           return hint + prev;
         });
       }
-    } catch (err) {
+    } catch (err: any) {
       setOutput(`上传失败: ${err.message}`);
     } finally {
       setUploading(false);
@@ -637,7 +637,7 @@ export default function RunModal({
           setImages(data.images);
           if (onImageReady && data.images[0]) onImageReady(data.images[0]);
         }
-      } catch (err) {
+      } catch (err: any) {
         setOutput(
           `连接 ${language === 'python' ? 'Python' : 'R'} Server 失败: ${err instanceof Error ? err.message : String(err)}\n\n请求地址: ${getApiPrefix(language)}/run`
         );
@@ -1280,7 +1280,7 @@ export default function RunModal({
                                     btn.classList.remove('saved');
                                     btn.disabled = false;
                                   }, 2000);
-                                } catch (err) {
+                                } catch (err: any) {
                                   btn.textContent = '保存失败';
                                   setTimeout(() => {
                                     btn.textContent = '保存到结果';

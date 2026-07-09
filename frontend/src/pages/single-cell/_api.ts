@@ -47,7 +47,7 @@ async function fetchWithTimeoutInner(
     const resp = await fetch(url, { ...opts, signal: controller.signal as AbortSignal });
     clearTimeout(timer);
     return resp;
-  } catch (err) {
+  } catch (err: any) {
     clearTimeout(timer);
     if (err?.name === 'AbortError') {
       throw new FetchTimeoutError(
@@ -82,12 +82,12 @@ export async function fetchWithTimeout(
         continue;
       }
       return resp;
-    } catch (err: unknown) {
+    } catch (err: any) {
       // Timeout and 5xx are retryable; 4xx / network error is not
       if (
         i < retries &&
         !(err instanceof FetchTimeoutError) &&
-        !((err as FetchTimeoutError)?.status >= 500)
+        !((err as any)?.status >= 500)
       ) {
         await new Promise((r) => setTimeout(r, delays[i] ?? 3000));
         continue;
@@ -161,7 +161,7 @@ export async function submitTask(
   throw new Error(data.error || '提交失败');
 }
 
-export async function getTaskStatus(taskId: string): Promise<Record<string, unknown>> {
+export async function getTaskStatus(taskId: string): Promise<any> {
   const resp = await fetchWithTimeout(getApiPrefix() + `/task/${taskId}`, {
     headers: getJsonAuthHeaders(),
   });

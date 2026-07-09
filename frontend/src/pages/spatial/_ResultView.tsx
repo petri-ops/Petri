@@ -343,7 +343,7 @@ export function ResultView({
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [dataset, setDataset] = useState<Dataset | null>(null);
   const [project, setProject] = useState<Project | null>(null);
-  const [taskData, setTaskData] = useState<unknown>(null);
+  const [taskData, setTaskData] = useState<any>(null);
   const [tab, setTab] = useState<Tab>('plots'); // Will be overridden to 'preview' once analysis loads
   const [dataView, setDataView] = useState<'meta' | 'features'>('meta');
   const [selectedPlot, setSelectedPlot] = useState<PlotItem | null>(null);
@@ -378,7 +378,7 @@ export function ResultView({
           setProject(proj);
         }
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error('加载分析失败', e);
     }
   }, [analysisId]);
@@ -446,7 +446,7 @@ export function ResultView({
           });
           reload();
         }
-      } catch (err) {
+      } catch (err: any) {
         if (analysis.status === 'done' && analysis.summary) {
           setTaskData({
             status: 'done',
@@ -482,7 +482,7 @@ export function ResultView({
 
   // Mirror single-cell: default to 'preview' tab for completed standard analyses (shows the tool card on the right)
   useEffect(() => {
-    if (analysis && analysis.type === 'spatial_standard' && analysis.status === 'done') {
+    if (analysis && (analysis.type as string) === 'spatial_standard' && analysis.status === 'done') {
       setTab('preview');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -504,7 +504,7 @@ export function ResultView({
         try {
           await deleteAnalysis(analysis.id);
           navigate({ name: 'dataset', datasetId: dataset.id });
-        } catch (err) {
+        } catch (err: any) {
           alert(`删除失败: ${err.message}`);
         }
       }
@@ -525,7 +525,7 @@ export function ResultView({
       await updateAnalysis(analysis.id, { name: renameValue.trim() });
       setRenaming(false);
       reload();
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(`重命名失败: ${e.message}`);
     }
   }, [analysis, renameValue, reload]);
@@ -588,14 +588,14 @@ export function ResultView({
     : 0;
 
   // Right info panel target
-  const activePanelTarget = (() => {
+  const activePanelTarget: PanelTarget = (() => {
     if (tab === 'data' && selectedFile) {
       const fm = SPATIAL_FILE_META[selectedFile.name];
-      return { kind: 'file' as const, meta: fm || null, plot: null, file: selectedFile };
+      return { kind: 'file' as const, meta: (fm || null) as any, plot: null, file: selectedFile };
     }
     if (tab === 'plots' && selectedPlot) {
       const pm = SPATIAL_PLOT_META[selectedPlot.filename] || SPATIAL_PLOT_META[selectedPlot.name];
-      return { kind: 'plot' as const, meta: pm || null, plot: selectedPlot, file: null };
+      return { kind: 'plot' as const, meta: (pm || null) as any, plot: selectedPlot, file: null };
     }
     return { kind: 'none' as const, meta: null, plot: null, file: null };
   })();
@@ -777,7 +777,7 @@ export function ResultView({
             <>
               {/* Tabs */}
               <div className="sc-result-tabs">
-                {analysis.type === 'spatial_standard' && (
+                {((analysis.type as string) === 'spatial_standard') && (
                   <button
                     className={`sc-tab ${tab === 'preview' ? 'active' : ''}`}
                     onClick={() => setTab('preview')}
@@ -1097,7 +1097,7 @@ export function ResultView({
 
 interface PanelTarget {
   kind: 'plot' | 'file' | 'none';
-  meta: Record<string, unknown>;
+  meta: Record<string, any> | null;
   plot: PlotItem | null;
   file: FileItem | null;
 }

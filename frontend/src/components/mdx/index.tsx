@@ -8,7 +8,7 @@
 // 或在这里统一映射。当前用 remark-mdx-import-rewrite（见 vite 配置）。
 
 import React from 'react';
-import type { Components } from '@mdx-js/react';
+import type { MDXComponents as Components } from 'mdx/types.js';
 import DownloadButton from './DownloadButton';
 import TryOnline from './TryOnline';
 import FigInline from './FigInline';

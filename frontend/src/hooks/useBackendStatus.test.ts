@@ -1,23 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
 import { useBackendStatus } from '@/hooks/useBackendStatus';
+import type { BackendStatus } from '@/lib/electron';
 
 type Status = { ready: boolean; services: { name: string }[] };
 
-declare global {
-  interface Window {
-    biof3Desktop?: {
-      backend?: { status?: () => Promise<Status> };
-    };
-  }
-}
-
 function installMock(status: Status | null, opts: { throw?: boolean } = {}) {
-  window.biof3Desktop = {
+  (window as any).biof3Desktop = {
     backend: {
       status: opts.throw
         ? () => Promise.reject(new Error('ipc failed'))
-        : () => Promise.resolve(status as Status),
+        : () => Promise.resolve(status) as unknown as Promise<BackendStatus>,
     },
   };
 }
@@ -28,7 +21,7 @@ describe('useBackendStatus', () => {
   });
   afterEach(() => {
     vi.useRealTimers();
-    delete window.biof3Desktop;
+    delete (window as any).biof3Desktop;
   });
 
   it('returns the resolved status on the first poll', async () => {
@@ -53,11 +46,11 @@ describe('useBackendStatus', () => {
   it('re-polls at the configured interval (10s)', async () => {
     const calls: number[] = [];
     let n = 0;
-    window.biof3Desktop = {
+    (window as any).biof3Desktop = {
       backend: {
         status: () => {
           calls.push(++n);
-          return Promise.resolve({ ready: n > 0, services: [] });
+          return Promise.resolve({ ready: n > 0, services: [] }) as unknown as Promise<BackendStatus>;
         },
       },
     };

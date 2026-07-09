@@ -43,7 +43,7 @@ interface Job {
 
 interface JobResult {
   files?: Array<{ name: string; type: string; label?: string; url?: string }>;
-  summary?: unknown;
+  summary?: Record<string, any>;
 }
 
 // ---- Tool icon colors / report URLs / figcode map are now sourced from
@@ -53,7 +53,7 @@ const TOOL_COLORS: Record<string, string> = Object.fromEntries(
   staticTools.map((t) => [t.id, t.color])
 );
 
-const REPORT_URLS: Record<string, string> = Object.fromEntries(
+const REPORT_URLS: Record<string, string | undefined> = Object.fromEntries(
   staticTools.filter((t) => t.reportUrl).map((t) => [t.id, t.reportUrl])
 );
 
@@ -733,7 +733,7 @@ function ToolsInner() {
   }, []);
 
   // Form state
-  const [params, setParams] = useState<Record<string, unknown>>({});
+  const [params, setParams] = useState<Record<string, any>>({});
   const [files, setFiles] = useState<Record<string, string>>({});
   const [fileNames, setFileNames] = useState<Record<string, string>>({});
   const [filePreviews, setFilePreviews] = useState<Record<string, string[][]>>({});
@@ -917,7 +917,7 @@ function ToolsInner() {
     let binary = '';
     const chunk = 32 * 1024;
     for (let i = 0; i < bytes.length; i += chunk) {
-      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk) as unknown[]);
+      binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)));
     }
     return btoa(binary);
   }, []);
@@ -931,7 +931,7 @@ function ToolsInner() {
     let binary = '';
     const chunk = 32 * 1024;
     for (let i = 0; i < bytes.length; i += chunk) {
-      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk) as unknown[]);
+      binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)));
     }
     return btoa(binary);
   }, []);
@@ -1015,7 +1015,7 @@ function ToolsInner() {
       setShowNewModal(false);
       startPolling(data.jobId, selectedTool.id, lang);
       fetchHistory();
-    } catch (e: unknown) {
+    } catch (e: any) {
       setError(e.message);
       setStatus('idle');
     }
@@ -2674,7 +2674,7 @@ function DemoTabs({
   const [tab, setTab] = useState<'plots' | 'files' | 'params'>('plots');
   const plots = demoFiles.filter((f) => f.type === 'plot');
   const tables = demoFiles.filter((f) => f.type === 'table' || f.type === 'file');
-  const tool = tools.find((t) => t.id === demoToolId);
+  const tool = (staticTools as any).find((t: any) => t.id === demoToolId);
   const apiBase = getApiPrefix(tool?.language === 'python' ? 'python' : 'r');
 
   return (

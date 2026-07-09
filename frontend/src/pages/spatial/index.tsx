@@ -89,7 +89,7 @@ function AppInner() {
     window.addEventListener('biof3:open-login', onOpenLogin);
     const unsubAuth = subscribeAuth((u) => {
       if (u) {
-        setUser(u as Record<string, unknown>);
+        setUser(u as unknown as User);
         setShowLoginModal(false);
       } else {
         setUser(null);

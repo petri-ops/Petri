@@ -61,7 +61,7 @@ function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-async function api(path: string, opts?: RequestInit): Promise<Record<string, unknown>> {
+async function api<T = any>(path: string, opts?: RequestInit): Promise<T> {
   let lastError: Error | null = null;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
@@ -92,7 +92,7 @@ async function api(path: string, opts?: RequestInit): Promise<Record<string, unk
   throw lastError || new Error('请求失败');
 }
 
-function mapProject(row: Record<string, unknown>): Project {
+function mapProject(row: Record<string, any>): Project {
   if (!row) return row;
   return {
     id: row.id,

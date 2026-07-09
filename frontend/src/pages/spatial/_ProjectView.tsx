@@ -160,13 +160,13 @@ export function ProjectView({
         dsList.map(async (d) => {
           try {
             map[d.id] = await getDatasetStats(d.id);
-          } catch (err) {
+          } catch (err: any) {
             map[d.id] = { analyses: 0 };
           }
         })
       );
       setStatsMap(map);
-    } catch (e) {
+    } catch (e: any) {
       console.error('加载项目失败', e);
       setLoading(false);
     }
@@ -231,7 +231,7 @@ export function ProjectView({
           size: result.size,
         });
         reload();
-      } catch (err) {
+      } catch (err: any) {
         alert(`上传失败: ${err.message}`);
       } finally {
         setUploading(false);
@@ -250,7 +250,7 @@ export function ProjectView({
         try {
           await deleteDataset(id);
           reload();
-        } catch (err) {
+        } catch (err: any) {
           alert(`删除失败: ${err.message}`);
         }
       }
@@ -271,7 +271,7 @@ export function ProjectView({
       await updateProject(project.id, { name: renameValue.trim() });
       setRenaming(false);
       reload();
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(`重命名失败: ${e.message}`);
     }
   }, [project, renameValue, reload]);
@@ -299,7 +299,7 @@ export function ProjectView({
       await updateDataset(renamingDsId, { name: trimmed });
       setRenamingDsId(null);
       reload();
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(`重命名失败: ${e.message}`);
       setRenamingDsId(null);
     }

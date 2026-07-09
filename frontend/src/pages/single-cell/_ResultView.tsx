@@ -49,7 +49,7 @@ export function ResultView({
   const [dataset, setDataset] = useState<Dataset | null>(null);
   const [project, setProject] = useState<Project | null>(null);
   const [_sibAnalyses, setSibAnalyses] = useState<Analysis[]>([]);
-  const [taskData, setTaskData] = useState<unknown>(null);
+  const [taskData, setTaskData] = useState<any>(null);
   const [tab, setTab] = useState<Tab>('plots');
   const [dataView, setDataView] = useState<'meta' | 'features'>('meta');
   const [selectedCells, setSelectedCells] = useState<string[]>([]);
@@ -63,7 +63,7 @@ export function ResultView({
   } | null>(null);
   const [replotModal, setReplotModal] = useState<{ title: string; code: string } | null>(null);
   const [tablePreview, setTablePreview] = useState<{ name: string; url: string } | null>(null);
-  const [docModal, setDocModal] = useState<unknown>(null); // DocSection
+  const [docModal, setDocModal] = useState<any>(null); // DocSection
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState('');
   const [warmupStatus, setWarmupStatus] = useState<'idle' | 'warming' | 'ready' | 'failed'>('idle');
@@ -262,7 +262,7 @@ export function ResultView({
         status: analysis.status,
         results: analysis.results,
         error: analysis.error,
-        cachePath: analysis.results?.cachePath,
+        cachePath: (analysis.results as any)?.cachePath,
       });
       return;
     }
@@ -323,7 +323,7 @@ export function ResultView({
 
     // Only warmup for analyses with RDS results (Seurat-based)
     const files = analysis.results?.files || taskData?.results?.files || [];
-    const hasRds = files.some((f: Record<string, unknown>) => f.name?.endsWith('.rds'));
+    const hasRds = files.some((f: Record<string, any>) => f.name?.endsWith('.rds'));
     // For standard/recluster analyses, always attempt warmup (they always produce RDS)
     const isStandardType = analysis.type === 'scrna_standard' || analysis.type === 'recluster';
     if (!hasRds && !isStandardType) return;
@@ -351,7 +351,7 @@ export function ResultView({
   }, [taskData?.results?.files, selectedFile]);
 
   // Switch right panel target based on active tab
-  const activePanelMeta: unknown = (() => {
+  const activePanelMeta: PanelTarget = (() => {
     if (tab === 'data' && selectedFile) {
       const fm = getFileMeta(selectedFile.name);
       if (fm) return { kind: 'file', meta: fm, plot: null, file: selectedFile };
@@ -372,7 +372,7 @@ export function ResultView({
         try {
           await deleteAnalysis(analysis.id);
           navigate({ name: 'dataset', datasetId: dataset.id });
-        } catch (err) {
+        } catch (err: any) {
           alert(`删除失败: ${err.message}`);
         }
       }
@@ -402,7 +402,7 @@ export function ResultView({
             error: data.error || data.message || '生成失败',
           });
         }
-      } catch (e: unknown) {
+      } catch (e: any) {
         setMethodsModal({ loading: false, text: '', lang, error: errMsg(e) || '网络错误' });
       }
     },
@@ -426,7 +426,7 @@ export function ResultView({
         } else {
           setReportState({ loading: false, error: data.error || data.message || '生成失败' });
         }
-      } catch (e: unknown) {
+      } catch (e: any) {
         setReportState({ loading: false, error: errMsg(e) || '网络错误' });
       }
     },
@@ -450,7 +450,7 @@ export function ResultView({
         } else {
           setScriptModal({ loading: false, lang, error: data.error || data.message || '生成失败' });
         }
-      } catch (e: unknown) {
+      } catch (e: any) {
         setScriptModal({ loading: false, lang, error: errMsg(e) || '网络错误' });
       }
     },
@@ -470,7 +470,7 @@ export function ResultView({
       await updateAnalysis(analysis.id, { name: renameValue.trim() });
       setRenaming(false);
       reload();
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(`重命名失败: ${e.message}`);
     }
   }, [analysis, renameValue, reload]);
@@ -1100,7 +1100,7 @@ export function ResultView({
                                         btn.textContent = '📝';
                                         btn.disabled = false;
                                       }
-                                    } catch (err: unknown) {
+                                    } catch (err: any) {
                                       alert('网络错误: ' + (errMsg(err) || ''));
                                       btn.textContent = '📝';
                                       btn.disabled = false;
@@ -1128,7 +1128,7 @@ export function ResultView({
                 <>
                   {results.files?.length > 0 ? (
                     <div className="sc-plots-grid">
-                      {results.files.map((f: Record<string, unknown>, i: number) => {
+                      {results.files.map((f: Record<string, any>, i: number) => {
                         const isCSV = /\.(csv|tsv|txt)$/i.test(f.name);
                         const isRds = /\.rds$/i.test(f.name);
                         const topName = f.name.replace(/\.[^.]+$/, '').replace(/_/g, ' ');
@@ -1137,7 +1137,7 @@ export function ResultView({
                           <div
                             key={i}
                             className={`sc-plot-card sc-data-card ${selectedFile?.name === f.name ? 'selected' : ''}`}
-                            onClick={() => setSelectedFile(f)}
+                            onClick={() => setSelectedFile(f as any)}
                           >
                             <div className="sc-plot-card-title">{topName}</div>
                             <div className="sc-plot-card-image sc-data-card-icon">
@@ -1235,7 +1235,7 @@ export function ResultView({
           onClose={() => setReplotModal(null)}
           title={`在线绘图 — ${replotModal.title}`}
           initialCode={replotModal.code}
-          subtitle={analysis.name}
+          subtitle={analysis?.name ?? ''}
           replotTaskId={warmupStatus === 'ready' ? analysis.taskId : undefined}
         />
       )}
@@ -1645,7 +1645,7 @@ export function ResultView({
 // ============================================================
 
 function _extractTopMarkers(
-  results: Record<string, unknown>
+  results: Record<string, any>
 ): Record<string, string[]> | undefined {
   if (!results?.summary?.clusters) return undefined;
   const out: Record<string, string[]> = {};

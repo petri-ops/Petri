@@ -189,7 +189,7 @@ export function DatasetView({
           'biof3_pending_label',
           JSON.stringify({ key: detail.labelKey, value: detail.labelValue })
         );
-      } catch (err) {}
+      } catch (err: any) {}
     };
     const onMerge = (e: Event) => {
       const detail = (e as CustomEvent).detail || {};
@@ -280,7 +280,7 @@ export function DatasetView({
               }
             }
           }
-        } catch (err) {
+        } catch (err: any) {
           /* ignore */
         }
       }
@@ -313,7 +313,7 @@ export function DatasetView({
         try {
           await deleteAnalysis(id);
           reload();
-        } catch (err) {
+        } catch (err: any) {
           alert(`删除失败: ${err.message}`);
         }
       }
@@ -349,7 +349,7 @@ export function DatasetView({
       await updateDataset(dataset.id, { name: renameValue.trim() });
       setRenaming(false);
       reload();
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(`重命名失败: ${e.message}`);
     }
   }, [dataset, renameValue, reload]);
@@ -581,7 +581,7 @@ export function DatasetView({
                         <button
                           key={key}
                           className={`sc-tool-item ${!isReady ? 'sc-tool-item-wip' : ''}`}
-                          onClick={(e) => (isReady ? openNewAnalysis(key as string, e) : undefined)}
+                          onClick={(e) => (isReady ? openNewAnalysis(key as any, e) : undefined)}
                           title={isReady ? `${meta.name} — ${meta.desc}` : `${meta.name}（开发中）`}
                           disabled={!isReady}
                         >
@@ -742,7 +742,7 @@ export function DatasetView({
                     ? (new Date(a.finishedAt).getTime() - new Date(a.createdAt).getTime()) / 1000
                     : 0;
                   // Get first plot thumbnail
-                  const firstPlot = a.results?.plots?.[0]?.url || null;
+                  const firstPlot = (a.results?.plots as any)?.[0]?.url || null;
                   // Extract key stats from summary
                   const stats = getAnalysisStats(a);
                   return (
@@ -921,7 +921,7 @@ function SaveSubsetModal({
         cellIds,
       });
       onSaved();
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(`保存失败: ${e.message}`);
       setSubmitting(false);
     }
@@ -1018,7 +1018,7 @@ function AddLabelModal({
         cellIds,
       });
       onSaved();
-    } catch (e: unknown) {
+    } catch (e: any) {
       alert(`添加失败: ${e.message}`);
       setSubmitting(false);
     }
@@ -1088,7 +1088,7 @@ function AddLabelModal({
 }
 
 function getAnalysisStats(a: Analysis): Array<{ value: string; label: string }> {
-  const s = a.summary || {};
+  const s: Record<string, any> = a.summary || {};
   if (a.status !== 'done') return [];
 
   switch (a.type) {
@@ -1318,8 +1318,8 @@ DimPlot(obj, reduction = "umap", label = TRUE) + theme_classic()`
 }
 
 function PlotToolsModal({ onClose, replotTaskId }: { onClose: () => void; replotTaskId?: string }) {
-  const [cards, setCards] = useState<unknown[]>([]);
-  const [selectedCard, setSelectedCard] = useState<unknown>(null);
+  const [cards, setCards] = useState<any[]>([]);
+  const [selectedCard, setSelectedCard] = useState<any>(null);
   const [warming, setWarming] = useState(false);
   const [warmReady, setWarmReady] = useState(false);
 

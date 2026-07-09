@@ -55,7 +55,7 @@ export function hasModule(user: AuthUser | null, moduleKey: string): boolean {
 }
 export function clearAuth(): void {}
 export function logout(): void {}
-export function subscribeAuth(): () => void {
+export function subscribeAuth(callback: (user: AuthUser | null) => void): () => void {
   return () => {};
 }
 export function getCachedGuestPermissions(): Record<string, boolean> | null {

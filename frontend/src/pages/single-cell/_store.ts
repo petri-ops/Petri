@@ -20,7 +20,7 @@ const API_BASE = () => getApiPrefix() + '/data';
 const MAX_RETRIES = 2;
 const RETRY_DELAYS = [1000, 3000]; // ms
 
-async function api(path: string, opts?: RequestInit): Promise<Record<string, unknown>> {
+async function api<T = any>(path: string, opts?: RequestInit): Promise<T> {
   let lastError: Error | null = null;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
@@ -88,7 +88,9 @@ export async function createProject(name: string, description?: string): Promise
     method: 'POST',
     body: JSON.stringify({ name, description, modality: SC_MODALITY }),
   });
-  return mapProject(data.project);
+  const created = mapProject(data.project);
+  if (!created) throw new Error('创建项目失败：服务端未返回数据');
+  return created;
 }
 
 export async function updateProject(
@@ -141,9 +143,12 @@ export async function createDataset(input: {
   size: number;
   description?: string;
   parentDatasetId?: string;
+  sourceDatasetIds?: string[];
 }): Promise<Dataset> {
   const data = await api('/datasets', { method: 'POST', body: JSON.stringify(input) });
-  return mapDataset(data.dataset);
+  const created = mapDataset(data.dataset);
+  if (!created) throw new Error('创建数据集失败：服务端未返回数据');
+  return created;
 }
 
 export async function updateDataset(
@@ -201,7 +206,9 @@ export async function createAnalysis(input: {
   status: AnalysisStatus;
 }): Promise<Analysis> {
   const data = await api('/analyses', { method: 'POST', body: JSON.stringify(input) });
-  return mapAnalysis(data.analysis);
+  const created = mapAnalysis(data.analysis);
+  if (!created) throw new Error('创建分析失败：服务端未返回数据');
+  return created;
 }
 
 export async function updateAnalysis(
@@ -270,7 +277,9 @@ export async function createSubset(input: {
       cellIds: input.cellIds,
     }),
   });
-  return mapSubset(data.subset);
+  const created = mapSubset(data.subset);
+  if (!created) throw new Error('创建子集失败：服务端未返回数据');
+  return created;
 }
 
 export async function deleteSubset(id: string): Promise<void> {
@@ -362,8 +371,29 @@ function mapDataset(row: DbRow | null): Dataset | null {
     metaUrl: (row.meta_url || row.metaUrl) as string,
     featuresUrl: (row.features_url || row.featuresUrl) as string,
     parentDatasetId: (row.parent_dataset_id || row.parentDatasetId) as string | undefined,
+    sourceDatasetIds: parseSourceDatasetIds(row.source_dataset_ids),
     uploadedAt: (row.uploaded_at || row.uploadedAt) as string,
   };
+}
+
+function parseSourceDatasetIds(raw: unknown): string[] | undefined {
+  if (raw == null) return undefined;
+  if (Array.isArray(raw)) {
+    return raw.map((item) => String(item)).filter((item) => item.length > 0);
+  }
+  if (typeof raw === 'string') {
+    const trimmed = raw.trim();
+    if (!trimmed) return undefined;
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => String(item)).filter((item) => item.length > 0);
+      }
+    } catch {
+      // Not JSON — fall through.
+    }
+  }
+  return undefined;
 }
 
 function mapAnalysis(row: DbRow | null): Analysis | null {
