@@ -55,6 +55,7 @@ export async function createProject(input: {
   name: string;
   description?: string;
   modality?: ProjectModality;
+  workspacePath?: string;
 }): Promise<Project> {
   const data = await api('/projects', {
     method: 'POST',
@@ -65,7 +66,7 @@ export async function createProject(input: {
 
 export async function updateProject(
   id: string,
-  patch: { name?: string; description?: string }
+  patch: { name?: string; description?: string; workspacePath?: string }
 ): Promise<Project | null> {
   try {
     const data = await api(`/projects/${id}`, { method: 'PUT', body: JSON.stringify(patch) });
@@ -134,6 +135,7 @@ function mapProject(p: Record<string, unknown>): Project {
     createdAt: String(p.created_at || ''),
     updatedAt: String(p.updated_at || ''),
     modality: p.modality ? String(p.modality) : undefined,
+    workspacePath: p.workspace_path ? String(p.workspace_path) : undefined,
   };
 }
 
@@ -141,13 +143,20 @@ function mapToolJob(j: Record<string, unknown>): ToolJob {
   return {
     id: String(j.id),
     tool_id: String(j.tool_id || ''),
-    status: (j.status as ToolJob['status']) || 'pending',
+    status: normalizeToolJobStatus(j.status),
     created_at: Number(j.created_at || 0),
     completed_at: j.completed_at ? Number(j.completed_at) : undefined,
     error: j.error ? String(j.error) : undefined,
     name: j.name ? String(j.name) : undefined,
     project_id: j.project_id ? String(j.project_id) : null,
   };
+}
+
+function normalizeToolJobStatus(status: unknown): ToolJob['status'] {
+  if (status === 'completed' || status === 'done') return 'done';
+  if (status === 'failed') return 'failed';
+  if (status === 'running') return 'running';
+  return 'pending';
 }
 
 function mapDataset(d: Record<string, unknown>): Dataset {

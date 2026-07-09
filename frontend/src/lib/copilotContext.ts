@@ -65,6 +65,15 @@ export interface CopilotContext {
   projectJobs?: { id: string; toolId: string; status: string; name?: string; createdAt: number }[];
   /** Current active job id being viewed */
   activeJobId?: string;
+  /** Current artifact/file being viewed inside the project result panel */
+  activeArtifact?: {
+    jobId: string;
+    toolId: string;
+    name: string;
+    type: string;
+    label?: string;
+    url?: string;
+  } | null;
 }
 
 let current: CopilotContext = { page: 'unknown' };

@@ -116,6 +116,11 @@ export function CopilotChat({ embedded = false, inputHeight }: { embedded?: bool
     conversationId: string;
     reason: string;
   } | null>(null);
+  const conversationProjectId =
+    ctx.page === 'desktop-project' && ctx.projectId ? ctx.projectId : undefined;
+  const conversationStorageKey = conversationProjectId
+    ? `biof3_copilot_active_conv:${conversationProjectId}`
+    : 'biof3_copilot_active_conv';
   // PLAN_INLINE_v1 — track active plan id and bump key to refresh card
   const [activePlanId, setActivePlanId] = useState<string | null>(null);
   const [planRefreshKey, setPlanRefreshKey] = useState(0);
@@ -541,10 +546,24 @@ export function CopilotChat({ embedded = false, inputHeight }: { embedded?: bool
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Project workspaces keep their active conversation separate from global pages.
+  useEffect(() => {
+    if (!open) return;
+    try {
+      setActiveConvId(localStorage.getItem(conversationStorageKey));
+    } catch {
+      setActiveConvId(null);
+    }
+    setActiveConvTitle('');
+    setTopicShiftHint(null);
+    setShowConvDropdown(false);
+    if (conversationProjectId) setMessages([]);
+  }, [conversationStorageKey, conversationProjectId, open]);
+
   // Load conversation list when panel opens; also resolve activeConvId title
   useEffect(() => {
     if (!open) return;
-    listConversations('active').then((arr) => {
+    listConversations('active', conversationProjectId).then((arr) => {
       setConversations(arr);
       if (activeConvId) {
         const conv = arr.find((c) => c.id === activeConvId);
@@ -560,16 +579,15 @@ export function CopilotChat({ embedded = false, inputHeight }: { embedded?: bool
         }
       }
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, conversationProjectId, activeConvId]);
 
   // Persist activeConvId
   useEffect(() => {
     try {
-      if (activeConvId) localStorage.setItem('biof3_copilot_active_conv', activeConvId);
-      else localStorage.removeItem('biof3_copilot_active_conv');
+      if (activeConvId) localStorage.setItem(conversationStorageKey, activeConvId);
+      else localStorage.removeItem(conversationStorageKey);
     } catch {}
-  }, [activeConvId]);
+  }, [activeConvId, conversationStorageKey]);
 
   // PLAN_INLINE_v1 — when conversation changes (or on first open), fetch the
   // most recent active plan owned by this user. The server's plan tool keys
@@ -1140,7 +1158,7 @@ export function CopilotChat({ embedded = false, inputHeight }: { embedded?: bool
             fetchSummary().then(setSummary);
           }, 8000);
           // Refresh conversations list (message_count + updated_at moved, possibly auto-titled)
-          listConversations('active').then((arr) => {
+          listConversations('active', conversationProjectId).then((arr) => {
             setConversations(arr);
             // Pick up server-side auto-title if it just landed
             const cur = arr.find((c) => c.id === activeConvId);
@@ -1611,7 +1629,7 @@ export function CopilotChat({ embedded = false, inputHeight }: { embedded?: bool
             onClose={() => setShowSummary(false)}
             onChange={() => {
               fetchSummary().then(setSummary);
-              listConversations('active').then(setConversations);
+              listConversations('active', conversationProjectId).then(setConversations);
             }}
             activeConvId={activeConvId}
             onSwitchConversation={(id) => {
@@ -2141,7 +2159,7 @@ export function CopilotChat({ embedded = false, inputHeight }: { embedded?: bool
           onClose={() => setShowSummary(false)}
           onChange={() => {
             fetchSummary().then(setSummary);
-            listConversations('active').then(setConversations);
+            listConversations('active', conversationProjectId).then(setConversations);
           }}
           activeConvId={activeConvId}
           onSwitchConversation={(id) => {

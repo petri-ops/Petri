@@ -12,7 +12,7 @@ const INITIAL_STATUS: BackendStatus = {
   pyServerUp: false,
   plumberUp: false,
   isReady: false,
-  downReason: '检测中…',
+  downReason: '',
 };
 
 const Ctx = createContext<BackendStatus>(INITIAL_STATUS);

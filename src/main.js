@@ -515,12 +515,12 @@ function startContentSync() {
 // ── 主窗口 ─────────────────────────────────────────────────────
 let mainWindow = null;
 
-function createWindow() {
+async function createWindow() {
   // 阶段 3（desktop-spa）：主窗口加载 Vite SPA build 产物
-  // Vite SPA 在 frontend/dist，base './'，无 baseUrl 前缀
+  // Vite SPA 在 frontend/dist，base '/'，无 baseUrl 前缀
   const spaBuildDir = resolveResource('frontend', 'dist');
   const spaIndexPath = path.join(spaBuildDir, 'index.html');
-  const spaServerUrl = 'http://localhost:3002/';
+  let spaServerUrl = null;
 
   // Docusaurus build 产物（docs/blog iframe 过渡用）
   // 桌面端已移除教程入口，docs-server 不再启动。
@@ -528,15 +528,21 @@ function createWindow() {
   // const docusaurusBuildDir = resolveResource('build');
   // const docusaurusServerUrl = 'http://localhost:3003/BioF3/';
 
-  // 启动 Vite SPA 静态服务器（:3002，无 baseUrl 前缀，SPA fallback）
+  // 启动 Vite SPA 静态服务器。若默认端口已被占用，回退到系统分配的
+  // 空闲端口，并在服务真正开始监听后再加载窗口。
   try {
     const { startStaticServer } = require('./static-server');
-    startStaticServer(spaBuildDir, {
+    const spaServer = await startStaticServer(spaBuildDir, {
       port: 3002,
       baseUrl: '/',
       label: 'spa-server',
       spaFallback: true,
+      fallbackToRandomPort: true,
     });
+    const address = spaServer?.address();
+    if (typeof address === 'object' && address) {
+      spaServerUrl = `http://localhost:${address.port}/`;
+    }
   } catch (e) {
     console.warn('[desktop] SPA static server failed:', e.message);
   }
@@ -562,8 +568,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1600,
     height: 1000,
-    minWidth: 1280,
-    minHeight: 800,
+    minWidth: 720,
+    minHeight: 520,
     title: 'BioF3',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -573,7 +579,7 @@ function createWindow() {
   });
 
   // 加载 Vite SPA（优先）；不存在则回退 Docusaurus build；再否则 dev server
-  if (fs.existsSync(spaIndexPath)) {
+  if (fs.existsSync(spaIndexPath) && spaServerUrl) {
     mainWindow.loadURL(spaServerUrl);
   } else {
     // 开发模式：加载 Vite dev server
@@ -594,7 +600,7 @@ function createWindow() {
   // 拦截主窗口导航：只允许在本地服务器范围内跳转，防止意外导航到
   // 外部 URL 或 file:// 导致白屏/弹窗
   mainWindow.webContents.on('will-navigate', (event, url) => {
-    const allowed = ['http://localhost:3002', 'http://localhost:3000'];
+    const allowed = [spaServerUrl?.replace(/\/$/, ''), 'http://localhost:3000'].filter(Boolean);
     if (!allowed.some((a) => url.startsWith(a))) {
       event.preventDefault();
       if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -603,8 +609,28 @@ function createWindow() {
     }
   });
 
-  // 开发模式打开 DevTools
-  if (process.argv.includes('--dev')) {
+  // 桌面稳定性：拦截 Cmd/Ctrl+R，避免 Electron 硬 reload 断开 SSE、丢失
+  // renderer 内存状态，并造成“前端刷新后后端像断开”的体感。
+  // Cmd/Ctrl+R 改为应用内软刷新；Cmd/Ctrl+Shift+R 保留为开发者硬刷新。
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    const isReloadKey =
+      input.key &&
+      input.key.toLowerCase() === 'r' &&
+      (input.meta || input.control) &&
+      !input.alt;
+    if (!isReloadKey) return;
+    event.preventDefault();
+    if (input.shift) {
+      console.log('[desktop] hard reload requested');
+      mainWindow.webContents.reloadIgnoringCache();
+      return;
+    }
+    console.log('[desktop] soft refresh requested');
+    mainWindow.webContents.send('app:soft-refresh');
+  });
+
+  // DevTools 仅在显式需要时打开，避免日常启动打断工作台。
+  if (process.env.BIOF3_OPEN_DEVTOOLS === '1') {
     mainWindow.webContents.openDevTools();
   }
 
@@ -1223,17 +1249,41 @@ function setupFileDialogIpc() {
     }
   });
 
-  ipcMain.handle('file:open-dialog', async (event, filters) => {
+  ipcMain.handle('file:open-dialog', async (event, optionsOrFilters) => {
     if (!mainWindow) return null;
     try {
+      const isOptions =
+        optionsOrFilters &&
+        typeof optionsOrFilters === 'object' &&
+        !Array.isArray(optionsOrFilters);
+      const filters = isOptions ? optionsOrFilters.filters : optionsOrFilters;
+      const properties = isOptions && optionsOrFilters.openDirectory
+        ? ['openDirectory', 'createDirectory']
+        : ['openFile'];
       const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
         filters: Array.isArray(filters) ? filters : [],
-        properties: ['openFile'],
+        properties,
       });
       return canceled ? null : filePaths[0];
     } catch (e) {
       console.error('[desktop] open dialog failed:', e.message);
       return null;
+    }
+  });
+
+  ipcMain.handle('file:open-path', async (_event, targetPath) => {
+    try {
+      if (!targetPath || typeof targetPath !== 'string') {
+        return { ok: false, error: 'invalid path' };
+      }
+      if (!fs.existsSync(targetPath)) {
+        fs.mkdirSync(targetPath, { recursive: true });
+      }
+      const error = await shell.openPath(targetPath);
+      return error ? { ok: false, error } : { ok: true };
+    } catch (e) {
+      console.error('[desktop] open path failed:', e.message);
+      return { ok: false, error: e.message };
     }
   });
 }
@@ -1494,22 +1544,14 @@ async function main() {
   setupCsp();
 
   // 6. 创建窗口
-  createWindow();
+  await createWindow();
 }
 
 app.whenReady().then(main);
 
 app.on('window-all-closed', () => {
-  // 清理 idle 计时 + 所有子进程（M2-7：py/plumber 按需起的也要 stop）
-  _clearPyIdleTimer();
-  _clearPlumberIdleTimer();
-  for (const proc of [rServerProc, pyServerProc, plumberProc]) {
-    if (proc) {
-      try {
-        proc.kill();
-      } catch {}
-    }
-  }
+  // macOS 关闭最后一个窗口后应用仍驻留，后端也应继续在线；否则从 Dock
+  // 重新打开时只会重建前端窗口，形成“前端在、后端断开”的状态。
   if (process.platform !== 'darwin') {
     app.quit();
   }
@@ -1517,11 +1559,15 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
   if (mainWindow === null) {
-    createWindow();
+    createWindow().catch((err) => {
+      console.error('[desktop] window recreation failed:', err);
+    });
   }
 });
 
 app.on('before-quit', () => {
+  _clearPyIdleTimer();
+  _clearPlumberIdleTimer();
   for (const proc of [rServerProc, pyServerProc, plumberProc]) {
     if (proc) {
       try {

@@ -1,9 +1,8 @@
 // BioF3 桌面版原生 shell — App 根组件
-// dock + 路由出口 + 首次启动引导
+// 路由出口 + 首次启动引导
 
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { DesktopToolbar } from '@/components/desktop/DesktopToolbar';
 import { DesktopOnboarding } from '@/components/desktop/DesktopOnboarding';
 import { BackendStatusProvider } from '@/components/backend/BackendStatusProvider';
 import { BackendDownBanner } from '@/components/backend/BackendDownBanner';
@@ -22,12 +21,14 @@ import { CopilotChat } from '@/components/copilot/CopilotChat';
 import { CopilotSelectionTip } from '@/components/copilot/CopilotSelectionTip';
 import '@/components/copilot/copilotActRegistryBoot';
 import { ProjectWorkspace } from '@/pages/project-workspace';
+import '@/components/desktop/desktop.css';
 // 断点6：注入平台 API 给 @biof3/shared 渲染层组件（ActResultCard/CopilotResultPanel/copilotActRegistry）
 import { configureApi } from '../../vendor/biof3-core/packages/shared-copilot/api-inject';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 configureApi({ getApiPrefix: () => getApiPrefix(), getToken });
 
 const ONBOARDING_FLAG = 'biof3-onboarding-completed';
+const THEME_STORAGE_KEY = 'biof3-theme';
 
 function DesktopOnboardingMount(): React.ReactElement | null {
   const [show, setShow] = useState(false);
@@ -49,10 +50,45 @@ function DesktopOnboardingMount(): React.ReactElement | null {
 }
 
 export default function App(): React.ReactElement {
+  useEffect(() => {
+    const html = document.documentElement;
+    html.classList.add('biof3-desktop');
+    html.classList.remove('biof3-desktop-dock-collapsed');
+    document.body.style.paddingLeft = '0';
+    document.body.style.boxSizing = 'border-box';
+
+    const applyTheme = (theme: 'light' | 'dark') => {
+      html.setAttribute('data-theme', theme);
+    };
+
+    let savedTheme: 'light' | 'dark' | null = null;
+    try {
+      const raw = localStorage.getItem(THEME_STORAGE_KEY);
+      if (raw === 'light' || raw === 'dark') savedTheme = raw;
+    } catch {
+      savedTheme = null;
+    }
+
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    applyTheme(savedTheme || (media.matches ? 'dark' : 'light'));
+
+    const onChange = () => {
+      try {
+        const raw = localStorage.getItem(THEME_STORAGE_KEY);
+        if (raw === 'light' || raw === 'dark') return;
+      } catch {
+        // ignore and follow system
+      }
+      applyTheme(media.matches ? 'dark' : 'light');
+    };
+
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
+
   return (
     <BackendStatusProvider>
       <BackendDownBanner />
-      <DesktopToolbar />
       <main className="biof3-spa-main">
         <Routes>
           {/* 阶段 1：8 个应用页面全部移植完成 */}

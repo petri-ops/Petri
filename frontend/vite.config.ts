@@ -156,7 +156,9 @@ export default defineConfig({
     }),
     react(),
   ],
-  base: './',
+  // 桌面端通过本地 HTTP 根路径托管。使用绝对根路径可保证
+  // /project/:id 等深层路由直接刷新时仍从 /assets 加载资源。
+  base: '/',
   // 静态资源根：指向 desktop 仓根 static/，让 docs/blog 里的 /img/... 路径
   // 直接解析到 static/img/...（Docusaurus 的 static 目录约定）
   // 分仓后 frontend/ 在 desktop/frontend/（一层深），只需往上一层到 desktop/

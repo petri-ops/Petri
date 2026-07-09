@@ -13,6 +13,7 @@ export interface Project {
   createdAt: string;
   updatedAt: string;
   modality?: ProjectModality;
+  workspacePath?: string;
 }
 
 export interface ToolJob {

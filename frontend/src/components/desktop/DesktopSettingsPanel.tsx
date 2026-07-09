@@ -11,6 +11,19 @@ interface Props {
   onClose: () => void;
 }
 
+interface ChatModelPreset {
+  id: string;
+  label: string;
+  provider: string;
+  model: string;
+  baseUrl?: string;
+  apiKey?: string;
+}
+
+const DEFAULT_CHAT_MODEL_PRESETS: ChatModelPreset[] = [
+  { id: 'deepseek-chat', label: 'DeepSeek Chat', provider: 'deepseek', model: 'deepseek-chat' },
+];
+
 /** UpdateChecker — 检查应用更新（electron-updater 前端 UI） */
 function UpdateChecker(): React.ReactElement | null {
   const [checking, setChecking] = useState(false);
@@ -247,6 +260,8 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   const [dashscopeKey, setDashscopeKey] = useState('');
   const [chatProvider, setChatProvider] = useState('deepseek');
   const [embedProvider, setEmbedProvider] = useState('dashscope');
+  const [chatModelPresets, setChatModelPresets] = useState<ChatModelPreset[]>(DEFAULT_CHAT_MODEL_PRESETS);
+  const [activeChatModelId, setActiveChatModelId] = useState(DEFAULT_CHAT_MODEL_PRESETS[0].id);
   // M2-3：错误遥测开关（默认关闭）
   const [telemetryEnabled, setTelemetryEnabled] = useState(false);
 
@@ -260,6 +275,13 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     setSettings(s);
     setChatProvider((s.chat_provider as string) || 'deepseek');
     setEmbedProvider((s.embed_provider as string) || 'dashscope');
+    const presets = Array.isArray(s.chat_model_presets)
+      ? (s.chat_model_presets as ChatModelPreset[]).filter((p) => p?.id && p?.model)
+      : [];
+    const nextPresets = presets.length > 0 ? presets : DEFAULT_CHAT_MODEL_PRESETS;
+    const nextActive = String(s.active_chat_model_id || nextPresets[0].id);
+    setChatModelPresets(nextPresets);
+    setActiveChatModelId(nextPresets.some((p) => p.id === nextActive) ? nextActive : nextPresets[0].id);
     setTelemetryEnabled(s.telemetry_enabled === true);
   }
 
@@ -272,6 +294,8 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
       dashscope_api_key: dashscopeKey || undefined,
       llm_provider: chatProvider,
       embed_provider: embedProvider,
+      chat_model_presets: chatModelPresets,
+      active_chat_model_id: activeChatModelId,
       telemetry_enabled: telemetryEnabled,
     });
     setSaving(false);
@@ -309,6 +333,34 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
 
   const isConfigured = (key: string) => !!settings[`${key}_configured`];
 
+  function updatePreset(index: number, patch: Partial<ChatModelPreset>) {
+    setChatModelPresets((prev) => {
+      const next = prev.map((item, i) => (i === index ? { ...item, ...patch } : item));
+      return next.map((item) => ({
+        ...item,
+        id: item.id || `${item.provider || 'provider'}-${item.model || Date.now()}`,
+      }));
+    });
+  }
+
+  function addPreset() {
+    const id = `model-${Date.now()}`;
+    setChatModelPresets((prev) => [
+      ...prev,
+      { id, label: '自定义模型', provider: chatProvider || 'deepseek', model: 'deepseek-chat' },
+    ]);
+    setActiveChatModelId(id);
+  }
+
+  function removePreset(id: string) {
+    setChatModelPresets((prev) => {
+      const next = prev.filter((item) => item.id !== id);
+      const safe = next.length > 0 ? next : DEFAULT_CHAT_MODEL_PRESETS;
+      if (activeChatModelId === id) setActiveChatModelId(safe[0].id);
+      return safe;
+    });
+  }
+
   return (
     <div className="biof3-desktop-panel" role="dialog" aria-label="设置">
       <div className="biof3-desktop-panel__header">
@@ -341,6 +393,69 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
             <option value="openai">OpenAI（未来支持）</option>
             <option value="ollama">Ollama 本地模型（未来支持）</option>
           </select>
+        </div>
+
+        <div className="biof3-field">
+          <label className="biof3-field__label">Chat 模型预设</label>
+          <div style={{ display: 'grid', gap: 8 }}>
+            {chatModelPresets.map((preset, index) => (
+              <div key={preset.id} className="biof3-input-row" style={{ alignItems: 'center' }}>
+                <input
+                  className="biof3-input"
+                  value={preset.label}
+                  onChange={(e) => updatePreset(index, { label: e.target.value })}
+                  placeholder="显示名称"
+                />
+                <input
+                  className="biof3-input"
+                  value={preset.provider}
+                  onChange={(e) => updatePreset(index, { provider: e.target.value })}
+                  placeholder="provider"
+                />
+                <input
+                  className="biof3-input"
+                  value={preset.model}
+                  onChange={(e) => updatePreset(index, { model: e.target.value })}
+                  placeholder="model"
+                />
+                <input
+                  type="password"
+                  className="biof3-input"
+                  value={preset.apiKey || ''}
+                  onChange={(e) => updatePreset(index, { apiKey: e.target.value })}
+                  placeholder="可选 API Key"
+                />
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
+                  <input
+                    type="radio"
+                    name="active-chat-model"
+                    checked={activeChatModelId === preset.id}
+                    onChange={() => {
+                      setActiveChatModelId(preset.id);
+                      setChatProvider(preset.provider);
+                    }}
+                  />
+                  默认
+                </label>
+                <button
+                  type="button"
+                  className="biof3-btn biof3-btn--ghost biof3-btn--sm"
+                  onClick={() => removePreset(preset.id)}
+                  disabled={chatModelPresets.length <= 1}
+                >
+                  删除
+                </button>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 8 }}>
+            <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={addPreset}>
+              添加模型预设
+            </button>
+          </div>
+          <p className="biof3-field__hint">
+            这里配置会话区右上角的模型列表。当前阶段 provider 复用下方 API Key；DeepSeek 默认模型为 deepseek-chat。
+          </p>
         </div>
 
         <div className="biof3-field">

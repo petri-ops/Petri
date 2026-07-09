@@ -12,8 +12,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getToken, getApiPrefix, getStoredUser, isLoggedIn } from '@/lib/authClient';
 import { Icon } from '@/components/icons/Icon';
-import { tools, toolCategories } from '@/pages/_data';
-import type { Tool } from '@/pages/_data';
+import { tools } from '@/pages/_data';
 import { TOOL_IMAGES } from '@/pages/_tool-images';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
 import { listProjects, createProject } from '@/lib/project-store';
@@ -77,6 +76,13 @@ function formatTime(ts: number): string {
   return `${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
+function formatProjectTime(ts?: string): string {
+  if (!ts) return '刚创建';
+  const time = new Date(ts).getTime();
+  if (Number.isNaN(time)) return '最近更新';
+  return formatTime(time);
+}
+
 function statusLabel(s: string): string {
   const map: Record<string, string> = {
     completed: '已完成',
@@ -95,7 +101,13 @@ function statusClass(s: string): string {
   return '';
 }
 
-export function DesktopDashboard(): React.ReactElement {
+export function DesktopDashboard({
+  embedded = false,
+  activeProject = null,
+}: {
+  embedded?: boolean;
+  activeProject?: Project | null;
+} = {}): React.ReactElement {
   const [recentJobs, setRecentJobs] = useState<Job[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -304,6 +316,49 @@ export function DesktopDashboard(): React.ReactElement {
   }, [fetchProjects]);
 
   const quickToolList = tools.filter((t) => QUICK_TOOLS.includes(t.id));
+  const sortedProjects = useMemo(
+    () =>
+      [...projects].sort((a, b) => {
+        const bt = new Date(b.updatedAt || b.createdAt || 0).getTime();
+        const at = new Date(a.updatedAt || a.createdAt || 0).getTime();
+        return bt - at;
+      }),
+    [projects]
+  );
+  const recentProject = sortedProjects[0] || null;
+  const runningJobs = useMemo(
+    () => recentJobs.filter((job) => ['running', 'pending', 'uploading'].includes(job.status)).length,
+    [recentJobs]
+  );
+  const focusProject = activeProject || recentProject;
+  const focusProjectJobs = useMemo(
+    () =>
+      focusProject
+        ? recentJobs.filter((job) => job.project_id === focusProject.id)
+        : [],
+    [focusProject, recentJobs]
+  );
+  const focusProjectRunning = focusProjectJobs.filter((job) =>
+    ['running', 'pending', 'uploading'].includes(job.status)
+  ).length;
+  const focusProjectDone = focusProjectJobs.filter((job) => job.status === 'completed').length;
+  const latestFocusJob = focusProjectJobs[0] || null;
+  const handleOpenSearch = useCallback(() => {
+    const targetProject = focusProject || sortedProjects[0] || null;
+    if (targetProject) {
+      navigate(`/project/${targetProject.id}?mode=search`);
+      return;
+    }
+    setShowNewProject(true);
+  }, [focusProject, navigate, sortedProjects]);
+  const handleOpenScheduled = useCallback(() => {
+    const targetProject = focusProject || sortedProjects[0] || null;
+    if (targetProject) {
+      navigate(`/project/${targetProject.id}?mode=scheduled`);
+      return;
+    }
+    navigate('/tools');
+  }, [focusProject, navigate, sortedProjects]);
 
   // M2-1：就绪灯颜色
   const readyColor = backendStatus.isReady
@@ -314,228 +369,326 @@ export function DesktopDashboard(): React.ReactElement {
   const readyLabel = backendStatus.isReady ? '后端就绪' : backendStatus.downReason || '检测中…';
 
   return (
-    <div className={styles.dashboard}>
-      <header className={styles.header}>
+    <div className={`${styles.dashboard} ${embedded ? styles.dashboardEmbedded : ''}`}>
+      <header className={`${styles.topbar} ${embedded ? styles.topbarEmbedded : ''}`}>
         <div className={styles.headerCopy}>
-          <h1 className={styles.title}>{user ? `欢迎回来，${user.username}` : '欢迎回来'}</h1>
-          <p className={styles.subtitle}>继续上次的分析，或探索新的工具</p>
+          <div className={styles.headerEyebrow}>工作台</div>
+          <h1 className={styles.title}>
+            {embedded
+              ? activeProject?.name || '工作台'
+              : user
+                ? `${user.username} 的项目空间`
+                : '项目空间'}
+          </h1>
+          <p className={styles.subtitle}>
+            {embedded
+              ? '继续当前项目，查看运行记录、结果和下一步分析。'
+              : '从最近的项目继续，或直接创建新的分析工作区。'}
+          </p>
         </div>
         <div className={styles.headerSearch}>
-          {/* M2-1：顶栏状态条——就绪灯 / 数据目录 / 更新红点 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginRight: '12px' }}>
-            <span
-              title={readyLabel}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                fontSize: '12px',
-                color: 'var(--biof3-text-muted, #5c6b64)',
-              }}
-            >
-              <span
-                style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  background: readyColor,
-                  display: 'inline-block',
-                  boxShadow: `0 0 6px ${readyColor}`,
-                }}
-              />
-              {readyLabel}
-            </span>
-            {dataDir && (
-              <button
-                type="button"
-                onClick={() => window.biof3Desktop?.data?.openDir()}
-                title={dataDir}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  fontSize: '12px',
-                  color: 'var(--biof3-text-muted, #5c6b64)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: 0,
-                  maxWidth: '160px',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                📁 {dataDir.split('/').pop()}
-              </button>
-            )}
-            {/* M2-8：导出我的数据 */}
-            <button
-              type="button"
-              onClick={handleExportData}
-              disabled={exporting}
-              title="将数据目录（数据库 + 结果 + 上传文件）打包成 zip 导出"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                fontSize: '12px',
-                color: 'var(--biof3-text-muted, #5c6b64)',
-                background: 'none',
-                border: '1px solid var(--biof3-border, #e2e8f0)',
-                borderRadius: '6px',
-                cursor: exporting ? 'wait' : 'pointer',
-                padding: '3px 8px',
-                opacity: exporting ? 0.6 : 1,
-              }}
-            >
-              {exporting ? '⏳ 导出中…' : '📤 导出我的数据'}
-            </button>
-            {exportMsg && (
-              <span
-                style={{
-                  fontSize: '11px',
-                  color: 'var(--biof3-text-muted, #5c6b64)',
-                  maxWidth: '200px',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-                title={exportMsg}
-              >
-                {exportMsg}
-              </span>
-            )}
-            {hasUpdate && (
-              <button
-                type="button"
-                onClick={() => setUpdOpen(true)}
-                title={`有新版本 ${updateVersion}，点击下载并重启`}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  fontSize: '12px',
-                  color: '#dc2626',
-                  fontWeight: 600,
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: 0,
-                }}
-              >
-                <span
-                  style={{
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    background: '#dc2626',
-                    display: 'inline-block',
-                  }}
-                />
-                有更新
-              </button>
-            )}
-          </div>
           <button
             className={styles.searchBtn}
-            onClick={() => window.dispatchEvent(new CustomEvent('biof3:open-search'))}
+            onClick={handleOpenSearch}
           >
-            <Icon name="search" size={18} />
-            <span>搜索教程、工具、结果…</span>
+            <Icon name="search" size={16} />
+            <span>搜索项目、工具、结果</span>
             <kbd className={styles.kbd}>⌘K</kbd>
+          </button>
+          <button className={styles.primaryBtn} onClick={() => setShowNewProject(true)}>
+            <Icon name="plus" size={16} />
+            <span>创建项目</span>
           </button>
         </div>
       </header>
 
-      {/* M2-8：首次提示"建议定期备份" */}
-      {!backupPromptDismissed && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            padding: '12px 16px',
-            marginBottom: '16px',
-            background: 'var(--biof3-surface-warn, #fef3c7)',
-            borderRadius: '10px',
-            border: '1px solid #f59e0b',
-          }}
+      <div className={`${styles.commandRow} ${embedded ? styles.commandRowEmbedded : ''}`}>
+        <span className={styles.commandChip} title={readyLabel}>
+          <span className={styles.commandDot} style={{ background: readyColor, boxShadow: `0 0 6px ${readyColor}` }} />
+          {readyLabel}
+        </span>
+        <span className={styles.commandChip}>
+          <Icon name="folder" size={14} />
+          <strong>{sortedProjects.length}</strong>
+          <span>项目</span>
+        </span>
+        <button type="button" className={styles.commandChipBtn} onClick={handleOpenScheduled}>
+          <Icon name="clock" size={14} />
+          <strong>{runningJobs}</strong>
+          <span>运行中</span>
+        </button>
+        {dataDir && (
+          <button
+            type="button"
+            className={styles.commandChipBtn}
+            onClick={() => window.biof3Desktop?.data?.openDir()}
+            title={dataDir}
+          >
+            <Icon name="folder" size={14} />
+            <span className={styles.commandPath}>{dataDir}</span>
+          </button>
+        )}
+        <button
+          type="button"
+          className={styles.commandChipBtn}
+          onClick={handleExportData}
+          disabled={exporting}
+          title="将数据目录（数据库 + 结果 + 上传文件）打包成 zip 导出"
         >
-          <span style={{ fontSize: '18px' }}>💡</span>
-          <div style={{ flex: 1, fontSize: '13px' }}>
-            <strong>建议定期备份你的数据</strong>
-            <span style={{ marginLeft: '8px', color: 'var(--biof3-text-muted, #5c6b64)' }}>
-              点击"导出我的数据"将数据库、分析结果与上传文件打包成 zip，保存到安全位置。
-            </span>
-          </div>
+          <Icon name="download" size={14} />
+          <span>{exporting ? '导出中…' : '导出数据'}</span>
+        </button>
+        {hasUpdate && (
           <button
             type="button"
-            onClick={() => setBackupPromptDismissed(true)}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '16px',
-              color: 'var(--biof3-text-muted, #5c6b64)',
-              padding: 0,
-            }}
-            title="关闭提示"
+            className={`${styles.commandChipBtn} ${styles.commandChipWarn}`}
+            onClick={() => setUpdOpen(true)}
+            title={`有新版本 ${updateVersion}，点击下载并重启`}
           >
-            ×
+            <Icon name="download" size={14} />
+            <span>更新 {updateVersion || ''}</span>
           </button>
-        </div>
-      )}
+        )}
+        {exportMsg && <span className={styles.commandNotice} title={exportMsg}>{exportMsg}</span>}
+      </div>
 
-      {/* 我的项⽬ — UI-REFACTOR Phase2：项目制⾸⻚ */}
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>
-          <Icon name="folder" size={18} />
-          我的项⽬
-          <button
-            type="button"
-            className={styles.emptyCta}
-            style={{ marginLeft: 'auto', fontSize: '13px', padding: '4px 12px' }}
-            onClick={() => setShowNewProject(true)}
-          >
-            + 新建项⽬
-          </button>
-        </h2>
-        {loadingProjects ? (
-          <div className={styles.emptyState}><p>加载中…</p></div>
-        ) : projects.length === 0 ? (
-          <div className={styles.emptyState}>
-            <p>还没有项⽬，创建⼀个开始你的分析旅程</p>
-            <button className={styles.emptyCta} onClick={() => setShowNewProject(true)}>
-              创建第⼀个项⽬ →
-            </button>
-          </div>
-        ) : (
-          <div className={styles.toolGrid}>
-            {projects.map((p) => (
-              <Link
-                key={p.id}
-                className={styles.toolCard}
-                to={`/project/${p.id}`}
-                title={p.description || p.name}
-              >
-                <div
-                  className={styles.toolIconCircle}
-                  style={{ background: 'var(--biof3-accent, #0d9488)' }}
-                >
-                  <Icon name="folder" size={24} />
+      <div className={`${styles.workspaceGrid} ${embedded ? styles.workspaceGridEmbedded : ''}`}>
+        <div className={styles.primaryCol}>
+          {focusProject && (
+            <section className={`${styles.heroPanel} ${embedded ? styles.heroPanelEmbedded : ''}`}>
+              <div className={styles.heroMain}>
+                <div className={styles.heroBadge}>{embedded ? '当前项目' : '最近项目'}</div>
+                <h2 className={styles.heroTitle}>{focusProject.name}</h2>
+                <p className={styles.heroDesc}>
+                  {focusProject.description || '继续这个项目中的对话、结果浏览和后续分析。'}
+                </p>
+                <div className={styles.heroMeta}>
+                  <span>{focusProject.modality || 'general'}</span>
+                  <span>最近更新 {formatProjectTime(focusProject.updatedAt)}</span>
+                  {focusProject.workspacePath ? <span>{focusProject.workspacePath}</span> : null}
                 </div>
-                <div className={styles.toolMeta}>
-                  <span className={styles.toolName}>{p.name}</span>
-                  <span className={styles.toolDesc}>
-                    {p.description || p.modality || '⼀般分析'}
+              </div>
+              <div className={styles.heroAside}>
+                <div className={styles.heroStats}>
+                  <div className={styles.heroStat}>
+                    <span>最近任务</span>
+                    <strong>{focusProjectJobs.length}</strong>
+                  </div>
+                  <div className={styles.heroStat}>
+                    <span>运行中</span>
+                    <strong>{focusProjectRunning}</strong>
+                  </div>
+                  <div className={styles.heroStat}>
+                    <span>已完成</span>
+                    <strong>{focusProjectDone}</strong>
+                  </div>
+                </div>
+                <div className={styles.heroLatest}>
+                  <span className={styles.heroLatestLabel}>最新分析</span>
+                  <strong className={styles.heroLatestTitle}>
+                    {latestFocusJob?.name || latestFocusJob?.tool_id || '还没有分析记录'}
+                  </strong>
+                  <span className={styles.heroLatestMeta}>
+                    {latestFocusJob ? `${statusLabel(latestFocusJob.status)} · ${formatTime(latestFocusJob.created_at)}` : '从对话或工具开始第一次运行'}
                   </span>
                 </div>
+                <div className={styles.heroActions}>
+                  <button
+                    className={styles.primaryBtn}
+                    onClick={() => navigate(`/project/${focusProject.id}?mode=chat`)}
+                  >
+                    <Icon name="arrow-right" size={16} />
+                    <span>继续工作</span>
+                  </button>
+                  <button
+                    className={styles.secondaryBtn}
+                    onClick={() => navigate(`/project/${focusProject.id}?mode=scheduled`)}
+                  >
+                    <Icon name="clock" size={15} />
+                    <span>查看已安排</span>
+                  </button>
+                </div>
+              </div>
+            </section>
+          )}
+
+          <section className={styles.panel}>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>
+                <Icon name="folder" size={18} />
+                项目
+              </h2>
+              <button type="button" className={styles.secondaryBtn} onClick={() => setShowNewProject(true)}>
+                <Icon name="plus" size={14} />
+                <span>新建项目</span>
+              </button>
+            </div>
+
+            {loadingProjects ? (
+              <div className={styles.emptyState}><p>加载中…</p></div>
+            ) : sortedProjects.length === 0 ? (
+              <div className={styles.emptyState}>
+                <p>还没有项目，先创建一个工作区吧。</p>
+                <button className={styles.emptyCta} onClick={() => setShowNewProject(true)}>
+                  创建第一个项目
+                </button>
+              </div>
+            ) : (
+              <div className={styles.projectList}>
+                {sortedProjects.map((p) => (
+                  <Link key={p.id} className={styles.projectRow} to={`/project/${p.id}`} title={p.description || p.name}>
+                    <div className={styles.projectRowIcon}>
+                      <Icon name="folder" size={18} />
+                    </div>
+                    <div className={styles.projectRowBody}>
+                      <div className={styles.projectRowTitle}>{p.name}</div>
+                      <div className={styles.projectRowMeta}>
+                        <span>{p.description || p.modality || '一般分析'}</span>
+                        <span>更新于 {formatProjectTime(p.updatedAt)}</span>
+                        {p.workspacePath ? <span>{p.workspacePath}</span> : null}
+                      </div>
+                    </div>
+                    <span className={styles.projectRowAction}>打开</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className={styles.panel}>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>
+                <Icon name="clock" size={18} />
+                最近活动
+              </h2>
+              <Link className={styles.sectionLink} to="/tools">
+                查看全部
               </Link>
-            ))}
-          </div>
-        )}
-      </section>
+            </div>
+            {loadingJobs ? (
+              <div className={styles.emptyState}>
+                <div className={styles.spinner} />
+                加载中…
+              </div>
+            ) : recentJobs.length === 0 ? (
+              <div className={styles.emptyState}>
+                <p>暂无运行记录</p>
+                <Link className={styles.emptyCta} to="/tools">
+                  去工具页开始第一次分析
+                </Link>
+              </div>
+            ) : (
+              <div className={styles.timeline}>
+                {groupJobsByTime(recentJobs).map((group) => (
+                  <div key={group.label} className={styles.timelineGroup}>
+                    <div className={styles.timelineDateLabel}>{group.label}</div>
+                    <div className={styles.timelineItems}>
+                      {group.jobs.map((job) => {
+                        const tool = tools.find((t) => t.id === job.tool_id);
+                        const project = job.project_id
+                          ? projects.find((p) => p.id === job.project_id)
+                          : null;
+                        return (
+                          <Link
+                            key={job.id}
+                            className={styles.timelineItem}
+                            to={project ? `/project/${project.id}` : `/tools#${job.tool_id}`}
+                            title={project ? `项目：${project.name}` : undefined}
+                          >
+                            <span
+                              className={`${styles.timelineDot} ${statusClass(job.status)}`}
+                              title={statusLabel(job.status)}
+                            />
+                            <div className={styles.timelineContent}>
+                              <span className={styles.timelineTitle}>
+                                {job.name || tool?.title || job.tool_id}
+                              </span>
+                              <span className={styles.timelineMeta}>
+                                {formatTime(job.created_at)}
+                                {project ? ` · ${project.name}` : ''}
+                              </span>
+                            </div>
+                            <span className={`${styles.jobStatusBadge} ${statusClass(job.status)}`}>
+                              {statusLabel(job.status)}
+                            </span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+
+        <aside className={styles.sideCol}>
+          <section className={styles.panel}>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>
+                <Icon name="zap" size={18} />
+                快速开始
+              </h2>
+            </div>
+            <div className={styles.toolGrid}>
+              {quickToolList.map((t) => (
+                <Link key={t.id} className={styles.toolCard} to={`/tools#${t.id}`} title={t.title}>
+                  {TOOL_IMAGES[t.id] ? (
+                    <img
+                      src={TOOL_IMAGES[t.id]}
+                      alt={t.title}
+                      className={styles.toolCover}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className={styles.toolIconCircle} style={{ background: t.color }}>
+                      {t.title[0]}
+                    </div>
+                  )}
+                  <div className={styles.toolMeta}>
+                    <span className={styles.toolName}>{t.title}</span>
+                    <span className={styles.toolCat}>{t.category}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          <section className={styles.panel}>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>
+                <Icon name="shield" size={18} />
+                环境与数据
+              </h2>
+            </div>
+
+            {!backupPromptDismissed && (
+              <div className={styles.noticeCard}>
+                <div className={styles.noticeTitle}>建议定期备份你的数据</div>
+                <div className={styles.noticeBody}>将数据库、分析结果和上传文件打包导出，保存在安全位置。</div>
+                <div className={styles.noticeActions}>
+                  <button type="button" className={styles.secondaryBtn} onClick={handleExportData} disabled={exporting}>
+                    <span>{exporting ? '导出中…' : '立即导出'}</span>
+                  </button>
+                  <button type="button" className={styles.ghostBtn} onClick={() => setBackupPromptDismissed(true)}>
+                    知道了
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!backendStatus.rRuntime && (
+              <div className={styles.warnCard}>
+                <div className={styles.noticeTitle}>R 运行时未安装</div>
+                <div className={styles.noticeBody}>分析工具需要 R 运行时，安装完成后即可开始流程运行。</div>
+                <Link className={styles.sectionLink} to="/admin">
+                  去插件商店
+                </Link>
+              </div>
+            )}
+          </section>
+        </aside>
+      </div>
 
       {/* 新建项⽬对话框 */}
       {showNewProject && (
@@ -593,131 +746,6 @@ export function DesktopDashboard(): React.ReactElement {
             </div>
           </div>
         </div>
-      )}
-
-      {/* 快捷工具 */}
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>
-          <Icon name="zap" size={18} />
-          快速开始
-        </h2>
-        <div className={styles.toolGrid}>
-          {quickToolList.map((t) => (
-            <Link key={t.id} className={styles.toolCard} to={`/tools#${t.id}`} title={t.title}>
-              {TOOL_IMAGES[t.id] ? (
-                <img
-                  src={TOOL_IMAGES[t.id]}
-                  alt={t.title}
-                  className={styles.toolCover}
-                  loading="lazy"
-                />
-              ) : (
-                <div className={styles.toolIconCircle} style={{ background: t.color }}>
-                  {t.title[0]}
-                </div>
-              )}
-              <div className={styles.toolMeta}>
-                <span className={styles.toolName}>{t.title}</span>
-                <span className={styles.toolCat}>{t.category}</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* 最近活动时间线 — 2.3 */}
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>
-          <Icon name="clock" size={18} />
-          最近活动
-          <Link className={styles.sectionLink} to="/tools">
-            查看全部 →
-          </Link>
-        </h2>
-        {loadingJobs ? (
-          <div className={styles.emptyState}>
-            <div className={styles.spinner} />
-            加载中…
-          </div>
-        ) : recentJobs.length === 0 ? (
-          <div className={styles.emptyState}>
-            <p>暂无运行记录</p>
-            <Link className={styles.emptyCta} to="/tools">
-              去工具页开始第一次分析 →
-            </Link>
-          </div>
-        ) : (
-          <div className={styles.timeline}>
-            {groupJobsByTime(recentJobs).map((group) => (
-              <div key={group.label} className={styles.timelineGroup}>
-                <div className={styles.timelineDateLabel}>{group.label}</div>
-                <div className={styles.timelineItems}>
-                  {group.jobs.map((job) => {
-                    const tool = tools.find((t) => t.id === job.tool_id);
-                    const project = job.project_id
-                      ? projects.find((p) => p.id === job.project_id)
-                      : null;
-                    return (
-                      <Link
-                        key={job.id}
-                        className={styles.timelineItem}
-                        to={project ? `/project/${project.id}` : `/tools#${job.tool_id}`}
-                        title={project ? `项目：${project.name}` : undefined}
-                      >
-                        <span
-                          className={`${styles.timelineDot} ${statusClass(job.status)}`}
-                          title={statusLabel(job.status)}
-                        />
-                        <div className={styles.timelineContent}>
-                          <span className={styles.timelineTitle}>
-                            {job.name || tool?.title || job.tool_id}
-                          </span>
-                          <span className={styles.timelineMeta}>
-                            {formatTime(job.created_at)}
-                            {project ? ` · ${project.name}` : ''}
-                          </span>
-                        </div>
-                        <span
-                          className={`${styles.jobStatusBadge} ${statusClass(job.status)}`}
-                        >
-                          {statusLabel(job.status)}
-                        </span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* M2-1：未装运行时引导 */}
-      {!backendStatus.rRuntime && (
-        <section className={styles.section}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '16px',
-              background: 'var(--biof3-surface-warn, #fef3c7)',
-              borderRadius: '10px',
-              border: '1px solid #f59e0b',
-            }}
-          >
-            <span style={{ fontSize: '20px' }}>⚠️</span>
-            <div style={{ flex: 1 }}>
-              <strong style={{ display: 'block', marginBottom: '4px' }}>R 运行时未安装</strong>
-              <span style={{ fontSize: '13px', color: 'var(--biof3-text-muted, #5c6b64)' }}>
-                分析工具需要 R 运行时，去插件商店安装后即可开始
-              </span>
-            </div>
-            <Link className={styles.emptyCta} to="/admin" style={{ flexShrink: 0 }}>
-              去插件商店 →
-            </Link>
-          </div>
-        </section>
       )}
 
       {/* 推荐教程 — 桌面端已移除教程入口，此区块已删除。

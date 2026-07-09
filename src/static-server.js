@@ -4,7 +4,7 @@
  * 用原生 Node.js http 模块（不依赖 express）托管前端 build 产物。
  *
  * 阶段 3（desktop-spa）起支持双服务器：
- *   - Vite SPA build → :3002（主窗口，base './'，无 baseUrl 前缀）
+ *   - Vite SPA build → :3002（主窗口，base '/'，无 baseUrl 前缀）
  *   - Docusaurus build → :3003（docs/blog iframe 过渡，baseUrl=/BioF3/）
  *
  * loadFile（file://）无法正确解析绝对路径资源，故仍需 HTTP 协议。
@@ -51,13 +51,15 @@ function getMime(ext) {
  * @param {string} opts.baseUrl - 路径前缀，如 '/BioF3/'（Docusaurus）；Vite SPA 用 '/'
  * @param {string} opts.label - 日志标签
  * @param {boolean} opts.spaFallback - 未命中的路径是否回退 index.html（SPA 路由）
- * @returns {object|null} server 实例
+ * @param {boolean} opts.fallbackToRandomPort - 端口占用时是否回退到系统分配端口
+ * @returns {Promise<object|null>} server 实例
  */
-function startStaticServer(buildDir, opts = {}) {
+async function startStaticServer(buildDir, opts = {}) {
   const port = opts.port || 3002;
   const baseUrl = opts.baseUrl || '/';
   const label = opts.label || 'static-server';
   const spaFallback = opts.spaFallback !== false;
+  const fallbackToRandomPort = opts.fallbackToRandomPort === true;
 
   if (servers[port]) return servers[port];
   if (!fs.existsSync(buildDir)) {
@@ -154,11 +156,44 @@ function startStaticServer(buildDir, opts = {}) {
     fs.createReadStream(fullPath).pipe(res);
   });
 
-  servers[port] = server;
-  server.listen(port, '127.0.0.1', () => {
-    console.log(`[${label}] serving ${buildDir} on http://127.0.0.1:${port}`);
-  });
+  const listen = (listenPort) =>
+    new Promise((resolve, reject) => {
+      const onError = (err) => {
+        server.off('listening', onListening);
+        reject(err);
+      };
+      const onListening = () => {
+        server.off('error', onError);
+        resolve();
+      };
+      server.once('error', onError);
+      server.once('listening', onListening);
+      server.listen(listenPort, '127.0.0.1');
+    });
 
+  try {
+    await listen(port);
+  } catch (err) {
+    if (!fallbackToRandomPort || err?.code !== 'EADDRINUSE') {
+      console.error(`[${label}] server failed:`, err);
+      return null;
+    }
+    console.warn(`[${label}] port ${port} is occupied; selecting an available port`);
+    try {
+      await listen(0);
+    } catch (fallbackError) {
+      console.error(`[${label}] fallback server failed:`, fallbackError);
+      return null;
+    }
+  }
+
+  const address = server.address();
+  const actualPort = typeof address === 'object' && address ? address.port : port;
+  servers[actualPort] = server;
+  server.on('error', (err) => {
+    console.error(`[${label}] server error:`, err);
+  });
+  console.log(`[${label}] serving ${buildDir} on http://127.0.0.1:${actualPort}`);
   return server;
 }
 

@@ -6,16 +6,16 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
+  ackRunTool,
   streamChat,
-  getApiPrefix,
   type ChatMessage,
 } from './copilotClient';
 import {
   listConversations,
-  createConversation,
   getConversationMessages,
   type ConversationSummary,
 } from './copilotConversationsClient';
+import { getCopilotContext } from '@/lib/copilotContext';
 import { CopilotMarkdown } from './copilotMarkdown';
 import './simple-chat.css';
 import { Icon } from '@/components/icons/Icon';
@@ -26,7 +26,53 @@ interface SimpleMessage {
   pending?: boolean;
   error?: boolean;
   ts?: string;
+  resultCards?: SimpleResultCard[];
 }
+
+interface SimpleResultCard {
+  jobId: string;
+  toolId?: string;
+  title: string;
+  status: 'done' | 'failed';
+  projectId?: string | null;
+  error?: string;
+  artifacts?: Array<{
+    id?: string;
+    name?: string;
+    filename?: string;
+    type?: string;
+    label?: string;
+    title?: string;
+  }>;
+  files?: string[];
+  outputs?: Array<{
+    id?: string;
+    name?: string;
+    filename?: string;
+    type?: string;
+    label?: string;
+  }>;
+}
+
+interface PendingApproval {
+  ackToken: string;
+  toolJobId?: string;
+  toolId?: string;
+  message?: string;
+  params?: Record<string, unknown>;
+}
+
+interface ChatModelPreset {
+  id: string;
+  label: string;
+  provider: string;
+  model: string;
+  baseUrl?: string;
+}
+
+const DEFAULT_MODEL_PRESETS: ChatModelPreset[] = [
+  { id: 'deepseek-chat', label: 'DeepSeek Chat', provider: 'deepseek', model: 'deepseek-chat' },
+];
 
 export interface SimpleChatHandle {
   newConversation: () => void;
@@ -36,6 +82,7 @@ interface SimpleChatProps {
   projectId: string;
   conversationId: string | null;
   onConversationChange: (id: string | null) => void;
+  onOpenResult?: (jobId: string) => void;
   inputHeight?: number;
 }
 
@@ -43,6 +90,7 @@ export function SimpleChat({
   projectId,
   conversationId,
   onConversationChange,
+  onOpenResult,
   inputHeight = 120,
 }: SimpleChatProps): React.ReactElement {
   const [messages, setMessages] = useState<SimpleMessage[]>([]);
@@ -50,6 +98,11 @@ export function SimpleChat({
   const [streaming, setStreaming] = useState(false);
   const [loading, setLoading] = useState(false);
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  const [pendingApproval, setPendingApproval] = useState<PendingApproval | null>(null);
+  const [paramDraft, setParamDraft] = useState<Record<string, string>>({});
+  const [modelPresets, setModelPresets] = useState<ChatModelPreset[]>(DEFAULT_MODEL_PRESETS);
+  const [activeModelId, setActiveModelId] = useState(DEFAULT_MODEL_PRESETS[0].id);
+  const [modelMenuOpen, setModelMenuOpen] = useState(false);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -66,6 +119,36 @@ export function SimpleChat({
 
   useEffect(() => { refreshConversations(); }, [refreshConversations]);
 
+  const loadModelSettings = useCallback(async () => {
+    try {
+      const settings = await window.biof3Desktop?.aiSettings?.get?.();
+      const presets = Array.isArray(settings?.chat_model_presets)
+        ? (settings.chat_model_presets as ChatModelPreset[]).filter((p) => p?.id && p?.model)
+        : [];
+      const nextPresets = presets.length > 0 ? presets : DEFAULT_MODEL_PRESETS;
+      const nextActive = String(settings?.active_chat_model_id || nextPresets[0].id);
+      setModelPresets(nextPresets);
+      setActiveModelId(nextPresets.some((p) => p.id === nextActive) ? nextActive : nextPresets[0].id);
+    } catch {
+      setModelPresets(DEFAULT_MODEL_PRESETS);
+      setActiveModelId(DEFAULT_MODEL_PRESETS[0].id);
+    }
+  }, []);
+
+  useEffect(() => { loadModelSettings(); }, [loadModelSettings]);
+
+  useEffect(() => {
+    if (!pendingApproval?.params) {
+      setParamDraft({});
+      return;
+    }
+    const draft: Record<string, string> = {};
+    Object.entries(pendingApproval.params).forEach(([key, value]) => {
+      draft[key] = typeof value === 'string' ? value : JSON.stringify(value);
+    });
+    setParamDraft(draft);
+  }, [pendingApproval]);
+
   // Load messages when conversationId changes
   useEffect(() => {
     if (!conversationId) {
@@ -81,6 +164,7 @@ export function SimpleChat({
         role: m.role === 'system' ? 'assistant' : (m.role as 'user' | 'assistant'),
         content: m.content,
         ts: m.ts,
+        resultCards: m.role === 'assistant' ? parseResultCards(m.meta?.resultCards) : undefined,
       }));
       setMessages(ui);
       setLoading(false);
@@ -134,10 +218,15 @@ export function SimpleChat({
     tagged.push({ role: 'user', content: trimmed });
 
     let acc = '';
-    let convCreated = false;
 
     await streamChat({
       messages: tagged,
+      modelPresetId: activeModelId,
+      context: {
+        ...getCopilotContext(),
+        page: 'desktop-project',
+        projectId,
+      },
       signal: ctrl.signal,
       conversationId: activeConvRef.current || undefined,
       onDelta: (delta) => {
@@ -152,12 +241,45 @@ export function SimpleChat({
         });
       },
       onConversation: (info) => {
-        if (!convCreated && info.conversationId && !activeConvRef.current) {
-          convCreated = true;
+        if (info.conversationId && info.conversationId !== activeConvRef.current) {
           activeConvRef.current = info.conversationId;
           onConversationChange(info.conversationId);
           refreshConversations();
         }
+      },
+      onToolResult: (event) => {
+        if (event.name === 'run_tool' && event.needApproval && event.ackToken) {
+          setPendingApproval({
+            ackToken: event.ackToken,
+            toolJobId: event.toolJobId,
+            toolId: event.toolId,
+            message: event.message,
+            params: event.params,
+          });
+          return;
+        }
+        if (event.name !== 'run_tool' || !event.toolJobId || event.needApproval) return;
+        const toolId = event.toolId || 'analysis';
+        const card: SimpleResultCard = {
+          jobId: event.toolJobId,
+          toolId,
+          title: `${toolId} 分析结果`,
+          status: event.summary && event.summary.startsWith('错误') ? 'failed' : 'done',
+          projectId,
+          error: event.message || (event.summary && event.summary.startsWith('错误') ? event.summary : undefined),
+        };
+        setMessages((prev) => {
+          const copy = prev.slice();
+          const lastIdx = copy.length - 1;
+          const last = copy[lastIdx];
+          if (!last || last.role !== 'assistant') return prev;
+          if ((last.resultCards || []).some((item) => item.jobId === card.jobId)) return prev;
+          copy[lastIdx] = {
+            ...last,
+            resultCards: [...(last.resultCards || []), card],
+          };
+          return copy;
+        });
       },
       onDone: () => {
         setStreaming(false);
@@ -188,12 +310,58 @@ export function SimpleChat({
         });
       },
     });
-  }, [streaming, messages, onConversationChange, refreshConversations]);
+  }, [streaming, messages, onConversationChange, refreshConversations, projectId, activeModelId]);
+
+  // Keep a ref to the latest send so the global event listener (mounted once) always
+  // invokes the current closure without re-binding on every message change.
+  const sendRef = useRef(send);
+  useEffect(() => {
+    sendRef.current = send;
+  }, [send]);
+
+  // The embedded SimpleChat owns the agent now (global floating CopilotChat removed).
+  // Toolbox clicks / "explain current result" / chain recommendations dispatch this
+  // event with a ready-to-send prompt; we pick it up here and send it.
+  useEffect(() => {
+    const onAsk = (event: Event) => {
+      const detail = (event as CustomEvent<{ prompt?: string }>).detail || {};
+      const prompt = typeof detail.prompt === 'string' ? detail.prompt.trim() : '';
+      if (!prompt) return;
+      sendRef.current(prompt);
+    };
+    window.addEventListener('biof3:copilot-ask', onAsk as EventListener);
+    return () => window.removeEventListener('biof3:copilot-ask', onAsk as EventListener);
+  }, []);
 
   const stop = useCallback(() => {
     if (abortRef.current) abortRef.current.abort();
     setStreaming(false);
   }, []);
+
+  const approvePending = useCallback(async () => {
+    if (!pendingApproval || streaming) return;
+    const mergedParams: Record<string, unknown> = { ...(pendingApproval.params || {}) };
+    Object.entries(paramDraft).forEach(([key, value]) => {
+      try {
+        mergedParams[key] = JSON.parse(value);
+      } catch {
+        mergedParams[key] = value;
+      }
+    });
+    const { ackToken, toolId } = pendingApproval;
+    await ackRunTool(ackToken, true);
+    setPendingApproval(null);
+    send(
+      `用户已确认开始（ackToken=${ackToken}）。请重调 run_tool(op=run, toolId="${toolId ?? ''}", params=${JSON.stringify(mergedParams)}, ackToken="${ackToken}") 续跑该重操作。`
+    );
+  }, [paramDraft, pendingApproval, send, streaming]);
+
+  const rejectPending = useCallback(async () => {
+    if (!pendingApproval || streaming) return;
+    await ackRunTool(pendingApproval.ackToken, false);
+    setPendingApproval(null);
+    send('用户取消了该重操作，不要重试。请简短说明已取消，并给出如需继续时应调整哪些参数。');
+  }, [pendingApproval, send, streaming]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -213,6 +381,19 @@ export function SimpleChat({
   // parent controls conversationId directly.
 
   const currentConv = conversations.find((c) => c.id === conversationId);
+  const activeModel = modelPresets.find((p) => p.id === activeModelId) || modelPresets[0];
+  const selectModel = useCallback(async (preset: ChatModelPreset) => {
+    setActiveModelId(preset.id);
+    setModelMenuOpen(false);
+    try {
+      const settings = await window.biof3Desktop?.aiSettings?.get?.();
+      await window.biof3Desktop?.aiSettings?.save?.({
+        ...(settings || {}),
+        active_chat_model_id: preset.id,
+        llm_provider: preset.provider,
+      });
+    } catch {}
+  }, []);
 
   return (
     <div className="sc-root">
@@ -221,6 +402,36 @@ export function SimpleChat({
         <span className="sc-title">
           {currentConv?.title || '新对话'}
         </span>
+        <div className="sc-model-picker">
+          <button
+            type="button"
+            className="sc-model-btn"
+            onClick={() => setModelMenuOpen((value) => !value)}
+            title="选择会话模型"
+          >
+            <Icon name="cpu" size={15} />
+            <span>{activeModel?.label || activeModel?.model || 'DeepSeek Chat'}</span>
+            <Icon name="chevron-down" size={13} />
+          </button>
+          {modelMenuOpen && (
+            <>
+              <div className="sc-model-overlay" onClick={() => setModelMenuOpen(false)} />
+              <div className="sc-model-menu">
+                {modelPresets.map((preset) => (
+                  <button
+                    type="button"
+                    key={preset.id}
+                    className={`sc-model-option ${preset.id === activeModelId ? 'sc-model-option-active' : ''}`}
+                    onClick={() => selectModel(preset)}
+                  >
+                    <span className="sc-model-option-title">{preset.label || preset.model}</span>
+                    <span className="sc-model-option-meta">{preset.provider} · {preset.model}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Messages */}
@@ -246,13 +457,42 @@ export function SimpleChat({
             </div>
             <div className="sc-msg-body">
               {m.role === 'assistant' ? (
-                <CopilotMarkdown content={m.content || (m.pending ? '…' : '')} />
+                <>
+                  <CopilotMarkdown text={m.content || (m.pending ? '…' : '')} />
+                  {m.resultCards?.map((card) => (
+                    <ResultCard
+                      key={card.jobId}
+                      card={card}
+                      disabled={streaming}
+                      onOpenResult={onOpenResult}
+                      onContinue={() => {
+                        if (card.status === 'failed') {
+                          send(`这个分析任务失败了：${card.title}（toolJobId=${card.jobId}）。错误信息：${card.error || '未知错误'}。请帮我定位原因，给出可恢复方案，并告诉我应该如何调整参数后重试。`);
+                        } else {
+                          send(`请基于刚完成的 ${card.title}（toolJobId=${card.jobId}）解释结果，并推荐下一步分析。`);
+                        }
+                      }}
+                    />
+                  ))}
+                </>
               ) : (
                 <div className="sc-msg-text">{m.content}</div>
               )}
             </div>
           </div>
         ))}
+        {pendingApproval && (
+          <ApprovalCard
+            approval={pendingApproval}
+            paramDraft={paramDraft}
+            disabled={streaming}
+            onParamChange={(key, value) =>
+              setParamDraft((prev) => ({ ...prev, [key]: value }))
+            }
+            onApprove={approvePending}
+            onReject={rejectPending}
+          />
+        )}
       </div>
 
       {/* Input */}
@@ -282,6 +522,188 @@ export function SimpleChat({
             </button>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function parseResultCards(value: unknown): SimpleResultCard[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const cards = value
+    .map((item): SimpleResultCard | null => {
+      if (!item || typeof item !== 'object') return null;
+      const raw = item as Record<string, unknown>;
+      if (typeof raw.jobId !== 'string' || !raw.jobId) return null;
+      const toolId = typeof raw.toolId === 'string' && raw.toolId ? raw.toolId : undefined;
+      const title =
+        typeof raw.title === 'string' && raw.title
+          ? raw.title
+          : `${toolId || 'analysis'} 分析结果`;
+      const status = raw.status === 'failed' ? 'failed' : 'done';
+      const files = Array.isArray(raw.files)
+        ? raw.files.filter((file): file is string => typeof file === 'string')
+        : undefined;
+      const artifacts: SimpleResultCard['artifacts'] = [];
+      if (Array.isArray(raw.artifacts)) {
+        raw.artifacts.forEach((artifact) => {
+          if (!artifact || typeof artifact !== 'object') return;
+          const a = artifact as Record<string, unknown>;
+          artifacts.push({
+            id: typeof a.id === 'string' ? a.id : undefined,
+            name: typeof a.name === 'string' ? a.name : undefined,
+            filename: typeof a.filename === 'string' ? a.filename : undefined,
+            type: typeof a.type === 'string' ? a.type : undefined,
+            label: typeof a.label === 'string' ? a.label : undefined,
+            title: typeof a.title === 'string' ? a.title : undefined,
+          });
+        });
+      }
+      const outputs: SimpleResultCard['outputs'] = [];
+      if (Array.isArray(raw.outputs)) {
+        raw.outputs.forEach((output) => {
+          if (!output || typeof output !== 'object') return;
+          const o = output as Record<string, unknown>;
+          outputs.push({
+            id: typeof o.id === 'string' ? o.id : undefined,
+            name: typeof o.name === 'string' ? o.name : undefined,
+            filename: typeof o.filename === 'string' ? o.filename : undefined,
+            type: typeof o.type === 'string' ? o.type : undefined,
+            label: typeof o.label === 'string' ? o.label : undefined,
+          });
+        });
+      }
+      return {
+        jobId: raw.jobId,
+        toolId,
+        title,
+        status,
+        projectId: typeof raw.projectId === 'string' ? raw.projectId : null,
+        error: typeof raw.error === 'string' ? raw.error : undefined,
+        artifacts: artifacts.length ? artifacts : undefined,
+        files,
+        outputs: outputs.length ? outputs : undefined,
+      };
+    })
+    .filter((card): card is SimpleResultCard => Boolean(card));
+  return cards.length ? cards : undefined;
+}
+
+function ApprovalCard({
+  approval,
+  paramDraft,
+  disabled,
+  onParamChange,
+  onApprove,
+  onReject,
+}: {
+  approval: PendingApproval;
+  paramDraft: Record<string, string>;
+  disabled: boolean;
+  onParamChange: (key: string, value: string) => void;
+  onApprove: () => void;
+  onReject: () => void;
+}): React.ReactElement {
+  const paramEntries = Object.entries(paramDraft);
+  return (
+    <div className="sc-approval-card">
+      <div className="sc-approval-header">
+        <div className="sc-approval-icon">
+          <Icon name="shield" size={16} />
+        </div>
+        <div className="sc-approval-title-wrap">
+          <div className="sc-approval-title">参数确认</div>
+          <div className="sc-approval-sub">
+            {approval.toolId || 'analysis'}{approval.toolJobId ? ` · ${approval.toolJobId}` : ''}
+          </div>
+        </div>
+      </div>
+      <div className="sc-approval-message">
+        {approval.message || 'agent 准备执行一个正式分析任务，请确认参数后再开始。'}
+      </div>
+      {paramEntries.length > 0 && (
+        <div className="sc-approval-params">
+          {paramEntries.map(([key, value]) => (
+            <label key={key} className="sc-approval-param-row">
+              <span className="sc-approval-param-key">{key}</span>
+              <input
+                className="sc-approval-param-input"
+                value={value}
+                onChange={(event) => onParamChange(key, event.target.value)}
+                disabled={disabled}
+              />
+            </label>
+          ))}
+        </div>
+      )}
+      <div className="sc-approval-risk">
+        正式分析会写入项目任务记录，并生成可复现的参数、输入和结果产物。
+      </div>
+      <div className="sc-approval-actions">
+        <button
+          type="button"
+          className="sc-approval-btn sc-approval-approve"
+          onClick={onApprove}
+          disabled={disabled}
+        >
+          <Icon name="check" size={13} /> 确认开始
+        </button>
+        <button
+          type="button"
+          className="sc-approval-btn sc-approval-cancel"
+          onClick={onReject}
+          disabled={disabled}
+        >
+          <Icon name="x" size={13} /> 取消
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ResultCard({
+  card,
+  disabled,
+  onOpenResult,
+  onContinue,
+}: {
+  card: SimpleResultCard;
+  disabled: boolean;
+  onOpenResult?: (jobId: string) => void;
+  onContinue: () => void;
+}): React.ReactElement {
+  return (
+    <div className={`sc-result-card sc-result-card-${card.status}`}>
+      <div className="sc-result-main">
+        <div className="sc-result-icon">
+          <Icon name={card.status === 'done' ? 'bar-chart' : 'x'} size={16} />
+        </div>
+        <div className="sc-result-copy">
+          <div className="sc-result-title">{card.title}</div>
+          <div className="sc-result-meta">
+            {card.status === 'done' ? '结果已生成' : '分析失败'} · {card.jobId}
+          </div>
+          {card.status === 'failed' && card.error && (
+            <div className="sc-result-error">{card.error}</div>
+          )}
+        </div>
+      </div>
+      <div className="sc-result-actions">
+        <button
+          type="button"
+          className="sc-result-btn"
+          onClick={() => onOpenResult?.(card.jobId)}
+          disabled={!onOpenResult}
+        >
+          <Icon name="bar-chart" size={13} /> 查看结果
+        </button>
+        <button
+          type="button"
+          className="sc-result-btn sc-result-btn-secondary"
+          onClick={onContinue}
+          disabled={disabled}
+        >
+          <Icon name="message-circle" size={13} /> {card.status === 'failed' ? '排查修复' : '解释下一步'}
+        </button>
       </div>
     </div>
   );

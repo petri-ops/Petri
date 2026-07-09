@@ -10,6 +10,12 @@
 
 const { contextBridge, ipcRenderer } = require('electron');
 
+ipcRenderer.on('app:soft-refresh', () => {
+  try {
+    window.dispatchEvent(new CustomEvent('biof3:soft-refresh'));
+  } catch {}
+});
+
 // ============================================================
 // 注入 process.env.BIOF3_DESKTOP = '1' 到渲染进程
 // ============================================================
@@ -87,6 +93,8 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
   files: {
     saveDialog: (defaultName) => ipcRenderer.invoke('file:save-dialog', defaultName),
     openDialog: (filters) => ipcRenderer.invoke('file:open-dialog', filters),
+    openDirectoryDialog: () => ipcRenderer.invoke('file:open-dialog', { openDirectory: true }),
+    openPath: (targetPath) => ipcRenderer.invoke('file:open-path', targetPath),
   },
 
   // 诊断日志导出

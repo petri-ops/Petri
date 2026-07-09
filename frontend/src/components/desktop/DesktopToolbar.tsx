@@ -156,6 +156,7 @@ function DesktopToolbarInner(): React.ReactElement {
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
+  const isProjectWorkspace = currentPath.startsWith('/project/');
 
   // dock 项是否处于 active：直接跳转类看路由前缀，伞类看 activePanel
   const isDockActive = (item: DockItemConfig): boolean => {
@@ -188,6 +189,12 @@ function DesktopToolbarInner(): React.ReactElement {
   useEffect(() => {
     const html = document.documentElement;
     html.classList.add('biof3-desktop');
+    if (isProjectWorkspace) {
+      html.classList.remove('biof3-desktop-dock-collapsed');
+      document.body.style.paddingLeft = '0';
+      document.body.style.boxSizing = 'border-box';
+      return;
+    }
     if (dockCollapsed) {
       html.classList.add('biof3-desktop-dock-collapsed');
       document.body.style.paddingLeft = '28px';
@@ -196,7 +203,7 @@ function DesktopToolbarInner(): React.ReactElement {
       document.body.style.paddingLeft = '64px';
     }
     document.body.style.boxSizing = 'border-box';
-  }, [dockCollapsed]);
+  }, [dockCollapsed, isProjectWorkspace]);
 
   // 拖拽排序状态
   const [draggingId, setDraggingId] = useState<string | null>(null);
@@ -326,6 +333,8 @@ function DesktopToolbarInner(): React.ReactElement {
       localStorage.setItem(THEME_STORAGE_KEY, next);
     } catch {}
   };
+
+  if (isProjectWorkspace) return <></>;
 
   return (
     <>

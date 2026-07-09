@@ -105,12 +105,10 @@ declare global {
         stop: () => Promise<{ ok: boolean; wasRunning?: boolean }>;
       };
       files: {
-        saveDialog: (
-          defaultName?: string
-        ) => Promise<{ ok: boolean; path?: string; error?: string }>;
-        openDialog: (
-          filters?: unknown
-        ) => Promise<{ ok: boolean; paths?: string[]; error?: string }>;
+        saveDialog: (defaultName?: string) => Promise<string | null>;
+        openDialog: (filters?: unknown) => Promise<string | null>;
+        openDirectoryDialog: () => Promise<string | null>;
+        openPath: (targetPath: string) => Promise<{ ok: boolean; error?: string }>;
       };
       diagnostic: {
         export: (targetPath?: string) => Promise<{ ok: boolean; path?: string; error?: string }>;

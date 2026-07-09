@@ -5,48 +5,178 @@
 // ============================================================
 
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import { Icon } from '@/components/icons/Icon';
-import { getProject, listProjectJobs, listDatasetsByProject, listProjects } from '@/lib/project-store';
+import { getProject, listProjectJobs, listDatasetsByProject, listProjects, updateProject, createProject } from '@/lib/project-store';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 import { tools as staticTools } from '@/pages/_data';
 import { Lightbox } from '@/components/ui/Lightbox';
-import { CopilotChat } from '@/components/copilot/CopilotChat';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
 import { listConversations, createConversation, type ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import { setCopilotContext } from '@/lib/copilotContext';
 import { getNextSteps, buildChainPrompt, type ResolvedJob } from '@/lib/workflow-chains';
+import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
+import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
+import { DesktopDashboard } from '@/pages/_desktop-dashboard';
+import ToolsPage from '@/pages/tools';
+import FigCodePage from '@/pages/figcode';
 import styles from './project-workspace.module.css';
+import 'highlight.js/styles/github.css';
+
+const markdownSanitizeSchema = {
+  ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    code: [...(defaultSchema.attributes?.code || []), ['className']],
+    span: [...(defaultSchema.attributes?.span || []), ['className']],
+    div: [...(defaultSchema.attributes?.div || []), ['className']],
+  },
+};
+
+interface ActiveArtifact {
+  jobId: string;
+  toolId: string;
+  name: string;
+  type: string;
+  label?: string;
+  url?: string;
+}
+
+interface ActiveWorkspaceFile {
+  path: string;
+  name: string;
+  url: string;
+  size?: number;
+}
+
+type WorkspaceMode =
+  | 'cloud'
+  | 'chat'
+  | 'search'
+  | 'scheduled'
+  | 'tools'
+  | 'figcode'
+  | 'plugins'
+  | 'settings';
+
+const WORKSPACE_MODES: WorkspaceMode[] = [
+  'cloud',
+  'chat',
+  'search',
+  'scheduled',
+  'tools',
+  'figcode',
+  'plugins',
+  'settings',
+];
+
+function parseWorkspaceMode(value: string | null): WorkspaceMode | null {
+  if (!value) return null;
+  return WORKSPACE_MODES.includes(value as WorkspaceMode) ? (value as WorkspaceMode) : null;
+}
 
 export function ProjectWorkspace(): React.ReactElement {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [project, setProject] = useState<Project | null>(null);
   const [jobs, setJobs] = useState<ToolJob[]>([]);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [workspaceNotice, setWorkspaceNotice] = useState('');
+  const [workspaceMode, setWorkspaceMode] = useState<WorkspaceMode>(
+    () => parseWorkspaceMode(searchParams.get('mode')) || 'chat'
+  );
 
   // Panel collapse state
   const [leftOpen, setLeftOpen] = useState(true);
   const [rightOpen, setRightOpen] = useState(true); // file tree + results panel
-  const [settingsOpen, setSettingsOpen] = useState(false); // settings sidebar overlay
+  const [compactLayout, setCompactLayout] = useState(
+    () => window.matchMedia('(max-width: 960px)').matches
+  );
 
   // Selected result tab
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
+  const [activeArtifact, setActiveArtifact] = useState<ActiveArtifact | null>(null);
+  const [activeWorkspaceFile, setActiveWorkspaceFile] = useState<ActiveWorkspaceFile | null>(null);
+  const [openWorkspaceFiles, setOpenWorkspaceFiles] = useState<ActiveWorkspaceFile[]>([]);
 
   // Conversation state — current project's conversations + active conversation
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set([projectId || '']));
+  const [creatingProjectInline, setCreatingProjectInline] = useState(false);
+  const [newProjectName, setNewProjectName] = useState('');
+  const [newProjectDesc, setNewProjectDesc] = useState('');
+  const [creatingProject, setCreatingProject] = useState(false);
+  const [creatingConversationFor, setCreatingConversationFor] = useState<string | null>(null);
+  const [newConversationTitle, setNewConversationTitle] = useState('');
+  const [creatingConversation, setCreatingConversation] = useState(false);
+  const [workspaceSearchQuery, setWorkspaceSearchQuery] = useState('');
+  const [searchConversationIndex, setSearchConversationIndex] = useState<Record<string, ConversationSummary[]>>({});
 
   // Resizable panel dimensions
   const [leftWidth, setLeftWidth] = useState(240);
   const [rightWidth, setRightWidth] = useState(340);
   const [inputHeight, setInputHeight] = useState(120);
   const [rightTab, setRightTab] = useState<'files' | 'results'>('files');
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 960px)');
+    const syncLayout = (compact: boolean) => {
+      setCompactLayout(compact);
+      if (compact) {
+        setLeftOpen(false);
+        setRightOpen(false);
+      }
+    };
+    syncLayout(media.matches);
+    const onChange = (event: MediaQueryListEvent) => syncLayout(event.matches);
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
+
+  useEffect(() => {
+    const nextMode = parseWorkspaceMode(searchParams.get('mode')) || 'chat';
+    setWorkspaceMode((current) => (current === nextMode ? current : nextMode));
+  }, [searchParams]);
+
+  const updateWorkspaceMode = useCallback((nextMode: WorkspaceMode, replace = true) => {
+    setWorkspaceMode(nextMode);
+    const nextParams = new URLSearchParams(searchParams);
+    if (nextMode === 'chat') nextParams.delete('mode');
+    else nextParams.set('mode', nextMode);
+    setSearchParams(nextParams, { replace });
+  }, [searchParams, setSearchParams]);
+
+  const toggleLeftPanel = useCallback(() => {
+    setLeftOpen((open) => {
+      const next = !open;
+      if (next && compactLayout) setRightOpen(false);
+      return next;
+    });
+  }, [compactLayout]);
+
+  const toggleRightPanel = useCallback(() => {
+    setRightOpen((open) => {
+      const next = !open;
+      if (next && compactLayout) setLeftOpen(false);
+      return next;
+    });
+  }, [compactLayout]);
+
+  const openRightPanel = useCallback((tab: 'files' | 'results') => {
+    if (compactLayout) setLeftOpen(false);
+    setRightTab(tab);
+    setRightOpen(true);
+  }, [compactLayout]);
 
   // Drag-to-resize handler factory
   const startResize = useCallback((which: 'left' | 'right' | 'input') => (e: React.MouseEvent) => {
@@ -59,11 +189,11 @@ export function ProjectWorkspace(): React.ReactElement {
 
     const onMove = (ev: MouseEvent) => {
       if (which === 'left') {
-        setLeftWidth(Math.max(160, Math.min(420, startLeft + ev.clientX - startX)));
+        setLeftWidth(Math.max(96, startLeft + ev.clientX - startX));
       } else if (which === 'right') {
-        setRightWidth(Math.max(240, Math.min(600, startRight - (ev.clientX - startX))));
+        setRightWidth(Math.max(96, startRight - (ev.clientX - startX)));
       } else if (which === 'input') {
-        setInputHeight(Math.max(60, Math.min(400, startInput - (ev.clientY - startY))));
+        setInputHeight(Math.max(48, startInput - (ev.clientY - startY)));
       }
     };
     const onUp = () => {
@@ -100,11 +230,48 @@ export function ProjectWorkspace(): React.ReactElement {
     return allProjects.filter((p) => p.name.toLowerCase().includes(q));
   }, [allProjects, switcherQuery]);
 
+  const workspacePath = project?.workspacePath || '';
+  const compactWorkspacePath = useMemo(() => {
+    if (!workspacePath) return '工作目录初始化中';
+    const homeMatch = workspacePath.match(/^\/Users\/[^/]+/);
+    const displayPath = homeMatch
+      ? workspacePath.replace(homeMatch[0], '~')
+      : workspacePath;
+    if (displayPath.length <= 72) return displayPath;
+    const parts = displayPath.split('/').filter(Boolean);
+    if (parts.length <= 4) return displayPath;
+    return `.../${parts.slice(-4).join('/')}`;
+  }, [workspacePath]);
+
   const switchToProject = useCallback((id: string) => {
     setSwitcherOpen(false);
     setSwitcherQuery('');
     if (id !== projectId) navigate(`/project/${id}`);
   }, [navigate, projectId]);
+
+  useEffect(() => {
+    setActiveWorkspaceFile(null);
+    setOpenWorkspaceFiles([]);
+  }, [projectId]);
+
+  const handleOpenWorkspaceFile = useCallback((file: ActiveWorkspaceFile) => {
+    setOpenWorkspaceFiles((prev) => (
+      prev.some((item) => item.path === file.path) ? prev : [...prev, file]
+    ));
+    setActiveWorkspaceFile(file);
+  }, []);
+
+  const handleCloseWorkspaceFile = useCallback((pathToClose: string) => {
+    setOpenWorkspaceFiles((prev) => {
+      const closingIndex = prev.findIndex((item) => item.path === pathToClose);
+      const next = prev.filter((item) => item.path !== pathToClose);
+      setActiveWorkspaceFile((current) => {
+        if (current?.path !== pathToClose) return current;
+        return next[Math.min(Math.max(closingIndex, 0), next.length - 1)] || null;
+      });
+      return next;
+    });
+  }, []);
 
   // Load conversations for current project
   const refreshConversations = useCallback(async () => {
@@ -124,19 +291,128 @@ export function ProjectWorkspace(): React.ReactElement {
   }, [refreshConversations]);
 
   // Create new conversation in current project
-  const handleNewConversation = useCallback(async () => {
-    if (!projectId) return;
-    const conv = await createConversation('新对话', undefined, projectId);
+  const handleNewConversation = useCallback(async (targetProjectId = projectId) => {
+    if (!targetProjectId) return;
+    updateWorkspaceMode('chat');
+    const conv = await createConversation('新对话', undefined, targetProjectId);
     if (conv) {
-      setActiveConvId(conv.id);
-      refreshConversations();
+      if (targetProjectId === projectId) {
+        setActiveConvId(conv.id);
+        refreshConversations();
+      } else {
+        setProjectConversations((prev) => ({
+          ...prev,
+          [targetProjectId]: [conv, ...(prev[targetProjectId] || [])],
+        }));
+        navigate(`/project/${targetProjectId}`);
+      }
     }
-  }, [projectId, refreshConversations]);
+  }, [projectId, refreshConversations, navigate, updateWorkspaceMode]);
 
   // Switch conversation
   const handleSwitchConversation = useCallback((convId: string) => {
+    updateWorkspaceMode('chat');
     setActiveConvId(convId);
-  }, []);
+  }, [updateWorkspaceMode]);
+
+  const handleShowCloud = useCallback(() => updateWorkspaceMode('cloud'), [updateWorkspaceMode]);
+  const handleShowSearch = useCallback(() => {
+    updateWorkspaceMode('search');
+  }, [updateWorkspaceMode]);
+  const handleShowScheduled = useCallback(() => {
+    updateWorkspaceMode('scheduled');
+    if (!activeJobId && jobs.length > 0) {
+      setActiveJobId(jobs[0].id);
+    }
+  }, [activeJobId, jobs, updateWorkspaceMode]);
+  const handleShowTools = useCallback(() => updateWorkspaceMode('tools'), [updateWorkspaceMode]);
+  const handleShowFigCode = useCallback(() => updateWorkspaceMode('figcode'), [updateWorkspaceMode]);
+  const handleShowSettings = useCallback(() => updateWorkspaceMode('settings'), [updateWorkspaceMode]);
+
+  const handleShowPlugins = useCallback(() => updateWorkspaceMode('plugins'), [updateWorkspaceMode]);
+
+  const ensureSearchConversationIndex = useCallback(async () => {
+    const targets = allProjects.filter((item) => !searchConversationIndex[item.id]);
+    if (targets.length === 0) return;
+    const loaded = await Promise.all(
+      targets.map(async (item) => [item.id, await listConversations('active', item.id)] as const)
+    );
+    setSearchConversationIndex((prev) => {
+      const next = { ...prev };
+      loaded.forEach(([id, list]) => {
+        next[id] = list;
+      });
+      return next;
+    });
+  }, [allProjects, searchConversationIndex]);
+
+  const openProjectCreator = useCallback(() => {
+    setCreatingProjectInline(true);
+    setNewProjectName('');
+    setNewProjectDesc('');
+    if (compactLayout) setLeftOpen(true);
+  }, [compactLayout]);
+
+  const submitProjectCreator = useCallback(async () => {
+    const name = newProjectName.trim();
+    if (!name || creatingProject) return;
+    setCreatingProject(true);
+    try {
+      const created = await createProject({
+        name,
+        description: newProjectDesc.trim() || undefined,
+        modality: 'general',
+      });
+      setAllProjects((prev) => [created, ...prev.filter((item) => item.id !== created.id)]);
+      setExpandedProjects((prev) => {
+        const next = new Set(prev);
+        next.add(created.id);
+        return next;
+      });
+      setCreatingProjectInline(false);
+      setNewProjectName('');
+      setNewProjectDesc('');
+      navigate(`/project/${created.id}`);
+    } finally {
+      setCreatingProject(false);
+    }
+  }, [creatingProject, navigate, newProjectDesc, newProjectName]);
+
+  const openConversationCreator = useCallback((targetProjectId = projectId) => {
+    if (!targetProjectId) return;
+    updateWorkspaceMode('chat');
+    setCreatingConversationFor(targetProjectId);
+    setNewConversationTitle('');
+    setExpandedProjects((prev) => {
+      const next = new Set(prev);
+      next.add(targetProjectId);
+      return next;
+    });
+    if (compactLayout) setLeftOpen(true);
+  }, [compactLayout, projectId, updateWorkspaceMode]);
+
+  const submitConversationCreator = useCallback(async (targetProjectId = creatingConversationFor) => {
+    if (!targetProjectId || creatingConversation) return;
+    setCreatingConversation(true);
+    try {
+      const conv = await createConversation(newConversationTitle.trim() || '新对话', undefined, targetProjectId);
+      if (!conv) return;
+      setCreatingConversationFor(null);
+      setNewConversationTitle('');
+      if (targetProjectId === projectId) {
+        setActiveConvId(conv.id);
+        await refreshConversations();
+      } else {
+        setProjectConversations((prev) => ({
+          ...prev,
+          [targetProjectId]: [conv, ...(prev[targetProjectId] || [])],
+        }));
+        navigate(`/project/${targetProjectId}`);
+      }
+    } finally {
+      setCreatingConversation(false);
+    }
+  }, [creatingConversation, creatingConversationFor, navigate, newConversationTitle, projectId, refreshConversations]);
 
   // Toggle project expansion in left panel
   const toggleProjectExpand = useCallback((pid: string) => {
@@ -183,18 +459,62 @@ export function ProjectWorkspace(): React.ReactElement {
     }
   }, [projectId]);
 
+  const handleOpenWorkspacePath = useCallback(async () => {
+    if (!project?.workspacePath) return;
+    const result = await window.biof3Desktop?.files?.openPath?.(project.workspacePath);
+    if (result && !result.ok) {
+      setWorkspaceNotice(result.error || '无法打开工作目录');
+    }
+  }, [project?.workspacePath]);
+
+  const handleChangeWorkspacePath = useCallback(async () => {
+    if (!projectId) return;
+    const selected = await window.biof3Desktop?.files?.openDirectoryDialog?.();
+    if (!selected) return;
+    const next = await updateProject(projectId, { workspacePath: selected });
+    if (next) {
+      setProject(next);
+      setWorkspaceNotice('工作目录已更新');
+      listProjects()
+        .then(setAllProjects)
+        .catch(() => {});
+      window.setTimeout(() => setWorkspaceNotice(''), 2400);
+    } else {
+      setWorkspaceNotice('工作目录更新失败');
+    }
+  }, [projectId]);
+
   useEffect(() => {
     fetchData();
     const id = setInterval(fetchData, 15_000);
     return () => clearInterval(id);
   }, [fetchData]);
 
-  // 6.3 — Inject project context into CopilotChat
+  useEffect(() => {
+    const handler = () => {
+      fetchData();
+      refreshConversations();
+      listProjects()
+        .then(setAllProjects)
+        .catch(() => {});
+    };
+    window.addEventListener('biof3:soft-refresh', handler);
+    return () => window.removeEventListener('biof3:soft-refresh', handler);
+  }, [fetchData, refreshConversations]);
+
+  useEffect(() => {
+    if (workspaceMode === 'search') {
+      ensureSearchConversationIndex().catch(() => {});
+    }
+  }, [ensureSearchConversationIndex, workspaceMode]);
+
+  // 6.3 — Inject project context into SimpleChat (via shared copilot context)
   useEffect(() => {
     if (!project) return;
     setCopilotContext({
       page: 'desktop-project',
       pageTitle: project.name,
+      projectId,
       projectName: project.name,
       projectModality: project.modality,
       projectDatasets: datasets.map((d) => ({
@@ -211,15 +531,70 @@ export function ProjectWorkspace(): React.ReactElement {
         createdAt: j.created_at,
       })),
       activeJobId: activeJobId ?? undefined,
+      activeArtifact,
     });
-  }, [project, datasets, jobs, activeJobId]);
+  }, [project, projectId, datasets, jobs, activeJobId, activeArtifact]);
+
+  useEffect(() => {
+    setActiveArtifact(null);
+  }, [activeJobId]);
 
   const activeJob = useMemo(
     () => jobs.find((j) => j.id === activeJobId) || null,
     [jobs, activeJobId]
   );
 
-  /** Dispatch a copilot-ask event so the embedded CopilotChat picks it up */
+  const normalizeToolStatus = useCallback((status: unknown): ToolJob['status'] => {
+    if (status === 'completed' || status === 'done') return 'done';
+    if (status === 'failed') return 'failed';
+    if (status === 'running') return 'running';
+    return 'pending';
+  }, []);
+
+  const handleOpenResult = useCallback(async (jobId: string) => {
+    let nextJob = jobs.find((j) => j.id === jobId) || null;
+    if (!nextJob) {
+      try {
+        const token = getToken();
+        const resp = await fetch(getApiPrefix() + '/tools/status/' + encodeURIComponent(jobId), {
+          headers: token ? { Authorization: 'Bearer ' + token } : {},
+        });
+        const data = await resp.json();
+        if (data && data.ok) {
+          nextJob = {
+            id: String(data.id || jobId),
+            tool_id: String(data.toolId || ''),
+            status: normalizeToolStatus(data.status),
+            created_at: Number(data.createdAt || Date.now()),
+            completed_at: data.completedAt ? Number(data.completedAt) : undefined,
+            error: data.error ? String(data.error) : undefined,
+            name: data.toolId ? `${data.toolId} via agent` : undefined,
+            project_id: projectId || null,
+          };
+          setJobs((prev) => (prev.some((j) => j.id === nextJob!.id) ? prev : [nextJob!, ...prev]));
+        }
+      } catch {
+        /* keep the current panel state if the status lookup fails */
+      }
+    }
+    if (nextJob) {
+      setActiveJobId(nextJob.id);
+      openRightPanel('results');
+    }
+  }, [jobs, normalizeToolStatus, openRightPanel, projectId]);
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<{ toolJobId?: string }>).detail;
+      if (detail && detail.toolJobId) {
+        handleOpenResult(detail.toolJobId);
+      }
+    };
+    window.addEventListener('biof3:project-open-result', handler);
+    return () => window.removeEventListener('biof3:project-open-result', handler);
+  }, [handleOpenResult]);
+
+  /** Dispatch a copilot-ask event so the embedded SimpleChat picks it up */
   const handleAskAgent = useCallback((prompt: string) => {
     window.dispatchEvent(new CustomEvent('biof3:copilot-ask', { detail: { prompt } }));
   }, []);
@@ -236,7 +611,7 @@ export function ProjectWorkspace(): React.ReactElement {
     return (
       <div className={styles.errorWrap}>
         <p>{error || '项目不存在'}</p>
-        <Link to="/" className={styles.backLink}>← 返回首页</Link>
+        <Link to="/" className={styles.backLink}>← 返回工作台</Link>
       </div>
     );
   }
@@ -297,8 +672,12 @@ export function ProjectWorkspace(): React.ReactElement {
                   </div>
                   <Link
                     className={styles.switcherNewProject}
-                    to="/"
-                    onClick={() => setSwitcherOpen(false)}
+                    to="#"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      setSwitcherOpen(false);
+                      openProjectCreator();
+                    }}
                   >
                     + 新建项目
                   </Link>
@@ -307,25 +686,45 @@ export function ProjectWorkspace(): React.ReactElement {
             )}
           </div>
         </div>
+        <div className={styles.workspacePathBar} title={workspacePath || undefined}>
+          <Icon name="folder" size={14} />
+          <span className={styles.workspacePathLabel}>Workspace</span>
+          <button
+            className={styles.workspacePathText}
+            onClick={handleOpenWorkspacePath}
+            disabled={!workspacePath}
+            title={workspacePath ? '在 Finder 中打开工作目录' : '工作目录初始化中'}
+          >
+            {compactWorkspacePath}
+          </button>
+          <button
+            className={styles.workspacePathAction}
+            onClick={handleChangeWorkspacePath}
+            title="更改项目工作目录"
+          >
+            更改
+          </button>
+          {workspaceNotice && <span className={styles.workspacePathNotice}>{workspaceNotice}</span>}
+        </div>
         <div className={styles.headerRight}>
           <button
             className={styles.iconBtn}
-            onClick={() => setLeftOpen((v) => !v)}
+            onClick={toggleLeftPanel}
             title="切换资源栏"
           >
             <Icon name="panel-left" size={18} />
           </button>
           <button
             className={styles.iconBtn}
-            onClick={() => setRightOpen((v) => !v)}
+            onClick={toggleRightPanel}
             title="切换结果栏"
           >
             <Icon name="panel-right" size={18} />
           </button>
           <button
-            className={`${styles.iconBtn} ${settingsOpen ? styles.iconBtnActive : ''}`}
-            onClick={() => setSettingsOpen((v) => !v)}
-            title="设置 / 技能助手"
+            className={`${styles.iconBtn} ${workspaceMode === 'settings' ? styles.iconBtnActive : ''}`}
+            onClick={handleShowSettings}
+            title="设置"
           >
             <Icon name="settings" size={18} />
           </button>
@@ -333,24 +732,15 @@ export function ProjectWorkspace(): React.ReactElement {
       </header>
 
       <div className={styles.workspaceBody}>
-        {/* Settings sidebar overlay — slides in from left */}
-        {settingsOpen && (
-          <>
-            <div className={styles.settingsOverlay} onClick={() => setSettingsOpen(false)} />
-            <aside className={styles.settingsSider}>
-              <div className={styles.settingsSiderHeader}>
-                <span className={styles.settingsSiderTitle}>设置</span>
-                <button
-                  className={styles.iconBtn}
-                  onClick={() => setSettingsOpen(false)}
-                  title="关闭"
-                >
-                  <Icon name="x" size={16} />
-                </button>
-              </div>
-              <ToolboxPanel onAskAgent={handleAskAgent} />
-            </aside>
-          </>
+        {compactLayout && (leftOpen || rightOpen) && (
+          <button
+            className={styles.panelBackdrop}
+            onClick={() => {
+              setLeftOpen(false);
+              setRightOpen(false);
+            }}
+            aria-label="关闭侧栏"
+          />
         )}
 
         {/* Left column — Project list + conversations (AionUi style) */}
@@ -358,17 +748,122 @@ export function ProjectWorkspace(): React.ReactElement {
           <>
             <aside className={styles.leftCol} style={{ width: leftWidth }}>
               <div className={styles.leftPanelWrap}>
+                <div className={styles.leftQuickActions}>
+                  <div className={styles.leftQuickSectionLabel}>工作台</div>
+                  <button
+                    className={`${styles.leftQuickAction} ${workspaceMode === 'cloud' ? styles.leftQuickActionActive : ''}`}
+                    onClick={handleShowCloud}
+                    title="云平台"
+                  >
+                    <Icon name="layout-grid" size={15} />
+                    <span>云平台</span>
+                  </button>
+                  <button
+                    className={`${styles.leftQuickAction} ${workspaceMode === 'chat' ? styles.leftQuickActionActive : ''}`}
+                    onClick={() => openConversationCreator()}
+                    title="新对话"
+                  >
+                    <Icon name="plus" size={15} />
+                    <span>新对话</span>
+                  </button>
+                  <button
+                    className={`${styles.leftQuickAction} ${workspaceMode === 'search' ? styles.leftQuickActionActive : ''}`}
+                    onClick={handleShowSearch}
+                    title="搜索项目"
+                  >
+                    <Icon name="search" size={15} />
+                    <span>搜索</span>
+                  </button>
+                  <button
+                    className={`${styles.leftQuickAction} ${workspaceMode === 'scheduled' ? styles.leftQuickActionActive : ''}`}
+                    onClick={handleShowScheduled}
+                    title="查看已安排/运行记录"
+                  >
+                    <Icon name="clock" size={15} />
+                    <span>已安排</span>
+                  </button>
+                  <button
+                    className={`${styles.leftQuickAction} ${workspaceMode === 'tools' ? styles.leftQuickActionActive : ''}`}
+                    onClick={handleShowTools}
+                    title="分析工具"
+                  >
+                    <Icon name="bar-chart" size={15} />
+                    <span>分析工具</span>
+                  </button>
+                  <button
+                    className={`${styles.leftQuickAction} ${workspaceMode === 'figcode' ? styles.leftQuickActionActive : ''}`}
+                    onClick={handleShowFigCode}
+                    title="FigCode"
+                  >
+                    <Icon name="image" size={15} />
+                    <span>FigCode</span>
+                  </button>
+                  <button
+                    className={`${styles.leftQuickAction} ${workspaceMode === 'plugins' ? styles.leftQuickActionActive : ''}`}
+                    onClick={handleShowPlugins}
+                    title="插件"
+                  >
+                    <Icon name="puzzle" size={15} />
+                    <span>插件</span>
+                  </button>
+                  <button
+                    className={`${styles.leftQuickAction} ${workspaceMode === 'settings' ? styles.leftQuickActionActive : ''}`}
+                    onClick={handleShowSettings}
+                    title="设置"
+                  >
+                    <Icon name="settings" size={15} />
+                    <span>设置</span>
+                  </button>
+                </div>
                 <div className={styles.leftPanelHeader}>
                   <span className={styles.leftPanelTitle}>项目</span>
                   <button
                     className={styles.iconBtn}
-                    onClick={() => setSwitcherOpen(true)}
+                    onClick={openProjectCreator}
                     title="新建项目"
                   >
                     <Icon name="plus" size={16} />
                   </button>
                 </div>
                 <div className={styles.projectTreeScroll}>
+                  {creatingProjectInline && (
+                    <div className={styles.inlineCreateCard}>
+                      <input
+                        className={styles.inlineCreateInput}
+                        placeholder="项目名称"
+                        value={newProjectName}
+                        onChange={(event) => setNewProjectName(event.target.value)}
+                        autoFocus
+                      />
+                      <textarea
+                        className={styles.inlineCreateTextarea}
+                        placeholder="项目描述（可选）"
+                        value={newProjectDesc}
+                        onChange={(event) => setNewProjectDesc(event.target.value)}
+                        rows={3}
+                      />
+                      <div className={styles.inlineCreateActions}>
+                        <button
+                          className={styles.inlineCreateBtn}
+                          onClick={() => {
+                            setCreatingProjectInline(false);
+                            setNewProjectName('');
+                            setNewProjectDesc('');
+                          }}
+                          disabled={creatingProject}
+                        >
+                          取消
+                        </button>
+                        <button
+                          className={`${styles.inlineCreateBtn} ${styles.inlineCreateBtnPrimary}`}
+                          onClick={submitProjectCreator}
+                          disabled={creatingProject || !newProjectName.trim()}
+                        >
+                          {creatingProject ? '创建中…' : '创建项目'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   {allProjects.map((p) => {
                     const isCurrent = p.id === projectId;
                     const isExpanded = expandedProjects.has(p.id);
@@ -392,12 +887,7 @@ export function ProjectWorkspace(): React.ReactElement {
                             className={styles.projectTreeAddBtn}
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (isCurrent) {
-                                handleNewConversation();
-                              } else {
-                                switchToProject(p.id);
-                                setTimeout(() => handleNewConversation(), 300);
-                              }
+                              openConversationCreator(p.id);
                             }}
                             title="新建对话"
                           >
@@ -406,6 +896,46 @@ export function ProjectWorkspace(): React.ReactElement {
                         </div>
                         {isExpanded && (
                           <ul className={styles.convList}>
+                            {creatingConversationFor === p.id && (
+                              <li className={styles.convCreateItem}>
+                                <input
+                                  className={styles.convCreateInput}
+                                  placeholder="对话标题（可选）"
+                                  value={newConversationTitle}
+                                  onChange={(event) => setNewConversationTitle(event.target.value)}
+                                  autoFocus
+                                  onKeyDown={(event) => {
+                                    if (event.key === 'Enter') {
+                                      event.preventDefault();
+                                      submitConversationCreator(p.id);
+                                    }
+                                    if (event.key === 'Escape') {
+                                      setCreatingConversationFor(null);
+                                      setNewConversationTitle('');
+                                    }
+                                  }}
+                                />
+                                <div className={styles.convCreateActions}>
+                                  <button
+                                    className={styles.convCreateBtn}
+                                    onClick={() => {
+                                      setCreatingConversationFor(null);
+                                      setNewConversationTitle('');
+                                    }}
+                                    disabled={creatingConversation}
+                                  >
+                                    取消
+                                  </button>
+                                  <button
+                                    className={`${styles.convCreateBtn} ${styles.convCreateBtnPrimary}`}
+                                    onClick={() => submitConversationCreator(p.id)}
+                                    disabled={creatingConversation}
+                                  >
+                                    {creatingConversation ? '创建中…' : '创建'}
+                                  </button>
+                                </div>
+                              </li>
+                            )}
                             {convs.length === 0 && (
                               <li className={styles.convEmpty}>暂无对话</li>
                             )}
@@ -437,17 +967,96 @@ export function ProjectWorkspace(): React.ReactElement {
 
         {/* Center column — Simple chat (conversation-driven) */}
         <main className={styles.centerCol}>
-          <div className={styles.agentMain}>
-            {project && (
-              <SimpleChat
-                projectId={projectId}
-                conversationId={activeConvId}
-                onConversationChange={setActiveConvId}
-                inputHeight={inputHeight}
-              />
-            )}
-          </div>
-          <div className={styles.resizeHandleH} onMouseDown={startResize('input')} />
+          {workspaceMode === 'cloud' && (
+            <div className={styles.workspaceEmbeddedPage}>
+              <DesktopDashboard embedded activeProject={project} />
+            </div>
+          )}
+          {workspaceMode === 'search' && (
+            <WorkspaceSearchPanel
+              query={workspaceSearchQuery}
+              onQueryChange={setWorkspaceSearchQuery}
+              projects={allProjects}
+              currentProjectId={projectId || ''}
+              conversations={Object.entries({
+                ...searchConversationIndex,
+                ...projectConversations,
+                ...(projectId ? { [projectId]: conversations } : {}),
+              }).flatMap(([pid, list]) => list.map((item) => ({ ...item, project_id: item.project_id || pid })))}
+              jobs={jobs}
+              datasets={datasets}
+              onOpenProject={(id) => {
+                switchToProject(id);
+                updateWorkspaceMode('chat');
+              }}
+              onOpenConversation={(pid, convId) => {
+                if (pid && pid !== projectId) {
+                  navigate(`/project/${pid}`);
+                }
+                updateWorkspaceMode('chat');
+                setActiveConvId(convId);
+              }}
+              onOpenScheduled={(jobId) => {
+                setActiveJobId(jobId);
+                updateWorkspaceMode('scheduled');
+                openRightPanel('results');
+              }}
+              onOpenTools={handleShowTools}
+              onOpenFigCode={handleShowFigCode}
+              onOpenPlugins={handleShowPlugins}
+            />
+          )}
+          {workspaceMode === 'chat' && (
+            <>
+              <div className={styles.agentMain}>
+                {project && projectId && (
+                  <SimpleChat
+                    projectId={projectId}
+                    conversationId={activeConvId}
+                    onConversationChange={setActiveConvId}
+                    onOpenResult={handleOpenResult}
+                    inputHeight={inputHeight}
+                  />
+                )}
+              </div>
+              <div className={styles.resizeHandleH} onMouseDown={startResize('input')} />
+            </>
+          )}
+          {workspaceMode === 'scheduled' && (
+            <ScheduledWorkspacePanel
+              project={project}
+              jobs={jobs}
+              activeJobId={activeJobId}
+              activeArtifact={activeArtifact}
+              onSelectJob={(jobId) => {
+                setActiveJobId(jobId);
+                openRightPanel('results');
+              }}
+              onActiveArtifactChange={setActiveArtifact}
+              onAskAgent={handleAskAgent}
+              onBackToChat={() => updateWorkspaceMode('chat')}
+            />
+          )}
+          {workspaceMode === 'tools' && (
+            <div className={styles.workspaceEmbeddedPage}>
+              <ToolsPage />
+            </div>
+          )}
+          {workspaceMode === 'figcode' && (
+            <div className={styles.workspaceEmbeddedPage}>
+              <FigCodePage />
+            </div>
+          )}
+          {workspaceMode === 'plugins' && (
+            <div className={styles.workspaceModeSurface}>
+              <PluginStorePanel onClose={() => updateWorkspaceMode('chat')} />
+            </div>
+          )}
+          {workspaceMode === 'settings' && (
+            <div className={styles.workspaceModeSurface}>
+              <DesktopSettingsPanel onClose={() => updateWorkspaceMode('chat')} />
+            </div>
+          )}
         </main>
 
         {/* Right column — File tree + Results panel */}
@@ -482,9 +1091,21 @@ export function ProjectWorkspace(): React.ReactElement {
                 </div>
                 <div className={styles.resultPanelBody}>
                   {rightTab === 'files' ? (
-                    <RightFileTree project={project} />
+                    <RightFileTree
+                      project={project}
+                      openFiles={openWorkspaceFiles}
+                      activeFile={activeWorkspaceFile}
+                      onOpenFile={handleOpenWorkspaceFile}
+                      onSelectFile={setActiveWorkspaceFile}
+                      onCloseFile={handleCloseWorkspaceFile}
+                    />
                   ) : activeJob ? (
-                    <ResultView job={activeJob} onAskAgent={handleAskAgent} />
+                    <ResultView
+                      job={activeJob}
+                      activeArtifact={activeArtifact}
+                      onActiveArtifactChange={setActiveArtifact}
+                      onAskAgent={handleAskAgent}
+                    />
                   ) : (
                     <EmptyResult project={project} />
                   )}
@@ -548,13 +1169,13 @@ function ResourcePanel({
   const fetchDir = useCallback(async (prefix: string) => {
     try {
       const resp = await fetch(
-        getApiPrefix() + `/files-tree?prefix=${encodeURIComponent(prefix)}`
+        getApiPrefix() + `/workspaces/${encodeURIComponent(project.id)}/tree?prefix=${encodeURIComponent(prefix)}`
       );
       const data = await resp.json();
       if (data.ok) return data.entries as FileEntry[];
     } catch { /* ignore */ }
     return [];
-  }, []);
+  }, [project.id]);
 
   useEffect(() => {
     if (activeTab === 'files') fetchDir('').then(setFileTree);
@@ -621,6 +1242,11 @@ function ResourcePanel({
                   expandedDirs={expandedDirs}
                   onToggleDir={toggleDir}
                   onFetchDir={fetchDir}
+                  fileUrlFor={(path) =>
+                    getApiPrefix() + `/workspaces/${encodeURIComponent(project.id)}/file?path=${encodeURIComponent(path)}`
+                  }
+                  onOpenFile={() => {}}
+                  activePath={null}
                 />
               )}
             </div>
@@ -631,7 +1257,7 @@ function ResourcePanel({
       {/* Bottom section — my projects (switchable) */}
       <div className={styles.leftBottomSection}>
         <div className={styles.leftBottomHeader}>
-          <Icon name="layers" size={14} />
+          <Icon name="folder" size={14} />
           <span>我的项目</span>
         </div>
         <div className={styles.projectListBody}>
@@ -673,6 +1299,9 @@ function FileTreeList({
   expandedDirs,
   onToggleDir,
   onFetchDir,
+  fileUrlFor,
+  onOpenFile,
+  activePath,
   depth = 0,
 }: {
   entries: FileEntry[];
@@ -680,6 +1309,9 @@ function FileTreeList({
   expandedDirs: Set<string>;
   onToggleDir: (path: string) => void;
   onFetchDir: (prefix: string) => Promise<FileEntry[]>;
+  fileUrlFor: (path: string) => string;
+  onOpenFile: (file: ActiveWorkspaceFile) => void;
+  activePath?: string | null;
   depth?: number;
 }): React.ReactElement {
   return (
@@ -697,6 +1329,9 @@ function FileTreeList({
             expandedDirs={expandedDirs}
             onToggleDir={onToggleDir}
             onFetchDir={onFetchDir}
+            fileUrlFor={fileUrlFor}
+            onOpenFile={onOpenFile}
+            activePath={activePath}
           />
         );
       })}
@@ -712,6 +1347,9 @@ function FileTreeItem({
   expandedDirs,
   onToggleDir,
   onFetchDir,
+  fileUrlFor,
+  onOpenFile,
+  activePath,
 }: {
   entry: FileEntry;
   fullPath: string;
@@ -720,6 +1358,9 @@ function FileTreeItem({
   expandedDirs: Set<string>;
   onToggleDir: (path: string) => void;
   onFetchDir: (prefix: string) => Promise<FileEntry[]>;
+  fileUrlFor: (path: string) => string;
+  onOpenFile: (file: ActiveWorkspaceFile) => void;
+  activePath?: string | null;
 }): React.ReactElement {
   const [children, setChildren] = useState<FileEntry[]>([]);
 
@@ -729,12 +1370,13 @@ function FileTreeItem({
     }
   }, [isExpanded, entry.type, fullPath, onFetchDir]);
 
-  const fileUrl = getApiPrefix() + '/files/' + encodeURIComponent(fullPath);
+  const fileUrl = fileUrlFor(fullPath);
+  const isActive = entry.type === 'file' && activePath === fullPath;
 
   return (
     <li className={styles.fileTreeNode}>
       <div
-        className={styles.fileTreeRow}
+        className={`${styles.fileTreeRow} ${isActive ? styles.fileTreeRowActive : ''}`}
         style={{ paddingLeft: depth * 16 }}
         onClick={() => entry.type === 'dir' && onToggleDir(fullPath)}
       >
@@ -748,14 +1390,21 @@ function FileTreeItem({
           <>
             <span style={{ width: 12, display: 'inline-block' }} />
             <Icon name="file" size={14} />
-            <a
+            <button
               className={styles.fileTreeLink}
-              href={fileUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              onClick={(event) => {
+                event.stopPropagation();
+                onOpenFile({
+                  path: fullPath,
+                  name: entry.name,
+                  url: fileUrl,
+                  size: entry.size,
+                });
+              }}
+              title="预览文件"
             >
               {entry.name}
-            </a>
+            </button>
             {entry.size != null && (
               <span className={styles.fileTreeSize}>{formatSize(entry.size)}</span>
             )}
@@ -769,6 +1418,9 @@ function FileTreeItem({
           expandedDirs={expandedDirs}
           onToggleDir={onToggleDir}
           onFetchDir={onFetchDir}
+          fileUrlFor={fileUrlFor}
+          onOpenFile={onOpenFile}
+          activePath={activePath}
           depth={depth + 1}
         />
       )}
@@ -780,21 +1432,101 @@ function FileTreeItem({
 // RightFileTree — file tree for the right panel (current workspace)
 // ============================================================
 
-function RightFileTree({ project }: { project: Project }): React.ReactElement {
+function fileExtension(name?: string): string {
+  const idx = name?.lastIndexOf('.') ?? -1;
+  return idx >= 0 && name ? name.slice(idx + 1).toLowerCase() : '';
+}
+
+function isImageFile(name?: string): boolean {
+  return ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(fileExtension(name));
+}
+
+function isTextFile(name?: string): boolean {
+  return [
+    'txt', 'md', 'markdown', 'csv', 'tsv', 'json', 'jsonl', 'log',
+    'r', 'py', 'sh', 'bash', 'zsh',
+    'js', 'jsx', 'mjs', 'cjs', 'ts', 'tsx',
+    'css', 'scss', 'html', 'xml',
+    'yaml', 'yml', 'toml',
+  ].includes(fileExtension(name));
+}
+
+function isMarkdownFile(name?: string): boolean {
+  return ['md', 'markdown'].includes(fileExtension(name));
+}
+
+function previewLanguage(name?: string): string {
+  const ext = fileExtension(name);
+  const map: Record<string, string> = {
+    bash: 'bash',
+    cjs: 'javascript',
+    css: 'css',
+    csv: 'csv',
+    html: 'xml',
+    js: 'javascript',
+    json: 'json',
+    jsonl: 'json',
+    jsx: 'jsx',
+    log: 'plaintext',
+    mjs: 'javascript',
+    py: 'python',
+    r: 'r',
+    scss: 'scss',
+    sh: 'bash',
+    toml: 'ini',
+    ts: 'typescript',
+    tsx: 'tsx',
+    tsv: 'tsv',
+    xml: 'xml',
+    yaml: 'yaml',
+    yml: 'yaml',
+    zsh: 'bash',
+  };
+  return map[ext] || 'plaintext';
+}
+
+function formatPreviewText(name: string, text: string): string {
+  if (fileExtension(name) === 'json') {
+    try {
+      return JSON.stringify(JSON.parse(text), null, 2);
+    } catch {
+      return text;
+    }
+  }
+  return text;
+}
+
+function RightFileTree({
+  project,
+  openFiles,
+  activeFile,
+  onOpenFile,
+  onSelectFile,
+  onCloseFile,
+}: {
+  project: Project;
+  openFiles: ActiveWorkspaceFile[];
+  activeFile: ActiveWorkspaceFile | null;
+  onOpenFile: (file: ActiveWorkspaceFile) => void;
+  onSelectFile: (file: ActiveWorkspaceFile) => void;
+  onCloseFile: (path: string) => void;
+}): React.ReactElement {
   const [tree, setTree] = useState<FileEntry[]>([]);
   const [expandedDirs, setExpandedDirs] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [treeOpen, setTreeOpen] = useState(!activeFile);
+  const [treeWidth, setTreeWidth] = useState(320);
 
   const fetchDir = useCallback(async (prefix: string) => {
     try {
       const resp = await fetch(
-        getApiPrefix() + `/files-tree?prefix=${encodeURIComponent(prefix)}`
+        getApiPrefix() + `/workspaces/${encodeURIComponent(project.id)}/tree?prefix=${encodeURIComponent(prefix)}`
       );
       const data = await resp.json();
       if (data.ok) return data.entries as FileEntry[];
     } catch { /* ignore */ }
     return [];
-  }, []);
+  }, [project.id]);
 
   useEffect(() => {
     setLoading(true);
@@ -813,24 +1545,568 @@ function RightFileTree({ project }: { project: Project }): React.ReactElement {
     });
   }, []);
 
-  if (loading) {
-    return <p className={styles.panelEmpty}>加载文件树…</p>;
-  }
+  const handleOpenFile = useCallback((file: ActiveWorkspaceFile) => {
+    onOpenFile(file);
+    setTreeOpen(false);
+  }, [onOpenFile]);
 
-  if (tree.length === 0) {
-    return <p className={styles.panelEmpty}>当前工作区暂无文件</p>;
+  useEffect(() => {
+    if (!activeFile && openFiles.length === 0) setTreeOpen(true);
+  }, [activeFile, openFiles.length]);
+
+  const startTreeResize = useCallback((event: React.MouseEvent) => {
+    event.preventDefault();
+    const startX = event.clientX;
+    const startWidth = treeWidth;
+    const onMove = (moveEvent: MouseEvent) => {
+      setTreeWidth(Math.max(96, startWidth - (moveEvent.clientX - startX)));
+    };
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    document.body.style.cursor = 'ew-resize';
+    document.body.style.userSelect = 'none';
+  }, [treeWidth]);
+
+  return (
+    <div className={styles.workspaceFiles}>
+      <div className={styles.workspaceFilesToolbar}>
+        <div className={styles.workspaceFileTabs}>
+          {openFiles.length === 0 ? (
+            <span className={styles.workspaceTabsEmpty}>选择文件预览</span>
+          ) : (
+            openFiles.map((file) => (
+              <button
+                key={file.path}
+                className={`${styles.workspaceFileTab} ${activeFile?.path === file.path ? styles.workspaceFileTabActive : ''}`}
+                onClick={() => onSelectFile(file)}
+                title={file.path}
+              >
+                <Icon name={isImageFile(file.name) ? 'image' : 'file'} size={13} />
+                <span>{file.name}</span>
+                <span
+                  className={styles.workspaceFileTabClose}
+                  role="button"
+                  tabIndex={0}
+                  title="关闭"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onCloseFile(file.path);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      onCloseFile(file.path);
+                    }
+                  }}
+                >
+                  <Icon name="x" size={12} />
+                </span>
+              </button>
+            ))
+          )}
+        </div>
+        <button
+          className={styles.workspaceTreeToggle}
+          onClick={() => setTreeOpen((value) => !value)}
+          title={treeOpen ? '收起文件树' : '展开文件树'}
+        >
+          <Icon name={treeOpen ? 'chevron-down' : 'chevron-right'} size={13} />
+          <Icon name="folder" size={14} />
+        </button>
+        {treeOpen && (
+          <div className={styles.workspaceFileTreePopover} style={{ width: treeWidth }}>
+            <div
+              className={styles.workspaceFileTreeResize}
+              onMouseDown={startTreeResize}
+              title="拖拽调整文件树宽度"
+            />
+            <div className={styles.workspaceFileTreePane}>
+              {loading ? (
+                <p className={styles.panelEmpty}>加载文件树…</p>
+              ) : tree.length === 0 ? (
+                <p className={styles.panelEmpty}>当前工作区暂无文件</p>
+              ) : (
+                <FileTreeList
+                  entries={tree}
+                  prefix=""
+                  expandedDirs={expandedDirs}
+                  onToggleDir={toggleDir}
+                  onFetchDir={fetchDir}
+                  fileUrlFor={(path) =>
+                    getApiPrefix() + `/workspaces/${encodeURIComponent(project.id)}/file?path=${encodeURIComponent(path)}`
+                  }
+                  onOpenFile={handleOpenFile}
+                  activePath={activeFile?.path || null}
+                  depth={0}
+                />
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+      <div className={styles.workspaceFilesMain}>
+        <WorkspaceFilePreview file={activeFile} />
+      </div>
+    </div>
+  );
+}
+
+function WorkspaceFilePreview({ file }: { file: ActiveWorkspaceFile | null }): React.ReactElement {
+  const [text, setText] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'unsupported' | 'error'>('idle');
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+
+  const isImage = isImageFile(file?.name);
+  const isText = isTextFile(file?.name);
+  const isMarkdown = isMarkdownFile(file?.name);
+
+  useEffect(() => {
+    let cancelled = false;
+    setText('');
+    if (!file) {
+      setStatus('idle');
+      return () => { cancelled = true; };
+    }
+    if (isImage) {
+      setStatus('ready');
+      return () => { cancelled = true; };
+    }
+    if (!isText) {
+      setStatus('unsupported');
+      return () => { cancelled = true; };
+    }
+    setStatus('loading');
+    fetch(file.url)
+      .then((resp) => {
+        if (!resp.ok) throw new Error('preview failed');
+        return resp.text();
+      })
+      .then((body) => {
+        if (cancelled) return;
+        setText(body.length > 120_000 ? `${body.slice(0, 120_000)}\n\n... 文件较大，仅预览前 120KB` : body);
+        setStatus('ready');
+      })
+      .catch(() => {
+        if (!cancelled) setStatus('error');
+      });
+    return () => { cancelled = true; };
+  }, [file, isImage, isText]);
+
+  if (!file) {
+    return (
+      <div className={styles.workspacePreviewEmpty}>
+        <Icon name="file" size={18} />
+        <span>选择一个文本或图片文件预览</span>
+      </div>
+    );
   }
 
   return (
-    <div className={styles.panelSection}>
-      <FileTreeList
-        entries={tree}
-        prefix=""
-        expandedDirs={expandedDirs}
-        onToggleDir={toggleDir}
-        onFetchDir={fetchDir}
-        depth={0}
-      />
+    <div className={styles.workspacePreview}>
+      <div className={styles.workspacePreviewHeader}>
+        <div className={styles.workspacePreviewTitle}>
+          <Icon name={isImage ? 'image' : 'file'} size={14} />
+          <span>{file.name}</span>
+        </div>
+        <a className={styles.workspacePreviewOpen} href={file.url} target="_blank" rel="noopener noreferrer">
+          打开
+        </a>
+      </div>
+      <div className={styles.workspacePreviewBody}>
+        {status === 'loading' && <p className={styles.panelEmpty}>加载预览…</p>}
+        {status === 'error' && <p className={styles.panelEmpty}>预览失败</p>}
+        {status === 'unsupported' && (
+          <p className={styles.panelEmpty}>暂不支持此类型的内联预览，可点击右上角打开。</p>
+        )}
+        {status === 'ready' && isImage && (
+          <button className={styles.workspaceImageButton} onClick={() => setLightboxSrc(file.url)}>
+            <img src={file.url} alt={file.name} className={styles.workspaceImagePreview} />
+          </button>
+        )}
+        {status === 'ready' && isText && isMarkdown && (
+          <div className={styles.workspaceMarkdownPreview}>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeHighlight, [rehypeSanitize, markdownSanitizeSchema]]}
+            >
+              {text}
+            </ReactMarkdown>
+          </div>
+        )}
+        {status === 'ready' && isText && !isMarkdown && (
+          <div className={styles.workspaceCodePreview}>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeHighlight, [rehypeSanitize, markdownSanitizeSchema]]}
+            >
+              {`~~~${previewLanguage(file.name)}\n${formatPreviewText(file.name, text)}\n~~~`}
+            </ReactMarkdown>
+          </div>
+        )}
+      </div>
+      {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
+    </div>
+  );
+}
+
+// ============================================================
+// WorkspaceSearchPanel — center column global search view
+// ============================================================
+
+function WorkspaceSearchPanel({
+  query,
+  onQueryChange,
+  projects,
+  currentProjectId,
+  conversations,
+  jobs,
+  datasets,
+  onOpenProject,
+  onOpenConversation,
+  onOpenScheduled,
+  onOpenTools,
+  onOpenFigCode,
+  onOpenPlugins,
+}: {
+  query: string;
+  onQueryChange: (value: string) => void;
+  projects: Project[];
+  currentProjectId: string;
+  conversations: ConversationSummary[];
+  jobs: ToolJob[];
+  datasets: Dataset[];
+  onOpenProject: (id: string) => void;
+  onOpenConversation: (projectId: string | null | undefined, convId: string) => void;
+  onOpenScheduled: (jobId: string) => void;
+  onOpenTools: () => void;
+  onOpenFigCode: () => void;
+  onOpenPlugins: () => void;
+}): React.ReactElement {
+  const normalizedQuery = query.trim().toLowerCase();
+
+  const projectMatches = useMemo(
+    () =>
+      projects.filter((item) => {
+        if (!normalizedQuery) return true;
+        return (
+          item.name.toLowerCase().includes(normalizedQuery) ||
+          (item.description || '').toLowerCase().includes(normalizedQuery) ||
+          (item.modality || '').toLowerCase().includes(normalizedQuery)
+        );
+      }),
+    [normalizedQuery, projects]
+  );
+
+  const uniqueConversations = useMemo(() => {
+    const deduped = new Map<string, ConversationSummary>();
+    conversations.forEach((item) => {
+      if (!deduped.has(item.id)) deduped.set(item.id, item);
+    });
+    return Array.from(deduped.values());
+  }, [conversations]);
+
+  const conversationMatches = useMemo(
+    () =>
+      uniqueConversations.filter((item) => {
+        if (!normalizedQuery) return true;
+        return (
+          item.title.toLowerCase().includes(normalizedQuery) ||
+          (item.last_topic_shift_reason || '').toLowerCase().includes(normalizedQuery)
+        );
+      }),
+    [normalizedQuery, uniqueConversations]
+  );
+
+  const toolMatches = useMemo(
+    () =>
+      staticTools.filter((item) => {
+        if (!normalizedQuery) return true;
+        return (
+          item.title.toLowerCase().includes(normalizedQuery) ||
+          item.subtitle.toLowerCase().includes(normalizedQuery) ||
+          item.id.toLowerCase().includes(normalizedQuery) ||
+          item.category.toLowerCase().includes(normalizedQuery)
+        );
+      }),
+    [normalizedQuery]
+  );
+
+  const datasetMatches = useMemo(
+    () =>
+      datasets.filter((item) => {
+        if (!normalizedQuery) return true;
+        return (
+          item.name.toLowerCase().includes(normalizedQuery) ||
+          (item.description || '').toLowerCase().includes(normalizedQuery)
+        );
+      }),
+    [datasets, normalizedQuery]
+  );
+
+  const jobMatches = useMemo(
+    () =>
+      jobs.filter((item) => {
+        if (!normalizedQuery) return true;
+        return (
+          (item.name || '').toLowerCase().includes(normalizedQuery) ||
+          item.tool_id.toLowerCase().includes(normalizedQuery) ||
+          item.status.toLowerCase().includes(normalizedQuery)
+        );
+      }),
+    [jobs, normalizedQuery]
+  );
+
+  const hasQuery = normalizedQuery.length > 0;
+
+  return (
+    <div className={styles.workspaceSearch}>
+      <div className={styles.workspaceSearchHeader}>
+        <div>
+          <h2 className={styles.workspaceSearchTitle}>搜索</h2>
+          <p className={styles.workspaceSearchDesc}>在项目、对话、工具和当前工作记录里快速跳转。</p>
+        </div>
+        <div className={styles.workspaceSearchActions}>
+          <button className={styles.workspaceSearchAction} onClick={onOpenTools}>
+            <Icon name="bar-chart" size={14} />
+            <span>分析工具</span>
+          </button>
+          <button className={styles.workspaceSearchAction} onClick={onOpenFigCode}>
+            <Icon name="image" size={14} />
+            <span>FigCode</span>
+          </button>
+          <button className={styles.workspaceSearchAction} onClick={onOpenPlugins}>
+            <Icon name="puzzle" size={14} />
+            <span>插件</span>
+          </button>
+        </div>
+      </div>
+
+      <div className={styles.workspaceSearchBar}>
+        <Icon name="search" size={16} />
+        <input
+          className={styles.workspaceSearchInput}
+          value={query}
+          onChange={(event) => onQueryChange(event.target.value)}
+          placeholder="搜索项目、对话、分析工具、任务…"
+          autoFocus
+        />
+      </div>
+
+      <div className={styles.workspaceSearchBody}>
+        {!hasQuery && (
+          <div className={styles.workspaceSearchHint}>
+            <div className={styles.workspaceSearchHintCard}>
+              <span>项目</span>
+              <strong>{projects.length}</strong>
+            </div>
+            <div className={styles.workspaceSearchHintCard}>
+              <span>对话</span>
+              <strong>{uniqueConversations.length}</strong>
+            </div>
+            <div className={styles.workspaceSearchHintCard}>
+              <span>任务</span>
+              <strong>{jobs.length}</strong>
+            </div>
+            <div className={styles.workspaceSearchHintCard}>
+              <span>工具</span>
+              <strong>{staticTools.length}</strong>
+            </div>
+          </div>
+        )}
+
+        <SearchResultSection title="项目" count={projectMatches.length}>
+          {projectMatches.slice(0, 8).map((item) => (
+            <button key={item.id} className={styles.searchResultItem} onClick={() => onOpenProject(item.id)}>
+              <Icon name="folder" size={14} />
+              <div className={styles.searchResultMeta}>
+                <span className={styles.searchResultTitle}>{item.name}</span>
+                <span className={styles.searchResultSub}>
+                  {item.id === currentProjectId ? '当前项目' : item.modality || item.description || '项目'}
+                </span>
+              </div>
+            </button>
+          ))}
+        </SearchResultSection>
+
+        <SearchResultSection title="对话" count={conversationMatches.length}>
+          {conversationMatches.slice(0, 8).map((item) => (
+            <button
+              key={item.id}
+              className={styles.searchResultItem}
+              onClick={() => onOpenConversation(item.project_id, item.id)}
+            >
+              <Icon name="message-circle" size={14} />
+              <div className={styles.searchResultMeta}>
+                <span className={styles.searchResultTitle}>{item.title}</span>
+                <span className={styles.searchResultSub}>
+                  {item.project_id === currentProjectId ? '当前项目' : item.project_id || '未绑定项目'}
+                </span>
+              </div>
+            </button>
+          ))}
+        </SearchResultSection>
+
+        <SearchResultSection title="任务与结果" count={jobMatches.length}>
+          {jobMatches.slice(0, 6).map((item) => (
+            <button key={item.id} className={styles.searchResultItem} onClick={() => onOpenScheduled(item.id)}>
+              <Icon name="clock" size={14} />
+              <div className={styles.searchResultMeta}>
+                <span className={styles.searchResultTitle}>{item.name || item.tool_id}</span>
+                <span className={styles.searchResultSub}>{item.status}</span>
+              </div>
+            </button>
+          ))}
+        </SearchResultSection>
+
+        <SearchResultSection title="数据集" count={datasetMatches.length}>
+          {datasetMatches.slice(0, 6).map((item) => (
+            <div key={item.id} className={styles.searchResultStatic}>
+              <Icon name="database" size={14} />
+              <div className={styles.searchResultMeta}>
+                <span className={styles.searchResultTitle}>{item.name}</span>
+                <span className={styles.searchResultSub}>{formatSize(item.size)}</span>
+              </div>
+            </div>
+          ))}
+        </SearchResultSection>
+
+        <SearchResultSection title="分析工具" count={toolMatches.length}>
+          {toolMatches.slice(0, 10).map((item) => (
+            <button key={item.id} className={styles.searchResultItem} onClick={onOpenTools}>
+              <Icon name="bar-chart" size={14} />
+              <div className={styles.searchResultMeta}>
+                <span className={styles.searchResultTitle}>{item.title}</span>
+                <span className={styles.searchResultSub}>{item.subtitle}</span>
+              </div>
+            </button>
+          ))}
+        </SearchResultSection>
+      </div>
+    </div>
+  );
+}
+
+function SearchResultSection({
+  title,
+  count,
+  children,
+}: {
+  title: string;
+  count: number;
+  children: React.ReactNode;
+}): React.ReactElement | null {
+  if (count === 0) return null;
+  return (
+    <section className={styles.searchResultSection}>
+      <div className={styles.searchResultHeader}>
+        <h3>{title}</h3>
+        <span>{count}</span>
+      </div>
+      <div className={styles.searchResultList}>{children}</div>
+    </section>
+  );
+}
+
+// ============================================================
+// ScheduledWorkspacePanel — center column scheduled/jobs view
+// ============================================================
+
+function ScheduledWorkspacePanel({
+  project,
+  jobs,
+  activeJobId,
+  activeArtifact,
+  onSelectJob,
+  onActiveArtifactChange,
+  onAskAgent,
+  onBackToChat,
+}: {
+  project: Project;
+  jobs: ToolJob[];
+  activeJobId: string | null;
+  activeArtifact: ActiveArtifact | null;
+  onSelectJob: (id: string) => void;
+  onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
+  onAskAgent: (prompt: string) => void;
+  onBackToChat: () => void;
+}): React.ReactElement {
+  const activeJob = useMemo(
+    () => jobs.find((job) => job.id === activeJobId) || jobs[0] || null,
+    [jobs, activeJobId]
+  );
+
+  const stats = useMemo(() => {
+    let running = 0;
+    let failed = 0;
+    let done = 0;
+    let pending = 0;
+    jobs.forEach((job) => {
+      if (job.status === 'running') running += 1;
+      else if (job.status === 'failed') failed += 1;
+      else if (job.status === 'done') done += 1;
+      else pending += 1;
+    });
+    return { running, failed, done, pending };
+  }, [jobs]);
+
+  return (
+    <div className={styles.scheduledWorkspace}>
+      <div className={styles.scheduledWorkspaceHeader}>
+        <div>
+          <h2 className={styles.scheduledWorkspaceTitle}>已安排</h2>
+          <p className={styles.scheduledWorkspaceDesc}>
+            当前项目 {project.name} 的运行记录、结果和下一步建议。
+          </p>
+        </div>
+        <button className={styles.scheduledWorkspaceBack} onClick={onBackToChat}>
+          <Icon name="message-circle" size={14} />
+          <span>返回对话</span>
+        </button>
+      </div>
+
+      <div className={styles.scheduledStats}>
+        <div className={styles.scheduledStatCard}>
+          <span className={styles.scheduledStatLabel}>总任务</span>
+          <strong>{jobs.length}</strong>
+        </div>
+        <div className={styles.scheduledStatCard}>
+          <span className={styles.scheduledStatLabel}>运行中</span>
+          <strong>{stats.running + stats.pending}</strong>
+        </div>
+        <div className={styles.scheduledStatCard}>
+          <span className={styles.scheduledStatLabel}>已完成</span>
+          <strong>{stats.done}</strong>
+        </div>
+        <div className={styles.scheduledStatCard}>
+          <span className={styles.scheduledStatLabel}>失败</span>
+          <strong>{stats.failed}</strong>
+        </div>
+      </div>
+
+      <div className={styles.scheduledWorkspaceBody}>
+        <aside className={styles.scheduledHistoryCol}>
+          <HistoryPanel jobs={jobs} activeJobId={activeJob?.id || null} onSelectJob={onSelectJob} />
+        </aside>
+        <section className={styles.scheduledResultCol}>
+          {activeJob ? (
+            <ResultView
+              job={activeJob}
+              activeArtifact={activeArtifact}
+              onActiveArtifactChange={onActiveArtifactChange}
+              onAskAgent={onAskAgent}
+            />
+          ) : (
+            <EmptyResult project={project} />
+          )}
+        </section>
+      </div>
     </div>
   );
 }
@@ -1204,20 +2480,55 @@ interface JobResultFile {
   name: string;
   type: string;
   label?: string;
+  title?: string;
+  filename?: string;
   url?: string;
+  preview?: boolean;
+  download?: boolean;
 }
 
 interface JobResult {
+  artifacts?: JobResultFile[];
   files?: JobResultFile[];
+  tool?: {
+    id?: string;
+    version?: string | null;
+    language?: string | null;
+  };
+  outputs?: unknown;
+  manifest?: unknown;
+  stdout?: string;
   summary?: unknown;
 }
 
-function ResultView({ job, onAskAgent }: { job: ToolJob; onAskAgent: (prompt: string) => void }): React.ReactElement {
+interface JobDetailMeta {
+  params?: Record<string, unknown>;
+  ackStatus?: string | null;
+  projectId?: string | null;
+}
+
+function artifactName(file: JobResultFile): string {
+  return file.name || file.filename || '';
+}
+
+function ResultView({
+  job,
+  activeArtifact,
+  onActiveArtifactChange,
+  onAskAgent,
+}: {
+  job: ToolJob;
+  activeArtifact: ActiveArtifact | null;
+  onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
+  onAskAgent: (prompt: string) => void;
+}): React.ReactElement {
   const [result, setResult] = useState<JobResult | null>(null);
+  const [jobMeta, setJobMeta] = useState<JobDetailMeta | null>(null);
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState<'plots' | 'files'>('plots');
+  const [tab, setTab] = useState<'plots' | 'files' | 'details'>('plots');
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<string[][] | null>(null);
+  const [previewText, setPreviewText] = useState<string | null>(null);
   const [previewName, setPreviewName] = useState<string>('');
 
   const tool = useMemo(
@@ -1239,11 +2550,24 @@ function ResultView({ job, onAskAgent }: { job: ToolJob; onAskAgent: (prompt: st
     [job.id, lang]
   );
 
+  const toArtifact = useCallback(
+    (file: JobResultFile): ActiveArtifact => ({
+      jobId: job.id,
+      toolId: job.tool_id,
+      name: artifactName(file),
+      type: file.type,
+      label: file.label || file.title,
+      url: buildUrl(artifactName(file)),
+    }),
+    [buildUrl, job.id, job.tool_id]
+  );
+
   // Fetch result when job is done
   useEffect(() => {
     if (job.status === 'done') {
       setLoading(true);
       setResult(null);
+      setJobMeta(null);
       (async () => {
         try {
           const token = getToken();
@@ -1253,6 +2577,11 @@ function ResultView({ job, onAskAgent }: { job: ToolJob; onAskAgent: (prompt: st
           const data = await resp.json();
           if (data.ok && data.result) {
             setResult(data.result);
+            setJobMeta({
+              params: data.params || {},
+              ackStatus: data.ackStatus || null,
+              projectId: data.projectId || null,
+            });
           }
         } catch {
           // ignore
@@ -1262,32 +2591,80 @@ function ResultView({ job, onAskAgent }: { job: ToolJob; onAskAgent: (prompt: st
       })();
     } else {
       setResult(null);
+      setJobMeta(null);
     }
   }, [job.id, job.status, lang]);
 
-  const files = result?.files || [];
+  const files = result?.artifacts || result?.files || [];
   const plots = files.filter((f) => f.type === 'plot');
-  const tables = files.filter((f) => f.type === 'table' || f.type === 'file' || f.type === 'text');
+  const tables = files.filter((f) => f.type === 'table' || f.type === 'file' || f.type === 'text' || f.type === 'json');
 
-  const previewCsv = useCallback(
-    async (name: string) => {
+  useEffect(() => {
+    if (job.status !== 'done') {
+      onActiveArtifactChange(null);
+      return;
+    }
+    const first = plots[0] || tables[0] || files[0];
+    if (!first) {
+      onActiveArtifactChange(null);
+      return;
+    }
+    if (!activeArtifact || activeArtifact.jobId !== job.id) {
+      onActiveArtifactChange(toArtifact(first));
+    }
+  }, [activeArtifact, files, job.id, job.status, onActiveArtifactChange, plots, tables, toArtifact]);
+
+  const previewFile = useCallback(
+    async (file: JobResultFile) => {
       try {
-        const resp = await fetch(buildUrl(name));
+        onActiveArtifactChange(toArtifact(file));
+        const fileName = artifactName(file);
+        const resp = await fetch(buildUrl(fileName));
         const text = await resp.text();
-        const sep = text.includes('\t') ? '\t' : ',';
-        const rows = text
-          .split('\n')
-          .filter((l) => l.trim())
-          .slice(0, 20)
-          .map((l) => l.split(sep).map((c) => c.replace(/^"|"$/g, '').trim()));
-        setPreviewData(rows);
-        setPreviewName(name);
+        const isTable = /\.(csv|tsv)$/i.test(fileName);
+        setPreviewName(fileName);
+        if (isTable) {
+          const sep = fileName.toLowerCase().endsWith('.tsv') || text.includes('\t') ? '\t' : ',';
+          const rows = text
+            .split('\n')
+            .filter((l) => l.trim())
+            .slice(0, 40)
+            .map((l) => l.split(sep).map((c) => c.replace(/^"|"$/g, '').trim()));
+          setPreviewData(rows);
+          setPreviewText(null);
+          return;
+        }
+        if (fileName.toLowerCase().endsWith('.json')) {
+          try {
+            setPreviewText(JSON.stringify(JSON.parse(text), null, 2));
+          } catch {
+            setPreviewText(text.slice(0, 12000));
+          }
+        } else {
+          setPreviewText(text.slice(0, 12000));
+        }
+        setPreviewData(null);
       } catch {
         setPreviewData(null);
+        setPreviewText('无法读取预览内容');
       }
     },
-    [buildUrl]
+    [buildUrl, onActiveArtifactChange, toArtifact]
   );
+
+  const explainCurrentResult = useCallback(() => {
+    const artifact = activeArtifact;
+    const fileList = files.slice(0, 12).map((f) => `${artifactName(f)}(${f.type})`).join(', ');
+    if (artifact) {
+      onAskAgent(
+        `请解释当前正在查看的分析结果 artifact：jobId=${artifact.jobId}，toolId=${artifact.toolId}，文件=${artifact.name}，类型=${artifact.type}，标签=${artifact.label || '无'}。请结合这个文件说明结果含义、关键观察、可能的质量问题，以及下一步建议。`
+      );
+      return;
+    }
+    onAskAgent(
+      `请解释当前分析结果：jobId=${job.id}，toolId=${job.tool_id}，可用文件=${fileList || '暂无文件'}。请总结主要发现和下一步建议。`
+    );
+  }, [activeArtifact, files, job.id, job.tool_id, onAskAgent]);
 
   // Running / pending state
   if (job.status === 'running' || job.status === 'pending') {
@@ -1340,7 +2717,7 @@ function ResultView({ job, onAskAgent }: { job: ToolJob; onAskAgent: (prompt: st
   }
 
   // No result data
-  if (!result || files.length === 0) {
+  if (!result) {
     return (
       <div className={styles.resultView}>
         <div className={styles.resultHeader}>
@@ -1362,6 +2739,11 @@ function ResultView({ job, onAskAgent }: { job: ToolJob; onAskAgent: (prompt: st
       <div className={styles.resultHeader}>
         <h2 className={styles.resultTitle}>{job.name || job.tool_id}</h2>
         <span className={styles.resultStatus} data-status="done">完成</span>
+        <div className={styles.resultHeaderActions}>
+          <button className={styles.plotCardBtnPrimary} onClick={explainCurrentResult}>
+            <Icon name="message-circle" size={13} /> 解释当前结果
+          </button>
+        </div>
       </div>
       <div className={styles.resultBody}>
         {/* Tabs */}
@@ -1378,29 +2760,47 @@ function ResultView({ job, onAskAgent }: { job: ToolJob; onAskAgent: (prompt: st
           >
             数据文件 ({tables.length})
           </button>
+          <button
+            className={`${styles.resultTab} ${tab === 'details' ? styles.resultTabActive : ''}`}
+            onClick={() => setTab('details')}
+          >
+            详情
+          </button>
         </div>
 
         {/* Plots tab */}
         {tab === 'plots' && (
           <div className={styles.plotCardGrid}>
             {plots.map((f, idx) => (
-              <div key={f.name} className={styles.plotCard}>
+              <div
+                key={artifactName(f)}
+                className={`${styles.plotCard} ${activeArtifact?.jobId === job.id && activeArtifact.name === artifactName(f) ? styles.plotCardActive : ''}`}
+              >
                 <div className={styles.plotCardHeader}>
                   <span className={styles.plotCardNum}>图{idx + 1}</span>
                   <span className={styles.plotCardLabel}>
-                    {f.label || f.name.replace('.png', '')}
+                    {f.label || f.title || artifactName(f).replace(/\.[^.]+$/, '')}
                   </span>
                 </div>
                 <div className={styles.plotCardImg}>
                   <img
-                    src={buildUrl(f.name)}
-                    alt={f.label || f.name}
-                    onClick={() => setLightboxSrc(buildUrl(f.name))}
+                    src={buildUrl(artifactName(f))}
+                    alt={f.label || f.title || artifactName(f)}
+                    onClick={() => {
+                      const artifact = toArtifact(f);
+                      onActiveArtifactChange(artifact);
+                      setLightboxSrc(artifact.url || buildUrl(artifactName(f)));
+                    }}
                     style={{ cursor: 'zoom-in' }}
                   />
                 </div>
                 <div className={styles.plotCardFooter}>
-                  <a href={buildUrl(f.name)} download className={styles.plotCardBtn}>
+                  <a
+                    href={buildUrl(artifactName(f))}
+                    download
+                    className={styles.plotCardBtn}
+                    onClick={() => onActiveArtifactChange(toArtifact(f))}
+                  >
                     下载 PNG
                   </a>
                 </div>
@@ -1413,20 +2813,28 @@ function ResultView({ job, onAskAgent }: { job: ToolJob; onAskAgent: (prompt: st
         {tab === 'files' && (
           <div className={styles.fileCardGrid}>
             {tables.map((f) => (
-              <div key={f.name} className={styles.fileCard}>
+              <div
+                key={artifactName(f)}
+                className={`${styles.fileCard} ${activeArtifact?.jobId === job.id && activeArtifact.name === artifactName(f) ? styles.fileCardActive : ''}`}
+              >
                 <div className={styles.fileCardIcon}>
-                  {f.type === 'table' ? '📋' : f.type === 'text' ? '📝' : '📦'}
+                  <Icon name={f.type === 'table' ? 'database' : 'file'} size={26} />
                 </div>
-                <div className={styles.fileCardName}>{f.label || f.name}</div>
-                <div className={styles.fileCardDesc}>{f.name}</div>
+                <div className={styles.fileCardName}>{f.label || f.title || artifactName(f)}</div>
+                <div className={styles.fileCardDesc}>{artifactName(f)}</div>
                 <div className={styles.fileCardActions}>
-                  <a href={buildUrl(f.name)} download className={styles.plotCardBtn}>
+                  <a
+                    href={buildUrl(artifactName(f))}
+                    download
+                    className={styles.plotCardBtn}
+                    onClick={() => onActiveArtifactChange(toArtifact(f))}
+                  >
                     下载
                   </a>
-                  {f.name.endsWith('.csv') && (
+                  {(f.preview !== false && /\.(csv|tsv|txt|log|json)$/i.test(artifactName(f))) && (
                     <button
                       className={styles.plotCardBtnPrimary}
-                      onClick={() => previewCsv(f.name)}
+                      onClick={() => previewFile(f)}
                     >
                       预览
                     </button>
@@ -1437,32 +2845,75 @@ function ResultView({ job, onAskAgent }: { job: ToolJob; onAskAgent: (prompt: st
           </div>
         )}
 
+        {/* Details tab */}
+        {tab === 'details' && (
+          <div className={styles.jobDetails}>
+            <section className={styles.jobDetailSection}>
+              <h3>任务</h3>
+              <dl>
+                <div><dt>jobId</dt><dd>{job.id}</dd></div>
+                <div><dt>toolId</dt><dd>{job.tool_id}</dd></div>
+                <div><dt>version</dt><dd>{result?.tool?.version || '-'}</dd></div>
+                <div><dt>language</dt><dd>{result?.tool?.language || tool?.language || '-'}</dd></div>
+                <div><dt>status</dt><dd>{job.status}</dd></div>
+                <div><dt>projectId</dt><dd>{jobMeta?.projectId || job.project_id || '-'}</dd></div>
+                <div><dt>ackStatus</dt><dd>{jobMeta?.ackStatus || '-'}</dd></div>
+              </dl>
+            </section>
+            <section className={styles.jobDetailSection}>
+              <h3>参数</h3>
+              <pre>{JSON.stringify(jobMeta?.params || {}, null, 2)}</pre>
+            </section>
+            <section className={styles.jobDetailSection}>
+              <h3>输出</h3>
+              <pre>{JSON.stringify(result?.artifacts || result?.outputs || result?.manifest || result?.files || [], null, 2)}</pre>
+            </section>
+            {(result?.stdout || job.error) && (
+              <section className={styles.jobDetailSection}>
+                <h3>日志</h3>
+                <pre>{result?.stdout || job.error}</pre>
+              </section>
+            )}
+          </div>
+        )}
+
         {/* CSV preview */}
-        {previewData && (
+        {(previewData || previewText) && (
           <div className={styles.csvPreview}>
             <div className={styles.csvPreviewHeader}>
               <span>{previewName}</span>
-              <button onClick={() => setPreviewData(null)}>✕</button>
+              <button
+                onClick={() => {
+                  setPreviewData(null);
+                  setPreviewText(null);
+                }}
+              >
+                <Icon name="x" size={14} />
+              </button>
             </div>
             <div className={styles.csvPreviewBody}>
-              <table>
-                <tbody>
-                  {previewData.map((row, i) => (
-                    <tr key={i}>
-                      {row.map((cell, j) => (
-                        <td key={j}>{cell}</td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {previewData ? (
+                <table>
+                  <tbody>
+                    {previewData.map((row, i) => (
+                      <tr key={i}>
+                        {row.map((cell, j) => (
+                          <td key={j}>{cell}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <pre className={styles.textPreview}>{previewText}</pre>
+              )}
             </div>
           </div>
         )}
       </div>
 
       {/* Phase 8: Chain recommendations — show next-step suggestions */}
-      <ChainRecommendations job={job} resultFiles={result?.files} onAskAgent={onAskAgent} />
+      <ChainRecommendations job={job} resultFiles={result?.artifacts || result?.files} onAskAgent={onAskAgent} />
 
       {/* Lightbox */}
       {lightboxSrc && (
@@ -1496,10 +2947,10 @@ function ChainRecommendations({
     id: job.id,
     toolId: job.tool_id,
     resultFiles: resultFiles?.map((f) => ({
-      name: f.name,
+      name: artifactName(f),
       url: f.url || '',
       type: f.type,
-      label: f.label,
+      label: f.label || f.title,
     })),
   };
 
