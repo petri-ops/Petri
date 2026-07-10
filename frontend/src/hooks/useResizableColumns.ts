@@ -20,14 +20,38 @@ export interface ResizableColumnsState {
   ) => void;
 }
 
+const LS_KEY = 'biof3-pw-cols';
+
+interface StoredDims {
+  leftWidth?: number;
+  rightWidth?: number;
+  inputHeight?: number;
+  bottomTerminalHeight?: number;
+}
+
+const DEFAULTS = { leftWidth: 240, rightWidth: 340, inputHeight: 120, bottomTerminalHeight: 240 };
+
+function loadDims(initial: Partial<{
+  leftWidth: number; rightWidth: number; inputHeight: number; bottomTerminalHeight: number;
+}> = {}): StoredDims {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) return { ...DEFAULTS, ...JSON.parse(raw), ...initial };
+  } catch {}
+  return { ...DEFAULTS, ...initial };
+}
+
+function saveDims(dims: StoredDims): void {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(dims)); } catch {}
+}
+
 const MIN_LEFT_WIDTH = 96;
 const MIN_RIGHT_WIDTH = 96;
 const MIN_INPUT_HEIGHT = 48;
 
 /**
  * Encapsulates drag-to-resize state for the three-column layout + the
- * bottom-docked terminal. Returns a stable contract that panel components
- * can wire directly to their splitter divs.
+ * bottom-docked terminal. Dimensions persist to localStorage automatically.
  */
 export function useResizableColumns(
   initial: Partial<{
@@ -37,17 +61,48 @@ export function useResizableColumns(
     bottomTerminalHeight: number;
   }> = {},
 ): ResizableColumnsState {
-  const [leftWidth, setLeftWidth] = useState(initial.leftWidth ?? 240);
-  const [rightWidth, setRightWidth] = useState(initial.rightWidth ?? 340);
-  const [inputHeight, setInputHeight] = useState(initial.inputHeight ?? 120);
-  const [bottomTerminalHeight, setBottomTerminalHeight] = useState(
-    initial.bottomTerminalHeight ?? 240,
+  const init = loadDims(initial);
+
+  const [leftWidth, _setLeftWidth] = useState(init.leftWidth ?? DEFAULTS.leftWidth);
+  const [rightWidth, _setRightWidth] = useState(init.rightWidth ?? DEFAULTS.rightWidth);
+  const [inputHeight, _setInputHeight] = useState(init.inputHeight ?? DEFAULTS.inputHeight);
+  const [bottomTerminalHeight, _setBottomTerminalHeight] = useState(
+    init.bottomTerminalHeight ?? DEFAULTS.bottomTerminalHeight,
   );
 
-  // Mirror state in refs so the drag handlers always see the latest values
-  // without re-creating on every render.
+  // Keep a mutable ref so drag handlers always see the latest values without
+  // needing to recreate the closures on every render.
   const dims = useRef({ leftWidth, rightWidth, inputHeight, bottomTerminalHeight });
   dims.current = { leftWidth, rightWidth, inputHeight, bottomTerminalHeight };
+
+  // Wrap every setter to persist the new value into localStorage atomically.
+  const setLeftWidth = useCallback((n: number) => {
+    _setLeftWidth(n);
+    dims.current.leftWidth = n;
+    const d = dims.current;
+    saveDims({ leftWidth: d.leftWidth, rightWidth: d.rightWidth, inputHeight: d.inputHeight, bottomTerminalHeight: d.bottomTerminalHeight });
+  }, []);
+
+  const setRightWidth = useCallback((n: number) => {
+    _setRightWidth(n);
+    dims.current.rightWidth = n;
+    const d = dims.current;
+    saveDims({ leftWidth: d.leftWidth, rightWidth: d.rightWidth, inputHeight: d.inputHeight, bottomTerminalHeight: d.bottomTerminalHeight });
+  }, []);
+
+  const setInputHeight = useCallback((n: number) => {
+    _setInputHeight(n);
+    dims.current.inputHeight = n;
+    const d = dims.current;
+    saveDims({ leftWidth: d.leftWidth, rightWidth: d.rightWidth, inputHeight: d.inputHeight, bottomTerminalHeight: d.bottomTerminalHeight });
+  }, []);
+
+  const setBottomTerminalHeight = useCallback((n: number) => {
+    _setBottomTerminalHeight(n);
+    dims.current.bottomTerminalHeight = n;
+    const d = dims.current;
+    saveDims({ leftWidth: d.leftWidth, rightWidth: d.rightWidth, inputHeight: d.inputHeight, bottomTerminalHeight: d.bottomTerminalHeight });
+  }, []);
 
   const startColumnResize = useCallback(
     (which: 'left' | 'right' | 'input') => (e: React.MouseEvent) => {
@@ -76,37 +131,37 @@ export function useResizableColumns(
       document.body.style.cursor = which === 'input' ? 'ns-resize' : 'ew-resize';
       document.body.style.userSelect = 'none';
     },
-    [],
+    [setLeftWidth, setRightWidth, setInputHeight],
   );
 
   const startBottomTerminalResize = useCallback(
-  (e: React.MouseEvent, clamp: { min?: number; max?: number } = {}) => {
-    e.preventDefault();
-    const startY = e.clientY;
-    const startHeight = dims.current.bottomTerminalHeight;
-    const minHeight = clamp.min ?? 120;
-    const maxHeight = clamp.max ?? 1_000_000;
+    (e: React.MouseEvent, clamp: { min?: number; max?: number } = {}) => {
+      e.preventDefault();
+      const startY = e.clientY;
+      const startHeight = dims.current.bottomTerminalHeight;
+      const minHeight = clamp.min ?? 120;
+      const maxHeight = clamp.max ?? 1_000_000;
 
-    const onMove = (ev: MouseEvent) => {
-      const next = Math.min(
-        maxHeight,
-        Math.max(minHeight, startHeight - (ev.clientY - startY))
-      );
-      setBottomTerminalHeight(next);
-    };
-    const onUp = () => {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-    };
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-    document.body.style.cursor = 'ns-resize';
-    document.body.style.userSelect = 'none';
-  },
-  []
-);
+      const onMove = (ev: MouseEvent) => {
+        const next = Math.min(
+          maxHeight,
+          Math.max(minHeight, startHeight - (ev.clientY - startY)),
+        );
+        setBottomTerminalHeight(next);
+      };
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+      document.body.style.cursor = 'ns-resize';
+      document.body.style.userSelect = 'none';
+    },
+    [setBottomTerminalHeight],
+  );
 
   return {
     leftWidth,
