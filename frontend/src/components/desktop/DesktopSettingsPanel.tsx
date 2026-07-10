@@ -4,13 +4,14 @@
  * 内容与原 DesktopSettingsModal 相同，但渲染为浮动面板而非全屏遮罩模态。
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import {
   useAiSettings,
   DEFAULT_CHAT_MODEL_PRESETS,
   type ChatModelPreset,
 } from '@/hooks/useAiSettings';
+import { useAutoUpdate } from '@/hooks/useAutoUpdate';
 
 interface Props {
   onClose: () => void;
@@ -21,70 +22,12 @@ interface Props {
 
 /** UpdateChecker — 检查应用更新（electron-updater 前端 UI） */
 function UpdateChecker(): React.ReactElement | null {
-  const [checking, setChecking] = useState(false);
-  const [updateInfo, setUpdateInfo] = useState<{ version: string } | null>(null);
-  const [downloading, setDownloading] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [downloaded, setDownloaded] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
-
-  const handleCheck = useCallback(async () => {
-    if (!window.biof3Desktop?.updater) return;
-    setChecking(true);
-    setMsg(null);
-    try {
-      const result = await window.biof3Desktop.updater.check();
-      if (!result.ok) {
-        setMsg(result.error || '检查失败');
-      } else if (!result.hasUpdate) {
-        setMsg('已是最新版本');
-      } else if (result.info) {
-        setUpdateInfo({ version: result.info.version });
-      }
-    } catch (e) {
-      setMsg(String(e));
-    }
-    setChecking(false);
-  }, []);
-
-  const handleDownload = useCallback(async () => {
-    if (!window.biof3Desktop?.updater) return;
-    setDownloading(true);
-    setProgress(0);
-    try {
-      await window.biof3Desktop.updater.download();
-    } catch (e) {
-      setMsg(String(e));
-      setDownloading(false);
-    }
-  }, []);
-
-  const handleInstall = useCallback(async () => {
-    if (!window.biof3Desktop?.updater) return;
-    await window.biof3Desktop.updater.install();
-  }, []);
-
-  useEffect(() => {
-    if (!window.biof3Desktop?.updater) return;
-    const off1 = window.biof3Desktop.updater.onDownloadProgress((p) =>
-      setProgress(Math.round(p.ratio * 100))
-    );
-    const off2 = window.biof3Desktop.updater.onUpdateDownloaded(() => {
-      setDownloading(false);
-      setDownloaded(true);
-    });
-    const off3 = window.biof3Desktop.updater.onError((m) => {
-      setMsg(m);
-      setDownloading(false);
-    });
-    return () => {
-      off1?.();
-      off2?.();
-      off3?.();
-    };
-  }, []);
-
   if (!window.biof3Desktop?.updater) return null;
+
+  const { checking, available, availableVersion, downloading, progress, downloaded, error, check, download, install } =
+    useAutoUpdate();
+
+  const pct = progress !== null ? Math.round(progress * 100) : 0;
 
   return (
     <div className="biof3-update-section">
@@ -92,31 +35,31 @@ function UpdateChecker(): React.ReactElement | null {
         <button
           type="button"
           className="biof3-btn biof3-btn--primary biof3-btn--sm"
-          onClick={handleInstall}
+          onClick={install}
         >
           重启安装更新
         </button>
       ) : downloading ? (
-        <span className="biof3-update-progress">下载中 {progress.toFixed(0)}%</span>
-      ) : updateInfo ? (
+        <span className="biof3-update-progress">下载中 {pct}%</span>
+      ) : available ? (
         <button
           type="button"
           className="biof3-btn biof3-btn--primary biof3-btn--sm"
-          onClick={handleDownload}
+          onClick={download}
         >
-          下载 v{updateInfo.version}
+          下载 v{availableVersion}
         </button>
       ) : (
         <button
           type="button"
           className="biof3-btn biof3-btn--ghost biof3-btn--sm"
-          onClick={handleCheck}
+          onClick={check}
           disabled={checking}
         >
           {checking ? '检查中…' : '检查更新'}
         </button>
       )}
-      {msg && <span className="biof3-field__hint">{msg}</span>}
+      {error && <span className="biof3-field__hint">{error}</span>}
     </div>
   );
 }

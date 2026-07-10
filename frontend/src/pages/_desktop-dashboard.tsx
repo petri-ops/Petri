@@ -15,6 +15,7 @@ import { Icon } from '@/components/icons/Icon';
 import { tools } from '@/pages/_data';
 import { TOOL_IMAGES } from '@/pages/_tool-images';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
+import { useAutoUpdate } from '@/hooks/useAutoUpdate';
 import { listProjects, createProject } from '@/lib/project-store';
 import type { Project } from '@/lib/project-types';
 import styles from './_desktop-dashboard.module.css';
@@ -117,15 +118,19 @@ export function DesktopDashboard({
   const [newProjectDesc, setNewProjectDesc] = useState('');
   const [creatingProject, setCreatingProject] = useState(false);
   const [dataDir, setDataDir] = useState<string>('');
-  const [hasUpdate, setHasUpdate] = useState(false);
-  const [updateVersion, setUpdateVersion] = useState('');
-  // M2-6 / E4：更新触发闭环状态
+  // §7 useAutoUpdate: all update state consolidated in hook
   const [updOpen, setUpdOpen] = useState(false);
-  const [updDownloading, setUpdDownloading] = useState(false);
-  const [updProgress, setUpdProgress] = useState(0); // 0..1
-  const [updDownloaded, setUpdDownloaded] = useState(false);
-  const [updError, setUpdError] = useState('');
-  const [updInstalling, setUpdInstalling] = useState(false);
+  const {
+    available: hasUpdate,
+    availableVersion: updateVersion,
+    downloading: updDownloading,
+    progress: updProgress,
+    downloaded: updDownloaded,
+    error: updError,
+    installing: updInstalling,
+    download,
+    install,
+  } = useAutoUpdate();
   // M2-8：备份/导出闭环
   const [exporting, setExporting] = useState(false);
   const [exportMsg, setExportMsg] = useState('');
@@ -223,76 +228,6 @@ export function DesktopDashboard({
       setTimeout(() => setExportMsg(''), 3000);
     }
   }, [exporting]);
-
-  // M2-1：启动时检查更新
-  useEffect(() => {
-    (async () => {
-      try {
-        const r = await window.biof3Desktop?.updater?.check();
-        if (r?.ok && r.hasUpdate) {
-          setHasUpdate(true);
-          setUpdateVersion(r.info?.version || r.version || '');
-        }
-      } catch {
-        // ignore
-      }
-    })();
-  }, []);
-
-  // M2-6 / E4：监听更新下载进度 / 完成 / 错误
-  useEffect(() => {
-    const u = window.biof3Desktop?.updater;
-    if (!u) return;
-    const offProgress = u.onDownloadProgress?.((p) => {
-      setUpdProgress(p?.ratio ?? 0);
-    });
-    const offDone = u.onUpdateDownloaded?.(() => {
-      setUpdDownloading(false);
-      setUpdProgress(1);
-      setUpdDownloaded(true);
-    });
-    const offErr = u.onError?.((msg: string) => {
-      setUpdDownloading(false);
-      setUpdInstalling(false);
-      setUpdError(msg || '更新失败');
-    });
-    return () => {
-      offProgress?.();
-      offDone?.();
-      offErr?.();
-    };
-  }, []);
-
-  // M2-6 / E4：点击"下载并重启"
-  const handleDownload = useCallback(async () => {
-    setUpdError('');
-    setUpdDownloading(true);
-    setUpdProgress(0);
-    setUpdDownloaded(false);
-    try {
-      const r = await window.biof3Desktop?.updater?.download();
-      if (r && !r.ok) {
-        setUpdDownloading(false);
-        setUpdError(r.error || '下载失败');
-      }
-    } catch (e) {
-      setUpdDownloading(false);
-      setUpdError(String(e) || '下载失败');
-    }
-  }, []);
-
-  // M2-6 / E4：下载完成 → 安装并重启
-  const handleInstall = useCallback(async () => {
-    setUpdError('');
-    setUpdInstalling(true);
-    try {
-      await window.biof3Desktop?.updater?.install();
-      // install() 会触发 quitAndInstall，应用会重启
-    } catch (e) {
-      setUpdInstalling(false);
-      setUpdError(String(e) || '重启失败');
-    }
-  }, []);
 
   useEffect(() => {
     fetchRecentJobs();
@@ -806,7 +741,7 @@ export function DesktopDashboard({
                 <button
                   type="button"
                   className={`${styles.updBtn} ${styles.updBtnPrimary}`}
-                  onClick={handleInstall}
+                  onClick={install}
                   disabled={updInstalling}
                 >
                   {updInstalling ? '重启中…' : '下载并重启'}
@@ -815,7 +750,7 @@ export function DesktopDashboard({
                 <button
                   type="button"
                   className={`${styles.updBtn} ${styles.updBtnPrimary}`}
-                  onClick={handleDownload}
+                  onClick={download}
                   disabled={updDownloading}
                 >
                   {updDownloading ? '下载中…' : '下载并重启'}
