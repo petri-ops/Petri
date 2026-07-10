@@ -1,6 +1,8 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, renderHook, type RenderHookResult } from '@testing-library/react';
 import { useResizableColumns } from '@/hooks/useResizableColumns';
+
+const LS_KEY = 'biof3-pw-cols';
 
 function flush() {
   return act(async () => {
@@ -15,6 +17,12 @@ function fireMouse(target: EventTarget, type: string, init: { clientX?: number; 
 }
 
 describe('useResizableColumns', () => {
+  beforeEach(() => {
+    localStorage.removeItem(LS_KEY);
+  });
+  afterEach(() => {
+    localStorage.removeItem(LS_KEY);
+  });
   it('exposes sane initial sizes', () => {
     const { result } = renderHook(() => useResizableColumns());
     expect(result.current.leftWidth).toBe(240);
@@ -122,5 +130,67 @@ describe('useResizableColumns', () => {
     fireMouse(document, 'mouseup');
     await flush();
     expect(result.current.bottomTerminalHeight).toBe(140);
+  });
+
+  // ---- §3 localStorage persistence ----
+
+  it('writes all four dims to localStorage on each resize', async () => {
+    localStorage.removeItem(LS_KEY);
+    const { result } = renderHook(() => useResizableColumns());
+    await flush();
+    const handler = result.current.startColumnResize('left');
+    const fakeEvent = { preventDefault: () => {}, clientX: 0, clientY: 0 } as unknown as React.MouseEvent;
+    handler(fakeEvent);
+    fireMouse(document, 'mousemove', { clientX: 100 });
+    fireMouse(document, 'mouseup');
+    await flush();
+
+    const saved = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+    expect(saved.leftWidth).toBe(340); // 240 + 100
+    expect(saved.rightWidth).toBe(340);
+    expect(saved.inputHeight).toBe(120);
+    expect(saved.bottomTerminalHeight).toBe(240);
+  });
+
+  it('restores dimensions from localStorage on re-mount', async () => {
+    localStorage.setItem(LS_KEY, JSON.stringify({ leftWidth: 500, rightWidth: 200, inputHeight: 90, bottomTerminalHeight: 300 }));
+    const { result } = renderHook(() => useResizableColumns());
+    expect(result.current.leftWidth).toBe(500);
+    expect(result.current.rightWidth).toBe(200);
+    expect(result.current.inputHeight).toBe(90);
+    expect(result.current.bottomTerminalHeight).toBe(300);
+  });
+
+  it('prefers localStorage over defaults but caller overrides override localStorage', async () => {
+    localStorage.setItem(LS_KEY, JSON.stringify({ leftWidth: 999, rightWidth: 888, inputHeight: 77, bottomTerminalHeight: 666 }));
+    const { result } = renderHook(() =>
+      useResizableColumns({ leftWidth: 300 }), // only leftWidth overridden
+    );
+    expect(result.current.leftWidth).toBe(300);   // caller wins
+    expect(result.current.rightWidth).toBe(888); // LS
+    expect(result.current.inputHeight).toBe(77);  // LS
+    expect(result.current.bottomTerminalHeight).toBe(666); // LS
+  });
+
+  it('persists on bottomTerminalHeight resize', async () => {
+    const { result } = renderHook(() => useResizableColumns({ bottomTerminalHeight: 200 }));
+    await flush();
+    result.current.startBottomTerminalResize(
+      { preventDefault: () => {}, clientY: 0 } as unknown as React.MouseEvent,
+    );
+    fireMouse(document, 'mousemove', { clientY: 80 }); // 200 - 80 = 120
+    fireMouse(document, 'mouseup');
+    await flush();
+
+    const saved = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+    expect(saved.bottomTerminalHeight).toBe(120);
+  });
+
+  it('survives corrupted localStorage gracefully', async () => {
+    localStorage.setItem(LS_KEY, 'not valid json {{{');
+    const { result } = renderHook(() => useResizableColumns());
+    // Should fall back to defaults without crashing
+    expect(result.current.leftWidth).toBe(240);
+    expect(result.current.rightWidth).toBe(340);
   });
 });
