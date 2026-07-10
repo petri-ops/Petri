@@ -15,6 +15,7 @@ import {
 } from './copilotConversationsClient';
 import { useCopilotContext } from '@/lib/copilotContextProvider';
 import { useConversations } from '@/hooks/useConversations';
+import { biof3Events, subscribeBioF3Event } from '@/lib/events';
 import {
   useAiSettings,
   type ChatModelPreset,
@@ -317,14 +318,11 @@ export function SimpleChat({
   // Toolbox clicks / "explain current result" / chain recommendations dispatch this
   // event with a ready-to-send prompt; we pick it up here and send it.
   useEffect(() => {
-    const onAsk = (event: Event) => {
-      const detail = (event as CustomEvent<{ prompt?: string }>).detail || {};
-      const prompt = typeof detail.prompt === 'string' ? detail.prompt.trim() : '';
-      if (!prompt) return;
-      sendRef.current(prompt);
-    };
-    window.addEventListener('biof3:copilot-ask', onAsk as EventListener);
-    return () => window.removeEventListener('biof3:copilot-ask', onAsk as EventListener);
+    const unsub = subscribeBioF3Event(biof3Events.copilotAsk, ({ prompt }) => {
+      const p = typeof prompt === 'string' ? prompt.trim() : '';
+      if (p) sendRef.current(p);
+    });
+    return unsub;
   }, []);
 
   const stop = useCallback(() => {

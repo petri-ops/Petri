@@ -16,6 +16,7 @@ import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon, type IconName } from '@/components/icons/Icon';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
+import { biof3Events, dispatchBioF3Event } from '@/lib/events';
 import './desktop.css';
 
 const ONBOARDING_FLAG = 'biof3-onboarding-completed';
@@ -45,8 +46,7 @@ export function DesktopOnboarding(): React.ReactElement | null {
       localStorage.setItem(ONBOARDING_FLAG, '1');
       if (mode) localStorage.setItem(MODE_FLAG, mode);
     } catch {}
-    // 触发关闭：通过自定义事件让挂载点卸载本组件
-    window.dispatchEvent(new CustomEvent('biof3:onboarding-done'));
+    dispatchBioF3Event(biof3Events.onboardingDone);
   }, [mode]);
 
   const goToPluginStore = useCallback(() => {
@@ -54,7 +54,7 @@ export function DesktopOnboarding(): React.ReactElement | null {
       localStorage.setItem(ONBOARDING_FLAG, '1');
       if (mode) localStorage.setItem(MODE_FLAG, mode);
     } catch {}
-    window.dispatchEvent(new CustomEvent('biof3:onboarding-done'));
+    dispatchBioF3Event(biof3Events.onboardingDone);
     navigate('/admin');
   }, [mode, navigate]);
 

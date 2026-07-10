@@ -7,6 +7,7 @@ import { DesktopOnboarding } from '@/components/desktop/DesktopOnboarding';
 import { BackendStatusProvider } from '@/components/backend/BackendStatusProvider';
 import { BackendDownBanner } from '@/components/backend/BackendDownBanner';
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
+import { biof3Events, subscribeBioF3Event } from '@/lib/events';
 import ToolsPage from '@/pages/tools';
 import FigCodePage from '@/pages/figcode';
 import SingleCellPage from '@/pages/single-cell';
@@ -29,6 +30,8 @@ configureApi({ getApiPrefix: () => getApiPrefix(), getToken });
 const ONBOARDING_FLAG = 'biof3-onboarding-completed';
 const THEME_STORAGE_KEY = 'biof3-theme';
 
+import { biof3Events, subscribeBioF3Event } from '@/lib/events';
+
 function DesktopOnboardingMount(): React.ReactElement | null {
   const [show, setShow] = useState(false);
 
@@ -40,8 +43,8 @@ function DesktopOnboardingMount(): React.ReactElement | null {
       setShow(true);
     }
     const handler = () => setShow(false);
-    window.addEventListener('biof3:onboarding-done', handler);
-    return () => window.removeEventListener('biof3:onboarding-done', handler);
+    const unsub = subscribeBioF3Event(biof3Events.onboardingDone, handler);
+    return unsub;
   }, []);
 
   if (!show) return null;

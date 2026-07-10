@@ -30,6 +30,7 @@ import {
 import { useResizableColumns } from '@/hooks/useResizableColumns';
 import { usePluginStore } from '@/hooks/usePluginStore';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
+import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
 import { getNextSteps, buildChainPrompt, type ResolvedJob } from '@/lib/workflow-chains';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
@@ -712,8 +713,8 @@ export function ProjectWorkspace(): React.ReactElement {
         .then(setAllProjects)
         .catch(() => {});
     };
-    window.addEventListener('biof3:soft-refresh', handler);
-    return () => window.removeEventListener('biof3:soft-refresh', handler);
+    const unsub = subscribeBioF3Event(biof3Events.softRefresh, handler);
+    return unsub;
   }, [fetchData, refreshConversations]);
 
   useEffect(() => {
@@ -875,19 +876,19 @@ export function ProjectWorkspace(): React.ReactElement {
   }, [jobs, normalizeToolStatus, openRightPanel, projectId]);
 
   useEffect(() => {
-    const handler = (event: Event) => {
-      const detail = (event as CustomEvent<{ toolJobId?: string }>).detail;
-      if (detail && detail.toolJobId) {
-        handleOpenResult(detail.toolJobId);
+    const handler = (detail: unknown) => {
+      const d = detail as { toolJobId?: string } | undefined;
+      if (d?.toolJobId) {
+        handleOpenResult(d.toolJobId);
       }
     };
-    window.addEventListener('biof3:project-open-result', handler);
-    return () => window.removeEventListener('biof3:project-open-result', handler);
+    const unsub = subscribeBioF3Event(biof3Events.projectOpenResult, handler);
+    return unsub;
   }, [handleOpenResult]);
 
   /** Dispatch a copilot-ask event so the embedded SimpleChat picks it up */
   const handleAskAgent = useCallback((prompt: string) => {
-    window.dispatchEvent(new CustomEvent('biof3:copilot-ask', { detail: { prompt } }));
+    dispatchBioF3Event(biof3Events.copilotAsk, { prompt });
   }, []);
 
   if (loading) {
