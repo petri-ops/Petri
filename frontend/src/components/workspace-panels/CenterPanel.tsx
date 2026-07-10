@@ -81,7 +81,7 @@ export interface CenterPanelContext {
   handleAskAgent: (prompt: string) => void;
   handleOpenWorkspacePath: () => void | Promise<void>;
   openScheduledResults: () => void;
-  startResize: (which: 'left' | 'right' | 'input') => (e: React.MouseEvent) => void;
+  startColumnResize: (which: 'left' | 'right' | 'input') => (e: React.MouseEvent) => void;
   startSummaryResize: (e: React.PointerEvent | React.MouseEvent) => void;
 }
 
@@ -127,7 +127,7 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
               />
             )}
           </div>
-          <div className={styles.resizeHandleH} onMouseDown={ctx.startResize('input')} />
+          <div className={styles.resizeHandleH} onMouseDown={ctx.startColumnResize('input')} />
         </SessionFrameView>
       )}
       {workspaceMode === 'scheduled' && (

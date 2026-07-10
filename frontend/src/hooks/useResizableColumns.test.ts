@@ -92,4 +92,35 @@ describe('useResizableColumns', () => {
     expect(setCursor).toHaveBeenCalledWith('');
     expect(setSelect).toHaveBeenCalledWith('');
   });
+
+  it('honors caller-supplied clamp on the bottom terminal resize', async () => {
+    const { result } = renderHook(() => useResizableColumns({ bottomTerminalHeight: 200 }));
+    const fakeEvent = { preventDefault: () => {}, clientY: 0 } as unknown as React.MouseEvent;
+
+    // Plan 1.6 §4.4 — project-workspace passes { min: 140, max: 520 } to
+    // keep the bottom terminal from eating the whole viewport. Verify
+    // that clamp is applied per drag (using the value at drag-start).
+    await flush();
+    result.current.startBottomTerminalResize(fakeEvent, { min: 140, max: 520 });
+
+    // Drag up by 800px (clientY = -800) — naive next = 200 - (-800) = 1000 → clamp to max 520.
+    fireMouse(document, 'mousemove', { clientY: -800 });
+    fireMouse(document, 'mouseup');
+    await flush();
+    expect(result.current.bottomTerminalHeight).toBe(520);
+
+    // Drag down by 200px (clientY = +200) — naive next = 520 - 200 = 320 → fits in [140, 520].
+    result.current.startBottomTerminalResize(fakeEvent, { min: 140, max: 520 });
+    fireMouse(document, 'mousemove', { clientY: 200 });
+    fireMouse(document, 'mouseup');
+    await flush();
+    expect(result.current.bottomTerminalHeight).toBe(320);
+
+    // Drag down by 10_000px (clientY = +10_000) — naive next = 320 - 10000 = -9680 → clamp to min 140.
+    result.current.startBottomTerminalResize(fakeEvent, { min: 140, max: 520 });
+    fireMouse(document, 'mousemove', { clientY: 10_000 });
+    fireMouse(document, 'mouseup');
+    await flush();
+    expect(result.current.bottomTerminalHeight).toBe(140);
+  });
 });

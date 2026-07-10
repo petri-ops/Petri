@@ -11,8 +11,13 @@ export interface ResizableColumnsState {
   setBottomTerminalHeight: (n: number) => void;
   /** Mouse-down handler for left/right/input column splitters. */
   startColumnResize: (which: 'left' | 'right' | 'input') => (e: React.MouseEvent) => void;
-  /** Pointer-down handler for the bottom terminal drag strip. */
-  startBottomTerminalResize: (e: React.MouseEvent) => void;
+  /** Pointer-down handler for the bottom terminal drag strip.
+   * Optional `clamp` lets callers cap the height (e.g. workspace
+   * caps at 520px so the terminal never eats the whole viewport). */
+  startBottomTerminalResize: (
+    e: React.MouseEvent,
+    clamp?: { min?: number; max?: number }
+  ) => void;
 }
 
 const MIN_LEFT_WIDTH = 96;
@@ -74,13 +79,20 @@ export function useResizableColumns(
     [],
   );
 
-  const startBottomTerminalResize = useCallback((e: React.MouseEvent) => {
+  const startBottomTerminalResize = useCallback(
+  (e: React.MouseEvent, clamp: { min?: number; max?: number } = {}) => {
     e.preventDefault();
     const startY = e.clientY;
     const startHeight = dims.current.bottomTerminalHeight;
+    const minHeight = clamp.min ?? 120;
+    const maxHeight = clamp.max ?? 1_000_000;
 
     const onMove = (ev: MouseEvent) => {
-      setBottomTerminalHeight(Math.max(120, startHeight - (ev.clientY - startY)));
+      const next = Math.min(
+        maxHeight,
+        Math.max(minHeight, startHeight - (ev.clientY - startY))
+      );
+      setBottomTerminalHeight(next);
     };
     const onUp = () => {
       document.removeEventListener('mousemove', onMove);
@@ -92,7 +104,9 @@ export function useResizableColumns(
     document.addEventListener('mouseup', onUp);
     document.body.style.cursor = 'ns-resize';
     document.body.style.userSelect = 'none';
-  }, []);
+  },
+  []
+);
 
   return {
     leftWidth,

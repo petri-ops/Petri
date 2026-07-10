@@ -27,6 +27,7 @@ import {
   useConversations,
   useOtherConversations,
 } from '@/hooks/useConversations';
+import { useResizableColumns } from '@/hooks/useResizableColumns';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import { getNextSteps, buildChainPrompt, type ResolvedJob } from '@/lib/workflow-chains';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
@@ -193,12 +194,22 @@ export function ProjectWorkspace(): React.ReactElement {
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [summarySize, setSummarySize] = useState({ width: 320, height: 296 });
 
-  // Resizable panel dimensions
-  const [leftWidth, setLeftWidth] = useState(240);
-  const [rightWidth, setRightWidth] = useState(340);
-  const [inputHeight, setInputHeight] = useState(120);
+  // Resizable panel dimensions — Plan 1.6 §4.4 [HIGH]. State + drag
+  // handlers now live in useResizableColumns (stable refs, no stale
+  // closure on drag), so the splitter drags don't tear with re-renders.
+  const {
+    leftWidth,
+    setLeftWidth,
+    rightWidth,
+    setRightWidth,
+    inputHeight,
+    setInputHeight,
+    bottomTerminalHeight,
+    setBottomTerminalHeight,
+    startColumnResize,
+    startBottomTerminalResize,
+  } = useResizableColumns();
   const [bottomTerminalOpen, setBottomTerminalOpen] = useState(false);
-  const [bottomTerminalHeight, setBottomTerminalHeight] = useState(240);
   const [rightTab, setRightTab] = useState<RightPanelMode>('home');
   const [openRightTabs, setOpenRightTabs] = useState<RightPanelMode[]>(['home']);
   const [rightToolMenuOpen, setRightToolMenuOpen] = useState(false);
@@ -292,35 +303,10 @@ export function ProjectWorkspace(): React.ReactElement {
     });
   }, []);
 
-  // Drag-to-resize handler factory
-  const startResize = useCallback((which: 'left' | 'right' | 'input') => (e: React.MouseEvent) => {
-    e.preventDefault();
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const startLeft = leftWidth;
-    const startRight = rightWidth;
-    const startInput = inputHeight;
-
-    const onMove = (ev: MouseEvent) => {
-      if (which === 'left') {
-        setLeftWidth(Math.max(96, startLeft + ev.clientX - startX));
-      } else if (which === 'right') {
-        setRightWidth(Math.max(96, startRight - (ev.clientX - startX)));
-      } else if (which === 'input') {
-        setInputHeight(Math.max(48, startInput - (ev.clientY - startY)));
-      }
-    };
-    const onUp = () => {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-    };
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-    document.body.style.cursor = which === 'input' ? 'ns-resize' : 'ew-resize';
-    document.body.style.userSelect = 'none';
-  }, [leftWidth, rightWidth, inputHeight]);
+  // Drag-to-resize handlers come from useResizableColumns above. The
+  // project-workspace panel-specific resize (startSummaryResize) stays
+  // inline because it operates on a different state slot (summarySize)
+  // with custom clamp logic tied to sessionFrame dimensions.
 
   const startSummaryResize = useCallback((e: React.PointerEvent | React.MouseEvent) => {
     e.preventDefault();
@@ -370,26 +356,15 @@ export function ProjectWorkspace(): React.ReactElement {
     document.body.style.userSelect = 'none';
   }, [sessionFrameHeight, sessionFrameWidth, summarySize.height, summarySize.width]);
 
-  const startBottomTerminalResize = useCallback((event: React.MouseEvent) => {
-    event.preventDefault();
-    const startY = event.clientY;
-    const startHeight = bottomTerminalHeight;
-    const onMove = (moveEvent: MouseEvent) => {
-      setBottomTerminalHeight(
-        Math.min(520, Math.max(140, startHeight - (moveEvent.clientY - startY)))
-      );
-    };
-    const onUp = () => {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-    };
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-    document.body.style.cursor = 'ns-resize';
-    document.body.style.userSelect = 'none';
-  }, [bottomTerminalHeight]);
+  // Bottom-terminal drag comes from useResizableColumns above; we clamp
+  // the height to the workspace viewport (140-520) inline so the
+  // terminal never eats the entire screen.
+  const handleBottomTerminalResize = useCallback(
+    (event: React.MouseEvent) => {
+      startBottomTerminalResize(event, { min: 140, max: 520 });
+    },
+    [startBottomTerminalResize]
+  );
 
   const [allProjects, setAllProjects] = useState<Project[]>([]);
 
@@ -982,7 +957,7 @@ export function ProjectWorkspace(): React.ReactElement {
     handleAskAgent,
     handleOpenWorkspacePath,
     openScheduledResults,
-    startResize,
+    startColumnResize,
     startSummaryResize,
   };
 
@@ -1091,7 +1066,7 @@ export function ProjectWorkspace(): React.ReactElement {
         {leftOpen && (
           <>
             <LeftPanel ctx={leftPanelCtx} />
-            <div className={styles.resizeHandleV} onMouseDown={startResize('left')} />
+            <div className={styles.resizeHandleV} onMouseDown={startColumnResize('left')} />
           </>
         )}
 
@@ -1102,14 +1077,14 @@ export function ProjectWorkspace(): React.ReactElement {
           ctx={rightPanelCtx}
           visible={rightOpen}
           workspaceMode={workspaceMode}
-          onResize={startResize('right')}
+          onResize={startColumnResize('right')}
         />
         <BottomTerminal
           open={bottomTerminalOpen}
           height={bottomTerminalHeight}
           leftOffset={leftOpen ? leftWidth + 5 : 0}
           workspacePath={project.workspacePath}
-          onResize={startBottomTerminalResize}
+          onResize={handleBottomTerminalResize}
           onClose={() => setBottomTerminalOpen(false)}
         />
       </div>
