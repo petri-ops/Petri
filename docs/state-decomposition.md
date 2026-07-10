@@ -345,11 +345,10 @@ The per-project key is set in `CopilotChat.tsx:593-594` (`copilotChat` knows its
 
 ## 4. Leaks and risks (prioritized)
 
-### 4.1 [HIGH] Three backend-status pollers for the same IPC
+### 4.1 [HIGH] Three backend-status pollers for the same IPC — ✅ FIXED 2026-07-10
 
-- Where: `useBackendStatus` (10s) + `BackendStatusProvider` (5s) + `project-workspace` poll (15s) + `TerminalPanel.snapshot` (5s, subset).
-- Risk: Each renderer hook fires its own `backend:status` IPC; if `project-workspace` mounts, the hook's 10s interval runs concurrent to the App-level 5s interval. Each triggers a fresh server-side aggregate. Wasted CPU on render; flicker on state.
-- Fix: Drop the `useBackendStatus` hook. All consumers should read from `BackendStatusProvider` Context. Remove the local `setBackendStatus(polledBackendStatus)` effect.
+- ~~`useBackendStatus` (10s) + `BackendStatusProvider` (5s) + `project-workspace` poll (15s) + `TerminalPanel.snapshot` (5s)~~
+- `useBackendStatus` hook deleted. `project-workspace.tsx` now uses `BackendStatusProvider` Context directly (5s poll). ✅
 
 ### 4.2 [HIGH] Copilot context singleton has no contract
 
@@ -363,11 +362,10 @@ The per-project key is set in `CopilotChat.tsx:593-594` (`copilotChat` knows its
 - Risk: User opens the same project in chat and in legacy Copilot — only the chat that writes wins the active id. Refresh / soft-reload: each panel issues its own `listConversations`. New conversation created from left panel doesn't reach SimpleChat until its next reload (5s).
 - Fix: One source of truth — `useConversations(projectId)` hook (SWR-style with revalidate-on-focus). SimpleChat reads from hook; project-workspace sidebar reads from same hook; legacy CopilotChat page-key points at the same cache.
 
-### 4.4 [HIGH] `useResizableColumns` exists but is bypassed by inline duplicate
+### 4.4 [HIGH] `useResizableColumns` bypassed by inline duplicate — ✅ FIXED 2026-07-10
 
-- Where: `frontend/src/hooks/useResizableColumns.ts` vs `project-workspace.tsx` line 280-376.
-- Risk: Future hooks changes won't reach project-workspace. `bottomTerminalHeight` and summary card lives on `useState` — lost on remount. No persistence.
-- Fix: Replace inline state with the hook; add LS persistence in the hook (one-key-per-dimension with clamping), or split into `useLocalStorageState('biof3-pw-cols', {left:240,right:340,input:120,bottom:240})`.
+- ~~`frontend/src/hooks/useResizableColumns.ts` vs `project-workspace.tsx` inline duplicate~~
+- Hook adopted in project-workspace. `biof3-pw-cols` LS persistence added. ✅
 
 ### 4.5 [HIGH] AI model preset state duplicated
 
@@ -393,17 +391,15 @@ The per-project key is set in `CopilotChat.tsx:593-594` (`copilotChat` knows its
 - Risk: The legacy key is read first if `ctx.page !== 'desktop-project'`; for the project workspace the per-project key is read. Two reads, two writes — the global key can become stale and continue to drive the "wrong project" state.
 - Fix: One canonical key (e.g. always `biof3_copilot_active_conv:${ctx.projectId ?? 'global'}`). Migrate read path; delete the unprefixed key.
 
-### 4.9 [MED] Update flow state duplicated
+### 4.9 [MED] Update flow state duplicated — ✅ FIXED 2026-07-10
 
-- Where: `_desktop-dashboard.tsx:127-131`, `DesktopSettingsPanel.tsx UpdateSection`.
-- Risk: Dashboard starts download (`updDownloading=true`); user opens Settings — Settings gets `updateInfo` from its own poll at `useEffect` line 73/92 of `DesktopSettingsPanel.tsx`, may overwrite mid-flight.
-- Fix: One hook `useAutoUpdate()` that exposes `{availableVersion, downloading, ratio, downloaded, error, install}`. Both panels render.
+- ~~`_desktop-dashboard.tsx` holds `updOpen/...`; `DesktopSettingsPanel` holds the same fields.~~
+- `useAutoUpdate()` hook created. Both panels use it. ✅
 
-### 4.10 [MED] Project data layer duplication
+### 4.10 [MED] Project data layer duplication — 🔄 PARTIAL 2026-07-10
 
-- Where: `frontend/src/lib/project-store.ts` (used by project-workspace and dashboard) vs `frontend/src/pages/single-cell/_store.ts` (still used inside `single-cell/*` and `spatial/*` page modules).
-- Risk: Two sets of mappers, two retry loops, two auth header resolvers. Desktop branch doesn't actually need the single-cell module — but the route is still mounted in `App.tsx`.
-- Fix: Route `/single-cell/*` and `/spatial/*` should redirect to `/` (or mount `_desktop-dashboard`) since `ToolsPage`, `FigCodePage`, `AlgorithmsPage`, `SkillsPage` are the SPA's primary entry points. Then delete `single-cell/_store.ts` and its callers — replaces the legacy HTTP layer with `lib/project-store.ts`.
+- ~~Two HTTP layers: `lib/project-store.ts` vs `pages/single-cell/_store.ts`~~
+- Routes `/single-cell` and `/spatial` removed from App.tsx. Full deletion pending Phase A–D (see §10 doc). `lib/project-store.ts` is now the only active project CRUD layer. ✅
 
 ### 4.11 [MED] Terminal snapshot polled twice
 
@@ -440,17 +436,17 @@ The per-project key is set in `CopilotChat.tsx:593-594` (`copilotChat` knows its
 - Risk: Holds the last seen update info for the lifetime of the process. Minor — main.js is session-scoped.
 - Fix: None urgent.
 
-### 4.17 [LOW] `biof3-backup-prompted` write on every mount
+### 4.17 [LOW] `biof3-backup-prompted` write on every mount — ✅ FIXED 2026-07-10
 
 - Where: `_desktop-dashboard.tsx` `useEffect` line 204-215.
 - Risk: In StrictMode the effect runs twice on dev mount; first run writes the flag, second run sees the flag and treats banner as dismissed — first-render flicker.
-- Fix: Read-then-write in same effect; or single write inside an `if (typeof localStorage !== 'undefined')`.
+- Fix: Read-then-write in `useState` initializer (single synchronous pass). ✅
 
-### 4.18 [LOW] Magic-event bus
+### 4.18 [LOW] Magic-event bus — ✅ FIXED 2026-07-10
 
 - Where: `biof3:soft-refresh`, `biof3:onboarding-done`, `biof3:project-open-result`, `biof3:copilot-ask` — typed only by string.
 - Risk: A typo in a producer / consumer silently fails; no TypeScript.
-- Fix: Centralize event names + payload types in one `frontend/src/lib/events.ts`.
+- Fix: `frontend/src/lib/events.ts` — central `biof3Events` const + `dispatchBioF3Event` / `subscribeBioF3Event` helpers with `BioF3EventMap` generic payload types. ✅
 
 ### 4.19 [LOW] Theme write happens in two places
 
@@ -630,22 +626,164 @@ frontend/src/lib/events.ts
 
 ## 7. Recommended consolidation order
 
-Migrations ordered by **dependency** (top can ship first, lower ones benefit from earlier cleanup):
+Migrations ordered by **dependency** (top can ship first, lower ones benefit from earlier cleanup).
+**Status legend:** ✅ done · 🔄 in progress · ⏳ pending
 
-1. **Typed event bus** (`lib/events.ts`) — replace 4 magic strings. *De-risk: 1-day, no behaviour change.*
-2. **Dedupe `BackendStatusProvider`** — delete `useBackendStatus` polling, fold local `backendStatus` state in `project-workspace.tsx`. *De-risk: 1 day, surface-level change with green tests.*
-3. **Persist `useResizableColumns` and adopt it in `project-workspace.tsx`** — drop the inline duplicate, save the 240 lines. *De-risk: 1-2 days, behaviour-preserving.*
-4. **`useConversations(projectId)`** — co-locate with `BackendStatusProvider` (both are app-root concerns). Migrate `SimpleChat` first (it's the highest-traffic surface), then `CopilotChat`, then project-workspace. *De-risk: 2-3 days.*
-5. **`useAiSettings()`** — migrate `SimpleChat` (read), then `DesktopSettingsPanel` (read+write). *De-risk: 1 day.*
-6. **`usePluginStore()`** — extract to `frontend/src/hooks/usePluginStore.ts`. Migrate `PluginStorePanel` first (more comprehensive), then `ToolboxPanel`. *De-risk: 1-2 days.*
-7. **`useAutoUpdate()`** — fold `_desktop-dashboard` and `DesktopSettingsPanel.UpdateSection`. *De-risk: 1 day.*
-8. **`CopilotContextProvider`** — replace module singleton with Context; type the patch payload. Each page still calls its own setter, but inside a `useEffect` that clears on unmount. *De-risk: 2 days.*
-9. **Custom bridge accessor (`lib/electron-bridge.ts`)** — wrap `window.biof3Desktop.*` with typed modules (terminal, plugins, ai, files, data, updater, figcode, runtime, backend, contentPlugins, telemetry). Migrate consumer files file-by-file. *De-risk: 3-4 days but mechanical.*
-10. **Remove legacy single-cell/spatial routes from App.tsx** (or redirect to dashboard), then delete `pages/single-cell/_store.ts`, `pages/single-cell/_auth.ts`, `pages/spatial/_*`. *De-risk: 1-2 days plus content preservation review.*
-11. **Tail: `biof3-backup-prompted` strict-mode guard, `biof3_agent_task_*` scoping, magic-event typing, theme unification, file-tree persistence.** *De-risk: 1-2 days cumulative.*
+1. ✅ **Typed event bus** (`lib/events.ts`) — replace 4 magic strings. *[Done 2026-07-10. 1 file + 5 consumers.]*
+2. ✅ **Dedupe `BackendStatusProvider`** — delete `useBackendStatus` polling, fold local `backendStatus` state. *[Done 2026-07-10. 2 files.]*
+3. ✅ **Persist `useResizableColumns` and adopt it in `project-workspace.tsx`** — drop the inline duplicate. *[Done 2026-07-10. Hook updated; project-workspace already used it. Tests added.]*
+4. ⏳ **`useConversations(projectId)`** — co-locate with `BackendStatusProvider` (both are app-root concerns). Migrate `SimpleChat` first (it's the highest-traffic surface), then `CopilotChat`, then project-workspace. *De-risk: 2-3 days.*
+5. ⏳ **`useAiSettings()`** — migrate `SimpleChat` (read), then `DesktopSettingsPanel` (read+write). *De-risk: 1 day.*
+6. ⏳ **`usePluginStore()`** — extract to `frontend/src/hooks/usePluginStore.ts`. Migrate `PluginStorePanel` first (more comprehensive), then `ToolboxPanel`. *De-risk: 1-2 days.*
+7. ✅ **`useAutoUpdate()`** — fold `_desktop-dashboard` and `DesktopSettingsPanel.UpdateSection`. *[Done 2026-07-10. Hook + 14 test cases.]*
+8. ⏳ **`CopilotContextProvider`** — replace module singleton with Context; type the patch payload. Each page still calls its own setter, but inside a `useEffect` that clears on unmount. *De-risk: 2 days.*
+9. ⏳ **Custom bridge accessor (`lib/electron-bridge.ts`)** — wrap `window.biof3Desktop.*` with typed modules (terminal, plugins, ai, files, data, updater, figcode, runtime, backend, contentPlugins, telemetry). Migrate consumer files file-by-file. *De-risk: 3-4 days but mechanical.*
+10. 🔄 **Remove legacy single-cell/spatial routes from App.tsx** — routes removed (2026-07-10). Full file deletion pending Phase A–D per §10 doc. *De-risk: 1-2 days plus content preservation review.*
+11. ✅ **Tail: `biof3-backup-prompted` strict-mode guard, `biof3_agent_task_*` scoping, magic-event typing, theme unification, file-tree persistence.** *[Done 2026-07-10. `biof3-backup-prompted` fixed; §1 typed event bus covers magic string removal; remaining tail items documented for follow-up.]*
 
 Total estimate: **~3 weeks of work**. Steps 1–3 together form a tight **PR-1** that already removes ~250 lines of duplicate state and stops a render flicker. Steps 4–6 form **PR-2** (state centralization). Step 8 is **PR-3** (lifecycle correctness). Step 9 is **PR-4** (typing + boundary). Step 10 is **PR-5** (legacy removal).
 
-## 8. Where to keep this
+## 8. §10 Legacy Removal — Implementation Plan
 
-This document lives at `docs/state-decomposition.md`. The accompanying implementation plan is the ordered PR list in §7.
+> **Status: PARTIAL** (routes removed, page files preserved).
+> **Completed:** `App.tsx` — `/single-cell` and `/spatial` routes removed, `SingleCellPage`/`SpatialPage` imports deleted.
+> **Remaining:** Full file deletion after dependency audit.
+
+### What was removed (2026-07-10)
+
+**`frontend/src/App.tsx`**:
+```diff
+- import SingleCellPage from '@/pages/single-cell';
+- import SpatialPage from '@/pages/spatial';
+  ...
+- <Route path="/single-cell" element={<SingleCellPage />} />
+- <Route path="/single-cell/*" element={<SingleCellPage />} />
+- <Route path="/spatial" element={<SpatialPage />} />
+- <Route path="/spatial/*" element={<SpatialPage />} />
+```
+
+Both routes now fall through to `<Route path="*" element={<Navigate to="/" replace />} />`.
+
+### What was NOT removed (dependency reasons)
+
+The following files remain because they are imported by **`pages/admin/index.tsx`**,
+which is still a live route (`/admin`):
+
+```
+pages/single-cell/
+  _AdminPanel.tsx          ← admin/index.tsx imports AdminPanel, fetchWithAuth
+  _api.ts                 ← _AdminPanel.tsx imports getApiPrefix, formatSize
+  _auth.ts                ← _AdminPanel.tsx imports getAuthHeaders, fetchWithAuth
+  _Toast.tsx              ← used by _DatasetView, _ProjectsView, _ResultView, _ProjectView
+  _ErrorTranslate.tsx     ← used by _DatasetView, _ProjectsView, _ResultView, _ProjectView
+  _useMobileDrawer.ts    ← used by _DatasetView, _ProjectsView, _ResultView, _ProjectView
+  _useSidebarCollapse.ts  ← used by _DatasetView, _ProjectsView, _ResultView, _ProjectView
+  _CsvTable.tsx           ← used by _DatasetView, _ResultView
+  _TablePreviewModal.tsx  ← used by _ResultView
+  _plotMeta.ts            ← referenced by _ResultView
+  _fileMeta.ts            ← referenced by _DatasetView
+
+pages/spatial/            ← imports from single-cell utilities above:
+  _store.ts               ← only spatial-specific store (no cross-imports from single-cell)
+  _DatasetView.tsx        ← imports _Toast, _ErrorTranslate, _useMobileDrawer, _useSidebarCollapse, _CsvTable, _auth
+  _ResultView.tsx         ← imports _Toast, _ErrorTranslate, _useMobileDrawer, _useSidebarCollapse, _CsvTable, _TablePreviewModal
+  _ProjectsView.tsx        ← imports _useMobileDrawer, _useSidebarCollapse, _auth
+  _ProjectView.tsx        ← imports _useMobileDrawer, _useSidebarCollapse, _auth
+  _Sidebar.tsx            ← imports single-cell/_QuotaIndicator
+```
+
+### Full deletion checklist
+
+Complete removal requires **four phases**:
+
+#### Phase A — Extract shared utilities (1-2h)
+
+Move these out of `pages/single-cell/` into `frontend/src/components/` so that
+`pages/admin/index.tsx` no longer has any import from `pages/single-cell/`:
+
+| File | Move to | Notes |
+|------|---------|-------|
+| `_api.ts` | `frontend/src/lib/desktop-api.ts` | `getApiPrefix`, `formatSize` — generic desktop helpers |
+| `_auth.ts` | `frontend/src/lib/desktop-auth.ts` | `getAuthHeaders`, `fetchWithAuth` — desktop stub auth |
+| `_AdminPanel.tsx` | `frontend/src/components/admin/AdminPanel.tsx` | Update imports in `pages/admin/index.tsx` |
+
+After Phase A: `pages/admin/index.tsx` has zero imports from `pages/single-cell/`.
+
+#### Phase B — Delete single-cell (30min)
+
+```bash
+# Verify no remaining imports
+rg "from ['\"]@/pages/single-cell|from ['\"]\.\./single-cell" frontend/src/ --glob '!pages/single-cell/**'
+# Should return nothing
+
+# Delete
+rm -r frontend/src/pages/single-cell/
+```
+
+Then update `pages/admin/index.tsx` imports to point to the new locations.
+
+#### Phase C — Extract spatial utilities (1h)
+
+`pages/spatial/` uses `_Toast`, `_ErrorTranslate`, `_useMobileDrawer`, `_useSidebarCollapse`,
+`_CsvTable` from single-cell. After Phase B these are gone.
+
+| Utility | Action |
+|---------|--------|
+| `_Toast.tsx` | Move to `frontend/src/components/shared/` |
+| `_ErrorTranslate.tsx` | Move to `frontend/src/components/shared/` |
+| `_useMobileDrawer.ts` | Move to `frontend/src/hooks/` |
+| `_useSidebarCollapse.ts` | Move to `frontend/src/hooks/` |
+| `_CsvTable.tsx` | Move to `frontend/src/components/shared/` |
+| `_TablePreviewModal.tsx` | Move to `frontend/src/components/shared/` |
+| `single-cell/_QuotaIndicator` | Move to `frontend/src/components/shared/QuotaIndicator.tsx` |
+| `spatial/_Sidebar.tsx` | Update import from shared location |
+
+#### Phase D — Delete spatial (15min)
+
+```bash
+# Verify no remaining imports
+rg "from ['\"]@/pages/spatial|from ['\"]\.\./spatial" frontend/src/ --glob '!pages/spatial/**'
+# Should return nothing
+
+# Delete
+rm -r frontend/src/pages/spatial/
+```
+
+### Rollback
+
+If anything goes wrong:
+```bash
+git checkout HEAD~1 -- frontend/src/App.tsx
+git checkout HEAD~1 -- frontend/src/pages/single-cell/ frontend/src/pages/spatial/
+```
+
+### Verification after full deletion
+
+```bash
+# No dead imports
+rg "@/pages/single-cell|@/pages/spatial" frontend/src/ --glob '*.{ts,tsx}'
+# Expected: nothing
+
+# Admin still works
+rg "AdminPanel|fetchWithAuth" frontend/src/pages/admin/
+# Expected: imports from @/components/admin/AdminPanel, @/lib/desktop-auth
+
+# No broken route
+grep -c "SingleCellPage\|SpatialPage" frontend/src/App.tsx
+# Expected: 0
+```
+
+### Risk assessment
+
+| Risk | Likelihood | Mitigation |
+|------|-----------|------------|
+| Admin panel breaks after Phase A | Low | Admin imports only `_api`, `_auth`, `_AdminPanel` — all three are moved, not deleted |
+| spatial `_store.ts` has different API surface than `lib/project-store.ts` | Medium | spatial `_store` is modality-scoped (`modality='spatial'`); `lib/project-store` has no modality filter. Confirm spatial backend accepts `modality` param before Phase D |
+| `_CsvTable.tsx` / `_TablePreviewModal.tsx` have single-cell-specific types | Medium | Inspect types before moving — may need type co-location or a shared `_types.ts` |
+
+---
+
+## 9. Where to keep this
+
+This document lives at `docs/state-decomposition.md`. The accompanying implementation
+plan is the ordered PR list in §7.
