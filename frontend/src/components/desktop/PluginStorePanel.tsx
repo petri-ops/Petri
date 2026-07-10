@@ -5,45 +5,13 @@
  * 左侧分类导航 + 右侧卡片网格。
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Icon, type IconName } from '@/components/icons/Icon';
-
-interface InstalledPlugin {
-  id: string;
-  version: string;
-  installedAt?: string;
-  type?: string;
-  language?: string;
-}
-
-interface UpdateInfo {
-  id: string;
-  currentVersion: string;
-  latestVersion: string;
-  changelog?: string;
-  size?: number;
-}
-
-interface RemotePlugin {
-  title?: string;
-  version?: string;
-  language?: string;
-  size?: number;
-  description?: string;
-  type?: string;
-  figcodeCardId?: string;
-  dependencies?: string[];
-  optional?: boolean;
-}
-
-interface RemoteManifest {
-  plugins?: Record<string, RemotePlugin>;
-}
-
-interface RuntimeStatus {
-  r: { installed: boolean; path: string | null };
-  python: { installed: boolean; path: string | null };
-}
+import {
+  usePluginStore,
+  type RemotePlugin,
+  type UpdateInfo,
+} from '@/hooks/usePluginStore';
 
 interface Props {
   onClose: () => void;
@@ -91,9 +59,16 @@ function getCategoryIcon(info: RemotePlugin): IconName {
 }
 
 export function PluginStorePanel({ onClose }: Props): React.ReactElement {
-  const [installed, setInstalled] = useState<InstalledPlugin[]>([]);
-  const [remote, setRemote] = useState<RemoteManifest>({});
-  const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatus | null>(null);
+  const {
+    installed,
+    remote,
+    runtimeStatus,
+    updates,
+    checkingUpdates,
+    install: hookInstall,
+    uninstall: hookUninstall,
+    checkUpdates: hookCheckUpdates,
+  } = usePluginStore();
   const [installing, setInstalling] = useState<string | null>(null);
   const [installProgress, setInstallProgress] = useState<
     Record<string, { ratio: number; received: number; total: number }>
@@ -103,63 +78,31 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
   const [runtimeJustInstalled, setRuntimeJustInstalled] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<CategoryId>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [updates, setUpdates] = useState<UpdateInfo[]>([]);
-  const [checkingUpdates, setCheckingUpdates] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadPlugins();
-  }, []);
+  // Use useMemo from the hook perspective: the hook already
+  // memoizes via useState snapshot; useMemo only needed for
+  // derived values like filteredEntries below.
+  const checkForUpdates = useCallback(async () => {
+    await hookCheckUpdates();
+  }, [hookCheckUpdates]);
 
-  async function loadPlugins() {
-    if (!window.biof3Desktop) return;
-    setError(null);
-    try {
-      const [inst, rem, rt] = await Promise.all([
-        window.biof3Desktop.plugins.listInstalled(),
-        window.biof3Desktop.plugins.listRemote(),
-        window.biof3Desktop.runtime.status(),
-      ]);
-      setInstalled(inst);
-      setRemote(rem);
-      setRuntimeStatus(rt);
-      // 加载后顺便检查更新
-      checkForUpdates();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '加载失败');
-    }
-  }
-
-  async function checkForUpdates() {
-    if (!window.biof3Desktop?.plugins?.checkUpdates) return;
-    setCheckingUpdates(true);
-    try {
-      const result = await window.biof3Desktop.plugins.checkUpdates();
-      setUpdates(Array.isArray(result) ? result : []);
-    } catch {
-      // 静默失败：无网络或 manifest 拉不到时不打扰用户
-    } finally {
-      setCheckingUpdates(false);
-    }
-  }
-
-  // 更新插件 = 重新安装（installRuntime/installPlugin 会清旧再装新）
+  // Updates the same way as the legacy impl — install via bridge,
+  // track progress for the spinner UX, refresh on success.
   async function handleUpdate(pluginId: string) {
-    if (!window.biof3Desktop) return;
     const info = remote.plugins?.[pluginId];
     const isRuntime = info?.type === 'runtime';
     setUpdatingId(pluginId);
     setError(null);
     setInstallProgress((prev) => ({ ...prev, [pluginId]: { ratio: 0, received: 0, total: 0 } }));
     try {
-      const result = await window.biof3Desktop.plugins.install(pluginId, (data) => {
-        if (data && data.pluginId === pluginId) {
+      const result = await hookInstall(pluginId, (data) => {
+        if (data) {
           setInstallProgress((prev) => ({ ...prev, [pluginId]: data }));
         }
       });
       if (result.ok) {
         if (isRuntime) setRuntimeJustInstalled(pluginId);
-        await loadPlugins();
       } else {
         setError(result.error || '更新失败');
       }
@@ -176,19 +119,17 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
   }
 
   async function handleInstall(pluginId: string, isRuntime?: boolean) {
-    if (!window.biof3Desktop) return;
     setInstalling(pluginId);
     setInstallProgress((prev) => ({ ...prev, [pluginId]: { ratio: 0, received: 0, total: 0 } }));
     setError(null);
     try {
-      const result = await window.biof3Desktop.plugins.install(pluginId, (data) => {
-        if (data && data.pluginId === pluginId) {
+      const result = await hookInstall(pluginId, (data) => {
+        if (data) {
           setInstallProgress((prev) => ({ ...prev, [pluginId]: data }));
         }
       });
       if (result.ok) {
         if (isRuntime) setRuntimeJustInstalled(pluginId);
-        await loadPlugins();
       } else {
         setError(result.error || '安装失败');
       }
@@ -205,14 +146,12 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
   }
 
   async function handleUninstall(pluginId: string) {
-    if (!window.biof3Desktop) return;
     if (!confirm(`确定卸载 ${pluginId}？`)) return;
     setUninstalling(pluginId);
     setError(null);
     try {
-      const result = await window.biof3Desktop.plugins.uninstall(pluginId);
-      if (result.ok) await loadPlugins();
-      else setError(result.error || '卸载失败');
+      const result = await hookUninstall(pluginId);
+      if (!result.ok) setError(result.error || '卸载失败');
     } catch (e) {
       setError(e instanceof Error ? e.message : '卸载失败');
     } finally {

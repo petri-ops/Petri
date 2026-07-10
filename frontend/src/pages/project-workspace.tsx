@@ -28,6 +28,7 @@ import {
   useOtherConversations,
 } from '@/hooks/useConversations';
 import { useResizableColumns } from '@/hooks/useResizableColumns';
+import { usePluginStore } from '@/hooks/usePluginStore';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import { getNextSteps, buildChainPrompt, type ResolvedJob } from '@/lib/workflow-chains';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
@@ -1979,26 +1980,11 @@ function HistoryPanel({
 // ToolboxPanel — right column (Phase7: tool catalog + 7.3 plugin list)
 // ============================================================
 
-/** Minimal remote plugin info (mirrors PluginStorePanel / electron.d.ts) */
-interface RemotePluginInfo {
-  title?: string;
-  version?: string;
-  language?: string;
-  size?: number;
-  description?: string;
-  type?: string;
-  figcodeCardId?: string;
-  dependencies?: string[];
-  optional?: boolean;
-}
-
-interface InstalledPluginInfo {
-  id: string;
-  version: string;
-  installedAt?: string;
-  type?: string;
-  language?: string;
-}
+// Plan 1.6 §4.6 — InstalledPlugin / RemotePlugin shapes are now
+// exported from `@/hooks/usePluginStore`. The local
+// `InstalledPluginInfo` / `RemotePluginInfo` aliases were
+// previously used inline; the hook now owns the canonical type
+// and the panel reads through it.
 
 const PLUGIN_TYPE_LABELS: Record<string, string> = {
   runtime: '运行时',
@@ -2016,13 +2002,21 @@ function ToolboxPanel({
   const [activeCat, setActiveCat] = useState<string>('全部');
   const [tab, setTab] = useState<'tools' | 'plugins'>('tools');
 
-  // --- Plugin state ---
-  const [installed, setInstalled] = useState<InstalledPluginInfo[]>([]);
-  const [remotePlugins, setRemotePlugins] = useState<Record<string, RemotePluginInfo>>({});
+  // --- Plugin state — Plan 1.6 §4.6 [HIGH] dedup ---
+  // Shares the same SWR catalog as PluginStorePanel. `autoLoad: false`
+  // because the toolbox only wants the catalog when its plugins tab
+  // is opened (no point burning the bridge on every workspace mount).
+  // We dispatch refresh() ourselves when the tab activates.
+  const {
+    installed,
+    remote,
+    install: hookInstall,
+    uninstall: hookUninstall,
+    refresh: refreshPluginCatalog,
+  } = usePluginStore({ autoLoad: false });
   const [installing, setInstalling] = useState<string | null>(null);
   const [uninstalling, setUninstalling] = useState<string | null>(null);
   const [pluginError, setPluginError] = useState<string | null>(null);
-  const [pluginLoaded, setPluginLoaded] = useState(false);
 
   // Group tools by category
   const categories = useMemo(() => {
@@ -2046,36 +2040,20 @@ function ToolboxPanel({
 
   // --- Load plugins when tab is first activated ---
   useEffect(() => {
-    if (tab !== 'plugins' || pluginLoaded) return;
-    loadPlugins();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab]);
-
-  async function loadPlugins() {
-    if (!window.biof3Desktop?.plugins) return;
-    setPluginError(null);
-    try {
-      const [inst, rem] = await Promise.all([
-        window.biof3Desktop.plugins.listInstalled(),
-        window.biof3Desktop.plugins.listRemote(),
-      ]);
-      setInstalled(inst);
-      setRemotePlugins(rem.plugins ?? {});
-      setPluginLoaded(true);
-    } catch (e) {
-      setPluginError(e instanceof Error ? e.message : '加载插件失败');
-    }
-  }
+    if (tab !== 'plugins') return;
+    // The shared cache may already have data from the sidebar
+    // PluginStorePanel; refresh() will short-circuit the IPC
+    // roundtrip via the cache hit (or fetch fresh if the user
+    // hasn't visited the store yet).
+    refreshPluginCatalog();
+  }, [tab, refreshPluginCatalog]);
 
   async function handleInstall(pluginId: string) {
-    if (!window.biof3Desktop?.plugins) return;
     setInstalling(pluginId);
     setPluginError(null);
     try {
-      const result = await window.biof3Desktop.plugins.install(pluginId);
-      if (result.ok) {
-        await loadPlugins();
-      } else {
+      const result = await hookInstall(pluginId);
+      if (!result.ok) {
         setPluginError(result.error || '安装失败');
       }
     } catch (e) {
@@ -2086,15 +2064,12 @@ function ToolboxPanel({
   }
 
   async function handleUninstall(pluginId: string) {
-    if (!window.biof3Desktop?.plugins) return;
     if (!confirm(`确定卸载插件「${pluginId}」？`)) return;
     setUninstalling(pluginId);
     setPluginError(null);
     try {
-      const result = await window.biof3Desktop.plugins.uninstall(pluginId);
-      if (result.ok) {
-        await loadPlugins();
-      } else {
+      const result = await hookUninstall(pluginId);
+      if (!result.ok) {
         setPluginError(result.error || '卸载失败');
       }
     } catch (e) {
@@ -2103,6 +2078,8 @@ function ToolboxPanel({
       setUninstalling(null);
     }
   }
+
+  const remotePlugins = remote.plugins || {};
 
   const installedIds = useMemo(() => new Set(installed.map((p) => p.id)), [installed]);
 
