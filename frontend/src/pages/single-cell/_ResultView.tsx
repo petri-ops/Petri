@@ -24,7 +24,7 @@ import { DocModal } from './_DocModal';
 import RunModal from '@/components/RunModal';
 import { CsvTable } from './_CsvTable';
 import { translateError } from './_errorTranslate';
-import { setCopilotContext } from '@/components/copilot';
+import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import { getApiPrefix } from './_config';
 import { getAuthHeaders } from './_auth';
 
@@ -129,43 +129,47 @@ export function ResultView({
     reload();
   }, [reload]);
 
-  // Publish context to Copilot whenever analysis/dataset/results change
-  useEffect(() => {
-    if (!analysis) return;
-    const summary = analysis.results?.summary || taskData?.results?.summary || analysis.summary;
-    const clusterIds = summary?.clusters
-      ? summary.clusters.map((c: Record<string, unknown>) => c.cluster ?? c.id ?? c)
-      : undefined;
-    setCopilotContext({
-      page: 'single-cell-result',
-      projectId: project?.id,
-      datasetId: dataset?.id,
-      datasetName: dataset?.name,
-      analysisId: analysis.id,
-      analysisName: analysis.name,
-      analysisType: analysis.type,
-      summary,
-      clusterIds,
-    });
-    return () => {
-      setCopilotContext({
-        page: 'single-cell-result',
-        analysisName: undefined,
-        summary: undefined,
-        clusterIds: undefined,
-      });
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    analysis?.id,
-    analysis?.name,
-    analysis?.type,
-    dataset?.id,
-    dataset?.name,
-    project?.id,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify(analysis?.summary),
-  ]);
+  // Publish context to Copilot whenever analysis/dataset/results change.
+  // Replaces the original useEffect that did a partial cleanup on
+  // unmount; useSetCopilotContext resets before re-applying, so
+  // analysis transitions get a clean context instead of inheriting
+  // stale fields from the previous analysis.
+  useSetCopilotContext(
+    analysis
+      ? (() => {
+          const summary =
+            analysis.results?.summary ||
+            taskData?.results?.summary ||
+            analysis.summary;
+          const clusterIds = summary?.clusters
+            ? summary.clusters.map((c: Record<string, unknown>) =>
+                c.cluster ?? c.id ?? c
+              )
+            : undefined;
+          return {
+            page: 'single-cell-result',
+            projectId: project?.id,
+            datasetId: dataset?.id,
+            datasetName: dataset?.name,
+            analysisId: analysis.id,
+            analysisName: analysis.name,
+            analysisType: analysis.type,
+            summary,
+            clusterIds,
+          };
+        })()
+      : {},
+    [
+      analysis?.id,
+      analysis?.name,
+      analysis?.type,
+      dataset?.id,
+      dataset?.name,
+      project?.id,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify(analysis?.summary),
+    ]
+  );
 
   // Listen for Copilot UI control events
   useEffect(() => {

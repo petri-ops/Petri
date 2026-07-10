@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { figCards, categories, stages } from '@/pages/figcode/_data';
 import type { FigCard } from '@/pages/figcode/_data';
 import RunModal from '@/components/RunModal';
-import { setCopilotContext } from '@/components/copilot';
+import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import { fetchCopilotIndex } from '@/components/copilot/copilotIndexClient';
 import { CopilotProgressTracker } from '@/components/copilot/CopilotProgressTracker';
 import { reportProgress } from '@/components/copilot/copilotProgressClient';
@@ -550,41 +550,42 @@ export default function FigCode(): React.ReactElement {
 
   // Push the currently focused FigCode tool into Copilot context.
   // Priority: open RunModal (用户主动跑) > 右侧详情 selected > 无
-  useEffect(() => {
-    const active = modalCard || selected;
-    if (active) {
-      const summaryBits: string[] = [];
-      if (active.subtitle) summaryBits.push(active.subtitle);
-      if (active.category) summaryBits.push('分类: ' + active.category);
-      if (active.inputFormat) summaryBits.push('输入: ' + active.inputFormat);
-      if (active.biologicalQuestion)
-        summaryBits.push('回答的生物学问题: ' + active.biologicalQuestion);
-      if (active.keyParams && active.keyParams.length)
-        summaryBits.push('关键参数: ' + active.keyParams.join(', '));
-      if (active.packages && active.packages.length)
-        summaryBits.push('R 包: ' + active.packages.join(', '));
-      const synopsis =
-        (active.description || '') + (summaryBits.length ? '\n' + summaryBits.join('\n') : '');
-
-      setCopilotContext({
-        page: 'figcode',
-        pageTitle: active.title + (active.subtitle ? ' · ' + active.subtitle : ''),
-        plotName: active.title,
-        codeContent: active.code,
-        pageContent: synopsis,
-      });
-    } else {
-      // No card focused — clear figcode-specific bits but keep page='figcode'
-      setCopilotContext({
+  useSetCopilotContext(
+    (() => {
+      const active = modalCard || selected;
+      if (active) {
+        const summaryBits: string[] = [];
+        if (active.subtitle) summaryBits.push(active.subtitle);
+        if (active.category) summaryBits.push('分类: ' + active.category);
+        if (active.inputFormat) summaryBits.push('输入: ' + active.inputFormat);
+        if (active.biologicalQuestion)
+          summaryBits.push('回答的生物学问题: ' + active.biologicalQuestion);
+        if (active.keyParams && active.keyParams.length)
+          summaryBits.push('关键参数: ' + active.keyParams.join(', '));
+        if (active.packages && active.packages.length)
+          summaryBits.push('R 包: ' + active.packages.join(', '));
+        const synopsis =
+          (active.description || '') +
+          (summaryBits.length ? '\n' + summaryBits.join('\n') : '');
+        return {
+          page: 'figcode',
+          pageTitle: active.title + (active.subtitle ? ' · ' + active.subtitle : ''),
+          plotName: active.title,
+          codeContent: active.code,
+          pageContent: synopsis,
+        };
+      }
+      // No card focused — keep page='figcode' but clear card-specific bits
+      return {
         page: 'figcode',
         pageTitle: 'FigCode — SCI 绘图代码集',
         plotName: undefined,
         codeContent: undefined,
         pageContent: undefined,
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected?.id, modalCard?.id]);
+      };
+    })(),
+    [selected?.id, modalCard?.id]
+  );
 
   return (
     <>

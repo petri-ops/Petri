@@ -35,7 +35,7 @@ import { showToast, requestNotificationPermission } from '../single-cell/_Toast'
 import { requireWrite } from '../single-cell/_auth';
 import { translateError } from '../single-cell/_errorTranslate';
 import { CsvTable } from '../single-cell/_CsvTable';
-import { setCopilotContext } from '@/components/copilot';
+import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 
 export function DatasetView({
   datasetId,
@@ -111,21 +111,22 @@ export function DatasetView({
   }, [reload]);
 
   // W3-C: publish Copilot context (so AI knows it's on spatial dataset page)
-  useEffect(() => {
-    if (!dataset) return;
-    setCopilotContext({
-      page: 'spatial-dataset',
-      currentModule: 'spatial',
-      projectId: dataset.projectId,
-      datasetId: dataset.id,
-      datasetName: dataset.name,
-      analysisId: undefined,
-      analysisName: undefined,
-      analysisType: undefined,
-      summary: undefined,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataset?.id, dataset?.projectId, dataset?.name]);
+  useSetCopilotContext(
+    dataset
+      ? {
+          page: 'spatial-dataset',
+          currentModule: 'spatial',
+          projectId: dataset.projectId,
+          datasetId: dataset.id,
+          datasetName: dataset.name,
+          analysisId: undefined,
+          analysisName: undefined,
+          analysisType: undefined,
+          summary: undefined,
+        }
+      : {},
+    [dataset?.id, dataset?.projectId, dataset?.name]
+  );
 
   // Poll running analyses to keep status in sync (mirrors single-cell pattern, but goes to py-server)
   useEffect(() => {

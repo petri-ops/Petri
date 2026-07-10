@@ -18,7 +18,7 @@ import { Lightbox } from '@/components/ui/Lightbox';
 import { getToken, getApiPrefix, getStoredUser, isLoggedIn } from '@/lib/authClient';
 import { LoginModal } from '@/components/auth/LoginModal';
 import RunModal from '@/components/RunModal';
-import { setCopilotContext } from '@/lib/copilotContext';
+import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import type { FigCard } from '@/pages/figcode/_data';
 import styles from '@/pages/tools.module.css';
 
@@ -1478,16 +1478,17 @@ function ToolsInner() {
   }, []);
 
   // Publish context to Copilot AI assistant
-  useEffect(() => {
-    setCopilotContext({
+  useSetCopilotContext(
+    {
       page: 'tools',
       pageTitle: '分析工具',
       toolId: selectedTool?.id || demoToolId,
       toolName: selectedTool?.title || tools.find((t) => t.id === demoToolId)?.title,
       toolResult: activeResult?.summary || null,
       availableTools: tools.map((t) => t.title),
-    });
-  }, [selectedTool, demoToolId, activeResult]);
+    },
+    [selectedTool, demoToolId, activeResult]
+  );
 
   // Listen for AI assistant tool actions
   useEffect(() => {

@@ -15,7 +15,8 @@ import {
   getConversationMessages,
   type ConversationSummary,
 } from './copilotConversationsClient';
-import { getCopilotContext } from '@/lib/copilotContext';
+import { useCopilotContext } from '@/lib/copilotContextProvider';
+import type { CopilotContext } from '@/lib/copilotContext';
 import { CopilotMarkdown } from './copilotMarkdown';
 import './simple-chat.css';
 import { Icon } from '@/components/icons/Icon';
@@ -109,6 +110,15 @@ export function SimpleChat({
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const activeConvRef = useRef<string | null>(conversationId);
+
+  // Plan 1.6 §4.2 — read Copilot context from React Context, not the
+  // module-scope singleton. Captured into a ref so the latest value is
+  // always reachable from the (stable) send callback without re-binding.
+  const copilotCtx = useCopilotContext();
+  const copilotCtxRef = useRef<CopilotContext>(copilotCtx);
+  useEffect(() => {
+    copilotCtxRef.current = copilotCtx;
+  }, [copilotCtx]);
 
   // Keep ref in sync
   useEffect(() => { activeConvRef.current = conversationId; }, [conversationId]);
@@ -225,7 +235,7 @@ export function SimpleChat({
       messages: tagged,
       modelPresetId: activeModelId,
       context: {
-        ...getCopilotContext(),
+        ...copilotCtxRef.current,
         page: 'desktop-project',
         projectId,
       },

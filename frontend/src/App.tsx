@@ -6,6 +6,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { DesktopOnboarding } from '@/components/desktop/DesktopOnboarding';
 import { BackendStatusProvider } from '@/components/backend/BackendStatusProvider';
 import { BackendDownBanner } from '@/components/backend/BackendDownBanner';
+import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import ToolsPage from '@/pages/tools';
 import FigCodePage from '@/pages/figcode';
 import SingleCellPage from '@/pages/single-cell';
@@ -87,6 +88,7 @@ export default function App(): React.ReactElement {
   return (
     <BackendStatusProvider>
       <BackendDownBanner />
+      <CopilotContextProvider>
       <main className="biof3-spa-main">
         <Routes>
           {/* 阶段 1：8 个应用页面全部移植完成 */}
@@ -114,6 +116,7 @@ export default function App(): React.ReactElement {
         </Routes>
       </main>
       <DesktopOnboardingMount />
+      </CopilotContextProvider>
     </BackendStatusProvider>
   );
 }

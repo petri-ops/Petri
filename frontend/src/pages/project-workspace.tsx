@@ -23,7 +23,7 @@ import { tools as staticTools } from '@/pages/_data';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
 import { listConversations, createConversation, type ConversationSummary } from '@/components/copilot/copilotConversationsClient';
-import { setCopilotContext } from '@/lib/copilotContext';
+import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import { getNextSteps, buildChainPrompt, type ResolvedJob } from '@/lib/workflow-chains';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
@@ -719,32 +719,38 @@ export function ProjectWorkspace(): React.ReactElement {
     }
   }, [ensureSearchConversationIndex, workspaceMode]);
 
-  // 6.3 — Inject project context into SimpleChat (via shared copilot context)
-  useEffect(() => {
-    if (!project) return;
-    setCopilotContext({
-      page: 'desktop-project',
-      pageTitle: project.name,
-      projectId,
-      projectName: project.name,
-      projectModality: project.modality,
-      projectDatasets: datasets.map((d) => ({
-        id: d.id,
-        name: d.name,
-        type: d.nCells != null ? 'single-cell' : undefined,
-        rows: d.nCells,
-      })),
-      projectJobs: jobs.map((j) => ({
-        id: j.id,
-        toolId: j.tool_id,
-        status: j.status,
-        name: j.name,
-        createdAt: j.created_at,
-      })),
-      activeJobId: activeJobId ?? undefined,
-      activeArtifact,
-    });
-  }, [project, projectId, datasets, jobs, activeJobId, activeArtifact]);
+  // 6.3 — Inject project context into SimpleChat (via shared copilot context).
+  // Replaces the original useEffect that did an in-place setCopilotContext
+  // patch on every render. useSetCopilotContext resets before applying,
+  // so a project switch gets a clean context instead of merging into the
+  // previous project's datasets/jobs.
+  useSetCopilotContext(
+    project
+      ? {
+          page: 'desktop-project',
+          pageTitle: project.name,
+          projectId,
+          projectName: project.name,
+          projectModality: project.modality,
+          projectDatasets: datasets.map((d) => ({
+            id: d.id,
+            name: d.name,
+            type: d.nCells != null ? 'single-cell' : undefined,
+            rows: d.nCells,
+          })),
+          projectJobs: jobs.map((j) => ({
+            id: j.id,
+            toolId: j.tool_id,
+            status: j.status,
+            name: j.name,
+            createdAt: j.created_at,
+          })),
+          activeJobId: activeJobId ?? undefined,
+          activeArtifact,
+        }
+      : {},
+    [project, projectId, datasets, jobs, activeJobId, activeArtifact]
+  );
 
   useEffect(() => {
     setActiveArtifact(null);

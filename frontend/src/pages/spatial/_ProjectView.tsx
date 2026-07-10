@@ -28,7 +28,7 @@ import { NewAnalysisModal } from './_NewAnalysisModal';
 import { useSidebarCollapse } from '../single-cell/_useSidebarCollapse';
 import { useMobileDrawer } from '../single-cell/_useMobileDrawer';
 import { requireWrite, getStoredUser, getAuthHeaders } from '../single-cell/_auth';
-import { setCopilotContext } from '@/components/copilot';
+import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 
 // 数据集图标
 const DS_ICONS = {
@@ -177,18 +177,16 @@ export function ProjectView({
   }, [reload]);
 
   // W3-C: publish Copilot context (project-level) so AI knows the spatial project we're in
-  useEffect(() => {
-    if (!project) return;
-    setCopilotContext({
-      page: 'spatial-project',
-      currentModule: 'spatial',
-      projectId: project.id,
-    });
-    return () => {
-      setCopilotContext({ projectId: undefined });
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [project?.id]);
+  useSetCopilotContext(
+    project
+      ? {
+          page: 'spatial-project',
+          currentModule: 'spatial',
+          projectId: project.id,
+        }
+      : {},
+    [project?.id]
+  );
 
   const handleUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {

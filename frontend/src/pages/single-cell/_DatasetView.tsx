@@ -31,7 +31,7 @@ import {
   deleteLabel,
 } from './_store';
 import type { Subset, LabelsSummary } from './_types';
-import { setCopilotContext } from '@/components/copilot';
+import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 
 export function DatasetView({
   datasetId,
@@ -140,21 +140,22 @@ export function DatasetView({
   }, [reload]);
 
   // Publish context to Copilot
-  useEffect(() => {
-    if (!dataset) return;
-    setCopilotContext({
-      page: 'single-cell-dataset',
-      projectId: dataset.projectId,
-      datasetId: dataset.id,
-      datasetName: dataset.name,
-      analysisId: undefined,
-      analysisName: undefined,
-      analysisType: undefined,
-      summary: undefined,
-      clusterIds: undefined,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataset?.id, dataset?.name, dataset?.projectId]);
+  useSetCopilotContext(
+    dataset
+      ? {
+          page: 'single-cell-dataset',
+          projectId: dataset.projectId,
+          datasetId: dataset.id,
+          datasetName: dataset.name,
+          analysisId: undefined,
+          analysisName: undefined,
+          analysisType: undefined,
+          summary: undefined,
+          clusterIds: undefined,
+        }
+      : {},
+    [dataset?.id, dataset?.name, dataset?.projectId]
+  );
 
   // Listen for Copilot action: open new analysis modal pre-filled
   useEffect(() => {
