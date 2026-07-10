@@ -129,7 +129,10 @@ export function DesktopDashboard({
   // M2-8：备份/导出闭环
   const [exporting, setExporting] = useState(false);
   const [exportMsg, setExportMsg] = useState('');
-  const [backupPromptDismissed, setBackupPromptDismissed] = useState(false);
+  // §11 Tail: read-then-write in initializer avoids StrictMode double-invoke flicker.
+  const [backupPromptDismissed, setBackupPromptDismissed] = useState(() => {
+    try { return !!localStorage.getItem('biof3-backup-prompted'); } catch { return false; }
+  });
   const user = getStoredUser();
   const backendStatus = useBackendStatus();
   const navigate = useNavigate();
@@ -198,20 +201,6 @@ export function DesktopDashboard({
         // ignore
       }
     })();
-  }, []);
-
-  // M2-8：首次提示"建议定期备份"
-  useEffect(() => {
-    try {
-      if (!localStorage.getItem('biof3-backup-prompted')) {
-        // 首次进入，标记已提示；横幅可通过关闭按钮临时隐藏
-        localStorage.setItem('biof3-backup-prompted', '1');
-      } else {
-        setBackupPromptDismissed(true);
-      }
-    } catch {
-      // ignore
-    }
   }, []);
 
   // M2-8：导出我的数据（zip 打包整个数据目录 + 日志）
