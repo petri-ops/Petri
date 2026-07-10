@@ -26,6 +26,7 @@
 // ============================================================
 
 import { useCallback, useEffect, useState } from 'react';
+import { getBridge } from '@/lib/desktopBridge';
 
 // ChatModelPreset type — extracted here so SimpleChat and
 // DesktopSettingsPanel no longer each carry their own copy.
@@ -66,15 +67,9 @@ function notify(): void {
   subscribers.forEach((fn) => fn());
 }
 
-interface ElectronAiSettingsBridge {
-  get?: () => Promise<{ chat_model_presets?: unknown; active_chat_model_id?: unknown } | undefined>;
-  save?: (patch: Record<string, unknown>) => Promise<void>;
-  test?: (provider: string, key: string) => Promise<unknown>;
-}
-
 function refreshFromBridge(): Promise<AiSettingsSnapshot> {
-  const bridge = (window.biof3Desktop?.aiSettings as ElectronAiSettingsBridge | undefined);
-  if (!bridge?.get) {
+  const bridge = getBridge('aiSettings');
+  if (!bridge) {
     return Promise.resolve(presetsCache);
   }
   if (inflight) return inflight;
@@ -196,7 +191,7 @@ export function useAiSettings(): UseAiSettingsResult {
     // model on disk. We don't fail the call when save fails — the
     // cache is the immediate source of truth and the next refresh()
     // will reconcile.
-    const bridge = (window.biof3Desktop?.aiSettings as ElectronAiSettingsBridge | undefined);
+    const bridge = getBridge('aiSettings');
     try {
       const current = (await bridge?.get?.()) || {};
       await bridge?.save?.({

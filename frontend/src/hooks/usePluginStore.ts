@@ -26,6 +26,7 @@
 // ============================================================
 
 import { useCallback, useEffect, useState } from 'react';
+import { getBridge } from '@/lib/desktopBridge';
 
 // Types — exported so callers don't re-declare them inline
 // (the project's existing `RemotePlugin` lives in electron.d.ts;
@@ -80,22 +81,12 @@ interface PluginStoreSnapshot {
   runtimeStatus: RuntimeStatus | null;
 }
 
-interface PluginBridge {
-  listInstalled: () => Promise<InstalledPlugin[]>;
-  listRemote: () => Promise<PluginManifest>;
-  install: (
-    pluginId: string,
-    onProgress?: (data: { pluginId: string; ratio: number; received: number; total: number }) => void
-  ) => Promise<{ ok: boolean; error?: string }>;
-  uninstall: (pluginId: string) => Promise<{ ok: boolean; error?: string }>;
-  checkUpdates?: () => Promise<UpdateInfo[]>;
-}
-
-function getBridge(): PluginBridge | null {
-  const w = window as unknown as { biof3Desktop?: { plugins?: PluginBridge; runtime?: { status: () => Promise<RuntimeStatus> } } };
-  if (!w.biof3Desktop?.plugins) return null;
-  return w.biof3Desktop.plugins;
-}
+// Plan 1.6 §4.7 [HIGH] — drop the hand-rolled `PluginBridge`
+// interface and the inline `getBridge()` helper. The canonical
+// bridge shape lives in `@/lib/electron.d.ts` and the typed
+// accessor lives in `@/lib/desktopBridge`. Hook now just
+// calls `getBridge('plugins')` and gets the proper return
+// type automatically.
 
 let cache: PluginStoreSnapshot = { installed: [], remote: { plugins: {} }, runtimeStatus: null };
 let loaded = false;
@@ -110,16 +101,15 @@ function notify(): void {
 
 async function refreshAllCore(): Promise<PluginStoreSnapshot> {
   if (inflight) return inflight;
-  const bridge = getBridge();
+  const bridge = getBridge('plugins');
   if (!bridge) return cache;
   inflight = (async () => {
     const [inst, rem] = await Promise.all([
       bridge.listInstalled().catch(() => []),
       bridge.listRemote().catch(() => ({ plugins: {} })),
     ]);
-    const rt = (await (window as unknown as { biof3Desktop?: { runtime?: { status: () => Promise<RuntimeStatus> } } })
-      .biof3Desktop?.runtime?.status?.()
-      .catch(() => null)) ?? null;
+    const runtime = getBridge('runtime');
+    const rt = (await runtime?.status?.().catch(() => null)) ?? null;
     cache = { installed: inst, remote: rem, runtimeStatus: rt };
     loaded = true;
     notify();
@@ -131,7 +121,7 @@ async function refreshAllCore(): Promise<PluginStoreSnapshot> {
 }
 
 async function refreshUpdates(): Promise<void> {
-  const bridge = getBridge();
+  const bridge = getBridge('plugins');
   if (!bridge?.checkUpdates) return;
   if (updatesInflight) return updatesInflight;
   updatesInflight = bridge
@@ -236,7 +226,7 @@ export function usePluginStore(
       pluginId: string,
       onProgress?: (data: PluginInstallProgress) => void
     ): Promise<{ ok: boolean; error?: string }> => {
-      const bridge = getBridge();
+      const bridge = getBridge('plugins');
       if (!bridge) return { ok: false, error: 'bridge unavailable' };
       const result = await bridge.install(pluginId, (data) => {
         if (onProgress) {
@@ -255,7 +245,7 @@ export function usePluginStore(
   );
 
   const uninstall = useCallback(async (pluginId: string) => {
-    const bridge = getBridge();
+    const bridge = getBridge('plugins');
     if (!bridge) return { ok: false, error: 'bridge unavailable' };
     const result = await bridge.uninstall(pluginId);
     if (result.ok) {

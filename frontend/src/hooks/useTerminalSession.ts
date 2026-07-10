@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Terminal as XTerm } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { pickTerminalTheme } from '@/themes/terminal-themes';
+import { getBridge } from '@/lib/desktopBridge';
 
 export interface UseTerminalSessionOptions {
   /** Workspace path passed to startSession (typically the active project dir). */
@@ -61,12 +62,12 @@ export function useTerminalSession(
     terminal.writeln('\x1b[38;5;39mBioF3 Terminal\x1b[0m');
 
     const inputDisposable = terminal.onData((data) => {
-      window.biof3Desktop?.terminal?.writeSession?.(data);
+      getBridge('terminal')?.writeSession?.(data);
     });
-    const offData = window.biof3Desktop?.terminal?.onData?.((data: string) => {
+    const offData = getBridge('terminal')?.onData?.((data: string) => {
       terminal.write(String(data || ''));
     });
-    const offExit = window.biof3Desktop?.terminal?.onExit?.(({ code, signal }: { code?: number | null; signal?: string | null }) => {
+    const offExit = getBridge('terminal')?.onExit?.(({ code, signal }) => {
       setRunning(false);
       startedRef.current = false;
       terminal.writeln(
@@ -77,7 +78,7 @@ export function useTerminalSession(
     const resizeObserver = new ResizeObserver(() => {
       try {
         fitAddon.fit();
-        window.biof3Desktop?.terminal?.resizeSession?.(terminal.cols, terminal.rows);
+        getBridge('terminal')?.resizeSession?.(terminal.cols, terminal.rows);
       } catch {
         /* ignore */
       }
@@ -107,7 +108,7 @@ export function useTerminalSession(
       terminal.dispose();
       terminalRef.current = null;
       fitAddonRef.current = null;
-      window.biof3Desktop?.terminal?.stopSession?.();
+      getBridge('terminal')?.stopSession?.();
     };
   }, []);
 
@@ -120,7 +121,7 @@ export function useTerminalSession(
   useEffect(() => {
     if (!open || startedRef.current) return;
     startedRef.current = true;
-    window.biof3Desktop?.terminal?.startSession?.(workspacePath).then((result: { ok?: boolean; error?: string } | undefined) => {
+    getBridge('terminal')?.startSession?.(workspacePath).then((result) => {
       if (!result?.ok) {
         startedRef.current = false;
         terminalRef.current?.writeln(
@@ -134,7 +135,7 @@ export function useTerminalSession(
           fitAddonRef.current?.fit();
           const term = terminalRef.current;
           if (term) {
-            window.biof3Desktop?.terminal?.resizeSession?.(term.cols, term.rows);
+            getBridge('terminal')?.resizeSession?.(term.cols, term.rows);
             term.focus();
           }
         } catch {
