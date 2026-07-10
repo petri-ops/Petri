@@ -11,7 +11,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import { Icon, type IconName } from '@/components/icons/Icon';
-import { useBackendStatus } from '@/hooks/useBackendStatus';
+import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
 import { BottomTerminal } from '@/components/workspace-panels/BottomTerminal';
 import { CenterPanel, type CenterPanelContext } from '@/components/workspace-panels/CenterPanel';
 import { LeftPanel, type LeftPanelContext } from '@/components/workspace-panels/LeftPanel';
@@ -185,14 +185,9 @@ export function ProjectWorkspace(): React.ReactElement {
   const [workspaceSearchQuery, setWorkspaceSearchQuery] = useState('');
   const [sidebarQuery, setSidebarQuery] = useState('');
   const [searchConversationIndex, setSearchConversationIndex] = useState<Record<string, ConversationSummary[]>>({});
-  const [backendStatus, setBackendStatus] = useState<BackendStatus | null>(null);
-  const polledBackendStatus = useBackendStatus();
-  // Sync the polled value into the local state so the rest of the component
-  // can keep reading `backendStatus`. (Will be removed when the ProjectWorkspace
-  // body is decomposed in PR-3.)
-  useEffect(() => {
-    setBackendStatus(polledBackendStatus);
-  }, [polledBackendStatus]);
+  // §2 dedup: use the App-level Context directly (5s poll), drop the standalone
+  // 10s polling hook and the local state sync layer.
+  const backendStatus = useBackendStatus();
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [summarySize, setSummarySize] = useState({ width: 320, height: 296 });
 
@@ -796,36 +791,24 @@ export function ProjectWorkspace(): React.ReactElement {
   }, [activeJobId, jobs, openRightPanel, updateWorkspaceMode]);
 
   const backendSummary = useMemo(() => {
-    const readyLabel = backendStatus?.isReady
+    const readyLabel = backendStatus.isReady
       ? '后端就绪'
-      : backendStatus?.downReason || '后端检测中…';
+      : backendStatus.downReason || '后端检测中…';
     const serviceItems = [
       {
         key: 'r-runtime',
         label: 'R',
-        status: backendStatus
-          ? backendStatus.rRuntime
-            ? 'runtime'
-            : 'offline'
-          : 'loading',
+        status: backendStatus.rRuntime ? 'runtime' : 'offline',
       },
       {
         key: 'py-runtime',
         label: 'Python',
-        status: backendStatus
-          ? backendStatus.pyRuntime
-            ? 'runtime'
-            : 'offline'
-          : 'loading',
+        status: backendStatus.pyRuntime ? 'runtime' : 'offline',
       },
       {
         key: 'plumber',
         label: 'Plumber',
-        status: backendStatus
-          ? backendStatus.plumberUp
-            ? 'online'
-            : 'offline'
-          : 'loading',
+        status: backendStatus.plumberUp ? 'online' : 'offline',
       },
     ];
     return { readyLabel, serviceItems };
@@ -2798,7 +2781,7 @@ export function TerminalPanel({
   backendStatus,
 }: {
   project: Project;
-  backendStatus: BackendStatus | null;
+  backendStatus: BackendStatus;
 }): React.ReactElement {
   const [snapshot, setSnapshot] = useState<{
     ok: boolean;
@@ -2840,7 +2823,7 @@ export function TerminalPanel({
         <div className={styles.terminalPanelTitleWrap}>
           <div className={styles.terminalPanelTitle}>后端</div>
           <div className={styles.terminalPanelMeta}>
-            {project.workspacePath || '当前项目'} · {backendStatus?.isReady ? '后端在线' : '后端检查中'}
+            {project.workspacePath || '当前项目'} · {backendStatus.isReady ? '后端在线' : '后端检查中'}
           </div>
         </div>
         <div className={styles.terminalPanelActions}>
@@ -2864,7 +2847,7 @@ export function TerminalPanel({
         </div>
       </div>
 
-      {backendStatus?.downReason && (
+      {backendStatus.downReason && (
         <div className={styles.terminalPanelHint}>{backendStatus.downReason}</div>
       )}
 

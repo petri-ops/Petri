@@ -47,7 +47,7 @@ export interface RightPanelContext {
   openWorkspaceFiles: ActiveWorkspaceFile[];
   activeWorkspaceFile: ActiveWorkspaceFile | null;
   setActiveWorkspaceFile: (f: ActiveWorkspaceFile | null) => void;
-  backendStatus: BackendStatus | null;
+  backendStatus: BackendStatus;
   browserUrl: string;
 
   // Handlers
