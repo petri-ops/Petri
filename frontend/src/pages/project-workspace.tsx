@@ -23,6 +23,10 @@ import { tools as staticTools } from '@/pages/_data';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
 import { listConversations, createConversation, type ConversationSummary } from '@/components/copilot/copilotConversationsClient';
+import {
+  useConversations,
+  useOtherConversations,
+} from '@/hooks/useConversations';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import { getNextSteps, buildChainPrompt, type ResolvedJob } from '@/lib/workflow-chains';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
@@ -151,9 +155,21 @@ export function ProjectWorkspace(): React.ReactElement {
   const [activeWorkspaceFile, setActiveWorkspaceFile] = useState<ActiveWorkspaceFile | null>(null);
   const [openWorkspaceFiles, setOpenWorkspaceFiles] = useState<ActiveWorkspaceFile[]>([]);
 
-  // Conversation state — current project's conversations + active conversation
-  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  // Conversation state — current project's conversations + active conversation.
+  // Plan 1.6 §4.3 — useConversations is the shared SWR hook (cache lives
+  // in a module-level Map so SimpleChat and the sidebar read the same list).
+  const {
+    list: conversations,
+    refresh: refreshConversations,
+    create: createConversationInProject,
+  } = useConversations(projectId);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
+
+  // Plan 1.6 §4.3 — optimistic prepend for cross-project creations
+  // (sidebar adds a conv under another project without switching pages).
+  // useOtherConversations below reads from the shared cache; this seed
+  // map is only the "just-created, not yet in cache" delta.
+  const [otherSeed, setOtherSeed] = useState<Record<string, ConversationSummary[]>>({});
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set([projectId || '']));
   const [creatingProjectInline, setCreatingProjectInline] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
@@ -429,41 +445,57 @@ export function ProjectWorkspace(): React.ReactElement {
     });
   }, []);
 
-  // Load conversations for current project
-  const refreshConversations = useCallback(async () => {
+  // Plan 1.6 §4.3 — the SWR hook already handles initial load + cleanup on
+  // projectId change (it seeds from the shared cache and resets state when
+  // projectId is null). What it doesn't know about is the auto-select rule
+  // "if no conversation is active, pick the most recent one for this project".
+  useEffect(() => {
     if (!projectId) return;
-    const list = await listConversations('active', projectId);
-    setConversations(list);
-    // Auto-select most recent conversation if none active
-    if (!activeConvId && list.length > 0) {
-      setActiveConvId(list[0].id);
-    }
-  }, [projectId]);
+    if (activeConvId) return;
+    if (conversations.length === 0) return;
+    setActiveConvId(conversations[0].id);
+  }, [projectId, conversations, activeConvId]);
 
+  // Reset active conv when the project changes — hook re-seeds the list.
   useEffect(() => {
     setActiveConvId(null);
-    setConversations([]);
-    refreshConversations();
-  }, [refreshConversations]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId]);
 
-  // Create new conversation in current project
-  const handleNewConversation = useCallback(async (targetProjectId = projectId) => {
-    if (!targetProjectId) return;
-    updateWorkspaceMode('chat');
-    const conv = await createConversation('新对话', undefined, targetProjectId);
-    if (conv) {
+  // Plan 1.6 §4.3 — single source for "other project" conversation lists.
+  // Replaces the old per-project useState map that re-fetched on every
+  // expansion. Reads / writes the same shared cache as useConversations.
+  const { byProjectId: projectConversations } = useOtherConversations(
+    expandedProjects,
+    projectId
+  );
+
+  // Create new conversation in current project (Plan 1.6 §4.3 — uses the
+  // shared SWR cache so sidebar + chat panel stay consistent without a
+  // 5s polling timer).
+  const handleNewConversation = useCallback(
+    async (targetProjectId = projectId) => {
+      if (!targetProjectId) return;
+      updateWorkspaceMode('chat');
+      const conv = await createConversation('新对话', undefined, targetProjectId);
+      if (!conv) return;
       if (targetProjectId === projectId) {
         setActiveConvId(conv.id);
+        // Hook already prepends optimistically; refresh keeps us honest if
+        // the server enriched the row with id/timestamps we didn't pre-seed.
         refreshConversations();
       } else {
-        setProjectConversations((prev) => ({
-          ...prev,
-          [targetProjectId]: [conv, ...(prev[targetProjectId] || [])],
+        // Cross-project creation: prepend into the local seed map so the
+        // next render shows the new conv without an extra fetch.
+        setOtherSeed((seed) => ({
+          ...seed,
+          [targetProjectId]: [conv, ...(seed[targetProjectId] || [])],
         }));
         navigate(`/project/${targetProjectId}`);
       }
-    }
-  }, [projectId, refreshConversations, navigate, updateWorkspaceMode]);
+    },
+    [projectId, refreshConversations, navigate, updateWorkspaceMode]
+  );
 
   // Switch conversation
   const handleSwitchConversation = useCallback((convId: string) => {
@@ -585,9 +617,11 @@ export function ProjectWorkspace(): React.ReactElement {
         setActiveConvId(conv.id);
         await refreshConversations();
       } else {
-        setProjectConversations((prev) => ({
-          ...prev,
-          [targetProjectId]: [conv, ...(prev[targetProjectId] || [])],
+        // Cross-project creation: prepend into the local seed map so the
+        // next render shows the new conv without an extra fetch.
+        setOtherSeed((seed) => ({
+          ...seed,
+          [targetProjectId]: [conv, ...(seed[targetProjectId] || [])],
         }));
         navigate(`/project/${targetProjectId}`);
       }
@@ -606,17 +640,10 @@ export function ProjectWorkspace(): React.ReactElement {
     });
   }, []);
 
-  // Load conversations for other projects when expanded
-  const [projectConversations, setProjectConversations] = useState<Record<string, ConversationSummary[]>>({});
-  useEffect(() => {
-    expandedProjects.forEach((pid) => {
-      if (pid === projectId) return; // current project uses `conversations`
-      if (projectConversations[pid]) return; // already loaded
-      listConversations('active', pid).then((list) => {
-        setProjectConversations((prev) => ({ ...prev, [pid]: list }));
-      });
-    });
-  }, [expandedProjects, projectId, projectConversations]);
+  // Load conversations for other projects when expanded.
+  // Plan 1.6 §4.3 — moved to useOtherConversations hook above; the
+  // `projectConversations` variable is now derived from the shared
+  // cache + cross-project seed map.
 
   const normalizedSidebarQuery = sidebarQuery.trim().toLowerCase();
   const projectMatchesSidebarQuery = useCallback(

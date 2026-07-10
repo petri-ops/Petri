@@ -11,11 +11,10 @@ import {
   type ChatMessage,
 } from './copilotClient';
 import {
-  listConversations,
   getConversationMessages,
-  type ConversationSummary,
 } from './copilotConversationsClient';
 import { useCopilotContext } from '@/lib/copilotContextProvider';
+import { useConversations } from '@/hooks/useConversations';
 import type { CopilotContext } from '@/lib/copilotContext';
 import { CopilotMarkdown } from './copilotMarkdown';
 import './simple-chat.css';
@@ -98,7 +97,6 @@ export function SimpleChat({
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [pendingApproval, setPendingApproval] = useState<PendingApproval | null>(null);
   const [paramDraft, setParamDraft] = useState<Record<string, string>>({});
   const [modelPresets, setModelPresets] = useState<ChatModelPreset[]>(DEFAULT_MODEL_PRESETS);
@@ -120,16 +118,14 @@ export function SimpleChat({
     copilotCtxRef.current = copilotCtx;
   }, [copilotCtx]);
 
+  // Plan 1.6 §4.3 — subscribe to the shared SWR conversation cache so
+  // the chat header / future list UI stays in sync with sidebar mutations
+  // without polling. The hook loads once on mount; `refresh` is invoked
+  // after server-driven onConversation events append a new conv.
+  const { refresh: refreshConversations } = useConversations(projectId);
+
   // Keep ref in sync
   useEffect(() => { activeConvRef.current = conversationId; }, [conversationId]);
-
-  // Load conversation list for this project
-  const refreshConversations = useCallback(async () => {
-    const list = await listConversations('active', projectId);
-    setConversations(list);
-  }, [projectId]);
-
-  useEffect(() => { refreshConversations(); }, [refreshConversations]);
 
   const loadModelSettings = useCallback(async () => {
     try {
