@@ -10,8 +10,10 @@ import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { biof3Events, subscribeBioF3Event } from '@/lib/events';
 import ToolsPage from '@/pages/tools';
 import FigCodePage from '@/pages/figcode';
-import SingleCellPage from '@/pages/single-cell';
-import SpatialPage from '@/pages/spatial';
+// NOTE: SingleCellPage and SpatialPage routes are intentionally disabled on the desktop
+// branch. The underlying pages/pages/single-cell and pages/spatial files are preserved
+// because their utilities (_Toast, _ErrorTranslate, _auth, _AdminPanel) are still
+// consumed by pages/admin. Full legacy removal tracked in state-decomposition §10.
 import AlgorithmsPage from '@/pages/algorithms';
 import SkillsPage from '@/pages/skills';
 import AdminPage from '@/pages/admin';
@@ -99,10 +101,7 @@ export default function App(): React.ReactElement {
           <Route path="/project/:projectId" element={<ProjectWorkspace />} />
           <Route path="/tools" element={<ToolsPage />} />
           <Route path="/tools/:toolId" element={<ToolsPage />} />
-          <Route path="/single-cell" element={<SingleCellPage />} />
-          <Route path="/single-cell/*" element={<SingleCellPage />} />
-          <Route path="/spatial" element={<SpatialPage />} />
-          <Route path="/spatial/*" element={<SpatialPage />} />
+          {/* single-cell and spatial routes intentionally removed — §10 state-decomposition */}
           <Route path="/figcode" element={<FigCodePage />} />
           <Route path="/figcode/:cardId" element={<FigCodePage />} />
           <Route path="/algorithms" element={<AlgorithmsPage />} />
