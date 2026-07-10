@@ -1,0 +1,284 @@
+// ============================================================
+// useAiSettings — SWR-style hook for chat-model-presets + active_id.
+//
+// Replaces two duplicated useState caches that previously lived in
+// SimpleChat (read-only) and DesktopSettingsPanel (full CRUD).
+// State-decomposition §4.5 [HIGH]: both components used
+// `useState<ChatModelPreset[]>` + `useState<activeId>` and
+// independently called `window.biof3Desktop.aiSettings.get()`,
+// which meant each one held its own view of "which model is the
+// one I'd send a request with".
+//
+// Design:
+//   - The hook exposes ChatModelPreset CRUD + activeId mutation.
+//   - A module-level `presetsCache: { presets, activeId } | null`
+//     + an `inflight: Promise<void> | null` is shared across
+//     every consumer. The first mount fetches via electron bridge;
+//     subsequent mounts read the cached snapshot and re-render
+//     when the cache mutates (no extra fetches).
+//   - Optimistic updates: every setter mutates the cache
+//     immediately. `setActive` additionally calls
+//     `aiSettings.save(active_chat_model_id, llm_provider)` so a
+//     chat request fired right after the click uses the new model
+//     on disk; `setPresets / updatePreset / addPreset / removePreset`
+//     don't persist on their own — the settings panel's batch
+//     `aiSettings.save(...)` handles durability.
+// ============================================================
+
+import { useCallback, useEffect, useState } from 'react';
+
+// ChatModelPreset type — extracted here so SimpleChat and
+// DesktopSettingsPanel no longer each carry their own copy.
+// Plan 1.6 §4.5 [HIGH] — type dedup.
+//
+// `apiKey` is intentionally optional: DesktopSettingsPanel lets
+// users paste a per-preset key into the UI but it's never
+// persisted (the actual LLM keys live in the panel-level
+// `deepseek_api_key` / `dashscope_api_key` fields). Including
+// it here keeps the type drop-in for that flow.
+export interface ChatModelPreset {
+  id: string;
+  label: string;
+  provider: string;
+  model: string;
+  baseUrl?: string;
+  apiKey?: string;
+}
+
+export const DEFAULT_CHAT_MODEL_PRESETS: ChatModelPreset[] = [
+  { id: 'deepseek-chat', label: 'DeepSeek Chat', provider: 'deepseek', model: 'deepseek-chat' },
+];
+
+interface AiSettingsSnapshot {
+  presets: ChatModelPreset[];
+  activeId: string;
+}
+
+let presetsCache: AiSettingsSnapshot = {
+  presets: DEFAULT_CHAT_MODEL_PRESETS,
+  activeId: DEFAULT_CHAT_MODEL_PRESETS[0].id,
+};
+let loaded = false;
+let inflight: Promise<AiSettingsSnapshot> | null = null;
+const subscribers = new Set<() => void>();
+
+function notify(): void {
+  subscribers.forEach((fn) => fn());
+}
+
+interface ElectronAiSettingsBridge {
+  get?: () => Promise<{ chat_model_presets?: unknown; active_chat_model_id?: unknown } | undefined>;
+  save?: (patch: Record<string, unknown>) => Promise<void>;
+  test?: (provider: string, key: string) => Promise<unknown>;
+}
+
+function refreshFromBridge(): Promise<AiSettingsSnapshot> {
+  const bridge = (window.biof3Desktop?.aiSettings as ElectronAiSettingsBridge | undefined);
+  if (!bridge?.get) {
+    return Promise.resolve(presetsCache);
+  }
+  if (inflight) return inflight;
+  inflight = bridge
+    .get()
+    .then((raw) => {
+      const presetsRaw = Array.isArray(raw?.chat_model_presets)
+        ? (raw.chat_model_presets as ChatModelPreset[]).filter((p) => p?.id && p?.model)
+        : [];
+      const presets = presetsRaw.length > 0 ? presetsRaw : DEFAULT_CHAT_MODEL_PRESETS;
+      const activeId = String(
+        raw?.active_chat_model_id || presets[0]?.id || DEFAULT_CHAT_MODEL_PRESETS[0].id
+      );
+      presetsCache = {
+        presets,
+        activeId: presets.some((p) => p.id === activeId) ? activeId : presets[0].id,
+      };
+      loaded = true;
+      inflight = null;
+      notify();
+      return presetsCache;
+    })
+    .catch(() => {
+      inflight = null;
+      return presetsCache;
+    });
+  return inflight;
+}
+
+function applyMutation(
+  next: { presets?: ChatModelPreset[]; activeId?: string },
+  defaultActive?: (presets: ChatModelPreset[]) => string
+): AiSettingsSnapshot {
+  const presets = next.presets ?? presetsCache.presets;
+  const candidate =
+    next.activeId !== undefined ? next.activeId : presetsCache.activeId;
+  const activeId = presets.some((p) => p.id === candidate)
+    ? candidate
+    : defaultActive
+    ? defaultActive(presets)
+    : presets[0].id;
+  presetsCache = { presets, activeId };
+  loaded = true;
+  notify();
+  return presetsCache;
+}
+
+export interface UseAiSettingsResult {
+  presets: ChatModelPreset[];
+  activeId: string;
+  activePreset: ChatModelPreset;
+  loading: boolean;
+  refresh: () => Promise<void>;
+  /** Update the active model. Persists via the electron bridge
+   *  optimistically so a chat request fired immediately after
+   *  click uses the new model. Returns the new activeId. */
+  setActive: (id: string) => Promise<string>;
+  /** Same as setActive but does NOT persist via the electron
+   *  bridge. Useful for settings panels that batch-save after
+   *  the user clicks a Save button — every radio click would
+   *  otherwise trigger an IPC roundtrip, racing the batch save. */
+  setActiveLocal: (id: string) => void;
+  /** Bulk-update presets. Does NOT persist by itself — the
+   *  caller's batch `aiSettings.save(...)` handles durability. */
+  setPresets: (next: ChatModelPreset[]) => void;
+  /** Patch a single preset by id. */
+  updatePreset: (id: string, patch: Partial<ChatModelPreset>) => void;
+  /** Append a new preset; returns its id. Auto-promotes the
+   *  new preset to active. */
+  addPreset: (init?: Partial<ChatModelPreset>) => string;
+  /** Drop a preset by id; auto-promotes the first remaining
+   *  preset to active if the removed preset was active. */
+  removePreset: (id: string) => void;
+}
+
+export function useAiSettings(): UseAiSettingsResult {
+  // Seed from cache so the first render shows the last-known
+  // state synchronously (no flash of "deepseek-chat" before
+  // the bridge answers).
+  const [snapshot, setSnapshot] = useState<AiSettingsSnapshot>(() => presetsCache);
+  const [loading, setLoading] = useState(!loaded);
+
+  useEffect(() => {
+    let cancelled = false;
+    const onChange = () => {
+      if (!cancelled) setSnapshot(presetsCache);
+    };
+    subscribers.add(onChange);
+    if (!loaded) {
+      setLoading(true);
+      refreshFromBridge().then((next) => {
+        if (cancelled) return;
+        setSnapshot(next);
+        setLoading(false);
+      });
+    } else {
+      setLoading(false);
+    }
+    return () => {
+      cancelled = true;
+      subscribers.delete(onChange);
+    };
+  }, []);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    inflight = null;
+    const next = await refreshFromBridge();
+    setSnapshot(next);
+    setLoading(false);
+  }, []);
+
+  const setActive = useCallback(async (id: string): Promise<string> => {
+    const target = presetsCache.presets.find((p) => p.id === id);
+    if (!target) return presetsCache.activeId;
+    // Optimistic cache write.
+    applyMutation({ activeId: target.id });
+    // Persist so the next chat request after this click uses the new
+    // model on disk. We don't fail the call when save fails — the
+    // cache is the immediate source of truth and the next refresh()
+    // will reconcile.
+    const bridge = (window.biof3Desktop?.aiSettings as ElectronAiSettingsBridge | undefined);
+    try {
+      const current = (await bridge?.get?.()) || {};
+      await bridge?.save?.({
+        ...current,
+        active_chat_model_id: target.id,
+        llm_provider: target.provider,
+      });
+    } catch {
+      /* see comment above */
+    }
+    return target.id;
+  }, []);
+
+  // Cache-only active update — no IPC. Settings panels use this
+  // when they batch-save via handleSave; otherwise every radio
+  // click would roundtrip the bridge.
+  const setActiveLocal = useCallback((id: string) => {
+    if (!presetsCache.presets.some((p) => p.id === id)) return;
+    applyMutation({ activeId: id });
+  }, []);
+
+  const setPresets = useCallback((next: ChatModelPreset[]) => {
+    const safe = next.length > 0 ? next : DEFAULT_CHAT_MODEL_PRESETS;
+    applyMutation({ presets: safe });
+  }, []);
+
+  const updatePreset = useCallback((id: string, patch: Partial<ChatModelPreset>) => {
+    const next = presetsCache.presets.map((p) =>
+      p.id === id ? { ...p, ...patch, id: p.id } : p
+    );
+    applyMutation({ presets: next });
+  }, []);
+
+  const addPreset = useCallback((init: Partial<ChatModelPreset> = {}): string => {
+    const id = init.id || `model-${Date.now()}`;
+    const preset: ChatModelPreset = {
+      id,
+      label: init.label || '自定义模型',
+      provider: init.provider || presetsCache.presets[0]?.provider || 'deepseek',
+      model: init.model || presetsCache.presets[0]?.model || 'deepseek-chat',
+      baseUrl: init.baseUrl,
+    };
+    const next = [...presetsCache.presets, preset];
+    applyMutation({ presets: next, activeId: id });
+    return id;
+  }, []);
+
+  const removePreset = useCallback((id: string) => {
+    const next = presetsCache.presets.filter((p) => p.id !== id);
+    const safe = next.length > 0 ? next : DEFAULT_CHAT_MODEL_PRESETS;
+    applyMutation({
+      presets: safe,
+      activeId: presetsCache.activeId === id ? safe[0].id : undefined,
+    });
+  }, []);
+
+  const activePreset =
+    snapshot.presets.find((p) => p.id === snapshot.activeId) || snapshot.presets[0];
+
+  return {
+    presets: snapshot.presets,
+    activeId: snapshot.activeId,
+    activePreset,
+    loading,
+    refresh,
+    setActive,
+    setActiveLocal,
+    setPresets,
+    updatePreset,
+    addPreset,
+    removePreset,
+  };
+}
+
+/** Test-only helper. Clears the module-scope cache so vitest
+ *  doesn't carry state between test runs. */
+export function __resetAiSettingsCacheForTests(): void {
+  presetsCache = {
+    presets: DEFAULT_CHAT_MODEL_PRESETS,
+    activeId: DEFAULT_CHAT_MODEL_PRESETS[0].id,
+  };
+  loaded = false;
+  inflight = null;
+  subscribers.clear();
+}

@@ -6,23 +6,18 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@/components/icons/Icon';
+import {
+  useAiSettings,
+  DEFAULT_CHAT_MODEL_PRESETS,
+  type ChatModelPreset,
+} from '@/hooks/useAiSettings';
 
 interface Props {
   onClose: () => void;
 }
 
-interface ChatModelPreset {
-  id: string;
-  label: string;
-  provider: string;
-  model: string;
-  baseUrl?: string;
-  apiKey?: string;
-}
-
-const DEFAULT_CHAT_MODEL_PRESETS: ChatModelPreset[] = [
-  { id: 'deepseek-chat', label: 'DeepSeek Chat', provider: 'deepseek', model: 'deepseek-chat' },
-];
+// ChatModelPreset type + DEFAULT_CHAT_MODEL_PRESETS live in
+// `@/hooks/useAiSettings` — Plan 1.6 §4.5 [HIGH] type dedup.
 
 /** UpdateChecker — 检查应用更新（electron-updater 前端 UI） */
 function UpdateChecker(): React.ReactElement | null {
@@ -260,8 +255,19 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   const [dashscopeKey, setDashscopeKey] = useState('');
   const [chatProvider, setChatProvider] = useState('deepseek');
   const [embedProvider, setEmbedProvider] = useState('dashscope');
-  const [chatModelPresets, setChatModelPresets] = useState<ChatModelPreset[]>(DEFAULT_CHAT_MODEL_PRESETS);
-  const [activeChatModelId, setActiveChatModelId] = useState(DEFAULT_CHAT_MODEL_PRESETS[0].id);
+  // Plan 1.6 §4.5 — presets + activeId now live in the shared
+  // SWR hook so the chat panel and this settings panel see the
+  // same source of truth. Provider / embedProvider / keys /
+  // telemetry stay here because no other component reads them.
+  const {
+    presets: chatModelPresets,
+    activeId: activeChatModelId,
+    setActiveLocal: setActiveChatModelId,
+    updatePreset: hookUpdatePreset,
+    addPreset: hookAddPreset,
+    removePreset: hookRemovePreset,
+    refresh: refreshAiSettings,
+  } = useAiSettings();
   // M2-3：错误遥测开关（默认关闭）
   const [telemetryEnabled, setTelemetryEnabled] = useState(false);
 
@@ -275,13 +281,10 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     setSettings(s);
     setChatProvider((s.chat_provider as string) || 'deepseek');
     setEmbedProvider((s.embed_provider as string) || 'dashscope');
-    const presets = Array.isArray(s.chat_model_presets)
-      ? (s.chat_model_presets as ChatModelPreset[]).filter((p) => p?.id && p?.model)
-      : [];
-    const nextPresets = presets.length > 0 ? presets : DEFAULT_CHAT_MODEL_PRESETS;
-    const nextActive = String(s.active_chat_model_id || nextPresets[0].id);
-    setChatModelPresets(nextPresets);
-    setActiveChatModelId(nextPresets.some((p) => p.id === nextActive) ? nextActive : nextPresets[0].id);
+    // presets + active_chat_model_id are owned by the shared SWR
+    // hook; refresh so this panel sees the same snapshot the chat
+    // panel would see after a sibling write.
+    await refreshAiSettings();
     setTelemetryEnabled(s.telemetry_enabled === true);
   }
 
@@ -334,30 +337,20 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   const isConfigured = (key: string) => !!settings[`${key}_configured`];
 
   function updatePreset(index: number, patch: Partial<ChatModelPreset>) {
-    setChatModelPresets((prev) => {
-      const next = prev.map((item, i) => (i === index ? { ...item, ...patch } : item));
-      return next.map((item) => ({
-        ...item,
-        id: item.id || `${item.provider || 'provider'}-${item.model || Date.now()}`,
-      }));
-    });
+    const target = chatModelPresets[index];
+    if (!target) return;
+    // Plan 1.6 §4.5 — delegate to the shared hook so the chat
+    // panel (SimpleChat) sees the rename immediately. JSX still
+    // passes `index` (preserves the existing onChange wiring),
+    // we look up the id here.
+    hookUpdatePreset(target.id, patch);
   }
 
   function addPreset() {
-    const id = `model-${Date.now()}`;
-    setChatModelPresets((prev) => [
-      ...prev,
-      { id, label: '自定义模型', provider: chatProvider || 'deepseek', model: 'deepseek-chat' },
-    ]);
-    setActiveChatModelId(id);
-  }
-
-  function removePreset(id: string) {
-    setChatModelPresets((prev) => {
-      const next = prev.filter((item) => item.id !== id);
-      const safe = next.length > 0 ? next : DEFAULT_CHAT_MODEL_PRESETS;
-      if (activeChatModelId === id) setActiveChatModelId(safe[0].id);
-      return safe;
+    hookAddPreset({
+      label: '自定义模型',
+      provider: chatProvider || 'deepseek',
+      model: 'deepseek-chat',
     });
   }
 
@@ -440,7 +433,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                 <button
                   type="button"
                   className="biof3-btn biof3-btn--ghost biof3-btn--sm"
-                  onClick={() => removePreset(preset.id)}
+                  onClick={() => hookRemovePreset(preset.id)}
                   disabled={chatModelPresets.length <= 1}
                 >
                   删除

@@ -15,6 +15,10 @@ import {
 } from './copilotConversationsClient';
 import { useCopilotContext } from '@/lib/copilotContextProvider';
 import { useConversations } from '@/hooks/useConversations';
+import {
+  useAiSettings,
+  type ChatModelPreset,
+} from '@/hooks/useAiSettings';
 import type { CopilotContext } from '@/lib/copilotContext';
 import { CopilotMarkdown } from './copilotMarkdown';
 import './simple-chat.css';
@@ -62,17 +66,8 @@ interface PendingApproval {
   params?: Record<string, unknown>;
 }
 
-interface ChatModelPreset {
-  id: string;
-  label: string;
-  provider: string;
-  model: string;
-  baseUrl?: string;
-}
-
-const DEFAULT_MODEL_PRESETS: ChatModelPreset[] = [
-  { id: 'deepseek-chat', label: 'DeepSeek Chat', provider: 'deepseek', model: 'deepseek-chat' },
-];
+// ChatModelPreset type + DEFAULT_CHAT_MODEL_PRESETS live in
+// `@/hooks/useAiSettings` — Plan 1.6 §4.5 [HIGH] type dedup.
 
 export interface SimpleChatHandle {
   newConversation: () => void;
@@ -99,8 +94,6 @@ export function SimpleChat({
   const [loading, setLoading] = useState(false);
   const [pendingApproval, setPendingApproval] = useState<PendingApproval | null>(null);
   const [paramDraft, setParamDraft] = useState<Record<string, string>>({});
-  const [modelPresets, setModelPresets] = useState<ChatModelPreset[]>(DEFAULT_MODEL_PRESETS);
-  const [activeModelId, setActiveModelId] = useState(DEFAULT_MODEL_PRESETS[0].id);
   const [modelMenuOpen, setModelMenuOpen] = useState(false);
   const [accessMenuOpen, setAccessMenuOpen] = useState(false);
   const [accessMode, setAccessMode] = useState<'full' | 'read'>('full');
@@ -124,26 +117,19 @@ export function SimpleChat({
   // after server-driven onConversation events append a new conv.
   const { refresh: refreshConversations } = useConversations(projectId);
 
+  // Plan 1.6 §4.5 — read presets + activeId from the shared SWR
+  // hook (module-scope cache). The settings panel and this chat
+  // panel both subscribe, so a CRUD in one propagates to the
+  // other without re-fetching.
+  const {
+    presets: modelPresets,
+    activeId: activeModelId,
+    activePreset: activeModel,
+    setActive: setActiveModelId,
+  } = useAiSettings();
+
   // Keep ref in sync
   useEffect(() => { activeConvRef.current = conversationId; }, [conversationId]);
-
-  const loadModelSettings = useCallback(async () => {
-    try {
-      const settings = await window.biof3Desktop?.aiSettings?.get?.();
-      const presets = Array.isArray(settings?.chat_model_presets)
-        ? (settings.chat_model_presets as ChatModelPreset[]).filter((p) => p?.id && p?.model)
-        : [];
-      const nextPresets = presets.length > 0 ? presets : DEFAULT_MODEL_PRESETS;
-      const nextActive = String(settings?.active_chat_model_id || nextPresets[0].id);
-      setModelPresets(nextPresets);
-      setActiveModelId(nextPresets.some((p) => p.id === nextActive) ? nextActive : nextPresets[0].id);
-    } catch {
-      setModelPresets(DEFAULT_MODEL_PRESETS);
-      setActiveModelId(DEFAULT_MODEL_PRESETS[0].id);
-    }
-  }, []);
-
-  useEffect(() => { loadModelSettings(); }, [loadModelSettings]);
 
   useEffect(() => {
     if (!pendingApproval?.params) {
@@ -388,20 +374,13 @@ export function SimpleChat({
   // Expose via ref-like pattern through props is not needed here;
   // parent controls conversationId directly.
 
-  const activeModel = modelPresets.find((p) => p.id === activeModelId) || modelPresets[0];
   const accessModeLabel = accessMode === 'full' ? '完全访问' : '只读模式';
   const selectModel = useCallback(async (preset: ChatModelPreset) => {
-    setActiveModelId(preset.id);
     setModelMenuOpen(false);
-    try {
-      const settings = await window.biof3Desktop?.aiSettings?.get?.();
-      await window.biof3Desktop?.aiSettings?.save?.({
-        ...(settings || {}),
-        active_chat_model_id: preset.id,
-        llm_provider: preset.provider,
-      });
-    } catch {}
-  }, []);
+    // Hook persists the new active id + llm_provider via electron
+    // bridge (Plan 1.6 §4.5 — replaces the local get-then-save).
+    await setActiveModelId(preset.id);
+  }, [setActiveModelId]);
 
   return (
     <div className="sc-root">
