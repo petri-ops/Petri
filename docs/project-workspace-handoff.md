@@ -26,6 +26,12 @@
   - MCP `tools/list` 透传 `_manifest`、`outputSchema.artifacts` 和 `failureModes`。
   - 内置可运行插件已补 `pluginManifestVersion`、`supportedPlatforms`、`failureModes`。
   - 新增 `npm run harness:check` 和 `test/harness-manifest.test.mjs`。
+- Harness Phase 2 初始能力已落地：
+  - `scripts/harness-file-index.mjs` 提供可复用文件探测、目录索引和缓存读写。
+  - `npm run harness:index -- <path>` 可输出 `harnessIndexVersion: 1` 结构化索引。
+  - 支持 CSV / TSV 表头、列类型、缺失值、矩阵方向、DEG 表、样本分组表、表达矩阵等识别。
+  - 支持 `--for-manifest <tool-definition.json>`，可根据插件输入定义推荐候选文件。
+  - 新增 `test/harness-file-index.test.mjs`。
 
 ### 最近一次稳定化验证
 
@@ -39,6 +45,8 @@ node --check scripts/dev-electron.js
 npm run build:spa
 npm run harness:check
 node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
+node --check scripts/harness-file-index.mjs
+node --test test/harness-file-index.test.mjs
 ```
 
 ### 现在最该做的事
@@ -51,10 +59,10 @@ node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
 2. 再读 `docs/harness-engine-spec.md`。
 3. 再读 `docs/next-steps-roadmap.md`。
 4. 然后继续 **Harness Phase 2**：
-   - 文件探测器。
-   - 索引层。
-   - 参数修复层。
-   - 平台抽象层。
+   - 把当前文件探测器 / 索引层接入真实项目目录、job 目录和 artifact 目录。
+   - 基于索引摘要做参数修复层。
+   - 建立平台抽象层。
+   - 增加弱模型只拿 manifest + index summary 也能选工具和补参数的回归测试。
 
 ### 当前原则
 

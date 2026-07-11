@@ -103,6 +103,48 @@ Examples:
 - `sample_group_mismatch`: align sample ids by intersection.
 - `top_n_too_large`: clamp parameter to available feature count.
 
+## File Index Schema v1
+
+Harness Phase 2 adds a lightweight file index that can be paired with plugin manifests before execution.
+
+The CLI entrypoint is:
+
+```bash
+npm run harness:index -- <path>
+```
+
+For a directory, it returns:
+
+```json
+{
+  "harnessIndexVersion": 1,
+  "root": "/absolute/dataset/path",
+  "fileCount": 2,
+  "byKind": { "csv": 1, "tsv": 1 },
+  "byRole": { "deg_table": 1, "sample_metadata": 1 },
+  "entries": [
+    {
+      "relativePath": "demo_deg.csv",
+      "kind": "csv",
+      "role": "deg_table",
+      "table": {
+        "headers": ["gene", "log2FC", "pvalue"],
+        "matrixOrientation": "unknown",
+        "hints": { "hasDegColumns": true }
+      }
+    }
+  ]
+}
+```
+
+When paired with a plugin manifest or `tool-definition.json`:
+
+```bash
+npm run harness:index -- <dataset-dir> --for-manifest <tool-definition.json>
+```
+
+the output includes `inputSuggestions`, so Harness can prefill likely file parameters and later repair mismatches without rereading the entire dataset.
+
 ## Reproducibility
 
 Every completed tool job should preserve:

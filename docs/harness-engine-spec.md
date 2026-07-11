@@ -166,6 +166,30 @@ Harness 负责把用户的模糊意图，转成稳定的分析动作链：
 
 如果能通过索引判断文件结构，就不要重新解析整份文件。
 
+### 5.5 当前 Phase 2 落地状态
+
+已新增轻量文件探测与目录索引入口：
+
+```bash
+npm run harness:index -- <path>
+```
+
+当前实现位于 `scripts/harness-file-index.mjs`，先作为 Harness 的可复用核心模块和 CLI 使用。它已经支持：
+
+- CSV / TSV / JSON / 文本 / 二进制文件的快速识别。
+- 表格表头、样例行、列类型、缺失值、数值列比例探测。
+- DEG 表、表达矩阵、样本分组表、manifest、summary 等常见角色推断。
+- 表达矩阵方向粗判：`rows_are_features` / `rows_are_samples`。
+- 大文件采样读取，避免把整份文件塞进上下文。
+- 文件 hash 与 `.biof3-harness-index.json` 缓存读写。
+- 基于插件 manifest 输入定义的候选文件推荐：
+
+```bash
+npm run harness:index -- <dataset-dir> --for-manifest <tool-definition.json>
+```
+
+这一步不是最终 UI，而是给后续参数补全、失败修复和弱模型工具选择提供稳定的结构化摘要。
+
 ## 6. 自动化工作流
 
 Harness 的标准执行链应是：

@@ -99,6 +99,34 @@ npm run harness:check
 node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
 ```
 
+### 9. Harness Phase 2 初始落地
+
+- 新增 `scripts/harness-file-index.mjs`。
+- 新增 `npm run harness:index`。
+- 新增 `test/harness-file-index.test.mjs`。
+- 文件探测器已支持：
+  - CSV / TSV / JSON / text / binary 快速分类。
+  - 表头、样例行、列类型、缺失值、数值列比例。
+  - DEG 表、表达矩阵、样本分组、manifest、summary 等角色识别。
+  - 表达矩阵方向：行是 feature 或行是 sample 的粗判。
+  - 大文件采样读取和 hash。
+- 目录索引器已支持：
+  - 跳过 node_modules / dist / build / `.git` 等重目录。
+  - 生成 `harnessIndexVersion: 1` 的轻量 index。
+  - 写入 / 读取 `.biof3-harness-index.json` 缓存。
+- 输入候选匹配已支持：
+  - 根据插件 `inputs` 的 `id` / `label` / `accept` 自动给文件参数推荐候选文件。
+  - 示例：火山图插件可以从 demo-data 里自动选中 `demo_deg.csv`。
+
+已通过：
+
+```bash
+node --check scripts/harness-file-index.mjs
+node --test test/harness-file-index.test.mjs
+npm run harness:index -- resources/built-in-plugins/volcano-plot/demo-data --for-manifest resources/built-in-plugins/volcano-plot/tool-definition.json --no-hash
+npm run harness:check
+```
+
 ## 接下来优先级
 
 ### P0：稳定化确认
@@ -124,13 +152,13 @@ npm run dev
 
 ### P1：Harness Phase 2
 
-Phase 1 的 manifest / artifact / failureModes 基础已经落地。下一步继续推进：
+Phase 1 的 manifest / artifact / failureModes 基础已经落地，Phase 2 的文件探测和索引基础也已经有了第一版。下一步继续推进：
 
-1. 文件探测器：识别 CSV/TSV 表头、矩阵方向、样本列、分组列、缺失值。
-2. 目录索引器：按 project / job / dataset / plugin 建立轻量 metadata index。
-3. 参数修复层：基于 `failureModes.suggestedFix` 做列名映射、参数裁剪、路径修复。
-4. 执行器抽象：把平台路径、runtime ready、script execution 下沉。
-5. 回归测试：验证弱模型只拿 manifest + 文件探测摘要也能选择正确工具。
+1. 把 `harness:index` 接入项目 / dataset / artifact 的真实目录，而不是只作为 CLI。
+2. 参数修复层：基于 `failureModes.suggestedFix` 做列名映射、参数裁剪、路径修复。
+3. 执行器抽象：把平台路径、runtime ready、script execution 下沉。
+4. 回归测试：验证弱模型只拿 manifest + 文件探测摘要也能选择正确工具。
+5. 增量索引：基于 mtime / hash 做局部更新，避免每次全量扫描。
 
 详细规范见：[Harness Engine Spec v1](./harness-engine-spec.md)。
 

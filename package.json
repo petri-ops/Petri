@@ -23,6 +23,7 @@
     "build:mac": "npm run prebuild && npm run build:all && electron-builder --mac --arm64 --x64",
     "build:mac-arm64": "npm run prebuild && npm run build:all && electron-builder --mac --arm64",
     "build:mac-x64": "npm run prebuild && npm run build:all && electron-builder --mac --x64",
+    "harness:index": "node scripts/harness-file-index.mjs",
     "harness:check": "node scripts/check-harness-manifests.mjs",
     "check": "bash scripts/sync-vendor.sh check && node --check src/main.js && node --check src/preload.js && npm run harness:check"
   },
