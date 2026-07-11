@@ -36,6 +36,51 @@ function normalizePath(inputPath) {
   return path.resolve(String(inputPath || '.'));
 }
 
+function normalizeCanonicalPath(inputPath) {
+  const raw = String(inputPath || '/');
+  const normalized = raw.replace(/\\/g, '/').replace(/\/+/g, '/');
+  return normalized.startsWith('/') ? path.posix.normalize(normalized) : path.posix.normalize('/' + normalized);
+}
+
+function normalizePathMappings(mappings = []) {
+  return mappings
+    .map((mapping) => {
+      const localRoot = mapping.localRoot || mapping.hostRoot || mapping.root;
+      const canonicalRoot = mapping.canonicalRoot || mapping.mountRoot || mapping.containerRoot;
+      if (!localRoot || !canonicalRoot) return null;
+      return {
+        localRoot: normalizePath(localRoot),
+        canonicalRoot: normalizeCanonicalPath(canonicalRoot),
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.localRoot.length - a.localRoot.length);
+}
+
+function relativePosix(fromRoot, targetPath) {
+  return path.relative(fromRoot, targetPath).split(path.sep).filter(Boolean).join('/');
+}
+
+function mapLocalToCanonical(localPath, mappings = []) {
+  const normalized = normalizePath(localPath);
+  const mapping = mappings.find(
+    (item) => normalized === item.localRoot || normalized.startsWith(item.localRoot + path.sep),
+  );
+  if (!mapping) return normalized.replace(/\\/g, '/');
+  const rel = relativePosix(mapping.localRoot, normalized);
+  return normalizeCanonicalPath(rel ? path.posix.join(mapping.canonicalRoot, rel) : mapping.canonicalRoot);
+}
+
+function mapCanonicalToLocal(canonicalPath, mappings = []) {
+  const normalized = normalizeCanonicalPath(canonicalPath);
+  const mapping = mappings.find(
+    (item) => normalized === item.canonicalRoot || normalized.startsWith(item.canonicalRoot + '/'),
+  );
+  if (!mapping) return normalizePath(normalized);
+  const rel = path.posix.relative(mapping.canonicalRoot, normalized);
+  return normalizePath(rel ? path.join(mapping.localRoot, ...rel.split('/').filter(Boolean)) : mapping.localRoot);
+}
+
 function pathExists(inputPath) {
   try {
     return !!inputPath && fs.existsSync(inputPath);
@@ -78,6 +123,32 @@ function safeProjectSlug(name) {
 function defaultProjectWorkspacePath(project, dataDir = defaultDataDir()) {
   const shortId = String(project?.id || 'local').replace(/^p_/, '').slice(0, 8);
   return path.join(dataDir, 'projects', `${safeProjectSlug(project?.name)}-${shortId}`);
+}
+
+function normalizeRuntimeName(runtime) {
+  const value = typeof runtime === 'object' && runtime ? runtime.type || runtime.name : runtime;
+  const name = String(value || 'shell').toLowerCase();
+  if (['rscript', 'r'].includes(name)) return 'r';
+  if (['python3', 'py', 'python'].includes(name)) return 'python';
+  return name || 'shell';
+}
+
+function normalizeRuntimeCheck(runtime, value) {
+  const name = normalizeRuntimeName(runtime);
+  if (value && typeof value === 'object') {
+    return {
+      runtime: name,
+      ready: value.ready !== false,
+      command: value.command || value.path || null,
+      reason: value.reason || null,
+    };
+  }
+  return {
+    runtime: name,
+    ready: value !== false,
+    command: null,
+    reason: value === false ? 'runtime_not_configured' : null,
+  };
 }
 
 function readSqliteRow(dbPath, sql, params = []) {
@@ -770,12 +841,14 @@ export function summarizeIndexForPrompt(index, options = {}) {
   return {
     harnessIndexVersion: index?.harnessIndexVersion || 1,
     root: index?.root,
+    canonicalRoot: index?.canonicalRoot,
     fileCount: index?.fileCount || 0,
     truncated: !!index?.truncated,
     byKind: index?.byKind || {},
     byRole: index?.byRole || {},
     entries: (index?.entries || []).slice(0, maxEntries).map((entry) => ({
       relativePath: entry.relativePath,
+      canonicalPath: entry.canonicalPath,
       kind: entry.kind,
       role: entry.role,
       size: entry.size,
@@ -824,38 +897,107 @@ export function createLocalHarnessPlatform(platformOptions = {}) {
   const dataDir = normalizePath(platformOptions.dataDir || defaultDataDir());
   const jobsDir = normalizePath(platformOptions.jobsDir || defaultJobsDir(dataDir));
   const dbPath = platformOptions.dbPath || process.env.BIOF3_DB_PATH || path.join(dataDir, 'biof3.db');
+  const runtimeChecks = platformOptions.runtimeChecks || {};
+  const pathMappings = normalizePathMappings(
+    platformOptions.pathMappings ||
+      [
+        platformOptions.canonicalRoot
+          ? {
+              localRoot: platformOptions.localRoot || dataDir,
+              canonicalRoot: platformOptions.canonicalRoot,
+            }
+          : null,
+      ].filter(Boolean),
+  );
+
+  const decorateScope = (scopeInfo) => ({
+    ...scopeInfo,
+    canonicalTarget: mapLocalToCanonical(scopeInfo.target, pathMappings),
+  });
 
   return {
     id: 'local',
     dataDir,
     jobsDir,
     dbPath,
+    pathMappings,
+    canonicalizePath(inputPath) {
+      return mapLocalToCanonical(inputPath, pathMappings);
+    },
+    resolveCanonicalPath(inputPath) {
+      return mapCanonicalToLocal(inputPath, pathMappings);
+    },
+    checkRuntimeReady(runtime = 'shell') {
+      const name = normalizeRuntimeName(runtime);
+      if (Object.prototype.hasOwnProperty.call(runtimeChecks, name)) {
+        return normalizeRuntimeCheck(name, runtimeChecks[name]);
+      }
+      if (name === 'shell') {
+        return { runtime: name, ready: true, command: process.env.SHELL || 'sh', reason: null };
+      }
+      if (name === 'r') {
+        const rHome = process.env.R_HOME;
+        const command = platformOptions.rscriptPath || process.env.RSCRIPT_PATH || (rHome ? path.join(rHome, 'bin', 'Rscript') : null);
+        return {
+          runtime: name,
+          ready: !!(command && pathExists(command)),
+          command,
+          reason: command && pathExists(command) ? null : 'r_runtime_not_found',
+        };
+      }
+      if (name === 'python') {
+        const command = platformOptions.pythonPath || process.env.PYTHON || process.env.PYTHON_PATH || null;
+        return {
+          runtime: name,
+          ready: !!(command && pathExists(command)),
+          command,
+          reason: command && pathExists(command) ? null : 'python_runtime_not_found',
+        };
+      }
+      return { runtime: name, ready: false, command: null, reason: 'unsupported_runtime' };
+    },
+    createExecutionContext(input = {}) {
+      const scopeInfo =
+        input.scopeInfo ||
+        (input.scope && typeof input.scope === 'object' ? input.scope : null) ||
+        this.resolveScope(input);
+      const runtime = normalizeRuntimeName(input.runtime || input.manifest?.runtime || input.manifest?.language || 'shell');
+      const runtimeReady = this.checkRuntimeReady(runtime);
+      return {
+        platform: 'local',
+        runtime,
+        runtimeReady,
+        workDir: scopeInfo.target,
+        canonicalWorkDir: scopeInfo.canonicalTarget || this.canonicalizePath(scopeInfo.target),
+        scope: scopeInfo,
+      };
+    },
     resolveScope(options = {}) {
       const scope = String(options.scope || (options.jobId ? 'job' : options.projectId ? 'project' : 'path'));
 
       if (scope === 'path' || scope === 'workspace') {
         const target = normalizePath(options.path || options._?.[0] || '.');
-        return {
+        return decorateScope({
           scope: 'path',
           id: null,
           target,
           partition: 'workspace',
           platform: 'local',
           exists: pathExists(target),
-        };
+        });
       }
 
       if (scope === 'project') {
         if (options.projectPath || options.workspacePath || options.path) {
           const target = normalizePath(options.projectPath || options.workspacePath || options.path);
-          return {
+          return decorateScope({
             scope,
             id: options.projectId || null,
             target,
             partition: 'project',
             platform: 'local',
             exists: pathExists(target),
-          };
+          });
         }
         if (!options.projectId) throw new Error('project scope requires --project-id or --project-path');
         const row = readSqliteRow(dbPath, 'SELECT id, name, workspace_path FROM projects WHERE id = ?', [
@@ -864,7 +1006,7 @@ export function createLocalHarnessPlatform(platformOptions = {}) {
         if (row?.__dbError) throw new Error(`Cannot read project from db: ${row.__dbError}`);
         if (!row) throw new Error(`Project not found: ${options.projectId}`);
         const target = row.workspace_path || defaultProjectWorkspacePath(row, dataDir);
-        return {
+        return decorateScope({
           scope,
           id: row.id,
           target,
@@ -872,7 +1014,7 @@ export function createLocalHarnessPlatform(platformOptions = {}) {
           platform: 'local',
           exists: pathExists(target),
           source: { dbPath, name: row.name, workspacePath: row.workspace_path || null },
-        };
+        });
       }
 
       if (scope === 'job' || scope === 'artifact') {
@@ -880,7 +1022,7 @@ export function createLocalHarnessPlatform(platformOptions = {}) {
         const jobRoot = safeJoinUnder(jobsDir, options.jobId);
         if (!jobRoot) throw new Error(`Invalid job id: ${options.jobId}`);
         const target = scope === 'artifact' ? path.join(jobRoot, 'output') : jobRoot;
-        return {
+        return decorateScope({
           scope,
           id: options.jobId,
           target,
@@ -888,20 +1030,20 @@ export function createLocalHarnessPlatform(platformOptions = {}) {
           platform: 'local',
           exists: pathExists(target),
           source: { jobsDir, jobRoot },
-        };
+        });
       }
 
       if (scope === 'dataset') {
         if (options.datasetPath || options.path) {
           const target = normalizePath(options.datasetPath || options.path);
-          return {
+          return decorateScope({
             scope,
             id: options.datasetId || null,
             target,
             partition: 'dataset',
             platform: 'local',
             exists: pathExists(target),
-          };
+          });
         }
         if (!options.datasetId) throw new Error('dataset scope requires --dataset-id or --dataset-path');
         const row = readSqliteRow(
@@ -918,7 +1060,7 @@ export function createLocalHarnessPlatform(platformOptions = {}) {
         if (!target) {
           throw new Error(`Dataset has no local indexable path: ${options.datasetId}`);
         }
-        return {
+        return decorateScope({
           scope,
           id: row.id,
           target,
@@ -932,7 +1074,7 @@ export function createLocalHarnessPlatform(platformOptions = {}) {
             metaUrl: row.meta_url || null,
             featuresUrl: row.features_url || null,
           },
-        };
+        });
       }
 
       throw new Error(`Unsupported harness index scope: ${scope}`);
@@ -948,8 +1090,17 @@ export function resolveHarnessScope(options = {}) {
   return platform.resolveScope(options);
 }
 
+export function createHarnessExecutionContext(options = {}) {
+  const platform = options.platform || createLocalHarnessPlatform(options);
+  if (!platform || typeof platform.createExecutionContext !== 'function') {
+    throw new Error('Harness platform must provide createExecutionContext(options)');
+  }
+  return platform.createExecutionContext(options);
+}
+
 export function indexHarnessScope(options = {}) {
-  const resolved = resolveHarnessScope(options);
+  const platform = options.platform || createLocalHarnessPlatform(options);
+  const resolved = resolveHarnessScope({ ...options, platform });
   if (!resolved.exists) throw new Error(`Scope target does not exist: ${resolved.target}`);
   const stat = fs.statSync(resolved.target);
   const index = stat.isDirectory()
@@ -974,6 +1125,13 @@ export function indexHarnessScope(options = {}) {
     const entry = index.entries[0];
     index.byKind[entry.kind] = 1;
     index.byRole[entry.role] = 1;
+  }
+  if (typeof platform.canonicalizePath === 'function') {
+    index.canonicalRoot = platform.canonicalizePath(index.root);
+    index.entries = (index.entries || []).map((entry) => ({
+      ...entry,
+      canonicalPath: platform.canonicalizePath(entry.path),
+    }));
   }
   return {
     scope: resolved,

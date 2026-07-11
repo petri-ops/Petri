@@ -65,6 +65,11 @@
     - `scripts/harness-file-index.mjs` 新增 `createLocalHarnessPlatform()`。
     - `resolveHarnessScope()` 对外兼容不变，但底层通过 `platform.resolveScope()` 解析 project / job / artifact / dataset。
     - `indexHarnessScope()` 已支持注入 custom platform adapter，后续可接远程 worker / 云端挂载路径。
+  - 平台抽象层第二步已落地：
+    - Local platform 支持 `pathMappings: [{ localRoot, canonicalRoot }]`。
+    - scope 和 index entries 会带 `canonicalTarget` / `canonicalPath`，prompt summary 也保留 canonical path。
+    - 新增 `createHarnessExecutionContext()`，返回 workDir、canonicalWorkDir 和 runtimeReady。
+    - runtime ready 支持注入式 `runtimeChecks`，默认 shell ready，R/Python 只做非阻塞环境/路径探测。
   - 新增 `test/harness-file-index.test.mjs`。
 
 ### 最近一次稳定化验证
@@ -106,7 +111,7 @@ npm run check
 2. 再读 `docs/harness-engine-spec.md`。
 3. 再读 `docs/next-steps-roadmap.md`。
 4. 然后继续 **Harness Phase 2**：
-   - 扩展平台抽象层：加入 runtime ready、执行目录、输入/输出 canonical path 映射。
+   - 扩展平台抽象层：把 canonical path 和 runtime ready 接入实际 run_tool 执行器。
    - 继续扩充弱模型回归测试，覆盖更多插件和失败恢复场景。
 
 ### 当前原则

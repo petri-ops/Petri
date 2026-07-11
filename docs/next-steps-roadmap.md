@@ -156,6 +156,11 @@ node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
   - `createLocalHarnessPlatform()` 封装本地 dataDir / jobsDir / dbPath / scope 解析。
   - `resolveHarnessScope()` 兼容旧调用，但内部走 `platform.resolveScope()`。
   - `indexHarnessScope()` 已支持注入 custom platform adapter，为后续远程 worker / 云端挂载路径预留边界。
+- 平台抽象第二步已接入：
+  - Local platform 支持 localRoot → canonicalRoot 路径映射。
+  - scope、index entry、prompt summary 会带 canonical target/path。
+  - `createHarnessExecutionContext()` 已返回 workDir、canonicalWorkDir 和 runtimeReady。
+  - runtime ready 支持注入式检测，避免启动时阻塞外部命令。
   - 摘要卡只展示轻量信息：文件数、类型分布、角色分布、前几个关键文件。
 
 已通过：
@@ -202,7 +207,7 @@ Phase 1 的 manifest / artifact / failureModes 基础已经落地，Phase 2 的�
 1. 在参数确认卡接入 `/api/harness/repair`：先展示可审计修复建议，再由用户或 Agent 确认提交。
 2. 再把 `repairHarnessParams()` 接入 run_tool 前置流程；注意要区分 legacy 工具和 manifest 插件工具，避免静默改参。
 3. 让 Agent prompt 能引用当前 active project/job/artifact 的 Harness prompt summary。
-4. 执行器抽象：继续把 runtime ready、script execution、输入/输出 canonical path 映射下沉。
+4. 执行器抽象：把 runtime ready、script execution、输入/输出 canonical path 映射接入实际 run_tool 执行器。
 5. 回归测试：验证弱模型只拿 manifest + prompt summary 也能选择正确工具并补参数。
 6. 增量索引：基于 mtime / hash 做局部更新，避免每次全量扫描。
 

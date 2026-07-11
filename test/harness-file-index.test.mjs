@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {
+  createHarnessExecutionContext,
   createLocalHarnessPlatform,
   detectFile,
   indexHarnessScope,
@@ -131,6 +132,66 @@ test('createLocalHarnessPlatform resolves job and artifact paths behind adapter 
     const artifactScope = resolveHarnessScope({ platform, scope: 'artifact', jobId: 'job_adapter' });
     assert.equal(artifactScope.partition, 'artifact');
     assert.equal(artifactScope.target, path.join(jobDir, 'output'));
+  });
+});
+
+test('createLocalHarnessPlatform maps local paths to canonical execution paths', () => {
+  withTempDir((dir) => {
+    const projectDir = path.join(dir, 'project-a');
+    fs.mkdirSync(projectDir, { recursive: true });
+    fs.writeFileSync(path.join(projectDir, 'deg.csv'), 'gene,log2FC,pvalue\nTP53,1,0.01\n');
+    const platform = createLocalHarnessPlatform({
+      dataDir: dir,
+      pathMappings: [{ localRoot: dir, canonicalRoot: '/work/biof3' }],
+    });
+
+    const localFile = path.join(projectDir, 'deg.csv');
+    assert.equal(platform.canonicalizePath(localFile), '/work/biof3/project-a/deg.csv');
+    assert.equal(platform.resolveCanonicalPath('/work/biof3/project-a/deg.csv'), localFile);
+
+    const scoped = indexHarnessScope({
+      platform,
+      scope: 'project',
+      projectId: 'p_canonical',
+      projectPath: projectDir,
+      hash: false,
+    });
+    assert.equal(scoped.scope.canonicalTarget, '/work/biof3/project-a');
+    assert.equal(scoped.index.canonicalRoot, '/work/biof3/project-a');
+    assert.equal(scoped.index.entries[0].canonicalPath, '/work/biof3/project-a/deg.csv');
+    assert.equal(scoped.promptSummary.canonicalRoot, '/work/biof3/project-a');
+    assert.equal(scoped.promptSummary.entries[0].canonicalPath, '/work/biof3/project-a/deg.csv');
+  });
+});
+
+test('createHarnessExecutionContext exposes runtime readiness and canonical workDir', () => {
+  withTempDir((dir) => {
+    const projectDir = path.join(dir, 'project-runtime');
+    fs.mkdirSync(projectDir, { recursive: true });
+    const platform = createLocalHarnessPlatform({
+      dataDir: dir,
+      pathMappings: [{ localRoot: dir, canonicalRoot: '/work/biof3' }],
+      runtimeChecks: {
+        r: { ready: true, command: '/opt/R/bin/Rscript' },
+        python: false,
+      },
+    });
+
+    const ctx = createHarnessExecutionContext({
+      platform,
+      scope: 'project',
+      projectId: 'p_runtime',
+      projectPath: projectDir,
+      manifest: { language: 'r' },
+    });
+
+    assert.equal(ctx.platform, 'local');
+    assert.equal(ctx.runtime, 'r');
+    assert.equal(ctx.runtimeReady.ready, true);
+    assert.equal(ctx.runtimeReady.command, '/opt/R/bin/Rscript');
+    assert.equal(ctx.workDir, projectDir);
+    assert.equal(ctx.canonicalWorkDir, '/work/biof3/project-runtime');
+    assert.equal(platform.checkRuntimeReady('python').ready, false);
   });
 });
 
