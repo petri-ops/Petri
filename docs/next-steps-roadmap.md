@@ -146,7 +146,9 @@ node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
 - Agent prompt 已接入项目 Harness summary：
   - `ProjectWorkspace` 会把 project scope 的 Harness prompt summary 注入 `CopilotContext.projectHarnessSummary`。
   - `system-prompt.js` 渲染 `【Harness 项目文件摘要】`，帮助 agent 结合 manifest 判断文件参数。
-  - 当前只接入 project scope；active job / artifact scope 仍可继续细化。
+- Agent prompt 已接入 active job / artifact Harness summary：
+  - 当前 active done job 会额外加载 artifact scope 的 Harness prompt summary。
+  - `system-prompt.js` 渲染 `【Harness 当前结果产物摘要】`，并优先标出当前选中的 artifact 匹配文件。
   - 摘要卡只展示轻量信息：文件数、类型分布、角色分布、前几个关键文件。
 
 已通过：

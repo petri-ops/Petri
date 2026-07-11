@@ -53,6 +53,10 @@
     - `ProjectWorkspace` 会获取 project scope 的 `/api/harness/index` prompt summary。
     - `CopilotContext.projectHarnessSummary` 只保留文件数、kind/role 统计和前若干候选文件，避免把完整索引塞进 prompt。
     - `vendor/biof3-core/r-server/helpers/system-prompt.js` 会渲染 `【Harness 项目文件摘要】`，task/legacy agent 路径都会生效。
+  - Agent prompt 已进一步接入 active job/artifact 的 Harness summary：
+    - `ProjectWorkspace` 会对当前 active done job 获取 artifact scope 的 `/api/harness/index` prompt summary。
+    - `CopilotContext.activeJobHarnessSummary` 会进入 prompt 的 `【Harness 当前结果产物摘要】`。
+    - 若当前选中了 active artifact，prompt 会优先标出匹配文件，方便 Agent 解释当前结果和选择后续输入。
   - 新增 `test/harness-file-index.test.mjs`。
 
 ### 最近一次稳定化验证
@@ -94,7 +98,6 @@ npm run check
 2. 再读 `docs/harness-engine-spec.md`。
 3. 再读 `docs/next-steps-roadmap.md`。
 4. 然后继续 **Harness Phase 2**：
-   - 让 Agent prompt 进一步读取 active job/artifact 的 Harness prompt summary。
    - 建立平台抽象层。
    - 增加弱模型只拿 manifest + index summary 也能选工具和补参数的回归测试。
 

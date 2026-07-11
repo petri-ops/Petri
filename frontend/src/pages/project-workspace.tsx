@@ -32,6 +32,7 @@ import { useWorkspaceLayout } from '@/hooks/useWorkspaceLayout';
 import { useRightPanelTabs } from '@/hooks/useRightPanelTabs';
 import { usePluginStore } from '@/hooks/usePluginStore';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
+import type { HarnessContextSummary } from '@/lib/copilotContext';
 import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { getNextSteps, buildChainPrompt, type ResolvedJob } from '@/lib/workflow-chains';
@@ -126,7 +127,7 @@ function parseWorkspaceMode(value: string | null): WorkspaceMode | null {
   return WORKSPACE_MODES.includes(value as WorkspaceMode) ? (value as WorkspaceMode) : null;
 }
 
-function toCopilotHarnessSummary(index: HarnessIndexSummary | null | undefined) {
+function toCopilotHarnessSummary(index: HarnessIndexSummary | null | undefined): HarnessContextSummary | undefined {
   if (!index) return undefined;
   return {
     fileCount: index.fileCount || 0,
@@ -175,6 +176,7 @@ export function ProjectWorkspace(): React.ReactElement {
   const [browserCanGoForward, setBrowserCanGoForward] = useState(false);
   const [openWorkspaceFiles, setOpenWorkspaceFiles] = useState<ActiveWorkspaceFile[]>([]);
   const [copilotHarnessIndex, setCopilotHarnessIndex] = useState<HarnessIndexSummary | null>(null);
+  const [activeJobHarnessIndex, setActiveJobHarnessIndex] = useState<HarnessIndexSummary | null>(null);
 
   // Conversation state — current project's conversations + active conversation.
   // Plan 1.6 §4.3 — useConversations is the shared SWR hook (cache lives
@@ -763,6 +765,24 @@ export function ProjectWorkspace(): React.ReactElement {
     [jobs, activeJobId]
   );
 
+  useEffect(() => {
+    if (!activeJob || activeJob.status !== 'done') {
+      setActiveJobHarnessIndex(null);
+      return;
+    }
+    let cancelled = false;
+    fetchHarnessIndex({ scope: 'artifact', jobId: activeJob.id, maxFiles: 80 })
+      .then((response) => {
+        if (!cancelled) setActiveJobHarnessIndex(response.index || null);
+      })
+      .catch(() => {
+        if (!cancelled) setActiveJobHarnessIndex(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeJob?.id, activeJob?.status]);
+
   const jobStats = useMemo(() => {
     let running = 0;
     let failed = 0;
@@ -844,6 +864,7 @@ export function ProjectWorkspace(): React.ReactElement {
           projectAnalysisSummary,
           projectAnalysisRecords,
           projectHarnessSummary: toCopilotHarnessSummary(copilotHarnessIndex),
+          activeJobHarnessSummary: toCopilotHarnessSummary(activeJobHarnessIndex),
           activeJobId: activeJobId ?? undefined,
           activeArtifact,
         }
@@ -856,6 +877,7 @@ export function ProjectWorkspace(): React.ReactElement {
       activeJobId,
       activeArtifact,
       copilotHarnessIndex,
+      activeJobHarnessIndex,
       projectAnalysisSummary,
       projectAnalysisRecords,
     ]
