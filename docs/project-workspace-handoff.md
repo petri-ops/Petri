@@ -70,6 +70,11 @@
     - scope 和 index entries 会带 `canonicalTarget` / `canonicalPath`，prompt summary 也保留 canonical path。
     - 新增 `createHarnessExecutionContext()`，返回 workDir、canonicalWorkDir 和 runtimeReady。
     - runtime ready 支持注入式 `runtimeChecks`，默认 shell ready，R/Python 只做非阻塞环境/路径探测。
+  - `run_tool` 执行链路已接入 canonical execution context：
+    - MCP/Agent 工具执行入口 `vendor/biof3-core/r-server/mcp/registry.js` 会在结果 summary 中写入 `execution`、`canonicalJobDir`、`canonicalOutputDir`、`canonicalResultDir`。
+    - MCP 产物 `artifacts` / `outputs` / `files` 会带 `canonicalPath`，便于后续 Agent、云端 worker、结果解释和参数修复稳定引用。
+    - HTTP/前端工具执行入口 `vendor/biof3-core/r-server/helpers/tools-executor.js` 也会把同样的 execution/canonical 元信息写入 `tool_jobs.result_json`。
+    - 本地运行时缺失时会更早失败，并把 `runtimeReady` 写入可审计结果上下文。
   - 新增 `test/harness-file-index.test.mjs`。
 
 ### 最近一次稳定化验证
@@ -99,20 +104,20 @@ npm run build:spa
 npm --prefix frontend run check
 npm run build:spa
 npm run check
+node --check vendor/biof3-core/r-server/mcp/registry.js
+node --check vendor/biof3-core/r-server/helpers/tools-executor.js
+node --test test/agent-run-tool.test.mjs test/harness-file-index.test.mjs
 ```
 
 ### 现在最该做的事
 
-1. 先做 **Phase 0：稳定化确认**：
-   - 确认桌面导航、路由、TitleBar、WorkspacePanelsContext 没有残留错链。
-   - 确认 `npm run dev` 真实打开项目页可用。
-   - 确认 vendor/biof3-core 的改动是否纳入本次快照。
-   - 确认 `.cursor/` 是否需要忽略或提交。
-2. 再读 `docs/harness-engine-spec.md`。
-3. 再读 `docs/next-steps-roadmap.md`。
-4. 然后继续 **Harness Phase 2**：
-   - 扩展平台抽象层：把 canonical path 和 runtime ready 接入实际 run_tool 执行器。
-   - 继续扩充弱模型回归测试，覆盖更多插件和失败恢复场景。
+1. 先读 `docs/harness-engine-spec.md`。
+2. 再读 `docs/next-steps-roadmap.md`。
+3. 继续 **Harness Phase 2 后半段**：
+   - 扩充弱模型回归测试，覆盖更多插件、失败恢复和二跳分析场景。
+   - 做增量索引：基于 mtime / hash 只更新变化文件，避免每次全量扫描。
+   - 把 canonical execution context 用到更多任务编排入口，例如步骤工具、二次分析、云端 worker adapter。
+   - 继续收敛 failureModes：把运行时缺失、参数不可修复、产物缺失等失败转成统一可诊断结构。
 
 ### 当前原则
 

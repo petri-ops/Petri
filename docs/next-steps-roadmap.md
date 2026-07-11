@@ -162,6 +162,11 @@ node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
   - `createHarnessExecutionContext()` 已返回 workDir、canonicalWorkDir 和 runtimeReady。
   - runtime ready 支持注入式检测，避免启动时阻塞外部命令。
   - 摘要卡只展示轻量信息：文件数、类型分布、角色分布、前几个关键文件。
+- 真实执行链路已接入 canonical execution context：
+  - MCP/Agent `run_tool` 入口会在工具运行结果里写入 `execution`、`canonicalJobDir`、`canonicalOutputDir`、`canonicalResultDir`。
+  - MCP 结果的 `artifacts` / `outputs` / `files` 已补 `canonicalPath`。
+  - 前端/HTTP 工具执行器也会把 execution/canonical 元信息写入 `tool_jobs.result_json`。
+  - 缺失本地 R/Python 运行时会更早进入 failed，并留下 `runtimeReady` 上下文，便于 UI/Agent 做诊断。
 
 已通过：
 
@@ -175,6 +180,9 @@ npm run harness:index -- resources/built-in-plugins/volcano-plot/demo-data --for
 node --check vendor/biof3-core/r-server/routes/harness.js
 node --check vendor/biof3-core/r-server/routes/index.js
 npm run harness:check
+node --check vendor/biof3-core/r-server/mcp/registry.js
+node --check vendor/biof3-core/r-server/helpers/tools-executor.js
+node --test test/agent-run-tool.test.mjs test/harness-file-index.test.mjs
 ```
 
 ## 接下来优先级
@@ -202,14 +210,13 @@ npm run dev
 
 ### P1：Harness Phase 2
 
-Phase 1 的 manifest / artifact / failureModes 基础已经落地，Phase 2 的文件探测和索引基础也已经有了第一版。下一步继续推进：
+Phase 1 的 manifest / artifact / failureModes 基础已经落地，Phase 2 已经从“文件探测/索引”推进到“参数修复 + prompt 注入 + canonical execution context”。下一步继续推进：
 
-1. 在参数确认卡接入 `/api/harness/repair`：先展示可审计修复建议，再由用户或 Agent 确认提交。
-2. 再把 `repairHarnessParams()` 接入 run_tool 前置流程；注意要区分 legacy 工具和 manifest 插件工具，避免静默改参。
-3. 让 Agent prompt 能引用当前 active project/job/artifact 的 Harness prompt summary。
-4. 执行器抽象：把 runtime ready、script execution、输入/输出 canonical path 映射接入实际 run_tool 执行器。
-5. 回归测试：验证弱模型只拿 manifest + prompt summary 也能选择正确工具并补参数。
-6. 增量索引：基于 mtime / hash 做局部更新，避免每次全量扫描。
+1. 扩充弱模型回归测试：覆盖更多内置插件、失败恢复、二跳分析链路。
+2. 增量索引：基于 mtime / hash 做局部更新，避免每次全量扫描。
+3. 统一 failureModes 诊断：把运行时缺失、参数不可修复、产物缺失、输入文件格式异常转为稳定结构。
+4. 把 canonical execution context 扩到步骤工具和云端 worker adapter。
+5. 梳理 `repairHarnessParams()` 与真实 `run_tool` 的边界：继续保持“可审计建议优先”，避免静默覆盖用户参数。
 
 详细规范见：[Harness Engine Spec v1](./harness-engine-spec.md)。
 

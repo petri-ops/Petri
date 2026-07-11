@@ -16,7 +16,8 @@ const req = createRequire(import.meta.url);
 
 // db.js 是 CJS，用 createRequire 拿到 module.exports 的具名函数（await import 只能拿 default）
 const db = req(R_SERVER + '/db.js');
-const { callTool } = await import(resolve(__dirname, '..', 'vendor', 'biof3-core', 'r-server', 'mcp', 'registry.js'));
+const registry = req(R_SERVER + '/mcp/registry.js');
+const { callTool, _test } = registry;
 
 // === DB 层单测：createToolJob/updateToolJob/getToolJob（非 live，默认跑）===
 
@@ -53,6 +54,53 @@ test('updateToolJob 失败分支写 error', async () => {
   });
   assert.equal(updated.status, 'failed');
   assert.equal(updated.error, 'R 脚本崩溃');
+});
+
+// === Harness execution context（非 live，默认跑）===
+
+test('MCP run_tool execution context 映射本地 jobDir 到 canonical workDir', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-mcp-context-'));
+  const jobDir = path.join(root, 'mcp-tool-jobs', 'mcp_1');
+  const outputDir = path.join(jobDir, 'output');
+  fs.mkdirSync(outputDir, { recursive: true });
+
+  const { context, canonicalizePath } = _test.createMcpExecutionContext({
+    jobDir,
+    outputDir,
+    runtime: 'r',
+    runtimeCommand: '/opt/R/bin/Rscript',
+    localRoot: root,
+    canonicalRoot: '/work/biof3',
+  });
+
+  assert.equal(context.mode, 'local');
+  assert.equal(context.runtime, 'r');
+  assert.equal(context.runtimeReady.ready, true);
+  assert.equal(context.workDir, jobDir);
+  assert.equal(context.canonicalWorkDir, '/work/biof3/mcp-tool-jobs/mcp_1');
+  assert.equal(context.canonicalOutputDir, '/work/biof3/mcp-tool-jobs/mcp_1/output');
+  assert.equal(canonicalizePath(path.join(outputDir, 'plot.png')), '/work/biof3/mcp-tool-jobs/mcp_1/output/plot.png');
+});
+
+test('MCP artifact summary 带 canonicalPath，供后续 Agent/平台抽象稳定引用', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-mcp-artifacts-'));
+  const resultDir = path.join(root, 'mcp-tool-jobs', 'mcp_2', 'output');
+  fs.mkdirSync(resultDir, { recursive: true });
+
+  const canonicalizePath = (value) =>
+    _test.canonicalizePath(value, { localRoot: root, canonicalRoot: '/work/biof3' });
+  const artifacts = _test.normalizeArtifacts({
+    manifestItems: [{ id: 'plot', name: 'volcano.png', type: 'plot', label: 'Volcano Plot' }],
+    outFiles: ['volcano.png', 'table.csv'],
+    resultDir,
+    canonicalizePath,
+  });
+
+  assert.equal(artifacts.length, 2);
+  assert.equal(artifacts[0].path, path.join(resultDir, 'volcano.png'));
+  assert.equal(artifacts[0].canonicalPath, '/work/biof3/mcp-tool-jobs/mcp_2/output/volcano.png');
+  assert.equal(artifacts[1].type, 'table');
+  assert.equal(artifacts[1].canonicalPath, '/work/biof3/mcp-tool-jobs/mcp_2/output/table.csv');
 });
 
 // === callTool 端到端：跑完返回 toolJobId（live，需 R）===
