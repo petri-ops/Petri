@@ -81,6 +81,12 @@
     - 诊断层会把缺必需文件、矩阵方向不匹配、样本/特征不足、runtime 不可用等转换成统一 `issues`。
     - `/api/harness/repair` 保持原 `repair` 返回值不变，并额外返回 `diagnostics`。
     - 参数确认卡会展示 `ready / needs_review / blocked` 诊断状态；blocked 时禁用“确认开始”，避免明显不可执行任务继续下发。
+  - `codex/cross-platform-runtime` 分支已完成专业审计并吸收到当前主线：
+    - 没有直接 merge 旧分支；采用 cherry-pick / 选择性吸收，避免回退 Harness 主线。
+    - vendor 子仓吸收了 Python runtime 跨平台路径解析：`shared-backend/runtime-paths.js`、Python executor、py-server warm pool / cold path。
+    - 主仓吸收了 `src/platform-compat.js`、R/Python runtime 二进制选择、终端 shell plan、插件 zip 纯 Node 解压、runtime 平台匹配。
+    - 修正了旧分支遗留风险：补 `scripts/fix-r-paths.mjs`，把 `extract-zip` 提升为直接依赖，并统一三处插件解压调用为 `extractZipFile()`。
+    - 新增 `test/platform-compat.test.mjs` 做跨平台命令选择回归。
   - 新增 `test/harness-file-index.test.mjs`。
 
 ### 最近一次稳定化验证
@@ -102,6 +108,7 @@ node --check vendor/biof3-core/r-server/routes/harness.js
 node --check vendor/biof3-core/r-server/routes/index.js
 npm --prefix frontend run check
 npm run build:spa
+node --test test/platform-compat.test.mjs
 ```
 
 2026-07-12 继续通过：
@@ -126,6 +133,7 @@ npm run build:spa
    - 做增量索引：基于 mtime / hash 只更新变化文件，避免每次全量扫描。
    - 把 canonical execution context 用到更多任务编排入口，例如步骤工具、二次分析、云端 worker adapter。
    - 继续收敛 failureModes：把产物缺失、输入文件格式异常、运行后失败等也转成统一可诊断结构。
+   - 后续如果继续做跨平台，优先补三平台 CI，而不是再开长期未同步分支。
 
 ### 当前原则
 

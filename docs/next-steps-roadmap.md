@@ -172,6 +172,11 @@ node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
   - `/api/harness/repair` 会额外返回 `diagnostics`，保持 `repair` 兼容不变。
   - 参数确认卡会展示 diagnostics；blocked 时禁用确认执行。
   - 弱模型回归已覆盖第三个内置插件 `gene-correlation`，包括“相关/共表达/热图”意图识别和 `top_n` 裁剪。
+- `codex/cross-platform-runtime` 已完成审计并吸收到主线：
+  - vendor 子仓已 cherry-pick Python runtime 跨平台路径解析。
+  - 主仓已吸收 `src/platform-compat.js`、R/Python runtime 二进制选择、终端 shell plan、插件 zip 纯 Node 解压和 runtime 平台匹配。
+  - 已补 `scripts/fix-r-paths.mjs`、`extract-zip` 直接依赖、`test/platform-compat.test.mjs`。
+  - 旧分支不应再作为待合入分支重复处理；后续跨平台工作优先补 CI 和真实 Windows/Linux 验证。
 
 已通过：
 
@@ -190,6 +195,7 @@ node --check vendor/biof3-core/r-server/helpers/tools-executor.js
 node --test test/agent-run-tool.test.mjs test/harness-file-index.test.mjs
 npm --prefix frontend run check
 npm run build:spa
+node --test test/platform-compat.test.mjs
 ```
 
 ## 接下来优先级
@@ -224,6 +230,7 @@ Phase 1 的 manifest / artifact / failureModes 基础已经落地，Phase 2 已�
 3. 继续统一 failureModes 诊断：把产物缺失、输入文件格式异常、运行后错误转为稳定结构。
 4. 把 canonical execution context 扩到步骤工具和云端 worker adapter。
 5. 梳理 `repairHarnessParams()` 与真实 `run_tool` 的边界：继续保持“可审计建议优先”，避免静默覆盖用户参数。
+6. 为跨平台主链路补 Windows / Linux / macOS CI，避免再次出现长期分支不同步。
 
 详细规范见：[Harness Engine Spec v1](./harness-engine-spec.md)。
 

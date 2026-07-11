@@ -18,6 +18,8 @@ const fs = require('fs');
 const https = require('https');
 const crypto = require('crypto');
 const { execFile } = require('child_process');
+const extractZip = require('extract-zip');
+const { getRuntimeBinCandidates } = require('./platform-compat');
 
 // 注册 R/Python 执行器（plugin-manager 在 Electron 主进程跑，不经过 r-server
 // 的 init 流程，必须自己调 initSharedBackend 注册执行器，否则 getExecutor 抛
@@ -45,6 +47,10 @@ function resolveSharedBackendDir() {
 }
 
 const SHARED_BACKEND_DIR = resolveSharedBackendDir();
+const {
+  getPythonRuntimeExecutable,
+  getPythonSitePackagesDir,
+} = require(path.join(SHARED_BACKEND_DIR, 'runtime-paths'));
 
 // core 仓根（r-server/py-server/shared-backend 平级目录所在）：
 // 开发模式 = desktop 仓根/vendor/biof3-core；打包模式 = resourcesPath/core
@@ -82,16 +88,16 @@ const RESOURCES_PATH =
     ? process.resourcesPath
     : path.join(__dirname, '..', 'resources');
 
-// fix-r-paths.sh 路径（打包在 resources/scripts/ 下，开发模式在 scripts/ 下）
+// fix-r-paths.mjs 路径（打包在 resources/scripts/ 下，开发模式在 scripts/ 下）
 function getFixRPathsScript() {
   if (
     process.resourcesPath &&
-    fs.existsSync(path.join(process.resourcesPath, 'scripts', 'fix-r-paths.sh'))
+    fs.existsSync(path.join(process.resourcesPath, 'scripts', 'fix-r-paths.mjs'))
   ) {
-    return path.join(process.resourcesPath, 'scripts', 'fix-r-paths.sh');
+    return path.join(process.resourcesPath, 'scripts', 'fix-r-paths.mjs');
   }
   // 开发模式
-  return path.join(__dirname, '..', 'scripts', 'fix-r-paths.sh');
+  return path.join(__dirname, '..', 'scripts', 'fix-r-paths.mjs');
 }
 
 // 内置插件目录（打包在 resources/built-in-plugins/）
@@ -255,40 +261,11 @@ function verifyChecksum(filePath, expectedSha256) {
 }
 
 // ── 解压 zip ───────────────────────────────────────────────────
-// 使用系统 unzip 命令（macOS/Linux 自带，Windows 需要内置 PowerShell 或 7z）
-
-function extractZip(zipPath, destDir) {
-  return new Promise((resolve, reject) => {
-    fs.mkdirSync(destDir, { recursive: true });
-    const platform = process.platform;
-    if (platform === 'win32') {
-      // Windows: 用 PowerShell 的 Expand-Archive
-      execFile(
-        'powershell',
-        [
-          '-NoProfile',
-          '-Command',
-          `Expand-Archive -Path "${zipPath}" -DestinationPath "${destDir}" -Force`,
-        ],
-        { timeout: 120000, maxBuffer: 64 * 1024 * 1024 },
-        (err) => {
-          if (err) reject(new Error('解压失败: ' + err.message));
-          else resolve(destDir);
-        }
-      );
-    } else {
-      // macOS/Linux: 用系统 unzip（-q 安静模式，避免大插件 stdout 撑爆默认 1MB maxBuffer）
-      execFile(
-        'unzip',
-        ['-q', '-o', zipPath, '-d', destDir],
-        { timeout: 120000, maxBuffer: 64 * 1024 * 1024 },
-        (err) => {
-          if (err) reject(new Error('解压失败: ' + err.message));
-          else resolve(destDir);
-        }
-      );
-    }
-  });
+// 纯 Node 实现，避免依赖系统 unzip / PowerShell。
+async function extractZipFile(zipPath, destDir) {
+  fs.mkdirSync(destDir, { recursive: true });
+  await extractZip(zipPath, { dir: destDir });
+  return destDir;
 }
 
 // ── 安装插件 ───────────────────────────────────────────────────
@@ -352,7 +329,7 @@ async function installPlugin(pluginId, onProgress) {
     if (fs.existsSync(pluginDir)) {
       fs.rmSync(pluginDir, { recursive: true, force: true });
     }
-    await extractZip(zipPath, pluginDir);
+    await extractZipFile(zipPath, pluginDir);
     try {
       fs.unlinkSync(zipPath);
     } catch {}
@@ -491,7 +468,7 @@ async function installContentPlugin(pluginId, plugin, onProgress) {
       }
     }
     if (fs.existsSync(pluginDir)) fs.rmSync(pluginDir, { recursive: true, force: true });
-    await extractZip(zipPath, pluginDir);
+    await extractZipFile(zipPath, pluginDir);
     try {
       fs.unlinkSync(zipPath);
     } catch {}
@@ -548,7 +525,7 @@ async function installContentPlugin(pluginId, plugin, onProgress) {
 // ── 安装 Runtime（R/Python 基础运行时）──────────────────────────
 // Runtime 赟特殊路径：
 //   1. 下载 zip → 校验 → 解压到 runtimes/{R|Python}/
-//   2. R 需要跑 fix-r-paths.sh 修 dylib 路径；Python 不需要
+  //   2. R 需要跑 fix-r-paths.mjs 修路径；Python 不需要
 //   3. 更新 process.env 让当前 r-server/py-server 立即用上新 Runtime
 //   4. 记录到 installed.json（type: 'runtime'）
 //   5. 不走 registerPluginInServer（Runtime 不是工具插件）
@@ -584,7 +561,7 @@ async function installRuntime(pluginId, plugin, onProgress) {
   }
 
   // 解压到 runtimes/{R|Python}/
-  await extractZip(zipPath, runtimeDir);
+  await extractZipFile(zipPath, runtimeDir);
   try {
     fs.unlinkSync(zipPath);
   } catch {}
@@ -609,14 +586,15 @@ async function installRuntime(pluginId, plugin, onProgress) {
   if (lang === 'r') {
     const fixScript = getFixRPathsScript();
     if (!fs.existsSync(fixScript)) {
-      console.warn('[plugin] fix-r-paths.sh not found, R may not start:', fixScript);
+      console.warn('[plugin] fix-r-paths.mjs not found, R may not start:', fixScript);
     } else {
-      console.log('[plugin] running fix-r-paths.sh for R runtime...');
+      console.log('[plugin] running fix-r-paths.mjs for R runtime...');
       await new Promise((resolve, reject) => {
         execFile(
-          'bash',
+          process.execPath,
           [fixScript, runtimeDir],
           {
+            env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
             timeout: 120000,
             maxBuffer: 8 * 1024 * 1024,
           },
@@ -689,7 +667,7 @@ async function installFigcodePack(pluginId, plugin, onProgress) {
   if (fs.existsSync(pluginDir)) {
     fs.rmSync(pluginDir, { recursive: true, force: true });
   }
-  await extractZip(zipPath, pluginDir);
+  await extractZipFile(zipPath, pluginDir);
   try {
     fs.unlinkSync(zipPath);
   } catch {}
@@ -730,7 +708,7 @@ async function installFigcodePack(pluginId, plugin, onProgress) {
     if (lang === 'r') {
       targetDir = path.join(RUNTIMES_DIR, 'R', 'library');
     } else {
-      targetDir = path.join(RUNTIMES_DIR, 'Python', 'site-packages');
+      targetDir = getPythonSitePackagesDir(path.join(RUNTIMES_DIR, 'Python'));
     }
 
     executor.installPackages(pkgDir, targetDir);
@@ -777,7 +755,7 @@ function getRuntimeStatus() {
       path: fs.existsSync(rDir) ? rDir : null,
     },
     python: {
-      installed: fs.existsSync(path.join(pyDir, 'bin', 'python3')),
+      installed: !!getPythonRuntimeExecutable(pyDir),
       path: fs.existsSync(pyDir) ? pyDir : null,
     },
   };
@@ -1026,7 +1004,7 @@ function removePackage(executor, language, pkgName) {
     const libDir =
       language === 'r'
         ? path.join(cfg.rHome || '', 'library')
-        : path.join(cfg.pyHome || '', 'site-packages');
+        : getPythonSitePackagesDir(cfg.pyHome || '');
     const pkgPath = path.join(libDir, pkgName);
     if (fs.existsSync(pkgPath)) {
       fs.rmSync(pkgPath, { recursive: true, force: true });
@@ -1068,12 +1046,25 @@ async function loadAllPlugins() {
     if (plug.type === 'runtime') {
       const runtimeName = plug.language === 'r' ? 'R' : 'Python';
       const runtimeDir = path.join(RUNTIMES_DIR, runtimeName);
-      if (fs.existsSync(runtimeDir)) {
+      const platformMatch =
+        !plug.platform ||
+        (Array.isArray(plug.platform)
+          ? plug.platform.includes(detectPlatform())
+          : String(plug.platform).split(',').map((s) => s.trim()).includes(detectPlatform()));
+      const binExists =
+        plug.language === 'r'
+          ? getRuntimeBinCandidates('r', process.platform).some((name) =>
+              fs.existsSync(path.join(runtimeDir, 'bin', name)),
+            )
+          : getPythonRuntimeExecutable(runtimeDir, process.platform) !== null;
+      if (fs.existsSync(runtimeDir) && platformMatch && binExists) {
         if (plug.language === 'r') process.env.BIOF3_R_HOME = runtimeDir;
         else process.env.BIOF3_PY_HOME = runtimeDir;
         console.log(`[plugin] runtime loaded: ${plug.id} → ${runtimeDir}`);
       } else {
-        console.warn(`[plugin] runtime ${plug.id} directory missing, skipping`);
+        console.warn(
+          `[plugin] runtime ${plug.id} incompatible with ${detectPlatform()} or missing executable, skipping`,
+        );
       }
       continue;
     }

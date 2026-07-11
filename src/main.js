@@ -22,6 +22,16 @@ const {
 const path = require("path");
 const fs = require("fs");
 const { spawn } = require("child_process");
+const {
+  getNodeLocator,
+  getRuntimeBinCandidates,
+  getRuntimeBinName,
+  getOpenShellPlan,
+  getSessionShellSpec,
+} = require("./platform-compat");
+const {
+  getPythonRuntimeExecutable,
+} = require("../vendor/biof3-core/shared-backend/runtime-paths");
 
 const isDevMode =
   process.argv.includes("--dev") ||
@@ -213,7 +223,7 @@ function resolveNodeBin() {
   if (!IS_DEV) return process.execPath;
   try {
     const { execFileSync } = require("child_process");
-    const locator = process.platform === "win32" ? "where" : "which";
+    const locator = getNodeLocator(process.platform);
     const bin = execFileSync(locator, ["node"], {
       encoding: "utf-8",
       timeout: 3000,
@@ -291,10 +301,7 @@ const BASE_PY_PACKAGES = new Set([
 function _detectSystemR() {
   const { execFileSync } = require("child_process");
   try {
-    const candidates =
-      process.platform === "win32"
-        ? ["Rscript.exe", "Rscript"]
-        : ["Rscript", "Rscript.exe"];
+    const candidates = getRuntimeBinCandidates("r", process.platform);
     for (const cmd of candidates) {
       try {
         const rHome = execFileSync(cmd, ["-e", "cat(R.home())"], {
@@ -316,6 +323,15 @@ function _detectSystemR() {
   for (const p of commonPaths) {
     const binName = process.platform === "win32" ? "Rscript.exe" : "Rscript";
     if (fs.existsSync(path.join(p, "bin", binName))) return p;
+    if (process.platform === "win32" && fs.existsSync(p)) {
+      try {
+        for (const entry of fs.readdirSync(p, { withFileTypes: true })) {
+          if (!entry.isDirectory()) continue;
+          const candidate = path.join(p, entry.name);
+          if (fs.existsSync(path.join(candidate, "bin", binName))) return candidate;
+        }
+      } catch {}
+    }
   }
   return null;
 }
@@ -323,10 +339,7 @@ function _detectSystemR() {
 function _detectSystemPython() {
   const { execFileSync } = require("child_process");
   try {
-    const candidates =
-      process.platform === "win32"
-        ? ["python.exe", "python3.exe", "python"]
-        : ["python3", "python"];
+    const candidates = getRuntimeBinCandidates("python", process.platform);
     for (const cmd of candidates) {
       try {
         const pyHome = execFileSync(
@@ -337,8 +350,7 @@ function _detectSystemPython() {
             timeout: 5000,
           },
         ).trim();
-        const binName = process.platform === "win32" ? "python.exe" : "python3";
-        if (pyHome && fs.existsSync(path.join(pyHome, "bin", binName)))
+        if (pyHome && getPythonRuntimeExecutable(pyHome, process.platform))
           return pyHome;
       } catch {}
     }
@@ -357,16 +369,12 @@ function resolveRuntime(lang, userDataDir) {
 
   // 1. 用户安装的独立 Runtime
   const userRuntime = path.join(userDataDir, "runtimes", runtimeName);
-  const runtimeBinCandidates =
-    lang === "r"
-      ? process.platform === "win32"
-        ? ["Rscript.exe", "Rscript"]
-        : ["Rscript", "Rscript.exe"]
-      : process.platform === "win32"
-        ? ["python.exe", "python3.exe", "python"]
-        : ["python3", "python"];
-  if (
-    runtimeBinCandidates.some((candidate) =>
+  if (lang === "python") {
+    if (getPythonRuntimeExecutable(userRuntime, process.platform)) {
+      return userRuntime;
+    }
+  } else if (
+    getRuntimeBinCandidates(lang, process.platform).some((candidate) =>
       fs.existsSync(path.join(userRuntime, "bin", candidate)),
     )
   ) {
@@ -615,7 +623,11 @@ function startPlumber(reason = "ipc") {
     return { ok: false, error: "R runtime not installed" };
   }
 
-  const rBin = path.join(process.env.BIOF3_R_HOME, "bin", "Rscript");
+  const rBin = path.join(
+    process.env.BIOF3_R_HOME,
+    "bin",
+    getRuntimeBinName("r", process.platform),
+  );
   if (!fs.existsSync(rBin)) {
     console.warn("[desktop] Rscript not found, plumber skipped:", rBin);
     return { ok: false, error: "Rscript not found" };
@@ -1807,37 +1819,27 @@ function setupTerminalIpc() {
         typeof targetPath === "string" && targetPath.trim()
           ? targetPath.trim()
           : process.env.BIOF3_LOCAL_DATA_DIR || PROJECT_ROOT;
-      if (process.platform === "darwin") {
-        const escaped = cwd.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-        spawn(
-          "osascript",
-          [
-            "-e",
-            `tell application "Terminal" to do script "cd \\"${escaped}\\"; clear"`,
-          ],
-          { detached: true, stdio: "ignore" },
-        ).unref();
-        return { ok: true, path: cwd };
-      }
-      if (process.platform === "win32") {
-        spawn("cmd.exe", ["/c", "start", "cmd", "/k", `cd /d "${cwd}"`], {
-          detached: true,
-          stdio: "ignore",
-          windowsHide: true,
+      const plan = getOpenShellPlan(cwd, process.platform);
+      if (plan.type === "osascript") {
+        spawn(plan.command, plan.args, {
+          detached: plan.detached,
+          stdio: plan.stdio,
         }).unref();
         return { ok: true, path: cwd };
       }
-      const terminals = [
-        "x-terminal-emulator",
-        "gnome-terminal",
-        "konsole",
-        "xfce4-terminal",
-      ];
-      for (const terminal of terminals) {
+      if (plan.type === "cmd") {
+        spawn(plan.command, plan.args, {
+          detached: plan.detached,
+          stdio: plan.stdio,
+          windowsHide: plan.windowsHide,
+        }).unref();
+        return { ok: true, path: cwd };
+      }
+      for (const terminal of plan.candidates) {
         try {
-          spawn(terminal, ["--working-directory", cwd], {
-            detached: true,
-            stdio: "ignore",
+          spawn(terminal, plan.args, {
+            detached: plan.detached,
+            stdio: plan.stdio,
           }).unref();
           return { ok: true, path: cwd };
         } catch {}
@@ -1861,11 +1863,7 @@ function setupTerminalIpc() {
         requestedCwd && fs.existsSync(requestedCwd)
           ? requestedCwd
           : process.env.BIOF3_LOCAL_DATA_DIR || PROJECT_ROOT;
-      const shellPath =
-        process.platform === "win32"
-          ? process.env.COMSPEC || "cmd.exe"
-          : process.env.SHELL || "/bin/zsh";
-      const args = process.platform === "win32" ? [] : ["-l"];
+      const { shellPath, args } = getSessionShellSpec(process.env, process.platform);
       const pty = require("node-pty");
       shellProc = pty.spawn(shellPath, args, {
         name: "xterm-256color",
