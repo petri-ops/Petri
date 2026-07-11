@@ -35,6 +35,11 @@
   - 支持 `--prompt-summary`，输出给模型使用的轻量摘要。
   - 支持 `--repair-params`，输出参数修复建议。
   - `repairHarnessParams()` 已能做文件输入预填、DEG 列名别名映射、数值参数裁剪。
+  - 后端已新增 Harness API：
+    - `GET /api/harness/index`
+    - `POST /api/harness/repair`
+    - 默认返回 prompt summary，`full=1` 才返回完整索引。
+    - project / job / artifact / dataset 均做权限检查；任意 path 只允许 internal/admin。
   - 新增 `test/harness-file-index.test.mjs`。
 
 ### 最近一次稳定化验证
@@ -52,6 +57,8 @@ node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
 node --check scripts/harness-file-index.mjs
 node --test test/harness-file-index.test.mjs
 npm run harness:index -- resources/built-in-plugins/volcano-plot/demo-data --for-manifest resources/built-in-plugins/volcano-plot/tool-definition.json --repair-params '{"top_n":999}' --prompt-summary --no-hash
+node --check vendor/biof3-core/r-server/routes/harness.js
+node --check vendor/biof3-core/r-server/routes/index.js
 ```
 
 ### 现在最该做的事
@@ -64,8 +71,9 @@ npm run harness:index -- resources/built-in-plugins/volcano-plot/demo-data --for
 2. 再读 `docs/harness-engine-spec.md`。
 3. 再读 `docs/next-steps-roadmap.md`。
 4. 然后继续 **Harness Phase 2**：
-   - 把 `indexHarnessScope()` 接入后端 API，让项目页、job 页、artifact 页能直接拿索引摘要。
-   - 把 `repairHarnessParams()` 接入 run_tool 前置流程，提交任务前先生成可审计修复建议。
+   - 前端项目页接入 `/api/harness/index`，让文件 / job / artifact 能显示 Harness 识别摘要。
+   - 参数确认卡接入 `/api/harness/repair`，提交任务前先展示可审计修复建议。
+   - 暂时不要静默改 run_tool 参数；legacy 工具和 manifest 插件工具约定不同，先通过确认卡稳定体验。
    - 建立平台抽象层。
    - 增加弱模型只拿 manifest + index summary 也能选工具和补参数的回归测试。
 

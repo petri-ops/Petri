@@ -194,6 +194,10 @@ npm run harness:index -- <path>
   - 文件输入自动预填。
   - DEG 常见列名别名映射。
   - 数值参数默认值填充与上限裁剪。
+- 后端只读 API：
+  - `GET /api/harness/index`
+  - `POST /api/harness/repair`
+  - 普通用户只能访问自己有权限的 project / job / dataset / artifact；任意 path 仅 internal/admin 可用。
 
 ```bash
 npm run harness:index -- <dataset-dir> --for-manifest <tool-definition.json>

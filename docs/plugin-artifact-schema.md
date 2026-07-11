@@ -184,6 +184,16 @@ Current repair capabilities:
 - Fill numeric defaults from manifest inputs.
 - Clamp `top_n` and `n_components` using index-derived feature/sample counts.
 
+The backend exposes the same capabilities for UI / Agent integration:
+
+```http
+GET /api/harness/index?scope=project&projectId=<projectId>
+GET /api/harness/index?scope=artifact&jobId=<jobId>
+POST /api/harness/repair
+```
+
+`POST /api/harness/repair` accepts a JSON body with `scope`, scope identifiers, `manifest`, and `params`, then returns the prompt summary plus repair suggestions. This endpoint is intentionally non-mutating; downstream UI should show the repair plan before applying it to a real tool run.
+
 ## Reproducibility
 
 Every completed tool job should preserve:
