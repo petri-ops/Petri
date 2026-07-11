@@ -183,9 +183,22 @@ npm run harness:index -- <path>
 - 大文件采样读取，避免把整份文件塞进上下文。
 - 文件 hash 与 `.biof3-harness-index.json` 缓存读写。
 - 基于插件 manifest 输入定义的候选文件推荐：
+- BioF3 范围解析：
+  - `path`：任意本地目录或文件。
+  - `project`：项目工作目录。
+  - `job`：工具任务目录。
+  - `artifact`：工具任务 `output/` 产物目录。
+  - `dataset`：本地可解析数据集路径。
+- 给模型使用的瘦身摘要：`--prompt-summary`。
+- 参数修复第一版：
+  - 文件输入自动预填。
+  - DEG 常见列名别名映射。
+  - 数值参数默认值填充与上限裁剪。
 
 ```bash
 npm run harness:index -- <dataset-dir> --for-manifest <tool-definition.json>
+npm run harness:index -- --scope artifact --job-id <jobId> --prompt-summary
+npm run harness:index -- <dataset-dir> --for-manifest <tool-definition.json> --repair-params '{"top_n":999}'
 ```
 
 这一步不是最终 UI，而是给后续参数补全、失败修复和弱模型工具选择提供稳定的结构化摘要。

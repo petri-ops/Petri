@@ -145,6 +145,45 @@ npm run harness:index -- <dataset-dir> --for-manifest <tool-definition.json>
 
 the output includes `inputSuggestions`, so Harness can prefill likely file parameters and later repair mismatches without rereading the entire dataset.
 
+BioF3-specific scopes are supported:
+
+```bash
+npm run harness:index -- --scope project --project-path <workspace>
+npm run harness:index -- --scope job --job-id <jobId>
+npm run harness:index -- --scope artifact --job-id <jobId>
+npm run harness:index -- --scope dataset --dataset-path <file-or-dir>
+```
+
+For prompt construction, use:
+
+```bash
+npm run harness:index -- <path> --prompt-summary
+```
+
+This removes bulky row samples while preserving headers, column types, roles, and matrix orientation.
+
+## Parameter Repair v1
+
+The same module exposes a first-pass repair layer:
+
+```bash
+npm run harness:index -- <dataset-dir> \
+  --for-manifest <tool-definition.json> \
+  --repair-params '{"top_n":999}'
+```
+
+The output includes `paramRepair` or `repair` when `--prompt-summary` is used.
+
+Current repair capabilities:
+
+- Prefill missing file inputs from `inputSuggestions`.
+- Map common DEG column aliases:
+  - `symbol`, `gene_name` → `gene`
+  - `logFC`, `avg_log2FC` → `log2FC`
+  - `p_val`, `padj` → `pvalue`
+- Fill numeric defaults from manifest inputs.
+- Clamp `top_n` and `n_components` using index-derived feature/sample counts.
+
 ## Reproducibility
 
 Every completed tool job should preserve:

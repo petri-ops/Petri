@@ -117,6 +117,18 @@ node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
 - 输入候选匹配已支持：
   - 根据插件 `inputs` 的 `id` / `label` / `accept` 自动给文件参数推荐候选文件。
   - 示例：火山图插件可以从 demo-data 里自动选中 `demo_deg.csv`。
+- Scope resolver 已支持：
+  - `path`
+  - `project`
+  - `job`
+  - `artifact`
+  - `dataset`
+- Prompt summary 已支持：
+  - `--prompt-summary` 输出更适合模型使用的瘦身索引，不包含大块样例行。
+- 参数修复第一版已支持：
+  - 文件输入自动预填。
+  - DEG 常见列名别名映射：`symbol/gene_name → gene`、`logFC/avg_log2FC → log2FC`、`p_val/padj → pvalue`。
+  - `top_n`、`n_components` 等数值参数根据索引探测结果裁剪。
 
 已通过：
 
@@ -124,6 +136,7 @@ node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
 node --check scripts/harness-file-index.mjs
 node --test test/harness-file-index.test.mjs
 npm run harness:index -- resources/built-in-plugins/volcano-plot/demo-data --for-manifest resources/built-in-plugins/volcano-plot/tool-definition.json --no-hash
+npm run harness:index -- resources/built-in-plugins/volcano-plot/demo-data --for-manifest resources/built-in-plugins/volcano-plot/tool-definition.json --repair-params '{"top_n":999}' --prompt-summary --no-hash
 npm run harness:check
 ```
 
@@ -154,10 +167,10 @@ npm run dev
 
 Phase 1 的 manifest / artifact / failureModes 基础已经落地，Phase 2 的文件探测和索引基础也已经有了第一版。下一步继续推进：
 
-1. 把 `harness:index` 接入项目 / dataset / artifact 的真实目录，而不是只作为 CLI。
-2. 参数修复层：基于 `failureModes.suggestedFix` 做列名映射、参数裁剪、路径修复。
+1. 把 `indexHarnessScope()` 接入后端 API：项目页可请求 project/job/artifact 的最新索引摘要。
+2. 把 `repairHarnessParams()` 接入 run_tool 前置流程：先生成可审计的参数修复建议，再提交任务。
 3. 执行器抽象：把平台路径、runtime ready、script execution 下沉。
-4. 回归测试：验证弱模型只拿 manifest + 文件探测摘要也能选择正确工具。
+4. 回归测试：验证弱模型只拿 manifest + prompt summary 也能选择正确工具并补参数。
 5. 增量索引：基于 mtime / hash 做局部更新，避免每次全量扫描。
 
 详细规范见：[Harness Engine Spec v1](./harness-engine-spec.md)。

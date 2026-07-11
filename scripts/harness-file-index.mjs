@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 
 const DEFAULT_MAX_SAMPLE_BYTES = 256 * 1024;
 const DEFAULT_MAX_FILES = 500;
@@ -33,6 +34,68 @@ function safeRelative(root, target) {
 
 function normalizePath(inputPath) {
   return path.resolve(String(inputPath || '.'));
+}
+
+function pathExists(inputPath) {
+  try {
+    return !!inputPath && fs.existsSync(inputPath);
+  } catch {
+    return false;
+  }
+}
+
+function defaultDataDir() {
+  return (
+    process.env.BIOF3_LOCAL_DATA_DIR ||
+    path.join(process.env.HOME || process.cwd(), 'Documents', 'BioF3-Local')
+  );
+}
+
+function defaultJobsDir(dataDir = defaultDataDir()) {
+  return (
+    process.env.BIOF3_TOOL_JOBS_DIR ||
+    path.join(process.env.BIOF3_LOCAL_RESULTS_DIR || path.join(dataDir, 'results'), 'tool-jobs')
+  );
+}
+
+function safeJoinUnder(root, ...parts) {
+  const normalizedRoot = normalizePath(root);
+  const target = path.resolve(normalizedRoot, ...parts.map((part) => String(part || '')));
+  if (target !== normalizedRoot && !target.startsWith(normalizedRoot + path.sep)) return null;
+  return target;
+}
+
+function safeProjectSlug(name) {
+  const slug = String(name || 'project')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48);
+  return slug || 'project';
+}
+
+function defaultProjectWorkspacePath(project, dataDir = defaultDataDir()) {
+  const shortId = String(project?.id || 'local').replace(/^p_/, '').slice(0, 8);
+  return path.join(dataDir, 'projects', `${safeProjectSlug(project?.name)}-${shortId}`);
+}
+
+function readSqliteRow(dbPath, sql, params = []) {
+  if (!dbPath || !pathExists(dbPath)) return null;
+  try {
+    const require = createRequire(import.meta.url);
+    const Database = require('better-sqlite3');
+    const db = new Database(dbPath, { readonly: true, fileMustExist: true });
+    try {
+      return db.prepare(sql).get(...params) || null;
+    } finally {
+      db.close();
+    }
+  } catch (error) {
+    return {
+      __dbError: error.message,
+    };
+  }
 }
 
 function inferKind(filePath) {
@@ -459,6 +522,348 @@ export function suggestInputBindings(manifest, index, options = {}) {
     });
 }
 
+const COLUMN_ALIASES = {
+  gene: ['gene', 'symbol', 'gene_name', 'geneid', 'gene_id', 'genes'],
+  log2FC: ['log2fc', 'logfc', 'avg_log2fc', 'avg_logfc', 'foldchange', 'fold_change'],
+  pvalue: ['pvalue', 'p_val', 'p.val', 'p-value', 'pvalue_adj_raw', 'padj', 'adj_p_val', 'qvalue'],
+  sample: ['sample', 'sample_id', 'sampleid', 'cell', 'cell_id', 'barcode'],
+  group: ['group', 'condition', 'class', 'label', 'cluster', 'treatment'],
+};
+
+function normalizeColumnName(name) {
+  return String(name || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+
+export function inferColumnMappings(entry, requiredColumns = []) {
+  const headers = entry?.table?.headers || [];
+  const normalizedHeaders = headers.map((header) => ({
+    raw: header,
+    normalized: normalizeColumnName(header),
+  }));
+  const mappings = {};
+  const missing = [];
+  for (const required of requiredColumns) {
+    const aliases = COLUMN_ALIASES[required] || [required];
+    const normalizedAliases = aliases.map(normalizeColumnName);
+    const matched = normalizedHeaders.find((header) => normalizedAliases.includes(header.normalized));
+    if (matched) mappings[required] = matched.raw;
+    else missing.push(required);
+  }
+  return { mappings, missing };
+}
+
+function fileInputs(manifest = {}) {
+  return (manifest.inputs || []).filter((input) => ['file', 'path'].includes(String(input.type || '').toLowerCase()));
+}
+
+function numberInputs(manifest = {}) {
+  return (manifest.inputs || []).filter((input) => String(input.type || '').toLowerCase() === 'number');
+}
+
+function firstSelectedEntry(index, binding) {
+  if (!binding?.selected) return null;
+  return (index.entries || []).find((entry) => entry.relativePath === binding.selected.relativePath) || null;
+}
+
+function availableFeatureCount(entry) {
+  if (!entry?.table) return null;
+  if (entry.table.matrixOrientation === 'rows_are_features') return entry.table.rowSampleCount;
+  if (entry.table.matrixOrientation === 'rows_are_samples') return Math.max(0, (entry.table.columnCount || 0) - 1);
+  if (entry.role === 'deg_table') return entry.table.rowSampleCount;
+  return entry.table.rowSampleCount || null;
+}
+
+function availableSampleCount(entry) {
+  if (!entry?.table) return null;
+  if (entry.table.matrixOrientation === 'rows_are_samples') return entry.table.rowSampleCount;
+  if (entry.table.matrixOrientation === 'rows_are_features') return Math.max(0, (entry.table.columnCount || 0) - 1);
+  return entry.table.rowSampleCount || null;
+}
+
+export function repairHarnessParams(manifest, index, params = {}, options = {}) {
+  const repairedParams = { ...params };
+  const repairs = [];
+  const warnings = [];
+  const inputSuggestions = options.inputSuggestions || suggestInputBindings(manifest, index);
+  const selectedByInput = new Map(inputSuggestions.map((binding) => [binding.inputId, binding]));
+
+  for (const input of fileInputs(manifest)) {
+    const binding = selectedByInput.get(input.id);
+    if (!repairedParams[input.id] && binding?.selected) {
+      repairedParams[input.id] = options.useAbsolutePaths ? binding.selected.path : binding.selected.relativePath;
+      repairs.push({
+        code: 'file_input_prefilled',
+        inputId: input.id,
+        value: repairedParams[input.id],
+        reason: binding.selected.reasons,
+      });
+    }
+  }
+
+  const degInput = fileInputs(manifest).find((input) => /deg|差异/.test(textForInput(input)));
+  if (degInput) {
+    const entry = firstSelectedEntry(index, selectedByInput.get(degInput.id));
+    const columnRepair = inferColumnMappings(entry, ['gene', 'log2FC', 'pvalue']);
+    if (Object.keys(columnRepair.mappings).length) {
+      repairedParams.columnMappings = {
+        ...(repairedParams.columnMappings || {}),
+        [degInput.id]: columnRepair.mappings,
+      };
+      repairs.push({
+        code: 'column_alias_mapped',
+        inputId: degInput.id,
+        mappings: columnRepair.mappings,
+        missing: columnRepair.missing,
+      });
+    }
+    if (columnRepair.missing.length) {
+      warnings.push({
+        code: 'missing_required_columns',
+        inputId: degInput.id,
+        missing: columnRepair.missing,
+      });
+    }
+  }
+
+  for (const input of numberInputs(manifest)) {
+    const id = input.id;
+    const hadParam = repairedParams[id] != null;
+    const current = hadParam ? repairedParams[id] : input.default;
+    if (current == null || !Number.isFinite(Number(current))) continue;
+    let next = Number(current);
+    const original = next;
+    if (typeof input.min === 'number') next = Math.max(input.min, next);
+    if (typeof input.max === 'number') next = Math.min(input.max, next);
+
+    if (/top[_-]?n/i.test(id)) {
+      const likelyMatrixBinding =
+        selectedByInput.get('expr_matrix') ||
+        inputSuggestions.find((binding) => /expr|matrix|表达|矩阵/.test(String(binding.label || '').toLowerCase()));
+      const likelyDegBinding = selectedByInput.get('deg_table');
+      const entry = firstSelectedEntry(index, likelyMatrixBinding || likelyDegBinding);
+      const maxFeatures = availableFeatureCount(entry);
+      if (maxFeatures && next > maxFeatures) next = maxFeatures;
+    }
+
+    if (/n[_-]?components/i.test(id)) {
+      const binding = selectedByInput.get('expr_matrix');
+      const entry = firstSelectedEntry(index, binding);
+      const maxComponents = Math.max(1, Math.min(availableSampleCount(entry) || next, availableFeatureCount(entry) || next));
+      if (next > maxComponents) next = maxComponents;
+    }
+
+    if (next !== original || !hadParam) {
+      repairedParams[id] = next;
+      repairs.push({
+        code: next !== original && hadParam ? 'number_param_clamped' : 'number_default_filled',
+        inputId: id,
+        from: hadParam ? original : null,
+        to: next,
+      });
+    }
+  }
+
+  return {
+    ok: warnings.length === 0,
+    repairedParams,
+    repairs,
+    warnings,
+    inputSuggestions,
+  };
+}
+
+export function summarizeIndexForPrompt(index, options = {}) {
+  const maxEntries = options.maxEntries ?? 40;
+  return {
+    harnessIndexVersion: index?.harnessIndexVersion || 1,
+    root: index?.root,
+    fileCount: index?.fileCount || 0,
+    truncated: !!index?.truncated,
+    byKind: index?.byKind || {},
+    byRole: index?.byRole || {},
+    entries: (index?.entries || []).slice(0, maxEntries).map((entry) => ({
+      relativePath: entry.relativePath,
+      kind: entry.kind,
+      role: entry.role,
+      size: entry.size,
+      readable: entry.readable,
+      table: entry.table
+        ? {
+            headers: entry.table.headers,
+            columnCount: entry.table.columnCount,
+            rowSampleCount: entry.table.rowSampleCount,
+            matrixOrientation: entry.table.matrixOrientation,
+            hints: entry.table.hints,
+            columns: (entry.table.columns || []).slice(0, 12).map((column) => ({
+              name: column.name,
+              likelyType: column.likelyType,
+              numericRatio: column.numericRatio,
+              missingCount: column.missingCount,
+            })),
+          }
+        : undefined,
+      json: entry.json
+        ? {
+            valid: entry.json.valid,
+            rootType: entry.json.rootType,
+            keys: entry.json.keys,
+          }
+        : undefined,
+    })),
+    errors: index?.errors || [],
+  };
+}
+
+function datasetPathFromValue(value, dataDir = defaultDataDir()) {
+  if (!value) return null;
+  const raw = String(value);
+  if (raw.startsWith('file://')) return new URL(raw).pathname;
+  if (path.isAbsolute(raw)) return raw;
+  const storageCandidates = [
+    path.join(dataDir, 'uploads', raw),
+    path.join(dataDir, 'results', raw),
+    path.join(dataDir, raw),
+  ];
+  return storageCandidates.find(pathExists) || null;
+}
+
+export function resolveHarnessScope(options = {}) {
+  const scope = String(options.scope || (options.jobId ? 'job' : options.projectId ? 'project' : 'path'));
+  const dataDir = normalizePath(options.dataDir || defaultDataDir());
+  const jobsDir = normalizePath(options.jobsDir || defaultJobsDir(dataDir));
+  const dbPath = options.dbPath || process.env.BIOF3_DB_PATH || path.join(dataDir, 'biof3.db');
+
+  if (scope === 'path' || scope === 'workspace') {
+    const target = normalizePath(options.path || options._?.[0] || '.');
+    return {
+      scope: 'path',
+      id: null,
+      target,
+      partition: 'workspace',
+      exists: pathExists(target),
+    };
+  }
+
+  if (scope === 'project') {
+    if (options.projectPath || options.workspacePath || options.path) {
+      const target = normalizePath(options.projectPath || options.workspacePath || options.path);
+      return {
+        scope,
+        id: options.projectId || null,
+        target,
+        partition: 'project',
+        exists: pathExists(target),
+      };
+    }
+    if (!options.projectId) throw new Error('project scope requires --project-id or --project-path');
+    const row = readSqliteRow(dbPath, 'SELECT id, name, workspace_path FROM projects WHERE id = ?', [
+      options.projectId,
+    ]);
+    if (row?.__dbError) throw new Error(`Cannot read project from db: ${row.__dbError}`);
+    if (!row) throw new Error(`Project not found: ${options.projectId}`);
+    const target = row.workspace_path || defaultProjectWorkspacePath(row, dataDir);
+    return {
+      scope,
+      id: row.id,
+      target,
+      partition: 'project',
+      exists: pathExists(target),
+      source: { dbPath, name: row.name, workspacePath: row.workspace_path || null },
+    };
+  }
+
+  if (scope === 'job' || scope === 'artifact') {
+    if (!options.jobId) throw new Error(`${scope} scope requires --job-id`);
+    const jobRoot = safeJoinUnder(jobsDir, options.jobId);
+    if (!jobRoot) throw new Error(`Invalid job id: ${options.jobId}`);
+    const target = scope === 'artifact' ? path.join(jobRoot, 'output') : jobRoot;
+    return {
+      scope,
+      id: options.jobId,
+      target,
+      partition: scope === 'artifact' ? 'artifact' : 'job',
+      exists: pathExists(target),
+      source: { jobsDir, jobRoot },
+    };
+  }
+
+  if (scope === 'dataset') {
+    if (options.datasetPath || options.path) {
+      const target = normalizePath(options.datasetPath || options.path);
+      return {
+        scope,
+        id: options.datasetId || null,
+        target,
+        partition: 'dataset',
+        exists: pathExists(target),
+      };
+    }
+    if (!options.datasetId) throw new Error('dataset scope requires --dataset-id or --dataset-path');
+    const row = readSqliteRow(dbPath, 'SELECT id, name, oss_url, meta_url, features_url FROM datasets WHERE id = ?', [
+      options.datasetId,
+    ]);
+    if (row?.__dbError) throw new Error(`Cannot read dataset from db: ${row.__dbError}`);
+    if (!row) throw new Error(`Dataset not found: ${options.datasetId}`);
+    const target =
+      datasetPathFromValue(row.oss_url, dataDir) ||
+      datasetPathFromValue(row.meta_url, dataDir) ||
+      datasetPathFromValue(row.features_url, dataDir);
+    if (!target) {
+      throw new Error(`Dataset has no local indexable path: ${options.datasetId}`);
+    }
+    return {
+      scope,
+      id: row.id,
+      target,
+      partition: 'dataset',
+      exists: pathExists(target),
+      source: {
+        dbPath,
+        name: row.name,
+        ossUrl: row.oss_url || null,
+        metaUrl: row.meta_url || null,
+        featuresUrl: row.features_url || null,
+      },
+    };
+  }
+
+  throw new Error(`Unsupported harness index scope: ${scope}`);
+}
+
+export function indexHarnessScope(options = {}) {
+  const resolved = resolveHarnessScope(options);
+  if (!resolved.exists) throw new Error(`Scope target does not exist: ${resolved.target}`);
+  const stat = fs.statSync(resolved.target);
+  const index = stat.isDirectory()
+    ? indexDirectory(resolved.target, options)
+    : {
+        harnessIndexVersion: 1,
+        root: path.dirname(resolved.target),
+        createdAt: stableNow(),
+        fileCount: 1,
+        truncated: false,
+        byKind: {},
+        byRole: {},
+        entries: [
+          {
+            ...detectFile(resolved.target, options),
+            relativePath: path.basename(resolved.target),
+          },
+        ],
+        errors: [],
+      };
+  if (!stat.isDirectory()) {
+    const entry = index.entries[0];
+    index.byKind[entry.kind] = 1;
+    index.byRole[entry.role] = 1;
+  }
+  return {
+    scope: resolved,
+    index,
+    promptSummary: summarizeIndexForPrompt(index, options),
+  };
+}
+
 export function writeIndexCache(index, cachePath) {
   const target = normalizePath(cachePath || path.join(index.root, DEFAULT_CACHE_NAME));
   fs.writeFileSync(target, JSON.stringify(index, null, 2));
@@ -475,6 +880,18 @@ function parseArgs(argv) {
     const item = argv[i];
     if (item === '--cache') args.cache = argv[++i] || DEFAULT_CACHE_NAME;
     else if (item === '--for-manifest') args.forManifest = argv[++i];
+    else if (item === '--repair-params') args.repairParams = argv[++i] || '{}';
+    else if (item === '--scope') args.scope = argv[++i];
+    else if (item === '--project-id') args.projectId = argv[++i];
+    else if (item === '--project-path') args.projectPath = argv[++i];
+    else if (item === '--workspace-path') args.workspacePath = argv[++i];
+    else if (item === '--job-id') args.jobId = argv[++i];
+    else if (item === '--dataset-id') args.datasetId = argv[++i];
+    else if (item === '--dataset-path') args.datasetPath = argv[++i];
+    else if (item === '--data-dir') args.dataDir = argv[++i];
+    else if (item === '--jobs-dir') args.jobsDir = argv[++i];
+    else if (item === '--db-path') args.dbPath = argv[++i];
+    else if (item === '--prompt-summary') args.promptSummary = true;
     else if (item === '--max-files') args.maxFiles = Number(argv[++i]) || DEFAULT_MAX_FILES;
     else if (item === '--no-hash') args.hash = false;
     else if (item === '--include-hidden') args.includeHidden = true;
@@ -483,20 +900,51 @@ function parseArgs(argv) {
   return args;
 }
 
+function readJsonArgument(value) {
+  const raw = String(value || '{}');
+  if (raw.trim().startsWith('{') || raw.trim().startsWith('[')) return JSON.parse(raw);
+  return JSON.parse(fs.readFileSync(normalizePath(raw), 'utf8'));
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const args = parseArgs(process.argv.slice(2));
-  const target = normalizePath(args._[0] || '.');
-  const stat = fs.statSync(target);
-  const result = stat.isDirectory()
-    ? indexDirectory(target, args)
-    : detectFile(target, args);
-  if (args.forManifest && stat.isDirectory()) {
+  if (args._[0] && !args.path) args.path = args._[0];
+  const scoped = indexHarnessScope(args);
+  const result = args.promptSummary
+    ? scoped.promptSummary
+    : {
+        ...scoped.index,
+        scope: scoped.scope,
+      };
+  let manifest = null;
+  let inputSuggestions = null;
+  if (args.forManifest && fs.statSync(scoped.scope.target).isDirectory()) {
+    manifest = JSON.parse(fs.readFileSync(normalizePath(args.forManifest), 'utf8'));
+    inputSuggestions = suggestInputBindings(manifest, scoped.index);
+  }
+  if (inputSuggestions && !args.promptSummary) {
+    result.inputSuggestions = inputSuggestions;
+  }
+  if (args.repairParams) {
+    if (!manifest) throw new Error('--repair-params requires --for-manifest');
+    const params = readJsonArgument(args.repairParams);
+    const repair = repairHarnessParams(manifest, scoped.index, params, { inputSuggestions });
+    if (args.promptSummary) {
+      result.repair = repair;
+    } else {
+      result.paramRepair = repair;
+    }
+  } else if (args.forManifest && !args.promptSummary && !inputSuggestions) {
     const manifest = JSON.parse(fs.readFileSync(normalizePath(args.forManifest), 'utf8'));
     result.inputSuggestions = suggestInputBindings(manifest, result);
   }
-  if (args.cache && stat.isDirectory()) {
+  if (args.cache && fs.statSync(scoped.scope.target).isDirectory()) {
     const cachePath = args.cache === true ? undefined : args.cache;
-    const written = writeIndexCache(result, path.isAbsolute(cachePath) ? cachePath : path.join(target, cachePath));
+    const cachePayload = args.promptSummary ? scoped.promptSummary : scoped.index;
+    const written = writeIndexCache(
+      cachePayload,
+      path.isAbsolute(cachePath) ? cachePath : path.join(scoped.scope.target, cachePath)
+    );
     console.error(`[harness:index] wrote ${written}`);
   }
   console.log(JSON.stringify(result, null, 2));

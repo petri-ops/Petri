@@ -31,6 +31,10 @@
   - `npm run harness:index -- <path>` 可输出 `harnessIndexVersion: 1` 结构化索引。
   - 支持 CSV / TSV 表头、列类型、缺失值、矩阵方向、DEG 表、样本分组表、表达矩阵等识别。
   - 支持 `--for-manifest <tool-definition.json>`，可根据插件输入定义推荐候选文件。
+  - 支持 `--scope project|job|artifact|dataset`，可以解析真实 BioF3 工作范围。
+  - 支持 `--prompt-summary`，输出给模型使用的轻量摘要。
+  - 支持 `--repair-params`，输出参数修复建议。
+  - `repairHarnessParams()` 已能做文件输入预填、DEG 列名别名映射、数值参数裁剪。
   - 新增 `test/harness-file-index.test.mjs`。
 
 ### 最近一次稳定化验证
@@ -47,6 +51,7 @@ npm run harness:check
 node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
 node --check scripts/harness-file-index.mjs
 node --test test/harness-file-index.test.mjs
+npm run harness:index -- resources/built-in-plugins/volcano-plot/demo-data --for-manifest resources/built-in-plugins/volcano-plot/tool-definition.json --repair-params '{"top_n":999}' --prompt-summary --no-hash
 ```
 
 ### 现在最该做的事
@@ -59,8 +64,8 @@ node --test test/harness-file-index.test.mjs
 2. 再读 `docs/harness-engine-spec.md`。
 3. 再读 `docs/next-steps-roadmap.md`。
 4. 然后继续 **Harness Phase 2**：
-   - 把当前文件探测器 / 索引层接入真实项目目录、job 目录和 artifact 目录。
-   - 基于索引摘要做参数修复层。
+   - 把 `indexHarnessScope()` 接入后端 API，让项目页、job 页、artifact 页能直接拿索引摘要。
+   - 把 `repairHarnessParams()` 接入 run_tool 前置流程，提交任务前先生成可审计修复建议。
    - 建立平台抽象层。
    - 增加弱模型只拿 manifest + index summary 也能选工具和补参数的回归测试。
 

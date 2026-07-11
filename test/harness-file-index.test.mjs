@@ -5,9 +5,14 @@ import os from 'node:os';
 import path from 'node:path';
 import {
   detectFile,
+  indexHarnessScope,
   indexDirectory,
+  inferColumnMappings,
   readIndexCache,
+  repairHarnessParams,
+  resolveHarnessScope,
   suggestInputBindings,
+  summarizeIndexForPrompt,
   writeIndexCache,
 } from '../scripts/harness-file-index.mjs';
 
@@ -89,5 +94,117 @@ test('suggestInputBindings ranks files for plugin inputs', () => {
     assert.equal(suggestions[1].selected.relativePath, 'groups.tsv');
     assert.ok(suggestions[0].selected.reasons.includes('role_deg_table'));
     assert.ok(suggestions[1].selected.reasons.includes('role_sample_metadata'));
+  });
+});
+
+test('resolveHarnessScope resolves project path without database dependency', () => {
+  withTempDir((dir) => {
+    const resolved = resolveHarnessScope({ scope: 'project', projectId: 'p_demo', projectPath: dir });
+    assert.equal(resolved.scope, 'project');
+    assert.equal(resolved.id, 'p_demo');
+    assert.equal(resolved.target, dir);
+    assert.equal(resolved.exists, true);
+  });
+});
+
+test('indexHarnessScope indexes job and artifact partitions', () => {
+  withTempDir((dir) => {
+    const jobsDir = path.join(dir, 'tool-jobs');
+    const jobDir = path.join(jobsDir, 'job_abc123');
+    const outputDir = path.join(jobDir, 'output');
+    fs.mkdirSync(outputDir, { recursive: true });
+    fs.writeFileSync(path.join(jobDir, 'params.json'), '{"alpha":0.05}');
+    fs.writeFileSync(path.join(outputDir, 'result.csv'), 'gene,log2FC,pvalue\nTP53,1,0.01\n');
+
+    const jobIndexed = indexHarnessScope({
+      scope: 'job',
+      jobId: 'job_abc123',
+      jobsDir,
+      hash: false,
+    });
+    assert.equal(jobIndexed.scope.partition, 'job');
+    assert.equal(jobIndexed.index.byRole.manifest || 0, 0);
+    assert.ok(jobIndexed.index.entries.some((entry) => entry.relativePath === 'output/result.csv'));
+
+    const artifactIndexed = indexHarnessScope({
+      scope: 'artifact',
+      jobId: 'job_abc123',
+      jobsDir,
+      hash: false,
+    });
+    assert.equal(artifactIndexed.scope.partition, 'artifact');
+    assert.equal(artifactIndexed.index.fileCount, 1);
+    assert.equal(artifactIndexed.index.entries[0].role, 'deg_table');
+  });
+});
+
+test('summarizeIndexForPrompt removes bulky row samples', () => {
+  withTempDir((dir) => {
+    fs.writeFileSync(path.join(dir, 'expr.csv'), 'gene,S1,S2,S3\nA,1,2,3\nB,4,5,6\n');
+    const index = indexDirectory(dir, { hash: false });
+    const summary = summarizeIndexForPrompt(index);
+    assert.equal(summary.fileCount, 1);
+    assert.equal(summary.entries[0].table.headers[0], 'gene');
+    assert.equal(summary.entries[0].table.sampleRows, undefined);
+    assert.equal(summary.entries[0].table.columns[0].name, 'gene');
+  });
+});
+
+test('inferColumnMappings maps common DEG aliases', () => {
+  withTempDir((dir) => {
+    fs.writeFileSync(path.join(dir, 'deg_alias.csv'), 'symbol,avg_log2FC,p_val\nTP53,1,0.01\n');
+    const entry = detectFile(path.join(dir, 'deg_alias.csv'), { hash: false });
+    const inferred = inferColumnMappings(entry, ['gene', 'log2FC', 'pvalue']);
+    assert.deepEqual(inferred.mappings, {
+      gene: 'symbol',
+      log2FC: 'avg_log2FC',
+      pvalue: 'p_val',
+    });
+    assert.deepEqual(inferred.missing, []);
+  });
+});
+
+test('repairHarnessParams prefills file inputs and column mappings', () => {
+  withTempDir((dir) => {
+    fs.writeFileSync(path.join(dir, 'deg_alias.csv'), 'symbol,avg_log2FC,p_val\nTP53,1,0.01\n');
+    const index = indexDirectory(dir, { hash: false });
+    const repaired = repairHarnessParams(
+      {
+        inputs: [
+          { id: 'deg_table', label: '差异分析结果表', type: 'file', required: true, accept: '.csv' },
+          { id: 'top_n', label: '标注 top N 基因', type: 'number', default: 10 },
+        ],
+      },
+      index,
+      { top_n: 999 },
+    );
+    assert.equal(repaired.repairedParams.deg_table, 'deg_alias.csv');
+    assert.equal(repaired.repairedParams.top_n, 1);
+    assert.deepEqual(repaired.repairedParams.columnMappings.deg_table, {
+      gene: 'symbol',
+      log2FC: 'avg_log2FC',
+      pvalue: 'p_val',
+    });
+    assert.ok(repaired.repairs.some((repair) => repair.code === 'file_input_prefilled'));
+    assert.ok(repaired.repairs.some((repair) => repair.code === 'number_param_clamped'));
+  });
+});
+
+test('repairHarnessParams clamps PCA n_components to matrix capacity', () => {
+  withTempDir((dir) => {
+    fs.writeFileSync(path.join(dir, 'expr.csv'), 'Sample,G1,G2\nS1,1,2\nS2,3,4\n');
+    const index = indexDirectory(dir, { hash: false });
+    const repaired = repairHarnessParams(
+      {
+        inputs: [
+          { id: 'expr_matrix', label: '表达矩阵', type: 'file', required: true, accept: '.csv' },
+          { id: 'n_components', label: '主成分数量', type: 'number', default: 2 },
+        ],
+      },
+      index,
+      { n_components: 10 },
+    );
+    assert.equal(repaired.repairedParams.expr_matrix, 'expr.csv');
+    assert.equal(repaired.repairedParams.n_components, 2);
   });
 });
