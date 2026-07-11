@@ -1,6 +1,6 @@
 # Project Workspace — Next Steps Roadmap
 
-最后更新：2026-07-11
+最后更新：2026-07-12
 
 当前路线图已经从“拆组件/拆 hooks”阶段，切换到“桌面端工作台稳定化 + Harness Engine v1”阶段。继续开发时不要先急着加新功能；这轮改动很大，必须先确保桌面壳子、路由和构建稳定，再进入 Harness Phase 1。
 
@@ -138,6 +138,11 @@ node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
   - 新增 `frontend/src/lib/harness-client.ts`。
   - 右侧文件面板读取 `scope=project`，展示项目工作区识别摘要。
   - 右侧结果面板读取 `scope=artifact`，展示当前 job 产物识别摘要。
+- 参数确认卡已接入 Harness repair：
+  - `SimpleChat` 在收到 `run_tool needApproval` 时，会按 `toolId` 获取工具 manifest。
+  - 调用 `POST /api/harness/repair` 使用当前 project scope 生成修复建议。
+  - 建议在卡片内可见；确认后采用卡片中最终参数。
+  - 异步建议不会覆盖用户已经手动修改过的参数。
   - 摘要卡只展示轻量信息：文件数、类型分布、角色分布、前几个关键文件。
 
 已通过：

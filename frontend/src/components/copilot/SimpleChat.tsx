@@ -17,6 +17,12 @@ import { useCopilotContext } from '@/lib/copilotContextProvider';
 import { useConversations } from '@/hooks/useConversations';
 import { biof3Events, subscribeBioF3Event } from '@/lib/events';
 import {
+  fetchHarnessToolManifest,
+  repairHarnessParams,
+  type HarnessParamRepair,
+  type HarnessToolManifest,
+} from '@/lib/harness-client';
+import {
   useAiSettings,
   type ChatModelPreset,
 } from '@/hooks/useAiSettings';
@@ -24,6 +30,7 @@ import type { CopilotContext } from '@/lib/copilotContext';
 import { CopilotMarkdown } from './copilotMarkdown';
 import './simple-chat.css';
 import { Icon } from '@/components/icons/Icon';
+import { tools as staticTools } from '@/pages/_data';
 
 interface SimpleMessage {
   role: 'user' | 'assistant';
@@ -67,6 +74,13 @@ interface PendingApproval {
   params?: Record<string, unknown>;
 }
 
+type ApprovalRepairState =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'ready'; repair: HarnessParamRepair }
+  | { status: 'skipped'; message: string }
+  | { status: 'error'; message: string };
+
 // ChatModelPreset type + DEFAULT_CHAT_MODEL_PRESETS live in
 // `@/hooks/useAiSettings` — Plan 1.6 §4.5 [HIGH] type dedup.
 
@@ -95,6 +109,7 @@ export function SimpleChat({
   const [loading, setLoading] = useState(false);
   const [pendingApproval, setPendingApproval] = useState<PendingApproval | null>(null);
   const [paramDraft, setParamDraft] = useState<Record<string, string>>({});
+  const [approvalRepair, setApprovalRepair] = useState<ApprovalRepairState>({ status: 'idle' });
   const [modelMenuOpen, setModelMenuOpen] = useState(false);
   const [accessMenuOpen, setAccessMenuOpen] = useState(false);
   const [accessMode, setAccessMode] = useState<'full' | 'read'>('full');
@@ -139,10 +154,78 @@ export function SimpleChat({
     }
     const draft: Record<string, string> = {};
     Object.entries(pendingApproval.params).forEach(([key, value]) => {
-      draft[key] = typeof value === 'string' ? value : JSON.stringify(value);
+      draft[key] = stringifyParamValue(value);
     });
     setParamDraft(draft);
   }, [pendingApproval]);
+
+  useEffect(() => {
+    if (!pendingApproval) {
+      setApprovalRepair({ status: 'idle' });
+      return;
+    }
+    if (!pendingApproval.toolId) {
+      setApprovalRepair({ status: 'skipped', message: '缺少 toolId，暂时保留 agent 给出的原始参数。' });
+      return;
+    }
+
+    let cancelled = false;
+    const originalParams = pendingApproval.params || {};
+    setApprovalRepair({ status: 'loading' });
+
+    (async () => {
+      try {
+        const remoteManifest = await fetchHarnessToolManifest(pendingApproval.toolId || '');
+        const fallbackManifest = staticTools.find((tool) => tool.id === pendingApproval.toolId) as
+          | HarnessToolManifest
+          | undefined;
+        const manifest = remoteManifest || fallbackManifest || null;
+        if (!manifest) {
+          if (!cancelled) {
+            setApprovalRepair({ status: 'skipped', message: '没有找到该工具的 manifest，参数将按原样确认。' });
+          }
+          return;
+        }
+        const response = await repairHarnessParams({
+          scope: 'project',
+          projectId,
+          manifest,
+          params: originalParams,
+          maxFiles: 500,
+        });
+        const repair = response.repair;
+        if (!repair) {
+          if (!cancelled) {
+            setApprovalRepair({ status: 'skipped', message: 'Harness 未返回可用修复建议，参数将按原样确认。' });
+          }
+          return;
+        }
+        if (cancelled) return;
+        setApprovalRepair({ status: 'ready', repair });
+        setParamDraft((current) => {
+          const next = { ...current };
+          Object.entries(repair.repairedParams || {}).forEach(([key, value]) => {
+            const originalValue = stringifyParamValue(originalParams[key]);
+            if (next[key] == null || next[key] === originalValue) {
+              next[key] = stringifyParamValue(value);
+            }
+          });
+          return next;
+        });
+      } catch (error) {
+        if (!cancelled) {
+          setApprovalRepair({
+            status: 'error',
+            message: error instanceof Error ? error.message : 'Harness 参数修复失败',
+          });
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pendingApproval, projectId]);
 
   // Load messages when conversationId changes
   useEffect(() => {
@@ -446,6 +529,7 @@ export function SimpleChat({
             <ApprovalCard
               approval={pendingApproval}
               paramDraft={paramDraft}
+              repairState={approvalRepair}
               disabled={streaming}
               onParamChange={(key, value) =>
                 setParamDraft((prev) => ({ ...prev, [key]: value }))
@@ -633,9 +717,52 @@ function parseResultCards(value: unknown): SimpleResultCard[] | undefined {
   return cards.length ? cards : undefined;
 }
 
+function stringifyParamValue(value: unknown): string {
+  if (typeof value === 'string') return value;
+  if (value == null) return '';
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+}
+
+function shortValue(value: unknown): string {
+  const text = stringifyParamValue(value);
+  return text.length > 64 ? `${text.slice(0, 61)}…` : text;
+}
+
+function formatHarnessRepair(item: Record<string, unknown>): string {
+  const code = String(item.code || '');
+  const inputId = String(item.inputId || '参数');
+  if (code === 'file_input_prefilled') {
+    return `已为 ${inputId} 选择候选文件：${shortValue(item.value)}`;
+  }
+  if (code === 'column_alias_mapped') {
+    return `已识别 ${inputId} 的关键列别名：${shortValue(item.mappings)}`;
+  }
+  if (code === 'number_param_clamped') {
+    return `已将 ${inputId} 从 ${shortValue(item.from)} 调整为 ${shortValue(item.to)}`;
+  }
+  if (code === 'number_default_filled') {
+    return `已补齐 ${inputId} 默认值：${shortValue(item.to)}`;
+  }
+  return `${inputId}: ${shortValue(item)}`;
+}
+
+function formatHarnessWarning(item: Record<string, unknown>): string {
+  const code = String(item.code || '');
+  const inputId = String(item.inputId || '参数');
+  if (code === 'missing_required_columns') {
+    return `${inputId} 可能缺少必要列：${shortValue(item.missing)}`;
+  }
+  return `${inputId}: ${shortValue(item)}`;
+}
+
 function ApprovalCard({
   approval,
   paramDraft,
+  repairState,
   disabled,
   onParamChange,
   onApprove,
@@ -643,12 +770,15 @@ function ApprovalCard({
 }: {
   approval: PendingApproval;
   paramDraft: Record<string, string>;
+  repairState: ApprovalRepairState;
   disabled: boolean;
   onParamChange: (key: string, value: string) => void;
   onApprove: () => void;
   onReject: () => void;
 }): React.ReactElement {
   const paramEntries = Object.entries(paramDraft);
+  const repairItems = repairState.status === 'ready' ? repairState.repair.repairs || [] : [];
+  const warningItems = repairState.status === 'ready' ? repairState.repair.warnings || [] : [];
   return (
     <div className="sc-approval-card">
       <div className="sc-approval-header">
@@ -680,6 +810,11 @@ function ApprovalCard({
           ))}
         </div>
       )}
+      <ApprovalRepairHint
+        state={repairState}
+        repairItems={repairItems}
+        warningItems={warningItems}
+      />
       <div className="sc-approval-risk">
         正式分析会写入项目任务记录，并生成可复现的参数、输入和结果产物。
       </div>
@@ -701,6 +836,47 @@ function ApprovalCard({
           <Icon name="x" size={13} /> 取消
         </button>
       </div>
+    </div>
+  );
+}
+
+function ApprovalRepairHint({
+  state,
+  repairItems,
+  warningItems,
+}: {
+  state: ApprovalRepairState;
+  repairItems: Array<Record<string, unknown>>;
+  warningItems: Array<Record<string, unknown>>;
+}): React.ReactElement | null {
+  if (state.status === 'idle') return null;
+  if (state.status === 'loading') {
+    return <div className="sc-approval-harness">Harness 正在根据项目文件探测并校正参数…</div>;
+  }
+  if (state.status === 'skipped') {
+    return <div className="sc-approval-harness sc-approval-harness-muted">{state.message}</div>;
+  }
+  if (state.status === 'error') {
+    return <div className="sc-approval-harness sc-approval-harness-warning">Harness 建议暂不可用：{state.message}</div>;
+  }
+  if (!repairItems.length && !warningItems.length) {
+    return <div className="sc-approval-harness">Harness 已检查项目文件，当前参数无需自动修正。</div>;
+  }
+  return (
+    <div className="sc-approval-harness">
+      <div className="sc-approval-harness-title">Harness 参数建议</div>
+      {repairItems.length > 0 && (
+        <ul className="sc-approval-harness-list">
+          {repairItems.slice(0, 4).map((item, index) => (
+            <li key={`${String(item.code || 'repair')}-${index}`}>{formatHarnessRepair(item)}</li>
+          ))}
+        </ul>
+      )}
+      {warningItems.length > 0 && (
+        <div className="sc-approval-harness-warning">
+          {warningItems.slice(0, 2).map((item) => formatHarnessWarning(item)).join('；')}
+        </div>
+      )}
     </div>
   );
 }

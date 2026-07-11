@@ -63,6 +63,53 @@ export interface HarnessIndexRequest {
   maxFiles?: number;
 }
 
+export interface HarnessToolInput {
+  id: string;
+  label?: string;
+  type?: string;
+  required?: boolean;
+  default?: unknown;
+  min?: number;
+  max?: number;
+  accept?: string;
+  hint?: string;
+}
+
+export interface HarnessToolManifest {
+  id: string;
+  title?: string;
+  inputs?: HarnessToolInput[];
+  inputSchema?: {
+    properties?: Record<string, HarnessToolInput>;
+  };
+}
+
+export interface HarnessParamRepair {
+  ok: boolean;
+  repairedParams: Record<string, unknown>;
+  repairs?: Array<Record<string, unknown>>;
+  warnings?: Array<Record<string, unknown>>;
+  inputSuggestions?: Array<Record<string, unknown>>;
+}
+
+export interface HarnessRepairRequest {
+  scope: 'project' | 'job' | 'artifact' | 'dataset';
+  projectId?: string;
+  jobId?: string;
+  datasetId?: string;
+  manifest: HarnessToolManifest;
+  params?: Record<string, unknown>;
+  maxFiles?: number;
+}
+
+export interface HarnessRepairResponse {
+  ok: boolean;
+  scope?: HarnessScopeInfo;
+  index?: HarnessIndexSummary;
+  repair?: HarnessParamRepair;
+  error?: string;
+}
+
 function authHeaders(): Record<string, string> {
   const token = getToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
@@ -87,3 +134,29 @@ export async function fetchHarnessIndex(input: HarnessIndexRequest): Promise<Har
   return data;
 }
 
+export async function fetchHarnessToolManifest(toolId: string): Promise<HarnessToolManifest | null> {
+  const resp = await fetch(`${getPlatformApiPrefix()}/tools/manifest`, {
+    headers: authHeaders(),
+  });
+  const data = (await resp.json()) as { ok?: boolean; tools?: HarnessToolManifest[]; error?: string };
+  if (!resp.ok || !data.ok) {
+    throw new Error(data.error || 'Tool manifest failed');
+  }
+  return (data.tools || []).find((tool) => tool.id === toolId) || null;
+}
+
+export async function repairHarnessParams(input: HarnessRepairRequest): Promise<HarnessRepairResponse> {
+  const resp = await fetch(`${getPlatformApiPrefix()}/harness/repair`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeaders(),
+    },
+    body: JSON.stringify(input),
+  });
+  const data = (await resp.json()) as HarnessRepairResponse;
+  if (!resp.ok || !data.ok) {
+    throw new Error(data.error || 'Harness repair failed');
+  }
+  return data;
+}

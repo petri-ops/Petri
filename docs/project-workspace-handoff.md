@@ -1,6 +1,6 @@
 # Project Workspace Handoff
 
-最后更新：2026-07-11
+最后更新：2026-07-12
 
 这份文档用于在切换工作区后恢复当前开发状态。当前阶段不是功能主线开发，而是在把 BioF3 项目工作台的前端骨架尽量收口到 Codex 式体验：轻、窄、白、少阴影、三栏对齐、输入区稳定贴底、右侧工具可预测。
 
@@ -44,6 +44,11 @@
     - 右侧文件面板展示 project 工作区识别摘要。
     - 右侧结果面板展示 active job 的 artifact 识别摘要。
     - 新增 `frontend/src/lib/harness-client.ts`。
+  - 前端参数确认卡已接入 `/api/harness/repair`：
+    - 确认卡会根据 `toolId` 拉取 `/api/tools/manifest`，找不到时 fallback 到静态工具定义。
+    - 使用 project scope 扫描当前项目文件，展示 Harness 参数建议。
+    - repair 返回后只会填充/修正仍保持原值的参数；如果用户已经手动改了某个参数，不覆盖用户输入。
+    - 用户点击“确认开始”后，会把可见且可编辑的修复后参数传回 `run_tool`。
   - 新增 `test/harness-file-index.test.mjs`。
 
 ### 最近一次稳定化验证
@@ -67,6 +72,14 @@ npm --prefix frontend run check
 npm run build:spa
 ```
 
+2026-07-12 继续通过：
+
+```bash
+npm --prefix frontend run check
+npm run build:spa
+npm run check
+```
+
 ### 现在最该做的事
 
 1. 先做 **Phase 0：稳定化确认**：
@@ -77,8 +90,6 @@ npm run build:spa
 2. 再读 `docs/harness-engine-spec.md`。
 3. 再读 `docs/next-steps-roadmap.md`。
 4. 然后继续 **Harness Phase 2**：
-   - 参数确认卡接入 `/api/harness/repair`，提交任务前先展示可审计修复建议。
-   - 暂时不要静默改 run_tool 参数；legacy 工具和 manifest 插件工具约定不同，先通过确认卡稳定体验。
    - 让 Agent prompt 能读取 active project/job/artifact 的 Harness prompt summary。
    - 建立平台抽象层。
    - 增加弱模型只拿 manifest + index summary 也能选工具和补参数的回归测试。
