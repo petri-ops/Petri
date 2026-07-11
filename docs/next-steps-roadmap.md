@@ -134,10 +134,17 @@ node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
   - `POST /api/harness/repair`
   - 默认返回 prompt summary，`full=1` 才返回完整索引。
   - project / job / artifact / dataset 均做权限检查；任意 path 只允许 internal/admin。
+- 前端项目工作台已接入 Harness index：
+  - 新增 `frontend/src/lib/harness-client.ts`。
+  - 右侧文件面板读取 `scope=project`，展示项目工作区识别摘要。
+  - 右侧结果面板读取 `scope=artifact`，展示当前 job 产物识别摘要。
+  - 摘要卡只展示轻量信息：文件数、类型分布、角色分布、前几个关键文件。
 
 已通过：
 
 ```bash
+npm --prefix frontend run check
+npm run build:spa
 node --check scripts/harness-file-index.mjs
 node --test test/harness-file-index.test.mjs
 npm run harness:index -- resources/built-in-plugins/volcano-plot/demo-data --for-manifest resources/built-in-plugins/volcano-plot/tool-definition.json --no-hash
@@ -174,9 +181,9 @@ npm run dev
 
 Phase 1 的 manifest / artifact / failureModes 基础已经落地，Phase 2 的文件探测和索引基础也已经有了第一版。下一步继续推进：
 
-1. 在前端项目页接入 `/api/harness/index`：右侧文件 / 结果 / job 能显示 Harness 识别摘要。
-2. 在参数确认卡接入 `/api/harness/repair`：先展示可审计修复建议，再由用户或 Agent 确认提交。
-3. 再把 `repairHarnessParams()` 接入 run_tool 前置流程；注意要区分 legacy 工具和 manifest 插件工具，避免静默改参。
+1. 在参数确认卡接入 `/api/harness/repair`：先展示可审计修复建议，再由用户或 Agent 确认提交。
+2. 再把 `repairHarnessParams()` 接入 run_tool 前置流程；注意要区分 legacy 工具和 manifest 插件工具，避免静默改参。
+3. 让 Agent prompt 能引用当前 active project/job/artifact 的 Harness prompt summary。
 4. 执行器抽象：把平台路径、runtime ready、script execution 下沉。
 5. 回归测试：验证弱模型只拿 manifest + prompt summary 也能选择正确工具并补参数。
 6. 增量索引：基于 mtime / hash 做局部更新，避免每次全量扫描。

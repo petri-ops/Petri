@@ -35,6 +35,7 @@ import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { getNextSteps, buildChainPrompt, type ResolvedJob } from '@/lib/workflow-chains';
+import { fetchHarnessIndex, type HarnessIndexSummary } from '@/lib/harness-client';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
 import { DesktopDashboard } from '@/pages/_desktop-dashboard';
@@ -1373,6 +1374,58 @@ function formatPreviewText(name: string, text: string): string {
   return text;
 }
 
+function summarizeRecord(record?: Record<string, number>, limit = 4): string {
+  const entries = Object.entries(record || {})
+    .filter(([, count]) => count > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit);
+  return entries.length ? entries.map(([key, count]) => `${key}×${count}`).join(' · ') : '暂无';
+}
+
+function HarnessIndexCard({
+  title,
+  index,
+  loading,
+  error,
+}: {
+  title: string;
+  index: HarnessIndexSummary | null;
+  loading: boolean;
+  error?: string;
+}): React.ReactElement | null {
+  if (!loading && !index && !error) return null;
+  const entries = index?.entries || [];
+  return (
+    <div className={styles.harnessIndexCard}>
+      <div className={styles.harnessIndexCardHeader}>
+        <span>{title}</span>
+        {loading && <em>识别中…</em>}
+        {!loading && index && <em>{index.fileCount || 0} 个文件</em>}
+      </div>
+      {error && !loading ? (
+        <p className={styles.harnessIndexMuted}>暂未生成识别摘要：{error}</p>
+      ) : index ? (
+        <>
+          <div className={styles.harnessIndexStats}>
+            <span>类型：{summarizeRecord(index.byKind)}</span>
+            <span>角色：{summarizeRecord(index.byRole)}</span>
+          </div>
+          {entries.length > 0 && (
+            <div className={styles.harnessIndexEntries}>
+              {entries.slice(0, 4).map((entry) => (
+                <div key={entry.relativePath} className={styles.harnessIndexEntry} title={entry.relativePath}>
+                  <span>{entry.relativePath}</span>
+                  <em>{entry.role || entry.kind}</em>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      ) : null}
+    </div>
+  );
+}
+
 export function RightFileTree({
   project,
   openFiles,
@@ -1393,6 +1446,9 @@ export function RightFileTree({
   const [loading, setLoading] = useState(true);
   const [treeOpen, setTreeOpen] = useState(true);
   const [treeWidth, setTreeWidth] = useState(220);
+  const [harnessIndex, setHarnessIndex] = useState<HarnessIndexSummary | null>(null);
+  const [harnessLoading, setHarnessLoading] = useState(false);
+  const [harnessError, setHarnessError] = useState('');
 
   const fetchDir = useCallback(async (prefix: string) => {
     try {
@@ -1412,6 +1468,28 @@ export function RightFileTree({
       setLoading(false);
     });
   }, [fetchDir, project.id]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setHarnessLoading(true);
+    setHarnessError('');
+    fetchHarnessIndex({ scope: 'project', projectId: project.id, maxFiles: 120 })
+      .then((data) => {
+        if (cancelled) return;
+        setHarnessIndex(data.index || null);
+      })
+      .catch((error: Error) => {
+        if (cancelled) return;
+        setHarnessIndex(null);
+        setHarnessError(error.message || '识别失败');
+      })
+      .finally(() => {
+        if (!cancelled) setHarnessLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [project.id]);
 
   const toggleDir = useCallback(async (dirPath: string) => {
     setExpandedDirs((prev) => {
@@ -1508,6 +1586,12 @@ export function RightFileTree({
               title="拖拽调整文件树宽度"
             />
             <div className={styles.workspaceFileTreePane}>
+              <HarnessIndexCard
+                title="Harness 识别"
+                index={harnessIndex}
+                loading={harnessLoading}
+                error={harnessError}
+              />
               {loading ? (
                 <p className={styles.panelEmpty}>加载文件树…</p>
               ) : tree.length === 0 ? (
@@ -2651,6 +2735,9 @@ export function ResultSidebarPanel({
   const [selectedName, setSelectedName] = useState('');
   const [previewText, setPreviewText] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [harnessIndex, setHarnessIndex] = useState<HarnessIndexSummary | null>(null);
+  const [harnessLoading, setHarnessLoading] = useState(false);
+  const [harnessError, setHarnessError] = useState('');
 
   const tool = useMemo(
     () => (job ? staticTools.find((t) => t.id === job.tool_id) || null : null),
@@ -2688,6 +2775,9 @@ export function ResultSidebarPanel({
       setJobMeta(null);
       setSelectedName('');
       setPreviewText(null);
+      setHarnessIndex(null);
+      setHarnessError('');
+      setHarnessLoading(false);
       setLoading(false);
       return;
     }
@@ -2723,6 +2813,34 @@ export function ResultSidebarPanel({
       setLoading(false);
     }
   }, [job, lang]);
+
+  useEffect(() => {
+    if (!job || job.status !== 'done') {
+      setHarnessIndex(null);
+      setHarnessError('');
+      setHarnessLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setHarnessLoading(true);
+    setHarnessError('');
+    fetchHarnessIndex({ scope: 'artifact', jobId: job.id, maxFiles: 120 })
+      .then((data) => {
+        if (cancelled) return;
+        setHarnessIndex(data.index || null);
+      })
+      .catch((error: Error) => {
+        if (cancelled) return;
+        setHarnessIndex(null);
+        setHarnessError(error.message || '识别失败');
+      })
+      .finally(() => {
+        if (!cancelled) setHarnessLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [job?.id, job?.status]);
 
   const files = result?.artifacts || result?.files || [];
   const htmlFiles = files.filter((f) => /\.(html?|xhtml)$/i.test(artifactName(f)));
@@ -2893,6 +3011,12 @@ export function ResultSidebarPanel({
 
   return (
     <div className={styles.resultSidebarRoot}>
+      <HarnessIndexCard
+        title="产物识别"
+        index={harnessIndex}
+        loading={harnessLoading}
+        error={harnessError}
+      />
       <div className={styles.resultSidebarPreview}>
         <div className={styles.resultSidebarPreviewBody}>
           {reportUrl ? (

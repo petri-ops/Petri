@@ -198,6 +198,9 @@ npm run harness:index -- <path>
   - `GET /api/harness/index`
   - `POST /api/harness/repair`
   - 普通用户只能访问自己有权限的 project / job / dataset / artifact；任意 path 仅 internal/admin 可用。
+- 前端展示层：
+  - 项目文件面板展示 project scope 的识别摘要。
+  - 结果侧栏展示 artifact scope 的识别摘要。
 
 ```bash
 npm run harness:index -- <dataset-dir> --for-manifest <tool-definition.json>
