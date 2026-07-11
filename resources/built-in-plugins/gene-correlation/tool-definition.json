@@ -35,5 +35,28 @@
     { "id": "heatmap", "type": "plot", "label": "相关性热图" },
     { "id": "corr_matrix", "type": "table", "label": "相关系数矩阵" }
   ],
+  "failureModes": [
+    {
+      "code": "matrix_orientation_mismatch",
+      "title": "表达矩阵方向不符合预期",
+      "description": "插件预期 CSV 行为基因、列为样本；如果用户提供行=样本、列=基因，会导致相关性对象错误。",
+      "recoverable": true,
+      "suggestedFix": "文件探测层根据首列和列名数量判断方向，必要时自动转置或请求用户确认。"
+    },
+    {
+      "code": "insufficient_numeric_genes",
+      "title": "可计算基因数量不足",
+      "description": "表达矩阵中可解析的数值基因少于 2 个，无法计算相关矩阵。",
+      "recoverable": false,
+      "suggestedFix": "提示用户检查表达矩阵格式或更换输入文件。"
+    },
+    {
+      "code": "top_n_too_large",
+      "title": "top N 超过可用基因数",
+      "description": "top_n 大于有效基因数时，仍可降级使用全部有效基因。",
+      "recoverable": true,
+      "suggestedFix": "将 top_n 自动裁剪到有效基因数，并在结果报告中记录修正。"
+    }
+  ],
   "estimatedMinutes": 2
 }

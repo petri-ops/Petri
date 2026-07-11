@@ -33,5 +33,28 @@
     { "id": "pca_plot", "type": "plot", "label": "PCA 散点图" },
     { "id": "variance_table", "type": "table", "label": "方差贡献表" }
   ],
+  "failureModes": [
+    {
+      "code": "non_numeric_expression_matrix",
+      "title": "表达矩阵包含非数值列",
+      "description": "PCA 输入矩阵除样本/索引列外必须主要为数值表达量。",
+      "recoverable": true,
+      "suggestedFix": "探测并移除明显的样本 ID/注释列，仅保留数值列进入 PCA。"
+    },
+    {
+      "code": "sample_group_mismatch",
+      "title": "分组文件与表达矩阵样本不匹配",
+      "description": "group_file 中的 sample 列与表达矩阵样本名无法对齐。",
+      "recoverable": true,
+      "suggestedFix": "根据交集自动对齐样本；如果交集过少，则请求用户确认分组文件。"
+    },
+    {
+      "code": "too_few_samples_or_features",
+      "title": "样本或特征数量不足",
+      "description": "PCA 至少需要足够的样本和数值特征才能计算指定主成分。",
+      "recoverable": true,
+      "suggestedFix": "将 n_components 裁剪到可计算上限；如果样本或特征少于 2，则中断并提示。"
+    }
+  ],
   "estimatedMinutes": 2
 }

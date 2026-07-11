@@ -39,5 +39,28 @@
     { "id": "volcano", "type": "plot", "label": "火山图" },
     { "id": "classified_table", "type": "table", "label": "分类结果表" }
   ],
+  "failureModes": [
+    {
+      "code": "missing_required_columns",
+      "title": "缺少必需列",
+      "description": "输入 CSV 必须包含 gene、log2FC、pvalue 三列或可被后续探测层映射的等价列。",
+      "recoverable": true,
+      "suggestedFix": "探测表头并尝试把 symbol/gene_name 映射为 gene，把 logFC/avg_log2FC 映射为 log2FC，把 p_val/padj 映射为 pvalue。"
+    },
+    {
+      "code": "invalid_numeric_values",
+      "title": "数值列不可解析",
+      "description": "log2FC 或 pvalue 存在非数字、空值或无限值，导致绘图失败。",
+      "recoverable": true,
+      "suggestedFix": "过滤无效行并提示用户确认阈值；如果有效行过少则中断并请求用户更换输入。"
+    },
+    {
+      "code": "empty_significant_set",
+      "title": "没有满足阈值的显著基因",
+      "description": "阈值过严或数据本身没有显著差异，图可生成但标注/分类结果可能为空。",
+      "recoverable": true,
+      "suggestedFix": "降低 fc_threshold 或 pval_threshold，并在报告中说明阈值变化。"
+    }
+  ],
   "estimatedMinutes": 2
 }

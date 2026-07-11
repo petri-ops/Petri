@@ -21,6 +21,11 @@
 - 已清理摘要卡 resize 残留状态；摘要卡按固定窄高卡片处理。
 - 已新增 `docs/harness-engine-spec.md`，作为 Harness 规范主文档。
 - 已在 `docs/next-steps-roadmap.md` 里挂上 Harness 落地入口。
+- Harness Phase 1 基础已落地：
+  - `plugin-loader.normalizePluginManifest()` 统一读取 `plugin.json + tool-definition.json`。
+  - MCP `tools/list` 透传 `_manifest`、`outputSchema.artifacts` 和 `failureModes`。
+  - 内置可运行插件已补 `pluginManifestVersion`、`supportedPlatforms`、`failureModes`。
+  - 新增 `npm run harness:check` 和 `test/harness-manifest.test.mjs`。
 
 ### 最近一次稳定化验证
 
@@ -32,6 +37,8 @@ node --check src/main.js
 node --check src/preload.js
 node --check scripts/dev-electron.js
 npm run build:spa
+npm run harness:check
+node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
 ```
 
 ### 现在最该做的事
@@ -43,11 +50,7 @@ npm run build:spa
    - 确认 `.cursor/` 是否需要忽略或提交。
 2. 再读 `docs/harness-engine-spec.md`。
 3. 再读 `docs/next-steps-roadmap.md`。
-4. 然后落地 **Harness Phase 1**：
-   - 统一 plugin manifest。
-   - 统一 artifact schema。
-   - 补 `failureModes`。
-5. 然后再做：
+4. 然后继续 **Harness Phase 2**：
    - 文件探测器。
    - 索引层。
    - 参数修复层。
@@ -257,10 +260,8 @@ npm run build:spa
 
 注意：
 
-- `npm run check` 目前可能因为 vendor 校验失败而中断，不一定是当前 UI 修改导致。
-- 之前观察到 vendor drift：
-  - expected `fc811db`
-  - actual `fc811dbc8b2157334120af595170ecf827139793`
+- `npm run check` 会先跑 `scripts/sync-vendor.sh check`，因此子模块变更必须同步更新 `.vendor-lock`。
+- 当前 Harness Phase 1 已接受 `vendor/biof3-core` 的新 HEAD，并更新 `.vendor-lock`。
 
 相关文件：
 

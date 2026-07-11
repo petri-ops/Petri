@@ -342,6 +342,13 @@ Harness 必须支持最基本的修复回路：
 - 统一 artifact schema
 - 补 failureModes
 
+当前落地状态（2026-07-11）：
+
+- `plugin-loader.normalizePluginManifest()` 已将 `plugin.json + tool-definition.json` 归一为 `BioF3PluginManifest v1`。
+- MCP `tools/list` 已透传 `_manifest`、`outputSchema.artifacts` 和 `failureModes`。
+- 内置可运行插件 `volcano-plot`、`gene-correlation`、`pca-explorer` 已补 `pluginManifestVersion`、`supportedPlatforms` 和 `failureModes`。
+- 已新增 `npm run harness:check` 和 `test/harness-manifest.test.mjs` 做回归校验。
+
 ### Phase 2
 
 - 文件探测器
@@ -377,4 +384,3 @@ Harness 必须支持最基本的修复回路：
 - 大项目下仍能快速定位文件与结果。
 - 跨平台部署不会把路径和执行逻辑写死。
 - 失败后能自动修复一轮，再决定是否打断用户。
-

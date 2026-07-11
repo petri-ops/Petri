@@ -70,6 +70,13 @@ test('listTools 合并插件工具 + 单细胞步骤', async () => {
         { id: 'fc_threshold', type: 'number', default: 1 },
       ],
       outputs: [{ id: 'volcano', type: 'plot' }],
+      failureModes: [
+        {
+          code: 'missing_required_columns',
+          title: '缺少必需列',
+          suggestedFix: '检查并映射 DEG 表头',
+        },
+      ],
     }),
   );
   globalThis._biof3Plugins = new Map();
@@ -88,6 +95,11 @@ test('listTools 合并插件工具 + 单细胞步骤', async () => {
     const vol = tools.find((t) => t.name === 'volcano-plot');
     assert.equal(vol.inputSchema.required[0], 'deg_table');
     assert.equal(vol.inputSchema.properties.fc_threshold.default, 1);
+    assert.equal(vol.outputSchema.type, 'object');
+    assert.equal(vol.outputSchema.artifactSchemaVersion, 1);
+    assert.equal(vol.outputSchema.artifacts[0].id, 'volcano');
+    assert.equal(vol.failureModes[0].code, 'missing_required_columns');
+    assert.equal(vol._manifest.pluginManifestVersion, 1);
     // 10 个单细胞步骤
     assert.ok(names.includes('scrna-standard'));
     assert.ok(names.includes('deg'));

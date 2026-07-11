@@ -1,5 +1,6 @@
 {
   "id": "gene-correlation",
+  "pluginManifestVersion": 1,
   "title": "基因相关性热图",
   "version": "1.0.0",
   "language": "r",
@@ -16,5 +17,6 @@
   "builtAgainst": {
     "r": "4.5"
   },
-  "platform": ["macos-arm64", "macos-x64", "windows-x64"]
+  "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+  "supportedPlatforms": ["macos-arm64", "macos-x64", "windows-x64"]
 }

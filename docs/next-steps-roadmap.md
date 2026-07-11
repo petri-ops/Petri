@@ -80,6 +80,25 @@ node --check scripts/dev-electron.js
 npm run build:spa
 ```
 
+### 8. Harness Phase 1 基础落地
+
+- 新增 `BioF3PluginManifest v1` normalized view。
+- `plugin-loader.normalizePluginManifest()` 兼容读取旧的 `plugin.json + tool-definition.json`。
+- MCP `tools/list` 现在会透传：
+  - `outputSchema.artifacts`
+  - `failureModes`
+  - `_manifest`
+- 内置可运行插件已补：
+  - `pluginManifestVersion`
+  - `supportedPlatforms`
+  - `failureModes`
+- 新增验证：
+
+```bash
+npm run harness:check
+node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
+```
+
 ## 接下来优先级
 
 ### P0：稳定化确认
@@ -103,16 +122,15 @@ npm run dev
 - vendor/biof3-core 的改动是否确认为本次快照的一部分。
 - `.cursor/` 是否需要提交或加入忽略。
 
-### P1：Harness 规范落地
+### P1：Harness Phase 2
 
-工作台壳子稳定后，下一步要把上层 Prompt 工程收敛成真正的执行底座：
+Phase 1 的 manifest / artifact / failureModes 基础已经落地。下一步继续推进：
 
-1. 统一插件 manifest / artifact schema。
-2. 加 `failureModes`。
-3. 加文件探测、索引和参数修复层。
-4. 把平台差异下沉到执行器抽象层。
-5. 把 Skills 变成流程模板，而不是执行真相。
-6. 建立回归测试，验证弱模型也能跑通标准流程。
+1. 文件探测器：识别 CSV/TSV 表头、矩阵方向、样本列、分组列、缺失值。
+2. 目录索引器：按 project / job / dataset / plugin 建立轻量 metadata index。
+3. 参数修复层：基于 `failureModes.suggestedFix` 做列名映射、参数裁剪、路径修复。
+4. 执行器抽象：把平台路径、runtime ready、script execution 下沉。
+5. 回归测试：验证弱模型只拿 manifest + 文件探测摘要也能选择正确工具。
 
 详细规范见：[Harness Engine Spec v1](./harness-engine-spec.md)。
 
@@ -141,7 +159,7 @@ npm run dev
 ## 当前风险与注意事项
 
 - 当前工作树有大量 UI 改动和新增文件，不要随手 reset。
-- `npm run check` 可能被 vendor drift 卡住；这不一定是 UI 改动导致。
+- `npm run check` 会校验 `.vendor-lock` 与 `vendor/biof3-core` HEAD；如果继续改子模块，记得用 `scripts/sync-vendor.sh update` 接受新 HEAD。
 - 推荐验证命令：
 
 ```bash
