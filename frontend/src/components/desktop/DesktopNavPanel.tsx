@@ -24,13 +24,9 @@ const NAV_ITEMS: NavItem[] = [
   { label: '首页', to: '/', icon: 'book' },
   // 桌面端已移除教程入口，教程导航项已删除。如需恢复取消下面注释即可。
   // { label: '教程', to: '/docs/intro', icon: 'book' },
-  { label: 'FigCode', to: '/figcode', icon: 'image' },
-  { label: '分析工具', to: '/tools', icon: 'bar-chart' },
-  { label: '单细胞', to: '/single-cell', icon: 'dna' },
-  { label: '空间组学', to: '/spatial', icon: 'sparkles' },
-  { label: 'Skills 库', to: '/skills', icon: 'study' },
-  { label: '算法卡片', to: '/algorithms', icon: 'brain' },
-  { label: '关于', to: '/about', icon: 'flag' },
+  { label: '分析结果', to: '/tools', icon: 'bar-chart' },
+  { label: '绘图模板', to: '/figcode', icon: 'image' },
+  { label: '管理', to: '/admin', icon: 'settings' },
 ];
 
 export function DesktopNavPanel({ onClose }: Props): React.ReactElement {

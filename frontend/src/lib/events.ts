@@ -22,6 +22,10 @@ export const biof3Events = {
    * a prompt into the chat input without navigating.
    */
   copilotAsk: 'biof3:copilot-ask',
+
+  /** Fired by the shared TitleBar; listened by BrowserPanel */
+  browserBack: 'biof3:browser-back',
+  browserForward: 'biof3:browser-forward',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -34,11 +38,18 @@ export interface CopilotAskDetail {
   prompt: string;
 }
 
+export interface ProjectOpenResultDetail {
+  toolJobId: string;
+  projectId?: string | null;
+}
+
 export type BioF3EventMap = {
   [biof3Events.onboardingDone]: undefined;
   [biof3Events.softRefresh]: undefined;
-  [biof3Events.projectOpenResult]: unknown;
+  [biof3Events.projectOpenResult]: ProjectOpenResultDetail;
   [biof3Events.copilotAsk]: CopilotAskDetail;
+  [biof3Events.browserBack]: undefined;
+  [biof3Events.browserForward]: undefined;
 };
 
 /** Dispatch a typed event on window */

@@ -8,7 +8,7 @@
  *
  * M2-9（content-plugin）：除构建时 glob 的内置 docs 外，还通过 IPC
  * 拉取已装 content-plugin 的 docs（运行时存在于用户数据目录，构建时
- * 不可见）。插件 md 用 react-markdown 渲染（与 skills 详情页同款），
+ * 不可见）。插件 md 用 react-markdown 渲染（与插件详情页同款），
  * sidebar 追加一个"插件教程"分类展示插件文档。
  */
 

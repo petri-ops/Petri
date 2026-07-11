@@ -1,29 +1,22 @@
 import React from 'react';
 import { Icon } from '@/components/icons/Icon';
 import type { ToolJob } from '@/lib/project-types';
-import type { ActiveArtifact } from '@/pages/project-workspace';
 import styles from '@/pages/project-workspace.module.css';
 
 export interface WorkspaceSummaryCardProps {
   open: boolean;
   visibility: 'hidden' | 'compact' | 'expanded';
-  width: number;
-  height: number;
+  width?: number;
   projectName: string;
-  projectModality?: string;
-  compactWorkspacePath: string;
   activeJob: ToolJob | null;
-  activeArtifact: ActiveArtifact | null;
+  recentJobs: ToolJob[];
   backendSummary: {
-    readyLabel: string;
     serviceItems: { key: string; label: string; status: string }[];
   };
   liveJobsPreview: ToolJob[];
   jobStats: { running: number; failed: number; done: number; pending: number };
-  onResize: (event: React.MouseEvent) => void;
   onOpenScheduled: () => void;
   onSelectJob: (id: string) => void;
-  onOpenWorkspace: () => void;
 }
 
 /**
@@ -39,19 +32,14 @@ export function WorkspaceSummaryCard({
   open,
   visibility,
   width,
-  height,
   projectName,
-  projectModality,
-  compactWorkspacePath,
   activeJob,
-  activeArtifact,
+  recentJobs,
   backendSummary,
   liveJobsPreview,
   jobStats,
-  onResize,
   onOpenScheduled,
   onSelectJob,
-  onOpenWorkspace,
 }: WorkspaceSummaryCardProps): React.ReactElement | null {
   if (visibility === 'hidden') return null;
 
@@ -76,7 +64,7 @@ export function WorkspaceSummaryCard({
       className={`${styles.workspacePinnedSummary} ${
         visibility === 'compact' ? styles.workspacePinnedSummaryCompactMode : ''
       }`}
-      style={{ width: `${width}px`, height: `${height}px` }}
+      style={width ? { width: `${width}px` } : undefined}
       aria-label="会话摘要"
     >
       <div className={styles.workspacePinnedSummaryTopBar}>
@@ -99,26 +87,9 @@ export function WorkspaceSummaryCard({
 
       <div className={styles.workspacePinnedSummaryBody}>
         <section className={styles.workspacePinnedSummarySection}>
-          <div className={styles.workspacePinnedSummarySectionTitle}>上下文</div>
-          <button
-            type="button"
-            className={styles.workspacePinnedSummaryContext}
-            onClick={onOpenWorkspace}
-            title={compactWorkspacePath}
-          >
-            <Icon name="folder" size={14} />
-            <span>
-              <strong>{projectModality || 'BioF3 项目'}</strong>
-              <small>{compactWorkspacePath || '未设置工作目录'}</small>
-            </span>
-            <Icon name="chevron-right" size={13} />
-          </button>
-        </section>
-
-        <section className={styles.workspacePinnedSummarySection}>
           <div className={styles.workspacePinnedSummarySectionHeading}>
             <div className={styles.workspacePinnedSummarySectionTitle}>当前活动</div>
-            <button type="button" onClick={onOpenScheduled}>查看全部</button>
+            <button type="button" onClick={onOpenScheduled}>分析记录</button>
           </div>
           {currentJob ? (
             <button
@@ -147,41 +118,57 @@ export function WorkspaceSummaryCard({
         </section>
 
         <section className={styles.workspacePinnedSummarySection}>
-          <div className={styles.workspacePinnedSummarySectionTitle}>正在查看</div>
-          {activeArtifact ? (
-            <button
-              type="button"
-              className={styles.workspacePinnedSummarySource}
-              onClick={() => onSelectJob(activeArtifact.jobId)}
-            >
-              <Icon name="pin" size={15} />
-              <span className={styles.workspacePinnedSummarySourceLabel}>
-                {activeArtifact.label || activeArtifact.name}
-              </span>
-              <span className={styles.workspacePinnedSummarySourceValue}>
-                {activeArtifact.type}
-              </span>
-            </button>
-          ) : (
-            <div className={styles.workspacePinnedSummarySourceEmpty}>尚未打开结果或文件</div>
-          )}
+          <div className={styles.workspacePinnedSummarySectionHeading}>
+            <div className={styles.workspacePinnedSummarySectionTitle}>最近分析</div>
+            <button type="button" onClick={onOpenScheduled}>查看全部</button>
+          </div>
+          <div className={styles.workspacePinnedSummaryHistory}>
+            {(recentJobs.length > 0 ? recentJobs : liveJobsPreview).slice(0, 3).map((job) => {
+              const statusLabel =
+                job.status === 'done'
+                  ? '已完成'
+                  : job.status === 'failed'
+                    ? '失败'
+                    : job.status === 'running'
+                      ? '运行中'
+                      : '等待中';
+              return (
+                <button
+                  key={job.id}
+                  type="button"
+                  className={styles.workspacePinnedSummaryHistoryItem}
+                  onClick={() => onSelectJob(job.id)}
+                >
+                  <span
+                    className={styles.workspacePinnedSummaryActivityIcon}
+                    data-status={job.status}
+                  >
+                    <Icon name={job.status === 'failed' ? 'flag' : 'terminal'} size={13} />
+                  </span>
+                  <span className={styles.workspacePinnedSummaryActivityText}>
+                    <strong>{job.name || job.tool_id}</strong>
+                    <small>{statusLabel} · {formatDate(job.created_at)}</small>
+                  </span>
+                  <Icon name="chevron-right" size={13} />
+                </button>
+              );
+            })}
+          </div>
         </section>
 
         <div className={styles.workspacePinnedSummaryFooter}>
-          <span title={backendSummary.serviceItems.map((item) => `${item.label}: ${item.status}`).join(' · ')}>
-            <i data-ready={backendSummary.readyLabel.includes('已就绪')} />
-            {backendSummary.readyLabel}
-          </span>
+          {backendSummary.serviceItems.map((item) => (
+            <span
+              key={item.key}
+              title={`${item.label}: ${item.status === 'runtime' ? '已就绪' : '未安装'}`}
+            >
+              <i data-ready={item.status === 'runtime'} />
+              {item.label} {item.status === 'runtime' ? '已就绪' : '未安装'}
+            </span>
+          ))}
           <span>{runningCount} 运行中</span>
           <span>{totalCount} 次运行</span>
         </div>
-        <button
-          type="button"
-          className={styles.workspacePinnedSummaryResizeHandle}
-          onPointerDown={onResize}
-          title="拖拽调整摘要卡大小"
-          aria-label="拖拽调整摘要卡大小"
-        />
       </div>
     </aside>
   );

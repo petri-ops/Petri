@@ -1,6 +1,6 @@
 // ============================================================
 // ProjectWorkspace — UI-REFACTOR Phase3
-// Three-column layout: left=resources, center=results+agent, right=history+tools
+// Three-column layout: left=resources, center=results+agent, right=history+results
 // Collapsible panels. Route: /project/:projectId
 // ============================================================
 
@@ -28,15 +28,16 @@ import {
   useOtherConversations,
 } from '@/hooks/useConversations';
 import { useResizableColumns } from '@/hooks/useResizableColumns';
+import { useWorkspaceLayout } from '@/hooks/useWorkspaceLayout';
+import { useRightPanelTabs } from '@/hooks/useRightPanelTabs';
 import { usePluginStore } from '@/hooks/usePluginStore';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
+import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { getNextSteps, buildChainPrompt, type ResolvedJob } from '@/lib/workflow-chains';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
 import { DesktopDashboard } from '@/pages/_desktop-dashboard';
-import ToolsPage from '@/pages/tools';
-import FigCodePage from '@/pages/figcode';
 import type { BackendStatus } from '@/lib/electron';
 import styles from './project-workspace.module.css';
 import 'highlight.js/styles/github.css';
@@ -74,7 +75,6 @@ interface BackendServiceItem {
 }
 
 interface BackendSummary {
-  readyLabel: string;
   serviceItems: BackendServiceItem[];
 }
 
@@ -98,15 +98,12 @@ type WorkspaceMode =
   | 'chat'
   | 'search'
   | 'scheduled'
-  | 'tools'
-  | 'figcode'
   | 'plugins'
   | 'settings';
 
 export type RightPanelMode = 'home' | 'results' | 'files' | 'terminal' | 'browser' | 'chat';
 
 export const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconName }> = [
-  { id: 'home', label: '工作台', icon: 'layout-grid' },
   { id: 'results', label: '结果', icon: 'bar-chart' },
   { id: 'files', label: '文件', icon: 'folder' },
   { id: 'terminal', label: '后端', icon: 'cpu' },
@@ -119,8 +116,6 @@ const WORKSPACE_MODES: WorkspaceMode[] = [
   'chat',
   'search',
   'scheduled',
-  'tools',
-  'figcode',
   'plugins',
   'settings',
 ];
@@ -131,6 +126,7 @@ function parseWorkspaceMode(value: string | null): WorkspaceMode | null {
 }
 
 export function ProjectWorkspace(): React.ReactElement {
+  const shell = useWorkspacePanelsContext();
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -144,18 +140,14 @@ export function ProjectWorkspace(): React.ReactElement {
   const [workspaceMode, setWorkspaceMode] = useState<WorkspaceMode>(
     () => parseWorkspaceMode(searchParams.get('mode')) || 'chat'
   );
+  const requestedJobId = searchParams.get('job');
 
-  // Panel collapse state
-  const [leftOpen, setLeftOpen] = useState(true);
-  const [rightOpen, setRightOpen] = useState(true); // file tree + results panel
-  const [compactLayout, setCompactLayout] = useState(
-    () => window.matchMedia('(max-width: 960px)').matches
-  );
-
-  // Selected result tab
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
+  const autoOpenedJobRef = useRef<string | null>(null);
   const [activeArtifact, setActiveArtifact] = useState<ActiveArtifact | null>(null);
   const [activeWorkspaceFile, setActiveWorkspaceFile] = useState<ActiveWorkspaceFile | null>(null);
+  const [browserCanGoBack, setBrowserCanGoBack] = useState(false);
+  const [browserCanGoForward, setBrowserCanGoForward] = useState(false);
   const [openWorkspaceFiles, setOpenWorkspaceFiles] = useState<ActiveWorkspaceFile[]>([]);
 
   // Conversation state — current project's conversations + active conversation.
@@ -188,9 +180,6 @@ export function ProjectWorkspace(): React.ReactElement {
   // §2 dedup: use the App-level Context directly (5s poll), drop the standalone
   // 10s polling hook and the local state sync layer.
   const backendStatus = useBackendStatus();
-  const [summaryOpen, setSummaryOpen] = useState(false);
-  const [summarySize, setSummarySize] = useState({ width: 320, height: 296 });
-
   // Resizable panel dimensions — Plan 1.6 §4.4 [HIGH]. State + drag
   // handlers now live in useResizableColumns (stable refs, no stale
   // closure on drag), so the splitter drags don't tear with re-renders.
@@ -206,152 +195,50 @@ export function ProjectWorkspace(): React.ReactElement {
     startColumnResize,
     startBottomTerminalResize,
   } = useResizableColumns();
-  const [bottomTerminalOpen, setBottomTerminalOpen] = useState(false);
-  const [rightTab, setRightTab] = useState<RightPanelMode>('home');
-  const [openRightTabs, setOpenRightTabs] = useState<RightPanelMode[]>(['home']);
-  const [rightToolMenuOpen, setRightToolMenuOpen] = useState(false);
-  const [browserUrl, setBrowserUrl] = useState('https://biof3.com/');
-  const centerColRef = useRef<HTMLElement | null>(null);
-  const sessionFrameRef = useRef<HTMLDivElement | null>(null);
-  const [centerColWidth, setCenterColWidth] = useState(0);
-  const [sessionFrameWidth, setSessionFrameWidth] = useState(0);
-  const [sessionFrameHeight, setSessionFrameHeight] = useState(0);
 
-  useEffect(() => {
-    const media = window.matchMedia('(max-width: 960px)');
-    const syncLayout = (compact: boolean) => {
-      setCompactLayout(compact);
-      if (compact) {
-        setLeftOpen(false);
-        setRightOpen(false);
-      }
-    };
-    syncLayout(media.matches);
-    const onChange = (event: MediaQueryListEvent) => syncLayout(event.matches);
-    media.addEventListener('change', onChange);
-    return () => media.removeEventListener('change', onChange);
-  }, []);
+  const {
+    leftOpen,
+    setLeftOpen,
+    rightOpen,
+    setRightOpen,
+    compactLayout,
+    bottomTerminalOpen,
+    setBottomTerminalOpen,
+    summaryOpen,
+    setSummaryOpen,
+    centerColRef,
+    sessionFrameRef,
+    centerColWidth,
+    sessionFrameWidth,
+    sessionFrameHeight,
+  } = useWorkspaceLayout();
 
-  useEffect(() => {
-    const element = centerColRef.current;
-    if (!element) return;
-    const updateWidth = () => setCenterColWidth(element.getBoundingClientRect().width || 0);
-    updateWidth();
-    window.addEventListener('resize', updateWidth);
-    return () => window.removeEventListener('resize', updateWidth);
-  }, []);
-
-  useEffect(() => {
-    const element = sessionFrameRef.current;
-    if (!element) return;
-    const updateSize = () => {
-      const rect = element.getBoundingClientRect();
-      setSessionFrameWidth(rect.width || 0);
-      setSessionFrameHeight(rect.height || 0);
-    };
-    updateSize();
-    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(updateSize);
-    observer?.observe(element);
-    window.addEventListener('resize', updateSize);
-    return () => {
-      observer?.disconnect();
-      window.removeEventListener('resize', updateSize);
-    };
-  }, []);
+  const {
+    rightTab,
+    setRightTab,
+    openRightTabs,
+    setOpenRightTabs,
+    rightToolMenuOpen,
+    setRightToolMenuOpen,
+    browserUrl,
+    setBrowserUrl,
+    closeRightPanelTab,
+    // openRightPanel is NOT returned — it lives in project-workspace
+    // with compactLayout awareness (setLeftOpen).
+  } = useRightPanelTabs();
 
   useEffect(() => {
     const nextMode = parseWorkspaceMode(searchParams.get('mode')) || 'chat';
     setWorkspaceMode((current) => (current === nextMode ? current : nextMode));
   }, [searchParams]);
 
+  // Derived summary visibility (semantic + pixel dimensions).
   const summaryVisibility = useMemo<'hidden' | 'compact' | 'expanded'>(() => {
     if (sessionFrameWidth === 0) return 'expanded';
     if (sessionFrameWidth >= 1120) return 'expanded';
     if (sessionFrameWidth >= 780) return 'compact';
     return 'hidden';
   }, [sessionFrameWidth]);
-
-  const updateWorkspaceMode = useCallback((nextMode: WorkspaceMode, replace = true) => {
-    setWorkspaceMode(nextMode);
-    const nextParams = new URLSearchParams(searchParams);
-    if (nextMode === 'chat') nextParams.delete('mode');
-    else nextParams.set('mode', nextMode);
-    setSearchParams(nextParams, { replace });
-  }, [searchParams, setSearchParams]);
-
-  const openRightPanel = useCallback((tab: RightPanelMode) => {
-    if (compactLayout) setLeftOpen(false);
-    setOpenRightTabs((current) => current.includes(tab) ? current : [...current, tab]);
-    setRightTab(tab);
-    setRightOpen(true);
-  }, [compactLayout]);
-
-  const closeRightPanelTab = useCallback((tab: RightPanelMode) => {
-    setOpenRightTabs((current) => {
-      if (current.length <= 1) return current;
-      const closingIndex = current.indexOf(tab);
-      const next = current.filter((item) => item !== tab);
-      setRightTab((active) => (
-        active === tab
-          ? next[Math.min(Math.max(closingIndex, 0), next.length - 1)] || next[0]
-          : active
-      ));
-      return next;
-    });
-  }, []);
-
-  // Drag-to-resize handlers come from useResizableColumns above. The
-  // project-workspace panel-specific resize (startSummaryResize) stays
-  // inline because it operates on a different state slot (summarySize)
-  // with custom clamp logic tied to sessionFrame dimensions.
-
-  const startSummaryResize = useCallback((e: React.PointerEvent | React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const target = e.currentTarget as HTMLElement & { setPointerCapture?: (pointerId: number) => void };
-    if ('pointerId' in e && typeof target.setPointerCapture === 'function') {
-      try {
-        target.setPointerCapture(e.pointerId);
-      } catch {
-        /* ignore */
-      }
-    }
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const startWidth = summarySize.width;
-    const startHeight = summarySize.height;
-    const minWidth = 288;
-    const minHeight = 236;
-    const maxWidth = Math.max(minWidth, sessionFrameWidth - 36);
-    const maxHeight = Math.max(minHeight, sessionFrameHeight - 36);
-
-    const onMove = (ev: MouseEvent | PointerEvent) => {
-      const deltaX = ev.clientX - startX;
-      const deltaY = ev.clientY - startY;
-      const nextWidth = Math.min(maxWidth, Math.max(minWidth, startWidth - deltaX));
-      const nextHeight = Math.min(maxHeight, Math.max(minHeight, startHeight + deltaY));
-      setSummarySize({ width: nextWidth, height: nextHeight });
-    };
-    const onUp = () => {
-      document.removeEventListener('pointermove', onMove as unknown as EventListener);
-      document.removeEventListener('pointerup', onUp as unknown as EventListener);
-      document.removeEventListener('pointercancel', onUp as unknown as EventListener);
-      if ('pointerId' in e && typeof target.releasePointerCapture === 'function') {
-        try {
-          target.releasePointerCapture(e.pointerId);
-        } catch {
-          /* ignore */
-        }
-      }
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-    };
-    document.addEventListener('pointermove', onMove as unknown as EventListener);
-    document.addEventListener('pointerup', onUp as unknown as EventListener);
-    document.addEventListener('pointercancel', onUp as unknown as EventListener);
-    document.body.style.cursor = 'nesw-resize';
-    document.body.style.userSelect = 'none';
-  }, [sessionFrameHeight, sessionFrameWidth, summarySize.height, summarySize.width]);
 
   // Bottom-terminal drag comes from useResizableColumns above; we clamp
   // the height to the workspace viewport (140-520) inline so the
@@ -362,6 +249,26 @@ export function ProjectWorkspace(): React.ReactElement {
     },
     [startBottomTerminalResize]
   );
+
+  // Bidirectional sync: setWorkspaceMode + URL param. Exists here (not in
+  // useWorkspaceRouting) because project-workspace owns workspaceMode state.
+  const updateWorkspaceMode = useCallback((nextMode: WorkspaceMode, replace = true, jobId?: string | null) => {
+    setWorkspaceMode(nextMode);
+    const nextParams = new URLSearchParams(searchParams);
+    if (nextMode === 'chat') nextParams.delete('mode');
+    else nextParams.set('mode', nextMode);
+    if (nextMode === 'scheduled' && jobId) nextParams.set('job', jobId);
+    else nextParams.delete('job');
+    setSearchParams(nextParams, { replace });
+  }, [searchParams, setSearchParams]);
+
+  // openRightPanel: collapses left in compactLayout, opens right tab.
+  const openRightPanel = useCallback((tab: RightPanelMode) => {
+    if (compactLayout) setLeftOpen(false);
+    setOpenRightTabs((current) => current.includes(tab) ? current : [...current, tab]);
+    setRightTab(tab);
+    setRightOpen(true);
+  }, [compactLayout]);
 
   const [allProjects, setAllProjects] = useState<Project[]>([]);
 
@@ -388,6 +295,22 @@ export function ProjectWorkspace(): React.ReactElement {
     if (parts.length <= 4) return displayPath;
     return `.../${parts.slice(-4).join('/')}`;
   }, [workspacePath]);
+
+  const titleBarTabs = useMemo(
+    () =>
+      openRightTabs
+        .filter((tab) => tab !== 'home')
+        .map((tab) => {
+          const item = RIGHT_PANEL_ITEMS.find((candidate) => candidate.id === tab);
+          return {
+            id: tab,
+            label: item?.label || tab,
+            icon: item?.icon || 'folder',
+            closable: true,
+          };
+        }),
+    [openRightTabs]
+  );
 
   const switchToProject = useCallback((id: string) => {
     if (id !== projectId) navigate(`/project/${id}`);
@@ -481,13 +404,12 @@ export function ProjectWorkspace(): React.ReactElement {
     updateWorkspaceMode('search');
   }, [updateWorkspaceMode]);
   const handleShowScheduled = useCallback(() => {
-    updateWorkspaceMode('scheduled');
-    if (!activeJobId && jobs.length > 0) {
-      setActiveJobId(jobs[0].id);
+    const nextJobId = activeJobId || jobs[0]?.id || null;
+    if (nextJobId) {
+      setActiveJobId(nextJobId);
     }
+    updateWorkspaceMode('scheduled', true, nextJobId);
   }, [activeJobId, jobs, updateWorkspaceMode]);
-  const handleShowTools = useCallback(() => updateWorkspaceMode('tools'), [updateWorkspaceMode]);
-  const handleShowFigCode = useCallback(() => updateWorkspaceMode('figcode'), [updateWorkspaceMode]);
   const handleShowSettings = useCallback(() => updateWorkspaceMode('settings'), [updateWorkspaceMode]);
 
   const handleShowPlugins = useCallback(() => updateWorkspaceMode('plugins'), [updateWorkspaceMode]);
@@ -503,7 +425,7 @@ export function ProjectWorkspace(): React.ReactElement {
   const handleOpenRightFiles = useCallback(() => {
     setRightOpen(true);
     openRightPanel('files');
-  }, [openRightPanel]);
+  }, [openRightPanel, setRightOpen]);
 
   const handleOpenRightChat = useCallback(() => {
     openRightPanel('chat');
@@ -695,6 +617,80 @@ export function ProjectWorkspace(): React.ReactElement {
   }, [chooseWorkspaceDirectory, projectId]);
 
   useEffect(() => {
+    shell.updateTitleBar({
+      title: project?.name || '梳理开发进展',
+      leftPanelWidth: leftWidth,
+      rightPanelWidth: rightWidth,
+      tabs: titleBarTabs,
+      activeTabId: rightTab === 'home' ? null : rightTab,
+      onSelectTab: (tabId) => {
+        setRightTab(tabId as RightPanelMode);
+        setRightToolMenuOpen(false);
+        setRightOpen(true);
+      },
+      onCloseTab: (tabId) => closeRightPanelTab(tabId as RightPanelMode),
+      onMoreAction: () => setRightToolMenuOpen((value) => !value),
+      toolMenuOpen: rightToolMenuOpen,
+      toolMenuItems: RIGHT_PANEL_ITEMS.map((item) => ({
+        id: item.id,
+        label: item.label,
+        icon: item.icon,
+        isOpen: openRightTabs.includes(item.id),
+      })),
+      onSelectToolItem: (tabId) => {
+        openRightPanel(tabId as RightPanelMode);
+        setRightToolMenuOpen(false);
+      },
+      canGoBack: rightTab === 'browser' && browserCanGoBack,
+      canGoForward: rightTab === 'browser' && browserCanGoForward,
+      onGoBack:
+        rightTab === 'browser' && browserCanGoBack
+          ? () => dispatchBioF3Event(biof3Events.browserBack)
+          : null,
+      onGoForward:
+        rightTab === 'browser' && browserCanGoForward
+          ? () => dispatchBioF3Event(biof3Events.browserForward)
+          : null,
+    });
+    return () => {
+      shell.updateTitleBar({
+        title: 'BioF3',
+        leftPanelWidth: 240,
+        rightPanelWidth: 340,
+        tabs: [],
+        activeTabId: null,
+        onSelectTab: null,
+        onCloseTab: null,
+        onMoreAction: null,
+        toolMenuOpen: false,
+        toolMenuItems: [],
+        onSelectToolItem: null,
+        canGoBack: false,
+        canGoForward: false,
+        onGoBack: null,
+        onGoForward: null,
+      });
+    };
+  }, [
+    activeJobId,
+    closeRightPanelTab,
+    browserCanGoBack,
+    browserCanGoForward,
+    leftWidth,
+    openRightPanel,
+    openRightTabs,
+    project?.name,
+    project?.workspacePath,
+    rightTab,
+    rightWidth,
+    setRightOpen,
+    setRightToolMenuOpen,
+    setRightTab,
+    shell,
+    titleBarTabs,
+  ]);
+
+  useEffect(() => {
     fetchData();
     const id = setInterval(fetchData, 15_000);
     return () => clearInterval(id);
@@ -717,6 +713,63 @@ export function ProjectWorkspace(): React.ReactElement {
       ensureSearchConversationIndex().catch(() => {});
     }
   }, [ensureSearchConversationIndex, workspaceMode]);
+
+  const activeJob = useMemo(
+    () => jobs.find((j) => j.id === activeJobId) || null,
+    [jobs, activeJobId]
+  );
+
+  const jobStats = useMemo(() => {
+    let running = 0;
+    let failed = 0;
+    let done = 0;
+    let pending = 0;
+    jobs.forEach((job) => {
+      if (job.status === 'running') running += 1;
+      else if (job.status === 'failed') failed += 1;
+      else if (job.status === 'done') done += 1;
+      else pending += 1;
+    });
+    return { running, failed, done, pending };
+  }, [jobs]);
+
+  const projectAnalysisRecords = useMemo(
+    () =>
+      jobs.map((job) => ({
+        id: job.id,
+        toolId: job.tool_id,
+        status: job.status,
+        name: job.name,
+        createdAt: job.created_at,
+        completedAt: job.completed_at,
+      })),
+    [jobs]
+  );
+
+  const projectAnalysisSummary = useMemo(() => {
+    if (jobs.length === 0) return '当前项目还没有分析记录。';
+
+    const statusLabel = (status: ToolJob['status']) => {
+      if (status === 'done') return '已完成';
+      if (status === 'failed') return '失败';
+      if (status === 'running') return '运行中';
+      return '排队中';
+    };
+
+    const recent = [...jobs]
+      .sort((a, b) => b.created_at - a.created_at)
+      .slice(0, 5)
+      .map((job, index) => {
+        const label = job.name || job.tool_id;
+        return `${index + 1}. ${label}（${statusLabel(job.status)}，${formatDate(job.created_at)}）`;
+      });
+
+    return [
+      `当前项目共有 ${jobs.length} 条分析记录。`,
+      `其中已完成 ${jobStats.done} 条，运行中 ${jobStats.running} 条，排队中 ${jobStats.pending} 条，失败 ${jobStats.failed} 条。`,
+      `最近分析：${recent.join('；')}`,
+    ].join(' ');
+  }, [jobs, jobStats.done, jobStats.failed, jobStats.pending, jobStats.running]);
 
   // 6.3 — Inject project context into SimpleChat (via shared copilot context).
   // Replaces the original useEffect that did an in-place setCopilotContext
@@ -744,35 +797,37 @@ export function ProjectWorkspace(): React.ReactElement {
             name: j.name,
             createdAt: j.created_at,
           })),
+          projectAnalysisSummary,
+          projectAnalysisRecords,
           activeJobId: activeJobId ?? undefined,
           activeArtifact,
         }
       : {},
-    [project, projectId, datasets, jobs, activeJobId, activeArtifact]
+    [
+      project,
+      projectId,
+      datasets,
+      jobs,
+      activeJobId,
+      activeArtifact,
+      projectAnalysisSummary,
+      projectAnalysisRecords,
+    ]
   );
 
   useEffect(() => {
     setActiveArtifact(null);
   }, [activeJobId]);
 
-  const activeJob = useMemo(
-    () => jobs.find((j) => j.id === activeJobId) || null,
-    [jobs, activeJobId]
-  );
-
-  const jobStats = useMemo(() => {
-    let running = 0;
-    let failed = 0;
-    let done = 0;
-    let pending = 0;
-    jobs.forEach((job) => {
-      if (job.status === 'running') running += 1;
-      else if (job.status === 'failed') failed += 1;
-      else if (job.status === 'done') done += 1;
-      else pending += 1;
-    });
-    return { running, failed, done, pending };
-  }, [jobs]);
+  useEffect(() => {
+    if (loading) return;
+    if (activeJobId || jobs.length === 0) return;
+    const firstJob = jobs[0];
+    if (!firstJob) return;
+    setActiveJobId(firstJob.id);
+    setRightOpen(true);
+    openRightPanel('results');
+  }, [activeJobId, jobs, loading, openRightPanel, setRightOpen]);
 
   const liveJobsPreview = useMemo(
     () =>
@@ -782,18 +837,7 @@ export function ProjectWorkspace(): React.ReactElement {
     [jobs]
   );
 
-  const openScheduledResults = useCallback(() => {
-    if (activeJobId || jobs.length > 0) {
-      setActiveJobId((current) => current || jobs[0]?.id || null);
-    }
-    updateWorkspaceMode('scheduled');
-    openRightPanel('results');
-  }, [activeJobId, jobs, openRightPanel, updateWorkspaceMode]);
-
   const backendSummary = useMemo(() => {
-    const readyLabel = backendStatus.isReady
-      ? '后端就绪'
-      : backendStatus.downReason || '后端检测中…';
     const serviceItems = [
       {
         key: 'r-runtime',
@@ -805,18 +849,12 @@ export function ProjectWorkspace(): React.ReactElement {
         label: 'Python',
         status: backendStatus.pyRuntime ? 'runtime' : 'offline',
       },
-      {
-        key: 'plumber',
-        label: 'Plumber',
-        status: backendStatus.plumberUp ? 'online' : 'offline',
-      },
     ];
-    return { readyLabel, serviceItems };
+    return { serviceItems };
   }, [backendStatus]);
 
   const showPinnedSummary = workspaceMode === 'chat' || workspaceMode === 'scheduled';
-  const summaryOpenWidth = Math.min(summarySize.width, Math.max(288, sessionFrameWidth - 36));
-  const summaryOpenHeight = Math.min(summarySize.height, Math.max(236, sessionFrameHeight - 36));
+  const summaryOpenWidth = Math.min(224, Math.max(0, sessionFrameWidth - 36));
   const summaryCardOpen = summaryVisibility !== 'hidden' && summaryOpen;
 
   const normalizeToolStatus = useCallback((status: unknown): ToolJob['status'] => {
@@ -826,8 +864,16 @@ export function ProjectWorkspace(): React.ReactElement {
     return 'pending';
   }, []);
 
-  const handleOpenResult = useCallback(async (jobId: string) => {
+  const handleOpenResult = useCallback(async (jobId: string, targetProjectId?: string | null) => {
+    const currentProjectId = projectId || null;
+    const resolvedTargetProjectId = targetProjectId ?? currentProjectId;
+    if (resolvedTargetProjectId && currentProjectId && resolvedTargetProjectId !== currentProjectId) {
+      navigate(`/project/${resolvedTargetProjectId}?mode=scheduled&job=${encodeURIComponent(jobId)}`);
+      return;
+    }
+
     let nextJob = jobs.find((j) => j.id === jobId) || null;
+    let nextProjectId = resolvedTargetProjectId;
     if (!nextJob) {
       try {
         const token = getToken();
@@ -844,8 +890,13 @@ export function ProjectWorkspace(): React.ReactElement {
             completed_at: data.completedAt ? Number(data.completedAt) : undefined,
             error: data.error ? String(data.error) : undefined,
             name: data.toolId ? `${data.toolId} via agent` : undefined,
-            project_id: projectId || null,
+            project_id: data.projectId ? String(data.projectId) : (resolvedTargetProjectId || null),
           };
+          nextProjectId = nextJob.project_id || nextProjectId;
+          if (nextProjectId && currentProjectId && nextProjectId !== currentProjectId) {
+            navigate(`/project/${nextProjectId}?mode=scheduled&job=${encodeURIComponent(nextJob.id)}`);
+            return;
+          }
           setJobs((prev) => (prev.some((j) => j.id === nextJob!.id) ? prev : [nextJob!, ...prev]));
         }
       } catch {
@@ -854,15 +905,48 @@ export function ProjectWorkspace(): React.ReactElement {
     }
     if (nextJob) {
       setActiveJobId(nextJob.id);
+      setRightOpen(true);
       openRightPanel('results');
+      updateWorkspaceMode('scheduled', true, nextJob.id);
     }
-  }, [jobs, normalizeToolStatus, openRightPanel, projectId]);
+  }, [jobs, navigate, normalizeToolStatus, openRightPanel, projectId, setRightOpen, updateWorkspaceMode]);
 
   useEffect(() => {
-    const handler = (detail: unknown) => {
-      const d = detail as { toolJobId?: string } | undefined;
+    autoOpenedJobRef.current = null;
+  }, [projectId]);
+
+  useEffect(() => {
+    if (loading || !projectId) return;
+
+    if (requestedJobId) {
+      if (activeJobId === requestedJobId && workspaceMode === 'scheduled') return;
+      if (autoOpenedJobRef.current === requestedJobId) return;
+      autoOpenedJobRef.current = requestedJobId;
+      void handleOpenResult(requestedJobId, projectId);
+      return;
+    }
+
+    if (activeJobId || jobs.length === 0) return;
+    const firstJob = jobs[0];
+    if (!firstJob || autoOpenedJobRef.current === firstJob.id) return;
+    autoOpenedJobRef.current = firstJob.id;
+    void handleOpenResult(firstJob.id, projectId);
+  }, [activeJobId, handleOpenResult, jobs, loading, projectId, requestedJobId, workspaceMode]);
+
+  const openScheduledResults = useCallback(() => {
+    const nextJobId = activeJobId || jobs[0]?.id || null;
+    if (nextJobId) {
+      setActiveJobId(nextJobId);
+    }
+    setRightOpen(true);
+    openRightPanel('results');
+  }, [activeJobId, jobs, openRightPanel, setRightOpen]);
+
+  useEffect(() => {
+    const handler = (detail: { toolJobId: string; projectId?: string | null }) => {
+      const d = detail;
       if (d?.toolJobId) {
-        handleOpenResult(d.toolJobId);
+        handleOpenResult(d.toolJobId, d.projectId || null);
       }
     };
     const unsub = subscribeBioF3Event(biof3Events.projectOpenResult, handler);
@@ -909,17 +993,18 @@ export function ProjectWorkspace(): React.ReactElement {
     sessionFrameRef: sessionFrameRef as React.RefObject<HTMLDivElement>,
     bottomTerminalOpen,
     bottomTerminalHeight,
+    leftOpen,
     rightOpen,
     inputHeight,
     summaryCardOpen,
     summaryVisibility,
     summaryOpenWidth,
-    summaryOpenHeight,
     compactWorkspacePath,
     activeJob,
     activeArtifact,
     activeJobId,
     backendSummary,
+    recentJobs: jobs,
     liveJobsPreview,
     jobStats,
     jobs,
@@ -933,17 +1018,15 @@ export function ProjectWorkspace(): React.ReactElement {
     setActiveJobId,
     setActiveArtifact,
     setBottomTerminalOpen,
-    setRightOpen,
     setSummaryOpen,
-    handleShowTools,
-    handleShowFigCode,
+    setLeftOpen,
+    setRightOpen,
     handleShowPlugins,
     handleOpenResult,
     handleAskAgent,
     handleOpenWorkspacePath,
     openScheduledResults,
     startColumnResize,
-    startSummaryResize,
   };
 
   const leftPanelCtx: LeftPanelContext = {
@@ -951,7 +1034,6 @@ export function ProjectWorkspace(): React.ReactElement {
     project: project as Project,
     workspacePath,
     compactWorkspacePath,
-    workspaceNotice,
     sidebarQuery,
     normalizedSidebarQuery,
     setSidebarQuery,
@@ -986,8 +1068,6 @@ export function ProjectWorkspace(): React.ReactElement {
     handleShowCloud,
     handleShowSearch,
     handleShowScheduled,
-    handleShowTools,
-    handleShowFigCode,
     handleShowPlugins,
     handleShowSettings,
     switchToProject,
@@ -1031,6 +1111,8 @@ export function ProjectWorkspace(): React.ReactElement {
     handleOpenRightFiles,
     handleOpenRightChat,
     setBrowserUrl,
+    setBrowserCanGoBack,
+    setBrowserCanGoForward,
   };
 
   return (
@@ -1067,7 +1149,7 @@ export function ProjectWorkspace(): React.ReactElement {
         <BottomTerminal
           open={bottomTerminalOpen}
           height={bottomTerminalHeight}
-          leftOffset={leftOpen ? leftWidth + 5 : 0}
+          leftOffset={leftOpen ? leftWidth + 1 : 0}
           workspacePath={project.workspacePath}
           onResize={handleBottomTerminalResize}
           onClose={() => setBottomTerminalOpen(false)}
@@ -1566,8 +1648,6 @@ export function WorkspaceSearchPanel({
   onOpenProject,
   onOpenConversation,
   onOpenScheduled,
-  onOpenTools,
-  onOpenFigCode,
   onOpenPlugins,
 }: {
   query: string;
@@ -1580,8 +1660,6 @@ export function WorkspaceSearchPanel({
   onOpenProject: (id: string) => void;
   onOpenConversation: (projectId: string | null | undefined, convId: string) => void;
   onOpenScheduled: (jobId: string) => void;
-  onOpenTools: () => void;
-  onOpenFigCode: () => void;
   onOpenPlugins: () => void;
 }): React.ReactElement {
   const normalizedQuery = query.trim().toLowerCase();
@@ -1619,20 +1697,6 @@ export function WorkspaceSearchPanel({
     [normalizedQuery, uniqueConversations]
   );
 
-  const toolMatches = useMemo(
-    () =>
-      staticTools.filter((item) => {
-        if (!normalizedQuery) return true;
-        return (
-          item.title.toLowerCase().includes(normalizedQuery) ||
-          item.subtitle.toLowerCase().includes(normalizedQuery) ||
-          item.id.toLowerCase().includes(normalizedQuery) ||
-          item.category.toLowerCase().includes(normalizedQuery)
-        );
-      }),
-    [normalizedQuery]
-  );
-
   const datasetMatches = useMemo(
     () =>
       datasets.filter((item) => {
@@ -1665,17 +1729,9 @@ export function WorkspaceSearchPanel({
       <div className={styles.workspaceSearchHeader}>
         <div>
           <h2 className={styles.workspaceSearchTitle}>搜索</h2>
-          <p className={styles.workspaceSearchDesc}>在项目、对话、工具和当前工作记录里快速跳转。</p>
+          <p className={styles.workspaceSearchDesc}>在项目、对话、结果和当前工作记录里快速跳转。</p>
         </div>
         <div className={styles.workspaceSearchActions}>
-          <button className={styles.workspaceSearchAction} onClick={onOpenTools}>
-            <Icon name="bar-chart" size={14} />
-            <span>分析工具</span>
-          </button>
-          <button className={styles.workspaceSearchAction} onClick={onOpenFigCode}>
-            <Icon name="image" size={14} />
-            <span>FigCode</span>
-          </button>
           <button className={styles.workspaceSearchAction} onClick={onOpenPlugins}>
             <Icon name="puzzle" size={14} />
             <span>插件</span>
@@ -1689,7 +1745,7 @@ export function WorkspaceSearchPanel({
           className={styles.workspaceSearchInput}
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
-          placeholder="搜索项目、对话、分析工具、任务…"
+          placeholder="搜索项目、对话、结果、任务…"
           autoFocus
         />
       </div>
@@ -1710,7 +1766,7 @@ export function WorkspaceSearchPanel({
               <strong>{jobs.length}</strong>
             </div>
             <div className={styles.workspaceSearchHintCard}>
-              <span>工具</span>
+              <span>分析项</span>
               <strong>{staticTools.length}</strong>
             </div>
           </div>
@@ -1771,18 +1827,6 @@ export function WorkspaceSearchPanel({
             </div>
           ))}
         </SearchResultSection>
-
-        <SearchResultSection title="分析工具" count={toolMatches.length}>
-          {toolMatches.slice(0, 10).map((item) => (
-            <button key={item.id} className={styles.searchResultItem} onClick={onOpenTools}>
-              <Icon name="bar-chart" size={14} />
-              <div className={styles.searchResultMeta}>
-                <span className={styles.searchResultTitle}>{item.title}</span>
-                <span className={styles.searchResultSub}>{item.subtitle}</span>
-              </div>
-            </button>
-          ))}
-        </SearchResultSection>
       </div>
     </div>
   );
@@ -1810,7 +1854,7 @@ function SearchResultSection({
 }
 
 // ============================================================
-// ScheduledWorkspacePanel — center column scheduled/jobs view
+// ScheduledWorkspacePanel — center column analysis-records view
 // ============================================================
 
 export function ScheduledWorkspacePanel({
@@ -1855,43 +1899,19 @@ export function ScheduledWorkspacePanel({
     <div className={styles.scheduledWorkspace}>
       <div className={styles.scheduledWorkspaceHeader}>
         <div>
-          <h2 className={styles.scheduledWorkspaceTitle}>已安排</h2>
-          <p className={styles.scheduledWorkspaceDesc}>
-            当前项目 {project.name} 的运行记录、结果和下一步建议。
-          </p>
+          <h2 className={styles.scheduledWorkspaceTitle}>分析记录</h2>
+          <p className={styles.scheduledWorkspaceDesc}>当前项目 {project.name} 的 HTML 报告预览。</p>
         </div>
         <button className={styles.scheduledWorkspaceBack} onClick={onBackToChat}>
           <Icon name="message-circle" size={14} />
           <span>返回对话</span>
         </button>
       </div>
-
-      <div className={styles.scheduledStats}>
-        <div className={styles.scheduledStatCard}>
-          <span className={styles.scheduledStatLabel}>总任务</span>
-          <strong>{jobs.length}</strong>
-        </div>
-        <div className={styles.scheduledStatCard}>
-          <span className={styles.scheduledStatLabel}>运行中</span>
-          <strong>{stats.running + stats.pending}</strong>
-        </div>
-        <div className={styles.scheduledStatCard}>
-          <span className={styles.scheduledStatLabel}>已完成</span>
-          <strong>{stats.done}</strong>
-        </div>
-        <div className={styles.scheduledStatCard}>
-          <span className={styles.scheduledStatLabel}>失败</span>
-          <strong>{stats.failed}</strong>
-        </div>
-      </div>
-
       <div className={styles.scheduledWorkspaceBody}>
-        <aside className={styles.scheduledHistoryCol}>
-          <HistoryPanel jobs={jobs} activeJobId={activeJob?.id || null} onSelectJob={onSelectJob} />
-        </aside>
         <section className={styles.scheduledResultCol}>
           {activeJob ? (
             <ResultView
+              project={project}
               job={activeJob}
               activeArtifact={activeArtifact}
               onActiveArtifactChange={onActiveArtifactChange}
@@ -2285,11 +2305,13 @@ function artifactName(file: JobResultFile): string {
 }
 
 export function ResultView({
+  project,
   job,
   activeArtifact,
   onActiveArtifactChange,
   onAskAgent,
 }: {
+  project: Project;
   job: ToolJob;
   activeArtifact: ActiveArtifact | null;
   onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
@@ -2298,11 +2320,12 @@ export function ResultView({
   const [result, setResult] = useState<JobResult | null>(null);
   const [jobMeta, setJobMeta] = useState<JobDetailMeta | null>(null);
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState<'plots' | 'files' | 'details'>('plots');
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<string[][] | null>(null);
   const [previewText, setPreviewText] = useState<string | null>(null);
   const [previewName, setPreviewName] = useState<string>('');
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [showRawOutputs, setShowRawOutputs] = useState(false);
 
   const tool = useMemo(
     () => staticTools.find((t) => t.id === job.tool_id) || null,
@@ -2318,7 +2341,7 @@ export function ResultView({
       const base = getApiPrefix(lang);
       const token = getToken();
       const tokenQs = token ? `?token=${encodeURIComponent(token)}` : '';
-      return `${base}/tools/result/${job.id}/${encodeURIComponent(name)}${tokenQs}`;
+      return `${base}/tools/file/${job.id}/${encodeURIComponent(name)}${tokenQs}`;
     },
     [job.id, lang]
   );
@@ -2371,59 +2394,127 @@ export function ResultView({
   const files = result?.artifacts || result?.files || [];
   const plots = files.filter((f) => f.type === 'plot');
   const tables = files.filter((f) => f.type === 'table' || f.type === 'file' || f.type === 'text' || f.type === 'json');
+  const htmlFiles = files.filter((f) => /\.(html?|xhtml)$/i.test(artifactName(f)));
+  const reportFile = htmlFiles.find((f) => /report(\.html?)?$/i.test(artifactName(f))) || htmlFiles[0] || null;
+  const reportUrl = reportFile ? buildUrl(artifactName(reportFile)) : '';
+  const firstHtmlName = htmlFiles[0] ? artifactName(htmlFiles[0]) : '';
+  const firstPlotName = plots[0] ? artifactName(plots[0]) : '';
+  const firstTableName = tables[0] ? artifactName(tables[0]) : '';
+  const firstFileName = files[0] ? artifactName(files[0]) : '';
+  const jumpToSection = useCallback((id: string) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+  const activeFile = useMemo(() => {
+    if (!files.length) return null;
+    const current =
+      activeArtifact && activeArtifact.jobId === job.id
+        ? files.find((f) => artifactName(f) === activeArtifact.name)
+        : null;
+    return current || htmlFiles[0] || plots[0] || tables[0] || files[0] || null;
+  }, [
+    activeArtifact?.jobId,
+    activeArtifact?.name,
+    firstHtmlName,
+    firstPlotName,
+    firstTableName,
+    firstFileName,
+    files,
+    job.id,
+  ]);
+  const activeName = activeFile ? artifactName(activeFile) : '';
+  const activeUrl = activeFile ? buildUrl(activeName) || activeFile.url || '' : '';
+  const activeIsText = activeFile
+    ? isTextFile(activeName) || isMarkdownFile(activeName) || /\.json$/i.test(activeName)
+    : false;
+  const activeIsImage = activeFile ? isImageFile(activeName) : false;
+  const activeIsHtml = activeFile ? /\.html?$/i.test(activeName) : false;
+  const focusArtifact = useMemo(
+    () => (activeFile ? toArtifact(activeFile) : null),
+    [activeFile, toArtifact]
+  );
 
   useEffect(() => {
     if (job.status !== 'done') {
       onActiveArtifactChange(null);
       return;
     }
-    const first = plots[0] || tables[0] || files[0];
+    const first = htmlFiles[0] || plots[0] || tables[0] || files[0];
     if (!first) {
       onActiveArtifactChange(null);
       return;
     }
-    if (!activeArtifact || activeArtifact.jobId !== job.id) {
+    if (!activeArtifact || activeArtifact.jobId !== job.id || activeArtifact.name !== artifactName(first)) {
       onActiveArtifactChange(toArtifact(first));
     }
-  }, [activeArtifact, files, job.id, job.status, onActiveArtifactChange, plots, tables, toArtifact]);
+  }, [
+    activeArtifact?.jobId,
+    activeArtifact?.name,
+    firstHtmlName,
+    firstPlotName,
+    firstTableName,
+    firstFileName,
+    job.id,
+    job.status,
+    onActiveArtifactChange,
+    toArtifact,
+  ]);
 
-  const previewFile = useCallback(
-    async (file: JobResultFile) => {
+  const loadTextPreview = useCallback(async (file: JobResultFile) => {
+    const fileName = artifactName(file);
+    const resp = await fetch(buildUrl(fileName));
+    const text = await resp.text();
+    const isTable = /\.(csv|tsv)$/i.test(fileName);
+    setPreviewName(fileName);
+    if (isTable) {
+      const sep = fileName.toLowerCase().endsWith('.tsv') || text.includes('\t') ? '\t' : ',';
+      const rows = text
+        .split('\n')
+        .filter((l) => l.trim())
+        .slice(0, 40)
+        .map((l) => l.split(sep).map((c) => c.replace(/^"|"$/g, '').trim()));
+      setPreviewData(rows);
+      setPreviewText(null);
+      return;
+    }
+    if (fileName.toLowerCase().endsWith('.json')) {
       try {
-        onActiveArtifactChange(toArtifact(file));
-        const fileName = artifactName(file);
-        const resp = await fetch(buildUrl(fileName));
-        const text = await resp.text();
-        const isTable = /\.(csv|tsv)$/i.test(fileName);
-        setPreviewName(fileName);
-        if (isTable) {
-          const sep = fileName.toLowerCase().endsWith('.tsv') || text.includes('\t') ? '\t' : ',';
-          const rows = text
-            .split('\n')
-            .filter((l) => l.trim())
-            .slice(0, 40)
-            .map((l) => l.split(sep).map((c) => c.replace(/^"|"$/g, '').trim()));
-          setPreviewData(rows);
-          setPreviewText(null);
-          return;
-        }
-        if (fileName.toLowerCase().endsWith('.json')) {
-          try {
-            setPreviewText(JSON.stringify(JSON.parse(text), null, 2));
-          } catch {
-            setPreviewText(text.slice(0, 12000));
-          }
-        } else {
-          setPreviewText(text.slice(0, 12000));
-        }
-        setPreviewData(null);
+        setPreviewText(JSON.stringify(JSON.parse(text), null, 2));
       } catch {
-        setPreviewData(null);
-        setPreviewText('无法读取预览内容');
+        setPreviewText(text.slice(0, 12000));
       }
-    },
-    [buildUrl, onActiveArtifactChange, toArtifact]
-  );
+    } else {
+      setPreviewText(text.slice(0, 12000));
+    }
+    setPreviewData(null);
+  }, [buildUrl]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!activeFile || !activeIsText || activeIsHtml) {
+      setPreviewLoading(false);
+      setPreviewData(null);
+      setPreviewText(null);
+      setPreviewName(activeName);
+      return () => {
+        cancelled = true;
+      };
+    }
+    setPreviewLoading(true);
+    loadTextPreview(activeFile)
+      .catch(() => {
+        if (!cancelled) {
+          setPreviewData(null);
+          setPreviewText('无法读取预览内容');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setPreviewLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeFile, activeIsHtml, activeIsText, activeName, loadTextPreview]);
 
   const explainCurrentResult = useCallback(() => {
     const artifact = activeArtifact;
@@ -2509,189 +2600,312 @@ export function ResultView({
   // Result with files
   return (
     <div className={styles.resultView}>
-      <div className={styles.resultHeader}>
-        <h2 className={styles.resultTitle}>{job.name || job.tool_id}</h2>
-        <span className={styles.resultStatus} data-status="done">完成</span>
-        <div className={styles.resultHeaderActions}>
-          <button className={styles.plotCardBtnPrimary} onClick={explainCurrentResult}>
-            <Icon name="message-circle" size={13} /> 解释当前结果
-          </button>
-        </div>
-      </div>
-      <div className={styles.resultBody}>
-        {/* Tabs */}
-        <div className={styles.resultTabs}>
-          <button
-            className={`${styles.resultTab} ${tab === 'plots' ? styles.resultTabActive : ''}`}
-            onClick={() => setTab('plots')}
-          >
-            图表 ({plots.length})
-          </button>
-          <button
-            className={`${styles.resultTab} ${tab === 'files' ? styles.resultTabActive : ''}`}
-            onClick={() => setTab('files')}
-          >
-            数据文件 ({tables.length})
-          </button>
-          <button
-            className={`${styles.resultTab} ${tab === 'details' ? styles.resultTabActive : ''}`}
-            onClick={() => setTab('details')}
-          >
-            详情
-          </button>
-        </div>
-
-        {/* Plots tab */}
-        {tab === 'plots' && (
-          <div className={styles.plotCardGrid}>
-            {plots.map((f, idx) => (
-              <div
-                key={artifactName(f)}
-                className={`${styles.plotCard} ${activeArtifact?.jobId === job.id && activeArtifact.name === artifactName(f) ? styles.plotCardActive : ''}`}
-              >
-                <div className={styles.plotCardHeader}>
-                  <span className={styles.plotCardNum}>图{idx + 1}</span>
-                  <span className={styles.plotCardLabel}>
-                    {f.label || f.title || artifactName(f).replace(/\.[^.]+$/, '')}
-                  </span>
-                </div>
-                <div className={styles.plotCardImg}>
-                  <img
-                    src={buildUrl(artifactName(f))}
-                    alt={f.label || f.title || artifactName(f)}
-                    onClick={() => {
-                      const artifact = toArtifact(f);
-                      onActiveArtifactChange(artifact);
-                      setLightboxSrc(artifact.url || buildUrl(artifactName(f)));
-                    }}
-                    style={{ cursor: 'zoom-in' }}
-                  />
-                </div>
-                <div className={styles.plotCardFooter}>
-                  <a
-                    href={buildUrl(artifactName(f))}
-                    download
-                    className={styles.plotCardBtn}
-                    onClick={() => onActiveArtifactChange(toArtifact(f))}
-                  >
-                    下载 PNG
-                  </a>
-                </div>
-              </div>
-            ))}
+      <section className={styles.resultReportSection}>
+        <div className={styles.resultReportSectionHeader}>
+          <div>
+            <div className={styles.resultEyebrow}>HTML 报告</div>
+            <div className={styles.resultReportSectionTitle}>{reportFile ? artifactName(reportFile) : job.name || job.tool_id}</div>
           </div>
-        )}
-
-        {/* Files tab */}
-        {tab === 'files' && (
-          <div className={styles.fileCardGrid}>
-            {tables.map((f) => (
-              <div
-                key={artifactName(f)}
-                className={`${styles.fileCard} ${activeArtifact?.jobId === job.id && activeArtifact.name === artifactName(f) ? styles.fileCardActive : ''}`}
-              >
-                <div className={styles.fileCardIcon}>
-                  <Icon name={f.type === 'table' ? 'database' : 'file'} size={26} />
-                </div>
-                <div className={styles.fileCardName}>{f.label || f.title || artifactName(f)}</div>
-                <div className={styles.fileCardDesc}>{artifactName(f)}</div>
-                <div className={styles.fileCardActions}>
-                  <a
-                    href={buildUrl(artifactName(f))}
-                    download
-                    className={styles.plotCardBtn}
-                    onClick={() => onActiveArtifactChange(toArtifact(f))}
-                  >
-                    下载
-                  </a>
-                  {(f.preview !== false && /\.(csv|tsv|txt|log|json)$/i.test(artifactName(f))) && (
-                    <button
-                      className={styles.plotCardBtnPrimary}
-                      onClick={() => previewFile(f)}
-                    >
-                      预览
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Details tab */}
-        {tab === 'details' && (
-          <div className={styles.jobDetails}>
-            <section className={styles.jobDetailSection}>
-              <h3>任务</h3>
-              <dl>
-                <div><dt>jobId</dt><dd>{job.id}</dd></div>
-                <div><dt>toolId</dt><dd>{job.tool_id}</dd></div>
-                <div><dt>version</dt><dd>{result?.tool?.version || '-'}</dd></div>
-                <div><dt>language</dt><dd>{result?.tool?.language || tool?.language || '-'}</dd></div>
-                <div><dt>status</dt><dd>{job.status}</dd></div>
-                <div><dt>projectId</dt><dd>{jobMeta?.projectId || job.project_id || '-'}</dd></div>
-                <div><dt>ackStatus</dt><dd>{jobMeta?.ackStatus || '-'}</dd></div>
-              </dl>
-            </section>
-            <section className={styles.jobDetailSection}>
-              <h3>参数</h3>
-              <pre>{JSON.stringify(jobMeta?.params || {}, null, 2)}</pre>
-            </section>
-            <section className={styles.jobDetailSection}>
-              <h3>输出</h3>
-              <pre>{JSON.stringify(result?.artifacts || result?.outputs || result?.manifest || result?.files || [], null, 2)}</pre>
-            </section>
-            {(result?.stdout || job.error) && (
-              <section className={styles.jobDetailSection}>
-                <h3>日志</h3>
-                <pre>{result?.stdout || job.error}</pre>
-              </section>
+          <div className={styles.resultFocusActions}>
+            {reportUrl && (
+              <a href={reportUrl} target="_blank" rel="noreferrer noopener" className={styles.resultFocusActionLink}>
+                新窗口打开
+              </a>
             )}
           </div>
-        )}
+        </div>
+        <div className={styles.resultReportCanvas}>
+          {reportUrl ? (
+            <iframe
+              src={reportUrl}
+              title={reportFile ? artifactName(reportFile) : (htmlFiles[0] ? artifactName(htmlFiles[0]) : 'report')}
+              className={styles.resultReportIframe}
+            />
+          ) : (
+            <div className={styles.resultPreviewPlaceholder}>未发现 HTML 报告</div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
 
-        {/* CSV preview */}
-        {(previewData || previewText) && (
-          <div className={styles.csvPreview}>
-            <div className={styles.csvPreviewHeader}>
-              <span>{previewName}</span>
-              <button
-                onClick={() => {
-                  setPreviewData(null);
-                  setPreviewText(null);
-                }}
-              >
-                <Icon name="x" size={14} />
-              </button>
+export function ResultSidebarPanel({
+  project,
+  job,
+  activeArtifact,
+  onActiveArtifactChange,
+  onAskAgent,
+  onOpenFullResult,
+}: {
+  project: Project;
+  job: ToolJob | null;
+  activeArtifact: ActiveArtifact | null;
+  onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
+  onAskAgent: (prompt: string) => void;
+  onOpenFullResult: (jobId: string) => void | Promise<void>;
+}): React.ReactElement {
+  const [result, setResult] = useState<JobResult | null>(null);
+  const [jobMeta, setJobMeta] = useState<JobDetailMeta | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [selectedName, setSelectedName] = useState('');
+  const [previewText, setPreviewText] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+
+  const tool = useMemo(
+    () => (job ? staticTools.find((t) => t.id === job.tool_id) || null : null),
+    [job]
+  );
+
+  const lang: 'r' | 'python' = tool?.language === 'python' ? 'python' : 'r';
+
+  const buildUrl = useCallback(
+    (name: string) => {
+      if (!job) return '';
+      const base = getApiPrefix(lang);
+      const token = getToken();
+      const tokenQs = token ? `?token=${encodeURIComponent(token)}` : '';
+      return `${base}/tools/file/${job.id}/${encodeURIComponent(name)}${tokenQs}`;
+    },
+    [job, lang]
+  );
+
+  const toArtifact = useCallback(
+    (file: JobResultFile): ActiveArtifact => ({
+      jobId: job?.id || '',
+      toolId: job?.tool_id || '',
+      name: artifactName(file),
+      type: file.type,
+      label: file.label || file.title,
+      url: buildUrl(artifactName(file)),
+    }),
+    [buildUrl, job]
+  );
+
+  useEffect(() => {
+    if (!job) {
+      setResult(null);
+      setJobMeta(null);
+      setSelectedName('');
+      setPreviewText(null);
+      setLoading(false);
+      return;
+    }
+
+    if (job.status === 'done') {
+      setLoading(true);
+      setResult(null);
+      setJobMeta(null);
+      (async () => {
+        try {
+          const token = getToken();
+          const resp = await fetch(getApiPrefix(lang) + '/tools/status/' + job.id, {
+            headers: token ? { Authorization: 'Bearer ' + token } : {},
+          });
+          const data = await resp.json();
+          if (data.ok && data.result) {
+            setResult(data.result);
+            setJobMeta({
+              params: data.params || {},
+              ackStatus: data.ackStatus || null,
+              projectId: data.projectId || null,
+            });
+          }
+        } catch {
+          // ignore
+        } finally {
+          setLoading(false);
+        }
+      })();
+    } else {
+      setResult(null);
+      setJobMeta(null);
+      setLoading(false);
+    }
+  }, [job, lang]);
+
+  const files = result?.artifacts || result?.files || [];
+  const htmlFiles = files.filter((f) => /\.(html?|xhtml)$/i.test(artifactName(f)));
+  const reportFile = htmlFiles.find((f) => /report(\.html?)?$/i.test(artifactName(f))) || htmlFiles[0] || null;
+  const reportUrl = reportFile ? buildUrl(artifactName(reportFile)) : '';
+  const plots = files.filter((f) => f.type === 'plot');
+  const tables = files.filter((f) => f.type === 'table' || f.type === 'file' || f.type === 'text' || f.type === 'json');
+  const activeFile = useMemo(() => {
+    if (!files.length) return null;
+    const current = files.find((f) => artifactName(f) === selectedName);
+    return current || htmlFiles[0] || plots[0] || tables[0] || files[0] || null;
+  }, [files, htmlFiles, plots, selectedName, tables]);
+
+  useEffect(() => {
+    if (!job || job.status !== 'done') return;
+    const preferred = htmlFiles[0] || files[0] || null;
+    const preferredName = preferred ? artifactName(preferred) : '';
+    setSelectedName((current) => {
+      if (current && files.some((file) => artifactName(file) === current)) return current;
+      return preferredName;
+    });
+  }, [files, htmlFiles, job]);
+
+  useEffect(() => {
+    if (!job || job.status !== 'done' || !activeFile) {
+      onActiveArtifactChange(null);
+      return;
+    }
+    const artifact = toArtifact(activeFile);
+    if (!activeArtifact || activeArtifact.jobId !== artifact.jobId || activeArtifact.name !== artifact.name) {
+      onActiveArtifactChange(artifact);
+    }
+  }, [activeArtifact, activeFile, job, onActiveArtifactChange, toArtifact]);
+
+  const activeUrl = activeFile ? buildUrl(artifactName(activeFile)) || activeFile.url || '' : '';
+  const activeName = activeFile ? artifactName(activeFile) : '';
+  const activeIsText = isTextFile(activeName) || isMarkdownFile(activeName) || /\.json$/i.test(activeName);
+  const activeIsImage = isImageFile(activeName);
+  const activeIsPreviewText = activeIsText && !/\.html?$/i.test(activeName);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!activeFile || !activeIsPreviewText) {
+      setPreviewText(null);
+      setPreviewLoading(false);
+      return () => { cancelled = true; };
+    }
+    setPreviewLoading(true);
+    const url = activeUrl || activeFile.url || '';
+    fetch(url)
+      .then((resp) => {
+        if (!resp.ok) throw new Error('preview failed');
+        return resp.text();
+      })
+      .then((text) => {
+        if (cancelled) return;
+        setPreviewText(formatPreviewText(activeName, text).slice(0, 12000));
+      })
+      .catch(() => {
+        if (!cancelled) setPreviewText('无法读取预览内容');
+      })
+      .finally(() => {
+        if (!cancelled) setPreviewLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeFile, activeIsPreviewText, activeName, activeUrl]);
+
+  const explainCurrentResult = useCallback(() => {
+    if (!job) return;
+    if (activeArtifact) {
+      onAskAgent(
+        `请解释当前正在查看的分析结果 artifact：jobId=${activeArtifact.jobId}，toolId=${activeArtifact.toolId}，文件=${activeArtifact.name}，类型=${activeArtifact.type}，标签=${activeArtifact.label || '无'}。请结合这个文件说明结果含义、关键观察、可能的质量问题，以及下一步建议。`
+      );
+      return;
+    }
+    const fileList = files.slice(0, 12).map((f) => `${artifactName(f)}(${f.type})`).join(', ');
+    onAskAgent(
+      `请解释当前分析结果：jobId=${job.id}，toolId=${job.tool_id}，可用文件=${fileList || '暂无文件'}。请总结主要发现和下一步建议。`
+    );
+  }, [activeArtifact, files, job, onAskAgent]);
+
+  if (!job) {
+    return <EmptyAnalysisResult />;
+  }
+
+  if (job.status === 'running' || job.status === 'pending') {
+    return (
+      <div className={styles.panelInner}>
+        <div className={styles.panelSection}>
+          <h3 className={styles.panelHeading}>
+            <Icon name="bar-chart" size={14} /> 结果
+          </h3>
+          <div className={styles.resultSidebarCard}>
+            <div className={styles.resultSidebarTitleRow}>
+              <strong>{job.name || job.tool_id}</strong>
+              <span className={styles.resultStatus} data-status={job.status}>
+                {job.status === 'running' ? '运行中…' : '排队中'}
+              </span>
             </div>
-            <div className={styles.csvPreviewBody}>
-              {previewData ? (
-                <table>
-                  <tbody>
-                    {previewData.map((row, i) => (
-                      <tr key={i}>
-                        {row.map((cell, j) => (
-                          <td key={j}>{cell}</td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <pre className={styles.textPreview}>{previewText}</pre>
-              )}
+            <div className={styles.resultRunning}>
+              <div className={styles.spinner} />
+              <p>分析正在执行，请稍候…</p>
             </div>
           </div>
-        )}
+        </div>
       </div>
+    );
+  }
 
-      {/* Phase 8: Chain recommendations — show next-step suggestions */}
-      <ChainRecommendations job={job} resultFiles={result?.artifacts || result?.files} onAskAgent={onAskAgent} />
+  if (job.status === 'failed') {
+    return (
+      <div className={styles.panelInner}>
+        <div className={styles.panelSection}>
+          <h3 className={styles.panelHeading}>
+            <Icon name="bar-chart" size={14} /> 结果
+          </h3>
+          <div className={styles.resultSidebarCard}>
+            <div className={styles.resultSidebarTitleRow}>
+              <strong>{job.name || job.tool_id}</strong>
+              <span className={styles.resultStatus} data-status="failed">失败</span>
+            </div>
+            <pre className={styles.resultError}>{job.error || '执行失败，无错误信息'}</pre>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-      {/* Lightbox */}
-      {lightboxSrc && (
-        <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
-      )}
+  if (loading) {
+    return (
+      <div className={styles.panelInner}>
+        <div className={styles.panelSection}>
+          <h3 className={styles.panelHeading}>
+            <Icon name="bar-chart" size={14} /> 结果
+          </h3>
+          <div className={styles.resultSidebarCard}>
+            <div className={styles.resultSidebarTitleRow}>
+              <strong>{job.name || job.tool_id}</strong>
+              <span className={styles.resultStatus} data-status="done">完成</span>
+            </div>
+            <p className={styles.panelEmpty}>加载结果中…</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!result) {
+    return (
+      <div className={styles.panelInner}>
+        <div className={styles.panelSection}>
+          <h3 className={styles.panelHeading}>
+            <Icon name="bar-chart" size={14} /> 结果
+          </h3>
+          <div className={styles.resultSidebarCard}>
+            <div className={styles.resultSidebarTitleRow}>
+              <strong>{job.name || job.tool_id}</strong>
+              <span className={styles.resultStatus} data-status="done">完成</span>
+            </div>
+            <p className={styles.panelEmpty}>分析已完成，但未生成可视化结果文件。</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.resultSidebarRoot}>
+      <div className={styles.resultSidebarPreview}>
+        <div className={styles.resultSidebarPreviewBody}>
+          {reportUrl ? (
+            <iframe
+              src={reportUrl}
+              title={reportFile ? artifactName(reportFile) : 'report'}
+              className={styles.resultSidebarIframe}
+            />
+          ) : (
+            <p className={styles.panelEmpty}>未发现 HTML 报告</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -2817,13 +3031,18 @@ export function TerminalPanel({
     return () => window.clearInterval(timer);
   }, [refresh]);
 
+  const visibleProcesses = useMemo(
+    () => (snapshot?.processes || []).filter((proc) => proc.id !== 'plumber'),
+    [snapshot]
+  );
+
   return (
     <div className={styles.terminalPanel}>
       <div className={styles.terminalPanelHead}>
         <div className={styles.terminalPanelTitleWrap}>
           <div className={styles.terminalPanelTitle}>后端</div>
           <div className={styles.terminalPanelMeta}>
-            {project.workspacePath || '当前项目'} · {backendStatus.isReady ? '后端在线' : '后端检查中'}
+            {project.workspacePath || '当前项目'} · R {backendStatus.rRuntime ? '已就绪' : '未安装'} · Python {backendStatus.pyRuntime ? '已就绪' : '未安装'}
           </div>
         </div>
         <div className={styles.terminalPanelActions}>
@@ -2853,14 +3072,11 @@ export function TerminalPanel({
 
       <div className={styles.terminalPanelList}>
         {loading && !snapshot && <div className={styles.panelEmpty}>加载后端状态…</div>}
-        {(snapshot?.processes || []).map((proc) => (
+        {visibleProcesses.map((proc) => (
           <details key={proc.id} className={styles.terminalProcessCard} open>
             <summary className={styles.terminalProcessSummary}>
               <span className={styles.terminalProcessName}>
-                <span
-                  className={styles.terminalProcessDot}
-                  data-status={proc.status}
-                />
+                <span className={styles.terminalProcessDot} data-status={proc.status} />
                 {proc.label}
               </span>
               <span className={styles.terminalProcessMeta}>
@@ -2874,7 +3090,7 @@ export function TerminalPanel({
             </pre>
           </details>
         ))}
-        {!loading && snapshot && (snapshot.processes || []).length === 0 && (
+        {!loading && snapshot && visibleProcesses.length === 0 && (
           <div className={styles.panelEmpty}>没有可显示的后端状态</div>
         )}
       </div>
@@ -2885,10 +3101,12 @@ export function TerminalPanel({
 export function BrowserPanel({
   initialUrl,
   onUrlChange,
+  onNavigationStateChange,
   obscured = false,
 }: {
   initialUrl: string;
   onUrlChange: (url: string) => void;
+  onNavigationStateChange?: (state: { canGoBack: boolean; canGoForward: boolean }) => void;
   obscured?: boolean;
 }): React.ReactElement {
   const startUrlRef = useRef(normalizeBrowserUrl(initialUrl));
@@ -2945,6 +3163,10 @@ export function BrowserPanel({
         if (typeof webview.getTitle === 'function') {
           setTitle(webview.getTitle() || '浏览器');
         }
+        onNavigationStateChange?.({
+          canGoBack: Boolean(webview.canGoBack?.()),
+          canGoForward: Boolean(webview.canGoForward?.()),
+        });
       } catch {
         /* noop */
       }
@@ -2967,6 +3189,7 @@ export function BrowserPanel({
       setLoading(false);
       setBrowserError(String(event?.errorDescription || '网页加载失败'));
       webview.style.visibility = 'hidden';
+      onNavigationStateChange?.({ canGoBack: false, canGoForward: false });
     };
     const onNewWindow = (event: any) => {
       event.preventDefault?.();
@@ -2999,8 +3222,9 @@ export function BrowserPanel({
       } catch {}
       host.innerHTML = '';
       webviewRef.current = null;
+      onNavigationStateChange?.({ canGoBack: false, canGoForward: false });
     };
-  }, [navigate, onUrlChange, startUrlRef]);
+  }, [navigate, onNavigationStateChange, onUrlChange, startUrlRef]);
 
   const goBack = useCallback(() => {
     try {
@@ -3019,6 +3243,15 @@ export function BrowserPanel({
       webviewRef.current?.reload?.();
     } catch {}
   }, []);
+
+  useEffect(() => {
+    const offBack = subscribeBioF3Event(biof3Events.browserBack, () => goBack());
+    const offForward = subscribeBioF3Event(biof3Events.browserForward, () => goForward());
+    return () => {
+      offBack();
+      offForward();
+    };
+  }, [goBack, goForward]);
 
   const submitUrl = useCallback(
     (event: React.FormEvent) => {

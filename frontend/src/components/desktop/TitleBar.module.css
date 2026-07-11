@@ -1,0 +1,331 @@
+.titleBar {
+  --titlebar-left-span: 310px;
+  --titlebar-right-span: 540px;
+  --titlebar-height: 28px;
+  --titlebar-bg: color-mix(in srgb, var(--biof3-bg-surface) 98%, var(--biof3-bg-canvas) 2%);
+  --titlebar-left-bg: var(--titlebar-bg);
+  --titlebar-border: color-mix(in srgb, var(--biof3-border) 72%, transparent 28%);
+  --titlebar-divider: color-mix(in srgb, var(--biof3-border) 64%, transparent 36%);
+  --titlebar-ink: var(--biof3-text);
+  --titlebar-ink-muted: var(--biof3-text-secondary);
+  --titlebar-pill-bg: color-mix(in srgb, var(--biof3-bg-surface) 72%, transparent 28%);
+  --titlebar-pill-border: color-mix(in srgb, var(--biof3-border-strong) 62%, transparent 38%);
+  --titlebar-hover: color-mix(in srgb, var(--biof3-hover) 88%, transparent 12%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--titlebar-height);
+  z-index: 9999;
+  display: grid;
+  grid-template-columns: var(--titlebar-left-span) minmax(0, 1fr) var(--titlebar-right-span);
+  align-items: center;
+  background: var(--titlebar-bg);
+  color: var(--titlebar-ink);
+  border-bottom: 1px solid var(--titlebar-border);
+  -webkit-app-region: drag;
+  user-select: none;
+  backdrop-filter: saturate(1.1) blur(18px);
+}
+
+.leftZone {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  background: var(--titlebar-left-bg);
+  border-right: 1px solid var(--titlebar-divider);
+}
+
+.trafficZone {
+  width: 76px;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.leftZoneCollapsed .trafficZone {
+  width: 62px;
+}
+
+.iconBtn,
+.pathPill,
+.tabPill,
+.toolMenu,
+.toolMenuOverlay {
+  -webkit-app-region: no-drag;
+}
+
+.leftTools {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding-left: 3px;
+  min-width: 0;
+}
+
+.centerTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-width: 0;
+  justify-self: stretch;
+  width: 100%;
+  height: 100%;
+  border-right: 1px solid var(--titlebar-divider);
+  padding: 0 5px 0 10px;
+}
+
+.centerTitleMain {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.centerTitleText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 630;
+}
+
+.rightZone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  justify-self: stretch;
+  position: relative;
+  gap: 3px;
+  padding-right: 7px;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.tabsRail {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-left: 3px;
+}
+
+.toolMenuOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  border: none;
+  background: transparent;
+}
+
+.toolMenu {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  z-index: 10001;
+  display: grid;
+  width: 176px;
+  padding: 5px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 10px;
+  background: var(--biof3-bg-elevated);
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.18);
+  -webkit-app-region: no-drag;
+}
+
+.toolMenu > button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.toolMenu > button:hover,
+.toolMenuItemActive {
+  background: var(--biof3-hover) !important;
+  color: var(--biof3-text) !important;
+}
+
+.toolMenu > button span {
+  flex: 1;
+}
+
+.windowTools {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 5px;
+  padding-left: 5px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  flex: 0 0 auto;
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--titlebar-ink-muted);
+  cursor: pointer;
+  transition: background 0.14s ease, color 0.14s ease, opacity 0.14s ease;
+  padding: 0;
+}
+
+.iconBtn:hover,
+.tabPill:hover,
+.pathPill:hover {
+  background: var(--titlebar-hover);
+  color: var(--titlebar-ink);
+}
+
+.iconBtnDisabled {
+  opacity: 0.32;
+  cursor: default;
+  pointer-events: none;
+}
+
+.iconBtnInactive {
+  color: color-mix(in srgb, var(--titlebar-ink-muted) 66%, transparent 34%);
+}
+
+.pathPill,
+.tabPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 188px;
+  height: 22px;
+  padding: 0 7px;
+  border: 1px solid var(--titlebar-pill-border);
+  border-radius: 8px;
+  background: var(--titlebar-pill-bg);
+  color: var(--titlebar-ink);
+  cursor: pointer;
+  transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease;
+}
+
+.tabPillActive {
+  background: color-mix(in srgb, var(--biof3-accent-bg) 72%, var(--biof3-bg-surface) 28%);
+  border-color: color-mix(in srgb, var(--biof3-accent) 28%, var(--biof3-border) 72%);
+}
+
+.tabPillMain {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.pathPillText,
+.tabPillText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 580;
+}
+
+.pathPill {
+  max-width: 146px;
+}
+
+.pathPillBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--biof3-accent) 18%, transparent 82%);
+  color: var(--biof3-accent);
+  flex-shrink: 0;
+}
+
+.tabClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: color-mix(in srgb, var(--titlebar-ink-muted) 72%, transparent 28%);
+  font-size: 13px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.tabClose:hover {
+  background: var(--titlebar-hover);
+  color: var(--titlebar-ink);
+}
+
+[data-theme='dark'] .titleBar {
+  --titlebar-bg: color-mix(in srgb, var(--biof3-bg-surface) 96%, var(--biof3-bg-canvas) 4%);
+  --titlebar-left-bg: var(--titlebar-bg);
+  --titlebar-pill-bg: color-mix(in srgb, var(--biof3-bg-elevated) 70%, transparent 30%);
+}
+
+@media (max-width: 1380px) {
+  .titleBar {
+    grid-template-columns: var(--titlebar-left-span) minmax(0, 1fr) var(--titlebar-right-span);
+  }
+
+  .pathPill {
+    max-width: 124px;
+  }
+
+  .tabPill {
+    max-width: 164px;
+  }
+}
+
+@media (max-width: 1120px) {
+  .titleBar {
+    grid-template-columns: var(--titlebar-left-span) minmax(0, 1fr) var(--titlebar-right-span);
+  }
+
+  .pathPill {
+    display: none;
+  }
+
+  .tabPill {
+    max-width: 142px;
+  }
+
+  .windowTools {
+    gap: 4px;
+    margin-left: 4px;
+    padding-left: 4px;
+  }
+}

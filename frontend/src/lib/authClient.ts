@@ -22,7 +22,6 @@ const DESKTOP_USER: AuthUser = {
     blog: true,
     figcode: true,
     tools: true,
-    skills: true,
     'single-cell': true,
     spatial: true,
     copilot: true,

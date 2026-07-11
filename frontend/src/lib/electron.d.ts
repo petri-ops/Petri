@@ -20,16 +20,33 @@ export interface TelemetryPayload {
   errorSummary?: string;
 }
 
+export interface ComputeSettings {
+  computeMode: 'local' | 'remote';
+  remoteComputeUrl: string;
+  remoteComputeToken: string;
+  remoteComputeName: string;
+}
+
 declare global {
   interface Window {
     biof3Desktop?: {
       isDesktop: true;
       platform: string;
       arch: string;
+      window: {
+        minimize: () => void;
+        maximize: () => void;
+        close: () => void;
+        isMaximized: () => Promise<boolean>;
+      };
       aiSettings: {
         get: () => Promise<Record<string, unknown>>;
         save: (settings: Record<string, unknown>) => Promise<void>;
         test: (provider: string, apiKey: string) => Promise<{ ok: boolean; message: string }>;
+      };
+      computeSettings: {
+        get: () => Promise<ComputeSettings>;
+        save: (settings: ComputeSettings) => Promise<{ ok: boolean; error?: string; restartRequired?: boolean }>;
       };
       plugins: {
         listInstalled: () => Promise<

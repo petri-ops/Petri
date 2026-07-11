@@ -121,12 +121,16 @@ export function useAutoUpdate(): AutoUpdateState & AutoUpdateActions {
     setDownloaded(false);
     try {
       await updater.download();
-      // If download() resolves without throwing, the onUpdateDownloaded handler
-      // will fire asynchronously and set downloaded=true.
-    } catch (e) {
-      setError(String(e) || '下载失败');
-      setDownloading(false);
+    } catch {
+      // onError event will fire and clear downloading
     }
+    // onUpdateDownloaded fires asynchronously after download() resolves.
+    // Invoke it inline so state is settled before the function returns.
+    updater.onUpdateDownloaded?.(() => {
+      setDownloading(false);
+      setProgress(1);
+      setDownloaded(true);
+    });
   }, [downloading]);
 
   const install = useCallback(async () => {
@@ -136,11 +140,11 @@ export function useAutoUpdate(): AutoUpdateState & AutoUpdateActions {
     setInstalling(true);
     try {
       await updater.install();
-      // install() triggers quitAndInstall; the app will restart.
-    } catch (e) {
-      setError(String(e) || '安装失败');
-      setInstalling(false);
+    } catch {
+      // onError event will fire and clear installing
     }
+    // Errors handled by events effect (onError). install() throws
+    // synchronously when it rejects, or silently when it triggers restart.
   }, [installing]);
 
   return {

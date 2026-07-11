@@ -1,184 +1,170 @@
-# ProjectWorkspace Refactor — Next Steps
+# Project Workspace — Next Steps Roadmap
 
-## What was done in this session (2026-07-10)
+最后更新：2026-07-11
 
-### Plan 1.2 (Panel Decomposition) — COMPLETE
-All 5 workspace panels extracted into independent files under
-`frontend/src/components/workspace-panels/`:
+当前路线图已经从“拆组件/拆 hooks”阶段，切换到“桌面端工作台稳定化 + Harness Engine v1”阶段。继续开发时不要先急着加新功能；这轮改动很大，必须先确保桌面壳子、路由和构建稳定，再进入 Harness Phase 1。
 
-| File | Lines | Role |
-|---|---|---|
-| `BottomTerminal.tsx` | 60 | Embedded xterm panel, uses `useTerminalSession` |
-| `CenterPanel.tsx` | 306 | 8-way `workspaceMode` router (chat/search/scheduled/tools/...) |
-| `LeftPanel.tsx` | 483 | Project tree + quick actions + inline creator |
-| `RightPanel.tsx` | 315 | 6-tab result panel (home/results/files/terminal/browser/chat) |
-| `WorkspaceSummaryCard.tsx` | 201 | Pinned summary card on chat/scheduled |
+## 当前阶段目标
 
-Each panel is a **pure renderer** — it accepts a `*Context` mega-prop and
-returns JSX. All state and handlers live in `ProjectWorkspace` and are passed
-in. This keeps panels unit-testable without mocking react state machines.
+先把 `/project/:projectId` 和桌面 SPA 壳子收口成稳定的 Codex-like 项目工作台：
 
-### Plan 1.3 (Hooks extracted) — COMPLETE
-| File | Lines | Role |
-|---|---|---|
-| `useBackendStatus.ts` | 38 | Polls backend health (R / Python / Plumber) |
-| `useTerminalSession.ts` | 152 | xterm IPC state machine (write/resize/start/stop/exit/data) |
-| `useResizableColumns.ts` | 108 | Column-width drag handling (reused by left/right/input) |
-| `useWorkspaceRouting.ts` | 54 | URL ↔ `WorkspaceMode` router |
+- 顶层 titlebar 分成左 / 中 / 右三段，并与下面主体三栏宽度对齐。
+- 中间会话区是主舞台，输入框固定底部，输出区居中留白。
+- 右侧工具区通过 tabs 和 `+` 管理，不再出现额外竖向图标栏。
+- 摘要概览默认关闭，作为中间栏顶层右侧按钮下方的轻量悬浮卡。
+- 云平台首页不要混入项目工作台顶栏和旧 quickstart。
+- 桌面端导航不能指向已移除的 legacy route。
+- 摘要卡、TitleBar、WorkspacePanelsContext 的状态契约要和真实 UI 一致。
 
-### Plan 1.5 (Themes + dead code) — COMPLETE
-- `terminal-themes.ts` extracted (101 lines + 61 test lines)
-- `ResourcePanel` dead branch deleted (plan 1.5)
+## 已完成的关键方向
 
-### Plan 1.7 (Tests) — PARTIAL
-- `useBackendStatus.test.ts` (3 tests)
-- `useResizableColumns.test.ts` (5 tests)
-- `terminal-themes.test.ts` (8 tests)
-- **Missing**: `useTerminalSession` test (the IPC state machine — most
-  complex, plan 6.3 marked it as a separate test pass)
+### 1. Codex-like 全局顶栏
 
-### Final state
-- `project-workspace.tsx`: **4098 → 3197 lines** (-22%)
-- 17 new untracked files
-- vitest: **16/16 passing**
-- tsc: **0 new errors**
-- sync-vendor: OK
+- 新增桌面级 `TitleBar`。
+- 顶栏高度压到 `28px`。
+- 顶栏宽度分区跟下方左 / 中 / 右三栏同步。
+- 清理了 `打开位置`、最小化、最大化、旧右侧竖栏等多余按钮。
+- `+` 明确为“展开更多工具”。
+- 摘要按钮明确在中间栏顶层右侧。
+- 顶栏区域支持拖动窗口，交互按钮为 no-drag。
 
----
+### 2. 中间会话区
 
-## What is NOT done (plan 1.4)
+- 去掉了大卡片边框和阴影。
+- 输入框固定在底部。
+- 删除横向 resize 控件。
+- 消息区域用户右对齐、模型左对齐。
+- 模型输出增加 Markdown 可读性。
+- 输入框支持随内容自动增高，并在一定范围内增宽。
+- 结果输出区已经开始做居中留白。
 
-`ProjectWorkspace` is still 3197 lines because it holds:
-- 46 `useState` calls (planning underestimated at 36)
-- 15 `useEffect` (planning said 10)
-- 38 `useCallback` handlers
-- 5 computed `useMemo` blocks
-- 3 large `*PanelContext` mega-prop construction blocks
+### 3. 左右分隔线与背景
 
-The body is now a thin shell that wires the panels together, but state
-abstraction is still inline. Plan 1.4's "150-200 line shell" target is
-**not** achieved.
+- 左右栏分隔线从厚 rail 改为 1px 布局 + hairline 视觉。
+- 主背景尽量统一为白色。
+- 左侧栏大面积浅绿背景已清理。
+- 主题色只保留在 active / hover / selected 状态。
 
----
+### 4. 右侧工具区
 
-## Recommended next session (state decomposition)
+- 右侧工具不再使用最右侧额外图标条。
+- 文件树固定在右侧，文件内容在左侧自适应。
+- 打开文件不应自动收起文件树。
+- 底部终端方向已引入，但终端体验仍需继续精修。
 
-### Why not done in this session
-The 46 useState + 15 useEffect + 38 handlers are **interleaved** across
-domain boundaries. Examples of cross-domain coupling:
+### 5. 摘要概览
 
-- `handleShowScheduled` reads `activeJobId` (Active) + `jobs` (Domain)
-- `handleNewConversation` writes `setProjectConversations` (Domain) and
-  calls `navigate` (Routing)
-- `useEffect[443]` (`refreshConversations`) depends on
-  `setActiveConvId` (Active) + `setConversations` (Domain) +
-  `refreshConversations` handler
-- `useEffect[408]` resets workspace files when `projectId` changes
+- 默认关闭。
+- 删除 resize 手柄。
+- 固定为窄而高的竖向卡片。
+- 删除过松散的信息，只保留当前活动和状态。
 
-Decomposing into 5 independent hooks would require either:
-- **Option A**: Mega-hook (one file holds all 46 state) → defeats
-  separation purpose
-- **Option B**: 5 domain hooks with shared setter callbacks exposed
-  across hooks → introduces implicit cross-hook contracts
+### 6. 开发体验
 
-Both options have higher risk than benefit at this codebase maturity.
-The next session should investigate Option B carefully before committing.
+- `npm run dev` 已改为 Vite dev server + Electron dev 启动。
+- 开发时可以热更新，不需要每次重新打包 dist。
+- dev CSP 已处理 React refresh preamble。
 
-### Step-by-step plan for next session
+### 7. Phase 0 稳定化收口
 
-#### Phase 1: Validate runtime
-The session's panel extraction is **statically validated** (tsc + vitest
-pass) but **not runtime validated** (no `npm run dev` was run). The
-most important first step is:
+- 清理了桌面 Dock / 导航面板里仍指向 `/single-cell`、`/spatial`、`/about` 的入口。
+- 清理了摘要卡 resize 残留状态，摘要卡回到固定窄高卡片。
+- 清理了 TitleBar state 中已不渲染的旧路径按钮 / 加标签字段。
+- 已通过：
 
 ```bash
-cd frontend
+npm --prefix frontend run check
+node --check src/main.js
+node --check src/preload.js
+node --check scripts/dev-electron.js
+npm run build:spa
+```
+
+## 接下来优先级
+
+### P0：稳定化确认
+
+先跑并实机确认：
+
+```bash
 npm run dev
 ```
 
-Open the desktop app, click through:
-- leftCol: project tree, inline create, conversation switch
-- centerCol: chat, scheduled, tools (embedded page)
-- rightCol: each of 6 tabs, tab open/close
-- bottom terminal: open, type, close
+检查：
 
-If anything misbehaves, the bug is in mega-ctx wiring — likely a missing
-prop or wrong setter type (`boolean` vs `DispatchSetter<boolean>`).
+- 打开项目页后顶栏是否只有 28px 左右。
+- 顶栏三段是否跟下面三栏严格对齐。
+- 左侧栏收起/展开按钮是否能反复操作。
+- 右侧栏收起/展开按钮是否稳定。
+- `+` 是否始终打开工具菜单，而不是跳回主页。
+- 摘要按钮是否能打开窄高摘要卡，默认是否关闭。
+- 中间结果输出区是否居中、有左右留白。
+- 桌面 Dock 和导航面板是否只出现有效路由入口。
+- vendor/biof3-core 的改动是否确认为本次快照的一部分。
+- `.cursor/` 是否需要提交或加入忽略。
 
-#### Phase 2: Decompose state (Plan 1.4)
+### P1：Harness 规范落地
 
-**Recommended order** (lowest risk first):
+工作台壳子稳定后，下一步要把上层 Prompt 工程收敛成真正的执行底座：
 
-1. **`useProjectDomain`** — 9 state (project/jobs/datasets/allProjects/...)
-   + 5 useEffect (polling, listing). Most isolated. This is the
-   foundation other hooks read from.
+1. 统一插件 manifest / artifact schema。
+2. 加 `failureModes`。
+3. 加文件探测、索引和参数修复层。
+4. 把平台差异下沉到执行器抽象层。
+5. 把 Skills 变成流程模板，而不是执行真相。
+6. 建立回归测试，验证弱模型也能跑通标准流程。
 
-2. **`useWorkspaceLayout`** — 13 state (leftOpen/rightOpen/.../centerColWidth)
-   + 5 useEffect (matchMedia, ResizeObserver, window resize). Pure DOM,
-   no business logic.
+详细规范见：[Harness Engine Spec v1](./harness-engine-spec.md)。
 
-3. **`useProjectForms`** — 10 state (creatingProjectInline/...) + 3
-   handlers (submitProjectCreator, openConversationCreator,
-   submitConversationCreator). Self-contained form state.
+### P2：继续必要的视觉精修
 
-4. **`useActiveSelection`** — 7 state (activeJobId/activeArtifact/.../activeConvId).
-   No own useEffect; pure state.
+只做不影响架构的小修：
 
-5. **`useRightPanelTabs`** — 4 state (rightTab/openRightTabs/rightToolMenuOpen/browserUrl).
-   Smallest. Easy to verify.
+1. 顶栏按钮距离：左侧栏按钮需要在展开/收起状态下都自然靠近 mac 窗口点。
+2. 中间输出留白：结果输出、Markdown、聊天卡片需要集中在中部，不要铺满。
+3. 摘要卡锚点：若视觉仍有割裂，下一步应根据 titlebar 摘要按钮真实位置计算 anchor。
+4. 分隔线：保持极轻，只提供空间分区暗示。
+5. 终端体验：继续做轻色主题、底部横跨中右栏、输入/输出手感。
 
-After each hook, the project-workspace line count should drop ~300-500
-lines. End state target: ~600-800 lines (NOT plan's 150-200 — see "Why
-not done" above).
+### P3：回到原产品主线
 
-#### Phase 3: Test useTerminalSession
+视觉骨架稳定后，回到 BioF3 真正的工作流闭环：
 
-The 152-line `useTerminalSession` hook handles the embedded terminal's
-lifecycle. It's the most stateful of the 4 extracted hooks and currently
-has zero tests. Plan 6.3 specifies 6-8 tests covering:
-- session start/stop lifecycle
-- write/resize propagation
-- data flow from pty → xterm
-- exit code/signal handling
+1. 项目级对话隔离。
+2. 参数确认卡片。
+3. Job 提交、运行、失败、完成状态。
+4. Artifact 生成与右侧查看。
+5. 聊天结果卡片点击后打开右侧结果。
+6. 当前右侧结果反向进入 Agent 上下文。
+7. 插件 / workflow 体系作为正式分析来源。
 
-This is the single highest-value test to add next.
+## 当前风险与注意事项
 
-#### Phase 4: Vendor submodule (plan 3.4)
+- 当前工作树有大量 UI 改动和新增文件，不要随手 reset。
+- `npm run check` 可能被 vendor drift 卡住；这不一定是 UI 改动导致。
+- 推荐验证命令：
 
-The `vendor/biof3-core` submodule has 17 modified + 2 untracked files
-that the user has not yet decided on (commit-and-push or revert). See
-the conversation history; user was asked to choose A or B.
+```bash
+npm --prefix frontend run check
+npm run build:spa
+```
 
----
+- 如果需要做 git 快照，建议先确认是否包含 `.cursor/`，它可能不是必须提交内容。
 
-## File reference
+## 继续开发时优先打开的文件
 
-### Panel contexts (mega-props)
-- `CenterPanelContext` — `CenterPanel.tsx` lines 18-77
-- `LeftPanelContext` — `LeftPanel.tsx` lines 7-65
-- `RightPanelContext` — `RightPanel.tsx` lines 17-78
-- `WorkspaceSummaryCardProps` — `WorkspaceSummaryCard.tsx` lines 7-25
-
-### Exported types from `project-workspace.tsx`
-- `ActiveArtifact`, `ActiveWorkspaceFile`
-- `BackendServiceItem`, `BackendSummary`, `JobStats`
-- `RightPanelMode`, `RIGHT_PANEL_ITEMS`
-
-### Exported components from `project-workspace.tsx`
-- `WorkspaceSearchPanel`
-- `ScheduledWorkspacePanel`
-- `EmptyResult`, `EmptyAnalysisResult`
-- `ResultView`, `RightFileTree`, `TerminalPanel`, `BrowserPanel`
-
-If a panel is moved out, these exports can be removed too.
-
----
-
-## Session stats
-
-- Session length: 1 conversation (multiple back-and-forth)
-- Files created: 17
-- Files modified: 1 (`project-workspace.tsx`)
-- Net new lines: 2233 (panels + hooks + tests + scripts + docs)
-- Net deleted lines: 694 (in `project-workspace.tsx`)
-- New tests: 16 (8 terminal-themes + 3 useBackendStatus + 5 useResizableColumns)
+- `docs/project-workspace-handoff.md`
+- `frontend/src/App.tsx`
+- `frontend/src/components/desktop/TitleBar.tsx`
+- `frontend/src/components/desktop/TitleBar.module.css`
+- `frontend/src/components/desktop/WorkspacePanelsContext.tsx`
+- `frontend/src/hooks/useWorkspaceLayout.ts`
+- `frontend/src/hooks/useWorkspacePanels.ts`
+- `frontend/src/hooks/useRightPanelTabs.ts`
+- `frontend/src/pages/project-workspace.tsx`
+- `frontend/src/pages/project-workspace.module.css`
+- `frontend/src/components/copilot/SimpleChat.tsx`
+- `frontend/src/components/copilot/simple-chat.css`
+- `frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx`
+- `frontend/src/components/workspace-panels/RightPanel.tsx`
+- `frontend/src/components/workspace-panels/LeftPanel.tsx`

@@ -13,7 +13,6 @@ export interface LeftPanelContext {
   project: Project;
   workspacePath?: string;
   compactWorkspacePath: string;
-  workspaceNotice: string;
 
   // Search
   sidebarQuery: string;
@@ -58,8 +57,6 @@ export interface LeftPanelContext {
   handleShowCloud: () => void;
   handleShowSearch: () => void;
   handleShowScheduled: () => void;
-  handleShowTools: () => void;
-  handleShowFigCode: () => void;
   handleShowPlugins: () => void;
   handleShowSettings: () => void;
 
@@ -67,8 +64,6 @@ export interface LeftPanelContext {
   switchToProject: (id: string) => void;
   handleSwitchConversation: (id: string) => void;
   toggleProjectExpand: (id: string) => void;
-
-  // Workspace path actions
   handleOpenWorkspacePath: () => void | Promise<void>;
   handleChangeWorkspacePath: () => void | Promise<void>;
 }
@@ -98,10 +93,9 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
   return (
     <aside className={styles.leftCol} style={{ width: ctx.width }}>
       <div className={styles.leftPanelWrap}>
-        <WorkspaceIntro ctx={ctx} />
         <SidebarSearch ctx={ctx} />
         <QuickActions ctx={ctx} />
-        <ProjectTreeHeader onCreate={ctx.openProjectCreator} />
+        <ProjectTreeHeader ctx={ctx} />
         <ProjectTree ctx={ctx} />
       </div>
     </aside>
@@ -111,49 +105,6 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
 // ---------------------------------------------------------------------------
 // Pieces
 // ---------------------------------------------------------------------------
-
-function WorkspaceIntro({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
-  return (
-    <div className={styles.leftQuickActions}>
-      <div className={styles.leftSidebarIntro}>
-        <div className={styles.leftSidebarEyebrow}>Workspace</div>
-        <div className={styles.leftSidebarTitleRow}>
-          <div className={styles.leftSidebarTitle}>{ctx.project.name}</div>
-          <button
-            className={styles.leftSidebarAction}
-            onClick={ctx.openProjectCreator}
-            title="新建项目"
-          >
-            <Icon name="plus" size={12} />
-          </button>
-        </div>
-        <div className={styles.leftSidebarMeta} title={ctx.project.workspacePath || ''}>
-          {ctx.project.modality ? `${ctx.project.modality} · ` : ''}项目工作区
-        </div>
-        <div className={styles.leftSidebarPathRow}>
-          <button
-            className={styles.leftSidebarPathText}
-            onClick={ctx.handleOpenWorkspacePath}
-            disabled={!ctx.workspacePath}
-            title={ctx.workspacePath ? '在 Finder 中打开工作目录' : '工作目录初始化中'}
-          >
-            {ctx.workspacePath ? ctx.compactWorkspacePath : '未设置工作目录'}
-          </button>
-          <button
-            className={styles.leftSidebarPathAction}
-            onClick={ctx.handleChangeWorkspacePath}
-            title="更改项目工作目录"
-          >
-            更改
-          </button>
-        </div>
-        {ctx.workspaceNotice && (
-          <div className={styles.leftSidebarPathNotice}>{ctx.workspaceNotice}</div>
-        )}
-      </div>
-    </div>
-  );
-}
 
 function SidebarSearch({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   return (
@@ -213,30 +164,6 @@ function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
       title: '搜索项目',
     },
     {
-      key: 'scheduled',
-      mode: 'scheduled',
-      label: '已安排',
-      icon: 'clock',
-      onClick: ctx.handleShowScheduled,
-      title: '查看已安排/运行记录',
-    },
-    {
-      key: 'tools',
-      mode: 'tools',
-      label: '分析工具',
-      icon: 'bar-chart',
-      onClick: ctx.handleShowTools,
-      title: '分析工具',
-    },
-    {
-      key: 'figcode',
-      mode: 'figcode',
-      label: 'FigCode',
-      icon: 'image',
-      onClick: ctx.handleShowFigCode,
-      title: 'FigCode',
-    },
-    {
       key: 'plugins',
       mode: 'plugins',
       label: '插件',
@@ -272,11 +199,11 @@ function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   );
 }
 
-function ProjectTreeHeader({ onCreate }: { onCreate: () => void }): React.ReactElement {
+function ProjectTreeHeader({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   return (
     <div className={styles.leftPanelHeader}>
       <span className={styles.leftPanelTitle}>项目</span>
-      <button className={styles.iconBtn} onClick={onCreate} title="新建项目">
+      <button className={styles.iconBtn} onClick={ctx.openProjectCreator} title="新建项目">
         <Icon name="plus" size={16} />
       </button>
     </div>
@@ -348,6 +275,18 @@ function ProjectNode({
         >
           <Icon name="plus" size={12} />
         </button>
+        {isCurrent && (
+          <button
+            className={styles.projectTreeAddBtn}
+            onClick={(e) => {
+              e.stopPropagation();
+              ctx.handleChangeWorkspacePath();
+            }}
+            title="更改项目工作目录"
+          >
+            <Icon name="settings" size={12} />
+          </button>
+        )}
       </div>
       {isExpanded && (
         <ul className={styles.convList}>

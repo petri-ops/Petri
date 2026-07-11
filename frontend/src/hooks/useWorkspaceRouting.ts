@@ -1,15 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-export type WorkspaceMode = 'cloud' | 'chat' | 'search' | 'scheduled' | 'tools' | 'figcode' | 'plugins' | 'settings';
+export type WorkspaceMode = 'cloud' | 'chat' | 'search' | 'scheduled' | 'plugins' | 'settings';
 
 export const WORKSPACE_MODES: ReadonlySet<WorkspaceMode> = new Set([
   'cloud',
   'chat',
   'search',
   'scheduled',
-  'tools',
-  'figcode',
   'plugins',
   'settings',
 ]);

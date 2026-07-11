@@ -63,6 +63,17 @@ export interface CopilotContext {
   projectDatasets?: { id: string; name: string; type?: string; rows?: number }[];
   /** Recent job summaries in current project (id + tool + status + time) */
   projectJobs?: { id: string; toolId: string; status: string; name?: string; createdAt: number }[];
+  /** Compact human-readable summary of the current project's analysis records. */
+  projectAnalysisSummary?: string;
+  /** Structured view of the current project's analysis records for prompt use. */
+  projectAnalysisRecords?: {
+    id: string;
+    toolId: string;
+    status: string;
+    name?: string;
+    createdAt: number;
+    completedAt?: number;
+  }[];
   /** Current active job id being viewed */
   activeJobId?: string;
   /** Current artifact/file being viewed inside the project result panel */

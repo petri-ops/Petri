@@ -5,13 +5,11 @@ import type { Project, ToolJob } from '@/lib/project-types';
 import type { BackendStatus } from '@/lib/electron';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import {
-  RIGHT_PANEL_ITEMS,
   type RightPanelMode,
   type ActiveArtifact,
   type ActiveWorkspaceFile,
   EmptyResult,
-  EmptyAnalysisResult,
-  ResultView,
+  ResultSidebarPanel,
   RightFileTree,
   TerminalPanel,
   BrowserPanel,
@@ -52,17 +50,19 @@ export interface RightPanelContext {
 
   // Handlers
   setBottomTerminalOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
-  setRightOpen: (v: boolean) => void;
+  setRightOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
   setActiveConvId: (id: string | null) => void;
   handleAskAgent: (prompt: string) => void;
   handleOpenWorkspaceFile: (file: ActiveWorkspaceFile) => void;
   handleCloseWorkspaceFile: (path: string) => void;
-  handleOpenResult: (jobId: string) => void | Promise<void>;
+  handleOpenResult: (jobId: string, projectId?: string | null) => void | Promise<void>;
   handleOpenRightTerminal: () => void;
   handleOpenRightBrowser: () => void;
   handleOpenRightFiles: () => void;
   handleOpenRightChat: () => void;
   setBrowserUrl: (url: string) => void;
+  setBrowserCanGoBack: (value: boolean) => void;
+  setBrowserCanGoForward: (value: boolean) => void;
 }
 
 export interface RightPanelProps {
@@ -73,7 +73,7 @@ export interface RightPanelProps {
 }
 
 /**
- * Right column — multi-tab tool panel (工作台/结果/文件/后端/浏览器/聊天).
+ * Right column — multi-tab tool panel (工作台/文件/后端/浏览器/聊天).
  *
  * Pure renderer: tab content components are provided by the parent (already
  * defined in project-workspace.tsx and re-exported). All interactions route
@@ -113,26 +113,6 @@ export function RightPanel({
         }}
       >
         <div className={styles.resultPanel}>
-          <div className={styles.resultPanelHeader}>
-            <RightPanelTabs ctx={ctx} />
-            <RightPanelAddMenu ctx={ctx} />
-            <button
-              className={`${styles.iconBtn} ${styles.rightPanelCollapseBtn}`}
-              onClick={() => ctx.setBottomTerminalOpen((value) => !value)}
-              title={ctx.bottomTerminalOpen ? '隐藏终端' : '显示终端'}
-              aria-label={ctx.bottomTerminalOpen ? '隐藏终端' : '显示终端'}
-            >
-              <Icon name="panel-bottom" size={17} />
-            </button>
-            <button
-              className={`${styles.iconBtn} ${styles.rightPanelCollapseBtn}`}
-              onClick={() => ctx.setRightOpen(false)}
-              title="隐藏右侧侧边栏"
-              aria-label="隐藏右侧侧边栏"
-            >
-              <Icon name="panel-right" size={17} />
-            </button>
-          </div>
           <div className={styles.resultPanelBody}>
             {ctx.openRightTabs.map((tab) => (
               <div
@@ -150,17 +130,16 @@ export function RightPanel({
                     onOpenChat={ctx.handleOpenRightChat}
                   />
                 )}
-                {tab === 'results' &&
-                  (ctx.activeJob ? (
-                    <ResultView
-                      job={ctx.activeJob}
-                      activeArtifact={ctx.activeArtifact}
-                      onActiveArtifactChange={ctx.setActiveArtifact}
-                      onAskAgent={ctx.handleAskAgent}
-                    />
-                  ) : (
-                    <EmptyAnalysisResult />
-                  ))}
+                {tab === 'results' && (
+                  <ResultSidebarPanel
+                    project={ctx.project}
+                    job={ctx.activeJob}
+                    activeArtifact={ctx.activeArtifact}
+                    onActiveArtifactChange={ctx.setActiveArtifact}
+                    onAskAgent={ctx.handleAskAgent}
+                    onOpenFullResult={ctx.handleOpenResult}
+                  />
+                )}
                 {tab === 'files' && (
                   <RightFileTree
                     project={ctx.project}
@@ -178,7 +157,11 @@ export function RightPanel({
                   <BrowserPanel
                     initialUrl={ctx.browserUrl}
                     onUrlChange={ctx.setBrowserUrl}
-                    obscured={ctx.rightTab !== 'browser' || ctx.rightToolMenuOpen}
+                    onNavigationStateChange={({ canGoBack, canGoForward }) => {
+                      ctx.setBrowserCanGoBack(canGoBack);
+                      ctx.setBrowserCanGoForward(canGoForward);
+                    }}
+                    obscured={ctx.rightTab !== 'browser'}
                   />
                 )}
                 {tab === 'chat' && (
@@ -200,117 +183,5 @@ export function RightPanel({
         </div>
       </aside>
     </>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Pieces
-// ---------------------------------------------------------------------------
-
-function RightPanelTabs({ ctx }: { ctx: RightPanelContext }): React.ReactElement {
-  return (
-    <div className={styles.rightPanelTabs}>
-      {ctx.openRightTabs.map((tab) => {
-        const item = RIGHT_PANEL_ITEMS.find((candidate) => candidate.id === tab)!;
-        return (
-          <button
-            type="button"
-            key={tab}
-            className={`${styles.rightPanelTab} ${
-              ctx.rightTab === tab ? styles.rightPanelTabActive : ''
-            }`}
-            onClick={() => ctx.setRightTab(tab)}
-            title={item.label}
-          >
-            <Icon name={item.icon} size={14} />
-            <span>{item.label}</span>
-            {ctx.openRightTabs.length > 1 && (
-              <span
-                className={styles.rightPanelTabClose}
-                role="button"
-                tabIndex={0}
-                aria-label={`关闭${item.label}`}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  ctx.closeRightPanelTab(tab);
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    ctx.closeRightPanelTab(tab);
-                  }
-                }}
-              >
-                <Icon name="x" size={11} />
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function RightPanelAddMenu({ ctx }: { ctx: RightPanelContext }): React.ReactElement {
-  return (
-    <div className={styles.rightPanelAddWrap}>
-      <button
-        type="button"
-        className={styles.rightPanelAddBtn}
-        onClick={() => ctx.setRightToolMenuOpen((value) => !value)}
-        title="添加或切换工具"
-        aria-label="添加或切换工具"
-        aria-haspopup="menu"
-        aria-expanded={ctx.rightToolMenuOpen}
-      >
-        <Icon name="plus" size={16} />
-      </button>
-      {ctx.rightToolMenuOpen && (
-        <>
-          <button
-            type="button"
-            className={styles.rightToolMenuOverlay}
-            onClick={() => ctx.setRightToolMenuOpen(false)}
-            aria-label="关闭工具菜单"
-          />
-          <div className={styles.rightToolMenu} role="menu">
-            {RIGHT_PANEL_ITEMS.filter((item) => item.id !== 'home').map((item) => {
-              const isOpen = ctx.openRightTabs.includes(item.id);
-              const isUnavailable = item.id === 'results' && !ctx.activeJob;
-              return (
-                <button
-                  type="button"
-                  key={item.id}
-                  className={isOpen ? styles.rightToolMenuItemActive : ''}
-                  disabled={isUnavailable}
-                  onClick={() => {
-                    ctx.openRightPanel(item.id);
-                    ctx.setRightToolMenuOpen(false);
-                  }}
-                  role="menuitem"
-                >
-                  <Icon name={item.icon} size={14} />
-                  <span>{item.label}</span>
-                  {isOpen && <Icon name="check" size={13} />}
-                </button>
-              );
-            })}
-            <div className={styles.rightToolMenuDivider} />
-            <button
-              type="button"
-              onClick={() => {
-                ctx.openRightPanel('home');
-                ctx.setRightToolMenuOpen(false);
-              }}
-              role="menuitem"
-            >
-              <Icon name="layout-grid" size={14} />
-              <span>工具工作台</span>
-            </button>
-          </div>
-        </>
-      )}
-    </div>
   );
 }

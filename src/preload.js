@@ -35,11 +35,25 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
   platform: process.platform,
   arch: process.arch,
 
+  // 窗口控制（配合 frame:false 自定义标题栏）
+  window: {
+    minimize: () => ipcRenderer.send('window:minimize'),
+    maximize: () => ipcRenderer.send('window:maximize'),
+    close: () => ipcRenderer.send('window:close'),
+    isMaximized: () => ipcRenderer.invoke('window:isMaximized'),
+  },
+
   // AI 设置
   aiSettings: {
     get: () => ipcRenderer.invoke('ai-settings:get'),
     save: (settings) => ipcRenderer.invoke('ai-settings:save', settings),
     test: (provider, apiKey) => ipcRenderer.invoke('ai-settings:test', provider, apiKey),
+  },
+
+  // 计算执行配置
+  computeSettings: {
+    get: () => ipcRenderer.invoke('compute-settings:get'),
+    save: (settings) => ipcRenderer.invoke('compute-settings:save', settings),
   },
 
   // 插件管理

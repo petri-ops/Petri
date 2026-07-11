@@ -13,7 +13,7 @@ import { AdminPanel, isAdminEnabled } from './_AdminPanel';
 import { PageHeader } from '@/components/ui/PageHeader';
 // User menu lives in the global navbar (src/components/auth/UserMenu.tsx).
 // Storage quota lives in the sidebar (src/pages/single-cell/_QuotaIndicator.tsx).
-// Agent Mode toggle lives in the Copilot Memory panel (src/components/copilot/MemoryPanel.tsx).
+// Agent Mode toggle lives in the single-cell admin/settings area.
 import { getApiPrefix } from './_config';
 import { installSingleCellActionHandler } from './_copilotActionHandler';
 

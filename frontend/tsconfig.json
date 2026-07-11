@@ -31,12 +31,9 @@
       "@biof3/shared/api-inject": ["../vendor/biof3-core/packages/shared-copilot/api-inject.ts"],
       "@biof3/shared/copilotMarkdown": ["../vendor/biof3-core/packages/shared-copilot/copilotMarkdown.tsx"],
       "@biof3/shared/ActResultCard": ["../vendor/biof3-core/packages/shared-copilot/ActResultCard.tsx"],
-      "@biof3/shared/CopilotResultPanel": ["../vendor/biof3-core/packages/shared-copilot/CopilotResultPanel.tsx"],
-      "@biof3/shared/MemoryPanel": ["../vendor/biof3-core/packages/shared-copilot/MemoryPanel.tsx"],
       "@biof3/shared/ActionCard": ["../vendor/biof3-core/packages/shared-copilot/ActionCard.tsx"],
       "@biof3/shared/copilotActRegistry": ["../vendor/biof3-core/packages/shared-copilot/copilotActRegistry.ts"],
-      "@biof3/shared/copilotActRegistryBoot": ["../vendor/biof3-core/packages/shared-copilot/copilotActRegistryBoot.ts"],
-      "@biof3/shared/copilotPageScraper": ["../vendor/biof3-core/packages/shared-copilot/copilotPageScraper.ts"]
+      "@biof3/shared/copilotActRegistryBoot": ["../vendor/biof3-core/packages/shared-copilot/copilotActRegistryBoot.ts"]
     }
   },
   "include": ["src"]

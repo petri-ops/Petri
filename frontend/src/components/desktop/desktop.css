@@ -7,16 +7,19 @@
 
 /* ---- 左侧垂直 dock（置顶 + 可收缩） ---- */
 .biof3-desktop-dock {
+  --biof3-dock-padding-top: 8px;
+  --biof3-dock-icon-size: 38px;
+  --biof3-dock-gap: 6px;
   position: fixed;
-  top: 0; /* 置顶：从窗口最顶部开始 */
+  top: 28px; /* 从标题栏下方开始，标题栏 28px 留给 macOS 交通灯 */
   left: 0;
   bottom: 0;
-  z-index: 9999;
+  z-index: 9998;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 8px 6px;
+  gap: var(--biof3-dock-gap);
+  padding: var(--biof3-dock-padding-top) 6px;
   background: var(--biof3-surface-dim);
   border-right: 1px solid var(--ifm-color-emphasis-200);
   width: 64px;
@@ -74,6 +77,10 @@
   transition:
     background 0.15s ease,
     color 0.15s ease;
+}
+/* 展开状态下，让 toggle 略靠右，避免贴左缘 */
+.biof3-desktop-dock:not(.biof3-desktop-dock--collapsed) .biof3-desktop-dock__toggle {
+  margin-left: 6px;
 }
 .biof3-desktop-dock__toggle:hover {
   background: var(--ifm-color-emphasis-100);

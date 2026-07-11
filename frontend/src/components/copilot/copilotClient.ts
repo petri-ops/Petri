@@ -93,7 +93,6 @@ export interface ToolCallEvent {
 export interface ToolResultEvent {
   name: string;
   summary: string;
-  /** Present when name === 'act' */
   actType?: string;
   message?: string;
   undoToken?: string;
@@ -101,9 +100,6 @@ export interface ToolResultEvent {
   actError?: string;
   analysisId?: string;
   taskId?: string;
-  /** Present when actType === 'update_figcode_editor' */
-  figcodeCode?: string;
-  figcodeAutoRun?: boolean;
   /** scRNA UI controls */
   scTab?: 'preview' | 'plots' | 'data' | 'params';
   scCluster?: string;
@@ -116,8 +112,6 @@ export interface ToolResultEvent {
   scMergeName?: string | null;
   scOpenReplotForAnalysis?: string;
   scUploadHint?: boolean;
-  /** open_figcode_plot */
-  figcardId?: string;
   /** open_tool */
   toolId?: string;
   /** open_tool autofill — when LLM passes autofillFromJobId, frontend uses
@@ -361,8 +355,6 @@ function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
       actError: obj.actError,
       analysisId: obj.analysisId,
       taskId: obj.taskId,
-      figcodeCode: obj.figcodeCode,
-      figcodeAutoRun: obj.figcodeAutoRun,
       scTab: obj.scTab,
       scCluster: obj.scCluster,
       scGene: obj.scGene,
@@ -374,7 +366,6 @@ function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
       scMergeName: obj.scMergeName,
       scOpenReplotForAnalysis: obj.scOpenReplotForAnalysis,
       scUploadHint: obj.scUploadHint,
-      figcardId: obj.figcardId,
       toolId: obj.toolId,
       autofillFromJobId: obj.autofillFromJobId,
       autofillSourceTool: obj.autofillSourceTool,
@@ -464,7 +455,7 @@ async function streamChatLegacy(opts: StreamChatOptions): Promise<void> {
 
 /**
  * Confirm to the server that a frontend-side act handler actually fired.
- * Called after each window event for `update_figcode_editor`, `switch_result_tab`, etc.
+ * Called after each window event for `switch_result_tab`, etc.
  * If `info.error` is supplied the server records it.
  */
 export async function ackAct(

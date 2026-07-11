@@ -171,7 +171,7 @@ function StepWelcome(): React.ReactElement {
           <Icon name="graduation-cap" size={18} />
           <div>
             <strong>学习 / 实战双模式</strong>
-            <p>新手走学习路径（计划+出题验证），老手直接进实战工具台。</p>
+            <p>新手走学习路径（计划+出题验证），老手直接进结果工作区。</p>
           </div>
         </div>
         <div className="biof3-onboarding__tip">
@@ -227,7 +227,7 @@ function StepMode({
           </span>
           <span className="biof3-onboarding__choice-body">
             <strong>实战模式</strong>
-            <p>直接进工具台：DESeq2 / GO-KEGG / Scanpy / FigCode 绘图按需调用。</p>
+            <p>直接进分析工作区：按项目查看结果、继续追问、按需调用分析能力。</p>
           </span>
           <span className="biof3-onboarding__choice-check">
             {mode === 'practice' && <Icon name="check" size={16} />}
@@ -259,7 +259,7 @@ function StepRuntime({
     <div className="biof3-onboarding__step-content">
       <h2 className="biof3-onboarding__title">准备运行时</h2>
       <p className="biof3-onboarding__subtitle">
-        BioF3 的分析工具依赖 R / Python 运行时。先看看你的环境是否就绪。
+        BioF3 的分析能力依赖 R / Python 运行时。先看看你的环境是否就绪。
       </p>
       <div className="biof3-onboarding__env-list">
         <EnvRow

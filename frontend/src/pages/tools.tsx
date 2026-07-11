@@ -885,11 +885,22 @@ function ToolsInner() {
     [leftWidth]
   );
 
+  const ensurePythonBackend = useCallback(async (): Promise<void> => {
+    if (typeof window === 'undefined' || !window.biof3Desktop?.py?.start) return;
+    const result = await window.biof3Desktop.py.start();
+    if (!result.ok) {
+      throw new Error(result.error || 'Python 后端启动失败');
+    }
+  }, []);
+
   // Select a tool to start new analysis (opens modal)
   const selectTool = useCallback((tool: Tool) => {
     if (!isLoggedIn()) {
       setShowLogin(true);
       return;
+    }
+    if (tool.language === 'python') {
+      void ensurePythonBackend().catch(() => {});
     }
     setSelectedTool(tool);
     setShowNewModal(true);
@@ -903,7 +914,7 @@ function ToolsInner() {
     setFiles({});
     setFileNames({});
     setFilePreviews({});
-  }, []);
+  }, [ensurePythonBackend]);
 
   // File handling — convert text to base64 in chunks to avoid stack overflow / encodeURIComponent
   // hangs on large files (16+ MB demos).
@@ -988,6 +999,9 @@ function ToolsInner() {
     setError(null);
     const lang = selectedTool.language; // 'r' | 'python' — routes to correct backend
     try {
+      if (lang === 'python') {
+        await ensurePythonBackend();
+      }
       // Generate request-id for tracing (stored in sessionStorage for bug reports)
       const rid = crypto.randomUUID?.() || Math.random().toString(36).slice(2, 14);
       const resp = await fetch(getApiPrefix(lang) + '/tools/run', {
@@ -1020,7 +1034,7 @@ function ToolsInner() {
       setStatus('idle');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedTool, params, files, fetchHistory]);
+  }, [ensurePythonBackend, selectedTool, params, files, fetchHistory]);
 
   const stopPolling = useCallback(() => {
     if (!pollRef.current) return;
@@ -1450,6 +1464,9 @@ function ToolsInner() {
     const tool = tools.find((t) => t.id === toolId);
     const lang: 'r' | 'python' = tool?.language === 'python' ? 'python' : 'r';
     try {
+      if (lang === 'python') {
+        await ensurePythonBackend();
+      }
       const resp = await fetch(getApiPrefix(lang) + '/tools/public-demo/' + toolId);
       const data = await resp.json();
       if (data.ok) setDemoFiles(data.files || []);
@@ -1457,7 +1474,7 @@ function ToolsInner() {
     } catch {
       setDemoFiles([]);
     }
-  }, []);
+  }, [ensurePythonBackend]);
 
   useEffect(() => {
     loadToolDemo('deseq2');

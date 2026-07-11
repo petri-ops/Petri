@@ -562,7 +562,6 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
         ['blog', true],
         ['figcode', true],
         ['tools', false],
-        ['skills', false],
         ['single-cell', false],
         ['spatial', false],
         ['copilot', false],
@@ -635,14 +634,13 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
       moduleKey: string,
       allow: boolean
     ) => {
-      // Build the full 8-module map from current effective perms (defaults baked in
+      // Build the full 7-module map from current effective perms (defaults baked in
       // server-side, so currentPerms from /admin/users is already effective).
       const MODS: Array<[string, boolean]> = [
         ['docs', true],
         ['blog', true],
         ['figcode', true],
         ['tools', false],
-        ['skills', false],
         ['single-cell', false],
         ['spatial', false],
         ['copilot', true],
@@ -1668,7 +1666,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                           }}
                         >
                           控制未登录用户能否使用各模块。教程/博客/FigCode
-                          浏览始终公开；此处主要限制在线工具、Skills、单细胞/空间云、
+                          浏览始终公开；此处主要限制在线工具、单细胞/空间云、
                           <strong>Copilot</strong>（站点 AI 组学实践助手，模块键{' '}
                           <code>copilot</code>）等需算力的能力。后端 API 与导航会同步生效。
                         </p>
@@ -1701,7 +1699,6 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                         {(
                           [
                             ['tools', '在线工具', false],
-                            ['skills', 'Skills', false],
                             ['single-cell', '单细胞云', false],
                             ['spatial', '空间组学', false],
                             ['copilot', 'Copilot', false],
@@ -1894,7 +1891,6 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                                     {(
                                       [
                                         ['tools', '工具', false],
-                                        ['skills', 'Skills', false],
                                         ['single-cell', '单细胞', false],
                                         ['spatial', '空间', false],
                                         ['copilot', 'Copilot', true],

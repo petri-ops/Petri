@@ -3,7 +3,7 @@
  *
  * 取代 Web 版的营销首页，提供软件化的启动体验：
  * - 最近运行任务（从 /tools/history API 拉取）
- * - 快捷工具入口（常用工具一键启动）
+ * - 结果与项目入口（常用结果一键回看）
  * - 推荐教程 / 学习进度
  * - 全局搜索快捷方式
  */
@@ -13,7 +13,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getToken, getApiPrefix, getStoredUser, isLoggedIn } from '@/lib/authClient';
 import { Icon } from '@/components/icons/Icon';
 import { tools } from '@/pages/_data';
-import { TOOL_IMAGES } from '@/pages/_tool-images';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
 import { useAutoUpdate } from '@/hooks/useAutoUpdate';
 import { listProjects, createProject } from '@/lib/project-store';
@@ -57,15 +56,6 @@ function groupJobsByTime(jobs: Job[]): { label: string; jobs: Job[] }[] {
 
   return buckets.filter((b) => b.jobs.length > 0);
 }
-
-const QUICK_TOOLS: string[] = [
-  'deseq2',
-  'go-kegg',
-  'gsea',
-  'km-survival',
-  'seurat-standard',
-  'spatial-standard',
-];
 
 function formatTime(ts: number): string {
   const d = new Date(ts);
@@ -134,10 +124,6 @@ export function DesktopDashboard({
   // M2-8：备份/导出闭环
   const [exporting, setExporting] = useState(false);
   const [exportMsg, setExportMsg] = useState('');
-  // §11 Tail: read-then-write in initializer avoids StrictMode double-invoke flicker.
-  const [backupPromptDismissed, setBackupPromptDismissed] = useState(() => {
-    try { return !!localStorage.getItem('biof3-backup-prompted'); } catch { return false; }
-  });
   const user = getStoredUser();
   const backendStatus = useBackendStatus();
   const navigate = useNavigate();
@@ -239,7 +225,6 @@ export function DesktopDashboard({
     fetchProjects();
   }, [fetchProjects]);
 
-  const quickToolList = tools.filter((t) => QUICK_TOOLS.includes(t.id));
   const sortedProjects = useMemo(
     () =>
       [...projects].sort((a, b) => {
@@ -267,14 +252,6 @@ export function DesktopDashboard({
   ).length;
   const focusProjectDone = focusProjectJobs.filter((job) => job.status === 'completed').length;
   const latestFocusJob = focusProjectJobs[0] || null;
-  const handleOpenSearch = useCallback(() => {
-    const targetProject = focusProject || sortedProjects[0] || null;
-    if (targetProject) {
-      navigate(`/project/${targetProject.id}?mode=search`);
-      return;
-    }
-    setShowNewProject(true);
-  }, [focusProject, navigate, sortedProjects]);
   const handleOpenScheduled = useCallback(() => {
     const targetProject = focusProject || sortedProjects[0] || null;
     if (targetProject) {
@@ -284,52 +261,40 @@ export function DesktopDashboard({
     navigate('/tools');
   }, [focusProject, navigate, sortedProjects]);
 
-  // M2-1：就绪灯颜色
-  const readyColor = backendStatus.isReady
-    ? '#16a34a'
-    : backendStatus.downReason
-      ? '#dc2626'
-      : '#f59e0b';
-  const readyLabel = backendStatus.isReady ? '后端就绪' : backendStatus.downReason || '检测中…';
+  const runtimeLoading = !backendStatus.isReady && !backendStatus.downReason;
+  const runtimeState = (installed: boolean) => {
+    if (runtimeLoading) return 'loading';
+    return installed ? 'ready' : 'missing';
+  };
+  const runtimeLabel = (name: string, installed: boolean) => {
+    if (runtimeLoading) return `${name} 检测中…`;
+    return installed ? `${name} 已就绪` : `${name} 未安装`;
+  };
+  const runtimeChipLabel = (name: string, installed: boolean) => {
+    if (runtimeLoading) return `${name} 检测中…`;
+    return installed ? '已就绪' : '未安装';
+  };
 
   return (
     <div className={`${styles.dashboard} ${embedded ? styles.dashboardEmbedded : ''}`}>
-      <header className={`${styles.topbar} ${embedded ? styles.topbarEmbedded : ''}`}>
-        <div className={styles.headerCopy}>
-          <div className={styles.headerEyebrow}>工作台</div>
-          <h1 className={styles.title}>
-            {embedded
-              ? activeProject?.name || '工作台'
-              : user
-                ? `${user.username} 的项目空间`
-                : '项目空间'}
-          </h1>
-          <p className={styles.subtitle}>
-            {embedded
-              ? '继续当前项目，查看运行记录、结果和下一步分析。'
-              : '从最近的项目继续，或直接创建新的分析工作区。'}
-          </p>
-        </div>
-        <div className={styles.headerSearch}>
-          <button
-            className={styles.searchBtn}
-            onClick={handleOpenSearch}
-          >
-            <Icon name="search" size={16} />
-            <span>搜索项目、工具、结果</span>
-            <kbd className={styles.kbd}>⌘K</kbd>
-          </button>
-          <button className={styles.primaryBtn} onClick={() => setShowNewProject(true)}>
-            <Icon name="plus" size={16} />
-            <span>创建项目</span>
-          </button>
-        </div>
-      </header>
-
       <div className={`${styles.commandRow} ${embedded ? styles.commandRowEmbedded : ''}`}>
-        <span className={styles.commandChip} title={readyLabel}>
-          <span className={styles.commandDot} style={{ background: readyColor, boxShadow: `0 0 6px ${readyColor}` }} />
-          {readyLabel}
+        <span
+          className={`${styles.commandChip} ${styles.runtimeChip}`}
+          data-state={runtimeState(backendStatus.rRuntime)}
+          title={runtimeLabel('R 运行时', backendStatus.rRuntime)}
+        >
+          <span className={styles.runtimeChipDot} data-state={runtimeState(backendStatus.rRuntime)} />
+          <strong>R</strong>
+          <span>{runtimeChipLabel('R', backendStatus.rRuntime)}</span>
+        </span>
+        <span
+          className={`${styles.commandChip} ${styles.runtimeChip}`}
+          data-state={runtimeState(backendStatus.pyRuntime)}
+          title={runtimeLabel('Python 运行时', backendStatus.pyRuntime)}
+        >
+          <span className={styles.runtimeChipDot} data-state={runtimeState(backendStatus.pyRuntime)} />
+          <strong>Python</strong>
+          <span>{runtimeChipLabel('Python', backendStatus.pyRuntime)}</span>
         </span>
         <span className={styles.commandChip}>
           <Icon name="folder" size={14} />
@@ -429,7 +394,7 @@ export function DesktopDashboard({
                     onClick={() => navigate(`/project/${focusProject.id}?mode=scheduled`)}
                   >
                     <Icon name="clock" size={15} />
-                    <span>查看已安排</span>
+                    <span>分析记录</span>
                   </button>
                 </div>
               </div>
@@ -498,7 +463,7 @@ export function DesktopDashboard({
               <div className={styles.emptyState}>
                 <p>暂无运行记录</p>
                 <Link className={styles.emptyCta} to="/tools">
-                  去工具页开始第一次分析
+                  去结果工作区开始第一次分析
                 </Link>
               </div>
             ) : (
@@ -545,73 +510,6 @@ export function DesktopDashboard({
             )}
           </section>
         </div>
-
-        <aside className={styles.sideCol}>
-          <section className={styles.panel}>
-            <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>
-                <Icon name="zap" size={18} />
-                快速开始
-              </h2>
-            </div>
-            <div className={styles.toolGrid}>
-              {quickToolList.map((t) => (
-                <Link key={t.id} className={styles.toolCard} to={`/tools#${t.id}`} title={t.title}>
-                  {TOOL_IMAGES[t.id] ? (
-                    <img
-                      src={TOOL_IMAGES[t.id]}
-                      alt={t.title}
-                      className={styles.toolCover}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className={styles.toolIconCircle} style={{ background: t.color }}>
-                      {t.title[0]}
-                    </div>
-                  )}
-                  <div className={styles.toolMeta}>
-                    <span className={styles.toolName}>{t.title}</span>
-                    <span className={styles.toolCat}>{t.category}</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-
-          <section className={styles.panel}>
-            <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>
-                <Icon name="shield" size={18} />
-                环境与数据
-              </h2>
-            </div>
-
-            {!backupPromptDismissed && (
-              <div className={styles.noticeCard}>
-                <div className={styles.noticeTitle}>建议定期备份你的数据</div>
-                <div className={styles.noticeBody}>将数据库、分析结果和上传文件打包导出，保存在安全位置。</div>
-                <div className={styles.noticeActions}>
-                  <button type="button" className={styles.secondaryBtn} onClick={handleExportData} disabled={exporting}>
-                    <span>{exporting ? '导出中…' : '立即导出'}</span>
-                  </button>
-                  <button type="button" className={styles.ghostBtn} onClick={() => setBackupPromptDismissed(true)}>
-                    知道了
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {!backendStatus.rRuntime && (
-              <div className={styles.warnCard}>
-                <div className={styles.noticeTitle}>R 运行时未安装</div>
-                <div className={styles.noticeBody}>分析工具需要 R 运行时，安装完成后即可开始流程运行。</div>
-                <Link className={styles.sectionLink} to="/admin">
-                  去插件商店
-                </Link>
-              </div>
-            )}
-          </section>
-        </aside>
       </div>
 
       {/* 新建项⽬对话框 */}
@@ -719,10 +617,10 @@ export function DesktopDashboard({
                 <div className={styles.updBar}>
                   <div
                     className={styles.updBarFill}
-                    style={{ width: `${Math.round(updProgress * 100)}%` }}
+                    style={{ width: `${Math.round((updProgress ?? 0) * 100)}%` }}
                   />
                 </div>
-                <div className={styles.updPct}>{Math.round(updProgress * 100)}%</div>
+                <div className={styles.updPct}>{Math.round((updProgress ?? 0) * 100)}%</div>
               </div>
             )}
 

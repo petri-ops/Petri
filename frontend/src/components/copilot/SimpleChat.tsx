@@ -78,7 +78,7 @@ interface SimpleChatProps {
   projectId: string;
   conversationId: string | null;
   onConversationChange: (id: string | null) => void;
-  onOpenResult?: (jobId: string) => void;
+  onOpenResult?: (jobId: string, projectId?: string | null) => void;
   inputHeight?: number;
 }
 
@@ -87,7 +87,7 @@ export function SimpleChat({
   conversationId,
   onConversationChange,
   onOpenResult,
-  inputHeight = 120,
+  inputHeight: _inputHeight = 120,
 }: SimpleChatProps): React.ReactElement {
   const [messages, setMessages] = useState<SimpleMessage[]>([]);
   const [input, setInput] = useState('');
@@ -174,12 +174,24 @@ export function SimpleChat({
     }
   }, [messages]);
 
-  // Auto-resize textarea
+  const inputLength = input.trim().length;
+  const composerWidth = Math.min(980, Math.max(560, 560 + Math.sqrt(inputLength) * 42));
+
+  // Auto-resize textarea height. Width is handled by the composer CSS var.
+  const resizeTextarea = useCallback((ta: HTMLTextAreaElement | null) => {
+    if (!ta) return;
+    ta.style.height = 'auto';
+    const nextHeight = Math.min(Math.max(ta.scrollHeight, 52), 220);
+    ta.style.height = `${nextHeight}px`;
+  }, []);
+
+  useEffect(() => {
+    resizeTextarea(taRef.current);
+  }, [input, resizeTextarea]);
+
   const onInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
-    const ta = e.target;
-    ta.style.height = 'auto';
-    ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
+    resizeTextarea(e.target);
   };
 
   const send = useCallback(async (text: string) => {
@@ -411,6 +423,7 @@ export function SimpleChat({
                       <ResultCard
                         key={card.jobId}
                         card={card}
+                        currentProjectId={projectId}
                         disabled={streaming}
                         onOpenResult={onOpenResult}
                         onContinue={() => {
@@ -443,7 +456,10 @@ export function SimpleChat({
           )}
         </div>
 
-        <div className="sc-input-area">
+        <div
+          className="sc-input-area"
+          style={{ ['--sc-composer-width' as string]: `${composerWidth}px` }}
+        >
           <div className="sc-composer">
             <div className="sc-composer-body">
               <textarea
@@ -454,7 +470,6 @@ export function SimpleChat({
                 placeholder="输入消息… (Enter 发送, Shift+Enter 换行)"
                 onChange={onInputChange}
                 onKeyDown={onKeyDown}
-                style={{ height: inputHeight, maxHeight: inputHeight }}
               />
             </div>
             <div className="sc-composer-bar">
@@ -512,7 +527,6 @@ export function SimpleChat({
                     onClick={() => setModelMenuOpen((value) => !value)}
                     title="选择会话模型"
                   >
-                    <span className="sc-model-btn-dot" />
                     <span>{activeModel?.label || activeModel?.model || 'DeepSeek Chat'}</span>
                     <Icon name="chevron-down" size={12} />
                   </button>
@@ -546,7 +560,7 @@ export function SimpleChat({
                     disabled={!input.trim()}
                     title="发送消息"
                   >
-                    <Icon name="send" size={15} />
+                    <Icon name="arrow-up" size={12} />
                   </button>
                 )}
               </div>
@@ -693,15 +707,20 @@ function ApprovalCard({
 
 function ResultCard({
   card,
+  currentProjectId,
   disabled,
   onOpenResult,
   onContinue,
 }: {
   card: SimpleResultCard;
+  currentProjectId: string;
   disabled: boolean;
-  onOpenResult?: (jobId: string) => void;
+  onOpenResult?: (jobId: string, projectId?: string | null) => void;
   onContinue: () => void;
 }): React.ReactElement {
+  const projectLabel =
+    card.projectId && card.projectId !== currentProjectId ? card.projectId : '当前项目';
+
   return (
     <div className={`sc-result-card sc-result-card-${card.status}`}>
       <div className="sc-result-main">
@@ -711,7 +730,7 @@ function ResultCard({
         <div className="sc-result-copy">
           <div className="sc-result-title">{card.title}</div>
           <div className="sc-result-meta">
-            {card.status === 'done' ? '结果已生成' : '分析失败'} · {card.jobId}
+            {card.status === 'done' ? '结果已生成' : '分析失败'} · {projectLabel} · {card.jobId}
           </div>
           {card.status === 'failed' && card.error && (
             <div className="sc-result-error">{card.error}</div>
@@ -722,10 +741,10 @@ function ResultCard({
         <button
           type="button"
           className="sc-result-btn"
-          onClick={() => onOpenResult?.(card.jobId)}
+          onClick={() => onOpenResult?.(card.jobId, card.projectId)}
           disabled={!onOpenResult}
         >
-          <Icon name="bar-chart" size={13} /> 查看结果
+          <Icon name="bar-chart" size={13} /> 查看项目结果
         </button>
         <button
           type="button"

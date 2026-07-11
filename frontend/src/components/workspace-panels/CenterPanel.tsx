@@ -1,8 +1,5 @@
 import React from 'react';
-import { Icon } from '@/components/icons/Icon';
 import { DesktopDashboard } from '@/pages/_desktop-dashboard';
-import ToolsPage from '@/pages/tools';
-import FigCodePage from '@/pages/figcode';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
@@ -42,6 +39,7 @@ export interface CenterPanelContext {
   sessionFrameRef: React.RefObject<HTMLDivElement>;
   bottomTerminalOpen: boolean;
   bottomTerminalHeight: number;
+  leftOpen: boolean;
   rightOpen: boolean;
   inputHeight: number;
 
@@ -49,12 +47,12 @@ export interface CenterPanelContext {
   summaryCardOpen: boolean;
   summaryVisibility: 'hidden' | 'compact' | 'expanded';
   summaryOpenWidth: number;
-  summaryOpenHeight: number;
   compactWorkspacePath: string;
   activeJob: ToolJob | null;
   activeArtifact: ActiveArtifact | null;
   activeJobId: string | null;
   backendSummary: BackendSummary;
+  recentJobs: ToolJob[];
   liveJobsPreview: ToolJob[];
   jobStats: JobStats;
 
@@ -72,17 +70,15 @@ export interface CenterPanelContext {
   setActiveJobId: (id: string | null) => void;
   setActiveArtifact: (a: ActiveArtifact | null) => void;
   setBottomTerminalOpen: (next: boolean | ((prev: boolean) => boolean)) => void;
-  setRightOpen: (next: boolean) => void;
+  setLeftOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
+  setRightOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
   setSummaryOpen: (next: boolean | ((prev: boolean) => boolean)) => void;
-  handleShowTools: () => void;
-  handleShowFigCode: () => void;
   handleShowPlugins: () => void;
-  handleOpenResult: (jobId: string) => void | Promise<void>;
+  handleOpenResult: (jobId: string, projectId?: string | null) => void | Promise<void>;
   handleAskAgent: (prompt: string) => void;
   handleOpenWorkspacePath: () => void | Promise<void>;
   openScheduledResults: () => void;
   startColumnResize: (which: 'left' | 'right' | 'input') => (e: React.MouseEvent) => void;
-  startSummaryResize: (e: React.PointerEvent | React.MouseEvent) => void;
 }
 
 export interface CenterPanelProps {
@@ -115,7 +111,7 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
         <WorkspaceSearchView ctx={ctx} />
       )}
       {workspaceMode === 'chat' && (
-        <SessionFrameView ctx={ctx}>
+        <SessionFrameView ctx={ctx} variant="chat">
           <div className={styles.agentMain}>
             {ctx.project && ctx.projectId && (
               <SimpleChat
@@ -127,7 +123,6 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
               />
             )}
           </div>
-          <div className={styles.resizeHandleH} onMouseDown={ctx.startColumnResize('input')} />
         </SessionFrameView>
       )}
       {workspaceMode === 'scheduled' && (
@@ -146,16 +141,6 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
             onBackToChat={() => ctx.updateWorkspaceMode('chat')}
           />
         </SessionFrameView>
-      )}
-      {workspaceMode === 'tools' && (
-        <div className={styles.workspaceEmbeddedPage}>
-          <ToolsPage />
-        </div>
-      )}
-      {workspaceMode === 'figcode' && (
-        <div className={styles.workspaceEmbeddedPage}>
-          <FigCodePage />
-        </div>
       )}
       {workspaceMode === 'plugins' && (
         <div className={styles.workspaceModeSurface}>
@@ -203,11 +188,8 @@ function WorkspaceSearchView({ ctx }: { ctx: CenterPanelContext }): React.ReactE
       }}
       onOpenScheduled={(jobId) => {
         ctx.setActiveJobId(jobId);
-        ctx.updateWorkspaceMode('scheduled');
         ctx.openRightPanel('results');
       }}
-      onOpenTools={ctx.handleShowTools}
-      onOpenFigCode={ctx.handleShowFigCode}
       onOpenPlugins={ctx.handleShowPlugins}
     />
   );
@@ -216,16 +198,27 @@ function WorkspaceSearchView({ ctx }: { ctx: CenterPanelContext }): React.ReactE
 function SessionFrameView({
   ctx,
   children,
+  variant = 'default',
 }: {
   ctx: CenterPanelContext;
   children: React.ReactNode;
+  variant?: 'default' | 'chat';
 }): React.ReactElement {
   return (
-    <div className={styles.workspaceSessionFrame} ref={ctx.sessionFrameRef}>
+    <div
+      className={`${styles.workspaceSessionFrame} ${
+        variant === 'chat' ? styles.workspaceSessionFrameChat : ''
+      }`}
+      ref={ctx.sessionFrameRef}
+      style={{
+        ['--workspace-summary-reserve-right' as string]: ctx.summaryCardOpen
+          ? `${ctx.summaryOpenWidth + 28}px`
+          : '0px',
+      }}
+    >
       <div className={styles.workspaceSessionSurface}>
         <div className={styles.workspaceSessionContent}>
-          {ctx.showPinnedSummary && <SessionChrome ctx={ctx} />}
-          {children}
+          {ctx.showPinnedSummary && children}
         </div>
       </div>
       <div className={styles.workspaceSummaryOverlay}>
@@ -234,71 +227,18 @@ function SessionFrameView({
             open={ctx.summaryCardOpen}
             visibility={ctx.summaryVisibility}
             width={ctx.summaryOpenWidth}
-            height={ctx.summaryOpenHeight}
             projectName={ctx.project.name}
-            projectModality={ctx.project.modality}
-            compactWorkspacePath={ctx.compactWorkspacePath}
             activeJob={ctx.activeJob}
-            activeArtifact={ctx.activeArtifact}
+            recentJobs={ctx.recentJobs}
             backendSummary={ctx.backendSummary}
             liveJobsPreview={ctx.liveJobsPreview}
             jobStats={ctx.jobStats}
-            onResize={ctx.startSummaryResize}
             onOpenScheduled={ctx.openScheduledResults}
             onSelectJob={(jobId) => {
               ctx.setActiveJobId(jobId);
-              ctx.updateWorkspaceMode(ctx.workspaceMode === 'chat' ? 'scheduled' : ctx.workspaceMode);
               ctx.openRightPanel('results');
             }}
-            onOpenWorkspace={ctx.handleOpenWorkspacePath}
           />
-        )}
-      </div>
-    </div>
-  );
-}
-
-function SessionChrome({ ctx }: { ctx: CenterPanelContext }): React.ReactElement {
-  return (
-    <div className={styles.workspaceSessionChrome}>
-      <div className={styles.workspaceSessionChromeLeft}>
-        <Icon name="file" size={14} />
-        <div className={styles.workspaceSessionChromeText}>
-          <span className={styles.workspaceSessionChromeEyebrow}>会话信息</span>
-          <span className={styles.workspaceSessionChromeTitle}>{ctx.project.name}</span>
-        </div>
-      </div>
-      <div className={styles.workspaceSessionChromeActions}>
-        <button
-          type="button"
-          className={styles.workspaceSessionChromeBtn}
-          onClick={() => ctx.setSummaryOpen((next) => !next)}
-          title={ctx.summaryCardOpen ? '收起摘要' : '展开摘要'}
-          aria-label={ctx.summaryCardOpen ? '收起摘要' : '展开摘要'}
-        >
-          <Icon name="list-details" size={17} />
-        </button>
-        {!ctx.rightOpen && (
-          <button
-            type="button"
-            className={styles.workspaceSessionChromeBtn}
-            onClick={() => ctx.setBottomTerminalOpen((value) => !value)}
-            title={ctx.bottomTerminalOpen ? '隐藏终端' : '显示终端'}
-            aria-label={ctx.bottomTerminalOpen ? '隐藏终端' : '显示终端'}
-          >
-            <Icon name="panel-bottom" size={17} />
-          </button>
-        )}
-        {!ctx.rightOpen && (
-          <button
-            type="button"
-            className={styles.workspaceSessionChromeBtn}
-            onClick={() => ctx.setRightOpen(true)}
-            title="显示右侧侧边栏"
-            aria-label="显示右侧侧边栏"
-          >
-            <Icon name="panel-right" size={17} />
-          </button>
         )}
       </div>
     </div>

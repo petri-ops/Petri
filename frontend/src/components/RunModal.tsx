@@ -542,6 +542,14 @@ export default function RunModal({
     }
   }, []);
 
+  const ensurePythonBackend = useCallback(async (): Promise<void> => {
+    if (typeof window === 'undefined' || !window.biof3Desktop?.py?.start) return;
+    const result = await window.biof3Desktop.py.start();
+    if (!result.ok) {
+      throw new Error(result.error || 'Python 后端启动失败');
+    }
+  }, []);
+
   const runCode = useCallback(
     async (codeToRun?: string) => {
       const execCode = codeToRun ?? codeRef.current;
@@ -583,6 +591,18 @@ export default function RunModal({
       setOutput('');
       setImages([]);
       const start = Date.now();
+
+      if (language === 'python') {
+        try {
+          await ensurePythonBackend();
+        } catch (err: unknown) {
+          setOutput(`启动 Python 后端失败: ${err instanceof Error ? err.message : String(err)}`);
+          setElapsed(Date.now() - start);
+          runningRef.current = false;
+          setRunning(false);
+          return;
+        }
+      }
 
       // Replot mode — persistent R session, much faster
       if (replotTaskId) {
@@ -648,7 +668,7 @@ export default function RunModal({
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [replotTaskId, language]
+    [ensurePythonBackend, replotTaskId, language]
   );
 
   // Keep codeRef in sync

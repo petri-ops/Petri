@@ -1,37 +1,329 @@
 # Project Workspace Handoff
 
-## 方向
+最后更新：2026-07-11
 
-- 目标：尽可能复刻 Codex 的 workspace UI，优先做“轻、窄、少层级”。
-- 当前主线：会话区 + 摘要卡 + 右侧工具抽屉的视觉/交互收口。
-- 当前最优先：摘要卡片必须继续对齐 Codex，现状仍明显不够像。
+这份文档用于在切换工作区后恢复当前开发状态。当前阶段不是功能主线开发，而是在把 BioF3 项目工作台的前端骨架尽量收口到 Codex 式体验：轻、窄、白、少阴影、三栏对齐、输入区稳定贴底、右侧工具可预测。
 
-## 已完成
+## 给下一位 Codex Agent 的交接提示
 
-- 顶层跨三栏导航已移除。
-- 会话输入框已贴底并向 Codex composer 靠拢。
-- 右侧已提供 `结果 / 文件 / 终端 / 浏览器 / 聊天`。
-- 右侧空态已改成轻量 launchpad。
-- 摘要开关按钮已嵌入会话区顶栏。
-- 摘要卡缩放手柄已移到左下角，拖拽逻辑已改为对应方向。
-- 会话顶栏已压薄，减少顶部占位。
+你是接手这个任务的下一位 Codex 时，请直接沿着下面的方向继续，不要重做已经完成的 UI 收口。
 
-## 当前状态
+### 当前目标
 
-- 代码已构建通过：`npm run build:spa`
-- 重点交互正在观察：摘要卡左下角 resize 手柄是否顺滑可拖。
+先把最近这批桌面端大改动稳定住，再推进 BioF3 的 **Harness Engine v1** 落地。当前项目经历了大量 UI、路由、状态和 Electron dev-mode 改动，下一位 agent 不应直接跳到新功能，而应先确认当前壳子稳定。
 
-## 下一步
+### 当前已完成
 
-- 优先修摘要卡：信息结构、卡片尺寸、折叠态、小按钮位置、拖拽手感都要继续打磨。
-- 继续微调会话顶栏高度、留白、文字密度。
-- 若缩放仍不够顺手，优先检查 pointer 捕获、命中区和 cursor 方向。
-- 继续压右侧抽屉与摘要卡的边框、阴影、间距，保持 Codex-like 轻量感。
+- 项目工作台 UI 已基本收口到 Codex-like 三栏结构。
+- 结果卡片、摘要卡、右侧工具区的视觉层级已经显著简化。
+- 桌面端已大幅瘦身：移除 skills / algorithms / prompt playground 等旧入口，`/single-cell` 和 `/spatial` 不再挂到桌面 SPA 路由。
+- 已清理桌面导航中仍指向已移除路由的入口。
+- 已清理摘要卡 resize 残留状态；摘要卡按固定窄高卡片处理。
+- 已新增 `docs/harness-engine-spec.md`，作为 Harness 规范主文档。
+- 已在 `docs/next-steps-roadmap.md` 里挂上 Harness 落地入口。
 
-## 先看这些文件
+### 最近一次稳定化验证
 
-- `frontend/src/pages/project-workspace.tsx`
-- `frontend/src/pages/project-workspace.module.css`
+2026-07-11 已通过：
+
+```bash
+npm --prefix frontend run check
+node --check src/main.js
+node --check src/preload.js
+node --check scripts/dev-electron.js
+npm run build:spa
+```
+
+### 现在最该做的事
+
+1. 先做 **Phase 0：稳定化确认**：
+   - 确认桌面导航、路由、TitleBar、WorkspacePanelsContext 没有残留错链。
+   - 确认 `npm run dev` 真实打开项目页可用。
+   - 确认 vendor/biof3-core 的改动是否纳入本次快照。
+   - 确认 `.cursor/` 是否需要忽略或提交。
+2. 再读 `docs/harness-engine-spec.md`。
+3. 再读 `docs/next-steps-roadmap.md`。
+4. 然后落地 **Harness Phase 1**：
+   - 统一 plugin manifest。
+   - 统一 artifact schema。
+   - 补 `failureModes`。
+5. 然后再做：
+   - 文件探测器。
+   - 索引层。
+   - 参数修复层。
+   - 平台抽象层。
+
+### 当前原则
+
+- 不要把 Harness 做成更长的 prompt。
+- 要把它做成可编排、可验证、可迁移的执行系统。
+- Skills 负责策略，插件负责计算，Harness 负责编排。
+- 跨平台和大文件索引是核心能力，不是附加项。
+
+### 暂时不要做的事
+
+- 不要再优先做 UI 大改。
+- 不要回头重构已经稳定的三栏布局。
+- 不要把真实执行逻辑继续散落在 prompt 文案里。
+- 不要绕过 Phase 0 直接大规模改 Harness；先确保当前大量未提交改动可构建、可运行、可交接。
+
+## 当前产品判断
+
+BioF3 的 `/project/:projectId` 应继续走 Codex 式项目工作台方向：
+
+- 左侧：项目/资源/搜索/项目切换。
+- 中间：Agent 会话与结果输出主舞台。
+- 右侧：结果、文件、浏览器、后端/终端、侧边聊天等工具面板。
+- 顶层：不是普通网页导航，而是桌面应用级 titlebar，按下面三栏宽度同步分区。
+
+当前视觉原则：
+
+- 全局顶栏高度控制在 `28px`。
+- 主背景尽量统一白色或接近白色，不再使用大面积浅绿/浅灰分块。
+- 分隔线只保留极细 hairline，避免厚 rail 影响布局观感。
+- 主题浅绿色只用于 active / hover / selected，不作为大面积区域背景。
+- 内容不要铺满，中间输出区需要左右留白并集中在视觉中部。
+
+## 顶层布局现状
+
+顶层已经从旧的混合式 toolbar 重构为 Codex-like 三段式 titlebar。
+
+目标结构：
+
+```text
+┌────────────── left span ──────────────┬──────────── center span ────────────┬──────────── right span ────────────┐
+│ mac 窗口点 | 左侧栏 | ← →             │ 文件夹 | 当前项目标题       摘要按钮 │ Tabs | + | 底部终端 | 右侧栏按钮     │
+└───────────────────────────────────────┴────────────────────────────────────┴───────────────────────────────────┘
+```
+
+已实现要点：
+
+- `App.tsx` 中接入新的 `TitleBar`。
+- `/` 封面页不显示这条 workspace titlebar，项目工作台显示。
+- 全局内容区 `padding-top` 与 titlebar 高度对齐为 `28px`。
+- 顶层左/中/右宽度跟下面主体布局同步：
+  - 左段宽度跟左侧栏一致；左侧栏收起时进入 collapsed 宽度。
+  - 中段使用 `minmax(0, 1fr)`。
+  - 右段跟右侧栏宽度一致；右侧栏收起时进入 collapsed 宽度。
+- titlebar 可拖动窗口；按钮区域使用 no-drag。
+- 已清除不需要的 `打开位置`、最小化、最大化等按钮。
+- 顶层 `+` 是“展开更多工具”，不是摘要按钮。
+- 摘要按钮放在中间栏顶层最右侧。
+
+相关文件：
+
+- `frontend/src/components/desktop/TitleBar.tsx`
+- `frontend/src/components/desktop/TitleBar.module.css`
+- `frontend/src/components/desktop/WorkspacePanelsContext.tsx`
+- `frontend/src/hooks/useWorkspaceLayout.ts`
+- `frontend/src/hooks/useWorkspacePanels.ts`
+- `frontend/src/hooks/useRightPanelTabs.ts`
+- `frontend/src/App.tsx`
+
+## 中间会话区现状
+
+中间区域已经从“大卡片包裹聊天”的形态改成更接近 Codex 的开放式会话区。
+
+已完成：
+
+- 移除了中间大卡片边框和阴影。
+- 输入框固定在整个中间消息区底部，不再跟着消息输出区漂浮。
+- 删除了用于调整聊天框宽度的横向拖拽控件。
+- 中间背景、结果区背景、左右区域背景已尽量统一为白色。
+- 消息展示做了左右分流：
+  - 用户消息在右侧。
+  - 模型消息在左侧。
+  - 模型消息有轻量卡片感，便于 Markdown 阅读。
+- Markdown 基础样式已优化：标题、列表、代码、表格等比之前更清晰。
+- 输入框支持随文字长度自适应：
+  - 高度自动增长，最大高度受控。
+  - 宽度会在一定范围内增长，但不会破坏页面布局。
+- 结果输出区已加左右留白，并用 `max-width` 居中，避免内容铺满。
+
+相关文件：
+
 - `frontend/src/components/copilot/SimpleChat.tsx`
 - `frontend/src/components/copilot/simple-chat.css`
-- `docs/project-workspace-prompt.md`
+- `frontend/src/components/workspace-panels/CenterPanel.tsx`
+- `frontend/src/pages/project-workspace.module.css`
+
+## 左侧栏现状
+
+左侧栏的方向是：背景统一、线条轻、控制按钮靠近 mac 窗口点。
+
+已完成：
+
+- 左侧大面积浅绿背景已移除。
+- 左侧栏顶部和下面控制区背景改为与整体一致。
+- active / hover 状态保留主题浅绿色。
+- 搜索框离全局顶栏更近，顶部空隙已压缩。
+- 左侧栏收起/展开按钮位置已向 mac 窗口点靠近。
+- 左侧栏收起时按钮应靠到最左侧，仍需继续实机观察细节是否完全和谐。
+
+相关文件：
+
+- `frontend/src/components/workspace-panels/LeftPanel.tsx`
+- `frontend/src/pages/project-workspace.module.css`
+- `frontend/src/components/desktop/TitleBar.module.css`
+
+## 右侧工具区现状
+
+右侧工具区现在以 tab + more tools 的模式运作。
+
+已完成：
+
+- 删除了最右侧额外图标竖栏。
+- 顶层 `+` 用于添加/切换更多工具。
+- 右侧空态不再作为“结果主页”的长期设计方向，只作为没有具体工具内容时的轻量入口。
+- 文件树保持在右侧，文件内容在左侧展示，打开文件不应自动收起文件树。
+- 右侧文件树宽度已加宽过，体验比最初稳定。
+- 浏览器已作为右侧工具之一接入；默认站点方向是 `https://biof3.com/`。
+- 后端/终端方向拆分过：顶部工具中的“后端”用于服务状态与日志，真正终端走底部面板。
+
+仍需继续确认：
+
+- `+` 菜单在所有状态下是否都稳定打开工具，而不是回到工作台主页。
+- 浏览器区域在不同网页下是否仍有高度/滚动/遮挡问题。
+- 终端体验还没有完全达到 Codex 手感，后面要继续精修。
+
+相关文件：
+
+- `frontend/src/components/workspace-panels/RightPanel.tsx`
+- `frontend/src/hooks/useRightPanelTabs.ts`
+- `frontend/src/pages/project-workspace.tsx`
+- `frontend/src/pages/project-workspace.module.css`
+
+## 摘要信息卡现状
+
+摘要信息现在定位为后续“分析任务动态跟踪”的基础，不再做宽大的横向信息面板。
+
+已完成：
+
+- 摘要默认关闭。
+- 摘要开关按钮在中间栏顶层最右侧。
+- 删除了摘要卡 resize 手柄。
+- 摘要卡固定为较窄、较高的竖向卡片。
+- 摘要卡阴影已尽量移除，避免顶部或边缘出现悬浮脏影。
+- 摘要卡内容已压缩：
+  - 保留当前活动/状态。
+  - 删除早期过松散的上下文、正在查看等内容。
+  - 不再展示不必要的长路径与宽卡片信息。
+
+需要继续观察：
+
+- 摘要卡与摘要按钮的视觉连接还可以更精准。当前是靠近按钮下方的固定悬浮卡，后续如果要完全 Codex-like，可以用按钮位置计算真实 anchor。
+
+相关文件：
+
+- `frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx`
+- `frontend/src/pages/project-workspace.module.css`
+- `frontend/src/hooks/useWorkspacePanels.ts`
+
+## 云平台/封面页现状
+
+已处理：
+
+- 软件打开首页/封面页顶部不再展示项目工作台 titlebar。
+- 云平台工作台里旧的“快速开始”区域已清理。
+
+产品判断：
+
+- “快速开始”是早期遗留分析入口，当前插件体系还没有稳定呈现时，保留它会误导用户。
+- 后续更适合替换为：
+  - 最近使用插件；
+  - 当前项目推荐工具；
+  - 插件市场/固定 workflow 入口；
+  - 最近任务与可复现记录。
+
+相关文件：
+
+- `frontend/src/pages/_desktop-dashboard.tsx`
+
+## 开发体验现状
+
+已支持开发热更新：
+
+- `npm run dev` 现在会启动 Vite dev server，再启动 Electron。
+- Electron dev 模式优先加载 `http://localhost:3000`，而不是每次使用 `frontend/dist`。
+- 修复过 `@vitejs/plugin-react can't detect preamble`，dev CSP 已允许 React refresh 所需脚本。
+
+常用命令：
+
+```bash
+npm run dev
+npm --prefix frontend run check
+npm run build:spa
+```
+
+注意：
+
+- `npm run check` 目前可能因为 vendor 校验失败而中断，不一定是当前 UI 修改导致。
+- 之前观察到 vendor drift：
+  - expected `fc811db`
+  - actual `fc811dbc8b2157334120af595170ecf827139793`
+
+相关文件：
+
+- `package.json`
+- `scripts/dev-electron.js`
+- `src/main.js`
+
+## 当前最重要的下一步
+
+换工作区后建议按这个顺序继续：
+
+1. 先跑 `npm run dev`，进入项目页检查真实 UI。
+2. 对照 Codex 继续检查三栏 titlebar：
+   - 左段宽度是否跟左栏一致；
+   - 中段标题和摘要按钮是否自然；
+   - 右段 tabs / `+` / 终端 / 右侧栏按钮是否不拥挤；
+   - 收起左栏、收起右栏后按钮位置是否稳定。
+3. 继续精修中间结果输出区：
+   - 左右留白是否足够；
+   - 输出内容是否居中；
+   - Markdown 卡片是否清晰；
+   - 用户/模型消息左右分布是否自然。
+4. 继续精修摘要卡：
+   - 默认关闭；
+   - 宽窄和高度是否像竖向动态追踪卡；
+   - 是否紧贴摘要按钮下方；
+   - 内容是否足够紧凑。
+5. 再回到原开发计划：
+   - 项目级对话隔离；
+   - 插件/Workflow 参数确认；
+   - Job/Artifact 结果卡片；
+   - 右侧结果查看与聊天上下文联动。
+
+## 当前重点文件索引
+
+- `frontend/src/App.tsx`
+- `frontend/src/components/desktop/TitleBar.tsx`
+- `frontend/src/components/desktop/TitleBar.module.css`
+- `frontend/src/components/desktop/WorkspacePanelsContext.tsx`
+- `frontend/src/hooks/useWorkspacePanels.ts`
+- `frontend/src/hooks/useWorkspaceLayout.ts`
+- `frontend/src/hooks/useRightPanelTabs.ts`
+- `frontend/src/components/workspace-panels/CenterPanel.tsx`
+- `frontend/src/components/workspace-panels/LeftPanel.tsx`
+- `frontend/src/components/workspace-panels/RightPanel.tsx`
+- `frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx`
+- `frontend/src/components/copilot/SimpleChat.tsx`
+- `frontend/src/components/copilot/simple-chat.css`
+- `frontend/src/pages/project-workspace.tsx`
+- `frontend/src/pages/project-workspace.module.css`
+- `frontend/src/pages/_desktop-dashboard.tsx`
+- `frontend/src/styles/global.css`
+- `src/main.js`
+- `package.json`
+- `scripts/dev-electron.js`
+
+## 当前工作树提示
+
+当前工作树有大量 UI 改动和新增文件，这是预期状态。切换工作区前，如果需要真正做 git 层面的快照，建议单独提交一次，例如：
+
+```bash
+git add docs/project-workspace-handoff.md frontend src package.json scripts
+git commit -m "Refine Codex-style project workspace layout"
+```
+
+不要随手 reset；这些改动大多是连续 UI 打磨的结果。

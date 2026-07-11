@@ -99,7 +99,7 @@ export const tools: Tool[] = [
         type: 'text',
         required: true,
         placeholder: 'condition',
-        hint: '样本信息表中用于分组的列名',
+        hint: '样本信息表中用于分组的列名，只填列名本身，例如 condition，不要写 ~ condition',
       },
       {
         id: 'contrast_ref',

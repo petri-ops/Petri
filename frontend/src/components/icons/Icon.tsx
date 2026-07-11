@@ -33,6 +33,7 @@ export type IconName =
   | 'study'
   | 'sparkles'
   | 'arrow-right'
+  | 'arrow-up'
   | 'check'
   | 'refresh'
   | 'flag'
@@ -61,6 +62,7 @@ export type IconName =
   | 'panel-right'
   | 'panel-bottom'
   | 'chevron-down'
+  | 'chevron-up'
   | 'chevron-right'
   | 'wrench'
   | 'layout-grid'
@@ -68,7 +70,9 @@ export type IconName =
   | 'plus'
   | 'message-circle'
   | 'send'
-  | 'square';
+  | 'square'
+  | 'minus'
+  | 'more-horizontal';
 
 interface IconProps {
   name: IconName;
@@ -209,6 +213,13 @@ const paths: Record<IconName, React.ReactNode> = {
     <>
       <line x1="5" y1="12" x2="19" y2="12" />
       <polyline points="12 5 19 12 12 19" />
+    </>
+  ),
+  // ArrowUp — submit / send
+  'arrow-up': (
+    <>
+      <line x1="12" y1="19" x2="12" y2="5" />
+      <polyline points="5 12 12 5 19 12" />
     </>
   ),
   check: <polyline points="20 6 9 17 4 12" />,
@@ -404,6 +415,7 @@ const paths: Record<IconName, React.ReactNode> = {
   ),
   // Chevron down — collapse (Lucide chevron-down)
   'chevron-down': <polyline points="6 9 12 15 18 9" />,
+  'chevron-up': <polyline points="18 15 12 9 6 15" />,
   // Chevron right — expand (Lucide chevron-right)
   'chevron-right': <polyline points="9 18 15 12 9 6" />,
   // Wrench — tool / toolbox (Lucide wrench)
@@ -453,6 +465,14 @@ const paths: Record<IconName, React.ReactNode> = {
   // Square — stop (Lucide square)
   square: (
     <rect x="3" y="3" width="18" height="18" rx="2" />
+  ),
+  minus: <line x1="5" y1="12" x2="19" y2="12" />,
+  'more-horizontal': (
+    <>
+      <circle cx="6" cy="12" r="1.75" />
+      <circle cx="12" cy="12" r="1.75" />
+      <circle cx="18" cy="12" r="1.75" />
+    </>
   ),
 };
 
