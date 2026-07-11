@@ -820,107 +820,132 @@ function datasetPathFromValue(value, dataDir = defaultDataDir()) {
   return storageCandidates.find(pathExists) || null;
 }
 
+export function createLocalHarnessPlatform(platformOptions = {}) {
+  const dataDir = normalizePath(platformOptions.dataDir || defaultDataDir());
+  const jobsDir = normalizePath(platformOptions.jobsDir || defaultJobsDir(dataDir));
+  const dbPath = platformOptions.dbPath || process.env.BIOF3_DB_PATH || path.join(dataDir, 'biof3.db');
+
+  return {
+    id: 'local',
+    dataDir,
+    jobsDir,
+    dbPath,
+    resolveScope(options = {}) {
+      const scope = String(options.scope || (options.jobId ? 'job' : options.projectId ? 'project' : 'path'));
+
+      if (scope === 'path' || scope === 'workspace') {
+        const target = normalizePath(options.path || options._?.[0] || '.');
+        return {
+          scope: 'path',
+          id: null,
+          target,
+          partition: 'workspace',
+          platform: 'local',
+          exists: pathExists(target),
+        };
+      }
+
+      if (scope === 'project') {
+        if (options.projectPath || options.workspacePath || options.path) {
+          const target = normalizePath(options.projectPath || options.workspacePath || options.path);
+          return {
+            scope,
+            id: options.projectId || null,
+            target,
+            partition: 'project',
+            platform: 'local',
+            exists: pathExists(target),
+          };
+        }
+        if (!options.projectId) throw new Error('project scope requires --project-id or --project-path');
+        const row = readSqliteRow(dbPath, 'SELECT id, name, workspace_path FROM projects WHERE id = ?', [
+          options.projectId,
+        ]);
+        if (row?.__dbError) throw new Error(`Cannot read project from db: ${row.__dbError}`);
+        if (!row) throw new Error(`Project not found: ${options.projectId}`);
+        const target = row.workspace_path || defaultProjectWorkspacePath(row, dataDir);
+        return {
+          scope,
+          id: row.id,
+          target,
+          partition: 'project',
+          platform: 'local',
+          exists: pathExists(target),
+          source: { dbPath, name: row.name, workspacePath: row.workspace_path || null },
+        };
+      }
+
+      if (scope === 'job' || scope === 'artifact') {
+        if (!options.jobId) throw new Error(`${scope} scope requires --job-id`);
+        const jobRoot = safeJoinUnder(jobsDir, options.jobId);
+        if (!jobRoot) throw new Error(`Invalid job id: ${options.jobId}`);
+        const target = scope === 'artifact' ? path.join(jobRoot, 'output') : jobRoot;
+        return {
+          scope,
+          id: options.jobId,
+          target,
+          partition: scope === 'artifact' ? 'artifact' : 'job',
+          platform: 'local',
+          exists: pathExists(target),
+          source: { jobsDir, jobRoot },
+        };
+      }
+
+      if (scope === 'dataset') {
+        if (options.datasetPath || options.path) {
+          const target = normalizePath(options.datasetPath || options.path);
+          return {
+            scope,
+            id: options.datasetId || null,
+            target,
+            partition: 'dataset',
+            platform: 'local',
+            exists: pathExists(target),
+          };
+        }
+        if (!options.datasetId) throw new Error('dataset scope requires --dataset-id or --dataset-path');
+        const row = readSqliteRow(
+          dbPath,
+          'SELECT id, name, oss_url, meta_url, features_url FROM datasets WHERE id = ?',
+          [options.datasetId],
+        );
+        if (row?.__dbError) throw new Error(`Cannot read dataset from db: ${row.__dbError}`);
+        if (!row) throw new Error(`Dataset not found: ${options.datasetId}`);
+        const target =
+          datasetPathFromValue(row.oss_url, dataDir) ||
+          datasetPathFromValue(row.meta_url, dataDir) ||
+          datasetPathFromValue(row.features_url, dataDir);
+        if (!target) {
+          throw new Error(`Dataset has no local indexable path: ${options.datasetId}`);
+        }
+        return {
+          scope,
+          id: row.id,
+          target,
+          partition: 'dataset',
+          platform: 'local',
+          exists: pathExists(target),
+          source: {
+            dbPath,
+            name: row.name,
+            ossUrl: row.oss_url || null,
+            metaUrl: row.meta_url || null,
+            featuresUrl: row.features_url || null,
+          },
+        };
+      }
+
+      throw new Error(`Unsupported harness index scope: ${scope}`);
+    },
+  };
+}
+
 export function resolveHarnessScope(options = {}) {
-  const scope = String(options.scope || (options.jobId ? 'job' : options.projectId ? 'project' : 'path'));
-  const dataDir = normalizePath(options.dataDir || defaultDataDir());
-  const jobsDir = normalizePath(options.jobsDir || defaultJobsDir(dataDir));
-  const dbPath = options.dbPath || process.env.BIOF3_DB_PATH || path.join(dataDir, 'biof3.db');
-
-  if (scope === 'path' || scope === 'workspace') {
-    const target = normalizePath(options.path || options._?.[0] || '.');
-    return {
-      scope: 'path',
-      id: null,
-      target,
-      partition: 'workspace',
-      exists: pathExists(target),
-    };
+  const platform = options.platform || createLocalHarnessPlatform(options);
+  if (!platform || typeof platform.resolveScope !== 'function') {
+    throw new Error('Harness platform must provide resolveScope(options)');
   }
-
-  if (scope === 'project') {
-    if (options.projectPath || options.workspacePath || options.path) {
-      const target = normalizePath(options.projectPath || options.workspacePath || options.path);
-      return {
-        scope,
-        id: options.projectId || null,
-        target,
-        partition: 'project',
-        exists: pathExists(target),
-      };
-    }
-    if (!options.projectId) throw new Error('project scope requires --project-id or --project-path');
-    const row = readSqliteRow(dbPath, 'SELECT id, name, workspace_path FROM projects WHERE id = ?', [
-      options.projectId,
-    ]);
-    if (row?.__dbError) throw new Error(`Cannot read project from db: ${row.__dbError}`);
-    if (!row) throw new Error(`Project not found: ${options.projectId}`);
-    const target = row.workspace_path || defaultProjectWorkspacePath(row, dataDir);
-    return {
-      scope,
-      id: row.id,
-      target,
-      partition: 'project',
-      exists: pathExists(target),
-      source: { dbPath, name: row.name, workspacePath: row.workspace_path || null },
-    };
-  }
-
-  if (scope === 'job' || scope === 'artifact') {
-    if (!options.jobId) throw new Error(`${scope} scope requires --job-id`);
-    const jobRoot = safeJoinUnder(jobsDir, options.jobId);
-    if (!jobRoot) throw new Error(`Invalid job id: ${options.jobId}`);
-    const target = scope === 'artifact' ? path.join(jobRoot, 'output') : jobRoot;
-    return {
-      scope,
-      id: options.jobId,
-      target,
-      partition: scope === 'artifact' ? 'artifact' : 'job',
-      exists: pathExists(target),
-      source: { jobsDir, jobRoot },
-    };
-  }
-
-  if (scope === 'dataset') {
-    if (options.datasetPath || options.path) {
-      const target = normalizePath(options.datasetPath || options.path);
-      return {
-        scope,
-        id: options.datasetId || null,
-        target,
-        partition: 'dataset',
-        exists: pathExists(target),
-      };
-    }
-    if (!options.datasetId) throw new Error('dataset scope requires --dataset-id or --dataset-path');
-    const row = readSqliteRow(dbPath, 'SELECT id, name, oss_url, meta_url, features_url FROM datasets WHERE id = ?', [
-      options.datasetId,
-    ]);
-    if (row?.__dbError) throw new Error(`Cannot read dataset from db: ${row.__dbError}`);
-    if (!row) throw new Error(`Dataset not found: ${options.datasetId}`);
-    const target =
-      datasetPathFromValue(row.oss_url, dataDir) ||
-      datasetPathFromValue(row.meta_url, dataDir) ||
-      datasetPathFromValue(row.features_url, dataDir);
-    if (!target) {
-      throw new Error(`Dataset has no local indexable path: ${options.datasetId}`);
-    }
-    return {
-      scope,
-      id: row.id,
-      target,
-      partition: 'dataset',
-      exists: pathExists(target),
-      source: {
-        dbPath,
-        name: row.name,
-        ossUrl: row.oss_url || null,
-        metaUrl: row.meta_url || null,
-        featuresUrl: row.features_url || null,
-      },
-    };
-  }
-
-  throw new Error(`Unsupported harness index scope: ${scope}`);
+  return platform.resolveScope(options);
 }
 
 export function indexHarnessScope(options = {}) {

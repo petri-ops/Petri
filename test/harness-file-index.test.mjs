@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {
+  createLocalHarnessPlatform,
   detectFile,
   indexHarnessScope,
   indexDirectory,
@@ -110,7 +111,48 @@ test('resolveHarnessScope resolves project path without database dependency', ()
     assert.equal(resolved.scope, 'project');
     assert.equal(resolved.id, 'p_demo');
     assert.equal(resolved.target, dir);
+    assert.equal(resolved.platform, 'local');
     assert.equal(resolved.exists, true);
+  });
+});
+
+test('createLocalHarnessPlatform resolves job and artifact paths behind adapter boundary', () => {
+  withTempDir((dir) => {
+    const jobsDir = path.join(dir, 'tool-jobs');
+    const jobDir = path.join(jobsDir, 'job_adapter');
+    fs.mkdirSync(path.join(jobDir, 'output'), { recursive: true });
+    const platform = createLocalHarnessPlatform({ dataDir: dir, jobsDir });
+
+    const jobScope = resolveHarnessScope({ platform, scope: 'job', jobId: 'job_adapter' });
+    assert.equal(jobScope.platform, 'local');
+    assert.equal(jobScope.partition, 'job');
+    assert.equal(jobScope.target, jobDir);
+
+    const artifactScope = resolveHarnessScope({ platform, scope: 'artifact', jobId: 'job_adapter' });
+    assert.equal(artifactScope.partition, 'artifact');
+    assert.equal(artifactScope.target, path.join(jobDir, 'output'));
+  });
+});
+
+test('indexHarnessScope accepts custom platform adapter', () => {
+  withTempDir((dir) => {
+    fs.writeFileSync(path.join(dir, 'deg.csv'), 'gene,log2FC,pvalue\nTP53,1,0.01\n');
+    const platform = {
+      id: 'test-platform',
+      resolveScope() {
+        return {
+          scope: 'project',
+          id: 'p_custom',
+          target: dir,
+          partition: 'project',
+          platform: 'test-platform',
+          exists: true,
+        };
+      },
+    };
+    const scoped = indexHarnessScope({ platform, scope: 'project', projectId: 'p_custom', hash: false });
+    assert.equal(scoped.scope.platform, 'test-platform');
+    assert.equal(scoped.index.byRole.deg_table, 1);
   });
 });
 

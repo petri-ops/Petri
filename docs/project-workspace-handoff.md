@@ -61,6 +61,10 @@
     - `scripts/harness-file-index.mjs` 新增 `rankHarnessToolsForRequest()`。
     - 不调用 LLM，仅根据用户意图、工具 manifest 和 Harness index summary 做确定性工具排序。
     - `test/harness-file-index.test.mjs` 已覆盖“差异结果画火山图”和“表达矩阵做 PCA”两条场景，验证选工具、绑定文件和参数修复。
+  - 平台抽象层第一版已落地：
+    - `scripts/harness-file-index.mjs` 新增 `createLocalHarnessPlatform()`。
+    - `resolveHarnessScope()` 对外兼容不变，但底层通过 `platform.resolveScope()` 解析 project / job / artifact / dataset。
+    - `indexHarnessScope()` 已支持注入 custom platform adapter，后续可接远程 worker / 云端挂载路径。
   - 新增 `test/harness-file-index.test.mjs`。
 
 ### 最近一次稳定化验证
@@ -102,7 +106,7 @@ npm run check
 2. 再读 `docs/harness-engine-spec.md`。
 3. 再读 `docs/next-steps-roadmap.md`。
 4. 然后继续 **Harness Phase 2**：
-   - 建立平台抽象层。
+   - 扩展平台抽象层：加入 runtime ready、执行目录、输入/输出 canonical path 映射。
    - 继续扩充弱模型回归测试，覆盖更多插件和失败恢复场景。
 
 ### 当前原则
