@@ -7,6 +7,7 @@ import {
   createHarnessExecutionContext,
   createLocalHarnessPlatform,
   detectFile,
+  diagnoseHarnessRunReadiness,
   indexHarnessScope,
   indexDirectory,
   inferColumnMappings,
@@ -371,5 +372,81 @@ test('weak-agent regression ranks PCA and binds expression matrix plus group fil
     assert.equal(repaired.repairedParams.expr_matrix, 'expression_matrix.csv');
     assert.equal(repaired.repairedParams.group_file, 'sample_groups.csv');
     assert.equal(repaired.repairedParams.n_components, 3);
+  });
+});
+
+test('weak-agent regression ranks gene correlation heatmap and clamps top_n', () => {
+  withTempDir((dir) => {
+    fs.writeFileSync(
+      path.join(dir, 'gene_expression.csv'),
+      'Gene,S1,S2,S3,S4\nA,1,2,3,4\nB,2,3,4,5\nC,5,6,7,8\n',
+    );
+    fs.writeFileSync(path.join(dir, 'deg.csv'), 'gene,log2FC,pvalue\nTP53,1,0.01\n');
+    const index = indexDirectory(dir, { hash: false });
+    const volcano = readBuiltInManifest('volcano-plot');
+    const pca = readBuiltInManifest('pca-explorer');
+    const correlation = readBuiltInManifest('gene-correlation');
+    const ranked = rankHarnessToolsForRequest('用表达矩阵做基因相关性热图，top 999 个基因', [volcano, pca, correlation], index);
+
+    assert.equal(ranked[0].toolId, 'gene-correlation');
+    assert.ok(ranked[0].reasons.includes('intent_correlation'));
+    assert.equal(
+      ranked[0].inputSuggestions.find((binding) => binding.inputId === 'expr_matrix')?.selected?.relativePath,
+      'gene_expression.csv',
+    );
+
+    const repaired = repairHarnessParams(correlation, index, { top_n: 999 });
+    assert.equal(repaired.repairedParams.expr_matrix, 'gene_expression.csv');
+    assert.equal(repaired.repairedParams.top_n, 3);
+  });
+});
+
+test('diagnoseHarnessRunReadiness maps matrix orientation mismatch to failureMode issue', () => {
+  withTempDir((dir) => {
+    fs.writeFileSync(path.join(dir, 'sample_rows.csv'), 'Sample,G1,G2,G3\nS1,1,2,3\nS2,4,5,6\nS3,7,8,9\n');
+    const index = indexDirectory(dir, { hash: false });
+    const correlation = readBuiltInManifest('gene-correlation');
+    const diagnostics = diagnoseHarnessRunReadiness(correlation, index, {});
+
+    assert.equal(diagnostics.status, 'needs_review');
+    assert.equal(diagnostics.ok, true);
+    const issue = diagnostics.issues.find((item) => item.code === 'matrix_orientation_mismatch');
+    assert.ok(issue, '应识别 gene-correlation 的矩阵方向不匹配');
+    assert.equal(issue.recoverable, true);
+    assert.equal(issue.failureMode.code, 'matrix_orientation_mismatch');
+    assert.equal(diagnostics.repairedParams.expr_matrix, 'sample_rows.csv');
+  });
+});
+
+test('diagnoseHarnessRunReadiness blocks missing required file inputs', () => {
+  withTempDir((dir) => {
+    fs.writeFileSync(path.join(dir, 'notes.md'), '# no usable data');
+    const index = indexDirectory(dir, { hash: false });
+    const volcano = readBuiltInManifest('volcano-plot');
+    const diagnostics = diagnoseHarnessRunReadiness(volcano, index, {});
+
+    assert.equal(diagnostics.ok, false);
+    assert.equal(diagnostics.status, 'blocked');
+    const issue = diagnostics.issues.find((item) => item.code === 'missing_required_file_inputs');
+    assert.ok(issue, '应阻塞缺失 deg_table 的执行');
+    assert.equal(issue.inputId, 'deg_table');
+  });
+});
+
+test('diagnoseHarnessRunReadiness reports runtime_not_ready as recoverable blocker', () => {
+  withTempDir((dir) => {
+    fs.writeFileSync(path.join(dir, 'deg.csv'), 'gene,log2FC,pvalue\nTP53,1,0.01\n');
+    const index = indexDirectory(dir, { hash: false });
+    const volcano = readBuiltInManifest('volcano-plot');
+    const diagnostics = diagnoseHarnessRunReadiness(volcano, index, {}, {
+      runtimeReady: { runtime: 'r', ready: false, reason: 'r_runtime_not_found' },
+    });
+
+    assert.equal(diagnostics.ok, false);
+    assert.equal(diagnostics.status, 'blocked');
+    const issue = diagnostics.issues.find((item) => item.code === 'runtime_not_ready');
+    assert.ok(issue, '应报告 runtime_not_ready');
+    assert.equal(issue.recoverable, true);
+    assert.match(issue.detail, /r_runtime_not_found/);
   });
 });

@@ -622,6 +622,7 @@ function requestIntentHints(requestText) {
   return {
     wantsVolcano: /volcano|火山/.test(text),
     wantsPca: /\bpca\b|主成分|降维/.test(text),
+    wantsCorrelation: /correlation|相关|共表达|heatmap|热图/.test(text),
     wantsDeg: /deg|差异|differential|de(seq)?2|log2?fc|p-?value/.test(text),
     wantsExpression: /expr|expression|表达|矩阵|count/.test(text),
     wantsGroup: /group|metadata|sample|分组|样本/.test(text),
@@ -647,6 +648,10 @@ export function rankHarnessToolsForRequest(requestText, manifests = [], index = 
       if (hints.wantsPca && /\bpca\b|主成分|降维/.test(toolText)) {
         score += 80;
         reasons.push('intent_pca');
+      }
+      if (hints.wantsCorrelation && /correlation|相关|共表达|heatmap|热图/.test(toolText)) {
+        score += 80;
+        reasons.push('intent_correlation');
       }
       if (hints.wantsDeg && /deg|差异|differential|log2?fc|p-?value/.test(toolText)) {
         score += 35;
@@ -742,6 +747,155 @@ function availableSampleCount(entry) {
   if (entry.table.matrixOrientation === 'rows_are_samples') return entry.table.rowSampleCount;
   if (entry.table.matrixOrientation === 'rows_are_features') return Math.max(0, (entry.table.columnCount || 0) - 1);
   return entry.table.rowSampleCount || null;
+}
+
+function failureModeByCode(manifest = {}, code) {
+  const modes = Array.isArray(manifest.failureModes) ? manifest.failureModes : [];
+  return modes.find((mode) => mode && mode.code === code) || null;
+}
+
+function normalizeDiagnosticIssue(manifest, issue) {
+  const failureMode = failureModeByCode(manifest, issue.code);
+  return {
+    code: issue.code,
+    severity: issue.severity || (failureMode?.recoverable === false ? 'error' : 'warning'),
+    recoverable: issue.recoverable ?? failureMode?.recoverable ?? true,
+    inputId: issue.inputId || null,
+    message: issue.message || failureMode?.title || issue.code,
+    detail: issue.detail || failureMode?.description || null,
+    suggestedFix: issue.suggestedFix || failureMode?.suggestedFix || null,
+    failureMode: failureMode
+      ? {
+          code: failureMode.code,
+          title: failureMode.title,
+          recoverable: failureMode.recoverable !== false,
+        }
+      : null,
+  };
+}
+
+function diagnosticIssueFromRepairWarning(manifest, warning) {
+  if (!warning || !warning.code) return null;
+  return normalizeDiagnosticIssue(manifest, {
+    ...warning,
+    severity: 'warning',
+    message: warning.code,
+  });
+}
+
+function expectedMatrixOrientation(input = {}) {
+  const text = textForInput(input);
+  if (/行\s*=\s*基因|rows?\s*=\s*genes?|gene.*列\s*=\s*样本|基因.*样本/.test(text)) return 'rows_are_features';
+  if (/行\s*=\s*样本|rows?\s*=\s*samples?|sample.*列\s*=\s*基因|样本.*基因/.test(text)) return 'rows_are_samples';
+  return null;
+}
+
+function selectedEntryForFileInput(index, params, input, selectedByInput) {
+  const bindingEntry = firstSelectedEntry(index, selectedByInput.get(input.id));
+  if (bindingEntry) return bindingEntry;
+  const value = params?.[input.id];
+  if (!value) return null;
+  const normalizedValue = String(value);
+  return (
+    (index.entries || []).find(
+      (entry) =>
+        entry.relativePath === normalizedValue ||
+        entry.path === normalizedValue ||
+        entry.canonicalPath === normalizedValue ||
+        path.basename(entry.path || '') === path.basename(normalizedValue),
+    ) || null
+  );
+}
+
+export function diagnoseHarnessRunReadiness(manifest, index, params = {}, options = {}) {
+  const inputSuggestions = options.inputSuggestions || suggestInputBindings(manifest, index);
+  const repair = options.repair || repairHarnessParams(manifest, index, params, { inputSuggestions });
+  const selectedByInput = new Map(inputSuggestions.map((binding) => [binding.inputId, binding]));
+  const issues = [];
+
+  for (const input of fileInputs(manifest)) {
+    const entry = selectedEntryForFileInput(index, repair.repairedParams, input, selectedByInput);
+    if (input.required && !entry && !repair.repairedParams[input.id]) {
+      issues.push(
+        normalizeDiagnosticIssue(manifest, {
+          code: 'missing_required_file_inputs',
+          severity: 'error',
+          recoverable: true,
+          inputId: input.id,
+          message: `缺少必需输入文件：${input.label || input.id}`,
+          suggestedFix: '请提供该文件，或让 Harness 根据当前项目文件重新推荐候选输入。',
+        }),
+      );
+      continue;
+    }
+
+    const expectedOrientation = expectedMatrixOrientation(input);
+    if (
+      expectedOrientation &&
+      entry?.table?.matrixOrientation &&
+      entry.table.matrixOrientation !== 'unknown' &&
+      entry.table.matrixOrientation !== expectedOrientation
+    ) {
+      issues.push(
+        normalizeDiagnosticIssue(manifest, {
+          code: 'matrix_orientation_mismatch',
+          severity: 'warning',
+          recoverable: true,
+          inputId: input.id,
+          message: `表达矩阵方向可能不符合 ${manifest.title || manifest.id} 预期`,
+          detail: `预期 ${expectedOrientation}，当前探测为 ${entry.table.matrixOrientation}`,
+        }),
+      );
+    }
+
+    if (/expr|expression|matrix|表达|矩阵|count/.test(textForInput(input)) && entry?.table) {
+      const featureCount = availableFeatureCount(entry) || 0;
+      const sampleCount = availableSampleCount(entry) || 0;
+      if (featureCount < 2 || sampleCount < 2) {
+        issues.push(
+          normalizeDiagnosticIssue(manifest, {
+            code: /pca/i.test(textForTool(manifest)) ? 'too_few_samples_or_features' : 'insufficient_numeric_genes',
+            severity: 'error',
+            recoverable: false,
+            inputId: input.id,
+            message: '表达矩阵可计算的样本或特征数量不足',
+            detail: `features=${featureCount}, samples=${sampleCount}`,
+          }),
+        );
+      }
+    }
+  }
+
+  for (const warning of repair.warnings || []) {
+    const issue = diagnosticIssueFromRepairWarning(manifest, warning);
+    if (issue) issues.push(issue);
+  }
+
+  const runtimeReady = options.executionContext?.runtimeReady || options.runtimeReady || null;
+  if (runtimeReady && runtimeReady.ready === false) {
+    issues.push(
+      normalizeDiagnosticIssue(manifest, {
+        code: 'runtime_not_ready',
+        severity: 'error',
+        recoverable: true,
+        message: `${runtimeReady.runtime || manifest.language || 'runtime'} 运行时不可用`,
+        detail: runtimeReady.reason || null,
+        suggestedFix: '请安装或配置对应运行时，然后重新执行该工具。',
+      }),
+    );
+  }
+
+  const errors = issues.filter((issue) => issue.severity === 'error');
+  return {
+    ok: errors.length === 0,
+    status: errors.length ? 'blocked' : issues.length ? 'needs_review' : 'ready',
+    toolId: manifest?.id || manifest?.name || null,
+    repairs: repair.repairs || [],
+    warnings: repair.warnings || [],
+    issues,
+    repairedParams: repair.repairedParams,
+    inputSuggestions,
+  };
 }
 
 export function repairHarnessParams(manifest, index, params = {}, options = {}) {

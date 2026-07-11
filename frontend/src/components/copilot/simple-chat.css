@@ -618,6 +618,11 @@
   border-color: var(--biof3-border-subtle, #eef2f7);
 }
 
+.sc-approval-harness-blocked {
+  background: rgba(255, 251, 235, 0.86);
+  border-color: rgba(217, 119, 6, 0.22);
+}
+
 .sc-approval-harness-warning {
   margin-top: 6px;
   color: var(--biof3-status-warning-fg, #92400e);

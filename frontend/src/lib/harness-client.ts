@@ -92,6 +92,32 @@ export interface HarnessParamRepair {
   inputSuggestions?: Array<Record<string, unknown>>;
 }
 
+export interface HarnessDiagnosticIssue {
+  code: string;
+  severity?: 'error' | 'warning' | string;
+  recoverable?: boolean;
+  inputId?: string | null;
+  message?: string;
+  detail?: string | null;
+  suggestedFix?: string | null;
+  failureMode?: {
+    code?: string;
+    title?: string;
+    recoverable?: boolean;
+  } | null;
+}
+
+export interface HarnessRunDiagnostics {
+  ok: boolean;
+  status: 'ready' | 'needs_review' | 'blocked' | string;
+  toolId?: string | null;
+  repairs?: Array<Record<string, unknown>>;
+  warnings?: Array<Record<string, unknown>>;
+  issues?: HarnessDiagnosticIssue[];
+  repairedParams?: Record<string, unknown>;
+  inputSuggestions?: Array<Record<string, unknown>>;
+}
+
 export interface HarnessRepairRequest {
   scope: 'project' | 'job' | 'artifact' | 'dataset';
   projectId?: string;
@@ -107,6 +133,7 @@ export interface HarnessRepairResponse {
   scope?: HarnessScopeInfo;
   index?: HarnessIndexSummary;
   repair?: HarnessParamRepair;
+  diagnostics?: HarnessRunDiagnostics | null;
   error?: string;
 }
 

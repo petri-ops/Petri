@@ -167,6 +167,11 @@ node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
   - MCP 结果的 `artifacts` / `outputs` / `files` 已补 `canonicalPath`。
   - 前端/HTTP 工具执行器也会把 execution/canonical 元信息写入 `tool_jobs.result_json`。
   - 缺失本地 R/Python 运行时会更早进入 failed，并留下 `runtimeReady` 上下文，便于 UI/Agent 做诊断。
+- Harness 诊断层第一版已接入：
+  - `diagnoseHarnessRunReadiness()` 会把参数修复、缺必需文件、矩阵方向不匹配、runtime 不可用等整合为 `ready / needs_review / blocked`。
+  - `/api/harness/repair` 会额外返回 `diagnostics`，保持 `repair` 兼容不变。
+  - 参数确认卡会展示 diagnostics；blocked 时禁用确认执行。
+  - 弱模型回归已覆盖第三个内置插件 `gene-correlation`，包括“相关/共表达/热图”意图识别和 `top_n` 裁剪。
 
 已通过：
 
@@ -183,6 +188,8 @@ npm run harness:check
 node --check vendor/biof3-core/r-server/mcp/registry.js
 node --check vendor/biof3-core/r-server/helpers/tools-executor.js
 node --test test/agent-run-tool.test.mjs test/harness-file-index.test.mjs
+npm --prefix frontend run check
+npm run build:spa
 ```
 
 ## 接下来优先级
@@ -212,9 +219,9 @@ npm run dev
 
 Phase 1 的 manifest / artifact / failureModes 基础已经落地，Phase 2 已经从“文件探测/索引”推进到“参数修复 + prompt 注入 + canonical execution context”。下一步继续推进：
 
-1. 扩充弱模型回归测试：覆盖更多内置插件、失败恢复、二跳分析链路。
+1. 扩充弱模型回归测试：覆盖更多失败恢复、二跳分析链路和真实历史结果输入。
 2. 增量索引：基于 mtime / hash 做局部更新，避免每次全量扫描。
-3. 统一 failureModes 诊断：把运行时缺失、参数不可修复、产物缺失、输入文件格式异常转为稳定结构。
+3. 继续统一 failureModes 诊断：把产物缺失、输入文件格式异常、运行后错误转为稳定结构。
 4. 把 canonical execution context 扩到步骤工具和云端 worker adapter。
 5. 梳理 `repairHarnessParams()` 与真实 `run_tool` 的边界：继续保持“可审计建议优先”，避免静默覆盖用户参数。
 

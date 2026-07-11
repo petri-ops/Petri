@@ -75,6 +75,12 @@
     - MCP 产物 `artifacts` / `outputs` / `files` 会带 `canonicalPath`，便于后续 Agent、云端 worker、结果解释和参数修复稳定引用。
     - HTTP/前端工具执行入口 `vendor/biof3-core/r-server/helpers/tools-executor.js` 也会把同样的 execution/canonical 元信息写入 `tool_jobs.result_json`。
     - 本地运行时缺失时会更早失败，并把 `runtimeReady` 写入可审计结果上下文。
+  - Harness 诊断层第一版已落地：
+    - `scripts/harness-file-index.mjs` 新增 `diagnoseHarnessRunReadiness()`。
+    - 弱模型工具排序已覆盖 `gene-correlation`，可以识别“相关/共表达/热图”意图。
+    - 诊断层会把缺必需文件、矩阵方向不匹配、样本/特征不足、runtime 不可用等转换成统一 `issues`。
+    - `/api/harness/repair` 保持原 `repair` 返回值不变，并额外返回 `diagnostics`。
+    - 参数确认卡会展示 `ready / needs_review / blocked` 诊断状态；blocked 时禁用“确认开始”，避免明显不可执行任务继续下发。
   - 新增 `test/harness-file-index.test.mjs`。
 
 ### 最近一次稳定化验证
@@ -107,6 +113,8 @@ npm run check
 node --check vendor/biof3-core/r-server/mcp/registry.js
 node --check vendor/biof3-core/r-server/helpers/tools-executor.js
 node --test test/agent-run-tool.test.mjs test/harness-file-index.test.mjs
+npm --prefix frontend run check
+npm run build:spa
 ```
 
 ### 现在最该做的事
@@ -114,10 +122,10 @@ node --test test/agent-run-tool.test.mjs test/harness-file-index.test.mjs
 1. 先读 `docs/harness-engine-spec.md`。
 2. 再读 `docs/next-steps-roadmap.md`。
 3. 继续 **Harness Phase 2 后半段**：
-   - 扩充弱模型回归测试，覆盖更多插件、失败恢复和二跳分析场景。
+   - 继续扩充弱模型回归测试，覆盖更多二跳分析和失败恢复场景。
    - 做增量索引：基于 mtime / hash 只更新变化文件，避免每次全量扫描。
    - 把 canonical execution context 用到更多任务编排入口，例如步骤工具、二次分析、云端 worker adapter。
-   - 继续收敛 failureModes：把运行时缺失、参数不可修复、产物缺失等失败转成统一可诊断结构。
+   - 继续收敛 failureModes：把产物缺失、输入文件格式异常、运行后失败等也转成统一可诊断结构。
 
 ### 当前原则
 

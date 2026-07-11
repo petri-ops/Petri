@@ -19,6 +19,8 @@ import { biof3Events, subscribeBioF3Event } from '@/lib/events';
 import {
   fetchHarnessToolManifest,
   repairHarnessParams,
+  type HarnessDiagnosticIssue,
+  type HarnessRunDiagnostics,
   type HarnessParamRepair,
   type HarnessToolManifest,
 } from '@/lib/harness-client';
@@ -77,7 +79,7 @@ interface PendingApproval {
 type ApprovalRepairState =
   | { status: 'idle' }
   | { status: 'loading' }
-  | { status: 'ready'; repair: HarnessParamRepair }
+  | { status: 'ready'; repair: HarnessParamRepair; diagnostics?: HarnessRunDiagnostics | null }
   | { status: 'skipped'; message: string }
   | { status: 'error'; message: string };
 
@@ -201,7 +203,7 @@ export function SimpleChat({
           return;
         }
         if (cancelled) return;
-        setApprovalRepair({ status: 'ready', repair });
+        setApprovalRepair({ status: 'ready', repair, diagnostics: response.diagnostics || null });
         setParamDraft((current) => {
           const next = { ...current };
           Object.entries(repair.repairedParams || {}).forEach(([key, value]) => {
@@ -759,6 +761,13 @@ function formatHarnessWarning(item: Record<string, unknown>): string {
   return `${inputId}: ${shortValue(item)}`;
 }
 
+function formatHarnessDiagnosticIssue(issue: HarnessDiagnosticIssue): string {
+  const inputId = issue.inputId ? `${String(issue.inputId)}：` : '';
+  const message = String(issue.message || issue.code || '诊断问题');
+  const detail = issue.detail ? `（${String(issue.detail)}）` : '';
+  return `${inputId}${message}${detail}`;
+}
+
 function ApprovalCard({
   approval,
   paramDraft,
@@ -779,6 +788,8 @@ function ApprovalCard({
   const paramEntries = Object.entries(paramDraft);
   const repairItems = repairState.status === 'ready' ? repairState.repair.repairs || [] : [];
   const warningItems = repairState.status === 'ready' ? repairState.repair.warnings || [] : [];
+  const diagnostics = repairState.status === 'ready' ? repairState.diagnostics : null;
+  const blockedByHarness = diagnostics?.status === 'blocked';
   return (
     <div className="sc-approval-card">
       <div className="sc-approval-header">
@@ -823,7 +834,8 @@ function ApprovalCard({
           type="button"
           className="sc-approval-btn sc-approval-approve"
           onClick={onApprove}
-          disabled={disabled}
+          disabled={disabled || blockedByHarness}
+          title={blockedByHarness ? 'Harness 诊断认为当前参数暂不可执行，请先修复阻塞项' : undefined}
         >
           <Icon name="check" size={13} /> 确认开始
         </button>
@@ -859,12 +871,18 @@ function ApprovalRepairHint({
   if (state.status === 'error') {
     return <div className="sc-approval-harness sc-approval-harness-warning">Harness 建议暂不可用：{state.message}</div>;
   }
-  if (!repairItems.length && !warningItems.length) {
+  const diagnostics = state.diagnostics || null;
+  const diagnosticIssues = diagnostics?.issues || [];
+  if (!repairItems.length && !warningItems.length && !diagnosticIssues.length) {
     return <div className="sc-approval-harness">Harness 已检查项目文件，当前参数无需自动修正。</div>;
   }
+  const blocked = diagnostics?.status === 'blocked';
+  const needsReview = diagnostics?.status === 'needs_review';
   return (
-    <div className="sc-approval-harness">
-      <div className="sc-approval-harness-title">Harness 参数建议</div>
+    <div className={`sc-approval-harness ${blocked ? 'sc-approval-harness-blocked' : ''}`}>
+      <div className="sc-approval-harness-title">
+        {blocked ? 'Harness 阻塞项' : needsReview ? 'Harness 需确认项' : 'Harness 参数建议'}
+      </div>
       {repairItems.length > 0 && (
         <ul className="sc-approval-harness-list">
           {repairItems.slice(0, 4).map((item, index) => (
@@ -872,9 +890,21 @@ function ApprovalRepairHint({
           ))}
         </ul>
       )}
+      {diagnosticIssues.length > 0 && (
+        <ul className="sc-approval-harness-list">
+          {diagnosticIssues.slice(0, 3).map((item, index) => (
+            <li key={`${String(item.code || 'issue')}-${index}`}>{formatHarnessDiagnosticIssue(item)}</li>
+          ))}
+        </ul>
+      )}
       {warningItems.length > 0 && (
         <div className="sc-approval-harness-warning">
           {warningItems.slice(0, 2).map((item) => formatHarnessWarning(item)).join('；')}
+        </div>
+      )}
+      {blocked && (
+        <div className="sc-approval-harness-warning">
+          当前参数暂不可执行，请先补齐文件、修正格式或配置运行时。
         </div>
       )}
     </div>
