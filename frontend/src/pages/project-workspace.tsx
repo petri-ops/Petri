@@ -126,6 +126,30 @@ function parseWorkspaceMode(value: string | null): WorkspaceMode | null {
   return WORKSPACE_MODES.includes(value as WorkspaceMode) ? (value as WorkspaceMode) : null;
 }
 
+function toCopilotHarnessSummary(index: HarnessIndexSummary | null | undefined) {
+  if (!index) return undefined;
+  return {
+    fileCount: index.fileCount || 0,
+    truncated: index.truncated,
+    byKind: index.byKind,
+    byRole: index.byRole,
+    entries: (index.entries || []).slice(0, 24).map((entry) => ({
+      relativePath: entry.relativePath,
+      kind: entry.kind,
+      role: entry.role,
+      readable: entry.readable,
+      table: entry.table
+        ? {
+            headers: (entry.table.headers || []).slice(0, 12),
+            columnCount: entry.table.columnCount,
+            rowSampleCount: entry.table.rowSampleCount,
+            matrixOrientation: entry.table.matrixOrientation,
+          }
+        : undefined,
+    })),
+  };
+}
+
 export function ProjectWorkspace(): React.ReactElement {
   const shell = useWorkspacePanelsContext();
   const { projectId } = useParams<{ projectId: string }>();
@@ -150,6 +174,7 @@ export function ProjectWorkspace(): React.ReactElement {
   const [browserCanGoBack, setBrowserCanGoBack] = useState(false);
   const [browserCanGoForward, setBrowserCanGoForward] = useState(false);
   const [openWorkspaceFiles, setOpenWorkspaceFiles] = useState<ActiveWorkspaceFile[]>([]);
+  const [copilotHarnessIndex, setCopilotHarnessIndex] = useState<HarnessIndexSummary | null>(null);
 
   // Conversation state — current project's conversations + active conversation.
   // Plan 1.6 §4.3 — useConversations is the shared SWR hook (cache lives
@@ -592,6 +617,24 @@ export function ProjectWorkspace(): React.ReactElement {
     }
   }, [projectId]);
 
+  useEffect(() => {
+    if (!projectId) {
+      setCopilotHarnessIndex(null);
+      return;
+    }
+    let cancelled = false;
+    fetchHarnessIndex({ scope: 'project', projectId, maxFiles: 80 })
+      .then((response) => {
+        if (!cancelled) setCopilotHarnessIndex(response.index || null);
+      })
+      .catch(() => {
+        if (!cancelled) setCopilotHarnessIndex(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
+
   const handleOpenWorkspacePath = useCallback(async () => {
     if (!project?.workspacePath) return;
     const result = await window.biof3Desktop?.files?.openPath?.(project.workspacePath);
@@ -800,6 +843,7 @@ export function ProjectWorkspace(): React.ReactElement {
           })),
           projectAnalysisSummary,
           projectAnalysisRecords,
+          projectHarnessSummary: toCopilotHarnessSummary(copilotHarnessIndex),
           activeJobId: activeJobId ?? undefined,
           activeArtifact,
         }
@@ -811,6 +855,7 @@ export function ProjectWorkspace(): React.ReactElement {
       jobs,
       activeJobId,
       activeArtifact,
+      copilotHarnessIndex,
       projectAnalysisSummary,
       projectAnalysisRecords,
     ]

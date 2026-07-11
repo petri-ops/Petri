@@ -143,6 +143,10 @@ node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
   - 调用 `POST /api/harness/repair` 使用当前 project scope 生成修复建议。
   - 建议在卡片内可见；确认后采用卡片中最终参数。
   - 异步建议不会覆盖用户已经手动修改过的参数。
+- Agent prompt 已接入项目 Harness summary：
+  - `ProjectWorkspace` 会把 project scope 的 Harness prompt summary 注入 `CopilotContext.projectHarnessSummary`。
+  - `system-prompt.js` 渲染 `【Harness 项目文件摘要】`，帮助 agent 结合 manifest 判断文件参数。
+  - 当前只接入 project scope；active job / artifact scope 仍可继续细化。
   - 摘要卡只展示轻量信息：文件数、类型分布、角色分布、前几个关键文件。
 
 已通过：

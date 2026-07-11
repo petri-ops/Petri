@@ -49,6 +49,10 @@
     - 使用 project scope 扫描当前项目文件，展示 Harness 参数建议。
     - repair 返回后只会填充/修正仍保持原值的参数；如果用户已经手动改了某个参数，不覆盖用户输入。
     - 用户点击“确认开始”后，会把可见且可编辑的修复后参数传回 `run_tool`。
+  - Agent prompt 已能读取当前项目的 Harness prompt summary：
+    - `ProjectWorkspace` 会获取 project scope 的 `/api/harness/index` prompt summary。
+    - `CopilotContext.projectHarnessSummary` 只保留文件数、kind/role 统计和前若干候选文件，避免把完整索引塞进 prompt。
+    - `vendor/biof3-core/r-server/helpers/system-prompt.js` 会渲染 `【Harness 项目文件摘要】`，task/legacy agent 路径都会生效。
   - 新增 `test/harness-file-index.test.mjs`。
 
 ### 最近一次稳定化验证
@@ -90,7 +94,7 @@ npm run check
 2. 再读 `docs/harness-engine-spec.md`。
 3. 再读 `docs/next-steps-roadmap.md`。
 4. 然后继续 **Harness Phase 2**：
-   - 让 Agent prompt 能读取 active project/job/artifact 的 Harness prompt summary。
+   - 让 Agent prompt 进一步读取 active job/artifact 的 Harness prompt summary。
    - 建立平台抽象层。
    - 增加弱模型只拿 manifest + index summary 也能选工具和补参数的回归测试。
 

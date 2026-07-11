@@ -74,6 +74,25 @@ export interface CopilotContext {
     createdAt: number;
     completedAt?: number;
   }[];
+  /** Compact Harness file-index summary for agent parameter planning. */
+  projectHarnessSummary?: {
+    fileCount: number;
+    truncated?: boolean;
+    byKind?: Record<string, number>;
+    byRole?: Record<string, number>;
+    entries?: {
+      relativePath: string;
+      kind: string;
+      role: string;
+      readable?: boolean;
+      table?: {
+        headers?: string[];
+        columnCount?: number;
+        rowSampleCount?: number;
+        matrixOrientation?: string;
+      };
+    }[];
+  };
   /** Current active job id being viewed */
   activeJobId?: string;
   /** Current artifact/file being viewed inside the project result panel */
