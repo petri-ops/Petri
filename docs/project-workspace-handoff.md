@@ -57,6 +57,10 @@
     - `ProjectWorkspace` 会对当前 active done job 获取 artifact scope 的 `/api/harness/index` prompt summary。
     - `CopilotContext.activeJobHarnessSummary` 会进入 prompt 的 `【Harness 当前结果产物摘要】`。
     - 若当前选中了 active artifact，prompt 会优先标出匹配文件，方便 Agent 解释当前结果和选择后续输入。
+  - 弱模型回归测试第一版已落地：
+    - `scripts/harness-file-index.mjs` 新增 `rankHarnessToolsForRequest()`。
+    - 不调用 LLM，仅根据用户意图、工具 manifest 和 Harness index summary 做确定性工具排序。
+    - `test/harness-file-index.test.mjs` 已覆盖“差异结果画火山图”和“表达矩阵做 PCA”两条场景，验证选工具、绑定文件和参数修复。
   - 新增 `test/harness-file-index.test.mjs`。
 
 ### 最近一次稳定化验证
@@ -99,7 +103,7 @@ npm run check
 3. 再读 `docs/next-steps-roadmap.md`。
 4. 然后继续 **Harness Phase 2**：
    - 建立平台抽象层。
-   - 增加弱模型只拿 manifest + index summary 也能选工具和补参数的回归测试。
+   - 继续扩充弱模型回归测试，覆盖更多插件和失败恢复场景。
 
 ### 当前原则
 

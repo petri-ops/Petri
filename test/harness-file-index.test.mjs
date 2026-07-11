@@ -9,6 +9,7 @@ import {
   indexDirectory,
   inferColumnMappings,
   readIndexCache,
+  rankHarnessToolsForRequest,
   repairHarnessParams,
   resolveHarnessScope,
   suggestInputBindings,
@@ -23,6 +24,12 @@ function withTempDir(fn) {
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
+}
+
+function readBuiltInManifest(id) {
+  return JSON.parse(
+    fs.readFileSync(path.join(process.cwd(), 'resources', 'built-in-plugins', id, 'tool-definition.json'), 'utf8'),
+  );
 }
 
 test('detectFile detects DEG table headers and failure-repair useful hints', () => {
@@ -206,5 +213,60 @@ test('repairHarnessParams clamps PCA n_components to matrix capacity', () => {
     );
     assert.equal(repaired.repairedParams.expr_matrix, 'expr.csv');
     assert.equal(repaired.repairedParams.n_components, 2);
+  });
+});
+
+test('weak-agent regression ranks volcano plot and repairs DEG params from index summary', () => {
+  withTempDir((dir) => {
+    fs.writeFileSync(path.join(dir, 'deg_alias.csv'), 'symbol,avg_log2FC,p_val\nTP53,1,0.01\nEGFR,-2,0.001\n');
+    fs.writeFileSync(path.join(dir, 'expr.csv'), 'Sample,G1,G2\nS1,1,2\nS2,3,4\n');
+    const index = indexDirectory(dir, { hash: false });
+    const volcano = readBuiltInManifest('volcano-plot');
+    const pca = readBuiltInManifest('pca-explorer');
+    const ranked = rankHarnessToolsForRequest('用当前项目里的差异分析结果画火山图，标注最多 999 个基因', [pca, volcano], index);
+
+    assert.equal(ranked[0].toolId, 'volcano-plot');
+    assert.ok(ranked[0].reasons.includes('intent_volcano'));
+    assert.equal(
+      ranked[0].inputSuggestions.find((binding) => binding.inputId === 'deg_table')?.selected?.relativePath,
+      'deg_alias.csv',
+    );
+
+    const repaired = repairHarnessParams(volcano, index, { top_n: 999 });
+    assert.equal(repaired.repairedParams.deg_table, 'deg_alias.csv');
+    assert.equal(repaired.repairedParams.top_n, 2);
+    assert.deepEqual(repaired.repairedParams.columnMappings.deg_table, {
+      gene: 'symbol',
+      log2FC: 'avg_log2FC',
+      pvalue: 'p_val',
+    });
+  });
+});
+
+test('weak-agent regression ranks PCA and binds expression matrix plus group file', () => {
+  withTempDir((dir) => {
+    fs.writeFileSync(path.join(dir, 'expression_matrix.csv'), 'Sample,G1,G2,G3\nS1,1,2,3\nS2,4,5,6\nS3,7,8,9\n');
+    fs.writeFileSync(path.join(dir, 'sample_groups.csv'), 'sample,group\nS1,A\nS2,B\nS3,A\n');
+    fs.writeFileSync(path.join(dir, 'deg.csv'), 'gene,log2FC,pvalue\nTP53,1,0.01\n');
+    const index = indexDirectory(dir, { hash: false });
+    const volcano = readBuiltInManifest('volcano-plot');
+    const pca = readBuiltInManifest('pca-explorer');
+    const ranked = rankHarnessToolsForRequest('对表达矩阵做 PCA 降维，并按分组文件上色', [volcano, pca], index);
+
+    assert.equal(ranked[0].toolId, 'pca-explorer');
+    assert.ok(ranked[0].reasons.includes('intent_pca'));
+    assert.equal(
+      ranked[0].inputSuggestions.find((binding) => binding.inputId === 'expr_matrix')?.selected?.relativePath,
+      'expression_matrix.csv',
+    );
+    assert.equal(
+      ranked[0].inputSuggestions.find((binding) => binding.inputId === 'group_file')?.selected?.relativePath,
+      'sample_groups.csv',
+    );
+
+    const repaired = repairHarnessParams(pca, index, { n_components: 10 });
+    assert.equal(repaired.repairedParams.expr_matrix, 'expression_matrix.csv');
+    assert.equal(repaired.repairedParams.group_file, 'sample_groups.csv');
+    assert.equal(repaired.repairedParams.n_components, 3);
   });
 });

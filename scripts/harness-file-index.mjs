@@ -522,6 +522,99 @@ export function suggestInputBindings(manifest, index, options = {}) {
     });
 }
 
+function textForTool(manifest = {}) {
+  const inputText = (manifest.inputs || [])
+    .map((input) => textForInput(input))
+    .filter(Boolean)
+    .join(' ');
+  const outputText = (manifest.outputs || manifest.artifacts || [])
+    .map((output) => [output.id, output.label, output.name, output.type].filter(Boolean).join(' '))
+    .join(' ');
+  return [
+    manifest.id,
+    manifest.name,
+    manifest.title,
+    manifest.subtitle,
+    manifest.category,
+    manifest.description,
+    manifest.longDescription,
+    inputText,
+    outputText,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+}
+
+function requestIntentHints(requestText) {
+  const text = String(requestText || '').toLowerCase();
+  return {
+    wantsVolcano: /volcano|火山/.test(text),
+    wantsPca: /\bpca\b|主成分|降维/.test(text),
+    wantsDeg: /deg|差异|differential|de(seq)?2|log2?fc|p-?value/.test(text),
+    wantsExpression: /expr|expression|表达|矩阵|count/.test(text),
+    wantsGroup: /group|metadata|sample|分组|样本/.test(text),
+  };
+}
+
+export function rankHarnessToolsForRequest(requestText, manifests = [], index = {}, options = {}) {
+  const hints = requestIntentHints(requestText);
+  const minRequiredBindings = options.minRequiredBindings ?? true;
+  return manifests
+    .map((manifest) => {
+      const toolText = textForTool(manifest);
+      const inputSuggestions = suggestInputBindings(manifest, index, { minScore: options.minInputScore ?? 25 });
+      const requiredFileInputs = inputSuggestions.filter((binding) => binding.required);
+      const missingRequired = requiredFileInputs.filter((binding) => !binding.selected);
+      let score = 0;
+      const reasons = [];
+
+      if (hints.wantsVolcano && /volcano|火山/.test(toolText)) {
+        score += 80;
+        reasons.push('intent_volcano');
+      }
+      if (hints.wantsPca && /\bpca\b|主成分|降维/.test(toolText)) {
+        score += 80;
+        reasons.push('intent_pca');
+      }
+      if (hints.wantsDeg && /deg|差异|differential|log2?fc|p-?value/.test(toolText)) {
+        score += 35;
+        reasons.push('intent_deg');
+      }
+      if (hints.wantsExpression && /expr|expression|表达|矩阵|count/.test(toolText)) {
+        score += 35;
+        reasons.push('intent_expression');
+      }
+      if (hints.wantsGroup && /group|metadata|sample|分组|样本/.test(toolText)) {
+        score += 20;
+        reasons.push('intent_group');
+      }
+
+      for (const binding of inputSuggestions) {
+        if (!binding.selected) continue;
+        const selectedScore = Number(binding.selected.score || 0);
+        score += Math.min(40, Math.round(selectedScore / 2));
+        reasons.push(`input_${binding.inputId}_matched`);
+      }
+
+      if (missingRequired.length) {
+        score -= minRequiredBindings ? 120 : 40;
+        reasons.push('missing_required_file_inputs');
+      }
+
+      return {
+        toolId: manifest.id || manifest.name,
+        title: manifest.title || manifest.name || manifest.id,
+        score,
+        reasons,
+        inputSuggestions,
+        missingRequired: missingRequired.map((binding) => binding.inputId),
+      };
+    })
+    .filter((ranked) => ranked.toolId)
+    .sort((a, b) => b.score - a.score || String(a.toolId).localeCompare(String(b.toolId)));
+}
+
 const COLUMN_ALIASES = {
   gene: ['gene', 'symbol', 'gene_name', 'geneid', 'gene_id', 'genes'],
   log2FC: ['log2fc', 'logfc', 'avg_log2fc', 'avg_logfc', 'foldchange', 'fold_change'],

@@ -149,6 +149,9 @@ node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
 - Agent prompt 已接入 active job / artifact Harness summary：
   - 当前 active done job 会额外加载 artifact scope 的 Harness prompt summary。
   - `system-prompt.js` 渲染 `【Harness 当前结果产物摘要】`，并优先标出当前选中的 artifact 匹配文件。
+- 弱模型回归第一版已接入：
+  - `rankHarnessToolsForRequest()` 根据用户请求、工具 manifest 和 Harness index summary 做确定性工具排序。
+  - 测试覆盖“差异结果画火山图”和“表达矩阵做 PCA”，验证无需真实 LLM 也能选中工具、绑定文件并修复参数。
   - 摘要卡只展示轻量信息：文件数、类型分布、角色分布、前几个关键文件。
 
 已通过：
