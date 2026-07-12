@@ -4,6 +4,28 @@
 
 这份文档用于在切换工作区后恢复当前开发状态。当前阶段不是功能主线开发，而是在把 BioF3 项目工作台的前端骨架尽量收口到 Codex 式体验：轻、窄、白、少阴影、三栏对齐、输入区稳定贴底、右侧工具可预测。
 
+## 最新同步状态
+
+- 当前主分支已经吸收远程跨平台 runtime 分支的核心改动，不再是“待合并”状态。
+- 这次同步的重点不是 UI，而是桌面运行时、插件安装、路径映射、Harness 索引与修复链路。
+- 现在的工作重点变成“合并后稳定化”：
+  - 确认跨平台 runtime 选择逻辑稳定。
+  - 确认 Harness 的文件索引、参数修复、诊断链路稳定。
+  - 确认桌面壳、路由、构建和 vendor 同步都没有漂移。
+- Harness 的定位要继续往通用交互式执行底座上抬，不要被局限成单纯的生信流程器。
+
+## 当前结果页状态
+
+- 中间会话区里不再展示分析记录卡片，聊天只保留对话本身。
+- 结果页顶部的“分析结果 / 摘要已生成”标题块已经去掉，避免重复信息。
+- 结果查看器已经收敛成“主预览 + 目录导航”的结构：
+  - 图表 / 表格 / 文本 / HTML 预览放在主区域。
+  - 其他分组和文件放在侧边目录里。
+- 结果目录现在放在右侧，并且做了紧凑化处理：
+  - 降低了字号、间距、圆角和卡片感。
+  - 分组与文件都压成更像目录条目的视觉。
+- 这次目标不是继续加新入口，而是把结果区维持在“简洁但内容不缺”的状态。
+
 ## 给下一位 Codex Agent 的交接提示
 
 你是接手这个任务的下一位 Codex 时，请直接沿着下面的方向继续，不要重做已经完成的 UI 收口。
@@ -12,14 +34,19 @@
 
 先把最近这批桌面端大改动稳定住，再推进 BioF3 的 **Harness Engine v1** 落地。当前项目经历了大量 UI、路由、状态和 Electron dev-mode 改动，下一位 agent 不应直接跳到新功能，而应先确认当前壳子稳定。
 
+补充一句：当前 UI 的结果工作台已经从“聊天里挂结果卡”切到“右侧结果目录 + 主预览”的模式，后续不要再把分析记录、标题摘要、解释按钮加回聊天流里。
+
 ### 当前已完成
 
 - 项目工作台 UI 已基本收口到 Codex-like 三栏结构。
 - 结果卡片、摘要卡、右侧工具区的视觉层级已经显著简化。
+- 聊天区里的分析记录卡、结果解释按钮、打开完整结果按钮已移除。
+- 结果查看器已改为右侧目录导航 + 主预览的紧凑布局。
 - 桌面端已大幅瘦身：移除 skills / algorithms / prompt playground 等旧入口，`/single-cell` 和 `/spatial` 不再挂到桌面 SPA 路由。
 - 已清理桌面导航中仍指向已移除路由的入口。
 - 已清理摘要卡 resize 残留状态；摘要卡按固定窄高卡片处理。
 - 已新增 `docs/harness-engine-spec.md`，作为 Harness 规范主文档。
+- 已新增 `docs/harness-roadmap.md`，作为 Harness 的阶段路线图。
 - 已在 `docs/next-steps-roadmap.md` 里挂上 Harness 落地入口。
 - Harness Phase 1 基础已落地：
   - `plugin-loader.normalizePluginManifest()` 统一读取 `plugin.json + tool-definition.json`。
@@ -30,11 +57,13 @@
   - `scripts/harness-file-index.mjs` 提供可复用文件探测、目录索引和缓存读写。
   - `npm run harness:index -- <path>` 可输出 `harnessIndexVersion: 1` 结构化索引。
   - 支持 CSV / TSV 表头、列类型、缺失值、矩阵方向、DEG 表、样本分组表、表达矩阵等识别。
+  - 支持基于缓存的增量索引重建，未变化文件会复用旧索引。
   - 支持 `--for-manifest <tool-definition.json>`，可根据插件输入定义推荐候选文件。
   - 支持 `--scope project|job|artifact|dataset`，可以解析真实 BioF3 工作范围。
   - 支持 `--prompt-summary`，输出给模型使用的轻量摘要。
   - 支持 `--repair-params`，输出参数修复建议。
   - `repairHarnessParams()` 已能做文件输入预填、DEG 列名别名映射、数值参数裁剪。
+  - `diagnoseHarnessRunReadiness()` 已能识别 `code` / `detect` 双通道失败模式，并补充 PCA 的 sample-group mismatch 诊断。
   - 后端已新增 Harness API：
     - `GET /api/harness/index`
     - `POST /api/harness/repair`
@@ -128,7 +157,7 @@ npm run build:spa
 
 1. 先读 `docs/harness-engine-spec.md`。
 2. 再读 `docs/next-steps-roadmap.md`。
-3. 继续 **Harness Phase 2 后半段**：
+3. 继续 **Harness Phase 2 后半段**，但不要再回头改旧的结果卡片交互：
    - 继续扩充弱模型回归测试，覆盖更多二跳分析和失败恢复场景。
    - 做增量索引：基于 mtime / hash 只更新变化文件，避免每次全量扫描。
    - 把 canonical execution context 用到更多任务编排入口，例如步骤工具、二次分析、云端 worker adapter。

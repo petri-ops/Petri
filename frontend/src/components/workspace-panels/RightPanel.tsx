@@ -137,7 +137,6 @@ export function RightPanel({
                     activeArtifact={ctx.activeArtifact}
                     onActiveArtifactChange={ctx.setActiveArtifact}
                     onAskAgent={ctx.handleAskAgent}
-                    onOpenFullResult={ctx.handleOpenResult}
                   />
                 )}
                 {tab === 'files' && (
@@ -171,7 +170,6 @@ export function RightPanel({
                         projectId={ctx.projectId}
                         conversationId={ctx.activeConvId}
                         onConversationChange={ctx.setActiveConvId}
-                        onOpenResult={ctx.handleOpenResult}
                         inputHeight={96}
                       />
                     )}

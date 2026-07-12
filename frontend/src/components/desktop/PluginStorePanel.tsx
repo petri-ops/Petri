@@ -17,7 +17,7 @@ interface Props {
   onClose: () => void;
 }
 
-type CategoryId = 'all' | 'runtime' | 'tool' | 'figcode' | 'data';
+type CategoryId = 'all' | 'runtime' | 'tool';
 
 interface Category {
   id: CategoryId;
@@ -33,28 +33,12 @@ const CATEGORIES: Category[] = [
     id: 'tool',
     label: '分析工具',
     icon: 'bar-chart',
-    filter: (_, info) =>
-      !info.type ||
-      (info.type !== 'runtime' && info.type !== 'figcode-card' && info.type !== 'figcode-data'),
-  },
-  {
-    id: 'figcode',
-    label: 'FigCode 绘图',
-    icon: 'image',
-    filter: (_, info) => info.type === 'figcode-card',
-  },
-  {
-    id: 'data',
-    label: '数据包',
-    icon: 'archive',
-    filter: (_, info) => info.type === 'figcode-data',
+    filter: (_, info) => !info.type || info.type !== 'runtime',
   },
 ];
 
 function getCategoryIcon(info: RemotePlugin): IconName {
   if (info.type === 'runtime') return 'cpu';
-  if (info.type === 'figcode-card') return 'image';
-  if (info.type === 'figcode-data') return 'archive';
   return 'bar-chart';
 }
 
@@ -162,6 +146,8 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
   const remotePlugins = remote.plugins || {};
   const remoteEntries = Object.entries(remotePlugins);
   const installedIds = new Set(installed.map((p) => p.id));
+  const installedById = new Map(installed.map((p) => [p.id, p]));
+  const driftedIds = new Set(installed.filter((p) => p.manifestDrift).map((p) => p.id));
   const updateMap = new Map(updates.map((u) => [u.id, u]));
   const hasUpdates = updates.length > 0;
 
@@ -175,7 +161,7 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
     runtimeStatus && (!runtimeStatus.r.installed || !runtimeStatus.python.installed);
 
   const categoryCounts = useMemo(() => {
-    const counts: Record<CategoryId, number> = { all: 0, runtime: 0, tool: 0, figcode: 0, data: 0 };
+    const counts: Record<CategoryId, number> = { all: 0, runtime: 0, tool: 0 };
     for (const [id, info] of remoteEntries) {
       counts.all++;
       for (const cat of CATEGORIES) {
@@ -215,6 +201,13 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
     if (pluginId === 'biof3-r-runtime') return rRuntimeInstalled;
     if (pluginId === 'biof3-py-runtime') return pyRuntimeInstalled;
     return installedIds.has(pluginId);
+  }
+
+  function isPluginDrifted(pluginId: string): boolean {
+    if (pluginId === 'biof3-r-runtime' || pluginId === 'biof3-py-runtime') {
+      return !!installedById.get(pluginId)?.manifestDrift;
+    }
+    return driftedIds.has(pluginId);
   }
 
   return (
@@ -320,6 +313,9 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
                           {info.title || id}
                           {isInstalled && (
                             <span className="biof3-plugin-store__badge-ok">✓ 已安装</span>
+                          )}
+                          {isInstalled && isPluginDrifted(id) && (
+                            <span className="biof3-plugin-store__badge-drift">已变更</span>
                           )}
                         </div>
                         <div className="biof3-plugin-store__runtime-meta">
@@ -428,6 +424,14 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
                           {info.title || id}
                         </div>
                         {isInstalled && <span className="biof3-plugin-card__badge">✓</span>}
+                        {isInstalled && isPluginDrifted(id) && (
+                          <span
+                            className="biof3-plugin-card__badge-drift"
+                            title="安装后脚本或清单已发生变化"
+                          >
+                            已变更
+                          </span>
+                        )}
                         {hasUpdate && (
                           <span
                             className="biof3-plugin-card__badge-update"
@@ -446,7 +450,7 @@ export function PluginStorePanel({ onClose }: Props): React.ReactElement {
                           <span className={`lang-${info.language}`}>{info.language}</span>
                         )}
                         {info.size ? <span>{formatSize(info.size)}</span> : <span>—</span>}
-                        {info.type === 'figcode-data' && <span className="tag-data">数据包</span>}
+                        {info.type === 'data' && <span className="tag-data">数据包</span>}
                         {info.optional && <span className="tag-optional">可选</span>}
                       </div>
                       <div className="biof3-plugin-card__action">

@@ -2,7 +2,7 @@
 
 最后更新：2026-07-12
 
-当前路线图已经从“拆组件/拆 hooks”阶段，切换到“桌面端工作台稳定化 + Harness Engine v1”阶段。继续开发时不要先急着加新功能；这轮改动很大，必须先确保桌面壳子、路由和构建稳定，再进入 Harness Phase 1。
+当前路线图已经从“拆组件/拆 hooks”阶段，切换到“桌面端工作台稳定化 + Harness Engine v1”阶段。当前又叠加了远程跨平台 runtime 分支的合并收口，因此继续开发时不要先急着加新功能；先确保桌面壳子、路由、构建、Harness 索引/修复与跨平台 runtime 逻辑都稳定，再进入下一轮扩展。
 
 ## 当前阶段目标
 
@@ -143,6 +143,10 @@ node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
   - 调用 `POST /api/harness/repair` 使用当前 project scope 生成修复建议。
   - 建议在卡片内可见；确认后采用卡片中最终参数。
   - 异步建议不会覆盖用户已经手动修改过的参数。
+- 结果页已进一步收口为“主预览 + 右侧目录导航”：
+  - 聊天区里的分析记录卡、`打开完整结果` / `解释结果` 按钮已经移除。
+  - 结果页的标题块（分析结果 / 摘要已生成）已经移除。
+  - 右侧目录已压缩为更紧凑的侧边导航，主预览保留图表、表格、文本与 HTML 结果。
 - Agent prompt 已接入项目 Harness summary：
   - `ProjectWorkspace` 会把 project scope 的 Harness prompt summary 注入 `CopilotContext.projectHarnessSummary`。
   - `system-prompt.js` 渲染 `【Harness 项目文件摘要】`，帮助 agent 结合 manifest 判断文件参数。
@@ -217,6 +221,7 @@ npm run dev
 - `+` 是否始终打开工具菜单，而不是跳回主页。
 - 摘要按钮是否能打开窄高摘要卡，默认是否关闭。
 - 中间结果输出区是否居中、有左右留白。
+- 结果页是否仍保持“主预览 + 右侧目录导航”的紧凑形态，而不是把分析记录或标题块加回去。
 - 桌面 Dock 和导航面板是否只出现有效路由入口。
 - vendor/biof3-core 的改动是否确认为本次快照的一部分。
 - `.cursor/` 是否需要提交或加入忽略。
@@ -226,13 +231,14 @@ npm run dev
 Phase 1 的 manifest / artifact / failureModes 基础已经落地，Phase 2 已经从“文件探测/索引”推进到“参数修复 + prompt 注入 + canonical execution context”。下一步继续推进：
 
 1. 扩充弱模型回归测试：覆盖更多失败恢复、二跳分析链路和真实历史结果输入。
-2. 增量索引：基于 mtime / hash 做局部更新，避免每次全量扫描。
+2. 增量索引已落地：基于 mtime / hash 做局部更新，避免每次全量扫描；后续继续补更复杂目录与更大数据集的回归。
 3. 继续统一 failureModes 诊断：把产物缺失、输入文件格式异常、运行后错误转为稳定结构。
 4. 把 canonical execution context 扩到步骤工具和云端 worker adapter。
 5. 梳理 `repairHarnessParams()` 与真实 `run_tool` 的边界：继续保持“可审计建议优先”，避免静默覆盖用户参数。
 6. 为跨平台主链路补 Windows / Linux / macOS CI，避免再次出现长期分支不同步。
 
-详细规范见：[Harness Engine Spec v1](./harness-engine-spec.md)。
+详细规范见：[Harness Engine Spec v1](./harness-engine-spec.md)。  
+详细路线图见：[Harness Roadmap v1](./harness-roadmap.md)。
 
 ### P2：继续必要的视觉精修
 

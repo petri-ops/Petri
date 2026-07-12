@@ -11,7 +11,6 @@ import { BackendDownBanner } from '@/components/backend/BackendDownBanner';
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { biof3Events, subscribeBioF3Event } from '@/lib/events';
 import ToolsPage from '@/pages/tools';
-import FigCodePage from '@/pages/figcode';
 // NOTE: SingleCellPage and SpatialPage routes are intentionally disabled on the desktop
 // branch. The underlying pages/pages/single-cell and pages/spatial files are preserved
 // because their utilities (_Toast, _ErrorTranslate, _auth, _AdminPanel) are still
@@ -104,9 +103,6 @@ export default function App(): React.ReactElement {
               <Route path="/project/:projectId" element={<ProjectWorkspace />} />
               <Route path="/tools" element={<ToolsPage />} />
               <Route path="/tools/:toolId" element={<ToolsPage />} />
-              {/* single-cell and spatial routes intentionally removed — §10 state-decomposition */}
-              <Route path="/figcode" element={<FigCodePage />} />
-              <Route path="/figcode/:cardId" element={<FigCodePage />} />
               <Route path="/admin" element={<AdminPage />} />
               {/* 教程路由已移除 — 桌面端不再内置教程入口。
                   原生渲染组件（pages/docs.tsx / docs-frame.tsx / mdx/）保留在代码库中，

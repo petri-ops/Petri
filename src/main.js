@@ -240,7 +240,6 @@ function resolveNodeBin() {
 const NODE_BIN = resolveNodeBin();
 
 // ── 基础 Runtime 自带包集合 ─────────────────────────────────────
-// figcode:check-packages 和 figcode:card-status 共用
 const BASE_R_PACKAGES = new Set([
   "ggplot2",
   "dplyr",
@@ -587,7 +586,7 @@ function stopPyServer(reason = "ipc") {
 }
 
 // ── 启动 R plumber replot 服务（按需启停）──────────────────────
-// M2-7：plumber 改为 lazy——仅在 figcode 重绘时通过 IPC plumber:start 启动。
+// M2-7：plumber 改为 lazy——仅在重绘时通过 IPC plumber:start 启动。
 let plumberProc = null;
 let plumberIdleTimer = null;
 const PLUMBER_IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5 分钟无调用自动停
@@ -1081,7 +1080,7 @@ function setupPluginIpc() {
 // ── M1-2：CSP 加固 ─────────────────────────────────────────────
 // 禁用 unsafe-eval，限制资源来源。connect-src 放开 localhost:* 覆盖
 // r-server(3001)/py-server(3004)/plumber(8787)/dev server(3000)/SSE。
-// frame-src 放开 localhost:* 供 figcode iframe 用。
+// frame-src 放开 localhost:* 供本地可视化嵌入用。
 // 不回退 unsafe-eval——Vite 生产构建已无 eval 需求。
 function setupCsp() {
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
@@ -1145,7 +1144,7 @@ function setupRuntimeIpc() {
 
 // ── IPC：M2-7 按需启停 py-server / plumber ──────────────────────
 // 前端在用 Python 工具前调 biof3Desktop.py.start()，用完调 .stop()；
-// plumber 在 figcode 重绘前调 .start()。未调用时 5min idle 自动 stop。
+// plumber 在重绘前调 .start()。未调用时 5min idle 自动 stop。
 function setupBackendLifecycleIpc() {
   ipcMain.handle("py:start", async () => {
     try {
@@ -1176,202 +1175,6 @@ function setupBackendLifecycleIpc() {
       return stopPlumber("ipc");
     } catch (e) {
       return { ok: false, error: e.message };
-    }
-  });
-}
-
-// ── IPC：FigCode 包检测 ───────────────────────────────────────
-// 检查一张卡片的依赖包是否已安装（通过已装 figcode-card 插件或基础 runtime 覆盖）
-// 返回 missing 包列表 + 对应的 figcode-card 插件推荐
-function setupFigcodeIpc() {
-  ipcMain.handle(
-    "figcode:check-packages",
-    async (event, { language, packages, cardId }) => {
-      try {
-        if (!Array.isArray(packages) || packages.length === 0) {
-          return {
-            ok: true,
-            missing: [],
-            missingPlugins: [],
-            cardInstalled: true,
-          };
-        }
-
-        const {
-          getInstalledPlugins,
-          getRemoteManifest,
-        } = require("./plugin-manager");
-        const installed = getInstalledPlugins();
-        const remote = await getRemoteManifest().catch(() => ({ plugins: {} }));
-        const allPlugins = remote.plugins || {};
-
-        // 收集已装 figcode-card / figcode-data 插件提供的包
-        const installedFigcode = installed.filter((p) => {
-          const meta = allPlugins[p.id];
-          return (
-            meta &&
-            (meta.type === "figcode-card" || meta.type === "figcode-data")
-          );
-        });
-
-        const providedPackages = new Set();
-        for (const plug of installedFigcode) {
-          const meta = allPlugins[plug.id];
-          if (!meta) continue;
-          const pkgList = meta.packages?.[language] || [];
-          for (const pkg of pkgList) providedPackages.add(pkg);
-        }
-
-        // 基础 runtime 自带的包
-        const baseSet =
-          language === "python" ? BASE_PY_PACKAGES : BASE_R_PACKAGES;
-
-        // 检查每个包
-        const missing = [];
-        for (const pkg of packages) {
-          if (!providedPackages.has(pkg) && !baseSet.has(pkg)) {
-            missing.push(pkg);
-          }
-        }
-
-        // 检查这张卡片对应的插件是否已安装
-        const cardPluginId = cardId ? "figcode-" + cardId : null;
-        const cardInManifest = cardPluginId && allPlugins[cardPluginId];
-        // 卡片已安装 = 插件已装 OR 卡片不在 manifest 中（只用基础包，不需要插件）
-        // OR 卡片在 manifest 中但所有包都在基础 runtime 中（edge case）
-        const cardInstalled = cardPluginId
-          ? installed.some((i) => i.id === cardPluginId) || !cardInManifest
-          : true;
-
-        // 找出哪些 figcode-card / figcode-data 插件能补齐 missing
-        const missingPlugins = [];
-        if (missing.length > 0 || !cardInstalled) {
-          for (const [pid, meta] of Object.entries(allPlugins)) {
-            if (meta.type !== "figcode-card" && meta.type !== "figcode-data")
-              continue;
-            if (meta.language !== language) continue;
-
-            // 如果是按 cardId 精确匹配
-            if (cardId && meta.figcodeCardId === cardId) {
-              const alreadyInstalled = installed.some((i) => i.id === pid);
-              if (!alreadyInstalled) {
-                missingPlugins.push({
-                  id: pid,
-                  title: meta.title,
-                  description: meta.description,
-                  size: meta.size,
-                  type: meta.type,
-                  dependencies: meta.dependencies || [],
-                });
-              }
-              continue;
-            }
-
-            // 按 package 覆盖匹配（fallback）
-            const pkgList = meta.packages?.[language] || [];
-            const provides = new Set(pkgList);
-            const covers = missing.some((p) => provides.has(p));
-            const alreadyInstalled = installed.some((i) => i.id === pid);
-            if (covers && !alreadyInstalled) {
-              missingPlugins.push({
-                id: pid,
-                title: meta.title,
-                description: meta.description,
-                size: meta.size,
-                type: meta.type,
-                dependencies: meta.dependencies || [],
-              });
-            }
-          }
-        }
-
-        // 检查依赖的数据包是否也安装了
-        const allMissingIds = new Set(missingPlugins.map((p) => p.id));
-        for (const plug of missingPlugins) {
-          for (const depId of plug.dependencies || []) {
-            if (
-              !installed.some((i) => i.id === depId) &&
-              !allMissingIds.has(depId)
-            ) {
-              const depMeta = allPlugins[depId];
-              if (depMeta) {
-                missingPlugins.push({
-                  id: depId,
-                  title: depMeta.title,
-                  description: depMeta.description,
-                  size: depMeta.size,
-                  type: depMeta.type,
-                });
-                allMissingIds.add(depId);
-              }
-            }
-          }
-        }
-
-        return { ok: true, missing, missingPlugins, cardInstalled };
-      } catch (e) {
-        console.error("[figcode] check-packages error:", e.message);
-        return {
-          ok: false,
-          error: e.message,
-          missing: [],
-          missingPlugins: [],
-          cardInstalled: false,
-        };
-      }
-    },
-  );
-
-  // 查询所有 figcode-card 插件的安装状态（供前端灰显用）
-  ipcMain.handle("figcode:card-status", async (event, cardIds) => {
-    try {
-      if (!Array.isArray(cardIds)) return { ok: true, statuses: {} };
-
-      const {
-        getInstalledPlugins,
-        getRemoteManifest,
-      } = require("./plugin-manager");
-      const installed = getInstalledPlugins();
-      const remote = await getRemoteManifest().catch(() => ({ plugins: {} }));
-      const allPlugins = remote.plugins || {};
-
-      // 已装插件 ID 集合
-      const installedIds = new Set(installed.map((p) => p.id));
-
-      const statuses = {};
-      for (const cardId of cardIds) {
-        const pluginId = "figcode-" + cardId;
-        const meta = allPlugins[pluginId];
-
-        if (!meta) {
-          // 不在 manifest 中 = 只用基础包 = 总是可用
-          statuses[cardId] = { installed: true, needsPlugin: false };
-          continue;
-        }
-
-        const isInstalled = installedIds.has(pluginId);
-        if (isInstalled) {
-          statuses[cardId] = { installed: true, needsPlugin: true, pluginId };
-        } else {
-          // 检查依赖的数据包
-          const deps = meta.dependencies || [];
-          const missingDeps = deps.filter((d) => !installedIds.has(d));
-          statuses[cardId] = {
-            installed: false,
-            needsPlugin: true,
-            pluginId,
-            title: meta.title,
-            size: meta.size,
-            language: meta.language,
-            missingDeps,
-          };
-        }
-      }
-
-      return { ok: true, statuses };
-    } catch (e) {
-      console.error("[figcode] card-status error:", e.message);
-      return { ok: false, error: e.message, statuses: {} };
     }
   });
 }

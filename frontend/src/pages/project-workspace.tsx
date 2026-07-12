@@ -20,6 +20,7 @@ import { getProject, listProjectJobs, listDatasetsByProject, listProjects, updat
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 import { tools as staticTools } from '@/pages/_data';
+import type { Tool } from '@/pages/_data';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
 import { listConversations, createConversation, type ConversationSummary } from '@/components/copilot/copilotConversationsClient';
@@ -36,7 +37,19 @@ import type { HarnessContextSummary } from '@/lib/copilotContext';
 import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { getNextSteps, buildChainPrompt, type ResolvedJob } from '@/lib/workflow-chains';
-import { fetchHarnessIndex, type HarnessIndexSummary } from '@/lib/harness-client';
+import {
+  fetchHarnessIndex,
+  type HarnessIndexSummary,
+} from '@/lib/harness-client';
+import {
+  normalizeResultManifest,
+  classifyArtifact,
+  findArtifactByName,
+  pickPreferredArtifact,
+  artifactKindLabel,
+  type ResultArtifactRecord,
+  type NormalizedResultManifest,
+} from '@/lib/result-manifest';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
 import { DesktopDashboard } from '@/pages/_desktop-dashboard';
@@ -1653,12 +1666,6 @@ export function RightFileTree({
               title="拖拽调整文件树宽度"
             />
             <div className={styles.workspaceFileTreePane}>
-              <HarnessIndexCard
-                title="Harness 识别"
-                index={harnessIndex}
-                loading={harnessLoading}
-                error={harnessError}
-              />
               {loading ? (
                 <p className={styles.panelEmpty}>加载文件树…</p>
               ) : tree.length === 0 ? (
@@ -2144,8 +2151,6 @@ function HistoryPanel({
 const PLUGIN_TYPE_LABELS: Record<string, string> = {
   runtime: '运行时',
   tool: '工具',
-  'figcode-card': '绘图',
-  'figcode-data': '数据',
 };
 
 function ToolboxPanel({
@@ -2455,353 +2460,45 @@ function artifactName(file: JobResultFile): string {
   return file.name || file.filename || '';
 }
 
-export function ResultView({
-  project,
-  job,
-  activeArtifact,
-  onActiveArtifactChange,
-  onAskAgent,
-}: {
-  project: Project;
-  job: ToolJob;
-  activeArtifact: ActiveArtifact | null;
-  onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
-  onAskAgent: (prompt: string) => void;
-}): React.ReactElement {
-  const [result, setResult] = useState<JobResult | null>(null);
-  const [jobMeta, setJobMeta] = useState<JobDetailMeta | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
-  const [previewData, setPreviewData] = useState<string[][] | null>(null);
-  const [previewText, setPreviewText] = useState<string | null>(null);
-  const [previewName, setPreviewName] = useState<string>('');
-  const [previewLoading, setPreviewLoading] = useState(false);
-  const [showRawOutputs, setShowRawOutputs] = useState(false);
-
-  const tool = useMemo(
-    () => staticTools.find((t) => t.id === job.tool_id) || null,
-    [job.tool_id]
-  );
-
-  // Determine API language prefix
-  const lang: 'r' | 'python' = tool?.language === 'python' ? 'python' : 'r';
-
-  // Build file URL helper
-  const buildUrl = useCallback(
-    (name: string) => {
-      const base = getApiPrefix(lang);
-      const token = getToken();
-      const tokenQs = token ? `?token=${encodeURIComponent(token)}` : '';
-      return `${base}/tools/file/${job.id}/${encodeURIComponent(name)}${tokenQs}`;
-    },
-    [job.id, lang]
-  );
-
-  const toArtifact = useCallback(
-    (file: JobResultFile): ActiveArtifact => ({
-      jobId: job.id,
-      toolId: job.tool_id,
-      name: artifactName(file),
-      type: file.type,
-      label: file.label || file.title,
-      url: buildUrl(artifactName(file)),
-    }),
-    [buildUrl, job.id, job.tool_id]
-  );
-
-  // Fetch result when job is done
-  useEffect(() => {
-    if (job.status === 'done') {
-      setLoading(true);
-      setResult(null);
-      setJobMeta(null);
-      (async () => {
-        try {
-          const token = getToken();
-          const resp = await fetch(getApiPrefix(lang) + '/tools/status/' + job.id, {
-            headers: token ? { Authorization: 'Bearer ' + token } : {},
-          });
-          const data = await resp.json();
-          if (data.ok && data.result) {
-            setResult(data.result);
-            setJobMeta({
-              params: data.params || {},
-              ackStatus: data.ackStatus || null,
-              projectId: data.projectId || null,
-            });
-          }
-        } catch {
-          // ignore
-        } finally {
-          setLoading(false);
-        }
-      })();
-    } else {
-      setResult(null);
-      setJobMeta(null);
-    }
-  }, [job.id, job.status, lang]);
-
-  const files = result?.artifacts || result?.files || [];
-  const plots = files.filter((f) => f.type === 'plot');
-  const tables = files.filter((f) => f.type === 'table' || f.type === 'file' || f.type === 'text' || f.type === 'json');
-  const htmlFiles = files.filter((f) => /\.(html?|xhtml)$/i.test(artifactName(f)));
-  const reportFile = htmlFiles.find((f) => /report(\.html?)?$/i.test(artifactName(f))) || htmlFiles[0] || null;
-  const reportUrl = reportFile ? buildUrl(artifactName(reportFile)) : '';
-  const firstHtmlName = htmlFiles[0] ? artifactName(htmlFiles[0]) : '';
-  const firstPlotName = plots[0] ? artifactName(plots[0]) : '';
-  const firstTableName = tables[0] ? artifactName(tables[0]) : '';
-  const firstFileName = files[0] ? artifactName(files[0]) : '';
-  const jumpToSection = useCallback((id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, []);
-  const activeFile = useMemo(() => {
-    if (!files.length) return null;
-    const current =
-      activeArtifact && activeArtifact.jobId === job.id
-        ? files.find((f) => artifactName(f) === activeArtifact.name)
-        : null;
-    return current || htmlFiles[0] || plots[0] || tables[0] || files[0] || null;
-  }, [
-    activeArtifact?.jobId,
-    activeArtifact?.name,
-    firstHtmlName,
-    firstPlotName,
-    firstTableName,
-    firstFileName,
-    files,
-    job.id,
-  ]);
-  const activeName = activeFile ? artifactName(activeFile) : '';
-  const activeUrl = activeFile ? buildUrl(activeName) || activeFile.url || '' : '';
-  const activeIsText = activeFile
-    ? isTextFile(activeName) || isMarkdownFile(activeName) || /\.json$/i.test(activeName)
-    : false;
-  const activeIsImage = activeFile ? isImageFile(activeName) : false;
-  const activeIsHtml = activeFile ? /\.html?$/i.test(activeName) : false;
-  const focusArtifact = useMemo(
-    () => (activeFile ? toArtifact(activeFile) : null),
-    [activeFile, toArtifact]
-  );
-
-  useEffect(() => {
-    if (job.status !== 'done') {
-      onActiveArtifactChange(null);
-      return;
-    }
-    const first = htmlFiles[0] || plots[0] || tables[0] || files[0];
-    if (!first) {
-      onActiveArtifactChange(null);
-      return;
-    }
-    if (!activeArtifact || activeArtifact.jobId !== job.id || activeArtifact.name !== artifactName(first)) {
-      onActiveArtifactChange(toArtifact(first));
-    }
-  }, [
-    activeArtifact?.jobId,
-    activeArtifact?.name,
-    firstHtmlName,
-    firstPlotName,
-    firstTableName,
-    firstFileName,
-    job.id,
-    job.status,
-    onActiveArtifactChange,
-    toArtifact,
-  ]);
-
-  const loadTextPreview = useCallback(async (file: JobResultFile) => {
-    const fileName = artifactName(file);
-    const resp = await fetch(buildUrl(fileName));
-    const text = await resp.text();
-    const isTable = /\.(csv|tsv)$/i.test(fileName);
-    setPreviewName(fileName);
-    if (isTable) {
-      const sep = fileName.toLowerCase().endsWith('.tsv') || text.includes('\t') ? '\t' : ',';
-      const rows = text
-        .split('\n')
-        .filter((l) => l.trim())
-        .slice(0, 40)
-        .map((l) => l.split(sep).map((c) => c.replace(/^"|"$/g, '').trim()));
-      setPreviewData(rows);
-      setPreviewText(null);
-      return;
-    }
-    if (fileName.toLowerCase().endsWith('.json')) {
-      try {
-        setPreviewText(JSON.stringify(JSON.parse(text), null, 2));
-      } catch {
-        setPreviewText(text.slice(0, 12000));
-      }
-    } else {
-      setPreviewText(text.slice(0, 12000));
-    }
-    setPreviewData(null);
-  }, [buildUrl]);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (!activeFile || !activeIsText || activeIsHtml) {
-      setPreviewLoading(false);
-      setPreviewData(null);
-      setPreviewText(null);
-      setPreviewName(activeName);
-      return () => {
-        cancelled = true;
-      };
-    }
-    setPreviewLoading(true);
-    loadTextPreview(activeFile)
-      .catch(() => {
-        if (!cancelled) {
-          setPreviewData(null);
-          setPreviewText('无法读取预览内容');
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setPreviewLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [activeFile, activeIsHtml, activeIsText, activeName, loadTextPreview]);
-
-  const explainCurrentResult = useCallback(() => {
-    const artifact = activeArtifact;
-    const fileList = files.slice(0, 12).map((f) => `${artifactName(f)}(${f.type})`).join(', ');
-    if (artifact) {
-      onAskAgent(
-        `请解释当前正在查看的分析结果 artifact：jobId=${artifact.jobId}，toolId=${artifact.toolId}，文件=${artifact.name}，类型=${artifact.type}，标签=${artifact.label || '无'}。请结合这个文件说明结果含义、关键观察、可能的质量问题，以及下一步建议。`
-      );
-      return;
-    }
-    onAskAgent(
-      `请解释当前分析结果：jobId=${job.id}，toolId=${job.tool_id}，可用文件=${fileList || '暂无文件'}。请总结主要发现和下一步建议。`
-    );
-  }, [activeArtifact, files, job.id, job.tool_id, onAskAgent]);
-
-  // Running / pending state
-  if (job.status === 'running' || job.status === 'pending') {
-    return (
-      <div className={styles.resultView}>
-        <div className={styles.resultHeader}>
-          <h2 className={styles.resultTitle}>{job.name || job.tool_id}</h2>
-          <span className={styles.resultStatus} data-status={job.status}>
-            {job.status === 'running' ? '运行中…' : '排队中'}
-          </span>
-        </div>
-        <div className={styles.resultBody}>
-          <div className={styles.resultRunning}>
-            <div className={styles.spinner} />
-            <p>分析正在执行，请稍候…</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Failed state
-  if (job.status === 'failed') {
-    return (
-      <div className={styles.resultView}>
-        <div className={styles.resultHeader}>
-          <h2 className={styles.resultTitle}>{job.name || job.tool_id}</h2>
-          <span className={styles.resultStatus} data-status="failed">失败</span>
-        </div>
-        <div className={styles.resultBody}>
-          <pre className={styles.resultError}>{job.error || '执行失败，无错误信息'}</pre>
-        </div>
-      </div>
-    );
-  }
-
-  // Loading result
-  if (loading) {
-    return (
-      <div className={styles.resultView}>
-        <div className={styles.resultHeader}>
-          <h2 className={styles.resultTitle}>{job.name || job.tool_id}</h2>
-          <span className={styles.resultStatus} data-status="done">完成</span>
-        </div>
-        <div className={styles.resultBody}>
-          <p className={styles.resultPlaceholder}>加载结果中…</p>
-        </div>
-      </div>
-    );
-  }
-
-  // No result data
-  if (!result) {
-    return (
-      <div className={styles.resultView}>
-        <div className={styles.resultHeader}>
-          <h2 className={styles.resultTitle}>{job.name || job.tool_id}</h2>
-          <span className={styles.resultStatus} data-status="done">完成</span>
-        </div>
-        <div className={styles.resultBody}>
-          <p className={styles.resultPlaceholder}>
-            分析已完成，但未生成可视化结果文件。
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Result with files
-  return (
-    <div className={styles.resultView}>
-      <section className={styles.resultReportSection}>
-        <div className={styles.resultReportSectionHeader}>
-          <div>
-            <div className={styles.resultEyebrow}>HTML 报告</div>
-            <div className={styles.resultReportSectionTitle}>{reportFile ? artifactName(reportFile) : job.name || job.tool_id}</div>
-          </div>
-          <div className={styles.resultFocusActions}>
-            {reportUrl && (
-              <a href={reportUrl} target="_blank" rel="noreferrer noopener" className={styles.resultFocusActionLink}>
-                新窗口打开
-              </a>
-            )}
-          </div>
-        </div>
-        <div className={styles.resultReportCanvas}>
-          {reportUrl ? (
-            <iframe
-              src={reportUrl}
-              title={reportFile ? artifactName(reportFile) : (htmlFiles[0] ? artifactName(htmlFiles[0]) : 'report')}
-              className={styles.resultReportIframe}
-            />
-          ) : (
-            <div className={styles.resultPreviewPlaceholder}>未发现 HTML 报告</div>
-          )}
-        </div>
-      </section>
-    </div>
-  );
+function buildPreviewTable(text: string, fileName: string): string[][] {
+  const sep = fileName.toLowerCase().endsWith('.tsv') || text.includes('\t') ? '\t' : ',';
+  return text
+    .split('\n')
+    .filter((line) => line.trim())
+    .slice(0, 40)
+    .map((line) => line.split(sep).map((cell) => cell.replace(/^"|"$/g, '').trim()));
 }
 
-export function ResultSidebarPanel({
+function ResultArtifactShell({
   project,
   job,
   activeArtifact,
   onActiveArtifactChange,
   onAskAgent,
-  onOpenFullResult,
+  variant,
+  showHarnessIndex = false,
 }: {
   project: Project;
   job: ToolJob | null;
   activeArtifact: ActiveArtifact | null;
   onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
   onAskAgent: (prompt: string) => void;
-  onOpenFullResult: (jobId: string) => void | Promise<void>;
+  variant: 'center' | 'sidebar';
+  showHarnessIndex?: boolean;
 }): React.ReactElement {
+  const isSidebar = variant === 'sidebar';
   const [result, setResult] = useState<JobResult | null>(null);
-  const [jobMeta, setJobMeta] = useState<JobDetailMeta | null>(null);
   const [loading, setLoading] = useState(false);
+  const [jobMeta, setJobMeta] = useState<JobDetailMeta | null>(null);
+  const [manifestRaw, setManifestRaw] = useState<unknown>(null);
+  const [manifestLoading, setManifestLoading] = useState(false);
+  const [manifestError, setManifestError] = useState('');
   const [selectedName, setSelectedName] = useState('');
+  const [selectedSectionId, setSelectedSectionId] = useState('');
   const [previewText, setPreviewText] = useState<string | null>(null);
+  const [previewData, setPreviewData] = useState<string[][] | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [harnessIndex, setHarnessIndex] = useState<HarnessIndexSummary | null>(null);
   const [harnessLoading, setHarnessLoading] = useState(false);
   const [harnessError, setHarnessError] = useState('');
@@ -2810,7 +2507,6 @@ export function ResultSidebarPanel({
     () => (job ? staticTools.find((t) => t.id === job.tool_id) || null : null),
     [job]
   );
-
   const lang: 'r' | 'python' = tool?.language === 'python' ? 'python' : 'r';
 
   const buildUrl = useCallback(
@@ -2824,28 +2520,21 @@ export function ResultSidebarPanel({
     [job, lang]
   );
 
-  const toArtifact = useCallback(
-    (file: JobResultFile): ActiveArtifact => ({
-      jobId: job?.id || '',
-      toolId: job?.tool_id || '',
-      name: artifactName(file),
-      type: file.type,
-      label: file.label || file.title,
-      url: buildUrl(artifactName(file)),
-    }),
-    [buildUrl, job]
-  );
-
   useEffect(() => {
     if (!job) {
       setResult(null);
       setJobMeta(null);
+      setManifestRaw(null);
+      setManifestLoading(false);
+      setManifestError('');
       setSelectedName('');
+      setSelectedSectionId('');
       setPreviewText(null);
+      setPreviewData(null);
+      setPreviewLoading(false);
       setHarnessIndex(null);
-      setHarnessError('');
       setHarnessLoading(false);
-      setLoading(false);
+      setHarnessError('');
       return;
     }
 
@@ -2853,6 +2542,8 @@ export function ResultSidebarPanel({
       setLoading(true);
       setResult(null);
       setJobMeta(null);
+      setSelectedName('');
+      setSelectedSectionId('');
       (async () => {
         try {
           const token = getToken();
@@ -2869,7 +2560,7 @@ export function ResultSidebarPanel({
             });
           }
         } catch {
-          // ignore
+          // keep shell quiet
         } finally {
           setLoading(false);
         }
@@ -2878,11 +2569,19 @@ export function ResultSidebarPanel({
       setResult(null);
       setJobMeta(null);
       setLoading(false);
+      setManifestRaw(null);
+      setManifestLoading(false);
+      setManifestError('');
+      setSelectedName('');
+      setSelectedSectionId('');
+      setPreviewText(null);
+      setPreviewData(null);
+      setPreviewLoading(false);
     }
   }, [job, lang]);
 
   useEffect(() => {
-    if (!job || job.status !== 'done') {
+    if (!job || job.status !== 'done' || !showHarnessIndex) {
       setHarnessIndex(null);
       setHarnessError('');
       setHarnessLoading(false);
@@ -2893,13 +2592,13 @@ export function ResultSidebarPanel({
     setHarnessError('');
     fetchHarnessIndex({ scope: 'artifact', jobId: job.id, maxFiles: 120 })
       .then((data) => {
-        if (cancelled) return;
-        setHarnessIndex(data.index || null);
+        if (!cancelled) setHarnessIndex(data.index || null);
       })
       .catch((error: Error) => {
-        if (cancelled) return;
-        setHarnessIndex(null);
-        setHarnessError(error.message || '识别失败');
+        if (!cancelled) {
+          setHarnessIndex(null);
+          setHarnessError(error.message || '识别失败');
+        }
       })
       .finally(() => {
         if (!cancelled) setHarnessLoading(false);
@@ -2907,56 +2606,176 @@ export function ResultSidebarPanel({
     return () => {
       cancelled = true;
     };
-  }, [job?.id, job?.status]);
+  }, [job?.id, job?.status, showHarnessIndex]);
 
   const files = result?.artifacts || result?.files || [];
-  const htmlFiles = files.filter((f) => /\.(html?|xhtml)$/i.test(artifactName(f)));
-  const reportFile = htmlFiles.find((f) => /report(\.html?)?$/i.test(artifactName(f))) || htmlFiles[0] || null;
-  const reportUrl = reportFile ? buildUrl(artifactName(reportFile)) : '';
-  const plots = files.filter((f) => f.type === 'plot');
-  const tables = files.filter((f) => f.type === 'table' || f.type === 'file' || f.type === 'text' || f.type === 'json');
-  const activeFile = useMemo(() => {
-    if (!files.length) return null;
-    const current = files.find((f) => artifactName(f) === selectedName);
-    return current || htmlFiles[0] || plots[0] || tables[0] || files[0] || null;
-  }, [files, htmlFiles, plots, selectedName, tables]);
+  const fallbackArtifacts = useMemo<ResultArtifactRecord[]>(
+    () =>
+      files.map((file) => ({
+        name: artifactName(file),
+        type: file.type,
+        label: file.label || file.title,
+        title: file.title,
+        url: buildUrl(artifactName(file)),
+        preview: file.preview,
+        download: file.download,
+      })),
+    [buildUrl, files]
+  );
 
   useEffect(() => {
-    if (!job || job.status !== 'done') return;
-    const preferred = htmlFiles[0] || files[0] || null;
-    const preferredName = preferred ? artifactName(preferred) : '';
+    if (!job || job.status !== 'done') {
+      setManifestRaw(null);
+      setManifestLoading(false);
+      setManifestError('');
+      return;
+    }
+    if (result?.manifest && typeof result.manifest === 'object') {
+      setManifestRaw(result.manifest);
+      setManifestLoading(false);
+      setManifestError('');
+      return;
+    }
+    let cancelled = false;
+    setManifestLoading(true);
+    setManifestError('');
+    fetch(buildUrl('manifest.json'))
+      .then((resp) => {
+        if (!resp.ok) throw new Error('manifest missing');
+        return resp.json();
+      })
+      .then((json) => {
+        if (!cancelled) setManifestRaw(json);
+      })
+      .catch((error: Error) => {
+        if (cancelled) return;
+        setManifestRaw(null);
+        setManifestError(error.message === 'manifest missing' ? '' : (error.message || 'manifest 解析失败'));
+      })
+      .finally(() => {
+        if (!cancelled) setManifestLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [buildUrl, job?.id, job?.status, result?.manifest]);
+
+  const manifest = useMemo(
+    () => normalizeResultManifest(manifestRaw, fallbackArtifacts),
+    [fallbackArtifacts, manifestRaw]
+  );
+  const artifacts = manifest?.artifacts?.length ? manifest.artifacts : fallbackArtifacts;
+  const sections = manifest?.sections || [];
+  const reportArtifact = useMemo(
+    () =>
+      artifacts.find((artifact) => classifyArtifact(artifact) === 'report') ||
+      artifacts.find((artifact) => /\.(html?|xhtml)$/i.test(artifact.name)) ||
+      null,
+    [artifacts]
+  );
+  const preferredArtifactName =
+    activeArtifact && activeArtifact.jobId === job?.id ? activeArtifact.name : '';
+  const selectedArtifact = useMemo(() => {
+    const current = findArtifactByName(artifacts, selectedName);
+    if (current) return current;
+    return (
+      pickPreferredArtifact(artifacts, preferredArtifactName) ||
+      reportArtifact ||
+      artifacts[0] ||
+      null
+    );
+  }, [artifacts, preferredArtifactName, reportArtifact, selectedName]);
+  const selectedArtifactName = selectedArtifact?.name || '';
+  const selectedArtifactUrl = selectedArtifact
+    ? selectedArtifact.url || buildUrl(selectedArtifact.name)
+    : '';
+  const selectedArtifactKind = selectedArtifact ? classifyArtifact(selectedArtifact) : 'file';
+  const selectedArtifactLabel = selectedArtifact
+    ? selectedArtifact.label || selectedArtifact.title || selectedArtifact.name
+    : '';
+  const activeFile = useMemo(() => {
+    if (!selectedArtifactName) return null;
+    return files.find((file) => artifactName(file) === selectedArtifactName) || null;
+  }, [files, selectedArtifactName]);
+  const activeIsHtml = selectedArtifactKind === 'report' || /\.html?$/i.test(selectedArtifactName);
+  const activeIsText =
+    !activeIsHtml &&
+    (selectedArtifactKind === 'text' || isTextFile(selectedArtifactName) || isMarkdownFile(selectedArtifactName) || /\.json$/i.test(selectedArtifactName) || /\.(csv|tsv)$/i.test(selectedArtifactName));
+  const activeIsImage = selectedArtifactKind === 'plot' || (selectedArtifactName ? isImageFile(selectedArtifactName) : false);
+  const activeIsPreviewText = activeIsText && !activeIsHtml;
+
+  const activeSection = useMemo(() => {
+    if (!sections.length) return null;
+    return (
+      sections.find((section) => section.id === selectedSectionId) ||
+      (selectedName
+        ? sections.find((section) => section.artifactNames.includes(selectedName))
+        : null) ||
+      (reportArtifact
+        ? sections.find((section) => section.artifactNames.includes(reportArtifact.name))
+        : null) ||
+      sections[0]
+    );
+  }, [reportArtifact, sections, selectedName, selectedSectionId]);
+
+  const visibleArtifacts = useMemo(() => {
+    if (!activeSection || activeSection.artifactNames.length === 0) return artifacts;
+    return activeSection.artifactNames
+      .map((name) => findArtifactByName(artifacts, name))
+      .filter(Boolean) as ResultArtifactRecord[];
+  }, [activeSection, artifacts]);
+
+  useEffect(() => {
+    if (!job || job.status !== 'done' || artifacts.length === 0) return;
+    const preferred = pickPreferredArtifact(artifacts, preferredArtifactName) || reportArtifact || artifacts[0];
+    const preferredName = preferred ? preferred.name : '';
     setSelectedName((current) => {
-      if (current && files.some((file) => artifactName(file) === current)) return current;
+      if (current && artifacts.some((artifact) => artifact.name === current)) return current;
       return preferredName;
     });
-  }, [files, htmlFiles, job]);
+    setSelectedSectionId((current) => {
+      if (current && sections.some((section) => section.id === current)) return current;
+      const nextSection =
+        (preferredName && sections.find((item) => item.artifactNames.includes(preferredName))) ||
+        sections[0];
+      return nextSection?.id || '';
+    });
+  }, [artifacts, job, preferredArtifactName, reportArtifact, sections]);
 
   useEffect(() => {
-    if (!job || job.status !== 'done' || !activeFile) {
+    if (!job || job.status !== 'done' || !selectedArtifact) {
       onActiveArtifactChange(null);
       return;
     }
-    const artifact = toArtifact(activeFile);
-    if (!activeArtifact || activeArtifact.jobId !== artifact.jobId || activeArtifact.name !== artifact.name) {
+    const artifact: ActiveArtifact = {
+      jobId: job.id,
+      toolId: job.tool_id,
+      name: selectedArtifact.name,
+      type: selectedArtifact.type || selectedArtifactKind,
+      label: selectedArtifact.label || selectedArtifact.title,
+      url: selectedArtifactUrl,
+    };
+    if (
+      !activeArtifact ||
+      activeArtifact.jobId !== artifact.jobId ||
+      activeArtifact.name !== artifact.name
+    ) {
       onActiveArtifactChange(artifact);
     }
-  }, [activeArtifact, activeFile, job, onActiveArtifactChange, toArtifact]);
-
-  const activeUrl = activeFile ? buildUrl(artifactName(activeFile)) || activeFile.url || '' : '';
-  const activeName = activeFile ? artifactName(activeFile) : '';
-  const activeIsText = isTextFile(activeName) || isMarkdownFile(activeName) || /\.json$/i.test(activeName);
-  const activeIsImage = isImageFile(activeName);
-  const activeIsPreviewText = activeIsText && !/\.html?$/i.test(activeName);
+  }, [activeArtifact, job, onActiveArtifactChange, selectedArtifact, selectedArtifactKind, selectedArtifactUrl]);
 
   useEffect(() => {
     let cancelled = false;
     if (!activeFile || !activeIsPreviewText) {
       setPreviewText(null);
+      setPreviewData(null);
       setPreviewLoading(false);
-      return () => { cancelled = true; };
+      return () => {
+        cancelled = true;
+      };
     }
     setPreviewLoading(true);
-    const url = activeUrl || activeFile.url || '';
+    const url = selectedArtifactUrl || activeFile.url || '';
     fetch(url)
       .then((resp) => {
         if (!resp.ok) throw new Error('preview failed');
@@ -2964,10 +2783,27 @@ export function ResultSidebarPanel({
       })
       .then((text) => {
         if (cancelled) return;
-        setPreviewText(formatPreviewText(activeName, text).slice(0, 12000));
+        if (/\.(csv|tsv)$/i.test(selectedArtifactName)) {
+          setPreviewData(buildPreviewTable(text, selectedArtifactName));
+          setPreviewText(null);
+          return;
+        }
+        if (selectedArtifactName.toLowerCase().endsWith('.json')) {
+          try {
+            setPreviewText(JSON.stringify(JSON.parse(text), null, 2));
+          } catch {
+            setPreviewText(formatPreviewText(selectedArtifactName, text).slice(0, 12000));
+          }
+        } else {
+          setPreviewText(formatPreviewText(selectedArtifactName, text).slice(0, 12000));
+        }
+        setPreviewData(null);
       })
       .catch(() => {
-        if (!cancelled) setPreviewText('无法读取预览内容');
+        if (!cancelled) {
+          setPreviewText('无法读取预览内容');
+          setPreviewData(null);
+        }
       })
       .finally(() => {
         if (!cancelled) setPreviewLoading(false);
@@ -2975,129 +2811,286 @@ export function ResultSidebarPanel({
     return () => {
       cancelled = true;
     };
-  }, [activeFile, activeIsPreviewText, activeName, activeUrl]);
+  }, [activeFile, activeIsPreviewText, selectedArtifactName, selectedArtifactUrl]);
 
-  const explainCurrentResult = useCallback(() => {
-    if (!job) return;
-    if (activeArtifact) {
-      onAskAgent(
-        `请解释当前正在查看的分析结果 artifact：jobId=${activeArtifact.jobId}，toolId=${activeArtifact.toolId}，文件=${activeArtifact.name}，类型=${activeArtifact.type}，标签=${activeArtifact.label || '无'}。请结合这个文件说明结果含义、关键观察、可能的质量问题，以及下一步建议。`
-      );
-      return;
+  const renderPreview = () => {
+    if (!selectedArtifact) {
+      return <div className={styles.resultPreviewPlaceholder}>未发现可预览的结果文件</div>;
     }
-    const fileList = files.slice(0, 12).map((f) => `${artifactName(f)}(${f.type})`).join(', ');
-    onAskAgent(
-      `请解释当前分析结果：jobId=${job.id}，toolId=${job.tool_id}，可用文件=${fileList || '暂无文件'}。请总结主要发现和下一步建议。`
+    if (selectedArtifactKind === 'report' && selectedArtifactUrl) {
+      return (
+        <iframe
+          src={selectedArtifactUrl}
+          title={selectedArtifactLabel || 'report'}
+          className={isSidebar ? styles.resultSidebarIframe : styles.resultReportIframe}
+        />
+      );
+    }
+    if (activeIsImage && selectedArtifactUrl) {
+      return (
+        <button
+          type="button"
+          className={styles.resultPreviewImageButton}
+          onClick={() => setLightboxSrc(selectedArtifactUrl)}
+        >
+          <img
+            src={selectedArtifactUrl}
+            alt={selectedArtifactLabel || selectedArtifact.name}
+            className={styles.resultPreviewImage}
+          />
+        </button>
+      );
+    }
+    if (previewLoading && !previewText && !previewData) {
+      return <div className={styles.resultPreviewPlaceholder}>加载预览中…</div>;
+    }
+    if (previewData && previewData.length > 0) {
+      const [header, ...rows] = previewData;
+      return (
+        <div className={styles.csvPreviewBody}>
+          <table>
+            <thead>
+              <tr>
+                {header.map((cell, idx) => (
+                  <td key={`${cell || 'col'}-${idx}`}>{cell || `列 ${idx + 1}`}</td>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.slice(0, 24).map((row, rowIndex) => (
+                <tr key={rowIndex}>
+                  {header.map((_, cellIndex) => (
+                    <td key={cellIndex}>{row[cellIndex] || '—'}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+    if (previewText) {
+      return <pre className={styles.textPreview}>{previewText}</pre>;
+    }
+    return (
+      <div className={styles.resultPreviewPlaceholder}>
+        当前文件暂不支持内嵌预览。
+      </div>
     );
-  }, [activeArtifact, files, job, onAskAgent]);
+  };
 
   if (!job) {
     return <EmptyAnalysisResult />;
   }
 
-  if (job.status === 'running' || job.status === 'pending') {
+  const sectionTabs = sections.length > 0 ? sections : [];
+  const showReportRail = sectionTabs.length > 1 || visibleArtifacts.length > 1;
+
+  const stateBlock = (title: string, body: React.ReactNode, status: 'running' | 'pending' | 'failed' | 'done') => {
+    const containerClass = isSidebar ? styles.resultSidebarCard : styles.resultView;
     return (
-      <div className={styles.panelInner}>
-        <div className={styles.panelSection}>
-          <h3 className={styles.panelHeading}>
-            <Icon name="bar-chart" size={14} /> 结果
-          </h3>
-          <div className={styles.resultSidebarCard}>
-            <div className={styles.resultSidebarTitleRow}>
-              <strong>{job.name || job.tool_id}</strong>
-              <span className={styles.resultStatus} data-status={job.status}>
-                {job.status === 'running' ? '运行中…' : '排队中'}
-              </span>
-            </div>
-            <div className={styles.resultRunning}>
-              <div className={styles.spinner} />
-              <p>分析正在执行，请稍候…</p>
-            </div>
-          </div>
+      <div className={containerClass}>
+        <div className={isSidebar ? styles.resultSidebarTitleRow : styles.resultHeader}>
+          <strong>{title}</strong>
+          <span className={styles.resultStatus} data-status={status}>
+            {status === 'running' ? '运行中…' : status === 'pending' ? '排队中' : status === 'failed' ? '失败' : '完成'}
+          </span>
         </div>
+        {body}
       </div>
+    );
+  };
+
+  if (job.status === 'running' || job.status === 'pending') {
+    return stateBlock(
+      job.name || job.tool_id,
+      <div className={styles.resultRunning}>
+        <div className={styles.spinner} />
+        <p>分析正在执行，请稍候…</p>
+      </div>,
+      job.status
     );
   }
 
   if (job.status === 'failed') {
-    return (
-      <div className={styles.panelInner}>
-        <div className={styles.panelSection}>
-          <h3 className={styles.panelHeading}>
-            <Icon name="bar-chart" size={14} /> 结果
-          </h3>
-          <div className={styles.resultSidebarCard}>
-            <div className={styles.resultSidebarTitleRow}>
-              <strong>{job.name || job.tool_id}</strong>
-              <span className={styles.resultStatus} data-status="failed">失败</span>
-            </div>
-            <pre className={styles.resultError}>{job.error || '执行失败，无错误信息'}</pre>
-          </div>
-        </div>
-      </div>
+    return stateBlock(
+      job.name || job.tool_id,
+      <pre className={styles.resultError}>{job.error || '执行失败，无错误信息'}</pre>,
+      'failed'
     );
   }
 
   if (loading) {
-    return (
-      <div className={styles.panelInner}>
-        <div className={styles.panelSection}>
-          <h3 className={styles.panelHeading}>
-            <Icon name="bar-chart" size={14} /> 结果
-          </h3>
-          <div className={styles.resultSidebarCard}>
-            <div className={styles.resultSidebarTitleRow}>
-              <strong>{job.name || job.tool_id}</strong>
-              <span className={styles.resultStatus} data-status="done">完成</span>
-            </div>
-            <p className={styles.panelEmpty}>加载结果中…</p>
-          </div>
-        </div>
-      </div>
+    return stateBlock(
+      job.name || job.tool_id,
+      <p className={styles.resultPlaceholder}>加载结果中…</p>,
+      'done'
     );
   }
 
   if (!result) {
-    return (
-      <div className={styles.panelInner}>
-        <div className={styles.panelSection}>
-          <h3 className={styles.panelHeading}>
-            <Icon name="bar-chart" size={14} /> 结果
-          </h3>
-          <div className={styles.resultSidebarCard}>
-            <div className={styles.resultSidebarTitleRow}>
-              <strong>{job.name || job.tool_id}</strong>
-              <span className={styles.resultStatus} data-status="done">完成</span>
-            </div>
-            <p className={styles.panelEmpty}>分析已完成，但未生成可视化结果文件。</p>
-          </div>
-        </div>
-      </div>
+    return stateBlock(
+      job.name || job.tool_id,
+      <p className={styles.resultPlaceholder}>分析已完成，但未生成可视化结果文件。</p>,
+      'done'
     );
   }
 
-  return (
+  const shellBody = (
+    <>
+      <section className={isSidebar ? styles.resultSidebarReportCard : styles.resultReportSection}>
+        {showReportRail ? (
+          <div className={styles.resultReportShell}>
+            <div className={styles.resultReportMain}>
+              <div className={styles.resultSidebarPreviewBody}>
+                {renderPreview()}
+              </div>
+            </div>
+
+            <aside className={styles.resultReportNav}>
+              <div className={styles.resultReportNavHeader}>
+                <div className={styles.resultReportEyebrow}>目录</div>
+                <div className={styles.resultReportTitle}>
+                  {sectionTabs.length > 0 ? `${sectionTabs.length} 组` : '文件'}
+                </div>
+                <div className={styles.resultReportNavMeta}>
+                  {sectionTabs.length > 0 && <span>{sectionTabs.length} 组</span>}
+                  {visibleArtifacts.length > 0 && <span>{visibleArtifacts.length} 项</span>}
+                </div>
+              </div>
+
+              {sectionTabs.length > 0 && (
+                <div className={styles.resultReportNavGroup}>
+                  <div className={styles.resultReportNavGroupTitle}>分组</div>
+                  {sectionTabs.map((section) => {
+                    const active = section.id === activeSection?.id;
+                    return (
+                      <button
+                        key={section.id}
+                        type="button"
+                        className={`${styles.resultReportNavItem} ${active ? styles.resultReportNavItemActive : ''}`}
+                        onClick={() => {
+                          setSelectedSectionId(section.id);
+                          const first = section.artifactNames
+                            .map((name) => findArtifactByName(artifacts, name))
+                            .find(Boolean);
+                          if (first) setSelectedName(first.name);
+                        }}
+                      >
+                        <span>{section.label}</span>
+                        <span>{section.artifactNames.length}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {visibleArtifacts.length > 0 && (
+                <div className={styles.resultReportNavGroup}>
+                  <div className={styles.resultReportNavGroupTitle}>
+                    {activeSection ? '文件' : '报告'}
+                  </div>
+                  <div className={styles.resultReportNavFiles}>
+                    {visibleArtifacts.map((artifact) => {
+                      const kind = classifyArtifact(artifact);
+                      const active = artifact.name === selectedArtifactName;
+                      return (
+                        <button
+                          key={artifact.name}
+                          type="button"
+                          className={`${styles.resultReportFileItem} ${active ? styles.resultReportFileItemActive : ''}`}
+                          onClick={() => {
+                            setSelectedName(artifact.name);
+                            const section = sections.find((item) => item.artifactNames.includes(artifact.name));
+                            if (section) setSelectedSectionId(section.id);
+                          }}
+                          title={artifact.description || artifact.label || artifact.name}
+                        >
+                          <span className={styles.resultReportFileName}>
+                            {artifact.label || artifact.title || artifact.name}
+                          </span>
+                          <span className={styles.resultReportFileMeta}>
+                            {artifactKindLabel(kind)}
+                            {artifact.description ? ` · ${artifact.description}` : ''}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </aside>
+          </div>
+        ) : (
+          <div className={styles.resultSidebarPreviewBody}>
+            {renderPreview()}
+          </div>
+        )}
+      </section>
+    </>
+  );
+
+  return isSidebar ? (
     <div className={styles.resultSidebarRoot}>
-      <HarnessIndexCard
-        title="产物识别"
-        index={harnessIndex}
-        loading={harnessLoading}
-        error={harnessError}
-      />
-      <div className={styles.resultSidebarPreview}>
-        <div className={styles.resultSidebarPreviewBody}>
-          {reportUrl ? (
-            <iframe
-              src={reportUrl}
-              title={reportFile ? artifactName(reportFile) : 'report'}
-              className={styles.resultSidebarIframe}
-            />
-          ) : (
-            <p className={styles.panelEmpty}>未发现 HTML 报告</p>
-          )}
-        </div>
-      </div>
+      {shellBody}
+      {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
     </div>
+  ) : (
+    <div className={styles.resultView}>
+      {shellBody}
+      {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
+    </div>
+  );
+}
+
+export function ResultView({
+  project,
+  job,
+  activeArtifact,
+  onActiveArtifactChange,
+  onAskAgent,
+}: {
+  project: Project;
+  job: ToolJob;
+  activeArtifact: ActiveArtifact | null;
+  onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
+  onAskAgent: (prompt: string) => void;
+}): React.ReactElement {
+  return (
+    <ResultArtifactShell
+      project={project}
+      job={job}
+      activeArtifact={activeArtifact}
+      onActiveArtifactChange={onActiveArtifactChange}
+      onAskAgent={onAskAgent}
+      variant="center"
+    />
+  );
+}
+
+export function ResultSidebarPanel({
+  project,
+  job,
+  activeArtifact,
+  onActiveArtifactChange,
+  onAskAgent,
+}: {
+  project: Project;
+  job: ToolJob | null;
+  activeArtifact: ActiveArtifact | null;
+  onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
+  onAskAgent: (prompt: string) => void;
+}): React.ReactElement {
+  return (
+    <ResultArtifactShell
+      project={project}
+      job={job}
+      activeArtifact={activeArtifact}
+      onActiveArtifactChange={onActiveArtifactChange}
+      onAskAgent={onAskAgent}
+      variant="sidebar"
+      showHarnessIndex
+    />
   );
 }
 

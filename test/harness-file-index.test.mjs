@@ -86,6 +86,37 @@ test('indexDirectory builds metadata index and cache', () => {
   });
 });
 
+test('indexDirectory reuses unchanged cached entries and drops deleted files', () => {
+  withTempDir((dir) => {
+    fs.mkdirSync(path.join(dir, 'nested'));
+    fs.writeFileSync(path.join(dir, 'keep.csv'), 'gene,log2FC,pvalue\nTP53,1,0.01\n');
+    fs.writeFileSync(path.join(dir, 'nested', 'stale.tsv'), 'sample\tgroup\nS1\tA\n');
+
+    const cachePath = path.join(dir, '.biof3-harness-index.json');
+    const initial = indexDirectory(dir, { hash: false });
+    writeIndexCache(initial, cachePath);
+
+    const keepBefore = initial.entries.find((entry) => entry.relativePath === 'keep.csv');
+    assert.ok(keepBefore, 'initial cache should contain keep.csv');
+
+    fs.unlinkSync(path.join(dir, 'nested', 'stale.tsv'));
+    fs.writeFileSync(path.join(dir, 'fresh.csv'), 'sample,group\nS1,A\n');
+
+    const incremental = indexDirectory(dir, { hash: false, cache: cachePath });
+    const keepAfter = incremental.entries.find((entry) => entry.relativePath === 'keep.csv');
+    const freshAfter = incremental.entries.find((entry) => entry.relativePath === 'fresh.csv');
+
+    assert.equal(incremental.cacheStats.hit, true);
+    assert.equal(incremental.cacheStats.reusedEntries, 1);
+    assert.equal(incremental.cacheStats.updatedEntries, 1);
+    assert.equal(incremental.cacheStats.removedEntries, 1);
+    assert.equal(incremental.fileCount, 2);
+    assert.equal(keepAfter.inspectedAt, keepBefore.inspectedAt);
+    assert.ok(freshAfter, 'fresh.csv should be indexed');
+    assert.equal(freshAfter.relativePath, 'fresh.csv');
+  });
+});
+
 test('suggestInputBindings ranks files for plugin inputs', () => {
   withTempDir((dir) => {
     fs.writeFileSync(path.join(dir, 'demo_deg.csv'), 'gene,log2FC,pvalue\nTP53,1.2,0.01\n');
@@ -448,5 +479,71 @@ test('diagnoseHarnessRunReadiness reports runtime_not_ready as recoverable block
     assert.ok(issue, '应报告 runtime_not_ready');
     assert.equal(issue.recoverable, true);
     assert.match(issue.detail, /r_runtime_not_found/);
+  });
+});
+
+test('diagnoseHarnessRunReadiness reports sample_group_mismatch for PCA inputs', () => {
+  withTempDir((dir) => {
+    fs.writeFileSync(path.join(dir, 'expr.csv'), 'Sample,G1,G2,G3\nS1,1,2,3\nS2,4,5,6\nS3,7,8,9\n');
+    fs.writeFileSync(path.join(dir, 'groups.csv'), 'sample,group\nX1,A\nX2,B\nX3,A\n');
+    const index = indexDirectory(dir, { hash: false });
+    const pca = readBuiltInManifest('pca-explorer');
+    const diagnostics = diagnoseHarnessRunReadiness(pca, index, {});
+
+    assert.equal(diagnostics.status, 'needs_review');
+    const issue = diagnostics.issues.find((item) => item.code === 'sample_group_mismatch');
+    assert.ok(issue, '应识别分组文件与表达矩阵不匹配');
+    assert.equal(issue.recoverable, true);
+    assert.equal(issue.severity, 'warning');
+    assert.ok(diagnostics.nextActions.some((action) => action.id === 'align_group_samples'));
+  });
+});
+
+test('diagnoseHarnessRunReadiness reports invalid_numeric_values and empty_significant_set for volcano inputs', () => {
+  withTempDir((dir) => {
+    fs.writeFileSync(
+      path.join(dir, 'deg_bad.csv'),
+      'gene,log2FC,pvalue\nTP53,foo,0.01\nEGFR,-2,bar\nBRCA1,0.3,0.9\n',
+    );
+    const index = indexDirectory(dir, { hash: false });
+    const volcano = readBuiltInManifest('volcano-plot');
+    const diagnostics = diagnoseHarnessRunReadiness(volcano, index, { top_n: 10 });
+
+    assert.equal(diagnostics.status, 'needs_review');
+    assert.ok(diagnostics.issues.some((item) => item.code === 'invalid_numeric_values'));
+  });
+});
+
+test('diagnoseHarnessRunReadiness reports empty_significant_set for volcano inputs', () => {
+  withTempDir((dir) => {
+    fs.writeFileSync(
+      path.join(dir, 'deg_no_sig.csv'),
+      'gene,log2FC,pvalue\nTP53,0.1,0.9\nEGFR,-0.2,0.8\nBRCA1,0.3,0.7\n',
+    );
+    const index = indexDirectory(dir, { hash: false });
+    const volcano = readBuiltInManifest('volcano-plot');
+    const diagnostics = diagnoseHarnessRunReadiness(volcano, index, { top_n: 10, fc_threshold: 2, pval_threshold: 2 });
+
+    assert.equal(diagnostics.status, 'needs_review');
+    const empty = diagnostics.issues.find((item) => item.code === 'empty_significant_set');
+    assert.ok(empty, '应识别没有满足阈值的显著基因');
+    assert.equal(empty.recoverable, true);
+  });
+});
+
+test('diagnoseHarnessRunReadiness surfaces next actions for blocked and ready states', () => {
+  withTempDir((dir) => {
+    fs.writeFileSync(path.join(dir, 'notes.md'), '# no usable data');
+    const index = indexDirectory(dir, { hash: false });
+    const volcano = readBuiltInManifest('volcano-plot');
+    const blocked = diagnoseHarnessRunReadiness(volcano, index, {});
+    assert.equal(blocked.status, 'blocked');
+    assert.ok(blocked.nextActions.some((action) => action.id === 'change_inputs'));
+    assert.ok(blocked.nextActions.some((action) => action.id === 'inspect_summary'));
+
+    fs.writeFileSync(path.join(dir, 'deg.csv'), 'gene,log2FC,pvalue\nTP53,1,0.01\n');
+    const readyIndex = indexDirectory(dir, { hash: false });
+    const ready = diagnoseHarnessRunReadiness(volcano, readyIndex, { top_n: 3 });
+    assert.ok(ready.nextActions.some((action) => action.id === 'run'));
   });
 });

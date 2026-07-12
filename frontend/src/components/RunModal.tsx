@@ -27,11 +27,9 @@ interface RunModalProps {
   onSaveToResult?: (imageUrl: string, code: string) => Promise<void>;
   /** Initial image URL to display before user runs code (e.g., from analysis results) */
   initialImage?: string;
-  /** Packages required by this card — used for desktop package check */
-  packages?: string[];
 }
 
-const R_SERVER_TOKEN = 'biof3-figcode-2026';
+const R_SERVER_TOKEN = 'biof3-desktop-2026';
 
 // R Server 统一地址：本地开发和线上都连同一个远程 R Server
 const R_SERVER_BASE = 'http://biof3.com:3001';
@@ -151,7 +149,6 @@ export default function RunModal({
   onImageReady,
   onSaveToResult,
   initialImage,
-  packages,
 }: RunModalProps) {
   const [code, setCode] = useState(initialCode);
   const [output, setOutput] = useState('');
@@ -185,10 +182,10 @@ export default function RunModal({
   const codeRef = useRef(initialCode);
 
   // URL helpers — must be at top level before any callbacks
-  const _scriptHref = useBaseUrl(cardId ? `/figcode/scripts/${cardId}.R` : '');
-  const dataHref = useBaseUrl(cardId ? `/figcode/data/${cardId}.csv` : '');
-  const _docHtmlHref = useBaseUrl(cardId ? `/exports/figcode/${cardId}/index.html` : '');
-  const _docPdfHref = useBaseUrl(cardId ? `/exports/figcode/${cardId}/article.pdf` : '');
+  const _scriptHref = useBaseUrl(cardId ? `/scripts/${cardId}.R` : '');
+  const dataHref = useBaseUrl(cardId ? `/data/${cardId}.csv` : '');
+  const _docHtmlHref = useBaseUrl(cardId ? `/exports/${cardId}/index.html` : '');
+  const _docPdfHref = useBaseUrl(cardId ? `/exports/${cardId}/article.pdf` : '');
 
   // Reset when modal opens with new code
   useEffect(() => {
@@ -405,7 +402,7 @@ export default function RunModal({
     if (!isOpen) return;
   }, [isOpen]);
 
-  // FIGCODE_ACT_v1: listen for AI-driven code replacement events
+  // Listen for AI-driven code replacement events
   useEffect(() => {
     if (!isOpen) return;
     const onReplace = (e: Event) => {
@@ -450,9 +447,9 @@ export default function RunModal({
       };
       setTimeout(tryRun, 120);
     };
-    window.addEventListener('biof3:figcode-replace-code', onReplace as EventListener);
+    window.addEventListener('biof3:run-modal-replace-code', onReplace as EventListener);
     return () =>
-      window.removeEventListener('biof3:figcode-replace-code', onReplace as EventListener);
+      window.removeEventListener('biof3:run-modal-replace-code', onReplace as EventListener);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     isOpen,
@@ -554,37 +551,6 @@ export default function RunModal({
     async (codeToRun?: string) => {
       const execCode = codeToRun ?? codeRef.current;
       if (!execCode || runningRef.current) return;
-
-      // Desktop: check required packages before running
-      if (
-        typeof window !== 'undefined' &&
-        window.biof3Desktop?.figcode &&
-        packages &&
-        packages.length > 0
-      ) {
-        try {
-          const result = await window.biof3Desktop.figcode.checkPackages(
-            language,
-            packages,
-            cardId
-          );
-          if (result.ok && !result.cardInstalled) {
-            const pluginNames = (result.missingPlugins || [])
-              .map((p: any) => `「${p.title}」`)
-              .join('、');
-            const pkgList = result.missing.join(', ');
-            setOutput(
-              `⚠️ 此卡片需要安装插件才能运行\n\n` +
-                (pkgList ? `缺少依赖包: ${pkgList}\n\n` : '') +
-                (pluginNames ? `需要安装: ${pluginNames}\n\n` : '') +
-                `请打开「设置 → 插件商店」安装对应插件后重试。`
-            );
-            return;
-          }
-        } catch {
-          // check failed — proceed anyway (let server-side error surface)
-        }
-      }
 
       runningRef.current = true;
       setRunning(true);

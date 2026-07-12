@@ -1,10 +1,10 @@
 // ============================================================
 // Global Project model — UI-REFACTOR Phase1
-// Shared across all modules (tools, single-cell, spatial, figcode, etc.)
+// Shared across all modules (tools, single-cell, spatial, etc.)
 // Replaces module-specific project stores with a unified interface.
 // ============================================================
 
-export type ProjectModality = 'single-cell' | 'spatial' | 'figcode' | 'general' | string;
+export type ProjectModality = 'single-cell' | 'spatial' | 'general' | string;
 
 export interface Project {
   id: string;

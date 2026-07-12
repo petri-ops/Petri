@@ -436,15 +436,57 @@ export function indexDirectory(rootPath, options = {}) {
   const root = normalizePath(rootPath);
   const startedAt = stableNow();
   const files = walkDirectory(root, options);
+  const cachePath = typeof options.cache === 'string' ? options.cache : options.cachePath;
+  const cache =
+    cachePath && fs.existsSync(path.isAbsolute(cachePath) ? cachePath : path.join(root, cachePath))
+      ? (() => {
+          try {
+            const resolvedCachePath = path.isAbsolute(cachePath) ? cachePath : path.join(root, cachePath);
+            const loaded = readIndexCache(resolvedCachePath);
+            return loaded && normalizePath(loaded.root) === root ? loaded : null;
+          } catch {
+            return null;
+          }
+        })()
+      : null;
+  const cachedEntries = new Map(
+    (cache?.entries || []).map((entry) => [
+      entry.relativePath || safeRelative(root, entry.path || entry.name || ''),
+      entry,
+    ])
+  );
   const entries = [];
   const errors = [];
+  const seenRelativePaths = new Set();
+  let reusedEntries = 0;
+  let updatedEntries = 0;
   for (const file of files) {
+    const relativePath = safeRelative(root, file);
+    seenRelativePaths.add(relativePath);
     try {
+      const stat = fs.statSync(file);
+      const cached = cachedEntries.get(relativePath);
+      const canReuse =
+        cached &&
+        cached.size === stat.size &&
+        cached.mtimeMs === stat.mtimeMs &&
+        (options.hash === false || cached.hash || !options.hash);
+      if (canReuse) {
+        entries.push({
+          ...cached,
+          path: file,
+          relativePath,
+          inspectedAt: cached.inspectedAt || startedAt,
+        });
+        reusedEntries += 1;
+        continue;
+      }
       const detection = detectFile(file, options);
       entries.push({
         ...detection,
-        relativePath: safeRelative(root, detection.path),
+        relativePath,
       });
+      updatedEntries += 1;
     } catch (error) {
       errors.push({ path: file, error: error.message });
     }
@@ -456,6 +498,12 @@ export function indexDirectory(rootPath, options = {}) {
     byKind[entry.kind] = (byKind[entry.kind] || 0) + 1;
     byRole[entry.role] = (byRole[entry.role] || 0) + 1;
   }
+  const removedEntries = cache
+    ? (cache.entries || []).filter((entry) => {
+        const rel = entry.relativePath || safeRelative(root, entry.path || entry.name || '');
+        return !seenRelativePaths.has(rel);
+      }).length
+    : 0;
 
   return {
     harnessIndexVersion: 1,
@@ -467,6 +515,21 @@ export function indexDirectory(rootPath, options = {}) {
     byRole,
     entries,
     errors,
+    cacheStats: cache
+      ? {
+          cachePath: path.isAbsolute(cachePath) ? normalizePath(cachePath) : path.join(root, cachePath),
+          hit: true,
+          reusedEntries,
+          updatedEntries,
+          removedEntries,
+          sourceCreatedAt: cache.createdAt || null,
+        }
+      : {
+          hit: false,
+          reusedEntries: 0,
+          updatedEntries: entries.length,
+          removedEntries: 0,
+        },
   };
 }
 
@@ -749,13 +812,53 @@ function availableSampleCount(entry) {
   return entry.table.rowSampleCount || null;
 }
 
+function normalizeDetectPatterns(detect) {
+  if (!detect) return [];
+  if (Array.isArray(detect)) return detect.flatMap((item) => normalizeDetectPatterns(item));
+  return [detect];
+}
+
+function failureModeMatchesIssue(failureMode, issue = {}) {
+  if (!failureMode || !issue) return false;
+  if (issue.code && failureMode.code === issue.code) return true;
+  const haystack = [issue.code, issue.message, issue.detail, issue.suggestedFix]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  if (!haystack) return false;
+  for (const pattern of normalizeDetectPatterns(failureMode.detect)) {
+    if (!pattern) continue;
+    if (pattern instanceof RegExp) {
+      if (pattern.test(haystack)) return true;
+      continue;
+    }
+    const text = String(pattern).trim();
+    if (!text) continue;
+    if (text.startsWith('/') && text.endsWith('/')) {
+      try {
+        if (new RegExp(text.slice(1, -1), 'i').test(haystack)) return true;
+      } catch {
+        /* ignore invalid pattern */
+      }
+      continue;
+    }
+    if (haystack.includes(text.toLowerCase())) return true;
+  }
+  return false;
+}
+
 function failureModeByCode(manifest = {}, code) {
   const modes = Array.isArray(manifest.failureModes) ? manifest.failureModes : [];
   return modes.find((mode) => mode && mode.code === code) || null;
 }
 
+function failureModeForIssue(manifest = {}, issue = {}) {
+  const modes = Array.isArray(manifest.failureModes) ? manifest.failureModes : [];
+  return modes.find((mode) => failureModeMatchesIssue(mode, issue)) || null;
+}
+
 function normalizeDiagnosticIssue(manifest, issue) {
-  const failureMode = failureModeByCode(manifest, issue.code);
+  const failureMode = failureModeForIssue(manifest, issue) || failureModeByCode(manifest, issue.code);
   return {
     code: issue.code,
     severity: issue.severity || (failureMode?.recoverable === false ? 'error' : 'warning'),
@@ -803,8 +906,168 @@ function selectedEntryForFileInput(index, params, input, selectedByInput) {
         entry.path === normalizedValue ||
         entry.canonicalPath === normalizedValue ||
         path.basename(entry.path || '') === path.basename(normalizedValue),
-    ) || null
+  ) || null
   );
+}
+
+function extractFirstColumnValues(entry, maxValues = 64) {
+  const rows = Array.isArray(entry?.table?.sampleRows) ? entry.table.sampleRows : [];
+  const values = [];
+  for (const row of rows.slice(0, maxValues)) {
+    if (!Array.isArray(row)) continue;
+    const value = String(row[0] ?? '').trim();
+    if (value) values.push(value);
+  }
+  return Array.from(new Set(values));
+}
+
+function tableColumnIndex(headers, name) {
+  if (!name) return -1;
+  const normalized = normalizeColumnName(name);
+  return (headers || []).findIndex((header) => normalizeColumnName(header) === normalized);
+}
+
+function parseNumericCell(value) {
+  if (value == null) return null;
+  const text = String(value).trim();
+  if (!text) return null;
+  const lower = text.toLowerCase();
+  if (['na', 'nan', 'null', 'none', 'inf', '-inf'].includes(lower)) return null;
+  const numeric = Number(text);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function uniqueActions(actions) {
+  const seen = new Set();
+  const out = [];
+  for (const action of actions) {
+    if (!action || !action.id) continue;
+    if (seen.has(action.id)) continue;
+    seen.add(action.id);
+    out.push(action);
+  }
+  return out;
+}
+
+function buildHarnessNextActions(manifest, diagnostics = {}, options = {}) {
+  const issues = Array.isArray(diagnostics.issues) ? diagnostics.issues : [];
+  const severity = diagnostics.status || (issues.some((issue) => issue.severity === 'error') ? 'blocked' : issues.length ? 'needs_review' : 'ready');
+  const actions = [];
+  const push = (action) => actions.push(action);
+  const toolName = manifest?.title || manifest?.name || manifest?.id || '当前工具';
+
+  if (severity === 'ready') {
+    push({
+      id: 'run',
+      label: `开始运行 ${toolName}`,
+      reason: '当前输入和运行时看起来可执行。',
+      recommended: true,
+    });
+    push({
+      id: 'inspect_output',
+      label: '预览输入摘要',
+      reason: '在正式运行前再看一眼当前文件摘要。',
+      recommended: false,
+    });
+    return uniqueActions(actions);
+  }
+
+  if (severity === 'needs_review') {
+    push({
+      id: 'repair',
+      label: `修复 ${toolName} 参数`,
+      reason: '存在可恢复问题，建议先让 Harness 自动修复再继续。',
+      recommended: true,
+    });
+    push({
+      id: 'inspect_inputs',
+      label: '检查当前输入文件',
+      reason: '确认工具选择和文件角色匹配。',
+      recommended: false,
+    });
+  }
+
+  if (severity === 'blocked') {
+    push({
+      id: 'change_inputs',
+      label: '更换或补充输入文件',
+      reason: '当前任务存在阻塞项，可能需要切换到别的文件或重新整理数据。',
+      recommended: true,
+    });
+    push({
+      id: 'fix_runtime',
+      label: '检查运行时配置',
+      reason: '如果是 runtime 不可用，需要先恢复运行环境。',
+      recommended: issues.some((issue) => issue.code === 'runtime_not_ready') || false,
+    });
+  }
+
+  for (const issue of issues) {
+    if (!issue || !issue.code) continue;
+    switch (issue.code) {
+      case 'missing_required_file_inputs':
+        push({
+          id: `resolve_${issue.inputId || 'missing_input'}`,
+          label: `补全 ${issue.inputId || '缺失'} 输入`,
+          reason: issue.suggestedFix || issue.message,
+          recommended: true,
+        });
+        break;
+      case 'matrix_orientation_mismatch':
+        push({
+          id: 'transpose_or_reselect',
+          label: '确认表达矩阵方向',
+          reason: issue.suggestedFix || issue.detail || issue.message,
+          recommended: true,
+        });
+        break;
+      case 'sample_group_mismatch':
+        push({
+          id: 'align_group_samples',
+          label: '对齐分组文件样本名',
+          reason: issue.suggestedFix || issue.detail || issue.message,
+          recommended: true,
+        });
+        break;
+      case 'invalid_numeric_values':
+        push({
+          id: 'clean_numeric_columns',
+          label: '清理数值列异常值',
+          reason: issue.suggestedFix || issue.detail || issue.message,
+          recommended: true,
+        });
+        break;
+      case 'empty_significant_set':
+        push({
+          id: 'relax_thresholds',
+          label: '适当放宽阈值',
+          reason: issue.suggestedFix || issue.detail || issue.message,
+          recommended: true,
+        });
+        break;
+      case 'runtime_not_ready':
+        push({
+          id: 'configure_runtime',
+          label: '配置对应运行时',
+          reason: issue.suggestedFix || issue.detail || issue.message,
+          recommended: true,
+        });
+        break;
+      default:
+        break;
+    }
+  }
+
+  if (options.includeInspect !== false) {
+    push({
+      id: 'inspect_summary',
+      label: '查看文件摘要',
+      reason: '在再次执行前快速查看 Harness 给出的结构化摘要。',
+      recommended: severity !== 'ready',
+    });
+  }
+
+  return uniqueActions(actions);
 }
 
 export function diagnoseHarnessRunReadiness(manifest, index, params = {}, options = {}) {
@@ -866,6 +1129,105 @@ export function diagnoseHarnessRunReadiness(manifest, index, params = {}, option
     }
   }
 
+  const matrixInputs = fileInputs(manifest).filter((input) => /expr|expression|matrix|表达|矩阵|count/.test(textForInput(input)));
+  const sampleGroupInput = fileInputs(manifest).find((input) => {
+    const text = textForInput(input);
+    return (
+      /group|metadata|分组/.test(text) &&
+      !/expr|expression|matrix|表达|矩阵|count/.test(text)
+    );
+  });
+  const exprInput = matrixInputs[0] || null;
+  if (exprInput && sampleGroupInput) {
+    const exprEntry = selectedEntryForFileInput(index, repair.repairedParams, exprInput, selectedByInput);
+    const groupEntry = selectedEntryForFileInput(index, repair.repairedParams, sampleGroupInput, selectedByInput);
+    if (
+      exprEntry &&
+      groupEntry &&
+      exprEntry.table?.matrixOrientation === 'rows_are_samples' &&
+      groupEntry.table?.rowSampleCount
+    ) {
+      const exprKeys = new Set(extractFirstColumnValues(exprEntry));
+      const groupKeys = new Set(extractFirstColumnValues(groupEntry));
+      const overlap = [...exprKeys].filter((key) => groupKeys.has(key));
+      if (exprKeys.size > 0 && groupKeys.size > 0 && overlap.length === 0) {
+        issues.push(
+          normalizeDiagnosticIssue(manifest, {
+            code: 'sample_group_mismatch',
+            severity: 'warning',
+            recoverable: true,
+            inputId: sampleGroupInput.id,
+            message: '分组文件与表达矩阵样本名无法对齐',
+            detail: `expr_matrix=${exprInput.id}, group_file=${sampleGroupInput.id}`,
+            suggestedFix: '请让分组文件的 sample 列与表达矩阵样本名对齐，或重新选择当前项目里的分组文件。',
+          }),
+        );
+      }
+    }
+  }
+
+  const degInput = fileInputs(manifest).find((input) => /deg|差异|volcano|火山/.test(textForInput(input)));
+  if (degInput) {
+    const degEntry = selectedEntryForFileInput(index, repair.repairedParams, degInput, selectedByInput);
+    if (degEntry?.table?.headers?.length && Array.isArray(degEntry.table.sampleRows)) {
+      const mapped = repair.repairedParams?.columnMappings?.[degInput.id] || {};
+      const inferred = inferColumnMappings(degEntry, ['gene', 'log2FC', 'pvalue']);
+      const columnMap = {
+        gene: mapped.gene || inferred.mappings.gene,
+        log2FC: mapped.log2FC || inferred.mappings.log2FC,
+        pvalue: mapped.pvalue || inferred.mappings.pvalue,
+      };
+      const log2fcIdx = tableColumnIndex(degEntry.table.headers, columnMap.log2FC);
+      const pvalueIdx = tableColumnIndex(degEntry.table.headers, columnMap.pvalue);
+      const rows = degEntry.table.sampleRows;
+      const validRows = [];
+      const invalidRows = [];
+      for (const row of rows) {
+        if (!Array.isArray(row)) continue;
+        const log2fc = parseNumericCell(row[log2fcIdx]);
+        const pvalue = parseNumericCell(row[pvalueIdx]);
+        if (log2fc == null || pvalue == null) {
+          invalidRows.push(row);
+          continue;
+        }
+        validRows.push({ log2fc, pvalue });
+      }
+      if (invalidRows.length > 0 && invalidRows.length >= Math.max(1, Math.floor(rows.length / 3))) {
+        issues.push(
+          normalizeDiagnosticIssue(manifest, {
+            code: 'invalid_numeric_values',
+            severity: 'warning',
+            recoverable: true,
+            inputId: degInput.id,
+            message: '差异分析表中存在非数值或不可解析值',
+            detail: `log2FC=${columnMap.log2FC || 'missing'}, pvalue=${columnMap.pvalue || 'missing'}`,
+            suggestedFix: '请清理 log2FC / pvalue 列中的空值、NA、文本和无穷大，再重新运行。',
+          }),
+        );
+      } else if (validRows.length > 0) {
+        const fcThreshold = Number(repair.repairedParams?.fc_threshold ?? params.fc_threshold ?? 1);
+        const pvalThreshold = Number(repair.repairedParams?.pval_threshold ?? params.pval_threshold ?? 1.3);
+        const pCutoff = Math.pow(10, -pvalThreshold);
+        const significantCount = validRows.filter(
+          (row) => Math.abs(row.log2fc) >= fcThreshold && row.pvalue <= pCutoff,
+        ).length;
+        if (significantCount === 0) {
+          issues.push(
+            normalizeDiagnosticIssue(manifest, {
+              code: 'empty_significant_set',
+              severity: 'warning',
+              recoverable: true,
+              inputId: degInput.id,
+              message: '当前阈值下未找到显著基因',
+              detail: `fc_threshold=${fcThreshold}, pval_threshold=${pvalThreshold}, validRows=${validRows.length}`,
+              suggestedFix: '可适度降低阈值，或确认当前差异分析结果本身是否足够显著。',
+            }),
+          );
+        }
+      }
+    }
+  }
+
   for (const warning of repair.warnings || []) {
     const issue = diagnosticIssueFromRepairWarning(manifest, warning);
     if (issue) issues.push(issue);
@@ -895,6 +1257,10 @@ export function diagnoseHarnessRunReadiness(manifest, index, params = {}, option
     issues,
     repairedParams: repair.repairedParams,
     inputSuggestions,
+    nextActions: buildHarnessNextActions(manifest, {
+      status: errors.length ? 'blocked' : issues.length ? 'needs_review' : 'ready',
+      issues,
+    }, options),
   };
 }
 

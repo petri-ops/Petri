@@ -149,13 +149,6 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     },
   },
 
-  // FigCode 包检测
-  figcode: {
-    checkPackages: (language, packages, cardId) =>
-      ipcRenderer.invoke('figcode:check-packages', { language, packages, cardId }),
-    cardStatus: (cardIds) => ipcRenderer.invoke('figcode:card-status', cardIds),
-  },
-
   // 自动更新（electron-updater）
   updater: {
     check: () => ipcRenderer.invoke('updater:check'),

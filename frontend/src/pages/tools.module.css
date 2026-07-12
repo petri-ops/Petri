@@ -987,26 +987,6 @@
   margin-top: 6px;
 }
 
-/* ---- FigCode link (tool → figcode association) ---- */
-.figcodeLink {
-  display: inline-flex;
-  align-items: center;
-  font-size: var(--biof3-font-size-sm);
-  color: var(--ifm-color-primary);
-  text-decoration: none;
-  font-weight: 500;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: rgba(16, 185, 129, 0.08);
-  border: none;
-  cursor: pointer;
-  transition: background 0.12s;
-}
-.figcodeLink:hover {
-  background: rgba(16, 185, 129, 0.18);
-  text-decoration: none;
-}
-
 .resultPlotFooter {
   display: flex;
   align-items: center;
@@ -1026,10 +1006,6 @@
 
 .demoPlotWrap {
   text-align: center;
-}
-.demoPlotWrap .figcodeLink {
-  margin-top: 8px;
-  display: inline-flex;
 }
 
 /* ============================================================
@@ -1324,6 +1300,20 @@
   cursor: pointer;
   text-align: left;
   transition: background 0.12s;
+}
+.navToolBadgeDrift {
+  margin-left: auto;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--ifm-color-warning-lightest);
+  color: var(--ifm-color-warning-darker);
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+[data-theme='dark'] .navToolBadgeDrift {
+  background: rgba(251, 191, 36, 0.15);
+  color: var(--ifm-color-warning);
 }
 .navToolBtn:hover {
   background: var(--ifm-color-success-lightest);

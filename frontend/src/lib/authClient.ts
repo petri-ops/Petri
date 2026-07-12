@@ -20,7 +20,6 @@ const DESKTOP_USER: AuthUser = {
   permissions: {
     docs: true,
     blog: true,
-    figcode: true,
     tools: true,
     'single-cell': true,
     spatial: true,

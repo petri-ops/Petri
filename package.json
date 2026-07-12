@@ -13,7 +13,7 @@
     "start": "electron .",
     "dev": "node scripts/dev-electron.js",
     "dev:electron": "electron . --dev",
-    "prebuild": "bash scripts/sync-vendor.sh check && node --check src/main.js && node --check src/preload.js",
+    "prebuild": "bash scripts/sync-vendor.sh check && node --check src/main.js && node --check src/preload.js && node --check src/plugin-manager.js && node --check vendor/biof3-core/r-server/plugin-loader.js",
     "test": "node --test test/*.test.mjs",
     "mcp:server": "node src/mcp-server.js",
     "build:site": "cd .. && npm run build:desktop",
@@ -24,8 +24,9 @@
     "build:mac-arm64": "npm run prebuild && npm run build:all && electron-builder --mac --arm64",
     "build:mac-x64": "npm run prebuild && npm run build:all && electron-builder --mac --x64",
     "harness:index": "node scripts/harness-file-index.mjs",
+    "harness:scaffold": "node scripts/scaffold-harness-tool.mjs",
     "harness:check": "node scripts/check-harness-manifests.mjs",
-    "check": "bash scripts/sync-vendor.sh check && node --check src/main.js && node --check src/preload.js && npm run harness:check"
+    "check": "bash scripts/sync-vendor.sh check && node --check src/main.js && node --check src/preload.js && node --check src/plugin-manager.js && node --check vendor/biof3-core/r-server/plugin-loader.js && node --check scripts/scaffold-harness-tool.mjs && npm run harness:check"
   },
   "dependencies": {
     "@electron/notarize": "^2.5.0",

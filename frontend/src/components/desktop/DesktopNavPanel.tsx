@@ -25,7 +25,6 @@ const NAV_ITEMS: NavItem[] = [
   // 桌面端已移除教程入口，教程导航项已删除。如需恢复取消下面注释即可。
   // { label: '教程', to: '/docs/intro', icon: 'book' },
   { label: '分析结果', to: '/tools', icon: 'bar-chart' },
-  { label: '绘图模板', to: '/figcode', icon: 'image' },
   { label: '管理', to: '/admin', icon: 'settings' },
 ];
 

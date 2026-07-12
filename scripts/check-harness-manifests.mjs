@@ -21,6 +21,19 @@ function assertField(errors, condition, message) {
   if (!condition) errors.push(message);
 }
 
+function assertUniqueKeys(errors, items, key, label, itemLabel) {
+  const seen = new Set();
+  for (const item of Array.isArray(items) ? items : []) {
+    const value = item && item[key];
+    if (!value) continue;
+    if (seen.has(value)) {
+      errors.push(`${label}: duplicate ${itemLabel} ${key} "${value}"`);
+      continue;
+    }
+    seen.add(value);
+  }
+}
+
 function runnableBuiltInPluginDirs(root = BUILT_IN_DIR) {
   if (!fs.existsSync(root)) return [];
   return fs
@@ -66,6 +79,9 @@ export function validateHarnessManifests({ root = BUILT_IN_DIR } = {}) {
     assertField(errors, Array.isArray(manifest.inputs) && manifest.inputs.length > 0, `${label}: inputs[] is required`);
     assertField(errors, Array.isArray(manifest.artifacts) && manifest.artifacts.length > 0, `${label}: artifacts[] is required`);
     assertField(errors, Array.isArray(manifest.failureModes) && manifest.failureModes.length > 0, `${label}: failureModes[] is required`);
+    assertUniqueKeys(errors, manifest.inputs, 'id', label, 'input');
+    assertUniqueKeys(errors, manifest.artifacts, 'id', label, 'artifact');
+    assertUniqueKeys(errors, manifest.failureModes, 'code', label, 'failure mode');
 
     for (const input of manifest.inputs) {
       assertField(errors, typeof input.id === 'string' && input.id.length > 0, `${label}: each input needs id`);
@@ -85,6 +101,7 @@ export function validateHarnessManifests({ root = BUILT_IN_DIR } = {}) {
       assertField(errors, typeof failureMode.code === 'string' && failureMode.code.length > 0, `${label}: failure mode needs code`);
       assertField(errors, typeof failureMode.title === 'string' && failureMode.title.length > 0, `${label}.${failureMode.code}: failure mode title is required`);
       assertField(errors, typeof failureMode.suggestedFix === 'string' && failureMode.suggestedFix.length > 0, `${label}.${failureMode.code}: suggestedFix is required`);
+      assertField(errors, typeof failureMode.detect === 'string' && failureMode.detect.length > 0, `${label}.${failureMode.code}: failure mode detect is required`);
     }
   }
 

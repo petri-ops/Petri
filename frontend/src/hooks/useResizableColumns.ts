@@ -48,6 +48,12 @@ function saveDims(dims: StoredDims): void {
 const MIN_LEFT_WIDTH = 96;
 const MIN_RIGHT_WIDTH = 96;
 const MIN_INPUT_HEIGHT = 48;
+const RESIZING_CLASS = 'biof3-resizing-columns';
+
+function setResizingClass(active: boolean): void {
+  if (typeof document === 'undefined') return;
+  document.body.classList.toggle(RESIZING_CLASS, active);
+}
 
 /**
  * Encapsulates drag-to-resize state for the three-column layout + the
@@ -74,6 +80,10 @@ export function useResizableColumns(
   // needing to recreate the closures on every render.
   const dims = useRef({ leftWidth, rightWidth, inputHeight, bottomTerminalHeight });
   dims.current = { leftWidth, rightWidth, inputHeight, bottomTerminalHeight };
+  const dragState = useRef<{ active: boolean; cleanup: null | (() => void) }>({
+    active: false,
+    cleanup: null,
+  });
 
   // Wrap every setter to persist the new value into localStorage atomically.
   const setLeftWidth = useCallback((n: number) => {
@@ -107,11 +117,28 @@ export function useResizableColumns(
   const startColumnResize = useCallback(
     (which: 'left' | 'right' | 'input') => (e: React.MouseEvent) => {
       e.preventDefault();
+      setResizingClass(true);
+      dragState.current.active = true;
       const startX = e.clientX;
       const startY = e.clientY;
       const { leftWidth: sl, rightWidth: sr, inputHeight: si } = dims.current;
 
+      const cleanup = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        window.removeEventListener('blur', onUp);
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        setResizingClass(false);
+        dragState.current.active = false;
+        dragState.current.cleanup = null;
+      };
+
       const onMove = (ev: MouseEvent) => {
+        if (dragState.current.active && (ev.buttons & 1) === 0) {
+          cleanup();
+          return;
+        }
         if (which === 'left') {
           setLeftWidth(Math.max(MIN_LEFT_WIDTH, sl + ev.clientX - startX));
         } else if (which === 'right') {
@@ -121,13 +148,12 @@ export function useResizableColumns(
         }
       };
       const onUp = () => {
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
-        document.body.style.cursor = '';
-        document.body.style.userSelect = '';
+        cleanup();
       };
+      dragState.current.cleanup = cleanup;
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onUp);
+      window.addEventListener('blur', onUp);
       document.body.style.cursor = which === 'input' ? 'ns-resize' : 'ew-resize';
       document.body.style.userSelect = 'none';
     },
@@ -137,12 +163,29 @@ export function useResizableColumns(
   const startBottomTerminalResize = useCallback(
     (e: React.MouseEvent, clamp: { min?: number; max?: number } = {}) => {
       e.preventDefault();
+      setResizingClass(true);
+      dragState.current.active = true;
       const startY = e.clientY;
       const startHeight = dims.current.bottomTerminalHeight;
       const minHeight = clamp.min ?? 120;
       const maxHeight = clamp.max ?? 1_000_000;
 
+      const cleanup = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        window.removeEventListener('blur', onUp);
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        setResizingClass(false);
+        dragState.current.active = false;
+        dragState.current.cleanup = null;
+      };
+
       const onMove = (ev: MouseEvent) => {
+        if (dragState.current.active && (ev.buttons & 1) === 0) {
+          cleanup();
+          return;
+        }
         const next = Math.min(
           maxHeight,
           Math.max(minHeight, startHeight - (ev.clientY - startY)),
@@ -150,13 +193,12 @@ export function useResizableColumns(
         setBottomTerminalHeight(next);
       };
       const onUp = () => {
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
-        document.body.style.cursor = '';
-        document.body.style.userSelect = '';
+        cleanup();
       };
+      dragState.current.cleanup = cleanup;
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onUp);
+      window.addEventListener('blur', onUp);
       document.body.style.cursor = 'ns-resize';
       document.body.style.userSelect = 'none';
     },

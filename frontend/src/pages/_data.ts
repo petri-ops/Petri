@@ -41,13 +41,18 @@ export interface Tool {
   color: string;
   /** Static demo report URL (HTML). Was scattered in REPORT_URLS. */
   reportUrl?: string;
-  /** Map output filename → FigCode card id for "在线绘图" buttons.
-   * Was scattered in FIGCODE_MAP. Keys must match what the R script writes
-   * (`ggsave/png` filename); values must be valid figcardId in src/pages/figcode/_data.ts. */
-  figcodeMap?: Record<string, string>;
   /** True = tool not yet runnable, only shows as placeholder card.
    * Wave 1 of machine-learning column adds 7 placeholders; will flip to false as Wave 2-4 ship. */
   comingSoon?: boolean;
+  _manifest?: {
+    execution?: {
+      scriptFingerprint?: string | null;
+      installedFingerprint?: string | null;
+      currentFingerprint?: string | null;
+      manifestDrift?: boolean;
+      driftReason?: string | null;
+    };
+  };
 }
 
 export const toolCategories = [
@@ -141,16 +146,6 @@ export const tools: Tool[] = [
     packages: ['DESeq2', 'ggplot2', 'ggrepel', 'pheatmap'],
     color: '#dc2626',
     reportUrl: '/exports/tools/deseq2/index.html',
-    figcodeMap: {
-      'volcano.png': 'volcano',
-      'pca.png': 'pca',
-      'heatmap.png': 'heatmap',
-      'deg_table.csv': 'volcano',
-      'ma_plot.png': 'ma-plot',
-      'library_size.png': 'library-size',
-      'dispersion.png': 'dispersion',
-      'sample_distance.png': 'sample-cor',
-    },
   },
   {
     id: 'go-kegg',
@@ -272,20 +267,6 @@ export const tools: Tool[] = [
     packages: ['clusterProfiler', 'org.Hs.eg.db', 'org.Mm.eg.db', 'enrichplot', 'DOSE'],
     color: '#059669',
     reportUrl: '/exports/tools/go-kegg/index.html',
-    figcodeMap: {
-      'go_bp_dotplot.png': 'dotplot',
-      'go_bp_barplot.png': 'go-bar',
-      'go_bp_cnetplot.png': 'cnetplot',
-      'go_bp_treeplot.png': 'treemap',
-      'go_bp_emapplot.png': 'go-emap',
-      'go_bp_heatplot.png': 'heatmap',
-      'go_mf_dotplot.png': 'dotplot',
-      'go_cc_dotplot.png': 'dotplot',
-      'kegg_dotplot.png': 'kegg-dotplot',
-      'kegg_barplot.png': 'go-bar',
-      'compare_up_down.png': 'dotplot',
-      'go_dotplot.png': 'dotplot',
-    },
   },
   {
     id: 'km-survival',
@@ -352,14 +333,6 @@ export const tools: Tool[] = [
     packages: ['survival', 'survminer', 'timeROC', 'ggplot2'],
     color: '#2563eb',
     reportUrl: '/exports/tools/km-survival/index.html',
-    figcodeMap: {
-      'km_plot.png': 'km-curve',
-      'km_curve.png': 'km-curve',
-      'forest_plot.png': 'forest-cox',
-      'roc_plot.png': 'time-roc',
-      'roc_curve.png': 'time-roc',
-      'expression_dist.png': 'expr-dist',
-    },
   },
   {
     id: 'gsea',
@@ -419,22 +392,6 @@ export const tools: Tool[] = [
     packages: ['clusterProfiler', 'enrichplot', 'org.Hs.eg.db', 'DOSE'],
     color: '#d97706',
     reportUrl: '/exports/tools/gsea/index.html',
-    figcodeMap: {
-      'gsea_dotplot.png': 'dotplot',
-      'gsea_waterfall.png': 'gsea-waterfall',
-      'gsea_ridge.png': 'ridge-gsea',
-      'gsea_cnetplot.png': 'cnetplot',
-      'gsea_emapplot.png': 'go-emap',
-      'gsea_treeplot.png': 'treemap',
-      'running_score_1.png': 'gsea-running',
-      'running_score_2.png': 'gsea-running',
-      'running_score_3.png': 'gsea-running',
-      'running_score.png': 'gsea-running',
-      'waterfall.png': 'gsea-waterfall',
-      'ridge.png': 'ridge-gsea',
-      'barplot.png': 'go-bar',
-      'boxplot.png': 'violin',
-    },
   },
   {
     id: 'bindea-immune',
@@ -489,12 +446,6 @@ export const tools: Tool[] = [
     packages: ['GSVA', 'ggplot2', 'pheatmap', 'immunedeconv'],
     color: '#7c3aed',
     reportUrl: '/exports/tools/immune/index.html',
-    figcodeMap: {
-      'barplot_composition.png': 'immune-composition',
-      'correlation_heatmap.png': 'immune-cor',
-      'boxplot_group.png': 'immune-boxplot',
-      'lollipop_scores.png': 'immune-lollipop',
-    },
   },
   // ============================================================
   // 新增工具（第二批）
@@ -624,7 +575,6 @@ export const tools: Tool[] = [
     packages: ['ComplexHeatmap', 'circlize', 'RColorBrewer'],
     color: '#9333ea',
     reportUrl: '/exports/tools/complexheatmap/index.html',
-    figcodeMap: {},
   },
   {
     id: 'wgcna',
@@ -723,7 +673,6 @@ export const tools: Tool[] = [
     packages: ['WGCNA', 'flashClust', 'ggplot2', 'pheatmap'],
     color: '#0891b2',
     reportUrl: '/exports/tools/wgcna/index.html',
-    figcodeMap: {},
   },
   {
     id: 'lasso-cox',
@@ -780,11 +729,6 @@ export const tools: Tool[] = [
     packages: ['glmnet', 'survival', 'survminer', 'timeROC', 'ggplot2'],
     color: '#be185d',
     reportUrl: '/exports/tools/lasso-cox/index.html',
-    figcodeMap: {
-      'lasso_cv.png': 'lasso-cv-plot',
-      'coef_barplot.png': 'lasso-coef',
-      'risk_triple.png': 'risk-triple',
-    },
   },
   {
     id: 'seurat-standard',
@@ -905,13 +849,6 @@ export const tools: Tool[] = [
     packages: ['Seurat', 'ggplot2', 'patchwork', 'dplyr'],
     color: '#4f46e5',
     reportUrl: '/exports/tools/seurat/index.html',
-    figcodeMap: {
-      'qc_violin.png': 'sc-qc-violin',
-      'umap_clusters.png': 'umap',
-      'pca_dimplot.png': 'pca',
-      'markers_heatmap.png': 'sc-deg-heatmap',
-      'markers_violin.png': 'sc-marker-bubble',
-    },
   },
   {
     id: 'maftools-mutation',
@@ -1003,7 +940,6 @@ export const tools: Tool[] = [
     packages: ['maftools', 'BSgenome.Hsapiens.UCSC.hg19', 'BSgenome.Hsapiens.UCSC.hg38', 'NMF'],
     color: '#475569',
     reportUrl: '/exports/tools/maftools/index.html',
-    figcodeMap: {},
   },
   {
     id: 'cellchat',
@@ -1106,7 +1042,6 @@ export const tools: Tool[] = [
     packages: ['CellChat', 'NMF', 'ggalluvial', 'circlize'],
     color: '#0d9488',
     reportUrl: '/exports/tools/cellchat/index.html',
-    figcodeMap: {},
   },
   // ============================================================
   // 机器学习专栏 — Wave 1 占位(2026-05-26)
@@ -1175,7 +1110,6 @@ export const tools: Tool[] = [
     estimatedMinutes: 2,
     packages: ['caret', 'Boruta', 'mRMRe', 'glmnet', 'VennDiagram'],
     color: '#7c3aed',
-    figcodeMap: {},
   },
   {
     id: 'ml-classifier',
@@ -1249,7 +1183,6 @@ export const tools: Tool[] = [
     estimatedMinutes: 3,
     packages: ['caret', 'glmnet', 'e1071', 'randomForest', 'xgboost', 'pROC'],
     color: '#dc2626',
-    figcodeMap: {},
   },
   {
     id: 'rsf-survival',
@@ -1314,7 +1247,6 @@ export const tools: Tool[] = [
     estimatedMinutes: 4,
     packages: ['randomForestSRC', 'survival', 'timeROC', 'pec'],
     color: '#0891b2',
-    figcodeMap: {},
   },
   {
     id: 'shap-explain',
@@ -1383,7 +1315,6 @@ export const tools: Tool[] = [
     estimatedMinutes: 4,
     packages: ['iml', 'caret', 'glmnet', 'randomForest', 'xgboost', 'e1071'],
     color: '#0891b2',
-    figcodeMap: {},
   },
   {
     id: 'consensus-cluster',
@@ -1453,7 +1384,6 @@ export const tools: Tool[] = [
     estimatedMinutes: 5,
     packages: ['ConsensusClusterPlus', 'NMF', 'cluster', 'mclust'],
     color: '#059669',
-    figcodeMap: {},
   },
   {
     id: 'ml-autoencoder',
@@ -1517,7 +1447,6 @@ export const tools: Tool[] = [
     estimatedMinutes: 2,
     packages: ['pytorch', 'scikit-learn', 'matplotlib', 'pandas'],
     color: '#7c3aed',
-    figcodeMap: {},
   },
   {
     id: 'ml-scvi-annotate',
@@ -1576,7 +1505,6 @@ export const tools: Tool[] = [
     estimatedMinutes: 3,
     packages: ['scvi-tools', 'pytorch', 'scanpy', 'anndata'],
     color: '#0d9488',
-    figcodeMap: {},
   },
   // ============================================================
   // 多组学整合专栏 — 第二期补缺(2026-05-28)
@@ -1671,7 +1599,6 @@ export const tools: Tool[] = [
     estimatedMinutes: 5,
     packages: ['MOFA2', 'ggplot2', 'pheatmap', 'msigdbr', 'fgsea'],
     color: '#6366f1',
-    figcodeMap: {},
   },
   {
     id: 'mo-snf',
@@ -1772,7 +1699,6 @@ export const tools: Tool[] = [
     estimatedMinutes: 3,
     packages: ['SNFtool', 'cluster', 'pheatmap', 'mclust', 'ggalluvial'],
     color: '#ea580c',
-    figcodeMap: {},
   },
   {
     id: 'mo-multivi',
@@ -1826,7 +1752,6 @@ export const tools: Tool[] = [
     estimatedMinutes: 5,
     packages: ['scvi-tools', 'pytorch', 'scanpy', 'muon'],
     color: '#8b5cf6',
-    figcodeMap: {},
     comingSoon: true,
   },
   {
@@ -1888,7 +1813,6 @@ export const tools: Tool[] = [
     estimatedMinutes: 3,
     packages: ['scanpy', 'muon', 'anndata', 'matplotlib'],
     color: '#d946ef',
-    figcodeMap: {},
     comingSoon: true,
   },
   // ============================================================
@@ -1985,11 +1909,6 @@ export const tools: Tool[] = [
     estimatedMinutes: 5,
     packages: ['scanpy', 'squidpy', 'spatialdata', 'anndata', 'matplotlib'],
     color: '#7c2d12', // 与 single-cell ANALYSIS_TYPES.spatial 的颜色一致
-    figcodeMap: {
-      'plot_001_spatial_clusters.png': 'spatial-cluster',
-      'plot_004_top_svgs.png': 'feature-spatial',
-      'plot_003_nhood_enrichment.png': 'squidpy-neighbors',
-    },
     // W2 (2026-05-28): demo 已上线，公开 demo 可看
   },
   // ============================================================
@@ -2075,10 +1994,6 @@ export const tools: Tool[] = [
     estimatedMinutes: 4,
     packages: ['squidpy', 'scanpy', 'matplotlib_venn', 'anndata'],
     color: '#9a3412',
-    figcodeMap: {
-      'plot_001_spatial_clusters.png': 'spatial-cluster',
-      'plot_002_top_robust_svgs.png': 'feature-spatial',
-    },
   },
   {
     id: 'spatial-deconv',
@@ -2150,10 +2065,6 @@ export const tools: Tool[] = [
     estimatedMinutes: 6,
     packages: ['tangram-sc', 'squidpy', 'scanpy', 'torch'],
     color: '#a16207',
-    figcodeMap: {
-      'plot_001_dominant_celltype.png': 'spatial-deconv',
-      'plot_002_top_celltypes_grid.png': 'spatial-deconv',
-    },
   },
   {
     id: 'spatial-lr',
@@ -2242,9 +2153,5 @@ export const tools: Tool[] = [
     estimatedMinutes: 5,
     packages: ['liana', 'squidpy', 'scanpy', 'anndata'],
     color: '#0891b2',
-    figcodeMap: {
-      'plot_002_top_lr_spatial.png': 'feature-spatial',
-      'plot_004_top_lr_pairs_grid.png': 'feature-spatial',
-    },
   },
 ];

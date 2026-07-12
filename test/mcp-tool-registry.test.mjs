@@ -60,6 +60,11 @@ test('listTools 合并插件工具 + 单细胞步骤', async () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-mcp-test-'));
   const pluginDir = path.join(tmpDir, 'volcano-plot');
   fs.mkdirSync(path.join(pluginDir, 'scripts'), { recursive: true });
+  fs.writeFileSync(path.join(tmpDir, 'installed.json'), JSON.stringify([{ id: 'volcano-plot' }]));
+  fs.writeFileSync(
+    path.join(pluginDir, 'plugin.json'),
+    JSON.stringify({ id: 'volcano-plot', title: 'Volcano Plot', version: '1.0.0', language: 'r' }),
+  );
   fs.writeFileSync(
     path.join(pluginDir, 'tool-definition.json'),
     JSON.stringify({
@@ -80,13 +85,7 @@ test('listTools 合并插件工具 + 单细胞步骤', async () => {
     }),
   );
   globalThis._biof3Plugins = new Map();
-  globalThis._biof3Plugins.set('volcano-plot', {
-    id: 'volcano-plot',
-    version: '1.0.0',
-    language: 'r',
-    pluginDir,
-    scriptPath: path.join(pluginDir, 'scripts'),
-  });
+  pluginLoader.loadPluginsFromDisk(tmpDir);
   try {
     const tools = await listTools();
     const names = tools.map((t) => t.name);

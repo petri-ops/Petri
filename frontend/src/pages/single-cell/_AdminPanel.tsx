@@ -560,7 +560,6 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
       const MODS: Array<[string, boolean]> = [
         ['docs', true],
         ['blog', true],
-        ['figcode', true],
         ['tools', false],
         ['single-cell', false],
         ['spatial', false],
@@ -639,7 +638,6 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
       const MODS: Array<[string, boolean]> = [
         ['docs', true],
         ['blog', true],
-        ['figcode', true],
         ['tools', false],
         ['single-cell', false],
         ['spatial', false],
@@ -1665,8 +1663,8 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                             lineHeight: 1.5,
                           }}
                         >
-                          控制未登录用户能否使用各模块。教程/博客/FigCode
-                          浏览始终公开；此处主要限制在线工具、单细胞/空间云、
+                          控制未登录用户能否使用各模块。教程/博客浏览始终公开；
+                          此处主要限制在线工具、单细胞/空间云、
                           <strong>Copilot</strong>（站点 AI 组学实践助手，模块键{' '}
                           <code>copilot</code>）等需算力的能力。后端 API 与导航会同步生效。
                         </p>
@@ -1694,7 +1692,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                         }}
                       >
                         <span style={{ fontSize: 9, color: '#94a3b8' }} title="始终可浏览">
-                          公开 教程/博客/FigCode
+                          公开 教程/博客
                         </span>
                         {(
                           [

@@ -107,6 +107,13 @@ export interface HarnessDiagnosticIssue {
   } | null;
 }
 
+export interface HarnessNextAction {
+  id: string;
+  label: string;
+  reason?: string;
+  recommended?: boolean;
+}
+
 export interface HarnessRunDiagnostics {
   ok: boolean;
   status: 'ready' | 'needs_review' | 'blocked' | string;
@@ -116,6 +123,7 @@ export interface HarnessRunDiagnostics {
   issues?: HarnessDiagnosticIssue[];
   repairedParams?: Record<string, unknown>;
   inputSuggestions?: Array<Record<string, unknown>>;
+  nextActions?: HarnessNextAction[];
 }
 
 export interface HarnessRepairRequest {

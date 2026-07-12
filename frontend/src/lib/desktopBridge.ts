@@ -43,9 +43,7 @@
 //     `window.biof3Desktop.x.y()` separately.
 //   - SSR safety: all accessors short-circuit when
 //     `typeof window === 'undefined'`. The legacy
-//     figcode.tsx had a hand-rolled `if (typeof window ===
-//     'undefined' || !window.biof3Desktop?.figcode) return;`
-//     that is now redundant.
+//     older plot pages had hand-rolled bridge checks that are now redundant.
 // ============================================================
 
 import type {} from '@/lib/electron'; // ensure the global Window augmentation is loaded

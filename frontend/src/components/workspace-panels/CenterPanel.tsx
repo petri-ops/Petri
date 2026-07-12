@@ -118,7 +118,6 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
                 projectId={ctx.projectId}
                 conversationId={ctx.activeConvId}
                 onConversationChange={ctx.setActiveConvId}
-                onOpenResult={ctx.handleOpenResult}
                 inputHeight={ctx.inputHeight}
               />
             )}

@@ -10,7 +10,11 @@ function flush() {
   });
 }
 
-function fireMouse(target: EventTarget, type: string, init: { clientX?: number; clientY?: number } = {}) {
+function fireMouse(
+  target: EventTarget,
+  type: string,
+  init: { clientX?: number; clientY?: number; buttons?: number } = {},
+) {
   const event = new MouseEvent(type, { bubbles: true, ...init });
   target.dispatchEvent(event);
   return event;
@@ -50,14 +54,14 @@ describe('useResizableColumns', () => {
     await flush();
     handler(fakeEvent);
 
-    fireMouse(document, 'mousemove', { clientX: 300 });
+    fireMouse(document, 'mousemove', { clientX: 300, buttons: 1 });
     fireMouse(document, 'mouseup');
     await flush();
     expect(result.current.leftWidth).toBe(240 + 300);
 
     // Re-attach and try to drag past the minimum.
     handler(fakeEvent);
-    fireMouse(document, 'mousemove', { clientX: -10_000 });
+    fireMouse(document, 'mousemove', { clientX: -10_000, buttons: 1 });
     fireMouse(document, 'mouseup');
     await flush();
     expect(result.current.leftWidth).toBe(96);
@@ -70,14 +74,14 @@ describe('useResizableColumns', () => {
 
     await flush();
     handler(fakeEvent);
-    fireMouse(document, 'mousemove', { clientY: 100 });
+    fireMouse(document, 'mousemove', { clientY: 100, buttons: 1 });
     fireMouse(document, 'mouseup');
     await flush();
     // 120 - 100 = 20, but Math.max(48, 20) clamps to 48.
     expect(result.current.inputHeight).toBe(48);
 
     handler(fakeEvent);
-    fireMouse(document, 'mousemove', { clientY: -10_000 });
+    fireMouse(document, 'mousemove', { clientY: -10_000, buttons: 1 });
     fireMouse(document, 'mouseup');
     await flush();
     // deltaY = -10000, startInput = 48 (clamped), so 48 - (-10000) = 10048.
@@ -95,10 +99,12 @@ describe('useResizableColumns', () => {
     handler(fakeEvent);
     expect(setCursor).toHaveBeenCalledWith('ew-resize');
     expect(setSelect).toHaveBeenCalledWith('none');
+    expect(document.body.classList.contains('biof3-resizing-columns')).toBe(true);
 
     fireMouse(document, 'mouseup');
     expect(setCursor).toHaveBeenCalledWith('');
     expect(setSelect).toHaveBeenCalledWith('');
+    expect(document.body.classList.contains('biof3-resizing-columns')).toBe(false);
   });
 
   it('honors caller-supplied clamp on the bottom terminal resize', async () => {
@@ -112,21 +118,21 @@ describe('useResizableColumns', () => {
     result.current.startBottomTerminalResize(fakeEvent, { min: 140, max: 520 });
 
     // Drag up by 800px (clientY = -800) — naive next = 200 - (-800) = 1000 → clamp to max 520.
-    fireMouse(document, 'mousemove', { clientY: -800 });
+    fireMouse(document, 'mousemove', { clientY: -800, buttons: 1 });
     fireMouse(document, 'mouseup');
     await flush();
     expect(result.current.bottomTerminalHeight).toBe(520);
 
     // Drag down by 200px (clientY = +200) — naive next = 520 - 200 = 320 → fits in [140, 520].
     result.current.startBottomTerminalResize(fakeEvent, { min: 140, max: 520 });
-    fireMouse(document, 'mousemove', { clientY: 200 });
+    fireMouse(document, 'mousemove', { clientY: 200, buttons: 1 });
     fireMouse(document, 'mouseup');
     await flush();
     expect(result.current.bottomTerminalHeight).toBe(320);
 
     // Drag down by 10_000px (clientY = +10_000) — naive next = 320 - 10000 = -9680 → clamp to min 140.
     result.current.startBottomTerminalResize(fakeEvent, { min: 140, max: 520 });
-    fireMouse(document, 'mousemove', { clientY: 10_000 });
+    fireMouse(document, 'mousemove', { clientY: 10_000, buttons: 1 });
     fireMouse(document, 'mouseup');
     await flush();
     expect(result.current.bottomTerminalHeight).toBe(140);
@@ -141,7 +147,7 @@ describe('useResizableColumns', () => {
     const handler = result.current.startColumnResize('left');
     const fakeEvent = { preventDefault: () => {}, clientX: 0, clientY: 0 } as unknown as React.MouseEvent;
     handler(fakeEvent);
-    fireMouse(document, 'mousemove', { clientX: 100 });
+    fireMouse(document, 'mousemove', { clientX: 100, buttons: 1 });
     fireMouse(document, 'mouseup');
     await flush();
 
@@ -178,7 +184,7 @@ describe('useResizableColumns', () => {
     result.current.startBottomTerminalResize(
       { preventDefault: () => {}, clientY: 0 } as unknown as React.MouseEvent,
     );
-    fireMouse(document, 'mousemove', { clientY: 80 }); // 200 - 80 = 120
+    fireMouse(document, 'mousemove', { clientY: 80, buttons: 1 }); // 200 - 80 = 120
     fireMouse(document, 'mouseup');
     await flush();
 
@@ -192,5 +198,22 @@ describe('useResizableColumns', () => {
     // Should fall back to defaults without crashing
     expect(result.current.leftWidth).toBe(240);
     expect(result.current.rightWidth).toBe(340);
+  });
+
+  it('stops resizing when the mouse button is no longer pressed', async () => {
+    const { result } = renderHook(() => useResizableColumns());
+    const handler = result.current.startColumnResize('right');
+    const fakeEvent = { preventDefault: () => {}, clientX: 0, clientY: 0 } as unknown as React.MouseEvent;
+
+    await flush();
+    handler(fakeEvent);
+    fireMouse(document, 'mousemove', { clientX: 60, buttons: 1 });
+    await flush();
+    const draggedWidth = result.current.rightWidth;
+    fireMouse(document, 'mousemove', { clientX: 600, buttons: 0 });
+    await flush();
+
+    expect(document.body.classList.contains('biof3-resizing-columns')).toBe(false);
+    expect(result.current.rightWidth).toBe(draggedWidth);
   });
 });

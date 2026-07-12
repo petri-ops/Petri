@@ -7,7 +7,6 @@ import styles from './TitleBar.module.css';
 function getFallbackTitle(pathname: string): string {
   if (pathname.startsWith('/project/')) return '梳理开发进展';
   if (pathname.startsWith('/tools')) return '分析结果';
-  if (pathname.startsWith('/figcode')) return '绘图模板';
   if (pathname.startsWith('/admin')) return '管理';
   return 'BioF3';
 }

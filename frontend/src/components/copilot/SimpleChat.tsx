@@ -20,6 +20,7 @@ import {
   fetchHarnessToolManifest,
   repairHarnessParams,
   type HarnessDiagnosticIssue,
+  type HarnessNextAction,
   type HarnessRunDiagnostics,
   type HarnessParamRepair,
   type HarnessToolManifest,
@@ -40,32 +41,6 @@ interface SimpleMessage {
   pending?: boolean;
   error?: boolean;
   ts?: string;
-  resultCards?: SimpleResultCard[];
-}
-
-interface SimpleResultCard {
-  jobId: string;
-  toolId?: string;
-  title: string;
-  status: 'done' | 'failed';
-  projectId?: string | null;
-  error?: string;
-  artifacts?: Array<{
-    id?: string;
-    name?: string;
-    filename?: string;
-    type?: string;
-    label?: string;
-    title?: string;
-  }>;
-  files?: string[];
-  outputs?: Array<{
-    id?: string;
-    name?: string;
-    filename?: string;
-    type?: string;
-    label?: string;
-  }>;
 }
 
 interface PendingApproval {
@@ -94,7 +69,6 @@ interface SimpleChatProps {
   projectId: string;
   conversationId: string | null;
   onConversationChange: (id: string | null) => void;
-  onOpenResult?: (jobId: string, projectId?: string | null) => void;
   inputHeight?: number;
 }
 
@@ -102,7 +76,6 @@ export function SimpleChat({
   projectId,
   conversationId,
   onConversationChange,
-  onOpenResult,
   inputHeight: _inputHeight = 120,
 }: SimpleChatProps): React.ReactElement {
   const [messages, setMessages] = useState<SimpleMessage[]>([]);
@@ -112,6 +85,7 @@ export function SimpleChat({
   const [pendingApproval, setPendingApproval] = useState<PendingApproval | null>(null);
   const [paramDraft, setParamDraft] = useState<Record<string, string>>({});
   const [approvalRepair, setApprovalRepair] = useState<ApprovalRepairState>({ status: 'idle' });
+  const autoApproveRef = useRef<string | null>(null);
   const [modelMenuOpen, setModelMenuOpen] = useState(false);
   const [accessMenuOpen, setAccessMenuOpen] = useState(false);
   const [accessMode, setAccessMode] = useState<'full' | 'read'>('full');
@@ -164,6 +138,7 @@ export function SimpleChat({
   useEffect(() => {
     if (!pendingApproval) {
       setApprovalRepair({ status: 'idle' });
+      autoApproveRef.current = null;
       return;
     }
     if (!pendingApproval.toolId) {
@@ -244,7 +219,6 @@ export function SimpleChat({
         role: m.role === 'system' ? 'assistant' : (m.role as 'user' | 'assistant'),
         content: m.content,
         ts: m.ts,
-        resultCards: m.role === 'assistant' ? parseResultCards(m.meta?.resultCards) : undefined,
       }));
       setMessages(ui);
       setLoading(false);
@@ -350,28 +324,6 @@ export function SimpleChat({
           });
           return;
         }
-        if (event.name !== 'run_tool' || !event.toolJobId || event.needApproval) return;
-        const toolId = event.toolId || 'analysis';
-        const card: SimpleResultCard = {
-          jobId: event.toolJobId,
-          toolId,
-          title: `${toolId} 分析结果`,
-          status: event.summary && event.summary.startsWith('错误') ? 'failed' : 'done',
-          projectId,
-          error: event.message || (event.summary && event.summary.startsWith('错误') ? event.summary : undefined),
-        };
-        setMessages((prev) => {
-          const copy = prev.slice();
-          const lastIdx = copy.length - 1;
-          const last = copy[lastIdx];
-          if (!last || last.role !== 'assistant') return prev;
-          if ((last.resultCards || []).some((item) => item.jobId === card.jobId)) return prev;
-          copy[lastIdx] = {
-            ...last,
-            resultCards: [...(last.resultCards || []), card],
-          };
-          return copy;
-        });
       },
       onDone: () => {
         setStreaming(false);
@@ -452,6 +404,17 @@ export function SimpleChat({
     send('用户取消了该重操作，不要重试。请简短说明已取消，并给出如需继续时应调整哪些参数。');
   }, [pendingApproval, send, streaming]);
 
+  useEffect(() => {
+    if (!pendingApproval || streaming || accessMode !== 'full') return;
+    if (approvalRepair.status === 'loading') return;
+    if (autoApproveRef.current === pendingApproval.ackToken) return;
+    autoApproveRef.current = pendingApproval.ackToken;
+    const timer = window.setTimeout(() => {
+      void approvePending();
+    }, 120);
+    return () => window.clearTimeout(timer);
+  }, [accessMode, approvalRepair.status, approvePending, pendingApproval, streaming]);
+
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -504,22 +467,6 @@ export function SimpleChat({
                 {m.role === 'assistant' ? (
                   <>
                     <CopilotMarkdown text={m.content || (m.pending ? '…' : '')} />
-                    {m.resultCards?.map((card) => (
-                      <ResultCard
-                        key={card.jobId}
-                        card={card}
-                        currentProjectId={projectId}
-                        disabled={streaming}
-                        onOpenResult={onOpenResult}
-                        onContinue={() => {
-                          if (card.status === 'failed') {
-                            send(`这个分析任务失败了：${card.title}（toolJobId=${card.jobId}）。错误信息：${card.error || '未知错误'}。请帮我定位原因，给出可恢复方案，并告诉我应该如何调整参数后重试。`);
-                          } else {
-                            send(`请基于刚完成的 ${card.title}（toolJobId=${card.jobId}）解释结果，并推荐下一步分析。`);
-                          }
-                        }}
-                      />
-                    ))}
                   </>
                 ) : (
                   <div className="sc-msg-text">{m.content}</div>
@@ -530,14 +477,7 @@ export function SimpleChat({
           {pendingApproval && (
             <ApprovalCard
               approval={pendingApproval}
-              paramDraft={paramDraft}
               repairState={approvalRepair}
-              disabled={streaming}
-              onParamChange={(key, value) =>
-                setParamDraft((prev) => ({ ...prev, [key]: value }))
-              }
-              onApprove={approvePending}
-              onReject={rejectPending}
             />
           )}
         </div>
@@ -658,67 +598,6 @@ export function SimpleChat({
   );
 }
 
-function parseResultCards(value: unknown): SimpleResultCard[] | undefined {
-  if (!Array.isArray(value)) return undefined;
-  const cards = value
-    .map((item): SimpleResultCard | null => {
-      if (!item || typeof item !== 'object') return null;
-      const raw = item as Record<string, unknown>;
-      if (typeof raw.jobId !== 'string' || !raw.jobId) return null;
-      const toolId = typeof raw.toolId === 'string' && raw.toolId ? raw.toolId : undefined;
-      const title =
-        typeof raw.title === 'string' && raw.title
-          ? raw.title
-          : `${toolId || 'analysis'} 分析结果`;
-      const status = raw.status === 'failed' ? 'failed' : 'done';
-      const files = Array.isArray(raw.files)
-        ? raw.files.filter((file): file is string => typeof file === 'string')
-        : undefined;
-      const artifacts: SimpleResultCard['artifacts'] = [];
-      if (Array.isArray(raw.artifacts)) {
-        raw.artifacts.forEach((artifact) => {
-          if (!artifact || typeof artifact !== 'object') return;
-          const a = artifact as Record<string, unknown>;
-          artifacts.push({
-            id: typeof a.id === 'string' ? a.id : undefined,
-            name: typeof a.name === 'string' ? a.name : undefined,
-            filename: typeof a.filename === 'string' ? a.filename : undefined,
-            type: typeof a.type === 'string' ? a.type : undefined,
-            label: typeof a.label === 'string' ? a.label : undefined,
-            title: typeof a.title === 'string' ? a.title : undefined,
-          });
-        });
-      }
-      const outputs: SimpleResultCard['outputs'] = [];
-      if (Array.isArray(raw.outputs)) {
-        raw.outputs.forEach((output) => {
-          if (!output || typeof output !== 'object') return;
-          const o = output as Record<string, unknown>;
-          outputs.push({
-            id: typeof o.id === 'string' ? o.id : undefined,
-            name: typeof o.name === 'string' ? o.name : undefined,
-            filename: typeof o.filename === 'string' ? o.filename : undefined,
-            type: typeof o.type === 'string' ? o.type : undefined,
-            label: typeof o.label === 'string' ? o.label : undefined,
-          });
-        });
-      }
-      return {
-        jobId: raw.jobId,
-        toolId,
-        title,
-        status,
-        projectId: typeof raw.projectId === 'string' ? raw.projectId : null,
-        error: typeof raw.error === 'string' ? raw.error : undefined,
-        artifacts: artifacts.length ? artifacts : undefined,
-        files,
-        outputs: outputs.length ? outputs : undefined,
-      };
-    })
-    .filter((card): card is SimpleResultCard => Boolean(card));
-  return cards.length ? cards : undefined;
-}
-
 function stringifyParamValue(value: unknown): string {
   if (typeof value === 'string') return value;
   if (value == null) return '';
@@ -770,26 +649,15 @@ function formatHarnessDiagnosticIssue(issue: HarnessDiagnosticIssue): string {
 
 function ApprovalCard({
   approval,
-  paramDraft,
   repairState,
-  disabled,
-  onParamChange,
-  onApprove,
-  onReject,
 }: {
   approval: PendingApproval;
-  paramDraft: Record<string, string>;
   repairState: ApprovalRepairState;
-  disabled: boolean;
-  onParamChange: (key: string, value: string) => void;
-  onApprove: () => void;
-  onReject: () => void;
 }): React.ReactElement {
-  const paramEntries = Object.entries(paramDraft);
   const repairItems = repairState.status === 'ready' ? repairState.repair.repairs || [] : [];
   const warningItems = repairState.status === 'ready' ? repairState.repair.warnings || [] : [];
   const diagnostics = repairState.status === 'ready' ? repairState.diagnostics : null;
-  const blockedByHarness = diagnostics?.status === 'blocked';
+  const nextActions = diagnostics?.nextActions || [];
   return (
     <div className="sc-approval-card">
       <div className="sc-approval-header">
@@ -797,56 +665,25 @@ function ApprovalCard({
           <Icon name="shield" size={16} />
         </div>
         <div className="sc-approval-title-wrap">
-          <div className="sc-approval-title">参数确认</div>
+          <div className="sc-approval-title">Harness 自动校正</div>
           <div className="sc-approval-sub">
             {approval.toolId || 'analysis'}{approval.toolJobId ? ` · ${approval.toolJobId}` : ''}
           </div>
         </div>
       </div>
       <div className="sc-approval-message">
-        {approval.message || 'agent 准备执行一个正式分析任务，请确认参数后再开始。'}
+        {approval.message && !/确认参数|请确认|confirm/i.test(approval.message)
+          ? approval.message
+          : 'Harness 已接管参数校正，系统将自动启动该分析。'}
       </div>
-      {paramEntries.length > 0 && (
-        <div className="sc-approval-params">
-          {paramEntries.map(([key, value]) => (
-            <label key={key} className="sc-approval-param-row">
-              <span className="sc-approval-param-key">{key}</span>
-              <input
-                className="sc-approval-param-input"
-                value={value}
-                onChange={(event) => onParamChange(key, event.target.value)}
-                disabled={disabled}
-              />
-            </label>
-          ))}
-        </div>
-      )}
       <ApprovalRepairHint
         state={repairState}
         repairItems={repairItems}
         warningItems={warningItems}
+        nextActions={nextActions}
       />
       <div className="sc-approval-risk">
         正式分析会写入项目任务记录，并生成可复现的参数、输入和结果产物。
-      </div>
-      <div className="sc-approval-actions">
-        <button
-          type="button"
-          className="sc-approval-btn sc-approval-approve"
-          onClick={onApprove}
-          disabled={disabled || blockedByHarness}
-          title={blockedByHarness ? 'Harness 诊断认为当前参数暂不可执行，请先修复阻塞项' : undefined}
-        >
-          <Icon name="check" size={13} /> 确认开始
-        </button>
-        <button
-          type="button"
-          className="sc-approval-btn sc-approval-cancel"
-          onClick={onReject}
-          disabled={disabled}
-        >
-          <Icon name="x" size={13} /> 取消
-        </button>
       </div>
     </div>
   );
@@ -856,10 +693,12 @@ function ApprovalRepairHint({
   state,
   repairItems,
   warningItems,
+  nextActions,
 }: {
   state: ApprovalRepairState;
   repairItems: Array<Record<string, unknown>>;
   warningItems: Array<Record<string, unknown>>;
+  nextActions: HarnessNextAction[];
 }): React.ReactElement | null {
   if (state.status === 'idle') return null;
   if (state.status === 'loading') {
@@ -902,65 +741,16 @@ function ApprovalRepairHint({
           {warningItems.slice(0, 2).map((item) => formatHarnessWarning(item)).join('；')}
         </div>
       )}
+      {nextActions.length > 0 && (
+        <div className="sc-approval-harness-next">
+          {nextActions.slice(0, 4).map((action) => action.label).join(' · ')}
+        </div>
+      )}
       {blocked && (
         <div className="sc-approval-harness-warning">
           当前参数暂不可执行，请先补齐文件、修正格式或配置运行时。
         </div>
       )}
-    </div>
-  );
-}
-
-function ResultCard({
-  card,
-  currentProjectId,
-  disabled,
-  onOpenResult,
-  onContinue,
-}: {
-  card: SimpleResultCard;
-  currentProjectId: string;
-  disabled: boolean;
-  onOpenResult?: (jobId: string, projectId?: string | null) => void;
-  onContinue: () => void;
-}): React.ReactElement {
-  const projectLabel =
-    card.projectId && card.projectId !== currentProjectId ? card.projectId : '当前项目';
-
-  return (
-    <div className={`sc-result-card sc-result-card-${card.status}`}>
-      <div className="sc-result-main">
-        <div className="sc-result-icon">
-          <Icon name={card.status === 'done' ? 'bar-chart' : 'x'} size={16} />
-        </div>
-        <div className="sc-result-copy">
-          <div className="sc-result-title">{card.title}</div>
-          <div className="sc-result-meta">
-            {card.status === 'done' ? '结果已生成' : '分析失败'} · {projectLabel} · {card.jobId}
-          </div>
-          {card.status === 'failed' && card.error && (
-            <div className="sc-result-error">{card.error}</div>
-          )}
-        </div>
-      </div>
-      <div className="sc-result-actions">
-        <button
-          type="button"
-          className="sc-result-btn"
-          onClick={() => onOpenResult?.(card.jobId, card.projectId)}
-          disabled={!onOpenResult}
-        >
-          <Icon name="bar-chart" size={13} /> 查看项目结果
-        </button>
-        <button
-          type="button"
-          className="sc-result-btn sc-result-btn-secondary"
-          onClick={onContinue}
-          disabled={disabled}
-        >
-          <Icon name="message-circle" size={13} /> {card.status === 'failed' ? '排查修复' : '解释下一步'}
-        </button>
-      </div>
     </div>
   );
 }

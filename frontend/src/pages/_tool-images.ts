@@ -2,9 +2,8 @@
  * Tool cover images — maps tool ID to a representative preview image.
  *
  * Priority for image selection:
- *   1. Reuse the first figcodeMap card's image (so the cover matches what
- *      the "用 FigCode 自定义" button would show)
- *   2. Reuse a related figcode card image (e.g. cellchat → cellchat-bubble)
+ *   1. Reuse a representative plot image when available
+ *   2. Reuse a related analysis image when available
  *   3. Reuse a tutorial screenshot
  *   4. Omit from this map → UI falls back to first-letter circle
  *
@@ -33,7 +32,7 @@ export const TOOL_IMAGES: Record<string, string> = {
   // 基因组
   'maftools-mutation': '/img/figcode/mut-signature.png',
 
-  // 机器学习 — 部分有可复用 figcode 图，其余 fallback 首字母
+  // 机器学习 — 部分有可复用图，其余 fallback 首字母
   'ml-classifier': '/img/figcode/calibration.png',
   'rsf-survival': '/img/figcode/forest-cox.png',
   'ml-scvi-annotate': '/img/figcode/py-umap-scanpy.png',

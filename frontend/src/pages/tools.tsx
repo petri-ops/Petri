@@ -17,9 +17,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { getToken, getApiPrefix, getStoredUser, isLoggedIn } from '@/lib/authClient';
 import { LoginModal } from '@/components/auth/LoginModal';
-import RunModal from '@/components/RunModal';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
-import type { FigCard } from '@/pages/figcode/_data';
 import styles from '@/pages/tools.module.css';
 
 type JobStatus =
@@ -46,9 +44,8 @@ interface JobResult {
   summary?: Record<string, any>;
 }
 
-// ---- Tool icon colors / report URLs / figcode map are now sourced from
-// _data.ts (per-tool fields: color, reportUrl, figcodeMap). The lookup
-// helpers below build maps once at module load. Single source of truth.
+// ---- Tool icon colors / report URLs are now sourced from _data.ts.
+// The lookup helpers below build maps once at module load. Single source of truth.
 const TOOL_COLORS: Record<string, string> = Object.fromEntries(
   staticTools.map((t) => [t.id, t.color])
 );
@@ -57,624 +54,6 @@ const REPORT_URLS: Record<string, string | undefined> = Object.fromEntries(
   staticTools.filter((t) => t.reportUrl).map((t) => [t.id, t.reportUrl])
 );
 
-// Combined output-filename → cardId map across all tools. Tools whose
-// figcodeMap defines the same filename will collide; in practice keys are
-// scoped enough (e.g. 'volcano.png' is DESeq2-specific) but if a future
-// collision happens, prefer the active tool's map at lookup time via
-// getFigcodeCardId(filename, toolId).
-const FIGCODE_MAP: Record<string, string> = (() => {
-  const m: Record<string, string> = {};
-  for (const t of staticTools) {
-    if (t.figcodeMap) Object.assign(m, t.figcodeMap);
-  }
-  return m;
-})();
-
-function getFigcodeCardId(filename: string): string | null {
-  return FIGCODE_MAP[filename] || null;
-}
-
-// ---- Generate FigCode code that uses actual analysis result data ----
-function generateFigcodeWithData(cardId: string, dataUrl: string, fallbackCode: string): string {
-  // Build a full HTTP URL that R can read from
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://biof3.com';
-  const fullUrl = dataUrl.startsWith('http') ? dataUrl : baseUrl + dataUrl;
-  // Derive base job URL for other files
-  const jobBase = fullUrl.replace(/\/[^/]+\.csv.*$/, '');
-  // Token suffix for authenticated URLs
-  const tokenSuffix = fullUrl.includes('?token=') ? '?' + fullUrl.split('?')[1] : '';
-
-  // Cached read helper — only downloads once per session
-  const cacheHeader = `# --- 数据加载（首次从服务器读取，后续使用缓存） ---
-if (!exists("de_df")) {
-  de_df <- read.csv("${fullUrl}")
-  de_df <- de_df[!is.na(de_df$padj), ]
-  cat("✓ 差异基因表已加载:", nrow(de_df), "个基因\\n")
-}
-`;
-
-  const vstHeader = `# --- 加载 VST 表达矩阵 + 样本信息 ---
-if (!exists("vst_mat")) {
-  vst_mat <- read.csv("${jobBase}/vst_matrix.csv${tokenSuffix}", row.names = 1, check.names = FALSE)
-  col_info <- read.csv("${jobBase}/coldata_info.csv${tokenSuffix}", row.names = 1)
-  cat("✓ VST 矩阵已加载:", nrow(vst_mat), "基因 x", ncol(vst_mat), "样本\\n")
-}
-`;
-
-  const dispHeader = `# --- 加载离散度数据 ---
-if (!exists("disp_df")) {
-  disp_df <- read.csv("${jobBase}/dispersion_data.csv${tokenSuffix}")
-  cat("✓ 离散度数据已加载:", nrow(disp_df), "基因\\n")
-}
-`;
-
-  const templates: Record<string, string> = {
-    volcano: `library(ggplot2)
-library(ggrepel)
-
-${cacheHeader}
-# 标记显著性
-de_df$sig <- ifelse(de_df$padj < 0.05 & de_df$log2FoldChange > 1, "Up",
-             ifelse(de_df$padj < 0.05 & de_df$log2FoldChange < -1, "Down", "NS"))
-top <- head(de_df[de_df$sig != "NS", ], 15)
-
-ggplot(de_df, aes(x = log2FoldChange, y = -log10(padj), color = sig)) +
-  geom_point(size = 0.6, alpha = 0.5) +
-  geom_text_repel(data = top, aes(label = gene), size = 3, max.overlaps = 15) +
-  scale_color_manual(values = c(Up = "#dc2626", Down = "#2563eb", NS = "#9ca3af")) +
-  geom_vline(xintercept = c(-1, 1), linetype = "dashed") +
-  geom_hline(yintercept = -log10(0.05), linetype = "dashed") +
-  labs(x = "log2 Fold Change", y = "-log10(padj)", title = "Volcano Plot") +
-  theme_classic()`,
-
-    'ma-plot': `library(ggplot2)
-
-${cacheHeader}
-de_df$sig <- abs(de_df$log2FoldChange) > 1 & de_df$padj < 0.05
-
-ggplot(de_df, aes(x = log10(baseMean + 1), y = log2FoldChange, color = sig)) +
-  geom_point(size = 0.5, alpha = 0.4) +
-  scale_color_manual(values = c("FALSE" = "#9ca3af", "TRUE" = "#dc2626")) +
-  geom_hline(yintercept = c(-1, 0, 1), linetype = c("dashed", "solid", "dashed"), color = c("#2563eb", "black", "#dc2626")) +
-  labs(x = "log10(baseMean)", y = "log2 Fold Change", title = "MA Plot") +
-  theme_classic() + theme(legend.position = "none")`,
-
-    heatmap: `library(ggplot2)
-library(pheatmap)
-
-${vstHeader}
-${cacheHeader}
-# Top 50 差异基因热图（和分析脚本完全一致）
-sig <- de_df[de_df$padj < 0.05 & abs(de_df$log2FoldChange) > 1, ]
-top50 <- head(sig[order(sig$padj), "gene"], 50)
-top50 <- top50[top50 %in% rownames(vst_mat)]
-
-mat <- vst_mat[top50, ]
-mat_z <- t(scale(t(mat)))
-anno_col <- data.frame(Group = col_info[[1]], row.names = rownames(col_info))
-
-pheatmap(mat_z, annotation_col = anno_col, show_colnames = FALSE,
-         clustering_method = "ward.D2", fontsize_row = 7,
-         color = colorRampPalette(c("#2563eb", "white", "#dc2626"))(100),
-         main = "Top 50 DEGs")`,
-
-    pca: `library(ggplot2)
-
-${vstHeader}
-# PCA（和分析脚本完全一致，使用 VST 数据）
-pca_res <- prcomp(t(vst_mat), scale. = FALSE)
-pca_df <- data.frame(PC1 = pca_res$x[,1], PC2 = pca_res$x[,2], group = col_info[[1]])
-pct <- round(100 * pca_res$sdev^2 / sum(pca_res$sdev^2), 1)
-
-ggplot(pca_df, aes(PC1, PC2, color = group)) +
-  geom_point(size = 3) +
-  labs(title = "PCA", x = paste0("PC1 (", pct[1], "%)"), y = paste0("PC2 (", pct[2], "%)")) +
-  theme_classic()`,
-
-    'library-size': `library(ggplot2)
-
-${vstHeader}
-# 文库大小条形图（和分析脚本一致）
-lib_df <- data.frame(
-  sample = colnames(vst_mat),
-  millions = colSums(2^vst_mat) / 1e6,
-  group = col_info[[1]]
-)
-
-ggplot(lib_df, aes(sample, millions, fill = group)) +
-  geom_col() +
-  scale_fill_manual(values = c("#2563eb", "#dc2626")) +
-  labs(title = "Library Size", y = "Millions", x = "") +
-  theme_classic() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))`,
-
-    dispersion: `library(ggplot2)
-
-${dispHeader}
-# 离散度估计图（和分析脚本一致）
-disp_df <- disp_df[disp_df$baseMean > 0 & !is.na(disp_df$dispGeneEst), ]
-
-ggplot(disp_df, aes(x = baseMean, y = dispGeneEst)) +
-  geom_point(size = 0.3, alpha = 0.3, color = "black") +
-  geom_line(aes(y = dispFit), color = "red", linewidth = 0.8) +
-  geom_point(aes(y = dispersion), size = 0.3, alpha = 0.3, color = "#2563eb") +
-  scale_x_log10() + scale_y_log10() +
-  labs(title = "Dispersion Estimates", x = "mean of normalized counts", y = "dispersion") +
-  theme_classic()`,
-
-    'sample-cor': `library(ggplot2)
-library(pheatmap)
-
-${vstHeader}
-# 样本距离热图（和分析脚本完全一致）
-sampleDists <- dist(t(as.matrix(vst_mat)))
-sampleDistMatrix <- as.matrix(sampleDists)
-rownames(sampleDistMatrix) <- paste0(colnames(vst_mat), " (", col_info[[1]], ")")
-colnames(sampleDistMatrix) <- rownames(sampleDistMatrix)
-
-pheatmap(sampleDistMatrix, main = "Sample Distance",
-         color = colorRampPalette(c("white", "#dc2626"))(50))`,
-
-    // ---- GO/KEGG Enrichment templates ----
-    dotplot: `library(ggplot2)
-
-# --- 加载 GO-BP 富集数据 ---
-if (!exists("go_bp")) {
-  go_bp <- read.csv("${fullUrl}")
-  cat("✓ GO-BP 数据已加载:", nrow(go_bp), "条通路\\n")
-}
-
-# 取 Top 20
-top <- head(go_bp[order(go_bp$p.adjust), ], 20)
-top$GeneRatio_num <- sapply(top$GeneRatio, function(x) eval(parse(text=x)))
-
-ggplot(top, aes(x = GeneRatio_num, y = reorder(Description, GeneRatio_num), size = Count, color = p.adjust)) +
-  geom_point() +
-  scale_color_gradient(low = "#dc2626", high = "#2563eb") +
-  labs(x = "GeneRatio", y = "", title = "GO-BP Enrichment Dotplot", size = "Count", color = "p.adjust") +
-  theme_classic() +
-  theme(axis.text.y = element_text(size = 9))`,
-
-    'go-bar': `library(ggplot2)
-
-# --- 加载 GO-BP 富集数据 ---
-if (!exists("go_bp")) {
-  go_bp <- read.csv("${fullUrl}")
-  cat("✓ GO-BP 数据已加载:", nrow(go_bp), "条通路\\n")
-}
-
-top <- head(go_bp[order(go_bp$p.adjust), ], 20)
-
-ggplot(top, aes(x = Count, y = reorder(Description, Count), fill = p.adjust)) +
-  geom_col() +
-  scale_fill_gradient(low = "#dc2626", high = "#2563eb") +
-  labs(x = "Gene Count", y = "", title = "GO-BP Enrichment Barplot") +
-  theme_classic() +
-  theme(axis.text.y = element_text(size = 9))`,
-
-    'kegg-dotplot': `library(ggplot2)
-
-# --- 加载 KEGG 富集数据 ---
-if (!exists("kegg_data")) {
-  kegg_data <- read.csv("${jobBase}/kegg_data.csv${tokenSuffix}")
-  cat("✓ KEGG 数据已加载:", nrow(kegg_data), "条通路\\n")
-}
-
-top <- head(kegg_data[order(kegg_data$p.adjust), ], 20)
-top$GeneRatio_num <- sapply(top$GeneRatio, function(x) eval(parse(text=x)))
-
-ggplot(top, aes(x = GeneRatio_num, y = reorder(Description, GeneRatio_num), size = Count, color = p.adjust)) +
-  geom_point() +
-  scale_color_gradient(low = "#dc2626", high = "#2563eb") +
-  labs(x = "GeneRatio", y = "", title = "KEGG Pathway Enrichment", size = "Count", color = "p.adjust") +
-  theme_classic() +
-  theme(axis.text.y = element_text(size = 9))`,
-
-    cnetplot: `library(clusterProfiler)
-library(enrichplot)
-library(org.Hs.eg.db)
-
-# --- 加载完整 enrichResult 对象 ---
-if (!exists("ego_bp_obj")) {
-  ego_bp_obj <- readRDS(url("${jobBase}/ego_bp.rds${tokenSuffix}"))
-  cat("✓ GO-BP enrichResult 对象已加载\\n")
-}
-
-cnetplot(ego_bp_obj, showCategory = 5, categorySize = "pvalue") +
-  ggtitle("GO-BP Gene-Concept Network")`,
-
-    treemap: `library(clusterProfiler)
-library(enrichplot)
-
-# --- 加载完整 enrichResult 对象 ---
-if (!exists("ego_bp_obj")) {
-  ego_bp_obj <- readRDS(url("${jobBase}/ego_bp.rds${tokenSuffix}"))
-  cat("✓ GO-BP enrichResult 对象已加载\\n")
-}
-
-ego_bp_sim <- pairwise_termsim(ego_bp_obj)
-treeplot(ego_bp_sim, showCategory = 30) +
-  ggtitle("GO-BP Enrichment Tree")`,
-
-    'go-emap': `library(clusterProfiler)
-library(enrichplot)
-
-# --- 加载完整 enrichResult 对象 ---
-if (!exists("ego_bp_obj")) {
-  ego_bp_obj <- readRDS(url("${jobBase}/ego_bp.rds${tokenSuffix}"))
-  cat("✓ GO-BP enrichResult 对象已加载\\n")
-}
-
-ego_bp_sim <- pairwise_termsim(ego_bp_obj)
-emapplot(ego_bp_sim, showCategory = 30) +
-  ggtitle("GO-BP Enrichment Map")`,
-
-    // ---- KM Survival templates ----
-    'km-curve': `library(survival)
-library(survminer)
-
-# --- 加载生存数据 ---
-if (!exists("surv_df")) {
-  surv_df <- read.csv("${jobBase}/survival_data.csv${tokenSuffix}")
-  surv_df$group <- factor(surv_df$group, levels = c("Low", "High"))
-  cat("✓ 生存数据已加载:", nrow(surv_df), "样本\\n")
-}
-
-fit <- survfit(Surv(time, event) ~ group, data = surv_df)
-
-ggsurvplot(fit, data = surv_df,
-           pval = TRUE, pval.method = TRUE,
-           risk.table = TRUE, risk.table.height = 0.25,
-           palette = c("#2563eb", "#dc2626"),
-           legend.labs = c("Low", "High"),
-           xlab = "Time", ylab = "Survival Probability",
-           title = "Kaplan-Meier Survival Curve",
-           ggtheme = theme_classic())`,
-
-    'forest-cox': `library(survival)
-library(ggplot2)
-
-# --- 加载 Cox 回归结果 ---
-if (!exists("cox_df")) {
-  cox_df <- read.csv("${jobBase}/cox_results.csv${tokenSuffix}")
-  cat("✓ Cox 结果已加载\\n")
-}
-
-ggplot(cox_df, aes(x = HR, y = Variable)) +
-  geom_point(size = 4, color = "#2e8555") +
-  geom_errorbarh(aes(xmin = HR_lower, xmax = HR_upper), height = 0.2, color = "#2e8555") +
-  geom_vline(xintercept = 1, linetype = "dashed", color = "gray50") +
-  scale_x_log10() +
-  labs(x = "Hazard Ratio (95% CI)", y = NULL,
-       title = "Cox Regression Forest Plot",
-       subtitle = paste0("HR = ", cox_df$HR, " (", cox_df$HR_lower, "-", cox_df$HR_upper, "), p = ", cox_df$P_value)) +
-  theme_classic() +
-  theme(plot.title = element_text(size = 13, face = "bold"))`,
-
-    'time-roc': `library(timeROC)
-library(survival)
-
-# --- 加载生存数据 ---
-if (!exists("surv_df")) {
-  surv_df <- read.csv("${jobBase}/survival_data.csv${tokenSuffix}")
-  cat("✓ 生存数据已加载:", nrow(surv_df), "样本\\n")
-}
-
-# 自动检测时间单位
-max_t <- max(surv_df$time)
-if (max_t > 365) { times <- c(365, 365*3, 365*5); labels <- c("1-year", "3-year", "5-year") }
-else if (max_t > 12) { times <- c(12, 36, 60); labels <- c("1-year", "3-year", "5-year") }
-else { times <- c(1, 3, 5); labels <- c("1-year", "3-year", "5-year") }
-times <- times[times <= max_t * 0.9]
-labels <- labels[1:length(times)]
-
-roc_res <- timeROC(T = surv_df$time, delta = surv_df$event,
-                   marker = surv_df$gene_expr, cause = 1, times = times, iid = TRUE)
-
-colors <- c("#dc2626", "#2563eb", "#16a34a")
-plot(roc_res, time = times[1], col = colors[1], lwd = 2, title = "Time-dependent ROC")
-if (length(times) >= 2) plot(roc_res, time = times[2], col = colors[2], lwd = 2, add = TRUE)
-if (length(times) >= 3) plot(roc_res, time = times[3], col = colors[3], lwd = 2, add = TRUE)
-abline(0, 1, lty = 2, col = "gray")
-legend("bottomright", legend = paste0(labels, " (AUC=", sprintf("%.3f", roc_res$AUC), ")"),
-       col = colors[1:length(times)], lwd = 2, bty = "n")`,
-
-    'expr-dist': `library(ggplot2)
-
-# --- 加载生存数据 ---
-if (!exists("surv_df")) {
-  surv_df <- read.csv("${jobBase}/survival_data.csv${tokenSuffix}")
-  surv_df$group <- factor(surv_df$group, levels = c("Low", "High"))
-  cat("✓ 生存数据已加载:", nrow(surv_df), "样本\\n")
-}
-
-cutoff_val <- median(surv_df$gene_expr)
-
-ggplot(surv_df, aes(x = gene_expr, fill = group)) +
-  geom_histogram(bins = 30, alpha = 0.7, position = "identity") +
-  geom_vline(xintercept = cutoff_val, linetype = "dashed", color = "gray30", linewidth = 0.8) +
-  scale_fill_manual(values = c(Low = "#2563eb", High = "#dc2626")) +
-  labs(x = "Gene Expression", y = "Count",
-       title = "Expression Distribution",
-       subtitle = paste0("Cutoff = ", round(cutoff_val, 3))) +
-  theme_classic() +
-  theme(plot.title = element_text(size = 13, face = "bold"), legend.position = "top")`,
-
-    'immune-composition': `library(ggplot2)
-library(reshape2)
-
-# --- 加载本次分析的免疫细胞 score ---
-mat <- as.matrix(read.csv("${jobBase}/immune_scores_normalized.csv${tokenSuffix}", row.names = 1, check.names = FALSE))
-df <- melt(mat); colnames(df) <- c('CellType','Sample','Score')
-df$Sample <- factor(df$Sample, levels = colnames(mat))
-
-ggplot(df, aes(x = Sample, y = Score, fill = CellType)) +
-  geom_bar(stat = 'identity', position = 'fill', width = 0.9) +
-  scale_y_continuous(labels = scales::percent) +
-  labs(x = NULL, y = 'Relative Proportion', title = 'Immune Cell Composition (ssGSEA)', fill = 'Cell Type') +
-  theme_classic() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 7), legend.text = element_text(size = 8))`,
-
-    'immune-cor': `library(ggplot2)
-library(reshape2)
-
-# --- 加载本次分析的免疫细胞 raw score ---
-mat <- as.matrix(read.csv("${jobBase}/immune_scores_raw.csv${tokenSuffix}", row.names = 1, check.names = FALSE))
-
-cor_mat <- cor(t(mat), method = 'spearman')
-df <- melt(cor_mat); colnames(df) <- c('A','B','r')
-
-ggplot(df, aes(A, B, fill = r)) +
-  geom_tile(color = 'white') +
-  scale_fill_gradient2(low = '#2563eb', mid = 'white', high = '#dc2626', midpoint = 0, limits = c(-1, 1)) +
-  labs(x = NULL, y = NULL, title = 'Immune Cell Co-infiltration (Spearman)', fill = 'r') +
-  theme_classic() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 9))`,
-
-    'immune-boxplot': `library(ggplot2)
-library(reshape2)
-
-# --- 加载本次分析的免疫细胞 score + 分组 ---
-mat <- as.matrix(read.csv("${jobBase}/immune_scores_raw.csv${tokenSuffix}", row.names = 1, check.names = FALSE))
-# Top 12 by variance
-cell_var <- apply(mat, 1, var)
-top_cells <- names(sort(cell_var, decreasing = TRUE))[1:min(12, nrow(mat))]
-mat <- mat[top_cells, ]
-
-df <- melt(mat); colnames(df) <- c('CellType','Sample','Score')
-# 用户需手动添加 Group 列（如从 group.csv 加载）
-# df$Group <- group_info$group[match(df$Sample, group_info$sample)]
-
-ggplot(df, aes(CellType, Score)) +
-  geom_boxplot(outlier.size = 0.5, width = 0.7, fill = '#a78bfa') +
-  labs(x = NULL, y = 'ssGSEA Score', title = 'Immune Infiltration: Top 12 Variable Cells') +
-  theme_classic() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 9))`,
-
-    'immune-lollipop': `library(ggplot2)
-
-# --- 加载本次分析的免疫细胞 score ---
-mat <- as.matrix(read.csv("${jobBase}/immune_scores_raw.csv${tokenSuffix}", row.names = 1, check.names = FALSE))
-
-mean_scores <- sort(rowMeans(mat), decreasing = TRUE)
-df <- data.frame(
-  CellType = factor(names(mean_scores), levels = rev(names(mean_scores))),
-  MeanScore = mean_scores
-)
-
-ggplot(df, aes(x = MeanScore, y = CellType)) +
-  geom_segment(aes(x = 0, xend = MeanScore, y = CellType, yend = CellType), color = '#dfe8e3', linewidth = 0.8) +
-  geom_point(size = 3, color = '#2e8555') +
-  labs(x = 'Mean ssGSEA Score', y = NULL, title = 'Immune Cell Infiltration Level') +
-  theme_classic() +
-  theme(plot.title = element_text(size = 13, face = 'bold'))`,
-
-    // ============================================================
-    // Seurat-standard 在线绘图模板
-    // 中间数据: qc_metrics.csv / umap_coords.csv / hvg_table.csv /
-    //          markers_table.csv / pca_loadings.csv / seurat_obj.rds
-    // ============================================================
-    'sc-qc-violin': `library(ggplot2)
-library(tidyr)
-
-# --- 加载本次分析的 QC 指标 ---
-qc <- read.csv("${jobBase}/qc_metrics.csv${tokenSuffix}")
-cat("✓ QC 指标已加载:", nrow(qc), "细胞\\n")
-
-# Long format for facet_wrap
-qc_long <- pivot_longer(qc, cols = c("nFeature_RNA", "nCount_RNA", "percent.mt"),
-                         names_to = "metric", values_to = "value")
-
-ggplot(qc_long, aes(x = metric, y = value, fill = metric)) +
-  geom_violin(scale = "width", trim = FALSE) +
-  geom_jitter(size = 0.1, alpha = 0.3) +
-  facet_wrap(~ metric, scales = "free", nrow = 1) +
-  scale_fill_manual(values = c(nFeature_RNA = "#2e8555", nCount_RNA = "#2563eb", percent.mt = "#dc2626")) +
-  labs(x = NULL, y = "Value", title = "QC: nFeature, nCount, percent.mt") +
-  theme_classic() +
-  theme(strip.background = element_blank(), legend.position = "none")`,
-
-    umap: `library(ggplot2)
-
-# --- 加载本次分析的 UMAP 坐标 + cluster ---
-umap <- read.csv("${jobBase}/umap_coords.csv${tokenSuffix}")
-umap$cluster <- factor(umap$cluster)
-cat("✓ UMAP 已加载:", nrow(umap), "细胞,", length(levels(umap$cluster)), "clusters\\n")
-
-# Cluster centroid for label
-centroids <- aggregate(cbind(UMAP_1, UMAP_2) ~ cluster, data = umap, FUN = mean)
-
-ggplot(umap, aes(x = UMAP_1, y = UMAP_2, color = cluster)) +
-  geom_point(size = 0.6, alpha = 0.8) +
-  geom_text(data = centroids, aes(label = cluster), color = "black", size = 5, fontface = "bold") +
-  labs(x = "UMAP_1", y = "UMAP_2", title = paste0("UMAP — ", length(levels(umap$cluster)), " clusters")) +
-  theme_classic() +
-  theme(legend.position = "none")`,
-
-    'sc-pca': `library(ggplot2)
-
-# --- 加载 UMAP 坐标（含 cluster） ---
-# 注意: 完整 PCA 散点图需要 seurat_obj.rds, 此处用 UMAP 坐标 + cluster 作演示
-# 如需真正的 PC1 vs PC2, 请加载 RDS:
-# obj <- readRDS("${jobBase}/seurat_obj.rds${tokenSuffix}")
-# pca_data <- as.data.frame(Seurat::Embeddings(obj, "pca"))
-# pca_data$cluster <- as.character(Seurat::Idents(obj))
-
-umap <- read.csv("${jobBase}/umap_coords.csv${tokenSuffix}")
-umap$cluster <- factor(umap$cluster)
-
-ggplot(umap, aes(x = UMAP_1, y = UMAP_2, color = cluster)) +
-  geom_point(size = 0.6) +
-  scale_color_brewer(palette = "Set2") +
-  labs(title = "Cell embedding (UMAP, colored by cluster)") +
-  theme_classic()`,
-
-    'sc-deg-heatmap': `library(ggplot2)
-library(dplyr)
-
-# --- 加载本次分析的 marker 表 ---
-markers <- read.csv("${jobBase}/markers_table.csv${tokenSuffix}")
-cat("✓ Markers 表已加载:", nrow(markers), "条记录,", length(unique(markers$cluster)), "clusters\\n")
-
-# Top N per cluster
-top_n <- 5  # 可改：每 cluster 显示几个 marker
-top_markers <- markers %>%
-  group_by(cluster) %>%
-  slice_max(order_by = avg_log2FC, n = top_n) %>%
-  ungroup()
-
-# Bubble plot 替代 DoHeatmap (后者需要 RDS 中的 scaled data)
-ggplot(top_markers, aes(x = factor(cluster), y = gene, size = -log10(p_val_adj + 1e-300), color = avg_log2FC)) +
-  geom_point() +
-  scale_color_gradient2(low = "#2563eb", mid = "white", high = "#dc2626", midpoint = 0) +
-  scale_size_continuous(range = c(1, 6)) +
-  labs(x = "Cluster", y = NULL, title = paste0("Top ", top_n, " Markers per Cluster"),
-       size = "-log10(padj)", color = "log2FC") +
-  theme_classic() +
-  theme(axis.text.y = element_text(size = 7),
-        axis.text.x = element_text(size = 9))`,
-
-    'sc-marker-bubble': `library(ggplot2)
-library(dplyr)
-
-# --- 加载 marker 表 ---
-markers <- read.csv("${jobBase}/markers_table.csv${tokenSuffix}")
-
-# Top 1 marker per cluster
-top1 <- markers %>%
-  group_by(cluster) %>%
-  slice_max(order_by = avg_log2FC, n = 1) %>%
-  ungroup() %>%
-  head(8)  # 限制为前 8 个 cluster
-
-ggplot(top1, aes(x = factor(cluster), y = avg_log2FC, fill = factor(cluster))) +
-  geom_col() +
-  geom_text(aes(label = gene), vjust = -0.3, size = 3.5, fontface = "bold") +
-  scale_fill_brewer(palette = "Set2") +
-  labs(x = "Cluster", y = "avg log2FC", title = "Top Marker per Cluster") +
-  theme_classic() +
-  theme(legend.position = "none")`,
-
-    // ============================================================
-    // LASSO-Cox 在线绘图模板
-    // 中间数据: signature_genes.csv (gene, coefficient) /
-    //          risk_scores.csv (sample, risk_score, group, time, event, set) /
-    //          signature_expr_matrix.csv (gene, [samples sorted by risk]) /
-    //          lasso_cv_fit.rds (cv.glmnet object, optional)
-    // ============================================================
-    'lasso-cv-plot': `library(glmnet)
-library(survival)
-
-# --- 加载本次分析的 cv.glmnet 对象 ---
-# RDS 路径需要带 token 的下载（R 不能直接跨域 readRDS HTTPS URL，先 download.file 到 tmp）
-rds_url <- "${jobBase}/lasso_cv_fit.rds${tokenSuffix}"
-tmp_rds <- tempfile(fileext = ".rds")
-download.file(rds_url, tmp_rds, mode = "wb", quiet = TRUE)
-cv_fit <- readRDS(tmp_rds)
-cat("✓ cv.glmnet 对象已加载，lambda.min =", round(cv_fit$lambda.min, 4),
-    ", lambda.1se =", round(cv_fit$lambda.1se, 4), "\\n")
-
-# --- 绘 CV 曲线 ---
-plot(cv_fit, main = "LASSO Cox Cross-Validation")
-abline(v = log(cv_fit$lambda.min), col = "red", lty = 2)
-abline(v = log(cv_fit$lambda.1se), col = "blue", lty = 2)
-legend("topright", legend = c("lambda.min", "lambda.1se"),
-       col = c("red", "blue"), lty = 2, bty = "n")`,
-
-    'lasso-coef': `library(ggplot2)
-
-# --- 加载本次分析的 signature 系数 ---
-sig_table <- read.csv("${jobBase}/signature_genes.csv${tokenSuffix}")
-cat("✓ Signature:", nrow(sig_table), "个基因\\n")
-
-# 按系数大小排序 + 染色
-sig_table$gene <- factor(sig_table$gene, levels = sig_table$gene[order(sig_table$coefficient)])
-sig_table$direction <- ifelse(sig_table$coefficient > 0, "Risk", "Protective")
-
-ggplot(sig_table, aes(x = coefficient, y = gene, fill = direction)) +
-  geom_col(width = 0.7) +
-  scale_fill_manual(values = c(Risk = "#dc2626", Protective = "#2563eb")) +
-  geom_vline(xintercept = 0, color = "gray30") +
-  labs(x = "LASSO Coefficient", y = NULL,
-       title = paste0("Signature: ", nrow(sig_table), " Genes"),
-       subtitle = "Red = Risk Factor, Blue = Protective") +
-  theme_classic() +
-  theme(plot.title = element_text(size = 13, face = "bold"),
-        legend.position = "top")`,
-
-    'risk-triple': `library(ggplot2)
-library(gridExtra)
-
-# --- 加载 risk score + 表达矩阵 ---
-risk_df <- read.csv("${jobBase}/risk_scores.csv${tokenSuffix}")
-sig_expr <- read.csv("${jobBase}/signature_expr_matrix.csv${tokenSuffix}", check.names = FALSE)
-cat("✓ Risk score:", nrow(risk_df), "样本; Signature 表达:", nrow(sig_expr), "基因\\n")
-
-# 按 risk score 排序（risk_scores.csv 顺序未必排好）
-risk_sorted <- risk_df[order(risk_df$risk_score), ]
-risk_sorted$rank <- 1:nrow(risk_sorted)
-risk_cutoff <- median(risk_sorted$risk_score)
-
-# Panel 1: risk score scatter
-p1 <- ggplot(risk_sorted, aes(x = rank, y = risk_score, color = group)) +
-  geom_point(size = 1) +
-  scale_color_manual(values = c(Low = "#2563eb", High = "#dc2626")) +
-  geom_hline(yintercept = risk_cutoff, linetype = "dashed") +
-  labs(x = "Patients (sorted)", y = "Risk Score", title = "Risk Score Distribution") +
-  theme_classic() + theme(legend.position = "none")
-
-# Panel 2: survival status scatter
-p2 <- ggplot(risk_sorted, aes(x = rank, y = time, color = factor(event))) +
-  geom_point(size = 1) +
-  scale_color_manual(values = c("0" = "#16a34a", "1" = "#dc2626"),
-                     labels = c("Alive", "Dead"), name = NULL) +
-  labs(x = "Patients (sorted)", y = "Survival Time", title = "Survival Status") +
-  theme_classic() + theme(legend.position = "top")
-
-# Panel 3: signature gene heatmap
-gene_col <- sig_expr[[1]]
-heat_mat <- as.matrix(sig_expr[, -1, drop = FALSE])
-rownames(heat_mat) <- gene_col
-heat_mat <- heat_mat[, risk_sorted$sample, drop = FALSE]  # 重新排序到 risk 顺序
-heat_mat_z <- t(scale(t(heat_mat)))
-heat_mat_z[heat_mat_z >  2] <-  2
-heat_mat_z[heat_mat_z < -2] <- -2
-
-heat_df <- expand.grid(gene = rownames(heat_mat_z), sample = 1:ncol(heat_mat_z))
-heat_df$value <- as.vector(heat_mat_z)
-
-p3 <- ggplot(heat_df, aes(x = sample, y = gene, fill = value)) +
-  geom_tile() +
-  scale_fill_gradient2(low = "#2563eb", mid = "white", high = "#dc2626", midpoint = 0) +
-  labs(x = "Patients (sorted)", y = NULL, title = "Signature Genes (Z-score)") +
-  theme_classic() +
-  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
-
-grid.arrange(p1, p2, p3, ncol = 1, heights = c(1, 1, 1.2))`,
-  };
-
-  return templates[cardId] || fallbackCode;
-}
 
 function ToolsInner() {
   const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
@@ -718,8 +97,10 @@ function ToolsInner() {
             packages: Array.isArray(d.packages) ? (d.packages as string[]) : [],
             color: String(d.color ?? '#7c3aed'),
             reportUrl: String(d.reportUrl ?? ''),
-            figcodeMap: (d.figcodeMap as Record<string, string>) || undefined,
             comingSoon: false,
+            _manifest: d._manifest && typeof d._manifest === 'object'
+              ? (d._manifest as Tool['_manifest'])
+              : undefined,
           }));
           if (!cancelled) setPluginTools(normalized);
         }
@@ -760,7 +141,7 @@ function ToolsInner() {
     fetchHistory();
   }, [fetchHistory]);
 
-  // Auto-select tool from URL param (?tool=deseq2) — used by docs/figcode cross-links.
+  // Auto-select tool from URL param (?tool=deseq2) — used by docs cross-links.
   // Only fires on mount; doesn't react to URL changes after that.
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -807,19 +188,7 @@ function ToolsInner() {
 
   const [showNewModal, setShowNewModal] = useState(false);
   const [showMobileToolSheet, setShowMobileToolSheet] = useState(false);
-  // Lazy-loaded figCards full data (only fetched when user clicks "用 FigCode 自定义")
-  const [figCardsFull, setFigCardsFull] = useState<FigCard[] | null>(null);
-  const [figcodeCardId, setFigcodeCardId] = useState<string | null>(null);
-
-  // When figcodeCardId is set for the first time, dynamic-import figCards data
-  useEffect(() => {
-    if (figcodeCardId && !figCardsFull) {
-      import('@/pages/figcode/_data').then((mod) => setFigCardsFull(mod.figCards)).catch(() => {});
-    }
-  }, [figcodeCardId, figCardsFull]);
   const [reportUrl, setReportUrl] = useState<string | null>(null);
-  const [imageVersion, setImageVersion] = useState(0);
-  const [savedCodes, setSavedCodes] = useState<Record<string, string>>({});
   const [leftWidth, setLeftWidth] = useState<number>(() => {
     if (typeof window === 'undefined') return 220;
     const saved = localStorage.getItem('biof3-tools-left-w');
@@ -1697,6 +1066,9 @@ function ToolsInner() {
                           style={{ background: TOOL_COLORS[t.id] || '#6b7280' }}
                         />
                         {t.title}
+                        {t._manifest?.execution?.manifestDrift && (
+                          <span className={styles.navToolBadgeDrift}>已变更</span>
+                        )}
                       </button>
                       {toolJobs.map((job) => (
                         <div key={job.id} className={styles.navJobRow}>
@@ -1830,7 +1202,6 @@ function ToolsInner() {
                     ? `${getApiPrefix(demoLang)}${f.url}`
                     : `${getApiPrefix(demoLang)}/tools/demo/${demoToolId}/${name}`;
                 }}
-                onFigcode={setFigcodeCardId}
                 onReport={() => {
                   const demoTool = tools.find((t) => t.id === demoToolId);
                   const demoLang: 'r' | 'python' = demoTool?.language === 'python' ? 'python' : 'r';
@@ -2225,9 +1596,8 @@ function ToolsInner() {
             <ResultTabs
               files={activeResult.files || []}
               buildUrl={(name: string) =>
-                `${apiBase}/tools/file/${jobId || activeJob?.id}/${name}${token ? '?token=' + token : ''}${imageVersion ? '&v=' + imageVersion : ''}`
+                `${apiBase}/tools/file/${jobId || activeJob?.id}/${name}${token ? '?token=' + token : ''}`
               }
-              onFigcode={setFigcodeCardId}
               onReport={() =>
                 setReportUrl(
                   `${apiBase}/tools/file/${jobId || activeJob?.id}/report.html${token ? '?token=' + token : ''}`
@@ -2343,182 +1713,17 @@ function ToolsInner() {
         </div>
       )}
 
-      {/* FigCode RunModal — opens when user clicks "用 FigCode 自定义" */}
-      {figcodeCardId &&
-        figCardsFull &&
-        (() => {
-          const card = figCardsFull.find((c) => c.id === figcodeCardId);
-          if (!card) return null;
-
-          // Generate code that uses the actual analysis result data
-          const currentJobId = jobId || activeJob?.id;
-          const tk = getToken();
-          const currentToolId = selectedTool?.id || activeJob?.tool_id || demoToolId;
-          const dataUrl = currentJobId
-            ? `${getApiPrefix()}/tools/file/${currentJobId}/${currentToolId === 'go-kegg' ? 'go_bp_data.csv' : 'deg_table.csv'}${tk ? '?token=' + tk : ''}`
-            : `${getApiPrefix()}/tools/demo/${currentToolId || 'deseq2'}/deg_table.csv`;
-
-          // Find which output PNG filename this figcode card corresponds to
-          let targetFilename: string | undefined;
-          for (const [fname, cid] of Object.entries(FIGCODE_MAP)) {
-            if (cid === figcodeCardId && fname.endsWith('.png')) {
-              targetFilename = fname;
-              break;
-            }
-          }
-
-          const customCode =
-            (targetFilename && savedCodes[targetFilename]) ||
-            generateFigcodeWithData(figcodeCardId, dataUrl, card.code);
-
-          // Try to load saved code if not already loaded
-          if (targetFilename && !savedCodes[targetFilename] && currentJobId) {
-            const tk = getToken();
-            fetch(
-              `${getApiPrefix()}/tools/file/${currentJobId}/${targetFilename}.R${tk ? '?token=' + tk : ''}`
-            )
-              .then((r) => (r.ok ? r.text() : null))
-              .then((text) => {
-                if (text) setSavedCodes((prev) => ({ ...prev, [targetFilename]: text }));
-              })
-              .catch(() => {});
-          }
-
-          return (
-            <RunModal
-              isOpen={true}
-              onClose={() => {
-                delete (window as unknown as Record<string, unknown>).__biof3_pending_image;
-                setFigcodeCardId(null);
-              }}
-              title={`${card.subtitle} — 基于分析结果绘图`}
-              initialCode={customCode}
-              initialImage={
-                targetFilename && currentJobId
-                  ? `${getApiPrefix()}/tools/file/${currentJobId}/${targetFilename}${tk ? '?token=' + tk : ''}`
-                  : targetFilename
-                    ? `${getApiPrefix()}/tools/demo/${currentToolId || 'deseq2'}/${targetFilename}`
-                    : undefined
-              }
-              cardId={card.id}
-              subtitle={card.subtitle}
-              slogan={card.slogan}
-              language={card.language || 'r'}
-              figLayout={card.figLayout || 'default'}
-              onSaveToResult={async (imageUrl: string, savedCode: string) => {
-                const jid = jobId || activeJob?.id;
-                const fname = targetFilename;
-                if (!jid || !fname) {
-                  alert('无法保存：请从分析结果页面打开在线绘图');
-                  return;
-                }
-                const tk = getToken();
-                // Save image
-                const imgResp = await fetch(imageUrl);
-                const blob = await imgResp.blob();
-                await fetch(getApiPrefix() + '/tools/file/' + jid + '/' + fname, {
-                  method: 'PUT',
-                  headers: tk ? { Authorization: 'Bearer ' + tk } : {},
-                  body: blob,
-                });
-                // Save code alongside the image
-                const codeBlob = new Blob([savedCode], { type: 'text/plain' });
-                await fetch(getApiPrefix() + '/tools/file/' + jid + '/' + fname + '.R', {
-                  method: 'PUT',
-                  headers: tk ? { Authorization: 'Bearer ' + tk } : {},
-                  body: codeBlob,
-                });
-                setSavedCodes((prev) => ({ ...prev, [fname]: savedCode }));
-                setImageVersion((v) => v + 1);
-              }}
-              onImageReady={
-                targetFilename && (jobId || activeJob?.id)
-                  ? (imageUrl: string) => {
-                      (window as unknown as Record<string, unknown>).__biof3_pending_image = {
-                        imageUrl,
-                        jobId: jobId || activeJob?.id,
-                        filename: targetFilename,
-                      };
-                    }
-                  : undefined
-              }
-            />
-          );
-        })()}
-
-      {/* Mobile-only: tool picker FAB + bottom sheet (shown when ≤900px via CSS) */}
-      <button
-        className={styles.mobileToolFab}
-        onClick={() => setShowMobileToolSheet(true)}
-        aria-label="选择工具"
-      >
-        <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
-        <span>选择工具</span>
-      </button>
-
-      {showMobileToolSheet && (
-        <div
-          className={styles.mobileToolSheetOverlay}
-          onClick={() => setShowMobileToolSheet(false)}
-        >
-          <div className={styles.mobileToolSheet} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.mobileToolSheetHandle} />
-            <div className={styles.mobileToolSheetHeader}>
-              <h3>选择分析工具</h3>
-              <button
-                className={styles.mobileToolSheetClose}
-                onClick={() => setShowMobileToolSheet(false)}
-                aria-label="关闭"
-              >
-                ×
-              </button>
-            </div>
-            <div className={styles.mobileToolList}>
-              {toolCategories.map((cat) => {
-                const catTools = tools.filter((t) => t.category === cat);
-                if (catTools.length === 0) return null;
-                return (
-                  <React.Fragment key={cat}>
-                    <div className={styles.mobileToolCatLabel}>{cat}</div>
-                    {catTools.map((t) => (
-                      <button
-                        key={t.id}
-                        className={styles.mobileToolItem}
-                        onClick={() => {
-                          setShowMobileToolSheet(false);
-                          selectTool(t);
-                        }}
-                      >
-                        <span
-                          className={styles.mobileToolItemDot}
-                          style={{ background: TOOL_COLORS[t.id] || '#6b7280' }}
-                        >
-                          {t.title[0]}
-                        </span>
-                        <span>{t.title}</span>
-                      </button>
-                    ))}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
-// ---- Result tabs (card layout for both job results and demo) ----
 function ResultTabs({
   files,
   buildUrl,
-  onFigcode,
   onReport,
 }: {
   files: Array<{ name: string; type: string; label?: string; url?: string }>;
   buildUrl: (name: string) => string;
-  onFigcode: (id: string) => void;
   onReport?: () => void;
 }) {
   const [tab, setTab] = useState<'plots' | 'files'>('plots');
@@ -2573,7 +1778,6 @@ function ResultTabs({
       {tab === 'plots' && (
         <div className={styles.plotCardGrid}>
           {plots.map((f, idx) => {
-            const figId = getFigcodeCardId(f.name);
             return (
               <div key={f.name} className={styles.plotCard}>
                 <div className={styles.plotCardHeader}>
@@ -2595,14 +1799,6 @@ function ResultTabs({
                     <a href={buildUrl(f.name)} download className={styles.plotCardBtn}>
                       PNG
                     </a>
-                    {figId && (
-                      <button
-                        className={styles.plotCardBtnPrimary}
-                        onClick={() => onFigcode(figId)}
-                      >
-                        在线绘图
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>
@@ -2683,11 +1879,9 @@ function ResultTabs({
 function DemoTabs({
   demoFiles,
   demoToolId,
-  onFigcode,
 }: {
   demoFiles: Array<{ name: string; type: string; url: string }>;
   demoToolId: string;
-  onFigcode: (id: string) => void;
 }) {
   const [tab, setTab] = useState<'plots' | 'files' | 'params'>('plots');
   const plots = demoFiles.filter((f) => f.type === 'plot');
@@ -2721,7 +1915,6 @@ function DemoTabs({
       {tab === 'plots' && (
         <div className={styles.plotCardGrid}>
           {plots.map((f) => {
-            const figId = getFigcodeCardId(f.name);
             return (
               <div key={f.name} className={styles.plotCard}>
                 <div className={styles.plotCardImg}>
@@ -2733,14 +1926,6 @@ function DemoTabs({
                     <a href={`${apiBase}${f.url}`} download className={styles.plotCardBtn}>
                       PNG
                     </a>
-                    {figId && (
-                      <button
-                        className={styles.plotCardBtnPrimary}
-                        onClick={() => onFigcode(figId)}
-                      >
-                        在线绘图
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>

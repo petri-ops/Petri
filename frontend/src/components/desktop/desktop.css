@@ -958,6 +958,20 @@
   color: var(--ifm-color-success-light);
 }
 
+.biof3-plugin-store__badge-drift {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--ifm-color-warning-darker);
+  background: var(--ifm-color-warning-lightest);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+[data-theme='dark'] .biof3-plugin-store__badge-drift {
+  color: var(--ifm-color-warning);
+  background: rgba(251, 191, 36, 0.15);
+}
+
 .biof3-plugin-store__runtime-meta {
   display: flex;
   flex-wrap: wrap;
@@ -1092,6 +1106,24 @@
 
 [data-theme='dark'] .biof3-plugin-card__badge {
   color: var(--ifm-color-success-light);
+}
+
+.biof3-plugin-card__badge-drift {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--ifm-color-warning-lightest);
+  color: var(--ifm-color-warning-darker);
+  font-size: 0.68rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .biof3-plugin-card__badge-drift {
+  background: rgba(251, 191, 36, 0.15);
+  color: var(--ifm-color-warning);
 }
 
 /* 有更新可用的卡片徽章 + 高亮 */

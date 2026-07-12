@@ -49,8 +49,8 @@ export const CHAINS: ChainStep[] = [
   // DESeq2 → 火山图在线绘图
   {
     from: 'deseq2',
-    to: 'figcode:volcano',
-    reason: '差异分析完成，可在线调整火山图样式',
+    to: 'volcano-plot',
+    reason: '差异分析完成，可直接生成火山图并继续解释结果',
     autoPrompt: false,
   },
   // GO/KEGG → GSEA (if available)
@@ -93,6 +93,10 @@ export const CHAINS: ChainStep[] = [
 
 export function getNextSteps(toolId: string): ChainStep[] {
   return CHAINS.filter((c) => c.from === toolId);
+}
+
+export function normalizeWorkflowToolId(toolId: string): string {
+  return toolId;
 }
 
 // ── Helper: resolve a param template against a completed job ──

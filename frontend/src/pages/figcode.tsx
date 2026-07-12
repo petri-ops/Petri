@@ -372,11 +372,14 @@ export default function FigCode(): React.ReactElement {
 
   // Desktop: 查询所有卡片的插件安装状态
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.biof3Desktop?.figcode) return;
+    const bridge = (window as unknown as {
+      biof3Desktop?: { figcode?: { cardStatus: (cardIds: string[]) => Promise<any> } };
+    }).biof3Desktop?.figcode;
+    if (typeof window === 'undefined' || !bridge) return;
     const allIds = figCards.map((c) => c.id);
-    window.biof3Desktop.figcode
+    bridge
       .cardStatus(allIds)
-      .then((result) => {
+      .then((result: any) => {
         if (result.ok && result.statuses) setCardStatuses(result.statuses);
       })
       .catch(() => {});
@@ -745,7 +748,6 @@ export default function FigCode(): React.ReactElement {
         slogan={modalCard?.slogan}
         language={modalCard?.language || 'r'}
         figLayout={modalCard?.figLayout || 'default'}
-        packages={modalCard?.packages}
       />
     </>
   );

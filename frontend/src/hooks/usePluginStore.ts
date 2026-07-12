@@ -44,6 +44,11 @@ export interface InstalledPlugin {
   installedAt?: string;
   type?: string;
   language?: string;
+  scriptFingerprint?: string | null;
+  installedFingerprint?: string | null;
+  currentFingerprint?: string | null;
+  manifestDrift?: boolean;
+  driftReason?: string | null;
 }
 
 export interface RemotePlugin {
@@ -53,7 +58,6 @@ export interface RemotePlugin {
   size?: number;
   description?: string;
   type?: string;
-  figcodeCardId?: string;
   dependencies?: string[];
   optional?: boolean;
 }

@@ -50,7 +50,17 @@ declare global {
       };
       plugins: {
         listInstalled: () => Promise<
-          Array<{ id: string; version: string; type?: string; language?: string }>
+          Array<{
+            id: string;
+            version: string;
+            type?: string;
+            language?: string;
+            scriptFingerprint?: string | null;
+            installedFingerprint?: string | null;
+            currentFingerprint?: string | null;
+            manifestDrift?: boolean;
+            driftReason?: string | null;
+          }>
         >;
         listRemote: () => Promise<{ plugins: Record<string, RemotePlugin> }>;
         install: (
@@ -134,31 +144,6 @@ declare global {
       // payload 仅含 category + errorSummary，不含用户数据/路径/文件名
       telemetry: {
         report: (payload: TelemetryPayload) => Promise<{ ok: boolean; reason?: string }>;
-      };
-      figcode: {
-        checkPackages: (
-          language: string,
-          packages: string[],
-          cardId?: string
-        ) => Promise<{
-          ok: boolean;
-          missing: string[];
-          missingPlugins: Array<{ id: string; title?: string }>;
-          cardInstalled: boolean;
-        }>;
-        cardStatus: (cardIds: string[]) => Promise<{
-          ok: boolean;
-          statuses: Record<
-            string,
-            {
-              installed: boolean;
-              needsPlugin: boolean;
-              pluginId?: string;
-              title?: string;
-              size?: number;
-            }
-          >;
-        }>;
       };
       data: {
         info: () => Promise<{

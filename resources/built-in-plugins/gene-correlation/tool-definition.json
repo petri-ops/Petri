@@ -26,36 +26,69 @@
       "type": "select",
       "default": "pearson",
       "options": [
-        { "value": "pearson", "label": "Pearson（线性相关）" },
-        { "value": "spearman", "label": "Spearman（秩相关）" }
+        {
+          "value": "pearson",
+          "label": "Pearson（线性相关）"
+        },
+        {
+          "value": "spearman",
+          "label": "Spearman（秩相关）"
+        }
       ]
     }
   ],
   "outputs": [
-    { "id": "heatmap", "type": "plot", "label": "相关性热图" },
-    { "id": "corr_matrix", "type": "table", "label": "相关系数矩阵" }
+    {
+      "id": "heatmap",
+      "type": "plot",
+      "label": "相关性热图"
+    },
+    {
+      "id": "corr_matrix",
+      "type": "table",
+      "label": "相关系数矩阵"
+    }
   ],
   "failureModes": [
+    {
+      "code": "non_numeric_expression_matrix",
+      "title": "表达矩阵包含非数值列",
+      "description": "相关性计算需要可解析的数值矩阵；如果混入样本 ID、注释列或文本列，会导致相关矩阵错误。",
+      "recoverable": true,
+      "suggestedFix": "去掉非数值列，仅保留基因表达数值区域，必要时由 Harness 自动剔除首列样本名。",
+      "detect": "non numeric expression matrix|non-numeric columns|numeric columns"
+    },
+    {
+      "code": "insufficient_numeric_genes",
+      "title": "可计算基因数量不足",
+      "description": "可用于相关性计算的数值基因少于 2 个时，无法生成相关性矩阵。",
+      "recoverable": false,
+      "suggestedFix": "检查表达矩阵格式或更换输入文件，确保至少有 2 个可计算基因。",
+      "detect": "insufficient numeric genes|fewer than 2 genes|too few numeric genes"
+    },
     {
       "code": "matrix_orientation_mismatch",
       "title": "表达矩阵方向不符合预期",
       "description": "插件预期 CSV 行为基因、列为样本；如果用户提供行=样本、列=基因，会导致相关性对象错误。",
       "recoverable": true,
-      "suggestedFix": "文件探测层根据首列和列名数量判断方向，必要时自动转置或请求用户确认。"
+      "suggestedFix": "文件探测层根据首列和列名数量判断方向，必要时自动转置或请求用户确认。",
+      "detect": "matrix orientation mismatch|rows_are_samples|transpose"
     },
     {
-      "code": "insufficient_numeric_genes",
-      "title": "可计算基因数量不足",
-      "description": "表达矩阵中可解析的数值基因少于 2 个，无法计算相关矩阵。",
-      "recoverable": false,
-      "suggestedFix": "提示用户检查表达矩阵格式或更换输入文件。"
+      "code": "low_variance_expression",
+      "title": "表达矩阵方差过低",
+      "description": "可用于相关性排序的基因虽然数量足够，但整体方差太低，热图容易退化成近似常数矩阵。",
+      "recoverable": true,
+      "suggestedFix": "优先扩大 top_n 或改用更有变化的基因子集；如果原始矩阵整体低变异，建议更换分析对象。",
+      "detect": "low variance|constant expression|near zero variance|all zero variance"
     },
     {
       "code": "top_n_too_large",
       "title": "top N 超过可用基因数",
       "description": "top_n 大于有效基因数时，仍可降级使用全部有效基因。",
       "recoverable": true,
-      "suggestedFix": "将 top_n 自动裁剪到有效基因数，并在结果报告中记录修正。"
+      "suggestedFix": "将 top_n 自动裁剪到有效基因数，并在结果报告中记录修正。",
+      "detect": "top_n too large|clamp top_n|top n exceeds available genes"
     }
   ],
   "estimatedMinutes": 2

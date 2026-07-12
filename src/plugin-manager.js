@@ -59,6 +59,7 @@ function resolveProjectRoot() {
   return path.resolve(__dirname, '..', 'vendor', 'biof3-core');
 }
 const PROJECT_ROOT = resolveProjectRoot();
+const pluginLoader = require(path.join(PROJECT_ROOT, 'r-server', 'plugin-loader.js'));
 try {
   require(path.join(SHARED_BACKEND_DIR, 'init')).initSharedBackend();
 } catch (e) {
@@ -112,7 +113,69 @@ const MANIFEST_URL =
 
 function getInstalledPlugins() {
   try {
-    return JSON.parse(fs.readFileSync(INSTALLED_FILE, 'utf8'));
+    const raw = JSON.parse(fs.readFileSync(INSTALLED_FILE, 'utf8'));
+    if (!Array.isArray(raw)) return [];
+    return raw.map((plug) => {
+      if (!plug || typeof plug !== 'object') return plug;
+      if (plug.type === 'runtime') {
+        return {
+          ...plug,
+          installedFingerprint: plug.scriptFingerprint || plug.manifestFingerprint || plug.fingerprint || null,
+          currentFingerprint: null,
+          manifestDrift: false,
+          driftReason: null,
+        };
+      }
+
+      const pluginDir = path.join(PLUGINS_DIR, plug.id || '');
+      const metaPath = path.join(pluginDir, 'plugin.json');
+      if (!plug.id || !fs.existsSync(metaPath)) {
+        return {
+          ...plug,
+          installedFingerprint: plug.scriptFingerprint || plug.manifestFingerprint || plug.fingerprint || null,
+          currentFingerprint: null,
+          manifestDrift: false,
+          driftReason: null,
+        };
+      }
+
+      try {
+        const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+        let toolDefinition = null;
+        const toolDefPath = path.join(pluginDir, 'tool-definition.json');
+        if (fs.existsSync(toolDefPath)) {
+          try {
+            toolDefinition = JSON.parse(fs.readFileSync(toolDefPath, 'utf8'));
+          } catch {}
+        }
+        const currentFingerprint = pluginLoader.computePluginFingerprint(
+          { ...meta, pluginDir, scriptPath: path.join(pluginDir, 'scripts') },
+          toolDefinition,
+        );
+        const installedFingerprint =
+          plug.scriptFingerprint || plug.manifestFingerprint || plug.fingerprint || null;
+        const manifestDrift = !!(
+          installedFingerprint &&
+          currentFingerprint &&
+          installedFingerprint !== currentFingerprint
+        );
+        return {
+          ...plug,
+          installedFingerprint,
+          currentFingerprint,
+          manifestDrift,
+          driftReason: manifestDrift ? 'fingerprint_changed' : null,
+        };
+      } catch {
+        return {
+          ...plug,
+          installedFingerprint: plug.scriptFingerprint || plug.manifestFingerprint || plug.fingerprint || null,
+          currentFingerprint: null,
+          manifestDrift: false,
+          driftReason: null,
+        };
+      }
+    });
   } catch {
     return [];
   }
@@ -120,7 +183,18 @@ function getInstalledPlugins() {
 
 function saveInstalledPlugins(list) {
   fs.mkdirSync(PLUGINS_DIR, { recursive: true });
-  fs.writeFileSync(INSTALLED_FILE, JSON.stringify(list, null, 2));
+  const sanitized = Array.isArray(list)
+    ? list.map((plug) => {
+        if (!plug || typeof plug !== 'object') return plug;
+        const next = { ...plug };
+        delete next.installedFingerprint;
+        delete next.currentFingerprint;
+        delete next.manifestDrift;
+        delete next.driftReason;
+        return next;
+      })
+    : [];
+  fs.writeFileSync(INSTALLED_FILE, JSON.stringify(sanitized, null, 2));
 }
 
 function addInstalledPlugin(plugin) {
@@ -419,6 +493,12 @@ async function installPlugin(pluginId, onProgress) {
   registerPluginInServer(pluginDir, meta);
 
   // 记录已装
+  const scriptFingerprint = pluginLoader.computePluginFingerprint(
+    { ...meta, pluginDir, scriptPath: path.join(pluginDir, 'scripts') },
+    fs.existsSync(path.join(pluginDir, 'tool-definition.json'))
+      ? JSON.parse(fs.readFileSync(path.join(pluginDir, 'tool-definition.json'), 'utf8'))
+      : null
+  );
   addInstalledPlugin({
     id: pluginId,
     version: plugin.version,
@@ -426,6 +506,7 @@ async function installPlugin(pluginId, onProgress) {
     platform,
     language,
     builtIn: isBuiltIn,
+    scriptFingerprint,
   });
 
   console.log(
@@ -508,6 +589,12 @@ async function installContentPlugin(pluginId, plugin, onProgress) {
   registerContentPlugin(pluginDir, meta);
 
   // 记录已装
+  const scriptFingerprint = pluginLoader.computePluginFingerprint(
+    { ...meta, pluginDir, scriptPath: path.join(pluginDir, 'scripts') },
+    fs.existsSync(path.join(pluginDir, 'tool-definition.json'))
+      ? JSON.parse(fs.readFileSync(path.join(pluginDir, 'tool-definition.json'), 'utf8'))
+      : null
+  );
   addInstalledPlugin({
     id: pluginId,
     version: plugin.version,
@@ -517,6 +604,7 @@ async function installContentPlugin(pluginId, plugin, onProgress) {
     contentType: meta.contentType,
     omics: meta.omics,
     builtIn: isBuiltIn,
+    scriptFingerprint,
   });
 
   console.log(`[plugin] content-plugin installed: ${pluginId} v${plugin.version}`);
@@ -1095,6 +1183,17 @@ async function loadAllPlugins() {
     const metaPath = path.join(pluginDir, 'plugin.json');
     try {
       const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+      if (plug.type !== 'runtime') {
+        const scriptFingerprint = pluginLoader.computePluginFingerprint(
+          { ...meta, pluginDir, scriptPath: path.join(pluginDir, 'scripts') },
+          fs.existsSync(path.join(pluginDir, 'tool-definition.json'))
+            ? JSON.parse(fs.readFileSync(path.join(pluginDir, 'tool-definition.json'), 'utf8'))
+            : null
+        );
+        if (scriptFingerprint && !plug.scriptFingerprint) {
+          addInstalledPlugin({ ...plug, scriptFingerprint });
+        }
+      }
       registerPluginInServer(pluginDir, meta);
     } catch (e) {
       console.warn(`[plugin] load ${plug.id} failed: ${e.message}`);
