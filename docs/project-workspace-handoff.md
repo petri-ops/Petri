@@ -43,7 +43,7 @@
   - 这次目标不是继续加新入口，而是把结果区维持在“简洁但内容不缺”的状态。
 - 摘要卡展开时的让位逻辑已经从 `workspaceSessionContent` 挪到 `workspaceSessionFrame`：
   - 之前只是给内容层加右侧 padding，卡片又是 absolute 覆盖，所以看起来只挤出了一小块空白。
-  - 现在通过 `workspaceSessionInset` 这种内层容器吃掉右侧预留，绘画区会整体向左缩进，而不是只在内容里留空。
+  - 现在通过 `workspaceSessionInset` 吃掉右侧预留，摘要卡本身保持在 `workspaceSessionFrame` 这一层，绘画区会整体向左缩进，而不是让卡片落进画布里。
 
 ## 当前结果层修复记录（2026-07-12）
 

@@ -207,26 +207,26 @@ function SessionFrameView({
             {ctx.showPinnedSummary && children}
           </div>
         </div>
-        <div className={styles.workspaceSummaryOverlay}>
-          {ctx.showPinnedSummary && (
-            <WorkspaceSummaryCard
-              open={ctx.summaryCardOpen}
-              visibility={ctx.summaryVisibility}
-              width={ctx.summaryOpenWidth}
-              projectName={ctx.project.name}
-              activeJob={ctx.activeJob}
-              recentJobs={ctx.recentJobs}
-              backendSummary={ctx.backendSummary}
-              liveJobsPreview={ctx.liveJobsPreview}
-              jobStats={ctx.jobStats}
-              onOpenScheduled={ctx.openScheduledResults}
-              onSelectJob={(jobId) => {
-                ctx.setActiveJobId(jobId);
-                ctx.openRightPanel('results');
-              }}
-            />
-          )}
-        </div>
+      </div>
+      <div className={styles.workspaceSummaryOverlay}>
+        {ctx.showPinnedSummary && (
+          <WorkspaceSummaryCard
+            open={ctx.summaryCardOpen}
+            visibility={ctx.summaryVisibility}
+            width={ctx.summaryOpenWidth}
+            projectName={ctx.project.name}
+            activeJob={ctx.activeJob}
+            recentJobs={ctx.recentJobs}
+            backendSummary={ctx.backendSummary}
+            liveJobsPreview={ctx.liveJobsPreview}
+            jobStats={ctx.jobStats}
+            onOpenScheduled={ctx.openScheduledResults}
+            onSelectJob={(jobId) => {
+              ctx.setActiveJobId(jobId);
+              ctx.openRightPanel('results');
+            }}
+          />
+        )}
       </div>
     </div>
   );
