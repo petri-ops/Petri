@@ -54,6 +54,7 @@ export type IconName =
   | 'clock'
   | 'folder'
   | 'file'
+  | 'svg'
   | 'database'
   | 'globe'
   | 'terminal'
@@ -359,6 +360,19 @@ const paths: Record<IconName, React.ReactNode> = {
     <>
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
       <polyline points="14 2 14 8 20 8" />
+    </>
+  ),
+  // SVG — vector file / chart artifact
+  svg: (
+    <>
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <path d="M8.5 13.5 10.5 11l2 2.5 2-3 1.5 2" />
+      <circle cx="8.5" cy="13.5" r="0.75" />
+      <circle cx="10.5" cy="11" r="0.75" />
+      <circle cx="12.5" cy="13.5" r="0.75" />
+      <circle cx="14.5" cy="10.5" r="0.75" />
+      <circle cx="16" cy="12.5" r="0.75" />
     </>
   ),
   // Database — dataset / storage (Lucide database)

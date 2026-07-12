@@ -2,10 +2,15 @@
 
 最后更新：2026-07-12
 
-这份文档用于在切换工作区后恢复当前开发状态。当前阶段不是功能主线开发，而是在把 BioF3 项目工作台的前端骨架尽量收口到 Codex 式体验：轻、窄、白、少阴影、三栏对齐、输入区稳定贴底、右侧工具可预测。
+这份文档用于在切换工作区后恢复当前开发状态。当前阶段不是功能主线开发，而是在把 BioF3 项目工作台的前端骨架和结果层体验尽量收口到 Codex 式体验：轻、窄、白、少阴影、三栏对齐、输入区稳定贴底、右侧工具可预测，并重点优化“主预览 + Honeycomb 结果导航”的结果查看体验。
 
 ## 最新同步状态
 
+- **当前正在进行的主线是结果层 UI 改变与稳定化优化**：
+  - 重点区域是 `/project/:projectId?mode=scheduled&job=...` 的结果查看器。
+  - 目标是保持“主预览 + Honeycomb artifact navigator”，让 HTML 报告、图表、表格、文本、PDF 等 artifact 都不丢失。
+  - 这不是要重做工作台，也不是要新增一套结果系统；应优先保护已有报告模板、manifest、artifact schema 和历史结果兼容。
+  - 后续继续动结果页时，必须先查现有实现、旧模板、历史 demo 产物和 git diff，再做最小修复。不要上来重写报告或导航结构。
 - 当前主分支已经吸收远程跨平台 runtime 分支的核心改动，不再是“待合并”状态。
 - 这次同步的重点不是 UI，而是桌面运行时、插件安装、路径映射、Harness 索引与修复链路。
 - 现在的工作重点变成“合并后稳定化”：
@@ -16,15 +21,61 @@
 
 ## 当前结果页状态
 
+- 当前结果层 UI 工作正在围绕 Honeycomb 结果导航继续精修：
+  - 主预览区负责展示当前 active artifact。
+  - 右侧 Honeycomb 导航负责展示 manifest sections、fallback artifacts、类型统计和当前分组摘要。
+  - 主预览上方会出现二级切换条，用来在当前分组内切换具体 artifact。
+  - 结果页要兼容旧 `manifest.files`、新 `artifacts`、`outputs`、`sections` 和 `report.html`。
+  - HTML 报告预览是已有能力，不应被弱化成普通文件或从结果页移除。
+- scheduled 模式的中间区域现在不再嵌入 `ResultView`，只保留返回对话入口；结果内容只允许出现在右侧结果栏。
 - 中间会话区里不再展示分析记录卡片，聊天只保留对话本身。
 - 结果页顶部的“分析结果 / 摘要已生成”标题块已经去掉，避免重复信息。
-- 结果查看器已经收敛成“主预览 + 目录导航”的结构：
+- 结果查看器已经收敛成“主预览 + Honeycomb 结果导航”的结构：
   - 图表 / 表格 / 文本 / HTML 预览放在主区域。
-  - 其他分组和文件放在侧边目录里。
-- 结果目录现在放在右侧，并且做了紧凑化处理：
-  - 降低了字号、间距、圆角和卡片感。
-  - 分组与文件都压成更像目录条目的视觉。
-- 这次目标不是继续加新入口，而是把结果区维持在“简洁但内容不缺”的状态。
+  - 右侧保持一级分组导航，主区域顶部承担二级 artifact 切换。
+  - manifest 显式 sections 之外的 fallback artifacts 会自动补进“其他图表 / 其他表格 / 其他文本”等分组，避免插件产物被弱化或漏显。
+- 右侧 Honeycomb 导航当前状态：
+  - 顶部显示组数、产物数和图表 / 表格 / 文本 / 数据等紧凑统计。
+  - 每个分组只保留一级入口与描述，不再展开所有文件。
+  - 底部显示当前分组的轻量详情和“打开原文件”入口。
+  - 宽度已从旧的 196px 提到 224px，仍保持窄导航，但信息密度更稳定。
+- 图表类分组现在优先显示专用 `svg` 图标，避免“图表结果”这类分组在 mixed section 下看起来像缺少图标。
+  - 这次目标不是继续加新入口，而是把结果区维持在“简洁但内容不缺”的状态。
+
+## 当前结果层修复记录（2026-07-12）
+
+- 已发现并纠正一个重要开发方式问题：结果报告不能临时手写一套新 HTML，应优先复用项目已有的报告模板机制。
+- 旧体系中已有报告生成约定：
+  - `vendor/biof3-core/r-server/tool-scripts/*-report-template.html`
+  - 执行器会把插件目录下的 `<toolId>-report-template.html` 复制到 job 根目录为 `report-template.html`
+  - 工具脚本读取模板并生成 `report.html`
+  - `manifest.files` / `outputs` / `sections` 负责结果页导航和预览
+- `resources/built-in-plugins/volcano-plot` 是新的轻量内置插件；原始版本只有 `volcano.png`、`volcano.pdf`、`classified_table.csv`、`manifest.json`，没有 `report.html`。
+- 已做的正确收口：
+  - 保留真实 bug 修复：`volcano-plot.R` 中 `%||%` 必须在首次使用前定义。
+  - 新增 `resources/built-in-plugins/volcano-plot/volcano-plot-report-template.html`。
+  - `volcano-plot.R` 改为读取 `report-template.html` 后生成 `report.html`，不再内嵌临时大段 HTML。
+  - 当前 demo job `tj_mrhgg5cf_ib7o` 已按同一模板机制重新生成 `report.html` 和 `manifest.json`，并同步更新本地 DB 的 `result_json`。
+- 当前 demo job 产物：
+  - `report.html`
+  - `volcano.png`
+  - `classified_table.csv`
+  - `deg_table.csv`
+  - `manifest.json`
+  - `volcano.pdf`
+- 已验证：
+  - `npm --prefix frontend run check`
+  - `npm --prefix frontend test -- result-manifest.test.ts`
+- `GET /api/tools/file/tj_mrhgg5cf_ib7o/report.html` 返回 200
+- `GET /api/tools/status/tj_mrhgg5cf_ib7o` 返回 completed 且包含 6 个 artifacts
+- `ScheduledWorkspacePanel` 已去掉中心结果预览，只剩返回对话；结果只保留在右侧 Honeycomb 导航中，避免重启后中心区再次出现分析记录/结果卡。
+
+后续继续做结果层 UI 时，先遵守这条顺序：
+
+1. 读 `docs/project-workspace-handoff.md` 与 `docs/next-steps-roadmap.md`。
+2. 查 `frontend/src/lib/result-manifest.ts`、`frontend/src/pages/project-workspace.tsx`、`frontend/src/lib/result-manifest.test.ts`。
+3. 查旧报告模板和 demo 产物：`vendor/biof3-core/r-server/tool-scripts/*-report-template.html`、`vendor/biof3-core/r-server/tool-demo-results/`。
+4. 只做兼容和最小修复；不要先重写报告模板、导航结构或结果渲染器。
 
 ## 给下一位 Codex Agent 的交接提示
 
@@ -41,7 +92,7 @@
 - 项目工作台 UI 已基本收口到 Codex-like 三栏结构。
 - 结果卡片、摘要卡、右侧工具区的视觉层级已经显著简化。
 - 聊天区里的分析记录卡、结果解释按钮、打开完整结果按钮已移除。
-- 结果查看器已改为右侧目录导航 + 主预览的紧凑布局。
+- 结果查看器已改为右侧 Honeycomb artifact navigator + 主预览的紧凑布局。
 - 桌面端已大幅瘦身：移除 skills / algorithms / prompt playground 等旧入口，`/single-cell` 和 `/spatial` 不再挂到桌面 SPA 路由。
 - 已清理桌面导航中仍指向已移除路由的入口。
 - 已清理摘要卡 resize 残留状态；摘要卡按固定窄高卡片处理。

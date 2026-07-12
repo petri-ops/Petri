@@ -56,6 +56,7 @@ export interface RightPanelContext {
   handleOpenWorkspaceFile: (file: ActiveWorkspaceFile) => void;
   handleCloseWorkspaceFile: (path: string) => void;
   handleOpenResult: (jobId: string, projectId?: string | null) => void | Promise<void>;
+  handleOpenRightResults: () => void;
   handleOpenRightTerminal: () => void;
   handleOpenRightBrowser: () => void;
   handleOpenRightFiles: () => void;
@@ -124,6 +125,7 @@ export function RightPanel({
                 {tab === 'home' && (
                   <EmptyResult
                     project={ctx.project}
+                    onOpenResults={ctx.handleOpenRightResults}
                     onOpenTerminal={ctx.handleOpenRightTerminal}
                     onOpenBrowser={ctx.handleOpenRightBrowser}
                     onOpenFiles={ctx.handleOpenRightFiles}

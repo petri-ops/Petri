@@ -73,6 +73,20 @@ const DEFAULT_TITLE_BAR: TitleBarState = {
   onGoForward: null,
 };
 
+function titleBarDataEqual(a: TitleBarState, b: TitleBarState): boolean {
+  return (
+    a.title === b.title &&
+    a.leftPanelWidth === b.leftPanelWidth &&
+    a.rightPanelWidth === b.rightPanelWidth &&
+    a.activeTabId === b.activeTabId &&
+    a.toolMenuOpen === b.toolMenuOpen &&
+    a.canGoBack === b.canGoBack &&
+    a.canGoForward === b.canGoForward &&
+    JSON.stringify(a.tabs) === JSON.stringify(b.tabs) &&
+    JSON.stringify(a.toolMenuItems) === JSON.stringify(b.toolMenuItems)
+  );
+}
+
 export function useWorkspacePanels(): WorkspacePanels {
   const [leftOpen, setLeftOpen] = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
@@ -85,7 +99,10 @@ export function useWorkspacePanels(): WorkspacePanels {
   const toggleBottomTerminal = useCallback(() => setBottomTerminalOpen((v) => !v), []);
   const toggleSummary = useCallback(() => setSummaryOpen((v) => !v), []);
   const updateTitleBar = useCallback((patch: Partial<TitleBarState>) => {
-    setTitleBar((current) => ({ ...current, ...patch }));
+    setTitleBar((current) => {
+      const next = { ...current, ...patch };
+      return titleBarDataEqual(current, next) ? current : next;
+    });
   }, []);
 
   return {

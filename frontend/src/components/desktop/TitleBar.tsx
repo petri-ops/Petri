@@ -129,42 +129,44 @@ export function TitleBar(): React.ReactElement {
               </div>
             );
           })}
-          <button
-            type="button"
-            className={styles.iconBtn}
-            onClick={() => onMoreAction?.()}
-            title="展开更多工具"
-            aria-label="展开更多工具"
-            aria-haspopup="menu"
-            aria-expanded={toolMenuOpen}
-          >
-            <Icon name="plus" size={16} />
-          </button>
-          {toolMenuOpen && (
-            <>
-              <button
-                type="button"
-                className={styles.toolMenuOverlay}
-                onClick={() => onMoreAction?.()}
-                aria-label="关闭工具菜单"
-              />
-              <div className={styles.toolMenu} role="menu">
-                {toolMenuItems.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className={item.isOpen ? styles.toolMenuItemActive : ''}
-                    onClick={() => onSelectToolItem?.(item.id)}
-                    role="menuitem"
-                  >
-                    <Icon name={item.icon} size={14} />
-                    <span>{item.label}</span>
-                    {item.isOpen && <Icon name="check" size={13} />}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
+          <div className={styles.toolMenuAnchor}>
+            <button
+              type="button"
+              className={styles.iconBtn}
+              onClick={() => onMoreAction?.()}
+              title="展开更多工具"
+              aria-label="展开更多工具"
+              aria-haspopup="menu"
+              aria-expanded={toolMenuOpen}
+            >
+              <Icon name="plus" size={16} />
+            </button>
+            {toolMenuOpen && (
+              <>
+                <button
+                  type="button"
+                  className={styles.toolMenuOverlay}
+                  onClick={() => onMoreAction?.()}
+                  aria-label="关闭工具菜单"
+                />
+                <div className={styles.toolMenu} role="menu">
+                  {toolMenuItems.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className={item.isOpen ? styles.toolMenuItemActive : ''}
+                      onClick={() => onSelectToolItem?.(item.id)}
+                      role="menuitem"
+                    >
+                      <Icon name={item.icon} size={14} />
+                      <span>{item.label}</span>
+                      {item.isOpen && <Icon name="check" size={13} />}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         <div className={styles.windowTools}>

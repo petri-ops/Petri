@@ -4,6 +4,8 @@
 
 当前路线图已经从“拆组件/拆 hooks”阶段，切换到“桌面端工作台稳定化 + Harness Engine v1”阶段。当前又叠加了远程跨平台 runtime 分支的合并收口，因此继续开发时不要先急着加新功能；先确保桌面壳子、路由、构建、Harness 索引/修复与跨平台 runtime 逻辑都稳定，再进入下一轮扩展。
 
+当前实际正在推进的局部主线是：**结果层 UI 改变的优化与稳定化**。具体指 `/project/:projectId?mode=scheduled&job=...` 的主预览、Honeycomb artifact navigator、HTML 报告预览、manifest sections、fallback artifacts、右侧一级分组与顶部二级切换同步。该阶段不应重写工作台，不应新增第二套结果系统，也不应绕过已有报告模板机制。
+
 ## 当前阶段目标
 
 先把 `/project/:projectId` 和桌面 SPA 壳子收口成稳定的 Codex-like 项目工作台：
@@ -11,6 +13,8 @@
 - 顶层 titlebar 分成左 / 中 / 右三段，并与下面主体三栏宽度对齐。
 - 中间会话区是主舞台，输入框固定底部，输出区居中留白。
 - 右侧工具区通过 tabs 和 `+` 管理，不再出现额外竖向图标栏。
+- 结果页采用主预览 + Honeycomb artifact navigator：中间负责阅读/预览，右侧负责一级结果索引，顶部负责二级 artifact 切换。
+- scheduled 模式中间区不要再嵌入独立结果视图；中心只保留会话/返回入口，所有结果内容统一收敛到右侧结果栏。
 - 摘要概览默认关闭，作为中间栏顶层右侧按钮下方的轻量悬浮卡。
 - 云平台首页不要混入项目工作台顶栏和旧 quickstart。
 - 桌面端导航不能指向已移除的 legacy route。
@@ -51,6 +55,59 @@
 - 文件树固定在右侧，文件内容在左侧自适应。
 - 打开文件不应自动收起文件树。
 - 底部终端方向已引入，但终端体验仍需继续精修。
+
+### 4.1 Honeycomb 结果导航
+
+- 结果页主预览和右侧导航已经从普通目录升级为 artifact navigator。
+- `frontend/src/lib/result-manifest.ts` 新增统一导航模型：
+  - 显式 manifest sections 优先保留。
+  - 未被 sections 覆盖的 fallback artifacts 会自动按类型补入“其他图表 / 其他表格 / 其他文本 / 其他数据”等分组。
+  - 提供 artifact kind 统计，供右侧导航展示紧凑 metadata。
+- `ProjectWorkspace` 结果页右侧导航现在按 section 直接展开 artifacts：
+  - 每个 section 只保留一级入口与紧凑描述。
+  - 主预览上方显示二级 artifact 切换条。
+  - 选中项会同步主预览和 active artifact 上下文。
+  - 底部显示当前分组与原文件打开入口。
+- 已补 `frontend/src/lib/result-manifest.test.ts` 回归，覆盖显式 section + fallback artifact 不丢失。
+
+当前结果层 UI 继续优化时的硬约束：
+
+- 优先兼容已有实现，而不是重写：
+  - 先查 `frontend/src/lib/result-manifest.ts`。
+  - 再查 `ProjectWorkspace` 中的 `ResultArtifactShell`。
+  - 再查旧工具报告模板和历史 demo 产物。
+- HTML 报告是结果页主预览的一等 artifact：
+  - `report.html` 应被识别为 `report`。
+  - 有 `report.html` 时应优先作为默认预览。
+  - 没有 `report.html` 时才 fallback 到图表/表格。
+- manifest 兼容范围必须覆盖：
+  - `manifest.files`
+  - `manifest.outputs`
+  - `manifest.sections`
+  - result-level `artifacts`
+  - result-level `files`
+  - result-level `outputs`
+- 显式 sections 优先，但不能导致未覆盖 artifact 消失；未覆盖项必须自动补进“其他图表 / 其他表格 / 其他文本 / 其他数据”等 fallback 分组。
+- 不要把分析记录卡、解释按钮、打开完整结果按钮重新塞回聊天流。
+
+2026-07-12 结果报告兼容修复记录：
+
+- `volcano-plot` 轻量内置插件补齐了已有报告机制：
+  - 新增 `resources/built-in-plugins/volcano-plot/volcano-plot-report-template.html`。
+  - `resources/built-in-plugins/volcano-plot/scripts/volcano-plot.R` 读取执行器复制的 `report-template.html` 生成 `report.html`。
+  - 保留 `%||%` 定义提前的真实 bug 修复。
+- 当前 demo job `tj_mrhgg5cf_ib7o` 已重新生成并同步：
+  - `report.html`
+  - `volcano.png`
+  - `classified_table.csv`
+  - `deg_table.csv`
+  - `manifest.json`
+  - `volcano.pdf`
+- 已验证：
+  - `npm --prefix frontend run check`
+  - `npm --prefix frontend test -- result-manifest.test.ts`
+  - `GET /api/tools/file/tj_mrhgg5cf_ib7o/report.html` 返回 200
+  - `GET /api/tools/status/tj_mrhgg5cf_ib7o` 返回 completed 且包含 6 个 artifacts
 
 ### 5. 摘要概览
 
@@ -147,6 +204,7 @@ node --test test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
   - 聊天区里的分析记录卡、`打开完整结果` / `解释结果` 按钮已经移除。
   - 结果页的标题块（分析结果 / 摘要已生成）已经移除。
   - 右侧目录已压缩为更紧凑的侧边导航，主预览保留图表、表格、文本与 HTML 结果。
+  - 图表类分组在 mixed section 下优先使用 `svg` 图标，避免“图表结果”看起来像缺少图标。
 - Agent prompt 已接入项目 Harness summary：
   - `ProjectWorkspace` 会把 project scope 的 Harness prompt summary 注入 `CopilotContext.projectHarnessSummary`。
   - `system-prompt.js` 渲染 `【Harness 项目文件摘要】`，帮助 agent 结合 manifest 判断文件参数。

@@ -29,6 +29,15 @@ export interface NormalizedResultManifest {
   hasExplicitSections: boolean;
 }
 
+export interface ResultArtifactNavSection {
+  id: string;
+  label: string;
+  description?: string;
+  artifactNames: string[];
+  artifacts: ResultArtifactRecord[];
+  kind: ResultArtifactKind | 'mixed';
+}
+
 const SECTION_ORDER: ResultArtifactKind[] = ['report', 'plot', 'table', 'text', 'data', 'file'];
 
 const SECTION_LABELS: Record<ResultArtifactKind, string> = {
@@ -179,6 +188,102 @@ export function pickPreferredArtifact(
   if (preferred) return preferred;
   const ordered = [...artifacts].sort((a, b) => artifactSortWeight(classifyArtifact(a)) - artifactSortWeight(classifyArtifact(b)));
   return ordered[0] || null;
+}
+
+function uniqueSectionId(baseId: string, usedIds: Set<string>): string {
+  let id = baseId || 'section';
+  let index = 2;
+  while (usedIds.has(id)) {
+    id = `${baseId}-${index}`;
+    index += 1;
+  }
+  usedIds.add(id);
+  return id;
+}
+
+function inferSectionKind(artifacts: ResultArtifactRecord[]): ResultArtifactKind | 'mixed' {
+  const kinds = new Set(artifacts.map((artifact) => classifyArtifact(artifact)));
+  return kinds.size === 1 ? ([...kinds][0] || 'file') : 'mixed';
+}
+
+function sectionLabelHintsPlot(label: string | undefined): boolean {
+  if (!label) return false;
+  return /图表|svg|plot|image|可视化|结果图/i.test(label);
+}
+
+export function inferSectionDisplayKind(
+  artifacts: ResultArtifactRecord[],
+  label?: string,
+): ResultArtifactKind {
+  const counts = countArtifactsByKind(artifacts);
+  if (sectionLabelHintsPlot(label) && counts.plot > 0) return 'plot';
+  let winner: ResultArtifactKind = 'file';
+  let winnerCount = -1;
+  for (const kind of SECTION_ORDER) {
+    const count = counts[kind];
+    if (count > winnerCount) {
+      winner = kind;
+      winnerCount = count;
+    }
+  }
+  return winner;
+}
+
+export function buildResultArtifactNavigation(
+  manifest: NormalizedResultManifest | null,
+  artifacts: ResultArtifactRecord[],
+): ResultArtifactNavSection[] {
+  const sections = manifest?.sections?.length ? manifest.sections : buildDerivedSections(artifacts);
+  const usedIds = new Set<string>();
+  const assignedNames = new Set<string>();
+  const navSections: ResultArtifactNavSection[] = [];
+
+  for (const section of sections) {
+    const sectionArtifacts = section.artifactNames
+      .map((name) => findArtifactByName(artifacts, name))
+      .filter(Boolean) as ResultArtifactRecord[];
+    if (sectionArtifacts.length === 0) continue;
+    sectionArtifacts.forEach((artifact) => assignedNames.add(artifact.name));
+    navSections.push({
+      id: uniqueSectionId(section.id, usedIds),
+      label: section.label,
+      description: section.description,
+      artifactNames: sectionArtifacts.map((artifact) => artifact.name),
+      artifacts: sectionArtifacts,
+      kind: inferSectionKind(sectionArtifacts),
+    });
+  }
+
+  const unassigned = artifacts.filter((artifact) => !assignedNames.has(artifact.name));
+  if (unassigned.length > 0) {
+    for (const section of buildDerivedSections(unassigned)) {
+      const sectionArtifacts = section.artifactNames
+        .map((name) => findArtifactByName(unassigned, name))
+        .filter(Boolean) as ResultArtifactRecord[];
+      if (sectionArtifacts.length === 0) continue;
+      navSections.push({
+        id: uniqueSectionId(`more-${section.id}`, usedIds),
+        label: manifest?.hasExplicitSections ? `其他${section.label}` : section.label,
+        description: section.description,
+        artifactNames: sectionArtifacts.map((artifact) => artifact.name),
+        artifacts: sectionArtifacts,
+        kind: inferSectionKind(sectionArtifacts),
+      });
+    }
+  }
+
+  return navSections;
+}
+
+export function countArtifactsByKind(artifacts: ResultArtifactRecord[]): Record<ResultArtifactKind, number> {
+  return artifacts.reduce(
+    (acc, artifact) => {
+      const kind = classifyArtifact(artifact);
+      acc[kind] += 1;
+      return acc;
+    },
+    { report: 0, plot: 0, table: 0, text: 0, data: 0, file: 0 } as Record<ResultArtifactKind, number>,
+  );
 }
 
 export function isTextLikeArtifact(artifact: ResultArtifactRecord): boolean {

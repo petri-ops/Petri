@@ -82,17 +82,6 @@ export interface CopilotContext {
   projectDatasets?: { id: string; name: string; type?: string; rows?: number }[];
   /** Recent job summaries in current project (id + tool + status + time) */
   projectJobs?: { id: string; toolId: string; status: string; name?: string; createdAt: number }[];
-  /** Compact human-readable summary of the current project's analysis records. */
-  projectAnalysisSummary?: string;
-  /** Structured view of the current project's analysis records for prompt use. */
-  projectAnalysisRecords?: {
-    id: string;
-    toolId: string;
-    status: string;
-    name?: string;
-    createdAt: number;
-    completedAt?: number;
-  }[];
   /** Compact project-scope Harness file-index summary for agent parameter planning. */
   projectHarnessSummary?: HarnessContextSummary;
   /** Compact active job/artifact-scope Harness summary for result-aware follow-up. */

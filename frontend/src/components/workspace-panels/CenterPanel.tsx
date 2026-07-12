@@ -12,7 +12,6 @@ import {
   ScheduledWorkspacePanel,
   type ActiveArtifact,
   type BackendSummary,
-  type BackendServiceItem,
   type JobStats,
 } from '@/pages/project-workspace';
 import styles from '@/pages/project-workspace.module.css';
@@ -42,12 +41,9 @@ export interface CenterPanelContext {
   leftOpen: boolean;
   rightOpen: boolean;
   inputHeight: number;
-
-  // Pinned summary card
   summaryCardOpen: boolean;
   summaryVisibility: 'hidden' | 'compact' | 'expanded';
   summaryOpenWidth: number;
-  compactWorkspacePath: string;
   activeJob: ToolJob | null;
   activeArtifact: ActiveArtifact | null;
   activeJobId: string | null;
@@ -127,16 +123,6 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
       {workspaceMode === 'scheduled' && (
         <SessionFrameView ctx={ctx}>
           <ScheduledWorkspacePanel
-            project={ctx.project}
-            jobs={ctx.jobs}
-            activeJobId={ctx.activeJobId}
-            activeArtifact={ctx.activeArtifact}
-            onSelectJob={(jobId) => {
-              ctx.setActiveJobId(jobId);
-              ctx.openRightPanel('results');
-            }}
-            onActiveArtifactChange={ctx.setActiveArtifact}
-            onAskAgent={ctx.handleAskAgent}
             onBackToChat={() => ctx.updateWorkspaceMode('chat')}
           />
         </SessionFrameView>

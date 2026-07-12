@@ -50,6 +50,7 @@
 .iconBtn,
 .pathPill,
 .tabPill,
+.toolMenuAnchor,
 .toolMenu,
 .toolMenuOverlay {
   -webkit-app-region: no-drag;
@@ -115,6 +116,13 @@
   padding-left: 3px;
 }
 
+.toolMenuAnchor {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
 .toolMenuOverlay {
   position: fixed;
   inset: 0;
@@ -126,7 +134,8 @@
 .toolMenu {
   position: absolute;
   top: calc(100% + 5px);
-  right: 0;
+  left: calc(100% + 6px);
+  right: auto;
   z-index: 10001;
   display: grid;
   width: 176px;

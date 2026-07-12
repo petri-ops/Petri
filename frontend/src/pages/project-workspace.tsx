@@ -44,9 +44,13 @@ import {
 import {
   normalizeResultManifest,
   classifyArtifact,
+  buildResultArtifactNavigation,
+  countArtifactsByKind,
   findArtifactByName,
+  inferSectionDisplayKind,
   pickPreferredArtifact,
   artifactKindLabel,
+  type ResultArtifactKind,
   type ResultArtifactRecord,
   type NormalizedResultManifest,
 } from '@/lib/result-manifest';
@@ -166,6 +170,7 @@ function toCopilotHarnessSummary(index: HarnessIndexSummary | null | undefined):
 
 export function ProjectWorkspace(): React.ReactElement {
   const shell = useWorkspacePanelsContext();
+  const updateTitleBar = shell.updateTitleBar;
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -249,9 +254,7 @@ export function ProjectWorkspace(): React.ReactElement {
     setSummaryOpen,
     centerColRef,
     sessionFrameRef,
-    centerColWidth,
     sessionFrameWidth,
-    sessionFrameHeight,
   } = useWorkspaceLayout();
 
   const {
@@ -457,6 +460,10 @@ export function ProjectWorkspace(): React.ReactElement {
 
   const handleOpenRightTerminal = useCallback(() => {
     openRightPanel('terminal');
+  }, [openRightPanel]);
+
+  const handleOpenRightResults = useCallback(() => {
+    openRightPanel('results');
   }, [openRightPanel]);
 
   const handleOpenRightBrowser = useCallback(() => {
@@ -676,7 +683,7 @@ export function ProjectWorkspace(): React.ReactElement {
   }, [chooseWorkspaceDirectory, projectId]);
 
   useEffect(() => {
-    shell.updateTitleBar({
+    updateTitleBar({
       title: project?.name || '梳理开发进展',
       leftPanelWidth: leftWidth,
       rightPanelWidth: rightWidth,
@@ -712,7 +719,7 @@ export function ProjectWorkspace(): React.ReactElement {
           : null,
     });
     return () => {
-      shell.updateTitleBar({
+      updateTitleBar({
         title: 'BioF3',
         leftPanelWidth: 240,
         rightPanelWidth: 340,
@@ -742,11 +749,12 @@ export function ProjectWorkspace(): React.ReactElement {
     project?.workspacePath,
     rightTab,
     rightWidth,
+    rightToolMenuOpen,
     setRightOpen,
     setRightToolMenuOpen,
     setRightTab,
-    shell,
     titleBarTabs,
+    updateTitleBar,
   ]);
 
   useEffect(() => {
@@ -810,106 +818,6 @@ export function ProjectWorkspace(): React.ReactElement {
     return { running, failed, done, pending };
   }, [jobs]);
 
-  const projectAnalysisRecords = useMemo(
-    () =>
-      jobs.map((job) => ({
-        id: job.id,
-        toolId: job.tool_id,
-        status: job.status,
-        name: job.name,
-        createdAt: job.created_at,
-        completedAt: job.completed_at,
-      })),
-    [jobs]
-  );
-
-  const projectAnalysisSummary = useMemo(() => {
-    if (jobs.length === 0) return '当前项目还没有分析记录。';
-
-    const statusLabel = (status: ToolJob['status']) => {
-      if (status === 'done') return '已完成';
-      if (status === 'failed') return '失败';
-      if (status === 'running') return '运行中';
-      return '排队中';
-    };
-
-    const recent = [...jobs]
-      .sort((a, b) => b.created_at - a.created_at)
-      .slice(0, 5)
-      .map((job, index) => {
-        const label = job.name || job.tool_id;
-        return `${index + 1}. ${label}（${statusLabel(job.status)}，${formatDate(job.created_at)}）`;
-      });
-
-    return [
-      `当前项目共有 ${jobs.length} 条分析记录。`,
-      `其中已完成 ${jobStats.done} 条，运行中 ${jobStats.running} 条，排队中 ${jobStats.pending} 条，失败 ${jobStats.failed} 条。`,
-      `最近分析：${recent.join('；')}`,
-    ].join(' ');
-  }, [jobs, jobStats.done, jobStats.failed, jobStats.pending, jobStats.running]);
-
-  // 6.3 — Inject project context into SimpleChat (via shared copilot context).
-  // Replaces the original useEffect that did an in-place setCopilotContext
-  // patch on every render. useSetCopilotContext resets before applying,
-  // so a project switch gets a clean context instead of merging into the
-  // previous project's datasets/jobs.
-  useSetCopilotContext(
-    project
-      ? {
-          page: 'desktop-project',
-          pageTitle: project.name,
-          projectId,
-          projectName: project.name,
-          projectModality: project.modality,
-          projectDatasets: datasets.map((d) => ({
-            id: d.id,
-            name: d.name,
-            type: d.nCells != null ? 'single-cell' : undefined,
-            rows: d.nCells,
-          })),
-          projectJobs: jobs.map((j) => ({
-            id: j.id,
-            toolId: j.tool_id,
-            status: j.status,
-            name: j.name,
-            createdAt: j.created_at,
-          })),
-          projectAnalysisSummary,
-          projectAnalysisRecords,
-          projectHarnessSummary: toCopilotHarnessSummary(copilotHarnessIndex),
-          activeJobHarnessSummary: toCopilotHarnessSummary(activeJobHarnessIndex),
-          activeJobId: activeJobId ?? undefined,
-          activeArtifact,
-        }
-      : {},
-    [
-      project,
-      projectId,
-      datasets,
-      jobs,
-      activeJobId,
-      activeArtifact,
-      copilotHarnessIndex,
-      activeJobHarnessIndex,
-      projectAnalysisSummary,
-      projectAnalysisRecords,
-    ]
-  );
-
-  useEffect(() => {
-    setActiveArtifact(null);
-  }, [activeJobId]);
-
-  useEffect(() => {
-    if (loading) return;
-    if (activeJobId || jobs.length === 0) return;
-    const firstJob = jobs[0];
-    if (!firstJob) return;
-    setActiveJobId(firstJob.id);
-    setRightOpen(true);
-    openRightPanel('results');
-  }, [activeJobId, jobs, loading, openRightPanel, setRightOpen]);
-
   const liveJobsPreview = useMemo(
     () =>
       jobs
@@ -937,6 +845,54 @@ export function ProjectWorkspace(): React.ReactElement {
   const showPinnedSummary = workspaceMode === 'chat' || workspaceMode === 'scheduled';
   const summaryOpenWidth = Math.min(224, Math.max(0, sessionFrameWidth - 36));
   const summaryCardOpen = summaryVisibility !== 'hidden' && summaryOpen;
+
+  // 6.3 — Inject project context into SimpleChat (via shared copilot context).
+  // Replaces the original useEffect that did an in-place setCopilotContext
+  // patch on every render. useSetCopilotContext resets before applying,
+  // so a project switch gets a clean context instead of merging into the
+  // previous project's datasets/jobs.
+  useSetCopilotContext(
+    project
+      ? {
+          page: 'desktop-project',
+          pageTitle: project.name,
+          projectId,
+          projectName: project.name,
+          projectModality: project.modality,
+          projectDatasets: datasets.map((d) => ({
+            id: d.id,
+            name: d.name,
+            type: d.nCells != null ? 'single-cell' : undefined,
+            rows: d.nCells,
+          })),
+          projectJobs: jobs.map((j) => ({
+            id: j.id,
+            toolId: j.tool_id,
+            status: j.status,
+            name: j.name,
+            createdAt: j.created_at,
+          })),
+          projectHarnessSummary: toCopilotHarnessSummary(copilotHarnessIndex),
+          activeJobHarnessSummary: toCopilotHarnessSummary(activeJobHarnessIndex),
+          activeJobId: activeJobId ?? undefined,
+          activeArtifact,
+        }
+      : {}
+  );
+
+  useEffect(() => {
+    setActiveArtifact(null);
+  }, [activeJobId]);
+
+  useEffect(() => {
+    if (loading) return;
+    if (activeJobId || jobs.length === 0) return;
+    const firstJob = jobs[0];
+    if (!firstJob) return;
+    setActiveJobId(firstJob.id);
+    setRightOpen(true);
+    openRightPanel('results');
+  }, [activeJobId, jobs, loading, openRightPanel, setRightOpen]);
 
   const normalizeToolStatus = useCallback((status: unknown): ToolJob['status'] => {
     if (status === 'completed' || status === 'done') return 'done';
@@ -1014,15 +970,6 @@ export function ProjectWorkspace(): React.ReactElement {
     void handleOpenResult(firstJob.id, projectId);
   }, [activeJobId, handleOpenResult, jobs, loading, projectId, requestedJobId, workspaceMode]);
 
-  const openScheduledResults = useCallback(() => {
-    const nextJobId = activeJobId || jobs[0]?.id || null;
-    if (nextJobId) {
-      setActiveJobId(nextJobId);
-    }
-    setRightOpen(true);
-    openRightPanel('results');
-  }, [activeJobId, jobs, openRightPanel, setRightOpen]);
-
   useEffect(() => {
     const handler = (detail: { toolJobId: string; projectId?: string | null }) => {
       const d = detail;
@@ -1038,6 +985,15 @@ export function ProjectWorkspace(): React.ReactElement {
   const handleAskAgent = useCallback((prompt: string) => {
     dispatchBioF3Event(biof3Events.copilotAsk, { prompt });
   }, []);
+
+  const openScheduledResults = useCallback(() => {
+    const nextJobId = activeJobId || jobs[0]?.id || null;
+    if (nextJobId) {
+      setActiveJobId(nextJobId);
+    }
+    setRightOpen(true);
+    openRightPanel('results');
+  }, [activeJobId, jobs, openRightPanel, setRightOpen]);
 
   if (loading) {
     return (
@@ -1080,7 +1036,6 @@ export function ProjectWorkspace(): React.ReactElement {
     summaryCardOpen,
     summaryVisibility,
     summaryOpenWidth,
-    compactWorkspacePath,
     activeJob,
     activeArtifact,
     activeJobId,
@@ -1187,6 +1142,7 @@ export function ProjectWorkspace(): React.ReactElement {
     handleOpenWorkspaceFile,
     handleCloseWorkspaceFile,
     handleOpenResult,
+    handleOpenRightResults,
     handleOpenRightTerminal,
     handleOpenRightBrowser,
     handleOpenRightFiles,
@@ -2012,79 +1968,26 @@ function SearchResultSection({
 }
 
 // ============================================================
-// ScheduledWorkspacePanel — center column analysis-records view
+// ScheduledWorkspacePanel — center column shell for scheduled mode
 // ============================================================
 
 export function ScheduledWorkspacePanel({
-  project,
-  jobs,
-  activeJobId,
-  activeArtifact,
-  onSelectJob,
-  onActiveArtifactChange,
-  onAskAgent,
   onBackToChat,
 }: {
-  project: Project;
-  jobs: ToolJob[];
-  activeJobId: string | null;
-  activeArtifact: ActiveArtifact | null;
-  onSelectJob: (id: string) => void;
-  onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
-  onAskAgent: (prompt: string) => void;
   onBackToChat: () => void;
 }): React.ReactElement {
-  const activeJob = useMemo(
-    () => jobs.find((job) => job.id === activeJobId) || jobs[0] || null,
-    [jobs, activeJobId]
-  );
-
-  const stats = useMemo(() => {
-    let running = 0;
-    let failed = 0;
-    let done = 0;
-    let pending = 0;
-    jobs.forEach((job) => {
-      if (job.status === 'running') running += 1;
-      else if (job.status === 'failed') failed += 1;
-      else if (job.status === 'done') done += 1;
-      else pending += 1;
-    });
-    return { running, failed, done, pending };
-  }, [jobs]);
-
   return (
     <div className={styles.scheduledWorkspace}>
       <div className={styles.scheduledWorkspaceHeader}>
-        <div>
-          <h2 className={styles.scheduledWorkspaceTitle}>分析记录</h2>
-          <p className={styles.scheduledWorkspaceDesc}>当前项目 {project.name} 的 HTML 报告预览。</p>
-        </div>
         <button className={styles.scheduledWorkspaceBack} onClick={onBackToChat}>
           <Icon name="message-circle" size={14} />
           <span>返回对话</span>
         </button>
       </div>
-      <div className={styles.scheduledWorkspaceBody}>
-        <section className={styles.scheduledResultCol}>
-          {activeJob ? (
-            <ResultView
-              project={project}
-              job={activeJob}
-              activeArtifact={activeArtifact}
-              onActiveArtifactChange={onActiveArtifactChange}
-              onAskAgent={onAskAgent}
-            />
-          ) : (
-            <EmptyResult project={project} />
-          )}
-        </section>
-      </div>
+      <div className={styles.scheduledWorkspaceBody} />
     </div>
   );
 }
-
-// WorkspaceSummaryCard moved to @/components/workspace-panels/WorkspaceSummaryCard (PR-3.1)
 
 // ============================================================
 // HistoryPanel — right column (Phase7)
@@ -2460,6 +2363,34 @@ function artifactName(file: JobResultFile): string {
   return file.name || file.filename || '';
 }
 
+function artifactKindIcon(kind: ResultArtifactKind): IconName {
+  if (kind === 'report') return 'book';
+  if (kind === 'plot') return 'svg';
+  if (kind === 'table') return 'bar-chart';
+  if (kind === 'text') return 'file';
+  if (kind === 'data') return 'database';
+  return 'file';
+}
+
+function artifactPreviewLabel(artifact: ResultArtifactRecord): string {
+  const kind = classifyArtifact(artifact);
+  if (artifact.preview === false) return '文件';
+  if (kind === 'report') return 'HTML';
+  if (kind === 'plot') return '图像';
+  if (kind === 'table') return '表格';
+  if (kind === 'text') return '文本';
+  if (kind === 'data') return '数据';
+  return '文件';
+}
+
+function compactArtifactKindSummary(artifacts: ResultArtifactRecord[]): string {
+  const counts = countArtifactsByKind(artifacts);
+  return (Object.keys(counts) as ResultArtifactKind[])
+    .filter((kind) => counts[kind] > 0)
+    .map((kind) => `${artifactKindLabel(kind)} ${counts[kind]}`)
+    .join(' · ');
+}
+
 function buildPreviewTable(text: string, fileName: string): string[][] {
   const sep = fileName.toLowerCase().endsWith('.tsv') || text.includes('\t') ? '\t' : ',';
   return text
@@ -2502,6 +2433,7 @@ function ResultArtifactShell({
   const [harnessIndex, setHarnessIndex] = useState<HarnessIndexSummary | null>(null);
   const [harnessLoading, setHarnessLoading] = useState(false);
   const [harnessError, setHarnessError] = useState('');
+  const [navCollapsed, setNavCollapsed] = useState(false);
 
   const tool = useMemo(
     () => (job ? staticTools.find((t) => t.id === job.tool_id) || null : null),
@@ -2665,7 +2597,11 @@ function ResultArtifactShell({
     [fallbackArtifacts, manifestRaw]
   );
   const artifacts = manifest?.artifacts?.length ? manifest.artifacts : fallbackArtifacts;
-  const sections = manifest?.sections || [];
+  const navSections = useMemo(
+    () => buildResultArtifactNavigation(manifest, artifacts),
+    [artifacts, manifest]
+  );
+  const artifactSummary = useMemo(() => compactArtifactKindSummary(artifacts), [artifacts]);
   const reportArtifact = useMemo(
     () =>
       artifacts.find((artifact) => classifyArtifact(artifact) === 'report') ||
@@ -2705,25 +2641,25 @@ function ResultArtifactShell({
   const activeIsPreviewText = activeIsText && !activeIsHtml;
 
   const activeSection = useMemo(() => {
-    if (!sections.length) return null;
+    if (!navSections.length) return null;
     return (
-      sections.find((section) => section.id === selectedSectionId) ||
       (selectedName
-        ? sections.find((section) => section.artifactNames.includes(selectedName))
+        ? navSections.find((section) => section.artifactNames.includes(selectedName))
         : null) ||
+      navSections.find((section) => section.id === selectedSectionId) ||
       (reportArtifact
-        ? sections.find((section) => section.artifactNames.includes(reportArtifact.name))
+        ? navSections.find((section) => section.artifactNames.includes(reportArtifact.name))
         : null) ||
-      sections[0]
+      navSections[0]
     );
-  }, [reportArtifact, sections, selectedName, selectedSectionId]);
+  }, [navSections, reportArtifact, selectedName, selectedSectionId]);
 
-  const visibleArtifacts = useMemo(() => {
-    if (!activeSection || activeSection.artifactNames.length === 0) return artifacts;
-    return activeSection.artifactNames
-      .map((name) => findArtifactByName(artifacts, name))
-      .filter(Boolean) as ResultArtifactRecord[];
-  }, [activeSection, artifacts]);
+  useEffect(() => {
+    if (!selectedArtifactName || navSections.length === 0) return;
+    const nextSection = navSections.find((section) => section.artifactNames.includes(selectedArtifactName));
+    if (!nextSection) return;
+    setSelectedSectionId((current) => (current === nextSection.id ? current : nextSection.id));
+  }, [navSections, selectedArtifactName]);
 
   useEffect(() => {
     if (!job || job.status !== 'done' || artifacts.length === 0) return;
@@ -2734,13 +2670,13 @@ function ResultArtifactShell({
       return preferredName;
     });
     setSelectedSectionId((current) => {
-      if (current && sections.some((section) => section.id === current)) return current;
+      if (current && navSections.some((section) => section.id === current)) return current;
       const nextSection =
-        (preferredName && sections.find((item) => item.artifactNames.includes(preferredName))) ||
-        sections[0];
+        (preferredName && navSections.find((item) => item.artifactNames.includes(preferredName))) ||
+        navSections[0];
       return nextSection?.id || '';
     });
-  }, [artifacts, job, preferredArtifactName, reportArtifact, sections]);
+  }, [artifacts, job, navSections, preferredArtifactName, reportArtifact]);
 
   useEffect(() => {
     if (!job || job.status !== 'done' || !selectedArtifact) {
@@ -2883,8 +2819,11 @@ function ResultArtifactShell({
     return <EmptyAnalysisResult />;
   }
 
-  const sectionTabs = sections.length > 0 ? sections : [];
-  const showReportRail = sectionTabs.length > 1 || visibleArtifacts.length > 1;
+  const sectionTabs = navSections.length > 0 ? navSections : [];
+  const showReportRail = sectionTabs.length > 0 && artifacts.length > 0;
+  const activeSectionArtifacts = activeSection?.artifacts || [];
+  const showArtifactRail = activeSectionArtifacts.length > 1;
+  const resultNavWidth = navCollapsed ? 0 : 224;
 
   const stateBlock = (title: string, body: React.ReactNode, status: 'running' | 'pending' | 'failed' | 'done') => {
     const containerClass = isSidebar ? styles.resultSidebarCard : styles.resultView;
@@ -2940,78 +2879,57 @@ function ResultArtifactShell({
     <>
       <section className={isSidebar ? styles.resultSidebarReportCard : styles.resultReportSection}>
         {showReportRail ? (
-          <div className={styles.resultReportShell}>
+          <div
+            className={styles.resultReportShell}
+            style={{ ['--result-nav-width' as string]: `${resultNavWidth}px` }}
+          >
+            <button
+              type="button"
+              className={styles.resultReportNavToggle}
+              onClick={() => setNavCollapsed((value) => !value)}
+              title={navCollapsed ? '展开结果导航' : '收起结果导航'}
+              aria-label={navCollapsed ? '展开结果导航' : '收起结果导航'}
+              aria-pressed={!navCollapsed}
+            >
+              <Icon name={navCollapsed ? 'arrow-left' : 'arrow-right'} size={13} />
+            </button>
+
             <div className={styles.resultReportMain}>
-              <div className={styles.resultSidebarPreviewBody}>
-                {renderPreview()}
-              </div>
-            </div>
-
-            <aside className={styles.resultReportNav}>
-              <div className={styles.resultReportNavHeader}>
-                <div className={styles.resultReportEyebrow}>目录</div>
-                <div className={styles.resultReportTitle}>
-                  {sectionTabs.length > 0 ? `${sectionTabs.length} 组` : '文件'}
-                </div>
-                <div className={styles.resultReportNavMeta}>
-                  {sectionTabs.length > 0 && <span>{sectionTabs.length} 组</span>}
-                  {visibleArtifacts.length > 0 && <span>{visibleArtifacts.length} 项</span>}
-                </div>
-              </div>
-
-              {sectionTabs.length > 0 && (
-                <div className={styles.resultReportNavGroup}>
-                  <div className={styles.resultReportNavGroupTitle}>分组</div>
-                  {sectionTabs.map((section) => {
-                    const active = section.id === activeSection?.id;
-                    return (
-                      <button
-                        key={section.id}
-                        type="button"
-                        className={`${styles.resultReportNavItem} ${active ? styles.resultReportNavItemActive : ''}`}
-                        onClick={() => {
-                          setSelectedSectionId(section.id);
-                          const first = section.artifactNames
-                            .map((name) => findArtifactByName(artifacts, name))
-                            .find(Boolean);
-                          if (first) setSelectedName(first.name);
-                        }}
-                      >
-                        <span>{section.label}</span>
-                        <span>{section.artifactNames.length}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              {visibleArtifacts.length > 0 && (
-                <div className={styles.resultReportNavGroup}>
-                  <div className={styles.resultReportNavGroupTitle}>
-                    {activeSection ? '文件' : '报告'}
+              {activeSection && showArtifactRail && (
+                <div className={styles.resultReportArtifactNav}>
+                  <div className={styles.resultReportArtifactNavHeader}>
+                    <div className={styles.resultReportArtifactNavEyebrow}>二级导航</div>
+                    <div className={styles.resultReportArtifactNavTitle}>{activeSection.label}</div>
+                    <div className={styles.resultReportArtifactNavMeta}>
+                      <span>{activeSectionArtifacts.length} 项</span>
+                      {activeSection.description && <span>{activeSection.description}</span>}
+                    </div>
                   </div>
-                  <div className={styles.resultReportNavFiles}>
-                    {visibleArtifacts.map((artifact) => {
+                  <div className={styles.resultReportArtifactTabs}>
+                    {activeSectionArtifacts.map((artifact) => {
                       const kind = classifyArtifact(artifact);
                       const active = artifact.name === selectedArtifactName;
                       return (
                         <button
                           key={artifact.name}
                           type="button"
-                          className={`${styles.resultReportFileItem} ${active ? styles.resultReportFileItemActive : ''}`}
+                          className={`${styles.resultReportArtifactTab} ${active ? styles.resultReportArtifactTabActive : ''}`}
                           onClick={() => {
                             setSelectedName(artifact.name);
-                            const section = sections.find((item) => item.artifactNames.includes(artifact.name));
-                            if (section) setSelectedSectionId(section.id);
+                            if (activeSection) setSelectedSectionId(activeSection.id);
                           }}
                           title={artifact.description || artifact.label || artifact.name}
                         >
-                          <span className={styles.resultReportFileName}>
-                            {artifact.label || artifact.title || artifact.name}
+                          <span className={styles.resultReportArtifactTabIcon}>
+                            <Icon name={artifactKindIcon(kind)} size={13} />
                           </span>
-                          <span className={styles.resultReportFileMeta}>
-                            {artifactKindLabel(kind)}
-                            {artifact.description ? ` · ${artifact.description}` : ''}
+                          <span className={styles.resultReportArtifactTabText}>
+                            <span className={styles.resultReportArtifactTabName}>
+                              {artifact.label || artifact.title || artifact.name}
+                            </span>
+                            <span className={styles.resultReportArtifactTabMeta}>
+                              {artifactPreviewLabel(artifact)}
+                            </span>
                           </span>
                         </button>
                       );
@@ -3019,7 +2937,77 @@ function ResultArtifactShell({
                   </div>
                 </div>
               )}
-            </aside>
+
+              <div className={styles.resultSidebarPreviewBody}>
+                {renderPreview()}
+              </div>
+            </div>
+
+            {!navCollapsed && (
+              <aside className={styles.resultReportNav}>
+                <div className={styles.resultReportNavHeader}>
+                  <div className={styles.resultReportEyebrow}>Honeycomb</div>
+                  <div className={styles.resultReportTitle}>结果导航</div>
+                  <div className={styles.resultReportNavMeta}>
+                    <span>{sectionTabs.length} 组 · {artifacts.length} 项</span>
+                    {artifactSummary && <span>{artifactSummary}</span>}
+                  </div>
+                </div>
+
+                {sectionTabs.length > 0 && (
+                  <div className={styles.resultReportNavSections}>
+                    {sectionTabs.map((section) => {
+                      const active = section.id === activeSection?.id;
+                      const sectionKind = section.kind === 'mixed'
+                        ? inferSectionDisplayKind(section.artifacts, section.label)
+                        : section.kind;
+                      return (
+                        <section
+                          key={section.id}
+                          className={`${styles.resultReportNavSection} ${active ? styles.resultReportNavSectionActive : ''}`}
+                        >
+                          <button
+                            type="button"
+                            className={styles.resultReportSectionButton}
+                            onClick={() => {
+                              setSelectedSectionId(section.id);
+                              const first = section.artifacts[0];
+                              if (first) setSelectedName(first.name);
+                            }}
+                          >
+                            <span className={styles.resultReportSectionTitle}>
+                              {sectionKind && <Icon name={artifactKindIcon(sectionKind)} size={13} />}
+                              <span>{section.label}</span>
+                            </span>
+                            <span className={styles.resultReportSectionCount}>{section.artifacts.length}</span>
+                          </button>
+
+                          {section.description && (
+                            <div className={styles.resultReportSectionDesc}>{section.description}</div>
+                          )}
+                        </section>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {selectedArtifact && (
+                  <div className={styles.resultReportActiveCard}>
+                    <div className={styles.resultReportActiveLabel}>当前预览</div>
+                    <div className={styles.resultReportActiveName}>{selectedArtifactLabel}</div>
+                    <div className={styles.resultReportActiveMeta}>
+                      <span>{artifactKindLabel(selectedArtifactKind)}</span>
+                      <span>{selectedArtifactName}</span>
+                    </div>
+                    {selectedArtifactUrl && (
+                      <a className={styles.resultReportActiveLink} href={selectedArtifactUrl} target="_blank" rel="noreferrer">
+                        打开原文件
+                      </a>
+                    )}
+                  </div>
+                )}
+              </aside>
+            )}
           </div>
         ) : (
           <div className={styles.resultSidebarPreviewBody}>
@@ -3504,12 +3492,14 @@ export function EmptyAnalysisResult(): React.ReactElement {
 
 export function EmptyResult({
   project,
+  onOpenResults,
   onOpenTerminal,
   onOpenBrowser,
   onOpenFiles,
   onOpenChat,
 }: {
   project: Project;
+  onOpenResults?: () => void;
   onOpenTerminal?: () => void;
   onOpenBrowser?: () => void;
   onOpenFiles?: () => void;
@@ -3526,6 +3516,13 @@ export function EmptyResult({
       </p>
       <p className={styles.emptyResultProject}>项目：{project.name}</p>
       <div className={styles.emptyResultLaunchpad}>
+        <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenResults} disabled={!onOpenResults}>
+          <Icon name="bar-chart" size={16} />
+          <div className={styles.emptyResultLaunchText}>
+            <span>结果</span>
+            <small>查看当前分析产物</small>
+          </div>
+        </button>
         <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenTerminal} disabled={!onOpenTerminal}>
           <Icon name="terminal" size={16} />
           <div className={styles.emptyResultLaunchText}>

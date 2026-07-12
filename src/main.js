@@ -1770,7 +1770,9 @@ async function main() {
   setupTerminalIpc();
   setupAutoUpdateIpc();
   setupDiagnosticIpc();
-  setupFigcodeIpc();
+  if (typeof setupFigcodeIpc === "function") {
+    setupFigcodeIpc();
+  }
   setupDataManagementIpc();
   setupTelemetryIpc();
 
