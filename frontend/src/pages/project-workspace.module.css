@@ -1159,16 +1159,24 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding-block: 0;
-  padding-inline-start: 24px;
-  padding-inline-end: calc(24px + var(--workspace-summary-reserve-right, 0px));
+  padding: 0 24px;
   position: relative;
 }
 
 .workspaceSessionFrameChat {
   justify-content: flex-end;
-  padding-inline-start: 32px;
-  padding-inline-end: calc(32px + var(--workspace-summary-reserve-right, 0px));
+  padding: 0 32px;
+}
+
+.workspaceSessionInset {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: calc(100% - var(--workspace-summary-reserve-right, 0px));
+  max-width: 100%;
 }
 
 .workspaceSessionSurface {
@@ -2046,9 +2054,7 @@
   }
 
   .workspaceSessionFrame {
-    padding-block: 12px;
-    padding-inline-start: 12px;
-    padding-inline-end: calc(12px + var(--workspace-summary-reserve-right, 0px));
+    padding: 12px;
   }
 
   .workspacePinnedSummary {
@@ -2156,9 +2162,7 @@
   }
 
   .workspaceSessionFrame {
-    padding-block: 10px;
-    padding-inline-start: 10px;
-    padding-inline-end: calc(10px + var(--workspace-summary-reserve-right, 0px));
+    padding: 10px;
   }
 
   .workspacePinnedSummary {
