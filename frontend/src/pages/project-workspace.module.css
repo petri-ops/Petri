@@ -1159,13 +1159,16 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: 0 24px;
+  padding-block: 0;
+  padding-inline-start: 24px;
+  padding-inline-end: calc(24px + var(--workspace-summary-reserve-right, 0px));
   position: relative;
 }
 
 .workspaceSessionFrameChat {
   justify-content: flex-end;
-  padding: 0 32px;
+  padding-inline-start: 32px;
+  padding-inline-end: calc(32px + var(--workspace-summary-reserve-right, 0px));
 }
 
 .workspaceSessionSurface {
@@ -1189,13 +1192,13 @@
   position: relative;
   border-radius: 0;
   padding-inline-start: 18px;
-  padding-inline-end: calc(18px + var(--workspace-summary-reserve-right, 0px));
+  padding-inline-end: 18px;
 }
 
 .workspaceSessionFrameChat .workspaceSessionContent {
   justify-content: flex-end;
   padding-inline-start: 18px;
-  padding-inline-end: calc(18px + var(--workspace-summary-reserve-right, 0px));
+  padding-inline-end: 18px;
 }
 
 .workspaceSessionChrome {
@@ -2043,7 +2046,9 @@
   }
 
   .workspaceSessionFrame {
-    padding: 12px;
+    padding-block: 12px;
+    padding-inline-start: 12px;
+    padding-inline-end: calc(12px + var(--workspace-summary-reserve-right, 0px));
   }
 
   .workspacePinnedSummary {
@@ -2151,7 +2156,9 @@
   }
 
   .workspaceSessionFrame {
-    padding: 10px;
+    padding-block: 10px;
+    padding-inline-start: 10px;
+    padding-inline-end: calc(10px + var(--workspace-summary-reserve-right, 0px));
   }
 
   .workspacePinnedSummary {
