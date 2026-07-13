@@ -26,6 +26,7 @@
     "harness:index": "node scripts/harness-file-index.mjs",
     "harness:scaffold": "node scripts/scaffold-harness-tool.mjs",
     "harness:check": "node scripts/check-harness-manifests.mjs",
+    "harness:evaluate": "node --test test/harness-weak-model.test.mjs test/harness-file-index.test.mjs",
     "check": "bash scripts/sync-vendor.sh check && node --check src/main.js && node --check src/preload.js && node --check src/plugin-manager.js && node --check vendor/biof3-core/r-server/plugin-loader.js && node --check scripts/scaffold-harness-tool.mjs && npm run harness:check"
   },
   "dependencies": {

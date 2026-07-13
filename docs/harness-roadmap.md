@@ -210,7 +210,7 @@
 
 ### Phase 4：弱模型可用性
 
-状态：下一主阶段（已有基础回归，待系统收口）。
+状态：已完成（2026-07-13）。
 
 目标：
 
@@ -221,6 +221,15 @@
 
 - 不调用 LLM 也能通过规则选对一批标准工具。
 - 至少对 DESeq2 / volcano / PCA / gene-correlation 这类常用场景稳定可用。
+
+当前实现：
+
+- version 1 薄任务包覆盖差异表达、火山图、PCA、相关性、富集、聚类、注释、整合、拟时序、通讯、细胞周期和 Doublet 共 12 类意图。
+- 任务包只描述意图和候选 tool id，不包含脚本、执行器或 artifact 真相。
+- `rankHarnessToolsForRequest()` 将任务包意图、真实 manifest 和文件索引组合评分；未知请求不会臆造工具。
+- workflow plan 在未提供 manifest 时可从已安装/内置插件确定性选择；候选工具不可用时返回 `no_matching_tool`。
+- 独立 `harness:evaluate` 门禁覆盖 12 类选型、未知请求、repair、blocked/recoverable、二跳 artifact 和运行时诊断。
+- 真实历史结果 `tj_mrhgg5cf_ib7o` 验证通过：自动选择 volcano、绑定 DEG 表、补列映射、裁剪 top_n 并进入显式确认。
 
 ### Phase 5：工作流编排
 
@@ -348,8 +357,8 @@
 
 接下来最稳妥的顺序是：
 
-1. Phase 4 扩大弱模型确定性选型与回归。
-2. 收口常见任务包与 Skills 流程模板。
-3. 再进入 Phase 5 的多步骤工作流模板与 Agent 状态联动。
+1. 进入 Phase 5，多步骤 workflow template 与 Agent 状态联动。
+2. 复用现有 task packs 组合多步骤计划，不新增执行器。
+3. 用真实二跳/三跳分析验证暂停、确认、恢复和 artifact lineage。
 
 这条路线最符合当前阶段的产品成熟度。

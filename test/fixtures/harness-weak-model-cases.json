@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "selection": [
+    ["用 DESeq2 比较 treatment 和 control 的差异表达", "differential-expression", "deseq2"],
+    ["把当前 DEG 结果画成火山图", "volcano-plot", "volcano-plot"],
+    ["对表达矩阵做 PCA 降维", "pca", "pca-explorer"],
+    ["绘制 top 基因的相关性热图", "gene-correlation", "gene-correlation"],
+    ["对 marker 做 GO 和 KEGG 富集分析", "enrichment", "enrichment"],
+    ["把 cluster 3 继续细分并重聚类", "clustering", "recluster"],
+    ["用 SingleR 做细胞类型注释", "annotation", "annotation"],
+    ["用 Harmony 去掉多样本批次效应", "integration", "integration"],
+    ["用 Monocle 做拟时序和发育轨迹", "trajectory", "trajectory"],
+    ["用 CellChat 分析配体受体细胞通讯", "communication", "communication"],
+    ["计算 G1 S G2M 细胞周期评分", "cell-cycle", "cell-cycle"],
+    ["运行 DoubletFinder 检测双细胞", "doublet", "doublet"]
+  ],
+  "unknown": [
+    "帮我看看这个项目接下来该怎么办",
+    "总结当前进度",
+    "这个结果可靠吗"
+  ]
+}

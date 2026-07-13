@@ -228,6 +228,23 @@ test('createHarnessExecutionContext exposes runtime readiness and canonical work
   });
 });
 
+test('createHarnessExecutionContext prefers manifest language over structured runtime metadata', () => {
+  withTempDir((dir) => {
+    const platform = createLocalHarnessPlatform({
+      dataDir: dir,
+      runtimeChecks: { r: { ready: true, command: '/opt/R/bin/Rscript' } },
+    });
+    const scopeInfo = platform.resolveScope({ scope: 'path', path: dir });
+    const context = createHarnessExecutionContext({
+      platform,
+      scopeInfo,
+      manifest: { language: 'r', runtime: { r: '>=4.3.0' } },
+    });
+    assert.equal(context.runtime, 'r');
+    assert.equal(context.runtimeReady.command, '/opt/R/bin/Rscript');
+  });
+});
+
 test('indexHarnessScope accepts custom platform adapter', () => {
   withTempDir((dir) => {
     fs.writeFileSync(path.join(dir, 'deg.csv'), 'gene,log2FC,pvalue\nTP53,1,0.01\n');

@@ -6,6 +6,21 @@
 
 ## 2026-07-13 当前检查点与今日计划
 
+### Harness Phase 4 已完成（最新检查点）
+
+- Phase 1–4 已完成，下一主阶段是 Phase 5 多步骤工作流模板；结果层 UI 继续冻结。
+- 新增 `scripts/harness-task-packs.mjs`，version 1 覆盖 12 类意图：差异表达、火山图、PCA、相关性、富集、聚类、注释、整合、拟时序、通讯、细胞周期、Doublet。
+- task pack 是薄策略层，只保存意图规则和候选 tool id；不保存执行脚本、参数真相或 artifact schema。
+- `rankHarnessToolsForRequest()` 现在组合 task pack、真实 plugin manifest 与 Harness 文件索引；未知请求不会按文件碰巧猜一个工具。
+- `POST /api/harness/workflow/plan` 不再强制调用方提供 manifest：会刷新已安装/内置插件并确定性选型；没有实际可用插件时返回 `no_matching_tool`。
+- workflow plan 会返回 `taskPack`，HTTP 返回 `selection.source / taskPack / rankedTools`，方便 Agent/UI 解释为什么选中该工具。
+- 新增 fixture 驱动的 `npm run harness:evaluate`，覆盖 12 类选型、未知请求、repair、diagnostics、blocked/recoverable 与二跳 artifact。
+- 修复规范化 manifest 的 structured runtime 被误判为 shell：现在优先采用 manifest language，真实 R 工具会检查 R runtime。
+- 全量测试 115 项：108 pass、7 个显式 live skip；Phase 4 评测 51/51 pass。
+- 真实 HTTP 验证：历史结果 `tj_mrhgg5cf_ib7o/output` 在不提供 manifest 时自动选中 `volcano-plot`，绑定 `classified_table.csv`，补齐列映射，将 `top_n: 999` 裁剪为 25，并进入 confirmation。
+- Core Phase 4 检查点为 `3fbfe3b feat: expose deterministic harness tool selection`，已推送到 `origin/fix/tsc-strict-pass`。
+- 下一步 Phase 5 必须复用 task packs、canonical execution context、tool job 和 artifact truth；不得创建第二套 workflow executor。
+
 ### Harness Phase 3 已完成（最新检查点）
 
 - 当前主线明确为 Harness 工程，结果层 UI 暂时冻结；Phase 1、Phase 2、Phase 3 已完成，下一步进入 Phase 4 弱模型可用性。
@@ -429,12 +444,12 @@ npm run build:spa
 
 1. 先读 `docs/harness-engine-spec.md`。
 2. 再读 `docs/next-steps-roadmap.md`。
-3. 进入 **Harness Phase 4 弱模型可用性**，不要再回头改旧的结果卡片交互：
-   - 扩充不依赖 LLM 的确定性工具选型，覆盖更多高频分析任务。
-   - 建立弱模型评测集，覆盖成功、blocked、recoverable、二跳分析与真实历史 artifact。
-   - 把常见任务整理成薄 Skills/流程模板，但不得复制插件或 Harness 的执行真相。
-   - 保持 repair 建议可审计、需要时显式确认。
-   - 补 canonical adapter 的三平台 CI，避免长期分支再次不同步。
+3. 进入 **Harness Phase 5 多步骤工作流模板**，不要再回头改旧的结果卡片交互：
+   - 模板只引用 task pack/tool id，不复制 manifest 和执行脚本。
+   - 每一步必须映射现有 tool job 状态与 artifact truth。
+   - verified artifact 通过显式 lineage 成为下一步输入。
+   - 步骤级确认、暂停、失败恢复继续复用现有审计协议。
+   - 先用真实二跳/三跳分析做回归，再考虑 UI 展示。
 
 ### 当前原则
 

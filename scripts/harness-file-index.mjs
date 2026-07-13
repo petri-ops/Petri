@@ -4,6 +4,12 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import {
+  rankHarnessTaskPacks,
+  selectHarnessTaskPack,
+} from './harness-task-packs.mjs';
+
+export { rankHarnessTaskPacks, selectHarnessTaskPack } from './harness-task-packs.mjs';
 
 const moduleRequire = createRequire(import.meta.url);
 const { createExecutionContext: createCanonicalExecutionContext } = moduleRequire(
@@ -709,6 +715,7 @@ function requestIntentHints(requestText) {
 
 export function rankHarnessToolsForRequest(requestText, manifests = [], index = {}, options = {}) {
   const hints = requestIntentHints(requestText);
+  const taskPacks = rankHarnessTaskPacks(requestText);
   const minRequiredBindings = options.minRequiredBindings ?? true;
   return manifests
     .map((manifest) => {
@@ -718,6 +725,15 @@ export function rankHarnessToolsForRequest(requestText, manifests = [], index = 
       const missingRequired = requiredFileInputs.filter((binding) => !binding.selected);
       let score = 0;
       const reasons = [];
+      for (const pack of taskPacks) {
+        const candidateIndex = pack.toolIds.findIndex(
+          (toolId) => toolId === manifest.id || toolId === manifest.name,
+        );
+        if (candidateIndex >= 0) {
+          score += pack.score + Math.max(0, pack.toolIds.length - candidateIndex);
+          reasons.push(`task_pack_${pack.id}`);
+        }
+      }
 
       if (hints.wantsVolcano && /volcano|火山/.test(toolText)) {
         score += 80;
@@ -1417,7 +1433,12 @@ export function createHarnessWorkflowPlan(options = {}) {
   const requestText = String(options.requestText || '');
   const manifests = options.manifests || (manifest ? [manifest] : []);
   const rankedTools = options.rankedTools || rankHarnessToolsForRequest(requestText, manifests, index, options);
-  const selectedToolId = options.toolId || manifest?.id || rankedTools[0]?.toolId || null;
+  const taskPack = selectHarnessTaskPack(requestText);
+  const taskPackTool = taskPack
+    ? rankedTools.find((item) => taskPack.toolIds.includes(item.toolId))
+    : null;
+  const selectedToolId =
+    options.toolId || manifest?.id || taskPackTool?.toolId || null;
   const selectedManifest = manifest || manifests.find((item) => item?.id === selectedToolId) || null;
   const inputSuggestions = options.inputSuggestions || (selectedManifest
     ? suggestInputBindings(selectedManifest, index, { preferredPaths: options.preferredPaths || [] })
@@ -1455,6 +1476,7 @@ export function createHarnessWorkflowPlan(options = {}) {
   return {
     harnessWorkflowVersion: 1,
     requestText,
+    taskPack,
     toolId: selectedToolId,
     readiness,
     runnable,
@@ -1601,7 +1623,11 @@ export function createLocalHarnessPlatform(platformOptions = {}) {
         input.scopeInfo ||
         (input.scope && typeof input.scope === 'object' ? input.scope : null) ||
         this.resolveScope(input);
-      const runtime = normalizeRuntimeName(input.runtime || input.manifest?.runtime || input.manifest?.language || 'shell');
+      const manifestRuntime =
+        typeof input.manifest?.runtime === 'string' ? input.manifest.runtime : null;
+      const runtime = normalizeRuntimeName(
+        input.runtime || input.manifest?.language || manifestRuntime || 'shell',
+      );
       const runtimeReady = this.checkRuntimeReady(runtime);
       const canonicalTarget = scopeInfo.canonicalTarget || this.canonicalizePath(scopeInfo.target);
       const execution = createCanonicalExecutionContext({
