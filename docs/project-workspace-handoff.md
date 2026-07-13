@@ -6,6 +6,18 @@
 
 ## 2026-07-13 当前检查点与今日计划
 
+### Harness Phase 2–5 新检查点（2026-07-13）
+
+- `repairHarnessParams()` 现在返回 `proposalVersion: 1` 与 audit 信息，明确区分默认补全、Harness 推断和对用户显式值的调整。
+- 用户显式提供的 `columnMappings` 不再被自动列名推断覆盖；数值裁剪会标记 `confirmationRequired`，确认卡使用“建议调整”文案。
+- diagnostics 保留兼容状态 `ready / needs_review / blocked`，同时提供稳定口径 `readiness: ready / recoverable / blocked`。
+- 缺少必要列、整张表数值完全不可解析会被 diagnostic gate 阻塞；部分脏数据、样本分组不匹配、阈值无结果继续作为可恢复确认项。
+- repair API 已与 HTTP/MCP 执行器共享 canonical execution context，并能识别桌面注入的 `BIOF3_R_HOME / BIOF3_PY_HOME`。
+- 新增 `POST /api/harness/workflow/plan` 与纯函数 `createHarnessWorkflowPlan()`，固定 `inspect → infer → select → repair → confirm → run → verify → report` 八阶段协议。
+- Core workflow API 检查点为 `f491b61 feat: expose canonical harness workflow plans`，已推送到 `origin/fix/tsc-strict-pass`；Desktop vendor lock 已同步。
+- 真实历史结果 `tj_mrhgg5cf_ib7o/output/classified_table.csv` 已通过 workflow API 验证：active artifact 选中正确、R runtime ready、计划 runnable，用户参数调整进入 confirm。
+- 这只是 Phase 5 的最小“计划骨架”，尚未替代现有 `run_tool`。下一步应把真实 job 状态、artifact truth 和失败恢复事件接到 `run / verify / report` 阶段，不能另写第二套执行器。
+
 ### 当前产品边界（不要再误解）
 
 - 中间栏始终属于 Agent 工作区，承载会话、思考过程、工具确认和连续交互；结果界面不能替换或遮盖中间 Agent 主舞台。

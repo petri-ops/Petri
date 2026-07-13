@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {
   createHarnessExecutionContext,
+  createHarnessWorkflowPlan,
   createLocalHarnessPlatform,
   detectFile,
   diagnoseHarnessRunReadiness,
@@ -351,6 +352,26 @@ test('repairHarnessParams clamps PCA n_components to matrix capacity', () => {
   });
 });
 
+test('repairHarnessParams preserves explicit column mappings and audits user value changes', () => {
+  withTempDir((dir) => {
+    fs.writeFileSync(path.join(dir, 'deg.csv'), 'symbol,avg_log2FC,p_val\nTP53,1,0.01\n');
+    const index = indexDirectory(dir, { hash: false });
+    const volcano = readBuiltInManifest('volcano-plot');
+    const repaired = repairHarnessParams(volcano, index, {
+      top_n: 999,
+      columnMappings: { deg_table: { gene: 'symbol', log2FC: 'custom_fc' } },
+    });
+
+    assert.equal(repaired.repairedParams.columnMappings.deg_table.log2FC, 'custom_fc');
+    assert.equal(repaired.repairedParams.columnMappings.deg_table.pvalue, 'p_val');
+    assert.equal(repaired.audit.confirmationRequired, true);
+    assert.deepEqual(repaired.audit.changedUserInputs, ['top_n']);
+    const clamp = repaired.repairs.find((item) => item.code === 'number_param_clamped');
+    assert.equal(clamp.origin, 'user_value_adjustment');
+    assert.equal(clamp.confirmationRequired, true);
+  });
+});
+
 test('weak-agent regression ranks volcano plot and repairs DEG params from index summary', () => {
   withTempDir((dir) => {
     fs.writeFileSync(path.join(dir, 'deg_alias.csv'), 'symbol,avg_log2FC,p_val\nTP53,1,0.01\nEGFR,-2,0.001\n');
@@ -556,6 +577,21 @@ test('diagnoseHarnessRunReadiness reports invalid_numeric_values and empty_signi
   });
 });
 
+test('diagnostic gate blocks an unrepairable DEG schema and fully invalid numeric table', () => {
+  withTempDir((dir) => {
+    const volcano = readBuiltInManifest('volcano-plot');
+    fs.writeFileSync(path.join(dir, 'deg.csv'), 'name,effect,probability\nTP53,foo,bar\nEGFR,baz,qux\n');
+    const index = indexDirectory(dir, { hash: false });
+    const inputSuggestions = suggestInputBindings(volcano, index, { preferredPaths: ['deg.csv'] });
+    const diagnostics = diagnoseHarnessRunReadiness(volcano, index, {}, { inputSuggestions });
+
+    assert.equal(diagnostics.status, 'blocked');
+    assert.equal(diagnostics.readiness, 'blocked');
+    assert.ok(diagnostics.issues.some((item) => item.code === 'missing_required_columns'));
+    assert.ok(diagnostics.issues.some((item) => item.code === 'invalid_numeric_values'));
+  });
+});
+
 test('diagnoseHarnessRunReadiness reports empty_significant_set for volcano inputs', () => {
   withTempDir((dir) => {
     fs.writeFileSync(
@@ -587,5 +623,63 @@ test('diagnoseHarnessRunReadiness surfaces next actions for blocked and ready st
     const readyIndex = indexDirectory(dir, { hash: false });
     const ready = diagnoseHarnessRunReadiness(volcano, readyIndex, { top_n: 3 });
     assert.ok(ready.nextActions.some((action) => action.id === 'run'));
+  });
+});
+
+test('workflow plan exposes deterministic ready lifecycle with canonical execution context', () => {
+  withTempDir((dir) => {
+    fs.writeFileSync(path.join(dir, 'deg.csv'), 'gene,log2FC,pvalue\nTP53,2,0.001\n');
+    const index = indexDirectory(dir, { hash: false });
+    const volcano = readBuiltInManifest('volcano-plot');
+    const platform = createLocalHarnessPlatform({
+      localRoot: dir,
+      canonicalRoot: '/workspace',
+      runtimeChecks: { r: { ready: true, command: '/runtime/Rscript' } },
+    });
+    const scopeInfo = platform.resolveScope({ scope: 'path', path: dir });
+    const executionContext = createHarnessExecutionContext({ platform, scopeInfo, manifest: volcano });
+    const plan = createHarnessWorkflowPlan({
+      requestText: '用差异结果画火山图',
+      manifest: volcano,
+      index,
+      params: { top_n: 1 },
+      executionContext,
+      useAbsolutePaths: true,
+    });
+
+    assert.equal(plan.readiness, 'ready');
+    assert.equal(plan.runnable, true);
+    assert.equal(plan.confirmationRequired, false);
+    assert.equal(plan.executionContext.canonicalWorkDir, '/workspace');
+    assert.deepEqual(plan.stages.map((stage) => stage.id), [
+      'inspect', 'infer', 'select', 'repair', 'confirm', 'run', 'verify', 'report',
+    ]);
+    assert.equal(plan.stages.find((stage) => stage.id === 'run').status, 'pending');
+  });
+});
+
+test('workflow plan distinguishes recoverable review from blocked input', () => {
+  withTempDir((dir) => {
+    const volcano = readBuiltInManifest('volcano-plot');
+    fs.writeFileSync(path.join(dir, 'deg.csv'), 'gene,log2FC,pvalue\nTP53,0.1,0.9\n');
+    const recoverable = createHarnessWorkflowPlan({
+      manifest: volcano,
+      index: indexDirectory(dir, { hash: false }),
+      params: { top_n: 1, fc_threshold: 2, pval_threshold: 2 },
+    });
+    assert.equal(recoverable.readiness, 'recoverable');
+    assert.equal(recoverable.runnable, true);
+    assert.equal(recoverable.confirmationRequired, true);
+    assert.equal(recoverable.stages.find((stage) => stage.id === 'confirm').status, 'pending');
+
+    fs.rmSync(path.join(dir, 'deg.csv'));
+    fs.writeFileSync(path.join(dir, 'notes.md'), '# no table');
+    const blocked = createHarnessWorkflowPlan({
+      manifest: volcano,
+      index: indexDirectory(dir, { hash: false }),
+    });
+    assert.equal(blocked.readiness, 'blocked');
+    assert.equal(blocked.runnable, false);
+    assert.equal(blocked.stages.find((stage) => stage.id === 'run').status, 'blocked');
   });
 });

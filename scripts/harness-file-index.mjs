@@ -891,7 +891,7 @@ function diagnosticIssueFromRepairWarning(manifest, warning) {
   if (!warning || !warning.code) return null;
   return normalizeDiagnosticIssue(manifest, {
     ...warning,
-    severity: 'warning',
+    severity: warning.code === 'missing_required_columns' ? 'error' : 'warning',
     message: warning.code,
   });
 }
@@ -1206,7 +1206,7 @@ export function diagnoseHarnessRunReadiness(manifest, index, params = {}, option
         issues.push(
           normalizeDiagnosticIssue(manifest, {
             code: 'invalid_numeric_values',
-            severity: 'warning',
+            severity: validRows.length === 0 ? 'error' : 'warning',
             recoverable: true,
             inputId: degInput.id,
             message: '差异分析表中存在非数值或不可解析值',
@@ -1258,9 +1258,11 @@ export function diagnoseHarnessRunReadiness(manifest, index, params = {}, option
   }
 
   const errors = issues.filter((issue) => issue.severity === 'error');
+  const status = errors.length ? 'blocked' : issues.length ? 'needs_review' : 'ready';
   return {
     ok: errors.length === 0,
-    status: errors.length ? 'blocked' : issues.length ? 'needs_review' : 'ready',
+    status,
+    readiness: status === 'needs_review' ? 'recoverable' : status,
     toolId: manifest?.id || manifest?.name || null,
     repairs: repair.repairs || [],
     warnings: repair.warnings || [],
@@ -1268,14 +1270,26 @@ export function diagnoseHarnessRunReadiness(manifest, index, params = {}, option
     repairedParams: repair.repairedParams,
     inputSuggestions,
     nextActions: buildHarnessNextActions(manifest, {
-      status: errors.length ? 'blocked' : issues.length ? 'needs_review' : 'ready',
+      status,
       issues,
     }, options),
   };
 }
 
 export function repairHarnessParams(manifest, index, params = {}, options = {}) {
-  const repairedParams = { ...params };
+  const repairedParams = {
+    ...params,
+    ...(params.columnMappings
+      ? {
+          columnMappings: Object.fromEntries(
+            Object.entries(params.columnMappings).map(([key, value]) => [
+              key,
+              value && typeof value === 'object' ? { ...value } : value,
+            ]),
+          ),
+        }
+      : {}),
+  };
   const repairs = [];
   const warnings = [];
   const inputSuggestions = options.inputSuggestions || suggestInputBindings(manifest, index);
@@ -1290,6 +1304,9 @@ export function repairHarnessParams(manifest, index, params = {}, options = {}) 
         inputId: input.id,
         value: repairedParams[input.id],
         reason: binding.selected.reasons,
+        origin: 'harness_default',
+        applied: true,
+        confirmationRequired: false,
       });
     }
   }
@@ -1298,16 +1315,26 @@ export function repairHarnessParams(manifest, index, params = {}, options = {}) 
   if (degInput) {
     const entry = firstSelectedEntry(index, selectedByInput.get(degInput.id));
     const columnRepair = inferColumnMappings(entry, ['gene', 'log2FC', 'pvalue']);
-    if (Object.keys(columnRepair.mappings).length) {
+    const existingMappings = repairedParams.columnMappings?.[degInput.id] || {};
+    const inferredMappings = Object.fromEntries(
+      Object.entries(columnRepair.mappings).filter(([key]) => !existingMappings[key]),
+    );
+    if (Object.keys(inferredMappings).length) {
       repairedParams.columnMappings = {
         ...(repairedParams.columnMappings || {}),
-        [degInput.id]: columnRepair.mappings,
+        [degInput.id]: {
+          ...inferredMappings,
+          ...existingMappings,
+        },
       };
       repairs.push({
         code: 'column_alias_mapped',
         inputId: degInput.id,
-        mappings: columnRepair.mappings,
+        mappings: inferredMappings,
         missing: columnRepair.missing,
+        origin: 'harness_inference',
+        applied: true,
+        confirmationRequired: false,
       });
     }
     if (columnRepair.missing.length) {
@@ -1353,16 +1380,85 @@ export function repairHarnessParams(manifest, index, params = {}, options = {}) 
         inputId: id,
         from: hadParam ? original : null,
         to: next,
+        origin: hadParam ? 'user_value_adjustment' : 'manifest_default',
+        applied: true,
+        confirmationRequired: hadParam && next !== original,
       });
     }
   }
 
   return {
     ok: warnings.length === 0,
+    proposalVersion: 1,
     repairedParams,
     repairs,
     warnings,
     inputSuggestions,
+    audit: {
+      userParams: { ...params },
+      changedUserInputs: repairs
+        .filter((repair) => repair.confirmationRequired)
+        .map((repair) => repair.inputId),
+      confirmationRequired: repairs.some((repair) => repair.confirmationRequired),
+    },
+  };
+}
+
+const HARNESS_WORKFLOW_STAGES = ['inspect', 'infer', 'select', 'repair', 'confirm', 'run', 'verify', 'report'];
+
+export function createHarnessWorkflowPlan(options = {}) {
+  const manifest = options.manifest || null;
+  const index = options.index || { entries: [] };
+  const requestText = String(options.requestText || '');
+  const manifests = options.manifests || (manifest ? [manifest] : []);
+  const rankedTools = options.rankedTools || rankHarnessToolsForRequest(requestText, manifests, index, options);
+  const selectedToolId = options.toolId || manifest?.id || rankedTools[0]?.toolId || null;
+  const selectedManifest = manifest || manifests.find((item) => item?.id === selectedToolId) || null;
+  const inputSuggestions = options.inputSuggestions || (selectedManifest
+    ? suggestInputBindings(selectedManifest, index, { preferredPaths: options.preferredPaths || [] })
+    : []);
+  const repair = options.repair || (selectedManifest
+    ? repairHarnessParams(selectedManifest, index, options.params || {}, {
+        inputSuggestions,
+        useAbsolutePaths: options.useAbsolutePaths === true,
+      })
+    : null);
+  const diagnostics = options.diagnostics || (selectedManifest
+    ? diagnoseHarnessRunReadiness(selectedManifest, index, options.params || {}, {
+        inputSuggestions,
+        repair,
+        executionContext: options.executionContext,
+      })
+    : null);
+  const readiness = diagnostics?.status === 'blocked'
+    ? 'blocked'
+    : diagnostics?.status === 'needs_review'
+      ? 'recoverable'
+      : selectedManifest
+        ? 'ready'
+        : 'blocked';
+  const confirmationRequired = !!repair?.audit?.confirmationRequired || readiness === 'recoverable';
+  const runnable = readiness !== 'blocked' && !!selectedManifest;
+  const statusFor = (stage) => {
+    if (['inspect', 'infer'].includes(stage)) return 'completed';
+    if (stage === 'select') return selectedManifest ? 'completed' : 'blocked';
+    if (stage === 'repair') return repair ? 'completed' : 'blocked';
+    if (stage === 'confirm') return confirmationRequired ? 'pending' : runnable ? 'completed' : 'blocked';
+    return runnable ? 'pending' : 'blocked';
+  };
+
+  return {
+    harnessWorkflowVersion: 1,
+    requestText,
+    toolId: selectedToolId,
+    readiness,
+    runnable,
+    confirmationRequired,
+    executionContext: options.executionContext || null,
+    inputSuggestions,
+    repair,
+    diagnostics,
+    stages: HARNESS_WORKFLOW_STAGES.map((id) => ({ id, status: statusFor(id) })),
   };
 }
 
@@ -1466,7 +1562,7 @@ export function createLocalHarnessPlatform(platformOptions = {}) {
         return { runtime: name, ready: true, command: process.env.SHELL || 'sh', reason: null };
       }
       if (name === 'r') {
-        const rHome = process.env.R_HOME;
+        const rHome = process.env.BIOF3_R_HOME || process.env.R_HOME;
         const command = platformOptions.rscriptPath || process.env.RSCRIPT_PATH || (rHome ? path.join(rHome, 'bin', 'Rscript') : null);
         return {
           runtime: name,
@@ -1476,7 +1572,16 @@ export function createLocalHarnessPlatform(platformOptions = {}) {
         };
       }
       if (name === 'python') {
-        const command = platformOptions.pythonPath || process.env.PYTHON || process.env.PYTHON_PATH || null;
+        const pyHome = process.env.BIOF3_PY_HOME;
+        const pyCandidates = pyHome
+          ? [path.join(pyHome, 'bin', 'python3'), path.join(pyHome, 'bin', 'python'), path.join(pyHome, 'python.exe')]
+          : [];
+        const command =
+          platformOptions.pythonPath ||
+          process.env.PYTHON ||
+          process.env.PYTHON_PATH ||
+          pyCandidates.find(pathExists) ||
+          null;
         return {
           runtime: name,
           ready: !!(command && pathExists(command)),

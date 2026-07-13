@@ -136,6 +136,13 @@
 - 更广的弱模型回归测试。
 - 更稳的 diagnostic gate。
 
+2026-07-13 新进展：
+
+- repair proposal audit 已落地，不再覆盖用户显式列映射；用户数值调整必须标记确认。
+- `ready / recoverable / blocked` 稳定口径已补齐。
+- 不可修复表结构和全无效数值输入已进入阻塞回归。
+- 历史 artifact 二跳 workflow API 已通过真实验证。
+
 #### 2. 合并后稳定化
 
 - 桌面壳稳定。
@@ -209,7 +216,7 @@
 
 ### Phase 5：工作流编排
 
-状态：下一阶段重点。
+状态：最小计划骨架已落地，下一步接真实执行状态机。
 
 目标：
 
@@ -222,6 +229,13 @@
 
 - 一个任务能自动拆成 inspect → infer → select → run → verify → report。
 - 用户不需要手动把每一步喂给模型。
+
+当前实现：
+
+- `createHarnessWorkflowPlan()` 固定八阶段协议并输出 runnable、readiness、confirmationRequired。
+- `/api/harness/workflow/plan` 复用现有 scope 授权、索引、repair、diagnostics 和 canonical execution context。
+- Core 检查点为 `f491b61 feat: expose canonical harness workflow plans`，Desktop vendor lock 已同步。
+- 尚未创建第二套执行器；后续必须把阶段推进映射到现有 `run_tool → tool_job → artifact truth`。
 
 ### Phase 6：远端执行与多平台扩展
 

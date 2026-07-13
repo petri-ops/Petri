@@ -636,7 +636,9 @@ function formatHarnessRepair(item: Record<string, unknown>): string {
     return `已识别 ${inputId} 的关键列别名：${shortValue(item.mappings)}`;
   }
   if (code === 'number_param_clamped') {
-    return `已将 ${inputId} 从 ${shortValue(item.from)} 调整为 ${shortValue(item.to)}`;
+    return item.confirmationRequired
+      ? `建议将 ${inputId} 从 ${shortValue(item.from)} 调整为 ${shortValue(item.to)}（需确认）`
+      : `已将 ${inputId} 从 ${shortValue(item.from)} 调整为 ${shortValue(item.to)}`;
   }
   if (code === 'number_default_filled') {
     return `已补齐 ${inputId} 默认值：${shortValue(item.to)}`;

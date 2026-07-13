@@ -86,10 +86,16 @@ export interface HarnessToolManifest {
 
 export interface HarnessParamRepair {
   ok: boolean;
+  proposalVersion?: number;
   repairedParams: Record<string, unknown>;
   repairs?: Array<Record<string, unknown>>;
   warnings?: Array<Record<string, unknown>>;
   inputSuggestions?: Array<Record<string, unknown>>;
+  audit?: {
+    userParams?: Record<string, unknown>;
+    changedUserInputs?: string[];
+    confirmationRequired?: boolean;
+  };
 }
 
 export interface HarnessDiagnosticIssue {
@@ -117,6 +123,7 @@ export interface HarnessNextAction {
 export interface HarnessRunDiagnostics {
   ok: boolean;
   status: 'ready' | 'needs_review' | 'blocked' | string;
+  readiness?: 'ready' | 'recoverable' | 'blocked' | string;
   toolId?: string | null;
   repairs?: Array<Record<string, unknown>>;
   warnings?: Array<Record<string, unknown>>;
@@ -143,6 +150,35 @@ export interface HarnessRepairResponse {
   index?: HarnessIndexSummary;
   repair?: HarnessParamRepair;
   diagnostics?: HarnessRunDiagnostics | null;
+  error?: string;
+}
+
+export interface HarnessWorkflowStage {
+  id: 'inspect' | 'infer' | 'select' | 'repair' | 'confirm' | 'run' | 'verify' | 'report';
+  status: 'completed' | 'pending' | 'blocked';
+}
+
+export interface HarnessWorkflowPlan {
+  harnessWorkflowVersion: number;
+  requestText: string;
+  toolId?: string | null;
+  readiness: 'ready' | 'recoverable' | 'blocked';
+  runnable: boolean;
+  confirmationRequired: boolean;
+  repair?: HarnessParamRepair | null;
+  diagnostics?: HarnessRunDiagnostics | null;
+  stages: HarnessWorkflowStage[];
+}
+
+export interface HarnessWorkflowPlanRequest extends HarnessRepairRequest {
+  requestText: string;
+}
+
+export interface HarnessWorkflowPlanResponse {
+  ok: boolean;
+  scope?: HarnessScopeInfo;
+  index?: HarnessIndexSummary;
+  plan?: HarnessWorkflowPlan;
   error?: string;
 }
 
@@ -193,6 +229,24 @@ export async function repairHarnessParams(input: HarnessRepairRequest): Promise<
   const data = (await resp.json()) as HarnessRepairResponse;
   if (!resp.ok || !data.ok) {
     throw new Error(data.error || 'Harness repair failed');
+  }
+  return data;
+}
+
+export async function planHarnessWorkflow(
+  input: HarnessWorkflowPlanRequest,
+): Promise<HarnessWorkflowPlanResponse> {
+  const resp = await fetch(`${getPlatformApiPrefix()}/harness/workflow/plan`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeaders(),
+    },
+    body: JSON.stringify(input),
+  });
+  const data = (await resp.json()) as HarnessWorkflowPlanResponse;
+  if (!resp.ok || !data.ok) {
+    throw new Error(data.error || 'Harness workflow planning failed');
   }
   return data;
 }
