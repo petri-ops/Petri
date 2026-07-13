@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { workflowPollDelay } from './useHarnessWorkflowStatus';
+import { isDirectRecoveryAction, workflowPollDelay } from './useHarnessWorkflowStatus';
 import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 
 function workflow(terminal: boolean): HarnessWorkflowJobState {
@@ -21,5 +21,12 @@ describe('workflowPollDelay', () => {
 
   it('stops polling terminal workflows', () => {
     expect(workflowPollDelay(workflow(true))).toBeNull();
+  });
+
+  it('only executes bounded recovery actions directly', () => {
+    expect(isDirectRecoveryAction('reconcile_artifacts')).toBe(true);
+    expect(isDirectRecoveryAction('retry_run')).toBe(true);
+    expect(isDirectRecoveryAction('repair_artifacts')).toBe(false);
+    expect(isDirectRecoveryAction('review_artifacts')).toBe(false);
   });
 });

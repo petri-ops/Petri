@@ -3179,6 +3179,61 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   text-decoration: underline;
 }
 
+.resultWorkflowBar > button:disabled {
+  opacity: 0.55;
+  cursor: default;
+  text-decoration: none;
+}
+
+.resultWorkflowConfirmation,
+.resultWorkflowError {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-shrink: 0;
+  padding: 7px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--biof3-border, #e2e8f0) 64%, transparent);
+  background: color-mix(in srgb, var(--biof3-accent, #0d9488) 5%, white);
+  color: var(--biof3-text-secondary, #64748b);
+  font-size: 10px;
+}
+
+.resultWorkflowConfirmation > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resultWorkflowConfirmation > div {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.resultWorkflowConfirmation button {
+  min-height: 23px;
+  padding: 2px 8px;
+  border: 1px solid var(--biof3-border, #e2e8f0);
+  border-radius: 6px;
+  background: var(--biof3-bg-surface, #ffffff);
+  color: var(--biof3-text-secondary, #64748b);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.resultWorkflowConfirmation button:last-child {
+  border-color: color-mix(in srgb, var(--biof3-accent, #0d9488) 42%, var(--biof3-border, #e2e8f0));
+  color: var(--biof3-accent, #0d9488);
+}
+
+.resultWorkflowError {
+  justify-content: flex-start;
+  background: var(--biof3-status-error-bg, #fef2f2);
+  color: var(--biof3-status-error-fg, #dc2626);
+}
+
 .resultSidebarReportCard {
   display: flex;
   flex-direction: column;

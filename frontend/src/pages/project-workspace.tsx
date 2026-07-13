@@ -32,7 +32,7 @@ import { useResizableColumns } from '@/hooks/useResizableColumns';
 import { useWorkspaceLayout } from '@/hooks/useWorkspaceLayout';
 import { useRightPanelTabs } from '@/hooks/useRightPanelTabs';
 import { usePluginStore } from '@/hooks/usePluginStore';
-import { useHarnessWorkflowStatus } from '@/hooks/useHarnessWorkflowStatus';
+import { isDirectRecoveryAction, useHarnessWorkflowStatus } from '@/hooks/useHarnessWorkflowStatus';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import type { HarnessContextSummary } from '@/lib/copilotContext';
 import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
@@ -40,6 +40,7 @@ import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsC
 import { getNextSteps, buildChainPrompt, type ResolvedJob } from '@/lib/workflow-chains';
 import {
   fetchHarnessIndex,
+  runHarnessWorkflowAction,
   type HarnessIndexSummary,
   type HarnessWorkflowJobState,
 } from '@/lib/harness-client';
@@ -185,6 +186,7 @@ export function ProjectWorkspace(): React.ReactElement {
   const [openWorkspaceFiles, setOpenWorkspaceFiles] = useState<ActiveWorkspaceFile[]>([]);
   const [copilotHarnessIndex, setCopilotHarnessIndex] = useState<HarnessIndexSummary | null>(null);
   const [activeJobHarnessIndex, setActiveJobHarnessIndex] = useState<HarnessIndexSummary | null>(null);
+  const [workflowRefreshKey, setWorkflowRefreshKey] = useState(0);
 
   // Conversation state — current project's conversations + active conversation.
   // Plan 1.6 §4.3 — useConversations is the shared SWR hook (cache lives
@@ -845,6 +847,7 @@ export function ProjectWorkspace(): React.ReactElement {
   const { workflow: activeWorkflow } = useHarnessWorkflowStatus(
     activeJob?.id,
     !!activeJob && (summaryCardOpen || (rightOpen && rightTab === 'results')),
+    workflowRefreshKey,
   );
 
   // 6.3 — Inject project context into SimpleChat (via shared copilot context).
@@ -1130,6 +1133,7 @@ export function ProjectWorkspace(): React.ReactElement {
     closeRightPanelTab,
     activeJob,
     activeWorkflow,
+    onWorkflowChanged: () => setWorkflowRefreshKey((value) => value + 1),
     activeArtifact,
     setActiveArtifact,
     openWorkspaceFiles,
@@ -2424,6 +2428,7 @@ function ResultArtifactShell({
   activeArtifact,
   onActiveArtifactChange,
   onAskAgent,
+  onWorkflowChanged,
   variant,
   showHarnessIndex = false,
 }: {
@@ -2433,6 +2438,7 @@ function ResultArtifactShell({
   activeArtifact: ActiveArtifact | null;
   onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
   onAskAgent: (prompt: string) => void;
+  onWorkflowChanged?: () => void;
   variant: 'center' | 'sidebar';
   showHarnessIndex?: boolean;
 }): React.ReactElement {
@@ -2456,12 +2462,28 @@ function ResultArtifactShell({
   const [harnessLoading, setHarnessLoading] = useState(false);
   const [harnessError, setHarnessError] = useState('');
   const [navCollapsed, setNavCollapsed] = useState(false);
+  const [pendingRecovery, setPendingRecovery] = useState<{
+    actionId: string;
+    label: string;
+    token: string;
+  } | null>(null);
+  const [recoveryBusy, setRecoveryBusy] = useState(false);
+  const [recoveryError, setRecoveryError] = useState('');
 
   const tool = useMemo(
     () => (job ? staticTools.find((t) => t.id === job.tool_id) || null : null),
     [job]
   );
   const lang: 'r' | 'python' = tool?.language === 'python' ? 'python' : 'r';
+  const effectiveJobStatus: ToolJob['status'] = workflow?.jobStatus === 'completed'
+    ? 'done'
+    : workflow?.jobStatus === 'failed' || workflow?.jobStatus === 'cancelled'
+      ? 'failed'
+      : workflow?.jobStatus === 'running'
+        ? 'running'
+        : workflow?.jobStatus === 'pending' || workflow?.jobStatus === 'queued'
+          ? 'pending'
+          : job?.status || 'pending';
 
   const buildUrl = useCallback(
     (name: string) => {
@@ -2492,7 +2514,7 @@ function ResultArtifactShell({
       return;
     }
 
-    if (job.status === 'done') {
+    if (effectiveJobStatus === 'done') {
       setLoading(true);
       setResult(null);
       setJobMeta(null);
@@ -2532,10 +2554,10 @@ function ResultArtifactShell({
       setPreviewData(null);
       setPreviewLoading(false);
     }
-  }, [job, lang]);
+  }, [effectiveJobStatus, job, lang]);
 
   useEffect(() => {
-    if (!job || job.status !== 'done' || !showHarnessIndex) {
+    if (!job || effectiveJobStatus !== 'done' || !showHarnessIndex) {
       setHarnessIndex(null);
       setHarnessError('');
       setHarnessLoading(false);
@@ -2560,7 +2582,7 @@ function ResultArtifactShell({
     return () => {
       cancelled = true;
     };
-  }, [job?.id, job?.status, showHarnessIndex]);
+  }, [effectiveJobStatus, job?.id, showHarnessIndex]);
 
   const files = result?.artifacts || result?.files || [];
   const fallbackArtifacts = useMemo<ResultArtifactRecord[]>(
@@ -2578,7 +2600,7 @@ function ResultArtifactShell({
   );
 
   useEffect(() => {
-    if (!job || job.status !== 'done') {
+    if (!job || effectiveJobStatus !== 'done') {
       setManifestRaw(null);
       setManifestLoading(false);
       setManifestError('');
@@ -2612,7 +2634,7 @@ function ResultArtifactShell({
     return () => {
       cancelled = true;
     };
-  }, [buildUrl, job?.id, job?.status, result?.manifest]);
+  }, [buildUrl, effectiveJobStatus, job?.id, result?.manifest]);
 
   const manifest = useMemo(
     () => normalizeResultManifest(manifestRaw, fallbackArtifacts),
@@ -2668,6 +2690,8 @@ function ResultArtifactShell({
 
   useEffect(() => {
     setUnavailableArtifactNames(new Set());
+    setPendingRecovery(null);
+    setRecoveryError('');
   }, [job?.id]);
 
   useEffect(() => {
@@ -2713,7 +2737,7 @@ function ResultArtifactShell({
   }, [navSections, selectedArtifactName]);
 
   useEffect(() => {
-    if (!job || job.status !== 'done' || artifacts.length === 0) return;
+    if (!job || effectiveJobStatus !== 'done' || artifacts.length === 0) return;
     const preferred = pickPreferredArtifact(artifacts, preferredArtifactName) || reportArtifact || artifacts[0];
     const preferredName = preferred ? preferred.name : '';
     setSelectedName((current) => {
@@ -2727,10 +2751,10 @@ function ResultArtifactShell({
         navSections[0];
       return nextSection?.id || '';
     });
-  }, [artifacts, job, navSections, preferredArtifactName, reportArtifact]);
+  }, [artifacts, effectiveJobStatus, job, navSections, preferredArtifactName, reportArtifact]);
 
   useEffect(() => {
-    if (!job || job.status !== 'done' || !selectedArtifact) {
+    if (!job || effectiveJobStatus !== 'done' || !selectedArtifact) {
       onActiveArtifactChange(null);
       return;
     }
@@ -2749,7 +2773,7 @@ function ResultArtifactShell({
     ) {
       onActiveArtifactChange(artifact);
     }
-  }, [activeArtifact, job, onActiveArtifactChange, selectedArtifact, selectedArtifactKind, selectedArtifactUrl]);
+  }, [activeArtifact, effectiveJobStatus, job, onActiveArtifactChange, selectedArtifact, selectedArtifactKind, selectedArtifactUrl]);
 
   useEffect(() => {
     let cancelled = false;
@@ -2875,6 +2899,56 @@ function ResultArtifactShell({
   const activeSectionArtifacts = activeSection?.artifacts || [];
   const showArtifactRail = activeSectionArtifacts.length > 1;
   const resultNavWidth = navCollapsed ? 0 : (isSidebar ? 184 : 224);
+  const recoveryAction = workflow?.nextActions?.[0] || null;
+  const actionRunsDirectly = isDirectRecoveryAction(recoveryAction?.id);
+
+  const requestRecovery = async () => {
+    if (!job || !recoveryAction) return;
+    if (!actionRunsDirectly) {
+      onAskAgent(
+        `请处理任务 ${job.id} 的 ${recoveryAction.label}。先说明原因和拟采取的操作，得到我确认后再执行。`,
+      );
+      return;
+    }
+    setRecoveryBusy(true);
+    setRecoveryError('');
+    try {
+      const response = await runHarnessWorkflowAction({
+        jobId: job.id,
+        actionId: recoveryAction.id,
+      });
+      if (!response.confirmationToken) throw new Error('未获得恢复确认凭证');
+      setPendingRecovery({
+        actionId: recoveryAction.id,
+        label: recoveryAction.label,
+        token: response.confirmationToken,
+      });
+    } catch (error) {
+      setRecoveryError(error instanceof Error ? error.message : '恢复请求失败');
+    } finally {
+      setRecoveryBusy(false);
+    }
+  };
+
+  const resolveRecovery = async (confirm: boolean) => {
+    if (!job || !pendingRecovery) return;
+    setRecoveryBusy(true);
+    setRecoveryError('');
+    try {
+      await runHarnessWorkflowAction({
+        jobId: job.id,
+        actionId: pendingRecovery.actionId,
+        confirmationToken: pendingRecovery.token,
+        confirm,
+      });
+      setPendingRecovery(null);
+      if (confirm) onWorkflowChanged?.();
+    } catch (error) {
+      setRecoveryError(error instanceof Error ? error.message : '恢复操作失败');
+    } finally {
+      setRecoveryBusy(false);
+    }
+  };
 
   const workflowBar = workflow ? (
     <div className={styles.resultWorkflowBar} data-state={workflow.resumeFrom || 'completed'}>
@@ -2889,17 +2963,31 @@ function ResultArtifactShell({
           <small>truth {String(workflow.artifactTruth.status || 'unknown')}</small>
         )}
       </div>
-      {workflow.nextActions?.[0] && (
+      {recoveryAction && (
         <button
           type="button"
-          onClick={() => onAskAgent(
-            `请处理任务 ${job.id} 的 ${workflow.nextActions![0].label}。先说明原因和拟采取的操作，得到我确认后再执行。`,
-          )}
+          disabled={recoveryBusy}
+          onClick={() => void requestRecovery()}
         >
-          {workflow.nextActions[0].label}
+          {recoveryBusy ? '处理中…' : recoveryAction.label}
         </button>
       )}
     </div>
+  ) : null;
+  const recoveryConfirmation = pendingRecovery ? (
+    <div className={styles.resultWorkflowConfirmation}>
+      <span>确认执行“{pendingRecovery.label}”？该操作会写入任务审计记录。</span>
+      <div>
+        <button type="button" disabled={recoveryBusy} onClick={() => void resolveRecovery(false)}>
+          取消
+        </button>
+        <button type="button" disabled={recoveryBusy} onClick={() => void resolveRecovery(true)}>
+          确认执行
+        </button>
+      </div>
+    </div>
+  ) : recoveryError ? (
+    <div className={styles.resultWorkflowError}>{recoveryError}</div>
   ) : null;
 
   const stateBlock = (title: string, body: React.ReactNode, status: 'running' | 'pending' | 'failed' | 'done') => {
@@ -2907,6 +2995,7 @@ function ResultArtifactShell({
     return (
       <div className={containerClass}>
         {workflowBar}
+        {recoveryConfirmation}
         <div className={isSidebar ? styles.resultSidebarTitleRow : styles.resultHeader}>
           <strong>{title}</strong>
           <span className={styles.resultStatus} data-status={status}>
@@ -2918,18 +3007,18 @@ function ResultArtifactShell({
     );
   };
 
-  if (job.status === 'running' || job.status === 'pending') {
+  if (effectiveJobStatus === 'running' || effectiveJobStatus === 'pending') {
     return stateBlock(
       job.name || job.tool_id,
       <div className={styles.resultRunning}>
         <div className={styles.spinner} />
         <p>分析正在执行，请稍候…</p>
       </div>,
-      job.status
+      effectiveJobStatus
     );
   }
 
-  if (job.status === 'failed') {
+  if (effectiveJobStatus === 'failed') {
     return stateBlock(
       job.name || job.tool_id,
       <pre className={styles.resultError}>{job.error || '执行失败，无错误信息'}</pre>,
@@ -2956,6 +3045,7 @@ function ResultArtifactShell({
   const shellBody = (
     <>
       {workflowBar}
+      {recoveryConfirmation}
       <section className={isSidebar ? styles.resultSidebarReportCard : styles.resultReportSection}>
         {showReportRail ? (
           <div
@@ -3145,6 +3235,7 @@ export function ResultSidebarPanel({
   activeArtifact,
   onActiveArtifactChange,
   onAskAgent,
+  onWorkflowChanged,
 }: {
   project: Project;
   job: ToolJob | null;
@@ -3152,6 +3243,7 @@ export function ResultSidebarPanel({
   activeArtifact: ActiveArtifact | null;
   onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
   onAskAgent: (prompt: string) => void;
+  onWorkflowChanged: () => void;
 }): React.ReactElement {
   return (
     <ResultArtifactShell
@@ -3161,6 +3253,7 @@ export function ResultSidebarPanel({
       activeArtifact={activeArtifact}
       onActiveArtifactChange={onActiveArtifactChange}
       onAskAgent={onAskAgent}
+      onWorkflowChanged={onWorkflowChanged}
       variant="sidebar"
       showHarnessIndex
     />

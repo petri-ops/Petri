@@ -42,6 +42,21 @@
 - 浏览器 console 无新增运行错误；只保留已记录的 React Router v7 future flag 警告。
 - 下一步：为 recoverable/blocked 的真实任务补 UI 回归 fixture，并把 Agent 确认后的 retry/repair 结果回写到同一个 workflow 状态投影。
 
+### Recoverable workflow 完整闭环（2026-07-13）
+
+- 新增 `POST /api/harness/workflow/action/:jobId` 两步动作协议：首次请求返回 5 分钟短期 confirmation token，第二次必须携带相同 job/action/user 范围的 token 与 `confirm=true`。
+- token 单次消费、范围绑定、过期安全失败；取消只消费 token，不改变原任务状态。待确认 token 仅存在内存，服务重启即失效，避免恢复后误执行。
+- 可直接执行的动作严格限制为 `reconcile_artifacts` 和 `retry_run`；`repair_artifacts / review_artifacts` 继续交给 Agent 解释与确认，禁止伪自动修复数据。
+- `retry_run` 只允许 failed/cancelled plugin job，复用原 tool job ID、原参数和现有 MCP registry；running/completed job 会被拒绝。
+- `reconcile_artifacts` 复用共享磁盘/manifest truth 自愈，不重新运行分析。
+- 确认动作写入有界 `__harnessRecovery` 审计历史；普通 tools status 的 params 会隐藏内部字段，workflow status 单独返回 `recoveryHistory`。
+- SQLite 与 PostgreSQL DB adapter 均新增 `updateToolJobParams()`；修复 workflow 路由错误假设高层 DB 具有 `prepare()`、导致自愈持久化静默失败的问题。
+- 结果工具新增内联确认条；确认后刷新原 workflow。展示状态优先采用 workflow truth，避免 jobs 列表旧状态让成功重试仍显示失败。
+- 真实 artifact reconcile：`tj_mriio04e_ey7h` 确认后保持 completed/valid/5 artifacts，审计成功写入。
+- 真实 retry：历史失败 job `tj_mrhgeniu_plms` 从 `spawn ... Rscript ENOENT` 经确认后复用同一 ID 重跑，最终 run/verify/report completed、truth valid、5 artifacts。
+- Core recovery 检查点为 `8cb2620 feat: close recoverable workflow actions`，已推送到 `origin/fix/tsc-strict-pass`；Desktop vendor lock 已同步。
+- 下一步不再补恢复基础设施；进入多步骤 workflow template 与 Agent 状态联动，或观察真实用户任务后再扩 recovery action。
+
 ### 当前产品边界（不要再误解）
 
 - 中间栏始终属于 Agent 工作区，承载会话、思考过程、工具确认和连续交互；结果界面不能替换或遮盖中间 Agent 主舞台。

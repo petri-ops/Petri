@@ -43,14 +43,23 @@ export function WorkspaceSummaryCard({
   if (visibility === 'hidden') return null;
 
   const currentJob = activeJob || liveJobsPreview[0] || null;
+  const currentJobStatus: ToolJob['status'] = workflow?.jobStatus === 'completed'
+    ? 'done'
+    : workflow?.jobStatus === 'failed' || workflow?.jobStatus === 'cancelled'
+      ? 'failed'
+      : workflow?.jobStatus === 'running'
+        ? 'running'
+        : workflow?.jobStatus === 'pending' || workflow?.jobStatus === 'queued'
+          ? 'pending'
+          : currentJob?.status || 'pending';
   const runningCount = jobStats.running + jobStats.pending;
   const totalCount = runningCount + jobStats.done + jobStats.failed;
   const statusLabel =
-    currentJob?.status === 'done'
+    currentJobStatus === 'done'
       ? '已完成'
-      : currentJob?.status === 'failed'
+      : currentJobStatus === 'failed'
         ? '失败'
-        : currentJob?.status === 'running'
+        : currentJobStatus === 'running'
           ? '运行中'
           : currentJob
             ? '等待中'
@@ -74,7 +83,7 @@ export function WorkspaceSummaryCard({
               <div className={styles.workspacePinnedSummaryTitle}>{projectName}</div>
               <span
                 className={styles.workspacePinnedSummaryStatus}
-                data-status={currentJob?.status || 'idle'}
+                data-status={currentJob ? currentJobStatus : 'idle'}
               >
                 <span />
                 {statusLabel}
@@ -98,9 +107,9 @@ export function WorkspaceSummaryCard({
             >
               <span
                 className={styles.workspacePinnedSummaryActivityIcon}
-                data-status={currentJob.status}
+                data-status={currentJobStatus}
               >
-                <Icon name={currentJob.status === 'failed' ? 'flag' : 'terminal'} size={14} />
+                <Icon name={currentJobStatus === 'failed' ? 'flag' : 'terminal'} size={14} />
               </span>
               <span className={styles.workspacePinnedSummaryActivityText}>
                 <strong>{currentJob.name || currentJob.tool_id}</strong>

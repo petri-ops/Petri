@@ -15,9 +15,14 @@ export function workflowPollDelay(workflow: HarnessWorkflowJobState | null): num
   return workflow.terminal ? null : 1500;
 }
 
+export function isDirectRecoveryAction(actionId: string | null | undefined): boolean {
+  return actionId === 'reconcile_artifacts' || actionId === 'retry_run';
+}
+
 export function useHarnessWorkflowStatus(
   jobId: string | null | undefined,
   enabled = true,
+  refreshKey = 0,
 ): HarnessWorkflowStatusState {
   const [state, setState] = useState<HarnessWorkflowStatusState>({
     workflow: null,
@@ -60,7 +65,7 @@ export function useHarnessWorkflowStatus(
       cancelled = true;
       if (timer != null) window.clearTimeout(timer);
     };
-  }, [enabled, jobId]);
+  }, [enabled, jobId, refreshKey]);
 
   return state;
 }

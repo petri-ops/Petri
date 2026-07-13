@@ -341,6 +341,8 @@ Phase 1 的 manifest / artifact / failureModes 基础已经落地，Phase 2 已�
 
 只读状态 UI 已接入：摘要卡八段轨道和结果工具 truth/recovery 单行状态已完成；查询只在对应界面可见时进行，终态停止。恢复按钮当前只创建需要用户确认的 Agent 请求。下一步应补 recoverable/blocked UI fixture，并实现确认后的 retry/repair → 原 workflow 状态回写闭环。
 
+Recoverable workflow 阶段已经完整收口（Core `8cb2620`）：`reconcile_artifacts / retry_run` 具备短期单次确认、动作白名单、审计、原 job 状态回写和真实运行验证；需要理解数据语义的 `repair_artifacts` 仍由 Agent 处理。下一步进入多步骤 workflow template 与 Agent/计划状态联动，不再继续增加恢复按钮。
+
 详细规范见：[Harness Engine Spec v1](./harness-engine-spec.md)。  
 详细路线图见：[Harness Roadmap v1](./harness-roadmap.md)。
 

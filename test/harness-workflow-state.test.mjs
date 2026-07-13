@@ -52,12 +52,17 @@ test('valid artifact truth completes verify and report', () => {
       artifactTruth: { status: 'valid', blocking: false, validCount: 1 },
       artifacts: [{ name: 'volcano.png' }],
     }),
+    params: {
+      top_n: 10,
+      __harnessRecovery: [{ id: 'recovery_1', actionId: 'retry_run' }],
+    },
   });
   assert.equal(stage(workflow, 'verify').status, 'completed');
   assert.equal(stage(workflow, 'report').status, 'completed');
   assert.equal(workflow.resumeFrom, null);
   assert.equal(workflow.terminal, true);
   assert.equal(workflow.artifactCount, 1);
+  assert.equal(workflow.recoveryHistory[0].actionId, 'retry_run');
 });
 
 test('degraded artifact truth keeps report available but requests review', () => {

@@ -196,6 +196,13 @@ export interface HarnessWorkflowJobState {
   artifactDiagnostics?: HarnessDiagnosticIssue[];
   artifactCount: number;
   error?: string | null;
+  recoveryHistory?: Array<{
+    id?: string;
+    actionId?: string;
+    confirmedAt?: string;
+    requestedBy?: string;
+    source?: string;
+  }>;
   nextActions?: Array<{
     id: string;
     label: string;
@@ -206,6 +213,18 @@ export interface HarnessWorkflowJobState {
 
 export interface HarnessWorkflowStatusResponse {
   ok: boolean;
+  workflow?: HarnessWorkflowJobState;
+  error?: string;
+}
+
+export interface HarnessWorkflowActionResponse {
+  ok: boolean;
+  needsConfirmation?: boolean;
+  confirmationToken?: string;
+  expiresAt?: number;
+  cancelled?: boolean;
+  actionId?: string;
+  jobId?: string;
   workflow?: HarnessWorkflowJobState;
   error?: string;
 }
@@ -286,6 +305,34 @@ export async function fetchHarnessWorkflowStatus(jobId: string): Promise<Harness
   const data = (await resp.json()) as HarnessWorkflowStatusResponse;
   if (!resp.ok || !data.ok) {
     throw new Error(data.error || 'Harness workflow status failed');
+  }
+  return data;
+}
+
+export async function runHarnessWorkflowAction(input: {
+  jobId: string;
+  actionId: string;
+  confirmationToken?: string;
+  confirm?: boolean;
+}): Promise<HarnessWorkflowActionResponse> {
+  const resp = await fetch(
+    `${getPlatformApiPrefix()}/harness/workflow/action/${encodeURIComponent(input.jobId)}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(),
+      },
+      body: JSON.stringify({
+        actionId: input.actionId,
+        ...(input.confirmationToken ? { confirmationToken: input.confirmationToken } : {}),
+        ...(input.confirm != null ? { confirm: input.confirm } : {}),
+      }),
+    },
+  );
+  const data = (await resp.json()) as HarnessWorkflowActionResponse;
+  if (!resp.ok || !data.ok) {
+    throw new Error(data.error || 'Harness workflow action failed');
   }
   return data;
 }

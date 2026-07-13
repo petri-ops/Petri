@@ -56,6 +56,16 @@ test('updateToolJob 失败分支写 error', async () => {
   assert.equal(updated.error, 'R 脚本崩溃');
 });
 
+test('updateToolJobParams 持久化 workflow recovery 审计', async () => {
+  const job = db.createToolJob({ toolId: 'test-tool-recovery', params: { top_n: 10 }, status: 'failed' });
+  const updated = db.updateToolJobParams(job.id, {
+    top_n: 10,
+    __harnessRecovery: [{ id: 'recovery_1', actionId: 'retry_run' }],
+  });
+  assert.equal(updated.params.top_n, 10);
+  assert.equal(updated.params.__harnessRecovery[0].actionId, 'retry_run');
+});
+
 // === Harness execution context（非 live，默认跑）===
 
 test('MCP run_tool execution context 映射本地 jobDir 到 canonical workDir', async () => {

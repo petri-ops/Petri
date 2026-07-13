@@ -42,6 +42,7 @@ export interface RightPanelContext {
   // Tab content data
   activeJob: ToolJob | null;
   activeWorkflow: HarnessWorkflowJobState | null;
+  onWorkflowChanged: () => void;
   activeArtifact: ActiveArtifact | null;
   setActiveArtifact: (a: ActiveArtifact | null) => void;
   openWorkspaceFiles: ActiveWorkspaceFile[];
@@ -141,6 +142,7 @@ export function RightPanel({
                     project={ctx.project}
                     job={ctx.activeJob}
                     workflow={ctx.activeWorkflow}
+                    onWorkflowChanged={ctx.onWorkflowChanged}
                     activeArtifact={ctx.activeArtifact}
                     onActiveArtifactChange={ctx.setActiveArtifact}
                     onAskAgent={ctx.handleAskAgent}
