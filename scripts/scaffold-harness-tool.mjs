@@ -263,9 +263,19 @@ cat("[${id}] TODO: implement analysis logic\\n")
       { path: path.join(toolDir, 'tool-definition.json'), content: JSON.stringify(toolDefinition, null, 2) + '\n' },
       { path: scriptPath, content: scriptStub },
       {
-        path: path.join(toolDir, 'demo-data', 'README.md'),
-        content:
-          `# Demo Data\n\nPut example input files for ${title} here.\n`,
+        path: path.join(toolDir, 'fixtures', 'input.csv'),
+        content: 'feature,value\nexample,1\n',
+      },
+      {
+        path: path.join(toolDir, 'fixtures', 'fixture.json'),
+        content: JSON.stringify({
+          fixtureVersion: 1,
+          id: `${id}-contract`,
+          toolId: id,
+          params: { input_table: 'input.csv' },
+          expectedReadiness: 'ready',
+          expectedArtifacts: [{ id: 'report_html', type: 'html', required: true }],
+        }, null, 2) + '\n',
       },
       {
         path: path.join(toolDir, 'README.md'),

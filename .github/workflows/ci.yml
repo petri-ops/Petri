@@ -42,6 +42,11 @@ jobs:
           test/artifact-truth.test.mjs
           test/harness-file-index.test.mjs
           test/harness-manifest.test.mjs
+          test/plugin-sdk.test.mjs
+          test/harness-tool-template.test.mjs
+          test/harness-workflow-fixtures.test.mjs
+          test/agent-workflow-phase6.test.mjs
+          vendor/biof3-core/test/agent-workflow.mjs
           test/mcp-tool-registry.test.mjs
 
       - name: Check frontend and build SPA

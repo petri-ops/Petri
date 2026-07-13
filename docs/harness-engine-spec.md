@@ -465,9 +465,12 @@ Harness 必须支持最基本的修复回路：
 
 ### Phase 6
 
-- 批量补充规范化生物数据分析流程
-- 每个流程的真实 fixture 与回归评测
-- Agent 对结果的多轮调整、局部重跑和派生分析
+- Plugin SDK：脚手架、契约校验、插件发现、注册诊断与兼容性报告
+- Agent Workflow Runtime：基于现有 tool job/artifact truth 的步骤状态、依赖、断点恢复和下一动作
+- Agent 单步闭环：plan → run → verify → bind → decide/recover
+- fixture 驱动的插件质量门禁与 local/container/remote 一致性验证
+
+Phase 6 不批量新增生物分析内容。Bulk RNA 与单细胞只作为平台样板；大规模流程扩充属于基座验收后的后续阶段。
 
 并行工程目标：远端集群接入、Windows 适配和大规模索引性能优化继续推进，但不能分叉核心执行协议。
 

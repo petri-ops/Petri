@@ -6,6 +6,33 @@
 
 ## 2026-07-13 当前检查点与今日计划
 
+### Phase 6 已完成本地实现与验收：Plugin SDK 与 Agent Workflow Runtime
+
+- Phase 6 是**平台工程开发阶段**，不是批量编写生物分析插件、堆分析脚本或扩充内容库。
+- 当前目标是把“以后接入一个新分析流程”的成本压缩到：提供 manifest、执行脚本和小型 fixture，其余发现、校验、执行、产物登记、Agent 调用与恢复由平台完成。
+- 必须复用现有唯一执行真相：`run_tool → tool_job → artifact truth`；禁止新增第二套 executor、workflow job 表、plan 状态库或结果系统。
+- 现有脚手架、manifest normalized view、artifact truth、canonical execution context、workflow status/recovery 和 Agent plan/bind 均应继续复用，先审计缺口再修改，禁止从头重写。
+
+Phase 6 按以下顺序实施：
+
+1. **Plugin SDK 收口**：统一脚手架、manifest/schema/failureModes 校验、插件发现与注册诊断；校验范围覆盖 built-in、已安装插件和开发目录，而不只检查少量内置样板。
+2. **Agent Workflow Runtime**：让薄工作流计划根据现有 tool job 自动投影步骤状态、识别 ready/blocked/recoverable/complete、恢复断点并给出下一步；不自动盲跑全部步骤。
+3. **Agent 控制闭环**：Agent 单步规划、运行、验证 valid artifact、绑定 lineage、判断失败、提出参数修复并在既有确认边界内重试。
+4. **插件质量门禁**：fixture 驱动的契约测试覆盖 manifest、输入诊断、ready/recoverable/blocked、真实或隔离执行、artifact truth 与 lineage。
+5. **跨平台一致性**：继续使用 canonical execution context 和 local/container/remote adapter；平台差异只允许存在于 adapter 层。
+
+Phase 6 验收标准：
+
+- 新插件无需修改 Agent 主 prompt、核心执行器或结果 UI 即可被发现和调用。
+- 一个不完整插件会在安装/CI 阶段得到结构化诊断，而不是运行后才随机失败。
+- 多步骤计划可从原 tool job 状态恢复，且只允许 truth=`valid` 的产物激活下游。
+- 至少使用现有 Bulk RNA/单细胞工具各做一个样板链路验证；样板用于验证平台，不代表开始批量补内容。
+- `npm test`、`npm run harness:evaluate`、Agent 专项评测、三平台 CI 和 vendor lock 检查保持通过。
+
+明确暂缓：空间转录组、蛋白组、代谢组等批量流程内容扩充。只有 Phase 6 基座验收通过后，才进入后续“标准流程覆盖”阶段。
+
+本次 Phase 6 已实现统一 Plugin SDK、三来源发现与结构化诊断、安装前校验、带 fixture 的 scaffold、多步骤 tool job 状态投影、`run_tool status/next`、ready step 提交门禁、valid lineage 幂等绑定，以及 Bulk RNA/单细胞 fixture 门禁。`npm test`、`npm run check`、`npm run harness:evaluate`、`npm run harness:agent-evaluate`、`npm run harness:phase6` 和 adapter 回归均通过。当前改动尚未提交；先提交 Core，再更新 `.vendor-lock` 和 Desktop submodule 指针。
+
 ### Agent-led analysis foundation v1 已完成（最新检查点）
 
 - 产品方向已明确：Agent 主导数据分析，调用规范化流程；流程基础覆盖完成后，再由 Agent 对结果做多轮调整。
@@ -22,7 +49,7 @@
 - 真实二跳验证通过：`tj_mrhgg5cf_ib7o` 的 valid `classified_table.csv` → Agent lineage → 新 `volcano-plot` job；下游 completed、truth valid、5 artifacts，验证任务已清理。
 - 全量测试 120 项：113 pass、7 个显式 live skip；Phase 4 评测继续保持 51/51。
 - Core Agent-led foundation 检查点为 `2f57ce4 feat: establish agent-led analysis workflows`，已推送到 `origin/fix/tsc-strict-pass`。
-- 下一步进入流程扩充阶段：先补 Bulk RNA/单细胞高频流程，再扩空间转录组、蛋白组、代谢组；不得再写另一套 executor/plan/job 状态。
+- 下一步进入 Phase 6 平台工程：Plugin SDK、Agent Workflow Runtime、Agent 单步闭环和 fixture 质量门禁；暂不批量补写分析流程。
 
 ### Harness Phase 4 已完成（最新检查点）
 
@@ -686,29 +713,42 @@ npm run build:spa
 
 换工作区后建议按这个顺序继续：
 
-1. 先跑 `npm run dev`，进入项目页检查真实 UI。
-2. 对照 Codex 继续检查三栏 titlebar：
-   - 左段宽度是否跟左栏一致；
-   - 中段标题和摘要按钮是否自然；
-   - 右段 tabs / `+` / 终端 / 右侧栏按钮是否不拥挤；
-   - 收起左栏、收起右栏后按钮位置是否稳定。
-3. 继续精修中间结果输出区：
-   - 左右留白是否足够；
-   - 输出内容是否居中；
-   - Markdown 卡片是否清晰；
-   - 用户/模型消息左右分布是否自然。
-4. 继续精修摘要卡：
-   - 默认关闭；
-   - 宽窄和高度是否像竖向动态追踪卡；
-   - 是否紧贴摘要按钮下方；
-   - 内容是否足够紧凑。
-5. 再回到原开发计划：
-   - 项目级对话隔离；
-   - 插件/Workflow 参数确认；
-   - Job/Artifact 结果卡片；
-   - 右侧结果查看与聊天上下文联动。
+1. 先运行 `git status`、检查 Core 子仓 HEAD 和 `.vendor-lock`，保留 `.cursor/`，不要覆盖用户文件。
+2. 审计并复用现有实现：
+   - `scripts/scaffold-harness-tool.mjs`
+   - `scripts/check-harness-manifests.mjs`
+   - `vendor/biof3-core/r-server/plugin-loader.js`
+   - `vendor/biof3-core/shared-backend/agent-workflow.js`
+   - `vendor/biof3-core/r-server/helpers/harness-workflow-state.js`
+   - `vendor/biof3-core/r-server/helpers/harness-workflow-recovery.js`
+3. 先实现 Phase 6 第一批平台能力：
+   - 校验 built-in、installed、development 三类插件来源并输出结构化诊断；
+   - 工作流计划从现有 tool job 自动投影步骤状态、断点、下一动作；
+   - Agent 可查询/恢复计划，但仍逐步确认执行。
+4. 建立 fixture 门禁并使用已有 Bulk RNA/单细胞工具做样板；不要新增一批分析脚本来“证明覆盖”。
+5. 完整运行测试和评测后，先提交/推送 Core，再同步 `.vendor-lock`、文档并提交/推送 Desktop。
+
+UI 目前冻结。只有阻断 Agent 工作区、结果数据错误或明确回归时才修改前端，不再继续进行纯视觉精修。
 
 ## 当前重点文件索引
+
+Phase 6 首要文件：
+
+- `scripts/scaffold-harness-tool.mjs`
+- `scripts/check-harness-manifests.mjs`
+- `scripts/harness-file-index.mjs`
+- `scripts/harness-task-packs.mjs`
+- `vendor/biof3-core/r-server/plugin-loader.js`
+- `vendor/biof3-core/shared-backend/agent-workflow.js`
+- `vendor/biof3-core/r-server/agent-tools/learning.js`
+- `vendor/biof3-core/r-server/helpers/harness-workflow-state.js`
+- `vendor/biof3-core/r-server/helpers/harness-workflow-recovery.js`
+- `test/harness-manifest.test.mjs`
+- `test/harness-tool-template.test.mjs`
+- `test/agent-approval.test.mjs`
+- `vendor/biof3-core/test/agent-workflow.mjs`
+
+冻结但仍需兼容的 UI 文件：
 
 - `frontend/src/App.tsx`
 - `frontend/src/components/desktop/TitleBar.tsx`

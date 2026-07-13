@@ -1,0 +1,125 @@
+{
+  "fixtureVersion": 1,
+  "cases": [
+    {
+      "id": "bulk-rna-valid-lineage",
+      "templateId": "bulk-rna-core",
+      "availableToolIds": ["deseq2", "volcano-plot", "enrichment"],
+      "jobs": [
+        {
+          "stepId": "differential",
+          "id": "tj_bulk_deg",
+          "tool_id": "deseq2",
+          "status": "completed",
+          "result": {
+            "artifactTruth": { "status": "valid", "validCount": 1 },
+            "artifacts": [
+              { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" }
+            ]
+          }
+        }
+      ],
+      "bindings": [
+        {
+          "fromStepId": "differential",
+          "toStepId": "volcano",
+          "inputId": "deg_table",
+          "artifact": { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" },
+          "artifactTruth": { "status": "valid" }
+        },
+        {
+          "fromStepId": "differential",
+          "toStepId": "enrichment",
+          "inputId": "ossInputUrl",
+          "artifact": { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" },
+          "artifactTruth": { "status": "valid" }
+        }
+      ],
+      "expected": {
+        "stepStatuses": { "differential": "complete", "volcano": "ready", "enrichment": "ready" },
+        "readyStepIds": ["volcano", "enrichment"],
+        "recoverable": false,
+        "terminal": false
+      }
+    },
+    {
+      "id": "bulk-rna-degraded-recovery",
+      "templateId": "bulk-rna-core",
+      "availableToolIds": ["deseq2", "volcano-plot", "enrichment"],
+      "jobs": [
+        {
+          "stepId": "differential",
+          "id": "tj_bulk_degraded",
+          "tool_id": "deseq2",
+          "status": "completed",
+          "result": {
+            "artifactTruth": { "status": "degraded", "validCount": 0, "blocking": true },
+            "artifactDiagnostics": [
+              { "code": "missing_required_columns", "recoverable": true }
+            ]
+          }
+        }
+      ],
+      "expected": {
+        "stepStatuses": { "differential": "recoverable" },
+        "readyStepIds": [],
+        "recoverable": true,
+        "terminal": false,
+        "nextActionIds": ["recover_differential"]
+      }
+    },
+    {
+      "id": "single-cell-breakpoint",
+      "templateId": "single-cell-core",
+      "availableToolIds": ["scrna-standard", "doublet", "deg", "annotation", "enrichment"],
+      "jobs": [
+        {
+          "stepId": "standard",
+          "id": "tj_scrna_standard",
+          "tool_id": "scrna-standard",
+          "status": "completed",
+          "result": { "artifactTruth": { "status": "valid", "validCount": 1 } }
+        },
+        {
+          "stepId": "doublet",
+          "id": "tj_scrna_doublet",
+          "tool_id": "doublet",
+          "status": "pending",
+          "ack_status": "pending"
+        }
+      ],
+      "expected": {
+        "stepStatuses": { "standard": "complete", "doublet": "waiting_for_confirmation" },
+        "readyStepIds": [],
+        "recoverable": false,
+        "terminal": false,
+        "nextActionIds": ["confirm_doublet"]
+      }
+    },
+    {
+      "id": "single-cell-failed-blocked",
+      "templateId": "single-cell-core",
+      "availableToolIds": ["scrna-standard", "doublet", "deg", "annotation", "enrichment"],
+      "jobs": [
+        {
+          "stepId": "standard",
+          "id": "tj_scrna_failed",
+          "tool_id": "scrna-standard",
+          "status": "failed",
+          "result": {
+            "artifactTruth": { "status": "blocked", "validCount": 0, "blocking": true },
+            "artifactDiagnostics": [
+              { "code": "runtime_missing", "recoverable": false }
+            ]
+          }
+        }
+      ],
+      "expected": {
+        "stepStatuses": { "standard": "blocked" },
+        "readyStepIds": [],
+        "recoverable": false,
+        "terminal": false
+      }
+    }
+  ]
+}

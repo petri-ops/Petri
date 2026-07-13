@@ -434,6 +434,22 @@ async function installPlugin(pluginId, onProgress) {
   const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
   console.log(`[plugin] read plugin.json: id=${meta.id} lang=${meta.language}`);
 
+  const toolDefinitionPath = path.join(pluginDir, 'tool-definition.json');
+  const { inspectPluginSources } = require(path.join(SHARED_BACKEND_DIR, 'plugin-sdk'));
+  const sdkReport = inspectPluginSources({
+    sources: [{ type: 'development', root: PLUGINS_DIR }],
+    normalizeManifest: pluginLoader.normalizePluginManifest,
+  });
+  const pluginIssues = sdkReport.diagnostics.filter(
+    (issue) => issue.pluginId === pluginId && issue.severity === 'error'
+  );
+  if (!fs.existsSync(toolDefinitionPath) || pluginIssues.length > 0) {
+    const error = new Error(`插件契约校验失败: ${pluginIssues.map((issue) => issue.code).join(', ') || 'tool_definition_missing'}`);
+    error.code = 'plugin_contract_invalid';
+    error.diagnostics = pluginIssues;
+    throw error;
+  }
+
   // 校验 Runtime 版本
   const language = meta.language;
   if (meta.runtime && meta.runtime[language]) {

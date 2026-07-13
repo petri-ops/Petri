@@ -252,7 +252,7 @@
 - 默认 `autoExecute: false`，Agent 必须逐步运行、检查结果、绑定 lineage，再决定下一步。
 - 真实二跳验证：历史 valid DEG artifact → Agent lineage → 新 volcano job，完成后 truth valid、5 项产物。
 
-下一阶段不再继续扩基座表面结构，而是批量补充规范化生物分析流程和对应真实评测。
+下一阶段不再扩写 plan 表面结构，也不批量补分析内容；进入 Phase 6，收口 Plugin SDK、基于现有 tool job 的工作流运行时和 fixture 质量门禁。
 - 也支持局部修改、反复追问、结果再分析这类交互式回合。
 
 完成标准：
@@ -293,19 +293,33 @@
 - `repair_artifacts` 仍由 Agent 提出方案并二次确认，这是刻意的安全边界。
 - Phase 5 下一步转向多步骤 template/状态联动，不继续扩大恢复按钮集合。
 
-### Phase 6：远端执行与多平台扩展
+### Phase 6：Plugin SDK 与 Agent Workflow Runtime
 
-状态：后续重点。
+状态：实现与本地验收已完成（2026-07-13），待提交 Core 并更新 vendor lock。
 
 目标：
 
-- 远端 worker、集群、Windows/Linux/macOS 都接入同一套 Harness 抽象。
-- 通用交互式协作能力在这些平台上保持一致。
+- 把 scaffold、manifest/schema/failureModes 校验、插件发现和注册诊断收成稳定 SDK。
+- 多步骤计划直接读取现有 tool job/artifact truth，支持依赖判断、断点恢复、下一动作和可审计 lineage。
+- Agent 按 plan → run → verify → bind → decide/recover 单步推进，默认不自动盲跑完整流程。
+- fixture 门禁覆盖插件契约、repair/diagnostics、artifact truth、lineage 和 adapter 一致性。
+- local/container/remote 继续使用统一 canonical execution context，平台差异只存在于 adapter 层。
 
 完成标准：
 
-- 平台差异只存在于 adapter 层。
-- 任务逻辑不因平台变化而重写。
+- 新插件只需 manifest、脚本和 fixture，即可被平台发现、校验、执行、登记产物并供 Agent 调用。
+- 插件缺陷在安装或 CI 阶段返回结构化诊断。
+- workflow 可从已有 job 状态恢复，只有 valid artifact 能激活下游。
+- 使用现有 Bulk RNA/单细胞各完成一条样板验证，不以批量编写流程作为 Phase 6 交付。
+
+2026-07-13 验收结果：
+
+- 统一 `plugin-sdk.js` 已覆盖 built-in、installed、development 三类来源、显式优先级、manifest/脚本/failure mode 校验和版本化结构诊断。
+- MCP、安装注册、scaffold 与 Agent 工具定义已接入同一契约；scaffold 默认生成最小 input/fixture。
+- 多步骤 runtime 直接从原 tool job 与 artifact truth 投影 9 类步骤状态，并输出 terminal、recoverable、readyStepIds、resumeFromStepId 与 nextActions。
+- `run_tool` 已支持 `status / next`；workflow step run 会先重建状态，只允许 ready step，lineage bind 仅接受真实 job 的 valid、类型匹配 artifact，重复 bind 幂等。
+- Bulk RNA 与单细胞 JSON fixture 覆盖 valid lineage、degraded recovery、确认断点和不可恢复阻塞；`npm run harness:phase6`、全量 `npm test`、Harness/Agent 评测和 adapter 回归均已通过。
+- 当前 Core 与 Desktop 改动尚未提交；提交 Core 后必须更新 `.vendor-lock`，再提交 Desktop 指针和门禁。
 
 ## 3. 推荐推进顺序
 
@@ -357,7 +371,9 @@
 
 ### Phase 6 Exit
 
-- 同一套 Harness 能跑本地、远端、Windows、Linux、macOS。
+- Plugin SDK、workflow runtime、Agent 单步闭环和 fixture 门禁全部可用。
+- 同一套 Harness 能通过 adapter 跑本地、容器、远端、Windows、Linux、macOS。
+- 接入新流程不需要修改 Agent 核心、执行器和结果系统。
 
 ## 5. 现在不该做什么
 
@@ -370,8 +386,8 @@
 
 接下来最稳妥的顺序是：
 
-1. 进入 Phase 6，批量补充常用生物数据分析流程。
-2. 每个流程必须具备 manifest、参数 schema、failureModes、artifact 约定和真实 fixture。
-3. 流程覆盖足够后，再强化 Agent 对结果的多轮调整和局部重跑。
+1. 提交 `vendor/biof3-core` 的 Phase 6 变更，更新 Desktop submodule 指针与 `.vendor-lock`。
+2. 保持 `npm run harness:phase6` 和三平台 CI 为必过门禁，观察首轮真实插件接入反馈。
+3. 进入标准流程覆盖，覆盖足够后再强化结果多轮调整和局部重跑。
 
 这条路线最符合当前阶段的产品成熟度。

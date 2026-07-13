@@ -40,7 +40,10 @@ test('writeHarnessToolScaffold writes files to disk', () => {
     assert.ok(fs.existsSync(path.join(scaffold.toolDir, 'plugin.json')));
     assert.ok(fs.existsSync(path.join(scaffold.toolDir, 'tool-definition.json')));
     assert.ok(fs.existsSync(path.join(scaffold.toolDir, 'scripts', 'disk-tool.R')));
-    assert.ok(fs.existsSync(path.join(scaffold.toolDir, 'demo-data', 'README.md')));
+    assert.ok(fs.existsSync(path.join(scaffold.toolDir, 'fixtures', 'input.csv')));
+    const fixture = JSON.parse(fs.readFileSync(path.join(scaffold.toolDir, 'fixtures', 'fixture.json'), 'utf8'));
+    assert.equal(fixture.fixtureVersion, 1);
+    assert.equal(fixture.toolId, 'disk-tool');
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
