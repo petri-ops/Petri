@@ -32,6 +32,7 @@ import { useResizableColumns } from '@/hooks/useResizableColumns';
 import { useWorkspaceLayout } from '@/hooks/useWorkspaceLayout';
 import { useRightPanelTabs } from '@/hooks/useRightPanelTabs';
 import { usePluginStore } from '@/hooks/usePluginStore';
+import { useHarnessWorkflowStatus } from '@/hooks/useHarnessWorkflowStatus';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import type { HarnessContextSummary } from '@/lib/copilotContext';
 import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
@@ -40,6 +41,7 @@ import { getNextSteps, buildChainPrompt, type ResolvedJob } from '@/lib/workflow
 import {
   fetchHarnessIndex,
   type HarnessIndexSummary,
+  type HarnessWorkflowJobState,
 } from '@/lib/harness-client';
 import {
   normalizeResultManifest,
@@ -87,16 +89,6 @@ interface ActiveWorkspaceFile {
   size?: number;
 }
 
-interface BackendServiceItem {
-  key: string;
-  label: string;
-  status: string;
-}
-
-interface BackendSummary {
-  serviceItems: BackendServiceItem[];
-}
-
 interface JobStats {
   running: number;
   failed: number;
@@ -107,8 +99,6 @@ interface JobStats {
 export type {
   ActiveArtifact,
   ActiveWorkspaceFile,
-  BackendServiceItem,
-  BackendSummary,
   JobStats,
 };
 
@@ -849,25 +839,13 @@ export function ProjectWorkspace(): React.ReactElement {
     [jobs]
   );
 
-  const backendSummary = useMemo(() => {
-    const serviceItems = [
-      {
-        key: 'r-runtime',
-        label: 'R',
-        status: backendStatus.rRuntime ? 'runtime' : 'offline',
-      },
-      {
-        key: 'py-runtime',
-        label: 'Python',
-        status: backendStatus.pyRuntime ? 'runtime' : 'offline',
-      },
-    ];
-    return { serviceItems };
-  }, [backendStatus]);
-
   const showPinnedSummary = workspaceMode === 'chat' || workspaceMode === 'scheduled';
   const summaryOpenWidth = Math.min(224, Math.max(0, sessionFrameWidth - 36));
   const summaryCardOpen = summaryVisibility !== 'hidden' && summaryOpen;
+  const { workflow: activeWorkflow } = useHarnessWorkflowStatus(
+    activeJob?.id,
+    !!activeJob && (summaryCardOpen || (rightOpen && rightTab === 'results')),
+  );
 
   // 6.3 — Inject project context into SimpleChat (via shared copilot context).
   // Replaces the original useEffect that did an in-place setCopilotContext
@@ -1060,9 +1038,9 @@ export function ProjectWorkspace(): React.ReactElement {
     summaryVisibility,
     summaryOpenWidth,
     activeJob,
+    activeWorkflow,
     activeArtifact,
     activeJobId,
-    backendSummary,
     recentJobs: jobs,
     liveJobsPreview,
     jobStats,
@@ -1151,6 +1129,7 @@ export function ProjectWorkspace(): React.ReactElement {
     openRightPanel,
     closeRightPanelTab,
     activeJob,
+    activeWorkflow,
     activeArtifact,
     setActiveArtifact,
     openWorkspaceFiles,
@@ -2416,6 +2395,19 @@ function compactArtifactKindSummary(artifacts: ResultArtifactRecord[]): string {
     .join(' · ');
 }
 
+function workflowStageLabel(stage: string): string {
+  return {
+    inspect: '检查输入',
+    infer: '识别结构',
+    select: '选择工具',
+    repair: '修复参数',
+    confirm: '等待确认',
+    run: '运行分析',
+    verify: '校验产物',
+    report: '生成报告',
+  }[stage] || stage;
+}
+
 function buildPreviewTable(text: string, fileName: string): string[][] {
   const sep = fileName.toLowerCase().endsWith('.tsv') || text.includes('\t') ? '\t' : ',';
   return text
@@ -2428,6 +2420,7 @@ function buildPreviewTable(text: string, fileName: string): string[][] {
 function ResultArtifactShell({
   project,
   job,
+  workflow,
   activeArtifact,
   onActiveArtifactChange,
   onAskAgent,
@@ -2436,6 +2429,7 @@ function ResultArtifactShell({
 }: {
   project: Project;
   job: ToolJob | null;
+  workflow: HarnessWorkflowJobState | null;
   activeArtifact: ActiveArtifact | null;
   onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
   onAskAgent: (prompt: string) => void;
@@ -2882,10 +2876,37 @@ function ResultArtifactShell({
   const showArtifactRail = activeSectionArtifacts.length > 1;
   const resultNavWidth = navCollapsed ? 0 : (isSidebar ? 184 : 224);
 
+  const workflowBar = workflow ? (
+    <div className={styles.resultWorkflowBar} data-state={workflow.resumeFrom || 'completed'}>
+      <div className={styles.resultWorkflowBarMain}>
+        <span className={styles.resultWorkflowDot} data-terminal={workflow.terminal} />
+        <span>
+          {workflow.resumeFrom
+            ? `当前阶段：${workflowStageLabel(workflow.resumeFrom)}`
+            : `结果已校验 · ${workflow.artifactCount} 项产物`}
+        </span>
+        {workflow.artifactTruth && (
+          <small>truth {String(workflow.artifactTruth.status || 'unknown')}</small>
+        )}
+      </div>
+      {workflow.nextActions?.[0] && (
+        <button
+          type="button"
+          onClick={() => onAskAgent(
+            `请处理任务 ${job.id} 的 ${workflow.nextActions![0].label}。先说明原因和拟采取的操作，得到我确认后再执行。`,
+          )}
+        >
+          {workflow.nextActions[0].label}
+        </button>
+      )}
+    </div>
+  ) : null;
+
   const stateBlock = (title: string, body: React.ReactNode, status: 'running' | 'pending' | 'failed' | 'done') => {
     const containerClass = isSidebar ? styles.resultSidebarCard : styles.resultView;
     return (
       <div className={containerClass}>
+        {workflowBar}
         <div className={isSidebar ? styles.resultSidebarTitleRow : styles.resultHeader}>
           <strong>{title}</strong>
           <span className={styles.resultStatus} data-status={status}>
@@ -2934,6 +2955,7 @@ function ResultArtifactShell({
 
   const shellBody = (
     <>
+      {workflowBar}
       <section className={isSidebar ? styles.resultSidebarReportCard : styles.resultReportSection}>
         {showReportRail ? (
           <div
@@ -3091,12 +3113,14 @@ function ResultArtifactShell({
 export function ResultView({
   project,
   job,
+  workflow = null,
   activeArtifact,
   onActiveArtifactChange,
   onAskAgent,
 }: {
   project: Project;
   job: ToolJob;
+  workflow?: HarnessWorkflowJobState | null;
   activeArtifact: ActiveArtifact | null;
   onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
   onAskAgent: (prompt: string) => void;
@@ -3105,6 +3129,7 @@ export function ResultView({
     <ResultArtifactShell
       project={project}
       job={job}
+      workflow={workflow}
       activeArtifact={activeArtifact}
       onActiveArtifactChange={onActiveArtifactChange}
       onAskAgent={onAskAgent}
@@ -3116,12 +3141,14 @@ export function ResultView({
 export function ResultSidebarPanel({
   project,
   job,
+  workflow,
   activeArtifact,
   onActiveArtifactChange,
   onAskAgent,
 }: {
   project: Project;
   job: ToolJob | null;
+  workflow: HarnessWorkflowJobState | null;
   activeArtifact: ActiveArtifact | null;
   onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
   onAskAgent: (prompt: string) => void;
@@ -3130,6 +3157,7 @@ export function ResultSidebarPanel({
     <ResultArtifactShell
       project={project}
       job={job}
+      workflow={workflow}
       activeArtifact={activeArtifact}
       onActiveArtifactChange={onActiveArtifactChange}
       onAskAgent={onAskAgent}

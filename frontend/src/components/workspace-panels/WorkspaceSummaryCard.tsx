@@ -1,6 +1,7 @@
 import React from 'react';
 import { Icon } from '@/components/icons/Icon';
 import type { ToolJob } from '@/lib/project-types';
+import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import styles from '@/pages/project-workspace.module.css';
 
 export interface WorkspaceSummaryCardProps {
@@ -9,10 +10,8 @@ export interface WorkspaceSummaryCardProps {
   width?: number;
   projectName: string;
   activeJob: ToolJob | null;
+  workflow: HarnessWorkflowJobState | null;
   recentJobs: ToolJob[];
-  backendSummary: {
-    serviceItems: { key: string; label: string; status: string }[];
-  };
   liveJobsPreview: ToolJob[];
   jobStats: { running: number; failed: number; done: number; pending: number };
   onOpenScheduled: () => void;
@@ -34,8 +33,8 @@ export function WorkspaceSummaryCard({
   width,
   projectName,
   activeJob,
+  workflow,
   recentJobs,
-  backendSummary,
   liveJobsPreview,
   jobStats,
   onOpenScheduled,
@@ -117,13 +116,38 @@ export function WorkspaceSummaryCard({
           )}
         </section>
 
+        {workflow && (
+          <section className={styles.workspacePinnedSummarySection}>
+            <div className={styles.workspacePinnedSummarySectionHeading}>
+              <div className={styles.workspacePinnedSummarySectionTitle}>任务进度</div>
+              <span className={styles.workspaceWorkflowStateLabel}>
+                {workflow.resumeFrom ? workflowStageLabel(workflow.resumeFrom) : '已完成'}
+              </span>
+            </div>
+            <div className={styles.workspaceWorkflowRail} aria-label="Harness 工作流进度">
+              {workflow.stages.map((stage) => (
+                <span
+                  key={stage.id}
+                  data-status={stage.status}
+                  title={`${workflowStageLabel(stage.id)} · ${workflowStatusLabel(stage.status)}`}
+                />
+              ))}
+            </div>
+            {workflow.nextActions?.[0] && (
+              <div className={styles.workspaceWorkflowNextAction}>
+                {workflow.nextActions[0].label}
+              </div>
+            )}
+          </section>
+        )}
+
         <section className={styles.workspacePinnedSummarySection}>
           <div className={styles.workspacePinnedSummarySectionHeading}>
             <div className={styles.workspacePinnedSummarySectionTitle}>最近分析</div>
             <button type="button" onClick={onOpenScheduled}>查看全部</button>
           </div>
           <div className={styles.workspacePinnedSummaryHistory}>
-            {(recentJobs.length > 0 ? recentJobs : liveJobsPreview).slice(0, 3).map((job) => {
+            {(recentJobs.length > 0 ? recentJobs : liveJobsPreview).slice(0, workflow ? 2 : 3).map((job) => {
               const statusLabel =
                 job.status === 'done'
                   ? '已完成'
@@ -157,21 +181,37 @@ export function WorkspaceSummaryCard({
         </section>
 
         <div className={styles.workspacePinnedSummaryFooter}>
-          {backendSummary.serviceItems.map((item) => (
-            <span
-              key={item.key}
-              title={`${item.label}: ${item.status === 'runtime' ? '已就绪' : '未安装'}`}
-            >
-              <i data-ready={item.status === 'runtime'} />
-              {item.label} {item.status === 'runtime' ? '已就绪' : '未安装'}
-            </span>
-          ))}
           <span>{runningCount} 运行中</span>
           <span>{totalCount} 次运行</span>
         </div>
       </div>
     </aside>
   );
+}
+
+function workflowStageLabel(stage: string): string {
+  return {
+    inspect: '检查',
+    infer: '识别',
+    select: '选择',
+    repair: '修复',
+    confirm: '确认',
+    run: '运行',
+    verify: '校验',
+    report: '报告',
+  }[stage] || stage;
+}
+
+function workflowStatusLabel(status: string): string {
+  return {
+    pending: '等待中',
+    in_progress: '进行中',
+    completed: '已完成',
+    needs_review: '需检查',
+    blocked: '已阻塞',
+    failed: '失败',
+    cancelled: '已取消',
+  }[status] || status;
 }
 
 // Local copy of formatDate — duplicated from project-workspace.tsx to avoid a

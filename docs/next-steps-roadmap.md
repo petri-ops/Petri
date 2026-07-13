@@ -339,6 +339,8 @@ Phase 1 的 manifest / artifact / failureModes 基础已经落地，Phase 2 已�
 
 状态机接续已经完成（Core `4af1be2`）：workflow status 现在复用现有 tool job 与 artifact truth，并输出 `resumeFrom / nextActions`；真实 valid、degraded、blocked、execution failed、queued、running、cancelled 均有确定性投影。下一步优先把该只读状态接入现有摘要动态跟踪/结果工具，不新增独立工作流主页；所有 retry 或 artifact repair 必须继续走明确确认和审计边界。
 
+只读状态 UI 已接入：摘要卡八段轨道和结果工具 truth/recovery 单行状态已完成；查询只在对应界面可见时进行，终态停止。恢复按钮当前只创建需要用户确认的 Agent 请求。下一步应补 recoverable/blocked UI fixture，并实现确认后的 retry/repair → 原 workflow 状态回写闭环。
+
 详细规范见：[Harness Engine Spec v1](./harness-engine-spec.md)。  
 详细路线图见：[Harness Roadmap v1](./harness-roadmap.md)。
 

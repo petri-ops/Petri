@@ -246,6 +246,13 @@
 - Core 状态机检查点为 `4af1be2 feat: project tool jobs into recoverable workflows`，Desktop vendor lock 已同步。
 - 下一步是在现有 Agent/结果区消费该状态，并为 retry/repair 动作增加显式、可审计的执行入口。
 
+2026-07-13 UI 接续：
+
+- 摘要卡与结果工具已消费 workflow status；轮询只在可见时发生，terminal 自动停止。
+- 摘要卡使用八段细轨道，结果工具使用单行 truth/recovery 状态，不新增工作流主页。
+- `retry_run / repair_artifacts / review_artifacts` 只转换为要求二次确认的 Agent 请求，不直接触发副作用。
+- 真实 valid job 已完成视觉和 DOM 核对；下一步补 recoverable/blocked fixture 与确认后状态闭环。
+
 ### Phase 6：远端执行与多平台扩展
 
 状态：后续重点。

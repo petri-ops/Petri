@@ -6,12 +6,12 @@ import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel'
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
+import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import { WorkspaceSummaryCard } from '@/components/workspace-panels/WorkspaceSummaryCard';
 import {
   WorkspaceSearchPanel,
   ScheduledWorkspacePanel,
   type ActiveArtifact,
-  type BackendSummary,
   type JobStats,
 } from '@/pages/project-workspace';
 import styles from '@/pages/project-workspace.module.css';
@@ -45,9 +45,9 @@ export interface CenterPanelContext {
   summaryVisibility: 'hidden' | 'compact' | 'expanded';
   summaryOpenWidth: number;
   activeJob: ToolJob | null;
+  activeWorkflow: HarnessWorkflowJobState | null;
   activeArtifact: ActiveArtifact | null;
   activeJobId: string | null;
-  backendSummary: BackendSummary;
   recentJobs: ToolJob[];
   liveJobsPreview: ToolJob[];
   jobStats: JobStats;
@@ -216,8 +216,8 @@ function SessionFrameView({
             width={ctx.summaryOpenWidth}
             projectName={ctx.project.name}
             activeJob={ctx.activeJob}
+            workflow={ctx.activeWorkflow}
             recentJobs={ctx.recentJobs}
-            backendSummary={ctx.backendSummary}
             liveJobsPreview={ctx.liveJobsPreview}
             jobStats={ctx.jobStats}
             onOpenScheduled={ctx.openScheduledResults}

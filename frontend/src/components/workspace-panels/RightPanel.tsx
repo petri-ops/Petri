@@ -3,6 +3,7 @@ import { Icon } from '@/components/icons/Icon';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
 import type { Project, ToolJob } from '@/lib/project-types';
 import type { BackendStatus } from '@/lib/electron';
+import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import {
   type RightPanelMode,
@@ -40,6 +41,7 @@ export interface RightPanelContext {
 
   // Tab content data
   activeJob: ToolJob | null;
+  activeWorkflow: HarnessWorkflowJobState | null;
   activeArtifact: ActiveArtifact | null;
   setActiveArtifact: (a: ActiveArtifact | null) => void;
   openWorkspaceFiles: ActiveWorkspaceFile[];
@@ -138,6 +140,7 @@ export function RightPanel({
                   <ResultSidebarPanel
                     project={ctx.project}
                     job={ctx.activeJob}
+                    workflow={ctx.activeWorkflow}
                     activeArtifact={ctx.activeArtifact}
                     onActiveArtifactChange={ctx.setActiveArtifact}
                     onAskAgent={ctx.handleAskAgent}

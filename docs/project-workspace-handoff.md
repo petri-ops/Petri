@@ -31,6 +31,17 @@
 - Core 状态机检查点为 `4af1be2 feat: project tool jobs into recoverable workflows`，已推送到 `origin/fix/tsc-strict-pass`；Desktop vendor lock 已同步。
 - 下一步：把 workflow status 接入 Agent/结果区的轻量动态跟踪，而不是新建独立大页面；再为真实 retry/repair 操作建立显式命令边界。
 
+### Workflow UI 动态跟踪检查点（2026-07-13）
+
+- 新增 `useHarnessWorkflowStatus()`：仅在摘要卡打开或结果工具可见时查询；live workflow 每 1.5 秒更新，terminal workflow 自动停止，错误时低频恢复。
+- 摘要卡新增极简八段进度轨道，显示当前阶段和第一条恢复建议；没有增加卡片高度，也没有创建独立工作流主页。
+- 为保持卡片紧凑，移除重复的 R/Python runtime 两行，只保留运行中数量和总运行次数。
+- 右侧结果工具顶部新增 30px 轻量状态条：valid 结果显示 artifact 数量和 truth，recoverable/blocked 结果显示 `resumeFrom` 与下一动作。
+- 恢复动作不会直接执行。按钮只向现有 Agent 会话发送带“先解释、得到确认后再执行”的请求，继续复用参数确认与审计链路。
+- 本地真实结果页 `tj_mriio04e_ey7h` 已视觉核对：摘要卡 8 段均完成，结果条显示 `5 项产物 / truth valid`，中间 Agent 主舞台和 Honeycomb 导航未被遮盖。
+- 浏览器 console 无新增运行错误；只保留已记录的 React Router v7 future flag 警告。
+- 下一步：为 recoverable/blocked 的真实任务补 UI 回归 fixture，并把 Agent 确认后的 retry/repair 结果回写到同一个 workflow 状态投影。
+
 ### 当前产品边界（不要再误解）
 
 - 中间栏始终属于 Agent 工作区，承载会话、思考过程、工具确认和连续交互；结果界面不能替换或遮盖中间 Agent 主舞台。
