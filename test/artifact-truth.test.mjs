@@ -26,6 +26,15 @@ const { _test: metadataTest } = req(resolve(
   'routes',
   'tools-metadata.js',
 ));
+const { _test: executorTest } = req(resolve(
+  __dirname,
+  '..',
+  'vendor',
+  'biof3-core',
+  'r-server',
+  'helpers',
+  'tools-executor.js',
+));
 
 function tempResultDir() {
   return fs.mkdtempSync(join(os.tmpdir(), 'biof3-artifact-truth-'));
@@ -126,4 +135,12 @@ test('reports a blocking type mismatch for required artifacts', () => {
 
   assert.equal(reconciled.blocking, true);
   assert.equal(reconciled.issues[0].code, 'artifact_type_mismatch');
+});
+
+test('allows standard and MCP result directories but rejects unmanaged paths', () => {
+  const root = tempResultDir();
+  const jobsDir = join(root, 'tool-jobs');
+  assert.equal(executorTest.isManagedResultDir(join(jobsDir, 'job_1', 'output'), jobsDir), true);
+  assert.equal(executorTest.isManagedResultDir(join(root, 'mcp-tool-jobs', 'mcp_1'), jobsDir), true);
+  assert.equal(executorTest.isManagedResultDir(join(root, 'outside', 'secret'), jobsDir), false);
 });

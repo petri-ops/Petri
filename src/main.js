@@ -21,7 +21,7 @@ const {
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
-const { spawn } = require("child_process");
+const { spawn, spawnSync } = require("child_process");
 const {
   getNodeLocator,
   getRuntimeBinCandidates,
@@ -1729,16 +1729,31 @@ function setupTerminalIpc() {
 async function main() {
   setupDesktopEnv();
 
-  // M1-4 (H3)：启动 r-server 前跑 db migration，防升级 schema 错乱
+  // M1-4 (H3)：启动 r-server 前跑 db migration，防升级 schema 错乱。
+  // Migration must use the same selected Node boundary as r-server. Loading
+  // better-sqlite3 inside Electron would require a different native ABI and
+  // would break the system-Node copy used by Harness/backend processes.
   try {
-    const { runMigrations, getAppliedVersion } = require("./migration-runner");
     const migDir = path.join(__dirname, "migrations");
     const dbPath = process.env.BIOF3_DB_PATH;
     if (dbPath) {
-      // 确保 db 目录存在
       fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-      const ver = await runMigrations(dbPath, migDir);
-      console.log("[desktop] migrations applied, version =", ver);
+      const migration = spawnSync(
+        NODE_BIN,
+        [path.join(__dirname, "migration-runner.js"), dbPath, migDir],
+        {
+          cwd: PROJECT_ROOT,
+          encoding: "utf8",
+          timeout: 30000,
+          env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" },
+        },
+      );
+      if (migration.error) throw migration.error;
+      if (migration.status !== 0) {
+        throw new Error((migration.stderr || migration.stdout || "migration child failed").trim());
+      }
+      const migrationOutput = String(migration.stdout || "").trim();
+      if (migrationOutput) console.log(migrationOutput);
     }
   } catch (e) {
     console.error("[desktop] migration failed:", e.message);

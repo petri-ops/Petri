@@ -11,8 +11,8 @@
 1. **UI checkpoint**：验证、文档同步、commit 与 push 已完成；非阻断型视觉修改已冻结。
 2. **Artifact truth**：核心闭环、验证、commit 与 push 已完成；status API、DB `result_json`、manifest 和磁盘真实文件已统一校验，缺失产物进入 diagnostics / failureModes。
 3. **Harness continuation**：真实二跳核心链路、绝对路径修复、失败恢复回归、commit 与 push 已完成。
-4. **Platform stability**：审计 Electron `better-sqlite3` ABI、runtime/canonical path、vendor drift 和三平台 CI 最小矩阵。
-5. **Delivery**：完整验证、更新三份进度文档、提交并推送今日成果。
+4. **Platform stability**：Electron ABI、runtime/canonical path、vendor lock、MCP 文件交付和三平台 CI 最小矩阵已完成并推送。
+5. **Delivery**：完整验证与三份进度文档同步已完成，今日成果已形成可恢复检查点。
 
 今日硬约束：
 
@@ -35,7 +35,16 @@
 - artifact scope blocked 时自动回退 project scope。
 - API repair 返回隔离执行器可读取的绝对路径。
 - 已跑通 `classified_table.csv → volcano-plot → 6 个 truth-valid artifacts` 的真实链路。
-- 下一步进入 Stage 4：Electron ABI、runtime/canonical path、vendor drift 与三平台 CI。
+- Stage 4 已接续完成 Electron ABI、runtime/canonical path、vendor lock、MCP 文件交付与三平台 CI 最小矩阵。
+
+### Stage 4 当前成果
+
+- migration 已迁出 Electron 主进程原生模块边界，开发启动不再出现 ABI mismatch。
+- vendor lock 与已推送 Core 一致。
+- MCP 结果文件可通过受控路径正常预览。
+- 三平台 CI 最小矩阵已配置。
+- Core 文件交付检查点为 `5733244`，Desktop 锁已同步到该提交。
+- 剩余 Router、循环依赖和 bundle 警告为非阻断后续项。
 
 ## 当前阶段目标
 

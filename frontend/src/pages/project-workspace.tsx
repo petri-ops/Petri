@@ -122,7 +122,7 @@ type WorkspaceMode =
 
 export type RightPanelMode = 'home' | 'results' | 'files' | 'terminal' | 'browser' | 'chat';
 
-export const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconName }> = [
+const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconName }> = [
   { id: 'results', label: '结果', icon: 'bar-chart' },
   { id: 'files', label: '文件', icon: 'folder' },
   { id: 'terminal', label: '后端', icon: 'cpu' },

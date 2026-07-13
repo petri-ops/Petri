@@ -14,7 +14,7 @@
 - 紧凑窗口下右侧工具采用临时覆盖模式，关闭工具后回到 Agent；结果工具内部根据自身宽度在左右布局和上下布局之间切换。
 - UI 细节优化到此暂时冻结。除阻断使用、数据错误或明显回归外，不再继续调整三栏骨架、配色和间距。
 
-### 本轮尚未提交的 UI 收口
+### 本轮已固定的 UI 收口
 
 - 结果模式右栏改为自适应宽工具区，同时为中间 Agent 保留最小可用宽度。
 - 新增独立 `resultRightWidth`，可拖拽、持久化，不影响普通 `rightWidth`。
@@ -112,16 +112,51 @@ Stage 3 验证：Node 定向回归 48 项中 45 项通过、3 项默认 live ski
 
 #### Stage 4 — 工程与跨平台稳定性
 
-- 审计 `better-sqlite3` Electron ABI 不一致，确定开发、打包和迁移路径。
-- 验证 macOS 当前 runtime、插件加载、终端、R/Python 执行与 canonical path。
-- 补三平台 CI 的最小矩阵设计；若当天无法全部落地，必须留下可执行清单。
-- 检查 vendor drift 和生产构建大 chunk 警告，区分阻断项与后续优化项。
+- 状态：核心稳定性工作、完整验证、commit 与 push 已完成。
+- `better-sqlite3` Electron ABI 不一致已解决：migration 使用与 r-server 相同的 Node 子进程边界，Electron 主进程不再加载系统 Node ABI 的原生模块。
+- macOS 启动已验证 R/Python runtime、插件加载、migration、MCP 结果文件服务与 canonical path。
+- macOS / Windows / Linux 三平台 CI 最小矩阵已落地到 `.github/workflows/ci.yml`。
+- vendor lock 已更新到当前已推送 Core；生产构建大 chunk 等非阻断警告已归档。
 
 #### Stage 5 — 今日交付
 
-- 运行完整回归，记录通过项、已知风险和未完成项。
-- 更新本文件、`docs/next-steps-roadmap.md` 与 `docs/harness-roadmap.md`。
-- 形成最终 commit / push，使下一位 agent 无需依赖聊天记忆即可继续。
+- 状态：已完成。
+- 已运行完整回归并记录通过项、已知风险和未完成项。
+- 已同步本文件、`docs/next-steps-roadmap.md` 与 `docs/harness-roadmap.md`。
+- 今日成果已形成可恢复的 Core 与 Desktop 检查点，下一位 agent 无需依赖聊天记忆即可继续。
+
+2026-07-13 Stage 4 实现记录：
+
+- `src/main.js` 不再直接 require `migration-runner`；通过选定 `NODE_BIN` 子进程执行 migration，并在打包路径设置 `ELECTRON_RUN_AS_NODE=1`。
+- `migration-runner.js` 增加 CLI 入口；回归测试在临时 DB 上真实应用 migration 并验证 schema version。
+- 桌面重启日志已从 ABI 报错变为 `[desktop] migrations applied, version = 0`。
+- Core MCP 文件交付修复已提交为 `5733244 fix: serve managed MCP result artifacts` 并推送到 `origin/fix/tsc-strict-pass`。
+- `.vendor-lock` 已更新为 Core `5733244`，`scripts/sync-vendor.sh check` 重新通过。
+- 新增三平台 CI：submodule、Node 20、Harness、migration、artifact truth、platform compat、前端检查和 SPA 构建。
+- MCP 结果文件服务会从 truth-validated DB `resultDir` 解析 `mcp-tool-jobs`，并限制在受管目录；外部路径被拒绝。
+- 真实二跳 job `tj_mriio04e_ey7h` 的 `report.html` 与 `volcano.png` 均通过 `/api/tools/file` 返回 200。
+- `RIGHT_PANEL_ITEMS` 改为模块内部常量，避免 Vite Fast Refresh 因非组件导出而主动失效。
+
+Stage 4 后续非阻断清单：
+
+- React Router v7 future flag 警告。
+- r-server 上游依赖的两个 circular dependency warning。
+- `authClient` 动态/静态混合导入与 SPA 主 bundle > 500 kB。
+- CI 已配置，但仍需观察首次 GitHub Actions 三平台真实运行结果。
+
+Stage 4 / 5 最终验证：
+
+```bash
+npm run check
+npm --prefix frontend run check
+npm --prefix frontend test -- useResizableColumns.test.ts result-manifest.test.ts
+node --test test/migration-runner.test.mjs test/platform-compat.test.mjs test/artifact-truth.test.mjs test/harness-file-index.test.mjs test/harness-manifest.test.mjs test/mcp-tool-registry.test.mjs
+npm run build:spa
+git diff --check
+git -C vendor/biof3-core diff --check
+```
+
+结果：vendor / Harness 检查通过；前端 19/19 通过；Node 定向回归 47 项中 45 项通过、2 项 live skip；SPA 构建通过。桌面开发启动已确认 migration ABI 警告消失，真实 MCP `report.html` 与 `volcano.png` 文件路由均返回 200。
 
 ## 最新同步状态
 

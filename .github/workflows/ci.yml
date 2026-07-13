@@ -1,0 +1,51 @@
+name: desktop-ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  stability:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install desktop dependencies
+        run: npm ci
+
+      - name: Install frontend dependencies
+        run: npm --prefix frontend ci
+
+      - name: Verify pinned core and manifests
+        shell: bash
+        run: |
+          bash scripts/sync-vendor.sh check
+          npm run harness:check
+
+      - name: Run platform and Harness regressions
+        run: >-
+          node --test
+          test/platform-compat.test.mjs
+          test/migration-runner.test.mjs
+          test/artifact-truth.test.mjs
+          test/harness-file-index.test.mjs
+          test/harness-manifest.test.mjs
+          test/mcp-tool-registry.test.mjs
+
+      - name: Check frontend and build SPA
+        run: |
+          npm --prefix frontend run check
+          npm --prefix frontend test -- useResizableColumns.test.ts result-manifest.test.ts
+          npm run build:spa

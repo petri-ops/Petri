@@ -82,3 +82,21 @@ async function runMigrations(dbPath, migrationsDir) {
 }
 
 module.exports = { getAppliedVersion, runMigrations };
+
+if (require.main === module) {
+  const dbPath = process.argv[2];
+  const migrationsDir = process.argv[3];
+  if (!dbPath || !migrationsDir) {
+    console.error('Usage: node migration-runner.js <db-path> <migrations-dir>');
+    process.exitCode = 2;
+  } else {
+    runMigrations(dbPath, migrationsDir)
+      .then((version) => {
+        console.log(`[desktop] migrations applied, version = ${version}`);
+      })
+      .catch((error) => {
+        console.error(`[desktop] migration failed: ${error.message}`);
+        process.exitCode = 1;
+      });
+  }
+}

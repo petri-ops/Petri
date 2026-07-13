@@ -48,6 +48,14 @@
 - 真实 Honeycomb DEG artifact 已成功驱动下游 volcano-plot，并通过 artifact truth 校验。
 - Core repair API 已提交为 `2ee2081 feat: prioritize active artifacts in repair` 并推送远程分支。
 
+### 平台稳定性（2026-07-13 已完成核心）
+
+- migration 与 r-server 统一走选定 Node 子进程，避免 Electron/system Node 原生 ABI 冲突。
+- vendor lock 已同步到最新已推送 Core。
+- MCP truth artifact 可由受管 `mcp-tool-jobs` 路径安全提供给结果预览。
+- MCP 文件交付修复已提交为 `5733244 fix: serve managed MCP result artifacts` 并推送远程分支；Desktop vendor lock 已同步。
+- macOS / Windows / Linux CI 最小矩阵已建立，覆盖 Harness、artifact truth、migration、platform compatibility 与 SPA。
+
 ## 1. 现状概览
 
 ### 已完成
