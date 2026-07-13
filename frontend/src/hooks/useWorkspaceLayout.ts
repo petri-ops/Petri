@@ -23,6 +23,7 @@ export interface UseWorkspaceLayoutResult {
   rightOpen: boolean;
   setRightOpen: React.Dispatch<React.SetStateAction<boolean>>;
   compactLayout: boolean;
+  viewportWidth: number;
 
   // Terminal
   bottomTerminalOpen: boolean;
@@ -50,6 +51,7 @@ export function useWorkspaceLayout(): UseWorkspaceLayoutResult {
   const [compactLayout, setCompactLayout] = useState(
     () => window.matchMedia('(max-width: 960px)').matches,
   );
+  const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);
 
   // ── Terminal ────────────────────────────────────────────────────
   const [bottomTerminalOpenLocal, setBottomTerminalOpenLocal] = useState(false);
@@ -92,6 +94,13 @@ export function useWorkspaceLayout(): UseWorkspaceLayoutResult {
     media.addEventListener('change', onChange);
     return () => media.removeEventListener('change', onChange);
   }, [ctxAvailable]);
+
+  useEffect(() => {
+    const updateViewportWidth = () => setViewportWidth(window.innerWidth);
+    updateViewportWidth();
+    window.addEventListener('resize', updateViewportWidth);
+    return () => window.removeEventListener('resize', updateViewportWidth);
+  }, []);
 
   // When compact layout triggers, close context panels too.
   useEffect(() => {
@@ -137,6 +146,7 @@ export function useWorkspaceLayout(): UseWorkspaceLayoutResult {
     rightOpen,
     setRightOpen,
     compactLayout,
+    viewportWidth,
     bottomTerminalOpen,
     setBottomTerminalOpen,
     summaryOpen,

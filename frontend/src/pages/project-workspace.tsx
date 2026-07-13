@@ -234,6 +234,7 @@ export function ProjectWorkspace(): React.ReactElement {
     setLeftWidth,
     rightWidth,
     setRightWidth,
+    resultRightWidth,
     inputHeight,
     setInputHeight,
     bottomTerminalHeight,
@@ -248,6 +249,7 @@ export function ProjectWorkspace(): React.ReactElement {
     rightOpen,
     setRightOpen,
     compactLayout,
+    viewportWidth,
     bottomTerminalOpen,
     setBottomTerminalOpen,
     summaryOpen,
@@ -270,6 +272,27 @@ export function ProjectWorkspace(): React.ReactElement {
     // openRightPanel is NOT returned — it lives in project-workspace
     // with compactLayout awareness (setLeftOpen).
   } = useRightPanelTabs();
+
+  const maximumResultRightWidth = useMemo(() => {
+    if (compactLayout) {
+      return Math.max(360, viewportWidth - 56);
+    }
+
+    const leftFootprint = leftOpen ? leftWidth + 1 : 0;
+    const availableWidth = Math.max(0, viewportWidth - leftFootprint);
+    const minimumAgentWidth = Math.min(720, Math.max(520, availableWidth * 0.45));
+    return Math.round(Math.max(360, availableWidth - minimumAgentWidth));
+  }, [compactLayout, leftOpen, leftWidth, viewportWidth]);
+
+  const effectiveRightWidth = useMemo(() => {
+    if (rightTab !== 'results') return rightWidth;
+
+    // Results are a full tool workspace, not a narrow auxiliary sidebar.
+    // Keep the Agent stage visible on desktop and use a wide overlay only at
+    // the compact breakpoint where side-by-side reading is no longer viable.
+    if (compactLayout) return maximumResultRightWidth;
+    return Math.max(360, Math.min(maximumResultRightWidth, resultRightWidth));
+  }, [compactLayout, maximumResultRightWidth, resultRightWidth, rightTab, rightWidth]);
 
   useEffect(() => {
     const nextMode = parseWorkspaceMode(searchParams.get('mode')) || 'chat';
@@ -686,7 +709,7 @@ export function ProjectWorkspace(): React.ReactElement {
     updateTitleBar({
       title: project?.name || '梳理开发进展',
       leftPanelWidth: leftWidth,
-      rightPanelWidth: rightWidth,
+      rightPanelWidth: effectiveRightWidth,
       tabs: titleBarTabs,
       activeTabId: rightTab === 'home' ? null : rightTab,
       onSelectTab: (tabId) => {
@@ -748,7 +771,7 @@ export function ProjectWorkspace(): React.ReactElement {
     project?.name,
     project?.workspacePath,
     rightTab,
-    rightWidth,
+    effectiveRightWidth,
     rightToolMenuOpen,
     setRightOpen,
     setRightToolMenuOpen,
@@ -1114,7 +1137,7 @@ export function ProjectWorkspace(): React.ReactElement {
   };
 
   const rightPanelCtx: RightPanelContext = {
-    width: rightWidth,
+    width: effectiveRightWidth,
     bottomTerminalOpen,
     bottomTerminalHeight,
     project: project as Project,
@@ -1181,7 +1204,9 @@ export function ProjectWorkspace(): React.ReactElement {
           ctx={rightPanelCtx}
           visible={rightOpen}
           workspaceMode={workspaceMode}
-          onResize={startColumnResize('right')}
+          onResize={rightTab === 'results'
+            ? startColumnResize('resultRight', { min: 360, max: maximumResultRightWidth })
+            : startColumnResize('right')}
         />
         <BottomTerminal
           open={bottomTerminalOpen}
@@ -2424,6 +2449,9 @@ function ResultArtifactShell({
   const [manifestRaw, setManifestRaw] = useState<unknown>(null);
   const [manifestLoading, setManifestLoading] = useState(false);
   const [manifestError, setManifestError] = useState('');
+  const [unavailableArtifactNames, setUnavailableArtifactNames] = useState<Set<string>>(
+    () => new Set()
+  );
   const [selectedName, setSelectedName] = useState('');
   const [selectedSectionId, setSelectedSectionId] = useState('');
   const [previewText, setPreviewText] = useState<string | null>(null);
@@ -2596,7 +2624,11 @@ function ResultArtifactShell({
     () => normalizeResultManifest(manifestRaw, fallbackArtifacts),
     [fallbackArtifacts, manifestRaw]
   );
-  const artifacts = manifest?.artifacts?.length ? manifest.artifacts : fallbackArtifacts;
+  const manifestArtifacts = manifest?.artifacts?.length ? manifest.artifacts : fallbackArtifacts;
+  const artifacts = useMemo(
+    () => manifestArtifacts.filter((artifact) => !unavailableArtifactNames.has(artifact.name)),
+    [manifestArtifacts, unavailableArtifactNames]
+  );
   const navSections = useMemo(
     () => buildResultArtifactNavigation(manifest, artifacts),
     [artifacts, manifest]
@@ -2639,6 +2671,31 @@ function ResultArtifactShell({
     (selectedArtifactKind === 'text' || isTextFile(selectedArtifactName) || isMarkdownFile(selectedArtifactName) || /\.json$/i.test(selectedArtifactName) || /\.(csv|tsv)$/i.test(selectedArtifactName));
   const activeIsImage = selectedArtifactKind === 'plot' || (selectedArtifactName ? isImageFile(selectedArtifactName) : false);
   const activeIsPreviewText = activeIsText && !activeIsHtml;
+
+  useEffect(() => {
+    setUnavailableArtifactNames(new Set());
+  }, [job?.id]);
+
+  useEffect(() => {
+    if (!activeIsHtml || !selectedArtifactName || !selectedArtifactUrl) return;
+    let cancelled = false;
+    fetch(selectedArtifactUrl)
+      .then((response) => {
+        if (cancelled || response.ok) return;
+        setUnavailableArtifactNames((current) => {
+          if (current.has(selectedArtifactName)) return current;
+          const next = new Set(current);
+          next.add(selectedArtifactName);
+          return next;
+        });
+      })
+      .catch(() => {
+        // A transient network failure must not permanently hide a valid report.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeIsHtml, selectedArtifactName, selectedArtifactUrl]);
 
   const activeSection = useMemo(() => {
     if (!navSections.length) return null;
@@ -2823,7 +2880,7 @@ function ResultArtifactShell({
   const showReportRail = sectionTabs.length > 0 && artifacts.length > 0;
   const activeSectionArtifacts = activeSection?.artifacts || [];
   const showArtifactRail = activeSectionArtifacts.length > 1;
-  const resultNavWidth = navCollapsed ? 0 : 224;
+  const resultNavWidth = navCollapsed ? 0 : (isSidebar ? 184 : 224);
 
   const stateBlock = (title: string, body: React.ReactNode, status: 'running' | 'pending' | 'failed' | 'done') => {
     const containerClass = isSidebar ? styles.resultSidebarCard : styles.resultView;

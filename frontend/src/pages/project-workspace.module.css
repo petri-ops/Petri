@@ -3082,6 +3082,7 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   margin: 0;
   overflow: hidden;
   background: transparent;
+  container-type: inline-size;
 }
 
 .resultSidebarReportCard {
@@ -3107,6 +3108,31 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   border-radius: 10px;
   border: 1px solid color-mix(in srgb, var(--biof3-border, #e2e8f0) 64%, transparent);
   background: #ffffff;
+  position: relative;
+}
+
+/* Keep the expensive embedded report out of the frame-by-frame layout pass.
+ * The surrounding result workspace still follows the pointer in real time. */
+body.biof3-resizing-columns .resultSidebarPreviewBody::after {
+  content: '调整结果面板宽度…';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--biof3-bg-surface, #ffffff) 96%, transparent);
+  color: var(--biof3-text-tertiary, #94a3b8);
+  font-size: 11px;
+  pointer-events: none;
+}
+
+body.biof3-resizing-columns .resultSidebarIframe {
+  display: none;
+}
+
+body.biof3-resizing-columns,
+body.biof3-resizing-columns * {
+  cursor: ew-resize !important;
 }
 
 .resultSidebarIframe {
@@ -5291,4 +5317,54 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   white-space: nowrap;
   flex-shrink: 0;
   font-weight: 500;
+}
+
+/* Result tools become an overlay below the workspace breakpoint. Keep the
+ * report readable inside that overlay instead of preserving the desktop
+ * preview/navigation split at any cost. This rule intentionally lives after
+ * the base result styles so it wins the cascade. */
+@media (max-width: 700px) {
+  .resultReportShell {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .resultReportNav {
+    position: relative;
+    top: auto;
+    align-self: stretch;
+    max-height: 220px;
+    border-top: 1px solid rgba(148, 163, 184, 0.18);
+    border-left: 0;
+    padding: 8px 6px 6px;
+  }
+
+  .resultReportNavSections {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px 8px;
+  }
+}
+
+/* The result tool has its own resizable width, so viewport media queries are
+ * insufficient. Switch its internal composition using the panel itself. */
+@container (max-width: 560px) {
+  .resultReportShell {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .resultReportNav {
+    position: relative;
+    top: auto;
+    align-self: stretch;
+    max-height: 220px;
+    border-top: 1px solid rgba(148, 163, 184, 0.18);
+    border-left: 0;
+    padding: 8px 6px 6px;
+  }
+
+  .resultReportNavSections {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px 8px;
+  }
 }

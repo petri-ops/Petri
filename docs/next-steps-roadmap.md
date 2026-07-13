@@ -1,10 +1,25 @@
 # Project Workspace — Next Steps Roadmap
 
-最后更新：2026-07-12
+最后更新：2026-07-13
 
 当前路线图已经从“拆组件/拆 hooks”阶段，切换到“桌面端工作台稳定化 + Harness Engine v1”阶段。当前又叠加了远程跨平台 runtime 分支的合并收口，因此继续开发时不要先急着加新功能；先确保桌面壳子、路由、构建、Harness 索引/修复与跨平台 runtime 逻辑都稳定，再进入下一轮扩展。
 
-当前实际正在推进的局部主线是：**结果层 UI 改变的优化与稳定化**。具体指 `/project/:projectId?mode=scheduled&job=...` 的主预览、Honeycomb artifact navigator、HTML 报告预览、manifest sections、fallback artifacts、右侧一级分组与顶部二级切换同步。该阶段不应重写工作台，不应新增第二套结果系统，也不应绕过已有报告模板机制。
+结果层 UI 已完成当前一轮收口，接下来进入：**结果产物可信化 + Harness Phase 2 后半段**。具体指校验 manifest 与真实磁盘产物、统一 artifact diagnostics / failureModes、打通 active artifact 二跳分析、参数修复和失败恢复。该阶段不应重写工作台，不应新增第二套结果系统，也不应绕过已有报告模板机制。
+
+## 2026-07-13 今日执行顺序
+
+1. **UI checkpoint**：验证、文档同步、commit 与 push 已完成；非阻断型视觉修改已冻结。
+2. **Artifact truth**：统一校验 status API、DB `result_json`、manifest 和磁盘真实文件，缺失产物进入 diagnostics / failureModes。
+3. **Harness continuation**：完成至少一条真实二跳分析链路，并扩展参数修复与失败恢复回归。
+4. **Platform stability**：审计 Electron `better-sqlite3` ABI、runtime/canonical path、vendor drift 和三平台 CI 最小矩阵。
+5. **Delivery**：完整验证、更新三份进度文档、提交并推送今日成果。
+
+今日硬约束：
+
+- 中间栏始终属于 Agent 工作区。
+- 结果主预览与 Honeycomb 导航始终属于右侧结果工具工作区。
+- UI 除阻断问题外不再继续精修。
+- 前端对缺失 artifact 的回退只是兼容保护，不能代替后端产物一致性校验。
 
 ## 当前阶段目标
 
@@ -13,8 +28,8 @@
 - 顶层 titlebar 分成左 / 中 / 右三段，并与下面主体三栏宽度对齐。
 - 中间会话区是主舞台，输入框固定底部，输出区居中留白。
 - 右侧工具区通过 tabs 和 `+` 管理，不再出现额外竖向图标栏。
-- 结果页采用主预览 + Honeycomb artifact navigator：中间负责阅读/预览，右侧负责一级结果索引，顶部负责二级 artifact 切换。
-- scheduled 模式中间区不要再嵌入独立结果视图；中心只保留会话/返回入口，所有结果内容统一收敛到右侧结果栏。
+- 结果工具采用主预览 + Honeycomb artifact navigator：二者都位于可扩宽的右侧工具工作区；工具内部主区域负责阅读/预览，内部右侧负责一级结果索引，内部顶部负责二级 artifact 切换。
+- scheduled 模式中间 Agent 区不要再嵌入独立结果视图；中心只保留 Agent 会话/返回入口，所有结果内容统一收敛到右侧结果工具工作区。
 - 摘要概览默认关闭，作为中间栏顶层右侧按钮下方的轻量悬浮卡。
 - 云平台首页不要混入项目工作台顶栏和旧 quickstart。
 - 桌面端导航不能指向已移除的 legacy route。

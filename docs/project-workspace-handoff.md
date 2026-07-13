@@ -1,13 +1,85 @@
 # Project Workspace Handoff
 
-最后更新：2026-07-12
+最后更新：2026-07-13
 
 这份文档用于在切换工作区后恢复当前开发状态。当前阶段不是功能主线开发，而是在把 BioF3 项目工作台的前端骨架和结果层体验尽量收口到 Codex 式体验：轻、窄、白、少阴影、三栏对齐、输入区稳定贴底、右侧工具可预测，并重点优化“主预览 + Honeycomb 结果导航”的结果查看体验。
 
+## 2026-07-13 当前检查点与今日计划
+
+### 当前产品边界（不要再误解）
+
+- 中间栏始终属于 Agent 工作区，承载会话、思考过程、工具确认和连续交互；结果界面不能替换或遮盖中间 Agent 主舞台。
+- HTML / 图片 / 表格 / PDF 主预览与 Honeycomb artifact navigator 都属于右侧“结果”工具工作区。
+- 结果工具使用独立宽度，桌面窗口下可扩宽并支持鼠标拖拽；文件、浏览器、侧边聊天继续使用普通右栏宽度，两者分别持久化。
+- 紧凑窗口下右侧工具采用临时覆盖模式，关闭工具后回到 Agent；结果工具内部根据自身宽度在左右布局和上下布局之间切换。
+- UI 细节优化到此暂时冻结。除阻断使用、数据错误或明显回归外，不再继续调整三栏骨架、配色和间距。
+
+### 本轮尚未提交的 UI 收口
+
+- 结果模式右栏改为自适应宽工具区，同时为中间 Agent 保留最小可用宽度。
+- 新增独立 `resultRightWidth`，可拖拽、持久化，不影响普通 `rightWidth`。
+- 结果拖拽通过 CSS 实时宽度更新，React 只在 pointer-up 后提交；移动事件按 animation frame 合并。
+- 拖拽期间暂停昂贵的 HTML iframe 渲染，并强制保持 `ew-resize` 鼠标图标。
+- 结果工具使用 container query：面板较窄时，Honeycomb 导航转为下方布局。
+- manifest 声明但磁盘不存在的 HTML 报告会被排除，自动回退到首个真实可用的图表或表格。
+- 当前旧 DESeq2 job `tj_mrhmz764_19ax` 的 `report.html` 实际返回 404；前端已从错误的 5 组 / 23 项回退为真实可用的 4 组 / 22 项。这暴露出下一阶段必须处理的 manifest / 磁盘产物一致性问题。
+
+### 今日多阶段计划
+
+#### Stage 1 — UI 稳定检查点
+
+- 状态：已完成验证、commit 与 push；UI 稳定检查点已固定在主线。
+- 已更新交接文档、路线图和验证记录。
+- 已运行前端类型检查、结果导航测试、列宽测试、Electron 关键脚本语法检查、SPA 构建和 diff 检查。
+- 提交并推送当前 UI 收口；不提交 `.cursor/`。
+- 出口条件：工作树只剩明确忽略项，下一位 agent 可从固定 commit 恢复。
+
+2026-07-13 Stage 1 已通过：
+
+```bash
+npm --prefix frontend run check
+npm --prefix frontend test -- useResizableColumns.test.ts result-manifest.test.ts
+node --check src/main.js
+node --check src/preload.js
+node --check scripts/dev-electron.js
+npm run build:spa
+git diff --check
+```
+
+结果：2 个测试文件、19 项测试全部通过；SPA 构建成功。当前仅保留两个非阻断构建警告：`authClient` 动态/静态混合导入，以及主 bundle 超过 500 kB。二者进入 Stage 4 工程稳定性审计，不阻断 UI checkpoint。
+
+#### Stage 2 — 结果产物可信化
+
+- 在执行结束与结果读取边界统一校验 manifest / artifacts / files / outputs 与磁盘真实文件。
+- 不存在、空文件、不可读、类型不符的 artifact 进入统一 diagnostics / failureModes。
+- 缺失 HTML 报告不能成为默认预览；前端 fallback 只作为兼容保护，后端必须记录真实问题。
+- 出口条件：状态 API、DB `result_json`、manifest 和磁盘产物四者一致，具有回归测试。
+
+#### Stage 3 — Harness Phase 2 后半段
+
+- 扩展二跳分析：当前 active artifact 可作为下一工具的候选输入。
+- 扩展参数修复、列名映射、输入角色判断和用户手动参数保护。
+- 扩展失败恢复：区分可自动修复、需要确认和 blocked。
+- 增加弱模型确定性回归，覆盖结果再分析与失败恢复。
+- 出口条件：至少完成一条 `上游结果 → 选择 artifact → 参数修复 → 下游工具 → 结果校验` 的真实链路。
+
+#### Stage 4 — 工程与跨平台稳定性
+
+- 审计 `better-sqlite3` Electron ABI 不一致，确定开发、打包和迁移路径。
+- 验证 macOS 当前 runtime、插件加载、终端、R/Python 执行与 canonical path。
+- 补三平台 CI 的最小矩阵设计；若当天无法全部落地，必须留下可执行清单。
+- 检查 vendor drift 和生产构建大 chunk 警告，区分阻断项与后续优化项。
+
+#### Stage 5 — 今日交付
+
+- 运行完整回归，记录通过项、已知风险和未完成项。
+- 更新本文件、`docs/next-steps-roadmap.md` 与 `docs/harness-roadmap.md`。
+- 形成最终 commit / push，使下一位 agent 无需依赖聊天记忆即可继续。
+
 ## 最新同步状态
 
-- **当前正在进行的主线是结果层 UI 改变与稳定化优化**：
-  - 重点区域是 `/project/:projectId?mode=scheduled&job=...` 的结果查看器。
+- **结果层 UI 已进入冻结前检查点，接下来转向结果可信化与 Harness Phase 2 后半段**：
+  - 重点区域仍是 `/project/:projectId?mode=scheduled&job=...` 的结果链路，但下一步优先处理数据与执行契约，不再做视觉大改。
   - 目标是保持“主预览 + Honeycomb artifact navigator”，让 HTML 报告、图表、表格、文本、PDF 等 artifact 都不丢失。
   - 这不是要重做工作台，也不是要新增一套结果系统；应优先保护已有报告模板、manifest、artifact schema 和历史结果兼容。
   - 后续继续动结果页时，必须先查现有实现、旧模板、历史 demo 产物和 git diff，再做最小修复。不要上来重写报告或导航结构。
@@ -21,8 +93,8 @@
 
 ## 当前结果页状态
 
-- 当前结果层 UI 工作正在围绕 Honeycomb 结果导航继续精修：
-  - 主预览区负责展示当前 active artifact。
+- 当前结果层 UI 已完成 Honeycomb 结果导航的本轮收口：
+  - 右侧结果工具工作区内部的主预览区负责展示当前 active artifact。
   - 右侧 Honeycomb 导航负责展示 manifest sections、fallback artifacts、类型统计和当前分组摘要。
   - 主预览上方会出现二级切换条，用来在当前分组内切换具体 artifact。
   - 结果页要兼容旧 `manifest.files`、新 `artifacts`、`outputs`、`sections` 和 `report.html`。

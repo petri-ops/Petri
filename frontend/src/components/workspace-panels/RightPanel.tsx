@@ -70,7 +70,7 @@ export interface RightPanelProps {
   ctx: RightPanelContext;
   visible: boolean;
   workspaceMode: WorkspaceMode;
-  onResize: (e: React.MouseEvent) => void;
+  onResize?: (e: React.MouseEvent) => void;
 }
 
 /**
@@ -105,11 +105,13 @@ export function RightPanel({
 
   return (
     <>
-      <div className={styles.resizeHandleV} onMouseDown={onResize} />
+      {onResize && <div className={styles.resizeHandleV} onMouseDown={onResize} />}
       <aside
         className={styles.rightCol}
         style={{
-          width: ctx.width,
+          width: ctx.rightTab === 'results'
+            ? `var(--biof3-live-result-right-width, ${ctx.width}px)`
+            : ctx.width,
           paddingBottom: ctx.bottomTerminalOpen ? ctx.bottomTerminalHeight : 0,
         }}
       >

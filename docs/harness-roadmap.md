@@ -1,6 +1,6 @@
 # BioF3 Harness Roadmap v1
 
-最后更新：2026-07-12
+最后更新：2026-07-13
 
 这份路线图回答三个问题：
 
@@ -9,6 +9,25 @@
 3. Harness 接下来按什么顺序推进，什么时候算完成。
 
 目标是把 Harness 推到真正工程化、可用、可稳定的阶段，而不是停留在“更长的 prompt”。它最终要成为通用的交互式执行底座，生信分析只是首个主场景。
+
+## 2026-07-13 今日 Harness 布局
+
+当前 UI 细节阶段结束后，Harness 工作按以下顺序连续推进：
+
+1. 先建立 artifact truth boundary：执行结束时校验声明产物与真实文件，统一缺失、空文件、不可读和类型不匹配诊断。
+2. 把 artifact diagnostics 接入现有 `failureModes.code + failureModes.detect`，保证前端、Agent 和日志读取同一结构。
+3. 打通真实二跳链路：active artifact → 候选输入 → repair → readiness gate → run_tool → verify outputs。
+4. 扩展弱模型回归，至少覆盖成功二跳、缺失上游产物、列名可修复、格式不可修复四类路径。
+5. 最后处理 ABI、runtime、canonical path、vendor drift 与三平台 CI；平台问题不得绕过 Harness adapter 边界。
+
+前置 UI checkpoint 已在 2026-07-13 通过 TypeScript、19 项定向测试、Electron 关键脚本语法检查和 SPA 生产构建，并已完成 commit / push；下一步直接进入第 1 项 artifact truth boundary。
+
+今日 Harness 出口条件：
+
+- manifest / DB / status API / disk 的产物状态有唯一可信口径。
+- 缺失 artifact 不会进入默认预览或被当作成功输入。
+- 至少一条真实二跳分析链路有自动化回归。
+- 所有未完成项进入可执行交接，不依赖聊天上下文。
 
 ## 1. 现状概览
 
