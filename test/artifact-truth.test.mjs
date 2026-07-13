@@ -17,7 +17,7 @@ const { reconcileArtifactTruth } = req(resolve(
   'helpers',
   'artifact-truth.js',
 ));
-const { _test: metadataTest } = req(resolve(
+const { _test: metadataTest, reconcileToolJobArtifacts } = req(resolve(
   __dirname,
   '..',
   'vendor',
@@ -64,6 +64,24 @@ test('filters optional manifest artifacts that do not exist on disk', () => {
   assert.deepEqual(reconciled.artifacts.map((item) => item.name), ['volcano.png']);
   assert.equal(reconciled.result.manifest.sections.length, 1);
   assert.equal(reconciled.issues[0].code, 'artifact_missing');
+});
+
+test('does not expose manifest metadata as a user artifact', () => {
+  const resultDir = tempResultDir();
+  fs.writeFileSync(join(resultDir, 'manifest.json'), '{}');
+  fs.writeFileSync(join(resultDir, 'table.csv'), 'a,b\n1,2\n');
+  const reconciled = reconcileArtifactTruth({
+    resultDir,
+    result: {
+      files: [
+        { name: 'manifest.json', type: 'text' },
+        { name: 'table.csv', type: 'table' },
+      ],
+    },
+  });
+
+  assert.equal(reconciled.artifactTruth.status, 'valid');
+  assert.deepEqual(reconciled.artifacts.map((item) => item.name), ['table.csv']);
 });
 
 test('blocks completion when a required declared artifact is missing', () => {
@@ -143,4 +161,36 @@ test('allows standard and MCP result directories but rejects unmanaged paths', (
   assert.equal(executorTest.isManagedResultDir(join(jobsDir, 'job_1', 'output'), jobsDir), true);
   assert.equal(executorTest.isManagedResultDir(join(root, 'mcp-tool-jobs', 'mcp_1'), jobsDir), true);
   assert.equal(executorTest.isManagedResultDir(join(root, 'outside', 'secret'), jobsDir), false);
+});
+
+test('shared tool-job reconciliation persists artifact truth before workflow projection', async () => {
+  const jobsDir = tempResultDir();
+  const resultDir = join(jobsDir, 'job_shared', 'output');
+  fs.mkdirSync(resultDir, { recursive: true });
+  fs.writeFileSync(join(resultDir, 'table.csv'), 'a,b\n1,2\n');
+  const writes = [];
+  const db = {
+    prepare() {
+      return {
+        async run(...args) {
+          writes.push(args);
+        },
+      };
+    },
+  };
+  const reconciled = await reconcileToolJobArtifacts({
+    db,
+    jobsDir,
+    job: {
+      id: 'job_shared',
+      tool_id: 'unknown-test-tool',
+      status: 'completed',
+      result: { resultDir, files: [{ name: 'table.csv', type: 'table' }] },
+    },
+  });
+
+  assert.equal(reconciled.status, 'completed');
+  assert.equal(reconciled.result.artifactTruth.status, 'valid');
+  assert.equal(reconciled.result.artifacts.length, 1);
+  assert.equal(writes.length, 1);
 });

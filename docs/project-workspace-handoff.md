@@ -18,6 +18,19 @@
 - 真实历史结果 `tj_mrhgg5cf_ib7o/output/classified_table.csv` 已通过 workflow API 验证：active artifact 选中正确、R runtime ready、计划 runnable，用户参数调整进入 confirm。
 - 这只是 Phase 5 的最小“计划骨架”，尚未替代现有 `run_tool`。下一步应把真实 job 状态、artifact truth 和失败恢复事件接到 `run / verify / report` 阶段，不能另写第二套执行器。
 
+### Harness workflow 真实状态检查点（2026-07-13）
+
+- 新增纯状态投影器 `harness-workflow-state.js`，直接读取现有 `tool_jobs` 的 status、ack、error、result 和 artifact truth，不新增工作流数据库或第二套执行器。
+- 新增受权只读接口 `GET /api/harness/workflow/status/:jobId`；接口先复用 tools status 的磁盘/manifest 自愈，再投影八阶段状态。
+- 阶段状态可区分 `pending / in_progress / completed / needs_review / blocked / failed / cancelled`。
+- completed job 在缺少 artifact truth 时只完成 run，verify 保持 pending、report 保持 blocked，防止把“进程退出成功”误判成“可信报告完成”。
+- 执行失败与产物验证失败被分开：前者从 run 重试，后者从 verify 修复；API 返回 `resumeFrom` 和结构化 `nextActions`。
+- queued、running、等待确认、拒绝、执行失败、artifact blocked、artifact degraded、artifact valid、cancelled 均有自动化回归。
+- `manifest.json` 已加入内部文件集合，不再作为用户 artifact 或 Honeycomb 结果计数，避免 text/json 类型误判造成假 degraded。
+- 真实验证：`tj_mrhgg5cf_ib7o` 与 `tj_mriio04e_ey7h` 均经共享 truth 自愈为 valid，真实 artifactCount=5，run/verify/report 全部 completed。
+- Core 状态机检查点为 `4af1be2 feat: project tool jobs into recoverable workflows`，已推送到 `origin/fix/tsc-strict-pass`；Desktop vendor lock 已同步。
+- 下一步：把 workflow status 接入 Agent/结果区的轻量动态跟踪，而不是新建独立大页面；再为真实 retry/repair 操作建立显式命令边界。
+
 ### 当前产品边界（不要再误解）
 
 - 中间栏始终属于 Agent 工作区，承载会话、思考过程、工具确认和连续交互；结果界面不能替换或遮盖中间 Agent 主舞台。

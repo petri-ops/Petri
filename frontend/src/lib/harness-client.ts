@@ -155,7 +155,8 @@ export interface HarnessRepairResponse {
 
 export interface HarnessWorkflowStage {
   id: 'inspect' | 'infer' | 'select' | 'repair' | 'confirm' | 'run' | 'verify' | 'report';
-  status: 'completed' | 'pending' | 'blocked';
+  status: 'completed' | 'pending' | 'in_progress' | 'needs_review' | 'blocked' | 'failed' | 'cancelled';
+  detail?: string | null;
 }
 
 export interface HarnessWorkflowPlan {
@@ -179,6 +180,33 @@ export interface HarnessWorkflowPlanResponse {
   scope?: HarnessScopeInfo;
   index?: HarnessIndexSummary;
   plan?: HarnessWorkflowPlan;
+  error?: string;
+}
+
+export interface HarnessWorkflowJobState {
+  harnessWorkflowStateVersion: number;
+  jobId?: string | null;
+  toolId?: string | null;
+  jobStatus: string;
+  ackStatus?: string | null;
+  terminal: boolean;
+  recoverable: boolean;
+  resumeFrom?: HarnessWorkflowStage['id'] | null;
+  artifactTruth?: Record<string, unknown> | null;
+  artifactDiagnostics?: HarnessDiagnosticIssue[];
+  artifactCount: number;
+  error?: string | null;
+  nextActions?: Array<{
+    id: string;
+    label: string;
+    stage: HarnessWorkflowStage['id'];
+  }>;
+  stages: HarnessWorkflowStage[];
+}
+
+export interface HarnessWorkflowStatusResponse {
+  ok: boolean;
+  workflow?: HarnessWorkflowJobState;
   error?: string;
 }
 
@@ -247,6 +275,17 @@ export async function planHarnessWorkflow(
   const data = (await resp.json()) as HarnessWorkflowPlanResponse;
   if (!resp.ok || !data.ok) {
     throw new Error(data.error || 'Harness workflow planning failed');
+  }
+  return data;
+}
+
+export async function fetchHarnessWorkflowStatus(jobId: string): Promise<HarnessWorkflowStatusResponse> {
+  const resp = await fetch(`${getPlatformApiPrefix()}/harness/workflow/status/${encodeURIComponent(jobId)}`, {
+    headers: authHeaders(),
+  });
+  const data = (await resp.json()) as HarnessWorkflowStatusResponse;
+  if (!resp.ok || !data.ok) {
+    throw new Error(data.error || 'Harness workflow status failed');
   }
   return data;
 }

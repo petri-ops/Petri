@@ -337,6 +337,8 @@ Phase 1 的 manifest / artifact / failureModes 基础已经落地，Phase 2 已�
 
 2026-07-13 接续进展：第 1、3、4 项进一步收口。repair audit、稳定 readiness、不可修复输入阻塞、桌面 runtime 探测和八阶段 workflow plan API 已落地并通过真实历史 artifact 验证；Core 检查点为 `f491b61`。下一步不再扩写 plan 表面结构，而是把现有 `run_tool` 的 job 状态和 artifact truth 映射到 `run / verify / report`，形成可恢复的真实状态机。
 
+状态机接续已经完成（Core `4af1be2`）：workflow status 现在复用现有 tool job 与 artifact truth，并输出 `resumeFrom / nextActions`；真实 valid、degraded、blocked、execution failed、queued、running、cancelled 均有确定性投影。下一步优先把该只读状态接入现有摘要动态跟踪/结果工具，不新增独立工作流主页；所有 retry 或 artifact repair 必须继续走明确确认和审计边界。
+
 详细规范见：[Harness Engine Spec v1](./harness-engine-spec.md)。  
 详细路线图见：[Harness Roadmap v1](./harness-roadmap.md)。
 

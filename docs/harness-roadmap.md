@@ -237,6 +237,15 @@
 - Core 检查点为 `f491b61 feat: expose canonical harness workflow plans`，Desktop vendor lock 已同步。
 - 尚未创建第二套执行器；后续必须把阶段推进映射到现有 `run_tool → tool_job → artifact truth`。
 
+2026-07-13 状态机接续：
+
+- `run_tool → tool_job → artifact truth` 已映射到八阶段只读状态投影。
+- `/api/harness/workflow/status/:jobId` 在投影前执行共享 artifact truth 自愈。
+- API 提供 `terminal / recoverable / resumeFrom / nextActions`，明确区分执行重试和产物修复。
+- 两个真实历史 job 已验证到 report completed；内部 `manifest.json` 不再计入 artifact。
+- Core 状态机检查点为 `4af1be2 feat: project tool jobs into recoverable workflows`，Desktop vendor lock 已同步。
+- 下一步是在现有 Agent/结果区消费该状态，并为 retry/repair 动作增加显式、可审计的执行入口。
+
 ### Phase 6：远端执行与多平台扩展
 
 状态：后续重点。
