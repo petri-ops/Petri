@@ -6,6 +6,19 @@
 
 ## 2026-07-13 当前检查点与今日计划
 
+### Harness Phase 3 已完成（最新检查点）
+
+- 当前主线明确为 Harness 工程，结果层 UI 暂时冻结；Phase 1、Phase 2、Phase 3 已完成，下一步进入 Phase 4 弱模型可用性。
+- 新增唯一共享实现 `vendor/biof3-core/shared-backend/execution-context.js`，`executionContextVersion: 1`。
+- HTTP 工具执行、MCP/Agent `run_tool`、Harness repair/plan、R task queue、Python task queue 均使用同一个 canonical execution context 工厂。
+- adapter 统一为 `local / container / remote`；platform/api enqueue 记录 remote，Docker worker 记录 container，本机运行记录 local。
+- 保留 `mode / workDir / canonicalWorkDir / runtimeReady` 等旧字段，避免破坏已有结果页、Agent 与插件；新增 `adapter / executionWorkDir / jobId / toolId / platform`。
+- R/Python task submit 返回 execution，worker 日志与完成结果也记录 execution；result 的 artifacts/outputs/files 会补 host `path` 和 `canonicalPath`。
+- `scripts/harness-file-index.mjs` 不再维护另一种上下文形状，Harness plan 与真实执行现在共享 version 1 契约。
+- 已通过桌面全量测试（96 项：89 pass、7 个显式 live skip）以及 execution-context 的 local/container/remote 定向测试。
+- Core Phase 3 检查点为 `c9208d5 feat: standardize canonical execution contexts`，已推送到 `origin/fix/tsc-strict-pass`。
+- 下一步不要继续改 execution context 表面结构；进入 Phase 4，扩大无 LLM tool selection、弱模型评测集和常见任务模板。
+
 ### Harness Phase 2–5 新检查点（2026-07-13）
 
 - `repairHarnessParams()` 现在返回 `proposalVersion: 1` 与 audit 信息，明确区分默认补全、Harness 推断和对用户显式值的调整。
@@ -416,12 +429,12 @@ npm run build:spa
 
 1. 先读 `docs/harness-engine-spec.md`。
 2. 再读 `docs/next-steps-roadmap.md`。
-3. 继续 **Harness Phase 2 后半段**，但不要再回头改旧的结果卡片交互：
-   - 继续扩充弱模型回归测试，覆盖更多二跳分析和失败恢复场景。
-   - 做增量索引：基于 mtime / hash 只更新变化文件，避免每次全量扫描。
-   - 把 canonical execution context 用到更多任务编排入口，例如步骤工具、二次分析、云端 worker adapter。
-   - 继续收敛 failureModes：把产物缺失、输入文件格式异常、运行后失败等也转成统一可诊断结构。
-   - 后续如果继续做跨平台，优先补三平台 CI，而不是再开长期未同步分支。
+3. 进入 **Harness Phase 4 弱模型可用性**，不要再回头改旧的结果卡片交互：
+   - 扩充不依赖 LLM 的确定性工具选型，覆盖更多高频分析任务。
+   - 建立弱模型评测集，覆盖成功、blocked、recoverable、二跳分析与真实历史 artifact。
+   - 把常见任务整理成薄 Skills/流程模板，但不得复制插件或 Harness 的执行真相。
+   - 保持 repair 建议可审计、需要时显式确认。
+   - 补 canonical adapter 的三平台 CI，避免长期分支再次不同步。
 
 ### 当前原则
 
@@ -435,7 +448,7 @@ npm run build:spa
 - 不要再优先做 UI 大改。
 - 不要回头重构已经稳定的三栏布局。
 - 不要把真实执行逻辑继续散落在 prompt 文案里。
-- 不要绕过 Phase 0 直接大规模改 Harness；先确保当前大量未提交改动可构建、可运行、可交接。
+- 不要另建 execution context 或第二套执行器；扩展现有 version 1 工厂和 `run_tool → tool_job → artifact truth` 主链。
 
 ## 当前产品判断
 

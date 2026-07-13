@@ -5,6 +5,11 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
+const moduleRequire = createRequire(import.meta.url);
+const { createExecutionContext: createCanonicalExecutionContext } = moduleRequire(
+  '../vendor/biof3-core/shared-backend/execution-context.js',
+);
+
 const DEFAULT_MAX_SAMPLE_BYTES = 256 * 1024;
 const DEFAULT_MAX_FILES = 500;
 const DEFAULT_CACHE_NAME = '.biof3-harness-index.json';
@@ -1598,14 +1603,19 @@ export function createLocalHarnessPlatform(platformOptions = {}) {
         this.resolveScope(input);
       const runtime = normalizeRuntimeName(input.runtime || input.manifest?.runtime || input.manifest?.language || 'shell');
       const runtimeReady = this.checkRuntimeReady(runtime);
-      return {
+      const canonicalTarget = scopeInfo.canonicalTarget || this.canonicalizePath(scopeInfo.target);
+      const execution = createCanonicalExecutionContext({
+        jobId: input.jobId || (scopeInfo.scope === 'job' ? scopeInfo.id : null),
+        toolId: input.manifest?.id || input.manifest?.name || null,
         platform: 'local',
         runtime,
         runtimeReady,
+        mode: 'local',
         workDir: scopeInfo.target,
-        canonicalWorkDir: scopeInfo.canonicalTarget || this.canonicalizePath(scopeInfo.target),
-        scope: scopeInfo,
-      };
+        localRoot: scopeInfo.target,
+        canonicalRoot: canonicalTarget,
+      }).context;
+      return { ...execution, scope: scopeInfo };
     },
     resolveScope(options = {}) {
       const scope = String(options.scope || (options.jobId ? 'job' : options.projectId ? 'project' : 'path'));

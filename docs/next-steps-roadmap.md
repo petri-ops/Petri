@@ -324,16 +324,15 @@ npm run dev
 - vendor/biof3-core 的改动是否确认为本次快照的一部分。
 - `.cursor/` 是否需要提交或加入忽略。
 
-### P1：Harness Phase 2
+### P1：Harness Phase 4（当前下一阶段）
 
-Phase 1 的 manifest / artifact / failureModes 基础已经落地，Phase 2 已经从“文件探测/索引”推进到“参数修复 + prompt 注入 + canonical execution context”。下一步继续推进：
+Phase 1–3 已正式完成。Phase 3 将 HTTP、MCP、Harness plan、R/Python step queue 统一到 version 1 canonical execution context，并覆盖 local/container/remote adapter。下一步进入弱模型可用性收口：
 
-1. 扩充弱模型回归测试：覆盖更多失败恢复、二跳分析链路和真实历史结果输入。
-2. 增量索引已落地：基于 mtime / hash 做局部更新，避免每次全量扫描；后续继续补更复杂目录与更大数据集的回归。
-3. 继续统一 failureModes 诊断：把产物缺失、输入文件格式异常、运行后错误转为稳定结构。
-4. 把 canonical execution context 扩到步骤工具和云端 worker adapter。
-5. 梳理 `repairHarnessParams()` 与真实 `run_tool` 的边界：继续保持“可审计建议优先”，避免静默覆盖用户参数。
-6. 为跨平台主链路补 Windows / Linux / macOS CI，避免再次出现长期分支不同步。
+1. 扩充无 LLM 的确定性 tool selection，覆盖 DESeq2 / volcano / PCA / gene-correlation 之外的高频任务。
+2. 把弱模型回归组成稳定评测集：成功、blocked、recoverable、二跳分析和历史 artifact 输入都要覆盖。
+3. 为常见任务建立薄 Skills/流程模板；Skills 只提供策略，不复制执行真相。
+4. 继续保持 repair 可审计、显式确认，不静默覆盖用户参数。
+5. 为 canonical adapter 主链路补 Windows / Linux / macOS CI。
 
 2026-07-13 接续进展：第 1、3、4 项进一步收口。repair audit、稳定 readiness、不可修复输入阻塞、桌面 runtime 探测和八阶段 workflow plan API 已落地并通过真实历史 artifact 验证；Core 检查点为 `f491b61`。下一步不再扩写 plan 表面结构，而是把现有 `run_tool` 的 job 状态和 artifact truth 映射到 `run / verify / report`，形成可恢复的真实状态机。
 
@@ -342,6 +341,8 @@ Phase 1 的 manifest / artifact / failureModes 基础已经落地，Phase 2 已�
 只读状态 UI 已接入：摘要卡八段轨道和结果工具 truth/recovery 单行状态已完成；查询只在对应界面可见时进行，终态停止。恢复按钮当前只创建需要用户确认的 Agent 请求。下一步应补 recoverable/blocked UI fixture，并实现确认后的 retry/repair → 原 workflow 状态回写闭环。
 
 Recoverable workflow 阶段已经完整收口（Core `8cb2620`）：`reconcile_artifacts / retry_run` 具备短期单次确认、动作白名单、审计、原 job 状态回写和真实运行验证；需要理解数据语义的 `repair_artifacts` 仍由 Agent 处理。下一步进入多步骤 workflow template 与 Agent/计划状态联动，不再继续增加恢复按钮。
+
+Phase 3 已于 2026-07-13 完成（Core `c9208d5`）：共享 `execution-context.js` 消除了 HTTP/MCP 的重复实现，并把同一契约扩到 Harness plan、R/Python 步骤任务与 platform/worker adapter；task result 文件具有 host/canonical 双路径。下一位 agent 不应再创建新的 execution context 实现，应直接扩展 version 1 工厂。
 
 详细规范见：[Harness Engine Spec v1](./harness-engine-spec.md)。  
 详细路线图见：[Harness Roadmap v1](./harness-roadmap.md)。

@@ -171,7 +171,7 @@
 
 ### Phase 2：文件探测 + 参数修复 + 诊断
 
-状态：已完成初始版，继续收口。
+状态：已完成。
 
 目标：
 
@@ -187,7 +187,7 @@
 
 ### Phase 3：执行链路标准化
 
-状态：进行中。
+状态：已完成（2026-07-13）。
 
 目标：
 
@@ -200,9 +200,17 @@
 - 任一工具执行都能记录标准执行元信息。
 - 参数修复、诊断、结果解释可以复用同一套上下文。
 
+当前实现：
+
+- `shared-backend/execution-context.js` 是唯一 canonical execution context 工厂，契约版本为 1。
+- HTTP、MCP、Harness plan、R/Python step task queue 均复用该工厂，不再各自维护路径映射。
+- 适配器显式区分 `local / container / remote`，同时保留旧的 mode/workDir/canonicalWorkDir 字段兼容现有消费者。
+- task submit、worker run、result files 都记录 execution；artifact/output/file 自动获得 host path 与 canonicalPath。
+- local、container、platform enqueue 和旧 MCP/Agent 路径均有自动化回归。
+
 ### Phase 4：弱模型可用性
 
-状态：进行中。
+状态：下一主阶段（已有基础回归，待系统收口）。
 
 目标：
 
@@ -216,7 +224,7 @@
 
 ### Phase 5：工作流编排
 
-状态：最小计划骨架已落地，下一步接真实执行状态机。
+状态：计划、真实状态投影与 recoverable action 闭环已落地；多步骤模板待推进。
 
 目标：
 
@@ -340,9 +348,8 @@
 
 接下来最稳妥的顺序是：
 
-1. Phase 2 收口。
-2. Phase 3 统一执行链路。
-3. Phase 4 做弱模型回归。
-4. 再进入 Phase 5 的工作流编排。
+1. Phase 4 扩大弱模型确定性选型与回归。
+2. 收口常见任务包与 Skills 流程模板。
+3. 再进入 Phase 5 的多步骤工作流模板与 Agent 状态联动。
 
 这条路线最符合当前阶段的产品成熟度。
