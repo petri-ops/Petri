@@ -138,6 +138,30 @@ function defaultFailureModes() {
       suggestedFix: '适度放宽阈值，或者提示用户检查数据是否真的存在足够信号。',
       detect: 'empty result|no significant|insufficient signal|no rows meet threshold',
     },
+    {
+      code: 'required_artifact_missing',
+      title: '必需结果产物缺失',
+      description: '工具结束后没有生成 output schema 声明的必需文件。',
+      recoverable: true,
+      suggestedFix: '检查运行日志和输出路径，修复后重新执行。',
+      detect: 'required artifact missing|was not produced',
+    },
+    {
+      code: 'required_artifact_empty',
+      title: '必需结果产物为空',
+      description: '必需结果文件为空或不可读取。',
+      recoverable: true,
+      suggestedFix: '检查写文件逻辑、磁盘空间和运行日志后重新执行。',
+      detect: 'required artifact empty|empty or unreadable',
+    },
+    {
+      code: 'artifact_type_mismatch',
+      title: '结果产物类型不匹配',
+      description: '声明的结果类型与真实文件格式不一致。',
+      recoverable: true,
+      suggestedFix: '修正 output schema 或输出正确格式的文件。',
+      detect: 'artifact type mismatch|declared as|detected as',
+    },
   ];
 }
 

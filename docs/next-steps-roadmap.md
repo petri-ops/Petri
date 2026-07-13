@@ -9,7 +9,7 @@
 ## 2026-07-13 今日执行顺序
 
 1. **UI checkpoint**：验证、文档同步、commit 与 push 已完成；非阻断型视觉修改已冻结。
-2. **Artifact truth**：统一校验 status API、DB `result_json`、manifest 和磁盘真实文件，缺失产物进入 diagnostics / failureModes。
+2. **Artifact truth**：核心闭环、验证、commit 与 push 已完成；status API、DB `result_json`、manifest 和磁盘真实文件已统一校验，缺失产物进入 diagnostics / failureModes。
 3. **Harness continuation**：完成至少一条真实二跳分析链路，并扩展参数修复与失败恢复回归。
 4. **Platform stability**：审计 Electron `better-sqlite3` ABI、runtime/canonical path、vendor drift 和三平台 CI 最小矩阵。
 5. **Delivery**：完整验证、更新三份进度文档、提交并推送今日成果。
@@ -20,6 +20,14 @@
 - 结果主预览与 Honeycomb 导航始终属于右侧结果工具工作区。
 - UI 除阻断问题外不再继续精修。
 - 前端对缺失 artifact 的回退只是兼容保护，不能代替后端产物一致性校验。
+
+### Stage 2 当前成果
+
+- artifact truth 已成为 HTTP、MCP 和状态读取的共享边界。
+- `valid / degraded / blocked` 与五类 artifact diagnostics 已落地。
+- required 产物异常阻断 completed；optional 异常保留结果并过滤失效导航。
+- 历史结果支持从磁盘 manifest 自愈 DB，目录选择优先真实 populated output。
+- 下一步进入 Stage 3：active artifact 二跳输入、repair、readiness gate 与下游结果验证。
 
 ## 当前阶段目标
 

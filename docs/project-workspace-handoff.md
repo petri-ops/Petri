@@ -50,10 +50,44 @@ git diff --check
 
 #### Stage 2 — 结果产物可信化
 
-- 在执行结束与结果读取边界统一校验 manifest / artifacts / files / outputs 与磁盘真实文件。
-- 不存在、空文件、不可读、类型不符的 artifact 进入统一 diagnostics / failureModes。
-- 缺失 HTML 报告不能成为默认预览；前端 fallback 只作为兼容保护，后端必须记录真实问题。
+- 状态：核心闭环、验证、commit 与 push 已完成。
+- 已在执行结束与结果读取边界统一校验 manifest / artifacts / files / outputs 与磁盘真实文件。
+- 不存在、空文件、不可读、类型不符的 artifact 已进入统一 diagnostics / failureModes。
+- 缺失 HTML 报告不再成为默认预览；前端 fallback 只作为兼容保护，后端会记录真实问题。
 - 出口条件：状态 API、DB `result_json`、manifest 和磁盘产物四者一致，具有回归测试。
+
+2026-07-13 Stage 2 实现记录：
+
+- 新增 `r-server/helpers/artifact-truth.js`，定义 `artifactTruthVersion: 1`。
+- 统一状态：`valid / degraded / blocked`。
+- 统一诊断：
+  - `required_artifact_missing`
+  - `required_artifact_empty`
+  - `artifact_type_mismatch`
+  - `artifact_missing`
+  - `artifact_empty`
+- HTTP/前端执行器与 MCP/Agent 执行器在写 DB 前调用同一校验器。
+- required artifact 问题会将任务置为 failed；可选 artifact 问题保留 completed 并标记 degraded。
+- `/api/tools/status/:id` 与 SSE 状态流会校验历史 `result_json`，从磁盘 manifest 恢复真实产物并自愈 DB。
+- MCP 执行器已补齐与 HTTP 执行器相同的报告模板复制约定，并停止把 `output/` 目录误当 artifact。
+- plugin-loader 会给所有 normalized manifest 注入全局 artifact failureModes；新工具 scaffold 默认携带核心 artifact failureModes。
+- Core 子仓检查点：`96b6781 feat: validate tool result artifacts`，已推送到 `origin/fix/tsc-strict-pass`。
+- 真实 MCP 火山图验证：6 个声明产物、6 个真实文件、0 issues，`report.html` 由已有模板机制生成。
+- 历史 Honeycomb demo `tj_mrhgg5cf_ib7o` 已验证 API / DB / manifest / disk 均为 6 个真实产物、4 个 sections、truth=`valid`。
+- 开发中曾发现历史 `resultDir` 指向空 job 根而真实文件位于 `output/`；已改为按 manifest 和真实文件数选择结果目录，并增加回归，受影响 demo 已从磁盘完整恢复。
+
+Stage 2 验证：
+
+```bash
+node --test test/artifact-truth.test.mjs test/agent-run-tool.test.mjs test/mcp-tool-registry.test.mjs test/harness-manifest.test.mjs test/harness-tool-template.test.mjs test/harness-file-index.test.mjs
+RUN_AGENT_LIVE=1 node --test test/agent-run-tool.test.mjs
+npm run harness:check
+npm --prefix frontend run check
+npm --prefix frontend test -- useResizableColumns.test.ts result-manifest.test.ts
+npm run build:spa
+```
+
+结果：Node 定向回归 50 项中 47 项通过、3 项默认 live skip；独立 live 火山图 8/8 通过；前端 19/19 通过；Harness manifest 检查和 SPA 构建通过。
 
 #### Stage 3 — Harness Phase 2 后半段
 

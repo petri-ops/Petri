@@ -14,7 +14,7 @@
 
 当前 UI 细节阶段结束后，Harness 工作按以下顺序连续推进：
 
-1. 先建立 artifact truth boundary：执行结束时校验声明产物与真实文件，统一缺失、空文件、不可读和类型不匹配诊断。
+1. artifact truth boundary 已完成核心闭环：执行结束时校验声明产物与真实文件，统一缺失、空文件、不可读和类型不匹配诊断。
 2. 把 artifact diagnostics 接入现有 `failureModes.code + failureModes.detect`，保证前端、Agent 和日志读取同一结构。
 3. 打通真实二跳链路：active artifact → 候选输入 → repair → readiness gate → run_tool → verify outputs。
 4. 扩展弱模型回归，至少覆盖成功二跳、缺失上游产物、列名可修复、格式不可修复四类路径。
@@ -28,6 +28,16 @@
 - 缺失 artifact 不会进入默认预览或被当作成功输入。
 - 至少一条真实二跳分析链路有自动化回归。
 - 所有未完成项进入可执行交接，不依赖聊天上下文。
+
+### Artifact truth boundary（2026-07-13 已完成核心）
+
+- HTTP/前端与 MCP/Agent 执行链路共用 `artifact-truth.js`。
+- 状态 API/SSE 对历史结果做磁盘复核和 DB 自愈。
+- 统一 artifact failureModes 已注入 normalized plugin manifest 与新工具 scaffold。
+- required missing/empty/type mismatch 为 blocked；optional missing/empty 为 degraded。
+- 真实火山图执行与历史 Honeycomb demo 恢复均已通过。
+- Core 实现已提交为 `96b6781 feat: validate tool result artifacts` 并推送远程分支。
+- Stage 3 直接复用 truth artifacts，禁止二跳分析绑定 missing/empty/type-mismatch 产物。
 
 ## 1. 现状概览
 
