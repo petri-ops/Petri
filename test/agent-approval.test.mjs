@@ -94,3 +94,71 @@ test('HEAVY_TOOLS 白名单含 deseq2/wgcna/ml-* 不含 volcano-plot', async () 
   const sqlite = db.getSqliteForLegacyModules();
   sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(r.toolJobId);
 });
+
+test('单细胞步骤首次运行也进入显式确认', async () => {
+  const r = await learning.tool_run_tool(
+    { op: 'run', toolId: 'doublet', params: { ossInputUrl: 'https://example.test/input.rds' } },
+    CTX,
+  );
+  assert.equal(r.needApproval, true);
+  assert.equal(r.toolId, 'doublet');
+  const sqlite = db.getSqliteForLegacyModules();
+  sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(r.toolJobId);
+});
+
+test('Agent 可以获取只规划不自动执行的标准分析计划', async () => {
+  const listed = await learning.tool_run_tool({ op: 'list' }, CTX);
+  assert.ok(listed.workflowTemplates.some((item) => item.id === 'bulk-rna-core'));
+  const planned = await learning.tool_run_tool(
+    {
+      op: 'plan',
+      templateId: 'bulk-rna-core',
+      initialInputs: { counts: '/data/counts.csv', coldata: '/data/groups.csv' },
+    },
+    CTX,
+  );
+  assert.equal(planned.ok, true);
+  assert.equal(planned.plan.autoExecute, false);
+  assert.equal(planned.plan.executionPolicy, 'agent_led_existing_tools');
+  assert.equal(planned.plan.steps[0].inputs.counts, '/data/counts.csv');
+});
+
+test('Agent 只能把真实 tool_job 中已验证的 artifact 绑定到下游', async () => {
+  const planned = await learning.tool_run_tool(
+    { op: 'plan', templateId: 'bulk-rna-core' },
+    CTX,
+  );
+  const job = db.createToolJob({
+    toolId: 'deseq2',
+    userId: CTX.userId,
+    status: 'completed',
+    params: {},
+  });
+  db.updateToolJob(job.id, {
+    status: 'completed',
+    resultJson: {
+      artifactTruth: { status: 'valid', validCount: 1 },
+      artifacts: [
+        { id: 'deg_table', name: 'deg.csv', path: '/results/deg.csv', type: 'table' },
+      ],
+    },
+    completedAt: Date.now(),
+  });
+  const bound = await learning.tool_run_tool(
+    {
+      op: 'bind_artifact',
+      workflowPlan: planned.plan,
+      fromToolJobId: job.id,
+      fromStepId: 'differential',
+      toStepId: 'volcano',
+      inputId: 'deg_table',
+      artifactId: 'deg_table',
+    },
+    CTX,
+  );
+  assert.equal(bound.ok, true);
+  assert.equal(bound.plan.steps.find((step) => step.id === 'volcano').inputs.deg_table, '/results/deg.csv');
+  assert.equal(bound.plan.lineage[0].fromToolJobId, job.id);
+  const sqlite = db.getSqliteForLegacyModules();
+  sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(job.id);
+});

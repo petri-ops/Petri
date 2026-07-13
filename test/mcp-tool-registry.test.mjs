@@ -50,7 +50,17 @@ test('listStepTools 返回 10 个单细胞步骤', () => {
   for (const s of steps) {
     assert.equal(s._isStep, true);
     assert.equal(s.inputSchema.type, 'object');
+    assert.deepEqual(s.inputSchema.required, ['ossInputUrl']);
   }
+});
+
+test('步骤工具缺少输入时返回结构化错误，而不是未实现占位', async () => {
+  globalThis._biof3Plugins = new Map();
+  const result = await callTool('doublet', {});
+  assert.equal(result.isError, true);
+  const payload = JSON.parse(result.content[0].text);
+  assert.equal(payload.error, 'missing_oss_input_url');
+  assert.doesNotMatch(result.content[0].text, /执行通道待/);
 });
 
 test('listTools 合并插件工具 + 单细胞步骤', async () => {

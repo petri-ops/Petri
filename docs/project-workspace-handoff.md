@@ -6,6 +6,24 @@
 
 ## 2026-07-13 当前检查点与今日计划
 
+### Agent-led analysis foundation v1 已完成（最新检查点）
+
+- 产品方向已明确：Agent 主导数据分析，调用规范化流程；流程基础覆盖完成后，再由 Agent 对结果做多轮调整。
+- `run_tool` 现在是 Agent 的统一分析入口，支持 `list / plan / bind_artifact / run`。
+- 新增三个薄流程模板：`bulk-rna-core`、`single-cell-core`、`deg-result-refinement`。模板 `autoExecute: false`，Agent 必须逐步决策。
+- 原先 MCP 中 10 个单细胞步骤的“执行通道待实现”已删除；全部映射真实 R task type，并具有至少可执行的 input schema。
+- step submit 会创建/复用 tool job，并在 task params 中保存 `__harness.toolJobId`；queue 的 queued/running/completed/failed 会回写同一个 job。
+- step 完成后，本地产物进入共享 artifact truth；摘要动态跟踪、结果打开、retry 和 workflow state 不需要第二套适配。
+- 修复 `cell-cycle / doublet` 生成器存在但未进入 task-manager switch 和路由白名单的问题。
+- 所有单细胞步骤都属于重分析，首次由 Agent 执行仍走原有显式确认卡。
+- `bind_artifact` 会从当前用户真实 tool job 读取 artifact 和 truth；只有 `valid` 才能写入下游输入并生成 lineage，模型不能自己声称结果已验证。
+- 隔离 platform enqueue 验证通过：Agent doublet call 同时产生 pending task 和 queued tool job，两者 ID 正确关联。
+- 模拟 worker completion 验证通过：task 完成后 tool job completed，artifact truth valid，2 个产物可追踪。
+- 真实二跳验证通过：`tj_mrhgg5cf_ib7o` 的 valid `classified_table.csv` → Agent lineage → 新 `volcano-plot` job；下游 completed、truth valid、5 artifacts，验证任务已清理。
+- 全量测试 120 项：113 pass、7 个显式 live skip；Phase 4 评测继续保持 51/51。
+- Core Agent-led foundation 检查点为 `2f57ce4 feat: establish agent-led analysis workflows`，已推送到 `origin/fix/tsc-strict-pass`。
+- 下一步进入流程扩充阶段：先补 Bulk RNA/单细胞高频流程，再扩空间转录组、蛋白组、代谢组；不得再写另一套 executor/plan/job 状态。
+
 ### Harness Phase 4 已完成（最新检查点）
 
 - Phase 1–4 已完成，下一主阶段是 Phase 5 多步骤工作流模板；结果层 UI 继续冻结。
@@ -444,12 +462,12 @@ npm run build:spa
 
 1. 先读 `docs/harness-engine-spec.md`。
 2. 再读 `docs/next-steps-roadmap.md`。
-3. 进入 **Harness Phase 5 多步骤工作流模板**，不要再回头改旧的结果卡片交互：
-   - 模板只引用 task pack/tool id，不复制 manifest 和执行脚本。
-   - 每一步必须映射现有 tool job 状态与 artifact truth。
-   - verified artifact 通过显式 lineage 成为下一步输入。
-   - 步骤级确认、暂停、失败恢复继续复用现有审计协议。
-   - 先用真实二跳/三跳分析做回归，再考虑 UI 展示。
+3. 进入 **标准生物分析流程扩充阶段**，不要再回头改旧的结果卡片交互：
+   - 优先盘点并补齐 Bulk RNA 和单细胞高频流程。
+   - 每个流程必须有 manifest、参数 schema、failureModes、artifact schema 和真实 fixture。
+   - 新流程只注册到现有 task pack/模板，禁止修改 Agent 主协议。
+   - 每批流程都跑 ready/recoverable/blocked 和真实产物回归。
+   - 基础流程覆盖达到可用规模后，再做结果多轮调整与局部重跑体验。
 
 ### 当前原则
 

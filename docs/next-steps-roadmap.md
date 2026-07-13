@@ -324,15 +324,15 @@ npm run dev
 - vendor/biof3-core 的改动是否确认为本次快照的一部分。
 - `.cursor/` 是否需要提交或加入忽略。
 
-### P1：Harness Phase 5（当前下一阶段）
+### P1：Harness Phase 6（当前下一阶段）
 
-Phase 1–4 已正式完成。Phase 4 已建立 12 类薄任务包、确定性工具选择、无猜测保护、HTTP workflow 自动选型和独立评测门禁。下一步进入多步骤工作流编排：
+Phase 1–5 已正式完成。Agent 现在能列流程、生成薄计划、逐步运行真实插件/步骤工具、验证 artifact truth，并把 verified artifact 绑定到下游。下一步开始批量补充标准分析流程：
 
-1. 定义多步骤 workflow template schema，引用 task pack/tool id，不复制 manifest。
-2. 把模板阶段映射到现有 `run_tool → tool_job → artifact truth`，不创建第二套执行器。
-3. 建立 artifact lineage：上一步 verified artifact 成为下一步显式输入。
-4. 支持步骤级暂停、确认、失败恢复和继续执行。
-5. 用真实二跳/三跳分析加入回归，再接 Agent/计划状态展示。
+1. 先盘点 Bulk RNA、单细胞、空间转录组、蛋白组、代谢组和常见统计/可视化流程。
+2. 每个流程按统一 manifest、input schema、artifact schema 和 failureModes 接入，不写 prompt 特例。
+3. 为每个流程准备小型真实 fixture，至少验证 ready、recoverable、blocked 和真实运行产物。
+4. 将新流程加入 task pack/模板候选，不修改 Agent 执行协议。
+5. 流程覆盖形成规模后，进入结果多轮调整、参数重跑和派生分析体验。
 
 2026-07-13 接续进展：第 1、3、4 项进一步收口。repair audit、稳定 readiness、不可修复输入阻塞、桌面 runtime 探测和八阶段 workflow plan API 已落地并通过真实历史 artifact 验证；Core 检查点为 `f491b61`。下一步不再扩写 plan 表面结构，而是把现有 `run_tool` 的 job 状态和 artifact truth 映射到 `run / verify / report`，形成可恢复的真实状态机。
 
@@ -345,6 +345,8 @@ Recoverable workflow 阶段已经完整收口（Core `8cb2620`）：`reconcile_a
 Phase 3 已于 2026-07-13 完成（Core `c9208d5`）：共享 `execution-context.js` 消除了 HTTP/MCP 的重复实现，并把同一契约扩到 Harness plan、R/Python 步骤任务与 platform/worker adapter；task result 文件具有 host/canonical 双路径。下一位 agent 不应再创建新的 execution context 实现，应直接扩展 version 1 工厂。
 
 Phase 4 已于 2026-07-13 完成（Core `3fbfe3b`）：`harness-task-packs.mjs` 覆盖 12 类常见分析意图，workflow plan 可在没有 LLM/显式 manifest 时从实际可用插件确定性选择，并对未知请求和缺失工具安全失败。`npm run harness:evaluate` 是后续必须保留的质量门禁；真实历史 DEG artifact 已完成自动选型、参数修复和确认边界验证。
+
+Phase 5 Agent-led foundation v1 已于 2026-07-13 完成（Core `2f57ce4`）：10 个单细胞步骤已从占位调用接入真实 task queue，并回写现有 tool job/artifact truth；`run_tool` 增加 plan 与 bind_artifact，三个薄模板默认不自动执行，只有 valid artifact 能激活下游。真实历史 DEG → 新 volcano 二跳执行验证为 valid。下一位 agent 应开始补流程，不应再创建新的计划器、执行器或 job 状态系统。
 
 详细规范见：[Harness Engine Spec v1](./harness-engine-spec.md)。  
 详细路线图见：[Harness Roadmap v1](./harness-roadmap.md)。

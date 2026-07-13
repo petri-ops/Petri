@@ -233,13 +233,26 @@
 
 ### Phase 5：工作流编排
 
-状态：计划、真实状态投影与 recoverable action 闭环已落地；多步骤模板待推进。
+状态：Agent-led analysis foundation v1 已完成（2026-07-13）。
 
 目标：
 
 - 把多步骤分析收成工作流模板。
 - Skills 变成“流程知识”，不是“执行真相”。
 - 支持项目级的连续分析链路。
+
+当前实现：
+
+- `run_tool` 统一提供 `list / plan / bind_artifact / run` 四种 Agent 操作。
+- 三个薄模板覆盖 Bulk RNA、单细胞标准分析和已有 DEG 结果二次分析；模板只引用 tool id，不拥有执行逻辑。
+- 10 个单细胞步骤不再是“可见但不可执行”：全部具有参数 schema、真实 task type 和 MCP/Agent 提交通道。
+- step task 通过 `__harness.toolJobId` 关联现有 tool job；queued/running/completed/failed 和 artifact truth 会回写同一 job。
+- `cell-cycle` 与 `doublet` 已接入真实 generator switch 和任务类型白名单。
+- 下游输入只能通过 `bind_artifact` 从当前用户真实 tool job 的 valid artifact truth 绑定；degraded/unverified artifact 会被拒绝。
+- 默认 `autoExecute: false`，Agent 必须逐步运行、检查结果、绑定 lineage，再决定下一步。
+- 真实二跳验证：历史 valid DEG artifact → Agent lineage → 新 volcano job，完成后 truth valid、5 项产物。
+
+下一阶段不再继续扩基座表面结构，而是批量补充规范化生物分析流程和对应真实评测。
 - 也支持局部修改、反复追问、结果再分析这类交互式回合。
 
 完成标准：
@@ -357,8 +370,8 @@
 
 接下来最稳妥的顺序是：
 
-1. 进入 Phase 5，多步骤 workflow template 与 Agent 状态联动。
-2. 复用现有 task packs 组合多步骤计划，不新增执行器。
-3. 用真实二跳/三跳分析验证暂停、确认、恢复和 artifact lineage。
+1. 进入 Phase 6，批量补充常用生物数据分析流程。
+2. 每个流程必须具备 manifest、参数 schema、failureModes、artifact 约定和真实 fixture。
+3. 流程覆盖足够后，再强化 Agent 对结果的多轮调整和局部重跑。
 
 这条路线最符合当前阶段的产品成熟度。

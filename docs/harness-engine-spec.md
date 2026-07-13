@@ -459,9 +459,17 @@ Harness 必须支持最基本的修复回路：
 
 ### Phase 5
 
-- 远端集群接入
-- Windows 适配
-- 大规模索引性能优化
+- Agent-led 多步骤计划协议
+- 真实 step tool → task → tool_job → artifact truth 闭环
+- verified artifact lineage 与步骤级确认/恢复
+
+### Phase 6
+
+- 批量补充规范化生物数据分析流程
+- 每个流程的真实 fixture 与回归评测
+- Agent 对结果的多轮调整、局部重跑和派生分析
+
+并行工程目标：远端集群接入、Windows 适配和大规模索引性能优化继续推进，但不能分叉核心执行协议。
 
 并行目标：
 
