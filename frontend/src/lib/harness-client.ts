@@ -130,6 +130,7 @@ export interface HarnessRepairRequest {
   scope: 'project' | 'job' | 'artifact' | 'dataset';
   projectId?: string;
   jobId?: string;
+  activeArtifactName?: string;
   datasetId?: string;
   manifest: HarnessToolManifest;
   params?: Record<string, unknown>;

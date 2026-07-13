@@ -378,6 +378,48 @@ test('weak-agent regression ranks volcano plot and repairs DEG params from index
   });
 });
 
+test('two-hop repair prioritizes the active upstream artifact and returns an executable absolute path', () => {
+  withTempDir((dir) => {
+    fs.writeFileSync(path.join(dir, 'other_deg.csv'), 'gene,log2FC,pvalue\nA,1,0.01\n');
+    fs.writeFileSync(path.join(dir, 'classified_table.csv'), 'gene,log2FC,pvalue\nB,2,0.001\n');
+    const index = indexDirectory(dir, { hash: false });
+    const volcano = readBuiltInManifest('volcano-plot');
+    const inputSuggestions = suggestInputBindings(volcano, index, {
+      preferredPaths: ['classified_table.csv'],
+    });
+    const selected = inputSuggestions.find((binding) => binding.inputId === 'deg_table')?.selected;
+    assert.equal(selected.relativePath, 'classified_table.csv');
+    assert.ok(selected.reasons.includes('active_artifact_preferred'));
+
+    const repaired = repairHarnessParams(volcano, index, {}, {
+      inputSuggestions,
+      useAbsolutePaths: true,
+    });
+    assert.equal(repaired.repairedParams.deg_table, path.join(dir, 'classified_table.csv'));
+  });
+});
+
+test('two-hop repair does not force an incompatible active artifact over a valid candidate', () => {
+  withTempDir((dir) => {
+    fs.writeFileSync(path.join(dir, 'report.html'), '<html>report</html>');
+    fs.writeFileSync(path.join(dir, 'deg.csv'), 'gene,log2FC,pvalue\nA,1,0.01\n');
+    const index = indexDirectory(dir, { hash: false });
+    const volcano = readBuiltInManifest('volcano-plot');
+    const inputSuggestions = suggestInputBindings(volcano, index, {
+      preferredPaths: ['report.html'],
+    });
+    const selected = inputSuggestions.find((binding) => binding.inputId === 'deg_table')?.selected;
+
+    assert.equal(selected.relativePath, 'deg.csv');
+    assert.ok(!selected.reasons.includes('active_artifact_preferred'));
+    const diagnostics = diagnoseHarnessRunReadiness(volcano, index, {}, {
+      inputSuggestions,
+      repair: repairHarnessParams(volcano, index, {}, { inputSuggestions, useAbsolutePaths: true }),
+    });
+    assert.equal(diagnostics.status, 'ready');
+  });
+});
+
 test('weak-agent regression ranks PCA and binds expression matrix plus group file', () => {
   withTempDir((dir) => {
     fs.writeFileSync(path.join(dir, 'expression_matrix.csv'), 'Sample,G1,G2,G3\nS1,1,2,3\nS2,4,5,6\nS3,7,8,9\n');

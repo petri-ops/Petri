@@ -10,7 +10,7 @@
 
 1. **UI checkpoint**：验证、文档同步、commit 与 push 已完成；非阻断型视觉修改已冻结。
 2. **Artifact truth**：核心闭环、验证、commit 与 push 已完成；status API、DB `result_json`、manifest 和磁盘真实文件已统一校验，缺失产物进入 diagnostics / failureModes。
-3. **Harness continuation**：完成至少一条真实二跳分析链路，并扩展参数修复与失败恢复回归。
+3. **Harness continuation**：真实二跳核心链路、绝对路径修复、失败恢复回归、commit 与 push 已完成。
 4. **Platform stability**：审计 Electron `better-sqlite3` ABI、runtime/canonical path、vendor drift 和三平台 CI 最小矩阵。
 5. **Delivery**：完整验证、更新三份进度文档、提交并推送今日成果。
 
@@ -27,7 +27,15 @@
 - `valid / degraded / blocked` 与五类 artifact diagnostics 已落地。
 - required 产物异常阻断 completed；optional 异常保留结果并过滤失效导航。
 - 历史结果支持从磁盘 manifest 自愈 DB，目录选择优先真实 populated output。
-- 下一步进入 Stage 3：active artifact 二跳输入、repair、readiness gate 与下游结果验证。
+- Stage 3 已接续完成 active artifact 二跳输入、repair、readiness gate 与下游结果验证。
+
+### Stage 3 当前成果
+
+- active artifact 可优先进入下游工具 repair，但必须先通过类型与角色匹配。
+- artifact scope blocked 时自动回退 project scope。
+- API repair 返回隔离执行器可读取的绝对路径。
+- 已跑通 `classified_table.csv → volcano-plot → 6 个 truth-valid artifacts` 的真实链路。
+- 下一步进入 Stage 4：Electron ABI、runtime/canonical path、vendor drift 与三平台 CI。
 
 ## 当前阶段目标
 

@@ -91,11 +91,24 @@ npm run build:spa
 
 #### Stage 3 — Harness Phase 2 后半段
 
-- 扩展二跳分析：当前 active artifact 可作为下一工具的候选输入。
-- 扩展参数修复、列名映射、输入角色判断和用户手动参数保护。
-- 扩展失败恢复：区分可自动修复、需要确认和 blocked。
-- 增加弱模型确定性回归，覆盖结果再分析与失败恢复。
+- 状态：二跳核心闭环、验证、commit 与 push 已完成。
+- 当前 active artifact 可作为下一工具的优先候选输入。
+- 参数修复已返回可直接执行的绝对路径，并保留列名映射、输入角色判断和用户手动参数保护。
+- artifact scope blocked 时前端自动回退 project scope；不兼容 active artifact 不会被强制绑定。
+- 弱模型确定性回归已覆盖结果再分析与不兼容输入恢复。
 - 出口条件：至少完成一条 `上游结果 → 选择 artifact → 参数修复 → 下游工具 → 结果校验` 的真实链路。
+
+2026-07-13 Stage 3 实现记录：
+
+- `suggestInputBindings()` 支持 `preferredPaths`，只对本身类型兼容且可评分的 active artifact 增加优先级。
+- repair API 接收 `activeArtifactName`，artifact scope 修复使用绝对文件路径。
+- `SimpleChat` 参数确认链路优先尝试当前 active artifact/job；若 diagnostics=`blocked`，自动回退 project scope。
+- 当前 artifact 与普通候选同时存在时，当前 artifact 获得 `active_artifact_preferred` 原因；不兼容 HTML 不会覆盖有效 CSV。
+- 真实二跳 API 验证：`tj_mrhgg5cf_ib7o/classified_table.csv` 被选为 volcano `deg_table`，得分 195，高于同目录 `deg_table.csv` 的 95，readiness=`ready`。
+- 真实下游执行：生成 `tj_mriio04e_ey7h`，artifact truth=`valid`，6 个真实产物、0 issues。
+- Core repair API 检查点：`2ee2081 feat: prioritize active artifacts in repair`，已推送远程分支。
+
+Stage 3 验证：Node 定向回归 48 项中 45 项通过、3 项默认 live skip；前端 19/19 通过；Harness manifest 和 SPA 构建通过；真实二跳执行成功。
 
 #### Stage 4 — 工程与跨平台稳定性
 

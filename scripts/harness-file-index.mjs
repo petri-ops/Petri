@@ -623,6 +623,9 @@ export function scoreEntryForInput(input, entry) {
 export function suggestInputBindings(manifest, index, options = {}) {
   const minScore = options.minScore ?? 25;
   const maxCandidates = options.maxCandidates ?? 5;
+  const preferredPaths = new Set(
+    (options.preferredPaths || []).map((value) => normalizePath(String(value))).filter(Boolean),
+  );
   const inputs = manifest?.inputs || manifest?.inputSchema?.properties || [];
   const normalizedInputs = Array.isArray(inputs)
     ? inputs
@@ -634,13 +637,20 @@ export function suggestInputBindings(manifest, index, options = {}) {
       const candidates = (index?.entries || [])
         .map((entry) => {
           const scored = scoreEntryForInput(input, entry);
+          const entryPaths = [entry.relativePath, entry.path, entry.canonicalPath]
+            .filter(Boolean)
+            .map((value) => normalizePath(String(value)));
+          const preferred = scored.score > 0 && entryPaths.some((value) =>
+            preferredPaths.has(value) || [...preferredPaths].some((preferredPath) => value.endsWith('/' + preferredPath))
+          );
           return {
             relativePath: entry.relativePath,
             path: entry.path,
             role: entry.role,
             kind: entry.kind,
-            score: scored.score,
-            reasons: scored.reasons,
+            canonicalPath: entry.canonicalPath,
+            score: scored.score + (preferred ? 100 : 0),
+            reasons: preferred ? ['active_artifact_preferred', ...scored.reasons] : scored.reasons,
           };
         })
         .filter((candidate) => candidate.score >= minScore)

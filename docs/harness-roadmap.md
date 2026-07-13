@@ -16,7 +16,7 @@
 
 1. artifact truth boundary 已完成核心闭环：执行结束时校验声明产物与真实文件，统一缺失、空文件、不可读和类型不匹配诊断。
 2. 把 artifact diagnostics 接入现有 `failureModes.code + failureModes.detect`，保证前端、Agent 和日志读取同一结构。
-3. 打通真实二跳链路：active artifact → 候选输入 → repair → readiness gate → run_tool → verify outputs。
+3. 真实二跳链路已打通：active artifact → 候选输入 → repair → readiness gate → run_tool → verify outputs。
 4. 扩展弱模型回归，至少覆盖成功二跳、缺失上游产物、列名可修复、格式不可修复四类路径。
 5. 最后处理 ABI、runtime、canonical path、vendor drift 与三平台 CI；平台问题不得绕过 Harness adapter 边界。
 
@@ -38,6 +38,15 @@
 - 真实火山图执行与历史 Honeycomb demo 恢复均已通过。
 - Core 实现已提交为 `96b6781 feat: validate tool result artifacts` 并推送远程分支。
 - Stage 3 直接复用 truth artifacts，禁止二跳分析绑定 missing/empty/type-mismatch 产物。
+
+### 二跳分析闭环（2026-07-13 已完成核心）
+
+- active artifact 通过 `preferredPaths` 参与确定性输入排序。
+- 只有扩展名、角色和表结构可匹配的 artifact 才能获得优先级。
+- repair API 输出绝对路径，可直接交给隔离执行器。
+- artifact scope blocked 自动回退 project scope。
+- 真实 Honeycomb DEG artifact 已成功驱动下游 volcano-plot，并通过 artifact truth 校验。
+- Core repair API 已提交为 `2ee2081 feat: prioritize active artifacts in repair` 并推送远程分支。
 
 ## 1. 现状概览
 

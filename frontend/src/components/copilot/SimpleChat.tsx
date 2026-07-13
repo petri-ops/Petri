@@ -163,13 +163,26 @@ export function SimpleChat({
           }
           return;
         }
-        const response = await repairHarnessParams({
-          scope: 'project',
-          projectId,
-          manifest,
-          params: originalParams,
-          maxFiles: 500,
-        });
+        const activeArtifact = copilotCtxRef.current.activeArtifact;
+        let response = activeArtifact
+          ? await repairHarnessParams({
+              scope: 'artifact',
+              jobId: activeArtifact.jobId,
+              activeArtifactName: activeArtifact.name,
+              manifest,
+              params: originalParams,
+              maxFiles: 500,
+            })
+          : null;
+        if (!response || response.diagnostics?.status === 'blocked') {
+          response = await repairHarnessParams({
+            scope: 'project',
+            projectId,
+            manifest,
+            params: originalParams,
+            maxFiles: 500,
+          });
+        }
         const repair = response.repair;
         if (!repair) {
           if (!cancelled) {
