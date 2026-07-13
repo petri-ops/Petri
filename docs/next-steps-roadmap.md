@@ -324,19 +324,19 @@ npm run dev
 - vendor/biof3-core 的改动是否确认为本次快照的一部分。
 - `.cursor/` 是否需要提交或加入忽略。
 
-### P1：Harness Phase 6（本地实现与验收已完成，待提交）
+### P1：标准流程覆盖 Phase 1（当前下一阶段）
 
-Phase 1–5 已正式完成。Phase 6 定义为 **Plugin SDK 与 Agent Workflow Runtime**，属于平台开发，不是内容扩充。当前按以下顺序推进：
+Harness Phase 1–6 已正式完成并推送：Core `dcd2043`，Desktop `2d000d5`。下一阶段不再建设新的平台层，而是用真实标准流程检验“manifest + script + fixture 即可接入”的承诺。
 
-1. 收口 Plugin SDK：统一 scaffold、契约校验、安装/开发目录发现、注册诊断和兼容性报告。
-2. 补齐 workflow runtime：复用现有 tool job 投影步骤状态、依赖、断点、恢复位置和下一动作，不新增执行器或状态库。
-3. 补齐 Agent 单步控制闭环：plan → run → verify → bind → decide/recover；禁止默认自动执行整条流程。
-4. 建立 fixture 驱动的插件门禁：覆盖 manifest、repair、diagnostics、执行结果、artifact truth 和 lineage。
-5. 继续验证 local/container/remote adapter 一致性，业务插件不得包含平台分支执行逻辑。
+首个试点选择 **GO/KEGG 富集分析**。现有 enrichment task pack、R 脚本与 DEG 上游结果可复用，能在不引入新算法范围的前提下验证完整开发者路径：
 
-Phase 6 只使用现有 Bulk RNA 与单细胞能力做少量样板验证。空间转录组、蛋白组、代谢组以及大批量高频流程，全部推迟到基座通过验收之后，避免用 Token 堆分析内容并造成返工。
+1. 用现有 scaffold 创建或规范化 GO/KEGG 插件，补齐 manifest、input/output schema、failureModes 与最小 fixture。
+2. 通过 built-in/development 来源发现、安装前诊断、弱模型选型和参数 repair 门禁。
+3. 从真实 valid DEG artifact 绑定输入，经 Agent `plan → run → verify → bind → decide` 单步执行。
+4. 验证 tool job、artifact truth、lineage、失败恢复和 local/container adapter；不修改 Agent 核心、执行器或结果 UI。
+5. 将该试点形成可复制的插件接入样板，再按 GSEA、WGCNA 等用户价值和依赖成熟度逐个扩展，不批量搬运旧脚本。
 
-2026-07-13 Phase 6 验收：统一 Plugin SDK、built-in/installed/development 来源优先级、结构化安装/CI 诊断、fixture scaffold、多步骤状态投影、Agent `status/next/run/bind` 闭环、valid lineage 和 Bulk RNA/单细胞 fixture 门禁已落地。专项 62 项、Agent 72 项通过（另 2 项 live skip），全量 Desktop 测试、Harness 51 项、adapter 12 项均通过。当前仅剩提交 Core、更新 `.vendor-lock` 与 Desktop submodule 指针。
+本阶段出口：GO/KEGG 真实链路执行完成、产物 truth=`valid`、下游可消费，新增 fixture 与全量 Harness/Agent 回归通过，且 Phase 6 平台接口无需特例修改。
 
 2026-07-13 接续进展：第 1、3、4 项进一步收口。repair audit、稳定 readiness、不可修复输入阻塞、桌面 runtime 探测和八阶段 workflow plan API 已落地并通过真实历史 artifact 验证；Core 检查点为 `f491b61`。下一步不再扩写 plan 表面结构，而是把现有 `run_tool` 的 job 状态和 artifact truth 映射到 `run / verify / report`，形成可恢复的真实状态机。
 
@@ -350,7 +350,7 @@ Phase 3 已于 2026-07-13 完成（Core `c9208d5`）：共享 `execution-context
 
 Phase 4 已于 2026-07-13 完成（Core `3fbfe3b`）：`harness-task-packs.mjs` 覆盖 12 类常见分析意图，workflow plan 可在没有 LLM/显式 manifest 时从实际可用插件确定性选择，并对未知请求和缺失工具安全失败。`npm run harness:evaluate` 是后续必须保留的质量门禁；真实历史 DEG artifact 已完成自动选型、参数修复和确认边界验证。
 
-Phase 5 Agent-led foundation v1 已于 2026-07-13 完成（Core `2f57ce4`）：10 个单细胞步骤已从占位调用接入真实 task queue，并回写现有 tool job/artifact truth；`run_tool` 增加 plan 与 bind_artifact，三个薄模板默认不自动执行，只有 valid artifact 能激活下游。真实历史 DEG → 新 volcano 二跳执行验证为 valid。下一位 agent 应进入 Phase 6 的 SDK/runtime 工程收口，不应立即批量补流程，也不应创建新的计划器、执行器或 job 状态系统。
+Phase 5 Agent-led foundation v1 已于 2026-07-13 完成（Core `2f57ce4`）：10 个单细胞步骤已从占位调用接入真实 task queue，并回写现有 tool job/artifact truth；`run_tool` 增加 plan 与 bind_artifact，三个薄模板默认不自动执行，只有 valid artifact 能激活下游。真实历史 DEG → 新 volcano 二跳执行验证为 valid。其后 Phase 6 SDK/runtime 工程已在 Core `dcd2043` 正式收口；当前不得再创建新的计划器、执行器或 job 状态系统。
 
 详细规范见：[Harness Engine Spec v1](./harness-engine-spec.md)。  
 详细路线图见：[Harness Roadmap v1](./harness-roadmap.md)。

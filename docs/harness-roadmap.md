@@ -295,7 +295,7 @@
 
 ### Phase 6：Plugin SDK 与 Agent Workflow Runtime
 
-状态：实现与本地验收已完成（2026-07-13），待提交 Core 并更新 vendor lock。
+状态：已完成并推送（2026-07-13）。Core `dcd2043`，Desktop `2d000d5`，vendor lock 已同步。
 
 目标：
 
@@ -319,7 +319,7 @@
 - 多步骤 runtime 直接从原 tool job 与 artifact truth 投影 9 类步骤状态，并输出 terminal、recoverable、readyStepIds、resumeFromStepId 与 nextActions。
 - `run_tool` 已支持 `status / next`；workflow step run 会先重建状态，只允许 ready step，lineage bind 仅接受真实 job 的 valid、类型匹配 artifact，重复 bind 幂等。
 - Bulk RNA 与单细胞 JSON fixture 覆盖 valid lineage、degraded recovery、确认断点和不可恢复阻塞；`npm run harness:phase6`、全量 `npm test`、Harness/Agent 评测和 adapter 回归均已通过。
-- 当前 Core 与 Desktop 改动尚未提交；提交 Core 后必须更新 `.vendor-lock`，再提交 Desktop 指针和门禁。
+- Core `dcd2043` 与 Desktop `2d000d5` 已提交并推送，Desktop `.vendor-lock` 与 submodule 指针一致；Phase 6 正式关闭。
 
 ## 3. 推荐推进顺序
 
@@ -384,10 +384,9 @@
 
 ## 6. 近期执行建议
 
-接下来最稳妥的顺序是：
+Phase 6 已关闭。接下来按以下顺序进入标准流程覆盖：
 
-1. 提交 `vendor/biof3-core` 的 Phase 6 变更，更新 Desktop submodule 指针与 `.vendor-lock`。
-2. 保持 `npm run harness:phase6` 和三平台 CI 为必过门禁，观察首轮真实插件接入反馈。
-3. 进入标准流程覆盖，覆盖足够后再强化结果多轮调整和局部重跑。
-
-这条路线最符合当前阶段的产品成熟度。
+1. 以 GO/KEGG 富集作为首个真实 SDK 接入试点，复用现有 enrichment task pack、R 脚本和 DEG artifact，不新增平台特例。
+2. 补齐 manifest、failureModes、fixture、诊断和 artifact schema，跑通 Agent 单步执行、valid lineage 与失败恢复。
+3. 保持 `npm run harness:phase6`、全量 Harness/Agent 评测和 adapter 回归为必过门禁；试点暴露的平台缺陷只做通用修复。
+4. 试点通过后沉淀可复制样板，再按 GSEA、WGCNA 等优先级逐个接入；覆盖足够后再强化结果多轮调整和局部重跑。

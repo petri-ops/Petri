@@ -2,11 +2,11 @@
 
 最后更新：2026-07-13
 
-这份文档用于在切换工作区后恢复当前开发状态。当前阶段不是功能主线开发，而是在把 BioF3 项目工作台的前端骨架和结果层体验尽量收口到 Codex 式体验：轻、窄、白、少阴影、三栏对齐、输入区稳定贴底、右侧工具可预测，并重点优化“主预览 + Honeycomb 结果导航”的结果查看体验。
+这份文档用于在切换工作区后恢复当前开发状态。工作台 UI 与 Harness Phase 1–6 已收口，当前进入标准流程覆盖阶段；新增分析能力必须通过既有 Plugin SDK、tool job、artifact truth、Agent workflow runtime 和 fixture 门禁接入，不再扩建第二套平台基础设施。
 
 ## 2026-07-13 当前检查点与今日计划
 
-### Phase 6 已完成本地实现与验收：Plugin SDK 与 Agent Workflow Runtime
+### Phase 6 已完成、提交并推送：Plugin SDK 与 Agent Workflow Runtime
 
 - Phase 6 是**平台工程开发阶段**，不是批量编写生物分析插件、堆分析脚本或扩充内容库。
 - 当前目标是把“以后接入一个新分析流程”的成本压缩到：提供 manifest、执行脚本和小型 fixture，其余发现、校验、执行、产物登记、Agent 调用与恢复由平台完成。
@@ -31,7 +31,7 @@ Phase 6 验收标准：
 
 明确暂缓：空间转录组、蛋白组、代谢组等批量流程内容扩充。只有 Phase 6 基座验收通过后，才进入后续“标准流程覆盖”阶段。
 
-本次 Phase 6 已实现统一 Plugin SDK、三来源发现与结构化诊断、安装前校验、带 fixture 的 scaffold、多步骤 tool job 状态投影、`run_tool status/next`、ready step 提交门禁、valid lineage 幂等绑定，以及 Bulk RNA/单细胞 fixture 门禁。`npm test`、`npm run check`、`npm run harness:evaluate`、`npm run harness:agent-evaluate`、`npm run harness:phase6` 和 adapter 回归均通过。当前改动尚未提交；先提交 Core，再更新 `.vendor-lock` 和 Desktop submodule 指针。
+本次 Phase 6 已实现统一 Plugin SDK、三来源发现与结构化诊断、安装前校验、带 fixture 的 scaffold、多步骤 tool job 状态投影、`run_tool status/next`、ready step 提交门禁、valid lineage 幂等绑定，以及 Bulk RNA/单细胞 fixture 门禁。`npm test`、`npm run check`、`npm run harness:evaluate`、`npm run harness:agent-evaluate`、`npm run harness:phase6` 和 adapter 回归均通过。Core `dcd2043` 已推送至 `origin/fix/tsc-strict-pass`；Desktop `2d000d5` 已同步 `.vendor-lock` 与 submodule 指针并推送至 `origin/main`。
 
 ### Agent-led analysis foundation v1 已完成（最新检查点）
 
@@ -713,26 +713,17 @@ npm run build:spa
 
 换工作区后建议按这个顺序继续：
 
-1. 先运行 `git status`、检查 Core 子仓 HEAD 和 `.vendor-lock`，保留 `.cursor/`，不要覆盖用户文件。
-2. 审计并复用现有实现：
-   - `scripts/scaffold-harness-tool.mjs`
-   - `scripts/check-harness-manifests.mjs`
-   - `vendor/biof3-core/r-server/plugin-loader.js`
-   - `vendor/biof3-core/shared-backend/agent-workflow.js`
-   - `vendor/biof3-core/r-server/helpers/harness-workflow-state.js`
-   - `vendor/biof3-core/r-server/helpers/harness-workflow-recovery.js`
-3. 先实现 Phase 6 第一批平台能力：
-   - 校验 built-in、installed、development 三类插件来源并输出结构化诊断；
-   - 工作流计划从现有 tool job 自动投影步骤状态、断点、下一动作；
-   - Agent 可查询/恢复计划，但仍逐步确认执行。
-4. 建立 fixture 门禁并使用已有 Bulk RNA/单细胞工具做样板；不要新增一批分析脚本来“证明覆盖”。
-5. 完整运行测试和评测后，先提交/推送 Core，再同步 `.vendor-lock`、文档并提交/推送 Desktop。
+1. 先运行 `git status`，确认 Core 位于 `dcd2043`、Desktop 基线为 `2d000d5` 且 `.vendor-lock` 一致；保留未跟踪的 `.cursor/`，不要覆盖用户文件。
+2. 以现有 GO/KEGG 富集能力作为标准流程覆盖的首个 Plugin SDK 试点，先盘点 `go-kegg.R`、enrichment task pack、插件 manifest 和真实 DEG artifact，避免复制已有实现。
+3. 通过 scaffold/SDK 补齐 manifest、input/output schema、failureModes 与最小 fixture，并验证 built-in/development 发现和结构化诊断。
+4. 从真实 valid DEG artifact 跑通 Agent `plan → run → verify → bind → decide`，核对 tool job、artifact truth、lineage 和恢复状态；不得为该插件修改 Agent 核心、执行器或结果 UI。
+5. 运行 `npm run check`、`npm run harness:phase6`、全量 Harness/Agent 评测和相关 adapter 回归。试点通过后再提交 Core、同步 `.vendor-lock` 和 Desktop 指针。
 
 UI 目前冻结。只有阻断 Agent 工作区、结果数据错误或明确回归时才修改前端，不再继续进行纯视觉精修。
 
 ## 当前重点文件索引
 
-Phase 6 首要文件：
+标准流程覆盖首要文件：
 
 - `scripts/scaffold-harness-tool.mjs`
 - `scripts/check-harness-manifests.mjs`
