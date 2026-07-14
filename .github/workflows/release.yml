@@ -25,6 +25,10 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+          # BioF3 core submodule lives at ShengXinF3/BioF3 (private).
+          # Default GITHUB_TOKEN does not cross repo boundaries, so a
+          # PAT with `repo` scope must be supplied via SUBMODULE_TOKEN.
+          token: ${{ secrets.SUBMODULE_TOKEN || secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
@@ -80,6 +84,8 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+          # BioF3 core submodule lives at ShengXinF3/BioF3 (private).
+          token: ${{ secrets.SUBMODULE_TOKEN || secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
