@@ -7,6 +7,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { getApiPrefix, formatSize } from './_api';
 import { getAuthHeaders, fetchWithAuth } from './_auth';
 export { fetchWithAuth } from './_auth';
+import { fetchGuestPermissions } from '@/lib/authClient';
 
 // ── Admin API response types (from r-server/routes/ai-admin.js) ──
 interface UsageDailyRow {
@@ -541,7 +542,6 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
       if (data.status === 'ok') {
         setGuestPerms(data.permissions);
         try {
-          const { fetchGuestPermissions } = await import('@/lib/authClient');
           await fetchGuestPermissions();
         } catch {
           /* ignore */
