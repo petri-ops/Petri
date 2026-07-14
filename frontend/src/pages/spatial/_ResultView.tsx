@@ -571,7 +571,7 @@ export function ResultView({
 
   const meta = ANALYSIS_TYPES[analysis.type as SpatialAnalysisType] || {
     name: analysis.type,
-    color: '#64748b',
+    color: 'var(--biof3-text-secondary)',
     icon: '?',
     shortName: analysis.type,
     desc: '',
@@ -580,7 +580,7 @@ export function ResultView({
     output: '',
     packages: [],
   };
-  const statusInfo = STATUS_LABELS[analysis.status] || { label: analysis.status, color: '#64748b' };
+  const statusInfo = STATUS_LABELS[analysis.status] || { label: analysis.status, color: 'var(--biof3-text-secondary)' };
   const isRunning =
     analysis.status === 'running' || analysis.status === 'pending' || analysis.status === 'queued';
   const isDone = analysis.status === 'done';
@@ -680,7 +680,7 @@ export function ResultView({
                     >
                       {analysis.name}
                       <span
-                        style={{ fontSize: 10, color: '#9ca3af', marginLeft: 6, fontWeight: 400 }}
+                        style={{ fontSize: 10, color: 'var(--biof3-text-muted)', marginLeft: 6, fontWeight: 400 }}
                       >
                         ✎
                       </span>
@@ -697,7 +697,7 @@ export function ResultView({
                   />
                   {statusInfo.label}
                 </span>
-                <span style={{ fontSize: 10, color: '#9ca3af', fontWeight: 400, marginLeft: 8 }}>
+                <span style={{ fontSize: 10, color: 'var(--biof3-text-muted)', fontWeight: 400, marginLeft: 8 }}>
                   {meta.name}
                   {isDone && elapsed > 0 && ` · 耗时 ${formatDuration(elapsed)}`}
                   {` · ${formatTime(analysis.createdAt)}`}
@@ -724,7 +724,7 @@ export function ResultView({
                 {taskData?.queuePosition > 0 ? (
                   <>
                     排队中 · 前面还有 <strong>{taskData.queuePosition}</strong> 个任务
-                    <span style={{ color: '#9ca3af', marginLeft: 8 }}>
+                    <span style={{ color: 'var(--biof3-text-muted)', marginLeft: 8 }}>
                       （服务器同时处理 {taskData.maxConcurrent || 3} 个任务，请稍候）
                     </span>
                   </>
@@ -765,7 +765,7 @@ export function ResultView({
                     </div>
                   )}
                   <details style={{ marginTop: 8 }}>
-                    <summary style={{ cursor: 'pointer', fontSize: 11, color: '#9ca3af' }}>
+                    <summary style={{ cursor: 'pointer', fontSize: 11, color: 'var(--biof3-text-muted)' }}>
                       原始错误信息
                     </summary>
                     <pre style={{ marginTop: 6, fontSize: 10 }}>{rawErr}</pre>
@@ -886,7 +886,7 @@ export function ResultView({
                             <div className="sc-plot-card-title">{topName}</div>
                             <div className="sc-plot-card-image sc-data-card-icon">
                               <span>{isCSV ? '📊' : isH5ad ? '🧬' : '📄'}</span>
-                              <span style={{ fontSize: 11, color: '#9ca3af', marginTop: 6 }}>
+                              <span style={{ fontSize: 11, color: 'var(--biof3-text-muted)', marginTop: 6 }}>
                                 {f.name}
                               </span>
                             </div>
@@ -958,10 +958,10 @@ export function ResultView({
                       />
                     ) : (
                       <div className="sc-data-preview-hint">
-                        <div style={{ fontSize: 12, color: '#f59e0b', fontWeight: 600 }}>
+                        <div style={{ fontSize: 12, color: 'var(--biof3-status-loading)', fontWeight: 600 }}>
                           ⏳ 数据预览正在生成中...
                         </div>
-                        <div style={{ marginTop: 6, fontSize: 11, color: '#9ca3af' }}>
+                        <div style={{ marginTop: 6, fontSize: 11, color: 'var(--biof3-text-muted)' }}>
                           分析完成后刷新页面即可查看 spot 元数据和基因列表
                         </div>
                       </div>
@@ -971,7 +971,7 @@ export function ResultView({
                     <div className="sc-tools-card-header">
                       <span className="sc-tools-card-title">空间分析工具</span>
                       {isPublicReadOnly && (
-                        <span style={{ fontSize: 9, color: '#9ca3af' }}>只读</span>
+                        <span style={{ fontSize: 9, color: 'var(--biof3-text-muted)' }}>只读</span>
                       )}
                     </div>
                     <div className="sc-tools-grid">
@@ -1024,7 +1024,7 @@ export function ResultView({
                           style={{
                             fontSize: 10,
                             fontWeight: 800,
-                            color: '#9ca3af',
+                            color: 'var(--biof3-text-muted)',
                             marginBottom: 6,
                           }}
                         >
@@ -1165,7 +1165,7 @@ function RightInfoPanel({ target }: { target: PanelTarget }) {
                     </span>
                   ))
                 ) : (
-                  <span style={{ fontSize: 11, color: '#9ca3af' }}>无</span>
+                  <span style={{ fontSize: 11, color: 'var(--biof3-text-muted)' }}>无</span>
                 )}
               </div>
             </div>
@@ -1175,7 +1175,7 @@ function RightInfoPanel({ target }: { target: PanelTarget }) {
             <h3 className="sc-info-title">{fallbackName}</h3>
             <p className="sc-info-subtitle">{target.plot?.filename || target.file?.name}</p>
             <div className="sc-info-section">
-              <p style={{ color: '#9ca3af' }}>暂无该项的详细介绍。</p>
+              <p style={{ color: 'var(--biof3-text-muted)' }}>暂无该项的详细介绍。</p>
             </div>
           </>
         )}

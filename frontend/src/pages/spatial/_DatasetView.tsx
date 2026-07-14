@@ -331,7 +331,7 @@ export function DatasetView({
                   style={{ cursor: 'text' }}
                 >
                   {dataset.name}
-                  <span style={{ fontSize: 10, color: '#9ca3af', marginLeft: 8, fontWeight: 400 }}>
+                  <span style={{ fontSize: 10, color: 'var(--biof3-text-muted)', marginLeft: 8, fontWeight: 400 }}>
                     ✎
                   </span>
                 </h1>
@@ -381,16 +381,16 @@ export function DatasetView({
                     (a.type as string) === 'spatial_standard' && (a.status === 'done' || a.status === 'running')
                 ) ? (
                   <div className="sc-data-preview-hint">
-                    <div style={{ fontSize: 12, color: '#9ca3af' }}>
+                    <div style={{ fontSize: 12, color: 'var(--biof3-text-muted)' }}>
                       请先在右侧"空间分析工具"启动「空间标准分析」
                     </div>
                   </div>
                 ) : !dataset.metaUrl ? (
                   <div className="sc-data-preview-hint">
-                    <div style={{ fontSize: 12, color: '#f59e0b', fontWeight: 600 }}>
+                    <div style={{ fontSize: 12, color: 'var(--biof3-status-loading)', fontWeight: 600 }}>
                       ⏳ 数据预览正在生成中...
                     </div>
-                    <div style={{ marginTop: 6, fontSize: 11, color: '#9ca3af' }}>
+                    <div style={{ marginTop: 6, fontSize: 11, color: 'var(--biof3-text-muted)' }}>
                       分析完成后刷新页面即可查看 spot 元数据和基因列表
                     </div>
                   </div>
@@ -490,7 +490,7 @@ export function DatasetView({
                   const meta = ANALYSIS_TYPES[a.type as SpatialAnalysisType] || {
                     name: a.type,
                     shortName: a.type,
-                    color: '#64748b',
+                    color: 'var(--biof3-text-secondary)',
                     icon: '?',
                     desc: '',
                   };
@@ -620,7 +620,7 @@ function getSpatialAnalysisStats(a: Analysis): Array<{ value: string; label: str
 }
 
 function StatusTag({ status }: { status: Analysis['status'] }) {
-  const info = STATUS_LABELS[status] || { label: status, color: '#64748b' };
+  const info = STATUS_LABELS[status] || { label: status, color: 'var(--biof3-text-secondary)' };
   return (
     <span className="sc-status-tag" style={{ background: `${info.color}20`, color: info.color }}>
       <span className={`sc-status-dot ${status}`} style={{ background: info.color }} />

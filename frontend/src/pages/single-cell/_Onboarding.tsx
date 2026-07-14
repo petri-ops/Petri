@@ -62,10 +62,10 @@ export function OnboardingModal({ onDismiss }: { onDismiss: () => void }) {
         {/* Header */}
         <div style={{ textAlign: 'center', padding: '28px 24px 0' }}>
           <div style={{ fontSize: 32, marginBottom: 8 }}>👋</div>
-          <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1e293b', margin: 0 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--biof3-text)', margin: 0 }}>
             欢迎使用 BioF3 单细胞云平台
           </h2>
-          <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 6 }}>
+          <p style={{ fontSize: 12, color: 'var(--biof3-text-muted)', marginTop: 6 }}>
             在线完成 scRNA-seq 数据的标准分析和下游挖掘
           </p>
         </div>
@@ -89,11 +89,11 @@ export function OnboardingModal({ onDismiss }: { onDismiss: () => void }) {
             >
               <span style={{ fontSize: 22, lineHeight: 1 }}>{s.icon}</span>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#1e293b' }}>
-                  <span style={{ color: '#9ca3af', marginRight: 6 }}>Step {i + 1}</span>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--biof3-text)' }}>
+                  <span style={{ color: 'var(--biof3-text-muted)', marginRight: 6 }}>Step {i + 1}</span>
                   {s.title}
                 </div>
-                <div style={{ fontSize: 11, color: '#64748b', marginTop: 4, lineHeight: 1.4 }}>
+                <div style={{ fontSize: 11, color: 'var(--biof3-text-secondary)', marginTop: 4, lineHeight: 1.4 }}>
                   {s.desc}
                 </div>
               </div>
@@ -114,7 +114,7 @@ export function OnboardingModal({ onDismiss }: { onDismiss: () => void }) {
             style={{
               background: 'none',
               border: 'none',
-              color: '#9ca3af',
+              color: 'var(--biof3-text-muted)',
               fontSize: 11,
               cursor: 'pointer',
             }}

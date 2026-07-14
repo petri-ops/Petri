@@ -320,7 +320,7 @@ export function NewAnalysisModal({
             <div
               style={{
                 fontSize: 11,
-                color: '#475569',
+                color: 'var(--biof3-text-secondary)',
                 padding: '8px 10px',
                 background: '#f8faf9',
                 borderRadius: 5,
@@ -329,7 +329,7 @@ export function NewAnalysisModal({
               <div>
                 ● 原始数据：<strong>{dataset.name}</strong>
                 {dataset.nCells && (
-                  <span style={{ color: '#9ca3af', marginLeft: 6 }}>
+                  <span style={{ color: 'var(--biof3-text-muted)', marginLeft: 6 }}>
                     ({dataset.nCells.toLocaleString()} cells)
                   </span>
                 )}

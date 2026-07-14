@@ -447,7 +447,7 @@ export function DatasetView({
                   style={{ cursor: 'text' }}
                 >
                   {dataset.name}
-                  <span style={{ fontSize: 10, color: '#9ca3af', marginLeft: 8, fontWeight: 400 }}>
+                  <span style={{ fontSize: 10, color: 'var(--biof3-text-muted)', marginLeft: 8, fontWeight: 400 }}>
                     ✎
                   </span>
                 </h1>
@@ -500,16 +500,16 @@ export function DatasetView({
                       (a.status === 'done' || a.status === 'running')
                   ) ? (
                     <div className="sc-data-preview-hint">
-                      <div style={{ fontSize: 12, color: '#9ca3af' }}>
+                      <div style={{ fontSize: 12, color: 'var(--biof3-text-muted)' }}>
                         请先在项目页面启动「标准分析」
                       </div>
                     </div>
                   ) : !dataset.metaUrl ? (
                     <div className="sc-data-preview-hint">
-                      <div style={{ fontSize: 12, color: '#f59e0b', fontWeight: 600 }}>
+                      <div style={{ fontSize: 12, color: 'var(--biof3-status-loading)', fontWeight: 600 }}>
                         ⏳ 数据预览正在生成中...
                       </div>
-                      <div style={{ marginTop: 6, fontSize: 11, color: '#9ca3af' }}>
+                      <div style={{ marginTop: 6, fontSize: 11, color: 'var(--biof3-text-muted)' }}>
                         分析完成后刷新页面即可查看细胞元数据和基因列表
                       </div>
                     </div>
@@ -963,7 +963,7 @@ function SaveSubsetModal({
           <div
             style={{
               fontSize: 11,
-              color: '#9ca3af',
+              color: 'var(--biof3-text-muted)',
               padding: '6px 10px',
               background: '#f8faf9',
               borderRadius: 5,
@@ -1061,7 +1061,7 @@ function AddLabelModal({
           <div
             style={{
               fontSize: 11,
-              color: '#9ca3af',
+              color: 'var(--biof3-text-muted)',
               padding: '6px 10px',
               background: '#f8faf9',
               borderRadius: 5,
@@ -1166,7 +1166,7 @@ function ContinueMenu({ onSelect }: { onSelect: (t: AnalysisType, e: React.Mouse
               right: 0,
               marginTop: 4,
               background: 'white',
-              border: '1px solid #e5ebe8',
+              border: '1px solid var(--biof3-border)',
               borderRadius: 6,
               boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
               zIndex: 11,
@@ -1182,7 +1182,7 @@ function ContinueMenu({ onSelect }: { onSelect: (t: AnalysisType, e: React.Mouse
                   padding: '6px 12px',
                   fontSize: 11,
                   fontWeight: 600,
-                  color: '#475569',
+                  color: 'var(--biof3-text-secondary)',
                   background: 'none',
                   border: 'none',
                   textAlign: 'left',
@@ -1384,10 +1384,10 @@ function PlotToolsModal({ onClose, replotTaskId }: { onClose: () => void; replot
           </button>
         </div>
         <div className="sc-modal-body">
-          <p style={{ fontSize: 11, color: '#9ca3af', marginBottom: 12 }}>
+          <p style={{ fontSize: 11, color: 'var(--biof3-text-muted)', marginBottom: 12 }}>
             选择图表类型，在线编辑 R 代码并绘图。由 FigCode 引擎驱动。
             {replotTaskId && warming && (
-              <span style={{ display: 'block', marginTop: 4, color: '#f59e0b', fontWeight: 600 }}>
+              <span style={{ display: 'block', marginTop: 4, color: 'var(--biof3-status-loading)', fontWeight: 600 }}>
                 ⏳ 正在预加载数据到 R 会话...
               </span>
             )}
@@ -1404,7 +1404,7 @@ function PlotToolsModal({ onClose, replotTaskId }: { onClose: () => void; replot
               </span>
             )}
             {replotTaskId && !warming && !warmReady && (
-              <span style={{ display: 'block', marginTop: 4, color: '#9ca3af' }}>
+              <span style={{ display: 'block', marginTop: 4, color: 'var(--biof3-text-muted)' }}>
                 预加载失败，绘图将使用 demo 数据
               </span>
             )}

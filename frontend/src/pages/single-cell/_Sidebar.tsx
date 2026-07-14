@@ -206,12 +206,12 @@ export function Sidebar({
             <div className="sc-sidebar-section">
               <div
                 className="sc-sidebar-label"
-                style={{ fontWeight: 700, color: '#1e293b', fontSize: 12 }}
+                style={{ fontWeight: 700, color: 'var(--biof3-text)', fontSize: 12 }}
               >
                 {activeDataset.name}
               </div>
               {isChildDataset && (
-                <div className="sc-sidebar-hint" style={{ fontSize: 10, color: '#9ca3af' }}>
+                <div className="sc-sidebar-hint" style={{ fontSize: 10, color: 'var(--biof3-text-muted)' }}>
                   子集 · 来自 {parentDataset?.name || '父数据集'}
                 </div>
               )}

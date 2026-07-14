@@ -72,7 +72,7 @@ export function DocModal({ meta, onClose }: Props) {
             <h2 className="sc-modal-title" style={{ marginTop: 4 }}>
               {meta.title}
             </h2>
-            <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 2 }}>{meta.subtitle}</div>
+            <div style={{ fontSize: 11, color: 'var(--biof3-text-muted)', marginTop: 2 }}>{meta.subtitle}</div>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button className="sc-btn sc-btn-sm" onClick={handleDownloadPdf}>
@@ -91,7 +91,7 @@ export function DocModal({ meta, onClose }: Props) {
                 <img
                   src={meta.imageUrl}
                   alt={meta.title}
-                  style={{ maxWidth: '100%', borderRadius: 6, border: '1px solid #e5ebe8' }}
+                  style={{ maxWidth: '100%', borderRadius: 6, border: '1px solid var(--biof3-border)' }}
                 />
               </div>
             )}
@@ -125,7 +125,7 @@ export function DocModal({ meta, onClose }: Props) {
                   </span>
                 ))
               ) : (
-                <span style={{ fontSize: 11, color: '#9ca3af' }}>无</span>
+                <span style={{ fontSize: 11, color: 'var(--biof3-text-muted)' }}>无</span>
               )}
             </div>
           </div>

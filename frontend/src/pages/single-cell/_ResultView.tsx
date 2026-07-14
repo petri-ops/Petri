@@ -655,7 +655,7 @@ export function ResultView({
                     >
                       {analysis.name}
                       <span
-                        style={{ fontSize: 10, color: '#9ca3af', marginLeft: 6, fontWeight: 400 }}
+                        style={{ fontSize: 10, color: 'var(--biof3-text-muted)', marginLeft: 6, fontWeight: 400 }}
                       >
                         ✎
                       </span>
@@ -675,7 +675,7 @@ export function ResultView({
                 {warmupStatus === 'warming' && (
                   <span
                     className="sc-status-tag"
-                    style={{ background: '#f59e0b20', color: '#f59e0b' }}
+                    style={{ background: '#f59e0b20', color: 'var(--biof3-status-loading)' }}
                     title="正在预加载 R 会话以加速在线绘图"
                   >
                     <span className="sc-status-dot running" style={{ background: '#f59e0b' }} />
@@ -685,13 +685,13 @@ export function ResultView({
                 {warmupStatus === 'ready' && (
                   <span
                     className="sc-status-tag"
-                    style={{ background: '#10b98120', color: '#10b981' }}
+                    style={{ background: '#10b98120', color: 'var(--biof3-status-online)' }}
                     title="R 会话已就绪，在线绘图 < 5 秒"
                   >
                     ⚡ 极速绘图
                   </span>
                 )}
-                <span style={{ fontSize: 10, color: '#9ca3af', fontWeight: 400, marginLeft: 8 }}>
+                <span style={{ fontSize: 10, color: 'var(--biof3-text-muted)', fontWeight: 400, marginLeft: 8 }}>
                   {meta.name}
                   {isDone && elapsed > 0 && ` · 耗时 ${formatDuration(elapsed)}`}
                   {` · ${formatTime(analysis.createdAt)}`}
@@ -747,7 +747,7 @@ export function ResultView({
                 {taskData?.queuePosition > 0 ? (
                   <>
                     排队中 · 前面还有 <strong>{taskData.queuePosition}</strong> 个任务
-                    <span style={{ color: '#9ca3af', marginLeft: 8 }}>
+                    <span style={{ color: 'var(--biof3-text-muted)', marginLeft: 8 }}>
                       （服务器同时处理 {taskData.maxConcurrent || 2} 个任务，请稍候）
                     </span>
                   </>
@@ -788,7 +788,7 @@ export function ResultView({
                     </div>
                   )}
                   <details style={{ marginTop: 8 }}>
-                    <summary style={{ cursor: 'pointer', fontSize: 11, color: '#9ca3af' }}>
+                    <summary style={{ cursor: 'pointer', fontSize: 11, color: 'var(--biof3-text-muted)' }}>
                       原始错误信息
                     </summary>
                     <pre style={{ marginTop: 6, fontSize: 10 }}>{rawErr}</pre>
@@ -869,10 +869,10 @@ export function ResultView({
                         />
                       ) : (
                         <div className="sc-data-preview-hint">
-                          <div style={{ fontSize: 12, color: '#f59e0b', fontWeight: 600 }}>
+                          <div style={{ fontSize: 12, color: 'var(--biof3-status-loading)', fontWeight: 600 }}>
                             ⏳ 数据预览正在生成中...
                           </div>
-                          <div style={{ marginTop: 6, fontSize: 11, color: '#9ca3af' }}>
+                          <div style={{ marginTop: 6, fontSize: 11, color: 'var(--biof3-text-muted)' }}>
                             分析完成后刷新页面即可查看
                           </div>
                         </div>
@@ -887,7 +887,7 @@ export function ResultView({
                           </span>
                         )}
                         {isPublicReadOnly && (
-                          <span style={{ fontSize: 9, color: '#9ca3af' }}>只读</span>
+                          <span style={{ fontSize: 9, color: 'var(--biof3-text-muted)' }}>只读</span>
                         )}
                       </div>
                       <div className="sc-tools-grid">
@@ -975,7 +975,7 @@ export function ResultView({
                             style={{
                               fontSize: 10,
                               fontWeight: 800,
-                              color: '#9ca3af',
+                              color: 'var(--biof3-text-muted)',
                               marginBottom: 6,
                             }}
                           >
@@ -1146,14 +1146,14 @@ export function ResultView({
                             <div className="sc-plot-card-title">{topName}</div>
                             <div className="sc-plot-card-image sc-data-card-icon">
                               <span>{isCSV ? '📊' : isRds ? '🧬' : '📄'}</span>
-                              <span style={{ fontSize: 11, color: '#9ca3af', marginTop: 6 }}>
+                              <span style={{ fontSize: 11, color: 'var(--biof3-text-muted)', marginTop: 6 }}>
                                 {f.name}
                               </span>
                               {f.description && (
                                 <span
                                   style={{
                                     fontSize: 10,
-                                    color: '#9ca3af',
+                                    color: 'var(--biof3-text-muted)',
                                     marginTop: 4,
                                     padding: '0 12px',
                                     textAlign: 'center',
@@ -1272,7 +1272,7 @@ export function ResultView({
             </div>
             <div className="sc-modal-body" style={{ minHeight: 200 }}>
               <div style={{ display: 'flex', gap: 6, marginBottom: 14, alignItems: 'center' }}>
-                <span style={{ fontSize: 12, color: '#6b7280' }}>语言：</span>
+                <span style={{ fontSize: 12, color: 'var(--biof3-text-secondary)' }}>语言：</span>
                 {(['r', 'python'] as const).map((l) => (
                   <button
                     key={l}
@@ -1292,7 +1292,7 @@ export function ResultView({
                 ))}
                 <span style={{ flex: 1 }} />
                 {scriptModal.filename && (
-                  <span style={{ fontSize: 11, color: '#9ca3af', fontFamily: 'monospace' }}>
+                  <span style={{ fontSize: 11, color: 'var(--biof3-text-muted)', fontFamily: 'monospace' }}>
                     {scriptModal.filename}
                   </span>
                 )}
@@ -1305,7 +1305,7 @@ export function ResultView({
                     alignItems: 'center',
                     gap: 10,
                     padding: 20,
-                    color: '#6b7280',
+                    color: 'var(--biof3-text-secondary)',
                   }}
                 >
                   <div className="sc-spinner" />
@@ -1386,7 +1386,7 @@ export function ResultView({
                     </button>
                   </div>
                   <div
-                    style={{ marginTop: 8, fontSize: 10.5, color: '#9ca3af', textAlign: 'right' }}
+                    style={{ marginTop: 8, fontSize: 10.5, color: 'var(--biof3-text-muted)', textAlign: 'right' }}
                   >
                     脚本包含真实参数和数据路径 · 离线可直接运行 · 请确保已安装对应 R/Python 包
                   </div>
@@ -1419,13 +1419,13 @@ export function ResultView({
                     alignItems: 'center',
                     gap: 10,
                     padding: 20,
-                    color: '#6b7280',
+                    color: 'var(--biof3-text-secondary)',
                   }}
                 >
                   <div className="sc-spinner" />
                   <div>
                     <div>AI 正在生成 PDF 报告...</div>
-                    <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>
+                    <div style={{ fontSize: 11, color: 'var(--biof3-text-muted)', marginTop: 4 }}>
                       包含数据集摘要、分析参数、图表和 Methods 段落，约 15-25 秒
                     </div>
                   </div>
@@ -1461,7 +1461,7 @@ export function ResultView({
                     ✅ PDF 报告已生成（
                     {reportState.sizeBytes ? Math.round(reportState.sizeBytes / 1024) : '?'} KB）
                     <br />
-                    <span style={{ fontSize: 11, color: '#6b7280' }}>
+                    <span style={{ fontSize: 11, color: 'var(--biof3-text-secondary)' }}>
                       签名链接 24 小时内有效，可分享给同事或保存到本地。
                     </span>
                   </div>
@@ -1518,7 +1518,7 @@ export function ResultView({
             </div>
             <div className="sc-modal-body" style={{ minHeight: 240 }}>
               <div style={{ display: 'flex', gap: 6, marginBottom: 14, alignItems: 'center' }}>
-                <span style={{ fontSize: 12, color: '#6b7280' }}>语言：</span>
+                <span style={{ fontSize: 12, color: 'var(--biof3-text-secondary)' }}>语言：</span>
                 {(['zh', 'en', 'both'] as const).map((l) => (
                   <button
                     key={l}
@@ -1537,7 +1537,7 @@ export function ResultView({
                   </button>
                 ))}
                 <span style={{ flex: 1 }} />
-                <span style={{ fontSize: 11, color: '#9ca3af' }}>
+                <span style={{ fontSize: 11, color: 'var(--biof3-text-muted)' }}>
                   基于「{analysis?.name}」及父链分析
                 </span>
               </div>
@@ -1549,7 +1549,7 @@ export function ResultView({
                     alignItems: 'center',
                     gap: 10,
                     padding: 20,
-                    color: '#6b7280',
+                    color: 'var(--biof3-text-secondary)',
                   }}
                 >
                   <div className="sc-spinner" />
@@ -1570,7 +1570,7 @@ export function ResultView({
                 >
                   生成失败：{methodsModal.error}
                   {methodsModal.error === 'no_analyses' && (
-                    <div style={{ marginTop: 8, fontSize: 11, color: '#6b7280' }}>
+                    <div style={{ marginTop: 8, fontSize: 11, color: 'var(--biof3-text-secondary)' }}>
                       该分析及其父链中没有 done 状态的记录。等分析完成后再试。
                     </div>
                   )}
@@ -1625,7 +1625,7 @@ export function ResultView({
                     </button>
                   </div>
                   <div
-                    style={{ marginTop: 10, fontSize: 10.5, color: '#9ca3af', textAlign: 'right' }}
+                    style={{ marginTop: 10, fontSize: 10.5, color: 'var(--biof3-text-muted)', textAlign: 'right' }}
                   >
                     AI 生成 · 学术风格 · 引用 Seurat / scanpy / Leiden 等版本号 ·
                     仅供参考，请核对参数后使用
@@ -1738,7 +1738,7 @@ function RightInfoPanel({
                     </span>
                   ))
                 ) : (
-                  <span style={{ fontSize: 11, color: '#9ca3af' }}>无</span>
+                  <span style={{ fontSize: 11, color: 'var(--biof3-text-muted)' }}>无</span>
                 )}
               </div>
             </div>
@@ -1763,7 +1763,7 @@ function RightInfoPanel({
             <h3 className="sc-info-title">{fallbackName}</h3>
             <p className="sc-info-subtitle">{target.plot?.filename || target.file?.name}</p>
             <div className="sc-info-section">
-              <p style={{ color: '#9ca3af' }}>暂无该项的详细介绍。</p>
+              <p style={{ color: 'var(--biof3-text-muted)' }}>暂无该项的详细介绍。</p>
             </div>
           </>
         )}

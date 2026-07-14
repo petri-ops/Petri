@@ -455,7 +455,7 @@ export function ProjectView({
                   style={{ cursor: 'text' }}
                 >
                   {project.name}
-                  <span style={{ fontSize: 10, color: '#9ca3af', marginLeft: 8, fontWeight: 400 }}>
+                  <span style={{ fontSize: 10, color: 'var(--biof3-text-muted)', marginLeft: 8, fontWeight: 400 }}>
                     ✎
                   </span>
                 </h1>
@@ -504,7 +504,7 @@ export function ProjectView({
                 支持 <code>.rds</code> · <code>.h5</code> · <code>.csv</code> · <code>.tsv</code>
                 ，最大 200MB
               </p>
-              <p style={{ fontSize: 12, color: '#64748b', marginTop: 8, lineHeight: 1.6 }}>
+              <p style={{ fontSize: 12, color: 'var(--biof3-text-secondary)', marginTop: 8, lineHeight: 1.6 }}>
                 <strong>推荐格式：</strong>Seurat RDS 对象 或 10x h5
                 文件（filtered_feature_bc_matrix.h5）
                 <br />
@@ -747,7 +747,7 @@ export function ProjectView({
                       ⏳
                     </div>
                     <div
-                      style={{ fontSize: 11, fontWeight: 600, color: '#475569', marginBottom: 8 }}
+                      style={{ fontSize: 11, fontWeight: 600, color: 'var(--biof3-text-secondary)', marginBottom: 8 }}
                     >
                       {uploadProgress < 100 ? '上传云服务器...' : '同步计算节点...'}
                     </div>
@@ -757,7 +757,7 @@ export function ProjectView({
                         style={{ width: `${uploadProgress}%`, transition: 'width 0.3s' }}
                       />
                     </div>
-                    <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 6 }}>
+                    <div style={{ fontSize: 10, color: 'var(--biof3-text-muted)', marginTop: 6 }}>
                       {uploadProgress}%
                     </div>
                   </div>
@@ -778,7 +778,7 @@ export function ProjectView({
                 margin: '16px 0',
                 padding: '10px 20px',
                 background: '#f8faf9',
-                border: '1px solid #e5ebe8',
+                border: '1px solid var(--biof3-border)',
                 borderRadius: 8,
                 display: 'flex',
                 alignItems: 'center',
@@ -786,7 +786,7 @@ export function ProjectView({
                 justifyContent: 'center',
               }}
             >
-              <span style={{ fontSize: 12, color: '#475569' }}>
+              <span style={{ fontSize: 12, color: 'var(--biof3-text-secondary)' }}>
                 已选 <strong>{selectedDsIds.size}</strong> 个数据集
               </span>
               <button

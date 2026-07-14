@@ -406,7 +406,7 @@ export function CsvTable({
   if (loading) return <div className="sc-csv-empty">加载中...</div>;
   if (err)
     return (
-      <div className="sc-csv-empty" style={{ color: '#dc2626' }}>
+      <div className="sc-csv-empty" style={{ color: 'var(--biof3-status-error-fg)' }}>
         加载失败: {err}
       </div>
     );
@@ -451,7 +451,7 @@ export function CsvTable({
           />
         </label>
         {mergedCols.headers.length > 0 && (
-          <span style={{ fontSize: 10, color: '#10b981' }}>+{mergedCols.headers.length} 列</span>
+          <span style={{ fontSize: 10, color: 'var(--biof3-status-online)' }}>+{mergedCols.headers.length} 列</span>
         )}
       </div>
 

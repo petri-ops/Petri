@@ -398,7 +398,7 @@ export function ProjectsView({ navigate }: { navigate: (r: Route) => void }) {
                         </button>
                       )}
                       {p.isPublic && (
-                        <span style={{ fontSize: 10, color: '#9ca3af' }}>只读示例</span>
+                        <span style={{ fontSize: 10, color: 'var(--biof3-text-muted)' }}>只读示例</span>
                       )}
                     </div>
 

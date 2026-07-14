@@ -100,7 +100,7 @@ export function TablePreviewModal({ fileName, fileUrl, onClose }: Props) {
         <div className="sc-modal-header">
           <div>
             <h2 className="sc-modal-title">{fileName}</h2>
-            <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 2 }}>
+            <div style={{ fontSize: 11, color: 'var(--biof3-text-muted)', marginTop: 2 }}>
               {loading
                 ? '加载中...'
                 : err
@@ -150,7 +150,7 @@ export function TablePreviewModal({ fileName, fileUrl, onClose }: Props) {
                 style={{
                   flex: 1,
                   overflow: 'auto',
-                  border: '1px solid #e5ebe8',
+                  border: '1px solid var(--biof3-border)',
                   borderRadius: 6,
                   maxHeight: '60vh',
                 }}
@@ -182,7 +182,7 @@ export function TablePreviewModal({ fileName, fileUrl, onClose }: Props) {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     fontSize: 11,
-                    color: '#475569',
+                    color: 'var(--biof3-text-secondary)',
                   }}
                 >
                   <span>

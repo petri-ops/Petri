@@ -392,7 +392,7 @@ export function ProjectView({
                   style={{ cursor: 'text' }}
                 >
                   {project.name}
-                  <span style={{ fontSize: 10, color: '#9ca3af', marginLeft: 8, fontWeight: 400 }}>
+                  <span style={{ fontSize: 10, color: 'var(--biof3-text-muted)', marginLeft: 8, fontWeight: 400 }}>
                     ✎
                   </span>
                 </h1>
@@ -440,7 +440,7 @@ export function ProjectView({
               <p>
                 支持 <code>.h5ad</code> · <code>.h5</code> · <code>.hdf5</code>，最大 500MB
               </p>
-              <p style={{ fontSize: 12, color: '#64748b', marginTop: 8, lineHeight: 1.6 }}>
+              <p style={{ fontSize: 12, color: 'var(--biof3-text-secondary)', marginTop: 8, lineHeight: 1.6 }}>
                 <strong>推荐格式：</strong>AnnData <code>.h5ad</code> 文件（含{' '}
                 <code>obsm[&quot;spatial&quot;]</code>，可选 <code>uns[&quot;spatial&quot;]</code>{' '}
                 组织底图 + scale factors）
@@ -660,7 +660,7 @@ export function ProjectView({
                       ⏳
                     </div>
                     <div
-                      style={{ fontSize: 11, fontWeight: 600, color: '#475569', marginBottom: 8 }}
+                      style={{ fontSize: 11, fontWeight: 600, color: 'var(--biof3-text-secondary)', marginBottom: 8 }}
                     >
                       {uploadProgress < 100 ? '上传云服务器...' : '同步计算节点...'}
                     </div>
@@ -670,7 +670,7 @@ export function ProjectView({
                         style={{ width: `${uploadProgress}%`, transition: 'width 0.3s' }}
                       />
                     </div>
-                    <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 6 }}>
+                    <div style={{ fontSize: 10, color: 'var(--biof3-text-muted)', marginTop: 6 }}>
                       {uploadProgress}%
                     </div>
                   </div>

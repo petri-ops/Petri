@@ -1102,14 +1102,14 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                               borderRadius: 6,
                               fontSize: 11,
                               lineHeight: 1.6,
-                              color: '#475569',
+                              color: 'var(--biof3-text-secondary)',
                               marginBottom: 12,
                             }}
                           >
                             节点: <code>{diskStats.host}</code> · 更新时间{' '}
                             {new Date(diskStats.timestamp).toLocaleString('zh-CN')}
                             {diskStats.warnings.length > 0 && (
-                              <span style={{ color: '#dc2626' }}>
+                              <span style={{ color: 'var(--biof3-status-error-fg)' }}>
                                 {' '}
                                 · {diskStats.warnings.length} 个目录统计异常
                               </span>
@@ -1121,11 +1121,11 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                                 <span className="sc-admin-file-name">
                                   {p.label} · <code>{p.path}</code>
                                   {!p.exists && (
-                                    <span style={{ color: '#dc2626', marginLeft: 6 }}>missing</span>
+                                    <span style={{ color: 'var(--biof3-status-error-fg)', marginLeft: 6 }}>missing</span>
                                   )}
                                   {p.error && (
                                     <span
-                                      style={{ color: '#dc2626', marginLeft: 6 }}
+                                      style={{ color: 'var(--biof3-status-error-fg)', marginLeft: 6 }}
                                       title={p.error}
                                     >
                                       error
@@ -1150,7 +1150,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                             value={tempHours}
                             onChange={(e) => setTempHours(+e.target.value)}
                           />
-                          <span style={{ fontSize: 11, color: '#9ca3af', marginLeft: 6 }}>
+                          <span style={{ fontSize: 11, color: 'var(--biof3-text-muted)', marginLeft: 6 }}>
                             小时
                           </span>
                         </div>
@@ -1163,7 +1163,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                             value={cacheDays}
                             onChange={(e) => setCacheDays(+e.target.value)}
                           />
-                          <span style={{ fontSize: 11, color: '#9ca3af', marginLeft: 6 }}>天</span>
+                          <span style={{ fontSize: 11, color: 'var(--biof3-text-muted)', marginLeft: 6 }}>天</span>
                         </div>
                       </div>
 
@@ -1172,7 +1172,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                         {stats.cache.files.slice(0, 20).map((f) => (
                           <div key={f.name} className="sc-admin-file">
                             <span className="sc-admin-file-name">
-                              {f.isSymlink && <span style={{ color: '#9ca3af' }}>↪ </span>}
+                              {f.isSymlink && <span style={{ color: 'var(--biof3-text-muted)' }}>↪ </span>}
                               {f.name}
                             </span>
                             <span className="sc-admin-file-size">{formatSize(f.size)}</span>
@@ -1198,7 +1198,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                           borderRadius: 6,
                           fontSize: 11,
                           lineHeight: 1.6,
-                          color: '#475569',
+                          color: 'var(--biof3-text-secondary)',
                           marginBottom: 12,
                         }}
                       >
@@ -1290,7 +1290,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                                 </span>
                                 <span className="sc-admin-file-size">{w.count}</span>
                                 {w.lastSeen && (
-                                  <span style={{ fontSize: 10, color: '#9ca3af', marginLeft: 8 }}>
+                                  <span style={{ fontSize: 10, color: 'var(--biof3-text-muted)', marginLeft: 8 }}>
                                     {new Date(w.lastSeen).toLocaleString('zh-CN')}
                                   </span>
                                 )}
@@ -1310,11 +1310,11 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                                 </span>
                                 <span className="sc-admin-file-size">{t.progress || 0}%</span>
                                 {t.workerId && (
-                                  <span style={{ fontSize: 10, color: '#64748b', marginLeft: 8 }}>
+                                  <span style={{ fontSize: 10, color: 'var(--biof3-text-secondary)', marginLeft: 8 }}>
                                     {t.workerId}
                                   </span>
                                 )}
-                                <span style={{ fontSize: 10, color: '#9ca3af', marginLeft: 8 }}>
+                                <span style={{ fontSize: 10, color: 'var(--biof3-text-muted)', marginLeft: 8 }}>
                                   {new Date(t.createdAt).toLocaleString('zh-CN')}
                                 </span>
                               </div>
@@ -1344,7 +1344,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                           borderRadius: 6,
                           fontSize: 11,
                           lineHeight: 1.6,
-                          color: '#475569',
+                          color: 'var(--biof3-text-secondary)',
                           marginBottom: 12,
                         }}
                       >
@@ -1388,10 +1388,10 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                               </span>{' '}
                               {d.toolId} · {d.jobId}
                               {!d.manifest.valid && d.manifest.exists && (
-                                <span style={{ color: '#dc2626', marginLeft: 6 }}>manifest</span>
+                                <span style={{ color: 'var(--biof3-status-error-fg)', marginLeft: 6 }}>manifest</span>
                               )}
                               {!d.outputExists && (
-                                <span style={{ color: '#dc2626', marginLeft: 6 }}>
+                                <span style={{ color: 'var(--biof3-status-error-fg)', marginLeft: 6 }}>
                                   missing output
                                 </span>
                               )}
@@ -1400,7 +1400,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                               {d.fileCount} 文件 · {d.totalHuman}
                             </span>
                             {d.newestMtime && (
-                              <span style={{ fontSize: 10, color: '#9ca3af', marginLeft: 8 }}>
+                              <span style={{ fontSize: 10, color: 'var(--biof3-text-muted)', marginLeft: 8 }}>
                                 {new Date(d.newestMtime).toLocaleString('zh-CN')}
                               </span>
                             )}
@@ -1418,12 +1418,12 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                               )}
                               {j.jobId}
                               {!j.outputExists && (
-                                <span style={{ color: '#dc2626', marginLeft: 6 }}>
+                                <span style={{ color: 'var(--biof3-status-error-fg)', marginLeft: 6 }}>
                                   missing output
                                 </span>
                               )}
                               {j.manifest.exists && !j.manifest.valid && (
-                                <span style={{ color: '#dc2626', marginLeft: 6 }}>
+                                <span style={{ color: 'var(--biof3-status-error-fg)', marginLeft: 6 }}>
                                   bad manifest
                                 </span>
                               )}
@@ -1432,7 +1432,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                               {j.fileCount} 文件 · {j.totalHuman}
                             </span>
                             {j.newestMtime && (
-                              <span style={{ fontSize: 10, color: '#9ca3af', marginLeft: 8 }}>
+                              <span style={{ fontSize: 10, color: 'var(--biof3-text-muted)', marginLeft: 8 }}>
                                 {new Date(j.newestMtime).toLocaleString('zh-CN')}
                               </span>
                             )}
@@ -1476,11 +1476,11 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                             value={ossDays}
                             onChange={(e) => setOssDays(+e.target.value)}
                           />
-                          <span style={{ fontSize: 11, color: '#9ca3af', marginLeft: 6 }}>
+                          <span style={{ fontSize: 11, color: 'var(--biof3-text-muted)', marginLeft: 6 }}>
                             天 (0=立即清理)
                           </span>
                         </div>
-                        <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 6 }}>
+                        <div style={{ fontSize: 10, color: 'var(--biof3-text-muted)', marginTop: 6 }}>
                           ⚠ demo/ 前缀永远保留 · 数据库中仍引用的 OSS 对象不会被删除
                         </div>
                       </div>
@@ -1510,7 +1510,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                       borderRadius: 6,
                       fontSize: 11,
                       lineHeight: 1.6,
-                      color: '#475569',
+                      color: 'var(--biof3-text-secondary)',
                       marginBottom: 12,
                     }}
                   >
@@ -1547,11 +1547,11 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                             <span className="sc-admin-file-name">{b.name}</span>
                             <span className="sc-admin-file-size">{b.sizeHuman}</span>
                             {b.engine && (
-                              <span style={{ fontSize: 10, color: '#64748b', marginLeft: 8 }}>
+                              <span style={{ fontSize: 10, color: 'var(--biof3-text-secondary)', marginLeft: 8 }}>
                                 {b.engine}
                               </span>
                             )}
-                            <span style={{ fontSize: 10, color: '#9ca3af', marginLeft: 8 }}>
+                            <span style={{ fontSize: 10, color: 'var(--biof3-text-muted)', marginLeft: 8 }}>
                               ↓ 下载
                             </span>
                           </div>
@@ -1566,7 +1566,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
               {tab === 'errors' && (
                 <>
                   <div className="sc-admin-section-title">错误日志（最近 200 条）</div>
-                  <div style={{ marginBottom: 10, fontSize: 11, color: '#9ca3af' }}>
+                  <div style={{ marginBottom: 10, fontSize: 11, color: 'var(--biof3-text-muted)' }}>
                     收集前后端的未捕获异常 · 实时推送 · 来源: <code>/var/log/biof3-errors.log</code>
                   </div>
                   {errors === null && <div className="sc-empty-desc">加载中...</div>}
@@ -1589,28 +1589,28 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                               marginBottom: 4,
                             }}
                           >
-                            <span style={{ color: '#dc2626', fontWeight: 600 }}>
+                            <span style={{ color: 'var(--biof3-status-error-fg)', fontWeight: 600 }}>
                               [{e.source}] {e.message}
                             </span>
-                            <span style={{ color: '#9ca3af', fontSize: 10 }}>
+                            <span style={{ color: 'var(--biof3-text-muted)', fontSize: 10 }}>
                               {new Date(e.time).toLocaleString('zh-CN')}
                             </span>
                           </div>
                           {e.url && (
-                            <div style={{ color: '#9ca3af', fontSize: 10 }}>URL: {e.url}</div>
+                            <div style={{ color: 'var(--biof3-text-muted)', fontSize: 10 }}>URL: {e.url}</div>
                           )}
-                          {e.ip && <div style={{ color: '#9ca3af', fontSize: 10 }}>IP: {e.ip}</div>}
+                          {e.ip && <div style={{ color: 'var(--biof3-text-muted)', fontSize: 10 }}>IP: {e.ip}</div>}
                           {e.stack && (
                             <details style={{ marginTop: 4 }}>
                               <summary
-                                style={{ cursor: 'pointer', fontSize: 10, color: '#64748b' }}
+                                style={{ cursor: 'pointer', fontSize: 10, color: 'var(--biof3-text-secondary)' }}
                               >
                                 堆栈
                               </summary>
                               <pre
                                 style={{
                                   fontSize: 10,
-                                  color: '#475569',
+                                  color: 'var(--biof3-text-secondary)',
                                   whiteSpace: 'pre-wrap',
                                   marginTop: 4,
                                   padding: 6,
@@ -1637,7 +1637,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                       marginBottom: 16,
                       padding: '14px 16px',
                       borderRadius: 10,
-                      border: '1px solid #e2e8f0',
+                      border: '1px solid var(--biof3-border)',
                       background: 'linear-gradient(135deg, #f8fafc 0%, #f0fdf4 100%)',
                     }}
                   >
@@ -1657,7 +1657,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                         <p
                           style={{
                             fontSize: 11,
-                            color: '#64748b',
+                            color: 'var(--biof3-text-secondary)',
                             margin: '6px 0 0',
                             maxWidth: 520,
                             lineHeight: 1.5,
@@ -1725,7 +1725,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                           );
                         })}
                         {guestPermsSaving && (
-                          <span style={{ fontSize: 10, color: '#64748b' }}>保存中…</span>
+                          <span style={{ fontSize: 10, color: 'var(--biof3-text-secondary)' }}>保存中…</span>
                         )}
                       </div>
                     )}
@@ -1746,7 +1746,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                       <span
                         style={{
                           fontSize: 11,
-                          color: '#64748b',
+                          color: 'var(--biof3-text-secondary)',
                           background: '#f1f5f9',
                           padding: '4px 12px',
                           borderRadius: 6,
@@ -1793,7 +1793,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                             style={{
                               borderBottom: '2px solid #e5ebe8',
                               textAlign: 'left',
-                              color: '#64748b',
+                              color: 'var(--biof3-text-secondary)',
                             }}
                           >
                             <th style={{ padding: '8px' }}>用户名</th>
@@ -1814,7 +1814,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                               <td style={{ padding: '8px' }}>
                                 <strong>{u.username}</strong>
                                 {u.role === 'admin' && (
-                                  <span style={{ marginLeft: 4, fontSize: 9, color: '#dc2626' }}>
+                                  <span style={{ marginLeft: 4, fontSize: 9, color: 'var(--biof3-status-error-fg)' }}>
                                     ★
                                   </span>
                                 )}
@@ -1826,7 +1826,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                                   style={{
                                     fontSize: 10,
                                     padding: '3px 6px',
-                                    border: '1px solid #e2e8f0',
+                                    border: '1px solid var(--biof3-border)',
                                     borderRadius: 4,
                                     background: 'white',
                                   }}
@@ -1842,7 +1842,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                                   style={{
                                     fontSize: 10,
                                     padding: '3px 6px',
-                                    border: '1px solid #e2e8f0',
+                                    border: '1px solid var(--biof3-border)',
                                     borderRadius: 4,
                                     background: 'white',
                                   }}
@@ -1855,16 +1855,16 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                                   <option value="10240">10 GB</option>
                                 </select>
                               </td>
-                              <td style={{ padding: '8px', color: '#475569' }}>
+                              <td style={{ padding: '8px', color: 'var(--biof3-text-secondary)' }}>
                                 {u.stats.storageHuman}
                               </td>
-                              <td style={{ padding: '8px', color: '#64748b' }}>
+                              <td style={{ padding: '8px', color: 'var(--biof3-text-secondary)' }}>
                                 {u.stats.projects}
                               </td>
-                              <td style={{ padding: '8px', color: '#64748b' }}>
+                              <td style={{ padding: '8px', color: 'var(--biof3-text-secondary)' }}>
                                 {u.stats.datasets}
                               </td>
-                              <td style={{ padding: '8px', color: '#64748b' }}>
+                              <td style={{ padding: '8px', color: 'var(--biof3-text-secondary)' }}>
                                 {u.stats.analyses}
                               </td>
                               <td style={{ padding: '8px' }}>
@@ -1920,7 +1920,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                                   </div>
                                 )}
                               </td>
-                              <td style={{ padding: '8px', color: '#9ca3af', fontSize: 10 }}>
+                              <td style={{ padding: '8px', color: 'var(--biof3-text-muted)', fontSize: 10 }}>
                                 {new Date(u.created_at).toLocaleDateString('zh-CN')}
                               </td>
                               <td style={{ padding: '8px' }}>
@@ -1945,10 +1945,10 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                                     fontSize: 10,
                                     padding: '3px 8px',
                                     borderRadius: 4,
-                                    border: '1px solid #e2e8f0',
+                                    border: '1px solid var(--biof3-border)',
                                     background: 'white',
                                     cursor: 'pointer',
-                                    color: '#64748b',
+                                    color: 'var(--biof3-text-secondary)',
                                   }}
                                   title="以该用户身份登录（1小时有效）"
                                   onClick={() => {
@@ -1985,7 +1985,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                                       border: '1px solid #fecaca',
                                       background: 'white',
                                       cursor: 'pointer',
-                                      color: '#dc2626',
+                                      color: 'var(--biof3-status-error-fg)',
                                     }}
                                     title="删除该用户及其所有数据"
                                     onClick={() => {
@@ -2047,12 +2047,12 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                       <div key={c.name} className="sc-admin-report-item">
                         <span
                           className="sc-admin-tag"
-                          style={{ background: '#fee2e2', color: '#dc2626' }}
+                          style={{ background: 'var(--biof3-status-error-bg)', color: 'var(--biof3-status-error-fg)' }}
                         >
                           CACHE
                         </span>
                         <span className="sc-admin-file-name">{c.name}</span>
-                        <span style={{ fontSize: 10, color: '#9ca3af' }}>{c.reason}</span>
+                        <span style={{ fontSize: 10, color: 'var(--biof3-text-muted)' }}>{c.reason}</span>
                         <span className="sc-admin-file-size">{formatSize(c.sizeBytes)}</span>
                       </div>
                     ))}
@@ -2077,7 +2077,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                 <>
                   <div className="sc-admin-section-title">🤖 AI 治理面板</div>
                   <div
-                    style={{ fontSize: 12, color: '#6b7280', marginBottom: 12, lineHeight: 1.6 }}
+                    style={{ fontSize: 12, color: 'var(--biof3-text-secondary)', marginBottom: 12, lineHeight: 1.6 }}
                   >
                     监控每个用户的 AI
                     助手使用情况、调用历史和暂停状态。出于隐私考虑，本面板不显示对话原文 —
@@ -2101,7 +2101,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                       <div style={{ fontWeight: 600, color: globalPaused ? '#991b1b' : '#047857' }}>
                         {globalPaused ? '⛔ 全局 Agent Mode 已暂停' : '✅ 全局 Agent Mode 正常'}
                       </div>
-                      <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>
+                      <div style={{ fontSize: 11, color: 'var(--biof3-text-secondary)', marginTop: 2 }}>
                         {globalPaused
                           ? '所有用户的 act / act_generic 调用会被拦截，普通对话不受影响'
                           : '紧急情况（滥用/Bug）下可一键关停全部 AI 写操作'}
@@ -2255,7 +2255,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                               <td
                                 style={{
                                   padding: '6px 8px',
-                                  color: '#6b7280',
+                                  color: 'var(--biof3-text-secondary)',
                                   whiteSpace: 'nowrap',
                                 }}
                               >
@@ -2274,7 +2274,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                                   <span
                                     style={{
                                       padding: '2px 6px',
-                                      background: '#fee2e2',
+                                      background: 'var(--biof3-status-error-bg)',
                                       color: '#991b1b',
                                       borderRadius: 4,
                                       fontSize: 10,
@@ -2339,7 +2339,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                     审计日志
                     {aiAuditUserFilter && (
                       <span
-                        style={{ marginLeft: 8, fontSize: 11, fontWeight: 400, color: '#6b7280' }}
+                        style={{ marginLeft: 8, fontSize: 11, fontWeight: 400, color: 'var(--biof3-text-secondary)' }}
                       >
                         (用户:{' '}
                         {aiUsers?.find((u) => u.id === aiAuditUserFilter)?.username ||
@@ -2349,7 +2349,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                           style={{
                             marginLeft: 6,
                             fontSize: 11,
-                            color: '#10b981',
+                            color: 'var(--biof3-status-online)',
                             background: 'transparent',
                             border: 'none',
                             cursor: 'pointer',
@@ -2369,7 +2369,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                         style={{
                           marginLeft: 8,
                           fontSize: 11,
-                          color: '#10b981',
+                          color: 'var(--biof3-status-online)',
                           background: 'transparent',
                           border: 'none',
                           cursor: 'pointer',
@@ -2420,7 +2420,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                                 style={{
                                   padding: '4px 10px',
                                   whiteSpace: 'nowrap',
-                                  color: '#6b7280',
+                                  color: 'var(--biof3-text-secondary)',
                                 }}
                               >
                                 {new Date(a.ts).toLocaleString('zh-CN', {
@@ -2450,7 +2450,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                                   padding: '4px 6px',
                                   fontFamily: 'monospace',
                                   fontSize: 10,
-                                  color: '#6b7280',
+                                  color: 'var(--biof3-text-secondary)',
                                   maxWidth: 260,
                                   overflow: 'hidden',
                                   textOverflow: 'ellipsis',
@@ -2461,7 +2461,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                               </td>
                               <td style={{ padding: '4px 6px' }}>
                                 {a.undone ? (
-                                  <span style={{ color: '#dc2626' }}>
+                                  <span style={{ color: 'var(--biof3-status-error-fg)' }}>
                                     ✓{' '}
                                     {a.undone_at
                                       ? new Date(a.undone_at).toLocaleTimeString('zh-CN', {
@@ -2487,13 +2487,13 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                 <>
                   <div className="sc-admin-section-title">📊 AI 用量看板</div>
                   <div
-                    style={{ fontSize: 12, color: '#6b7280', marginBottom: 12, lineHeight: 1.6 }}
+                    style={{ fontSize: 12, color: 'var(--biof3-text-secondary)', marginBottom: 12, lineHeight: 1.6 }}
                   >
                     每次 LLM / Embedding 调用的 token
                     消耗、延迟、错误，按当前定价估算实际人民币成本。这是数据驱动决策的依据。
                   </div>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14 }}>
-                    <span style={{ fontSize: 12, color: '#6b7280' }}>时间范围：</span>
+                    <span style={{ fontSize: 12, color: 'var(--biof3-text-secondary)' }}>时间范围：</span>
                     {[7, 30, 90].map((d) => (
                       <button
                         key={d}
@@ -2570,7 +2570,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                               >
                                 ¥{totalCost.toFixed(3)}
                               </div>
-                              <div style={{ fontSize: 10, color: '#6b7280', marginTop: 2 }}>
+                              <div style={{ fontSize: 10, color: 'var(--biof3-text-secondary)', marginTop: 2 }}>
                                 {usageDays} 天累计
                               </div>
                             </div>
@@ -2595,7 +2595,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                               >
                                 {totalCalls}
                               </div>
-                              <div style={{ fontSize: 10, color: '#6b7280', marginTop: 2 }}>
+                              <div style={{ fontSize: 10, color: 'var(--biof3-text-secondary)', marginTop: 2 }}>
                                 每天约 {Math.round(totalCalls / usageDays)} 次
                               </div>
                             </div>
@@ -2620,7 +2620,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                               >
                                 {(totalTokens / 1000).toFixed(1)}K
                               </div>
-                              <div style={{ fontSize: 10, color: '#6b7280', marginTop: 2 }}>
+                              <div style={{ fontSize: 10, color: 'var(--biof3-text-secondary)', marginTop: 2 }}>
                                 累计输入+输出
                               </div>
                             </div>
@@ -2651,7 +2651,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                               >
                                 {errorRate.toFixed(1)}%
                               </div>
-                              <div style={{ fontSize: 10, color: '#6b7280', marginTop: 2 }}>
+                              <div style={{ fontSize: 10, color: 'var(--biof3-text-secondary)', marginTop: 2 }}>
                                 {totalErrors} / {totalCalls} 次
                               </div>
                             </div>
@@ -2782,7 +2782,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                                       style={{
                                         padding: '4px 6px',
                                         textAlign: 'right',
-                                        color: '#6b7280',
+                                        color: 'var(--biof3-text-secondary)',
                                       }}
                                     >
                                       {Math.round(r.avg_latency)}ms
@@ -2903,7 +2903,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                                       style={{
                                         padding: '4px 6px',
                                         textAlign: 'right',
-                                        color: '#6b7280',
+                                        color: 'var(--biof3-text-secondary)',
                                       }}
                                     >
                                       {Math.round(r.avg_latency)}ms
@@ -2962,7 +2962,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                                     <span
                                       style={{
                                         width: 24,
-                                        color: '#9ca3af',
+                                        color: 'var(--biof3-text-muted)',
                                         fontVariantNumeric: 'tabular-nums',
                                       }}
                                     >
@@ -3009,7 +3009,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                                         style={{
                                           width: 70,
                                           textAlign: 'right',
-                                          color: '#dc2626',
+                                          color: 'var(--biof3-status-error-fg)',
                                           fontSize: 10,
                                         }}
                                       >
@@ -3046,7 +3046,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                                     <span style={{ fontFamily: 'monospace', color: '#991b1b' }}>
                                       {e.error_code}
                                     </span>
-                                    <span style={{ color: '#6b7280', marginLeft: 6 }}>×{e.n}</span>
+                                    <span style={{ color: 'var(--biof3-text-secondary)', marginLeft: 6 }}>×{e.n}</span>
                                   </div>
                                 ))}
                               </div>
@@ -3061,7 +3061,7 @@ export function AdminPanel({ embedded = false, activeTab }: AdminPanelProps = {}
                               background: '#f9fafb',
                               borderRadius: 6,
                               fontSize: 11,
-                              color: '#6b7280',
+                              color: 'var(--biof3-text-secondary)',
                             }}
                           >
                             <strong>定价参考（CNY/M tokens）：</strong>
