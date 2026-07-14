@@ -3,6 +3,48 @@
 All notable changes to the BioF3 desktop app are documented in this
 file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## Week 4 (2026-07-14) -- RC Gate 1 source/version close-out
+
+### Added
+
+- `release-contract.json` + `frontend/src/lib/releaseContract.ts` --
+  typed contract for positioning, golden path, platform matrix, GA bar
+- `resources/built-in-plugins/manifest.schema.json` +
+  `manifest.placeholders.json` -- schema-validated per-platform plugin
+  manifest
+- `resources/built-in-plugins/deseq2/` -- bundled deseq2 plugin with
+  R script, tool definition, plugin.json and demo data
+- `frontend/src/styles/theme-token-contract.test.ts` -- theme token
+  contract coverage
+- `AGENTS.md` + `frontend/AGENTS.md` + `.cursorignore` -- AI agent
+  entry points and context scope
+- `icons/biof3-logo-concept-v1.{svg,png}` -- brand concept for
+  rc.1 packaging
+
+### Changed
+
+- `frontend/src/App.tsx` -- single-cell / spatial / tutorials
+  independent routes closed; desktop lands on dashboard, project
+  workspace, tools, admin
+- `frontend/src/components/desktop/DesktopOnboarding.tsx` -- dropped
+  "learn / practice" dual-mode framing; copy aligned to beta
+  positioning
+- `frontend/src/pages/tools.tsx` -- trimmed page-level state,
+  consistent with collapsed routes
+- `src/plugin-manager.js` -- per-platform artifact resolution backed
+  by `manifest.schema.json`
+- `electron-builder.yml` + `build/afterSign.js` +
+  `build/entitlements.mac.plist` -- rc.1 macOS arm64 / x64 + Windows
+  NSIS pipeline and notarize entitlements
+- `package.json` -- registered golden-path script
+
+### Gate progress
+
+- **Gate 1 -- source/version close-out: closed.** Working tree
+  clean, submodule pointer = `e2efb73` matching `.vendor-lock`,
+  `scripts/sync-vendor.sh check` OK. Split into 4 commits:
+  meta / release-contract / desktop-collapse / docs+tests.
+
 ## Week 3 (2026-07) -- First-success path
 
 ### Added
