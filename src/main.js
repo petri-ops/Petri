@@ -785,9 +785,9 @@ async function createWindow() {
     title: "BioF3",
     frame: false,
     titleBarStyle: "hiddenInset",
-    // Keep the native 12px traffic lights on the same 14px centerline as
-    // the renderer's 28px title bar controls.
-    trafficLightPosition: { x: 12, y: 8 },
+    // Electron's native inset uses a different vertical origin from the
+    // renderer title bar. This value is verified against the live window.
+    trafficLightPosition: { x: 12, y: 4 },
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
