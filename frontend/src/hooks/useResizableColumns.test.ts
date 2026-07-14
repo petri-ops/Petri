@@ -167,21 +167,21 @@ describe('useResizableColumns', () => {
     const fakeEvent = { preventDefault: () => {}, clientX: 0, clientY: 0 } as unknown as React.MouseEvent;
 
     handler(fakeEvent);
-    fireMouse(document, 'mousemove', { clientX: 120, buttons: 1 });
+    fireMouse(document, 'mousemove', { clientX: 300, buttons: 1 });
     expect(result.current.resultRightWidth).toBe(720);
     await act(async () => {
       await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
     });
     expect(
       document.documentElement.style.getPropertyValue('--biof3-live-result-right-width'),
-    ).toBe('600px');
+    ).toBe('420px');
     fireMouse(document, 'mouseup');
     await flush();
 
-    expect(result.current.resultRightWidth).toBe(600);
+    expect(result.current.resultRightWidth).toBe(420);
     expect(result.current.rightWidth).toBe(340);
     const saved = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-    expect(saved.resultRightWidth).toBe(600);
+    expect(saved.resultRightWidth).toBe(420);
     expect(saved.rightWidth).toBe(340);
   });
 
@@ -194,11 +194,16 @@ describe('useResizableColumns', () => {
     expect(result.current.bottomTerminalHeight).toBe(300);
   });
 
-  it('normalizes stale and invalid persisted result widths to the stable minimum', () => {
-    localStorage.setItem(LS_KEY, JSON.stringify({ resultRightWidth: 360 }));
-    const stale = renderHook(() => useResizableColumns());
-    expect(stale.result.current.resultRightWidth).toBe(600);
-    stale.unmount();
+  it('keeps narrow persisted widths usable and rejects values below the safety floor', () => {
+    localStorage.setItem(LS_KEY, JSON.stringify({ resultRightWidth: 420 }));
+    const narrow = renderHook(() => useResizableColumns());
+    expect(narrow.result.current.resultRightWidth).toBe(420);
+    narrow.unmount();
+
+    localStorage.setItem(LS_KEY, JSON.stringify({ resultRightWidth: 240 }));
+    const belowFloor = renderHook(() => useResizableColumns());
+    expect(belowFloor.result.current.resultRightWidth).toBe(360);
+    belowFloor.unmount();
 
     localStorage.setItem(LS_KEY, JSON.stringify({ resultRightWidth: Number.NaN }));
     const invalid = renderHook(() => useResizableColumns());
@@ -253,5 +258,24 @@ describe('useResizableColumns', () => {
 
     expect(document.body.classList.contains('biof3-resizing-columns')).toBe(false);
     expect(result.current.rightWidth).toBe(draggedWidth);
+  });
+
+  it('keeps result resizing responsive when an environment omits the buttons bitmask', async () => {
+    const { result } = renderHook(() => useResizableColumns());
+    const handler = result.current.startColumnResize('resultRight');
+    const fakeEvent = { preventDefault: () => {}, clientX: 0, clientY: 0 } as unknown as React.MouseEvent;
+
+    handler(fakeEvent);
+    fireMouse(document, 'mousemove', { clientX: 240, buttons: 0 });
+    await act(async () => {
+      await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+    });
+    expect(
+      document.documentElement.style.getPropertyValue('--biof3-live-result-right-width'),
+    ).toBe('480px');
+
+    fireMouse(document, 'mouseup');
+    await flush();
+    expect(result.current.resultRightWidth).toBe(480);
   });
 });

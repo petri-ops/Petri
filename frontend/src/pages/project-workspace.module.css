@@ -2814,7 +2814,9 @@
 
 /* Resize handles */
 .resizeHandleV {
-  width: 1px;
+  width: 9px;
+  margin-left: -4px;
+  margin-right: -4px;
   flex-shrink: 0;
   cursor: ew-resize;
   background: transparent;
@@ -2823,21 +2825,12 @@
   transition: background 0.15s ease;
 }
 
-.resizeHandleV::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -4px;
-  right: -4px;
-}
-
 .resizeHandleV::after {
   content: '';
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 0;
+  left: 4px;
   width: 1px;
   background: color-mix(in srgb, var(--biof3-border, #e2e8f0) 46%, transparent 54%);
   opacity: 0.58;
@@ -3250,23 +3243,9 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   position: relative;
 }
 
-/* Keep the expensive embedded report out of the frame-by-frame layout pass.
- * The surrounding result workspace still follows the pointer in real time. */
-body.biof3-resizing-columns .resultSidebarPreviewBody::after {
-  content: '调整结果面板宽度…';
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  display: grid;
-  place-items: center;
-  background: color-mix(in srgb, var(--biof3-bg-surface, #ffffff) 96%, transparent);
-  color: var(--biof3-text-tertiary, #94a3b8);
-  font-size: 11px;
-  pointer-events: none;
-}
-
-body.biof3-resizing-columns .resultSidebarIframe {
-  display: none;
+body.biof3-resizing-columns .rightCol {
+  transition: none;
+  will-change: width;
 }
 
 body.biof3-resizing-columns,

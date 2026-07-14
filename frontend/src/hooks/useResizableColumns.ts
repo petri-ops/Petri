@@ -87,7 +87,7 @@ function saveDims(dims: StoredDims): void {
 const MIN_LEFT_WIDTH = 96;
 const MIN_RIGHT_WIDTH = 96;
 const MIN_INPUT_HEIGHT = 48;
-const MIN_RESULT_RIGHT_WIDTH = 600;
+const MIN_RESULT_RIGHT_WIDTH = 360;
 const RESIZING_CLASS = 'biof3-resizing-columns';
 
 function setResizingClass(active: boolean): void {
@@ -207,7 +207,7 @@ export function useResizableColumns(
       };
 
       const onMove = (ev: MouseEvent) => {
-        if (dragState.current.active && (ev.buttons & 1) === 0) {
+        if (which !== 'resultRight' && dragState.current.active && (ev.buttons & 1) === 0) {
           cleanup();
           return;
         }

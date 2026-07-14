@@ -6,10 +6,11 @@
 
 - 当前主线仍是 `project workspace` 的结果区稳定性修复，重点不是新增功能，而是把“结果预览在拖拽时跳版/抖动”的根因收口。
 - 已确认问题根因主要有两部分：
-  1. 结果右栏 `resultRightWidth` 之前没有足够的稳定下限，历史脏值会被 localStorage 继续带入。
+  1. 结果右栏历史脏值会被 localStorage 继续带入，拖拽热区和拖动反馈也不够跟手。
   2. 结果报告壳 `resultReportShell` 仍有窄屏切换规则，会在面板变窄时从左右布局切成单列，造成明显跳变。
 - 已完成修复：
-  - `frontend/src/hooks/useResizableColumns.ts` 为 `resultRightWidth` 加入归一化，历史值会被洗到安全区间，当前最小值收紧到 600px。
+  - `frontend/src/hooks/useResizableColumns.ts` 为 `resultRightWidth` 加入归一化，安全下限为 360px；拖动通过 CSS 变量逐帧更新，松手后才持久化。
+  - 拖拽实际热区扩展为 9px，拖动时报告 iframe 保持可见，只禁用指针事件，避免预览消失后再出现。
   - `frontend/src/pages/project-workspace.module.css` 移除了结果报告的窄宽度断点切版逻辑，保留同一套报告结构，只做缩放，不再在拖拽时切换成另一种排版。
 - 已做验证：
   - `npm --prefix frontend run check`
