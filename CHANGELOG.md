@@ -66,6 +66,36 @@ file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
   in repo secrets, then a `git push v0.0.1-rc.1` will exercise the
   new `.github/workflows/release.yml` end-to-end.
 
+
+## Week 4.1 (2026-07-15) -- Post-Gate-4 polish (local, not pushed)
+
+### Changed
+
+- `frontend/vite.config.ts` -- `manualChunks` 改为函数式，新增
+  `ui-vendor` (xterm + highlight.js + infima, 504KB)、
+  `markdown-vendor` (mdx/remark/rehype 栈, 76KB)、
+  `vendor` (其余第三方, 105KB)。主入口 `index-*.js` 从 1.1 MB
+  降至 **404 KB**（−63%）。
+- `frontend/src/pages/single-cell/_AdminPanel.tsx` -- 第 544 行
+  原 `await import('@/lib/authClient')` 改为顶部静态 import；
+  消解 Vite "dynamically imported but also statically imported"
+  警告；try/catch 容错语义保留。
+
+### Known carry-over (下个 PR 单独评审)
+
+- `Circular chunk: vendor ↔ react-vendor / markdown-vendor` -- 跨
+  chunk 引用导致 HTTP 多一次往返，收益 < 风险。
+- `ui-vendor` 504KB 超 500KB 警告线 -- 实际是 xterm 占 477KB；
+  拆需改 `useTerminalSession.ts` 为 lazy import + 改
+  `useTerminalSession.test.ts` 的 `vi.mock`，超出本 PR 范围。
+
+### Verification
+
+- `npm --prefix frontend run build` exit=0
+- `npx tsc -b` exit=0
+- `npm --prefix frontend test` 19 files / 147 tests passed
+- 工作树 `git status --short` 干净（commit 后）
+
 ## Week 3 (2026-07) -- First-success path
 
 ### Added
