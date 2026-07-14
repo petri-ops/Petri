@@ -17,7 +17,7 @@
     "test": "node --test test/*.test.mjs",
     "mcp:server": "node src/mcp-server.js",
     "golden-path": "node scripts/golden-path.mjs",
-    "build:site": "cd .. && npm run build:desktop",
+    "build:site": "echo '[build:site] no-op: desktop is a standalone repo, Vite SPA output already lands in frontend/dist/. This hook is kept as a placeholder for a future monorepo layout.'",
     "build:spa": "cd frontend && npm run build",
     "build:all": "npm run build:spa && npm run build:site",
     "build:win": "npm run prebuild && npm run build:all && electron-builder --win --x64",

@@ -24,7 +24,6 @@ mac:
   icon: icons/icon.icns
   hardenedRuntime: true
   gatekeeperAssess: false
-  afterSign: build/afterSign.js
   target:
     - target: dmg
       arch:
