@@ -2876,6 +2876,7 @@
 .browserHost {
   flex: 1;
   width: 100%;
+  height: 100%;
   min-height: 0;
   margin: 0;
   border-top: none;
@@ -2889,6 +2890,7 @@
   display: block;
   flex: 1;
   width: 100%;
+  height: 100%;
   min-height: 0;
   border: 0;
   background: var(--biof3-bg-surface);
@@ -4960,7 +4962,7 @@ body.biof3-resizing-columns * {
   min-height: 0;
   min-width: 96px;
   border-left: 1px solid var(--biof3-border, #e2e8f0);
-  background: var(--biof3-bg, #f8fafc);
+  background: var(--biof3-bg-surface, #ffffff);
   overflow: hidden;
 }
 
@@ -4970,7 +4972,7 @@ body.biof3-resizing-columns * {
   height: 100%;
   overflow: auto;
   padding: 10px 10px 8px;
-  background: var(--biof3-bg, #f8fafc);
+  background: var(--biof3-bg-surface, #ffffff);
 }
 
 .workspaceFileTreeResize {

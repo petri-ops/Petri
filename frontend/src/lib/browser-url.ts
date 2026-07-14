@@ -8,11 +8,10 @@ export function normalizeBrowserUrl(value: string): string {
   return `https://${trimmed}`;
 }
 
-export function isBioF3LocalReportUrl(value: string): boolean {
+export function isBioF3LocalBrowserUrl(value: string): boolean {
   try {
     const url = new URL(value);
-    const isLocalHost = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
-    return isLocalHost && /\/api\/tools\/file\/[^/]+\/(?:final-)?report\.html$/i.test(url.pathname);
+    return url.protocol === 'http:' && (url.hostname === 'localhost' || url.hostname === '127.0.0.1');
   } catch {
     return false;
   }

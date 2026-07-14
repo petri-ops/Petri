@@ -36,8 +36,9 @@ import { isDirectRecoveryAction, useHarnessWorkflowStatus } from '@/hooks/useHar
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import type { HarnessContextSummary } from '@/lib/copilotContext';
 import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
-import { isBioF3LocalReportUrl, normalizeBrowserUrl } from '@/lib/browser-url';
+import { isBioF3LocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
+import { useTheme } from '@/themes/ThemeProvider';
 import { getNextSteps, buildChainPrompt, type ResolvedJob } from '@/lib/workflow-chains';
 import {
   fetchHarnessIndex,
@@ -2425,6 +2426,7 @@ function ResultArtifactShell({
   /** Opens a generated delivery report in the right-side Electron webview. */
   onOpenBrowser?: (url: string) => void;
 }): React.ReactElement {
+  const { resolvedTheme } = useTheme();
   const isSidebar = variant === 'sidebar';
   const [result, setResult] = useState<JobResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -2955,7 +2957,7 @@ function ResultArtifactShell({
           'Content-Type': 'application/json',
           ...(token ? {Authorization: `Bearer ${token}`} : {}),
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ theme: resolvedTheme }),
       });
       const data = await response.json();
       if (!response.ok || !data.ok || !data.fileName) throw new Error(data.message || data.error || '报告生成失败');
@@ -3510,7 +3512,7 @@ export function BrowserPanel({
   const webviewRef = useRef<any>(null);
   const [inputUrl, setInputUrl] = useState(() => normalizeBrowserUrl(initialUrl));
   const [frameUrl, setFrameUrl] = useState(() =>
-    isBioF3LocalReportUrl(startUrlRef.current) ? startUrlRef.current : ''
+    isBioF3LocalBrowserUrl(startUrlRef.current) ? startUrlRef.current : ''
   );
   const [frameKey, setFrameKey] = useState(0);
   const [title, setTitle] = useState('浏览器');
@@ -3529,7 +3531,7 @@ export function BrowserPanel({
       startUrlRef.current = nextUrl;
       setInputUrl(nextUrl);
       onUrlChange(nextUrl);
-      if (isBioF3LocalReportUrl(nextUrl)) {
+      if (isBioF3LocalBrowserUrl(nextUrl)) {
         setFrameUrl(nextUrl);
         setBrowserError('');
         setLoading(true);
