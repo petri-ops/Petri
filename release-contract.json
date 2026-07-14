@@ -1,0 +1,48 @@
+{
+  "channel": "beta",
+  "version": "v0.1.0-beta",
+  "tagline": "BioF3 是一个本地优先的生物信息学项目工作台，AI 在项目上下文中帮助用户运行分析、检查产物并生成报告。",
+  "goldenPath": {
+    "name": "demo-deseq2-report",
+    "dataset": "内置小型 DESeq2 demo (resources/demo-data/deseq2-sample)",
+    "tool": "deseq2",
+    "reportFormat": "html"
+  },
+  "platforms": [
+    {
+      "id": "macos-arm64",
+      "supported": false,
+      "minOs": "13.0",
+      "codeSigned": false,
+      "notarized": false,
+      "runtimeArtifact": {
+        "format": "tar.zst",
+        "sizeBytes": null,
+        "sha256": null,
+        "url": null
+      },
+      "reason": "primary target platform; supported will flip to true in Week 4 once sizeBytes/sha256/url are populated from the real signed+notarized build (do not fabricate)"
+    },
+    {
+      "id": "macos-x64",
+      "supported": false,
+      "reason": "no real Runtime artifact yet"
+    },
+    {
+      "id": "windows-x64",
+      "supported": false,
+      "reason": "no real Runtime artifact yet, awaiting Week 3 milestone"
+    }
+  ],
+  "gaCriteria": [
+    "Apple Developer signature + notarization complete",
+    "≥5 target users, ≥3 complete first-success path independently",
+    "≥2 users return within 7 days and continue a project",
+    "No P0 data-loss incidents"
+  ],
+  "knownLimits": [
+    "macOS arm64 build is unsigned; users must use Gatekeeper 'Open Anyway' the first time",
+    "Windows is preview only until Week 3 validation passes",
+    "No multi-user, no cloud sync, no cloud single-cell/spatial modules"
+  ]
+}

@@ -1,41 +1,65 @@
 {
-  "version": "1.2.0",
-  "updated": "2026-06-29",
+  "$schema": "./manifest.schema.json",
+  "version": "2.0.0",
+  "updated": "2026-07-14",
+  "checksumAlgorithm": "sha256",
+  "notes": "Per-platform artifact schema (Week 2 发行可信化). Only macos-arm64 declared; windows-x64/macos-x64/linux-x64 have NO artifacts (release-contract.json platforms[*].supported = false until Week 3/4). See manifest.placeholders.json for placeholder fields pending Week 4 CI fill-in. Built-in plugins use built-in:// pseudo-URLs and ship under resources/built-in-plugins/{id}/.",
   "plugins": {
     "biof3-r-runtime": {
+      "id": "biof3-r-runtime",
       "title": "R 运行时（基础环境）",
       "version": "1.0.0",
+      "kind": "runtime",
       "type": "runtime",
       "language": "r",
       "description": "R 4.5 + ggplot2/dplyr/data.table/BiocGenerics 等 70+ 包，BioF3 所有 R 工具的运行基础。约 280MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/macos-arm64.zip",
-      "size": 280000000,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "runtime": {
         "r": ">=4.4.0"
       }
     },
     "biof3-py-runtime": {
+      "id": "biof3-py-runtime",
       "title": "Python 运行时（基础环境）",
       "version": "1.0.0",
+      "kind": "runtime",
       "type": "runtime",
       "language": "python",
       "description": "Python 3.11 + pandas/numpy/scipy/sklearn/matplotlib/scanpy 等 200+ 包，BioF3 所有 Python 工具的运行基础。约 750MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/macos-arm64.zip",
-      "size": 750000000,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "runtime": {
         "python": ">=3.10.0"
       }
     },
     "volcano-plot": {
+      "id": "volcano-plot",
       "title": "火山图绘制",
       "version": "1.0.0",
+      "kind": "plugin",
       "language": "r",
       "description": "从差异分析结果（log2FC + pvalue）绘制 publication-ready 火山图，支持阈值标注与 top 基因高亮。",
-      "url": "built-in://volcano-plot",
-      "size": 0,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://volcano-plot",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
         "r": {
           "ggplot2": ">=3.4.0",
@@ -50,13 +74,20 @@
       }
     },
     "gene-correlation": {
+      "id": "gene-correlation",
       "title": "基因相关性热图",
       "version": "1.0.0",
+      "kind": "plugin",
       "language": "r",
       "description": "计算表达矩阵中 top N 基因的 Pearson/Spearman 相关系数，输出相关性热图 + 系数矩阵 CSV。",
-      "url": "built-in://gene-correlation",
-      "size": 0,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://gene-correlation",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
         "r": {
           "ggplot2": ">=3.4.0",
@@ -71,13 +102,20 @@
       }
     },
     "pca-explorer": {
+      "id": "pca-explorer",
       "title": "PCA 可视化",
       "version": "1.0.0",
+      "kind": "plugin",
       "language": "python",
       "description": "对表达矩阵做 PCA 降维，输出 PC1/PC2 散点图（按分组着色）+ 方差贡献表。",
-      "url": "built-in://pca-explorer",
-      "size": 0,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://pca-explorer",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
         "python": {
           "pandas": ">=2.0.0",
@@ -92,338 +130,552 @@
         "python": "3.11"
       }
     },
+    "single-cell-tutorial": {
+      "id": "single-cell-tutorial",
+      "title": "单细胞教程（试点插件）",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "type": "content-plugin",
+      "contentType": "tutorial",
+      "omics": "single-cell",
+      "description": "M2-9 content-plugin 试点：演示教程插件如何通过 plugin-manager 注册到 docs 页面（manifest + 示例 md，无语言包）。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://single-cell-tutorial",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256"
+    },
     "figcode-volcano-animated": {
+      "id": "figcode-volcano-animated",
       "title": "FigCode · 动画火山图",
       "version": "1.0.0",
+      "kind": "plugin",
       "type": "figcode-card",
       "language": "r",
       "figcodeCardId": "volcano-animated",
       "description": "动画火山图卡片所需依赖：gifski（GIF 导出）。约 5MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-volcano-animated/1.0.0/macos-arm64.zip",
-      "size": 5242880,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-volcano-animated/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
-        "r": ["gifski"]
+        "r": [
+          "gifski"
+        ]
       },
       "builtAgainst": {
         "r": "4.5"
       }
     },
     "figcode-trajectory-branch": {
+      "id": "figcode-trajectory-branch",
       "title": "FigCode · 轨迹分支图",
       "version": "1.0.0",
+      "kind": "plugin",
       "type": "figcode-card",
       "language": "r",
       "figcodeCardId": "trajectory-branch",
       "description": "单细胞轨迹推断卡片所需依赖：monocle3。约 40MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-trajectory-branch/1.0.0/macos-arm64.zip",
-      "size": 41943040,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-trajectory-branch/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
-        "r": ["monocle3"]
+        "r": [
+          "monocle3"
+        ]
       },
       "builtAgainst": {
         "r": "4.5"
       }
     },
     "figcode-sc-doublet": {
+      "id": "figcode-sc-doublet",
       "title": "FigCode · 双胞检测 QC",
       "version": "1.0.0",
+      "kind": "plugin",
       "type": "figcode-card",
       "language": "r",
       "figcodeCardId": "sc-doublet",
       "description": "双胞检测质控卡片所需依赖：scDblFinder。约 15MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-sc-doublet/1.0.0/macos-arm64.zip",
-      "size": 15728640,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-sc-doublet/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
-        "r": ["scDblFinder"]
+        "r": [
+          "scDblFinder"
+        ]
       },
       "builtAgainst": {
         "r": "4.5"
       }
     },
     "figcode-cytotrace": {
+      "id": "figcode-cytotrace",
       "title": "FigCode · 分化潜能 CytoTRACE",
       "version": "1.0.0",
+      "kind": "plugin",
       "type": "figcode-card",
       "language": "r",
       "figcodeCardId": "cytotrace",
       "description": "CytoTRACE 分化潜能预测卡片所需依赖：CytoTRACE。约 10MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-cytotrace/1.0.0/macos-arm64.zip",
-      "size": 10485760,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-cytotrace/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
-        "r": ["CytoTRACE"]
+        "r": [
+          "CytoTRACE"
+        ]
       },
       "builtAgainst": {
         "r": "4.5"
       }
     },
     "figcode-qq-plot": {
+      "id": "figcode-qq-plot",
       "title": "FigCode · QQ 图",
       "version": "1.0.0",
+      "kind": "plugin",
       "type": "figcode-card",
       "language": "r",
       "figcodeCardId": "qq-plot",
       "description": "QQ 图卡片所需依赖：qqman。约 3MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-qq-plot/1.0.0/macos-arm64.zip",
-      "size": 3145728,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-qq-plot/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
-        "r": ["qqman"]
+        "r": [
+          "qqman"
+        ]
       },
       "builtAgainst": {
         "r": "4.5"
       }
     },
     "figcode-manhattan": {
+      "id": "figcode-manhattan",
       "title": "FigCode · 曼哈顿图",
       "version": "1.0.0",
+      "kind": "plugin",
       "type": "figcode-card",
       "language": "r",
       "figcodeCardId": "manhattan",
       "description": "GWAS 曼哈顿图卡片所需依赖：qqman。约 3MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-manhattan/1.0.0/macos-arm64.zip",
-      "size": 3145728,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-manhattan/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
-        "r": ["qqman"]
+        "r": [
+          "qqman"
+        ]
       },
       "builtAgainst": {
         "r": "4.5"
       }
     },
     "figcode-power-curve": {
+      "id": "figcode-power-curve",
       "title": "FigCode · 功效分析曲线",
       "version": "1.0.0",
+      "kind": "plugin",
       "type": "figcode-card",
       "language": "r",
       "figcodeCardId": "power-curve",
       "description": "样本量功效分析卡片所需依赖：pwr。约 2MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-power-curve/1.0.0/macos-arm64.zip",
-      "size": 2097152,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-power-curve/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
-        "r": ["pwr"]
+        "r": [
+          "pwr"
+        ]
       },
       "builtAgainst": {
         "r": "4.5"
       }
     },
     "figcode-meta-forest": {
+      "id": "figcode-meta-forest",
       "title": "FigCode · 荟萃分析森林图",
       "version": "1.0.0",
+      "kind": "plugin",
       "type": "figcode-card",
       "language": "r",
       "figcodeCardId": "meta-forest",
       "description": "荟萃分析森林图卡片所需依赖：metafor。约 8MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-meta-forest/1.0.0/macos-arm64.zip",
-      "size": 8388608,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-meta-forest/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
-        "r": ["metafor"]
+        "r": [
+          "metafor"
+        ]
       },
       "builtAgainst": {
         "r": "4.5"
       }
     },
     "figcode-mut-signature": {
+      "id": "figcode-mut-signature",
       "title": "FigCode · 突变签名分析",
       "version": "1.0.0",
+      "kind": "plugin",
       "type": "figcode-card",
       "language": "r",
       "figcodeCardId": "mut-signature",
       "description": "突变签名分析卡片，需要 BSgenome hg19 数据包。约 5MB（不含数据包）。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-mut-signature/1.0.0/macos-arm64.zip",
-      "size": 5242880,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-mut-signature/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
         "r": []
       },
-      "dependencies": ["figcode-data-bsgenome-hg19"],
       "builtAgainst": {
         "r": "4.5"
-      }
+      },
+      "dependencies": [
+        "figcode-data-bsgenome-hg19"
+      ]
     },
     "figcode-lego-plot": {
+      "id": "figcode-lego-plot",
       "title": "FigCode · 突变乐高图",
       "version": "1.0.0",
+      "kind": "plugin",
       "type": "figcode-card",
       "language": "r",
       "figcodeCardId": "lego-plot",
       "description": "突变三核苷酸乐高图卡片，需要 BSgenome hg19 数据包。约 5MB（不含数据包）。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-lego-plot/1.0.0/macos-arm64.zip",
-      "size": 5242880,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-lego-plot/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
         "r": []
       },
-      "dependencies": ["figcode-data-bsgenome-hg19"],
       "builtAgainst": {
         "r": "4.5"
-      }
+      },
+      "dependencies": [
+        "figcode-data-bsgenome-hg19"
+      ]
     },
     "figcode-spatial-cluster": {
+      "id": "figcode-spatial-cluster",
       "title": "FigCode · 空间聚类",
       "version": "1.0.0",
+      "kind": "plugin",
       "type": "figcode-card",
       "language": "python",
       "figcodeCardId": "spatial-cluster",
       "description": "空间转录组聚类卡片所需依赖：squidpy。约 120MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-cluster/1.0.0/macos-arm64.zip",
-      "size": 125829120,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-cluster/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
-        "python": ["squidpy"]
+        "python": [
+          "squidpy"
+        ]
       },
       "builtAgainst": {
         "python": "3.11"
       }
     },
     "figcode-spatial-deconv-c2l": {
+      "id": "figcode-spatial-deconv-c2l",
       "title": "FigCode · 空间解卷积 Cell2location",
       "version": "1.0.0",
+      "kind": "plugin",
       "type": "figcode-card",
       "language": "python",
       "figcodeCardId": "spatial-deconv-c2l",
       "description": "空间解卷积卡片所需依赖：squidpy。约 120MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-deconv-c2l/1.0.0/macos-arm64.zip",
-      "size": 125829120,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-deconv-c2l/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
-        "python": ["squidpy"]
+        "python": [
+          "squidpy"
+        ]
       },
       "builtAgainst": {
         "python": "3.11"
       }
     },
     "figcode-feature-spatial": {
+      "id": "figcode-feature-spatial",
       "title": "FigCode · 空间基因表达",
       "version": "1.0.0",
+      "kind": "plugin",
       "type": "figcode-card",
       "language": "python",
       "figcodeCardId": "feature-spatial",
       "description": "空间基因表达卡片所需依赖：squidpy。约 120MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-feature-spatial/1.0.0/macos-arm64.zip",
-      "size": 125829120,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-feature-spatial/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
-        "python": ["squidpy"]
+        "python": [
+          "squidpy"
+        ]
       },
       "builtAgainst": {
         "python": "3.11"
       }
     },
     "figcode-spatial-svg-moran": {
+      "id": "figcode-spatial-svg-moran",
       "title": "FigCode · 空间高变基因 SVG",
       "version": "1.0.0",
+      "kind": "plugin",
       "type": "figcode-card",
       "language": "python",
       "figcodeCardId": "spatial-svg-moran",
       "description": "空间自相关 SVG 检验卡片所需依赖：squidpy。约 120MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-svg-moran/1.0.0/macos-arm64.zip",
-      "size": 125829120,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-svg-moran/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
-        "python": ["squidpy"]
+        "python": [
+          "squidpy"
+        ]
       },
       "builtAgainst": {
         "python": "3.11"
       }
     },
     "figcode-squidpy-neighbors": {
+      "id": "figcode-squidpy-neighbors",
       "title": "FigCode · 空间邻居网络",
       "version": "1.0.0",
+      "kind": "plugin",
       "type": "figcode-card",
       "language": "python",
       "figcodeCardId": "squidpy-neighbors",
       "description": "空间邻居网络卡片所需依赖：squidpy。约 120MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-squidpy-neighbors/1.0.0/macos-arm64.zip",
-      "size": 125829120,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-squidpy-neighbors/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
-        "python": ["squidpy"]
+        "python": [
+          "squidpy"
+        ]
       },
       "builtAgainst": {
         "python": "3.11"
       }
     },
     "figcode-spatial-lr-liana": {
+      "id": "figcode-spatial-lr-liana",
       "title": "FigCode · 空间细胞通讯 LIANA",
       "version": "1.0.0",
+      "kind": "plugin",
       "type": "figcode-card",
       "language": "python",
       "figcodeCardId": "spatial-lr-liana",
       "description": "空间细胞通讯卡片所需依赖：squidpy + liana。约 150MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-lr-liana/1.0.0/macos-arm64.zip",
-      "size": 157286400,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-spatial-lr-liana/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
-        "python": ["squidpy", "liana"]
+        "python": [
+          "squidpy",
+          "liana"
+        ]
       },
       "builtAgainst": {
         "python": "3.11"
       }
     },
     "figcode-scvelo-stream": {
+      "id": "figcode-scvelo-stream",
       "title": "FigCode · RNA Velocity 流图",
       "version": "1.0.0",
+      "kind": "plugin",
       "type": "figcode-card",
       "language": "python",
       "figcodeCardId": "scvelo-stream",
       "description": "RNA velocity 流图卡片所需依赖：scvelo。约 80MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-scvelo-stream/1.0.0/macos-arm64.zip",
-      "size": 83886080,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-scvelo-stream/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
-        "python": ["scvelo"]
+        "python": [
+          "scvelo"
+        ]
       },
       "builtAgainst": {
         "python": "3.11"
       }
     },
-    "figcode-shap-summary": {
+    "deseq2": {
+    "id": "deseq2",
+    "title": "DESeq2 差异分析",
+    "version": "1.0.0",
+    "kind": "plugin",
+    "language": "r",
+    "description": "Bulk RNA-seq 差异表达基因检测（DESeq2 + lfcShrink(apeglm)），Week 3 first-success-path 的核心工具。",
+    "artifacts": {
+      "macos-arm64": {
+        "url": "built-in://deseq2",
+        "sha256": null,
+        "sizeBytes": 0
+      }
+    },
+    "checksumAlgorithm": "sha256",
+    "packages": {
+      "r": {
+        "DESeq2": ">=1.40.0",
+        "ggplot2": ">=3.4.0",
+        "ggrepel": ">=0.9.0",
+        "pheatmap": ">=1.0.12",
+        "apeglm": ">=1.20.0"
+      }
+    },
+    "runtime": {
+      "r": ">=4.4.0"
+    },
+    "builtAgainst": {
+      "r": "4.5"
+    }
+  },
+  "figcode-shap-summary": {
+      "id": "figcode-shap-summary",
       "title": "FigCode · SHAP 特征重要性",
       "version": "1.0.0",
+      "kind": "plugin",
       "type": "figcode-card",
       "language": "python",
       "figcodeCardId": "shap-summary",
       "description": "SHAP 模型解释卡片所需依赖：xgboost + shap。约 120MB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-shap-summary/1.0.0/macos-arm64.zip",
-      "size": 125829120,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-shap-summary/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
+      },
+      "checksumAlgorithm": "sha256",
       "packages": {
-        "python": ["xgboost", "shap"]
+        "python": [
+          "xgboost",
+          "shap"
+        ]
       },
       "builtAgainst": {
         "python": "3.11"
       }
     },
-    "single-cell-tutorial": {
-      "title": "单细胞教程（试点插件）",
-      "version": "1.0.0",
-      "type": "content-plugin",
-      "contentType": "tutorial",
-      "omics": "single-cell",
-      "description": "M2-9 content-plugin 试点：演示教程插件如何通过 plugin-manager 注册到 docs 页面（manifest + 示例 md，无语言包）。",
-      "url": "built-in://single-cell-tutorial",
-      "size": 0,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"]
-    },
     "figcode-data-bsgenome-hg19": {
+      "id": "figcode-data-bsgenome-hg19",
       "title": "FigCode 数据包 · BSgenome hg19（突变签名用）",
       "version": "1.0.0",
+      "kind": "plugin",
       "type": "figcode-data",
       "language": "r",
       "description": "BSgenome.Hsapiens.UCSC.hg19 基因组参考数据，mut-signature 和 lego-plot 卡片需要。约 2.5GB。",
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-data-bsgenome-hg19/1.0.0/macos-arm64.zip",
-      "size": 2500000000,
-      "platform": ["macos-arm64", "macos-x64", "windows-x64"],
-      "packages": {
-        "r": ["BSgenome.Hsapiens.UCSC.hg19"]
+      "artifacts": {
+        "macos-arm64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/figcode-data-bsgenome-hg19/1.0.0/macos-arm64.zip",
+          "sha256": null,
+          "sizeBytes": null
+        }
       },
-      "figcodeCardIds": ["mut-signature", "lego-plot"],
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": [
+          "BSgenome.Hsapiens.UCSC.hg19"
+        ]
+      },
+      "figcodeCardIds": [
+        "mut-signature",
+        "lego-plot"
+      ],
       "optional": true
     }
   }

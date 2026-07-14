@@ -1,0 +1,75 @@
+{
+  "id": "deseq2",
+  "title": "DESeq2 差异分析",
+  "subtitle": "Bulk RNA-seq 差异表达基因检测",
+  "category": "bulk RNA-seq",
+  "language": "r",
+  "description": "Bulk RNA-seq 差异表达基因检测。",
+  "inputs": [
+    {
+      "id": "counts",
+      "label": "基因表达 counts 矩阵 (CSV: gene × sample)",
+      "type": "file",
+      "required": true,
+      "accept": ".csv"
+    },
+    {
+      "id": "coldata",
+      "label": "样本信息表 (CSV: sample, condition)",
+      "type": "file",
+      "required": true,
+      "accept": ".csv"
+    },
+    {
+      "id": "design",
+      "label": "设计公式（design 列名）",
+      "type": "text",
+      "default": "condition",
+      "hint": "默认 'condition'，与 coldata.csv 中的列名一致"
+    },
+    {
+      "id": "contrast_ref",
+      "label": "对照组（reference level）",
+      "type": "text",
+      "default": "WT"
+    },
+    {
+      "id": "contrast_treat",
+      "label": "实验组（treatment level）",
+      "type": "text",
+      "default": "KO"
+    }
+  ],
+  "outputs": [
+    { "id": "deg_table", "type": "table", "label": "差异基因表" },
+    { "id": "volcano", "type": "plot", "label": "火山图" },
+    { "id": "pca", "type": "plot", "label": "PCA 图" },
+    { "id": "heatmap", "type": "plot", "label": "Top50 热图" },
+    { "id": "report", "type": "report", "label": "解读报告" },
+    { "id": "zip", "type": "file", "label": "全部结果打包下载" }
+  ],
+  "tutorialUrl": "/docs/bulk-rnaseq/module02",
+  "demoDataUrl": "/demo-data/deseq2-demo",
+  "estimatedMinutes": 2,
+  "packages": ["DESeq2", "ggplot2", "ggrepel", "pheatmap"],
+  "color": "#dc2626",
+  "reportUrl": "/exports/tools/deseq2/index.html",
+  "failureModes": [
+    {
+      "code": "missing_required_file_inputs",
+      "title": "缺少必需输入文件",
+      "description": "DESeq2 至少需要 counts 矩阵 + coldata；缺一不可。",
+      "recoverable": true,
+      "suggestedFix": "检查用户是否提供了两个 CSV，或者用 '使用示例数据' 按钮。",
+      "detect": "missing required file inputs|missing input file|please provide file"
+    },
+    {
+      "code": "sample_mismatch",
+      "title": "样本名不匹配",
+      "description": "counts 列名与 coldata 行名不一致，DESeq2 无法对齐。",
+      "recoverable": true,
+      "suggestedFix": "提示用户检查 metadata.csv 的 sample 列是否与 counts 的列名完全一致。",
+      "detect": "sample|mismatch|not in coldata|counts and coldata"
+    }
+  ]
+}

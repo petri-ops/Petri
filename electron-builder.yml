@@ -9,6 +9,7 @@ directories:
   buildResources: resources
 
 # M2-11 (H4)：签名后 notarize + staple（需 CI 注入 APPLE_ID/APP_PASSWORD/NOTARIZE_TEAM_ID）
+# 顶层 afterSign 仅作为冗余保险；mac: 段下也声明了一次（electron-builder 双读）
 afterSign: build/afterSign.js
 
 # 打包进 Electron app bundle 的文件
@@ -21,17 +22,20 @@ files:
 mac:
   category: public.app-category.education
   icon: icons/icon.icns
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  afterSign: build/afterSign.js
   target:
     - target: dmg
       arch:
         - arm64
-  hardenedRuntime: true
+        - x64
   # M2-11 (H4)：mac 签名 + notarization
   # 有证书时：CI 注入 CSC_LINK/CSC_KEY_PASSWORD → identity 自动匹配
   # 无证书时：identity: null，用户需右键打开（v1 过渡）
-  identity: null
-  notarize:
-    teamId: ${NOTARIZE_TEAM_ID}
+  identity: ${CSC_NAME:-null}
+  # 使用 build/afterSign.js hook 走 notarytool；关闭 electron-builder 内置 notarize 避免双提交
+  notarize: false
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
 
