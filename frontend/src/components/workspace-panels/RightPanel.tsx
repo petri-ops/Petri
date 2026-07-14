@@ -46,6 +46,8 @@ export interface RightPanelContext {
   openWorkspaceFiles: ActiveWorkspaceFile[];
   activeWorkspaceFile: ActiveWorkspaceFile | null;
   setActiveWorkspaceFile: (f: ActiveWorkspaceFile | null) => void;
+  pendingArtifactName: string | null;
+  onPendingArtifactConsumed: () => void;
   backendStatus: BackendStatus;
   browserUrl: string;
 
@@ -147,6 +149,8 @@ export function RightPanel({
                     activeArtifact={ctx.activeArtifact}
                     onActiveArtifactChange={ctx.setActiveArtifact}
                     onAskAgent={ctx.handleAskAgent}
+                    pendingArtifactName={ctx.pendingArtifactName}
+                    onPendingArtifactConsumed={ctx.onPendingArtifactConsumed}
                     onOpenBrowser={(url) => {
                       ctx.setBrowserUrl(url);
                       ctx.openRightPanel('browser');

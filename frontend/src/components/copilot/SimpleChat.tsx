@@ -15,7 +15,9 @@ import {
 } from './copilotConversationsClient';
 import { useCopilotContext } from '@/lib/copilotContextProvider';
 import { useConversations } from '@/hooks/useConversations';
-import { biof3Events, subscribeBioF3Event } from '@/lib/events';
+import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
+import '@/lib/chat-file-references';
+import type { ExtractContext, FileReferenceClickDetail } from '@/lib/chat-file-references';
 import {
   fetchHarnessToolManifest,
   repairHarnessParams,
@@ -122,6 +124,48 @@ export function SimpleChat({
 
   // Keep ref in sync
   useEffect(() => { activeConvRef.current = conversationId; }, [conversationId]);
+
+  // Resolve file references only after a message is fully settled —
+  // streaming deltas would otherwise hammer the resolver and we never want
+  // to surface a clickable artifact on half-rendered text. We snapshot the
+  // latest Copilot context once per settled message and let CopilotMarkdown
+  // drive the resolution effect.
+  const [settledContext, setSettledContext] = useState<ExtractContext | null>(null);
+  const settledConvRef = useRef<string | null>(conversationId);
+  useEffect(() => {
+    // Conv switch: clear until the new history finishes loading.
+    if (settledConvRef.current !== conversationId) {
+      settledConvRef.current = conversationId;
+      setSettledContext(null);
+    }
+  }, [conversationId]);
+  useEffect(() => {
+    if (loading) return;
+    setSettledContext({
+      projectId: copilotCtx.projectId,
+      activeJobId: copilotCtx.activeJobId || copilotCtx.activeArtifact?.jobId || null,
+      activeArtifactName: copilotCtx.activeArtifact?.name,
+    });
+  }, [copilotCtx, loading]);
+
+  const handleFileReferenceClick = useCallback((detail: FileReferenceClickDetail) => {
+    const resolved = detail.resolved;
+    if (resolved?.kind === 'artifact') {
+      dispatchBioF3Event(biof3Events.projectOpenArtifact, {
+        jobId: resolved.jobId,
+        artifactName: resolved.artifactName,
+        projectId: resolved.projectId ?? projectId,
+      });
+      return;
+    }
+    if (resolved?.kind === 'workspace') {
+      dispatchBioF3Event(biof3Events.projectOpenWorkspaceFile, {
+        projectId: resolved.projectId,
+        relativePath: resolved.relativePath,
+        name: resolved.name,
+      });
+    }
+  }, [projectId]);
 
   useEffect(() => {
     if (!pendingApproval?.params) {
@@ -478,9 +522,11 @@ export function SimpleChat({
               </div>
               <div className="sc-msg-body">
                 {m.role === 'assistant' ? (
-                  <>
-                    <CopilotMarkdown text={m.content || (m.pending ? '…' : '')} />
-                  </>
+                  <CopilotMarkdown
+                    text={m.content || (m.pending ? '…' : '')}
+                    onFileReferenceClick={handleFileReferenceClick}
+                    resolveContext={m.pending || streaming ? null : settledContext}
+                  />
                 ) : (
                   <div className="sc-msg-text">{m.content}</div>
                 )}

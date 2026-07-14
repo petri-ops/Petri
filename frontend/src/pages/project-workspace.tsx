@@ -178,6 +178,8 @@ export function ProjectWorkspace(): React.ReactElement {
     () => parseWorkspaceMode(searchParams.get('mode')) || 'chat'
   );
   const requestedJobId = searchParams.get('job');
+  const requestedArtifactName = searchParams.get('artifact');
+  const requestedFilePath = searchParams.get('file');
 
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const autoOpenedJobRef = useRef<string | null>(null);
@@ -189,6 +191,12 @@ export function ProjectWorkspace(): React.ReactElement {
   const [copilotHarnessIndex, setCopilotHarnessIndex] = useState<HarnessIndexSummary | null>(null);
   const [activeJobHarnessIndex, setActiveJobHarnessIndex] = useState<HarnessIndexSummary | null>(null);
   const [workflowRefreshKey, setWorkflowRefreshKey] = useState(0);
+  // Pending artifact name captured from an external trigger (chat click,
+  // cross-project navigation, etc.) — applied once the manifest is loaded
+  // inside ResultArtifactShell via the imperative handle.
+  const pendingArtifactNameRef = useRef<string | null>(null);
+  const pendingArtifactJobIdRef = useRef<string | null>(null);
+  const [pendingArtifactName, setPendingArtifactName] = useState<string | null>(null);
 
   // Conversation state — current project's conversations + active conversation.
   // Plan 1.6 §4.3 — useConversations is the shared SWR hook (cache lives
@@ -893,11 +901,16 @@ export function ProjectWorkspace(): React.ReactElement {
     return 'pending';
   }, []);
 
-  const handleOpenResult = useCallback(async (jobId: string, targetProjectId?: string | null) => {
+  const handleOpenResult = useCallback(async (
+    jobId: string,
+    targetProjectId?: string | null,
+    options?: { preserveWorkspaceMode?: boolean },
+  ) => {
     const currentProjectId = projectId || null;
     const resolvedTargetProjectId = targetProjectId ?? currentProjectId;
     if (resolvedTargetProjectId && currentProjectId && resolvedTargetProjectId !== currentProjectId) {
-      navigate(`/project/${resolvedTargetProjectId}?mode=scheduled&job=${encodeURIComponent(jobId)}`);
+      const mode = options?.preserveWorkspaceMode ? 'chat' : 'scheduled';
+      navigate(`/project/${resolvedTargetProjectId}?mode=${mode}&job=${encodeURIComponent(jobId)}`);
       return;
     }
 
@@ -923,7 +936,8 @@ export function ProjectWorkspace(): React.ReactElement {
           };
           nextProjectId = nextJob.project_id || nextProjectId;
           if (nextProjectId && currentProjectId && nextProjectId !== currentProjectId) {
-            navigate(`/project/${nextProjectId}?mode=scheduled&job=${encodeURIComponent(nextJob.id)}`);
+            const mode = options?.preserveWorkspaceMode ? 'chat' : 'scheduled';
+            navigate(`/project/${nextProjectId}?mode=${mode}&job=${encodeURIComponent(nextJob.id)}`);
             return;
           }
           setJobs((prev) => (prev.some((j) => j.id === nextJob!.id) ? prev : [nextJob!, ...prev]));
@@ -936,7 +950,9 @@ export function ProjectWorkspace(): React.ReactElement {
       setActiveJobId(nextJob.id);
       setRightOpen(true);
       openRightPanel('results');
-      updateWorkspaceMode('scheduled', true, nextJob.id);
+      if (!options?.preserveWorkspaceMode) {
+        updateWorkspaceMode('scheduled', true, nextJob.id);
+      }
     }
   }, [jobs, navigate, normalizeToolStatus, openRightPanel, projectId, setRightOpen, updateWorkspaceMode]);
 
@@ -948,10 +964,17 @@ export function ProjectWorkspace(): React.ReactElement {
     if (loading || !projectId) return;
 
     if (requestedJobId) {
+      if (requestedArtifactName && pendingArtifactNameRef.current !== requestedArtifactName) {
+        pendingArtifactNameRef.current = requestedArtifactName;
+        pendingArtifactJobIdRef.current = requestedJobId;
+        setPendingArtifactName(requestedArtifactName);
+      }
       if (activeJobId === requestedJobId && workspaceMode === 'scheduled') return;
       if (autoOpenedJobRef.current === requestedJobId) return;
       autoOpenedJobRef.current = requestedJobId;
-      void handleOpenResult(requestedJobId, projectId);
+      void handleOpenResult(requestedJobId, projectId, {
+        preserveWorkspaceMode: workspaceMode === 'chat',
+      });
       return;
     }
 
@@ -960,7 +983,19 @@ export function ProjectWorkspace(): React.ReactElement {
     if (!firstJob || autoOpenedJobRef.current === firstJob.id) return;
     autoOpenedJobRef.current = firstJob.id;
     void handleOpenResult(firstJob.id, projectId);
-  }, [activeJobId, handleOpenResult, jobs, loading, projectId, requestedJobId, workspaceMode]);
+  }, [activeJobId, handleOpenResult, jobs, loading, projectId, requestedArtifactName, requestedJobId, workspaceMode]);
+
+  useEffect(() => {
+    if (loading || !projectId || !requestedFilePath) return;
+    if (activeWorkspaceFile?.path === requestedFilePath) return;
+    const file: ActiveWorkspaceFile = {
+      path: requestedFilePath,
+      name: requestedFilePath.split('/').pop() || requestedFilePath,
+      url: workspaceFileUrlFor(projectId, requestedFilePath),
+    };
+    handleOpenWorkspaceFile(file);
+    openRightPanel('files');
+  }, [activeWorkspaceFile?.path, handleOpenWorkspaceFile, loading, openRightPanel, projectId, requestedFilePath]);
 
   useEffect(() => {
     const handler = (detail: { toolJobId: string; projectId?: string | null }) => {
@@ -972,6 +1007,47 @@ export function ProjectWorkspace(): React.ReactElement {
     const unsub = subscribeBioF3Event(biof3Events.projectOpenResult, handler);
     return unsub;
   }, [handleOpenResult]);
+
+  useEffect(() => {
+    const handler = (detail: { jobId: string; artifactName: string; projectId?: string | null }) => {
+      if (!detail?.jobId || !detail?.artifactName) return;
+      const targetProjectId = detail.projectId || projectId;
+      pendingArtifactNameRef.current = detail.artifactName;
+      pendingArtifactJobIdRef.current = detail.jobId;
+      setPendingArtifactName(detail.artifactName);
+      if (targetProjectId && targetProjectId !== projectId) {
+        navigate(
+          `/project/${encodeURIComponent(targetProjectId)}?mode=chat&job=${encodeURIComponent(detail.jobId)}&artifact=${encodeURIComponent(detail.artifactName)}`,
+        );
+        return;
+      }
+      void handleOpenResult(detail.jobId, targetProjectId || null, { preserveWorkspaceMode: true });
+    };
+    const unsub = subscribeBioF3Event(biof3Events.projectOpenArtifact, handler);
+    return unsub;
+  }, [handleOpenResult, navigate, projectId]);
+
+  useEffect(() => {
+    const handler = (detail: { projectId: string; relativePath: string; name?: string }) => {
+      if (!detail?.projectId || !detail?.relativePath) return;
+      if (detail.projectId !== projectId) {
+        // Cross-project workspace files are out of scope for the desktop
+        // workspace (each project has its own file tree); the chat host
+        // can decide to navigate or surface a toast.
+        navigate(`/project/${encodeURIComponent(detail.projectId)}?mode=chat&file=${encodeURIComponent(detail.relativePath)}`);
+        return;
+      }
+      const file: ActiveWorkspaceFile = {
+        path: detail.relativePath,
+        name: detail.name || detail.relativePath.split('/').pop() || detail.relativePath,
+        url: workspaceFileUrlFor(projectId || '', detail.relativePath),
+      };
+      handleOpenWorkspaceFile(file);
+      openRightPanel('files');
+    };
+    const unsub = subscribeBioF3Event(biof3Events.projectOpenWorkspaceFile, handler);
+    return unsub;
+  }, [handleOpenWorkspaceFile, navigate, openRightPanel, projectId]);
 
   /** Dispatch a copilot-ask event so the embedded SimpleChat picks it up */
   const handleAskAgent = useCallback((prompt: string) => {
@@ -1125,6 +1201,12 @@ export function ProjectWorkspace(): React.ReactElement {
     openWorkspaceFiles,
     activeWorkspaceFile,
     setActiveWorkspaceFile,
+    pendingArtifactName: pendingArtifactJobIdRef.current === activeJob?.id ? pendingArtifactName : null,
+    onPendingArtifactConsumed: () => {
+      pendingArtifactNameRef.current = null;
+      pendingArtifactJobIdRef.current = null;
+      setPendingArtifactName(null);
+    },
     backendStatus,
     browserUrl,
     setBottomTerminalOpen,
@@ -1392,6 +1474,14 @@ function previewLanguage(name?: string): string {
   return map[ext] || 'plaintext';
 }
 
+/**
+ * Build a controlled workspace file URL for the in-app preview. Mirrors the
+ * URL the workspace file tree uses, so the same auth / cache invariants hold.
+ */
+function workspaceFileUrlFor(projectId: string, relativePath: string): string {
+  return `${getApiPrefix()}/workspaces/${encodeURIComponent(projectId)}/file?path=${encodeURIComponent(relativePath)}`;
+}
+
 function formatPreviewText(name: string, text: string): string {
   if (fileExtension(name) === 'json') {
     try {
@@ -1643,26 +1733,33 @@ export function RightFileTree({
 }
 
 function WorkspaceFilePreview({ file }: { file: ActiveWorkspaceFile | null }): React.ReactElement {
+  const { resolvedTheme } = useTheme();
   const [text, setText] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'unsupported' | 'error'>('idle');
+  const [previewData, setPreviewData] = useState<string[][] | null>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
   const isImage = isImageFile(file?.name);
   const isText = isTextFile(file?.name);
   const isMarkdown = isMarkdownFile(file?.name);
+  const isCsv = isCsvFile(file?.name);
+  const isPdf = isPdfFile(file?.name);
+  const isHtml = isHtmlFile(file?.name);
+  const isJson = isJsonFile(file?.name);
 
   useEffect(() => {
     let cancelled = false;
     setText('');
+    setPreviewData(null);
     if (!file) {
       setStatus('idle');
       return () => { cancelled = true; };
     }
-    if (isImage) {
+    if (isImage || isPdf || isHtml) {
       setStatus('ready');
       return () => { cancelled = true; };
     }
-    if (!isText) {
+    if (!isText && !isCsv && !isJson) {
       setStatus('unsupported');
       return () => { cancelled = true; };
     }
@@ -1674,23 +1771,41 @@ function WorkspaceFilePreview({ file }: { file: ActiveWorkspaceFile | null }): R
       })
       .then((body) => {
         if (cancelled) return;
-        setText(body.length > 120_000 ? `${body.slice(0, 120_000)}\n\n... 文件较大，仅预览前 120KB` : body);
+        if (isCsv) {
+          setPreviewData(buildWorkspacePreviewTable(body, file.name));
+          setStatus('ready');
+          return;
+        }
+        const clipped = body.length > 120_000
+          ? `${body.slice(0, 120_000)}\n\n... 文件较大，仅预览前 120KB`
+          : body;
+        setText(formatPreviewText(file.name, clipped));
         setStatus('ready');
       })
       .catch(() => {
         if (!cancelled) setStatus('error');
       });
     return () => { cancelled = true; };
-  }, [file, isImage, isText]);
+  }, [file, isCsv, isHtml, isImage, isJson, isPdf, isText]);
 
   if (!file) {
     return (
       <div className={styles.workspacePreviewEmpty}>
         <Icon name="file" size={18} />
-        <span>选择一个文本或图片文件预览</span>
+        <span>选择一个文本、图片或 PDF 文件预览</span>
       </div>
     );
   }
+
+  const fallbackKind: 'csv' | 'pdf' | 'html' | 'json' | 'markdown' | 'image' | 'text' | 'binary' =
+    isCsv ? 'csv'
+    : isPdf ? 'pdf'
+    : isHtml ? 'html'
+    : isJson ? 'json'
+    : isMarkdown ? 'markdown'
+    : isImage ? 'image'
+    : isText ? 'text'
+    : 'binary';
 
   return (
     <div className={styles.workspacePreview}>
@@ -1706,15 +1821,73 @@ function WorkspaceFilePreview({ file }: { file: ActiveWorkspaceFile | null }): R
       <div className={styles.workspacePreviewBody}>
         {status === 'loading' && <p className={styles.panelEmpty}>加载预览…</p>}
         {status === 'error' && <p className={styles.panelEmpty}>预览失败</p>}
-        {status === 'unsupported' && (
-          <p className={styles.panelEmpty}>暂不支持此类型的内联预览，可点击右上角打开。</p>
+        {status === 'unsupported' && fallbackKind === 'binary' && (
+          <div className={styles.workspaceBinaryFallback}>
+            <Icon name="file" size={20} />
+            <p>该文件暂不支持内联预览。</p>
+            <p className={styles.workspaceBinaryMeta}>
+              类型：{fileExtension(file.name) || '未知'} · 建议在外部应用打开或下载查看。
+            </p>
+            <a className={styles.workspacePreviewOpen} href={file.url} target="_blank" rel="noopener noreferrer">
+              打开 / 下载
+            </a>
+          </div>
         )}
-        {status === 'ready' && isImage && (
+        {status === 'ready' && fallbackKind === 'image' && (
           <button className={styles.workspaceImageButton} onClick={() => setLightboxSrc(file.url)}>
             <img src={file.url} alt={file.name} className={styles.workspaceImagePreview} />
           </button>
         )}
-        {status === 'ready' && isText && isMarkdown && (
+        {status === 'ready' && fallbackKind === 'pdf' && (
+          <object
+            data={file.url}
+            type="application/pdf"
+            className={styles.workspacePdfObject}
+            aria-label={file.name}
+          >
+            <iframe
+              src={file.url}
+              title={file.name}
+              className={styles.workspacePdfIframe}
+            />
+          </object>
+        )}
+        {status === 'ready' && fallbackKind === 'html' && (
+          <iframe
+            src={withReportTheme(file.url, resolvedTheme)}
+            title={file.name}
+            className={styles.workspaceHtmlIframe}
+            sandbox=""
+          />
+        )}
+        {status === 'ready' && fallbackKind === 'csv' && previewData && previewData.length > 0 && (
+          <div className={styles.workspaceCsvPreview}>
+            <table>
+              <thead>
+                <tr>
+                  {previewData[0].map((cell, idx) => (
+                    <th key={`${cell || 'col'}-${idx}`}>{cell || `列 ${idx + 1}`}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {previewData.slice(1, 41).map((row, rowIndex) => (
+                  <tr key={rowIndex}>
+                    {previewData[0].map((_, cellIndex) => (
+                      <td key={cellIndex}>{row[cellIndex] || '—'}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {previewData.length > 41 && (
+              <p className={styles.workspaceCsvHint}>
+                已展示前 40 行 / 共 {previewData.length - 1} 行，完整数据请在外部工具打开。
+              </p>
+            )}
+          </div>
+        )}
+        {status === 'ready' && fallbackKind === 'markdown' && (
           <div className={styles.workspaceMarkdownPreview}>
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
@@ -1724,20 +1897,50 @@ function WorkspaceFilePreview({ file }: { file: ActiveWorkspaceFile | null }): R
             </ReactMarkdown>
           </div>
         )}
-        {status === 'ready' && isText && !isMarkdown && (
-          <div className={styles.workspaceCodePreview}>
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeHighlight, [rehypeSanitize, markdownSanitizeSchema]]}
-            >
-              {`~~~${previewLanguage(file.name)}\n${formatPreviewText(file.name, text)}\n~~~`}
-            </ReactMarkdown>
-          </div>
+        {status === 'ready' && fallbackKind === 'text' && (
+          <pre className={styles.workspaceTextPreview}>{text}</pre>
+        )}
+        {status === 'ready' && fallbackKind === 'json' && (
+          <pre className={styles.workspaceTextPreview}>{text}</pre>
         )}
       </div>
       {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
     </div>
   );
+}
+
+function buildWorkspacePreviewTable(text: string, fileName: string): string[][] {
+  const lower = fileName.toLowerCase();
+  const sep = lower.endsWith('.tsv') || text.includes('\t') ? '\t' : ',';
+  return text
+    .split(/\r?\n/)
+    .filter((line) => line.trim().length > 0)
+    .slice(0, 200)
+    .map((line) => line.split(sep).map((cell) => cell.replace(/^"|"$/g, '').trim()));
+}
+
+function isCsvFile(name?: string): boolean {
+  const ext = fileExtension(name);
+  return ext === 'csv' || ext === 'tsv';
+}
+
+function isPdfFile(name?: string): boolean {
+  return fileExtension(name) === 'pdf';
+}
+
+function isHtmlFile(name?: string): boolean {
+  const ext = fileExtension(name);
+  return ext === 'html' || ext === 'htm';
+}
+
+function withReportTheme(url: string, theme: 'light' | 'dark'): string {
+  if (!url) return url;
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}theme=${theme}`;
+}
+
+function isJsonFile(name?: string): boolean {
+  return fileExtension(name) === 'json' || fileExtension(name) === 'jsonl';
 }
 
 // ============================================================
@@ -2416,6 +2619,8 @@ function ResultArtifactShell({
   onWorkflowChanged,
   variant,
   showHarnessIndex = false,
+  pendingArtifactName = null,
+  onPendingArtifactConsumed,
   onOpenBrowser,
 }: {
   project: Project;
@@ -2427,6 +2632,14 @@ function ResultArtifactShell({
   onWorkflowChanged?: () => void;
   variant: 'center' | 'sidebar';
   showHarnessIndex?: boolean;
+  /**
+   * Optional artifact name the host wants pre-selected once the manifest
+   * (or fallback artifacts) becomes available. Populated by the chat
+   * `projectOpenArtifact` event after a cross-project jump.
+   */
+  pendingArtifactName?: string | null;
+  /** Fires after the pending artifact has been applied (or dismissed). */
+  onPendingArtifactConsumed?: () => void;
   /** Opens a generated delivery report in the right-side Electron webview. */
   onOpenBrowser?: (url: string) => void;
 }): React.ReactElement {
@@ -2663,12 +2876,16 @@ function ResultArtifactShell({
   const selectedArtifact = useMemo(() => {
     const current = findArtifactByName(artifacts, selectedName);
     if (current) return current;
+    // The pending artifact (from chat click / cross-project navigation)
+    // wins over the active-artifact hint when both are present.
+    const pending = pendingArtifactName ? findArtifactByName(artifacts, pendingArtifactName) : null;
+    if (pending) return pending;
     return (
       pickPreferredArtifact(coreArtifacts, preferredArtifactName) ||
       coreArtifacts[0] ||
       null
     );
-  }, [artifacts, coreArtifacts, preferredArtifactName, selectedName]);
+  }, [artifacts, coreArtifacts, pendingArtifactName, preferredArtifactName, selectedName]);
   const selectedArtifactName = selectedArtifact?.name || '';
   const selectedArtifactUrl = selectedArtifact
     ? selectedArtifact.url || buildUrl(selectedArtifact.name)
@@ -2746,17 +2963,37 @@ function ResultArtifactShell({
     const preferred = pickPreferredArtifact(coreArtifacts, preferredArtifactName) || coreArtifacts[0];
     const preferredName = preferred ? preferred.name : '';
     setSelectedName((current) => {
+      // Pending artifact name (from chat click) wins over the user's prior
+      // selection — the chat is the trigger that brought us here.
+      if (pendingArtifactName && artifacts.some((artifact) => artifact.name === pendingArtifactName)) {
+        return pendingArtifactName;
+      }
       if (current && coreArtifacts.some((artifact) => artifact.name === current)) return current;
       return preferredName;
     });
     setSelectedSectionId((current) => {
       if (current && navSections.some((section) => section.id === current)) return current;
+      const focusName =
+        (pendingArtifactName && artifacts.some((artifact) => artifact.name === pendingArtifactName)
+          ? pendingArtifactName
+          : preferredName);
       const nextSection =
-        (preferredName && navSections.find((item) => item.artifactNames.includes(preferredName))) ||
+        (focusName && navSections.find((item) => item.artifactNames.includes(focusName))) ||
         navSections[0];
       return nextSection?.id || '';
     });
-  }, [coreArtifacts, effectiveJobStatus, job, navSections, preferredArtifactName]);
+  }, [artifacts, coreArtifacts, effectiveJobStatus, job, navSections, pendingArtifactName, preferredArtifactName]);
+
+  // Clear the pending artifact after it's been applied so a subsequent
+  // unrelated render doesn't keep forcing it.
+  useEffect(() => {
+    if (!pendingArtifactName) return;
+    if (artifacts.length === 0) return;
+    const matches = artifacts.some((artifact) => artifact.name === pendingArtifactName);
+    if (matches) {
+      onPendingArtifactConsumed?.();
+    }
+  }, [artifacts, onPendingArtifactConsumed, pendingArtifactName]);
 
   useEffect(() => {
     if (!job || effectiveJobStatus !== 'done' || !selectedArtifact) {
@@ -3266,6 +3503,8 @@ export function ResultView({
   activeArtifact,
   onActiveArtifactChange,
   onAskAgent,
+  pendingArtifactName = null,
+  onPendingArtifactConsumed,
 }: {
   project: Project;
   job: ToolJob;
@@ -3273,6 +3512,8 @@ export function ResultView({
   activeArtifact: ActiveArtifact | null;
   onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
   onAskAgent: (prompt: string) => void;
+  pendingArtifactName?: string | null;
+  onPendingArtifactConsumed?: () => void;
 }): React.ReactElement {
   return (
     <ResultArtifactShell
@@ -3282,6 +3523,8 @@ export function ResultView({
       activeArtifact={activeArtifact}
       onActiveArtifactChange={onActiveArtifactChange}
       onAskAgent={onAskAgent}
+      pendingArtifactName={pendingArtifactName}
+      onPendingArtifactConsumed={onPendingArtifactConsumed}
       variant="center"
     />
   );
@@ -3295,6 +3538,8 @@ export function ResultSidebarPanel({
   onActiveArtifactChange,
   onAskAgent,
   onWorkflowChanged,
+  pendingArtifactName = null,
+  onPendingArtifactConsumed,
   onOpenBrowser,
 }: {
   project: Project;
@@ -3304,6 +3549,8 @@ export function ResultSidebarPanel({
   onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
   onAskAgent: (prompt: string) => void;
   onWorkflowChanged: () => void;
+  pendingArtifactName?: string | null;
+  onPendingArtifactConsumed?: () => void;
   onOpenBrowser?: (url: string) => void;
 }): React.ReactElement {
   return (
@@ -3315,6 +3562,8 @@ export function ResultSidebarPanel({
       onActiveArtifactChange={onActiveArtifactChange}
       onAskAgent={onAskAgent}
       onWorkflowChanged={onWorkflowChanged}
+      pendingArtifactName={pendingArtifactName}
+      onPendingArtifactConsumed={onPendingArtifactConsumed}
       onOpenBrowser={onOpenBrowser}
       variant="sidebar"
       showHarnessIndex

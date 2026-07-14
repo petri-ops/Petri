@@ -1,5 +1,6 @@
 import React from 'react';
 import { Icon } from '@/components/icons/Icon';
+import { ThemeControl } from '@/components/desktop/ThemeControl';
 import type { Project } from '@/lib/project-types';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
@@ -97,6 +98,9 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
         <QuickActions ctx={ctx} />
         <ProjectTreeHeader ctx={ctx} />
         <ProjectTree ctx={ctx} />
+        <div className={styles.leftPanelFooter}>
+          <ThemeControl />
+        </div>
       </div>
     </aside>
   );

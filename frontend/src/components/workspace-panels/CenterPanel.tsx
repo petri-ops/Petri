@@ -195,37 +195,34 @@ function SessionFrameView({
         variant === 'chat' ? styles.workspaceSessionFrameChat : ''
       }`}
       ref={ctx.sessionFrameRef}
-      style={{
-        ['--workspace-summary-reserve-right' as string]: ctx.summaryCardOpen
-          ? `${ctx.summaryOpenWidth + 28}px`
-          : '0px',
-      }}
     >
-      <div className={styles.workspaceSessionInset}>
-        <div className={styles.workspaceSessionSurface}>
-          <div className={styles.workspaceSessionContent}>
-            {ctx.showPinnedSummary && children}
+      <div className={styles.workspaceSessionLayout}>
+        <div className={styles.workspaceSessionInset}>
+          <div className={styles.workspaceSessionSurface}>
+            <div className={styles.workspaceSessionContent}>
+              {ctx.showPinnedSummary && children}
+            </div>
           </div>
         </div>
-      </div>
-      <div className={styles.workspaceSummaryOverlay}>
-        {ctx.showPinnedSummary && (
-          <WorkspaceSummaryCard
-            open={ctx.summaryCardOpen}
-            visibility={ctx.summaryVisibility}
-            width={ctx.summaryOpenWidth}
-            projectName={ctx.project.name}
-            activeJob={ctx.activeJob}
-            workflow={ctx.activeWorkflow}
-            recentJobs={ctx.recentJobs}
-            liveJobsPreview={ctx.liveJobsPreview}
-            jobStats={ctx.jobStats}
-            onOpenScheduled={ctx.openScheduledResults}
-            onSelectJob={(jobId) => {
-              ctx.setActiveJobId(jobId);
-              ctx.openRightPanel('results');
-            }}
-          />
+        {ctx.showPinnedSummary && ctx.summaryCardOpen && (
+          <div className={styles.workspaceSummaryColumn}>
+            <WorkspaceSummaryCard
+              open
+              visibility={ctx.summaryVisibility}
+              width={ctx.summaryOpenWidth}
+              projectName={ctx.project.name}
+              activeJob={ctx.activeJob}
+              workflow={ctx.activeWorkflow}
+              recentJobs={ctx.recentJobs}
+              liveJobsPreview={ctx.liveJobsPreview}
+              jobStats={ctx.jobStats}
+              onOpenScheduled={ctx.openScheduledResults}
+              onSelectJob={(jobId) => {
+                ctx.setActiveJobId(jobId);
+                ctx.openRightPanel('results');
+              }}
+            />
+          </div>
         )}
       </div>
     </div>
