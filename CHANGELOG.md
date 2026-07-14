@@ -3,7 +3,7 @@
 All notable changes to the BioF3 desktop app are documented in this
 file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
-## Week 4 (2026-07-14) -- RC Gate 1 source/version close-out
+## Week 4 (2026-07-14) -- RC Gate 1 close-out + Gate 4 macOS DMG + release CI
 
 ### Added
 
@@ -20,6 +20,9 @@ file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
   entry points and context scope
 - `icons/biof3-logo-concept-v1.{svg,png}` -- brand concept for
   rc.1 packaging
+- `.github/workflows/release.yml` -- tag-driven dual-platform build
+  (`macos-14` arm64+x64 dmg, `windows-latest` x64 NSIS) +
+  SHA-256SUMS aggregation + GitHub prerelease publish
 
 ### Changed
 
@@ -36,7 +39,15 @@ file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - `electron-builder.yml` + `build/afterSign.js` +
   `build/entitlements.mac.plist` -- rc.1 macOS arm64 / x64 + Windows
   NSIS pipeline and notarize entitlements
-- `package.json` -- registered golden-path script
+- `package.json` -- registered golden-path script; replaced dead
+  `build:site` (cd .. && npm run build:desktop) with no-op echo
+
+### Fixed
+
+- `electron-builder.yml` -- drop `mac.afterSign` (24.x rejects the
+  property; top-level `afterSign` already covers the hook)
+- `package.json` -- `build:site` no longer breaks the mac/win build
+  chain
 
 ### Gate progress
 
@@ -44,6 +55,16 @@ file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
   clean, submodule pointer = `e2efb73` matching `.vendor-lock`,
   `scripts/sync-vendor.sh check` OK. Split into 4 commits:
   meta / release-contract / desktop-collapse / docs+tests.
+- **Gate 4 -- macOS DMG arm64 + x64: closed locally.** Desktop
+  commit `ae31106`, rebuilt 2026-07-14. SHA-256:
+  - arm64 dmg `eeff399dbe13332278b4d3f2136e8788d87a0a4515761464edb001f479a05e2c` (188.6 MB)
+  - x64   dmg `90f514b64feec9a51b1c3fefa098162dcc1c7832924c79f9b519d1a629872585` (193.0 MB)
+- **Gate 4 -- Windows NSIS, macOS notarize, Windows code sign:
+  blocked on secrets.** Requires `WIN_CSC_LINK` /
+  `WIN_CSC_KEY_PASSWORD` and macOS
+  `MAC_CSC_NAME` + `APPLE_ID` + `APP_PASSWORD` + `NOTARIZE_TEAM_ID`
+  in repo secrets, then a `git push v0.0.1-rc.1` will exercise the
+  new `.github/workflows/release.yml` end-to-end.
 
 ## Week 3 (2026-07) -- First-success path
 
