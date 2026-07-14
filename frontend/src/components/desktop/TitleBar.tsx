@@ -34,9 +34,10 @@ export function TitleBar(): React.ReactElement {
 
   const displayTitle = title || getFallbackTitle(location.pathname);
   const resizeRail = 1;
-  const collapsedRail = 146;
-  const leftSpan = panels.leftOpen ? leftPanelWidth + resizeRail : collapsedRail;
-  const rightSpan = panels.rightOpen ? rightPanelWidth + resizeRail : collapsedRail;
+  const collapsedLeftRail = 146;
+  const collapsedRightRail = 64;
+  const leftSpan = panels.leftOpen ? leftPanelWidth + resizeRail : collapsedLeftRail;
+  const rightSpan = panels.rightOpen ? rightPanelWidth + resizeRail : collapsedRightRail;
   const titleBarStyle = {
     ['--titlebar-left-span' as string]: `${leftSpan}px`,
     ['--titlebar-right-span' as string]: `${rightSpan}px`,
@@ -97,7 +98,7 @@ export function TitleBar(): React.ReactElement {
         </button>
       </div>
 
-      <div className={styles.rightZone}>
+      <div className={`${styles.rightZone} ${!panels.rightOpen ? styles.rightZoneCollapsed : ''}`}>
         <div className={styles.tabsRail}>
           {tabs.map((tab) => {
             const active = tab.id === activeTabId;

@@ -112,6 +112,20 @@
   height: 100%;
 }
 
+.rightZoneCollapsed {
+  justify-content: flex-end;
+}
+
+.rightZoneCollapsed .tabsRail {
+  display: none;
+}
+
+.rightZoneCollapsed .windowTools {
+  margin-left: 0;
+  padding-left: 0;
+  border-left: 0;
+}
+
 .tabsRail {
   position: relative;
   display: flex;

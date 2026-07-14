@@ -271,6 +271,10 @@ export function ProjectWorkspace(): React.ReactElement {
   const effectiveRightWidth = rightWidth;
 
   useEffect(() => {
+    if (!rightOpen) setRightToolMenuOpen(false);
+  }, [rightOpen, setRightToolMenuOpen]);
+
+  useEffect(() => {
     const nextMode = parseWorkspaceMode(searchParams.get('mode')) || 'chat';
     setWorkspaceMode((current) => (current === nextMode ? current : nextMode));
   }, [searchParams]);
