@@ -29,3 +29,9 @@ tsconfig.tsbuildinfo
 
 # Local aionui CLI symlink (points to ~/.aionui/builtin-skills/...)
 .aionrs/
+
+# Local scratch / agent working area
+tmp/
+
+# Cursor IDE local settings (machine-local)
+.cursor/

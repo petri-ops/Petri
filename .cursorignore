@@ -1,0 +1,50 @@
+# Vendor submodule dependencies (有独立的 CLAUDE.md)
+vendor/biof3-core/node_modules/
+vendor/biof3-core/py-server/node_modules/
+vendor/biof3-core/r-server/node_modules/
+vendor/biof3-core/platform-server/node_modules/
+vendor/biof3-core/shared-backend/node_modules/
+vendor/biof3-core/packages/*/node_modules/
+
+# Build outputs
+dist/
+build/
+release/
+out/
+.electron/
+
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Cache
+.cache/
+.vite/
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Docs (不需要 AI 理解)
+docs/
+
+# Test coverage
+coverage/
+
+# Temporary
+tmp/
+.tmp/

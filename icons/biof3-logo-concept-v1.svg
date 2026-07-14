@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">BioF3 logo concept</title>
+  <desc id="desc">A compact DNA ribbon and three connected analysis nodes forming an abstract BioF3 emblem.</desc>
+  <defs>
+    <linearGradient id="panel" x1="64" y1="40" x2="448" y2="472" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#14263d"/>
+      <stop offset="1" stop-color="#091522"/>
+    </linearGradient>
+    <linearGradient id="tealRibbon" x1="144" y1="104" x2="352" y2="408" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#46dccb"/>
+      <stop offset="1" stop-color="#13998e"/>
+    </linearGradient>
+    <linearGradient id="cyanRibbon" x1="350" y1="112" x2="154" y2="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#65dfff"/>
+      <stop offset="1" stop-color="#2f82c9"/>
+    </linearGradient>
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect x="24" y="24" width="464" height="464" rx="112" fill="url(#panel)"/>
+  <path d="M107 106C167 65 337 65 397 106" fill="none" stroke="#ffffff" stroke-opacity="0.055" stroke-width="2"/>
+
+  <!-- Two broad ribbons form one compact double helix and a subtle B/3 silhouette. -->
+  <path
+    d="M166 108C301 108 354 166 354 218C354 270 298 290 256 306C207 325 176 344 166 404"
+    fill="none"
+    stroke="url(#cyanRibbon)"
+    stroke-width="40"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M346 108C211 108 158 166 158 218C158 270 214 290 256 306C305 325 336 344 346 404"
+    fill="none"
+    stroke="url(#tealRibbon)"
+    stroke-width="40"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Broad rungs keep the DNA reading legible at small icon sizes. -->
+  <path d="M202 137L310 137" stroke="#d6fbff" stroke-opacity="0.72" stroke-width="13" stroke-linecap="round"/>
+  <path d="M172 207L340 207" stroke="#d6fbff" stroke-opacity="0.56" stroke-width="13" stroke-linecap="round"/>
+  <path d="M202 278L310 278" stroke="#d6fbff" stroke-opacity="0.64" stroke-width="13" stroke-linecap="round"/>
+  <path d="M203 361L309 361" stroke="#d6fbff" stroke-opacity="0.5" stroke-width="13" stroke-linecap="round"/>
+
+  <!-- Three analysis nodes: input, inference, verified result. -->
+  <path d="M338 132L374 256L338 380" fill="none" stroke="#8ceae1" stroke-opacity="0.34" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="338" cy="132" r="23" fill="#43d6c6" stroke="#d9fffb" stroke-width="7"/>
+  <circle cx="374" cy="256" r="27" fill="#ff846e" stroke="#fff1ed" stroke-width="7" filter="url(#softGlow)"/>
+  <circle cx="338" cy="380" r="23" fill="#4bb8eb" stroke="#e2f7ff" stroke-width="7"/>
+  <circle cx="374" cy="256" r="8" fill="#ffffff"/>
+</svg>
