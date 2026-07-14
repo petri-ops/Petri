@@ -41,6 +41,13 @@ describe('terminal-themes', () => {
     expect(TERMINAL_THEMES.dark.foreground).not.toBe(TERMINAL_THEMES.light.foreground);
   });
 
+  it('keeps the dark terminal on the BioF3 surface and accent palette', () => {
+    expect(TERMINAL_THEMES.dark.background).toBe('#111a2e');
+    expect(TERMINAL_THEMES.dark.foreground).toBe('#e6edf3');
+    expect(TERMINAL_THEMES.dark.cursor).toBe('#2dd4bf');
+    expect(TERMINAL_THEMES.dark.cyan).toBe('#2dd4bf');
+  });
+
   describe('pickTerminalTheme', () => {
     const cases: Array<[unknown, TerminalThemeName]> = [
       ['light', 'light'],
