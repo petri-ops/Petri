@@ -194,6 +194,17 @@ describe('useResizableColumns', () => {
     expect(result.current.bottomTerminalHeight).toBe(300);
   });
 
+  it('normalizes stale and invalid persisted result widths to the stable minimum', () => {
+    localStorage.setItem(LS_KEY, JSON.stringify({ resultRightWidth: 360 }));
+    const stale = renderHook(() => useResizableColumns());
+    expect(stale.result.current.resultRightWidth).toBe(600);
+    stale.unmount();
+
+    localStorage.setItem(LS_KEY, JSON.stringify({ resultRightWidth: Number.NaN }));
+    const invalid = renderHook(() => useResizableColumns());
+    expect(invalid.result.current.resultRightWidth).toBe(720);
+  });
+
   it('prefers localStorage over defaults but caller overrides override localStorage', async () => {
     localStorage.setItem(LS_KEY, JSON.stringify({ leftWidth: 999, rightWidth: 888, inputHeight: 77, bottomTerminalHeight: 666 }));
     const { result } = renderHook(() =>

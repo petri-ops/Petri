@@ -265,26 +265,10 @@ export function ProjectWorkspace(): React.ReactElement {
     // with compactLayout awareness (setLeftOpen).
   } = useRightPanelTabs();
 
-  const maximumResultRightWidth = useMemo(() => {
-    if (compactLayout) {
-      return Math.max(360, viewportWidth - 56);
-    }
-
-    const leftFootprint = leftOpen ? leftWidth + 1 : 0;
-    const availableWidth = Math.max(0, viewportWidth - leftFootprint);
-    const minimumAgentWidth = Math.min(720, Math.max(520, availableWidth * 0.45));
-    return Math.round(Math.max(360, availableWidth - minimumAgentWidth));
-  }, [compactLayout, leftOpen, leftWidth, viewportWidth]);
-
   const effectiveRightWidth = useMemo(() => {
     if (rightTab !== 'results') return rightWidth;
-
-    // Results are a full tool workspace, not a narrow auxiliary sidebar.
-    // Keep the Agent stage visible on desktop and use a wide overlay only at
-    // the compact breakpoint where side-by-side reading is no longer viable.
-    if (compactLayout) return maximumResultRightWidth;
-    return Math.max(360, Math.min(maximumResultRightWidth, resultRightWidth));
-  }, [compactLayout, maximumResultRightWidth, resultRightWidth, rightTab, rightWidth]);
+    return resultRightWidth;
+  }, [resultRightWidth, rightTab, rightWidth]);
 
   useEffect(() => {
     const nextMode = parseWorkspaceMode(searchParams.get('mode')) || 'chat';
@@ -1187,9 +1171,7 @@ export function ProjectWorkspace(): React.ReactElement {
           ctx={rightPanelCtx}
           visible={rightOpen}
           workspaceMode={workspaceMode}
-          onResize={rightTab === 'results'
-            ? startColumnResize('resultRight', { min: 360, max: maximumResultRightWidth })
-            : startColumnResize('right')}
+          onResize={rightTab === 'results' ? startColumnResize('resultRight') : startColumnResize('right')}
         />
         <BottomTerminal
           open={bottomTerminalOpen}

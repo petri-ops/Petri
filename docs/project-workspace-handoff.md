@@ -1,6 +1,27 @@
 # Project Workspace Handoff
 
-最后更新：2026-07-13
+最后更新：2026-07-14
+
+## 2026-07-14 当前交接点
+
+- 当前主线仍是 `project workspace` 的结果区稳定性修复，重点不是新增功能，而是把“结果预览在拖拽时跳版/抖动”的根因收口。
+- 已确认问题根因主要有两部分：
+  1. 结果右栏 `resultRightWidth` 之前没有足够的稳定下限，历史脏值会被 localStorage 继续带入。
+  2. 结果报告壳 `resultReportShell` 仍有窄屏切换规则，会在面板变窄时从左右布局切成单列，造成明显跳变。
+- 已完成修复：
+  - `frontend/src/hooks/useResizableColumns.ts` 为 `resultRightWidth` 加入归一化，历史值会被洗到安全区间，当前最小值收紧到 600px。
+  - `frontend/src/pages/project-workspace.module.css` 移除了结果报告的窄宽度断点切版逻辑，保留同一套报告结构，只做缩放，不再在拖拽时切换成另一种排版。
+- 已做验证：
+  - `npm --prefix frontend run check`
+  - `npm --prefix frontend run build`
+  - 本机 Chrome 实测 `localhost:3000/project/p_mrcpi1zo_515l`，结果壳在宽/窄视口下保持同构布局，不再自动切成上下叠。
+- 当前结论：
+  - 这不是 iframe 性能不足，也不建议把结果预览改成内置浏览器 `webview` 作为默认方案。
+  - `BrowserPanel` 适合网页浏览，不适合替代结果报告预览；结果预览继续保留 iframe 路线更轻，也更符合当前产品边界。
+- 后续如果还看到“跳”，优先检查：
+  1. 是否有新的 CSS 断点重新引入了布局切换。
+  2. localStorage 里是否存在旧的 `biof3-pw-cols` 脏值。
+  3. 是否是 `iframe` 内部报告自身的响应式规则，而不是外层 workspace 面板。
 
 这份文档用于在切换工作区后恢复当前开发状态。工作台 UI 与 Harness Phase 1–6 已收口，当前进入标准流程覆盖阶段；新增分析能力必须通过既有 Plugin SDK、tool job、artifact truth、Agent workflow runtime 和 fixture 门禁接入，不再扩建第二套平台基础设施。
 

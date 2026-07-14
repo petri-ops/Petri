@@ -48,9 +48,36 @@ function loadDims(initial: Partial<{
 }> = {}): StoredDims {
   try {
     const raw = localStorage.getItem(LS_KEY);
-    if (raw) return { ...DEFAULTS, ...JSON.parse(raw), ...initial };
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<StoredDims>;
+      return {
+        leftWidth: normalizeWidth(initial.leftWidth ?? parsed.leftWidth, DEFAULTS.leftWidth, MIN_LEFT_WIDTH),
+        rightWidth: normalizeWidth(initial.rightWidth ?? parsed.rightWidth, DEFAULTS.rightWidth, MIN_RIGHT_WIDTH),
+        resultRightWidth: normalizeWidth(
+          initial.resultRightWidth ?? parsed.resultRightWidth,
+          DEFAULTS.resultRightWidth,
+          MIN_RESULT_RIGHT_WIDTH,
+        ),
+        inputHeight: normalizeWidth(initial.inputHeight ?? parsed.inputHeight, DEFAULTS.inputHeight, MIN_INPUT_HEIGHT),
+        bottomTerminalHeight: normalizeWidth(
+          initial.bottomTerminalHeight ?? parsed.bottomTerminalHeight,
+          DEFAULTS.bottomTerminalHeight,
+          120,
+        ),
+      };
+    }
   } catch {}
-  return { ...DEFAULTS, ...initial };
+  return {
+    leftWidth: normalizeWidth(initial.leftWidth, DEFAULTS.leftWidth, MIN_LEFT_WIDTH),
+    rightWidth: normalizeWidth(initial.rightWidth, DEFAULTS.rightWidth, MIN_RIGHT_WIDTH),
+    resultRightWidth: normalizeWidth(
+      initial.resultRightWidth,
+      DEFAULTS.resultRightWidth,
+      MIN_RESULT_RIGHT_WIDTH,
+    ),
+    inputHeight: normalizeWidth(initial.inputHeight, DEFAULTS.inputHeight, MIN_INPUT_HEIGHT),
+    bottomTerminalHeight: normalizeWidth(initial.bottomTerminalHeight, DEFAULTS.bottomTerminalHeight, 120),
+  };
 }
 
 function saveDims(dims: StoredDims): void {
@@ -59,13 +86,18 @@ function saveDims(dims: StoredDims): void {
 
 const MIN_LEFT_WIDTH = 96;
 const MIN_RIGHT_WIDTH = 96;
-const MIN_RESULT_RIGHT_WIDTH = 360;
 const MIN_INPUT_HEIGHT = 48;
+const MIN_RESULT_RIGHT_WIDTH = 600;
 const RESIZING_CLASS = 'biof3-resizing-columns';
 
 function setResizingClass(active: boolean): void {
   if (typeof document === 'undefined') return;
   document.body.classList.toggle(RESIZING_CLASS, active);
+}
+
+function normalizeWidth(value: unknown, fallback: number, min: number): number {
+  const next = typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+  return Math.max(min, next);
 }
 
 /**
@@ -118,8 +150,9 @@ export function useResizableColumns(
   }, []);
 
   const setResultRightWidth = useCallback((n: number) => {
-    _setResultRightWidth(n);
-    dims.current.resultRightWidth = n;
+    const next = normalizeWidth(n, DEFAULTS.resultRightWidth, MIN_RESULT_RIGHT_WIDTH);
+    _setResultRightWidth(next);
+    dims.current.resultRightWidth = next;
     const d = dims.current;
     saveDims({ leftWidth: d.leftWidth, rightWidth: d.rightWidth, resultRightWidth: d.resultRightWidth, inputHeight: d.inputHeight, bottomTerminalHeight: d.bottomTerminalHeight });
   }, []);
