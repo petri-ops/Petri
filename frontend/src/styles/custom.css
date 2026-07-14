@@ -91,6 +91,7 @@
   --biof3-status-error-fg: #dc2626;
   --biof3-status-warning-fg: #b45309;
   --biof3-status-danger-fg: #991b1b;
+  --biof3-user-bubble-bg: rgba(15, 23, 42, 0.045);
   --biof3-accent-orange: #ea580c;
   --biof3-accent-orange-bg: rgba(249, 115, 22, 0.08);
 }
@@ -155,6 +156,7 @@
   --biof3-status-error-fg: #f87171;
   --biof3-status-warning-fg: #fbbf24;
   --biof3-status-danger-fg: #fca5a5;
+  --biof3-user-bubble-bg: rgba(148, 163, 184, 0.08);
   --biof3-accent-orange: #fb923c;
   --biof3-accent-orange-bg: rgba(251, 146, 60, 0.16);
 

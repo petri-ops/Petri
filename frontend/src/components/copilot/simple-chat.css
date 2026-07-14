@@ -213,7 +213,12 @@
 }
 
 .sc-msg-user .sc-msg-body {
-  color: var(--biof3-text-secondary, #475569);
+  padding: 8px 12px;
+  border: 1px solid color-mix(in srgb, var(--biof3-border, #e2e8f0) 78%, transparent);
+  border-radius: 14px 14px 4px 14px;
+  background: var(--biof3-user-bubble-bg);
+  color: var(--biof3-text, #0f172a);
+  box-shadow: 0 1px 1px color-mix(in srgb, var(--biof3-text, #0f172a) 4%, transparent);
 }
 
 .sc-msg-assistant .sc-msg-body {
