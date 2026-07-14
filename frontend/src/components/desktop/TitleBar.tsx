@@ -37,12 +37,9 @@ export function TitleBar(): React.ReactElement {
   const collapsedRail = 146;
   const leftSpan = panels.leftOpen ? leftPanelWidth + resizeRail : collapsedRail;
   const rightSpan = panels.rightOpen ? rightPanelWidth + resizeRail : collapsedRail;
-  const rightSpanValue = panels.rightOpen && activeTabId === 'results'
-    ? `calc(var(--biof3-live-result-right-width, ${rightPanelWidth}px) + ${resizeRail}px)`
-    : `${rightSpan}px`;
   const titleBarStyle = {
     ['--titlebar-left-span' as string]: `${leftSpan}px`,
-    ['--titlebar-right-span' as string]: rightSpanValue,
+    ['--titlebar-right-span' as string]: `${rightSpan}px`,
   } as React.CSSProperties;
 
   return (

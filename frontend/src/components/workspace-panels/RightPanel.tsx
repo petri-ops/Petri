@@ -22,8 +22,6 @@ type DispatchSetter<T> = React.Dispatch<React.SetStateAction<T>>;
 export interface RightPanelContext {
   // Layout
   width: number;
-  bottomTerminalOpen: boolean;
-  bottomTerminalHeight: number;
 
   // Project + conversation
   project: Project;
@@ -111,12 +109,7 @@ export function RightPanel({
       {onResize && <div className={styles.resizeHandleV} onMouseDown={onResize} />}
       <aside
         className={styles.rightCol}
-        style={{
-          width: ctx.rightTab === 'results'
-            ? `var(--biof3-live-result-right-width, ${ctx.width}px)`
-            : ctx.width,
-          paddingBottom: ctx.bottomTerminalOpen ? ctx.bottomTerminalHeight : 0,
-        }}
+        style={{ width: ctx.width }}
       >
         <div className={styles.resultPanel}>
           <div className={styles.resultPanelBody}>
@@ -125,7 +118,7 @@ export function RightPanel({
                 key={tab}
                 className={`${styles.rightPanelTabContent} ${
                   ctx.rightTab === tab ? styles.rightPanelTabContentActive : ''
-                }`}
+                } ${tab === 'browser' ? styles.rightPanelBrowserTab : ''}`}
               >
                 {tab === 'home' && (
                   <EmptyResult

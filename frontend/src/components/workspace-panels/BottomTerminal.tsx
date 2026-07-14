@@ -7,6 +7,7 @@ export interface BottomTerminalProps {
   open: boolean;
   height: number;
   leftOffset: number;
+  rightOffset: number;
   workspacePath?: string;
   onResize: (event: React.MouseEvent) => void;
   onClose: () => void;
@@ -22,6 +23,7 @@ export function BottomTerminal({
   open,
   height,
   leftOffset,
+  rightOffset,
   workspacePath,
   onResize,
   onClose,
@@ -34,7 +36,7 @@ export function BottomTerminal({
   return (
     <section
       className={`${styles.embeddedTerminal} ${open ? styles.embeddedTerminalOpen : ''}`}
-      style={{ height: open ? height : 0, left: leftOffset }}
+      style={{ height: open ? height : 0, left: leftOffset, right: rightOffset }}
       aria-hidden={!open}
     >
       <div className={styles.embeddedTerminalResize} onMouseDown={onResize} />

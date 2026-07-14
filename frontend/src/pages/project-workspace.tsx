@@ -226,7 +226,6 @@ export function ProjectWorkspace(): React.ReactElement {
     setLeftWidth,
     rightWidth,
     setRightWidth,
-    resultRightWidth,
     inputHeight,
     setInputHeight,
     bottomTerminalHeight,
@@ -265,10 +264,9 @@ export function ProjectWorkspace(): React.ReactElement {
     // with compactLayout awareness (setLeftOpen).
   } = useRightPanelTabs();
 
-  const effectiveRightWidth = useMemo(() => {
-    if (rightTab !== 'results') return rightWidth;
-    return resultRightWidth;
-  }, [resultRightWidth, rightTab, rightWidth]);
+  // Every right-side tool shares one width. Switching to Results must not
+  // jump to a separately constrained layout or change the drag feel.
+  const effectiveRightWidth = rightWidth;
 
   useEffect(() => {
     const nextMode = parseWorkspaceMode(searchParams.get('mode')) || 'chat';
@@ -1103,8 +1101,6 @@ export function ProjectWorkspace(): React.ReactElement {
 
   const rightPanelCtx: RightPanelContext = {
     width: effectiveRightWidth,
-    bottomTerminalOpen,
-    bottomTerminalHeight,
     project: project as Project,
     projectId,
     activeConvId,
@@ -1171,12 +1167,13 @@ export function ProjectWorkspace(): React.ReactElement {
           ctx={rightPanelCtx}
           visible={rightOpen}
           workspaceMode={workspaceMode}
-          onResize={rightTab === 'results' ? startColumnResize('resultRight') : startColumnResize('right')}
+          onResize={startColumnResize('right')}
         />
         <BottomTerminal
           open={bottomTerminalOpen}
           height={bottomTerminalHeight}
           leftOffset={leftOpen ? leftWidth + 1 : 0}
+          rightOffset={rightOpen ? effectiveRightWidth + 1 : 0}
           workspacePath={project.workspacePath}
           onResize={handleBottomTerminalResize}
           onClose={() => setBottomTerminalOpen(false)}
