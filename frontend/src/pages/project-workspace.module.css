@@ -2451,14 +2451,17 @@
 .embeddedTerminal {
   position: absolute;
   right: 0;
-  bottom: 0;
+  bottom: 8px;
   z-index: 55;
   display: flex;
   flex-direction: column;
   min-height: 0;
-  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  margin: 0 8px;
+  border: 1px solid color-mix(in srgb, var(--biof3-border, #243149) 84%, transparent);
+  border-radius: 11px;
   background: var(--biof3-bg-terminal, #0d1117);
   color: var(--biof3-text-terminal-strong, #e6edf3);
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.16);
   overflow: hidden;
   opacity: 0;
   visibility: hidden;
@@ -2473,27 +2476,41 @@
 
 .embeddedTerminalResize {
   position: absolute;
-  inset: -3px 0 auto;
+  inset: 0 0 auto;
   z-index: 3;
   height: 7px;
   cursor: ns-resize;
 }
 
-.embeddedTerminalResize:hover {
-  background: rgba(13, 148, 136, 0.75);
+.embeddedTerminalResize::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  width: 34px;
+  height: 2px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--biof3-border-strong, #64748b) 68%, transparent);
+  transform: translateX(-50%);
+  transition: width 0.14s ease, background 0.14s ease;
 }
 
-/* Codex-like terminal: thin dark header, no panel chrome */
+.embeddedTerminalResize:hover::after {
+  width: 44px;
+  background: var(--biof3-accent, #0d9488);
+}
+
+/* Compact terminal card header, shared by light and dark application themes. */
 .embeddedTerminalHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  height: 28px;
-  min-height: 28px;
-  padding: 0 6px 0 10px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
-  background: var(--biof3-bg-terminal, #0d1117);
+  height: 30px;
+  min-height: 30px;
+  padding: 2px 7px 0 11px;
+  border-bottom: 1px solid color-mix(in srgb, var(--biof3-border, #243149) 72%, transparent);
+  background: color-mix(in srgb, var(--biof3-bg-terminal, #0d1117) 88%, var(--biof3-bg-subtle, #182339) 12%);
   color: var(--biof3-text-terminal-muted, #cbd5e1);
   font-size: 11px;
 }
@@ -2551,10 +2568,11 @@
   min-height: 0;
   background: var(--biof3-bg-terminal, #0d1117);
   color: var(--biof3-text-terminal-strong, #e6edf3);
+  border-radius: 0 0 10px 10px;
 }
 
 .embeddedTerminalHost :global(.xterm) {
-  padding: 6px 8px 4px;
+  padding: 8px 10px 6px;
   height: 100%;
   background: transparent;
 }
@@ -2562,6 +2580,20 @@
 .embeddedTerminalHost :global(.xterm-viewport),
 .embeddedTerminalHost :global(.xterm-screen) {
   background: transparent !important;
+}
+
+.embeddedTerminalHost :global(.xterm-viewport)::-webkit-scrollbar {
+  width: 8px;
+}
+
+.embeddedTerminalHost :global(.xterm-viewport)::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.embeddedTerminalHost :global(.xterm-viewport)::-webkit-scrollbar-thumb {
+  border: 2px solid var(--biof3-bg-terminal, #0d1117);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--biof3-text-terminal-muted, #64748b) 52%, transparent);
 }
 
 .embeddedTerminalOutput {

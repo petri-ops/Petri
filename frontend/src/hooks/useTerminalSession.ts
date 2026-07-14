@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Terminal as XTerm } from '@xterm/xterm';
+import '@xterm/xterm/css/xterm.css';
 import { FitAddon } from '@xterm/addon-fit';
 import { pickTerminalTheme, type TerminalThemeName } from '@/themes/terminal-themes';
 import { getBridge } from '@/lib/desktopBridge';
@@ -61,7 +62,6 @@ export function useTerminalSession(
     terminal.open(hostRef.current);
     terminalRef.current = terminal;
     fitAddonRef.current = fitAddon;
-    terminal.writeln('\x1b[38;5;39mBioF3 Terminal\x1b[0m');
 
     const inputDisposable = terminal.onData((data) => {
       getBridge('terminal')?.writeSession?.(data);
