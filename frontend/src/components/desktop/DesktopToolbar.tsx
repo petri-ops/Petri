@@ -14,6 +14,7 @@ import { Icon, type IconName } from '@/components/icons/Icon';
 import { DesktopSettingsPanel } from './DesktopSettingsPanel';
 import { PluginStorePanel } from './PluginStorePanel';
 import { DesktopNavPanel } from './DesktopNavPanel';
+import { ThemeControl } from './ThemeControl';
 import './desktop.css';
 
 // 各面板宽度区间（px）。拖拽右边缘手柄在此范围内调整。
@@ -98,20 +99,11 @@ function readDockOrder(): DockItemConfig[] {
   }
 }
 
-const THEME_STORAGE_KEY = 'biof3-theme';
-
 function DesktopToolbarInner(): React.ReactElement {
   const [activePanel, setActivePanel] = useState<PanelKind>(null);
   const [panelWidths, setPanelWidths] = useState<Record<ResizablePanel, number>>(readPanelWidths);
   const [dockCollapsed, setDockCollapsed] = useState(false);
   const [dockOrder, setDockOrder] = useState<DockItemConfig[]>(readDockOrder);
-  const [colorMode, setColorMode] = useState<'light' | 'dark'>(() => {
-    try {
-      const saved = localStorage.getItem(THEME_STORAGE_KEY);
-      if (saved === 'dark' || saved === 'light') return saved;
-    } catch {}
-    return 'light';
-  });
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -124,26 +116,6 @@ function DesktopToolbarInner(): React.ReactElement {
     if (item.to === '/') return currentPath === '/';
     return item.matchPrefix ? currentPath.startsWith(item.matchPrefix) : false;
   };
-
-  // 跟随系统主题
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mql = window.matchMedia('(prefers-color-scheme: dark)');
-    const onChange = () => {
-      if (!localStorage.getItem(THEME_STORAGE_KEY)) {
-        const sys = mql.matches ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', sys);
-        setColorMode(sys);
-      }
-    };
-    mql.addEventListener('change', onChange);
-    return () => mql.removeEventListener('change', onChange);
-  }, []);
-
-  // 应用主题
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', colorMode);
-  }, [colorMode]);
 
   // dock 收缩
   useEffect(() => {
@@ -274,15 +246,6 @@ function DesktopToolbarInner(): React.ReactElement {
     setDragOverId(null);
   };
 
-  const toggleTheme = () => {
-    const next = colorMode === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    setColorMode(next);
-    try {
-      localStorage.setItem(THEME_STORAGE_KEY, next);
-    } catch {}
-  };
-
   if (isProjectWorkspace) return <></>;
 
   return (
@@ -327,15 +290,7 @@ function DesktopToolbarInner(): React.ReactElement {
         </div>
 
         <div className="biof3-desktop-dock__footer">
-          <button
-            type="button"
-            className="biof3-desktop-dock__btn biof3-desktop-dock__theme-toggle"
-            onClick={toggleTheme}
-            aria-label={colorMode === 'dark' ? '切换到浅色' : '切换到深色'}
-            title={colorMode === 'dark' ? '切换到浅色' : '切换到深色'}
-          >
-            <Icon name={colorMode === 'dark' ? 'sun' : 'moon'} size={22} />
-          </button>
+          <ThemeControl compact />
           <button
             type="button"
             className="biof3-desktop-dock__toggle"

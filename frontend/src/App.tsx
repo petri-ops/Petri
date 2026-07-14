@@ -29,7 +29,6 @@ import { getApiPrefix, getToken } from '@/lib/authClient';
 configureApi({ getApiPrefix: () => getApiPrefix(), getToken });
 
 const ONBOARDING_FLAG = 'biof3-onboarding-completed';
-const THEME_STORAGE_KEY = 'biof3-theme';
 
 function DesktopOnboardingMount(): React.ReactElement | null {
   const [show, setShow] = useState(false);
@@ -61,33 +60,6 @@ export default function App(): React.ReactElement {
     document.body.style.paddingLeft = '0';
     document.body.style.boxSizing = 'border-box';
 
-    const applyTheme = (theme: 'light' | 'dark') => {
-      html.setAttribute('data-theme', theme);
-    };
-
-    let savedTheme: 'light' | 'dark' | null = null;
-    try {
-      const raw = localStorage.getItem(THEME_STORAGE_KEY);
-      if (raw === 'light' || raw === 'dark') savedTheme = raw;
-    } catch {
-      savedTheme = null;
-    }
-
-    const media = window.matchMedia('(prefers-color-scheme: dark)');
-    applyTheme(savedTheme || (media.matches ? 'dark' : 'light'));
-
-    const onChange = () => {
-      try {
-        const raw = localStorage.getItem(THEME_STORAGE_KEY);
-        if (raw === 'light' || raw === 'dark') return;
-      } catch {
-        // ignore and follow system
-      }
-      applyTheme(media.matches ? 'dark' : 'light');
-    };
-
-    media.addEventListener('change', onChange);
-    return () => media.removeEventListener('change', onChange);
   }, []);
 
   return (
