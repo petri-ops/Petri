@@ -191,7 +191,9 @@
 }
 
 .sc-msg-user .sc-msg-avatar {
-  display: none;
+  background: var(--biof3-accent, #0d9488);
+  color: var(--biof3-on-accent, #ffffff);
+  margin-top: 2px;
 }
 
 .sc-msg-assistant .sc-msg-avatar {
