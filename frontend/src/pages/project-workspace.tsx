@@ -3075,14 +3075,28 @@ function ResultArtifactShell({
           {reportGenerationError && <em>{reportGenerationError}</em>}
         </div>
         <div className={styles.resultDeliveryActions}>
-          <button type="button" disabled={reportGenerating || !reportArtifact} onClick={() => void generateFinalReport()}>
-            {reportGenerating ? '生成中…' : finalReportUrl ? '重新生成' : '生成报告'}
+          <button
+            type="button"
+            disabled={reportGenerating || !reportArtifact}
+            onClick={() => void generateFinalReport()}
+            title={finalReportUrl ? '重新生成最终 HTML 报告' : '生成最终 HTML 报告'}
+          >
+            {reportGenerating ? '生成中…' : '生成'}
           </button>
           {finalReportUrl && onOpenBrowser && (
-            <button type="button" onClick={() => onOpenBrowser(finalReportUrl)}>内置浏览器查看</button>
+            <button
+              type="button"
+              onClick={() => onOpenBrowser(finalReportUrl)}
+              title="在右侧内置浏览器查看"
+            >
+              查看
+            </button>
           )}
-          {finalReportUrl && <a href={finalReportUrl} target="_blank" rel="noopener noreferrer">系统浏览器查看</a>}
-          {finalReportUrl && <a href={finalReportUrl} download="final-report.html">下载 HTML</a>}
+          {finalReportUrl && (
+            <a href={finalReportUrl} download="final-report.html" title="导出最终 HTML 报告">
+              导出
+            </a>
+          )}
         </div>
       </section>
       <section className={isSidebar ? styles.resultSidebarReportCard : styles.resultReportSection}>

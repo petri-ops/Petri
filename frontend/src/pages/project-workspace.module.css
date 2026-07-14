@@ -2258,8 +2258,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: 8px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--biof3-border, #e2e8f0);
   background: var(--biof3-surface-alt, #f8fafc);
 }
@@ -2292,15 +2292,15 @@
   align-items: center;
   justify-content: flex-end;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
 }
 
 .resultDeliveryActions button,
 .resultDeliveryActions a {
   display: inline-flex;
   align-items: center;
-  height: 26px;
-  padding: 0 9px;
+  height: 24px;
+  padding: 0 8px;
   border: 1px solid var(--biof3-border, #e2e8f0);
   border-radius: 7px;
   background: var(--biof3-bg-surface, #ffffff);
