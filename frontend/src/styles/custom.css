@@ -133,6 +133,9 @@
   --biof3-danger: #f87171;
   --biof3-bg-terminal: #050a16;
   --biof3-text-terminal: #cbd5e1;
+  --biof3-text-terminal-strong: #e6edf3;
+  --biof3-text-terminal-muted: #8b98ad;
+  --biof3-text-terminal-prompt: #2dd4bf;
 
   /* ===== 状态语义色（dark mode） ===== */
   --biof3-status-online: #4ade80;

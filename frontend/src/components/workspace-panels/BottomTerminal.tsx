@@ -1,6 +1,7 @@
 import React from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { useTerminalSession } from '@/hooks/useTerminalSession';
+import { useTheme } from '@/themes/ThemeProvider';
 import styles from '@/pages/project-workspace.module.css';
 
 export interface BottomTerminalProps {
@@ -28,9 +29,11 @@ export function BottomTerminal({
   onResize,
   onClose,
 }: BottomTerminalProps): React.ReactElement {
+  const { resolvedTheme } = useTheme();
   const { hostRef, running, clear } = useTerminalSession({
     open,
     workspacePath,
+    theme: resolvedTheme,
   });
 
   return (

@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { useTerminalSession } from '@/hooks/useTerminalSession';
+import { TERMINAL_THEMES, type TerminalThemeName } from '@/themes/terminal-themes';
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -129,23 +130,28 @@ function uninstallBridge() {
 // Mount helper
 // ---------------------------------------------------------------------------
 
-function mountHost(workspacePath?: string, open = false) {
+function mountHost(workspacePath?: string, open = false, theme: TerminalThemeName = 'dark') {
   const host = document.createElement('div');
   document.body.appendChild(host);
 
   // We attach hostRef.current before the renderHook so the mount effect can
   // find a non-null host. We do this by passing a small wrapper component
   // that captures the ref synchronously in its render body.
-  function Harness(props: { isOpen: boolean; ws?: string }) {
-    const session = useTerminalSession({ open: props.isOpen, workspacePath: props.ws });
+  function Harness(props: { isOpen: boolean; ws?: string; theme: TerminalThemeName }) {
+    const session = useTerminalSession({
+      open: props.isOpen,
+      workspacePath: props.ws,
+      theme: props.theme,
+    });
     // Set the ref synchronously during render. The mount effect reads it.
     (session.hostRef as React.MutableRefObject<HTMLDivElement | null>).current = host;
     return session;
   }
 
   const { result, rerender, unmount } = renderHook(
-    ({ isOpen, ws }: { isOpen: boolean; ws?: string }) => Harness({ isOpen, ws }),
-    { initialProps: { isOpen: open, ws: workspacePath } }
+    ({ isOpen, ws, activeTheme }: { isOpen: boolean; ws?: string; activeTheme: TerminalThemeName }) =>
+      Harness({ isOpen, ws, theme: activeTheme }),
+    { initialProps: { isOpen: open, ws: workspacePath, activeTheme: theme } }
   );
 
   return { result, rerender, unmount, host };
@@ -176,6 +182,18 @@ describe('useTerminalSession', () => {
     expect(term.open).toHaveBeenCalledTimes(1);
     expect(term.open.mock.calls[0][0]).toBeInstanceOf(HTMLDivElement);
     expect(result.current.hostRef.current).toBeInstanceOf(HTMLDivElement);
+  });
+
+  it('uses the resolved application theme and updates the existing terminal live', () => {
+    installBridge();
+    const { rerender } = mountHost('/tmp/proj', false, 'light');
+    const term = hoisted.FakeXTerm.instances[0];
+    expect(term.options.theme).toBe(TERMINAL_THEMES.light);
+
+    rerender({ isOpen: false, ws: '/tmp/proj', activeTheme: 'dark' });
+
+    expect(hoisted.FakeXTerm.instances).toHaveLength(1);
+    expect(term.options.theme).toBe(TERMINAL_THEMES.dark);
   });
 
   it('does not call startSession until open=true', () => {

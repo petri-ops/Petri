@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Terminal as XTerm } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
-import { pickTerminalTheme } from '@/themes/terminal-themes';
+import { pickTerminalTheme, type TerminalThemeName } from '@/themes/terminal-themes';
 import { getBridge } from '@/lib/desktopBridge';
 
 export interface UseTerminalSessionOptions {
@@ -9,6 +9,8 @@ export interface UseTerminalSessionOptions {
   workspacePath?: string;
   /** Whether the terminal is currently visible. Starts the session when true. */
   open: boolean;
+  /** Resolved application theme. The live xterm instance follows this value. */
+  theme: TerminalThemeName;
 }
 
 export interface UseTerminalSessionResult {
@@ -21,8 +23,8 @@ export interface UseTerminalSessionResult {
 /**
  * Owns an xterm.js instance bound to a desktop node-pty session.
  *
- * - Constructs the terminal on mount with a `data-theme`-aware palette.
- * - Reapplies the palette when `<html data-theme>` mutates.
+ * - Constructs the terminal with the resolved application palette.
+ * - Reapplies the palette live when the application theme changes.
  * - Proxies input to `window.biof3Desktop.terminal.writeSession` and
  *   surfaces remote output via `onData` / `onExit`.
  * - Starts the session when `open` flips to `true` and stops it on unmount.
@@ -31,7 +33,7 @@ export interface UseTerminalSessionResult {
 export function useTerminalSession(
   options: UseTerminalSessionOptions,
 ): UseTerminalSessionResult {
-  const { open, workspacePath } = options;
+  const { open, theme, workspacePath } = options;
   const hostRef = useRef<HTMLDivElement | null>(null);
   const terminalRef = useRef<XTerm | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
@@ -52,7 +54,7 @@ export function useTerminalSession(
       scrollback: 5000,
       convertEol: true,
       allowProposedApi: false,
-      theme: pickTerminalTheme(),
+      theme: pickTerminalTheme(theme),
     });
     const fitAddon = new FitAddon();
     terminal.loadAddon(fitAddon);
@@ -85,22 +87,7 @@ export function useTerminalSession(
     });
     resizeObserver.observe(hostRef.current);
 
-    const applyTheme = () => {
-      try {
-        terminal.options.theme = pickTerminalTheme();
-      } catch {
-        /* ignore */
-      }
-    };
-    applyTheme();
-    const themeObserver = new MutationObserver(applyTheme);
-    themeObserver.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['data-theme'],
-    });
-
     return () => {
-      themeObserver.disconnect();
       resizeObserver.disconnect();
       inputDisposable.dispose();
       offData?.();
@@ -116,6 +103,17 @@ export function useTerminalSession(
   // without re-binding listeners (the listener setup is mount-once).
   openRef.current = open;
   workspacePathRef.current = workspacePath;
+
+  // Theme changes should not recreate xterm or restart the PTY session.
+  useEffect(() => {
+    const terminal = terminalRef.current;
+    if (!terminal) return;
+    try {
+      terminal.options.theme = pickTerminalTheme(theme);
+    } catch {
+      /* ignore */
+    }
+  }, [theme]);
 
   // Auto-start session when opened (and not already started).
   useEffect(() => {

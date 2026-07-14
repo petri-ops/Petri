@@ -2,11 +2,12 @@
  * Embedded xterm theme registry + theme-resolution contract.
  *
  * Out-of-the-box light/dark palettes tuned for the BioF3 workspace shell.
- * Theme switching is driven by `document.documentElement.dataset.theme`
- * (values: "light" | "dark"); default falls back to dark when unset.
+ * Theme switching is driven by the application's resolved `light` / `dark`
+ * value. Callers should pass that value explicitly so xterm and the React
+ * shell update from the same source of truth.
  *
  * Consumers should:
- *   1. Call `pickTerminalTheme()` at construction time to seed xterm options.
+ *   1. Call `pickTerminalTheme(resolvedTheme)` when constructing xterm.
  *   2. Re-invoke via `useTerminalTheme` (or their own MutationObserver) on
  *      `data-theme` mutations to reapply palette live.
  */
@@ -65,9 +66,8 @@ export const TERMINAL_THEMES: Readonly<Record<TerminalThemeName, ITheme>> = {
 } as const;
 
 /**
- * Resolve current terminal theme by reading `data-theme` on `<html>`.
- * Returns dark palette when attribute is unset or document is unavailable
- * (SSR / tests).
+ * Resolve an explicit application theme to the matching xterm palette.
+ * Unknown or missing values use the dark palette as a safe fallback.
  */
 export function pickTerminalTheme(name?: TerminalThemeName | string | null): ITheme {
   const resolved: TerminalThemeName = name === 'light' ? 'light' : 'dark';
