@@ -188,8 +188,40 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined;
+          // React 生态稳定在一起，避免 react-router 单独被切
+          if (
+            id.includes('/react/') ||
+            id.includes('/react-dom/') ||
+            id.includes('/react-router') ||
+            id.includes('/scheduler/')
+          ) {
+            return 'react-vendor';
+          }
+          // UI 重客户端：终端、代码高亮
+          if (
+            id.includes('/@xterm/') ||
+            id.includes('/highlight.js/') ||
+            id.includes('/infima/')
+          ) {
+            return 'ui-vendor';
+          }
+          // MDX / Markdown 解析栈，docs 页才用得到，单独切
+          if (
+            id.includes('/mdx-js/') ||
+            id.includes('/react-markdown/') ||
+            id.includes('/remark-') ||
+            id.includes('/rehype-') ||
+            id.includes('/micromark/') ||
+            id.includes('/unist-') ||
+            id.includes('/hast-') ||
+            id.includes('/mdast-')
+          ) {
+            return 'markdown-vendor';
+          }
+          // 其余 npm 第三方归 vendor
+          return 'vendor';
         },
       },
     },
