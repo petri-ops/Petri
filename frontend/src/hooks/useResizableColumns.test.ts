@@ -34,7 +34,7 @@ describe('useResizableColumns', () => {
     expect(result.current.rightWidth).toBe(340);
     expect(result.current.resultRightWidth).toBe(720);
     expect(result.current.inputHeight).toBe(120);
-    expect(result.current.bottomTerminalHeight).toBe(240);
+    expect(result.current.bottomTerminalHeight).toBe(176);
   });
 
   it('honors overrides on initial render', () => {
@@ -158,7 +158,7 @@ describe('useResizableColumns', () => {
     expect(saved.rightWidth).toBe(340);
     expect(saved.resultRightWidth).toBe(720);
     expect(saved.inputHeight).toBe(120);
-    expect(saved.bottomTerminalHeight).toBe(240);
+    expect(saved.bottomTerminalHeight).toBe(176);
   });
 
   it('resizes and persists the result panel independently from the standard right panel', async () => {
@@ -192,6 +192,18 @@ describe('useResizableColumns', () => {
     expect(result.current.rightWidth).toBe(200);
     expect(result.current.inputHeight).toBe(90);
     expect(result.current.bottomTerminalHeight).toBe(300);
+  });
+
+  it('migrates the legacy default terminal height without overriding custom sizes', () => {
+    localStorage.setItem(LS_KEY, JSON.stringify({ bottomTerminalHeight: 240 }));
+    const legacyDefault = renderHook(() => useResizableColumns());
+    expect(legacyDefault.result.current.bottomTerminalHeight).toBe(176);
+    legacyDefault.unmount();
+
+    localStorage.setItem(LS_KEY, JSON.stringify({ bottomTerminalHeight: 320 }));
+    const customSize = renderHook(() => useResizableColumns());
+    expect(customSize.result.current.bottomTerminalHeight).toBe(320);
+    customSize.unmount();
   });
 
   it('keeps narrow persisted widths usable and rejects values below the safety floor', () => {

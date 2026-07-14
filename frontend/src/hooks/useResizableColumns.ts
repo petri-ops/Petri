@@ -26,6 +26,9 @@ export interface ResizableColumnsState {
 }
 
 const LS_KEY = 'biof3-pw-cols';
+const LEGACY_DEFAULT_BOTTOM_TERMINAL_HEIGHT = 240;
+const DEFAULT_BOTTOM_TERMINAL_HEIGHT = 176;
+const MIN_BOTTOM_TERMINAL_HEIGHT = 120;
 
 interface StoredDims {
   leftWidth?: number;
@@ -40,7 +43,7 @@ const DEFAULTS = {
   rightWidth: 340,
   resultRightWidth: 720,
   inputHeight: 120,
-  bottomTerminalHeight: 240,
+  bottomTerminalHeight: DEFAULT_BOTTOM_TERMINAL_HEIGHT,
 };
 
 function loadDims(initial: Partial<{
@@ -50,6 +53,10 @@ function loadDims(initial: Partial<{
     const raw = localStorage.getItem(LS_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<StoredDims>;
+      const storedBottomTerminalHeight =
+        parsed.bottomTerminalHeight === LEGACY_DEFAULT_BOTTOM_TERMINAL_HEIGHT
+          ? DEFAULT_BOTTOM_TERMINAL_HEIGHT
+          : parsed.bottomTerminalHeight;
       return {
         leftWidth: normalizeWidth(initial.leftWidth ?? parsed.leftWidth, DEFAULTS.leftWidth, MIN_LEFT_WIDTH),
         rightWidth: normalizeWidth(initial.rightWidth ?? parsed.rightWidth, DEFAULTS.rightWidth, MIN_RIGHT_WIDTH),
@@ -60,9 +67,9 @@ function loadDims(initial: Partial<{
         ),
         inputHeight: normalizeWidth(initial.inputHeight ?? parsed.inputHeight, DEFAULTS.inputHeight, MIN_INPUT_HEIGHT),
         bottomTerminalHeight: normalizeWidth(
-          initial.bottomTerminalHeight ?? parsed.bottomTerminalHeight,
+          initial.bottomTerminalHeight ?? storedBottomTerminalHeight,
           DEFAULTS.bottomTerminalHeight,
-          120,
+          MIN_BOTTOM_TERMINAL_HEIGHT,
         ),
       };
     }
@@ -76,7 +83,11 @@ function loadDims(initial: Partial<{
       MIN_RESULT_RIGHT_WIDTH,
     ),
     inputHeight: normalizeWidth(initial.inputHeight, DEFAULTS.inputHeight, MIN_INPUT_HEIGHT),
-    bottomTerminalHeight: normalizeWidth(initial.bottomTerminalHeight, DEFAULTS.bottomTerminalHeight, 120),
+    bottomTerminalHeight: normalizeWidth(
+      initial.bottomTerminalHeight,
+      DEFAULTS.bottomTerminalHeight,
+      MIN_BOTTOM_TERMINAL_HEIGHT,
+    ),
   };
 }
 
