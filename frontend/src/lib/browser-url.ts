@@ -16,3 +16,11 @@ export function isBioF3LocalBrowserUrl(value: string): boolean {
     return false;
   }
 }
+
+export function getBrowserViewportSize(width: number, height: number): { width: number; height: number } | null {
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width < 1 || height < 1) return null;
+  return {
+    width: Math.max(1, Math.floor(width)),
+    height: Math.max(1, Math.floor(height)),
+  };
+}

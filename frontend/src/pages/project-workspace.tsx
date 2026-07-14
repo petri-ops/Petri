@@ -36,7 +36,7 @@ import { isDirectRecoveryAction, useHarnessWorkflowStatus } from '@/hooks/useHar
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import type { HarnessContextSummary } from '@/lib/copilotContext';
 import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
-import { isBioF3LocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
+import { getBrowserViewportSize, isBioF3LocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { useTheme } from '@/themes/ThemeProvider';
 import { getNextSteps, buildChainPrompt, type ResolvedJob } from '@/lib/workflow-chains';
@@ -3519,11 +3519,25 @@ export function BrowserPanel({
   const [loading, setLoading] = useState(true);
   const [browserError, setBrowserError] = useState('');
 
+  const syncWebviewViewport = useCallback(() => {
+    const host = hostRef.current;
+    const webview = webviewRef.current;
+    if (!host || !webview) return;
+    const bounds = host.getBoundingClientRect();
+    const viewport = getBrowserViewportSize(bounds.width, bounds.height);
+    if (!viewport) return;
+    webview.style.setProperty('width', `${viewport.width}px`, 'important');
+    webview.style.setProperty('height', `${viewport.height}px`, 'important');
+  }, []);
+
   useEffect(() => {
     if (!webviewRef.current) return;
     webviewRef.current.style.visibility = obscured ? 'hidden' : 'visible';
     webviewRef.current.style.pointerEvents = obscured ? 'none' : 'auto';
-  }, [obscured]);
+    if (!obscured) {
+      requestAnimationFrame(() => requestAnimationFrame(syncWebviewViewport));
+    }
+  }, [obscured, syncWebviewViewport]);
 
   const navigate = useCallback(
     (value: string) => {
@@ -3562,10 +3576,8 @@ export function BrowserPanel({
     host.innerHTML = '';
 
     const webview = document.createElement('webview') as any;
-    webview.style.width = '100%';
-    webview.style.height = '100%';
     webview.style.border = '0';
-    webview.style.display = 'block';
+    webview.style.display = 'flex';
     webview.setAttribute('partition', 'persist:biof3-browser');
     webview.setAttribute('allowpopups', 'true');
     webview.src = startUrlRef.current;
@@ -3597,6 +3609,7 @@ export function BrowserPanel({
     };
     const onStop = () => {
       setLoading(false);
+      syncWebviewViewport();
       syncState();
     };
     const onTitle = (event: any) => {
@@ -3625,6 +3638,10 @@ export function BrowserPanel({
 
     host.appendChild(webview);
     webviewRef.current = webview;
+    const resizeObserver = new ResizeObserver(syncWebviewViewport);
+    resizeObserver.observe(host);
+    const initialResizeFrame = requestAnimationFrame(syncWebviewViewport);
+    window.addEventListener('resize', syncWebviewViewport);
     setTitle('浏览器');
     setLoading(true);
 
@@ -3638,11 +3655,14 @@ export function BrowserPanel({
         webview.removeEventListener('did-fail-load', onFail);
         webview.removeEventListener('new-window', onNewWindow);
       } catch {}
+      cancelAnimationFrame(initialResizeFrame);
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', syncWebviewViewport);
       host.innerHTML = '';
       webviewRef.current = null;
       onNavigationStateChange?.({ canGoBack: false, canGoForward: false });
     };
-  }, [frameUrl, navigate, onNavigationStateChange, onUrlChange, startUrlRef]);
+  }, [frameUrl, navigate, onNavigationStateChange, onUrlChange, startUrlRef, syncWebviewViewport]);
 
   const goBack = useCallback(() => {
     try {

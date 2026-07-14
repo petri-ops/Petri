@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isBioF3LocalBrowserUrl, normalizeBrowserUrl } from './browser-url';
+import { getBrowserViewportSize, isBioF3LocalBrowserUrl, normalizeBrowserUrl } from './browser-url';
 
 describe('browser URL routing', () => {
   it('normalizes local and external addresses', () => {
@@ -13,5 +13,11 @@ describe('browser URL routing', () => {
     expect(isBioF3LocalBrowserUrl('http://localhost:3001/api/health')).toBe(true);
     expect(isBioF3LocalBrowserUrl('https://localhost:3001/api/health')).toBe(false);
     expect(isBioF3LocalBrowserUrl('https://example.com/api/tools/file/tj_1/final-report.html')).toBe(false);
+  });
+
+  it('turns the live browser host bounds into an explicit pixel viewport', () => {
+    expect(getBrowserViewportSize(1180.9, 588.7)).toEqual({ width: 1180, height: 588 });
+    expect(getBrowserViewportSize(0, 588)).toBeNull();
+    expect(getBrowserViewportSize(Number.NaN, 588)).toBeNull();
   });
 });
