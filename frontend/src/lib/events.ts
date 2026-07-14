@@ -18,6 +18,21 @@ export const biof3Events = {
   projectOpenResult: 'biof3:project-open-result',
 
   /**
+   * Fired by SimpleChat when the user clicks an internal artifact link in
+   * the copilot reply. project-workspace subscribes and either focuses the
+   * current job + selects the named artifact, or — when the artifact belongs
+   * to a different project — navigates there first.
+   */
+  projectOpenArtifact: 'biof3:project-open-artifact',
+
+  /**
+   * Fired by SimpleChat when the user clicks an internal workspace-file link
+   * in the copilot reply. project-workspace validates the target project,
+   * opens the file in the right Files panel and adds/focuses the tab.
+   */
+  projectOpenWorkspaceFile: 'biof3:project-open-workspace-file',
+
+  /**
    * Fired by project-workspace (handleAskAgent); listened by SimpleChat to inject
    * a prompt into the chat input without navigating.
    */
@@ -43,10 +58,34 @@ export interface ProjectOpenResultDetail {
   projectId?: string | null;
 }
 
+/**
+ * Payload for `projectOpenArtifact`. `projectId` is optional — when present
+ * it indicates the artifact belongs to a different project than the current
+ * one and the host should navigate there before focusing the artifact.
+ */
+export interface ProjectOpenArtifactDetail {
+  jobId: string;
+  artifactName: string;
+  projectId?: string | null;
+}
+
+/**
+ * Payload for `projectOpenWorkspaceFile`. `projectId` is required and must
+ * be validated by the host before opening — the resolver never trusts
+ * user-supplied cross-project paths.
+ */
+export interface ProjectOpenWorkspaceFileDetail {
+  projectId: string;
+  relativePath: string;
+  name?: string;
+}
+
 export type BioF3EventMap = {
   [biof3Events.onboardingDone]: undefined;
   [biof3Events.softRefresh]: undefined;
   [biof3Events.projectOpenResult]: ProjectOpenResultDetail;
+  [biof3Events.projectOpenArtifact]: ProjectOpenArtifactDetail;
+  [biof3Events.projectOpenWorkspaceFile]: ProjectOpenWorkspaceFileDetail;
   [biof3Events.copilotAsk]: CopilotAskDetail;
   [biof3Events.browserBack]: undefined;
   [biof3Events.browserForward]: undefined;
