@@ -15,8 +15,40 @@ const db = req(R_SERVER + '/db.js');
 const { tool_run_tool } = req(R_SERVER + '/agent-tools/plan-ui-tools.js');
 // 直接 require learning.js 拿 tool_run_tool（它在那里定义并导出）
 const learning = req(R_SERVER + '/agent-tools/learning.js');
+const { dispatchTool, inferExecutionPolicy } = req(R_SERVER + '/agent-tools/index.js');
 
 const CTX = { userId: 'local-user' };
+
+test('只读检查请求禁止 run，但允许 list', async () => {
+  const policy = inferExecutionPolicy([
+    {
+      role: 'user',
+      content: '请检查当前项目中的文件，先不要执行任何分析，只告诉我关键列和下一步。',
+    },
+  ]);
+  assert.equal(policy.allowExecution, false);
+
+  const listed = await dispatchTool('run_tool', { op: 'list' }, { ...CTX, ...policy });
+  assert.equal(listed.ok, true);
+
+  const blocked = await dispatchTool(
+    'run_tool',
+    { op: 'run', toolId: 'deseq2', params: { padj_cutoff: 0.05 } },
+    { ...CTX, allowExecution: policy.allowExecution, executionPolicyReason: policy.reason },
+  );
+  assert.equal(blocked.ok, false);
+  assert.equal(blocked.error, 'execution_not_allowed');
+});
+
+test('明确确认续跑不被只读关键词误拦截', () => {
+  const policy = inferExecutionPolicy([
+    {
+      role: 'user',
+      content: '用户已确认开始（ackToken=ack_9959ea82-9dc）。请重调 run_tool 续跑该重操作。',
+    },
+  ]);
+  assert.equal(policy.allowExecution, true);
+});
 
 test('deseq2 首次 run 返回 needApproval + ackToken', async () => {
   // 用 deseq2（在 HEAVY_TOOLS 白名单）
