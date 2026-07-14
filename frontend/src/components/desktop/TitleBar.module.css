@@ -46,13 +46,10 @@
 }
 
 .trafficZone {
+  /* Native window controls stay fixed when the sidebar collapses. */
   width: 76px;
   height: 100%;
   flex-shrink: 0;
-}
-
-.leftZoneCollapsed .trafficZone {
-  width: 62px;
 }
 
 .iconBtn,

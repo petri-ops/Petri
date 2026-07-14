@@ -44,7 +44,7 @@ export function TitleBar(): React.ReactElement {
 
   return (
     <header className={styles.titleBar} style={titleBarStyle}>
-      <div className={`${styles.leftZone} ${!panels.leftOpen ? styles.leftZoneCollapsed : ''}`}>
+      <div className={styles.leftZone}>
         <div className={styles.trafficZone} aria-hidden="true" />
 
         <div className={styles.leftTools}>
