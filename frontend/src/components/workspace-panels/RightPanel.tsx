@@ -146,6 +146,10 @@ export function RightPanel({
                     activeArtifact={ctx.activeArtifact}
                     onActiveArtifactChange={ctx.setActiveArtifact}
                     onAskAgent={ctx.handleAskAgent}
+                    onOpenBrowser={(url) => {
+                      ctx.setBrowserUrl(url);
+                      ctx.openRightPanel('browser');
+                    }}
                   />
                 )}
                 {tab === 'files' && (

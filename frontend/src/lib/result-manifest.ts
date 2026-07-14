@@ -39,6 +39,7 @@ export interface ResultArtifactNavSection {
 }
 
 const SECTION_ORDER: ResultArtifactKind[] = ['report', 'plot', 'table', 'text', 'data', 'file'];
+const PREVIEW_ORDER: ResultArtifactKind[] = ['plot', 'table', 'text', 'data', 'file', 'report'];
 
 const SECTION_LABELS: Record<ResultArtifactKind, string> = {
   report: '报告',
@@ -93,7 +94,7 @@ export function classifyArtifact(artifact: ResultArtifactRecord): ResultArtifact
 }
 
 function artifactSortWeight(kind: ResultArtifactKind): number {
-  return SECTION_ORDER.indexOf(kind);
+  return PREVIEW_ORDER.indexOf(kind);
 }
 
 function buildDerivedSections(artifacts: ResultArtifactRecord[]): ResultSectionRecord[] {

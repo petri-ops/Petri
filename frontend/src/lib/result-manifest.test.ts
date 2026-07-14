@@ -39,7 +39,7 @@ describe('result-manifest', () => {
       'summary.txt',
     ]);
     expect(classifyArtifact(manifest!.artifacts[0])).toBe('report');
-    expect(pickPreferredArtifact(manifest!.artifacts, null)?.name).toBe('report.html');
+    expect(pickPreferredArtifact(manifest!.artifacts, null)?.name).toBe('volcano.png');
   });
 
   it('derives sections from artifact kinds when sections are missing', () => {

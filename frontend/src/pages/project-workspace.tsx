@@ -2413,6 +2413,7 @@ function ResultArtifactShell({
   onWorkflowChanged,
   variant,
   showHarnessIndex = false,
+  onOpenBrowser,
 }: {
   project: Project;
   job: ToolJob | null;
@@ -2423,6 +2424,8 @@ function ResultArtifactShell({
   onWorkflowChanged?: () => void;
   variant: 'center' | 'sidebar';
   showHarnessIndex?: boolean;
+  /** Opens a generated delivery report in the right-side Electron webview. */
+  onOpenBrowser?: (url: string) => void;
 }): React.ReactElement {
   const isSidebar = variant === 'sidebar';
   const [result, setResult] = useState<JobResult | null>(null);
@@ -2451,6 +2454,10 @@ function ResultArtifactShell({
   } | null>(null);
   const [recoveryBusy, setRecoveryBusy] = useState(false);
   const [recoveryError, setRecoveryError] = useState('');
+  const [reportGenerating, setReportGenerating] = useState(false);
+  const [finalReportUrl, setFinalReportUrl] = useState('');
+  const [finalReportGeneratedAt, setFinalReportGeneratedAt] = useState('');
+  const [reportGenerationError, setReportGenerationError] = useState('');
 
   const tool = useMemo(
     () => (job ? staticTools.find((t) => t.id === job.tool_id) || null : null),
@@ -2627,16 +2634,24 @@ function ResultArtifactShell({
     () => manifestArtifacts.filter((artifact) => !unavailableArtifactNames.has(artifact.name)),
     [manifestArtifacts, unavailableArtifactNames]
   );
-  const navSections = useMemo(
-    () => buildResultArtifactNavigation(manifest, artifacts),
-    [artifacts, manifest]
+  const coreArtifacts = useMemo(
+    () => artifacts.filter((artifact) => classifyArtifact(artifact) !== 'report'),
+    [artifacts]
   );
-  const artifactSummary = useMemo(() => compactArtifactKindSummary(artifacts), [artifacts]);
+  const navSections = useMemo(
+    () => buildResultArtifactNavigation(manifest, coreArtifacts),
+    [coreArtifacts, manifest]
+  );
+  const artifactSummary = useMemo(() => compactArtifactKindSummary(coreArtifacts), [coreArtifacts]);
   const reportArtifact = useMemo(
     () =>
       artifacts.find((artifact) => classifyArtifact(artifact) === 'report') ||
       artifacts.find((artifact) => /\.(html?|xhtml)$/i.test(artifact.name)) ||
       null,
+    [artifacts]
+  );
+  const materializedReportArtifact = useMemo(
+    () => artifacts.find((artifact) => /(^|\/)final-report\.html$/i.test(artifact.name)) || null,
     [artifacts]
   );
   const preferredArtifactName =
@@ -2645,12 +2660,11 @@ function ResultArtifactShell({
     const current = findArtifactByName(artifacts, selectedName);
     if (current) return current;
     return (
-      pickPreferredArtifact(artifacts, preferredArtifactName) ||
-      reportArtifact ||
-      artifacts[0] ||
+      pickPreferredArtifact(coreArtifacts, preferredArtifactName) ||
+      coreArtifacts[0] ||
       null
     );
-  }, [artifacts, preferredArtifactName, reportArtifact, selectedName]);
+  }, [artifacts, coreArtifacts, preferredArtifactName, selectedName]);
   const selectedArtifactName = selectedArtifact?.name || '';
   const selectedArtifactUrl = selectedArtifact
     ? selectedArtifact.url || buildUrl(selectedArtifact.name)
@@ -2674,7 +2688,15 @@ function ResultArtifactShell({
     setUnavailableArtifactNames(new Set());
     setPendingRecovery(null);
     setRecoveryError('');
+    setFinalReportUrl('');
+    setFinalReportGeneratedAt('');
+    setReportGenerationError('');
   }, [job?.id]);
+
+  useEffect(() => {
+    if (!materializedReportArtifact) return;
+    setFinalReportUrl(materializedReportArtifact.url || buildUrl(materializedReportArtifact.name));
+  }, [buildUrl, materializedReportArtifact]);
 
   useEffect(() => {
     if (!activeIsHtml || !selectedArtifactName || !selectedArtifactUrl) return;
@@ -2704,12 +2726,9 @@ function ResultArtifactShell({
         ? navSections.find((section) => section.artifactNames.includes(selectedName))
         : null) ||
       navSections.find((section) => section.id === selectedSectionId) ||
-      (reportArtifact
-        ? navSections.find((section) => section.artifactNames.includes(reportArtifact.name))
-        : null) ||
       navSections[0]
     );
-  }, [navSections, reportArtifact, selectedName, selectedSectionId]);
+  }, [navSections, selectedName, selectedSectionId]);
 
   useEffect(() => {
     if (!selectedArtifactName || navSections.length === 0) return;
@@ -2719,11 +2738,11 @@ function ResultArtifactShell({
   }, [navSections, selectedArtifactName]);
 
   useEffect(() => {
-    if (!job || effectiveJobStatus !== 'done' || artifacts.length === 0) return;
-    const preferred = pickPreferredArtifact(artifacts, preferredArtifactName) || reportArtifact || artifacts[0];
+    if (!job || effectiveJobStatus !== 'done' || coreArtifacts.length === 0) return;
+    const preferred = pickPreferredArtifact(coreArtifacts, preferredArtifactName) || coreArtifacts[0];
     const preferredName = preferred ? preferred.name : '';
     setSelectedName((current) => {
-      if (current && artifacts.some((artifact) => artifact.name === current)) return current;
+      if (current && coreArtifacts.some((artifact) => artifact.name === current)) return current;
       return preferredName;
     });
     setSelectedSectionId((current) => {
@@ -2733,7 +2752,7 @@ function ResultArtifactShell({
         navSections[0];
       return nextSection?.id || '';
     });
-  }, [artifacts, effectiveJobStatus, job, navSections, preferredArtifactName, reportArtifact]);
+  }, [coreArtifacts, effectiveJobStatus, job, navSections, preferredArtifactName]);
 
   useEffect(() => {
     if (!job || effectiveJobStatus !== 'done' || !selectedArtifact) {
@@ -2811,13 +2830,7 @@ function ResultArtifactShell({
       return <div className={styles.resultPreviewPlaceholder}>未发现可预览的结果文件</div>;
     }
     if (selectedArtifactKind === 'report' && selectedArtifactUrl) {
-      return (
-        <iframe
-          src={selectedArtifactUrl}
-          title={selectedArtifactLabel || 'report'}
-          className={isSidebar ? styles.resultSidebarIframe : styles.resultReportIframe}
-        />
-      );
+      return <div className={styles.resultPreviewPlaceholder}>报告属于后置交付物，请从上方报告卡生成最终 HTML。</div>;
     }
     if (activeIsImage && selectedArtifactUrl) {
       return (
@@ -2932,6 +2945,31 @@ function ResultArtifactShell({
     }
   };
 
+  const generateFinalReport = async () => {
+    if (!job) return;
+    setReportGenerating(true);
+    setReportGenerationError('');
+    try {
+      const token = getToken();
+      const response = await fetch(`${getApiPrefix(lang)}/tools/report/${encodeURIComponent(job.id)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? {Authorization: `Bearer ${token}`} : {}),
+        },
+        body: JSON.stringify({}),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok || !data.fileName) throw new Error(data.message || data.error || '报告生成失败');
+      setFinalReportUrl(buildUrl(data.fileName));
+      setFinalReportGeneratedAt(data.generatedAt || new Date().toISOString());
+    } catch (error) {
+      setReportGenerationError(error instanceof Error ? error.message : '报告生成失败');
+    } finally {
+      setReportGenerating(false);
+    }
+  };
+
   const workflowBar = workflow ? (
     <div className={styles.resultWorkflowBar} data-state={workflow.resumeFrom || 'completed'}>
       <div className={styles.resultWorkflowBarMain}>
@@ -3028,6 +3066,27 @@ function ResultArtifactShell({
     <>
       {workflowBar}
       {recoveryConfirmation}
+      <section className={styles.resultDeliveryCard}>
+        <div className={styles.resultDeliveryCopy}>
+          <strong>最终 HTML 报告</strong>
+          <span>
+            {finalReportUrl
+              ? `已基于当前结果生成${finalReportGeneratedAt ? ` · ${new Date(finalReportGeneratedAt).toLocaleString()}` : ''}`
+              : '分析结果确认后按需生成，不占用核心结果预览。'}
+          </span>
+          {reportGenerationError && <em>{reportGenerationError}</em>}
+        </div>
+        <div className={styles.resultDeliveryActions}>
+          <button type="button" disabled={reportGenerating || !reportArtifact} onClick={() => void generateFinalReport()}>
+            {reportGenerating ? '生成中…' : finalReportUrl ? '重新生成' : '生成报告'}
+          </button>
+          {finalReportUrl && onOpenBrowser && (
+            <button type="button" onClick={() => onOpenBrowser(finalReportUrl)}>内置浏览器查看</button>
+          )}
+          {finalReportUrl && <a href={finalReportUrl} target="_blank" rel="noopener noreferrer">系统浏览器查看</a>}
+          {finalReportUrl && <a href={finalReportUrl} download="final-report.html">下载 HTML</a>}
+        </div>
+      </section>
       <section className={isSidebar ? styles.resultSidebarReportCard : styles.resultReportSection}>
         {showReportRail ? (
           <div
@@ -3218,6 +3277,7 @@ export function ResultSidebarPanel({
   onActiveArtifactChange,
   onAskAgent,
   onWorkflowChanged,
+  onOpenBrowser,
 }: {
   project: Project;
   job: ToolJob | null;
@@ -3226,6 +3286,7 @@ export function ResultSidebarPanel({
   onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
   onAskAgent: (prompt: string) => void;
   onWorkflowChanged: () => void;
+  onOpenBrowser?: (url: string) => void;
 }): React.ReactElement {
   return (
     <ResultArtifactShell
@@ -3236,6 +3297,7 @@ export function ResultSidebarPanel({
       onActiveArtifactChange={onActiveArtifactChange}
       onAskAgent={onAskAgent}
       onWorkflowChanged={onWorkflowChanged}
+      onOpenBrowser={onOpenBrowser}
       variant="sidebar"
       showHarnessIndex
     />
