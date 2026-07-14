@@ -87,6 +87,14 @@ export function RightPanel({
   workspaceMode,
   onResize,
 }: RightPanelProps): React.ReactElement | null {
+  const handleBrowserNavigationStateChange = React.useCallback(
+    ({ canGoBack, canGoForward }: { canGoBack: boolean; canGoForward: boolean }) => {
+      ctx.setBrowserCanGoBack(canGoBack);
+      ctx.setBrowserCanGoForward(canGoForward);
+    },
+    [ctx.setBrowserCanGoBack, ctx.setBrowserCanGoForward],
+  );
+
   if (!visible) {
     if (workspaceMode !== 'chat' && workspaceMode !== 'scheduled') {
       return (
@@ -162,10 +170,7 @@ export function RightPanel({
                   <BrowserPanel
                     initialUrl={ctx.browserUrl}
                     onUrlChange={ctx.setBrowserUrl}
-                    onNavigationStateChange={({ canGoBack, canGoForward }) => {
-                      ctx.setBrowserCanGoBack(canGoBack);
-                      ctx.setBrowserCanGoForward(canGoForward);
-                    }}
+                    onNavigationStateChange={handleBrowserNavigationStateChange}
                     obscured={ctx.rightTab !== 'browser'}
                   />
                 )}

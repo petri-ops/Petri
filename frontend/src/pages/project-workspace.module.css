@@ -2611,7 +2611,8 @@
   flex: 1 1 auto;
 }
 
-.browserPanelObscured .browserHost {
+.browserPanelObscured .browserHost,
+.browserPanelObscured .browserFrame {
   visibility: hidden;
   pointer-events: none;
 }
@@ -2850,6 +2851,15 @@
   background: var(--biof3-bg-surface, #fff);
   position: relative;
   overflow: hidden;
+}
+
+.browserFrame {
+  display: block;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  border: 0;
+  background: var(--biof3-bg-surface);
 }
 
 .browserHost :global(webview) {

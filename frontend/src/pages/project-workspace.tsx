@@ -36,6 +36,7 @@ import { isDirectRecoveryAction, useHarnessWorkflowStatus } from '@/hooks/useHar
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import type { HarnessContextSummary } from '@/lib/copilotContext';
 import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
+import { isBioF3LocalReportUrl, normalizeBrowserUrl } from '@/lib/browser-url';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { getNextSteps, buildChainPrompt, type ResolvedJob } from '@/lib/workflow-chains';
 import {
@@ -3369,16 +3370,6 @@ function ChainRecommendations({
   );
 }
 
-function normalizeBrowserUrl(value: string): string {
-  const trimmed = value.trim();
-  if (!trimmed) return 'https://biof3.com/';
-  if (/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(trimmed)) return trimmed;
-  if (trimmed.startsWith('localhost') || trimmed.startsWith('127.0.0.1')) {
-    return `http://${trimmed}`;
-  }
-  return `https://${trimmed}`;
-}
-
 // EmbeddedTerminalPanel moved to @/components/workspace-panels/BottomTerminal (PR-3.1)
 
 export function TerminalPanel({
@@ -3504,6 +3495,10 @@ export function BrowserPanel({
   const hostRef = useRef<HTMLDivElement | null>(null);
   const webviewRef = useRef<any>(null);
   const [inputUrl, setInputUrl] = useState(() => normalizeBrowserUrl(initialUrl));
+  const [frameUrl, setFrameUrl] = useState(() =>
+    isBioF3LocalReportUrl(startUrlRef.current) ? startUrlRef.current : ''
+  );
+  const [frameKey, setFrameKey] = useState(0);
   const [title, setTitle] = useState('浏览器');
   const [loading, setLoading] = useState(true);
   const [browserError, setBrowserError] = useState('');
@@ -3517,8 +3512,17 @@ export function BrowserPanel({
   const navigate = useCallback(
     (value: string) => {
       const nextUrl = normalizeBrowserUrl(value);
+      startUrlRef.current = nextUrl;
       setInputUrl(nextUrl);
       onUrlChange(nextUrl);
+      if (isBioF3LocalReportUrl(nextUrl)) {
+        setFrameUrl(nextUrl);
+        setBrowserError('');
+        setLoading(true);
+        onNavigationStateChange?.({ canGoBack: false, canGoForward: false });
+        return;
+      }
+      setFrameUrl('');
       if (webviewRef.current) {
         try {
           webviewRef.current.loadURL(nextUrl);
@@ -3527,10 +3531,16 @@ export function BrowserPanel({
         }
       }
     },
-    [onUrlChange]
+    [onNavigationStateChange, onUrlChange]
   );
 
   useEffect(() => {
+    const nextUrl = normalizeBrowserUrl(initialUrl);
+    if (nextUrl !== startUrlRef.current) navigate(nextUrl);
+  }, [initialUrl, navigate]);
+
+  useEffect(() => {
+    if (frameUrl) return;
     const host = hostRef.current;
     if (!host) return;
     host.innerHTML = '';
@@ -3548,6 +3558,7 @@ export function BrowserPanel({
       try {
         const current = typeof webview.getURL === 'function' ? webview.getURL() : webview.src;
         if (current) {
+          startUrlRef.current = current;
           setInputUrl(current);
           onUrlChange(current);
         }
@@ -3615,7 +3626,7 @@ export function BrowserPanel({
       webviewRef.current = null;
       onNavigationStateChange?.({ canGoBack: false, canGoForward: false });
     };
-  }, [navigate, onNavigationStateChange, onUrlChange, startUrlRef]);
+  }, [frameUrl, navigate, onNavigationStateChange, onUrlChange, startUrlRef]);
 
   const goBack = useCallback(() => {
     try {
@@ -3630,10 +3641,15 @@ export function BrowserPanel({
   }, []);
 
   const reload = useCallback(() => {
+    if (frameUrl) {
+      setLoading(true);
+      setFrameKey((value) => value + 1);
+      return;
+    }
     try {
       webviewRef.current?.reload?.();
     } catch {}
-  }, []);
+  }, [frameUrl]);
 
   useEffect(() => {
     const offBack = subscribeBioF3Event(biof3Events.browserBack, () => goBack());
@@ -3682,7 +3698,20 @@ export function BrowserPanel({
         <span>{title}</span>
         {loading && <span>加载中…</span>}
       </div>
-      <div className={styles.browserHost} ref={hostRef} />
+      {frameUrl ? (
+        <iframe
+          key={frameKey}
+          className={styles.browserFrame}
+          src={frameUrl}
+          title="BioF3 HTML 报告"
+          onLoad={() => {
+            setLoading(false);
+            setBrowserError('');
+          }}
+        />
+      ) : (
+        <div className={styles.browserHost} ref={hostRef} />
+      )}
       {browserError && (
         <div className={styles.browserError}>
           <Icon name="globe" size={22} />
