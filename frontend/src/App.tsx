@@ -78,7 +78,11 @@ export default function App(): React.ReactElement {
               <Route path="/admin" element={<AdminPage />} />
               {/* 教程路由已移除 — 桌面端不再内置教程入口。
                   原生渲染组件（pages/docs.tsx / docs-frame.tsx / mdx/）保留在代码库中，
-                  如需恢复：import DocsPage 并加回下面两行路由即可。 */}
+                  如需恢复：import DocsPage 并加回下面两行路由即可。
+
+                  Source of truth：本桌面版的发行版本、支持的 platform、golden path 工具等
+                  一律以仓库根 release-contract.json 为准；测试 test/release-contract.test.mjs
+                  会强制 _data.ts 中存在对应的 tool id。 */}
               {/* <Route path="/docs/*" element={<DocsPage />} /> */}
               {/* <Route path="/docs" element={<DocsPage />} /> */}
               <Route path="*" element={<Navigate to="/" replace />} />

@@ -500,6 +500,10 @@ function ToolsInner() {
     if (selectedTool.id === 'deseq2') {
       try {
         const base = getApiPrefix() + '/tools/demo-data/deseq2';
+        // Week 3: demo CSVs ship under resources/demo-data/deseq2/
+        // (counts.csv + metadata.csv, WT/KO conditions). tools.tsx historically
+        // used the legacy demo-counts.csv / demo-coldata.csv names — both are
+        // resolved by the r-server demo-data route.
         const [cr, cd] = await Promise.all([
           fetch(base + '/demo-counts.csv'),
           fetch(base + '/demo-coldata.csv'),
@@ -511,8 +515,11 @@ function ToolsInner() {
         setParams((p) => ({
           ...p,
           design: 'condition',
-          contrast_ref: 'Control',
-          contrast_treat: 'Treatment',
+          // Week 3: built-in demo data uses WT/KO contrasts (see
+          // resources/demo-data/deseq2/metadata.csv). Defaulting to Control/Treatment
+          // would silently produce an empty results table on first run.
+          contrast_ref: 'WT',
+          contrast_treat: 'KO',
         }));
         const sep = ',';
         const mp = (t: string) =>

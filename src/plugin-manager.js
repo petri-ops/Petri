@@ -109,6 +109,18 @@ const MANIFEST_URL =
   process.env.BIOF3_PLUGIN_MANIFEST_URL ||
   'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/manifest.json';
 
+// Week 2 per-platform manifest schema helpers (pure, no electron dep — see src/plugin-schema.js).
+const {
+  PLATFORM_IDS,
+  ALLOWED_RUNTIME_HOSTS,
+  selectArtifact,
+  assertAllowedUrl,
+  validateManifest,
+} = require('./plugin-schema');
+
+// Re-export helpers via module.exports below so callers can do `require('./plugin-manager')`.
+// (selectArtifact / assertAllowedUrl / validateManifest are used in this file too.)
+
 // ── 已装插件清单 ───────────────────────────────────────────────
 
 function getInstalledPlugins() {
@@ -213,16 +225,30 @@ function removeInstalledPlugin(pluginId) {
 // ── 远程 manifest（含本地内置 fallback）─────────────────────────
 
 // 读取本地内置 manifest（打包在 resources/built-in-plugins/manifest.json）
+// Week 2：parse 后立刻 validateManifest。失败直接抛错（不能静默接受错位 manifest）。
 function getBuiltInManifest() {
   try {
     const p = path.join(BUILT_IN_PLUGINS_DIR, 'manifest.json');
     if (fs.existsSync(p)) {
-      return JSON.parse(fs.readFileSync(p, 'utf8'));
+      const parsed = JSON.parse(fs.readFileSync(p, 'utf8'));
+      const v = validateManifest(parsed);
+      if (!v.valid) {
+        const msg = `built-in manifest schema validation failed: ${v.issues.join('; ')}`;
+        console.error('[plugin]', msg);
+        throw new Error(msg);
+      }
+      return parsed;
     }
   } catch (e) {
+    if (e instanceof SyntaxError) {
+      const msg = `built-in manifest is not valid JSON: ${e.message}`;
+      console.error('[plugin]', msg);
+      throw new Error(msg);
+    }
+    if (e.message && e.message.startsWith('built-in manifest')) throw e;
     console.warn('[plugin] built-in manifest read failed:', e.message);
   }
-  return { plugins: {} };
+  return { plugins: {}, version: '0.0.0' };
 }
 
 // 合并远程 + 内置 manifest（内置插件标记 _builtIn: true）
@@ -260,6 +286,14 @@ async function getRemoteManifest() {
   });
   // 合并：远程优先（同 id 时远程覆盖内置，便于未来推送更新）
   const merged = { plugins: { ...builtInPlugins, ...(remote.plugins || {}) } };
+  // Week 2：合并后再次校验远程部分（built-in 已在 getBuiltInManifest 校验过）。
+  // 远程失败时 console.warn 但不抛错 — 离线场景仍可用 built-in manifest。
+  if (remote.plugins && Object.keys(remote.plugins).length > 0) {
+    const v = validateManifest(remote);
+    if (!v.valid) {
+      console.warn(`[plugin] remote manifest validation failed: ${v.issues.join('; ')}`);
+    }
+  }
   return merged;
 }
 
@@ -316,6 +350,7 @@ function downloadFile(url, destPath, onProgress) {
 
 // ── SHA256 校验 ────────────────────────────────────────────────
 
+// 旧接口（保留）：返回 boolean
 function verifyChecksum(filePath, expectedSha256) {
   // 兼容 "sha256:<hex>" 和纯 "<hex>" 两种格式
   const expected = String(expectedSha256)
@@ -334,6 +369,42 @@ function verifyChecksum(filePath, expectedSha256) {
   });
 }
 
+// Week 2 流式 SHA-256：500MB Runtime 不进内存，按 1MB chunk 增量哈希。
+// 返回 lowercase hex 字符串。
+function streamingSha256(filePath, onProgress) {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha256');
+    const stream = fs.createReadStream(filePath, { highWaterMark: 1024 * 1024 });
+    let totalBytes = 0;
+    stream.on('data', (chunk) => {
+      hash.update(chunk);
+      totalBytes += chunk.length;
+      if (onProgress) onProgress(totalBytes);
+    });
+    stream.on('end', () => resolve(hash.digest('hex').toLowerCase()));
+    stream.on('error', reject);
+  });
+}
+
+// Week 2：递归计算目录总大小（best-effort unpacked size 校验用）
+function dirSize(dir) {
+  let total = 0;
+  const walk = (d) => {
+    let entries;
+    try { entries = fs.readdirSync(d, { withFileTypes: true }); }
+    catch { return; }
+    for (const e of entries) {
+      const p = path.join(d, e.name);
+      try {
+        if (e.isDirectory()) walk(p);
+        else if (e.isFile()) total += fs.statSync(p).size;
+      } catch {}
+    }
+  };
+  walk(dir);
+  return total;
+}
+
 // ── 解压 zip ───────────────────────────────────────────────────
 // 纯 Node 实现，避免依赖系统 unzip / PowerShell。
 async function extractZipFile(zipPath, destDir) {
@@ -343,30 +414,54 @@ async function extractZipFile(zipPath, destDir) {
 }
 
 // ── 安装插件 ───────────────────────────────────────────────────
-
-async function installPlugin(pluginId, onProgress) {
+//
+// Week 2 入口：支持两种签名以保持向后兼容
+//   - installPlugin(pluginId, onProgress)            — 旧签名：按 id 查 manifest
+//   - installPlugin({ id, manifest, platform }, onProgress) — 新签名：直接传解析后的 manifest
+//
+// installPlugin 现在把流程整理成「选 platform → 校验 → 下载 → SHA256 → 解压 → size → 业务钩子」五步。
+async function installPlugin(pluginIdOrSpec, onProgress) {
   const platform = detectPlatform();
-  const manifest = await getRemoteManifest();
-  const plugin = manifest.plugins && manifest.plugins[pluginId];
+  let pluginSpec;
+  if (typeof pluginIdOrSpec === 'string') {
+    // 旧调用：按 pluginId 查 manifest.plugins[pluginId]
+    const manifest = await getRemoteManifest();
+    const plugin = manifest.plugins && manifest.plugins[pluginIdOrSpec];
+    if (!plugin) throw new Error(`插件 ${pluginIdOrSpec} 不存在`);
+    pluginSpec = { id: pluginIdOrSpec, manifest: plugin, platform };
+  } else if (pluginIdOrSpec && typeof pluginIdOrSpec === 'object') {
+    // 新调用：调用方自己解析 manifest，并指定 platform（便于测试和特殊场景）
+    pluginSpec = {
+      id: pluginIdOrSpec.id,
+      manifest: pluginIdOrSpec.manifest,
+      platform: pluginIdOrSpec.platform || platform,
+    };
+    if (!pluginSpec.id) throw new Error('installPlugin({ id }) missing id');
+    if (!pluginSpec.manifest) throw new Error(`installPlugin(${pluginSpec.id}) missing manifest`);
+  } else {
+    throw new Error('installPlugin expects a pluginId string or { id, manifest } spec');
+  }
 
-  if (!plugin) throw new Error(`插件 ${pluginId} 不存在`);
-  if (!plugin.platform || !plugin.platform.includes(platform)) {
-    throw new Error(`插件不支持当前平台 ${platform}`);
+  const { id: pluginId, manifest: plugin } = pluginSpec;
+
+  // 兼容老逻辑：plugin.platform 数组（如果有）作为额外约束 — 内置 plugin 不一定有 platform 字段
+  if (Array.isArray(plugin.platform) && plugin.platform.length > 0 && !plugin.platform.includes(platform)) {
+    throw new Error(`插件不支持当前平台 ${platform}（声明 ${plugin.platform.join(', ')}）`);
   }
 
   // Runtime 类型走特殊安装路径（下载 → 解压到 runtimes/ → R 修路径 → 更新 env）
-  if (plugin.type === 'runtime') {
-    return installRuntime(pluginId, plugin, onProgress);
+  if (plugin.kind === 'runtime' || plugin.type === 'runtime') {
+    return installRuntime(pluginId, plugin, pluginSpec.platform, onProgress);
   }
 
   // FigCode 卡片/数据包类型：下载 → 解压 → 装包到 runtime library，不走工具注册
   if (plugin.type === 'figcode-card' || plugin.type === 'figcode-data') {
-    return installFigcodePack(pluginId, plugin, onProgress);
+    return installFigcodePack(pluginId, plugin, pluginSpec.platform, onProgress);
   }
 
   // Content 插件类型：下载/解压 → 注册 docsDir → 不装包不走工具注册
   if (plugin.type === 'content-plugin') {
-    return installContentPlugin(pluginId, plugin, onProgress);
+    return installContentPlugin(pluginId, plugin, pluginSpec.platform, onProgress);
   }
 
   const isBuiltIn = !!plugin._builtIn;
@@ -385,31 +480,43 @@ async function installPlugin(pluginId, onProgress) {
     }
     copyDirSync(srcDir, pluginDir);
   } else {
-    // 远程插件：下载 → 校验 → 解压
-    const zipPath = path.join(PLUGINS_DIR, `${pluginId}-${plugin.version}.zip`);
-    console.log(`[plugin] downloading ${pluginId} from ${plugin.url}`);
-    await downloadFile(plugin.url, zipPath, onProgress);
+    // 远程插件：按 platform 取 artifact（Week 2 起替换 plugin.url 直读）
+    const { artifact } = selectArtifact(plugin, pluginSpec.platform);
+    assertAllowedUrl(artifact.url);
 
-    if (plugin.checksum) {
-      const ok = await verifyChecksum(zipPath, plugin.checksum);
-      if (!ok) {
-        try {
-          fs.unlinkSync(zipPath);
-        } catch {}
-        throw new Error('校验失败，文件可能损坏');
+    const zipPath = path.join(PLUGINS_DIR, `${pluginId}-${plugin.version}.zip`);
+    console.log(`[plugin] downloading ${pluginId} from ${artifact.url} (platform=${pluginSpec.platform})`);
+    await downloadFile(artifact.url, zipPath, onProgress);
+
+    // streaming SHA-256 校验 — 500MB Runtime 不进内存
+    if (artifact.sha256) {
+      const actualHash = await streamingSha256(zipPath);
+      const expected = String(artifact.sha256).replace(/^sha256:/i, '').trim().toLowerCase();
+      if (actualHash !== expected) {
+        try { fs.unlinkSync(zipPath); } catch {}
+        const e = new Error(
+          `SHA-256 mismatch for ${pluginId} on ${pluginSpec.platform}: ` +
+            `expected ${expected}, actual ${actualHash}`
+        );
+        e.code = 'CHECKSUM_MISMATCH';
+        e.expected = expected;
+        e.actual = actualHash;
+        throw e;
       }
+    } else {
+      console.warn(
+        `[plugin] ${pluginId}.artifacts.${pluginSpec.platform}.sha256 is null — ` +
+          'skipping checksum verification (Week 4 placeholder)'
+      );
     }
 
     if (fs.existsSync(pluginDir)) {
       fs.rmSync(pluginDir, { recursive: true, force: true });
     }
     await extractZipFile(zipPath, pluginDir);
-    try {
-      fs.unlinkSync(zipPath);
-    } catch {}
+    try { fs.unlinkSync(zipPath); } catch {}
 
     // zip 内顶层目录通常是 <plugin-id>-plugin/，解压后会多套一层。
-    // 检测单一嵌套子目录，把内容上提到 pluginDir 根。
     const entries = fs.readdirSync(pluginDir);
     if (
       entries.length === 1 &&
@@ -423,6 +530,20 @@ async function installPlugin(pluginId, onProgress) {
       }
       fs.rmdirSync(nested);
       console.log(`[plugin] flattened nested dir: ${entries[0]}`);
+    }
+
+    // sizeBytes 校验（解压后 best-effort）
+    if (typeof artifact.sizeBytes === 'number' && artifact.sizeBytes > 0) {
+      const actualSize = dirSize(pluginDir);
+      if (actualSize > 0 && Math.abs(actualSize - artifact.sizeBytes) > artifact.sizeBytes * 0.1) {
+        console.warn(
+          `[plugin] ${pluginId} unpacked size ${actualSize} differs from artifact.sizeBytes ${artifact.sizeBytes} by >10% — not failing (best-effort)`
+        );
+      } else if (actualSize > 0) {
+        console.log(`[plugin] ${pluginId} unpacked size ${actualSize} ≈ artifact.sizeBytes ${artifact.sizeBytes}`);
+      }
+    } else {
+      console.log(`[plugin] ${pluginId}.artifacts.${pluginSpec.platform}.sizeBytes is null — skipping unpacked size check`);
     }
   }
 
@@ -537,8 +658,7 @@ async function installPlugin(pluginId, onProgress) {
 //   3. 注册 docsDir 到 globalThis._biof3ContentPlugins
 //   4. 不装语言包、不走工具注册、不需要重启
 
-async function installContentPlugin(pluginId, plugin, onProgress) {
-  const platform = detectPlatform();
+async function installContentPlugin(pluginId, plugin, platform, onProgress) {
   const pluginDir = path.join(PLUGINS_DIR, pluginId);
   fs.mkdirSync(PLUGINS_DIR, { recursive: true });
 
@@ -552,17 +672,23 @@ async function installContentPlugin(pluginId, plugin, onProgress) {
     if (fs.existsSync(pluginDir)) fs.rmSync(pluginDir, { recursive: true, force: true });
     copyDirSync(srcDir, pluginDir);
   } else {
+    // Week 2：按 platform 选 artifact
+    const { artifact } = selectArtifact(plugin, platform);
+    assertAllowedUrl(artifact.url);
     const zipPath = path.join(PLUGINS_DIR, `${pluginId}-${plugin.version}.zip`);
-    console.log(`[plugin] downloading content-plugin ${pluginId} from ${plugin.url}`);
-    await downloadFile(plugin.url, zipPath, onProgress);
-    if (plugin.checksum) {
-      const ok = await verifyChecksum(zipPath, plugin.checksum);
-      if (!ok) {
-        try {
-          fs.unlinkSync(zipPath);
-        } catch {}
-        throw new Error('校验失败，文件可能损坏');
+    console.log(`[plugin] downloading content-plugin ${pluginId} from ${artifact.url} (platform=${platform})`);
+    await downloadFile(artifact.url, zipPath, onProgress);
+    if (artifact.sha256) {
+      const actualHash = await streamingSha256(zipPath);
+      const expected = String(artifact.sha256).replace(/^sha256:/i, '').trim().toLowerCase();
+      if (actualHash !== expected) {
+        try { fs.unlinkSync(zipPath); } catch {}
+        const e = new Error(`SHA-256 mismatch for content-plugin ${pluginId} on ${platform}: expected ${expected}, actual ${actualHash}`);
+        e.code = 'CHECKSUM_MISMATCH';
+        throw e;
       }
+    } else {
+      console.warn(`[plugin] content-plugin ${pluginId}.artifacts.${platform}.sha256 is null — skipping checksum (Week 4 placeholder)`);
     }
     if (fs.existsSync(pluginDir)) fs.rmSync(pluginDir, { recursive: true, force: true });
     await extractZipFile(zipPath, pluginDir);
@@ -634,7 +760,7 @@ async function installContentPlugin(pluginId, plugin, onProgress) {
 //   4. 记录到 installed.json（type: 'runtime'）
 //   5. 不走 registerPluginInServer（Runtime 不是工具插件）
 
-async function installRuntime(pluginId, plugin, onProgress) {
+async function installRuntime(pluginId, plugin, platform, onProgress) {
   const lang = plugin.language; // 'r' or 'python'
   if (!lang) throw new Error('Runtime 插件缺少 language 字段');
 
@@ -642,21 +768,35 @@ async function installRuntime(pluginId, plugin, onProgress) {
   const runtimeDir = path.join(RUNTIMES_DIR, runtimeName);
   fs.mkdirSync(RUNTIMES_DIR, { recursive: true });
 
+  // Week 2：按 platform 取 artifact（不再直读 plugin.url / plugin.checksum / plugin.size）
+  const { artifact } = selectArtifact(plugin, platform);
+  assertAllowedUrl(artifact.url);
+
   // 下载 zip
   const zipPath = path.join(PLUGINS_DIR, `${pluginId}-${plugin.version}.zip`);
   fs.mkdirSync(PLUGINS_DIR, { recursive: true });
-  console.log(`[plugin] downloading runtime ${pluginId} from ${plugin.url}`);
-  await downloadFile(plugin.url, zipPath, onProgress);
+  console.log(`[plugin] downloading runtime ${pluginId} from ${artifact.url} (platform=${platform})`);
+  await downloadFile(artifact.url, zipPath, onProgress);
 
-  // SHA256 校验
-  if (plugin.checksum) {
-    const ok = await verifyChecksum(zipPath, plugin.checksum);
-    if (!ok) {
-      try {
-        fs.unlinkSync(zipPath);
-      } catch {}
-      throw new Error('校验失败，文件可能损坏');
+  // streaming SHA-256 校验
+  if (artifact.sha256) {
+    const actualHash = await streamingSha256(zipPath);
+    const expected = String(artifact.sha256).replace(/^sha256:/i, '').trim().toLowerCase();
+    if (actualHash !== expected) {
+      try { fs.unlinkSync(zipPath); } catch {}
+      const e = new Error(
+        `SHA-256 mismatch for runtime ${pluginId} on ${platform}: expected ${expected}, actual ${actualHash}`
+      );
+      e.code = 'CHECKSUM_MISMATCH';
+      e.expected = expected;
+      e.actual = actualHash;
+      throw e;
     }
+  } else {
+    console.warn(
+      `[plugin] runtime ${pluginId}.artifacts.${platform}.sha256 is null — ` +
+        'skipping checksum (Week 4 placeholder)'
+    );
   }
 
   // 清旧 Runtime
@@ -666,9 +806,7 @@ async function installRuntime(pluginId, plugin, onProgress) {
 
   // 解压到 runtimes/{R|Python}/
   await extractZipFile(zipPath, runtimeDir);
-  try {
-    fs.unlinkSync(zipPath);
-  } catch {}
+  try { fs.unlinkSync(zipPath); } catch {}
 
   // 检测并展开嵌套顶层目录（zip 内可能套一层 R/ 或 Python/）
   const entries = fs.readdirSync(runtimeDir);
@@ -684,6 +822,18 @@ async function installRuntime(pluginId, plugin, onProgress) {
     }
     fs.rmdirSync(nested);
     console.log(`[plugin] flattened nested runtime dir: ${entries[0]}`);
+  }
+
+  // sizeBytes 校验（解压后 best-effort）
+  if (typeof artifact.sizeBytes === 'number' && artifact.sizeBytes > 0) {
+    const actualSize = dirSize(runtimeDir);
+    if (actualSize > 0 && Math.abs(actualSize - artifact.sizeBytes) > artifact.sizeBytes * 0.1) {
+      console.warn(
+        `[plugin] runtime ${pluginId} unpacked size ${actualSize} differs from artifact.sizeBytes ${artifact.sizeBytes} by >10% — not failing (best-effort)`
+      );
+    } else if (actualSize > 0) {
+      console.log(`[plugin] runtime ${pluginId} unpacked size ${actualSize} ≈ artifact.sizeBytes ${artifact.sizeBytes}`);
+    }
   }
 
   // R 需要修 dylib 路径
@@ -744,28 +894,34 @@ async function installRuntime(pluginId, plugin, onProgress) {
 //   4. 不走 registerPluginInServer（不是工具插件，不注册 tool-definition）
 //   5. 不需要重启 — 包复制到 library 后立即可用
 
-async function installFigcodePack(pluginId, plugin, onProgress) {
+async function installFigcodePack(pluginId, plugin, platform, onProgress) {
   const lang = plugin.language;
   if (!lang) throw new Error('FigCode 插件缺少 language 字段');
 
-  const platform = detectPlatform();
   const pluginDir = path.join(PLUGINS_DIR, pluginId);
   fs.mkdirSync(PLUGINS_DIR, { recursive: true });
 
   // FigCode 扩展包总是从远程下载（包体积大，不内置在 app bundle 中）
   // manifest 中的 _builtIn 标记只让它在插件商店可见，实际包从 OSS 下载
+  // Week 2：按 platform 选 artifact
+  const { artifact } = selectArtifact(plugin, platform);
+  assertAllowedUrl(artifact.url);
   const zipPath = path.join(PLUGINS_DIR, `${pluginId}-${plugin.version}.zip`);
-  console.log(`[plugin] downloading figcode-pack ${pluginId} from ${plugin.url}`);
-  await downloadFile(plugin.url, zipPath, onProgress);
+  console.log(`[plugin] downloading figcode-pack ${pluginId} from ${artifact.url} (platform=${platform})`);
+  await downloadFile(artifact.url, zipPath, onProgress);
 
-  if (plugin.checksum) {
-    const ok = await verifyChecksum(zipPath, plugin.checksum);
-    if (!ok) {
-      try {
-        fs.unlinkSync(zipPath);
-      } catch {}
-      throw new Error('校验失败，文件可能损坏');
+  // streaming SHA-256
+  if (artifact.sha256) {
+    const actualHash = await streamingSha256(zipPath);
+    const expected = String(artifact.sha256).replace(/^sha256:/i, '').trim().toLowerCase();
+    if (actualHash !== expected) {
+      try { fs.unlinkSync(zipPath); } catch {}
+      const e = new Error(`SHA-256 mismatch for figcode-pack ${pluginId} on ${platform}: expected ${expected}, actual ${actualHash}`);
+      e.code = 'CHECKSUM_MISMATCH';
+      throw e;
     }
+  } else {
+    console.warn(`[plugin] figcode-pack ${pluginId}.artifacts.${platform}.sha256 is null — skipping checksum (Week 4 placeholder)`);
   }
 
   if (fs.existsSync(pluginDir)) {
@@ -1264,4 +1420,12 @@ module.exports = {
   listAllContentPlugins,
   listContentPluginDocs,
   readContentPluginDoc,
+  // Week 2 per-platform schema helpers
+  PLATFORM_IDS,
+  ALLOWED_RUNTIME_HOSTS,
+  selectArtifact,
+  assertAllowedUrl,
+  validateManifest,
+  streamingSha256,
+  dirSize,
 };

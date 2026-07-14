@@ -1,41 +1,43 @@
 /**
- * DesktopOnboarding — 桌面版首次启动引导（M2-4 / E2）
+ * DesktopOnboarding — 桌面版首次启动引导（Week1 收口版）
  *
- * 新用户第一次打开桌面版时显示的 3 步向导：
- *   1. 欢迎页：介绍 BioF3 是什么
- *   2. 选模式：学习还是实战（影响首页推荐卡片，可跳过）
- *   3. 运行时检测：未装 R/Python 时引导去插件商店（/admin）
+ * 收口说明：
+ *   原 M2-4 / E2 版本有 3 步：欢迎 → 选模式（学习/实战）→ 运行时检测 → 跳插件商店。
+ *   实际产品表面（App.tsx + admin gate）已不再提供「学习/实战」双模式首选项，
+ *   「去插件商店」分支也只指向 /admin，且 admin 角色由 authClient 固定返回，
+ *   引导里的 mode 字段没有任何真实消费者。Week 1 发行可信化阶段已确认：
+ *   - 删除「学习/实战」二选一步骤
+ *   - 删除「去插件商店」分支（运行时检测保留为信息页）
+ *   - 缩成单一线性流：欢迎 → 运行时检测 → 完成
+ *   - 保留 localStorage 兼容键，但 MODE_FLAG 只读不写（标 deprecated）
  *
- * 可跳过；完成或跳过后写 localStorage 标志 `biof3-onboarding-completed`，
- * 不再弹出。挂载逻辑在 App.tsx 的 DesktopOnboardingMount，本组件不改挂载方式。
+ * 完成事件（biof3:onboarding-done）保持兼容 App.tsx 的挂载逻辑。
  *
- * 约束：仅用 useState/useCallback；运行时状态复用 useBackendStatus()。
+ * 约束：仅 useState/useCallback；运行时状态复用 useBackendStatus()。
  */
 
 import React, { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Icon, type IconName } from '@/components/icons/Icon';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
 import { biof3Events, dispatchBioF3Event } from '@/lib/events';
+import { loadReleaseTagline } from '@/lib/releaseContract';
 import './desktop.css';
 
 const ONBOARDING_FLAG = 'biof3-onboarding-completed';
+// deprecated: Week 1 起不再写入。保留读取兼容旧用户，下个迭代可移除。
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const MODE_FLAG = 'biof3-onboarding-mode';
 
-type Step = 0 | 1 | 2;
-type Mode = 'learn' | 'practice' | null;
+type Step = 0 | 1;
 
 const STEPS: Array<{ title: string; icon: IconName }> = [
   { title: '欢迎', icon: 'sparkles' },
-  { title: '选模式', icon: 'graduation-cap' },
   { title: '准备运行时', icon: 'cpu' },
 ];
 
 export function DesktopOnboarding(): React.ReactElement | null {
   const [step, setStep] = useState<Step>(0);
-  const [mode, setMode] = useState<Mode>(null);
   const backend = useBackendStatus();
-  const navigate = useNavigate();
 
   // 运行时是否就绪：任一已装即视为"有运行时"
   const hasAnyRuntime = backend.rRuntime || backend.pyRuntime;
@@ -44,24 +46,25 @@ export function DesktopOnboarding(): React.ReactElement | null {
   const finish = useCallback(() => {
     try {
       localStorage.setItem(ONBOARDING_FLAG, '1');
-      if (mode) localStorage.setItem(MODE_FLAG, mode);
+      // deprecated: 旧版会写 MODE_FLAG（learn/practice），现在不再写，但保留读路径以便后续清理。
+      // 故意保留读取调用是为了让未来一个 lint 规则或迁移脚本发现这个键还在被消费。
     } catch {}
     dispatchBioF3Event(biof3Events.onboardingDone);
-  }, [mode]);
+  }, []);
 
-  const goToPluginStore = useCallback(() => {
-    try {
-      localStorage.setItem(ONBOARDING_FLAG, '1');
-      if (mode) localStorage.setItem(MODE_FLAG, mode);
-    } catch {}
-    dispatchBioF3Event(biof3Events.onboardingDone);
-    navigate('/admin');
-  }, [mode, navigate]);
-
-  const next = useCallback(() => setStep((s) => (s < 2 ? ((s + 1) as Step) : s)), []);
+  const next = useCallback(() => setStep((s) => (s < 1 ? ((s + 1) as Step) : s)), []);
   const prev = useCallback(() => setStep((s) => (s > 0 ? ((s - 1) as Step) : s)), []);
 
-  const selectMode = useCallback((m: Mode) => setMode(m), []);
+  // deprecated: 读取旧 key 用于后续清理判断；当前 UI 已不使用。
+  // 返回值仅用于 console，不入 state，避免触发额外渲染。
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _legacyMode = (() => {
+    try {
+      return localStorage.getItem(MODE_FLAG);
+    } catch {
+      return null;
+    }
+  })();
 
   return (
     <div className="biof3-onboarding-overlay" role="dialog" aria-label="首次启动引导">
@@ -84,14 +87,12 @@ export function DesktopOnboarding(): React.ReactElement | null {
         {/* 步骤内容 */}
         <div className="biof3-onboarding__body">
           {step === 0 && <StepWelcome />}
-          {step === 1 && <StepMode mode={mode} onSelect={selectMode} />}
-          {step === 2 && (
+          {step === 1 && (
             <StepRuntime
               rOk={backend.rRuntime}
               pyOk={backend.pyRuntime}
               hasAnyRuntime={hasAnyRuntime}
               hasAllRuntime={hasAllRuntime}
-              onGoToStore={goToPluginStore}
             />
           )}
         </div>
@@ -115,7 +116,7 @@ export function DesktopOnboarding(): React.ReactElement | null {
                 上一步
               </button>
             )}
-            {step < 2 ? (
+            {step < 1 ? (
               <button
                 type="button"
                 className="biof3-btn biof3-btn--primary biof3-btn--sm"
@@ -124,7 +125,7 @@ export function DesktopOnboarding(): React.ReactElement | null {
                 下一步
                 <Icon name="arrow-right" size={14} />
               </button>
-            ) : hasAnyRuntime ? (
+            ) : (
               <button
                 type="button"
                 className="biof3-btn biof3-btn--primary biof3-btn--sm"
@@ -132,15 +133,6 @@ export function DesktopOnboarding(): React.ReactElement | null {
               >
                 <Icon name="check" size={14} />
                 开始使用
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="biof3-btn biof3-btn--primary biof3-btn--sm"
-                onClick={goToPluginStore}
-              >
-                <Icon name="puzzle" size={14} />
-                去插件商店装运行时
               </button>
             )}
           </div>
@@ -152,13 +144,11 @@ export function DesktopOnboarding(): React.ReactElement | null {
 
 // ── Step 1: 欢迎 ─────────────────────────────────────────────
 function StepWelcome(): React.ReactElement {
+  const tagline = loadReleaseTagline();
   return (
     <div className="biof3-onboarding__step-content">
       <h2 className="biof3-onboarding__title">欢迎来到 BioF3</h2>
-      <p className="biof3-onboarding__subtitle">
-        BioF3 是一个全组学数据分析工作台：差异分析、富集、单细胞、空间组学、SCI 论文级绘图，
-        全部以插件化按需安装。跟着引导走两步，就能开始你的第一条分析。
-      </p>
+      <p className="biof3-onboarding__subtitle">{tagline}</p>
       <div className="biof3-onboarding__plugin-tips">
         <div className="biof3-onboarding__tip">
           <Icon name="cpu" size={18} />
@@ -168,17 +158,17 @@ function StepWelcome(): React.ReactElement {
           </div>
         </div>
         <div className="biof3-onboarding__tip">
-          <Icon name="graduation-cap" size={18} />
+          <Icon name="sparkles" size={18} />
           <div>
-            <strong>学习 / 实战双模式</strong>
-            <p>新手走学习路径（计划+出题验证），老手直接进结果工作区。</p>
+            <strong>项目工作台</strong>
+            <p>创建项目、上传数据、运行工具、检查产物、生成报告，一站完成。</p>
           </div>
         </div>
         <div className="biof3-onboarding__tip">
           <Icon name="brain" size={18} />
           <div>
             <strong>AI Copilot 陪学</strong>
-            <p>内置 DeepSeek 驱动的 Copilot，解释代码、出学习计划、查文档。</p>
+            <p>内置 DeepSeek 驱动的 Copilot，解释代码、查文档、辅助决策。</p>
           </div>
         </div>
       </div>
@@ -186,74 +176,17 @@ function StepWelcome(): React.ReactElement {
   );
 }
 
-// ── Step 2: 选模式（学习 / 实战） ────────────────────────────
-function StepMode({
-  mode,
-  onSelect,
-}: {
-  mode: Mode;
-  onSelect: (m: Mode) => void;
-}): React.ReactElement {
-  return (
-    <div className="biof3-onboarding__step-content">
-      <h2 className="biof3-onboarding__title">你想怎么用 BioF3？</h2>
-      <p className="biof3-onboarding__subtitle">
-        选一个模式，首页会优先展示对应入口。随时可在设置里切换，不影响功能。
-      </p>
-      <div className="biof3-onboarding__choice-list">
-        <button
-          type="button"
-          className={`biof3-onboarding__choice ${mode === 'learn' ? 'selected' : ''}`}
-          onClick={() => onSelect('learn')}
-        >
-          <span className="biof3-onboarding__choice-icon">
-            <Icon name="graduation-cap" size={22} />
-          </span>
-          <span className="biof3-onboarding__choice-body">
-            <strong>学习模式</strong>
-            <p>从零入门：系统化学习路径、配套练习、AI 出题验证掌握度。</p>
-          </span>
-          <span className="biof3-onboarding__choice-check">
-            {mode === 'learn' && <Icon name="check" size={16} />}
-          </span>
-        </button>
-        <button
-          type="button"
-          className={`biof3-onboarding__choice ${mode === 'practice' ? 'selected' : ''}`}
-          onClick={() => onSelect('practice')}
-        >
-          <span className="biof3-onboarding__choice-icon">
-            <Icon name="bar-chart" size={22} />
-          </span>
-          <span className="biof3-onboarding__choice-body">
-            <strong>实战模式</strong>
-            <p>直接进分析工作区：按项目查看结果、继续追问、按需调用分析能力。</p>
-          </span>
-          <span className="biof3-onboarding__choice-check">
-            {mode === 'practice' && <Icon name="check" size={16} />}
-          </span>
-        </button>
-      </div>
-      <p className="biof3-onboarding__hint">
-        不确定？默认进学习模式，随时可切。也可点"跳过引导"稍后再选。
-      </p>
-    </div>
-  );
-}
-
-// ── Step 3: 运行时检测 ───────────────────────────────────────
+// ── Step 2: 运行时检测（信息页，不再跳插件商店） ─────────────
 function StepRuntime({
   rOk,
   pyOk,
   hasAnyRuntime,
   hasAllRuntime,
-  onGoToStore,
 }: {
   rOk: boolean;
   pyOk: boolean;
   hasAnyRuntime: boolean;
   hasAllRuntime: boolean;
-  onGoToStore: () => void;
 }): React.ReactElement {
   return (
     <div className="biof3-onboarding__step-content">
@@ -284,23 +217,9 @@ function StepRuntime({
         </p>
       )}
       {!hasAnyRuntime && (
-        <div className="biof3-onboarding__store-callout">
-          <div className="biof3-onboarding__store-callout-body">
-            <strong>还没装运行时</strong>
-            <p>
-              没关系——插件商店里有一键安装包（R + Python 约 1GB）。 点下方按钮直接跳到「插件商店 →
-              运行时」。
-            </p>
-          </div>
-          <button
-            type="button"
-            className="biof3-btn biof3-btn--primary biof3-btn--sm"
-            onClick={onGoToStore}
-          >
-            <Icon name="puzzle" size={14} />
-            打开插件商店
-          </button>
-        </div>
+        <p className="biof3-onboarding__hint">
+          还没检测到运行时。完成引导后，可在「项目工作台 → 插件商店」一键补装（约 1GB）。
+        </p>
       )}
     </div>
   );

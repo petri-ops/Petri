@@ -16,6 +16,7 @@
     "prebuild": "bash scripts/sync-vendor.sh check && node --check src/main.js && node --check src/preload.js && node --check src/plugin-manager.js && node --check vendor/biof3-core/r-server/plugin-loader.js",
     "test": "node --test test/*.test.mjs",
     "mcp:server": "node src/mcp-server.js",
+    "golden-path": "node scripts/golden-path.mjs",
     "build:site": "cd .. && npm run build:desktop",
     "build:spa": "cd frontend && npm run build",
     "build:all": "npm run build:spa && npm run build:site",
