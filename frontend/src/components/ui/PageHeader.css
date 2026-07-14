@@ -19,7 +19,7 @@
 }
 
 [data-theme='dark'] .biof3-page-header {
-  border-bottom-color: rgba(148, 163, 184, 0.2);
+  border-bottom-color: var(--biof3-border);
 }
 
 /* ---- 面包屑 ---- */
@@ -44,7 +44,7 @@
 }
 
 a.biof3-page-header__crumb:hover {
-  color: var(--biof3-teal, #0f766e);
+  color: var(--biof3-teal);
   text-decoration: none;
 }
 
@@ -81,14 +81,14 @@ a.biof3-page-header__crumb:hover {
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: #e4f4ee;
-  color: var(--biof3-teal, #0f766e);
+  background: var(--biof3-accent-bg);
+  color: var(--biof3-teal);
   flex-shrink: 0;
 }
 
 [data-theme='dark'] .biof3-page-header__icon {
   background: rgba(67, 209, 174, 0.14);
-  color: #8ff0d6;
+  color: var(--biof3-mint-bright);
 }
 
 .biof3-page-header__titles {

@@ -25,7 +25,7 @@
 .biof3-login-modal {
   position: relative;
   width: min(360px, 100%);
-  background: white;
+  background: var(--biof3-bg-elevated);
   border-radius: 14px;
   padding: 2rem 1.5rem 1.4rem;
   box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.35);
@@ -33,8 +33,8 @@
 }
 
 [data-theme='dark'] .biof3-login-modal {
-  background: #1e293b;
-  color: #f1f5f9;
+  background: var(--biof3-bg-surface);
+  color: var(--biof3-text);
   box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.6);
 }
 
@@ -57,19 +57,19 @@
   border: 0;
   font-size: 1.6rem;
   line-height: 1;
-  color: #94a3b8;
+  color: var(--biof3-text-muted);
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 6px;
 }
 
 .biof3-login-modal__close:hover {
-  background: rgba(148, 163, 184, 0.12);
-  color: #475569;
+  background: var(--biof3-hover);
+  color: var(--biof3-text-secondary);
 }
 
 [data-theme='dark'] .biof3-login-modal__close:hover {
-  color: #f1f5f9;
+  color: var(--biof3-text);
 }
 
 .biof3-login-modal__brand {
@@ -90,32 +90,32 @@
   display: block;
   margin-top: 2px;
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--biof3-text-secondary);
 }
 
 [data-theme='dark'] .biof3-login-modal__tagline {
-  color: #cbd5e1;
+  color: var(--biof3-text-muted);
 }
 
 .biof3-login-modal__cta {
   margin: 0 0 14px;
   padding: 8px 12px;
   border-radius: 8px;
-  background: rgba(16, 185, 129, 0.1);
-  color: #047857;
+  background: var(--biof3-status-success-bg);
+  color: var(--biof3-status-success-fg);
   font-size: 0.85rem;
   text-align: center;
 }
 
 [data-theme='dark'] .biof3-login-modal__cta {
-  background: rgba(16, 185, 129, 0.15);
-  color: #e0f2fe;
+  background: var(--biof3-status-success-bg);
+  color: var(--biof3-status-success-fg);
 }
 
 .biof3-login-modal__tabs {
   display: flex;
   gap: 0;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--biof3-border);
   margin-bottom: 14px;
 }
 
@@ -131,7 +131,7 @@
   font-weight: 600;
   padding: 8px 4px 10px;
   cursor: pointer;
-  color: #94a3b8;
+  color: var(--biof3-text-muted);
   border-bottom: 2px solid transparent;
   transition:
     color 120ms,
@@ -159,11 +159,11 @@
   font-size: 0.78rem;
   font-weight: 500;
   margin-bottom: 4px;
-  color: #475569;
+  color: var(--biof3-text-secondary);
 }
 
 [data-theme='dark'] .biof3-login-modal__field label {
-  color: #cbd5e1;
+  color: var(--biof3-text-muted);
 }
 
 .biof3-login-modal__field input {
@@ -171,9 +171,9 @@
   font-size: 0.9rem;
   padding: 8px 11px;
   border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  background: #fff;
-  color: #0f172a;
+  border: 1px solid var(--biof3-border);
+  background: var(--biof3-input-bg);
+  color: var(--biof3-text);
   transition:
     border-color 120ms,
     box-shadow 120ms;
@@ -188,23 +188,23 @@
 }
 
 [data-theme='dark'] .biof3-login-modal__field input {
-  background: #0f172a;
-  border-color: #334155;
-  color: #f1f5f9;
+  background: var(--biof3-bg-canvas);
+  border-color: var(--biof3-border);
+  color: var(--biof3-text);
 }
 
 .biof3-login-modal__error {
   margin-top: 4px;
   padding: 6px 10px;
   border-radius: 6px;
-  background: rgba(220, 38, 38, 0.1);
-  color: #b91c1c;
+  background: var(--biof3-status-error-bg);
+  color: var(--biof3-status-error-fg);
   font-size: 0.82rem;
 }
 
 [data-theme='dark'] .biof3-login-modal__error {
-  background: rgba(220, 38, 38, 0.18);
-  color: #fecaca;
+  background: var(--biof3-status-error-bg);
+  color: var(--biof3-status-error-fg);
 }
 
 .biof3-login-modal__submit {
@@ -237,7 +237,7 @@
   margin-top: 14px;
   text-align: center;
   font-size: 0.82rem;
-  color: #64748b;
+  color: var(--biof3-text-secondary);
 }
 
 .biof3-login-modal__footer button {
@@ -250,7 +250,7 @@
 }
 
 [data-theme='dark'] .biof3-login-modal__footer {
-  color: #cbd5e1;
+  color: var(--biof3-text-muted);
 }
 
 [data-theme='dark'] .biof3-login-modal__footer button {

@@ -78,10 +78,10 @@
   background: var(--ifm-color-success-lightest);
 }
 [data-theme='dark'] .jobItem:hover {
-  background: rgba(16, 185, 129, 0.1);
+  background: var(--biof3-accent-bg);
 }
 [data-theme='dark'] .jobItemActive {
-  background: rgba(16, 185, 129, 0.2);
+  background: var(--biof3-accent-bg);
 }
 
 .jobDot {
@@ -439,7 +439,7 @@
   flex-wrap: wrap;
 }
 [data-theme='dark'] .resultSummary {
-  background: rgba(16, 185, 129, 0.1);
+  background: var(--biof3-accent-bg);
 }
 .resultStat {
   text-align: center;
@@ -547,12 +547,12 @@
   position: relative;
 }
 .toolIcon:hover {
-  background: rgba(46, 133, 85, 0.05);
+  background: var(--biof3-accent-bg);
   border-color: var(--ifm-color-primary);
   transform: translateY(-1px);
 }
 [data-theme='dark'] .toolIcon:hover {
-  background: rgba(16, 185, 129, 0.08);
+  background: var(--biof3-accent-bg);
   border-color: var(--ifm-color-primary-light);
 }
 .toolIconActive {
@@ -560,7 +560,7 @@
   border-color: var(--ifm-color-primary);
 }
 [data-theme='dark'] .toolIconActive {
-  background: rgba(16, 185, 129, 0.2);
+  background: var(--biof3-accent-bg);
   border-color: var(--ifm-color-primary-light);
 }
 
@@ -587,7 +587,7 @@
   display: block;
 }
 [data-theme='dark'] .toolIconCover {
-  border-color: rgba(255, 255, 255, 0.08);
+  border-color: var(--biof3-border);
 }
 .toolIconLabel {
   font-size: var(--biof3-font-size-xs);
@@ -920,7 +920,7 @@
   font-size: var(--biof3-font-size-xs);
   padding: 3px 8px;
   border-radius: 999px;
-  background: rgba(16, 185, 129, 0.12);
+  background: var(--biof3-accent-bg);
   color: var(--ifm-color-primary-darker);
   font-weight: 600;
 }
@@ -1064,7 +1064,7 @@
   flex-direction: column;
 }
 .plotCard:hover {
-  border-color: rgba(16, 185, 129, 0.5);
+  border-color: var(--biof3-accent);
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
 }
 [data-theme='dark'] .plotCard {
@@ -1161,7 +1161,7 @@
   border-radius: var(--ifm-global-radius);
 }
 [data-theme='dark'] .dataSummaryRow {
-  background: rgba(16, 185, 129, 0.1);
+  background: var(--biof3-accent-bg);
 }
 .dataSummaryItem {
   text-align: center;
@@ -1312,7 +1312,7 @@
   white-space: nowrap;
 }
 [data-theme='dark'] .navToolBadgeDrift {
-  background: rgba(251, 191, 36, 0.15);
+  background: var(--biof3-status-warning-bg);
   color: var(--ifm-color-warning);
 }
 .navToolBtn:hover {
@@ -1326,10 +1326,10 @@
   color: var(--ifm-color-emphasis-200);
 }
 [data-theme='dark'] .navToolBtn:hover {
-  background: rgba(16, 185, 129, 0.1);
+  background: var(--biof3-accent-bg);
 }
 [data-theme='dark'] .navToolBtnActive {
-  background: rgba(16, 185, 129, 0.2);
+  background: var(--biof3-accent-bg);
   color: var(--ifm-color-success-light);
 }
 
@@ -1364,10 +1364,10 @@
   font-weight: 500;
 }
 [data-theme='dark'] .navJobBtn:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--biof3-surface-translucent);
 }
 [data-theme='dark'] .navJobBtnActive {
-  background: rgba(16, 185, 129, 0.1);
+  background: var(--biof3-accent-bg);
   color: var(--ifm-color-success-light);
 }
 
@@ -1408,7 +1408,7 @@
 }
 .resizeHandle:hover,
 .resizeHandle:active {
-  background: rgba(16, 185, 129, 0.3);
+  background: var(--biof3-accent);
 }
 
 /* Shift Copilot FAB left on tools page to avoid right toolbar overlap */

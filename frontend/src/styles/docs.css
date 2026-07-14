@@ -46,10 +46,10 @@
   background: var(--ifm-color-emphasis-100, #f1f5f9);
 }
 .biof3-docs-sidebar-item.active {
-  border-left-color: var(--biof3-teal, #0f766e);
-  color: var(--biof3-teal, #0f766e);
+  border-left-color: var(--biof3-teal);
+  color: var(--biof3-teal);
   font-weight: 600;
-  background: rgba(15, 118, 110, 0.05);
+  background: var(--biof3-accent-bg);
 }
 
 .biof3-docs-main {
@@ -111,7 +111,7 @@
   transition: color 0.15s;
 }
 .biof3-docs-toc-item:hover {
-  color: var(--biof3-teal, #0f766e);
+  color: var(--biof3-teal);
 }
 .biof3-docs-toc-level-3 {
   padding-left: 14px;
@@ -132,7 +132,7 @@
   font-size: 0.95rem;
 }
 .biof3-docs-error {
-  color: #ef4444;
+  color: var(--biof3-status-error-fg);
 }
 
 /* markdown 内容样式 */
@@ -156,7 +156,7 @@
   margin: 12px 0;
 }
 .biof3-docs-content a {
-  color: var(--biof3-teal, #0f766e);
+  color: var(--biof3-teal);
   text-decoration: none;
 }
 .biof3-docs-content a:hover {
@@ -168,13 +168,13 @@
   padding: 2px 6px;
   border-radius: 4px;
   background: var(--ifm-color-emphasis-100, #f1f5f9);
-  color: #d6336c;
+  color: var(--biof3-status-error-fg);
 }
 .biof3-docs-content pre {
   padding: 16px;
   border-radius: 8px;
   overflow-x: auto;
-  background: #1e293b;
+  background: var(--biof3-bg-canvas);
   margin: 16px 0;
 }
 .biof3-docs-content pre code {
@@ -189,7 +189,7 @@
   margin: 12px 0;
 }
 .biof3-docs-content blockquote {
-  border-left: 4px solid var(--biof3-teal, #0f766e);
+  border-left: 4px solid var(--biof3-teal);
   padding: 8px 16px;
   margin: 16px 0;
   background: var(--ifm-color-emphasis-100, #f1f5f9);
@@ -221,20 +221,20 @@
 }
 .biof3-docs-content .admonition-tip,
 .biof3-docs-content .admonition-note {
-  background: rgba(15, 118, 110, 0.06);
-  border-color: var(--biof3-teal, #0f766e);
+  background: var(--biof3-accent-bg);
+  border-color: var(--biof3-teal);
 }
 .biof3-docs-content .admonition-warning {
-  background: rgba(245, 158, 11, 0.08);
-  border-color: #f59e0b;
+  background: var(--biof3-status-warning-bg);
+  border-color: var(--biof3-status-loading);
 }
 .biof3-docs-content .admonition-danger {
-  background: rgba(239, 68, 68, 0.08);
-  border-color: #ef4444;
+  background: var(--biof3-status-error-bg);
+  border-color: var(--biof3-status-error-fg);
 }
 
 [data-theme='dark'] .biof3-docs-content pre {
-  background: #0f172a;
+  background: var(--biof3-bg-canvas);
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -245,7 +245,7 @@
 .biof3-docs-back-link {
   display: inline-block;
   margin-bottom: 16px;
-  color: var(--biof3-teal, #0f766e);
+  color: var(--biof3-teal);
   text-decoration: none;
   font-size: 0.9rem;
 }
@@ -308,7 +308,7 @@
     transform 0.18s ease;
 }
 .biof3-blog-card:hover {
-  border-color: var(--biof3-teal, #0f766e);
+  border-color: var(--biof3-teal);
   box-shadow: var(--ifm-global-shadow-lw, 0 1px 2px 0 rgba(0, 0, 0, 0.1));
   transform: translateY(-1px);
 }

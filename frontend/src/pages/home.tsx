@@ -72,7 +72,7 @@ export default function Home(): React.ReactElement {
   }, []);
 
   if (status === 'loading') {
-    return <div style={{ minHeight: '100vh', background: 'var(--biof3-bg, #f8fafc)' }} />;
+    return <div style={{ minHeight: '100vh', background: 'var(--biof3-bg)' }} />;
   }
 
   if (targetProjectId) {

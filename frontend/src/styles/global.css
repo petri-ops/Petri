@@ -37,6 +37,7 @@
   --biof3-space-4: 12px;
   --biof3-space-5: 16px;
   --biof3-space-6: 24px;
+  --biof3-live-result-right-width: 720px;
 
   /* dock/面板表面色 — 亮色浅灰（与正文白底微区分），暗色蓝灰深底（保持品牌冷调，
      非 infima emphasis 的纯灰） */

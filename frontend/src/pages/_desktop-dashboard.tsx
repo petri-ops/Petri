@@ -529,7 +529,7 @@ export function DesktopDashboard({
                 style={{
                   padding: '8px 12px',
                   borderRadius: '8px',
-                  border: '1px solid var(--biof3-border, #e2e8f0)',
+                  border: '1px solid var(--biof3-border)',
                   fontSize: '14px',
                 }}
                 autoFocus
@@ -542,7 +542,7 @@ export function DesktopDashboard({
                 style={{
                   padding: '8px 12px',
                   borderRadius: '8px',
-                  border: '1px solid var(--biof3-border, #e2e8f0)',
+                  border: '1px solid var(--biof3-border)',
                   fontSize: '14px',
                   resize: 'vertical',
                 }}

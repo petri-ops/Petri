@@ -43,7 +43,7 @@
 }
 .resizeHandle:hover,
 .resizeHandle:active {
-  background: rgba(15, 118, 110, 0.3);
+  background: var(--biof3-accent);
 }
 
 /* Left sidebar */
@@ -115,11 +115,11 @@
   margin: 1px 0;
 }
 .sidebarBtn:hover {
-  background: rgba(15, 118, 110, 0.06);
+  background: var(--biof3-accent-bg);
   color: var(--biof3-teal);
 }
 .sidebarBtn.active {
-  background: rgba(15, 118, 110, 0.1);
+  background: var(--biof3-accent-bg);
   color: var(--biof3-teal);
   font-weight: 750;
 }
@@ -221,7 +221,7 @@
   display: inline-block;
   padding: 1px 5px;
   border-radius: 999px;
-  background: rgba(15, 118, 110, 0.08);
+  background: var(--biof3-accent-bg);
   color: var(--biof3-teal);
   font-size: 8px;
   font-weight: 750;
@@ -546,33 +546,33 @@
 
 /* Dark mode */
 [data-theme='dark'] .cardFace {
-  background: #1e293b;
-  border-color: #334155;
+  background: var(--biof3-bg-canvas);
+  border-color: var(--biof3-border);
 }
 [data-theme='dark'] .cardImage {
-  background: #0f172a;
+  background: var(--biof3-bg-canvas);
 }
 [data-theme='dark'] .cardInfo h3,
 [data-theme='dark'] .backHeader h3,
 [data-theme='dark'] .rightContent h3 {
-  color: #f1f5f9;
+  color: var(--biof3-text);
 }
 [data-theme='dark'] .codeBlock {
-  background: #0f172a;
-  border-color: #334155;
+  background: var(--biof3-bg-canvas);
+  border-color: var(--biof3-border);
 }
 [data-theme='dark'] .codeBlock code {
-  color: #e2e8f0;
+  color: var(--biof3-text);
 }
 [data-theme='dark'] .hero h1 {
-  color: #f1f5f9;
+  color: var(--biof3-text);
 }
 [data-theme='dark'] .rightPanel {
-  border-left-color: #334155;
+  border-left-color: var(--biof3-border);
 }
 [data-theme='dark'] .pkgTag {
-  background: #334155;
-  color: #94a3b8;
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text-muted);
 }
 
 /* TutorialLinkSection — 这张图属于哪节课 */
@@ -596,14 +596,14 @@
 
 .tutorialLinkCard:hover {
   transform: translateY(-1px);
-  border-color: rgba(15, 118, 110, 0.55);
+  border-color: var(--biof3-accent);
   box-shadow: 0 4px 12px -4px rgba(15, 118, 110, 0.4);
 }
 
 .tutorialLinkTitle {
   font-size: 12.5px;
   font-weight: 600;
-  color: #047857;
+  color: var(--biof3-status-success-fg);
   line-height: 1.45;
   margin-bottom: 4px;
 }
@@ -621,7 +621,7 @@
   display: inline-block;
   padding: 1px 6px;
   border-radius: 999px;
-  background: rgba(15, 118, 110, 0.15);
+  background: var(--biof3-accent-bg);
   color: var(--ifm-color-primary-darker);
   font-weight: 500;
   font-size: 10px;
@@ -636,24 +636,24 @@
 
 [data-theme='dark'] .tutorialLinkCard {
   background: linear-gradient(135deg, rgba(6, 78, 59, 0.25) 0%, rgba(6, 95, 70, 0.18) 100%);
-  border-color: rgba(15, 118, 110, 0.35);
+  border-color: var(--biof3-accent-border);
 }
 
 [data-theme='dark'] .tutorialLinkTitle {
-  color: #d1fae5;
+  color: var(--biof3-status-success-bg);
 }
 
 [data-theme='dark'] .tutorialLinkMeta {
-  color: #cbd5e1;
+  color: var(--biof3-text-muted);
 }
 
 [data-theme='dark'] .tutorialLinkBadge {
-  background: rgba(15, 118, 110, 0.18);
-  color: #6ee7b7;
+  background: var(--biof3-accent-bg);
+  color: var(--biof3-status-success-fg);
 }
 
 [data-theme='dark'] .tutorialLinkArrow {
-  color: #6ee7b7;
+  color: var(--biof3-status-success-fg);
 }
 
 /* Python language badge on card */
@@ -733,7 +733,7 @@
 }
 [data-theme='dark'] .stageBanner {
   background: linear-gradient(135deg, rgba(6, 78, 59, 0.25) 0%, rgba(6, 95, 70, 0.18) 100%);
-  border-color: rgba(15, 118, 110, 0.35);
+  border-color: var(--biof3-accent-border);
 }
 
 .stageBannerLabel {
@@ -744,7 +744,7 @@
   color: var(--ifm-color-primary-darker);
 }
 [data-theme='dark'] .stageBannerLabel {
-  color: #6ee7b7;
+  color: var(--biof3-status-success-fg);
 }
 
 .stageBannerTitle {
@@ -753,7 +753,7 @@
   color: var(--ifm-color-emphasis-900);
 }
 [data-theme='dark'] .stageBannerTitle {
-  color: #f1f5f9;
+  color: var(--biof3-text);
 }
 
 .stageBannerDesc {
@@ -762,7 +762,7 @@
   line-height: 1.45;
 }
 [data-theme='dark'] .stageBannerDesc {
-  color: #cbd5e1;
+  color: var(--biof3-text-muted);
 }
 
 .stageBannerCount {
@@ -772,11 +772,11 @@
   font-size: var(--biof3-font-size-sm);
   font-weight: 600;
   color: var(--ifm-color-primary-darker);
-  background: rgba(15, 118, 110, 0.15);
+  background: var(--biof3-accent-bg);
   padding: 3px 9px;
   border-radius: 999px;
 }
 [data-theme='dark'] .stageBannerCount {
-  color: #6ee7b7;
-  background: rgba(15, 118, 110, 0.2);
+  color: var(--biof3-status-success-fg);
+  background: var(--biof3-accent-bg);
 }

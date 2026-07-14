@@ -1522,7 +1522,7 @@ function ToolsInner() {
         {status === 'completed' && !activeResult && (
           <div
             className={styles.progressBar}
-            style={{ background: '#d1fae5', borderColor: '#6ee7b7' }}
+            style={{ background: 'var(--biof3-status-success-bg)', borderColor: 'var(--biof3-status-success-fg)' }}
           >
             <span>✓ 分析完成，加载结果中...</span>
           </div>
@@ -1646,7 +1646,7 @@ function ToolsInner() {
                       <span className={styles.toolIconLabel}>
                         {t.title}
                         {t.comingSoon && (
-                          <span style={{ fontSize: 9, color: '#d97706', marginLeft: 4 }}>🚧</span>
+                          <span style={{ fontSize: 9, color: 'var(--biof3-status-warning-fg)', marginLeft: 4 }}>🚧</span>
                         )}
                       </span>
                     </button>
@@ -1828,7 +1828,7 @@ function ResultTabs({
               </div>
             </div>
           ))}
-          {tables.length === 0 && <p style={{ color: '#9ca3af', fontSize: 12 }}>暂无数据文件</p>}
+          {tables.length === 0 && <p style={{ color: 'var(--biof3-text-muted)', fontSize: 12 }}>暂无数据文件</p>}
         </div>
       )}
 
@@ -1947,7 +1947,7 @@ function DemoTabs({
               </div>
             </a>
           ))}
-          {tables.length === 0 && <p style={{ color: '#9ca3af', fontSize: 12 }}>暂无数据文件</p>}
+          {tables.length === 0 && <p style={{ color: 'var(--biof3-text-muted)', fontSize: 12 }}>暂无数据文件</p>}
         </div>
       )}
 
@@ -1980,7 +1980,7 @@ function DemoTabs({
               </tr> */}
             </tbody>
           </table>
-          <p style={{ fontSize: 12, color: '#6b7280', marginTop: 12 }}>{tool.longDescription}</p>
+          <p style={{ fontSize: 12, color: 'var(--biof3-text-secondary)', marginTop: 12 }}>{tool.longDescription}</p>
         </div>
       )}
     </>
