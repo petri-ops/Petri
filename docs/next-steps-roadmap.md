@@ -2,7 +2,17 @@
 
 最后更新：2026-07-15
 
-## 2026-07-15 当前阶段：P-06 RC 收口完成，进入标准流程覆盖 Phase 1
+## 2026-07-15 最新产品决策：先 UI，再模型层，再 Harness
+
+`rc.4` 之后的开发顺序已重新确定：
+
+> **Stage 1 UI 产品化 → Stage 2 模型层 → Stage 3 Harness 与标准流程 → Stage 4 首个稳定产品版本**
+
+详细范围、阶段边界、验收出口和跨 Agent 交接规则统一以 [`docs/v1-productization-roadmap.md`](./v1-productization-roadmap.md) 为准。该文件覆盖本页后文仍保留的旧“立即进入 GO/KEGG/P-04”顺序；GO/KEGG 延后到 Stage 3，在 UI 和模型层验收前不展开实现。
+
+当前唯一实现阶段是 **Stage 1 桌面 UI 产品化**。第一步不是直接改 CSS，而是按 `docs/ui-productization-audit.md` 模板，对正式 `rc.4` 和开发版逐屏截图、分模块记录问题、与用户确认优先级，然后按桌面壳 → 导航/项目 → Agent 工作区 → 结果/工具区 → 设置/边缘页面推进。
+
+## 2026-07-15 已完成基线：P-06 RC 收口
 
 `P-06 桌面集成与交付` 的当前 RC 阻断已经关闭：`v0.0.1-rc.4` 已完成 macOS arm64/x64 本机构建，源码和不可变标签已推送 GitHub，双架构 DMG、SHA-256 清单和 `latest-mac.yml` 已发布到阿里云 OSS。正式安装版可启动、Core/R/Python/SPA 可用，设置页检查最新版会明确提示“当前已是最新版本”。
 
@@ -15,7 +25,7 @@
 
 至此发布链路固定为：GitHub 只保存源码与标签；OSS 保存桌面安装包、校验文件和自动更新清单。应用负责检查、下载、校验并打开 DMG；由于没有 Developer ID 签名/公证，成员仍需手动拖入 Applications 覆盖安装。
 
-新的唯一产品开发主线是 **P-04 标准流程覆盖 Phase 1**：以现有 GO/KEGG 富集能力为首个 Plugin SDK 真实试点，复用 `P-03` 编排与 `P-02` 执行事实链，不新增第二套执行器、工作流数据库或结果系统。本阶段出口仍以本页“P1：标准流程覆盖 Phase 1”为准。
+原计划立即进入 **P-04 标准流程覆盖 Phase 1**，现已根据最新产品决策延后到 v1 路线图 Stage 3。GO/KEGG 方案继续保留，届时复用 `P-03` 编排与 `P-02` 执行事实链，不新增第二套执行器、工作流数据库或结果系统。
 
 ## 2026-07-15 固定发布规则：macOS-only + OSS
 
@@ -52,7 +62,7 @@
 
 ## 2026-07-13 今日执行顺序
 
-1. **UI checkpoint**：验证、文档同步、commit 与 push 已完成；非阻断型视觉修改已冻结。
+1. **UI checkpoint（当日历史口径）**：验证、文档同步、commit 与 push 已完成；当时冻结非阻断型视觉修改。该冻结现已被 v1 Stage 1 UI 产品化决策解除。
 2. **Artifact truth**：核心闭环、验证、commit 与 push 已完成；status API、DB `result_json`、manifest 和磁盘真实文件已统一校验，缺失产物进入 diagnostics / failureModes。
 3. **Harness continuation**：真实二跳核心链路、绝对路径修复、失败恢复回归、commit 与 push 已完成。
 4. **Platform stability**：Electron ABI、runtime/canonical path、vendor lock、MCP 文件交付和三平台 CI 最小矩阵已完成并推送。
@@ -62,7 +72,7 @@
 
 - 中间栏始终属于 Agent 工作区。
 - 结果主预览与 Honeycomb 导航始终属于右侧结果工具工作区。
-- UI 除阻断问题外不再继续精修。
+- 当日 UI 冻结约束已经完成其检查点作用；当前执行以 v1 Stage 1 UI 产品化路线图为准。
 - 前端对缺失 artifact 的回退只是兼容保护，不能代替后端产物一致性校验。
 
 ### Stage 2 当前成果
@@ -368,7 +378,7 @@ npm run dev
 - vendor/biof3-core 的改动是否确认为本次快照的一部分。
 - `.cursor/` 是否需要提交或加入忽略。
 
-### P1：标准流程覆盖 Phase 1（当前下一阶段）
+### P1：标准流程覆盖 Phase 1（已延后到 v1 Stage 3）
 
 Harness Phase 1–6 已正式完成并推送：Core `dcd2043`，Desktop `2d000d5`。下一阶段不再建设新的平台层，而是用真实标准流程检验“manifest + script + fixture 即可接入”的承诺。
 

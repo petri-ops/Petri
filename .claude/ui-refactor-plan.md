@@ -1,5 +1,7 @@
 # BioF3 桌面端 UI 重构计划 — 项目制 + Agent 主导
 
+> 2026-07-15 当前执行口径：本文件记录已经完成的结构性改造与历史待办；新的 UI 产品化工作必须遵循 `docs/v1-productization-roadmap.md` Stage 1，并在 `docs/ui-productization-audit.md` 中登记、分级和验收。不要从本文件的旧编号直接推断当前优先级。
+
 > 方向标准：后续工作台、Agent、插件、结果查看、可复现链路相关改造，均以 `docs/codex-style-workbench-direction.md` 为产品和工程准则。
 
 ## 工作方式

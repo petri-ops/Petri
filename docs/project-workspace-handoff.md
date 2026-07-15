@@ -6,16 +6,26 @@
 
 开发模块、职责边界和标准表述统一以 [`docs/development-module-map.md`](./development-module-map.md) 为准。新增需求、缺陷、交接和提交应标明主模块；主题、布局、安全、状态同步、测试和性能作为跨模块关注点附加说明，不再使用无法定位责任边界的“右侧栏问题”“后端问题”等说法。
 
+## 2026-07-15 最新产品阶段决策
+
+`rc.4` 是技术发布基线，不是首个稳定产品版本。用户已明确重排后续开发顺序：
+
+> **Stage 1 UI 产品化 → Stage 2 模型层 → Stage 3 Harness 与标准流程 → Stage 4 首个稳定产品版本**
+
+完整计划已写入 [`docs/v1-productization-roadmap.md`](./v1-productization-roadmap.md)，该文件是跨 Agent 的当前主路线图。旧文档中“立即进入 GO/KEGG/P-04”的表述已被覆盖，GO/KEGG 延后到 Stage 3。
+
+当前唯一实现工作是 Stage 1 `UI-1 实机审计与问题台账`：按 [`docs/ui-productization-audit.md`](./ui-productization-audit.md) 模板，对正式 `rc.4` 和开发版逐屏截图并按 W/P/C 模块、P0/P1/P2 分类，与用户确认后再开始第一批 UI 修复。Stage 1 验收前不实现新模型 Provider；Stage 2 验收前不扩充 Harness 内容。
+
 ## 2026-07-15 最新决策：发布范围固定为 macOS-only
 
 主模块：`P-06 桌面集成与交付`；关注点：`C-05 测试与质量门禁`。
 
 - GitHub Actions 免费额度本月已用满（2,000 / 2,000 分钟），并非存储耗尽或代码故障；额度将在 Billing 页面显示的周期到期后重置。
 - 用户已明确决定：从 `v0.0.1-rc.2` 开始，后续桌面发布默认只支持 macOS，不再以 Windows/Linux 产物作为发布门禁。
-- 默认发布路径改为本机执行 `npm run build:mac`，生成 arm64 与 x64 DMG，完成本地冒烟和 SHA-256 后用 `gh release` 直接上传；不依赖 GitHub Actions。
-- `.github/workflows/ci.yml` 已收敛为 macOS，`.github/workflows/release.yml` 已收敛为手动触发的 macOS-only 备用流程。
+- 默认发布路径为本机执行 `npm run build:mac`，生成 arm64 与 x64 DMG，完成本地冒烟、SHA-256 和 `latest-mac.yml` 后发布到 OSS；不依赖 GitHub Actions。
+- GitHub 只保存源码与不可变标签，不上传桌面软件资产；`.github/workflows/` 不再是当前 macOS 桌面发布的前置条件。
 - `v0.0.1-rc.2` 本地构建已完成：arm64 与 x64 DMG 均生成；arm64 真实打包态页面、migration、R `:3001`、Python `:3004` 与 SPA `:3002` 验证通过。
-- `v0.0.1-rc.2` 已从发布提交 `3a3f990` 创建不可变标签并发布为 GitHub prerelease：<https://github.com/ShengXinF3/biof3-desktop/releases/tag/v0.0.1-rc.2>。GitHub 端两份 DMG 的大小与 SHA-256 均已复核一致。
+- `v0.0.1-rc.2` 的 GitHub prerelease 属于 OSS 迁移前历史产物；当前基线为 `v0.0.1-rc.4`，软件分发入口已迁移到 OSS。
 - 当前未配置 Apple Developer ID，DMG 未签名、未公证；用户首次启动需要在“系统设置 → 隐私与安全性”中确认打开。
 
 后续固定顺序：macOS 本机检查 → arm64/x64 构建 → arm64 真实启动冒烟 → SHA-256/`latest-mac.yml` → OSS 原子发布 → 匿名读取与旧版升级验收。GitHub 只保存源码与标签；Windows/Linux 仅在用户以后重新明确要求时恢复。
@@ -30,7 +40,7 @@
 - 验收没有覆盖正式安装；测试结束后临时旧版进程、复制应用、临时 local data 和测试挂载均已清理，`/Applications/BioF3.app` 的 `rc.4` 已恢复运行。
 - 当前发布链路已形成可信基线。唯一保留限制是未购买 Apple Developer ID，不能静默覆盖 `.app`；应用下载并校验后打开 DMG，由团队成员手动拖入 Applications。
 
-下一阶段主模块切换为 `P-04 Plugin SDK 与分析能力`，由 `P-03` 编排、`P-02` 记录 job/artifact truth、`W-03/W-04` 交付。首个试点是 GO/KEGG 标准流程覆盖；不得为试点修改 Agent 核心、创建第二套执行器/工作流状态库或重写结果 UI。
+发布闭环完成后的当前主模块已按最新决策切换为 `W-01` 至 `W-07` UI 产品化。`P-07` 模型层排在第二阶段；`P-03/P-04` GO/KEGG 标准流程覆盖排在第三阶段。详细边界与出口见 `docs/v1-productization-roadmap.md`。
 
 ## 2026-07-15 自动更新源迁移：GitHub → 阿里云 OSS
 

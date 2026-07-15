@@ -139,6 +139,15 @@
 - 不包含：页面视觉样式和分析业务逻辑。
 - 主要路径：`src/`、`build/`、`package.json`、`.github/workflows/`、`.vendor-lock`、`vendor/biof3-core/`。
 
+### P-07 模型网关与 AI Provider（Model Gateway）
+
+负责 Agent、聊天、摘要、记忆、报告和多模态能力使用的统一模型接入层。
+
+- 包含：Model Profile、Provider 注册、Base URL、credential reference、流式响应、tool calling、vision、embedding、能力声明、角色路由、健康检查、usage 与标准化错误。
+- 业务模块不得直接硬编码 Provider Endpoint、模型名或 API Key；兼容层只能转发到统一 Gateway。
+- Provider 失败时不得静默换模型；fallback 必须由用户配置、明确允许并可审计。
+- 主要路径：`vendor/biof3-core/shared-backend/llm-providers/`、Core `helpers/llm-client.js` / `helpers/ai-settings.js` / AI routes、Desktop AI settings IPC 和模型管理 UI。
+
 ## 4. 跨模块关注点（C）
 
 跨模块关注点不是独立功能区，不能替代主模块。
@@ -161,6 +170,7 @@
 | “结果页宽度” | 外层拖拽与持久化属于 W-02；结果内部排版属于 W-04。 |
 | “终端执行失败” | xterm/终端会话属于 W-07；正式分析任务失败属于 P-02；运行时缺失属于 P-05。 |
 | “Agent 没跑对” | 消息交互属于 W-03；选型/修参属于 P-03；插件计算属于 P-04；job/artifact 状态属于 P-02。 |
+| “模型不够用” | 会话选择器属于 W-03；Provider、Endpoint、能力和凭据属于 P-07；模型导致的选型/修参效果属于 P-03。 |
 | “主题没统一” | 仍需指定主模块，并附加关注点 C-01。 |
 | “后端问题” | 明确为 P-01 上下文、P-02 执行真相、P-03 工作流、P-04 插件或 P-05 runtime。 |
 
@@ -168,9 +178,7 @@
 
 ### 当前活跃
 
-- W-01/W-02：桌面顶栏、面板折叠、全高容器和拖拽手感的回归收口。
-- W-03：Agent 会话视觉与结果/文件交互恢复。
-- W-04/W-05/W-06/W-07：结果报告、浏览器、文件树和终端的主题与容器一致性。
+- v1 Stage 1 只实现 UI 产品化：W-01/W-02 桌面壳、布局、面板与拖拽；W-03 Agent 会话；W-04/W-05/W-06/W-07 结果、浏览器、文件与终端容器。
 - C-01/C-02/C-04/C-06：主题联动、布局责任、跨面板状态和交互性能。
 
 ### 基础能力已建立，后续以稳定化为主
@@ -179,12 +187,13 @@
 - P-03：Harness Phase 1–6、Agent workflow runtime、恢复与 fixture 门禁。
 - P-04：Plugin SDK、三来源发现、manifest 校验和内置样板插件。
 - P-05/P-06：canonical execution context、跨平台 adapter、Electron 集成与 CI。
+- P-07：已有 DeepSeek/DashScope 局部实现和 Provider 接口，但统一 Gateway、多 Provider、凭据分离和能力路由尚未完成；等待 v1 Stage 2。
 
 ### 后续主线
 
-- 在不扩建第二套平台基础设施的前提下，通过 P-04 增加标准分析流程覆盖。
-- 由 P-03 编排插件，由 P-02 记录真实 job/artifact，由 W-03/W-04 交付和继续分析。
-- 观察真实使用反馈，修复阻断性 UI/运行回归；避免重新打开无边界的全局视觉重构。
+- 固定顺序以 `docs/v1-productization-roadmap.md` 为准：Stage 1 UI → Stage 2 P-07 模型层 → Stage 3 P-03/P-04 Harness 与标准流程 → Stage 4 P-06 稳定发布。
+- Stage 1 期间不展开模型 Provider 或 Harness 内容扩充；Stage 2 期间保持 Harness 可回归但不批量增加流程。
+- Stage 3 由 P-03 编排插件、P-02 记录真实 job/artifact、P-07 提供模型能力、W-03/W-04 交付和继续分析。
 
 ## 7. 任务与提交模板
 
