@@ -15,6 +15,8 @@
 
 2026-07-15 本地验证基线：根项目 178 pass / 7 live skip / 0 fail；前端 147/147；TypeScript、SPA build、Release YAML 均通过；arm64 打包态页面、migration、R/Python 健康均通过。生产构建只剩 1.24 MB 主 bundle 警告，作为 `rc.2+` 性能项，不得再次用会产生 circular chunk/TDZ 的手工拆包阻断 RC。
 
+提交检查点：Core `46cc143`、Desktop `d4844ce` 已推送并同步。Desktop CI run `29398304364` 未执行测试，Ubuntu/Windows/macOS jobs 均被 GitHub Actions 账单失败或额度上限在启动前拒绝；恢复账户额度后从第 3 步继续，不需要重做本地修复。
+
 以下旧路线图保留为历史背景；执行优先级以上述 RC 收口顺序为准。
 
 当前路线图已经从“拆组件/拆 hooks”阶段，切换到“桌面端工作台稳定化 + Harness Engine v1”阶段。当前又叠加了远程跨平台 runtime 分支的合并收口，因此继续开发时不要先急着加新功能；先确保桌面壳子、路由、构建、Harness 索引/修复与跨平台 runtime 逻辑都稳定，再进入下一轮扩展。

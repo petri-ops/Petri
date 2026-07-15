@@ -16,10 +16,11 @@
 - Windows `icon.ico` 已由现有 1024px 主图重新生成，包含 16/24/32/48/64/128/256 七种尺寸；临时 TIFF、PNG 和 `to-ico` 试验依赖均已清理。
 - 2026-07-15 本地门禁：`npm run check` 通过；根项目 185 项中 178 pass、7 个显式 live skip、0 fail；前端 19 files / 147 tests 全通过；TypeScript 与生产构建通过，构建不再报告 circular chunk，仅保留主 bundle 体积警告。
 - 真实 arm64 打包冒烟通过：`dist/mac-arm64/BioF3.app` 页面加载成功，migration version 0，R `:3001` 与 Python `:3004` 健康接口均返回 `ok`，无模块缺失、ABI、递归启动或 renderer ReferenceError。
-- 当前唯一无法在仓库内解决的阻塞是 GitHub Actions 账户付款失败/额度上限；最新 jobs 在运行前即被 GitHub 拒绝。额度恢复后仍需 Windows NSIS、macOS x64 和三平台安装冒烟。
+- Core `46cc143` 与 Desktop `d4844ce` 均已推送，`main` 与远端同步，vendor lock 指向一致。
+- 当前唯一无法在仓库内解决的阻塞是 GitHub Actions 账户付款失败/额度上限；Desktop CI run `29398304364` 的 Ubuntu、Windows、macOS jobs 均在运行前被 GitHub 拒绝。额度恢复后仍需 Windows NSIS、macOS x64 和三平台安装冒烟。
 - 现有 `v0.0.1-rc.1` 标签与 GitHub Release 草稿经历过多次移动和失败构建，不作为可信发布基线；完成收口后建议创建不可变的 `v0.0.1-rc.2`，不要继续覆盖 rc.1。
 
-下一步固定顺序：Desktop 发布修复提交 → 恢复 Actions 额度 → 三平台 CI/NSIS → 安装级冒烟与校验和 → 新建 `rc.2` prerelease → 再同步发布状态。
+下一步固定顺序：恢复 Actions 额度 → 重跑 `29398304364` 或触发新三平台 CI → Windows NSIS/安装级冒烟与校验和 → 新建 `rc.2` prerelease → 再同步发布状态。
 
 ## RC 发布准备（历史口径，以上述 2026-07-15 检查点为准）
 
