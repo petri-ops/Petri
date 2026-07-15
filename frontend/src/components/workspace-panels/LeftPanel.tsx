@@ -55,7 +55,6 @@ export interface LeftPanelContext {
 
   // Workspace routing
   workspaceMode: WorkspaceMode;
-  handleShowCloud: () => void;
   handleShowSearch: () => void;
   handleShowScheduled: () => void;
   handleShowPlugins: () => void;
@@ -143,14 +142,6 @@ function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
     onClick: () => void;
     title: string;
   }> = [
-    {
-      key: 'cloud',
-      mode: 'cloud',
-      label: '云平台',
-      icon: 'layout-grid',
-      onClick: ctx.handleShowCloud,
-      title: '云平台',
-    },
     {
       key: 'newConv',
       mode: 'chat',

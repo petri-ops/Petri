@@ -98,11 +98,6 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
       ref={centerColRef}
       style={{ paddingBottom: bottomTerminalOpen ? bottomTerminalHeight : 0 }}
     >
-      {workspaceMode === 'cloud' && (
-        <div className={styles.workspaceEmbeddedPage}>
-          <DesktopDashboard embedded activeProject={ctx.project} />
-        </div>
-      )}
       {workspaceMode === 'search' && (
         <WorkspaceSearchView ctx={ctx} />
       )}

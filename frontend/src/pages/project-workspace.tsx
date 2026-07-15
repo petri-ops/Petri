@@ -106,7 +106,6 @@ export type {
 };
 
 type WorkspaceMode =
-  | 'cloud'
   | 'chat'
   | 'search'
   | 'scheduled'
@@ -124,7 +123,6 @@ const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconNa
 ];
 
 const WORKSPACE_MODES: WorkspaceMode[] = [
-  'cloud',
   'chat',
   'search',
   'scheduled',
@@ -453,7 +451,6 @@ export function ProjectWorkspace(): React.ReactElement {
     setActiveConvId(convId);
   }, [updateWorkspaceMode]);
 
-  const handleShowCloud = useCallback(() => updateWorkspaceMode('cloud'), [updateWorkspaceMode]);
   const handleShowChat = useCallback(() => updateWorkspaceMode('chat'), [updateWorkspaceMode]);
   const handleShowSearch = useCallback(() => {
     updateWorkspaceMode('search');
@@ -1169,7 +1166,6 @@ export function ProjectWorkspace(): React.ReactElement {
     openConversationCreator,
     submitConversationCreator,
     workspaceMode,
-    handleShowCloud,
     handleShowSearch,
     handleShowScheduled,
     handleShowPlugins,

@@ -1,7 +1,7 @@
 /**
  * Home — 桌面版启动入口
  *
- * 有项目时直接进入最近项目的工作台（云平台视图），
+ * 有项目时直接进入最近项目的工作台，
  * 没有项目时才保留创建项目的启动页。
  */
 
@@ -84,7 +84,7 @@ export default function Home(): React.ReactElement {
         />
       );
     }
-    return <Navigate to={`/project/${targetProjectId}?mode=cloud`} replace />;
+    return <Navigate to={`/project/${targetProjectId}`} replace />;
   }
 
   return <DesktopDashboard />;
