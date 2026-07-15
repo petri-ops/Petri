@@ -3101,10 +3101,14 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
 }
 
 .resultSidebarTitleRow strong {
+  flex: 1;
   font-size: 13px;
   line-height: 1.35;
   color: var(--biof3-text);
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .resultSidebarMeta {
