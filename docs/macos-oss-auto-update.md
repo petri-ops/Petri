@@ -12,7 +12,7 @@
 - 客户端实现：`src/macos-oss-updater.js`
 - 更新方式：自动检查 → 下载匹配架构的 DMG → SHA-512 校验 → 打开安装包
 
-GitHub Release 继续保存 DMG 供手动下载安装，但应用内更新不再访问私有 GitHub Release。
+GitHub 只保存源码与不可变标签，不再保存桌面软件资产。DMG、人工校验文件和应用内更新清单统一由 OSS 分发。
 
 ## 发布文件
 
@@ -70,13 +70,13 @@ npm run release:mac:oss
 
 上传后必须匿名验证 `latest-mac.yml` 和两套 DMG 均能通过 HTTPS `GET/HEAD` 访问，并核对清单中的 SHA-512 与本地文件一致。
 
-## 当前阻塞
+## 当前状态与保留限制
 
-截至 2026-07-15，本机未找到 OSS 上传环境变量，因此尚未对 Bucket 执行写入。客户端已改为不依赖签名的“小团队更新”流程，发布端也已移除 `ossutil` 依赖。
+截至 2026-07-15，发布端已从本地 `.biof3-secrets` 安全加载 OSS 凭据并成功发布 `rc.3`、`rc.4`。客户端只做匿名 HTTPS 读取，不需要 OSS SDK、AccessKey 或 `ossutil`。
 
-现有 `v0.0.1-rc.2` 是修改前构建，仍使用旧更新代码。`v0.0.1-rc.3` 是首个包含新更新器的版本，团队成员需要手动安装这一次；从 `rc.3` 开始，应用可以自行检查 OSS、下载并打开后续 DMG。
+Clash Verge 已固定为规则模式：阿里云 OSS 域名直连，OpenAI/Codex/GitHub 继续代理。错误的前置 `MATCH,DIRECT` 已移除；清单读取、DMG 下载与发布上传均验证成功，不再需要发布时手工切换代理模式。
 
-本机 Clash Verge 当前使用全局代理模式，阿里云域名在该模式下会被代理节点关闭 TLS 连接；临时规则模式下 OSS 可正常连接并返回标准 HTTP 响应。该问题属于本机代理链路，不改 BioF3 更新协议，也不应由发布脚本自动修改系统代理。真实团队验证应在可直连阿里云的网络环境中执行。
+保留限制只有 macOS 签名方式：当前没有 Developer ID 签名和 Apple 公证，应用不会静默覆盖安装。下载与 SHA-512 校验完成后会打开 DMG，由成员手动拖入 Applications。
 
 ## 2026-07-15 rc.3 发布结果
 
@@ -87,3 +87,11 @@ npm run release:mac:oss
 - GitHub 后续只同步源码；桌面 DMG 和自动更新清单统一放 OSS。`rc.3` 的 GitHub Release 草稿及中断上传的资产已删除，Git 标签保留为源码检查点。
 
 `rc.4` 修复检查最新版本时没有任何反馈的问题：设置页成功检查且没有更高版本时显示“当前已是最新版本”。同时更新弹窗不再声称应用会自动重启，而是准确提示下载、校验并打开 DMG。
+
+## 2026-07-15 rc.4 升级验收
+
+- 线上 `latest-mac.yml` 已确认指向 `0.0.1-rc.4`，arm64/x64 DMG 与 SHA-256 清单均已上传。
+- 隔离启动真实 `rc.3` 打包应用，通过其正式 IPC 检查更新，返回 `hasUpdate=true` 并正确选择 `BioF3-0.0.1-rc.4-arm64.dmg`。
+- 下载文件大小为 197,172,657 字节，与清单一致；SHA-512 与清单一致。
+- `updater:install` 成功打开并挂载 `BioF3 0.0.1-rc.4-arm64`，挂载包内版本确认为 `0.0.1-rc.4`。
+- 验收使用复制出的临时应用与临时 `BIOF3_LOCAL_DATA_DIR`，不覆盖正式安装；结束后已清理临时进程、应用、local data 与挂载，并恢复 `/Applications/BioF3.app`。

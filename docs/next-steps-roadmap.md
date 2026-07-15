@@ -2,17 +2,32 @@
 
 最后更新：2026-07-15
 
-## 2026-07-15 当前唯一主线：macOS-only RC 发布
+## 2026-07-15 当前阶段：P-06 RC 收口完成，进入标准流程覆盖 Phase 1
+
+`P-06 桌面集成与交付` 的当前 RC 阻断已经关闭：`v0.0.1-rc.4` 已完成 macOS arm64/x64 本机构建，源码和不可变标签已推送 GitHub，双架构 DMG、SHA-256 清单和 `latest-mac.yml` 已发布到阿里云 OSS。正式安装版可启动、Core/R/Python/SPA 可用，设置页检查最新版会明确提示“当前已是最新版本”。
+
+2026-07-15 已用隔离运行的真实 `rc.3` 安装包完成 `rc.3 → rc.4` 升级验收：
+
+1. 旧版通过打包态 IPC 从 OSS 识别 `hasUpdate=true`，目标版本和 arm64 下载地址均为 `rc.4`。
+2. 旧版下载 197,172,657 字节 DMG 成功；本地文件大小与更新清单一致，SHA-512 校验一致。
+3. 旧版执行安装入口后成功打开并挂载 `BioF3 0.0.1-rc.4-arm64` DMG，包内版本确认为 `0.0.1-rc.4`。
+4. 测试使用复制出的临时应用和临时 `BIOF3_LOCAL_DATA_DIR`，没有覆盖 `/Applications/BioF3.app`；测试结束后临时进程、应用、local data 和挂载已清理，正式 `rc.4` 已恢复运行。
+
+至此发布链路固定为：GitHub 只保存源码与标签；OSS 保存桌面安装包、校验文件和自动更新清单。应用负责检查、下载、校验并打开 DMG；由于没有 Developer ID 签名/公证，成员仍需手动拖入 Applications 覆盖安装。
+
+新的唯一产品开发主线是 **P-04 标准流程覆盖 Phase 1**：以现有 GO/KEGG 富集能力为首个 Plugin SDK 真实试点，复用 `P-03` 编排与 `P-02` 执行事实链，不新增第二套执行器、工作流数据库或结果系统。本阶段出口仍以本页“P1：标准流程覆盖 Phase 1”为准。
+
+## 2026-07-15 固定发布规则：macOS-only + OSS
 
 用户已确认后续桌面版本固定走 macOS 平台。Windows/Linux 不再是发布范围，也不再阻塞 RC；以下规则覆盖本页后续保留的旧三平台计划：
 
 1. 默认在本机运行 `npm run check` 与 `npm run build:mac`，同时生成 macOS arm64/x64 DMG。
 2. arm64 必须完成真实打包态启动、migration、R/Python backend 与 SPA 健康检查；x64 至少完成架构与打包结构校验。
-3. 生成 SHA-256 后直接使用 `gh release` 上传 GitHub prerelease，不消耗 GitHub Actions 分钟。
-4. GitHub Release workflow 仅作为手动备用路径；CI 与 Release workflow 均已收敛为 macOS-only。
+3. 生成 SHA-256 与 `latest-mac.yml` 后执行 `npm run release:mac:oss`，版本文件先上传、无缓存清单最后上传。
+4. GitHub 只推送源码与不可变标签，不上传 DMG；GitHub Actions/Release workflow 不再是桌面发布前置条件。
 5. 当前包未配置 Developer ID 签名和 Apple 公证，发布说明必须持续披露这一点。
 
-`v0.0.1-rc.2` 当前状态：已发布 macOS prerelease；arm64/x64 DMG 与 SHA-256 已上传并完成 GitHub 端复核。发布地址：<https://github.com/ShengXinF3/biof3-desktop/releases/tag/v0.0.1-rc.2>。
+`v0.0.1-rc.4` 当前状态：GitHub 源码与标签位于提交 `08a0bbb`；OSS `latest-mac.yml` 已指向 `rc.4`，真实旧版升级链路已通过。`rc.2` 的 GitHub Release 属于迁移前历史产物，不再作为当前分发入口。
 
 ## 2026-07-15 历史主线：RC 三平台发布工程收口（已被上述决策取代）
 

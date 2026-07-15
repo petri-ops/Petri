@@ -18,7 +18,19 @@
 - `v0.0.1-rc.2` 已从发布提交 `3a3f990` 创建不可变标签并发布为 GitHub prerelease：<https://github.com/ShengXinF3/biof3-desktop/releases/tag/v0.0.1-rc.2>。GitHub 端两份 DMG 的大小与 SHA-256 均已复核一致。
 - 当前未配置 Apple Developer ID，DMG 未签名、未公证；用户首次启动需要在“系统设置 → 隐私与安全性”中确认打开。
 
-后续固定顺序：macOS 本机检查 → arm64/x64 构建 → arm64 真实启动冒烟 → SHA-256 → GitHub prerelease。Windows/Linux 仅在用户以后重新明确要求时恢复。
+后续固定顺序：macOS 本机检查 → arm64/x64 构建 → arm64 真实启动冒烟 → SHA-256/`latest-mac.yml` → OSS 原子发布 → 匿名读取与旧版升级验收。GitHub 只保存源码与标签；Windows/Linux 仅在用户以后重新明确要求时恢复。
+
+## 2026-07-15 P-06 发布闭环验收完成
+
+主模块：`P-06 桌面集成与交付`；关注点：`C-03 安全与审计`、`C-05 测试与质量门禁`。
+
+- `v0.0.1-rc.4` 源码和不可变标签已推送，双架构 DMG、SHA-256 清单和 `latest-mac.yml` 已成功上传 OSS；线上清单确认 `version: 0.0.1-rc.4`。
+- Clash Verge 已改为长期规则模式：OpenAI/Codex/GitHub 继续走代理，`aliyuncs.com`/`aliyun.com`/`alicdn.com` 直连；错误的前置 `MATCH,DIRECT` 已从当前持久脚本移除。OSS 清单读取与发布上传均已在该模式下成功。
+- 已隔离运行真实 `rc.3` 打包应用，通过它自己的 `updater:check / updater:download / updater:install` IPC 完成升级验收：识别 `rc.4`、下载 197,172,657 字节 arm64 DMG、大小与 SHA-512 双校验通过、成功打开并挂载 DMG、包内版本确认为 `0.0.1-rc.4`。
+- 验收没有覆盖正式安装；测试结束后临时旧版进程、复制应用、临时 local data 和测试挂载均已清理，`/Applications/BioF3.app` 的 `rc.4` 已恢复运行。
+- 当前发布链路已形成可信基线。唯一保留限制是未购买 Apple Developer ID，不能静默覆盖 `.app`；应用下载并校验后打开 DMG，由团队成员手动拖入 Applications。
+
+下一阶段主模块切换为 `P-04 Plugin SDK 与分析能力`，由 `P-03` 编排、`P-02` 记录 job/artifact truth、`W-03/W-04` 交付。首个试点是 GO/KEGG 标准流程覆盖；不得为试点修改 Agent 核心、创建第二套执行器/工作流状态库或重写结果 UI。
 
 ## 2026-07-15 自动更新源迁移：GitHub → 阿里云 OSS
 
@@ -29,12 +41,12 @@
 - 客户端不需要 OSS 密钥、SDK 或 `ossutil`；刚安装到用户目录的 `ossutil` 已移除。发布脚本改用项目内 `ali-oss` Node SDK，也不要求系统安装额外工具。
 - macOS 构建只生成 arm64/x64 两套 DMG；不再生成 Squirrel ZIP/blockmap。`scripts/publish-macos-oss.mjs` 仍坚持版本文件先上传、无缓存清单最后上传，并拒绝未打标签、标签未指向 HEAD 或工作树不干净的发布。
 - 新增 `src/macos-oss-updater.js`，包含版本比较、受限同源 URL、架构选择、流式下载、大小与 SHA-512 双校验、失败清理和打开 DMG；相关 Node 测试覆盖正常与篡改下载。
-- 本机尚未找到 `OSS_ACCESS_KEY_ID/SECRET` 或旧 `OSS_AK/SK`，因此未向 Bucket 写入。现有 `rc.2` 是旧构建，仍需手动安装一次带新更新器的后续版本；之后即可走 OSS 检查、下载和引导覆盖安装。
-- 真实 arm64 打包启动通过，R `:3001`、Python `:3004`、SPA `:3002` 均健康；应用包已确认包含 `macos-oss-updater.js` 且不再包含 `electron-updater`。本机 Clash Verge 全局模式会关闭阿里云 TLS，临时规则模式下 OSS 可达；用户明确要求不要再切换代理模式，后续保持全局模式并把网络差异作为本机验证限制。
+- 发布端凭据由仓库根目录的本地 `.biof3-secrets` 提供，发布脚本已成功向 Bucket 写入；客户端仍只做匿名 HTTPS 读取，不包含上传凭据。
+- 真实 arm64 打包启动通过，R `:3001`、Python `:3004`、SPA `:3002` 均健康；应用包已确认包含 `macos-oss-updater.js` 且不再包含 `electron-updater`。Clash Verge 已固定为规则模式，阿里云 OSS 直连，OpenAI/Codex/GitHub 继续代理，不再依赖手工切换全局/规则模式。
 - 仓库根目录已有本地 `.biof3-secrets`，包含现成 `OSS_AK` / `OSS_SK`。发布入口现会自动加载该文件；文件已加入 `.gitignore` 并收紧为 `600`，密钥值不得输出或提交。
 - `0.0.1-rc.3` 双架构 DMG 已完成真实构建；arm64 打包态启动、migration、R/Python/SPA 健康检查均通过。该版本是首个包含无签名小团队更新器的安装基线，现有 `rc.2` 用户需手动覆盖安装一次 `rc.3`。
 - 用户已在可连接 OSS 的网络模式下成功执行 `npm run release:mac:oss`；双架构 DMG、SHA-256 清单和 `latest-mac.yml` 均按原子发布顺序上传，用户端测试可用。GitHub `rc.3` Release 草稿已删除，不保留软件资产；后续固定为 GitHub 只推源码，桌面安装包和更新源只发布到 OSS。
-- 安装 `rc.3` 后复现“检查更新无反馈”：成功返回 `hasUpdate=false` 时 hook 只清空更新状态，没有保存“检查完成且已最新”。`rc.4` 已新增 `upToDate` 状态和“当前已是最新版本”提示，并把 Dashboard 的旧“下载并重启”文案纠正为“下载、校验并打开 DMG”；前端 147 项测试、TypeScript 和生产构建通过，双架构 DMG 已生成。
+- 安装 `rc.3` 后复现“检查更新无反馈”：成功返回 `hasUpdate=false` 时 hook 只清空更新状态，没有保存“检查完成且已最新”。`rc.4` 已新增 `upToDate` 状态和“当前已是最新版本”提示，并把 Dashboard 的旧“下载并重启”文案纠正为“下载、校验并打开 DMG”；前端 147 项测试、TypeScript 和生产构建通过，双架构 DMG 已生成并发布，`rc.3 → rc.4` 真实升级链路已验收通过。
 - 完整操作说明见 [`docs/macos-oss-auto-update.md`](./macos-oss-auto-update.md)。
 
 ## 2026-07-15 最新交接点：RC 安装版修复已完成本地验证
