@@ -153,17 +153,16 @@ jobs:
           npm run harness:check
 
       - name: Build Windows NSIS x64
-        env:
-          # Windows code signing is disabled — no WIN_CSC_LINK / CSC_KEY_PASSWORD secrets
-          # are configured (they need a valid base64 .pfx, not a file path).
-          # When you have a Windows code-signing certificate:
-          #   1. base64-encode your .pfx file: base64 -i cert.pfx | tr -d '\n'
-          #   2. set WIN_CSC_LINK = <base64 string>  (not the file path)
-          #   3. set WIN_CSC_KEY_PASSWORD = <pfx password>
-          #   4. remove this comment block and the ternary below
-          # For now electron-builder skips signing; the .exe will trigger
-          # Windows SmartScreen "unrecognized app" on first run — this is normal
-          # for self-hosted / unsigned builds and does not affect functionality.
+        # Windows code signing is disabled — no WIN_CSC_LINK / CSC_KEY_PASSWORD secrets
+        # are configured (they need a valid base64 .pfx, not a file path).
+        # When you have a Windows code-signing certificate:
+        #   1. base64-encode your .pfx file: base64 -i cert.pfx | tr -d '\n'
+        #   2. set WIN_CSC_LINK = <base64 string>  (not the file path)
+        #   3. set WIN_CSC_KEY_PASSWORD = <pfx password>
+        #   4. remove this comment block and add back CSC_LINK + CSC_KEY_PASSWORD below
+        # For now electron-builder skips signing; the .exe triggers
+        # Windows SmartScreen "unrecognized app" on first run — normal for
+        # self-hosted / unsigned builds, does not affect functionality.
         run: npm run build:win
 
       - name: Compute SHA-256 for windows artifacts
