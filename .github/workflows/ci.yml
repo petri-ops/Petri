@@ -16,6 +16,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
+          # BioF3 core submodule lives at ShengXinF3/BioF3 (private).
+          # Default GITHUB_TOKEN does not cross repo boundaries, so a PAT
+          # with `repo` scope must be supplied via SUBMODULE_TOKEN. Note
+          # this PAT must additionally have read scope on the parent
+          # repository (ShengXinF3/biof3-desktop) since it is also used
+          # to fetch this repo itself. Graceful degradation: when the
+          # secret is missing we still attempt the checkout with the
+          # default GITHUB_TOKEN — the 401 surfaces as a CI failure here
+          # because main pipeline expects to verify submodule fidelity.
+          token: ${{ secrets.SUBMODULE_TOKEN || secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
