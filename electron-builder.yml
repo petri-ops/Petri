@@ -11,6 +11,7 @@ directories:
 # M2-11 (H4)：签名后 notarize + staple（需 CI 注入 APPLE_ID/APP_PASSWORD/NOTARIZE_TEAM_ID）
 # 顶层 afterSign 仅作为冗余保险；mac: 段下也声明了一次（electron-builder 双读）
 afterSign: build/afterSign.js
+afterPack: build/afterPack.js
 
 # 打包进 Electron app bundle 的文件
 files:

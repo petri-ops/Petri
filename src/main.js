@@ -29,9 +29,12 @@ const {
   getOpenShellPlan,
   getSessionShellSpec,
 } = require("./platform-compat");
+const runtimePathsModule = app.isPackaged
+  ? path.join(process.resourcesPath, "core", "shared-backend", "runtime-paths.js")
+  : path.join(__dirname, "..", "vendor", "biof3-core", "shared-backend", "runtime-paths.js");
 const {
   getPythonRuntimeExecutable,
-} = require("../vendor/biof3-core/shared-backend/runtime-paths");
+} = require(runtimePathsModule);
 
 const isDevMode =
   process.argv.includes("--dev") ||
@@ -189,8 +192,8 @@ function _applyComputeSettings(settings) {
 // 打包模式：desktop 资源在 process.resourcesPath，core 资源在 process.resourcesPath/core（electron-builder extraResources）
 // 注意：分仓前 main.js 在 desktop-app/src/main.js，往上两层到仓库根；
 //       分仓后 main.js 在 src/main.js，只需往上一层到 desktop 仓根。
-const PROJECT_ROOT = path.join(__dirname, "..");
 const IS_DEV = !app.isPackaged;
+const PROJECT_ROOT = IS_DEV ? path.join(__dirname, "..") : process.resourcesPath;
 
 // core 仓根（submodule）。dev: vendor/biof3-core；pack: resourcesPath/core
 function resolveCoreRoot() {
@@ -218,9 +221,25 @@ function resolveCore(...parts) {
 // 与 better-sqlite3（按系统 node 编译，137）版本不匹配导致崩溃。
 // PATH 查找不可靠（Electron 子进程 PATH 不含用户自定义 node 路径），
 // 所以用 execFileSync('which node') 拿绝对路径。
-// 打包模式：用 Electron 自带 node（better-sqlite3 在打包时按 Electron node 重编译）。
+// 打包模式：macOS 必须使用 Helper 可执行文件。直接 spawn 主应用可执行文件会
+// 再次加载 app.asar，递归启动整套桌面进程，而不是进入 Node 子进程模式。
 function resolveNodeBin() {
-  if (!IS_DEV) return process.execPath;
+  if (!IS_DEV) {
+    if (process.platform === "darwin") {
+      const helperName = `${path.basename(process.execPath)} Helper`;
+      const helperBin = path.join(
+        path.dirname(process.execPath),
+        "..",
+        "Frameworks",
+        `${helperName}.app`,
+        "Contents",
+        "MacOS",
+        helperName,
+      );
+      if (fs.existsSync(helperBin)) return helperBin;
+    }
+    return process.execPath;
+  }
   try {
     const { execFileSync } = require("child_process");
     const locator = getNodeLocator(process.platform);
@@ -473,7 +492,7 @@ function startRServer() {
   }
 
   rServerProc = spawn(NODE_BIN, [rServerPath], {
-    env: { ...process.env },
+    env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" },
     stdio: ["ignore", "pipe", "pipe"],
   });
 
@@ -530,7 +549,7 @@ function startPyServer(reason = "ipc") {
 
   try {
     pyServerProc = spawn(NODE_BIN, [pyServerPath], {
-      env: { ...process.env },
+      env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" },
       stdio: ["ignore", "pipe", "pipe"],
     });
   } catch (e) {
