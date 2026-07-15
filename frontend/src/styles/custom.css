@@ -108,7 +108,7 @@
  --biof3-status-warning-border: #fbbf24;
  --biof3-accent-border: rgba(13, 148, 136, 0.4);
  --biof3-accent-surface: rgba(240, 253, 250, 0.78);
- --biof3-user-bubble-bg: rgba(15, 23, 42, 0.045);
+ --biof3-user-bubble-bg: rgba(15, 23, 42, 0.065);
  --biof3-accent-orange: #ea580c;
  --biof3-accent-orange-bg: rgba(249, 115, 22, 0.08);
 }
@@ -190,7 +190,7 @@
  --biof3-status-warning-border: rgba(251, 191, 36, 0.3);
  --biof3-accent-border: rgba(45, 212, 191, 0.4);
  --biof3-accent-surface: rgba(45, 212, 191, 0.12);
- --biof3-user-bubble-bg: rgba(148, 163, 184, 0.08);
+ --biof3-user-bubble-bg: rgba(148, 163, 184, 0.12);
  --biof3-accent-orange: #fb923c;
  --biof3-accent-orange-bg: rgba(251, 146, 60, 0.16);
 
