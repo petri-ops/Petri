@@ -206,21 +206,10 @@ jobs:
           name: desktop-macos
           path: artifacts/macos
 
-      - name: Download Windows artifacts
-        if: success()
-        uses: actions/download-artifact@v4
-        with:
-          name: desktop-windows
-          path: artifacts/windows
-          continue-on-error: true
-
       - name: Combine SHA-256 sums
         shell: bash
         run: |
-          cat artifacts/macos/SHA256SUMS-mac.txt > artifacts/SHA256SUMS.txt
-          if [ -f artifacts/windows/SHA256SUMS-win.txt ]; then
-            cat artifacts/windows/SHA256SUMS-win.txt >> artifacts/SHA256SUMS.txt
-          fi
+          cp artifacts/macos/SHA256SUMS-mac.txt artifacts/SHA256SUMS.txt
           echo "----- Combined SHA256SUMS -----"
           cat artifacts/SHA256SUMS.txt
 
