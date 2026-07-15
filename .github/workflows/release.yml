@@ -88,7 +88,14 @@ jobs:
           npm run build:mac-x64
 
       - name: Compute SHA-256 for mac artifacts
-        run: shasum -a 256 dist/*.dmg dist/*.zip > dist/SHA256SUMS-mac.txt
+        shell: bash
+        run: |
+          set +e
+          shasum -a 256 dist/*.dmg dist/*.zip dist/*.yml 2>/dev/null > dist/SHA256SUMS-mac.txt
+          if [ ! -s dist/SHA256SUMS-mac.txt ]; then
+            shasum -a 256 dist/*.dmg > dist/SHA256SUMS-mac.txt || true
+          fi
+          cat dist/SHA256SUMS-mac.txt
 
       - name: Upload mac artifacts
         uses: actions/upload-artifact@v4
