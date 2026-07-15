@@ -182,7 +182,7 @@ jobs:
   release:
     name: Publish GitHub prerelease
     needs: [macos]
-    if: success()
+    if: needs.macos.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
