@@ -10,16 +10,9 @@ import { BackendStatusProvider } from '@/components/backend/BackendStatusProvide
 import { BackendDownBanner } from '@/components/backend/BackendDownBanner';
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { biof3Events, subscribeBioF3Event } from '@/lib/events';
-import ToolsPage from '@/pages/tools';
-// NOTE: SingleCellPage and SpatialPage routes are intentionally disabled on the desktop
-// branch. The underlying pages/pages/single-cell and pages/spatial files are preserved
-// because their utilities (_Toast, _ErrorTranslate, _auth, _AdminPanel) are still
-// consumed by pages/admin. Full legacy removal tracked in state-decomposition §10.
-import AdminPage from '@/pages/admin';
 import HomePage from '@/pages/home';
-// DocsPage 原生渲染组件保留在 pages/docs.tsx，但桌面端不再挂载教程路由。
-// 如需恢复内置教程，取消下面注释并加回 /docs 路由即可。
-// import DocsPage from '@/pages/docs';
+// NOTE: Legacy pages (tools, admin, docs, figcode, single-cell, spatial) have been removed
+// as the desktop application now uses the Agent-based workflow through ProjectWorkspace.
 import '@/components/copilot/copilotActRegistryBoot';
 import { ProjectWorkspace } from '@/pages/project-workspace';
 import '@/components/desktop/desktop.css';
@@ -70,21 +63,10 @@ export default function App(): React.ReactElement {
         <CopilotContextProvider>
           <main className="biof3-spa-main" style={{ marginTop: 0, paddingTop: isCoverRoute ? 0 : 28 }}>
             <Routes>
-              {/* 阶段 1：8 个应用页面全部移植完成 */}
+              {/* Desktop Agent-based workflow */}
               <Route path="/" element={<HomePage />} />
               <Route path="/project/:projectId" element={<ProjectWorkspace />} />
-              <Route path="/tools" element={<ToolsPage />} />
-              <Route path="/tools/:toolId" element={<ToolsPage />} />
-              <Route path="/admin" element={<AdminPage />} />
-              {/* 教程路由已移除 — 桌面端不再内置教程入口。
-                  原生渲染组件（pages/docs.tsx / docs-frame.tsx / mdx/）保留在代码库中，
-                  如需恢复：import DocsPage 并加回下面两行路由即可。
-
-                  Source of truth：本桌面版的发行版本、支持的 platform、golden path 工具等
-                  一律以仓库根 release-contract.json 为准；测试 test/release-contract.test.mjs
-                  会强制 _data.ts 中存在对应的 tool id。 */}
-              {/* <Route path="/docs/*" element={<DocsPage />} /> */}
-              {/* <Route path="/docs" element={<DocsPage />} /> */}
+              {/* Legacy pages (tools, admin, docs, figcode) removed - all workflows now use Agent */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
