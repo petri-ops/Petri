@@ -4817,10 +4817,13 @@ body.biof3-resizing-columns * {
 
 .fileTreeRow:hover {
   background: var(--biof3-hover);
+  color: var(--biof3-text);
 }
 
 .fileTreeRowActive {
   background: var(--biof3-accent-bg);
+  color: var(--biof3-accent);
+  font-weight: 500;
 }
 
 .fileTreeName {

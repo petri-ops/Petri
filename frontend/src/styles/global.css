@@ -91,11 +91,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--ifm-color-emphasis-300);
+  background: color-mix(in srgb, var(--biof3-border) 60%, var(--biof3-bg-subtle) 40%);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--ifm-color-emphasis-500);
+  background: color-mix(in srgb, var(--biof3-text-secondary) 50%, transparent 50%);
 }
 
 /* docs/blog iframe 过渡容器 */
