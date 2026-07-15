@@ -1,6 +1,8 @@
 # Plan 1.6 — State Hook Refactor · Closeout
 
-> Six HIGH-severity leaks from `docs/state-decomposition.md`
+> 历史验收报告：Plan 1.6 已完成，本文件只用于追溯，不是当前任务清单。
+
+> Six HIGH-severity leaks from `state-decomposition-1.4.md`
 > §4.2-§4.7 fixed via React hooks + module-scope shared
 > caches + a typed IPC accessor. Plan 1.6 closes; all six
 > items landed, 9 test files / 74 tests, tsc + build green.

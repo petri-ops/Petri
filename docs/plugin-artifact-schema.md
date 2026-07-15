@@ -1,5 +1,7 @@
 # BioF3 Plugin and Artifact Schema
 
+> 状态：当前兼容契约，Stage 1–2 只保持回归，Stage 3 新增标准流程时继续使用。
+
 This document defines the compatibility contract for Codex-style BioF3 analysis plugins.
 
 ## Plugin Tool Contract

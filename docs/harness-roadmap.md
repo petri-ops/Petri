@@ -1,5 +1,7 @@
 # BioF3 Harness Roadmap v1
 
+> 状态：Phase 1–6 完成记录与 Stage 3 技术参考。当前开发顺序以 `docs/v1-productization-roadmap.md` 为准，GO/KEGG 等流程扩展等待 UI 和模型层验收。
+
 最后更新：2026-07-13
 
 这份路线图回答三个问题：

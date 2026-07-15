@@ -1,5 +1,7 @@
 # Plan 1.4 — State Decomposition (desktop app)
 
+> 历史审计：本文件中的多项问题已经由 Plan 1.6 等后续工作关闭；不得把其中的旧问题列表直接当成当前状态。
+
 > Mapping all runtime state, classifying it, finding leaks, and proposing the canonical home for each piece.
 >
 > Scope: BioF3 desktop Electron app (root + `frontend/` + `src/main.js` + `src/preload.js` + `src/plugin-manager.js` + `src/content-sync.js`).
@@ -785,5 +787,5 @@ grep -c "SingleCellPage\|SpatialPage" frontend/src/App.tsx
 
 ## 9. Where to keep this
 
-This document lives at `docs/state-decomposition.md`. The accompanying implementation
+This historical document now lives at `docs/archive/checkpoints/state-decomposition-1.4.md`. The accompanying implementation
 plan is the ordered PR list in §7.

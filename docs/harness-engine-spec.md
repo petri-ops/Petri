@@ -1,5 +1,7 @@
 # BioF3 Harness Engine Spec v1
 
+> 状态：Harness Phase 1–6 基础规范已完成。当前 UI/模型阶段只保持回归；Stage 3 继续复用本规范，不从本文件推断当前优先级。
+
 最后更新：2026-07-11
 
 这份文档定义 BioF3 的“Prompt 工程 / Harness 工程”底座。

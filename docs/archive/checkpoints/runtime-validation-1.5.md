@@ -1,5 +1,7 @@
 # Plan 1.5 — Runtime Validation Report
 
+> 历史验收报告：记录 2026-07-10 的运行时验证，不代表当前版本验证状态。
+
 > Static analysis is not enough. Plan 1.5 runs the actual SPA + backend
 > stack end-to-end without an Electron GUI and verifies that everything
 > that compiles also boots and serves traffic.
@@ -170,10 +172,10 @@ In strict plan order:
 1. **Plan 1.5a — Add `useTerminalSession.test.ts`** (highest-value test
    gap, named in `next-steps-roadmap.md` Phase 3).
 2. **Plan 1.6 — Dedupe backend-status pollers** (PR-1 of
-   `state-decomposition.md` §7 step 2 — delete `useBackendStatus`,
+   `state-decomposition-1.4.md` §7 step 2 — delete `useBackendStatus`,
    point consumers at `BackendStatusProvider` context).
 3. **Plan 1.7 — Adopt `useResizableColumns`** in `project-workspace.tsx`
-   (PR-1 of `state-decomposition.md` §7 step 3).
+   (PR-1 of `state-decomposition-1.4.md` §7 step 3).
 4. **Plan 1.8 — Lazy-load jspdf + html2canvas** behind a click handler
    for PDF export, dropping main bundle by ~590KB / ~175KB gzip.
 5. **Manual GUI smoke test** under Playwright-with-electron if

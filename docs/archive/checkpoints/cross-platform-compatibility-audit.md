@@ -1,5 +1,7 @@
 # Cross-Platform Compatibility Audit
 
+> 历史检查点：记录 2026-07-11 的三平台兼容审计。当前默认发布范围已改为 macOS-only，本文件不再决定当前开发顺序。
+
 最后更新：2026-07-11
 
 目标：确认 `biof3-desktop` 在 Windows、Linux、macOS 上的实际可用性，避免把部署脚本、运行时逻辑和本地开发捷径混在一起。

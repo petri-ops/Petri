@@ -1,5 +1,7 @@
 # First-success path (Week 3)
 
+> Status: maintained as the demo/golden-path regression contract because tests and fixtures reference it. It is not the current product roadmap.
+
 The exact steps a brand-new BioF3 desktop user needs to take to go
 from "I just installed the app" to "I have a real analysis report".
 Designed to be smooth, deterministic, and zero-config.

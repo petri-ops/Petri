@@ -1,5 +1,7 @@
 # M2-11 (H4)：mac 签名 + notarization CI 配置
 
+> 延后参考：当前用户明确不购买 Apple Developer 账号，macOS 使用未签名 DMG + OSS 小团队更新流程。本文件只有在未来重新启用 Developer ID 签名/公证时使用。
+
 ## 前置条件
 
 - Apple Developer 证书（Developer ID Application）导入 keychain
