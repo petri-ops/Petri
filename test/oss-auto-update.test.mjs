@@ -11,17 +11,19 @@ test('macOS updater uses the BioF3 OSS generic latest feed', () => {
   assert.match(builder, /publish:\s*\n\s*provider: generic\s*\n\s*url: https:\/\/biof3-uploads\.oss-cn-hangzhou\.aliyuncs\.com\/desktop\/updates\/macos\s*\n\s*channel: latest/);
 });
 
-test('macOS build emits DMG installers and ZIP updater payloads for both architectures', () => {
+test('macOS build emits DMG installers for both architectures', () => {
   assert.match(builder, /target: dmg[\s\S]*?- arm64[\s\S]*?- x64/);
-  assert.match(builder, /target: zip[\s\S]*?- arm64[\s\S]*?- x64/);
+  assert.doesNotMatch(builder, /target: zip/);
 });
 
-test('OSS publisher uploads immutable artifacts before the no-cache manifest', () => {
+test('OSS publisher uses the Node SDK and uploads immutable artifacts before the no-cache manifest', () => {
   const immutableIndex = publisher.indexOf("'public,max-age=31536000,immutable'");
   const manifestIndex = publisher.indexOf("'no-cache,no-store,must-revalidate'");
   assert.ok(immutableIndex > 0);
   assert.ok(manifestIndex > immutableIndex);
-  assert.match(publisher, /--acl', 'public-read'/);
+  assert.match(publisher, /import OSS from 'ali-oss'/);
+  assert.match(publisher, /putACL\(objectName, 'public-read'\)/);
+  assert.doesNotMatch(publisher, /ossutil/);
   assert.match(publisher, /expectedTag = `v\$\{version\}`/);
   assert.match(publisher, /working tree is not clean/);
   assert.match(publisher, /metadata SHA-512 mismatch/);

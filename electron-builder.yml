@@ -30,12 +30,6 @@ mac:
       arch:
         - arm64
         - x64
-    # electron-updater on macOS downloads ZIP through Squirrel.Mac.
-    # DMG remains the manual installer; both targets are required.
-    - target: zip
-      arch:
-        - arm64
-        - x64
   # M2-11 (H4)：mac 签名 + notarization
   # 有证书时：CI 注入 CSC_LINK/CSC_KEY_PASSWORD → identity 自动匹配
   # 无证书时：identity: null，用户需右键打开（v1 过渡）
@@ -65,8 +59,9 @@ nsis:
 # 压缩
 compression: maximum
 
-# 自动更新发布源 — 阿里云 OSS macOS 渠道
-# latest-mac.yml 必须最后上传并禁用缓存；带版本号的 DMG/ZIP/blockmap 可长期缓存。
+# 小团队更新发布源 — 阿里云 OSS macOS 渠道
+# 客户端读取 latest-mac.yml，下载匹配架构的 DMG 并校验 SHA-512。
+# latest-mac.yml 必须最后上传并禁用缓存；带版本号的 DMG 可长期缓存。
 # GitHub Release 继续作为手动下载镜像，不再作为应用内更新源。
 publish:
   provider: generic

@@ -120,17 +120,15 @@ export function useAutoUpdate(): AutoUpdateState & AutoUpdateActions {
     setProgress(0);
     setDownloaded(false);
     try {
-      await updater.download();
-    } catch {
-      // onError event will fire and clear downloading
-    }
-    // onUpdateDownloaded fires asynchronously after download() resolves.
-    // Invoke it inline so state is settled before the function returns.
-    updater.onUpdateDownloaded?.(() => {
+      const result = await updater.download();
+      if (result && !result.ok) {
+        throw new Error(result.error || '下载失败');
+      }
+    } catch (e) {
       setDownloading(false);
-      setProgress(1);
-      setDownloaded(true);
-    });
+      setError(e instanceof Error ? e.message : String(e) || '下载失败');
+      return;
+    }
   }, [downloading]);
 
   const install = useCallback(async () => {
@@ -139,12 +137,15 @@ export function useAutoUpdate(): AutoUpdateState & AutoUpdateActions {
     setError('');
     setInstalling(true);
     try {
-      await updater.install();
-    } catch {
-      // onError event will fire and clear installing
+      const result = await updater.install();
+      if (result && !result.ok) {
+        throw new Error(result.error || '打开安装包失败');
+      }
+      setInstalling(false);
+    } catch (e) {
+      setInstalling(false);
+      setError(e instanceof Error ? e.message : String(e) || '打开安装包失败');
     }
-    // Errors handled by events effect (onError). install() throws
-    // synchronously when it rejects, or silently when it triggers restart.
   }, [installing]);
 
   return {

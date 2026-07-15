@@ -149,7 +149,7 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     },
   },
 
-  // 自动更新（electron-updater）
+  // macOS 小团队更新（OSS 清单 + DMG）
   updater: {
     check: () => ipcRenderer.invoke('updater:check'),
     download: () => ipcRenderer.invoke('updater:download'),

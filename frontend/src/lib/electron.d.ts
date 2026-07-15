@@ -195,8 +195,8 @@ declare global {
           version?: string;
           error?: string;
         }>;
-        download: () => Promise<{ ok: boolean; error?: string }>;
-        install: () => Promise<void>;
+        download: () => Promise<{ ok: boolean; error?: string } | void>;
+        install: () => Promise<{ ok: boolean; error?: string } | void>;
         onUpdateAvailable: (cb: (info: { version: string }) => void) => () => void;
         onUpdateNotAvailable: (cb: () => void) => () => void;
         onDownloadProgress: (

@@ -21,11 +21,11 @@ interface Props {
 // ChatModelPreset type + DEFAULT_CHAT_MODEL_PRESETS live in
 // `@/hooks/useAiSettings` — Plan 1.6 §4.5 [HIGH] type dedup.
 
-/** UpdateChecker — 检查应用更新（electron-updater 前端 UI） */
+/** UpdateChecker — 检查 OSS 更新并打开已校验的 macOS 安装包 */
 function UpdateChecker(): React.ReactElement | null {
   if (!window.biof3Desktop?.updater) return null;
 
-  const { checking, available, availableVersion, downloading, progress, downloaded, error, check, download, install } =
+  const { checking, available, availableVersion, downloading, progress, downloaded, error, installing, check, download, install } =
     useAutoUpdate();
 
   const pct = progress !== null ? Math.round(progress * 100) : 0;
@@ -37,8 +37,9 @@ function UpdateChecker(): React.ReactElement | null {
           type="button"
           className="biof3-btn biof3-btn--primary biof3-btn--sm"
           onClick={install}
+          disabled={installing}
         >
-          重启安装更新
+          {installing ? '正在打开…' : '打开安装包'}
         </button>
       ) : downloading ? (
         <span className="biof3-update-progress">下载中 {pct}%</span>

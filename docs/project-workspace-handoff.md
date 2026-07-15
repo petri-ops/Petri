@@ -24,13 +24,13 @@
 
 主模块：`P-06 桌面集成与交付`；关注点：`C-03 安全与审计`、`C-05 测试与质量门禁`。
 
-- `electron-builder.yml` 的 updater provider 已从私有 GitHub 改为 OSS generic feed：`https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/desktop/updates/macos`，固定 `latest` 渠道。
-- macOS 构建现在同时生成 arm64/x64 DMG 与 ZIP；ZIP 是 Squirrel.Mac/electron-updater 的实际更新载荷。
-- 新增 `scripts/publish-macos-oss.mjs`：校验双架构产物、生成 SHA-256、版本文件长期缓存、`latest-mac.yml` 禁止缓存且最后上传，并拒绝未打标签、标签未指向 HEAD 或工作树不干净的发布。
-- 真实构建验证通过：两套打包应用内 `app-update.yml` 均指向 OSS；新 `latest-mac.yml` 同时引用两套 ZIP 与两套 DMG；dry-run 共规划 10 个版本对象加最终清单。
-- 完整根项目回归在恢复 Node ABI 后为 188 项中 181 pass、7 个显式 live skip、0 fail；新增 OSS updater 测试 3/3 通过。
-- 本机尚未发现 `ossutil`、`~/.ossutilconfig`、`OSS_ACCESS_KEY_ID/SECRET` 或旧 `OSS_AK/SK`，因此未向 Bucket 写入。ECS SSH 探测也未建立连接。
-- 当前没有 Apple Developer ID，macOS 自动替换安装仍被签名要求阻塞；现有 `rc.2` 继续手动更新。首个可自动更新版本必须使用新版本号、签名/公证并完成 OSS 匿名下载验证。
+- 更新源固定为 `https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/desktop/updates/macos`，入口为 `latest-mac.yml`。
+- 用户明确不购买 Apple Developer 账号，方案已从 `electron-updater` 的签名替换安装改为小团队流程：应用自动检查 OSS、按 arm64/x64 下载 DMG、校验 SHA-512，然后打开安装包供成员覆盖安装。
+- 客户端不需要 OSS 密钥、SDK 或 `ossutil`；刚安装到用户目录的 `ossutil` 已移除。发布脚本改用项目内 `ali-oss` Node SDK，也不要求系统安装额外工具。
+- macOS 构建只生成 arm64/x64 两套 DMG；不再生成 Squirrel ZIP/blockmap。`scripts/publish-macos-oss.mjs` 仍坚持版本文件先上传、无缓存清单最后上传，并拒绝未打标签、标签未指向 HEAD 或工作树不干净的发布。
+- 新增 `src/macos-oss-updater.js`，包含版本比较、受限同源 URL、架构选择、流式下载、大小与 SHA-512 双校验、失败清理和打开 DMG；相关 Node 测试覆盖正常与篡改下载。
+- 本机尚未找到 `OSS_ACCESS_KEY_ID/SECRET` 或旧 `OSS_AK/SK`，因此未向 Bucket 写入。现有 `rc.2` 是旧构建，仍需手动安装一次带新更新器的后续版本；之后即可走 OSS 检查、下载和引导覆盖安装。
+- 真实 arm64 打包启动通过，R `:3001`、Python `:3004`、SPA `:3002` 均健康；应用包已确认包含 `macos-oss-updater.js` 且不再包含 `electron-updater`。本机 Clash Verge 全局模式会关闭阿里云 TLS，临时规则模式下 OSS 可达；用户明确要求不要再切换代理模式，后续保持全局模式并把网络差异作为本机验证限制。
 - 完整操作说明见 [`docs/macos-oss-auto-update.md`](./macos-oss-auto-update.md)。
 
 ## 2026-07-15 最新交接点：RC 安装版修复已完成本地验证

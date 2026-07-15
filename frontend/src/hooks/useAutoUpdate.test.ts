@@ -157,18 +157,14 @@ describe('useAutoUpdate', () => {
     expect(result.current.installing).toBe(true);
   });
 
-  it('install() sets error via onError event when promise rejects', async () => {
-    let errorFn!: (msg: string) => void;
+  it('install() surfaces a rejected installer-open request and clears installing', async () => {
     installMock({
       check: () => Promise.resolve({ ok: true, hasUpdate: false }),
       download: () => Promise.resolve(),
       install: () => Promise.reject(new Error('denied')),
-      onError: fn => { errorFn = fn; return () => {}; },
     });
     const { result } = renderHook(() => useAutoUpdate());
     await act(async () => { result.current.install(); await vi.runOnlyPendingTimersAsync(); });
-    expect(result.current.installing).toBe(true);
-    await act(async () => { errorFn('denied'); await vi.runOnlyPendingTimersAsync(); });
     expect(result.current.error).toBe('denied');
     expect(result.current.installing).toBe(false);
   });

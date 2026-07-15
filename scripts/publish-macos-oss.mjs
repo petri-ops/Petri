@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import OSS from 'ali-oss';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const DIST = join(ROOT, 'dist');
@@ -35,24 +36,16 @@ if (!metadata.includes(`version: ${version}`)) {
 
 const artifactNames = readdirSync(DIST)
   .filter((name) => name.includes(version))
-  .filter((name) => /\.(dmg|zip|blockmap)$/.test(name))
+  .filter((name) => name.endsWith('.dmg'))
   .sort();
 
 const dmgNames = artifactNames.filter((name) => name.endsWith('.dmg'));
-const zipNames = artifactNames.filter((name) => name.endsWith('.zip'));
 if (dmgNames.length !== 2) fail(`expected 2 DMGs for ${version}, found ${dmgNames.length}`);
-if (zipNames.length !== 2) fail(`expected 2 ZIPs for ${version}, found ${zipNames.length}`);
-
-for (const name of zipNames) {
-  if (!metadata.includes(`url: ${name}`)) {
-    fail(`latest-mac.yml does not reference ${name}`);
-  }
-}
 
 const metadataFiles = [...metadata.matchAll(/^\s*- url: (.+)\n\s+sha512: (.+)\n\s+size: (\d+)$/gm)]
   .map((match) => ({ name: match[1], sha512: match[2], size: Number(match[3]) }));
-if (metadataFiles.length !== 4) {
-  fail(`expected 4 files in latest-mac.yml, found ${metadataFiles.length}`);
+if (metadataFiles.length !== 2) {
+  fail(`expected 2 DMG files in latest-mac.yml, found ${metadataFiles.length}`);
 }
 for (const entry of metadataFiles) {
   const file = join(DIST, entry.name);
@@ -64,7 +57,7 @@ for (const entry of metadataFiles) {
 
 const checksumName = `SHA256SUMS-mac-${version}.txt`;
 const checksumPath = join(DIST, checksumName);
-const checksumLines = [...dmgNames, ...zipNames]
+const checksumLines = dmgNames
   .sort()
   .map((name) => {
     const digest = createHash('sha256').update(readFileSync(join(DIST, name))).digest('hex');
@@ -72,21 +65,12 @@ const checksumLines = [...dmgNames, ...zipNames]
   });
 writeFileSync(checksumPath, `${checksumLines.join('\n')}\n`);
 
-const immutableFiles = [...artifactNames.map((name) => join(DIST, name)), checksumPath];
+const immutableFiles = [...dmgNames.map((name) => join(DIST, name)), checksumPath];
 
 function contentType(file) {
   if (file.endsWith('.yml')) return 'text/yaml; charset=utf-8';
-  if (file.endsWith('.zip')) return 'application/zip';
   if (file.endsWith('.dmg')) return 'application/x-apple-diskimage';
   return 'application/octet-stream';
-}
-
-function findOssutil() {
-  for (const command of ['ossutil', 'ossutil64']) {
-    const result = spawnSync('command', ['-v', command], { shell: true, encoding: 'utf8' });
-    if (result.status === 0) return command;
-  }
-  return null;
 }
 
 function git(...args) {
@@ -104,31 +88,26 @@ function verifyReleaseSource() {
   if (dirty) fail('working tree is not clean; commit release source before uploading');
 }
 
-const ossEnv = {
-  ...process.env,
-  OSS_ACCESS_KEY_ID: process.env.OSS_ACCESS_KEY_ID || process.env.OSS_AK,
-  OSS_ACCESS_KEY_SECRET: process.env.OSS_ACCESS_KEY_SECRET || process.env.OSS_SK,
-  OSS_REGION: region,
-  OSS_ENDPOINT: endpoint,
-};
+let client = null;
 
-function upload(command, file, cacheControl) {
+async function upload(file, cacheControl) {
   const name = basename(file);
+  const objectName = `${prefix}/${name}`;
   const destination = `oss://${bucket}/${prefix}/${name}`;
-  const args = [
-    'cp', file, destination,
-    '--region', region,
-    '--endpoint', endpoint,
-    '--acl', 'public-read',
-    '--content-type', contentType(file),
-    '--cache-control', cacheControl,
-    '--force',
-  ];
   console.log(`[oss-update] ${dryRun ? 'would upload' : 'uploading'} ${name}`);
   console.log(`[oss-update] public URL: ${publicBaseUrl}/${encodeURIComponent(name)}`);
   if (dryRun) return;
-  const result = spawnSync(command, args, { cwd: ROOT, stdio: 'inherit', env: ossEnv });
-  if (result.status !== 0) fail(`ossutil failed while uploading ${name}`);
+  try {
+    await client.put(objectName, file, {
+      headers: {
+        'Content-Type': contentType(file),
+        'Cache-Control': cacheControl,
+      },
+    });
+    await client.putACL(objectName, 'public-read');
+  } catch (error) {
+    fail(`OSS upload failed for ${name}: ${error.message}`);
+  }
 }
 
 console.log(`[oss-update] version=${version}`);
@@ -140,17 +119,28 @@ if (prepareOnly) {
   process.exit(0);
 }
 
-const ossutil = findOssutil();
-if (!dryRun && !ossutil) {
-  fail('ossutil is not installed; install it and configure a least-privilege RAM credential first');
+if (!dryRun) {
+  verifyReleaseSource();
+  const accessKeyId = process.env.OSS_ACCESS_KEY_ID || process.env.OSS_AK;
+  const accessKeySecret = process.env.OSS_ACCESS_KEY_SECRET || process.env.OSS_SK;
+  if (!accessKeyId || !accessKeySecret) {
+    fail('missing OSS_ACCESS_KEY_ID / OSS_ACCESS_KEY_SECRET release credentials');
+  }
+  client = new OSS({
+    region: region.startsWith('oss-') ? region : `oss-${region}`,
+    endpoint: endpoint.startsWith('http') ? endpoint : `https://${endpoint}`,
+    accessKeyId,
+    accessKeySecret,
+    bucket,
+    secure: true,
+  });
 }
-if (!dryRun) verifyReleaseSource();
 
 // Immutable versioned objects are uploaded first. The channel manifest is the
 // atomic switch and must always be uploaded last with caching disabled.
 for (const file of immutableFiles) {
-  upload(ossutil, file, 'public,max-age=31536000,immutable');
+  await upload(file, 'public,max-age=31536000,immutable');
 }
-upload(ossutil, metadataPath, 'no-cache,no-store,must-revalidate');
+await upload(metadataPath, 'no-cache,no-store,must-revalidate');
 
 console.log(`[oss-update] complete: ${publicBaseUrl}/latest-mac.yml`);

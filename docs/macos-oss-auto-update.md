@@ -9,26 +9,28 @@
 - Endpoint：`oss-cn-hangzhou.aliyuncs.com`
 - 对象前缀：`desktop/updates/macos/`
 - 更新清单：`https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/desktop/updates/macos/latest-mac.yml`
-- electron-updater provider：`generic`
-- channel：`latest`
+- 客户端实现：`src/macos-oss-updater.js`
+- 更新方式：自动检查 → 下载匹配架构的 DMG → SHA-512 校验 → 打开安装包
 
 GitHub Release 继续保存 DMG 供手动下载安装，但应用内更新不再访问私有 GitHub Release。
 
 ## 发布文件
 
-每个版本同时生成：
+每个版本生成：
 
-- arm64/x64 DMG：用户手动安装。
-- arm64/x64 ZIP：`electron-updater` 在 macOS 上实际下载的更新载荷。
-- DMG/ZIP blockmap：差分更新元数据。
+- arm64/x64 DMG：应用按当前 Mac 架构自动选择、下载并打开。
 - `SHA256SUMS-mac-<version>.txt`：人工下载校验。
 - `latest-mac.yml`：更新渠道的原子入口。
 
 带版本号的文件使用 `Cache-Control: public,max-age=31536000,immutable`；`latest-mac.yml` 使用 `no-cache,no-store,must-revalidate`。发布脚本始终先上传不可变文件，最后上传清单，避免客户端看到半发布版本。
 
-## 首次配置 OSS 写权限
+客户端只需要匿名 HTTPS 读取权限，不需要 AccessKey、OSS SDK 或 `ossutil`。Apple Developer 付费账号也不是这个小团队更新流程的前置条件。
 
-本机需要安装阿里云 `ossutil`，并使用最小权限 RAM 用户或 STS 凭据。不要使用主账号 AccessKey，也不要把密钥写进仓库。
+由于应用未使用 Developer ID 签名，安装动作不能静默替换正在运行的 `.app`。下载完成后 BioF3 会打开已校验的 DMG，由成员把 BioF3 拖入 Applications 覆盖旧版本；首次打开仍可能需要在“系统设置 → 隐私与安全性”中确认。
+
+## 发布端 OSS 写权限
+
+发布脚本使用项目内的官方 `ali-oss` Node SDK，不需要在系统中安装 `ossutil`。上传时仍需最小权限 RAM 用户或 STS 凭据；不要使用主账号 AccessKey，也不要把密钥写进仓库。
 
 建议 RAM 权限仅允许对以下前缀执行列举、上传和覆盖：
 
@@ -36,7 +38,7 @@ GitHub Release 继续保存 DMG 供手动下载安装，但应用内更新不再
 acs:oss:*:*:biof3-uploads/desktop/updates/macos/*
 ```
 
-ossutil 支持标准环境变量：
+发布脚本读取标准环境变量：
 
 ```bash
 export OSS_ACCESS_KEY_ID=...
@@ -64,10 +66,12 @@ npm run release:mac:oss:dry-run
 npm run release:mac:oss
 ```
 
-上传后必须匿名验证 `latest-mac.yml`、两套 ZIP 和两套 DMG 均能通过 HTTPS `GET/HEAD` 访问，并核对清单中的 SHA-512 与本地文件一致。
+上传后必须匿名验证 `latest-mac.yml` 和两套 DMG 均能通过 HTTPS `GET/HEAD` 访问，并核对清单中的 SHA-512 与本地文件一致。
 
 ## 当前阻塞
 
-截至 2026-07-15，本机未找到 `ossutil`、`~/.ossutilconfig` 或 OSS 环境变量，因此尚未对 Bucket 执行写入。源码和产物协议已迁移并完成 dry-run。
+截至 2026-07-15，本机未找到 OSS 上传环境变量，因此尚未对 Bucket 执行写入。客户端已改为不依赖签名的“小团队更新”流程，发布端也已移除 `ossutil` 依赖。
 
-macOS 自动安装更新还要求应用使用 Apple Developer ID 签名。当前 RC 未签名、未公证，因此 OSS 更新检查与下载配置可以完成，但正式的应用内替换安装必须在签名/公证就绪后启用。现有 `v0.0.1-rc.2` 仍需手动升级到首个签名且指向 OSS 的后续版本。
+现有 `v0.0.1-rc.2` 是修改前构建，仍使用旧更新代码。团队成员需要手动安装一次包含新更新器的后续版本；从该版本开始，应用可以自行检查 OSS、下载并打开后续 DMG。
+
+本机 Clash Verge 当前使用全局代理模式，阿里云域名在该模式下会被代理节点关闭 TLS 连接；临时规则模式下 OSS 可正常连接并返回标准 HTTP 响应。该问题属于本机代理链路，不改 BioF3 更新协议，也不应由发布脚本自动修改系统代理。真实团队验证应在可直连阿里云的网络环境中执行。

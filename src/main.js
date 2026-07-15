@@ -18,10 +18,12 @@ const {
   ipcMain,
   dialog,
   session,
+  net,
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const { spawn, spawnSync } = require("child_process");
+const { createMacOssUpdater } = require("./macos-oss-updater");
 const {
   getNodeLocator,
   getRuntimeBinCandidates,
@@ -62,20 +64,6 @@ process.stderr?.on?.("error", (err) => {
   if (err && err.code === "EPIPE") return;
   throw err;
 });
-
-// ── 自动更新（electron-updater）─────────────────────────────
-// 打包模式下加载 electron-updater；开发模式下跳过（npm start 无打包元数据）
-let autoUpdater = null;
-if (!isDevMode && app.isPackaged) {
-  try {
-    autoUpdater = require("electron-updater");
-    if (autoUpdater.autoUpdater) autoUpdater = autoUpdater.autoUpdater;
-  } catch (e) {
-    console.warn(
-      "[desktop] electron-updater not installed — auto-update disabled",
-    );
-  }
-}
 
 // ── 日志收集（诊断包用）──────────────────────────────────────
 // 子进程 stdout/stderr 同时写入 logs/ 下的滚动日志文件
@@ -1200,13 +1188,12 @@ function setupBackendLifecycleIpc() {
   });
 }
 
-// ── IPC：自动更新（electron-updater）──────────────────────────
+// ── IPC：macOS 小团队更新（OSS 清单 + 已校验 DMG）─────────────
 function setupAutoUpdateIpc() {
-  if (!autoUpdater) {
-    // 打包时未安装 electron-updater：所有 IPC 返回 disabled
+  if (process.platform !== "darwin" || isDevMode || !app.isPackaged) {
     ipcMain.handle("updater:check", async () => ({
       ok: false,
-      error: "auto-update disabled",
+      error: "auto-update is available in packaged macOS builds only",
     }));
     ipcMain.handle("updater:download", async () => ({
       ok: false,
@@ -1219,66 +1206,57 @@ function setupAutoUpdateIpc() {
     return;
   }
 
-  autoUpdater.autoDownload = false; // 手动控制下载（用户点"下载"才下）
-  autoUpdater.autoInstallOnAppQuit = true;
-
   let _updateInfo = null;
-
-  autoUpdater.on("update-available", (info) => {
-    _updateInfo = info;
-    if (mainWindow)
-      mainWindow.webContents.send("updater:update-available", {
-        version: info.version,
-        releaseDate: info.releaseDate,
-        releaseNotes: info.releaseNotes,
-      });
-  });
-
-  autoUpdater.on("update-not-available", () => {
-    if (mainWindow) mainWindow.webContents.send("updater:update-not-available");
-  });
-
-  autoUpdater.on("download-progress", (progress) => {
-    if (mainWindow)
-      mainWindow.webContents.send("updater:download-progress", {
-        percent: progress.percent,
-        transferred: progress.transferred,
-        total: progress.total,
-      });
-  });
-
-  autoUpdater.on("update-downloaded", () => {
-    if (mainWindow) mainWindow.webContents.send("updater:update-downloaded");
-  });
-
-  autoUpdater.on("error", (err) => {
-    console.error("[updater] error:", err.message);
-    if (mainWindow) mainWindow.webContents.send("updater:error", err.message);
+  const updater = createMacOssUpdater({
+    currentVersion: app.getVersion(),
+    downloadsDir: app.getPath("downloads"),
+    fetchImpl: (url, options) => net.fetch(url, options),
+    openPath: (target) => shell.openPath(target),
+    onProgress: (progress) => {
+      if (mainWindow) {
+        mainWindow.webContents.send("updater:download-progress", progress);
+      }
+    },
   });
 
   ipcMain.handle("updater:check", async () => {
     try {
-      const result = await autoUpdater.checkForUpdates();
-      return { ok: true, hasUpdate: !!_updateInfo, info: _updateInfo };
+      const result = await updater.check();
+      _updateInfo = result.info || null;
+      if (mainWindow) {
+        mainWindow.webContents.send(
+          result.hasUpdate
+            ? "updater:update-available"
+            : "updater:update-not-available",
+          _updateInfo,
+        );
+      }
+      return { ok: true, hasUpdate: result.hasUpdate, info: _updateInfo };
     } catch (e) {
+      console.error("[updater] check failed:", e.message);
       return { ok: false, error: e.message };
     }
   });
 
   ipcMain.handle("updater:download", async () => {
     try {
-      await autoUpdater.downloadUpdate();
+      await updater.download();
+      if (mainWindow) mainWindow.webContents.send("updater:update-downloaded");
       return { ok: true };
     } catch (e) {
+      console.error("[updater] download failed:", e.message);
+      if (mainWindow) mainWindow.webContents.send("updater:error", e.message);
       return { ok: false, error: e.message };
     }
   });
 
   ipcMain.handle("updater:install", async () => {
     try {
-      autoUpdater.quitAndInstall();
+      await updater.install();
       return { ok: true };
     } catch (e) {
+      console.error("[updater] open installer failed:", e.message);
+      if (mainWindow) mainWindow.webContents.send("updater:error", e.message);
       return { ok: false, error: e.message };
     }
   });
