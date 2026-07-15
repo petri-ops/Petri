@@ -1,6 +1,6 @@
 // M1-1 后端就绪感知层 — 全局 Context + 5s 轮询
 // 挂在 App 根，下游用 useBackendStatus() 消费。
-// r-server 不通时由 BackendDownBanner 显示降级提示。
+// r-server 不通时由摘要概览显示降级提示。
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import type { BackendStatus } from '@/lib/electron';
 

@@ -7,7 +7,6 @@ import { DesktopOnboarding } from '@/components/desktop/DesktopOnboarding';
 import { TitleBar } from '@/components/desktop/TitleBar';
 import { WorkspacePanelsProvider } from '@/components/desktop/WorkspacePanelsContext';
 import { BackendStatusProvider } from '@/components/backend/BackendStatusProvider';
-import { BackendDownBanner } from '@/components/backend/BackendDownBanner';
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { biof3Events, subscribeBioF3Event } from '@/lib/events';
 import HomePage from '@/pages/home';
@@ -57,7 +56,6 @@ export default function App(): React.ReactElement {
 
   return (
     <BackendStatusProvider>
-      <BackendDownBanner />
       <WorkspacePanelsProvider>
         {!isCoverRoute && <TitleBar />}
         <CopilotContextProvider>

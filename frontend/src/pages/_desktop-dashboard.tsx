@@ -275,6 +275,20 @@ export function DesktopDashboard({
     return installed ? '已就绪' : '未安装';
   };
 
+  // 后端降级处理
+  const [diagnosing, setDiagnosing] = useState(false);
+  const handleDiagnose = useCallback(async () => {
+    if (diagnosing) return;
+    setDiagnosing(true);
+    try {
+      await window.biof3Desktop?.diagnostic?.export();
+    } catch {
+      // ignore
+    } finally {
+      setDiagnosing(false);
+    }
+  }, [diagnosing]);
+
   return (
     <div className={`${styles.dashboard} ${embedded ? styles.dashboardEmbedded : ''}`}>
       <div className={`${styles.commandRow} ${embedded ? styles.commandRowEmbedded : ''}`}>
@@ -296,6 +310,23 @@ export function DesktopDashboard({
           <strong>Python</strong>
           <span>{runtimeChipLabel('Python', backendStatus.pyRuntime)}</span>
         </span>
+        {!backendStatus.isReady && backendStatus.downReason && (
+          <>
+            <span className={styles.commandChip} style={{ color: '#b91c1c' }}>
+              ⚠️ {backendStatus.downReason}
+            </span>
+            <button
+              type="button"
+              className={styles.commandChipBtn}
+              onClick={handleDiagnose}
+              disabled={diagnosing}
+              title="导出诊断日志帮助排查问题"
+            >
+              <Icon name="download" size={14} />
+              <span>{diagnosing ? '导出中…' : '导出诊断'}</span>
+            </button>
+          </>
+        )}
         <span className={styles.commandChip}>
           <Icon name="folder" size={14} />
           <strong>{sortedProjects.length}</strong>
