@@ -31,6 +31,8 @@
 - 新增 `src/macos-oss-updater.js`，包含版本比较、受限同源 URL、架构选择、流式下载、大小与 SHA-512 双校验、失败清理和打开 DMG；相关 Node 测试覆盖正常与篡改下载。
 - 本机尚未找到 `OSS_ACCESS_KEY_ID/SECRET` 或旧 `OSS_AK/SK`，因此未向 Bucket 写入。现有 `rc.2` 是旧构建，仍需手动安装一次带新更新器的后续版本；之后即可走 OSS 检查、下载和引导覆盖安装。
 - 真实 arm64 打包启动通过，R `:3001`、Python `:3004`、SPA `:3002` 均健康；应用包已确认包含 `macos-oss-updater.js` 且不再包含 `electron-updater`。本机 Clash Verge 全局模式会关闭阿里云 TLS，临时规则模式下 OSS 可达；用户明确要求不要再切换代理模式，后续保持全局模式并把网络差异作为本机验证限制。
+- 仓库根目录已有本地 `.biof3-secrets`，包含现成 `OSS_AK` / `OSS_SK`。发布入口现会自动加载该文件；文件已加入 `.gitignore` 并收紧为 `600`，密钥值不得输出或提交。
+- `0.0.1-rc.3` 双架构 DMG 已完成真实构建；arm64 打包态启动、migration、R/Python/SPA 健康检查均通过。该版本是首个包含无签名小团队更新器的安装基线，现有 `rc.2` 用户需手动覆盖安装一次 `rc.3`。
 - 完整操作说明见 [`docs/macos-oss-auto-update.md`](./macos-oss-auto-update.md)。
 
 ## 2026-07-15 最新交接点：RC 安装版修复已完成本地验证

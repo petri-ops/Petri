@@ -1,6 +1,6 @@
 {
   "name": "biof3-local",
-  "version": "0.0.1-rc.2",
+  "version": "0.0.1-rc.3",
   "private": true,
   "description": "BioF3 本地桌面版 — AI 陪伴的全组学学习与实战平台",
   "author": "BioF3",
@@ -25,8 +25,8 @@
     "build:mac-arm64": "npm run prebuild && npm run build:all && electron-builder --mac --arm64",
     "build:mac-x64": "npm run prebuild && npm run build:all && electron-builder --mac --x64",
     "release:mac:prepare": "npm run check && npm run build:mac && node scripts/publish-macos-oss.mjs --prepare-only",
-    "release:mac:oss": "node scripts/publish-macos-oss.mjs",
-    "release:mac:oss:dry-run": "node scripts/publish-macos-oss.mjs --dry-run",
+    "release:mac:oss": "bash scripts/publish-macos-oss.sh",
+    "release:mac:oss:dry-run": "bash scripts/publish-macos-oss.sh --dry-run",
     "release:checksums": "node scripts/release-checksums.mjs",
     "release:checksums:verify": "node scripts/release-checksums.mjs --verify",
     "harness:index": "node scripts/harness-file-index.mjs",
