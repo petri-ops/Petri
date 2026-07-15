@@ -511,28 +511,31 @@ export function SimpleChat({
               <span>在下方输入框中提问</span>
             </div>
           )}
-          {messages.map((m, i) => (
-            <div key={i} className={`sc-msg sc-msg-${m.role}`}>
-              <div className="sc-msg-avatar">
-                {m.role === 'user' ? (
-                  <Icon name="user" size={16} />
-                ) : (
-                  <Icon name="cpu" size={16} />
-                )}
+          {messages.map((m, i) => {
+            const key = m.ts ? `${m.role}-${m.ts}-${i}` : `${m.role}-${i}`;
+            return (
+              <div key={key} className={`sc-msg sc-msg-${m.role}`}>
+                <div className="sc-msg-avatar">
+                  {m.role === 'user' ? (
+                    <Icon name="user" size={16} />
+                  ) : (
+                    <Icon name="cpu" size={16} />
+                  )}
+                </div>
+                <div className="sc-msg-body">
+                  {m.role === 'assistant' ? (
+                    <CopilotMarkdown
+                      text={m.content || (m.pending ? '…' : '')}
+                      onFileReferenceClick={handleFileReferenceClick}
+                      resolveContext={m.pending || streaming ? null : settledContext}
+                    />
+                  ) : (
+                    <div className="sc-msg-text">{m.content}</div>
+                  )}
+                </div>
               </div>
-              <div className="sc-msg-body">
-                {m.role === 'assistant' ? (
-                  <CopilotMarkdown
-                    text={m.content || (m.pending ? '…' : '')}
-                    onFileReferenceClick={handleFileReferenceClick}
-                    resolveContext={m.pending || streaming ? null : settledContext}
-                  />
-                ) : (
-                  <div className="sc-msg-text">{m.content}</div>
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
           {pendingApproval && (
             <ApprovalCard
               approval={pendingApproval}

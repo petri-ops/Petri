@@ -124,6 +124,8 @@
   flex-direction: column;
   gap: 14px;
   min-height: 0;
+  will-change: scroll-position;
+  contain: layout style paint;
 }
 
 .sc-loading {
@@ -165,6 +167,7 @@
   gap: 8px;
   max-width: 100%;
   align-items: flex-start;
+  contain: layout style;
 }
 
 .sc-msg-user {
