@@ -48,7 +48,7 @@ jobs:
         run: npm run build:mac
 
       - name: Compute SHA-256
-        run: shasum -a 256 dist/*.dmg > dist/SHA256SUMS-mac.txt
+        run: shasum -a 256 dist/*.dmg dist/*.zip > dist/SHA256SUMS-mac.txt
 
       - name: Publish macOS prerelease
         uses: softprops/action-gh-release@v2
@@ -59,6 +59,7 @@ jobs:
           generate_release_notes: true
           files: |
             dist/*.dmg
+            dist/*.zip
             dist/SHA256SUMS-mac.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

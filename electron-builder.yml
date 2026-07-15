@@ -30,6 +30,12 @@ mac:
       arch:
         - arm64
         - x64
+    # electron-updater on macOS downloads ZIP through Squirrel.Mac.
+    # DMG remains the manual installer; both targets are required.
+    - target: zip
+      arch:
+        - arm64
+        - x64
   # M2-11 (H4)：mac 签名 + notarization
   # 有证书时：CI 注入 CSC_LINK/CSC_KEY_PASSWORD → identity 自动匹配
   # 无证书时：identity: null，用户需右键打开（v1 过渡）
@@ -59,17 +65,13 @@ nsis:
 # 压缩
 compression: maximum
 
-# 自动更新发布源 — Public Beta 渠道
-# Provider: GitHub Releases on ShengXinF3/biof3-desktop.
-# release workflow (.github/workflows/release.yml) 已经把 mac/win artifact + SHA256SUMS 上传
-# 到每个 Git tag 对应的 prerelease；electron-updater 默认从 owner/repo 拉 latest-mac.yml /
-# latest.yml 自动发现新版本。
-# channel 留给 electron-updater 默认（latest）；预发版本（v*-rc.* / v*-beta.* / v*-alpha.*）
-# 会自动按 GitHub release 的 prerelease 标记分流，不在此处指定。
+# 自动更新发布源 — 阿里云 OSS macOS 渠道
+# latest-mac.yml 必须最后上传并禁用缓存；带版本号的 DMG/ZIP/blockmap 可长期缓存。
+# GitHub Release 继续作为手动下载镜像，不再作为应用内更新源。
 publish:
-  provider: github
-  owner: ShengXinF3
-  repo: biof3-desktop
+  provider: generic
+  url: https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/desktop/updates/macos
+  channel: latest
 
 # 额外资源：r-server / py-server / shared-backend / 前端 build 产物 / 内置插件
 # r-server 和 py-server 作为子进程 spawn，需要带上各自的 node_modules

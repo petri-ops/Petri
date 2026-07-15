@@ -20,6 +20,19 @@
 
 后续固定顺序：macOS 本机检查 → arm64/x64 构建 → arm64 真实启动冒烟 → SHA-256 → GitHub prerelease。Windows/Linux 仅在用户以后重新明确要求时恢复。
 
+## 2026-07-15 自动更新源迁移：GitHub → 阿里云 OSS
+
+主模块：`P-06 桌面集成与交付`；关注点：`C-03 安全与审计`、`C-05 测试与质量门禁`。
+
+- `electron-builder.yml` 的 updater provider 已从私有 GitHub 改为 OSS generic feed：`https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/desktop/updates/macos`，固定 `latest` 渠道。
+- macOS 构建现在同时生成 arm64/x64 DMG 与 ZIP；ZIP 是 Squirrel.Mac/electron-updater 的实际更新载荷。
+- 新增 `scripts/publish-macos-oss.mjs`：校验双架构产物、生成 SHA-256、版本文件长期缓存、`latest-mac.yml` 禁止缓存且最后上传，并拒绝未打标签、标签未指向 HEAD 或工作树不干净的发布。
+- 真实构建验证通过：两套打包应用内 `app-update.yml` 均指向 OSS；新 `latest-mac.yml` 同时引用两套 ZIP 与两套 DMG；dry-run 共规划 10 个版本对象加最终清单。
+- 完整根项目回归在恢复 Node ABI 后为 188 项中 181 pass、7 个显式 live skip、0 fail；新增 OSS updater 测试 3/3 通过。
+- 本机尚未发现 `ossutil`、`~/.ossutilconfig`、`OSS_ACCESS_KEY_ID/SECRET` 或旧 `OSS_AK/SK`，因此未向 Bucket 写入。ECS SSH 探测也未建立连接。
+- 当前没有 Apple Developer ID，macOS 自动替换安装仍被签名要求阻塞；现有 `rc.2` 继续手动更新。首个可自动更新版本必须使用新版本号、签名/公证并完成 OSS 匿名下载验证。
+- 完整操作说明见 [`docs/macos-oss-auto-update.md`](./macos-oss-auto-update.md)。
+
 ## 2026-07-15 最新交接点：RC 安装版修复已完成本地验证
 
 主模块：`P-06 桌面集成与交付`；关注点：`C-03 安全与审计`、`C-05 测试与质量门禁`。
