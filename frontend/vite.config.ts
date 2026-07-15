@@ -208,17 +208,31 @@ export default defineConfig({
             return 'ui-vendor';
           }
           // MDX / Markdown 解析栈，docs 页才用得到，单独切
+          //   高层 API（react-markdown / remark-*-plugin / rehype-*）：markdown-vendor
+          //   底层 parser（micromark-* / mdast-util-* / hast-util-* / unist-util-*）：
+          //     单独成 chunk，避免 markdown-vendor 与 vendor 之间形成 circular chunk 触发
+          //     esbuild 顶层 export 重命名后的 TDZ（Cannot access 'O' before initialization）
           if (
-            id.includes('/mdx-js/') ||
             id.includes('/react-markdown/') ||
             id.includes('/remark-') ||
-            id.includes('/rehype-') ||
-            id.includes('/micromark/') ||
-            id.includes('/unist-') ||
-            id.includes('/hast-') ||
-            id.includes('/mdast-')
+            id.includes('/rehype-')
           ) {
             return 'markdown-vendor';
+          }
+          if (
+            id.includes('/micromark/') ||
+            id.includes('/mdast-') ||
+            id.includes('/hast-') ||
+            id.includes('/unist-') ||
+            id.includes('/vfile') ||
+            id.includes('/unified') ||
+            id.includes('/bail') ||
+            id.includes('/trough') ||
+            id.includes('/is-plain-obj') ||
+            id.includes('/decode-named-character-reference') ||
+            id.includes('/character-entities')
+          ) {
+            return 'parser-vendor';
           }
           // 其余 npm 第三方归 vendor
           return 'vendor';
