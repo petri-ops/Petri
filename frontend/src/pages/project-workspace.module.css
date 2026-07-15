@@ -518,6 +518,7 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Left panel — project tree (AionUi style) */
@@ -2095,6 +2096,7 @@
   flex-direction: column;
   position: relative;
   box-sizing: border-box;
+  transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (max-width: 960px) {
@@ -2970,8 +2972,8 @@
   bottom: 0;
   left: 4px;
   width: 1px;
-  background: color-mix(in srgb, var(--biof3-border) 46%, transparent 54%);
-  opacity: 0.58;
+  background: color-mix(in srgb, var(--biof3-border) 62%, transparent 38%);
+  opacity: 0.72;
 }
 
 .resizeHandleV:hover,
@@ -2981,8 +2983,9 @@
 
 .resizeHandleV:hover::after,
 .resizeHandleV:active::after {
-  background: color-mix(in srgb, var(--biof3-accent) 42%, transparent 58%);
-  opacity: 0.72;
+  background: color-mix(in srgb, var(--biof3-accent) 58%, transparent 42%);
+  opacity: 0.88;
+  width: 2px;
 }
 
 body.biof3-resizing-columns .rightCol iframe,
