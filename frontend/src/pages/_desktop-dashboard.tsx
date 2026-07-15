@@ -435,6 +435,71 @@ export function DesktopDashboard({
           <section className={styles.panel}>
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>
+                <Icon name="cpu" size={18} />
+                运行时状态
+              </h2>
+            </div>
+            <div className={styles.runtimeGrid}>
+              <div className={styles.runtimeCard} data-state={runtimeState(backendStatus.rRuntime)}>
+                <div className={styles.runtimeCardHeader}>
+                  <div className={styles.runtimeCardIcon}>
+                    <Icon name="cpu" size={24} />
+                  </div>
+                  <div className={styles.runtimeCardTitle}>
+                    <strong>R 运行时</strong>
+                    <span className={styles.runtimeCardStatus}>
+                      {runtimeLabel('R', backendStatus.rRuntime)}
+                    </span>
+                  </div>
+                </div>
+                {backendStatus.rServerUp && (
+                  <div className={styles.runtimeCardMeta}>
+                    <span>✓ R 服务已启动</span>
+                    <span>端口 3001</span>
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.runtimeCard} data-state={runtimeState(backendStatus.pyRuntime)}>
+                <div className={styles.runtimeCardHeader}>
+                  <div className={styles.runtimeCardIcon}>
+                    <Icon name="cpu" size={24} />
+                  </div>
+                  <div className={styles.runtimeCardTitle}>
+                    <strong>Python 运行时</strong>
+                    <span className={styles.runtimeCardStatus}>
+                      {runtimeLabel('Python', backendStatus.pyRuntime)}
+                    </span>
+                  </div>
+                </div>
+                {backendStatus.pyServerUp && (
+                  <div className={styles.runtimeCardMeta}>
+                    <span>✓ Python 服务已启动</span>
+                    <span>端口 3004</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            {!backendStatus.isReady && backendStatus.downReason && (
+              <div className={styles.runtimeWarning}>
+                <Icon name="x" size={16} />
+                <span>{backendStatus.downReason}</span>
+                <button
+                  type="button"
+                  className={styles.secondaryBtn}
+                  onClick={handleDiagnose}
+                  disabled={diagnosing}
+                >
+                  <Icon name="download" size={14} />
+                  <span>{diagnosing ? '导出中…' : '导出诊断'}</span>
+                </button>
+              </div>
+            )}
+          </section>
+
+          <section className={styles.panel}>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>
                 <Icon name="folder" size={18} />
                 项目
               </h2>

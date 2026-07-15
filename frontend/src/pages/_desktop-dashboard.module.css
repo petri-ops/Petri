@@ -1012,3 +1012,122 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Runtime status cards */
+.runtimeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.runtimeCard {
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--biof3-border);
+  background: var(--biof3-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+
+.runtimeCard[data-state="ready"] {
+  border-color: #10b981;
+  background: linear-gradient(135deg, var(--biof3-surface) 0%, rgba(16, 185, 129, 0.05) 100%);
+}
+
+.runtimeCard[data-state="missing"] {
+  border-color: #f59e0b;
+  background: linear-gradient(135deg, var(--biof3-surface) 0%, rgba(245, 158, 11, 0.05) 100%);
+}
+
+.runtimeCard[data-state="loading"] {
+  border-color: var(--biof3-border);
+  opacity: 0.7;
+}
+
+.runtimeCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.runtimeCardIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--biof3-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--biof3-accent);
+}
+
+.runtimeCard[data-state="ready"] .runtimeCardIcon {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.runtimeCard[data-state="missing"] .runtimeCardIcon {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.runtimeCardTitle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.runtimeCardTitle strong {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--biof3-text);
+}
+
+.runtimeCardStatus {
+  font-size: 13px;
+  color: var(--biof3-text-muted);
+}
+
+.runtimeCard[data-state="ready"] .runtimeCardStatus {
+  color: #10b981;
+}
+
+.runtimeCard[data-state="missing"] .runtimeCardStatus {
+  color: #f59e0b;
+}
+
+.runtimeCardMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--biof3-text-muted);
+  padding-left: 56px;
+}
+
+.runtimeWarning {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  margin-top: 12px;
+  border-radius: 10px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  font-size: 13px;
+}
+
+.runtimeWarning span:first-of-type {
+  flex: 1;
+}
+
+@media screen and (max-width: 900px) {
+  .runtimeGrid {
+    grid-template-columns: 1fr;
+  }
+}
