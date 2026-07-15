@@ -12,7 +12,7 @@
 4. GitHub Release workflow 仅作为手动备用路径；CI 与 Release workflow 均已收敛为 macOS-only。
 5. 当前包未配置 Developer ID 签名和 Apple 公证，发布说明必须持续披露这一点。
 
-`v0.0.1-rc.2` 当前状态：本地 arm64/x64 DMG 已构建；arm64 页面、migration、R `:3001`、Python `:3004`、SPA `:3002` 均通过；待上传 prerelease。
+`v0.0.1-rc.2` 当前状态：已发布 macOS prerelease；arm64/x64 DMG 与 SHA-256 已上传并完成 GitHub 端复核。发布地址：<https://github.com/ShengXinF3/biof3-desktop/releases/tag/v0.0.1-rc.2>。
 
 ## 2026-07-15 历史主线：RC 三平台发布工程收口（已被上述决策取代）
 

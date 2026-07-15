@@ -15,6 +15,7 @@
 - 默认发布路径改为本机执行 `npm run build:mac`，生成 arm64 与 x64 DMG，完成本地冒烟和 SHA-256 后用 `gh release` 直接上传；不依赖 GitHub Actions。
 - `.github/workflows/ci.yml` 已收敛为 macOS，`.github/workflows/release.yml` 已收敛为手动触发的 macOS-only 备用流程。
 - `v0.0.1-rc.2` 本地构建已完成：arm64 与 x64 DMG 均生成；arm64 真实打包态页面、migration、R `:3001`、Python `:3004` 与 SPA `:3002` 验证通过。
+- `v0.0.1-rc.2` 已从发布提交 `3a3f990` 创建不可变标签并发布为 GitHub prerelease：<https://github.com/ShengXinF3/biof3-desktop/releases/tag/v0.0.1-rc.2>。GitHub 端两份 DMG 的大小与 SHA-256 均已复核一致。
 - 当前未配置 Apple Developer ID，DMG 未签名、未公证；用户首次启动需要在“系统设置 → 隐私与安全性”中确认打开。
 
 后续固定顺序：macOS 本机检查 → arm64/x64 构建 → arm64 真实启动冒烟 → SHA-256 → GitHub prerelease。Windows/Linux 仅在用户以后重新明确要求时恢复。
