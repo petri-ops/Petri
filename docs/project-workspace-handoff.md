@@ -1,14 +1,29 @@
 # Project Workspace Handoff
 
-最后更新：2026-07-14
+最后更新：2026-07-15
 
 ## 长期开发模块口径
 
 开发模块、职责边界和标准表述统一以 [`docs/development-module-map.md`](./development-module-map.md) 为准。新增需求、缺陷、交接和提交应标明主模块；主题、布局、安全、状态同步、测试和性能作为跨模块关注点附加说明，不再使用无法定位责任边界的“右侧栏问题”“后端问题”等说法。
 
-## RC 发布准备
+## 2026-07-15 最新交接点：RC 安装版修复已完成本地验证
 
-首个候选版本统一为 `v0.0.1-rc.1`。当前已进入 **Gate 0 范围冻结阶段**（2026-07-14），正在执行 Gate 1 源码收口。在计划中的源码、安全、自动化、安装包和冒烟门禁全部通过前，不创建版本标签，不启用公开发布或自动更新。
+主模块：`P-06 桌面集成与交付`；关注点：`C-03 安全与审计`、`C-05 测试与质量门禁`。
+
+- 远端 `origin/main` 当前到 `c647dba`；本地 `main` 另有 3 个尚未进入远端的 Release workflow 提交。工作流最终口径已恢复为 macOS 与 Windows 都成功后才能发布，不接受 Windows 失败时静默发布 macOS-only RC。
+- 已修复发布版启动链：打包态 Core 路径、macOS Electron Helper Node 边界、打包后端 `better-sqlite3` ABI、migration 工作目录均已进入现有发布修复；本轮又取消不稳定的手工 `manualChunks`，避免生产包 `Cannot access ... before initialization` 白屏。
+- 已重新修复 Core `chat-file-references` 的反斜杠/控制字符校验；Core `46cc143` 已推送至 `origin/main`，Desktop submodule 指针与 `.vendor-lock` 已同步到该提交。
+- Windows `icon.ico` 已由现有 1024px 主图重新生成，包含 16/24/32/48/64/128/256 七种尺寸；临时 TIFF、PNG 和 `to-ico` 试验依赖均已清理。
+- 2026-07-15 本地门禁：`npm run check` 通过；根项目 185 项中 178 pass、7 个显式 live skip、0 fail；前端 19 files / 147 tests 全通过；TypeScript 与生产构建通过，构建不再报告 circular chunk，仅保留主 bundle 体积警告。
+- 真实 arm64 打包冒烟通过：`dist/mac-arm64/BioF3.app` 页面加载成功，migration version 0，R `:3001` 与 Python `:3004` 健康接口均返回 `ok`，无模块缺失、ABI、递归启动或 renderer ReferenceError。
+- 当前唯一无法在仓库内解决的阻塞是 GitHub Actions 账户付款失败/额度上限；最新 jobs 在运行前即被 GitHub 拒绝。额度恢复后仍需 Windows NSIS、macOS x64 和三平台安装冒烟。
+- 现有 `v0.0.1-rc.1` 标签与 GitHub Release 草稿经历过多次移动和失败构建，不作为可信发布基线；完成收口后建议创建不可变的 `v0.0.1-rc.2`，不要继续覆盖 rc.1。
+
+下一步固定顺序：Desktop 发布修复提交 → 恢复 Actions 额度 → 三平台 CI/NSIS → 安装级冒烟与校验和 → 新建 `rc.2` prerelease → 再同步发布状态。
+
+## RC 发布准备（历史口径，以上述 2026-07-15 检查点为准）
+
+首个候选版本原定为 `v0.0.1-rc.1`。该标签已经被提前创建并多次移动，但门禁未完成；当前禁止公开发布或启用自动更新，后续以新的 `v0.0.1-rc.2` 作为可信候选基线。
 
 ## 2026-07-14 当前交接点
 

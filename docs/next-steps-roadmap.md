@@ -1,6 +1,21 @@
 # Project Workspace — Next Steps Roadmap
 
-最后更新：2026-07-13
+最后更新：2026-07-15
+
+## 2026-07-15 当前唯一主线：RC 发布工程收口
+
+工作台与 Harness Phase 1–6 已完成；当前不再扩张产品功能。下一阶段只处理 `P-06 桌面集成与交付` 的发布阻断：
+
+1. **Core 收口（已完成）**：`chat-file-references` 反斜杠/控制字符修复已作为 Core `46cc143` 推送，Desktop submodule 与 `.vendor-lock` 已同步。
+2. **Desktop 收口**：提交取消不稳定 `manualChunks`、标准七尺寸 Windows ICO、恢复三平台 Release 门禁等修改；清理所有图标转换临时文件。
+3. **CI 恢复**：处理 GitHub Actions 付款失败或额度上限。该项是外部阻塞，代码无法绕过；恢复后重新运行 desktop-ci 与 desktop-release。
+4. **三平台构建**：macOS arm64/x64 与 Windows x64 必须全部成功；Windows NSIS 重点验证新 `icon.ico`，不允许因 Windows 失败自动发布 macOS-only RC。
+5. **安装级冒烟**：每个平台记录安装、首次启动、migration、R/Python backend、结果预览、关闭/重启/卸载；macOS arm64 当前已完成真实 `.app` 启动和后端健康验证。
+6. **重新发布**：废弃已反复移动的 `v0.0.1-rc.1` 作为可信基线，创建不可变 `v0.0.1-rc.2`，上传完整产物、SHA-256 和明确的签名状态。
+
+2026-07-15 本地验证基线：根项目 178 pass / 7 live skip / 0 fail；前端 147/147；TypeScript、SPA build、Release YAML 均通过；arm64 打包态页面、migration、R/Python 健康均通过。生产构建只剩 1.24 MB 主 bundle 警告，作为 `rc.2+` 性能项，不得再次用会产生 circular chunk/TDZ 的手工拆包阻断 RC。
+
+以下旧路线图保留为历史背景；执行优先级以上述 RC 收口顺序为准。
 
 当前路线图已经从“拆组件/拆 hooks”阶段，切换到“桌面端工作台稳定化 + Harness Engine v1”阶段。当前又叠加了远程跨平台 runtime 分支的合并收口，因此继续开发时不要先急着加新功能；先确保桌面壳子、路由、构建、Harness 索引/修复与跨平台 runtime 逻辑都稳定，再进入下一轮扩展。
 
