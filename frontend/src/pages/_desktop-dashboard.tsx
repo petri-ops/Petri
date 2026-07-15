@@ -332,7 +332,7 @@ export function DesktopDashboard({
             type="button"
             className={`${styles.commandChipBtn} ${styles.commandChipWarn}`}
             onClick={() => setUpdOpen(true)}
-            title={`有新版本 ${updateVersion}，点击下载并重启`}
+            title={`有新版本 ${updateVersion}，点击下载并打开安装包`}
           >
             <Icon name="download" size={14} />
             <span>更新 {updateVersion || ''}</span>
@@ -594,7 +594,7 @@ export function DesktopDashboard({
       </section>
       */}
 
-      {/* M2-6 / E4：下载并重启对话框 */}
+      {/* M2-6 / E4：下载并打开安装包对话框 */}
       {updOpen && (
         <div
           className={styles.updOverlay}
@@ -606,10 +606,10 @@ export function DesktopDashboard({
             </h3>
             <p className={styles.updBody}>
               {updDownloaded
-                ? '更新已下载完成，点击下方按钮安装并重启应用。'
+                ? '更新已下载并通过校验，点击下方按钮打开安装包。'
                 : updDownloading
                   ? '正在下载更新，请勿关闭应用…'
-                  : '下载最新版本并安装，安装过程中应用将自动重启。'}
+                  : '下载最新版本并校验，完成后打开 DMG 覆盖安装。'}
             </p>
 
             {(updDownloading || updDownloaded) && (
@@ -642,7 +642,7 @@ export function DesktopDashboard({
                   onClick={install}
                   disabled={updInstalling}
                 >
-                  {updInstalling ? '重启中…' : '下载并重启'}
+                  {updInstalling ? '正在打开…' : '打开安装包'}
                 </button>
               ) : (
                 <button
@@ -651,7 +651,7 @@ export function DesktopDashboard({
                   onClick={download}
                   disabled={updDownloading}
                 >
-                  {updDownloading ? '下载中…' : '下载并重启'}
+                  {updDownloading ? '下载中…' : '下载更新'}
                 </button>
               )}
             </div>

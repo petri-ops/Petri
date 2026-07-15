@@ -24,6 +24,8 @@ export interface AutoUpdateState {
   downloaded: boolean;
   /** Last error message (cleared on next action). */
   error: string;
+  /** True after a successful check confirms there is no newer version. */
+  upToDate: boolean;
   /** True while `install()` is in flight. */
   installing: boolean;
 }
@@ -42,6 +44,7 @@ export function useAutoUpdate(): AutoUpdateState & AutoUpdateActions {
   const [progress, setProgress] = useState<number | null>(null);
   const [downloaded, setDownloaded] = useState(false);
   const [error, setError] = useState('');
+  const [upToDate, setUpToDate] = useState(false);
   const [installing, setInstalling] = useState(false);
 
   // Mount: do one auto-check for a pending update
@@ -53,7 +56,12 @@ export function useAutoUpdate(): AutoUpdateState & AutoUpdateActions {
     (async () => {
       try {
         const r = await updater.check();
-        if (cancelled || !r?.ok || !r.hasUpdate) return;
+        if (cancelled || !r?.ok) return;
+        if (!r.hasUpdate) {
+          setUpToDate(true);
+          return;
+        }
+        setUpToDate(false);
         setAvailable(true);
         setAvailableVersion(r.info?.version ?? r.version ?? '');
       } catch {
@@ -94,6 +102,7 @@ export function useAutoUpdate(): AutoUpdateState & AutoUpdateActions {
     if (!updater || checking) return;
     setChecking(true);
     setError('');
+    setUpToDate(false);
     try {
       const r = await updater.check();
       if (!r?.ok) {
@@ -101,7 +110,9 @@ export function useAutoUpdate(): AutoUpdateState & AutoUpdateActions {
       } else if (!r.hasUpdate) {
         setAvailable(false);
         setAvailableVersion('');
+        setUpToDate(true);
       } else {
+        setUpToDate(false);
         setAvailable(true);
         setAvailableVersion(r.info?.version ?? r.version ?? '');
       }
@@ -156,6 +167,7 @@ export function useAutoUpdate(): AutoUpdateState & AutoUpdateActions {
     progress,
     downloaded,
     error,
+    upToDate,
     installing,
     check,
     download,

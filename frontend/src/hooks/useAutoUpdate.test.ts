@@ -29,6 +29,7 @@ describe('useAutoUpdate', () => {
     await act(async () => { await vi.runOnlyPendingTimersAsync(); });
     expect(result.current.available).toBe(false);
     expect(result.current.availableVersion).toBe('');
+    expect(result.current.upToDate).toBe(true);
   });
 
   it('detects available update on mount', async () => {
@@ -37,6 +38,7 @@ describe('useAutoUpdate', () => {
     await act(async () => { await vi.runOnlyPendingTimersAsync(); });
     expect(result.current.available).toBe(true);
     expect(result.current.availableVersion).toBe('2.1.0');
+    expect(result.current.upToDate).toBe(false);
   });
 
   it('treats thrown mount check as no update', async () => {
@@ -44,6 +46,7 @@ describe('useAutoUpdate', () => {
     const { result } = renderHook(() => useAutoUpdate());
     await act(async () => { await vi.runOnlyPendingTimersAsync(); });
     expect(result.current.available).toBe(false);
+    expect(result.current.upToDate).toBe(false);
   });
 
   // check action
@@ -73,6 +76,7 @@ describe('useAutoUpdate', () => {
     installMock({ check: () => Promise.resolve({ ok: true, hasUpdate: false }), download: () => Promise.resolve(), install: () => Promise.resolve() });
     await act(async () => { result.current.check(); await vi.runOnlyPendingTimersAsync(); });
     expect(result.current.available).toBe(false);
+    expect(result.current.upToDate).toBe(true);
   });
 
   // download action

@@ -25,7 +25,7 @@ interface Props {
 function UpdateChecker(): React.ReactElement | null {
   if (!window.biof3Desktop?.updater) return null;
 
-  const { checking, available, availableVersion, downloading, progress, downloaded, error, installing, check, download, install } =
+  const { checking, available, availableVersion, downloading, progress, downloaded, error, upToDate, installing, check, download, install } =
     useAutoUpdate();
 
   const pct = progress !== null ? Math.round(progress * 100) : 0;
@@ -60,6 +60,9 @@ function UpdateChecker(): React.ReactElement | null {
         >
           {checking ? '检查中…' : '检查更新'}
         </button>
+      )}
+      {upToDate && !error && (
+        <span className="biof3-field__hint">当前已是最新版本</span>
       )}
       {error && <span className="biof3-field__hint">{error}</span>}
     </div>
