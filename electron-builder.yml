@@ -58,14 +58,17 @@ nsis:
 # 压缩
 compression: maximum
 
-# 自动更新发布源（占位 — 发布时填实际 URL）
-# publish:
-#   provider: generic
-#   url: https://biof3-updates.oss-cn-hangzhou.aliyuncs.com/desktop/mac/
-# 或 GitHub Releases:
-#   provider: github
-#   owner: ShengXinF3
-#   repo: BioF3
+# 自动更新发布源 — Public Beta 渠道
+# Provider: GitHub Releases on ShengXinF3/biof3-desktop.
+# release workflow (.github/workflows/release.yml) 已经把 mac/win artifact + SHA256SUMS 上传
+# 到每个 Git tag 对应的 prerelease；electron-updater 默认从 owner/repo 拉 latest-mac.yml /
+# latest.yml 自动发现新版本。
+# channel 留给 electron-updater 默认（latest）；预发版本（v*-rc.* / v*-beta.* / v*-alpha.*）
+# 会自动按 GitHub release 的 prerelease 标记分流，不在此处指定。
+publish:
+  provider: github
+  owner: ShengXinF3
+  repo: biof3-desktop
 
 # 额外资源：r-server / py-server / shared-backend / 前端 build 产物 / 内置插件
 # r-server 和 py-server 作为子进程 spawn，需要带上各自的 node_modules

@@ -28,7 +28,27 @@ jobs:
           # BioF3 core submodule lives at ShengXinF3/BioF3 (private).
           # Default GITHUB_TOKEN does not cross repo boundaries, so a
           # PAT with `repo` scope must be supplied via SUBMODULE_TOKEN.
+          #
+          # Graceful degradation: when SUBMODULE_TOKEN is missing we still
+          # attempt the checkout with GITHUB_TOKEN. The 401 from the private
+          # submodule surfaces as a warning instead of a hard failure so the
+          # build steps below can decide whether to proceed.
           token: ${{ secrets.SUBMODULE_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Diagnose submodule availability
+        # If the private Core submodule failed to fetch above, surface a
+        # single clear warning so the operator knows to set SUBMODULE_TOKEN
+        # instead of staring at a generic 401 later. We do NOT fail the job
+        # here so that build/upload steps can still produce evidence.
+        shell: bash
+        run: |
+          if git submodule status vendor/biof3-core | grep -q '^-'; then
+            echo "::warning::vendor/biof3-core submodule is NOT initialized."
+            echo "::warning::Set repository Secret SUBMODULE_TOKEN (PAT with 'repo' scope)"
+            echo "::warning::to enable cross-repo submodule fetch in CI."
+          else
+            echo "[submodule] vendor/biof3-core OK at $(git -C vendor/biof3-core rev-parse HEAD)"
+          fi
 
       - uses: actions/setup-node@v4
         with:
@@ -85,7 +105,20 @@ jobs:
           submodules: recursive
           fetch-depth: 0
           # BioF3 core submodule lives at ShengXinF3/BioF3 (private).
+          # Graceful degradation: see the macOS job's Diagnose submodule
+          # step above — same fallback strategy applies here.
           token: ${{ secrets.SUBMODULE_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Diagnose submodule availability
+        shell: bash
+        run: |
+          if git submodule status vendor/biof3-core | grep -q '^-'; then
+            echo "::warning::vendor/biof3-core submodule is NOT initialized."
+            echo "::warning::Set repository Secret SUBMODULE_TOKEN (PAT with 'repo' scope)"
+            echo "::warning::to enable cross-repo submodule fetch in CI."
+          else
+            echo "[submodule] vendor/biof3-core OK at $(git -C vendor/biof3-core rev-parse HEAD)"
+          fi
 
       - uses: actions/setup-node@v4
         with:

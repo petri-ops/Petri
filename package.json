@@ -24,6 +24,8 @@
     "build:mac": "npm run prebuild && npm run build:all && electron-builder --mac --arm64 --x64",
     "build:mac-arm64": "npm run prebuild && npm run build:all && electron-builder --mac --arm64",
     "build:mac-x64": "npm run prebuild && npm run build:all && electron-builder --mac --x64",
+    "release:checksums": "node scripts/release-checksums.mjs",
+    "release:checksums:verify": "node scripts/release-checksums.mjs --verify",
     "harness:index": "node scripts/harness-file-index.mjs",
     "harness:scaffold": "node scripts/scaffold-harness-tool.mjs",
     "harness:check": "node scripts/check-harness-manifests.mjs",
