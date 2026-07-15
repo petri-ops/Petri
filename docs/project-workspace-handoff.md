@@ -33,6 +33,7 @@
 - 真实 arm64 打包启动通过，R `:3001`、Python `:3004`、SPA `:3002` 均健康；应用包已确认包含 `macos-oss-updater.js` 且不再包含 `electron-updater`。本机 Clash Verge 全局模式会关闭阿里云 TLS，临时规则模式下 OSS 可达；用户明确要求不要再切换代理模式，后续保持全局模式并把网络差异作为本机验证限制。
 - 仓库根目录已有本地 `.biof3-secrets`，包含现成 `OSS_AK` / `OSS_SK`。发布入口现会自动加载该文件；文件已加入 `.gitignore` 并收紧为 `600`，密钥值不得输出或提交。
 - `0.0.1-rc.3` 双架构 DMG 已完成真实构建；arm64 打包态启动、migration、R/Python/SPA 健康检查均通过。该版本是首个包含无签名小团队更新器的安装基线，现有 `rc.2` 用户需手动覆盖安装一次 `rc.3`。
+- 用户已在可连接 OSS 的网络模式下成功执行 `npm run release:mac:oss`；双架构 DMG、SHA-256 清单和 `latest-mac.yml` 均按原子发布顺序上传，用户端测试可用。GitHub `rc.3` Release 草稿已删除，不保留软件资产；后续固定为 GitHub 只推源码，桌面安装包和更新源只发布到 OSS。
 - 完整操作说明见 [`docs/macos-oss-auto-update.md`](./macos-oss-auto-update.md)。
 
 ## 2026-07-15 最新交接点：RC 安装版修复已完成本地验证
