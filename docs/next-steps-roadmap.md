@@ -2,7 +2,19 @@
 
 最后更新：2026-07-15
 
-## 2026-07-15 当前唯一主线：RC 发布工程收口
+## 2026-07-15 当前唯一主线：macOS-only RC 发布
+
+用户已确认后续桌面版本固定走 macOS 平台。Windows/Linux 不再是发布范围，也不再阻塞 RC；以下规则覆盖本页后续保留的旧三平台计划：
+
+1. 默认在本机运行 `npm run check` 与 `npm run build:mac`，同时生成 macOS arm64/x64 DMG。
+2. arm64 必须完成真实打包态启动、migration、R/Python backend 与 SPA 健康检查；x64 至少完成架构与打包结构校验。
+3. 生成 SHA-256 后直接使用 `gh release` 上传 GitHub prerelease，不消耗 GitHub Actions 分钟。
+4. GitHub Release workflow 仅作为手动备用路径；CI 与 Release workflow 均已收敛为 macOS-only。
+5. 当前包未配置 Developer ID 签名和 Apple 公证，发布说明必须持续披露这一点。
+
+`v0.0.1-rc.2` 当前状态：本地 arm64/x64 DMG 已构建；arm64 页面、migration、R `:3001`、Python `:3004`、SPA `:3002` 均通过；待上传 prerelease。
+
+## 2026-07-15 历史主线：RC 三平台发布工程收口（已被上述决策取代）
 
 工作台与 Harness Phase 1–6 已完成；当前不再扩张产品功能。下一阶段只处理 `P-06 桌面集成与交付` 的发布阻断：
 

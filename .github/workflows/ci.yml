@@ -7,11 +7,8 @@ on:
 
 jobs:
   stability:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+    # BioF3 Desktop releases are macOS-only from v0.0.1-rc.2 onward.
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
         with:

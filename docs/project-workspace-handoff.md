@@ -6,6 +6,19 @@
 
 开发模块、职责边界和标准表述统一以 [`docs/development-module-map.md`](./development-module-map.md) 为准。新增需求、缺陷、交接和提交应标明主模块；主题、布局、安全、状态同步、测试和性能作为跨模块关注点附加说明，不再使用无法定位责任边界的“右侧栏问题”“后端问题”等说法。
 
+## 2026-07-15 最新决策：发布范围固定为 macOS-only
+
+主模块：`P-06 桌面集成与交付`；关注点：`C-05 测试与质量门禁`。
+
+- GitHub Actions 免费额度本月已用满（2,000 / 2,000 分钟），并非存储耗尽或代码故障；额度将在 Billing 页面显示的周期到期后重置。
+- 用户已明确决定：从 `v0.0.1-rc.2` 开始，后续桌面发布默认只支持 macOS，不再以 Windows/Linux 产物作为发布门禁。
+- 默认发布路径改为本机执行 `npm run build:mac`，生成 arm64 与 x64 DMG，完成本地冒烟和 SHA-256 后用 `gh release` 直接上传；不依赖 GitHub Actions。
+- `.github/workflows/ci.yml` 已收敛为 macOS，`.github/workflows/release.yml` 已收敛为手动触发的 macOS-only 备用流程。
+- `v0.0.1-rc.2` 本地构建已完成：arm64 与 x64 DMG 均生成；arm64 真实打包态页面、migration、R `:3001`、Python `:3004` 与 SPA `:3002` 验证通过。
+- 当前未配置 Apple Developer ID，DMG 未签名、未公证；用户首次启动需要在“系统设置 → 隐私与安全性”中确认打开。
+
+后续固定顺序：macOS 本机检查 → arm64/x64 构建 → arm64 真实启动冒烟 → SHA-256 → GitHub prerelease。Windows/Linux 仅在用户以后重新明确要求时恢复。
+
 ## 2026-07-15 最新交接点：RC 安装版修复已完成本地验证
 
 主模块：`P-06 桌面集成与交付`；关注点：`C-03 安全与审计`、`C-05 测试与质量门禁`。

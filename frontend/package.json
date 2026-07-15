@@ -1,6 +1,6 @@
 {
   "name": "biof3-desktop-frontend",
-  "version": "0.0.1-rc.1",
+  "version": "0.0.1-rc.2",
   "private": true,
   "description": "BioF3 桌面版原生前端 — Vite SPA（脱离 Docusaurus）",
   "type": "module",
