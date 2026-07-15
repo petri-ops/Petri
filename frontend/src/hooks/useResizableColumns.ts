@@ -197,6 +197,10 @@ export function useResizableColumns(
       let resultResizeFrame: number | null = null;
 
       const cleanup = () => {
+        if (rafId !== null) {
+          window.cancelAnimationFrame(rafId);
+          rafId = null;
+        }
         if (which === 'resultRight') {
           if (resultResizeFrame !== null) {
             window.cancelAnimationFrame(resultResizeFrame);
@@ -217,35 +221,42 @@ export function useResizableColumns(
         dragState.current.cleanup = null;
       };
 
+      let rafId: number | null = null;
       const onMove = (ev: MouseEvent) => {
         if (which !== 'resultRight' && dragState.current.active && (ev.buttons & 1) === 0) {
           cleanup();
           return;
         }
-        if (which === 'left') {
-          setLeftWidth(Math.max(MIN_LEFT_WIDTH, sl + ev.clientX - startX));
-        } else if (which === 'right') {
-          setRightWidth(Math.max(MIN_RIGHT_WIDTH, sr - (ev.clientX - startX)));
-        } else if (which === 'resultRight') {
-          pendingResultRightWidth = Math.min(
-            clamp.max ?? Number.POSITIVE_INFINITY,
-            Math.max(
-              clamp.min ?? MIN_RESULT_RIGHT_WIDTH,
-              srr - (ev.clientX - startX),
-            ),
-          );
-          if (resultResizeFrame === null) {
-            resultResizeFrame = window.requestAnimationFrame(() => {
-              resultResizeFrame = null;
-              document.documentElement.style.setProperty(
-                '--biof3-live-result-right-width',
-                `${pendingResultRightWidth}px`,
-              );
-            });
+
+        if (rafId !== null) return;
+
+        rafId = window.requestAnimationFrame(() => {
+          rafId = null;
+          if (which === 'left') {
+            setLeftWidth(Math.max(MIN_LEFT_WIDTH, sl + ev.clientX - startX));
+          } else if (which === 'right') {
+            setRightWidth(Math.max(MIN_RIGHT_WIDTH, sr - (ev.clientX - startX)));
+          } else if (which === 'resultRight') {
+            pendingResultRightWidth = Math.min(
+              clamp.max ?? Number.POSITIVE_INFINITY,
+              Math.max(
+                clamp.min ?? MIN_RESULT_RIGHT_WIDTH,
+                srr - (ev.clientX - startX),
+              ),
+            );
+            if (resultResizeFrame === null) {
+              resultResizeFrame = window.requestAnimationFrame(() => {
+                resultResizeFrame = null;
+                document.documentElement.style.setProperty(
+                  '--biof3-live-result-right-width',
+                  `${pendingResultRightWidth}px`,
+                );
+              });
+            }
+          } else if (which === 'input') {
+            setInputHeight(Math.max(MIN_INPUT_HEIGHT, si - (ev.clientY - startY)));
           }
-        } else if (which === 'input') {
-          setInputHeight(Math.max(MIN_INPUT_HEIGHT, si - (ev.clientY - startY)));
-        }
+        });
       };
       const onUp = () => {
         cleanup();
