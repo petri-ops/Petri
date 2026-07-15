@@ -181,7 +181,7 @@ jobs:
   # Aggregate artifacts and create / update GitHub prerelease
   release:
     name: Publish GitHub prerelease
-    needs: [macos, windows]
+    needs: [macos]
     if: success()
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -207,16 +207,20 @@ jobs:
           path: artifacts/macos
 
       - name: Download Windows artifacts
+        if: success()
         uses: actions/download-artifact@v4
         with:
           name: desktop-windows
           path: artifacts/windows
+          continue-on-error: true
 
       - name: Combine SHA-256 sums
         shell: bash
         run: |
-          cat artifacts/macos/SHA256SUMS-mac.txt artifacts/windows/SHA256SUMS-win.txt \
-            | sort -k 2 > artifacts/SHA256SUMS.txt
+          cat artifacts/macos/SHA256SUMS-mac.txt > artifacts/SHA256SUMS.txt
+          if [ -f artifacts/windows/SHA256SUMS-win.txt ]; then
+            cat artifacts/windows/SHA256SUMS-win.txt >> artifacts/SHA256SUMS.txt
+          fi
           echo "----- Combined SHA256SUMS -----"
           cat artifacts/SHA256SUMS.txt
 
@@ -229,7 +233,6 @@ jobs:
           generate_release_notes: true
           files: |
             artifacts/macos/*
-            artifacts/windows/*
             artifacts/SHA256SUMS.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
