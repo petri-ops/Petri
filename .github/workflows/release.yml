@@ -61,6 +61,12 @@ jobs:
       - name: Install frontend dependencies
         run: npm --prefix frontend ci
 
+      - name: Stub @docusaurus/tsconfig for submodule tsconfig extends
+        run: |
+          mkdir -p vendor/biof3-core/node_modules/@docusaurus/tsconfig
+          cp frontend/scripts/stubs/docusaurus-tsconfig/tsconfig.json \
+             vendor/biof3-core/node_modules/@docusaurus/tsconfig/tsconfig.json
+
       - name: Verify pinned core and manifests
         shell: bash
         run: |
@@ -130,6 +136,12 @@ jobs:
 
       - name: Install frontend dependencies
         run: npm --prefix frontend ci
+
+      - name: Stub @docusaurus/tsconfig for submodule tsconfig extends
+        run: |
+          mkdir -p vendor/biof3-core/node_modules/@docusaurus/tsconfig
+          cp frontend/scripts/stubs/docusaurus-tsconfig/tsconfig.json \
+             vendor/biof3-core/node_modules/@docusaurus/tsconfig/tsconfig.json
 
       - name: Verify pinned core and manifests
         shell: bash
