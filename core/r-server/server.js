@@ -65,25 +65,20 @@ process.on('uncaughtException', (err) => {
   // Don't exit — let pm2 decide
 });
 
-// === Legacy all-in-one recovery ===
-// In platform/api/worker split mode, restarting an HTTP node does not mean a
-// compute task died. Only the old single-process mode may mark analyses failed
-// on server startup.
-if (config.runMode === 'all') {
-  try {
-    const dbMod = require('./db');
-    const stalled = dbMod.listStalledAnalyses();
-    if (stalled.length > 0) {
-      console.log('[Recovery] Marking ' + stalled.length + ' stalled tasks as failed');
-      const errMsg = '服务重启时此任务被中断，请重新提交';
-      const finishedAt = new Date().toISOString();
-      for (const a of stalled) {
-        dbMod.updateAnalysis(a.id, { status: 'failed', error: errMsg, finishedAt });
-      }
+// A desktop server restart interrupts any in-process analysis still marked active.
+try {
+  const dbMod = require('./db');
+  const stalled = dbMod.listStalledAnalyses();
+  if (stalled.length > 0) {
+    console.log('[Recovery] Marking ' + stalled.length + ' stalled tasks as failed');
+    const errMsg = '服务重启时此任务被中断，请重新提交';
+    const finishedAt = new Date().toISOString();
+    for (const a of stalled) {
+      dbMod.updateAnalysis(a.id, { status: 'failed', error: errMsg, finishedAt });
     }
-  } catch (e) {
-    console.error('[Recovery] Failed:', e.message);
   }
+} catch (e) {
+  console.error('[Recovery] Failed:', e.message);
 }
 
 const PORT = process.env.R_SERVER_PORT || 3003;
@@ -141,19 +136,9 @@ setupAiBridge({ tempDir: TEMP_DIR });
 
 // /api/ai/chat — moved to routes/ai-chat.js
 
-if (config.runMode === 'worker') {
-  console.log(
-    '[BioF3] BIOF3_RUN_MODE=worker — use node worker.js for compute; server.js not started.'
-  );
-  process.exit(0);
-}
-
 // ── Event-loop block monitor ───────────────────────────────────────────────
-// Detects when the single-threaded event loop is stalled (e.g. a synchronous
-// deasync→PG bridge blocking on a stale PostgreSQL socket). Fires AFTER the block
-// clears, logging how long it was wedged + wall-clock time, so freezes that
-// cause 504s become visible in pm2 logs instead of silent hangs. .unref() so
-// it never keeps the process alive on its own.
+// Detect when synchronous work stalls the single-threaded event loop. The timer
+// fires after the block clears and is unref'd so it never keeps the process alive.
 (function startEventLoopMonitor() {
   const TICK_MS = 1000;
   const BLOCK_THRESHOLD_MS = 2000; // report blocks longer than this
@@ -163,7 +148,7 @@ if (config.runMode === 'worker') {
     const lag = now - last - TICK_MS;
     if (lag > BLOCK_THRESHOLD_MS) {
       console.warn(
-        `[event-loop] ⚠ blocked ~${lag}ms (recovered at ${new Date(now).toISOString()}, runMode=${config.runMode}) — check for synchronous deasync/PG stalls`
+        `[event-loop] ⚠ blocked ~${lag}ms (recovered at ${new Date(now).toISOString()})`
       );
     }
     last = now;
@@ -172,7 +157,7 @@ if (config.runMode === 'worker') {
 })();
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🧬 BioF3 R Server running on port ${PORT} (runMode=${config.runMode})`);
+  console.log(`🧬 BioF3 R Server running on port ${PORT}`);
   console.log(`   POST http://localhost:${PORT}/api/run`);
   console.log(`   GET  http://localhost:${PORT}/api/health`);
 });

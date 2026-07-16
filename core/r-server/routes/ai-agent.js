@@ -56,9 +56,6 @@ const {
 const { runAgentLoop } = require('../agent-runner');
 const { aiTaskConcurrencyAcquire, aiTaskConcurrencyRelease } = require('../helpers/runtime');
 const taskStore = require('../task-store');
-const config = require('../config');
-/** ECS platform: skip sync-PG snapshot/facts/plans (deasync hangs the event loop). */
-const skipAgentHeavyPrompt = config.runMode === 'platform';
 
 // AGENT_TASK_MODE_v1：默认 task 模式（loop 后台跑 + 订阅重连），legacy 回退到直连 SSE
 const USE_AGENT_TASK_MODE = (process.env.BIOF3_AGENT_TASK_MODE || 'task') !== 'legacy';
@@ -312,29 +309,27 @@ module.exports = function registerAiAgentRoute(app) {
       const block = renderDocsIndexForPrompt(idx, 2200);
       if (block) systemPrompt += block;
     } catch {}
-    // Append site snapshot (skipped on ECS platform — sync PG shim blocks event loop)
-    if (!skipAgentHeavyPrompt) {
-      try {
-        const userId = req.user && req.user.id;
-        if (userId) {
-          const snap = await buildSiteSnapshotAsync(userId);
-          const block = renderSiteSnapshotForPrompt(snap, 3500);
-          if (block) systemPrompt += block;
-          const factsBlock = await buildFactsBlockAsync(userId, 1200);
-          if (factsBlock && factsBlock.trim()) {
-            systemPrompt += '\n\n=== 关于该用户的已知事实（请记住并参考） ===' + factsBlock;
-          }
-          const sumRow = await getChatSummaryAsync(userId);
-          if (sumRow && sumRow.summary) {
-            systemPrompt += '\n\n=== 与该用户的对话历史摘要（已归档） ===\n' + sumRow.summary;
-          }
-          const activePlan = await getActivePlanForUserAsync(userId, _activeConv && _activeConv.id);
-          if (activePlan) {
-            systemPrompt += renderActivePlanForPrompt(activePlan);
-          }
+    // Append the local user's site snapshot, facts, summary, and active plan.
+    try {
+      const userId = req.user && req.user.id;
+      if (userId) {
+        const snap = await buildSiteSnapshotAsync(userId);
+        const block = renderSiteSnapshotForPrompt(snap, 3500);
+        if (block) systemPrompt += block;
+        const factsBlock = await buildFactsBlockAsync(userId, 1200);
+        if (factsBlock && factsBlock.trim()) {
+          systemPrompt += '\n\n=== 关于该用户的已知事实（请记住并参考） ===' + factsBlock;
         }
-      } catch {}
-    }
+        const sumRow = await getChatSummaryAsync(userId);
+        if (sumRow && sumRow.summary) {
+          systemPrompt += '\n\n=== 与该用户的对话历史摘要（已归档） ===\n' + sumRow.summary;
+        }
+        const activePlan = await getActivePlanForUserAsync(userId, _activeConv && _activeConv.id);
+        if (activePlan) {
+          systemPrompt += renderActivePlanForPrompt(activePlan);
+        }
+      }
+    } catch {}
 
     // Add tool-calling instructions
     systemPrompt += '\n\n=== Tool Calling 指南 ===';

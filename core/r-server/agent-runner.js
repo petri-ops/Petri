@@ -58,11 +58,8 @@ const {
   _gatherAnalysisContextForMethods,
   _renderMethodsParagraph,
 } = require('./helpers/methods-export');
-const config = require('./config');
 const taskStore = require('./task-store');
 const logger = require('./logger');
-
-const skipAgentHeavyPrompt = config.runMode === 'platform';
 
 const MAX_ITERS = 15;
 const MAX_TOTAL_TOOL_CALLS = 20;
@@ -196,27 +193,25 @@ async function runAgentLoop({
     const pluginBlock = renderContentPluginsForPrompt(1200);
     if (pluginBlock) systemPrompt += pluginBlock;
   } catch {}
-  if (!skipAgentHeavyPrompt) {
-    try {
-      if (userId) {
-        const snap = await buildSiteSnapshotAsync(userId);
-        const block = renderSiteSnapshotForPrompt(snap, 3500);
-        if (block) systemPrompt += block;
-        const factsBlock = await buildFactsBlockAsync(userId, 1200);
-        if (factsBlock && factsBlock.trim()) {
-          systemPrompt += '\n\n=== 关于该用户的已知事实（请记住并参考） ===' + factsBlock;
-        }
-        const sumRow = await getChatSummaryAsync(userId);
-        if (sumRow && sumRow.summary) {
-          systemPrompt += '\n\n=== 与该用户的对话历史摘要（已归档） ===\n' + sumRow.summary;
-        }
-        const activePlan = await getActivePlanForUserAsync(userId, _activeConv && _activeConv.id);
-        if (activePlan) {
-          systemPrompt += renderActivePlanForPrompt(activePlan);
-        }
+  try {
+    if (userId) {
+      const snap = await buildSiteSnapshotAsync(userId);
+      const block = renderSiteSnapshotForPrompt(snap, 3500);
+      if (block) systemPrompt += block;
+      const factsBlock = await buildFactsBlockAsync(userId, 1200);
+      if (factsBlock && factsBlock.trim()) {
+        systemPrompt += '\n\n=== 关于该用户的已知事实（请记住并参考） ===' + factsBlock;
       }
-    } catch {}
-  }
+      const sumRow = await getChatSummaryAsync(userId);
+      if (sumRow && sumRow.summary) {
+        systemPrompt += '\n\n=== 与该用户的对话历史摘要（已归档） ===\n' + sumRow.summary;
+      }
+      const activePlan = await getActivePlanForUserAsync(userId, _activeConv && _activeConv.id);
+      if (activePlan) {
+        systemPrompt += renderActivePlanForPrompt(activePlan);
+      }
+    }
+  } catch {}
 
   systemPrompt += '\n\n=== Tool Calling 指南 ===';
   systemPrompt += '\n你可以调用工具来获取真实数据：query / read_page / search';

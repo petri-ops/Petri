@@ -377,9 +377,6 @@ function createToolsExecutor({
   }
 
   function startZombieRecovery() {
-    // ponytail: platform 只代理 Dell，不本地执行工具 → 不该跑 zombie recovery
-    // （Dell r-server runMode=all/api 负责）。platform 的 db shim 在此路径会抛 dbAsync 未定义。
-    if (config.runMode === 'platform') return;
     recoverZombieJobs();
     setInterval(
       () => {
@@ -399,7 +396,7 @@ function createToolsExecutor({
                   template: 'orange',
                   lines: [
                     '5 分钟周期扫描发现 10 分钟以上无响应的任务。',
-                    '可能是 R 容器卡死 / docker exec 超时未捕获。',
+                    '可能是本地运行时卡死或执行超时未被捕获。',
                   ],
                 });
               } catch {}

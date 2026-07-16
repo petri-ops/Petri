@@ -10,8 +10,6 @@ const { execFile } = require('child_process');
 const { v4: uuidv4 } = require('uuid');
 
 const config = require('../config');
-const IS_PLATFORM = config.runMode === 'platform';
-
 // 执行器注册表（local 模式用，延迟 require 避免循环依赖）
 let _executor = null;
 function getRExecutor() {
@@ -51,18 +49,6 @@ function checkRateLimit(ip) {
   record.count++;
   rateLimits.set(ip, record);
   return record.count <= RATE_LIMIT;
-}
-
-// ── Platform guard ────────────────────────────────────────────
-function rComputeOnly(req, res, next) {
-  if (IS_PLATFORM) {
-    return res.status(503).json({
-      status: 'error',
-      error: 'compute_on_dell',
-      message: 'R 即时执行在算力节点（/api/r/），控制面仅支持任务入队 /api/task',
-    });
-  }
-  next();
 }
 
 // ── Helpers ───────────────────────────────────────────────────
@@ -141,7 +127,7 @@ function getContainerIp() {
 // ── Route registration ────────────────────────────────────────
 function registerRCompute(app) {
   // Execute R code
-  app.post('/api/run', rComputeOnly, (req, res) => {
+  app.post('/api/run', (req, res) => {
     const ip = req.ip || req.connection.remoteAddress;
     if (!checkRateLimit(ip)) {
       return res.status(429).json({
@@ -241,7 +227,7 @@ while (dev.cur() > 1) dev.off()
   });
 
   // ── Replot API — proxy to local R plumber service (port 8787) ──
-  app.post('/api/replot/warmup', rComputeOnly, (req, res) => {
+  app.post('/api/replot/warmup', (req, res) => {
     const { taskId, cachePath } = req.body;
     if (!taskId || !cachePath) {
       return res.status(400).json({ status: 'error', error: 'Missing taskId or cachePath' });
@@ -249,7 +235,7 @@ while (dev.cur() > 1) dev.off()
     proxyToR('/warmup', { taskId, cachePath }, res);
   });
 
-  app.post('/api/replot/run', rComputeOnly, (req, res) => {
+  app.post('/api/replot/run', (req, res) => {
     const { taskId, code } = req.body;
     if (!taskId || !code) {
       return res.status(400).json({ status: 'error', error: 'Missing taskId or code' });
@@ -257,7 +243,7 @@ while (dev.cur() > 1) dev.off()
     proxyToR('/run-json', { taskId, code }, res);
   });
 
-  app.get('/api/replot/status', rComputeOnly, (req, res) => {
+  app.get('/api/replot/status', (req, res) => {
     const containerIp = getContainerIp();
     http
       .get(`http://${containerIp}:8787/status`, (proxyRes) => {
@@ -270,4 +256,4 @@ while (dev.cur() > 1) dev.off()
 
 }
 
-module.exports = { registerRCompute, rComputeOnly };
+module.exports = { registerRCompute };
