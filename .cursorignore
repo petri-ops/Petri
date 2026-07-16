@@ -1,10 +1,7 @@
-# Vendor submodule dependencies (有独立的 CLAUDE.md)
-vendor/biof3-core/node_modules/
-vendor/biof3-core/py-server/node_modules/
-vendor/biof3-core/r-server/node_modules/
-vendor/biof3-core/platform-server/node_modules/
-vendor/biof3-core/shared-backend/node_modules/
-vendor/biof3-core/packages/*/node_modules/
+# Embedded core server dependencies (formerly vendor/biof3-core submodule)
+core/r-server/node_modules/
+core/py-server/node_modules/
+core/**/node_modules/
 
 # Build outputs
 dist/
