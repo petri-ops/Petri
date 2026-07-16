@@ -11,6 +11,7 @@
   },
   "scripts": {
     "start": "electron .",
+    "postinstall": "node scripts/install-core-deps.mjs",
     "dev": "node scripts/dev-electron.js",
     "dev:electron": "electron . --dev",
     "prebuild": "node --check src/main.js && node --check src/preload.js && node --check src/plugin-manager.js && node --check core/r-server/plugin-loader.js",

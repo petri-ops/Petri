@@ -8,23 +8,18 @@
 
 module.exports = async function registerRoutes(app) {
   const routes = [
+    // Web-only 路由已移除（desktop 前端/copilot 不调用）：ai-report、ai-review、
+    // analytics、admin-ops、admin-compute、admin-users、observability。
     ['AI conversations', () => require('./ai-conversations')(app)],
     ['AI memory', () => require('./ai-memory')(app)],
-    ['AI report', () => require('./ai-report')(app)],
     ['AI admin', () => require('./ai-admin')(app)],
     ['AI plans', () => require('./ai-plans')(app)],
     ['AI misc', () => require('./ai-misc')(app)],
     ['AI legacy', () => require('./ai-legacy')(app)],
     ['AI progress', () => require('./ai-progress')(app)],
-    ['AI review', () => require('./ai-review')(app)],
-    ['Analytics', () => require('./analytics')(app)],
-    ['Admin ops', () => require('./admin-ops')(app)],
-    ['Admin compute', () => require('./admin-compute')(app)],
-    ['Admin users', () => require('./admin-users')(app)],
     ['Data CRUD', () => { app.use('/api/data', require('../api-data')); }],
     ['Files', () => require('./files')(app)],
     ['Harness', () => require('./harness')(app)],
-    ['Observability', () => require('./observability')(app)],
     ['Tools', () => require('./tools')(app)],
     ['Feedback', () => require('./feedback')(app)],
     ['AI chat', () => require('./ai-chat')(app)],
