@@ -6,6 +6,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
+import { ThemeControl } from './ThemeControl';
 import {
   useAiSettings,
   DEFAULT_CHAT_MODEL_PRESETS,
@@ -13,10 +14,33 @@ import {
 } from '@/hooks/useAiSettings';
 import { useAutoUpdate } from '@/hooks/useAutoUpdate';
 import type { ComputeSettings } from '@/lib/electron';
+import { deleteProject, listProjects, setProjectStatus } from '@/lib/project-store';
+import type { Project } from '@/lib/project-types';
+import {
+  archiveConversation,
+  deleteConversation,
+  listConversations,
+  type ConversationSummary,
+} from '@/components/copilot/copilotConversationsClient';
 
 interface Props {
   onClose: () => void;
 }
+
+type SettingsSection = 'general' | 'models' | 'credentials' | 'compute' | 'maintenance';
+
+const SETTINGS_SECTIONS: Array<{
+  id: SettingsSection;
+  label: string;
+  description: string;
+  icon: 'settings' | 'brain' | 'key' | 'cpu' | 'wrench';
+}> = [
+  { id: 'general', label: '常规', description: '外观与应用偏好', icon: 'settings' },
+  { id: 'models', label: 'AI 模型', description: '会话与语义模型', icon: 'brain' },
+  { id: 'credentials', label: '凭据', description: 'API Key 管理', icon: 'key' },
+  { id: 'compute', label: '计算与数据', description: '执行位置与存储', icon: 'cpu' },
+  { id: 'maintenance', label: '隐私与维护', description: '反馈、诊断与更新', icon: 'wrench' },
+];
 
 // ChatModelPreset type + DEFAULT_CHAT_MODEL_PRESETS live in
 // `@/hooks/useAiSettings` — Plan 1.6 §4.5 [HIGH] type dedup.
@@ -372,7 +396,151 @@ function ComputeExecution(): React.ReactElement | null {
   );
 }
 
+function TrashManagement(): React.ReactElement {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const loadTrash = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [activeProjects, archivedProjects] = await Promise.all([
+        listProjects(),
+        listProjects(undefined, 'archived'),
+      ]);
+      const allProjects = [...activeProjects, ...archivedProjects];
+      const archivedConversations = await Promise.all(
+        allProjects.map((project) => listConversations('archived', project.id))
+      );
+      setProjects(archivedProjects);
+      setConversations(archivedConversations.flat());
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadTrash();
+  }, [loadTrash]);
+
+  const restoreProject = async (projectId: string) => {
+    setBusyId(projectId);
+    try {
+      await setProjectStatus(projectId, 'active');
+      await loadTrash();
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const restoreConversation = async (conversationId: string) => {
+    setBusyId(conversationId);
+    try {
+      await archiveConversation(conversationId, false);
+      await loadTrash();
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const permanentlyDeleteProject = async (projectId: string) => {
+    if (!window.confirm('永久删除这个项目记录及其应用内数据？外部工作目录不会被删除。此操作无法撤销。')) return;
+    setBusyId(projectId);
+    try {
+      await deleteProject(projectId);
+      await loadTrash();
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const permanentlyDeleteConversation = async (conversationId: string) => {
+    if (!window.confirm('永久删除这个会话及其消息？此操作无法撤销。')) return;
+    setBusyId(conversationId);
+    try {
+      await deleteConversation(conversationId);
+      await loadTrash();
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const emptyTrash = async () => {
+    if (projects.length + conversations.length === 0) return;
+    if (!window.confirm('永久清空回收站？项目记录、会话和消息将无法恢复；外部工作目录不会被删除。')) return;
+    setBusyId('all');
+    try {
+      // Delete conversations first. Project deletion cascades its remaining
+      // conversations, so avoiding concurrent requests keeps the operation
+      // deterministic when both appear in the recycle bin.
+      for (const conversation of conversations) {
+        await deleteConversation(conversation.id);
+      }
+      for (const project of projects) {
+        await deleteProject(project.id);
+      }
+      await loadTrash();
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const projectNameById = new Map(
+    projects.map((project) => [project.id, project.name])
+  );
+  const count = projects.length + conversations.length;
+
+  return (
+    <div className="biof3-trash-section">
+      <div className="biof3-trash-section__header">
+        <div>
+          <strong>回收站</strong>
+          <p>移除的项目和会话会保留在这里，清理后才会永久删除。</p>
+        </div>
+        <button
+          type="button"
+          className="biof3-btn biof3-btn--danger-ghost biof3-btn--sm"
+          onClick={() => void emptyTrash()}
+          disabled={loading || count === 0 || busyId !== null}
+        >
+          清空回收站{count > 0 ? ` (${count})` : ''}
+        </button>
+      </div>
+      {loading ? (
+        <div className="biof3-trash-empty">正在读取回收站…</div>
+      ) : count === 0 ? (
+        <div className="biof3-trash-empty">回收站为空</div>
+      ) : (
+        <div className="biof3-trash-list">
+          {projects.map((project) => (
+            <div key={project.id} className="biof3-trash-item">
+              <Icon name="folder" size={14} />
+              <div><strong>{project.name}</strong><small>项目</small></div>
+              <button type="button" onClick={() => void restoreProject(project.id)} disabled={busyId !== null}>恢复</button>
+              <button type="button" className="danger" onClick={() => void permanentlyDeleteProject(project.id)} disabled={busyId !== null}>永久删除</button>
+            </div>
+          ))}
+          {conversations.map((conversation) => (
+            <div key={conversation.id} className="biof3-trash-item">
+              <Icon name="message-circle" size={14} />
+              <div>
+                <strong>{conversation.title}</strong>
+                <small>会话{conversation.project_id ? ` · ${projectNameById.get(conversation.project_id) || '现有项目'}` : ''}</small>
+              </div>
+              <button type="button" onClick={() => void restoreConversation(conversation.id)} disabled={busyId !== null}>恢复</button>
+              <button type="button" className="danger" onClick={() => void permanentlyDeleteConversation(conversation.id)} disabled={busyId !== null}>永久删除</button>
+            </div>
+          ))}
+        </div>
+      )}
+      <p className="biof3-field__hint">永久清理只删除 BioF3 内的项目记录、会话和关联消息，不会删除你选择的外部工作目录。</p>
+    </div>
+  );
+}
+
 export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
+  const [activeSection, setActiveSection] = useState<SettingsSection>('general');
   const [settings, setSettings] = useState<Record<string, unknown>>({});
   const [testing, setTesting] = useState<string | null>(null);
   const [testResult, setTestResult] = useState<Record<string, { ok: boolean; message: string }>>(
@@ -484,6 +652,9 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     });
   }
 
+  const activeSectionMeta = SETTINGS_SECTIONS.find((item) => item.id === activeSection) || SETTINGS_SECTIONS[0];
+  const showAiSave = activeSection === 'models' || activeSection === 'credentials';
+
   return (
     <div className="biof3-desktop-panel" role="dialog" aria-label="设置">
       <div className="biof3-desktop-panel__header">
@@ -492,7 +663,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         </span>
         <div className="biof3-desktop-panel__titles">
           <h2 className="biof3-desktop-panel__title">设置</h2>
-          <p className="biof3-desktop-panel__subtitle">AI Copilot 配置 · 密钥本地存储</p>
+          <p className="biof3-desktop-panel__subtitle">{activeSectionMeta.description}</p>
         </div>
         <button
           type="button"
@@ -504,7 +675,46 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         </button>
       </div>
 
-      <div className="biof3-desktop-panel__body">
+      <div className="biof3-settings-layout">
+        <nav className="biof3-settings-nav" aria-label="设置分类">
+          {SETTINGS_SECTIONS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`biof3-settings-nav__item${activeSection === item.id ? ' active' : ''}`}
+              onClick={() => setActiveSection(item.id)}
+            >
+              <Icon name={item.icon} size={15} />
+              <span>
+                <strong>{item.label}</strong>
+                <small>{item.description}</small>
+              </span>
+            </button>
+          ))}
+        </nav>
+
+        <div className="biof3-desktop-panel__body biof3-settings-content">
+        {activeSection === 'general' && (
+          <section className="biof3-settings-section">
+            <div className="biof3-settings-section__heading">
+              <h3>常规</h3>
+              <p>调整应用外观与基础使用偏好。</p>
+            </div>
+        <div className="biof3-field">
+          <label className="biof3-field__label">外观主题</label>
+          <ThemeControl menuPlacement="bottom" />
+          <p className="biof3-field__hint">可跟随 macOS 外观，或固定使用日间/夜间模式。</p>
+        </div>
+
+          </section>
+        )}
+
+        {activeSection === 'models' && (
+          <section className="biof3-settings-section">
+            <div className="biof3-settings-section__heading">
+              <h3>AI 模型</h3>
+              <p>管理会话区使用的模型和语义搜索 Provider。</p>
+            </div>
         <div className="biof3-field">
           <label className="biof3-field__label">Chat 模型 Provider</label>
           <select
@@ -522,24 +732,27 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
           <label className="biof3-field__label">Chat 模型预设</label>
           <div style={{ display: 'grid', gap: 8 }}>
             {chatModelPresets.map((preset, index) => (
-              <div key={preset.id} className="biof3-input-row" style={{ alignItems: 'center' }}>
+              <div key={preset.id} className="biof3-model-preset">
                 <input
                   className="biof3-input"
                   value={preset.label}
                   onChange={(e) => updatePreset(index, { label: e.target.value })}
                   placeholder="显示名称"
+                  aria-label="预设显示名称"
                 />
                 <input
                   className="biof3-input"
                   value={preset.provider}
                   onChange={(e) => updatePreset(index, { provider: e.target.value })}
                   placeholder="provider"
+                  aria-label="Provider"
                 />
                 <input
                   className="biof3-input"
                   value={preset.model}
                   onChange={(e) => updatePreset(index, { model: e.target.value })}
                   placeholder="model"
+                  aria-label="模型名称"
                 />
                 <input
                   type="password"
@@ -547,8 +760,10 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                   value={preset.apiKey || ''}
                   onChange={(e) => updatePreset(index, { apiKey: e.target.value })}
                   placeholder="可选 API Key"
+                  aria-label="预设 API Key"
                 />
-                <label style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
+                <div className="biof3-model-preset__actions">
+                <label className="biof3-model-preset__default">
                   <input
                     type="radio"
                     name="active-chat-model"
@@ -568,6 +783,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                 >
                   删除
                 </button>
+                </div>
               </div>
             ))}
           </div>
@@ -581,6 +797,26 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
           </p>
         </div>
 
+        <div className="biof3-field">
+          <label className="biof3-field__label">Embedding 模型 Provider（语义搜索用）</label>
+          <select
+            className="biof3-select"
+            value={embedProvider}
+            onChange={(e) => setEmbedProvider(e.target.value)}
+          >
+            <option value="dashscope">DashScope（阿里云百炼）</option>
+            <option value="ollama">Ollama 本地模型（未来支持）</option>
+          </select>
+        </div>
+          </section>
+        )}
+
+        {activeSection === 'credentials' && (
+          <section className="biof3-settings-section">
+            <div className="biof3-settings-section__heading">
+              <h3>凭据</h3>
+              <p>管理模型服务密钥。已配置的密钥不会在界面中回显。</p>
+            </div>
         <div className="biof3-field">
           <label className="biof3-field__label">
             DeepSeek API Key
@@ -620,18 +856,6 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
             </p>
           )}
           <p className="biof3-field__hint">获取地址：platform.deepseek.com → API Keys</p>
-        </div>
-
-        <div className="biof3-field">
-          <label className="biof3-field__label">Embedding 模型 Provider（语义搜索用）</label>
-          <select
-            className="biof3-select"
-            value={embedProvider}
-            onChange={(e) => setEmbedProvider(e.target.value)}
-          >
-            <option value="dashscope">DashScope（阿里云百炼）</option>
-            <option value="ollama">Ollama 本地模型（未来支持）</option>
-          </select>
         </div>
 
         <div className="biof3-field">
@@ -675,10 +899,28 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
           <p className="biof3-field__hint">获取地址：bailian.console.aliyun.com → API-KEY 管理</p>
         </div>
 
+          </section>
+        )}
+
+        {activeSection === 'compute' && (
+          <section className="biof3-settings-section">
+            <div className="biof3-settings-section__heading">
+              <h3>计算与数据</h3>
+              <p>设置分析任务的执行位置，并查看本地数据占用。</p>
+            </div>
         <ComputeExecution />
 
         <DataManagement />
 
+          </section>
+        )}
+
+        {activeSection === 'maintenance' && (
+          <section className="biof3-settings-section">
+            <div className="biof3-settings-section__heading">
+              <h3>隐私与维护</h3>
+              <p>控制匿名错误反馈，并处理诊断和应用更新。</p>
+            </div>
         {/* M2-3：可选错误遥测开关（默认关闭，用户主动开启） */}
         <div className="biof3-field">
           <label className="biof3-field__label">开启错误反馈</label>
@@ -699,16 +941,34 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
             用于改进工具稳定性。可随时关闭。
           </p>
         </div>
+        <div className="biof3-maintenance-actions">
+          <div className="biof3-maintenance-row">
+            <div>
+              <strong>应用更新</strong>
+              <p>检查并下载适用于当前 Mac 的安装包。</p>
+            </div>
+            <UpdateChecker />
+          </div>
+          <div className="biof3-maintenance-row">
+            <div>
+              <strong>诊断日志</strong>
+              <p>导出用于排查问题的本地诊断信息。</p>
+            </div>
+            <ExportDiagnostic />
+          </div>
+        </div>
+        <TrashManagement />
+          </section>
+        )}
+        </div>
       </div>
 
-      <div className="biof3-desktop-panel__footer">
+      {showAiSave && <div className="biof3-desktop-panel__footer biof3-settings-footer">
         {saved && (
           <span className="biof3-saved-toast">
             <Icon name="check" size={14} /> 已保存
           </span>
         )}
-        <UpdateChecker />
-        <ExportDiagnostic />
         <button
           type="button"
           className="biof3-btn biof3-btn--primary biof3-btn--sm"
@@ -717,7 +977,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         >
           {saving ? '保存中…' : '保存'}
         </button>
-      </div>
+      </div>}
     </div>
   );
 }

@@ -14,6 +14,7 @@ export interface Project {
   updatedAt: string;
   modality?: ProjectModality;
   workspacePath?: string;
+  status?: 'active' | 'archived';
 }
 
 export interface ToolJob {

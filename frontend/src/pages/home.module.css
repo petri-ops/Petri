@@ -1,0 +1,87 @@
+.homeState,
+.emptyHome {
+  min-height: calc(100vh - var(--biof3-titlebar-height));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--biof3-bg-surface);
+  color: var(--biof3-text-secondary);
+}
+
+.homeState {
+  gap: 9px;
+  font-size: 12px;
+}
+
+.homeState button,
+.emptyHomeCreate button {
+  border: 1px solid var(--biof3-border);
+  border-radius: 7px;
+  background: var(--biof3-bg-surface);
+  color: var(--biof3-text);
+  cursor: pointer;
+}
+
+.homeState button {
+  height: 28px;
+  padding: 0 10px;
+}
+
+.homeStateDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--biof3-accent);
+  animation: homePulse 1.2s ease-in-out infinite;
+}
+
+.emptyHome {
+  flex-direction: column;
+  gap: 8px;
+  padding: 32px;
+  text-align: center;
+}
+
+.emptyHomeIcon {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--biof3-accent-bg);
+  color: var(--biof3-accent);
+}
+
+.emptyHome h1 {
+  margin: 4px 0 0;
+  color: var(--biof3-text);
+  font-size: 18px;
+}
+
+.emptyHome p {
+  margin: 0;
+  font-size: 12px;
+}
+
+.emptyHomeCreate {
+  margin-top: 8px;
+}
+
+.emptyHomeCreate button {
+  height: 34px;
+  padding: 0 13px;
+  background: var(--biof3-accent);
+  border-color: var(--biof3-accent);
+  color: white;
+}
+
+.emptyHomeCreate button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+@keyframes homePulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}

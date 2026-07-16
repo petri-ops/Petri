@@ -2,7 +2,7 @@
  * useAutoUpdate — unified update state for the BioF3 desktop shell.
  *
  * Subscribes to window.biof3Desktop.updater IPC events and exposes a
- * single source of truth for both _desktop-dashboard and DesktopSettingsPanel.
+ * single source of truth for desktop update surfaces such as DesktopSettingsPanel.
  *
  * State is session-only (lives in React state, resets on page refresh —
  * which is correct for update UX).

@@ -56,7 +56,7 @@ export function TitleBar(): React.ReactElement {
             title={panels.leftOpen ? '收起左侧栏' : '展开左侧栏'}
             aria-label={panels.leftOpen ? '收起左侧栏' : '展开左侧栏'}
           >
-            <Icon name="panel-left" size={16} />
+            <Icon name="panel-left" size={15} />
           </button>
           <button
             type="button"
@@ -83,7 +83,7 @@ export function TitleBar(): React.ReactElement {
 
       <div className={styles.centerTitle}>
         <div className={styles.centerTitleMain}>
-          <Icon name="folder" size={16} />
+          <Icon name="folder" size={15} />
           <span className={styles.centerTitleText}>{displayTitle}</span>
         </div>
         <button
@@ -94,7 +94,7 @@ export function TitleBar(): React.ReactElement {
           aria-label={panels.summaryOpen ? '收起摘要概览' : '展开摘要概览'}
           aria-pressed={panels.summaryOpen}
         >
-          <Icon name="list-details" size={16} />
+          <Icon name="list-details" size={15} />
         </button>
       </div>
 
@@ -115,7 +115,7 @@ export function TitleBar(): React.ReactElement {
                     title={tab.label}
                     aria-pressed={active}
                   >
-                    <Icon name={tab.icon} size={15} />
+                    <Icon name={tab.icon} size={14} />
                     <span className={styles.tabPillText}>{tab.label}</span>
                   </button>
                   {tab.closable && onCloseTab && (
@@ -141,7 +141,7 @@ export function TitleBar(): React.ReactElement {
                 aria-haspopup="menu"
                 aria-expanded={toolMenuOpen}
               >
-                <Icon name="plus" size={16} />
+                <Icon name="plus" size={15} />
               </button>
               {toolMenuOpen && (
                 <>
@@ -180,7 +180,7 @@ export function TitleBar(): React.ReactElement {
             title={panels.bottomTerminalOpen ? '收起底部终端' : '展开底部终端'}
             aria-label={panels.bottomTerminalOpen ? '收起底部终端' : '展开底部终端'}
           >
-            <Icon name="panel-bottom" size={16} />
+            <Icon name="panel-bottom" size={15} />
           </button>
           <button
             type="button"
@@ -189,7 +189,7 @@ export function TitleBar(): React.ReactElement {
             title={panels.rightOpen ? '收起右侧栏' : '展开右侧栏'}
             aria-label={panels.rightOpen ? '收起右侧栏' : '展开右侧栏'}
           >
-            <Icon name="panel-right" size={16} />
+            <Icon name="panel-right" size={15} />
           </button>
         </div>
       </div>

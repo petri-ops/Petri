@@ -195,12 +195,45 @@ export function useResizableColumns(
       const { leftWidth: sl, rightWidth: sr, resultRightWidth: srr, inputHeight: si } = dims.current;
       let pendingResultRightWidth = srr;
       let resultResizeFrame: number | null = null;
+      let rafId: number | null = null;
+      let pendingMove: MouseEvent | null = null;
+
+      const applyMove = (ev: MouseEvent) => {
+        if (which === 'left') {
+          setLeftWidth(Math.max(MIN_LEFT_WIDTH, sl + ev.clientX - startX));
+        } else if (which === 'right') {
+          setRightWidth(Math.max(MIN_RIGHT_WIDTH, sr - (ev.clientX - startX)));
+        } else if (which === 'resultRight') {
+          pendingResultRightWidth = Math.min(
+            clamp.max ?? Number.POSITIVE_INFINITY,
+            Math.max(
+              clamp.min ?? MIN_RESULT_RIGHT_WIDTH,
+              srr - (ev.clientX - startX),
+            ),
+          );
+          if (resultResizeFrame === null) {
+            resultResizeFrame = window.requestAnimationFrame(() => {
+              resultResizeFrame = null;
+              document.documentElement.style.setProperty(
+                '--biof3-live-result-right-width',
+                `${pendingResultRightWidth}px`,
+              );
+            });
+          }
+        } else if (which === 'input') {
+          setInputHeight(Math.max(MIN_INPUT_HEIGHT, si - (ev.clientY - startY)));
+        }
+      };
 
       const cleanup = () => {
         if (rafId !== null) {
           window.cancelAnimationFrame(rafId);
           rafId = null;
+          // A quick mouseup can arrive before the scheduled frame. Commit the
+          // latest pointer position so the final drag delta is never lost.
+          if (pendingMove) applyMove(pendingMove);
         }
+        pendingMove = null;
         if (which === 'resultRight') {
           if (resultResizeFrame !== null) {
             window.cancelAnimationFrame(resultResizeFrame);
@@ -221,41 +254,20 @@ export function useResizableColumns(
         dragState.current.cleanup = null;
       };
 
-      let rafId: number | null = null;
       const onMove = (ev: MouseEvent) => {
         if (which !== 'resultRight' && dragState.current.active && (ev.buttons & 1) === 0) {
           cleanup();
           return;
         }
 
+        pendingMove = ev;
         if (rafId !== null) return;
 
         rafId = window.requestAnimationFrame(() => {
           rafId = null;
-          if (which === 'left') {
-            setLeftWidth(Math.max(MIN_LEFT_WIDTH, sl + ev.clientX - startX));
-          } else if (which === 'right') {
-            setRightWidth(Math.max(MIN_RIGHT_WIDTH, sr - (ev.clientX - startX)));
-          } else if (which === 'resultRight') {
-            pendingResultRightWidth = Math.min(
-              clamp.max ?? Number.POSITIVE_INFINITY,
-              Math.max(
-                clamp.min ?? MIN_RESULT_RIGHT_WIDTH,
-                srr - (ev.clientX - startX),
-              ),
-            );
-            if (resultResizeFrame === null) {
-              resultResizeFrame = window.requestAnimationFrame(() => {
-                resultResizeFrame = null;
-                document.documentElement.style.setProperty(
-                  '--biof3-live-result-right-width',
-                  `${pendingResultRightWidth}px`,
-                );
-              });
-            }
-          } else if (which === 'input') {
-            setInputHeight(Math.max(MIN_INPUT_HEIGHT, si - (ev.clientY - startY)));
-          }
+          const latestMove = pendingMove;
+          pendingMove = null;
+          if (latestMove) applyMove(latestMove);
         });
       };
       const onUp = () => {

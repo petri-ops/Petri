@@ -2,6 +2,7 @@ import React from 'react';
 import { Icon } from '@/components/icons/Icon';
 import type { ToolJob } from '@/lib/project-types';
 import type { HarnessWorkflowJobState } from '@/lib/harness-client';
+import type { BackendStatus } from '@/lib/electron';
 import styles from '@/pages/project-workspace.module.css';
 
 export interface WorkspaceSummaryCardProps {
@@ -14,6 +15,7 @@ export interface WorkspaceSummaryCardProps {
   recentJobs: ToolJob[];
   liveJobsPreview: ToolJob[];
   jobStats: { running: number; failed: number; done: number; pending: number };
+  backendStatus: BackendStatus;
   onOpenScheduled: () => void;
   onSelectJob: (id: string) => void;
 }
@@ -37,6 +39,7 @@ export function WorkspaceSummaryCard({
   recentJobs,
   liveJobsPreview,
   jobStats,
+  backendStatus,
   onOpenScheduled,
   onSelectJob,
 }: WorkspaceSummaryCardProps): React.ReactElement | null {
@@ -190,11 +193,48 @@ export function WorkspaceSummaryCard({
         </section>
 
         <div className={styles.workspacePinnedSummaryFooter}>
-          <span>{runningCount} 运行中</span>
-          <span>{totalCount} 次运行</span>
+          <span className={styles.workspacePinnedSummaryRuntimes} aria-label="后端运行状态">
+            <RuntimeStatusChip
+              label="R"
+              runtimeReady={backendStatus.rRuntime}
+              serverUp={backendStatus.rServerUp}
+              downReason={backendStatus.downReason}
+            />
+            <RuntimeStatusChip
+              label="Py"
+              runtimeReady={backendStatus.pyRuntime}
+              serverUp={backendStatus.pyServerUp}
+            />
+          </span>
+          <span>{runningCount} 运行中 · {totalCount} 次</span>
         </div>
       </div>
     </aside>
+  );
+}
+
+function RuntimeStatusChip({
+  label,
+  runtimeReady,
+  serverUp,
+  downReason,
+}: {
+  label: string;
+  runtimeReady: boolean;
+  serverUp: boolean;
+  downReason?: string | null;
+}): React.ReactElement {
+  const state = serverUp ? 'online' : runtimeReady ? 'offline' : 'missing';
+  const stateLabel = serverUp ? '后端运行中' : runtimeReady ? '后端未启动' : '运行时未安装';
+  return (
+    <span
+      className={styles.workspacePinnedSummaryRuntimeChip}
+      data-state={state}
+      title={`${label} ${stateLabel}${downReason && !serverUp ? `：${downReason}` : ''}`}
+    >
+      <i />
+      {label}
+    </span>
   );
 }
 

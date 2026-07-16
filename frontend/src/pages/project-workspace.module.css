@@ -6,8 +6,8 @@
 .workspaceRoot {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 28px);
-  max-height: calc(100vh - 28px);
+  height: calc(100vh - var(--biof3-titlebar-height));
+  max-height: calc(100vh - var(--biof3-titlebar-height));
   min-height: 0;
   overflow: hidden;
   background: var(--biof3-bg-surface);
@@ -529,9 +529,6 @@
   overflow: hidden;
   padding: 4px 8px 10px;
 }
-.leftPanelWrap .leftSidebarSearchWrap {
-  margin-top: 0;
-}
 
 .leftWorkspaceBar {
   display: flex;
@@ -710,58 +707,6 @@
   color: var(--biof3-teal);
 }
 
-.leftSidebarSearchWrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 34px;
-  margin: 0 0 10px;
-  padding: 0 10px;
-  border: 1px solid color-mix(in srgb, var(--biof3-border) 76%, transparent 24%);
-  border-radius: 8px;
-  background: var(--biof3-bg-surface);
-  color: var(--ifm-color-emphasis-600);
-}
-
-.leftSidebarSearch {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  padding: 0;
-  background: transparent;
-  color: var(--ifm-color-emphasis-800);
-  font: inherit;
-  font-size: 12px;
-}
-
-.leftSidebarSearch::placeholder {
-  color: var(--ifm-color-emphasis-500);
-}
-
-.leftSidebarSearch:focus {
-  outline: none;
-}
-
-.leftSidebarSearchClear {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  border: none;
-  border-radius: 999px;
-  background: var(--biof3-bg-surface);
-  color: var(--ifm-color-emphasis-700);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.leftSidebarSearchClear:hover {
-  background: var(--biof3-hover);
-  color: var(--biof3-teal);
-}
-
 .leftQuickActions {
   display: grid;
   gap: 2px;
@@ -843,103 +788,6 @@
   border-top: 1px solid var(--biof3-border);
 }
 
-.inlineCreateCard {
-  margin: 8px 8px 10px;
-  padding: 10px;
-  border: 1px solid color-mix(in srgb, var(--biof3-border) 76%, transparent 24%);
-  border-radius: 10px;
-  background: var(--biof3-bg-surface);
-  display: grid;
-  gap: 8px;
-}
-
-.inlineCreatePathRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.inlineCreatePathBtn {
-  flex-shrink: 0;
-  border: 1px solid var(--biof3-border);
-  border-radius: 8px;
-  padding: 0 10px;
-  height: 30px;
-  background: var(--biof3-surface);
-  color: var(--biof3-text-secondary);
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.inlineCreatePathBtn:hover {
-  color: var(--biof3-text);
-  border-color: var(--biof3-accent);
-}
-
-.inlineCreatePathValue {
-  min-width: 0;
-  flex: 1;
-  font-size: 12px;
-  color: var(--biof3-text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.inlineCreateInput,
-.inlineCreateTextarea,
-.convCreateInput {
-  width: 100%;
-  border: 1px solid color-mix(in srgb, var(--biof3-border) 76%, transparent 24%);
-  border-radius: 8px;
-  padding: 8px 10px;
-  font: inherit;
-  font-size: 12px;
-  color: var(--ifm-color-emphasis-800);
-  background: var(--biof3-bg-surface);
-  box-sizing: border-box;
-}
-
-.inlineCreateTextarea {
-  resize: vertical;
-  min-height: 76px;
-}
-
-.inlineCreateInput:focus,
-.inlineCreateTextarea:focus,
-.convCreateInput:focus {
-  outline: none;
-  border-color: var(--biof3-accent-border);
-  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
-}
-
-.inlineCreateActions,
-.convCreateActions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.inlineCreateBtn,
-.convCreateBtn {
-  height: 30px;
-  border: 1px solid color-mix(in srgb, var(--biof3-border) 76%, transparent 24%);
-  border-radius: 8px;
-  padding: 0 10px;
-  background: var(--biof3-bg-surface);
-  color: var(--ifm-color-emphasis-700);
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.inlineCreateBtnPrimary,
-.convCreateBtnPrimary {
-  border-color: var(--biof3-accent-border);
-  background: var(--biof3-accent);
-  color: #ffffff;
-}
-
 .projectTreeNode {
   display: flex;
   flex-direction: column;
@@ -968,6 +816,14 @@
 
 .projectTreeName {
   flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: text;
   font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
@@ -1010,12 +866,6 @@
   color: var(--ifm-color-emphasis-500);
 }
 
-.convCreateItem {
-  padding: 8px 8px 8px 26px;
-  display: grid;
-  gap: 8px;
-}
-
 .convItem {
   display: flex;
   align-items: center;
@@ -1040,9 +890,57 @@
 
 .convItemTitle {
   flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: text;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.convItemTrashBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--biof3-text-muted);
+  cursor: pointer;
+  opacity: 0;
+}
+
+.convItem:hover .convItemTrashBtn,
+.convItemTrashBtn:focus-visible {
+  opacity: 1;
+}
+
+.convItemTrashBtn:hover {
+  background: var(--biof3-hover);
+  color: var(--biof3-status-error-fg);
+}
+
+.treeRenameInput {
+  flex: 1;
+  min-width: 0;
+  height: 22px;
+  padding: 0 5px;
+  border: 1px solid var(--biof3-accent-border);
+  border-radius: 5px;
+  outline: none;
+  background: var(--biof3-bg-surface);
+  color: var(--biof3-text);
+  font: inherit;
+  font-size: 12px;
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.1);
 }
 
 /* Center column — Agent main interaction area */
@@ -1763,6 +1661,38 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
+}
+
+.workspacePinnedSummaryRuntimes {
+  gap: 7px !important;
+  flex-shrink: 0;
+}
+
+.workspacePinnedSummaryRuntimeChip {
+  gap: 3px !important;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--biof3-text-secondary);
+}
+
+.workspacePinnedSummaryRuntimeChip > i {
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--biof3-text-tertiary);
+}
+
+.workspacePinnedSummaryRuntimeChip[data-state='online'] > i {
+  background: var(--biof3-status-online);
+}
+
+.workspacePinnedSummaryRuntimeChip[data-state='offline'] > i {
+  background: var(--biof3-status-loading);
+}
+
+.workspacePinnedSummaryRuntimeChip[data-state='missing'] {
+  color: var(--biof3-text-tertiary);
 }
 
 

@@ -36,8 +36,14 @@ async function api(path: string, opts?: RequestInit): Promise<any> {
 // Projects CRUD
 // ============================================================
 
-export async function listProjects(modality?: ProjectModality): Promise<Project[]> {
-  const qs = modality ? `?modality=${encodeURIComponent(modality)}` : '';
+export async function listProjects(
+  modality?: ProjectModality,
+  status: 'active' | 'archived' = 'active'
+): Promise<Project[]> {
+  const params = new URLSearchParams();
+  if (modality) params.set('modality', modality);
+  if (status === 'archived') params.set('status', status);
+  const qs = params.size > 0 ? `?${params.toString()}` : '';
   const data = await api(`/projects${qs}`);
   return (data.projects || []).map(mapProject);
 }
@@ -78,6 +84,21 @@ export async function updateProject(
 
 export async function deleteProject(id: string): Promise<void> {
   await api(`/projects/${id}`, { method: 'DELETE' });
+}
+
+export async function setProjectStatus(
+  id: string,
+  status: 'active' | 'archived'
+): Promise<Project | null> {
+  try {
+    const data = await api(`/projects/${id}/status`, {
+      method: 'POST',
+      body: JSON.stringify({ status }),
+    });
+    return mapProject(data.project);
+  } catch {
+    return null;
+  }
 }
 
 // ============================================================
@@ -137,6 +158,7 @@ function mapProject(p: Record<string, unknown>): Project {
     updatedAt: String(p.updated_at || ''),
     modality: p.modality ? String(p.modality) : undefined,
     workspacePath: p.workspace_path ? String(p.workspace_path) : undefined,
+    status: p.status === 'archived' ? 'archived' : 'active',
   };
 }
 

@@ -5,11 +5,13 @@
  * 没有项目时才保留创建项目的启动页。
  */
 
-import React, { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
-import { DesktopDashboard } from './_desktop-dashboard';
-import { listProjectJobs, listProjects } from '@/lib/project-store';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { Icon } from '@/components/icons/Icon';
+import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
+import { createProject, listProjectJobs, listProjects } from '@/lib/project-store';
 import type { Project, ToolJob } from '@/lib/project-types';
+import styles from './home.module.css';
 
 function pickRecentProject(projects: Project[]): Project | null {
   if (projects.length === 0) return null;
@@ -34,11 +36,16 @@ function pickRecentCompletedJob(jobs: ToolJob[], projects: Project[]): ToolJob |
 }
 
 export default function Home(): React.ReactElement {
-  const [status, setStatus] = useState<'loading' | 'ready'>('loading');
+  const backendStatus = useBackendStatus();
+  const navigate = useNavigate();
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [targetProjectId, setTargetProjectId] = useState<string | null>(null);
   const [targetJobId, setTargetJobId] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   useEffect(() => {
+    if (!backendStatus.isReady) return;
     let cancelled = false;
     (async () => {
       try {
@@ -53,26 +60,52 @@ export default function Home(): React.ReactElement {
         if (recentJob?.project_id) {
           setTargetProjectId(recentJob.project_id);
           setTargetJobId(recentJob.id);
+          setStatus('ready');
           return;
         }
         const recent = pickRecentProject(projects);
         setTargetProjectId(recent?.id || null);
         setTargetJobId(null);
+        setStatus('ready');
       } catch {
         if (cancelled) return;
         setTargetProjectId(null);
         setTargetJobId(null);
-      } finally {
-        if (!cancelled) setStatus('ready');
+        setStatus('error');
+        return;
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [backendStatus.isReady, loadAttempt]);
+
+  const handleCreateProject = useCallback(async () => {
+    if (creating) return;
+    setCreating(true);
+    try {
+      const selectedPath = await window.biof3Desktop?.files?.openDirectoryDialog?.();
+      if (!selectedPath) return;
+      const normalizedPath = selectedPath.replace(/[\\/]+$/, '');
+      const name = normalizedPath.split(/[\\/]/).pop()?.trim() || '新项目';
+      const project = await createProject({
+        name,
+        modality: 'general',
+        workspacePath: selectedPath,
+      });
+      navigate(`/project/${project.id}`, { replace: true });
+    } finally {
+      setCreating(false);
+    }
+  }, [creating, navigate]);
 
   if (status === 'loading') {
-    return <div style={{ minHeight: '100vh', background: 'var(--biof3-bg)' }} />;
+    return (
+      <div className={styles.homeState} aria-label="正在启动 BioF3">
+        <span className={styles.homeStateDot} />
+        <span>{backendStatus.downReason || '正在准备项目工作台…'}</span>
+      </div>
+    );
   }
 
   if (targetProjectId) {
@@ -87,5 +120,31 @@ export default function Home(): React.ReactElement {
     return <Navigate to={`/project/${targetProjectId}`} replace />;
   }
 
-  return <DesktopDashboard />;
+  if (status === 'error') {
+    return (
+      <div className={styles.homeState}>
+        <Icon name="flag" size={18} />
+        <span>项目列表加载失败</span>
+        <button type="button" onClick={() => {
+          setStatus('loading');
+          setLoadAttempt((value) => value + 1);
+        }}>
+          重试
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <section className={styles.emptyHome} aria-label="创建第一个项目">
+      <div className={styles.emptyHomeIcon}><Icon name="folder" size={22} /></div>
+      <h1>创建第一个项目</h1>
+      <p>选择工作目录后，将以目录名称创建项目。</p>
+      <div className={styles.emptyHomeCreate}>
+        <button type="button" onClick={() => void handleCreateProject()} disabled={creating}>
+          {creating ? '创建中…' : '选择工作目录并创建'}
+        </button>
+      </div>
+    </section>
+  );
 }

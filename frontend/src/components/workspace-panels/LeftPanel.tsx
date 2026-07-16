@@ -1,6 +1,5 @@
 import React from 'react';
 import { Icon } from '@/components/icons/Icon';
-import { ThemeControl } from '@/components/desktop/ThemeControl';
 import type { Project } from '@/lib/project-types';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
@@ -15,11 +14,6 @@ export interface LeftPanelContext {
   workspacePath?: string;
   compactWorkspacePath: string;
 
-  // Search
-  sidebarQuery: string;
-  normalizedSidebarQuery: string;
-  setSidebarQuery: (q: string) => void;
-
   // Project tree
   visibleProjects: Project[];
   projectConversations: Record<string, ConversationSummary[]>;
@@ -27,31 +21,16 @@ export interface LeftPanelContext {
   conversations: ConversationSummary[];
   activeConvId: string | null;
   expandedProjects: Set<string>;
-  projectMatchesSidebarQuery: (p: Project) => boolean;
-  matchesConversationQuery: (c: ConversationSummary) => boolean;
 
-  // Inline project creator
-  creatingProjectInline: boolean;
-  newProjectName: string;
-  newProjectDesc: string;
-  newProjectWorkspacePath: string;
+  // One-click creators
   creatingProject: boolean;
-  setCreatingProjectInline: (v: boolean) => void;
-  setNewProjectName: (v: string) => void;
-  setNewProjectDesc: (v: string) => void;
-  setNewProjectWorkspacePath: (v: string) => void;
-  openProjectCreator: () => void;
-  submitProjectCreator: () => void | Promise<void>;
-  chooseWorkspaceDirectory: () => Promise<string | null>;
-
-  // Inline conversation creator
-  creatingConversationFor: string | null;
-  newConversationTitle: string;
   creatingConversation: boolean;
-  setCreatingConversationFor: (id: string | null) => void;
-  setNewConversationTitle: (v: string) => void;
-  openConversationCreator: (projectId?: string) => void;
-  submitConversationCreator: (projectId?: string) => void | Promise<void>;
+  createProjectFromDirectory: () => void | Promise<void>;
+  createConversationForProject: (projectId?: string) => void | Promise<void>;
+  renameProject: (projectId: string, name: string) => Promise<boolean>;
+  renameConversation: (conversationId: string, title: string) => Promise<boolean>;
+  archiveProject: (projectId: string) => Promise<boolean>;
+  archiveConversation: (conversationId: string) => Promise<boolean>;
 
   // Workspace routing
   workspaceMode: WorkspaceMode;
@@ -81,10 +60,8 @@ export interface LeftPanelProps {
  *   │  Workspace eyebrow           │
  *   │  Project title + new btn     │
  *   │  Workspace path row          │
- *   │  Search box                  │
- *   │  Mode quick-actions (8)      │
+ *   │  Mode quick-actions          │
  *   ├─ projectTreeScroll ──────────┤
- *   │  Inline project creator      │
  *   │  Project tree (recursive)    │
  *   │  Each project → conversations│
  *   └──────────────────────────────┘
@@ -93,12 +70,19 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
   return (
     <aside className={styles.leftCol} style={{ width: ctx.width }}>
       <div className={styles.leftPanelWrap}>
-        <SidebarSearch ctx={ctx} />
         <QuickActions ctx={ctx} />
         <ProjectTreeHeader ctx={ctx} />
         <ProjectTree ctx={ctx} />
         <div className={styles.leftPanelFooter}>
-          <ThemeControl />
+          <button
+            type="button"
+            className={`${styles.leftQuickAction} ${ctx.workspaceMode === 'settings' ? styles.leftQuickActionActive : ''}`}
+            onClick={ctx.handleShowSettings}
+            title="设置"
+          >
+            <Icon name="settings" size={15} />
+            <span>设置</span>
+          </button>
         </div>
       </div>
     </aside>
@@ -109,47 +93,15 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
 // Pieces
 // ---------------------------------------------------------------------------
 
-function SidebarSearch({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
-  return (
-    <label className={styles.leftSidebarSearchWrap} title="搜索项目或对话">
-      <Icon name="search" size={14} />
-      <input
-        className={styles.leftSidebarSearch}
-        value={ctx.sidebarQuery}
-        onChange={(event) => ctx.setSidebarQuery(event.target.value)}
-        placeholder="搜索项目或对话"
-      />
-      {ctx.sidebarQuery && (
-        <button
-          type="button"
-          className={styles.leftSidebarSearchClear}
-          onClick={() => ctx.setSidebarQuery('')}
-          aria-label="清空搜索"
-        >
-          <Icon name="x" size={12} />
-        </button>
-      )}
-    </label>
-  );
-}
-
 function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   const items: Array<{
-    key: WorkspaceMode | 'newConv';
+    key: WorkspaceMode;
     mode: WorkspaceMode | null;
     label: string;
     icon: Parameters<typeof Icon>[0]['name'];
     onClick: () => void;
     title: string;
   }> = [
-    {
-      key: 'newConv',
-      mode: 'chat',
-      label: '新对话',
-      icon: 'plus',
-      onClick: () => ctx.openConversationCreator(),
-      title: '新对话',
-    },
     {
       key: 'search',
       mode: 'search',
@@ -165,14 +117,6 @@ function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
       icon: 'puzzle',
       onClick: ctx.handleShowPlugins,
       title: '插件',
-    },
-    {
-      key: 'settings',
-      mode: 'settings',
-      label: '设置',
-      icon: 'settings',
-      onClick: ctx.handleShowSettings,
-      title: '设置',
     },
   ];
 
@@ -198,7 +142,12 @@ function ProjectTreeHeader({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
   return (
     <div className={styles.leftPanelHeader}>
       <span className={styles.leftPanelTitle}>项目</span>
-      <button className={styles.iconBtn} onClick={ctx.openProjectCreator} title="新建项目">
+      <button
+        className={styles.iconBtn}
+        onClick={ctx.createProjectFromDirectory}
+        title="选择工作目录并创建项目"
+        disabled={ctx.creatingProject}
+      >
         <Icon name="plus" size={16} />
       </button>
     </div>
@@ -208,17 +157,13 @@ function ProjectTreeHeader({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
 function ProjectTree({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   return (
     <div className={styles.projectTreeScroll}>
-      {ctx.normalizedSidebarQuery && ctx.visibleProjects.length === 0 && (
-        <div className={styles.sidebarEmptyState}>没有匹配的项目或对话</div>
-      )}
-      {ctx.creatingProjectInline && <InlineProjectCreator ctx={ctx} />}
       {ctx.visibleProjects.map((p) => (
         <ProjectNode
           key={p.id}
           project={p}
           ctx={ctx}
           isCurrent={p.id === ctx.projectId}
-          isExpanded={ctx.normalizedSidebarQuery ? true : ctx.expandedProjects.has(p.id)}
+          isExpanded={ctx.expandedProjects.has(p.id)}
           conversations={
             p.id === ctx.projectId
               ? ctx.conversations
@@ -243,10 +188,22 @@ function ProjectNode({
   isExpanded: boolean;
   conversations: ConversationSummary[];
 }): React.ReactElement {
-  const filteredConvs =
-    ctx.normalizedSidebarQuery && !ctx.projectMatchesSidebarQuery(p)
-      ? convs.filter(ctx.matchesConversationQuery)
-      : convs;
+  const [editingProject, setEditingProject] = React.useState(false);
+  const [projectName, setProjectName] = React.useState(p.name);
+
+  React.useEffect(() => setProjectName(p.name), [p.name]);
+
+  const finishProjectRename = async () => {
+    const name = projectName.trim();
+    if (!name || name === p.name) {
+      setProjectName(p.name);
+      setEditingProject(false);
+      return;
+    }
+    const ok = await ctx.renameProject(p.id, name);
+    if (!ok) setProjectName(p.name);
+    setEditingProject(false);
+  };
 
   return (
     <div className={styles.projectTreeNode}>
@@ -259,16 +216,55 @@ function ProjectNode({
       >
         <Icon name={isExpanded ? 'chevron-down' : 'chevron-right'} size={12} />
         <Icon name="folder" size={14} />
-        <span className={styles.projectTreeName}>{p.name}</span>
+        {editingProject ? (
+          <input
+            className={styles.treeRenameInput}
+            value={projectName}
+            onChange={(event) => setProjectName(event.target.value)}
+            onClick={(event) => event.stopPropagation()}
+            onBlur={() => void finishProjectRename()}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') void finishProjectRename();
+              if (event.key === 'Escape') {
+                setProjectName(p.name);
+                setEditingProject(false);
+              }
+            }}
+            autoFocus
+          />
+        ) : (
+          <button
+            type="button"
+            className={styles.projectTreeName}
+            onDoubleClick={(event) => {
+              event.stopPropagation();
+              setEditingProject(true);
+            }}
+            title="双击重命名项目"
+          >
+            {p.name}
+          </button>
+        )}
         <button
           className={styles.projectTreeAddBtn}
           onClick={(e) => {
             e.stopPropagation();
-            ctx.openConversationCreator(p.id);
+            ctx.createConversationForProject(p.id);
           }}
-          title="新建对话"
+          title="创建新对话"
+          disabled={ctx.creatingConversation}
         >
           <Icon name="plus" size={12} />
+        </button>
+        <button
+          className={styles.projectTreeAddBtn}
+          onClick={(event) => {
+            event.stopPropagation();
+            void ctx.archiveProject(p.id);
+          }}
+          title="移入回收站"
+        >
+          <Icon name="trash" size={12} />
         </button>
         {isCurrent && (
           <button
@@ -285,23 +281,9 @@ function ProjectNode({
       </div>
       {isExpanded && (
         <ul className={styles.convList}>
-          {ctx.creatingConversationFor === p.id && (
-            <InlineConversationCreator projectId={p.id} ctx={ctx} />
-          )}
-          {filteredConvs.length === 0 && <li className={styles.convEmpty}>暂无对话</li>}
-          {filteredConvs.map((c) => (
-            <li
-              key={c.id}
-              className={`${styles.convItem} ${isCurrent && c.id === ctx.activeConvId ? styles.convItemActive : ''}`}
-              onClick={() => {
-                if (!isCurrent) ctx.switchToProject(p.id);
-                ctx.handleSwitchConversation(c.id);
-              }}
-              title={c.title}
-            >
-              <Icon name="message-circle" size={12} />
-              <span className={styles.convItemTitle}>{c.title}</span>
-            </li>
+          {convs.length === 0 && <li className={styles.convEmpty}>暂无对话</li>}
+          {convs.map((c) => (
+            <ConversationItem key={c.id} conversation={c} projectId={p.id} ctx={ctx} isCurrent={isCurrent} />
           ))}
         </ul>
       )}
@@ -309,110 +291,80 @@ function ProjectNode({
   );
 }
 
-function InlineProjectCreator({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
-  return (
-    <div className={styles.inlineCreateCard}>
-      <input
-        className={styles.inlineCreateInput}
-        placeholder="项目名称"
-        value={ctx.newProjectName}
-        onChange={(event) => ctx.setNewProjectName(event.target.value)}
-        autoFocus
-      />
-      <div className={styles.inlineCreatePathRow}>
-        <button
-          type="button"
-          className={styles.inlineCreatePathBtn}
-          onClick={async () => {
-            const selected = await ctx.chooseWorkspaceDirectory();
-            if (selected) ctx.setNewProjectWorkspacePath(selected);
-          }}
-        >
-          选择工作目录
-        </button>
-        <span
-          className={styles.inlineCreatePathValue}
-          title={ctx.newProjectWorkspacePath || '未选择'}
-        >
-          {ctx.newProjectWorkspacePath || '未选择工作目录'}
-        </span>
-      </div>
-      <textarea
-        className={styles.inlineCreateTextarea}
-        placeholder="项目描述（可选）"
-        value={ctx.newProjectDesc}
-        onChange={(event) => ctx.setNewProjectDesc(event.target.value)}
-        rows={3}
-      />
-      <div className={styles.inlineCreateActions}>
-        <button
-          className={styles.inlineCreateBtn}
-          onClick={() => {
-            ctx.setCreatingProjectInline(false);
-            ctx.setNewProjectName('');
-            ctx.setNewProjectDesc('');
-          }}
-          disabled={ctx.creatingProject}
-        >
-          取消
-        </button>
-        <button
-          className={`${styles.inlineCreateBtn} ${styles.inlineCreateBtnPrimary}`}
-          onClick={ctx.submitProjectCreator}
-          disabled={ctx.creatingProject || !ctx.newProjectName.trim()}
-        >
-          {ctx.creatingProject ? '创建中…' : '创建项目'}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function InlineConversationCreator({
-  projectId,
-  ctx,
-}: {
+function ConversationItem({ conversation, projectId, ctx, isCurrent }: {
+  conversation: ConversationSummary;
   projectId: string;
   ctx: LeftPanelContext;
+  isCurrent: boolean;
 }): React.ReactElement {
+  const [editing, setEditing] = React.useState(false);
+  const [title, setTitle] = React.useState(conversation.title);
+
+  React.useEffect(() => setTitle(conversation.title), [conversation.title]);
+
+  const finishRename = async () => {
+    const nextTitle = title.trim();
+    if (!nextTitle || nextTitle === conversation.title) {
+      setTitle(conversation.title);
+      setEditing(false);
+      return;
+    }
+    const ok = await ctx.renameConversation(conversation.id, nextTitle);
+    if (!ok) setTitle(conversation.title);
+    setEditing(false);
+  };
+
   return (
-    <li className={styles.convCreateItem}>
-      <input
-        className={styles.convCreateInput}
-        placeholder="对话标题（可选）"
-        value={ctx.newConversationTitle}
-        onChange={(event) => ctx.setNewConversationTitle(event.target.value)}
-        autoFocus
-        onKeyDown={(event) => {
-          if (event.key === 'Enter') {
-            event.preventDefault();
-            ctx.submitConversationCreator(projectId);
-          }
-          if (event.key === 'Escape') {
-            ctx.setCreatingConversationFor(null);
-            ctx.setNewConversationTitle('');
-          }
-        }}
-      />
-      <div className={styles.convCreateActions}>
-        <button
-          className={styles.convCreateBtn}
-          onClick={() => {
-            ctx.setCreatingConversationFor(null);
-            ctx.setNewConversationTitle('');
+    <li
+      className={`${styles.convItem} ${isCurrent && conversation.id === ctx.activeConvId ? styles.convItemActive : ''}`}
+      onClick={() => {
+        if (!isCurrent) ctx.switchToProject(projectId);
+        ctx.handleSwitchConversation(conversation.id);
+      }}
+    >
+      <Icon name="message-circle" size={12} />
+      {editing ? (
+        <input
+          className={styles.treeRenameInput}
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          onClick={(event) => event.stopPropagation()}
+          onBlur={() => void finishRename()}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') void finishRename();
+            if (event.key === 'Escape') {
+              setTitle(conversation.title);
+              setEditing(false);
+            }
           }}
-          disabled={ctx.creatingConversation}
-        >
-          取消
-        </button>
+          autoFocus
+        />
+      ) : (
         <button
-          className={`${styles.convCreateBtn} ${styles.convCreateBtnPrimary}`}
-          onClick={() => ctx.submitConversationCreator(projectId)}
-          disabled={ctx.creatingConversation}
+          type="button"
+          className={styles.convItemTitle}
+          onDoubleClick={(event) => {
+            event.stopPropagation();
+            setEditing(true);
+          }}
+          title="双击重命名对话"
         >
-          {ctx.creatingConversation ? '创建中…' : '创建'}
+          {conversation.title}
         </button>
-      </div>
+      )}
+      {!editing && (
+        <button
+          type="button"
+          className={styles.convItemTrashBtn}
+          onClick={(event) => {
+            event.stopPropagation();
+            void ctx.archiveConversation(conversation.id);
+          }}
+          title="移入回收站"
+        >
+          <Icon name="trash" size={11} />
+        </button>
+      )}
     </li>
   );
 }

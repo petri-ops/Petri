@@ -16,14 +16,14 @@ import { BottomTerminal } from '@/components/workspace-panels/BottomTerminal';
 import { CenterPanel, type CenterPanelContext } from '@/components/workspace-panels/CenterPanel';
 import { LeftPanel, type LeftPanelContext } from '@/components/workspace-panels/LeftPanel';
 import { RightPanel, type RightPanelContext } from '@/components/workspace-panels/RightPanel';
-import { getProject, listProjectJobs, listDatasetsByProject, listProjects, updateProject, createProject } from '@/lib/project-store';
+import { getProject, listProjectJobs, listDatasetsByProject, listProjects, updateProject, createProject, setProjectStatus } from '@/lib/project-store';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 import { tools as staticTools } from '@/pages/_data';
 import type { Tool } from '@/pages/_data';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
-import { listConversations, createConversation, type ConversationSummary } from '@/components/copilot/copilotConversationsClient';
+import { listConversations, createConversation, renameConversation, archiveConversation, type ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import {
   useConversations,
   useOtherConversations,
@@ -61,7 +61,6 @@ import {
 } from '@/lib/result-manifest';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
-import { DesktopDashboard } from '@/pages/_desktop-dashboard';
 import type { BackendStatus } from '@/lib/electron';
 import styles from './project-workspace.module.css';
 import 'highlight.js/styles/github.css';
@@ -212,16 +211,9 @@ export function ProjectWorkspace(): React.ReactElement {
   // map is only the "just-created, not yet in cache" delta.
   const [otherSeed, setOtherSeed] = useState<Record<string, ConversationSummary[]>>({});
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set([projectId || '']));
-  const [creatingProjectInline, setCreatingProjectInline] = useState(false);
-  const [newProjectName, setNewProjectName] = useState('');
-  const [newProjectDesc, setNewProjectDesc] = useState('');
-  const [newProjectWorkspacePath, setNewProjectWorkspacePath] = useState('');
   const [creatingProject, setCreatingProject] = useState(false);
-  const [creatingConversationFor, setCreatingConversationFor] = useState<string | null>(null);
-  const [newConversationTitle, setNewConversationTitle] = useState('');
   const [creatingConversation, setCreatingConversation] = useState(false);
   const [workspaceSearchQuery, setWorkspaceSearchQuery] = useState('');
-  const [sidebarQuery, setSidebarQuery] = useState('');
   const [searchConversationIndex, setSearchConversationIndex] = useState<Record<string, ConversationSummary[]>>({});
   // §2 dedup: use the App-level Context directly (5s poll), drop the standalone
   // 10s polling hook and the local state sync layer.
@@ -413,7 +405,7 @@ export function ProjectWorkspace(): React.ReactElement {
   // Plan 1.6 §4.3 — single source for "other project" conversation lists.
   // Replaces the old per-project useState map that re-fetched on every
   // expansion. Reads / writes the same shared cache as useConversations.
-  const { byProjectId: projectConversations } = useOtherConversations(
+  const { byProjectId: projectConversations, refresh: refreshOtherConversations } = useOtherConversations(
     expandedProjects,
     projectId
   );
@@ -502,29 +494,23 @@ export function ProjectWorkspace(): React.ReactElement {
     });
   }, [allProjects, searchConversationIndex]);
 
-  const openProjectCreator = useCallback(() => {
-    setCreatingProjectInline(true);
-    setNewProjectName('');
-    setNewProjectDesc('');
-    setNewProjectWorkspacePath('');
-    if (compactLayout) setLeftOpen(true);
-  }, [compactLayout]);
-
   const chooseWorkspaceDirectory = useCallback(async () => {
     const selected = await window.biof3Desktop?.files?.openDirectoryDialog?.();
     return selected || '';
   }, []);
 
-  const submitProjectCreator = useCallback(async () => {
-    const name = newProjectName.trim();
-    if (!name || creatingProject) return;
+  const createProjectFromDirectory = useCallback(async () => {
+    if (creatingProject) return;
     setCreatingProject(true);
     try {
+      const selectedPath = await chooseWorkspaceDirectory();
+      if (!selectedPath) return;
+      const normalizedPath = selectedPath.replace(/[\\/]+$/, '');
+      const name = normalizedPath.split(/[\\/]/).pop()?.trim() || '新项目';
       const created = await createProject({
         name,
-        description: newProjectDesc.trim() || undefined,
         modality: 'general',
-        workspacePath: newProjectWorkspacePath.trim() || undefined,
+        workspacePath: selectedPath,
       });
       setAllProjects((prev) => [created, ...prev.filter((item) => item.id !== created.id)]);
       setExpandedProjects((prev) => {
@@ -532,37 +518,24 @@ export function ProjectWorkspace(): React.ReactElement {
         next.add(created.id);
         return next;
       });
-      setCreatingProjectInline(false);
-      setNewProjectName('');
-      setNewProjectDesc('');
-      setNewProjectWorkspacePath('');
       navigate(`/project/${created.id}`);
     } finally {
       setCreatingProject(false);
     }
-  }, [creatingProject, navigate, newProjectDesc, newProjectName, newProjectWorkspacePath]);
+  }, [chooseWorkspaceDirectory, creatingProject, navigate]);
 
-  const openConversationCreator = useCallback((targetProjectId = projectId) => {
-    if (!targetProjectId) return;
+  const createConversationForProject = useCallback(async (targetProjectId = projectId) => {
+    if (!targetProjectId || creatingConversation) return;
     updateWorkspaceMode('chat');
-    setCreatingConversationFor(targetProjectId);
-    setNewConversationTitle('');
     setExpandedProjects((prev) => {
       const next = new Set(prev);
       next.add(targetProjectId);
       return next;
     });
-    if (compactLayout) setLeftOpen(true);
-  }, [compactLayout, projectId, updateWorkspaceMode]);
-
-  const submitConversationCreator = useCallback(async (targetProjectId = creatingConversationFor) => {
-    if (!targetProjectId || creatingConversation) return;
     setCreatingConversation(true);
     try {
-      const conv = await createConversation(newConversationTitle.trim() || '新对话', undefined, targetProjectId);
+      const conv = await createConversation('新对话', undefined, targetProjectId);
       if (!conv) return;
-      setCreatingConversationFor(null);
-      setNewConversationTitle('');
       if (targetProjectId === projectId) {
         setActiveConvId(conv.id);
         await refreshConversations();
@@ -578,7 +551,41 @@ export function ProjectWorkspace(): React.ReactElement {
     } finally {
       setCreatingConversation(false);
     }
-  }, [creatingConversation, creatingConversationFor, navigate, newConversationTitle, projectId, refreshConversations]);
+  }, [creatingConversation, navigate, projectId, refreshConversations, updateWorkspaceMode]);
+
+  const renameProjectInTree = useCallback(async (targetProjectId: string, name: string) => {
+    const next = await updateProject(targetProjectId, { name });
+    if (!next) return false;
+    setAllProjects((current) => current.map((item) => item.id === next.id ? next : item));
+    if (targetProjectId === projectId) setProject(next);
+    return true;
+  }, [projectId]);
+
+  const renameConversationInTree = useCallback(async (conversationId: string, title: string) => {
+    const ok = await renameConversation(conversationId, title);
+    if (!ok) return false;
+    await Promise.all([refreshConversations(), refreshOtherConversations()]);
+    return true;
+  }, [refreshConversations, refreshOtherConversations]);
+
+  const archiveProjectFromTree = useCallback(async (targetProjectId: string) => {
+    const archived = await setProjectStatus(targetProjectId, 'archived');
+    if (!archived) return false;
+    const remaining = allProjects.filter((item) => item.id !== targetProjectId);
+    setAllProjects(remaining);
+    if (targetProjectId === projectId) {
+      navigate(remaining[0] ? `/project/${remaining[0].id}` : '/', { replace: true });
+    }
+    return true;
+  }, [allProjects, navigate, projectId]);
+
+  const archiveConversationFromTree = useCallback(async (conversationId: string) => {
+    const ok = await archiveConversation(conversationId, true);
+    if (!ok) return false;
+    if (conversationId === activeConvId) setActiveConvId(null);
+    await Promise.all([refreshConversations(), refreshOtherConversations()]);
+    return true;
+  }, [activeConvId, refreshConversations, refreshOtherConversations]);
 
   // Toggle project expansion in left panel
   const toggleProjectExpand = useCallback((pid: string) => {
@@ -594,35 +601,6 @@ export function ProjectWorkspace(): React.ReactElement {
   // Plan 1.6 §4.3 — moved to useOtherConversations hook above; the
   // `projectConversations` variable is now derived from the shared
   // cache + cross-project seed map.
-
-  const normalizedSidebarQuery = sidebarQuery.trim().toLowerCase();
-  const projectMatchesSidebarQuery = useCallback(
-    (item: Project) => {
-      if (!normalizedSidebarQuery) return true;
-      const projectText = [item.name, item.description || '', item.modality || '']
-        .join(' ')
-        .toLowerCase();
-      if (projectText.includes(normalizedSidebarQuery)) return true;
-      const projectConversationList =
-        item.id === projectId ? conversations : projectConversations[item.id] || [];
-      return projectConversationList.some((conversation) =>
-        String(conversation.title || '').toLowerCase().includes(normalizedSidebarQuery)
-      );
-    },
-    [conversations, normalizedSidebarQuery, projectConversations, projectId]
-  );
-
-  const matchesConversationQuery = useCallback(
-    (conversation: ConversationSummary) =>
-      !normalizedSidebarQuery ||
-      String(conversation.title || '').toLowerCase().includes(normalizedSidebarQuery),
-    [normalizedSidebarQuery]
-  );
-
-  const visibleProjects = useMemo(() => {
-    if (!normalizedSidebarQuery) return allProjects;
-    return allProjects.filter(projectMatchesSidebarQuery);
-  }, [allProjects, normalizedSidebarQuery, projectMatchesSidebarQuery]);
 
   const fetchData = useCallback(async () => {
     if (!projectId) return;
@@ -1108,6 +1086,7 @@ export function ProjectWorkspace(): React.ReactElement {
     recentJobs: jobs,
     liveJobsPreview,
     jobStats,
+    backendStatus,
     jobs,
     datasets,
     updateWorkspaceMode,
@@ -1135,36 +1114,20 @@ export function ProjectWorkspace(): React.ReactElement {
     project: project as Project,
     workspacePath,
     compactWorkspacePath,
-    sidebarQuery,
-    normalizedSidebarQuery,
-    setSidebarQuery,
-    visibleProjects,
+    visibleProjects: allProjects,
     projectConversations,
     projectId,
     conversations,
     activeConvId,
     expandedProjects,
-    projectMatchesSidebarQuery,
-    matchesConversationQuery,
-    creatingProjectInline,
-    newProjectName,
-    newProjectDesc,
-    newProjectWorkspacePath,
     creatingProject,
-    setCreatingProjectInline,
-    setNewProjectName,
-    setNewProjectDesc,
-    setNewProjectWorkspacePath,
-    openProjectCreator,
-    submitProjectCreator,
-    chooseWorkspaceDirectory,
-    creatingConversationFor,
-    newConversationTitle,
     creatingConversation,
-    setCreatingConversationFor,
-    setNewConversationTitle,
-    openConversationCreator,
-    submitConversationCreator,
+    createProjectFromDirectory,
+    createConversationForProject,
+    renameProject: renameProjectInTree,
+    renameConversation: renameConversationInTree,
+    archiveProject: archiveProjectFromTree,
+    archiveConversation: archiveConversationFromTree,
     workspaceMode,
     handleShowSearch,
     handleShowScheduled,

@@ -1,5 +1,4 @@
 import React from 'react';
-import { DesktopDashboard } from '@/pages/_desktop-dashboard';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
@@ -7,6 +6,7 @@ import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import type { HarnessWorkflowJobState } from '@/lib/harness-client';
+import type { BackendStatus } from '@/lib/electron';
 import { WorkspaceSummaryCard } from '@/components/workspace-panels/WorkspaceSummaryCard';
 import {
   WorkspaceSearchPanel,
@@ -51,6 +51,7 @@ export interface CenterPanelContext {
   recentJobs: ToolJob[];
   liveJobsPreview: ToolJob[];
   jobStats: JobStats;
+  backendStatus: BackendStatus;
 
   // Domain state for search + scheduled
   jobs: ToolJob[];
@@ -211,6 +212,7 @@ function SessionFrameView({
               recentJobs={ctx.recentJobs}
               liveJobsPreview={ctx.liveJobsPreview}
               jobStats={ctx.jobStats}
+              backendStatus={ctx.backendStatus}
               onOpenScheduled={ctx.openScheduledResults}
               onSelectJob={(jobId) => {
                 ctx.setActiveJobId(jobId);

@@ -126,6 +126,28 @@
   min-height: 0;
   will-change: scroll-position;
   contain: layout style paint;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--biof3-border) 46%, transparent) transparent;
+}
+
+.sc-messages::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sc-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sc-messages::-webkit-scrollbar-thumb {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--biof3-border-strong) 42%, transparent);
+  background-clip: padding-box;
+}
+
+.sc-messages::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--biof3-text-secondary) 42%, transparent);
+  background-clip: padding-box;
 }
 
 .sc-loading {

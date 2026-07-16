@@ -156,7 +156,7 @@ function formatBytes(bytes) {
 
 router.get('/projects', (req, res) => {
   const userId = req.user?.id;
-  // W1-4: optional ?modality=single-cell|spatial filter (backward-compat: omit returns all)
+  // W1-4: optional modality filter (backward-compat: omit returns all)
   const modality = req.query.modality;
   const status = req.query.status === 'archived' ? 'archived' : 'active';
   const allProjects = modality ? db.listProjectsByModality(modality, status) : db.listProjects(status);
@@ -181,8 +181,8 @@ router.post('/projects', (req, res) => {
   const { name, description, modality, workspacePath } = req.body;
   const userId = req.user?.id;
   if (!name) return res.status(400).json({ status: 'error', error: '缺少 name' });
-  // W1-4: optional modality (single-cell | spatial). Defaults to 'single-cell' (db.js handles fallback).
-  const allowedModalities = ['single-cell', 'spatial', 'bulk'];
+  // Desktop projects may be workflow-neutral (`general`) or carry a domain hint.
+  const allowedModalities = ['general', 'single-cell', 'spatial', 'bulk'];
   const m = modality && allowedModalities.includes(modality) ? modality : 'single-cell';
   const ownerId = userId && userId !== '__admin__' ? userId : null;
   const p = db.createProject({ name, description, modality: m, userId: ownerId, workspacePath });

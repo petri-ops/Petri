@@ -9,7 +9,13 @@ const options: Array<{ value: ThemePreference; label: string; icon: IconName }> 
   { value: 'dark', label: '夜间模式', icon: 'moon' },
 ];
 
-export function ThemeControl({ compact = false }: { compact?: boolean }): React.ReactElement {
+export function ThemeControl({
+  compact = false,
+  menuPlacement = 'top',
+}: {
+  compact?: boolean;
+  menuPlacement?: 'top' | 'bottom';
+}): React.ReactElement {
   const { preference, resolvedTheme, setPreference } = useTheme();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -25,7 +31,10 @@ export function ThemeControl({ compact = false }: { compact?: boolean }): React.
   }, [open]);
 
   return (
-    <div className={`biof3-theme-control ${compact ? 'biof3-theme-control--compact' : ''}`} ref={rootRef}>
+    <div
+      className={`biof3-theme-control ${compact ? 'biof3-theme-control--compact' : ''} ${menuPlacement === 'bottom' ? 'biof3-theme-control--menu-bottom' : ''}`}
+      ref={rootRef}
+    >
       {open && (
         <div className="biof3-theme-control__menu" role="menu" aria-label="选择外观主题">
           {options.map((option) => (

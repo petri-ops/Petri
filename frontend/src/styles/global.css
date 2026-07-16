@@ -13,6 +13,7 @@
 :root {
   /* 桌面版基础（覆盖 infima 的 web 站点默认） */
   --ifm-navbar-height: 0px; /* 桌面版无 navbar */
+  --biof3-titlebar-height: 38px;
   /* infima 默认 background-color: transparent（靠 body），桌面版给实色 */
   --ifm-background-color: #ffffff;
   /* 桌面版内容区更紧凑的阅读宽度 */
