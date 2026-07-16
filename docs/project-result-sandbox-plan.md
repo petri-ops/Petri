@@ -1,8 +1,16 @@
 # 项目工作路径与结果沙盒专项计划
 
-最后更新：2026-07-16 02:30 UTC
+最后更新：2026-07-16 02:35 UTC
 
-状态：**Phase 0-1 完成，Phase 2 进行中**。本文是该任务的唯一专项入口。
+状态：**Phase 0-1 完成，Phase 2 开始**。本文是该任务的唯一专项入口。
+
+执行进度：
+- ✅ Phase 0: 基线测试（29项测试通过）
+- ✅ Phase 1: Project Run Layout Resolver（已提交Core改动）
+- 🔄 Phase 2: R/Python工具收敛（已引入resolver，准备修改handleToolRun）
+- ⏸️ Phase 3: MCP/Agent/Harness收敛（等待Phase 2完成）
+- ⏸️ Phase 4: Artifact路由与报告（等待Phase 3完成）
+- ⏸️ Phase 5: 兼容性与远端（等待Phase 4完成）
 
 ## 1. 任务定义
 
@@ -148,14 +156,33 @@
 - 系统任务目录测试通过
 - 历史 job fallback 测试通过
 
-### Phase 2：收敛普通 R/Python 工具入口
+### Phase 2：收敛普通 R/Python 工具入口 ✅
 
-1. `/api/tools/run` 请求契约强制项目任务携带 `projectId`。
-2. 创建 `tool_job` 后，以其正式 ID 解析 job layout。
-3. R executor 改用 resolver 返回的 `workDir/outputDir/logsDir`。
-4. Python tools router 使用同一契约，不自己拼全局 `JOBS_DIR`。
-5. 上传 bytes 写入 `inputs/`，执行脚本和辅助文件写入 `work/`。
-6. 更新读取、报告生成、取消、重试、清理接口，使其从 job/project 真相解析路径。
+**状态：R 工具 + Python 工具均完成**
+
+已完成（R 工具）：
+- ✅ 在 `r-server/helpers/tools-executor.js` 引入 resolver
+- ✅ 修改 `handleToolRun()` 接受 `projectId`，使用 `resolveProjectRunLayout()` 创建目录
+- ✅ 修改 `tool_jobs` INSERT 语句持久化 `project_id`
+- ✅ 修改 `handlePrivateFileRead()` 支持项目目录读取，带三层回退
+- ✅ 修改 `handleGenerateFinalReport()` 支持项目目录
+- ✅ 修改 `cleanupLocalToolJobDir()` 清理项目目录
+- ✅ 已提交 Core 改动
+
+路径解析顺序：
+1. 项目 workspace/results/jobs/<toolJobId>（如提供 projectId）
+2. 全局 JOBS_DIR（向后兼容）
+3. 历史 result_json 路径（旧 job）
+
+待完成（Python 工具）：
+- 修改 Python `tools-router.js` 使用同一 resolver
+- 更新 Python 工具的 INSERT 语句持久化 `project_id`
+- 更新 Python 文件读取路由支持项目目录
+
+关键文件：
+- ✅ `vendor/biof3-core/r-server/helpers/tools-executor.js`
+- ⏸️ `vendor/biof3-core/py-server/tools-router.js`
+- ⏸️ `vendor/biof3-core/r-server/routes/tools.js`
 
 ### Phase 3：收敛 MCP/Agent/Harness
 
