@@ -481,33 +481,20 @@ function cleanup(workDir) {
 // Start
 // ============================================================
 
-if (config.runMode === 'worker') {
-  console.log(
-    '[BioF3] BIOF3_RUN_MODE=worker — use node worker.js for Python tasks; server.js not started.'
-  );
-  process.exit(0);
-}
-
 const server = app.listen(config.port, '0.0.0.0', () => {
-  logger.info(`BioF3 Python Server running on port ${config.port} (runMode=${config.runMode})`, {
+  logger.info(`BioF3 Python Server running on port ${config.port}`, {
     pool: config.poolEnabled ? `${config.poolSize} workers` : 'disabled',
     maxConcurrentTasks: config.maxConcurrentTasks,
   });
   logger.info(`  POST http://localhost:${config.port}/api/run`);
   logger.info(`  POST http://localhost:${config.port}/api/task`);
   logger.info(`  GET  http://localhost:${config.port}/api/health`);
-  if (config.runMode === 'api') {
-    logger.info('  Tasks enqueue only — start biof3-py-worker on compute node(s)');
-  } else if (config.runMode === 'all') {
-    logger.info('  Local drain: task queue in this process (legacy all-in-one)');
-  }
+  logger.info('  Local drain: task queue in this process');
 });
 
 // Maintenance
 setInterval(() => taskStore.cleanupOld(), 60 * 60 * 1000);
-if (config.runMode === 'all') {
-  setInterval(() => taskQueue.scheduleDrain(), 5000);
-}
+setInterval(() => taskQueue.scheduleDrain(), 5000);
 
 // Graceful shutdown
 function shutdown(signal) {

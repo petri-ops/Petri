@@ -41,11 +41,9 @@ function submitTask({ type, params, ossInputUrl, parentTaskId }) {
   );
   logger.info('Task submitted', { taskId, type, parentTaskId: parentTaskId || null, execution });
 
-  if (config.runMode === 'all') {
-    setImmediate(() => {
-      void drainQueue();
-    });
-  }
+  setImmediate(() => {
+    void drainQueue();
+  });
   return { taskId, status: 'pending', execution };
 }
 
@@ -307,17 +305,14 @@ function getActiveTasks() {
 }
 
 function scheduleDrain() {
-  if (config.runMode !== 'all') return;
   setImmediate(() => {
     void drainQueue();
   });
 }
 
-if (config.runMode === 'all') {
-  setInterval(() => {
-    void drainQueue();
-  }, POLL_MS);
-}
+setInterval(() => {
+  void drainQueue();
+}, POLL_MS);
 
 module.exports = {
   submitTask,
