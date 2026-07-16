@@ -80,11 +80,11 @@
 
 ## Demo 数据
 
-**用 maftools 内置 TCGA-LAML**（已在容器内）：
+**用本地 R runtime 中 maftools 自带的 TCGA-LAML**：
 - `system.file('extdata', 'tcga_laml.maf.gz', package = 'maftools')` 64KB
 - `system.file('extdata', 'tcga_laml_annot.tsv', package = 'maftools')` 4.5KB
 
-直接 `cp` 到 `/opt/biof3-r-server/tool-demo-data/maftools-mutation/`。文件极小（< 70KB），是真实 TCGA 数据，193 AML 样本 + FAB 分类 + 生存数据。
+可复制到本地插件的 `demo-data/` 目录。文件极小（< 70KB），是真实 TCGA 数据，193 AML 样本 + FAB 分类 + 生存数据。
 
 ## 工具间数据联动
 

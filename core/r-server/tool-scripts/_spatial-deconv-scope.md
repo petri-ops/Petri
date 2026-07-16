@@ -6,7 +6,7 @@
 
 ## 版本锁定
 
-- py-server 容器: Python 3.11+
+- 本地 Python runtime: Python 3.11+
 - 关键包: `scanpy` / `squidpy` / `tangram` / `torch` / `pandas`
 
 ## Canonical workflow source
@@ -15,7 +15,7 @@
 
 ## Steps (in-scope) — Tangram 细胞类型解卷积
 
-1. **加载空间数据** — result_spatial.h5ad（3 入口：parentCachePath / OSS / /tools 上传）
+1. **加载空间数据** — 从本地 tool job 目录读取上传的 h5ad
 2. **自动补全标准化** — 检测 log1p 缺失则 normalize_total + log1p
 3. **加载单细胞参考** — sq.datasets.sc_mouse_cortex（~21k cells，自动下采样防 OOM）
 4. **挑选 training genes** — sc 与 st 共有基因，按 sc mean expression top-N

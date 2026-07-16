@@ -118,7 +118,7 @@ meta <- meta_raw[common, , drop = FALSE]
 
 # Validate
 if (ncol(expr) > 5000) {
-  stop(sprintf("Too many cells (%d) — limit 5000 to fit container memory. Subsample first.", ncol(expr)))
+  stop(sprintf("Too many cells (%d) — desktop limit is 5000. Subsample first.", ncol(expr)))
 }
 n_types <- length(unique(meta$cell_type))
 if (n_types < 3) {
@@ -392,9 +392,6 @@ writeLines(toJSON(manifest, auto_unbox = TRUE, pretty = TRUE),
 # ============================================================
 cat("[cellchat] Generating HTML report...\n")
 template_path <- file.path(job_dir, "report-template.html")
-if (!file.exists(template_path)) {
-  template_path <- "/opt/biof3-r-server/tool-scripts/cellchat-report-template.html"
-}
 if (file.exists(template_path)) {
   report_html <- paste(readLines(template_path, warn = FALSE), collapse = "\n")
 

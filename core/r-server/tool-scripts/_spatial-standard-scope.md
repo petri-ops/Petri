@@ -6,7 +6,7 @@
 
 ## 版本锁定
 
-- py-server 容器: Python 3.11+
+- 本地 Python runtime: Python 3.11+
 - 关键包: `scanpy` / `squidpy` / `anndata` / `matplotlib`
 
 ## Canonical workflow source
@@ -27,8 +27,8 @@
 - ❌ **多方法 SVG 鉴定**（Moran + Geary + Sepal 交叉验证，见 spatial-svg 工具）
 - ❌ **细胞类型解卷积**（见 spatial-deconv 工具）
 - ❌ **配体-受体分析**（见 spatial-lr 工具）
-- ❌ **子聚类**（见 spatial-recluster，平台链路专用）
-- ❌ **整合批次**（见 scanpy-integration）
+- ❌ **子聚类**（当前工具集不包含）
+- ❌ **整合批次**（当前工具集不包含）
 - ❌ **HE 图像分割 / 对齐**（用户预处理）
 
 ## Default params (脚本默认)
@@ -51,4 +51,4 @@
 ## 工具间数据联动
 
 - ✅ 上游：用户提供带 obsm['spatial'] 的 h5ad
-- ✅ 下游：result_spatial.h5ad 可被 spatial-svg / spatial-deconv / spatial-lr 通过 parentCachePath 复用
+- ✅ 下游：result_spatial.h5ad 可作为本地文件输入 spatial-svg / spatial-deconv / spatial-lr

@@ -46,7 +46,7 @@ suppressMessages({
   # NOTE: must explicitly attach NMF here. extractSignatures() internally calls
   # NMF::nmf() which dispatches via match.fun("brunet"). Without library(NMF),
   # the algorithm registry is not initialized -> error "'what' must be a function
-  # or character string". Confirmed via _test_mafsig3.R against same docker env.
+  # or character string". Confirmed via _test_mafsig3.R against the bundled runtime.
   library(NMF)
 })
 
@@ -416,9 +416,6 @@ writeLines(toJSON(manifest, auto_unbox = TRUE, pretty = TRUE),
 # ============================================================
 cat("[maftools] Generating HTML report...\n")
 template_path <- file.path(job_dir, "report-template.html")
-if (!file.exists(template_path)) {
-  template_path <- "/opt/biof3-r-server/tool-scripts/maftools-mutation-report-template.html"
-}
 if (file.exists(template_path)) {
   report_html <- paste(readLines(template_path, warn = FALSE), collapse = "\n")
 

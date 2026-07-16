@@ -17,8 +17,7 @@ const express = require('express');
 
 const fs = require('fs');
 
-// 单细胞异步计算引擎（task-queue/task-manager，旧 web 产线）已移除。
-// 分析执行现走插件 executor（tools 路由）；本地不再运行 R 任务队列。
+// Scientific analysis runs through the tools routes and tool_job persistence.
 const cacheManager = require('./cache-manager');
 const db = require('./db');
 const config = require('./config');

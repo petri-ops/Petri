@@ -40,7 +40,7 @@ test('_inputsToInputSchema 把 inputs[] 转 JSON Schema', () => {
 });
 
 test('单细胞步骤已移除：callTool 视为未知工具', async () => {
-  // 单细胞 step 引擎（旧 web task-queue/OSS 产线）已整体移除。
+  // Scientific analysis is exposed only through installed plugin tools.
   globalThis._biof3Plugins = new Map();
   const result = await callTool('doublet', {});
   assert.equal(result.isError, true);

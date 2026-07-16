@@ -142,7 +142,7 @@ if (has_mtx && has_barcodes && has_features) {
 
 cat(sprintf("[seurat]   Loaded matrix: %d genes × %d cells\n", nrow(counts), ncol(counts)))
 
-# Sanity check on dataset size — refuse if too big to avoid OOM in 4G container
+# Sanity check on dataset size to avoid exhausting desktop memory.
 if (ncol(counts) > 50000) {
   stop(sprintf("Dataset too large: %d cells exceeds the 50,000 cell limit for this online tool. Please filter or downsample first.", ncol(counts)))
 }
@@ -421,9 +421,6 @@ writeLines(toJSON(manifest, auto_unbox = TRUE, pretty = TRUE),
 # ============================================================
 cat("[seurat] Generating HTML report...\n")
 template_path <- file.path(job_dir, "report-template.html")
-if (!file.exists(template_path)) {
-  template_path <- "/opt/biof3-r-server/tool-scripts/seurat-standard-report-template.html"
-}
 if (file.exists(template_path)) {
   report_html <- paste(readLines(template_path, warn = FALSE), collapse = "\n")
 

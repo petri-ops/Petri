@@ -140,9 +140,6 @@ writeLines(toJSON(manifest, auto_unbox = TRUE, pretty = TRUE),
 # 7. HTML 报告 (从 template 替换 {{占位符}}, 图片 base64 内嵌)
 # ============================================================
 template_path <- file.path(job_dir, "report-template.html")
-if (!file.exists(template_path)) {
-  template_path <- "/opt/biof3-r-server/tool-scripts/__TOOL_ID__-report-template.html"
-}
 if (file.exists(template_path)) {
   cat("[__TOOL_ID__] Generating report...\n")
   report_html <- paste(readLines(template_path, warn = FALSE), collapse = "\n")

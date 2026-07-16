@@ -385,9 +385,6 @@ writeLines(toJSON(manifest, auto_unbox = TRUE, pretty = TRUE),
 # ---- HTML report ----
 cat("[complexheatmap] Generating HTML report...\n")
 template_path <- file.path(job_dir, "report-template.html")
-if (!file.exists(template_path)) {
-  template_path <- "/opt/biof3-r-server/tool-scripts/complexheatmap-report-template.html"
-}
 if (file.exists(template_path)) {
   report_html <- paste(readLines(template_path, warn = FALSE), collapse = "\n")
 

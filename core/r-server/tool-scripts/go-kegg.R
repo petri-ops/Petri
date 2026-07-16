@@ -447,9 +447,6 @@ writeLines(toJSON(manifest, auto_unbox = TRUE, pretty = TRUE),
 # HTML 报告
 # ============================================================
 template_path <- file.path(job_dir, "report-template.html")
-if (!file.exists(template_path)) {
-  template_path <- "/opt/biof3-r-server/tool-scripts/go-kegg-report-template.html"
-}
 if (file.exists(template_path)) {
   cat("[go-kegg] Generating report...\n")
   report_html <- paste(readLines(template_path, warn = FALSE), collapse = "\n")

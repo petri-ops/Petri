@@ -148,7 +148,7 @@ function buildSystemPrompt(context) {
     '\n- 历史消息开头若带有 [页面·实体] 标签（例如 [docs · PCA降维] 或 [single-cell-result · PBMC]），表示用户当时正在浏览那个页面。利用这些标签理解用户跨页面的思维链：用户可能从教程跳到分析页又跳回博客，但话题往往是延续的';
   base += '\n- 当前消息没有标签，但下方【当前页面】指明了用户此刻的位置';
 
-  base += `\n\n=== Action Cards Protocol (ACTION_PROTOCOL_v1) ===\n\nWhen the user asks you to DO something on this platform (start an analysis, recluster, navigate, etc.), emit one or more action cards using fenced code blocks with the language tag "action".\n\nEach action card is a single JSON object. Format strictly:\n\n\u0060\u0060\u0060action\n{"type": "...", "label": "...", ...params}\n\u0060\u0060\u0060\n\nSupported action types:\n\n1) start_analysis — start a new analysis on the current dataset\n   { "type": "start_analysis", "label": "启动 scRNA 标准分析",\n     "datasetId": "<from context.datasetId>",\n     "analysisType": "<see list below>",\n     "params": { "minCells": 3, "minFeatures": 200, "mtPercent": 15, "resolution": 0.5 },\n     "rationale": "(optional) 一句话解释为什么用这些参数" }\n\n   analysisType allowed values:\n   - 单细胞 (r-server): scrna_standard | recluster | deg | enrichment | cell_annotation | scrna_integration | trajectory | communication | cell_cycle | doublet_detection\n   - 空间组学 (py-server, 仅在 /spatial 模块下): spatial_standard | spatial_recluster | spatial_svg | spatial_deconv | spatial_lr\n\n2) recluster — recluster a specific cluster of the current result\n   { "type": "recluster", "label": "对 cluster 3 重新聚类",\n     "analysisId": "<from context.analysisId>", "cluster": 3, "resolution": 0.3 }\n\n3) navigate — jump to another page in the platform\n   { "type": "navigate", "label": "查看数据集",\n     "target": "dataset|result|project|projects",\n     "id": "<entity id, omit for projects>" }\n\n4) external_link — open external doc/site\n   { "type": "external_link", "label": "查看 Seurat 教程", "url": "https://..." }\n\nRules:\n- Only emit actions that are concretely executable using IDs from the current context.\n- Always put the action AFTER your natural-language reply that explains what it does.\n- Use one action per fenced "action" block, but you may emit multiple blocks.\n- If the user is just asking a question (not requesting an operation), do NOT emit any action block.\n- Never invent IDs that are not in the provided context.\n- Use snake_case for action types and camelCase for params.\n`;
+  base += `\n\n=== Action Cards Protocol (ACTION_PROTOCOL_v1) ===\n\nAction cards are only for navigation and external links. Scientific analysis must use run_tool so every execution creates a tool_job and verified artifacts.\n\nEach action card is a single JSON object in a fenced \u0060\u0060\u0060action block. Supported types:\n\n1) navigate\n   { "type": "navigate", "label": "查看数据集",\n     "target": "dataset|result|project|projects",\n     "id": "<entity id, omit for projects>" }\n\n2) external_link\n   { "type": "external_link", "label": "查看 Seurat 教程", "url": "https://..." }\n\nRules:\n- Never emit start_analysis or recluster action cards; call run_tool instead.\n- Only emit actions using real IDs from the current context.\n- Put actions after the natural-language explanation.\n- Do not emit action blocks for ordinary questions.\n- Never invent IDs.\n`;
 
   if (!context) return base;
 
@@ -175,7 +175,7 @@ function buildSystemPrompt(context) {
   if (currentModule === 'spatial') {
     base += '\n\n=== 当前云平台模块：空间组学 (/spatial) ===';
     base +=
-      '\n- 用户当前在空间转录组云平台，优先建议 spatial_standard / spatial_recluster / spatial_svg / spatial_deconv / spatial_lr 类型';
+      '\n- 用户当前在空间转录组模块，分析统一调用 run_tool；当前本地工具为 spatial-standard / spatial-svg / spatial-deconv / spatial-lr';
     base +=
       '\n- 数据格式以 .h5ad（含 obsm["spatial"] 坐标）为主，主要数据来源：10x Visium / Stereo-seq / MERFISH';
     base +=
@@ -185,7 +185,7 @@ function buildSystemPrompt(context) {
   } else if (currentModule === 'single-cell') {
     base += '\n\n=== 当前云平台模块：单细胞 (/single-cell) ===';
     base +=
-      '\n- 用户当前在单细胞云平台，优先建议 scrna_standard / recluster / deg / enrichment / cell_annotation / scrna_integration / trajectory / communication / cell_cycle / doublet_detection';
+      '\n- 用户当前在单细胞模块，分析统一调用 run_tool；先 op=list 确认可用工具，常用本地工具包括 seurat-standard / cellchat / go-kegg';
     base += '\n- 数据格式以 .rds / .h5 / matrix.mtx 为主';
     base += '\n- 后端走 r-server（Seurat v5 + clusterProfiler + Monocle3 + CellChat 生态）';
   }
@@ -336,7 +336,7 @@ function renderFileReferenceHints(context) {
   block +=
     '\n- 当用户问到具体某个工具产物或工作区文件但你拿不到准确 id 时，告诉用户"没拿到该文件的内部 id，无法生成直达链接"，不要凭空伪造 path。';
   block +=
-    '\n- 这些 URI 只在 Copilot 聊天内渲染，不影响 Action Card；start_analysis / recluster / navigate / external_link 仍按上方 ACTION_PROTOCOL_v1 输出 ```action``` 块。';
+    '\n- 这些 URI 只在 Copilot 聊天内渲染，不影响 navigate / external_link Action Card；分析执行仍调用 run_tool。';
 
   const summary = context && context.activeJobHarnessSummary;
   if (summary && Array.isArray(summary.entries) && summary.entries.length > 0) {

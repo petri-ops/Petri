@@ -6,7 +6,7 @@
 
 ## 版本锁定
 
-- py-server 容器: Python 3.11+
+- 本地 Python runtime: Python 3.11+
 - 关键包: `scanpy` / `squidpy` / `matplotlib`
 
 ## Canonical workflow source
@@ -15,7 +15,7 @@
 
 ## Steps (in-scope) — 三方法交叉 SVG 鉴定
 
-1. **加载父分析结果** — result_spatial.h5ad（3 入口：parentCachePath / OSS / /tools 上传）
+1. **加载输入** — 从本地 tool job 目录读取上传的 h5ad
 2. **自动补全预处理** — 检测 log1p / HVG / spatial_connectivities 缺失则补
 3. **Method 1: Moran's I** — sq.gr.spatial_autocorr(mode='moran')，全局空间自相关
 4. **Method 2: Geary's C** — sq.gr.spatial_autocorr(mode='geary')，局部空间差异

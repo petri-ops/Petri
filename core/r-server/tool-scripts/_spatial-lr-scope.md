@@ -6,7 +6,7 @@
 
 ## 版本锁定
 
-- py-server 容器: Python 3.11+
+- 本地 Python runtime: Python 3.11+
 - 关键包: `scanpy` / `squidpy` / `liana` / `pandas`
 
 ## Canonical workflow source
@@ -15,7 +15,7 @@
 
 ## Steps (in-scope) — 双变量 LR 分析
 
-1. **加载空间数据** — result_spatial.h5ad（3 入口：parentCachePath / OSS / /tools 上传）
+1. **加载空间数据** — 从本地 tool job 目录读取上传的 h5ad
 2. **自动补全** — 检测 log1p / spatial_connectivities 缺失则补
 3. **LIANA bivariate** — li.mt.bivariate(resource + local metric)，直接在 spot 物理邻居上算 LR 共现
 4. **per-LR-pair 统计** — mean_score / frac_active（>0.5 阈值）

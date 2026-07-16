@@ -2,8 +2,8 @@
 # BioF3 SCI-style 共享绘图主题
 # Version: 1.0 (2026-05-24)
 #
-# 用法（每个工具脚本顶部 source）:
-#   source("/opt/biof3-r-server/tool-scripts/_biof3-theme.R")
+# 用法（脚本已复制到本地 job 目录）:
+#   source(file.path(job_dir, "_biof3-theme.R"))
 #
 # 提供的工具:
 #   theme_biof3()        - ggplot2 标准主题, 替换 theme_classic() / theme_minimal()

@@ -89,7 +89,7 @@ function cleanup(workDir) {
 function proxyToR(rPath, reqBody, res) {
   const postData = JSON.stringify(reqBody);
   const options = {
-    hostname: getContainerIp(),
+    hostname: getReplotHost(),
     port: 8787,
     path: rPath,
     method: 'POST',
@@ -118,8 +118,7 @@ function proxyToR(rPath, reqBody, res) {
   proxyReq.end();
 }
 
-function getContainerIp() {
-  // 本地：plumber 跑在 localhost
+function getReplotHost() {
   return '127.0.0.1';
 }
 
@@ -242,9 +241,9 @@ while (dev.cur() > 1) dev.off()
   });
 
   app.get('/api/replot/status', (req, res) => {
-    const containerIp = getContainerIp();
+    const replotHost = getReplotHost();
     http
-      .get(`http://${containerIp}:8787/status`, (proxyRes) => {
+      .get(`http://${replotHost}:8787/status`, (proxyRes) => {
         const chunks = [];
         proxyRes.on('data', (c) => chunks.push(c));
         proxyRes.on('end', () => res.json(JSON.parse(Buffer.concat(chunks).toString())));

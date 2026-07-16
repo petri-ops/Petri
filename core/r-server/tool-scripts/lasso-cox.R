@@ -446,7 +446,6 @@ writeLines(toJSON(manifest, auto_unbox = TRUE, pretty = TRUE), file.path(output_
 
 # Report generation
 template_path <- file.path(job_dir, "report-template.html")
-if (!file.exists(template_path)) template_path <- "/opt/biof3-r-server/tool-scripts/lasso-cox-report-template.html"
 if (file.exists(template_path)) {
   cat("Generating HTML report...\n")
   report_html <- paste(readLines(template_path, warn = FALSE), collapse = "\n")

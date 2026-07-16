@@ -320,9 +320,6 @@ writeLines(toJSON(manifest, auto_unbox = TRUE, pretty = TRUE),
 # HTML 报告 (从模板 base64 内嵌)
 # ============================================================
 template_path <- file.path(job_dir, "report-template.html")
-if (!file.exists(template_path)) {
-  template_path <- "/opt/biof3-r-server/tool-scripts/deseq2-report-template.html"
-}
 if (file.exists(template_path)) {
   report_html <- readLines(template_path, warn = FALSE)
   report_html <- paste(report_html, collapse = "\n")

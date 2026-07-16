@@ -692,8 +692,8 @@ async function callTool(name, args, opts = {}) {
     return _runPluginScript(plugin, scriptPath, args, userId, projectId, toolJobId);
   }
 
-  // 单细胞步骤（STEP_META）已移除：其异步 task-queue/OSS 引擎属于旧 web 产线，
-  // 不契合本地 agent 模型；工作流稳定后将重写。这些工具不再暴露，调用按未知工具处理。
+  // Scientific analysis is exposed only through installed plugin tools so all
+  // execution follows run_tool → tool_job → artifact truth.
 
   return {
     content: [{ type: 'text', text: `unknown_tool: ${name}` }],

@@ -47,7 +47,7 @@ suppressMessages({
 
 # WGCNA settings (官方推荐)
 options(stringsAsFactors = FALSE)
-allowWGCNAThreads(nThreads = 2)  # match container BLAS limit
+allowWGCNAThreads(nThreads = 2)  # keep desktop analysis responsive
 
 if (!exists("%||%")) {
   `%||%` <- function(a, b) if (is.null(a) || (length(a) == 0 && !is.list(a))) b else a
@@ -508,9 +508,6 @@ writeLines(toJSON(manifest, auto_unbox = TRUE, pretty = TRUE),
 # ============================================================
 cat("[wgcna] Generating HTML report...\n")
 template_path <- file.path(job_dir, "report-template.html")
-if (!file.exists(template_path)) {
-  template_path <- "/opt/biof3-r-server/tool-scripts/wgcna-report-template.html"
-}
 if (file.exists(template_path)) {
   report_html <- paste(readLines(template_path, warn = FALSE), collapse = "\n")
 
