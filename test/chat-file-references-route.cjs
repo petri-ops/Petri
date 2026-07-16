@@ -4,7 +4,7 @@ const path = require('path');
 const Module = require('module');
 
 function loadResolveRoute(dbStub) {
-  const rServer = path.resolve(__dirname, '..', 'vendor', 'biof3-core', 'r-server');
+  const rServer = path.resolve(__dirname, '..', 'core', 'r-server');
   const harnessModulePath = path.join(rServer, 'routes', 'harness.js');
   const dbModulePath = path.join(rServer, 'db.js');
 

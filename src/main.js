@@ -22,6 +22,7 @@ const {
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
+const nodeNet = require("net");
 const { spawn, spawnSync } = require("child_process");
 const { createMacOssUpdater } = require("./macos-oss-updater");
 const {
@@ -33,7 +34,7 @@ const {
 } = require("./platform-compat");
 const runtimePathsModule = app.isPackaged
   ? path.join(process.resourcesPath, "core", "shared-backend", "runtime-paths.js")
-  : path.join(__dirname, "..", "vendor", "biof3-core", "shared-backend", "runtime-paths.js");
+  : path.join(__dirname, "..", "core", "shared-backend", "runtime-paths.js");
 const {
   getPythonRuntimeExecutable,
 } = require(runtimePathsModule);
@@ -173,20 +174,18 @@ function _applyComputeSettings(settings) {
 }
 
 // ── 路径解析（开发模式 vs 打包模式）────────────────────────────
-// desktop 仓分仓后（断点5）：
+// 去 submodule 后（core 内嵌）：
 //   - desktop 自己的资源（frontend/dist, build, resources/）在 desktop 仓根
-//   - core 资源（r-server, py-server, shared-backend）在 git submodule vendor/biof3-core/
-// 开发模式：PROJECT_ROOT = desktop 仓根（src/..），CORE_ROOT = PROJECT_ROOT/vendor/biof3-core
+//   - core 资源（r-server, py-server, shared-backend）内嵌在 desktop 仓根 core/ 下
+// 开发模式：PROJECT_ROOT = desktop 仓根（src/..），CORE_ROOT = PROJECT_ROOT/core
 // 打包模式：desktop 资源在 process.resourcesPath，core 资源在 process.resourcesPath/core（electron-builder extraResources）
-// 注意：分仓前 main.js 在 desktop-app/src/main.js，往上两层到仓库根；
-//       分仓后 main.js 在 src/main.js，只需往上一层到 desktop 仓根。
 const IS_DEV = !app.isPackaged;
 const PROJECT_ROOT = IS_DEV ? path.join(__dirname, "..") : process.resourcesPath;
 
-// core 仓根（submodule）。dev: vendor/biof3-core；pack: resourcesPath/core
+// core 根（去 submodule 后内嵌在 desktop 仓根）。dev: core/；pack: resourcesPath/core
 function resolveCoreRoot() {
   if (IS_DEV) {
-    return path.join(PROJECT_ROOT, "vendor", "biof3-core");
+    return path.join(PROJECT_ROOT, "core");
   }
   return path.join(process.resourcesPath, "core");
 }
@@ -401,7 +400,7 @@ function resolveRuntime(lang, userDataDir) {
   return null;
 }
 
-function setupDesktopEnv() {
+function setupDesktopEnv(backendPorts) {
   process.env.BIOF3_EXEC_MODE = "local";
   process.env.BIOF3_STORAGE = "local";
   process.env.BIOF3_LOCAL_MODE = "1";
@@ -456,12 +455,44 @@ function setupDesktopEnv() {
     );
   }
 
-  // 端口（避免和 web 版开发端口冲突）
-  process.env.R_SERVER_PORT = "3001";
-  process.env.PY_SERVER_PORT = "3004";
+  process.env.R_SERVER_PORT = String(backendPorts.r);
+  process.env.PY_SERVER_PORT = String(backendPorts.python);
+  process.env.PLUMBER_PORT = String(backendPorts.plumber);
 
   // 计算执行配置：默认本地优先；若用户已保存远端集群配置，则一并注入
   _applyComputeSettings(_loadComputeSettings());
+}
+
+function reserveAvailablePort(preferredPort) {
+  return new Promise((resolve, reject) => {
+    const tryListen = (port) => {
+      const server = nodeNet.createServer();
+      server.unref();
+      server.once("error", (error) => {
+        if (port === preferredPort && error.code === "EADDRINUSE") {
+          tryListen(0);
+          return;
+        }
+        reject(error);
+      });
+      server.listen({ host: "127.0.0.1", port, exclusive: true }, () => {
+        const address = server.address();
+        const selectedPort = typeof address === "object" && address ? address.port : port;
+        server.close((error) => (error ? reject(error) : resolve(selectedPort)));
+      });
+    };
+    tryListen(preferredPort);
+  });
+}
+
+async function selectBackendPorts() {
+  const r = await reserveAvailablePort(3001);
+  const python = await reserveAvailablePort(3004);
+  const plumber = await reserveAvailablePort(8787);
+  if (r !== 3001) console.warn(`[desktop] port 3001 occupied; using ${r} for r-server`);
+  if (python !== 3004) console.warn(`[desktop] port 3004 occupied; using ${python} for py-server`);
+  if (plumber !== 8787) console.warn(`[desktop] port 8787 occupied; using ${plumber} for plumber`);
+  return { r, python, plumber };
 }
 
 // ── 启动 r-server（子进程 spawn，避免原生模块 V8 版本冲突）─────
@@ -505,7 +536,7 @@ function startRServer() {
   });
 
   console.log(
-    "[desktop] r-server spawned (pid=" + rServerProc.pid + ") on :3001",
+    `[desktop] r-server spawned (pid=${rServerProc.pid}) on :${process.env.R_SERVER_PORT}`,
   );
 }
 
@@ -567,7 +598,7 @@ function startPyServer(reason = "ipc") {
   });
 
   console.log(
-    `[desktop] py-server spawned (pid=${pyServerProc.pid}) on :3004 — reason=${reason}`,
+    `[desktop] py-server spawned (pid=${pyServerProc.pid}) on :${process.env.PY_SERVER_PORT} — reason=${reason}`,
   );
   return { ok: true, pid: pyServerProc.pid };
 }
@@ -647,7 +678,7 @@ function startPlumber(reason = "ipc") {
   }
 
   try {
-    plumberProc = spawn(rBin, [plumberScript, "--port", "8787"], {
+    plumberProc = spawn(rBin, [plumberScript, "--port", process.env.PLUMBER_PORT], {
       env: { ...process.env, R_HOME: process.env.BIOF3_R_HOME },
       stdio: "pipe",
     });
@@ -670,7 +701,7 @@ function startPlumber(reason = "ipc") {
   });
 
   _resetPlumberIdleTimer();
-  console.log(`[desktop] plumber started on :8787 — reason=${reason}`);
+  console.log(`[desktop] plumber started on :${process.env.PLUMBER_PORT} — reason=${reason}`);
   return { ok: true, pid: plumberProc.pid };
 }
 
@@ -732,6 +763,21 @@ function startContentSync() {
 // ── 主窗口 ─────────────────────────────────────────────────────
 let mainWindow = null;
 
+// BioF3 owns local backend ports and must run as a single application
+// instance. A repeated launch focuses the existing window instead of starting
+// another R/Python service stack.
+const hasSingleInstanceLock = app.requestSingleInstanceLock();
+if (!hasSingleInstanceLock) {
+  app.quit();
+} else {
+  app.on("second-instance", () => {
+    if (!mainWindow) return;
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.show();
+    mainWindow.focus();
+  });
+}
+
 async function createWindow() {
   // 阶段 3（desktop-spa）：主窗口加载 Vite SPA build 产物
   // Vite SPA 在 frontend/dist，base '/'，无 baseUrl 前缀
@@ -790,11 +836,11 @@ async function createWindow() {
     minWidth: 720,
     minHeight: 520,
     title: "BioF3",
-    frame: false,
+    // On macOS, hiddenInset keeps the native traffic lights and lets the OS
+    // place them on its title-bar track. Other platforms keep the frameless
+    // shell used by the custom toolbar.
+    frame: process.platform === "darwin",
     titleBarStyle: "hiddenInset",
-    // Electron's native inset uses a different vertical origin from the
-    // renderer title bar. This value is verified against the live window.
-    trafficLightPosition: { x: 12, y: 4 },
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -1726,7 +1772,8 @@ function setupTerminalIpc() {
 
 // ── 应用生命周期 ───────────────────────────────────────────────
 async function main() {
-  setupDesktopEnv();
+  const backendPorts = await selectBackendPorts();
+  setupDesktopEnv(backendPorts);
 
   // M1-4 (H3)：启动 r-server 前跑 db migration，防升级 schema 错乱。
   // Migration must use the same selected Node boundary as r-server. Loading
@@ -1801,11 +1848,9 @@ async function main() {
 app.whenReady().then(main);
 
 app.on("window-all-closed", () => {
-  // macOS 关闭最后一个窗口后应用仍驻留，后端也应继续在线；否则从 Dock
-  // 重新打开时只会重建前端窗口，形成“前端在、后端断开”的状态。
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
+  // Product contract: closing BioF3 stops the local application and every
+  // backend it owns. Do not keep R/Python services resident on macOS.
+  app.quit();
 });
 
 app.on("activate", () => {

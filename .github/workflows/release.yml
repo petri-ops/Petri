@@ -20,9 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
           fetch-depth: 0
-          token: ${{ secrets.SUBMODULE_TOKEN || secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
@@ -33,8 +31,6 @@ jobs:
         run: |
           npm ci
           npm --prefix frontend ci
-          mkdir -p vendor/biof3-core/node_modules/@docusaurus/tsconfig
-          cp frontend/scripts/stubs/docusaurus-tsconfig/tsconfig.json vendor/biof3-core/node_modules/@docusaurus/tsconfig/tsconfig.json
 
       - name: Verify source and manifests
         run: npm run check

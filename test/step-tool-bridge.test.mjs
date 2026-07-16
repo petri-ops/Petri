@@ -10,10 +10,10 @@ test('Agent step submission closes through task, tool_job and artifact truth', (
   const script = `
     const fs = require('fs');
     const path = require('path');
-    const registry = require('./vendor/biof3-core/r-server/mcp/registry');
-    const db = require('./vendor/biof3-core/r-server/db');
-    const taskStore = require('./vendor/biof3-core/r-server/task-store');
-    const { syncStepToolCompleted } = require('./vendor/biof3-core/r-server/helpers/step-tool-job');
+    const registry = require('./core/r-server/mcp/registry');
+    const db = require('./core/r-server/db');
+    const taskStore = require('./core/r-server/task-store');
+    const { syncStepToolCompleted } = require('./core/r-server/helpers/step-tool-job');
     (async () => {
       globalThis._biof3Plugins = new Map();
       const submitted = await registry.callTool('doublet', {

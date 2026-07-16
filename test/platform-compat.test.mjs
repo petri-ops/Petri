@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 
 const req = createRequire(import.meta.url);
 const compat = req(resolve(process.cwd(), 'src/platform-compat.js'));
-const runtimePaths = req(resolve(process.cwd(), 'vendor/biof3-core/shared-backend/runtime-paths.js'));
+const runtimePaths = req(resolve(process.cwd(), 'core/shared-backend/runtime-paths.js'));
 
 test('platform compat chooses runtime binary names per OS', () => {
   assert.deepEqual(compat.getRuntimeBinCandidates('r', 'win32'), ['Rscript.exe']);

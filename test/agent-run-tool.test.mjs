@@ -11,7 +11,7 @@ import os from 'node:os';
 
 const path = { join };
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const R_SERVER = resolve(__dirname, '..', 'vendor', 'biof3-core', 'r-server');
+const R_SERVER = resolve(__dirname, '..', 'core', 'r-server');
 const req = createRequire(import.meta.url);
 
 // db.js 是 CJS，用 createRequire 拿到 module.exports 的具名函数（await import 只能拿 default）

@@ -1,0 +1,29 @@
+{
+  "name": "@biof3/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Copilot 纯逻辑层共享包（web 版 Docusaurus + 桌面版 Vite SPA）",
+  "type": "module",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./types": "./types.ts",
+    "./context": "./context.ts",
+    "./trace": "./trace.ts",
+    "./helpers": "./helpers.ts",
+    "./actions": "./actions.ts",
+    "./actionBus": "./actionBus.ts",
+    "./error": "./error.ts",
+    "./api-inject": "./api-inject.ts",
+    "./copilotMarkdown": "./copilotMarkdown.tsx",
+    "./ActResultCard": "./ActResultCard.tsx",
+    "./ActionCard": "./ActionCard.tsx",
+    "./copilotActRegistry": "./copilotActRegistry.ts",
+    "./copilotActRegistryBoot": "./copilotActRegistryBoot.ts"
+  },
+  "files": [
+    "*.ts",
+    "*.tsx"
+  ]
+}

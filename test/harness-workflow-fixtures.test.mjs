@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const { bindVerifiedArtifact, createAgentWorkflowPlan, projectWorkflowPlan } = require(
-  '../vendor/biof3-core/shared-backend/agent-workflow.js'
+  '../core/shared-backend/agent-workflow.js'
 );
 const fixturePath = path.join(
   path.dirname(fileURLToPath(import.meta.url)),

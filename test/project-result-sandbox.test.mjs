@@ -54,8 +54,8 @@ describe('Phase 0: 基线审计 — 当前路径行为', () => {
       // 预期行为：写入 project.workspace_path/results/jobs/<jobId>
       //
       // 证据位置：
-      // - vendor/biof3-core/r-server/routes/tools.js:29-31
-      // - vendor/biof3-core/r-server/helpers/tools-executor.js 使用固定 jobsDir
+      // - core/r-server/routes/tools.js:29-31
+      // - core/r-server/helpers/tools-executor.js 使用固定 jobsDir
 
       assert.fail('R 工具当前写入全局 tool-jobs，而不是项目 workspace');
     });
@@ -65,7 +65,7 @@ describe('Phase 0: 基线审计 — 当前路径行为', () => {
       // 预期行为：写入 project.workspace_path/results/jobs/<jobId>
       //
       // 证据位置：
-      // - vendor/biof3-core/py-server/tools-router.js:32-36
+      // - core/py-server/tools-router.js:32-36
 
       assert.fail('Python 工具当前写入全局 tool-jobs，而不是项目 workspace');
     });
@@ -75,8 +75,8 @@ describe('Phase 0: 基线审计 — 当前路径行为', () => {
       // 预期行为：使用 workspace/results/jobs/<tool_job.id>
       //
       // 证据位置：
-      // - vendor/biof3-core/r-server/mcp/registry.js 中 MCP_JOBS_DIR
-      // - vendor/biof3-core/r-server/helpers/tools-executor.js:15 isManagedResultDir
+      // - core/r-server/mcp/registry.js 中 MCP_JOBS_DIR
+      // - core/r-server/helpers/tools-executor.js:15 isManagedResultDir
 
       assert.fail('MCP 工具当前使用独立的 mcp-tool-jobs 目录和身份');
     });
@@ -96,27 +96,27 @@ describe('Phase 0: 基线审计 — 当前路径行为', () => {
   describe('workspace_path 数据库字段已存在', () => {
     it('projects 表已有 workspace_path 列', () => {
       // 证据：
-      // - vendor/biof3-core/r-server/db.js:231 ALTER TABLE
-      // - vendor/biof3-core/r-server/migrations/pg/015_projects_workspace_path.sql
+      // - core/r-server/db.js:231 ALTER TABLE
+      // - core/r-server/migrations/pg/015_projects_workspace_path.sql
       assert.ok(true, 'workspace_path 列已添加');
     });
 
     it('tool_jobs 表已有 project_id 列', () => {
       // 证据：
-      // - vendor/biof3-core/r-server/migrations/pg/013_tool_jobs_project.sql
+      // - core/r-server/migrations/pg/013_tool_jobs_project.sql
       assert.ok(true, 'project_id 列已添加');
     });
 
     it('workspace file API 已使用 workspace_path', () => {
       // 证据：
-      // - vendor/biof3-core/r-server/routes/files.js:85-93 getProjectWorkspace
+      // - core/r-server/routes/files.js:85-93 getProjectWorkspace
       // - 文件树和文件读取已限制在项目根目录内
       assert.ok(true, 'workspace file API 已实现 containment');
     });
 
     it('Harness project scope 已读取 workspace_path', () => {
       // 证据：
-      // - vendor/biof3-core/r-server/routes/harness.js:135, 608
+      // - core/r-server/routes/harness.js:135, 608
       assert.ok(true, 'Harness 已能读取 workspace_path');
     });
   });

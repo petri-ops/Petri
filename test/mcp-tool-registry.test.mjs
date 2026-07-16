@@ -8,11 +8,11 @@ import { dirname, resolve, join } from 'node:path';
 const path = { join };
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // desktop-app/test → 仓库根/r-server
-const R_SERVER = resolve(__dirname, '..', 'vendor', 'biof3-core', 'r-server');
+const R_SERVER = resolve(__dirname, '..', 'core', 'r-server');
 
 const pluginLoader = await import(R_SERVER + '/plugin-loader.js');
 const taskScripts = await import(R_SERVER + '/task-scripts-gen/index.js');
-const { listTools, callTool } = await import(resolve(__dirname, '..', 'vendor', 'biof3-core', 'r-server', 'mcp', 'registry.js'));
+const { listTools, callTool } = await import(resolve(__dirname, '..', 'core', 'r-server', 'mcp', 'registry.js'));
 
 // helper：注册一个 mock 插件到 globalThis._biof3Plugins
 function mockPlugin(id, def) {

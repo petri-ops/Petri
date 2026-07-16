@@ -22,8 +22,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const require = createRequire(import.meta.url);
 
-const SHARED_BACKEND = path.join(__dirname, '..', 'vendor', 'biof3-core', 'shared-backend');
-const R_HELPERS = path.join(__dirname, '..', 'vendor', 'biof3-core', 'r-server', 'helpers');
+const SHARED_BACKEND = path.join(__dirname, '..', 'core', 'shared-backend');
+const R_HELPERS = path.join(__dirname, '..', 'core', 'r-server', 'helpers');
 
 const { resolveProjectRunLayout, isPathContained, safeJoinUnder } = require(
   path.join(SHARED_BACKEND, 'project-run-layout.js')

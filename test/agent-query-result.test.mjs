@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
-const R_SERVER = resolve(__dirname, '..', 'vendor', 'biof3-core', 'r-server');
+const R_SERVER = resolve(__dirname, '..', 'core', 'r-server');
 const { localizeToolResult } = require(R_SERVER + '/helpers/system-prompt.js');
 const { tool_query } = require(R_SERVER + '/agent-tools/query-tools.js');
 

@@ -1,0 +1,27 @@
+# BioF3 Python Container — Base (fast build)
+# Start with core packages, add bioinformatics later
+FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc g++ libhdf5-dev libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Core scientific (fast to install)
+RUN pip install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ \
+    numpy==1.26.4 \
+    pandas==2.2.2 \
+    scipy==1.13.1 \
+    matplotlib==3.9.0 \
+    seaborn==0.13.2 \
+    scikit-learn==1.5.0 \
+    h5py==3.11.0 \
+    anndata==0.10.7
+
+# Scanpy (the most important one)
+RUN pip install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ \
+    scanpy==1.10.1 \
+    leidenalg==0.10.2
+
+WORKDIR /app
+RUN mkdir -p /app/data/biof3-py-tmp
+CMD ["tail", "-f", "/dev/null"]

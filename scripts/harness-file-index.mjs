@@ -13,7 +13,7 @@ export { rankHarnessTaskPacks, selectHarnessTaskPack } from './harness-task-pack
 
 const moduleRequire = createRequire(import.meta.url);
 const { createExecutionContext: createCanonicalExecutionContext } = moduleRequire(
-  '../vendor/biof3-core/shared-backend/execution-context.js',
+  '../core/shared-backend/execution-context.js',
 );
 
 const DEFAULT_MAX_SAMPLE_BYTES = 256 * 1024;

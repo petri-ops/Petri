@@ -22,7 +22,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // 动态加载 project-run-layout
-const layoutModule = await import('../vendor/biof3-core/shared-backend/project-run-layout.js');
+const layoutModule = await import('../core/shared-backend/project-run-layout.js');
 const {
   resolveProjectRunLayout,
   resolveSystemRunLayout,

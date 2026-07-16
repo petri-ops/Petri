@@ -23,7 +23,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const require = createRequire(import.meta.url);
 
-const R_SERVER = path.join(__dirname, '..', 'vendor', 'biof3-core', 'r-server');
+const R_SERVER = path.join(__dirname, '..', 'core', 'r-server');
 const db = require(path.join(R_SERVER, 'db.js'));
 const { materializeStepArtifactsToProject } = require(
   path.join(R_SERVER, 'helpers', 'step-tool-job.js')

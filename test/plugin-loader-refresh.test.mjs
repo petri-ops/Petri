@@ -6,7 +6,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const pluginLoader = require('../vendor/biof3-core/r-server/plugin-loader.js');
+const pluginLoader = require('../core/r-server/plugin-loader.js');
 
 test('loadPluginsFromDisk refreshes changed installed plugin metadata and removes deleted plugins', () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-plugin-refresh-'));

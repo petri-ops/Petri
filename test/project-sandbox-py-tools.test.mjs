@@ -27,8 +27,7 @@ const require = createRequire(import.meta.url);
 const PY_SERVER_DIR = path.join(
   __dirname,
   '..',
-  'vendor',
-  'biof3-core',
+  'core',
   'py-server'
 );
 

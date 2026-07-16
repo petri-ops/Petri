@@ -1,0 +1,139 @@
+/**
+ * routes/ai-conversations.js — multi-conversation support endpoints.
+ * Migrated from server.js as part of MODULES_BATCH1_v1.
+ *
+ * 2026-06-08: converted to ASYNC DB access (getAsyncDbForLegacyModules) — the
+ * old sync shim used deasync.loopWhile, which is NOT reentrant: concurrent
+ * Copilot/admin reads ran multiple loopWhile at once and crashed V8
+ * ("Empty MaybeLocal"), taking down the whole platform. Async = no deasync.
+ */
+const express = require('express');
+const dbMod = require('../db');
+const adb = dbMod.getAsyncDbForLegacyModules();
+let _projectColumnReady = null;
+
+function _newConvId() {
+  const {v4: uuidv4} = require('uuid');
+  return 'conv_' + uuidv4().slice(0, 12);
+}
+
+function _projectIdFromReq(req) {
+  const raw = (req.query && req.query.project_id) || (req.body && (req.body.project_id || req.body.projectId));
+  if (typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  return trimmed ? trimmed.slice(0, 120) : null;
+}
+
+function ensureProjectColumn() {
+  if (!_projectColumnReady) {
+    _projectColumnReady = (async () => {
+      try { await adb.prepare('ALTER TABLE copilot_conversations ADD COLUMN project_id TEXT').run(); } catch {}
+      try { await adb.prepare('CREATE INDEX IF NOT EXISTS idx_conv_project ON copilot_conversations(user_id, project_id, status, updated_at DESC)').run(); } catch {}
+    })();
+  }
+  return _projectColumnReady;
+}
+
+module.exports = function mountConversations(app) {
+  async function updateConversation(req, res) {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({status:'error', error:'未授权'});
+    try {
+      const row = await adb.prepare('SELECT id FROM copilot_conversations WHERE id=? AND user_id=?').get(req.params.id, userId);
+      if (!row) return res.status(404).json({status:'error', error:'not_found'});
+      const sets = []; const values = [];
+      if (req.body && typeof req.body.title === 'string') { sets.push('title=?'); values.push(req.body.title.slice(0, 100)); }
+      if (req.body && (req.body.status === 'active' || req.body.status === 'archived')) { sets.push('status=?'); values.push(req.body.status); }
+      if (sets.length === 0) return res.status(400).json({status:'error', error:'no_updates'});
+      sets.push('updated_at=?'); values.push(new Date().toISOString());
+      values.push(req.params.id, userId);
+      await adb.prepare(`UPDATE copilot_conversations SET ${sets.join(', ')} WHERE id=? AND user_id=?`).run(...values);
+      res.json({status:'ok'});
+    } catch (e) { res.status(500).json({status:'error', error: e.message}); }
+  }
+
+  app.get('/api/ai/conversations', async (req, res) => {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({status:'error', error:'未授权'});
+    try {
+      await ensureProjectColumn();
+      const status = (req.query.status === 'archived') ? 'archived' : (req.query.status === 'all' ? null : 'active');
+      const projectId = _projectIdFromReq(req);
+      const cols = 'id, title, status, last_page, project_id, message_count, created_at, updated_at, last_topic_shift_at, last_topic_shift_reason';
+      const where = ['user_id=?'];
+      const values = [userId];
+      if (status) { where.push('status=?'); values.push(status); }
+      if (projectId) { where.push('project_id=?'); values.push(projectId); }
+      else where.push("COALESCE(project_id, '')=''");
+      const rows = await adb.prepare(`SELECT ${cols} FROM copilot_conversations WHERE ${where.join(' AND ')} ORDER BY updated_at DESC LIMIT 100`).all(...values);
+      res.json({status:'ok', conversations: rows});
+    } catch (e) { res.status(500).json({status:'error', error: e.message}); }
+  });
+
+  app.post('/api/ai/conversations', express.json({limit: '8kb'}), async (req, res) => {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({status:'error', error:'未授权'});
+    try {
+      await ensureProjectColumn();
+      const id = _newConvId();
+      const now = new Date().toISOString();
+      const title = String((req.body && req.body.title) || '新对话').slice(0, 100);
+      const lastPage = (req.body && req.body.lastPage) || null;
+      const projectId = _projectIdFromReq(req);
+      await adb.prepare('INSERT INTO copilot_conversations(id, user_id, title, status, last_page, project_id, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?)')
+        .run(id, userId, title, 'active', lastPage, projectId, now, now);
+      res.json({status:'ok', conversation: {id, title, status:'active', last_page: lastPage, project_id: projectId, message_count: 0, created_at: now, updated_at: now}});
+    } catch (e) { res.status(500).json({status:'error', error: e.message}); }
+  });
+
+  app.get('/api/ai/conversations/:id', async (req, res) => {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({status:'error', error:'未授权'});
+    try {
+      const row = await adb.prepare('SELECT * FROM copilot_conversations WHERE id=? AND user_id=?').get(req.params.id, userId);
+      if (!row) return res.status(404).json({status:'error', error:'not_found'});
+      res.json({status:'ok', conversation: row});
+    } catch (e) { res.status(500).json({status:'error', error: e.message}); }
+  });
+
+  // POST update (workaround for nginx PATCH bug — same body shape as PATCH)
+  app.post('/api/ai/conversations/:id/update', express.json({limit: '8kb'}), updateConversation);
+
+  // PATCH compatibility route retained for older clients.
+  app.patch('/api/ai/conversations/:id', express.json({limit: '8kb'}), updateConversation);
+
+  app.delete('/api/ai/conversations/:id', async (req, res) => {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({status:'error', error:'未授权'});
+    try {
+      const row = await adb.prepare('SELECT id FROM copilot_conversations WHERE id=? AND user_id=?').get(req.params.id, userId);
+      if (!row) return res.status(404).json({status:'error', error:'not_found'});
+      await adb.prepare('DELETE FROM copilot_messages WHERE conversation_id=?').run(req.params.id);
+      await adb.prepare('DELETE FROM copilot_conversations WHERE id=? AND user_id=?').run(req.params.id, userId);
+      res.json({status:'ok'});
+    } catch (e) { res.status(500).json({status:'error', error: e.message}); }
+  });
+
+  app.get('/api/ai/conversations/:id/messages', async (req, res) => {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({status:'error', error:'未授权'});
+    try {
+      const conv = await adb.prepare('SELECT id FROM copilot_conversations WHERE id=? AND user_id=?').get(req.params.id, userId);
+      if (!conv) return res.status(404).json({status:'error', error:'not_found'});
+      const limit = Math.max(1, Math.min(500, parseInt(req.query.limit) || 100));
+      const rows = await adb.prepare('SELECT id, role, content, meta_json, ts FROM copilot_messages WHERE conversation_id=? ORDER BY ts ASC LIMIT ?').all(req.params.id, limit);
+      const items = rows.map(r => ({...r, meta: r.meta_json ? (() => { try { return JSON.parse(r.meta_json); } catch { return null; } })() : null}));
+      res.json({status:'ok', messages: items});
+    } catch (e) { res.status(500).json({status:'error', error: e.message}); }
+  });
+
+  app.post('/api/ai/conversations/:id/dismiss-topic-shift', async (req, res) => {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({status:'error', error:'未授权'});
+    try {
+      const r = await adb.prepare('UPDATE copilot_conversations SET last_topic_shift_at=NULL, last_topic_shift_reason=NULL WHERE id=? AND user_id=?').run(req.params.id, userId);
+      if (r.changes === 0) return res.status(404).json({status:'error', error:'not_found'});
+      res.json({status:'ok'});
+    } catch (e) { res.status(500).json({status:'error', error: e.message}); }
+  });
+};

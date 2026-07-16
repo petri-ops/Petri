@@ -78,23 +78,23 @@ publish:
 # 打包脚本: scripts/build-runtime-plugins.sh → 上传 OSS → manifest.json 注册
 # 用户首次启动后在插件商店下载 R/Python Runtime 到 ~/Documents/BioF3-Local/runtimes/
 extraResources:
-  # 断点5：core 仓作为 git submodule 在 vendor/biof3-core/
+  # 去 submodule 后：core 内嵌在 desktop 仓根 core/ 下
   # 打包时把 core 的 r-server/py-server/shared-backend 复制到 resources/core/
-  - from: ./vendor/biof3-core/r-server
+  - from: ./core/r-server
     to: core/r-server
     filter:
       - "**/*"
       - "!**/.DS_Store"
       - "!**/*.log"
       - "!**/test*"
-  - from: ./vendor/biof3-core/py-server
+  - from: ./core/py-server
     to: core/py-server
     filter:
       - "**/*"
       - "!**/.DS_Store"
       - "!**/*.log"
       - "!**/test*"
-  - from: ./vendor/biof3-core/shared-backend
+  - from: ./core/shared-backend
     to: core/shared-backend
     filter:
       - "**/*"

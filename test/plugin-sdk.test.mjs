@@ -6,8 +6,8 @@ import test from 'node:test';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const pluginLoader = require('../vendor/biof3-core/r-server/plugin-loader.js');
-const { inspectPluginSources } = require('../vendor/biof3-core/shared-backend/plugin-sdk.js');
+const pluginLoader = require('../core/r-server/plugin-loader.js');
+const { inspectPluginSources } = require('../core/shared-backend/plugin-sdk.js');
 
 function writePlugin(root, id, options = {}) {
   const dir = path.join(root, id);

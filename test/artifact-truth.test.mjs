@@ -11,8 +11,7 @@ const req = createRequire(import.meta.url);
 const { reconcileArtifactTruth } = req(resolve(
   __dirname,
   '..',
-  'vendor',
-  'biof3-core',
+  'core',
   'r-server',
   'helpers',
   'artifact-truth.js',
@@ -20,8 +19,7 @@ const { reconcileArtifactTruth } = req(resolve(
 const { _test: metadataTest, reconcileToolJobArtifacts } = req(resolve(
   __dirname,
   '..',
-  'vendor',
-  'biof3-core',
+  'core',
   'r-server',
   'routes',
   'tools-metadata.js',
@@ -29,8 +27,7 @@ const { _test: metadataTest, reconcileToolJobArtifacts } = req(resolve(
 const { _test: executorTest } = req(resolve(
   __dirname,
   '..',
-  'vendor',
-  'biof3-core',
+  'core',
   'r-server',
   'helpers',
   'tools-executor.js',

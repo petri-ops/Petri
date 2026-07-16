@@ -8,7 +8,7 @@ const {
   isHtmlFile,
   normalizeReportTheme,
   REPORT_THEME_STYLE_ID,
-} = require('../vendor/biof3-core/r-server/helpers/report-theme.js');
+} = require('../core/r-server/helpers/report-theme.js');
 
 test('accepts only explicit light and dark report themes', () => {
   assert.equal(normalizeReportTheme('light'), 'light');

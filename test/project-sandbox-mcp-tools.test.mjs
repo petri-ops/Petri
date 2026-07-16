@@ -24,7 +24,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const require = createRequire(import.meta.url);
 
-const R_SERVER = path.join(__dirname, '..', 'vendor', 'biof3-core', 'r-server');
+const R_SERVER = path.join(__dirname, '..', 'core', 'r-server');
 const db = require(path.join(R_SERVER, 'db.js'));
 const registry = require(path.join(R_SERVER, 'mcp', 'registry.js'));
 const { resolveMcpJobLayout, GLOBAL_JOBS_DIR } = registry._test;

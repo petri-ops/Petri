@@ -4,8 +4,8 @@ import http from 'node:http';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { DeepSeekProvider } = require('../vendor/biof3-core/shared-backend/llm-providers/deepseek.js');
-const aiUsageHelper = require('../vendor/biof3-core/shared-backend/ai-usage-helper.js');
+const { DeepSeekProvider } = require('../core/shared-backend/llm-providers/deepseek.js');
+const aiUsageHelper = require('../core/shared-backend/ai-usage-helper.js');
 
 function startServer(handler) {
   return new Promise((resolve) => {

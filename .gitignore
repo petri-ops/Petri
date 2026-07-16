@@ -36,3 +36,16 @@ tmp/
 
 # Cursor IDE local settings (machine-local)
 .cursor/
+
+# Absorbed core (formerly vendor/biof3-core submodule) — runtime/generated files.
+# node_modules/ and *.log are already ignored globally above; these are the
+# core-specific dev databases, caches, backups, and large demo datasets.
+core/r-server/biof3.db*
+core/r-server/.tmp/
+core/r-server/backups/
+core/py-server/pyserver.db*
+core/**/__pycache__/
+core/**/*.pyc
+core/r-server/tool-demo-data/
+core/r-server/tool-demo-results/
+core/**/.DS_Store

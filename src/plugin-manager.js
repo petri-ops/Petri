@@ -25,16 +25,15 @@ const { getRuntimeBinCandidates } = require('./platform-compat');
 // 的 init 流程，必须自己调 initSharedBackend 注册执行器，否则 getExecutor 抛
 // "未注册执行器" 导致 runtime 校验/装包静默失败）
 //
-// 路径解析策略（desktop 仓分仓后，断点5）：
-//   - core 仓作为 git submodule 在 vendor/biof3-core/
-//   - 开发模式 (app.isPackaged=false): shared-backend 在 vendor/biof3-core/shared-backend
-//     __dirname = .../src/ → ../vendor/biof3-core/shared-backend
+// 路径解析策略（去 submodule 后，core 内嵌在 desktop 仓根 core/）：
+//   - 开发模式 (app.isPackaged=false): shared-backend 在 core/shared-backend
+//     __dirname = .../src/ → ../core/shared-backend
 //   - 打包模式 (app.isPackaged=true): core 在 extraResources/core 下
 //     process.resourcesPath = .../BioF3.app/Contents/Resources/
 function resolveSharedBackendDir() {
-  // 开发模式：从 src/ 向上一级到 desktop 仓根，再进 vendor/biof3-core/shared-backend
+  // 开发模式：从 src/ 向上一级到 desktop 仓根，再进 core/shared-backend（去 submodule 后内嵌）
   if (app && !app.isPackaged) {
-    const devPath = path.resolve(__dirname, '..', 'vendor', 'biof3-core', 'shared-backend');
+    const devPath = path.resolve(__dirname, '..', 'core', 'shared-backend');
     if (fs.existsSync(devPath)) return devPath;
   }
   // 打包模式：core 在 extraResources/core 下
@@ -43,7 +42,7 @@ function resolveSharedBackendDir() {
     if (fs.existsSync(pkgPath)) return pkgPath;
   }
   // 兜底：回退到开发模式路径（即使 fs.existsSync 失败，让 require 抛错更明确）
-  return path.resolve(__dirname, '..', 'vendor', 'biof3-core', 'shared-backend');
+  return path.resolve(__dirname, '..', 'core', 'shared-backend');
 }
 
 const SHARED_BACKEND_DIR = resolveSharedBackendDir();
@@ -52,11 +51,11 @@ const {
   getPythonSitePackagesDir,
 } = require(path.join(SHARED_BACKEND_DIR, 'runtime-paths'));
 
-// core 仓根（r-server/py-server/shared-backend 平级目录所在）：
-// 开发模式 = desktop 仓根/vendor/biof3-core；打包模式 = resourcesPath/core
+// core 根（r-server/py-server/shared-backend 平级目录所在）：
+// 开发模式 = desktop 仓根/core；打包模式 = resourcesPath/core
 function resolveProjectRoot() {
   if (app && app.isPackaged && process.resourcesPath) return path.join(process.resourcesPath, 'core');
-  return path.resolve(__dirname, '..', 'vendor', 'biof3-core');
+  return path.resolve(__dirname, '..', 'core');
 }
 const PROJECT_ROOT = resolveProjectRoot();
 const pluginLoader = require(path.join(PROJECT_ROOT, 'r-server', 'plugin-loader.js'));

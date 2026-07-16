@@ -8,12 +8,12 @@ import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const R_SERVER = resolve(__dirname, '..', 'vendor', 'biof3-core', 'r-server');
+const R_SERVER = resolve(__dirname, '..', 'core', 'r-server');
 const req = createRequire(import.meta.url);
 
 const db = req(R_SERVER + '/db.js');
 const { tool_read_image } = req(R_SERVER + '/agent-tools/vision-tools.js');
-const { callTool } = await import(resolve(__dirname, '..', 'vendor', 'biof3-core', 'r-server', 'mcp', 'registry.js'));
+const { callTool } = await import(resolve(__dirname, '..', 'core', 'r-server', 'mcp', 'registry.js'));
 
 const RUN_LIVE = process.env.RUN_VISION_LIVE === '1';
 

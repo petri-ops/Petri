@@ -22,7 +22,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const require = createRequire(import.meta.url);
 
-const SHARED_BACKEND = path.join(__dirname, '..', 'vendor', 'biof3-core', 'shared-backend');
+const SHARED_BACKEND = path.join(__dirname, '..', 'core', 'shared-backend');
 const { resolveProjectRunLayout, resolveSystemRunLayout, restoreLegacyJobLayout } = require(
   path.join(SHARED_BACKEND, 'project-run-layout.js')
 );

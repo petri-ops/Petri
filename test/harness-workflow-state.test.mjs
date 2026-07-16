@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { projectHarnessWorkflowJob } = require('../vendor/biof3-core/r-server/helpers/harness-workflow-state.js');
+const { projectHarnessWorkflowJob } = require('../core/r-server/helpers/harness-workflow-state.js');
 
 function stage(workflow, id) {
   return workflow.stages.find((item) => item.id === id);

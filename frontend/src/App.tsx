@@ -2,7 +2,7 @@
 // 路由出口 + 首次启动引导
 
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { DesktopOnboarding } from '@/components/desktop/DesktopOnboarding';
 import { TitleBar } from '@/components/desktop/TitleBar';
 import { WorkspacePanelsProvider } from '@/components/desktop/WorkspacePanelsContext';
@@ -16,7 +16,7 @@ import '@/components/copilot/copilotActRegistryBoot';
 import { ProjectWorkspace } from '@/pages/project-workspace';
 import '@/components/desktop/desktop.css';
 // 断点6：注入平台 API 给 @biof3/shared 渲染层组件（ActResultCard/copilotActRegistry）
-import { configureApi } from '../../vendor/biof3-core/packages/shared-copilot/api-inject';
+import { configureApi } from '../../core/packages/shared-copilot/api-inject';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 configureApi({ getApiPrefix: () => getApiPrefix(), getToken });
 
@@ -42,9 +42,6 @@ function DesktopOnboardingMount(): React.ReactElement | null {
 }
 
 export default function App(): React.ReactElement {
-  const location = useLocation();
-  const isCoverRoute = location.pathname === '/';
-
   useEffect(() => {
     const html = document.documentElement;
     html.classList.add('biof3-desktop');
@@ -57,9 +54,12 @@ export default function App(): React.ReactElement {
   return (
     <BackendStatusProvider>
       <WorkspacePanelsProvider>
-        {!isCoverRoute && <TitleBar />}
+        <TitleBar />
         <CopilotContextProvider>
-          <main className="biof3-spa-main" style={{ marginTop: 0, paddingTop: isCoverRoute ? 0 : 28 }}>
+          <main
+            className="biof3-spa-main"
+            style={{ marginTop: 0, paddingTop: 'var(--biof3-titlebar-height)' }}
+          >
             <Routes>
               {/* Desktop Agent-based workflow */}
               <Route path="/" element={<HomePage />} />

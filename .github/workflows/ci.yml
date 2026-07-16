@@ -12,18 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
           fetch-depth: 0
-          # BioF3 core submodule lives at ShengXinF3/BioF3 (private).
-          # Default GITHUB_TOKEN does not cross repo boundaries, so a PAT
-          # with `repo` scope must be supplied via SUBMODULE_TOKEN. Note
-          # this PAT must additionally have read scope on the parent
-          # repository (ShengXinF3/biof3-desktop) since it is also used
-          # to fetch this repo itself. Graceful degradation: when the
-          # secret is missing we still attempt the checkout with the
-          # default GITHUB_TOKEN — the 401 surfaces as a CI failure here
-          # because main pipeline expects to verify submodule fidelity.
-          token: ${{ secrets.SUBMODULE_TOKEN || secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
@@ -36,15 +25,9 @@ jobs:
       - name: Install frontend dependencies
         run: npm --prefix frontend ci
 
-      - name: Stub @docusaurus/tsconfig for submodule tsconfig extends
+      - name: Verify manifests
         shell: bash
-        run: mkdir -p vendor/biof3-core/node_modules/@docusaurus/tsconfig && cp frontend/scripts/stubs/docusaurus-tsconfig/tsconfig.json vendor/biof3-core/node_modules/@docusaurus/tsconfig/tsconfig.json
-
-      - name: Verify pinned core and manifests
-        shell: bash
-        run: |
-          bash scripts/sync-vendor.sh check
-          npm run harness:check
+        run: npm run harness:check
 
       - name: Run platform and Harness regressions
         run: >-
@@ -58,7 +41,7 @@ jobs:
           test/harness-tool-template.test.mjs
           test/harness-workflow-fixtures.test.mjs
           test/agent-workflow-phase6.test.mjs
-          vendor/biof3-core/test/agent-workflow.mjs
+          core/test/agent-workflow.mjs
           test/mcp-tool-registry.test.mjs
 
       - name: Check frontend and build SPA

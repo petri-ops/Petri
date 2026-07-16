@@ -1,0 +1,270 @@
+/**
+ * routes/files.js — platform file upload/sign/proxy support.
+ *
+ * Public production traffic should reach these via /api/platform/*.
+ * The historical r-server mount remains during backend convergence.
+ */
+const crypto = require('crypto');
+const fs = require('fs');
+const http = require('http');
+const https = require('https');
+const path = require('path');
+const multer = require('multer');
+
+const config = require('../config');
+const IS_LOCAL = config.storageMode === 'local';
+
+const OSS_BUCKET = 'biof3-uploads';
+const OSS_ENDPOINT = 'oss-cn-hangzhou.aliyuncs.com';
+const OSS_HOST = `https://${OSS_BUCKET}.${OSS_ENDPOINT}`;
+const TEMP_DIR = IS_LOCAL ? (config.tempDir || '/tmp/biof3-tmp') : '/mnt/storage_16tb/omichub/biof3-tmp';
+
+// OSS client（桌面版跳过）
+let ossClient = null;
+if (!IS_LOCAL) {
+  const OSS = require('ali-oss');
+  ossClient = new OSS({
+    region: 'oss-cn-hangzhou',
+    accessKeyId: process.env.OSS_AK,
+    accessKeySecret: process.env.OSS_SK,
+    bucket: OSS_BUCKET,
+  });
+}
+
+// 存储适配器（桌面版用）
+let _storage = null;
+function getStorage() {
+  if (!_storage && IS_LOCAL) {
+    const { getActiveStorage } = require('../../shared-backend/storage');
+    _storage = getActiveStorage();
+  }
+  return _storage;
+}
+
+function contentTypeFor(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  return {
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.svg': 'image/svg+xml',
+    '.pdf': 'application/pdf',
+    '.csv': 'text/csv',
+    '.tsv': 'text/tab-separated-values',
+    '.json': 'application/json',
+    '.log': 'text/plain',
+    '.md': 'text/markdown',
+    '.markdown': 'text/markdown',
+    '.r': 'text/plain',
+    '.py': 'text/plain',
+    '.sh': 'text/plain',
+    '.bash': 'text/plain',
+    '.zsh': 'text/plain',
+    '.js': 'text/javascript',
+    '.jsx': 'text/javascript',
+    '.mjs': 'text/javascript',
+    '.cjs': 'text/javascript',
+    '.ts': 'text/plain',
+    '.tsx': 'text/plain',
+    '.css': 'text/css',
+    '.scss': 'text/plain',
+    '.html': 'text/html',
+    '.xml': 'application/xml',
+    '.toml': 'text/plain',
+    '.txt': 'text/plain',
+    '.yaml': 'text/plain',
+    '.yml': 'text/plain',
+    '.rds': 'application/octet-stream',
+    '.rda': 'application/octet-stream',
+    '.h5': 'application/octet-stream',
+    '.hdf5': 'application/octet-stream',
+    '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  }[ext] || 'application/octet-stream';
+}
+
+function getProjectWorkspace(projectId) {
+  const db = require('../db');
+  const project = db.getProject(projectId);
+  if (!project || !project.workspace_path) return null;
+  try {
+    fs.mkdirSync(project.workspace_path, { recursive: true });
+  } catch {}
+  return project.workspace_path;
+}
+
+function resolveInside(root, relativePath) {
+  const safeRelative = String(relativePath || '').replace(/^[/\\]+/, '');
+  const target = path.resolve(root, safeRelative);
+  const normalizedRoot = path.resolve(root);
+  if (target !== normalizedRoot && !target.startsWith(normalizedRoot + path.sep)) {
+    return null;
+  }
+  return target;
+}
+
+const upload = multer({
+  dest: path.join(TEMP_DIR, 'uploads'),
+  limits: { fileSize: 500 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['.csv', '.tsv', '.txt', '.rds', '.rda', '.xlsx', '.h5', '.hdf5', '.gz'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowed.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error(`不支持的文件格式: ${ext}，支持: ${allowed.join(', ')}`));
+    }
+  },
+});
+
+module.exports = function registerFileRoutes(app) {
+  // ── 桌面版本地文件服务 ──────────────────────────────────────
+  // /api/files/<key> → 从本地 results 目录读取文件并返回
+  if (IS_LOCAL) {
+    app.get('/api/workspaces/:projectId/tree', (req, res) => {
+      try {
+        const root = getProjectWorkspace(req.params.projectId);
+        if (!root) return res.status(404).json({ ok: false, error: '项目工作目录不存在' });
+        const dir = resolveInside(root, req.query.prefix || '');
+        if (!dir) return res.status(400).json({ ok: false, error: '非法路径' });
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        if (!fs.statSync(dir).isDirectory()) {
+          return res.status(400).json({ ok: false, error: '不是目录' });
+        }
+        const entries = fs
+          .readdirSync(dir, { withFileTypes: true })
+          .filter((entry) => !entry.name.startsWith('.'))
+          .map((entry) => {
+            const full = path.join(dir, entry.name);
+            const stat = fs.statSync(full);
+            return {
+              name: entry.name,
+              type: entry.isDirectory() ? 'dir' : 'file',
+              size: entry.isFile() ? stat.size : undefined,
+              modifiedAt: stat.mtimeMs,
+            };
+          })
+          .sort((a, b) => {
+            if (a.type !== b.type) return a.type === 'dir' ? -1 : 1;
+            return a.name.localeCompare(b.name);
+          });
+        res.json({ ok: true, entries });
+      } catch (e) {
+        res.status(500).json({ ok: false, error: e.message });
+      }
+    });
+
+    app.get('/api/workspaces/:projectId/file', (req, res) => {
+      try {
+        const root = getProjectWorkspace(req.params.projectId);
+        if (!root) return res.status(404).json({ status: 'error', error: '项目工作目录不存在' });
+        const target = resolveInside(root, req.query.path || '');
+        if (!target || !fs.existsSync(target) || !fs.statSync(target).isFile()) {
+          return res.status(404).json({ status: 'error', error: '文件不存在' });
+        }
+        res.setHeader('Content-Type', contentTypeFor(target));
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.send(fs.readFileSync(target));
+      } catch (e) {
+        res.status(500).json({ status: 'error', error: e.message });
+      }
+    });
+
+    app.get('/api/files/:key(*)', (req, res) => {
+      const key = req.params.key;
+      try {
+        const storage = getStorage();
+        if (!storage || !storage.exists(key)) {
+          return res.status(404).json({ status: 'error', error: '文件不存在' });
+        }
+        const buf = storage.read(key);
+        // 根据扩展名设置 Content-Type
+        res.setHeader('Content-Type', contentTypeFor(key));
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.send(buf);
+      } catch (e) {
+        res.status(500).json({ status: 'error', error: e.message });
+      }
+    });
+  }
+
+  app.post('/api/oss/sign', (req, res) => {
+    const { filename, contentType } = req.body;
+    if (!filename) {
+      return res.status(400).json({ error: '缺少 filename' });
+    }
+    const ts = Date.now();
+    const rand = crypto.randomBytes(4).toString('hex');
+    const safeFilename = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const key = `uploads/${ts}-${rand}-${safeFilename}`;
+    const expires = Math.floor(Date.now() / 1000) + 300;
+    const mimeType = contentType || 'application/octet-stream';
+    const stringToSign = `PUT\n\n${mimeType}\n${expires}\n/${OSS_BUCKET}/${key}`;
+    const signature = crypto
+      .createHmac('sha1', process.env.OSS_SK)
+      .update(stringToSign)
+      .digest('base64');
+    const uploadUrl = `${OSS_HOST}/${key}?OSSAccessKeyId=${encodeURIComponent(process.env.OSS_AK)}&Expires=${expires}&Signature=${encodeURIComponent(signature)}`;
+    const fileUrl = `${OSS_HOST}/${key}`;
+    res.json({ uploadUrl, fileUrl, key });
+  });
+
+  app.post('/api/upload', upload.single('file'), async (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ status: 'error', error: '未收到文件' });
+    }
+    const ext = path.extname(req.file.originalname).toLowerCase();
+    const newPath = req.file.path + ext;
+    fs.renameSync(req.file.path, newPath);
+
+    const ts = Date.now();
+    const rand = crypto.randomBytes(4).toString('hex');
+    const safeFilename = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const ossKey = `uploads/${ts}-${rand}-${safeFilename}`;
+    let ossUrl = null;
+
+    try {
+      await ossClient.put(ossKey, newPath);
+      ossUrl = `${OSS_HOST}/${ossKey}`;
+    } catch {
+      // Preserve legacy behavior: fall back to the local temp path if OSS fails.
+    }
+
+    res.json({
+      status: 'ok',
+      filePath: newPath.replace(/\\/g, '/'),
+      ossUrl: ossUrl || newPath.replace(/\\/g, '/'),
+      originalName: req.file.originalname,
+      size: req.file.size,
+    });
+  });
+
+  app.get('/api/proxy-file', async (req, res) => {
+    const fileUrl = req.query.url;
+    if (!fileUrl || typeof fileUrl !== 'string') {
+      return res.status(400).json({ status: 'error', error: '缺少 url 参数' });
+    }
+    if (!fileUrl.startsWith(`${OSS_HOST}/`)) {
+      return res.status(403).json({ status: 'error', error: '不允许代理该 URL' });
+    }
+    try {
+      const fetcher = fileUrl.startsWith('https') ? https : http;
+      fetcher
+        .get(fileUrl, (upstream) => {
+          if (upstream.statusCode !== 200) {
+            return res
+              .status(upstream.statusCode)
+              .json({ status: 'error', error: `上游返回 ${upstream.statusCode}` });
+          }
+          const ct = upstream.headers['content-type'] || 'application/octet-stream';
+          res.setHeader('Content-Type', ct);
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          upstream.pipe(res);
+        })
+        .on('error', (e) => {
+          res.status(500).json({ status: 'error', error: e.message });
+        });
+    } catch (e) {
+      res.status(500).json({ status: 'error', error: e.message });
+    }
+  });
+};

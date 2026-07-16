@@ -26,18 +26,18 @@ export {
   type ResolveRequest,
   type ResolveResponse,
   type FileReferenceFetcher,
-} from '../../../vendor/biof3-core/packages/shared-copilot/chat-file-references';
+} from '../../../core/packages/shared-copilot/chat-file-references';
 
 // FileReferenceClickDetail is owned by the shared markdown renderer; re-export
 // it here so platform code can import everything from a single entry point.
-export { type FileReferenceClickDetail } from '../../../vendor/biof3-core/packages/shared-copilot/copilotMarkdown';
+export { type FileReferenceClickDetail } from '../../../core/packages/shared-copilot/copilotMarkdown';
 
 import { getPlatformApiPrefix, getToken } from './authClient';
 import {
   setFileReferenceFetcher,
   type FileReferenceFetcher,
   type ResolveResponse,
-} from '../../../vendor/biof3-core/packages/shared-copilot/chat-file-references';
+} from '../../../core/packages/shared-copilot/chat-file-references';
 
 const fetcher: FileReferenceFetcher = async (body) => {
   const token = getToken();

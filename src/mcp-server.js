@@ -18,13 +18,13 @@ async function startMcpServer() {
   const { StdioServerTransport } = await import('@modelcontextprotocol/sdk/server/stdio.js');
   const { ListToolsRequestSchema, CallToolRequestSchema } =
     await import('@modelcontextprotocol/sdk/types.js');
-  // 断点5：core 仓作为 git submodule 在 vendor/biof3-core/
+  // 去 submodule 后：core 内嵌在 desktop 仓根 core/ 下。
   // mcp-server 是 stdio 子进程（被 biof3-mcp bin spawn），不经 Electron 主进程，
-  // 自己解析 core 路径：dev = ../vendor/biof3-core（从 src/ 出发），pack = process.resourcesPath/core
+  // 自己解析 core 路径：dev = ../core（从 src/ 出发），pack = process.resourcesPath/core
   // 注意：本文件是 CJS（有 require/module.exports），用 __dirname 全局，不用 ESM 的 import.meta.url
   const path = require('node:path');
   const fs = require('node:fs');
-  const devCorePath = path.resolve(__dirname, '..', 'vendor', 'biof3-core');
+  const devCorePath = path.resolve(__dirname, '..', 'core');
   const coreRoot = fs.existsSync(devCorePath)
     ? devCorePath
     : path.join(process.resourcesPath || '', 'core');

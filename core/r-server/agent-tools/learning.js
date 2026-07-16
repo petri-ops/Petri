@@ -1,0 +1,1088 @@
+/**
+ * agent-tools/learning.js — Learning & discovery tools
+ * (discover_capabilities, act_generic, generate_methods, suggest_next_steps,
+ *  verify_understanding, suggest_review, record_learning_signal)
+ */
+const dbMod = require('../db');
+const sqlite = dbMod.getSqliteForLegacyModules();
+// ponytail: cross-module refs from act-tools.js (isAgentPaused, _pendingActAcks, recordAudit)
+const { isAgentPaused, _pendingActAcks, recordAudit } = require('./act-tools');
+
+// SUGGEST_NEXT_STEPS_BRIDGE_v1 marker
+// ACT_GENERIC_TOOL_v1 — frontend-registered handlers + introspection
+async function tool_discover_capabilities(args, ctx) {
+  const reg = (ctx && ctx.actRegistry) || {};
+  const ids = Object.keys(reg);
+  if (ids.length === 0) {
+    return {
+      ok: true,
+      handlers: {},
+      note: '当前用户没有上传 act 注册表（可能页面还没加载完，或者前端没注册 generic handler）。常规 act tool 仍可用。',
+    };
+  }
+  return { ok: true, handlers: reg, count: ids.length };
+}
+
+async function tool_act_generic(args, ctx) {
+  const userId = ctx && ctx.userId;
+  if (!userId) throw new Error('未授权');
+  if (typeof isAgentPaused === 'function' && isAgentPaused(userId)) {
+    return { error: 'agent_paused', message: '用户已暂停 agent 自主操作。' };
+  }
+  if (!args || !args.handlerId) return { error: 'missing_handlerId' };
+  const reg = (ctx && ctx.actRegistry) || {};
+  const def = reg[args.handlerId];
+  if (!def) {
+    return {
+      error: 'unknown_handler',
+      message:
+        '没有注册名为 "' + args.handlerId + '" 的 handler。先调用 discover_capabilities 看清单。',
+    };
+  }
+  // page check
+  const currentPage = (ctx && ctx.context && ctx.context.page) || null;
+  if (def.pages && def.pages !== '*') {
+    if (Array.isArray(def.pages) && !def.pages.includes(currentPage)) {
+      return {
+        error: 'wrong_page',
+        expected: def.pages,
+        actual: currentPage || '(unknown)',
+        message:
+          '此 handler 只能在 [' +
+          def.pages.join(', ') +
+          '] 页面使用，当前在 ' +
+          (currentPage || '未知') +
+          '。先 navigate 过去。',
+      };
+    }
+  }
+  // Rate limit reuse same store: max 5 generic acts / minute
+  try {
+    const db = sqlite;
+    const since = new Date(Date.now() - 60_000).toISOString();
+    const recent = db
+      .prepare('SELECT COUNT(*) AS n FROM agent_audit WHERE user_id=? AND ts >= ?')
+      .get(userId, since);
+    if (recent && recent.n >= 5) {
+      return { error: 'rate_limited', message: '1 分钟内已执行 5 次写操作，请稍后。' };
+    }
+  } catch {}
+
+  // Generate ackToken so the frontend confirms receipt
+  const ackToken = (function _genTok() {
+    const { v4: uuidv4 } = require('uuid');
+    return 'ack_' + uuidv4().slice(0, 12);
+  })();
+  const ackPromise = (function _registerAck() {
+    return new Promise((resolve) => {
+      const timer = setTimeout(() => {
+        _pendingActAcks.delete(ackToken);
+        resolve({ timedOut: true });
+      }, 800);
+      _pendingActAcks.set(ackToken, {
+        resolve: (info) => {
+          clearTimeout(timer);
+          resolve({ timedOut: false, info });
+        },
+        expiresAt: Date.now() + 800,
+      });
+    });
+  })();
+
+  // audit
+  let undoToken = null;
+  try {
+    undoToken = recordAudit(userId, 'generic:' + args.handlerId, args.payload || {}, { ok: true });
+  } catch {}
+
+  return {
+    ok: true,
+    actType: 'generic',
+    handlerId: args.handlerId,
+    payload: args.payload || {},
+    message: '已派发 ' + args.handlerId + ' 到前端，等待 ack。',
+    ackToken,
+    undoToken,
+    undoableUntil: Date.now() + 5000,
+    _ackPromise: ackPromise,
+  };
+}
+
+// GENERATE_METHODS_v1 — academic Methods paragraph generator
+async function tool_generate_methods(args, ctx) {
+  const userId = ctx && ctx.userId;
+  if (!userId) throw new Error('未授权');
+  const gather = ctx && ctx.gatherAnalysisContextForMethods;
+  const render = ctx && ctx.renderMethodsParagraph;
+  if (!gather || !render)
+    return { error: 'helpers_missing', message: 'GENERATE_METHODS_v1 helpers not wired' };
+  if (!args.analysisId && !args.planId && !args.datasetId) {
+    return { error: 'missing_target', message: '需要 analysisId / planId / datasetId 之一' };
+  }
+  const data = gather(userId, {
+    analysisId: args.analysisId,
+    planId: args.planId,
+    datasetId: args.datasetId,
+  });
+  if (!data) return { error: 'not_found', message: '未找到对应数据或无权访问' };
+  if (!data.analyses || data.analyses.length === 0) {
+    return { error: 'no_analyses', message: '目标范围内没有 done 状态的分析，无法生成 Methods' };
+  }
+  data._userId = userId;
+  data._conversationId = ctx && ctx.conversationId;
+  const r = await render(data, { language: args.language || 'zh' });
+  if (r.error) return r;
+  return {
+    ok: true,
+    methods: r.methods,
+    language: r.language,
+    sources: {
+      analyses: data.analyses.length,
+      datasets: data.datasets.length,
+      plans: data.plans.length,
+    },
+  };
+}
+
+// SUGGEST_NEXT_STEPS_v1 — recommend 3-5 next-step resources for user
+async function tool_suggest_next_steps(args, ctx) {
+  const userId = ctx && ctx.userId;
+  if (!userId) return { error: 'unauthorized' };
+
+  const idx = ctx.docsIndex || {};
+  const docs = Array.isArray(idx.docs) ? idx.docs : [];
+  const figcode = Array.isArray(idx.figcode) ? idx.figcode : [];
+  const acts = Array.isArray(idx.acts) ? idx.acts : [];
+  const all = [
+    ...docs.map((d) => ({ kind: 'doc', ...d })),
+    ...figcode.map((f) => ({ kind: 'figcode', ...f, url: f.url || '/figcode#' + f.id })),
+    ...acts.map((a) => ({ kind: 'act', ...a, url: 'act://' + a.id })),
+  ];
+
+  // Read user's progress from SQLite
+  const db = sqlite;
+  let progressRows = [];
+  try {
+    progressRows = db
+      .prepare(
+        'SELECT resource, type, status, updated_at FROM user_progress WHERE user_id = ? ORDER BY updated_at DESC LIMIT 500'
+      )
+      .all(userId);
+  } catch {
+    progressRows = [];
+  }
+  const progressByResource = new Map();
+  for (const row of progressRows) progressByResource.set(row.resource, row);
+
+  // Topic hint: explicit > most-recent progress's domain > most-completed domain > basics
+  const topicArg = args && typeof args.topic === 'string' ? args.topic.toLowerCase().trim() : null;
+  let topicHint = null;
+  if (topicArg) topicHint = topicArg;
+  else if (progressRows.length > 0) {
+    // Find latest doc/figcode whose copilot.domain we know
+    for (const row of progressRows) {
+      const r = all.find((x) => x.url === row.resource);
+      if (r && r.copilot && r.copilot.domain) {
+        topicHint = r.copilot.domain;
+        break;
+      }
+    }
+  }
+
+  // Score each candidate
+  const limit = Math.max(1, Math.min(6, (args && args.limit) || 4));
+  const scored = [];
+  const completedSet = new Set(
+    progressRows.filter((r) => r.status === 'completed').map((r) => r.resource)
+  );
+  const startedSet = new Set(
+    progressRows.filter((r) => r.status === 'started').map((r) => r.resource)
+  );
+
+  // SUGGEST_NEXT_STEPS_BRIDGE_v1 — compute domain saturation
+  const domainTotals = {};
+  const domainCompleted = {};
+  for (const item of all) {
+    const d = item.copilot && item.copilot.domain;
+    if (!d) continue;
+    domainTotals[d] = (domainTotals[d] || 0) + 1;
+    if (item.url && completedSet.has(item.url)) {
+      domainCompleted[d] = (domainCompleted[d] || 0) + 1;
+    }
+  }
+  const saturatedDomains = new Set();
+  for (const d of Object.keys(domainTotals)) {
+    const total = domainTotals[d];
+    const done = domainCompleted[d] || 0;
+    if (total >= 4 && done / total >= 0.7) saturatedDomains.add(d);
+  }
+
+  for (const item of all) {
+    if (!item.url) continue;
+    if (completedSet.has(item.url)) continue; // already done — never re-recommend
+    const meta = item.copilot || {};
+    let score = 0;
+    const reasons = [];
+
+    // Started but not completed → strongly recommend continuing
+    if (startedSet.has(item.url)) {
+      score += 60;
+      reasons.push('上次没看完');
+    }
+
+    // Topic match
+    if (topicHint && meta.domain === topicHint) {
+      score += 30;
+      reasons.push('与当前学习领域一致');
+    }
+
+    // Prerequisites — boost when all are completed; penalize when missing
+    const prereqs = Array.isArray(meta.prerequisites) ? meta.prerequisites : [];
+    if (prereqs.length > 0) {
+      const completedCount = prereqs.filter((p) => completedSet.has(p)).length;
+      const ratio = completedCount / prereqs.length;
+      if (ratio === 1) {
+        score += 25;
+        reasons.push('前置已学完');
+      } else if (ratio === 0) {
+        score -= 15;
+      } else {
+        score += 5;
+      }
+    } else {
+      // No prereqs declared → considered safe entry, mild bonus
+      score += 5;
+    }
+
+    // Level pacing — beginners first if user has no progress yet
+    if (progressRows.length === 0) {
+      if (meta.level === 'beginner') {
+        score += 15;
+        reasons.push('适合刚入门');
+      } else if (meta.level === 'advanced') {
+        score -= 10;
+      }
+    } else {
+      // Returning user: avoid pushing beginner content unless directly next
+      if (meta.level === 'beginner' && completedSet.size >= 5) score -= 5;
+    }
+
+    // Estimated time — short tasks score slightly higher (tie-breaker)
+    const minutes = Number(meta.estimated_minutes) || 0;
+    if (minutes > 0 && minutes <= 15) score += 3;
+    else if (minutes > 60) score -= 3;
+
+    // Has metadata at all is a tiny bonus — items without copilot.* are less reliable to recommend
+    if (Object.keys(meta).length > 0) score += 2;
+
+    // hands_on items score higher when the user has > 3 doc completions
+    const docCompleted = progressRows.filter(
+      (r) => r.type === 'doc' && r.status === 'completed'
+    ).length;
+    if (meta.hands_on === true && docCompleted >= 3) {
+      score += 8;
+      reasons.push('该动手了');
+    }
+
+    // SUGGEST_NEXT_STEPS_BRIDGE_v1 — cross-domain bridge boost
+    if (prereqs.length >= 2) {
+      const prereqDomains = new Set();
+      for (const p of prereqs) {
+        if (!completedSet.has(p)) continue;
+        const r = all.find((x) => x.url === p);
+        const d = r && r.copilot && r.copilot.domain;
+        if (d) prereqDomains.add(d);
+      }
+      if (prereqDomains.size >= 2) {
+        score += 25;
+        reasons.push('跨领域：前置已跨组学学完');
+      }
+    }
+    // Domain-saturation nudge — if user has saturated their dominant domain,
+    // gently prefer other domains to encourage breadth.
+    if (saturatedDomains.size > 0 && meta.domain && !saturatedDomains.has(meta.domain)) {
+      score += 5;
+    }
+
+    if (score <= 0) continue;
+    scored.push({
+      kind: item.kind,
+      url: item.url,
+      title: item.title || item.subtitle || item.id,
+      domain: meta.domain || null,
+      level: meta.level || null,
+      estimated_minutes: meta.estimated_minutes || null,
+      hands_on: meta.hands_on === true,
+      score,
+      reasons,
+    });
+  }
+
+  scored.sort(
+    (a, b) => b.score - a.score || (a.estimated_minutes || 999) - (b.estimated_minutes || 999)
+  );
+  // Diversify: don't return more than 2 from the same domain
+  const picked = [];
+  const domainCounts = {};
+  for (const c of scored) {
+    const d = c.domain || '_unknown';
+    if ((domainCounts[d] || 0) >= 2 && picked.length >= 2) continue;
+    picked.push(c);
+    domainCounts[d] = (domainCounts[d] || 0) + 1;
+    if (picked.length >= limit) break;
+  }
+
+  return {
+    suggestions: picked.map((p) => ({
+      kind: p.kind,
+      url: p.url,
+      title: p.title,
+      domain: p.domain,
+      level: p.level,
+      estimated_minutes: p.estimated_minutes,
+      hands_on: p.hands_on,
+      reasons: p.reasons,
+    })),
+    user_state: {
+      progress_count: progressRows.length,
+      completed_count: completedSet.size,
+      topic_hint: topicHint,
+    },
+    note:
+      picked.length === 0
+        ? '当前 copilot-index 里没有足够 metadata 可推荐。请先让运营给资产填好 copilot.* 字段。'
+        : null,
+  };
+}
+
+// VERIFY_UNDERSTANDING_v1 — generate 1-3 questions from learning_outcomes
+async function tool_verify_understanding(args, ctx) {
+  const userId = ctx && ctx.userId;
+  if (!userId) return { error: 'unauthorized' };
+
+  const docUrl = args && typeof args.docUrl === 'string' ? args.docUrl.trim() : '';
+  if (!docUrl) return { error: 'missing_docUrl' };
+  const count = Math.max(1, Math.min(3, (args && args.count) || 2));
+
+  const idx = ctx.docsIndex || {};
+  const doc = (idx.docs || []).find((d) => d.url === docUrl);
+  if (!doc) {
+    return {
+      error: 'doc_not_found',
+      message: '在索引里找不到 ' + docUrl + '，确认 url 写对（不要带末尾 /）。',
+    };
+  }
+  const meta = doc.copilot || {};
+  const outcomes = Array.isArray(meta.learning_outcomes) ? meta.learning_outcomes.slice(0, 5) : [];
+
+  if (outcomes.length === 0) {
+    return {
+      questions: [],
+      doc: { url: doc.url, title: doc.title },
+      note: '该 doc 还没填 copilot.learning_outcomes，无法生成针对性的理解题。请回答：你刚学完的内容里，你能用一段话说清楚最关键的概念是什么吗？',
+    };
+  }
+
+  // Try LLM-driven question generation first
+  const llmQuestions = await _generateQuestionsViaLLM(doc, outcomes, count).catch(() => null);
+  let questions = llmQuestions && llmQuestions.length > 0 ? llmQuestions : null;
+
+  // Fallback: outcome-based deterministic questions
+  if (!questions) {
+    questions = _outcomesToQuestions(outcomes, count);
+  }
+
+  return {
+    questions: questions.slice(0, count).map((q, i) => ({
+      n: i + 1,
+      question: q.question || q,
+      hint: q.hint || null,
+      addresses_outcome: q.outcome || outcomes[i] || null,
+    })),
+    doc: {
+      url: doc.url,
+      title: doc.title,
+      learning_outcomes: outcomes,
+    },
+    instruction:
+      '逐道把题目发给用户，等他回答后给简短反馈（对/不对 + 一句修正/扩展）。' +
+      '所有题答完后给一句总结：哪几条 outcome 看起来稳了，哪条还需补一下。',
+  };
+}
+
+/** Convert learning_outcomes into question wordings deterministically. */
+function _outcomesToQuestions(outcomes, count) {
+  const out = [];
+  for (let i = 0; i < Math.min(outcomes.length, count); i++) {
+    const o = outcomes[i];
+    // Heuristic — strip leading verbs that don't translate well into a question
+    const cleaned = o.replace(
+      /^[\s\u4e00-\u9fff]{0,4}(理解|知道|会|能|掌握|区分|看懂|学会|跑通|完成|用|写出)\s*/g,
+      ''
+    );
+    const q = '请用你自己的话讲一遍：' + cleaned + '。';
+    out.push({ question: q, outcome: o });
+  }
+  return out;
+}
+
+/** Optional DeepSeek-driven question generation. Best-effort. */
+async function _generateQuestionsViaLLM(doc, outcomes, count) {
+  const { getApiKey } = require('../helpers/ai-settings');
+  const apiKey = getApiKey('deepseek');
+  if (!apiKey) return null;
+
+  const sys =
+    '你是一位生信教学助手。基于一篇 docs 的标题、摘要和学习产出（learning_outcomes），生成 ' +
+    count +
+    ' 道用来验证学生是否掌握的简短问题。' +
+    '每个问题必须明确针对一条 learning_outcome（在 outcome 字段填出对应原文），' +
+    '问题语言为中文，避免选择题，鼓励让学生用自己的话回答。' +
+    '严格输出 JSON：{"questions":[{"question":"...","outcome":"...","hint":"..."}]}';
+
+  const user =
+    '篇目：' +
+    (doc.title || '(无标题)') +
+    '\n' +
+    '摘要：' +
+    (doc.summary || '').slice(0, 500) +
+    '\n' +
+    'learning_outcomes:\n' +
+    outcomes.map((o, i) => i + 1 + '. ' + o).join('\n');
+
+  const body = JSON.stringify({
+    model: 'deepseek-chat',
+    messages: [
+      { role: 'system', content: sys },
+      { role: 'user', content: user },
+    ],
+    stream: false,
+    temperature: 0.4,
+    max_tokens: 600,
+    response_format: { type: 'json_object' },
+  });
+
+  return new Promise((resolve) => {
+    const https = require('https');
+    let buf = '';
+    const r = https.request(
+      {
+        hostname: 'api.deepseek.com',
+        port: 443,
+        path: '/chat/completions',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + apiKey,
+          'Content-Length': Buffer.byteLength(body),
+        },
+        agent: false,
+        timeout: 25000,
+      },
+      (res) => {
+        res.setEncoding('utf8');
+        res.on('data', (c) => (buf += c));
+        res.on('end', () => {
+          try {
+            if (res.statusCode !== 200) {
+              resolve(null);
+              return;
+            }
+            const j = JSON.parse(buf);
+            const text = j?.choices?.[0]?.message?.content || '';
+            let parsed;
+            try {
+              parsed = JSON.parse(text);
+            } catch {
+              const m = text.match(/\{[\s\S]*\}/);
+              if (m) {
+                try {
+                  parsed = JSON.parse(m[0]);
+                } catch {}
+              }
+            }
+            const arr = Array.isArray(parsed?.questions) ? parsed.questions : [];
+            const filtered = arr.filter(
+              (q) => q && typeof q.question === 'string' && q.question.length > 4
+            );
+            resolve(filtered.length > 0 ? filtered : null);
+          } catch {
+            resolve(null);
+          }
+        });
+        res.on('error', () => resolve(null));
+      }
+    );
+    r.on('error', () => resolve(null));
+    r.on('timeout', () => {
+      try {
+        r.destroy();
+      } catch {}
+      resolve(null);
+    });
+    r.write(body);
+    r.end();
+  });
+}
+
+// LEARNING_MEMORY_v1 — suggest_review now reads review_queue first
+async function tool_suggest_review(args, ctx) {
+  // Queue-first: any non-retired weak/moderate items override age-based picks.
+  const userId = ctx && ctx.userId;
+  if (userId) {
+    const db = sqlite;
+    let queueRows = [];
+    try {
+      queueRows = db
+        .prepare(
+          `
+        SELECT resource, concept, signal, note, updated_at
+        FROM review_queue
+        WHERE user_id = ? AND retired_at IS NULL
+        ORDER BY CASE signal WHEN 'weak' THEN 0 WHEN 'moderate' THEN 1 ELSE 2 END,
+                 updated_at ASC
+      `
+        )
+        .all(userId);
+    } catch {}
+    if (queueRows && queueRows.length > 0) {
+      const docs = (ctx.docsIndex && ctx.docsIndex.docs) || [];
+      const docByUrl = new Map(docs.map((d) => [d.url, d]));
+      // Group by resource so we don't repeat the same doc multiple times.
+      const seenRes = new Set();
+      const queueCandidates = [];
+      for (const r of queueRows) {
+        if (seenRes.has(r.resource)) continue;
+        seenRes.add(r.resource);
+        const doc = docByUrl.get(r.resource);
+        const meta = doc ? doc.copilot || {} : {};
+        queueCandidates.push({
+          source: 'queue',
+          url: r.resource,
+          title: (doc && doc.title) || r.resource,
+          domain: meta.domain || null,
+          level: meta.level || null,
+          estimated_minutes: meta.estimated_minutes || null,
+          weak_concepts: queueRows
+            .filter((x) => x.resource === r.resource)
+            .map((x) => ({
+              concept: x.concept,
+              signal: x.signal,
+              note: x.note,
+            })),
+        });
+      }
+      const limit = Math.max(1, Math.min(5, (args && args.limit) || 3));
+      if (queueCandidates.length > 0) {
+        return {
+          candidates: queueCandidates.slice(0, limit),
+          source: 'queue',
+          instruction:
+            '该用户在 verify_understanding 答题时表现较弱的概念优先复习。' +
+            '挑 1 条 candidates，针对 weak_concepts 里挑 1-2 个概念，让他用自己话讲一遍。' +
+            '答到位就 record_learning_signal({resource, concept, signal:"strong"}) 让该条退出队列。',
+        };
+      }
+    }
+  }
+  // Fallback: original age-based picks
+  return await _tool_suggest_review_age(args, ctx);
+}
+
+// SUGGEST_REVIEW_v1 — find completed docs that are due for review (age-based fallback)
+async function _tool_suggest_review_age(args, ctx) {
+  const userId = ctx && ctx.userId;
+  if (!userId) return { error: 'unauthorized' };
+
+  const daysThreshold = Math.max(1, Math.min(180, (args && args.days_threshold) || 7));
+  const limit = Math.max(1, Math.min(5, (args && args.limit) || 3));
+
+  const idx = ctx.docsIndex || {};
+  const docs = Array.isArray(idx.docs) ? idx.docs : [];
+  const docByUrl = new Map();
+  for (const d of docs) docByUrl.set(d.url, d);
+
+  const db = sqlite;
+  const cutoff = new Date(Date.now() - daysThreshold * 86400000).toISOString();
+
+  let rows;
+  try {
+    rows = db
+      .prepare(
+        `
+      SELECT resource, type, completed_at, updated_at
+      FROM user_progress
+      WHERE user_id = ?
+        AND status = 'completed'
+        AND type = 'doc'
+        AND completed_at IS NOT NULL
+        AND completed_at <= ?
+      ORDER BY completed_at ASC
+    `
+      )
+      .all(userId, cutoff);
+  } catch (e) {
+    return { error: 'db_error', message: e.message };
+  }
+
+  if (!rows || rows.length === 0) {
+    return {
+      candidates: [],
+      threshold_days: daysThreshold,
+      note:
+        '当前没有 ' +
+        daysThreshold +
+        ' 天前已完成、可以复习的 doc。' +
+        '如果用户在问"该学什么"，请改用 suggest_next_steps 推荐新内容。',
+    };
+  }
+
+  const now = Date.now();
+  const candidates = [];
+  for (const r of rows) {
+    const doc = docByUrl.get(r.resource);
+    if (!doc) continue; // skip if doc disappeared from index
+    const meta = doc.copilot || {};
+    const outcomes = Array.isArray(meta.learning_outcomes) ? meta.learning_outcomes : [];
+    const completedTs = Date.parse(r.completed_at) || now;
+    const ageDays = Math.max(0, Math.round((now - completedTs) / 86400000));
+    candidates.push({
+      url: doc.url,
+      title: doc.title,
+      domain: meta.domain || null,
+      level: meta.level || null,
+      estimated_minutes: meta.estimated_minutes || null,
+      learning_outcomes: outcomes.slice(0, 4),
+      completed_at: r.completed_at,
+      age_days: ageDays,
+      // Score: older + more outcomes (richer review material) wins
+      _score: ageDays + Math.min(outcomes.length, 5) * 3,
+    });
+  }
+
+  if (candidates.length === 0) {
+    return {
+      candidates: [],
+      threshold_days: daysThreshold,
+      note:
+        '虽有 ' +
+        rows.length +
+        ' 条历史完成记录，但对应 doc 缺少元数据，无法生成有意义的复习建议。',
+    };
+  }
+
+  candidates.sort((a, b) => b._score - a._score);
+  const picked = candidates.slice(0, limit).map((c) => {
+    const { _score, ...rest } = c;
+    return rest;
+  });
+
+  return {
+    candidates: picked,
+    threshold_days: daysThreshold,
+    instruction:
+      '把 1-2 条候选讲给用户听（"上次你学了 X，已经过去 N 天了"），' +
+      '问他要不要花几分钟再过一遍。如果他答 yes，' +
+      '可以从该 doc 的 learning_outcomes 里挑 1 条，让用户尝试用自己的话回答；' +
+      '如果他答 no，记下不强推。',
+  };
+}
+
+// LEARNING_MEMORY_v1 — record_learning_signal
+const _LEARNING_SIGNALS = new Set(['weak', 'moderate', 'strong']);
+
+function _ensureReviewQueueTable() {
+  const db = sqlite;
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS review_queue (
+      user_id     TEXT NOT NULL,
+      resource    TEXT NOT NULL,
+      concept     TEXT NOT NULL,
+      signal      TEXT NOT NULL,
+      note        TEXT,
+      created_at  TEXT NOT NULL,
+      updated_at  TEXT NOT NULL,
+      retired_at  TEXT,
+      PRIMARY KEY (user_id, resource, concept)
+    );
+    CREATE INDEX IF NOT EXISTS idx_review_user_signal
+      ON review_queue(user_id, signal, retired_at, updated_at DESC);
+  `);
+}
+_ensureReviewQueueTable();
+
+async function tool_record_learning_signal(args, ctx) {
+  const userId = ctx && ctx.userId;
+  if (!userId) return { error: 'unauthorized' };
+  const resource = args && typeof args.resource === 'string' ? args.resource.trim() : '';
+  const concept = args && typeof args.concept === 'string' ? args.concept.trim().slice(0, 80) : '';
+  const signal = args && typeof args.signal === 'string' ? args.signal.trim().toLowerCase() : '';
+  const note = args && typeof args.note === 'string' ? args.note.trim().slice(0, 240) : null;
+
+  if (!resource || !/^(\/docs\/|\/figcode#|act:\/\/)/.test(resource)) {
+    return { error: 'invalid_resource' };
+  }
+  if (!concept) return { error: 'missing_concept' };
+  if (!_LEARNING_SIGNALS.has(signal)) return { error: 'invalid_signal' };
+
+  const db = sqlite;
+  const now = new Date().toISOString();
+  const existing = db
+    .prepare('SELECT * FROM review_queue WHERE user_id=? AND resource=? AND concept=?')
+    .get(userId, resource, concept);
+
+  if (existing) {
+    // strong overrides any weaker prior signal & retires the row
+    const retiredAt = signal === 'strong' ? now : null;
+    db.prepare(
+      `UPDATE review_queue SET signal=?, note=?, updated_at=?, retired_at=?
+                WHERE user_id=? AND resource=? AND concept=?`
+    ).run(signal, note, now, retiredAt, userId, resource, concept);
+  } else {
+    const retiredAt = signal === 'strong' ? now : null;
+    db.prepare(
+      `INSERT INTO review_queue
+        (user_id, resource, concept, signal, note, created_at, updated_at, retired_at)
+       VALUES (?,?,?,?,?,?,?,?)`
+    ).run(userId, resource, concept, signal, note, now, now, retiredAt);
+  }
+
+  const row = db
+    .prepare('SELECT * FROM review_queue WHERE user_id=? AND resource=? AND concept=?')
+    .get(userId, resource, concept);
+  return { ok: true, signal: row.signal, retired: !!row.retired_at };
+}
+
+// VERIFY_STATE_v1 marker
+// OPEN_FIGCODE_PLOT_v1 marker
+// SCRNA_DATA_ACT_v1 marker
+// SCRNA_UI_ACT_v1 marker
+// FIGCODE_ACT_v1 marker
+// RUN_TOOL_v1 — 执行 BioF3 分析工具（复用 r-server/mcp/registry）
+// 让平台 AI Copilot 能真实跑 R/Python 分析出图，不只是前端交互。
+// 断点2（A1）：从 desktop-app/src/mcp-tool-registry 下沉到 r-server/mcp/registry，
+// 斩断 r-server → desktop-app 的反向引用。
+// 懒加载 registry（避免模块加载副作用 + 路径找不到时 graceful）。
+let _registry = null;
+function _getRegistry() {
+  if (_registry) return _registry;
+  const path = require('path');
+  // r-server/agent-tools/ → r-server/mcp/registry（同 r-server 内，循环斩断）
+  const registryPath = path.resolve(__dirname, '..', 'mcp', 'registry');
+  _registry = require(registryPath);
+  return _registry;
+}
+
+// TOOL_JOB_APPROVAL_v1（阶段2 Task3）：重操作白名单 + 确认超时。
+// 命中白名单的 toolId，run_tool 跑前先落 tool_jobs 待批准，前端确认卡 ack 后才续跑。
+// 白名单标准：多步骤全流程 / 耗时较长 / 不可轻易重跑的工具。单图小工具（volcano-plot 等）不进。
+const HEAVY_TOOLS = new Set([
+  'deseq2',
+  'wgcna',
+  'ml-feature-select',
+  'ml-classifier',
+  'rsf-survival',
+  'lasso-cox',
+  'consensus-cluster',
+  'ml-autoencoder',
+  'ml-scvi-annotate',
+  'mo-mofa',
+  'mo-snf',
+  'mo-multivi',
+  'mo-citeseq',
+  'seurat-standard',
+  'cellchat',
+  'maftools-mutation',
+  'scrna-standard',
+  'recluster',
+  'deg',
+  'enrichment',
+  'annotation',
+  'integration',
+  'trajectory',
+  'communication',
+  'cell-cycle',
+  'doublet',
+]);
+const APPROVAL_TIMEOUT_MS = 5 * 60 * 1000; // 5 分钟内未确认自动取消
+
+async function tool_run_tool(args, ctx) {
+  const userId = ctx && ctx.userId;
+  if (!userId) throw new Error('未授权');
+  const op = args && args.op;
+  if (op === 'list') {
+    const tools = await _getRegistry().listTools();
+    const { listAgentWorkflowTemplates } = require('../../shared-backend/agent-workflow');
+    return {
+      ok: true,
+      count: tools.length,
+      tools: tools.map((t) => ({
+        name: t.name,
+        description: t.description,
+        inputSchema: t.inputSchema,
+        outputSchema: t.outputSchema,
+        pluginVersion: t._pluginVersion,
+        language: t._language,
+        _isStep: t._isStep || false,
+      })),
+      workflowTemplates: listAgentWorkflowTemplates(tools.map((tool) => tool.name)),
+    };
+  }
+  if (op === 'plan') {
+    const templateId = args && args.templateId;
+    if (!templateId) return { error: 'missing_template_id', message: 'op=plan 需要 templateId' };
+    const tools = await _getRegistry().listTools();
+    const { createAgentWorkflowPlan } = require('../../shared-backend/agent-workflow');
+    try {
+      return {
+        ok: true,
+        plan: createAgentWorkflowPlan({
+          templateId,
+          availableToolIds: tools.map((tool) => tool.name),
+          initialInputs: (args && args.initialInputs) || {},
+        }),
+      };
+    } catch (error) {
+      return { ok: false, error: 'workflow_plan_failed', message: error.message };
+    }
+  }
+  if (op === 'bind_artifact') {
+    const plan = args && args.workflowPlan;
+    const fromToolJobId = args && args.fromToolJobId;
+    if (!plan || !fromToolJobId || !args.fromStepId || !args.toStepId || !args.inputId) {
+      return {
+        ok: false,
+        error: 'missing_lineage_binding',
+        message: 'bind_artifact 需要 workflowPlan、fromToolJobId、fromStepId、toStepId 和 inputId',
+      };
+    }
+    const job = dbMod.getToolJob(fromToolJobId);
+    if (!job || (job.user_id !== userId && job.user_id !== 'agent')) {
+      return { ok: false, error: 'tool_job_not_found' };
+    }
+    const result = job.result || {};
+    const artifactTruth = result.artifactTruth;
+    const artifacts = result.artifacts || result.files || [];
+    const artifact = artifacts.find((item) => {
+      const identity = item && (item.id || item.name || item.filename);
+      return !args.artifactId || identity === args.artifactId;
+    });
+    if (!artifact) return { ok: false, error: 'artifact_not_found' };
+    try {
+      const { bindVerifiedArtifact } = require('../../shared-backend/agent-workflow');
+      const linkedPlan = {
+        ...plan,
+        steps: plan.steps.map((step) =>
+          step.id === args.fromStepId ? { ...step, toolJobId: fromToolJobId } : step
+        ),
+      };
+      return {
+        ok: true,
+        plan: bindVerifiedArtifact(linkedPlan, {
+          fromStepId: args.fromStepId,
+          toStepId: args.toStepId,
+          inputId: args.inputId,
+          artifact,
+          artifactTruth,
+        }),
+      };
+    } catch (error) {
+      return { ok: false, error: 'artifact_binding_failed', message: error.message };
+    }
+  }
+  if (op === 'run') {
+    let toolId = args && args.toolId;
+    let params = (args && args.params) || {};
+    if (args && args.workflowPlan && args.stepId) {
+      const { projectWorkflowPlan, runToolJobs } = require('../../shared-backend/agent-workflow');
+      const jobs = runToolJobs(args.workflowPlan, (id) => {
+        const job = dbMod.getToolJob(id);
+        return job && (job.user_id === userId || job.user_id === 'agent') ? job : null;
+      });
+      const projected = projectWorkflowPlan(args.workflowPlan, jobs);
+      const step = projected.steps.find((item) => item.id === args.stepId);
+      if (!step) return { ok: false, error: 'workflow_step_not_found' };
+      if (!projected.readyStepIds.includes(step.id) || step.status !== 'ready') {
+        return { ok: false, error: 'workflow_step_not_ready', stepId: step.id, status: step.status };
+      }
+      toolId = step.toolId;
+      params = { ...step.inputs, ...params };
+    }
+    if (!toolId) return { error: 'missing_toolId', message: 'op=run 需要 toolId' };
+
+    // TOOL_JOB_APPROVAL_v1（阶段2 Task3）：重操作强制确认。
+    // HEAVY_TOOLS 跑前先落 tool_jobs 记录 ack_status='pending'，返回 needApproval。
+    // 前端确认卡 ack 后（ackStatus='approved'）才续跑；5min 超时/拒绝则取消。
+    if (HEAVY_TOOLS.has(toolId)) {
+      // 已带 ackToken 且 ackStatus='approved' → 续跑（第二轮调用）
+      if (args.ackToken) {
+        const job = dbMod.getToolJobByAckToken(args.ackToken);
+        if (job && job.ack_status === 'approved') {
+          return await _executeRunTool(toolId, params, userId, args.ackToken, ctx && ctx.projectId);
+        }
+        if (job && job.ack_status === 'rejected') {
+          return { ok: false, error: 'user_rejected', message: '用户取消了该重操作', toolId };
+        }
+        return { ok: false, error: 'approval_invalid', message: '确认 token 无效或已过期', toolId };
+      }
+      // 首次跑：建 tool_jobs 待批准记录 + 返回 needApproval
+      const ackToken = 'ack_' + require('uuid').v4().slice(0, 12);
+      const expiresAt = Date.now() + APPROVAL_TIMEOUT_MS;
+      const job = dbMod.createToolJob({
+        toolId,
+        userId,
+        projectId: ctx && ctx.projectId,
+        params,
+        status: 'pending',
+        name: `${toolId} 待确认`,
+      });
+      if (job && job.id) {
+        dbMod.setToolJobApproval(job.id, ackToken, expiresAt);
+      }
+      return {
+        ok: true,
+        needApproval: true,
+        ackToken,
+        toolJobId: job && job.id,
+        toolId,
+        params,
+        message: `重操作 ${toolId} 需用户确认。请在前端确认卡点"开始"后重调 run_tool(op=run, ackToken=${ackToken})。${Math.round(APPROVAL_TIMEOUT_MS / 1000)} 秒内未确认将自动取消。`,
+      };
+    }
+
+    // 非重操作：直接跑（原逻辑）
+    return await _executeRunTool(toolId, params, userId, null, ctx && ctx.projectId);
+  }
+  if (op === 'status') {
+    // Phase 6: project workflow plan status from real tool jobs in DB.
+    // Does NOT auto-execute anything.
+    const plan = args && args.workflowPlan;
+    if (!plan) return { ok: false, error: 'missing_workflow_plan', message: 'op=status 需要 workflowPlan' };
+    try {
+      const { projectWorkflowPlan, runToolJobs } = require('../../shared-backend/agent-workflow');
+      const jobs = runToolJobs(plan, (id) => {
+        const job = dbMod.getToolJob(id);
+        return job && (job.user_id === userId || job.user_id === 'agent') ? job : null;
+      });
+      const projected = projectWorkflowPlan(plan, jobs);
+      return {
+        ok: true,
+        plan: projected,
+        stepCount: projected.steps.length,
+        completedCount: projected.steps.filter((s) => s.status === 'complete').length,
+        terminal: projected.terminal,
+        recoverable: projected.recoverable,
+        readyStepIds: projected.readyStepIds,
+        resumeFromStepId: projected.resumeFromStepId,
+        nextActions: projected.nextActions,
+        jobs: jobs.map((j) => ({
+          id: j.id,
+          toolId: j.tool_id,
+          status: j.status,
+          stepId: j._stepId,
+          harnessState: j.harnessState || null,
+        })),
+      };
+    } catch (error) {
+      return { ok: false, error: 'status_projection_failed', message: error.message };
+    }
+  }
+  if (op === 'next') {
+    // Phase 6: return next runnable steps for the workflow plan.
+    // Uses real DB jobs; does NOT auto-execute.
+    const plan = args && args.workflowPlan;
+    if (!plan) return { ok: false, error: 'missing_workflow_plan', message: 'op=next 需要 workflowPlan' };
+    try {
+      const { projectWorkflowPlan, runToolJobs } = require('../../shared-backend/agent-workflow');
+      const jobs = runToolJobs(plan, (id) => {
+        const job = dbMod.getToolJob(id);
+        return job && (job.user_id === userId || job.user_id === 'agent') ? job : null;
+      });
+      const projected = projectWorkflowPlan(plan, jobs);
+      const next = projected.readyStepIds
+        .filter((stepId) => {
+          const step = projected.steps.find((s) => s.id === stepId);
+          return step && (step.status === 'waiting_for_dependency' || step.status === 'ready') && step.toolId;
+        })
+        .map((stepId) => {
+          const step = projected.steps.find((s) => s.id === stepId);
+          const job = jobs.find((j) => j._stepId === stepId) || null;
+          return {
+            stepId,
+            toolId: step.toolId,
+            toolCandidates: step.toolCandidates,
+            inputs: step.inputs,
+            dependencies: step.dependsOn,
+            blockedReason: step.blockedReason,
+            harnessState: job ? (job.harnessState || null) : null,
+            toolJobId: step.toolJobId,
+            status: step.status,
+          };
+        });
+      return {
+        ok: true,
+        nextSteps: next,
+        planStatus: projected.status,
+        terminal: projected.terminal,
+        recoverable: projected.recoverable,
+        resumeFromStepId: projected.resumeFromStepId,
+        nextActions: projected.nextActions,
+      };
+    } catch (error) {
+      return { ok: false, error: 'next_steps_failed', message: error.message };
+    }
+  }
+  return { error: 'unknown_op', message: 'op 只能是 list、plan、bind_artifact、run、status 或 next' };
+}
+
+// 实际执行 callTool（重操作确认通过后 + 非重操作都走这里）
+async function _executeRunTool(toolId, params, userId, ackToken, projectId) {
+  try {
+    const approvedJob = ackToken ? dbMod.getToolJobByAckToken(ackToken) : null;
+    const result = await _getRegistry().callTool(toolId, params, {
+      userId,
+      projectId,
+      toolJobId: approvedJob && approvedJob.id,
+    });
+    const text = result.content && result.content[0] && result.content[0].text;
+    let parsed = null;
+    try { parsed = JSON.parse(text); } catch { /* 非 JSON 文本保持 null */ }
+    if (result.isError) {
+      return {
+        ok: false,
+        error: 'tool_failed',
+        message: text,
+        toolId,
+        ...(result.toolJobId ? { toolJobId: result.toolJobId } : {}),
+      };
+    }
+    // 透传 callTool 返回的 toolJobId（tool_jobs 表的真实 id，tj_xxx），
+    // 供 agent 调 read_image / plan(update_step, toolJobId) / open_result 用。
+    // 注意：toolJobId 是 db.createToolJob 生成的 tj_xxx，不是 summary.jobDir 里的 mcp_xxx。
+    return {
+      ok: true,
+      toolId,
+      result: parsed || text,
+      ...(result.toolJobId ? { toolJobId: result.toolJobId } : {}),
+      ...(ackToken ? { ackToken } : {}),
+    };
+  } catch (e) {
+    return { ok: false, error: 'run_exception', message: e.message, toolId };
+  }
+}
+
+/**
+ * Agent tools — server-side dispatcher for LLM tool calls.
+ * Each tool is user-scoped (uses req.user.id implicitly via wrapper).
+ */
+
+module.exports = {
+  tool_discover_capabilities,
+  tool_act_generic,
+  tool_run_tool,
+  tool_generate_methods,
+  tool_suggest_next_steps,
+  tool_verify_understanding,
+  tool_suggest_review,
+  tool_record_learning_signal,
+};

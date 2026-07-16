@@ -238,10 +238,10 @@ register('telemetry', 'telemetry.js 暴露发行漏斗钩子（开关 + 接收�
 
 // report-theme — 报告主题色同步
 register('report-theme', '报告生成时按当前主题取色', () => {
-  if (!exists('vendor/biof3-core/r-server/helpers/report-theme.js')) {
+  if (!exists('core/r-server/helpers/report-theme.js')) {
     throw new Error('report-theme.js 不存在 — Gate 5 §200 "最终 HTML 报告按当前主题生成" 路径未闭环');
   }
-  const rt = read('vendor/biof3-core/r-server/helpers/report-theme.js');
+  const rt = read('core/r-server/helpers/report-theme.js');
   if (!/theme|color|palette|dark|light/i.test(rt)) {
     throw new Error('report-theme.js 缺少 theme/color/palette 关键字');
   }

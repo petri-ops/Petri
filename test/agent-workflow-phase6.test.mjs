@@ -8,7 +8,7 @@ import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const R_SERVER = resolve(__dirname, '..', 'vendor', 'biof3-core', 'r-server');
+const R_SERVER = resolve(__dirname, '..', 'core', 'r-server');
 const req = createRequire(import.meta.url);
 
 const db = req(R_SERVER + '/db.js');
