@@ -9,7 +9,6 @@
  *   - AnnData manipulation
  */
 
-const _config = require('./config');
 
 function generatePyScript({ type, params, ossInputUrl, containerWorkDir, parentCachePath }) {
   const progressHelper = `
