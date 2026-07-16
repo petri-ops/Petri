@@ -20,11 +20,6 @@
 function TEMP_DIR() {
   return (globalThis._biof3 && globalThis._biof3.TEMP_DIR) || '/tmp';
 }
-function ossClient() {
-  const c = globalThis._biof3 && globalThis._biof3.ossClient;
-  if (!c) throw new Error('ossClient not available');
-  return c;
-}
 
 // GENERATE_METHODS_v1 — collect analyses + plan + render Methods
 // ============================================================
@@ -676,9 +671,9 @@ async function _renderReportPdf(opts) {
     });
     await page.close();
 
-    // Upload to OSS — EXPORT_REPORT_FIX_v1: write to temp file first, then put
+    // 写临时文件后通过本地存储适配器落盘，返回可访问 URL
     const ts = new Date().toISOString().replace(/[:.]/g, '-');
-    const ossKey = 'reports/' + userId + '/' + ts + '.pdf';
+    const key = 'reports/' + userId + '/' + ts + '.pdf';
     const path = require('path');
     const fsLocal = require('fs');
     const tmpPath = path.join(
@@ -686,17 +681,18 @@ async function _renderReportPdf(opts) {
       'report-' + ts + '-' + Math.random().toString(36).slice(2, 8) + '.pdf'
     );
     fsLocal.writeFileSync(tmpPath, pdfBuf);
+    let url;
     try {
-      await ossClient().put(ossKey, tmpPath);
+      const { getActiveStorage } = require('../../shared-backend/storage');
+      url = await getActiveStorage().upload(tmpPath, key);
     } finally {
       try {
         fsLocal.unlinkSync(tmpPath);
       } catch {}
     }
-    const signed = ossClient().signatureUrl(ossKey, { expires: 24 * 3600 });
     return {
       ok: true,
-      url: signed,
+      url,
       sizeBytes: pdfBuf.length,
       sources: {
         analyses: ctx.analyses.length,

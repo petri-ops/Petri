@@ -1,40 +1,22 @@
 /**
- * routes/files.js — platform file upload/sign/proxy support.
+ * routes/files.js — 桌面版本地文件上传/读取路由。
  *
- * Public production traffic should reach these via /api/platform/*.
- * The historical r-server mount remains during backend convergence.
+ * 提供项目工作区文件树浏览、文件读取，以及通过本地存储适配器的上传。
  */
 const crypto = require('crypto');
 const fs = require('fs');
-const http = require('http');
-const https = require('https');
 const path = require('path');
 const multer = require('multer');
 
 const config = require('../config');
 const IS_LOCAL = config.storageMode === 'local';
 
-const OSS_BUCKET = 'biof3-uploads';
-const OSS_ENDPOINT = 'oss-cn-hangzhou.aliyuncs.com';
-const OSS_HOST = `https://${OSS_BUCKET}.${OSS_ENDPOINT}`;
 const TEMP_DIR = IS_LOCAL ? (config.tempDir || '/tmp/biof3-tmp') : '/mnt/storage_16tb/omichub/biof3-tmp';
 
-// OSS client（桌面版跳过）
-let ossClient = null;
-if (!IS_LOCAL) {
-  const OSS = require('ali-oss');
-  ossClient = new OSS({
-    region: 'oss-cn-hangzhou',
-    accessKeyId: process.env.OSS_AK,
-    accessKeySecret: process.env.OSS_SK,
-    bucket: OSS_BUCKET,
-  });
-}
-
-// 存储适配器（桌面版用）
+// 本地存储适配器
 let _storage = null;
 function getStorage() {
-  if (!_storage && IS_LOCAL) {
+  if (!_storage) {
     const { getActiveStorage } = require('../../shared-backend/storage');
     _storage = getActiveStorage();
   }
@@ -187,27 +169,6 @@ module.exports = function registerFileRoutes(app) {
     });
   }
 
-  app.post('/api/oss/sign', (req, res) => {
-    const { filename, contentType } = req.body;
-    if (!filename) {
-      return res.status(400).json({ error: '缺少 filename' });
-    }
-    const ts = Date.now();
-    const rand = crypto.randomBytes(4).toString('hex');
-    const safeFilename = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const key = `uploads/${ts}-${rand}-${safeFilename}`;
-    const expires = Math.floor(Date.now() / 1000) + 300;
-    const mimeType = contentType || 'application/octet-stream';
-    const stringToSign = `PUT\n\n${mimeType}\n${expires}\n/${OSS_BUCKET}/${key}`;
-    const signature = crypto
-      .createHmac('sha1', process.env.OSS_SK)
-      .update(stringToSign)
-      .digest('base64');
-    const uploadUrl = `${OSS_HOST}/${key}?OSSAccessKeyId=${encodeURIComponent(process.env.OSS_AK)}&Expires=${expires}&Signature=${encodeURIComponent(signature)}`;
-    const fileUrl = `${OSS_HOST}/${key}`;
-    res.json({ uploadUrl, fileUrl, key });
-  });
-
   app.post('/api/upload', upload.single('file'), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ status: 'error', error: '未收到文件' });
@@ -219,52 +180,22 @@ module.exports = function registerFileRoutes(app) {
     const ts = Date.now();
     const rand = crypto.randomBytes(4).toString('hex');
     const safeFilename = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const ossKey = `uploads/${ts}-${rand}-${safeFilename}`;
-    let ossUrl = null;
+    const key = `uploads/${ts}-${rand}-${safeFilename}`;
+    let fileUrl = null;
 
     try {
-      await ossClient.put(ossKey, newPath);
-      ossUrl = `${OSS_HOST}/${ossKey}`;
+      const storage = getStorage();
+      if (storage) fileUrl = await storage.upload(newPath, key);
     } catch {
-      // Preserve legacy behavior: fall back to the local temp path if OSS fails.
+      // 存储失败时回退到本地临时路径
     }
 
     res.json({
       status: 'ok',
       filePath: newPath.replace(/\\/g, '/'),
-      ossUrl: ossUrl || newPath.replace(/\\/g, '/'),
+      ossUrl: fileUrl || newPath.replace(/\\/g, '/'),
       originalName: req.file.originalname,
       size: req.file.size,
     });
-  });
-
-  app.get('/api/proxy-file', async (req, res) => {
-    const fileUrl = req.query.url;
-    if (!fileUrl || typeof fileUrl !== 'string') {
-      return res.status(400).json({ status: 'error', error: '缺少 url 参数' });
-    }
-    if (!fileUrl.startsWith(`${OSS_HOST}/`)) {
-      return res.status(403).json({ status: 'error', error: '不允许代理该 URL' });
-    }
-    try {
-      const fetcher = fileUrl.startsWith('https') ? https : http;
-      fetcher
-        .get(fileUrl, (upstream) => {
-          if (upstream.statusCode !== 200) {
-            return res
-              .status(upstream.statusCode)
-              .json({ status: 'error', error: `上游返回 ${upstream.statusCode}` });
-          }
-          const ct = upstream.headers['content-type'] || 'application/octet-stream';
-          res.setHeader('Content-Type', ct);
-          res.setHeader('Access-Control-Allow-Origin', '*');
-          upstream.pipe(res);
-        })
-        .on('error', (e) => {
-          res.status(500).json({ status: 'error', error: e.message });
-        });
-    } catch (e) {
-      res.status(500).json({ status: 'error', error: e.message });
-    }
   });
 };

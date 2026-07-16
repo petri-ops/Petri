@@ -18,8 +18,8 @@ const config = {
   // ── 桌面版模式（Electron 本地运行）──────────────────────────
   // execMode: 'docker'（web 版，走 docker exec）| 'local'（桌面版，直接调 Rscript）
   execMode: process.env.BIOF3_EXEC_MODE || 'docker',
-  // storageMode: 'oss'（web 版，上传到阿里云）| 'local'（桌面版，本地文件系统）
-  storageMode: process.env.BIOF3_STORAGE || 'oss',
+  // storageMode: 'local'（桌面版，本地文件系统）
+  storageMode: process.env.BIOF3_STORAGE || 'local',
   // localMode: 桌面版跳过 JWT 验证，返回固定 local-user
   localMode: process.env.BIOF3_LOCAL_MODE === '1',
   // R Runtime 路径（桌面版内嵌 R 的根目录）
@@ -63,15 +63,6 @@ const config = {
   // Rate limiting
   rateLimitPerMinute: parseInt(process.env.R_RATE_LIMIT || '20', 10),
 
-  // OSS
-  oss: {
-    region: process.env.OSS_REGION || 'oss-cn-hangzhou',
-    accessKeyId: process.env.OSS_AK || '',
-    accessKeySecret: process.env.OSS_SK || '',
-    bucket: process.env.OSS_BUCKET || 'biof3-uploads',
-    endpoint: process.env.OSS_ENDPOINT || 'oss-cn-hangzhou.aliyuncs.com',
-  },
-
   // Upload
   maxUploadSize: parseInt(process.env.MAX_UPLOAD_SIZE || String(500 * 1024 * 1024), 10),
 
@@ -83,9 +74,6 @@ const config = {
   toolDemoDataDir: process.env.BIOF3_TOOL_DEMO_DATA_DIR || '',
   toolDemoResultsDir: process.env.BIOF3_TOOL_DEMO_RESULTS_DIR || '',
 };
-
-// Derived
-config.ossHost = `https://${config.oss.bucket}.${config.oss.endpoint}`;
 
 /**
  * Build the prefix args for `docker exec ... <command>`.

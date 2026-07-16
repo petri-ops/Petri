@@ -2,11 +2,11 @@
  * Cache & Temp Space Manager
  *
  * Cleanup rules:
- *   - TEMP_DIR (/mnt/storage_16tb/omichub/biof3-tmp):
+ *   - TEMP_DIR:
  *       Delete task-* dirs older than 24h. Skip if dir name matches a
  *       running task (in-memory tasks Map).
  *
- *   - CACHE_DIR (/mnt/storage_16tb/omichub/biof3-cache):
+ *   - CACHE_DIR:
  *       Always keep:
  *         - demo-*.rds
  *         - symbolic links (point to demo files)
@@ -16,149 +16,23 @@
  *
  * Exposed:
  *   - getStats() — disk usage + file count + breakdown
+ *   - getLocalDiskStats() — df/du across configured local paths
  *   - cleanup({dryRun, tempMaxAgeHours, cacheMaxIdleDays}) — perform cleanup
  *   - startScheduler() — run cleanup daily at 03:00 (server local time)
  */
 
 const fs = require('fs');
 const path = require('path');
-const { execFile, spawn } = require('child_process');
+const { execFile } = require('child_process');
 
 const config = require('./config');
 const IS_LOCAL = config.storageMode === 'local';
-
-// OSS 模块延迟加载（桌面版不需要）
-let OSS = null;
-if (!IS_LOCAL) {
-  try { OSS = require('ali-oss'); } catch {}
-}
 
 const TEMP_DIR = IS_LOCAL ? (config.tempDir || '/tmp/biof3-tmp') : '/mnt/storage_16tb/omichub/biof3-tmp';
 const CACHE_DIR = IS_LOCAL ? (config.tempDir || '/tmp/biof3-tmp') + '/_cache' : '/mnt/storage_16tb/omichub/biof3-cache';
 
 const DEFAULT_TEMP_MAX_AGE_HOURS = 24;
 const DEFAULT_CACHE_MAX_IDLE_DAYS = 7;
-const DEFAULT_OSS_MAX_AGE_DAYS = 30;
-
-/** Run OSS list in a child process so that event-loop stalls (e.g. deasync/PG
- *  sync calls that can freeze the loop for 60+ seconds) do NOT block the HTTP
- *  request. The child process has its own V8 instance and event loop.
- *
- *  Uses FILE-BASED result passing (not Promise/microtask) so it works even when
- *  the parent event loop is blocked by deasync. The child writes JSON to a temp
- *  file, then the parent reads it synchronously.
- *
- *  Returns {objects} on success or {objects:[], error} on failure/timeout. */
-function runOssListInWorker(_timeoutMs = 90_000) {
-  const resultFile = `/tmp/oss-stats-result-${process.pid}.json`;
-  // Clean up any stale result file from a previous crashed run
-  try {
-    fs.unlinkSync(resultFile);
-  } catch {}
-
-  // Run oss-list-worker.js as a separate Node process.
-  // Env vars (OSS_AK, OSS_SK) are inherited from the parent process.
-  // IMPORTANT: ECS has mihomo proxy at 127.0.0.1:9981 that cannot reach OSS.
-  // Must explicitly DELETE proxy vars so OSS SDK connects directly.
-  const childEnv = { ...process.env };
-  delete childEnv.http_proxy;
-  delete childEnv.HTTP_PROXY;
-  delete childEnv.https_proxy;
-  delete childEnv.HTTPS_PROXY;
-  delete childEnv.all_proxy;
-  delete childEnv.ALL_PROXY;
-  childEnv.OSS_STATS_RESULT_FILE = resultFile;
-  childEnv.OSS_STATS_PID = String(process.pid); // parent PID, child sends SIGUSR2 here to unblock sync cache update
-
-  let proc;
-  try {
-    proc = spawn(process.execPath, [path.join(__dirname, 'oss-list-worker.js')], {
-      env: childEnv,
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-  } catch (e) {
-    return { objects: [], error: 'spawn failed: ' + e.message };
-  }
-
-  // SIGUSR2 signal handler: fires when child writes the result file.
-  // This runs synchronously even if the parent event loop is blocked by deasync.
-  // We use it to update the OSS stats cache directly from the signal handler.
-  let sigusr2Handler = null;
-  function armSigusr2() {
-    sigusr2Handler = () => {
-      try {
-        const raw = fs.readFileSync(resultFile, 'utf8');
-        const result = JSON.parse(raw);
-        const objects = result.objects || [];
-        if (result.error) console.error('[CacheManager] OSS refresh error:', result.error);
-        _ossStatsCache = computeOssStats(objects);
-        _ossStatsCacheTime = Date.now();
-        console.log('[CacheManager] OSS refresh done, objects:', objects.length);
-      } catch (e) {
-        console.error('[CacheManager] SIGUSR2 read error:', e.message);
-      } finally {
-        process.removeListener('SIGUSR2', sigusr2Handler);
-        try {
-          fs.unlinkSync(resultFile);
-        } catch {}
-      }
-    };
-    process.on('SIGUSR2', sigusr2Handler);
-  }
-
-  // Fire-and-forget: spawn and arm the signal handler, return immediately.
-  // The actual result will be processed asynchronously via SIGUSR2.
-  proc.on('error', (e) => {
-    console.error('[CacheManager] child spawn error:', e.message);
-    process.removeListener('SIGUSR2', sigusr2Handler);
-  });
-
-  // Fallback: if the child process exits without sending SIGUSR2 (e.g. crashes),
-  // the result file may still exist — poll briefly to catch it.
-  proc.on('close', (_code) => {
-    // Child exited. Give it 100ms to write the file (should be instant).
-    // This is a fallback; the SIGUSR2 handler above is the primary mechanism.
-    setTimeout(() => {
-      try {
-        if (fs.existsSync(resultFile)) {
-          const raw = fs.readFileSync(resultFile, 'utf8');
-          const result = JSON.parse(raw);
-          const objects = result.objects || [];
-          if (result.error) console.error('[CacheManager] OSS refresh error:', result.error);
-          _ossStatsCache = computeOssStats(objects);
-          _ossStatsCacheTime = Date.now();
-          _ossStatsRefreshing = false;
-          console.log('[CacheManager] OSS refresh done (close fallback), objects:', objects.length);
-        }
-      } catch {}
-      try {
-        fs.unlinkSync(resultFile);
-      } catch {}
-      process.removeListener('SIGUSR2', sigusr2Handler);
-    }, 100);
-  });
-
-  armSigusr2();
-  return null; // Fire-and-forget — result delivered via SIGUSR2 signal
-}
-
-// Lazy OSS client — used by cleanupOss() scheduler runs (the /api/admin/oss/stats
-// hot path uses runOssListInWorker() in a worker thread instead).
-// 桌面版不初始化 OSS。
-let _ossClient = null;
-function getOss() {
-  if (IS_LOCAL) return null;
-  if (_ossClient) return _ossClient;
-  if (!OSS) return null;
-  _ossClient = new OSS({
-    region: 'oss-cn-hangzhou',
-    accessKeyId: process.env.OSS_AK,
-    accessKeySecret: process.env.OSS_SK,
-    bucket: 'biof3-uploads',
-    timeout: 60000,
-  });
-  return _ossClient;
-}
 
 // ============================================================
 // Stats
@@ -221,7 +95,6 @@ function getStats() {
   });
 
   // List cache files breakdown — also timed
-  const _cacheFiles = [];
   const partialFiles = withTimeout(
     () => {
       try {
@@ -331,33 +204,25 @@ async function duForPath(targetPath) {
 
 function localDiskTargets() {
   const targets = [
-    {
-      key: 'computeVolume',
-      label: 'Dell compute volume',
-      path: '/mnt/storage_16tb/omichub',
-      measureUsage: false,
-    },
     { key: 'rTemp', label: 'R temp', path: TEMP_DIR, measureUsage: true },
     { key: 'rCache', label: 'R cache', path: CACHE_DIR, measureUsage: true },
-    {
+  ];
+  if (process.env.BIOF3_PY_TEMP_DIR) {
+    targets.push({
       key: 'pyTemp',
       label: 'Python temp',
-      path: process.env.BIOF3_PY_TEMP_DIR || '/mnt/storage_16tb/omichub/biof3-py-tmp',
+      path: process.env.BIOF3_PY_TEMP_DIR,
       measureUsage: true,
-    },
-    {
+    });
+  }
+  if (process.env.BIOF3_PY_CACHE_DIR) {
+    targets.push({
       key: 'pyCache',
       label: 'Python cache',
-      path: process.env.BIOF3_PY_CACHE_DIR || '/mnt/storage_16tb/omichub/biof3-py-tmp/_cache',
+      path: process.env.BIOF3_PY_CACHE_DIR,
       measureUsage: true,
-    },
-    {
-      key: 'toolJobs',
-      label: 'Tool jobs',
-      path: '/mnt/storage_16tb/omichub/biof3-tool-jobs',
-      measureUsage: true,
-    },
-  ];
+    });
+  }
   if (process.env.BIOF3_TOOL_DEMO_RESULTS_DIR) {
     targets.push({
       key: 'toolDemoResults',
@@ -430,8 +295,6 @@ async function getLocalDiskStats() {
 
 // Wrap a synchronous function with a hard timeout. If it doesn't finish within
 // `ms` milliseconds, return a "partial" result so the HTTP response never hangs.
-// This prevents the admin panel from showing "loading…" forever when the NAS
-// storage (16TB mount) is slow or unresponsive.
 function withTimeout(fn, ms, fallbackValue) {
   let timedOut = false;
   const timer = setTimeout(() => {
@@ -448,233 +311,6 @@ function withTimeout(fn, ms, fallbackValue) {
     }
     return fallbackValue;
   }
-}
-
-// ============================================================
-// OSS helpers
-// ============================================================
-
-const OSS_BASE_URL = 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/';
-
-/** Extract object key from a full OSS URL. Returns null if not our bucket. */
-function urlToOssKey(url) {
-  if (!url || typeof url !== 'string') return null;
-  if (!url.startsWith(OSS_BASE_URL)) return null;
-  return decodeURIComponent(url.slice(OSS_BASE_URL.length).split('?')[0]);
-}
-
-/** List all objects in the bucket. Returns array of {name, size, lastModified}. */
-async function listAllOssObjects() {
-  const client = getOss();
-  const all = [];
-  let continuationToken = undefined;
-  do {
-    const result = await client.listV2({
-      'max-keys': 1000,
-      'continuation-token': continuationToken,
-    });
-    if (result.objects) {
-      for (const obj of result.objects) {
-        all.push({
-          name: obj.name,
-          size: obj.size,
-          lastModified: obj.lastModified,
-        });
-      }
-    }
-    continuationToken = result.nextContinuationToken;
-  } while (continuationToken);
-  return all;
-}
-
-/** Collect all OSS keys still referenced by the DB (datasets + analyses).
- *  Reads through the PG switch layer (getSqliteForLegacyModules) so in PG mode it
- *  sees the AUTHORITATIVE store, not a stale local SQLite — otherwise the daily OSS
- *  cleanup would treat real users' files as orphans and delete them.
- *  Throws on failure (caller MUST NOT delete on an incomplete reference set). */
-function collectReferencedOssKeys() {
-  const referenced = new Set();
-  const dbMod = require('./db');
-  const sqlDb = dbMod.getSqliteForLegacyModules();
-
-  // Datasets
-  const datasets = sqlDb.prepare('SELECT oss_url FROM datasets').all();
-  for (const d of datasets) {
-    const k = urlToOssKey(d.oss_url);
-    if (k) referenced.add(k);
-  }
-
-  // Analyses — results JSON contains plots[].url and files[].url
-  const analyses = sqlDb.prepare('SELECT results FROM analyses WHERE results IS NOT NULL').all();
-  for (const a of analyses) {
-    try {
-      const r = typeof a.results === 'string' ? JSON.parse(a.results) : a.results;
-      if (r?.plots)
-        for (const p of r.plots) {
-          const k = urlToOssKey(p.url);
-          if (k) referenced.add(k);
-        }
-      if (r?.files)
-        for (const f of r.files) {
-          const k = urlToOssKey(f.url);
-          if (k) referenced.add(k);
-        }
-    } catch {}
-  }
-
-  return referenced;
-}
-
-/** Get OSS storage stats: total size + count + sample top files.
- *  Returns cached data if fresh (< 5min) to avoid blocking the event-loop on ECS
- *  where deasync/PG sync calls can freeze the loop for 60+ seconds.
- *  Freshness is checked synchronously (no await) so this never hangs.
- *  Uses file-based IPC + SIGUSR2 so it works even when the event loop is blocked. */
-function getOssStats() {
-  const now = Date.now();
-  // Synchronous cache check — no await, no event-loop dependency
-  if (_ossStatsCache && now - _ossStatsCacheTime < OSS_STATS_TTL_MS) {
-    return _ossStatsCache;
-  }
-  // Fire-and-forget refresh: runOssListInWorker handles the background refresh
-  // using file-based IPC + SIGUSR2, so it works even with deasync blocking.
-  if (!_ossStatsRefreshing) {
-    _ossStatsRefreshing = true;
-    console.log('[CacheManager] starting OSS stats refresh...');
-    runOssListInWorker(90_000);
-  }
-  // Return stale cache if available, otherwise return placeholder
-  if (_ossStatsCache) return _ossStatsCache;
-  return {
-    totalBytes: -1,
-    sizeHuman: '获取中…',
-    objectCount: -1,
-    byPrefix: [],
-    topFiles: [],
-    _error: 'refresh pending',
-  };
-}
-
-function computeOssStats(objects) {
-  const totalBytes = objects.reduce((s, o) => s + o.size, 0);
-  const byPrefix = {};
-  for (const o of objects) {
-    const prefix = o.name.split('/')[0] || '_root';
-    if (!byPrefix[prefix]) byPrefix[prefix] = { count: 0, bytes: 0 };
-    byPrefix[prefix].count++;
-    byPrefix[prefix].bytes += o.size;
-  }
-  return {
-    totalBytes,
-    sizeHuman: humanSize(totalBytes),
-    objectCount: objects.length,
-    byPrefix: Object.entries(byPrefix)
-      .map(([prefix, s]) => ({
-        prefix,
-        count: s.count,
-        sizeHuman: humanSize(s.bytes),
-      }))
-      .sort((a, b) => b.count - a.count),
-    topFiles: [...objects]
-      .sort((a, b) => b.size - a.size)
-      .slice(0, 20)
-      .map((o) => ({
-        ...o,
-        sizeHuman: humanSize(o.size),
-      })),
-  };
-}
-
-// Cache for OSS stats (5 minute TTL so page reload gets fresh data)
-let _ossStatsCache = null;
-let _ossStatsCacheTime = 0;
-const OSS_STATS_TTL_MS = 5 * 60 * 1000;
-let _ossStatsRefreshing = false;
-
-/** Cleanup OSS — delete orphans + old files. Always preserve `demo/` prefix. */
-async function cleanupOss(opts = {}) {
-  const { dryRun = true, maxAgeDays = DEFAULT_OSS_MAX_AGE_DAYS } = opts;
-
-  const report = {
-    dryRun,
-    deleted: [],
-    kept: [],
-    bytesFreed: 0,
-    errors: [],
-  };
-
-  const referenced = collectReferencedOssKeys();
-  // Fail-safe: an empty reference set almost always means a read problem, not a
-  // truly empty platform. Deleting against an empty set would wipe real user files.
-  if (!referenced || referenced.size === 0) {
-    report.errors.push(
-      'Aborted: reference set empty (likely DB read issue) — refusing to delete OSS objects'
-    );
-    console.error('[OSS] cleanup aborted: empty reference set');
-    return report;
-  }
-  const _cutoff = Date.now() - maxAgeDays * 24 * 3600 * 1000;
-
-  let objects;
-  try {
-    objects = await listAllOssObjects();
-  } catch (e) {
-    report.errors.push(`List OSS failed: ${e.message}`);
-    return report;
-  }
-
-  const client = getOss();
-  const toDelete = [];
-
-  for (const obj of objects) {
-    // Always keep demo/
-    if (obj.name.startsWith('demo/')) {
-      report.kept.push({ name: obj.name, reason: 'demo' });
-      continue;
-    }
-
-    const isReferenced = referenced.has(obj.name);
-    const age = Date.now() - new Date(obj.lastModified).getTime();
-    const isOld = age > maxAgeDays * 24 * 3600 * 1000;
-
-    if (isReferenced) {
-      report.kept.push({ name: obj.name, reason: 'referenced' });
-    } else if (isOld) {
-      // Orphan + old → delete
-      toDelete.push(obj);
-    } else {
-      // Orphan but recent (within grace period) → keep
-      report.kept.push({ name: obj.name, reason: 'recent (grace)' });
-    }
-  }
-
-  // Batch delete (OSS supports up to 1000 per call)
-  if (toDelete.length > 0) {
-    const batchSize = 100;
-    for (let i = 0; i < toDelete.length; i += batchSize) {
-      const batch = toDelete.slice(i, i + batchSize);
-      const keys = batch.map((o) => o.name);
-      try {
-        if (!dryRun) {
-          await client.deleteMulti(keys, { quiet: true });
-        }
-        for (const obj of batch) {
-          report.deleted.push({
-            name: obj.name,
-            sizeBytes: obj.size,
-            sizeHuman: humanSize(obj.size),
-            lastModified: obj.lastModified,
-          });
-          report.bytesFreed += obj.size;
-        }
-      } catch (e) {
-        report.errors.push(`Batch delete failed: ${e.message}`);
-      }
-    }
-  }
-
-  report.bytesFreedHuman = humanSize(report.bytesFreed);
-  return report;
 }
 
 // ============================================================
@@ -719,23 +355,8 @@ function cleanup(opts = {}) {
   const tempCutoff = now - tempMaxAgeHours * 3600 * 1000;
   const cacheCutoff = now - cacheMaxIdleDays * 24 * 3600 * 1000;
 
-  // Get running task IDs from task-manager (avoid deleting active work)
-  const runningTaskIds = new Set();
-  try {
-    const { listTasks } = require('./task-manager');
-    if (listTasks) {
-      for (const t of listTasks(1000)) {
-        if (t.status === 'running' || t.status === 'pending' || t.status === 'queued') {
-          runningTaskIds.add(t.taskId);
-        }
-      }
-    }
-  } catch (e) {
-    report.errors.push(`Failed to load task-manager: ${e.message}`);
-  }
-
   // Get active analysis taskIds from DB (preserve corresponding caches).
-  // Read via PG switch layer so PG mode sees real analyses, not stale local SQLite.
+  const runningTaskIds = new Set();
   const dbTaskIds = new Set();
   try {
     const dbMod = require('./db');
@@ -881,7 +502,7 @@ function startScheduler() {
     next.setHours(3, 0, 0, 0);
     if (next <= now) next.setDate(next.getDate() + 1);
     const delay = next.getTime() - now.getTime();
-    schedulerHandle = setTimeout(async () => {
+    schedulerHandle = setTimeout(() => {
       try {
         const localReport = cleanup();
         console.log(
@@ -889,14 +510,6 @@ function startScheduler() {
         );
       } catch (e) {
         console.error('[CacheManager] Local cleanup error:', e);
-      }
-      try {
-        const ossReport = await cleanupOss({ dryRun: false });
-        console.log(
-          `[CacheManager] OSS cleanup: freed ${ossReport.bytesFreedHuman}, removed ${ossReport.deleted.length} objects`
-        );
-      } catch (e) {
-        console.error('[CacheManager] OSS cleanup error:', e);
       }
       scheduleNext();
     }, delay);
@@ -919,8 +532,6 @@ module.exports = {
   getStats,
   getLocalDiskStats,
   cleanup,
-  getOssStats,
-  cleanupOss,
   startScheduler,
   stopScheduler,
   humanSize,

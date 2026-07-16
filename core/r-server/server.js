@@ -16,12 +16,10 @@
 const express = require('express');
 
 const fs = require('fs');
-const OSS = require('ali-oss');
 
 // 单细胞异步计算引擎（task-queue/task-manager，旧 web 产线）已移除。
 // 分析执行现走插件 executor（tools 路由）；本地不再运行 R 任务队列。
 const cacheManager = require('./cache-manager');
-const backupManager = require('./backup-manager');
 const db = require('./db');
 const config = require('./config');
 const { logError } = require('./helpers/error-log');
@@ -93,17 +91,6 @@ const TEMP_DIR = config.execMode === 'local'
   ? (config.tempDir || '/tmp/biof3-tmp')
   : '/mnt/storage_16tb/omichub/biof3-tmp'; // Shared with Docker container
 
-// OSS client for uploading results（桌面版 storageMode='local' 时跳过）
-let ossClient = null;
-if (config.storageMode !== 'local') {
-  ossClient = new OSS({
-    region: 'oss-cn-hangzhou',
-    accessKeyId: process.env.OSS_AK,
-    accessKeySecret: process.env.OSS_SK,
-    bucket: 'biof3-uploads',
-  });
-}
-
 // Ensure temp directory exists
 if (!fs.existsSync(TEMP_DIR)) {
   fs.mkdirSync(TEMP_DIR, { recursive: true });
@@ -142,18 +129,13 @@ try {
 } catch (e) {
   console.error('cache scheduler error:', e.message);
 }
-try {
-  backupManager.startScheduler();
-} catch (e) {
-  console.error('backup scheduler error:', e.message);
-}
 
 // ============================================================
 // ============================================================
 // AI Chat API (streaming) — helpers + globalThis bridge extracted to ai-bridge.js
 // ============================================================
 const { setupAiBridge } = require('./ai-bridge');
-setupAiBridge({ tempDir: TEMP_DIR, ossClient });
+setupAiBridge({ tempDir: TEMP_DIR });
 
 // buildSystemPrompt — moved to helpers/system-prompt.js
 

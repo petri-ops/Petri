@@ -79,26 +79,10 @@ if (config.poolEnabled) {
 
 taskQueue.setScriptGenerator(generatePyScript);
 
-// OSS client：桌面版（storageMode='local'）不初始化，走 StorageAdapter
-let ossClient = null;
-if (config.storageMode !== 'local') {
-  try {
-    const OSS = require('ali-oss');
-    ossClient = new OSS({
-      region: config.oss.region,
-      accessKeyId: config.oss.accessKeyId,
-      accessKeySecret: config.oss.accessKeySecret,
-      bucket: config.oss.bucket,
-    });
-  } catch (e) {
-    logger.warn(`[py-server] ali-oss 不可用: ${e.message}`);
-  }
-}
-
-// 存储适配器（桌面版用）
+// 本地存储适配器（桌面版）
 let _storage = null;
 function getStorage() {
-  if (!_storage && config.storageMode === 'local') {
+  if (!_storage) {
     const { getActiveStorage } = require('../shared-backend/storage');
     _storage = getActiveStorage();
   }
@@ -279,28 +263,20 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
   const newPath = req.file.path + ext;
   fs.renameSync(req.file.path, newPath);
 
-  const ossKey = `uploads/py-${Date.now()}-${crypto.randomBytes(4).toString('hex')}-${req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-  let ossUrl = null;
+  const fileKey = `uploads/py-${Date.now()}-${crypto.randomBytes(4).toString('hex')}-${req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+  let fileUrl = null;
 
-  // local 模式：走 StorageAdapter（本地文件）；docker 模式：走 OSS
-  if (config.storageMode === 'local') {
-    try {
-      const storage = getStorage();
-      if (storage) {
-        ossUrl = await storage.upload(newPath, ossKey);
-      }
-    } catch {}
-  } else if (ossClient) {
-    try {
-      await ossClient.put(ossKey, newPath);
-      ossUrl = `${config.ossHost}/${ossKey}`;
-    } catch {}
-  }
+  try {
+    const storage = getStorage();
+    if (storage) {
+      fileUrl = await storage.upload(newPath, fileKey);
+    }
+  } catch {}
 
   res.json({
     status: 'ok',
     filePath: newPath,
-    ossUrl: ossUrl || newPath,
+    ossUrl: fileUrl || newPath,
     originalName: req.file.originalname,
     size: req.file.size,
   });
@@ -500,25 +476,17 @@ registerToolsRoutes(app);
 
 async function collectImages(workDir, sessionId) {
   const images = [];
-  const storage = config.storageMode === 'local' ? getStorage() : null;
+  const storage = getStorage();
   try {
     const files = fs.readdirSync(workDir).filter((f) => f.match(/\.(png|svg)$/));
     files.sort();
     for (const f of files) {
       const localPath = path.join(workDir, f);
-      const ossKey = `results/py-${sessionId}/${f}`;
-      // local 模式：走 StorageAdapter
+      const key = `results/py-${sessionId}/${f}`;
       if (storage) {
         try {
-          const url = await storage.upload(localPath, ossKey);
+          const url = await storage.upload(localPath, key);
           images.push(url);
-          continue;
-        } catch {}
-      } else if (ossClient) {
-        // docker/web 模式：走 OSS
-        try {
-          await ossClient.put(ossKey, localPath);
-          images.push(`${config.ossHost}/${ossKey}`);
           continue;
         } catch {}
       }

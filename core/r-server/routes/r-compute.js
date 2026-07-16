@@ -42,11 +42,6 @@ const CONTAINER_TEMP_DIR = IS_LOCAL ? TEMP_DIR : '/app/data/biof3-tmp';
 const R_CONTAINER = 'omichub_react_backend_1';
 const TIMEOUT_MS = 30000;
 
-// OSS client is bridged via globalThis._biof3 by ai-bridge.js
-function getOssClient() {
-  return (globalThis._biof3 && globalThis._biof3.ossClient) || null;
-}
-
 // ── Rate limiting (simple in-memory, per-IP) ──────────────────
 const rateLimits = new Map();
 const RATE_LIMIT = 20; // requests per minute
@@ -79,8 +74,7 @@ function rComputeOnly(req, res, next) {
 // ── Helpers ───────────────────────────────────────────────────
 async function collectAndUploadImages(workDir) {
   const images = [];
-  const storage = IS_LOCAL ? getStorage() : null;
-  const ossClient = IS_LOCAL ? null : getOssClient();
+  const storage = getStorage();
   try {
     const files = fs
       .readdirSync(workDir)
@@ -89,7 +83,6 @@ async function collectAndUploadImages(workDir) {
     const sessionId = path.basename(workDir);
     for (const f of files) {
       const localPath = path.join(workDir, f);
-      // local 模式：走 StorageAdapter（本地文件）
       if (storage) {
         const key = `results/${sessionId}/${f}`;
         try {
@@ -98,18 +91,6 @@ async function collectAndUploadImages(workDir) {
           continue;
         } catch {
           // fallback to base64
-        }
-      }
-      // docker/web 模式：走 OSS（原有逻辑）
-      if (ossClient) {
-        const ossKey = `results/${sessionId}/${f}`;
-        try {
-          await ossClient.put(ossKey, localPath);
-          const url = `https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/${ossKey}`;
-          images.push(url);
-          continue;
-        } catch {
-          // Fallback to base64 if OSS upload fails
         }
       }
       const imgData = fs.readFileSync(localPath);

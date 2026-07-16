@@ -18,8 +18,8 @@ const config = {
   // ── 桌面版模式（与 r-server/config.js 对称）──────────────────
   // execMode: 'docker'（web 版）| 'local'（桌面版，直接调 python3）
   execMode: process.env.BIOF3_EXEC_MODE || 'docker',
-  // storageMode: 'oss'（web 版）| 'local'（桌面版，本地文件系统）
-  storageMode: process.env.BIOF3_STORAGE || 'oss',
+  // storageMode: 'local'（桌面版，本地文件系统）
+  storageMode: process.env.BIOF3_STORAGE || 'local',
   // localMode: 桌面版跳过 JWT 验证
   localMode: process.env.BIOF3_LOCAL_MODE === '1',
   // Python Runtime 路径（桌面版内嵌 Python 的根目录）
@@ -67,22 +67,11 @@ const config = {
   // Rate limiting
   rateLimitPerMinute: parseInt(process.env.PY_RATE_LIMIT || '20', 10),
 
-  // OSS (shared with r-server)
-  oss: {
-    region: process.env.OSS_REGION || 'oss-cn-hangzhou',
-    accessKeyId: process.env.OSS_AK || '',
-    accessKeySecret: process.env.OSS_SK || '',
-    bucket: process.env.OSS_BUCKET || 'biof3-uploads',
-    endpoint: process.env.OSS_ENDPOINT || 'oss-cn-hangzhou.aliyuncs.com',
-  },
-
   // Upload
   maxUploadSize: parseInt(process.env.MAX_UPLOAD_SIZE || String(500 * 1024 * 1024), 10),
 
   // Task cleanup
   taskRetentionMs: parseInt(process.env.TASK_RETENTION_MS || String(24 * 60 * 60 * 1000), 10),
 };
-
-config.ossHost = `https://${config.oss.bucket}.${config.oss.endpoint}`;
 
 module.exports = config;

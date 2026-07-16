@@ -8,7 +8,6 @@
     "dev": "NODE_ENV=development node server.js"
   },
   "dependencies": {
-    "ali-oss": "^6.23.0",
     "better-sqlite3": "^12.11.1",
     "cors": "^2.8.5",
     "deasync": "^0.1.30",

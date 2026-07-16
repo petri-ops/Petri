@@ -6,11 +6,7 @@
  * globalThis._biof3 so modular routes in routes/ can consume without
  * importing r-server by name.
  *
- * Also bridges TEMP_DIR + ossClient from the caller so methods-export can use them.
- *
- * This module is shared by both r-server/server.js (Dell) and a future
- * standalone platform-server/server.js (ECS) — both roles run the AI
- * Copilot control plane.
+ * Also bridges TEMP_DIR from the caller so methods-export can use it.
  */
 
 // MEMORY_VECTORS_v1 — only the 3 used in globalThis bridge
@@ -84,9 +80,9 @@ const {
 
 /**
  * Expose AI helpers on globalThis._biof3 for modular routes.
- * @param {object} opts — {tempDir, ossClient} bridged from caller
+ * @param {object} opts — {tempDir} bridged from caller
  */
-function setupAiBridge({ tempDir, ossClient } = {}) {
+function setupAiBridge({ tempDir } = {}) {
   globalThis._biof3RecordAiUsage = recordAiUsage;
 
   globalThis._biof3 = globalThis._biof3 || {};
@@ -127,9 +123,8 @@ function setupAiBridge({ tempDir, ossClient } = {}) {
     globalThis._biof3.docsIndexCache = getCachedDocsIndex;
   } catch {}
 
-  // METHODS_EXPORT — bridge TEMP_DIR + ossClient so the helper can use them.
+  // METHODS_EXPORT — bridge TEMP_DIR so the helper can use it.
   if (tempDir !== undefined) globalThis._biof3.TEMP_DIR = tempDir;
-  if (ossClient) globalThis._biof3.ossClient = ossClient;
 
   try {
     globalThis._biof3.gatherAnalysisContextForMethods = _gatherAnalysisContextForMethods;

@@ -5,12 +5,9 @@
  *   - R 执行器（RExecutor）
  *   - Python 执行器（PyExecutor）
  *   - 本地存储适配器（LocalFileStorage）
- *   - OSS 存储适配器（OSSStorage，仅 web 模式）
  *
- * 根据 config 自动选择激活的存储适配器。
+ * 桌面版只用本地文件存储。
  */
-
-const config = require('./config-helper');
 
 // 执行器注册表
 const { registerExecutor } = require('./executors');
@@ -23,9 +20,6 @@ let _initialized = false;
 function initSharedBackend() {
   if (_initialized) return;
   _initialized = true;
-
-  const execMode = config.execMode || 'docker';
-  const storageMode = config.storageMode || (execMode === 'local' ? 'local' : 'oss');
 
   // ── 注册执行器 ──────────────────────────────────────────────
   try {
@@ -42,28 +36,13 @@ function initSharedBackend() {
     console.warn('[init] Python executor registration failed:', e.message);
   }
 
-  // ── 注册存储适配器 ──────────────────────────────────────────
+  // ── 注册并激活本地存储适配器 ────────────────────────────────
   try {
     const { LocalFileStorage } = require('./storage/local-storage');
     registerStorage('local', new LocalFileStorage());
+    setActiveStorage('local');
   } catch (e) {
     console.warn('[init] Local storage registration failed:', e.message);
-  }
-
-  if (storageMode === 'oss') {
-    try {
-      const { OSSStorage } = require('./storage/oss-storage');
-      registerStorage('oss', new OSSStorage());
-    } catch (e) {
-      console.warn('[init] OSS storage registration failed:', e.message);
-    }
-  }
-
-  // ── 激活存储适配器 ──────────────────────────────────────────
-  try {
-    setActiveStorage(storageMode);
-  } catch (e) {
-    console.warn(`[init] cannot activate storage "${storageMode}":`, e.message);
   }
 }
 

@@ -227,33 +227,32 @@ function pollProgress(taskId, workDir) {
 }
 
 async function collectTaskResults(taskId, workDir) {
-  const OSS = require('ali-oss');
-  const ossClient = new OSS({
-    region: config.oss.region,
-    accessKeyId: config.oss.accessKeyId,
-    accessKeySecret: config.oss.accessKeySecret,
-    bucket: config.oss.bucket,
-  });
+  const { getActiveStorage } = require('../shared-backend/storage');
+  let storage = null;
+  try {
+    storage = getActiveStorage();
+  } catch {}
   const results = { plots: [], files: [], summary: null };
 
   try {
     const files = fs.readdirSync(workDir);
-    const ossPrefix = `results/py-task-${taskId}`;
+    const keyPrefix = `results/py-task-${taskId}`;
 
     const plotFiles = files.filter((f) => f.match(/\.(png|svg|pdf)$/) && !f.startsWith('input'));
     plotFiles.sort();
     for (const f of plotFiles) {
       const localPath = path.join(workDir, f);
-      const ossKey = `${ossPrefix}/${f}`;
+      const key = `${keyPrefix}/${f}`;
       try {
-        await ossClient.put(ossKey, localPath);
+        if (!storage) throw new Error('storage adapter unavailable');
+        const url = await storage.upload(localPath, key);
         results.plots.push({
           name: f.replace(/\.[^.]+$/, '').replace(/_/g, ' '),
-          url: `${config.ossHost}/${ossKey}`,
+          url,
           filename: f,
         });
       } catch (e) {
-        logger.warn('OSS plot upload failed, falling back to base64', {
+        logger.warn('Plot upload failed, falling back to base64', {
           taskId,
           file: f,
           error: e.message,
@@ -270,12 +269,13 @@ async function collectTaskResults(taskId, workDir) {
     const dataFiles = files.filter((f) => f.match(/\.(csv|tsv|h5ad)$/) && !f.startsWith('input'));
     for (const f of dataFiles) {
       const localPath = path.join(workDir, f);
-      const ossKey = `${ossPrefix}/${f}`;
+      const key = `${keyPrefix}/${f}`;
       try {
-        await ossClient.put(ossKey, localPath);
-        results.files.push({ name: f, url: `${config.ossHost}/${ossKey}` });
+        if (!storage) throw new Error('storage adapter unavailable');
+        const url = await storage.upload(localPath, key);
+        results.files.push({ name: f, url });
       } catch (e) {
-        logger.error('OSS data file upload failed, file dropped from results', {
+        logger.error('Data file upload failed, file dropped from results', {
           taskId,
           file: f,
           error: e.message,
