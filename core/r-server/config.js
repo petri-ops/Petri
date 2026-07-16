@@ -8,11 +8,8 @@
 const path = require('path');
 
 const config = {
-  // platform = ECS control plane only (auth, data, copilot, tools enqueue; no R docker)
-  // api = HTTP enqueue tasks, no local drain (Dell workers consume PG tasks)
-  // worker = poll queue + run R only (no HTTP server)
-  // all = API + local worker (single-node / Dell legacy)
-  runMode: (process.env.BIOF3_RUN_MODE || 'all').toLowerCase(),
+  // Desktop is a single local process: API and runtime capabilities are always available.
+  runMode: 'all',
   workerId: process.env.BIOF3_WORKER_ID || require('os').hostname(),
 
   // ── 桌面版模式（Electron 本地运行）──────────────────────────
@@ -82,4 +79,3 @@ config.mkdirSandbox = function mkdirSandbox(dirPath) {
 };
 
 module.exports = config;
-

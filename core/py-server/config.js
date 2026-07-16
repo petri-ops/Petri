@@ -8,8 +8,8 @@
 const path = require('path');
 
 const config = {
-  // api = HTTP enqueue + /api/run pool; worker = claim PG tasks only; all = API + local drain (legacy single-node)
-  runMode: (process.env.BIOF3_RUN_MODE || 'all').toLowerCase(),
+  // Desktop is a single local process: API and runtime capabilities are always available.
+  runMode: 'all',
   // Server
   port: parseInt(process.env.PY_SERVER_PORT || '3004', 10),
   apiToken: process.env.BIOF3_API_TOKEN || 'biof3-figcode-2026',
