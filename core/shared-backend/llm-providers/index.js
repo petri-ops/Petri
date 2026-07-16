@@ -3,7 +3,7 @@
  *
  * AI 控制层核心。将 LLM 调用从硬编码的 DeepSeek/DashScope 抽象为统一接口。
  * 桌面版用户在设置页自填 API key，选择 provider；
- * web 版继续用环境变量配置的 DeepSeek/DashScope。
+ * 凭据由宿主通过 credentialRef 解析；Provider adapter 不读取设置文件。
  *
  * 加新 provider = 新建实现 + registerProvider()，不改核心。
  * 未来可加 OpenAIProvider / OllamaProvider（本地离线模型）。
@@ -18,6 +18,9 @@
  */
 
 const logger = require('../logger');
+const { DeepSeekProvider } = require('./deepseek');
+const { DashScopeEmbedProvider } = require('./dashscope');
+const { DashScopeVisionProvider } = require('./dashscope-vision');
 
 const _providers = new Map();
 
@@ -63,10 +66,21 @@ function listProviders() {
   return Array.from(_providers.keys());
 }
 
+function registerBuiltInProviders() {
+  if (!_providers.has('deepseek')) registerProvider(new DeepSeekProvider());
+  if (!_providers.has('dashscope')) registerProvider(new DashScopeEmbedProvider());
+  if (!_providers.has('dashscope-vision')) registerProvider(new DashScopeVisionProvider());
+}
+
+registerBuiltInProviders();
+
 module.exports = {
   registerProvider,
   getProvider,
   getChatProvider,
   getEmbedProvider,
   listProviders,
+  registerBuiltInProviders,
+  ...require('./model-profile'),
+  ...require('./model-gateway'),
 };

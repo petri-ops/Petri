@@ -35,7 +35,7 @@ class DashScopeEmbedProvider {
    * @param {object} telemetry - {userId?, conversationId?, kind?}
    * @returns {Promise<Float32Array[] | null>} - 向量数组，失败返回 null
    */
-  async embed(apiKey, texts, _telemetry) {
+  async embed(apiKey, texts, _telemetry, options) {
     if (!apiKey) {
       logger.warn('[dashscope] API key 未配置，embedding 跳过');
       return null;
@@ -48,9 +48,11 @@ class DashScopeEmbedProvider {
 
     const truncated = texts.map((t) => (t || '').slice(0, MAX_CONTENT_LEN));
     const _approxTokens = truncated.reduce((s, t) => s + Math.ceil((t || '').length * 0.7), 0);
+    const model = (options && options.model) || EMBEDDING_MODEL;
     const body = JSON.stringify({
-      model: EMBEDDING_MODEL,
+      model,
       input: { texts: truncated },
+      ...((options && options.parameters) || {}),
     });
 
     return new Promise((resolve) => {
@@ -79,7 +81,7 @@ class DashScopeEmbedProvider {
                 recordAiUsage({
                   userId: _t.userId,
                   kind: _t.kind || 'embedding',
-                  model: EMBEDDING_MODEL,
+                  model,
                   promptTokens: _approxTokens,
                   latencyMs: Date.now() - _start,
                   errorCode: 'http_' + res.statusCode,
@@ -99,7 +101,7 @@ class DashScopeEmbedProvider {
               recordAiUsage({
                 userId: _t.userId,
                 kind: _t.kind || 'embedding',
-                model: EMBEDDING_MODEL,
+                model,
                 promptTokens: _approxTokens,
                 latencyMs: Date.now() - _start,
                 conversationId: _t.conversationId,

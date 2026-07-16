@@ -1,18 +1,27 @@
 /**
  * helpers/llm-client.js — DeepSeek API client used by /api/ai/agent.
  *
- * 现在委托给 shared-backend/llm-providers/deepseek.js（LLMProvider 抽象层）。
+ * 现在统一委托给 Model Gateway。旧函数名只作为兼容转发层保留。
  * 保持 callDeepSeek(apiKey, body, telemetry) 导出兼容，调用方不用改。
  *
  * 桌面版：apiKey 从 ai-settings.js 用户设置读取（调用方传入）。
  * Web 版：apiKey 从 process.env.DEEPSEEK_API_KEY 读取（调用方传入）。
  */
 
-const { DeepSeekProvider } = require('../../shared-backend/llm-providers/deepseek');
-const { DashScopeVisionProvider } = require('../../shared-backend/llm-providers/dashscope-vision');
+const { modelGateway } = require('./model-gateway');
 
-const _provider = new DeepSeekProvider();
-const _visionProvider = new DashScopeVisionProvider();
+function resolveCompatibilityProfileId(providerName, body, options) {
+  if (options && options.profileId) return options.profileId;
+  const config = modelGateway.getConfig();
+  const requestedModel = body && body.model;
+  const requestedBaseUrl = options && options.baseUrl;
+  const match = config.profiles.find((profile) =>
+    (!providerName || profile.provider === providerName) &&
+    (!requestedModel || profile.model === requestedModel) &&
+    (!requestedBaseUrl || profile.baseUrl === requestedBaseUrl)
+  );
+  return match && match.id;
+}
 
 /**
  * callDeepSeek — 委托给 DeepSeekProvider.chat()
@@ -22,33 +31,38 @@ const _visionProvider = new DashScopeVisionProvider();
  * @returns {Promise<object>} - 解析后的 JSON 或 {error}
  */
 function callDeepSeek(apiKey, body, telemetry, options) {
-  return _provider.chat(apiKey, body, telemetry, options);
+  return modelGateway.chat({
+    role: 'chat',
+    body,
+    telemetry,
+    profileId: resolveCompatibilityProfileId('deepseek', body, options),
+    signal: options && options.signal,
+    apiKeyOverride: apiKey,
+  });
 }
 
 function callDeepSeekStream(apiKey, body, telemetry, onEvent, options) {
-  return _provider.chatStream(apiKey, body, telemetry, onEvent, options);
-}
-
-function getChatProvider(providerName) {
-  if (!providerName || providerName === _provider.name) return _provider;
-  return require('../../shared-backend/llm-providers').getProvider(providerName);
+  return modelGateway.chat({
+    role: 'chat',
+    body,
+    telemetry,
+    onEvent,
+    profileId: resolveCompatibilityProfileId('deepseek', body, options),
+    signal: options && options.signal,
+    apiKeyOverride: apiKey,
+  });
 }
 
 async function callChatProvider(providerName, apiKey, body, telemetry, onEvent, options) {
-  const provider = getChatProvider(providerName);
-  if (!provider) {
-    return { error: 'provider_not_registered', message: `LLM Provider 未注册: ${providerName}` };
-  }
-  if (typeof provider.chatStream === 'function') {
-    return provider.chatStream(apiKey, body, telemetry, onEvent, options);
-  }
-  const result = await provider.chat(apiKey, body, telemetry, options);
-  const content = result && result.choices && result.choices[0] && result.choices[0].message
-    ? result.choices[0].message.content || ''
-    : '';
-  if (content && typeof onEvent === 'function') onEvent({ type: 'content_delta', content });
-  if (typeof onEvent === 'function') onEvent({ type: 'done', usage: result && result.usage });
-  return result;
+  return modelGateway.chat({
+    role: (options && options.role) || 'agent',
+    profileId: resolveCompatibilityProfileId(providerName, body, options),
+    body,
+    telemetry,
+    onEvent,
+    signal: options && options.signal,
+    apiKeyOverride: apiKey,
+  });
 }
 
 /**
@@ -60,13 +74,13 @@ async function callChatProvider(providerName, apiKey, body, telemetry, onEvent, 
  * @returns {Promise<{ok, content, usage}|{error, message}>}
  */
 function callVision(apiKey, body, telemetry) {
-  return _visionProvider.chat(apiKey, body, telemetry);
+  return modelGateway.vision({ body, telemetry, apiKeyOverride: apiKey });
 }
 
 module.exports = {
   callDeepSeek,
   callDeepSeekStream,
   callChatProvider,
-  getChatProvider,
   callVision,
+  modelGateway,
 };

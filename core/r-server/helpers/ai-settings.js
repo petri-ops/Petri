@@ -12,6 +12,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { normalizeModelConfig } = require('../../shared-backend/llm-providers/model-profile');
 
 const SETTINGS_DIR = process.env.BIOF3_LOCAL_DATA_DIR ||
   path.join(os.homedir(), 'Documents', 'BioF3-Local');
@@ -69,6 +70,10 @@ function normalizeAiSettings(settings) {
     next.active_chat_model_id = next.chat_model_presets[0].id;
   }
   next.llm_provider = next.llm_provider || next.chat_provider || next.chat_model_presets[0].provider || 'deepseek';
+  const modelConfig = normalizeModelConfig(next);
+  next.model_profile_schema_version = modelConfig.schemaVersion;
+  next.model_profiles = modelConfig.profiles;
+  next.model_role_bindings = modelConfig.roleBindings;
   next.deepseek_configured = !!(next.deepseek_api_key || process.env.DEEPSEEK_API_KEY);
   next.dashscope_configured = !!(next.dashscope_api_key || process.env.DASHSCOPE_API_KEY);
   return next;
@@ -119,6 +124,12 @@ function saveAiSettings(settings) {
   _ensureDir();
   const prev = getAiSettings();
   const merged = { ...prev, ...(settings || {}) };
+  // The Stage 1 UI still writes chat_model_presets. When it does not also send
+  // model_profiles, rebuild profiles from those presets instead of retaining a
+  // stale normalized snapshot from the previous read.
+  if (settings && Array.isArray(settings.chat_model_presets) && !Array.isArray(settings.model_profiles)) {
+    delete merged.model_profiles;
+  }
   if (!settings || !settings.deepseek_api_key) merged.deepseek_api_key = prev.deepseek_api_key;
   if (!settings || !settings.dashscope_api_key) merged.dashscope_api_key = prev.dashscope_api_key;
   _cache = normalizeAiSettings(merged);
@@ -131,7 +142,7 @@ function saveAiSettings(settings) {
 async function testApiKey(provider, apiKey) {
   if (!apiKey) return { ok: false, message: 'API key 为空' };
   try {
-    const { getProvider } = require('../../../shared-backend/llm-providers');
+    const { getProvider } = require('../../shared-backend/llm-providers');
     const p = getProvider(provider);
     if (!p) return { ok: false, message: `Provider ${provider} 未注册` };
     if (typeof p.healthCheck === 'function') {
