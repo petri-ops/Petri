@@ -34,6 +34,10 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
   isDesktop: true,
   platform: process.platform,
   arch: process.arch,
+  backendConfig: Object.freeze({
+    rApiBase: `http://localhost:${process.env.R_SERVER_PORT || 3001}/api`,
+    pythonApiBase: `http://localhost:${process.env.PY_SERVER_PORT || 3004}/api`,
+  }),
 
   // 窗口控制（配合 frame:false 自定义标题栏）
   window: {

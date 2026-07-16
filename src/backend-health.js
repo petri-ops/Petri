@@ -10,9 +10,9 @@
 //
 // isReady 最低要求 = rServerUp（r-server 是硬底座，py/plumber 按需）。
 
-const R_SERVER_HEALTH = 'http://localhost:3001/api/health';
-const PY_SERVER_HEALTH = 'http://localhost:3004/api/health';
-const PLUMBER_HEALTH = 'http://localhost:8787/health';
+const R_SERVER_HEALTH = `http://localhost:${process.env.R_SERVER_PORT || 3001}/api/health`;
+const PY_SERVER_HEALTH = `http://localhost:${process.env.PY_SERVER_PORT || 3004}/api/health`;
+const PLUMBER_HEALTH = `http://localhost:${process.env.PLUMBER_PORT || 8787}/health`;
 
 /**
  * 探测一个 URL 是否可达且返回 2xx。1.5s 超时，失败返回 false（不抛）。

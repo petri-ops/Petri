@@ -3,6 +3,7 @@
 // 替代 Docusaurus 版 authClient.ts 的桌面分支。
 
 import { errMsg } from '@/lib/error';
+import { getApiPrefix, getComputeApiPrefix, getPlatformApiPrefix } from '@/lib/env';
 
 export const IS_DESKTOP = true;
 
@@ -27,16 +28,7 @@ const DESKTOP_USER: AuthUser = {
   },
 };
 
-// API 前缀：桌面版 r-server :3001, py-server :3004
-export function getPlatformApiPrefix(): string {
-  return 'http://localhost:3001/api';
-}
-export function getComputeApiPrefix(): string {
-  return 'http://localhost:3001/api';
-}
-export function getApiPrefix(language: 'r' | 'python' = 'r'): string {
-  return language === 'python' ? 'http://localhost:3004/api' : 'http://localhost:3001/api';
-}
+export { getApiPrefix, getComputeApiPrefix, getPlatformApiPrefix };
 
 // 桌面版固定 admin，无需登录
 export function getToken(): string | null {

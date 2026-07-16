@@ -33,6 +33,10 @@ declare global {
       isDesktop: true;
       platform: string;
       arch: string;
+      backendConfig: {
+        rApiBase: string;
+        pythonApiBase: string;
+      };
       window: {
         minimize: () => void;
         maximize: () => void;
