@@ -395,24 +395,18 @@ bash scripts/_dev/verify-template-defense.sh
 | GO/KEGG ORA | DESeq2 | deg_table.csv |
 | GSEA | DESeq2 | deg_table.csv |
 
-## 十三、部署注意事项
+## 十三、桌面集成与发布验证
 
-### 13.1 推送文件到服务器
+工具脚本、报告模板和 Node 路由都随 Desktop 仓库与应用包发布，不再单独推送到
+远程服务器。修改后从仓库根执行：
+
 ```bash
-# deploy.sh --push 只取 basename，子目录文件需用 scp 直接推送
-scp r-server/tool-scripts/{tool}.R dell:/opt/biof3-r-server/tool-scripts/{tool}.R
-scp r-server/tool-scripts/{tool}-report-template.html dell:/opt/biof3-r-server/tool-scripts/{tool}-report-template.html
-
-# routes/tools.js 等 JS 文件修改后需重启
-scp r-server/routes/tools.js dell:/opt/biof3-r-server/routes/tools.js
-ssh dell "pm2 restart biof3-r-server --silent"
+npm run check
+npm --prefix frontend run check
+npm run build:spa
+node --test test/*.test.mjs
 ```
 
-### 13.2 R 脚本 vs Node 文件
-- **R 脚本 / HTML 模板**：推送后无需重启 pm2（运行时动态读取）
-- **JS 文件**（routes、helpers、agent-tools）：推送后必须重启 pm2
-
-### 13.3 前端部署
-```bash
-./deploy.sh --site   # 自动 build + rsync 到阿里云
-```
+随后用 `npm run dev` 验证 R/Python 本地服务、工具执行、`tool_job` 状态与 artifact
+结果预览。需要发布安装包时走仓库根的 Electron build/release 流程；不得恢复
+scp、pm2、ECS 或容器部署步骤。

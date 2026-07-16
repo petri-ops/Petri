@@ -31,18 +31,16 @@
 - npm run build:spa（期望 568 modules 通过）
 - node --test test/*.test.mjs（基线 = 268 tests，恰好 5 个 test/qa-smoke.test.mjs 失败属预先存在；任何其它失败都是回归）
 - r-server / py-server 冒烟启动：
-  BIOF3_STORAGE=local BIOF3_LOCAL_MODE=1 R_SERVER_PORT=39110 \
+  BIOF3_LOCAL_MODE=1 R_SERVER_PORT=39110 \
   BIOF3_TEMP_DIR=/tmp/biof3-boot/tmp BIOF3_LOCAL_RESULTS_DIR=/tmp/biof3-boot/results \
   BIOF3_LOCAL_DATA_DIR=/tmp/biof3-boot timeout 10 node core/r-server/server.js
   （看到 "running on port" 即成功；py-server 在 dev 无内嵌 Python 会有 Python pool ENOENT，属预期，不算回归）
 - 终端 stdout 偶发丢输出：把命令输出重定向到 /tmp/*.txt 再读取。
 
 ## 当前清理进度与下一步
-A 档纯清理、runMode 去耦、execMode/metadata 移除及 canonical 路径正名均已完成；具体提交与保留边界见 docs/dependency-decoupling-checkpoint.md 的 #3e–#3g。
+A 档纯清理、runMode/execMode 去耦、canonical 路径正名及 C 档旧异步 task 引擎移除均已完成；具体提交与保留边界见 docs/dependency-decoupling-checkpoint.md 的 #3e–#3h。
 
-当前模式架构已收口完成，不再为清理而继续修改执行真相链。下一步回到 v1 Stage 1 UI 主线。
-
-C 档（py-server 单细胞/空间异步 task 引擎移除）等用户明确工作流稳定后再做，不要自行启动。
+当前模式架构与执行引擎已收口完成，不再为清理而继续修改执行真相链。下一步回到 v1 Stage 1 UI 主线。
 
 ## 交接习惯
 每完成一个增量，用一两句报告：改了什么、验证结果（对比基线）、下一步。遇到连续两次同类失败就停下来分析根因，别反复打补丁。

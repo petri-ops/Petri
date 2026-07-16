@@ -291,7 +291,7 @@
 
 - recoverable/blocked UI、短期确认 token、动作白名单、审计历史和状态刷新已闭环。
 - artifact reconcile 与 retry run 都复用现有 truth/MCP registry，不新增执行器。
-- SQLite/PG 参数审计写入使用统一 `updateToolJobParams()`。
+- SQLite 参数审计写入使用统一 `updateToolJobParams()`。
 - 一个历史 R runtime 失败 job 已真实重试为 completed + truth valid；一个 valid job 已真实 reconcile 并保持 valid。
 - Core recovery 检查点为 `8cb2620 feat: close recoverable workflow actions`，Desktop vendor lock 已同步。
 - `repair_artifacts` 仍由 Agent 提出方案并二次确认，这是刻意的安全边界。

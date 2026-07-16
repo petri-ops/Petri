@@ -75,6 +75,21 @@
 - `containerTempDir` 正名为 `canonicalTaskRoot=/work/biof3/tasks`；删除 `containerCacheDir`，Python 父缓存复用改用真实本地文件路径。
 - R/Python 默认临时目录回归 `/tmp` 本地路径，Python cache 默认跟随 `BIOF3_PY_TEMP_DIR`。
 
+### #3h — C 档旧异步引擎与执行残留移除
+
+- 删除 py-server 的 `/api/task` 队列、task store、旧脚本生成入口与配置；保留当前
+  Python 工具路由，并把脚本生成器限定为本地输入和仓库模板。
+- Agent 删除旧 `createTask`、`start_analysis`、`recluster` 提交路径；后台对话任务
+  单独落在 `agent-task-store`，不再借用分析 task 语义。
+- 删除旧容器 runtime 语义、无实现的 Python 工具注册、旧执行提示、不可达 PG
+  分支，并把数据库访问器正名为 SQLite-only 接口。
+- MCP registry 只暴露注册插件；未知或已删除工具在创建 `tool_job` 前拒绝，旧
+  `single-cell-core` 工作流、fixture 与弱模型 task pack 已清理。
+- 删除 `BIOF3_STORAGE` / `storageMode` 假选择器；本地存储是唯一实现。
+- 主要提交：`a17fffb`、`8332602`、`744491a`、`fef97ac`、`63475df`、
+  `d6b6eaf`、`cbaac59`、`5141fac`、`a469bcf`、`db2e357`、`d29588b`、
+  `1940b42`、`45f7f26`、`c577c21`。
+
 ### 实机验证
 
 `npm run dev` 实测：Vite:3000 + r-server:3001 + py-server:3004 全部起来；`storage active: local`（OSS 移除生效）、SQLite migrations applied（PG 移除生效）、PyWorker 用内嵌 Python 直接 spawn 就绪（docker 移除生效）；渲染进程加载完成。
@@ -84,26 +99,20 @@
 | 维度 | 现状 |
 |------|------|
 | 核心后端 | 仓库内 `core/`，无 submodule |
-| 存储 | 本地文件（`LocalFileStorage`，`BIOF3_STORAGE=local`） |
+| 存储 | 本地文件（`LocalFileStorage`，无模式开关） |
 | 数据库 | SQLite（`better-sqlite3`） |
 | 执行 | 内嵌 R/Python 本地执行，无模式开关 |
 | 运行形态 | 单进程本地全能，无 platform/api/worker 分支 |
 | 依赖 | server 端不再有 `ali-oss`/`pg`/`deasync`；根 `ali-oss` 仅发布脚本用 |
 
-## 下阶段建议（继续规范化 / 清理）
+## 下阶段建议
 
 > 可直接粘贴给下一个 Agent 的接手提示词见 [`agent-handoff-prompt.md`](./agent-handoff-prompt.md)。
 
-按「收益 / 风险」排序，均可在 UI 产品化主线之外的空档独立进行：
+架构去耦与 C 档执行引擎清理已经完成。后续回到 v1 Stage 1 UI 产品化主线；
+以下只剩非阻塞文档/模块归档事项：
 
-### A. 低风险、纯清理
-
-1. **文档收尾**：`docs/archive/checkpoints/project-result-sandbox-plan.md`（已归档）大量 `vendor/biof3-core/...` 历史路径 + 已删的 `db-core-pg.js`；`docs/harness-roadmap.md`「vendor 同步稳定」；`docs/first-success-path.md` 的 `cd vendor/biof3-core/r-server`。属历史记录，可加顶部横幅说明「已去 vendor 化，路径 `vendor/biof3-core/X` = `core/X`；PG 已移除」而非逐行重写。
-
-### C. 待工作流稳定后（用户已确认方向）
-
-2. **py-server 单细胞/空间异步 task 引擎**（`task-queue`/`task-store`/`task-scripts`/`tools-router` 的 `/api/task` + `ossInputUrl` 路径）是 web 时代产线。用户已说明单细胞工具会重写，届时可整体移除，替换为插件化工作流。
-3. **早期 flagged 但保留的模块**：`sanitizer.js`（有测试）、`mcp/server.js`（独立可用）、`dashscope.js`（`getEmbedProvider` 默认）—— 等 P-07 模型网关落地时统一收编。
+1. **早期 flagged 但保留的模块**：`sanitizer.js`（有测试）、`mcp/server.js`（独立可用）、`dashscope.js`（`getEmbedProvider` 默认）—— 等 P-07 模型网关落地时统一收编。
 
 ## 不变量（清理时不得破坏）
 

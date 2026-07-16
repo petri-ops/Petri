@@ -113,7 +113,7 @@ build artifacts; Windows follows in Week 3.5.
 ```bash
 # 1. Start r-server in local mode (local storage, uses system R)
 cd core/r-server
-BIOF3_STORAGE=local BIOF3_LOCAL_MODE=1 \
+BIOF3_LOCAL_MODE=1 \
   BIOF3_R_HOME=/Library/Frameworks/R.framework/Resources \
   PORT=3001 BIOF3_TEMP_DIR=/tmp/biof3-tmp BIOF3_CACHE_DIR=/tmp/biof3-cache \
   node server.js &
@@ -162,7 +162,7 @@ HEAD == origin/main confirms this is upstream, not a local lag).
   analysis_succeeded_zip_packaging_pending`.
 
 Verified by re-running on 2026-07-14 against the same local r-server config
-(`BIOF3_STORAGE=local BIOF3_LOCAL_MODE=1
+(`BIOF3_LOCAL_MODE=1
 BIOF3_R_HOME=/Library/Frameworks/R.framework/Resources`). The new run
 produced a fully-populated run.json (`tmp/golden-path/report/deseq2-job_51d05ccdece3450c.run.json`)
 with 22 artifacts harvested from `/status.result.files`.
