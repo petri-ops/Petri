@@ -18,9 +18,8 @@ const express = require('express');
 const fs = require('fs');
 const OSS = require('ali-oss');
 
-const taskQueue = require('./task-queue');
-const { generateRScript } = require('./task-manager');
-taskQueue.setScriptGenerator(generateRScript);
+// 单细胞异步计算引擎（task-queue/task-manager，旧 web 产线）已移除。
+// 分析执行现走插件 executor（tools 路由）；本地不再运行 R 任务队列。
 const cacheManager = require('./cache-manager');
 const backupManager = require('./backup-manager');
 const db = require('./db');
@@ -193,14 +192,5 @@ if (config.runMode === 'worker') {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🧬 BioF3 R Server running on port ${PORT} (runMode=${config.runMode})`);
   console.log(`   POST http://localhost:${PORT}/api/run`);
-  console.log(`   POST http://localhost:${PORT}/api/task`);
-  console.log(`   GET  http://localhost:${PORT}/api/task/:id`);
   console.log(`   GET  http://localhost:${PORT}/api/health`);
-  if (config.runMode === 'platform') {
-    console.log('   Platform control plane — R/Python on Dell compute nodes');
-  } else if (config.runMode === 'all') {
-    console.log('   Local worker: draining task queue on this node');
-  } else if (config.runMode === 'api') {
-    console.log('   Tasks enqueue only — start worker.js on compute node(s)');
-  }
 });

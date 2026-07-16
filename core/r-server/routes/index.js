@@ -25,7 +25,6 @@ module.exports = async function registerRoutes(app) {
     ['Files', () => require('./files')(app)],
     ['Harness', () => require('./harness')(app)],
     ['Observability', () => require('./observability')(app)],
-    ['Tasks', () => require('./tasks')(app)],
     ['Tools', () => require('./tools')(app)],
     ['Feedback', () => require('./feedback')(app)],
     ['AI chat', () => require('./ai-chat')(app)],

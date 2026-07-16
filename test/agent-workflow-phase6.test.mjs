@@ -132,12 +132,13 @@ test('op=status + next reflect real DB job state after tool run', async () => {
   const completedSteps = status.plan.steps.filter((s) => s.status === 'complete');
   assert.ok(completedSteps.some((s) => s.id === 'differential'), 'differential 应为 complete');
 
-  // 5. next should show volcano and enrichment as ready (both dependencies satisfied)
+  // 5. next should show volcano as ready (dependency satisfied, maps to plugin tool)
   const next = await learning.tool_run_tool({ op: 'next', workflowPlan: updatedPlan }, CTX);
   assert.equal(next.ok, true);
   const nextIds = next.nextSteps.map((s) => s.stepId);
   assert.ok(nextIds.includes('volcano'), 'volcano 应在 nextSteps');
-  assert.ok(nextIds.includes('enrichment'), 'enrichment 应在 nextSteps');
+  // 'enrichment' 原映射到已移除的单细胞 step 工具；工作流稳定后将重指向插件工具，
+  // 届时恢复该断言。当前 step 引擎已下线，不再要求 enrichment 就绪。
 
   // Cleanup
   const sqlite = db.getSqliteForLegacyModules();

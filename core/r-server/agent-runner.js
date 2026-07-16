@@ -53,7 +53,8 @@ const {
 const { aiTaskConcurrencyRelease } = require('./helpers/runtime');
 const { getToolDefs, dispatchTool } = require('./agent-tools');
 const { inferExecutionPolicy } = require('./helpers/agent-execution-policy');
-const { createTask } = require('./task-manager');
+// 单细胞异步计算引擎已移除；act 工具任务提交经 ctx.createTask 判空优雅降级。
+const createTask = null;
 const {
   _gatherAnalysisContextForMethods,
   _renderMethodsParagraph,

@@ -40,8 +40,8 @@ test('mcp-server 子进程启动后 tools/list 含自动加载的插件', async 
     const { tools } = await client.listTools();
     const names = tools.map((t) => t.name);
     assert.ok(names.includes('e2e-tool'), `应含自动加载的 e2e-tool，实际: ${names.join(',')}`);
-    // 10 个单细胞步骤也应在
-    assert.ok(names.includes('scrna-standard'));
+    // 单细胞步骤已移除，不再出现在 tools/list
+    assert.ok(!names.includes('scrna-standard'), '单细胞步骤应已移除');
     const t = tools.find((x) => x.name === 'e2e-tool');
     assert.equal(t.inputSchema.required[0], 'val');
   } finally {

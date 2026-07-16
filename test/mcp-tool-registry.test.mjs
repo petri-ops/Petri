@@ -11,7 +11,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const R_SERVER = resolve(__dirname, '..', 'core', 'r-server');
 
 const pluginLoader = await import(R_SERVER + '/plugin-loader.js');
-const taskScripts = await import(R_SERVER + '/task-scripts-gen/index.js');
 const { listTools, callTool } = await import(resolve(__dirname, '..', 'core', 'r-server', 'mcp', 'registry.js'));
 
 // helper：注册一个 mock 插件到 globalThis._biof3Plugins
@@ -40,30 +39,15 @@ test('_inputsToInputSchema 把 inputs[] 转 JSON Schema', () => {
   assert.equal(schema.properties.fc_threshold.default, 1);
 });
 
-test('listStepTools 返回 10 个单细胞步骤', () => {
-  const steps = taskScripts.listStepTools();
-  assert.equal(steps.length, 10);
-  const names = steps.map((s) => s.name);
-  assert.ok(names.includes('scrna-standard'));
-  assert.ok(names.includes('deg'));
-  assert.ok(names.includes('doublet'));
-  for (const s of steps) {
-    assert.equal(s._isStep, true);
-    assert.equal(s.inputSchema.type, 'object');
-    assert.deepEqual(s.inputSchema.required, ['ossInputUrl']);
-  }
-});
-
-test('步骤工具缺少输入时返回结构化错误，而不是未实现占位', async () => {
+test('单细胞步骤已移除：callTool 视为未知工具', async () => {
+  // 单细胞 step 引擎（旧 web task-queue/OSS 产线）已整体移除。
   globalThis._biof3Plugins = new Map();
   const result = await callTool('doublet', {});
   assert.equal(result.isError, true);
-  const payload = JSON.parse(result.content[0].text);
-  assert.equal(payload.error, 'missing_oss_input_url');
-  assert.doesNotMatch(result.content[0].text, /执行通道待/);
+  assert.match(result.content[0].text, /unknown_tool/i);
 });
 
-test('listTools 合并插件工具 + 单细胞步骤', async () => {
+test('listTools 只返回插件工具（单细胞步骤已移除）', async () => {
   // 清空 + 注册一个 mock 插件（pluginDir 指向临时目录，放真实 tool-definition.json）
   const os = await import('node:os');
   const fs = await import('node:fs');
@@ -109,13 +93,11 @@ test('listTools 合并插件工具 + 单细胞步骤', async () => {
     assert.equal(vol.outputSchema.artifacts[0].id, 'volcano');
     assert.equal(vol.failureModes[0].code, 'missing_required_columns');
     assert.equal(vol._manifest.pluginManifestVersion, 1);
-    // 10 个单细胞步骤
-    assert.ok(names.includes('scrna-standard'));
-    assert.ok(names.includes('deg'));
+    // 单细胞步骤已移除：listTools 不再包含任何 step 工具
+    assert.ok(!names.includes('scrna-standard'), '不应再暴露单细胞步骤');
+    assert.ok(!names.includes('deg'), '不应再暴露单细胞步骤');
     const stepCount = tools.filter((t) => t._isStep).length;
-    assert.equal(stepCount, 10, '应含 10 个单细胞步骤');
-    // 统一来源刷新还会恢复 built-in 插件；步骤数量保持稳定且 mock 插件不丢失。
-    assert.ok(tools.length >= 11);
+    assert.equal(stepCount, 0, '不应含单细胞步骤');
   } finally {
     globalThis._biof3Plugins = new Map();
     fs.rmSync(tmpDir, { recursive: true, force: true });

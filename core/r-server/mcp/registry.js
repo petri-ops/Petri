@@ -50,7 +50,6 @@ function resolveSharedBackend() {
 const R_SERVER = resolveRSserver();
 const SHARED_BACKEND = resolveSharedBackend();
 const pluginLoader = require(path.join(R_SERVER, 'plugin-loader.js'));
-const taskScripts = require(path.join(R_SERVER, 'task-scripts-gen', 'index.js'));
 const config = require(path.join(R_SERVER, 'config.js'));
 // db.js 双驱动（SQLite/PG）：callTool 跑完写 tool_jobs 记录（方案 C，agent-led Task 1）
 let db = null;
@@ -228,7 +227,8 @@ function _resolveMcpJobLayout({ toolJobId, projectId, userId }) {
 }
 
 /**
- * 合并插件工具 + 单细胞步骤，返回 MCP tools/list 格式。
+ * 返回插件工具的 MCP tools/list 格式。
+ * 单细胞步骤（旧 web task 引擎）已移除，不再对外暴露。
  */
 async function listTools() {
   try {
@@ -236,9 +236,7 @@ async function listTools() {
   } catch (e) {
     console.warn('[mcp-registry] refresh plugins before listTools failed:', e.message);
   }
-  const pluginTools = pluginLoader.listToolsForMCP();
-  const stepTools = taskScripts.listStepTools();
-  return [...pluginTools, ...stepTools];
+  return pluginLoader.listToolsForMCP();
 }
 
 function _inferArtifactType(item, filename) {
@@ -695,96 +693,8 @@ async function callTool(name, args, opts = {}) {
     return _runPluginScript(plugin, scriptPath, args, userId, projectId, toolJobId);
   }
 
-  // 单细胞步骤分支（Task 4）
-  if (taskScripts.STEP_META[name]) {
-    const {
-      prepareStepToolJob,
-      buildStepTaskRequest,
-      markStepToolQueued,
-      syncStepToolFailed,
-    } = require('../helpers/step-tool-job');
-    const taskQueue = require('../task-queue');
-    const input = args || {};
-    if (!(input.ossInputUrl || input.inputUrl || input.input_url)) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify({
-              error: 'missing_oss_input_url',
-              message: `步骤 ${name} 需要 ossInputUrl；如需复用上游结果，同时传 parentTaskId。`,
-            }),
-          },
-        ],
-        isError: true,
-      };
-    }
-    let job = null;
-    let task = null;
-    try {
-      job = prepareStepToolJob({
-        toolId: name,
-        args: input,
-        userId,
-        projectId,
-        existingToolJobId: toolJobId,
-      });
-      const taskRequest = buildStepTaskRequest({
-        toolId: name,
-        toolJobId: job.id,
-        args: input,
-        userId,
-        projectId,
-      });
-      task = taskQueue.submitTask(taskRequest);
-      markStepToolQueued({
-        toolJobId: job.id,
-        toolId: name,
-        taskId: task.taskId,
-        execution: task.execution,
-      });
-      const summary = {
-        harnessStepExecutionVersion: 1,
-        toolId: name,
-        toolJobId: job.id,
-        taskId: task.taskId,
-        status: task.status,
-        execution: task.execution,
-      };
-      return {
-        content: [{ type: 'text', text: JSON.stringify(summary, null, 2) }],
-        isError: false,
-        toolJobId: job.id,
-        taskId: task.taskId,
-      };
-    } catch (error) {
-      if (job && task) {
-        try {
-          syncStepToolFailed(
-            {
-              taskId: task.taskId,
-              params: { __harness: { toolId: name, toolJobId: job.id } },
-            },
-            error.message,
-            task.execution
-          );
-        } catch {}
-      } else if (job) {
-        try {
-          db.updateToolJob(job.id, {
-            status: 'failed',
-            error: error.message,
-            completedAt: Date.now(),
-          });
-        } catch {}
-      }
-      return {
-        content: [{ type: 'text', text: `步骤 ${name} 提交失败: ${error.message}` }],
-        isError: true,
-        ...(job?.id ? { toolJobId: job.id } : {}),
-      };
-    }
-  }
+  // 单细胞步骤（STEP_META）已移除：其异步 task-queue/OSS 引擎属于旧 web 产线，
+  // 不契合本地 agent 模型；工作流稳定后将重写。这些工具不再暴露，调用按未知工具处理。
 
   return {
     content: [{ type: 'text', text: `unknown_tool: ${name}` }],
