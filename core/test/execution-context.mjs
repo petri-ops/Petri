@@ -6,7 +6,6 @@ const require = createRequire(import.meta.url);
 const {
   EXECUTION_CONTEXT_VERSION,
   createExecutionContext,
-  createTaskExecutionContext,
   attachExecutionMetadata,
 } = require('../shared-backend/execution-context');
 
@@ -33,45 +32,21 @@ test('maps host result paths to stable canonical paths', () => {
   );
 });
 
-test('task contexts preserve local and canonical paths', () => {
-  const context = createTaskExecutionContext(
-    {
-      taskId: 'task-1',
-      type: 'scrna-standard',
-      workDir: '/srv/tasks/task-task-1',
-      workerId: 'worker-a',
-    },
-    {
-      tempDir: '/srv/tasks',
-      canonicalTaskRoot: '/work/biof3/tasks',
-    },
-    'r'
-  );
-
-  assert.equal(context.adapter.workerId, 'worker-a');
-  assert.equal(context.workDir, '/srv/tasks/task-task-1');
-  assert.equal(context.canonicalWorkDir, '/work/biof3/tasks/task-task-1');
-  assert.equal(context.executionWorkDir, '/srv/tasks/task-task-1');
-});
-
 test('result files inherit stable host and canonical paths', () => {
-  const context = createTaskExecutionContext(
-    {
-      taskId: 'task-2',
-      type: 'deg',
-      workDir: '/srv/tasks/task-task-2',
-    },
-    {
-      tempDir: '/srv/tasks',
-      canonicalTaskRoot: '/work/biof3/tasks',
-    },
-    'r'
-  );
+  const { context } = createExecutionContext({
+    jobId: 'job-2',
+    toolId: 'deg',
+    runtime: 'r',
+    workDir: '/srv/jobs/job-2',
+    resultDir: '/srv/jobs/job-2/output',
+    localRoot: '/srv/jobs',
+    canonicalRoot: '/work/biof3/jobs',
+  });
   const result = attachExecutionMetadata(
-    { files: [{ name: 'markers.csv', url: 'oss://x' }] },
+    { files: [{ name: 'markers.csv' }] },
     context
   );
   assert.equal(result.execution, context);
-  assert.equal(result.files[0].path, '/srv/tasks/task-task-2/markers.csv');
-  assert.equal(result.files[0].canonicalPath, '/work/biof3/tasks/task-task-2/markers.csv');
+  assert.equal(result.files[0].path, '/srv/jobs/job-2/output/markers.csv');
+  assert.equal(result.files[0].canonicalPath, '/work/biof3/jobs/job-2/output/markers.csv');
 });

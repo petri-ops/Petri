@@ -52,8 +52,6 @@ const {
 const { aiTaskConcurrencyRelease } = require('./helpers/runtime');
 const { getToolDefs, dispatchTool } = require('./agent-tools');
 const { inferExecutionPolicy } = require('./helpers/agent-execution-policy');
-// 单细胞异步计算引擎已移除；act 工具任务提交经 ctx.createTask 判空优雅降级。
-const createTask = null;
 const {
   _gatherAnalysisContextForMethods,
   _renderMethodsParagraph,
@@ -234,7 +232,7 @@ async function runAgentLoop({
     '\n- 分析现场卡住时（不确定某工具参数、忘了某流程怎么走、用户报错对应不上某个分析步骤）：主动调 read_page(url="/plugin/<id>/<slug>") 或 search(scope="plugins") 查已装内容插件的教程片段，再继续回答/推进。不要凭空猜参数。';
   systemPrompt += '\n- 工具调用后再判断下一步：可能继续调用，也可能直接回答用户';
   systemPrompt +=
-    '\n- 最终回答里：可执行操作仍用 ```action 块（navigate / start_analysis / external_link 等）';
+    '\n- 最终回答里：页面跳转或外部链接可用 ```action 块（navigate / external_link）';
   systemPrompt += '\n- 控制工具调用次数：通常 0-3 次足够回答';
   systemPrompt +=
     '\n- 当用户的请求是**多步骤任务**时（如"做完整 PBMC 分析"），应当先调用 plan(op="create", title, steps[])，再按步骤推进。每完成一步用 plan(op="update_step") 更新状态。';
@@ -248,19 +246,15 @@ async function runAgentLoop({
   systemPrompt +=
     '\n- 切勿在没有真实工具反馈或工具返回 error/unhandled 时声称"已完成"。如果工具调用失败而你仍想给用户"已跳转"的体验，请显式 emit navigate action card。';
   systemPrompt +=
-    '\n- 重要写操作（start_analysis / rename_* / update_analysis_params / switch_result_tab 等）执行后，调用 verify_state(...) 复查实际状态。这是防止 AI 自欺欺人的兜底措施。';
+    '\n- 重要写操作（rename_* / update_analysis_params / switch_result_tab 等）执行后，调用 verify_state(...) 复查实际状态。这是防止 AI 自欺欺人的兜底措施。';
   systemPrompt +=
-    '\n  例：act(start_analysis) → 记下返回的 analysisId → verify_state(kind="analysis", id=<analysisId>, expect={status:"running"})';
+    '\n  例：act(rename_project) → verify_state(kind="project", id=<项目 id>, expect={name:<新名称>})';
   systemPrompt +=
     '\n- verify_state 返回 ok=false 时直接告诉用户"操作未生效"并附 mismatches 信息，不要硬声称成功。';
-  systemPrompt +=
-    '\n- 当 act(start_analysis) 返回 error=parent_not_ready 时，意味着前置分析还在跑。请：1) 跟用户说一声"父分析还在跑"；2) 把当前 plan 步骤状态保持 pending（不要标 failed）；3) 用户稍后说"继续"时再尝试。';
   systemPrompt +=
     '\n- 推进 plan 时不要硬冲多步——一步还没 done 就发下一步会失败。Plan 步骤大多有先后依赖关系。';
   systemPrompt +=
     '\n- 创建 plan(create) 时，把触发该计划的用户原话（一句话总结即可）作为 chatExcerpt 字段传入，方便用户日后回顾。';
-  systemPrompt +=
-    '\n- 当 act(start_analysis) 成功后立刻调 plan(update_step, planId, stepN, stepStatus="running", analysisId=<新分析 id>) 把步骤和分析关联。后台任务跑完时步骤会自动同步 done/failed，无需用户提醒。';
   systemPrompt +=
     '\n- 当用户在 FigCode 页面要求修改代码时（例如"换成横向条形图"/"配色改成 Nature 风格"/"加 facet"等），不要让用户自己复制粘贴。直接调用 act(type="update_figcode_editor", code="<完整新代码>", autoRun=true)，前端会自动替换并运行。';
   systemPrompt += '\n\n=== 通用 act handler 注册表（动态扩展） ===';
@@ -336,7 +330,7 @@ async function runAgentLoop({
     '\n- 常见 figcardId 示例：volcano（火山图）、heatmap（热图）、correlation-heatmap（相关性热图）、boxplot（箱线图）、ridge-plot（山脊图）等。准确的 id 在站点索引中查。';
   systemPrompt += '\n\n=== Action Card 协议 vs Tool Calling 区分 ===';
   systemPrompt +=
-    '\n- ⚠️ 重要：action card（用 ```action JSON```代码块发的）只支持以下 4 种 type: start_analysis / recluster / navigate / external_link。';
+    '\n- ⚠️ 重要：action card（用 ```action JSON```代码块发的）只支持 navigate / external_link。分析执行必须调用 run_tool。';
   systemPrompt +=
     '\n- 其他所有写操作（update_figcode_editor / switch_result_tab / focus_cluster / highlight_gene / select_cells / filter_table / label_cells / merge_datasets / open_replot / upload_data_hint / open_figcode_plot 等）都通过 act 工具调用，不要再额外发一个 action card。';
   systemPrompt +=
@@ -374,7 +368,6 @@ async function runAgentLoop({
     docsIndex: getCachedDocsIndex(),
     dashscopeEmbed,
     cosineSim,
-    createTask, // ACT_TOOL_v1: lets act tool submit jobs
     conversationId: _activeConv && _activeConv.id, // PLAN_CONV_LINK_v1
     actRegistry: require('./helpers/runtime').actRegistryGet(userId), // ACT_GENERIC_v1
     gatherAnalysisContextForMethods: _gatherAnalysisContextForMethods, // GENERATE_METHODS_v1

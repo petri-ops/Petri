@@ -99,20 +99,6 @@ function createExecutionContext(options = {}) {
   return { context, canonicalizePath: mapper.canonicalize, mapper };
 }
 
-function createTaskExecutionContext(task = {}, config = {}, runtime = null) {
-  return createExecutionContext({
-    jobId: task.taskId,
-    toolId: task.type,
-    platform: config.platform || process.platform,
-    runtime,
-    workerId: task.workerId || config.workerId,
-    workDir: task.workDir,
-    localRoot: config.tempDir,
-    canonicalRoot: config.canonicalTaskRoot || '/work/biof3/tasks',
-    runtimeReady: { runtime, ready: true, command: null, reason: null },
-  }).context;
-}
-
 function attachExecutionMetadata(result = {}, context) {
   const enriched = { ...result, execution: context };
   const localRoot = context?.resultDir || context?.outputDir || context?.workDir;
@@ -142,6 +128,5 @@ module.exports = {
   normalizeSlashPath,
   createPathMapper,
   createExecutionContext,
-  createTaskExecutionContext,
   attachExecutionMetadata,
 };

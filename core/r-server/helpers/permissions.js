@@ -254,11 +254,6 @@ function moduleGate(req, res, next) {
     return runGate(['tools', 'single-cell', 'spatial']);
   }
 
-  // --- single-cell: compute submission (r-server task queue) ---
-  if (m === 'POST' && p === '/api/task') {
-    return runGate('single-cell');
-  }
-
   // --- single-cell / spatial: shared data writes (projects/datasets/analyses/...) ---
   if (p.startsWith('/api/data/') && (m === 'POST' || m === 'PUT' || m === 'DELETE')) {
     return runGate(['single-cell', 'spatial']);
@@ -278,7 +273,6 @@ function routeRequiresModuleGate(req) {
   }
   if (m === 'POST' && p === '/api/tools/run') return true;
   if (m === 'POST' && p === '/api/run') return true;
-  if (m === 'POST' && p === '/api/task') return true;
   if (p.startsWith('/api/data/') && (m === 'POST' || m === 'PUT' || m === 'DELETE')) return true;
   return false;
 }

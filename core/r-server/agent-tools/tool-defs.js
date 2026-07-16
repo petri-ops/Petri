@@ -95,8 +95,6 @@ const TOOL_DEFS = [
       description:
         'ACT_TOOL_v1 — 在用户的 BioF3 账户上执行写操作。受白名单限制，所有操作都会被审计记录，并支持 5 秒内撤销。' +
         '支持的 type：' +
-        ' start_analysis（在某 dataset 上发起新分析）;' +
-        ' recluster（对某结果的某 cluster 子聚类）;' +
         ' rename_project / rename_dataset / rename_analysis（重命名）;' +
         ' update_analysis_params（修改分析参数）。' +
         '不允许：删除、跨用户操作、上传数据。删除请让用户自己在 UI 中操作。',
@@ -106,8 +104,6 @@ const TOOL_DEFS = [
           type: {
             type: 'string',
             enum: [
-              'start_analysis',
-              'recluster',
               'rename_project',
               'rename_dataset',
               'rename_analysis',
@@ -127,42 +123,13 @@ const TOOL_DEFS = [
             ],
             description: '操作类型',
           },
-          datasetId: { type: 'string', description: 'start_analysis 用' },
+          datasetId: { type: 'string', description: 'rename_dataset 等数据集操作使用' },
           analysisId: {
             type: 'string',
-            description: 'recluster / rename_analysis / update_params 用',
+            description: 'rename_analysis / update_params 使用',
           },
           projectId: { type: 'string', description: 'rename_project 用' },
-          analysisType: {
-            type: 'string',
-            // W1-5 (2026-05-28): 补全长期遗漏的 communication / cell_cycle / doublet_detection +
-            // 新增空间组学 spatial_* 5 种类型（与 /spatial 平台对齐）
-            enum: [
-              // 单细胞（r-server）
-              'scrna_standard',
-              'recluster',
-              'deg',
-              'enrichment',
-              'cell_annotation',
-              'scrna_integration',
-              'trajectory',
-              'communication',
-              'cell_cycle',
-              'doublet_detection',
-              // 空间组学（py-server）
-              'spatial_standard',
-              'spatial_recluster',
-              'spatial_svg',
-              'spatial_deconv',
-              'spatial_lr',
-            ],
-            description: 'start_analysis 时的分析类型',
-          },
-          parentAnalysisId: {
-            type: 'string',
-            description: 'start_analysis 时可选的父分析（提供已聚类 RDS）',
-          },
-          cluster: { type: ['string', 'number'], description: 'recluster 时指定哪个 cluster' },
+          cluster: { type: ['string', 'number'], description: 'focus_cluster 使用的 cluster' },
           name: { type: 'string', description: '可选：分析或资源的新名称' },
           newName: { type: 'string', description: 'rename_* 时的新名字' },
           params: {
@@ -269,7 +236,7 @@ const TOOL_DEFS = [
           analysisId: {
             type: 'string',
             description:
-              'PLAN_STEP_LINK_v1_TOOL — update_step 用：把当前 step 关联到某个 analysis id。当你 act(start_analysis) 后立刻在该步骤调用 plan(update_step, analysisId=<新分析 id>) 把它们绑定。这样分析自然 done/failed 时会自动同步 step status。',
+              'PLAN_STEP_LINK_v1_TOOL — update_step 用：把当前 step 关联到已有 analysis id，使其状态变化同步到步骤。',
           },
           toolJobId: {
             type: 'string',
@@ -544,8 +511,7 @@ const TOOL_DEFS = [
       name: 'verify_state',
       description:
         'VERIFY_STATE_v1 — 确认某个实体的当前状态符合预期。在执行写操作后调用此工具核实，避免在没有真实反馈时声称"已完成"。' +
-        ' 例如：act(start_analysis) 后 verify_state(kind="analysis", id=<id>, expect={status:"running"}); ' +
-        'act(rename_project) 后 verify_state(kind="project", id=<id>, expect={name:<新名>}); ' +
+        ' 例如：act(rename_project) 后 verify_state(kind="project", id=<id>, expect={name:<新名>}); ' +
         'act(switch_result_tab) 后 verify_state(kind="context", expect={page:"single-cell-result"})。',
       parameters: {
         type: 'object',
