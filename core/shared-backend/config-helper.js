@@ -27,7 +27,6 @@ function getConfig() {
   if (_getConfig) return _getConfig();
   // fallback：从环境变量构造（真自洽，不依赖 r-server/py-server）
   return {
-    localMode: process.env.BIOF3_LOCAL_MODE === '1',
     rHome: process.env.BIOF3_R_HOME || '',
     pyHome: process.env.BIOF3_PY_HOME || '',
     tempDir: process.env.BIOF3_TEMP_DIR || '/tmp/biof3-tmp',

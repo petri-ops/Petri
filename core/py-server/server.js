@@ -104,52 +104,16 @@ app.use((req, res, next) => {
   next();
 });
 
-// Auth
-const { _jwtAuthOptional, JWT_SECRET } = require('./jwt-auth');
-let jwt = null;
-if (!config.localMode) {
-  try {
-    jwt = require('jsonwebtoken');
-  } catch (e) {
-    jwt = null;
-  }
-}
-
-function checkToken(req, res, next) {
-  // 桌面版 localMode：跳过所有 auth，设为 admin
-  if (config.localMode) {
-    req.user = { id: 'local-user', username: 'Local User', role: 'admin' };
-    return next();
-  }
-  if (req.path === '/api/health') return next();
-  // W2-A: /api/tools/* uses JWT (Authorization: Bearer), not x-api-token. Let it pass through
-  // to its own jwtAuthRequired middleware.
-  if (req.path.startsWith('/api/tools/')) return next();
-  // /api/upload accepts either the user JWT or the internal API token.
-  const isUserScoped = req.path === '/api/upload';
-  if (isUserScoped) {
-    const auth = req.headers.authorization || '';
-    if (auth.startsWith('Bearer ') && JWT_SECRET) {
-      try {
-        req.user = jwt.verify(auth.slice(7), JWT_SECRET);
-        return next();
-      } catch {
-        return res.status(401).json({ status: 'error', error: '登录已过期，请重新登录' });
-      }
-    }
-  }
-  const token = req.headers['x-api-token'] || req.query.token;
-  if (token !== config.apiToken) {
-    return res.status(401).json({ status: 'error', error: '未授权访问' });
-  }
+const { LOCAL_USER } = require('./jwt-auth');
+function attachLocalUser(req, _res, next) {
+  req.user = LOCAL_USER;
   next();
 }
-app.use(checkToken);
+app.use(attachLocalUser);
 
 // ── 桌面版本地文件服务 ──────────────────────────────────────
 // /api/files/<key> → 从本地 results 目录读取文件并返回
-if (config.localMode) {
-  app.get(/^\/api\/files\/(.+)$/, (req, res) => {
+app.get(/^\/api\/files\/(.+)$/, (req, res) => {
     const key = req.params[0];
     try {
       const { getActiveStorage } = require('../shared-backend/storage');
@@ -173,7 +137,6 @@ if (config.localMode) {
       res.status(500).json({ status: 'error', error: e.message });
     }
   });
-}
 
 // Upload
 function createUploadMiddleware() {
@@ -403,7 +366,7 @@ function cleanup(workDir) {
 // Start
 // ============================================================
 
-const server = app.listen(config.port, '0.0.0.0', () => {
+const server = app.listen(config.port, '127.0.0.1', () => {
   logger.info(`BioF3 Python Server running on port ${config.port}`, {
     pool: config.poolEnabled ? `${config.poolSize} workers` : 'disabled',
   });

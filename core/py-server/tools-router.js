@@ -4,7 +4,7 @@
  * py-server 上的 /api/tools/* 端点，与 r-server 的 /api/tools/* 接口对齐。
  *
  * 关键设计：
- * - JWT 与 r-server 共用本地认证配置
+ * - 所有请求使用桌面固定 local-user 身份
  * - tool_jobs 表写入 r-server 的 SQLite（跨进程 WAL）
  * - 输出写入本地 project sandbox 或 BioF3-Local/results/tool-jobs
  *
@@ -41,8 +41,8 @@ try {
   fs.mkdirSync(JOBS_DIR, { recursive: true });
 } catch {}
 
-// Published demo assets are immutable job output directories on the Dell
-// compute volume. They remain available even if tool_jobs loses is_public rows.
+// Published demo assets are immutable local job output directories. They remain
+// available even if tool_jobs loses is_public rows.
 const PUBLIC_DEMO_ASSETS = Object.freeze({
   'spatial-deconv': 'job_a9701b22bc144c34',
   'spatial-lr': 'job_b53a8136d7584d5d',

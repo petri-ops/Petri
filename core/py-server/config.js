@@ -11,11 +11,6 @@ const tempDir = process.env.BIOF3_PY_TEMP_DIR || process.env.BIOF3_TEMP_DIR || '
 const config = {
   // Server
   port: parseInt(process.env.PY_SERVER_PORT || '3004', 10),
-  apiToken: process.env.BIOF3_API_TOKEN || 'biof3-figcode-2026',
-
-  // ── 桌面版模式（与 r-server/config.js 对称）──────────────────
-  // localMode: 桌面版跳过 JWT 验证
-  localMode: process.env.BIOF3_LOCAL_MODE === '1',
   // Python Runtime 路径（桌面版内嵌 Python 的根目录）
   pyHome: process.env.BIOF3_PY_HOME || '',
   // 本地结果/上传目录（桌面版用户数据目录）
