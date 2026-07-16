@@ -14,7 +14,7 @@ BioF3 Desktop 是一个 Electron 桌面应用，结合了 AI 陪伴的全组学�
 
 ## 当前开发阶段
 
-当前处于 **Stage 1: UI 产品化阶段**，唯一任务是 `UI-1 实机审计与问题台账`。
+当前处于 **Stage 1: UI 产品化验收与收口阶段**。已有 UI 实现不得重新从头审查；先用 Git 提交证据与 `docs/ui-productization-audit.md` 对账，只补缺失的定向实机验收。
 
 固定执行顺序：
 1. Stage 1: 桌面 UI 产品化（当前）
@@ -26,6 +26,14 @@ BioF3 Desktop 是一个 Electron 桌面应用，结合了 AI 陪伴的全组学�
 - Stage 1 验收前不实现新模型 Provider
 - Stage 2 验收前不扩充 Harness 内容
 - 当前只做 UI 产品化和视觉一致性修复
+
+### UI 台账同步铁律
+
+- `docs/ui-productization-audit.md` 是验收状态的唯一事实源；Git 提交是实现证据，二者必须在同一个 UI 增量中同步。
+- 修改 UI 表面（`frontend/src/components/`、`pages/`、`styles/`、`themes/` 等）时，同一提交必须更新 UI 台账，并在提交标题或正文写明对应的 `UI-###`。
+- 代码完成只能把问题推进到 `in_progress`；只有附有实机主题、窗口和交互证据后才能标为 `verified`。
+- 开始新一轮 UI 工作前先运行 `npm run ui:audit:check`，优先复用已有提交证据，不重复审查已经实现或验证的项目。
+- 根 `npm run check` 已包含 UI 台账同步门禁；遗漏台账或问题编号会直接失败。
 
 ## 必读文档顺序
 
@@ -53,7 +61,8 @@ npm run dev                             # 启动 Vite(:3000) + Electron + 自动
 npm run dev:electron                    # 带 --dev 标志的 Electron
 
 # 检查
-npm run check                           # 静态语法检查 + Harness manifest 校验
+npm run check                           # 静态语法 + Harness manifest + UI 台账同步校验
+npm run ui:audit:check                  # 单独检查 UI 实现/台账是否同步
 npm --prefix frontend run check         # TypeScript 类型检查
 npm test                                # 根项目测试
 npm test --prefix frontend              # 前端测试

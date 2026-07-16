@@ -1,0 +1,84 @@
+#!/usr/bin/env node
+
+import { execFileSync } from 'node:child_process'
+
+const AUDIT_PATH = 'docs/ui-productization-audit.md'
+const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
+const UI_ID_PATTERN = /\bUI-\d{3}\b/g
+
+function git(args, options = {}) {
+  return execFileSync('git', args, {
+    cwd: process.cwd(),
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', options.allowFailure ? 'ignore' : 'pipe'],
+  }).trim()
+}
+
+function lines(value) {
+  return value ? value.split('\n').filter(Boolean) : []
+}
+
+function isUiSurface(file) {
+  return (
+    file === 'frontend/src/App.tsx' ||
+    file.startsWith('frontend/src/components/') ||
+    file.startsWith('frontend/src/pages/') ||
+    file.startsWith('frontend/src/styles/') ||
+    file.startsWith('frontend/src/themes/') ||
+    /\.module\.css$/.test(file)
+  )
+}
+
+function uiIds(value) {
+  return [...new Set(value.match(UI_ID_PATTERN) ?? [])]
+}
+
+function baselineIsAvailable() {
+  try {
+    git(['merge-base', '--is-ancestor', ENFORCEMENT_BASELINE, 'HEAD'])
+    return true
+  } catch {
+    return false
+  }
+}
+
+const failures = []
+
+if (baselineIsAvailable()) {
+  const commits = lines(git(['rev-list', '--reverse', `${ENFORCEMENT_BASELINE}..HEAD`]))
+
+  for (const commit of commits) {
+    const files = lines(git(['diff-tree', '--no-commit-id', '--name-only', '-r', commit]))
+    if (!files.some(isUiSurface)) continue
+
+    const message = git(['show', '-s', '--format=%s%n%b', commit])
+    const shortCommit = commit.slice(0, 7)
+
+    if (!files.includes(AUDIT_PATH)) {
+      failures.push(`${shortCommit}: UI 改动没有同步 ${AUDIT_PATH}`)
+    }
+    if (uiIds(message).length === 0) {
+      failures.push(`${shortCommit}: UI 提交信息缺少 UI-### 问题编号`)
+    }
+  }
+} else {
+  console.warn(`[ui-audit] 未找到执行基线 ${ENFORCEMENT_BASELINE.slice(0, 7)}，跳过历史提交检查`)
+}
+
+const trackedChanges = lines(git(['diff', '--name-only', 'HEAD']))
+const untrackedChanges = lines(git(['ls-files', '--others', '--exclude-standard']))
+const worktreeFiles = [...new Set([...trackedChanges, ...untrackedChanges])]
+
+if (worktreeFiles.some(isUiSurface) && !trackedChanges.includes(AUDIT_PATH)) {
+  failures.push(`当前工作区包含 UI 改动，但没有同步 ${AUDIT_PATH}`)
+}
+
+if (failures.length > 0) {
+  console.error('[ui-audit] UI 实现与审计台账不同步：')
+  for (const failure of failures) console.error(`- ${failure}`)
+  console.error('[ui-audit] UI 状态只能在实机验证后标记 verified；代码完成请先记录为 in_progress。')
+  process.exit(1)
+}
+
+const knownIds = uiIds(git(['log', '--format=%s%n%b']))
+console.log(`[ui-audit] 同步检查通过；Git 历史已有 ${knownIds.length} 个带实现证据的 UI 问题编号`)

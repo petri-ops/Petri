@@ -80,6 +80,13 @@ desktop/
 
 ## AI 行为指引
 
+### UI 进度自动对账
+
+- 不得把 `docs/ui-productization-audit.md` 中的旧状态直接当成未实现结论；先核对已有 Git 提交证据，避免重复开发。
+- 每个 UI 增量必须在同一提交更新 `docs/ui-productization-audit.md`，并在提交标题或正文标注对应 `UI-###`。
+- 实现完成、尚未实机验收的条目使用 `in_progress`；只有实机证据充分时才能使用 `verified`。
+- 提交前运行 `npm run ui:audit:check`；根 `npm run check` 也会自动执行该门禁。
+
 ### 修改大型文件前
 
 - `main.js` (61KB) — 先理解 Electron 进程模型和 window 管理
