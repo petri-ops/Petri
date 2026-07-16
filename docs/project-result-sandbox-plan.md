@@ -2,7 +2,7 @@
 
 最后更新：2026-07-16 04:05 UTC
 
-状态：**Phase 0-5 全部完成**。本文是该任务的唯一专项入口。
+状态：**Phase 0-5 全部完成 + Phase 5b 单细胞 step 引擎收敛完成**。本文是该任务的唯一专项入口。
 
 执行进度：
 - ✅ Phase 0: 基线测试（29项测试通过）
@@ -11,6 +11,7 @@
 - ✅ Phase 3: MCP/Agent/Harness收敛（插件工具入口以 tool_job.id 收敛到项目沙盒/全局 tool-jobs；Harness 读取已兼容）
 - ✅ Phase 4: Artifact路由与报告（route containment 硬化 + 报告落 output/ + 导出副本进 results/exports/）
 - ✅ Phase 5: 兼容性与远端（历史不搬迁 + 换 workspace 各自可读 + system scope + 远端边界确认）
+- ✅ Phase 5b: 单细胞 step 引擎收敛（harness 作用域运行物化产物到项目沙盒 output/，零回归）
 
 ## 1. 任务定义
 
@@ -213,8 +214,9 @@
 历史兼容：
 - 历史 `mcp-tool-jobs/<mcp_*>` 结果不自动搬迁，按 `result_json` 绝对路径回读；`tools-executor.js` 的 `isManagedResultDir` 已识别 `mcp-tool-jobs` 根。
 
-边界说明（不在本阶段扩张范围）：
-- 单细胞 10 步（`STEP_META` 分支）走独立异步 task-queue/worker 引擎，物理结果沿用 `results/task-<taskId>` 约定（harness step truth），其 `tool_job` 已持久化 `project_id`（`prepareStepToolJob` 传入），供 Phase 4 按项目授权。将 task-queue 结果根迁入项目沙盒属 task 引擎改造，遵循"不建立第二套/不扩充分析流程"，不在本次收敛内。
+单细胞 step 引擎收敛（Phase 5b，见下）：
+- 单细胞 10 步（`STEP_META` 分支）走独立异步 task-queue/worker 引擎，在 ephemeral `TEMP/task-<taskId>` workDir 执行，产物经 storage adapter 持久化到 `results/task-<taskId>`（其自有系统，支撑单细胞页 UI + `analyses` 表）。
+- Phase 5b 已把它纳入运行目录契约：项目作用域运行（harness 上下文带 `projectId` + `toolJobId`）时，完成后把已声明产物**物化**到项目沙盒 `<workspace>/results/jobs/<toolJobId>/output/`，`tool_job.resultDir` 指向沙盒，经同一 `/api/tools/file/<toolJobId>/<name>` 身份提供。详见 Phase 5b。
 
 验证证据：
 - `test/project-sandbox-mcp-tools.test.mjs`：5 项测试全部通过
@@ -264,6 +266,29 @@
   - 历史 job 从 result_json 回读 / 兜底全局 / 无路径返回 null；换 workspace 后新旧 job 各自路径可读；system scope 落 system-tasks、缺 toolJobId 抛错
 - 全量 `node --test test/*.test.mjs`：仅剩已知基线 5 个 qa-smoke 失败，未新增失败
 - `npm run check`：通过（sync-vendor OK + node --check + harness 4/4 manifest 有效）
+
+### Phase 5b：单细胞 step 引擎收敛 ✅
+
+**状态：完成（应用户要求，把此前标为边界外的单细胞 step 引擎纳入运行目录契约）**
+
+背景：
+- 单细胞 10 步走独立、更早期的异步 task-queue/worker 引擎，用 `analyses` 表 + storage adapter（OSS key `results/task-<taskId>`）作为自有结果系统，支撑 `/single-cell` 页 UI。
+- 它在 ephemeral `TEMP/task-<taskId>` workDir 执行；此前 harness 桥接的 `tool_job.resultDir` 指向一个并不在项目沙盒、甚至本地不存在的 `results/task-<taskId>`，未遵循运行目录契约。
+
+已完成（`helpers/step-tool-job.js`）：
+- ✅ 新增 `materializeStepArtifactsToProject({ task, results })`：仅在 harness 上下文带 `projectId` + `toolJobId` 时，把 workDir 里**已声明产物**（plots + files + summary.json）物化到 `resolveProjectRunLayout()` 解析出的项目沙盒 `output/`，`safeJoinUnder` 守卫 containment
+- ✅ `syncStepToolCompleted` 在项目作用域运行时把 `tool_job.resultDir` 指向沙盒 `output/`（`reconcileArtifactTruth` 随之对沙盒校验）；非项目运行回退旧 `persistentResultDir`，语义不变
+- ✅ 沿用 Phase 5「远端执行完成后物化到本地项目 output/」模式：workDir 是临时执行区（等价 ephemeral executor），沙盒是唯一持久结果家 —— 不是"运行后复制冒充收敛"
+- ✅ 只物化已声明产物，不搬运 `result.rds` 等未声明中间态/脚本
+- ✅ 保留原 storage upload（单细胞页 UI 不受影响，零回归）；harness/tool_job 视图改由沙盒 + `/api/tools/file/<toolJobId>` 统一身份提供
+
+权衡（已知）：
+- 项目作用域单细胞 step 的已声明产物会同时存在于 storage（单细胞页）与项目沙盒（harness/tool_job）。这是为零回归保留双消费方的有意取舍；若后续要单一化，可让单细胞页也改读沙盒身份后移除 storage 上传（独立跟进项）。
+
+验证证据：
+- `test/project-sandbox-singlecell.test.mjs`：3 项通过（项目作用域物化到沙盒 output/、非项目返回 null、workDir 缺失返回 null、未声明产物不物化）
+- `test/step-tool-bridge.test.mjs` + `test/harness-workflow-*.test.mjs`：12 pass，零回归
+- 全量 `node --test test/*.test.mjs`：仅剩已知基线 5 个 qa-smoke 失败
 
 ## 6. 关键不变量与禁止事项
 
