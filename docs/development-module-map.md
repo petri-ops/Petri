@@ -43,7 +43,7 @@
 
 - 包含：消息气泡、用户/模型头像、输入框、流式回复、工具确认卡、结果卡、会话切换和项目级会话绑定。
 - 不包含：工具真实执行、artifact 真相判断、右侧结果的渲染实现。
-- 主要路径：`frontend/src/components/copilot/`、`vendor/biof3-core/r-server/routes/ai-conversations.js`、`vendor/biof3-core/r-server/helpers/conversations*.js`。
+- 主要路径：`frontend/src/components/copilot/`、`core/r-server/routes/ai-conversations.js`、`core/r-server/helpers/conversations*.js`。
 
 ### W-04 结果与报告（Results & Reports）
 
@@ -52,7 +52,7 @@
 - 包含：artifact 导航、图表/表格/图片/PDF/HTML 预览、最终报告生成/查看/导出、报告主题、结果状态条。
 - 报告是后置交付物；核心 artifacts 继续作为后续分析的交互入口。
 - 不包含：通用网页导航控件、工具执行本身、文件树的一般文件浏览。
-- 主要路径：`frontend/src/pages/project-workspace.tsx` 中结果组件、`frontend/src/pages/project-workspace.module.css`、`vendor/biof3-core/r-server/helpers/report-theme.js`、插件报告模板。
+- 主要路径：`frontend/src/pages/project-workspace.tsx` 中结果组件、`frontend/src/pages/project-workspace.module.css`、`core/r-server/helpers/report-theme.js`、插件报告模板。
 
 ### W-05 内置浏览器（In-app Browser）
 
@@ -113,7 +113,7 @@
 - 固定阶段：`inspect → infer → select → repair → confirm → run → verify → report`。
 - 包含：文件索引、readiness、tool selection、workflow state、恢复动作、二跳 artifact 绑定。
 - 不拥有执行真相；状态必须投影自 P-02。
-- 主要路径：`scripts/harness-*`、`vendor/biof3-core/shared-backend/agent-workflow.js`、Core Harness routes/helpers。
+- 主要路径：`scripts/harness-*`、`core/shared-backend/agent-workflow.js`、Core Harness routes/helpers。
 
 ### P-04 Plugin SDK 与分析能力（Plugin System）
 
@@ -129,7 +129,7 @@
 
 - 包含：canonical execution context、R/Python/Node runtime、路径映射、local/container/remote adapter、跨平台 shell 与 ABI 兼容。
 - 平台差异只能停留在 adapter 层，不能渗入业务 UI 或工作流定义。
-- 主要路径：`vendor/biof3-core/shared-backend/execution-context.js`、runtime helpers、`src/platform-compat.js`。
+- 主要路径：`core/shared-backend/execution-context.js`、runtime helpers、`src/platform-compat.js`。
 
 ### P-06 桌面集成与交付（Desktop Integration & Delivery）
 
@@ -137,7 +137,7 @@
 
 - 包含：main/preload、WebView 权限、后端进程管理、构建产物、macOS/Windows/Linux 打包。
 - 不包含：页面视觉样式和分析业务逻辑。
-- 主要路径：`src/`、`build/`、`package.json`、`.github/workflows/`、`.vendor-lock`、`vendor/biof3-core/`。
+- 主要路径：`src/`、`build/`、`package.json`、`.github/workflows/`、`core/`。
 
 ### P-07 模型网关与 AI Provider（Model Gateway）
 
@@ -146,7 +146,7 @@
 - 包含：Model Profile、Provider 注册、Base URL、credential reference、流式响应、tool calling、vision、embedding、能力声明、角色路由、健康检查、usage 与标准化错误。
 - 业务模块不得直接硬编码 Provider Endpoint、模型名或 API Key；兼容层只能转发到统一 Gateway。
 - Provider 失败时不得静默换模型；fallback 必须由用户配置、明确允许并可审计。
-- 主要路径：`vendor/biof3-core/shared-backend/llm-providers/`、Core `helpers/llm-client.js` / `helpers/ai-settings.js` / AI routes、Desktop AI settings IPC 和模型管理 UI。
+- 主要路径：`core/shared-backend/llm-providers/`、Core `helpers/llm-client.js` / `helpers/ai-settings.js` / AI routes、Desktop AI settings IPC 和模型管理 UI。
 
 ## 4. 跨模块关注点（C）
 
