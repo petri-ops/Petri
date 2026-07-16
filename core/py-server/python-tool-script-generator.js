@@ -865,7 +865,7 @@ print("TASK_COMPLETE")
 // Tangram-based cell type deconvolution per spot.
 // Uses sq.datasets.sc_mouse_cortex() (Tasic 2018, 21k cells × 22k genes,
 // pre-annotated with cell_subclass: L5 IT / Vip / Pvalb / Sst / L6 IT / Astro / ...)
-// as the default reference. Future param: allow user to specify ossRefUrl.
+// as the default reference and cache it in the local BioF3 data directory.
 //
 // Algorithm:
 //   1. Load parent spatial AnnData (from cache → no re-QC)

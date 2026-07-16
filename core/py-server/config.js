@@ -5,6 +5,9 @@
  * Override via environment variables or .env file.
  */
 
+const path = require('path');
+const tempDir = process.env.BIOF3_PY_TEMP_DIR || process.env.BIOF3_TEMP_DIR || '/tmp/biof3-py-tmp';
+
 const config = {
   // Server
   port: parseInt(process.env.PY_SERVER_PORT || '3004', 10),
@@ -20,11 +23,12 @@ const config = {
   // 本地结果/上传目录（桌面版用户数据目录）
   localResultsDir: process.env.BIOF3_LOCAL_RESULTS_DIR || '',
   localUploadsDir: process.env.BIOF3_LOCAL_UPLOADS_DIR || '',
+  localDataDir: process.env.BIOF3_LOCAL_DATA_DIR || path.dirname(tempDir),
   // 桌面版标记
   desktop: process.env.BIOF3_DESKTOP === '1',
 
   // Paths (host-side)
-  tempDir: process.env.BIOF3_PY_TEMP_DIR || '/tmp/biof3-py-tmp',
+  tempDir,
   // Fast-path timeout
   runTimeoutMs: parseInt(process.env.PY_RUN_TIMEOUT_MS || '30000', 10),
 

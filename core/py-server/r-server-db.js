@@ -3,8 +3,8 @@
  *
  * py-server's bridge to the shared user/tool-jobs/datasets store.
  *
- * SQLite backend — reads/writes r-server's local biof3.db on the same host
- * (better-sqlite3 + WAL). Path from BIOF3_R_DB_PATH or /opt/biof3-r-server/biof3.db.
+ * SQLite backend — reads/writes r-server's local biof3.db in this checkout
+ * (better-sqlite3 + WAL). Desktop launchers may override the path explicitly.
  *
  * This module only reads users + reads/writes tool_jobs + bridges datasets.meta_url
  * (py-server should not touch other tables).
@@ -14,7 +14,11 @@
 // SQLite backend (lazy — only opened when actually used)
 // ============================================================
 
-const R_DB_PATH = process.env.BIOF3_R_DB_PATH || '/opt/biof3-r-server/biof3.db';
+const path = require('path');
+const R_DB_PATH =
+  process.env.BIOF3_R_DB_PATH ||
+  process.env.BIOF3_DB_PATH ||
+  path.join(__dirname, '..', 'r-server', 'biof3.db');
 
 let _db = null;
 function db() {

@@ -465,39 +465,31 @@ function createToolsExecutor({
   }
 
   function getToolConfig(toolId) {
-    // 桌面版（localMode）：优先走 plugin-loader，用插件里的本地 R 脚本 + 本地 R 运行时，
-    // 不依赖 Docker container。registry 里的同名条目仅服务 web 版，桌面版绕过。
-    // web 版（docker 模式）：走 registry SSOT（Docker container + 相对脚本路径）。
-    const isLocal = require('../config').localMode;
-    if (isLocal) {
-      try {
-        const { getScriptForTool, getPlugin } = require('../plugin-loader');
-        const plugin = getPlugin(toolId);
-        if (plugin) {
-          const scriptPath = getScriptForTool(toolId);
-          if (scriptPath && fs.existsSync(scriptPath)) {
-            return {
-              container: null,
-              script: scriptPath, // 绝对路径（plugin scripts/ 目录下）
-              lang: plugin.language,
-              _isPlugin: true,
-              pluginDir: plugin.pluginDir,
-            };
-          }
+    // Installed plugins take precedence and carry absolute local script paths.
+    try {
+      const { getScriptForTool, getPlugin } = require('../plugin-loader');
+      const plugin = getPlugin(toolId);
+      if (plugin) {
+        const scriptPath = getScriptForTool(toolId);
+        if (scriptPath && fs.existsSync(scriptPath)) {
+          return {
+            script: scriptPath,
+            lang: plugin.language,
+            _isPlugin: true,
+            pluginDir: plugin.pluginDir,
+          };
         }
-      } catch (e) {
-        console.warn('[tools] plugin-loader lookup failed for', toolId, ':', e.message);
       }
+    } catch (e) {
+      console.warn('[tools] plugin-loader lookup failed for', toolId, ':', e.message);
     }
 
-    // registry 是 SSOT（r-server/tool-registry.js），处理别名 + 返回完整 config。
-    // r-server 只执行 R 工具；python 工具走 py-server，这里返回 null。
+    // Built-in registry is the local R-tool fallback. Python tools run in py-server.
     try {
       const { getToolConfig: getRegistryConfig } = require('../tool-registry');
       const cfg = getRegistryConfig(toolId);
       if (cfg && cfg.lang === 'r') {
         return {
-          container: cfg.container,
           script: cfg.script,
           lang: cfg.lang,
         };
@@ -506,27 +498,6 @@ function createToolsExecutor({
       console.warn('[tools] tool-registry lookup failed for', toolId, ':', e.message);
     }
 
-    // 非 localMode 下的插件 fallback（registry 查不到时，查已装插件）
-    if (!isLocal) {
-      try {
-        const { getScriptForTool, getPlugin } = require('../plugin-loader');
-        const plugin = getPlugin(toolId);
-        if (plugin) {
-          const scriptPath = getScriptForTool(toolId);
-          if (scriptPath && fs.existsSync(scriptPath)) {
-            return {
-              container: null,
-              script: scriptPath,
-              lang: plugin.language,
-              _isPlugin: true,
-              pluginDir: plugin.pluginDir,
-            };
-          }
-        }
-      } catch (e) {
-        console.warn('[tools] plugin-loader lookup failed for', toolId, ':', e.message);
-      }
-    }
     return null;
   }
 
@@ -554,9 +525,7 @@ function createToolsExecutor({
       return;
     }
 
-    // 本地执行：jobDir 就是真实本地路径，脚本直接用它。
-    const containerJobDir = jobDir;
-    const containerScript = containerJobDir + '/run-script.' + (cfg.lang === 'r' ? 'R' : 'py');
+    const scriptPath = path.join(jobDir, 'run-script.' + (cfg.lang === 'r' ? 'R' : 'py'));
 
     try {
       fs.copyFileSync(
@@ -618,7 +587,7 @@ function createToolsExecutor({
         //（deseq2.R: `args <- commandArgs(trailingOnly=TRUE); job_dir <- args[1]`）
         // 不能用 buildSpawnCommand（它加 --args params.json，是 figcode 脚本约定，
         // 会让 args[1]="--args"，R 脚本 source(file.path("--args",...)) 找不到文件）
-        runCmd = [executor.binPath, containerScript, containerJobDir];
+        runCmd = [executor.binPath, scriptPath, jobDir];
         // 插件脚本：注入插件自带的预编译包目录到 R 库搜索路径，
         // 让 library(DESeq2) 等从 pluginDir/packages/r 加载，不污染基础 runtime library。
         // R_LIBS_USER 会被追加到默认 .libPaths() 之后，runtime 基础包仍可用。
@@ -636,7 +605,7 @@ function createToolsExecutor({
         }
       } else {
         // Python 工具脚本约定：--params <paramFile>（buildSpawnCommand）
-        const spawnCmd = executor.buildSpawnCommand(containerScript, containerJobDir, {});
+        const spawnCmd = executor.buildSpawnCommand(scriptPath, jobDir, {});
         runCmd = [spawnCmd.cmd, ...spawnCmd.args];
         if (spawnCmd.env) runEnv = spawnCmd.env;
       }
@@ -771,7 +740,6 @@ function createToolsExecutor({
       process: child,
       startedAt: Date.now(),
       toolId,
-      container: cfg.container,
     });
   }
 

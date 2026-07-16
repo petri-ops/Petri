@@ -165,22 +165,19 @@ class PyPool {
   }
 
   async execute(code, workDir) {
-    // 本地执行：containerWorkDir = workDir（无容器路径转换）
-    const containerWorkDir = workDir;
     const scriptPath = path.join(workDir, 'run.py');
-    const containerScriptPath = `${containerWorkDir}/run.py`;
+    const datasetCacheDir = path.join(config.localDataDir, 'cache', 'datasets');
 
     const pyScript = `
 import os, sys, json
-os.chdir("${containerWorkDir}")
+os.chdir(${JSON.stringify(workDir)})
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-# W4-B (2026-05-30): 把 scanpy/squidpy 数据集缓存指到共享目录，避免 FigCode 卡每次
-# 在 per-session cwd 重下 ~80MB Visium 数据集（之前导致 spatial 卡 30s fast-path 超时）。
+# 将 scanpy/squidpy 数据集缓存到本地 BioF3 数据目录，避免每个会话重复下载。
 try:
     import scanpy as _sc
-    _ds = "/app/data/biof3-py-tmp/_datasets"
+    _ds = ${JSON.stringify(datasetCacheDir)}
     os.makedirs(_ds, exist_ok=True)
     _sc.settings.datasetdir = _ds
 except Exception:
@@ -207,7 +204,7 @@ finally:
     fs.writeFileSync(scriptPath, pyScript);
 
     const worker = this._getWorker();
-    if (worker) return worker.execute(containerScriptPath);
+    if (worker) return worker.execute(scriptPath);
 
     // Queue
     return new Promise((resolve, reject) => {
@@ -217,7 +214,7 @@ finally:
         reject(new Error('所有 Python 工作进程繁忙，请稍后重试'));
       }, WORKER_TIMEOUT_MS);
       this._requestQueue.push({
-        scriptPath: containerScriptPath,
+        scriptPath,
         resolve: (r) => { clearTimeout(timer); resolve(r); },
         reject: (e) => { clearTimeout(timer); reject(e); },
       });

@@ -300,12 +300,11 @@ app.post('/api/run', async (req, res) => {
       result = await pyPool.execute(code, workDir);
     } else {
       // Cold fallback — 本地执行内嵌 python
-      const containerWorkDir = workDir;
       const pyScript = `
 import os, sys, matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-os.chdir("${containerWorkDir}")
+os.chdir(${JSON.stringify(workDir)})
 try:
 ${code
   .split('\n')
