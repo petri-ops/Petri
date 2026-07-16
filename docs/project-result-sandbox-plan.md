@@ -1,16 +1,16 @@
 # 项目工作路径与结果沙盒专项计划
 
-最后更新：2026-07-16 03:35 UTC
+最后更新：2026-07-16 03:50 UTC
 
-状态：**Phase 0-3 完成，Phase 4 开始**。本文是该任务的唯一专项入口。
+状态：**Phase 0-4 完成，Phase 5 开始**。本文是该任务的唯一专项入口。
 
 执行进度：
 - ✅ Phase 0: 基线测试（29项测试通过）
 - ✅ Phase 1: Project Run Layout Resolver（已提交Core改动）
 - ✅ Phase 2: R/Python工具收敛（R + Python 入口均已收敛到 resolver，含 Python 真实临时目录测试）
 - ✅ Phase 3: MCP/Agent/Harness收敛（插件工具入口以 tool_job.id 收敛到项目沙盒/全局 tool-jobs；Harness 读取已兼容）
-- 🔄 Phase 4: Artifact路由与报告（准备开始）
-- ⏸️ Phase 5: 兼容性与远端（等待Phase 4完成）
+- ✅ Phase 4: Artifact路由与报告（route containment 硬化 + 报告落 output/ + 导出副本进 results/exports/）
+- 🔄 Phase 5: 兼容性与远端（准备开始）
 
 ## 1. 任务定义
 
@@ -222,12 +222,30 @@
 - 全量 `node --test test/*.test.mjs`：仅剩已知基线 5 个 qa-smoke 失败，未新增失败
 - 既有 `test/mcp-*.test.mjs` / `test/agent-run-tool.test.mjs` 全部通过
 
-### Phase 4：Artifact、报告与文件可发现性
+### Phase 4：Artifact、报告与文件可发现性 ✅
 
-1. artifact file route 按 `tool_job.project_id → workspace_path → jobRoot` 做授权和 containment。
-2. 最终报告在当前 job 的 `output/` 生成；用户主动导出的副本进入 `results/exports/`。
-3. 项目文件树默认显示 `data/`、`results/jobs/`、`results/exports/`，可对 `work/` 做低视觉优先级或隐藏。
-4. 结果 UI 继续使用 job/artifact identity，不把裸绝对路径传给前端。
+**状态：完成**
+
+已完成：
+- ✅ artifact file route 授权链：route 层 `canAccessToolJob`（owner/admin，跨用户/跨项目拒绝）→ `handlePrivateFileRead` 按 `tool_job.project_id → workspace_path → jobRoot` 三层解析
+- ✅ **containment 硬化**：项目分支改用 `safeJoinUnder(layout.outputDir, filename)`，拒绝 `../`/绝对路径注入逃逸（此前项目分支用裸 `path.join`，全局分支才有守卫）
+- ✅ `handlePrivateFileWrite` 改为项目感知（load job → 解析项目 `output/` → `safeJoinUnder` 守卫 → 回退全局），并包 try/catch 不产生未处理 rejection；`regenerateReportForImage` 接受解析出的 `outputDir`
+- ✅ 最终报告在当前 job 的 `output/` 生成（`materializeFinalReport` 写 `output/final-report.html`，内嵌图片自包含）
+- ✅ **用户主动导出的副本进入 `results/exports/`**：`handleGenerateFinalReport` 在项目 job 上把自包含报告复制到 `<workspace>/results/exports/<jobId>-final-report.html`，响应返回 `exportPath`（相对项目根，文件树可发现）
+- ✅ resolver 目录契约新增 `exportsDir = resultsRoot/exports`（结果根级共享目录，跨 job）
+- ✅ 项目文件树（`routes/files.js` `/api/workspaces/:projectId/tree`）为通用递归 prefix 遍历，自然显示真实存在的 `data/`、`results/jobs/`、`results/exports/`；隐藏 `.` 开头项
+- ✅ 结果 UI 继续走 `/api/tools/file/<jobId>/<name>` job/artifact identity，不把裸绝对路径传前端
+- ✅ 未新建 workflow DB / 结果索引 / artifact 表
+
+关键文件：
+- ✅ `vendor/biof3-core/shared-backend/project-run-layout.js`（新增 exportsDir）
+- ✅ `vendor/biof3-core/r-server/helpers/tools-executor.js`（containment + 项目感知写 + 导出副本）
+
+验证证据：
+- `test/project-sandbox-artifacts.test.mjs`：4 项通过
+  - resolver exportsDir 契约、报告在 output/ 自包含内嵌、导出副本落 results/exports/ 且路径可发现、safeJoin containment 拒绝 `../`
+- `test/project-run-layout.test.mjs`：30 pass（新增 exportsDir 未破坏既有断言）
+- 全量 `node --test test/*.test.mjs`：仅剩已知基线 5 个 qa-smoke 失败，未新增失败
 
 ### Phase 5：兼容、迁移与远端
 
