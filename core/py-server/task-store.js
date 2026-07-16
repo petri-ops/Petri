@@ -1,22 +1,9 @@
 /**
- * Task Store — SQLite or PostgreSQL persistent task storage for py-server.
- *
- * When DATABASE_URL is set (BIOF3_P2_PG=1), delegates to task-store-pg.js
- * so py tasks go to the shared PostgreSQL tasks queue.
- *
- * task-store-pg.js exports fully async functions.
- * task-store.js provides sync wrappers so drainQueue (synchronous) works.
+ * Task Store — SQLite persistent task storage for py-server.
  */
 
 const config = require('./config');
 const logger = require('./logger');
-
-const USE_TASK_PG = !!(process.env.DATABASE_URL && String(process.env.DATABASE_URL).trim());
-let _pg = null;
-if (USE_TASK_PG) {
-  _pg = require('./task-store-pg');
-  console.log('[task-store] PostgreSQL tasks queue (platform + Dell workers)');
-}
 
 let _sqliteDb = null;
 function getSqliteDb() {
@@ -29,7 +16,7 @@ function getSqliteDb() {
   return _sqliteDb;
 }
 
-if (!USE_TASK_PG) {
+{
   const db = getSqliteDb();
   db.exec(`
     CREATE TABLE IF NOT EXISTS tasks (
@@ -61,7 +48,7 @@ if (!USE_TASK_PG) {
   }
 }
 
-const stmts = USE_TASK_PG ? null : (() => {
+const stmts = (() => {
   const db = getSqliteDb();
   return {
     insert: db.prepare(`INSERT INTO tasks (id, type, params, oss_input_url, status, progress, progress_message, created_at, work_dir, container_work_dir) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`),
@@ -75,65 +62,40 @@ const stmts = USE_TASK_PG ? null : (() => {
   };
 })();
 
-// deasync wrappers so drainQueue (sync) can call async PG functions
-let _ds = null;
-function _syncWrap(fn) {
-  if (!_ds) _ds = require('deasync');
-  let done = false;
-  let err = null;
-  let result = null;
-  Promise.resolve(fn())
-    .then((r) => { result = r; done = true; })
-    .catch((e) => { err = e; done = true; });
-  _ds.loopWhile(() => !done);
-  if (err) throw err;
-  return result;
-}
-
 function insertTask({taskId, type, params, ossInputUrl, workDir, containerWorkDir}) {
-  if (USE_TASK_PG) return _syncWrap(() => _pg.insertTask({taskId, type, params, ossInputUrl, workDir, containerWorkDir}));
   stmts.insert.run(taskId, type, JSON.stringify(params || {}), ossInputUrl || null, 'pending', 0, '排队中...', new Date().toISOString(), workDir, containerWorkDir);
   return getTask(taskId);
 }
 
 function getTask(taskId) {
-  if (USE_TASK_PG) return _syncWrap(() => _pg.getTask(taskId));
   const row = stmts.get.get(taskId);
   return row ? parseRow(row) : null;
 }
 
 function listTasks(limit = 50) {
-  if (USE_TASK_PG) return _syncWrap(() => _pg.listTasks(limit));
   return stmts.list.all(limit).map(parseRow);
 }
 function listPendingTasks(limit = 10) {
-  if (USE_TASK_PG) return _syncWrap(() => _pg.listPendingTasks(limit));
   return stmts.listByStatus.all('pending', limit).map(parseRow);
 }
 function getRunningCount() {
-  if (USE_TASK_PG) return _syncWrap(() => _pg.getRunningCount());
   return stmts.countRunning.get().count;
 }
 
 function markRunning(taskId) {
-  if (USE_TASK_PG) return _syncWrap(() => _pg.markRunning(taskId));
   stmts.updateStatus.run('running', 5, '正在启动分析...', new Date().toISOString(), null, null, null, taskId);
 }
 function markDone(taskId, {results, progress = 100, progressMessage = '分析完成'}) {
-  if (USE_TASK_PG) return _syncWrap(() => _pg.markDone(taskId, {results, progress, progressMessage}));
   stmts.updateStatus.run('done', progress, progressMessage, null, new Date().toISOString(), JSON.stringify(results), null, taskId);
 }
 function markFailed(taskId, errorMsg) {
-  if (USE_TASK_PG) return _syncWrap(() => _pg.markFailed(taskId, errorMsg));
   stmts.updateStatus.run('failed', 0, '分析失败', null, new Date().toISOString(), null, errorMsg, taskId);
 }
 function updateProgress(taskId, progress, message) {
-  if (USE_TASK_PG) return _syncWrap(() => _pg.updateProgress(taskId, progress, message));
   stmts.updateStatus.run('running', progress, message, null, null, null, null, taskId);
 }
 
 function getStats() {
-  if (USE_TASK_PG) return _syncWrap(() => _pg.getStats());
   const rows = stmts.countByStatus.all();
   const stats = {pending: 0, running: 0, done: 0, failed: 0};
   for (const r of rows) stats[r.status] = r.count;
@@ -141,7 +103,6 @@ function getStats() {
 }
 
 function cleanupOld(maxAgeMs = config.taskRetentionMs) {
-  if (USE_TASK_PG) return _syncWrap(() => _pg.cleanupOld(maxAgeMs));
   const cutoff = new Date(Date.now() - maxAgeMs).toISOString();
   const result = stmts.deleteOld.run(cutoff);
   if (result.changes > 0) logger.info(`Cleaned up ${result.changes} old task(s)`);
@@ -149,8 +110,6 @@ function cleanupOld(maxAgeMs = config.taskRetentionMs) {
 }
 
 function claimPendingTask(workerId) {
-  if (USE_TASK_PG) return _syncWrap(() => _pg.asyncClaimPendingTask(workerId));
-  // SQLite fallback — simple lock without FOR UPDATE SKIP LOCKED
   const db = getSqliteDb();
   const claim = db.transaction(() => {
     const running = db.prepare(`SELECT COUNT(*) as count FROM tasks WHERE status = 'running'`).get().count;
@@ -158,7 +117,7 @@ function claimPendingTask(workerId) {
     const row = db.prepare(`SELECT * FROM tasks WHERE status = 'pending' ORDER BY created_at ASC LIMIT 1`).get();
     if (!row) return null;
     const now = new Date().toISOString();
-    db.prepare(`UPDATE tasks SET status = 'running', worker_id = ?, claimed_at = ?, progress = 5, progress_message = '正在启动分析...', started_at = ? WHERE id = ?`).run(workerId, now, now, row.id);
+    db.prepare(`UPDATE tasks SET status = 'running', progress = 5, progress_message = '正在启动分析...', started_at = ? WHERE id = ?`).run(now, row.id);
     return db.prepare('SELECT * FROM tasks WHERE id = ?').get(row.id);
   });
   return parseRow(claim());

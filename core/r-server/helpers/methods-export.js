@@ -71,31 +71,10 @@ const _METHODS_CITATIONS = {
   ],
 };
 
-async function _pgOne(sql, params) {
-  const { query } = require('../db-pg');
-  const r = await query(sql, params);
-  return r.rows[0] || null;
-}
-
-async function _pgAll(sql, params) {
-  const { query } = require('../db-pg');
-  const r = await query(sql, params);
-  return r.rows;
-}
-
 function _gatherAnalysisContextForMethods(userId, opts) {
   const dbMod = require('../db');
-  const usePg = dbMod.isPg && dbMod.isPg();
 
-  async function fetchAnalysisOwned(analysisId) {
-    if (usePg) {
-      return _pgOne(
-        `SELECT a.*, d.name AS dataset_name, d.n_cells, d.n_genes, p.user_id
-         FROM analyses a JOIN datasets d ON a.dataset_id = d.id JOIN projects p ON d.project_id = p.id
-         WHERE a.id = $1 AND p.user_id = $2`,
-        [analysisId, userId]
-      );
-    }
+  function fetchAnalysisOwned(analysisId) {
     return dbMod.db
       .prepare(
         `SELECT a.*, d.name AS dataset_name, d.n_cells, d.n_genes, p.user_id
@@ -105,146 +84,76 @@ function _gatherAnalysisContextForMethods(userId, opts) {
       .get(analysisId, userId);
   }
 
-  async function fetchAnalysisById(id) {
-    if (usePg) return _pgOne('SELECT * FROM analyses WHERE id = $1', [id]);
+  function fetchAnalysisById(id) {
     return dbMod.db.prepare('SELECT * FROM analyses WHERE id=?').get(id);
   }
 
-  const run = async () => {
-    const out = { datasets: [], analyses: [], plans: [] };
+  const out = { datasets: [], analyses: [], plans: [] };
 
-    if (opts.analysisId) {
-      const a = await fetchAnalysisOwned(opts.analysisId);
-      if (!a) return null;
-      out.datasets.push({
-        id: a.dataset_id,
-        name: a.dataset_name,
-        n_cells: a.n_cells,
-        n_genes: a.n_genes,
-      });
-      out.analyses.push(_serializeAnalysisForMethods(a));
-      let parentId = a.parent_analysis_id;
-      while (parentId) {
-        const p = await fetchAnalysisById(parentId);
-        if (!p) break;
-        out.analyses.unshift(_serializeAnalysisForMethods(p));
-        parentId = p.parent_analysis_id;
-      }
+  if (opts.analysisId) {
+    const a = fetchAnalysisOwned(opts.analysisId);
+    if (!a) return null;
+    out.datasets.push({
+      id: a.dataset_id,
+      name: a.dataset_name,
+      n_cells: a.n_cells,
+      n_genes: a.n_genes,
+    });
+    out.analyses.push(_serializeAnalysisForMethods(a));
+    let parentId = a.parent_analysis_id;
+    while (parentId) {
+      const p = fetchAnalysisById(parentId);
+      if (!p) break;
+      out.analyses.unshift(_serializeAnalysisForMethods(p));
+      parentId = p.parent_analysis_id;
     }
+  }
 
-    if (opts.planId) {
-      let plan;
-      let steps;
-      if (usePg) {
-        plan = await _pgOne('SELECT * FROM copilot_plans WHERE id = $1 AND user_id = $2', [
-          opts.planId,
-          userId,
-        ]);
-        steps = await _pgAll('SELECT * FROM copilot_plan_steps WHERE plan_id = $1 ORDER BY n', [
-          opts.planId,
-        ]);
-      } else {
-        plan = dbMod.db
-          .prepare('SELECT * FROM copilot_plans WHERE id=? AND user_id=?')
-          .get(opts.planId, userId);
-        steps = dbMod.db
-          .prepare('SELECT * FROM copilot_plan_steps WHERE plan_id=? ORDER BY n')
-          .all(opts.planId);
-      }
-      if (!plan) return null;
-      out.plans.push({ title: plan.title, goal: plan.goal, status: plan.status, steps });
-      const seenAnalysisIds = new Set(out.analyses.map((x) => x.id));
-      for (const s of steps) {
-        if (s.analysis_id && !seenAnalysisIds.has(s.analysis_id)) {
-          const a = await fetchAnalysisOwned(s.analysis_id);
-          if (a) {
-            out.analyses.push(_serializeAnalysisForMethods(a));
-            seenAnalysisIds.add(a.id);
-            if (!out.datasets.find((d) => d.id === a.dataset_id)) {
-              out.datasets.push({
-                id: a.dataset_id,
-                name: a.dataset_name,
-                n_cells: a.n_cells,
-                n_genes: a.n_genes,
-              });
-            }
+  if (opts.planId) {
+    const plan = dbMod.db
+      .prepare('SELECT * FROM copilot_plans WHERE id=? AND user_id=?')
+      .get(opts.planId, userId);
+    const steps = dbMod.db
+      .prepare('SELECT * FROM copilot_plan_steps WHERE plan_id=? ORDER BY n')
+      .all(opts.planId);
+    if (!plan) return null;
+    out.plans.push({ title: plan.title, goal: plan.goal, status: plan.status, steps });
+    const seenAnalysisIds = new Set(out.analyses.map((x) => x.id));
+    for (const s of steps) {
+      if (s.analysis_id && !seenAnalysisIds.has(s.analysis_id)) {
+        const a = fetchAnalysisOwned(s.analysis_id);
+        if (a) {
+          out.analyses.push(_serializeAnalysisForMethods(a));
+          seenAnalysisIds.add(a.id);
+          if (!out.datasets.find((d) => d.id === a.dataset_id)) {
+            out.datasets.push({
+              id: a.dataset_id,
+              name: a.dataset_name,
+              n_cells: a.n_cells,
+              n_genes: a.n_genes,
+            });
           }
         }
       }
     }
+  }
 
-    if (opts.datasetId) {
-      let ds;
-      if (usePg) {
-        ds = await _pgOne(
-          `SELECT d.*, p.user_id FROM datasets d JOIN projects p ON d.project_id = p.id WHERE d.id = $1 AND p.user_id = $2`,
-          [opts.datasetId, userId]
-        );
-      } else {
-        ds = dbMod.db
-          .prepare(
-            `SELECT d.*, p.user_id FROM datasets d JOIN projects p ON d.project_id=p.id WHERE d.id=? AND p.user_id=?`
-          )
-          .get(opts.datasetId, userId);
-      }
-      if (!ds) return null;
-      out.datasets.push({ id: ds.id, name: ds.name, n_cells: ds.n_cells, n_genes: ds.n_genes });
-      let rows;
-      if (usePg) {
-        rows = await _pgAll(
-          `SELECT * FROM analyses WHERE dataset_id = $1 AND status = 'done' ORDER BY created_at DESC LIMIT 10`,
-          [opts.datasetId]
-        );
-      } else {
-        rows = dbMod.db
-          .prepare(
-            `SELECT * FROM analyses WHERE dataset_id=? AND status='done' ORDER BY created_at DESC LIMIT 10`
-          )
-          .all(opts.datasetId);
-      }
-      rows.forEach((a) => out.analyses.push(_serializeAnalysisForMethods(a)));
-    }
-    return out;
-  };
-
-  const deasync = require('deasync');
-  let done = false;
-  let err = null;
-  let result = null;
-  run()
-    .then((r) => {
-      result = r;
-      done = true;
-    })
-    .catch((e) => {
-      err = e;
-      done = true;
-    });
-  // Bounded wait + reentrancy guard — see db-p2-pg-shim.js. deasync.loopWhile is
-  // not reentrant (concurrent calls crash V8); a stale PostgreSQL socket must not freeze
-  // the loop forever.
-  if (global.__biof3DeasyncActive) {
-    throw new Error(
-      '[deasync-guard] concurrent sync DB call rejected (methods-export during another deasync call)'
-    );
+  if (opts.datasetId) {
+    const ds = dbMod.db
+      .prepare(
+        `SELECT d.*, p.user_id FROM datasets d JOIN projects p ON d.project_id=p.id WHERE d.id=? AND p.user_id=?`
+      )
+      .get(opts.datasetId, userId);
+    if (!ds) return null;
+    out.datasets.push({ id: ds.id, name: ds.name, n_cells: ds.n_cells, n_genes: ds.n_genes });
+    const rows = dbMod.db
+      .prepare(
+        `SELECT * FROM analyses WHERE dataset_id=? AND status='done' ORDER BY created_at DESC LIMIT 10`
+      )
+      .all(opts.datasetId);
+    rows.forEach((a) => out.analyses.push(_serializeAnalysisForMethods(a)));
   }
-  const _DEADLINE_MS = 25_000;
-  const _deadline = Date.now() + _DEADLINE_MS;
-  const _ka = setInterval(() => {}, 250);
-  global.__biof3DeasyncActive = true;
-  try {
-    deasync.loopWhile(() => !done && Date.now() < _deadline);
-  } finally {
-    global.__biof3DeasyncActive = false;
-    clearInterval(_ka);
-  }
-  if (!done) {
-    throw new Error(
-      '[methods-export] PG op exceeded ' + _DEADLINE_MS + 'ms deadline (deasync backstop)'
-    );
-  }
-  if (err) throw err;
-  return result;
+  return out;
 }
 
 function _serializeAnalysisForMethods(a) {

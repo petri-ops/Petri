@@ -24,8 +24,6 @@ const {
 const { getActivePlanForUserAsync, renderActivePlanForPrompt } = require('../helpers/plans');
 const dbMod = require('../db');
 const convSync = require('../helpers/conversations');
-const convAsync = require('../helpers/conversations-async');
-const useConvAsync = dbMod.USE_PG && process.env.BIOF3_P2_PG === '1';
 const {
   getOrCreateActiveConversation,
   appendMessageToConversation,
@@ -154,9 +152,7 @@ module.exports = function registerAiAgentRoute(app) {
               ? String(messages[0].content).slice(0, 40)
               : '新对话',
         };
-        _activeConv = useConvAsync
-          ? await convAsync.getOrCreateActiveConversation(userId, hint)
-          : getOrCreateActiveConversation(userId, hint);
+        _activeConv = getOrCreateActiveConversation(userId, hint);
       } catch {}
 
       // 持久化 user 消息
@@ -171,11 +167,7 @@ module.exports = function registerAiAgentRoute(app) {
               datasetId: context && context.datasetId,
               analysisId: context && context.analysisId,
             };
-            if (useConvAsync) {
-              await convAsync.appendMessageToConversation(_activeConv.id, 'user', cleanContent, meta);
-            } else {
-              appendMessageToConversation(_activeConv.id, 'user', cleanContent, meta);
-            }
+            appendMessageToConversation(_activeConv.id, 'user', cleanContent, meta);
           }
         }
       } catch {}

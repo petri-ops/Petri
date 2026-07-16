@@ -13,77 +13,15 @@ const Database = require('better-sqlite3');
 const config = require('./config');
 const logger = require('./logger');
 
-const USE_TASK_PG = !!(process.env.DATABASE_URL && String(process.env.DATABASE_URL).trim());
-let _pg = null;
-let _runPg = null;
-if (USE_TASK_PG) {
-  const deasync = require('deasync');
-  _pg = require('./task-store-pg');
-  _runPg = (fn) => {
-    if (global.__biof3DeasyncActive) {
-      throw new Error(
-        '[deasync-guard] concurrent sync DB call rejected (deasync.loopWhile not reentrant) — task-store op during another deasync call'
-      );
-    }
-    let done = false;
-    let err = null;
-    let result = null;
-    Promise.resolve(fn())
-      .then((r) => {
-        result = r;
-        done = true;
-      })
-      .catch((e) => {
-        err = e;
-        done = true;
-      });
-    const DEADLINE_MS = 25_000;
-    const deadline = Date.now() + DEADLINE_MS;
-    const ka = setInterval(() => {}, 250);
-    global.__biof3DeasyncActive = true;
-    try {
-      deasync.loopWhile(() => !done && Date.now() < deadline);
-    } finally {
-      global.__biof3DeasyncActive = false;
-      clearInterval(ka);
-    }
-    if (!done) {
-      throw new Error(
-        '[task-store] PG op exceeded ' +
-          DEADLINE_MS +
-          'ms deadline (deasync backstop) — likely stale PostgreSQL connection'
-      );
-    }
-    if (err) throw err;
-    return result;
-  };
-  // Startup cleanup is only safe for a process that actually executes tasks.
-  // Platform/api nodes share the PG queue with Dell workers, so their restarts
-  // must not mark someone else's running tasks as failed.
-  if (config.runMode === 'worker' || config.runMode === 'all') {
-    try {
-      _runPg(() => _pg.markInterruptedOnStartup(config.workerId));
-    } catch (e) {
-      logger.warn(`[task-store] startup markInterrupted skipped (PG not ready): ${e && e.message}`);
-    }
-  }
-  console.log('[task-store] PostgreSQL tasks queue (platform + Dell workers)');
-}
+const db = new Database(config.dbPath);
+db.pragma('journal_mode = WAL');
+db.pragma('busy_timeout = 5000');
 
-const db = USE_TASK_PG ? null : new Database(config.dbPath);
-// ponytail: stmts declared at module scope so ESLint doesn't flag it as
-// block-scoped unused (inside if) + no-undef (outside if). The if-block
-// assigns it; the Public API functions below read it.
-let stmts = null;
-if (!USE_TASK_PG) {
-  db.pragma('journal_mode = WAL');
-  db.pragma('busy_timeout = 5000');
+// ============================================================
+// Schema migration
+// ============================================================
 
-  // ============================================================
-  // Schema migration
-  // ============================================================
-
-  db.exec(`
+db.exec(`
   CREATE TABLE IF NOT EXISTS tasks (
     id TEXT PRIMARY KEY,
     type TEXT NOT NULL,
@@ -105,68 +43,64 @@ if (!USE_TASK_PG) {
   CREATE INDEX IF NOT EXISTS idx_tasks_created ON tasks(created_at);
 `);
 
-  try {
-    db.exec('ALTER TABLE tasks ADD COLUMN worker_id TEXT');
-  } catch {}
-  try {
-    db.exec('ALTER TABLE tasks ADD COLUMN claimed_at TEXT');
-  } catch {}
-  try {
-    db.exec('ALTER TABLE tasks ADD COLUMN parent_task_id TEXT');
-  } catch {}
-  try {
-    db.exec('ALTER TABLE tasks ADD COLUMN engine TEXT DEFAULT \'R\'');
-  } catch {}
-  try {
-    db.exec('ALTER TABLE tasks ADD COLUMN user_id TEXT');
-  } catch {}
-  try {
-    db.exec('ALTER TABLE tasks ADD COLUMN agent_status TEXT');
-  } catch {}
+try {
+  db.exec('ALTER TABLE tasks ADD COLUMN worker_id TEXT');
+} catch {}
+try {
+  db.exec('ALTER TABLE tasks ADD COLUMN claimed_at TEXT');
+} catch {}
+try {
+  db.exec('ALTER TABLE tasks ADD COLUMN parent_task_id TEXT');
+} catch {}
+try {
+  db.exec('ALTER TABLE tasks ADD COLUMN engine TEXT DEFAULT \'R\'');
+} catch {}
+try {
+  db.exec('ALTER TABLE tasks ADD COLUMN user_id TEXT');
+} catch {}
+try {
+  db.exec('ALTER TABLE tasks ADD COLUMN agent_status TEXT');
+} catch {}
 
-  // agent loop 事件流表（P2-b）：订阅端点按 seq 回放
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS task_events (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      task_id TEXT NOT NULL,
-      seq INTEGER NOT NULL,
-      event_type TEXT NOT NULL,
-      payload TEXT NOT NULL,
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-    CREATE INDEX IF NOT EXISTS idx_task_events_task_seq ON task_events(task_id, seq);
-  `);
+// agent loop 事件流表（P2-b）：订阅端点按 seq 回放
+db.exec(`
+  CREATE TABLE IF NOT EXISTS task_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    task_id TEXT NOT NULL,
+    seq INTEGER NOT NULL,
+    event_type TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+  CREATE INDEX IF NOT EXISTS idx_task_events_task_seq ON task_events(task_id, seq);
+`);
 
-  // On startup: running tasks were interrupted (workers/API restarted)
-  const interrupted = db
-    .prepare(
-      `UPDATE tasks SET status = 'failed', error = '服务重启，任务中断', finished_at = ?, worker_id = NULL
+// On startup: running tasks were interrupted (server restarted)
+const interrupted = db
+  .prepare(
+    `UPDATE tasks SET status = 'failed', error = '服务重启，任务中断', finished_at = ?, worker_id = NULL
    WHERE status = 'running'`
-    )
-    .run(new Date().toISOString());
+  )
+  .run(new Date().toISOString());
 
-  if (interrupted.changes > 0) {
-    logger.warn(`Marked ${interrupted.changes} interrupted task(s) as failed on startup`);
-  }
+if (interrupted.changes > 0) {
+  logger.warn(`Marked ${interrupted.changes} interrupted task(s) as failed on startup`);
+}
 
-  // ============================================================
-  // Prepared statements
-  // ============================================================
+// ============================================================
+// Prepared statements
+// ============================================================
 
-  stmts = USE_TASK_PG
-    ? null
-    : {
-        insert: db.prepare(`
+const stmts = {
+  insert: db.prepare(`
     INSERT INTO tasks (id, type, params, oss_input_url, status, progress, progress_message,
                        created_at, work_dir, container_work_dir, parent_task_id)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `),
-        get: db.prepare('SELECT * FROM tasks WHERE id = ?'),
-        list: db.prepare('SELECT * FROM tasks ORDER BY created_at DESC LIMIT ?'),
-        listByStatus: db.prepare(
-          'SELECT * FROM tasks WHERE status = ? ORDER BY created_at ASC LIMIT ?'
-        ),
-        updateStatus: db.prepare(`
+  get: db.prepare('SELECT * FROM tasks WHERE id = ?'),
+  list: db.prepare('SELECT * FROM tasks ORDER BY created_at DESC LIMIT ?'),
+  listByStatus: db.prepare('SELECT * FROM tasks WHERE status = ? ORDER BY created_at ASC LIMIT ?'),
+  updateStatus: db.prepare(`
     UPDATE tasks SET status = ?, progress = ?, progress_message = ?,
                      started_at = COALESCE(?, started_at),
                      finished_at = COALESCE(?, finished_at),
@@ -174,32 +108,29 @@ if (!USE_TASK_PG) {
                      error = COALESCE(?, error)
     WHERE id = ?
   `),
-        countByStatus: db.prepare('SELECT status, COUNT(*) as count FROM tasks GROUP BY status'),
-        deleteOld: db.prepare(
-          'DELETE FROM tasks WHERE finished_at IS NOT NULL AND finished_at < ?'
-        ),
-        countRunning: db.prepare(`SELECT COUNT(*) as count FROM tasks WHERE status = 'running'`),
-        countRunningOnWorker: db.prepare(
-          `SELECT COUNT(*) as count FROM tasks WHERE status = 'running' AND worker_id = ?`
-        ),
-        // agent task（P2-b）
-        insertAgent: db.prepare(`
-          INSERT INTO tasks (id, type, params, status, created_at, engine, user_id, agent_status)
-          VALUES (?, 'agent_loop', ?, 'running', ?, 'agent', ?, 'running')
-        `),
-        insertEvent: db.prepare(`
-          INSERT INTO task_events (task_id, seq, event_type, payload, created_at)
-          VALUES (?, ?, ?, ?, ?)
-        `),
-        listEvents: db.prepare(
-          `SELECT seq, event_type, payload, created_at FROM task_events
-           WHERE task_id = ? AND seq > ? ORDER BY seq ASC LIMIT ?`
-        ),
-        updateAgentStatus: db.prepare(
-          `UPDATE tasks SET agent_status = ?, status = ?, error = ?, finished_at = ? WHERE id = ?`
-        ),
-      };
-} // end !USE_TASK_PG sqlite init
+  countByStatus: db.prepare('SELECT status, COUNT(*) as count FROM tasks GROUP BY status'),
+  deleteOld: db.prepare('DELETE FROM tasks WHERE finished_at IS NOT NULL AND finished_at < ?'),
+  countRunning: db.prepare(`SELECT COUNT(*) as count FROM tasks WHERE status = 'running'`),
+  countRunningOnWorker: db.prepare(
+    `SELECT COUNT(*) as count FROM tasks WHERE status = 'running' AND worker_id = ?`
+  ),
+  // agent task（P2-b）
+  insertAgent: db.prepare(`
+    INSERT INTO tasks (id, type, params, status, created_at, engine, user_id, agent_status)
+    VALUES (?, 'agent_loop', ?, 'running', ?, 'agent', ?, 'running')
+  `),
+  insertEvent: db.prepare(`
+    INSERT INTO task_events (task_id, seq, event_type, payload, created_at)
+    VALUES (?, ?, ?, ?, ?)
+  `),
+  listEvents: db.prepare(
+    `SELECT seq, event_type, payload, created_at FROM task_events
+     WHERE task_id = ? AND seq > ? ORDER BY seq ASC LIMIT ?`
+  ),
+  updateAgentStatus: db.prepare(
+    `UPDATE tasks SET agent_status = ?, status = ?, error = ?, finished_at = ? WHERE id = ?`
+  ),
+};
 
 // ============================================================
 // Public API
@@ -214,10 +145,6 @@ function insertTask({
   containerWorkDir,
   parentTaskId,
 }) {
-  if (USE_TASK_PG)
-    return _runPg(() =>
-      _pg.insertTask({ taskId, type, params, ossInputUrl, workDir, containerWorkDir, parentTaskId })
-    );
   stmts.insert.run(
     taskId,
     type,
@@ -242,10 +169,6 @@ function createTaskForQueue({
   workDir,
   containerWorkDir,
 }) {
-  if (USE_TASK_PG)
-    return _runPg(() =>
-      _pg.createTaskForQueue({ type, params, ossInputUrl, parentTaskId, workDir, containerWorkDir })
-    );
   const { v4: uuidv4 } = require('uuid');
   const taskId = uuidv4();
   insertTask({ taskId, type, params, ossInputUrl, workDir, containerWorkDir, parentTaskId });
@@ -253,7 +176,6 @@ function createTaskForQueue({
 }
 
 function claimPendingTask(workerId) {
-  if (USE_TASK_PG) return _runPg(() => _pg.claimPendingTask(workerId));
   const claim = db.transaction(() => {
     const running = stmts.countRunningOnWorker.get(workerId).count;
     if (running >= config.maxConcurrentTasks) return null;
@@ -272,12 +194,10 @@ function claimPendingTask(workerId) {
 }
 
 function getRunningCountForWorker(workerId) {
-  if (USE_TASK_PG) return _runPg(() => _pg.getRunningCountForWorker(workerId));
   return stmts.countRunningOnWorker.get(workerId).count;
 }
 
 function publicTask(task) {
-  if (USE_TASK_PG) return _pg.publicTask(task);
   if (!task) return null;
   return {
     taskId: task.taskId,
@@ -295,29 +215,24 @@ function publicTask(task) {
 }
 
 function getTask(taskId) {
-  if (USE_TASK_PG) return _runPg(() => _pg.getTask(taskId));
   const row = stmts.get.get(taskId);
   if (!row) return null;
   return parseRow(row);
 }
 
 function listTasks(limit = 50) {
-  if (USE_TASK_PG) return _runPg(() => _pg.listTasks(limit));
   return stmts.list.all(limit).map(parseRow);
 }
 
 function listPendingTasks(limit = 10) {
-  if (USE_TASK_PG) return _runPg(() => _pg.listPendingTasks(limit));
   return stmts.listByStatus.all('pending', limit).map(parseRow);
 }
 
 function getRunningCount() {
-  if (USE_TASK_PG) return _runPg(() => _pg.getRunningCount());
   return stmts.countRunning.get().count;
 }
 
 function markRunning(taskId, workerId) {
-  if (USE_TASK_PG) return _runPg(() => _pg.markRunning(taskId, workerId));
   const wid = workerId || config.workerId;
   db.prepare(
     `UPDATE tasks SET status = 'running', progress = 5, progress_message = '正在启动分析...',
@@ -326,8 +241,6 @@ function markRunning(taskId, workerId) {
 }
 
 function markDone(taskId, { results, progress = 100, progressMessage = '分析完成' }) {
-  if (USE_TASK_PG)
-    return _runPg(() => _pg.markDone(taskId, { results, progress, progressMessage }));
   stmts.updateStatus.run(
     'done',
     progress,
@@ -341,7 +254,6 @@ function markDone(taskId, { results, progress = 100, progressMessage = '分析�
 }
 
 function markFailed(taskId, errorMsg) {
-  if (USE_TASK_PG) return _runPg(() => _pg.markFailed(taskId, errorMsg));
   stmts.updateStatus.run(
     'failed',
     0,
@@ -355,12 +267,10 @@ function markFailed(taskId, errorMsg) {
 }
 
 function updateProgress(taskId, progress, message) {
-  if (USE_TASK_PG) return _runPg(() => _pg.updateProgress(taskId, progress, message));
   stmts.updateStatus.run('running', progress, message, null, null, null, null, taskId);
 }
 
 function getStats() {
-  if (USE_TASK_PG) return _runPg(() => _pg.getStats());
   const rows = stmts.countByStatus.all();
   const stats = { pending: 0, running: 0, done: 0, failed: 0 };
   for (const r of rows) stats[r.status] = r.count;
@@ -368,7 +278,6 @@ function getStats() {
 }
 
 function cleanupOld(maxAgeMs = config.taskRetentionMs) {
-  if (USE_TASK_PG) return _runPg(() => _pg.cleanupOld(maxAgeMs));
   const cutoff = new Date(Date.now() - maxAgeMs).toISOString();
   const result = stmts.deleteOld.run(cutoff);
   if (result.changes > 0) {
@@ -382,7 +291,6 @@ function cleanupOld(maxAgeMs = config.taskRetentionMs) {
 // ============================================================
 
 function insertAgentTask({ taskId, userId, params }) {
-  if (USE_TASK_PG) return _runPg(() => _pg.insertAgentTask({ taskId, userId, params }));
   stmts.insertAgent.run(
     taskId,
     JSON.stringify(params || {}),
@@ -393,7 +301,6 @@ function insertAgentTask({ taskId, userId, params }) {
 }
 
 function appendTaskEvent(taskId, seq, eventType, payload) {
-  if (USE_TASK_PG) return _runPg(() => _pg.appendTaskEvent(taskId, seq, eventType, payload));
   stmts.insertEvent.run(
     taskId,
     seq,
@@ -404,7 +311,6 @@ function appendTaskEvent(taskId, seq, eventType, payload) {
 }
 
 function getTaskEventsSince(taskId, afterSeq, limit = 500) {
-  if (USE_TASK_PG) return _runPg(() => _pg.getTaskEventsSince(taskId, afterSeq, limit));
   return stmts.listEvents.all(taskId, afterSeq, limit).map((r) => ({
     seq: r.seq,
     eventType: r.event_type,
@@ -414,12 +320,10 @@ function getTaskEventsSince(taskId, afterSeq, limit = 500) {
 }
 
 function markAgentDone(taskId) {
-  if (USE_TASK_PG) return _runPg(() => _pg.markAgentDone(taskId));
   stmts.updateAgentStatus.run('done', 'completed', null, new Date().toISOString(), taskId);
 }
 
 function markAgentFailed(taskId, errorMsg) {
-  if (USE_TASK_PG) return _runPg(() => _pg.markAgentFailed(taskId, errorMsg));
   stmts.updateAgentStatus.run('failed', 'failed', String(errorMsg || 'agent task 失败'), new Date().toISOString(), taskId);
 }
 

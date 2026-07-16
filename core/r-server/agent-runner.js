@@ -36,7 +36,6 @@ const {
 } = require('./helpers/chat-summary');
 const { getActivePlanForUserAsync, renderActivePlanForPrompt } = require('./helpers/plans');
 const convSync = require('./helpers/conversations');
-const convAsync = require('./helpers/conversations-async');
 const {
   getOrCreateActiveConversation,
   appendMessageToConversation,
@@ -63,8 +62,6 @@ const config = require('./config');
 const taskStore = require('./task-store');
 const logger = require('./logger');
 
-const dbMod = require('./db');
-const useConvAsync = dbMod.USE_PG && process.env.BIOF3_P2_PG === '1';
 const skipAgentHeavyPrompt = config.runMode === 'platform';
 
 const MAX_ITERS = 15;
@@ -662,16 +659,7 @@ async function runAgentLoop({
                 projectId: context && context.projectId,
                 ...(assistantResultCards.length ? { resultCards: assistantResultCards } : {}),
               };
-              if (useConvAsync) {
-                await convAsync.appendMessageToConversation(
-                  _activeConv.id,
-                  'assistant',
-                  assistantAcc.trim(),
-                  assistantMeta
-                );
-              } else {
-                appendMessageToConversation(_activeConv.id, 'assistant', assistantAcc.trim(), assistantMeta);
-              }
+              appendMessageToConversation(_activeConv.id, 'assistant', assistantAcc.trim(), assistantMeta);
               try {
                 _maybeAutoTitleConversation(_activeConv.id, userId);
               } catch {}
