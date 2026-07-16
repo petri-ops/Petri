@@ -13,7 +13,6 @@ const {
   safeJoinUnder,
   createToolsAssetHandlers,
 } = require('../helpers/tools-assets');
-const {createToolsDellProxy} = require('../helpers/tools-dell-proxy');
 const {createToolsExecutor} = require('../helpers/tools-executor');
 const {createToolsInternalRoutes} = require('./tools-internal');
 const {createToolsMetadataRoutes} = require('./tools-metadata');
@@ -30,8 +29,6 @@ const JOBS_DIR = config.execMode === 'local'
   ? path.join(config.localResultsDir || path.join(require('os').homedir(), 'Documents', 'BioF3-Local', 'results'), 'tool-jobs')
   : '/mnt/storage_16tb/omichub/biof3-tool-jobs';
 const SCRIPTS_DIR = path.join(__dirname, '..', 'tool-scripts');
-const INTERNAL_TOKEN = process.env.BIOF3_INTERNAL_TOKEN || '';
-const DELL_INTERNAL_API_BASE = (process.env.BIOF3_DELL_INTERNAL_API_BASE || 'http://127.0.0.1:3001/api').replace(/\/+$/, '');
 /** Legacy static demo dirs — off by default (BIOF3_TOOL_DEMO_DISABLED=1). Demo = tool_jobs.is_public. */
 const TOOL_DEMO_RESULTS_DIR = config.toolDemoResultsDir || '';
 const TOOL_DEMO_DATA_DIR = config.toolDemoDataDir || '';
@@ -91,19 +88,6 @@ const {
 });
 
 const {
-  proxyDellToolRun,
-  proxyDellToolAsset,
-  proxyDellPrivateFile,
-  proxyDellGenerateReport,
-  proxyDellToolCancel,
-  proxyDellToolDelete,
-} = createToolsDellProxy({
-  internalToken: INTERNAL_TOKEN,
-  dellInternalApiBase: DELL_INTERNAL_API_BASE,
-  getUserId: userId,
-});
-
-const {
   handleToolRun,
   handlePrivateFileRead,
   handlePrivateFileWrite,
@@ -142,16 +126,9 @@ const registerToolsInternal = createToolsInternalRoutes({
 });
 const registerToolsPlatform = createToolsPlatformRoutes({
   db,
-  config,
   getUserId: userId,
   canAccessToolJob,
   isCancellableJob,
-  proxyDellToolRun,
-  proxyDellPrivateFile,
-  proxyDellGenerateReport,
-  proxyDellToolCancel,
-  proxyDellToolDelete,
-  proxyDellToolAsset,
   handleToolRun,
   handlePrivateFileRead,
   handlePrivateFileWrite,
