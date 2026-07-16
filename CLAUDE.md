@@ -14,18 +14,17 @@ BioF3 Desktop 是一个 Electron 桌面应用，结合了 AI 陪伴的全组学�
 
 ## 当前开发阶段
 
-当前处于 **Stage 1: UI 产品化验收与收口阶段**。已有 UI 实现不得重新从头审查；先用 Git 提交证据与 `docs/ui-productization-audit.md` 对账，只补缺失的定向实机验收。
+当前处于 **Stage 2: 模型层与多 Provider**。Stage 1 UI 产品化已在 `v0.0.1-rc.5` 检查点完成；后续 UI 只承接模型管理中心或修复明确回归，不重新启动泛化审美审查。
 
 固定执行顺序：
-1. Stage 1: 桌面 UI 产品化（当前）
-2. Stage 2: 模型层与多 Provider（等待 Stage 1 验收）
+1. Stage 1: 桌面 UI 产品化（已完成）
+2. Stage 2: 模型层与多 Provider（当前）
 3. Stage 3: Harness 与标准流程扩展（等待 Stage 2 验收）
 4. Stage 4: 首个稳定产品版本
 
 **重要限制**：
-- Stage 1 验收前不实现新模型 Provider
 - Stage 2 验收前不扩充 Harness 内容
-- 当前只做 UI 产品化和视觉一致性修复
+- 当前先做 MODEL-1 Provider 调用收口，不批量接入 Provider
 
 ### UI 台账同步铁律
 
@@ -40,7 +39,7 @@ BioF3 Desktop 是一个 Electron 桌面应用，结合了 AI 陪伴的全组学�
 开始任何任务前，按顺序阅读：
 1. `docs/v1-productization-roadmap.md` — 唯一阶段路线图
 2. `docs/project-workspace-handoff.md` — 当前工程检查点
-3. `docs/ui-productization-audit.md` — Stage 1 执行台账
+3. `docs/ui-productization-audit.md` — 已完成的 Stage 1 验收台账
 4. `docs/development-module-map.md` — 模块责任边界 (W/P/C)
 5. `docs/codex-style-workbench-direction.md` — UI 产品方向
 6. `docs/dependency-decoupling-checkpoint.md` — 去 vendor 化 + web 冗余清理检查点（架构现状 + 下阶段清理建议）
@@ -204,7 +203,7 @@ desktop/
    - 改核心后端直接改 `core/`，随 Desktop 一起提交
    - 单一后端形态：本地文件存储 + SQLite + 内嵌运行时本地执行；不要重新引入 OSS / PostgreSQL / docker 双模式
 
-4. **macOS-only 发布**: 当前版本 `v0.0.1-rc.4` 只支持 macOS arm64/x64
+4. **macOS-only 发布**: 当前版本 `v0.0.1-rc.5` 只支持 macOS arm64/x64
 
 ## 关键代码规范
 
@@ -315,7 +314,6 @@ npm run release:mac:oss:dry-run
 
 ## 禁止事项
 
-- **不要**在 Stage 1 实现新模型 Provider
 - **不要**在 Stage 2 前扩充 Harness 内容
 - **不要**建立第二套 executor、job 状态表或结果真相系统
 - **不要**在前端发明新流程状态（消费现有 Agent/job 状态）

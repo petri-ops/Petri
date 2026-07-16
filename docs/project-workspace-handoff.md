@@ -1,6 +1,6 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-07-15
+最后更新：2026-07-17
 
 ## 1. 恢复顺序
 
@@ -17,31 +17,35 @@
 
 ## 2. 当前产品阶段
 
-`v0.0.1-rc.4` 是可安装、可启动、可从 OSS 检查更新的技术基线，不是首个稳定产品版本。
+`v0.0.1-rc.5` 是 Stage 1 UI 产品化代码检查点，不是首个稳定产品版本；最新 OSS 安装发布仍为 `rc.4`。
 
 当前固定顺序：
 
 > **Stage 1 UI 产品化 → Stage 2 模型层 → Stage 3 Harness 与标准流程 → Stage 4 首个稳定产品版本**
 
-当前唯一实现工作是 Stage 1 `UI-1 实机审计与问题台账`。Stage 1 验收前不实现新模型 Provider；Stage 2 验收前不扩充 Harness 内容。阻断性回归不受该限制。
+当前唯一实现工作是 Stage 2 `MODEL-1 Provider 调用收口`。先定义统一模型契约并迁移现有 DeepSeek/DashScope 调用，不批量接入新 Provider；Stage 2 验收前不扩充 Harness 内容。
 
 ## 3. 当前立即任务
 
-按 [`ui-productization-audit.md`](./ui-productization-audit.md) 执行：
+按 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md) 的 MODEL-1 执行：
 
-1. 正式 `/Applications/BioF3.app` 与 `npm run dev` 开发版逐屏截图。
-2. 覆盖首页、项目工作台、Agent、结果、浏览器、文件、终端、设置、插件和专业页面壳层。
-3. 每个问题标注截图、复现步骤、主 W/P 模块、C 关注点、P0/P1/P2 和预期结果。
-4. 先向用户同步问题台账和建议批次，再开始修改。
-5. 第一批优先全局 token、桌面壳、顶栏、三栏容器、折叠和拖拽手感。
+1. 只读盘点全部模型调用与凭据读取入口。
+2. 定义版本化 `ModelProfile`、能力声明、角色和错误 contract。
+3. 通过兼容层迁移现有调用，不改变会话、确认、job 或 artifact 状态。
+4. 每个入口迁移均补 contract 测试与日志脱敏检查。
+5. MODEL-1 完成前不开始 MODEL-2 Provider 扩展。
 
-UI 形态遵守 [`codex-style-workbench-direction.md`](./codex-style-workbench-direction.md)：左侧项目与资源、中间 Agent 主舞台、右侧结果与工具；学习 Codex 的交互原则，不做像素级复制。
+### 已拆分给独立 Agent 的专项
+
+`[P-02 工具执行、Job 与 Artifact Truth]` 项目工作路径结果沙盒 Phase 0–5b 已完成实施（resolver + R/Python/MCP 收敛 + 测试），记录见 [`project-result-sandbox-plan.md`](./archive/checkpoints/project-result-sandbox-plan.md)。
+
+当前结论：项目作用域的 R/Python/MCP/Agent Workflow 已统一透传 `projectId`，由后端解析到 `workspace_path/results/jobs/<toolJobId>`；无项目的兼容任务仍保留显式全局落点。不得建立第二套结果系统、自动移动历史结果或删除用户外部工作目录。
 
 ## 4. 发布与安装状态
 
 主模块：`P-06 桌面集成与交付`。
 
-- 当前版本：`0.0.1-rc.4`，标签 `v0.0.1-rc.4`，发布提交 `08a0bbb`。
+- 当前代码版本：`0.0.1-rc.5`；最新 OSS 发布为 `v0.0.1-rc.4`（提交 `08a0bbb`）。
 - 默认平台：macOS-only；构建 arm64/x64。
 - GitHub：只保存源码和不可变标签，不上传 DMG。
 - OSS：保存双架构 DMG、SHA-256 清单和 `latest-mac.yml`。
@@ -89,7 +93,7 @@ Stage 2 目标以 [`v1-productization-roadmap.md`](./v1-productization-roadmap.m
 
 ## 6. UI 已建立结构与边界
 
-- 项目制 Dashboard 与 `/project/:projectId` 工作台。
+- 极简项目启动页与 `/project/:projectId` 工作台。
 - 左/中/右三栏、折叠与拖拽。
 - 项目级 conversation、Agent 输入和流式消息。
 - 参数确认、工具调用、运行/失败/恢复状态。
@@ -97,7 +101,40 @@ Stage 2 目标以 [`v1-productization-roadmap.md`](./v1-productization-roadmap.m
 - 图片、CSV/TSV、HTML、日志、JSON 和下载入口。
 - 浏览器、文件、终端与设置/插件容器。
 
-Stage 1 是逐屏产品化，不是推翻上述结构。结果预览继续采用现有受控 iframe/WebView 分工；不要因为拖拽跳版重新发明结果系统。
+Stage 1 已完成。Stage 2 的模型管理 UI 复用现有设置分类；结果预览继续采用受控 iframe/WebView 分工，不得因为模型层改造重新发明结果系统。
+
+### 2026-07-16 W-01/W-02 桌面壳与左栏检查点
+
+主模块：`W-01 桌面壳层`；影响模块：`W-02 工作台布局`、`P-06 桌面集成与交付`；关注点：`C-02`、`C-05`。
+
+当前已完成：
+
+- macOS 顶栏改为单一几何基准：`hiddenInset` 保留系统原生交通灯，不再设置 `trafficLightPosition`，不再用局部 `translateY` 互相补偿。
+- 标题栏高度统一为全局 `--biof3-titlebar-height: 38px`；TitleBar、工作区可用高度和 Desktop Dock 共用该变量。
+- 关闭最后一个 BioF3 窗口会退出整个应用；开发启动器会清理 Vite/Electron 子进程树，主进程同时停止 R/Python/Plumber 和集成终端。
+- 加入单实例保护；重复打开只聚焦已有窗口，不启动第二套本地后端。
+- R Server/Python Server/Plumber 保留 `3001/3004/8787` 为首选端口；如被其他程序占用，自动选择系统空闲端口，并通过 preload 安全桥传给前端，不杀占用者。
+- 左侧项目栏删除了与“搜索”工作台按钮重复的顶部筛选输入框，同时删除对应查询状态和废弃 CSS；快捷按钮组自然上移约 44px。
+- 左栏信息层级收敛：删除了重复的全局“新对话”，上方只保留搜索和插件等工作流入口；全局“设置”固定到左下角。原左下角主题切换器已移入设置页面的“外观主题”项，不在左栏重复暴露。
+- 项目行内的 `+` 改为直接创建并进入默认“新对话”，不再弹出标题确认表单。项目列表标题的 `+` 与无项目启动页统一先打开系统目录选择器；用户选定后，以目录 basename 作为项目名、以所选目录作为 workspace path 立即创建并进入，取消选择则不创建。
+- 项目树中的项目名和会话名支持双击后原位重命名；单击仍用于切换/展开，Enter 或失焦保存，Escape 取消，创建流程本身仍保持零确认。
+- 设置页已从单列长表单重组为“常规 / AI 模型 / 凭据 / 计算与数据 / 隐私与维护”五类导航，右侧一次只展示当前模块；模型预设改为紧凑卡片，检查更新与诊断导出移入维护区，AI 保存按钮只在模型和凭据分类出现。窄窗口下分类栏自动切换为顶部横向导航。
+- 项目和会话删除改为两阶段回收站机制：左侧树的 hover 删除按钮只归档，设置 → 隐私与维护固定展示回收站，可恢复、单项永久删除或清空。项目使用 SQLite 中的 Core `status=active|archived`，会话复用既有 archived 状态；永久删除项目会清理其应用内会话和消息，但明确不删除用户选择的外部工作目录。
+- 全局 `BackendStatusProvider` 的 R/Python 状态已接入会话摘要卡 Footer：仅使用 5px 状态点与 `R / Py` 短标签，在同一行保留运行中/总次数；运行中、未启动、未安装通过颜色区分，详细降级原因只在 hover title 中显示，不新增卡片分区。
+- 旧 Desktop Dashboard 已彻底删除（组件与 1133 行专属样式一并移除）。`/` 启动路由只在后端就绪后读取项目，有项目直接进入最近工作台；无项目只显示极简创建入口，加载失败显示可重试状态。启动路由也始终挂载统一 TitleBar，不再出现交通灯压住无拖拽页面的情况。
+
+验证证据：
+
+- `npm --prefix frontend run check` 通过。
+- `npm test --prefix frontend` 通过：19 files / 146 tests。
+- `npm --prefix frontend run build` 通过：568 modules；仅有既有 chunk-size 提示。
+- `npm run build:mac` 通过，生成 `rc.5` x64/arm64 DMG；未签名、未公证，且未执行 OSS 上传脚本。
+- 打包态 `dist/mac-arm64/BioF3.app` 在本地 `:3002` 启动，项目工作台、结果与 Artifact 读取正常。
+- 真实占用 `3001/3004` 后启动 BioF3，R/Python 自动切换至系统空闲端口，渲染页和 Python Worker 正常就绪；验证后已恢复默认端口启动。
+- 开发实例关闭时，日志确认 Electron、R Server 与 Python Server 收到退出/停止信号。
+- 临时项目与会话均完成 `创建 → 归档 → 回收站可见 → 恢复 → 再归档 → 永久删除` 实际 API 验证；另验证永久删除项目后其活动会话返回 404，测试数据已清理。
+
+Stage 1 出口已满足：UI 台账 30/30 verified，明暗主题、设置五分类、回收站、结果区、折叠/拖拽和动态端口回退已完成实机验收。下一步进入 MODEL-1；不恢复局部偏移补丁、重复搜索框或旧 Desktop Dashboard。
 
 ## 7. 验证门禁
 
@@ -113,13 +150,12 @@ npm run harness:phase6
 npm run harness:agent-evaluate
 ```
 
-UI 任务必须补实机截图/交互证据；Electron 壳、IPC、runtime、更新和打包资源改动必须补打包态验证。涉及 Core 时同时提交 Core、同步 submodule 指针与 `.vendor-lock`。
+UI 任务必须补实机截图/交互证据；Electron 壳、IPC、runtime、更新和打包资源改动必须补打包态验证。涉及 Core 时直接修改仓库内 `core/` 并随 Desktop 提交；没有 submodule 或 `.vendor-lock`。
 
 ## 8. 禁止误读
 
 - 不把 `docs/archive/` 中的历史 P0、旧分支、旧 CI 或旧阶段编号当成当前任务。
 - 不把旧 Windows/Linux 发布计划恢复为当前门禁；除非用户重新明确要求。
-- 不在 Stage 1 扩充模型 Provider 或 Harness 内容。
 - 不在 Stage 2 批量增加分析流程。
 - 不用前端回退代替后端 artifact truth。
 - 不覆盖用户未提交改动，不随手 reset 子模块或工作树。
@@ -133,7 +169,7 @@ UI Stage 1：
 - `frontend/src/components/workspace-panels/`
 - `frontend/src/components/copilot/SimpleChat.tsx`
 - `frontend/src/pages/project-workspace.tsx`
-- `frontend/src/pages/_desktop-dashboard.tsx`
+- `frontend/src/pages/home.tsx`
 - `frontend/src/themes/`
 - `frontend/src/styles/global.css`
 

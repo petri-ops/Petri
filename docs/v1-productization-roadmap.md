@@ -1,10 +1,10 @@
 # BioF3 Desktop v1 产品化路线图
 
-最后更新：2026-07-15
+最后更新：2026-07-17
 
 ## 1. 决策与文档优先级
 
-本文件是 `rc.4` 之后、首个相对稳定产品版本之前的主执行路线图。后续无论使用 Codex、Claude Code、Cursor 或其他 Agent，都必须先读取本文件，再读取：
+本文件是 `rc.5` 之后、首个相对稳定产品版本之前的主执行路线图。后续无论使用 Codex、Claude Code、Cursor 或其他 Agent，都必须先读取本文件，再读取：
 
 1. [`docs/project-workspace-handoff.md`](./project-workspace-handoff.md)
 2. [`docs/development-module-map.md`](./development-module-map.md)
@@ -19,11 +19,11 @@
 
 ## 2. 当前基线
 
-- `v0.0.1-rc.4` 是当前技术发布基线，不等同于产品 v1。
+- `v0.0.1-rc.5` 是 Stage 1 UI 产品化代码检查点，不等同于产品 v1；最新 OSS 安装发布仍为 `rc.4`，直到单独执行发布流程。
 - macOS arm64/x64 本机构建、OSS 发布、最新版提示和 `rc.3 → rc.4` 真实升级链路已经通过。
 - Harness Phase 1–6、Plugin SDK、Agent workflow runtime、恢复与 fixture 门禁已经建立；Stage 1–2 期间保持可回归，不继续扩建第二套基础设施。
 - 当前聊天主链主要依赖 DeepSeek；DashScope 已用于 embedding/vision；OpenAI/Ollama 在设置页仍属于未来入口，模型调用链仍存在 DeepSeek 硬编码。
-- 桌面三栏工作台、项目会话、结果卡片、Artifact 查看器和参数确认已经建立，但桌面壳、视觉一致性、信息密度、设置页和专业工具容器仍需产品化验收。
+- 桌面三栏工作台、项目会话、结果/Artifact、浏览器、文件、终端、设置分类和回收站已完成 Stage 1 产品化验收。
 
 始终保持的工程不变量：
 
@@ -33,7 +33,7 @@ UI 不得制造第二套状态真相，模型层不得绕过确认/审计边界�
 
 ## 3. Stage 1：桌面 UI 产品化
 
-状态：**当前唯一实现阶段**。
+状态：**已完成（`v0.0.1-rc.5` 检查点）**。
 
 主模块：`W-01` 至 `W-07`；主要关注点：`C-01`、`C-02`、`C-04`、`C-06`。
 
@@ -101,7 +101,7 @@ UI 不得制造第二套状态真相，模型层不得绕过确认/审计边界�
 
 ## 4. Stage 2：模型层与多 Provider
 
-状态：等待 Stage 1 验收。
+状态：**当前唯一实现阶段**。
 
 主模块：`P-07 模型网关与 AI Provider`；影响模块：`W-03`、`P-01`、`P-03`、`P-06`；主要关注点：`C-03`、`C-04`、`C-05`。
 
@@ -231,10 +231,10 @@ UI 不得制造第二套状态真相，模型层不得绕过确认/审计边界�
 
 ## 8. 当前立即执行项
 
-当前只启动 Stage 1 的 `UI-1 实机审计与问题台账`：
+当前只启动 Stage 2 的 `MODEL-1 Provider 调用收口`：
 
-1. 按 `docs/ui-productization-audit.md` 模板填充逐屏审计结果。
-2. 以正式 `rc.4` 和开发版为对象逐屏截图。
-3. 将问题按 P0/P1/P2、W 模块和 C 关注点分类。
-4. 与用户确认第一批 UI 修复范围。
-5. 从桌面壳、顶栏、三栏容器和全局 token 开始，不先改模型或 Harness。
+1. 只读盘点聊天、Agent、摘要、记忆、报告、解释、embedding/vision 的实际模型调用入口。
+2. 定义版本化 `ModelProfile` 与 Gateway contract，不先批量增加 Provider。
+3. 让现有 DeepSeek/DashScope 路径经兼容层转发到统一 Gateway。
+4. 保持 conversation、确认、`tool_job` 与 artifact truth 不变，并为每个迁移入口补 contract 测试。
+5. MODEL-1 验收后再进入 MODEL-2 第一批 Provider；Stage 2 验收前不扩充 Harness 内容。

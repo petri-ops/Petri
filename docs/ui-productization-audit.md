@@ -2,13 +2,13 @@
 
 最后更新：2026-07-17
 
-状态：**定向验收收口中**
+状态：**Stage 1 验收完成（30/30 verified）**
 
 本文件是 [`docs/v1-productization-roadmap.md`](./v1-productization-roadmap.md) Stage 1 的唯一 UI 问题清单。它记录真实可复现问题，不用来收集没有目标层级的泛化审美意见。
 
 ## 1. 审计基线
 
-- 正式安装版：`/Applications/BioF3.app`，当前版本 `0.0.1-rc.4`。
+- 正式安装版基线：`/Applications/BioF3.app`，版本 `0.0.1-rc.4`；Stage 1 开发检查点版本 `0.0.1-rc.5`。
 - 开发版：仓库根目录执行 `npm run dev`。
 - 主题：日间、夜间、跟随系统。
 - 窗口：常用尺寸、最小可用尺寸、最大化。

@@ -1,6 +1,6 @@
 # BioF3 Desktop 文档入口
 
-最后更新：2026-07-15
+最后更新：2026-07-17
 
 ## 当前开发必读
 
@@ -9,7 +9,7 @@
 1. [`v1-productization-roadmap.md`](./v1-productization-roadmap.md) — 唯一阶段路线图。
 2. [`next-steps-roadmap.md`](./next-steps-roadmap.md) — 当前阶段与立即任务摘要。
 3. [`project-workspace-handoff.md`](./project-workspace-handoff.md) — 当前可恢复工程检查点。
-4. [`ui-productization-audit.md`](./ui-productization-audit.md) — Stage 1 执行台账。
+4. [`ui-productization-audit.md`](./ui-productization-audit.md) — 已完成的 Stage 1 验收台账。
 5. [`development-module-map.md`](./development-module-map.md) — W/P/C 责任边界。
 
 ## 当前有效专项规范
@@ -25,7 +25,7 @@
 ## 发布记录
 
 - [`releases/v0.0.1-rc.2.md`](./releases/v0.0.1-rc.2.md) — OSS 迁移前历史发布记录。
-- `rc.3`、`rc.4` 当前状态集中记录在 handoff、next steps 与 OSS 更新说明中。
+- `rc.3`、`rc.4` 发布状态与 `rc.5` 代码检查点集中记录在 handoff、next steps 与 OSS 更新说明中。
 
 ## 历史归档
 
