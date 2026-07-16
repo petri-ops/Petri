@@ -443,13 +443,8 @@ function createToolsExecutor({
       if (job.is_test_run) return;
       let username = null;
       try {
-        if (dbMod.isPg && dbMod.isPg()) {
-          const u = await dbMod.getUserByIdAsync(job.user_id);
-          username = u && u.username;
-        } else {
-          const u = await db.prepare('SELECT username FROM users WHERE id=?').get(job.user_id);
-          username = u && u.username;
-        }
+        const u = await db.prepare('SELECT username FROM users WHERE id=?').get(job.user_id);
+        username = u && u.username;
       } catch {}
       notify.toolJobFailed({
         jobId,

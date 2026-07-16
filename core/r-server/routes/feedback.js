@@ -95,13 +95,8 @@ module.exports = function registerFeedback(app) {
     let username = null;
     if (userId) {
       try {
-        if (dbMod.isPg && dbMod.isPg()) {
-          const u = await dbMod.getUserByIdAsync(userId);
-          username = u && u.username;
-        } else {
-          const u = _dbSync.prepare('SELECT username FROM users WHERE id=?').get(userId);
-          username = u && u.username;
-        }
+        const u = _dbSync.prepare('SELECT username FROM users WHERE id=?').get(userId);
+        username = u && u.username;
       } catch {}
     }
 

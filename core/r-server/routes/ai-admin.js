@@ -2,10 +2,8 @@
  * routes/ai-admin.js — admin governance, audit, AI usage stats.
  * Migrated from server.js as part of MODULES_BATCH2_v1.
  *
- * 2026-06-08: ASYNC DB (getAsyncDbForLegacyModules + listUsersAsync). The old
- * sync shim used deasync.loopWhile which is NOT reentrant — the admin console
- * fires these concurrently with other AI reads, and concurrent loopWhile
- * crashed V8 ("Empty MaybeLocal") taking down the platform.
+ * Uses the Promise facade over the desktop SQLite database so route handlers
+ * can keep a consistent async control flow.
  */
 const express = require('express');
 const dbMod = require('../db');
@@ -15,9 +13,8 @@ const {
   setAgentGlobalPauseAsync,
 } = require('../helpers/admin-gov');
 
-/** PG: undone/agent_paused are BOOLEAN; SQLite uses 0/1 */
 function _undoneTrue(col = 'undone') {
-  return dbMod.isPg() ? `${col} IS TRUE` : `${col}=1`;
+  return `${col}=1`;
 }
 
 function _boolFromDb(v) {
@@ -44,9 +41,9 @@ module.exports = function mountAdmin(app) {
     if (!_requireAdmin(req, res)) return;
     try {
       // OPT_ADMIN_OVERVIEW_v1: 11 batch COUNT queries instead of users × 11 sequential.
-      const baseUsers = dbMod.isPg()
-        ? await dbMod.listUsersAsync()
-        : await adb.prepare('SELECT id, username, role, created_at FROM users ORDER BY created_at DESC').all();
+      const baseUsers = await adb
+        .prepare('SELECT id, username, role, created_at FROM users ORDER BY created_at DESC')
+        .all();
 
       if (baseUsers.length === 0) return res.json({status:'ok', users: [], globalPaused: false});
 
@@ -144,7 +141,7 @@ module.exports = function mountAdmin(app) {
     if (!userId || typeof paused !== 'boolean') return res.status(400).json({status:'error', error:'需要 userId 和 paused (boolean)'});
     try {
       const now = new Date().toISOString();
-      const pausedVal = dbMod.isPg() ? !!paused : (paused ? 1 : 0);
+      const pausedVal = paused ? 1 : 0;
       await adb.prepare(`INSERT INTO copilot_settings(user_id, agent_paused, updated_at) VALUES (?, ?, ?)
                   ON CONFLICT(user_id) DO UPDATE SET agent_paused=excluded.agent_paused, updated_at=excluded.updated_at`)
         .run(userId, pausedVal, now);
@@ -178,9 +175,7 @@ module.exports = function mountAdmin(app) {
     const PRICING = (globalThis._biof3 && globalThis._biof3.AI_PRICING) || {};
     if (!estimate) return res.status(500).json({status:'error', error:'helper_missing'});
     try {
-      const dayExpr = dbMod.isPg()
-        ? "to_char(ts AT TIME ZONE 'UTC', 'YYYY-MM-DD')"
-        : 'substr(ts, 1, 10)';
+      const dayExpr = 'substr(ts, 1, 10)';
       const daily = await adb.prepare(`
         SELECT ${dayExpr} AS day, kind, CAST(COUNT(*) AS INTEGER) AS calls,
                CAST(SUM(prompt_tokens) AS INTEGER) AS prompt_tokens, CAST(SUM(completion_tokens) AS INTEGER) AS completion_tokens,
@@ -196,7 +191,7 @@ module.exports = function mountAdmin(app) {
         FROM ai_usage WHERE ts >= ? AND user_id IS NOT NULL
         GROUP BY user_id ORDER BY (SUM(prompt_tokens) + SUM(completion_tokens)) DESC
       `).all(cutoff);
-      const nameRows = dbMod.isPg() ? await dbMod.listUsersAsync() : await adb.prepare('SELECT id, username FROM users').all();
+      const nameRows = await adb.prepare('SELECT id, username FROM users').all();
       const nameMap = Object.fromEntries(nameRows.map((u) => [u.id, u.username]));
       const perUser = usageByUser.map((d) => ({
         id: d.user_id,
@@ -213,9 +208,7 @@ module.exports = function mountAdmin(app) {
       }));
       const perUserWithCost = perUser.map(d => ({...d, estimated_cost_cny: estimate('deepseek-chat', d.prompt_tokens, d.completion_tokens)}));
       const errorsBreakdown = await adb.prepare(`SELECT error_code, COUNT(*) AS n FROM ai_usage WHERE ts >= ? AND error_code IS NOT NULL GROUP BY error_code ORDER BY n DESC`).all(cutoff);
-      const undoneCase = dbMod.isPg()
-        ? 'CAST(SUM(CASE WHEN undone IS TRUE THEN 1 ELSE 0 END) AS INTEGER)'
-        : 'CAST(SUM(CASE WHEN undone=1 THEN 1 ELSE 0 END) AS INTEGER)';
+      const undoneCase = 'CAST(SUM(CASE WHEN undone=1 THEN 1 ELSE 0 END) AS INTEGER)';
       const topActs = await adb.prepare(`SELECT action, CAST(COUNT(*) AS INTEGER) AS n, ${undoneCase} AS undone FROM agent_audit WHERE ts >= ? GROUP BY action ORDER BY n DESC LIMIT 20`).all(cutoff);
       res.json({status:'ok', days, pricing: PRICING, daily: dailyWithCost, perUser: perUserWithCost, errors: errorsBreakdown, topActs});
     } catch (e) { res.status(500).json({status:'error', error: e.message}); }
@@ -226,7 +219,7 @@ module.exports = function mountAdmin(app) {
     if (!_requireAdmin(req, res)) return;
     try {
       // OPT_ADMIN_MEMSTATS_v1: 4 batch queries instead of users × 4 sequential.
-      const baseUsers = dbMod.isPg() ? await dbMod.listUsersAsync() : await adb.prepare('SELECT id, username FROM users').all();
+      const baseUsers = await adb.prepare('SELECT id, username FROM users').all();
       if (baseUsers.length === 0) return res.json({status: 'ok', users: []});
 
       const [factCounts, vecCounts, chatCounts] = await Promise.all([

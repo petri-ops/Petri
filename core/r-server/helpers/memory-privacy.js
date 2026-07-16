@@ -39,13 +39,12 @@ function logChatAudit(userId, page, msgCount) {
 
 function getMemoryStats(userId) {
   const stats = {};
-  const pinnedCond = dbMod.isPg() ? 'pinned IS TRUE' : 'pinned = 1';
   try {
     stats.facts = sqlite
       .prepare('SELECT COUNT(*) AS n FROM user_facts WHERE user_id = ?')
       .get(userId).n;
     stats.factsPinned = sqlite
-      .prepare(`SELECT COUNT(*) AS n FROM user_facts WHERE user_id = ? AND ${pinnedCond}`)
+      .prepare('SELECT COUNT(*) AS n FROM user_facts WHERE user_id = ? AND pinned = 1')
       .get(userId).n;
   } catch {
     stats.facts = 0;

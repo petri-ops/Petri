@@ -160,50 +160,6 @@ function _enforce(moduleKeys, req, res, next) {
   });
 }
 
-/** P0 ECS: async user lookup (no deasync on /api/ai/* gate). */
-async function _enforceAsync(moduleKeys, req, res, next) {
-  if (req.user && req.user.role === 'admin') return next();
-  const keys = Array.isArray(moduleKeys) ? moduleKeys : [moduleKeys];
-  const primary = keys[0];
-  const uid = _userIdOf(req);
-  if (!uid) {
-    let guestOk = false;
-    try {
-      const gp = require('./guest-permissions');
-      if (gp.canGuestAsync) {
-        const results = await Promise.all(keys.map((k) => gp.canGuestAsync(k)));
-        guestOk = results.some((r) => r);
-      } else {
-        guestOk = keys.some((k) => gp.canGuest(k));
-      }
-    } catch {
-      /* ignore */
-    }
-    if (guestOk) return next();
-    return res.status(403).json({
-      status: 'error',
-      error: 'module_forbidden',
-      module: primary,
-      message: '该功能暂未对游客开放，请登录或联系管理员。',
-    });
-  }
-  let row = null;
-  try {
-    if (dbMod.getUserByIdAsync) row = await dbMod.getUserByIdAsync(uid);
-    else row = dbMod.getUserById(uid);
-  } catch {
-    /* fall through */
-  }
-  if (!row) return res.status(401).json({ status: 'error', error: '未登录' });
-  if (keys.some((k) => can(row, k))) return next();
-  return res.status(403).json({
-    status: 'error',
-    error: 'module_forbidden',
-    module: primary,
-    message: MODULE_MSG[primary] || '该功能暂未对你的账号开放。',
-  });
-}
-
 /**
  * Single centralized gate middleware. Mount once after auth, before routes.
  * Maps request paths/methods to the module they belong to, then enforces.
@@ -224,14 +180,7 @@ function moduleGate(req, res, next) {
   const m = req.method;
 
   const runGate = (moduleKeys) => {
-    if (dbMod.isPg && dbMod.isPg()) {
-      _enforceAsync(moduleKeys, req, res, next).catch((e) => {
-        console.error('[moduleGate]', e && e.message);
-        if (!res.headersSent) res.status(500).json({ status: 'error', error: '权限检查失败' });
-      });
-    } else {
-      _enforce(moduleKeys, req, res, next);
-    }
+    _enforce(moduleKeys, req, res, next);
   };
 
   // --- copilot: all /api/ai/* except health + admin ---

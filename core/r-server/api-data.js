@@ -130,12 +130,8 @@ router.get('/quota', (req, res) => {
     },
     // Analysis count this month
     analysesThisMonth: (() => {
-      const db2 = require('./db');
       const thisMonth = new Date().toISOString().slice(0, 7) + '-01';
-      if (db2.isPg && db2.isPg()) {
-        return db2.countAnalysesForUserSince(userId, thisMonth) || 0;
-      }
-      const row = db2.db
+      const row = require('./db').db
         .prepare(
           'SELECT COUNT(*) as cnt FROM analyses WHERE dataset_id IN (SELECT id FROM datasets WHERE project_id IN (SELECT id FROM projects WHERE user_id = ?)) AND created_at >= ?'
         )

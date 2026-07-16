@@ -1000,8 +1000,6 @@ module.exports = {
   deleteCellLabel,
   getLabelsSummary,
   db,
-  isPgUsers: () => false,
-  isPg: () => false,
   getSqliteForLegacyModules,
   getAsyncDbForLegacyModules,
 };
