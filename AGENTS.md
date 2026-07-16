@@ -24,7 +24,7 @@ npm run dev          # 启动 Electron (npm run dev:electron)
 npm run dev:electron # 带 --dev 标志
 
 # 前端开发
-cd frontend && npm run dev   # Vite dev server (:5173)
+cd frontend && npm run dev   # Vite dev server (:3000)
 cd frontend && npm run build # 构建 SPA
 
 # 全量构建
@@ -64,8 +64,11 @@ desktop/
 │   │   └── desktopBridge.ts  # IPC 桥接
 │   └── themes/            # 主题系统
 ├── test/                   # Electron 测试
-└── vendor/biof3-core/    # 核心库 (git submodule)
+└── core/                   # 核心后端（仓库内，已内联；r-server/py-server/shared-backend）
 ```
+
+> 架构去耦（2026-07）：core 已从 vendor submodule 内联；OSS/PostgreSQL/docker 双模式已移除，
+> 现为「本地文件存储 + SQLite + 内嵌运行时本地执行」。详见 `docs/dependency-decoupling-checkpoint.md`。
 
 ### 关键规范
 

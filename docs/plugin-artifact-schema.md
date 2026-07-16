@@ -12,7 +12,7 @@ The runtime keeps backward compatibility with the existing split files:
 - `plugin.json`: install/runtime/platform metadata.
 - `tool-definition.json`: form/input/output metadata.
 
-`vendor/biof3-core/r-server/plugin-loader.js` merges both files through
+`core/r-server/plugin-loader.js` merges both files through
 `normalizePluginManifest()`, so Harness and MCP tools consume one stable
 contract even while older plugins remain installable.
 

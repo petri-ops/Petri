@@ -178,7 +178,7 @@ UI 不得制造第二套状态真相，模型层不得绕过确认/审计边界�
 - 缺陷在安装或 CI 阶段给出结构化诊断。
 - Agent 按 `plan → run → verify → bind → decide/recover` 单步推进。
 - 只有真实 valid artifact 能激活下游。
-- local/container adapter 行为一致；需要远端时只扩 adapter。
+- 本地内嵌运行时执行（`execMode=local`，桌面唯一模式）；canonical execution context 抽象保留，未来若需远端/容器执行只扩 adapter，不改业务。
 
 ### 5.3 Stage 3 验收出口
 
@@ -226,7 +226,7 @@ UI 不得制造第二套状态真相，模型层不得绕过确认/审计边界�
 - 当前 Stage、主模块和任务目标。
 - 修改文件与关键设计决定。
 - 验证命令、实机证据和未覆盖项。
-- 是否影响 Core submodule 与 `.vendor-lock`。
+- 涉及核心后端的改动直接改仓库内 `core/`，随 Desktop 一起提交（已去 vendor 化，无 submodule / `.vendor-lock`）。
 - 下一步和禁止破坏的不变量。
 
 ## 8. 当前立即执行项

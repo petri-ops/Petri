@@ -7,8 +7,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 BioF3 Desktop 是一个 Electron 桌面应用，结合了 AI 陪伴的全组学学习与实战平台。技术栈包括：
 - **桌面壳**: Electron 30.5.1
 - **前端**: React 18 + Vite + TypeScript (严格模式)
-- **后端**: Node.js + better-sqlite3
-- **核心库**: `vendor/biof3-core/` (git submodule)
+- **后端**: Node.js + better-sqlite3（纯本地：本地文件存储 + SQLite + 内嵌 R/Python 本地执行）
+- **核心库**: `core/`（仓库内，已内联；不再是 git submodule）
+
+> **架构去耦（2026-07）**：核心后端已从 `vendor/biof3-core` submodule 内联为 `core/`；OSS 存储、PostgreSQL、docker 执行三条 web/ECS 双模式分支已全部移除。详见 `docs/dependency-decoupling-checkpoint.md`。凡本文与该检查点冲突，以检查点为准。
 
 ## 当前开发阶段
 
@@ -33,6 +35,7 @@ BioF3 Desktop 是一个 Electron 桌面应用，结合了 AI 陪伴的全组学�
 3. `docs/ui-productization-audit.md` — Stage 1 执行台账
 4. `docs/development-module-map.md` — 模块责任边界 (W/P/C)
 5. `docs/codex-style-workbench-direction.md` — UI 产品方向
+6. `docs/dependency-decoupling-checkpoint.md` — 去 vendor 化 + web 冗余清理检查点（架构现状 + 下阶段清理建议）
 
 `docs/archive/` 只用于追溯历史，不决定当前优先级。
 
@@ -42,15 +45,15 @@ BioF3 Desktop 是一个 Electron 桌面应用，结合了 AI 陪伴的全组学�
 
 ```bash
 # 前端开发
-cd frontend && npm run dev              # Vite dev server (:5173)
+cd frontend && npm run dev              # Vite dev server (:3000)
 cd frontend && npm run build            # 构建 SPA
 
 # Electron 开发
-npm run dev                             # 启动 Electron + 自动重载
+npm run dev                             # 启动 Vite(:3000) + Electron + 自动重载
 npm run dev:electron                    # 带 --dev 标志的 Electron
 
 # 检查
-npm run check                           # 静态检查 + vendor 同步 + manifest 校验
+npm run check                           # 静态语法检查 + Harness manifest 校验
 npm --prefix frontend run check         # TypeScript 类型检查
 npm test                                # 根项目测试
 npm test --prefix frontend              # 前端测试
@@ -111,16 +114,18 @@ desktop/
 │   │   └── desktopBridge.ts      # IPC 通信桥接（必经）
 │   ├── themes/                   # 主题系统
 │   └── styles/                   # 全局样式
-├── vendor/biof3-core/            # 核心后端库 (git submodule)
-│   ├── r-server/                 # R 分析服务
-│   ├── shared-backend/           # 共享后端逻辑
+├── core/                          # 核心后端库（仓库内，已内联）
+│   ├── r-server/                 # R 分析服务 + 路由 + Copilot/Agent
+│   ├── py-server/                # Python 分析服务
+│   ├── shared-backend/           # 共享后端逻辑（executors, storage, execution-context）
+│   ├── packages/                 # shared-copilot 等共享包
 │   └── test/                     # Core 测试
 ├── resources/
 │   └── built-in-plugins/         # 内置插件
 ├── scripts/                       # 构建和工具脚本
 │   ├── harness-file-index.mjs    # Harness 文件索引
 │   ├── scaffold-harness-tool.mjs # 插件脚手架
-│   └── sync-vendor.sh            # vendor 同步检查
+│   └── publish-macos-oss.mjs     # macOS 更新发布（唯一用 ali-oss 的地方）
 └── test/                         # Electron 和集成测试
 ```
 
@@ -143,7 +148,7 @@ desktop/
 - **P-02 执行真相**: `run_tool → tool_job → artifact truth` 唯一执行链
 - **P-03 Harness 工作流**: `inspect → infer → select → repair → confirm → run → verify → report`
 - **P-04 Plugin SDK**: plugin.json, tool-definition.json, 输入/输出 schema
-- **P-05 Runtime 适配**: R/Python/Node runtime, local/container/remote adapter
+- **P-05 Runtime 适配**: R/Python/Node 内嵌 runtime，本地执行（`execMode=local`，唯一模式）；canonical context 抽象保留
 - **P-06 桌面集成**: Electron 主进程、IPC、构建、macOS 打包、OSS 更新
 - **P-07 模型网关**: Model Profile, Provider 注册, 流式响应, tool calling
 
@@ -185,9 +190,10 @@ desktop/
 
 2. **Harness Phase 1–6 已完成**: Stage 1–2 只保持回归，不扩充内容
 
-3. **vendor/biof3-core 同步**:
-   - 涉及 Core 改动时，同时提交 Core、同步 submodule 指针和 `.vendor-lock`
-   - 运行 `bash scripts/sync-vendor.sh check` 验证同步
+3. **核心后端在仓库内 `core/`**:
+   - 已去 vendor 化，无 git submodule / `.vendor-lock` / `sync-vendor.sh`
+   - 改核心后端直接改 `core/`，随 Desktop 一起提交
+   - 单一后端形态：本地文件存储 + SQLite + 内嵌运行时本地执行；不要重新引入 OSS / PostgreSQL / docker 双模式
 
 4. **macOS-only 发布**: 当前版本 `v0.0.1-rc.4` 只支持 macOS arm64/x64
 
@@ -214,11 +220,10 @@ desktop/
 - 内置插件在 `resources/built-in-plugins/`
 - 插件必须声明: id, name, version, input/output schema, failureModes
 
-### Vendor Submodule
+### 核心后端（core/）
 
-- 核心后端逻辑在 `vendor/biof3-core/`
-- 修改 Core 后运行 `bash scripts/sync-vendor.sh check`
-- `.vendor-lock` 记录当前锁定的 Core commit
+- 核心后端逻辑在仓库内 `core/`（`r-server` / `py-server` / `shared-backend` / `packages`）。
+- 已内联，无 submodule；改核心直接改 `core/`，随 Desktop 一起提交，无需 vendor 同步。
 
 ## 验证门禁
 
@@ -249,7 +254,7 @@ npm run harness:agent-evaluate
 
 ### 开发模式
 
-- 前端开发服务器: `http://localhost:5173`
+- 前端开发服务器: `http://localhost:3000`
 - R 服务健康检查: `:3001/api/health`
 - Python 服务健康检查: `:3004/api/health`
 - 静态资源服务: `:3002`
@@ -264,7 +269,6 @@ npm run harness:agent-evaluate
 ### 常见问题
 
 - **前端类型错误**: 运行 `npm --prefix frontend run check`
-- **vendor 不一致**: 运行 `bash scripts/sync-vendor.sh check`
 - **Harness manifest 无效**: 运行 `npm run harness:check`
 - **Electron 窗口无法打开**: 检查 `src/main.js` 和 DevTools Console
 

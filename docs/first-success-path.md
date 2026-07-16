@@ -111,15 +111,15 @@ build artifacts; Windows follows in Week 3.5.
 ## Reproducing the real run locally
 
 ```bash
-# 1. Start r-server in local mode (skips OSS, uses system R)
-cd vendor/biof3-core/r-server
+# 1. Start r-server in local mode (local storage, uses system R)
+cd core/r-server
 BIOF3_STORAGE=local BIOF3_LOCAL_MODE=1 BIOF3_EXEC_MODE=local \
   BIOF3_R_HOME=/Library/Frameworks/R.framework/Resources \
   PORT=3001 BIOF3_TEMP_DIR=/tmp/biof3-tmp BIOF3_CACHE_DIR=/tmp/biof3-cache \
   node server.js &
 
 # 2. Run the golden path (server actually listens on 3003, not 3001)
-cd ../../..  # back to repo root
+cd ../..  # back to repo root
 R_BASE=http://localhost:3003 node scripts/golden-path.mjs --skip-install
 
 # Expected:

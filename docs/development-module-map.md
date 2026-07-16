@@ -1,6 +1,6 @@
 # BioF3 开发模块地图
 
-最后更新：2026-07-14
+最后更新：2026-07-16
 
 这份文档是 BioF3 Desktop 的统一开发词典。需求、缺陷、交接、提交和测试都应使用这里的模块名，避免把“右侧栏”“结果页”“后端”“主题”等不同层级的概念混在一起。
 
@@ -125,19 +125,21 @@
 
 ### P-05 Runtime 与平台适配（Runtime & Adapters）
 
-负责分析在本地、容器和远端平台上的一致运行环境。
+负责分析在本地内嵌运行时上的一致运行环境。
 
-- 包含：canonical execution context、R/Python/Node runtime、路径映射、local/container/remote adapter、跨平台 shell 与 ABI 兼容。
-- 平台差异只能停留在 adapter 层，不能渗入业务 UI 或工作流定义。
-- 主要路径：`core/shared-backend/execution-context.js`、runtime helpers、`src/platform-compat.js`。
+- 桌面版**只有本地执行一种模式**：直接调内嵌 R / Python（`execMode=local`）。docker/容器执行分支已于 2026-07 去除（见 `dependency-decoupling-checkpoint.md`）。
+- 包含：canonical execution context（作为稳定的跨引用路径抽象保留）、R/Python/Node runtime、路径映射、跨平台 shell 与 ABI 兼容。
+- 平台差异只能停留在 adapter 层，不能渗入业务 UI 或工作流定义；未来若需远端/容器执行，只扩 adapter，不改业务。
+- 主要路径：`core/shared-backend/execution-context.js`、`core/shared-backend/executors/`、runtime helpers、`src/platform-compat.js`。
 
 ### P-06 桌面集成与交付（Desktop Integration & Delivery）
 
-负责 Electron 主进程、IPC、安全边界、服务启动、资源打包、安装更新和 vendor 同步。
+负责 Electron 主进程、IPC、安全边界、服务启动、资源打包、安装更新。
 
-- 包含：main/preload、WebView 权限、后端进程管理、构建产物、macOS/Windows/Linux 打包。
+- 核心后端已内联为仓库内 `core/`，**不再是 git submodule**（2026-07 去 vendor 化），因此不再有 vendor 同步职责。
+- 包含：main/preload、WebView 权限、后端进程管理、构建产物、macOS/Windows/Linux 打包、macOS OSS 自动更新发布。
 - 不包含：页面视觉样式和分析业务逻辑。
-- 主要路径：`src/`、`build/`、`package.json`、`.github/workflows/`、`core/`。
+- 主要路径：`src/`、`build/`、`package.json`、`.github/workflows/`、`core/`、`scripts/publish-macos-oss.mjs`。
 
 ### P-07 模型网关与 AI Provider（Model Gateway）
 
@@ -180,6 +182,12 @@
 
 - v1 Stage 1 只实现 UI 产品化：W-01/W-02 桌面壳、布局、面板与拖拽；W-03 Agent 会话；W-04/W-05/W-06/W-07 结果、浏览器、文件与终端容器。
 - C-01/C-02/C-04/C-06：主题联动、布局责任、跨面板状态和交互性能。
+
+### 架构去耦已完成（2026-07）
+
+- 核心后端从 `vendor/biof3-core` submodule 内联为仓库内 `core/`，桌面版完全独立、无外部依赖。
+- 移除三条 web/ECS 时代双模式分支：**OSS 存储**（走本地文件存储）、**PostgreSQL**（纯 SQLite）、**docker 执行**（内嵌 R/Python 本地执行）。
+- 详见 [`dependency-decoupling-checkpoint.md`](./dependency-decoupling-checkpoint.md)。
 
 ### 基础能力已建立，后续以稳定化为主
 

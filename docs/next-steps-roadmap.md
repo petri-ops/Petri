@@ -32,6 +32,7 @@ Stage 1 验收前不实现新模型 Provider；Stage 2 验收前不扩充 Harnes
 - 正式 `/Applications/BioF3.app` 为 `0.0.1-rc.4`，R/Python/SPA 健康检查通过。
 - Clash Verge 使用规则模式：OpenAI/Codex/GitHub 代理，阿里云 OSS 直连。
 - Harness Phase 1–6、Plugin SDK、Agent workflow runtime、恢复与 fixture 门禁已建立，Stage 1–2 期间保持可回归。
+- **架构去耦已完成（2026-07）**：核心后端从 `vendor/biof3-core` submodule 内联为仓库内 `core/`（完全独立）；移除 OSS 存储、PostgreSQL、docker 执行三条 web/ECS 双模式分支，现为「本地文件存储 + SQLite + 内嵌运行时本地执行」单一路径。详见 [`dependency-decoupling-checkpoint.md`](./dependency-decoupling-checkpoint.md)（含下阶段清理建议）。
 
 ## 后续阶段摘要
 
@@ -70,3 +71,4 @@ Stage 1 验收前不实现新模型 Provider；Stage 2 验收前不扩充 Harnes
 4. [`development-module-map.md`](./development-module-map.md)：模块责任边界。
 5. [`codex-style-workbench-direction.md`](./codex-style-workbench-direction.md)：UI 产品方向。
 6. [`macos-oss-auto-update.md`](./macos-oss-auto-update.md)：当前发布/更新操作规范。
+7. [`dependency-decoupling-checkpoint.md`](./dependency-decoupling-checkpoint.md)：去 vendor 化 + web 冗余清理检查点与下阶段清理建议。

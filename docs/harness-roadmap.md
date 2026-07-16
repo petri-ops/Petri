@@ -2,7 +2,9 @@
 
 > 状态：Phase 1–6 完成记录与 Stage 3 技术参考。当前开发顺序以 `docs/v1-productization-roadmap.md` 为准，GO/KEGG 等流程扩展等待 UI 和模型层验收。
 
-最后更新：2026-07-13
+> **⚠️ vendor 工作流已退役（2026-07-16）**：本文多处「vendor lock 已同步 / Core 检查点 `xxxxxxx`，Desktop `yyyyyyy`」是**旧双仓库（Core submodule + Desktop）工作流的历史完成记录**。核心已内联为仓库内 `core/`，不再有 submodule / `.vendor-lock` / vendor 同步（见 [`dependency-decoupling-checkpoint.md`](./dependency-decoupling-checkpoint.md)）。阅读时把这些 commit 视为历史，忽略"同步 vendor"类步骤——现在改 Core 就是改 `core/`，随 Desktop 一起提交。
+
+最后更新：2026-07-16
 
 这份路线图回答三个问题：
 
@@ -149,7 +151,7 @@
 
 - 桌面壳稳定。
 - 路由稳定。
-- vendor 同步稳定。
+- 核心已内联为 `core/`，不再有 vendor submodule 同步（2026-07 去 vendor 化）。
 - 跨平台 runtime 的真实机验证继续补齐。
 
 ## 2. 当前阶段划分

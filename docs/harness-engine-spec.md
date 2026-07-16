@@ -470,7 +470,7 @@ Harness 必须支持最基本的修复回路：
 - Plugin SDK：脚手架、契约校验、插件发现、注册诊断与兼容性报告
 - Agent Workflow Runtime：基于现有 tool job/artifact truth 的步骤状态、依赖、断点恢复和下一动作
 - Agent 单步闭环：plan → run → verify → bind → decide/recover
-- fixture 驱动的插件质量门禁与 local/container/remote 一致性验证
+- fixture 驱动的插件质量门禁（桌面为本地执行；canonical context 抽象保留，未来远端只扩 adapter）
 
 Phase 6 不批量新增生物分析内容。Bulk RNA 与单细胞只作为平台样板；大规模流程扩充属于基座验收后的后续阶段。
 
