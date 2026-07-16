@@ -83,4 +83,8 @@ module.exports = {
   registerBuiltInProviders,
   ...require('./model-profile'),
   ...require('./model-gateway'),
+  protocolConversion: require('./protocol-conversion'),
+  streamAggregate: require('./stream-aggregate'),
+  protocolUsage: require('./protocol-usage'),
+  providerReliability: require('./provider-reliability'),
 };
