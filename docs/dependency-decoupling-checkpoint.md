@@ -56,6 +56,19 @@
 - config：`execMode` 默认改 `local`；删除 `dockerExecArgs`/`rContainer`/`rExecUser`/`pyContainer` 及失效的 `effectiveContainer*` getter；简化 `mkdirSandbox`；config-helper fallback 改本地。
 - **刻意保留**：`execMode` 字段（恒 `local`）、`containerTempDir`/`containerCacheDir`（execution-context 的 canonical 路径抽象，有测试）、`normalizeExecutionMode` 的 docker→container 映射（纯映射函数，有测试）。
 
+### #3e — A 档低风险残留清理（`065a628` / `e190935` / `66a0f31` / `7492583`）
+
+- 删除 py-server 的 web-only Dockerfile 与 `.env.example` OSS 凭据示例。
+- 清理 guest permissions、feedback、Python task queue、MCP registry 中的 PG/deasync/docker 过期注释。
+- 删除 `task-scripts.js` 未使用的 `_config` 导入。
+
+### #3f — runMode 去耦（`1900b0f` / `be4d42f` / `b833590`）
+
+- r-server / py-server 的 `runMode` 固定为 `all`，删除 `BIOF3_RUN_MODE` 配置入口。
+- 删除 platform/api/worker 启动、路由、Agent prompt、zombie recovery 与 Python queue drain 分支，桌面恒走本地单进程路径。
+- `task-store` 在此前 SQLite 化后已无 worker 模式分支，无需额外修改。
+- **刻意保留**：execution-context 中的 `runMode` metadata 与通用 remote 映射测试；是否随 `execMode` 一起移除属于下一项独立决策。
+
 ### 实机验证
 
 `npm run dev` 实测：Vite:3000 + r-server:3001 + py-server:3004 全部起来；`storage active: local`（OSS 移除生效）、SQLite migrations applied（PG 移除生效）、PyWorker 用内嵌 Python 直接 spawn 就绪（docker 移除生效）；渲染进程加载完成。
@@ -77,24 +90,19 @@
 
 按「收益 / 风险」排序，均可在 UI 产品化主线之外的空档独立进行：
 
-### A. 低风险、纯清理（建议优先）
+### A. 低风险、纯清理
 
-1. **删除 `core/py-server/Dockerfile`** —— 纯 web 版 docker 构建文件，桌面运行时不引用。
-2. **清理 `core/py-server/.env.example` 里的 OSS 段**（`OSS_AK/OSS_SK/...`）—— OSS 已移除，示例误导。
-3. **清理残留注释**：`guest-permissions.js`、`feedback.js`、`py-server/task-queue.js`、`mcp/registry.js` 里仍提到 deasync / PG / docker 的注释（代码已无）。
-4. **`core/py-server/task-scripts.js` 未使用的 `_config` 导入**。
-5. **文档收尾**：`docs/archive/checkpoints/project-result-sandbox-plan.md`（已归档）大量 `vendor/biof3-core/...` 历史路径 + 已删的 `db-core-pg.js`；`docs/harness-roadmap.md`「vendor 同步稳定」；`docs/first-success-path.md` 的 `cd vendor/biof3-core/r-server`。属历史记录，可加顶部横幅说明「已去 vendor 化，路径 `vendor/biof3-core/X` = `core/X`；PG 已移除」而非逐行重写。
+1. **文档收尾**：`docs/archive/checkpoints/project-result-sandbox-plan.md`（已归档）大量 `vendor/biof3-core/...` 历史路径 + 已删的 `db-core-pg.js`；`docs/harness-roadmap.md`「vendor 同步稳定」；`docs/first-success-path.md` 的 `cd vendor/biof3-core/r-server`。属历史记录，可加顶部横幅说明「已去 vendor 化，路径 `vendor/biof3-core/X` = `core/X`；PG 已移除」而非逐行重写。
 
 ### B. 中风险、进一步去 web 化（建议独立成一轮）
 
-6. **runMode 去耦**：桌面恒为 `all`，但代码仍散布 `runMode==='platform'|'api'|'worker'` 分支（`rComputeOnly`/`IS_PLATFORM`、`server.js` worker 退出、task-store worker 逻辑等）。可比照本次 #3 的做法，逐个剥离 platform/api/worker 分支，只留 `all`。
-7. **`execMode` 字段彻底移除**：目前恒为 `local` 的 vestigial 字段。彻底删需同时改 `execution-context.js` 的 metadata 与其测试 fixture，收益是"完全规范化"，风险中等。
-8. **`containerTempDir`/`containerCacheDir` 语义正名**：现仅作 canonical 路径根，建议重命名为 `canonicalRoot` 之类，去掉"container"误导。
+2. **`execMode` 字段彻底移除**：目前恒为 `local` 的 vestigial 字段。彻底删需同时改 `execution-context.js` 的 metadata 与其测试 fixture，收益是"完全规范化"，风险中等。
+3. **`containerTempDir`/`containerCacheDir` 语义正名**：现仅作 canonical 路径根，建议重命名为 `canonicalRoot` 之类，去掉"container"误导。
 
 ### C. 待工作流稳定后（用户已确认方向）
 
-9. **py-server 单细胞/空间异步 task 引擎**（`task-queue`/`task-store`/`task-scripts`/`tools-router` 的 `/api/task` + `ossInputUrl` 路径）是 web 时代产线。用户已说明单细胞工具会重写，届时可整体移除，替换为插件化工作流。
-10. **早期 flagged 但保留的模块**：`sanitizer.js`（有测试）、`mcp/server.js`（独立可用）、`dashscope.js`（`getEmbedProvider` 默认）—— 等 P-07 模型网关落地时统一收编。
+4. **py-server 单细胞/空间异步 task 引擎**（`task-queue`/`task-store`/`task-scripts`/`tools-router` 的 `/api/task` + `ossInputUrl` 路径）是 web 时代产线。用户已说明单细胞工具会重写，届时可整体移除，替换为插件化工作流。
+5. **早期 flagged 但保留的模块**：`sanitizer.js`（有测试）、`mcp/server.js`（独立可用）、`dashscope.js`（`getEmbedProvider` 默认）—— 等 P-07 模型网关落地时统一收编。
 
 ## 不变量（清理时不得破坏）
 

@@ -37,16 +37,12 @@
   （看到 "running on port" 即成功；py-server 在 dev 无内嵌 Python 会有 Python pool ENOENT，属预期，不算回归）
 - 终端 stdout 偶发丢输出：把命令输出重定向到 /tmp/*.txt 再读取。
 
-## 本轮任务（按低→高风险，逐个提交，全绿后再下一个）
-优先做 docs/dependency-decoupling-checkpoint.md「下阶段建议」的 A 档（低风险纯清理）：
-1. 删除 core/py-server/Dockerfile（web-only）
-2. 清理 core/py-server/.env.example 里的 OSS 段（OSS_AK/OSS_SK/…）
-3. 清理残留注释：guest-permissions.js / feedback.js / py-server/task-queue.js / mcp/registry.js 里提到 deasync / PG / docker 的过期注释
-4. 删除 core/py-server/task-scripts.js 里未使用的 _config 导入
+## 当前清理进度与下一步
+A 档纯清理和 B 档 runMode 去耦均已完成；具体提交与保留边界见 docs/dependency-decoupling-checkpoint.md 的 #3e / #3f。
 
-做完 A 档、确认全绿后，再和用户确认是否进入 B 档：
-5. runMode 去耦：桌面恒为 all，剥离散布的 runMode==='platform'|'api'|'worker' 分支（rComputeOnly/IS_PLATFORM、server.js worker 退出、task-store worker 逻辑等），只留 all —— 这是较大一轮，独立成多个提交。
-6.（可选）彻底移除恒为 local 的 execMode 字段（需同步改 execution-context.js metadata 及其测试 fixture）。
+下一步必须先和用户确认范围，再从以下项目中选择，不能顺手混做：
+1.（可选）彻底移除恒为 local 的 execMode 字段（需同步改 execution-context.js metadata 及其测试 fixture）。
+2.（可选）把 containerTempDir/containerCacheDir 正名为 canonicalRoot 一类语义。
 
 C 档（py-server 单细胞/空间异步 task 引擎移除）等用户明确工作流稳定后再做，不要自行启动。
 
