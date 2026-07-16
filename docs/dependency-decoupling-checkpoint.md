@@ -81,7 +81,7 @@
 2. **清理 `core/py-server/.env.example` 里的 OSS 段**（`OSS_AK/OSS_SK/...`）—— OSS 已移除，示例误导。
 3. **清理残留注释**：`guest-permissions.js`、`feedback.js`、`py-server/task-queue.js`、`mcp/registry.js` 里仍提到 deasync / PG / docker 的注释（代码已无）。
 4. **`core/py-server/task-scripts.js` 未使用的 `_config` 导入**。
-5. **文档收尾**：`docs/project-result-sandbox-plan.md` 大量 `vendor/biof3-core/...` 历史路径 + 已删的 `db-core-pg.js`；`docs/harness-roadmap.md`「vendor 同步稳定」；`docs/first-success-path.md` 的 `cd vendor/biof3-core/r-server`。属历史记录，可加顶部横幅说明「已去 vendor 化，路径 `vendor/biof3-core/X` = `core/X`；PG 已移除」而非逐行重写。
+5. **文档收尾**：`docs/archive/checkpoints/project-result-sandbox-plan.md`（已归档）大量 `vendor/biof3-core/...` 历史路径 + 已删的 `db-core-pg.js`；`docs/harness-roadmap.md`「vendor 同步稳定」；`docs/first-success-path.md` 的 `cd vendor/biof3-core/r-server`。属历史记录，可加顶部横幅说明「已去 vendor 化，路径 `vendor/biof3-core/X` = `core/X`；PG 已移除」而非逐行重写。
 
 ### B. 中风险、进一步去 web 化（建议独立成一轮）
 

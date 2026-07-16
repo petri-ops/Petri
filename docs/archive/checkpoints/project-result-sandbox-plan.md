@@ -2,7 +2,7 @@
 
 最后更新：2026-07-16 04:05 UTC
 
-> **⚠️ 历史记录横幅（2026-07-16 补充）**：本文是已完成的历史专项记录，其后仓库经历了「去 vendor 化 + web 冗余清理」（见 [`dependency-decoupling-checkpoint.md`](./dependency-decoupling-checkpoint.md)），阅读时请注意：
+> **⚠️ 历史记录横幅（2026-07-16 补充）**：本文是已完成的历史专项记录，其后仓库经历了「去 vendor 化 + web 冗余清理」（见 [`dependency-decoupling-checkpoint.md`](../../dependency-decoupling-checkpoint.md)），阅读时请注意：
 > - 文中所有 `vendor/biof3-core/X` 路径现在是 `core/X`（submodule 已内联）。
 > - 文中提到的 PostgreSQL 文件（`db-core-pg.js`、`r-server-db-pg.js` 等）与 `Core vendor 同步` 均已移除；数据库现为纯 SQLite。
 > - Phase 5b 收敛的「单细胞 step 引擎」已在 Phase B 整体移除（单细胞工具将重写）。
