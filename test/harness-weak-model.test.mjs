@@ -15,16 +15,16 @@ import {
 
 const STEP_MANIFESTS = [
   ['deseq2', 'DESeq2 差异表达分析'],
-  ['deg', '单细胞差异表达 marker 分析'],
-  ['enrichment', 'GO KEGG 富集与通路分析'],
-  ['recluster', '对 cluster 重新聚类'],
-  ['scrna-standard', '单细胞标准流程与聚类'],
-  ['annotation', '细胞类型注释 SingleR'],
-  ['integration', 'Harmony CCA 多样本整合去批次'],
-  ['trajectory', 'Monocle 拟时序与发育轨迹'],
-  ['communication', 'CellChat 配体受体细胞通讯'],
-  ['cell-cycle', 'G1 S G2M 细胞周期打分'],
-  ['doublet', 'DoubletFinder 双细胞检测'],
+  ['go-kegg', 'GO KEGG 富集与通路分析'],
+  ['gsea', 'GSEA 基因集富集分析'],
+  ['seurat-standard', 'Seurat 单细胞标准流程与聚类'],
+  ['ml-scvi-annotate', 'scVI 细胞类型注释'],
+  ['mo-mofa', 'MOFA 多组学整合'],
+  ['mo-snf', 'SNF 多组学整合'],
+  ['km-survival', 'Kaplan Meier 生存分析'],
+  ['cellchat', 'CellChat 配体受体细胞通讯'],
+  ['maftools-mutation', 'maftools 突变景观分析'],
+  ['spatial-standard', '空间转录组标准分析'],
   ['volcano-plot', '差异分析结果火山图'],
   ['pca-explorer', 'PCA 主成分降维'],
   ['gene-correlation', '基因相关性共表达热图'],
@@ -50,12 +50,12 @@ test('task packs are versioned, unique and only describe selection strategy', ()
 
 test('workflow plan deterministically selects a tool without an LLM', () => {
   const plan = createHarnessWorkflowPlan({
-    requestText: '用 Harmony 去掉批次效应并整合样本',
+    requestText: '用 MOFA 做多组学整合',
     manifests: STEP_MANIFESTS,
     index: { entries: [] },
     params: {},
   });
-  assert.equal(plan.toolId, 'integration');
+  assert.equal(plan.toolId, 'mo-mofa');
   assert.equal(plan.stages.find((stage) => stage.id === 'select')?.status, 'completed');
 });
 
