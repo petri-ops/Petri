@@ -49,9 +49,13 @@
   },
   "devDependencies": {
     "@electron/rebuild": "^4.1.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
     "ali-oss": "^6.23.0",
     "electron": "30.5.1",
-    "electron-builder": "^24.13.0"
+    "electron-builder": "^24.13.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "engines": {
     "node": ">=18.0"
