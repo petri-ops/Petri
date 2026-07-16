@@ -27,7 +27,6 @@ function getConfig() {
   if (_getConfig) return _getConfig();
   // fallback：从环境变量构造（真自洽，不依赖 r-server/py-server）
   return {
-    storageMode: process.env.BIOF3_STORAGE || 'local',
     localMode: process.env.BIOF3_LOCAL_MODE === '1',
     rHome: process.env.BIOF3_R_HOME || '',
     pyHome: process.env.BIOF3_PY_HOME || '',
@@ -39,7 +38,7 @@ function getConfig() {
 
 // 向后兼容：原 module.exports 是个 Proxy，字段访问走 getConfig()。
 // 现在导出一个 Proxy，对 configure/getConfig 两个方法名返回函数，其余走 getConfig()。
-// 老代码 `const config = require('./config-helper'); config.storageMode` 仍 work；
+// 老代码的字段访问仍由 Proxy 转发到当前 config；
 // 新代码 `const { configure, getConfig } = require('./config-helper')` 也 work。
 module.exports = new Proxy(
   { configure, getConfig },

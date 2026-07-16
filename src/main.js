@@ -401,7 +401,6 @@ function resolveRuntime(lang, userDataDir) {
 }
 
 function setupDesktopEnv(backendPorts) {
-  process.env.BIOF3_STORAGE = "local";
   process.env.BIOF3_LOCAL_MODE = "1";
   process.env.BIOF3_DESKTOP = "1";
   process.env.BIOF3_SITE_DIR = resolveResource("build");

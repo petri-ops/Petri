@@ -1,9 +1,8 @@
 /**
  * Storage Adapter Registry — 存储适配器注册表
  *
- * 桌面版用 LocalFileStorage（本地文件系统）。适配器实现统一接口，
- * r-server / py-server 通过 getActiveStorage() 获取，不直接引用本地路径，
- * 保留存储后端可切换的扩展点。
+ * 桌面版只使用 LocalFileStorage（本地文件系统）。r-server / py-server
+ * 通过 getActiveStorage() 获取，避免各自重复实现文件操作。
  *
  * 接口规范（StorageAdapter）：
  *   name           — 'local' | ...
@@ -32,7 +31,7 @@ function getStorage(name) {
 }
 
 function getActiveStorage() {
-  const name = _activeName || process.env.BIOF3_STORAGE || 'local';
+  const name = _activeName || 'local';
   const adapter = _storages.get(name);
   if (!adapter) {
     throw new Error(`存储适配器未注册: ${name}`);
