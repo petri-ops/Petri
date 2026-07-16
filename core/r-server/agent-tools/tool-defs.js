@@ -364,7 +364,7 @@ const TOOL_DEFS = [
       name: 'read_image',
       description:
         '读取某个 tool_job 结果里的图（PNG），交给多模态模型解读图内容。' +
-        '\n用途：run_tool 跑完出图后，如果你需要看图内容才能回答（如"图里上调基因集中在哪？"），调本工具拿图，后端会用 qwen-vl-max 解读。' +
+        '\n用途：run_tool 跑完出图后，如果你需要看图内容才能回答（如"图里上调基因集中在哪？"），调本工具拿图，后端会用 vision 角色模型解读。' +
         '\n注意：token 消耗较高，仅在用户明确问图内容时调，不要每次出图都读。',
       parameters: {
         type: 'object',

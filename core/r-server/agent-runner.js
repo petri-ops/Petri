@@ -129,6 +129,7 @@ function _pushUniqueResultCard(cards, card) {
  * @param {string} opts.apiKey
  * @param {string} opts.providerName
  * @param {string} [opts.modelName]
+ * @param {string} [opts.profileId]
  * @param {string} [opts.baseUrl]
  * @param {string} opts.taskId          用于写 task_events / markDone/markFailed
  * @param {function} opts.onEvent       (eventObj) => void，实时推进程内订阅
@@ -144,6 +145,7 @@ async function runAgentLoop({
   apiKey,
   providerName,
   modelName,
+  profileId,
   baseUrl,
   taskId,
   onEvent,
@@ -272,7 +274,7 @@ async function runAgentLoop({
   systemPrompt +=
     '\n- run_tool 跑完出图后，立即调用 act_generic(handlerId="open_result", payload={toolJobId}) 把结果展示给用户（Copilot 浮窗内自动加载该 job 的图/表）。toolJobId 从 run_tool 的返回里取。不要让用户自己去翻 history。';
   systemPrompt +=
-    '\n- agent 看图（read_image）：当用户问图内容（如"图里上调基因集中在哪""这张图说明了什么"），调 read_image(toolJobId) 让多模态模型（qwen-vl-max）解读图，返回的 description 可直接据此回答。token 较贵，仅用户明确问图内容时调，不要每次出图都读。';
+    '\n- agent 看图（read_image）：当用户问图内容（如"图里上调基因集中在哪""这张图说明了什么"），调 read_image(toolJobId) 让 vision 角色模型解读图，返回的 description 可直接据此回答。token 较贵，仅用户明确问图内容时调，不要每次出图都读。';
   systemPrompt += '\n\n=== 学习路径推荐 ===';
   systemPrompt +=
     '\n如果用户首次对话或问"我该从哪开始"/"接下来学什么"/"推荐路径"等，调用 suggest_next_steps。';
@@ -405,7 +407,7 @@ async function runAgentLoop({
         });
       }
       const reqBody = {
-        model: modelName || 'deepseek-chat',
+        ...(modelName ? { model: modelName } : {}),
         messages: fullMessages,
         temperature: 0.4,
         max_tokens: 1500,
@@ -429,7 +431,7 @@ async function runAgentLoop({
             _emit({ choices: [{ delta: { content: event.content } }] });
           }
         },
-        { baseUrl }
+        { baseUrl, profileId }
       );
       if (!upJson || upJson.error || !upJson.choices) {
         _emit({
@@ -598,7 +600,7 @@ async function runAgentLoop({
             '你已用完本轮工具调用次数。请基于已收集到的工具结果，直接给用户一个有用的最终答复（不要再调用工具）。如果工具结果不足以完整回答，就给出当前能给出的最佳答复，并说明还缺什么。',
         });
         const fallbackBody = {
-          model: modelName || 'deepseek-chat',
+          ...(modelName ? { model: modelName } : {}),
           messages: fullMessages,
           temperature: 0.4,
           max_tokens: 1500,
@@ -619,7 +621,7 @@ async function runAgentLoop({
               _emit({ choices: [{ delta: { content: event.content } }] });
             }
           },
-          { baseUrl }
+          { baseUrl, profileId }
         );
         if (fbJson && fbJson.choices && fbJson.choices[0]) {
           const fbText = fallbackText || (fbJson.choices[0].message || {}).content || '';

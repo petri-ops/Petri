@@ -1,5 +1,5 @@
 /**
- * routes/ai-chat.js — POST /api/ai/chat (streaming SSE chat with DeepSeek)
+ * routes/ai-chat.js — POST /api/ai/chat (streaming SSE via Model Gateway)
  *
  * Migrated from server.js. AI_CHAT_FINAL_VERSION v3.
  *
@@ -11,7 +11,6 @@
  */
 
 const express = require('express');
-const https = require('https');
 
 const { logChatAudit } = require('../helpers/memory-privacy');
 const { buildSystemPrompt } = require('../helpers/system-prompt');
@@ -45,13 +44,6 @@ module.exports = function registerAiChatRoute(app) {
     } catch {
       /* ignore */
     }
-    const { getApiKey, getChatProviderName } = require('../helpers/ai-settings');
-    const providerName = getChatProviderName();
-    const apiKey = getApiKey(providerName);
-    if (!apiKey) {
-      return res.status(503).json({ status: 'error', error: 'AI 服务未配置' });
-    }
-
     const { messages, context } = req.body || {};
     if (!Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ status: 'error', error: '缺少消息' });
@@ -150,22 +142,6 @@ module.exports = function registerAiChatRoute(app) {
     res.setHeader('X-Accel-Buffering', 'no');
     res.flushHeaders && res.flushHeaders();
 
-    // Provider-specific model + endpoint config
-    const _chatModelMap = { deepseek: 'deepseek-chat', ollama: 'qwen3:8b' };
-    const _chatEpMap = {
-      deepseek: { hostname: 'api.deepseek.com', port: 443, path: '/chat/completions', authHeader: 'Bearer ' + apiKey },
-      ollama: { hostname: 'localhost', port: 11434, path: '/api/chat', authHeader: '' },
-    };
-    const _ep = _chatEpMap[providerName] || _chatEpMap.deepseek;
-
-    const body = JSON.stringify({
-      model: _chatModelMap[providerName] || 'deepseek-chat',
-      messages: fullMessages,
-      stream: true,
-      temperature: 0.5,
-      max_tokens: 1500,
-    });
-
     let ended = false;
     const writeError = (msg) => {
       if (ended) return;
@@ -178,72 +154,8 @@ module.exports = function registerAiChatRoute(app) {
       } catch {}
     };
 
-    const upstream = https.request(
-      {
-        hostname: _ep.hostname,
-        port: _ep.port,
-        path: _ep.path,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(_ep.authHeader ? { Authorization: _ep.authHeader } : {}),
-          Accept: 'text/event-stream',
-          'Content-Length': Buffer.byteLength(body),
-        },
-        agent: false,
-        timeout: 60000,
-      },
-      (upRes) => {
-        if (upRes.statusCode !== 200) {
-          let buf = '';
-          upRes.setEncoding('utf8');
-          upRes.on('data', (c) => {
-            buf += c;
-          });
-          upRes.on('end', () =>
-            writeError('DeepSeek HTTP ' + upRes.statusCode + ' ' + buf.slice(0, 200))
-          );
-          return;
-        }
-        let assistantAcc = '';
-        let dataBuf = '';
-        upRes.on('data', (chunk) => {
-          if (!ended) {
-            try {
-              res.write(chunk);
-            } catch {}
-          }
-          try {
-            dataBuf += chunk.toString('utf8');
-            let idx;
-            while ((idx = dataBuf.indexOf('\n\n')) !== -1) {
-              const evt = dataBuf.slice(0, idx);
-              dataBuf = dataBuf.slice(idx + 2);
-              for (const line of evt.split('\n')) {
-                const m = line.match(/^data:\s?(.*)$/);
-                if (!m) continue;
-                const data = m[1];
-                if (data === '[DONE]') continue;
-                try {
-                  const obj = JSON.parse(data);
-                  const delta = obj?.choices?.[0]?.delta?.content;
-                  if (typeof delta === 'string') assistantAcc += delta;
-                } catch {
-                  /* ignore non-JSON */
-                }
-              }
-            }
-          } catch (e) {
-            console.log('[mem-vec-err]', e && e.message);
-          }
-        });
-        upRes.on('end', () => {
-          if (!ended) {
-            try {
-              res.end();
-              ended = true;
-            } catch {}
-          }
+    let assistantAcc = '';
+    const finalizeAssistant = () => {
           // Layer 3b: index the just-completed (user, assistant) pair
           try {
             const userId = req.user && req.user.id;
@@ -318,26 +230,52 @@ module.exports = function registerAiChatRoute(app) {
           } catch (e) {
             console.log('[mem-vec-err]', e && e.message);
           }
-        });
-        upRes.on('error', (e) => writeError('上游响应错误: ' + e.message));
+    };
+
+    const abortController = new AbortController();
+    const { modelGateway } = require('../helpers/model-gateway');
+    modelGateway.chat({
+      role: 'chat',
+      body: {
+        messages: fullMessages,
+        temperature: 0.5,
+        max_tokens: 1500,
+      },
+      telemetry: {
+        userId: req.user && req.user.id,
+        kind: 'chat',
+      },
+      signal: abortController.signal,
+      onEvent: (event) => {
+        if (ended || event.type !== 'content_delta' || !event.content) return;
+        assistantAcc += event.content;
+        try {
+          res.write(
+            'data: ' +
+              JSON.stringify({ choices: [{ delta: { content: event.content } }] }) +
+              '\n\n'
+          );
+        } catch {}
+      },
+    }).then((result) => {
+      if (ended) return;
+      if (!result || result.error) {
+        writeError((result && (result.message || result.error)) || '模型请求失败');
+        return;
       }
-    );
-
-    upstream.on('error', (e) => writeError('请求 DeepSeek 失败: ' + e.message));
-    upstream.on('timeout', () => {
       try {
-        upstream.destroy(new Error('upstream timeout'));
+        res.write('data: [DONE]\n\n');
+        res.end();
+        ended = true;
       } catch {}
-    });
-
-    upstream.write(body);
-    upstream.end();
+      finalizeAssistant();
+    }).catch((error) => writeError('模型请求失败: ' + error.message));
 
     req.on('aborted', () => {
       if (!ended) {
         ended = true;
         try {
-          upstream.destroy();
+          abortController.abort();
         } catch {}
       }
     });
@@ -345,7 +283,7 @@ module.exports = function registerAiChatRoute(app) {
       if (!ended) {
         ended = true;
         try {
-          upstream.destroy();
+          abortController.abort();
         } catch {}
       }
     });

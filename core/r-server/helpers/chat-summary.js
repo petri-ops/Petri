@@ -2,7 +2,7 @@
  * helpers/chat-summary.js — CHAT_SUMMARY_v1
  *
  * Extracted from server.js (Phase 8.6 helper modularization).
- * Pure module: depends only on ./db and process.env.DEEPSEEK_API_KEY.
+ * Persists through ./db and delegates model work to the shared Gateway.
  *
  * Public API:
  *   getChatSummaryAsync(userId)            → Promise<row|null>
@@ -69,13 +69,11 @@ async function deleteChatSummaryAsync(userId) {
 }
 
 /**
- * Compress older messages into a Chinese summary using DeepSeek.
+ * Compress older messages into a Chinese summary using the summary role.
  * Fire-and-forget; errors swallowed.
  */
 async function summarizeMessages(userId, oldMessages, existingSummary) {
-  const { getApiKey } = require('./ai-settings');
-  const apiKey = getApiKey('deepseek');
-  if (!apiKey || !userId || !Array.isArray(oldMessages) || oldMessages.length === 0) return;
+  if (!userId || !Array.isArray(oldMessages) || oldMessages.length === 0) return;
 
   const lines = oldMessages
     .map((m) => {
@@ -91,76 +89,28 @@ async function summarizeMessages(userId, oldMessages, existingSummary) {
     ? '已有摘要：\n' + existingSummary + '\n\n新增对话：\n' + lines + '\n\n请输出合并后的新摘要。'
     : '请总结以下对话：\n' + lines;
 
-  const body = JSON.stringify({
-    model: 'deepseek-chat',
+  const { callModelTask } = require('./model-tasks');
+  const result = await callModelTask({
+    role: 'summary',
     messages: [
       { role: 'system', content: sysPrompt },
       { role: 'user', content: userPrompt },
     ],
-    stream: false,
     temperature: 0.3,
-    max_tokens: 800,
+    maxTokens: 800,
+    telemetry: { userId, kind: 'chat_summary' },
   });
-
-  return new Promise((resolve) => {
-    const https = require('https');
-    let buf = '';
-    const r = https.request(
-      {
-        hostname: 'api.deepseek.com',
-        port: 443,
-        path: '/chat/completions',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + apiKey,
-          'Content-Length': Buffer.byteLength(body),
-        },
-        agent: false,
-        timeout: 90000,
-      },
-      (res) => {
-        res.setEncoding('utf8');
-        res.on('data', (c) => {
-          buf += c;
-        });
-        res.on('end', () => {
-          try {
-            if (res.statusCode !== 200) {
-              resolve();
-              return;
-            }
-            const j = JSON.parse(buf);
-            const text = j?.choices?.[0]?.message?.content;
-            if (text && text.trim()) {
-              saveChatSummaryAsync(
-                userId,
-                text.trim(),
-                oldMessages.length + (existingSummary ? -1 : 0)
-              )
-                .then(() => {
-                  console.log('[chat-summary] saved for user', userId, 'len=', text.length);
-                })
-                .catch((e) => console.log('[chat-summary-err]', e && e.message));
-            }
-          } catch (e) {
-            console.log('[chat-summary-err]', e && e.message);
-          }
-          resolve();
-        });
-        res.on('error', () => resolve());
-      }
+  if (!result.text) return;
+  try {
+    await saveChatSummaryAsync(
+      userId,
+      result.text,
+      oldMessages.length + (existingSummary ? -1 : 0)
     );
-    r.on('error', () => resolve());
-    r.on('timeout', () => {
-      try {
-        r.destroy();
-      } catch {}
-      resolve();
-    });
-    r.write(body);
-    r.end();
-  });
+    console.log('[chat-summary] saved for user', userId, 'len=', result.text.length);
+  } catch (e) {
+    console.log('[chat-summary-err]', e && e.message);
+  }
 }
 
 const SUMMARY_TRIGGER_AT = 22; // start summarizing once thread has > N msgs

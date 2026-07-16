@@ -66,9 +66,9 @@ async function callChatProvider(providerName, apiKey, body, telemetry, onEvent, 
 }
 
 /**
- * callVision — 委托给 DashScopeVisionProvider.chat()（agent-led 阶段2 Task4）
- * 让 agent 能看图（qwen-vl-max）。apiKey 复用 DashScope key（getApiKey('dashscope')）。
- * @param {string} apiKey - DashScope API key
+ * callVision — 兼容入口，委托给 Model Gateway 的 vision 角色。
+ * 让 agent 能看图。具体模型和凭据由 vision 角色的 ModelProfile 决定。
+ * @param {string} apiKey - 旧调用方可传；为空时由 credentialRef 解析
  * @param {object} body - { messages: [{role, content:[{type:'text'|'image',...}]}] }
  * @param {object} telemetry - {userId?, conversationId?, kind?}
  * @returns {Promise<{ok, content, usage}|{error, message}>}

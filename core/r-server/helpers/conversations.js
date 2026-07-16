@@ -103,28 +103,18 @@ async function _maybeAutoTitleConversation(conversationId, userId) {
     if (!userBits) return;
 
     const prompt = '基于以下用户提问和助手回答，生成一个 6 到 12 个字的中文短标题，概括对话核心。不要标点，不要引号，直接输出标题文本。\n\n用户：' + userBits + '\n助手：' + assistantBits;
-    const { getApiKey } = require('./ai-settings');
-    const apiKey = getApiKey('deepseek');
-    if (!apiKey) return;
-    const fetchFn = (typeof fetch === 'function') ? fetch : require('node-fetch');
-    const resp = await fetchFn('https://api.deepseek.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json', 'Authorization':'Bearer ' + apiKey},
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [
-          {role:'system', content:'你只输出标题文本，不超过 12 个汉字，不带任何标点。'},
-          {role:'user', content: prompt},
-        ],
-        temperature: 0.3,
-        max_tokens: 32,
-        stream: false,
-      }),
+    const { callModelTask } = require('./model-tasks');
+    const result = await callModelTask({
+      role: 'summary',
+      messages: [
+        {role:'system', content:'你只输出标题文本，不超过 12 个汉字，不带任何标点。'},
+        {role:'user', content: prompt},
+      ],
+      temperature: 0.3,
+      maxTokens: 32,
+      telemetry: { userId, conversationId, kind: 'conversation_title' },
     });
-    if (!resp.ok) return;
-    const data = await resp.json();
-    let title = (((data || {}).choices || [])[0] || {}).message;
-    title = String((title && title.content) || '').trim();
+    let title = result.text;
     title = title.replace(/^[\s"\u201c\u201d''\u300c\u300d]+|[\s"\u201c\u201d''\u300c\u300d]+$/g, '');
     title = title.replace(/[\r\n]/g, ' ').slice(0, 18);
     if (!title) return;
@@ -168,31 +158,19 @@ async function _maybeDetectTopicShift(conversationId, userId) {
     const latest = recent.slice(-4).map(m => m.role + ': ' + String(m.content || '').slice(0, 200)).join('\n');
     if (!earlier || !latest) return null;
 
-    const { getApiKey } = require('./ai-settings');
-    const apiKey = getApiKey('deepseek');
-    if (!apiKey) return null;
-    const fetchFn = (typeof fetch === 'function') ? fetch : require('node-fetch');
-    const resp = await fetchFn('https://api.deepseek.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json', 'Authorization':'Bearer ' + apiKey},
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [
-          {role:'system', content:'你判断对话是否换了主题。只回答 JSON：{"shifted":true|false,"reason":"≤30字"}。如果近期对话明显在讨论一个**与之前完全不同**的新话题（不是同主题的延伸），shifted=true；否则 false。模糊不清就 false。'},
-          {role:'user', content:'之前的对话：\n' + earlier + '\n\n刚刚的对话：\n' + latest},
-        ],
-        temperature: 0.1,
-        max_tokens: 100,
-        response_format: {type: 'json_object'},
-        stream: false,
-      }),
+    const { callModelTask, parseJsonText } = require('./model-tasks');
+    const result = await callModelTask({
+      role: 'summary',
+      messages: [
+        {role:'system', content:'你判断对话是否换了主题。只回答 JSON：{"shifted":true|false,"reason":"≤30字"}。如果近期对话明显在讨论一个**与之前完全不同**的新话题（不是同主题的延伸），shifted=true；否则 false。模糊不清就 false。'},
+        {role:'user', content:'之前的对话：\n' + earlier + '\n\n刚刚的对话：\n' + latest},
+      ],
+      temperature: 0.1,
+      maxTokens: 100,
+      responseFormat: {type: 'json_object'},
+      telemetry: { userId, conversationId, kind: 'topic_shift' },
     });
-    if (!resp.ok) return null;
-    const data = await resp.json();
-    const raw = (((data || {}).choices || [])[0] || {}).message;
-    const txt = String((raw && raw.content) || '').trim();
-    let parsed;
-    try { parsed = JSON.parse(txt); } catch { return null; }
+    const parsed = parseJsonText(result.text);
     if (!parsed || !parsed.shifted) return null;
     const reason = String(parsed.reason || '话题已切换').slice(0, 60);
     sqlite.prepare('UPDATE copilot_conversations SET last_topic_shift_at=?, last_topic_shift_reason=? WHERE id=?')

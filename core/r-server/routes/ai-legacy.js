@@ -57,7 +57,7 @@ module.exports = function mountAiLegacy(app) {
       status: 'ok',
       interpretation: aiText,
       cellTypeHints: localResults,
-      source: require('../helpers/ai-settings').getApiKey('deepseek') && aiText && !aiText.startsWith('✓') ? 'deepseek' : 'fallback',
+      source: aiText && !aiText.startsWith('✓') ? 'model_gateway' : 'fallback',
     });
   });
 

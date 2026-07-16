@@ -4,6 +4,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const { ModelGateway } = require('../core/shared-backend/llm-providers/model-gateway.js');
+const { parseJsonText, responseText } = require('../core/r-server/helpers/model-tasks.js');
 
 function createGateway(overrides = {}) {
   const calls = [];
@@ -97,4 +98,14 @@ test('gateway reports an unregistered provider without exposing credentials', as
   const result = await gateway.chat({ body: { messages: [] } });
   assert.equal(result.error, 'provider_not_registered');
   assert.equal(JSON.stringify(result).includes('apiKey'), false);
+});
+
+test('model task helpers normalize text and fenced JSON-like output', () => {
+  assert.equal(
+    responseText({ choices: [{ message: { content: '  result  ' } }] }),
+    'result'
+  );
+  assert.deepEqual(parseJsonText('answer:\n{"ok":true}\nend'), { ok: true });
+  assert.deepEqual(parseJsonText('prefix [1,2,3] suffix'), [1, 2, 3]);
+  assert.equal(parseJsonText('not-json'), null);
 });

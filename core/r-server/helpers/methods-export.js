@@ -173,9 +173,6 @@ function _serializeAnalysisForMethods(a) {
 }
 
 async function _renderMethodsParagraph(ctx, { language }) {
-  const { getApiKey } = require('./ai-settings');
-  const apiKey = getApiKey('deepseek');
-  if (!apiKey) return { error: 'no_api_key' };
   const lang = language === 'en' ? 'en' : language === 'both' ? 'both' : 'zh';
 
   // Build the data block
@@ -253,39 +250,27 @@ async function _renderMethodsParagraph(ctx, { language }) {
     messages.push({ role: 'user', content: userPromptZh + dataBlock });
   }
 
-  const fetchFn = typeof fetch === 'function' ? fetch : require('node-fetch');
-  const start = Date.now();
   try {
-    const resp = await fetchFn('https://api.deepseek.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + apiKey },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages,
-        temperature: 0.4,
-        max_tokens: 1200,
-        stream: false,
-      }),
+    const { callModelTask } = require('./model-tasks');
+    const result = await callModelTask({
+      role: 'report',
+      messages,
+      temperature: 0.4,
+      maxTokens: 1200,
+      telemetry: {
+        userId: ctx._userId,
+        conversationId: ctx._conversationId,
+        kind: 'methods',
+      },
     });
-    const data = await resp.json();
-    const usage = (data && data.usage) || {};
-    try {
-      const recordAiUsage = globalThis._biof3 && globalThis._biof3.recordAiUsage;
-      if (recordAiUsage)
-        recordAiUsage({
-          userId: ctx._userId,
-          kind: 'methods',
-          model: 'deepseek-chat',
-          promptTokens: usage.prompt_tokens || 0,
-          completionTokens: usage.completion_tokens || 0,
-          latencyMs: Date.now() - start,
-          conversationId: ctx._conversationId,
-        });
-    } catch {}
-    const text = (((data || {}).choices || [])[0] || {}).message;
-    const content = String((text && text.content) || '').trim();
+    const content = result.text;
     if (!content) return { error: 'empty_response' };
-    return { ok: true, methods: content, language: lang, usage };
+    return {
+      ok: true,
+      methods: content,
+      language: lang,
+      usage: (result.response && result.response.usage) || {},
+    };
   } catch (e) {
     return { error: 'api_error', message: (e && e.message) || String(e) };
   }

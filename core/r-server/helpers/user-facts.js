@@ -231,12 +231,10 @@ function buildFactsBlock(userId, maxChars = 1200) {
   return out;
 }
 
-/** Extract structured facts from recent messages using DeepSeek.
+/** Extract structured facts from recent messages using the summary role.
  *  Returns array of {category, content}. Background, fail-safe. */
 async function extractFactsFromMessages(messages, existingFacts) {
-  const { getApiKey } = require('./ai-settings');
-  const apiKey = getApiKey('deepseek');
-  if (!apiKey || !Array.isArray(messages) || messages.length === 0) return [];
+  if (!Array.isArray(messages) || messages.length === 0) return [];
 
   const lines = messages
     .slice(-12)
@@ -269,104 +267,40 @@ async function extractFactsFromMessages(messages, existingFacts) {
 
   const userPrompt = '从以下对话提取用户档案事实：\n\n' + lines + existingBlock;
 
-  const body = JSON.stringify({
-    model: 'deepseek-chat',
+  const { callModelTask, parseJsonText } = require('./model-tasks');
+  const result = await callModelTask({
+    role: 'summary',
     messages: [
       { role: 'system', content: sysPrompt },
       { role: 'user', content: userPrompt },
     ],
-    stream: false,
     temperature: 0.2,
-    max_tokens: 800,
-    response_format: { type: 'json_object' },
+    maxTokens: 800,
+    responseFormat: { type: 'json_object' },
+    telemetry: { kind: 'user_fact_extraction' },
   });
-
-  return new Promise((resolve) => {
-    const https = require('https');
-    let buf = '';
-    const r = https.request(
-      {
-        hostname: 'api.deepseek.com',
-        port: 443,
-        path: '/chat/completions',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + apiKey,
-          'Content-Length': Buffer.byteLength(body),
-        },
-        agent: false,
-        timeout: 60000,
-      },
-      (res) => {
-        res.setEncoding('utf8');
-        res.on('data', (c) => (buf += c));
-        res.on('end', () => {
-          try {
-            if (res.statusCode !== 200) {
-              resolve([]);
-              return;
-            }
-            const j = JSON.parse(buf);
-            let text = j?.choices?.[0]?.message?.content || '';
-            text = text.trim();
-            let arr;
-            try {
-              const parsed = JSON.parse(text);
-              arr = Array.isArray(parsed)
-                ? parsed
-                : Array.isArray(parsed.facts)
-                  ? parsed.facts
-                  : Array.isArray(parsed.data)
-                    ? parsed.data
-                    : null;
-              if (!arr) {
-                for (const k of Object.keys(parsed)) {
-                  if (Array.isArray(parsed[k])) {
-                    arr = parsed[k];
-                    break;
-                  }
-                }
-              }
-            } catch {
-              const m = text.match(/\[[\s\S]*\]/);
-              if (m) {
-                try {
-                  arr = JSON.parse(m[0]);
-                } catch {
-                  arr = [];
-                }
-              }
-            }
-            if (!Array.isArray(arr)) arr = [];
-            const filtered = arr.filter(
-              (f) =>
-                f &&
-                typeof f === 'object' &&
-                typeof f.category === 'string' &&
-                FACT_CATEGORIES.includes(f.category) &&
-                typeof f.content === 'string' &&
-                f.content.trim().length > 0 &&
-                f.content.length <= 200
-            );
-            resolve(filtered);
-          } catch {
-            resolve([]);
-          }
-        });
-        res.on('error', () => resolve([]));
-      }
-    );
-    r.on('error', () => resolve([]));
-    r.on('timeout', () => {
-      try {
-        r.destroy();
-      } catch {}
-      resolve([]);
-    });
-    r.write(body);
-    r.end();
-  });
+  const parsed = parseJsonText(result.text);
+  let arr = Array.isArray(parsed)
+    ? parsed
+    : parsed && Array.isArray(parsed.facts)
+      ? parsed.facts
+      : parsed && Array.isArray(parsed.data)
+        ? parsed.data
+        : null;
+  if (!arr && parsed && typeof parsed === 'object') {
+    arr = Object.values(parsed).find(Array.isArray) || [];
+  }
+  if (!Array.isArray(arr)) return [];
+  return arr.filter(
+    (fact) =>
+      fact &&
+      typeof fact === 'object' &&
+      typeof fact.category === 'string' &&
+      FACT_CATEGORIES.includes(fact.category) &&
+      typeof fact.content === 'string' &&
+      fact.content.trim().length > 0 &&
+      fact.content.length <= 200
+  );
 }
 
 /** Extract + persist (de-duped). Fire-and-forget. */

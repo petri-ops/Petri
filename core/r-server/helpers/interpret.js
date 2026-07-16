@@ -1,7 +1,7 @@
 /**
  * helpers/interpret.js — /api/ai/interpret support
  *
- * Extracted from server.js. Pure module: depends on https + DEEPSEEK_API_KEY.
+ * Extracted from server.js. Model calls route through the shared Gateway.
  *
  * Public API:
  *   lookupCellType(markers) → string|null
@@ -13,8 +13,6 @@
  * with the agent's callDeepSeek(apiKey, body, telemetry) signature in server.js.
  * (Old name was being shadowed by hoisting and producing JSON.stringify(undefined) errors.)
  */
-
-const https = require('https');
 
 // === 本地知识库：常见 marker 基因 → 细胞类型映射 ===
 // 数据来源：CellMarker 2.0 + PanglaoDB 高频条目精选
@@ -67,14 +65,11 @@ function lookupCellType(markers) {
   return bestMatch;
 }
 
-/** Simple DeepSeek caller for interpret use. Returns text or null. */
+/** Model Gateway caller for interpretation. Returns text or null. */
 async function callDeepSeekSimple(prompt, maxTokens = 800) {
-  const { getApiKey } = require('./ai-settings');
-  const apiKey = getApiKey('deepseek');
-  if (!apiKey) return null;
-
-  const body = JSON.stringify({
-    model: 'deepseek-chat',
+  const { callModelTask } = require('./model-tasks');
+  const result = await callModelTask({
+    role: 'explanation',
     messages: [
       {
         role: 'system',
@@ -83,46 +78,11 @@ async function callDeepSeekSimple(prompt, maxTokens = 800) {
       },
       { role: 'user', content: prompt },
     ],
-    max_tokens: maxTokens,
+    maxTokens,
     temperature: 0.3,
+    telemetry: { kind: 'interpretation' },
   });
-
-  return new Promise((resolve) => {
-    const req = https.request(
-      {
-        hostname: 'api.deepseek.com',
-        path: '/chat/completions',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + apiKey,
-          'Content-Length': Buffer.byteLength(body),
-        },
-        timeout: 30000,
-      },
-      (res) => {
-        let data = '';
-        res.on('data', (chunk) => {
-          data += chunk;
-        });
-        res.on('end', () => {
-          try {
-            const parsed = JSON.parse(data);
-            resolve(parsed.choices?.[0]?.message?.content || null);
-          } catch {
-            resolve(null);
-          }
-        });
-      }
-    );
-    req.on('error', () => resolve(null));
-    req.on('timeout', () => {
-      req.destroy();
-      resolve(null);
-    });
-    req.write(body);
-    req.end();
-  });
+  return result.text || null;
 }
 
 /** Build interpret prompt by analysis type. Returns null if type not supported. */

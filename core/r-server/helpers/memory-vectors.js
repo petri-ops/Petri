@@ -2,11 +2,7 @@
  * helpers/memory-vectors.js — SEMANTIC_SEARCH_v1 (Layer 3b vector retrieval)
  *
  * Extracted from server.js (Phase 8.6 helper modularization).
- * Pure module: depends on ../db, uuid, and process.env.DASHSCOPE_API_KEY.
- *
- * For AI usage telemetry, dashscopeEmbed will call
- *   globalThis._biof3.recordAiUsage(...)
- * if available (server.js sets this up). Falls back to noop otherwise.
+ * Embedding calls route through the shared Model Gateway.
  *
  * Public API:
  *   dashscopeEmbed(texts, telemetry) → Promise<Float32Array[]|null>
@@ -50,71 +46,15 @@ const RETRIEVE_MAX_CHARS = 1500;
 const MAX_CONTENT_LEN = 1500;
 const TURN_MIN_CHARS = 30;
 
-function _recordAiUsage(args) {
-  try {
-    const fn = (globalThis._biof3 && globalThis._biof3.recordAiUsage) || globalThis._biof3RecordAiUsage;
-    if (typeof fn === 'function') fn(args);
-  } catch {}
-}
-
-/** Call DashScope to embed an array of texts. Returns array of Float32Array, or null. */
+/** Compatibility name; resolves the configured embedding role through the Gateway. */
 async function dashscopeEmbed(texts, _telemetry) {
-  const _t = _telemetry || {};
-  const _start = Date.now();
-  const { getApiKey } = require('./ai-settings');
-  const apiKey = getApiKey('dashscope');
-  if (!apiKey) return null;
   if (!Array.isArray(texts) || texts.length === 0) return [];
-  const truncated = texts.map(t => (t || '').slice(0, MAX_CONTENT_LEN));
-  const _approxTokens = truncated.reduce((s, t) => s + Math.ceil((t || '').length * 0.7), 0);
-  const body = JSON.stringify({
-    model: EMBEDDING_MODEL,
-    input: {texts: truncated},
+  const { modelGateway } = require('./model-gateway');
+  const result = await modelGateway.embed({
+    texts: texts.map((text) => (text || '').slice(0, MAX_CONTENT_LEN)),
+    telemetry: _telemetry || {},
   });
-  return new Promise((resolve) => {
-    const https = require('https');
-    let buf = '';
-    const r = https.request({
-      hostname: 'dashscope.aliyuncs.com',
-      port: 443,
-      path: '/api/v1/services/embeddings/text-embedding/text-embedding',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + apiKey,
-        'Content-Length': Buffer.byteLength(body),
-      },
-      agent: false,
-      timeout: 30000,
-    }, (res) => {
-      res.setEncoding('utf8');
-      res.on('data', c => buf += c);
-      res.on('end', () => {
-        try {
-          if (res.statusCode !== 200) {
-            console.log('[embed] HTTP', res.statusCode, buf.slice(0,200));
-            _recordAiUsage({userId: _t.userId, kind: _t.kind || 'embedding', model: EMBEDDING_MODEL, promptTokens: _approxTokens, latencyMs: Date.now() - _start, errorCode: 'http_' + res.statusCode, conversationId: _t.conversationId});
-            resolve(null); return;
-          }
-          const j = JSON.parse(buf);
-          const arr = j?.output?.embeddings;
-          if (!Array.isArray(arr)) { resolve(null); return; }
-          arr.sort((a, b) => (a.text_index || 0) - (b.text_index || 0));
-          const out = arr.map(e => Float32Array.from(e.embedding));
-          _recordAiUsage({userId: _t.userId, kind: _t.kind || 'embedding', model: EMBEDDING_MODEL, promptTokens: _approxTokens, latencyMs: Date.now() - _start, conversationId: _t.conversationId});
-          resolve(out);
-        } catch (e) {
-          console.log('[embed] parse err:', e.message);
-          resolve(null);
-        }
-      });
-      res.on('error', () => resolve(null));
-    });
-    r.on('error', (e) => { console.log('[embed] req err:', e.message); resolve(null); });
-    r.on('timeout', () => { try { r.destroy(); } catch{} resolve(null); });
-    r.write(body);
-    r.end();
-  });
+  return Array.isArray(result) ? result : null;
 }
 
 function _bufFromVec(vec) {

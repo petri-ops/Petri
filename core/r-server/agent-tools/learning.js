@@ -426,12 +426,8 @@ function _outcomesToQuestions(outcomes, count) {
   return out;
 }
 
-/** Optional DeepSeek-driven question generation. Best-effort. */
+/** Optional explanation-role question generation. Best-effort. */
 async function _generateQuestionsViaLLM(doc, outcomes, count) {
-  const { getApiKey } = require('../helpers/ai-settings');
-  const apiKey = getApiKey('deepseek');
-  if (!apiKey) return null;
-
   const sys =
     '你是一位生信教学助手。基于一篇 docs 的标题、摘要和学习产出（learning_outcomes），生成 ' +
     count +
@@ -450,79 +446,24 @@ async function _generateQuestionsViaLLM(doc, outcomes, count) {
     'learning_outcomes:\n' +
     outcomes.map((o, i) => i + 1 + '. ' + o).join('\n');
 
-  const body = JSON.stringify({
-    model: 'deepseek-chat',
+  const { callModelTask, parseJsonText } = require('../helpers/model-tasks');
+  const result = await callModelTask({
+    role: 'explanation',
     messages: [
       { role: 'system', content: sys },
       { role: 'user', content: user },
     ],
-    stream: false,
     temperature: 0.4,
-    max_tokens: 600,
-    response_format: { type: 'json_object' },
+    maxTokens: 600,
+    responseFormat: { type: 'json_object' },
+    telemetry: { kind: 'learning_questions' },
   });
-
-  return new Promise((resolve) => {
-    const https = require('https');
-    let buf = '';
-    const r = https.request(
-      {
-        hostname: 'api.deepseek.com',
-        port: 443,
-        path: '/chat/completions',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + apiKey,
-          'Content-Length': Buffer.byteLength(body),
-        },
-        agent: false,
-        timeout: 25000,
-      },
-      (res) => {
-        res.setEncoding('utf8');
-        res.on('data', (c) => (buf += c));
-        res.on('end', () => {
-          try {
-            if (res.statusCode !== 200) {
-              resolve(null);
-              return;
-            }
-            const j = JSON.parse(buf);
-            const text = j?.choices?.[0]?.message?.content || '';
-            let parsed;
-            try {
-              parsed = JSON.parse(text);
-            } catch {
-              const m = text.match(/\{[\s\S]*\}/);
-              if (m) {
-                try {
-                  parsed = JSON.parse(m[0]);
-                } catch {}
-              }
-            }
-            const arr = Array.isArray(parsed?.questions) ? parsed.questions : [];
-            const filtered = arr.filter(
-              (q) => q && typeof q.question === 'string' && q.question.length > 4
-            );
-            resolve(filtered.length > 0 ? filtered : null);
-          } catch {
-            resolve(null);
-          }
-        });
-        res.on('error', () => resolve(null));
-      }
-    );
-    r.on('error', () => resolve(null));
-    r.on('timeout', () => {
-      try {
-        r.destroy();
-      } catch {}
-      resolve(null);
-    });
-    r.write(body);
-    r.end();
-  });
+  const parsed = parseJsonText(result.text);
+  const questions = parsed && Array.isArray(parsed.questions) ? parsed.questions : [];
+  const filtered = questions.filter(
+    (question) => question && typeof question.question === 'string' && question.question.length > 4
+  );
+  return filtered.length > 0 ? filtered : null;
 }
 
 // LEARNING_MEMORY_v1 — suggest_review now reads review_queue first

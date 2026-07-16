@@ -121,8 +121,6 @@ module.exports = function registerAiAgentRoute(app) {
     const modelName = selectedPreset && selectedPreset.model;
     const baseUrl = selectedPreset && selectedPreset.baseUrl;
     const apiKey = (selectedPreset && selectedPreset.apiKey) || getApiKey(providerName);
-    if (!apiKey) return res.status(503).json({ status: 'error', error: 'AI 服务未配置' });
-
     if (!Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ status: 'error', error: '缺少消息' });
     }
@@ -196,6 +194,7 @@ module.exports = function registerAiAgentRoute(app) {
           apiKey,
           providerName,
           modelName,
+          profileId: selectedPreset && selectedPreset.id,
           baseUrl,
           taskId,
           onEvent: () => {
@@ -347,7 +346,7 @@ module.exports = function registerAiAgentRoute(app) {
     systemPrompt +=
       '\n- run_tool 跑完出图后，立即调用 act_generic(handlerId="open_result", payload={toolJobId}) 把结果展示给用户（主面板自动加载该 job 的图/表）。toolJobId 从 run_tool 的返回里取。不要让用户自己去翻 history。';
     systemPrompt +=
-      '\n- agent 看图（read_image）：当用户问图内容（如"图里上调基因集中在哪""这张图说明了什么"），调 read_image(toolJobId) 让多模态模型（qwen-vl-max）解读图，返回的 description 可直接据此回答。token 较贵，仅用户明确问图内容时调，不要每次出图都读。';
+      '\n- agent 看图（read_image）：当用户问图内容（如"图里上调基因集中在哪""这张图说明了什么"），调 read_image(toolJobId) 让 vision 角色模型解读图，返回的 description 可直接据此回答。token 较贵，仅用户明确问图内容时调，不要每次出图都读。';
     systemPrompt +=
       '\n- 重操作确认：run_tool 跑前判断——若工具属多步骤全流程（如 DESeq2 完整差异分析、WGCNA、ML 建模）或预计耗时较长，先在对话里告诉用户"将运行 X，约 N 秒，开始？"，等用户确认后再 run_tool。单图小工具（画火山图、PCA、热图等秒级完成的）直接跑，不用问。';
     systemPrompt += '\n- 工具调用后再判断下一步：可能继续调用，也可能直接回答用户';
@@ -543,7 +542,7 @@ module.exports = function registerAiAgentRoute(app) {
           });
         }
         const reqBody = {
-          model: modelName || 'deepseek-chat',
+          ...(modelName ? { model: modelName } : {}),
           messages: fullMessages,
           temperature: 0.4,
           max_tokens: 1500,
@@ -567,7 +566,7 @@ module.exports = function registerAiAgentRoute(app) {
               sseSend({ choices: [{ delta: { content: event.content } }] });
             }
           },
-          { baseUrl }
+          { baseUrl, profileId: selectedPreset && selectedPreset.id }
         );
         if (!upJson || upJson.error || !upJson.choices) {
           sseSend({
@@ -745,7 +744,7 @@ module.exports = function registerAiAgentRoute(app) {
               '你已用完本轮工具调用次数。请基于已收集到的工具结果，直接给用户一个有用的最终答复（不要再调用工具）。如果工具结果不足以完整回答，就给出当前能给出的最佳答复，并说明还缺什么。',
           });
           const fallbackBody = {
-            model: modelName || 'deepseek-chat',
+            ...(modelName ? { model: modelName } : {}),
             messages: fullMessages,
             temperature: 0.4,
             max_tokens: 1500,
@@ -766,7 +765,7 @@ module.exports = function registerAiAgentRoute(app) {
                 sseSend({ choices: [{ delta: { content: event.content } }] });
               }
             },
-            { baseUrl }
+            { baseUrl, profileId: selectedPreset && selectedPreset.id }
           );
           if (fbJson && fbJson.choices && fbJson.choices[0]) {
             const fbText = fallbackText || (fbJson.choices[0].message || {}).content || '';

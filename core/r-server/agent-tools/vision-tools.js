@@ -6,21 +6,20 @@
  *      → fs.readFileSync → base64。
  *
  * agent 循环里 tool_result 含 imageBase64 时，ai-agent.js 改用 vision provider
- * （callVision）喂 image_url content block，让 qwen-vl-max 看图。
+ * （callVision）喂 image content block，让当前 vision 角色模型看图。
  */
 const fs = require('fs');
 const path = require('path');
 const dbMod = require('../db');
 const config = require('../config');
 const { callVision } = require('../helpers/llm-client');
-const { getApiKey } = require('../helpers/ai-settings');
 
 /**
- * tool_read_image — 读工具结果的图，用 qwen-vl-max 解读图内容（agent-led 阶段2 Task4）。
+ * tool_read_image — 读工具结果的图，用 vision 角色模型解读图内容。
  *
  * 设计：agent 调本工具后，后端读图 base64 → 直接调 DashScopeVisionProvider 解读 →
  * 把"图里看到的内容"作为 tool_result 文本返回给 agent。这样 agent 循环不用改
- * （deepseek-chat 仍跑文本循环，vision 解读在 read_image 内部完成）。
+ * （文本 Agent 循环与 vision 解读分别按任务角色解析模型）。
  *
  * @param {object} args - { toolJobId, fileName?, question? }
  *   - toolJobId: tool_jobs.id（run_tool 返回的）
@@ -87,14 +86,8 @@ async function tool_read_image(args, ctx) {
   const dataUrl = `data:${mimeType};base64,${imageBase64}`;
 
   // 调 vision provider 解读图
-  const apiKey = getApiKey('dashscope');
-  if (!apiKey) {
-    return { error: 'no_vision_key', message: 'DashScope API key 未配置，无法看图。请在设置页填 DashScope key。' };
-  }
-
   const question = (args.question || '描述这张生物信息学图的主要内容：图表类型、轴标签、数据分布、显著特征。').slice(0, 500);
   const visionBody = {
-    model: 'qwen-vl-max',
     messages: [
       {
         role: 'user',
@@ -107,7 +100,7 @@ async function tool_read_image(args, ctx) {
   };
 
   const telemetry = { userId: ctx && ctx.userId, conversationId: ctx && ctx.conversationId, kind: 'vision' };
-  const visionResp = await callVision(apiKey, visionBody, telemetry);
+  const visionResp = await callVision('', visionBody, telemetry);
 
   if (!visionResp || visionResp.error) {
     return {
@@ -123,7 +116,7 @@ async function tool_read_image(args, ctx) {
     fileName: targetName,
     description: visionResp.content || '（vision 模型未返回描述）',
     usage: visionResp.usage,
-    _note: '图已用 qwen-vl-max 解读，上方 description 是图内容描述，可直接据此回答用户。',
+    _note: '图已用当前 vision 角色模型解读，上方 description 是图内容描述，可直接据此回答用户。',
   };
 }
 
