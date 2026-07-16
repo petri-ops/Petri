@@ -56,7 +56,7 @@ const {
   _gatherAnalysisContextForMethods,
   _renderMethodsParagraph,
 } = require('./helpers/methods-export');
-const taskStore = require('./task-store');
+const agentTaskStore = require('./agent-task-store');
 const logger = require('./logger');
 
 const MAX_ITERS = 15;
@@ -164,7 +164,7 @@ async function runAgentLoop({
     const eventType = (obj && obj.event) || 'delta';
     try {
       _seq += 1;
-      taskStore.appendTaskEvent(taskId, _seq, eventType, obj);
+      agentTaskStore.appendAgentTaskEvent(taskId, _seq, eventType, obj);
     } catch (e) {
       /* task_events 写失败不阻塞 loop */
     }
@@ -736,9 +736,9 @@ async function runAgentLoop({
     // 释放 task 生命周期锁 + 标记 task 终态（无论成功/失败/异常）
     try {
       if (assistantAcc.trim().length > 20 || pendingApprovalEmitted) {
-        taskStore.markAgentDone(taskId);
+        agentTaskStore.markAgentTaskDone(taskId);
       } else {
-        taskStore.markAgentFailed(taskId, 'agent loop 未生成有效回复');
+        agentTaskStore.markAgentTaskFailed(taskId, 'agent loop 未生成有效回复');
       }
     } catch {}
     try {

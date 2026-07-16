@@ -52,7 +52,7 @@ const {
 } = require('../helpers/methods-export');
 const { runAgentLoop } = require('../agent-runner');
 const { aiTaskConcurrencyAcquire, aiTaskConcurrencyRelease } = require('../helpers/runtime');
-const taskStore = require('../task-store');
+const agentTaskStore = require('../agent-task-store');
 
 // AGENT_TASK_MODE_v1：默认 task 模式（loop 后台跑 + 订阅重连），legacy 回退到直连 SSE
 const USE_AGENT_TASK_MODE = (process.env.BIOF3_AGENT_TASK_MODE || 'task') !== 'legacy';
@@ -174,7 +174,7 @@ module.exports = function registerAiAgentRoute(app) {
         return res.status(503).json({ error: guard.reason, message: guard.message });
       }
       try {
-        taskStore.insertAgentTask({
+        agentTaskStore.insertAgentTask({
           taskId,
           userId,
           params: { messages, context, conversationId: _activeConv && _activeConv.id },
@@ -204,7 +204,7 @@ module.exports = function registerAiAgentRoute(app) {
           shouldAbort: () => false, // 阶段 1：用户关浏览器不 abort，loop 继续跑
         }).catch((e) => {
           try {
-            taskStore.markAgentFailed(taskId, e && e.message ? e.message : String(e));
+            agentTaskStore.markAgentTaskFailed(taskId, e && e.message ? e.message : String(e));
           } catch {}
           try {
             aiTaskConcurrencyRelease(userId, taskId);
@@ -919,7 +919,7 @@ module.exports = function registerAiAgentRoute(app) {
 
     let task;
     try {
-      task = taskStore.getTask(taskId);
+      task = agentTaskStore.getAgentTask(taskId);
     } catch (e) {
       return res.status(500).json({ status: 'error', error: '查询 task 失败' });
     }
@@ -948,7 +948,7 @@ module.exports = function registerAiAgentRoute(app) {
 
     // 1. 回放已存事件（afterSeq+1 起）
     try {
-      const events = taskStore.getTaskEventsSince(taskId, afterSeq);
+      const events = agentTaskStore.getAgentTaskEventsSince(taskId, afterSeq);
       for (const ev of events) {
         sseSend({ seq: ev.seq, eventType: ev.eventType, payload: ev.payload });
         lastSeq = ev.seq;
@@ -956,7 +956,7 @@ module.exports = function registerAiAgentRoute(app) {
     } catch {}
 
     // 2. 若 task 已终态，发 done/error 后结束
-    const freshTask = taskStore.getTask(taskId);
+    const freshTask = agentTaskStore.getAgentTask(taskId);
     if (isTerminal(freshTask)) {
       if (freshTask.agent_status === 'failed') {
         sseSend({ event: 'error', error: freshTask.error || 'agent task 失败' });
@@ -970,12 +970,12 @@ module.exports = function registerAiAgentRoute(app) {
     // 3. 轮询增量事件到终态（500ms 间隔）
     const poll = setInterval(() => {
       try {
-        const events = taskStore.getTaskEventsSince(taskId, lastSeq);
+        const events = agentTaskStore.getAgentTaskEventsSince(taskId, lastSeq);
         for (const ev of events) {
           sseSend({ seq: ev.seq, eventType: ev.eventType, payload: ev.payload });
           lastSeq = ev.seq;
         }
-        const t = taskStore.getTask(taskId);
+        const t = agentTaskStore.getAgentTask(taskId);
         if (isTerminal(t)) {
           clearInterval(poll);
           if (t.agent_status === 'failed') {

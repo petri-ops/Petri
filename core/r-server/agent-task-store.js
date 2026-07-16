@@ -1,0 +1,166 @@
+/**
+ * SQLite persistence for background Agent loops and their SSE event stream.
+ *
+ * The `tasks` table name is retained for existing desktop databases, but this
+ * module deliberately exposes no scientific-analysis queue API. Analysis
+ * execution belongs to run_tool -> tool_job -> artifact truth.
+ */
+
+const Database = require('better-sqlite3');
+const config = require('./config');
+const logger = require('./logger');
+
+const db = new Database(config.dbPath);
+db.pragma('journal_mode = WAL');
+db.pragma('busy_timeout = 5000');
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS tasks (
+    id TEXT PRIMARY KEY,
+    type TEXT NOT NULL,
+    params TEXT DEFAULT '{}',
+    status TEXT NOT NULL DEFAULT 'running',
+    created_at TEXT NOT NULL,
+    finished_at TEXT,
+    error TEXT,
+    user_id TEXT,
+    agent_status TEXT
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
+  CREATE INDEX IF NOT EXISTS idx_tasks_created ON tasks(created_at);
+
+  CREATE TABLE IF NOT EXISTS task_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    task_id TEXT NOT NULL,
+    seq INTEGER NOT NULL,
+    event_type TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+  CREATE INDEX IF NOT EXISTS idx_task_events_task_seq ON task_events(task_id, seq);
+`);
+
+// Existing databases may predate the Agent-loop columns.
+for (const statement of [
+  'ALTER TABLE tasks ADD COLUMN user_id TEXT',
+  'ALTER TABLE tasks ADD COLUMN agent_status TEXT',
+]) {
+  try {
+    db.exec(statement);
+  } catch {}
+}
+
+const interrupted = db
+  .prepare(
+    `UPDATE tasks
+     SET status = 'failed', agent_status = 'failed', error = '服务重启，Agent 任务中断', finished_at = ?
+     WHERE type = 'agent_loop' AND status = 'running'`
+  )
+  .run(new Date().toISOString());
+
+if (interrupted.changes > 0) {
+  logger.warn(`Marked ${interrupted.changes} interrupted Agent task(s) as failed on startup`);
+}
+
+const stmts = {
+  insert: db.prepare(`
+    INSERT INTO tasks (id, type, params, status, created_at, user_id, agent_status)
+    VALUES (?, 'agent_loop', ?, 'running', ?, ?, 'running')
+  `),
+  get: db.prepare(
+    `SELECT id, params, status, created_at, finished_at, error, user_id, agent_status
+     FROM tasks WHERE id = ? AND type = 'agent_loop'`
+  ),
+  insertEvent: db.prepare(`
+    INSERT INTO task_events (task_id, seq, event_type, payload, created_at)
+    VALUES (?, ?, ?, ?, ?)
+  `),
+  listEvents: db.prepare(
+    `SELECT seq, event_type, payload, created_at FROM task_events
+     WHERE task_id = ? AND seq > ? ORDER BY seq ASC LIMIT ?`
+  ),
+  updateStatus: db.prepare(
+    `UPDATE tasks SET agent_status = ?, status = ?, error = ?, finished_at = ?
+     WHERE id = ? AND type = 'agent_loop'`
+  ),
+};
+
+function insertAgentTask({ taskId, userId, params }) {
+  stmts.insert.run(
+    taskId,
+    JSON.stringify(params || {}),
+    new Date().toISOString(),
+    userId || null
+  );
+  return getAgentTask(taskId);
+}
+
+function getAgentTask(taskId) {
+  const row = stmts.get.get(taskId);
+  if (!row) return null;
+  return {
+    taskId: row.id,
+    params: tryParse(row.params),
+    status: row.status,
+    createdAt: row.created_at,
+    finishedAt: row.finished_at,
+    error: row.error,
+    userId: row.user_id || null,
+    agentStatus: row.agent_status || null,
+    // Route compatibility while the persisted SQLite columns remain snake_case.
+    user_id: row.user_id || null,
+    agent_status: row.agent_status || null,
+  };
+}
+
+function appendAgentTaskEvent(taskId, seq, eventType, payload) {
+  stmts.insertEvent.run(
+    taskId,
+    seq,
+    eventType,
+    typeof payload === 'string' ? payload : JSON.stringify(payload),
+    new Date().toISOString()
+  );
+}
+
+function getAgentTaskEventsSince(taskId, afterSeq, limit = 500) {
+  return stmts.listEvents.all(taskId, afterSeq, limit).map((row) => ({
+    seq: row.seq,
+    eventType: row.event_type,
+    payload: tryParse(row.payload),
+    createdAt: row.created_at,
+  }));
+}
+
+function markAgentTaskDone(taskId) {
+  stmts.updateStatus.run('done', 'completed', null, new Date().toISOString(), taskId);
+}
+
+function markAgentTaskFailed(taskId, error) {
+  stmts.updateStatus.run(
+    'failed',
+    'failed',
+    String(error || 'Agent 任务失败'),
+    new Date().toISOString(),
+    taskId
+  );
+}
+
+function tryParse(value) {
+  if (!value) return null;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+}
+
+module.exports = {
+  insertAgentTask,
+  getAgentTask,
+  appendAgentTaskEvent,
+  getAgentTaskEventsSince,
+  markAgentTaskDone,
+  markAgentTaskFailed,
+};

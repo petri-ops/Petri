@@ -8,8 +8,6 @@
 const path = require('path');
 
 const config = {
-  workerId: process.env.BIOF3_WORKER_ID || require('os').hostname(),
-
   // ── 桌面版模式（Electron 本地运行）──────────────────────────
   // storageMode: 'local'（桌面版，本地文件系统）
   storageMode: process.env.BIOF3_STORAGE || 'local',
@@ -34,15 +32,8 @@ const config = {
   tempDir: process.env.BIOF3_TEMP_DIR || '/tmp/biof3-tmp',
   dbPath: process.env.BIOF3_DB_PATH || path.join(__dirname, 'biof3.db'),
 
-  // Canonical 执行路径根（execution-context 用于稳定的跨引用标识，非实际文件系统路径）
-  canonicalTaskRoot: process.env.BIOF3_CANONICAL_TASK_ROOT || '/work/biof3/tasks',
-
   // Timeouts
   runTimeoutMs: parseInt(process.env.R_RUN_TIMEOUT_MS || '30000', 10),
-  taskTimeoutMs: parseInt(process.env.R_TASK_TIMEOUT_MS || '600000', 10), // 10 min
-
-  // Concurrency — how many R tasks can run in parallel
-  maxConcurrentTasks: parseInt(process.env.R_MAX_CONCURRENT_TASKS || '3', 10),
 
   // R Pool (warm workers for /api/run)
   poolSize: parseInt(process.env.R_POOL_SIZE || '2', 10),
@@ -54,9 +45,6 @@ const config = {
   // Upload
   maxUploadSize: parseInt(process.env.MAX_UPLOAD_SIZE || String(500 * 1024 * 1024), 10),
 
-  // Task cleanup
-  taskRetentionMs: parseInt(process.env.TASK_RETENTION_MS || String(24 * 60 * 60 * 1000), 10),
-
   // FigCode static tool demos (legacy dirs under r-server). Production: leave unset + BIOF3_TOOL_DEMO_DISABLED=1
   toolDemoDisabled: process.env.BIOF3_TOOL_DEMO_DISABLED === '1',
   toolDemoDataDir: process.env.BIOF3_TOOL_DEMO_DATA_DIR || '',
@@ -64,8 +52,7 @@ const config = {
 };
 
 /**
- * Create a directory (recursive). Kept as a named helper for the call sites that
- * previously needed docker-sandbox permission tweaks; on desktop it's a plain mkdir.
+ * Create a local directory recursively.
  *
  * @param {string} dirPath - absolute path
  */
