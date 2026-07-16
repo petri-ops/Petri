@@ -147,14 +147,6 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":
 | `spatial-lr` | 空间配受体分析 |
 | `ml-scvi-annotate` | scVI 单细胞类型注释 |
 
-### 待实现（3 个）
-
-| 工具 ID | 状态 |
-|---------|------|
-| `mo-multivi` | 待开发 |
-| `mo-citeseq` | 待开发 |
-| `ml-autoencoder` | 待开发 |
-
 ## 环境要求
 
 - Node.js >= 18

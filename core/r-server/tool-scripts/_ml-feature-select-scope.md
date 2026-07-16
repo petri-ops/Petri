@@ -25,7 +25,7 @@
 ## Out-of-scope (不做)
 
 - ❌ **LASSO 特征选择**（见 lasso-cox 工具）
-- ❌ **Deep learning feature learning**（见 ml-autoencoder）
+- ❌ **Deep learning feature learning**（本工具不包含）
 - ❌ **SHAP 特征重要性**（见 shap-explain，是后验解释而非选择）
 - ❌ **Stability selection**（高级，留给用户）
 - ❌ **特征工程 / 交互项构造**（用户自行预处理）

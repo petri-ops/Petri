@@ -162,14 +162,6 @@ const TOOLS = {
     csvInputs: ['matrix', 'known_labels'],
     sizeLimitMB: 100,
   },
-  'ml-autoencoder': {
-    displayName: 'Autoencoder 表征',
-    script: 'ml_autoencoder',  // py-server 是 type 而非脚本路径
-    lang: 'python',
-    description: '深度学习降维(PyTorch Autoencoder,p → hidden → latent → hidden → p)',
-    csvInputs: ['matrix'],
-    sizeLimitMB: 200,
-  },
   'ml-scvi-annotate': {
     displayName: 'scVI 自动注释',
     script: 'scvi_annotation',  // 复用 py-server 现有 task type
@@ -180,7 +172,7 @@ const TOOLS = {
   },
   // ============================================================
   // 多组学整合专栏 — 第二期补缺(2026-05-28)
-  // 4 个工具:mo-mofa / mo-snf(R) + mo-multivi / mo-citeseq(Python)
+  // 本地已实现工具：mo-mofa / mo-snf (R)
   // 详细 spec: .kiro/drafts/multi-omics-spec.md
   // ============================================================
   'mo-mofa': {
@@ -198,22 +190,6 @@ const TOOLS = {
     description: '相似性网络融合亚型发现(SNFtool,谱聚类 + NMI/ARI 验证)',
     csvInputs: ['omics_layer1', 'omics_layer2'],
     sizeLimitMB: 200,
-  },
-  'mo-multivi': {
-    displayName: 'MultiVI 多模态',
-    script: 'mo_multivi',
-    lang: 'python',
-    description: '单细胞多模态整合(scRNA + scATAC,scvi-tools MultiVI)',
-    csvInputs: [],  // h5ad 二进制
-    sizeLimitMB: 500,
-  },
-  'mo-citeseq': {
-    displayName: 'CITE-seq WNN',
-    script: 'mo_citeseq',
-    lang: 'python',
-    description: 'CITE-seq 多模态整合(scRNA + ADT,WNN 加权最近邻)',
-    csvInputs: [],  // h5ad 二进制
-    sizeLimitMB: 500,
   },
   // ============================================================
   // 空间组学专栏 — Wave 2 (2026-05-28)

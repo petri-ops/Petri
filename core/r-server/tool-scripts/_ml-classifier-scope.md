@@ -27,7 +27,7 @@
 
 - ❌ **特征选择**（见 ml-feature-select）
 - ❌ **SHAP 解释**（见 shap-explain）
-- ❌ **深度学习分类器**（见 ml-autoencoder）
+- ❌ **深度学习分类器**（本工具不包含）
 - ❌ **Bayesian optimization 超参**（留高级用户）
 - ❌ **Ensemble stacking**（独立工具）
 - ❌ **生存预测**（见 rsf-survival）

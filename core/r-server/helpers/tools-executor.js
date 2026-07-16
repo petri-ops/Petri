@@ -892,12 +892,9 @@ function createToolsExecutor({
       'rsf-survival': 'RSF生存森林',
       'shap-explain': 'SHAP',
       'consensus-cluster': '一致性聚类',
-      'ml-autoencoder': 'Autoencoder',
       'ml-scvi-annotate': 'scVI',
       'mo-mofa': 'MOFA2',
       'mo-snf': 'SNF',
-      'mo-multivi': 'MultiVI',
-      'mo-citeseq': 'CITE-seq',
     };
     const existCount = await db
       .prepare('SELECT COUNT(*) as cnt FROM tool_jobs WHERE user_id = ? AND tool_id = ?')

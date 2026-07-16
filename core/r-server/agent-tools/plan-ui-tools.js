@@ -450,12 +450,9 @@ async function actOpenTool(args, _ctx) {
     'rsf-survival': '随机生存森林',
     'shap-explain': 'SHAP 可解释性',
     'consensus-cluster': '一致性聚类',
-    'ml-autoencoder': 'Autoencoder 表征',
     'ml-scvi-annotate': 'scVI 自动注释',
     'mo-mofa': 'MOFA2 因子分析',
     'mo-snf': 'SNF 网络融合',
-    'mo-multivi': 'MultiVI 多模态',
-    'mo-citeseq': 'CITE-seq WNN',
   };
   const name = toolNames[toolId] || toolId;
   return {
