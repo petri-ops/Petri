@@ -117,8 +117,8 @@ if (existsSync(FIXTURE)) {
 
 // Rescue-path schema (Week 3B): golden-path.mjs writes a
 // `analysis_succeeded_zip_packaging_pending` record when r-server's
-// HTML-report endpoint returns report_source_not_found (a known local-mode
-// gap in BIOF3_EXEC_MODE=local: the zip post-processor that bundles
+// HTML-report endpoint returns report_source_not_found (a known packaging
+// gap: the zip post-processor that bundles
 // output/ → all_results.zip isn't wired yet, so report endpoint 502s
 // even though the R analysis itself completed). This block asserts the
 // shape of that rescue record so the contract doesn't silently drift.
@@ -148,7 +148,7 @@ const rescue = {
     artifactList: ['deg_table.csv', 'volcano.png', 'report.html'],
   },
   exit: 'analysis_succeeded_zip_packaging_pending',
-  notes: 'R analysis completed; r-server zip post-processor did not run in BIOF3_EXEC_MODE=local.',
+  notes: 'R analysis completed; r-server zip post-processor did not run.',
 };
 let rb = 0;
 const r2check = (cond, msg) => { if (cond) console.log(`  ✓ ${msg}`); else { console.error(`  ✗ ${msg}`); rb++; } };

@@ -250,8 +250,8 @@ let jobDiskSummary = null;
     if (lastStatus === 'failed' || lastStatus === 'cancelled') {
       // Known r-server local-mode gap: jobs land in `failed: Required artifact
       // zip was not produced` even when the R analysis completed and all 23
-      // artifacts are on disk (zip post-processor doesn't run in
-      // BIOF3_EXEC_MODE=local). If we can see artifacts in /status.result.files,
+      // artifacts are on disk (zip post-processor doesn't run on this path).
+      // If we can see artifacts in /status.result.files,
       // the analysis itself succeeded — continue to step 6 with the rescue
       // path rather than bailing.
       const files = lastBody.result?.files || [];
@@ -291,9 +291,8 @@ let servedUrl = null;
     if (servedUrl) log('INFO', `  served URL: ${servedUrl}`);
   } else if (r.body && r.body.error === 'report_source_not_found') {
     // Known local-mode gap: r-server marks jobs as "failed: Required artifact zip
-    // was not produced" when the zip post-processor isn't wired (e.g. when
-    // running in BIOF3_EXEC_MODE=local against a system R install instead of the
-    // vendored Runtime artifact). The actual R analysis completed — 23
+    // was not produced" when the zip post-processor isn't wired. The actual
+    // R analysis completed — 23
     // artifacts exist on disk — but report endpoint returns 404 because the
     // zip step didn't run.
     //

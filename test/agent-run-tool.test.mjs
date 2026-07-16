@@ -83,7 +83,7 @@ test('MCP run_tool execution context 映射本地 jobDir 到 canonical workDir',
     canonicalRoot: '/work/biof3',
   });
 
-  assert.equal(context.mode, 'local');
+  assert.equal(context.adapter.kind, 'local');
   assert.equal(context.runtime, 'r');
   assert.equal(context.runtimeReady.ready, true);
   assert.equal(context.workDir, jobDir);

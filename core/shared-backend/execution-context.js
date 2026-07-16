@@ -75,7 +75,6 @@ function createExecutionContext(options = {}) {
   const targetWorkDir = executionWorkDir || localWorkDir;
   const context = {
     executionContextVersion: EXECUTION_CONTEXT_VERSION,
-    mode: 'local',
     adapter: {
       kind: 'local',
       workerId: workerId || null,

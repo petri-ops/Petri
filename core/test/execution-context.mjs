@@ -48,7 +48,6 @@ test('task contexts preserve local and canonical paths', () => {
     'r'
   );
 
-  assert.equal(context.mode, 'local');
   assert.equal(context.adapter.workerId, 'worker-a');
   assert.equal(context.workDir, '/srv/tasks/task-task-1');
   assert.equal(context.canonicalWorkDir, '/work/biof3/tasks/task-task-1');
