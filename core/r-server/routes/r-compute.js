@@ -31,7 +31,6 @@ function getStorage() {
 }
 
 const TEMP_DIR = config.tempDir || '/tmp/biof3-tmp';
-const CONTAINER_TEMP_DIR = TEMP_DIR;
 const TIMEOUT_MS = 30000;
 
 // ── Rate limiting (simple in-memory, per-IP) ──────────────────
@@ -167,17 +166,16 @@ function registerRCompute(app) {
 
     const sessionId = uuidv4();
     const workDir = path.join(TEMP_DIR, sessionId);
-    const containerWorkDir = `${CONTAINER_TEMP_DIR}/${sessionId}`;
     config.mkdirSandbox(workDir);
 
     const rScript = `
-setwd("${containerWorkDir}")
-options(device = function(...) png(file.path("${containerWorkDir}", sprintf("plot_%03d.png", length(list.files(pattern="plot_.*\\\\.png")) + 1)), width = 600, height = 400, res = 100, ...))
+setwd("${workDir}")
+options(device = function(...) png(file.path("${workDir}", sprintf("plot_%03d.png", length(list.files(pattern="plot_.*\\\\.png")) + 1)), width = 600, height = 400, res = 100, ...))
 tryCatch({
 ${code}
   # Auto-print last ggplot if not already printed
   lp <- tryCatch(ggplot2::last_plot(), error = function(e) NULL)
-  if (!is.null(lp) && length(list.files("${containerWorkDir}", pattern="plot_.*\\\\.png")) == 0) print(lp)
+  if (!is.null(lp) && length(list.files("${workDir}", pattern="plot_.*\\\\.png")) == 0) print(lp)
 }, error = function(e) {
   cat("Error:", conditionMessage(e), "\\n")
 })

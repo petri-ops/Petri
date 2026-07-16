@@ -29,20 +29,20 @@ const config = {
   desktop: process.env.BIOF3_DESKTOP === '1',
 
   // Paths (host-side)
-  tempDir: process.env.BIOF3_PY_TEMP_DIR || '/mnt/storage_16tb/omichub/biof3-py-tmp',
+  tempDir: process.env.BIOF3_PY_TEMP_DIR || '/tmp/biof3-py-tmp',
   // W4-A (2026-05-28): result cache for parentTaskId reuse.
-  cacheDir: process.env.BIOF3_PY_CACHE_DIR || '/mnt/storage_16tb/omichub/biof3-py-tmp/_cache',
-  containerCacheDir: process.env.PY_CONTAINER_CACHE_DIR || '/app/data/biof3-py-tmp/_cache',
+  cacheDir:
+    process.env.BIOF3_PY_CACHE_DIR ||
+    path.join(process.env.BIOF3_PY_TEMP_DIR || '/tmp/biof3-py-tmp', '_cache'),
   dbPath: process.env.BIOF3_PY_DB_PATH || path.join(__dirname, 'pyserver.db'),
 
   // Canonical 执行路径根（execution-context 用于稳定的跨引用标识，非实际文件系统路径）
-  containerTempDir: process.env.PY_CONTAINER_TEMP_DIR || '/app/data/biof3-py-tmp',
+  canonicalTaskRoot: process.env.BIOF3_CANONICAL_TASK_ROOT || '/work/biof3/tasks',
 
   // Timeouts
   // taskTimeoutMs=0 means "no timeout" — science workloads (Tangram CPU deconv,
   // cell2location, large slide spatial pipelines) routinely run 30+ min and that's
-  // legitimate. Container resource limits (--memory=8g --cpus=4 --pids-limit=2000)
-  // already protect against runaway processes; we don't need a hard wall clock.
+  // legitimate, so local execution does not impose a hard wall clock by default.
   // Keep PY_TASK_TIMEOUT_MS env override for special cases (e.g. CI smoke tests).
   runTimeoutMs: parseInt(process.env.PY_RUN_TIMEOUT_MS || '30000', 10),
   taskTimeoutMs: parseInt(process.env.PY_TASK_TIMEOUT_MS || '0', 10),

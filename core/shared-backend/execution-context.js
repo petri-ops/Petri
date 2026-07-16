@@ -109,7 +109,7 @@ function createTaskExecutionContext(task = {}, config = {}, runtime = null) {
     workerId: task.workerId || config.workerId,
     workDir: task.workDir,
     localRoot: config.tempDir,
-    canonicalRoot: config.containerTempDir || '/work/biof3/tasks',
+    canonicalRoot: config.canonicalTaskRoot || '/work/biof3/tasks',
     runtimeReady: { runtime, ready: true, command: null, reason: null },
   }).context;
 }

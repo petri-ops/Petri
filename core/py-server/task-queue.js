@@ -112,7 +112,7 @@ async function executeTask(task) {
     if (parentTaskId) {
       const cacheFile = path.join(config.cacheDir, `task-${parentTaskId}.h5ad`);
       if (fs.existsSync(cacheFile)) {
-        parentCachePath = `${config.containerCacheDir}/task-${parentTaskId}.h5ad`;
+        parentCachePath = cacheFile;
         logger.info('Using parent cache', { taskId, parentTaskId, parentCachePath });
       }
     }

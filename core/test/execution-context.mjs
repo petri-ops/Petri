@@ -43,7 +43,7 @@ test('task contexts preserve local and canonical paths', () => {
     },
     {
       tempDir: '/srv/tasks',
-      containerTempDir: '/app/tasks',
+      canonicalTaskRoot: '/work/biof3/tasks',
     },
     'r'
   );
@@ -51,7 +51,7 @@ test('task contexts preserve local and canonical paths', () => {
   assert.equal(context.mode, 'local');
   assert.equal(context.adapter.workerId, 'worker-a');
   assert.equal(context.workDir, '/srv/tasks/task-task-1');
-  assert.equal(context.canonicalWorkDir, '/app/tasks/task-task-1');
+  assert.equal(context.canonicalWorkDir, '/work/biof3/tasks/task-task-1');
   assert.equal(context.executionWorkDir, '/srv/tasks/task-task-1');
 });
 
@@ -64,7 +64,7 @@ test('result files inherit stable host and canonical paths', () => {
     },
     {
       tempDir: '/srv/tasks',
-      containerTempDir: '/app/tasks',
+      canonicalTaskRoot: '/work/biof3/tasks',
     },
     'r'
   );
@@ -74,5 +74,5 @@ test('result files inherit stable host and canonical paths', () => {
   );
   assert.equal(result.execution, context);
   assert.equal(result.files[0].path, '/srv/tasks/task-task-2/markers.csv');
-  assert.equal(result.files[0].canonicalPath, '/app/tasks/task-task-2/markers.csv');
+  assert.equal(result.files[0].canonicalPath, '/work/biof3/tasks/task-task-2/markers.csv');
 });

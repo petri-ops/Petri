@@ -33,11 +33,11 @@ const config = {
   apiToken: process.env.BIOF3_API_TOKEN || 'biof3-figcode-2026',
 
   // Paths (host-side)
-  tempDir: process.env.BIOF3_TEMP_DIR || '/mnt/storage_16tb/omichub/biof3-tmp',
+  tempDir: process.env.BIOF3_TEMP_DIR || '/tmp/biof3-tmp',
   dbPath: process.env.BIOF3_DB_PATH || path.join(__dirname, 'biof3.db'),
 
   // Canonical 执行路径根（execution-context 用于稳定的跨引用标识，非实际文件系统路径）
-  containerTempDir: process.env.CONTAINER_TEMP_DIR || '/app/data/biof3-tmp',
+  canonicalTaskRoot: process.env.BIOF3_CANONICAL_TASK_ROOT || '/work/biof3/tasks',
 
   // Timeouts
   runTimeoutMs: parseInt(process.env.R_RUN_TIMEOUT_MS || '30000', 10),
