@@ -10,7 +10,7 @@
  */
 
 
-function generatePythonToolScript({ type, params, ossInputUrl, outputDir, parentCachePath }) {
+function generatePythonToolScript({ type, params, outputDir }) {
   const progressHelper = `
 import json, os
 
@@ -22,267 +22,48 @@ report_progress(5, "初始化环境...")
 `;
 
   switch (type) {
-    case 'scanpy_standard':
-      return generateScanpyScript({ params, ossInputUrl, outputDir }, progressHelper);
-    case 'scanpy_integration':
-      return generateScanpyIntegrationScript(
-        { params, ossInputUrl, outputDir },
-        progressHelper
-      );
-    // W1-9: 'spatial' 是 'spatial_standard' 的旧别名（向后兼容），共用 generator
-    case 'spatial':
     case 'spatial_standard':
-      return generateSpatialStandardScript(
-        { params, ossInputUrl, outputDir },
-        progressHelper
-      );
-    // W4-A (2026-05-28): spatial_recluster — sub-cluster a chosen leiden cluster from parent's result_spatial.h5ad
-    case 'spatial_recluster':
-      return generateSpatialReclusterScript(
-        { params, ossInputUrl, outputDir, parentCachePath },
-        progressHelper
-      );
-    // W4-A (2026-05-28): spatial_svg — multi-method spatially variable genes (Moran's I + Geary's C + Sepal)
+      return generateSpatialStandardScript({ params, outputDir }, progressHelper);
     case 'spatial_svg':
-      return generateSpatialSvgScript(
-        { params, ossInputUrl, outputDir, parentCachePath },
-        progressHelper
-      );
-    // W4-A (2026-05-28): spatial_deconv — Tangram-based cell type deconvolution per spot
+      return generateSpatialSvgScript({ params, outputDir }, progressHelper);
     case 'spatial_deconv':
-      return generateSpatialDeconvScript(
-        { params, ossInputUrl, outputDir, parentCachePath },
-        progressHelper
-      );
-    // W4-A (2026-05-29): spatial_lr — LIANA spatial-aware ligand-receptor analysis
+      return generateSpatialDeconvScript({ params, outputDir }, progressHelper);
     case 'spatial_lr':
-      return generateSpatialLrScript(
-        { params, ossInputUrl, outputDir, parentCachePath },
-        progressHelper
-      );
+      return generateSpatialLrScript({ params, outputDir }, progressHelper);
     case 'scvi_annotation':
-      return generateScVIScript({ params, ossInputUrl, outputDir }, progressHelper);
-    case 'ml_classifier':
-      return generateMLScript({ params, ossInputUrl, outputDir }, progressHelper);
-    case 'cellrank':
-      return generateCellRankScript({ params, ossInputUrl, outputDir }, progressHelper);
+      return generateScVIScript({ params, outputDir }, progressHelper);
     default:
       return `${progressHelper}\nraise ValueError("未知任务类型: ${type}")`;
   }
 }
 
-// ============================================================
-// Scanpy Standard Pipeline
-// ============================================================
-
-function generateScanpyScript({ params, ossInputUrl, outputDir }, progressHelper) {
-  const {
-    minGenes = 200,
-    maxGenes = 5000,
-    maxMtPct = 20,
-    nPCs = 30,
-    resolution = 0.5,
-    nTopGenes = 2000,
-  } = params || {};
-
-  return `
-import scanpy as sc
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import json, os, urllib.request
-
-${progressHelper}
-os.chdir("${outputDir}")
-sc.settings.figdir = "${outputDir}"
-sc.settings.set_figure_params(dpi=150, frameon=False)
-
-# --- 1. Load data ---
-report_progress(10, "下载数据...")
-input_url = "${ossInputUrl}"
-ext = os.path.splitext(input_url)[1].lower()
-
-if ext == ".h5ad":
-    urllib.request.urlretrieve(input_url, "input.h5ad")
-    adata = sc.read_h5ad("input.h5ad")
-elif ext == ".h5":
-    urllib.request.urlretrieve(input_url, "input.h5")
-    adata = sc.read_10x_h5("input.h5")
-elif ext in (".csv", ".tsv", ".txt"):
-    urllib.request.urlretrieve(input_url, "input.csv")
-    adata = sc.read_csv("input.csv").T  # genes x cells → cells x genes
-else:
-    urllib.request.urlretrieve(input_url, "input" + ext)
-    adata = sc.read("input" + ext)
-
-report_progress(20, f"加载完成: {adata.n_obs} 细胞, {adata.n_vars} 基因")
-
-# --- 2. QC ---
-report_progress(25, "质控分析...")
-adata.var_names_make_unique()
-sc.pp.filter_cells(adata, min_genes=${minGenes})
-sc.pp.filter_genes(adata, min_cells=3)
-
-adata.var["mt"] = adata.var_names.str.startswith(("MT-", "mt-"))
-sc.pp.calculate_qc_metrics(adata, qc_vars=["mt"], inplace=True)
-
-fig, axes = plt.subplots(1, 3, figsize=(12, 4))
-sc.pl.violin(adata, ["n_genes_by_counts"], ax=axes[0], show=False)
-sc.pl.violin(adata, ["total_counts"], ax=axes[1], show=False)
-sc.pl.violin(adata, ["pct_counts_mt"], ax=axes[2], show=False)
-plt.tight_layout()
-plt.savefig("plot_001_qc_violin.png", dpi=150, bbox_inches="tight")
-plt.close()
-
-adata = adata[adata.obs.n_genes_by_counts < ${maxGenes}, :]
-adata = adata[adata.obs.pct_counts_mt < ${maxMtPct}, :]
-report_progress(35, f"质控后: {adata.n_obs} 细胞")
-
-# --- 3. Normalize & HVG ---
-report_progress(40, "标准化 + 高变基因...")
-sc.pp.normalize_total(adata, target_sum=1e4)
-sc.pp.log1p(adata)
-sc.pp.highly_variable_genes(adata, n_top_genes=${nTopGenes})
-
-sc.pl.highly_variable_genes(adata, show=False)
-plt.savefig("plot_002_hvg.png", dpi=150, bbox_inches="tight")
-plt.close()
-
-# --- 4. PCA ---
-report_progress(50, "PCA...")
-adata.raw = adata
-adata = adata[:, adata.var.highly_variable]
-sc.pp.scale(adata, max_value=10)
-sc.pp.pca(adata, n_comps=${nPCs})
-
-sc.pl.pca_variance_ratio(adata, n_pcs=${nPCs}, show=False)
-plt.savefig("plot_003_pca_variance.png", dpi=150, bbox_inches="tight")
-plt.close()
-
-# --- 5. Neighbors + Clustering ---
-report_progress(65, "聚类分析...")
-sc.pp.neighbors(adata, n_pcs=${nPCs})
-sc.tl.leiden(adata, resolution=${resolution})
-
-# --- 6. UMAP ---
-report_progress(75, "UMAP...")
-sc.tl.umap(adata)
-
-sc.pl.umap(adata, color=["leiden"], legend_loc="on data", show=False)
-plt.savefig("plot_004_umap_clusters.png", dpi=150, bbox_inches="tight")
-plt.close()
-
-# --- 7. Marker genes ---
-report_progress(85, "寻找标记基因...")
-sc.tl.rank_genes_groups(adata, "leiden", method="wilcoxon")
-
-sc.pl.rank_genes_groups(adata, n_genes=5, show=False)
-plt.savefig("plot_005_markers.png", dpi=150, bbox_inches="tight")
-plt.close()
-
-# Save top markers
-markers_df = sc.get.rank_genes_groups_df(adata, group=None)
-markers_df.head(100).to_csv("markers_top.csv", index=False)
-
-# --- 8. Save ---
-report_progress(95, "保存结果...")
-adata.write("result.h5ad")
-
-summary = {
-    "n_cells": int(adata.n_obs),
-    "n_genes": int(adata.n_vars),
-    "n_clusters": int(adata.obs["leiden"].nunique()),
-    "n_pcs": ${nPCs},
-    "resolution": ${resolution},
-}
-with open("summary.json", "w") as f:
-    json.dump(summary, f)
-
-report_progress(100, "分析完成!")
-print("TASK_COMPLETE")
-`;
+function buildLocalH5adLoadBlock(outputDir, variableName = 'adata') {
+  return `report_progress(10, "查找已上传的 .h5ad 文件...")
+import glob, shutil
+parent_dir = os.path.dirname("${outputDir}".rstrip("/"))
+candidates = []
+for name in ["adata", "input", "file", "reference", "input.h5ad", "input.h5"]:
+    candidate = os.path.join(parent_dir, name)
+    if os.path.isfile(candidate) and os.path.getsize(candidate) > 1000:
+        candidates.append(candidate)
+if not candidates:
+    candidates = sorted(glob.glob(os.path.join(parent_dir, "*.h5ad")) + glob.glob(os.path.join(parent_dir, "*.h5")))
+if not candidates:
+    raise FileNotFoundError(f"未在 {parent_dir} 找到 h5ad 输入")
+src = candidates[0]
+dst = os.path.join("${outputDir}", "input.h5ad")
+if src != dst:
+    shutil.copy(src, dst)
+${variableName} = sc.read_h5ad(dst)
+print(f"  使用输入文件: {src} → {${variableName}.n_obs} observations × {${variableName}.n_vars} variables")`;
 }
 
-// ============================================================
-// Scanpy Integration (Harmony / scanorama / bbknn)
-// ============================================================
-
-function generateScanpyIntegrationScript(
-  { params, ossInputUrl, outputDir },
-  progressHelper
-) {
-  const { method = 'harmony', batchKey = 'batch', nPCs = 30, resolution = 0.5 } = params || {};
-
-  return `
-import scanpy as sc
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import json, os, urllib.request
-
-${progressHelper}
-os.chdir("${outputDir}")
-sc.settings.set_figure_params(dpi=150, frameon=False)
-
-report_progress(10, "下载数据...")
-urllib.request.urlretrieve("${ossInputUrl}", "input.h5ad")
-adata = sc.read_h5ad("input.h5ad")
-report_progress(20, f"{adata.n_obs} 细胞, batch: ${batchKey}")
-
-report_progress(30, "预处理...")
-sc.pp.normalize_total(adata, target_sum=1e4)
-sc.pp.log1p(adata)
-sc.pp.highly_variable_genes(adata, n_top_genes=2000, batch_key="${batchKey}")
-adata = adata[:, adata.var.highly_variable]
-sc.pp.scale(adata, max_value=10)
-sc.pp.pca(adata, n_comps=${nPCs})
-
-# Before integration
-sc.pp.neighbors(adata, n_pcs=${nPCs})
-sc.tl.umap(adata)
-sc.pl.umap(adata, color=["${batchKey}"], show=False)
-plt.savefig("plot_001_before_integration.png", dpi=150, bbox_inches="tight")
-plt.close()
-
-report_progress(50, "运行 ${method} 整合...")
-if "${method}" == "harmony":
-    import scanpy.external as sce
-    sce.pp.harmony_integrate(adata, "${batchKey}")
-    sc.pp.neighbors(adata, use_rep="X_pca_harmony", n_pcs=${nPCs})
-elif "${method}" == "bbknn":
-    import bbknn
-    bbknn.bbknn(adata, batch_key="${batchKey}")
-elif "${method}" == "scanorama":
-    import scanorama
-    sce.pp.scanorama_integrate(adata, "${batchKey}")
-    sc.pp.neighbors(adata, use_rep="X_scanorama", n_pcs=${nPCs})
-
-report_progress(70, "聚类 + UMAP...")
-sc.tl.leiden(adata, resolution=${resolution})
-sc.tl.umap(adata)
-
-sc.pl.umap(adata, color=["${batchKey}"], show=False)
-plt.savefig("plot_002_after_integration.png", dpi=150, bbox_inches="tight")
-plt.close()
-
-sc.pl.umap(adata, color=["leiden"], legend_loc="on data", show=False)
-plt.savefig("plot_003_clusters.png", dpi=150, bbox_inches="tight")
-plt.close()
-
-report_progress(90, "保存结果...")
-adata.write("result_integrated.h5ad")
-summary = {"n_cells": int(adata.n_obs), "n_clusters": int(adata.obs["leiden"].nunique()), "method": "${method}", "batch_key": "${batchKey}"}
-with open("summary.json", "w") as f: json.dump(summary, f)
-report_progress(100, "分析完成!")
-print("TASK_COMPLETE")
-`;
-}
 
 // ============================================================
 // Spatial Transcriptomics (Squidpy)
 // ============================================================
 
-function generateSpatialStandardScript({ params, ossInputUrl, outputDir }, progressHelper) {
+function generateSpatialStandardScript({ params, outputDir }, progressHelper) {
   const {
     nPCs = 30,
     resolution = 0.5,
@@ -292,34 +73,7 @@ function generateSpatialStandardScript({ params, ossInputUrl, outputDir }, progr
     nHVGs = 2000,
   } = params || {};
 
-  // 双输入模式：
-  // - ossInputUrl 提供 → 走 OSS 下载（单细胞平台 / 内部任务调用）
-  // - 否则 → 期望 input.h5ad 已在 outputDir（/tools 页面 base64 上传 + 后端解码）
-  // 注意：/tools 页面的文件按 input id 命名（如 'adata'），无扩展名 — 与 r-server 行为一致
-  const inputBlock = ossInputUrl
-    ? `report_progress(10, "下载数据...")
-import urllib.request
-urllib.request.urlretrieve("${ossInputUrl}", "input.h5ad")`
-    : `report_progress(10, "查找已上传的 .h5ad 文件...")
-# /tools 页面：前端 base64 上传后已写到 jobDir 根目录
-# 文件名是 input id（如 'adata'，无扩展名）。优先按 input id 找，再按 *.h5ad/*.h5 兜底
-import shutil
-parent_dir = os.path.dirname("${outputDir}".rstrip("/"))  # jobDir
-candidates = []
-for name in ["adata", "input.h5ad", "input.h5"]:
-    p = os.path.join(parent_dir, name)
-    if os.path.isfile(p) and os.path.getsize(p) > 1000:
-        candidates.append(p)
-if not candidates:
-    import glob
-    candidates = sorted(glob.glob(os.path.join(parent_dir, "*.h5ad")) + glob.glob(os.path.join(parent_dir, "*.h5")))
-if not candidates:
-    raise FileNotFoundError(f"未在 {parent_dir} 找到 h5ad 输入。期望: input id 'adata' 或文件后缀 .h5ad/.h5")
-src = candidates[0]
-dst = os.path.join("${outputDir}", "input.h5ad")
-if src != dst:
-    shutil.copy(src, dst)
-print(f"  使用输入文件: {src} ({os.path.getsize(src)/1024/1024:.1f} MB)")`;
+  const inputBlock = buildLocalH5adLoadBlock(outputDir, 'adata');
 
   return `
 import scanpy as sc
@@ -343,7 +97,6 @@ os.chdir("${outputDir}")
 sc.settings.set_figure_params(dpi=150, frameon=False, facecolor="white")
 
 ${inputBlock}
-adata = sc.read_h5ad("input.h5ad")
 n_obs_in = adata.n_obs
 n_var_in = adata.n_vars
 report_progress(20, f"{n_obs_in} spots × {n_var_in} genes")
@@ -532,8 +285,7 @@ with open("summary.json", "w") as f:
 
 # ============================================================
 # 报告 HTML 生成（W2, 2026-05-28）
-# 模板路径优先：jobDir/report-template.html (r-server 流程会 cp 进去)
-#   fallback: /opt/biof3-r-server/tool-scripts/spatial-standard-report-template.html
+# 模板路径：jobDir/report-template.html（tools-router 从仓库内模板复制）
 # 图替换：{{plot_xxx.png}} → data:image/png;base64,...
 # 占位符替换：{{n_spots}} 等
 # 微信 QR：从 cellchat 模板里 grep 复用，避免每个工具都内嵌 35KB
@@ -545,8 +297,6 @@ import base64
 parent_dir = os.path.dirname("${outputDir}".rstrip("/"))
 template_candidates = [
     os.path.join(parent_dir, "report-template.html"),
-    "/app/data/biof3-tool-jobs/_templates/spatial-standard-report-template.html",  # py 容器内备选
-    "/app/data/biof3-py-tmp/_templates/spatial-standard-report-template.html",
 ]
 template_path = None
 for p in template_candidates:
@@ -572,8 +322,7 @@ if template_path:
         # 2) 微信 QR — 尝试从 cellchat 模板拿；找不到就保留 placeholder（图标会损坏但不影响 layout，因 CSS fix 56x56）
         wechat_qr = ""
         for qr_src in [
-            "/app/data/biof3-tool-jobs/_templates/wechat-qr.b64",
-            "/app/data/biof3-py-tmp/_templates/wechat-qr.b64",
+            os.path.join(parent_dir, "wechat-qr.b64"),
         ]:
             if os.path.isfile(qr_src):
                 with open(qr_src, "r") as f:
@@ -638,277 +387,6 @@ print("TASK_COMPLETE")
 `;
 }
 
-// ============================================================
-// Spatial Recluster (W4-A, 2026-05-28)
-//
-// Sub-cluster a chosen leiden cluster from parent's result_spatial.h5ad.
-// Loads from parentCachePath (no re-download / no re-QC) when available,
-// falls back to ossInputUrl (parent's full result h5ad URL).
-//
-// Output shape (mirrors spatial_standard so frontend renders identically):
-//   - plot_001_spatial_clusters.png  (subset spots colored by sub-cluster, on tissue if available)
-//   - plot_002_umap.png              (sub-clustered UMAP — re-computed on the subset)
-//   - plot_003_top_markers.png       (top-3 marker per sub-cluster, dotplot)
-//   - plot_004_subset_in_context.png (full slide with subset highlighted, others gray)
-//   - result_spatial.h5ad            (subset AnnData with new sub-cluster labels written
-//                                     back as obs['leiden_sub'] AND obs['leiden'] = old + sub combo)
-//   - top_markers.csv                (sub-cluster markers ranked by score)
-//   - metadata.csv / features.csv    (obs/var of the subset)
-//   - summary.json                   ({n_spots, n_subclusters, parent_cluster, ...})
-// ============================================================
-
-function generateSpatialReclusterScript(
-  { params, ossInputUrl, outputDir, parentCachePath },
-  progressHelper
-) {
-  const {
-    parentCluster = '0', // which leiden cluster from parent to sub-cluster
-    nPCs = 20,
-    subResolution = 0.5,
-    nNeighbors = 15,
-    topNMarkers = 5,
-  } = params || {};
-
-  // Load: prefer cache, fall back to OSS download
-  const loadBlock = parentCachePath
-    ? `report_progress(10, "从父分析缓存加载 result_spatial.h5ad ...")
-adata_parent = sc.read_h5ad("${parentCachePath}")
-print(f"  parent: {adata_parent.n_obs} spots × {adata_parent.n_vars} genes")`
-    : `report_progress(10, "下载父分析结果...")
-import urllib.request
-urllib.request.urlretrieve("${ossInputUrl}", "input.h5ad")
-adata_parent = sc.read_h5ad("input.h5ad")
-print(f"  parent: {adata_parent.n_obs} spots × {adata_parent.n_vars} genes")`;
-
-  return `
-import scanpy as sc
-import squidpy as sq
-import numpy as np
-import pandas as pd
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import json, os
-import anndata as ad
-
-try:
-    ad.settings.allow_write_nullable_strings = True
-except Exception:
-    pass
-
-${progressHelper}
-os.chdir("${outputDir}")
-sc.settings.set_figure_params(dpi=150, frameon=False, facecolor="white")
-
-${loadBlock}
-
-# Sanity check leiden column
-if "leiden" not in adata_parent.obs:
-    raise ValueError("父分析结果缺少 obs['leiden'] — 请确认它是 spatial_standard 的输出")
-
-parent_cluster_str = "${String(parentCluster)}"
-mask = adata_parent.obs["leiden"].astype(str) == parent_cluster_str
-n_subset = int(mask.sum())
-print(f"  parent cluster '{parent_cluster_str}': {n_subset} spots selected")
-
-if n_subset < 20:
-    raise ValueError(f"父 cluster '{parent_cluster_str}' 只有 {n_subset} 个 spots，太少（< 20），无法做有效子聚类")
-
-report_progress(25, f"提取 cluster {parent_cluster_str} 子集 ({n_subset} spots) ...")
-adata = adata_parent[mask, :].copy()
-
-# Reset highly_variable on the subset (subset's HVGs may differ from parent's)
-report_progress(35, "子集重新选 HVG + PCA ...")
-# 子集已经是 log-normalized（继承自父的 raw -> normalize -> log1p -> HVG -> scale 流程）。
-# 我们先恢复完整 raw（如果有），再重做 normalize / HVG 让子集独立；这样下游 marker 计算更准。
-if adata.raw is not None:
-    adata = adata.raw.to_adata()  # restore counts/log-normalized full gene set
-sc.pp.normalize_total(adata, target_sum=1e4)
-sc.pp.log1p(adata)
-n_top = min(2000, max(500, adata.n_vars // 4))
-sc.pp.highly_variable_genes(adata, n_top_genes=n_top, flavor="seurat")
-adata.raw = adata
-adata = adata[:, adata.var["highly_variable"]].copy()
-sc.pp.scale(adata, max_value=10)
-
-n_pcs_use = min(${nPCs}, adata.n_obs - 1, adata.n_vars - 1)
-sc.pp.pca(adata, n_comps=n_pcs_use)
-
-report_progress(50, "子集 UMAP + Leiden 子聚类 ...")
-sc.pp.neighbors(adata, n_pcs=n_pcs_use, n_neighbors=min(${nNeighbors}, adata.n_obs - 1))
-sc.tl.leiden(adata, resolution=${subResolution}, key_added="leiden_sub")
-sc.tl.umap(adata)
-n_subclusters = int(adata.obs["leiden_sub"].nunique())
-print(f"  found {n_subclusters} sub-clusters")
-
-# Compose hierarchical label: "parent.sub" e.g. "3.0", "3.1"
-adata.obs["leiden"] = (parent_cluster_str + "." + adata.obs["leiden_sub"].astype(str))
-
-# Bring back original obsm['spatial'] (preserved from parent slice)
-if "spatial" in adata_parent.obsm:
-    parent_coords = adata_parent.obsm["spatial"]
-    parent_idx = np.where(mask)[0]
-    adata.obsm["spatial"] = parent_coords[parent_idx]
-# Bring back original uns['spatial'] (image data) if present
-if "spatial" in adata_parent.uns:
-    adata.uns["spatial"] = adata_parent.uns["spatial"]
-
-has_image = "spatial" in adata.uns and any("images" in v for v in adata.uns["spatial"].values())
-
-# ------------------------------------------------------------
-# Plot 1: subset spots colored by sub-cluster (on tissue)
-# ------------------------------------------------------------
-report_progress(60, "Plot 1/4: 子聚类空间分布 ...")
-if "spatial" in adata.obsm:
-    try:
-        sc.pl.spatial(adata, color="leiden_sub", spot_size=1.5 if not has_image else None,
-                      img_key="hires" if has_image else None, show=False, legend_loc="right margin",
-                      title=f"Sub-clusters of parent cluster {parent_cluster_str}")
-        plt.savefig("plot_001_spatial_clusters.png", dpi=150, bbox_inches="tight")
-        plt.close("all")
-    except Exception as e:
-        coords = adata.obsm["spatial"]
-        fig, ax = plt.subplots(figsize=(7, 7))
-        for c in sorted(adata.obs["leiden_sub"].unique(), key=str):
-            m = adata.obs["leiden_sub"] == c
-            ax.scatter(coords[m, 0], coords[m, 1], s=8, label=f"sub-{c}", alpha=0.85)
-        ax.set_aspect("equal"); ax.invert_yaxis()
-        ax.legend(bbox_to_anchor=(1.02, 1), loc="upper left", fontsize=8)
-        ax.set_title(f"Sub-clusters of parent cluster {parent_cluster_str}")
-        plt.savefig("plot_001_spatial_clusters.png", dpi=150, bbox_inches="tight")
-        plt.close("all")
-else:
-    fig, ax = plt.subplots(figsize=(6, 4))
-    ax.text(0.5, 0.5, "obsm['spatial'] missing", ha="center", va="center"); ax.axis("off")
-    plt.savefig("plot_001_spatial_clusters.png", dpi=150, bbox_inches="tight")
-    plt.close("all")
-
-# ------------------------------------------------------------
-# Plot 2: UMAP
-# ------------------------------------------------------------
-report_progress(70, "Plot 2/4: 子集 UMAP ...")
-sc.pl.umap(adata, color="leiden_sub", legend_loc="on data", show=False,
-           title=f"UMAP — {n_subclusters} sub-clusters")
-plt.savefig("plot_002_umap.png", dpi=150, bbox_inches="tight")
-plt.close("all")
-
-# ------------------------------------------------------------
-# Plot 3: top markers dotplot
-# ------------------------------------------------------------
-report_progress(80, "Plot 3/4: Marker 基因 dotplot + CSV ...")
-markers_df = None
-try:
-    sc.tl.rank_genes_groups(adata, "leiden_sub", method="wilcoxon", n_genes=200)
-    # Build top-N markers per sub-cluster table
-    rgg = adata.uns["rank_genes_groups"]
-    rows = []
-    for grp in rgg["names"].dtype.names:
-        for i in range(min(${topNMarkers}, len(rgg["names"][grp]))):
-            rows.append({
-                "sub_cluster": grp,
-                "rank": i + 1,
-                "gene": rgg["names"][grp][i],
-                "score": float(rgg["scores"][grp][i]),
-                "logfc": float(rgg["logfoldchanges"][grp][i]) if "logfoldchanges" in rgg else None,
-                "pval_adj": float(rgg["pvals_adj"][grp][i]) if "pvals_adj" in rgg else None,
-            })
-    markers_df = pd.DataFrame(rows)
-    markers_df.to_csv("top_markers.csv", index=False)
-
-    # dotplot top-3 per group (smaller subset for plotting)
-    sc.pl.rank_genes_groups_dotplot(adata, n_genes=3, show=False)
-    plt.savefig("plot_003_top_markers.png", dpi=150, bbox_inches="tight")
-    plt.close("all")
-except Exception as e:
-    fig, ax = plt.subplots(figsize=(6, 4))
-    ax.text(0.5, 0.5, f"Marker 计算失败:\\n{str(e)[:120]}", ha="center", va="center", fontsize=8)
-    ax.axis("off")
-    plt.savefig("plot_003_top_markers.png", dpi=150, bbox_inches="tight")
-    plt.close("all")
-    markers_df = pd.DataFrame()
-
-# ------------------------------------------------------------
-# Plot 4: subset highlighted in full slide context
-# ------------------------------------------------------------
-report_progress(88, "Plot 4/4: 子集在完整切片中的位置 ...")
-if "spatial" in adata_parent.obsm:
-    try:
-        coords_full = adata_parent.obsm["spatial"]
-        fig, ax = plt.subplots(figsize=(7, 7))
-        # gray background for non-subset spots
-        ax.scatter(coords_full[~mask, 0], coords_full[~mask, 1], s=4, color="#d1d5db", alpha=0.5, label="other")
-        ax.scatter(coords_full[mask, 0], coords_full[mask, 1], s=8, color="#dc2626", alpha=0.85, label=f"cluster {parent_cluster_str}")
-        ax.set_aspect("equal"); ax.invert_yaxis()
-        ax.legend(loc="upper right", fontsize=9)
-        ax.set_title(f"Selected subset highlighted (parent cluster {parent_cluster_str})")
-        plt.savefig("plot_004_subset_in_context.png", dpi=150, bbox_inches="tight")
-        plt.close("all")
-    except Exception as e:
-        fig, ax = plt.subplots(figsize=(6, 4))
-        ax.text(0.5, 0.5, "context plot fail", ha="center", va="center"); ax.axis("off")
-        plt.savefig("plot_004_subset_in_context.png", dpi=150, bbox_inches="tight")
-        plt.close("all")
-else:
-    fig, ax = plt.subplots(figsize=(6, 4))
-    ax.text(0.5, 0.5, "no spatial coords in parent", ha="center", va="center"); ax.axis("off")
-    plt.savefig("plot_004_subset_in_context.png", dpi=150, bbox_inches="tight")
-    plt.close("all")
-
-# ------------------------------------------------------------
-# Save .h5ad result + obs/var tables (mirrors spatial_standard)
-# ------------------------------------------------------------
-report_progress(94, "保存 .h5ad + summary.json ...")
-adata_out = adata.raw.to_adata() if adata.raw is not None else adata
-adata_out.obs["leiden_sub"] = adata.obs["leiden_sub"].values
-adata_out.obs["leiden"] = adata.obs["leiden"].values  # composite "parent.sub"
-adata_out.obsm = adata.obsm
-if "spatial" in adata.uns:
-    adata_out.uns["spatial"] = adata.uns["spatial"]
-adata_out.write("result_spatial.h5ad")
-
-# obs/var tables for /spatial 数据预览 tab
-report_progress(96, "导出 obs/var 表 ...")
-try:
-    import scipy.sparse as sp
-    obs = adata_out.obs.copy()
-    obs.insert(0, "cell_id", obs.index.astype(str))
-    if "spatial" in adata_out.obsm:
-        coords = adata_out.obsm["spatial"]
-        obs["spatial_x"] = coords[:, 0]
-        obs["spatial_y"] = coords[:, 1]
-    for col in obs.columns:
-        if obs[col].dtype.kind == "f":
-            obs[col] = obs[col].round(3)
-    obs.to_csv("metadata.csv", index=False)
-
-    X = adata_out.X
-    mean_expr = np.asarray(X.mean(axis=0)).flatten() if not sp.issparse(X) else np.asarray(X.mean(axis=0)).flatten()
-    pct_expr = (np.asarray((X > 0).mean(axis=0)).flatten() if not sp.issparse(X) else np.asarray((X > 0).mean(axis=0)).flatten()) * 100
-    var = adata_out.var.copy()
-    var.insert(0, "gene_symbol", var.index.astype(str))
-    var["mean_expression"] = np.round(mean_expr, 4)
-    var["pct_spots"] = np.round(pct_expr, 2)
-    var = var.sort_values("mean_expression", ascending=False)
-    var.to_csv("features.csv", index=False)
-    print(f"  ✓ metadata.csv: {len(obs)} spots, features.csv: {len(var)} genes")
-except Exception as _e:
-    print(f"[meta-export] WARN: {_e}")
-
-summary = {
-    "n_spots": int(n_subset),
-    "n_genes": int(adata_parent.n_vars),
-    "parent_cluster": parent_cluster_str,
-    "n_subclusters": int(n_subclusters),
-    "n_significant_markers": int(len(markers_df)) if markers_df is not None else 0,
-    "sub_resolution": ${subResolution},
-}
-with open("summary.json", "w") as f:
-    json.dump(summary, f, indent=2)
-
-report_progress(100, "重聚类完成!")
-print("TASK_COMPLETE")
-`;
-}
 
 // ============================================================
 // Spatial SVG (W4-A, 2026-05-28)
@@ -934,7 +412,7 @@ print("TASK_COMPLETE")
 // ============================================================
 
 function generateSpatialSvgScript(
-  { params, ossInputUrl, outputDir, parentCachePath },
+  { params, outputDir },
   progressHelper
 ) {
   const {
@@ -945,35 +423,7 @@ function generateSpatialSvgScript(
     nGenesTest = 1000, // limit testing to top-N HVG to keep runtime manageable
   } = params || {};
 
-  // 3 入口模式：父分析缓存（/spatial 链） / OSS 下载（内部任务） / jobDir 上传（/tools 单次任务）
-  const loadBlock = parentCachePath
-    ? `report_progress(10, "从父分析缓存加载 result_spatial.h5ad ...")
-adata = sc.read_h5ad("${parentCachePath}")
-print(f"  loaded from cache: {adata.n_obs} spots × {adata.n_vars} genes")`
-    : ossInputUrl
-      ? `report_progress(10, "下载父分析结果...")
-import urllib.request
-urllib.request.urlretrieve("${ossInputUrl}", "input.h5ad")
-adata = sc.read_h5ad("input.h5ad")
-print(f"  loaded from OSS: {adata.n_obs} spots × {adata.n_vars} genes")`
-      : `report_progress(10, "查找 /tools 上传的 .h5ad 文件 ...")
-import shutil, glob
-parent_dir = os.path.dirname("${outputDir}".rstrip("/"))  # jobDir
-candidates = []
-for name in ["adata", "input.h5ad", "input.h5"]:
-    p = os.path.join(parent_dir, name)
-    if os.path.isfile(p) and os.path.getsize(p) > 1000:
-        candidates.append(p)
-if not candidates:
-    candidates = sorted(glob.glob(os.path.join(parent_dir, "*.h5ad")) + glob.glob(os.path.join(parent_dir, "*.h5")))
-if not candidates:
-    raise FileNotFoundError(f"未在 {parent_dir} 找到 h5ad 输入。期望 input id 'adata' 或文件后缀 .h5ad/.h5")
-src = candidates[0]
-dst = os.path.join("${outputDir}", "input.h5ad")
-if src != dst:
-    shutil.copy(src, dst)
-adata = sc.read_h5ad(dst)
-print(f"  loaded from /tools upload: {src} → {adata.n_obs} spots × {adata.n_vars} genes")`;
+  const loadBlock = buildLocalH5adLoadBlock(outputDir, 'adata');
 
   return `
 import scanpy as sc
@@ -1336,8 +786,6 @@ import base64
 parent_dir = os.path.dirname("${outputDir}".rstrip("/"))
 template_candidates = [
     os.path.join(parent_dir, "report-template.html"),
-    "/app/data/biof3-tool-jobs/_templates/spatial-svg-report-template.html",
-    "/app/data/biof3-py-tmp/_templates/spatial-svg-report-template.html",
 ]
 template_path = None
 for p in template_candidates:
@@ -1356,8 +804,7 @@ if template_path:
                 html = html.replace("{{" + fname + "}}", f"data:image/png;base64,{b64}")
         wechat_qr = ""
         for qr_src in [
-            "/app/data/biof3-tool-jobs/_templates/wechat-qr.b64",
-            "/app/data/biof3-py-tmp/_templates/wechat-qr.b64",
+            os.path.join(parent_dir, "wechat-qr.b64"),
         ]:
             if os.path.isfile(qr_src):
                 with open(qr_src) as fp:
@@ -1440,45 +887,17 @@ print("TASK_COMPLETE")
 // ============================================================
 
 function generateSpatialDeconvScript(
-  { params, ossInputUrl, outputDir, parentCachePath },
+  { params, outputDir },
   progressHelper
 ) {
   const {
     nTrainingGenes = 1000, // shared HVG used for Tangram training
     refLabelKey = 'cell_subclass', // sc_mouse_cortex has cell_subclass
     minSpotsPerCellType = 10, // skip cell types that map to too few spots in plotting
-    maxRefCells = 8000, // W4-B: 下采样参考集上限，防 Tangram CPU 训练 OOM（8g 容器）
+    maxRefCells = 8000,
   } = params || {};
 
-  // 3 入口模式：父分析缓存（/spatial 链） / OSS 下载（内部任务） / jobDir 上传（/tools 单次任务）
-  const loadBlock = parentCachePath
-    ? `report_progress(10, "从父分析缓存加载 result_spatial.h5ad ...")
-adata_st = sc.read_h5ad("${parentCachePath}")
-print(f"  spatial: {adata_st.n_obs} spots × {adata_st.n_vars} genes")`
-    : ossInputUrl
-      ? `report_progress(10, "下载父分析结果...")
-import urllib.request
-urllib.request.urlretrieve("${ossInputUrl}", "input.h5ad")
-adata_st = sc.read_h5ad("input.h5ad")
-print(f"  spatial: {adata_st.n_obs} spots × {adata_st.n_vars} genes")`
-      : `report_progress(10, "查找 /tools 上传的 .h5ad 文件 ...")
-import shutil, glob
-parent_dir = os.path.dirname("${outputDir}".rstrip("/"))  # jobDir
-candidates = []
-for name in ["adata", "input.h5ad", "input.h5"]:
-    p = os.path.join(parent_dir, name)
-    if os.path.isfile(p) and os.path.getsize(p) > 1000:
-        candidates.append(p)
-if not candidates:
-    candidates = sorted(glob.glob(os.path.join(parent_dir, "*.h5ad")) + glob.glob(os.path.join(parent_dir, "*.h5")))
-if not candidates:
-    raise FileNotFoundError(f"未在 {parent_dir} 找到 h5ad 输入。期望 input id 'adata' 或文件后缀 .h5ad/.h5")
-src = candidates[0]
-dst = os.path.join("${outputDir}", "input.h5ad")
-if src != dst:
-    shutil.copy(src, dst)
-adata_st = sc.read_h5ad(dst)
-print(f"  loaded from /tools upload: {src} → {adata_st.n_obs} spots × {adata_st.n_vars} genes")`;
+  const loadBlock = buildLocalH5adLoadBlock(outputDir, 'adata_st');
 
   return `
 import scanpy as sc
@@ -1520,11 +939,11 @@ has_image = "spatial" in adata_st.uns and any("images" in v for v in adata_st.un
 # Load reference single-cell dataset
 # ============================================================
 report_progress(20, "加载单细胞参考数据集 (sc_mouse_cortex, ~21k cells)...")
-# W4-B (2026-05-29): 把 squidpy/scanpy 数据集缓存到共享目录，避免每个 job 重下 3.25GB。
-# biof3-py-tmp 已 mount 进容器（持久 + 跨 job 共享）。
+# 把 squidpy/scanpy 数据集缓存到本地 BioF3 数据目录，避免每个 job 重下 3.25GB。
 import scanpy as _sc_cfg
 try:
-    _shared_ds = "/app/data/biof3-py-tmp/_datasets"
+    _data_root = os.environ.get("BIOF3_LOCAL_DATA_DIR", os.path.dirname(parent_dir))
+    _shared_ds = os.path.join(_data_root, "cache", "datasets")
     os.makedirs(_shared_ds, exist_ok=True)
     _sc_cfg.settings.datasetdir = _shared_ds
 except Exception as _e:
@@ -1818,8 +1237,6 @@ import base64
 parent_dir = os.path.dirname("${outputDir}".rstrip("/"))
 template_candidates = [
     os.path.join(parent_dir, "report-template.html"),
-    "/app/data/biof3-tool-jobs/_templates/spatial-deconv-report-template.html",
-    "/app/data/biof3-py-tmp/_templates/spatial-deconv-report-template.html",
 ]
 template_path = None
 for p in template_candidates:
@@ -1838,8 +1255,7 @@ if template_path:
                 html = html.replace("{{" + fname + "}}", f"data:image/png;base64,{b64}")
         wechat_qr = ""
         for qr_src in [
-            "/app/data/biof3-tool-jobs/_templates/wechat-qr.b64",
-            "/app/data/biof3-py-tmp/_templates/wechat-qr.b64",
+            os.path.join(parent_dir, "wechat-qr.b64"),
         ]:
             if os.path.isfile(qr_src):
                 with open(qr_src) as fp:
@@ -1911,7 +1327,7 @@ print("TASK_COMPLETE")
 // ============================================================
 
 function generateSpatialLrScript(
-  { params, ossInputUrl, outputDir, parentCachePath },
+  { params, outputDir },
   progressHelper
 ) {
   const {
@@ -1922,36 +1338,7 @@ function generateSpatialLrScript(
     nzProp = 0.05, // min non-zero proportion of L or R
   } = params || {};
 
-  // 3 入口模式：父分析缓存（/spatial 链） / OSS 下载（内部任务） / jobDir 上传（/tools 单次任务）
-  const loadBlock = parentCachePath
-    ? `report_progress(10, "从父分析缓存加载 result_spatial.h5ad ...")
-adata = sc.read_h5ad("${parentCachePath}")
-print(f"  loaded from cache: {adata.n_obs} spots × {adata.n_vars} genes")`
-    : ossInputUrl
-      ? `report_progress(10, "下载父分析结果...")
-import urllib.request
-urllib.request.urlretrieve("${ossInputUrl}", "input.h5ad")
-adata = sc.read_h5ad("input.h5ad")
-print(f"  loaded from OSS: {adata.n_obs} spots × {adata.n_vars} genes")`
-      : `report_progress(10, "查找 /tools 上传的 .h5ad 文件 ...")
-import shutil, glob
-parent_dir = os.path.dirname("${outputDir}".rstrip("/"))  # jobDir
-candidates = []
-for name in ["adata", "input.h5ad", "input.h5"]:
-    p = os.path.join(parent_dir, name)
-    if os.path.isfile(p) and os.path.getsize(p) > 1000:
-        candidates.append(p)
-if not candidates:
-    candidates = sorted(glob.glob(os.path.join(parent_dir, "*.h5ad")) + glob.glob(os.path.join(parent_dir, "*.h5")))
-if not candidates:
-    raise FileNotFoundError(f"未在 {parent_dir} 找到 h5ad 输入。期望 input id 'adata' 或文件后缀 .h5ad/.h5")
-src = candidates[0]
-dst = os.path.join("${outputDir}", "input.h5ad")
-if src != dst:
-    shutil.copy(src, dst)
-adata = sc.read_h5ad(dst)
-print(f"  loaded from /tools upload: {src} → {adata.n_obs} spots × {adata.n_vars} genes")
-# /tools 上传的可能是原始 counts，下面会按 'log1p' in uns 自动判断是否需要标准化`;
+  const loadBlock = buildLocalH5adLoadBlock(outputDir, 'adata');
 
   return `
 import scanpy as sc
@@ -2205,8 +1592,6 @@ import base64
 parent_dir = os.path.dirname("${outputDir}".rstrip("/"))
 template_candidates = [
     os.path.join(parent_dir, "report-template.html"),
-    "/app/data/biof3-tool-jobs/_templates/spatial-lr-report-template.html",
-    "/app/data/biof3-py-tmp/_templates/spatial-lr-report-template.html",
 ]
 template_path = None
 for p in template_candidates:
@@ -2225,8 +1610,7 @@ if template_path:
                 html = html.replace("{{" + fname + "}}", f"data:image/png;base64,{b64}")
         wechat_qr = ""
         for qr_src in [
-            "/app/data/biof3-tool-jobs/_templates/wechat-qr.b64",
-            "/app/data/biof3-py-tmp/_templates/wechat-qr.b64",
+            os.path.join(parent_dir, "wechat-qr.b64"),
         ]:
             if os.path.isfile(qr_src):
                 with open(qr_src) as fp:
@@ -2284,23 +1668,22 @@ print("TASK_COMPLETE")
 // scVI Annotation
 // ============================================================
 
-function generateScVIScript({ params, ossInputUrl, outputDir }, progressHelper) {
+function generateScVIScript({ params, outputDir }, progressHelper) {
   const { nLatent = 10, nEpochs = 100, _referenceLabels = 'cell_type' } = params || {};
+  const loadBlock = buildLocalH5adLoadBlock(outputDir, 'adata');
 
   return `
 import scanpy as sc
 import scvi
 import numpy as np
 import matplotlib.pyplot as plt
-import json, os, urllib.request
+import json, os
 
 ${progressHelper}
 os.chdir("${outputDir}")
 sc.settings.set_figure_params(dpi=150, frameon=False)
 
-report_progress(10, "下载数据...")
-urllib.request.urlretrieve("${ossInputUrl}", "input.h5ad")
-adata = sc.read_h5ad("input.h5ad")
+${loadBlock}
 report_progress(20, f"{adata.n_obs} 细胞")
 
 report_progress(30, "准备 scVI 模型...")
@@ -2352,12 +1735,8 @@ with open("manifest.json", "w") as f: json.dump(manifest, f, ensure_ascii=False,
 # Report
 import base64
 report_html = ""
-template_dirs = [os.environ.get("BIOF3_TOOL_SCRIPTS", ""), "/opt/biof3-r-server/tool-scripts", "/app/data/biof3-tool-jobs/_templates"]
-template_path = None
-for d in template_dirs:
-    p = os.path.join(d, "ml-scvi-annotate-report-template.html")
-    if os.path.exists(p): template_path = p; break
-if template_path:
+template_path = os.path.join(parent_dir, "report-template.html")
+if os.path.isfile(template_path):
     with open(template_path, "r") as f: report_html = f.read()
     for img_name in ["plot_001_scvi_umap.png", "plot_002_training.png"]:
         if os.path.exists(img_name):
@@ -2376,152 +1755,5 @@ print("TASK_COMPLETE")
 `;
 }
 
-// ============================================================
-// ML Classifier (marker-based cell type prediction)
-// ============================================================
-
-function generateMLScript({ params, ossInputUrl, outputDir }, progressHelper) {
-  const { model = 'random_forest', targetCol = 'cell_type', testSize = 0.2 } = params || {};
-
-  return `
-import scanpy as sc
-import numpy as np
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from sklearn.svm import SVC
-import matplotlib.pyplot as plt
-import seaborn as sns
-import json, os, urllib.request
-
-${progressHelper}
-os.chdir("${outputDir}")
-
-report_progress(10, "下载数据...")
-urllib.request.urlretrieve("${ossInputUrl}", "input.h5ad")
-adata = sc.read_h5ad("input.h5ad")
-report_progress(20, f"{adata.n_obs} 细胞, 标签列: ${targetCol}")
-
-if "${targetCol}" not in adata.obs.columns:
-    raise ValueError(f"找不到标签列 '${targetCol}'，可用列: {list(adata.obs.columns)}")
-
-report_progress(30, "特征准备...")
-sc.pp.highly_variable_genes(adata, n_top_genes=2000)
-X = adata[:, adata.var.highly_variable].X
-if hasattr(X, "toarray"): X = X.toarray()
-y = adata.obs["${targetCol}"].values
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=${testSize}, random_state=42, stratify=y)
-report_progress(40, f"训练集: {len(y_train)}, 测试集: {len(y_test)}")
-
-report_progress(50, "训练 ${model}...")
-if "${model}" == "random_forest":
-    clf = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
-elif "${model}" == "gradient_boosting":
-    clf = GradientBoostingClassifier(n_estimators=100, random_state=42)
-elif "${model}" == "svm":
-    clf = SVC(kernel="rbf", random_state=42)
-else:
-    clf = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
-
-clf.fit(X_train, y_train)
-report_progress(70, "评估模型...")
-
-y_pred = clf.predict(X_test)
-report = classification_report(y_test, y_pred, output_dict=True)
-accuracy = report["accuracy"]
-
-# Confusion matrix
-cm = confusion_matrix(y_test, y_pred, labels=sorted(set(y)))
-plt.figure(figsize=(10, 8))
-sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=sorted(set(y)), yticklabels=sorted(set(y)))
-plt.xlabel("Predicted"); plt.ylabel("True"); plt.title(f"Confusion Matrix (Accuracy: {accuracy:.3f})")
-plt.tight_layout()
-plt.savefig("plot_001_confusion_matrix.png", dpi=150, bbox_inches="tight")
-plt.close()
-
-# Feature importance (for tree-based models)
-if hasattr(clf, "feature_importances_"):
-    fi = pd.DataFrame({"gene": adata.var_names[adata.var.highly_variable], "importance": clf.feature_importances_})
-    fi = fi.sort_values("importance", ascending=False).head(20)
-    plt.figure(figsize=(8, 6))
-    plt.barh(fi["gene"], fi["importance"])
-    plt.xlabel("Importance"); plt.title("Top 20 Feature Importance")
-    plt.tight_layout()
-    plt.savefig("plot_002_feature_importance.png", dpi=150, bbox_inches="tight")
-    plt.close()
-    fi.to_csv("feature_importance.csv", index=False)
-
-report_progress(90, "保存结果...")
-pd.DataFrame(report).T.to_csv("classification_report.csv")
-summary = {"n_cells": int(adata.n_obs), "n_classes": len(set(y)), "model": "${model}", "accuracy": round(accuracy, 4), "test_size": ${testSize}}
-with open("summary.json", "w") as f: json.dump(summary, f)
-report_progress(100, "分析完成!")
-print("TASK_COMPLETE")
-`;
-}
-
-// ============================================================
-// CellRank (fate mapping)
-// ============================================================
-
-function generateCellRankScript({ params, ossInputUrl, outputDir }, progressHelper) {
-  const { nStates = 3, clusterKey = 'leiden' } = params || {};
-
-  return `
-import scanpy as sc
-import cellrank as cr
-import numpy as np
-import matplotlib.pyplot as plt
-import json, os, urllib.request
-
-${progressHelper}
-os.chdir("${outputDir}")
-sc.settings.set_figure_params(dpi=150, frameon=False)
-
-report_progress(10, "下载数据...")
-urllib.request.urlretrieve("${ossInputUrl}", "input.h5ad")
-adata = sc.read_h5ad("input.h5ad")
-report_progress(20, f"{adata.n_obs} 细胞")
-
-report_progress(30, "RNA velocity...")
-# Compute velocity kernel
-from cellrank.kernels import VelocityKernel, ConnectivityKernel
-vk = VelocityKernel(adata).compute_transition_matrix()
-ck = ConnectivityKernel(adata).compute_transition_matrix()
-combined_kernel = 0.8 * vk + 0.2 * ck
-
-report_progress(50, "估计终末状态...")
-from cellrank.estimators import GPCCA
-estimator = GPCCA(combined_kernel)
-estimator.compute_schur(n_components=20)
-estimator.compute_macrostates(n_states=${nStates}, cluster_key="${clusterKey}")
-
-estimator.plot_macrostates(which="all", show=False)
-plt.savefig("plot_001_macrostates.png", dpi=150, bbox_inches="tight")
-plt.close()
-
-report_progress(70, "计算命运概率...")
-estimator.set_terminal_states_from_macrostates()
-estimator.compute_fate_probabilities()
-
-estimator.plot_fate_probabilities(show=False)
-plt.savefig("plot_002_fate_probabilities.png", dpi=150, bbox_inches="tight")
-plt.close()
-
-report_progress(85, "驱动基因...")
-drivers = estimator.compute_lineage_drivers(lineages=estimator.terminal_states.cat.categories.tolist()[:3])
-if drivers is not None:
-    drivers.head(20).to_csv("lineage_drivers.csv")
-
-report_progress(95, "保存结果...")
-adata.write("result_cellrank.h5ad")
-summary = {"n_cells": int(adata.n_obs), "n_macrostates": ${nStates}, "terminal_states": estimator.terminal_states.cat.categories.tolist()}
-with open("summary.json", "w") as f: json.dump(summary, f)
-report_progress(100, "分析完成!")
-print("TASK_COMPLETE")
-`;
-}
 
 module.exports = { generatePythonToolScript };

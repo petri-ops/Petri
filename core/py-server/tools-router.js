@@ -50,6 +50,7 @@ const PUBLIC_DEMO_ASSETS = Object.freeze({
   'spatial-svg': 'job_bfa695b75eff4663',
 });
 const PUBLIC_DEMO_JOB_IDS = new Set(Object.values(PUBLIC_DEMO_ASSETS));
+const TOOL_SCRIPTS_DIR = path.join(__dirname, '..', 'r-server', 'tool-scripts');
 
 // Path-traversal guard: join user-supplied segments under baseDir and verify the
 // resolved path stays inside baseDir. Returns null if it escapes (e.g. '../').
@@ -201,19 +202,9 @@ const PY_TOOL_REGISTRY = {
     displayName: 'Spatial Standard',
     sizeLimitMB: 500,
   },
-  // 占位（Wave 4 实现）
   'spatial-svg': { taskType: 'spatial_svg', displayName: 'Spatial SVG', sizeLimitMB: 500 },
   'spatial-deconv': { taskType: 'spatial_deconv', displayName: 'Spatial Deconv', sizeLimitMB: 500 },
   'spatial-lr': { taskType: 'spatial_lr', displayName: 'Spatial LR', sizeLimitMB: 500 },
-  // 多组学 placeholder（与 r-server tool-registry.js 对齐）
-  'mo-multivi': { taskType: 'mo_multivi', displayName: 'MultiVI', sizeLimitMB: 500 },
-  'mo-citeseq': { taskType: 'mo_citeseq', displayName: 'CITE-seq WNN', sizeLimitMB: 500 },
-  // ML 已有 task type
-  'ml-autoencoder': {
-    taskType: 'ml_autoencoder',
-    displayName: 'Autoencoder 表征',
-    sizeLimitMB: 200,
-  },
   'ml-scvi-annotate': {
     taskType: 'scvi_annotation',
     displayName: 'scVI 自动注释',
@@ -244,9 +235,8 @@ function executeJob({ jobId, toolId, taskType, params, layout }) {
     fs.mkdirSync(outputDir, { recursive: true, mode: 0o1777 });
   } catch {}
 
-  // W2 (2026-05-28): 复制报告模板到 jobDir（与 r-server routes/tools.js 行为一致）
-  // 模板路径：/opt/biof3-r-server/tool-scripts/{toolId}-report-template.html
-  const reportTemplateSrc = `/opt/biof3-r-server/tool-scripts/${toolId}-report-template.html`;
+  // 复制仓库内报告模板到 jobDir（与 r-server routes/tools.js 行为一致）。
+  const reportTemplateSrc = path.join(TOOL_SCRIPTS_DIR, `${toolId}-report-template.html`);
   if (fs.existsSync(reportTemplateSrc)) {
     try {
       fs.copyFileSync(reportTemplateSrc, path.join(jobDir, 'report-template.html'));
@@ -261,7 +251,6 @@ function executeJob({ jobId, toolId, taskType, params, layout }) {
     pyScript = generatePythonToolScript({
       type: taskType,
       params: params || {},
-      ossInputUrl: null, // tools 是 base64 上传，不走 OSS
       outputDir,
     });
   } catch (e) {
