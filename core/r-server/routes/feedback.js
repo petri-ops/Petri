@@ -13,8 +13,8 @@ const dbMod = require('../db');
 const notify = require('../notify-feishu');
 const ipGeo = require('../helpers/ip-geo');
 // Keep request-path feedback operations on the async database adapter.
-const _dbSync = dbMod.getSqliteForLegacyModules(); // for CREATE TABLE (runs once at startup)
-const dbAsync = dbMod.getAsyncDbForLegacyModules();
+const _dbSync = dbMod.getDatabase(); // for CREATE TABLE (runs once at startup)
+const dbAsync = dbMod.getAsyncDatabase();
 
 // ---- Schema ----
 _dbSync.exec(`

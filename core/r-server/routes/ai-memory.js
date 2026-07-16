@@ -2,15 +2,11 @@
  * routes/ai-memory.js — facts / summary / memories / vectors / wipe.
  * Migrated from server.js as part of MODULES_BATCH1_v1.
  *
- * 2026-06-08: converted to ASYNC DB access (getAsyncDbForLegacyModules). The
- * old sync shim used deasync.loopWhile which is NOT reentrant — concurrent
- * Copilot/admin reads crashed V8 ("Empty MaybeLocal") and took down the
- * platform. Async path = no deasync. Works in both PG (shim→async) and
- * SQLite (Dell) modes.
+ * Uses the Promise facade over desktop SQLite for consistent async handlers.
  */
 const express = require('express');
 const dbMod = require('../db');
-const adb = dbMod.getAsyncDbForLegacyModules();
+const adb = dbMod.getAsyncDatabase();
 
 module.exports = function mountMemory(app) {
 

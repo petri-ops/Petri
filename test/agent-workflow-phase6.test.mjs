@@ -141,7 +141,7 @@ test('op=status + next reflect real DB job state after tool run', async () => {
   // 届时恢复该断言。当前 step 引擎已下线，不再要求 enrichment 就绪。
 
   // Cleanup
-  const sqlite = db.getSqliteForLegacyModules();
+  const sqlite = db.getDatabase();
   sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(job.id);
 });
 
@@ -172,7 +172,7 @@ test('op=status shows waiting_for_confirmation for pending-ack jobs', async () =
   assert.ok(status.nextActions.some((a) => a.id === 'confirm_differential'), '应有 confirm action');
 
   // Cleanup
-  const sqlite = db.getSqliteForLegacyModules();
+  const sqlite = db.getDatabase();
   sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(job.id);
 });
 
@@ -222,6 +222,6 @@ test('op=status returns harnessState on jobs when available', async () => {
   assert.equal(differentialJob.harnessState.harnessWorkflowStateVersion, 1);
   assert.equal(differentialJob.harnessState.jobId, job.id);
 
-  const sqlite = db.getSqliteForLegacyModules();
+  const sqlite = db.getDatabase();
   sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(job.id);
 });

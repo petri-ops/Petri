@@ -15,7 +15,7 @@
  *
  * Status finite-state: started → completed (later events idempotent).
  *
- * 2026-06-09: async DB (getAsyncDbForLegacyModules) — no deasync on ECS platform.
+ * Uses the Promise facade over desktop SQLite.
  */
 const express = require('express');
 const dbMod = require('../db');
@@ -56,7 +56,7 @@ async function _ensureTable(adb) {
 }
 
 module.exports = async function mountProgress(app) {
-  const adb = dbMod.getAsyncDbForLegacyModules();
+  const adb = dbMod.getAsyncDatabase();
   await _ensureTable(adb);
 
   // -------- POST /api/ai/progress --------
@@ -75,7 +75,7 @@ module.exports = async function mountProgress(app) {
     const now = new Date().toISOString();
     const type = _resourceType(resource);
     const existing = await adb
-      .prepare('SELECT * FROM user_progress WHERE user_id = $1 AND resource = $2')
+      .prepare('SELECT * FROM user_progress WHERE user_id = ? AND resource = ?')
       .get(userId, resource);
 
     if (!existing) {
@@ -85,7 +85,7 @@ module.exports = async function mountProgress(app) {
         .prepare(
           `INSERT INTO user_progress
           (user_id, resource, type, status, started_at, completed_at, updated_at)
-        VALUES ($1,$2,$3,$4,$5,$6,$7)`
+        VALUES (?,?,?,?,?,?,?)`
         )
         .run(userId, resource, type, event, startedAt, completedAt, now);
     } else {
@@ -98,14 +98,14 @@ module.exports = async function mountProgress(app) {
       await adb
         .prepare(
           `UPDATE user_progress
-        SET status=$1, started_at=$2, completed_at=$3, updated_at=$4
-        WHERE user_id=$5 AND resource=$6`
+        SET status=?, started_at=?, completed_at=?, updated_at=?
+        WHERE user_id=? AND resource=?`
         )
         .run(nextStatus, startedAt, completedAt, now, userId, resource);
     }
 
     const row = await adb
-      .prepare('SELECT * FROM user_progress WHERE user_id = $1 AND resource = $2')
+      .prepare('SELECT * FROM user_progress WHERE user_id = ? AND resource = ?')
       .get(userId, resource);
     res.json({ status: 'ok', progress: row });
   });
@@ -120,8 +120,8 @@ module.exports = async function mountProgress(app) {
       .prepare(
         `
       SELECT resource, type, status, started_at, completed_at, updated_at
-      FROM user_progress WHERE user_id = $1
-      ORDER BY updated_at DESC LIMIT $2
+      FROM user_progress WHERE user_id = ?
+      ORDER BY updated_at DESC LIMIT ?
     `
       )
       .all(userId, limit);
@@ -134,16 +134,16 @@ module.exports = async function mountProgress(app) {
     if (!userId) return res.status(401).json({ status: 'error', error: '未授权' });
 
     const totalRow = await adb
-      .prepare('SELECT COUNT(*) AS n FROM user_progress WHERE user_id = $1')
+      .prepare('SELECT COUNT(*) AS n FROM user_progress WHERE user_id = ?')
       .get(userId);
     const completedRow = await adb
-      .prepare('SELECT COUNT(*) AS n FROM user_progress WHERE user_id = $1 AND status = $2')
+      .prepare('SELECT COUNT(*) AS n FROM user_progress WHERE user_id = ? AND status = ?')
       .get(userId, 'completed');
     const byType = await adb
       .prepare(
         `
       SELECT type, status, COUNT(*) AS n FROM user_progress
-      WHERE user_id = $1 GROUP BY type, status
+      WHERE user_id = ? GROUP BY type, status
     `
       )
       .all(userId);
@@ -151,7 +151,7 @@ module.exports = async function mountProgress(app) {
       .prepare(
         `
       SELECT resource, type, status, updated_at FROM user_progress
-      WHERE user_id = $1 ORDER BY updated_at DESC LIMIT 10
+      WHERE user_id = ? ORDER BY updated_at DESC LIMIT 10
     `
       )
       .all(userId);

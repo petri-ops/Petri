@@ -1,5 +1,5 @@
 const dbMod = require('../db');
-const sqlite = dbMod.getSqliteForLegacyModules();
+const sqlite = dbMod.getDatabase();
 
 async function tool_verify_state(args, ctx) {
   const userId = ctx.userId;

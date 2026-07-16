@@ -9,8 +9,6 @@ const path = require('path');
 
 const config = {
   // ── 桌面版模式（Electron 本地运行）──────────────────────────
-  // storageMode: 'local'（桌面版，本地文件系统）
-  storageMode: process.env.BIOF3_STORAGE || 'local',
   // localMode: 桌面版跳过 JWT 验证，返回固定 local-user
   localMode: process.env.BIOF3_LOCAL_MODE === '1',
   // R Runtime 路径（桌面版内嵌 R 的根目录）

@@ -7,7 +7,7 @@
  *   buildSiteSnapshotAsync(userId, opts) → Promise<{projects, datasets, analyses}|null>
  *   renderSiteSnapshotForPrompt(snap, maxChars) → string
  *
- * 2026-06-09: async DB (getAsyncDbForLegacyModules) — no deasync on ECS platform.
+ * Async helpers use the Promise facade over desktop SQLite.
  */
 const dbMod = require('../db');
 
@@ -18,7 +18,7 @@ async function buildSiteSnapshotAsync(userId, opts) {
   const maxDatasets = o.maxDatasets || 50;
   const maxProjects = o.maxProjects || 30;
 
-  const adb = dbMod.getAsyncDbForLegacyModules();
+  const adb = dbMod.getAsyncDatabase();
 
   try {
     const projects = await adb.prepare(`
@@ -26,9 +26,9 @@ async function buildSiteSnapshotAsync(userId, opts) {
         (SELECT COUNT(*) FROM datasets d WHERE d.project_id = p.id) AS dataset_count,
         (SELECT COUNT(*) FROM analyses a WHERE a.dataset_id IN (SELECT id FROM datasets WHERE project_id = p.id)) AS analysis_count
       FROM projects p
-      WHERE p.user_id = $1
+      WHERE p.user_id = ?
       ORDER BY p.updated_at DESC
-      LIMIT $2
+      LIMIT ?
     `).all(userId, maxProjects);
 
     if (projects.length === 0) return {projects: [], datasets: [], analyses: []};
@@ -166,8 +166,7 @@ function renderSiteSnapshotForPrompt(snap, maxChars) {
   return out;
 }
 
-// SYNC_BRIDGE_v1: sync wrapper for Dell (non-PG) path.
-// Uses the same DB queries but in sync better-sqlite3 mode — no deasync.
+// Sync wrapper using the same better-sqlite3 database.
 function buildSiteSnapshot(userId, opts) {
   if (!userId) return null;
   const o = opts || {};
@@ -175,7 +174,7 @@ function buildSiteSnapshot(userId, opts) {
   const maxDatasets = o.maxDatasets || 50;
   const maxProjects = o.maxProjects || 30;
 
-  const sqlite = dbMod.getSqliteForLegacyModules();
+  const sqlite = dbMod.getDatabase();
 
   try {
     const projects = sqlite.prepare(`

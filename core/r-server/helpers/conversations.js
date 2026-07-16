@@ -12,7 +12,7 @@
  */
 
 const dbMod = require('../db');
-const sqlite = dbMod.getSqliteForLegacyModules();
+const sqlite = dbMod.getDatabase();
 const {v4: uuidv4} = require('uuid');
 
 // One-time table create + migrations (idempotent)

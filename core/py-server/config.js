@@ -14,8 +14,6 @@ const config = {
   apiToken: process.env.BIOF3_API_TOKEN || 'biof3-figcode-2026',
 
   // ── 桌面版模式（与 r-server/config.js 对称）──────────────────
-  // storageMode: 'local'（桌面版，本地文件系统）
-  storageMode: process.env.BIOF3_STORAGE || 'local',
   // localMode: 桌面版跳过 JWT 验证
   localMode: process.env.BIOF3_LOCAL_MODE === '1',
   // Python Runtime 路径（桌面版内嵌 Python 的根目录）

@@ -239,7 +239,7 @@ module.exports = function registerAiAgentRoute(app) {
     };
     sseSend({ event: 'iter', n: 0 });
 
-    // CONVERSATIONS_v1: resolve / create active conversation (async PG on ECS platform)
+    // Resolve or create the active conversation through the SQLite facade.
     let _activeConv = null;
     try {
       const _userId = req.user && req.user.id;

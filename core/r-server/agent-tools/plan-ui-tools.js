@@ -2,7 +2,7 @@
  * agent-tools/plan-ui-tools.js — Plan management + UI control acts
  */
 const dbMod = require('../db');
-const sqlite = dbMod.getSqliteForLegacyModules();
+const sqlite = dbMod.getDatabase();
 // ponytail: cross-module refs from act-tools.js (testFilterExpr, _setImpliedPage)
 const { testFilterExpr, _setImpliedPage } = require('./act-tools');
 
@@ -362,7 +362,7 @@ async function actSelectCells(args, ctx) {
   const cellIds = matched.map((r) => r[cellIdIdx]).filter(Boolean);
   if (cellIds.length === 0) return { error: 'no_cell_ids_extracted' };
 
-  // Create subset via shared db helper (business method, PG-aware inside db.js)
+  // Create subset through the shared database helper.
   const subset = dbMod.createSubset({
     datasetId,
     name: subsetName,

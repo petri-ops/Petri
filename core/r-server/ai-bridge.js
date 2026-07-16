@@ -24,7 +24,7 @@ const { undoAgentAct } = require('./helpers/act-tool');
 // PLAN_TOOL_v1 — persistent plan tables + helpers
 (function setupPlanTables() {
   const dbMod = require('./db');
-  const sqlite = dbMod.getSqliteForLegacyModules();
+  const sqlite = dbMod.getDatabase();
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS copilot_plans (
       id TEXT PRIMARY KEY,
@@ -53,7 +53,7 @@ const { undoAgentAct } = require('./helpers/act-tool');
 // PLAN_CHAT_LINK_v1
 (function migratePlansAddChatContext() {
   const dbMod = require('./db');
-  const sqlite = dbMod.getSqliteForLegacyModules();
+  const sqlite = dbMod.getDatabase();
   try {
     sqlite.exec('ALTER TABLE copilot_plans ADD COLUMN chat_context_excerpt TEXT');
   } catch {

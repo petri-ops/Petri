@@ -12,7 +12,7 @@
  *   backgroundExtractFacts(userId, messages)         → Promise<void>
  *   FACT_CATEGORIES, FACT_CAT_LABEL
  *
- * 2026-06-09: async DB (getAsyncDbForLegacyModules) — no deasync on ECS platform.
+ * Async helpers use the Promise facade over desktop SQLite.
  */
 
 const dbMod = require('../db');
@@ -23,7 +23,7 @@ let _tableChecked = false;
 async function _ensureTable() {
   if (_tableChecked) return;
   _tableChecked = true;
-  const adb = dbMod.getAsyncDbForLegacyModules();
+  const adb = dbMod.getAsyncDatabase();
   try {
     await adb.exec(`
       CREATE TABLE IF NOT EXISTS user_facts (
@@ -63,10 +63,10 @@ const FACT_CAT_LABEL = {
 async function listUserFactsAsync(userId, limit) {
   if (!userId) return [];
   await _ensureTable();
-  const adb = dbMod.getAsyncDbForLegacyModules();
+  const adb = dbMod.getAsyncDatabase();
   const sql = limit
-    ? 'SELECT * FROM user_facts WHERE user_id = $1 ORDER BY pinned DESC, updated_at DESC LIMIT $2'
-    : 'SELECT * FROM user_facts WHERE user_id = $1 ORDER BY pinned DESC, updated_at DESC';
+    ? 'SELECT * FROM user_facts WHERE user_id = ? ORDER BY pinned DESC, updated_at DESC LIMIT ?'
+    : 'SELECT * FROM user_facts WHERE user_id = ? ORDER BY pinned DESC, updated_at DESC';
   const rows = limit
     ? await adb.prepare(sql).all(userId, limit)
     : await adb.prepare(sql).all(userId);
@@ -75,26 +75,26 @@ async function listUserFactsAsync(userId, limit) {
 
 async function getUserFactAsync(id, userId) {
   await _ensureTable();
-  const adb = dbMod.getAsyncDbForLegacyModules();
+  const adb = dbMod.getAsyncDatabase();
   return await adb
-    .prepare('SELECT * FROM user_facts WHERE id = $1 AND user_id = $2')
+    .prepare('SELECT * FROM user_facts WHERE id = ? AND user_id = ?')
     .get(id, userId);
 }
 
 async function upsertUserFactAsync({ id, userId, category, content, pinned = 0, source = 'auto' }) {
   if (!userId || !content || !category) return null;
   await _ensureTable();
-  const adb = dbMod.getAsyncDbForLegacyModules();
+  const adb = dbMod.getAsyncDatabase();
   const now = new Date().toISOString();
   const pinnedVal = pinned ? 1 : 0;
   if (id) {
     const existing = await adb
-      .prepare('SELECT * FROM user_facts WHERE id = $1 AND user_id = $2')
+      .prepare('SELECT * FROM user_facts WHERE id = ? AND user_id = ?')
       .get(id, userId);
     if (existing) {
       await adb
         .prepare(
-          `UPDATE user_facts SET category=$1, content=$2, pinned=$3, source=$4, updated_at=$5 WHERE id=$6 AND user_id=$7`
+          `UPDATE user_facts SET category=?, content=?, pinned=?, source=?, updated_at=? WHERE id=? AND user_id=?`
         )
         .run(category, content, pinnedVal, source, now, id, userId);
       return getUserFactAsync(id, userId);
@@ -103,7 +103,7 @@ async function upsertUserFactAsync({ id, userId, category, content, pinned = 0, 
   const newId = id || 'fact_' + uuidv4().slice(0, 12);
   await adb
     .prepare(
-      `INSERT INTO user_facts(id, user_id, category, content, pinned, source, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`
+      `INSERT INTO user_facts(id, user_id, category, content, pinned, source, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?)`
     )
     .run(newId, userId, category, content, pinnedVal, source, now, now);
   return getUserFactAsync(newId, userId);
@@ -111,14 +111,14 @@ async function upsertUserFactAsync({ id, userId, category, content, pinned = 0, 
 
 async function deleteUserFactAsync(id, userId) {
   await _ensureTable();
-  const adb = dbMod.getAsyncDbForLegacyModules();
-  await adb.prepare('DELETE FROM user_facts WHERE id = $1 AND user_id = $2').run(id, userId);
+  const adb = dbMod.getAsyncDatabase();
+  await adb.prepare('DELETE FROM user_facts WHERE id = ? AND user_id = ?').run(id, userId);
 }
 
 async function clearUserFactsAsync(userId) {
   await _ensureTable();
-  const adb = dbMod.getAsyncDbForLegacyModules();
-  await adb.prepare('DELETE FROM user_facts WHERE user_id = $1').run(userId);
+  const adb = dbMod.getAsyncDatabase();
+  await adb.prepare('DELETE FROM user_facts WHERE user_id = ?').run(userId);
 }
 
 function _normFact(s) {
@@ -174,10 +174,10 @@ async function buildFactsBlockAsync(userId, maxChars = 1200) {
   return out;
 }
 
-// SYNC_BRIDGE_v1: sync wrapper for Dell (non-PG) path.
+// Sync wrapper for in-process callers.
 function buildFactsBlock(userId, maxChars = 1200) {
-  const _adb = dbMod.getAsyncDbForLegacyModules();
-  const sqlite = dbMod.getSqliteForLegacyModules();
+  const _adb = dbMod.getAsyncDatabase();
+  const sqlite = dbMod.getDatabase();
   let rows;
   try {
     rows = sqlite

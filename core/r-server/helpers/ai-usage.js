@@ -10,7 +10,7 @@
  */
 
 const dbMod = require('../db');
-const sqlite = dbMod.getSqliteForLegacyModules();
+const sqlite = dbMod.getDatabase();
 
 // One-time table create (idempotent)
 sqlite.exec(`

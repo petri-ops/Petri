@@ -7,7 +7,7 @@
  */
 const express = require('express');
 const dbMod = require('../db');
-const adb = dbMod.getAsyncDbForLegacyModules();
+const adb = dbMod.getAsyncDatabase();
 const {
   isAgentGloballyPausedAsync,
   setAgentGlobalPauseAsync,

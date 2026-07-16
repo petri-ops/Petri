@@ -215,7 +215,7 @@ router.post('/projects/:id/status', (req, res) => {
 router.delete('/projects/:id', async (req, res) => {
   if (!checkOwnership(req, res, req.params.id)) return;
   try {
-    const adb = db.getAsyncDbForLegacyModules();
+    const adb = db.getAsyncDatabase();
     const conversations = await adb.prepare('SELECT id FROM copilot_conversations WHERE project_id=?').all(req.params.id);
     for (const conversation of conversations) {
       await adb.prepare('DELETE FROM copilot_messages WHERE conversation_id=?').run(conversation.id);

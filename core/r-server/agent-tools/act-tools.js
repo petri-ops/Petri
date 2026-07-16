@@ -2,7 +2,7 @@
  * agent-tools/act-tools.js — Action execution system (page check, ack, dispatch)
  */
 const dbMod = require('../db');
-const sqlite = dbMod.getSqliteForLegacyModules();
+const sqlite = dbMod.getDatabase();
 const {
   actUpdateFigcodeEditor,
   actSwitchResultTab,

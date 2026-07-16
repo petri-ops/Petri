@@ -9,9 +9,7 @@ const path = require('path');
 const multer = require('multer');
 
 const config = require('../config');
-const IS_LOCAL = config.storageMode === 'local';
-
-const TEMP_DIR = IS_LOCAL ? (config.tempDir || '/tmp/biof3-tmp') : '/mnt/storage_16tb/omichub/biof3-tmp';
+const TEMP_DIR = config.tempDir || '/tmp/biof3-tmp';
 
 // 本地存储适配器
 let _storage = null;

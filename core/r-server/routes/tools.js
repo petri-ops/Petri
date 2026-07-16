@@ -1,6 +1,6 @@
 // Tools module — job submission + execution + results.
 // Route registration is delegated to three submodules:
-//   - tools-metadata:   PG-only reads/writes (status, history, job name/public)
+//   - tools-metadata:   SQLite reads/writes (status, history, job name/public)
 //   - tools-platform:   public routes that auth then proxy to Dell or run local
 //   - tools-internal:   Dell-only internal-token execution/file/cancel/delete
 const fs = require('fs');
@@ -18,10 +18,9 @@ const {createToolsInternalRoutes} = require('./tools-internal');
 const {createToolsMetadataRoutes} = require('./tools-metadata');
 const {createToolsPlatformRoutes} = require('./tools-platform');
 
-// PG bridge: when BIOF3_P2_PG=1 (ECS platform), use PostgreSQL via shim;
-// when running on Dell without PG, falls back to local SQLite.
+// Promise facade over the desktop SQLite database.
 // tool_jobs table must exist (006_tool_jobs.sql migration).
-const db = dbMod.getAsyncDbForLegacyModules();
+const db = dbMod.getAsyncDatabase();
 
 // 桌面 job 目录位于本地用户数据目录。
 const JOBS_DIR = path.join(

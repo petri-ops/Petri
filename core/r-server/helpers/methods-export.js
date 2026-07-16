@@ -508,7 +508,7 @@ async function _embedPlotsAsDataUrls(analyses) {
   for (const a of analyses) {
     if (!a.id) continue;
     try {
-      const row = dbMod.getAnalysis(a.id); // PG/SQLite-aware; results already parsed
+      const row = dbMod.getAnalysis(a.id); // results are already parsed
       if (!row || !row.results) continue;
       let r = row.results;
       if (typeof r === 'string') {

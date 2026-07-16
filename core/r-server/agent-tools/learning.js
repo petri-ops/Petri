@@ -4,7 +4,7 @@
  *  verify_understanding, suggest_review, record_learning_signal)
  */
 const dbMod = require('../db');
-const sqlite = dbMod.getSqliteForLegacyModules();
+const sqlite = dbMod.getDatabase();
 // ponytail: cross-module refs from act-tools.js (isAgentPaused, _pendingActAcks, recordAudit)
 const { isAgentPaused, _pendingActAcks, recordAudit } = require('./act-tools');
 

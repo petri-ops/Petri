@@ -11,7 +11,7 @@
  *   summarizeMessages(userId, oldMessages, existingSummary) → Promise<void>
  *   SUMMARY_TRIGGER_AT, SUMMARY_KEEP_RECENT
  *
- * 2026-06-09: async DB (getAsyncDbForLegacyModules) — no deasync on ECS platform.
+ * Async helpers use the Promise facade over desktop SQLite.
  */
 
 const dbMod = require('../db');
@@ -21,7 +21,7 @@ let _tableChecked = false;
 async function _ensureTable() {
   if (_tableChecked) return;
   _tableChecked = true;
-  const adb = dbMod.getAsyncDbForLegacyModules();
+  const adb = dbMod.getAsyncDatabase();
   try {
     await adb.exec(`
       CREATE TABLE IF NOT EXISTS chat_summaries (
@@ -39,9 +39,9 @@ async function _ensureTable() {
 async function getChatSummaryAsync(userId) {
   if (!userId) return null;
   await _ensureTable();
-  const adb = dbMod.getAsyncDbForLegacyModules();
+  const adb = dbMod.getAsyncDatabase();
   const row = await adb
-    .prepare('SELECT summary, msg_count, updated_at FROM chat_summaries WHERE user_id = $1')
+    .prepare('SELECT summary, msg_count, updated_at FROM chat_summaries WHERE user_id = ?')
     .get(userId);
   return row || null;
 }
@@ -49,12 +49,12 @@ async function getChatSummaryAsync(userId) {
 async function saveChatSummaryAsync(userId, summary, msgCount) {
   if (!userId) return;
   await _ensureTable();
-  const adb = dbMod.getAsyncDbForLegacyModules();
+  const adb = dbMod.getAsyncDatabase();
   await adb
     .prepare(
       `
     INSERT INTO chat_summaries(user_id, summary, msg_count, updated_at)
-    VALUES ($1, $2, $3, $4)
+    VALUES (?, ?, ?, ?)
     ON CONFLICT(user_id) DO UPDATE SET summary=excluded.summary, msg_count=excluded.msg_count, updated_at=excluded.updated_at
   `
     )
@@ -64,8 +64,8 @@ async function saveChatSummaryAsync(userId, summary, msgCount) {
 async function deleteChatSummaryAsync(userId) {
   if (!userId) return;
   await _ensureTable();
-  const adb = dbMod.getAsyncDbForLegacyModules();
-  await adb.prepare('DELETE FROM chat_summaries WHERE user_id = $1').run(userId);
+  const adb = dbMod.getAsyncDatabase();
+  await adb.prepare('DELETE FROM chat_summaries WHERE user_id = ?').run(userId);
 }
 
 /**
@@ -166,12 +166,10 @@ async function summarizeMessages(userId, oldMessages, existingSummary) {
 const SUMMARY_TRIGGER_AT = 22; // start summarizing once thread has > N msgs
 const SUMMARY_KEEP_RECENT = 14; // keep this many recent msgs as raw context
 
-// SYNC_BRIDGE_v1: sync wrapper for Dell (non-PG) path.
-// The async version always goes through getAsyncDbForLegacyModules.
-// The sync version uses the same underlying SQLite directly — no deasync.
+// Sync wrapper for in-process callers using the same SQLite database.
 function getChatSummary(userId) {
   if (!userId) return null;
-  const sqlite = dbMod.getSqliteForLegacyModules();
+  const sqlite = dbMod.getDatabase();
   try {
     // Guard: ensure table exists (idempotent — ignore errors from re-creating)
     sqlite.exec(`

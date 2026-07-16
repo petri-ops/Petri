@@ -4,7 +4,7 @@
 const path = require('path');
 const fs = require('fs');
 const dbMod = require('../db');
-const sqlite = dbMod.getSqliteForLegacyModules();
+const sqlite = dbMod.getDatabase();
 // C3 (M2-10): content-plugin tutorial snippets (read by read_page / search)
 const contentPlugins = require('./content-plugins');
 

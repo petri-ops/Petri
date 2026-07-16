@@ -10,7 +10,7 @@
  *   getActivePlanForUser(userId, conversationId)      → plan|null  (sync fallback)
  *   renderActivePlanForPrompt(plan) → string
  *
- * 2026-06-09: async DB (getAsyncDbForLegacyModules) — no deasync on ECS platform.
+ * Async helpers use the Promise facade over desktop SQLite.
  */
 
 const dbMod = require('../db');
@@ -18,7 +18,7 @@ const dbMod = require('../db');
 // Local sqlite reference for sync methods
 let _sqlite = null;
 function _getSqlite() {
-  if (!_sqlite) _sqlite = dbMod.getSqliteForLegacyModules();
+  if (!_sqlite) _sqlite = dbMod.getDatabase();
   return _sqlite;
 }
 
@@ -135,29 +135,29 @@ function syncPlanStepStatusFromToolJob(toolJobId, newStatus, errorText) {
   }
 }
 
-/** Async version — preferred on ECS platform. */
+/** Async version for route handlers. */
 async function getActivePlanForUserAsync(userId, conversationId) {
   if (!userId) return null;
-  const adb = dbMod.getAsyncDbForLegacyModules();
+  const adb = dbMod.getAsyncDatabase();
   try {
     let plan = null;
     if (conversationId) {
       plan = await adb
         .prepare(
-          `SELECT * FROM copilot_plans WHERE user_id = $1 AND conversation_id = $2 AND status IN ('active','paused') ORDER BY updated_at DESC LIMIT 1`
+          `SELECT * FROM copilot_plans WHERE user_id = ? AND conversation_id = ? AND status IN ('active','paused') ORDER BY updated_at DESC LIMIT 1`
         )
         .get(userId, conversationId);
     }
     if (!plan) {
       plan = await adb
         .prepare(
-          `SELECT * FROM copilot_plans WHERE user_id = $1 AND (conversation_id IS NULL OR conversation_id = $2) AND status IN ('active','paused') ORDER BY updated_at DESC LIMIT 1`
+          `SELECT * FROM copilot_plans WHERE user_id = ? AND (conversation_id IS NULL OR conversation_id = ?) AND status IN ('active','paused') ORDER BY updated_at DESC LIMIT 1`
         )
         .get(userId, conversationId || '');
     }
     if (!plan) return null;
     const steps = await adb
-      .prepare('SELECT * FROM copilot_plan_steps WHERE plan_id = $1 ORDER BY n ASC')
+      .prepare('SELECT * FROM copilot_plan_steps WHERE plan_id = ? ORDER BY n ASC')
       .all(plan.id);
     return { ...plan, steps };
   } catch (e) {
@@ -166,7 +166,7 @@ async function getActivePlanForUserAsync(userId, conversationId) {
   }
 }
 
-/** Sync fallback — used on Dell (non-PG path). */
+/** Sync version for in-process callers. */
 function getActivePlanForUser(userId, conversationId) {
   const sqlite = _getSqlite();
   let plan = null;
@@ -233,7 +233,7 @@ async function syncPlanStepStatusFromAnalysisAsync(analysisId, newStatus, errorT
   else if (newStatus === 'running' || newStatus === 'pending' || newStatus === 'queued')
     stepStatus = 'running';
   if (!stepStatus) return;
-  const adb = dbMod.getAsyncDbForLegacyModules();
+  const adb = dbMod.getAsyncDatabase();
   try {
     const rows = await adb
       .prepare('SELECT plan_id, n FROM copilot_plan_steps WHERE analysis_id=?')
@@ -273,7 +273,7 @@ async function syncPlanStepStatusFromAnalysisAsync(analysisId, newStatus, errorT
   }
 }
 
-/** Async version of syncPlanStepStatusFromToolJob — preferred on ECS platform. */
+/** Async version of syncPlanStepStatusFromToolJob. */
 async function syncPlanStepStatusFromToolJobAsync(toolJobId, newStatus, errorText) {
   if (!toolJobId) return;
   let stepStatus = null;
@@ -281,7 +281,7 @@ async function syncPlanStepStatusFromToolJobAsync(toolJobId, newStatus, errorTex
   else if (newStatus === 'failed') stepStatus = 'failed';
   else if (newStatus === 'running' || newStatus === 'pending') stepStatus = 'running';
   if (!stepStatus) return;
-  const adb = dbMod.getAsyncDbForLegacyModules();
+  const adb = dbMod.getAsyncDatabase();
   try {
     const rows = await adb
       .prepare('SELECT plan_id, n FROM copilot_plan_steps WHERE tool_job_id=?')

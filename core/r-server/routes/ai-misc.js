@@ -3,13 +3,11 @@
  * docs-index, site-snapshot, health, usage-mine, act-registry).
  * Migrated from server.js as part of MODULES_BATCH2_v1.
  *
- * Phase B / ECS platform: DB access goes through `sqlite`
- * (= getSqliteForLegacyModules() → sync PG shim when BIOF3_P2_PG=1, else
- * local better-sqlite3). Do not use the raw `{db}` connection here.
+ * DB access goes through the shared desktop SQLite handle.
  */
 const express = require('express');
 const dbMod = require('../db');
-const adb = dbMod.getAsyncDbForLegacyModules();
+const adb = dbMod.getAsyncDatabase();
 
 module.exports = function mountMisc(app) {
 

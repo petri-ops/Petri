@@ -2,14 +2,11 @@
  * routes/ai-conversations.js — multi-conversation support endpoints.
  * Migrated from server.js as part of MODULES_BATCH1_v1.
  *
- * 2026-06-08: converted to ASYNC DB access (getAsyncDbForLegacyModules) — the
- * old sync shim used deasync.loopWhile, which is NOT reentrant: concurrent
- * Copilot/admin reads ran multiple loopWhile at once and crashed V8
- * ("Empty MaybeLocal"), taking down the whole platform. Async = no deasync.
+ * Uses the Promise facade over desktop SQLite for route handlers.
  */
 const express = require('express');
 const dbMod = require('../db');
-const adb = dbMod.getAsyncDbForLegacyModules();
+const adb = dbMod.getAsyncDatabase();
 let _projectColumnReady = null;
 
 function _newConvId() {

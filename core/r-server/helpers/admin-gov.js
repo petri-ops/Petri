@@ -11,13 +11,13 @@
  */
 
 const dbMod = require('../db');
-const db = dbMod.getSqliteForLegacyModules();
-const adb = dbMod.getAsyncDbForLegacyModules ? dbMod.getAsyncDbForLegacyModules() : null;
+const db = dbMod.getDatabase();
+const adb = dbMod.getAsyncDatabase ? dbMod.getAsyncDatabase() : null;
 
 let pauseCache = {value: false, ts: 0};
 const PAUSE_CACHE_MS = 30_000;
 
-// One-time table create (idempotent; PG: no-op via shim, table from migration 008)
+// One-time idempotent table creation.
 db.exec(`
   CREATE TABLE IF NOT EXISTS copilot_global_settings (
     key TEXT PRIMARY KEY,
@@ -38,7 +38,7 @@ function isAgentGloballyPaused() {
 async function isAgentGloballyPausedAsync() {
   if (Date.now() - pauseCache.ts < PAUSE_CACHE_MS) return pauseCache.value;
   try {
-    const handle = adb || dbMod.getAsyncDbForLegacyModules();
+    const handle = adb || dbMod.getAsyncDatabase();
     const row = await handle.prepare("SELECT value FROM copilot_global_settings WHERE key='agent_paused'").get();
     pauseCache = {value: !!(row && row.value === '1'), ts: Date.now()};
     return pauseCache.value;
@@ -58,7 +58,7 @@ function setAgentGlobalPause(paused, byAdminId) {
 
 async function setAgentGlobalPauseAsync(paused, byAdminId) {
   const now = new Date().toISOString();
-  const handle = adb || dbMod.getAsyncDbForLegacyModules();
+  const handle = adb || dbMod.getAsyncDatabase();
   await handle.prepare(`INSERT INTO copilot_global_settings(key, value, updated_at) VALUES ('agent_paused', ?, ?)
               ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at`)
     .run(paused ? '1' : '0', now);

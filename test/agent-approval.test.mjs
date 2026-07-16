@@ -68,7 +68,7 @@ test('deseq2 首次 run 返回 needApproval + ackToken', async () => {
   assert.ok(job.ack_expires_at > Date.now(), 'ack_expires_at 应在未来');
 
   // 清理
-  const sqlite = db.getSqliteForLegacyModules();
+  const sqlite = db.getDatabase();
   sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(r.toolJobId);
 });
 
@@ -80,7 +80,7 @@ test('ack(approve) 后 ack_status 变 approved', async () => {
   const job = db.ackToolJob(r.ackToken, true);
   assert.equal(job.ack_status, 'approved');
 
-  const sqlite = db.getSqliteForLegacyModules();
+  const sqlite = db.getDatabase();
   sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(r.toolJobId);
 });
 
@@ -97,7 +97,7 @@ test('ack(reject) 后重调 ackToken 返回 user_rejected', async () => {
   assert.equal(r2.ok, false);
   assert.equal(r2.error, 'user_rejected');
 
-  const sqlite = db.getSqliteForLegacyModules();
+  const sqlite = db.getDatabase();
   sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(r.toolJobId);
 });
 
@@ -123,7 +123,7 @@ test('HEAVY_TOOLS 白名单含 deseq2/wgcna/ml-* 不含 volcano-plot', async () 
     CTX
   );
   assert.equal(r.needApproval, true, 'wgcna 应在白名单');
-  const sqlite = db.getSqliteForLegacyModules();
+  const sqlite = db.getDatabase();
   sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(r.toolJobId);
 });
 
@@ -134,7 +134,7 @@ test('单细胞步骤首次运行也进入显式确认', async () => {
   );
   assert.equal(r.needApproval, true);
   assert.equal(r.toolId, 'doublet');
-  const sqlite = db.getSqliteForLegacyModules();
+  const sqlite = db.getDatabase();
   sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(r.toolJobId);
 });
 
@@ -191,6 +191,6 @@ test('Agent 只能把真实 tool_job 中已验证的 artifact 绑定到下游', 
   assert.equal(bound.ok, true);
   assert.equal(bound.plan.steps.find((step) => step.id === 'volcano').inputs.deg_table, '/results/deg.csv');
   assert.equal(bound.plan.lineage[0].fromToolJobId, job.id);
-  const sqlite = db.getSqliteForLegacyModules();
+  const sqlite = db.getDatabase();
   sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(job.id);
 });

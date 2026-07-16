@@ -152,7 +152,7 @@ test('callTool 跑通 volcano-plot 返回 toolJobId（live）', { skip: !RUN_LIV
 test('syncPlanStepStatusFromToolJob 把绑定的 step 变 done', async () => {
   const plans = req(R_SERVER + '/helpers/plans.js');
   // 造 plan + 1 个 step（直接用 db.js 的 sqlite）
-  const sqlite = db.getSqliteForLegacyModules();
+  const sqlite = db.getDatabase();
   const planId = 'testplan_' + Date.now();
   sqlite
     .prepare(
@@ -190,7 +190,7 @@ test('syncPlanStepStatusFromToolJob 把绑定的 step 变 done', async () => {
 
 test('syncPlanStepStatusFromToolJob failed 分支写错误信息', async () => {
   const plans = req(R_SERVER + '/helpers/plans.js');
-  const sqlite = db.getSqliteForLegacyModules();
+  const sqlite = db.getDatabase();
   const planId = 'testplan2_' + Date.now();
   sqlite
     .prepare(

@@ -26,10 +26,8 @@ const path = require('path');
 const { execFile } = require('child_process');
 
 const config = require('./config');
-const IS_LOCAL = config.storageMode === 'local';
-
-const TEMP_DIR = IS_LOCAL ? (config.tempDir || '/tmp/biof3-tmp') : '/mnt/storage_16tb/omichub/biof3-tmp';
-const CACHE_DIR = IS_LOCAL ? (config.tempDir || '/tmp/biof3-tmp') + '/_cache' : '/mnt/storage_16tb/omichub/biof3-cache';
+const TEMP_DIR = config.tempDir || '/tmp/biof3-tmp';
+const CACHE_DIR = path.join(TEMP_DIR, '_cache');
 
 const DEFAULT_TEMP_MAX_AGE_HOURS = 24;
 const DEFAULT_CACHE_MAX_IDLE_DAYS = 7;
@@ -360,7 +358,7 @@ function cleanup(opts = {}) {
   const dbTaskIds = new Set();
   try {
     const dbMod = require('./db');
-    const sqlDb = dbMod.getSqliteForLegacyModules();
+    const sqlDb = dbMod.getDatabase();
     const rows = sqlDb.prepare('SELECT task_id FROM analyses WHERE task_id IS NOT NULL').all();
     for (const r of rows) if (r.task_id) dbTaskIds.add(r.task_id);
   } catch (e) {

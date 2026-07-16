@@ -2,12 +2,11 @@
  * routes/ai-plans.js — plan list / get / status / delete.
  * Migrated from server.js as part of MODULES_BATCH2_v1.
  *
- * 2026-06-08: async DB (getAsyncDbForLegacyModules) — no deasync (reentrant
- * loopWhile crashed V8 under concurrent Copilot/admin reads).
+ * Uses the Promise facade over desktop SQLite.
  */
 const express = require('express');
 const dbMod = require('../db');
-const adb = dbMod.getAsyncDbForLegacyModules();
+const adb = dbMod.getAsyncDatabase();
 
 module.exports = function mountPlans(app) {
   app.get('/api/ai/plans', async (req, res) => {

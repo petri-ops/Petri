@@ -611,7 +611,7 @@ function countAnalysesForUserSince(userId, sinceIso) {
 }
 
 async function countAnalysesForUserSinceAsync(userId, sinceIso) {
-  const adb = getAsyncDbForLegacyModules();
+  const adb = getAsyncDatabase();
   const row = await adb
     .prepare(
       `SELECT COUNT(*) as cnt FROM analyses WHERE dataset_id IN (
@@ -830,7 +830,7 @@ function listUsers() {
     .all();
 }
 
-/** Async (deasync-free) user list — for hot/concurrent paths (analytics admin). */
+/** Async user list for route handlers. */
 async function listUsersAsync() {
   return db
     .prepare(
@@ -886,36 +886,21 @@ async function deleteUserAsync(id) {
 }
 
 // ============================================================
-// Legacy-module DB accessors
-//
-// Historically the platform supported a PostgreSQL backend; the desktop app is
-// SQLite-only. These accessors are kept for API compatibility with modules that
-// consume them (chat-summary / plans / user-facts / cache-manager等).
+// Shared SQLite accessors
 // ============================================================
 
-/** Sync SQLite handle for legacy modules. */
-function getSqliteForLegacyModules() {
+function getDatabase() {
   return db;
 }
 
-/** Convert PostgreSQL-style $N placeholders to SQLite ? placeholders. */
-function _pgToSqlitePlaceholders(sql) {
-  if (typeof sql !== 'string' || !sql.includes('$')) return sql;
-  return sql.replace(/\$(\d+)/g, '?');
-}
-
-/**
- * Async (Promise-based) DB facade over the sync better-sqlite3 handle. Legacy
- * modules author SQL with $N placeholders (a PostgreSQL habit); we translate
- * them to SQLite ? here so those modules work unchanged.
- */
-function _wrapSyncDbAsync(realDb) {
+/** Promise facade over better-sqlite3 for async route handlers. */
+function createAsyncDatabaseFacade(realDb) {
   return {
     async exec(ddl) {
       return realDb.exec(ddl);
     },
     prepare(sql) {
-      const stmt = realDb.prepare(_pgToSqlitePlaceholders(sql));
+      const stmt = realDb.prepare(sql);
       return {
         async run(...p) {
           return stmt.run(...p);
@@ -931,8 +916,8 @@ function _wrapSyncDbAsync(realDb) {
   };
 }
 
-function getAsyncDbForLegacyModules() {
-  return _wrapSyncDbAsync(db);
+function getAsyncDatabase() {
+  return createAsyncDatabaseFacade(db);
 }
 
 module.exports = {
@@ -1000,6 +985,6 @@ module.exports = {
   deleteCellLabel,
   getLabelsSummary,
   db,
-  getSqliteForLegacyModules,
-  getAsyncDbForLegacyModules,
+  getDatabase,
+  getAsyncDatabase,
 };
