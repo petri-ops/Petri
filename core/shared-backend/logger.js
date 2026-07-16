@@ -1,10 +1,8 @@
 /**
  * BioF3 shared backend — Structured Logger
  *
- * Canonical logger implementation shared by r-server, py-server, and
- * platform-server. JSON-formatted logs in production; pretty console in
- * development. Replaces the previously duplicated r-server/logger.js and
- * py-server/logger.js.
+ * Canonical logger implementation shared by r-server and py-server.
+ * JSON-formatted logs in production; pretty console in development.
  */
 
 const isDev = process.env.NODE_ENV !== 'production';

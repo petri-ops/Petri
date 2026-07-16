@@ -3,8 +3,8 @@ const path = require('path');
 const {safeJoinUnder} = require('../../shared-backend/path-safe');
 const {sendThemedHtmlFile} = require('./report-theme');
 
-// Published demo assets are immutable job output directories on the Dell
-// compute volume. They must remain visible even if the mutable tool_jobs table
+// Published demo assets are immutable local job output directories. They must
+// remain visible even if the mutable tool_jobs table
 // is re-migrated, truncated, or no longer carries is_public flags.
 const PUBLIC_DEMO_ASSETS = Object.freeze({
   'bindea-immune': 'job_bdd759f1fd7a46f1',

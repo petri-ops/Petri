@@ -1,8 +1,7 @@
 // Tools module — job submission + execution + results.
-// Route registration is delegated to three submodules:
+// Route registration is delegated to two submodules:
 //   - tools-metadata:   SQLite reads/writes (status, history, job name/public)
-//   - tools-platform:   public routes that auth then proxy to Dell or run local
-//   - tools-internal:   Dell-only internal-token execution/file/cancel/delete
+//   - tools-platform:   desktop-local execution, files, reports and demos
 const fs = require('fs');
 const path = require('path');
 const dbMod = require('../db');
@@ -14,7 +13,6 @@ const {
   createToolsAssetHandlers,
 } = require('../helpers/tools-assets');
 const {createToolsExecutor} = require('../helpers/tools-executor');
-const {createToolsInternalRoutes} = require('./tools-internal');
 const {createToolsMetadataRoutes} = require('./tools-metadata');
 const {createToolsPlatformRoutes} = require('./tools-platform');
 
@@ -41,12 +39,6 @@ const STATIC_DEMO_ENABLED =
 
 try { fs.mkdirSync(JOBS_DIR, {recursive: true}); } catch {}
 try { fs.mkdirSync(SCRIPTS_DIR, {recursive: true}); } catch {}
-
-function requireInternal(req, res) {
-  if (req.isInternal) return true;
-  res.status(403).json({error: 'internal_only'});
-  return false;
-}
 
 function userId(req) { return req.user && (req.user.id || req.user.userId) || null; }
 
@@ -107,22 +99,6 @@ const {
 });
 
 const registerToolsMetadata = createToolsMetadataRoutes({db, getUserId: userId, jobsDir: JOBS_DIR});
-const registerToolsInternal = createToolsInternalRoutes({
-  requireInternal,
-  handleToolRun,
-  handlePublicDemo,
-  handlePublicFile,
-  handleDemoData,
-  handleLegacyDemoFile,
-  handleLegacyDemoList,
-  handlePrivateFileRead,
-  handlePrivateFileWrite,
-  handleGenerateFinalReport,
-  killLocalToolJob,
-  cleanupLocalToolJobDir,
-  isSmokeTestRequest,
-  notify,
-});
 const registerToolsPlatform = createToolsPlatformRoutes({
   db,
   getUserId: userId,
@@ -143,6 +119,5 @@ const registerToolsPlatform = createToolsPlatformRoutes({
 
 module.exports = function registerTools(app) {
   registerToolsMetadata(app);
-  registerToolsInternal(app);
   registerToolsPlatform(app);
 };

@@ -53,15 +53,12 @@ function fetchDocsIndex() {
     return Promise.resolve(_docsIndexCache);
   }
 
-  // 桌面版：先尝试本地文件
-  if (_isLocalMode()) {
-    const localData = _readLocalIndex();
-    if (localData) {
-      _docsIndexCache = localData;
-      _docsIndexFetchedAt = Date.now();
-      return Promise.resolve(localData);
-    }
-    // 本地文件没有就 fallback 到网络（可能内容同步还没完成）
+  // 桌面版：先尝试本地文件，本地没有再 fallback 到网络。
+  const localData = _readLocalIndex();
+  if (localData) {
+    _docsIndexCache = localData;
+    _docsIndexFetchedAt = Date.now();
+    return Promise.resolve(localData);
   }
 
   const urls = DOCS_INDEX_URL_CANDIDATES;

@@ -36,7 +36,7 @@ function assertSafePath(absPath, baseDir) {
 }
 
 /**
- * 转义插值进 R 双引号字符串内的值（如 "${ossInputUrl}" 里的值）。
+ * 转义插值进 R 双引号字符串内的文件路径值。
  * 转义 " 和 \，拒绝换行/回车（防闭合字符串后注入 R 代码）。
  * 合法返回转义后的字符串，含危险控制字符返回 null。
  */

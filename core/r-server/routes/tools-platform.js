@@ -3,9 +3,7 @@ const express = require('express');
 /**
  * Public tool routes (desktop local execution).
  *
- * Authenticate/authorize against tool_jobs, then call local execution/asset
- * handlers directly. The former "platform" mode that proxied to Dell compute
- * nodes has been removed — the desktop app runs everything locally.
+ * Authorize against local tool_jobs, then call execution/asset handlers directly.
  *
  * Routes: run, file GET/PUT, report, cancel, delete, public-demo, public-file,
  * demo, demo-data.
@@ -99,9 +97,9 @@ function createToolsPlatformRoutes({
               '该任务已设为公开 Demo，删除后该工具将失去 Demo 展示。如确认删除请传 ?force=true',
           });
         }
-        const dell = cleanupLocalToolJobDir(job.id);
+        const localCleanup = cleanupLocalToolJobDir(job.id);
         await db.prepare('DELETE FROM tool_jobs WHERE id = ?').run(req.params.id);
-        res.json({ ok: true, dell });
+        res.json({ ok: true, localCleanup });
       } catch (e) {
         res.status(500).json({ error: e.message });
       }

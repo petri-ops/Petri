@@ -707,8 +707,7 @@ function _scriptHeader({ analysis, dataset, language, generatedAt, username }) {
       '# Generated: ' + generatedAt + ' by ' + (username || 'BioF3'),
       '#',
       '# This script reproduces the exact pipeline that ran on BioF3. Replace',
-      '# INPUT_PATH below with your local matrix file (the OSS URL is the actual',
-      '# input that the platform used; any equivalent matrix will work).',
+      '# INPUT_PATH below with the local matrix file used for the analysis.',
       '# ============================================================',
       '',
     ].join('\n');
@@ -737,7 +736,6 @@ function _scriptHeader({ analysis, dataset, language, generatedAt, username }) {
 function _pythonEquivalent(analysis, _dataset) {
   const type = analysis.type;
   const p = analysis.params || {};
-  const inputUrl = analysis.ossInputUrl || 'INPUT_MATRIX_PATH';
 
   if (type === 'scrna_standard' || type === 'recluster') {
     const minCells = p.minCells || 3;
@@ -757,8 +755,7 @@ function _pythonEquivalent(analysis, _dataset) {
       'sc.settings.set_figure_params(dpi=150, facecolor="white")',
       '',
       '# ---- 1. Load data ----',
-      '# Replace this with your local matrix or .h5ad file. The OSS URL was:',
-      '# ' + inputUrl,
+      '# Replace this with your local matrix or .h5ad file.',
       'adata = sc.read_csv("INPUT_MATRIX.csv")  # genes x cells; transpose if needed',
       'if adata.shape[0] < adata.shape[1]:',
       '    adata = adata.T  # ensure cells are rows',

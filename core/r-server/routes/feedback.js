@@ -143,7 +143,7 @@ module.exports = function registerFeedback(app) {
   });
 
   // ---- Admin: list feedbacks with filters ----
-  // FIX_DEASYNC_RACE: use async shim so concurrent requests never block or time out
+  // Async SQLite facade keeps concurrent requests from blocking the event loop.
   app.get('/api/feedback/admin', async (req, res) => {
     if (!_isAdmin(req)) return res.status(403).json({status: 'error', error: 'admin_only'});
     const status = req.query.status || '';
