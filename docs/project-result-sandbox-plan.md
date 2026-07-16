@@ -1,8 +1,8 @@
 # 项目工作路径与结果沙盒专项计划
 
-最后更新：2026-07-16 03:50 UTC
+最后更新：2026-07-16 04:05 UTC
 
-状态：**Phase 0-4 完成，Phase 5 开始**。本文是该任务的唯一专项入口。
+状态：**Phase 0-5 全部完成**。本文是该任务的唯一专项入口。
 
 执行进度：
 - ✅ Phase 0: 基线测试（29项测试通过）
@@ -10,7 +10,7 @@
 - ✅ Phase 2: R/Python工具收敛（R + Python 入口均已收敛到 resolver，含 Python 真实临时目录测试）
 - ✅ Phase 3: MCP/Agent/Harness收敛（插件工具入口以 tool_job.id 收敛到项目沙盒/全局 tool-jobs；Harness 读取已兼容）
 - ✅ Phase 4: Artifact路由与报告（route containment 硬化 + 报告落 output/ + 导出副本进 results/exports/）
-- 🔄 Phase 5: 兼容性与远端（准备开始）
+- ✅ Phase 5: 兼容性与远端（历史不搬迁 + 换 workspace 各自可读 + system scope + 远端边界确认）
 
 ## 1. 任务定义
 
@@ -247,13 +247,23 @@
 - `test/project-run-layout.test.mjs`：30 pass（新增 exportsDir 未破坏既有断言）
 - 全量 `node --test test/*.test.mjs`：仅剩已知基线 5 个 qa-smoke 失败，未新增失败
 
-### Phase 5：兼容、迁移与远端
+### Phase 5：兼容、迁移与远端 ✅
 
-- **历史 job**：不自动搬迁。优先读取 `result_json` 中已记录的旧路径；新 job 只写新路径。
-- **更换 workspace**：不移动历史结果。变更后新 job 写新 workspace，旧 job 按其已持久化路径继续可读；UI 应提示这一语义。
-- **远端执行**：远端 adapter 完成后，把已校验 artifacts 物化/同步到本地项目 job `output/`，再完成本地 artifact truth；不得只留下远端临时 URL。
-- **系统任务**：更新、诊断、缓存清理等非项目任务继续使用应用级目录，必须显式标记 system scope。
-- **回收站**：归档项目不删除 workspace；永久删除项目记录也不删除用户外部 workspace。未来若提供“同时删除目录”，必须是独立高风险操作并再次确认。
+**状态：完成**
+
+已完成/已确认：
+- ✅ **历史 job 不自动搬迁**：`restoreLegacyJobLayout(job, fallbackJobsDir)` 优先读 `result_json` 中的 `jobDir`/`outputDir`/`resultDir`，存在即回读；否则兜底全局 `JOBS_DIR/<job.id>`；都没有则返回 null（不臆造路径）。R/Python executor 的 3 层回退（项目 → 全局 → result_json）与之一致，新 job 只写新路径。
+- ✅ **更换 workspace 不移动历史结果**：resolver 运行时读 `project.workspace_path` 当前值 → 新 job 落新 workspace；旧 job 按其 `result_json` 持久化路径继续可读，不搬迁。测试覆盖新旧 job 各自路径。
+- ✅ **系统任务显式 system scope**：`resolveSystemRunLayout({ toolJobId, systemScope })` 落 `<appData>/system-tasks/<scope>/results/jobs/<toolJobId>`，缺 `toolJobId` 抛错，不静默回退项目/全局。当前无 tool_jobs 型系统任务；该入口为更新/诊断/缓存清理等应用级任务预留。
+- ✅ **远端执行**：桌面版 `execMode=local`（无远端），工具直接在本地项目 sandbox 执行。Web/平台部署下 `runMode=platform` 通过 `tools-dell-proxy` 把请求（含 `projectId`）转发到 Dell，Dell 侧用同一 resolver 在**其**项目 sandbox 解析并落地；平台为无状态代理，`proxyDellPrivateFile`/`proxyDellGenerateReport` 按需回源 Dell artifacts，无需也不应在代理侧另建本地物化目录（符合"唯一执行事实链 / 不建第二套"）。桌面版无远端物化需求。
+- ✅ **回收站**：Core 现有回收站改动（`016_projects_status.sql`、`api-data.js`、`db.js` 等 dirty worktree）完整保留、未 reset；归档项目不删 workspace；本任务未新增"删目录"高风险操作。
+- ✅ 移除 executor 中未使用的 `restoreLegacyJobLayout` import（resolver 仍导出供库/测试使用）。
+
+验证证据：
+- `test/project-sandbox-compat.test.mjs`：6 项通过
+  - 历史 job 从 result_json 回读 / 兜底全局 / 无路径返回 null；换 workspace 后新旧 job 各自路径可读；system scope 落 system-tasks、缺 toolJobId 抛错
+- 全量 `node --test test/*.test.mjs`：仅剩已知基线 5 个 qa-smoke 失败，未新增失败
+- `npm run check`：通过（sync-vendor OK + node --check + harness 4/4 manifest 有效）
 
 ## 6. 关键不变量与禁止事项
 
@@ -300,13 +310,16 @@ npm run harness:phase6
 npm run harness:agent-evaluate
 ```
 
-另外必须增加专项自动化测试：
+另外必须增加专项自动化测试（已全部落地）：
 
-- resolver 单元测试（路径、权限、归档、不可写、symlink）。
-- R/Python/MCP 三入口真实临时目录测试。
-- 旧 job fallback 测试。
-- workspace 变更测试。
-- artifact route containment 和跨项目拒绝测试。
+- ✅ resolver 单元测试（路径、权限、归档、不可写、symlink）：`test/project-run-layout.test.mjs`（30 pass）
+- ✅ R/Python/MCP 三入口真实临时目录测试：
+  - Python：`test/project-sandbox-py-tools.test.mjs`（7 pass）
+  - MCP/Agent：`test/project-sandbox-mcp-tools.test.mjs`（5 pass）
+  - R：结果契约由 resolver 单测 + `test/project-sandbox-artifacts.test.mjs` 覆盖（executor 复用同一 resolver）
+- ✅ 旧 job fallback 测试：`test/project-sandbox-compat.test.mjs`
+- ✅ workspace 变更测试：`test/project-sandbox-compat.test.mjs`
+- ✅ artifact route containment 和跨项目拒绝测试：`test/project-sandbox-artifacts.test.mjs`（safeJoin containment）+ route 层 `canAccessToolJob` owner-only 授权
 
 当前已知、不要误归因给本任务的基线失败：
 
