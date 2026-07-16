@@ -56,7 +56,6 @@ function createToolsExecutor({
     runtime,
     runtimeCommand,
     runtimeReady,
-    mode,
   }) {
     return createCanonicalExecutionContext({
       workDir: jobDir,
@@ -65,8 +64,6 @@ function createToolsExecutor({
       runtime,
       runtimeCommand,
       runtimeReady,
-      mode: mode || config.execMode || 'local',
-      runMode: config.runMode,
       localRoot: defaultLocalRoot,
       canonicalRoot: defaultCanonicalRoot,
     }).context;
@@ -694,7 +691,6 @@ function createToolsExecutor({
           runtime: cfg.lang || null,
           runtimeCommand,
           runtimeReady,
-          mode: 'local',
         });
         result.toolJobId = jobId;
         result.jobDir = jobDir;

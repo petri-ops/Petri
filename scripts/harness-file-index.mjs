@@ -1636,7 +1636,6 @@ export function createLocalHarnessPlatform(platformOptions = {}) {
         platform: 'local',
         runtime,
         runtimeReady,
-        mode: 'local',
         workDir: scopeInfo.target,
         localRoot: scopeInfo.target,
         canonicalRoot: canonicalTarget,

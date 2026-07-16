@@ -193,7 +193,6 @@ function _createMcpExecutionContext({
     runtime,
     runtimeCommand,
     runtimeReady,
-    mode: 'local',
     localRoot: localRoot || _localRootFromEnv(),
     canonicalRoot: canonicalRoot || _canonicalRootFromEnv(),
   });

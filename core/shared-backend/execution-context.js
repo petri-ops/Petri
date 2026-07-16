@@ -1,6 +1,6 @@
 const path = require('path');
 
-const EXECUTION_CONTEXT_VERSION = 1;
+const EXECUTION_CONTEXT_VERSION = 2;
 
 function normalizeSlashPath(value) {
   return (
@@ -8,15 +8,6 @@ function normalizeSlashPath(value) {
       .replace(/\\/g, '/')
       .replace(/\/+$/, '') || '/'
   );
-}
-
-function normalizeExecutionMode({ mode, execMode, runMode } = {}) {
-  if (['platform', 'api'].includes(String(runMode || '').toLowerCase())) return 'remote';
-  const value = String(mode || execMode || '').toLowerCase();
-  if (['docker', 'container'].includes(value)) return 'container';
-  if (['remote', 'platform', 'api', 'worker'].includes(value)) return 'remote';
-  if (value === 'local') return 'local';
-  return 'local';
 }
 
 function createPathMapper({ localRoot, canonicalRoot = '/work/biof3' } = {}) {
@@ -73,26 +64,20 @@ function createExecutionContext(options = {}) {
     workDir,
     jobDir,
     executionWorkDir,
-    containerWorkDir,
     outputDir,
     resultDir,
     workerId,
-    runMode,
     localRoot,
     canonicalRoot,
   } = options;
-  const mode = normalizeExecutionMode(options);
   const mapper = createPathMapper({ localRoot, canonicalRoot });
   const localWorkDir = workDir || jobDir || null;
-  const targetWorkDir =
-    executionWorkDir ||
-    (mode === 'local' ? localWorkDir : containerWorkDir || mapper.canonicalize(localWorkDir));
+  const targetWorkDir = executionWorkDir || localWorkDir;
   const context = {
     executionContextVersion: EXECUTION_CONTEXT_VERSION,
-    mode,
+    mode: 'local',
     adapter: {
-      kind: mode,
-      runMode: runMode || null,
+      kind: 'local',
       workerId: workerId || null,
     },
     platform: platform || null,
@@ -121,11 +106,8 @@ function createTaskExecutionContext(task = {}, config = {}, runtime = null) {
     toolId: task.type,
     platform: config.platform || process.platform,
     runtime,
-    execMode: config.execMode,
-    runMode: config.runMode,
     workerId: task.workerId || config.workerId,
     workDir: task.workDir,
-    containerWorkDir: task.containerWorkDir,
     localRoot: config.tempDir,
     canonicalRoot: config.containerTempDir || '/work/biof3/tasks',
     runtimeReady: { runtime, ready: true, command: null, reason: null },
@@ -159,7 +141,6 @@ function attachExecutionMetadata(result = {}, context) {
 module.exports = {
   EXECUTION_CONTEXT_VERSION,
   normalizeSlashPath,
-  normalizeExecutionMode,
   createPathMapper,
   createExecutionContext,
   createTaskExecutionContext,
