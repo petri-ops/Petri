@@ -2,10 +2,7 @@
  * Guest (未登录游客) module permissions — stored in site_settings.
  * Admins configure via /admin → 用户管理 → 游客权限.
  *
- * FIX_GUEST_PERMS_RACE_V1: On the ECS platform (BIOF3_P2_PG=1), reading
- * site_settings through _runPg → deasync means every request blocks the event
- * loop. With concurrent requests + zombie-scan timers, deasync loops nest and crash.
- * Solution: in-process TTL cache (30s). Writes invalidate cache immediately.
+ * Reads use an in-process TTL cache (30s). Writes invalidate cache immediately.
  */
 
 const dbMod = require('../db');
@@ -43,7 +40,7 @@ function _parseStored(json) {
   }
 }
 
-/** Sync read with 30s in-process cache — zero deasync calls on the hot path. */
+/** Sync read with a 30s in-process cache. */
 function effectiveGuestPermissions() {
   if (_cache.perms && Date.now() - _cache.ts < CACHE_TTL_MS) {
     return _cache.perms;
@@ -80,7 +77,7 @@ function effectiveGuestPermissionsForApi() {
   return effectiveGuestPermissions();
 }
 
-/** P0 ECS: no sync getSiteSetting (deasync) on copilot gate. */
+/** Async read for the copilot permission gate. */
 async function effectiveGuestPermissionsAsync() {
   let raw = null;
   try {

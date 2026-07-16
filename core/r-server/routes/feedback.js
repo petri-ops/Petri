@@ -12,10 +12,7 @@ const express = require('express');
 const dbMod = require('../db');
 const notify = require('../notify-feishu');
 const ipGeo = require('../helpers/ip-geo');
-// Phase B: feedbacks is a P2 table. In PG mode (BIOF3_P2_PG=1 on ECS),
-// the sync shim blocks the event loop under concurrent load and collides with
-// deasync-loopWhile (v8 crash). Use the async shim so admin list requests never
-// block or timeout.
+// Keep request-path feedback operations on the async database adapter.
 const _dbSync = dbMod.getSqliteForLegacyModules(); // for CREATE TABLE (runs once at startup)
 const dbAsync = dbMod.getAsyncDbForLegacyModules();
 
@@ -72,7 +69,7 @@ function _isAdmin(req) {
 
 module.exports = function registerFeedback(app) {
   // ---- Public: submit feedback (anonymous allowed) ----
-  // FIX_DEASYNC_RACE: async so dbAsync insert never blocks concurrent requests
+  // Use the async adapter so inserts do not block concurrent requests.
   app.post('/api/feedback', express.json({limit: '32kb'}), async (req, res) => {
     const ip = _clientIp(req);
     if (!_checkRate(ip)) {
@@ -111,8 +108,7 @@ module.exports = function registerFeedback(app) {
     const userAgent = String(req.headers['user-agent'] || '').slice(0, 500);
     const url = String(pageUrl || req.headers['referer'] || '').slice(0, 500);
 
-    // Async insert: feedbacks is a P2 table; in PG mode _dbSync triggers deasync which
-    // collides with concurrent requests. Use dbAsync for the insert.
+    // Insert through the async adapter used by request-path feedback operations.
     let feedbackId = null;
     try {
       const insertResult = await dbAsync.prepare(

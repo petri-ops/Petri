@@ -51,7 +51,7 @@ const R_SERVER = resolveRSserver();
 const SHARED_BACKEND = resolveSharedBackend();
 const pluginLoader = require(path.join(R_SERVER, 'plugin-loader.js'));
 const config = require(path.join(R_SERVER, 'config.js'));
-// db.js 双驱动（SQLite/PG）：callTool 跑完写 tool_jobs 记录（方案 C，agent-led Task 1）
+// callTool 跑完后通过 db.js 写入 tool_jobs 记录（方案 C，agent-led Task 1）
 let db = null;
 try {
   db = require(path.join(R_SERVER, 'db.js'));

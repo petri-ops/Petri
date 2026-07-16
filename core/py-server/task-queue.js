@@ -1,7 +1,6 @@
 /**
  * Task Queue — Async polling queue for Python tasks.
- * All blocking removed; drainQueue is fully async so executeTask's
- * promises resolve normally even with PG queries in the same tick.
+ * drainQueue is fully async so task execution does not block queue polling.
  */
 
 const config = require('./config');
@@ -47,8 +46,6 @@ function submitTask({ type, params, ossInputUrl, parentTaskId }) {
       void drainQueue();
     });
   }
-  // api / platform enqueue: biof3-py-worker claims from PostgreSQL (engine=Python)
-
   return { taskId, status: 'pending', execution };
 }
 
@@ -61,8 +58,6 @@ async function drainQueue() {
   if (drainRunning) return;
   drainRunning = true;
   try {
-    // If PG mode: claimPendingTask is sync via deasync. Wrap it.
-    // deasync blocks only until the already-connected pool responds (~a few ms).
     let running;
     try {
       running = taskStore.getRunningCount();
@@ -83,8 +78,7 @@ async function drainQueue() {
       }
       if (!task) break;
 
-      // Fire-and-forget: executeTask runs async, so drainQueue loop is free to
-      // handle its own synchronous PG calls (via deasync) without being blocked.
+      // Fire-and-forget: executeTask runs async, leaving the queue loop available.
       void executeTask(task).then(() => {
         void drainQueue();
       });
