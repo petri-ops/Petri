@@ -1,9 +1,8 @@
 /**
  * helpers/docs-index.js — DOCS_INDEX_v1
  *
- * 桌面版（execMode='local'）：优先从本地文件读取 copilot-index.json
+ * 桌面版优先从本地文件读取 copilot-index.json
  *   （内容同步时下载到 site 目录），fallback 到网络。
- * Web 版：走原有网络候选 URL 列表。
  */
 
 const fs = require('fs');
@@ -34,16 +33,7 @@ function _getLocalIndexPaths() {
   return paths;
 }
 
-function _isLocalMode() {
-  try {
-    return require('../config').execMode === 'local';
-  } catch {
-    return false;
-  }
-}
-
 function _readLocalIndex() {
-  if (!_isLocalMode()) return null;
   for (const p of _getLocalIndexPaths()) {
     try {
       if (fs.existsSync(p)) {

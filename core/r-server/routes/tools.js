@@ -23,11 +23,11 @@ const {createToolsPlatformRoutes} = require('./tools-platform');
 // tool_jobs table must exist (006_tool_jobs.sql migration).
 const db = dbMod.getAsyncDbForLegacyModules();
 
-// 桌面版（execMode=local）：job 目录放本地用户数据目录下；
-// web 版（docker）：Dell 宿主机路径，挂载到容器 /app/data/biof3-tool-jobs
-const JOBS_DIR = config.execMode === 'local'
-  ? path.join(config.localResultsDir || path.join(require('os').homedir(), 'Documents', 'BioF3-Local', 'results'), 'tool-jobs')
-  : '/mnt/storage_16tb/omichub/biof3-tool-jobs';
+// 桌面 job 目录位于本地用户数据目录。
+const JOBS_DIR = path.join(
+  config.localResultsDir || path.join(require('os').homedir(), 'Documents', 'BioF3-Local', 'results'),
+  'tool-jobs'
+);
 const SCRIPTS_DIR = path.join(__dirname, '..', 'tool-scripts');
 /** Legacy static demo dirs — off by default (BIOF3_TOOL_DEMO_DISABLED=1). Demo = tool_jobs.is_public. */
 const TOOL_DEMO_RESULTS_DIR = config.toolDemoResultsDir || '';

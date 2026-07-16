@@ -2,7 +2,7 @@
  * Electron 主进程入口 — BioF3 本地桌面版
  *
  * 职责：
- * 1. 设置桌面版环境变量（BIOF3_EXEC_MODE=local 等）
+ * 1. 设置桌面版本地存储、运行时和用户数据环境变量
  * 2. 启动 r-server + py-server（子进程 spawn，避免原生模块 V8 版本冲突）
  * 3. 启动 R plumber replot 服务（spawn 子进程）
  * 4. 加载已安装插件
@@ -401,7 +401,6 @@ function resolveRuntime(lang, userDataDir) {
 }
 
 function setupDesktopEnv(backendPorts) {
-  process.env.BIOF3_EXEC_MODE = "local";
   process.env.BIOF3_STORAGE = "local";
   process.env.BIOF3_LOCAL_MODE = "1";
   process.env.BIOF3_DESKTOP = "1";

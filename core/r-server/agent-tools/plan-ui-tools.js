@@ -250,10 +250,9 @@ async function actSelectCells(args, ctx) {
 
   // Fetch CSV — 本地 /api/files/ 走本地文件；其它 URL 走 HTTP 拉取
   const config = require('../config');
-  const IS_LOCAL = config.execMode === 'local';
   let text = '';
 
-  if (IS_LOCAL && metaUrl && metaUrl.startsWith('/api/files/')) {
+  if (metaUrl && metaUrl.startsWith('/api/files/')) {
     // 本地存储路径：/api/files/<key> → 从本地 results 目录读
     try {
       const key = metaUrl.replace('/api/files/', '');

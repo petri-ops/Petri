@@ -48,13 +48,11 @@ function canAccessJob(req, job) {
 }
 
 function jobsDir() {
-  return config.execMode === 'local'
-    ? path.join(
-        config.localResultsDir ||
-          path.join(require('os').homedir(), 'Documents', 'BioF3-Local', 'results'),
-        'tool-jobs'
-      )
-    : '/mnt/storage_16tb/omichub/biof3-tool-jobs';
+  return path.join(
+    config.localResultsDir ||
+      path.join(require('os').homedir(), 'Documents', 'BioF3-Local', 'results'),
+    'tool-jobs'
+  );
 }
 
 function desktopRootFromHere() {

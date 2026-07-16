@@ -82,9 +82,7 @@ try {
 }
 
 const PORT = process.env.R_SERVER_PORT || 3003;
-const TEMP_DIR = config.execMode === 'local'
-  ? (config.tempDir || '/tmp/biof3-tmp')
-  : '/mnt/storage_16tb/omichub/biof3-tmp'; // Shared with Docker container
+const TEMP_DIR = config.tempDir || '/tmp/biof3-tmp';
 
 // Ensure temp directory exists
 if (!fs.existsSync(TEMP_DIR)) {

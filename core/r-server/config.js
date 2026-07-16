@@ -13,8 +13,6 @@ const config = {
   workerId: process.env.BIOF3_WORKER_ID || require('os').hostname(),
 
   // ── 桌面版模式（Electron 本地运行）──────────────────────────
-  // execMode: 桌面版恒为 'local'（直接调内嵌 Rscript，不走 docker）
-  execMode: process.env.BIOF3_EXEC_MODE || 'local',
   // storageMode: 'local'（桌面版，本地文件系统）
   storageMode: process.env.BIOF3_STORAGE || 'local',
   // localMode: 桌面版跳过 JWT 验证，返回固定 local-user

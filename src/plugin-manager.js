@@ -66,7 +66,7 @@ try {
 }
 
 // 断点1（分仓前置）：注入 config 让执行器/storage 读到真 config（不走 env fallback）。
-// plugin-manager 在 Electron 主进程跑，调执行器做 runtime 校验/装包，需要正确 execMode/rHome。
+// plugin-manager 在 Electron 主进程跑，调执行器做 runtime 校验/装包，需要正确 rHome。
 // ai-usage 桌面版主进程不写库，不注入（helper no-op）。
 try {
   require(SHARED_BACKEND_DIR).configure({
