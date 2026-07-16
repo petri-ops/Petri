@@ -544,10 +544,11 @@ test('runToolJobs skips null jobs returned by getToolJobFn', () => {
 
 test('listAgentWorkflowTemplates returns all templates', () => {
   const result = listAgentWorkflowTemplates(['deseq2', 'volcano-plot', 'enrichment']);
-  assert.ok(result.length >= 3);
+  assert.equal(result.length, 2);
   const ids = result.map((t) => t.id);
   assert.ok(ids.includes('bulk-rna-core'));
-  assert.ok(ids.includes('single-cell-core'));
+  assert.ok(ids.includes('deg-result-refinement'));
+  assert.equal(ids.includes('single-cell-core'), false);
 });
 
 test('listAgentWorkflowTemplates marks template unavailable when tools are missing', () => {
