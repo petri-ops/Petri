@@ -1,19 +1,17 @@
 /**
  * tools-router.js (W2-A, 2026-05-28)
  *
- * py-server 上的 /api/tools/* 端点 — 与 r-server 的 /api/tools/* 接口对齐，
- * 让前端 `getApiPrefix('python')` + `Authorization: Bearer <JWT>` 工作。
+ * py-server 上的 /api/tools/* 端点，与 r-server 的 /api/tools/* 接口对齐。
  *
  * 关键设计：
- * - JWT 共用 r-server 的 JWT_SECRET（来自 /etc/biof3.env）
- * - tool_jobs 表写入 r-server 的 biof3.db（跨进程，better-sqlite3 + WAL 安全）
- * - 输出文件路径与 r-server 完全一致：/mnt/storage_16tb/omichub/biof3-tool-jobs/{jobId}/output/
- * - 容器内访问路径：/app/data/biof3-tool-jobs/{jobId}（共享 volume mount）
+ * - JWT 与 r-server 共用本地认证配置
+ * - tool_jobs 表写入 r-server 的 SQLite（跨进程 WAL）
+ * - 输出写入本地 project sandbox 或 BioF3-Local/results/tool-jobs
  *
  * 与 r-server `routes/tools.js` 的差异：
  * - 只处理 `lang: 'python'` 的工具
  * - tool_id → task type 映射通过 toolRegistry 提供
- * - 容器是 biof3_python_1（不是 omichub_react_backend_1）
+ * - 直接调用内嵌 Python runtime
  */
 
 const _express = require('express');
@@ -35,11 +33,8 @@ const {
 const JOBS_DIR = config.localResultsDir
   ? require('path').join(config.localResultsDir, 'tool-jobs')
   : require('path').join(require('os').homedir(), 'Documents', 'BioF3-Local', 'results', 'tool-jobs');
-// W4-B (2026-05-29): 取消 hard wall-clock timeout（与 task-queue / r-server task-manager 的
-// W4-A "取消 task hard timeout" 决策对齐）。科学计算（Tangram CPU 训练 / cell2location /
-// LIANA permutation）合理时长不该被 10 分钟墙钟倒逼妥协 —— 之前 spatial-deconv 在 epoch ~100
-// 被 10min timeout 砍断，产出空结果却被误标 completed。容器自身的 8g/4cpu/2000pids 限制 +
-// pm2 已防失控进程。保留 PY_TOOL_TIMEOUT_MS env override 给 CI / 特殊场景。
+// 科学计算可能长时间运行；默认不设 hard wall-clock timeout。
+// 保留 PY_TOOL_TIMEOUT_MS 给 CI 或特殊场景显式限制。
 const TOOL_TIMEOUT_MS = parseInt(process.env.PY_TOOL_TIMEOUT_MS || '0', 10) || undefined;
 
 try {
@@ -69,7 +64,6 @@ function safeJoinUnder(baseDir, ...segments) {
 //   - With projectId: results land in <workspace>/results/jobs/<jobId> (the project
 //     sandbox). The client only submits projectId; the path is resolved server-side.
 //   - Without projectId: fall back to the global JOBS_DIR (legacy / back-compat).
-// 本地执行：容器路径即宿主路径，解析出的目录直接使用。
 function resolveRunLayout({ jobId, projectId, userId }) {
   if (projectId) {
     const layout = resolveProjectRunLayout({
@@ -83,16 +77,12 @@ function resolveRunLayout({ jobId, projectId, userId }) {
     return {
       jobDir: layout.jobRoot,
       outputDir: layout.outputDir,
-      containerJobDir: layout.jobRoot,
-      containerOutputDir: `${layout.jobRoot}/output`,
     };
   }
   const jobDir = path.join(JOBS_DIR, jobId);
   return {
     jobDir,
     outputDir: path.join(jobDir, 'output'),
-    containerJobDir: jobDir,
-    containerOutputDir: `${jobDir}/output`,
   };
 }
 
@@ -238,8 +228,7 @@ function getToolMeta(toolId) {
 // ============================================================
 // Job execution
 // Mirrors r-server/routes/tools.js executeJob, but:
-// - container = biof3_python_1
-// - script generated dynamically by task-scripts.js (passes via stdin)
+// - script generated dynamically by python-tool-script-generator.js
 // - manifest.json output expected (same as r-server convention)
 // ============================================================
 
@@ -257,7 +246,6 @@ function executeJob({ jobId, toolId, taskType, params, layout }) {
 
   // W2 (2026-05-28): 复制报告模板到 jobDir（与 r-server routes/tools.js 行为一致）
   // 模板路径：/opt/biof3-r-server/tool-scripts/{toolId}-report-template.html
-  // 容器内 mount 路径：模板放在 jobDir，Python 脚本读 ../report-template.html
   const reportTemplateSrc = `/opt/biof3-r-server/tool-scripts/${toolId}-report-template.html`;
   if (fs.existsSync(reportTemplateSrc)) {
     try {
@@ -267,23 +255,19 @@ function executeJob({ jobId, toolId, taskType, params, layout }) {
     }
   }
 
-  const containerJobDir = runLayout.containerJobDir;
-  const containerOutputDir = runLayout.containerOutputDir;
-
   let pyScript;
   try {
-    const { generatePyScript } = require('./task-scripts');
-    pyScript = generatePyScript({
+    const { generatePythonToolScript } = require('./python-tool-script-generator');
+    pyScript = generatePythonToolScript({
       type: taskType,
       params: params || {},
       ossInputUrl: null, // tools 是 base64 上传，不走 OSS
-      containerWorkDir: containerOutputDir, // 输出直接写到 jobDir/output
+      outputDir,
     });
   } catch (e) {
     return markJobFailed(jobId, 'Script generation failed: ' + e.message);
   }
 
-  // Write script to host-side path (visible inside container at containerJobDir/run-script.py)
   const scriptHostPath = path.join(jobDir, 'run-script.py');
   try {
     fs.writeFileSync(scriptHostPath, pyScript);
@@ -291,14 +275,12 @@ function executeJob({ jobId, toolId, taskType, params, layout }) {
     return markJobFailed(jobId, 'Script write failed: ' + e.message);
   }
 
-  const containerScriptPath = `${containerJobDir}/run-script.py`;
-
   logger.info(`[tools] Executing python job`, { jobId, toolId, taskType });
 
   // 本地执行：直接调内嵌 python
   const { getExecutor } = require('../shared-backend/executors');
   const executor = getExecutor('python');
-  const spawnCmd = executor.buildSpawnCommand(containerScriptPath, jobDir, {});
+  const spawnCmd = executor.buildSpawnCommand(scriptHostPath, jobDir, {});
   const execCmd = spawnCmd.cmd;
   const execArgs = spawnCmd.args;
 

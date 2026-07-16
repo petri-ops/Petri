@@ -10,12 +10,12 @@
  */
 
 
-function generatePyScript({ type, params, ossInputUrl, containerWorkDir, parentCachePath }) {
+function generatePythonToolScript({ type, params, ossInputUrl, outputDir, parentCachePath }) {
   const progressHelper = `
 import json, os
 
 def report_progress(pct, msg):
-    with open(os.path.join("${containerWorkDir}", "progress.json"), "w") as f:
+    with open(os.path.join("${outputDir}", "progress.json"), "w") as f:
         json.dump({"progress": pct, "message": msg}, f)
 
 report_progress(5, "初始化环境...")
@@ -23,49 +23,49 @@ report_progress(5, "初始化环境...")
 
   switch (type) {
     case 'scanpy_standard':
-      return generateScanpyScript({ params, ossInputUrl, containerWorkDir }, progressHelper);
+      return generateScanpyScript({ params, ossInputUrl, outputDir }, progressHelper);
     case 'scanpy_integration':
       return generateScanpyIntegrationScript(
-        { params, ossInputUrl, containerWorkDir },
+        { params, ossInputUrl, outputDir },
         progressHelper
       );
     // W1-9: 'spatial' 是 'spatial_standard' 的旧别名（向后兼容），共用 generator
     case 'spatial':
     case 'spatial_standard':
       return generateSpatialStandardScript(
-        { params, ossInputUrl, containerWorkDir },
+        { params, ossInputUrl, outputDir },
         progressHelper
       );
     // W4-A (2026-05-28): spatial_recluster — sub-cluster a chosen leiden cluster from parent's result_spatial.h5ad
     case 'spatial_recluster':
       return generateSpatialReclusterScript(
-        { params, ossInputUrl, containerWorkDir, parentCachePath },
+        { params, ossInputUrl, outputDir, parentCachePath },
         progressHelper
       );
     // W4-A (2026-05-28): spatial_svg — multi-method spatially variable genes (Moran's I + Geary's C + Sepal)
     case 'spatial_svg':
       return generateSpatialSvgScript(
-        { params, ossInputUrl, containerWorkDir, parentCachePath },
+        { params, ossInputUrl, outputDir, parentCachePath },
         progressHelper
       );
     // W4-A (2026-05-28): spatial_deconv — Tangram-based cell type deconvolution per spot
     case 'spatial_deconv':
       return generateSpatialDeconvScript(
-        { params, ossInputUrl, containerWorkDir, parentCachePath },
+        { params, ossInputUrl, outputDir, parentCachePath },
         progressHelper
       );
     // W4-A (2026-05-29): spatial_lr — LIANA spatial-aware ligand-receptor analysis
     case 'spatial_lr':
       return generateSpatialLrScript(
-        { params, ossInputUrl, containerWorkDir, parentCachePath },
+        { params, ossInputUrl, outputDir, parentCachePath },
         progressHelper
       );
     case 'scvi_annotation':
-      return generateScVIScript({ params, ossInputUrl, containerWorkDir }, progressHelper);
+      return generateScVIScript({ params, ossInputUrl, outputDir }, progressHelper);
     case 'ml_classifier':
-      return generateMLScript({ params, ossInputUrl, containerWorkDir }, progressHelper);
+      return generateMLScript({ params, ossInputUrl, outputDir }, progressHelper);
     case 'cellrank':
-      return generateCellRankScript({ params, ossInputUrl, containerWorkDir }, progressHelper);
+      return generateCellRankScript({ params, ossInputUrl, outputDir }, progressHelper);
     default:
       return `${progressHelper}\nraise ValueError("未知任务类型: ${type}")`;
   }
@@ -75,7 +75,7 @@ report_progress(5, "初始化环境...")
 // Scanpy Standard Pipeline
 // ============================================================
 
-function generateScanpyScript({ params, ossInputUrl, containerWorkDir }, progressHelper) {
+function generateScanpyScript({ params, ossInputUrl, outputDir }, progressHelper) {
   const {
     minGenes = 200,
     maxGenes = 5000,
@@ -93,8 +93,8 @@ import matplotlib.pyplot as plt
 import json, os, urllib.request
 
 ${progressHelper}
-os.chdir("${containerWorkDir}")
-sc.settings.figdir = "${containerWorkDir}"
+os.chdir("${outputDir}")
+sc.settings.figdir = "${outputDir}"
 sc.settings.set_figure_params(dpi=150, frameon=False)
 
 # --- 1. Load data ---
@@ -208,7 +208,7 @@ print("TASK_COMPLETE")
 // ============================================================
 
 function generateScanpyIntegrationScript(
-  { params, ossInputUrl, containerWorkDir },
+  { params, ossInputUrl, outputDir },
   progressHelper
 ) {
   const { method = 'harmony', batchKey = 'batch', nPCs = 30, resolution = 0.5 } = params || {};
@@ -221,7 +221,7 @@ import matplotlib.pyplot as plt
 import json, os, urllib.request
 
 ${progressHelper}
-os.chdir("${containerWorkDir}")
+os.chdir("${outputDir}")
 sc.settings.set_figure_params(dpi=150, frameon=False)
 
 report_progress(10, "下载数据...")
@@ -282,7 +282,7 @@ print("TASK_COMPLETE")
 // Spatial Transcriptomics (Squidpy)
 // ============================================================
 
-function generateSpatialStandardScript({ params, ossInputUrl, containerWorkDir }, progressHelper) {
+function generateSpatialStandardScript({ params, ossInputUrl, outputDir }, progressHelper) {
   const {
     nPCs = 30,
     resolution = 0.5,
@@ -294,7 +294,7 @@ function generateSpatialStandardScript({ params, ossInputUrl, containerWorkDir }
 
   // 双输入模式：
   // - ossInputUrl 提供 → 走 OSS 下载（单细胞平台 / 内部任务调用）
-  // - 否则 → 期望 input.h5ad 已在 containerWorkDir（/tools 页面 base64 上传 + 后端解码）
+  // - 否则 → 期望 input.h5ad 已在 outputDir（/tools 页面 base64 上传 + 后端解码）
   // 注意：/tools 页面的文件按 input id 命名（如 'adata'），无扩展名 — 与 r-server 行为一致
   const inputBlock = ossInputUrl
     ? `report_progress(10, "下载数据...")
@@ -304,7 +304,7 @@ urllib.request.urlretrieve("${ossInputUrl}", "input.h5ad")`
 # /tools 页面：前端 base64 上传后已写到 jobDir 根目录
 # 文件名是 input id（如 'adata'，无扩展名）。优先按 input id 找，再按 *.h5ad/*.h5 兜底
 import shutil
-parent_dir = os.path.dirname("${containerWorkDir}".rstrip("/"))  # jobDir
+parent_dir = os.path.dirname("${outputDir}".rstrip("/"))  # jobDir
 candidates = []
 for name in ["adata", "input.h5ad", "input.h5"]:
     p = os.path.join(parent_dir, name)
@@ -316,7 +316,7 @@ if not candidates:
 if not candidates:
     raise FileNotFoundError(f"未在 {parent_dir} 找到 h5ad 输入。期望: input id 'adata' 或文件后缀 .h5ad/.h5")
 src = candidates[0]
-dst = os.path.join("${containerWorkDir}", "input.h5ad")
+dst = os.path.join("${outputDir}", "input.h5ad")
 if src != dst:
     shutil.copy(src, dst)
 print(f"  使用输入文件: {src} ({os.path.getsize(src)/1024/1024:.1f} MB)")`;
@@ -339,7 +339,7 @@ except Exception:
     pass
 
 ${progressHelper}
-os.chdir("${containerWorkDir}")
+os.chdir("${outputDir}")
 sc.settings.set_figure_params(dpi=150, frameon=False, facecolor="white")
 
 ${inputBlock}
@@ -542,7 +542,7 @@ report_progress(98, "生成 HTML 报告...")
 import base64
 
 # 找模板 — jobDir 优先（用户上传/r-server 复制），否则全局位置
-parent_dir = os.path.dirname("${containerWorkDir}".rstrip("/"))
+parent_dir = os.path.dirname("${outputDir}".rstrip("/"))
 template_candidates = [
     os.path.join(parent_dir, "report-template.html"),
     "/app/data/biof3-tool-jobs/_templates/spatial-standard-report-template.html",  # py 容器内备选
@@ -562,7 +562,7 @@ if template_path:
         # 1) 把 PNG 图替换成 base64 内嵌
         for fname in ["plot_001_spatial_clusters.png", "plot_002_umap.png",
                        "plot_003_nhood_enrichment.png", "plot_004_top_svgs.png"]:
-            fpath = fname  # 当前 cwd 就是 containerWorkDir
+            fpath = fname  # 当前 cwd 就是 outputDir
             if os.path.isfile(fpath):
                 with open(fpath, "rb") as f:
                     b64 = base64.b64encode(f.read()).decode("ascii")
@@ -658,7 +658,7 @@ print("TASK_COMPLETE")
 // ============================================================
 
 function generateSpatialReclusterScript(
-  { params, ossInputUrl, containerWorkDir, parentCachePath },
+  { params, ossInputUrl, outputDir, parentCachePath },
   progressHelper
 ) {
   const {
@@ -697,7 +697,7 @@ except Exception:
     pass
 
 ${progressHelper}
-os.chdir("${containerWorkDir}")
+os.chdir("${outputDir}")
 sc.settings.set_figure_params(dpi=150, frameon=False, facecolor="white")
 
 ${loadBlock}
@@ -934,7 +934,7 @@ print("TASK_COMPLETE")
 // ============================================================
 
 function generateSpatialSvgScript(
-  { params, ossInputUrl, containerWorkDir, parentCachePath },
+  { params, ossInputUrl, outputDir, parentCachePath },
   progressHelper
 ) {
   const {
@@ -958,7 +958,7 @@ adata = sc.read_h5ad("input.h5ad")
 print(f"  loaded from OSS: {adata.n_obs} spots × {adata.n_vars} genes")`
       : `report_progress(10, "查找 /tools 上传的 .h5ad 文件 ...")
 import shutil, glob
-parent_dir = os.path.dirname("${containerWorkDir}".rstrip("/"))  # jobDir
+parent_dir = os.path.dirname("${outputDir}".rstrip("/"))  # jobDir
 candidates = []
 for name in ["adata", "input.h5ad", "input.h5"]:
     p = os.path.join(parent_dir, name)
@@ -969,7 +969,7 @@ if not candidates:
 if not candidates:
     raise FileNotFoundError(f"未在 {parent_dir} 找到 h5ad 输入。期望 input id 'adata' 或文件后缀 .h5ad/.h5")
 src = candidates[0]
-dst = os.path.join("${containerWorkDir}", "input.h5ad")
+dst = os.path.join("${outputDir}", "input.h5ad")
 if src != dst:
     shutil.copy(src, dst)
 adata = sc.read_h5ad(dst)
@@ -992,7 +992,7 @@ except Exception:
     pass
 
 ${progressHelper}
-os.chdir("${containerWorkDir}")
+os.chdir("${outputDir}")
 sc.settings.set_figure_params(dpi=150, frameon=False, facecolor="white")
 
 ${loadBlock}
@@ -1333,7 +1333,7 @@ with open("summary.json", "w") as f:
 # ============================================================
 report_progress(98, "生成 HTML 报告 + manifest.json ...")
 import base64
-parent_dir = os.path.dirname("${containerWorkDir}".rstrip("/"))
+parent_dir = os.path.dirname("${outputDir}".rstrip("/"))
 template_candidates = [
     os.path.join(parent_dir, "report-template.html"),
     "/app/data/biof3-tool-jobs/_templates/spatial-svg-report-template.html",
@@ -1440,7 +1440,7 @@ print("TASK_COMPLETE")
 // ============================================================
 
 function generateSpatialDeconvScript(
-  { params, ossInputUrl, containerWorkDir, parentCachePath },
+  { params, ossInputUrl, outputDir, parentCachePath },
   progressHelper
 ) {
   const {
@@ -1463,7 +1463,7 @@ adata_st = sc.read_h5ad("input.h5ad")
 print(f"  spatial: {adata_st.n_obs} spots × {adata_st.n_vars} genes")`
       : `report_progress(10, "查找 /tools 上传的 .h5ad 文件 ...")
 import shutil, glob
-parent_dir = os.path.dirname("${containerWorkDir}".rstrip("/"))  # jobDir
+parent_dir = os.path.dirname("${outputDir}".rstrip("/"))  # jobDir
 candidates = []
 for name in ["adata", "input.h5ad", "input.h5"]:
     p = os.path.join(parent_dir, name)
@@ -1474,7 +1474,7 @@ if not candidates:
 if not candidates:
     raise FileNotFoundError(f"未在 {parent_dir} 找到 h5ad 输入。期望 input id 'adata' 或文件后缀 .h5ad/.h5")
 src = candidates[0]
-dst = os.path.join("${containerWorkDir}", "input.h5ad")
+dst = os.path.join("${outputDir}", "input.h5ad")
 if src != dst:
     shutil.copy(src, dst)
 adata_st = sc.read_h5ad(dst)
@@ -1499,7 +1499,7 @@ except Exception:
     pass
 
 ${progressHelper}
-os.chdir("${containerWorkDir}")
+os.chdir("${outputDir}")
 sc.settings.set_figure_params(dpi=150, frameon=False, facecolor="white")
 
 ${loadBlock}
@@ -1815,7 +1815,7 @@ with open("summary.json", "w") as f:
 # ============================================================
 report_progress(98, "生成 HTML 报告 + manifest.json ...")
 import base64
-parent_dir = os.path.dirname("${containerWorkDir}".rstrip("/"))
+parent_dir = os.path.dirname("${outputDir}".rstrip("/"))
 template_candidates = [
     os.path.join(parent_dir, "report-template.html"),
     "/app/data/biof3-tool-jobs/_templates/spatial-deconv-report-template.html",
@@ -1911,7 +1911,7 @@ print("TASK_COMPLETE")
 // ============================================================
 
 function generateSpatialLrScript(
-  { params, ossInputUrl, containerWorkDir, parentCachePath },
+  { params, ossInputUrl, outputDir, parentCachePath },
   progressHelper
 ) {
   const {
@@ -1935,7 +1935,7 @@ adata = sc.read_h5ad("input.h5ad")
 print(f"  loaded from OSS: {adata.n_obs} spots × {adata.n_vars} genes")`
       : `report_progress(10, "查找 /tools 上传的 .h5ad 文件 ...")
 import shutil, glob
-parent_dir = os.path.dirname("${containerWorkDir}".rstrip("/"))  # jobDir
+parent_dir = os.path.dirname("${outputDir}".rstrip("/"))  # jobDir
 candidates = []
 for name in ["adata", "input.h5ad", "input.h5"]:
     p = os.path.join(parent_dir, name)
@@ -1946,7 +1946,7 @@ if not candidates:
 if not candidates:
     raise FileNotFoundError(f"未在 {parent_dir} 找到 h5ad 输入。期望 input id 'adata' 或文件后缀 .h5ad/.h5")
 src = candidates[0]
-dst = os.path.join("${containerWorkDir}", "input.h5ad")
+dst = os.path.join("${outputDir}", "input.h5ad")
 if src != dst:
     shutil.copy(src, dst)
 adata = sc.read_h5ad(dst)
@@ -1971,7 +1971,7 @@ except Exception:
     pass
 
 ${progressHelper}
-os.chdir("${containerWorkDir}")
+os.chdir("${outputDir}")
 sc.settings.set_figure_params(dpi=150, frameon=False, facecolor="white")
 
 ${loadBlock}
@@ -2202,7 +2202,7 @@ with open("summary.json", "w") as f:
 # ============================================================
 report_progress(98, "生成 HTML 报告 + manifest.json ...")
 import base64
-parent_dir = os.path.dirname("${containerWorkDir}".rstrip("/"))
+parent_dir = os.path.dirname("${outputDir}".rstrip("/"))
 template_candidates = [
     os.path.join(parent_dir, "report-template.html"),
     "/app/data/biof3-tool-jobs/_templates/spatial-lr-report-template.html",
@@ -2284,7 +2284,7 @@ print("TASK_COMPLETE")
 // scVI Annotation
 // ============================================================
 
-function generateScVIScript({ params, ossInputUrl, containerWorkDir }, progressHelper) {
+function generateScVIScript({ params, ossInputUrl, outputDir }, progressHelper) {
   const { nLatent = 10, nEpochs = 100, _referenceLabels = 'cell_type' } = params || {};
 
   return `
@@ -2295,7 +2295,7 @@ import matplotlib.pyplot as plt
 import json, os, urllib.request
 
 ${progressHelper}
-os.chdir("${containerWorkDir}")
+os.chdir("${outputDir}")
 sc.settings.set_figure_params(dpi=150, frameon=False)
 
 report_progress(10, "下载数据...")
@@ -2380,7 +2380,7 @@ print("TASK_COMPLETE")
 // ML Classifier (marker-based cell type prediction)
 // ============================================================
 
-function generateMLScript({ params, ossInputUrl, containerWorkDir }, progressHelper) {
+function generateMLScript({ params, ossInputUrl, outputDir }, progressHelper) {
   const { model = 'random_forest', targetCol = 'cell_type', testSize = 0.2 } = params || {};
 
   return `
@@ -2396,7 +2396,7 @@ import seaborn as sns
 import json, os, urllib.request
 
 ${progressHelper}
-os.chdir("${containerWorkDir}")
+os.chdir("${outputDir}")
 
 report_progress(10, "下载数据...")
 urllib.request.urlretrieve("${ossInputUrl}", "input.h5ad")
@@ -2466,7 +2466,7 @@ print("TASK_COMPLETE")
 // CellRank (fate mapping)
 // ============================================================
 
-function generateCellRankScript({ params, ossInputUrl, containerWorkDir }, progressHelper) {
+function generateCellRankScript({ params, ossInputUrl, outputDir }, progressHelper) {
   const { nStates = 3, clusterKey = 'leiden' } = params || {};
 
   return `
@@ -2477,7 +2477,7 @@ import matplotlib.pyplot as plt
 import json, os, urllib.request
 
 ${progressHelper}
-os.chdir("${containerWorkDir}")
+os.chdir("${outputDir}")
 sc.settings.set_figure_params(dpi=150, frameon=False)
 
 report_progress(10, "下载数据...")
@@ -2524,4 +2524,4 @@ print("TASK_COMPLETE")
 `;
 }
 
-module.exports = { generatePyScript };
+module.exports = { generatePythonToolScript };
