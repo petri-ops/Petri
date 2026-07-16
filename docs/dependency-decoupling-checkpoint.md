@@ -51,10 +51,9 @@
 
 ### #3d — 移除 docker 执行分支（`c464ea8`，约 -483 行）
 
-- 桌面直接调内嵌 R/Python（`execMode=local`），docker exec 是 web/ECS 遗留。
+- 桌面直接调内嵌 R/Python；docker exec 是 web/ECS 遗留。
 - r/py executor 改为纯本地；`tools-executor.js` / `r-compute.js` / `py-pool.js` / `py-server/server.js` / `task-queue.js` / `tools-router.js` 全部剥离 docker 分支。
-- config：`execMode` 默认改 `local`；删除 `dockerExecArgs`/`rContainer`/`rExecUser`/`pyContainer` 及失效的 `effectiveContainer*` getter；简化 `mkdirSandbox`；config-helper fallback 改本地。
-- **刻意保留**：`execMode` 字段（恒 `local`）、`containerTempDir`/`containerCacheDir`（execution-context 的 canonical 路径抽象，有测试）、`normalizeExecutionMode` 的 docker→container 映射（纯映射函数，有测试）。
+- 该增量先把 `execMode` 默认改为 `local`，并删除 `dockerExecArgs`/`rContainer`/`rExecUser`/`pyContainer` 及失效 getter；后续 #3g 已把模式字段与 container 命名彻底移除。
 
 ### #3e — A 档低风险残留清理（`065a628` / `e190935` / `66a0f31` / `7492583`）
 
@@ -64,10 +63,17 @@
 
 ### #3f — runMode 去耦（`1900b0f` / `be4d42f` / `b833590`）
 
-- r-server / py-server 的 `runMode` 固定为 `all`，删除 `BIOF3_RUN_MODE` 配置入口。
+- r-server / py-server 先把 `runMode` 固定为 `all` 并删除 `BIOF3_RUN_MODE` 配置入口；后续 #3g 已删除无人读取的固定字段。
 - 删除 platform/api/worker 启动、路由、Agent prompt、zombie recovery 与 Python queue drain 分支，桌面恒走本地单进程路径。
 - `task-store` 在此前 SQLite 化后已无 worker 模式分支，无需额外修改。
-- **刻意保留**：execution-context 中的 `runMode` metadata 与通用 remote 映射测试；是否随 `execMode` 一起移除属于下一项独立决策。
+
+### #3g — 执行模式与 canonical 路径彻底收口（`44830b5` / `be0c46d` / `ba65aec` / `8feca10`）
+
+- 删除主进程 `BIOF3_EXEC_MODE` 注入、两端 config 与 config-helper 的 `execMode`，并展开所有恒真本地分支。
+- execution-context 升级到 v2：删除 local/container/remote 归一化器及 `execMode`/`runMode`/重复 `mode` metadata，adapter 恒为 local；保留 canonical path 与 artifact metadata 能力。
+- 删除最终无人读取的 `runMode` 固定字段；生产代码不再存在运行模式开关。
+- `containerTempDir` 正名为 `canonicalTaskRoot=/work/biof3/tasks`；删除 `containerCacheDir`，Python 父缓存复用改用真实本地文件路径。
+- R/Python 默认临时目录回归 `/tmp` 本地路径，Python cache 默认跟随 `BIOF3_PY_TEMP_DIR`。
 
 ### 实机验证
 
@@ -80,8 +86,8 @@
 | 核心后端 | 仓库内 `core/`，无 submodule |
 | 存储 | 本地文件（`LocalFileStorage`，`BIOF3_STORAGE=local`） |
 | 数据库 | SQLite（`better-sqlite3`） |
-| 执行 | 内嵌 R/Python 本地执行（`execMode=local`） |
-| 运行模式 | `runMode=all`（单进程本地全能） |
+| 执行 | 内嵌 R/Python 本地执行，无模式开关 |
+| 运行形态 | 单进程本地全能，无 platform/api/worker 分支 |
 | 依赖 | server 端不再有 `ali-oss`/`pg`/`deasync`；根 `ali-oss` 仅发布脚本用 |
 
 ## 下阶段建议（继续规范化 / 清理）
@@ -94,15 +100,10 @@
 
 1. **文档收尾**：`docs/archive/checkpoints/project-result-sandbox-plan.md`（已归档）大量 `vendor/biof3-core/...` 历史路径 + 已删的 `db-core-pg.js`；`docs/harness-roadmap.md`「vendor 同步稳定」；`docs/first-success-path.md` 的 `cd vendor/biof3-core/r-server`。属历史记录，可加顶部横幅说明「已去 vendor 化，路径 `vendor/biof3-core/X` = `core/X`；PG 已移除」而非逐行重写。
 
-### B. 中风险、进一步去 web 化（建议独立成一轮）
-
-2. **`execMode` 字段彻底移除**：目前恒为 `local` 的 vestigial 字段。彻底删需同时改 `execution-context.js` 的 metadata 与其测试 fixture，收益是"完全规范化"，风险中等。
-3. **`containerTempDir`/`containerCacheDir` 语义正名**：现仅作 canonical 路径根，建议重命名为 `canonicalRoot` 之类，去掉"container"误导。
-
 ### C. 待工作流稳定后（用户已确认方向）
 
-4. **py-server 单细胞/空间异步 task 引擎**（`task-queue`/`task-store`/`task-scripts`/`tools-router` 的 `/api/task` + `ossInputUrl` 路径）是 web 时代产线。用户已说明单细胞工具会重写，届时可整体移除，替换为插件化工作流。
-5. **早期 flagged 但保留的模块**：`sanitizer.js`（有测试）、`mcp/server.js`（独立可用）、`dashscope.js`（`getEmbedProvider` 默认）—— 等 P-07 模型网关落地时统一收编。
+2. **py-server 单细胞/空间异步 task 引擎**（`task-queue`/`task-store`/`task-scripts`/`tools-router` 的 `/api/task` + `ossInputUrl` 路径）是 web 时代产线。用户已说明单细胞工具会重写，届时可整体移除，替换为插件化工作流。
+3. **早期 flagged 但保留的模块**：`sanitizer.js`（有测试）、`mcp/server.js`（独立可用）、`dashscope.js`（`getEmbedProvider` 默认）—— 等 P-07 模型网关落地时统一收编。
 
 ## 不变量（清理时不得破坏）
 

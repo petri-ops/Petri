@@ -148,7 +148,7 @@ desktop/
 - **P-02 执行真相**: `run_tool → tool_job → artifact truth` 唯一执行链
 - **P-03 Harness 工作流**: `inspect → infer → select → repair → confirm → run → verify → report`
 - **P-04 Plugin SDK**: plugin.json, tool-definition.json, 输入/输出 schema
-- **P-05 Runtime 适配**: R/Python/Node 内嵌 runtime，本地执行（`execMode=local`，唯一模式）；canonical context 抽象保留
+- **P-05 Runtime 适配**: R/Python/Node 内嵌 runtime，只有本地执行且无模式开关；canonical context 抽象保留
 - **P-06 桌面集成**: Electron 主进程、IPC、构建、macOS 打包、OSS 更新
 - **P-07 模型网关**: Model Profile, Provider 注册, 流式响应, tool calling
 

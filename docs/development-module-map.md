@@ -127,7 +127,7 @@
 
 负责分析在本地内嵌运行时上的一致运行环境。
 
-- 桌面版**只有本地执行一种模式**：直接调内嵌 R / Python（`execMode=local`）。docker/容器执行分支已于 2026-07 去除（见 `dependency-decoupling-checkpoint.md`）。
+- 桌面版**只有本地执行**：直接调内嵌 R / Python，无执行模式配置字段。docker/容器执行分支及其模式开关已于 2026-07 去除（见 `dependency-decoupling-checkpoint.md`）。
 - 包含：canonical execution context（作为稳定的跨引用路径抽象保留）、R/Python/Node runtime、路径映射、跨平台 shell 与 ABI 兼容。
 - 平台差异只能停留在 adapter 层，不能渗入业务 UI 或工作流定义；未来若需远端/容器执行，只扩 adapter，不改业务。
 - 主要路径：`core/shared-backend/execution-context.js`、`core/shared-backend/executors/`、runtime helpers、`src/platform-compat.js`。

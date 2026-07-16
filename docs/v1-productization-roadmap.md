@@ -178,7 +178,7 @@ UI 不得制造第二套状态真相，模型层不得绕过确认/审计边界�
 - 缺陷在安装或 CI 阶段给出结构化诊断。
 - Agent 按 `plan → run → verify → bind → decide/recover` 单步推进。
 - 只有真实 valid artifact 能激活下游。
-- 本地内嵌运行时执行（`execMode=local`，桌面唯一模式）；canonical execution context 抽象保留，未来若需远端/容器执行只扩 adapter，不改业务。
+- 本地内嵌运行时执行（无执行模式开关）；canonical execution context 抽象保留，未来若需远端/容器执行只扩 adapter，不改业务。
 
 ### 5.3 Stage 3 验收出口
 
