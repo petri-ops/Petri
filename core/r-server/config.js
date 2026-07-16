@@ -8,9 +8,6 @@
 const path = require('path');
 
 const config = {
-  // ── 桌面版模式（Electron 本地运行）──────────────────────────
-  // localMode: 桌面版跳过 JWT 验证，返回固定 local-user
-  localMode: process.env.BIOF3_LOCAL_MODE === '1',
   // R Runtime 路径（桌面版内嵌 R 的根目录）
   rHome: process.env.BIOF3_R_HOME || '',
   // 本地结果/上传目录（桌面版用户数据目录）
@@ -24,8 +21,6 @@ const config = {
 
   // Server
   port: parseInt(process.env.R_SERVER_PORT || '3003', 10),
-  apiToken: process.env.BIOF3_API_TOKEN || 'biof3-figcode-2026',
-
   // Paths (host-side)
   tempDir: process.env.BIOF3_TEMP_DIR || '/tmp/biof3-tmp',
   dbPath: process.env.BIOF3_DB_PATH || path.join(__dirname, 'biof3.db'),

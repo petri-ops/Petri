@@ -88,19 +88,10 @@ if (!fs.existsSync(TEMP_DIR)) {
   fs.mkdirSync(TEMP_DIR, { recursive: true });
 }
 
-// Simple API token authentication
-const API_TOKEN = process.env.BIOF3_API_TOKEN || 'biof3-figcode-2026';
-const INTERNAL_TOKEN = process.env.BIOF3_INTERNAL_TOKEN || '';
-
-// Shared middleware bootstrap (CORS, JSON body, request-id, auth routes,
-// combinedAuth, module gate). Extracted to r-server/bootstrap.js so
-// platform-server can mount the same stack without duplicating inline defs.
+// Desktop middleware bootstrap (CORS, JSON body, request id, local identity,
+// module permissions).
 const { setupBootstrap } = require('./bootstrap');
-const { _rateLimiters } = setupBootstrap(app, {
-  db,
-  apiToken: API_TOKEN,
-  internalToken: INTERNAL_TOKEN,
-});
+setupBootstrap(app, { db });
 
 // MODULES_PRECEDENCE_v1 — modular routes register here, BEFORE all legacy
 // endpoints below. Express uses first-match-wins, so new versions automatically
@@ -153,7 +144,7 @@ setupAiBridge({ tempDir: TEMP_DIR });
   if (t.unref) t.unref();
 })();
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '127.0.0.1', () => {
   console.log(`🧬 BioF3 R Server running on port ${PORT}`);
   console.log(`   POST http://localhost:${PORT}/api/run`);
   console.log(`   GET  http://localhost:${PORT}/api/health`);
