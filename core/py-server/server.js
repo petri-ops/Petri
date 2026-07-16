@@ -6,11 +6,6 @@
  *
  * API:
  *   POST /api/run          — Execute Python code (fast, pooled)
- *   POST /api/task         — Submit async analysis task
- *   GET  /api/task/:id     — Poll task status
- *   GET  /api/tasks        — List recent tasks
- *   DELETE /api/task/:id   — Cancel a task
- *   GET  /api/queue-status — Monitoring
  *   GET  /api/health       — Health check
  */
 
@@ -31,9 +26,6 @@ try {
 const config = require('./config');
 const logger = require('./logger');
 const { createPool } = require('./py-pool');
-const taskStore = require('./task-store');
-const taskQueue = require('./task-queue');
-const { generatePyScript } = require('./task-scripts');
 const { getExecutor } = require('../shared-backend/executors');
 const { getPythonRuntimeExecutable } = require('../shared-backend/runtime-paths');
 
@@ -77,8 +69,6 @@ if (config.poolEnabled) {
   pyPool = createPool();
 }
 
-taskQueue.setScriptGenerator(generatePyScript);
-
 // 本地存储适配器（桌面版）
 let _storage = null;
 function getStorage() {
@@ -97,7 +87,7 @@ const app = express();
 app.use(cors());
 // W2-A: 路径相关 body limit
 // - /api/tools/* — 200mb（base64 上传大 h5ad 文件）
-// - 其他 — 1mb（fast-path /api/run / /api/task 等只接受小 JSON）
+// - 其他 — 1mb（fast-path /api/run 等只接受小 JSON）
 app.use((req, res, next) => {
   const limit = req.path.startsWith('/api/tools/') ? '200mb' : '1mb';
   express.json({ limit })(req, res, next);
@@ -135,14 +125,8 @@ function checkToken(req, res, next) {
   // W2-A: /api/tools/* uses JWT (Authorization: Bearer), not x-api-token. Let it pass through
   // to its own jwtAuthRequired middleware.
   if (req.path.startsWith('/api/tools/')) return next();
-  // W3-B (2026-05-28): /api/task* (and /api/upload) accept either Bearer JWT or x-api-token.
-  // JWT path is used by /spatial cloud-platform UI; x-api-token path is used by
-  // FigCode/internal /api/run callers. Both still require some valid credential.
-  const isUserScoped =
-    req.path === '/api/task' ||
-    req.path.startsWith('/api/task/') ||
-    req.path === '/api/tasks' ||
-    req.path === '/api/upload';
+  // /api/upload accepts either the user JWT or the internal API token.
+  const isUserScoped = req.path === '/api/upload';
   if (isUserScoped) {
     const auth = req.headers.authorization || '';
     if (auth.startsWith('Bearer ') && JWT_SECRET) {
@@ -245,14 +229,6 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     pool: pyPool ? { enabled: true, size: config.poolSize } : { enabled: false },
-  });
-});
-
-app.get('/api/queue-status', (req, res) => {
-  res.json({
-    status: 'ok',
-    queue: taskQueue.getQueueStatus(),
-    pool: pyPool ? pyPool.getStatus() : null,
   });
 });
 
@@ -383,59 +359,6 @@ finally:
   }
 });
 
-// Async tasks
-// W1-9 (2026-05-28): 加 spatial_standard 作为 'spatial' 的更明确别名（保留旧名向后兼容），
-// 同时占位 spatial_recluster / spatial_svg / spatial_deconv / spatial_lr（Wave 2/3 实现）
-const VALID_TYPES = [
-  'scanpy_standard',
-  'scanpy_integration',
-  'spatial',
-  'spatial_standard',
-  'spatial_recluster',
-  'spatial_svg',
-  'spatial_deconv',
-  'spatial_lr',
-  'scvi_annotation',
-  'ml_classifier',
-  'cellrank',
-];
-
-app.post('/api/task', (req, res) => {
-  const { type, ossInputUrl, params, parentTaskId } = req.body;
-  if (!type) return res.status(400).json({ status: 'error', error: '缺少 type' });
-  if (!VALID_TYPES.includes(type))
-    return res
-      .status(400)
-      .json({ status: 'error', error: `不支持: ${type}，可选: ${VALID_TYPES.join(', ')}` });
-  if (!ossInputUrl) return res.status(400).json({ status: 'error', error: '缺少 ossInputUrl' });
-
-  try {
-    const result = taskQueue.submitTask({ type, params, ossInputUrl, parentTaskId });
-    res.json({ status: 'ok', taskId: result.taskId, taskStatus: result.status });
-  } catch (err) {
-    res.status(500).json({ status: 'error', error: err.message });
-  }
-});
-
-app.get('/api/task/:id', (req, res) => {
-  const task = taskStore.getTask(req.params.id);
-  if (!task) return res.status(404).json({ status: 'error', error: '任务不存在' });
-  const { _workDir, _containerWorkDir, ...pub } = task;
-  res.json({ status: 'ok', task: pub });
-});
-
-app.get('/api/tasks', (req, res) => {
-  const limit = parseInt(req.query.limit) || 20;
-  const tasks = taskStore.listTasks(limit).map(({ ...t }) => t);
-  res.json({ status: 'ok', tasks });
-});
-
-app.delete('/api/task/:id', (req, res) => {
-  const ok = taskQueue.cancelTask(req.params.id);
-  if (ok) res.json({ status: 'ok', message: '任务已取消' });
-  else res.status(404).json({ status: 'error', error: '任务不存在或已完成' });
-});
-
 // ============================================================
 // W2-A (2026-05-28): User-scoped tools API for /tools page
 // JWT-authenticated, mirrors r-server /api/tools/* contract
@@ -484,17 +407,11 @@ function cleanup(workDir) {
 const server = app.listen(config.port, '0.0.0.0', () => {
   logger.info(`BioF3 Python Server running on port ${config.port}`, {
     pool: config.poolEnabled ? `${config.poolSize} workers` : 'disabled',
-    maxConcurrentTasks: config.maxConcurrentTasks,
   });
   logger.info(`  POST http://localhost:${config.port}/api/run`);
-  logger.info(`  POST http://localhost:${config.port}/api/task`);
+  logger.info(`  POST http://localhost:${config.port}/api/tools/run`);
   logger.info(`  GET  http://localhost:${config.port}/api/health`);
-  logger.info('  Local drain: task queue in this process');
 });
-
-// Maintenance
-setInterval(() => taskStore.cleanupOld(), 60 * 60 * 1000);
-setInterval(() => taskQueue.scheduleDrain(), 5000);
 
 // Graceful shutdown
 function shutdown(signal) {
