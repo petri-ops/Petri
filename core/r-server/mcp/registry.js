@@ -5,11 +5,8 @@
  * 斩断 r-server/agent-tools/learning.js → desktop-app/src/mcp-tool-registry 的反向引用。
  * desktop-app/src/mcp-server.js 改 require 本文件（dev: ../../r-server/mcp/registry）。
  *
- * 合并两条产线成单一 listTools()/callTool() 接口：
- *   1. 插件通道（bulk 工具，如 volcano-plot/deseq2）—— r-server/plugin-loader
- *   2. 单细胞步骤（10 步，如 scrna-standard/deg）—— r-server/task-scripts-gen
- *
- * 这是 BioF3 两套脚本产线的接合点。
+ * 通过单一 listTools()/callTool() 接口暴露插件工具，所有执行统一进入
+ * run_tool → tool_job → artifact truth 事实链。
  */
 
 const path = require('path');
@@ -86,7 +83,7 @@ try {
 
 // 启动时自动加载用户已装插件（~/Documents/BioF3-Local/plugins/）。
 // mcp-server 子进程与 Electron 主进程不共享 globalThis，必须自己 load。
-// 失败不致命（无 installed.json = 没装过插件，正常），listTools 仍返回 10 个单细胞步骤。
+// 失败不致命（无 installed.json = 没装过插件，正常），built-in 插件仍会在下方加载。
 try {
   pluginLoader.loadPluginsFromDisk();
 } catch (e) {
@@ -664,7 +661,7 @@ function _runPluginScript(
 }
 
 /**
- * 执行工具。插件分支（Task 3）；单细胞步骤分支（Task 4）。
+ * 执行已注册插件工具。
  * @returns {Promise<{content: Array, isError: boolean}>}
  */
 async function callTool(name, args, opts = {}) {

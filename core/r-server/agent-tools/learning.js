@@ -790,16 +790,6 @@ const HEAVY_TOOLS = new Set([
   'seurat-standard',
   'cellchat',
   'maftools-mutation',
-  'scrna-standard',
-  'recluster',
-  'deg',
-  'enrichment',
-  'annotation',
-  'integration',
-  'trajectory',
-  'communication',
-  'cell-cycle',
-  'doublet',
 ]);
 const APPROVAL_TIMEOUT_MS = 5 * 60 * 1000; // 5 分钟内未确认自动取消
 
@@ -906,6 +896,13 @@ async function tool_run_tool(args, ctx) {
       params = { ...step.inputs, ...params };
     }
     if (!toolId) return { error: 'missing_toolId', message: 'op=run 需要 toolId' };
+
+    // 注册表是唯一工具事实源。先拒绝不存在的工具，避免旧步骤 ID 在确认阶段
+    // 提前生成永远无法执行的 tool_job。
+    const registeredTools = await _getRegistry().listTools();
+    if (!registeredTools.some((tool) => tool.name === toolId)) {
+      return { ok: false, error: 'unknown_tool', message: `未知工具: ${toolId}`, toolId };
+    }
 
     // TOOL_JOB_APPROVAL_v1（阶段2 Task3）：重操作强制确认。
     // HEAVY_TOOLS 跑前先落 tool_jobs 记录 ack_status='pending'，返回 needApproval。

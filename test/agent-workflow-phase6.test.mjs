@@ -73,7 +73,7 @@ test('op=status + next reflect real DB job state after tool run', async () => {
   const differentialStep = planned.plan.steps.find((s) => s.id === 'differential');
   assert.ok(differentialStep, '应有 differential 步骤');
 
-  // 2. Create completed job producing both deg_table and ossInputUrl
+  // 2. Create completed job producing the verified deg_table artifact
   const job = db.createToolJob({
     toolId: 'deseq2',
     userId: CTX.userId,
@@ -88,7 +88,6 @@ test('op=status + next reflect real DB job state after tool run', async () => {
       artifactTruth: { status: 'valid', validCount: 2 },
       artifacts: [
         { id: 'deg_table', name: 'deg.csv', path: '/results/deg.csv', type: 'table' },
-        { id: 'ossInputUrl', name: 'deg.csv', path: '/results/deg.csv', type: 'table' },
       ],
     },
     completedAt: Date.now(),
@@ -106,15 +105,15 @@ test('op=status + next reflect real DB job state after tool run', async () => {
   }, CTX);
   assert.equal(bound.ok, true, 'bind_artifact(volcano) 应成功');
 
-  // Bind ossInputUrl to enrichment (differential also produces this artifact)
+  // Bind the same verified DEG artifact to enrichment
   const bound2 = await learning.tool_run_tool({
     op: 'bind_artifact',
     workflowPlan: bound.plan,
     fromToolJobId: job.id,
     fromStepId: 'differential',
     toStepId: 'enrichment',
-    inputId: 'ossInputUrl',
-    artifactId: 'ossInputUrl',
+    inputId: 'deg_table',
+    artifactId: 'deg_table',
   }, CTX);
   assert.equal(bound2.ok, true, 'bind_artifact(enrichment) 应成功');
 

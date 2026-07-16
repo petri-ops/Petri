@@ -115,27 +115,30 @@ test('volcano-plot（非重操作）不拦截，直接跑', async () => {
   assert.notEqual(r.error, 'approval_invalid');
 });
 
-test('HEAVY_TOOLS 白名单含 deseq2/wgcna/ml-* 不含 volcano-plot', async () => {
-  // 间接验证：deseq2 返回 needApproval，volcano-plot 不返回（上面已测）
-  // 这里再验证 wgcna
+test('未注册的重工具不会生成待确认 tool_job', async () => {
+  const sqlite = db.getDatabase();
+  const countJobs = sqlite.prepare("SELECT COUNT(*) AS count FROM tool_jobs WHERE tool_id='wgcna'");
+  const before = countJobs.get().count;
   const r = await learning.tool_run_tool(
     { op: 'run', toolId: 'wgcna', params: {} },
     CTX
   );
-  assert.equal(r.needApproval, true, 'wgcna 应在白名单');
-  const sqlite = db.getDatabase();
-  sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(r.toolJobId);
+  assert.equal(r.ok, false);
+  assert.equal(r.error, 'unknown_tool');
+  assert.equal(countJobs.get().count, before);
 });
 
-test('单细胞步骤首次运行也进入显式确认', async () => {
+test('已移除的单细胞步骤不会生成待确认 tool_job', async () => {
+  const sqlite = db.getDatabase();
+  const countJobs = sqlite.prepare("SELECT COUNT(*) AS count FROM tool_jobs WHERE tool_id='doublet'");
+  const before = countJobs.get().count;
   const r = await learning.tool_run_tool(
-    { op: 'run', toolId: 'doublet', params: { ossInputUrl: 'https://example.test/input.rds' } },
+    { op: 'run', toolId: 'doublet', params: { inputFile: '/tmp/input.rds' } },
     CTX,
   );
-  assert.equal(r.needApproval, true);
-  assert.equal(r.toolId, 'doublet');
-  const sqlite = db.getDatabase();
-  sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(r.toolJobId);
+  assert.equal(r.ok, false);
+  assert.equal(r.error, 'unknown_tool');
+  assert.equal(countJobs.get().count, before);
 });
 
 test('Agent 可以获取只规划不自动执行的标准分析计划', async () => {

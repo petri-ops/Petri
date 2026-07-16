@@ -30,7 +30,7 @@
         {
           "fromStepId": "differential",
           "toStepId": "enrichment",
-          "inputId": "ossInputUrl",
+          "inputId": "deg_table",
           "artifact": { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" },
           "artifactTruth": { "status": "valid" }
         }
@@ -69,42 +69,35 @@
       }
     },
     {
-      "id": "single-cell-breakpoint",
-      "templateId": "single-cell-core",
-      "availableToolIds": ["scrna-standard", "doublet", "deg", "annotation", "enrichment"],
+      "id": "bulk-rna-waiting-for-approval",
+      "templateId": "bulk-rna-core",
+      "availableToolIds": ["deseq2", "volcano-plot", "enrichment"],
       "jobs": [
         {
-          "stepId": "standard",
-          "id": "tj_scrna_standard",
-          "tool_id": "scrna-standard",
-          "status": "completed",
-          "result": { "artifactTruth": { "status": "valid", "validCount": 1 } }
-        },
-        {
-          "stepId": "doublet",
-          "id": "tj_scrna_doublet",
-          "tool_id": "doublet",
+          "stepId": "differential",
+          "id": "tj_bulk_pending",
+          "tool_id": "deseq2",
           "status": "pending",
           "ack_status": "pending"
         }
       ],
       "expected": {
-        "stepStatuses": { "standard": "complete", "doublet": "waiting_for_confirmation" },
+        "stepStatuses": { "differential": "waiting_for_confirmation" },
         "readyStepIds": [],
         "recoverable": false,
         "terminal": false,
-        "nextActionIds": ["confirm_doublet"]
+        "nextActionIds": ["confirm_differential"]
       }
     },
     {
-      "id": "single-cell-failed-blocked",
-      "templateId": "single-cell-core",
-      "availableToolIds": ["scrna-standard", "doublet", "deg", "annotation", "enrichment"],
+      "id": "bulk-rna-failed-blocked",
+      "templateId": "bulk-rna-core",
+      "availableToolIds": ["deseq2", "volcano-plot", "enrichment"],
       "jobs": [
         {
-          "stepId": "standard",
-          "id": "tj_scrna_failed",
-          "tool_id": "scrna-standard",
+          "stepId": "differential",
+          "id": "tj_bulk_failed",
+          "tool_id": "deseq2",
           "status": "failed",
           "result": {
             "artifactTruth": { "status": "blocked", "validCount": 0, "blocking": true },
@@ -115,7 +108,7 @@
         }
       ],
       "expected": {
-        "stepStatuses": { "standard": "blocked" },
+        "stepStatuses": { "differential": "blocked" },
         "readyStepIds": [],
         "recoverable": false,
         "terminal": false

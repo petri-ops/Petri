@@ -99,8 +99,7 @@ const upload = multer({
 module.exports = function registerFileRoutes(app) {
   // ── 桌面版本地文件服务 ──────────────────────────────────────
   // /api/files/<key> → 从本地 results 目录读取文件并返回
-  if (IS_LOCAL) {
-    app.get('/api/workspaces/:projectId/tree', (req, res) => {
+  app.get('/api/workspaces/:projectId/tree', (req, res) => {
       try {
         const root = getProjectWorkspace(req.params.projectId);
         if (!root) return res.status(404).json({ ok: false, error: '项目工作目录不存在' });
@@ -165,7 +164,6 @@ module.exports = function registerFileRoutes(app) {
         res.status(500).json({ status: 'error', error: e.message });
       }
     });
-  }
 
   app.post('/api/upload', upload.single('file'), async (req, res) => {
     if (!req.file) {

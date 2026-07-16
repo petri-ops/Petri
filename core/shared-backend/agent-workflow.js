@@ -330,40 +330,8 @@ const AGENT_WORKFLOW_TEMPLATES = [
         toolCandidates: ['enrichment'],
         dependsOn: ['differential'],
         inputBindings: [
-          { inputId: 'ossInputUrl', fromStepId: 'differential', artifactType: 'table' },
+          { inputId: 'deg_table', fromStepId: 'differential', artifactType: 'table' },
         ],
-      },
-    ],
-  },
-  {
-    id: 'single-cell-core',
-    title: '单细胞标准分析',
-    description: '标准处理、Doublet 检测、差异 marker、细胞注释与富集。',
-    steps: [
-      { id: 'standard', toolCandidates: ['scrna-standard', 'seurat-standard'], dependsOn: [] },
-      {
-        id: 'doublet',
-        toolCandidates: ['doublet'],
-        dependsOn: ['standard'],
-        inputBindings: [{ inputId: 'ossInputUrl', fromStepId: 'standard', artifactType: 'file' }],
-      },
-      {
-        id: 'markers',
-        toolCandidates: ['deg'],
-        dependsOn: ['doublet'],
-        inputBindings: [{ inputId: 'ossInputUrl', fromStepId: 'doublet', artifactType: 'file' }],
-      },
-      {
-        id: 'annotation',
-        toolCandidates: ['annotation'],
-        dependsOn: ['doublet'],
-        inputBindings: [{ inputId: 'ossInputUrl', fromStepId: 'doublet', artifactType: 'file' }],
-      },
-      {
-        id: 'enrichment',
-        toolCandidates: ['enrichment'],
-        dependsOn: ['markers'],
-        inputBindings: [{ inputId: 'ossInputUrl', fromStepId: 'markers', artifactType: 'table' }],
       },
     ],
   },
