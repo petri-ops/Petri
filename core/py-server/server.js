@@ -323,10 +323,8 @@ app.post('/api/run', async (req, res) => {
     if (pyPool) {
       result = await pyPool.execute(code, workDir);
     } else {
-      // Cold fallback
-      const containerWorkDir = config.execMode === 'local'
-        ? workDir
-        : `${config.containerTempDir}/${sessionId}`;
+      // Cold fallback — 本地执行内嵌 python
+      const containerWorkDir = workDir;
       const pyScript = `
 import os, sys, matplotlib
 matplotlib.use("Agg")
@@ -344,54 +342,29 @@ finally:
 `;
       fs.writeFileSync(path.join(workDir, 'run.py'), pyScript);
       result = await new Promise((resolve, reject) => {
-        if (config.execMode === 'local') {
-          // 本地模式：直接用系统 python 执行
-          const pyBin =
-            getPythonRuntimeExecutable(config.pyHome || process.env.BIOF3_PY_HOME || '') ||
-            getExecutor('python').binPath;
-          execFile(
-            pyBin,
-            ['-u', path.join(workDir, 'run.py')],
-            {
-              timeout: config.runTimeoutMs,
-              maxBuffer: 1024 * 1024 * 5,
-              env: { ...process.env, PYTHONUNBUFFERED: '1' },
-            },
-            (error, stdout, stderr) => {
-              if (error)
-                reject(
-                  new Error(
-                    error.killed
-                      ? `执行超时（${config.runTimeoutMs / 1000}秒）`
-                      : stderr || error.message
-                  )
-                );
-              else resolve({ stdout: stdout || '', stderr: stderr || '' });
-            }
-          );
-        } else {
-          // Docker 模式：原有逻辑
-          execFile(
-            'docker',
-            ['exec', config.pyContainer, 'python', '-u', `${containerWorkDir}/run.py`],
-            {
-              timeout: config.runTimeoutMs,
-              maxBuffer: 1024 * 1024 * 5,
-              env: { ...process.env, PYTHONUNBUFFERED: '1' },
-            },
-            (error, stdout, stderr) => {
-              if (error)
-                reject(
-                  new Error(
-                    error.killed
-                      ? `执行超时（${config.runTimeoutMs / 1000}秒）`
-                      : stderr || error.message
-                  )
-                );
-              else resolve({ stdout: stdout || '', stderr: stderr || '' });
-            }
-          );
-        }
+        const pyBin =
+          getPythonRuntimeExecutable(config.pyHome || process.env.BIOF3_PY_HOME || '') ||
+          getExecutor('python').binPath;
+        execFile(
+          pyBin,
+          ['-u', path.join(workDir, 'run.py')],
+          {
+            timeout: config.runTimeoutMs,
+            maxBuffer: 1024 * 1024 * 5,
+            env: { ...process.env, PYTHONUNBUFFERED: '1' },
+          },
+          (error, stdout, stderr) => {
+            if (error)
+              reject(
+                new Error(
+                  error.killed
+                    ? `执行超时（${config.runTimeoutMs / 1000}秒）`
+                    : stderr || error.message
+                )
+              );
+            else resolve({ stdout: stdout || '', stderr: stderr || '' });
+          }
+        );
       });
     }
 

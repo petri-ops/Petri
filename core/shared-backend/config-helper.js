@@ -27,9 +27,8 @@ function getConfig() {
   if (_getConfig) return _getConfig();
   // fallback：从环境变量构造（真自洽，不依赖 r-server/py-server）
   return {
-    execMode: process.env.BIOF3_EXEC_MODE || 'docker',
-    storageMode:
-      process.env.BIOF3_STORAGE || (process.env.BIOF3_EXEC_MODE === 'local' ? 'local' : 'oss'),
+    execMode: process.env.BIOF3_EXEC_MODE || 'local',
+    storageMode: process.env.BIOF3_STORAGE || 'local',
     localMode: process.env.BIOF3_LOCAL_MODE === '1',
     rHome: process.env.BIOF3_R_HOME || '',
     pyHome: process.env.BIOF3_PY_HOME || '',

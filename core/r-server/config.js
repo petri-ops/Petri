@@ -16,8 +16,8 @@ const config = {
   workerId: process.env.BIOF3_WORKER_ID || require('os').hostname(),
 
   // ── 桌面版模式（Electron 本地运行）──────────────────────────
-  // execMode: 'docker'（web 版，走 docker exec）| 'local'（桌面版，直接调 Rscript）
-  execMode: process.env.BIOF3_EXEC_MODE || 'docker',
+  // execMode: 桌面版恒为 'local'（直接调内嵌 Rscript，不走 docker）
+  execMode: process.env.BIOF3_EXEC_MODE || 'local',
   // storageMode: 'local'（桌面版，本地文件系统）
   storageMode: process.env.BIOF3_STORAGE || 'local',
   // localMode: 桌面版跳过 JWT 验证，返回固定 local-user
@@ -41,13 +41,8 @@ const config = {
   tempDir: process.env.BIOF3_TEMP_DIR || '/mnt/storage_16tb/omichub/biof3-tmp',
   dbPath: process.env.BIOF3_DB_PATH || path.join(__dirname, 'biof3.db'),
 
-  // Docker R execution
-  rContainer: process.env.R_CONTAINER || 'omichub_react_backend_1',
+  // Canonical 执行路径根（execution-context 用于稳定的跨引用标识，非实际文件系统路径）
   containerTempDir: process.env.CONTAINER_TEMP_DIR || '/app/data/biof3-tmp',
-  // Sandbox: docker exec --user value (e.g. "nobody:nogroup"). Empty = run as container default (root).
-  // Enable in production for ε-test by setting R_EXEC_USER=nobody:nogroup.
-  // Pre-requisite: container temp dir must be writable by the chosen user.
-  rExecUser: process.env.R_EXEC_USER || '',
 
   // Timeouts
   runTimeoutMs: parseInt(process.env.R_RUN_TIMEOUT_MS || '30000', 10),
@@ -76,67 +71,14 @@ const config = {
 };
 
 /**
- * Build the prefix args for `docker exec ... <command>`.
- * Returns ['exec', '<container>'] or ['exec', '-u', '<user>', '-e', 'HOME=/tmp', '<container>'].
- *
- * @param {object|boolean} opts - {interactive, container} or boolean for legacy `interactive` flag.
- * @returns {string[]}
- *
- * Usage:
- *   spawn('docker', [...config.dockerExecArgs(), 'Rscript', ...])
- *   spawn('docker', [...config.dockerExecArgs({interactive: true}), 'Rscript', ...])
- *   spawn('docker', [...config.dockerExecArgs({container: 'biof3_python_1'}), 'python3', ...])
- *
- * Note on HOME: when running as 'nobody' (whose home is /nonexistent), R will fail to
- * read/write ~/.RData ~/.Renviron etc. We force HOME=/tmp (writable for everyone) when
- * a sandbox user is set, so R initializes cleanly without polluting any user dir.
- *
- * Note on BLAS threads: OpenBLAS by default tries to spawn N=cpu_count threads.
- * Combined with the container's --pids-limit cgroup, a single R process can hit the
- * pid quota and crash with "pthread_create failed: Resource temporarily unavailable".
- * We cap BLAS at 2 threads in sandbox mode — sufficient for the workloads we run
- * and well below any reasonable pids-limit.
- */
-config.dockerExecArgs = function dockerExecArgs(opts = {}) {
-  // Legacy: dockerExecArgs(true) means interactive=true
-  if (opts === true) opts = {interactive: true};
-  const interactive = !!opts.interactive;
-  const container = opts.container || config.rContainer;
-  // Sandbox user is only applied to the R container (Python container has its own setup)
-  const applyUser = config.rExecUser && container === config.rContainer;
-
-  const args = ['exec'];
-  if (interactive) args.push('-i');
-  if (applyUser) {
-    args.push('-u', config.rExecUser);
-    args.push('-e', 'HOME=/tmp');
-    // Cap BLAS threads to stay well under --pids-limit
-    args.push('-e', 'OPENBLAS_NUM_THREADS=2');
-    args.push('-e', 'OMP_NUM_THREADS=2');
-    args.push('-e', 'MKL_NUM_THREADS=2');
-  }
-  args.push(container);
-  return args;
-};
-
-/**
- * Create a directory and (when sandbox is enabled) make it world-writable with sticky bit (1777).
- * Used for any directory that the sandboxed R process needs to write into:
- *   - /api/run session dirs
- *   - tool job dirs (and their output/ subdirs)
- *   - long-running task work dirs
- *
- * Behavior is identical to fs.mkdirSync({recursive:true}) when R_EXEC_USER is empty —
- * so non-sandbox installations see no permission change.
+ * Create a directory (recursive). Kept as a named helper for the call sites that
+ * previously needed docker-sandbox permission tweaks; on desktop it's a plain mkdir.
  *
  * @param {string} dirPath - absolute path
  */
 config.mkdirSandbox = function mkdirSandbox(dirPath) {
   const fs = require('fs');
   fs.mkdirSync(dirPath, {recursive: true});
-  if (config.rExecUser) {
-    try { fs.chmodSync(dirPath, 0o1777); } catch {}
-  }
 };
 
 module.exports = config;

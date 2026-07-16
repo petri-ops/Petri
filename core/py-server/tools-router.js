@@ -31,14 +31,10 @@ const {
   isPathContained,
 } = require('../shared-backend/project-run-layout');
 
-// 路径：local 模式用可配路径，docker 模式用原有硬编码
-const IS_LOCAL = config.execMode === 'local';
-const JOBS_DIR = IS_LOCAL
-  ? (config.localResultsDir
-     ? require('path').join(config.localResultsDir, 'tool-jobs')
-     : require('path').join(require('os').homedir(), 'Documents', 'BioF3-Local', 'results', 'tool-jobs'))
-  : '/mnt/storage_16tb/omichub/biof3-tool-jobs';
-const CONTAINER_JOBS_DIR = IS_LOCAL ? JOBS_DIR : '/app/data/biof3-tool-jobs';
+// 本地路径（可配）：结果落 BioF3-Local/results/tool-jobs
+const JOBS_DIR = config.localResultsDir
+  ? require('path').join(config.localResultsDir, 'tool-jobs')
+  : require('path').join(require('os').homedir(), 'Documents', 'BioF3-Local', 'results', 'tool-jobs');
 // W4-B (2026-05-29): 取消 hard wall-clock timeout（与 task-queue / r-server task-manager 的
 // W4-A "取消 task hard timeout" 决策对齐）。科学计算（Tangram CPU 训练 / cell2location /
 // LIANA permutation）合理时长不该被 10 分钟墙钟倒逼妥协 —— 之前 spatial-deconv 在 epoch ~100
@@ -73,10 +69,7 @@ function safeJoinUnder(baseDir, ...segments) {
 //   - With projectId: results land in <workspace>/results/jobs/<jobId> (the project
 //     sandbox). The client only submits projectId; the path is resolved server-side.
 //   - Without projectId: fall back to the global JOBS_DIR (legacy / back-compat).
-// In local (desktop) mode the container path equals the host path, so the resolved
-// project dir is used directly. In docker (web) mode the container mount stays the
-// legacy global path (external workspaces are not mounted into the container),
-// mirroring r-server/helpers/tools-executor.js behavior.
+// 本地执行：容器路径即宿主路径，解析出的目录直接使用。
 function resolveRunLayout({ jobId, projectId, userId }) {
   if (projectId) {
     const layout = resolveProjectRunLayout({
@@ -87,21 +80,19 @@ function resolveRunLayout({ jobId, projectId, userId }) {
       skipPermissionCheck: false,
       ensureDirs: true,
     });
-    const containerJobDir = IS_LOCAL ? layout.jobRoot : `${CONTAINER_JOBS_DIR}/${jobId}`;
     return {
       jobDir: layout.jobRoot,
       outputDir: layout.outputDir,
-      containerJobDir,
-      containerOutputDir: `${containerJobDir}/output`,
+      containerJobDir: layout.jobRoot,
+      containerOutputDir: `${layout.jobRoot}/output`,
     };
   }
   const jobDir = path.join(JOBS_DIR, jobId);
-  const containerJobDir = `${CONTAINER_JOBS_DIR}/${jobId}`;
   return {
     jobDir,
     outputDir: path.join(jobDir, 'output'),
-    containerJobDir,
-    containerOutputDir: `${containerJobDir}/output`,
+    containerJobDir: jobDir,
+    containerOutputDir: `${jobDir}/output`,
   };
 }
 
@@ -304,18 +295,12 @@ function executeJob({ jobId, toolId, taskType, params, layout }) {
 
   logger.info(`[tools] Executing python job`, { jobId, toolId, taskType });
 
-  // local 模式：直接调 python3；docker 模式：走 docker exec
-  let execCmd, execArgs;
-  if (IS_LOCAL) {
-    const { getExecutor } = require('../shared-backend/executors');
-    const executor = getExecutor('python');
-    const spawnCmd = executor.buildSpawnCommand(containerScriptPath, jobDir, {});
-    execCmd = spawnCmd.cmd;
-    execArgs = spawnCmd.args;
-  } else {
-    execCmd = 'docker';
-    execArgs = ['exec', config.pyContainer, 'python', '-u', containerScriptPath];
-  }
+  // 本地执行：直接调内嵌 python
+  const { getExecutor } = require('../shared-backend/executors');
+  const executor = getExecutor('python');
+  const spawnCmd = executor.buildSpawnCommand(containerScriptPath, jobDir, {});
+  const execCmd = spawnCmd.cmd;
+  const execArgs = spawnCmd.args;
 
   execFile(
     execCmd,

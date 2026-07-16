@@ -30,7 +30,7 @@ const activeTasks = new Map();
 function submitTask({ type, params, ossInputUrl, parentTaskId }) {
   const taskId = uuidv4();
   const workDir = path.join(config.tempDir, `task-${taskId}`);
-  const containerWorkDir = `${config.containerTempDir}/task-${taskId}`;
+  const containerWorkDir = workDir;
   fs.mkdirSync(workDir, { recursive: true });
 
   const allParams = parentTaskId ? { ...(params || {}), parentTaskId } : params || {};
@@ -97,7 +97,7 @@ async function drainQueue() {
 async function runTaskRow(task) {
   const taskId = task.taskId;
   const workDir = task.workDir || path.join(config.tempDir, `task-${taskId}`);
-  const containerWorkDir = task.containerWorkDir || `${config.containerTempDir}/task-${taskId}`;
+  const containerWorkDir = task.containerWorkDir || workDir;
   if (!fs.existsSync(workDir)) fs.mkdirSync(workDir, { recursive: true });
   return executeTask({ ...task, workDir, containerWorkDir });
 }
@@ -144,19 +144,13 @@ async function executeTask(task) {
     if (config.taskTimeoutMs > 0) execOpts.timeout = config.taskTimeoutMs;
 
     await new Promise((resolve, reject) => {
-      // local 模式：直接调 python3；docker 模式：走 docker exec
-      let execCmd, execArgs;
-      if (config.execMode === 'local') {
-        const { getExecutor } = require('../shared-backend/executors');
-        const executor = getExecutor('python');
-        const spawnCmd = executor.buildSpawnCommand(`${containerWorkDir}/run_task.py`, workDir, {});
-        execCmd = spawnCmd.cmd;
-        execArgs = spawnCmd.args;
-        if (spawnCmd.env) execOpts.env = { ...execOpts.env, ...spawnCmd.env };
-      } else {
-        execCmd = 'docker';
-        execArgs = ['exec', config.pyContainer, 'python', `${containerWorkDir}/run_task.py`];
-      }
+      // 本地执行：直接调内嵌 python
+      const { getExecutor } = require('../shared-backend/executors');
+      const executor = getExecutor('python');
+      const spawnCmd = executor.buildSpawnCommand(`${containerWorkDir}/run_task.py`, workDir, {});
+      const execCmd = spawnCmd.cmd;
+      const execArgs = spawnCmd.args;
+      if (spawnCmd.env) execOpts.env = { ...execOpts.env, ...spawnCmd.env };
       const proc = execFile(execCmd, execArgs, execOpts, (error, stdout, stderr) => {
         activeTasks.delete(taskId);
         clearInterval(progressInterval);

@@ -1,8 +1,7 @@
 /**
  * Python Executor — Python 语言执行器实现
  *
- * 桌面版（execMode='local'）：直接调内嵌 Python，不走 docker。
- * Web 版（execMode='docker'）：走 docker exec，保持原有行为。
+ * 桌面版直接调内嵌 Python（本地执行）。
  *
  * 与 RExecutor 对称，实现同一 LanguageExecutor 接口。
  */
@@ -29,17 +28,11 @@ class PythonExecutor {
     return 'python';
   }
 
-  /**
-   * Python 可执行文件路径。
-   * local 模式用内嵌 Python；docker 模式返回 'python3'。
-   */
+  /** Python 可执行文件路径（内嵌 Python）。 */
   get binPath() {
     const cfg = getPyConfig();
-    if (cfg.execMode === 'local') {
-      const runtimeHome = cfg.pyHome || path.join(__dirname, '../../py-server/Python');
-      return getPythonRuntimeExecutable(runtimeHome) || path.join(runtimeHome, 'python.exe');
-    }
-    return 'python3';
+    const runtimeHome = cfg.pyHome || path.join(__dirname, '../../py-server/Python');
+    return getPythonRuntimeExecutable(runtimeHome) || path.join(runtimeHome, 'python.exe');
   }
 
   /**
@@ -57,83 +50,44 @@ class PythonExecutor {
 
   /**
    * 构造完整的 spawn 命令（含可执行文件）。
-   * local 模式：['/path/to/python3', script.py, --params, params.json]
-   * docker 模式：['docker', 'exec', '<container>', 'python3', script.py, ...]
-   * @returns {{cmd: string, args: string[]}}
+   * ['/path/to/python3', script.py, --params, params.json]
+   * @returns {{cmd: string, args: string[], env: object}}
    */
   buildSpawnCommand(scriptPath, workDir, params) {
     const cfg = getPyConfig();
     const scriptArgs = this.buildRunArgs(scriptPath, workDir, params);
-
-    if (cfg.execMode === 'local') {
-      const env = { ...process.env };
-      // 确保 site-packages 在 PYTHONPATH 里
-      const siteDir = getPythonSitePackagesDir(cfg.pyHome || '');
-      if (fs.existsSync(siteDir)) {
-        env.PYTHONPATH = siteDir + (env.PYTHONPATH ? path.delimiter + env.PYTHONPATH : '');
-      }
-      return { cmd: this.binPath, args: scriptArgs, env };
+    const env = { ...process.env };
+    // 确保 site-packages 在 PYTHONPATH 里
+    const siteDir = getPythonSitePackagesDir(cfg.pyHome || '');
+    if (fs.existsSync(siteDir)) {
+      env.PYTHONPATH = siteDir + (env.PYTHONPATH ? path.delimiter + env.PYTHONPATH : '');
     }
-    // docker 模式
-    const container = cfg.pyContainer || 'biof3_python_1';
-    return { cmd: 'docker', args: ['exec', container, 'python3', ...scriptArgs] };
+    return { cmd: this.binPath, args: scriptArgs, env };
   }
 
-  /**
-   * 创建进程池 worker（常驻 Python 进程）。
-   * local 模式：spawn 本地 python -u -i
-   * docker 模式：返回 null（由 py-pool.js 原有逻辑处理）
-   */
+  /** 创建进程池 worker（常驻 Python 进程）。 */
   buildPoolWorker() {
     const cfg = getPyConfig();
-    if (cfg.execMode === 'local') {
-      const pyBin = this.binPath;
-      const siteDir = getPythonSitePackagesDir(cfg.pyHome || '');
-      const env = { ...process.env };
-      if (fs.existsSync(siteDir)) {
-        env.PYTHONPATH = siteDir + (env.PYTHONPATH ? path.delimiter + env.PYTHONPATH : '');
-      }
-      return spawn(pyBin, ['-u', '-i'], { env });
+    const pyBin = this.binPath;
+    const siteDir = getPythonSitePackagesDir(cfg.pyHome || '');
+    const env = { ...process.env };
+    if (fs.existsSync(siteDir)) {
+      env.PYTHONPATH = siteDir + (env.PYTHONPATH ? path.delimiter + env.PYTHONPATH : '');
     }
-    return null; // docker 模式走 py-pool.js 原有逻辑
+    return spawn(pyBin, ['-u', '-i'], { env });
   }
 
-  /**
-   * 检查 Python 包是否已安装。
-   * local 模式：检查 site-packages/<pkg> 目录。
-   * docker 模式：用 docker exec 查询。
-   */
+  /** 检查 Python 包是否已安装（site-packages/<pkg>）。 */
   checkPackageInstalled(pkgName) {
     const cfg = getPyConfig();
     const normalized = pkgName.replace(/-/g, '_');
-
-    if (cfg.execMode === 'local') {
-      const siteDir = getPythonSitePackagesDir(cfg.pyHome || '');
-      // Python 包目录可能是 pkg_name/ 或 pkg_name.egg-info/ 或 pkg.dist-info/
-      return (
-        fs.existsSync(path.join(siteDir, normalized)) ||
-        fs.existsSync(path.join(siteDir, `${normalized}.egg-info`)) ||
-        fs.existsSync(path.join(siteDir, `${normalized}.dist-info`))
-      );
-    }
-    // docker 模式
-    try {
-      const container = cfg.pyContainer || 'biof3_python_1';
-      const out = execFileSync(
-        'docker',
-        [
-          'exec',
-          container,
-          'python3',
-          '-c',
-          `import importlib; print(importlib.util.find_spec("${pkgName}") is not None)`,
-        ],
-        { timeout: 10000, encoding: 'utf8' }
-      );
-      return out.trim() === 'True';
-    } catch {
-      return false;
-    }
+    const siteDir = getPythonSitePackagesDir(cfg.pyHome || '');
+    // Python 包目录可能是 pkg_name/ 或 pkg_name.egg-info/ 或 pkg.dist-info/
+    return (
+      fs.existsSync(path.join(siteDir, normalized)) ||
+      fs.existsSync(path.join(siteDir, `${normalized}.egg-info`)) ||
+      fs.existsSync(path.join(siteDir, `${normalized}.dist-info`))
+    );
   }
 
   /**
@@ -183,18 +137,9 @@ class PythonExecutor {
   }
 
   _getPyVersion() {
-    const cfg = getPyConfig();
     try {
-      if (cfg.execMode === 'local') {
-        const pyBin = this.binPath;
-        const out = execFileSync(pyBin, ['--version'], { encoding: 'utf8', timeout: 5000 });
-        return out.match(/Python (\d+\.\d+\.\d+)/)?.[1] || '0.0.0';
-      }
-      const container = cfg.pyContainer || 'biof3_python_1';
-      const out = execFileSync('docker', ['exec', container, 'python3', '--version'], {
-        encoding: 'utf8',
-        timeout: 10000,
-      });
+      const pyBin = this.binPath;
+      const out = execFileSync(pyBin, ['--version'], { encoding: 'utf8', timeout: 5000 });
       return out.match(/Python (\d+\.\d+\.\d+)/)?.[1] || '0.0.0';
     } catch {
       return '0.0.0';

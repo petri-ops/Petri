@@ -19,9 +19,6 @@ function isManagedResultDir(candidate, jobsDir) {
   return roots.some((root) => resolved === root || resolved.startsWith(root + path.sep));
 }
 
-function shellQuote(value) {
-  return "'" + String(value).replace(/'/g, "'\\''") + "'";
-}
 
 function createToolsExecutor({
   db,
@@ -93,26 +90,6 @@ function createToolsExecutor({
       result.signal = 'SIGTERM';
     } catch (e) {
       result.error = e.message;
-    }
-    if (active.container) {
-      const pattern = shellQuote(jobId);
-      execFile(
-        'docker',
-        [
-          ...config.dockerExecArgs({ container: active.container }),
-          'sh',
-          '-lc',
-          `pkill -TERM -f ${pattern} 2>/dev/null || true`,
-        ],
-        { timeout: 5000, maxBuffer: 1024 * 1024 },
-        (err) => {
-          if (err)
-            console.warn(
-              '[tools] container cancel best-effort failed for ' + jobId + ': ' + err.message
-            );
-        }
-      );
-      result.containerKillRequested = true;
     }
     return result;
   }
@@ -583,10 +560,8 @@ function createToolsExecutor({
       return;
     }
 
-    // local 模式：jobDir 就是真实本地路径，R 脚本直接用它；
-    // docker 模式：容器内路径 /app/data/biof3-tool-jobs/<jobId>
-    const isLocal = config.execMode === 'local';
-    const containerJobDir = isLocal ? jobDir : '/app/data/biof3-tool-jobs/' + jobId;
+    // 本地执行：jobDir 就是真实本地路径，脚本直接用它。
+    const containerJobDir = jobDir;
     const containerScript = containerJobDir + '/run-script.' + (cfg.lang === 'r' ? 'R' : 'py');
 
     try {
@@ -622,12 +597,12 @@ function createToolsExecutor({
       return;
     }
 
-    // local 模式：直接调 Rscript/python3；docker 模式：走 docker exec
+    // 本地执行：直接调内嵌 Rscript/python3。
     let runCmd;
     let runEnv = undefined;
     let runtimeReady = null;
     let runtimeCommand = null;
-    if (config.execMode === 'local') {
+    {
       const { getExecutor } = require('../../shared-backend/executors');
       const executor = getExecutor(cfg.lang);
       runtimeCommand = executor && executor.binPath;
@@ -671,36 +646,6 @@ function createToolsExecutor({
         runCmd = [spawnCmd.cmd, ...spawnCmd.args];
         if (spawnCmd.env) runEnv = spawnCmd.env;
       }
-    } else if (cfg.lang === 'r') {
-      runtimeCommand = 'docker Rscript';
-      runtimeReady = {
-        runtime: cfg.lang || null,
-        ready: true,
-        command: runtimeCommand,
-        reason: null,
-      };
-      runCmd = [
-        'docker',
-        ...config.dockerExecArgs({ container: cfg.container }),
-        'Rscript',
-        containerScript,
-        containerJobDir,
-      ];
-    } else {
-      runtimeCommand = 'docker python3';
-      runtimeReady = {
-        runtime: cfg.lang || null,
-        ready: true,
-        command: runtimeCommand,
-        reason: null,
-      };
-      runCmd = [
-        'docker',
-        ...config.dockerExecArgs({ container: cfg.container }),
-        'python3',
-        containerScript,
-        containerJobDir,
-      ];
     }
 
     const child = execFile(
@@ -752,7 +697,7 @@ function createToolsExecutor({
           runtime: cfg.lang || null,
           runtimeCommand,
           runtimeReady,
-          mode: config.execMode,
+          mode: 'local',
         });
         result.toolJobId = jobId;
         result.jobDir = jobDir;

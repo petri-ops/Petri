@@ -248,7 +248,7 @@ async function actSelectCells(args, ctx) {
       message: '该数据集还没有 metadata，无法按列筛选。请先做完标准分析生成 metadata。',
     };
 
-  // Fetch CSV — local 模式从本地文件读，docker 模式从 OSS URL 拉
+  // Fetch CSV — 本地 /api/files/ 走本地文件；其它 URL 走 HTTP 拉取
   const config = require('../config');
   const IS_LOCAL = config.execMode === 'local';
   let text = '';

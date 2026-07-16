@@ -16,8 +16,8 @@ const config = {
   workerId: process.env.BIOF3_WORKER_ID || require('os').hostname(),
 
   // ── 桌面版模式（与 r-server/config.js 对称）──────────────────
-  // execMode: 'docker'（web 版）| 'local'（桌面版，直接调 python3）
-  execMode: process.env.BIOF3_EXEC_MODE || 'docker',
+  // execMode: 桌面版恒为 'local'（直接调内嵌 python3，不走 docker）
+  execMode: process.env.BIOF3_EXEC_MODE || 'local',
   // storageMode: 'local'（桌面版，本地文件系统）
   storageMode: process.env.BIOF3_STORAGE || 'local',
   // localMode: 桌面版跳过 JWT 验证
@@ -32,23 +32,13 @@ const config = {
 
   // Paths (host-side)
   tempDir: process.env.BIOF3_PY_TEMP_DIR || '/mnt/storage_16tb/omichub/biof3-py-tmp',
-  // W4-A (2026-05-28): result cache for parentTaskId reuse (mirror r-server biof3-cache pattern).
-  // Lives under tempDir/_cache so we don't need a new docker mount; container sees it at containerCacheDir.
+  // W4-A (2026-05-28): result cache for parentTaskId reuse.
   cacheDir: process.env.BIOF3_PY_CACHE_DIR || '/mnt/storage_16tb/omichub/biof3-py-tmp/_cache',
   containerCacheDir: process.env.PY_CONTAINER_CACHE_DIR || '/app/data/biof3-py-tmp/_cache',
   dbPath: process.env.BIOF3_PY_DB_PATH || path.join(__dirname, 'pyserver.db'),
 
-  // Docker Python execution
-  pyContainer: process.env.PY_CONTAINER || 'biof3_python_1',
+  // Canonical 执行路径根（execution-context 用于稳定的跨引用标识，非实际文件系统路径）
   containerTempDir: process.env.PY_CONTAINER_TEMP_DIR || '/app/data/biof3-py-tmp',
-
-  // 桌面版 local 模式：containerTempDir = tempDir（无容器路径转换）
-  get effectiveContainerTempDir() {
-    return execMode === 'local' ? this.tempDir : this.containerTempDir;
-  },
-  get effectiveContainerCacheDir() {
-    return execMode === 'local' ? this.cacheDir : this.containerCacheDir;
-  },
 
   // Timeouts
   // taskTimeoutMs=0 means "no timeout" — science workloads (Tangram CPU deconv,

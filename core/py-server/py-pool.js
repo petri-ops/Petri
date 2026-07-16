@@ -1,8 +1,8 @@
 /**
- * Python Process Pool — Docker-based warm Python workers.
+ * Python Process Pool — warm embedded Python workers.
  *
- * Each worker is a persistent `docker exec python -u` session
- * with scanpy/numpy/pandas pre-imported. Reads script paths from stdin.
+ * Each worker is a persistent `python -u` session with scanpy/numpy/pandas
+ * pre-imported. Reads script paths from stdin.
  */
 
 const {spawn} = require('child_process');
@@ -66,29 +66,19 @@ for line in sys.stdin:
     print("__DONE__", flush=True)
 `;
 
-    // local 模式：直接 spawn 本地 python；docker 模式：走 docker exec
-    if (config.execMode === 'local') {
-      const pyBin =
-        getPythonRuntimeExecutable(config.pyHome || process.env.BIOF3_PY_HOME || '') ||
-        getExecutor('python').binPath;
-      const siteDir = getPythonSitePackagesDir(config.pyHome || process.env.BIOF3_PY_HOME || '');
-      const env = { ...process.env, PYTHONUNBUFFERED: '1' };
-      if (require('fs').existsSync(siteDir)) {
-        env.PYTHONPATH = siteDir + (env.PYTHONPATH ? path.delimiter + env.PYTHONPATH : '');
-      }
-      this.proc = spawn(pyBin, ['-u', '-c', workerScript], {
-        stdio: ['pipe', 'pipe', 'pipe'],
-        env,
-      });
-    } else {
-      this.proc = spawn('docker', [
-        'exec', '-i', config.pyContainer,
-        'python', '-u', '-c', workerScript,
-      ], {
-        stdio: ['pipe', 'pipe', 'pipe'],
-        env: {...process.env, PYTHONUNBUFFERED: '1'},
-      });
+    // 本地执行：直接 spawn 内嵌 python
+    const pyBin =
+      getPythonRuntimeExecutable(config.pyHome || process.env.BIOF3_PY_HOME || '') ||
+      getExecutor('python').binPath;
+    const siteDir = getPythonSitePackagesDir(config.pyHome || process.env.BIOF3_PY_HOME || '');
+    const env = { ...process.env, PYTHONUNBUFFERED: '1' };
+    if (require('fs').existsSync(siteDir)) {
+      env.PYTHONPATH = siteDir + (env.PYTHONPATH ? path.delimiter + env.PYTHONPATH : '');
     }
+    this.proc = spawn(pyBin, ['-u', '-c', workerScript], {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      env,
+    });
 
     this._stdout = '';
     this._stderr = '';
@@ -175,10 +165,8 @@ class PyPool {
   }
 
   async execute(code, workDir) {
-    // 桌面版 local 模式：containerWorkDir = workDir（无容器路径转换）
-    const containerWorkDir = config.execMode === 'local'
-      ? workDir
-      : workDir.replace(config.tempDir, config.containerTempDir);
+    // 本地执行：containerWorkDir = workDir（无容器路径转换）
+    const containerWorkDir = workDir;
     const scriptPath = path.join(workDir, 'run.py');
     const containerScriptPath = `${containerWorkDir}/run.py`;
 

@@ -1,20 +1,16 @@
 /**
  * routes/r-compute.js — R 即时执行 + Replot 代理路由。
  *
- * 从 server.js 抽出。仅在 Dell compute 节点（runMode=all|api）实际执行；
- * platform runMode 下 rComputeOnly 中间件返回 503 compute_on_dell。
- *
- * 依赖：docker exec Rscript、R plumber (port 8787)、OSS 上传。
+ * 本地执行内嵌 Rscript；Replot 代理到本地 R plumber (port 8787)。
  */
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
-const { execFile, execSync } = require('child_process');
+const { execFile } = require('child_process');
 const { v4: uuidv4 } = require('uuid');
 
 const config = require('../config');
 const IS_PLATFORM = config.runMode === 'platform';
-const IS_LOCAL = config.execMode === 'local';
 
 // 执行器注册表（local 模式用，延迟 require 避免循环依赖）
 let _executor = null;
@@ -26,7 +22,7 @@ function getRExecutor() {
   return _executor;
 }
 
-// 存储适配器（local 模式用本地文件，web 模式用 OSS）
+// 本地文件存储适配器
 let _storage = null;
 function getStorage() {
   if (!_storage) {
@@ -36,10 +32,8 @@ function getStorage() {
   return _storage;
 }
 
-// 路径：local 模式用 config.tempDir（可配），docker 模式用原有硬编码
-const TEMP_DIR = IS_LOCAL ? (config.tempDir || '/tmp/biof3-tmp') : '/mnt/storage_16tb/omichub/biof3-tmp';
-const CONTAINER_TEMP_DIR = IS_LOCAL ? TEMP_DIR : '/app/data/biof3-tmp';
-const R_CONTAINER = 'omichub_react_backend_1';
+const TEMP_DIR = config.tempDir || '/tmp/biof3-tmp';
+const CONTAINER_TEMP_DIR = TEMP_DIR;
 const TIMEOUT_MS = 30000;
 
 // ── Rate limiting (simple in-memory, per-IP) ──────────────────
@@ -140,17 +134,8 @@ function proxyToR(rPath, reqBody, res) {
 }
 
 function getContainerIp() {
-  // local 模式：plumber 跑在 localhost
-  if (IS_LOCAL) return '127.0.0.1';
-  try {
-    return execSync(
-      "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' omichub_react_backend_1"
-    )
-      .toString()
-      .trim();
-  } catch {
-    return '127.0.0.1';
-  }
+  // 本地：plumber 跑在 localhost
+  return '127.0.0.1';
 }
 
 // ── Route registration ────────────────────────────────────────
@@ -216,17 +201,11 @@ while (dev.cur() > 1) dev.off()
     const scriptPath = path.join(workDir, 'run.R');
     fs.writeFileSync(scriptPath, rScript);
 
-    // local 模式：直接调 Rscript；docker 模式：走 docker exec
-    let execCmd, execArgs;
-    if (IS_LOCAL) {
-      const executor = getRExecutor();
-      const spawnCmd = executor.buildSpawnCommand(`${workDir}/run.R`, workDir, {});
-      execCmd = spawnCmd.cmd;
-      execArgs = spawnCmd.args;
-    } else {
-      execCmd = 'docker';
-      execArgs = [...config.dockerExecArgs(), 'Rscript', '--vanilla', `${containerWorkDir}/run.R`];
-    }
+    // 本地执行：直接调内嵌 Rscript
+    const executor = getRExecutor();
+    const spawnCmd = executor.buildSpawnCommand(`${workDir}/run.R`, workDir, {});
+    const execCmd = spawnCmd.cmd;
+    const execArgs = spawnCmd.args;
 
     execFile(
       execCmd,
@@ -261,7 +240,7 @@ while (dev.cur() > 1) dev.off()
     );
   });
 
-  // ── Replot API — proxy to R plumber service inside Docker (port 8787) ──
+  // ── Replot API — proxy to local R plumber service (port 8787) ──
   app.post('/api/replot/warmup', rComputeOnly, (req, res) => {
     const { taskId, cachePath } = req.body;
     if (!taskId || !cachePath) {
@@ -289,25 +268,6 @@ while (dev.cur() > 1) dev.off()
       .on('error', (e) => res.status(502).json({ status: 'error', error: e.message }));
   });
 
-  // ── R container pre-warm (best-effort, async) ────────────────
-  if (!IS_PLATFORM) {
-    execFile(
-      'docker',
-      [
-        'exec',
-        R_CONTAINER,
-        'Rscript',
-        '--vanilla',
-        '-e',
-        'suppressMessages(library(ggplot2)); cat("warmed\\n")',
-      ],
-      { timeout: 30000 },
-      (err, out) => {
-        if (out && out.includes('warmed'))
-          console.log('  R container warmed (ggplot2 loaded in ' + R_CONTAINER + ')');
-      }
-    );
-  }
 }
 
 module.exports = { registerRCompute, rComputeOnly };
