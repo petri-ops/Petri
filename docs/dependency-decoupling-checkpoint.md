@@ -90,6 +90,16 @@
   `d6b6eaf`、`cbaac59`、`5141fac`、`a469bcf`、`db2e357`、`d29588b`、
   `1940b42`、`45f7f26`、`c577c21`。
 
+### #3i — 桌面身份与本地 API 最终收口
+
+- 删除 R/Python 的 `localMode`、JWT、API token、internal token 分支及仅被这些
+  分支使用的依赖；两个后端恒使用固定 `local-user` 身份。
+- R/Python HTTP 服务改为只监听 `127.0.0.1`，不再暴露到所有网卡。
+- 删除重复的 `/api/internal/tools/*` Web/ECS 路由；工具只保留桌面本地 API，
+  继续复用唯一 `tool_job` 与 artifact truth 链。
+- 修复 docs index 调用已删除 `_isLocalMode()` 的运行时错误；本地索引恒优先。
+- 主要提交：`f43a6d8`、`ceb3269`、`aee3100`。
+
 ### 实机验证
 
 `npm run dev` 实测：Vite:3000 + r-server:3001 + py-server:3004 全部起来；`storage active: local`（OSS 移除生效）、SQLite migrations applied（PG 移除生效）、PyWorker 用内嵌 Python 直接 spawn 就绪（docker 移除生效）；渲染进程加载完成。
@@ -102,7 +112,7 @@
 | 存储 | 本地文件（`LocalFileStorage`，无模式开关） |
 | 数据库 | SQLite（`better-sqlite3`） |
 | 执行 | 内嵌 R/Python 本地执行，无模式开关 |
-| 运行形态 | 单进程本地全能，无 platform/api/worker 分支 |
+| 运行形态 | 单进程本地全能，后端只监听 loopback，无 platform/api/worker 分支 |
 | 依赖 | server 端不再有 `ali-oss`/`pg`/`deasync`；根 `ali-oss` 仅发布脚本用 |
 
 ## 下阶段建议

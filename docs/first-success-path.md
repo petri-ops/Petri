@@ -113,12 +113,11 @@ build artifacts; Windows follows in Week 3.5.
 ```bash
 # 1. Start r-server in local mode (local storage, uses system R)
 cd core/r-server
-BIOF3_LOCAL_MODE=1 \
-  BIOF3_R_HOME=/Library/Frameworks/R.framework/Resources \
-  PORT=3001 BIOF3_TEMP_DIR=/tmp/biof3-tmp BIOF3_CACHE_DIR=/tmp/biof3-cache \
+BIOF3_R_HOME=/Library/Frameworks/R.framework/Resources \
+  R_SERVER_PORT=3003 BIOF3_TEMP_DIR=/tmp/biof3-tmp BIOF3_CACHE_DIR=/tmp/biof3-cache \
   node server.js &
 
-# 2. Run the golden path (server actually listens on 3003, not 3001)
+# 2. Run the golden path
 cd ../..  # back to repo root
 R_BASE=http://localhost:3003 node scripts/golden-path.mjs --skip-install
 
@@ -162,8 +161,7 @@ HEAD == origin/main confirms this is upstream, not a local lag).
   analysis_succeeded_zip_packaging_pending`.
 
 Verified by re-running on 2026-07-14 against the same local r-server config
-(`BIOF3_LOCAL_MODE=1
-BIOF3_R_HOME=/Library/Frameworks/R.framework/Resources`). The new run
+(`BIOF3_R_HOME=/Library/Frameworks/R.framework/Resources`). The new run
 produced a fully-populated run.json (`tmp/golden-path/report/deseq2-job_51d05ccdece3450c.run.json`)
 with 22 artifacts harvested from `/status.result.files`.
 
