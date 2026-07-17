@@ -6,6 +6,7 @@
  */
 
 const providers = require('../../shared-backend/llm-providers');
+const logger = require('../../shared-backend/logger');
 const aiSettings = require('./ai-settings');
 
 function getCredential(credentialRef, profile) {
@@ -18,6 +19,9 @@ const modelGateway = new providers.ModelGateway({
   getSettings: aiSettings.getAiSettings,
   getCredential,
   getProvider: providers.getProvider,
+  recordRouting(event) {
+    logger.warn('[model-gateway] explicit fallback', event);
+  },
 });
 
 module.exports = { modelGateway, getCredential };

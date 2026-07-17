@@ -38,7 +38,7 @@ class DashScopeEmbedProvider {
   async embed(apiKey, texts, _telemetry, options) {
     if (!apiKey) {
       logger.warn('[dashscope] API key 未配置，embedding 跳过');
-      return null;
+      return { error: 'no_api_key', message: 'DashScope API key 未配置' };
     }
     if (!Array.isArray(texts) || texts.length === 0) return [];
 
@@ -87,13 +87,13 @@ class DashScopeEmbedProvider {
                   errorCode: 'http_' + res.statusCode,
                   conversationId: _t.conversationId,
                 });
-                resolve(null);
+                resolve({ error: 'http_error', message: `HTTP ${res.statusCode}`, status: res.statusCode });
                 return;
               }
               const j = JSON.parse(buf);
               const arr = j?.output?.embeddings;
               if (!Array.isArray(arr)) {
-                resolve(null);
+                resolve({ error: 'api_error', message: 'Embedding 响应缺少向量数据' });
                 return;
               }
               arr.sort((a, b) => (a.text_index || 0) - (b.text_index || 0));
@@ -109,21 +109,21 @@ class DashScopeEmbedProvider {
               resolve(out);
             } catch (e) {
               logger.warn(`[dashscope] parse err: ${e.message}`);
-              resolve(null);
+              resolve({ error: 'parse_error', message: e.message });
             }
           });
-          res.on('error', () => resolve(null));
+          res.on('error', (e) => resolve({ error: 'res_error', message: e.message }));
         }
       );
       r.on('error', (e) => {
         logger.warn(`[dashscope] req err: ${e.message}`);
-        resolve(null);
+        resolve({ error: 'req_error', message: e.message });
       });
       r.on('timeout', () => {
         try {
           r.destroy();
         } catch {}
-        resolve(null);
+        resolve({ error: 'timeout', message: 'Embedding 请求超时' });
       });
       r.write(body);
       r.end();

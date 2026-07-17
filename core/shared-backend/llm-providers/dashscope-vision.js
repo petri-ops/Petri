@@ -91,7 +91,12 @@ class DashScopeVisionProvider {
                   errorCode: 'api_error',
                   conversationId: _t.conversationId,
                 });
-                return resolve({ error: parsed.code, message: parsed.message });
+                return resolve({
+                  error: 'api_error',
+                  providerCode: parsed.code,
+                  message: parsed.message,
+                  status: res.statusCode,
+                });
               }
               // 成功格式：{ output: { choices: [{ message: { content: [...] } }] }, usage: {...} }
               const choice =

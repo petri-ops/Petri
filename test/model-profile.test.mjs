@@ -131,3 +131,21 @@ test('duplicate profile ids resolve deterministically to the first profile', () 
   assert.equal(config.profiles.length, 1);
   assert.equal(config.profiles[0].model, 'first');
 });
+
+test('fallback policy is disabled by default and diagnoses invalid candidates', () => {
+  const config = normalizeModelConfig({
+    model_profiles: [
+      { id: 'primary', provider: 'openai', model: 'chat-a', capabilities: ['chat'] },
+      { id: 'embed', provider: 'dashscope', model: 'embed-a', capabilities: ['embedding'] },
+    ],
+    model_role_bindings: { chat: 'primary' },
+    model_fallback_bindings: { chat: ['primary', 'missing', 'embed'] },
+  });
+
+  assert.equal(config.fallbackEnabled, false);
+  assert.deepEqual(config.fallbackBindings.chat, ['primary', 'missing', 'embed']);
+  assert.deepEqual(
+    config.diagnostics.filter((item) => item.role === 'chat' && item.code.startsWith('model_fallback')).map((item) => item.code),
+    ['model_fallback_matches_primary', 'model_fallback_not_found', 'model_fallback_capability_mismatch']
+  );
+});

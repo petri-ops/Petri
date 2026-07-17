@@ -208,12 +208,28 @@ function normalizeRoleBindings(settings, profiles) {
   return bindings;
 }
 
+function normalizeFallbackBindings(settings) {
+  const source = settings && typeof settings === 'object' ? settings : {};
+  const supplied = source.model_fallback_bindings && typeof source.model_fallback_bindings === 'object'
+    ? source.model_fallback_bindings
+    : {};
+  const bindings = {};
+  for (const role of MODEL_ROLES) {
+    const values = Array.isArray(supplied[role]) ? supplied[role] : [];
+    const ids = [...new Set(values.map(_cleanString).filter(Boolean))];
+    if (ids.length) bindings[role] = ids;
+  }
+  return bindings;
+}
+
 function normalizeModelConfig(settings) {
   const profiles = normalizeModelProfiles(settings);
   const config = {
     schemaVersion: MODEL_PROFILE_SCHEMA_VERSION,
     profiles,
     roleBindings: normalizeRoleBindings(settings, profiles),
+    fallbackEnabled: settings && settings.model_fallback_enabled === true,
+    fallbackBindings: normalizeFallbackBindings(settings),
   };
   return { ...config, diagnostics: validateModelConfig(config) };
 }
@@ -223,6 +239,9 @@ function validateModelConfig(config) {
   const profiles = config && Array.isArray(config.profiles) ? config.profiles : [];
   const roleBindings = config && config.roleBindings && typeof config.roleBindings === 'object'
     ? config.roleBindings
+    : {};
+  const fallbackBindings = config && config.fallbackBindings && typeof config.fallbackBindings === 'object'
+    ? config.fallbackBindings
     : {};
   const byId = new Map(profiles.map((profile) => [profile.id, profile]));
 
@@ -255,6 +274,33 @@ function validateModelConfig(config) {
         requiredCapability: capability,
         message: `模型 ${profile.label} 不支持 ${capability} 能力（任务角色: ${role}）`,
       });
+    }
+
+    for (const fallbackId of fallbackBindings[role] || []) {
+      const fallback = byId.get(fallbackId);
+      if (fallbackId === profileId) {
+        diagnostics.push({
+          code: 'model_fallback_matches_primary',
+          role,
+          profileId: fallbackId,
+          message: `模型角色 ${role} 的 fallback 与主模型相同: ${fallbackId}`,
+        });
+      } else if (!fallback) {
+        diagnostics.push({
+          code: 'model_fallback_not_found',
+          role,
+          profileId: fallbackId,
+          message: `模型角色 ${role} 的 fallback 不存在: ${fallbackId}`,
+        });
+      } else if (!fallback.capabilities.includes(capability)) {
+        diagnostics.push({
+          code: 'model_fallback_capability_mismatch',
+          role,
+          profileId: fallbackId,
+          requiredCapability: capability,
+          message: `Fallback 模型 ${fallback.label} 不支持 ${capability} 能力（任务角色: ${role}）`,
+        });
+      }
     }
   }
   return diagnostics;
@@ -293,6 +339,7 @@ module.exports = {
   inferCapabilities,
   normalizeModelProfile,
   legacyPresetToProfile,
+  normalizeFallbackBindings,
   normalizeModelConfig,
   validateModelConfig,
   resolveModelProfile,

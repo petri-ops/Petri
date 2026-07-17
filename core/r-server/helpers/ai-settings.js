@@ -74,6 +74,8 @@ function normalizeAiSettings(settings) {
   next.model_profile_schema_version = modelConfig.schemaVersion;
   next.model_profiles = modelConfig.profiles;
   next.model_role_bindings = modelConfig.roleBindings;
+  next.model_fallback_enabled = modelConfig.fallbackEnabled;
+  next.model_fallback_bindings = modelConfig.fallbackBindings;
   next.model_config_diagnostics = modelConfig.diagnostics;
   next.deepseek_configured = !!(next.deepseek_api_key || process.env.DEEPSEEK_API_KEY);
   next.dashscope_configured = !!(next.dashscope_api_key || process.env.DASHSCOPE_API_KEY);

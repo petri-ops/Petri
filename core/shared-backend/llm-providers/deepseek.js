@@ -126,9 +126,19 @@ class DeepSeekProvider {
           res.on('end', () => {
             try {
               const parsed = JSON.parse(buffer);
+              if (res.statusCode < 200 || res.statusCode >= 300) {
+                const message = (parsed.error && parsed.error.message) || `HTTP ${res.statusCode}`;
+                finish({ error: 'http_error', message, status: res.statusCode }, 'http_error');
+                return;
+              }
               finish(parsed, parsed && parsed.error ? 'api_error' : null, parsed && parsed.usage);
             } catch (error) {
-              finish({ error: 'parse_error', message: error.message }, 'parse_error');
+              const status = Number(res.statusCode);
+              finish({
+                error: status >= 400 ? 'http_error' : 'parse_error',
+                message: status >= 400 ? (buffer || `HTTP ${status}`) : error.message,
+                ...(Number.isFinite(status) ? { status } : {}),
+              }, status >= 400 ? 'http_error' : 'parse_error');
             }
           });
           res.on('error', (error) =>
@@ -192,8 +202,8 @@ class DeepSeekProvider {
         recordAiUsage(usageArgs(t, body, startedAt, usage, errorCode));
         resolve(result);
       };
-      const fail = (code, message) => {
-        const result = { error: code, message };
+      const fail = (code, message, details) => {
+        const result = { error: code, message, ...(details || {}) };
         emit({ type: 'error', error: code, message });
         finish(result, code);
       };
@@ -291,7 +301,7 @@ class DeepSeekProvider {
                 const parsed = JSON.parse(errorBuffer);
                 message = (parsed.error && parsed.error.message) || message;
               } catch {}
-              fail('http_error', message);
+              fail('http_error', message, { status: res.statusCode });
               return;
             }
             processFrames();

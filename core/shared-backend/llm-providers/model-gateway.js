@@ -13,14 +13,49 @@ function gatewayError(error, message, details) {
   return { error, message, ...(details || {}) };
 }
 
+const RETRYABLE_ERROR_CODES = new Set([
+  'network_error',
+  'req_error',
+  'res_error',
+  'timeout',
+  'parse_error',
+  'http_error',
+  'api_error',
+]);
+
+function errorCode(result) {
+  if (!result || !result.error) return '';
+  if (typeof result.error === 'string') return result.error;
+  return String(result.error.code || result.error.type || 'api_error');
+}
+
+function isRetryableProviderError(result) {
+  const code = errorCode(result);
+  if (!code || code === 'aborted' || code === 'no_api_key' || code === 'serialize_error') return false;
+  const status = Number(result && (result.status || result.statusCode));
+  if (Number.isFinite(status)) {
+    return status === 408 || status === 409 || status === 425 || status === 429 || status >= 500;
+  }
+  return RETRYABLE_ERROR_CODES.has(code);
+}
+
+function routingReason(result) {
+  const status = Number(result && (result.status || result.statusCode));
+  return {
+    code: errorCode(result) || 'provider_failure',
+    ...(Number.isFinite(status) ? { status } : {}),
+  };
+}
+
 class ModelGateway {
-  constructor({ getSettings, getCredential, getProvider }) {
+  constructor({ getSettings, getCredential, getProvider, recordRouting }) {
     if (typeof getSettings !== 'function') throw new Error('ModelGateway requires getSettings');
     if (typeof getCredential !== 'function') throw new Error('ModelGateway requires getCredential');
     if (typeof getProvider !== 'function') throw new Error('ModelGateway requires getProvider');
     this._getSettings = getSettings;
     this._getCredential = getCredential;
     this._getProvider = getProvider;
+    this._recordRouting = typeof recordRouting === 'function' ? recordRouting : () => {};
   }
 
   getConfig() {
@@ -47,67 +82,182 @@ class ModelGateway {
     return { profile, provider, apiKey };
   }
 
-  async chat({ role = 'chat', profileId, body, telemetry, onEvent, signal, apiKeyOverride } = {}) {
-    const prepared = this._prepare(role, profileId, apiKeyOverride);
-    if (prepared.error) return prepared;
-    const { profile, provider, apiKey } = prepared;
-    if (typeof provider.chat !== 'function') {
-      return gatewayError('provider_method_missing', `Provider ${profile.provider} 不支持 chat`, {
-        profileId: profile.id,
-      });
-    }
-    const requestBody = {
-      ...(profile.parameters || {}),
-      ...(body || {}),
-      model: profile.model,
+  _fallbackProfileIds(role, primaryId) {
+    const config = this.getConfig();
+    if (!config.fallbackEnabled) return [];
+    const candidates = config.fallbackBindings[role] || [];
+    return candidates.filter((id) => id !== primaryId);
+  }
+
+  _withRouting(result, role, profileId, fallbackFrom, reason) {
+    if (!result || typeof result !== 'object') return result;
+    return {
+      ...result,
+      modelRouting: {
+        role,
+        profileId,
+        ...(fallbackFrom ? { fallbackFrom, fallbackReason: reason } : {}),
+      },
     };
-    const options = { baseUrl: profile.baseUrl, signal, profile };
-    if (typeof onEvent === 'function' && typeof provider.chatStream === 'function') {
-      return provider.chatStream(apiKey, requestBody, telemetry || {}, onEvent, options);
-    }
-    const result = await provider.chat(apiKey, requestBody, telemetry || {}, options);
-    if (typeof onEvent === 'function' && result && !result.error) {
-      const content = result.choices && result.choices[0] && result.choices[0].message
-        ? result.choices[0].message.content || ''
-        : '';
-      if (content) onEvent({ type: 'content_delta', content });
-      onEvent({ type: 'done', usage: result.usage });
-    }
-    return result;
   }
 
-  async vision({ profileId, body, telemetry, apiKeyOverride } = {}) {
-    const prepared = this._prepare('vision', profileId, apiKeyOverride);
-    if (prepared.error) return prepared;
-    const { profile, provider, apiKey } = prepared;
-    if (typeof provider.chat !== 'function') {
-      return gatewayError('provider_method_missing', `Provider ${profile.provider} 不支持 vision`, {
-        profileId: profile.id,
-      });
-    }
-    return provider.chat(
-      apiKey,
-      { ...(body || {}), model: profile.model },
-      telemetry || {},
-      { baseUrl: profile.baseUrl, profile }
-    );
+  _recordFallback(role, fromProfileId, toProfileId, reason) {
+    const event = { role, fromProfileId, toProfileId, reason };
+    try {
+      this._recordRouting({ type: 'model_fallback', ...event });
+    } catch {}
+    return event;
   }
 
-  async embed({ profileId, texts, telemetry, apiKeyOverride } = {}) {
-    const prepared = this._prepare('embedding', profileId, apiKeyOverride);
-    if (prepared.error) return prepared;
-    const { profile, provider, apiKey } = prepared;
-    if (typeof provider.embed !== 'function') {
-      return gatewayError('provider_method_missing', `Provider ${profile.provider} 不支持 embedding`, {
-        profileId: profile.id,
-      });
+  async chat({ role = 'chat', profileId, body, telemetry, onEvent, signal, apiKeyOverride } = {}) {
+    const primary = this._prepare(role, profileId, apiKeyOverride);
+    if (primary.error) return primary;
+    const attempts = [primary.profile.id, ...this._fallbackProfileIds(role, primary.profile.id)];
+    let lastResult;
+    let previousProfileId;
+    let previousReason;
+    for (let index = 0; index < attempts.length; index += 1) {
+      const prepared = index === 0 ? primary : this._prepare(role, attempts[index]);
+      if (prepared.error) {
+        lastResult = prepared;
+        continue;
+      }
+      const { profile, provider, apiKey } = prepared;
+      const canStream = typeof onEvent === 'function' && typeof provider.chatStream === 'function';
+      if (typeof provider.chat !== 'function' && !canStream) {
+        lastResult = gatewayError('provider_method_missing', `Provider ${profile.provider} 不支持 chat`, {
+          profileId: profile.id,
+        });
+        continue;
+      }
+      if (index > 0 && typeof onEvent === 'function') {
+        const fallback = this._recordFallback(role, previousProfileId, profile.id, previousReason);
+        onEvent({
+          type: 'model_fallback',
+          ...fallback,
+        });
+      } else if (index > 0) {
+        this._recordFallback(role, previousProfileId, profile.id, previousReason);
+      }
+      const requestBody = {
+        ...(profile.parameters || {}),
+        ...(body || {}),
+        model: profile.model,
+      };
+      const options = { baseUrl: profile.baseUrl, signal, profile };
+      let emittedOutput = false;
+      let result;
+      if (canStream) {
+        result = await provider.chatStream(apiKey, requestBody, telemetry || {}, (event) => {
+          if (event && (event.type === 'content_delta' || event.type === 'tool_call_delta')) emittedOutput = true;
+          // Hold a failed attempt's terminal error until the gateway decides
+          // whether it will switch. Output and successful events remain live.
+          if (!event || event.type !== 'error') onEvent(event);
+        }, options);
+      } else {
+        result = await provider.chat(apiKey, requestBody, telemetry || {}, options);
+      }
+      const canFallback = !emittedOutput && isRetryableProviderError(result) && index < attempts.length - 1;
+      if (canFallback) {
+        previousProfileId = profile.id;
+        previousReason = routingReason(result);
+        lastResult = result;
+        continue;
+      }
+      if (typeof onEvent === 'function' && result && result.error) {
+        onEvent({ type: 'error', error: errorCode(result), message: result.message });
+      } else if (typeof onEvent === 'function' && result && !result.error && typeof provider.chatStream !== 'function') {
+        const content = result.choices && result.choices[0] && result.choices[0].message
+          ? result.choices[0].message.content || ''
+          : '';
+        if (content) onEvent({ type: 'content_delta', content });
+        onEvent({ type: 'done', usage: result.usage });
+      }
+      return this._withRouting(result, role, profile.id, index > 0 ? previousProfileId : undefined, previousReason);
     }
-    return provider.embed(apiKey, texts, telemetry || {}, {
-      baseUrl: profile.baseUrl,
-      model: profile.model,
-      parameters: profile.parameters,
-      profile,
-    });
+    return lastResult;
+  }
+
+  async vision({ profileId, body, telemetry, apiKeyOverride, onEvent } = {}) {
+    const primary = this._prepare('vision', profileId, apiKeyOverride);
+    if (primary.error) return primary;
+    const attempts = [primary.profile.id, ...this._fallbackProfileIds('vision', primary.profile.id)];
+    let previousProfileId;
+    let previousReason;
+    let lastResult;
+    for (let index = 0; index < attempts.length; index += 1) {
+      const prepared = index === 0 ? primary : this._prepare('vision', attempts[index]);
+      if (prepared.error) {
+        lastResult = prepared;
+        continue;
+      }
+      const { profile, provider, apiKey } = prepared;
+      if (typeof provider.chat !== 'function') {
+        lastResult = gatewayError('provider_method_missing', `Provider ${profile.provider} 不支持 vision`, {
+          profileId: profile.id,
+        });
+        continue;
+      }
+      if (index > 0) {
+        const fallback = this._recordFallback('vision', previousProfileId, profile.id, previousReason);
+        if (typeof onEvent === 'function') onEvent({ type: 'model_fallback', ...fallback });
+      }
+      const result = await provider.chat(
+        apiKey,
+        { ...(body || {}), model: profile.model },
+        telemetry || {},
+        { baseUrl: profile.baseUrl, profile }
+      );
+      if (isRetryableProviderError(result) && index < attempts.length - 1) {
+        previousProfileId = profile.id;
+        previousReason = routingReason(result);
+        lastResult = result;
+        continue;
+      }
+      return this._withRouting(result, 'vision', profile.id, index > 0 ? previousProfileId : undefined, previousReason);
+    }
+    return lastResult;
+  }
+
+  async embed({ profileId, texts, telemetry, apiKeyOverride, onEvent } = {}) {
+    const primary = this._prepare('embedding', profileId, apiKeyOverride);
+    if (primary.error) return primary;
+    const attempts = [primary.profile.id, ...this._fallbackProfileIds('embedding', primary.profile.id)];
+    let previousProfileId;
+    let previousReason;
+    let lastResult;
+    for (let index = 0; index < attempts.length; index += 1) {
+      const prepared = index === 0 ? primary : this._prepare('embedding', attempts[index]);
+      if (prepared.error) {
+        lastResult = prepared;
+        continue;
+      }
+      const { profile, provider, apiKey } = prepared;
+      if (typeof provider.embed !== 'function') {
+        lastResult = gatewayError('provider_method_missing', `Provider ${profile.provider} 不支持 embedding`, {
+          profileId: profile.id,
+        });
+        continue;
+      }
+      if (index > 0) {
+        const fallback = this._recordFallback('embedding', previousProfileId, profile.id, previousReason);
+        if (typeof onEvent === 'function') onEvent({ type: 'model_fallback', ...fallback });
+      }
+      const result = await provider.embed(apiKey, texts, telemetry || {}, {
+        baseUrl: profile.baseUrl,
+        model: profile.model,
+        parameters: profile.parameters,
+        profile,
+      });
+      if (isRetryableProviderError(result) && index < attempts.length - 1) {
+        previousProfileId = profile.id;
+        previousReason = routingReason(result);
+        lastResult = result;
+        continue;
+      }
+      return result && result.error ? null : result;
+    }
+    return lastResult && lastResult.error ? null : lastResult;
   }
 
   async healthCheck(profileId, apiKeyOverride) {
@@ -125,4 +275,4 @@ class ModelGateway {
   }
 }
 
-module.exports = { ModelGateway, gatewayError };
+module.exports = { ModelGateway, gatewayError, isRetryableProviderError };

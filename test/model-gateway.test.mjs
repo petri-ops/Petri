@@ -3,7 +3,7 @@ import test from 'node:test';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { ModelGateway } = require('../core/shared-backend/llm-providers/model-gateway.js');
+const { ModelGateway, isRetryableProviderError } = require('../core/shared-backend/llm-providers/model-gateway.js');
 const { parseJsonText, responseText } = require('../core/r-server/helpers/model-tasks.js');
 
 function createGateway(overrides = {}) {
@@ -108,4 +108,140 @@ test('model task helpers normalize text and fenced JSON-like output', () => {
   assert.deepEqual(parseJsonText('answer:\n{"ok":true}\nend'), { ok: true });
   assert.deepEqual(parseJsonText('prefix [1,2,3] suffix'), [1, 2, 3]);
   assert.equal(parseJsonText('not-json'), null);
+});
+
+test('gateway only falls back when explicitly enabled and records the switch', async () => {
+  const calls = [];
+  const providers = {
+    first: {
+      async chatStream(_key, _body, _telemetry, onEvent) {
+        calls.push('first');
+        onEvent({ type: 'error', error: 'http_error', message: 'busy' });
+        return { error: 'http_error', message: 'busy', status: 503 };
+      },
+    },
+    second: {
+      async chatStream(_key, _body, _telemetry, onEvent) {
+        calls.push('second');
+        onEvent({ type: 'content_delta', content: 'recovered' });
+        onEvent({ type: 'done' });
+        return { choices: [{ message: { content: 'recovered' } }] };
+      },
+    },
+  };
+  const gateway = new ModelGateway({
+    getSettings: () => ({
+      model_profiles: [
+        { id: 'a', provider: 'first', model: 'a', capabilities: ['chat', 'streaming'] },
+        { id: 'b', provider: 'second', model: 'b', capabilities: ['chat', 'streaming'] },
+      ],
+      model_role_bindings: { chat: 'a' },
+      model_fallback_enabled: true,
+      model_fallback_bindings: { chat: ['b'] },
+    }),
+    getCredential: () => 'key',
+    getProvider: (name) => providers[name],
+  });
+  const events = [];
+  const result = await gateway.chat({ body: { messages: [] }, onEvent: (event) => events.push(event) });
+
+  assert.deepEqual(calls, ['first', 'second']);
+  assert.equal(events.some((event) => event.type === 'error'), false);
+  assert.deepEqual(events.find((event) => event.type === 'model_fallback'), {
+    type: 'model_fallback',
+    role: 'chat',
+    fromProfileId: 'a',
+    toProfileId: 'b',
+    reason: { code: 'http_error', status: 503 },
+  });
+  assert.deepEqual(result.modelRouting, {
+    role: 'chat',
+    profileId: 'b',
+    fallbackFrom: 'a',
+    fallbackReason: { code: 'http_error', status: 503 },
+  });
+});
+
+test('gateway does not switch on auth errors or after streamed output begins', async () => {
+  for (const failure of [
+    { result: { error: 'api_error', status: 401 }, emitContent: false },
+    { result: { error: 'timeout' }, emitContent: true },
+  ]) {
+    const calls = [];
+    const gateway = new ModelGateway({
+      getSettings: () => ({
+        model_profiles: [
+          { id: 'a', provider: 'first', model: 'a', capabilities: ['chat', 'streaming'] },
+          { id: 'b', provider: 'second', model: 'b', capabilities: ['chat', 'streaming'] },
+        ],
+        model_role_bindings: { chat: 'a' },
+        model_fallback_enabled: true,
+        model_fallback_bindings: { chat: ['b'] },
+      }),
+      getCredential: () => 'key',
+      getProvider: (name) => ({
+        async chatStream(_key, _body, _telemetry, onEvent) {
+          calls.push(name);
+          if (failure.emitContent) onEvent({ type: 'content_delta', content: 'partial' });
+          return failure.result;
+        },
+      }),
+    });
+    await gateway.chat({ body: { messages: [] }, onEvent: () => {} });
+    assert.deepEqual(calls, ['first']);
+  }
+});
+
+test('retryable provider errors are classified without retrying configuration failures', () => {
+  assert.equal(isRetryableProviderError({ error: 'timeout' }), true);
+  assert.equal(isRetryableProviderError({ error: 'api_error', status: 429 }), true);
+  assert.equal(isRetryableProviderError({ error: 'api_error', status: 500 }), true);
+  assert.equal(isRetryableProviderError({ error: 'api_error', status: 401 }), false);
+  assert.equal(isRetryableProviderError({ error: 'no_api_key' }), false);
+  assert.equal(isRetryableProviderError({ error: 'aborted' }), false);
+});
+
+test('vision and embedding use the same explicit fallback policy and audit callback', async () => {
+  const routing = [];
+  const calls = [];
+  const gateway = new ModelGateway({
+    getSettings: () => ({
+      model_profiles: [
+        { id: 'vision-a', provider: 'vision-a', model: 'va', capabilities: ['vision'] },
+        { id: 'vision-b', provider: 'vision-b', model: 'vb', capabilities: ['vision'] },
+        { id: 'embed-a', provider: 'embed-a', model: 'ea', capabilities: ['embedding'] },
+        { id: 'embed-b', provider: 'embed-b', model: 'eb', capabilities: ['embedding'] },
+      ],
+      model_role_bindings: { vision: 'vision-a', embedding: 'embed-a' },
+      model_fallback_enabled: true,
+      model_fallback_bindings: { vision: ['vision-b'], embedding: ['embed-b'] },
+    }),
+    getCredential: () => 'key',
+    getProvider: (name) => ({
+      async chat() {
+        calls.push(name);
+        return name === 'vision-a'
+          ? { error: 'network_error', message: 'offline' }
+          : { ok: true, content: 'seen' };
+      },
+      async embed() {
+        calls.push(name);
+        return name === 'embed-a'
+          ? { error: 'timeout', message: 'slow' }
+          : [Float32Array.from([0.5])];
+      },
+    }),
+    recordRouting: (event) => routing.push(event),
+  });
+
+  const vision = await gateway.vision({ body: { messages: [] } });
+  const vectors = await gateway.embed({ texts: ['abc'] });
+  assert.equal(vision.content, 'seen');
+  assert.equal(vision.modelRouting.fallbackFrom, 'vision-a');
+  assert.equal(vectors[0][0], 0.5);
+  assert.deepEqual(calls, ['vision-a', 'vision-b', 'embed-a', 'embed-b']);
+  assert.deepEqual(routing.map((event) => [event.role, event.fromProfileId, event.toProfileId]), [
+    ['vision', 'vision-a', 'vision-b'],
+    ['embedding', 'embed-a', 'embed-b'],
+  ]);
 });
