@@ -16,6 +16,7 @@
 | 🟡建议 | 2026-07-17 | Stage 3 M1: `tools-executor.js` 与 `mcp/registry.js` 的 R_LIBS_USER 组装逻辑重复约 25 行 | 本文件 §3 | [§3 问题 A](#问题-a代码重复r-libs-user-组装逻辑) |
 | 🟡建议 | 2026-07-17 | Stage 3 M1: 两处 `catch {}` 静默吞掉所有错误，调试困难 | 本文件 §3 | [§3 问题 B](#问题-b静默-catch-吞掉所有错误) |
 | 🟡建议 | 2026-07-17 | Stage 3 M1: `capability-provisioning.js` 的 defaultDownload 未复用 plugin-manager 且无 host 白名单 | 本文件 §3 | [§3 问题 C](#问题-cdefaultdownload-未复用-plugin-manager) |
+| 🟡建议 | 2026-07-17 | Stage 3 M1: `defaultDownload` 缺少 host 白名单，设计文档 D4 要求，M2 扩展分发源前需修复 | stage3-m1-audit | [§3 问题 D](#问题-ddefaultdownload-缺少-host-白名单) |
 | 🟢待合并 | 2026-07-17 | `fix/qa-smoke-stale-css-paths` 分支待合并，零冲突 | 分支备忘录 | [§2.1](#21-fixqa-smoke-stale-css-paths-) |
 | 🟡待评估 | 2026-07-17 | `codex/fix-collapsed-right-titlebar` 分支待评估，三文件两边改过 | 分支备忘录 | [§2.2](#22-codexfix-collapsed-right-titlebar-) |
 | ⚪可清理 | 2026-07-17 | 5 个 codex/* 已合并残留分支可删除 | 分支备忘录 | [§2.3](#23-已合并残留分支可安全删除-) |
@@ -133,6 +134,17 @@ git branch -D codex/fix-collapsed-right-titlebar-minimal \
 - **优先级**：低
 - **对验收影响**:无
 
+### 问题 D：defaultDownload 缺少 host 白名单
+
+- **位置**：`core/shared-backend/capability-provisioning.js` 的 `defaultDownload` 函数
+- **现象**：直接 `https.get(options.url)`，无 host 白名单校验
+- **设计文档要求**：第 5.5 节明确提到"host 走白名单"
+- **当前风险评估**：低 -- M1 阶段 URL 来源是内置 `CAPABILITIES` 常量，非用户直接输入
+- **建议**：在 M2 扩展分发源前补上 host 白名单，复用 plugin-manager 的 host 白名单逻辑
+- **优先级**：中（当前低风险，但应在 M2 前修复）
+- **对验收影响**：不阻塞 M1
+- **详细报告**：`docs/stage3-m1-audit.md`
+
 ---
 
 ## 审计发现追加规范
@@ -158,3 +170,4 @@ git branch -D codex/fix-collapsed-right-titlebar-minimal \
 | 2026-07-17 | 建立审计广播台，汇总 Stage 2 验收审计 + 分支备忘录的发现 | 非主 agent |
 | 2026-07-17 | Stage 2 验收审计归档（主 agent 已完成验收） | 非主 agent |
 | 2026-07-17 | 追加 Stage 3 M1 capability-provisioning 审计（3 条建议级） | 非主 agent |
+| 2026-07-17 | 追加 Stage 3 M1 深度审计报告（不变量/约束/安全），新增问题 D（host 白名单） | 非主 agent |
