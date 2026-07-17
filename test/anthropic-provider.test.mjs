@@ -5,6 +5,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const { AnthropicProvider } = require('../core/shared-backend/llm-providers/anthropic.js');
+const aiUsageHelper = require('../core/shared-backend/ai-usage-helper.js');
 
 function startServer(handler) {
   return new Promise((resolve) => {
@@ -163,6 +164,46 @@ test('Anthropic provider propagates AbortSignal as a standardized cancel', async
     );
     assert.equal(result.error, 'aborted');
   } finally {
+    await closeServer(server);
+  }
+});
+
+test('Anthropic non-streaming chat records usage tokens and a finite latency once', async () => {
+  const usageRecords = [];
+  aiUsageHelper.configure({ recordAiUsage: (record) => usageRecords.push(record) });
+  const { server, baseUrl } = await startServer((req, res) => {
+    req.resume();
+    req.on('end', () => {
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({
+        id: 'message-usage',
+        type: 'message',
+        role: 'assistant',
+        model: 'claude-test',
+        content: [{ type: 'text', text: 'done' }],
+        stop_reason: 'end_turn',
+        usage: { input_tokens: 7, output_tokens: 3 },
+      }));
+    });
+  });
+  try {
+    const result = await new AnthropicProvider().chat(
+      'secret',
+      { model: 'claude-test', messages: [{ role: 'user', content: 'hi' }] },
+      { userId: 'u-1', kind: 'agent_iter' },
+      { baseUrl }
+    );
+    assert.equal(result.choices[0].message.content, 'done');
+    assert.equal(usageRecords.length, 1);
+    const record = usageRecords[0];
+    assert.equal(record.promptTokens, 7);
+    assert.equal(record.completionTokens, 3);
+    assert.equal(record.model, 'claude-test');
+    assert.equal(record.errorCode, null);
+    assert.equal(Number.isFinite(record.latencyMs), true);
+    assert.equal(record.latencyMs >= 0, true);
+  } finally {
+    aiUsageHelper.configure({ recordAiUsage: () => {} });
     await closeServer(server);
   }
 });
