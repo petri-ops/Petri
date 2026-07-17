@@ -11,7 +11,8 @@ const aiSettings = require('./ai-settings');
 
 function getCredential(credentialRef, profile) {
   const ref = String(credentialRef || '');
-  if (ref.startsWith('provider:')) return aiSettings.getApiKey(ref.slice('provider:'.length));
+  const separator = ref.indexOf(':');
+  if (separator >= 0 && ref.slice(separator + 1)) return aiSettings.getApiKey(ref.slice(separator + 1));
   return aiSettings.getApiKey((profile && profile.provider) || ref);
 }
 

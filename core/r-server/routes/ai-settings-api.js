@@ -9,43 +9,24 @@ const express = require('express');
 const { getAiSettings, saveAiSettings, testApiKey, getChatProviderName, getEmbedProviderName } = require('../helpers/ai-settings');
 
 function registerAiSettingsRoutes(app) {
-  // 获取当前 AI 设置（不返回完整 key，只返回 mask 后的）
+  // 获取当前 AI 设置。密钥已与普通设置分离，因此这里不会出现明文 key。
   app.get('/api/ai/settings', (req, res) => {
     const settings = getAiSettings();
-    const masked = {};
-    for (const [key, value] of Object.entries(settings)) {
-      if (key.endsWith('_api_key') && typeof value === 'string' && value.length > 8) {
-        masked[key] = value.slice(0, 4) + '****' + value.slice(-4);
-        masked[key + '_configured'] = true;
-      } else if (key.endsWith('_api_key')) {
-        masked[key] = value ? '****' : '';
-        masked[key + '_configured'] = !!value;
-      } else {
-        masked[key] = value;
-      }
-    }
-    masked.chat_provider = getChatProviderName();
-    masked.embed_provider = getEmbedProviderName();
-    res.json({ status: 'ok', settings: masked });
+    res.json({
+      status: 'ok',
+      settings: {
+        ...settings,
+        chat_provider: getChatProviderName(),
+        embed_provider: getEmbedProviderName(),
+      },
+    });
   });
 
   // 保存 AI 设置
   app.post('/api/ai/settings', express.json(), (req, res) => {
     const incoming = req.body || {};
     const current = getAiSettings();
-    // 合并：只更新传入的字段（空 key 不覆盖已有 key）
-    const merged = { ...current };
-    for (const [key, value] of Object.entries(incoming)) {
-      if (key.endsWith('_api_key')) {
-        // 空字符串不覆盖（前端可能发空表示不改）
-        if (value && value.length > 0) {
-          merged[key] = value;
-        }
-      } else {
-        merged[key] = value;
-      }
-    }
-    saveAiSettings(merged);
+    saveAiSettings({ ...current, ...incoming });
     res.json({ status: 'ok' });
   });
 

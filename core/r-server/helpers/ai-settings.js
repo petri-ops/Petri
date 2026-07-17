@@ -1,22 +1,24 @@
 /**
  * helpers/ai-settings.js — AI 配置本地存储（桌面版）
  *
- * 桌面版用户在设置页填入 API key，存储在本地文件。
+ * 桌面版用户在设置页填入 API key，密钥由 credential-store 单独保存。
  * Web 版不使用此模块（走 process.env.DEEPSEEK_API_KEY / DASHSCOPE_API_KEY）。
  *
  * 文件位置：~/Documents/BioF3-Local/ai-settings.json
  *
- * 安全说明：API key 以明文存储（与 .env 同级别），文档告知用户。
+ * ai-settings.json 永不保存或返回明文 API key。
  */
 
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { normalizeModelConfig } = require('../../shared-backend/llm-providers/model-profile');
+const { createCredentialStore, normalizeProvider } = require('./credential-store');
 
 const SETTINGS_DIR = process.env.BIOF3_LOCAL_DATA_DIR ||
   path.join(os.homedir(), 'Documents', 'BioF3-Local');
 const SETTINGS_FILE = path.join(SETTINGS_DIR, 'ai-settings.json');
+const credentialStore = createCredentialStore({ settingsDir: SETTINGS_DIR });
 
 let _cache = null;
 
@@ -42,7 +44,17 @@ function _ensureDir() {
 function getAiSettings() {
   if (_cache) return _cache;
   try {
-    _cache = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+    const stored = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+    const migrated = _extractCredentialUpdates(stored);
+    for (const [provider, secret] of Object.entries(migrated.credentials)) {
+      credentialStore.set(provider, secret);
+    }
+    _cache = migrated.settings;
+    if (Object.keys(migrated.credentials).length) {
+      _ensureDir();
+      fs.writeFileSync(SETTINGS_FILE, JSON.stringify(_cache, null, 2));
+      fs.chmodSync(SETTINGS_FILE, 0o600);
+    }
   } catch {
     _cache = {};
   }
@@ -61,7 +73,6 @@ function normalizeAiSettings(settings) {
           provider: String(p.provider || 'deepseek').trim(),
           model: String(p.model || 'deepseek-chat').trim(),
           baseUrl: p.baseUrl ? String(p.baseUrl).trim() : undefined,
-          apiKey: p.apiKey ? String(p.apiKey).trim() : undefined,
         }))
         .filter((p) => p.id && p.label && p.provider && p.model)
     : [];
@@ -77,9 +88,45 @@ function normalizeAiSettings(settings) {
   next.model_fallback_enabled = modelConfig.fallbackEnabled;
   next.model_fallback_bindings = modelConfig.fallbackBindings;
   next.model_config_diagnostics = modelConfig.diagnostics;
-  next.deepseek_configured = !!(next.deepseek_api_key || process.env.DEEPSEEK_API_KEY);
-  next.dashscope_configured = !!(next.dashscope_api_key || process.env.DASHSCOPE_API_KEY);
+  const providers = [...new Set(modelConfig.profiles.map((profile) => {
+    const ref = String(profile.credentialRef || '');
+    const separator = ref.indexOf(':');
+    return normalizeProvider(separator >= 0 ? ref.slice(separator + 1) : (ref || profile.provider));
+  }))];
+  next.credential_backend = credentialStore.backend;
+  next.credential_status = Object.fromEntries(providers.map((provider) => [provider, !!getApiKey(provider)]));
+  next.deepseek_configured = !!next.credential_status.deepseek;
+  next.dashscope_configured = !!next.credential_status.dashscope;
   return next;
+}
+
+function _extractCredentialUpdates(input) {
+  const settings = input && typeof input === 'object' ? { ...input } : {};
+  const credentials = {};
+  const explicit = settings.credential_updates && typeof settings.credential_updates === 'object'
+    ? settings.credential_updates
+    : {};
+  for (const [provider, secret] of Object.entries(explicit)) {
+    if (secret) credentials[normalizeProvider(provider)] = String(secret).trim();
+  }
+  delete settings.credential_updates;
+  for (const key of Object.keys(settings)) {
+    if (!key.endsWith('_api_key')) continue;
+    const secret = settings[key];
+    if (secret) credentials[normalizeProvider(key.slice(0, -'_api_key'.length))] = String(secret).trim();
+    delete settings[key];
+  }
+  if (Array.isArray(settings.chat_model_presets)) {
+    settings.chat_model_presets = settings.chat_model_presets.map((preset) => {
+      if (!preset || typeof preset !== 'object') return preset;
+      const { apiKey, ...safePreset } = preset;
+      if (apiKey && safePreset.provider) {
+        credentials[normalizeProvider(safePreset.provider)] = String(apiKey).trim();
+      }
+      return safePreset;
+    });
+  }
+  return { settings, credentials };
 }
 
 function getChatModelPreset(id) {
@@ -97,9 +144,9 @@ function getChatModelPreset(id) {
  * @returns {string} - API key 或空字符串
  */
 function getApiKey(provider) {
-  const settings = getAiSettings();
-  const envKey = `${provider.toUpperCase()}_API_KEY`;
-  return settings[`${provider}_api_key`] || process.env[envKey] || '';
+  const id = normalizeProvider(provider);
+  const envKey = `${id.toUpperCase().replace(/[^A-Z0-9]/g, '_')}_API_KEY`;
+  return credentialStore.get(id) || process.env[envKey] || '';
 }
 
 /**
@@ -126,17 +173,20 @@ function getEmbedProviderName() {
 function saveAiSettings(settings) {
   _ensureDir();
   const prev = getAiSettings();
-  const merged = { ...prev, ...(settings || {}) };
+  const extracted = _extractCredentialUpdates(settings);
+  for (const [provider, secret] of Object.entries(extracted.credentials)) {
+    credentialStore.set(provider, secret);
+  }
+  const merged = { ...prev, ...extracted.settings };
   // The Stage 1 UI still writes chat_model_presets. When it does not also send
   // model_profiles, rebuild profiles from those presets instead of retaining a
   // stale normalized snapshot from the previous read.
-  if (settings && Array.isArray(settings.chat_model_presets) && !Array.isArray(settings.model_profiles)) {
+  if (extracted.settings && Array.isArray(extracted.settings.chat_model_presets) && !Array.isArray(extracted.settings.model_profiles)) {
     delete merged.model_profiles;
   }
-  if (!settings || !settings.deepseek_api_key) merged.deepseek_api_key = prev.deepseek_api_key;
-  if (!settings || !settings.dashscope_api_key) merged.dashscope_api_key = prev.dashscope_api_key;
   _cache = normalizeAiSettings(merged);
   fs.writeFileSync(SETTINGS_FILE, JSON.stringify(_cache, null, 2));
+  fs.chmodSync(SETTINGS_FILE, 0o600);
 }
 
 /**
@@ -166,5 +216,8 @@ module.exports = {
   getEmbedProviderName,
   saveAiSettings,
   testApiKey,
+  normalizeAiSettings,
+  _extractCredentialUpdates,
+  credentialStore,
   SETTINGS_FILE,
 };
