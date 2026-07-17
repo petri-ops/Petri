@@ -19,7 +19,7 @@
 | 🟡建议 | 2026-07-17 | Stage 3 M1: `defaultDownload` 缺少 host 白名单，设计文档 D4 要求，M2 扩展分发源前需修复 | stage3-m1-audit | [§3 问题 D](#问题-ddefaultdownload-缺少-host-白名单) |
 | ✅已处理 | 2026-07-17 | `fix/qa-smoke-stale-css-paths` 已合并，themes 门禁恢复 7/7 | 分支备忘录 | [§2.1](#21-fixqa-smoke-stale-css-paths-) |
 | 🟡待评估 | 2026-07-17 | `codex/fix-collapsed-right-titlebar` 分支待评估，三文件两边改过 | 分支备忘录 | [§2.2](#22-codexfix-collapsed-right-titlebar-) |
-| ⚪可清理 | 2026-07-17 | 5 个 codex/* 已合并残留分支可删除 | 分支备忘录 | [§2.3](#23-已合并残留分支可安全删除-) |
+| ✅已处理 | 2026-07-17 | 5 个 codex/* 已合并残留分支已删除（连带 prune 6 个失效 worktree 注册） | 分支备忘录 | [§2.3](#23-已合并残留分支可安全删除-) |
 | ✅已处理 | 2026-07-17 | `sanitizer.js` 死模块 + 其测试已删除（全仓零生产引用） | 本文件 §4 | [§4 问题 E](#问题-esanitizerjs-死模块) |
 | ✅已处理 | 2026-07-17 | `core/test/` 门禁盲区已收口：3 个单测迁入 `test/*.test.mjs`，死模块测试删除，4 个联网 smoke 保留在 core/test/ | 本文件 §4 | [§4 问题 F](#问题-fcoretest-目录不在门禁范围) |
 | ✅已处理 | 2026-07-17 | `project-run-layout.js` isAdmin 硬编码 → 实现为 `db.getUserById().role === 'admin'`（与 api-data/feedback 一致） | 本文件 §4 | [§4 问题 G](#问题-gproject-run-layoutjs-isadmin-硬编码) |
@@ -61,14 +61,19 @@
 - **合并方式**：建议先 `git diff main...codex/fix-collapsed-right-titlebar` review
 - **合并时机**：人工 review 后
 
-### §2.3 已合并残留分支可安全删除 ⚪
+### §2.3 已合并残留分支可安全删除 ✅
+
+- **状态**：✅ 2026-07-17 已处理（主 agent）。`git branch --merged main` 逐个核实 5 个分支确已合并；发现它们各被 `/private/tmp/` 下的 worktree 占用（且 `/tmp` 已清空，worktree 目录 MISSING、标记 prunable），先 `git worktree prune` 清理陈旧注册，再 `git branch -d`（安全删除，只删已合并）删除。
+- 待评估的 `codex/fix-collapsed-right-titlebar`（§2.2，无 `-minimal` 后缀）不在 `--merged` 列表，已正确排除、保留。
 
 ```bash
-git branch -D codex/fix-collapsed-right-titlebar-minimal \
-             codex/fix-external-webview-height \
-             codex/restore-user-avatar \
-             codex/restore-user-chat-bubble \
-             codex/theme-linked-panels
+# 已执行：
+git worktree prune
+git branch -d codex/fix-collapsed-right-titlebar-minimal \
+              codex/fix-external-webview-height \
+              codex/restore-user-avatar \
+              codex/restore-user-chat-bubble \
+              codex/theme-linked-panels
 ```
 
 ---
@@ -230,3 +235,4 @@ git branch -D codex/fix-collapsed-right-titlebar-minimal \
 | 2026-07-17 | 抽取共享 R_LIBS_USER resolver（问题 A/B），静默 catch → warn | 主 agent |
 | 2026-07-17 | 删除 sanitizer 死模块（问题 E）；core/test 门禁分流：3 单测迁入门禁、删陈旧副本、保留 4 个 live smoke（问题 F）；顺带修 agent-workflow 模板数断言（WGCNA 引入的 CI 潜伏失败） | 主 agent |
 | 2026-07-17 | 处理问题 G：实现 project-run-layout 的 isAdmin（`db.getUserById().role === 'admin'`，防御性回退非管理员），补 3 个权限单测（admin 放行 / 非 admin 拒绝 / 无 getUserById 回退） | 主 agent |
+| 2026-07-17 | 清理 §2.3 5 个已合并 codex 残留分支（worktree prune + branch -d），保留 §2.2 待评估分支 | 主 agent |
