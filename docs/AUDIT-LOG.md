@@ -13,8 +13,8 @@
 
 | 状态 | 日期 | 发现 | 来源 | 详情 |
 |------|------|------|------|------|
-| 🟡建议 | 2026-07-17 | Stage 3 M1: `tools-executor.js` 与 `mcp/registry.js` 的 R_LIBS_USER 组装逻辑重复约 25 行 | 本文件 §3 | [§3 问题 A](#问题-a代码重复r-libs-user-组装逻辑) |
-| 🟡建议 | 2026-07-17 | Stage 3 M1: 两处 `catch {}` 静默吞掉所有错误，调试困难 | 本文件 §3 | [§3 问题 B](#问题-b静默-catch-吞掉所有错误) |
+| ✅已处理 | 2026-07-17 | Stage 3 M1: R_LIBS_USER 组装逻辑抽到 `shared-backend/r-libs-resolver.js`，两处调用共用 | 本文件 §3 | [§3 问题 A](#问题-a代码重复r-libs-user-组装逻辑) |
+| ✅已处理 | 2026-07-17 | Stage 3 M1: 两处 `catch {}` 静默吞掉所有错误，调试困难 | 本文件 §3 | [§3 问题 B](#问题-b静默-catch-吞掉所有错误) |
 | 🟡建议 | 2026-07-17 | Stage 3 M1: `capability-provisioning.js` 的 defaultDownload 未复用 plugin-manager 且无 host 白名单 | 本文件 §3 | [§3 问题 C](#问题-cdefaultdownload-未复用-plugin-manager) |
 | 🟡建议 | 2026-07-17 | Stage 3 M1: `defaultDownload` 缺少 host 白名单，设计文档 D4 要求，M2 扩展分发源前需修复 | stage3-m1-audit | [§3 问题 D](#问题-ddefaultdownload-缺少-host-白名单) |
 | ✅已处理 | 2026-07-17 | `fix/qa-smoke-stale-css-paths` 已合并，themes 门禁恢复 7/7 | 分支备忘录 | [§2.1](#21-fixqa-smoke-stale-css-paths-) |
@@ -113,6 +113,8 @@ git branch -D codex/fix-collapsed-right-titlebar-minimal \
 - **建议**：抽取为共享 helper，如 `core/shared-backend/r-libs-resolver.js`，导出 `resolveRLibsForPlugin(pluginCfg)` 函数
 - **优先级**：中（不阻塞 M1，但 M2 增加更多 bundle 类型时会重复更多）
 - **对验收影响**：无
+- **状态**：✅ 2026-07-17 已处理。新建 `core/shared-backend/r-libs-resolver.js`，导出 `resolveRLibsForPlugin(pluginCfg)` 与 `resolveProvisionedBundleLibs(pluginCfg)`。`tools-executor.js`（HTTP 执行器）与 `mcp/registry.js`（MCP 注册表）两处三段式逻辑替换为单行调用，约 25 行重复消除。触发时机正是 WGCNA 引入第二个 bundle 类型（`r-wgcna`）——审计预判的"M2 增加更多 bundle 类型时会重复更多"已兑现。全量测试 312 pass（唯一 fail 为环境 sqlite ABI，与改动无关），`npm run check` 绿。
+- **状态**：✅ 2026-07-17 已处理。新建 `core/shared-backend/r-libs-resolver.js`，导出 `resolveRLibsForPlugin(pluginCfg)`（返回完整 runEnv 或 null）+ `resolveProvisionedBundleLibs`。`tools-executor.js`、`mcp/registry.js` 两处三段式组装均改为调用该 helper，重复代码消除。四件套全绿（harness:check 7/7、node --test 312 pass 仅环境 sqlite ABI fail、frontend tsc 0、npm run check 绿）。
 
 ### 问题 B：静默 catch {} 吞掉所有错误
 
@@ -125,6 +127,8 @@ git branch -D codex/fix-collapsed-right-titlebar-minimal \
   ```
 - **优先级**：中
 - **对验收影响**：无
+- **状态**：✅ 2026-07-17 随问题 A 一并处理。抽取到 `r-libs-resolver.js` 后，provisioning 不可用时 `console.warn('[harness] capability provisioning unavailable:', ...)`（每进程只 warn 一次，避免刷屏），单个 bundle readiness 检查失败也 warn 而非静默。两处调用点不再有裸 `catch {}`。
+- **状态**：✅ 2026-07-17 随问题 A 一并处理。抽取进 `r-libs-resolver.js` 时，require 失败改为每进程 warn 一次（`_warnedProvisioningUnavailable` 门闩，避免每次 tool run 刷屏）；`checkCapabilityReady` 单 bundle 失败也改为 `console.warn` 带 bundleId，不再静默。
 
 ### 问题 C：defaultDownload 未复用 plugin-manager
 
@@ -214,3 +218,5 @@ git branch -D codex/fix-collapsed-right-titlebar-minimal \
 | 2026-07-17 | 追加 Stage 3 M1 深度审计报告（不变量/约束/安全），新增问题 D（host 白名单） | 非主 agent |
 | 2026-07-17 | 追加代码质量审计：死模块/门禁覆盖盲区/硬编码 TODO（问题 E/F/G） | 非主 agent |
 | 2026-07-17 | 合并 `fix/qa-smoke-stale-css-paths`（§2.1），qa-smoke 6/7 → 7/7，删除已合并分支 | 主 agent |
+| 2026-07-17 | Stage 3 M4 打包 WGCNA 为 built-in 插件（含修复输入正则 dead-on-arrival bug + 新增 coexpression-network 工作流） | 主 agent |
+| 2026-07-17 | 处理 §3 问题 A/B：R_LIBS_USER 三段式抽到 `shared-backend/r-libs-resolver.js`，静默 catch 改 console.warn（每进程一次） | 主 agent |

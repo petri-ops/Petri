@@ -46,6 +46,7 @@ function resolveSharedBackend() {
 
 const R_SERVER = resolveRSserver();
 const SHARED_BACKEND = resolveSharedBackend();
+const { resolveRLibsForPlugin } = require(path.join(SHARED_BACKEND, 'r-libs-resolver.js'));
 const pluginLoader = require(path.join(R_SERVER, 'plugin-loader.js'));
 const config = require(path.join(R_SERVER, 'config.js'));
 // callTool 跑完后通过 db.js 写入 tool_jobs 记录（方案 C，agent-led Task 1）
@@ -471,39 +472,10 @@ function _runPluginScript(
     let runEnv = undefined;
     if (plugin.language === 'r') {
       runCmd = [executor.binPath, runScript, jobDir];
-      // 插件包注入 R_LIBS_USER
-      // 路径组成（优先级从高到低）：
-      //   1. Harness provision 的外部 capability bundle 库目录（如 r-enrichment）
-      //      — 存放不能打入只读 .app 的 Bioconductor 重包（Stage 3 M1）
-      //   2. 插件内置的 pluginDir/packages/r（小型依赖，随插件打包）
-      //   3. R runtime 安装目录 library（基础包）
-      const rLibsParts = [];
-      // 1. Provisioned capability bundle lib（requiresBundle 声明，Stage 3 M2 开始使用）
-      try {
-        const cp = require(path.join(SHARED_BACKEND, 'capability-provisioning.js'));
-        if (plugin.requiresBundle) {
-          const bundles = Array.isArray(plugin.requiresBundle)
-            ? plugin.requiresBundle
-            : [plugin.requiresBundle];
-          for (const bundleId of bundles) {
-            const ready = cp.checkCapabilityReady({ capabilityId: bundleId, version: plugin.requiresBundleVersion || '1.0.0' });
-            if (ready.ready && ready.installDir) rLibsParts.push(ready.installDir);
-          }
-        }
-      } catch {}
-      // 2. Plugin-local packages (optional, still supported for small deps)
-      const pluginRPkgDir = path.join(plugin.pluginDir, 'packages', 'r');
-      if (fs.existsSync(pluginRPkgDir)) rLibsParts.push(pluginRPkgDir);
-      // 3. R home library
-      const rHomeLib = path.join(process.env.BIOF3_R_HOME || '', 'library');
-      if (fs.existsSync(rHomeLib)) rLibsParts.push(rHomeLib);
-      if (rLibsParts.length > 0) {
-        runEnv = {
-          ...process.env,
-          R_HOME: process.env.BIOF3_R_HOME || process.env.R_HOME,
-          R_LIBS_USER: rLibsParts.join(':'),
-        };
-      }
+      // 插件包注入 R_LIBS_USER（provisioned bundle → pluginDir/packages/r → R home）。
+      // 三段式组装逻辑抽到 shared-backend/r-libs-resolver.js（与 tools-executor.js 共用）。
+      const resolvedEnv = resolveRLibsForPlugin(plugin);
+      if (resolvedEnv) runEnv = resolvedEnv;
     } else {
       // Python 走 buildSpawnCommand（--params 约定）
       const spawnCmd = executor.buildSpawnCommand(runScript, jobDir, args || {});
