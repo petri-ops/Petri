@@ -2,7 +2,7 @@
 
 最后更新：2026-07-17
 
-状态：**Stage 1 验收完成（30/30 verified）；Stage 2 模型管理 UI 已验收（UI-031 verified）**
+状态：**Stage 1 验收完成（30/30 verified）；Stage 2 模型管理 UI 已验收（UI-031 verified）；Stage 3 M1 Harness 环境视图 1 项待实机验收（UI-032 in_progress）**
 
 本文件是 [`docs/v1-productization-roadmap.md`](./v1-productization-roadmap.md) Stage 1 的唯一 UI 问题清单。它记录真实可复现问题，不用来收集没有目标层级的泛化审美意见。
 
@@ -135,7 +135,15 @@ npm run check
 - UI-019 所指旧专业页面已由 `1e6e845` 删除，当前产品只保留首页与 ProjectWorkspace，不再为已退役路由维持第二套主题壳层。
 - 本轮当前态截图：`/tmp/biof3-ui-ledger-final-night.jpeg`。结合第 7 节既有截图，30 项均已有实现或退役依据及运行时验收证据。
 
-## 9. Stage 2 模型管理 UI
+## 10. Stage 3 Harness 环境视图
+
+| ID | 状态 | 级别 | 主模块 | 关注点 | 页面/状态 | 问题摘要 | 证据 | 目标批次 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| UI-032 | in_progress | P2 | P-07 | C-04 | 设置 / 计算与数据 | Stage 3 M1 新增只读"Harness 分析环境"面板（`HarnessEnvironment` 组件），展示 Harness 已自备的运行时与 R 包 bundle 清单 | 代码实现：`frontend/src/components/desktop/DesktopSettingsPanel.tsx` `HarnessEnvironment` 组件；IPC：`harness-capabilities:list`；类型：`electron.d.ts HarnessCapabilityEntry`；暂无 bundle 可显示（Stage 3 M2 GO/KEGG 接入后才有真实条目）；待 M2 真实 bundle 装入后实机截图 | Stage 3 M2 |
+
+- UI-032 属于 `P-07 模型网关与 AI Provider` 的 Harness 能力子系统（Stage 3 M1），不影响 Stage 1/2 已关闭的 31 项结论。
+- 不允许破坏：设置页窄窗布局、计算与数据分类既有 `ComputeExecution`/`DataManagement` 组件、`run_tool → tool_job → artifact truth` 执行链。
+- 当前条目仅含空状态文案（暂无已预备的分析包），Stage 3 M2 GO/KEGG 插件接入后有真实 bundle 才能实机截图，届时更新为 `verified`。
 
 - UI-031 属于 `P-07 模型网关与 AI Provider`，不改变 Stage 1 已关闭的 30 项结论。
 - 预期：用户只需选择 Provider、填写模型名；自定义或本地接口再填写 Endpoint，云端模型在凭据页填写 Key。一个模型配置可被不同任务角色复用，也可为角色显式指定 fallback。

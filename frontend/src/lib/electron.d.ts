@@ -27,6 +27,19 @@ export interface ComputeSettings {
   remoteComputeName: string;
 }
 
+/** Stage 3 M1: one entry from the Harness provisioning ledger. */
+export interface HarnessCapabilityEntry {
+  capabilityId: string;
+  kind: 'bundle' | 'runtime' | string;
+  version: string;
+  sha256: string | null;
+  url: string;
+  size: number | null;
+  installDir: string;
+  installedAt: number;
+  attempts: number;
+}
+
 declare global {
   interface Window {
     biof3Desktop?: {
@@ -51,6 +64,10 @@ declare global {
       computeSettings: {
         get: () => Promise<ComputeSettings>;
         save: (settings: ComputeSettings) => Promise<{ ok: boolean; error?: string; restartRequired?: boolean }>;
+      };
+      /** Stage 3 M1: read-only view of Harness-provisioned capabilities (runtimes/bundles). */
+      harnessCapabilities: {
+        list: () => Promise<{ ok: boolean; capabilities: HarnessCapabilityEntry[]; error?: string }>;
       };
       plugins: {
         listInstalled: () => Promise<

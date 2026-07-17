@@ -595,6 +595,63 @@ function TrashManagement(): React.ReactElement {
   );
 }
 
+// ── Stage 3 M1: Harness 环境 — 只读已预备能力视图 ───────────────
+function HarnessEnvironment(): React.ReactElement | null {
+  const bridge = window.biof3Desktop?.harnessCapabilities;
+  const [capabilities, setCapabilities] = useState<Array<{
+    capabilityId: string;
+    kind: string;
+    version: string;
+    installedAt: number;
+    size: number | null;
+  }>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!bridge) { setLoading(false); return; }
+    bridge.list()
+      .then((result) => { setCapabilities((result.capabilities ?? []) as typeof capabilities); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [bridge]);
+
+  if (!bridge) return null;
+
+  function fmtBytes(size: number | null): string {
+    if (!size) return '';
+    if (size < 1024 * 1024) return `${(size / 1024).toFixed(0)} KB`;
+    return `${(size / (1024 * 1024)).toFixed(0)} MB`;
+  }
+
+  return (
+    <div className="biof3-data-section">
+      <label className="biof3-field__label">Harness 分析环境</label>
+      <p className="biof3-field__hint">
+        Harness 自动为内置分析模块准备的运行时和 R 包，无需手动安装。
+      </p>
+      {loading ? (
+        <p className="biof3-field__hint">正在读取…</p>
+      ) : capabilities.length === 0 ? (
+        <p className="biof3-field__hint">暂无已预备的分析包（将在首次运行分析时自动获取）。</p>
+      ) : (
+        <div className="biof3-harness-caps">
+          {capabilities.map((cap) => (
+            <div key={cap.capabilityId} className="biof3-harness-cap-row">
+              <span className="biof3-badge">{cap.kind}</span>
+              <strong>{cap.capabilityId}</strong>
+              <span className="biof3-field__hint">v{cap.version}</span>
+              {cap.size ? <span className="biof3-field__hint">{fmtBytes(cap.size)}</span> : null}
+              <span className="biof3-field__hint">
+                {new Date(cap.installedAt).toLocaleDateString()}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   const [activeSection, setActiveSection] = useState<SettingsSection>('general');
   const [settings, setSettings] = useState<Record<string, unknown>>({});
@@ -916,6 +973,8 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         <ComputeExecution />
 
         <DataManagement />
+
+        <HarnessEnvironment />
 
           </section>
         )}
