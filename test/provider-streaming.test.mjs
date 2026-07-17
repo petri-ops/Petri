@@ -231,3 +231,105 @@ test('OpenAI-compatible provider normalizes embedding vectors', async () => {
     await closeServer(server);
   }
 });
+
+test('chat classifies HTTP 401 JSON error body with normalized message and status', async () => {
+  const { server, baseUrl } = await startServer((_req, res) => {
+    res.writeHead(401, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ error: { message: 'bad key' } }));
+  });
+  try {
+    const result = await new DeepSeekProvider().chat(
+      'key',
+      { model: 'deepseek-chat', messages: [] },
+      {},
+      { baseUrl }
+    );
+    assert.equal(result.error, 'http_error');
+    assert.equal(result.message, 'bad key');
+    assert.equal(result.status, 401);
+  } finally {
+    await closeServer(server);
+  }
+});
+
+test('chat preserves a top-level error field on a 200 body instead of treating it as success', async () => {
+  const usageRecords = [];
+  aiUsageHelper.configure({ recordAiUsage: (record) => usageRecords.push(record) });
+  const { server, baseUrl } = await startServer((_req, res) => {
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ error: { message: 'rate limited' }, choices: [] }));
+  });
+  try {
+    const result = await new DeepSeekProvider().chat(
+      'key',
+      { model: 'deepseek-chat', messages: [] },
+      {},
+      { baseUrl }
+    );
+    assert.ok(result.error, 'top-level error field must be retained');
+    assert.equal(result.error.message, 'rate limited');
+    assert.equal(usageRecords.at(-1).errorCode, 'api_error');
+  } finally {
+    await closeServer(server);
+  }
+});
+
+test('chat classifies a non-JSON body with a >=400 status as http_error carrying the status', async () => {
+  const { server, baseUrl } = await startServer((_req, res) => {
+    res.writeHead(500, { 'content-type': 'text/plain' });
+    res.end('internal boom');
+  });
+  try {
+    const result = await new DeepSeekProvider().chat(
+      'key',
+      { model: 'deepseek-chat', messages: [] },
+      {},
+      { baseUrl }
+    );
+    assert.equal(result.error, 'http_error');
+    assert.equal(result.status, 500);
+    assert.equal(result.message, 'internal boom');
+  } finally {
+    await closeServer(server);
+  }
+});
+
+test('chat classifies a non-JSON body with a 200 status as parse_error', async () => {
+  const { server, baseUrl } = await startServer((_req, res) => {
+    res.writeHead(200, { 'content-type': 'text/plain' });
+    res.end('not json');
+  });
+  try {
+    const result = await new DeepSeekProvider().chat(
+      'key',
+      { model: 'deepseek-chat', messages: [] },
+      {},
+      { baseUrl }
+    );
+    assert.equal(result.error, 'parse_error');
+    assert.equal(result.status, 200);
+  } finally {
+    await closeServer(server);
+  }
+});
+
+test('chat returns no_api_key without issuing a request when a key is required but missing', async () => {
+  let requestReceived = false;
+  const { server, baseUrl } = await startServer((_req, res) => {
+    requestReceived = true;
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ choices: [] }));
+  });
+  try {
+    const result = await new DeepSeekProvider().chat(
+      '',
+      { model: 'deepseek-chat', messages: [] },
+      {},
+      { baseUrl }
+    );
+    assert.equal(result.error, 'no_api_key');
+    assert.equal(requestReceived, false);
+  } finally {
+    await closeServer(server);
+  }
+});
