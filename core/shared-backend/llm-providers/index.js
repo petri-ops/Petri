@@ -21,6 +21,7 @@ const logger = require('../logger');
 const { DeepSeekProvider } = require('./deepseek');
 const { DashScopeEmbedProvider } = require('./dashscope');
 const { DashScopeVisionProvider } = require('./dashscope-vision');
+const { AnthropicProvider } = require('./anthropic');
 
 const _providers = new Map();
 
@@ -107,6 +108,7 @@ function registerBuiltInProviders() {
       requiresApiKey: false,
     }));
   }
+  if (!_providers.has('anthropic')) registerProvider(new AnthropicProvider());
   if (!_providers.has('dashscope')) registerProvider(new DashScopeEmbedProvider());
   if (!_providers.has('dashscope-vision')) registerProvider(new DashScopeVisionProvider());
 }
