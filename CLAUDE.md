@@ -37,6 +37,7 @@ BioF3 Desktop 是一个 Electron 桌面应用，结合了 AI 陪伴的全组学�
 ## 必读文档顺序
 
 开始任何任务前，按顺序阅读：
+0. **`docs/AUDIT-LOG.md`** - 审计广播台（最高优先级，处理 🔴/🟢 项后再开始主线工作）
 1. `docs/v1-productization-roadmap.md` — 唯一阶段路线图
 2. `docs/project-workspace-handoff.md` — 当前工程检查点
 3. `docs/ui-productization-audit.md` — 已完成的 Stage 1 验收台账
