@@ -68,6 +68,45 @@ function listProviders() {
 
 function registerBuiltInProviders() {
   if (!_providers.has('deepseek')) registerProvider(new DeepSeekProvider());
+  if (!_providers.has('openai')) {
+    registerProvider(new DeepSeekProvider({
+      name: 'openai',
+      label: 'OpenAI',
+      defaultBaseUrl: 'https://api.openai.com/v1',
+    }));
+  }
+  if (!_providers.has('openai-compatible')) {
+    registerProvider(new DeepSeekProvider({
+      name: 'openai-compatible',
+      label: 'OpenAI-compatible',
+      defaultBaseUrl: 'https://api.openai.com/v1',
+      requiresApiKey: false,
+    }));
+  }
+  if (!_providers.has('ollama')) {
+    registerProvider(new DeepSeekProvider({
+      name: 'ollama',
+      label: 'Ollama',
+      defaultBaseUrl: 'http://127.0.0.1:11434/v1',
+      requiresApiKey: false,
+    }));
+  }
+  if (!_providers.has('lmstudio')) {
+    registerProvider(new DeepSeekProvider({
+      name: 'lmstudio',
+      label: 'LM Studio',
+      defaultBaseUrl: 'http://127.0.0.1:1234/v1',
+      requiresApiKey: false,
+    }));
+  }
+  if (!_providers.has('vllm')) {
+    registerProvider(new DeepSeekProvider({
+      name: 'vllm',
+      label: 'vLLM',
+      defaultBaseUrl: 'http://127.0.0.1:8000/v1',
+      requiresApiKey: false,
+    }));
+  }
   if (!_providers.has('dashscope')) registerProvider(new DashScopeEmbedProvider());
   if (!_providers.has('dashscope-vision')) registerProvider(new DashScopeVisionProvider());
 }

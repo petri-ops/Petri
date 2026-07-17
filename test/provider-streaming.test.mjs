@@ -4,7 +4,7 @@ import http from 'node:http';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { DeepSeekProvider } = require('../core/shared-backend/llm-providers/deepseek.js');
+const { DeepSeekProvider, OpenAICompatibleProvider } = require('../core/shared-backend/llm-providers/deepseek.js');
 const aiUsageHelper = require('../core/shared-backend/ai-usage-helper.js');
 
 function startServer(handler) {
@@ -172,6 +172,61 @@ test('chat remains available as non-streaming fallback with custom base URL', as
       { baseUrl }
     );
     assert.equal(result.choices[0].message.content, 'fallback');
+  } finally {
+    await closeServer(server);
+  }
+});
+
+test('OpenAI-compatible local provider supports no-key chat and /v1 path prefixes', async () => {
+  let requestPath;
+  let authorization;
+  const { server, baseUrl } = await startServer((req, res) => {
+    requestPath = req.url;
+    authorization = req.headers.authorization;
+    req.resume();
+    req.on('end', () => {
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ choices: [{ message: { content: 'local' } }], usage: {} }));
+    });
+  });
+  try {
+    const provider = new OpenAICompatibleProvider({
+      name: 'local-test',
+      defaultBaseUrl: `${baseUrl}/v1`,
+      requiresApiKey: false,
+    });
+    const result = await provider.chat('', { model: 'local-model', messages: [] }, {});
+    assert.equal(result.choices[0].message.content, 'local');
+    assert.equal(requestPath, '/v1/chat/completions');
+    assert.equal(authorization, undefined);
+  } finally {
+    await closeServer(server);
+  }
+});
+
+test('OpenAI-compatible provider normalizes embedding vectors', async () => {
+  let requestBody;
+  const { server, baseUrl } = await startServer((req, res) => {
+    let body = '';
+    req.on('data', (chunk) => (body += chunk));
+    req.on('end', () => {
+      requestBody = JSON.parse(body);
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({
+        data: [
+          { index: 1, embedding: [0, 1] },
+          { index: 0, embedding: [1, 0] },
+        ],
+        usage: { prompt_tokens: 2 },
+      }));
+    });
+  });
+  try {
+    const provider = new OpenAICompatibleProvider({ name: 'embed-test', requiresApiKey: false });
+    const vectors = await provider.embed('', ['a', 'b'], {}, { baseUrl: `${baseUrl}/v1`, model: 'embed' });
+    assert.deepEqual(Array.from(vectors[0]), [1, 0]);
+    assert.deepEqual(Array.from(vectors[1]), [0, 1]);
+    assert.deepEqual(requestBody, { model: 'embed', input: ['a', 'b'] });
   } finally {
     await closeServer(server);
   }

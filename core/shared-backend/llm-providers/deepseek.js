@@ -1,5 +1,5 @@
 /**
- * DeepSeek Provider — OpenAI-compatible chat completion provider.
+ * OpenAI-compatible provider transport, with DeepSeek-compatible defaults.
  */
 
 const http = require('http');
@@ -13,26 +13,27 @@ function getRecordAiUsage() {
   return aiUsageHelper.recordAiUsage;
 }
 
-function resolveEndpoint(baseUrl, pathname) {
-  const url = new URL(baseUrl || DEFAULT_BASE_URL);
+function resolveEndpoint(baseUrl, pathname, defaultBaseUrl = DEFAULT_BASE_URL) {
+  const url = new URL(baseUrl || defaultBaseUrl);
   const prefix = url.pathname.replace(/\/$/, '');
   url.pathname = `${prefix}${pathname}`;
   return url;
 }
 
 function buildRequestOptions(endpoint, apiKey, data, accept) {
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: accept,
+    'Content-Length': Buffer.byteLength(data),
+  };
+  if (apiKey) headers.Authorization = 'Bearer ' + apiKey;
   return {
     protocol: endpoint.protocol,
     hostname: endpoint.hostname,
     port: endpoint.port || undefined,
     path: endpoint.pathname + endpoint.search,
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: accept,
-      Authorization: 'Bearer ' + apiKey,
-      'Content-Length': Buffer.byteLength(data),
-    },
+    headers,
     agent: false,
     timeout: 90000,
   };
@@ -71,8 +72,15 @@ function appendToolCall(target, delta) {
 }
 
 class DeepSeekProvider {
+  constructor(options = {}) {
+    this.providerName = options.name || 'deepseek';
+    this.defaultBaseUrl = options.defaultBaseUrl || DEFAULT_BASE_URL;
+    this.requiresApiKey = options.requiresApiKey !== false;
+    this.providerLabel = options.label || this.providerName;
+  }
+
   get name() {
-    return 'deepseek';
+    return this.providerName;
   }
 
   get capabilities() {
@@ -84,8 +92,8 @@ class DeepSeekProvider {
   }
 
   async chat(apiKey, body, telemetry, options) {
-    if (!apiKey) {
-      return { error: 'no_api_key', message: 'DeepSeek API key 未配置' };
+    if (this.requiresApiKey && !apiKey) {
+      return { error: 'no_api_key', message: `${this.providerLabel} API key 未配置` };
     }
 
     const t = telemetry || {};
@@ -101,7 +109,7 @@ class DeepSeekProvider {
     }
 
     return new Promise((resolve) => {
-      const endpoint = resolveEndpoint(options && options.baseUrl, CHAT_PATH);
+      const endpoint = resolveEndpoint(options && options.baseUrl, CHAT_PATH, this.defaultBaseUrl);
       let settled = false;
       let buffer = '';
       const finish = (result, errorCode, usage) => {
@@ -145,8 +153,8 @@ class DeepSeekProvider {
    * onEvent receives content_delta, tool_call_delta, usage, done, or error.
    */
   async chatStream(apiKey, body, telemetry, onEvent, options) {
-    if (!apiKey) {
-      return { error: 'no_api_key', message: 'DeepSeek API key 未配置' };
+    if (this.requiresApiKey && !apiKey) {
+      return { error: 'no_api_key', message: `${this.providerLabel} API key 未配置` };
     }
 
     const t = telemetry || {};
@@ -162,7 +170,7 @@ class DeepSeekProvider {
     }
 
     return new Promise((resolve) => {
-      const endpoint = resolveEndpoint(options && options.baseUrl, CHAT_PATH);
+      const endpoint = resolveEndpoint(options && options.baseUrl, CHAT_PATH, this.defaultBaseUrl);
       const contentParts = [];
       const toolCalls = [];
       let usage = null;
@@ -313,9 +321,11 @@ class DeepSeekProvider {
   }
 
   async healthCheck(apiKey, options) {
-    if (!apiKey) return false;
+    if (this.requiresApiKey && !apiKey) return false;
     return new Promise((resolve) => {
-      const endpoint = resolveEndpoint(options && options.baseUrl, '/models');
+      const endpoint = resolveEndpoint(options && options.baseUrl, '/models', this.defaultBaseUrl);
+      const headers = {};
+      if (apiKey) headers.Authorization = 'Bearer ' + apiKey;
       const req = requestModule(endpoint).request(
         {
           protocol: endpoint.protocol,
@@ -323,7 +333,7 @@ class DeepSeekProvider {
           port: endpoint.port || undefined,
           path: endpoint.pathname + endpoint.search,
           method: 'GET',
-          headers: { Authorization: 'Bearer ' + apiKey },
+          headers,
           agent: false,
           timeout: 10000,
         },
@@ -337,6 +347,61 @@ class DeepSeekProvider {
       req.end();
     });
   }
+
+  async embed(apiKey, texts, telemetry, options) {
+    if (this.requiresApiKey && !apiKey) return null;
+    if (!Array.isArray(texts) || texts.length === 0) return [];
+    const body = {
+      ...((options && options.parameters) || {}),
+      model: (options && options.model) || '',
+      input: texts,
+    };
+    const data = JSON.stringify(body);
+    const endpoint = resolveEndpoint(options && options.baseUrl, '/embeddings', this.defaultBaseUrl);
+    const startedAt = Date.now();
+    const recordAiUsage = getRecordAiUsage();
+    return new Promise((resolve) => {
+      let buffer = '';
+      const req = requestModule(endpoint).request(
+        buildRequestOptions(endpoint, apiKey, data, 'application/json'),
+        (res) => {
+          res.setEncoding('utf8');
+          res.on('data', (chunk) => (buffer += chunk));
+          res.on('end', () => {
+            try {
+              const parsed = JSON.parse(buffer);
+              if (res.statusCode < 200 || res.statusCode >= 300 || !Array.isArray(parsed.data)) {
+                resolve(null);
+                return;
+              }
+              const rows = [...parsed.data].sort((a, b) => (a.index || 0) - (b.index || 0));
+              const vectors = rows.map((row) => Float32Array.from(row.embedding || []));
+              const usage = parsed.usage || {};
+              recordAiUsage({
+                userId: telemetry && telemetry.userId,
+                kind: (telemetry && telemetry.kind) || 'embedding',
+                model: body.model,
+                promptTokens: usage.prompt_tokens || usage.total_tokens || 0,
+                latencyMs: Date.now() - startedAt,
+                conversationId: telemetry && telemetry.conversationId,
+              });
+              resolve(vectors);
+            } catch {
+              resolve(null);
+            }
+          });
+          res.on('error', () => resolve(null));
+        }
+      );
+      req.on('error', () => resolve(null));
+      req.on('timeout', () => {
+        req.destroy();
+        resolve(null);
+      });
+      req.write(data);
+      req.end();
+    });
+  }
 }
 
-module.exports = { DeepSeekProvider };
+module.exports = { DeepSeekProvider, OpenAICompatibleProvider: DeepSeekProvider };
