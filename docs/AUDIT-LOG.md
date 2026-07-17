@@ -20,8 +20,8 @@
 | ✅已处理 | 2026-07-17 | `fix/qa-smoke-stale-css-paths` 已合并，themes 门禁恢复 7/7 | 分支备忘录 | [§2.1](#21-fixqa-smoke-stale-css-paths-) |
 | 🟡待评估 | 2026-07-17 | `codex/fix-collapsed-right-titlebar` 分支待评估，三文件两边改过 | 分支备忘录 | [§2.2](#22-codexfix-collapsed-right-titlebar-) |
 | ⚪可清理 | 2026-07-17 | 5 个 codex/* 已合并残留分支可删除 | 分支备忘录 | [§2.3](#23-已合并残留分支可安全删除-) |
-| ⚪可清理 | 2026-07-17 | `sanitizer.js`(51行) 是死模块，生产代码无引用，测试不在门禁范围 | 本文件 §4 | [§4 问题 E](#问题-esanitizerjs-死模块) |
-| ⚠️注意 | 2026-07-17 | `core/test/` 下 9 个测试文件不在 npm test 门禁范围，含死模块测试 | 本文件 §4 | [§4 问题 F](#问题-fcoretest-目录不在门禁范围) |
+| ✅已处理 | 2026-07-17 | `sanitizer.js` 死模块 + 其测试已删除（全仓零生产引用） | 本文件 §4 | [§4 问题 E](#问题-esanitizerjs-死模块) |
+| ✅已处理 | 2026-07-17 | `core/test/` 门禁盲区已收口：3 个单测迁入 `test/*.test.mjs`，死模块测试删除，4 个联网 smoke 保留在 core/test/ | 本文件 §4 | [§4 问题 F](#问题-fcoretest-目录不在门禁范围) |
 | 🟡建议 | 2026-07-17 | `project-run-layout.js:86` `isAdmin = false` 硬编码 TODO | 本文件 §4 | [§4 问题 G](#问题-gproject-run-layoutjs-isadmin-硬编码) |
 
 **状态图例**：🔴 阻塞验收必须处理 | 🟡 建议处理不阻塞 | 🟢 待合并零风险 | ⚪ 可清理 | ✅ 已处理
@@ -164,6 +164,7 @@ git branch -D codex/fix-collapsed-right-titlebar-minimal \
 - **建议**：主 agent 评估是否删除 `sanitizer.js` 和 `core/test/sanitizer.test.mjs`。如果安全函数仍有价值，应迁移到 `core/shared-backend/` 或合并到现有 util
 - **优先级**：低（死代码不影响运行，但增加维护噪音）
 - **对验收影响**：无
+- **✅ 处理（2026-07-17，主 agent）**：确认全仓（core/+src/+frontend/，排除 dist/node_modules）无任何生产引用，确为死模块。删除 `core/r-server/sanitizer.js` + `core/test/sanitizer.test.mjs`。安全函数当前无消费方，未迁移；未来需要 R 参数/路径消毒时再从 git 历史取回并接入实际调用点。
 
 ### 问题 F：core/test/ 目录不在门禁范围
 
@@ -180,6 +181,12 @@ git branch -D codex/fix-collapsed-right-titlebar-minimal \
   3. 或在 package.json 中扩展 test glob 为 `node --test test/*.test.mjs core/test/*.mjs`
 - **优先级**：中（门禁覆盖范围直接影响 CI 可信度）
 - **对验收影响**：不阻塞 Stage 3，但影响长期代码质量
+- **✅ 处理（2026-07-17，主 agent）**：未采用方案 3（`core/test/*.mjs` glob 会拖入 4 个打 `biof3.com` 已下线云平台的 live smoke，CI 必挂）。改为按测试性质分流：
+  - 3 个纯单测迁进门禁：`agent-workflow.mjs` / `execution-context.mjs` / `final-report.mjs` → `test/*.test.mjs`（`git mv` 保留历史，修正相对 require 路径）。同步更新引用它们的 `package.json`（harness:phase6 / harness:agent-evaluate）与 `.github/workflows/ci.yml`。
+  - `report-theme.mjs`：`test/report-theme.test.mjs` 已是其超集（含 isHtmlFile + XSS 用例），删除 `core/test/` 陈旧副本。
+  - `sanitizer.test.mjs`：随死模块删除（见问题 E）。
+  - 4 个 live-network smoke（`agent-tools.smoke` / `copilot-scenarios` / `smoke-phase-c3` / `smoke-tools`）**有意保留在 `core/test/`**：它们打已下线的 `biof3.com` 云平台、需凭证、CI 里会挂，不应进门禁。已在本记录标注其性质，避免后续误纳入。
+  - **顺带抓到的真 bug**：迁移后 `npm test` 覆盖到 `agent-workflow.test.mjs`，暴露 `listAgentWorkflowTemplates` 断言仍期望 2 个模板 —— 但 WGCNA 提交 `e30bc90` 已新增第 3 个 `coexpression-network` 模板。该测试在 CI 门禁内、却不在本地 `npm test` glob 内，正是本问题所述"假绿"：`e30bc90` 一旦 push 就会让 CI 变红。已把断言更新为 3 模板（含 coexpression-network）。本地 `npm test` 从 324→367（+43 迁移用例），唯一 fail 仍是环境性 sqlite ABI。
 
 ### 问题 G：project-run-layout.js isAdmin 硬编码
 
@@ -218,5 +225,6 @@ git branch -D codex/fix-collapsed-right-titlebar-minimal \
 | 2026-07-17 | 追加 Stage 3 M1 深度审计报告（不变量/约束/安全），新增问题 D（host 白名单） | 非主 agent |
 | 2026-07-17 | 追加代码质量审计：死模块/门禁覆盖盲区/硬编码 TODO（问题 E/F/G） | 非主 agent |
 | 2026-07-17 | 合并 `fix/qa-smoke-stale-css-paths`（§2.1），qa-smoke 6/7 → 7/7，删除已合并分支 | 主 agent |
-| 2026-07-17 | Stage 3 M4 打包 WGCNA 为 built-in 插件（含修复输入正则 dead-on-arrival bug + 新增 coexpression-network 工作流） | 主 agent |
-| 2026-07-17 | 处理 §3 问题 A/B：R_LIBS_USER 三段式抽到 `shared-backend/r-libs-resolver.js`，静默 catch 改 console.warn（每进程一次） | 主 agent |
+| 2026-07-17 | 打包 WGCNA 为 built-in 插件（Stage 3 M4）+ 修锚定正则输入 bug + 新增 coexpression-network 工作流 | 主 agent |
+| 2026-07-17 | 抽取共享 R_LIBS_USER resolver（问题 A/B），静默 catch → warn | 主 agent |
+| 2026-07-17 | 删除 sanitizer 死模块（问题 E）；core/test 门禁分流：3 单测迁入门禁、删陈旧副本、保留 4 个 live smoke（问题 F）；顺带修 agent-workflow 模板数断言（WGCNA 引入的 CI 潜伏失败） | 主 agent |

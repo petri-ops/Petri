@@ -15,7 +15,7 @@ const {
   validateLineageEntry,
   runToolJobs,
   listAgentWorkflowTemplates,
-} = require('../shared-backend/agent-workflow.js');
+} = require('../core/shared-backend/agent-workflow.js');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -544,10 +544,11 @@ test('runToolJobs skips null jobs returned by getToolJobFn', () => {
 
 test('listAgentWorkflowTemplates returns all templates', () => {
   const result = listAgentWorkflowTemplates(['deseq2', 'volcano-plot', 'enrichment']);
-  assert.equal(result.length, 2);
+  assert.equal(result.length, 3);
   const ids = result.map((t) => t.id);
   assert.ok(ids.includes('bulk-rna-core'));
   assert.ok(ids.includes('deg-result-refinement'));
+  assert.ok(ids.includes('coexpression-network'));
   assert.equal(ids.includes('single-cell-core'), false);
 });
 

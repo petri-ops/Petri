@@ -6,7 +6,7 @@ import test from 'node:test';
 import {createRequire} from 'node:module';
 
 const require = createRequire(import.meta.url);
-const {materializeFinalReport} = require('../r-server/helpers/final-report');
+const {materializeFinalReport} = require('../core/r-server/helpers/final-report');
 
 test('materializeFinalReport creates a self-contained HTML delivery artifact', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-final-report-'));

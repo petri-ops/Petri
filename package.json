@@ -34,8 +34,8 @@
     "harness:scaffold": "node scripts/scaffold-harness-tool.mjs",
     "harness:check": "node scripts/check-harness-manifests.mjs",
     "harness:evaluate": "node --test test/harness-weak-model.test.mjs test/harness-file-index.test.mjs",
-    "harness:agent-evaluate": "node --test core/test/agent-workflow.mjs test/agent-approval.test.mjs test/agent-workflow-phase6.test.mjs test/harness-workflow-fixtures.test.mjs test/mcp-tool-registry.test.mjs",
-    "harness:phase6": "node --test test/plugin-sdk.test.mjs test/harness-manifest.test.mjs test/harness-tool-template.test.mjs test/harness-workflow-fixtures.test.mjs test/agent-workflow-phase6.test.mjs core/test/agent-workflow.mjs",
+    "harness:agent-evaluate": "node --test test/agent-workflow.test.mjs test/agent-approval.test.mjs test/agent-workflow-phase6.test.mjs test/harness-workflow-fixtures.test.mjs test/mcp-tool-registry.test.mjs",
+    "harness:phase6": "node --test test/plugin-sdk.test.mjs test/harness-manifest.test.mjs test/harness-tool-template.test.mjs test/harness-workflow-fixtures.test.mjs test/agent-workflow-phase6.test.mjs test/agent-workflow.test.mjs",
     "ui:audit:check": "node scripts/check-ui-productization-audit.mjs",
     "check": "node --check src/main.js && node --check src/preload.js && node --check src/plugin-manager.js && node --check core/r-server/plugin-loader.js && node --check scripts/scaffold-harness-tool.mjs && npm run harness:check && npm run ui:audit:check"
   },

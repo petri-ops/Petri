@@ -7,7 +7,7 @@ const {
   EXECUTION_CONTEXT_VERSION,
   createExecutionContext,
   attachExecutionMetadata,
-} = require('../shared-backend/execution-context');
+} = require('../core/shared-backend/execution-context');
 
 test('maps host result paths to stable canonical paths', () => {
   const { context, canonicalizePath } = createExecutionContext({
