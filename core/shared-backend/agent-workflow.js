@@ -327,7 +327,7 @@ const AGENT_WORKFLOW_TEMPLATES = [
       },
       {
         id: 'enrichment',
-        toolCandidates: ['go-kegg', 'enrichment'],
+        toolCandidates: ['go-kegg', 'gsea', 'enrichment'],
         dependsOn: ['differential'],
         inputBindings: [
           { inputId: 'deg_table', fromStepId: 'differential', artifactType: 'table' },
@@ -341,7 +341,7 @@ const AGENT_WORKFLOW_TEMPLATES = [
     description: '从已有 DEG artifact 生成火山图并开展功能富集。',
     steps: [
       { id: 'volcano', toolCandidates: ['volcano-plot'], dependsOn: [] },
-      { id: 'enrichment', toolCandidates: ['go-kegg', 'enrichment'], dependsOn: [] },
+      { id: 'enrichment', toolCandidates: ['go-kegg', 'gsea', 'enrichment'], dependsOn: [] },
     ],
   },
 ];
