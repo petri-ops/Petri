@@ -92,8 +92,6 @@ register('themes', '主题 token 覆盖：壳/聊天/结果/报告/浏览器/文
     'frontend/src/styles/custom.css',
     'frontend/src/styles/docs.css',
     'frontend/src/pages/index.module.css',
-    'frontend/src/pages/_desktop-dashboard.module.css',
-    'frontend/src/pages/tools.module.css',
     'frontend/src/pages/project-workspace.module.css',
     'frontend/src/styles/single-cell.css',
     'frontend/src/components/desktop/desktop.css',
