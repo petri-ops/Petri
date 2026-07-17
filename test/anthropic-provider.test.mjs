@@ -142,3 +142,27 @@ test('Anthropic provider returns standardized HTTP and no-key errors', async () 
     await closeServer(server);
   }
 });
+
+test('Anthropic provider propagates AbortSignal as a standardized cancel', async () => {
+  const { server, baseUrl } = await startServer((req, res) => {
+    req.resume();
+    req.on('end', () => {
+      res.writeHead(200, { 'content-type': 'text/event-stream' });
+      res.write('event: message_start\ndata: {"type":"message_start","message":{"id":"m","model":"claude-test","content":[],"usage":{"input_tokens":1}}}\n\n');
+      // 保持连接打开，等待客户端 abort
+    });
+  });
+  try {
+    const controller = new AbortController();
+    const result = await new AnthropicProvider().chatStream(
+      'secret',
+      { model: 'claude-test', messages: [{ role: 'user', content: 'hi' }] },
+      {},
+      (event) => { if (event.type === 'usage') controller.abort(); },
+      { baseUrl, signal: controller.signal }
+    );
+    assert.equal(result.error, 'aborted');
+  } finally {
+    await closeServer(server);
+  }
+});
