@@ -58,7 +58,7 @@ function env(name) {
  * single-profile gateway config with chat + agent roles bound to that profile.
  */
 function resolveTargets() {
-  const requested = (env('ACCEPT_TARGETS') || 'deepseek,openai-compatible,local')
+  const requested = (env('ACCEPT_TARGETS') || 'deepseek,openai-compatible,anthropic,local')
     .split(',')
     .map((value) => value.trim())
     .filter(Boolean);
@@ -80,6 +80,15 @@ function resolveTargets() {
       model: env('OPENAI_COMPAT_MODEL'),
       baseUrl: env('OPENAI_COMPAT_BASE_URL'),
       apiKey: env('OPENAI_COMPAT_API_KEY'),
+    }));
+  }
+
+  if (requested.includes('anthropic') && env('ANTHROPIC_BASE_URL') && env('ANTHROPIC_MODEL')) {
+    targets.push(makeTarget('anthropic', {
+      provider: 'anthropic',
+      model: env('ANTHROPIC_MODEL'),
+      baseUrl: env('ANTHROPIC_BASE_URL'),
+      apiKey: env('ANTHROPIC_API_KEY'),
     }));
   }
 
