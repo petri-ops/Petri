@@ -587,14 +587,33 @@ function createToolsExecutor({
         // 让 library(DESeq2) 等从 pluginDir/packages/r 加载，不污染基础 runtime library。
         // R_LIBS_USER 会被追加到默认 .libPaths() 之后，runtime 基础包仍可用。
         if (cfg._isPlugin) {
+          // 路径组成（优先级从高到低）：
+          //   1. Harness provision 的外部 capability bundle 库目录（requiresBundle，Stage 3 M1）
+          //   2. 插件内置的 pluginDir/packages/r（小型依赖，随插件打包）
+          //   3. R runtime 安装目录 library（基础包）
+          const rLibsParts = [];
+          // 1. Provisioned capability bundle lib
+          try {
+            const cp = require('../../shared-backend/capability-provisioning');
+            if (cfg.requiresBundle) {
+              const bundles = Array.isArray(cfg.requiresBundle) ? cfg.requiresBundle : [cfg.requiresBundle];
+              for (const bundleId of bundles) {
+                const ready = cp.checkCapabilityReady({ capabilityId: bundleId, version: cfg.requiresBundleVersion || '1.0.0' });
+                if (ready.ready && ready.installDir) rLibsParts.push(ready.installDir);
+              }
+            }
+          } catch {}
+          // 2. Plugin-local packages
           const pluginRPkgDir = path.join(cfg.pluginDir, 'packages', 'r');
-          if (fs.existsSync(pluginRPkgDir)) {
-            const rHomeLib = path.join(process.env.BIOF3_R_HOME || '', 'library');
-            // R_LIBS_USER 用冒号分隔多路径；优先插件包目录，再回退 runtime library
+          if (fs.existsSync(pluginRPkgDir)) rLibsParts.push(pluginRPkgDir);
+          // 3. R home library
+          const rHomeLib = path.join(process.env.BIOF3_R_HOME || '', 'library');
+          if (fs.existsSync(rHomeLib)) rLibsParts.push(rHomeLib);
+          if (rLibsParts.length > 0) {
             runEnv = {
               ...process.env,
               R_HOME: process.env.BIOF3_R_HOME || process.env.R_HOME,
-              R_LIBS_USER: pluginRPkgDir + (fs.existsSync(rHomeLib) ? ':' + rHomeLib : ''),
+              R_LIBS_USER: rLibsParts.join(':'),
             };
           }
         }

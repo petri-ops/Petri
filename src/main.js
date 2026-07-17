@@ -1767,6 +1767,21 @@ function setupTerminalIpc() {
   });
 }
 
+// ── IPC：Harness Capability Provisioning — Stage 3 M1 ─────────
+// 只读：让设置页"计算与数据"分类展示 Harness 自备了哪些运行时/包。
+// 写入动作（provision/remove）由 Harness 编排层内部完成，不通过前端 IPC
+// 直接触发，以保持 D8 透明进度和 C-03 安全确认边界。
+function setupHarnessCapabilitiesIpc() {
+  ipcMain.handle("harness-capabilities:list", async () => {
+    try {
+      const cp = require(resolveCore("shared-backend", "capability-provisioning.js"));
+      return { ok: true, capabilities: cp.listProvisionedCapabilities() };
+    } catch (e) {
+      return { ok: false, capabilities: [], error: e.message };
+    }
+  });
+}
+
 // ── 应用生命周期 ───────────────────────────────────────────────
 async function main() {
   const backendPorts = await selectBackendPorts();
@@ -1833,6 +1848,7 @@ async function main() {
   }
   setupDataManagementIpc();
   setupTelemetryIpc();
+  setupHarnessCapabilitiesIpc();
 
   // 6. 创建窗口
   // M1-2：CSP 加固——禁用 unsafe-eval，限制资源来源到 self + localhost（后端/SSE/dev server）

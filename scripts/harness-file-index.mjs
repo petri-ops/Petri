@@ -1271,9 +1271,14 @@ export function diagnoseHarnessRunReadiness(manifest, index, params = {}, option
         code: 'runtime_not_ready',
         severity: 'error',
         recoverable: true,
+        // Stage 3 M1: provisionable=true signals that Harness can auto-fetch
+        // this capability rather than requiring manual user action via the
+        // plugin store. The planning layer checks this flag before deciding
+        // whether to surface a "please install" prompt or silently provision.
+        provisionable: true,
         message: `${runtimeReady.runtime || manifest.language || 'runtime'} 运行时不可用`,
         detail: runtimeReady.reason || null,
-        suggestedFix: '请安装或配置对应运行时，然后重新执行该工具。',
+        suggestedFix: 'Harness 将自动准备所需运行时与分析包，完成后继续执行。',
       }),
     );
   }

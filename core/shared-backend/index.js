@@ -32,6 +32,7 @@ module.exports = {
   pathSafe: require('./path-safe'),
   executionContext: require('./execution-context'),
   agentWorkflow: require('./agent-workflow'),
+  capabilityProvisioning: require('./capability-provisioning'),
   executors: require('./executors'),
   storage: require('./storage'),
   llmProviders: require('./llm-providers'),

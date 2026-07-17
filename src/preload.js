@@ -60,6 +60,11 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     save: (settings) => ipcRenderer.invoke('compute-settings:save', settings),
   },
 
+  // Harness 能力预备 — Stage 3 M1：只读，展示已自备的运行时/包 bundle
+  harnessCapabilities: {
+    list: () => ipcRenderer.invoke('harness-capabilities:list'),
+  },
+
   // 插件管理
   plugins: {
     listInstalled: () => ipcRenderer.invoke('plugin:list-installed'),
