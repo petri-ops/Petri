@@ -1,14 +1,30 @@
 # 并行分支待合并备忘录
 
 > 维护方：非主 agent（只读审计 + 阻断性回归修复通道）
-> 更新日期：2026-07-17
+> 更新日期：2026-07-17（含 codex/* 分支 diff 审计结果）
 > 用途：记录在 main 之外进行的并行工作分支，供主 agent / 项目负责人统筹合并时机
 
 ---
 
-## 一、由本非主 agent 创建的分支
+## 一、分支总览（2026-07-17 审计后）
 
-### fix/qa-smoke-stale-css-paths
+| 分支名 | 状态 | 合并风险 | 建议操作 |
+|--------|------|---------|---------|
+| `fix/qa-smoke-stale-css-paths` | 🟢 待合并 | 零冲突 | 随时 merge |
+| `codex/fix-collapsed-right-titlebar` | 🟡 待合并 | 三文件两边改过，无文本冲突但有语义风险 | 人工 review 后 merge |
+| `codex/fix-collapsed-right-titlebar-minimal` | ⚪ 已合并残留 | - | 删除分支 |
+| `codex/fix-external-webview-height` | ⚪ 已合并残留 | - | 删除分支 |
+| `codex/restore-user-avatar` | ⚪ 已合并残留 | - | 删除分支 |
+| `codex/restore-user-chat-bubble` | ⚪ 已合并残留 | - | 删除分支 |
+| `codex/theme-linked-panels` | ⚪ 已合并残留 | - | 删除分支 |
+
+**审计方法**：对每个分支执行 `git merge-base --is-ancestor <branch> main` 判定是否已包含，对未包含的分支执行 `git merge-tree` 预演检测冲突。
+
+---
+
+## 二、本非主 agent 创建的分支
+
+### fix/qa-smoke-stale-css-paths 🟢
 
 | 字段 | 值 |
 |------|-----|
@@ -35,27 +51,64 @@ git cherry-pick ce1f054
 
 ---
 
-## 二、已存在的 codex/* 分支（非本 agent 创建，仅供记录）
+## 三、其他 agent 创建的分支（codex/*）
 
-以下分支由其他 agent（codex 终端）在独立 worktree 中创建，与主 agent 的 MODEL 工作可能存在重叠风险。**本 agent 未审计其内容，合并前需主 agent 自行核对。**
+### codex/fix-collapsed-right-titlebar 🟡
 
-| 分支名 | 提交 | worktree 路径 | 描述 |
-|--------|------|---------------|------|
-| `codex/fix-collapsed-right-titlebar` | `23705a3` | `/private/tmp/biof3-collapse-titlebar` | Fully collapse right title bar tools |
-| `codex/fix-collapsed-right-titlebar-minimal` | `dcc9f2e` | `/private/tmp/biof3-collapse-minimal` | Fully collapse right title bar tools |
-| `codex/fix-external-webview-height` | `8d51872` | `/private/tmp/biof3-webview-flex` | Fix external browser webview height |
-| `codex/restore-user-avatar` | `0b32e4d` | `/private/tmp/biof3-user-avatar` | Restore user avatar in chat messages |
-| `codex/restore-user-chat-bubble` | `9755867` | `/private/tmp/biof3-chat-bubble` | Restore themed user chat bubbles |
-| `codex/theme-linked-panels` | `ee49a71` | `/private/tmp/biof3-desktop-theme-sync` | Sync reports browser and file tree themes |
+| 字段 | 值 |
+|------|-----|
+| 分支名 | `codex/fix-collapsed-right-titlebar` |
+| 提交 | `23705a3`（07-14 创建） |
+| 改动 | 3 文件：`TitleBar.module.css`(+10)、`TitleBar.tsx`(129 行大改)、`project-workspace.tsx`(+4) |
+| 是否已包含在 main | 否（有 1 个独立提交） |
+| 文本冲突 | 无（`git merge-tree` 无 `<<<<<<<` 标记，git 能自动合并） |
+| 语义冲突风险 | 中（三文件都 "changed in both"，见下） |
 
-**风险提示**：
-- 这些分支都涉及前端 UI（titlebar / webview / avatar / chat bubble / theme），与主 agent 的 MODEL 工作（core/ + frontend 模型相关文件）**文件重叠风险较低**，但仍需主 agent 逐一核对 diff。
-- 其中 `codex/restore-user-chat-bubble` 和 `codex/restore-user-avatar` 可能涉及 SimpleChat 组件，而 SimpleChat 也被 MODEL 的 `useAiSettings` 迁移影响过，合并时需重点检查冲突。
-- 建议合并顺序：先合并本 agent 的 `fix/qa-smoke-stale-css-paths`（零风险），再由主 agent 逐一评估 codex/* 分支。
+**关键风险点**：该分支基于 07-14 的 main 创建，但此后 main 已合并 `dcc9f2e`（`codex/fix-collapsed-right-titlebar-minimal`，即同一功能的 minimal 版本）及多次 Stage 1 UI 改动。合并预演显示三个文件都 "changed in both"：
+
+| 文件 | main 侧改动 | 分支侧改动 |
+|------|------------|-----------|
+| `TitleBar.module.css` | minimal 版本 + Stage 1 UI 调整 | 完整版折叠逻辑 |
+| `TitleBar.tsx` | minimal 版本 + Stage 1 UI 调整 | 完整版折叠逻辑（129 行重写） |
+| `project-workspace.tsx` | Stage 1 多次改动 | 新增 useEffect（rightOpen 联动 rightToolMenuOpen） |
+
+**判定**：虽然无文本冲突，但 `TitleBar.tsx` 被该分支重写了 129 行，而 main 侧也大改过同一文件。合并后可能出现**功能退化或重复逻辑**。**必须人工 review**，确认该分支的功能是否已被 main 的 minimal 版本覆盖，或需要手动 rebase 保留完整版逻辑。
+
+**建议主 agent 处理方式**：
+```bash
+# 不要直接 merge，先看 diff 决定
+git diff main...codex/fix-collapsed-right-titlebar
+# 若决定采用，建议 rebase 到最新 main 再合并
+git checkout codex/fix-collapsed-right-titlebar
+git rebase main
+# 解决可能的语义冲突后
+git checkout main && git merge codex/fix-collapsed-right-titlebar
+```
+
+### 已合并残留分支（可安全删除）⚪
+
+以下 5 个分支的 tip 提交均已包含在 main 中（`git merge-base --is-ancestor` 判定为是），是已合并的残留分支，**可安全删除**：
+
+| 分支名 | tip 提交 | 说明 |
+|--------|---------|------|
+| `codex/fix-collapsed-right-titlebar-minimal` | `dcc9f2e` | 已合并入 main |
+| `codex/fix-external-webview-height` | `8d51872` | 已合并入 main |
+| `codex/restore-user-avatar` | `0b32e4d` | 已合并入 main |
+| `codex/restore-user-chat-bubble` | `9755867` | 已合并入 main |
+| `codex/theme-linked-panels` | `ee49a71` | 已合并入 main |
+
+**删除命令**（建议主 agent 执行）：
+```bash
+git branch -D codex/fix-collapsed-right-titlebar-minimal \
+             codex/fix-external-webview-height \
+             codex/restore-user-avatar \
+             codex/restore-user-chat-bubble \
+             codex/theme-linked-panels
+```
 
 ---
 
-## 三、合并协作约定
+## 四、合并协作约定
 
 为避免"不同 agent 干活不同步导致修改丢失"，约定如下：
 
@@ -68,6 +121,17 @@ git cherry-pick ce1f054
 3. **主 agent 责任**：每次开始 / 结束工作时，检查 `docs/branch-handoff.md` 和 `git branch` 是否有待合并分支。
 
 4. **绝不**：force push、`reset --hard`、`git stash` 跨分支操作。
+
+---
+
+## 五、合并优先级建议
+
+按风险从低到高，建议主 agent 按此顺序处理：
+
+1. **先删除 5 个已合并残留分支**（零风险，清理工作区）
+2. **合并 `fix/qa-smoke-stale-css-paths`**（零冲突，恢复门禁绿色）
+3. **评估 `codex/fix-collapsed-right-titlebar`**（需人工 review，可能与 main 的 minimal 版本功能重复）
+4. **完成 MODEL 工作后**，执行 `docs/stage2-acceptance-audit.md` 第四节的实机验收
 
 ---
 
