@@ -20,6 +20,9 @@
 | 🟢待合并 | 2026-07-17 | `fix/qa-smoke-stale-css-paths` 分支待合并，零冲突 | 分支备忘录 | [§2.1](#21-fixqa-smoke-stale-css-paths-) |
 | 🟡待评估 | 2026-07-17 | `codex/fix-collapsed-right-titlebar` 分支待评估，三文件两边改过 | 分支备忘录 | [§2.2](#22-codexfix-collapsed-right-titlebar-) |
 | ⚪可清理 | 2026-07-17 | 5 个 codex/* 已合并残留分支可删除 | 分支备忘录 | [§2.3](#23-已合并残留分支可安全删除-) |
+| ⚪可清理 | 2026-07-17 | `sanitizer.js`(51行) 是死模块，生产代码无引用，测试不在门禁范围 | 本文件 §4 | [§4 问题 E](#问题-esanitizerjs-死模块) |
+| ⚠️注意 | 2026-07-17 | `core/test/` 下 9 个测试文件不在 npm test 门禁范围，含死模块测试 | 本文件 §4 | [§4 问题 F](#问题-fcoretest-目录不在门禁范围) |
+| 🟡建议 | 2026-07-17 | `project-run-layout.js:86` `isAdmin = false` 硬编码 TODO | 本文件 §4 | [§4 问题 G](#问题-gproject-run-layoutjs-isadmin-硬编码) |
 
 **状态图例**：🔴 阻塞验收必须处理 | 🟡 建议处理不阻塞 | 🟢 待合并零风险 | ⚪ 可清理 | ✅ 已处理
 
@@ -147,6 +150,45 @@ git branch -D codex/fix-collapsed-right-titlebar-minimal \
 
 ---
 
+## §4 代码质量审计（2026-07-17）
+
+### 问题 E：sanitizer.js 死模块
+
+- **位置**：`core/r-server/sanitizer.js`（51 行）
+- **现象**：导出 `sanitizeParam`/`assertSafePath`/`sanitizeRString`，但全项目（core/ + src/ + frontend/）无任何生产代码引用
+- **测试**：`core/test/sanitizer.test.mjs` 存在，但该文件在 `core/test/` 下，不在 `npm test` 门禁范围（`node --test test/*.test.mjs`）
+- **dependency-decoupling-checkpoint.md 记录**："早期 flagged 但保留的模块，等 P-07 模型网关落地时统一收编"。P-07 已落地，但 sanitizer 仍无人引用
+- **建议**：主 agent 评估是否删除 `sanitizer.js` 和 `core/test/sanitizer.test.mjs`。如果安全函数仍有价值，应迁移到 `core/shared-backend/` 或合并到现有 util
+- **优先级**：低（死代码不影响运行，但增加维护噪音）
+- **对验收影响**：无
+
+### 问题 F：core/test/ 目录不在门禁范围
+
+- **现象**：`package.json` 的 test 脚本是 `node --test test/*.test.mjs`，只覆盖 `test/` 目录
+- **`core/test/` 目录下有 9 个测试文件**不被门禁覆盖：
+  - `sanitizer.test.mjs`（测死模块）
+  - `agent-tools.smoke.mjs`、`agent-workflow.mjs`、`copilot-scenarios.mjs`
+  - `execution-context.mjs`、`final-report.mjs`、`report-theme.mjs`
+  - `smoke-phase-c3.mjs`、`smoke-tools.mjs`
+- **风险**：这些测试可能测的模块已变更但测试未同步，产生"假绿色"或"假红色"
+- **建议**：主 agent 评估：
+  1. 将仍有价值的 `core/test/` 测试迁移到 `test/` 目录纳入门禁
+  2. 删除测死模块的测试（如 sanitizer.test.mjs）
+  3. 或在 package.json 中扩展 test glob 为 `node --test test/*.test.mjs core/test/*.mjs`
+- **优先级**：中（门禁覆盖范围直接影响 CI 可信度）
+- **对验收影响**：不阻塞 Stage 3，但影响长期代码质量
+
+### 问题 G：project-run-layout.js isAdmin 硬编码
+
+- **位置**：`core/r-server/helpers/project-run-layout.js:86`
+- **现象**：`const isAdmin = false; // TODO: 从 user 对象获取角色`
+- **风险**：管理员判断被硬编码为 false，如果有依赖 isAdmin 的权限分支，可能永远不执行
+- **建议**：主 agent 确认该 TODO 是否需要实现，或标记为"桌面版不需要管理员角色"并移除 TODO
+- **优先级**：低（桌面单用户场景可能不需要 admin 判断）
+- **对验收影响**：无
+
+---
+
 ## 审计发现追加规范
 
 非主 agent 完成新审计后，按以下格式追加到"当前待处理项"表格：
@@ -171,3 +213,4 @@ git branch -D codex/fix-collapsed-right-titlebar-minimal \
 | 2026-07-17 | Stage 2 验收审计归档（主 agent 已完成验收） | 非主 agent |
 | 2026-07-17 | 追加 Stage 3 M1 capability-provisioning 审计（3 条建议级） | 非主 agent |
 | 2026-07-17 | 追加 Stage 3 M1 深度审计报告（不变量/约束/安全），新增问题 D（host 白名单） | 非主 agent |
+| 2026-07-17 | 追加代码质量审计：死模块/门禁覆盖盲区/硬编码 TODO（问题 E/F/G） | 非主 agent |
