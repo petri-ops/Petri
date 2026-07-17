@@ -17,7 +17,7 @@
 | 🟡建议 | 2026-07-17 | Stage 3 M1: 两处 `catch {}` 静默吞掉所有错误，调试困难 | 本文件 §3 | [§3 问题 B](#问题-b静默-catch-吞掉所有错误) |
 | 🟡建议 | 2026-07-17 | Stage 3 M1: `capability-provisioning.js` 的 defaultDownload 未复用 plugin-manager 且无 host 白名单 | 本文件 §3 | [§3 问题 C](#问题-cdefaultdownload-未复用-plugin-manager) |
 | 🟡建议 | 2026-07-17 | Stage 3 M1: `defaultDownload` 缺少 host 白名单，设计文档 D4 要求，M2 扩展分发源前需修复 | stage3-m1-audit | [§3 问题 D](#问题-ddefaultdownload-缺少-host-白名单) |
-| 🟢待合并 | 2026-07-17 | `fix/qa-smoke-stale-css-paths` 分支待合并，零冲突 | 分支备忘录 | [§2.1](#21-fixqa-smoke-stale-css-paths-) |
+| ✅已处理 | 2026-07-17 | `fix/qa-smoke-stale-css-paths` 已合并，themes 门禁恢复 7/7 | 分支备忘录 | [§2.1](#21-fixqa-smoke-stale-css-paths-) |
 | 🟡待评估 | 2026-07-17 | `codex/fix-collapsed-right-titlebar` 分支待评估，三文件两边改过 | 分支备忘录 | [§2.2](#22-codexfix-collapsed-right-titlebar-) |
 | ⚪可清理 | 2026-07-17 | 5 个 codex/* 已合并残留分支可删除 | 分支备忘录 | [§2.3](#23-已合并残留分支可安全删除-) |
 | ⚪可清理 | 2026-07-17 | `sanitizer.js`(51行) 是死模块，生产代码无引用，测试不在门禁范围 | 本文件 §4 | [§4 问题 E](#问题-esanitizerjs-死模块) |
@@ -46,13 +46,12 @@
 
 > 详细备忘录见 `docs/branch-handoff.md`
 
-### §2.1 fix/qa-smoke-stale-css-paths 🟢
+### §2.1 fix/qa-smoke-stale-css-paths ✅
 
 - **提交**：`ce1f054`
 - **改动**：`scripts/qa-smoke.mjs`（2 行删除）
-- **合并方式**：`git merge fix/qa-smoke-stale-css-paths`
-- **风险**：零冲突，与 MODEL 文件零重叠
-- **合并时机**：任何时候，建议尽快让门禁恢复绿色
+- **状态**：✅ 2026-07-17 已 `git merge` 进 main（ort merge commit），qa-smoke 从 6/7 恢复到 7/7。分支已删除。
+- **风险**：零冲突，与 MODEL 文件零重叠（已确认）
 
 ### §2.2 codex/fix-collapsed-right-titlebar 🟡
 
@@ -214,3 +213,4 @@ git branch -D codex/fix-collapsed-right-titlebar-minimal \
 | 2026-07-17 | 追加 Stage 3 M1 capability-provisioning 审计（3 条建议级） | 非主 agent |
 | 2026-07-17 | 追加 Stage 3 M1 深度审计报告（不变量/约束/安全），新增问题 D（host 白名单） | 非主 agent |
 | 2026-07-17 | 追加代码质量审计：死模块/门禁覆盖盲区/硬编码 TODO（问题 E/F/G） | 非主 agent |
+| 2026-07-17 | 合并 `fix/qa-smoke-stale-css-paths`（§2.1），qa-smoke 6/7 → 7/7，删除已合并分支 | 主 agent |
