@@ -231,10 +231,10 @@ UI 不得制造第二套状态真相，模型层不得绕过确认/审计边界�
 
 ## 8. 当前立即执行项
 
-当前只启动 Stage 2 的 `MODEL-1 Provider 调用收口`：
+MODEL-1 至 MODEL-5 的代码主干已完成。当前只执行 Stage 2 出口验收：
 
-1. 只读盘点聊天、Agent、摘要、记忆、报告、解释、embedding/vision 的实际模型调用入口。
-2. 定义版本化 `ModelProfile` 与 Gateway contract，不先批量增加 Provider。
-3. 让现有 DeepSeek/DashScope 路径经兼容层转发到统一 Gateway。
-4. 保持 conversation、确认、`tool_job` 与 artifact truth 不变，并为每个迁移入口补 contract 测试。
-5. MODEL-1 验收后再进入 MODEL-2 第一批 Provider；Stage 2 验收前不扩充 Harness 内容。
+1. 真实验证 DeepSeek、一个 OpenAI-compatible 云端模型和一个本地模型的聊天连接。
+2. 至少两个 Provider 完成 streaming 与 Agent tool calling 实测。
+3. 在 macOS 打包态验收 UI-031 的模型 CRUD、角色绑定、显式 fallback、Keychain、保存重开与会话选择器同步。
+4. 对比 conversation、确认、`tool_job` 和 artifact truth，确认 Provider 切换没有建立第二套状态或执行事实。
+5. 验收完成后再固定下一 release candidate；Stage 2 出口前不扩充 Harness 内容。

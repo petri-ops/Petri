@@ -14,12 +14,13 @@
 
 Stage 2：模型层与多 Provider。
 
-当前只执行 `MODEL-1 Provider 调用收口`：
+MODEL-1 至 MODEL-5 的代码主干已经完成，当前只执行 Stage 2 验收收口：
 
-1. 盘点聊天、Agent、摘要、记忆、报告、解释、embedding/vision 的真实调用入口。
-2. 定义 `ModelProfile` 与统一 Gateway contract。
-3. 先迁移现有 DeepSeek/DashScope 路径，不批量增加 Provider。
-4. 保持 conversation、确认、`tool_job` 与 artifact truth 契约不变，并补 contract 测试。
+1. 用用户实际可用的 DeepSeek、一个 OpenAI-compatible 云端模型和一个本地模型做真实聊天连通性验证。
+2. 至少选择两个 Provider 回归流式输出与 Agent tool calling；不把单元测试替代为真实服务结论。
+3. 完成 UI-031 打包态的凭据、保存重开、模型选择器同步和窄窗口验收。
+4. 确认 conversation、确认、`tool_job` 与 artifact truth 契约未因 Provider 切换改变。
+5. 上述验收通过后再固定下一个 release candidate；此前不进入 Stage 3。
 
 Stage 2 验收前不扩充 Harness 内容。阻断性回归仍可随时修复。
 
@@ -33,16 +34,19 @@ Stage 2 验收前不扩充 Harness 内容。阻断性回归仍可随时修复。
 - Clash Verge 使用规则模式：OpenAI/Codex/GitHub 代理，阿里云 OSS 直连。
 - Harness Phase 1–6、Plugin SDK、Agent workflow runtime、恢复与 fixture 门禁已建立，Stage 1–2 期间保持可回归。
 - Stage 1 UI 台账 30/30 verified；前端 146 tests 全通过，桌面明暗主题、设置分类、回收站、结果区和动态端口回退完成实机验收。
+- Stage 2 模型主干已完成：版本化 ModelProfile、统一 Gateway、全业务入口迁移、OpenAI-compatible/Ollama/LM Studio/vLLM、Anthropic 原生协议、DashScope vision/embedding、角色能力路由和默认关闭的显式 fallback。
+- `api-failover-proxy` 只作为 MIT 协议转换与流聚合来源融合；未引入其 Express、SQLite pool、Admin、Docker 或默认自动切换架构。
+- API Key 已退出 `ai-settings.json` 与设置读取 IPC；macOS 使用 Keychain，其他平台使用独立 0600 凭据文件。模型管理中心已完成开发壳实机渲染，UI-031 在打包态验收前保持 `in_progress`。
+- 当前门禁：前端 19 files / 147 tests；SPA 568 modules；Node 302 tests / 285 pass / 6 个已知基线失败（5 个 qa-smoke + 当前 Node/Electron ABI 迁移项，迁移项在 Electron ABI 下通过）。
+- 本地 arm64 打包已通过并生成约 183 MB 的 rc.5 DMG；包内 R/Python/SPA、模型页、凭据页和无明文 Key 的设置 API 已验证。未执行 OSS 上传、签名或公证。
 - **架构去耦已完成（2026-07）**：核心后端从 `vendor/biof3-core` submodule 内联为仓库内 `core/`（完全独立）；移除 OSS 存储、PostgreSQL、docker 执行三条 web/ECS 双模式分支，现为「本地文件存储 + SQLite + 内嵌运行时本地执行」单一路径。详见 [`dependency-decoupling-checkpoint.md`](./dependency-decoupling-checkpoint.md)（含下阶段清理建议）。
 
 ## 后续阶段摘要
 
 ### Stage 2：模型层
 
-- 建立 `P-07 Model Gateway`。
-- 清理 DeepSeek 硬编码。
-- 支持 DeepSeek、OpenAI-compatible、本地 Ollama/LM Studio/vLLM，随后接 Anthropic 原生协议。
-- 分离凭据、能力声明、角色路由、健康检查与用量记录。
+- MODEL-1 至 MODEL-5 代码主干已完成。
+- 当前只补真实 Provider 矩阵、打包态模型管理 UI 和版本候选验收证据。
 
 ### Stage 3：Harness 与标准流程
 

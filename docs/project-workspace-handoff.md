@@ -23,17 +23,16 @@
 
 > **Stage 1 UI 产品化 → Stage 2 模型层 → Stage 3 Harness 与标准流程 → Stage 4 首个稳定产品版本**
 
-当前唯一实现工作是 Stage 2 `MODEL-1 Provider 调用收口`。先定义统一模型契约并迁移现有 DeepSeek/DashScope 调用，不批量接入新 Provider；Stage 2 验收前不扩充 Harness 内容。
+Stage 2 的 MODEL-1 至 MODEL-5 代码主干已经完成；当前唯一工作是 Stage 2 验收收口。真实 Provider 矩阵和模型管理中心打包态验收完成前，不固定下一候选版本，也不扩充 Harness 内容。
 
 ## 3. 当前立即任务
 
-按 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md) 的 MODEL-1 执行：
+按 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md) 的 Stage 2 出口执行：
 
-1. 只读盘点全部模型调用与凭据读取入口。
-2. 定义版本化 `ModelProfile`、能力声明、角色和错误 contract。
-3. 通过兼容层迁移现有调用，不改变会话、确认、job 或 artifact 状态。
-4. 每个入口迁移均补 contract 测试与日志脱敏检查。
-5. MODEL-1 完成前不开始 MODEL-2 Provider 扩展。
+1. 真实验证 DeepSeek、一个 OpenAI-compatible 云模型和一个本地模型。
+2. 至少两个 Provider 回归 streaming 与 Agent tool calling。
+3. 打包态验收 UI-031：模型 CRUD、角色能力过滤、显式 fallback、Keychain、连通性测试、保存重开和聊天选择器同步。
+4. 通过后更新 UI 台账、决定下一 RC 版本并做本地 macOS 包验证；发布仍需用户明确授权。
 
 ### 已拆分给独立 Agent 的专项
 
@@ -82,14 +81,15 @@ Stage 1–2 只保持回归；GO/KEGG、GSEA、WGCNA 延后到 Stage 3。技术�
 
 ### P-07 模型层现状
 
-- 当前聊天主链主要使用 DeepSeek。
-- DashScope 已用于 embedding/vision。
-- Core 已有 Provider 接口，但统一 Gateway 尚未完成。
-- OpenAI/Ollama 当前设置入口仍是未来支持。
-- 聊天摘要、记忆、报告和部分 Agent 路径仍存在 DeepSeek Endpoint、模型名或 Key 读取硬编码。
-- API Key 当前仍存于本地 AI 设置文件；Stage 2 需要改成 credential reference，macOS 优先 Keychain。
-
-Stage 2 目标以 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md) 为准，不应在 UI Stage 1 提前实现。
+- ModelProfile v1 与 Model Gateway 已成为聊天、Agent、规划、摘要、记忆、报告、解释、vision 和 embedding 的统一调用边界。
+- 已注册 DeepSeek、OpenAI、OpenAI-compatible、Ollama、LM Studio、vLLM、Anthropic、DashScope embedding/vision；Anthropic 使用原生 Messages/stream/tool 协议适配。
+- 多模型角色绑定覆盖 chat、agent、planner、vision、embedding、summary、report、explanation；能力不匹配在调用前阻断。
+- fallback 默认关闭，仅在用户显式开启并逐角色配置候选时对可重试错误切换；401、缺 Key、取消和已经输出部分流内容时不切换，切换原因写入事件/日志。
+- API Key 已从普通设置与读取 IPC 分离：macOS Keychain，其他平台独立 0600 凭据文件；旧字段自动迁移。一个兼容 Provider 可通过不同 credential reference 使用多套 Key。
+- 模型管理中心已实现 Provider/Profile、Endpoint、能力标签、8 类角色、fallback、凭据状态和按 Profile 连通性测试；UI-031 开发壳实机截图为 `/tmp/biof3-model-management-ui.png`，完整持久化与真实 Provider 验收前保持 `in_progress`。
+- 本地 `build:mac-arm64` 已生成约 183 MB 的 `BioF3-0.0.1-rc.5-arm64.dmg`（未上传、未签名、未公证）；包内 R/Python/SPA 健康，模型/凭据页可访问，设置 API 返回 Keychain 配置状态且无 secret 字段。保存重开、窄窗和真实 Provider 矩阵未完成，因此 UI-031 与 Stage 2 仍未关闭。
+- 打包验收发现 `electron-builder.yml` 曾把双架构写死在 target，导致 `build:mac-arm64` 仍构建 x64 并把工作区 native module 留成 x86_64；现已改为由 `build:mac` / `build:mac-arm64` / `build:mac-x64` 的 CLI 架构参数决定，并重建回 arm64 Electron ABI。
+- `api-failover-proxy/` 是未跟踪的嵌套参考仓库，绝不能加入 Desktop 提交；已融合的仅是 MIT 协议转换、usage/stream 聚合与可靠性原语。
 
 ## 6. UI 已建立结构与边界
 
@@ -134,7 +134,7 @@ Stage 1 已完成。Stage 2 的模型管理 UI 复用现有设置分类；结果
 - 开发实例关闭时，日志确认 Electron、R Server 与 Python Server 收到退出/停止信号。
 - 临时项目与会话均完成 `创建 → 归档 → 回收站可见 → 恢复 → 再归档 → 永久删除` 实际 API 验证；另验证永久删除项目后其活动会话返回 404，测试数据已清理。
 
-Stage 1 出口已满足：UI 台账 30/30 verified，明暗主题、设置五分类、回收站、结果区、折叠/拖拽和动态端口回退已完成实机验收。下一步进入 MODEL-1；不恢复局部偏移补丁、重复搜索框或旧 Desktop Dashboard。
+Stage 1 出口已满足。Stage 2 代码主干完成，下一步只做真实 Provider 与打包态验收；不恢复局部偏移补丁、重复搜索框、旧 Desktop Dashboard 或第二套模型调用链。
 
 ## 7. 验证门禁
 
