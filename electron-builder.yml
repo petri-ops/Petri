@@ -26,10 +26,7 @@ mac:
   hardenedRuntime: true
   gatekeeperAssess: false
   target:
-    - target: dmg
-      arch:
-        - arm64
-        - x64
+    - dmg
   # M2-11 (H4)：mac 签名 + notarization
   # 有证书时：CI 注入 CSC_LINK/CSC_KEY_PASSWORD → identity 自动匹配
   # 无证书时：identity: null，用户需右键打开（v1 过渡）
