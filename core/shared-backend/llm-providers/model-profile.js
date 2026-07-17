@@ -157,8 +157,18 @@ function normalizeModelProfiles(settings) {
   const supplied = Array.isArray(source.model_profiles) ? source.model_profiles : [];
   const legacy = Array.isArray(source.chat_model_presets) ? source.chat_model_presets : [];
   const candidates = supplied.length ? supplied : legacy.map(legacyPresetToProfile);
-  const profiles = candidates.map(normalizeModelProfile).filter(Boolean);
-  const ids = new Set(profiles.map((profile) => profile.id));
+  const profiles = [];
+  const ids = new Set();
+  for (const candidate of candidates) {
+    const profile = normalizeModelProfile(candidate, profiles.length);
+    if (!profile || ids.has(profile.id)) continue;
+    profiles.push(profile);
+    ids.add(profile.id);
+  }
+  // Defaults are a first-run / legacy migration aid only. Once a caller saves
+  // explicit ModelProfiles, that list is authoritative: silently adding cloud
+  // models would make the model-management UI lie about what is configured.
+  if (supplied.length) return profiles;
   for (const defaultProfile of DEFAULT_MODEL_PROFILES) {
     const capability = defaultProfile.capabilities[0];
     if (!profiles.some((profile) => profile.capabilities.includes(capability))) {
@@ -181,8 +191,11 @@ function normalizeRoleBindings(settings, profiles) {
     const requested = _cleanString(supplied[role]) || (role === 'chat' ? activeChatId : undefined);
     const capability = ROLE_CAPABILITY[role];
     const requestedProfile = requested && byId.get(requested);
-    if (requestedProfile && requestedProfile.capabilities.includes(capability)) {
-      bindings[role] = requestedProfile.id;
+    // An explicit binding is configuration truth, even when invalid. Preserve
+    // it so resolution returns a visible diagnostic instead of silently using
+    // another model for the task.
+    if (requested) {
+      bindings[role] = requested;
       continue;
     }
     const defaultId = DEFAULT_MODEL_ROLE_BINDINGS[role];
@@ -197,11 +210,54 @@ function normalizeRoleBindings(settings, profiles) {
 
 function normalizeModelConfig(settings) {
   const profiles = normalizeModelProfiles(settings);
-  return {
+  const config = {
     schemaVersion: MODEL_PROFILE_SCHEMA_VERSION,
     profiles,
     roleBindings: normalizeRoleBindings(settings, profiles),
   };
+  return { ...config, diagnostics: validateModelConfig(config) };
+}
+
+function validateModelConfig(config) {
+  const diagnostics = [];
+  const profiles = config && Array.isArray(config.profiles) ? config.profiles : [];
+  const roleBindings = config && config.roleBindings && typeof config.roleBindings === 'object'
+    ? config.roleBindings
+    : {};
+  const byId = new Map(profiles.map((profile) => [profile.id, profile]));
+
+  for (const role of MODEL_ROLES) {
+    const profileId = _cleanString(roleBindings[role]);
+    if (!profileId) {
+      diagnostics.push({
+        code: 'model_role_unbound',
+        role,
+        message: `模型角色尚未绑定: ${role}`,
+      });
+      continue;
+    }
+    const profile = byId.get(profileId);
+    if (!profile) {
+      diagnostics.push({
+        code: 'model_profile_not_found',
+        role,
+        profileId,
+        message: `模型角色 ${role} 绑定了不存在的配置: ${profileId}`,
+      });
+      continue;
+    }
+    const capability = ROLE_CAPABILITY[role];
+    if (!profile.capabilities.includes(capability)) {
+      diagnostics.push({
+        code: 'model_capability_mismatch',
+        role,
+        profileId,
+        requiredCapability: capability,
+        message: `模型 ${profile.label} 不支持 ${capability} 能力（任务角色: ${role}）`,
+      });
+    }
+  }
+  return diagnostics;
 }
 
 function resolveModelProfile(config, role, requestedId) {
@@ -238,5 +294,6 @@ module.exports = {
   normalizeModelProfile,
   legacyPresetToProfile,
   normalizeModelConfig,
+  validateModelConfig,
   resolveModelProfile,
 };

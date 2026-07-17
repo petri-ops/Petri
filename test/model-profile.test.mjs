@@ -8,6 +8,7 @@ const {
   normalizeModelConfig,
   normalizeModelProfile,
   resolveModelProfile,
+  validateModelConfig,
 } = require('../core/shared-backend/llm-providers/model-profile.js');
 
 test('ModelProfile v1 normalizes an OpenAI-compatible custom model', () => {
@@ -80,4 +81,53 @@ test('role resolution rejects a profile without the required capability', () => 
 test('invalid role is diagnosed before a provider call', () => {
   const result = resolveModelProfile(normalizeModelConfig({}), 'unknown-role');
   assert.equal(result.error, 'unknown_model_role');
+});
+
+test('explicit profiles are authoritative and do not inject cloud defaults', () => {
+  const config = normalizeModelConfig({
+    model_profiles: [
+      {
+        id: 'local-chat',
+        provider: 'ollama',
+        model: 'qwen3',
+        capabilities: ['chat', 'streaming', 'tools'],
+      },
+    ],
+    model_role_bindings: { chat: 'local-chat', agent: 'local-chat' },
+  });
+
+  assert.deepEqual(config.profiles.map((profile) => profile.id), ['local-chat']);
+  assert.equal(config.roleBindings.chat, 'local-chat');
+  assert.ok(config.diagnostics.some((item) => item.code === 'model_role_unbound' && item.role === 'vision'));
+});
+
+test('invalid explicit role bindings remain visible instead of silently switching models', () => {
+  const config = normalizeModelConfig({
+    model_profiles: [
+      { id: 'chat-only', provider: 'deepseek', model: 'deepseek-chat', capabilities: ['chat'] },
+    ],
+    model_role_bindings: { chat: 'missing', agent: 'chat-only' },
+  });
+
+  assert.equal(config.roleBindings.chat, 'missing');
+  assert.equal(config.roleBindings.agent, 'chat-only');
+  assert.equal(resolveModelProfile(config, 'chat').error, 'model_profile_not_found');
+  assert.equal(resolveModelProfile(config, 'agent').error, 'model_capability_mismatch');
+  assert.deepEqual(
+    validateModelConfig(config).filter((item) => item.role === 'chat' || item.role === 'agent').map((item) => item.code),
+    ['model_profile_not_found', 'model_capability_mismatch']
+  );
+});
+
+test('duplicate profile ids resolve deterministically to the first profile', () => {
+  const config = normalizeModelConfig({
+    model_profiles: [
+      { id: 'same', provider: 'ollama', model: 'first', capabilities: ['chat'] },
+      { id: 'same', provider: 'openai', model: 'second', capabilities: ['chat'] },
+    ],
+    model_role_bindings: { chat: 'same' },
+  });
+
+  assert.equal(config.profiles.length, 1);
+  assert.equal(config.profiles[0].model, 'first');
 });
