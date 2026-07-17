@@ -22,7 +22,7 @@
 | ⚪可清理 | 2026-07-17 | 5 个 codex/* 已合并残留分支可删除 | 分支备忘录 | [§2.3](#23-已合并残留分支可安全删除-) |
 | ✅已处理 | 2026-07-17 | `sanitizer.js` 死模块 + 其测试已删除（全仓零生产引用） | 本文件 §4 | [§4 问题 E](#问题-esanitizerjs-死模块) |
 | ✅已处理 | 2026-07-17 | `core/test/` 门禁盲区已收口：3 个单测迁入 `test/*.test.mjs`，死模块测试删除，4 个联网 smoke 保留在 core/test/ | 本文件 §4 | [§4 问题 F](#问题-fcoretest-目录不在门禁范围) |
-| 🟡建议 | 2026-07-17 | `project-run-layout.js:86` `isAdmin = false` 硬编码 TODO | 本文件 §4 | [§4 问题 G](#问题-gproject-run-layoutjs-isadmin-硬编码) |
+| ✅已处理 | 2026-07-17 | `project-run-layout.js` isAdmin 硬编码 → 实现为 `db.getUserById().role === 'admin'`（与 api-data/feedback 一致） | 本文件 §4 | [§4 问题 G](#问题-gproject-run-layoutjs-isadmin-硬编码) |
 
 **状态图例**：🔴 阻塞验收必须处理 | 🟡 建议处理不阻塞 | 🟢 待合并零风险 | ⚪ 可清理 | ✅ 已处理
 
@@ -196,6 +196,7 @@ git branch -D codex/fix-collapsed-right-titlebar-minimal \
 - **建议**：主 agent 确认该 TODO 是否需要实现，或标记为"桌面版不需要管理员角色"并移除 TODO
 - **优先级**：低（桌面单用户场景可能不需要 admin 判断）
 - **对验收影响**：无
+- **✅ 处理（2026-07-17，主 agent）**：核实"桌面版不需要 admin"的建议前提**不成立** —— 仓库确有角色模型：`users` 表有 `role` 列（默认 `'user'`），`db.getUserById()` 返回它，且 `api-data.js` / `feedback.js` 均已用 `role === 'admin'` 派生管理员权限。因此按既有模式**实现** TODO 而非删除：`resolveProjectRunLayout` 在非 owner 时经 `db.getUserById(userId)` 查 `role === 'admin'` 放行。防御性处理：db 未提供 `getUserById`（如单测 mock）或用户不存在/抛错时安全回退为非管理员，owner-only 行为不变。注意实际路径是 `core/shared-backend/project-run-layout.js`（审计记的 `core/r-server/helpers/` 已过时）。新增 3 个测试用例（admin 放行 / 非 admin 拒绝 / 无 getUserById 回退），`test/project-run-layout.test.mjs` 30→33 pass。
 
 ---
 
@@ -228,3 +229,4 @@ git branch -D codex/fix-collapsed-right-titlebar-minimal \
 | 2026-07-17 | 打包 WGCNA 为 built-in 插件（Stage 3 M4）+ 修锚定正则输入 bug + 新增 coexpression-network 工作流 | 主 agent |
 | 2026-07-17 | 抽取共享 R_LIBS_USER resolver（问题 A/B），静默 catch → warn | 主 agent |
 | 2026-07-17 | 删除 sanitizer 死模块（问题 E）；core/test 门禁分流：3 单测迁入门禁、删陈旧副本、保留 4 个 live smoke（问题 F）；顺带修 agent-workflow 模板数断言（WGCNA 引入的 CI 潜伏失败） | 主 agent |
+| 2026-07-17 | 处理问题 G：实现 project-run-layout 的 isAdmin（`db.getUserById().role === 'admin'`，防御性回退非管理员），补 3 个权限单测（admin 放行 / 非 admin 拒绝 / 无 getUserById 回退） | 主 agent |

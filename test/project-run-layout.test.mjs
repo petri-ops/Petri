@@ -187,6 +187,54 @@ describe('Phase 1: Project Run Layout Resolver', () => {
       assert.ok(layout.jobRoot.includes('job-200'));
     });
 
+    it('权限检查：允许管理员访问他人项目（role === admin）', () => {
+      const adminDb = {
+        ...mockDb,
+        getProject: (id) => mockDb.getProject(id),
+        getUserById: (id) => (id === 'admin-1' ? { id: 'admin-1', role: 'admin' } : null),
+      };
+      const layout = resolveProjectRunLayout({
+        projectId: 'test-project-1', // owned by user-1
+        toolJobId: 'job-admin',
+        db: adminDb,
+        userId: 'admin-1', // 非拥有者，但是 admin
+        skipPermissionCheck: false,
+      });
+      assert.ok(layout.jobRoot.includes('job-admin'));
+    });
+
+    it('权限检查：非拥有者非管理员被拒（role === user）', () => {
+      const userDb = {
+        ...mockDb,
+        getProject: (id) => mockDb.getProject(id),
+        getUserById: (id) => ({ id, role: 'user' }),
+      };
+      assert.throws(
+        () => resolveProjectRunLayout({
+          projectId: 'test-project-1', // owned by user-1
+          toolJobId: 'job-denied',
+          db: userDb,
+          userId: 'user-2', // 非拥有者且非 admin
+          skipPermissionCheck: false,
+        }),
+        /Permission denied/
+      );
+    });
+
+    it('权限检查：db 无 getUserById 时安全回退为非管理员（拒绝非拥有者）', () => {
+      // mockDb 只有 getProject，没有 getUserById —— 不应崩溃，应按非管理员拒绝
+      assert.throws(
+        () => resolveProjectRunLayout({
+          projectId: 'test-project-1',
+          toolJobId: 'job-nofn',
+          db: mockDb,
+          userId: 'user-2',
+          skipPermissionCheck: false,
+        }),
+        /Permission denied/
+      );
+    });
+
     it('ensureDirs: false 不自动创建目录', () => {
       const layout = resolveProjectRunLayout({
         projectId: 'test-project-1',

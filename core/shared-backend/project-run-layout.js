@@ -83,7 +83,17 @@ function resolveProjectRunLayout(options) {
   // 4. 权限检查
   if (!skipPermissionCheck && userId) {
     const isOwner = project.user_id === userId;
-    const isAdmin = false; // TODO: 从 user 对象获取角色
+    // 管理员放行：与 api-data.js / feedback.js 一致，从 users.role 派生（role === 'admin'）。
+    // 防御性：db 未提供 getUserById（如单元测试的 mock）或用户不存在时，安全回退为非管理员。
+    let isAdmin = false;
+    if (!isOwner && typeof db.getUserById === 'function') {
+      try {
+        const user = db.getUserById(userId);
+        isAdmin = !!user && user.role === 'admin';
+      } catch {
+        isAdmin = false;
+      }
+    }
     if (!isOwner && !isAdmin) {
       throw new Error(`[project-run-layout] Permission denied for project: ${projectId}`);
     }
