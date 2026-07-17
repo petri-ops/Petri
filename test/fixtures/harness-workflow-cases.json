@@ -113,6 +113,47 @@
         "recoverable": false,
         "terminal": false
       }
+    },
+    {
+      "id": "go-kegg-enrichment-lineage",
+      "templateId": "bulk-rna-core",
+      "availableToolIds": ["deseq2", "volcano-plot", "go-kegg"],
+      "jobs": [
+        {
+          "stepId": "differential",
+          "id": "tj_deg_for_go_kegg",
+          "tool_id": "deseq2",
+          "status": "completed",
+          "result": {
+            "artifactTruth": { "status": "valid", "validCount": 1 },
+            "artifacts": [
+              { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" }
+            ]
+          }
+        }
+      ],
+      "bindings": [
+        {
+          "fromStepId": "differential",
+          "toStepId": "volcano",
+          "inputId": "deg_table",
+          "artifact": { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" },
+          "artifactTruth": { "status": "valid" }
+        },
+        {
+          "fromStepId": "differential",
+          "toStepId": "enrichment",
+          "inputId": "deg_table",
+          "artifact": { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" },
+          "artifactTruth": { "status": "valid" }
+        }
+      ],
+      "expected": {
+        "stepStatuses": { "differential": "complete", "volcano": "ready", "enrichment": "ready" },
+        "readyStepIds": ["volcano", "enrichment"],
+        "recoverable": false,
+        "terminal": false
+      }
     }
   ]
 }

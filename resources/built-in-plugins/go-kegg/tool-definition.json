@@ -1,0 +1,142 @@
+{
+  "id": "go-kegg",
+  "title": "GO/KEGG 富集分析",
+  "subtitle": "基因功能与通路富集",
+  "category": "bulk RNA-seq",
+  "language": "r",
+  "description": "对基因列表或差异分析结果做 GO（BP/MF/CC）与 KEGG 通路富集（clusterProfiler，离线 KEGG 数据）。",
+  "inputs": [
+    {
+      "id": "deg_table",
+      "label": "基因列表或差异分析结果表 (CSV)",
+      "type": "file",
+      "required": true,
+      "accept": ".csv",
+      "hint": "单列基因名，或含 gene/log2FoldChange/padj 的 DESeq2 结果表（可由差异分析步骤二跳绑定）；后者会自动按显著性拆分上/下调"
+    },
+    {
+      "id": "species",
+      "label": "物种",
+      "type": "select",
+      "default": "human",
+      "options": ["human", "mouse"],
+      "hint": "首期预构建覆盖 human(org.Hs) 与 mouse(org.Mm)，其余物种按需自备"
+    },
+    {
+      "id": "analysis_type",
+      "label": "分析类型",
+      "type": "select",
+      "default": "all",
+      "options": ["all", "GO", "GO-BP", "GO-MF", "GO-CC", "KEGG"]
+    },
+    {
+      "id": "gene_id_type",
+      "label": "基因 ID 类型",
+      "type": "select",
+      "default": "SYMBOL",
+      "options": ["SYMBOL", "ENSEMBL", "ENTREZID", "auto"]
+    },
+    {
+      "id": "enrich_pvalue",
+      "label": "富集 p-value 阈值",
+      "type": "number",
+      "default": 0.05
+    },
+    {
+      "id": "enrich_qvalue",
+      "label": "富集 q-value 阈值",
+      "type": "number",
+      "default": 0.2
+    },
+    {
+      "id": "top_n",
+      "label": "展示 top N 条目",
+      "type": "number",
+      "default": 20
+    },
+    {
+      "id": "padj_cutoff",
+      "label": "差异表 padj 阈值",
+      "type": "number",
+      "default": 0.05,
+      "hint": "仅在输入为 DESeq2 结果表时用于筛选显著基因"
+    },
+    {
+      "id": "lfc_cutoff",
+      "label": "差异表 |log2FC| 阈值",
+      "type": "number",
+      "default": 1,
+      "hint": "仅在输入为 DESeq2 结果表时用于筛选显著基因"
+    }
+  ],
+  "outputs": [
+    { "id": "go_bp_results", "type": "table", "label": "GO-BP 结果表" },
+    { "id": "kegg_results", "type": "table", "label": "KEGG 结果表" },
+    { "id": "go_bp_dotplot", "type": "plot", "label": "GO-BP 气泡图" },
+    { "id": "kegg_dotplot", "type": "plot", "label": "KEGG 气泡图" },
+    { "id": "report", "type": "report", "label": "解读报告" }
+  ],
+  "tutorialUrl": "/docs/bulk-rnaseq/enrichment",
+  "demoDataUrl": "/demo-data/go-kegg",
+  "estimatedMinutes": 3,
+  "packages": ["clusterProfiler", "enrichplot", "DOSE", "org.Hs.eg.db", "KEGG.db"],
+  "color": "#0891b2",
+  "failureModes": [
+    {
+      "code": "missing_required_file_inputs",
+      "title": "缺少必需输入文件",
+      "description": "富集分析需要一个基因列表或差异分析结果表；缺少输入无法继续。",
+      "recoverable": true,
+      "suggestedFix": "让 Harness 从项目中选择上游差异结果（deg_table），或用示例基因列表。",
+      "detect": "missing required file inputs|no input gene file|please provide file"
+    },
+    {
+      "code": "too_few_genes",
+      "title": "基因数不足",
+      "description": "有效基因少于 3 个，无法进行富集分析。",
+      "recoverable": true,
+      "suggestedFix": "放宽上游显著性阈值（padj_cutoff/lfc_cutoff），或检查输入基因列是否正确。",
+      "detect": "too few genes|need >= 3|need at least 3"
+    },
+    {
+      "code": "gene_id_mapping_failed",
+      "title": "基因 ID 映射失败",
+      "description": "gene_id_type 与物种注释库不匹配，bitr 无法把基因名转换为 ENTREZID。",
+      "recoverable": true,
+      "suggestedFix": "切换 gene_id_type（SYMBOL/ENSEMBL/ENTREZID）或设为 auto 自动探测；确认物种选择正确。",
+      "detect": "bitr|fail to map|no gene can be mapped|input gene id|ENTREZID"
+    },
+    {
+      "code": "organism_db_missing",
+      "title": "物种注释库缺失",
+      "description": "所选物种的 OrgDb（如 org.Hs.eg.db / org.Mm.eg.db）未就位。",
+      "recoverable": true,
+      "suggestedFix": "由 Harness 自动准备 r-enrichment 分析包中对应物种的注释库；或改用已支持的物种。",
+      "detect": "org.Hs.eg.db|org.Mm.eg.db|there is no package|OrgDb"
+    },
+    {
+      "code": "kegg_offline_data_missing",
+      "title": "KEGG 离线数据缺失",
+      "description": "KEGG 富集使用离线数据（use_internal_data），若离线库缺失则该步骤跳过。",
+      "recoverable": true,
+      "suggestedFix": "由 Harness 自动补齐 r-enrichment 分析包中的离线 KEGG 数据；GO 富集不受影响。",
+      "detect": "KEGG.db|use_internal_data|KEGG failed"
+    },
+    {
+      "code": "empty_result_or_insufficient_signal",
+      "title": "富集结果为空",
+      "description": "当前阈值下没有显著富集的条目。",
+      "recoverable": true,
+      "suggestedFix": "适度放宽 enrich_pvalue/enrich_qvalue，或确认输入基因集是否具有一致的生物学信号。",
+      "detect": "no term enriched|empty result|0 enriched|no significant"
+    },
+    {
+      "code": "runtime_not_ready",
+      "title": "运行时不可用",
+      "description": "R 运行时或 r-enrichment 分析包未就绪，无法执行富集分析。",
+      "recoverable": true,
+      "suggestedFix": "Harness 将自动准备所需运行时与分析包，完成后继续执行。",
+      "detect": "runtime not ready|r runtime not found|rscript not found"
+    }
+  ]
+}
