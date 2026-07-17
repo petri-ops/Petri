@@ -1,11 +1,11 @@
 # 审计广播台 (AUDIT-LOG)
 
-> **本文件是所有非主线 agent（审计/辅助 agent）向主 agent 广播发现的唯一入口。**
-> 主 agent 每次会话开始时，**必须先读本文件**，处理其中 🔴 待处理项，再开始主线工作。
-> 非主 agent 每次完成审计后，必须把发现追加到本文件并提交。
+> **本文件是非主线 agent（审计/辅助 agent）向主 agent 广播发现的唯一入口。**
+> 主 agent 每次会话开始时，**必须先读本文件**，处理其中 🔴 阻塞项和 🟢 待合并项，再开始主线工作。
+> 非主 agent 每次完成审计后，必须把发现追加到本文件并提交，不要只写在单独报告里。
 >
 > 维护方：非主 agent（只读审计 + 阻断性回归修复通道）
-> 最后更新：2026-07-17
+> 最后更新：2026-07-17（追加 Stage 3 M1 审计）
 
 ---
 
@@ -13,9 +13,9 @@
 
 | 状态 | 日期 | 发现 | 来源 | 详情 |
 |------|------|------|------|------|
-| 🟡建议 | 2026-07-17 | `conversations.js:5` 等模块头注释陈旧，仍写 `process.env.DEEPSEEK_API_KEY` 但代码已走 ModelGateway | 审计报告 | [§1.1 问题A](#问题-a模块头注释陈旧) |
-| 🟡建议 | 2026-07-17 | `ai-admin.js:207` 成本估算硬编码 `deepseek-chat`，切换 Provider 后成本不准 | 审计报告 | [§1.2 问题B](#问题-b成本估算硬编码-deepseek-chat) |
-| 🟡建议 | 2026-07-17 | `ai-agent.js:123` 兼容期仍从 `getApiKey()` 拿明文 key 传给 Gateway | 审计报告 | [§1.3 问题C](#问题-c兼容期-apikeyoverride) |
+| 🟡建议 | 2026-07-17 | Stage 3 M1: `tools-executor.js` 与 `mcp/registry.js` 的 R_LIBS_USER 组装逻辑重复约 25 行 | 本文件 §3 | [§3 问题 A](#问题-a代码重复r-libs-user-组装逻辑) |
+| 🟡建议 | 2026-07-17 | Stage 3 M1: 两处 `catch {}` 静默吞掉所有错误，调试困难 | 本文件 §3 | [§3 问题 B](#问题-b静默-catch-吞掉所有错误) |
+| 🟡建议 | 2026-07-17 | Stage 3 M1: `capability-provisioning.js` 的 defaultDownload 未复用 plugin-manager 且无 host 白名单 | 本文件 §3 | [§3 问题 C](#问题-cdefaultdownload-未复用-plugin-manager) |
 | 🟢待合并 | 2026-07-17 | `fix/qa-smoke-stale-css-paths` 分支待合并，零冲突 | 分支备忘录 | [§2.1](#21-fixqa-smoke-stale-css-paths-) |
 | 🟡待评估 | 2026-07-17 | `codex/fix-collapsed-right-titlebar` 分支待评估，三文件两边改过 | 分支备忘录 | [§2.2](#22-codexfix-collapsed-right-titlebar-) |
 | ⚪可清理 | 2026-07-17 | 5 个 codex/* 已合并残留分支可删除 | 分支备忘录 | [§2.3](#23-已合并残留分支可安全删除-) |
@@ -24,32 +24,17 @@
 
 ---
 
-## §1 Stage 2 验收审计发现（2026-07-17）
+## §1 Stage 2 验收审计（已完成，归档）
 
 > 详细报告见 `docs/stage2-acceptance-audit.md`
-> 审计结论：6 项验收清单中 5 项代码层通过，1 项待实机验收。无阻塞级问题。
+> **状态：✅ 已被主 agent 完成验收，本审计归档**
 
-### 问题 A：模块头注释陈旧
+主 agent 已于 2026-07-17 完成 Stage 2 全部验收：
+- 真实 Provider 矩阵通过（DeepSeek + xunfei-astron + api.xcdw.us claude-opus-4-8）
+- 打包态 UI-031 verified（提交 `f7a9b4e`）
+- conversation/tool_job/artifact 契约不变
 
-- **位置**：`core/r-server/helpers/conversations.js:5`、`core/r-server/helpers/user-facts.js`
-- **现象**：注释仍写 `process.env.DEEPSEEK_API_KEY`，实际代码已走 `callModelTask()` -> ModelGateway
-- **建议**：主 agent 清理注释，避免误导后续审计。优先级低。
-- **对验收影响**：无（不影响功能）
-
-### 问题 B：成本估算硬编码 deepseek-chat
-
-- **位置**：`core/r-server/helpers/ai-admin.js:207,209`
-- **现象**：成本估算硬编码 `deepseek-chat` 作为默认模型
-- **建议**：让成本估算读取当前绑定的模型。优先级中。
-- **对验收影响**：无（不影响模型调用路径）
-
-### 问题 C：兼容期 apiKeyOverride
-
-- **位置**：`core/r-server/routes/ai-agent.js:123`
-- **现象**：仍通过 `getApiKey(providerName)` 拿明文 key 作为 `apiKeyOverride` 传给兼容层
-- **判定**：MODEL-1 兼容期设计的预期行为，最终 dispatch 仍由 Gateway 负责。不阻塞验收。
-- **建议**：MODEL-1 收尾时考虑改为 `profileId` 路由。优先级低（兼容期可接受）。
-- **对验收影响**：无
+原审计报告中的 3 条建议级问题（注释陈旧/成本估算硬编码/兼容期 apiKeyOverride）未在 Stage 2 验收中处理，仍为 🟡 建议级，不阻塞后续工作，主 agent 可在 Stage 3 间隙清理。
 
 ---
 
@@ -70,7 +55,7 @@
 - **提交**：`23705a3`
 - **改动**：3 文件（TitleBar.module.css、TitleBar.tsx、project-workspace.tsx）
 - **风险**：无文本冲突，但三文件两边都改过，有语义冲突风险
-- **合并方式**：建议先 `git diff main...codex/fix-collapsed-right-titlebar` review，确认功能是否已被 main 的 minimal 版本覆盖
+- **合并方式**：建议先 `git diff main...codex/fix-collapsed-right-titlebar` review
 - **合并时机**：人工 review 后
 
 ### §2.3 已合并残留分支可安全删除 ⚪
@@ -85,6 +70,71 @@ git branch -D codex/fix-collapsed-right-titlebar-minimal \
 
 ---
 
+## §3 Stage 3 M1 Capability Provisioning 审计（2026-07-17）
+
+> 审计对象：工作区未提交的 Stage 3 M1 代码
+> 审计方式：只读，未改动任何代码
+> 审计结论：**代码质量良好，13 个测试全通过，无阻塞级问题。3 条建议级改进。**
+
+### 审计范围
+
+| 文件 | 改动类型 | 说明 |
+|------|---------|------|
+| `core/shared-backend/capability-provisioning.js` | 新增 | 核心模块：能力预备 CRUD + SHA-256 校验 + 幂等 |
+| `test/capability-provisioning.test.mjs` | 新增 | 13 个测试，全通过 |
+| `core/shared-backend/index.js` | +1 行 | 注册新模块导出 |
+| `core/r-server/helpers/tools-executor.js` | +27/-4 | R_LIBS_USER 注入 provisioned bundle |
+| `core/r-server/mcp/registry.js` | +29/-3 | 同上（插件脚本路径） |
+| `src/main.js` | +16 | IPC: `harness-capabilities:list`（只读） |
+| `src/preload.js` | +5 | 暴露 `harnessCapabilities.list` |
+| `frontend/src/lib/electron.d.ts` | +17 | 类型定义 |
+| `frontend/src/components/desktop/DesktopSettingsPanel.tsx` | +59 | 设置面板 HarnessEnvironment 只读视图 |
+| `scripts/harness-file-index.mjs` | +7/-2 | 索引更新 |
+
+### 优点（设计正确的部分）
+
+1. **capability-provisioning.js 不依赖 electron**，可独立测试，符合 D5 "不引入新依赖"
+2. **流式 SHA-256 + 幂等性 + 自愈检查**（install_dir_missing）设计完善
+3. **可注入的 download/hash/install 函数**，测试用 mock 完全覆盖，无真实网络调用
+4. **IPC 只暴露 list（只读）**，provision/remove 由 Harness 编排层内部完成，符合 D8 透明进度
+5. **tools-executor.js 和 mcp/registry.js 两处 R_LIBS_USER 注入逻辑一致**，provisioned bundle 优先级最高
+6. **HarnessEnvironment 组件遵循 Stage 1 UI 规范**（field__label / field__hint / biof3-badge）
+
+### 问题 A：代码重复（R_LIBS_USER 组装逻辑）
+
+- **位置**：`core/r-server/helpers/tools-executor.js:590-615` 和 `core/r-server/mcp/registry.js:475-500`
+- **现象**：两处的 R_LIBS_USER 三段式组装逻辑几乎完全相同（约 25 行重复代码）：
+  1. provisioned capability bundle lib（requiresBundle）
+  2. 插件内置 packages/r
+  3. R runtime library
+- **建议**：抽取为共享 helper，如 `core/shared-backend/r-libs-resolver.js`，导出 `resolveRLibsForPlugin(pluginCfg)` 函数
+- **优先级**：中（不阻塞 M1，但 M2 增加更多 bundle 类型时会重复更多）
+- **对验收影响**：无
+
+### 问题 B：静默 catch {} 吞掉所有错误
+
+- **位置**：`tools-executor.js:598` 和 `mcp/registry.js:484`
+- **现象**：两处 `try { require('capability-provisioning')... } catch {}` 会吞掉所有错误（require 失败、ledger 损坏等）
+- **设计意图**：provisioning 未就绪时不阻塞基础执行（正确）
+- **建议**：至少 `console.warn` 一次，记录原因，否则调试困难。例如：
+  ```js
+  } catch (e) { console.warn('[harness] capability provisioning unavailable:', e.message); }
+  ```
+- **优先级**：中
+- **对验收影响**：无
+
+### 问题 C：defaultDownload 未复用 plugin-manager
+
+- **位置**：`core/shared-backend/capability-provisioning.js` 的 `defaultDownload` 函数
+- **现象**：代码注释写"mirrors src/plugin-manager.js#streamingSha256"，是复制而不是复用
+- **背景**：设计文档 D5 提到"复用现有管道 plugin-manager.js 的 downloadFile"
+- **判定**：可接受的偏离 -- capability-provisioning 有意不依赖 electron（plugin-manager 依赖 electron 的 app.getPath），无法直接复用。但可考虑抽取共享的下载函数到 shared-backend
+- **建议**：M2 阶段评估是否抽取共享下载函数
+- **优先级**：低
+- **对验收影响**:无
+
+---
+
 ## 审计发现追加规范
 
 非主 agent 完成新审计后，按以下格式追加到"当前待处理项"表格：
@@ -94,7 +144,7 @@ git branch -D codex/fix-collapsed-right-titlebar-minimal \
 ```
 
 - **状态**：🔴/🟡/🟢/⚪/✅
-- **来源**：审计报告文件名或"分支备忘录"
+- **来源**：审计报告文件名或"本文件 §N"
 - **详情锚点**：指向本文件下方的详细小节
 
 每条新增发现同时在下方新建小节记录详情。已处理的条目状态改为 ✅ 并保留，不删除（供追溯）。
@@ -106,3 +156,5 @@ git branch -D codex/fix-collapsed-right-titlebar-minimal \
 | 日期 | 处理内容 | 处理方 |
 |------|---------|--------|
 | 2026-07-17 | 建立审计广播台，汇总 Stage 2 验收审计 + 分支备忘录的发现 | 非主 agent |
+| 2026-07-17 | Stage 2 验收审计归档（主 agent 已完成验收） | 非主 agent |
+| 2026-07-17 | 追加 Stage 3 M1 capability-provisioning 审计（3 条建议级） | 非主 agent |
