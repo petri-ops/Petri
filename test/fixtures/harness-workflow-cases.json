@@ -154,6 +154,40 @@
         "recoverable": false,
         "terminal": false
       }
+    },
+    {
+      "id": "wgcna-coexpression-lineage",
+      "templateId": "coexpression-network",
+      "availableToolIds": ["wgcna", "go-kegg"],
+      "jobs": [
+        {
+          "stepId": "coexpression",
+          "id": "tj_wgcna_modules",
+          "tool_id": "wgcna",
+          "status": "completed",
+          "result": {
+            "artifactTruth": { "status": "valid", "validCount": 1 },
+            "artifacts": [
+              { "id": "module_assignment", "type": "table", "canonicalPath": "/work/biof3/results/module_assignment.csv" }
+            ]
+          }
+        }
+      ],
+      "bindings": [
+        {
+          "fromStepId": "coexpression",
+          "toStepId": "enrichment",
+          "inputId": "deg_table",
+          "artifact": { "id": "module_assignment", "type": "table", "canonicalPath": "/work/biof3/results/module_assignment.csv" },
+          "artifactTruth": { "status": "valid" }
+        }
+      ],
+      "expected": {
+        "stepStatuses": { "coexpression": "complete", "enrichment": "ready" },
+        "readyStepIds": ["enrichment"],
+        "recoverable": false,
+        "terminal": false
+      }
     }
   ]
 }

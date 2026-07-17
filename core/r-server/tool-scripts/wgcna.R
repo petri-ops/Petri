@@ -86,8 +86,11 @@ read_table_auto <- function(file, row_names_col = 1) {
              check.names = FALSE, stringsAsFactors = FALSE)
 }
 
-expr_files <- list.files(job_dir, pattern = "^expression$", full.names = TRUE)
-traits_files <- list.files(job_dir, pattern = "^traits$", full.names = TRUE)
+# NOTE: file inputs are copied into job_dir as "<inputId><ext>" (e.g. expression.csv)
+# by both the HTTP executor and the MCP registry, so match by unanchored prefix
+# (mirrors deseq2 "^counts" / go-kegg "^genes") rather than an exact "^expression$".
+expr_files <- list.files(job_dir, pattern = "^expression", full.names = TRUE)
+traits_files <- list.files(job_dir, pattern = "^traits", full.names = TRUE)
 
 if (length(expr_files) == 0) stop("No expression file found in job_dir")
 if (length(traits_files) == 0) stop("No traits file found in job_dir")

@@ -344,6 +344,22 @@ const AGENT_WORKFLOW_TEMPLATES = [
       { id: 'enrichment', toolCandidates: ['go-kegg', 'gsea', 'enrichment'], dependsOn: [] },
     ],
   },
+  {
+    id: 'coexpression-network',
+    title: '共表达网络分析',
+    description: 'WGCNA 从表达矩阵构建共表达网络、识别模块并做模块-性状关联，再对模块基因做功能富集。',
+    steps: [
+      { id: 'coexpression', toolCandidates: ['wgcna'], dependsOn: [] },
+      {
+        id: 'enrichment',
+        toolCandidates: ['go-kegg', 'gsea', 'enrichment'],
+        dependsOn: ['coexpression'],
+        inputBindings: [
+          { inputId: 'deg_table', fromStepId: 'coexpression', artifactType: 'table' },
+        ],
+      },
+    ],
+  },
 ];
 
 function listAgentWorkflowTemplates(availableToolIds = []) {

@@ -116,11 +116,14 @@ test('volcano-plot（非重操作）不拦截，直接跑', async () => {
 });
 
 test('未注册的重工具不会生成待确认 tool_job', async () => {
+  // ml-classifier 在 HEAVY_TOOLS 白名单里，但未打包成 built-in 插件（不可发现），
+  // 因此走 callTool 应直接 unknown_tool，跑前不落 ack_status='pending' 的 tool_job。
+  // （wgcna 曾用于此断言，Stage 3 打包成 built-in 插件后已可发现，故换成仍未注册的重工具）
   const sqlite = db.getDatabase();
-  const countJobs = sqlite.prepare("SELECT COUNT(*) AS count FROM tool_jobs WHERE tool_id='wgcna'");
+  const countJobs = sqlite.prepare("SELECT COUNT(*) AS count FROM tool_jobs WHERE tool_id='ml-classifier'");
   const before = countJobs.get().count;
   const r = await learning.tool_run_tool(
-    { op: 'run', toolId: 'wgcna', params: {} },
+    { op: 'run', toolId: 'ml-classifier', params: {} },
     CTX
   );
   assert.equal(r.ok, false);
