@@ -39,7 +39,7 @@ function _ensureDir() {
 
 /**
  * 读取 AI 设置。
- * @returns {object} - { deepseek_api_key, dashscope_api_key, llm_provider, embed_provider, ... }
+ * @returns {object} - ModelProfiles, role bindings, credential status and non-secret preferences.
  */
 function getAiSettings() {
   if (_cache) return _cache;
@@ -168,7 +168,7 @@ function getEmbedProviderName() {
 
 /**
  * 保存 AI 设置（设置页调用）。
- * @param {object} settings - { deepseek_api_key, dashscope_api_key, ... }
+ * @param {object} settings - ordinary settings plus optional one-way credential_updates.
  */
 function saveAiSettings(settings) {
   _ensureDir();
@@ -193,13 +193,24 @@ function saveAiSettings(settings) {
  * 测试 API key 连通性（设置页"测试"按钮调用）。
  */
 async function testApiKey(provider, apiKey) {
-  if (!apiKey) return { ok: false, message: 'API key 为空' };
   try {
     const { getProvider } = require('../../shared-backend/llm-providers');
-    const p = getProvider(provider);
-    if (!p) return { ok: false, message: `Provider ${provider} 未注册` };
+    const { normalizeModelProfile } = require('../../shared-backend/llm-providers/model-profile');
+    const profile = typeof provider === 'object'
+      ? normalizeModelProfile(provider)
+      : normalizeModelProfile({ provider, model: 'connection-test' });
+    if (!profile) return { ok: false, message: '模型配置无效' };
+    const p = getProvider(profile.provider);
+    if (!p) return { ok: false, message: `Provider ${profile.provider} 未注册` };
     if (typeof p.healthCheck === 'function') {
-      const ok = await p.healthCheck(apiKey);
+      const ref = String(profile.credentialRef || `provider:${profile.provider.replace(/-vision$/, '')}`);
+      const credentialId = ref.includes(':') ? ref.slice(ref.indexOf(':') + 1) : ref;
+      const resolvedKey = apiKey || getApiKey(credentialId);
+      const ok = await p.healthCheck(resolvedKey || '', {
+        baseUrl: profile.baseUrl,
+        model: profile.model,
+        profile,
+      });
       return { ok, message: ok ? '连接正常' : '连接失败' };
     }
     return { ok: true, message: 'Provider 无健康检查，跳过' };

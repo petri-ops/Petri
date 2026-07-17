@@ -983,12 +983,12 @@ function setupAiSettingsIpc() {
     }
   });
 
-  ipcMain.handle("ai-settings:test", async (event, provider, apiKey) => {
+  ipcMain.handle("ai-settings:test", async (event, providerOrProfile, apiKey) => {
     try {
       const { testApiKey } = require(
         resolveCore("r-server", "helpers", "ai-settings.js"),
       );
-      return await testApiKey(provider, apiKey);
+      return await testApiKey(providerOrProfile, apiKey);
     } catch (e) {
       return { ok: false, message: e.message };
     }

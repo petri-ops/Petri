@@ -32,18 +32,18 @@ import { getBridge } from '@/lib/desktopBridge';
 // DesktopSettingsPanel no longer each carry their own copy.
 // Plan 1.6 §4.5 [HIGH] — type dedup.
 //
-// `apiKey` is intentionally optional: DesktopSettingsPanel lets
-// users paste a per-preset key into the UI but it's never
-// persisted (the actual LLM keys live in the panel-level
-// `deepseek_api_key` / `dashscope_api_key` fields). Including
-// it here keeps the type drop-in for that flow.
+// Credentials are referenced by id and never enter renderer snapshots.
 export interface ChatModelPreset {
   id: string;
   label: string;
   provider: string;
   model: string;
   baseUrl?: string;
-  apiKey?: string;
+  credentialRef?: string;
+  protocol?: string;
+  capabilities?: string[];
+  roles?: string[];
+  parameters?: Record<string, unknown>;
 }
 
 export const DEFAULT_CHAT_MODEL_PRESETS: ChatModelPreset[] = [
@@ -76,12 +76,20 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
   inflight = bridge
     .get()
     .then((raw) => {
-      const presetsRaw = Array.isArray(raw?.chat_model_presets)
+      const profilePresets = Array.isArray(raw?.model_profiles)
+        ? (raw.model_profiles as ChatModelPreset[]).filter(
+            (p) => p?.id && p?.model && (!Array.isArray(p.capabilities) || p.capabilities.includes('chat'))
+          )
+        : [];
+      const presetsRaw = profilePresets.length > 0
+        ? profilePresets
+        : Array.isArray(raw?.chat_model_presets)
         ? (raw.chat_model_presets as ChatModelPreset[]).filter((p) => p?.id && p?.model)
         : [];
       const presets = presetsRaw.length > 0 ? presetsRaw : DEFAULT_CHAT_MODEL_PRESETS;
       const activeId = String(
-        raw?.active_chat_model_id || presets[0]?.id || DEFAULT_CHAT_MODEL_PRESETS[0].id
+        (raw?.model_role_bindings as Record<string, unknown> | undefined)?.chat ||
+          raw?.active_chat_model_id || presets[0]?.id || DEFAULT_CHAT_MODEL_PRESETS[0].id
       );
       presetsCache = {
         presets,
@@ -198,6 +206,10 @@ export function useAiSettings(): UseAiSettingsResult {
         ...current,
         active_chat_model_id: target.id,
         llm_provider: target.provider,
+        model_role_bindings: {
+          ...((current.model_role_bindings as Record<string, unknown> | undefined) || {}),
+          chat: target.id,
+        },
       });
     } catch {
       /* see comment above */
@@ -233,6 +245,11 @@ export function useAiSettings(): UseAiSettingsResult {
       provider: init.provider || presetsCache.presets[0]?.provider || 'deepseek',
       model: init.model || presetsCache.presets[0]?.model || 'deepseek-chat',
       baseUrl: init.baseUrl,
+      credentialRef: init.credentialRef,
+      protocol: init.protocol,
+      capabilities: init.capabilities || ['chat', 'streaming', 'tools'],
+      roles: init.roles || [],
+      parameters: init.parameters || {},
     };
     const next = [...presetsCache.presets, preset];
     applyMutation({ presets: next, activeId: id });

@@ -8,7 +8,7 @@ import {
 } from '@/hooks/useAiSettings';
 
 function installBridge(opts: {
-  initial?: { chat_model_presets?: unknown; active_chat_model_id?: unknown };
+  initial?: Record<string, unknown>;
   save?: (patch: Record<string, unknown>) => Promise<void>;
 } = {}) {
   const get = vi.fn().mockResolvedValue(opts.initial || null);
@@ -53,6 +53,23 @@ describe('useAiSettings', () => {
     expect(result.current.activePreset.id).toBe('gpt-3.5');
   });
 
+  it('uses chat-capable ModelProfiles and the chat role binding as primary truth', async () => {
+    installBridge({
+      initial: {
+        model_profiles: [
+          { id: 'chat-a', label: 'Chat A', provider: 'ollama', model: 'qwen3', capabilities: ['chat'] },
+          { id: 'embed-a', label: 'Embed A', provider: 'ollama', model: 'embed', capabilities: ['embedding'] },
+        ],
+        model_role_bindings: { chat: 'chat-a', embedding: 'embed-a' },
+        chat_model_presets: [{ id: 'legacy', label: 'Legacy', provider: 'deepseek', model: 'deepseek-chat' }],
+      },
+    });
+    const { result } = renderHook(() => useAiSettings());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.presets.map((profile) => profile.id)).toEqual(['chat-a']);
+    expect(result.current.activeId).toBe('chat-a');
+  });
+
   it('falls back to defaults when bridge returns invalid data', async () => {
     installBridge({ initial: { chat_model_presets: 'not-an-array' } });
     const { result } = renderHook(() => useAiSettings());
@@ -87,7 +104,11 @@ describe('useAiSettings', () => {
     });
     expect(result.current.activeId).toBe('b');
     expect(save).toHaveBeenCalledWith(
-      expect.objectContaining({ active_chat_model_id: 'b', llm_provider: 'p' })
+      expect.objectContaining({
+        active_chat_model_id: 'b',
+        llm_provider: 'p',
+        model_role_bindings: expect.objectContaining({ chat: 'b' }),
+      })
     );
   });
 

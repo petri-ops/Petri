@@ -32,11 +32,11 @@ function registerAiSettingsRoutes(app) {
 
   // 测试 API key 连通性
   app.post('/api/ai/settings/test', express.json(), async (req, res) => {
-    const { provider, apiKey } = req.body || {};
-    if (!provider || !apiKey) {
-      return res.status(400).json({ ok: false, message: '缺少 provider 或 apiKey' });
+    const { provider, profile, apiKey } = req.body || {};
+    if (!provider && !profile) {
+      return res.status(400).json({ ok: false, message: '缺少模型配置' });
     }
-    const result = await testApiKey(provider, apiKey);
+    const result = await testApiKey(profile || provider, apiKey);
     res.json(result);
   });
 }

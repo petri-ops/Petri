@@ -9,7 +9,6 @@ import { Icon } from '@/components/icons/Icon';
 import { ThemeControl } from './ThemeControl';
 import {
   useAiSettings,
-  DEFAULT_CHAT_MODEL_PRESETS,
   type ChatModelPreset,
 } from '@/hooks/useAiSettings';
 import { useAutoUpdate } from '@/hooks/useAutoUpdate';
@@ -44,6 +43,63 @@ const SETTINGS_SECTIONS: Array<{
 
 // ChatModelPreset type + DEFAULT_CHAT_MODEL_PRESETS live in
 // `@/hooks/useAiSettings` — Plan 1.6 §4.5 [HIGH] type dedup.
+
+type ModelRole = 'chat' | 'agent' | 'planner' | 'vision' | 'embedding' | 'summary' | 'report' | 'explanation';
+type ModelCapability = 'chat' | 'streaming' | 'tools' | 'vision' | 'embedding' | 'reasoning';
+
+const MODEL_ROLES: Array<{ id: ModelRole; label: string; capability: ModelCapability; hint: string }> = [
+  { id: 'chat', label: '默认聊天', capability: 'chat', hint: '日常对话与问答' },
+  { id: 'agent', label: 'Agent 工具调用', capability: 'tools', hint: '分析规划和工具执行' },
+  { id: 'planner', label: '复杂规划', capability: 'chat', hint: '多步骤任务拆解' },
+  { id: 'vision', label: '视觉理解', capability: 'vision', hint: '图片和图表解读' },
+  { id: 'embedding', label: '语义向量', capability: 'embedding', hint: '记忆与语义检索' },
+  { id: 'summary', label: '低成本摘要', capability: 'chat', hint: '会话与文档摘要' },
+  { id: 'report', label: '报告生成', capability: 'chat', hint: '分析报告撰写' },
+  { id: 'explanation', label: '结果解释', capability: 'chat', hint: 'Artifact 结果解读' },
+];
+
+const MODEL_CAPABILITIES: Array<{ id: ModelCapability; label: string }> = [
+  { id: 'chat', label: 'Chat' },
+  { id: 'streaming', label: '流式' },
+  { id: 'tools', label: '工具调用' },
+  { id: 'vision', label: '视觉' },
+  { id: 'embedding', label: 'Embedding' },
+  { id: 'reasoning', label: '推理' },
+];
+
+const LOCAL_PROVIDERS = new Set(['ollama', 'lmstudio', 'vllm']);
+
+const PROVIDER_OPTIONS = [
+  ['deepseek', 'DeepSeek'],
+  ['openai', 'OpenAI'],
+  ['anthropic', 'Anthropic'],
+  ['openai-compatible', 'OpenAI-compatible'],
+  ['ollama', 'Ollama'],
+  ['lmstudio', 'LM Studio'],
+  ['vllm', 'vLLM'],
+  ['dashscope', 'DashScope Embedding'],
+  ['dashscope-vision', 'DashScope Vision'],
+] as const;
+
+function providerDefaults(provider: string, id: string): Partial<ChatModelPreset> {
+  const defaults: Record<string, Partial<ChatModelPreset>> = {
+    deepseek: { model: 'deepseek-chat', capabilities: ['chat', 'streaming', 'tools'], credentialRef: 'provider:deepseek' },
+    openai: { model: '', capabilities: ['chat', 'streaming', 'tools'], credentialRef: 'provider:openai' },
+    anthropic: { model: '', protocol: 'anthropic-messages', capabilities: ['chat', 'streaming', 'tools'], credentialRef: 'provider:anthropic' },
+    'openai-compatible': { model: '', capabilities: ['chat', 'streaming', 'tools'], credentialRef: `credential:${id}` },
+    ollama: { model: '', baseUrl: 'http://127.0.0.1:11434/v1', capabilities: ['chat', 'streaming', 'tools'], credentialRef: 'provider:ollama' },
+    lmstudio: { model: '', baseUrl: 'http://127.0.0.1:1234/v1', capabilities: ['chat', 'streaming', 'tools'], credentialRef: 'provider:lmstudio' },
+    vllm: { model: '', baseUrl: 'http://127.0.0.1:8000/v1', capabilities: ['chat', 'streaming', 'tools'], credentialRef: 'provider:vllm' },
+    dashscope: { model: 'text-embedding-v3', protocol: 'dashscope-native', capabilities: ['embedding'], credentialRef: 'provider:dashscope' },
+    'dashscope-vision': { model: 'qwen-vl-max', protocol: 'dashscope-native', capabilities: ['vision'], credentialRef: 'provider:dashscope' },
+  };
+  return { protocol: 'openai-compatible', baseUrl: undefined, ...defaults[provider] };
+}
+
+function credentialId(profile: ChatModelPreset): string {
+  const ref = profile.credentialRef || `provider:${profile.provider.replace(/-vision$/, '')}`;
+  return ref.includes(':') ? ref.slice(ref.indexOf(':') + 1) : ref;
+}
 
 /** UpdateChecker — 检查 OSS 更新并打开已校验的 macOS 安装包 */
 function UpdateChecker(): React.ReactElement | null {
@@ -549,23 +605,14 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const [deepseekKey, setDeepseekKey] = useState('');
-  const [dashscopeKey, setDashscopeKey] = useState('');
-  const [chatProvider, setChatProvider] = useState('deepseek');
-  const [embedProvider, setEmbedProvider] = useState('dashscope');
-  // Plan 1.6 §4.5 — presets + activeId now live in the shared
-  // SWR hook so the chat panel and this settings panel see the
-  // same source of truth. Provider / embedProvider / keys /
-  // telemetry stay here because no other component reads them.
-  const {
-    presets: chatModelPresets,
-    activeId: activeChatModelId,
-    setActiveLocal: setActiveChatModelId,
-    updatePreset: hookUpdatePreset,
-    addPreset: hookAddPreset,
-    removePreset: hookRemovePreset,
-    refresh: refreshAiSettings,
-  } = useAiSettings();
+  const [modelProfiles, setModelProfiles] = useState<ChatModelPreset[]>([]);
+  const [roleBindings, setRoleBindings] = useState<Partial<Record<ModelRole, string>>>({});
+  const [fallbackEnabled, setFallbackEnabled] = useState(false);
+  const [fallbackBindings, setFallbackBindings] = useState<Partial<Record<ModelRole, string[]>>>({});
+  const [credentialInputs, setCredentialInputs] = useState<Record<string, string>>({});
+  const [credentialStatus, setCredentialStatus] = useState<Record<string, boolean>>({});
+  const [credentialBackend, setCredentialBackend] = useState('local');
+  const { refresh: refreshAiSettings } = useAiSettings();
   // M2-3：错误遥测开关（默认关闭）
   const [telemetryEnabled, setTelemetryEnabled] = useState(false);
 
@@ -577,11 +624,15 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     if (!window.biof3Desktop) return;
     const s = await window.biof3Desktop.aiSettings.get();
     setSettings(s);
-    setChatProvider((s.chat_provider as string) || 'deepseek');
-    setEmbedProvider((s.embed_provider as string) || 'dashscope');
-    // presets + active_chat_model_id are owned by the shared SWR
-    // hook; refresh so this panel sees the same snapshot the chat
-    // panel would see after a sibling write.
+    const profiles = Array.isArray(s.model_profiles)
+      ? (s.model_profiles as ChatModelPreset[]).filter((profile) => profile?.id && profile?.model)
+      : [];
+    setModelProfiles(profiles);
+    setRoleBindings((s.model_role_bindings as Partial<Record<ModelRole, string>>) || {});
+    setFallbackEnabled(s.model_fallback_enabled === true);
+    setFallbackBindings((s.model_fallback_bindings as Partial<Record<ModelRole, string[]>>) || {});
+    setCredentialStatus((s.credential_status as Record<string, boolean>) || {});
+    setCredentialBackend(String(s.credential_backend || 'local'));
     await refreshAiSettings();
     setTelemetryEnabled(s.telemetry_enabled === true);
   }
@@ -590,19 +641,28 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     if (!window.biof3Desktop) return;
     setSaving(true);
     setSaved(false);
+    const profiles = modelProfiles
+      .filter((profile) => profile.id.trim() && profile.model.trim())
+      .map((profile) => ({ ...profile, roles: MODEL_ROLES.filter((role) => roleBindings[role.id] === profile.id).map((role) => role.id) }));
+    const chatProfile = profiles.find((profile) => profile.id === roleBindings.chat);
+    const embedProfile = profiles.find((profile) => profile.id === roleBindings.embedding);
     await window.biof3Desktop.aiSettings.save({
-      deepseek_api_key: deepseekKey || undefined,
-      dashscope_api_key: dashscopeKey || undefined,
-      llm_provider: chatProvider,
-      embed_provider: embedProvider,
-      chat_model_presets: chatModelPresets,
-      active_chat_model_id: activeChatModelId,
+      model_profiles: profiles,
+      model_role_bindings: roleBindings,
+      model_fallback_enabled: fallbackEnabled,
+      model_fallback_bindings: fallbackBindings,
+      credential_updates: Object.fromEntries(Object.entries(credentialInputs).filter(([, value]) => value.trim())),
+      // Compatibility snapshot for older renderer builds. The Gateway only
+      // reads ModelProfiles and role bindings.
+      chat_model_presets: profiles.filter((profile) => profile.capabilities?.includes('chat')).map(({ id, label, provider, model, baseUrl }) => ({ id, label, provider, model, baseUrl })),
+      active_chat_model_id: roleBindings.chat,
+      llm_provider: chatProfile?.provider,
+      embed_provider: embedProfile?.provider,
       telemetry_enabled: telemetryEnabled,
     });
     setSaving(false);
     setSaved(true);
-    setDeepseekKey('');
-    setDashscopeKey('');
+    setCredentialInputs({});
     setTimeout(() => setSaved(false), 3000);
     loadSettings();
   }
@@ -624,31 +684,49 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     }
   }
 
-  async function handleTest(provider: string, key: string) {
-    if (!window.biof3Desktop || !key) return;
-    setTesting(provider);
-    const result = await window.biof3Desktop.aiSettings.test(provider, key);
-    setTestResult((prev) => ({ ...prev, [provider]: result }));
+  async function handleTest(profile: ChatModelPreset) {
+    if (!window.biof3Desktop) return;
+    const id = credentialId(profile);
+    const key = credentialInputs[id] || '';
+    setTesting(profile.id);
+    const result = await window.biof3Desktop.aiSettings.test(profile as unknown as Record<string, unknown>, key);
+    setTestResult((prev) => ({ ...prev, [profile.id]: result }));
     setTesting(null);
   }
 
-  const isConfigured = (key: string) => !!settings[`${key}_configured`];
-
-  function updatePreset(index: number, patch: Partial<ChatModelPreset>) {
-    const target = chatModelPresets[index];
-    if (!target) return;
-    // Plan 1.6 §4.5 — delegate to the shared hook so the chat
-    // panel (SimpleChat) sees the rename immediately. JSX still
-    // passes `index` (preserves the existing onChange wiring),
-    // we look up the id here.
-    hookUpdatePreset(target.id, patch);
+  function updateProfile(id: string, patch: Partial<ChatModelPreset>) {
+    setModelProfiles((profiles) => profiles.map((profile) => profile.id === id ? { ...profile, ...patch, id } : profile));
   }
 
-  function addPreset() {
-    hookAddPreset({
-      label: '自定义模型',
-      provider: chatProvider || 'deepseek',
-      model: 'deepseek-chat',
+  function changeProvider(profile: ChatModelPreset, provider: string) {
+    updateProfile(profile.id, { provider, ...providerDefaults(provider, profile.id) });
+  }
+
+  function addProfile() {
+    const id = `model-${Date.now()}`;
+    setModelProfiles((profiles) => [...profiles, {
+      id,
+      label: '新模型',
+      provider: 'openai-compatible',
+      model: '',
+      ...providerDefaults('openai-compatible', id),
+      roles: [],
+      parameters: {},
+    }]);
+  }
+
+  function removeProfile(id: string) {
+    setModelProfiles((profiles) => profiles.filter((profile) => profile.id !== id));
+    setRoleBindings((bindings) => Object.fromEntries(Object.entries(bindings).filter(([, value]) => value !== id)));
+    setFallbackBindings((bindings) => Object.fromEntries(Object.entries(bindings).map(([role, ids]) => [role, (ids || []).filter((value) => value !== id)])));
+  }
+
+  function toggleCapability(profile: ChatModelPreset, capability: ModelCapability) {
+    const current = profile.capabilities || [];
+    updateProfile(profile.id, {
+      capabilities: current.includes(capability)
+        ? current.filter((item) => item !== capability)
+        : [...current, capability],
     });
   }
 
@@ -713,101 +791,86 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
           <section className="biof3-settings-section">
             <div className="biof3-settings-section__heading">
               <h3>AI 模型</h3>
-              <p>管理会话区使用的模型和语义搜索 Provider。</p>
+              <p>添加多个模型，并为聊天、Agent、规划、视觉和后台任务分别指定默认模型。</p>
             </div>
-        <div className="biof3-field">
-          <label className="biof3-field__label">Chat 模型 Provider</label>
-          <select
-            className="biof3-select"
-            value={chatProvider}
-            onChange={(e) => setChatProvider(e.target.value)}
-          >
-            <option value="deepseek">DeepSeek（深度求索）</option>
-            <option value="openai">OpenAI（未来支持）</option>
-            <option value="ollama">Ollama 本地模型（未来支持）</option>
-          </select>
-        </div>
-
-        <div className="biof3-field">
-          <label className="biof3-field__label">Chat 模型预设</label>
-          <div style={{ display: 'grid', gap: 8 }}>
-            {chatModelPresets.map((preset, index) => (
-              <div key={preset.id} className="biof3-model-preset">
+            <div className="biof3-model-list">
+              {modelProfiles.map((profile) => (
+                <div key={profile.id} className="biof3-model-preset">
+                  <div className="biof3-model-preset__header">
+                    <span>{profile.label || profile.model || '未命名模型'}</span>
+                    <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => removeProfile(profile.id)}>
+                      删除
+                    </button>
+                  </div>
                 <input
                   className="biof3-input"
-                  value={preset.label}
-                  onChange={(e) => updatePreset(index, { label: e.target.value })}
+                  value={profile.label}
+                  onChange={(e) => updateProfile(profile.id, { label: e.target.value })}
                   placeholder="显示名称"
-                  aria-label="预设显示名称"
+                  aria-label="模型显示名称"
                 />
+                <select className="biof3-select" value={profile.provider} onChange={(e) => changeProvider(profile, e.target.value)} aria-label="Provider">
+                  {PROVIDER_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                </select>
                 <input
                   className="biof3-input"
-                  value={preset.provider}
-                  onChange={(e) => updatePreset(index, { provider: e.target.value })}
-                  placeholder="provider"
-                  aria-label="Provider"
-                />
-                <input
-                  className="biof3-input"
-                  value={preset.model}
-                  onChange={(e) => updatePreset(index, { model: e.target.value })}
-                  placeholder="model"
+                  value={profile.model}
+                  onChange={(e) => updateProfile(profile.id, { model: e.target.value })}
+                  placeholder="模型名称，例如 qwen3:14b"
                   aria-label="模型名称"
                 />
                 <input
-                  type="password"
                   className="biof3-input"
-                  value={preset.apiKey || ''}
-                  onChange={(e) => updatePreset(index, { apiKey: e.target.value })}
-                  placeholder="可选 API Key"
-                  aria-label="预设 API Key"
+                  value={profile.baseUrl || ''}
+                  onChange={(e) => updateProfile(profile.id, { baseUrl: e.target.value || undefined })}
+                  placeholder={LOCAL_PROVIDERS.has(profile.provider) || profile.provider === 'openai-compatible' ? 'Endpoint / Base URL' : 'Base URL（可选，留空使用官方地址）'}
+                  aria-label="Base URL"
                 />
-                <div className="biof3-model-preset__actions">
-                <label className="biof3-model-preset__default">
-                  <input
-                    type="radio"
-                    name="active-chat-model"
-                    checked={activeChatModelId === preset.id}
-                    onChange={() => {
-                      setActiveChatModelId(preset.id);
-                      setChatProvider(preset.provider);
-                    }}
-                  />
-                  默认
-                </label>
-                <button
-                  type="button"
-                  className="biof3-btn biof3-btn--ghost biof3-btn--sm"
-                  onClick={() => hookRemovePreset(preset.id)}
-                  disabled={chatModelPresets.length <= 1}
-                >
-                  删除
-                </button>
+                <div className="biof3-model-capabilities" aria-label="模型能力">
+                  {MODEL_CAPABILITIES.map((capability) => (
+                    <label key={capability.id}>
+                      <input type="checkbox" checked={(profile.capabilities || []).includes(capability.id)} onChange={() => toggleCapability(profile, capability.id)} />
+                      {capability.label}
+                    </label>
+                  ))}
                 </div>
               </div>
             ))}
-          </div>
-          <div style={{ marginTop: 8 }}>
-            <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={addPreset}>
-              添加模型预设
+              {modelProfiles.length === 0 && <p className="biof3-field__hint">尚未配置模型。添加一个模型后再绑定任务角色。</p>}
+            </div>
+            <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={addProfile}>
+              添加模型
             </button>
-          </div>
-          <p className="biof3-field__hint">
-            这里配置会话区右上角的模型列表。当前阶段 provider 复用下方 API Key；DeepSeek 默认模型为 deepseek-chat。
-          </p>
-        </div>
 
-        <div className="biof3-field">
-          <label className="biof3-field__label">Embedding 模型 Provider（语义搜索用）</label>
-          <select
-            className="biof3-select"
-            value={embedProvider}
-            onChange={(e) => setEmbedProvider(e.target.value)}
-          >
-            <option value="dashscope">DashScope（阿里云百炼）</option>
-            <option value="ollama">Ollama 本地模型（未来支持）</option>
-          </select>
-        </div>
+            <div className="biof3-model-routing">
+              <div className="biof3-model-routing__heading">
+                <div><strong>任务角色路由</strong><p>每类任务只会使用这里明确绑定且能力匹配的模型。</p></div>
+                <label className="biof3-toggle-row">
+                  <input type="checkbox" className="biof3-toggle" checked={fallbackEnabled} onChange={(e) => setFallbackEnabled(e.target.checked)} />
+                  <span className="biof3-toggle-label">允许显式故障转移</span>
+                </label>
+              </div>
+              {MODEL_ROLES.map((role) => {
+                const eligible = modelProfiles.filter((profile) => (profile.capabilities || []).includes(role.capability));
+                const primaryId = roleBindings[role.id] || '';
+                const fallbackId = fallbackBindings[role.id]?.[0] || '';
+                return (
+                  <div key={role.id} className="biof3-model-role-row">
+                    <label><strong>{role.label}</strong><small>{role.hint}</small></label>
+                    <select className="biof3-select" value={primaryId} onChange={(e) => setRoleBindings((current) => ({ ...current, [role.id]: e.target.value || undefined }))}>
+                      <option value="">未绑定</option>
+                      {eligible.map((profile) => <option key={profile.id} value={profile.id}>{profile.label || profile.model}</option>)}
+                    </select>
+                    {fallbackEnabled && (
+                      <select className="biof3-select" value={fallbackId} onChange={(e) => setFallbackBindings((current) => ({ ...current, [role.id]: e.target.value ? [e.target.value] : [] }))} aria-label={`${role.label} fallback`}>
+                        <option value="">不自动切换</option>
+                        {eligible.filter((profile) => profile.id !== primaryId).map((profile) => <option key={profile.id} value={profile.id}>{profile.label || profile.model}</option>)}
+                      </select>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </section>
         )}
 
@@ -815,90 +878,32 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
           <section className="biof3-settings-section">
             <div className="biof3-settings-section__heading">
               <h3>凭据</h3>
-              <p>管理模型服务密钥。已配置的密钥不会在界面中回显。</p>
+              <p>管理模型服务密钥。已配置密钥不会回显；{credentialBackend === 'keychain' ? '当前使用 macOS Keychain。' : '当前使用独立本地凭据存储。'}</p>
             </div>
-        <div className="biof3-field">
-          <label className="biof3-field__label">
-            DeepSeek API Key
-            {isConfigured('deepseek') && (
-              <span className="biof3-badge">
-                <Icon name="check" size={12} /> 已配置
-              </span>
-            )}
-          </label>
-          <div className="biof3-input-row">
-            <input
-              type="password"
-              className="biof3-input"
-              value={deepseekKey}
-              onChange={(e) => setDeepseekKey(e.target.value)}
-              placeholder={
-                isConfigured('deepseek') ? '已配置（输入新 key 覆盖）' : 'sk-xxxxxxxxxxxxxxxx'
-              }
-            />
-            <button
-              type="button"
-              className="biof3-btn biof3-btn--ghost biof3-btn--sm"
-              onClick={() => handleTest('deepseek', deepseekKey)}
-              disabled={!deepseekKey || testing === 'deepseek'}
-            >
-              {testing === 'deepseek' ? '测试中…' : '测试'}
-            </button>
-          </div>
-          {testResult.deepseek && (
-            <p
-              className={`biof3-field__result ${
-                testResult.deepseek.ok ? 'biof3-field__result--ok' : 'biof3-field__result--err'
-              }`}
-            >
-              {testResult.deepseek.ok ? '✓ ' : '✗ '}
-              {testResult.deepseek.message}
-            </p>
-          )}
-          <p className="biof3-field__hint">获取地址：platform.deepseek.com → API Keys</p>
-        </div>
-
-        <div className="biof3-field">
-          <label className="biof3-field__label">
-            DashScope API Key
-            {isConfigured('dashscope') && (
-              <span className="biof3-badge">
-                <Icon name="check" size={12} /> 已配置
-              </span>
-            )}
-          </label>
-          <div className="biof3-input-row">
-            <input
-              type="password"
-              className="biof3-input"
-              value={dashscopeKey}
-              onChange={(e) => setDashscopeKey(e.target.value)}
-              placeholder={
-                isConfigured('dashscope') ? '已配置（输入新 key 覆盖）' : 'sk-xxxxxxxxxxxxxxxx'
-              }
-            />
-            <button
-              type="button"
-              className="biof3-btn biof3-btn--ghost biof3-btn--sm"
-              onClick={() => handleTest('dashscope', dashscopeKey)}
-              disabled={!dashscopeKey || testing === 'dashscope'}
-            >
-              {testing === 'dashscope' ? '测试中…' : '测试'}
-            </button>
-          </div>
-          {testResult.dashscope && (
-            <p
-              className={`biof3-field__result ${
-                testResult.dashscope.ok ? 'biof3-field__result--ok' : 'biof3-field__result--err'
-              }`}
-            >
-              {testResult.dashscope.ok ? '✓ ' : '✗ '}
-              {testResult.dashscope.message}
-            </p>
-          )}
-          <p className="biof3-field__hint">获取地址：bailian.console.aliyun.com → API-KEY 管理</p>
-        </div>
-
+            <div className="biof3-model-list">
+              {modelProfiles.map((profile) => {
+                const id = credentialId(profile);
+                const local = LOCAL_PROVIDERS.has(profile.provider);
+                const configured = !!credentialStatus[id];
+                return (
+                  <div key={profile.id} className="biof3-credential-card">
+                    <label className="biof3-field__label">
+                      {profile.label || profile.model}
+                      <span className="biof3-field__hint">{profile.provider} · {id}</span>
+                      {(configured || local) && <span className="biof3-badge"><Icon name="check" size={12} /> {local ? '本地免 Key' : '已配置'}</span>}
+                    </label>
+                    <div className="biof3-input-row">
+                      <input type="password" className="biof3-input" value={credentialInputs[id] || ''} onChange={(e) => setCredentialInputs((current) => ({ ...current, [id]: e.target.value }))} disabled={local} placeholder={local ? '本地 Provider 无需 API Key' : configured ? '已配置（输入新 Key 覆盖）' : '输入 API Key'} />
+                      <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => void handleTest(profile)} disabled={testing === profile.id || (!local && !configured && !credentialInputs[id])}>
+                        {testing === profile.id ? '测试中…' : '测试连接'}
+                      </button>
+                    </div>
+                    {testResult[profile.id] && <p className={`biof3-field__result ${testResult[profile.id].ok ? 'biof3-field__result--ok' : 'biof3-field__result--err'}`}>{testResult[profile.id].ok ? '✓ ' : '✗ '}{testResult[profile.id].message}</p>}
+                  </div>
+                );
+              })}
+              {modelProfiles.length === 0 && <p className="biof3-field__hint">先在“AI 模型”中添加模型，再配置凭据和测试连接。</p>}
+            </div>
           </section>
         )}
 

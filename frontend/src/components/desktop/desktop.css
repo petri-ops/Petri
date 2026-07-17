@@ -413,6 +413,104 @@
   background: var(--biof3-bg-subtle);
 }
 
+.biof3-model-list {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.biof3-model-preset__header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--biof3-text);
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+.biof3-model-capabilities {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding-top: 3px;
+}
+
+.biof3-model-capabilities label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--biof3-text-secondary);
+  font-size: 0.72rem;
+}
+
+.biof3-model-routing {
+  display: grid;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--biof3-border);
+}
+
+.biof3-model-routing__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.biof3-model-routing__heading strong {
+  color: var(--biof3-text);
+  font-size: 0.84rem;
+}
+
+.biof3-model-routing__heading p {
+  margin: 3px 0 0;
+  color: var(--biof3-text-tertiary);
+  font-size: 0.72rem;
+}
+
+.biof3-model-role-row {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.8fr) minmax(150px, 1fr) minmax(150px, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 8px;
+  background: var(--biof3-bg-subtle);
+}
+
+.biof3-model-role-row > label {
+  display: grid;
+  gap: 2px;
+}
+
+.biof3-model-role-row strong {
+  color: var(--biof3-text);
+  font-size: 0.76rem;
+}
+
+.biof3-model-role-row small {
+  color: var(--biof3-text-tertiary);
+  font-size: 0.66rem;
+}
+
+.biof3-credential-card {
+  padding: 12px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 10px;
+  background: var(--biof3-bg-subtle);
+}
+
+.biof3-credential-card .biof3-field__label {
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
 .biof3-model-preset__actions {
   grid-column: 1 / -1;
   display: flex;
@@ -590,6 +688,14 @@
 
   .biof3-model-preset {
     grid-template-columns: 1fr;
+  }
+
+  .biof3-model-role-row {
+    grid-template-columns: 1fr;
+  }
+
+  .biof3-model-routing__heading {
+    flex-direction: column;
   }
 
   .biof3-maintenance-row {
