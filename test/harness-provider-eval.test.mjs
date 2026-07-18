@@ -59,7 +59,7 @@ test('resolveTargets: EVAL_TARGETS filters which targets are built', () => {
   assert.equal(targets[0].name, 'deepseek');
 });
 
-// ── extractJsonObject ────────────────────────────────────────────��────────────
+// ── extractJsonObject ────────────────────────────────────────────────────────
 
 test('extractJsonObject: plain JSON', () => {
   assert.deepEqual(extractJsonObject('{"species":"human"}'), { species: 'human' });
@@ -198,7 +198,7 @@ test('evalResultInterpret: hallucinated terms fail even if partly grounded', () 
   assert.equal(r.failure, 'hallucinated_terms');
 });
 
-// ── scoreTarget ──────────────────────────────────────────────────────────────��
+// ── scoreTarget ──────────────────────────────────────────────────────────────
 
 function allPass() {
   return {

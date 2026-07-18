@@ -201,6 +201,7 @@ test/fixtures/harness/go-kegg-*.json        # valid lineage / degraded / blocked
 - 复用 Stage 2 已验证的 Provider：DeepSeek（OpenAI-compatible）、xunfei-astron / api.xcdw.us opus-4-8（Anthropic 原生）。
 - 对每条标准流程，用不同 Provider 跑：intent 识别、选型、参数修复、tool calling、失败恢复、结果解释。
 - **落地（2026-07-18）**：`scripts/harness-provider-eval.mjs` 实现上述 6 环节探针（前 4 项 intent/选型/参数/tool calling 为必需门槛，失败恢复/结果解释计分但不 gate，兼容弱模型跳过细节）。目标由环境变量解析（`EVAL_TARGETS`，默认 `deepseek,anthropic`），凭据沿用 `DEEPSEEK_API_KEY` / `ANTHROPIC_API_KEY`+`ANTHROPIC_BASE_URL`+`ANTHROPIC_MODEL`。产出 Markdown（人读）+ JSON（回归对比）双报告到 `eval-reports/`。出口判据：≥2 个 Provider 通过必需项 → exit 0。脚本只测 LLM 决策质量，不执行 R（不依赖 r-enrichment bundle），沿用已移除的 `live-provider-check.mjs` 思路。
+- **首次真机跑分（2026-07-18，用户执行）**：DeepSeek 与 Anthropic 双目标各 **6/6 全绿**（intent / 工具选型 / 参数填充 / tool calling / 失败恢复 / 结果解释），`requiredFailures` 与 `failures` 均空，脚本 exit 0，**达成 Stage 3 出口判据"≥2 个 Provider 通过必需项 + 可比较报告 + 明确失败分类"**。验证了 gateway 装配、两种协议（OpenAI-compatible + Anthropic 原生）、tool calling 往返在真实网络下均通。报告落 `eval-reports/`（gitignore，不入库；凭据只经环境变量，不落盘、不打印）。
 - 产出可比较报告 + 明确失败分类（参考已移除的 `acceptance/stage2/live-provider-check.mjs` 的设计思路，扩一个 harness 评测脚本）。<br/>注：`acceptance/stage2/` 验收工具已于 2026-07-17（commit `498a661`）移除，此处仅引用其历史设计思路，验收结论见 `docs/ui-productization-audit.md` 第 10 节。
 
 ---
@@ -277,15 +278,14 @@ test/fixtures/harness/go-kegg-*.json        # valid lineage / degraded / blocked
 
 ---
 
-## 15. Stage 3 出口交付：三方插件接入指南（占位）
-出口要求形成“可复制的第三方插件接入指南”，至少覆盖：
-- 一个模块的最小文件集（manifest/script/demo/fixtures）。
-- 如何声明 `requiresBundle` 并让 Harness 自备依赖。
-- 如何被 built-in/installed/development 发现。
-- artifact 契约、failureModes 模板、二跳 lineage 绑定要求。
-- fixture 门禁与本地验证命令。
+## 15. Stage 3 出口交付：三方插件接入指南
 
-（GO/KEGG 跑通后据实沉淀。）
+✅ **已落地（2026-07-18）**：完整指南见 [`docs/third-party-plugin-guide.md`](./third-party-plugin-guide.md)，基于已跑通的真实插件（`go-kegg` / `deseq2` / `volcano-plot`）据实沉淀，覆盖：
+- 一个模块的最小文件集（`plugin.json` / `tool-definition.json` / `scripts/<id>.R` / demo-data / fixtures）。
+- 如何声明 `requiresBundle` 并让 Harness 自备依赖（L1/L2/L3 三层）。
+- 如何被 built-in / installed / development 三来源发现（优先级 10/20/30）。
+- artifact 契约、failureModes 模板（`detect` 归类）、二跳 lineage 绑定要求。
+- fixture 门禁与本地验证命令（`harness:check` / `harness:phase6` / `npm test`）。
 
 ---
 
