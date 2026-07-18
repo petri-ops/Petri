@@ -198,7 +198,7 @@ test/fixtures/harness/go-kegg-*.json        # valid lineage / degraded / blocked
 ## 9. Provider 评测矩阵（Stage 3 出口项）
 - 复用 Stage 2 已验证的 Provider：DeepSeek（OpenAI-compatible）、xunfei-astron / api.xcdw.us opus-4-8（Anthropic 原生）。
 - 对每条标准流程，用不同 Provider 跑：intent 识别、选型、参数修复、tool calling、失败恢复、结果解释。
-- 产出可比较报告 + 明确失败分类（复用 `acceptance/stage2/live-provider-check.mjs` 的思路，扩一个 harness 评测脚本）。
+- 产出可比较报告 + 明确失败分类（参考已移除的 `acceptance/stage2/live-provider-check.mjs` 的设计思路，扩一个 harness 评测脚本）。<br/>注：`acceptance/stage2/` 验收工具已于 2026-07-17（commit `498a661`）移除，此处仅引用其历史设计思路，验收结论见 `docs/ui-productization-audit.md` 第 10 节。
 
 ---
 
