@@ -34,6 +34,10 @@ tsconfig.tsbuildinfo
 # Local scratch / agent working area
 tmp/
 
+# Harness provider-eval reports (real-network manual run; may reference model
+# behavior, kept local — the eval script and its unit tests are committed)
+eval-reports/
+
 # Cursor IDE local settings (machine-local)
 .cursor/
 

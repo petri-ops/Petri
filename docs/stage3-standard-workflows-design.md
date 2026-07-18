@@ -200,6 +200,7 @@ test/fixtures/harness/go-kegg-*.json        # valid lineage / degraded / blocked
 ## 9. Provider 评测矩阵（Stage 3 出口项）
 - 复用 Stage 2 已验证的 Provider：DeepSeek（OpenAI-compatible）、xunfei-astron / api.xcdw.us opus-4-8（Anthropic 原生）。
 - 对每条标准流程，用不同 Provider 跑：intent 识别、选型、参数修复、tool calling、失败恢复、结果解释。
+- **落地（2026-07-18）**：`scripts/harness-provider-eval.mjs` 实现上述 6 环节探针（前 4 项 intent/选型/参数/tool calling 为必需门槛，失败恢复/结果解释计分但不 gate，兼容弱模型跳过细节）。目标由环境变量解析（`EVAL_TARGETS`，默认 `deepseek,anthropic`），凭据沿用 `DEEPSEEK_API_KEY` / `ANTHROPIC_API_KEY`+`ANTHROPIC_BASE_URL`+`ANTHROPIC_MODEL`。产出 Markdown（人读）+ JSON（回归对比）双报告到 `eval-reports/`。出口判据：≥2 个 Provider 通过必需项 → exit 0。脚本只测 LLM 决策质量，不执行 R（不依赖 r-enrichment bundle），沿用已移除的 `live-provider-check.mjs` 思路。
 - 产出可比较报告 + 明确失败分类（参考已移除的 `acceptance/stage2/live-provider-check.mjs` 的设计思路，扩一个 harness 评测脚本）。<br/>注：`acceptance/stage2/` 验收工具已于 2026-07-17（commit `498a661`）移除，此处仅引用其历史设计思路，验收结论见 `docs/ui-productization-audit.md` 第 10 节。
 
 ---
@@ -251,6 +252,7 @@ test/fixtures/harness/go-kegg-*.json        # valid lineage / degraded / blocked
 
 **M3 Provider 评测**
 - harness 评测脚本，DeepSeek + Anthropic 各跑 GO/KEGG 全链；可比较报告 + 失败分类。
+- ✅ 脚本已实现（2026-07-18）：`scripts/harness-provider-eval.mjs`（`npm run harness:provider-eval`）。6 环节探针（intent / 工具选型 / 参数填充 / tool calling / 失败恢复 / 结果解释），前 4 项为必需门槛；产出 Markdown + JSON 双报告到 `eval-reports/`（已 gitignore）。凭据只读环境变量（`source .biof3-secrets`），不落盘、不打印、不进 CI。纯评分/渲染函数由 `test/harness-provider-eval.test.mjs`（31 用例、mock gateway、零网络）纳入门禁。**真机跑分待用户提供 key/endpoint 后执行**——脚本不执行 R，只测 LLM 在 Harness 决策链的表现。
 
 **M4 样板复制**
 - GSEA（复用 bundle）→ WGCNA（新 bundle）。达到 Stage 3 出口“三条真实标准流程闭环”。

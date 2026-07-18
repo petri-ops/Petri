@@ -244,3 +244,4 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
 | 2026-07-17 | 处理问题 G：实现 project-run-layout 的 isAdmin（`db.getUserById().role === 'admin'`，防御性回退非管理员），补 3 个权限单测（admin 放行 / 非 admin 拒绝 / 无 getUserById 回退） | 主 agent |
 | 2026-07-17 | 清理 §2.3 5 个已合并 codex 残留分支（worktree prune + branch -d），保留 §2.2 待评估分支 | 主 agent |
 | 2026-07-18 | 处理问题 D：为 capability-provisioning 实现 host 白名单（`checkUrlAllowed`：https-only + 默认 OSS CDN 白名单 + `options.allowedHosts`/env 覆盖），gate 加在 readiness 之后不 strand 已装 bundle，补 5 个测试（13→18）；顺带纠正设计文档 §3.3/§5.5「复用 plugin-manager host 白名单」的失实描述（该白名单从不存在，本次为新实现） | 主 agent |
+| 2026-07-18 | Stage 3 M3：实现多 Provider harness 评测脚本 `scripts/harness-provider-eval.mjs`（6 环节探针，前 4 必需；Markdown+JSON 双报告到 gitignored `eval-reports/`；凭据只读环境变量、不落盘/不打印/不进 CI）+ 31 个 mock 单测纳入门禁（`test/harness-provider-eval.test.mjs`，零网络）+ package.json `harness:provider-eval` 接线。真机跑分待用户 key/endpoint。全量测试 367→406（+39），唯一 fail 仍为环境 sqlite ABI。 | 主 agent |
