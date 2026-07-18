@@ -60,8 +60,10 @@
 - built-in 插件放进 `resources/built-in-plugins/` 且 manifest 合规即被发现/注册/可运行，**无需额外任务白名单接线**。
 
 ### 3.3 现有获取管道（可复用，不重建）
-- `src/plugin-manager.js`：远程 manifest（当前指向 OSS CDN）、`downloadFile()` 带 **SHA-256 流式校验 + host 白名单**、运行时装到 `USER_DATA_DIR/runtimes`、`installed.json` 记账、runtime 校验/装包能力。
+- `src/plugin-manager.js`：远程 manifest（当前指向 OSS CDN）、`downloadFile()` 带 **SHA-256 流式校验**、运行时装到 `USER_DATA_DIR/runtimes`、`installed.json` 记账、runtime 校验/装包能力。
 - **Stage 3 复用这套管道做“自备”，不新建下载/校验/装包系统。**
+
+> 更正（2026-07-18）：本文早期版本称 `plugin-manager.js#downloadFile` 带 **host 白名单**，经核实不属实——`downloadFile`（及 `content-sync.js#downloadFile`）都是裸 `https.get(url)`，无 host 校验；全仓唯一做 host 校验的是 `src/macos-oss-updater.js#resolveArtifactUrl`（https + 同源）。host 白名单已于 2026-07-18 在 `core/shared-backend/capability-provisioning.js#checkUrlAllowed` **新实现**（见 §5.5），非复用现有逻辑。
 
 ---
 
@@ -95,7 +97,7 @@
       ready    → 直接进 run
       missing  → provisionCapability():
                    解析 bundle 描述（bundleId, version, url, sha256, size）
-                   downloadFile()（复用：SHA-256 校验 + host 白名单）
+                   下载（SHA-256 校验 + host 白名单校验，见 §5.5）
                    解压到 USER_DATA_DIR/runtimes/...
                    写 provisioning ledger（见 5.4）
                    → 就位后进 run

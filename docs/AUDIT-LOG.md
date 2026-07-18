@@ -16,7 +16,7 @@
 | ✅已处理 | 2026-07-17 | Stage 3 M1: R_LIBS_USER 组装逻辑抽到 `shared-backend/r-libs-resolver.js`，两处调用共用 | 本文件 §3 | [§3 问题 A](#问题-a代码重复r-libs-user-组装逻辑) |
 | ✅已处理 | 2026-07-17 | Stage 3 M1: 两处 `catch {}` 静默吞掉所有错误，调试困难 | 本文件 §3 | [§3 问题 B](#问题-b静默-catch-吞掉所有错误) |
 | 🟡建议 | 2026-07-17 | Stage 3 M1: `capability-provisioning.js` 的 defaultDownload 未复用 plugin-manager 且无 host 白名单 | 本文件 §3 | [§3 问题 C](#问题-cdefaultdownload-未复用-plugin-manager) |
-| 🟡建议 | 2026-07-17 | Stage 3 M1: `defaultDownload` 缺少 host 白名单，设计文档 D4 要求，M2 扩展分发源前需修复 | stage3-m1-audit | [§3 问题 D](#问题-ddefaultdownload-缺少-host-白名单) |
+| ✅已处理 | 2026-07-18 | Stage 3 M1: `capability-provisioning` 加 host 白名单（https-only + 精确/后缀匹配 + env 覆盖），下载前 gate；顺带纠正设计文档失实描述（plugin-manager 从无 host 白名单） | 本文件 §4 | [§4 问题 D](#问题-ddefaultdownload-缺少-host-白名单) |
 | ✅已处理 | 2026-07-17 | `fix/qa-smoke-stale-css-paths` 已合并，themes 门禁恢复 7/7 | 分支备忘录 | [§2.1](#21-fixqa-smoke-stale-css-paths-) |
 | 🟡待评估 | 2026-07-17 | `codex/fix-collapsed-right-titlebar` 分支待评估，三文件两边改过 | 分支备忘录 | [§2.2](#22-codexfix-collapsed-right-titlebar-) |
 | ✅已处理 | 2026-07-17 | 5 个 codex/* 已合并残留分支已删除（连带 prune 6 个失效 worktree 注册） | 分支备忘录 | [§2.3](#23-已合并残留分支可安全删除-) |
@@ -154,6 +154,13 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
 - **建议**：在 M2 扩展分发源前补上 host 白名单，复用 plugin-manager 的 host 白名单逻辑
 - **优先级**：中（当前低风险，但应在 M2 前修复）
 - **对验收影响**：不阻塞 M1
+- **✅ 处理（2026-07-18，主 agent）**：在 `capability-provisioning.js` 实现 host 白名单，作为独立 gate 加在 `provisionCapability` 的 readiness 检查之后、任何下载之前：
+  - `checkUrlAllowed(url, options)`：强制 `https:`（对齐 `macos-oss-updater.js` 的 https-only），host 走白名单；返回结构化 `{ok:false, reason}`（`invalid_url` / `insecure_protocol` / `host_not_allowed`），不抛异常。
+  - 默认白名单 `DEFAULT_ALLOWED_HOSTS` = 真实分发源 `biof3-uploads.oss-cn-hangzhou.aliyuncs.com` + 后缀 `.aliyuncs.com`（对齐 D7 OSS CDN）。`.` 开头条目为后缀匹配且防 `aliyuncs.com.evil.net` 型 lookalike，其余精确匹配。
+  - 可覆盖：`options.allowedHosts`（测试/编排）与 `BIOF3_CAPABILITY_ALLOWED_HOSTS` 环境变量（D4 分发源可换、只改配置不改逻辑）。
+  - gate 位置刻意在 readiness 之后：已就位的 capability 短路返回、不重新校验，收紧白名单不会 strand 已装 bundle。
+  - 新增 5 个测试（off-allowlist 拒绝且不下载 / http 拒绝 / allowedHosts 覆盖 / checkUrlAllowed 匹配规则 / env 覆盖），本文件测试 13→18，全通过。
+  - **顺带纠正设计文档失实描述**：设计文档 §3.3/§5.5 与本审计原文均称"复用 plugin-manager 的 host 白名单逻辑"——经核实 `src/plugin-manager.js#downloadFile`（及 `content-sync.js#downloadFile`）**从来没有 host 白名单**，都是裸 `https.get(url)`；全仓唯一做 host 校验的是 `macos-oss-updater.js#resolveArtifactUrl`（https + 同源）。因此本次是**新实现**而非复用，并已修正 `stage3-standard-workflows-design.md` §3.3/§5.2 的错误表述，避免后续 agent 继续被"现成白名单"误导。
 - **详细报告**：`docs/stage3-m1-audit.md`
 
 ---
@@ -236,3 +243,4 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
 | 2026-07-17 | 删除 sanitizer 死模块（问题 E）；core/test 门禁分流：3 单测迁入门禁、删陈旧副本、保留 4 个 live smoke（问题 F）；顺带修 agent-workflow 模板数断言（WGCNA 引入的 CI 潜伏失败） | 主 agent |
 | 2026-07-17 | 处理问题 G：实现 project-run-layout 的 isAdmin（`db.getUserById().role === 'admin'`，防御性回退非管理员），补 3 个权限单测（admin 放行 / 非 admin 拒绝 / 无 getUserById 回退） | 主 agent |
 | 2026-07-17 | 清理 §2.3 5 个已合并 codex 残留分支（worktree prune + branch -d），保留 §2.2 待评估分支 | 主 agent |
+| 2026-07-18 | 处理问题 D：为 capability-provisioning 实现 host 白名单（`checkUrlAllowed`：https-only + 默认 OSS CDN 白名单 + `options.allowedHosts`/env 覆盖），gate 加在 readiness 之后不 strand 已装 bundle，补 5 个测试（13→18）；顺带纠正设计文档 §3.3/§5.5「复用 plugin-manager host 白名单」的失实描述（该白名单从不存在，本次为新实现） | 主 agent |

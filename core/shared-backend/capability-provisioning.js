@@ -38,6 +38,70 @@ const LEDGER_FILE_NAME = 'harness-provisioning.json';
 const TMP_DIR_NAME = '.tmp';
 const CAPABILITIES_DIR_NAME = 'capabilities';
 
+/**
+ * Host allowlist for capability downloads (Stage 3 design doc §5.5, §D7;
+ * AUDIT-LOG problem D). Provisioning fetches multi-hundred-MB bundles from a
+ * URL carried in a capability descriptor; without a host allowlist a
+ * malformed/hostile manifest could point the downloader at an arbitrary host
+ * (SSRF / exfiltration surface). The current distribution source is the
+ * project OSS CDN (see src/macos-oss-updater.js DEFAULT_FEED_URL), so the
+ * default allowlist covers Aliyun OSS. Distribution source can move (D4/D7)
+ * without touching provisioning logic by overriding the allowlist via
+ * `options.allowedHosts` or the BIOF3_CAPABILITY_ALLOWED_HOSTS env var.
+ *
+ * Entries are matched case-insensitively. An entry beginning with '.' is a
+ * suffix match (e.g. '.aliyuncs.com' matches 'x.oss-cn-hangzhou.aliyuncs.com');
+ * any other entry must match the host exactly.
+ */
+const DEFAULT_ALLOWED_HOSTS = Object.freeze([
+  'biof3-uploads.oss-cn-hangzhou.aliyuncs.com',
+  '.aliyuncs.com',
+]);
+
+function resolveAllowedHosts(options = {}) {
+  if (Array.isArray(options.allowedHosts) && options.allowedHosts.length > 0) {
+    return options.allowedHosts;
+  }
+  const fromEnv = process.env.BIOF3_CAPABILITY_ALLOWED_HOSTS;
+  if (fromEnv && fromEnv.trim()) {
+    return fromEnv.split(',').map((h) => h.trim()).filter(Boolean);
+  }
+  return DEFAULT_ALLOWED_HOSTS;
+}
+
+function _hostMatches(host, pattern) {
+  const h = String(host || '').toLowerCase();
+  const p = String(pattern || '').toLowerCase();
+  if (!h || !p) return false;
+  if (p.startsWith('.')) return h === p.slice(1) || h.endsWith(p);
+  return h === p;
+}
+
+/**
+ * Validate that a capability download URL is https and its host is on the
+ * allowlist. Never throws; returns a structured result so callers surface a
+ * clean diagnostic instead of a stack trace.
+ *
+ * @returns {{ok:true, host:string} | {ok:false, reason:string}}
+ */
+function checkUrlAllowed(url, options = {}) {
+  let parsed;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return { ok: false, reason: 'invalid_url' };
+  }
+  if (parsed.protocol !== 'https:') {
+    return { ok: false, reason: 'insecure_protocol' };
+  }
+  const allowed = resolveAllowedHosts(options);
+  const host = parsed.hostname;
+  if (!allowed.some((pattern) => _hostMatches(host, pattern))) {
+    return { ok: false, reason: 'host_not_allowed', host };
+  }
+  return { ok: true, host };
+}
+
 function defaultRuntimesDir() {
   const localDataDir = process.env.BIOF3_LOCAL_DATA_DIR || path.join(os.homedir(), 'Documents', 'BioF3-Local');
   return path.join(localDataDir, 'runtimes');
@@ -240,6 +304,17 @@ async function provisionCapability(capability, options = {}) {
     return { ok: true, alreadyReady: true, installDir: already.installDir };
   }
 
+  // Host allowlist gate — only reached when a real network fetch is about to
+  // happen (an already-provisioned capability short-circuits above and is
+  // never re-validated, so tightening the allowlist can't strand installed
+  // bundles). A caller-injected `options.download` (tests) still passes
+  // through this gate so the allowlist is exercised uniformly; injected
+  // downloaders simply must use an allowed URL.
+  const urlCheck = checkUrlAllowed(capability.url, options);
+  if (!urlCheck.ok) {
+    return { ok: false, error: urlCheck.reason, url: capability.url, host: urlCheck.host };
+  }
+
   const maxAttempts = Number.isInteger(options.maxAttempts) ? options.maxAttempts : 2;
   let lastError = null;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
@@ -304,4 +379,7 @@ module.exports = {
   removeCapability,
   streamingSha256,
   defaultDownload,
+  checkUrlAllowed,
+  resolveAllowedHosts,
+  DEFAULT_ALLOWED_HOSTS,
 };

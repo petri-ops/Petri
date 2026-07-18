@@ -37,11 +37,14 @@ function makeDownload(content) {
 const CONTENT = 'test-bundle-payload';
 const GOOD_SHA = sha256Of(CONTENT);
 
+// Default URL uses the project OSS CDN host so it passes the host allowlist
+// gate (see capability-provisioning.js DEFAULT_ALLOWED_HOSTS). Tests that
+// exercise the allowlist itself override `url` and/or pass `allowedHosts`.
 function baseCap(overrides = {}) {
   return {
     capabilityId: 'r-enrichment',
     version: '1.0.0',
-    url: 'https://example.invalid/bundle.tar',
+    url: 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/bundles/r-enrichment-1.0.0.tar',
     sha256: GOOD_SHA,
     ...overrides,
   };
@@ -262,4 +265,90 @@ test('capabilityInstallDir: path contains capabilityId and version', () => {
   assert.ok(dir.includes('r-enrichment'), 'path must include capabilityId');
   assert.ok(dir.includes('1.2.3'), 'path must include version');
   assert.ok(dir.startsWith(runtimesDir), 'path must be under runtimesDir');
+});
+
+// ── 14. host allowlist: rejects off-allowlist host before downloading ─────────
+
+test('provisionCapability: rejects a host not on the allowlist without downloading', async () => {
+  const runtimesDir = tmpDir();
+  let downloadCalls = 0;
+  const countingDownload = async (_url, destPath) => {
+    downloadCalls += 1;
+    fs.writeFileSync(destPath, CONTENT);
+  };
+  const cap = baseCap({ url: 'https://evil.example.com/bundle.tar' });
+  const result = await cp.provisionCapability(cap, { runtimesDir, download: countingDownload });
+  assert.equal(result.ok, false);
+  assert.equal(result.error, 'host_not_allowed');
+  assert.equal(result.host, 'evil.example.com');
+  assert.equal(downloadCalls, 0, 'must not download from a disallowed host');
+  // nothing written to ledger
+  assert.equal(cp.readLedger({ runtimesDir }).capabilities['r-enrichment'], undefined);
+});
+
+// ── 15. host allowlist: rejects non-https URLs ────────────────────────────────
+
+test('provisionCapability: rejects insecure (http) protocol', async () => {
+  const runtimesDir = tmpDir();
+  const cap = baseCap({ url: 'http://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/bundle.tar' });
+  const result = await cp.provisionCapability(cap, { runtimesDir, download: makeDownload(CONTENT) });
+  assert.equal(result.ok, false);
+  assert.equal(result.error, 'insecure_protocol');
+});
+
+// ── 16. host allowlist: options.allowedHosts override ─────────────────────────
+
+test('provisionCapability: options.allowedHosts permits a custom host', async () => {
+  const runtimesDir = tmpDir();
+  const cap = baseCap({ url: 'https://mirror.internal.test/bundle.tar' });
+  const result = await cp.provisionCapability(cap, {
+    runtimesDir,
+    download: makeDownload(CONTENT),
+    allowedHosts: ['mirror.internal.test'],
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.alreadyReady, false);
+});
+
+// ── 17. checkUrlAllowed: unit coverage of matching rules ──────────────────────
+
+test('checkUrlAllowed: exact, suffix, protocol and invalid-url rules', () => {
+  // default allowlist: exact host
+  assert.equal(
+    cp.checkUrlAllowed('https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/x.tar').ok,
+    true,
+  );
+  // default allowlist: suffix match on .aliyuncs.com
+  assert.equal(cp.checkUrlAllowed('https://other-bucket.aliyuncs.com/x.tar').ok, true);
+  // suffix pattern must not match a lookalike host
+  assert.equal(cp.checkUrlAllowed('https://aliyuncs.com.evil.net/x.tar').ok, false);
+  // off-allowlist
+  const off = cp.checkUrlAllowed('https://example.com/x.tar');
+  assert.equal(off.ok, false);
+  assert.equal(off.reason, 'host_not_allowed');
+  // http rejected
+  assert.equal(cp.checkUrlAllowed('http://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/x.tar').reason, 'insecure_protocol');
+  // garbage URL
+  assert.equal(cp.checkUrlAllowed('not a url').reason, 'invalid_url');
+  // explicit allowedHosts override
+  assert.equal(cp.checkUrlAllowed('https://h.test/x', { allowedHosts: ['h.test'] }).ok, true);
+});
+
+// ── 18. host allowlist: BIOF3_CAPABILITY_ALLOWED_HOSTS env override ────────────
+
+test('checkUrlAllowed: BIOF3_CAPABILITY_ALLOWED_HOSTS env var overrides default', () => {
+  const prev = process.env.BIOF3_CAPABILITY_ALLOWED_HOSTS;
+  try {
+    process.env.BIOF3_CAPABILITY_ALLOWED_HOSTS = 'cdn.example.org, .mirror.test';
+    assert.equal(cp.checkUrlAllowed('https://cdn.example.org/x.tar').ok, true);
+    assert.equal(cp.checkUrlAllowed('https://a.mirror.test/x.tar').ok, true);
+    // default OSS host no longer allowed once env override is set
+    assert.equal(
+      cp.checkUrlAllowed('https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/x.tar').ok,
+      false,
+    );
+  } finally {
+    if (prev === undefined) delete process.env.BIOF3_CAPABILITY_ALLOWED_HOSTS;
+    else process.env.BIOF3_CAPABILITY_ALLOWED_HOSTS = prev;
+  }
 });
