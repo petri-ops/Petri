@@ -33,6 +33,7 @@ module.exports = {
   executionContext: require('./execution-context'),
   agentWorkflow: require('./agent-workflow'),
   capabilityProvisioning: require('./capability-provisioning'),
+  capabilityBundles: require('./capability-bundles'),
   executors: require('./executors'),
   storage: require('./storage'),
   llmProviders: require('./llm-providers'),

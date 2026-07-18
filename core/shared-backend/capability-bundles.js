@@ -1,0 +1,253 @@
+'use strict';
+
+/**
+ * Capability Bundle Registry — Stage 3 B1/B2 (single source of truth).
+ *
+ * A "capability bundle" is a prebuilt archive of heavyweight R/Python packages
+ * (e.g. clusterProfiler + org.*.eg.db for enrichment) that a built-in analysis
+ * module declares it needs via `plugin.json.requiresBundle`. Module code always
+ * ships read-only inside the packaged app; bundles are fetched on demand into a
+ * writable user directory by `capability-provisioning.js`.
+ *
+ * The gap this module closes (AUDIT-LOG §5): `plugin.json` only records a
+ * `bundleId` (e.g. "r-enrichment") + `requiresBundleVersion`, but *nowhere*
+ * mapped that bundleId to a concrete `{ url, sha256, sizeBytes }` descriptor.
+ * This file IS that mapping — the single source of truth for "what is bundle X,
+ * where does it live, and how do we verify it".
+ *
+ * Layering:
+ *   - This module is PURE DATA + THIN ORCHESTRATION. It has no `electron`
+ *     dependency and can run in core/ (r-server, tests) and the main process.
+ *   - `capability-provisioning.js` is the generic download/verify/install
+ *     engine. This module supplies it descriptors and decides *whether* a
+ *     bundle should be fetched.
+ *   - `ensureBundlesForPlugin()` is the orchestration layer that wires the two
+ *     together. IMPORTANT: as of B1/B2 part 1 it is NOT yet called from any
+ *     real run path (registry.js / tools-executor.js). It exists as an
+ *     independently testable module; run-path wiring is a later batch.
+ *
+ * CONVENTION — `sha256 === null` means "unpublished, do not download":
+ *   Bundles have not been built + signed yet, so their `sha256`/`sizeBytes` are
+ *   null. Per the repo-wide rule (see manifest.placeholders.json), we DO NOT
+ *   fabricate hashes. A descriptor with `sha256 === null` is treated as
+ *   `status: 'unpublished'` and provisioning will NOT attempt a download for
+ *   it — an unverifiable bundle must never be fetched. Once a real build exists,
+ *   `scripts/build-r-bundle.mjs` produces the sha256/sizeBytes to backfill here.
+ */
+
+const BUNDLE_HOST = 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com';
+const DEFAULT_PLATFORM = 'macos-arm64';
+const DEFAULT_VERSION = '1.0.0';
+
+function bundleUrl(bundleId, version, platform) {
+  return `${BUNDLE_HOST}/bundles/${bundleId}-${version}-${platform}.tar.gz`;
+}
+
+/**
+ * The registry: bundleId → descriptor.
+ *
+ * Each descriptor:
+ *   - bundleId {string}
+ *   - version {string}
+ *   - url {string}       download URL (host must be on provisioning allowlist)
+ *   - sha256 {string|null}   null ⇒ unpublished (do not download)
+ *   - sizeBytes {number|null} null ⇒ unknown (bundle not built yet)
+ *   - platforms {string[]}    supported platforms for this descriptor
+ *
+ * sha256/sizeBytes intentionally null: bundles are not built yet and we never
+ * fabricate hashes (manifest.placeholders.json convention). Backfill from
+ * `scripts/build-r-bundle.mjs` output once real builds exist.
+ */
+const BUNDLE_REGISTRY = Object.freeze({
+  'r-enrichment': Object.freeze({
+    bundleId: 'r-enrichment',
+    version: DEFAULT_VERSION,
+    url: bundleUrl('r-enrichment', DEFAULT_VERSION, DEFAULT_PLATFORM),
+    sha256: null,
+    sizeBytes: null,
+    platforms: Object.freeze([DEFAULT_PLATFORM]),
+  }),
+  'r-wgcna': Object.freeze({
+    bundleId: 'r-wgcna',
+    version: DEFAULT_VERSION,
+    url: bundleUrl('r-wgcna', DEFAULT_VERSION, DEFAULT_PLATFORM),
+    sha256: null,
+    sizeBytes: null,
+    platforms: Object.freeze([DEFAULT_PLATFORM]),
+  }),
+});
+
+/**
+ * Classify a descriptor's publication status.
+ *   - 'unknown'     — no such bundleId in the registry
+ *   - 'unpublished' — registered but sha256 is null (not built/signed yet)
+ *   - 'ready'       — registered and has a sha256 (verifiable, downloadable)
+ */
+function bundleStatus(descriptor) {
+  if (!descriptor) return 'unknown';
+  return descriptor.sha256 ? 'ready' : 'unpublished';
+}
+
+/**
+ * Look up a bundle descriptor by id. Returns null for an unknown bundle or when
+ * the descriptor does not support the requested platform.
+ *
+ * @param {string} bundleId
+ * @param {{platform?: string, version?: string}} [opts]
+ * @returns {object|null} a shallow copy of the descriptor, or null
+ */
+function getBundleDescriptor(bundleId, opts = {}) {
+  if (!bundleId || typeof bundleId !== 'string') return null;
+  const base = BUNDLE_REGISTRY[bundleId];
+  if (!base) return null;
+
+  const platform = opts.platform || DEFAULT_PLATFORM;
+  if (Array.isArray(base.platforms) && !base.platforms.includes(platform)) {
+    return null;
+  }
+
+  // A requested version different from the registered one is not an error here
+  // (the caller may want the descriptor to compare); we surface the registered
+  // descriptor and let the readiness/provisioning layer enforce version match.
+  const version = opts.version || base.version;
+  const platformMismatchSafe = { ...base, platforms: [...base.platforms] };
+  if (version !== base.version) {
+    // Re-derive the URL for the requested version so callers building a
+    // per-version fetch get a consistent URL; sha256 stays null (we only have a
+    // verified hash for the registered/built version).
+    return {
+      ...platformMismatchSafe,
+      version,
+      url: bundleUrl(bundleId, version, platform),
+      sha256: base.version === version ? base.sha256 : null,
+      sizeBytes: base.version === version ? base.sizeBytes : null,
+    };
+  }
+  return platformMismatchSafe;
+}
+
+function normalizeRequiredBundles(pluginCfg) {
+  if (!pluginCfg || !pluginCfg.requiresBundle) return [];
+  const raw = Array.isArray(pluginCfg.requiresBundle)
+    ? pluginCfg.requiresBundle
+    : [pluginCfg.requiresBundle];
+  return raw.filter((b) => typeof b === 'string' && b.length > 0);
+}
+
+/**
+ * Resolve the bundle descriptors a plugin requires, each annotated with a
+ * `status` for a future wiring layer to make decisions on.
+ *
+ * @param {{requiresBundle?: string|string[], requiresBundleVersion?: string}} pluginCfg
+ * @param {{platform?: string}} [opts]
+ * @returns {Array<{bundleId:string, status:'ready'|'unpublished'|'unknown', descriptor:object|null}>}
+ */
+function resolveBundlesForPlugin(pluginCfg, opts = {}) {
+  const bundleIds = normalizeRequiredBundles(pluginCfg);
+  const version = (pluginCfg && pluginCfg.requiresBundleVersion) || undefined;
+  // Call through module.exports so a test (or a future override layer) can swap
+  // getBundleDescriptor and have resolve/ensure honor it.
+  const lookup = module.exports.getBundleDescriptor;
+  return bundleIds.map((bundleId) => {
+    const descriptor = lookup(bundleId, { platform: opts.platform, version });
+    return { bundleId, status: bundleStatus(descriptor), descriptor };
+  });
+}
+
+/**
+ * Orchestration layer: ensure every bundle a plugin requires is provisioned.
+ *
+ * For each required bundle:
+ *   - unknown bundle           → { ok:false, status:'unknown' }        (no fetch)
+ *   - unpublished (sha256=null)→ { ok:false, status:'unpublished' }    (no fetch)
+ *   - already provisioned      → { ok:true,  status:'ready', alreadyReady:true }
+ *   - ready + not installed    → provisionCapability(...) result
+ *
+ * Never throws; returns a structured aggregate. `options` are forwarded to
+ * `provisionCapability` (download/hash/install/runtimesDir/onProgress can be
+ * injected, e.g. by tests or the future wiring layer).
+ *
+ * NOTE: not yet wired into any run path (see file header). This is the seam a
+ * later batch will call from registry.js / tools-executor.js readiness gate.
+ *
+ * @param {{requiresBundle?: string|string[], requiresBundleVersion?: string}} pluginCfg
+ * @param {object} [options] forwarded to provisionCapability + { platform }
+ * @returns {Promise<{ok:boolean, results:Array<object>}>}
+ */
+async function ensureBundlesForPlugin(pluginCfg, options = {}) {
+  const resolved = resolveBundlesForPlugin(pluginCfg, { platform: options.platform });
+  if (resolved.length === 0) {
+    return { ok: true, results: [] };
+  }
+
+  let cp = null;
+  try {
+    cp = require('./capability-provisioning');
+  } catch (e) {
+    return {
+      ok: false,
+      results: resolved.map((r) => ({
+        bundleId: r.bundleId,
+        ok: false,
+        status: 'provisioning_unavailable',
+        message: e.message,
+      })),
+    };
+  }
+
+  const results = [];
+  for (const { bundleId, status, descriptor } of resolved) {
+    if (status === 'unknown') {
+      results.push({ bundleId, ok: false, status: 'unknown' });
+      continue;
+    }
+    if (status === 'unpublished') {
+      // sha256 is null — unverifiable, must not download.
+      results.push({ bundleId, ok: false, status: 'unpublished' });
+      continue;
+    }
+
+    // status === 'ready': check readiness first, then provision if needed.
+    const capability = {
+      capabilityId: descriptor.bundleId,
+      version: descriptor.version,
+      url: descriptor.url,
+      sha256: descriptor.sha256,
+      size: descriptor.sizeBytes || undefined,
+      kind: 'bundle',
+    };
+
+    let ready = { ready: false };
+    try {
+      ready = cp.checkCapabilityReady(capability, options);
+    } catch (e) {
+      results.push({ bundleId, ok: false, status: 'readiness_check_failed', message: e.message });
+      continue;
+    }
+    if (ready.ready) {
+      results.push({ bundleId, ok: true, status: 'ready', alreadyReady: true, installDir: ready.installDir });
+      continue;
+    }
+
+    const prov = await cp.provisionCapability(capability, options);
+    results.push({
+      bundleId,
+      ok: !!prov.ok,
+      status: prov.ok ? 'ready' : 'provision_failed',
+      alreadyReady: !!prov.alreadyReady,
+      installDir: prov.installDir,
+      error: prov.error,
+      message: prov.message,
+    });
+  }
+
+  return { ok: results.every((r) => r.ok), results };
+}
+
+module.exports = {
+  BUNDLE_REGISTRY,
+  getBundleDescriptor,
+  resolveBundlesForPlugin,
+  ensureBundlesForPlugin,
+  bundleStatus,
+};
