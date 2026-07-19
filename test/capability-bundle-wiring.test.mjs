@@ -125,8 +125,8 @@ test('wiring: published bundle downloads once and is then mounted via R_LIBS_USE
   }
 });
 
-// ── 2. unpublished (sha256=null, the real registry state) → no download,
-//       no throw, run path continues on base runtime ───────────────────────────
+// ── 2. unpublished descriptor (sha256=null) → no download, no throw,
+//       run path continues on base runtime ────────────────────────────────────
 
 test('wiring: unpublished bundle does not download, does not throw, run continues', async () => {
   const localData = tmpDir();
@@ -135,8 +135,13 @@ test('wiring: unpublished bundle does not download, does not throw, run continue
   process.env.BIOF3_LOCAL_DATA_DIR = localData;
 
   const counter = { calls: 0 };
+  const original = bundles.getBundleDescriptor;
+  bundles.getBundleDescriptor = () => ({
+    ...PUBLISHED,
+    sha256: null,
+    sizeBytes: null,
+  });
   try {
-    // Real registry state: r-enrichment sha256 === null ⇒ unpublished.
     const cfg = {
       language: 'r',
       requiresBundle: 'r-enrichment',
@@ -155,6 +160,7 @@ test('wiring: unpublished bundle does not download, does not throw, run continue
     // (no lib to mount) — identical to pre-wiring behavior.
     assert.equal(env, null, 'no ready bundle ⇒ no R_LIBS_USER env, run on base runtime');
   } finally {
+    bundles.getBundleDescriptor = original;
     if (prevLocalData === undefined) delete process.env.BIOF3_LOCAL_DATA_DIR;
     else process.env.BIOF3_LOCAL_DATA_DIR = prevLocalData;
   }

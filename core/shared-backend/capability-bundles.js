@@ -29,12 +29,11 @@ const { execFile } = require('child_process');
  *     R run paths (registry.js / tools-executor.js).
  *
  * CONVENTION — `sha256 === null` means "unpublished, do not download":
- *   Bundles have not been built + signed yet, so their `sha256`/`sizeBytes` are
- *   null. Per the repo-wide rule (see manifest.placeholders.json), we DO NOT
- *   fabricate hashes. A descriptor with `sha256 === null` is treated as
- *   `status: 'unpublished'` and provisioning will NOT attempt a download for
- *   it — an unverifiable bundle must never be fetched. Once a real build exists,
- *   `scripts/build-r-bundle.mjs` produces the sha256/sizeBytes to backfill here.
+ *   We never fabricate hashes. A descriptor with `sha256 === null` is treated
+ *   as `status: 'unpublished'` and provisioning will NOT attempt a download for
+ *   it — an unverifiable bundle must never be fetched. Published descriptors
+ *   below are backfilled only from `scripts/build-r-bundle.mjs` output after
+ *   their OSS objects have been uploaded and checked.
  */
 
 const BUNDLE_HOST = 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com';
@@ -56,25 +55,25 @@ function bundleUrl(bundleId, version, platform) {
  *   - sizeBytes {number|null} null ⇒ unknown (bundle not built yet)
  *   - platforms {string[]}    supported platforms for this descriptor
  *
- * sha256/sizeBytes intentionally null: bundles are not built yet and we never
- * fabricate hashes (manifest.placeholders.json convention). Backfill from
- * `scripts/build-r-bundle.mjs` output once real builds exist.
+ * sha256/sizeBytes are immutable build descriptors for the published macOS
+ * arm64 archives. New platform/version builds require their own verified
+ * descriptors; a requested version with no descriptor remains unpublished.
  */
 const BUNDLE_REGISTRY = Object.freeze({
   'r-enrichment': Object.freeze({
     bundleId: 'r-enrichment',
     version: DEFAULT_VERSION,
     url: bundleUrl('r-enrichment', DEFAULT_VERSION, DEFAULT_PLATFORM),
-    sha256: null,
-    sizeBytes: null,
+    sha256: 'a857831d0d548cc6f9d856684ccec32c0241af018521c5d0641349ade0be1820',
+    sizeBytes: 422094687,
     platforms: Object.freeze([DEFAULT_PLATFORM]),
   }),
   'r-wgcna': Object.freeze({
     bundleId: 'r-wgcna',
     version: DEFAULT_VERSION,
     url: bundleUrl('r-wgcna', DEFAULT_VERSION, DEFAULT_PLATFORM),
-    sha256: null,
-    sizeBytes: null,
+    sha256: '439273d8b9cad414d3ed32f14076ac88649ca885e6b5854e0ae91bf5e7980288',
+    sizeBytes: 82367498,
     platforms: Object.freeze([DEFAULT_PLATFORM]),
   }),
 });

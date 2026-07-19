@@ -231,8 +231,9 @@ test/fixtures/harness/go-kegg-*.json        # valid lineage / degraded / blocked
   - `r-wgcna-1.0.0-macos-arm64.tar.gz`：82,367,498 bytes，SHA-256 `439273d8b9cad414d3ed32f14076ac88649ca885e6b5854e0ae91bf5e7980288`，71 个外部包；
   - 首轮隔离加载发现 `otel` / `dichromat` 会经 Suggests 动态加载并逃逸系统库；构建器现会观测根包 namespace 初始化时的额外运行依赖，重建后两包均无外部 namespace 逃逸；
   - 使用解压后的 bundle 实跑 GO/KEGG、GSEA、WGCNA，分别得到 31 / 24 / 27 个有效产物，全部 `valid`、0 issues；KEGG 两流程均明确命中离线 snapshot。
-- ⏳ 注册表 `sha256/sizeBytes` 仍为 `null`，这是刻意保持 unpublished：OSS 对象尚不存在时提前回填会让 App 把 404 URL 当作 ready bundle。上传与 URL HEAD 验证通过后再原子回填。
-- ⏳ OSS 上传与上传后的真实自动下载/解压/挂载回归尚未执行；上传必须由用户用本地凭据人工授权。
+- ✅ 用户已于 2026-07-19 人工授权并完成 OSS 上传；上传脚本完成 multipart upload、`public-read` ACL 与 OSS HEAD 后返回成功，外部网络访问两个 HTTPS URL 均确认进入匿名下载。
+- ✅ 注册表已回填上述正式构建的 `sha256/sizeBytes`，`r-enrichment` 与 `r-wgcna` 现均为 `ready`；未登记的新版本仍保持 unpublished，不会下载不可验证对象。
+- ⏳ 上传后的本机自动下载/解压/挂载回归仍待完成：当前机器的 Clash/Fake-IP 将 OSS host 解析为 `198.18.0.155` 并在 TLS 建连前重置；该问题未触及 OSS HTTP 状态，外部网络已确认对象可匿名下载。
 
 ---
 
@@ -279,7 +280,7 @@ test/fixtures/harness/go-kegg-*.json        # valid lineage / degraded / blocked
 
 **M4 样板复制**
 - GSEA（复用 bundle）→ WGCNA（新 bundle）。达到 Stage 3 出口“三条真实标准流程闭环”。
-- 🟡 2026-07-19：GO/KEGG、GSEA、WGCNA 的 demo 科学脚本与真实 artifact 均已通过，GO/KEGG Electron App 基础 runtime 真链也已通过；仅剩 OSS 发布后的自动下载/解压/挂载回归，因此 M4 尚未关闭。
+- 🟡 2026-07-19：GO/KEGG、GSEA、WGCNA 的 demo 科学脚本与真实 artifact 均已通过，GO/KEGG Electron App 基础 runtime 真链也已通过，两个 bundle 已发布并进入 ready；仅剩当前机器网络恢复后的自动下载/解压/挂载回归，因此 M4 尚未关闭。
 
 **M5 出口收口**
 - 三方插件接入指南（第 15 节）；全量门禁；更新台账/交接文档；决定是否进 Stage 4。
@@ -319,4 +320,4 @@ test/fixtures/harness/go-kegg-*.json        # valid lineage / degraded / blocked
 - 全量 Harness/Agent fixture、真实 artifact、恢复与 adapter 回归通过。
 - 形成可复制的三方插件接入指南。
 
-> **2026-07-19 对账结论：Stage 3 尚未达到出口。** Provider 评测、复用现有执行/结果真相、三方指南、三条科学流程、GO/KEGG App 真链及正式 bundle 隔离加载均已有证据；唯一剩余出口缺口是人工 OSS 发布及发布后的自动 provision 真链。
+> **2026-07-19 对账结论：Stage 3 尚未达到出口。** Provider 评测、复用现有执行/结果真相、三方指南、三条科学流程、GO/KEGG App 真链、正式 bundle 隔离加载及 OSS 发布均已有证据；唯一剩余出口缺口是当前机器网络恢复后的自动 provision 真链。

@@ -4,9 +4,8 @@
  * Unit tests for core/shared-backend/capability-bundles.js
  *
  * Stage 3 B1/B2 — pure local, zero network. Provisioning is exercised through
- * injected mock download/hash + a temp runtimesDir; the "ready" path uses a
- * temporarily-published descriptor (a fabricated sha256 is fine HERE because it
- * only lives inside the test's mock download output, never in the registry).
+ * injected mock download/hash + a temp runtimesDir. Mock descriptors isolate
+ * provisioning behavior from the immutable production archive hashes.
  */
 
 import assert from 'node:assert/strict';
@@ -49,14 +48,24 @@ async function makeMockInstall(tmpFile, installDir) {
 // ── 1. registry entries exist ─────────────────────────────────────────────────
 
 test('BUNDLE_REGISTRY contains the two real bundle entries', () => {
+  const expected = {
+    'r-enrichment': {
+      sha256: 'a857831d0d548cc6f9d856684ccec32c0241af018521c5d0641349ade0be1820',
+      sizeBytes: 422094687,
+    },
+    'r-wgcna': {
+      sha256: '439273d8b9cad414d3ed32f14076ac88649ca885e6b5854e0ae91bf5e7980288',
+      sizeBytes: 82367498,
+    },
+  };
   assert.ok(bundles.BUNDLE_REGISTRY['r-enrichment'], 'r-enrichment must be registered');
   assert.ok(bundles.BUNDLE_REGISTRY['r-wgcna'], 'r-wgcna must be registered');
   for (const id of ['r-enrichment', 'r-wgcna']) {
     const d = bundles.BUNDLE_REGISTRY[id];
     assert.equal(d.bundleId, id);
     assert.equal(d.version, '1.0.0');
-    assert.equal(d.sha256, null, 'sha256 must be null (unpublished, no fabricated hashes)');
-    assert.equal(d.sizeBytes, null);
+    assert.equal(d.sha256, expected[id].sha256);
+    assert.equal(d.sizeBytes, expected[id].sizeBytes);
     assert.ok(d.url.startsWith('https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/bundles/'));
     assert.ok(d.url.includes(id) && d.url.includes('1.0.0') && d.url.includes('macos-arm64'));
     assert.deepEqual(d.platforms, ['macos-arm64']);
@@ -69,7 +78,7 @@ test('getBundleDescriptor: returns descriptor for a known bundle', () => {
   const d = bundles.getBundleDescriptor('r-enrichment');
   assert.ok(d);
   assert.equal(d.bundleId, 'r-enrichment');
-  assert.equal(d.sha256, null);
+  assert.equal(d.sha256, 'a857831d0d548cc6f9d856684ccec32c0241af018521c5d0641349ade0be1820');
 });
 
 test('getBundleDescriptor: returns null for an unknown bundle', () => {
@@ -84,11 +93,11 @@ test('getBundleDescriptor: returns null for an unsupported platform', () => {
 
 // ── 3. resolveBundlesForPlugin variants ───────────────────────────────────────
 
-test('resolveBundlesForPlugin: single bundle (string) → one unpublished entry', () => {
+test('resolveBundlesForPlugin: single published bundle → one ready entry', () => {
   const out = bundles.resolveBundlesForPlugin({ requiresBundle: 'r-enrichment', requiresBundleVersion: '1.0.0' });
   assert.equal(out.length, 1);
   assert.equal(out[0].bundleId, 'r-enrichment');
-  assert.equal(out[0].status, 'unpublished');
+  assert.equal(out[0].status, 'ready');
   assert.ok(out[0].descriptor);
 });
 
@@ -96,7 +105,7 @@ test('resolveBundlesForPlugin: multiple bundles (array)', () => {
   const out = bundles.resolveBundlesForPlugin({ requiresBundle: ['r-enrichment', 'r-wgcna'] });
   assert.equal(out.length, 2);
   assert.deepEqual(out.map((r) => r.bundleId).sort(), ['r-enrichment', 'r-wgcna']);
-  assert.ok(out.every((r) => r.status === 'unpublished'));
+  assert.ok(out.every((r) => r.status === 'ready'));
 });
 
 test('resolveBundlesForPlugin: unknown bundle → status unknown, descriptor null', () => {
@@ -118,7 +127,8 @@ test('ensureBundlesForPlugin: unpublished bundle does NOT download and returns s
   const runtimesDir = tmpDir();
   const counter = { calls: 0 };
   const result = await bundles.ensureBundlesForPlugin(
-    { requiresBundle: 'r-enrichment', requiresBundleVersion: '1.0.0' },
+    // No verified descriptor exists for this requested version.
+    { requiresBundle: 'r-enrichment', requiresBundleVersion: '9.9.9' },
     { runtimesDir, download: makeDownload(CONTENT, counter) },
   );
   assert.equal(result.ok, false);
