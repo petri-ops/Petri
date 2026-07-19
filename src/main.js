@@ -455,6 +455,14 @@ function setupDesktopEnv(backendPorts) {
   process.env.R_SERVER_PORT = String(backendPorts.r);
   process.env.PY_SERVER_PORT = String(backendPorts.python);
   process.env.PLUMBER_PORT = String(backendPorts.plumber);
+  // Child servers run in separate Node processes and cannot see Electron's
+  // in-memory plugin registry. Give them the exact packaged/dev built-in root
+  // so HTTP execution resolves the same plugin metadata as MCP (including
+  // requiresBundle declarations).
+  process.env.BIOF3_BUILT_IN_PLUGINS_DIR = resolveResource(
+    "resources",
+    "built-in-plugins",
+  );
 
   // 计算执行配置：默认本地优先；若用户已保存远端集群配置，则一并注入
   _applyComputeSettings(_loadComputeSettings());

@@ -9,10 +9,10 @@
   "requiresBundleVersion": "1.0.0",
   "packages": {
     "r": {
-      "WGCNA": ">=1.73",
-      "flashClust": ">=1.1.2",
-      "impute": ">=1.82.0",
-      "ggplot2": ">=3.5.0",
+      "WGCNA": ">=1.74",
+      "flashClust": ">=1.1.4",
+      "impute": ">=1.84.0",
+      "ggplot2": ">=4.0.0",
       "dplyr": ">=1.1.0",
       "jsonlite": ">=1.8.0",
       "base64enc": ">=0.1-3"

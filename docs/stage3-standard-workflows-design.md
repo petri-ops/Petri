@@ -213,6 +213,27 @@ test/fixtures/harness/go-kegg-*.json        # valid lineage / degraded / blocked
 - bundle 内含**离线分析数据**（D5：KEGG 离线数据 + org.Hs/org.Mm），保证离线可跑；联网只作兜底补齐。
 - **架构一致性口径**：去耦移除的是 OSS **业务存储**；运行时/bundle 的**分发**允许联网（OSS CDN，非业务存储）。文档统一此口径，避免误读为“全程离线”。
 
+### B3 真机检查点（2026-07-19）
+
+- ✅ `scripts/build-r-bundle.mjs` 已改为从当前已验证 R library 计算 `Depends / Imports / LinkingTo` 递归闭包并复制到 staging，避开“系统库已安装导致新 libDir 为空”和 `options(warn=2)` 把安装警告升级成致命错误的问题。`--dry-run` 已核对：`r-enrichment` 127 个外部包、`r-wgcna` 69 个外部包，R 4.5.2 / Bioconductor 3.22 与根包版本匹配。
+- ✅ `r-enrichment` 构建路径会生成 human / mouse 两份 KEGG snapshot；GO/KEGG 与 GSEA 脚本先读 bundle 内 `.biof3-data/kegg-{hsa,mmu}.rds`，缺失或读取失败才回退 KEGG REST。
+- ✅ 已补齐真实 `.tar.gz` 安装器：SHA-256 校验后解压到 capability installDir，校验 `bundle-manifest.json` 的 bundleId/version，成功后才写 provisioning ledger。此前仅下载文件、未解压时即使发布也不能被 `R_LIBS_USER` 使用。
+- ✅ HTTP r-server 启动时已与 MCP 对齐 built-in / installed / development 三源发现；此前 HTTP 回退旧 tool registry 会丢失 `requiresBundle`，导致 B2 ensure 接线在 App 工具入口不触发。
+- ✅ GO/KEGG 上传校验已允许契约声明的一列 `gene` 列表；此前通用 CSV“至少两列”门禁会在创建 tool_job 前拒绝官方 demo。
+- ✅ 科学脚本/产物层真跑：
+  - GO/KEGG demo：离线 KEGG，31 个产物，artifact truth `valid`、0 issues；
+  - GSEA demo：修复无效的 `GENE001...` 假 SYMBOL 后，离线 KEGG 得到 90 个富集基因集，24 个产物，artifact truth `valid`、0 issues；
+  - WGCNA demo：3 个非-grey 模块，27 个产物，artifact truth `valid`、0 issues。
+- ✅ 已实测 `clusterProfiler 4.18.4 / enrichplot 1.30.5 / ggplot2 4.0.3` 的 `dotplot()` + `ggsave()`，旧的 ggplot2 3.5.2 锁不再成立；脚本、manifest、范围卡和报告模板已对齐当前版本。
+- ✅ Electron App HTTP 真链已验证（2026-07-19）：GO/KEGG 官方 demo 创建 `job_97f7a9b576e94802`，日志出现 `capability bundle not fully ready ... continuing with base runtime`，随后完成 32/32 有效产物、artifact truth `valid`、0 issues。
+- ✅ 正式 macOS arm64 bundle 已构建并二次隔离验证：
+  - `r-enrichment-1.0.0-macos-arm64.tar.gz`：422,094,687 bytes，SHA-256 `a857831d0d548cc6f9d856684ccec32c0241af018521c5d0641349ade0be1820`，129 个外部包；
+  - `r-wgcna-1.0.0-macos-arm64.tar.gz`：82,367,498 bytes，SHA-256 `439273d8b9cad414d3ed32f14076ac88649ca885e6b5854e0ae91bf5e7980288`，71 个外部包；
+  - 首轮隔离加载发现 `otel` / `dichromat` 会经 Suggests 动态加载并逃逸系统库；构建器现会观测根包 namespace 初始化时的额外运行依赖，重建后两包均无外部 namespace 逃逸；
+  - 使用解压后的 bundle 实跑 GO/KEGG、GSEA、WGCNA，分别得到 31 / 24 / 27 个有效产物，全部 `valid`、0 issues；KEGG 两流程均明确命中离线 snapshot。
+- ⏳ 注册表 `sha256/sizeBytes` 仍为 `null`，这是刻意保持 unpublished：OSS 对象尚不存在时提前回填会让 App 把 404 URL 当作 ready bundle。上传与 URL HEAD 验证通过后再原子回填。
+- ⏳ OSS 上传与上传后的真实自动下载/解压/挂载回归尚未执行；上传必须由用户用本地凭据人工授权。
+
 ---
 
 ## 11. 测试与门禁
@@ -253,10 +274,12 @@ test/fixtures/harness/go-kegg-*.json        # valid lineage / degraded / blocked
 
 **M3 Provider 评测**
 - harness 评测脚本，DeepSeek + Anthropic 各跑 GO/KEGG 全链；可比较报告 + 失败分类。
-- ✅ 脚本已实现（2026-07-18）：`scripts/harness-provider-eval.mjs`（`npm run harness:provider-eval`）。6 环节探针（intent / 工具选型 / 参数填充 / tool calling / 失败恢复 / 结果解释），前 4 项为必需门槛；产出 Markdown + JSON 双报告到 `eval-reports/`（已 gitignore）。凭据只读环境变量（`source .biof3-secrets`），不落盘、不打印、不进 CI。纯评分/渲染函数由 `test/harness-provider-eval.test.mjs`（31 用例、mock gateway、零网络）纳入门禁。**真机跑分待用户提供 key/endpoint 后执行**——脚本不执行 R，只测 LLM 在 Harness 决策链的表现。
+- ✅ 脚本已实现（2026-07-18）：`scripts/harness-provider-eval.mjs`（`npm run harness:provider-eval`）。6 环节探针（intent / 工具选型 / 参数填充 / tool calling / 失败恢复 / 结果解释），前 4 项为必需门槛；产出 Markdown + JSON 双报告到 `eval-reports/`（已 gitignore）。凭据只读环境变量（`source .biof3-secrets`），不落盘、不打印、不进 CI。纯评分/渲染函数由 `test/harness-provider-eval.test.mjs`（31 用例、mock gateway、零网络）纳入门禁。
+- ✅ 真机跑分已完成（2026-07-18）：DeepSeek + Anthropic 各 6/6，`requiredFailures` 与 `failures` 均为空；该脚本只测 LLM 决策链，不执行 R。
 
 **M4 样板复制**
 - GSEA（复用 bundle）→ WGCNA（新 bundle）。达到 Stage 3 出口“三条真实标准流程闭环”。
+- 🟡 2026-07-19：GO/KEGG、GSEA、WGCNA 的 demo 科学脚本与真实 artifact 均已通过，GO/KEGG Electron App 基础 runtime 真链也已通过；仅剩 OSS 发布后的自动下载/解压/挂载回归，因此 M4 尚未关闭。
 
 **M5 出口收口**
 - 三方插件接入指南（第 15 节）；全量门禁；更新台账/交接文档；决定是否进 Stage 4。
@@ -295,3 +318,5 @@ test/fixtures/harness/go-kegg-*.json        # valid lineage / degraded / blocked
 - 新流程接入不修改第二套执行器/job 库/结果查看器。
 - 全量 Harness/Agent fixture、真实 artifact、恢复与 adapter 回归通过。
 - 形成可复制的三方插件接入指南。
+
+> **2026-07-19 对账结论：Stage 3 尚未达到出口。** Provider 评测、复用现有执行/结果真相、三方指南、三条科学流程、GO/KEGG App 真链及正式 bundle 隔离加载均已有证据；唯一剩余出口缺口是人工 OSS 发布及发布后的自动 provision 真链。

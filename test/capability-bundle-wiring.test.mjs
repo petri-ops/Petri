@@ -47,6 +47,11 @@ function makeDownload(content, counter) {
   };
 }
 
+async function makeMockInstall(tmpFile, installDir) {
+  fs.mkdirSync(installDir, { recursive: true });
+  fs.copyFileSync(tmpFile, path.join(installDir, 'mock-package'));
+}
+
 const PUBLISHED = {
   bundleId: 'r-enrichment',
   version: '1.0.0',
@@ -100,6 +105,7 @@ test('wiring: published bundle downloads once and is then mounted via R_LIBS_USE
     const { ensured, env } = await runWiring(cfg, {
       runtimesDir,
       download: makeDownload(CONTENT, counter),
+      install: makeMockInstall,
     });
 
     assert.equal(ensured.ok, true, JSON.stringify(ensured));

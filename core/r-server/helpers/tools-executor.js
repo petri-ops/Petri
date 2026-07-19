@@ -21,6 +21,66 @@ function isManagedResultDir(candidate, jobsDir) {
   return roots.some((root) => resolved === root || resolved.startsWith(root + path.sep));
 }
 
+function validateUploadedFiles(toolId, jobDir, files) {
+  if (!files || typeof files !== 'object') return null;
+  const csvTools = [
+    'deseq2',
+    'go-kegg',
+    'gsea',
+    'km-survival',
+    'lasso-cox',
+    'bindea-immune',
+    'wgcna',
+    'complexheatmap',
+  ];
+
+  for (const [key, fileData] of Object.entries(files)) {
+    if (!fileData || typeof fileData !== 'string') continue;
+    const filePath = path.join(jobDir, key);
+    if (!fs.existsSync(filePath)) continue;
+
+    const fd = fs.openSync(filePath, 'r');
+    const buf = Buffer.alloc(4096);
+    const bytesRead = fs.readSync(fd, buf, 0, 4096, 0);
+    fs.closeSync(fd);
+    const head = buf.slice(0, bytesRead).toString('utf-8');
+
+    if (csvTools.includes(toolId) && head.includes('\0')) {
+      return `文件 "${key}" 似乎是二进制文件（如 Excel .xlsx），请转换为 CSV 或 TSV 格式后重新上传。提示：在 Excel 中"另存为" → 选择 CSV (UTF-8) 格式。`;
+    }
+
+    if (csvTools.includes(toolId)) {
+      const lines = head.split(/\r?\n/).filter((line) => line.trim());
+      if (lines.length < 2) {
+        return `文件 "${key}" 内容为空或只有表头，需要至少包含 1 行数据。`;
+      }
+      const firstLine = lines[0];
+      const sep = firstLine.includes('\t') ? '\t' : ',';
+      const headerCols = firstLine.split(sep).length;
+      // GO/KEGG explicitly accepts a one-column gene list (`gene` header);
+      // the other CSV tools require at least two columns.
+      const acceptsSingleColumnGeneList = toolId === 'go-kegg';
+      if (headerCols < 2 && !acceptsSingleColumnGeneList) {
+        return `文件 "${key}" 只检测到 1 列。请确认分隔符是逗号(CSV)或制表符(TSV)，不是分号或空格。`;
+      }
+      const dataCols = lines[1].split(sep).length;
+      if (Math.abs(dataCols - headerCols) > 1) {
+        return `文件 "${key}" 格式异常：表头有 ${headerCols} 列，但第一行数据有 ${dataCols} 列。请检查 CSV 格式是否正确。`;
+      }
+    }
+
+    const stat = fs.statSync(filePath);
+    if (
+      stat.size > 100 * 1024 * 1024 &&
+      toolId !== 'seurat-standard' &&
+      toolId !== 'cellchat'
+    ) {
+      return `文件 "${key}" 大小为 ${Math.round(stat.size / 1024 / 1024)}MB，超过推荐上限(100MB)。大文件可能导致分析超时。建议：筛选基因或样本后重试。`;
+    }
+  }
+  return null;
+}
+
 
 function createToolsExecutor({
   db,
@@ -758,61 +818,6 @@ function createToolsExecutor({
     });
   }
 
-  function validateUploadedFiles(toolId, jobDir, files) {
-    if (!files || typeof files !== 'object') return null;
-    const csvTools = [
-      'deseq2',
-      'go-kegg',
-      'gsea',
-      'km-survival',
-      'lasso-cox',
-      'bindea-immune',
-      'wgcna',
-      'complexheatmap',
-    ];
-
-    for (const [key, fileData] of Object.entries(files)) {
-      if (!fileData || typeof fileData !== 'string') continue;
-      const filePath = path.join(jobDir, key);
-      if (!fs.existsSync(filePath)) continue;
-
-      const fd = fs.openSync(filePath, 'r');
-      const buf = Buffer.alloc(4096);
-      const bytesRead = fs.readSync(fd, buf, 0, 4096, 0);
-      fs.closeSync(fd);
-      const head = buf.slice(0, bytesRead).toString('utf-8');
-
-      if (csvTools.includes(toolId) && head.includes('\0')) {
-        return `文件 "${key}" 似乎是二进制文件（如 Excel .xlsx），请转换为 CSV 或 TSV 格式后重新上传。提示：在 Excel 中"另存为" → 选择 CSV (UTF-8) 格式。`;
-      }
-
-      if (csvTools.includes(toolId)) {
-        const lines = head.split(/\r?\n/).filter((l) => l.trim());
-        if (lines.length < 2) {
-          return `文件 "${key}" 内容为空或只有表头，需要至少包含 1 行数据。`;
-        }
-        const firstLine = lines[0];
-        const sep = firstLine.includes('\t') ? '\t' : ',';
-        const headerCols = firstLine.split(sep).length;
-        if (headerCols < 2) {
-          return `文件 "${key}" 只检测到 1 列。请确认分隔符是逗号(CSV)或制表符(TSV)，不是分号或空格。`;
-        }
-        if (lines.length >= 2) {
-          const dataCols = lines[1].split(sep).length;
-          if (Math.abs(dataCols - headerCols) > 1) {
-            return `文件 "${key}" 格式异常：表头有 ${headerCols} 列，但第一行数据有 ${dataCols} 列。请检查 CSV 格式是否正确。`;
-          }
-        }
-      }
-
-      const stat = fs.statSync(filePath);
-      if (stat.size > 100 * 1024 * 1024 && toolId !== 'seurat-standard' && toolId !== 'cellchat') {
-        return `文件 "${key}" 大小为 ${Math.round(stat.size / 1024 / 1024)}MB，超过推荐上限(100MB)。大文件可能导致分析超时。建议：筛选基因或样本后重新上传。`;
-      }
-    }
-    return null;
-  }
-
   function translateRError(rawError) {
     if (!rawError) return null;
     for (const { pattern, msg } of R_ERROR_TRANSLATIONS) {
@@ -1015,5 +1020,5 @@ const R_ERROR_TRANSLATIONS = [
 
 module.exports = {
   createToolsExecutor,
-  _test: { isManagedResultDir },
+  _test: { isManagedResultDir, validateUploadedFiles },
 };

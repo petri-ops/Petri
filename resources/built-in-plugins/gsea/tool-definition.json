@@ -13,7 +13,7 @@
       "type": "file",
       "required": true,
       "accept": ".csv",
-      "hint": "两列排序列表（gene, log2FC/score）或含 gene/log2FoldChange 的 DESeq2/limma 结果表（可由差异分析步骤二跳绑定）；GSEA 需 ≥100 个基因，不要预先按显著性筛选"
+      "hint": "两列排序列表（SYMBOL/ENTREZID + log2FC/score）或含 gene/log2FoldChange 的 DESeq2/limma 结果表（可由差异分析步骤二跳绑定）；GSEA 需 ≥100 个可映射基因，不要预先按显著性筛选"
     },
     {
       "id": "organism",
@@ -54,7 +54,7 @@
   "tutorialUrl": "/docs/bulk-rnaseq/gsea",
   "demoDataUrl": "/demo-data/gsea",
   "estimatedMinutes": 4,
-  "packages": ["clusterProfiler", "enrichplot", "DOSE", "msigdbr", "org.Hs.eg.db", "KEGG.db"],
+  "packages": ["clusterProfiler", "enrichplot", "DOSE", "msigdbr", "org.Hs.eg.db", "KEGGREST"],
   "color": "#0891b2",
   "failureModes": [
     {
@@ -78,8 +78,8 @@
       "title": "基因 ID 映射失败",
       "description": "SYMBOL → ENTREZID 转换失败或匹配率过低，通常是物种或 ID 类型不符。",
       "recoverable": true,
-      "suggestedFix": "确认输入基因为对应物种的 SYMBOL，或核对 organism 参数（hsa/mmu）。",
-      "detect": "bitr|ENTREZID|Converted: .* 0|no gene can be mapped"
+      "suggestedFix": "确认输入基因为对应物种的 SYMBOL 或 ENTREZID，并核对 organism 参数（hsa/mmu）。",
+      "detect": "Gene ID mapping failed|bitr|ENTREZID|Converted: .* 0|no gene can be mapped"
     },
     {
       "code": "organism_db_missing",
@@ -87,7 +87,7 @@
       "description": "org.Hs.eg.db / org.Mm.eg.db、离线 KEGG 数据或 msigdbr 未随 r-enrichment 分析包就位。",
       "recoverable": true,
       "suggestedFix": "由 Harness 自动补齐 r-enrichment 分析包（含物种 org.db、离线 KEGG 数据与 msigdbr）后重试。",
-      "detect": "there is no package|could not find function|org.Hs.eg.db|org.Mm.eg.db|KEGG.db|msigdbr"
+      "detect": "there is no package|could not find function|org.Hs.eg.db|org.Mm.eg.db|offline KEGG snapshot|KEGG REST|msigdbr"
     },
     {
       "code": "no_enriched_gene_sets",

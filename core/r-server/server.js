@@ -16,6 +16,8 @@
 const express = require('express');
 
 const fs = require('fs');
+const os = require('os');
+const path = require('path');
 
 // Scientific analysis runs through the tools routes and tool_job persistence.
 const cacheManager = require('./cache-manager');
@@ -45,10 +47,23 @@ try {
   console.warn('[server] shared-backend configure failed:', e.message);
 }
 
-// 桌面版：从磁盘加载已装插件（r-server 是独立子进程，不共享 Electron 主进程
-// 的 globalThis._biof3Plugins，必须自己扫 ~/Documents/BioF3-Local/plugins/）
+// r-server 是独立子进程，不共享 Electron 主进程的插件 Map。使用与 MCP
+// 相同的 built-in / installed / development 三源发现，确保 HTTP 执行路径
+// 也能拿到 requiresBundle 等完整插件契约。
 try {
-  require('./plugin-loader').loadPluginsFromDisk();
+  const developmentDirs = String(process.env.BIOF3_DEVELOPMENT_PLUGIN_DIRS || '')
+    .split(path.delimiter)
+    .map((item) => item.trim())
+    .filter(Boolean);
+  require('./plugin-loader').loadPluginsFromSources({
+    builtInDir:
+      process.env.BIOF3_BUILT_IN_PLUGINS_DIR ||
+      path.resolve(__dirname, '..', '..', 'resources', 'built-in-plugins'),
+    installedDir:
+      process.env.BIOF3_PLUGINS_DIR ||
+      path.join(os.homedir(), 'Documents', 'BioF3-Local', 'plugins'),
+    developmentDirs,
+  });
 } catch (e) {
   console.warn('[server] plugin-loader init failed:', e.message);
 }

@@ -1,7 +1,8 @@
 #!/usr/bin/env Rscript
 # ============================================================
 # Tool: wgcna
-# Version targeted: WGCNA 1.73 (R 4.5.1)
+# Validated: WGCNA 1.74 / flashClust 1.1-4 / impute 1.84.0
+# (R 4.5.2, Bioconductor 3.22)
 # Canonical workflow source:
 #   https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/Tutorials/
 #   Tutorial I — Network construction and module detection

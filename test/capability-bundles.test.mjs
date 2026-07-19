@@ -15,6 +15,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
@@ -38,6 +39,11 @@ function makeDownload(content, counter) {
     if (counter) counter.calls += 1;
     fs.writeFileSync(destPath, content);
   };
+}
+
+async function makeMockInstall(tmpFile, installDir) {
+  fs.mkdirSync(installDir, { recursive: true });
+  fs.copyFileSync(tmpFile, path.join(installDir, 'mock-package'));
 }
 
 // ── 1. registry entries exist ─────────────────────────────────────────────────
@@ -170,7 +176,7 @@ test('ensureBundlesForPlugin: published bundle with sha256 downloads and install
   try {
     const result = await bundles.ensureBundlesForPlugin(
       { requiresBundle: 'r-enrichment', requiresBundleVersion: '1.0.0' },
-      { runtimesDir, download: makeDownload(CONTENT, counter) },
+      { runtimesDir, download: makeDownload(CONTENT, counter), install: makeMockInstall },
     );
     assert.equal(result.ok, true, JSON.stringify(result));
     assert.equal(result.results[0].status, 'ready');
@@ -200,7 +206,7 @@ test('ensureBundlesForPlugin: already-provisioned bundle returns alreadyReady wi
     // First call provisions.
     const first = await bundles.ensureBundlesForPlugin(
       { requiresBundle: 'r-enrichment' },
-      { runtimesDir, download: makeDownload(CONTENT) },
+      { runtimesDir, download: makeDownload(CONTENT), install: makeMockInstall },
     );
     assert.equal(first.ok, true);
 
@@ -208,11 +214,89 @@ test('ensureBundlesForPlugin: already-provisioned bundle returns alreadyReady wi
     const counter = { calls: 0 };
     const second = await bundles.ensureBundlesForPlugin(
       { requiresBundle: 'r-enrichment' },
-      { runtimesDir, download: makeDownload(CONTENT, counter) },
+      { runtimesDir, download: makeDownload(CONTENT, counter), install: makeMockInstall },
     );
     assert.equal(second.ok, true);
     assert.equal(second.results[0].alreadyReady, true);
     assert.equal(counter.calls, 0, 'no re-download when already provisioned');
+  } finally {
+    bundles.getBundleDescriptor = original;
+  }
+});
+
+test('installTarGzBundle extracts a real bundle archive and requires its marker', async () => {
+  const root = tmpDir();
+  const source = path.join(root, 'source');
+  const installDir = path.join(root, 'installed');
+  const archive = path.join(root, 'bundle.tar.gz');
+  fs.mkdirSync(path.join(source, 'demoPkg'), { recursive: true });
+  fs.writeFileSync(
+    path.join(source, 'bundle-manifest.json'),
+    JSON.stringify({ schemaVersion: 1, bundleId: 'demo' })
+  );
+  fs.writeFileSync(path.join(source, 'demoPkg', 'DESCRIPTION'), 'Package: demoPkg\n');
+  execFileSync('tar', ['-czf', archive, '-C', source, '.']);
+
+  await bundles.installTarGzBundle(archive, installDir);
+
+  assert.ok(fs.existsSync(path.join(installDir, 'bundle-manifest.json')));
+  assert.ok(fs.existsSync(path.join(installDir, 'demoPkg', 'DESCRIPTION')));
+});
+
+test('installTarGzBundle rejects a manifest for a different bundle', async () => {
+  const root = tmpDir();
+  const source = path.join(root, 'source');
+  const installDir = path.join(root, 'installed');
+  const archive = path.join(root, 'bundle.tar.gz');
+  fs.mkdirSync(source, { recursive: true });
+  fs.writeFileSync(
+    path.join(source, 'bundle-manifest.json'),
+    JSON.stringify({ schemaVersion: 1, bundleId: 'r-wgcna', bundleVersion: '1.0.0' })
+  );
+  execFileSync('tar', ['-czf', archive, '-C', source, '.']);
+
+  await assert.rejects(
+    bundles.installTarGzBundle(archive, installDir, {
+      bundleId: 'r-enrichment',
+      version: '1.0.0',
+    }),
+    (error) => error && error.code === 'bundle_manifest_mismatch'
+  );
+});
+
+test('ensureBundlesForPlugin uses the real tar.gz installer by default', async () => {
+  const root = tmpDir();
+  const source = path.join(root, 'source');
+  const archive = path.join(root, 'r-enrichment-1.0.0-macos-arm64.tar.gz');
+  const runtimesDir = path.join(root, 'runtimes');
+  fs.mkdirSync(path.join(source, 'demoPkg'), { recursive: true });
+  fs.writeFileSync(
+    path.join(source, 'bundle-manifest.json'),
+    JSON.stringify({ schemaVersion: 1, bundleId: 'r-enrichment', bundleVersion: '1.0.0' })
+  );
+  fs.writeFileSync(path.join(source, 'demoPkg', 'DESCRIPTION'), 'Package: demoPkg\n');
+  execFileSync('tar', ['-czf', archive, '-C', source, '.']);
+
+  const original = bundles.getBundleDescriptor;
+  bundles.getBundleDescriptor = () => ({
+    bundleId: 'r-enrichment',
+    version: '1.0.0',
+    url: 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/bundles/r-enrichment-1.0.0-macos-arm64.tar.gz',
+    sha256: crypto.createHash('sha256').update(fs.readFileSync(archive)).digest('hex'),
+    sizeBytes: fs.statSync(archive).size,
+    platforms: ['macos-arm64'],
+  });
+  try {
+    const result = await bundles.ensureBundlesForPlugin(
+      { requiresBundle: 'r-enrichment', requiresBundleVersion: '1.0.0' },
+      {
+        runtimesDir,
+        download: async (_url, destPath) => fs.copyFileSync(archive, destPath),
+      }
+    );
+    assert.equal(result.ok, true, JSON.stringify(result));
+    assert.ok(fs.existsSync(path.join(result.results[0].installDir, 'bundle-manifest.json')));
+    assert.ok(fs.existsSync(path.join(result.results[0].installDir, 'demoPkg', 'DESCRIPTION')));
   } finally {
     bundles.getBundleDescriptor = original;
   }

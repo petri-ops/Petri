@@ -9,13 +9,13 @@
 
 ## Version targeted
 
-- BioF3 R 容器: `R 4.5.1`
+- BioF3 R runtime: `R 4.5.2`
 - 关键包版本（已 `Rscript packageVersion()` 验证）:
-  - `WGCNA 1.73`
-  - `flashClust 1.1.2`
-  - `impute 1.82.0`
-  - `preprocessCore 1.70.0`
-  - `GO.db 3.21.0`
+  - `WGCNA 1.74`
+  - `flashClust 1.1-4`
+  - `impute 1.84.0`
+  - `preprocessCore 1.72.0`
+  - `GO.db 3.22.0`
 
 ## Canonical workflow source
 
@@ -114,7 +114,7 @@
 - [x] WGCNA Tutorial I (network construction + module detection) — Horvath lab UCLA
 - [x] BioF3 自己的教程 `docs/integration/module04` 对照口径（用 power=8 / unsigned，是 BioF3 自己的选择，**工具默认跟官方更新的 signed**，文档说明可调）
 - [x] `blockwiseModules` rdocumentation 默认参数（power=6 是占位，用户必须用 pickSoftThreshold 自动选）
-- [x] BioF3 容器版本验证: WGCNA 1.73 / R 4.5.1
+- [x] BioF3 runtime 版本验证: WGCNA 1.74 / R 4.5.2（2026-07-19 demo 真流程）
 
 ## 已知风险
 

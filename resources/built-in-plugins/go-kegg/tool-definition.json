@@ -79,7 +79,7 @@
   "tutorialUrl": "/docs/bulk-rnaseq/enrichment",
   "demoDataUrl": "/demo-data/go-kegg",
   "estimatedMinutes": 3,
-  "packages": ["clusterProfiler", "enrichplot", "DOSE", "org.Hs.eg.db", "KEGG.db"],
+  "packages": ["clusterProfiler", "enrichplot", "DOSE", "org.Hs.eg.db", "KEGGREST"],
   "color": "#0891b2",
   "failureModes": [
     {
@@ -117,10 +117,10 @@
     {
       "code": "kegg_offline_data_missing",
       "title": "KEGG 离线数据缺失",
-      "description": "KEGG 富集使用离线数据（use_internal_data），若离线库缺失则该步骤跳过。",
+      "description": "KEGG 富集优先使用 bundle 内的 human/mouse 离线快照；快照缺失时回退 KEGG REST。",
       "recoverable": true,
-      "suggestedFix": "由 Harness 自动补齐 r-enrichment 分析包中的离线 KEGG 数据；GO 富集不受影响。",
-      "detect": "KEGG.db|use_internal_data|KEGG failed"
+      "suggestedFix": "由 Harness 自动补齐 r-enrichment 分析包中的离线 KEGG 快照，或检查 KEGG REST 网络连通性；GO 富集不受影响。",
+      "detect": "offline KEGG snapshot|KEGG REST|KEGG failed"
     },
     {
       "code": "empty_result_or_insufficient_signal",

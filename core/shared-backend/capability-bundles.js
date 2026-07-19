@@ -1,5 +1,9 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+const { execFile } = require('child_process');
+
 /**
  * Capability Bundle Registry — Stage 3 B1/B2 (single source of truth).
  *
@@ -21,10 +25,8 @@
  *   - `capability-provisioning.js` is the generic download/verify/install
  *     engine. This module supplies it descriptors and decides *whether* a
  *     bundle should be fetched.
- *   - `ensureBundlesForPlugin()` is the orchestration layer that wires the two
- *     together. IMPORTANT: as of B1/B2 part 1 it is NOT yet called from any
- *     real run path (registry.js / tools-executor.js). It exists as an
- *     independently testable module; run-path wiring is a later batch.
+ *   - `ensureBundlesForPlugin()` is the orchestration layer used by both real
+ *     R run paths (registry.js / tools-executor.js).
  *
  * CONVENTION — `sha256 === null` means "unpublished, do not download":
  *   Bundles have not been built + signed yet, so their `sha256`/`sizeBytes` are
@@ -135,6 +137,65 @@ function normalizeRequiredBundles(pluginCfg) {
 }
 
 /**
+ * Extract a verified .tar.gz bundle into the library directory mounted by
+ * R_LIBS_USER. The archive is trusted only after capability-provisioning has
+ * matched its SHA-256 against the descriptor committed in this registry.
+ *
+ * A bundle-manifest.json marker is mandatory so a wrong-but-valid archive
+ * cannot be recorded as a ready R library.
+ */
+function installTarGzBundle(archivePath, installDir, expected = {}) {
+  fs.mkdirSync(installDir, { recursive: true });
+  return new Promise((resolve, reject) => {
+    const rejectAndClean = (failure) => {
+      try { fs.rmSync(installDir, { recursive: true, force: true }); } catch {}
+      reject(failure);
+    };
+    execFile(
+      'tar',
+      ['-xzf', archivePath, '-C', installDir],
+      { timeout: 300000, maxBuffer: 1024 * 1024 },
+      (error, _stdout, stderr) => {
+        if (error) {
+          const failure = new Error(
+            `bundle_extract_failed: ${String(stderr || error.message).trim()}`
+          );
+          failure.code = 'bundle_extract_failed';
+          rejectAndClean(failure);
+          return;
+        }
+        const marker = path.join(installDir, 'bundle-manifest.json');
+        if (!fs.existsSync(marker)) {
+          const failure = new Error('bundle_manifest_missing');
+          failure.code = 'bundle_manifest_missing';
+          rejectAndClean(failure);
+          return;
+        }
+        let manifest;
+        try {
+          manifest = JSON.parse(fs.readFileSync(marker, 'utf8'));
+        } catch {
+          const failure = new Error('bundle_manifest_invalid');
+          failure.code = 'bundle_manifest_invalid';
+          rejectAndClean(failure);
+          return;
+        }
+        if (
+          (expected.bundleId && manifest.bundleId !== expected.bundleId) ||
+          (expected.version && manifest.bundleVersion !== expected.version)
+        ) {
+          const failure = new Error('bundle_manifest_mismatch');
+          failure.code = 'bundle_manifest_mismatch';
+          rejectAndClean(failure);
+          return;
+        }
+        resolve(installDir);
+      }
+    );
+  });
+}
+
+/**
  * Resolve the bundle descriptors a plugin requires, each annotated with a
  * `status` for a future wiring layer to make decisions on.
  *
@@ -166,9 +227,6 @@ function resolveBundlesForPlugin(pluginCfg, opts = {}) {
  * Never throws; returns a structured aggregate. `options` are forwarded to
  * `provisionCapability` (download/hash/install/runtimesDir/onProgress can be
  * injected, e.g. by tests or the future wiring layer).
- *
- * NOTE: not yet wired into any run path (see file header). This is the seam a
- * later batch will call from registry.js / tools-executor.js readiness gate.
  *
  * @param {{requiresBundle?: string|string[], requiresBundleVersion?: string}} pluginCfg
  * @param {object} [options] forwarded to provisionCapability + { platform }
@@ -229,7 +287,18 @@ async function ensureBundlesForPlugin(pluginCfg, options = {}) {
       continue;
     }
 
-    const prov = await cp.provisionCapability(capability, options);
+    const provisionOptions = { ...options };
+    if (
+      typeof provisionOptions.install !== 'function' &&
+      /\.tar\.gz(?:$|[?#])/i.test(descriptor.url)
+    ) {
+      provisionOptions.install = (archivePath, installDir) =>
+        installTarGzBundle(archivePath, installDir, {
+          bundleId: descriptor.bundleId,
+          version: descriptor.version,
+        });
+    }
+    const prov = await cp.provisionCapability(capability, provisionOptions);
     results.push({
       bundleId,
       ok: !!prov.ok,
@@ -250,4 +319,5 @@ module.exports = {
   resolveBundlesForPlugin,
   ensureBundlesForPlugin,
   bundleStatus,
+  installTarGzBundle,
 };

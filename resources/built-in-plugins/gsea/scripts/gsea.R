@@ -1,8 +1,8 @@
 #!/usr/bin/env Rscript
 # ============================================================
 # GSEA 基因集富集分析工具脚本
-# Version targeted: clusterProfiler 4.16+ / enrichplot 1.28.4 (R 4.5.x)
-# ggplot2 锁在 3.5.2 (与 GO-KEGG 同)
+# Validated: clusterProfiler 4.18.4 / enrichplot 1.30.5 /
+# ggplot2 4.0.3 (R 4.5.2, Bioconductor 3.22)
 #
 # Steps (in-scope):
 #   1. read ranked gene list (gene + log2FC, 或 DESeq2 result)
@@ -27,6 +27,49 @@ suppressMessages({
 
 if (!exists("%||%")) {
   `%||%` <- function(a, b) if (is.null(a) || (length(a) == 0 && !is.list(a))) b else a
+}
+
+find_biof3_kegg_snapshot <- function(organism) {
+  candidates <- file.path(.libPaths(), ".biof3-data", paste0("kegg-", organism, ".rds"))
+  matches <- candidates[file.exists(candidates)]
+  if (length(matches) == 0) return(NA_character_)
+  matches[1]
+}
+
+run_kegg_gsea <- function(gene_list, organism, min_size, max_size) {
+  snapshot_path <- find_biof3_kegg_snapshot(organism)
+  if (!is.na(snapshot_path)) {
+    offline <- tryCatch({
+      snapshot <- readRDS(snapshot_path)
+      GSEA(
+        geneList = gene_list,
+        TERM2GENE = snapshot$term2gene,
+        TERM2NAME = snapshot$term2name,
+        minGSSize = min_size,
+        maxGSSize = max_size,
+        pvalueCutoff = 0.25,
+        verbose = FALSE
+      )
+    }, error = function(e) {
+      cat(sprintf("  Offline KEGG snapshot failed: %s\n", e$message))
+      NULL
+    })
+    if (!is.null(offline)) {
+      cat(sprintf("  KEGG source: offline snapshot %s\n", basename(snapshot_path)))
+      return(offline)
+    }
+  }
+
+  cat("  KEGG offline snapshot unavailable; falling back to KEGG REST\n")
+  gseKEGG(
+    geneList = gene_list,
+    organism = organism,
+    minGSSize = min_size,
+    maxGSSize = max_size,
+    pvalueCutoff = 0.25,
+    verbose = FALSE,
+    use_internal_data = FALSE
+  )
 }
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -115,12 +158,26 @@ if (all(grepl("^[0-9]+$", head(names(gene_list), 20)))) {
   cat("  IDs are ENTREZID\n")
   entrez_list <- gene_list
 } else {
-  id_map <- bitr(names(gene_list), fromType = "SYMBOL", toType = "ENTREZID", OrgDb = orgdb)
+  id_map <- tryCatch(
+    bitr(names(gene_list), fromType = "SYMBOL", toType = "ENTREZID", OrgDb = orgdb),
+    error = function(e) {
+      stop(sprintf(
+        "Gene ID mapping failed: none of the input values are valid %s SYMBOLs",
+        if (organism == "mmu") "mouse" else "human"
+      ), call. = FALSE)
+    }
+  )
   mapped <- gene_list[names(gene_list) %in% id_map$SYMBOL]
   names(mapped) <- id_map$ENTREZID[match(names(mapped), id_map$SYMBOL)]
   mapped <- mapped[!duplicated(names(mapped))]
   entrez_list <- sort(mapped, decreasing = TRUE)
   cat(sprintf("  Converted: %d → %d ENTREZID\n", length(gene_list), length(entrez_list)))
+  if (length(entrez_list) < 100) {
+    stop(sprintf(
+      "Gene ID mapping failed: only %d of %d input SYMBOLs mapped to ENTREZID (need >= 100)",
+      length(entrez_list), length(gene_list)
+    ), call. = FALSE)
+  }
   write.csv(id_map, file.path(output_dir, "gene_id_mapping.csv"), row.names = FALSE)
 }
 
@@ -137,12 +194,8 @@ if (gene_set == "GO_BP") {
            pvalueCutoff = 0.25, verbose = FALSE),
     error = function(e) { cat(sprintf("  gseGO failed: %s\n", e$message)); NULL })
 } else if (gene_set == "KEGG") {
-  suppressMessages(library(KEGG.db))
   gsea_res <- tryCatch(
-    gseKEGG(geneList = entrez_list, organism = kegg_org,
-             minGSSize = min_size, maxGSSize = max_size,
-             pvalueCutoff = 0.25, verbose = FALSE,
-             use_internal_data = TRUE),
+    run_kegg_gsea(entrez_list, kegg_org, min_size, max_size),
     error = function(e) { cat(sprintf("  gseKEGG failed: %s\n", e$message)); NULL })
 } else if (gene_set == "Hallmark") {
   tryCatch({

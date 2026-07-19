@@ -7,7 +7,7 @@
 ## Version targeted
 
 - BioF3 R 容器: `R 4.5.x`
-- 关键包: `clusterProfiler 4.16+` / `enrichplot 1.28.4`（ggplot2 锁 3.5.2）
+- 关键包: `clusterProfiler 4.18+` / `enrichplot 1.30+` / `ggplot2 4.0+`
 
 ## Canonical workflow source
 

@@ -1,8 +1,9 @@
 #!/usr/bin/env Rscript
 # ============================================================
 # GO/KEGG 富集分析工具脚本
-# Version targeted: clusterProfiler 4.16+ / enrichplot 1.28.4 (R 4.5.x)
-# ggplot2 锁在 3.5.2 (因 enrichplot 1.28.4 内部 fortify by=x 与 ggplot2 4.0+ 不兼容)
+# Validated: clusterProfiler 4.18.4 / enrichplot 1.30.5 /
+# ggplot2 4.0.3 (R 4.5.2, Bioconductor 3.22)
+# enrichplot 1.28.4 曾与 ggplot2 4.0+ 不兼容；当前组合已完成 dotplot + ggsave 实测。
 #
 # Steps (in-scope):
 #   1. read input (gene list 或 DESeq2 result)
@@ -29,6 +30,47 @@ suppressMessages({
 
 if (!exists("%||%")) {
   `%||%` <- function(a, b) if (is.null(a) || (length(a) == 0 && !is.list(a))) b else a
+}
+
+find_biof3_kegg_snapshot <- function(organism) {
+  candidates <- file.path(.libPaths(), ".biof3-data", paste0("kegg-", organism, ".rds"))
+  matches <- candidates[file.exists(candidates)]
+  if (length(matches) == 0) return(NA_character_)
+  matches[1]
+}
+
+run_kegg_ora <- function(gene_ids, organism, pvalue_cutoff, qvalue_cutoff) {
+  snapshot_path <- find_biof3_kegg_snapshot(organism)
+  if (!is.na(snapshot_path)) {
+    offline <- tryCatch({
+      snapshot <- readRDS(snapshot_path)
+      enricher(
+        gene = gene_ids,
+        TERM2GENE = snapshot$term2gene,
+        TERM2NAME = snapshot$term2name,
+        pAdjustMethod = "BH",
+        pvalueCutoff = pvalue_cutoff,
+        qvalueCutoff = qvalue_cutoff
+      )
+    }, error = function(e) {
+      cat(sprintf("  Offline KEGG snapshot failed: %s\n", e$message))
+      NULL
+    })
+    if (!is.null(offline)) {
+      cat(sprintf("  KEGG source: offline snapshot %s\n", basename(snapshot_path)))
+      return(offline)
+    }
+  }
+
+  cat("  KEGG offline snapshot unavailable; falling back to KEGG REST\n")
+  enrichKEGG(
+    gene = gene_ids,
+    organism = organism,
+    pAdjustMethod = "BH",
+    pvalueCutoff = pvalue_cutoff,
+    qvalueCutoff = qvalue_cutoff,
+    use_internal_data = FALSE
+  )
 }
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -205,11 +247,7 @@ kegg_res <- NULL
 if (analysis_type %in% c("all", "KEGG")) {
   cat("[go-kegg] enrichKEGG...\n")
   tryCatch({
-    suppressMessages(library(KEGG.db))
-    kegg_res <- enrichKEGG(gene = entrez_ids, organism = kegg_org,
-                           pAdjustMethod = "BH",
-                           pvalueCutoff = enrich_pval, qvalueCutoff = enrich_qval,
-                           use_internal_data = TRUE)
+    kegg_res <- run_kegg_ora(entrez_ids, kegg_org, enrich_pval, enrich_qval)
     if (!is.null(kegg_res) && nrow(as.data.frame(kegg_res)) > 0) {
       write.csv(as.data.frame(kegg_res), file.path(output_dir, "kegg_results.csv"), row.names = FALSE)
       cat(sprintf("  KEGG: %d pathways\n", nrow(as.data.frame(kegg_res))))
@@ -240,7 +278,7 @@ if (!is.null(ego_bp) && nrow(as.data.frame(ego_bp)) > 0) {
   # ---- 3-6: cnetplot / treeplot / heatplot / emapplot (ggraph 复合对象, 用 save_grid_biof3) ----
   tryCatch({
     p3 <- cnetplot(ego_bp, showCategory = min(5, nrow(as.data.frame(ego_bp))),
-                   categorySize = "pvalue", foldChange = NULL) +
+                   foldChange = NULL) +
       ggtitle("GO-BP Gene-Concept Network")
     save_grid_biof3(file.path(output_dir, "go_bp_cnetplot"), width = 10, height = 8, expr = print(p3))
   }, error = function(e) cat(sprintf("  cnetplot skipped: %s\n", e$message)))

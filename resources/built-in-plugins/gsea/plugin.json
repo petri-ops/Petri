@@ -9,13 +9,14 @@
   "requiresBundleVersion": "1.0.0",
   "packages": {
     "r": {
-      "clusterProfiler": ">=4.16.0",
-      "enrichplot": ">=1.28.0",
-      "DOSE": ">=3.30.0",
-      "org.Hs.eg.db": ">=3.19.0",
-      "org.Mm.eg.db": ">=3.19.0",
-      "msigdbr": ">=7.5.0",
-      "ggplot2": ">=3.5.0",
+      "clusterProfiler": ">=4.18.0",
+      "enrichplot": ">=1.30.0",
+      "DOSE": ">=4.4.0",
+      "org.Hs.eg.db": ">=3.22.0",
+      "org.Mm.eg.db": ">=3.22.0",
+      "msigdbr": ">=26.1.0",
+      "KEGGREST": ">=1.50.0",
+      "ggplot2": ">=4.0.0",
       "jsonlite": ">=1.8.0",
       "base64enc": ">=0.1-3"
     }
