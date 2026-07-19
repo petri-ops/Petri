@@ -501,6 +501,7 @@ module.exports = function registerAiAgentRoute(app) {
     const toolCtx = {
       userId: req.user && req.user.id,
       projectId: context && context.projectId,
+      accessMode: context && context.accessMode === 'read' ? 'read' : 'full',
       allowExecution: executionPolicy.allowExecution,
       executionPolicyReason: executionPolicy.reason,
       docsIndex: {},

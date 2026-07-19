@@ -76,6 +76,8 @@ export interface CopilotContext {
   // 6.3 — desktop project workspace context
   /** Current project name (desktop workspace) */
   projectName?: string;
+  /** Agent workspace permission selected in the chat input. */
+  accessMode?: 'full' | 'read';
   /** Project modality: single-cell / spatial / genome / etc. */
   projectModality?: string;
   /** Dataset summaries in current project (id + name + type + rows) */

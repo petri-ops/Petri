@@ -362,6 +362,7 @@ async function runAgentLoop({
   const toolCtx = {
     userId,
     projectId: context && context.projectId,
+    accessMode: context && context.accessMode === 'read' ? 'read' : 'full',
     allowExecution: executionPolicy.allowExecution,
     executionPolicyReason: executionPolicy.reason,
     docsIndex: {},

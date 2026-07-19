@@ -24,14 +24,37 @@ const {
 const { tool_verify_state } = require('./verify-dispatch');
 const { tool_read_image } = require('./vision-tools');
 const { inferExecutionPolicy } = require('../helpers/agent-execution-policy');
+const {
+  tool_workspace_list,
+  tool_workspace_find,
+  tool_workspace_search,
+  tool_workspace_read,
+  tool_workspace_write,
+  tool_workspace_replace,
+  tool_workspace_exec,
+} = require('./workspace-tools');
+
+const MUTATING_WORKSPACE_TOOLS = new Set([
+  'workspace_write',
+  'workspace_replace',
+  'workspace_exec',
+]);
 
 async function dispatchTool(name, argsObj, ctx = {}) {
-  if (name === 'run_tool' && argsObj && argsObj.op === 'run' && ctx.allowExecution === false) {
+  const isAnalysisRun = name === 'run_tool' && argsObj && argsObj.op === 'run';
+  if ((isAnalysisRun || MUTATING_WORKSPACE_TOOLS.has(name)) && ctx.allowExecution === false) {
     return {
       ok: false,
       error: 'execution_not_allowed',
-      message: '用户当前明确要求只检查或规划，禁止执行分析。请依据 Harness 项目文件摘要回答；可使用 list/plan/status/next，但不要创建任务或请求确认。',
+      message: '用户当前明确要求只检查或规划，禁止执行分析、修改文件或运行命令。',
       reason: ctx.executionPolicyReason || 'explicit_read_only_request',
+    };
+  }
+  if (MUTATING_WORKSPACE_TOOLS.has(name) && ctx.accessMode === 'read') {
+    return {
+      ok: false,
+      error: 'access_mode_read_only',
+      message: '聊天当前处于只读模式，禁止修改项目文件或运行命令。',
     };
   }
   switch (name) {
@@ -65,6 +88,20 @@ async function dispatchTool(name, argsObj, ctx = {}) {
       return tool_suggest_review(argsObj, ctx);
     case 'record_learning_signal':
       return tool_record_learning_signal(argsObj, ctx);
+    case 'workspace_list':
+      return tool_workspace_list(argsObj, ctx);
+    case 'workspace_find':
+      return tool_workspace_find(argsObj, ctx);
+    case 'workspace_search':
+      return tool_workspace_search(argsObj, ctx);
+    case 'workspace_read':
+      return tool_workspace_read(argsObj, ctx);
+    case 'workspace_write':
+      return tool_workspace_write(argsObj, ctx);
+    case 'workspace_replace':
+      return tool_workspace_replace(argsObj, ctx);
+    case 'workspace_exec':
+      return tool_workspace_exec(argsObj, ctx);
     default:
       return { error: 'unknown_tool', message: '未知工具: ' + name };
   }

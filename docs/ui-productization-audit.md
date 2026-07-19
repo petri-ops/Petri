@@ -1,6 +1,6 @@
 # BioF3 Desktop UI 产品化审计台账
 
-最后更新：2026-07-17
+最后更新：2026-07-19
 
 状态：**Stage 1 验收完成（30/30 verified）；Stage 2 模型管理 UI 已验收（UI-031 verified）；Stage 3 M1 Harness 环境视图 1 项待实机验收（UI-032 in_progress）**
 
@@ -162,3 +162,4 @@ npm run check
   - 验收工具与人工清单沉淀在 `acceptance/stage2/`（`live-provider-check.mjs` + `UI-031-packaged-acceptance.md` + `README.md`），不进单元测试套件与 CI。
   - 注：上述 `acceptance/stage2/` 验收工具目录（含本节及 UI-031 表格行引用的 `live-provider-check.mjs` 等）已于 2026-07-17（commit `498a661`）移除；相关路径引用仅作历史验收记录留存，验收结论以本记录为准。
 - 不变量保持：`run_tool → tool_job → artifact truth` 执行链未因模型层改造分叉；fallback 默认关闭；Key 不回显、不入 `ai-settings.json`/日志/诊断。
+- **2026-07-19 功能边界加固（UI-031 状态不变）**：SimpleChat 的“完全访问 / 只读模式”现在随会话 context 传到 Agent runtime；中央工具 dispatcher 会在只读模式阻断项目文件写入、精确替换和短命令执行。没有改变控件布局、模型选择或已验收视觉状态。

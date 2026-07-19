@@ -7,7 +7,135 @@ const _path = require('path');
 // --------------------------------------------------------------
 // Tool schemas (OpenAI-compatible function definitions)
 // --------------------------------------------------------------
+const WORKSPACE_TOOL_DEFS = [
+  {
+    type: 'function',
+    function: {
+      name: 'workspace_list',
+      description:
+        '列出当前 BioF3 项目工作区中的目录内容。路径必须是相对项目根目录的路径；不会返回符号链接或默认隐藏文件。',
+      parameters: {
+        type: 'object',
+        properties: {
+          path: { type: 'string', description: '相对项目根目录的目录，默认 "."' },
+          includeHidden: { type: 'boolean', description: '是否包含普通隐藏文件，默认 false；敏感路径始终不可见' },
+          limit: { type: 'integer', description: '最多返回多少项，默认 200，最大 500' },
+        },
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'workspace_find',
+      description:
+        '在当前项目工作区递归查找文件名。适合先定位 CSV、脚本、配置或报告；不会进入 node_modules、.git、target、dist 等生成目录。',
+      parameters: {
+        type: 'object',
+        properties: {
+          pattern: { type: 'string', description: 'glob 模式，例如 "*.csv"、"scripts/*.R"、"**/report.html"' },
+          path: { type: 'string', description: '相对搜索起点，默认 "."' },
+          maxDepth: { type: 'integer', description: '递归深度，默认 8，最大 20' },
+          limit: { type: 'integer', description: '最多返回多少项，默认 200，最大 500' },
+          includeHidden: { type: 'boolean', description: '是否包含普通隐藏文件，默认 false' },
+        },
+        required: ['pattern'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'workspace_search',
+      description:
+        '在当前项目工作区的文本文件中搜索内容并返回文件、行号和匹配行。适合定位列名、函数、配置项和错误信息。',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', description: '要搜索的文本' },
+          path: { type: 'string', description: '相对文件或目录，默认 "."' },
+          filePattern: { type: 'string', description: '可选 glob，例如 "*.R"、"**/*.ts"' },
+          caseSensitive: { type: 'boolean', description: '是否区分大小写，默认 false' },
+          maxDepth: { type: 'integer', description: '递归深度，默认 8，最大 20' },
+          limit: { type: 'integer', description: '最多返回匹配行数，默认 80，最大 300' },
+        },
+        required: ['query'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'workspace_read',
+      description:
+        '分段读取当前项目工作区内的文本文件，返回行号范围、总行数和 sha256。大文件应多次按 startLine/maxLines 分段读取。',
+      parameters: {
+        type: 'object',
+        properties: {
+          path: { type: 'string', description: '相对项目根目录的文件路径' },
+          startLine: { type: 'integer', description: '起始行，从 1 开始，默认 1' },
+          maxLines: { type: 'integer', description: '最多读取行数，默认 240，最大 1000' },
+        },
+        required: ['path'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'workspace_write',
+      description:
+        '在当前项目工作区创建或完整覆写一个文本文件。已存在文件必须传 overwrite=true；建议同时传 workspace_read 返回的 expectedSha256 防止覆盖并发修改。只读模式或只检查请求中禁止调用。',
+      parameters: {
+        type: 'object',
+        properties: {
+          path: { type: 'string', description: '相对项目根目录的文件路径' },
+          content: { type: 'string', description: '完整文本内容，最大 1 MiB' },
+          overwrite: { type: 'boolean', description: '目标存在时必须显式为 true' },
+          expectedSha256: { type: 'string', description: '可选：写入前文件 sha256，用于并发冲突检测' },
+        },
+        required: ['path', 'content'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'workspace_replace',
+      description:
+        '在当前项目工作区文本文件中做一次精确替换。oldText 必须唯一匹配；建议传 expectedSha256 防止覆盖并发修改。只读模式或只检查请求中禁止调用。',
+      parameters: {
+        type: 'object',
+        properties: {
+          path: { type: 'string', description: '相对项目根目录的文件路径' },
+          oldText: { type: 'string', description: '必须在文件中唯一出现的原文本' },
+          newText: { type: 'string', description: '替换后的文本' },
+          expectedSha256: { type: 'string', description: '可选：修改前文件 sha256' },
+        },
+        required: ['path', 'oldText', 'newText'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'workspace_exec',
+      description:
+        '在当前项目工作区根目录执行一个短命令，最多 30 秒并截断输出。适合检查、测试、格式化和短脚本；禁止 sudo、强制删除、git push/reset --hard、发布、远程脚本管道等危险操作。开发服务器、watch、训练等长驻进程不支持。只读模式或只检查请求中禁止调用。',
+      parameters: {
+        type: 'object',
+        properties: {
+          command: { type: 'string', description: '单行短命令' },
+          timeoutMs: { type: 'integer', description: '超时毫秒，默认 20000，最大 30000' },
+        },
+        required: ['command'],
+      },
+    },
+  },
+];
+
 const TOOL_DEFS = [
+  ...WORKSPACE_TOOL_DEFS,
   {
     type: 'function',
     function: {
@@ -425,4 +553,4 @@ function getToolDefs() {
   return TOOL_DEFS;
 }
 
-module.exports = { TOOL_DEFS, getToolDefs };
+module.exports = { TOOL_DEFS, WORKSPACE_TOOL_DEFS, getToolDefs };

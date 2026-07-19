@@ -350,6 +350,7 @@ export function SimpleChat({
         ...copilotCtxRef.current,
         page: 'desktop-project',
         projectId,
+        accessMode,
       },
       signal: ctrl.signal,
       conversationId: activeConvRef.current || undefined,
@@ -412,7 +413,7 @@ export function SimpleChat({
         });
       },
     });
-  }, [streaming, messages, onConversationChange, refreshConversations, projectId, activeModelId, activeModel]);
+  }, [streaming, messages, onConversationChange, refreshConversations, projectId, activeModelId, activeModel, accessMode]);
 
   // Keep a ref to the latest send so the global event listener (mounted once) always
   // invokes the current closure without re-binding on every message change.

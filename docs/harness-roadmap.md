@@ -1,10 +1,10 @@
 # BioF3 Harness Roadmap v1
 
-> 状态：Phase 1–6 完成记录与 Stage 3 技术参考。当前开发顺序以 `docs/v1-productization-roadmap.md` 为准，GO/KEGG 等流程扩展等待 UI 和模型层验收。
+> 状态：Phase 1–6 是分析流程 Harness 的完成记录；2026-07-19 起进入 Phase 7「通用基础工具与运行控制面」。不再把增加标准流程数量当作 Harness 完善度。
 
 > **⚠️ vendor 工作流已退役（2026-07-16）**：本文多处「vendor lock 已同步 / Core 检查点 `xxxxxxx`，Desktop `yyyyyyy`」是**旧双仓库（Core submodule + Desktop）工作流的历史完成记录**。核心已内联为仓库内 `core/`，不再有 submodule / `.vendor-lock` / vendor 同步（见 [`dependency-decoupling-checkpoint.md`](./dependency-decoupling-checkpoint.md)）。阅读时把这些 commit 视为历史，忽略"同步 vendor"类步骤——现在改 Core 就是改 `core/`，随 Desktop 一起提交。
 
-最后更新：2026-07-16
+最后更新：2026-07-19
 
 这份路线图回答三个问题：
 
@@ -325,6 +325,40 @@
 - Bulk RNA 与单细胞 JSON fixture 覆盖 valid lineage、degraded recovery、确认断点和不可恢复阻塞；`npm run harness:phase6`、全量 `npm test`、Harness/Agent 评测和 adapter 回归均已通过。
 - Core `dcd2043` 与 Desktop `2d000d5` 已提交并推送，Desktop `.vendor-lock` 与 submodule 指针一致；Phase 6 正式关闭。
 
+### Phase 7：通用基础工具与运行控制面
+
+状态：`in_progress`（2026-07-19，代码与单元测试已完成，待真实 Agent 会话验收）。
+
+背景修正：
+
+- Phase 1–6 主要解决“识别生信输入 → 选择分析工具 → 运行 → 验证 artifact → 恢复”的纵向流程。
+- 它没有给 Agent 提供完整的文件查询、分段阅读、安全修改和短命令能力，因此还不能算通用交互式执行底座。
+- 后续不应继续靠扩写 system prompt 或增加 workflow template 掩盖这层缺口。
+
+本阶段第一批基础工具：
+
+- `workspace_list`：列项目目录。
+- `workspace_find`：按 glob 递归找文件。
+- `workspace_search`：搜索文本并返回文件、行号和匹配行。
+- `workspace_read`：按行分段读取文本，同时返回 sha256。
+- `workspace_write`：创建或显式覆写文本文件，支持 expectedSha256 并发保护。
+- `workspace_replace`：只允许 oldText 唯一匹配的一次精确替换。
+- `workspace_exec`：在项目根目录执行最长 30 秒的短命令。
+
+安全不变量：
+
+- 所有文件路径只能是当前 `projectId` 对应 workspace 下的相对路径。
+- 路径穿越、绝对路径、敏感文件、符号链接逃逸、跨用户项目访问硬失败。
+- 聊天“只读模式”和用户明确只检查/规划的请求在中央 dispatcher 阻断写文件、替换、命令和分析执行。
+- 命令固定以项目根目录为 cwd，移除 credential 形环境变量，清洗输出，限制时长/大小，并阻断 sudo、强制删除、远端 Git、发布和远程脚本管道等操作。
+- 基础工具不创建第二套 analysis executor、tool job 或 artifact truth；科学计算仍只走 `run_tool → tool_job → artifact truth`。
+
+Phase 7 后续：
+
+1. 真实 DeepSeek/自定义 Provider 会话验证 7 个工具的选择和连续调用。
+2. 将工具前后置策略收敛为统一 policy/interceptor pipeline，补结构化 termination reason 和 trace。
+3. 再评估后台长任务（start/check/stop）是否需要；SSH、远程执行和批量替换不进入当前基线。
+
 ## 3. 推荐推进顺序
 
 ### 第一优先级
@@ -388,9 +422,4 @@
 
 ## 6. 近期执行建议
 
-Phase 6 已关闭。接下来按以下顺序进入标准流程覆盖：
-
-1. 以 GO/KEGG 富集作为首个真实 SDK 接入试点，复用现有 enrichment task pack、R 脚本和 DEG artifact，不新增平台特例。
-2. 补齐 manifest、failureModes、fixture、诊断和 artifact schema，跑通 Agent 单步执行、valid lineage 与失败恢复。
-3. 保持 `npm run harness:phase6`、全量 Harness/Agent 评测和 adapter 回归为必过门禁；试点暴露的平台缺陷只做通用修复。
-4. 试点通过后沉淀可复制样板，再按 GSEA、WGCNA 等优先级逐个接入；覆盖足够后再强化结果多轮调整和局部重跑。
+Phase 6 已关闭，Stage 3 已完成软件面试点。当前优先完成 Phase 7 通用基础工具与运行控制面，不继续用 GO/KEGG、GSEA、WGCNA 等流程数量衡量 Harness 工程进度。
