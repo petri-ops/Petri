@@ -1,6 +1,6 @@
 # macOS OSS 自动更新
 
-最后更新：2026-07-15
+最后更新：2026-07-19
 
 ## 固定配置
 
@@ -72,7 +72,7 @@ npm run release:mac:oss
 
 ## 当前状态与保留限制
 
-截至 2026-07-15，发布端已从本地 `.biof3-secrets` 安全加载 OSS 凭据并成功发布 `rc.3`、`rc.4`。客户端只做匿名 HTTPS 读取，不需要 OSS SDK、AccessKey 或 `ossutil`。
+截至 2026-07-19，发布端已从本地 `.biof3-secrets` 安全加载 OSS 凭据并成功发布 `rc.3`、`rc.4`、`rc.6`。客户端只做匿名 HTTPS 读取，不需要 OSS SDK、AccessKey 或 `ossutil`。
 
 Clash Verge 已固定为规则模式：阿里云 OSS 域名直连，OpenAI/Codex/GitHub 继续代理。错误的前置 `MATCH,DIRECT` 已移除；清单读取、DMG 下载与发布上传均验证成功，不再需要发布时手工切换代理模式。
 
@@ -95,3 +95,13 @@ Clash Verge 已固定为规则模式：阿里云 OSS 域名直连，OpenAI/Codex
 - 下载文件大小为 197,172,657 字节，与清单一致；SHA-512 与清单一致。
 - `updater:install` 成功打开并挂载 `BioF3 0.0.1-rc.4-arm64`，挂载包内版本确认为 `0.0.1-rc.4`。
 - 验收使用复制出的临时应用与临时 `BIOF3_LOCAL_DATA_DIR`，不覆盖正式安装；结束后已清理临时进程、应用、local data 与挂载，并恢复 `/Applications/BioF3.app`。
+
+## 2026-07-19 rc.6 发布与升级验收
+
+- main、`origin/main` 与不可变标签 `v0.0.1-rc.6` 的发布提交一致（`907b695`）。
+- 上传顺序为 arm64 DMG → x64 DMG → SHA-256 清单 → `latest-mac.yml`，脚本输出 `complete`。
+- 匿名清单指向 `0.0.1-rc.6`；人工 SHA-256 与本地最终产物一致。
+- 使用正式更新器从 `rc.4`/arm64 视角返回 `hasUpdate=true`，选择 `BioF3-0.0.1-rc.6-arm64.dmg`。
+- 公开下载大小为 `194522883` bytes，更新器的大小与 SHA-512 校验通过。
+- DMG 校验后只读挂载；包内版本和 build version 均为 `0.0.1-rc.6`，主可执行文件为 arm64。
+- 未覆盖 `/Applications/BioF3.app`，保留 rc.4 作为回滚点；未签名 RC 继续由成员手动拖入 Applications。

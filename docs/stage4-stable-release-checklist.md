@@ -1,7 +1,7 @@
 # Stage 4 稳定版本收口台账
 
 最后更新：2026-07-19
-状态：**候选版发布验收中**
+状态：**✅ arm64 RC 发布验收完成**
 主模块：`P-06 桌面集成与交付`
 关注点：`C-01 安全`、`C-03 数据一致性`、`C-05 质量`、`C-06 性能`
 
@@ -9,7 +9,7 @@
 
 Stage 1–3 已完成出口验收。Stage 4 进入功能冻结：只处理发布阻断、数据错误、安全问题、明确回归和验收文档，不继续批量增加分析内容。
 
-当前候选版本为 `0.0.1-rc.6`，线上最新版在本轮发布前仍为 `rc.4`。
+当前候选版本与 OSS 线上最新版均为 `0.0.1-rc.6`。
 
 ## 2. 出口矩阵
 
@@ -25,8 +25,8 @@ Stage 1–3 已完成出口验收。Stage 4 进入功能冻结：只处理发布
 | 全新用户完整首用 | ✅ | 真实 OSS Runtime 首装：R 4.5.2 + Python 3.11.15；项目沙盒 DESeq2 `completed` + ZIP + 1.6 MB final report；go-kegg 首次自动 provision bundle，37/37 valid |
 | 旧版数据迁移与兼容 | ✅ | 正式 rc.4 与候选版先后启动同一只读数据副本；SQLite integrity、30 表、项目/任务/对话计数及设置/插件账本哈希一致 |
 | macOS x64 | ⚠️ 部分 | App/Helper/Core 均 x86_64，Rosetta 空目录启动与 SPA 通过；没有 x64 Runtime artifact，分析能力不宣称支持 |
-| OSS 更新链 | ⏳ | 下一候选版确定后，人工授权上传；验证 `latest-mac.yml`、SHA-512、DMG 下载与打开 |
-| 安装级覆盖升级 | ⏳ | rc.6 上传后，用下载 DMG 验证打开；不自动替换 `/Applications`，避免中断当前用户环境 |
+| OSS 更新链 | ✅ | `v0.0.1-rc.6` tag 与 main 已推送；双 DMG、SHA-256 和清单上传完成；rc.4→rc.6 更新选择、194522883-byte 下载与 SHA-512 通过 |
+| 安装级覆盖升级 | ✅（RC 边界） | 公开 arm64 DMG 校验并只读挂载，包内版本/架构为 rc.6/arm64；保留未签名版本的人工拖入 Applications 边界，未破坏 rc.4 回滚点 |
 | 安全与隐私 | ✅ | Keychain/0600 门禁通过；诊断包改为脱敏日志+最小摘要，排除 DB、设置、对话、结果与凭据；卸载 App 不删除 Documents 数据 |
 | 用户文档与发布说明 | ✅ | `docs/releases/v0.0.1-rc.6.md` + 本台账 + first-success 合同 |
 | 签名与公证 | ⚠️ 已知边界 | 当前无 Developer ID；若本版不签名/公证，必须在发布说明保留人工打开/覆盖安装说明 |
@@ -63,11 +63,11 @@ electron-builder 会把根 `better-sqlite3` 重建为 Electron ABI，并在 `aft
 - go-kegg 首次自动 provision `r-enrichment`，任务 `job_4fab81993e6e4536` 为 37/37 valid、0 issues，证明 ggplot2 4.0.3 真渲染兼容。
 - 2026-07-19 Provider 重测：DeepSeek 必需项通过但结果解释探针未复述英文通路名；Anthropic 自定义 Endpoint 当时返回 `api_error`。Stage 3 既有双 Provider 6/6 证据保留，外部服务波动不冒充本地发行成功。
 
-## 5. 发布顺序
+## 5. 发布结果
 
-1. 最终全量回归并重建 rc.6 双架构 DMG。
-2. 提交、创建 `v0.0.1-rc.6` 标签并推送。
-3. 上传 OSS，匿名核对清单、大小、SHA-512 和更新选择。
-4. 下载 arm64 DMG 并打开验证；保留人工拖入 Applications 的未签名边界。
+1. ✅ 最终全量回归并重建 rc.6 双架构 DMG。
+2. ✅ 提交并推送 main；不可变 `v0.0.1-rc.6` 标签指向发布提交 `907b695`。
+3. ✅ 上传 OSS；匿名核对清单、SHA-256、大小、SHA-512 和 arm64 更新选择。
+4. ✅ 从公开地址下载并只读挂载 arm64 DMG；包内版本 `0.0.1-rc.6`、可执行文件 arm64。
 
-签名和公证仍受 Developer ID 缺失限制；不得将 unsigned RC 描述成 GA。
+Stage 4 对 macOS arm64 RC 的出口已满足。签名/公证与 x64 分析 Runtime 仍是下一发行层级的明确边界；不得将 unsigned RC 描述成 GA。

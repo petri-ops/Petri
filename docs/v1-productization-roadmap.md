@@ -20,7 +20,7 @@
 ## 2. 当前基线
 
 - `v0.0.1-rc.6` 是 Stage 4 macOS 候选版本；最新 OSS 安装发布在显式发布动作前仍为 `rc.4`。
-- macOS arm64/x64 本机构建、OSS 发布、最新版提示和 `rc.3 → rc.4` 真实升级链路已经通过。
+- macOS arm64/x64 本机构建、OSS 发布、最新版提示和 `rc.4 → rc.6` 公开更新链路已经通过。
 - Harness Phase 1–6、Plugin SDK、Agent workflow runtime、恢复与 fixture 门禁已经建立；Stage 1–2 期间保持可回归，不继续扩建第二套基础设施。
 - 当前聊天主链主要依赖 DeepSeek；DashScope 已用于 embedding/vision；OpenAI/Ollama 在设置页仍属于未来入口，模型调用链仍存在 DeepSeek 硬编码。
 - 桌面三栏工作台、项目会话、结果/Artifact、浏览器、文件、终端、设置分类和回收站已完成 Stage 1 产品化验收。
@@ -190,7 +190,7 @@ UI 不得制造第二套状态真相，模型层不得绕过确认/审计边界�
 
 ## 6. Stage 4：首个稳定产品版本
 
-状态：🟡 `rc.6` 候选发布中；本地代码与实机门禁已完成，剩余 OSS 上传和公开下载反向验证。执行台账见 [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md)。
+状态：✅ macOS arm64 RC 出口完成；`rc.6` 已发布且公开更新链路通过。签名/公证和 x64 分析 Runtime 是后续发行层级边界。执行台账见 [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md)。
 
 主模块：`P-06 桌面集成与交付`；覆盖全部质量关注点。
 
@@ -231,10 +231,11 @@ UI 不得制造第二套状态真相，模型层不得绕过确认/审计边界�
 
 ## 8. 当前立即执行项
 
-Stage 1–3 已关闭，当前只执行 Stage 4 稳定版本收口：
+Stage 1–4 的 macOS arm64 RC 出口均已关闭。当前没有新的功能开发主线：
 
 1. 功能冻结，只修复发布阻断、数据错误、安全问题和明确回归。
 2. ✅ 全新用户目录完成 Runtime、项目、DESeq2 与 GO/KEGG 真实分析。
 3. ✅ 用正式 `rc.4` 数据副本验证迁移与设置/插件兼容。
 4. ✅ 完成 arm64 完整链和 x64 壳层构建/启动门禁；x64 Runtime 缺失已列为限制。
-5. 发布 `v0.0.1-rc.6`，验证 OSS 更新、公开下载、SHA-512 和 DMG 打开链。
+5. ✅ 发布 `v0.0.1-rc.6`，验证 OSS 更新、公开下载、SHA-512 和 DMG 打开链。
+6. 观察 rc.6 真实使用反馈；后续 Stage、签名/公证或 x64 Runtime 需单独立项。

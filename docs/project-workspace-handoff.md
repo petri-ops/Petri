@@ -17,13 +17,13 @@
 
 ## 2. 当前产品阶段
 
-`v0.0.1-rc.6` 是 Stage 4 macOS 候选版本；本轮显式发布动作完成前，最新 OSS 安装发布仍为 `rc.4`。
+`v0.0.1-rc.6` 是 Stage 4 macOS arm64 候选版本，也是当前 OSS 线上最新版。
 
 当前固定顺序：
 
 > **Stage 1 UI 产品化 → Stage 2 模型层 → Stage 3 Harness 与标准流程 → Stage 4 首个稳定产品版本**
 
-Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 已固定 `rc.6` 候选版并完成代码、本地首用、迁移、隐私与构建收口；剩余动作是提交/tag、显式 OSS 上传及公开下载反向验证。
+Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC 已完成代码、首用、迁移、隐私、构建、提交/tag、OSS 上传及公开下载反向验证。
 
 ## 3. 当前立即任务
 
@@ -44,7 +44,7 @@ Stage 3 最新验收证据：
 
 Stage 4 rc.6 已完成：原生 ABI 边界、真实 OSS Runtime 首装、DESeq2 报告/ZIP、GO/KEGG bundle 真链、rc.4 数据副本迁移、诊断导出隐私及 arm64/x64 构建结构。arm64 是完整候选链；x64 因没有分析 Runtime 仅为壳层预览。详见 [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md)。
 
-下一步仅执行 rc.6 发布：提交/tag、显式 OSS 上传、匿名校验和 DMG 打开。当前无 Developer ID，签名/公证不在本 RC 内，不得描述为 GA。
+当前没有待执行的发布动作。下一步先观察 rc.6 真实使用反馈，再单独决定签名/公证、x64 Runtime 或后续 Stage。当前无 Developer ID，本 RC 不得描述为 GA。
 
 ### 已拆分给独立 Agent 的专项
 
@@ -56,13 +56,13 @@ Stage 4 rc.6 已完成：原生 ABI 边界、真实 OSS Runtime 首装、DESeq2 
 
 主模块：`P-06 桌面集成与交付`。
 
-- 当前候选版本：`0.0.1-rc.6`；本轮上传前最新 OSS 发布为 `v0.0.1-rc.4`。
+- 当前代码、Git 标签与 OSS 线上版本：`v0.0.1-rc.6`（发布提交 `907b695`）。
 - 默认平台：macOS-only；构建 arm64/x64。
 - GitHub：只保存源码和不可变标签，不上传 DMG。
 - OSS：保存双架构 DMG、SHA-256 清单和 `latest-mac.yml`。
 - 更新方式：检查 OSS → 下载匹配架构 DMG → 大小/SHA-512 校验 → 打开 DMG → 成员手动拖入 Applications。
 - 当前没有 Apple Developer ID 签名和公证，不承诺静默覆盖安装。
-- `rc.3 → rc.4` 已完成真实旧版检查、下载、校验、DMG 打开和包内版本确认。
+- `rc.4 → rc.6` 已完成更新选择、公开下载、大小/SHA-512 校验、DMG 只读挂载和包内版本/架构确认。
 - 正式 `rc.4` 已恢复运行，R `:3001/api/health`、Python `:3004/api/health`、SPA `:3002` 验证通过。
 - 发布端凭据只存在本地 `.biof3-secrets`，权限 `600`，禁止输出或提交。
 - Clash Verge 使用规则模式：OpenAI/Codex/GitHub 代理，`aliyuncs.com`/`aliyun.com`/`alicdn.com` 直连。

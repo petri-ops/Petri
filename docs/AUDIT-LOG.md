@@ -330,3 +330,4 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
 | 2026-07-18 | Stage 3 B1/B2：新增 R bundle 构建脚本 build-r-bundle.mjs + capability-bundles 注册表 + 运行路径接线（ensureBundlesForPlugin 接进 tools-executor/registry），闭合问题 H；4 wiring 测试，全量 423 零回归 | 主 agent |
 | 2026-07-19 | Stage 4 第一批：修复 migration 系统 Node / Electron ABI 边界（问题 I），全量根测试首次 0 fail；开发态与 arm64 打包态空目录启动通过 | 主 agent |
 | 2026-07-19 | Stage 4 rc.6：处理 Runtime 首装契约、诊断导出隐私和 DESeq2 首次成功产物缺口（问题 J/K/L）；完成真实 OSS Runtime、bundle、rc.4 数据副本与双架构验证 | 主 agent |
+| 2026-07-19 | 发布 `v0.0.1-rc.6`：main/tag/OSS 一致；公开更新选择、下载、大小/SHA-512、DMG 挂载及包内版本/架构验证通过，Stage 4 arm64 RC 出口关闭 | 主 agent |
