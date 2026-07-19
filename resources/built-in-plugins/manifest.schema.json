@@ -41,7 +41,7 @@
         "sizeBytes": {
           "type": ["integer", "null"],
           "minimum": 0,
-          "description": "Uncompressed-or-archived size in bytes (integer >= 0). Null allowed pre-Week-4."
+          "description": "Downloaded archive size in bytes (integer >= 0). Null allowed pre-Week-4."
         }
       }
     },

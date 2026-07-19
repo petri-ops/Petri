@@ -112,6 +112,7 @@ const MANIFEST_URL =
 const {
   PLATFORM_IDS,
   ALLOWED_RUNTIME_HOSTS,
+  normalizeRemotePluginEntry,
   selectArtifact,
   assertAllowedUrl,
   validateManifest,
@@ -283,12 +284,20 @@ async function getRemoteManifest() {
       resolve({ plugins: {} });
     });
   });
-  // 合并：远程优先（同 id 时远程覆盖内置，便于未来推送更新）
-  const merged = { plugins: { ...builtInPlugins, ...(remote.plugins || {}) } };
-  // Week 2：合并后再次校验远程部分（built-in 已在 getBuiltInManifest 校验过）。
-  // 远程失败时 console.warn 但不抛错 — 离线场景仍可用 built-in manifest。
+  // 合并：远程优先，但先把旧版 {url, checksum, size, platform} 条目规范化
+  // 为当前 per-platform artifacts 契约。否则旧 OSS 清单会整条覆盖内置
+  // Runtime 条目，导致 selectArtifact 在全新用户首装时失败。
+  const mergedPlugins = { ...builtInPlugins };
+  for (const [id, info] of Object.entries(remote.plugins || {})) {
+    mergedPlugins[id] = normalizeRemotePluginEntry(id, info, builtInPlugins[id]);
+  }
+  const merged = {
+    version: remote.version || builtIn.version,
+    plugins: mergedPlugins,
+  };
+  // 规范化后的合并结果必须满足当前契约。远程失败时仍保留内置 fallback。
   if (remote.plugins && Object.keys(remote.plugins).length > 0) {
-    const v = validateManifest(remote);
+    const v = validateManifest(merged);
     if (!v.valid) {
       console.warn(`[plugin] remote manifest validation failed: ${v.issues.join('; ')}`);
     }
@@ -777,6 +786,21 @@ async function installRuntime(pluginId, plugin, platform, onProgress) {
   console.log(`[plugin] downloading runtime ${pluginId} from ${artifact.url} (platform=${platform})`);
   await downloadFile(artifact.url, zipPath, onProgress);
 
+  // sizeBytes is the immutable archive size, not the unpacked directory size.
+  if (typeof artifact.sizeBytes === 'number' && artifact.sizeBytes > 0) {
+    const actualSize = fs.statSync(zipPath).size;
+    if (actualSize !== artifact.sizeBytes) {
+      try { fs.unlinkSync(zipPath); } catch {}
+      const e = new Error(
+        `Size mismatch for runtime ${pluginId} on ${platform}: expected ${artifact.sizeBytes}, actual ${actualSize}`
+      );
+      e.code = 'SIZE_MISMATCH';
+      e.expected = artifact.sizeBytes;
+      e.actual = actualSize;
+      throw e;
+    }
+  }
+
   // streaming SHA-256 校验
   if (artifact.sha256) {
     const actualHash = await streamingSha256(zipPath);
@@ -821,18 +845,6 @@ async function installRuntime(pluginId, plugin, platform, onProgress) {
     }
     fs.rmdirSync(nested);
     console.log(`[plugin] flattened nested runtime dir: ${entries[0]}`);
-  }
-
-  // sizeBytes 校验（解压后 best-effort）
-  if (typeof artifact.sizeBytes === 'number' && artifact.sizeBytes > 0) {
-    const actualSize = dirSize(runtimeDir);
-    if (actualSize > 0 && Math.abs(actualSize - artifact.sizeBytes) > artifact.sizeBytes * 0.1) {
-      console.warn(
-        `[plugin] runtime ${pluginId} unpacked size ${actualSize} differs from artifact.sizeBytes ${artifact.sizeBytes} by >10% — not failing (best-effort)`
-      );
-    } else if (actualSize > 0) {
-      console.log(`[plugin] runtime ${pluginId} unpacked size ${actualSize} ≈ artifact.sizeBytes ${artifact.sizeBytes}`);
-    }
   }
 
   // R 需要修 dylib 路径
@@ -1422,6 +1434,7 @@ module.exports = {
   // Week 2 per-platform schema helpers
   PLATFORM_IDS,
   ALLOWED_RUNTIME_HOSTS,
+  normalizeRemotePluginEntry,
   selectArtifact,
   assertAllowedUrl,
   validateManifest,

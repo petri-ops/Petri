@@ -1,8 +1,8 @@
 {
   "_about": "Placeholders manifest — documents which fields in manifest.json are placeholders pending Week 4 CI fill-in. Documentation only.",
   "version": "1.0.0",
-  "updated": "2026-07-14",
-  "notes": "Plan hard constraint: do NOT fabricate sha256 or sizeBytes. Each Runtime/FigCode macos-arm64 artifact has sha256=null and sizeBytes=null until Week 4 CI fills them in from a real signed+notarized build. The release-contract.json platforms[*].macos-arm64.supported flag also stays at false until that build exists.",
+  "updated": "2026-07-19",
+  "notes": "Do not fabricate sha256 or sizeBytes. Runtime descriptors were verified and filled during Stage 4; the remaining FigCode placeholders stay null until their real artifacts are measured. The release-contract supported flag remains independent because it describes the signed and notarized desktop release boundary.",
   "placeholders": [
     {
       "pluginId": "figcode-volcano-animated",
@@ -219,30 +219,6 @@
       "field": "artifacts.macos-arm64.sizeBytes",
       "current": null,
       "needsFillFrom": "Week 4 release pipeline (legacy approximate in old manifest)"
-    },
-    {
-      "pluginId": "biof3-r-runtime",
-      "field": "artifacts.macos-arm64.sha256",
-      "current": null,
-      "needsFillFrom": "Week 4 release pipeline — signed+notarized Runtime zip"
-    },
-    {
-      "pluginId": "biof3-r-runtime",
-      "field": "artifacts.macos-arm64.sizeBytes",
-      "current": null,
-      "needsFillFrom": "Week 4 release pipeline — byte size of signed+notarized Runtime zip"
-    },
-    {
-      "pluginId": "biof3-py-runtime",
-      "field": "artifacts.macos-arm64.sha256",
-      "current": null,
-      "needsFillFrom": "Week 4 release pipeline — signed+notarized Runtime zip"
-    },
-    {
-      "pluginId": "biof3-py-runtime",
-      "field": "artifacts.macos-arm64.sizeBytes",
-      "current": null,
-      "needsFillFrom": "Week 4 release pipeline — byte size of signed+notarized Runtime zip"
     },
     {
       "pluginId": "figcode-data-bsgenome-hg19",

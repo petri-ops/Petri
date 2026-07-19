@@ -37,6 +37,7 @@ assert(existsSync(contractPath), 'release-contract.json missing');
 const {
   PLATFORM_IDS,
   ALLOWED_RUNTIME_HOSTS,
+  normalizeRemotePluginEntry,
   selectArtifact,
   assertAllowedUrl,
   validateManifest,
@@ -148,19 +149,46 @@ for (const [id, plug] of Object.entries(manifest.plugins)) {
 assert.strictEqual(offenders.length, 0, `offending URLs:\n${offenders.join('\n')}`);
 console.log(`✓ ${checked} non-built-in URLs all match ALLOWED_RUNTIME_HOSTS=${JSON.stringify(ALLOWED_RUNTIME_HOSTS)}`);
 
-// ── 5. placeholders.json mentions sha256+sizeBytes for each placeholder ──
-const expectedPlaceholderFields = ['artifacts.macos-arm64.sha256', 'artifacts.macos-arm64.sizeBytes'];
+// ── 5. Runtime archives have immutable descriptors and no stale placeholders ──
 for (const pid of ['biof3-r-runtime', 'biof3-py-runtime']) {
-  for (const field of expectedPlaceholderFields) {
-    assert.ok(
-      placeholders.placeholders.some((p) => p.pluginId === pid && p.field === field && p.current === null),
-      `placeholders.json must declare ${pid}.${field}=null`
-    );
-  }
+  const artifact = manifest.plugins[pid].artifacts['macos-arm64'];
+  assert.match(artifact.sha256, /^[a-f0-9]{64}$/, `${pid} must have a real SHA-256`);
+  assert.ok(Number.isInteger(artifact.sizeBytes) && artifact.sizeBytes > 0, `${pid} must have archive size`);
+  assert.equal(
+    placeholders.placeholders.some((p) => p.pluginId === pid),
+    false,
+    `${pid} must not remain in placeholders.json`
+  );
 }
-console.log(`✓ manifest.placeholders.json documents sha256+sizeBytes placeholders for runtimes`);
+console.log(`✓ Runtime archives have SHA-256/size descriptors and no stale placeholders`);
 
-// ── 6. assertAllowedUrl built-in:// is allowed; non-whitelisted host throws ──
+// ── 6. legacy remote Runtime entries normalize to the current artifact schema ──
+const normalizedRuntime = normalizeRemotePluginEntry(
+  'biof3-r-runtime',
+  {
+    title: 'R Runtime',
+    version: '1.0.0',
+    type: 'runtime',
+    language: 'r',
+    url: 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/macos-arm64.zip',
+    size: 154050101,
+    checksum: 'sha256:007b6c5436e7986dd60bed0457b431dce30aef25b8bee2d49cbe97e839c8a1d2',
+    platform: ['macos-arm64'],
+  },
+  manifest.plugins['biof3-r-runtime']
+);
+assert.equal(normalizedRuntime.id, 'biof3-r-runtime');
+assert.equal(normalizedRuntime.kind, 'runtime');
+assert.equal(normalizedRuntime._builtIn, false);
+assert.deepEqual(normalizedRuntime.artifacts['macos-arm64'], {
+  url: 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/macos-arm64.zip',
+  sha256: '007b6c5436e7986dd60bed0457b431dce30aef25b8bee2d49cbe97e839c8a1d2',
+  sizeBytes: 154050101,
+});
+assert.equal(validateManifest({ version: '1.0.0', plugins: { 'biof3-r-runtime': normalizedRuntime } }).valid, true);
+console.log(`✓ legacy remote Runtime entry normalizes to per-platform artifacts`);
+
+// ── 7. assertAllowedUrl built-in:// is allowed; non-whitelisted host throws ──
 assertAllowedUrl('built-in://volcano-plot');
 assertAllowedUrl('https://github.com/x/y.zip');
 let rejected = false;

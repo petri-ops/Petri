@@ -16,8 +16,8 @@
       "artifacts": {
         "macos-arm64": {
           "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/macos-arm64.zip",
-          "sha256": null,
-          "sizeBytes": null
+          "sha256": "007b6c5436e7986dd60bed0457b431dce30aef25b8bee2d49cbe97e839c8a1d2",
+          "sizeBytes": 154050101
         }
       },
       "checksumAlgorithm": "sha256",
@@ -36,8 +36,8 @@
       "artifacts": {
         "macos-arm64": {
           "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/macos-arm64.zip",
-          "sha256": null,
-          "sizeBytes": null
+          "sha256": "a3ba85eea02a5d09097ab49e77b39a44e4691726a221c0c4f80516600ff41e12",
+          "sizeBytes": 480914965
         }
       },
       "checksumAlgorithm": "sha256",

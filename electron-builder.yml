@@ -108,6 +108,8 @@ extraResources:
     filter:
       - "**/*"
       - "!**/.DS_Store"
-  # fix-r-paths.sh — R Runtime 安装时调用（修正 dylib 路径）
+  # fix-r-paths.mjs + shell helper — R Runtime 安装时调用（修正 dylib 路径）
+  - from: ./scripts/fix-r-paths.mjs
+    to: scripts/fix-r-paths.mjs
   - from: ./scripts/fix-r-paths.sh
     to: scripts/fix-r-paths.sh
