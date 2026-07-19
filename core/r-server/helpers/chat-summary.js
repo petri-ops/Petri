@@ -5,10 +5,10 @@
  * Persists through ./db and delegates model work to the shared Gateway.
  *
  * Public API:
- *   getChatSummaryAsync(userId)            → Promise<row|null>
- *   saveChatSummaryAsync(userId, s, count) → Promise<void>
- *   deleteChatSummaryAsync(userId)         → Promise<void>
- *   summarizeMessages(userId, oldMessages, existingSummary) → Promise<void>
+ *   getChatSummaryAsync(userId, projectId)            → Promise<row|null>
+ *   saveChatSummaryAsync(userId, projectId, s, count) → Promise<void>
+ *   deleteChatSummaryAsync(userId, projectId)         → Promise<void>
+ *   summarizeMessages(userId, projectId, oldMessages, existingSummary) → Promise<void>
  *   SUMMARY_TRIGGER_AT, SUMMARY_KEEP_RECENT
  *
  * Async helpers use the Promise facade over desktop SQLite.
@@ -24,55 +24,69 @@ async function _ensureTable() {
   const adb = dbMod.getAsyncDatabase();
   try {
     await adb.exec(`
-      CREATE TABLE IF NOT EXISTS chat_summaries (
-        user_id TEXT PRIMARY KEY,
+      CREATE TABLE IF NOT EXISTS project_chat_summaries (
+        user_id TEXT NOT NULL,
+        project_id TEXT NOT NULL DEFAULT '',
         summary TEXT NOT NULL,
         msg_count INTEGER NOT NULL DEFAULT 0,
-        updated_at TEXT NOT NULL
+        updated_at TEXT NOT NULL,
+        PRIMARY KEY (user_id, project_id)
       );
     `);
+    // Legacy summaries had one row per user. Preserve them only in the
+    // project-less scope; never inject them into a concrete project.
+    try {
+      await adb.exec(`
+        INSERT OR IGNORE INTO project_chat_summaries(user_id, project_id, summary, msg_count, updated_at)
+        SELECT user_id, '', summary, msg_count, updated_at FROM chat_summaries
+      `);
+    } catch {}
   } catch {
     /* ignore */
   }
 }
 
-async function getChatSummaryAsync(userId) {
+function _scopeKey(projectId) {
+  return projectId ? String(projectId) : '';
+}
+
+async function getChatSummaryAsync(userId, projectId = null) {
   if (!userId) return null;
   await _ensureTable();
   const adb = dbMod.getAsyncDatabase();
   const row = await adb
-    .prepare('SELECT summary, msg_count, updated_at FROM chat_summaries WHERE user_id = ?')
-    .get(userId);
+    .prepare('SELECT summary, msg_count, updated_at FROM project_chat_summaries WHERE user_id = ? AND project_id = ?')
+    .get(userId, _scopeKey(projectId));
   return row || null;
 }
 
-async function saveChatSummaryAsync(userId, summary, msgCount) {
+async function saveChatSummaryAsync(userId, projectId, summary, msgCount) {
   if (!userId) return;
   await _ensureTable();
   const adb = dbMod.getAsyncDatabase();
   await adb
     .prepare(
       `
-    INSERT INTO chat_summaries(user_id, summary, msg_count, updated_at)
-    VALUES (?, ?, ?, ?)
-    ON CONFLICT(user_id) DO UPDATE SET summary=excluded.summary, msg_count=excluded.msg_count, updated_at=excluded.updated_at
+    INSERT INTO project_chat_summaries(user_id, project_id, summary, msg_count, updated_at)
+    VALUES (?, ?, ?, ?, ?)
+    ON CONFLICT(user_id, project_id) DO UPDATE SET summary=excluded.summary, msg_count=excluded.msg_count, updated_at=excluded.updated_at
   `
     )
-    .run(userId, summary, msgCount, new Date().toISOString());
+    .run(userId, _scopeKey(projectId), summary, msgCount, new Date().toISOString());
 }
 
-async function deleteChatSummaryAsync(userId) {
+async function deleteChatSummaryAsync(userId, projectId = null) {
   if (!userId) return;
   await _ensureTable();
   const adb = dbMod.getAsyncDatabase();
-  await adb.prepare('DELETE FROM chat_summaries WHERE user_id = ?').run(userId);
+  await adb.prepare('DELETE FROM project_chat_summaries WHERE user_id = ? AND project_id = ?').run(userId, _scopeKey(projectId));
 }
 
 /**
  * Compress older messages into a Chinese summary using the summary role.
  * Fire-and-forget; errors swallowed.
  */
-async function summarizeMessages(userId, oldMessages, existingSummary) {
+async function summarizeMessages(userId, projectId, oldMessages, existingSummary) {
   if (!userId || !Array.isArray(oldMessages) || oldMessages.length === 0) return;
 
   const lines = oldMessages
@@ -104,10 +118,11 @@ async function summarizeMessages(userId, oldMessages, existingSummary) {
   try {
     await saveChatSummaryAsync(
       userId,
+      projectId,
       result.text,
       oldMessages.length + (existingSummary ? -1 : 0)
     );
-    console.log('[chat-summary] saved for user', userId, 'len=', result.text.length);
+    console.log('[chat-summary] saved for scope', _scopeKey(projectId) || 'global', 'len=', result.text.length);
   } catch (e) {
     console.log('[chat-summary-err]', e && e.message);
   }
@@ -117,22 +132,24 @@ const SUMMARY_TRIGGER_AT = 22; // start summarizing once thread has > N msgs
 const SUMMARY_KEEP_RECENT = 14; // keep this many recent msgs as raw context
 
 // Sync wrapper for in-process callers using the same SQLite database.
-function getChatSummary(userId) {
+function getChatSummary(userId, projectId = null) {
   if (!userId) return null;
   const sqlite = dbMod.getDatabase();
   try {
     // Guard: ensure table exists (idempotent — ignore errors from re-creating)
     sqlite.exec(`
-      CREATE TABLE IF NOT EXISTS chat_summaries (
-        user_id TEXT PRIMARY KEY,
+      CREATE TABLE IF NOT EXISTS project_chat_summaries (
+        user_id TEXT NOT NULL,
+        project_id TEXT NOT NULL DEFAULT '',
         summary TEXT NOT NULL,
         msg_count INTEGER NOT NULL DEFAULT 0,
-        updated_at TEXT NOT NULL
+        updated_at TEXT NOT NULL,
+        PRIMARY KEY (user_id, project_id)
       );
     `);
     const row = sqlite
-      .prepare('SELECT summary, msg_count, updated_at FROM chat_summaries WHERE user_id = ?')
-      .get(userId);
+      .prepare('SELECT summary, msg_count, updated_at FROM project_chat_summaries WHERE user_id = ? AND project_id = ?')
+      .get(userId, _scopeKey(projectId));
     return row || null;
   } catch {
     return null;

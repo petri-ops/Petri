@@ -106,18 +106,14 @@ async function tool_query(args, ctx) {
       .all(userId, limit);
   }
   if (resource === 'facts') {
-    return db
-      .prepare(
-        'SELECT * FROM user_facts WHERE user_id=? ORDER BY pinned DESC, updated_at DESC LIMIT ?'
-      )
-      .all(userId, limit);
+    return ctx.projectId
+      ? db.prepare('SELECT * FROM user_facts WHERE user_id=? AND project_id=? ORDER BY pinned DESC, updated_at DESC LIMIT ?').all(userId, String(ctx.projectId), limit)
+      : db.prepare("SELECT * FROM user_facts WHERE user_id=? AND COALESCE(project_id, '')='' ORDER BY pinned DESC, updated_at DESC LIMIT ?").all(userId, limit);
   }
   if (resource === 'memories') {
-    return db
-      .prepare(
-        'SELECT id, kind, ref_id, page, page_title, content, ts FROM memory_vectors WHERE user_id=? ORDER BY ts DESC LIMIT ?'
-      )
-      .all(userId, limit);
+    return ctx.projectId
+      ? db.prepare('SELECT id, kind, ref_id, page, page_title, content, ts FROM memory_vectors WHERE user_id=? AND project_id=? ORDER BY ts DESC LIMIT ?').all(userId, String(ctx.projectId), limit)
+      : db.prepare("SELECT id, kind, ref_id, page, page_title, content, ts FROM memory_vectors WHERE user_id=? AND COALESCE(project_id, '')='' ORDER BY ts DESC LIMIT ?").all(userId, limit);
   }
 
   throw new Error('未知 resource: ' + resource);
@@ -276,11 +272,9 @@ async function tool_search(args, ctx) {
       const vecs = await ctx.dashscopeEmbed([q], { userId });
       if (vecs && vecs[0]) {
         const db = sqlite;
-        const rows = db
-          .prepare(
-            'SELECT id, kind, content, ts, page, page_title, embedding FROM memory_vectors WHERE user_id=? LIMIT 1000'
-          )
-          .all(userId);
+        const rows = ctx.projectId
+          ? db.prepare('SELECT id, kind, content, ts, page, page_title, embedding FROM memory_vectors WHERE user_id=? AND project_id=? LIMIT 1000').all(userId, String(ctx.projectId))
+          : db.prepare("SELECT id, kind, content, ts, page, page_title, embedding FROM memory_vectors WHERE user_id=? AND COALESCE(project_id, '')='' LIMIT 1000").all(userId);
         for (const r of rows) {
           const v = new Float32Array(
             r.embedding.buffer,

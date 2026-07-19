@@ -326,14 +326,15 @@ module.exports = function registerAiAgentRoute(app) {
     try {
       const userId = req.user && req.user.id;
       if (userId) {
-        const snap = await buildSiteSnapshotAsync(userId);
+        const projectId = context && context.projectId ? String(context.projectId) : null;
+        const snap = await buildSiteSnapshotAsync(userId, { projectId });
         const block = renderSiteSnapshotForPrompt(snap, 3500);
         if (block) systemPrompt += block;
-        const factsBlock = await buildFactsBlockAsync(userId, 1200);
+        const factsBlock = await buildFactsBlockAsync(userId, 1200, projectId);
         if (factsBlock && factsBlock.trim()) {
           systemPrompt += '\n\n=== 关于该用户的已知事实（请记住并参考） ===' + factsBlock;
         }
-        const sumRow = await getChatSummaryAsync(userId);
+        const sumRow = await getChatSummaryAsync(userId, projectId);
         if (sumRow && sumRow.summary) {
           systemPrompt += '\n\n=== 与该用户的对话历史摘要（已归档） ===\n' + sumRow.summary;
         }
@@ -867,6 +868,7 @@ module.exports = function registerAiAgentRoute(app) {
                   if (vecs && vecs[0]) {
                     saveMemoryVector({
                       userId,
+                      projectId: context && context.projectId,
                       kind: 'chat_turn',
                       refId: null,
                       page: context && context.page,
@@ -891,7 +893,7 @@ module.exports = function registerAiAgentRoute(app) {
                 const threadForExtract = messages
                   .slice(-12)
                   .concat([{ role: 'assistant', content: assistantAcc.trim() }]);
-                backgroundExtractFacts(userId, threadForExtract).catch(() => {});
+                backgroundExtractFacts(userId, threadForExtract, context && context.projectId).catch(() => {});
               }
             } catch {}
 
@@ -902,9 +904,9 @@ module.exports = function registerAiAgentRoute(app) {
               if (Array.isArray(messages) && messages.length > SUMMARY_TRIGGER_AT) {
                 const oldMsgs = messages.slice(0, messages.length - SUMMARY_KEEP_RECENT);
                 if (oldMsgs.length >= 6) {
-                  getChatSummaryAsync(userId)
+                  getChatSummaryAsync(userId, context && context.projectId)
                     .then((existing) => {
-                      summarizeMessages(userId, oldMsgs, existing && existing.summary).catch(
+                      summarizeMessages(userId, context && context.projectId, oldMsgs, existing && existing.summary).catch(
                         () => {}
                       );
                     })

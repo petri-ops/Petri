@@ -115,6 +115,27 @@ try {
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
   )`);
 } catch {}
+// Migration (PROJECT_MEMORY_SCOPE_v1): memory payloads must never cross projects.
+// Legacy rows remain project-less unless a linked conversation can identify
+// their project safely; helpers/conversations.js performs that backfill.
+try { db.exec('ALTER TABLE user_facts ADD COLUMN project_id TEXT'); } catch {}
+try { db.exec('ALTER TABLE memory_vectors ADD COLUMN project_id TEXT'); } catch {}
+try { db.exec('CREATE INDEX IF NOT EXISTS idx_user_facts_project ON user_facts(user_id, project_id, pinned DESC, updated_at DESC)'); } catch {}
+try { db.exec('CREATE INDEX IF NOT EXISTS idx_memvec_project ON memory_vectors(user_id, project_id, ts DESC)'); } catch {}
+try {
+  db.exec(`CREATE TABLE IF NOT EXISTS project_chat_summaries (
+    user_id TEXT NOT NULL,
+    project_id TEXT NOT NULL DEFAULT '',
+    summary TEXT NOT NULL,
+    msg_count INTEGER NOT NULL DEFAULT 0,
+    updated_at TEXT NOT NULL,
+    PRIMARY KEY (user_id, project_id)
+  )`);
+  db.exec(`
+    INSERT OR IGNORE INTO project_chat_summaries(user_id, project_id, summary, msg_count, updated_at)
+    SELECT user_id, '', summary, msg_count, updated_at FROM chat_summaries
+  `);
+} catch {}
 // Migration: add user_id to projects
 try {
   db.exec('ALTER TABLE projects ADD COLUMN user_id TEXT');

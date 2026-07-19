@@ -217,6 +217,9 @@ router.delete('/projects/:id', async (req, res) => {
   try {
     const adb = db.getAsyncDatabase();
     const conversations = await adb.prepare('SELECT id FROM copilot_conversations WHERE project_id=?').all(req.params.id);
+    try { await adb.prepare('DELETE FROM memory_vectors WHERE project_id=?').run(req.params.id); } catch {}
+    try { await adb.prepare('DELETE FROM user_facts WHERE project_id=?').run(req.params.id); } catch {}
+    try { await adb.prepare('DELETE FROM project_chat_summaries WHERE project_id=?').run(req.params.id); } catch {}
     for (const conversation of conversations) {
       await adb.prepare('DELETE FROM copilot_messages WHERE conversation_id=?').run(conversation.id);
     }

@@ -6,9 +6,9 @@
  *
  * Public API:
  *   dashscopeEmbed(texts, telemetry) → Promise<Float32Array[]|null>
- *   saveMemoryVector({userId, kind, refId, page, pageTitle, content, vec, ts, conversationId})
+ *   saveMemoryVector({userId, projectId, kind, refId, page, pageTitle, content, vec, ts, conversationId})
  *   cosineSim(a, b)
- *   retrieveMemories(userId, queryVec, k, threshold)
+ *   retrieveMemories(userId, queryVec, k, threshold, projectId)
  *   buildRetrievalBlock(hits)
  *   makeTurnText(prevMsg, curMsg)
  *   indexLatestTurn(userId, messages, page, pageTitle)
@@ -32,11 +32,32 @@ sqlite.exec(`
     content TEXT NOT NULL,
     embedding BLOB NOT NULL,
     ts TEXT NOT NULL,
-    created_at TEXT NOT NULL
+    created_at TEXT NOT NULL,
+    conversation_id TEXT,
+    project_id TEXT
   );
   CREATE INDEX IF NOT EXISTS idx_memvec_user ON memory_vectors(user_id, ts DESC);
   CREATE INDEX IF NOT EXISTS idx_memvec_user_kind ON memory_vectors(user_id, kind);
 `);
+try { sqlite.exec('ALTER TABLE memory_vectors ADD COLUMN conversation_id TEXT'); } catch {}
+try { sqlite.exec('ALTER TABLE memory_vectors ADD COLUMN project_id TEXT'); } catch {}
+try { sqlite.exec('CREATE INDEX IF NOT EXISTS idx_memvec_project ON memory_vectors(user_id, project_id, ts DESC)'); } catch {}
+try {
+  sqlite.exec(`
+    UPDATE memory_vectors
+    SET project_id = (
+      SELECT c.project_id FROM copilot_conversations c
+      WHERE c.id = memory_vectors.conversation_id
+    )
+    WHERE project_id IS NULL
+      AND conversation_id IS NOT NULL
+      AND EXISTS (
+        SELECT 1 FROM copilot_conversations c
+        WHERE c.id = memory_vectors.conversation_id
+          AND c.project_id IS NOT NULL
+      )
+  `);
+} catch {}
 
 const EMBEDDING_DIM = 1024;
 const EMBEDDING_MODEL = 'text-embedding-v3';
@@ -64,13 +85,14 @@ function _vecFromBuf(buf) {
   return new Float32Array(buf.buffer, buf.byteOffset, buf.byteLength / 4);
 }
 
-function saveMemoryVector({userId, kind, refId, page, pageTitle, content, vec, ts, conversationId}) {
+function saveMemoryVector({userId, projectId, kind, refId, page, pageTitle, content, vec, ts, conversationId}) {
   if (!userId || !vec || !content) return;
   const id = 'mem_' + uuidv4().slice(0, 12);
-  sqlite.prepare(`INSERT INTO memory_vectors(id, user_id, kind, ref_id, page, page_title, content, embedding, ts, created_at, conversation_id)
-              VALUES (?,?,?,?,?,?,?,?,?,?,?)`)
+  sqlite.prepare(`INSERT INTO memory_vectors(id, user_id, kind, ref_id, page, page_title, content, embedding, ts, created_at, conversation_id, project_id)
+              VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`)
     .run(id, userId, kind, refId || null, page || null, pageTitle || null, content, _bufFromVec(vec),
-         ts || new Date().toISOString(), new Date().toISOString(), conversationId || null);
+         ts || new Date().toISOString(), new Date().toISOString(), conversationId || null,
+         projectId ? String(projectId) : null);
 }
 
 /** Cosine similarity between two Float32Arrays. */
@@ -86,9 +108,11 @@ function cosineSim(a, b) {
 }
 
 /** Retrieve top-K most similar memory entries for a user against a query vector. */
-function retrieveMemories(userId, queryVec, k = RETRIEVE_TOPK, threshold = RETRIEVE_THRESHOLD) {
+function retrieveMemories(userId, queryVec, k = RETRIEVE_TOPK, threshold = RETRIEVE_THRESHOLD, projectId = null) {
   if (!userId || !queryVec) return [];
-  const rows = sqlite.prepare('SELECT id, kind, ref_id, page, page_title, content, embedding, ts FROM memory_vectors WHERE user_id = ?').all(userId);
+  const rows = projectId
+    ? sqlite.prepare('SELECT id, kind, ref_id, page, page_title, content, embedding, ts FROM memory_vectors WHERE user_id = ? AND project_id = ?').all(userId, String(projectId))
+    : sqlite.prepare("SELECT id, kind, ref_id, page, page_title, content, embedding, ts FROM memory_vectors WHERE user_id = ? AND COALESCE(project_id, '') = ''").all(userId);
   if (rows.length === 0) return [];
   const scored = rows.map(r => {
     const v = _vecFromBuf(r.embedding);
@@ -134,7 +158,7 @@ function makeTurnText(prevMsg, curMsg) {
 }
 
 /** After a chat completes, embed the just-finished turn and persist. */
-async function indexLatestTurn(userId, messages, page, pageTitle) {
+async function indexLatestTurn(userId, messages, page, pageTitle, projectId = null) {
   if (!userId || !Array.isArray(messages) || messages.length < 2) return;
   const last = messages[messages.length - 1];
   const prev = messages[messages.length - 2];
@@ -143,18 +167,18 @@ async function indexLatestTurn(userId, messages, page, pageTitle) {
   const vecs = await dashscopeEmbed([turn]);
   if (!vecs || !vecs[0]) return;
   saveMemoryVector({
-    userId, kind: 'chat_turn', refId: null,
+    userId, projectId, kind: 'chat_turn', refId: null,
     page, pageTitle, content: turn, vec: vecs[0],
   });
   console.log('[mem-vec] indexed turn for user', userId, 'len', turn.length);
 }
 
 /** Embed a query and retrieve hits. Returns block string ready for prompt injection. */
-async function retrieveForPrompt(userId, queryText) {
+async function retrieveForPrompt(userId, queryText, projectId = null) {
   if (!userId || !queryText) return '';
   const vecs = await dashscopeEmbed([queryText], {userId});
   if (!vecs || !vecs[0]) return '';
-  const hits = retrieveMemories(userId, vecs[0]);
+  const hits = retrieveMemories(userId, vecs[0], RETRIEVE_TOPK, RETRIEVE_THRESHOLD, projectId);
   return buildRetrievalBlock(hits);
 }
 

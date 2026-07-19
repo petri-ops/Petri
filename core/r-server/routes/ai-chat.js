@@ -45,6 +45,7 @@ module.exports = function registerAiChatRoute(app) {
       /* ignore */
     }
     const { messages, context } = req.body || {};
+    const projectId = context && context.projectId ? String(context.projectId) : null;
     if (!Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ status: 'error', error: '缺少消息' });
     }
@@ -73,7 +74,7 @@ module.exports = function registerAiChatRoute(app) {
           .replace(/^\[[^\]]+\]\s*\n?/, '')
           .slice(0, 500);
         if (q.length >= 6) {
-          retrievalBlock = await retrieveForPrompt(userId, q);
+          retrievalBlock = await retrieveForPrompt(userId, q, projectId);
         }
       }
     } catch (e) {
@@ -99,7 +100,7 @@ module.exports = function registerAiChatRoute(app) {
     try {
       const userId = req.user && req.user.id;
       if (userId) {
-        const snap = await buildSiteSnapshotAsync(userId);
+        const snap = await buildSiteSnapshotAsync(userId, { projectId });
         const block = renderSiteSnapshotForPrompt(snap, 3500);
         if (block) systemPrompt += block;
       }
@@ -111,7 +112,7 @@ module.exports = function registerAiChatRoute(app) {
     try {
       const userId = req.user && req.user.id;
       if (userId) {
-        const factsBlock = await buildFactsBlockAsync(userId, 1200);
+        const factsBlock = await buildFactsBlockAsync(userId, 1200, projectId);
         if (factsBlock && factsBlock.trim()) {
           systemPrompt += '\n\n=== 关于该用户的已知事实（请记住并参考） ===' + factsBlock;
         }
@@ -125,7 +126,7 @@ module.exports = function registerAiChatRoute(app) {
     try {
       const userId = req.user && req.user.id;
       if (userId) {
-        const row = await getChatSummaryAsync(userId);
+        const row = await getChatSummaryAsync(userId, projectId);
         if (row && row.summary) {
           savedSummary = row;
           systemPrompt +=
@@ -188,6 +189,7 @@ module.exports = function registerAiChatRoute(app) {
                     if (vecs && vecs[0]) {
                       saveMemoryVector({
                         userId,
+                        projectId,
                         kind: 'chat_turn',
                         refId: null,
                         page: context && context.page,
@@ -218,7 +220,7 @@ module.exports = function registerAiChatRoute(app) {
               messages.length <= 22 &&
               messages.length % 4 === 0
             ) {
-              backgroundExtractFacts(userId, messages).catch(() => {});
+              backgroundExtractFacts(userId, messages, projectId).catch(() => {});
             }
           } catch (e) {
             console.log('[mem-vec-err]', e && e.message);
@@ -229,12 +231,12 @@ module.exports = function registerAiChatRoute(app) {
             if (userId && Array.isArray(messages) && messages.length > SUMMARY_TRIGGER_AT) {
               const oldMsgs = messages.slice(0, messages.length - SUMMARY_KEEP_RECENT);
               if (oldMsgs.length >= 6) {
-                summarizeMessages(userId, oldMsgs, savedSummary && savedSummary.summary).catch(
+                summarizeMessages(userId, projectId, oldMsgs, savedSummary && savedSummary.summary).catch(
                   () => {}
                 );
               }
               if (messages.length % 4 === 0) {
-                backgroundExtractFacts(userId, messages).catch(() => {});
+                backgroundExtractFacts(userId, messages, projectId).catch(() => {});
               }
             }
           } catch (e) {

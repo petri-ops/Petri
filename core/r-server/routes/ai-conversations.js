@@ -105,6 +105,7 @@ module.exports = function mountConversations(app) {
     try {
       const row = await adb.prepare('SELECT id FROM copilot_conversations WHERE id=? AND user_id=?').get(req.params.id, userId);
       if (!row) return res.status(404).json({status:'error', error:'not_found'});
+      try { await adb.prepare('DELETE FROM memory_vectors WHERE conversation_id=? AND user_id=?').run(req.params.id, userId); } catch {}
       await adb.prepare('DELETE FROM copilot_messages WHERE conversation_id=?').run(req.params.id);
       await adb.prepare('DELETE FROM copilot_conversations WHERE id=? AND user_id=?').run(req.params.id, userId);
       res.json({status:'ok'});

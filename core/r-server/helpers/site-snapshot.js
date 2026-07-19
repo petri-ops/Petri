@@ -17,11 +17,21 @@ async function buildSiteSnapshotAsync(userId, opts) {
   const maxAnalyses = o.maxAnalyses || 100;
   const maxDatasets = o.maxDatasets || 50;
   const maxProjects = o.maxProjects || 30;
+  const projectId = o.projectId ? String(o.projectId) : null;
 
   const adb = dbMod.getAsyncDatabase();
 
   try {
-    const projects = await adb.prepare(`
+    const projects = projectId
+      ? await adb.prepare(`
+      SELECT p.id, p.name, p.description, p.created_at, p.updated_at,
+        (SELECT COUNT(*) FROM datasets d WHERE d.project_id = p.id) AS dataset_count,
+        (SELECT COUNT(*) FROM analyses a WHERE a.dataset_id IN (SELECT id FROM datasets WHERE project_id = p.id)) AS analysis_count
+      FROM projects p
+      WHERE p.user_id = ? AND p.id = ?
+      LIMIT 1
+    `).all(userId, projectId)
+      : await adb.prepare(`
       SELECT p.id, p.name, p.description, p.created_at, p.updated_at,
         (SELECT COUNT(*) FROM datasets d WHERE d.project_id = p.id) AS dataset_count,
         (SELECT COUNT(*) FROM analyses a WHERE a.dataset_id IN (SELECT id FROM datasets WHERE project_id = p.id)) AS analysis_count
@@ -31,29 +41,29 @@ async function buildSiteSnapshotAsync(userId, opts) {
       LIMIT ?
     `).all(userId, maxProjects);
 
-    if (projects.length === 0) return {projects: [], datasets: [], analyses: []};
+    if (projects.length === 0) return {projects: [], datasets: [], analyses: [], scopeProjectId: projectId};
 
     const projectIds = projects.map(p => p.id);
-    const placeholders = projectIds.map((_, i) => '$' + (i + 1)).join(',');
+    const placeholders = projectIds.map(() => '?').join(',');
 
     const datasets = await adb.prepare(`
       SELECT id, project_id, name, n_cells, n_genes, size, uploaded_at, description
       FROM datasets
       WHERE project_id IN (${placeholders})
       ORDER BY uploaded_at DESC
-      LIMIT $${projectIds.length + 1}
+      LIMIT ?
     `).all(...projectIds, maxDatasets);
 
     const datasetIds = datasets.map(d => d.id);
     let analyses = [];
     if (datasetIds.length > 0) {
-      const dsPh = datasetIds.map((_, i) => '$' + (i + 1)).join(',');
+      const dsPh = datasetIds.map(() => '?').join(',');
       analyses = await adb.prepare(`
         SELECT id, dataset_id, type, name, status, parent_analysis_id, summary, created_at, finished_at, error
         FROM analyses
         WHERE dataset_id IN (${dsPh})
         ORDER BY created_at DESC
-        LIMIT $${datasetIds.length + 1}
+        LIMIT ?
       `).all(...datasetIds, maxAnalyses);
     }
 
@@ -107,6 +117,7 @@ async function buildSiteSnapshotAsync(userId, opts) {
         uploadedAt: d.uploaded_at,
       })),
       analyses,
+      scopeProjectId: projectId,
     };
   } catch (e) {
     console.log('[site-snapshot] err:', e.message);
@@ -120,7 +131,9 @@ async function buildSiteSnapshotAsync(userId, opts) {
 function renderSiteSnapshotForPrompt(snap, maxChars) {
   if (!snap) return '';
   maxChars = maxChars || 3500;
-  let out = '\n\n=== 用户在 BioF3 的全部资源（实时数据，可直接引用） ===\n';
+  let out = snap.scopeProjectId
+    ? '\n\n=== 当前项目资源（实时数据，仅限当前项目） ===\n'
+    : '\n\n=== 用户的全部资源（实时数据，可直接引用） ===\n';
   out += '注：所有 id 都可以用于 navigate、recluster、start_analysis 等 action。优先使用这里的真实数据回答用户。\n';
 
   if (snap.projects.length === 0) {
@@ -173,11 +186,21 @@ function buildSiteSnapshot(userId, opts) {
   const maxAnalyses = o.maxAnalyses || 100;
   const maxDatasets = o.maxDatasets || 50;
   const maxProjects = o.maxProjects || 30;
+  const projectId = o.projectId ? String(o.projectId) : null;
 
   const sqlite = dbMod.getDatabase();
 
   try {
-    const projects = sqlite.prepare(`
+    const projects = projectId
+      ? sqlite.prepare(`
+      SELECT p.id, p.name, p.description, p.created_at, p.updated_at,
+        (SELECT COUNT(*) FROM datasets d WHERE d.project_id = p.id) AS dataset_count,
+        (SELECT COUNT(*) FROM analyses a WHERE a.dataset_id IN (SELECT id FROM datasets WHERE project_id = p.id)) AS analysis_count
+      FROM projects p
+      WHERE p.user_id = ? AND p.id = ?
+      LIMIT 1
+    `).all(userId, projectId)
+      : sqlite.prepare(`
       SELECT p.id, p.name, p.description, p.created_at, p.updated_at,
         (SELECT COUNT(*) FROM datasets d WHERE d.project_id = p.id) AS dataset_count,
         (SELECT COUNT(*) FROM analyses a WHERE a.dataset_id IN (SELECT id FROM datasets WHERE project_id = p.id)) AS analysis_count
@@ -187,7 +210,7 @@ function buildSiteSnapshot(userId, opts) {
       LIMIT ?
     `).all(userId, maxProjects);
 
-    if (projects.length === 0) return {projects: [], datasets: [], analyses: []};
+    if (projects.length === 0) return {projects: [], datasets: [], analyses: [], scopeProjectId: projectId};
 
     const projectIds = projects.map(p => p.id);
     const placeholders = projectIds.map(() => '?').join(',');
@@ -263,6 +286,7 @@ function buildSiteSnapshot(userId, opts) {
         uploadedAt: d.uploaded_at,
       })),
       analyses,
+      scopeProjectId: projectId,
     };
   } catch (e) {
     console.log('[site-snapshot:sync] err:', e.message);

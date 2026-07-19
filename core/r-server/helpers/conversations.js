@@ -42,8 +42,26 @@ sqlite.exec(`
   CREATE INDEX IF NOT EXISTS idx_msg_conv_ts ON copilot_messages(conversation_id, ts ASC);
 `);
 try { sqlite.exec('ALTER TABLE memory_vectors ADD COLUMN conversation_id TEXT'); } catch {}
+try { sqlite.exec('ALTER TABLE memory_vectors ADD COLUMN project_id TEXT'); } catch {}
 try { sqlite.exec('ALTER TABLE copilot_conversations ADD COLUMN project_id TEXT'); } catch {}
 try { sqlite.exec('CREATE INDEX IF NOT EXISTS idx_conv_project ON copilot_conversations(user_id, project_id, status, updated_at DESC)'); } catch {}
+try { sqlite.exec('CREATE INDEX IF NOT EXISTS idx_memvec_project ON memory_vectors(user_id, project_id, ts DESC)'); } catch {}
+try {
+  sqlite.exec(`
+    UPDATE memory_vectors
+    SET project_id = (
+      SELECT c.project_id FROM copilot_conversations c
+      WHERE c.id = memory_vectors.conversation_id
+    )
+    WHERE project_id IS NULL
+      AND conversation_id IS NOT NULL
+      AND EXISTS (
+        SELECT 1 FROM copilot_conversations c
+        WHERE c.id = memory_vectors.conversation_id
+          AND c.project_id IS NOT NULL
+      )
+  `);
+} catch {}
 try { sqlite.exec('ALTER TABLE copilot_conversations ADD COLUMN last_topic_shift_at TEXT'); } catch {}
 try { sqlite.exec('ALTER TABLE copilot_conversations ADD COLUMN last_topic_shift_reason TEXT'); } catch {}
 

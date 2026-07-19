@@ -52,9 +52,9 @@ function getMemoryStats(userId) {
   }
   try {
     const sumRow = sqlite
-      .prepare('SELECT msg_count, updated_at FROM chat_summaries WHERE user_id = ?')
+      .prepare('SELECT SUM(msg_count) AS msg_count, MAX(updated_at) AS updated_at FROM project_chat_summaries WHERE user_id = ?')
       .get(userId);
-    stats.summary = sumRow ? { msgCount: sumRow.msg_count, updatedAt: sumRow.updated_at } : null;
+    stats.summary = sumRow && sumRow.updated_at ? { msgCount: sumRow.msg_count, updatedAt: sumRow.updated_at } : null;
   } catch {
     stats.summary = null;
   }
@@ -85,6 +85,9 @@ function wipeAllMemory(userId) {
   } catch {}
   try {
     removed += sqlite.prepare('DELETE FROM chat_summaries WHERE user_id = ?').run(userId).changes;
+  } catch {}
+  try {
+    removed += sqlite.prepare('DELETE FROM project_chat_summaries WHERE user_id = ?').run(userId).changes;
   } catch {}
   try {
     removed += sqlite.prepare('DELETE FROM memory_vectors WHERE user_id = ?').run(userId).changes;

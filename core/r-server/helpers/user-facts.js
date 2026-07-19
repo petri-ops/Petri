@@ -33,6 +33,7 @@ async function _ensureTable() {
         content TEXT NOT NULL,
         pinned INTEGER NOT NULL DEFAULT 0,
         source TEXT NOT NULL DEFAULT 'auto',
+        project_id TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       );
@@ -41,6 +42,8 @@ async function _ensureTable() {
   } catch {
     /* ignore */
   }
+  try { await adb.prepare('ALTER TABLE user_facts ADD COLUMN project_id TEXT').run(); } catch {}
+  try { await adb.prepare('CREATE INDEX IF NOT EXISTS idx_user_facts_project ON user_facts(user_id, project_id, pinned DESC, updated_at DESC)').run(); } catch {}
 }
 
 const FACT_CATEGORIES = [
@@ -60,16 +63,15 @@ const FACT_CAT_LABEL = {
   learning_state: '学习状态',
 };
 
-async function listUserFactsAsync(userId, limit) {
+async function listUserFactsAsync(userId, limit, projectId = null) {
   if (!userId) return [];
   await _ensureTable();
   const adb = dbMod.getAsyncDatabase();
-  const sql = limit
-    ? 'SELECT * FROM user_facts WHERE user_id = ? ORDER BY pinned DESC, updated_at DESC LIMIT ?'
-    : 'SELECT * FROM user_facts WHERE user_id = ? ORDER BY pinned DESC, updated_at DESC';
-  const rows = limit
-    ? await adb.prepare(sql).all(userId, limit)
-    : await adb.prepare(sql).all(userId);
+  const scopeSql = projectId ? 'project_id = ?' : "COALESCE(project_id, '') = ''";
+  const args = projectId ? [userId, String(projectId)] : [userId];
+  const sql = `SELECT * FROM user_facts WHERE user_id = ? AND ${scopeSql} ORDER BY pinned DESC, updated_at DESC${limit ? ' LIMIT ?' : ''}`;
+  if (limit) args.push(limit);
+  const rows = await adb.prepare(sql).all(...args);
   return rows || [];
 }
 
@@ -81,7 +83,7 @@ async function getUserFactAsync(id, userId) {
     .get(id, userId);
 }
 
-async function upsertUserFactAsync({ id, userId, category, content, pinned = 0, source = 'auto' }) {
+async function upsertUserFactAsync({ id, userId, projectId = null, category, content, pinned = 0, source = 'auto' }) {
   if (!userId || !content || !category) return null;
   await _ensureTable();
   const adb = dbMod.getAsyncDatabase();
@@ -103,9 +105,9 @@ async function upsertUserFactAsync({ id, userId, category, content, pinned = 0, 
   const newId = id || 'fact_' + uuidv4().slice(0, 12);
   await adb
     .prepare(
-      `INSERT INTO user_facts(id, user_id, category, content, pinned, source, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?)`
+      `INSERT INTO user_facts(id, user_id, category, content, pinned, source, project_id, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?)`
     )
-    .run(newId, userId, category, content, pinnedVal, source, now, now);
+    .run(newId, userId, category, content, pinnedVal, source, projectId ? String(projectId) : null, now, now);
   return getUserFactAsync(newId, userId);
 }
 
@@ -115,10 +117,14 @@ async function deleteUserFactAsync(id, userId) {
   await adb.prepare('DELETE FROM user_facts WHERE id = ? AND user_id = ?').run(id, userId);
 }
 
-async function clearUserFactsAsync(userId) {
+async function clearUserFactsAsync(userId, projectId = null) {
   await _ensureTable();
   const adb = dbMod.getAsyncDatabase();
-  await adb.prepare('DELETE FROM user_facts WHERE user_id = ?').run(userId);
+  if (projectId) {
+    await adb.prepare('DELETE FROM user_facts WHERE user_id = ? AND project_id = ?').run(userId, String(projectId));
+  } else {
+    await adb.prepare("DELETE FROM user_facts WHERE user_id = ? AND COALESCE(project_id, '') = ''").run(userId);
+  }
 }
 
 function _normFact(s) {
@@ -127,8 +133,8 @@ function _normFact(s) {
 
 /** Build a compact text block of top facts for system prompt injection.
  *  FACTS_TTL_v1 — age-aware filter so old auto-extracted facts don't pollute current convo. */
-async function buildFactsBlockAsync(userId, maxChars = 1200) {
-  const facts = await listUserFactsAsync(userId, 80);
+async function buildFactsBlockAsync(userId, maxChars = 1200, projectId = null) {
+  const facts = await listUserFactsAsync(userId, 80, projectId);
   if (!facts || facts.length === 0) return '';
   const now = Date.now();
   const DAY = 86400_000;
@@ -175,16 +181,14 @@ async function buildFactsBlockAsync(userId, maxChars = 1200) {
 }
 
 // Sync wrapper for in-process callers.
-function buildFactsBlock(userId, maxChars = 1200) {
+function buildFactsBlock(userId, maxChars = 1200, projectId = null) {
   const _adb = dbMod.getAsyncDatabase();
   const sqlite = dbMod.getDatabase();
   let rows;
   try {
-    rows = sqlite
-      .prepare(
-        'SELECT * FROM user_facts WHERE user_id = ? ORDER BY pinned DESC, updated_at DESC LIMIT 80'
-      )
-      .all(userId);
+    rows = projectId
+      ? sqlite.prepare('SELECT * FROM user_facts WHERE user_id = ? AND project_id = ? ORDER BY pinned DESC, updated_at DESC LIMIT 80').all(userId, String(projectId))
+      : sqlite.prepare("SELECT * FROM user_facts WHERE user_id = ? AND COALESCE(project_id, '') = '' ORDER BY pinned DESC, updated_at DESC LIMIT 80").all(userId);
   } catch {
     return '';
   }
@@ -304,10 +308,10 @@ async function extractFactsFromMessages(messages, existingFacts) {
 }
 
 /** Extract + persist (de-duped). Fire-and-forget. */
-async function backgroundExtractFacts(userId, messages) {
+async function backgroundExtractFacts(userId, messages, projectId = null) {
   if (!userId) return;
   try {
-    const existing = await listUserFactsAsync(userId, 60);
+    const existing = await listUserFactsAsync(userId, 60, projectId);
     const newFacts = await extractFactsFromMessages(messages, existing);
     if (newFacts.length === 0) return;
     const existingSet = new Set(existing.map((f) => f.category + '||' + _normFact(f.content)));
@@ -317,6 +321,7 @@ async function backgroundExtractFacts(userId, messages) {
       if (existingSet.has(key)) continue;
       await upsertUserFactAsync({
         userId,
+        projectId,
         category: f.category,
         content: f.content.trim(),
         source: 'auto',
