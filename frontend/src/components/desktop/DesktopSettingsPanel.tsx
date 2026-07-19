@@ -16,6 +16,11 @@ import type { ComputeSettings } from '@/lib/electron';
 import { deleteProject, listProjects, setProjectStatus } from '@/lib/project-store';
 import type { Project } from '@/lib/project-types';
 import {
+  USER_MODEL_PROVIDER_OPTIONS,
+  USER_MODEL_ROLE_IDS,
+  isUserConfigurableModelProvider,
+} from '@/lib/model-provider-options';
+import {
   archiveConversation,
   deleteConversation,
   listConversations,
@@ -67,31 +72,10 @@ const MODEL_CAPABILITIES: Array<{ id: ModelCapability; label: string }> = [
   { id: 'reasoning', label: '推理' },
 ];
 
-const LOCAL_PROVIDERS = new Set(['ollama', 'lmstudio', 'vllm']);
-
-const PROVIDER_OPTIONS = [
-  ['deepseek', 'DeepSeek'],
-  ['openai', 'OpenAI'],
-  ['anthropic', 'Anthropic'],
-  ['openai-compatible', 'OpenAI-compatible'],
-  ['ollama', 'Ollama'],
-  ['lmstudio', 'LM Studio'],
-  ['vllm', 'vLLM'],
-  ['dashscope', 'DashScope Embedding'],
-  ['dashscope-vision', 'DashScope Vision'],
-] as const;
-
 function providerDefaults(provider: string, id: string): Partial<ChatModelPreset> {
   const defaults: Record<string, Partial<ChatModelPreset>> = {
     deepseek: { model: 'deepseek-chat', capabilities: ['chat', 'streaming', 'tools'], credentialRef: 'provider:deepseek' },
-    openai: { model: '', capabilities: ['chat', 'streaming', 'tools'], credentialRef: 'provider:openai' },
-    anthropic: { model: '', protocol: 'anthropic-messages', capabilities: ['chat', 'streaming', 'tools'], credentialRef: 'provider:anthropic' },
     'openai-compatible': { model: '', capabilities: ['chat', 'streaming', 'tools'], credentialRef: `credential:${id}` },
-    ollama: { model: '', baseUrl: 'http://127.0.0.1:11434/v1', capabilities: ['chat', 'streaming', 'tools'], credentialRef: 'provider:ollama' },
-    lmstudio: { model: '', baseUrl: 'http://127.0.0.1:1234/v1', capabilities: ['chat', 'streaming', 'tools'], credentialRef: 'provider:lmstudio' },
-    vllm: { model: '', baseUrl: 'http://127.0.0.1:8000/v1', capabilities: ['chat', 'streaming', 'tools'], credentialRef: 'provider:vllm' },
-    dashscope: { model: 'text-embedding-v3', protocol: 'dashscope-native', capabilities: ['embedding'], credentialRef: 'provider:dashscope' },
-    'dashscope-vision': { model: 'qwen-vl-max', protocol: 'dashscope-native', capabilities: ['vision'], credentialRef: 'provider:dashscope' },
   };
   return { protocol: 'openai-compatible', baseUrl: undefined, ...defaults[provider] };
 }
@@ -789,6 +773,12 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
 
   const activeSectionMeta = SETTINGS_SECTIONS.find((item) => item.id === activeSection) || SETTINGS_SECTIONS[0];
   const showAiSave = activeSection === 'models' || activeSection === 'credentials';
+  const userModelProfiles = modelProfiles.filter((profile) =>
+    isUserConfigurableModelProvider(profile.provider)
+  );
+  const userModelRoles = MODEL_ROLES.filter((role) =>
+    USER_MODEL_ROLE_IDS.includes(role.id as (typeof USER_MODEL_ROLE_IDS)[number])
+  );
 
   return (
     <div className="biof3-desktop-panel" role="dialog" aria-label="设置">
@@ -848,10 +838,10 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
           <section className="biof3-settings-section">
             <div className="biof3-settings-section__heading">
               <h3>AI 模型</h3>
-              <p>添加多个模型，并为聊天、Agent、规划、视觉和后台任务分别指定默认模型。</p>
+              <p>使用 DeepSeek，或接入一个兼容 OpenAI 协议的自定义 API。</p>
             </div>
             <div className="biof3-model-list">
-              {modelProfiles.map((profile) => (
+              {userModelProfiles.map((profile) => (
                 <div key={profile.id} className="biof3-model-preset">
                   <div className="biof3-model-preset__header">
                     <span>{profile.label || profile.model || '未命名模型'}</span>
@@ -867,20 +857,20 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                   aria-label="模型显示名称"
                 />
                 <select className="biof3-select" value={profile.provider} onChange={(e) => changeProvider(profile, e.target.value)} aria-label="Provider">
-                  {PROVIDER_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                  {USER_MODEL_PROVIDER_OPTIONS.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
                 </select>
                 <input
                   className="biof3-input"
                   value={profile.model}
                   onChange={(e) => updateProfile(profile.id, { model: e.target.value })}
-                  placeholder="模型名称，例如 qwen3:14b"
+                  placeholder={profile.provider === 'deepseek' ? 'deepseek-chat' : '模型名称'}
                   aria-label="模型名称"
                 />
                 <input
                   className="biof3-input"
                   value={profile.baseUrl || ''}
                   onChange={(e) => updateProfile(profile.id, { baseUrl: e.target.value || undefined })}
-                  placeholder={LOCAL_PROVIDERS.has(profile.provider) || profile.provider === 'openai-compatible' ? 'Endpoint / Base URL' : 'Base URL（可选，留空使用官方地址）'}
+                  placeholder={profile.provider === 'openai-compatible' ? 'API Base URL，例如 https://example.com/v1' : '留空使用 DeepSeek 官方 API'}
                   aria-label="Base URL"
                 />
                 <div className="biof3-model-capabilities" aria-label="模型能力">
@@ -893,10 +883,10 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                 </div>
               </div>
             ))}
-              {modelProfiles.length === 0 && <p className="biof3-field__hint">尚未配置模型。添加一个模型后再绑定任务角色。</p>}
+              {userModelProfiles.length === 0 && <p className="biof3-field__hint">尚未配置模型。添加一个自定义 API，或选择 DeepSeek。</p>}
             </div>
             <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={addProfile}>
-              添加模型
+              添加自定义 API
             </button>
 
             <div className="biof3-model-routing">
@@ -907,8 +897,8 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                   <span className="biof3-toggle-label">允许显式故障转移</span>
                 </label>
               </div>
-              {MODEL_ROLES.map((role) => {
-                const eligible = modelProfiles.filter((profile) => (profile.capabilities || []).includes(role.capability));
+              {userModelRoles.map((role) => {
+                const eligible = userModelProfiles.filter((profile) => (profile.capabilities || []).includes(role.capability));
                 const primaryId = roleBindings[role.id] || '';
                 const fallbackId = fallbackBindings[role.id]?.[0] || '';
                 return (
@@ -938,20 +928,19 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
               <p>管理模型服务密钥。已配置密钥不会回显；{credentialBackend === 'keychain' ? '当前使用 macOS Keychain。' : '当前使用独立本地凭据存储。'}</p>
             </div>
             <div className="biof3-model-list">
-              {modelProfiles.map((profile) => {
+              {userModelProfiles.map((profile) => {
                 const id = credentialId(profile);
-                const local = LOCAL_PROVIDERS.has(profile.provider);
                 const configured = !!credentialStatus[id];
                 return (
                   <div key={profile.id} className="biof3-credential-card">
                     <label className="biof3-field__label">
                       {profile.label || profile.model}
                       <span className="biof3-field__hint">{profile.provider} · {id}</span>
-                      {(configured || local) && <span className="biof3-badge"><Icon name="check" size={12} /> {local ? '本地免 Key' : '已配置'}</span>}
+                      {configured && <span className="biof3-badge"><Icon name="check" size={12} /> 已配置</span>}
                     </label>
                     <div className="biof3-input-row">
-                      <input type="password" className="biof3-input" value={credentialInputs[id] || ''} onChange={(e) => setCredentialInputs((current) => ({ ...current, [id]: e.target.value }))} disabled={local} placeholder={local ? '本地 Provider 无需 API Key' : configured ? '已配置（输入新 Key 覆盖）' : '输入 API Key'} />
-                      <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => void handleTest(profile)} disabled={testing === profile.id || (!local && !configured && !credentialInputs[id])}>
+                      <input type="password" className="biof3-input" value={credentialInputs[id] || ''} onChange={(e) => setCredentialInputs((current) => ({ ...current, [id]: e.target.value }))} placeholder={configured ? '已配置（输入新 Key 覆盖）' : '输入 API Key'} />
+                      <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => void handleTest(profile)} disabled={testing === profile.id || (!configured && !credentialInputs[id])}>
                         {testing === profile.id ? '测试中…' : '测试连接'}
                       </button>
                     </div>
@@ -959,7 +948,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                   </div>
                 );
               })}
-              {modelProfiles.length === 0 && <p className="biof3-field__hint">先在“AI 模型”中添加模型，再配置凭据和测试连接。</p>}
+              {userModelProfiles.length === 0 && <p className="biof3-field__hint">先在“AI 模型”中选择 DeepSeek 或添加自定义 API。</p>}
             </div>
           </section>
         )}
