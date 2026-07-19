@@ -450,7 +450,7 @@ function _buildReportHtml({
     <div class="cover">
       <div class="cover-title">单细胞分析报告</div>
       <div class="cover-subtitle">${_escapeHtml(title)}</div>
-      <div style="font-size:11pt;color:#6b7280;margin-top:30px">由 BioF3 Copilot 自动生成</div>
+      <div style="font-size:11pt;color:#6b7280;margin-top:30px">由 AI 分析助手根据项目记录生成</div>
       <div class="cover-meta">
         生成时间：${_escapeHtml(generatedAt)}<br/>
         ${user ? '用户：' + _escapeHtml(user) : ''}

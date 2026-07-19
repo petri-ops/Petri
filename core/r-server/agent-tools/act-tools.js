@@ -229,7 +229,7 @@ async function tool_act(args, ctx) {
   if (isAgentPaused(userId)) {
     return {
       error: 'agent_paused',
-      message: '用户已暂停 agent 自主操作。请用户先在 Copilot 设置里恢复。',
+      message: '用户已暂停 agent 自主操作。请先在助手设置里恢复。',
     };
   }
   // Rate limit: 5 acts / minute

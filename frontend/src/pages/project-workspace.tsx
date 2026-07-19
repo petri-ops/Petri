@@ -39,7 +39,6 @@ import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/even
 import { getBrowserViewportSize, isBioF3LocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { useTheme } from '@/themes/ThemeProvider';
-import { getNextSteps, buildChainPrompt, type ResolvedJob } from '@/lib/workflow-chains';
 import {
   fetchHarnessIndex,
   runHarnessWorkflowAction,
@@ -3527,74 +3526,6 @@ export function ResultSidebarPanel({
       variant="sidebar"
       showHarnessIndex
     />
-  );
-}
-
-// ============================================================
-// ChainRecommendations — Phase 8: recommend next analysis steps
-// ============================================================
-
-function ChainRecommendations({
-  job,
-  resultFiles,
-  onAskAgent,
-}: {
-  job: ToolJob;
-  resultFiles?: JobResultFile[];
-  onAskAgent: (prompt: string) => void;
-}): React.ReactElement | null {
-  // Only show for completed jobs
-  if (job.status !== 'done') return null;
-
-  const steps = getNextSteps(job.tool_id);
-  if (steps.length === 0) return null;
-
-  // Build a resolved job for param mapping
-  const resolvedJob: ResolvedJob = {
-    id: job.id,
-    toolId: job.tool_id,
-    resultFiles: resultFiles?.map((f) => ({
-      name: artifactName(f),
-      url: f.url || '',
-      type: f.type,
-      label: f.label || f.title,
-    })),
-  };
-
-  // Find tool title for each step
-  const findTitle = (id: string) =>
-    staticTools.find((t) => t.id === id)?.title || id;
-
-  return (
-    <div className={styles.chainRecs}>
-      <div className={styles.chainRecsHeader}>
-        <Icon name="zap" size={14} />
-        <span>推荐下一步分析</span>
-      </div>
-      <div className={styles.chainRecsBody}>
-        {steps.map((step, i) => {
-          const toTitle = findTitle(step.to);
-          return (
-            <button
-              key={i}
-              className={styles.chainRecItem}
-              onClick={() => {
-                const prompt = buildChainPrompt(step, resolvedJob, findTitle(job.tool_id));
-                onAskAgent(prompt);
-              }}
-              title={step.reason}
-            >
-              <span className={styles.chainRecArrow}>→</span>
-              <div className={styles.chainRecMeta}>
-                <span className={styles.chainRecTitle}>{toTitle}</span>
-                <span className={styles.chainRecReason}>{step.reason}</span>
-              </div>
-              <span className={styles.chainRecCta}>发送给 Agent</span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
   );
 }
 

@@ -167,8 +167,8 @@ function StepWelcome(): React.ReactElement {
         <div className="biof3-onboarding__tip">
           <Icon name="brain" size={18} />
           <div>
-            <strong>AI Copilot 陪学</strong>
-            <p>内置 DeepSeek 驱动的 Copilot，解释代码、查文档、辅助决策。</p>
+            <strong>AI 分析助手</strong>
+            <p>连接你配置的模型，解释结果、核对分析信息并辅助决策。</p>
           </div>
         </div>
       </div>

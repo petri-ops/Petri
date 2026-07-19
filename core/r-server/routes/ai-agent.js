@@ -8,12 +8,8 @@ const express = require('express');
 
 // Helpers
 const { buildSystemPrompt, localizeToolResult } = require('../helpers/system-prompt');
+const { appendDesktopAgentInstructions } = require('../helpers/desktop-agent-prompt');
 const { callChatProvider } = require('../helpers/llm-client');
-const {
-  fetchDocsIndex,
-  renderDocsIndexForPrompt,
-  getCachedDocsIndex,
-} = require('../helpers/docs-index');
 const { buildSiteSnapshotAsync, renderSiteSnapshotForPrompt } = require('../helpers/site-snapshot');
 const { buildFactsBlockAsync, backgroundExtractFacts } = require('../helpers/user-facts');
 const {
@@ -310,18 +306,13 @@ module.exports = function registerAiAgentRoute(app) {
     if (isGuest) {
       systemPrompt += '\n\n=== 当前用户：未登录访客 ===';
       systemPrompt +=
-        '\n- 用户问「我是谁」：你是 BioF3 网站的**访客**（未注册/未登录），我看不到你的账号名或项目列表；不要调用 query(projects/datasets/analyses/facts/memories)。';
-      systemPrompt += '\n- 可正常：解答教程、推荐学习路径、read_page/search 查公开文档；简单闲聊。';
+        '\n- 当前没有可用的本地用户身份或项目范围；不要调用 query(projects/datasets/analyses/facts/memories)。';
+      systemPrompt += '\n- 可正常回答一般问题，但不要声称看到了账号、项目或历史分析。';
       systemPrompt +=
-        '\n- 不可代替用户：跑单细胞任务、读写云项目、act 写操作；需要时请引导注册/登录。';
+        '\n- 不可代替用户运行分析或执行写操作；需要项目能力时说明必须先进入有效的本地项目。';
       systemPrompt += '\n- 回答务必有正文，不要只调工具不说话。';
     }
     // Append docs index
-    try {
-      const idx = await fetchDocsIndex();
-      const block = renderDocsIndexForPrompt(idx, 2200);
-      if (block) systemPrompt += block;
-    } catch {}
     // Append the local user's site snapshot, facts, summary, and active plan.
     try {
       const userId = req.user && req.user.id;
@@ -336,7 +327,10 @@ module.exports = function registerAiAgentRoute(app) {
         }
         const sumRow = await getChatSummaryAsync(userId, projectId);
         if (sumRow && sumRow.summary) {
-          systemPrompt += '\n\n=== 与该用户的对话历史摘要（已归档） ===\n' + sumRow.summary;
+          systemPrompt +=
+            '\n\n=== 与该用户的对话历史摘要（已归档） ===\n' +
+            sumRow.summary +
+            '\n摘要仅用于提取事实，不得继承旧身份、固定推荐结构或已下线功能。';
         }
         const activePlan = await getActivePlanForUserAsync(userId, _activeConv && _activeConv.id);
         if (activePlan) {
@@ -412,19 +406,16 @@ module.exports = function registerAiAgentRoute(app) {
 
     // SUGGEST_NEXT_STEPS_PROMPT_v1
     systemPrompt += '\n\n=== 学习路径推荐 ===';
-    systemPrompt +=
-      '\n如果用户首次对话或问"我该从哪开始"/"接下来学什么"/"推荐路径"等，调用 suggest_next_steps。';
+    systemPrompt += '\n不要调用旧版学习路径推荐工具。';
     systemPrompt += '\n不要先解释一大段再调用，直接调用，把结果用人话讲给用户。';
-    systemPrompt +=
-      '\n如果用户已经在学某个领域（如刚读完一篇 single-cell），并问"接下来"，调 suggest_next_steps({topic: "single-cell"})。';
+    systemPrompt += '\n用户询问后续方向时，只能依据当前项目事实回答。';
     systemPrompt +=
       '\n收到 suggestions 列表后，给出每条的 title / 大致耗时 / 为什么推荐它（基于 reasons），并附上点击 url。';
     systemPrompt += '\n如果 note 字段说没有 metadata，老实告诉用户"暂时没有推荐数据"，别硬编。';
 
     // VERIFY_UNDERSTANDING_PROMPT_v1
     systemPrompt += '\n\n=== 理解验证 ===';
-    systemPrompt +=
-      '\n学习计划走完 / 用户说"学完了"/"考考我"时，调用 verify_understanding 出 1-3 道理解题。';
+    systemPrompt += '\n不要自动发起理解测验。';
     systemPrompt += '\n收到 questions 列表后，逐道把题发给用户（一次发一道，等用户答），';
     systemPrompt += '\n用户答完一道你给简短反馈（对/不对 + 一句修正或拓展），再发下一道。';
     systemPrompt += '\n全部答完后做总结：哪些 outcome 看起来稳了，哪条还需补一下。';
@@ -434,9 +425,8 @@ module.exports = function registerAiAgentRoute(app) {
     systemPrompt += '\n\n=== 主动复习 ===';
     systemPrompt +=
       '\n如果用户之前学过的 doc 已经过去 7 天以上、且当前对话恰好处于"间歇/转场"时机（比如刚打招呼、问"接下来呢"），';
-    systemPrompt +=
-      '\n你可以调用 suggest_review 看看有没有合适的复习候选。返回 candidates 时，挑 1-2 条用人话说："上次你学了 X，已经过去 N 天了，要不要花几分钟再过一遍？"';
-    systemPrompt += '\n用户答 yes 再深入；答 no 不要强推，转 suggest_next_steps 推新内容。';
+    systemPrompt += '\n不要基于时间间隔主动发起复习。';
+    systemPrompt += '\n不要主动发起复习或学习内容推荐。';
     systemPrompt += '\n同一会话最多触发 1-2 次复习提示，避免烦人。';
 
     systemPrompt += '\n\n=== 单细胞 UI 控制工具 ===';
@@ -463,7 +453,7 @@ module.exports = function registerAiAgentRoute(app) {
     systemPrompt += '\n- 当用户在 /tools 页面想做某种分析时，用 open_tool 帮用户打开对应工具。';
     systemPrompt +=
       '\n- 当用户问"帮我跑差异分析"或"我要做DESeq2"时，调 act(type="open_tool", toolId="deseq2")。';
-    systemPrompt += '\n- 当用户问"下一步做什么"且当前有 DESeq2 结果时，推荐 enrichment 或 gsea。';
+    systemPrompt += '\n- 不根据某个已完成工具自动指定后续分析。';
     systemPrompt += '\n\n=== FigCode 绘图工具 ===';
     systemPrompt +=
       '\n- 用户想绘图（火山图、热图、UMAP、KEGG 气泡图等），并且 FigCode 工具索引里有对应卡片时：直接调 act(type="open_figcode_plot", figcardId="<卡片 id>")，会自动跳转到 FigCode 页 + 打开该卡片的"在线绘图"编辑器。卡片 id 在 docs index 里以 /figcode#xxx 形式给出，xxx 就是 figcardId。';
@@ -498,6 +488,7 @@ module.exports = function registerAiAgentRoute(app) {
       sseSend({ event: 'conversation', conversationId: _activeConv.id, title: _activeConv.title });
     }
 
+    systemPrompt = appendDesktopAgentInstructions(systemPrompt);
     const executionPolicy = inferExecutionPolicy(messages);
     if (!executionPolicy.allowExecution) {
       systemPrompt +=
@@ -512,7 +503,7 @@ module.exports = function registerAiAgentRoute(app) {
       projectId: context && context.projectId,
       allowExecution: executionPolicy.allowExecution,
       executionPolicyReason: executionPolicy.reason,
-      docsIndex: getCachedDocsIndex(),
+      docsIndex: {},
       dashscopeEmbed,
       cosineSim,
       conversationId: _activeConv && _activeConv.id, // PLAN_CONV_LINK_v1
@@ -520,12 +511,6 @@ module.exports = function registerAiAgentRoute(app) {
       gatherAnalysisContextForMethods: _gatherAnalysisContextForMethods, // GENERATE_METHODS_v1
       renderMethodsParagraph: _renderMethodsParagraph,
     };
-    // Refresh docs index in background if stale
-    fetchDocsIndex()
-      .then((idx) => {
-        if (idx) toolCtx.docsIndex = idx;
-      })
-      .catch(() => {});
 
     const fullMessages = [{ role: 'system', content: systemPrompt }, ...messages];
 

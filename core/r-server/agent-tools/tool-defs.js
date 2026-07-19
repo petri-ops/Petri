@@ -13,24 +13,15 @@ const TOOL_DEFS = [
     function: {
       name: 'query',
       description:
-        '查询用户在 BioF3 上的任意结构化资源。返回 JSON 数组。' +
-        '资源类型：projects | datasets | analyses | facts | memories | docs | figcode | blog. ' +
+        '查询当前项目范围内的结构化资源。返回 JSON 数组。' +
+        '资源类型：projects | datasets | analyses | facts | memories. ' +
         '当你需要更详细的资源信息（system prompt 里没有的字段）时调用此工具。',
       parameters: {
         type: 'object',
         properties: {
           resource: {
             type: 'string',
-            enum: [
-              'projects',
-              'datasets',
-              'analyses',
-              'facts',
-              'memories',
-              'docs',
-              'figcode',
-              'blog',
-            ],
+            enum: ['projects', 'datasets', 'analyses', 'facts', 'memories'],
             description: '资源类型',
           },
           id: { type: 'string', description: '可选：精确查找某条记录' },
@@ -49,8 +40,7 @@ const TOOL_DEFS = [
     function: {
       name: 'read_page',
       description:
-        '读取一篇教程、博客或 FigCode 工具的完整内容。url 必须是站内路径，例如 /docs/single-cell/module05 或 /figcode#volcano。' +
-        '也支持读取已安装内容插件的教程片段：url 形如 /plugin/<pluginId>/<slug>（如 /plugin/deseq2-tutorial/quickstart）。' +
+        '读取已安装内容插件的教程片段。url 形如 /plugin/<pluginId>/<slug>（如 /plugin/deseq2-tutorial/quickstart）。' +
         '当分析现场卡住、不确定某工具/流程怎么用时，先调 read_page 查对应插件教程片段再回答用户。',
       parameters: {
         type: 'object',
@@ -58,7 +48,7 @@ const TOOL_DEFS = [
           url: {
             type: 'string',
             description:
-              '站内路径（不含 https:// 前缀）。教程用 /docs/...，FigCode 用 /figcode#...，内容插件用 /plugin/<id>/<slug>。',
+              '已安装内容插件路径，格式为 /plugin/<id>/<slug>。',
           },
         },
         required: ['url'],
@@ -70,21 +60,20 @@ const TOOL_DEFS = [
     function: {
       name: 'search',
       description:
-        '在 BioF3 全站做语义 + 关键词混合检索。返回最相关的若干条目（混合教程/工具/历史对话/已装内容插件教程片段）。' +
-        '当用户的问题需要找站点中匹配某个主题/概念的内容时使用。' +
-        '分析卡住、不确定某工具/流程怎么用时也可调用，scope 可选 plugins 只搜内容插件。',
+        '在当前项目记忆或已安装内容插件中做语义 + 关键词检索。' +
+        '分析卡住、不确定某工具或流程怎么用时，优先用 scope=plugins。',
       parameters: {
         type: 'object',
         properties: {
           q: { type: 'string', description: '查询语句' },
           scope: {
             type: 'string',
-            enum: ['all', 'docs', 'figcode', 'memories', 'plugins'],
-            description: '默认 all。plugins 只搜已装内容插件的教程片段。',
+            enum: ['memories', 'plugins'],
+            description: 'memories 搜当前项目记忆；plugins 搜已安装内容插件。',
           },
           topK: { type: 'integer', description: '返回多少条，默认 5，最大 15' },
         },
-        required: ['q'],
+        required: ['q', 'scope'],
       },
     },
   },
@@ -399,109 +388,6 @@ const TOOL_DEFS = [
           datasetId: { type: 'string', description: '可选：dataset id（取所有完成的分析）' },
           language: { type: 'string', enum: ['zh', 'en', 'both'], description: '语言，默认 zh' },
         },
-      },
-    },
-  },
-  // SUGGEST_NEXT_STEPS_v1
-  {
-    type: 'function',
-    function: {
-      name: 'suggest_next_steps',
-      description:
-        'SUGGEST_NEXT_STEPS_v1 — 基于当前用户已学进度（user_progress 表）和 copilot-index.json 元数据，推荐 3-5 条可执行的"下一步"。' +
-        '适用场景：用户首次进站不知道从哪开始；用户问"接下来该学什么"；用户在某领域（如 single-cell）已有进度但卡壳时。' +
-        '不要为了写"我可以推荐..."这种过场话调用此工具，调用就要把结果直接给用户。' +
-        '可选参数 topic（领域偏好，如 "single-cell" / "bulk-rnaseq" / "basics"）；不传则自动按用户进度推断。',
-      parameters: {
-        type: 'object',
-        properties: {
-          topic: { type: 'string', description: '可选：用户偏好的领域（copilot.domain 枚举值）' },
-          limit: { type: 'number', description: '返回条数，默认 4，最多 6' },
-        },
-      },
-    },
-  },
-  // VERIFY_UNDERSTANDING_v1
-  {
-    type: 'function',
-    function: {
-      name: 'verify_understanding',
-      description:
-        'VERIFY_UNDERSTANDING_v1 — 在用户完成一篇 docs 的学习流程之后，调用此工具生成 1-3 道理解题。' +
-        '题目基于该篇 docs 的 copilot.learning_outcomes，帮你验证用户是否真的学到了。' +
-        '调用时机：学习计划全部完成 / 用户说"我学完了"/"出题考考我" 时。' +
-        '不要为了凑话调用，调用就把题目逐道发给用户、收到答案后简短反馈。',
-      parameters: {
-        type: 'object',
-        properties: {
-          docUrl: {
-            type: 'string',
-            description:
-              '要出题的 docs URL，例如 "/docs/single-cell/module03"。如果当前页就是该 doc，可直接传 ctx.page 对应的 url。',
-          },
-          count: {
-            type: 'number',
-            description: '题目数量，默认 2，最多 3。',
-          },
-        },
-        required: ['docUrl'],
-      },
-    },
-  },
-  // SUGGEST_REVIEW_v1
-  {
-    type: 'function',
-    function: {
-      name: 'suggest_review',
-      description:
-        'SUGGEST_REVIEW_v1 — 找出用户 N 天前已完成、现在适合再过一遍的 docs。' +
-        '调用时机：用户重新进站、问"接下来学什么"、或你判断当前对话有合适的"复习而非新学"窗口时。' +
-        '返回的每条候选都附带它的 learning_outcomes，方便你直接用一两道问题快速测一下。' +
-        '不要每次都调用，频率掌握在合理范围（同一会话最多 1-2 次）。',
-      parameters: {
-        type: 'object',
-        properties: {
-          days_threshold: {
-            type: 'number',
-            description: '完成多少天之前的内容才算"该复习"。默认 7。',
-          },
-          limit: {
-            type: 'number',
-            description: '最多返回几条候选，默认 3，最多 5。',
-          },
-        },
-      },
-    },
-  },
-  // LEARNING_MEMORY_v1 — record mastery signal
-  {
-    type: 'function',
-    function: {
-      name: 'record_learning_signal',
-      description:
-        'LEARNING_MEMORY_v1 — 记录用户对某个概念的掌握信号。' +
-        '使用场景：调用 verify_understanding 让用户回答题之后，根据答得对不对，给每个相关 outcome / concept 打一个 weak / moderate / strong。' +
-        '系统会用这些信号优先推荐复习内容。' +
-        '不是让你写笔记，而是用 1-2 词的"概念"+ 一个等级。',
-      parameters: {
-        type: 'object',
-        properties: {
-          resource: {
-            type: 'string',
-            description: '该概念所属 doc/figcode 的 url，例如 "/docs/single-cell/module03"。',
-          },
-          concept: {
-            type: 'string',
-            description:
-              '一两个词的概念关键词，例如 "UMAP" / "线粒体过滤" / "DESeq2 dispersion"。建议从 doc 的 learning_outcomes 里挑词。',
-          },
-          signal: {
-            type: 'string',
-            description: '"weak" 答错或答得很差｜"moderate" 答得有点意思但不全｜"strong" 答得到位',
-          },
-          note: { type: 'string', description: '可选：一句话备注，比如"对降维原理还是模糊"。' },
-        },
-        required: ['resource', 'concept', 'signal'],
       },
     },
   },

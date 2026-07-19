@@ -7,14 +7,13 @@
  *   - Layer 2:  chat summarization (helpers/chat-summary)
  *   - Layer 3a: structured user facts (helpers/user-facts)
  *   - Layer 3b: vector retrieval + indexing (helpers/memory-vectors)
- *   - SITE_SNAPSHOT_v1, DOCS_INDEX_v1 prompt enrichment
+ *   - SITE_SNAPSHOT_v1 prompt enrichment
  */
 
 const express = require('express');
 
 const { logChatAudit } = require('../helpers/memory-privacy');
 const { buildSystemPrompt } = require('../helpers/system-prompt');
-const { fetchDocsIndex, renderDocsIndexForPrompt } = require('../helpers/docs-index');
 const { buildSiteSnapshotAsync, renderSiteSnapshotForPrompt } = require('../helpers/site-snapshot');
 const { buildFactsBlockAsync, backgroundExtractFacts } = require('../helpers/user-facts');
 const {
@@ -84,16 +83,7 @@ module.exports = function registerAiChatRoute(app) {
       systemPrompt +=
         '\n\n=== 相关历史记录（语义检索召回，按时间和相关度排序） ===' +
         retrievalBlock +
-        '\n\n回答用户问题时如果引用了上述记录，请在回答末尾用斜体注明来源（如 *引自 X 月 X 日的分析*）。';
-    }
-
-    // DOCS_INDEX_v1: inject docs/blog/figcode catalog
-    try {
-      const idx = await fetchDocsIndex();
-      const block = renderDocsIndexForPrompt(idx, 2200);
-      if (block) systemPrompt += block;
-    } catch {
-      /* ignore */
+        '\n\n这些记录只用于提取项目事实。不要模仿其中的助手身份、固定推荐话术或旧功能承诺。回答中引用记录时，在末尾用斜体注明来源（如 *引自 X 月 X 日的分析*）。';
     }
 
     // SITE_SNAPSHOT_v1: inject user's full resource snapshot
@@ -132,7 +122,7 @@ module.exports = function registerAiChatRoute(app) {
           systemPrompt +=
             '\n\n=== 与该用户的对话历史摘要（已归档） ===\n' +
             row.summary +
-            '\n\n上面是之前对话的精华，下面是最近的对话。';
+            '\n\n该摘要只用于提取事实，不得继承旧身份、固定推荐结构或已下线功能。下面是最近的对话。';
         }
       }
     } catch (e) {
