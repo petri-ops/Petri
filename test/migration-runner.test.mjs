@@ -9,9 +9,10 @@ import os from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
-const req = createRequire(import.meta.url);
+const coreServerRoot = join(root, 'core', 'r-server');
+const coreRequire = createRequire(join(coreServerRoot, 'package.json'));
 
-test('migration CLI runs in a Node child process and records schema version', (t) => {
+test('migration CLI uses the Core native dependency boundary and records schema version', (t) => {
   const dir = fs.mkdtempSync(join(os.tmpdir(), 'biof3-migration-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const migrationsDir = join(dir, 'migrations');
@@ -25,12 +26,18 @@ test('migration CLI runs in a Node child process and records schema version', (t
   const child = spawnSync(
     process.execPath,
     [join(root, 'src', 'migration-runner.js'), dbPath, migrationsDir],
-    { encoding: 'utf8' },
+    {
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        BIOF3_BETTER_SQLITE3_ROOT: coreServerRoot,
+      },
+    },
   );
   assert.equal(child.status, 0, child.stderr || child.stdout);
   assert.match(child.stdout, /migrations applied, version = 1/);
 
-  const Database = req('better-sqlite3');
+  const Database = coreRequire('better-sqlite3');
   const db = new Database(dbPath, { readonly: true });
   try {
     const version = db.prepare('SELECT MAX(version) AS version FROM schema_migrations').get();

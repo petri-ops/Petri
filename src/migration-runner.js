@@ -7,9 +7,24 @@
 // 注意：遵循 Global Constraints，不用 INSERT OR REPLACE / PRAGMA / AUTOINCREMENT。
 // migration SQL 用 BEGIN/COMMIT 包裹，单个 migration 失败回滚不影响已应用的。
 
-const Database = require('better-sqlite3');
 const fs = require('fs');
 const path = require('path');
+const { createRequire } = require('module');
+
+/**
+ * Development uses the system Node process for Core servers, while
+ * electron-builder rebuilds the root native dependency for Electron. Pointing
+ * the migration child at Core's dependency root avoids coupling startup to
+ * whichever ABI the last packaging/test command left in root node_modules.
+ */
+function loadDatabaseConstructor() {
+  const dependencyRoot = process.env.BIOF3_BETTER_SQLITE3_ROOT;
+  if (!dependencyRoot) return require('better-sqlite3');
+  const scopedRequire = createRequire(path.join(path.resolve(dependencyRoot), 'package.json'));
+  return scopedRequire('better-sqlite3');
+}
+
+const Database = loadDatabaseConstructor();
 
 const SCHEMA_TABLE_SQL = `CREATE TABLE IF NOT EXISTS schema_migrations (
   version INTEGER PRIMARY KEY,
@@ -81,7 +96,7 @@ async function runMigrations(dbPath, migrationsDir) {
   }
 }
 
-module.exports = { getAppliedVersion, runMigrations };
+module.exports = { getAppliedVersion, runMigrations, loadDatabaseConstructor };
 
 if (require.main === module) {
   const dbPath = process.argv[2];

@@ -204,8 +204,8 @@ function resolveCore(...parts) {
 }
 
 // ── 解析用来跑 r-server/py-server 的 node 可执行文件 ────────────
-// 开发模式：用系统 node（如 v23），避免 Electron 内置 node（v20/131）
-// 与 better-sqlite3（按系统 node 编译，137）版本不匹配导致崩溃。
+// 开发模式：用系统 Node，并让各子进程从 Core 的独立 node_modules
+// 加载原生依赖，避免与 electron-builder 重建后的根 ABI 混用。
 // PATH 查找不可靠（Electron 子进程 PATH 不含用户自定义 node 路径），
 // 所以用 execFileSync('which node') 拿绝对路径。
 // 打包模式：macOS 必须使用 Helper 可执行文件。直接 spawn 主应用可执行文件会
@@ -1804,6 +1804,12 @@ async function main() {
     const dbPath = process.env.BIOF3_DB_PATH;
     if (dbPath) {
       fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+      const migrationEnv = { ...process.env, ELECTRON_RUN_AS_NODE: "1" };
+      if (IS_DEV) {
+        migrationEnv.BIOF3_BETTER_SQLITE3_ROOT = resolveCore("r-server");
+      } else {
+        delete migrationEnv.BIOF3_BETTER_SQLITE3_ROOT;
+      }
       const migration = spawnSync(
         NODE_BIN,
         [path.join(__dirname, "migration-runner.js"), dbPath, migDir],
@@ -1811,7 +1817,7 @@ async function main() {
           cwd: PROJECT_ROOT,
           encoding: "utf8",
           timeout: 30000,
-          env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" },
+          env: migrationEnv,
         },
       );
       if (migration.error) throw migration.error;
