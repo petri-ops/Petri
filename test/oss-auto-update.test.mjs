@@ -18,6 +18,7 @@ test('macOS build scripts choose architecture without locking it in the DMG targ
   assert.doesNotMatch(macConfig, /arch:/);
   assert.doesNotMatch(builder, /target: zip/);
   assert.match(packageJson.scripts['build:mac'], /electron-builder --mac --arm64 --x64/);
+  assert.doesNotMatch(packageJson.scripts['build:mac'], /--publish/);
   assert.match(packageJson.scripts['build:mac-arm64'], /electron-builder --mac --arm64$/);
   assert.match(packageJson.scripts['build:mac-x64'], /electron-builder --mac --x64$/);
 });

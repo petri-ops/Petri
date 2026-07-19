@@ -208,6 +208,7 @@ let jobId = null;
         counts: Buffer.from(countsText, 'utf8').toString('base64'),
         coldata: Buffer.from(coldataText, 'utf8').toString('base64'),
       },
+      projectId,
     },
     headers: { Authorization: 'Bearer desktop-local' },
   });
@@ -248,12 +249,8 @@ let jobDiskSummary = null;
       break;
     }
     if (lastStatus === 'failed' || lastStatus === 'cancelled') {
-      // Known r-server local-mode gap: jobs land in `failed: Required artifact
-      // zip was not produced` even when the R analysis completed and all 23
-      // artifacts are on disk (zip post-processor doesn't run on this path).
-      // If we can see artifacts in /status.result.files,
-      // the analysis itself succeeded — continue to step 6 with the rescue
-      // path rather than bailing.
+      // Preserve an evidence-only rescue for older installed builds. Current
+      // Stage 4 builds must finish as completed and do not rely on this branch.
       const files = lastBody.result?.files || [];
       if (files.length >= 3) {
         log('WARN', `  job status=${lastStatus} but ${files.length} artifacts visible —`);
@@ -279,9 +276,20 @@ let servedUrl = null;
     headers: { Authorization: 'Bearer desktop-local' },
     timeoutMs: 60000,
   });
-  if (r.ok && r.body && r.body.ok === true && typeof r.body.html === 'string') {
-    htmlContent = r.body.html;
+  if (r.ok && r.body && r.body.ok === true) {
     servedUrl = r.body.url || null;
+    if (typeof r.body.html === 'string') {
+      htmlContent = r.body.html;
+    } else if (servedUrl) {
+      const served = await http('GET', servedUrl, {
+        headers: { Authorization: 'Bearer desktop-local' },
+        timeoutMs: 60000,
+      });
+      if (served.ok && typeof served.body === 'string') htmlContent = served.body;
+    }
+    if (typeof htmlContent !== 'string') {
+      bail(`report endpoint succeeded but no HTML could be read: ${JSON.stringify(r.body)?.slice(0, 500)}`, 2);
+    }
     mkdirSync(REPORT_OUT, { recursive: true });
     const baseName = `${TOOL_ID}-${jobId}`;
     const fileName = r.body.fileName || `${baseName}.html`;
@@ -290,18 +298,7 @@ let servedUrl = null;
     log('INFO', `✓ HTML report written: ${htmlPath} (${htmlContent.length} bytes)`);
     if (servedUrl) log('INFO', `  served URL: ${servedUrl}`);
   } else if (r.body && r.body.error === 'report_source_not_found') {
-    // Known local-mode gap: r-server marks jobs as "failed: Required artifact zip
-    // was not produced" when the zip post-processor isn't wired. The actual
-    // R analysis completed — 23
-    // artifacts exist on disk — but report endpoint returns 404 because the
-    // zip step didn't run.
-    //
-    // We treat this as a known-failure-with-recoverable-evidence and fall
-    // through to a 'disk-artifact rescue' path: read /status, harvest
-    // artifact metadata, write a best-effort run.json with
-    // exit: "analysis_succeeded_zip_packaging_pending" so the first-success
-    // path test still has something concrete to assert against. (See
-    // docs/first-success-path.md §C.)
+    // Compatibility rescue for pre-Stage-4 installed builds.
     log('WARN', `  report endpoint returned report_source_not_found (status=${r.status})`);
     log('WARN', '  → entering disk-artifact rescue path: R analysis likely succeeded;');
     log('WARN', '    r-server just could not bundle output/ → all_results.zip in local mode.');

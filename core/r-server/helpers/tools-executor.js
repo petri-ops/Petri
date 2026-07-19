@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { createResultArchive } = require('./result-archive');
 const { v4: uuidv4 } = require('uuid');
 const { execFile } = require('child_process');
 const { reconcileArtifactTruth } = require('./artifact-truth');
@@ -593,11 +594,15 @@ function createToolsExecutor({
         scriptSrc,
         path.join(jobDir, 'run-script.' + (cfg.lang === 'r' ? 'R' : 'py'))
       );
-      // 报告模板：内置工具按 toolId 在 scriptsDir 找；插件在 pluginDir 找
-      const templateSrc = cfg._isPlugin
-        ? path.join(cfg.pluginDir, toolId + '-report-template.html')
-        : path.join(scriptsDir, toolId + '-report-template.html');
-      if (fs.existsSync(templateSrc)) {
+      // 报告模板：插件自带模板优先；内置插件可复用 r-server 旧模板。
+      const templateCandidates = cfg._isPlugin
+        ? [
+            path.join(cfg.pluginDir, toolId + '-report-template.html'),
+            path.join(scriptsDir, toolId + '-report-template.html'),
+          ]
+        : [path.join(scriptsDir, toolId + '-report-template.html')];
+      const templateSrc = templateCandidates.find((candidate) => fs.existsSync(candidate));
+      if (templateSrc) {
         fs.copyFileSync(templateSrc, path.join(jobDir, 'report-template.html'));
       }
       if (cfg.lang === 'r') {
@@ -713,6 +718,33 @@ function createToolsExecutor({
           return;
         }
 
+        let expectedArtifacts = [];
+        try {
+          const pluginLoader = require('../plugin-loader');
+          const definition = pluginLoader.getToolDefinition(toolId);
+          expectedArtifacts = Array.isArray(definition && definition.outputs)
+            ? definition.outputs.map((item) =>
+                item && item.id === 'zip' && !item.filename && !item.name
+                  ? { ...item, filename: 'all_results.zip' }
+                  : item
+              )
+            : [];
+        } catch {}
+        const archiveArtifact = expectedArtifacts.find(
+          (item) => item && item.id === 'zip' && item.required !== false
+        );
+        if (archiveArtifact) {
+          try {
+            await createResultArchive(
+              outputDir,
+              archiveArtifact.filename || archiveArtifact.name || 'all_results.zip'
+            );
+          } catch (archiveError) {
+            await markJobFailed(jobId, `Result archive failed: ${archiveError.message}`, 'postprocess');
+            return;
+          }
+        }
+
         const manifestPath = path.join(outputDir, 'manifest.json');
         let result = {};
         if (fs.existsSync(manifestPath)) {
@@ -769,14 +801,6 @@ function createToolsExecutor({
             };
           });
         }
-        let expectedArtifacts = [];
-        try {
-          const pluginLoader = require('../plugin-loader');
-          const definition = pluginLoader.getToolDefinition(toolId);
-          expectedArtifacts = Array.isArray(definition && definition.outputs)
-            ? definition.outputs
-            : [];
-        } catch {}
         const truth = reconcileArtifactTruth({
           result,
           resultDir: outputDir,

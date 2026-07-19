@@ -25,6 +25,7 @@ const fs = require("fs");
 const nodeNet = require("net");
 const { spawn, spawnSync } = require("child_process");
 const { createMacOssUpdater } = require("./macos-oss-updater");
+const { redactSensitiveText } = require("./diagnostic-redaction");
 const {
   getNodeLocator,
   getRuntimeBinCandidates,
@@ -1370,8 +1371,8 @@ function setupFileDialogIpc() {
 
 // ── IPC：诊断日志导出 / 数据备份（M2-8）─────────────────────────
 function setupDiagnosticIpc() {
-  // 导出包：收集 r-server/py-server/main 日志 + 系统信息 + 整个数据目录
-  // （db + results + uploads），打包成 zip 供用户备份。
+  // 诊断包只收集脱敏日志、最小系统信息和插件摘要。数据库、设置、
+  // 对话、结果与凭据文件均不得进入诊断包。
   ipcMain.handle("diagnostic:export", async (event, targetPath) => {
     try {
       const logDir = _getLogDir();
@@ -1383,19 +1384,14 @@ function setupDiagnosticIpc() {
       if (!outPath && mainWindow) {
         const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
         const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
-          title: "导出我的数据",
-          defaultPath: `biof3-backup-${ts}.zip`,
+          title: "导出诊断日志",
+          defaultPath: `biof3-diagnostic-${ts}.zip`,
           filters: [{ name: "ZIP", extensions: ["zip"] }],
         });
         if (canceled) return { ok: false, error: "cancelled" };
         outPath = filePath;
       }
       if (!outPath) return { ok: false, error: "no output path" };
-
-      // M2-8：数据目录（db + results + uploads）
-      const dataDir =
-        process.env.BIOF3_LOCAL_DATA_DIR ||
-        path.join(app.getPath("documents"), "BioF3-Local");
 
       // 先 flush 日志流
       for (const s of Object.values(_logStreams)) {
@@ -1413,18 +1409,18 @@ function setupDiagnosticIpc() {
         appVersion: app.getVersion(),
         isPackaged: app.isPackaged,
         timestamp: new Date().toISOString(),
-        rHome: process.env.BIOF3_R_HOME || "(not set)",
-        pyHome: process.env.BIOF3_PY_HOME || "(not set)",
-        dataDir: process.env.BIOF3_LOCAL_DATA_DIR || "(not set)",
+        rRuntimeConfigured: !!process.env.BIOF3_R_HOME,
+        pythonRuntimeConfigured: !!process.env.BIOF3_PY_HOME,
       };
 
       // 用简单的方式打包：逐文件写入 zip（避免额外依赖）
       // 如果有 archiver 就用，没有就用 tar.gz
       let usedArchiver = false;
       try {
-        const archiver = require("archiver");
+        // archiver v8 is ESM-only; Electron's Node 20 cannot require() it.
+        const { ZipArchive } = await import("archiver");
         const output = createWriteStream(outPath);
-        const archive = archiver("zip", { zlib: { level: 6 } });
+        const archive = new ZipArchive({ zlib: { level: 6 } });
         output.on("close", () => {});
         archive.pipe(output);
 
@@ -1432,7 +1428,10 @@ function setupDiagnosticIpc() {
         for (const name of ["r-server", "py-server"]) {
           const logFile = path.join(logDir, `${name}.log`);
           if (fs.existsSync(logFile)) {
-            archive.file(logFile, { name: `${name}.log` });
+            archive.append(
+              redactSensitiveText(fs.readFileSync(logFile, "utf8")),
+              { name: `${name}.log` },
+            );
           }
         }
         // 添加系统信息
@@ -1447,25 +1446,10 @@ function setupDiagnosticIpc() {
           });
         } catch {}
 
-        // M2-8 备份/导出闭环：打包整个数据目录（db + results + uploads）
-        // 跳过 tmp 目录避免打包临时文件
-        if (fs.existsSync(dataDir)) {
-          try {
-            for (const entry of fs.readdirSync(dataDir, {
-              withFileTypes: true,
-            })) {
-              if (entry.name === "tmp") continue; // 临时目录不打包
-              const full = path.join(dataDir, entry.name);
-              if (entry.isDirectory()) {
-                archive.directory(full, entry.name);
-              } else if (entry.isFile()) {
-                archive.file(full, { name: entry.name });
-              }
-            }
-          } catch (e) {
-            console.warn("[diagnostic] add data dir failed:", e.message);
-          }
-        }
+        archive.append(
+          "This diagnostic package excludes databases, settings, conversations, results, and credential files.\n",
+          { name: "privacy.txt" },
+        );
 
         await archive.finalize();
         usedArchiver = true;
@@ -1483,7 +1467,9 @@ function setupDiagnosticIpc() {
           const logFile = path.join(logDir, `${name}.log`);
           lines.push(`\n=== ${name}.log ===`);
           try {
-            lines.push(fs.readFileSync(logFile, "utf8").slice(-5000)); // 最后 5000 字符
+            lines.push(
+              redactSensitiveText(fs.readFileSync(logFile, "utf8").slice(-5000)),
+            );
           } catch {
             lines.push("(log file not found)");
           }
@@ -1493,10 +1479,8 @@ function setupDiagnosticIpc() {
           lines.push("\n=== installed-plugins.json ===");
           lines.push(JSON.stringify(getInstalledPlugins(), null, 2));
         } catch {}
-        lines.push("\n=== data-dir note ===");
-        lines.push(
-          `数据目录位于 ${dataDir}（archiver 不可用，未打包；请手动复制该目录进行备份）`,
-        );
+        lines.push("\n=== privacy ===");
+        lines.push("诊断包不包含数据库、设置、对话、结果或凭据文件。");
         fs.writeFileSync(outPath, lines.join("\n"));
       }
 

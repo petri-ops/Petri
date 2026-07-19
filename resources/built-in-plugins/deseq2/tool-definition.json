@@ -46,7 +46,7 @@
     { "id": "pca", "type": "plot", "label": "PCA 图" },
     { "id": "heatmap", "type": "plot", "label": "Top50 热图" },
     { "id": "report", "type": "report", "label": "解读报告" },
-    { "id": "zip", "type": "file", "label": "全部结果打包下载" }
+    { "id": "zip", "filename": "all_results.zip", "type": "file", "label": "全部结果打包下载" }
   ],
   "tutorialUrl": "/docs/bulk-rnaseq/module02",
   "demoDataUrl": "/demo-data/deseq2-demo",
