@@ -10,13 +10,15 @@ import {
 function installBridge(opts: {
   initial?: Record<string, unknown>;
   save?: (patch: Record<string, unknown>) => Promise<void>;
+  listModels?: (profile: Record<string, unknown>, apiKey: string) => Promise<{ ok: boolean; models: string[]; message: string }>;
 } = {}) {
   const get = vi.fn().mockResolvedValue(opts.initial || null);
   const save = opts.save || vi.fn().mockResolvedValue(undefined);
+  const listModels = opts.listModels;
   (window as unknown as { biof3Desktop: unknown }).biof3Desktop = {
-    aiSettings: { get, save },
+    aiSettings: { get, save, ...(listModels ? { listModels } : {}) },
   };
-  return { get, save };
+  return { get, save, listModels };
 }
 
 function uninstallBridge() {
@@ -68,6 +70,56 @@ describe('useAiSettings', () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.presets.map((profile) => profile.id)).toEqual(['chat-a']);
     expect(result.current.activeId).toBe('chat-a');
+  });
+
+  it('expands one supplier endpoint into all discovered chat models and persists a switch', async () => {
+    const listModels = vi.fn().mockResolvedValue({
+      ok: true,
+      models: ['deepseek-v4-flash', 'deepseek-v4-pro'],
+      message: '已获取 2 个模型',
+    });
+    const { save } = installBridge({
+      initial: {
+        model_profiles: [
+          {
+            id: 'deepseek-chat',
+            label: 'DeepSeek Chat',
+            provider: 'deepseek',
+            model: 'deepseek-v4-flash',
+            capabilities: ['chat', 'streaming', 'tools'],
+          },
+        ],
+        model_role_bindings: { chat: 'deepseek-chat' },
+        active_chat_model_id: 'deepseek-chat',
+        chat_model_presets: [
+          { id: 'deepseek-chat', label: 'DeepSeek Chat', provider: 'deepseek', model: 'deepseek-v4-flash' },
+        ],
+      },
+      listModels,
+    });
+
+    const { result } = renderHook(() => useAiSettings());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.presets.map((preset) => preset.model)).toEqual([
+      'deepseek-v4-flash',
+      'deepseek-v4-pro',
+    ]);
+    expect(result.current.presets.every((preset) => preset.label === 'DeepSeek')).toBe(true);
+    expect(result.current.presets.every((preset) => preset.endpointProfileId === 'deepseek-chat')).toBe(true);
+    expect(result.current.activePreset.model).toBe('deepseek-v4-flash');
+
+    const pro = result.current.presets.find((preset) => preset.model === 'deepseek-v4-pro');
+    await act(async () => {
+      await result.current.setActive(pro!.id);
+    });
+    expect(result.current.activePreset.model).toBe('deepseek-v4-pro');
+    expect(save).toHaveBeenCalledWith(expect.objectContaining({
+      active_chat_model_id: 'deepseek-chat',
+      model_role_bindings: expect.objectContaining({ chat: 'deepseek-chat' }),
+      model_profiles: [
+        expect.objectContaining({ id: 'deepseek-chat', model: 'deepseek-v4-pro' }),
+      ],
+    }));
   });
 
   it('falls back to defaults when bridge returns invalid data', async () => {

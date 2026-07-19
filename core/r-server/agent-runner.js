@@ -431,7 +431,7 @@ async function runAgentLoop({
             _emit({ choices: [{ delta: { content: event.content } }] });
           }
         },
-        { baseUrl, profileId }
+        { baseUrl, profileId, modelOverride: modelName }
       );
       if (!upJson || upJson.error || !upJson.choices) {
         _emit({
@@ -621,7 +621,7 @@ async function runAgentLoop({
               _emit({ choices: [{ delta: { content: event.content } }] });
             }
           },
-          { baseUrl, profileId }
+          { baseUrl, profileId, modelOverride: modelName }
         );
         if (fbJson && fbJson.choices && fbJson.choices[0]) {
           const fbText = fallbackText || (fbJson.choices[0].message || {}).content || '';

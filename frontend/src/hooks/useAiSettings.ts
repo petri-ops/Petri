@@ -27,7 +27,11 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { getBridge } from '@/lib/desktopBridge';
-import { isChatSelectableProfile } from '@/lib/model-provider-options';
+import {
+  isChatSelectableProfile,
+  modelChoiceId,
+  modelSupplierName,
+} from '@/lib/model-provider-options';
 
 // ChatModelPreset type — extracted here so SimpleChat and
 // DesktopSettingsPanel no longer each carry their own copy.
@@ -45,6 +49,8 @@ export interface ChatModelPreset {
   capabilities?: string[];
   roles?: string[];
   parameters?: Record<string, unknown>;
+  /** Persisted Endpoint profile backing a transient provider/model choice. */
+  endpointProfileId?: string;
 }
 
 export const DEFAULT_CHAT_MODEL_PRESETS: ChatModelPreset[] = [
@@ -76,7 +82,7 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
   if (inflight) return inflight;
   inflight = bridge
     .get()
-    .then((raw) => {
+    .then(async (raw) => {
       const profilePresets = Array.isArray(raw?.model_profiles)
         ? (raw.model_profiles as ChatModelPreset[]).filter(isChatSelectableProfile)
         : [];
@@ -85,11 +91,46 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
         : Array.isArray(raw?.chat_model_presets)
         ? (raw.chat_model_presets as ChatModelPreset[]).filter((p) => p?.id && p?.model)
         : [];
-      const presets = presetsRaw.length > 0 ? presetsRaw : DEFAULT_CHAT_MODEL_PRESETS;
-      const activeId = String(
+      let presets = presetsRaw.length > 0 ? presetsRaw : DEFAULT_CHAT_MODEL_PRESETS;
+      const activeEndpointId = String(
         (raw?.model_role_bindings as Record<string, unknown> | undefined)?.chat ||
           raw?.active_chat_model_id || presets[0]?.id || DEFAULT_CHAT_MODEL_PRESETS[0].id
       );
+      if (profilePresets.length > 0 && typeof bridge.listModels === 'function') {
+        const discovered = await Promise.all(profilePresets.map(async (profile) => {
+          try {
+            const result = await bridge.listModels(
+              profile as unknown as Record<string, unknown>,
+              ''
+            );
+            const models = result.ok && Array.isArray(result.models) && result.models.length > 0
+              ? result.models
+              : [profile.model];
+            return models.map((model) => ({
+              ...profile,
+              id: modelChoiceId(profile.id, model),
+              endpointProfileId: profile.id,
+              label: modelSupplierName(profile),
+              model,
+            }));
+          } catch {
+            return [{
+              ...profile,
+              id: modelChoiceId(profile.id, profile.model),
+              endpointProfileId: profile.id,
+              label: modelSupplierName(profile),
+            }];
+          }
+        }));
+        const choices = discovered.flat();
+        if (choices.length > 0) presets = choices;
+      }
+      const activeEndpoint = profilePresets.find((profile) => profile.id === activeEndpointId);
+      const activeChoice = presets.find((preset) =>
+        (preset.endpointProfileId || preset.id) === activeEndpointId &&
+        (!activeEndpoint || preset.model === activeEndpoint.model)
+      ) || presets.find((preset) => (preset.endpointProfileId || preset.id) === activeEndpointId);
+      const activeId = activeChoice?.id || activeEndpointId;
       presetsCache = {
         presets,
         activeId: presets.some((p) => p.id === activeId) ? activeId : presets[0].id,
@@ -192,6 +233,7 @@ export function useAiSettings(): UseAiSettingsResult {
   const setActive = useCallback(async (id: string): Promise<string> => {
     const target = presetsCache.presets.find((p) => p.id === id);
     if (!target) return presetsCache.activeId;
+    const endpointProfileId = target.endpointProfileId || target.id;
     // Optimistic cache write.
     applyMutation({ activeId: target.id });
     // Persist so the next chat request after this click uses the new
@@ -201,13 +243,25 @@ export function useAiSettings(): UseAiSettingsResult {
     const bridge = getBridge('aiSettings');
     try {
       const current = (await bridge?.get?.()) || {};
+      const modelProfiles = Array.isArray(current.model_profiles)
+        ? (current.model_profiles as ChatModelPreset[]).map((profile) =>
+            profile.id === endpointProfileId ? { ...profile, model: target.model } : profile
+          )
+        : current.model_profiles;
+      const chatModelPresets = Array.isArray(current.chat_model_presets)
+        ? (current.chat_model_presets as ChatModelPreset[]).map((profile) =>
+            profile.id === endpointProfileId ? { ...profile, model: target.model } : profile
+          )
+        : current.chat_model_presets;
       await bridge?.save?.({
         ...current,
-        active_chat_model_id: target.id,
+        model_profiles: modelProfiles,
+        chat_model_presets: chatModelPresets,
+        active_chat_model_id: endpointProfileId,
         llm_provider: target.provider,
         model_role_bindings: {
           ...((current.model_role_bindings as Record<string, unknown> | undefined) || {}),
-          chat: target.id,
+          chat: endpointProfileId,
         },
       });
     } catch {

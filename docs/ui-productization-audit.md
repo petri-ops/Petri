@@ -140,7 +140,7 @@ npm run check
 | ID | 状态 | 级别 | 主模块 | 关注点 | 页面/状态 | 问题摘要 | 证据 | 目标批次 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | UI-032 | in_progress | P2 | P-07 | C-04 | 设置 / 计算与数据 | Stage 3 M1 新增只读"Harness 分析环境"面板（`HarnessEnvironment` 组件），展示 Harness 已自备的运行时与 R 包 bundle 清单 | 代码实现：`frontend/src/components/desktop/DesktopSettingsPanel.tsx` `HarnessEnvironment` 组件；IPC：`harness-capabilities:list`；类型：`electron.d.ts HarnessCapabilityEntry`；暂无 bundle 可显示（Stage 3 M2 GO/KEGG 接入后才有真实条目）；待 M2 真实 bundle 装入后实机截图 | Stage 3 M2 |
-| UI-033 | in_progress | P1 | P-07 | C-02, C-04 | 设置 / 模型接口与聊天选择器 | Provider 入口、Endpoint 聚合和密度已按用户反馈收敛；修复自定义卡静默过滤、聊天模型菜单裁剪，并将手填模型名改为 Endpoint 实时模型下拉 | DeepSeek/自定义 API 共用安全的 `ai-settings:list-models` IPC，从 Keychain 或一次性输入解析 Key 后请求 `<Base URL>/models`，前端只接收模型 ID；真实 DeepSeek API 验证返回 `deepseek-v4-flash`、`deepseek-v4-pro`，旧 `deepseek-chat` 不在列表；设置页自动发现已配置 Endpoint、支持手动刷新，失效旧值自动选择首个返回模型；聊天输入框直接显示真实模型 ID，避免泛化标签误导；待本轮新构建实机确认模型下拉 | MODEL-UX |
+| UI-033 | in_progress | P1 | P-07 | C-02, C-04 | 设置 / 模型接口与聊天选择器 | 配置卡收敛为“供应商 Endpoint”，模型来自实时目录；聊天菜单按供应商聚合其全部可用模型，并真实切换本次 Gateway 调用模型 | DeepSeek/自定义 API 共用安全的 `ai-settings:list-models` IPC，从 Keychain 或一次性输入解析 Key 后请求 `<Base URL>/models`，前端只接收模型 ID；真实 DeepSeek API 返回 `deepseek-v4-flash`、`deepseek-v4-pro`；设置页“显示名称”改为“供应商”，“模型名称”改为“默认模型”；`useAiSettings` 将一个 Endpoint 展开为多个瞬时选择项，首个模型为失效/空配置的默认值；聊天请求分离 `profileId` 与 `modelName`，Gateway 只对主 Endpoint 应用受控 `modelOverride`，切换不是纯 UI；待新构建实机确认分组菜单 | MODEL-UX |
 
 - UI-032 属于 `P-07 模型网关与 AI Provider` 的 Harness 能力子系统（Stage 3 M1），不影响 Stage 1/2 已关闭的 31 项结论。
 - 不允许破坏：设置页窄窗布局、计算与数据分类既有 `ComputeExecution`/`DataManagement` 组件、`run_tool → tool_job → artifact truth` 执行链。

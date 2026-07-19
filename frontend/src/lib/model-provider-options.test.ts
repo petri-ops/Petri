@@ -5,6 +5,8 @@ import {
   endpointBaseUrl,
   isChatSelectableProfile,
   isUserConfigurableModelProvider,
+  modelChoiceId,
+  modelSupplierName,
   validateUserModelProfile,
 } from './model-provider-options';
 
@@ -35,6 +37,20 @@ describe('user-facing model provider options', () => {
       })
     ).toBe('https://example.com/v1');
     expect(endpointBaseUrl({ provider: 'openai-compatible' })).toBe('');
+  });
+
+  it('derives stable supplier labels and unique endpoint/model choice ids', () => {
+    expect(modelSupplierName({ provider: 'deepseek', label: 'DeepSeek Chat' })).toBe('DeepSeek');
+    expect(modelSupplierName({
+      provider: 'openai-compatible',
+      label: '火山方舟',
+      baseUrl: 'https://ark.example.com/v1',
+    })).toBe('火山方舟');
+    expect(modelSupplierName({
+      provider: 'openai-compatible',
+      baseUrl: 'https://api.example.com/v1',
+    })).toBe('api.example.com');
+    expect(modelChoiceId('endpoint-a', 'model/a')).toBe('endpoint-a::model%2Fa');
   });
 
   it('uses one explicit contract for chat-selectable endpoints', () => {

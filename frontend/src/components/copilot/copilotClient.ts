@@ -142,6 +142,8 @@ export interface StreamChatOptions {
   conversationId?: string;
   /** Desktop workspace selected chat model preset id */
   modelPresetId?: string;
+  /** Model id discovered from the selected provider Endpoint. */
+  modelName?: string;
   onDelta: (delta: string) => void;
   onDone?: () => void;
   onError?: (err: Error) => void;
@@ -232,13 +234,13 @@ async function streamChatViaTask(opts: StreamChatOptions): Promise<void> {
 
 /** POST /ai/agent 提交，返回 taskId */
 async function submitAgentTask(opts: StreamChatOptions): Promise<string> {
-  const { messages, context, conversationId, modelPresetId, signal } = opts;
+  const { messages, context, conversationId, modelPresetId, modelName, signal } = opts;
   // M2-5: 提交前先探测网络，离线时直接抛 OfflineError，避免裸 fetch 报错
   await ensureOnlineOrThrow();
   const resp = await fetch(getApiPrefix() + '/ai/agent', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-    body: JSON.stringify({ messages, context, conversationId, modelPresetId }),
+    body: JSON.stringify({ messages, context, conversationId, modelPresetId, modelName }),
     signal,
   });
   if (!resp.ok) {
@@ -391,14 +393,14 @@ function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
 
 /** 老路径：直连 SSE（fallback） */
 async function streamChatLegacy(opts: StreamChatOptions): Promise<void> {
-  const { messages, context, conversationId, modelPresetId, signal, onDelta, onDone, onError } = opts;
+  const { messages, context, conversationId, modelPresetId, modelName, signal, onDelta, onDone, onError } = opts;
   try {
     // M2-5: 离线探测，先于 fetch 触发，避免裸 fetch 报错
     await ensureOnlineOrThrow();
     const resp = await fetch(getApiPrefix() + '/ai/agent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-      body: JSON.stringify({ messages, context, conversationId, modelPresetId }),
+      body: JSON.stringify({ messages, context, conversationId, modelPresetId, modelName }),
       signal,
     });
 

@@ -36,6 +36,7 @@ function callDeepSeek(apiKey, body, telemetry, options) {
     body,
     telemetry,
     profileId: resolveCompatibilityProfileId('deepseek', body, options),
+    modelOverride: options && options.modelOverride,
     signal: options && options.signal,
     apiKeyOverride: apiKey,
   });
@@ -48,6 +49,7 @@ function callDeepSeekStream(apiKey, body, telemetry, onEvent, options) {
     telemetry,
     onEvent,
     profileId: resolveCompatibilityProfileId('deepseek', body, options),
+    modelOverride: options && options.modelOverride,
     signal: options && options.signal,
     apiKeyOverride: apiKey,
   });
@@ -57,6 +59,7 @@ async function callChatProvider(providerName, apiKey, body, telemetry, onEvent, 
   return modelGateway.chat({
     role: (options && options.role) || 'agent',
     profileId: resolveCompatibilityProfileId(providerName, body, options),
+    modelOverride: options && options.modelOverride,
     body,
     telemetry,
     onEvent,

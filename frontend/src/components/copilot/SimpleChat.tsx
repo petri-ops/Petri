@@ -344,7 +344,8 @@ export function SimpleChat({
 
     await streamChat({
       messages: tagged,
-      modelPresetId: activeModelId,
+      modelPresetId: activeModel?.endpointProfileId || activeModelId,
+      modelName: activeModel?.model,
       context: {
         ...copilotCtxRef.current,
         page: 'desktop-project',
@@ -411,7 +412,7 @@ export function SimpleChat({
         });
       },
     });
-  }, [streaming, messages, onConversationChange, refreshConversations, projectId, activeModelId]);
+  }, [streaming, messages, onConversationChange, refreshConversations, projectId, activeModelId, activeModel]);
 
   // Keep a ref to the latest send so the global event listener (mounted once) always
   // invokes the current closure without re-binding on every message change.
@@ -490,6 +491,17 @@ export function SimpleChat({
   // parent controls conversationId directly.
 
   const accessModeLabel = accessMode === 'full' ? '完全访问' : '只读模式';
+  const modelGroups = modelPresets.reduce<Array<{ key: string; supplier: string; presets: ChatModelPreset[] }>>(
+    (groups, preset) => {
+      const supplier = preset.label || preset.provider;
+      const key = preset.endpointProfileId || preset.provider;
+      const existing = groups.find((group) => group.key === key);
+      if (existing) existing.presets.push(preset);
+      else groups.push({ key, supplier, presets: [preset] });
+      return groups;
+    },
+    []
+  );
   const selectModel = useCallback(async (preset: ChatModelPreset) => {
     setModelMenuOpen(false);
     // Hook persists the new active id + llm_provider via electron
@@ -615,23 +627,34 @@ export function SimpleChat({
                     onClick={() => setModelMenuOpen((value) => !value)}
                     title="选择会话模型"
                   >
-                    <span>{activeModel?.model || activeModel?.label || 'deepseek-chat'}</span>
+                    <span>
+                      {activeModel
+                        ? `${activeModel.label || activeModel.provider} · ${activeModel.model}`
+                        : 'DeepSeek · deepseek-chat'}
+                    </span>
                     <Icon name="chevron-down" size={12} />
                   </button>
                   {modelMenuOpen && (
                     <>
                       <div className="sc-model-overlay" onClick={() => setModelMenuOpen(false)} />
                       <div className="sc-model-menu">
-                        {modelPresets.map((preset) => (
-                          <button
-                            type="button"
-                            key={preset.id}
-                            className={`sc-model-option ${preset.id === activeModelId ? 'sc-model-option-active' : ''}`}
-                            onClick={() => selectModel(preset)}
-                          >
-                            <span className="sc-model-option-title">{preset.label || preset.model}</span>
-                            <span className="sc-model-option-meta">{preset.provider} · {preset.model}</span>
-                          </button>
+                        {modelGroups.map((group) => (
+                          <div className="sc-model-group" key={group.key}>
+                            <div className="sc-model-group-title">{group.supplier}</div>
+                            {group.presets.map((preset) => (
+                              <button
+                                type="button"
+                                key={preset.id}
+                                className={`sc-model-option ${preset.id === activeModelId ? 'sc-model-option-active' : ''}`}
+                                onClick={() => selectModel(preset)}
+                              >
+                                <span className="sc-model-option-title">{preset.model}</span>
+                                <span className="sc-model-option-meta">
+                                  {preset.id === activeModelId ? '当前使用' : '点击切换'}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
                         ))}
                       </div>
                     </>

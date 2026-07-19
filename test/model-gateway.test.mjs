@@ -71,6 +71,20 @@ test('gateway resolves a role, injects profile model, and streams through one ad
   assert.equal(events[0].content, 'ok');
 });
 
+test('gateway applies a discovered model override to the selected primary endpoint', async () => {
+  const { gateway, calls } = createGateway();
+  await gateway.chat({
+    role: 'chat',
+    profileId: 'chat-a',
+    modelOverride: 'model-b',
+    body: { model: 'caller-must-not-win', messages: [] },
+  });
+
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].body.model, 'model-b');
+  assert.equal(calls[0].options.profile.id, 'chat-a');
+});
+
 test('gateway routes embedding with profile model and credential reference', async () => {
   const { gateway, calls } = createGateway();
   const vectors = await gateway.embed({ texts: ['abc'], telemetry: { kind: 'embedding' } });

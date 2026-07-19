@@ -109,7 +109,7 @@ class ModelGateway {
     return event;
   }
 
-  async chat({ role = 'chat', profileId, body, telemetry, onEvent, signal, apiKeyOverride } = {}) {
+  async chat({ role = 'chat', profileId, modelOverride, body, telemetry, onEvent, signal, apiKeyOverride } = {}) {
     const primary = this._prepare(role, profileId, apiKeyOverride);
     if (primary.error) return primary;
     const attempts = [primary.profile.id, ...this._fallbackProfileIds(role, primary.profile.id)];
@@ -142,7 +142,7 @@ class ModelGateway {
       const requestBody = {
         ...(profile.parameters || {}),
         ...(body || {}),
-        model: profile.model,
+        model: index === 0 && modelOverride ? modelOverride : profile.model,
       };
       const options = { baseUrl: profile.baseUrl, signal, profile };
       let emittedOutput = false;

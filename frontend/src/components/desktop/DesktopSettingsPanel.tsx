@@ -75,8 +75,8 @@ const MODEL_CAPABILITIES: Array<{ id: ModelCapability; label: string }> = [
 
 function providerDefaults(provider: string, id: string): Partial<ChatModelPreset> {
   const defaults: Record<string, Partial<ChatModelPreset>> = {
-    deepseek: { model: 'deepseek-chat', capabilities: ['chat', 'streaming', 'tools'], credentialRef: 'provider:deepseek' },
-    'openai-compatible': { model: '', capabilities: ['chat', 'streaming', 'tools'], credentialRef: `credential:${id}` },
+    deepseek: { label: 'DeepSeek', model: 'deepseek-chat', capabilities: ['chat', 'streaming', 'tools'], credentialRef: 'provider:deepseek' },
+    'openai-compatible': { label: '自定义 API', model: '', capabilities: ['chat', 'streaming', 'tools'], credentialRef: `credential:${id}` },
   };
   return { protocol: 'openai-compatible', baseUrl: undefined, ...defaults[provider] };
 }
@@ -669,7 +669,9 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     const s = await window.biof3Desktop.aiSettings.get();
     setSettings(s);
     const profiles = Array.isArray(s.model_profiles)
-      ? (s.model_profiles as ChatModelPreset[]).filter((profile) => profile?.id && profile?.model)
+      ? (s.model_profiles as ChatModelPreset[])
+          .filter((profile) => profile?.id && profile?.model)
+          .map((profile) => profile.provider === 'deepseek' ? { ...profile, label: 'DeepSeek' } : profile)
       : [];
     const statuses = (s.credential_status as Record<string, boolean>) || {};
     setModelProfiles(profiles);
@@ -793,7 +795,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     const id = `model-${Date.now()}`;
     setModelProfiles((profiles) => [...profiles, {
       id,
-      label: '新模型',
+      label: '自定义 API',
       provider: 'openai-compatible',
       model: '',
       ...providerDefaults('openai-compatible', id),
@@ -882,7 +884,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
             <div className="biof3-settings-section__heading">
               <h3>API Endpoint</h3>
               <p>
-                每个 URL 独立配置模型、Key 和可承担的功能；Key
+                每个供应商独立配置 URL、Key 和可承担的功能；模型列表由 Endpoint 自动返回。Key
                 {credentialBackend === 'keychain' ? ' 保存在 macOS Keychain。' : ' 保存在独立本地凭据存储。'}
               </p>
             </div>
@@ -908,16 +910,17 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       </select>
                     </label>
                     <label className="biof3-endpoint-field">
-                      <span>显示名称</span>
+                      <span>供应商</span>
                       <input
                         className="biof3-input"
-                        value={profile.label}
+                        value={profile.provider === 'deepseek' ? 'DeepSeek' : profile.label}
                         onChange={(e) => updateProfile(profile.id, { label: e.target.value })}
-                        placeholder="例如：主力分析接口"
+                        placeholder="例如：火山方舟"
+                        readOnly={profile.provider === 'deepseek'}
                       />
                     </label>
                     <label className="biof3-endpoint-field">
-                      <span>模型名称</span>
+                      <span>默认模型</span>
                       <select
                         className="biof3-select"
                         value={profile.model}

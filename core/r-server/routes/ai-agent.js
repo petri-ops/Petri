@@ -115,10 +115,12 @@ function _pushUniqueResultCard(cards, card) {
 module.exports = function registerAiAgentRoute(app) {
   app.post('/api/ai/agent', express.json({ limit: '256kb' }), async (req, res) => {
     const { getApiKey, getChatProviderName, getChatModelPreset } = require('../helpers/ai-settings');
-    const { messages, context, conversationId: explicitConvId, modelPresetId } = req.body || {};
+    const { messages, context, conversationId: explicitConvId, modelPresetId, modelName: requestedModelName } = req.body || {};
     const selectedPreset = getChatModelPreset(modelPresetId);
     const providerName = (selectedPreset && selectedPreset.provider) || getChatProviderName();
-    const modelName = selectedPreset && selectedPreset.model;
+    const modelName = typeof requestedModelName === 'string' && requestedModelName.trim()
+      ? requestedModelName.trim().slice(0, 200)
+      : selectedPreset && selectedPreset.model;
     const baseUrl = selectedPreset && selectedPreset.baseUrl;
     const apiKey = (selectedPreset && selectedPreset.apiKey) || getApiKey(providerName);
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -566,7 +568,7 @@ module.exports = function registerAiAgentRoute(app) {
               sseSend({ choices: [{ delta: { content: event.content } }] });
             }
           },
-          { baseUrl, profileId: selectedPreset && selectedPreset.id }
+          { baseUrl, profileId: selectedPreset && selectedPreset.id, modelOverride: modelName }
         );
         if (!upJson || upJson.error || !upJson.choices) {
           sseSend({
@@ -765,7 +767,7 @@ module.exports = function registerAiAgentRoute(app) {
                 sseSend({ choices: [{ delta: { content: event.content } }] });
               }
             },
-            { baseUrl, profileId: selectedPreset && selectedPreset.id }
+            { baseUrl, profileId: selectedPreset && selectedPreset.id, modelOverride: modelName }
           );
           if (fbJson && fbJson.choices && fbJson.choices[0]) {
             const fbText = fallbackText || (fbJson.choices[0].message || {}).content || '';

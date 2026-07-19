@@ -29,6 +29,24 @@ export function endpointBaseUrl(profile: {
   return profile.baseUrl || (profile.provider === 'deepseek' ? DEEPSEEK_DEFAULT_BASE_URL : '');
 }
 
+export function modelSupplierName(profile: {
+  provider: string;
+  label?: string;
+  baseUrl?: string;
+}): string {
+  if (profile.provider === 'deepseek') return 'DeepSeek';
+  if (profile.label?.trim()) return profile.label.trim();
+  try {
+    return profile.baseUrl ? new URL(profile.baseUrl).hostname : '自定义 API';
+  } catch {
+    return '自定义 API';
+  }
+}
+
+export function modelChoiceId(profileId: string, model: string): string {
+  return `${profileId}::${encodeURIComponent(model)}`;
+}
+
 export interface UserModelProfileLike {
   id?: string;
   provider?: string;

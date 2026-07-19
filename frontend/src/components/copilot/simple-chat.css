@@ -90,6 +90,20 @@
   cursor: pointer;
 }
 
+.sc-model-group + .sc-model-group {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid var(--biof3-border);
+}
+
+.sc-model-group-title {
+  padding: 4px 10px 3px;
+  color: var(--biof3-text-tertiary);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
 .sc-model-option:hover,
 .sc-model-option-active {
   background: var(--biof3-hover);
