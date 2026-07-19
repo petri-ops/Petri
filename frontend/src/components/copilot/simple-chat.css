@@ -65,9 +65,10 @@
   bottom: calc(100% + 8px);
   right: 0;
   z-index: 81;
-  width: 280px;
-  max-height: 360px;
+  width: min(280px, calc(100vw - 32px));
+  max-height: min(360px, calc(100vh - 168px));
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 6px;
   border: 1px solid var(--biof3-border);
   border-radius: 10px;
@@ -652,13 +653,15 @@
 }
 
 .sc-composer {
+  position: relative;
+  z-index: 2;
   width: min(100%, var(--sc-composer-width));
   max-width: min(100%, 980px);
   border: 1px solid var(--biof3-border);
   border-radius: 24px;
   background: var(--biof3-bg-elevated);
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   transition: width 0.16s ease, border-color 0.16s ease, background 0.16s ease;

@@ -140,7 +140,7 @@ npm run check
 | ID | 状态 | 级别 | 主模块 | 关注点 | 页面/状态 | 问题摘要 | 证据 | 目标批次 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | UI-032 | in_progress | P2 | P-07 | C-04 | 设置 / 计算与数据 | Stage 3 M1 新增只读"Harness 分析环境"面板（`HarnessEnvironment` 组件），展示 Harness 已自备的运行时与 R 包 bundle 清单 | 代码实现：`frontend/src/components/desktop/DesktopSettingsPanel.tsx` `HarnessEnvironment` 组件；IPC：`harness-capabilities:list`；类型：`electron.d.ts HarnessCapabilityEntry`；暂无 bundle 可显示（Stage 3 M2 GO/KEGG 接入后才有真实条目）；待 M2 真实 bundle 装入后实机截图 | Stage 3 M2 |
-| UI-033 | in_progress | P1 | P-07 | C-02, C-04 | 设置 / 模型接口与聊天选择器 | Provider 入口、Endpoint 聚合和密度已按用户反馈收敛；进一步发现不完整的自定义卡会被保存逻辑静默过滤，导致聊天输入框无法选择用户以为已经配置的模型 | 当前真实设置仅有 DeepSeek + 内部 Vision/Embedding，无自定义 profile；修复为 URL/模型缺失时卡内显式报错且阻止保存，不再静默丢弃；卡内明确 Chat 可选状态；聊天选择器与设置页共用 `isChatSelectableProfile`，只展示完整、启用 Chat 的 DeepSeek/自定义 API；待新构建实机确认 | MODEL-UX |
+| UI-033 | in_progress | P1 | P-07 | C-02, C-04 | 设置 / 模型接口与聊天选择器 | Provider 入口、Endpoint 聚合和密度已按用户反馈收敛；进一步修复不完整自定义卡被静默过滤，以及聊天输入框模型菜单被 composer 边界裁剪的问题 | 当前真实设置仅有 DeepSeek + 内部 Vision/Embedding，无自定义 profile；URL/模型缺失时卡内显式报错且阻止保存；聊天选择器与设置页共用 `isChatSelectableProfile`；用户截图确认模型菜单被 `.sc-composer { overflow: hidden }` 裁剪，已改为允许向上溢出并增加窄窗宽度、短窗高度及滚动约束；待新构建实机确认 | MODEL-UX |
 
 - UI-032 属于 `P-07 模型网关与 AI Provider` 的 Harness 能力子系统（Stage 3 M1），不影响 Stage 1/2 已关闭的 31 项结论。
 - 不允许破坏：设置页窄窗布局、计算与数据分类既有 `ComputeExecution`/`DataManagement` 组件、`run_tool → tool_job → artifact truth` 执行链。
