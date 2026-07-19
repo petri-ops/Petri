@@ -1,6 +1,6 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-07-17
+最后更新：2026-07-19
 
 ## 1. 恢复顺序
 
@@ -23,7 +23,7 @@
 
 > **Stage 1 UI 产品化 → Stage 2 模型层 → Stage 3 Harness 与标准流程 → Stage 4 首个稳定产品版本**
 
-Stage 2 的 MODEL-1 至 MODEL-5 代码主干已经完成；当前唯一工作是 Stage 2 验收收口。真实 Provider 矩阵和模型管理中心打包态验收完成前，不固定下一候选版本，也不扩充 Harness 内容。
+Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 3 的 bundle 构建、OSS 发布、注册表回填和 Electron App 首次自动 provision 真链已于 2026-07-19 闭合；当前尚未启动 Stage 4，也未固定下一候选版本。
 
 ## 3. 当前立即任务
 
@@ -35,7 +35,14 @@ Stage 2 的 MODEL-1 至 MODEL-5 代码主干已经完成；当前唯一工作是
 2. ✅ 打包态 UI-031 实机验收通过（`dist/mac-arm64/BioF3.app` arm64/rc.5）：模型 CRUD、8 类角色绑定与能力过滤、显式 fallback、Keychain（无明文回显）、保存重开、聊天选择器同步、窄窗。
 3. UI-031 台账已标 `verified`；`run_tool → tool_job → artifact truth`、fallback 默认关闭、Key 不回显等不变量保持。
 
-下一步（**需用户明确授权**，不擅自执行）：决定下一 RC 版本号、本地 macOS 包验证、发布/签名/公证。Stage 3 Harness 内容扩充在用户确认后再启动。
+Stage 3 最新验收证据：
+
+1. ✅ GO/KEGG、GSEA、WGCNA 三条真实标准流程均为 valid artifact。
+2. ✅ DeepSeek + Anthropic Harness 评测各 6/6。
+3. ✅ `r-enrichment` / `r-wgcna` 已发布并回填真实 SHA-256；Electron App 首次自动下载、校验、解压、挂载成功。
+4. ✅ 发布后任务 `job_1257dae3bfda4aa0`（GO/KEGG，37/37）和 `job_02bb39e189d845f9`（WGCNA，28/28）均为 `valid`、0 issues。
+
+下一步（**需用户明确授权**，不擅自执行）：启动 Stage 4，锁定功能冻结范围、下一 RC 版本号、本地 macOS 打包安装、全新用户目录、升级链及发布/签名/公证边界。
 
 ### 已拆分给独立 Agent 的专项
 
@@ -80,7 +87,7 @@ Harness Phase 1–6 已建立：
 - Plugin SDK、built-in/installed/development 三来源与 fixture 门禁
 - local/container/remote 共用 canonical execution context，差异留在 adapter
 
-Stage 1–2 只保持回归；GO/KEGG、GSEA、WGCNA 延后到 Stage 3。技术参考见 [`harness-engine-spec.md`](./harness-engine-spec.md) 和 [`harness-roadmap.md`](./harness-roadmap.md)。
+Stage 3 已完成 GO/KEGG、GSEA、WGCNA 与 capability bundle 自动 provision 真链。后续只做回归和 Stage 4 发布收口，不继续批量增加分析内容。技术参考见 [`harness-engine-spec.md`](./harness-engine-spec.md)、[`harness-roadmap.md`](./harness-roadmap.md) 和 [`stage3-standard-workflows-design.md`](./stage3-standard-workflows-design.md)。
 
 ### P-07 模型层现状
 

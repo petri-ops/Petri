@@ -1,7 +1,7 @@
-# Stage 3 标准流程与模块化 Harness — 设计文档 (草案 v1)
+# Stage 3 标准流程与模块化 Harness — 实施与验收记录
 
-最后更新：2026-07-17
-状态：**设计草案，待用户评审后进入实现**。当前 Stage 1/2 已验收关闭；本文件定义 Stage 3 的架构与推进顺序，允许后期迭代优化。
+最后更新：2026-07-19
+状态：**已实现并通过 Stage 3 出口验收**。本文保留架构决策、实施证据和后续维护边界。
 
 > 阅读前置：`docs/v1-productization-roadmap.md`（阶段总纲）、`docs/harness-engine-spec.md`、`docs/harness-roadmap.md`（Phase 1–6 已完成）、`docs/plugin-artifact-schema.md`、`docs/dependency-decoupling-checkpoint.md`。
 
@@ -233,7 +233,11 @@ test/fixtures/harness/go-kegg-*.json        # valid lineage / degraded / blocked
   - 使用解压后的 bundle 实跑 GO/KEGG、GSEA、WGCNA，分别得到 31 / 24 / 27 个有效产物，全部 `valid`、0 issues；KEGG 两流程均明确命中离线 snapshot。
 - ✅ 用户已于 2026-07-19 人工授权并完成 OSS 上传；上传脚本完成 multipart upload、`public-read` ACL 与 OSS HEAD 后返回成功，外部网络访问两个 HTTPS URL 均确认进入匿名下载。
 - ✅ 注册表已回填上述正式构建的 `sha256/sizeBytes`，`r-enrichment` 与 `r-wgcna` 现均为 `ready`；未登记的新版本仍保持 unpublished，不会下载不可验证对象。
-- ⏳ 上传后的本机自动下载/解压/挂载回归仍待完成：当前机器的 Clash/Fake-IP 将 OSS host 解析为 `198.18.0.155` 并在 TLS 建连前重置；该问题未触及 OSS HTTP 状态，外部网络已确认对象可匿名下载。
+- ✅ 上传后的 Electron App 自动 provision 真链已通过（Clash Verge 规则模式，`GEOIP,CN → DIRECT`）：
+  - OSS 两对象 HEAD 均为 `200 OK`，远端 `Content-Length` 与注册表完全一致；
+  - GO/KEGG `job_1257dae3bfda4aa0` 首次自动下载、SHA-256 校验、解压并挂载 `r-enrichment`，ledger `attempts=1`；完成 37/37 有效产物、0 issues，日志明确命中离线 `kegg-hsa.rds`；
+  - WGCNA `job_02bb39e189d845f9` 首次自动下载、SHA-256 校验、解压并挂载 `r-wgcna`，ledger `attempts=1`；完成 28/28 有效产物、0 issues，检出 3 个非-grey 模块；
+  - 两个任务均沿用现有 `run_tool → tool_job → artifact truth`，未建立第二套执行或结果系统。
 
 ---
 
@@ -280,10 +284,11 @@ test/fixtures/harness/go-kegg-*.json        # valid lineage / degraded / blocked
 
 **M4 样板复制**
 - GSEA（复用 bundle）→ WGCNA（新 bundle）。达到 Stage 3 出口“三条真实标准流程闭环”。
-- 🟡 2026-07-19：GO/KEGG、GSEA、WGCNA 的 demo 科学脚本与真实 artifact 均已通过，GO/KEGG Electron App 基础 runtime 真链也已通过，两个 bundle 已发布并进入 ready；仅剩当前机器网络恢复后的自动下载/解压/挂载回归，因此 M4 尚未关闭。
+- ✅ 2026-07-19：GO/KEGG、GSEA、WGCNA 的 demo 科学脚本与真实 artifact 均已通过；两个 bundle 已发布，Electron App 首次自动下载、校验、解压、挂载及分析真链通过，M4 关闭。
 
 **M5 出口收口**
 - 三方插件接入指南（第 15 节）；全量门禁；更新台账/交接文档；决定是否进 Stage 4。
+- ✅ 2026-07-19：三方指南、台账、门禁和出口逐项对账完成；Stage 3 关闭，是否启动 Stage 4 由用户另行决定。
 
 每个里程碑独立提交（Conventional Commits），只暂存自己文件，遵循“完成一批再 push”节奏。
 
@@ -320,4 +325,4 @@ test/fixtures/harness/go-kegg-*.json        # valid lineage / degraded / blocked
 - 全量 Harness/Agent fixture、真实 artifact、恢复与 adapter 回归通过。
 - 形成可复制的三方插件接入指南。
 
-> **2026-07-19 对账结论：Stage 3 尚未达到出口。** Provider 评测、复用现有执行/结果真相、三方指南、三条科学流程、GO/KEGG App 真链、正式 bundle 隔离加载及 OSS 发布均已有证据；唯一剩余出口缺口是当前机器网络恢复后的自动 provision 真链。
+> **2026-07-19 对账结论：Stage 3 已达到出口并正式关闭。** 三条真实标准流程、双 Provider 评测、单一执行/结果真相、Harness/Agent 门禁、三方指南，以及发布后的 bundle 自动 provision 真链均已有可复核证据。下一阶段是 Stage 4 稳定版本收口，不在本阶段自动展开。

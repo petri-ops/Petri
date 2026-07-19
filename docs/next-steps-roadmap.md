@@ -1,28 +1,20 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-07-17
+最后更新：2026-07-19
 
 ## 当前结论
 
-`v0.0.1-rc.5` 已固定为 Stage 1 UI 产品化代码检查点，但还不是首个稳定产品版本；最新 OSS 安装发布仍为 `rc.4`。当前开发严格遵循：
+`v0.0.1-rc.5` 仍是当前代码版本，尚不是首个稳定产品版本；最新 OSS 安装发布仍为 `rc.4`。Stage 1、Stage 2、Stage 3 已依序完成出口验收，当前阶段边界为：
 
 > **Stage 1 UI 产品化 → Stage 2 模型层 → Stage 3 Harness 与标准流程 → Stage 4 首个稳定产品版本**
 
 详细阶段范围和验收出口见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)。若其他文档与该顺序冲突，以 v1 路线图为准。
 
-## 当前唯一实现阶段
+## 当前唯一后续阶段
 
-Stage 2：模型层与多 Provider。
+Stage 4：首个稳定产品版本收口（尚未启动，等待用户确认范围）。
 
-MODEL-1 至 MODEL-5 的代码主干已经完成，当前只执行 Stage 2 验收收口：
-
-1. 用用户实际可用的 DeepSeek、一个 OpenAI-compatible 云端模型和一个本地模型做真实聊天连通性验证。
-2. 至少选择两个 Provider 回归流式输出与 Agent tool calling；不把单元测试替代为真实服务结论。
-3. 完成 UI-031 打包态的凭据、保存重开、模型选择器同步和窄窗口验收。
-4. 确认 conversation、确认、`tool_job` 与 artifact truth 契约未因 Provider 切换改变。
-5. 上述验收通过后再固定下一个 release candidate；此前不进入 Stage 3。
-
-Stage 2 验收前不扩充 Harness 内容。阻断性回归仍可随时修复。
+Stage 3 已于 2026-07-19 关闭：GO/KEGG、GSEA、WGCNA 三条标准流程、DeepSeek + Anthropic 评测、第三方插件指南，以及 `r-enrichment` / `r-wgcna` 发布后的自动下载、校验、解压、挂载真链均通过。下一步不再扩充分析内容，而是按 Stage 4 做功能冻结、全新用户目录、打包安装、升级与发布验收。
 
 ## 已完成基线
 
@@ -50,9 +42,7 @@ Stage 2 验收前不扩充 Harness 内容。阻断性回归仍可随时修复。
 
 ### Stage 3：Harness 与标准流程
 
-- 先 GO/KEGG，再 GSEA、WGCNA。
-- 使用不同 Provider 做意图、选型、修参、tool calling、恢复和结果解释评测。
-- 不创建第二套执行器、job 数据库、workflow 状态库或结果系统。
+- ✅ 2026-07-19 已完成并关闭；完整证据见 [`stage3-standard-workflows-design.md`](./stage3-standard-workflows-design.md)。
 
 ### Stage 4：稳定产品版本
 
