@@ -88,18 +88,12 @@ need the button added to the tool page template, with the
 per-tool `loadDemoForForm` already implemented (see
 `tools.tsx:535-800`).
 
-### C. r-server local-mode zip post-processor
+### C. r-server local-mode ZIP post-processor
 
-`tmp/real-run/` shows a captured real run where the R analysis
-succeeded (82 sig genes, 23 artifacts) but the r-server marked
-the job `failed: Required artifact zip was not produced`. The
-post-processor that bundles the output dir into `all_results.zip`
-isn't running on this local execution path.
-
-This is a r-server config concern, not a Week 3 demo-data
-deliverable. The run.json schema already accommodates the case
-where zip packaging is deferred (we use
-`exit: "analysis_succeeded_zip_packaging_pending"`).
+✅ Stage 4 已闭合。执行器在 R 脚本成功后生成 `all_results.zip`，再进入
+artifact truth；DESeq2 内置插件同时复用 r-server 报告模板生成
+`report.html`。`scripts/golden-path.mjs` 会读取当前报告 API 返回的 URL，
+并把任务绑定到刚创建的项目沙盒。
 
 ### D. Windows validation (Week 3.5)
 
@@ -123,20 +117,15 @@ R_BASE=http://localhost:3003 node scripts/golden-path.mjs --skip-install
 
 # Expected:
 # STEP 1-4: pass
-# STEP 5: job runs (DESeq2 ~30s in local mode)
-# STEP 6: report endpoint returns 502 report_source_not_found
-#         (r-server's report route requires a successful job, but
-#          the zip post-processor didn't run in local mode -- see
-#          section C above)
-# Result: run.json + HTML report NOT written, but the analysis
-#         artifacts are in
-#         /Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/<jobId>/output/
+# STEP 5: status=completed
+# STEP 6: final-report.html written
+# Result: run.json exit=passed; project sandbox contains all_results.zip
 ```
 
 The captured fixture at `tmp/real-run/` was produced by this
 procedure on 2026-07-14 and serves as Week 3A evidence.
 
-## Update 2026-07-14: rescue path landed in `golden-path.mjs`
+## Historical note: 2026-07-14 rescue path
 
 After the first run on 2026-07-14, two gaps were observed:
 
@@ -165,5 +154,7 @@ Verified by re-running on 2026-07-14 against the same local r-server config
 produced a fully-populated run.json (`tmp/golden-path/report/deseq2-job_51d05ccdece3450c.run.json`)
 with 22 artifacts harvested from `/status.result.files`.
 
-Rescue-path run.json shape is asserted by `test/run-json.test.mjs` rescue-schema
-block (10 assertions).
+Rescue-path run.json shape remains asserted for compatibility with old installed
+builds. Stage 4 evidence on 2026-07-19 completed normally in 9 seconds with
+`all_results.zip`, a 1.6 MB self-contained `final-report.html`, and
+`run.json exit=passed`; the rescue branch was not used.

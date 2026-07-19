@@ -5,7 +5,7 @@
 > 非主 agent 每次完成审计后，必须把发现追加到本文件并提交，不要只写在单独报告里。
 >
 > 维护方：非主 agent（只读审计 + 阻断性回归修复通道）
-> 最后更新：2026-07-17（追加 Stage 3 M1 审计）
+> 最后更新：2026-07-19（Stage 4 rc.6 候选收口）
 
 ---
 
@@ -25,6 +25,9 @@
 | ✅已处理 | 2026-07-17 | `project-run-layout.js` isAdmin 硬编码 → 实现为 `db.getUserById().role === 'admin'`（与 api-data/feedback 一致） | 本文件 §4 | [§4 问题 G](#问题-gproject-run-layoutjs-isadmin-硬编码) |
 | ✅已处理 | 2026-07-18 | Stage 3 B2: `provisionCapability` 写好但未接入任何真实运行路径（无执行器/readiness gate 调用它，`r-libs-resolver` 只查已装不触发下载）——文档说有、实际没有 → B2 part2 已接进 tools-executor/registry 运行路径 | 本文件 §5 | [§5 问题 H](#问题-hprovisioncapability-未接入任何真实运行路径) |
 | ✅已处理 | 2026-07-19 | Stage 4: 开发 migration 使用系统 Node 却加载 electron-builder 留下的 Electron ABI `better-sqlite3`，导致首次启动和全量测试不干净 | 本文件 §6 | [§6 问题 I](#问题-istage-4-migration-原生模块-abi-边界错误) |
+| ✅已处理 | 2026-07-19 | Stage 4: Runtime 首装被线上旧 manifest 覆盖，且内置清单缺校验描述符、安装包缺 R 路径修复脚本 | 本文件 §6 | [§6 问题 J](#问题-jruntime-首装契约不完整) |
+| ✅已处理 | 2026-07-19 | Stage 4: 诊断导出范围过宽且原始日志未脱敏，可能携带用户数据 | 本文件 §6 | [§6 问题 K](#问题-k诊断导出隐私边界过宽) |
+| ✅已处理 | 2026-07-19 | Stage 4: DESeq2 可产生科学文件却缺必需 ZIP/报告模板，golden-path 曾用补救逻辑掩盖失败 | 本文件 §6 | [§6 问题 L](#问题-ldeseq2-首次成功产物契约不完整) |
 
 **状态图例**：🔴 阻塞验收必须处理 | 🟡 建议处理不阻塞 | 🟢 待合并零风险 | ⚪ 可清理 | ✅ 已处理
 
@@ -254,6 +257,39 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
   - 全新临时数据目录的开发态和 arm64 打包态均验证 migration version 0、SQLite 25 张表、R/Python/SPA 健康；
   - 详细 Stage 4 矩阵见 `docs/stage4-stable-release-checklist.md`。
 
+### 问题 J：Runtime 首装契约不完整
+
+- **位置**：`resources/built-in-plugins/manifest.json`、`src/plugin-manager.js`、`src/plugin-schema.js`、`electron-builder.yml`。
+- **现象**：线上 `plugins/manifest.json` 仍是旧 `{url, checksum, size, platform}` 结构，浅合并后覆盖新版 `artifacts`，导致全新首装无法选择 artifact；内置 R/Python 条目的 SHA-256/大小为空，且安装包只带旧 `.sh`、未带实际调用的 `fix-r-paths.mjs`。
+- **影响**：已有开发机因缓存 Runtime 不暴露问题，但全新用户会在下载、校验或 R dylib 修复阶段失败。
+- **✅ 处理（2026-07-19，主 agent）**：
+  - 旧远程条目先归一化为现代 artifact 契约，再与可信内置 fallback 合并；
+  - 回填线上 R/Python ZIP 的真实大小与 SHA-256，并增加严格 archive 大小校验；
+  - 同时打包 `.mjs` 与 `.sh` 路径修复资源；
+  - 隔离目录通过真实 OSS 下载 R/Python，R 修复扫描 74 个 `.so` 后 framework 引用为 0，R 4.5.2 与 Python 3.11.15 均可执行。
+
+### 问题 K：诊断导出隐私边界过宽
+
+- **位置**：`src/main.js` 诊断导出 IPC。
+- **现象**：旧实现归档整个用户数据目录并附带未经脱敏的原始后端日志，与“诊断包”名称不符。
+- **影响**：可能将 SQLite、设置、对话、结果或日志中的认证信息带入用户分享的 ZIP，属于安全发布阻断。
+- **✅ 处理（2026-07-19，主 agent）**：
+  - 导出仅保留脱敏后的 R/Python 日志、最小系统信息、插件安装摘要和隐私说明；
+  - 明确排除数据库、设置、对话、结果与凭据；
+  - 覆盖 header、结构化字段、query 参数和 Provider key 模式的脱敏测试；
+  - 适配 archiver v8 的 `ZipArchive` 构造接口。
+
+### 问题 L：DESeq2 首次成功产物契约不完整
+
+- **位置**：`core/r-server/helpers/tools-executor.js`、DESeq2 tool definition、`scripts/golden-path.mjs`。
+- **现象**：R 脚本完成并产生 22 个科学文件后，因声明的 `all_results.zip` 不存在而失败；报告模板只查插件目录，golden-path 还保留测试侧补报告逻辑。
+- **影响**：科学计算成功不等于产品首次成功，`run_tool → tool_job → artifact truth` 会被缺失的交付产物阻断，且测试补救会掩盖真实产品缺口。
+- **✅ 处理（2026-07-19，主 agent）**：
+  - 执行器在 artifact truth 前按声明输出生成 `all_results.zip`；
+  - 报告模板允许回退到内置 tool-scripts；
+  - golden-path 读取当前报告 URL 契约，旧补救只保留为兼容分支；
+  - 隔离首用任务 `job_828eacaf0e9741ea` 为 `completed`，run.json `passed`，ZIP 与约 1.6 MB 自包含报告均存在。
+
 ---
 
 ## 审计发现追加规范
@@ -293,3 +329,4 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
 | 2026-07-18 | Stage 3 M5 三方插件接入指南落地：新建 `docs/third-party-plugin-guide.md`（基于真实 go-kegg/deseq2/volcano-plot 插件），stage3 §15 占位改为指向该指南 | 主 agent |
 | 2026-07-18 | Stage 3 B1/B2：新增 R bundle 构建脚本 build-r-bundle.mjs + capability-bundles 注册表 + 运行路径接线（ensureBundlesForPlugin 接进 tools-executor/registry），闭合问题 H；4 wiring 测试，全量 423 零回归 | 主 agent |
 | 2026-07-19 | Stage 4 第一批：修复 migration 系统 Node / Electron ABI 边界（问题 I），全量根测试首次 0 fail；开发态与 arm64 打包态空目录启动通过 | 主 agent |
+| 2026-07-19 | Stage 4 rc.6：处理 Runtime 首装契约、诊断导出隐私和 DESeq2 首次成功产物缺口（问题 J/K/L）；完成真实 OSS Runtime、bundle、rc.4 数据副本与双架构验证 | 主 agent |

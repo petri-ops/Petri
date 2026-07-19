@@ -4,7 +4,7 @@
 
 ## 1. 决策与文档优先级
 
-本文件是 `rc.5` 之后、首个相对稳定产品版本之前的主执行路线图。后续无论使用 Codex、Claude Code、Cursor 或其他 Agent，都必须先读取本文件，再读取：
+本文件是 `rc.5` 之后、首个相对稳定产品版本的主执行路线图。当前 Stage 4 候选版本为 `rc.6`。后续无论使用 Codex、Claude Code、Cursor 或其他 Agent，都必须先读取本文件，再读取：
 
 1. [`docs/project-workspace-handoff.md`](./project-workspace-handoff.md)
 2. [`docs/development-module-map.md`](./development-module-map.md)
@@ -19,7 +19,7 @@
 
 ## 2. 当前基线
 
-- `v0.0.1-rc.5` 是 Stage 1 UI 产品化代码检查点，不等同于产品 v1；最新 OSS 安装发布仍为 `rc.4`，直到单独执行发布流程。
+- `v0.0.1-rc.6` 是 Stage 4 macOS 候选版本；最新 OSS 安装发布在显式发布动作前仍为 `rc.4`。
 - macOS arm64/x64 本机构建、OSS 发布、最新版提示和 `rc.3 → rc.4` 真实升级链路已经通过。
 - Harness Phase 1–6、Plugin SDK、Agent workflow runtime、恢复与 fixture 门禁已经建立；Stage 1–2 期间保持可回归，不继续扩建第二套基础设施。
 - 当前聊天主链主要依赖 DeepSeek；DashScope 已用于 embedding/vision；OpenAI/Ollama 在设置页仍属于未来入口，模型调用链仍存在 DeepSeek 硬编码。
@@ -190,7 +190,7 @@ UI 不得制造第二套状态真相，模型层不得绕过确认/审计边界�
 
 ## 6. Stage 4：首个稳定产品版本
 
-状态：🟡 2026-07-19 已启动，当前进行发布前收口；执行台账见 [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md)。
+状态：🟡 `rc.6` 候选发布中；本地代码与实机门禁已完成，剩余 OSS 上传和公开下载反向验证。执行台账见 [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md)。
 
 主模块：`P-06 桌面集成与交付`；覆盖全部质量关注点。
 
@@ -234,7 +234,7 @@ UI 不得制造第二套状态真相，模型层不得绕过确认/审计边界�
 Stage 1–3 已关闭，当前只执行 Stage 4 稳定版本收口：
 
 1. 功能冻结，只修复发布阻断、数据错误、安全问题和明确回归。
-2. 全新用户目录完成 runtime、模型、项目、真实分析和结果解释。
-3. 用正式 `rc.4` 数据副本验证迁移与设置/凭据兼容。
-4. 完成 arm64 安装级与 x64 构建/实机门禁。
-5. 用户确认候选版本号并人工授权后，验证 OSS 更新与覆盖安装链。
+2. ✅ 全新用户目录完成 Runtime、项目、DESeq2 与 GO/KEGG 真实分析。
+3. ✅ 用正式 `rc.4` 数据副本验证迁移与设置/插件兼容。
+4. ✅ 完成 arm64 完整链和 x64 壳层构建/启动门禁；x64 Runtime 缺失已列为限制。
+5. 发布 `v0.0.1-rc.6`，验证 OSS 更新、公开下载、SHA-512 和 DMG 打开链。

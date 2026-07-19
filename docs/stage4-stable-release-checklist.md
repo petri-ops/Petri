@@ -1,7 +1,7 @@
 # Stage 4 稳定版本收口台账
 
 最后更新：2026-07-19
-状态：**进行中**
+状态：**候选版发布验收中**
 主模块：`P-06 桌面集成与交付`
 关注点：`C-01 安全`、`C-03 数据一致性`、`C-05 质量`、`C-06 性能`
 
@@ -9,26 +9,26 @@
 
 Stage 1–3 已完成出口验收。Stage 4 进入功能冻结：只处理发布阻断、数据错误、安全问题、明确回归和验收文档，不继续批量增加分析内容。
 
-当前源码版本仍为 `0.0.1-rc.5`，线上最新版仍为 `rc.4`。本阶段尚未决定下一 RC 版本号，尚未上传新的桌面 DMG，也未创建发布标签。
+当前候选版本为 `0.0.1-rc.6`，线上最新版在本轮发布前仍为 `rc.4`。
 
 ## 2. 出口矩阵
 
 | 门禁 | 当前状态 | 证据 / 剩余工作 |
 |---|---|---|
 | Stage 1–3 出口 | ✅ | UI、模型层、Harness/标准流程均已关闭 |
-| 根项目全量测试 | ✅ | 2026-07-19：428 total / 417 pass / 11 skip / **0 fail** |
+| 根项目全量测试 | ✅ | 2026-07-19：432 total / 421 pass / 11 skip / **0 fail** |
 | 前端测试 | ✅ | 19 files / 147 tests |
 | 静态与契约门禁 | ✅ | `npm run check`；Harness manifest 7/7；UI audit 通过 |
 | 全新数据目录开发启动 | ✅ | 空库 migration version 0、25 张表；R `:3001`、Python `:3004` 健康 |
 | macOS arm64 构建结构 | ✅ | `npm run build:mac-arm64`；App/Helper/Core native module 均为 arm64 |
-| macOS arm64 打包态空目录启动 | ✅（结构级） | 临时空数据目录 + 已验证 runtime 软链接；migration、SPA `:3002`、R/Python、Python worker 全部健康 |
-| 全新用户完整首用 | ⏳ | 仍需真实 runtime 获取、模型配置、项目创建、真实分析、结果解释；不得用已有 runtime 软链接替代最终结论 |
-| 旧版数据迁移与兼容 | ⏳ | 从正式 `rc.4` 用户数据副本升级到候选版，核对数据库、设置、凭据引用、项目与历史结果 |
-| macOS x64 | ⏳ | 需完成构建结构与必要实机验证 |
+| macOS arm64 打包态空目录启动 | ✅ | migration、SPA、R/Python、Python worker 全部健康 |
+| 全新用户完整首用 | ✅ | 真实 OSS Runtime 首装：R 4.5.2 + Python 3.11.15；项目沙盒 DESeq2 `completed` + ZIP + 1.6 MB final report；go-kegg 首次自动 provision bundle，37/37 valid |
+| 旧版数据迁移与兼容 | ✅ | 正式 rc.4 与候选版先后启动同一只读数据副本；SQLite integrity、30 表、项目/任务/对话计数及设置/插件账本哈希一致 |
+| macOS x64 | ⚠️ 部分 | App/Helper/Core 均 x86_64，Rosetta 空目录启动与 SPA 通过；没有 x64 Runtime artifact，分析能力不宣称支持 |
 | OSS 更新链 | ⏳ | 下一候选版确定后，人工授权上传；验证 `latest-mac.yml`、SHA-512、DMG 下载与打开 |
-| 安装级覆盖升级 | ⏳ | 从 `/Applications/BioF3.app` 旧 RC 按现有 DMG 流程人工覆盖，确认数据保留 |
-| 安全与隐私 | ⏳ | 日志脱敏、诊断包、Keychain/0600 凭据、卸载后数据保留逐项复核 |
-| 用户文档与发布说明 | ⏳ | 模型配置、标准流程、已知限制、安装/升级说明及候选版 release notes |
+| 安装级覆盖升级 | ⏳ | rc.6 上传后，用下载 DMG 验证打开；不自动替换 `/Applications`，避免中断当前用户环境 |
+| 安全与隐私 | ✅ | Keychain/0600 门禁通过；诊断包改为脱敏日志+最小摘要，排除 DB、设置、对话、结果与凭据；卸载 App 不删除 Documents 数据 |
+| 用户文档与发布说明 | ✅ | `docs/releases/v0.0.1-rc.6.md` + 本台账 + first-success 合同 |
 | 签名与公证 | ⚠️ 已知边界 | 当前无 Developer ID；若本版不签名/公证，必须在发布说明保留人工打开/覆盖安装说明 |
 
 ## 3. 第一批：原生 ABI 与首次启动基线
@@ -53,12 +53,21 @@ electron-builder 会把根 `better-sqlite3` 重建为 Electron ABI，并在 `aft
 - `npm run build:mac-arm64`：成功生成本地 `rc.5` arm64 DMG（未上传）。
 - 打包态临时空目录启动：migration、SPA、R/Python、Python worker 均健康；退出后端口与临时目录已清理。
 
-## 4. 下一批顺序
+## 4. 第二批实机证据
 
-1. 固定“全新用户完整首用”验收脚本/人工清单，验证 runtime 获取而不是复用现有安装。
-2. 用只读副本执行 `rc.4 → 候选版` 数据与设置迁移审计。
-3. 决定下一 RC 版本号；完成 arm64/x64 构建、校验和已知限制。
-4. 经用户人工授权后发布 OSS，再做真实更新检查、下载、DMG 打开和覆盖安装。
-5. 完成安全/隐私复核、用户文档、release notes 和最终发布决策。
+- Runtime 线上原件：R ZIP `154050101` bytes，SHA-256 `007b6c...a1d2`；Python ZIP `480914965` bytes，SHA-256 `a3ba85...1e12`；ZIP 完整性通过并回填内置清单。
+- 修复远程旧版 manifest 覆盖新版 artifact 契约的问题；首装脚本走真实 `installPlugin` 入口。
+- 修复打包缺少 `fix-r-paths.mjs`；隔离 R 首装实际扫描 74 个 `.so`，残留 framework 引用为 0。
+- 修复 DESeq2 缺 ZIP/报告模板和 golden-path 旧报告响应契约；最终任务 `job_828eacaf0e9741ea` 为 `completed`、run.json `passed`。
+- 最终打包冒烟发现并修复 archiver v8 ESM / Electron Node 20 的加载边界；重构建后任务 `job_b8e9474e421b4800` 为 `completed`，2.4 MB ZIP 和 1,636,850-byte 报告均由打包 App 产生。
+- go-kegg 首次自动 provision `r-enrichment`，任务 `job_4fab81993e6e4536` 为 37/37 valid、0 issues，证明 ggplot2 4.0.3 真渲染兼容。
+- 2026-07-19 Provider 重测：DeepSeek 必需项通过但结果解释探针未复述英文通路名；Anthropic 自定义 Endpoint 当时返回 `api_error`。Stage 3 既有双 Provider 6/6 证据保留，外部服务波动不冒充本地发行成功。
 
-任何 OSS 上传、正式 `/Applications` 覆盖、签名、公证和版本标签都需要单独确认；本台账中的本地验证不等同于发布完成。
+## 5. 发布顺序
+
+1. 最终全量回归并重建 rc.6 双架构 DMG。
+2. 提交、创建 `v0.0.1-rc.6` 标签并推送。
+3. 上传 OSS，匿名核对清单、大小、SHA-512 和更新选择。
+4. 下载 arm64 DMG 并打开验证；保留人工拖入 Applications 的未签名边界。
+
+签名和公证仍受 Developer ID 缺失限制；不得将 unsigned RC 描述成 GA。

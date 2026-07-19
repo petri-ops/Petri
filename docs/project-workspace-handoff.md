@@ -17,13 +17,13 @@
 
 ## 2. 当前产品阶段
 
-`v0.0.1-rc.5` 是 Stage 1 UI 产品化代码检查点，不是首个稳定产品版本；最新 OSS 安装发布仍为 `rc.4`。
+`v0.0.1-rc.6` 是 Stage 4 macOS 候选版本；本轮显式发布动作完成前，最新 OSS 安装发布仍为 `rc.4`。
 
 当前固定顺序：
 
 > **Stage 1 UI 产品化 → Stage 2 模型层 → Stage 3 Harness 与标准流程 → Stage 4 首个稳定产品版本**
 
-Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 已于 2026-07-19 启动并进入功能冻结/发布收口；当前尚未固定下一候选版本，也未上传新的桌面 DMG。
+Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 已固定 `rc.6` 候选版并完成代码、本地首用、迁移、隐私与构建收口；剩余动作是提交/tag、显式 OSS 上传及公开下载反向验证。
 
 ## 3. 当前立即任务
 
@@ -42,9 +42,9 @@ Stage 3 最新验收证据：
 3. ✅ `r-enrichment` / `r-wgcna` 已发布并回填真实 SHA-256；Electron App 首次自动下载、校验、解压、挂载成功。
 4. ✅ 发布后任务 `job_1257dae3bfda4aa0`（GO/KEGG，37/37）和 `job_02bb39e189d845f9`（WGCNA，28/28）均为 `valid`、0 issues。
 
-Stage 4 第一批已完成：修复开发 migration 误加载 Electron ABI `better-sqlite3` 的阻断；根测试 428 total / 417 pass / 11 skip / 0 fail，前端 147/147；全新临时数据目录的开发态与 arm64 打包态均完成 migration、SQLite、SPA 和双后端健康验证。详见 [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md)。
+Stage 4 rc.6 已完成：原生 ABI 边界、真实 OSS Runtime 首装、DESeq2 报告/ZIP、GO/KEGG bundle 真链、rc.4 数据副本迁移、诊断导出隐私及 arm64/x64 构建结构。arm64 是完整候选链；x64 因没有分析 Runtime 仅为壳层预览。详见 [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md)。
 
-下一步：验证不复用现有 runtime 的全新用户完整首用，并用正式 `rc.4` 用户数据的只读副本做升级迁移审计。下一 RC 版本号、OSS 上传、正式 Applications 覆盖、签名/公证仍需用户单独确认。
+下一步仅执行 rc.6 发布：提交/tag、显式 OSS 上传、匿名校验和 DMG 打开。当前无 Developer ID，签名/公证不在本 RC 内，不得描述为 GA。
 
 ### 已拆分给独立 Agent 的专项
 
@@ -56,7 +56,7 @@ Stage 4 第一批已完成：修复开发 migration 误加载 Electron ABI `bett
 
 主模块：`P-06 桌面集成与交付`。
 
-- 当前代码版本：`0.0.1-rc.5`；最新 OSS 发布为 `v0.0.1-rc.4`（提交 `08a0bbb`）。
+- 当前候选版本：`0.0.1-rc.6`；本轮上传前最新 OSS 发布为 `v0.0.1-rc.4`。
 - 默认平台：macOS-only；构建 arm64/x64。
 - GitHub：只保存源码和不可变标签，不上传 DMG。
 - OSS：保存双架构 DMG、SHA-256 清单和 `latest-mac.yml`。
