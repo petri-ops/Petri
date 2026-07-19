@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { buildSystemPrompt } = require('../core/r-server/helpers/system-prompt.js');
 
-test('system prompt distinguishes the BioF3 role from the real provider and model', () => {
+test('system prompt keeps the assistant role brand-neutral and discloses the real provider and model', () => {
   const prompt = buildSystemPrompt(
     { page: 'desktop-project', projectId: 'project-a' },
     {
@@ -15,10 +15,14 @@ test('system prompt distinguishes the BioF3 role from the real provider and mode
     }
   );
 
-  assert.match(prompt, /BioF3 平台的 AI 助手 Copilot/);
+  assert.match(prompt, /生物信息学分析助手/);
+  assert.doesNotMatch(prompt, /BioF3 平台的 AI 助手 Copilot/);
+  assert.doesNotMatch(prompt, /“BioF3 Copilot”是你在本产品中的工作角色/);
   assert.match(prompt, /供应商：DeepSeek/);
   assert.match(prompt, /模型：deepseek-v4-flash/);
-  assert.match(prompt, /必须同时说明 BioF3 工作角色、当前供应商和当前模型 ID/);
+  assert.match(prompt, /必须直接说明当前供应商和当前模型 ID/);
+  assert.match(prompt, /不得提及任何产品名/);
+  assert.match(prompt, /不得使用“Copilot”作为身份/);
   assert.match(prompt, /不得省略、模糊/);
 });
 
