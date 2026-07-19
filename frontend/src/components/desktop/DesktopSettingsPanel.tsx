@@ -17,7 +17,6 @@ import { deleteProject, listProjects, setProjectStatus } from '@/lib/project-sto
 import type { Project } from '@/lib/project-types';
 import {
   USER_MODEL_PROVIDER_OPTIONS,
-  USER_MODEL_ROLE_IDS,
   endpointBaseUrl,
   isUserConfigurableModelProvider,
 } from '@/lib/model-provider-options';
@@ -776,9 +775,6 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   const userModelProfiles = modelProfiles.filter((profile) =>
     isUserConfigurableModelProvider(profile.provider)
   );
-  const userModelRoles = MODEL_ROLES.filter((role) =>
-    USER_MODEL_ROLE_IDS.includes(role.id as (typeof USER_MODEL_ROLE_IDS)[number])
-  );
 
   return (
     <div className="biof3-desktop-panel" role="dialog" aria-label="设置">
@@ -849,15 +845,6 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                 const configured = !!credentialStatus[id];
                 return (
                 <div key={profile.id} className="biof3-model-preset biof3-endpoint-card">
-                  <div className="biof3-model-preset__header">
-                    <div className="biof3-endpoint-card__title">
-                      <span>{profile.label || profile.model || '未命名接口'}</span>
-                      {configured && <span className="biof3-badge"><Icon name="check" size={12} /> Key 已配置</span>}
-                    </div>
-                    <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => removeProfile(profile.id)}>
-                      删除
-                    </button>
-                  </div>
                   <div className="biof3-endpoint-card__grid">
                     <label className="biof3-endpoint-field">
                       <span>接口类型</span>
@@ -883,6 +870,9 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                         placeholder={profile.provider === 'deepseek' ? 'deepseek-chat' : '例如：gpt-4.1'}
                       />
                     </label>
+                    <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm biof3-endpoint-card__delete" onClick={() => removeProfile(profile.id)}>
+                      删除
+                    </button>
                     <label className="biof3-endpoint-field biof3-endpoint-field--url">
                       <span>API Base URL</span>
                       <input
@@ -893,7 +883,10 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       />
                     </label>
                     <label className="biof3-endpoint-field">
-                      <span>API Key</span>
+                      <span className="biof3-endpoint-field__title">
+                        API Key
+                        {configured && <span className="biof3-badge"><Icon name="check" size={12} /> 已配置</span>}
+                      </span>
                       <input
                         type="password"
                         className="biof3-input"
@@ -902,6 +895,9 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                         placeholder={configured ? '已配置（输入新 Key 覆盖）' : '输入 API Key'}
                       />
                     </label>
+                    <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm biof3-endpoint-card__test" onClick={() => void handleTest(profile)} disabled={testing === profile.id || (!configured && !credentialInputs[id])}>
+                      {testing === profile.id ? '测试中…' : '测试连接'}
+                    </button>
                   </div>
                   <div className="biof3-endpoint-card__capabilities">
                     <strong>功能</strong>
@@ -913,9 +909,6 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                         </label>
                       ))}
                     </div>
-                    <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => void handleTest(profile)} disabled={testing === profile.id || (!configured && !credentialInputs[id])}>
-                      {testing === profile.id ? '测试中…' : '测试连接'}
-                    </button>
                   </div>
                   {testResult[profile.id] && <p className={`biof3-field__result ${testResult[profile.id].ok ? 'biof3-field__result--ok' : 'biof3-field__result--err'}`}>{testResult[profile.id].ok ? '✓ ' : '✗ '}{testResult[profile.id].message}</p>}
                 </div>
@@ -927,35 +920,6 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
               添加自定义 API
             </button>
 
-            <div className="biof3-model-routing">
-              <div className="biof3-model-routing__heading">
-                <div><strong>任务角色路由</strong><p>每类任务只会使用这里明确绑定且能力匹配的模型。</p></div>
-                <label className="biof3-toggle-row">
-                  <input type="checkbox" className="biof3-toggle" checked={fallbackEnabled} onChange={(e) => setFallbackEnabled(e.target.checked)} />
-                  <span className="biof3-toggle-label">允许显式故障转移</span>
-                </label>
-              </div>
-              {userModelRoles.map((role) => {
-                const eligible = userModelProfiles.filter((profile) => (profile.capabilities || []).includes(role.capability));
-                const primaryId = roleBindings[role.id] || '';
-                const fallbackId = fallbackBindings[role.id]?.[0] || '';
-                return (
-                  <div key={role.id} className="biof3-model-role-row">
-                    <label><strong>{role.label}</strong><small>{role.hint}</small></label>
-                    <select className="biof3-select" value={primaryId} onChange={(e) => setRoleBindings((current) => ({ ...current, [role.id]: e.target.value || undefined }))}>
-                      <option value="">未绑定</option>
-                      {eligible.map((profile) => <option key={profile.id} value={profile.id}>{profile.label || profile.model}</option>)}
-                    </select>
-                    {fallbackEnabled && (
-                      <select className="biof3-select" value={fallbackId} onChange={(e) => setFallbackBindings((current) => ({ ...current, [role.id]: e.target.value ? [e.target.value] : [] }))} aria-label={`${role.label} fallback`}>
-                        <option value="">不自动切换</option>
-                        {eligible.filter((profile) => profile.id !== primaryId).map((profile) => <option key={profile.id} value={profile.id}>{profile.label || profile.model}</option>)}
-                      </select>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
           </section>
         )}
 

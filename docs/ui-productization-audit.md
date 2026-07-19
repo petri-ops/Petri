@@ -140,7 +140,7 @@ npm run check
 | ID | 状态 | 级别 | 主模块 | 关注点 | 页面/状态 | 问题摘要 | 证据 | 目标批次 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | UI-032 | in_progress | P2 | P-07 | C-04 | 设置 / 计算与数据 | Stage 3 M1 新增只读"Harness 分析环境"面板（`HarnessEnvironment` 组件），展示 Harness 已自备的运行时与 R 包 bundle 清单 | 代码实现：`frontend/src/components/desktop/DesktopSettingsPanel.tsx` `HarnessEnvironment` 组件；IPC：`harness-capabilities:list`；类型：`electron.d.ts HarnessCapabilityEntry`；暂无 bundle 可显示（Stage 3 M2 GO/KEGG 接入后才有真实条目）；待 M2 真实 bundle 装入后实机截图 | Stage 3 M2 |
-| UI-033 | in_progress | P1 | P-07 | C-02, C-04 | 设置 / 模型接口 | Provider 入口过多，且 URL、模型、Key、功能与连接测试分散；首版聚合卡仍因双列纵向排布和嵌套功能卡占高过大 | 用户确认“每个 URL 一张 Endpoint 卡”方向后要求进一步压缩；本增量改为类型/名称/模型三列、URL 双列+Key、功能与测试同排，移除重复 URL 摘要、凭据标识和嵌套功能卡；窄窗仍回退单列；待新构建实机确认 | MODEL-UX |
+| UI-033 | in_progress | P1 | P-07 | C-02, C-04 | 设置 / 模型接口 | Provider 入口过多，且 URL、模型、Key、功能与连接测试分散；聚合卡迭代后仍被用户认为占高过大，“任务角色路由”也不需要暴露 | 本增量彻底移除任务角色路由 UI（后台既有默认绑定保持）；卡片取消独立标题行，第一行类型/名称/模型/删除，第二行 URL/Key/测试，第三行功能；输入框、间距和内边距继续压缩；窄窗仍回退单列；待新构建实机确认 | MODEL-UX |
 
 - UI-032 属于 `P-07 模型网关与 AI Provider` 的 Harness 能力子系统（Stage 3 M1），不影响 Stage 1/2 已关闭的 31 项结论。
 - 不允许破坏：设置页窄窗布局、计算与数据分类既有 `ComputeExecution`/`DataManagement` 组件、`run_tool → tool_job → artifact truth` 执行链。
@@ -148,6 +148,7 @@ npm run check
 
 - UI-033 只收敛用户可配置层，不删除 Gateway 已支持的底层适配器，也不改写历史 profile。
 - 预期：只出现 DeepSeek 与“自定义 API”；每个 URL 在同一张 Endpoint 卡中配置 Base URL、模型名、Key、功能和连接测试，自定义 API 使用 OpenAI-compatible 协议。
+- “任务角色路由”不再显示；现有默认角色绑定和 fallback 配置仍按持久化设置工作，卡片功能声明与聊天模型选择保持为主要用户入口。
 - 不允许破坏：当前 DeepSeek 绑定、隐藏的 Vision/Embedding 系统服务、Keychain 不回显、fallback 默认关闭和现有聊天模型同步。
 
 - UI-031 属于 `P-07 模型网关与 AI Provider`，不改变 Stage 1 已关闭的 30 项结论。

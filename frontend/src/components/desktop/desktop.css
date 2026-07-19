@@ -438,15 +438,15 @@
 }
 
 .biof3-endpoint-card {
-  gap: 8px;
-  padding: 10px;
+  gap: 6px;
+  padding: 8px;
 }
 
 .biof3-endpoint-card__grid {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: minmax(110px, 0.65fr) minmax(140px, 1fr) minmax(140px, 1fr);
-  gap: 7px;
+  grid-template-columns: minmax(96px, 0.62fr) minmax(120px, 0.9fr) minmax(130px, 1fr) auto;
+  gap: 6px;
 }
 
 .biof3-endpoint-field {
@@ -472,12 +472,25 @@
   gap: 8px;
 }
 
+.biof3-endpoint-card__delete,
+.biof3-endpoint-card__test {
+  align-self: end;
+  min-height: 32px;
+  white-space: nowrap;
+}
+
+.biof3-endpoint-card .biof3-input,
+.biof3-endpoint-card .biof3-select {
+  min-height: 32px;
+  padding: 6px 8px;
+}
+
 .biof3-endpoint-card__capabilities {
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding-top: 7px;
+  padding-top: 5px;
   border-top: 1px solid var(--biof3-border);
 }
 
@@ -510,59 +523,6 @@
   gap: 5px;
   color: var(--biof3-text-secondary);
   font-size: 0.72rem;
-}
-
-.biof3-model-routing {
-  display: grid;
-  gap: 8px;
-  margin-top: 20px;
-  padding-top: 18px;
-  border-top: 1px solid var(--biof3-border);
-}
-
-.biof3-model-routing__heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 4px;
-}
-
-.biof3-model-routing__heading strong {
-  color: var(--biof3-text);
-  font-size: 0.84rem;
-}
-
-.biof3-model-routing__heading p {
-  margin: 3px 0 0;
-  color: var(--biof3-text-tertiary);
-  font-size: 0.72rem;
-}
-
-.biof3-model-role-row {
-  display: grid;
-  grid-template-columns: minmax(130px, 0.8fr) minmax(150px, 1fr) minmax(150px, 1fr);
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border: 1px solid var(--biof3-border);
-  border-radius: 8px;
-  background: var(--biof3-bg-subtle);
-}
-
-.biof3-model-role-row > label {
-  display: grid;
-  gap: 2px;
-}
-
-.biof3-model-role-row strong {
-  color: var(--biof3-text);
-  font-size: 0.76rem;
-}
-
-.biof3-model-role-row small {
-  color: var(--biof3-text-tertiary);
-  font-size: 0.66rem;
 }
 
 .biof3-credential-card {
@@ -771,14 +731,6 @@
 
   .biof3-endpoint-card__capabilities .biof3-btn {
     margin-left: auto;
-  }
-
-  .biof3-model-role-row {
-    grid-template-columns: 1fr;
-  }
-
-  .biof3-model-routing__heading {
-    flex-direction: column;
   }
 
   .biof3-maintenance-row {
