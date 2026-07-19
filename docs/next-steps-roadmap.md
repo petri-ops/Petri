@@ -12,9 +12,11 @@
 
 ## 当前唯一后续阶段
 
-Stage 4：首个稳定产品版本收口（尚未启动，等待用户确认范围）。
+Stage 4：首个稳定产品版本收口（已于 2026-07-19 启动）。
 
 Stage 3 已于 2026-07-19 关闭：GO/KEGG、GSEA、WGCNA 三条标准流程、DeepSeek + Anthropic 评测、第三方插件指南，以及 `r-enrichment` / `r-wgcna` 发布后的自动下载、校验、解压、挂载真链均通过。下一步不再扩充分析内容，而是按 Stage 4 做功能冻结、全新用户目录、打包安装、升级与发布验收。
+
+Stage 4 第一批已完成 migration / `better-sqlite3` 双 ABI 阻断修复：根项目全量测试已实现 0 fail，全新临时数据目录的开发态和 arm64 打包态启动均通过。完整矩阵见 [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md)。
 
 ## 已完成基线
 
@@ -46,7 +48,7 @@ Stage 3 已于 2026-07-19 关闭：GO/KEGG、GSEA、WGCNA 三条标准流程、D
 
 ### Stage 4：稳定产品版本
 
-- 功能冻结、全新用户目录验收、真实流程、模型切换、数据迁移和旧版更新验证。
+- 🟡 进行中：功能冻结；下一批是真实 runtime 首用、`rc.4` 数据迁移、x64 和 OSS 更新/覆盖安装验证。
 - 用户确认达到“第一个相对稳定产品版本”标准后，再决定最终版本号。
 
 ## 固定工程不变量
@@ -67,3 +69,4 @@ Stage 3 已于 2026-07-19 关闭：GO/KEGG、GSEA、WGCNA 三条标准流程、D
 5. [`codex-style-workbench-direction.md`](./codex-style-workbench-direction.md)：UI 产品方向。
 6. [`macos-oss-auto-update.md`](./macos-oss-auto-update.md)：当前发布/更新操作规范。
 7. [`dependency-decoupling-checkpoint.md`](./dependency-decoupling-checkpoint.md)：去 vendor 化 + web 冗余清理检查点与下阶段清理建议。
+8. [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md)：当前稳定版本出口矩阵与实机证据。

@@ -190,7 +190,7 @@ UI 不得制造第二套状态真相，模型层不得绕过确认/审计边界�
 
 ## 6. Stage 4：首个稳定产品版本
 
-状态：Stage 1–3 入口条件已满足；尚未启动，等待用户确认稳定版本收口范围。
+状态：🟡 2026-07-19 已启动，当前进行发布前收口；执行台账见 [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md)。
 
 主模块：`P-06 桌面集成与交付`；覆盖全部质量关注点。
 
@@ -231,10 +231,10 @@ UI 不得制造第二套状态真相，模型层不得绕过确认/审计边界�
 
 ## 8. 当前立即执行项
 
-MODEL-1 至 MODEL-5 的代码主干已完成。当前只执行 Stage 2 出口验收：
+Stage 1–3 已关闭，当前只执行 Stage 4 稳定版本收口：
 
-1. 真实验证 DeepSeek、一个 OpenAI-compatible 云端模型和一个本地模型的聊天连接。
-2. 至少两个 Provider 完成 streaming 与 Agent tool calling 实测。
-3. 在 macOS 打包态验收 UI-031 的模型 CRUD、角色绑定、显式 fallback、Keychain、保存重开与会话选择器同步。
-4. 对比 conversation、确认、`tool_job` 和 artifact truth，确认 Provider 切换没有建立第二套状态或执行事实。
-5. 验收完成后再固定下一 release candidate；Stage 2 出口前不扩充 Harness 内容。
+1. 功能冻结，只修复发布阻断、数据错误、安全问题和明确回归。
+2. 全新用户目录完成 runtime、模型、项目、真实分析和结果解释。
+3. 用正式 `rc.4` 数据副本验证迁移与设置/凭据兼容。
+4. 完成 arm64 安装级与 x64 构建/实机门禁。
+5. 用户确认候选版本号并人工授权后，验证 OSS 更新与覆盖安装链。

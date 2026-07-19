@@ -24,6 +24,7 @@
 | ✅已处理 | 2026-07-17 | `core/test/` 门禁盲区已收口：3 个单测迁入 `test/*.test.mjs`，死模块测试删除，4 个联网 smoke 保留在 core/test/ | 本文件 §4 | [§4 问题 F](#问题-fcoretest-目录不在门禁范围) |
 | ✅已处理 | 2026-07-17 | `project-run-layout.js` isAdmin 硬编码 → 实现为 `db.getUserById().role === 'admin'`（与 api-data/feedback 一致） | 本文件 §4 | [§4 问题 G](#问题-gproject-run-layoutjs-isadmin-硬编码) |
 | ✅已处理 | 2026-07-18 | Stage 3 B2: `provisionCapability` 写好但未接入任何真实运行路径（无执行器/readiness gate 调用它，`r-libs-resolver` 只查已装不触发下载）——文档说有、实际没有 → B2 part2 已接进 tools-executor/registry 运行路径 | 本文件 §5 | [§5 问题 H](#问题-hprovisioncapability-未接入任何真实运行路径) |
+| ✅已处理 | 2026-07-19 | Stage 4: 开发 migration 使用系统 Node 却加载 electron-builder 留下的 Electron ABI `better-sqlite3`，导致首次启动和全量测试不干净 | 本文件 §6 | [§6 问题 I](#问题-istage-4-migration-原生模块-abi-边界错误) |
 
 **状态图例**：🔴 阻塞验收必须处理 | 🟡 建议处理不阻塞 | 🟢 待合并零风险 | ⚪ 可清理 | ✅ 已处理
 
@@ -238,6 +239,23 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
 
 ---
 
+## §6 Stage 4 发布收口审计（2026-07-19）
+
+### 问题 I：Stage 4 migration 原生模块 ABI 边界错误
+
+- **位置**：`src/main.js` 启动 migration 子进程；`src/migration-runner.js` 的 `better-sqlite3` 加载边界。
+- **现象**：electron-builder 会把根 `better-sqlite3` 重建为 Electron ABI。构建后再运行 `npm test` 或 `npm run dev` 时，migration 使用系统 Node，却从根 `node_modules` 加载 Electron ABI，出现 `NODE_MODULE_VERSION 123` / `131` 错误。
+- **影响**：此前虽被记录成“环境性允许失败”，但实际会让开发首次启动 migration 失败，也使 Stage 4 的“全量测试通过”无法成立；属于发布收口阻断。
+- **✅ 处理（2026-07-19，主 agent）**：
+  - 开发 migration 通过内部环境变量明确加载 `core/r-server` 的系统 Node ABI 依赖；
+  - 打包态保持 Electron Helper + electron-builder 重建的根 ABI，`afterPack` 继续复制到两个 Core；
+  - migration 单测改用相同 Core 依赖边界，消除 build/test 执行顺序耦合；
+  - `npm test` 达到 428 total / 417 pass / 11 skip / 0 fail，原唯一 ABI fail 消失；
+  - 全新临时数据目录的开发态和 arm64 打包态均验证 migration version 0、SQLite 25 张表、R/Python/SPA 健康；
+  - 详细 Stage 4 矩阵见 `docs/stage4-stable-release-checklist.md`。
+
+---
+
 ## 审计发现追加规范
 
 非主 agent 完成新审计后，按以下格式追加到"当前待处理项"表格：
@@ -274,3 +292,4 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
 | 2026-07-18 | Stage 3 M3 首次真机跑分（用户执行 `source .biof3-secrets && npm run harness:provider-eval`）：DeepSeek + Anthropic 双目标各 6/6 全绿，exit 0，达成"≥2 Provider 通过必需项 + 可比较报告 + 失败分类"出口判据；结论记入 stage3 §9（不含 key） | 主 agent |
 | 2026-07-18 | Stage 3 M5 三方插件接入指南落地：新建 `docs/third-party-plugin-guide.md`（基于真实 go-kegg/deseq2/volcano-plot 插件），stage3 §15 占位改为指向该指南 | 主 agent |
 | 2026-07-18 | Stage 3 B1/B2：新增 R bundle 构建脚本 build-r-bundle.mjs + capability-bundles 注册表 + 运行路径接线（ensureBundlesForPlugin 接进 tools-executor/registry），闭合问题 H；4 wiring 测试，全量 423 零回归 | 主 agent |
+| 2026-07-19 | Stage 4 第一批：修复 migration 系统 Node / Electron ABI 边界（问题 I），全量根测试首次 0 fail；开发态与 arm64 打包态空目录启动通过 | 主 agent |

@@ -23,7 +23,7 @@
 
 > **Stage 1 UI 产品化 → Stage 2 模型层 → Stage 3 Harness 与标准流程 → Stage 4 首个稳定产品版本**
 
-Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 3 的 bundle 构建、OSS 发布、注册表回填和 Electron App 首次自动 provision 真链已于 2026-07-19 闭合；当前尚未启动 Stage 4，也未固定下一候选版本。
+Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 已于 2026-07-19 启动并进入功能冻结/发布收口；当前尚未固定下一候选版本，也未上传新的桌面 DMG。
 
 ## 3. 当前立即任务
 
@@ -42,7 +42,9 @@ Stage 3 最新验收证据：
 3. ✅ `r-enrichment` / `r-wgcna` 已发布并回填真实 SHA-256；Electron App 首次自动下载、校验、解压、挂载成功。
 4. ✅ 发布后任务 `job_1257dae3bfda4aa0`（GO/KEGG，37/37）和 `job_02bb39e189d845f9`（WGCNA，28/28）均为 `valid`、0 issues。
 
-下一步（**需用户明确授权**，不擅自执行）：启动 Stage 4，锁定功能冻结范围、下一 RC 版本号、本地 macOS 打包安装、全新用户目录、升级链及发布/签名/公证边界。
+Stage 4 第一批已完成：修复开发 migration 误加载 Electron ABI `better-sqlite3` 的阻断；根测试 428 total / 417 pass / 11 skip / 0 fail，前端 147/147；全新临时数据目录的开发态与 arm64 打包态均完成 migration、SQLite、SPA 和双后端健康验证。详见 [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md)。
+
+下一步：验证不复用现有 runtime 的全新用户完整首用，并用正式 `rc.4` 用户数据的只读副本做升级迁移审计。下一 RC 版本号、OSS 上传、正式 Applications 覆盖、签名/公证仍需用户单独确认。
 
 ### 已拆分给独立 Agent 的专项
 
