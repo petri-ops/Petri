@@ -10,9 +10,13 @@
 
 详细阶段范围和验收出口见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)。若其他文档与该顺序冲突，以 v1 路线图为准。
 
-## 当前唯一后续阶段
+## 当前后续阶段
 
-Stage 4：首个稳定产品版本收口（已于 2026-07-19 启动）。
+Stage 4 首个稳定产品版本收口已完成。2026-07-19 起新增一条明确的发布后平台工程主线：
+
+> **Harness Phase 7：通用基础工具与运行控制面**
+
+当前 7 个项目级文件/短命令工具已完成代码、单元测试和开发壳加载验证；下一步先做真实 DeepSeek + 自定义 Provider 会话矩阵。完整工作包、边界和出口判据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 
 Stage 3 已于 2026-07-19 关闭：GO/KEGG、GSEA、WGCNA 三条标准流程、DeepSeek + Anthropic 评测、第三方插件指南，以及 `r-enrichment` / `r-wgcna` 发布后的自动下载、校验、解压、挂载真链均通过。下一步不再扩充分析内容，而是按 Stage 4 做功能冻结、全新用户目录、打包安装、升级与发布验收。
 
@@ -49,7 +53,7 @@ Stage 4 候选版已完成 migration / `better-sqlite3` 双 ABI 修复、真实 
 ### Stage 4：稳定产品版本
 
 - ✅ macOS arm64 RC 出口完成：rc.6 已发布，公开更新选择、下载、大小/SHA-512、DMG 挂载和包内版本均通过。
-- 当前没有新的功能开发主线。下一步是观察 rc.6 真实使用反馈，再单独决定签名/公证、x64 Runtime 或后续 Stage；这些边界不影响 arm64 RC 结论，也不把本版描述为 GA。
+- 发布线继续观察 rc.6 真实使用反馈，再单独决定签名/公证或 x64 Runtime；平台开发线按 Phase 7 计划推进。两条线不得混在同一提交，也不影响 arm64 RC 结论或把本版描述为 GA。
 
 ## 固定工程不变量
 

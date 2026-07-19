@@ -329,6 +329,9 @@
 
 状态：`in_progress`（2026-07-19，代码与单元测试已完成，待真实 Agent 会话验收）。
 
+完整实施顺序、跨工具接手协议与出口判据见
+[`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。本节只保留阶段摘要；后续执行状态以专项计划为准。
+
 背景修正：
 
 - Phase 1–6 主要解决“识别生信输入 → 选择分析工具 → 运行 → 验证 artifact → 恢复”的纵向流程。

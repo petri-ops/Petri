@@ -27,6 +27,16 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 
 ## 3. 当前立即任务
 
+### Stage 4 之后的 Harness 工程主线
+
+用户已于 2026-07-19 明确启动 Phase 7「通用基础工具与运行控制面」。这不重开已关闭的 Stage 3，也不增加分析流程；它是在 Stage 4 RC 基线之上的平台工程增量。
+
+- 当前提交 `cec2c58` 已加入 7 个项目级文件/短命令工具并推送。
+- 代码与单元测试已完成，开发壳已确认加载工具；真实 DeepSeek / 自定义 Provider 连续调用验收仍待执行。
+- 下一工作包固定为 P7-A Provider 基线验收；其后才进入统一工具契约、policy/interceptor、Trace 和结果呈现。
+- 全面计划、出口判据和后续工具接手协议见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
+- `DeepSeek_harness/` 仅为未跟踪参考工程，不得整体纳入提交。
+
 **Stage 2 出口已于 2026-07-17 验收完成**（详见 `ui-productization-audit.md` 第 9 节与 `acceptance/stage2/`）：
 
 > 注：`acceptance/stage2/`（`live-provider-check.mjs` 等验收工具与人工清单）已于 2026-07-17（commit `498a661`）移除；下列路径引用与结论仅作历史验收记录留存，验收结论以本记录为准。
@@ -89,7 +99,7 @@ Harness Phase 1–6 已建立：
 - Plugin SDK、built-in/installed/development 三来源与 fixture 门禁
 - local/container/remote 共用 canonical execution context，差异留在 adapter
 
-Stage 3 已完成 GO/KEGG、GSEA、WGCNA 与 capability bundle 自动 provision 真链。后续只做回归和 Stage 4 发布收口，不继续批量增加分析内容。技术参考见 [`harness-engine-spec.md`](./harness-engine-spec.md)、[`harness-roadmap.md`](./harness-roadmap.md) 和 [`stage3-standard-workflows-design.md`](./stage3-standard-workflows-design.md)。
+Stage 3 已完成 GO/KEGG、GSEA、WGCNA 与 capability bundle 自动 provision 真链。后续不继续批量增加分析内容；Stage 4 发布收口完成后的 Harness 增量限定为 Phase 7 通用基础工具与运行控制面。技术参考见 [`harness-engine-spec.md`](./harness-engine-spec.md)、[`harness-roadmap.md`](./harness-roadmap.md)、[`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md) 和 [`stage3-standard-workflows-design.md`](./stage3-standard-workflows-design.md)。
 
 ### P-07 模型层现状
 

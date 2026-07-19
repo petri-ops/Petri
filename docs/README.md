@@ -1,6 +1,6 @@
 # BioF3 Desktop 文档入口
 
-最后更新：2026-07-17
+最后更新：2026-07-19
 
 ## 当前开发必读
 
@@ -19,6 +19,7 @@
 - [`plugin-artifact-schema.md`](./plugin-artifact-schema.md) — Plugin/Artifact 兼容契约。
 - [`harness-engine-spec.md`](./harness-engine-spec.md) — 已完成 Harness 基础技术规范，Stage 3 继续复用。
 - [`harness-roadmap.md`](./harness-roadmap.md) — Harness Phase 1–6 完成记录与 Stage 3 技术参考。
+- [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md) — Stage 4 RC 之后的通用基础工具、策略控制面、Trace 与跨工具接手计划。
 - [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md) — 当前稳定版本收口台账、出口矩阵与实机证据。
 - [`releases/v0.0.1-rc.6.md`](./releases/v0.0.1-rc.6.md) — Stage 4 macOS 候选版发布说明与已知边界。
 - [`harness-tool-template.md`](./harness-tool-template.md) — Harness 工具模板。
