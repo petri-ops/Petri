@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   USER_MODEL_PROVIDER_OPTIONS,
   USER_MODEL_ROLE_IDS,
+  endpointBaseUrl,
   isUserConfigurableModelProvider,
 } from './model-provider-options';
 
@@ -21,5 +22,16 @@ describe('user-facing model provider options', () => {
     expect(isUserConfigurableModelProvider('anthropic')).toBe(false);
     expect(USER_MODEL_ROLE_IDS).not.toContain('vision');
     expect(USER_MODEL_ROLE_IDS).not.toContain('embedding');
+  });
+
+  it('shows the effective URL for each endpoint', () => {
+    expect(endpointBaseUrl({ provider: 'deepseek' })).toBe('https://api.deepseek.com');
+    expect(
+      endpointBaseUrl({
+        provider: 'openai-compatible',
+        baseUrl: 'https://example.com/v1',
+      })
+    ).toBe('https://example.com/v1');
+    expect(endpointBaseUrl({ provider: 'openai-compatible' })).toBe('');
   });
 });

@@ -18,6 +18,7 @@ import type { Project } from '@/lib/project-types';
 import {
   USER_MODEL_PROVIDER_OPTIONS,
   USER_MODEL_ROLE_IDS,
+  endpointBaseUrl,
   isUserConfigurableModelProvider,
 } from '@/lib/model-provider-options';
 import {
@@ -31,17 +32,16 @@ interface Props {
   onClose: () => void;
 }
 
-type SettingsSection = 'general' | 'models' | 'credentials' | 'compute' | 'maintenance';
+type SettingsSection = 'general' | 'models' | 'compute' | 'maintenance';
 
 const SETTINGS_SECTIONS: Array<{
   id: SettingsSection;
   label: string;
   description: string;
-  icon: 'settings' | 'brain' | 'key' | 'cpu' | 'wrench';
+  icon: 'settings' | 'brain' | 'cpu' | 'wrench';
 }> = [
   { id: 'general', label: '常规', description: '外观与应用偏好', icon: 'settings' },
-  { id: 'models', label: 'AI 模型', description: '会话与语义模型', icon: 'brain' },
-  { id: 'credentials', label: '凭据', description: 'API Key 管理', icon: 'key' },
+  { id: 'models', label: '模型接口', description: 'URL、模型与 Key', icon: 'brain' },
   { id: 'compute', label: '计算与数据', description: '执行位置与存储', icon: 'cpu' },
   { id: 'maintenance', label: '隐私与维护', description: '反馈、诊断与更新', icon: 'wrench' },
 ];
@@ -772,7 +772,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   }
 
   const activeSectionMeta = SETTINGS_SECTIONS.find((item) => item.id === activeSection) || SETTINGS_SECTIONS[0];
-  const showAiSave = activeSection === 'models' || activeSection === 'credentials';
+  const showAiSave = activeSection === 'models';
   const userModelProfiles = modelProfiles.filter((profile) =>
     isUserConfigurableModelProvider(profile.provider)
   );
@@ -837,52 +837,99 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         {activeSection === 'models' && (
           <section className="biof3-settings-section">
             <div className="biof3-settings-section__heading">
-              <h3>AI 模型</h3>
-              <p>使用 DeepSeek，或接入一个兼容 OpenAI 协议的自定义 API。</p>
+              <h3>API Endpoint</h3>
+              <p>
+                每个 URL 独立配置模型、Key 和可承担的功能；Key
+                {credentialBackend === 'keychain' ? ' 保存在 macOS Keychain。' : ' 保存在独立本地凭据存储。'}
+              </p>
             </div>
             <div className="biof3-model-list">
-              {userModelProfiles.map((profile) => (
-                <div key={profile.id} className="biof3-model-preset">
+              {userModelProfiles.map((profile) => {
+                const id = credentialId(profile);
+                const configured = !!credentialStatus[id];
+                return (
+                <div key={profile.id} className="biof3-model-preset biof3-endpoint-card">
                   <div className="biof3-model-preset__header">
-                    <span>{profile.label || profile.model || '未命名模型'}</span>
+                    <div>
+                      <span>{profile.label || profile.model || '未命名接口'}</span>
+                      <small>{endpointBaseUrl(profile) || '尚未填写 API URL'}</small>
+                    </div>
                     <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => removeProfile(profile.id)}>
                       删除
                     </button>
                   </div>
-                <input
-                  className="biof3-input"
-                  value={profile.label}
-                  onChange={(e) => updateProfile(profile.id, { label: e.target.value })}
-                  placeholder="显示名称"
-                  aria-label="模型显示名称"
-                />
-                <select className="biof3-select" value={profile.provider} onChange={(e) => changeProvider(profile, e.target.value)} aria-label="Provider">
-                  {USER_MODEL_PROVIDER_OPTIONS.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
-                </select>
-                <input
-                  className="biof3-input"
-                  value={profile.model}
-                  onChange={(e) => updateProfile(profile.id, { model: e.target.value })}
-                  placeholder={profile.provider === 'deepseek' ? 'deepseek-chat' : '模型名称'}
-                  aria-label="模型名称"
-                />
-                <input
-                  className="biof3-input"
-                  value={profile.baseUrl || ''}
-                  onChange={(e) => updateProfile(profile.id, { baseUrl: e.target.value || undefined })}
-                  placeholder={profile.provider === 'openai-compatible' ? 'API Base URL，例如 https://example.com/v1' : '留空使用 DeepSeek 官方 API'}
-                  aria-label="Base URL"
-                />
-                <div className="biof3-model-capabilities" aria-label="模型能力">
-                  {MODEL_CAPABILITIES.map((capability) => (
-                    <label key={capability.id}>
-                      <input type="checkbox" checked={(profile.capabilities || []).includes(capability.id)} onChange={() => toggleCapability(profile, capability.id)} />
-                      {capability.label}
+                  <div className="biof3-endpoint-card__grid">
+                    <label className="biof3-endpoint-field">
+                      <span>接口类型</span>
+                      <select className="biof3-select" value={profile.provider} onChange={(e) => changeProvider(profile, e.target.value)} aria-label="接口类型">
+                        {USER_MODEL_PROVIDER_OPTIONS.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
+                      </select>
                     </label>
-                  ))}
+                    <label className="biof3-endpoint-field">
+                      <span>显示名称</span>
+                      <input
+                        className="biof3-input"
+                        value={profile.label}
+                        onChange={(e) => updateProfile(profile.id, { label: e.target.value })}
+                        placeholder="例如：主力分析接口"
+                      />
+                    </label>
+                    <label className="biof3-endpoint-field biof3-endpoint-field--wide">
+                      <span>API Base URL</span>
+                      <input
+                        className="biof3-input"
+                        value={endpointBaseUrl(profile)}
+                        onChange={(e) => updateProfile(profile.id, { baseUrl: e.target.value || undefined })}
+                        placeholder="https://example.com/v1"
+                      />
+                    </label>
+                    <label className="biof3-endpoint-field">
+                      <span>模型名称</span>
+                      <input
+                        className="biof3-input"
+                        value={profile.model}
+                        onChange={(e) => updateProfile(profile.id, { model: e.target.value })}
+                        placeholder={profile.provider === 'deepseek' ? 'deepseek-chat' : '例如：gpt-4.1'}
+                      />
+                    </label>
+                    <label className="biof3-endpoint-field">
+                      <span className="biof3-endpoint-field__title">
+                        API Key
+                        {configured && <span className="biof3-badge"><Icon name="check" size={12} /> 已配置</span>}
+                      </span>
+                      <input
+                        type="password"
+                        className="biof3-input"
+                        value={credentialInputs[id] || ''}
+                        onChange={(e) => setCredentialInputs((current) => ({ ...current, [id]: e.target.value }))}
+                        placeholder={configured ? '已配置（输入新 Key 覆盖）' : '输入 API Key'}
+                      />
+                    </label>
+                  </div>
+                  <div className="biof3-endpoint-card__capabilities">
+                    <div>
+                      <strong>接口功能</strong>
+                      <small>声明这个 URL 支持的能力，用于下方任务路由筛选。</small>
+                    </div>
+                    <div className="biof3-model-capabilities" aria-label="接口功能">
+                      {MODEL_CAPABILITIES.map((capability) => (
+                        <label key={capability.id}>
+                          <input type="checkbox" checked={(profile.capabilities || []).includes(capability.id)} onChange={() => toggleCapability(profile, capability.id)} />
+                          {capability.label}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="biof3-endpoint-card__actions">
+                    <span className="biof3-field__hint">凭据标识：{id}</span>
+                    <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => void handleTest(profile)} disabled={testing === profile.id || (!configured && !credentialInputs[id])}>
+                      {testing === profile.id ? '测试中…' : '测试连接'}
+                    </button>
+                  </div>
+                  {testResult[profile.id] && <p className={`biof3-field__result ${testResult[profile.id].ok ? 'biof3-field__result--ok' : 'biof3-field__result--err'}`}>{testResult[profile.id].ok ? '✓ ' : '✗ '}{testResult[profile.id].message}</p>}
                 </div>
-              </div>
-            ))}
+              );
+              })}
               {userModelProfiles.length === 0 && <p className="biof3-field__hint">尚未配置模型。添加一个自定义 API，或选择 DeepSeek。</p>}
             </div>
             <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={addProfile}>
@@ -917,38 +964,6 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                   </div>
                 );
               })}
-            </div>
-          </section>
-        )}
-
-        {activeSection === 'credentials' && (
-          <section className="biof3-settings-section">
-            <div className="biof3-settings-section__heading">
-              <h3>凭据</h3>
-              <p>管理模型服务密钥。已配置密钥不会回显；{credentialBackend === 'keychain' ? '当前使用 macOS Keychain。' : '当前使用独立本地凭据存储。'}</p>
-            </div>
-            <div className="biof3-model-list">
-              {userModelProfiles.map((profile) => {
-                const id = credentialId(profile);
-                const configured = !!credentialStatus[id];
-                return (
-                  <div key={profile.id} className="biof3-credential-card">
-                    <label className="biof3-field__label">
-                      {profile.label || profile.model}
-                      <span className="biof3-field__hint">{profile.provider} · {id}</span>
-                      {configured && <span className="biof3-badge"><Icon name="check" size={12} /> 已配置</span>}
-                    </label>
-                    <div className="biof3-input-row">
-                      <input type="password" className="biof3-input" value={credentialInputs[id] || ''} onChange={(e) => setCredentialInputs((current) => ({ ...current, [id]: e.target.value }))} placeholder={configured ? '已配置（输入新 Key 覆盖）' : '输入 API Key'} />
-                      <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => void handleTest(profile)} disabled={testing === profile.id || (!configured && !credentialInputs[id])}>
-                        {testing === profile.id ? '测试中…' : '测试连接'}
-                      </button>
-                    </div>
-                    {testResult[profile.id] && <p className={`biof3-field__result ${testResult[profile.id].ok ? 'biof3-field__result--ok' : 'biof3-field__result--err'}`}>{testResult[profile.id].ok ? '✓ ' : '✗ '}{testResult[profile.id].message}</p>}
-                  </div>
-                );
-              })}
-              {userModelProfiles.length === 0 && <p className="biof3-field__hint">先在“AI 模型”中选择 DeepSeek 或添加自定义 API。</p>}
             </div>
           </section>
         )}
