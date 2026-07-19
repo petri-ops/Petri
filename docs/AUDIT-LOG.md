@@ -23,6 +23,7 @@
 | ✅已处理 | 2026-07-17 | `sanitizer.js` 死模块 + 其测试已删除（全仓零生产引用） | 本文件 §4 | [§4 问题 E](#问题-esanitizerjs-死模块) |
 | ✅已处理 | 2026-07-17 | `core/test/` 门禁盲区已收口：3 个单测迁入 `test/*.test.mjs`，死模块测试删除，4 个联网 smoke 保留在 core/test/ | 本文件 §4 | [§4 问题 F](#问题-fcoretest-目录不在门禁范围) |
 | ✅已处理 | 2026-07-17 | `project-run-layout.js` isAdmin 硬编码 → 实现为 `db.getUserById().role === 'admin'`（与 api-data/feedback 一致） | 本文件 §4 | [§4 问题 G](#问题-gproject-run-layoutjs-isadmin-硬编码) |
+| ✅已处理 | 2026-07-18 | Stage 3 B2: `provisionCapability` 写好但未接入任何真实运行路径（无执行器/readiness gate 调用它，`r-libs-resolver` 只查已装不触发下载）——文档说有、实际没有 → B2 part2 已接进 tools-executor/registry 运行路径 | 本文件 §5 | [§5 问题 H](#问题-hprovisioncapability-未接入任何真实运行路径) |
 
 **状态图例**：🔴 阻塞验收必须处理 | 🟡 建议处理不阻塞 | 🟢 待合并零风险 | ⚪ 可清理 | ✅ 已处理
 
@@ -212,6 +213,31 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
 
 ---
 
+## §5 Stage 3 B2 接线缺口审计（2026-07-18）
+
+### 问题 H：provisionCapability 未接入任何真实运行路径
+
+- **位置**：`core/shared-backend/capability-provisioning.js#provisionCapability`（下载函数本身）；缺口在 `core/shared-backend/r-libs-resolver.js#resolveProvisionedBundleLibs`（运行路径侧）
+- **现象**：`provisionCapability`（下载 + 校验 + 落盘 + ledger）实现完整、测试齐全，但**全仓没有任何执行器 / readiness gate 真正调用它**。全仓搜索 `provisionCapability` 的调用者，除模块自身、文档、测试外，无生产调用点。运行路径侧 `r-libs-resolver.js` 的 `resolveProvisionedBundleLibs` 只调 `checkCapabilityReady`（检查 bundle 是否**已装**），从不在缺失时触发 `provisionCapability`（**下载**）。
+- **事实核对（已核实）**：
+  - `checkCapabilityReady` 有生产调用者（`r-libs-resolver.js`）——只读检查已装。
+  - `provisionCapability` 无生产调用者——即"缺 bundle 就自动触发下载"这一步从未接线。
+  - 结果：即便 `BUNDLE_REGISTRY` 里某 bundle 已 `ready`（有 sha256），运行路径也不会去下载它，只会因 `checkCapabilityReady` 返回 `not_provisioned` 而静默跳过该 bundle 的 lib 注入。
+- **性质**：与之前 host 白名单那个 gap（问题 D）同类——**"文档说有、实际没有"**。设计文档 §5.2 把"缺 bundle 就自动 provision"描述成"已有机制"，实际 M1 只做了下载函数本身，没做"缺 bundle 就自动触发下载"的接线。
+- **B2 进度对账**：
+  - ✅ B2 part1（`capability-bundles.js` bundle 注册表，commit `4c6557e`）已补齐 **"bundleId → descriptor"** 这一环（单一事实源：bundleId → `{url, sha256, sizeBytes, platforms}`），并提供了 `ensureBundlesForPlugin()` 编排层作为"未来运行路径将调用的接缝"——但该编排层同样尚未被任何运行路径调用（见 `capability-bundles.js` 文件头注释自述）。
+  - ⏳ 剩下的运行路径接线（在 `r-libs-resolver.js` / readiness gate 缺 bundle 时调 `ensureBundlesForPlugin` → `provisionCapability`）留 **B2 part2**。
+- **状态标记**：✅已处理（原为 🟡建议。不阻塞当前验收——bundle 尚未构建发布，`sha256===null` 时本就不该下载；B2 part2 已把接线批次补齐，闭合本 gap）。
+- **对验收影响**：无（当前所有 bundle 均 unpublished，运行路径本就应跳过；接线缺口只有在 bundle 真正发布后才显现为"该下载却没下载"）。
+- **✅ 处理（2026-07-18，主 agent）**：B2 part2 已把运行路径接线补齐，闭合本 gap：
+  - `core/r-server/helpers/tools-executor.js#executeJob`（R 分支，`resolveRLibsForPlugin` 之前）与 `core/r-server/mcp/registry.js#_runPluginScript`（已改为 async，在 `return new Promise` 之前 await）两处，均在 R 库解析前调用 `ensureBundlesForPlugin(cfg/plugin)`；`getToolConfig` 已透传 `requiresBundle`/`requiresBundleVersion`。
+  - best-effort 语义：双守卫（仅 R 插件 + 有 `requiresBundle`）+ try/catch only-warn；unpublished（`sha256===null`）/ unknown / 下载失败均不中断 job，行为与接线前一致（当前所有 bundle 均 unpublished 故不下载）。
+  - 新增 `test/capability-bundle-wiring.test.mjs`（4 个 wiring 契约测试，零网络）；全量 `npm test` 423 tests，仅 1 个环境性 sqlite ABI fail，零功能回归。
+  - **gap 已闭合**：`provisionCapability` 现在有真实运行路径调用者（经 `ensureBundlesForPlugin` 编排层触达），"缺 bundle 就自动 provision"不再是空转；bundle 一旦发布（有 sha256）即会在运行路径按需下载。
+  - 相关提交：B2 part1 注册表 `4c6557e`；B1 构建脚本 + 本 gap 记录（批次一）；B2 part2 接线（批次二）均已 push。
+
+---
+
 ## 审计发现追加规范
 
 非主 agent 完成新审计后，按以下格式追加到"当前待处理项"表格：
@@ -247,3 +273,4 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
 | 2026-07-18 | Stage 3 M3：实现多 Provider harness 评测脚本 `scripts/harness-provider-eval.mjs`（6 环节探针，前 4 必需；Markdown+JSON 双报告到 gitignored `eval-reports/`；凭据只读环境变量、不落盘/不打印/不进 CI）+ 31 个 mock 单测纳入门禁（`test/harness-provider-eval.test.mjs`，零网络）+ package.json `harness:provider-eval` 接线。真机跑分待用户 key/endpoint。全量测试 367→406（+39），唯一 fail 仍为环境 sqlite ABI。 | 主 agent |
 | 2026-07-18 | Stage 3 M3 首次真机跑分（用户执行 `source .biof3-secrets && npm run harness:provider-eval`）：DeepSeek + Anthropic 双目标各 6/6 全绿，exit 0，达成"≥2 Provider 通过必需项 + 可比较报告 + 失败分类"出口判据；结论记入 stage3 §9（不含 key） | 主 agent |
 | 2026-07-18 | Stage 3 M5 三方插件接入指南落地：新建 `docs/third-party-plugin-guide.md`（基于真实 go-kegg/deseq2/volcano-plot 插件），stage3 §15 占位改为指向该指南 | 主 agent |
+| 2026-07-18 | Stage 3 B1/B2：新增 R bundle 构建脚本 build-r-bundle.mjs + capability-bundles 注册表 + 运行路径接线（ensureBundlesForPlugin 接进 tools-executor/registry），闭合问题 H；4 wiring 测试，全量 423 零回归 | 主 agent |
