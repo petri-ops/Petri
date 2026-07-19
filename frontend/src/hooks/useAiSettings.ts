@@ -27,6 +27,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { getBridge } from '@/lib/desktopBridge';
+import { isChatSelectableProfile } from '@/lib/model-provider-options';
 
 // ChatModelPreset type — extracted here so SimpleChat and
 // DesktopSettingsPanel no longer each carry their own copy.
@@ -77,9 +78,7 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
     .get()
     .then((raw) => {
       const profilePresets = Array.isArray(raw?.model_profiles)
-        ? (raw.model_profiles as ChatModelPreset[]).filter(
-            (p) => p?.id && p?.model && (!Array.isArray(p.capabilities) || p.capabilities.includes('chat'))
-          )
+        ? (raw.model_profiles as ChatModelPreset[]).filter(isChatSelectableProfile)
         : [];
       const presetsRaw = profilePresets.length > 0
         ? profilePresets

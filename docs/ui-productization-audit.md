@@ -140,7 +140,7 @@ npm run check
 | ID | 状态 | 级别 | 主模块 | 关注点 | 页面/状态 | 问题摘要 | 证据 | 目标批次 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | UI-032 | in_progress | P2 | P-07 | C-04 | 设置 / 计算与数据 | Stage 3 M1 新增只读"Harness 分析环境"面板（`HarnessEnvironment` 组件），展示 Harness 已自备的运行时与 R 包 bundle 清单 | 代码实现：`frontend/src/components/desktop/DesktopSettingsPanel.tsx` `HarnessEnvironment` 组件；IPC：`harness-capabilities:list`；类型：`electron.d.ts HarnessCapabilityEntry`；暂无 bundle 可显示（Stage 3 M2 GO/KEGG 接入后才有真实条目）；待 M2 真实 bundle 装入后实机截图 | Stage 3 M2 |
-| UI-033 | in_progress | P1 | P-07 | C-02, C-04 | 设置 / 模型接口 | Provider 入口过多，且 URL、模型、Key、功能与连接测试分散；聚合卡迭代后仍被用户认为占高过大，“任务角色路由”也不需要暴露 | 本增量彻底移除任务角色路由 UI（后台既有默认绑定保持）；卡片取消独立标题行，第一行类型/名称/模型/删除，第二行 URL/Key/测试，第三行功能；输入框、间距和内边距继续压缩；窄窗仍回退单列；待新构建实机确认 | MODEL-UX |
+| UI-033 | in_progress | P1 | P-07 | C-02, C-04 | 设置 / 模型接口与聊天选择器 | Provider 入口、Endpoint 聚合和密度已按用户反馈收敛；进一步发现不完整的自定义卡会被保存逻辑静默过滤，导致聊天输入框无法选择用户以为已经配置的模型 | 当前真实设置仅有 DeepSeek + 内部 Vision/Embedding，无自定义 profile；修复为 URL/模型缺失时卡内显式报错且阻止保存，不再静默丢弃；卡内明确 Chat 可选状态；聊天选择器与设置页共用 `isChatSelectableProfile`，只展示完整、启用 Chat 的 DeepSeek/自定义 API；待新构建实机确认 | MODEL-UX |
 
 - UI-032 属于 `P-07 模型网关与 AI Provider` 的 Harness 能力子系统（Stage 3 M1），不影响 Stage 1/2 已关闭的 31 项结论。
 - 不允许破坏：设置页窄窗布局、计算与数据分类既有 `ComputeExecution`/`DataManagement` 组件、`run_tool → tool_job → artifact truth` 执行链。

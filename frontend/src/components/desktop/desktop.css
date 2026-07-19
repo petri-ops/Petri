@@ -505,6 +505,17 @@
   margin: 0;
 }
 
+.biof3-endpoint-card__chat-status {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--biof3-text-tertiary);
+  font-size: 0.66rem;
+}
+
+.biof3-endpoint-card__chat-status.is-ready {
+  color: var(--biof3-status-success-fg);
+}
+
 .biof3-model-capabilities {
   grid-column: 1 / -1;
   display: flex;

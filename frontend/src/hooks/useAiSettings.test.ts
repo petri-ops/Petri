@@ -57,8 +57,8 @@ describe('useAiSettings', () => {
     installBridge({
       initial: {
         model_profiles: [
-          { id: 'chat-a', label: 'Chat A', provider: 'ollama', model: 'qwen3', capabilities: ['chat'] },
-          { id: 'embed-a', label: 'Embed A', provider: 'ollama', model: 'embed', capabilities: ['embedding'] },
+          { id: 'chat-a', label: 'Chat A', provider: 'openai-compatible', model: 'custom-chat', baseUrl: 'https://example.com/v1', capabilities: ['chat'] },
+          { id: 'embed-a', label: 'Embed A', provider: 'openai-compatible', model: 'custom-embed', baseUrl: 'https://example.com/v1', capabilities: ['embedding'] },
         ],
         model_role_bindings: { chat: 'chat-a', embedding: 'embed-a' },
         chat_model_presets: [{ id: 'legacy', label: 'Legacy', provider: 'deepseek', model: 'deepseek-chat' }],

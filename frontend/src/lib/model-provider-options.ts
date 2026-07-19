@@ -28,3 +28,39 @@ export function endpointBaseUrl(profile: {
 }): string {
   return profile.baseUrl || (profile.provider === 'deepseek' ? DEEPSEEK_DEFAULT_BASE_URL : '');
 }
+
+export interface UserModelProfileLike {
+  id?: string;
+  provider?: string;
+  model?: string;
+  baseUrl?: string;
+  capabilities?: string[];
+}
+
+export function isChatSelectableProfile(profile: UserModelProfileLike): boolean {
+  return Boolean(
+    profile.id?.trim() &&
+      profile.model?.trim() &&
+      profile.provider &&
+      isUserConfigurableModelProvider(profile.provider) &&
+      (!Array.isArray(profile.capabilities) || profile.capabilities.includes('chat'))
+  );
+}
+
+export function validateUserModelProfile(
+  profile: UserModelProfileLike
+): string | null {
+  if (!profile.model?.trim()) return '请填写模型名称，保存后才能在聊天中选择。';
+  if (profile.provider === 'openai-compatible') {
+    if (!profile.baseUrl?.trim()) return '自定义 API 必须填写 Base URL。';
+    try {
+      const url = new URL(profile.baseUrl);
+      if (!['http:', 'https:'].includes(url.protocol)) {
+        return 'Base URL 必须使用 http 或 https。';
+      }
+    } catch {
+      return 'Base URL 格式不正确。';
+    }
+  }
+  return null;
+}

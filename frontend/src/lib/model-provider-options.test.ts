@@ -3,7 +3,9 @@ import {
   USER_MODEL_PROVIDER_OPTIONS,
   USER_MODEL_ROLE_IDS,
   endpointBaseUrl,
+  isChatSelectableProfile,
   isUserConfigurableModelProvider,
+  validateUserModelProfile,
 } from './model-provider-options';
 
 describe('user-facing model provider options', () => {
@@ -33,5 +35,55 @@ describe('user-facing model provider options', () => {
       })
     ).toBe('https://example.com/v1');
     expect(endpointBaseUrl({ provider: 'openai-compatible' })).toBe('');
+  });
+
+  it('uses one explicit contract for chat-selectable endpoints', () => {
+    expect(
+      isChatSelectableProfile({
+        id: 'custom',
+        provider: 'openai-compatible',
+        model: 'custom-chat',
+        capabilities: ['chat', 'streaming'],
+      })
+    ).toBe(true);
+    expect(
+      isChatSelectableProfile({
+        id: 'custom',
+        provider: 'openai-compatible',
+        model: 'custom-chat',
+        capabilities: ['embedding'],
+      })
+    ).toBe(false);
+    expect(
+      isChatSelectableProfile({
+        id: 'legacy',
+        provider: 'anthropic',
+        model: 'claude',
+        capabilities: ['chat'],
+      })
+    ).toBe(false);
+  });
+
+  it('rejects incomplete custom endpoints instead of silently dropping them', () => {
+    expect(
+      validateUserModelProfile({
+        provider: 'openai-compatible',
+        model: '',
+        baseUrl: 'https://example.com/v1',
+      })
+    ).toContain('模型名称');
+    expect(
+      validateUserModelProfile({
+        provider: 'openai-compatible',
+        model: 'custom-chat',
+      })
+    ).toContain('Base URL');
+    expect(
+      validateUserModelProfile({
+        provider: 'openai-compatible',
+        model: 'custom-chat',
+        baseUrl: 'https://example.com/v1',
+      })
+    ).toBeNull();
   });
 });

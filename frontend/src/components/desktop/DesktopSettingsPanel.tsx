@@ -18,7 +18,9 @@ import type { Project } from '@/lib/project-types';
 import {
   USER_MODEL_PROVIDER_OPTIONS,
   endpointBaseUrl,
+  isChatSelectableProfile,
   isUserConfigurableModelProvider,
+  validateUserModelProfile,
 } from '@/lib/model-provider-options';
 import {
   archiveConversation,
@@ -651,6 +653,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   const [fallbackBindings, setFallbackBindings] = useState<Partial<Record<ModelRole, string[]>>>({});
   const [credentialInputs, setCredentialInputs] = useState<Record<string, string>>({});
   const [credentialStatus, setCredentialStatus] = useState<Record<string, boolean>>({});
+  const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
   const [credentialBackend, setCredentialBackend] = useState('local');
   const { refresh: refreshAiSettings } = useAiSettings();
   // M2-3：错误遥测开关（默认关闭）
@@ -681,6 +684,18 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     if (!window.biof3Desktop) return;
     setSaving(true);
     setSaved(false);
+    const nextProfileErrors = Object.fromEntries(
+      modelProfiles
+        .filter((profile) => isUserConfigurableModelProvider(profile.provider))
+        .map((profile) => [profile.id, validateUserModelProfile(profile)])
+        .filter((entry): entry is [string, string] => Boolean(entry[1]))
+    );
+    if (Object.keys(nextProfileErrors).length > 0) {
+      setProfileErrors(nextProfileErrors);
+      setSaving(false);
+      return;
+    }
+    setProfileErrors({});
     const profiles = modelProfiles
       .filter((profile) => profile.id.trim() && profile.model.trim())
       .map((profile) => ({ ...profile, roles: MODEL_ROLES.filter((role) => roleBindings[role.id] === profile.id).map((role) => role.id) }));
@@ -843,6 +858,9 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
               {userModelProfiles.map((profile) => {
                 const id = credentialId(profile);
                 const configured = !!credentialStatus[id];
+                const chatReady =
+                  isChatSelectableProfile(profile) &&
+                  validateUserModelProfile(profile) === null;
                 return (
                 <div key={profile.id} className="biof3-model-preset biof3-endpoint-card">
                   <div className="biof3-endpoint-card__grid">
@@ -910,6 +928,16 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       ))}
                     </div>
                   </div>
+                  <p className={`biof3-endpoint-card__chat-status${chatReady ? ' is-ready' : ''}`}>
+                    {chatReady
+                      ? '保存后可在聊天输入框中选择'
+                      : '勾选 Chat 并填写模型名称后，才会出现在聊天模型菜单'}
+                  </p>
+                  {profileErrors[profile.id] && (
+                    <p className="biof3-field__result biof3-field__result--err">
+                      {profileErrors[profile.id]}
+                    </p>
+                  )}
                   {testResult[profile.id] && <p className={`biof3-field__result ${testResult[profile.id].ok ? 'biof3-field__result--ok' : 'biof3-field__result--err'}`}>{testResult[profile.id].ok ? '✓ ' : '✗ '}{testResult[profile.id].message}</p>}
                 </div>
               );
