@@ -144,6 +144,7 @@ async function runAgentLoop({
   _activeConv,
   apiKey,
   providerName,
+  providerLabel,
   modelName,
   profileId,
   baseUrl,
@@ -173,7 +174,11 @@ async function runAgentLoop({
   };
 
   // ---------- system prompt 构建（搬迁自 ai-agent.js L142-319）----------
-  let systemPrompt = buildSystemPrompt(ctxForPrompt);
+  let systemPrompt = buildSystemPrompt(ctxForPrompt, {
+    provider: providerName,
+    providerLabel,
+    model: modelName,
+  });
   if (isGuest) {
     systemPrompt += '\n\n=== 当前用户：未登录访客 ===';
     systemPrompt +=

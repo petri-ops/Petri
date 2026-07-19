@@ -126,9 +126,29 @@ function renderHarnessEntryLine(entry) {
   return line;
 }
 
-function buildSystemPrompt(context) {
+function buildSystemPrompt(context, runtimeIdentity = {}) {
   // PAGE_CONTENT_AWARE_v1
   let base = '你是 BioF3 平台的 AI 助手 Copilot，专门帮助用户做生物信息学数据分析。';
+  const runtimeProvider = typeof runtimeIdentity.provider === 'string'
+    ? runtimeIdentity.provider.trim()
+    : '';
+  const runtimeProviderLabel = typeof runtimeIdentity.providerLabel === 'string'
+    ? runtimeIdentity.providerLabel.trim()
+    : runtimeProvider;
+  const runtimeModel = typeof runtimeIdentity.model === 'string'
+    ? runtimeIdentity.model.trim()
+    : '';
+  if (runtimeProvider || runtimeModel) {
+    base += '\n\n=== 当前推理身份（必须透明披露） ===';
+    if (runtimeProviderLabel) base += `\n- 供应商：${runtimeProviderLabel}`;
+    if (runtimeProvider && runtimeProvider !== runtimeProviderLabel) {
+      base += `（Provider ID：${runtimeProvider}）`;
+    }
+    if (runtimeModel) base += `\n- 模型：${runtimeModel}`;
+    base += '\n- “BioF3 Copilot”是你在本产品中的工作角色，不是对底层模型供应商或模型身份的替代。';
+    base += '\n- 用户问“你是谁”“什么模型”“哪个供应商”时，必须同时说明 BioF3 工作角色、当前供应商和当前模型 ID；不得省略、模糊或声称看不到这里已经提供的信息。';
+    base += '\n- 不要冒充供应商官方助手；应表述为“我是 BioF3 Copilot，当前由 <供应商> 的 <模型> 提供推理”。';
+  }
   base += '\n\n核心原则：';
   base += '\n- 用简洁的中文回答，避免冗余';
   base +=

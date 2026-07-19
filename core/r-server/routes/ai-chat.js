@@ -49,7 +49,17 @@ module.exports = function registerAiChatRoute(app) {
       return res.status(400).json({ status: 'error', error: '缺少消息' });
     }
 
-    let systemPrompt = buildSystemPrompt(context);
+    const { modelGateway } = require('../helpers/model-gateway');
+    const resolvedIdentity = modelGateway.resolve('chat');
+    const identityProfile = resolvedIdentity && resolvedIdentity.profile;
+    const identityProvider = identityProfile && identityProfile.provider;
+    let systemPrompt = buildSystemPrompt(context, {
+      provider: identityProvider,
+      providerLabel: identityProvider === 'deepseek'
+        ? 'DeepSeek'
+        : identityProfile && identityProfile.label,
+      model: identityProfile && identityProfile.model,
+    });
 
     // Layer 3b: semantic retrieval — find related historical turns/analyses
     let retrievalBlock = '';
@@ -233,7 +243,6 @@ module.exports = function registerAiChatRoute(app) {
     };
 
     const abortController = new AbortController();
-    const { modelGateway } = require('../helpers/model-gateway');
     modelGateway.chat({
       role: 'chat',
       body: {

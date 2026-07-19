@@ -118,6 +118,9 @@ module.exports = function registerAiAgentRoute(app) {
     const { messages, context, conversationId: explicitConvId, modelPresetId, modelName: requestedModelName } = req.body || {};
     const selectedPreset = getChatModelPreset(modelPresetId);
     const providerName = (selectedPreset && selectedPreset.provider) || getChatProviderName();
+    const providerLabel = providerName === 'deepseek'
+      ? 'DeepSeek'
+      : (selectedPreset && selectedPreset.label) || providerName;
     const modelName = typeof requestedModelName === 'string' && requestedModelName.trim()
       ? requestedModelName.trim().slice(0, 200)
       : selectedPreset && selectedPreset.model;
@@ -177,7 +180,14 @@ module.exports = function registerAiAgentRoute(app) {
         agentTaskStore.insertAgentTask({
           taskId,
           userId,
-          params: { messages, context, conversationId: _activeConv && _activeConv.id },
+          params: {
+            messages,
+            context,
+            conversationId: _activeConv && _activeConv.id,
+            providerName,
+            providerLabel,
+            modelName,
+          },
         });
       } catch (e) {
         aiTaskConcurrencyRelease(userId, taskId);
@@ -195,6 +205,7 @@ module.exports = function registerAiAgentRoute(app) {
           _activeConv,
           apiKey,
           providerName,
+          providerLabel,
           modelName,
           profileId: selectedPreset && selectedPreset.id,
           baseUrl,
@@ -291,7 +302,11 @@ module.exports = function registerAiAgentRoute(app) {
         : { audience: isGuest ? 'guest' : 'user' };
 
     // Build the same rich system prompt used by /api/ai/chat
-    let systemPrompt = buildSystemPrompt(ctxForPrompt);
+    let systemPrompt = buildSystemPrompt(ctxForPrompt, {
+      provider: providerName,
+      providerLabel,
+      model: modelName,
+    });
     if (isGuest) {
       systemPrompt += '\n\n=== 当前用户：未登录访客 ===';
       systemPrompt +=
