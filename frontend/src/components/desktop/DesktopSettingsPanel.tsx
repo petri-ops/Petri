@@ -850,9 +850,9 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                 return (
                 <div key={profile.id} className="biof3-model-preset biof3-endpoint-card">
                   <div className="biof3-model-preset__header">
-                    <div>
+                    <div className="biof3-endpoint-card__title">
                       <span>{profile.label || profile.model || '未命名接口'}</span>
-                      <small>{endpointBaseUrl(profile) || '尚未填写 API URL'}</small>
+                      {configured && <span className="biof3-badge"><Icon name="check" size={12} /> Key 已配置</span>}
                     </div>
                     <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => removeProfile(profile.id)}>
                       删除
@@ -874,15 +874,6 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                         placeholder="例如：主力分析接口"
                       />
                     </label>
-                    <label className="biof3-endpoint-field biof3-endpoint-field--wide">
-                      <span>API Base URL</span>
-                      <input
-                        className="biof3-input"
-                        value={endpointBaseUrl(profile)}
-                        onChange={(e) => updateProfile(profile.id, { baseUrl: e.target.value || undefined })}
-                        placeholder="https://example.com/v1"
-                      />
-                    </label>
                     <label className="biof3-endpoint-field">
                       <span>模型名称</span>
                       <input
@@ -892,11 +883,17 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                         placeholder={profile.provider === 'deepseek' ? 'deepseek-chat' : '例如：gpt-4.1'}
                       />
                     </label>
+                    <label className="biof3-endpoint-field biof3-endpoint-field--url">
+                      <span>API Base URL</span>
+                      <input
+                        className="biof3-input"
+                        value={endpointBaseUrl(profile)}
+                        onChange={(e) => updateProfile(profile.id, { baseUrl: e.target.value || undefined })}
+                        placeholder="https://example.com/v1"
+                      />
+                    </label>
                     <label className="biof3-endpoint-field">
-                      <span className="biof3-endpoint-field__title">
-                        API Key
-                        {configured && <span className="biof3-badge"><Icon name="check" size={12} /> 已配置</span>}
-                      </span>
+                      <span>API Key</span>
                       <input
                         type="password"
                         className="biof3-input"
@@ -907,10 +904,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                     </label>
                   </div>
                   <div className="biof3-endpoint-card__capabilities">
-                    <div>
-                      <strong>接口功能</strong>
-                      <small>声明这个 URL 支持的能力，用于下方任务路由筛选。</small>
-                    </div>
+                    <strong>功能</strong>
                     <div className="biof3-model-capabilities" aria-label="接口功能">
                       {MODEL_CAPABILITIES.map((capability) => (
                         <label key={capability.id}>
@@ -919,9 +913,6 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                         </label>
                       ))}
                     </div>
-                  </div>
-                  <div className="biof3-endpoint-card__actions">
-                    <span className="biof3-field__hint">凭据标识：{id}</span>
                     <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => void handleTest(profile)} disabled={testing === profile.id || (!configured && !credentialInputs[id])}>
                       {testing === profile.id ? '测试中…' : '测试连接'}
                     </button>

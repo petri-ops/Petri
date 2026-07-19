@@ -140,7 +140,7 @@ npm run check
 | ID | 状态 | 级别 | 主模块 | 关注点 | 页面/状态 | 问题摘要 | 证据 | 目标批次 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | UI-032 | in_progress | P2 | P-07 | C-04 | 设置 / 计算与数据 | Stage 3 M1 新增只读"Harness 分析环境"面板（`HarnessEnvironment` 组件），展示 Harness 已自备的运行时与 R 包 bundle 清单 | 代码实现：`frontend/src/components/desktop/DesktopSettingsPanel.tsx` `HarnessEnvironment` 组件；IPC：`harness-capabilities:list`；类型：`electron.d.ts HarnessCapabilityEntry`；暂无 bundle 可显示（Stage 3 M2 GO/KEGG 接入后才有真实条目）；待 M2 真实 bundle 装入后实机截图 | Stage 3 M2 |
-| UI-033 | in_progress | P1 | P-07 | C-02, C-04 | 设置 / 模型接口 | Provider 入口过多，且 URL、模型、Key、功能与连接测试分散在不同页面/区块，增加配置认知负担 | 用户确认首版“DeepSeek + 自定义 API”方向后指出布局松散；本增量改为每个 URL 一张 Endpoint 卡，聚合类型、名称、Base URL、模型、Key、功能和测试；凭据独立导航移除；内部 DashScope Vision/Embedding 配置只隐藏不删除；待新构建实机确认 | MODEL-UX |
+| UI-033 | in_progress | P1 | P-07 | C-02, C-04 | 设置 / 模型接口 | Provider 入口过多，且 URL、模型、Key、功能与连接测试分散；首版聚合卡仍因双列纵向排布和嵌套功能卡占高过大 | 用户确认“每个 URL 一张 Endpoint 卡”方向后要求进一步压缩；本增量改为类型/名称/模型三列、URL 双列+Key、功能与测试同排，移除重复 URL 摘要、凭据标识和嵌套功能卡；窄窗仍回退单列；待新构建实机确认 | MODEL-UX |
 
 - UI-032 属于 `P-07 模型网关与 AI Provider` 的 Harness 能力子系统（Stage 3 M1），不影响 Stage 1/2 已关闭的 31 项结论。
 - 不允许破坏：设置页窄窗布局、计算与数据分类既有 `ComputeExecution`/`DataManagement` 组件、`run_tool → tool_job → artifact truth` 执行链。
