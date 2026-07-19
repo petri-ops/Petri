@@ -12,6 +12,7 @@ const {
   resolveProjectRunLayout,
 } = require('../../shared-backend/project-run-layout');
 const { resolveRLibsForPlugin } = require('../../shared-backend/r-libs-resolver');
+const { ensureBundlesForPlugin } = require('../../shared-backend/capability-bundles');
 
 function isManagedResultDir(candidate, jobsDir) {
   if (!candidate || !jobsDir) return false;
@@ -473,6 +474,10 @@ function createToolsExecutor({
             lang: plugin.language,
             _isPlugin: true,
             pluginDir: plugin.pluginDir,
+            // Carry bundle declarations so the run path can (a) auto-provision
+            // required capability bundles and (b) mount them via R_LIBS_USER.
+            requiresBundle: plugin.requiresBundle,
+            requiresBundleVersion: plugin.requiresBundleVersion,
           };
         }
       }
@@ -589,6 +594,27 @@ function createToolsExecutor({
         // R_LIBS_USER 会被追加到默认 .libPaths() 之后，runtime 基础包仍可用。
         // 三段式组装逻辑抽到 shared-backend/r-libs-resolver.js（与 mcp/registry.js 共用）。
         if (cfg._isPlugin) {
+          // Stage 3 B2 part2：在组装 R_LIBS_USER 之前，先确保插件声明的 capability
+          // bundle 已就绪（缺则按需下载）。ensureBundlesForPlugin 对 unpublished /
+          // unknown bundle 不下载、不抛错；任何非 ok 结果只 warn，随后照常继续用基础
+          // runtime 跑（与接线前行为完全一致——resolveRLibsForPlugin 找不到即返回 null）。
+          // 绝不因 bundle 未就绪而中断 job。await 确保已下载的 bundle 能被随后的
+          // resolveRLibsForPlugin → checkCapabilityReady 命中。
+          if (cfg.requiresBundle) {
+            try {
+              const ensured = await ensureBundlesForPlugin(cfg);
+              if (ensured && !ensured.ok) {
+                console.warn(
+                  '[tools] capability bundle not fully ready for',
+                  toolId,
+                  '— continuing with base runtime:',
+                  JSON.stringify(ensured.results)
+                );
+              }
+            } catch (e) {
+              console.warn('[tools] ensureBundlesForPlugin failed for', toolId, ':', e.message);
+            }
+          }
           const resolvedEnv = resolveRLibsForPlugin(cfg);
           if (resolvedEnv) runEnv = resolvedEnv;
         }

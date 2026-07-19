@@ -47,6 +47,7 @@ function resolveSharedBackend() {
 const R_SERVER = resolveRSserver();
 const SHARED_BACKEND = resolveSharedBackend();
 const { resolveRLibsForPlugin } = require(path.join(SHARED_BACKEND, 'r-libs-resolver.js'));
+const { ensureBundlesForPlugin } = require(path.join(SHARED_BACKEND, 'capability-bundles.js'));
 const pluginLoader = require(path.join(R_SERVER, 'plugin-loader.js'));
 const config = require(path.join(R_SERVER, 'config.js'));
 // callTool 跑完后通过 db.js 写入 tool_jobs 记录（方案 C，agent-led Task 1）
@@ -301,7 +302,7 @@ function _normalizeArtifacts({ manifestItems, outFiles, resultDir, canonicalizeP
  *   - 插件包注入 R_LIBS_USER（pluginDir/packages/r 优先）
  *   - 结果读 jobDir/manifest.json（脚本写）+ 列 jobDir 下输出文件
  */
-function _runPluginScript(
+async function _runPluginScript(
   plugin,
   scriptPath,
   args,
@@ -309,6 +310,25 @@ function _runPluginScript(
   projectId = null,
   existingToolJobId = null
 ) {
+  // Stage 3 B2 part2: auto-provision required capability bundle(s) before
+  // assembling R_LIBS_USER, so a freshly-downloaded bundle is visible to the
+  // resolveRLibsForPlugin readiness check below. Best-effort only: an
+  // unpublished/unknown bundle (or any provisioning failure) MUST NOT fail the
+  // job — resolveRLibsForPlugin simply won't find the lib and we run on the
+  // base runtime, identical to today's behavior.
+  if (plugin && plugin.language === 'r' && plugin.requiresBundle) {
+    try {
+      const ensureResult = await ensureBundlesForPlugin(plugin);
+      if (ensureResult && !ensureResult.ok) {
+        console.warn(
+          `[mcp-registry] capability bundle(s) not ready for ${plugin.id}, running on base runtime:`,
+          JSON.stringify(ensureResult.results)
+        );
+      }
+    } catch (e) {
+      console.warn(`[mcp-registry] ensureBundlesForPlugin failed for ${plugin.id}:`, e.message);
+    }
+  }
   return new Promise((resolve) => {
     // Phase 3: 先创建/准备正式 tool_job，再以 tool_job.id 创建物理目录。
     // 方案 C（agent-led Task 1）：跑前建 tool_jobs 记录，跑完更新状态。
