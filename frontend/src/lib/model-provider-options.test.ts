@@ -71,7 +71,7 @@ describe('user-facing model provider options', () => {
         model: '',
         baseUrl: 'https://example.com/v1',
       })
-    ).toContain('模型名称');
+    ).toContain('获取并选择模型');
     expect(
       validateUserModelProfile({
         provider: 'openai-compatible',

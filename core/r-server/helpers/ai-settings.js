@@ -219,6 +219,44 @@ async function testApiKey(provider, apiKey) {
   }
 }
 
+/**
+ * 从 DeepSeek 或 OpenAI-compatible Endpoint 获取可用模型。
+ * Key 仅作为一次性 IPC 参数或从凭据存储解析，不写入设置快照。
+ */
+async function listAvailableModels(provider, apiKey) {
+  try {
+    const { getProvider } = require('../../shared-backend/llm-providers');
+    const { normalizeModelProfile } = require('../../shared-backend/llm-providers/model-profile');
+    const input = typeof provider === 'object'
+      ? { ...provider, model: provider.model || 'model-discovery' }
+      : { provider, model: 'model-discovery' };
+    const profile = normalizeModelProfile(input);
+    if (!profile) return { ok: false, models: [], message: '模型接口配置无效' };
+    const p = getProvider(profile.provider);
+    if (!p) return { ok: false, models: [], message: `Provider ${profile.provider} 未注册` };
+    if (typeof p.listModels !== 'function') {
+      return { ok: false, models: [], message: `Provider ${profile.provider} 不支持模型列表查询` };
+    }
+    const ref = String(profile.credentialRef || `provider:${profile.provider.replace(/-vision$/, '')}`);
+    const credentialId = ref.includes(':') ? ref.slice(ref.indexOf(':') + 1) : ref;
+    const resolvedKey = apiKey || getApiKey(credentialId);
+    const result = await p.listModels(resolvedKey || '', {
+      baseUrl: profile.baseUrl,
+      profile,
+    });
+    const models = Array.isArray(result && result.models)
+      ? [...new Set(result.models.map((value) => String(value || '').trim()).filter(Boolean))].slice(0, 1000)
+      : [];
+    return {
+      ok: result && result.ok === true && models.length > 0,
+      models,
+      message: (result && result.message) || (models.length > 0 ? `已获取 ${models.length} 个模型` : '接口未返回可用模型'),
+    };
+  } catch (e) {
+    return { ok: false, models: [], message: e.message };
+  }
+}
+
 module.exports = {
   getAiSettings,
   getApiKey,
@@ -227,6 +265,7 @@ module.exports = {
   getEmbedProviderName,
   saveAiSettings,
   testApiKey,
+  listAvailableModels,
   normalizeAiSettings,
   _extractCredentialUpdates,
   credentialStore,

@@ -60,6 +60,7 @@ declare global {
         get: () => Promise<Record<string, unknown>>;
         save: (settings: Record<string, unknown>) => Promise<void>;
         test: (providerOrProfile: string | Record<string, unknown>, apiKey: string) => Promise<{ ok: boolean; message: string }>;
+        listModels: (providerOrProfile: string | Record<string, unknown>, apiKey: string) => Promise<{ ok: boolean; models: string[]; message: string }>;
       };
       computeSettings: {
         get: () => Promise<ComputeSettings>;

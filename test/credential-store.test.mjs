@@ -7,7 +7,11 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const { createCredentialStore } = require('../core/r-server/helpers/credential-store.js');
-const { _extractCredentialUpdates, testApiKey } = require('../core/r-server/helpers/ai-settings.js');
+const {
+  _extractCredentialUpdates,
+  listAvailableModels,
+  testApiKey,
+} = require('../core/r-server/helpers/ai-settings.js');
 const { registerProvider } = require('../core/shared-backend/llm-providers/index.js');
 
 test('file credential backend separates secrets with owner-only permissions', () => {
@@ -93,4 +97,33 @@ test('connection test uses the configured profile endpoint and supports no-key l
   assert.equal(received.apiKey, '');
   assert.equal(received.options.baseUrl, 'http://127.0.0.1:9999/v1');
   assert.equal(received.options.model, 'qwen3');
+});
+
+test('model discovery passes the endpoint and one-time key without persisting it', async () => {
+  let received;
+  registerProvider({
+    name: 'test-model-discovery',
+    capabilities: 'chat',
+    async listModels(apiKey, options) {
+      received = { apiKey, options };
+      return { ok: true, models: ['model-b', 'model-a'], message: '已获取 2 个模型' };
+    },
+  });
+
+  const result = await listAvailableModels({
+    id: 'discovery-a',
+    provider: 'test-model-discovery',
+    model: '',
+    baseUrl: 'http://127.0.0.1:9999/v1',
+    credentialRef: 'credential:discovery-a',
+    capabilities: ['chat'],
+  }, 'one-time-secret');
+
+  assert.deepEqual(result, {
+    ok: true,
+    models: ['model-b', 'model-a'],
+    message: '已获取 2 个模型',
+  });
+  assert.equal(received.apiKey, 'one-time-secret');
+  assert.equal(received.options.baseUrl, 'http://127.0.0.1:9999/v1');
 });

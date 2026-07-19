@@ -615,7 +615,7 @@ export function SimpleChat({
                     onClick={() => setModelMenuOpen((value) => !value)}
                     title="选择会话模型"
                   >
-                    <span>{activeModel?.label || activeModel?.model || 'DeepSeek Chat'}</span>
+                    <span>{activeModel?.model || activeModel?.label || 'deepseek-chat'}</span>
                     <Icon name="chevron-down" size={12} />
                   </button>
                   {modelMenuOpen && (

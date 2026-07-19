@@ -91,6 +91,90 @@ class DeepSeekProvider {
     return true;
   }
 
+  async listModels(apiKey, options) {
+    if (this.requiresApiKey && !apiKey) {
+      return { ok: false, models: [], message: `${this.providerLabel} API key 未配置` };
+    }
+
+    return new Promise((resolve) => {
+      const endpoint = resolveEndpoint(options && options.baseUrl, '/models', this.defaultBaseUrl);
+      const headers = { Accept: 'application/json' };
+      if (apiKey) headers.Authorization = 'Bearer ' + apiKey;
+      let settled = false;
+      let buffer = '';
+      const finish = (result) => {
+        if (settled) return;
+        settled = true;
+        resolve(result);
+      };
+      const req = requestModule(endpoint).request(
+        {
+          protocol: endpoint.protocol,
+          hostname: endpoint.hostname,
+          port: endpoint.port || undefined,
+          path: endpoint.pathname + endpoint.search,
+          method: 'GET',
+          headers,
+          agent: false,
+          timeout: 10000,
+        },
+        (res) => {
+          res.setEncoding('utf8');
+          res.on('data', (chunk) => {
+            buffer += chunk;
+            if (buffer.length > 2 * 1024 * 1024) {
+              req.destroy();
+              finish({ ok: false, models: [], message: '模型列表响应过大' });
+            }
+          });
+          res.on('end', () => {
+            if (settled) return;
+            let parsed;
+            try {
+              parsed = buffer ? JSON.parse(buffer) : {};
+            } catch {
+              finish({ ok: false, models: [], message: `模型列表响应不是有效 JSON（HTTP ${res.statusCode || 0}）` });
+              return;
+            }
+            if ((res.statusCode || 0) < 200 || (res.statusCode || 0) >= 300) {
+              const remoteMessage = parsed && parsed.error && parsed.error.message;
+              finish({
+                ok: false,
+                models: [],
+                message: remoteMessage || `获取模型列表失败（HTTP ${res.statusCode || 0}）`,
+              });
+              return;
+            }
+            const rows = Array.isArray(parsed.data)
+              ? parsed.data
+              : Array.isArray(parsed.models)
+                ? parsed.models
+                : [];
+            const models = [...new Set(rows
+              .map((row) => typeof row === 'string' ? row : row && (row.id || row.name || row.model))
+              .map((value) => String(value || '').trim())
+              .filter(Boolean))]
+              .sort((a, b) => a.localeCompare(b));
+            finish(models.length > 0
+              ? { ok: true, models, message: `已获取 ${models.length} 个模型` }
+              : { ok: false, models: [], message: '接口未返回可用模型' });
+          });
+          res.on('error', (error) => {
+            finish({ ok: false, models: [], message: error.message || '读取模型列表失败' });
+          });
+        }
+      );
+      req.on('error', (error) => {
+        finish({ ok: false, models: [], message: error.message || '模型列表请求失败' });
+      });
+      req.on('timeout', () => {
+        req.destroy();
+        finish({ ok: false, models: [], message: '获取模型列表超时' });
+      });
+      req.end();
+    });
+  }
+
   async chat(apiKey, body, telemetry, options) {
     if (this.requiresApiKey && !apiKey) {
       return { error: 'no_api_key', message: `${this.providerLabel} API key 未配置` };

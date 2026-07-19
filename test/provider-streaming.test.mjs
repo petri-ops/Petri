@@ -25,6 +25,38 @@ function writeSse(res, payload) {
   res.write(`data: ${payload}\n\n`);
 }
 
+test('listModels reads and normalizes OpenAI-compatible model ids', async () => {
+  let receivedPath;
+  let receivedAuthorization;
+  const { server, baseUrl } = await startServer((req, res) => {
+    receivedPath = req.url;
+    receivedAuthorization = req.headers.authorization;
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({
+      data: [
+        { id: 'deepseek-reasoner' },
+        { id: 'deepseek-chat' },
+        { id: 'deepseek-chat' },
+      ],
+    }));
+  });
+
+  try {
+    const result = await new DeepSeekProvider().listModels('secret-key', {
+      baseUrl: `${baseUrl}/v1`,
+    });
+    assert.deepEqual(result, {
+      ok: true,
+      models: ['deepseek-chat', 'deepseek-reasoner'],
+      message: '已获取 2 个模型',
+    });
+    assert.equal(receivedPath, '/v1/models');
+    assert.equal(receivedAuthorization, 'Bearer secret-key');
+  } finally {
+    await closeServer(server);
+  }
+});
+
 test('chatStream emits content before response completion and records usage once', async () => {
   let receivedBody;
   const usageRecords = [];

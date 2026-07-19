@@ -52,6 +52,7 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     get: () => ipcRenderer.invoke('ai-settings:get'),
     save: (settings) => ipcRenderer.invoke('ai-settings:save', settings),
     test: (providerOrProfile, apiKey) => ipcRenderer.invoke('ai-settings:test', providerOrProfile, apiKey),
+    listModels: (providerOrProfile, apiKey) => ipcRenderer.invoke('ai-settings:list-models', providerOrProfile, apiKey),
   },
 
   // 计算执行配置

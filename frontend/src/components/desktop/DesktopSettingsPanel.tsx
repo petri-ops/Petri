@@ -640,7 +640,8 @@ function HarnessEnvironment(): React.ReactElement | null {
 export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   const [activeSection, setActiveSection] = useState<SettingsSection>('general');
   const [settings, setSettings] = useState<Record<string, unknown>>({});
-  const [testing, setTesting] = useState<string | null>(null);
+  const [loadingModels, setLoadingModels] = useState<Record<string, boolean>>({});
+  const [availableModels, setAvailableModels] = useState<Record<string, string[]>>({});
   const [testResult, setTestResult] = useState<Record<string, { ok: boolean; message: string }>>(
     {}
   );
@@ -670,14 +671,22 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     const profiles = Array.isArray(s.model_profiles)
       ? (s.model_profiles as ChatModelPreset[]).filter((profile) => profile?.id && profile?.model)
       : [];
+    const statuses = (s.credential_status as Record<string, boolean>) || {};
     setModelProfiles(profiles);
     setRoleBindings((s.model_role_bindings as Partial<Record<ModelRole, string>>) || {});
     setFallbackEnabled(s.model_fallback_enabled === true);
     setFallbackBindings((s.model_fallback_bindings as Partial<Record<ModelRole, string[]>>) || {});
-    setCredentialStatus((s.credential_status as Record<string, boolean>) || {});
+    setCredentialStatus(statuses);
     setCredentialBackend(String(s.credential_backend || 'local'));
     await refreshAiSettings();
     setTelemetryEnabled(s.telemetry_enabled === true);
+    profiles
+      .filter((profile) =>
+        isUserConfigurableModelProvider(profile.provider) &&
+        ((profile.provider === 'deepseek' && statuses[credentialId(profile)]) ||
+          (profile.provider === 'openai-compatible' && Boolean(profile.baseUrl)))
+      )
+      .forEach((profile) => void discoverModels(profile, '', true));
   }
 
   async function handleSave() {
@@ -739,14 +748,31 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     }
   }
 
-  async function handleTest(profile: ChatModelPreset) {
+  async function discoverModels(profile: ChatModelPreset, apiKey = '', silent = false) {
     if (!window.biof3Desktop) return;
-    const id = credentialId(profile);
-    const key = credentialInputs[id] || '';
-    setTesting(profile.id);
-    const result = await window.biof3Desktop.aiSettings.test(profile as unknown as Record<string, unknown>, key);
-    setTestResult((prev) => ({ ...prev, [profile.id]: result }));
-    setTesting(null);
+    setLoadingModels((current) => ({ ...current, [profile.id]: true }));
+    const result = await window.biof3Desktop.aiSettings.listModels(
+      profile as unknown as Record<string, unknown>,
+      apiKey
+    );
+    if (result.ok && result.models.length > 0) {
+      setAvailableModels((current) => ({ ...current, [profile.id]: result.models }));
+      setModelProfiles((profiles) => profiles.map((candidate) =>
+        candidate.id === profile.id
+          ? {
+              ...candidate,
+              model: result.models.includes(candidate.model) ? candidate.model : result.models[0],
+            }
+          : candidate
+      ));
+    }
+    if (!silent || result.ok) {
+      setTestResult((prev) => ({
+        ...prev,
+        [profile.id]: { ok: result.ok, message: result.message },
+      }));
+    }
+    setLoadingModels((current) => ({ ...current, [profile.id]: false }));
   }
 
   function updateProfile(id: string, patch: Partial<ChatModelPreset>) {
@@ -754,6 +780,12 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   }
 
   function changeProvider(profile: ChatModelPreset, provider: string) {
+    setAvailableModels((current) => ({ ...current, [profile.id]: [] }));
+    setTestResult((current) => {
+      const next = { ...current };
+      delete next[profile.id];
+      return next;
+    });
     updateProfile(profile.id, { provider, ...providerDefaults(provider, profile.id) });
   }
 
@@ -858,6 +890,11 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
               {userModelProfiles.map((profile) => {
                 const id = credentialId(profile);
                 const configured = !!credentialStatus[id];
+                const discoveredModels = availableModels[profile.id] || [];
+                const modelOptions = profile.model && !discoveredModels.includes(profile.model)
+                  ? [profile.model, ...discoveredModels]
+                  : discoveredModels;
+                const discovering = loadingModels[profile.id] === true;
                 const chatReady =
                   isChatSelectableProfile(profile) &&
                   validateUserModelProfile(profile) === null;
@@ -881,12 +918,18 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                     </label>
                     <label className="biof3-endpoint-field">
                       <span>模型名称</span>
-                      <input
-                        className="biof3-input"
+                      <select
+                        className="biof3-select"
                         value={profile.model}
                         onChange={(e) => updateProfile(profile.id, { model: e.target.value })}
-                        placeholder={profile.provider === 'deepseek' ? 'deepseek-chat' : '例如：gpt-4.1'}
-                      />
+                        disabled={discovering || modelOptions.length === 0}
+                        aria-label="模型名称"
+                      >
+                        {modelOptions.length === 0 && (
+                          <option value="">{discovering ? '正在获取模型…' : '请先获取模型列表'}</option>
+                        )}
+                        {modelOptions.map((model) => <option key={model} value={model}>{model}</option>)}
+                      </select>
                     </label>
                     <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm biof3-endpoint-card__delete" onClick={() => removeProfile(profile.id)}>
                       删除
@@ -896,7 +939,10 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       <input
                         className="biof3-input"
                         value={endpointBaseUrl(profile)}
-                        onChange={(e) => updateProfile(profile.id, { baseUrl: e.target.value || undefined })}
+                        onChange={(e) => {
+                          updateProfile(profile.id, { baseUrl: e.target.value || undefined });
+                          setAvailableModels((current) => ({ ...current, [profile.id]: [] }));
+                        }}
                         placeholder="https://example.com/v1"
                       />
                     </label>
@@ -909,12 +955,24 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                         type="password"
                         className="biof3-input"
                         value={credentialInputs[id] || ''}
-                        onChange={(e) => setCredentialInputs((current) => ({ ...current, [id]: e.target.value }))}
+                        onChange={(e) => {
+                          setCredentialInputs((current) => ({ ...current, [id]: e.target.value }));
+                          setAvailableModels((current) => ({ ...current, [profile.id]: [] }));
+                        }}
                         placeholder={configured ? '已配置（输入新 Key 覆盖）' : '输入 API Key'}
                       />
                     </label>
-                    <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm biof3-endpoint-card__test" onClick={() => void handleTest(profile)} disabled={testing === profile.id || (!configured && !credentialInputs[id])}>
-                      {testing === profile.id ? '测试中…' : '测试连接'}
+                    <button
+                      type="button"
+                      className="biof3-btn biof3-btn--ghost biof3-btn--sm biof3-endpoint-card__test"
+                      onClick={() => void discoverModels(profile, credentialInputs[id] || '')}
+                      disabled={
+                        discovering ||
+                        !endpointBaseUrl(profile).trim() ||
+                        (profile.provider === 'deepseek' && !configured && !credentialInputs[id])
+                      }
+                    >
+                      {discovering ? '获取中…' : discoveredModels.length > 0 ? '刷新模型' : '获取模型'}
                     </button>
                   </div>
                   <div className="biof3-endpoint-card__capabilities">
@@ -931,7 +989,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                   <p className={`biof3-endpoint-card__chat-status${chatReady ? ' is-ready' : ''}`}>
                     {chatReady
                       ? '保存后可在聊天输入框中选择'
-                      : '勾选 Chat 并填写模型名称后，才会出现在聊天模型菜单'}
+                      : '勾选 Chat 并从接口获取模型后，才会出现在聊天模型菜单'}
                   </p>
                   {profileErrors[profile.id] && (
                     <p className="biof3-field__result biof3-field__result--err">

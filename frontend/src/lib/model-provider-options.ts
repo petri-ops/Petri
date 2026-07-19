@@ -50,7 +50,7 @@ export function isChatSelectableProfile(profile: UserModelProfileLike): boolean 
 export function validateUserModelProfile(
   profile: UserModelProfileLike
 ): string | null {
-  if (!profile.model?.trim()) return '请填写模型名称，保存后才能在聊天中选择。';
+  if (!profile.model?.trim()) return '请先从 API 获取并选择模型，保存后才能在聊天中选择。';
   if (profile.provider === 'openai-compatible') {
     if (!profile.baseUrl?.trim()) return '自定义 API 必须填写 Base URL。';
     try {

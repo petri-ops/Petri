@@ -1002,6 +1002,17 @@ function setupAiSettingsIpc() {
       return { ok: false, message: e.message };
     }
   });
+
+  ipcMain.handle("ai-settings:list-models", async (event, providerOrProfile, apiKey) => {
+    try {
+      const { listAvailableModels } = require(
+        resolveCore("r-server", "helpers", "ai-settings.js"),
+      );
+      return await listAvailableModels(providerOrProfile, apiKey);
+    } catch (e) {
+      return { ok: false, models: [], message: e.message };
+    }
+  });
 }
 
 // ── IPC：计算执行配置 ─────────────────────────────────────────
