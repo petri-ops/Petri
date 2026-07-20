@@ -56,7 +56,7 @@ const BLOCKED_COMMAND_PATTERNS = [
   { pattern: /(^|[\s"'=])\/(?!\/|dev\/null\b)/, reason: 'absolute filesystem paths are not allowed' },
   { pattern: /(^|[\s"'=])~(?:\/|\s|$)|(?:^|[\s"'=])\.\.(?:\/|\s|$)/, reason: 'paths outside the project workspace are not allowed' },
   { pattern: /\b(?:mkfs|shutdown|reboot|halt)\b/i, reason: 'system administration command is not allowed' },
-  { pattern: /\brm\s+(?:-[^\s]*[rf][^\s]*\s+|--recursive\b|--force\b)/i, reason: 'recursive or forced deletion is not allowed' },
+  { pattern: /\b(?:rm|rmdir|unlink)\b/i, reason: 'file deletion is not allowed' },
   { pattern: /\bgit\s+(?:push|reset\s+--hard|clean\s+-[^\s]*f|checkout\s+--|restore\s+--source)\b/i, reason: 'destructive or remote git operation is not allowed' },
   { pattern: /\b(?:npm|pnpm|yarn|cargo)\s+publish\b/i, reason: 'package publishing is not allowed' },
   { pattern: /\b(?:docker\s+(?:rm|rmi|system\s+prune)|kubectl\s+delete|terraform\s+destroy)\b/i, reason: 'destructive infrastructure operation is not allowed' },

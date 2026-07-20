@@ -1,6 +1,6 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-07-19
+最后更新：2026-07-20
 
 ## 1. 恢复顺序
 
@@ -31,9 +31,11 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 
 用户已于 2026-07-19 明确启动 Phase 7「通用基础工具与运行控制面」。这不重开已关闭的 Stage 3，也不增加分析流程；它是在 Stage 4 RC 基线之上的平台工程增量。
 
-- 当前提交 `cec2c58` 已加入 7 个项目级文件/短命令工具并推送。
-- 代码与单元测试已完成，开发壳已确认加载工具；真实 DeepSeek / 自定义 Provider 连续调用验收仍待执行。
-- 下一工作包固定为 P7-A Provider 基线验收；其后才进入统一工具契约、policy/interceptor、Trace 和结果呈现。
+- 提交 `cec2c58` 已加入 7 个项目级文件/短命令工具并推送；开发壳已确认加载工具。
+- P7-A 真实 Provider 基线验收已完成：DeepSeek `deepseek-chat` 与自定义 OpenAI-compatible `gpt-5.6-sol` 使用同一 8 场景矩阵，均为 8/8 PASS。
+- 脱敏证据位于 `acceptance/harness-phase7/provider-baseline.{json,md}`；仅使用临时 fixture workspace，不含用户文件正文、凭据、请求头或完整 Provider 响应。
+- 后端安全探针确认只读模式阻断 write/replace/exec/run，敏感/绝对/逃逸路径被拒绝，sudo、删除、git push 与远程脚本管道被拒绝；普通 `rm` 缺口已最小修复。
+- P7-B 工具契约与注册表已具备进入条件，但尚未开始；P7-C policy/interceptor、Trace 和后台任务不得提前实施。
 - 全面计划、出口判据和后续工具接手协议见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 - `DeepSeek_harness/` 仅为未跟踪参考工程，不得整体纳入提交。
 

@@ -121,7 +121,7 @@ const WORKSPACE_TOOL_DEFS = [
     function: {
       name: 'workspace_exec',
       description:
-        '在当前项目工作区根目录执行一个短命令，最多 30 秒并截断输出。适合检查、测试、格式化和短脚本；禁止 sudo、强制删除、git push/reset --hard、发布、远程脚本管道等危险操作。开发服务器、watch、训练等长驻进程不支持。只读模式或只检查请求中禁止调用。',
+        '在当前项目工作区根目录执行一个短命令，最多 30 秒并截断输出。适合检查、测试、格式化和短脚本；禁止 sudo、文件删除、git push/reset --hard、发布、远程脚本管道等危险操作。开发服务器、watch、训练等长驻进程不支持。只读模式或只检查请求中禁止调用。',
       parameters: {
         type: 'object',
         properties: {

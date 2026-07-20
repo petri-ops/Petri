@@ -1,7 +1,7 @@
 # BioF3 Harness Phase 7 完成计划
 
 > 状态：`active`  
-> 最后核对：2026-07-19  
+> 最后核对：2026-07-20
 > 主模块：`P-03 Harness 与 Agent 工作流`  
 > 影响模块：`P-01 项目、会话与上下文`、`P-02 工具执行、Job 与 Artifact Truth`、`P-07 模型网关与 AI Provider`、`W-03 Agent 会话`  
 > 关注点：`C-03 安全、确认与审计`、`C-04 状态与事件同步`、`C-05 测试与质量门禁`、`C-06 性能与交互手感`
@@ -48,9 +48,15 @@ Phase 1–6 已经解决分析流程的识别、选型、修参、确认、运�
 - `test/harness-workspace-tools.test.mjs` 已覆盖注册、读取、写入、精确替换、项目权限、路径逃逸、符号链接、敏感文件、命令阻断、凭据环境移除和输出脱敏。
 - 开发壳已从当前源码启动，R/Python 后端健康，运行时确认加载全部 7 个工具。
 
-仍未完成：
+P7-A 已完成：
 
-- 尚无一份保存证据的真实 DeepSeek / 自定义 Provider 会话验收矩阵。
+- 已新增 `scripts/harness-workspace-provider-eval.mjs` 与 `test/fixtures/harness-workspace-provider-cases.json`，使用 `os.tmpdir()` 中的隔离 fixture workspace，不接触用户真实项目文件。
+- 2026-07-20 完成真实 DeepSeek `deepseek-chat` 与自定义 OpenAI-compatible `gpt-5.6-sol` 同一 8 场景矩阵，均为 8/8 PASS。
+- 脱敏证据保存于 `acceptance/harness-phase7/provider-baseline.json` 与 `provider-baseline.md`；只记录 fixture 参数摘要、hash/字节数、结果码、模型和 endpoint host，不含凭据、请求头、完整 Provider 响应或文件正文。
+- 安全场景由后端独立探针强制验证：只读策略拒绝 write/replace/exec/run，路径策略拒绝 `.env`、绝对路径和路径逃逸，命令策略拒绝 sudo、删除、git push 和远程脚本管道。
+- 验收中发现普通 `rm file` 原未命中过滤规则，已最小收紧为拒绝 `rm|rmdir|unlink`；未重构 dispatcher，未进入 P7-B。
+
+仍未完成：
 - dispatcher 的安全判断仍是局部条件，尚未形成统一 policy/interceptor pipeline。
 - 工具定义缺少统一的类别、副作用、资源需求、可取消性和确认等级元数据。
 - 工具结果虽可用，但没有统一 envelope、termination reason、duration 和 traceId。
@@ -152,7 +158,7 @@ Provider tool call
 
 ### P7-A：真实 Provider 基线验收
 
-状态：`next`
+状态：`completed`（2026-07-20；DeepSeek 与自定义 OpenAI-compatible 均 8/8 PASS）
 
 目标：先证明现有 7 工具在真实模型链中可用，再重构底层。
 
@@ -490,8 +496,8 @@ git rev-parse origin/main
 
 ## 9. 推荐立即开始的内容
 
-当前下一步只有 P7-A：
+P7-A 已完成并保存真实双 Provider 脱敏证据。下一工作包为 P7-B：
 
-> 用真实 DeepSeek 和一个自定义 Provider 验证现有 7 个工具，保存脱敏证据；在此之前不要先重写 dispatcher，也不要实现后台任务。
+> 在保持 Provider schema 兼容和 `run_tool → tool_job → artifact truth` 不变量的前提下，统一 Agent 工具契约与注册表。
 
-P7-A 能区分“模型不会正确选工具”和“后端工具契约不够清楚”两类问题，为后续 P7-B/P7-C 提供真实依据。
+P7-B 已具备进入条件，但不属于本次 P7-A 提交范围；P7-C policy/interceptor 与后台任务仍不得提前实施。

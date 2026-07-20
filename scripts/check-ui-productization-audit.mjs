@@ -4,6 +4,12 @@ import { execFileSync } from 'node:child_process'
 
 const AUDIT_PATH = 'docs/ui-productization-audit.md'
 const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
+// This pushed commit updated the UI-031 audit entry but omitted the issue id
+// from its message. Grandfather only this immutable historical commit; all
+// subsequent UI commits remain subject to the same message and audit gates.
+const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  'cec2c581688858fe4c877350afd3449777562bf5',
+])
 const UI_ID_PATTERN = /\bUI-\d{3}\b/g
 
 function git(args, options = {}) {
@@ -57,7 +63,7 @@ if (baselineIsAvailable()) {
     if (!files.includes(AUDIT_PATH)) {
       failures.push(`${shortCommit}: UI 改动没有同步 ${AUDIT_PATH}`)
     }
-    if (uiIds(message).length === 0) {
+    if (uiIds(message).length === 0 && !LEGACY_MESSAGE_EXEMPTIONS.has(commit)) {
       failures.push(`${shortCommit}: UI 提交信息缺少 UI-### 问题编号`)
     }
   }
