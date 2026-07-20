@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "phase": "Harness Phase 7 P7-H",
+  "generatedAt": "2026-07-20T23:41:06.067Z",
+  "sourceBaseCommit": "80ca1990bb4aa7e261939b361de56b1a3b816788",
+  "acceptanceScriptSha256": "dde397e45b4025d5d285b696a4a1010f31eba8876e8765ddc54b338056fd98dd",
+  "mode": "offline-production-interceptor",
+  "privacy": {
+    "temporaryWorkspaceOnly": true,
+    "containsCredentials": false,
+    "containsFileBodies": false,
+    "containsAbsolutePaths": false,
+    "touchesUserDatabase": false,
+    "createsAnalysisJobs": false
+  },
+  "passed": true,
+  "passedChecks": 13,
+  "totalChecks": 13,
+  "checks": [
+    {
+      "id": "list_hides_sensitive_entries",
+      "passed": true,
+      "evidence": {
+        "ok": true,
+        "path": ".",
+        "truncated": false,
+        "entryCount": 2
+      }
+    },
+    {
+      "id": "find_project_csv",
+      "passed": true,
+      "evidence": {
+        "ok": true,
+        "truncated": false,
+        "matchCount": 1
+      }
+    },
+    {
+      "id": "search_returns_path_and_line",
+      "passed": true,
+      "evidence": {
+        "ok": true,
+        "truncated": false,
+        "matchCount": 1
+      }
+    },
+    {
+      "id": "read_is_bounded_and_hashed",
+      "passed": true,
+      "evidence": {
+        "ok": true,
+        "path": "data/genes.csv",
+        "sha256": "64ce4a52f507fbb974590392d68f06fb3773ac1c846944c4ec27e7cd7c9e5475",
+        "truncated": true,
+        "startLine": 2,
+        "endLine": 2,
+        "totalLines": 4
+      }
+    },
+    {
+      "id": "write_dry_run_has_no_side_effect",
+      "passed": true,
+      "evidence": {
+        "ok": true,
+        "path": "notes/session.txt",
+        "created": true,
+        "dryRun": true,
+        "sha256": "3873d3053d4624cc8b8ec32df26bcbbe0c19ea4ae68885e7c7dba32c0c020042",
+        "previousSha256": null
+      }
+    },
+    {
+      "id": "write_then_read",
+      "passed": true,
+      "evidence": {
+        "ok": true,
+        "path": "notes/session.txt",
+        "created": true,
+        "dryRun": false,
+        "sha256": "3873d3053d4624cc8b8ec32df26bcbbe0c19ea4ae68885e7c7dba32c0c020042",
+        "previousSha256": null,
+        "contentSha256": "3873d3053d4624cc8b8ec32df26bcbbe0c19ea4ae68885e7c7dba32c0c020042"
+      }
+    },
+    {
+      "id": "replace_dry_run_preserves_file",
+      "passed": true,
+      "evidence": {
+        "ok": true,
+        "path": "notes/review.txt",
+        "dryRun": true,
+        "replacements": 1,
+        "sha256": "0ecc08d8ea6c4ee44c5d85cbb8937ec94c1f9957f7c131e022b1b269da666714",
+        "previousSha256": "8bb933304cb4e2c36af0d2d95b7afc64110fedd334c3b824e33b0aea375e3470"
+      }
+    },
+    {
+      "id": "sha_guarded_replace_then_read",
+      "passed": true,
+      "evidence": {
+        "ok": true,
+        "path": "notes/review.txt",
+        "dryRun": false,
+        "replacements": 1,
+        "sha256": "0ecc08d8ea6c4ee44c5d85cbb8937ec94c1f9957f7c131e022b1b269da666714",
+        "previousSha256": "8bb933304cb4e2c36af0d2d95b7afc64110fedd334c3b824e33b0aea375e3470",
+        "contentSha256": "0ecc08d8ea6c4ee44c5d85cbb8937ec94c1f9957f7c131e022b1b269da666714"
+      }
+    },
+    {
+      "id": "allowlisted_exec_uses_project_cwd",
+      "passed": true,
+      "evidence": {
+        "ok": true,
+        "exitCode": 0,
+        "truncated": false,
+        "cwdRedacted": "[project workspace]"
+      }
+    },
+    {
+      "id": "read_only_policy_blocks_side_effects",
+      "passed": true,
+      "evidence": {
+        "writeError": "execution_not_allowed",
+        "execError": "execution_not_allowed"
+      }
+    },
+    {
+      "id": "path_policy_blocks_sensitive_and_escape",
+      "passed": true,
+      "evidence": {
+        "sensitiveError": "sensitive_path",
+        "escapeError": "path_escape"
+      }
+    },
+    {
+      "id": "command_policy_blocks_remote_git",
+      "passed": true,
+      "evidence": {
+        "ok": false,
+        "error": "command_blocked"
+      }
+    },
+    {
+      "id": "project_ownership_is_enforced",
+      "passed": true,
+      "evidence": {
+        "ok": false,
+        "error": "permission_denied"
+      }
+    }
+  ]
+}

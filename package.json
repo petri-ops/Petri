@@ -37,10 +37,13 @@
     "harness:evaluate": "node --test test/harness-weak-model.test.mjs test/harness-file-index.test.mjs",
     "harness:agent-evaluate": "node --test test/agent-workflow.test.mjs test/agent-approval.test.mjs test/agent-workflow-phase6.test.mjs test/harness-workflow-fixtures.test.mjs test/mcp-tool-registry.test.mjs",
     "harness:phase6": "node --test test/plugin-sdk.test.mjs test/harness-manifest.test.mjs test/harness-tool-template.test.mjs test/harness-workflow-fixtures.test.mjs test/agent-workflow-phase6.test.mjs test/agent-workflow.test.mjs",
+    "harness:phase7:acceptance": "node scripts/harness-phase7-acceptance.mjs --verify-evidence",
+    "harness:phase7:acceptance:update": "node scripts/harness-phase7-acceptance.mjs --write-evidence",
+    "harness:phase7": "npm run harness:check && npm run harness:phase6 && node --test test/agent-tool-registry.test.mjs test/agent-tool-policy.test.mjs test/harness-workspace-tools.test.mjs test/agent-tool-result.test.mjs test/agent-provider-boundary.test.mjs test/agent-approval.test.mjs test/project-memory-isolation.test.mjs test/diagnostic-redaction.test.mjs && npm run harness:phase7:acceptance",
     "harness:provider-eval": "node scripts/harness-provider-eval.mjs",
     "harness:workspace-provider-eval": "node scripts/harness-workspace-provider-eval.mjs",
     "ui:audit:check": "node scripts/check-ui-productization-audit.mjs",
-    "check": "node --check src/main.js && node --check src/preload.js && node --check src/plugin-manager.js && node --check core/r-server/plugin-loader.js && node --check scripts/scaffold-harness-tool.mjs && node --check scripts/harness-workspace-provider-eval.mjs && npm run harness:check && npm run ui:audit:check"
+    "check": "node --check src/main.js && node --check src/preload.js && node --check src/plugin-manager.js && node --check core/r-server/plugin-loader.js && node --check scripts/scaffold-harness-tool.mjs && node --check scripts/harness-workspace-provider-eval.mjs && node --check scripts/harness-phase7-acceptance.mjs && npm run harness:check && npm run ui:audit:check"
   },
   "dependencies": {
     "@electron/notarize": "^2.5.0",

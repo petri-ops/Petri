@@ -25,24 +25,17 @@ jobs:
       - name: Install frontend dependencies
         run: npm --prefix frontend ci
 
-      - name: Verify manifests
-        shell: bash
-        run: npm run harness:check
-
-      - name: Run platform and Harness regressions
+      - name: Run platform regressions
         run: >-
           node --test
           test/platform-compat.test.mjs
           test/migration-runner.test.mjs
           test/artifact-truth.test.mjs
           test/harness-file-index.test.mjs
-          test/harness-manifest.test.mjs
-          test/plugin-sdk.test.mjs
-          test/harness-tool-template.test.mjs
-          test/harness-workflow-fixtures.test.mjs
-          test/agent-workflow-phase6.test.mjs
-          test/agent-workflow.test.mjs
           test/mcp-tool-registry.test.mjs
+
+      - name: Run Phase 7 Harness quality gate
+        run: npm run harness:phase7
 
       - name: Check frontend and build SPA
         run: |
