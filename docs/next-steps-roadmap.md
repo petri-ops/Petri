@@ -16,7 +16,7 @@ Stage 4 首个稳定产品版本收口已完成。2026-07-19 起新增一条明�
 
 > **Harness Phase 7：通用基础工具与运行控制面**
 
-当前 7 个项目级文件/短命令工具已完成代码、单元测试、开发壳加载与 P7-A 真实 Provider 验收：DeepSeek `deepseek-chat` 和自定义 OpenAI-compatible `gpt-5.6-sol` 在同一 8 场景矩阵中均为 8/8 PASS，脱敏证据位于 `acceptance/harness-phase7/provider-baseline.{json,md}`。P7-B 工具契约与注册表也已完成：18 个模型可见工具的 definition、handler 和内部 contract 使用同一运行时注册表，启动校验定义/handler/contract 漂移，Provider 只接收显式 schema 投影；定向测试 registry 9/9、desktop prompt 2/2、Provider protocol 7/7、Anthropic 5/5、workspace 9/9，均为 TAP 0 fail。下一工作包为 P7-C policy/interceptor，仅具备进入条件、尚未实施；Trace 与后台任务不得提前实施。完整边界和出口判据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
+当前 7 个项目级文件/短命令工具已完成代码、单元测试、开发壳加载与 P7-A 真实 Provider 验收：DeepSeek `deepseek-chat` 和自定义 OpenAI-compatible `gpt-5.6-sol` 在同一 8 场景矩阵中均为 8/8 PASS，脱敏证据位于 `acceptance/harness-phase7/provider-baseline.{json,md}`。P7-B 已将 18 个模型可见工具的 definition、handler 和内部 contract 收敛为同一运行时注册表，并保持 Provider-safe schema 投影。P7-C 也已完成：中央 dispatcher 统一经过 schema 校验、workspace preflight 和纯 `allow | deny` 执行策略；已有文件写入必须携带匹配的 `expectedSha256`，新文件使用原子 create-only 发布，同进程修改按目标串行化并在发布前复核 SHA。`workspace_exec` 自动执行面仅保留不启动 shell/PATH 的内建 `pwd`。原 handler 保留 TOCTOU 防线，`run_tool(op=run)` 仍委托真实 `tool_job + ackToken` 审批。专项 policy/interceptor + workspace 修复回归 22/22，关键策略/审批/注册表/workspace/recovery 回归 45/45，均为 TAP 0 fail。下一工作包为 P7-D 结构化结果、Trace 与前端呈现；P7-F 后台任务仍是 decision gate，P7-G 上下文压缩尚未实施。完整边界和出口判据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 
 Stage 3 已于 2026-07-19 关闭：GO/KEGG、GSEA、WGCNA 三条标准流程、DeepSeek + Anthropic 评测、第三方插件指南，以及 `r-enrichment` / `r-wgcna` 发布后的自动下载、校验、解压、挂载真链均通过。下一步不再扩充分析内容，而是按 Stage 4 做功能冻结、全新用户目录、打包安装、升级与发布验收。
 

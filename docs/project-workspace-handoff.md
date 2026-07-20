@@ -36,8 +36,10 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 - 脱敏证据位于 `acceptance/harness-phase7/provider-baseline.{json,md}`；仅使用临时 fixture workspace，不含用户文件正文、凭据、请求头或完整 Provider 响应。
 - 后端安全探针确认只读模式阻断 write/replace/exec/run，敏感/绝对/逃逸路径被拒绝，sudo、删除、git push 与远程脚本管道被拒绝；普通 `rm` 缺口已最小修复。
 - P7-B 工具契约与注册表已完成：18 个模型可见工具的 definition、handler 与内部 contract 已收敛到 `agent-tools/registry.js`，模块加载时校验重名、定义/handler 漂移和非法元数据；`getToolDefs()` 只输出不含内部字段的 Provider-safe schema。
-- dispatcher 已从注册表解析 handler，4 个退役学习工具保持不可见、不可由 Agent dispatcher 调用；原只读策略未迁移，未提前实施 P7-C。
-- P7-B 定向证据为 registry 9/9、desktop prompt 2/2、Provider protocol 7/7、Anthropic 5/5、workspace 9/9，均为 TAP 0 fail；下一工作包为 P7-C policy/interceptor，仅具备进入条件，Trace 和后台任务不得提前实施。
+- dispatcher 已从注册表解析完整 entry，4 个退役学习工具保持不可见、不可由 Agent dispatcher 调用。
+- P7-C 统一 Policy/Interceptor 已完成：schema 校验、workspace preflight、纯 `allow | deny` 执行决策和原 handler 调用形成统一后端链；handler 侧权限、路径、symlink、命令、大小和并发检查继续保留。
+- 覆写已有文件与精确替换必须携带匹配的 `expectedSha256`；新文件使用原子 create-only 发布，同进程修改按目标串行化并在发布前复核 SHA。`workspace_exec` 仅自动执行不启动 shell/PATH 的内建 `pwd`，其他命令返回结构化拒绝。`run_tool(op=run)` 继续复用真实 pending `tool_job + ackToken`，workflow recovery token 与 `act` 执行后 ACK 未改义。
+- 审阅修复后的 policy/interceptor + workspace 回归为 22/22，关键策略/审批/注册表/workspace/recovery 回归为 45/45，均为 TAP 0 fail；下一工作包为 P7-D 结构化结果、Trace 与前端呈现。P7-D 才负责通用 confirmation 状态与 UI 消费；P7-F 后台任务仍是 decision gate，P7-G 上下文压缩尚未实施。
 - 全面计划、出口判据和后续工具接手协议见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 - `DeepSeek_harness/` 与 `api-failover-proxy/` 仅可作为未跟踪参考工程，均不得纳入 Desktop 提交。
 

@@ -8,20 +8,14 @@
  */
 
 const crypto = require('crypto');
-const fs = require('fs');
 const fsp = require('fs/promises');
-const os = require('os');
 const path = require('path');
-const { execFile } = require('child_process');
 
 const DEFAULT_MAX_ENTRIES = 200;
 const DEFAULT_MAX_READ_LINES = 240;
 const MAX_READ_LINES = 1000;
 const MAX_TEXT_FILE_BYTES = 2 * 1024 * 1024;
 const MAX_WRITE_BYTES = 1024 * 1024;
-const MAX_COMMAND_OUTPUT_BYTES = 20 * 1024;
-const DEFAULT_COMMAND_TIMEOUT_MS = 20_000;
-const MAX_COMMAND_TIMEOUT_MS = 30_000;
 
 const SKIP_DIRECTORIES = new Set([
   '.git',
@@ -49,6 +43,8 @@ const SENSITIVE_SEGMENTS = new Set([
   'id_ed25519',
   'keychain',
 ]);
+
+const READ_ONLY_COMMAND_PATTERNS = [/^pwd$/];
 
 const BLOCKED_COMMAND_PATTERNS = [
   { pattern: /(^|[;&|]\s*)sudo\b/i, reason: 'sudo is not allowed' },
@@ -172,6 +168,23 @@ function authorizeProject(project, userId, db) {
 
 function createWorkspaceTools(options = {}) {
   const dbProvider = options.dbProvider || (() => require('../db'));
+  const targetLocks = new Map();
+
+  async function withTargetLock(target, callback) {
+    const previous = targetLocks.get(target) || Promise.resolve();
+    let release;
+    const current = new Promise((resolve) => {
+      release = resolve;
+    });
+    targetLocks.set(target, current);
+    await previous.catch(() => {});
+    try {
+      return await callback();
+    } finally {
+      release();
+      if (targetLocks.get(target) === current) targetLocks.delete(target);
+    }
+  }
 
   async function getWorkspace(ctx) {
     const projectId = String((ctx && ctx.projectId) || '').trim();
@@ -413,6 +426,11 @@ function createWorkspaceTools(options = {}) {
         code: 'overwrite_required',
       });
     }
+    if (existing && !args.expectedSha256) {
+      throw Object.assign(new Error('覆写已有文件必须提供 expectedSha256'), {
+        code: 'expected_sha256_required',
+      });
+    }
     if (args.expectedSha256 && (!existing || sha256(existing) !== String(args.expectedSha256))) {
       throw Object.assign(new Error('文件已发生变化，expectedSha256 不匹配'), {
         code: 'content_conflict',
@@ -428,26 +446,45 @@ function createWorkspaceTools(options = {}) {
     }
     return withWorkspace(ctx, async ({ root }) => {
       const resolved = await resolveWorkspaceTarget(root, args.path);
-      const existing = await checkWritePreconditions(resolved.target, args);
-      await fsp.mkdir(path.dirname(resolved.target), { recursive: true });
-      const tempPath = path.join(
-        path.dirname(resolved.target),
-        `.biof3-write-${process.pid}-${crypto.randomBytes(6).toString('hex')}`
-      );
-      try {
-        await fsp.writeFile(tempPath, content, { encoding: 'utf8', mode: 0o600, flag: 'wx' });
-        await fsp.rename(tempPath, resolved.target);
-      } finally {
-        await fsp.rm(tempPath, { force: true }).catch(() => {});
-      }
-      return {
-        ok: true,
-        path: resolved.relativePath,
-        created: !existing,
-        sizeBytes: Buffer.byteLength(content),
-        previousSha256: existing ? sha256(existing) : null,
-        sha256: sha256(content),
-      };
+      return withTargetLock(resolved.target, async () => {
+        const existing = await checkWritePreconditions(resolved.target, args);
+        await fsp.mkdir(path.dirname(resolved.target), { recursive: true });
+        const tempPath = path.join(
+          path.dirname(resolved.target),
+          `.biof3-write-${process.pid}-${crypto.randomBytes(6).toString('hex')}`
+        );
+        try {
+          await fsp.writeFile(tempPath, content, { encoding: 'utf8', mode: 0o600, flag: 'wx' });
+          if (existing) {
+            const latest = await fsp.readFile(resolved.target);
+            if (sha256(latest) !== sha256(existing)) {
+              throw Object.assign(new Error('文件在写入期间发生变化'), { code: 'content_conflict' });
+            }
+            await fsp.rename(tempPath, resolved.target);
+          } else {
+            try {
+              await fsp.link(tempPath, resolved.target);
+            } catch (error) {
+              if (error && error.code === 'EEXIST') {
+                throw Object.assign(new Error('目标文件在写入前已被创建'), {
+                  code: 'content_conflict',
+                });
+              }
+              throw error;
+            }
+          }
+        } finally {
+          await fsp.rm(tempPath, { force: true }).catch(() => {});
+        }
+        return {
+          ok: true,
+          path: resolved.relativePath,
+          created: !existing,
+          sizeBytes: Buffer.byteLength(content),
+          previousSha256: existing ? sha256(existing) : null,
+          sha256: sha256(content),
+        };
+      });
     });
   }
 
@@ -455,37 +492,55 @@ function createWorkspaceTools(options = {}) {
     const oldText = String(args.oldText == null ? '' : args.oldText);
     const newText = String(args.newText == null ? '' : args.newText);
     if (!oldText) return errorResult('old_text_required', 'oldText 不能为空');
+    if (!args.expectedSha256) {
+      return errorResult('expected_sha256_required', '文本替换必须提供 expectedSha256');
+    }
     return withWorkspace(ctx, async ({ root }) => {
       const resolved = await resolveWorkspaceTarget(root, args.path);
-      const stat = await fsp.stat(resolved.target);
-      if (!stat.isFile()) return errorResult('not_a_file', '目标不是文件');
-      if (stat.size > MAX_TEXT_FILE_BYTES) return errorResult('file_too_large', '文件过大，拒绝文本替换');
-      const before = await fsp.readFile(resolved.target, 'utf8');
-      if (args.expectedSha256 && sha256(before) !== String(args.expectedSha256)) {
-        return errorResult('content_conflict', '文件已发生变化，expectedSha256 不匹配');
-      }
-      let count = 0;
-      let position = before.indexOf(oldText);
-      while (position !== -1) {
-        count += 1;
-        position = before.indexOf(oldText, position + oldText.length);
-      }
-      if (count === 0) return errorResult('text_not_found', 'oldText 未找到');
-      if (count !== 1) {
-        return errorResult('text_not_unique', `oldText 匹配 ${count} 次；必须提供唯一片段`);
-      }
-      const after = before.replace(oldText, newText);
-      if (Buffer.byteLength(after) > MAX_WRITE_BYTES) {
-        return errorResult('content_too_large', `替换后的文件超过 ${MAX_WRITE_BYTES} 字节`);
-      }
-      await fsp.writeFile(resolved.target, after, 'utf8');
-      return {
-        ok: true,
-        path: resolved.relativePath,
-        replacements: 1,
-        previousSha256: sha256(before),
-        sha256: sha256(after),
-      };
+      return withTargetLock(resolved.target, async () => {
+        const stat = await fsp.stat(resolved.target);
+        if (!stat.isFile()) return errorResult('not_a_file', '目标不是文件');
+        if (stat.size > MAX_TEXT_FILE_BYTES) return errorResult('file_too_large', '文件过大，拒绝文本替换');
+        const before = await fsp.readFile(resolved.target, 'utf8');
+        if (sha256(before) !== String(args.expectedSha256)) {
+          return errorResult('content_conflict', '文件已发生变化，expectedSha256 不匹配');
+        }
+        let count = 0;
+        let position = before.indexOf(oldText);
+        while (position !== -1) {
+          count += 1;
+          position = before.indexOf(oldText, position + oldText.length);
+        }
+        if (count === 0) return errorResult('text_not_found', 'oldText 未找到');
+        if (count !== 1) {
+          return errorResult('text_not_unique', `oldText 匹配 ${count} 次；必须提供唯一片段`);
+        }
+        const after = before.replace(oldText, newText);
+        if (Buffer.byteLength(after) > MAX_WRITE_BYTES) {
+          return errorResult('content_too_large', `替换后的文件超过 ${MAX_WRITE_BYTES} 字节`);
+        }
+        const tempPath = path.join(
+          path.dirname(resolved.target),
+          `.biof3-replace-${process.pid}-${crypto.randomBytes(6).toString('hex')}`
+        );
+        try {
+          await fsp.writeFile(tempPath, after, { encoding: 'utf8', mode: stat.mode & 0o777, flag: 'wx' });
+          const latest = await fsp.readFile(resolved.target, 'utf8');
+          if (sha256(latest) !== sha256(before)) {
+            throw Object.assign(new Error('文件在替换期间发生变化'), { code: 'content_conflict' });
+          }
+          await fsp.rename(tempPath, resolved.target);
+        } finally {
+          await fsp.rm(tempPath, { force: true }).catch(() => {});
+        }
+        return {
+          ok: true,
+          path: resolved.relativePath,
+          replacements: 1,
+          previousSha256: sha256(before),
+          sha256: sha256(after),
+        };
+      });
     });
   }
 
@@ -502,77 +557,54 @@ function createWorkspaceTools(options = {}) {
     return { ok: true };
   }
 
-  function sanitizedEnvironment() {
-    const env = {};
-    for (const [key, value] of Object.entries(process.env)) {
-      if (/(?:KEY|TOKEN|SECRET|PASSWORD|PASSWD|CREDENTIAL|AUTH|COOKIE|OSS_|DEEPSEEK|ANTHROPIC)/i.test(key)) {
-        continue;
+  async function preflightTool(name, args = {}, ctx = {}) {
+    return withWorkspace(ctx, async ({ root }) => {
+      if (name === 'workspace_exec') {
+        const command = String(args.command || '').trim();
+        const verdict = commandVerdict(command);
+        if (!verdict.ok) return errorResult('command_blocked', verdict.reason);
+        return {
+          ok: true,
+          commandRisk: READ_ONLY_COMMAND_PATTERNS.some((pattern) => pattern.test(command))
+            ? 'read_only'
+            : 'unknown',
+        };
       }
-      env[key] = value;
-    }
-    env.HOME = os.homedir();
-    return env;
-  }
 
-  function sanitizeCommandOutput(value) {
-    return String(value || '')
-      .replace(/\b(?:sk-|ghp_|gho_|ghs_|xoxb-)[A-Za-z0-9._-]{12,}\b/g, '***')
-      .replace(
-        /^(\s*(?:api[_-]?key|token|secret|password|passwd|authorization)\s*[:=]\s*).+$/gim,
-        '$1***'
-      );
+      const resolved = await resolveWorkspaceTarget(root, args.path || '.');
+      let exists = true;
+      try {
+        await fsp.lstat(resolved.target);
+      } catch (error) {
+        if (!error || error.code !== 'ENOENT') throw error;
+        exists = false;
+      }
+      return {
+        ok: true,
+        exists,
+        relativePath: resolved.relativePath,
+      };
+    });
   }
 
   async function executeCommand(args = {}, ctx = {}) {
     const command = String(args.command || '').trim();
     const verdict = commandVerdict(command);
     if (!verdict.ok) return errorResult('command_blocked', verdict.reason);
-    return withWorkspace(ctx, async ({ root }) => {
-      const timeoutMs = clampInteger(
-        args.timeoutMs,
-        DEFAULT_COMMAND_TIMEOUT_MS,
-        100,
-        MAX_COMMAND_TIMEOUT_MS
-      );
-      return new Promise((resolve) => {
-        const shell = process.platform === 'win32' ? 'cmd.exe' : '/bin/sh';
-        const shellArgs = process.platform === 'win32' ? ['/d', '/s', '/c', command] : ['-lc', command];
-        execFile(
-          shell,
-          shellArgs,
-          {
-            cwd: root,
-            env: sanitizedEnvironment(),
-            timeout: timeoutMs,
-            maxBuffer: MAX_COMMAND_OUTPUT_BYTES * 4,
-            windowsHide: true,
-          },
-          (error, stdout, stderr) => {
-            const rawStdout = sanitizeCommandOutput(stdout);
-            const rawStderr = sanitizeCommandOutput(stderr);
-            const outputBytes = Buffer.byteLength(rawStdout) + Buffer.byteLength(rawStderr);
-            const truncate = (text) =>
-              Buffer.byteLength(text) > MAX_COMMAND_OUTPUT_BYTES
-                ? Buffer.from(text).subarray(0, MAX_COMMAND_OUTPUT_BYTES).toString('utf8')
-                : text;
-            const exitCode =
-              error && typeof error.code === 'number' ? error.code : error ? -1 : 0;
-            resolve({
-              ok: !error,
-              command,
-              cwd: '.',
-              exitCode,
-              signal: error && error.signal ? String(error.signal) : null,
-              timedOut: !!(error && error.killed),
-              stdout: truncate(rawStdout),
-              stderr: truncate(rawStderr),
-              truncated: outputBytes > MAX_COMMAND_OUTPUT_BYTES,
-              ...(error && !error.killed ? { message: error.message } : {}),
-            });
-          }
-        );
-      });
-    });
+    if (!READ_ONLY_COMMAND_PATTERNS.some((pattern) => pattern.test(command))) {
+      return errorResult('command_not_allowlisted', '该命令不在自动执行白名单中');
+    }
+    return withWorkspace(ctx, async ({ root }) => ({
+      ok: true,
+      command,
+      cwd: '.',
+      exitCode: 0,
+      signal: null,
+      timedOut: false,
+      stdout: `${root}\n`,
+      stderr: '',
+      truncated: false,
+    }));
   }
 
   return {
@@ -583,6 +615,7 @@ function createWorkspaceTools(options = {}) {
     writeFile,
     replaceText,
     executeCommand,
+    preflightTool,
     commandVerdict,
   };
 }
@@ -598,6 +631,7 @@ module.exports = {
   tool_workspace_write: defaultTools.writeFile,
   tool_workspace_replace: defaultTools.replaceText,
   tool_workspace_exec: defaultTools.executeCommand,
+  preflightWorkspaceTool: defaultTools.preflightTool,
   _internal: {
     commandVerdict: defaultTools.commandVerdict,
     globToRegExp: (pattern) => {

@@ -144,7 +144,14 @@ test('creates files and requires explicit overwrite plus matching sha256', async
   assert.equal(overwritten.created, false);
 });
 
-test('precise replace requires one match and supports optimistic concurrency', async () => {
+test('precise replace requires sha at the handler and supports optimistic concurrency', async () => {
+  const missingSha = await tools.replaceText(
+    { path: 'notes.md', oldText: 'TP53 is important.', newText: 'changed' },
+    ctx
+  );
+  assert.equal(missingSha.ok, false);
+  assert.equal(missingSha.error, 'expected_sha256_required');
+
   const read = await tools.readFile({ path: 'notes.md' }, ctx);
   const replaced = await tools.replaceText(
     {
@@ -158,12 +165,52 @@ test('precise replace requires one match and supports optimistic concurrency', a
   assert.equal(replaced.ok, true);
 
   await fs.writeFile(path.join(workspaceRoot, 'duplicate.txt'), 'same\nsame\n');
+  const duplicateRead = await tools.readFile({ path: 'duplicate.txt' }, ctx);
   const duplicate = await tools.replaceText(
-    { path: 'duplicate.txt', oldText: 'same', newText: 'changed' },
+    {
+      path: 'duplicate.txt',
+      oldText: 'same',
+      newText: 'changed',
+      expectedSha256: duplicateRead.sha256,
+    },
     ctx
   );
   assert.equal(duplicate.ok, false);
   assert.equal(duplicate.error, 'text_not_unique');
+});
+
+test('same-process writes serialize so one stale sha loses for overwrite and replace', async () => {
+  const writePath = path.join(workspaceRoot, 'concurrent-write.txt');
+  await fs.writeFile(writePath, 'base\n');
+  const writeRead = await tools.readFile({ path: 'concurrent-write.txt' }, ctx);
+  const writeResults = await Promise.all([
+    tools.writeFile(
+      { path: 'concurrent-write.txt', content: 'first\n', overwrite: true, expectedSha256: writeRead.sha256 },
+      ctx
+    ),
+    tools.writeFile(
+      { path: 'concurrent-write.txt', content: 'second\n', overwrite: true, expectedSha256: writeRead.sha256 },
+      ctx
+    ),
+  ]);
+  assert.equal(writeResults.filter((result) => result.ok).length, 1);
+  assert.equal(writeResults.filter((result) => result.error === 'content_conflict').length, 1);
+
+  const replacePath = path.join(workspaceRoot, 'concurrent-replace.txt');
+  await fs.writeFile(replacePath, 'base\n');
+  const replaceRead = await tools.readFile({ path: 'concurrent-replace.txt' }, ctx);
+  const replaceResults = await Promise.all([
+    tools.replaceText(
+      { path: 'concurrent-replace.txt', oldText: 'base', newText: 'first', expectedSha256: replaceRead.sha256 },
+      ctx
+    ),
+    tools.replaceText(
+      { path: 'concurrent-replace.txt', oldText: 'base', newText: 'second', expectedSha256: replaceRead.sha256 },
+      ctx
+    ),
+  ]);
+  assert.equal(replaceResults.filter((result) => result.ok).length, 1);
+  assert.equal(replaceResults.filter((result) => result.error === 'content_conflict').length, 1);
 });
 
 test('blocks path traversal, absolute paths, sensitive files, and symlink escape', async () => {
@@ -222,26 +269,12 @@ test('executes a short command in the project root and blocks dangerous commands
   }
 });
 
-test('command environment strips credential-shaped variables and redacts output', async () => {
-  const previous = process.env.DEEPSEEK_API_KEY;
-  process.env.DEEPSEEK_API_KEY = 'sk-12345678901234567890';
-  try {
-    await fs.writeFile(
-      path.join(workspaceRoot, 'print-env.js'),
-      'process.stdout.write(process.env.DEEPSEEK_API_KEY || "missing");\n'
-    );
-    const envResult = await tools.executeCommand({ command: 'node print-env.js' }, ctx);
-    assert.equal(envResult.ok, true);
-    assert.equal(envResult.stdout, 'missing');
-
-    const redacted = await tools.executeCommand(
-      { command: "printf 'api_key=sk-12345678901234567890\\n'" },
-      ctx
-    );
-    assert.equal(redacted.ok, true);
-    assert.equal(redacted.stdout.trim(), 'api_key=***');
-  } finally {
-    if (previous === undefined) delete process.env.DEEPSEEK_API_KEY;
-    else process.env.DEEPSEEK_API_KEY = previous;
+test('command handler never executes project-controlled tools or shell syntax', async () => {
+  await fs.writeFile(path.join(workspaceRoot, 'marker.txt'), 'unchanged\n');
+  for (const command of ['node print-env.js', 'yarn --version', "printf changed > marker.txt"]) {
+    const result = await tools.executeCommand({ command }, ctx);
+    assert.equal(result.ok, false, command);
+    assert.equal(result.error, 'command_not_allowlisted', command);
   }
+  assert.equal(await fs.readFile(path.join(workspaceRoot, 'marker.txt'), 'utf8'), 'unchanged\n');
 });

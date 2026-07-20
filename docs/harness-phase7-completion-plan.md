@@ -61,14 +61,22 @@ P7-B 已完成：
 - `core/r-server/agent-tools/registry.js` 已成为 18 个模型可见工具 definition、handler 与内部 contract 的单一运行时注册表；模块加载时校验重名、定义/handler/contract 漂移和非法元数据。
 - contract 已声明 `contractVersion`、`category`、`sideEffect`、`riskTier`、`resources`、`estimatedDurationMs`、`cancellable`；当前 handler 尚无统一 `AbortSignal`，因此 `cancellable` 如实为 `false`。
 - `getToolDefs()` 每次返回全新的 OpenAI function schema 投影，内部 contract 不进入 Provider 请求；OpenAI-compatible 实际出站 JSON 与 Anthropic 显式转换均有兼容测试。
-- dispatcher 已从同一注册表解析 handler；原有只读策略仍保留原位，不提前实施 P7-C。4 个退役学习工具继续不向模型暴露，也不再属于 Agent dispatcher。
+- dispatcher 已从同一注册表解析 handler；4 个退役学习工具继续不向模型暴露，也不属于 Agent dispatcher。
 - 定向证据：registry 9/9、desktop prompt 2/2、Provider protocol 7/7、Anthropic 5/5、workspace 9/9，均为 TAP 0 fail。
 
+P7-C 已完成：
+
+- `agent-tool-policy.js` 提供无 I/O 的 `allow | deny` 执行决策，按具体 operation 区分只读与有副作用调用，并返回稳定 `reason`、`error` 与 `messageKey`。
+- `agent-tool-interceptor.js` 统一执行注册表解析、最小递归 JSON Schema 校验、workspace preflight、纯策略判断和原 handler 调用；不可自动执行的 workspace 调用返回可操作的结构化拒绝且不执行 handler。
+- `workspace-tools.js` 公开共享 preflight，但 handler 继续重复路径、权限、symlink、命令、大小及并发检查；新文件使用原子 create-only 发布，已有文件修改在进程内按目标串行化并于发布前复核 `expectedSha256`，保留 TOCTOU defense-in-depth。
+- `workspace_exec` 的自动执行面收紧为内建 `pwd`，不启动 shell、不解析 `PATH` 或项目级工具配置；其他命令返回结构化拒绝。
+- `run_tool(op=run)` 继续委托既有真实 `tool_job + ackToken` 审批；workflow recovery token 与 `act` 执行后 ACK 保持各自语义，没有新建第三套确认协议。
+- 专项证据：policy/interceptor 12/12、既有 approval + workspace 20/20、registry + workspace 19/19，均为 TAP 0 fail。
+
 仍未完成：
-- dispatcher 的安全判断仍是局部条件，尚未形成统一 policy/interceptor pipeline。
 - 工具结果虽可用，但没有统一 envelope、termination reason、duration 和 traceId。
 - 前端只收到简化的 `tool_call` / `tool_result` SSE，无法稳定展示耗时、截断、超时、拒绝原因和副作用摘要。
-- 尚无后台任务 `start/check/stop`；当前 `workspace_exec` 明确只支持最长 30 秒的短命令。
+- 尚无后台任务 `start/check/stop`；当前 `workspace_exec` 仅提供不启动进程的内建 `pwd`。
 - 当前工具结果进入模型上下文时统一按 6000 字符截断，尚未按结果类型压缩。
 
 ## 3. 从 DeepSeek_harness 借鉴什么
@@ -120,10 +128,10 @@ Provider tool call
 
 - `tool-defs.js`：保留模型可见 schema catalog 与 `TOOL_DEFS` / `WORKSPACE_TOOL_DEFS` / `getToolDefs()` 兼容 facade。
 - `agent-tools/registry.js`：definition、handler 与内部 contract 的单一运行时事实源；模块加载时执行一致性校验，并向 Provider 显式投影 schema。
-- `agent-tools/index.js`：统一调度入口；P7-B 仍保留既有只读策略，P7-C 再迁移策略细节。
-- 新增 `agent-tool-policy.js`：纯策略判断，可注入、可单测，不依赖 Electron。
-- 新增 `agent-tool-runtime.js`：拦截器执行、计时、结果归一化和 Trace。
-- `workspace-tools.js`：只负责项目内文件和短命令的实际执行与局部安全校验。
+- `agent-tools/index.js`：统一调度入口；P7-C 起只委托 interceptor，不再拥有局部安全条件。
+- `agent-tool-policy.js`：纯策略判断，可注入、可单测，不依赖 Electron 或 Provider。
+- `agent-tool-interceptor.js`：注册表解析、参数校验、workspace preflight、策略决策和现有 handler 调用；P7-D 再增加计时、结果归一化与 Trace。
+- `workspace-tools.js`：项目内文件和短命令的实际执行、共享 preflight 与 handler 侧局部安全校验。
 - `ai-agent.js`：Agent 循环、Provider 协议和 SSE；不拥有文件安全规则。
 - P-02 原有 `run_tool`：继续独占科学执行真相。
 
@@ -243,38 +251,36 @@ refactor(harness): unify agent tool contracts
 
 ### P7-C：统一 Policy / Interceptor Pipeline
 
-状态：`planned`
+状态：`completed`（2026-07-20）
 
-目标：把分散在 dispatcher、workspace tool 和 prompt 中的规则收敛为后端强制策略。
+目标：把分散在 dispatcher、workspace tool 和 prompt 中的执行前规则收敛为后端强制策略。
 
-实施顺序：
+已实施：
 
-1. 参数 schema 校验。
-2. 用户、项目和会话作用域解析。
-3. `accessMode` 与本轮只读意图检查。
-4. 风险和副作用分类。
-5. 路径、敏感文件、符号链接和命令策略。
-6. 资源限制：超时、输出、文件大小、递归深度和文件数。
-7. 执行后脱敏、结果归一化和 Trace。
+1. `agent-tool-interceptor.js` 从统一注册表解析工具，并在 handler 前执行最小递归 JSON Schema 校验。
+2. workspace 调用统一解析用户/项目作用域并执行路径、敏感文件、符号链接和命令 preflight。
+3. `agent-tool-policy.js` 按具体 operation、`accessMode`、本轮只读意图、风险和副作用输出可立即消费的 `allow | deny` 决策。
+4. 新建小文本、带 sha256 的精确替换和安全只读命令可执行；已有文件覆写必须同时提供 `overwrite=true + expectedSha256`，无 sha 替换和非 allowlist 命令返回可操作的结构化拒绝且不执行。
+5. 新文件通过原子 create-only 发布，若目标在 preflight 后出现则返回 `content_conflict`；删除、提权、发布、远端 Git、远程脚本管道和越界路径继续硬拒绝。
+6. 原 handler 保留超时、输出、文件大小、递归深度、文件数和并发保护等局部检查；`run_tool(op=run)` 继续使用真实 `tool_job + ackToken` 审批，Harness recovery token 和 `act` 执行后 ACK 不合并、不改义。
 
-策略默认值：
+边界：
 
-- 读工具：项目授权通过后自动允许。
-- 新建小文本、带 sha256 的精确替换：full 模式允许，记录副作用。
-- 覆盖现有完整文件或风险不明确的命令：返回 `confirmation_required`，不得先执行再确认。
-- 删除、提权、发布、远端 Git、远程脚本管道、越界路径：直接拒绝，不提供“确认后绕过”。
 - prompt 只解释正确用法，不作为安全边界。
-
-确认机制优先复用现有短期 token / ack 模式；不要再建第三种确认协议。
+- P7-C 不创建不可消费的通用确认状态；通用 confirmation token、SSE 与前端确认卡消费链若需要，必须在 P7-D 作为完整协议实现。
+- 执行后脱敏沿用既有 handler；统一 result envelope、termination reason、duration、Trace 与 SSE 呈现属于 P7-D。
+- 后台进程 `start/check/stop` 仍属于 P7-F decision gate；6000 字符上下文压缩替换仍属于 P7-G。
 
 验收：
 
-- policy 是纯函数或可注入模块，单元测试不启动 Electron/Provider。
-- allow/confirm/deny 的原因稳定、结构化、可本地化。
-- 同一请求从 DeepSeek 与自定义 Provider 进入时得到相同决策。
-- 既有 `run_tool` 审批、Harness recovery token 和 `act` ack 行为不回归。
+- policy 是纯函数，interceptor 可注入，单元测试不依赖 Electron 或 Provider。
+- allow/deny 返回稳定 `reason`、`error` 和 `messageKey`。
+- Provider-independent interceptor 对同一调用给出同一决策。
+- 并发目标在 preflight 后出现时不被覆写，Git 命令不进入自动执行 allowlist。
+- 既有 `run_tool` 审批、Harness recovery token 和 `act` ACK 语义不回归。
+- 专项 policy/interceptor 12/12、既有 approval + workspace 19/19、registry + workspace 18/18，均为 TAP 0 fail。
 
-建议提交：
+提交：
 
 ```text
 feat(harness): enforce unified agent tool policy
@@ -504,8 +510,8 @@ git rev-parse origin/main
 
 ## 9. 推荐立即开始的内容
 
-P7-A 与 P7-B 已完成。下一工作包为 P7-C：
+P7-A、P7-B 与 P7-C 已完成。下一工作包为 P7-D：
 
-> 在保持 Provider schema 兼容、现有审批协议和 `run_tool → tool_job → artifact truth` 不变量的前提下，将分散策略收敛为后端统一 policy/interceptor pipeline。
+> 在保持 Provider schema 兼容、既有审批协议和 `run_tool → tool_job → artifact truth` 不变量的前提下，引入版本化 ToolResult envelope、termination reason、duration、Trace 与向后兼容的前端呈现。
 
-P7-C 仅具备进入条件，尚未实施；结构化结果/Trace 属于 P7-D，后台任务属于 P7-F 决策门，均不得提前混入 P7-C。
+P7-D 尚未实施；后台任务仍属于 P7-F 决策门，6000 字符上下文压缩替换仍属于 P7-G，均不得提前混入 P7-D。

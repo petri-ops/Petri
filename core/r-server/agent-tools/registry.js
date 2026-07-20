@@ -230,8 +230,12 @@ function getProviderToolDefs() {
   return TOOL_REGISTRY.map((entry) => projectProviderDefinition(entry.definition));
 }
 
+function getToolEntry(name) {
+  return TOOL_BY_NAME.get(name);
+}
+
 function getToolHandler(name) {
-  const entry = TOOL_BY_NAME.get(name);
+  const entry = getToolEntry(name);
   return entry && entry.handler;
 }
 
@@ -249,6 +253,7 @@ module.exports = {
   RISK_TIERS,
   buildToolRegistry,
   getProviderToolDefs,
+  getToolEntry,
   getToolHandler,
   getToolContract,
   getToolRegistry,
