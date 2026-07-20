@@ -126,8 +126,20 @@ async function resolveWorkspaceTarget(workspaceRoot, relativePath, options = {})
     throw Object.assign(new Error('路径逃逸出当前项目工作区'), { code: 'path_escape' });
   }
 
-  await fsp.mkdir(root, { recursive: true });
-  const realRoot = await fsp.realpath(root);
+  if (options.createRoot !== false) {
+    await fsp.mkdir(root, { recursive: true });
+  }
+  let realRoot;
+  try {
+    realRoot = await fsp.realpath(root);
+  } catch (error) {
+    if (error && error.code === 'ENOENT') {
+      throw Object.assign(new Error('项目工作区尚不存在，无法执行只读预演'), {
+        code: 'workspace_unavailable',
+      });
+    }
+    throw error;
+  }
   const existingAncestor = await nearestExistingAncestor(target);
   const realAncestor = await fsp.realpath(existingAncestor);
   if (!isContained(realRoot, realAncestor)) {
@@ -186,13 +198,16 @@ function createWorkspaceTools(options = {}) {
     }
   }
 
-  async function getWorkspace(ctx) {
+  async function getWorkspace(ctx, options = {}) {
     const projectId = String((ctx && ctx.projectId) || '').trim();
     if (!projectId) {
       throw Object.assign(new Error('基础文件工具只能在有效项目中使用'), { code: 'project_required' });
     }
     const db = dbProvider();
-    const project = db.getProject(projectId);
+    const createRoot = options.createRoot !== false;
+    const project = !createRoot && typeof db.getDatabase === 'function'
+      ? db.getDatabase().prepare('SELECT * FROM projects WHERE id = ?').get(projectId) || null
+      : db.getProject(projectId);
     if (!project) {
       throw Object.assign(new Error('项目不存在'), { code: 'project_not_found' });
     }
@@ -200,13 +215,26 @@ function createWorkspaceTools(options = {}) {
     if (!project.workspace_path || !path.isAbsolute(project.workspace_path)) {
       throw Object.assign(new Error('项目工作区路径未配置或不是绝对路径'), { code: 'workspace_unavailable' });
     }
-    await fsp.mkdir(project.workspace_path, { recursive: true });
-    return { project, root: await fsp.realpath(project.workspace_path) };
+    if (createRoot) {
+      await fsp.mkdir(project.workspace_path, { recursive: true });
+    }
+    let root;
+    try {
+      root = await fsp.realpath(project.workspace_path);
+    } catch (error) {
+      if (error && error.code === 'ENOENT') {
+        throw Object.assign(new Error('项目工作区尚不存在，无法执行只读预演'), {
+          code: 'workspace_unavailable',
+        });
+      }
+      throw error;
+    }
+    return { project, root };
   }
 
-  async function withWorkspace(ctx, callback) {
+  async function withWorkspace(ctx, callback, options = {}) {
     try {
-      const workspace = await getWorkspace(ctx);
+      const workspace = await getWorkspace(ctx, options);
       return await callback(workspace);
     } catch (error) {
       return errorResult(error.code || 'workspace_error', error.message || String(error));
@@ -414,6 +442,59 @@ function createWorkspaceTools(options = {}) {
     });
   }
 
+  function contentMetadata(content) {
+    if (content == null) return { sha256: null, sizeBytes: 0, lineCount: 0 };
+    const buffer = Buffer.isBuffer(content) ? content : Buffer.from(String(content), 'utf8');
+    return {
+      sha256: sha256(buffer),
+      sizeBytes: buffer.length,
+      lineCount: buffer.toString('utf8').split(/\r?\n/).length,
+    };
+  }
+
+  function buildChangeSummary(relativePath, before, after) {
+    return {
+      path: relativePath,
+      before: contentMetadata(before),
+      after: contentMetadata(after),
+    };
+  }
+
+  async function atomicPublish(target, content, expected, options = {}) {
+    await fsp.mkdir(path.dirname(target), { recursive: true });
+    const tempPath = path.join(
+      path.dirname(target),
+      `.biof3-${options.prefix || 'write'}-${process.pid}-${crypto.randomBytes(6).toString('hex')}`
+    );
+    try {
+      await fsp.writeFile(tempPath, content, {
+        encoding: 'utf8',
+        mode: options.mode == null ? 0o600 : options.mode,
+        flag: 'wx',
+      });
+      if (expected != null) {
+        const latest = await fsp.readFile(target);
+        if (sha256(latest) !== sha256(expected)) {
+          throw Object.assign(new Error('文件在写入期间发生变化'), { code: 'content_conflict' });
+        }
+        await fsp.rename(tempPath, target);
+        return;
+      }
+      try {
+        await fsp.link(tempPath, target);
+      } catch (error) {
+        if (error && error.code === 'EEXIST') {
+          throw Object.assign(new Error('目标文件在写入前已被创建'), {
+            code: 'content_conflict',
+          });
+        }
+        throw error;
+      }
+    } finally {
+      await fsp.rm(tempPath, { force: true }).catch(() => {});
+    }
+  }
+
   async function checkWritePreconditions(target, args) {
     let existing = null;
     try {
@@ -445,36 +526,14 @@ function createWorkspaceTools(options = {}) {
       return errorResult('content_too_large', `单次写入上限为 ${MAX_WRITE_BYTES} 字节`);
     }
     return withWorkspace(ctx, async ({ root }) => {
-      const resolved = await resolveWorkspaceTarget(root, args.path);
+      const resolved = await resolveWorkspaceTarget(root, args.path, {
+        createRoot: args.dryRun !== true,
+      });
       return withTargetLock(resolved.target, async () => {
         const existing = await checkWritePreconditions(resolved.target, args);
-        await fsp.mkdir(path.dirname(resolved.target), { recursive: true });
-        const tempPath = path.join(
-          path.dirname(resolved.target),
-          `.biof3-write-${process.pid}-${crypto.randomBytes(6).toString('hex')}`
-        );
-        try {
-          await fsp.writeFile(tempPath, content, { encoding: 'utf8', mode: 0o600, flag: 'wx' });
-          if (existing) {
-            const latest = await fsp.readFile(resolved.target);
-            if (sha256(latest) !== sha256(existing)) {
-              throw Object.assign(new Error('文件在写入期间发生变化'), { code: 'content_conflict' });
-            }
-            await fsp.rename(tempPath, resolved.target);
-          } else {
-            try {
-              await fsp.link(tempPath, resolved.target);
-            } catch (error) {
-              if (error && error.code === 'EEXIST') {
-                throw Object.assign(new Error('目标文件在写入前已被创建'), {
-                  code: 'content_conflict',
-                });
-              }
-              throw error;
-            }
-          }
-        } finally {
-          await fsp.rm(tempPath, { force: true }).catch(() => {});
+        const changeSummary = buildChangeSummary(resolved.relativePath, existing, content);
+        if (args.dryRun !== true) {
+          await atomicPublish(resolved.target, content, existing, { prefix: 'write' });
         }
         return {
           ok: true,
@@ -483,9 +542,11 @@ function createWorkspaceTools(options = {}) {
           sizeBytes: Buffer.byteLength(content),
           previousSha256: existing ? sha256(existing) : null,
           sha256: sha256(content),
+          dryRun: args.dryRun === true,
+          changeSummary,
         };
       });
-    });
+    }, { createRoot: args.dryRun !== true });
   }
 
   async function replaceText(args = {}, ctx = {}) {
@@ -496,7 +557,9 @@ function createWorkspaceTools(options = {}) {
       return errorResult('expected_sha256_required', '文本替换必须提供 expectedSha256');
     }
     return withWorkspace(ctx, async ({ root }) => {
-      const resolved = await resolveWorkspaceTarget(root, args.path);
+      const resolved = await resolveWorkspaceTarget(root, args.path, {
+        createRoot: args.dryRun !== true,
+      });
       return withTargetLock(resolved.target, async () => {
         const stat = await fsp.stat(resolved.target);
         if (!stat.isFile()) return errorResult('not_a_file', '目标不是文件');
@@ -519,19 +582,12 @@ function createWorkspaceTools(options = {}) {
         if (Buffer.byteLength(after) > MAX_WRITE_BYTES) {
           return errorResult('content_too_large', `替换后的文件超过 ${MAX_WRITE_BYTES} 字节`);
         }
-        const tempPath = path.join(
-          path.dirname(resolved.target),
-          `.biof3-replace-${process.pid}-${crypto.randomBytes(6).toString('hex')}`
-        );
-        try {
-          await fsp.writeFile(tempPath, after, { encoding: 'utf8', mode: stat.mode & 0o777, flag: 'wx' });
-          const latest = await fsp.readFile(resolved.target, 'utf8');
-          if (sha256(latest) !== sha256(before)) {
-            throw Object.assign(new Error('文件在替换期间发生变化'), { code: 'content_conflict' });
-          }
-          await fsp.rename(tempPath, resolved.target);
-        } finally {
-          await fsp.rm(tempPath, { force: true }).catch(() => {});
+        const changeSummary = buildChangeSummary(resolved.relativePath, before, after);
+        if (args.dryRun !== true) {
+          await atomicPublish(resolved.target, after, before, {
+            prefix: 'replace',
+            mode: stat.mode & 0o777,
+          });
         }
         return {
           ok: true,
@@ -539,9 +595,11 @@ function createWorkspaceTools(options = {}) {
           replacements: 1,
           previousSha256: sha256(before),
           sha256: sha256(after),
+          dryRun: args.dryRun === true,
+          changeSummary,
         };
       });
-    });
+    }, { createRoot: args.dryRun !== true });
   }
 
   function commandVerdict(command) {
@@ -571,7 +629,9 @@ function createWorkspaceTools(options = {}) {
         };
       }
 
-      const resolved = await resolveWorkspaceTarget(root, args.path || '.');
+      const resolved = await resolveWorkspaceTarget(root, args.path || '.', {
+        createRoot: args.dryRun !== true,
+      });
       let exists = true;
       try {
         await fsp.lstat(resolved.target);
@@ -584,7 +644,7 @@ function createWorkspaceTools(options = {}) {
         exists,
         relativePath: resolved.relativePath,
       };
-    });
+    }, { createRoot: args.dryRun !== true });
   }
 
   async function executeCommand(args = {}, ctx = {}) {

@@ -322,31 +322,28 @@ feat(harness): trace structured tool outcomes
 
 ### P7-E：编辑能力补强
 
-状态：`planned_after_policy`
+状态：`completed`（2026-07-20）
 
 目标：在不开放任意批量写入的前提下，提高真实开发任务的修改能力。
 
-实施候选：
+已实施：
 
-1. 给 `workspace_write` 和 `workspace_replace` 增加 `dryRun`，返回 diff 摘要但不落盘。
-2. 统一原子写入：`workspace_replace` 也使用同目录临时文件 + rename。
-3. 写入后返回行数变化、大小变化、前后 sha256。
-4. 评估新增 `workspace_patch`，只接受有限 unified diff：
-   - 仅项目相对路径
-   - 禁止删除文件和改名
-   - 限制文件数、hunk 数和总字节
-   - 每个旧 hunk 必须精确匹配
-   - 支持 dry-run 和 expectedSha256
+1. `workspace_write` 与 `workspace_replace` 的 Provider schema 新增可选 `dryRun`；预演仍执行项目授权、路径/敏感文件/symlink、文件大小、`overwrite`、`expectedSha256` 和唯一匹配校验，但不创建工作区根目录、目标父目录、临时文件或目标文件；若配置的工作区根目录尚不存在则返回 `workspace_unavailable`。
+2. 成功结果保留既有顶层字段 `created/sizeBytes/replacements/previousSha256/sha256`，仅追加 `dryRun` 与 `changeSummary`，避免破坏现有 Provider 和直接调用方。
+3. `changeSummary` 只包含项目相对路径和前后 `sha256/sizeBytes/lineCount`；不返回正文或完整 diff，创建前态固定为 `sha256: null, sizeBytes: 0, lineCount: 0`。
+4. write/replace 共用同目录 `atomicPublish()`：临时文件使用 `wx`；已有目标发布前再次复核预期内容并 `rename`，新目标通过 hard-link create-only 发布；临时文件在 `finally` 中 best-effort 清理，常规冲突回归验证无残留，极端文件系统清理失败不作绝对保证。
+5. 同进程 `withTargetLock` 与发布前 SHA 复核继续存在。该机制防止本进程并发静默覆盖，但不宣称跨进程 CAS；外部进程在最终复核与 rename 之间仍存在有限 TOCTOU 边界。
+6. policy 将成功 dry-run 视为非变更操作，因此只读上下文可预演；真实 write/replace 仍被阻断。ToolResult 仅在 handler 实际返回 `dryRun: true` 后报告 `sideEffects: none/R0`，真实编辑仍为 `workspace-write/R2`。
+7. 未实现 `workspace_patch`：当前没有真实 Provider 证据证明 write/replace 不足，不扩大多文件/hunk 写入攻击面。
 
-`workspace_patch` 不是本阶段出口硬要求。只有真实 Provider 验收证明 write/replace 明显不足时才实现。
+验收证据：
 
-验收：
+- `CI=1 TERM=dumb node --test test/harness-workspace-tools.test.mjs test/agent-tool-policy.test.mjs test/agent-tool-result.test.mjs`：32 tests / 32 pass / 0 fail。
+- 覆盖 Provider schema、create/replace dry-run 不落盘、缺失 workspace root、授权/敏感路径/symlink、overwrite、stale SHA、唯一匹配、additive 旧字段兼容、只读 policy、成功预演 R0 与真实写入 R2。
+- 既有原子 create-only race 测试继续验证目标不会被并发创建覆盖，并确认常规冲突路径无临时文件残留；极端文件系统清理失败仍遵循 best-effort 边界。
+- 科学计算链路未改变，仍只走 `run_tool → tool_job → artifact truth`。
 
-- 并发修改不被静默覆盖。
-- 任一写入失败后不留下临时文件或半写文件。
-- diff 只包含项目相对路径且不泄漏敏感文件。
-
-建议提交：
+提交：
 
 ```text
 feat(harness): harden workspace edits
@@ -510,8 +507,8 @@ git rev-parse origin/main
 
 ## 9. 推荐立即开始的内容
 
-P7-A、P7-B、P7-C 与 P7-D 已完成。下一工作包为 P7-E：
+P7-A、P7-B、P7-C、P7-D 与 P7-E 已完成。下一工作包为 P7-F decision gate：
 
-> 在保持 Provider schema 兼容、既有审批协议和 `run_tool → tool_job → artifact truth` 不变量的前提下，补强受控编辑能力，优先评估 dry-run、原子替换、变更摘要和并发保护。
+> 先核对是否存在至少 3 个无法在 30 秒内完成、且不属于科学分析 `run_tool` 的真实用户任务，以及现有集成终端是否确实不能满足 Agent 查询/停止需求。只有证据满足进入条件才实现受限 `start/check/stop`；否则将 P7-F 标记为有证据地 `deferred`。
 
-P7-D 已完成代码与自动化验证，UI-034 保持 `in_progress` 等待开发壳或打包态实机验收；后台任务仍属于 P7-F 决策门，按结果类型替换 6000 字符统一截断仍属于 P7-G，均不得提前混入 P7-E。
+P7-D 的 UI-034 保持 `in_progress` 等待开发壳或打包态实机验收；P7-E 未引入 `workspace_patch`，后续也不得借 P7-F 扩大文件编辑权限。按结果类型替换 6000 字符统一截断仍属于 P7-G，不得提前混入 P7-F。

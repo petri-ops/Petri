@@ -245,6 +245,42 @@ test('workspace preflight hard-denies missing scope, ownership, sensitive paths,
   assert.equal(escaped.reason, 'policy_denied');
 });
 
+test('read-only policy allows validated dry-runs but still denies real workspace edits', async () => {
+  const readOnlyCtx = { ...workspaceCtx, accessMode: 'read', allowExecution: false };
+  const writePreview = await interceptWorkspace(
+    'workspace_write',
+    { path: 'preview-only.txt', content: 'preview\n', dryRun: true },
+    readOnlyCtx
+  );
+  assert.equal(writePreview.ok, true);
+  assert.equal(writePreview.dryRun, true);
+  await assert.rejects(fs.access(path.join(workspaceRoot, 'preview-only.txt')));
+
+  const before = await fs.readFile(path.join(workspaceRoot, 'replace.txt'));
+  const replacePreview = await interceptWorkspace(
+    'workspace_replace',
+    {
+      path: 'replace.txt',
+      oldText: 'before',
+      newText: 'preview',
+      expectedSha256: hash(before),
+      dryRun: true,
+    },
+    readOnlyCtx
+  );
+  assert.equal(replacePreview.ok, true);
+  assert.equal(replacePreview.dryRun, true);
+  assert.equal(await fs.readFile(path.join(workspaceRoot, 'replace.txt'), 'utf8'), 'before\n');
+
+  const denied = await interceptWorkspace(
+    'workspace_write',
+    { path: 'real-write.txt', content: 'mutating\n' },
+    readOnlyCtx
+  );
+  assert.equal(denied.error, 'execution_not_allowed');
+  await assert.rejects(fs.access(path.join(workspaceRoot, 'real-write.txt')));
+});
+
 test('new write executes and existing overwrite requires a matching sha256', async () => {
   const created = await interceptWorkspace(
     'workspace_write',
@@ -319,6 +355,10 @@ test('atomic create-only publish converts a final link race into content_conflic
     assert.equal(raced.ok, false);
     assert.equal(raced.error, 'content_conflict');
     assert.equal(await fs.readFile(racePath, 'utf8'), 'concurrent-link\n');
+    const residue = (await fs.readdir(workspaceRoot)).filter((name) =>
+      name.startsWith('.biof3-write-')
+    );
+    assert.deepEqual(residue, []);
   } finally {
     fs.link = nativeLink;
   }

@@ -85,7 +85,7 @@ const WORKSPACE_TOOL_DEFS = [
     function: {
       name: 'workspace_write',
       description:
-        '在当前项目工作区创建或完整覆写一个文本文件。已存在文件必须同时传 overwrite=true 和 workspace_read 返回的 expectedSha256；创建新文件不需要 expectedSha256。只读模式或只检查请求中禁止调用。',
+        '在当前项目工作区创建或完整覆写一个文本文件。已存在文件必须同时传 overwrite=true 和 workspace_read 返回的 expectedSha256；创建新文件不需要 expectedSha256。dryRun=true 时只校验并返回变更摘要，不写盘；真实写入在只读模式或只检查请求中禁止调用。',
       parameters: {
         type: 'object',
         properties: {
@@ -93,6 +93,7 @@ const WORKSPACE_TOOL_DEFS = [
           content: { type: 'string', description: '完整文本内容，最大 1 MiB' },
           overwrite: { type: 'boolean', description: '目标存在时必须显式为 true' },
           expectedSha256: { type: 'string', description: '覆写已有文件时必填：写入前文件 sha256' },
+          dryRun: { type: 'boolean', description: '为 true 时只校验并返回变更摘要，不修改文件' },
         },
         required: ['path', 'content'],
       },
@@ -103,7 +104,7 @@ const WORKSPACE_TOOL_DEFS = [
     function: {
       name: 'workspace_replace',
       description:
-        '在当前项目工作区文本文件中做一次精确替换。oldText 必须唯一匹配，并且必须传 workspace_read 返回的 expectedSha256 防止覆盖并发修改。只读模式或只检查请求中禁止调用。',
+        '在当前项目工作区文本文件中做一次精确替换。oldText 必须唯一匹配，并且必须传 workspace_read 返回的 expectedSha256 防止覆盖并发修改。dryRun=true 时只校验并返回变更摘要，不写盘；真实替换在只读模式或只检查请求中禁止调用。',
       parameters: {
         type: 'object',
         properties: {
@@ -111,6 +112,7 @@ const WORKSPACE_TOOL_DEFS = [
           oldText: { type: 'string', description: '必须在文件中唯一出现的原文本' },
           newText: { type: 'string', description: '替换后的文本' },
           expectedSha256: { type: 'string', description: '必填：修改前文件 sha256' },
+          dryRun: { type: 'boolean', description: '为 true 时只校验并返回变更摘要，不修改文件' },
         },
         required: ['path', 'oldText', 'newText'],
       },

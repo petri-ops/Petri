@@ -48,6 +48,14 @@ function sideEffectSummary(name, args, contract, result, classification) {
   const operation = args && typeof args === 'object' ? args.op : undefined;
   if (name === 'run_tool' && operation !== 'run') return noSideEffects();
   if (name === 'plan' && (operation === 'list' || operation === 'get')) return noSideEffects();
+  if (
+    (name === 'workspace_write' || name === 'workspace_replace') &&
+    result &&
+    typeof result === 'object' &&
+    result.dryRun === true
+  ) {
+    return noSideEffects();
+  }
   if (!contract || contract.sideEffect === 'none') return noSideEffects();
   return {
     type: contract.sideEffect,

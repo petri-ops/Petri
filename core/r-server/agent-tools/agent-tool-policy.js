@@ -30,6 +30,9 @@ function deny(reason, error, message, extra = {}) {
 }
 
 function effectiveOperation(name, args, contract) {
+  if ((name === 'workspace_write' || name === 'workspace_replace') && args && args.dryRun === true) {
+    return { mutating: false, delegatedApproval: false };
+  }
   if (name === 'run_tool') {
     if (READ_ONLY_RUN_TOOL_OPS.has(args && args.op)) {
       return { mutating: false, delegatedApproval: false };

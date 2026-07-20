@@ -50,7 +50,8 @@ after(async () => {
 });
 
 test('foundation tool definitions are exposed to the model', () => {
-  const names = new Set(getToolDefs().map((item) => item.function.name));
+  const definitions = getToolDefs();
+  const names = new Set(definitions.map((item) => item.function.name));
   for (const name of [
     'workspace_list',
     'workspace_find',
@@ -62,6 +63,125 @@ test('foundation tool definitions are exposed to the model', () => {
   ]) {
     assert.equal(names.has(name), true, `${name} should be registered`);
   }
+  for (const name of ['workspace_write', 'workspace_replace']) {
+    const definition = definitions.find((item) => item.function.name === name);
+    assert.equal(definition.function.parameters.properties.dryRun.type, 'boolean');
+  }
+});
+
+test('write dry-run validates and summarizes a create without touching disk', async () => {
+  const result = await tools.writeFile(
+    { path: 'preview/new.txt', content: 'first\nsecond\n', dryRun: true },
+    ctx
+  );
+
+  assert.equal(result.ok, true);
+  assert.equal(result.created, true);
+  assert.equal(result.dryRun, true);
+  assert.equal(result.changeSummary.path, 'preview/new.txt');
+  assert.deepEqual(result.changeSummary.before, { sha256: null, sizeBytes: 0, lineCount: 0 });
+  assert.deepEqual(result.changeSummary.after, {
+    sha256: result.sha256,
+    sizeBytes: Buffer.byteLength('first\nsecond\n'),
+    lineCount: 3,
+  });
+  await assert.rejects(fs.access(path.join(workspaceRoot, 'preview')));
+
+  const stale = await tools.writeFile(
+    {
+      path: 'notes.md',
+      content: 'stale preview\n',
+      overwrite: true,
+      expectedSha256: '0'.repeat(64),
+      dryRun: true,
+    },
+    ctx
+  );
+  assert.equal(stale.error, 'content_conflict');
+  assert.equal(await fs.readFile(path.join(workspaceRoot, 'notes.md'), 'utf8'), '# Project\nTP53 is important.\n');
+
+  const absentRoot = path.join(sandboxRoot, 'absent-workspace');
+  let hydratingGetProjectCalls = 0;
+  const absentRootTools = createWorkspaceTools({
+    dbProvider: () => ({
+      getDatabase() {
+        return {
+          prepare() {
+            return {
+              get() {
+                return {
+                  id: 'p_absent',
+                  user_id: 'u_owner',
+                  status: 'active',
+                  workspace_path: absentRoot,
+                };
+              },
+            };
+          },
+        };
+      },
+      getProject() {
+        hydratingGetProjectCalls += 1;
+        return null;
+      },
+      getUserById(userId) {
+        return { id: userId, role: 'user' };
+      },
+    }),
+  });
+  const absentPreview = await absentRootTools.writeFile(
+    { path: 'preview.txt', content: 'preview\n', dryRun: true },
+    { projectId: 'p_absent', userId: 'u_owner' }
+  );
+  assert.equal(absentPreview.error, 'workspace_unavailable');
+  assert.equal(hydratingGetProjectCalls, 0);
+  await assert.rejects(fs.access(absentRoot));
+});
+
+test('dry-run preserves workspace authorization and edit preconditions', async () => {
+  const deniedOwner = await tools.writeFile(
+    { path: 'owner-check.txt', content: 'preview\n', dryRun: true },
+    { ...ctx, userId: 'u_other' }
+  );
+  assert.equal(deniedOwner.error, 'permission_denied');
+
+  const sensitive = await tools.writeFile(
+    { path: '.env', content: 'preview\n', dryRun: true },
+    ctx
+  );
+  assert.equal(sensitive.error, 'sensitive_path');
+
+  const escaped = await tools.writeFile(
+    { path: 'escape/preview.txt', content: 'preview\n', dryRun: true },
+    ctx
+  );
+  assert.equal(escaped.error, 'symlink_escape');
+
+  const overwrite = await tools.writeFile(
+    { path: 'notes.md', content: 'preview\n', dryRun: true },
+    ctx
+  );
+  assert.equal(overwrite.error, 'overwrite_required');
+
+  const staleReplace = await tools.replaceText(
+    {
+      path: 'notes.md',
+      oldText: 'TP53 is important.',
+      newText: 'preview',
+      expectedSha256: '0'.repeat(64),
+      dryRun: true,
+    },
+    ctx
+  );
+  assert.equal(staleReplace.error, 'content_conflict');
+
+  const oversized = await tools.writeFile(
+    { path: 'large.txt', content: 'x'.repeat(1024 * 1024 + 1), dryRun: true },
+    ctx
+  );
+  assert.equal(oversized.error, 'content_too_large');
+  await assert.rejects(fs.access(path.join(workspaceRoot, 'owner-check.txt')));
+  await assert.rejects(fs.access(path.join(workspaceRoot, 'large.txt')));
 });
 
 test('central dispatcher enforces explicit read-only access mode', async () => {
@@ -114,6 +234,9 @@ test('creates files and requires explicit overwrite plus matching sha256', async
   const created = await tools.writeFile({ path: 'scripts/check.R', content: 'print("ok")\n' }, ctx);
   assert.equal(created.ok, true);
   assert.equal(created.created, true);
+  assert.equal(created.dryRun, false);
+  assert.deepEqual(created.changeSummary.before, { sha256: null, sizeBytes: 0, lineCount: 0 });
+  assert.equal(created.changeSummary.after.sha256, created.sha256);
 
   const refused = await tools.writeFile({ path: 'scripts/check.R', content: 'print("new")\n' }, ctx);
   assert.equal(refused.ok, false);
@@ -153,6 +276,22 @@ test('precise replace requires sha at the handler and supports optimistic concur
   assert.equal(missingSha.error, 'expected_sha256_required');
 
   const read = await tools.readFile({ path: 'notes.md' }, ctx);
+  const preview = await tools.replaceText(
+    {
+      path: 'notes.md',
+      oldText: 'TP53 is important.',
+      newText: 'TP53 and EGFR are important.',
+      expectedSha256: read.sha256,
+      dryRun: true,
+    },
+    ctx
+  );
+  assert.equal(preview.ok, true);
+  assert.equal(preview.dryRun, true);
+  assert.equal(preview.changeSummary.before.sha256, read.sha256);
+  assert.equal(preview.changeSummary.after.sha256, preview.sha256);
+  assert.equal(await fs.readFile(path.join(workspaceRoot, 'notes.md'), 'utf8'), '# Project\nTP53 is important.\n');
+
   const replaced = await tools.replaceText(
     {
       path: 'notes.md',
@@ -163,6 +302,9 @@ test('precise replace requires sha at the handler and supports optimistic concur
     ctx
   );
   assert.equal(replaced.ok, true);
+  assert.equal(replaced.dryRun, false);
+  assert.equal(replaced.changeSummary.before.sha256, replaced.previousSha256);
+  assert.equal(replaced.changeSummary.after.sha256, replaced.sha256);
 
   await fs.writeFile(path.join(workspaceRoot, 'duplicate.txt'), 'same\nsame\n');
   const duplicateRead = await tools.readFile({ path: 'duplicate.txt' }, ctx);
@@ -172,11 +314,13 @@ test('precise replace requires sha at the handler and supports optimistic concur
       oldText: 'same',
       newText: 'changed',
       expectedSha256: duplicateRead.sha256,
+      dryRun: true,
     },
     ctx
   );
   assert.equal(duplicate.ok, false);
   assert.equal(duplicate.error, 'text_not_unique');
+  assert.equal(await fs.readFile(path.join(workspaceRoot, 'duplicate.txt'), 'utf8'), 'same\nsame\n');
 });
 
 test('same-process writes serialize so one stale sha loses for overwrite and replace', async () => {

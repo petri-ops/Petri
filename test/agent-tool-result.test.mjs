@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createRequire } from 'node:module';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 
 const require = createRequire(import.meta.url);
 const db = require('../core/r-server/db.js');
@@ -44,6 +47,53 @@ test('successful read-only operations report no observed side effects', async ()
   const planList = await executeToolCall('plan', { op: 'list' }, { userId: 'local-user' });
   assert.equal(planList.status, 'success');
   assert.deepEqual(planList.sideEffects, { type: 'none', riskTier: 'R0', resources: [] });
+});
+
+test('workspace dry-run reports no side effects while a real write remains R2', async () => {
+  const workspaceRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'biof3-tool-result-'));
+  const project = db.createProject({
+    name: 'ToolResult dry-run',
+    description: '',
+    modality: 'single-cell',
+    userId: 'tool-result-user',
+    workspacePath: workspaceRoot,
+  });
+  db.setProjectUserId(project.id, 'tool-result-user');
+
+  try {
+    const args = { path: 'preview/new.txt', content: 'preview\n', dryRun: true };
+    const preview = await executeToolCall('workspace_write', args, {
+      projectId: project.id,
+      userId: 'tool-result-user',
+      accessMode: 'read',
+      allowExecution: false,
+    });
+
+    assert.equal(preview.status, 'success');
+    assert.equal(preview.terminationReason, 'success');
+    assert.equal(preview.data.dryRun, true);
+    assert.deepEqual(preview.sideEffects, { type: 'none', riskTier: 'R0', resources: [] });
+    await assert.rejects(fs.access(path.join(workspaceRoot, 'preview')));
+
+    const written = await executeToolCall(
+      'workspace_write',
+      { path: 'written.txt', content: 'written\n' },
+      {
+        projectId: project.id,
+        userId: 'tool-result-user',
+        accessMode: 'full',
+        allowExecution: true,
+      }
+    );
+    assert.equal(written.status, 'success');
+    assert.equal(written.data.dryRun, false);
+    assert.equal(written.sideEffects.type, 'workspace-write');
+    assert.equal(written.sideEffects.riskTier, 'R2');
+    assert.equal(await fs.readFile(path.join(workspaceRoot, 'written.txt'), 'utf8'), 'written\n');
+  } finally {
+    db.deleteProject(project.id);
+    await fs.rm(workspaceRoot, { recursive: true, force: true });
+  }
 });
 
 test('executeToolCall keeps pending run_tool approval truthful and records only the created job', async () => {
