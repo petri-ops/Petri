@@ -50,11 +50,18 @@ const {
   getToolDefs,
   createCallId,
   createTraceId,
+  createModelResultState,
+  createRejectedToolResult,
   executeToolCall,
   replaceToolResultData,
   serializeToolResultForModel,
   buildToolCallEvent,
   buildToolResultEvent,
+  MAX_AGENT_ITERS,
+  MAX_AGENT_TOOL_CALLS,
+  shouldFinalizeAgentIteration,
+  createAgentToolCallController,
+  runAgentToolCallBatch,
 } = require('./agent-tools');
 const { inferExecutionPolicy } = require('./helpers/agent-execution-policy');
 const {
@@ -63,9 +70,6 @@ const {
 } = require('./helpers/methods-export');
 const agentTaskStore = require('./agent-task-store');
 const logger = require('./logger');
-
-const MAX_ITERS = 15;
-const MAX_TOTAL_TOOL_CALLS = 20;
 
 function _buildResultCardFromRunTool(result, context) {
   if (!result || typeof result !== 'object' || !result.toolJobId || result.needApproval) return null;
@@ -387,26 +391,31 @@ async function runAgentLoop({
   const fullMessages = [{ role: 'system', content: systemPrompt }, ...messages];
   const tools = getToolDefs();
 
-  let totalToolCalls = 0;
   const traceId = createTraceId();
+  const toolCallController = createAgentToolCallController({ maxToolCalls: MAX_AGENT_TOOL_CALLS });
+  const modelResultState = createModelResultState({
+    projectId: toolCtx.projectId,
+    traceId,
+  });
   const aborted = () => (typeof shouldAbort === 'function' ? shouldAbort() : false);
   let assistantAcc = '';
   let pendingApprovalEmitted = false;
   const assistantResultCards = [];
 
   try {
-    for (let iter = 0; iter < MAX_ITERS && !aborted(); iter++) {
+    for (let iter = 0; iter < MAX_AGENT_ITERS && !aborted(); iter++) {
       _emit({ event: 'iter', n: iter + 1 });
 
-      // TOOL_CAP_v1: when cap hit, pull tools so LLM must answer with text only
-      const capHit = totalToolCalls >= MAX_TOTAL_TOOL_CALLS;
-      if (capHit) {
+      // The fifth Provider round is the finalization round. Reaching the
+      // tool-call cap also finalizes immediately, so one request never exceeds
+      // MAX_AGENT_ITERS Provider calls.
+      const finalizing = shouldFinalizeAgentIteration(iter, toolCallController);
+      if (finalizing) {
         fullMessages.push({
           role: 'system',
-          content:
-            '已达到工具调用上限（' +
-            MAX_TOTAL_TOOL_CALLS +
-            ' 次/请求）。请基于已收到的工具结果直接给出最终答复，不要再调用工具。',
+          content: toolCallController.capHit()
+            ? `已达到工具调用上限（${MAX_AGENT_TOOL_CALLS} 次/请求）。请基于已收到的工具结果直接给出最终答复，不要再调用工具。`
+            : '这是本轮最后一次模型调用。请基于已收到的工具结果直接给出最终答复，不要再调用工具。',
         });
       }
       const reqBody = {
@@ -414,8 +423,8 @@ async function runAgentLoop({
         messages: fullMessages,
         temperature: 0.4,
         max_tokens: 1500,
-        tools: capHit ? undefined : tools,
-        tool_choice: capHit ? undefined : 'auto',
+        tools: finalizing ? undefined : tools,
+        tool_choice: finalizing ? undefined : 'auto',
       };
 
       let streamedText = '';
@@ -454,113 +463,93 @@ async function runAgentLoop({
         _emit({ event: 'done' });
         break;
       }
-
-      // Append assistant tool_calls message to history
-      fullMessages.push({
-        role: 'assistant',
-        content: msg.content || '',
-        tool_calls: toolCalls,
-      });
-
-      // Execute each tool call sequentially
-      for (const tc of toolCalls) {
-        totalToolCalls++; // TOOL_CAP_v1
-        const fn = tc.function || {};
-        let args = {};
-        try {
-          args = JSON.parse(fn.arguments || '{}');
-        } catch {}
-        const callId = tc.id || createCallId();
-        _emit(buildToolCallEvent({ name: fn.name, args, traceId, callId }));
-
-        let envelope = await executeToolCall(fn.name, args, toolCtx, { traceId, callId });
-        let result = localizeToolResult(envelope.data);
-        envelope = replaceToolResultData(envelope, result);
-
-        // ACT_ACK_v1_SERVER: send the event first, then wait for the frontend ack.
-        let ackInfo = null;
-        if (result && result.ackToken && result._ackPromise) {
-          ackInfo = result._ackPromise;
-          delete result._ackPromise;
-        }
-        if (fn.name === 'run_tool' && result && typeof result === 'object') {
-          if (result.needApproval) pendingApprovalEmitted = true;
-          if (result.toolJobId && !result.needApproval) {
-            _pushUniqueResultCard(assistantResultCards, _buildResultCardFromRunTool(result, context));
-          }
-        }
-        _emit(buildToolResultEvent(envelope, args));
-
-        if (ackInfo) {
-          const ackResult = await ackInfo;
-          if (ackResult && ackResult.timedOut) {
-            result.unhandled = true;
-            result.message =
-              (result.message || '操作已记录') + '（⚠ 前端没有响应——可能当前页面没监听这个事件）';
-            const ackEvent = buildToolResultEvent({ ...envelope, data: result }, args);
-            ackEvent.summary = 'unhandled';
-            _emit(ackEvent);
-          } else if (ackResult && ackResult.info && ackResult.info.error) {
-            result.unhandled = true;
-            result.message =
-              (result.message || '操作已记录') + '（前端报错：' + ackResult.info.error + '）';
-          }
-        }
-        envelope = replaceToolResultData(envelope, result);
-        fullMessages.push({
-          role: 'tool',
-          tool_call_id: tc.id,
-          name: fn.name,
-          content: serializeToolResultForModel(envelope),
-        });
+      if (finalizing) {
+        // A Provider that ignores the tool-free finalization request must not
+        // start another handler or trigger a sixth Provider request.
+        assistantAcc = streamedText || msg.content || '';
+        break;
       }
+
+      await runAgentToolCallBatch({
+        controller: toolCallController,
+        toolCalls,
+        createCallId,
+        shouldAbort: aborted,
+        onReserved: (accepted) => {
+          // Keep Provider history protocol-valid: only reserved calls enter the
+          // assistant message, and every reserved call receives one tool result.
+          fullMessages.push({
+            role: 'assistant',
+            content: msg.content || '',
+            tool_calls: accepted,
+          });
+        },
+        execute: async ({ name, args, callId }) => {
+          _emit(buildToolCallEvent({ name, args, traceId, callId }));
+          let envelope = await executeToolCall(name, args, toolCtx, { traceId, callId });
+          let result = localizeToolResult(envelope.data);
+          envelope = replaceToolResultData(envelope, result);
+
+          // ACT_ACK_v1_SERVER: send the event first, then wait for the frontend ack.
+          let ackInfo = null;
+          if (result && result.ackToken && result._ackPromise) {
+            ackInfo = result._ackPromise;
+            delete result._ackPromise;
+          }
+          if (name === 'run_tool' && result && typeof result === 'object') {
+            if (result.needApproval) pendingApprovalEmitted = true;
+            if (result.toolJobId && !result.needApproval) {
+              _pushUniqueResultCard(assistantResultCards, _buildResultCardFromRunTool(result, context));
+            }
+          }
+          _emit(buildToolResultEvent(envelope, args));
+
+          if (ackInfo) {
+            const ackResult = await ackInfo;
+            if (ackResult && ackResult.timedOut) {
+              result.unhandled = true;
+              result.message =
+                (result.message || '操作已记录') + '（⚠ 前端没有响应——可能当前页面没监听这个事件）';
+              const ackEvent = buildToolResultEvent({ ...envelope, data: result }, args);
+              ackEvent.summary = 'unhandled';
+              _emit(ackEvent);
+            } else if (ackResult && ackResult.info && ackResult.info.error) {
+              result.unhandled = true;
+              result.message =
+                (result.message || '操作已记录') + '（前端报错：' + ackResult.info.error + '）';
+            }
+          }
+          envelope = replaceToolResultData(envelope, result);
+          return { envelope, result, args, name, callId };
+        },
+        reject: async ({ name, args, callId, error, message }) => {
+          _emit(buildToolCallEvent({ name, args, traceId, callId }));
+          let envelope = createRejectedToolResult(name, error, message, toolCtx, { traceId, callId });
+          const result = localizeToolResult(envelope.data);
+          envelope = replaceToolResultData(envelope, result);
+          _emit(buildToolResultEvent(envelope, args));
+          return { envelope, result, args, name, callId };
+        },
+        onResult: ({ outcome }) => {
+          fullMessages.push({
+            role: 'tool',
+            tool_call_id: outcome.callId,
+            name: outcome.name,
+            content: serializeToolResultForModel(outcome.envelope, undefined, {
+              state: modelResultState,
+            }),
+          });
+        },
+      });
     }
 
-    // AGENT_FALLBACK_v1: 若 MAX_ITERS 跑满仍未收敛，强制无 tools 再调一次 LLM 生成兜底回复
+    // The fifth Provider round is already tool-free finalization. Do not make
+    // a sixth request; keep only the local non-empty fallback for empty output.
     if (!aborted() && assistantAcc.trim().length <= 20) {
-      try {
-        fullMessages.push({
-          role: 'system',
-          content:
-            '你已用完本轮工具调用次数。请基于已收集到的工具结果，直接给用户一个有用的最终答复（不要再调用工具）。如果工具结果不足以完整回答，就给出当前能给出的最佳答复，并说明还缺什么。',
-        });
-        const fallbackBody = {
-          ...(modelName ? { model: modelName } : {}),
-          messages: fullMessages,
-          temperature: 0.4,
-          max_tokens: 1500,
-        };
-        let fallbackText = '';
-        const fbJson = await callChatProvider(
-          providerName,
-          apiKey,
-          fallbackBody,
-          {
-            userId,
-            conversationId: _activeConv && _activeConv.id,
-            kind: 'agent_fallback',
-          },
-          (event) => {
-            if (event.type === 'content_delta' && event.content && !aborted()) {
-              fallbackText += event.content;
-              _emit({ choices: [{ delta: { content: event.content } }] });
-            }
-          },
-          { baseUrl, profileId, modelOverride: modelName }
-        );
-        if (fbJson && fbJson.choices && fbJson.choices[0]) {
-          const fbText = fallbackText || (fbJson.choices[0].message || {}).content || '';
-          if (fbText.trim()) assistantAcc = fbText;
-        }
-      } catch {
-        /* 兜底本身失败也不阻塞 */
-      }
-      if (assistantAcc.trim().length <= 20) {
-        const fallbackMsg =
-          '抱歉，这次对话我调用了多次工具但没能整理出最终答复。请把你的需求再描述一下，或者换个问法试试。';
-        _emit({ choices: [{ delta: { content: fallbackMsg } }] });
-        assistantAcc = fallbackMsg;
-      }
+      const fallbackMsg =
+        '抱歉，这次对话我调用了多次工具但没能整理出最终答复。请把你的需求再描述一下，或者换个问法试试。';
+      _emit({ choices: [{ delta: { content: fallbackMsg } }] });
+      assistantAcc = fallbackMsg;
     }
 
     // ---------- 持久化 assistant 消息 + 下游管线（搬迁自 ai-agent.js L592-703）----------

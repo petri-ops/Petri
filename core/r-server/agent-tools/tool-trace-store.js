@@ -17,6 +17,10 @@ function summarize(value, maxChars = DEFAULT_SUMMARY_CHARS) {
   return { text: `${text.slice(0, maxChars)}…`, truncated: true };
 }
 
+function normalizeProjectId(value) {
+  return value == null || String(value).trim() === '' ? null : String(value);
+}
+
 function createToolTraceStore(options = {}) {
   const maxEntries = Math.max(1, options.maxEntries || DEFAULT_MAX_ENTRIES);
   const ttlMs = Math.max(1, options.ttlMs || DEFAULT_TTL_MS);
@@ -34,6 +38,7 @@ function createToolTraceStore(options = {}) {
     const result = summarize(record.result);
     entries.push(Object.freeze({
       traceId: record.traceId,
+      projectId: normalizeProjectId(record.projectId),
       callId: record.callId,
       tool: record.tool,
       status: record.status,
@@ -47,9 +52,10 @@ function createToolTraceStore(options = {}) {
     prune();
   }
 
-  function getTrace(traceId) {
+  function getTrace(traceId, projectId = null) {
     prune();
-    return entries.filter((entry) => entry.traceId === traceId);
+    const scope = normalizeProjectId(projectId);
+    return entries.filter((entry) => entry.traceId === traceId && entry.projectId === scope);
   }
 
   function clear() {

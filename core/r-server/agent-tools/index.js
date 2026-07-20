@@ -1,4 +1,5 @@
 /**
+/**
  * agent-tools/index.js — Entry point for AI agent tool system.
  *
  * Re-exports getToolDefs() and dispatchTool() which are the only public API
@@ -13,10 +14,19 @@ const { interceptAgentToolCall } = require('./agent-tool-interceptor');
 const {
   createCallId,
   createTraceId,
+  createModelResultState,
+  createRejectedToolResult,
   executeToolCall,
   replaceToolResultData,
   serializeToolResultForModel,
 } = require('./tool-execution');
+const {
+  MAX_AGENT_ITERS,
+  MAX_AGENT_TOOL_CALLS,
+  shouldFinalizeAgentIteration,
+  createAgentToolCallController,
+  runAgentToolCallBatch,
+} = require('./agent-loop-control');
 const { buildToolCallEvent, buildToolResultEvent } = require('./tool-events');
 const { inferExecutionPolicy } = require('../helpers/agent-execution-policy');
 
@@ -30,11 +40,18 @@ module.exports = {
   inferExecutionPolicy,
   createCallId,
   createTraceId,
+  createModelResultState,
+  createRejectedToolResult,
   executeToolCall,
   replaceToolResultData,
   serializeToolResultForModel,
   buildToolCallEvent,
   buildToolResultEvent,
+  MAX_AGENT_ITERS,
+  MAX_AGENT_TOOL_CALLS,
+  shouldFinalizeAgentIteration,
+  createAgentToolCallController,
+  runAgentToolCallBatch,
 };
 module.exports.ackActToken = _ackActToken;
 module.exports.pendingActAcks = _pendingActAcks;

@@ -8,6 +8,8 @@ import path from 'node:path';
 const require = createRequire(import.meta.url);
 const db = require('../core/r-server/db.js');
 const {
+  createModelResultState,
+  createRejectedToolResult,
   dispatchTool,
   executeToolCall,
   replaceToolResultData,
@@ -37,6 +39,30 @@ test('executeToolCall wraps a denied unknown tool while dispatchTool stays raw',
   assert.ok(result.durationMs >= 0);
   assert.deepEqual(result.sideEffects, { type: 'none', riskTier: 'R0', resources: [] });
   assert.equal(result.data.error, 'unknown_tool');
+});
+
+test('initial ToolResult truncation is measured from raw data before redaction', () => {
+  const rawCredentialMessage = `GITHUB_TOKEN=${'x'.repeat(7000)}`;
+  const result = createRejectedToolResult(
+    'workspace_read',
+    'invalid_arguments',
+    rawCredentialMessage,
+    { projectId: 'project-truncation' },
+    { traceId: 'trace_raw_truncation', callId: 'call_raw_truncation' }
+  );
+
+  assert.equal(result.truncated, true);
+  assert.equal(result.data.message, rawCredentialMessage);
+
+  const transformed = replaceToolResultData(result, {
+    ...result.data,
+    message: '[REDACTED]',
+  });
+  assert.equal(transformed.truncated, true);
+  assert.equal(buildToolResultEvent(transformed, {}).toolResult.truncated, true);
+
+  const projected = serializeToolResultForModel(transformed, 10_000);
+  assert.equal(projected.includes(rawCredentialMessage), false);
 });
 
 test('successful read-only operations report no observed side effects', async () => {
@@ -215,10 +241,14 @@ test('model serialization recursively redacts credential variants and preserves 
   assert.equal(JSON.parse(full).data.nested.second.value, 'safe');
 
   const serialized = serializeToolResultForModel(envelope, 120);
-  assert.ok(serialized.endsWith('... (truncated)'));
+  const limited = JSON.parse(serialized);
+  assert.ok(serialized.length <= 120);
+  assert.equal(limited.truncated, true);
 
-  const replaced = replaceToolResultData(envelope, { value: 'x'.repeat(7000) });
+  const rawTruncatedEnvelope = { ...envelope, truncated: true };
+  const replaced = replaceToolResultData(rawTruncatedEnvelope, { value: 'localized' });
   assert.equal(replaced.truncated, true);
+  assert.deepEqual(replaced.data, { value: 'localized' });
 });
 
 test('trace store keeps only redacted summaries within capacity and TTL', () => {
@@ -252,4 +282,184 @@ test('trace store keeps only redacted summaries within capacity and TTL', () => 
   now += 51;
   assert.equal(store.size(), 0);
   assert.deepEqual(store.getTrace('trace_store'), []);
+});
+
+function modelEnvelope(tool, data, overrides = {}) {
+  return {
+    contractVersion: '1.0.0',
+    traceId: 'trace_projection',
+    callId: `call_${tool}`,
+    tool,
+    status: 'success',
+    terminationReason: 'success',
+    durationMs: 1,
+    truncated: false,
+    sideEffects: { type: 'none', riskTier: 'R0', resources: [] },
+    data,
+    ...overrides,
+  };
+}
+
+test('model projection compacts workspace result types without changing the source envelope', () => {
+  const entries = Array.from({ length: 60 }, (_, index) => ({
+    name: `file-${index}.txt`,
+    path: `data/file-${index}.txt`,
+    type: 'file',
+    noisyMetadata: 'x'.repeat(200),
+  }));
+  const cases = [
+    ['workspace_list', { ok: true, path: 'data', entries }],
+    ['workspace_find', { ok: true, pattern: '*.txt', matches: entries, filesScanned: 90 }],
+    ['workspace_search', {
+      ok: true,
+      query: 'TP53',
+      matches: entries.map((entry, index) => ({ ...entry, line: index + 1, text: `TP53 ${'x'.repeat(500)}` })),
+      filesScanned: 60,
+    }],
+    ['workspace_write', {
+      ok: true,
+      path: 'notes/new.txt',
+      created: true,
+      sha256: 'a'.repeat(64),
+      sizeBytes: 12,
+      changeSummary: { addedLines: 1, preview: 'must stay' },
+      content: 'must not enter model context'.repeat(200),
+    }],
+    ['workspace_replace', {
+      ok: true,
+      path: 'notes/new.txt',
+      replacements: 1,
+      previousSha256: 'a'.repeat(64),
+      sha256: 'b'.repeat(64),
+      changeSummary: { changedLines: 1 },
+      content: 'must not enter model context'.repeat(200),
+    }],
+    ['workspace_exec', {
+      ok: true,
+      command: 'npm test',
+      cwd: '/Users/private/project',
+      exitCode: 0,
+      stdout: 'x'.repeat(8_000),
+      stderr: 'warning\n'.repeat(500),
+    }],
+  ];
+
+  for (const [tool, data] of cases) {
+    const envelope = modelEnvelope(tool, data);
+    const source = JSON.stringify(envelope);
+    const serialized = serializeToolResultForModel(envelope, 6000);
+    const projected = JSON.parse(serialized);
+    assert.ok(serialized.length < source.length, `${tool} should compact model context`);
+    assert.equal(projected.modelContext.sourceChars, source.length);
+    assert.equal(projected.modelContext.projectedChars, serialized.length);
+    assert.equal(projected.modelContext.compacted, true);
+    assert.equal(envelope.data, data, `${tool} source envelope must stay unchanged`);
+  }
+
+  const list = JSON.parse(serializeToolResultForModel(modelEnvelope('workspace_list', {
+    ok: true, path: 'data', entries,
+  }), 6000));
+  assert.equal(list.data.entries.length, 40);
+  assert.equal(list.data.totalReturnedByTool, 60);
+  assert.equal(list.data.truncated, true);
+
+  const search = JSON.parse(serializeToolResultForModel(modelEnvelope('workspace_search', {
+    ok: true,
+    query: 'TP53',
+    matches: [{ path: 'data/genes.csv', line: 3, text: 'x'.repeat(500) }],
+  }), 6000));
+  assert.deepEqual(Object.keys(search.data.matches[0]).sort(), ['line', 'path', 'text']);
+  assert.ok(search.data.matches[0].text.length <= 120);
+
+  const exec = JSON.parse(serializeToolResultForModel(modelEnvelope('workspace_exec', {
+    ok: true,
+    command: 'pwd',
+    cwd: '/Users/private/project',
+    exitCode: 0,
+    stdout: '/Users/private/project\n',
+    stderr: '',
+  }), 6000));
+  assert.equal(exec.data.cwd, '[project workspace]');
+  assert.equal(exec.data.stdoutTail, '[project workspace]\n');
+  assert.equal(serializedContains(exec, '/Users/private/project'), false);
+});
+
+function serializedContains(value, needle) {
+  return JSON.stringify(value).includes(needle);
+}
+
+test('workspace_read deduplicates only within one project, trace, and path scope', () => {
+  const data = {
+    ok: true,
+    path: 'data/genes.csv',
+    content: 'gene,value\nTP53,1\nBRCA1,2',
+    startLine: 1,
+    endLine: 3,
+    totalLines: 3,
+    sizeBytes: 31,
+    sha256: 'c'.repeat(64),
+  };
+  const envelope = modelEnvelope('workspace_read', data, { traceId: 'trace_read' });
+  const stateA = createModelResultState({ projectId: 'project-a', traceId: 'trace_read' });
+  const first = JSON.parse(serializeToolResultForModel(envelope, 6000, { state: stateA }));
+  const repeated = JSON.parse(serializeToolResultForModel(envelope, 6000, { state: stateA }));
+  assert.equal(first.data.segments.length, 1);
+  assert.equal(repeated.data.segments.length, 0);
+  assert.equal(repeated.data.omittedPreviouslyReadLines, 3);
+
+  const projectB = createModelResultState({ projectId: 'project-b', traceId: 'trace_read' });
+  const otherProject = JSON.parse(serializeToolResultForModel(envelope, 6000, { state: projectB }));
+  assert.equal(otherProject.data.segments.length, 1);
+  assert.equal(otherProject.data.omittedPreviouslyReadLines, 0);
+
+  const otherTraceEnvelope = { ...envelope, traceId: 'trace_other' };
+  const otherTrace = JSON.parse(serializeToolResultForModel(otherTraceEnvelope, 6000, { state: stateA }));
+  assert.equal(otherTrace.data.segments.length, 1);
+  assert.equal(otherTrace.data.omittedPreviouslyReadLines, 0);
+});
+
+test('trace store isolates identical trace ids by project including global scope', () => {
+  const store = createToolTraceStore();
+  const append = (projectId, callId) => store.append({
+    traceId: 'trace_shared',
+    projectId,
+    callId,
+    tool: 'workspace_read',
+    status: 'success',
+    terminationReason: 'success',
+    durationMs: 1,
+    args: {},
+    result: { ok: true },
+  });
+  append('project-a', 'call-a');
+  append('project-b', 'call-b');
+  append(null, 'call-global');
+
+  assert.deepEqual(store.getTrace('trace_shared', 'project-a').map((entry) => entry.callId), ['call-a']);
+  assert.deepEqual(store.getTrace('trace_shared', 'project-b').map((entry) => entry.callId), ['call-b']);
+  assert.deepEqual(store.getTrace('trace_shared').map((entry) => entry.callId), ['call-global']);
+});
+
+test('hard-capped workspace_read does not mark omitted lines as already read', () => {
+  const content = Array.from({ length: 200 }, (_, index) => `line-${index + 1}-${'x'.repeat(80)}`).join('\n');
+  const envelope = modelEnvelope('workspace_read', {
+    ok: true,
+    path: 'data/large.txt',
+    content,
+    startLine: 1,
+    endLine: 200,
+    totalLines: 200,
+    sizeBytes: Buffer.byteLength(content),
+    sha256: 'd'.repeat(64),
+  }, { traceId: 'trace_large_read' });
+  const state = createModelResultState({ projectId: 'project-a', traceId: 'trace_large_read' });
+
+  const capped = JSON.parse(serializeToolResultForModel(envelope, 600, { state }));
+  assert.equal(capped.truncated, true);
+  assert.equal(state.readRanges.size, 0);
+
+  const retried = JSON.parse(serializeToolResultForModel(envelope, 30_000, { state }));
+  assert.equal(retried.data.segments.length, 1);
+  assert.equal(retried.data.omittedPreviouslyReadLines, 0);
+  assert.equal(state.readRanges.size, 1);
 });

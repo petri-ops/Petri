@@ -80,9 +80,14 @@ P7-D 已完成：
 - SimpleChat 按 `callId` 幂等呈现运行、成功、失败和拒绝状态，以及耗时、截断、termination reason 和副作用摘要；task 回放不会把终态降级为运行中。
 - 当前执行器没有统一 `AbortSignal` 或 timeout，因此不虚构 `timeout` / `cancelled` 状态；前端停止按钮只停止当前订阅/生成显示，不声称工具已取消。
 
+P7-G 已完成：
+- 模型上下文不再只依赖统一 6000 字符截断，而由 `serializeToolResultForModel()` 按 list/find/search/read/write/replace/exec 类型生成有界投影；硬截断仍返回有效 JSON，并通过 `modelContext` 记录压缩比例与 read 去重状态。
+- read 去重限定在 `projectId + traceId + path`，且只提交真正进入模型的行段；Trace entry 携带 `projectId` 并支持项目精确查询。
+- task/legacy 两条 loop 已共用严格 5 次 Provider 请求/12 次工具调用边界；第 5 次请求为无工具最终整理轮，不再发起第 6 次请求，并结构化处理非法参数、重复 Provider call ID、批次超限和取消后剩余调用。
+
 后续未完成：
 - P7-F 后台任务控制面已于 2026-07-20 经 decision gate 判定为 `deferred`：当前 `workspace_exec` 仍仅提供不启动进程的内建 `pwd`，且未新增 `workspace_process_start/check/stop`。
-- 当前工具结果进入模型上下文时统一按 6000 字符截断，尚未按结果类型压缩；该工作属于 P7-G。
+- P7-H 尚待完成 Phase 7 聚合门禁与真实产品验收。
 
 ## 3. 从 DeepSeek_harness 借鉴什么
 
@@ -136,7 +141,8 @@ Provider tool call
 - `agent-tools/index.js`：统一调度入口；P7-C 起只委托 interceptor，不再拥有局部安全条件。
 - `agent-tool-policy.js`：纯策略判断，可注入、可单测，不依赖 Electron 或 Provider。
 - `agent-tool-interceptor.js`：注册表解析、参数校验、workspace preflight、策略决策和现有 handler 调用。
-- `agent-tools/tool-execution.js`：P7-D 中央后置层，负责计时、版本化结果归一化、真实 termination reason、递归脱敏和 Trace 写入。
+- `agent-tools/tool-execution.js`：P7-D 中央后置层，负责计时、版本化结果归一化、真实 termination reason、递归脱敏和 Trace 写入；P7-G 在不修改原始 ToolResult/SSE/handler 数据的前提下，按工具类型生成有界模型投影与可测 `modelContext` 元数据。
+- `agent-tools/agent-loop-control.js`：P7-G task/legacy loop 的共享 Provider 边界，统一 5 轮/12 次调用、批次 reserve、参数解析、重复 call ID 隔离和取消后的剩余调用拒绝。
 - `agent-tools/tool-events.js`：task/legacy loop 共用的向后兼容 SSE 投影。
 - `workspace-tools.js`：项目内文件和短命令的实际执行、共享 preflight 与 handler 侧局部安全校验。
 - `ai-agent.js`：Agent 循环、Provider 协议和 SSE；不拥有文件安全规则。
@@ -380,30 +386,33 @@ docs(harness): defer background process control
 
 ### P7-G：上下文效率与 Provider 稳定性
 
-状态：`planned`
+状态：`completed`（2026-07-20）
 
 目标：减少工具结果对模型上下文的无效占用，并确保不同 Provider 行为一致。
 
-实施：
+已实施：
 
-1. 按工具类型压缩送回模型的结果：
-   - list/find：保留命中、总数和截断状态。
-   - search：保留路径、行号和有限上下文。
-   - read：保留本次行段，不重复已读片段。
-   - write/replace：保留路径、sha256 和变更摘要。
-   - exec：保留 exitCode、末尾关键输出、超时和截断。
-2. 完整结构化结果只进入短期 Trace，不重复写入项目记忆。
-3. 保持已完成的项目记忆硬隔离；工具 Trace 必须携带 `projectId`，且不得跨项目召回。
-4. Provider 评测增加 malformed arguments、重复 tool call、达到工具上限和用户中途取消。
-5. 不通过添加 Provider 特定 prompt 修补协议适配问题。
+1. `serializeToolResultForModel()` 只压缩模型侧投影，原始 handler result、ToolResult envelope、SSE 与 Trace 摘要生成链保持不变：
+   - list/find：稳定字段白名单，最多 40 条，并保留总数与截断状态。
+   - search：最多 12 条命中，每条上下文最多 120 字符，同时保留路径和行号。
+   - read：返回实际入模行段，并按 `projectId + traceId + path` 去重；只有完整结构化投影真正入模后才提交已读范围，硬截断不会污染去重状态。
+   - write/replace：保留相对路径、sha256 与变更摘要。
+   - exec：保留状态、exitCode 与 stdout/stderr 尾部；cwd 统一显示 `[project workspace]`，`pwd` 不暴露绝对路径。
+2. 所有硬截断结果仍是可 `JSON.parse` 的有效 JSON；`modelContext` 记录 projection、原始/投影字符数、read 去重与压缩状态，使上下文缩减可测。
+3. Trace entry 新增 `projectId`，查询可按 `traceId + projectId` 精确过滤；read 去重状态同样包含项目作用域，不跨项目复用。
+4. task 与 legacy 两条 Agent loop 共用 `agent-loop-control.js`，统一为最多 5 次 Provider 请求 / 12 次工具调用；第 5 次请求固定为无工具最终整理轮，不再追加第 6 次请求。工具批次先严格 reserve，只把已接受调用写入 assistant history，并为每个调用生成配对 tool result。
+5. malformed JSON、数组或 null 参数返回 `invalid_arguments` 且不执行 handler；重复 Provider call ID 返回 `duplicate_tool_call` 且不执行 handler，写入协议 history 前使用唯一 ID，同时保留原始 `providerCallId` 供诊断。
+6. 观察到用户取消后，不再启动剩余已 reserve 的 handler，也不发起后续 Provider 请求；剩余调用返回 `request_canceled`。当前没有公共 `AbortSignal`，因此不声称能中断已开始执行的 handler。
+7. 未增加 Provider 特定 prompt，也未改变科学计算的 `run_tool → tool_job → artifact truth`。
 
-验收：
+验收证据：
 
-- 同一任务的上下文体积可测且低于现有统一 6000 字符截断策略。
-- 达到 5 轮 / 12 次工具上限时仍能给出非空最终答复。
-- A/B 项目文件名和内容相同或冲突时，不发生跨项目工具或记忆污染。
+- `CI=1 TERM=dumb node --test test/agent-tool-result.test.mjs test/agent-provider-boundary.test.mjs`：18 tests / 18 pass / 0 fail。
+- ToolResult 回归覆盖按类型投影、有效 JSON 截断、原始数据截断语义、read 实际入模范围去重、`projectId` Trace 隔离和模型上下文测量元数据。
+- 零网络 Provider 边界回归覆盖严格 5 次 Provider 请求/12 次工具调用、无工具最终轮、严格批次上限、malformed/non-object 参数、重复及跨轮碰撞 call ID、协议配对和取消后不再启动后续 handler。
+- 原始 ToolResult/SSE/handler 数据未压缩，P7-D 的 UI、审批、result cards 与兼容调用方保持原契约。
 
-建议提交：
+提交：
 
 ```text
 perf(harness): compact agent tool context
@@ -503,8 +512,8 @@ git rev-parse origin/main
 
 ## 9. 推荐立即开始的内容
 
-P7-A 至 P7-E 已完成；P7-F 已于 2026-07-20 完成 decision gate 并有证据地 `deferred`：终端的 Agent 查询/停止缺口成立，但符合“真实、`>30s`、非科学、需要 Agent 生命周期控制”的任务为 0/3，未达到 AND gate，不新增后台进程工具。
+P7-A 至 P7-E 与 P7-G 已完成；P7-F 已于 2026-07-20 完成 decision gate 并有证据地 `deferred`：终端的 Agent 查询/停止缺口成立，但符合“真实、`>30s`、非科学、需要 Agent 生命周期控制”的任务为 0/3，未达到 AND gate，不新增后台进程工具。
 
-下一工作包为 P7-G 上下文效率与 Provider 稳定性。实施时只处理按结果类型压缩入模上下文和 Provider 边界回归，不得借机重开 P7-F、扩展命令权限或改变科学计算的 `run_tool → tool_job → artifact truth`。
+下一工作包为 P7-H 文档、门禁与真实产品验收。实施时只聚合 Phase 7 门禁、CI 与真实会话证据，不得借机重开 P7-F、扩展命令权限或改变科学计算的 `run_tool → tool_job → artifact truth`。
 
-P7-D 的 UI-034 保持 `in_progress` 等待开发壳或打包态实机验收；P7-E 未引入 `workspace_patch`。P7-F 只有在至少 3 个合格真实任务的可复现证据进入仓库后才能重新评审。
+P7-G 已通过零网络定向回归 18/18；其取消保证仅覆盖“观察到取消后不再启动剩余 handler 或发起下一轮 Provider 请求”，不包含中断已开始执行的 handler。P7-D 的 UI-034 保持 `in_progress` 等待开发壳或打包态实机验收；P7-E 未引入 `workspace_patch`。P7-F 只有在至少 3 个合格真实任务的可复现证据进入仓库后才能重新评审。

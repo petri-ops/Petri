@@ -327,7 +327,7 @@
 
 ### Phase 7：通用基础工具与运行控制面
 
-状态：`in_progress`（2026-07-20；P7-A 至 P7-E 已完成，P7-F 已有证据地 `deferred`，下一工作包为 P7-G 上下文效率与 Provider 稳定性）。
+状态：`in_progress`（2026-07-20；P7-A 至 P7-E 与 P7-G 已完成，P7-F 已有证据地 `deferred`，下一工作包为 P7-H 文档、门禁与真实产品验收）。
 
 完整实施顺序、跨工具接手协议与出口判据见
 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。本节只保留阶段摘要；后续执行状态以专项计划为准。
@@ -364,7 +364,8 @@ Phase 7 后续：
 4. ✅ P7-D：中央执行层已生成版本化 ToolResult envelope；task/legacy loop 共用兼容 SSE 投影与 `traceId/callId`，Trace 仅保留容量/TTL 受限的脱敏摘要；SimpleChat 幂等显示真实运行/等待确认/成功/失败/拒绝、耗时、截断、termination reason 和实际副作用。只读 operation 不继承静态最大能力，常见 provider token 在普通文本中也会脱敏；后端 P7-D 6/6、审批/脱敏组合定向 18/18、前端 parser/activity 7/7，UI-034 待实机验收。
 5. ✅ P7-E：`workspace_write` / `workspace_replace` 已增加真实 `dryRun` 与 additive `changeSummary`；预演继续执行项目、路径、SHA、overwrite、大小和唯一匹配检查，不创建工作区根目录、目标父目录、临时文件或目标文件。两工具共用同目录原子发布，保留同进程目标锁和发布前 SHA 复核；临时文件常规失败路径由 `finally` best-effort 清理。成功 dry-run 报告 `none/R0`，真实编辑保持 `workspace-write/R2`；未因无真实 Provider 证据而实现 `workspace_patch`。
 6. ⏸ P7-F：后台长任务 decision gate 已完成并有证据地 `deferred`。现有集成终端缺少 Agent 按任务查询/停止能力，但严格合格的真实 `>30s` 非科学 Agent 任务为 0/3，AND gate 不成立；未新增 `workspace_process_start/check/stop`。只有至少 3 个可复现合格任务进入仓库后才重新评审。
-7. 下一工作包为 P7-G 上下文效率与 Provider 稳定性；当前尚未实施。SSH、远程执行和批量替换不进入当前基线。
+7. ✅ P7-G：模型侧工具结果已按 list/find/search/read/write/replace/exec 类型投影，硬截断保持有效 JSON，并记录可测的 `modelContext` 元数据；read 仅对 `projectId + traceId + path` 内实际入模范围去重，Trace 可按项目精确过滤。task/legacy loop 已共用严格 5 次 Provider 请求/12 次工具调用 controller，第 5 次请求无工具且不再追加第 6 次请求；批次上限、非法/非对象参数、跨轮重复或碰撞的 Provider/protocol call ID 与取消后不再启动后续 handler 均被严格处理。零网络定向回归 18/18。当前无公共 `AbortSignal`，不宣称中断已运行 handler。
+8. 下一工作包为 P7-H 文档、门禁与真实产品验收。SSH、远程执行和批量替换不进入当前基线。
 
 ## 3. 推荐推进顺序
 
