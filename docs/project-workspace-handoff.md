@@ -1,7 +1,6 @@
 # BioF3 Desktop Current Handoff
-# BioF3 Desktop Current Handoff
 
-最后更新：2026-07-20
+最后更新：2026-07-21
 
 ## 1. 恢复顺序
 
@@ -49,7 +48,9 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 - P7-F 后台任务 decision gate 已于 2026-07-20 完成：P7-A–D 前置条件满足，集成终端的 Agent 查询/停止缺口成立，但严格合格的真实 `>30s` 非科学 Agent 任务为 0/3，因此 AND gate 不成立并标记 `deferred`；未新增 `workspace_process_start/check/stop`。
 - P7-G 上下文效率与 Provider 稳定性已完成：模型侧按 list/find/search/read/write/replace/exec 类型投影，硬截断保持有效 JSON，`modelContext` 暴露原始/投影字符数与压缩/去重状态；原始 handler result、ToolResult envelope 和 SSE 不压缩。read 只在 `projectId + traceId + path` 内提交实际入模范围，Trace entry 携带 `projectId` 并支持精确过滤。
 - task 与 legacy Agent loop 已统一使用共享严格 5 次 Provider 请求/12 次工具调用 controller：第 5 次请求为无工具最终整理轮，不再追加第 6 次请求；批次严格 reserve，只把已接受调用及其配对结果写入 history。malformed JSON、数组/null 参数和跨轮重复或碰撞的 Provider/protocol call ID 均结构化拒绝且不执行 handler，协议 history 始终使用请求级唯一 ID并保留原始 `providerCallId`。观察到取消后不再启动剩余 handler 或下一轮 Provider 请求；当前没有公共 `AbortSignal`，因此不声称中断已开始的 handler。
-- P7-G 定向证据：`agent-tool-result.test.mjs` + `agent-provider-boundary.test.mjs` 合计 18/18，0 fail；覆盖按类型压缩、有效 JSON、原始 ToolResult 截断语义、read 去重、Trace 项目隔离、严格 5/12 上限、非法参数、跨轮 call ID 碰撞、协议配对与取消边界。下一工作包为 P7-H 文档、门禁与真实产品验收。
+- P7-G 定向证据：`agent-tool-result.test.mjs` + `agent-provider-boundary.test.mjs` 合计 18/18，0 fail；覆盖按类型压缩、有效 JSON、原始 ToolResult 截断语义、read 去重、Trace 项目隔离、严格 5/12 上限、非法参数、跨轮 call ID 碰撞、协议配对与取消边界。
+- P7-H 已于 2026-07-21 完成：单一零网络、零凭据的 `npm run harness:phase7` 已接入 CI，实测 manifests 7/7、Phase 6 tests 64/64、Phase 7 核心 tests 68/68、离线临时真实 workspace 产品检查 13/13，全部 0 fail；脱敏证据位于 `acceptance/harness-phase7/product-acceptance.{json,md}`。
+- Phase 7 已关闭。P7-A live Provider 双目标继续保持 8/8 人工证据；P7-F 保持 `deferred`；UI-034 保持 `in_progress`，不得用离线后端验收冒充视觉实机证据。下一步观察发布后反馈，再独立决定新阶段，不默认继续扩展 Phase 7。
 - 全面计划、出口判据和后续工具接手协议见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 - `DeepSeek_harness/` 与 `api-failover-proxy/` 仅可作为未跟踪参考工程，均不得纳入 Desktop 提交。
 

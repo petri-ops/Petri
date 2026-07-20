@@ -1,7 +1,7 @@
 # BioF3 Harness Phase7 完成计划
 
-> 状态：`active`  
-> 最后核对：2026-07-20
+> 状态：`completed`（2026-07-21）
+> 最后核对：2026-07-21
 > 主模块：`P-03 Harness 与 Agent 工作流`  
 > 影响模块：`P-01 项目、会话与上下文`、`P-02 工具执行、Job 与 Artifact Truth`、`P-07 模型网关与 AI Provider`、`W-03 Agent 会话`  
 > 关注点：`C-03 安全、确认与审计`、`C-04 状态与事件同步`、`C-05 测试与质量门禁`、`C-06 性能与交互手感`
@@ -85,9 +85,11 @@ P7-G 已完成：
 - read 去重限定在 `projectId + traceId + path`，且只提交真正进入模型的行段；Trace entry 携带 `projectId` 并支持项目精确查询。
 - task/legacy 两条 loop 已共用严格 5 次 Provider 请求/12 次工具调用边界；第 5 次请求为无工具最终整理轮，不再发起第 6 次请求，并结构化处理非法参数、重复 Provider call ID、批次超限和取消后剩余调用。
 
-后续未完成：
+Phase 7 已完成：
 - P7-F 后台任务控制面已于 2026-07-20 经 decision gate 判定为 `deferred`：当前 `workspace_exec` 仍仅提供不启动进程的内建 `pwd`，且未新增 `workspace_process_start/check/stop`。
-- P7-H 尚待完成 Phase 7 聚合门禁与真实产品验收。
+- P7-H 已于 2026-07-21 完成离线聚合门禁、CI 接线与真实产品链路验收：`harness:phase7` 覆盖 manifests 7/7、Phase 6 回归 64/64、Phase 7 核心回归 68/68，临时真实 workspace 经生产 interceptor / policy / preflight / handler 链完成 13/13 检查。
+- P7-A live Provider 证据继续作为人工验收：DeepSeek 与自定义 OpenAI-compatible 均为 8/8 PASS，不进入零网络、零凭据 CI。
+- UI-034 仍为 `in_progress`；本次离线后端产品验收不冒充开发壳或打包态视觉验收。
 
 ## 3. 从 DeepSeek_harness 借鉴什么
 
@@ -420,30 +422,27 @@ perf(harness): compact agent tool context
 
 ### P7-H：文档、门禁与真实产品验收
 
-状态：`planned`
+状态：`completed`（2026-07-21）
 
-实施：
+已实施：
 
-1. 新增 `npm run harness:phase7`，至少包含：
-   - 工具契约/注册表
-   - policy
-   - workspace tools
-   - result envelope / trace
-   - 项目隔离
-2. CI 运行不依赖真实 Provider；live Provider 矩阵保留为人工验收。
-3. 更新：
-   - `docs/harness-roadmap.md`
-   - `docs/project-workspace-handoff.md`
-   - `docs/next-steps-roadmap.md`
-   - 本文状态和证据
-4. 开发壳完成真实会话验收；若涉及 Electron IPC、持久化或前端呈现，再补打包态验收。
-5. 只在证据齐全时把 Phase 7 标为 `completed`。
+1. 新增单一离线聚合入口 `npm run harness:phase7`：依次执行 `harness:check`、`harness:phase6`、Phase 7 核心契约测试和产品验收脚本；全链零网络、零凭据。
+2. CI 使用同一 `npm run harness:phase7`，不再维护重复且易漂移的 Phase 6-era 手写 Harness 测试清单；P7-A 真实 Provider 矩阵继续保留为人工验收，不进入 CI。
+3. 新增 `scripts/harness-phase7-acceptance.mjs`，在 `os.tmpdir()` 创建临时真实 workspace，并通过生产 `createAgentToolInterceptor()`、registry schema、workspace preflight 与真实 handlers 验证 list/find/search/read/dry-run/write/replace/exec 和安全拒绝链；`finally` 删除临时目录。
+4. 产品验收不访问真实 SQLite、用户项目、Provider 或凭据，不创建科学分析 Job；证据不保存文件正文、绝对路径、命令 stdout 或请求数据，未建立第二套 analysis executor/job/artifact truth。
+5. 脱敏证据保存于 `acceptance/harness-phase7/product-acceptance.{json,md}`，并更新 Phase 7 计划、路线图、交接与下一步文档。
 
-建议提交：
+验收证据：
+
+- P7-A 人工 live Provider：DeepSeek `deepseek-chat` 与自定义 OpenAI-compatible `gpt-5.6-sol` 均为 8/8 PASS。
+- `CI=1 TERM=dumb npm run harness:phase7`：manifest 7/7；Phase 6 tests 64/64；Phase 7 核心 tests 68/68；产品检查 13/13；全部 0 fail。
+- P7-F 保持 `deferred`；UI-034 保持 `in_progress`，本次离线产品验收不作为视觉实机证据。
+
+提交：
 
 ```text
-test(harness): close phase 7 quality gates
-docs(harness): record phase 7 acceptance
+test(harness): close phase7 quality gates
+docs(harness): record phase7 acceptance
 ```
 
 ## 6. Phase 7 出口判据
@@ -510,10 +509,10 @@ git rev-parse origin/main
 - 未完成项和真实阻塞原因。
 - 是否需要实机、打包态、凭据或用户确认。
 
-## 9. 推荐立即开始的内容
+## 9. Phase 7 关闭后的下一步
 
-P7-A 至 P7-E 与 P7-G 已完成；P7-F 已于 2026-07-20 完成 decision gate 并有证据地 `deferred`：终端的 Agent 查询/停止缺口成立，但符合“真实、`>30s`、非科学、需要 Agent 生命周期控制”的任务为 0/3，未达到 AND gate，不新增后台进程工具。
+Phase 7 已于 2026-07-21 完成，不再存在待执行的 Phase 7 工作包。P7-H 的离线聚合门禁、CI 接线和产品链路验收已落地；P7-A live Provider 证据继续保留为人工验收，不进入 CI。
 
-下一工作包为 P7-H 文档、门禁与真实产品验收。实施时只聚合 Phase 7 门禁、CI 与真实会话证据，不得借机重开 P7-F、扩展命令权限或改变科学计算的 `run_tool → tool_job → artifact truth`。
+后续先观察 `v0.0.1-rc.6` 与 Phase 7 的真实使用反馈，再独立决定发布签名/公证、x64 Runtime 或新的产品阶段；不得借“收尾”继续扩大命令权限、增加分析流程或改变 `run_tool → tool_job → artifact truth`。
 
-P7-G 已通过零网络定向回归 18/18；其取消保证仅覆盖“观察到取消后不再启动剩余 handler 或发起下一轮 Provider 请求”，不包含中断已开始执行的 handler。P7-D 的 UI-034 保持 `in_progress` 等待开发壳或打包态实机验收；P7-E 未引入 `workspace_patch`。P7-F 只有在至少 3 个合格真实任务的可复现证据进入仓库后才能重新评审。
+P7-D 的 UI-034 仍为 `in_progress`，只在取得开发壳或打包态视觉证据后单独标记 `verified`，不影响后端 Phase 7 出口结论。P7-F 继续 `deferred`，只有至少 3 个合格真实任务的可复现证据进入仓库后才能重新评审；P7-E 仍未引入 `workspace_patch`。

@@ -4,7 +4,7 @@
 
 > **⚠️ vendor 工作流已退役（2026-07-16）**：本文多处「vendor lock 已同步 / Core 检查点 `xxxxxxx`，Desktop `yyyyyyy`」是**旧双仓库（Core submodule + Desktop）工作流的历史完成记录**。核心已内联为仓库内 `core/`，不再有 submodule / `.vendor-lock` / vendor 同步（见 [`dependency-decoupling-checkpoint.md`](./dependency-decoupling-checkpoint.md)）。阅读时把这些 commit 视为历史，忽略"同步 vendor"类步骤——现在改 Core 就是改 `core/`，随 Desktop 一起提交。
 
-最后更新：2026-07-20
+最后更新：2026-07-21
 
 这份路线图回答三个问题：
 
@@ -327,45 +327,29 @@
 
 ### Phase 7：通用基础工具与运行控制面
 
-状态：`in_progress`（2026-07-20；P7-A 至 P7-E 与 P7-G 已完成，P7-F 已有证据地 `deferred`，下一工作包为 P7-H 文档、门禁与真实产品验收）。
+状态：`completed`（2026-07-21；P7-A 至 P7-H 出口已关闭，P7-F 有证据地 `deferred`）。
 
-完整实施顺序、跨工具接手协议与出口判据见
-[`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。本节只保留阶段摘要；后续执行状态以专项计划为准。
+完整实施顺序、证据和跨工具接手协议见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 
 背景修正：
 
-- Phase 1–6 主要解决“识别生信输入 → 选择分析工具 → 运行 → 验证 artifact → 恢复”的纵向流程。
-- 它没有给 Agent 提供完整的文件查询、分段阅读、安全修改和短命令能力，因此还不能算通用交互式执行底座。
-- 后续不应继续靠扩写 system prompt 或增加 workflow template 掩盖这层缺口。
+- Phase 1–6 解决“识别生信输入 → 选择分析工具 → 运行 → 验证 artifact → 恢复”的纵向流程；Phase 7 补齐项目文件查询、分段阅读、受控编辑、短命令、统一策略、结构化结果、Trace 与 Provider 边界。
+- 后续不得靠扩写 system prompt 或增加 workflow template 绕过这些后端边界。
 
-本阶段第一批基础工具：
+本阶段基础工具为 `workspace_list/find/search/read/write/replace/exec`。所有路径必须位于当前项目 workspace；路径穿越、敏感文件、符号链接逃逸、跨用户访问和危险命令硬失败。基础工具不创建第二套 analysis executor、tool job 或 artifact truth，科学计算仍只走 `run_tool → tool_job → artifact truth`。
 
-- `workspace_list`：列项目目录。
-- `workspace_find`：按 glob 递归找文件。
-- `workspace_search`：搜索文本并返回文件、行号和匹配行。
-- `workspace_read`：按行分段读取文本，同时返回 sha256。
-- `workspace_write`：创建或显式覆写文本文件，支持 expectedSha256 并发保护。
-- `workspace_replace`：只允许 oldText 唯一匹配的一次精确替换。
-- `workspace_exec`：在项目根目录执行最长 30 秒的短命令。
+Phase 7 完成记录：
 
-安全不变量：
+1. ✅ P7-A：DeepSeek `deepseek-chat` 与自定义 OpenAI-compatible `gpt-5.6-sol` 的同一 8 场景 live Provider 矩阵均 8/8 PASS，作为人工验收保留。
+2. ✅ P7-B：18 个模型可见工具的 definition、handler 与内部 contract 收敛为单一注册表，并保持 Provider-safe schema 投影。
+3. ✅ P7-C：中央 dispatcher 统一经过 schema 校验、workspace preflight 与纯 `allow | deny` policy；写入、替换、命令和真实 `run_tool` 审批边界保持后端强制。
+4. ✅ P7-D：ToolResult envelope、兼容 SSE、脱敏 Trace 与 SimpleChat 工具活动投影已完成；UI-034 仍为 `in_progress`，等待独立的开发壳或打包态视觉证据。
+5. ✅ P7-E：write/replace 支持真实 dry-run、变更摘要、原子发布和 SHA 并发保护；未引入 `workspace_patch`。
+6. ⏸ P7-F：后台长任务 decision gate 因合格真实任务为 0/3 而 `deferred`，未新增 process start/check/stop。
+7. ✅ P7-G：按工具类型的有界模型投影和严格 5 次 Provider 请求/12 次工具调用边界已完成，零网络定向回归 18/18。
+8. ✅ P7-H：单一 `npm run harness:phase7` 已接入 CI；离线结果为 manifests 7/7、Phase 6 tests 64/64、Phase 7 核心 tests 68/68、临时真实 workspace 产品检查 13/13，全部 0 fail。脱敏证据位于 `acceptance/harness-phase7/product-acceptance.{json,md}`。
 
-- 所有文件路径只能是当前 `projectId` 对应 workspace 下的相对路径。
-- 路径穿越、绝对路径、敏感文件、符号链接逃逸、跨用户项目访问硬失败。
-- 聊天“只读模式”和用户明确只检查/规划的请求在中央 dispatcher 阻断写文件、替换、命令和分析执行。
-- 命令固定以项目根目录为 cwd，移除 credential 形环境变量，清洗输出，限制时长/大小，并阻断 sudo、强制删除、远端 Git、发布和远程脚本管道等操作。
-- 基础工具不创建第二套 analysis executor、tool job 或 artifact truth；科学计算仍只走 `run_tool → tool_job → artifact truth`。
-
-Phase 7 后续：
-
-1. ✅ P7-A：DeepSeek `deepseek-chat` 与自定义 OpenAI-compatible `gpt-5.6-sol` 已完成同一 8 场景真实 Provider 矩阵，均 8/8 PASS。
-2. ✅ P7-B：18 个模型可见工具的 definition、handler 与内部 contract 已收敛为单一注册表；启动一致性校验、Provider-safe schema 投影和协议兼容测试已完成。
-3. ✅ P7-C：中央 dispatcher 已统一经过 schema 校验、workspace preflight 和纯 `allow | deny` 策略；已有文件覆写与精确替换强制匹配 `expectedSha256`，新文件原子 create-only，命令仅自动放行保守白名单；原 handler 保留 TOCTOU 防线，既有审批协议不改义。
-4. ✅ P7-D：中央执行层已生成版本化 ToolResult envelope；task/legacy loop 共用兼容 SSE 投影与 `traceId/callId`，Trace 仅保留容量/TTL 受限的脱敏摘要；SimpleChat 幂等显示真实运行/等待确认/成功/失败/拒绝、耗时、截断、termination reason 和实际副作用。只读 operation 不继承静态最大能力，常见 provider token 在普通文本中也会脱敏；后端 P7-D 6/6、审批/脱敏组合定向 18/18、前端 parser/activity 7/7，UI-034 待实机验收。
-5. ✅ P7-E：`workspace_write` / `workspace_replace` 已增加真实 `dryRun` 与 additive `changeSummary`；预演继续执行项目、路径、SHA、overwrite、大小和唯一匹配检查，不创建工作区根目录、目标父目录、临时文件或目标文件。两工具共用同目录原子发布，保留同进程目标锁和发布前 SHA 复核；临时文件常规失败路径由 `finally` best-effort 清理。成功 dry-run 报告 `none/R0`，真实编辑保持 `workspace-write/R2`；未因无真实 Provider 证据而实现 `workspace_patch`。
-6. ⏸ P7-F：后台长任务 decision gate 已完成并有证据地 `deferred`。现有集成终端缺少 Agent 按任务查询/停止能力，但严格合格的真实 `>30s` 非科学 Agent 任务为 0/3，AND gate 不成立；未新增 `workspace_process_start/check/stop`。只有至少 3 个可复现合格任务进入仓库后才重新评审。
-7. ✅ P7-G：模型侧工具结果已按 list/find/search/read/write/replace/exec 类型投影，硬截断保持有效 JSON，并记录可测的 `modelContext` 元数据；read 仅对 `projectId + traceId + path` 内实际入模范围去重，Trace 可按项目精确过滤。task/legacy loop 已共用严格 5 次 Provider 请求/12 次工具调用 controller，第 5 次请求无工具且不再追加第 6 次请求；批次上限、非法/非对象参数、跨轮重复或碰撞的 Provider/protocol call ID 与取消后不再启动后续 handler 均被严格处理。零网络定向回归 18/18。当前无公共 `AbortSignal`，不宣称中断已运行 handler。
-8. 下一工作包为 P7-H 文档、门禁与真实产品验收。SSH、远程执行和批量替换不进入当前基线。
+SSH、远程执行、批量替换和任意网络工具不进入本阶段。
 
 ## 3. 推荐推进顺序
 
