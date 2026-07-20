@@ -80,9 +80,9 @@ P7-D 已完成：
 - SimpleChat 按 `callId` 幂等呈现运行、成功、失败和拒绝状态，以及耗时、截断、termination reason 和副作用摘要；task 回放不会把终态降级为运行中。
 - 当前执行器没有统一 `AbortSignal` 或 timeout，因此不虚构 `timeout` / `cancelled` 状态；前端停止按钮只停止当前订阅/生成显示，不声称工具已取消。
 
-仍未完成：
-- 尚无后台任务 `start/check/stop`；当前 `workspace_exec` 仅提供不启动进程的内建 `pwd`。
-- 当前工具结果进入模型上下文时统一按 6000 字符截断，尚未按结果类型压缩。
+后续未完成：
+- P7-F 后台任务控制面已于 2026-07-20 经 decision gate 判定为 `deferred`：当前 `workspace_exec` 仍仅提供不启动进程的内建 `pwd`，且未新增 `workspace_process_start/check/stop`。
+- 当前工具结果进入模型上下文时统一按 6000 字符截断，尚未按结果类型压缩；该工作属于 P7-G。
 
 ## 3. 从 DeepSeek_harness 借鉴什么
 
@@ -351,21 +351,19 @@ feat(harness): harden workspace edits
 
 ### P7-F：后台长任务控制面
 
-状态：`decision_gate`
+状态：`deferred`（2026-07-20；decision gate 已完成，未进入实现）
 
-进入条件：
+进入条件核对：
 
-- P7-A 至 P7-D 已通过。
-- 有至少 3 个真实用户任务无法在 30 秒内完成，且不属于科学分析 `run_tool`。
-- 集成终端现有进程管理不能直接满足 Agent 查询和停止需求。
+| 条件 | 结论 | 证据 |
+| --- | --- | --- |
+| P7-A 至 P7-D 已通过 | 满足 | 真实 Provider 基线、统一注册表/Policy 与结构化 ToolResult 均已完成；P7-E 也已完成。 |
+| 至少 3 个真实用户任务无法在 30 秒内完成，且不属于科学分析 `run_tool` | **不满足（0/3）** | 仓库中未找到同时具备真实用户/产品需求、可信 `>30s`、非科学且需要 Agent 生命周期控制的任务。插件/Runtime 安装、应用更新已有专用 IPC/进度面；诊断导出无 `>30s` 证据；dev server/watch 仅为潜在终端场景；构建发布属于维护门禁；content sync/capability provision 已有专用机制，均不得凑数。 |
+| 集成终端现有进程管理不能直接满足 Agent 查询和停止需求 | 满足 | Electron 仅维护全应用单例 PTY；无项目归属或不透明 `processId`，无主进程有界 stdout/stderr 缓冲和按任务状态查询，stop 只能终止整个 session，且缺少项目归档/后端重启时的 orphan 清理策略。renderer 的 xterm `scrollback: 5000` 不是 Agent 可查询的后台缓冲。 |
 
-若进入，最小工具仅为：
+决策：三个进入条件为 AND 关系。虽然终端能力缺口成立，但真实任务门槛为 0/3，因此本包明确 `deferred`。本次不新增 `workspace_process_start`、`workspace_process_check`、`workspace_process_stop`，不修改生产代码或测试，不扩大 P7-C 命令策略，也不提前实施 P7-G。
 
-- `workspace_process_start`
-- `workspace_process_check`
-- `workspace_process_stop`
-
-约束：
+重新开启条件：后续只有在仓库中沉淀至少 3 个可复现的真实产品任务，并分别证明其通常或必然超过 30 秒、不能归入科学 `run_tool`、且专用 IPC/现有终端无法满足 Agent 查询与停止时，才重新评审本 gate。重新开启后仍必须遵守以下最小边界：
 
 - 只允许项目 cwd 和已通过 P7-C 的命令策略。
 - 返回不透明 `processId`，不得允许模型自行传 PID。
@@ -374,12 +372,10 @@ feat(harness): harden workspace edits
 - App 退出、项目归档或后端重启时必须有明确的 orphan 清理策略。
 - 不复制正式分析 job；不为长驻 dev server 自动宣称“已完成”。
 
-若进入条件不满足，本工作包明确标记 `deferred`，Phase 7 仍可完成。
-
-建议提交：
+文档提交：
 
 ```text
-feat(harness): manage bounded workspace processes
+docs(harness): defer background process control
 ```
 
 ### P7-G：上下文效率与 Provider 稳定性
@@ -507,8 +503,8 @@ git rev-parse origin/main
 
 ## 9. 推荐立即开始的内容
 
-P7-A、P7-B、P7-C、P7-D 与 P7-E 已完成。下一工作包为 P7-F decision gate：
+P7-A 至 P7-E 已完成；P7-F 已于 2026-07-20 完成 decision gate 并有证据地 `deferred`：终端的 Agent 查询/停止缺口成立，但符合“真实、`>30s`、非科学、需要 Agent 生命周期控制”的任务为 0/3，未达到 AND gate，不新增后台进程工具。
 
-> 先核对是否存在至少 3 个无法在 30 秒内完成、且不属于科学分析 `run_tool` 的真实用户任务，以及现有集成终端是否确实不能满足 Agent 查询/停止需求。只有证据满足进入条件才实现受限 `start/check/stop`；否则将 P7-F 标记为有证据地 `deferred`。
+下一工作包为 P7-G 上下文效率与 Provider 稳定性。实施时只处理按结果类型压缩入模上下文和 Provider 边界回归，不得借机重开 P7-F、扩展命令权限或改变科学计算的 `run_tool → tool_job → artifact truth`。
 
-P7-D 的 UI-034 保持 `in_progress` 等待开发壳或打包态实机验收；P7-E 未引入 `workspace_patch`，后续也不得借 P7-F 扩大文件编辑权限。按结果类型替换 6000 字符统一截断仍属于 P7-G，不得提前混入 P7-F。
+P7-D 的 UI-034 保持 `in_progress` 等待开发壳或打包态实机验收；P7-E 未引入 `workspace_patch`。P7-F 只有在至少 3 个合格真实任务的可复现证据进入仓库后才能重新评审。
