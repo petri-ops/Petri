@@ -1,4 +1,4 @@
-# BioF3 Harness Phase 7 完成计划
+# BioF3 Harness Phase7 完成计划
 
 > 状态：`active`  
 > 最后核对：2026-07-20
@@ -73,9 +73,14 @@ P7-C 已完成：
 - `run_tool(op=run)` 继续委托既有真实 `tool_job + ackToken` 审批；workflow recovery token 与 `act` 执行后 ACK 保持各自语义，没有新建第三套确认协议。
 - 专项证据：policy/interceptor 12/12、既有 approval + workspace 20/20、registry + workspace 19/19，均为 TAP 0 fail。
 
+P7-D 已完成：
+- Agent loop 通过中央 `executeToolCall()` 生成版本化 ToolResult envelope，记录真实 `traceId`、`callId`、状态、termination reason、耗时、截断标记和副作用摘要；旧 `dispatchTool()` 仍返回原始 handler 数据，保持直接调用兼容。
+- task 与 legacy 两条 loop 共用向后兼容 SSE builder；旧 `name/summary`、审批和 Act 扁平字段保留，新增可选 `toolResult`。
+- Trace 使用最多 200 条、TTL 15 分钟的进程内脱敏摘要 store，不持久化原始参数、正文、命令输出或凭据。
+- SimpleChat 按 `callId` 幂等呈现运行、成功、失败和拒绝状态，以及耗时、截断、termination reason 和副作用摘要；task 回放不会把终态降级为运行中。
+- 当前执行器没有统一 `AbortSignal` 或 timeout，因此不虚构 `timeout` / `cancelled` 状态；前端停止按钮只停止当前订阅/生成显示，不声称工具已取消。
+
 仍未完成：
-- 工具结果虽可用，但没有统一 envelope、termination reason、duration 和 traceId。
-- 前端只收到简化的 `tool_call` / `tool_result` SSE，无法稳定展示耗时、截断、超时、拒绝原因和副作用摘要。
 - 尚无后台任务 `start/check/stop`；当前 `workspace_exec` 仅提供不启动进程的内建 `pwd`。
 - 当前工具结果进入模型上下文时统一按 6000 字符截断，尚未按结果类型压缩。
 
@@ -117,11 +122,11 @@ Provider tool call
   → validate schema
   → resolve project/user context
   → classify risk and side effect
-  → policy decision: allow | confirm | deny
+  → policy decision: allow | deny
   → execute existing tool implementation
   → normalize result and termination reason
   → redact + trace
-  → SSE presentation + compressed model context
+  → compatible SSE presentation + bounded model context
 ```
 
 职责边界：
@@ -130,43 +135,37 @@ Provider tool call
 - `agent-tools/registry.js`：definition、handler 与内部 contract 的单一运行时事实源；模块加载时执行一致性校验，并向 Provider 显式投影 schema。
 - `agent-tools/index.js`：统一调度入口；P7-C 起只委托 interceptor，不再拥有局部安全条件。
 - `agent-tool-policy.js`：纯策略判断，可注入、可单测，不依赖 Electron 或 Provider。
-- `agent-tool-interceptor.js`：注册表解析、参数校验、workspace preflight、策略决策和现有 handler 调用；P7-D 再增加计时、结果归一化与 Trace。
+- `agent-tool-interceptor.js`：注册表解析、参数校验、workspace preflight、策略决策和现有 handler 调用。
+- `agent-tools/tool-execution.js`：P7-D 中央后置层，负责计时、版本化结果归一化、真实 termination reason、递归脱敏和 Trace 写入。
+- `agent-tools/tool-events.js`：task/legacy loop 共用的向后兼容 SSE 投影。
 - `workspace-tools.js`：项目内文件和短命令的实际执行、共享 preflight 与 handler 侧局部安全校验。
 - `ai-agent.js`：Agent 循环、Provider 协议和 SSE；不拥有文件安全规则。
 - P-02 原有 `run_tool`：继续独占科学执行真相。
 
-建议的版本化结果 envelope：
+P7-D 已落地的版本化结果 envelope：
 
 ```json
 {
-  "contractVersion": 1,
+  "contractVersion": "1.0.0",
   "callId": "call_xxx",
   "traceId": "trace_xxx",
   "tool": "workspace_read",
   "status": "success",
-  "terminationReason": "completed",
+  "terminationReason": "success",
   "durationMs": 12,
   "truncated": false,
-  "sideEffects": [],
+  "sideEffects": {
+    "type": "none",
+    "riskTier": "R0",
+    "resources": []
+  },
   "data": {}
 }
 ```
 
-`status` 固定为 `success | error | denied | confirmation_required | timeout | cancelled | partial`。
+当前 `status` 只报告执行器真实可观察的 `success | error | denied`。
 
-`terminationReason` 至少覆盖：
-
-- `completed`
-- `invalid_arguments`
-- `project_required`
-- `permission_denied`
-- `read_only`
-- `policy_denied`
-- `confirmation_required`
-- `timeout`
-- `cancelled`
-- `output_limit`
-- `tool_error`
+当前 `terminationReason` 来自真实结果分类：成功为 `success`，普通 handler 失败为 `handler_error`，策略/校验拒绝沿用后端返回的稳定 `reason` 或 `error`（例如 `invalid_arguments`、`project_required`、`read_only`、`policy_denied`）。在统一 `AbortSignal`、timeout 执行器或完整 confirmation 消费协议落地前，不声明 `timeout`、`cancelled`、`partial` 或通用 `confirmation_required` 状态。
 
 ## 5. 工作包与执行顺序
 
@@ -267,8 +266,8 @@ refactor(harness): unify agent tool contracts
 边界：
 
 - prompt 只解释正确用法，不作为安全边界。
-- P7-C 不创建不可消费的通用确认状态；通用 confirmation token、SSE 与前端确认卡消费链若需要，必须在 P7-D 作为完整协议实现。
-- 执行后脱敏沿用既有 handler；统一 result envelope、termination reason、duration、Trace 与 SSE 呈现属于 P7-D。
+- P7-C 不创建不可消费的通用确认状态；P7-D 也未新增通用 confirmation 协议。若未来需要，必须另行实现 token、SSE、前端确认卡和执行回执的完整消费链。
+- 执行后递归脱敏、统一 result envelope、termination reason、duration、Trace 与 SSE 呈现已由 P7-D 的 `tool-execution.js` / `tool-events.js` 完成。
 - 后台进程 `start/check/stop` 仍属于 P7-F decision gate；6000 字符上下文压缩替换仍属于 P7-G。
 
 验收：
@@ -288,36 +287,37 @@ feat(harness): enforce unified agent tool policy
 
 ### P7-D：结构化结果、Trace 与前端呈现
 
-状态：`planned`
+状态：`completed`（2026-07-20；代码与自动化验证完成，UI-034 待实机验收）
 
-目标：让用户和后续开发工具准确知道 Agent 调了什么、为什么被拒绝、运行多久、改了哪些文件。
+目标：让用户和后续开发工具准确知道 Agent 调了什么、为什么被拒绝、运行多久、产生了何种副作用。
 
-实施：
+已实施：
 
-1. 每个用户请求生成 `traceId`，每个工具调用保留 Provider `callId`。
-2. 记录工具名、开始/结束时间、状态、termination reason、参数摘要、结果摘要和副作用。
-3. 参数与结果统一走现有脱敏规则；文件正文、API Key、环境变量和完整命令输出默认不持久化。
-4. Trace 优先使用受限内存环形缓冲或现有 SQLite 边界；先写保留周期和清理策略再持久化。
-5. SSE 增加向后兼容字段，前端紧凑展示：
-   - 运行中 / 完成 / 拒绝 / 超时
-   - 耗时
-   - 截断提示
-   - 修改文件数量与相对路径
-   - 可复制的错误码
-6. 不展示模型隐藏推理，不把 Trace 做成新的聊天消息系统。
+1. 每个用户请求生成 `traceId`；每个工具调用保留 Provider `callId`，缺失时生成稳定 fallback id。
+2. `executeToolCall()` 在中央执行层生成 `contractVersion/traceId/callId/tool/status/terminationReason/durationMs/truncated/sideEffects/data` envelope；旧 `dispatchTool()` 仍返回原始 handler 数据。
+3. task 与 legacy Agent loop 共用 `buildToolCallEvent()` / `buildToolResultEvent()`，保留旧 `name/summary` 及审批、Act 扁平字段，同时增加可选 `toolResult`。
+4. 参数、事件、入模结果和 Trace 摘要统一递归脱敏；Trace store 最多保留 200 条、TTL 15 分钟，只存各 1200 字符的参数/结果摘要，不持久化原始正文或凭据。
+5. SimpleChat 按 `callId` 幂等投影工具活动，兼容旧事件同名调用关联，并防止 task 回放把终态降级为 `running`；展示运行、等待确认、成功、失败、拒绝、耗时、截断、termination reason 和实际副作用摘要。
+6. 副作用摘要按本次 operation 的真实可观察结果生成：`run_tool` 的只读/规划/绑定/状态操作与 `plan` 的读取操作不继承工具静态最大能力；待审批调用只报告实际创建的 pending `tool_job`。
+7. 保留现有 6000 字符入模截断。当前没有公共 `AbortSignal` 或通用 timeout 执行器，因此只报告真实可观察的 `success | error | denied`，不虚构 `timeout` 或 `cancelled`；停止前端订阅不改写工具终态。
 
-验收：
+验收证据：
 
-- 任一失败能从 `traceId + callId + terminationReason` 定位。
-- 用户可看到工具状态，但不会看到凭据、系统绝对路径或冗长原始输出。
-- 取消会话后不再继续向已关闭 SSE 写事件。
-- 前端旧事件消费者仍能工作。
+- `test/agent-tool-result.test.mjs` 6/6：legacy dispatcher 兼容、envelope、SSE 投影、只读 operation 无副作用、递归脱敏（含常见 provider token）、共享引用、截断、Trace 容量与 TTL。
+- 前端 `copilotClient.test.ts` + `toolActivity.test.ts` 7/7：task/legacy SSE parser、`callId` 幂等、回放防降级、legacy 同名关联、等待确认及展示格式。
+- 后端 P7-D + 既有审批 + diagnostic redaction 组合定向回归 18/18，0 fail。
+- UI-034 已登记为 `in_progress`；未取得开发壳或打包态视觉证据前不得标记 `verified`。
 
-建议拆成两个提交：
+边界：
+
+- 未新增通用 confirmation 状态；`run_tool` 审批、workflow recovery token 和 `act` ACK 保持原协议。
+- 未实现 P7-F 后台进程生命周期，也未提前替换 P7-G 的按类型上下文压缩。
+- 科学计算仍只走 `run_tool → tool_job → artifact truth`。
+
+提交：
 
 ```text
-feat(harness): trace agent tool execution
-feat(chat): present structured tool outcomes
+feat(harness): trace structured tool outcomes
 ```
 
 ### P7-E：编辑能力补强
@@ -510,8 +510,8 @@ git rev-parse origin/main
 
 ## 9. 推荐立即开始的内容
 
-P7-A、P7-B 与 P7-C 已完成。下一工作包为 P7-D：
+P7-A、P7-B、P7-C 与 P7-D 已完成。下一工作包为 P7-E：
 
-> 在保持 Provider schema 兼容、既有审批协议和 `run_tool → tool_job → artifact truth` 不变量的前提下，引入版本化 ToolResult envelope、termination reason、duration、Trace 与向后兼容的前端呈现。
+> 在保持 Provider schema 兼容、既有审批协议和 `run_tool → tool_job → artifact truth` 不变量的前提下，补强受控编辑能力，优先评估 dry-run、原子替换、变更摘要和并发保护。
 
-P7-D 尚未实施；后台任务仍属于 P7-F 决策门，6000 字符上下文压缩替换仍属于 P7-G，均不得提前混入 P7-D。
+P7-D 已完成代码与自动化验证，UI-034 保持 `in_progress` 等待开发壳或打包态实机验收；后台任务仍属于 P7-F 决策门，按结果类型替换 6000 字符统一截断仍属于 P7-G，均不得提前混入 P7-E。

@@ -1,4 +1,5 @@
 # BioF3 Desktop Current Handoff
+# BioF3 Desktop Current Handoff
 
 最后更新：2026-07-20
 
@@ -39,7 +40,10 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 - dispatcher 已从注册表解析完整 entry，4 个退役学习工具保持不可见、不可由 Agent dispatcher 调用。
 - P7-C 统一 Policy/Interceptor 已完成：schema 校验、workspace preflight、纯 `allow | deny` 执行决策和原 handler 调用形成统一后端链；handler 侧权限、路径、symlink、命令、大小和并发检查继续保留。
 - 覆写已有文件与精确替换必须携带匹配的 `expectedSha256`；新文件使用原子 create-only 发布，同进程修改按目标串行化并在发布前复核 SHA。`workspace_exec` 仅自动执行不启动 shell/PATH 的内建 `pwd`，其他命令返回结构化拒绝。`run_tool(op=run)` 继续复用真实 pending `tool_job + ackToken`，workflow recovery token 与 `act` 执行后 ACK 未改义。
-- 审阅修复后的 policy/interceptor + workspace 回归为 22/22，关键策略/审批/注册表/workspace/recovery 回归为 45/45，均为 TAP 0 fail；下一工作包为 P7-D 结构化结果、Trace 与前端呈现。P7-D 才负责通用 confirmation 状态与 UI 消费；P7-F 后台任务仍是 decision gate，P7-G 上下文压缩尚未实施。
+- P7-D 结构化结果、Trace 与前端呈现已完成：task/legacy loop 共用版本化 ToolResult envelope 与兼容 SSE 投影，`traceId/callId`、真实状态、termination reason、耗时、截断和副作用摘要贯穿；旧 `dispatchTool()` 与审批/Act 扁平字段保持兼容。
+- Trace 仅保留容量 200、TTL 15 分钟的进程内脱敏摘要，不持久化原始参数、文件正文、命令输出或凭据。SimpleChat 按 `callId` 幂等显示运行/等待确认/成功/失败/拒绝、耗时、截断、拒绝原因和实际副作用；task 回放不重复，停止订阅不伪装工具已取消。只读 operation 不继承静态最大能力，待审批仅报告实际创建的 pending `tool_job`。
+- P7-D 自动化证据：`agent-tool-result.test.mjs` 6/6；前端 SSE parser 与活动状态 7/7；后端 P7-D + 既有审批 + diagnostic redaction 组合定向回归 18/18，0 fail。UI-034 仅完成代码和自动化验证，尚无开发壳/打包态实机证据，保持 `in_progress`。
+- 当前没有公共 `AbortSignal`/通用 timeout 执行器，因此 P7-D 未虚构 `timeout/cancelled`；下一工作包为 P7-E 编辑能力补强。P7-F 后台任务仍是 decision gate，P7-G 上下文压缩尚未实施。
 - 全面计划、出口判据和后续工具接手协议见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 - `DeepSeek_harness/` 与 `api-failover-proxy/` 仅可作为未跟踪参考工程，均不得纳入 Desktop 提交。
 

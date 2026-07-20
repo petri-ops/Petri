@@ -327,7 +327,7 @@
 
 ### Phase 7：通用基础工具与运行控制面
 
-状态：`in_progress`（2026-07-20；P7-A 真实双 Provider 基线、P7-B 工具契约/注册表与 P7-C 统一 Policy/Interceptor 已完成，下一工作包为 P7-D）。
+状态：`in_progress`（2026-07-20；P7-A 至 P7-D 已完成，下一工作包为 P7-E 编辑能力补强）。
 
 完整实施顺序、跨工具接手协议与出口判据见
 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。本节只保留阶段摘要；后续执行状态以专项计划为准。
@@ -361,7 +361,8 @@ Phase 7 后续：
 1. ✅ P7-A：DeepSeek `deepseek-chat` 与自定义 OpenAI-compatible `gpt-5.6-sol` 已完成同一 8 场景真实 Provider 矩阵，均 8/8 PASS。
 2. ✅ P7-B：18 个模型可见工具的 definition、handler 与内部 contract 已收敛为单一注册表；启动一致性校验、Provider-safe schema 投影和协议兼容测试已完成。
 3. ✅ P7-C：中央 dispatcher 已统一经过 schema 校验、workspace preflight 和纯 `allow | deny` 策略；已有文件覆写与精确替换强制匹配 `expectedSha256`，新文件原子 create-only，命令仅自动放行保守白名单；原 handler 保留 TOCTOU 防线，既有审批协议不改义。
-4. 下一工作包 P7-D 补结构化 result envelope、termination reason、Trace 与前端呈现；后台长任务 start/check/stop 仅在 P7-F 决策门满足时进入，P7-G 上下文压缩尚未实施。SSH、远程执行和批量替换不进入当前基线。
+4. ✅ P7-D：中央执行层已生成版本化 ToolResult envelope；task/legacy loop 共用兼容 SSE 投影与 `traceId/callId`，Trace 仅保留容量/TTL 受限的脱敏摘要；SimpleChat 幂等显示真实运行/等待确认/成功/失败/拒绝、耗时、截断、termination reason 和实际副作用。只读 operation 不继承静态最大能力，常见 provider token 在普通文本中也会脱敏；后端 P7-D 6/6、审批/脱敏组合定向 18/18、前端 parser/activity 7/7，UI-034 待实机验收。
+5. 下一工作包 P7-E 补强受控编辑能力；后台长任务 start/check/stop 仅在 P7-F 决策门满足时进入，P7-G 上下文压缩尚未实施。SSH、远程执行和批量替换不进入当前基线。
 
 ## 3. 推荐推进顺序
 

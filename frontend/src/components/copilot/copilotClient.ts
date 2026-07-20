@@ -88,11 +88,33 @@ export interface ChatMessage {
 export interface ToolCallEvent {
   name: string;
   args: Record<string, unknown>;
+  traceId?: string;
+  callId?: string;
+}
+
+export interface ToolSideEffects {
+  type: 'none' | 'state-write' | 'workspace-write' | 'execution' | 'external-request';
+  riskTier: 'R0' | 'R1' | 'R2' | 'R3';
+  resources: string[];
+}
+
+export interface StructuredToolResult {
+  contractVersion: string;
+  traceId: string;
+  callId: string;
+  tool: string;
+  status: 'success' | 'error' | 'denied';
+  terminationReason: string;
+  durationMs: number;
+  truncated: boolean;
+  sideEffects: ToolSideEffects;
+  data?: unknown;
 }
 
 export interface ToolResultEvent {
   name: string;
   summary: string;
+  toolResult?: StructuredToolResult;
   actType?: string;
   message?: string;
   undoToken?: string;
@@ -132,6 +154,54 @@ export interface ToolResultEvent {
   /** ACT_GENERIC_v1 — generic handler dispatch */
   handlerId?: string;
   payload?: Record<string, unknown>;
+}
+
+export function parseToolCallEvent(obj: Record<string, unknown>): ToolCallEvent {
+  return {
+    name: String(obj.name || ''),
+    args: obj.args && typeof obj.args === 'object' && !Array.isArray(obj.args)
+      ? obj.args as Record<string, unknown>
+      : {},
+    traceId: typeof obj.traceId === 'string' ? obj.traceId : undefined,
+    callId: typeof obj.callId === 'string' ? obj.callId : undefined,
+  };
+}
+
+export function parseToolResultEvent(obj: Record<string, unknown>): ToolResultEvent {
+  return {
+    name: String(obj.name || ''),
+    summary: typeof obj.summary === 'string' ? obj.summary : '',
+    toolResult: obj.toolResult as StructuredToolResult | undefined,
+    actType: obj.actType as string | undefined,
+    message: obj.message as string | undefined,
+    undoToken: obj.undoToken as string | undefined,
+    undoableUntil: obj.undoableUntil as number | undefined,
+    actError: obj.actError as string | undefined,
+    analysisId: obj.analysisId as string | undefined,
+    taskId: obj.taskId as string | undefined,
+    scTab: obj.scTab as ToolResultEvent['scTab'],
+    scCluster: obj.scCluster as string | undefined,
+    scGene: obj.scGene as string | undefined,
+    scColumnFilters: obj.scColumnFilters as Record<string, string> | undefined,
+    scSubsetName: obj.scSubsetName as string | null | undefined,
+    scLabelKey: obj.scLabelKey as string | undefined,
+    scLabelValue: obj.scLabelValue as string | undefined,
+    scDatasetIds: obj.scDatasetIds as string[] | undefined,
+    scMergeName: obj.scMergeName as string | null | undefined,
+    scOpenReplotForAnalysis: obj.scOpenReplotForAnalysis as string | undefined,
+    scUploadHint: obj.scUploadHint as boolean | undefined,
+    toolId: obj.toolId as string | undefined,
+    autofillFromJobId: obj.autofillFromJobId as string | undefined,
+    autofillSourceTool: obj.autofillSourceTool as string | undefined,
+    planId: obj.planId as string | undefined,
+    allDone: obj.allDone as boolean | undefined,
+    ackToken: obj.ackToken as string | undefined,
+    needApproval: obj.needApproval as boolean | undefined,
+    toolJobId: obj.toolJobId as string | undefined,
+    params: obj.params as Record<string, unknown> | undefined,
+    handlerId: obj.handlerId as string | undefined,
+    payload: obj.payload as Record<string, unknown> | undefined,
+  };
 }
 
 export interface StreamChatOptions {
@@ -343,43 +413,11 @@ function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
     return;
   }
   if (obj.event === 'tool_call') {
-    onToolCall?.({ name: obj.name, args: obj.args || {} });
+    onToolCall?.(parseToolCallEvent(obj));
     return;
   }
   if (obj.event === 'tool_result') {
-    onToolResult?.({
-      name: obj.name,
-      summary: obj.summary || '',
-      actType: obj.actType,
-      message: obj.message,
-      undoToken: obj.undoToken,
-      undoableUntil: obj.undoableUntil,
-      actError: obj.actError,
-      analysisId: obj.analysisId,
-      taskId: obj.taskId,
-      scTab: obj.scTab,
-      scCluster: obj.scCluster,
-      scGene: obj.scGene,
-      scColumnFilters: obj.scColumnFilters,
-      scSubsetName: obj.scSubsetName,
-      scLabelKey: obj.scLabelKey,
-      scLabelValue: obj.scLabelValue,
-      scDatasetIds: obj.scDatasetIds,
-      scMergeName: obj.scMergeName,
-      scOpenReplotForAnalysis: obj.scOpenReplotForAnalysis,
-      scUploadHint: obj.scUploadHint,
-      toolId: obj.toolId,
-      autofillFromJobId: obj.autofillFromJobId,
-      autofillSourceTool: obj.autofillSourceTool,
-      planId: obj.planId,
-      allDone: obj.allDone,
-      ackToken: obj.ackToken,
-      needApproval: obj.needApproval,
-      toolJobId: obj.toolJobId,
-      params: obj.params,
-      handlerId: obj.handlerId,
-      payload: obj.payload,
-    });
+    onToolResult?.(parseToolResultEvent(obj));
     return;
   }
   if (obj.event === 'done') {

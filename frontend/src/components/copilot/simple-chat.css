@@ -429,6 +429,91 @@
   border-bottom: none;
 }
 
+/* Tool activity */
+.sc-tool-activity-list {
+  display: grid;
+  gap: 6px;
+  align-self: stretch;
+  margin-left: 38px;
+}
+
+.sc-tool-activity {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 9px;
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text-secondary);
+}
+
+.sc-tool-activity-running {
+  border-color: var(--biof3-accent-border);
+  background: var(--biof3-accent-surface);
+}
+
+.sc-tool-activity-error,
+.sc-tool-activity-denied {
+  border-color: var(--biof3-status-warning-border);
+  background: var(--biof3-status-warning-bg);
+}
+
+.sc-tool-activity-icon {
+  display: flex;
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: var(--biof3-text-tertiary);
+}
+
+.sc-tool-activity-running .sc-tool-activity-icon {
+  color: var(--biof3-accent);
+}
+
+.sc-tool-activity-error .sc-tool-activity-icon,
+.sc-tool-activity-denied .sc-tool-activity-icon {
+  color: var(--biof3-status-warning-fg);
+}
+
+.sc-tool-activity-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.sc-tool-activity-head,
+.sc-tool-activity-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px 8px;
+}
+
+.sc-tool-activity-name {
+  color: var(--biof3-text);
+  font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.sc-tool-activity-status {
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.sc-tool-activity-meta {
+  margin-top: 3px;
+  color: var(--biof3-text-tertiary);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.sc-tool-activity-reason {
+  color: var(--biof3-status-warning-fg);
+  overflow-wrap: anywhere;
+}
+
 /* Approval card */
 .sc-approval-card {
   align-self: stretch;

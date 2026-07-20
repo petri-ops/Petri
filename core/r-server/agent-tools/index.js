@@ -10,12 +10,31 @@
 const { getToolDefs } = require('./tool-defs');
 const { _ackActToken, _pendingActAcks } = require('./act-tools');
 const { interceptAgentToolCall } = require('./agent-tool-interceptor');
+const {
+  createCallId,
+  createTraceId,
+  executeToolCall,
+  replaceToolResultData,
+  serializeToolResultForModel,
+} = require('./tool-execution');
+const { buildToolCallEvent, buildToolResultEvent } = require('./tool-events');
 const { inferExecutionPolicy } = require('../helpers/agent-execution-policy');
 
 async function dispatchTool(name, argsObj, ctx = {}) {
   return interceptAgentToolCall(name, argsObj, ctx);
 }
 
-module.exports = { getToolDefs, dispatchTool, inferExecutionPolicy };
+module.exports = {
+  getToolDefs,
+  dispatchTool,
+  inferExecutionPolicy,
+  createCallId,
+  createTraceId,
+  executeToolCall,
+  replaceToolResultData,
+  serializeToolResultForModel,
+  buildToolCallEvent,
+  buildToolResultEvent,
+};
 module.exports.ackActToken = _ackActToken;
 module.exports.pendingActAcks = _pendingActAcks;

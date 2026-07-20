@@ -9,6 +9,8 @@ import {
   ackRunTool,
   streamChat,
   type ChatMessage,
+  type ToolCallEvent,
+  type ToolResultEvent,
 } from './copilotClient';
 import {
   getConversationMessages,
@@ -33,6 +35,13 @@ import {
 } from '@/hooks/useAiSettings';
 import type { CopilotContext } from '@/lib/copilotContext';
 import { CopilotMarkdown } from './copilotMarkdown';
+import {
+  formatToolDuration,
+  formatToolSideEffects,
+  mergeToolCallActivity,
+  mergeToolResultActivity,
+  type ToolActivityItem,
+} from './toolActivity';
 import './simple-chat.css';
 import { Icon } from '@/components/icons/Icon';
 import { tools as staticTools } from '@/pages/_data';
@@ -81,6 +90,7 @@ export function SimpleChat({
   inputHeight: _inputHeight = 120,
 }: SimpleChatProps): React.ReactElement {
   const [messages, setMessages] = useState<SimpleMessage[]>([]);
+  const [toolActivities, setToolActivities] = useState<ToolActivityItem[]>([]);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -263,6 +273,7 @@ export function SimpleChat({
 
   // Load messages when conversationId changes
   useEffect(() => {
+    setToolActivities([]);
     if (!conversationId) {
       setMessages([]);
       return;
@@ -288,7 +299,7 @@ export function SimpleChat({
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, toolActivities]);
 
   const inputLength = input.trim().length;
   const composerWidth = Math.min(980, Math.max(560, 560 + Math.sqrt(inputLength) * 42));
@@ -329,6 +340,7 @@ export function SimpleChat({
       ts: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, userMsg, assistantMsg]);
+    setToolActivities([]);
     setStreaming(true);
 
     const ctrl = new AbortController();
@@ -372,7 +384,11 @@ export function SimpleChat({
           refreshConversations();
         }
       },
-      onToolResult: (event) => {
+      onToolCall: (event: ToolCallEvent) => {
+        setToolActivities((current) => mergeToolCallActivity(current, event));
+      },
+      onToolResult: (event: ToolResultEvent) => {
+        setToolActivities((current) => mergeToolResultActivity(current, event));
         if (event.name === 'run_tool' && event.needApproval && event.ackToken) {
           setPendingApproval({
             ackToken: event.ackToken,
@@ -381,7 +397,6 @@ export function SimpleChat({
             message: event.message,
             params: event.params,
           });
-          return;
         }
       },
       onDone: () => {
@@ -486,6 +501,7 @@ export function SimpleChat({
     if (streaming) stop();
     onConversationChange(null);
     setMessages([]);
+    setToolActivities([]);
   }, [streaming, stop, onConversationChange]);
 
   // Expose via ref-like pattern through props is not needed here;
@@ -549,6 +565,9 @@ export function SimpleChat({
               </div>
             );
           })}
+          {toolActivities.length > 0 && (
+            <ToolActivityList activities={toolActivities} />
+          )}
           {pendingApproval && (
             <ApprovalCard
               approval={pendingApproval}
@@ -680,6 +699,55 @@ export function SimpleChat({
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function ToolActivityList({ activities }: { activities: ToolActivityItem[] }): React.ReactElement {
+  const statusLabels: Record<ToolActivityItem['status'], string> = {
+    running: '运行中',
+    awaiting_confirmation: '等待确认',
+    success: '已完成',
+    error: '失败',
+    denied: '已拒绝',
+  };
+
+  return (
+    <div className="sc-tool-activity-list" aria-label="工具活动">
+      {activities.map((activity) => {
+        const duration = formatToolDuration(activity.durationMs);
+        const sideEffects = formatToolSideEffects(activity.sideEffects);
+        const showReason = activity.status === 'error' || activity.status === 'denied';
+        return (
+          <div
+            key={activity.key}
+            className={`sc-tool-activity sc-tool-activity-${activity.status}`}
+          >
+            <span className="sc-tool-activity-icon" aria-hidden="true">
+              <Icon name={activity.status === 'success' ? 'check' : 'wrench'} size={14} />
+            </span>
+            <div className="sc-tool-activity-body">
+              <div className="sc-tool-activity-head">
+                <span className="sc-tool-activity-name">{activity.name}</span>
+                <span className="sc-tool-activity-status">{statusLabels[activity.status]}</span>
+              </div>
+              <div className="sc-tool-activity-meta">
+                {duration && <span>{duration}</span>}
+                {activity.truncated && <span>结果已截断</span>}
+                {sideEffects && <span>副作用摘要：{sideEffects}</span>}
+                {showReason && activity.terminationReason && (
+                  <span className="sc-tool-activity-reason">
+                    原因：{activity.terminationReason}
+                  </span>
+                )}
+                {!activity.terminationReason && activity.summary && activity.status !== 'running' && (
+                  <span>{activity.summary}</span>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

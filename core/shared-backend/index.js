@@ -29,6 +29,7 @@ module.exports = {
   // 子模块直接导出（调用方可按需 require）
   logger: require('./logger'),
   errorLog: require('./error-log'),
+  redaction: require('./redaction'),
   pathSafe: require('./path-safe'),
   executionContext: require('./execution-context'),
   agentWorkflow: require('./agent-workflow'),

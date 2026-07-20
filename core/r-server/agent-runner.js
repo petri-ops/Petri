@@ -46,7 +46,16 @@ const {
   MAX_CONTENT_LEN,
 } = require('./helpers/memory-vectors');
 const { aiTaskConcurrencyRelease } = require('./helpers/runtime');
-const { getToolDefs, dispatchTool } = require('./agent-tools');
+const {
+  getToolDefs,
+  createCallId,
+  createTraceId,
+  executeToolCall,
+  replaceToolResultData,
+  serializeToolResultForModel,
+  buildToolCallEvent,
+  buildToolResultEvent,
+} = require('./agent-tools');
 const { inferExecutionPolicy } = require('./helpers/agent-execution-policy');
 const {
   _gatherAnalysisContextForMethods,
@@ -379,6 +388,7 @@ async function runAgentLoop({
   const tools = getToolDefs();
 
   let totalToolCalls = 0;
+  const traceId = createTraceId();
   const aborted = () => (typeof shouldAbort === 'function' ? shouldAbort() : false);
   let assistantAcc = '';
   let pendingApprovalEmitted = false;
@@ -460,126 +470,48 @@ async function runAgentLoop({
         try {
           args = JSON.parse(fn.arguments || '{}');
         } catch {}
-        _emit({ event: 'tool_call', name: fn.name, args });
+        const callId = tc.id || createCallId();
+        _emit(buildToolCallEvent({ name: fn.name, args, traceId, callId }));
 
-        let result;
-        try {
-          result = await dispatchTool(fn.name, args, toolCtx);
-        } catch (toolErr) {
-          result = {
-            error: 'tool_failed',
-            message: (toolErr && toolErr.message) || String(toolErr),
-          };
-        }
-        result = localizeToolResult(result);
-        // ACT_ACK_v1_SERVER: if act has a pending ack, send the event first then await
+        let envelope = await executeToolCall(fn.name, args, toolCtx, { traceId, callId });
+        let result = localizeToolResult(envelope.data);
+        envelope = replaceToolResultData(envelope, result);
+
+        // ACT_ACK_v1_SERVER: send the event first, then wait for the frontend ack.
         let ackInfo = null;
         if (result && result.ackToken && result._ackPromise) {
           ackInfo = result._ackPromise;
           delete result._ackPromise;
         }
-        const summary =
-          typeof result === 'object' && result
-            ? Array.isArray(result)
-              ? `返回 ${result.length} 条`
-              : result.error
-                ? '错误: ' + result.error
-                : 'ok'
-            : String(result);
-        // ACT_SSE_v1: enrich act results with undo + message details
-        const evt = { event: 'tool_result', name: fn.name, summary };
-        if (fn.name === 'act' && result && typeof result === 'object') {
-          if (result.undoToken) evt.undoToken = result.undoToken;
-          if (result.undoableUntil) evt.undoableUntil = result.undoableUntil;
-          if (result.message) evt.message = result.message;
-          if (result.error) evt.actError = result.error;
-          if (args && args.type) evt.actType = args.type;
-          if (result.analysisId) evt.analysisId = result.analysisId;
-          if (result.taskId) evt.taskId = result.taskId;
-          if (result.ackToken) evt.ackToken = result.ackToken;
-          if (result.type === 'update_figcode_editor' && result.code) {
-            evt.figcodeCode = result.code;
-            evt.figcodeAutoRun = result.autoRun !== false;
-          }
-          if (result.type === 'switch_result_tab') evt.scTab = result.tab;
-          if (result.type === 'focus_cluster') evt.scCluster = result.cluster;
-          if (result.type === 'highlight_gene') evt.scGene = result.gene;
-          if (
-            result.type === 'select_cells' ||
-            result.type === 'filter_table' ||
-            result.type === 'label_cells'
-          ) {
-            if (result.columnFilters) evt.scColumnFilters = result.columnFilters;
-          }
-          if (result.type === 'select_cells') evt.scSubsetName = result.subsetName || null;
-          if (result.type === 'label_cells') {
-            evt.scLabelKey = result.labelKey;
-            evt.scLabelValue = result.labelValue;
-          }
-          if (result.type === 'merge_datasets') {
-            evt.scDatasetIds = result.datasetIds;
-            evt.scMergeName = result.mergeName || null;
-          }
-          if (result.type === 'open_replot') evt.scOpenReplotForAnalysis = result.analysisId;
-          if (result.type === 'upload_data_hint') evt.scUploadHint = true;
-          if (result.type === 'open_figcode_plot') evt.figcardId = result.figcardId;
-          if (result.type === 'open_tool' && result.toolId) evt.toolId = result.toolId;
-        }
-        // ACT_GENERIC_SSE_v1：act_generic 透传 actType/handlerId/payload 给前端
-        // （阶段2 Task2：open_result 等 generic handler 依赖 payload 触发结果面板）
-        if (fn.name === 'act_generic' && result && typeof result === 'object') {
-          if (result.actType) evt.actType = result.actType;
-          if (result.handlerId) evt.handlerId = result.handlerId;
-          if (result.payload) evt.payload = result.payload;
-          if (result.message) evt.message = result.message;
-          if (result.ackToken) evt.ackToken = result.ackToken;
-        }
-        // TOOL_JOB_APPROVAL_v1_SERVER（阶段2 Task3）：run_tool 重操作确认信号 + toolJobId 透传
         if (fn.name === 'run_tool' && result && typeof result === 'object') {
-          if (result.needApproval) {
-            pendingApprovalEmitted = true;
-            evt.needApproval = true;
-            if (result.ackToken) evt.ackToken = result.ackToken;
-            if (result.toolJobId) evt.toolJobId = result.toolJobId;
-            if (result.toolId) evt.toolId = result.toolId;
-            if (result.message) evt.message = result.message;
-          } else if (result.toolJobId) {
-            evt.toolJobId = result.toolJobId;
-            if (result.toolId) evt.toolId = result.toolId;
-            if (result.message || result.error) evt.message = String(result.message || result.error);
+          if (result.needApproval) pendingApprovalEmitted = true;
+          if (result.toolJobId && !result.needApproval) {
             _pushUniqueResultCard(assistantResultCards, _buildResultCardFromRunTool(result, context));
           }
         }
-        _emit(evt);
+        _emit(buildToolResultEvent(envelope, args));
 
-        // ACT_ACK_v1_SERVER: wait briefly for frontend ack
         if (ackInfo) {
           const ackResult = await ackInfo;
           if (ackResult && ackResult.timedOut) {
             result.unhandled = true;
             result.message =
               (result.message || '操作已记录') + '（⚠ 前端没有响应——可能当前页面没监听这个事件）';
-            _emit({
-              event: 'tool_result',
-              name: fn.name,
-              summary: 'unhandled',
-              actType: args && args.type,
-              message: result.message,
-            });
+            const ackEvent = buildToolResultEvent({ ...envelope, data: result }, args);
+            ackEvent.summary = 'unhandled';
+            _emit(ackEvent);
           } else if (ackResult && ackResult.info && ackResult.info.error) {
             result.unhandled = true;
             result.message =
               (result.message || '操作已记录') + '（前端报错：' + ackResult.info.error + '）';
           }
         }
-        // Truncate result to keep prompt manageable
-        let resultStr = JSON.stringify(result);
-        if (resultStr.length > 6000) resultStr = resultStr.slice(0, 6000) + '... (truncated)';
+        envelope = replaceToolResultData(envelope, result);
         fullMessages.push({
           role: 'tool',
           tool_call_id: tc.id,
           name: fn.name,
-          content: resultStr,
+          content: serializeToolResultForModel(envelope),
         });
       }
     }
