@@ -54,11 +54,18 @@ P7-A 已完成：
 - 2026-07-20 完成真实 DeepSeek `deepseek-chat` 与自定义 OpenAI-compatible `gpt-5.6-sol` 同一 8 场景矩阵，均为 8/8 PASS。
 - 脱敏证据保存于 `acceptance/harness-phase7/provider-baseline.json` 与 `provider-baseline.md`；只记录 fixture 参数摘要、hash/字节数、结果码、模型和 endpoint host，不含凭据、请求头、完整 Provider 响应或文件正文。
 - 安全场景由后端独立探针强制验证：只读策略拒绝 write/replace/exec/run，路径策略拒绝 `.env`、绝对路径和路径逃逸，命令策略拒绝 sudo、删除、git push 和远程脚本管道。
-- 验收中发现普通 `rm file` 原未命中过滤规则，已最小收紧为拒绝 `rm|rmdir|unlink`；未重构 dispatcher，未进入 P7-B。
+- 验收中发现普通 `rm file` 原未命中过滤规则，已最小收紧为拒绝 `rm|rmdir|unlink`；未重构 dispatcher，未提前进入 P7-B。
+
+P7-B 已完成：
+
+- `core/r-server/agent-tools/registry.js` 已成为 18 个模型可见工具 definition、handler 与内部 contract 的单一运行时注册表；模块加载时校验重名、定义/handler/contract 漂移和非法元数据。
+- contract 已声明 `contractVersion`、`category`、`sideEffect`、`riskTier`、`resources`、`estimatedDurationMs`、`cancellable`；当前 handler 尚无统一 `AbortSignal`，因此 `cancellable` 如实为 `false`。
+- `getToolDefs()` 每次返回全新的 OpenAI function schema 投影，内部 contract 不进入 Provider 请求；OpenAI-compatible 实际出站 JSON 与 Anthropic 显式转换均有兼容测试。
+- dispatcher 已从同一注册表解析 handler；原有只读策略仍保留原位，不提前实施 P7-C。4 个退役学习工具继续不向模型暴露，也不再属于 Agent dispatcher。
+- 定向证据：registry 9/9、desktop prompt 2/2、Provider protocol 7/7、Anthropic 5/5、workspace 9/9，均为 TAP 0 fail。
 
 仍未完成：
 - dispatcher 的安全判断仍是局部条件，尚未形成统一 policy/interceptor pipeline。
-- 工具定义缺少统一的类别、副作用、资源需求、可取消性和确认等级元数据。
 - 工具结果虽可用，但没有统一 envelope、termination reason、duration 和 traceId。
 - 前端只收到简化的 `tool_call` / `tool_result` SSE，无法稳定展示耗时、截断、超时、拒绝原因和副作用摘要。
 - 尚无后台任务 `start/check/stop`；当前 `workspace_exec` 明确只支持最长 30 秒的短命令。
@@ -111,8 +118,9 @@ Provider tool call
 
 职责边界：
 
-- `tool-defs.js`：模型可见 schema 和静态元数据。
-- `agent-tools/index.js`：注册与统一调度，不继续堆每类工具的策略细节。
+- `tool-defs.js`：保留模型可见 schema catalog 与 `TOOL_DEFS` / `WORKSPACE_TOOL_DEFS` / `getToolDefs()` 兼容 facade。
+- `agent-tools/registry.js`：definition、handler 与内部 contract 的单一运行时事实源；模块加载时执行一致性校验，并向 Provider 显式投影 schema。
+- `agent-tools/index.js`：统一调度入口；P7-B 仍保留既有只读策略，P7-C 再迁移策略细节。
 - 新增 `agent-tool-policy.js`：纯策略判断，可注入、可单测，不依赖 Electron。
 - 新增 `agent-tool-runtime.js`：拦截器执行、计时、结果归一化和 Trace。
 - `workspace-tools.js`：只负责项目内文件和短命令的实际执行与局部安全校验。
@@ -196,7 +204,7 @@ test(harness): validate workspace tools with live providers
 
 ### P7-B：工具契约与注册表
 
-状态：`planned`
+状态：`completed`（2026-07-20）
 
 目标：让全部 Agent 工具有机器可读的能力和风险声明。
 
@@ -496,8 +504,8 @@ git rev-parse origin/main
 
 ## 9. 推荐立即开始的内容
 
-P7-A 已完成并保存真实双 Provider 脱敏证据。下一工作包为 P7-B：
+P7-A 与 P7-B 已完成。下一工作包为 P7-C：
 
-> 在保持 Provider schema 兼容和 `run_tool → tool_job → artifact truth` 不变量的前提下，统一 Agent 工具契约与注册表。
+> 在保持 Provider schema 兼容、现有审批协议和 `run_tool → tool_job → artifact truth` 不变量的前提下，将分散策略收敛为后端统一 policy/interceptor pipeline。
 
-P7-B 已具备进入条件，但不属于本次 P7-A 提交范围；P7-C policy/interceptor 与后台任务仍不得提前实施。
+P7-C 仅具备进入条件，尚未实施；结构化结果/Trace 属于 P7-D，后台任务属于 P7-F 决策门，均不得提前混入 P7-C。

@@ -550,7 +550,9 @@ const TOOL_DEFS = [
 ];
 
 function getToolDefs() {
-  return TOOL_DEFS;
+  // Lazy require avoids a module-initialization cycle: registry consumes these
+  // schema constants, while callers receive only fresh Provider-safe projections.
+  return require('./registry').getProviderToolDefs();
 }
 
 module.exports = { TOOL_DEFS, WORKSPACE_TOOL_DEFS, getToolDefs };

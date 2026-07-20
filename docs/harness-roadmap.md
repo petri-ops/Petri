@@ -4,7 +4,7 @@
 
 > **⚠️ vendor 工作流已退役（2026-07-16）**：本文多处「vendor lock 已同步 / Core 检查点 `xxxxxxx`，Desktop `yyyyyyy`」是**旧双仓库（Core submodule + Desktop）工作流的历史完成记录**。核心已内联为仓库内 `core/`，不再有 submodule / `.vendor-lock` / vendor 同步（见 [`dependency-decoupling-checkpoint.md`](./dependency-decoupling-checkpoint.md)）。阅读时把这些 commit 视为历史，忽略"同步 vendor"类步骤——现在改 Core 就是改 `core/`，随 Desktop 一起提交。
 
-最后更新：2026-07-19
+最后更新：2026-07-20
 
 这份路线图回答三个问题：
 
@@ -327,7 +327,7 @@
 
 ### Phase 7：通用基础工具与运行控制面
 
-状态：`in_progress`（2026-07-19，代码与单元测试已完成，待真实 Agent 会话验收）。
+状态：`in_progress`（2026-07-20；P7-A 真实双 Provider 基线与 P7-B 工具契约/注册表已完成，下一工作包为 P7-C）。
 
 完整实施顺序、跨工具接手协议与出口判据见
 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。本节只保留阶段摘要；后续执行状态以专项计划为准。
@@ -358,9 +358,10 @@
 
 Phase 7 后续：
 
-1. 真实 DeepSeek/自定义 Provider 会话验证 7 个工具的选择和连续调用。
-2. 将工具前后置策略收敛为统一 policy/interceptor pipeline，补结构化 termination reason 和 trace。
-3. 再评估后台长任务（start/check/stop）是否需要；SSH、远程执行和批量替换不进入当前基线。
+1. ✅ P7-A：DeepSeek `deepseek-chat` 与自定义 OpenAI-compatible `gpt-5.6-sol` 已完成同一 8 场景真实 Provider 矩阵，均 8/8 PASS。
+2. ✅ P7-B：18 个模型可见工具的 definition、handler 与内部 contract 已收敛为单一注册表；启动一致性校验、Provider-safe schema 投影和协议兼容测试已完成。
+3. 下一工作包 P7-C：将工具前后置策略收敛为统一 policy/interceptor pipeline；当前仅具备进入条件，尚未实施。
+4. P7-D 再补结构化 termination reason 与 trace；后台长任务 start/check/stop 仅在 P7-F 决策门满足时进入。SSH、远程执行和批量替换不进入当前基线。
 
 ## 3. 推荐推进顺序
 

@@ -35,9 +35,11 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 - P7-A 真实 Provider 基线验收已完成：DeepSeek `deepseek-chat` 与自定义 OpenAI-compatible `gpt-5.6-sol` 使用同一 8 场景矩阵，均为 8/8 PASS。
 - 脱敏证据位于 `acceptance/harness-phase7/provider-baseline.{json,md}`；仅使用临时 fixture workspace，不含用户文件正文、凭据、请求头或完整 Provider 响应。
 - 后端安全探针确认只读模式阻断 write/replace/exec/run，敏感/绝对/逃逸路径被拒绝，sudo、删除、git push 与远程脚本管道被拒绝；普通 `rm` 缺口已最小修复。
-- P7-B 工具契约与注册表已具备进入条件，但尚未开始；P7-C policy/interceptor、Trace 和后台任务不得提前实施。
+- P7-B 工具契约与注册表已完成：18 个模型可见工具的 definition、handler 与内部 contract 已收敛到 `agent-tools/registry.js`，模块加载时校验重名、定义/handler 漂移和非法元数据；`getToolDefs()` 只输出不含内部字段的 Provider-safe schema。
+- dispatcher 已从注册表解析 handler，4 个退役学习工具保持不可见、不可由 Agent dispatcher 调用；原只读策略未迁移，未提前实施 P7-C。
+- P7-B 定向证据为 registry 9/9、desktop prompt 2/2、Provider protocol 7/7、Anthropic 5/5、workspace 9/9，均为 TAP 0 fail；下一工作包为 P7-C policy/interceptor，仅具备进入条件，Trace 和后台任务不得提前实施。
 - 全面计划、出口判据和后续工具接手协议见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
-- `DeepSeek_harness/` 仅为未跟踪参考工程，不得整体纳入提交。
+- `DeepSeek_harness/` 与 `api-failover-proxy/` 仅可作为未跟踪参考工程，均不得纳入 Desktop 提交。
 
 **Stage 2 出口已于 2026-07-17 验收完成**（详见 `ui-productization-audit.md` 第 9 节与 `acceptance/stage2/`）：
 
