@@ -366,6 +366,20 @@ export function SimpleChat({
       },
       signal: ctrl.signal,
       conversationId: activeConvRef.current || undefined,
+      onIter: (iteration) => {
+        // Text emitted before a tool call is intermediate narration, not the
+        // final answer. Keep only the final tool-free iteration visible.
+        if (iteration <= 1) return;
+        acc = '';
+        setMessages((prev) => {
+          const copy = prev.slice();
+          const last = copy[copy.length - 1];
+          if (last && last.role === 'assistant') {
+            copy[copy.length - 1] = { ...last, content: '', pending: true };
+          }
+          return copy;
+        });
+      },
       onDelta: (delta) => {
         acc += delta;
         setMessages((prev) => {
@@ -542,32 +556,35 @@ export function SimpleChat({
           )}
           {messages.map((m, i) => {
             const key = m.ts ? `${m.role}-${m.ts}-${i}` : `${m.role}-${i}`;
+            const isCurrentAssistant = m.role === 'assistant' && i === messages.length - 1;
             return (
-              <div key={key} className={`sc-msg sc-msg-${m.role}`}>
-                <div className="sc-msg-avatar">
-                  {m.role === 'user' ? (
-                    <Icon name="user" size={16} />
-                  ) : (
-                    <Icon name="cpu" size={16} />
-                  )}
+              <React.Fragment key={key}>
+                {isCurrentAssistant && toolActivities.length > 0 && (
+                  <ToolActivityList activities={toolActivities} />
+                )}
+                <div className={`sc-msg sc-msg-${m.role}`}>
+                  <div className="sc-msg-avatar">
+                    {m.role === 'user' ? (
+                      <Icon name="user" size={16} />
+                    ) : (
+                      <Icon name="cpu" size={16} />
+                    )}
+                  </div>
+                  <div className="sc-msg-body">
+                    {m.role === 'assistant' ? (
+                      <CopilotMarkdown
+                        text={m.content || (m.pending ? '…' : '')}
+                        onFileReferenceClick={handleFileReferenceClick}
+                        resolveContext={m.pending || streaming ? null : settledContext}
+                      />
+                    ) : (
+                      <div className="sc-msg-text">{m.content}</div>
+                    )}
+                  </div>
                 </div>
-                <div className="sc-msg-body">
-                  {m.role === 'assistant' ? (
-                    <CopilotMarkdown
-                      text={m.content || (m.pending ? '…' : '')}
-                      onFileReferenceClick={handleFileReferenceClick}
-                      resolveContext={m.pending || streaming ? null : settledContext}
-                    />
-                  ) : (
-                    <div className="sc-msg-text">{m.content}</div>
-                  )}
-                </div>
-              </div>
+              </React.Fragment>
             );
           })}
-          {toolActivities.length > 0 && (
-            <ToolActivityList activities={toolActivities} />
-          )}
           {pendingApproval && (
             <ApprovalCard
               approval={pendingApproval}
@@ -704,6 +721,7 @@ export function SimpleChat({
 }
 
 function ToolActivityList({ activities }: { activities: ToolActivityItem[] }): React.ReactElement {
+  const [expanded, setExpanded] = useState(false);
   const statusLabels: Record<ToolActivityItem['status'], string> = {
     running: '运行中',
     awaiting_confirmation: '等待确认',
@@ -712,9 +730,37 @@ function ToolActivityList({ activities }: { activities: ToolActivityItem[] }): R
     denied: '已拒绝',
   };
 
+  useEffect(() => {
+    if (activities.length === 0) setExpanded(false);
+  }, [activities.length]);
+
+  const running = activities.filter((activity) => activity.status === 'running').length;
+  const awaiting = activities.filter((activity) => activity.status === 'awaiting_confirmation').length;
+  const failed = activities.filter(
+    (activity) => activity.status === 'error' || activity.status === 'denied'
+  ).length;
+  const summary = running > 0
+    ? '正在处理'
+    : awaiting > 0
+      ? '等待确认'
+      : failed > 0
+        ? `${failed} 项未完成`
+        : '处理完成';
+
   return (
     <div className="sc-tool-activity-list" aria-label="工具活动">
-      {activities.map((activity) => {
+      <button
+        type="button"
+        className="sc-tool-activity-summary"
+        aria-expanded={expanded}
+        onClick={() => setExpanded((current) => !current)}
+      >
+        <Icon name={expanded ? 'chevron-down' : 'chevron-right'} size={14} />
+        <span className="sc-tool-activity-summary-label">本轮使用了 {activities.length} 次工具</span>
+        <span className="sc-tool-activity-summary-status">{summary}</span>
+        <span className="sc-tool-activity-summary-hint">{expanded ? '收起详情' : '展开追溯'}</span>
+      </button>
+      {expanded && activities.map((activity) => {
         const duration = formatToolDuration(activity.durationMs);
         const sideEffects = formatToolSideEffects(activity.sideEffects);
         const showReason = activity.status === 'error' || activity.status === 'denied';

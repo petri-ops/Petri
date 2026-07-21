@@ -343,7 +343,7 @@ Phase 7 完成记录：
 1. ✅ P7-A：DeepSeek `deepseek-chat` 与自定义 OpenAI-compatible `gpt-5.6-sol` 的同一 8 场景 live Provider 矩阵均 8/8 PASS，作为人工验收保留。
 2. ✅ P7-B：18 个模型可见工具的 definition、handler 与内部 contract 收敛为单一注册表，并保持 Provider-safe schema 投影。
 3. ✅ P7-C：中央 dispatcher 统一经过 schema 校验、workspace preflight 与纯 `allow | deny` policy；写入、替换、命令和真实 `run_tool` 审批边界保持后端强制。
-4. ✅ P7-D：ToolResult envelope、兼容 SSE、脱敏 Trace 与 SimpleChat 工具活动投影已完成；UI-034 仍为 `in_progress`，等待独立的开发壳或打包态视觉证据。
+4. ✅ P7-D：ToolResult envelope、兼容 SSE、脱敏 Trace 与 SimpleChat 工具活动投影已完成；UI-034 已完成实机视觉验收。UI-035（工具活动默认收缩与中间叙述收口）作为后续阅读密度优化单独跟踪。
 5. ✅ P7-E：write/replace 支持真实 dry-run、变更摘要、原子发布和 SHA 并发保护；未引入 `workspace_patch`。
 6. ⏸ P7-F：后台长任务 decision gate 因合格真实任务为 0/3 而 `deferred`，未新增 process start/check/stop。
 7. ✅ P7-G：按工具类型的有界模型投影和严格 5 次 Provider 请求/12 次工具调用边界已完成，零网络定向回归 18/18。
