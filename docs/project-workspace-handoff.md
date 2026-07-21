@@ -17,7 +17,7 @@
 
 ## 2. 当前产品阶段
 
-`v0.0.1-rc.6` 是当前 OSS 线上最新版；`v0.0.1-rc.7` 已完成候选代码、双架构构建与安装启动验收，等待发布动作。
+`v0.0.1-rc.7` 是当前 OSS 线上最新版，已完成候选代码、双架构构建、安装启动验收和公开更新链核验。
 
 当前固定顺序：
 
@@ -71,7 +71,7 @@ Stage 3 最新验收证据：
 
 Stage 4 rc.6 已完成：原生 ABI 边界、真实 OSS Runtime 首装、DESeq2 报告/ZIP、GO/KEGG bundle 真链、rc.4 数据副本迁移、诊断导出隐私及 arm64/x64 构建结构。arm64 是完整候选链；x64 因没有分析 Runtime 仅为壳层预览。详见 [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md)。
 
-当前没有待执行的发布动作。下一步先观察 rc.6 真实使用反馈，再单独决定签名/公证、x64 Runtime 或后续 Stage。当前无 Developer ID，本 RC 不得描述为 GA。
+当前没有待执行的发布动作。下一步观察 rc.7 真实使用反馈；UI-032 仍需真实 capability bundle 设置页证据，之后再单独决定签名/公证、x64 Runtime 或后续 Stage。当前无 Developer ID，本 RC 不得描述为 GA。
 
 ### 已拆分给独立 Agent 的专项
 
@@ -83,13 +83,13 @@ Stage 4 rc.6 已完成：原生 ABI 边界、真实 OSS Runtime 首装、DESeq2 
 
 主模块：`P-06 桌面集成与交付`。
 
-- 当前代码、Git 标签与 OSS 线上版本：`v0.0.1-rc.6`（发布提交 `907b695`）。
+- 当前代码、Git 标签与 OSS 线上版本：`v0.0.1-rc.7`（发布提交 `ab519fa`）。
 - 默认平台：macOS-only；构建 arm64/x64。
 - GitHub：只保存源码和不可变标签，不上传 DMG。
 - OSS：保存双架构 DMG、SHA-256 清单和 `latest-mac.yml`。
 - 更新方式：检查 OSS → 下载匹配架构 DMG → 大小/SHA-512 校验 → 打开 DMG → 成员手动拖入 Applications。
 - 当前没有 Apple Developer ID 签名和公证，不承诺静默覆盖安装。
-- `rc.4 → rc.6` 已完成更新选择、公开下载、大小/SHA-512 校验、DMG 只读挂载和包内版本/架构确认。
+- `rc.4 → rc.7` 已完成更新选择、公开下载、大小/SHA-512 校验、DMG 只读挂载和包内版本/架构确认；rc.7 的公开 `latest-mac.yml` 与 SHA-256 清单已反向核验。
 - 正式 `rc.4` 已恢复运行，R `:3001/api/health`、Python `:3004/api/health`、SPA `:3002` 验证通过。
 - 发布端凭据只存在本地 `.biof3-secrets`，权限 `600`，禁止输出或提交。
 - Clash Verge 使用规则模式：OpenAI/Codex/GitHub 代理，`aliyuncs.com`/`aliyun.com`/`alicdn.com` 直连。

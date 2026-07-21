@@ -19,8 +19,8 @@
 
 ## 2. 当前基线
 
-- `v0.0.1-rc.6` 是当前 OSS 安装基线；`v0.0.1-rc.7` 已完成发布前候选验收。
-- macOS arm64/x64 本机构建、OSS 发布、最新版提示和 `rc.4 → rc.6` 公开更新链路已经通过。
+- `v0.0.1-rc.7` 是当前 OSS 安装基线，已完成发布验收。
+- macOS arm64/x64 本机构建、OSS 发布、最新版提示和 `rc.4 → rc.7` 公开更新链路已经通过。
 - Harness Phase 1–6、Plugin SDK、Agent workflow runtime、恢复与 fixture 门禁已经建立；Stage 1–2 期间保持可回归，不继续扩建第二套基础设施。
 - 当前聊天主链主要依赖 DeepSeek；DashScope 已用于 embedding/vision；OpenAI/Ollama 在设置页仍属于未来入口，模型调用链仍存在 DeepSeek 硬编码。
 - 桌面三栏工作台、项目会话、结果/Artifact、浏览器、文件、终端、设置分类和回收站已完成 Stage 1 产品化验收。

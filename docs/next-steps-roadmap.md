@@ -4,9 +4,9 @@
 
 ## 当前结论
 
-`v0.0.1-rc.6` 仍是当前 OSS 线上版本，`v0.0.1-rc.7` 已完成代码、自动化、双架构构建和安装候选启动验收，等待本轮发布动作。Stage 1 UI 产品化、Stage 2 模型层、Stage 3 Harness 与标准流程、Stage 4 首个稳定产品版本及 Harness Phase 7 均已关闭。
+`v0.0.1-rc.7` 是当前 OSS 线上版本，已完成代码、自动化、双架构构建、安装候选启动验收和公开更新链核验。Stage 1 UI 产品化、Stage 2 模型层、Stage 3 Harness 与标准流程、Stage 4 首个稳定产品版本及 Harness Phase 7 均已关闭。
 
-当前没有默认进入实施的新工作包。下一步先观察 rc.6 与 Phase 7 的真实使用反馈，再独立决定签名/公证、x64 Runtime 或新的产品阶段；不得把候选方向写成已承诺计划，也不得将本 RC 描述为 GA。
+当前没有默认进入实施的新工作包。下一步观察 rc.7 的真实使用反馈；UI-032 仍是唯一已明确的短项，完成设置页 capability bundle 的真实证据后再决定签名/公证、x64 Runtime 或新的产品阶段。不得把候选方向写成已承诺计划，也不得将本 RC 描述为 GA。
 
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 
@@ -30,7 +30,7 @@ Phase 7 未建立第二套 analysis executor、job、artifact 或 workflow truth
 
 ## 已完成基线
 
-- 当前代码、标签与 OSS 线上版本：`v0.0.1-rc.6`（发布提交 `907b695`）。
+- 当前代码、标签与 OSS 线上版本：`v0.0.1-rc.7`（发布提交 `ab519fa`）。
 - macOS arm64/x64 DMG、SHA-256 和 `latest-mac.yml` 已发布到阿里云 OSS；GitHub 只保存源码与不可变标签。
 - Stage 1 UI 台账 30/30 verified；Stage 2 的 UI-031 已完成打包态验收并标记 `verified`。
 - Stage 3 的 GO/KEGG、GSEA、WGCNA、双 Provider 评测、插件指南与 capability bundle 真链已完成。
@@ -42,7 +42,7 @@ Phase 7 未建立第二套 analysis executor、job、artifact 或 workflow truth
 
 以下是需要真实反馈或单独授权后才能开启的候选方向，不是当前实施任务：
 
-1. rc.6 使用反馈与缺陷修复。
+1. rc.7 使用反馈与缺陷修复。
 2. Apple Developer ID 签名与公证。
 3. x64 分析 Runtime。
 4. UI-032 设置页真实 capability bundle 视图验收。
