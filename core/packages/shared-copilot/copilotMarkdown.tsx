@@ -70,6 +70,14 @@ export interface CopilotMarkdownProps {
   onFileReferenceClick?: (detail: FileReferenceClickDetail) => void;
   /** Resolver scope supplied by the host after a message has settled. */
   resolveContext?: ExtractContext | null;
+  /**
+   * Bumping nonce forces a fresh resolve pass for the current text — used by
+   * the "refresh file links" toolbar button so users can rerun the resolver
+   * against the latest workspace state without regenerating the message.
+   */
+  resolveNonce?: number;
+  /** Optional host renderer for syntax-highlighted fenced code. */
+  highlightCode?: (code: string, language?: string) => React.ReactNode;
 }
 
 // ---------------------------------------------------------------------------
@@ -597,7 +605,15 @@ function FileReferenceLink({
 // Code block
 // ---------------------------------------------------------------------------
 
-function CodeBlock({ lang, code }: { lang?: string; code: string }) {
+function CodeBlock({
+  lang,
+  code,
+  highlightCode,
+}: {
+  lang?: string;
+  code: string;
+  highlightCode?: (code: string, language?: string) => React.ReactNode;
+}) {
   const [copied, setCopied] = React.useState(false);
   const onCopy = () => {
     try {
@@ -608,16 +624,34 @@ function CodeBlock({ lang, code }: { lang?: string; code: string }) {
       /* ignore */
     }
   };
+  const accessibleLabel = copied ? '已复制' : '复制代码';
+  const normalizedLang = (lang || '').trim().toLowerCase();
+  const isPlainText = !normalizedLang || ['text', 'txt', 'plaintext', 'tree'].includes(normalizedLang);
+  const copyButton = (
+    <button
+      type="button"
+      className={`cp-copy-button${copied ? ' is-copied' : ''}`}
+      onClick={onCopy}
+      title={accessibleLabel}
+      aria-label={accessibleLabel}
+    >
+      <span className="cp-copy-button-icon" aria-hidden="true">
+        {copied ? '✓' : ''}
+      </span>
+    </button>
+  );
   return (
-    <div className="cp-code-block">
-      <div className="cp-code-head">
-        <span className="cp-code-lang">{lang || 'code'}</span>
-        <button className="cp-code-copy" onClick={onCopy}>
-          {copied ? '已复制' : '复制'}
-        </button>
-      </div>
+    <div className={`cp-code-block${isPlainText ? ' cp-code-block-plain' : ''}`}>
+      {isPlainText ? (
+        <div className="cp-code-plain-action">{copyButton}</div>
+      ) : (
+        <div className="cp-code-head">
+          <span className="cp-code-lang">{lang}</span>
+          {copyButton}
+        </div>
+      )}
       <pre className="cp-code-pre">
-        <code>{code}</code>
+        {highlightCode ? highlightCode(code, lang) : <code>{code}</code>}
       </pre>
     </div>
   );
@@ -634,9 +668,18 @@ function CopyButton({ text, label = '复制' }: { text: string; label?: string }
       /* clipboard access can be unavailable in non-secure previews */
     }
   };
+  const accessibleLabel = copied ? '已复制' : label;
   return (
-    <button type="button" className="cp-copy-button" onClick={() => void onCopy()}>
-      {copied ? '已复制' : label}
+    <button
+      type="button"
+      className={`cp-copy-button${copied ? ' is-copied' : ''}`}
+      onClick={() => void onCopy()}
+      title={accessibleLabel}
+      aria-label={accessibleLabel}
+    >
+      <span className="cp-copy-button-icon" aria-hidden="true">
+        {copied ? '✓' : ''}
+      </span>
     </button>
   );
 }
@@ -656,6 +699,8 @@ export function CopilotMarkdown({
   onLinkClick,
   onFileReferenceClick,
   resolveContext,
+  resolveNonce = 0,
+  highlightCode,
 }: CopilotMarkdownProps) {
   const safeText = typeof text === 'string' ? text : text == null ? '' : String(text);
   const blocks = React.useMemo(() => parse(safeText), [safeText]);
@@ -704,7 +749,7 @@ export function CopilotMarkdown({
     return () => {
       cancelled = true;
     };
-  }, [resolveContext, safeText]);
+  }, [resolveContext, safeText, resolveNonce]);
 
   const renderOptions: RenderInlineOptions = React.useMemo(
     () => ({ onLinkClick, onFileReferenceClick, resolvedByToken }),
@@ -726,43 +771,59 @@ export function CopilotMarkdown({
           );
         }
         if (b.type === 'code') {
-          return <CodeBlock key={idx} lang={b.lang} code={b.lines.join('\n')} />;
+          return (
+            <CodeBlock
+              key={idx}
+              lang={b.lang}
+              code={b.lines.join('\n')}
+              highlightCode={highlightCode}
+            />
+          );
         }
         if (b.type === 'table') {
           const cols = b.header ? b.header.length : 0;
+          const copyText = tableCopyText(b.header || [], b.rows || []);
           return (
-            <div key={idx} className="cp-table-wrap">
-              <div className="cp-table-head">
-                <span>表格</span>
-                <CopyButton text={tableCopyText(b.header || [], b.rows || [])} />
+            <figure key={idx} className="cp-table-figure">
+              <div className="cp-table-tools" aria-label="表格操作">
+                <CopyButton text={copyText} />
               </div>
-              <table className="cp-table">
-                <thead>
-                  <tr>
-                    {(b.header || []).map((cell, j) => (
-                      <th key={j} style={{ textAlign: (b.align && b.align[j]) || 'left' }}>
-                        {renderInlineTokens(tokenizeInline(cell), `${idx}-th-${j}`, renderOptions)}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {(b.rows || []).map((row, ri) => (
-                    <tr key={ri}>
-                      {Array.from({ length: cols }).map((_, ci) => (
-                        <td key={ci} style={{ textAlign: (b.align && b.align[ci]) || 'left' }}>
-                          {renderInlineTokens(
-                            tokenizeInline(row[ci] || ''),
-                            `${idx}-tr-${ri}-${ci}`,
-                            renderOptions
-                          )}
-                        </td>
+              <div className="cp-table-scroll">
+                <table className="cp-table">
+                  <thead>
+                    <tr>
+                      {(b.header || []).map((cell, j) => (
+                        <th
+                          key={j}
+                          scope="col"
+                          style={{ textAlign: (b.align && b.align[j]) || 'left' }}
+                        >
+                          {renderInlineTokens(tokenizeInline(cell), `${idx}-th-${j}`, renderOptions)}
+                        </th>
                       ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {(b.rows || []).map((row, ri) => (
+                      <tr key={ri}>
+                        {Array.from({ length: cols }).map((_, ci) => (
+                          <td
+                            key={ci}
+                            style={{ textAlign: (b.align && b.align[ci]) || 'left' }}
+                          >
+                            {renderInlineTokens(
+                              tokenizeInline(row[ci] || ''),
+                              `${idx}-tr-${ri}-${ci}`,
+                              renderOptions
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </figure>
           );
         }
         if (b.type === 'h') {

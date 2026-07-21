@@ -38,6 +38,11 @@ describe('chat-file-references: URL safety', () => {
     expect(classifyLink('#results')).toBe('internal');
   });
 
+  it('does not treat local absolute paths as app routes', () => {
+    expect(classifyLink('/Users/demo/project/data.csv')).toBe('dangerous');
+    expect(classifyLink('/Volumes/Data/sample.tsv')).toBe('dangerous');
+  });
+
   it('classifies mailto links as external when address is valid', () => {
     expect(classifyLink('mailto:hi@example.com')).toBe('external');
   });
@@ -120,23 +125,70 @@ describe('chat-file-references: candidate extraction', () => {
       '',
       'Open `report.html` directly.',
       '',
-      'Expressions like `read.csv("hidden.csv")` and `package.json` stay inert.',
+      'Expressions like `read.csv("hidden.csv")` stay inert, while `package.json` is a file.',
     ].join('\n');
     const out = extractFileReferenceCandidates(md);
     expect(out).toContain('data.csv');
     expect(out).toContain('report.html');
+    expect(out).toContain('package.json');
     expect(out).not.toContain('ignored.csv');
     expect(out).not.toContain('hidden.csv');
-    expect(out).not.toContain('package.json');
   });
 
-  it('skips common project file names', () => {
+  it('extracts common project, source, notebook, and bioinformatics file names', () => {
     const out = extractFileReferenceCandidates(
-      'See package.json and tsconfig.json and the new volcano.png',
+      'See package.json, tsconfig.json, model-registry.ts, analysis.ipynb, variants.vcf, and Fig5_intermediate.RData.',
     );
-    expect(out).not.toContain('package.json');
-    expect(out).not.toContain('tsconfig.json');
-    expect(out).toContain('volcano.png');
+    expect(out).toEqual(expect.arrayContaining([
+      'package.json',
+      'tsconfig.json',
+      'model-registry.ts',
+      'analysis.ipynb',
+      'variants.vcf',
+      'Fig5_intermediate.RData',
+    ]));
+  });
+
+  it('extracts common office documents and browser image formats', () => {
+    const out = extractFileReferenceCandidates([
+      '报告.docx 旧稿.doc 演示.pptx 数据.xlsx 开放文档.odt 项目.pages',
+      '动画.gif 插图.svg 动画.webp 图像.apng 照片.heic 扫描.tiff',
+    ].join('\n'));
+    expect(out).toEqual(expect.arrayContaining([
+      '报告.docx',
+      '旧稿.doc',
+      '演示.pptx',
+      '数据.xlsx',
+      '开放文档.odt',
+      '项目.pages',
+      '动画.gif',
+      '插图.svg',
+      '动画.webp',
+      '图像.apng',
+      '照片.heic',
+      '扫描.tiff',
+    ]));
+  });
+
+  it('extracts unicode names, quoted paths with spaces, and project absolute paths', () => {
+    const out = extractFileReferenceCandidates(
+      '查看 差异基因.csv、"results/final report.html" 和 /Users/demo/BioF3/data/sample matrix.tsv。',
+    );
+    expect(out).toEqual(expect.arrayContaining([
+      '差异基因.csv',
+      'results/final report.html',
+      '/Users/demo/BioF3/data/sample matrix.tsv',
+    ]));
+  });
+
+  it('extracts file targets from markdown links for verified resolution', () => {
+    const out = extractFileReferenceCandidates(
+      '打开 [工作区配置](frontend/src/config.ts) 和 [结果](biof3://artifact/job-1/report.html)。',
+    );
+    expect(out).toEqual(expect.arrayContaining([
+      'frontend/src/config.ts',
+      'biof3://artifact/job-1/report.html',
+    ]));
   });
 
   it('skips the currently active artifact self-reference', () => {

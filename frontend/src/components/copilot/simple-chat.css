@@ -395,19 +395,50 @@
 }
 
 .cp-inline-code {
-  border: 1px solid var(--biof3-border);
-  border-radius: 5px;
-  background: var(--biof3-bg-subtle);
-  padding: 1px 5px;
+  border: 1px solid color-mix(in srgb, var(--biof3-border) 54%, transparent 46%);
+  border-radius: 4px;
+  background: transparent;
+  padding: 1px 4px;
+  font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
+  font-size: 0.9em;
+}
+
+.cp-file-ref-code {
+  border-bottom-color: color-mix(in srgb, var(--biof3-accent) 42%, transparent 58%);
+  background: transparent;
   font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
   font-size: 0.9em;
 }
 
 .cp-code-block {
+  position: relative;
   overflow: hidden;
-  border: 1px solid var(--biof3-border);
-  border-radius: 11px;
-  background: var(--biof3-bg-canvas);
+  border: 1px solid color-mix(in srgb, var(--biof3-border) 70%, transparent 30%);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--biof3-bg-canvas) 76%, var(--biof3-bg-surface) 24%);
+}
+
+.cp-code-block-plain {
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.cp-code-plain-action {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 25px;
+  margin-bottom: 1px;
+}
+
+.cp-code-block-plain .cp-code-pre {
+  margin-right: 34px;
+  padding: 10px 2px;
+  border-top: 1px solid color-mix(in srgb, var(--biof3-border) 40%, transparent 60%);
+  border-bottom: 1px solid color-mix(in srgb, var(--biof3-border) 40%, transparent 60%);
+  background: transparent;
 }
 
 .cp-code-head {
@@ -415,50 +446,78 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  min-height: 32px;
-  padding: 0 10px;
-  border-bottom: 1px solid var(--biof3-border);
-  background: color-mix(in srgb, var(--biof3-bg-subtle) 72%, var(--biof3-bg-surface) 28%);
+  min-height: 28px;
+  padding: 0 5px 0 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--biof3-border) 58%, transparent 42%);
+  background: color-mix(in srgb, var(--biof3-bg-subtle) 48%, transparent 52%);
 }
 
 .cp-code-lang {
-  font-size: 11px;
-  font-weight: 700;
   color: var(--biof3-text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.cp-code-copy {
-  height: 24px;
-  border: 1px solid var(--biof3-border);
-  border-radius: 7px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
-  font-size: 11px;
-  cursor: pointer;
-}
-
-.cp-code-copy:hover {
-  color: var(--biof3-text);
-  background: var(--biof3-hover);
+  font-size: 10.5px;
+  font-weight: 650;
+  text-transform: lowercase;
 }
 
 .cp-copy-button {
-  height: 24px;
-  padding: 0 8px;
-  border: 1px solid var(--biof3-border);
-  border-radius: 7px;
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text-secondary);
-  font: inherit;
-  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--biof3-text-tertiary);
   cursor: pointer;
+  opacity: 0.45;
+  transition: color 120ms ease, background-color 120ms ease, opacity 120ms ease;
 }
 
-.cp-copy-button:hover {
+.cp-copy-button:hover,
+.cp-copy-button:focus-visible,
+.cp-copy-button.is-copied {
   color: var(--biof3-text);
   background: var(--biof3-hover);
+  opacity: 1;
+}
+
+.cp-copy-button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--biof3-accent) 45%, transparent 55%);
+  outline-offset: 1px;
+}
+
+.cp-copy-button-icon {
+  position: relative;
+  display: block;
+  width: 14px;
+  height: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+}
+
+.cp-copy-button:not(.is-copied) .cp-copy-button-icon::before,
+.cp-copy-button:not(.is-copied) .cp-copy-button-icon::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 9px;
+  border: 1.4px solid currentColor;
+  border-radius: 2px;
+}
+
+.cp-copy-button:not(.is-copied) .cp-copy-button-icon::before {
+  top: 1px;
+  left: 4px;
+}
+
+.cp-copy-button:not(.is-copied) .cp-copy-button-icon::after {
+  top: 4px;
+  left: 1px;
+  background: var(--biof3-bg-surface);
 }
 
 .cp-code-pre {
@@ -473,46 +532,102 @@
   font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
 }
 
-.cp-table-wrap {
-  overflow-x: auto;
-  border: 1px solid var(--biof3-border);
-  border-radius: 8px;
-  background: var(--biof3-bg-surface);
+.cp-table-figure {
+  min-width: 0;
+  margin: 1px 0 3px;
 }
 
-.cp-table-head {
+.cp-table-tools {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  min-height: 30px;
-  padding: 0 8px 0 10px;
-  border-bottom: 1px solid var(--biof3-border);
-  color: var(--biof3-text-tertiary);
-  font-size: 11px;
-  font-weight: 650;
+  justify-content: flex-end;
+  min-height: 25px;
+  margin-bottom: 1px;
+}
+
+.cp-table-scroll {
+  overflow-x: auto;
+  background: transparent;
+  scrollbar-width: thin;
+}
+
+.cp-table-figure:hover .cp-copy-button,
+.cp-table-figure:focus-within .cp-copy-button {
+  opacity: 1;
 }
 
 .cp-table {
   width: 100%;
+  min-width: max-content;
   border-collapse: collapse;
+  background: transparent;
   font-size: 12.5px;
+  line-height: 1.4;
 }
 
-.cp-table th,
-.cp-table td {
-  padding: 7px 10px;
-  border-bottom: 1px solid var(--biof3-border);
+.cp-md .cp-table thead,
+.cp-md .cp-table tbody,
+.cp-md .cp-table tr,
+.cp-md .cp-table tbody tr:nth-child(odd),
+.cp-md .cp-table tbody tr:nth-child(even) {
+  background: transparent;
+  background-color: transparent;
+  background-image: none;
+}
+
+.cp-md .cp-table th,
+.cp-md .cp-table td,
+.cp-md .cp-table tbody tr:nth-child(odd) > td,
+.cp-md .cp-table tbody tr:nth-child(even) > td {
+  padding: 5px 9px;
+  border-bottom: 0.5px solid color-mix(in srgb, var(--biof3-border) 22%, transparent 78%);
+  background: color-mix(in srgb, var(--biof3-bg-subtle) 55%, transparent 45%);
+  background-image: none;
   vertical-align: top;
 }
 
-.cp-table th {
-  background: var(--biof3-bg-subtle);
-  color: var(--biof3-text-secondary);
-  font-weight: 700;
+.cp-md .cp-table tbody tr:nth-child(odd) > td {
+  background: color-mix(in srgb, var(--biof3-bg-subtle) 20%, transparent 80%);
 }
 
-.cp-table tr:last-child td {
-  border-bottom: none;
+.cp-md .cp-table tbody tr:nth-child(even) > td {
+  background: transparent;
+}
+
+.cp-md .cp-table th {
+  background: color-mix(in srgb, var(--biof3-bg-subtle) 20%, transparent 80%);
+  background-image: none;
+  border-bottom: 0.5px solid color-mix(in srgb, var(--biof3-border) 22%, transparent 78%);
+  color: var(--biof3-text-secondary);
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.cp-md .cp-table tbody tr:hover > td {
+  background: color-mix(in srgb, var(--biof3-bg-subtle) 32%, transparent 68%);
+}
+
+.cp-md .cp-table tbody tr:last-child > td {
+  border-bottom: 0.5px solid color-mix(in srgb, var(--biof3-border) 22%, transparent 78%);
+}
+
+[data-theme='dark'] .cp-md .cp-inline-code {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--biof3-border) 72%, transparent 28%);
+}
+
+[data-theme='dark'] .cp-md .cp-code-block {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--biof3-border) 66%, transparent 34%);
+}
+
+[data-theme='dark'] .cp-md .cp-code-head {
+  background: transparent;
+  border-bottom-color: color-mix(in srgb, var(--biof3-border) 52%, transparent 48%);
+}
+
+[data-theme='dark'] .cp-md .cp-code-pre {
+  background: transparent;
 }
 
 .cp-status-mark {

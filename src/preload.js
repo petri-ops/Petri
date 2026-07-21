@@ -120,6 +120,8 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     openDialog: (filters) => ipcRenderer.invoke('file:open-dialog', filters),
     openDirectoryDialog: () => ipcRenderer.invoke('file:open-dialog', { openDirectory: true }),
     openPath: (targetPath) => ipcRenderer.invoke('file:open-path', targetPath),
+    openWorkspaceFile: (workspacePath, relativePath) =>
+      ipcRenderer.invoke('file:open-workspace-file', workspacePath, relativePath),
   },
 
   // 诊断日志导出

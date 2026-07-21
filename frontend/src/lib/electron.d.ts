@@ -159,6 +159,10 @@ declare global {
         openDialog: (filters?: unknown) => Promise<string | null>;
         openDirectoryDialog: () => Promise<string | null>;
         openPath: (targetPath: string) => Promise<{ ok: boolean; error?: string }>;
+        openWorkspaceFile: (
+          workspacePath: string,
+          relativePath: string
+        ) => Promise<{ ok: boolean; error?: string }>;
       };
       diagnostic: {
         export: (targetPath?: string) => Promise<{ ok: boolean; path?: string; error?: string }>;

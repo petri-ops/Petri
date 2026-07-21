@@ -17,6 +17,29 @@ import { useConversations } from '@/hooks/useConversations';
 import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
 import '@/lib/chat-file-references';
 import type { ExtractContext, FileReferenceClickDetail } from '@/lib/chat-file-references';
+import { __resetFileReferenceCache } from '@/lib/chat-file-references';
+
+/**
+ * Files that cannot be inlined in the right Files panel trigger the system
+ * opener alongside the in-app preview. Office/iWork files that we now parse
+ * (docx/xlsx/pptx/odt/ods/odp) and simple text/code files are intentionally
+ * excluded so the user only sees one window per click. R / scanpy data
+ * formats (rds, RData, h5ad, h5, hdf5, loom, mtx) are excluded because no
+ * default macOS app can open them — auto-opening would just pop the
+ * "Choose Application" dialog, which is more disruptive than helpful. Users
+ * who actually want to open them in RStudio / scanpy can still use the
+ * "Open with system app" button in the preview card.
+ */
+const SYSTEM_OPEN_FILE_EXTENSIONS = new Set([
+  'doc', 'dot', 'xls', 'xlt', 'ppt', 'pps', 'pot',
+  'pages', 'numbers', 'keynote',
+  'rtf', 'epub', 'tif', 'tiff', 'heic', 'heif',
+]);
+
+export function shouldOpenWithSystemApp(name: string): boolean {
+  const extension = name.split('.').pop()?.toLowerCase() || '';
+  return SYSTEM_OPEN_FILE_EXTENSIONS.has(extension);
+}
 import {
   fetchHarnessToolManifest,
   repairHarnessParams,
@@ -49,6 +72,7 @@ import {
 } from './conversationRunStore';
 import './simple-chat.css';
 import { Icon } from '@/components/icons/Icon';
+import { HighlightedCode } from '@/components/ui/CodeHighlight';
 import { tools as staticTools } from '@/pages/_data';
 
 const conversationDrafts = new Map<string, string>();
@@ -149,6 +173,7 @@ export function SimpleChat({
   // latest Copilot context once per settled message and let CopilotMarkdown
   // drive the resolution effect.
   const [settledContext, setSettledContext] = useState<ExtractContext | null>(null);
+  const [resolveNonce, setResolveNonce] = useState(0);
   const settledConvRef = useRef<string | null>(conversationId);
   useEffect(() => {
     // Conv switch: clear until the new history finishes loading.
@@ -159,30 +184,29 @@ export function SimpleChat({
   }, [conversationId]);
   useEffect(() => {
     if (loading) return;
-    setSettledContext({
-      projectId: copilotCtx.projectId,
-      activeJobId: copilotCtx.activeJobId || copilotCtx.activeArtifact?.jobId || null,
-      activeArtifactName: copilotCtx.activeArtifact?.name,
-    });
-  }, [copilotCtx, loading]);
+    // A page-level active job can belong to another conversation. Settled
+    // history therefore resolves only against this project's workspace;
+    // explicit biof3 artifact URIs still carry and verify their own job ID.
+    setSettledContext({ projectId });
+  }, [loading, projectId]);
 
   const handleFileReferenceClick = useCallback((detail: FileReferenceClickDetail) => {
     const resolved = detail.resolved;
-    if (resolved?.kind === 'artifact') {
+    if (!resolved || resolved.projectId !== projectId) return;
+    if (resolved.kind === 'artifact') {
       dispatchBioF3Event(biof3Events.projectOpenArtifact, {
         jobId: resolved.jobId,
         artifactName: resolved.artifactName,
-        projectId: resolved.projectId ?? projectId,
+        projectId,
       });
       return;
     }
-    if (resolved?.kind === 'workspace') {
-      dispatchBioF3Event(biof3Events.projectOpenWorkspaceFile, {
-        projectId: resolved.projectId,
-        relativePath: resolved.relativePath,
-        name: resolved.name,
-      });
-    }
+    dispatchBioF3Event(biof3Events.projectOpenWorkspaceFile, {
+      projectId,
+      relativePath: resolved.relativePath,
+      name: resolved.name,
+      openWithSystemApp: shouldOpenWithSystemApp(resolved.name || resolved.relativePath),
+    });
   }, [projectId]);
 
   const copyMessage = useCallback(async (messageKey: string, content: string) => {
@@ -614,15 +638,15 @@ export function SimpleChat({
                     )}
                   </div>
                   <div className="sc-msg-body">
-                    {m.role === 'assistant' ? (
-                      <CopilotMarkdown
-                        text={m.content || (m.pending ? '…' : '')}
-                        onFileReferenceClick={handleFileReferenceClick}
-                        resolveContext={m.pending || streaming ? null : settledContext}
-                      />
-                    ) : (
-                      <div className="sc-msg-text">{m.content}</div>
-                    )}
+                    <CopilotMarkdown
+                      text={m.content || (m.pending ? '…' : '')}
+                      onFileReferenceClick={handleFileReferenceClick}
+                      resolveContext={m.pending || (m.role === 'assistant' && streaming) ? null : settledContext}
+                      resolveNonce={resolveNonce}
+                      highlightCode={m.role === 'assistant' ? ((code, language) => (
+                        <HighlightedCode code={code} language={language} />
+                      )) : undefined}
+                    />
                     {m.role === 'assistant' && m.content && !m.pending && (
                       <div className="sc-msg-actions">
                         <button
@@ -670,6 +694,18 @@ export function SimpleChat({
               <div className="sc-composer-left">
                 <button type="button" className="sc-composer-icon-btn" title="添加内容">
                   <Icon name="plus" size={20} />
+                </button>
+                <button
+                  type="button"
+                  className="sc-composer-icon-btn"
+                  title="重新解析当前会话中的文件链接（清除解析缓存并对所有已落地消息重跑解析器；首次生效需重启 Electron 让 r-server 加载最新索引逻辑）"
+                  aria-label="刷新文件链接"
+                  onClick={() => {
+                    __resetFileReferenceCache();
+                    setResolveNonce((value) => value + 1);
+                  }}
+                >
+                  <Icon name="refresh" size={16} />
                 </button>
                 <div className="sc-access-picker">
                   <button

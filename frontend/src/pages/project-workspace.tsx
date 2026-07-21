@@ -22,6 +22,7 @@ import { getApiPrefix, getToken } from '@/lib/authClient';
 import { tools as staticTools } from '@/pages/_data';
 import type { Tool } from '@/pages/_data';
 import { Lightbox } from '@/components/ui/Lightbox';
+import { HighlightedCode, codeLanguageForFile } from '@/components/ui/CodeHighlight';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
 import { listConversations, createConversation, renameConversation, archiveConversation, type ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import {
@@ -61,8 +62,17 @@ import {
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
 import type { BackendStatus } from '@/lib/electron';
+import { getBridge } from '@/lib/desktopBridge';
+import {
+  describeOfficeKind,
+  loadOfficePreview,
+  revokeOfficePreviewBlobs,
+  suggestedOpener,
+  type OfficePreviewAsset,
+  type OfficePreviewKind,
+  type OfficePreviewModel,
+} from '@/lib/office-file-preview';
 import styles from './project-workspace.module.css';
-import 'highlight.js/styles/github.css';
 
 const markdownSanitizeSchema = {
   ...defaultSchema,
@@ -453,7 +463,18 @@ export function ProjectWorkspace(): React.ReactElement {
     }
     updateWorkspaceMode('scheduled', true, nextJobId);
   }, [activeJobId, jobs, updateWorkspaceMode]);
-  const handleShowSettings = useCallback(() => updateWorkspaceMode('settings'), [updateWorkspaceMode]);
+  // Entering settings hides both side rails: settings is a global surface
+  // that doesn't need project context (left: project/chat list) or job
+  // artifacts (right: files/results/browser), so collapsing them gives the
+  // settings panel more room. Leaving settings (back to chat / search /
+  // scheduled / plugins) leaves `leftOpen` / `rightOpen` to the user — we
+  // don't force them back open because they may have intentionally kept
+  // them collapsed.
+  const handleShowSettings = useCallback(() => {
+    setLeftOpen(false);
+    setRightOpen(false);
+    updateWorkspaceMode('settings');
+  }, [setLeftOpen, setRightOpen, updateWorkspaceMode]);
 
   const handleShowPlugins = useCallback(() => updateWorkspaceMode('plugins'), [updateWorkspaceMode]);
 
@@ -1002,7 +1023,12 @@ export function ProjectWorkspace(): React.ReactElement {
   }, [handleOpenResult, navigate, projectId]);
 
   useEffect(() => {
-    const handler = (detail: { projectId: string; relativePath: string; name?: string }) => {
+    const handler = (detail: {
+      projectId: string;
+      relativePath: string;
+      name?: string;
+      openWithSystemApp?: boolean;
+    }) => {
       if (!detail?.projectId || !detail?.relativePath) return;
       if (detail.projectId !== projectId) {
         // Cross-project workspace files are out of scope for the desktop
@@ -1018,10 +1044,13 @@ export function ProjectWorkspace(): React.ReactElement {
       };
       handleOpenWorkspaceFile(file);
       openRightPanel('files');
+      if (detail.openWithSystemApp && workspacePath) {
+        void getBridge('files')?.openWorkspaceFile(workspacePath, detail.relativePath);
+      }
     };
     const unsub = subscribeBioF3Event(biof3Events.projectOpenWorkspaceFile, handler);
     return unsub;
-  }, [handleOpenWorkspaceFile, navigate, openRightPanel, projectId]);
+  }, [handleOpenWorkspaceFile, navigate, openRightPanel, projectId, workspacePath]);
 
   /** Dispatch a copilot-ask event so the embedded SimpleChat picks it up */
   const handleAskAgent = useCallback((prompt: string) => {
@@ -1385,51 +1414,22 @@ function fileExtension(name?: string): string {
 }
 
 function isImageFile(name?: string): boolean {
-  return ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(fileExtension(name));
+  return ['png', 'apng', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'avif', 'bmp', 'ico', 'tif', 'tiff', 'heic', 'heif'].includes(fileExtension(name));
 }
 
 function isTextFile(name?: string): boolean {
   return [
-    'txt', 'md', 'markdown', 'csv', 'tsv', 'json', 'jsonl', 'log',
+    'txt', 'md', 'markdown', 'csv', 'tsv', 'tab', 'json', 'jsonl', 'log',
     'r', 'py', 'sh', 'bash', 'zsh',
     'js', 'jsx', 'mjs', 'cjs', 'ts', 'tsx',
-    'css', 'scss', 'html', 'xml',
-    'yaml', 'yml', 'toml',
+    'css', 'scss', 'html', 'htm', 'xml',
+    'yaml', 'yml', 'toml', 'ini', 'conf', 'sql',
+    'sam', 'bed', 'gtf', 'gff', 'vcf', 'fasta', 'fa', 'fastq', 'fq',
   ].includes(fileExtension(name));
 }
 
 function isMarkdownFile(name?: string): boolean {
   return ['md', 'markdown'].includes(fileExtension(name));
-}
-
-function previewLanguage(name?: string): string {
-  const ext = fileExtension(name);
-  const map: Record<string, string> = {
-    bash: 'bash',
-    cjs: 'javascript',
-    css: 'css',
-    csv: 'csv',
-    html: 'xml',
-    js: 'javascript',
-    json: 'json',
-    jsonl: 'json',
-    jsx: 'jsx',
-    log: 'plaintext',
-    mjs: 'javascript',
-    py: 'python',
-    r: 'r',
-    scss: 'scss',
-    sh: 'bash',
-    toml: 'ini',
-    ts: 'typescript',
-    tsx: 'tsx',
-    tsv: 'tsv',
-    xml: 'xml',
-    yaml: 'yaml',
-    yml: 'yaml',
-    zsh: 'bash',
-  };
-  return map[ext] || 'plaintext';
 }
 
 /**
@@ -1650,7 +1650,7 @@ export function RightFileTree({
       </div>
       <div className={styles.workspaceFilesMain}>
         <div className={styles.workspaceFilePreviewPane}>
-          <WorkspaceFilePreview file={activeFile} />
+          <WorkspaceFilePreview file={activeFile} workspacePath={project.workspacePath || ''} />
         </div>
         {treeOpen && (
           <aside
@@ -1690,12 +1690,22 @@ export function RightFileTree({
   );
 }
 
-function WorkspaceFilePreview({ file }: { file: ActiveWorkspaceFile | null }): React.ReactElement {
+function WorkspaceFilePreview({
+  file,
+  workspacePath,
+}: {
+  file: ActiveWorkspaceFile | null;
+  workspacePath: string;
+}): React.ReactElement {
   const { resolvedTheme } = useTheme();
   const [text, setText] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'unsupported' | 'error'>('idle');
   const [previewData, setPreviewData] = useState<string[][] | null>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [openError, setOpenError] = useState('');
+  const [opening, setOpening] = useState(false);
+  const [officePreview, setOfficePreview] = useState<OfficePreviewModel | null>(null);
+  const [officeStatus, setOfficeStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
 
   const isImage = isImageFile(file?.name);
   const isText = isTextFile(file?.name);
@@ -1704,11 +1714,15 @@ function WorkspaceFilePreview({ file }: { file: ActiveWorkspaceFile | null }): R
   const isPdf = isPdfFile(file?.name);
   const isHtml = isHtmlFile(file?.name);
   const isJson = isJsonFile(file?.name);
+  const officeKind = detectOfficeKind(file?.name);
+  const codeLanguage = codeLanguageForFile(file?.name);
 
   useEffect(() => {
     let cancelled = false;
     setText('');
     setPreviewData(null);
+    setOfficePreview(null);
+    setOfficeStatus('idle');
     if (!file) {
       setStatus('idle');
       return () => { cancelled = true; };
@@ -1716,6 +1730,27 @@ function WorkspaceFilePreview({ file }: { file: ActiveWorkspaceFile | null }): R
     if (isImage || isPdf || isHtml) {
       setStatus('ready');
       return () => { cancelled = true; };
+    }
+    if (officeKind) {
+      setOfficeStatus('loading');
+      loadOfficePreview({
+        url: file.url,
+        name: file.name,
+        authToken: getToken() || undefined,
+      })
+        .then((model) => {
+          if (cancelled) return;
+          setOfficePreview(model);
+          setOfficeStatus(model.fallback ? 'error' : 'ready');
+          setStatus(model.fallback ? 'unsupported' : 'ready');
+        })
+        .catch(() => {
+          if (cancelled) return;
+          setOfficePreview(null);
+          setOfficeStatus('error');
+          setStatus('unsupported');
+        });
+      return () => { cancelled = true; revokeOfficePreviewBlobs(); };
     }
     if (!isText && !isCsv && !isJson) {
       setStatus('unsupported');
@@ -1744,7 +1779,42 @@ function WorkspaceFilePreview({ file }: { file: ActiveWorkspaceFile | null }): R
         if (!cancelled) setStatus('error');
       });
     return () => { cancelled = true; };
-  }, [file, isCsv, isHtml, isImage, isJson, isPdf, isText]);
+  }, [file, isCsv, isHtml, isImage, isJson, isPdf, isText, officeKind]);
+
+  useEffect(() => {
+    setOpenError('');
+    setOpening(false);
+  }, [file?.path]);
+
+  const openWithSystemApp = useCallback(async () => {
+    if (!file || !workspacePath) return;
+    const filesBridge = getBridge('files');
+    if (!filesBridge?.openWorkspaceFile) {
+      setOpenError('桌面文件打开能力不可用');
+      return;
+    }
+    setOpening(true);
+    setOpenError('');
+    try {
+      const result = await filesBridge.openWorkspaceFile(workspacePath, file.path);
+      if (!result.ok) setOpenError(result.error || '系统应用无法打开该文件');
+    } catch (error) {
+      setOpenError((error as Error).message || '系统应用无法打开该文件');
+    } finally {
+      setOpening(false);
+    }
+  }, [file, workspacePath]);
+
+  const downloadCopy = useCallback(() => {
+    if (!file) return;
+    const link = document.createElement('a');
+    link.href = file.url;
+    link.download = file.name;
+    link.rel = 'noopener';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }, [file]);
 
   if (!file) {
     return (
@@ -1772,24 +1842,54 @@ function WorkspaceFilePreview({ file }: { file: ActiveWorkspaceFile | null }): R
           <Icon name={isImage ? 'image' : 'file'} size={14} />
           <span>{file.name}</span>
         </div>
-        <a className={styles.workspacePreviewOpen} href={file.url} target="_blank" rel="noopener noreferrer">
-          打开
-        </a>
+        <div className={styles.workspacePreviewActions}>
+          <button
+            type="button"
+            className={styles.workspacePreviewOpen}
+            onClick={() => void openWithSystemApp()}
+            disabled={opening}
+            title="使用系统默认应用打开"
+          >
+            <Icon name="file" size={13} />
+            {opening ? '打开中' : '系统打开'}
+          </button>
+          <button
+            type="button"
+            className={styles.workspacePreviewOpen}
+            onClick={downloadCopy}
+            title="下载文件副本"
+          >
+            <Icon name="download" size={13} />
+            下载副本
+          </button>
+        </div>
       </div>
+      {openError && <div className={styles.workspacePreviewError}>{openError}</div>}
       <div className={styles.workspacePreviewBody}>
         {status === 'loading' && <p className={styles.panelEmpty}>加载预览…</p>}
         {status === 'error' && <p className={styles.panelEmpty}>预览失败</p>}
-        {status === 'unsupported' && fallbackKind === 'binary' && (
-          <div className={styles.workspaceBinaryFallback}>
-            <Icon name="file" size={20} />
-            <p>该文件暂不支持内联预览。</p>
-            <p className={styles.workspaceBinaryMeta}>
-              类型：{fileExtension(file.name) || '未知'} · 建议在外部应用打开或下载查看。
-            </p>
-            <a className={styles.workspacePreviewOpen} href={file.url} target="_blank" rel="noopener noreferrer">
-              打开 / 下载
-            </a>
-          </div>
+        {status === 'unsupported' && !officePreview && (
+          <BinaryPreviewCard
+            file={file}
+            opening={opening}
+            onOpen={openWithSystemApp}
+            onDownload={downloadCopy}
+          />
+        )}
+        {status === 'unsupported' && officePreview && officePreview.fallback && (
+          <BinaryPreviewCard
+            file={file}
+            opening={opening}
+            onOpen={openWithSystemApp}
+            onDownload={downloadCopy}
+            reason={officePreview.fallback.reason}
+          />
+        )}
+        {officeStatus === 'loading' && (
+          <p className={styles.panelEmpty}>解析 {file.name} 的内容…</p>
+        )}
+        {officeStatus === 'ready' && officePreview && !officePreview.fallback && (
+          <OfficePreviewPane preview={officePreview} onAssetOpen={setLightboxSrc} />
         )}
         {status === 'ready' && fallbackKind === 'image' && (
           <button className={styles.workspaceImageButton} onClick={() => setLightboxSrc(file.url)}>
@@ -1855,11 +1955,18 @@ function WorkspaceFilePreview({ file }: { file: ActiveWorkspaceFile | null }): R
             </ReactMarkdown>
           </div>
         )}
-        {status === 'ready' && fallbackKind === 'text' && (
+        {status === 'ready' && fallbackKind === 'text' && codeLanguage && (
+          <pre className={styles.workspaceCodePreview}>
+            <HighlightedCode code={text} language={codeLanguage} />
+          </pre>
+        )}
+        {status === 'ready' && fallbackKind === 'text' && !codeLanguage && (
           <pre className={styles.workspaceTextPreview}>{text}</pre>
         )}
         {status === 'ready' && fallbackKind === 'json' && (
-          <pre className={styles.workspaceTextPreview}>{text}</pre>
+          <pre className={styles.workspaceCodePreview}>
+            <HighlightedCode code={text} language="json" />
+          </pre>
         )}
       </div>
       {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
@@ -1899,6 +2006,195 @@ function withReportTheme(url: string, theme: 'light' | 'dark'): string {
 
 function isJsonFile(name?: string): boolean {
   return fileExtension(name) === 'json' || fileExtension(name) === 'jsonl';
+}
+
+function detectOfficeKind(name?: string): OfficePreviewKind | null {
+  if (!name) return null;
+  const ext = name.split('.').pop()?.toLowerCase() || '';
+  switch (ext) {
+    case 'docx':
+    case 'docm':
+    case 'dotx':
+      return 'docx';
+    case 'xlsx':
+    case 'xlsm':
+    case 'xltx':
+    case 'xlsb':
+      return 'xlsx';
+    case 'pptx':
+    case 'pptm':
+    case 'ppsx':
+    case 'potx':
+      return 'pptx';
+    case 'odt':
+      return 'odt';
+    case 'ods':
+      return 'ods';
+    case 'odp':
+      return 'odp';
+    case 'pages':
+      return 'pages';
+    case 'numbers':
+      return 'numbers';
+    case 'keynote':
+      return 'keynote';
+    default:
+      return null;
+  }
+}
+
+function BinaryPreviewCard({
+  file,
+  opening,
+  onOpen,
+  onDownload,
+  reason,
+}: {
+  file: ActiveWorkspaceFile;
+  opening: boolean;
+  onOpen: () => void;
+  onDownload: () => void;
+  reason?: string;
+}): React.ReactElement {
+  const ext = fileExtension(file.name);
+  const kind = describeOfficeKind(detectOfficeKind(file.name) || fallbackKindForExtension(ext));
+  const opener = suggestedOpener(detectOfficeKind(file.name) || fallbackKindForExtension(ext));
+  return (
+    <div className={styles.workspaceBinaryFallback}>
+      <Icon name="file" size={20} />
+      <p className={styles.workspaceBinaryTitle}>{kind}</p>
+      {reason && <p className={styles.workspaceBinaryMeta}>{reason}</p>}
+      <p className={styles.workspaceBinaryMeta}>
+        推荐用 {opener} 打开 · 也可以下载副本用本地工具查看。
+      </p>
+      <div className={styles.workspacePreviewActions}>
+        <button
+          type="button"
+          className={styles.workspacePreviewOpen}
+          onClick={onOpen}
+          disabled={opening}
+        >
+          <Icon name="file" size={13} />
+          {opening ? '打开中' : '使用系统应用打开'}
+        </button>
+        <button type="button" className={styles.workspacePreviewOpen} onClick={onDownload}>
+          <Icon name="download" size={13} />
+          下载副本
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function fallbackKindForExtension(ext: string): OfficePreviewKind {
+  switch (ext) {
+    case 'rdata':
+      return 'rdata';
+    case 'rds':
+      return 'rds';
+    case 'h5ad':
+      return 'h5ad';
+    case 'loom':
+      return 'loom';
+    case 'h5':
+    case 'hdf5':
+      return 'hdf5';
+    case 'mtx':
+      return 'mtx';
+    case 'rtf':
+      return 'rtf';
+    case 'epub':
+      return 'epub';
+    default:
+      return 'binary';
+  }
+}
+
+function OfficePreviewPane({
+  preview,
+  onAssetOpen,
+}: {
+  preview: OfficePreviewModel;
+  onAssetOpen: (url: string) => void;
+}): React.ReactElement {
+  if (preview.sheet) {
+    return (
+      <div className={styles.workspaceOfficeSheet}>
+        <div className={styles.workspaceOfficeHeader}>{preview.sheet.name}</div>
+        <table>
+          <tbody>
+            {preview.sheet.rows.length === 0 && (
+              <tr><td>未读取到任何行内容，建议在外部表格工具打开</td></tr>
+            )}
+            {preview.sheet.rows.map((row, idx) => (
+              <tr key={idx}>
+                {row.cells.map((cell, cellIdx) => (
+                  <td key={cellIdx}>{cell || '—'}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {preview.sheet.rows.length >= 80 && (
+          <p className={styles.workspaceOfficeHint}>仅展示前 80 行，完整内容请在外部工具打开。</p>
+        )}
+        <PreviewAssets assets={preview.assets} onAssetOpen={onAssetOpen} />
+        <TextBlock text={preview.text} />
+      </div>
+    );
+  }
+  if (preview.contents && preview.contents.length > 0) {
+    return (
+      <div className={styles.workspaceOfficeListing}>
+        <p className={styles.workspaceOfficeHint}>
+          Apple iWork 容器列出了 {preview.contents.length} 个内嵌资源；如需完整版式，请在系统应用（Pages / Numbers / Keynote）中打开。
+        </p>
+        <ul>
+          {preview.contents.map((name) => (
+            <li key={name}>{name}</li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+  return (
+    <div className={styles.workspaceOfficeDoc}>
+      <TextBlock text={preview.text} />
+      <PreviewAssets assets={preview.assets} onAssetOpen={onAssetOpen} />
+    </div>
+  );
+}
+
+function PreviewAssets({
+  assets,
+  onAssetOpen,
+}: {
+  assets?: OfficePreviewAsset[];
+  onAssetOpen: (url: string) => void;
+}): React.ReactElement | null {
+  if (!assets || assets.length === 0) return null;
+  return (
+    <div className={styles.workspaceOfficeAssets}>
+      {assets.map((asset) => (
+        <button
+          key={asset.name}
+          type="button"
+          className={styles.workspaceOfficeAsset}
+          onClick={() => onAssetOpen(asset.url)}
+          title={asset.name}
+        >
+          <img src={asset.url} alt={asset.name} />
+          <span>{asset.name}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function TextBlock({ text }: { text?: string }): React.ReactElement | null {
+  if (!text) return null;
+  const clipped = text.length > 12_000 ? `${text.slice(0, 12_000)}\n…` : text;
+  return <pre className={styles.workspaceOfficeText}>{clipped}</pre>;
 }
 
 // ============================================================

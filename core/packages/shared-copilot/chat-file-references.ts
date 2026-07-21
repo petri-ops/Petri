@@ -103,6 +103,7 @@ export function classifyLink(raw: string): LinkKind {
   if (/^biof3:\/\/workspace\//i.test(value)) return 'workspace';
   if (/^biof3:\/\/artifact\//i.test(value)) return 'artifact';
   if (/^biof3:/i.test(value)) return 'dangerous';
+  if (/^\/(?:Users|Volumes|private|tmp|var|etc|home)\//i.test(value)) return 'dangerous';
   if (isSafeRelativeUrl(value)) return 'internal';
   if (/^mailto:/i.test(value)) {
     const after = value.slice(7);
@@ -119,30 +120,30 @@ export function classifyLink(raw: string): LinkKind {
 const INTERNAL_URI_RE = /\b(biof3:\/\/(?:artifact|workspace)\/[^\s)\]\>"']+)/gi;
 const TOOLS_FILE_URL_RE = /\/api\/(?:[^/]+\/)?tools\/file\/([A-Za-z0-9._-]+)\/([^\s)\]\>"']+)/gi;
 const PROJECT_RELATIVE_RE =
-  /(?:^|[\s(\["'>])((?:\.{0,2}\/)?(?:[A-Za-z0-9_.-]+\/)+[A-Za-z0-9_.-]+\.[A-Za-z0-9]+)\b/g;
-const ARTIFACT_FILENAME_RE =
-  /\b([A-Za-z0-9_.-]+\.(?:html?|htm|pdf|png|jpe?g|svg|webp|gif|csv|tsv|xlsx?|json|jsonl|md|markdown|rds|rda|h5ad|loom|h5|mtx|txt|log|yaml|yml|zip|tar\.gz|tgz))\b/gi;
+  /(?:^|[\s(\["'>])((?:\.{0,2}\/)?(?:[\p{L}\p{N}_.-]+\/)+[\p{L}\p{N}_.-]+\.[A-Za-z0-9]+)(?=$|[\s,.，。 、;；:：!?！？)\]"'])/gu;
+const QUOTED_FILE_REFERENCE_RE =
+  /(["'])(\.?\.?\/?[^"'\n]+\.[A-Za-z0-9][A-Za-z0-9.]*?)\1/gu;
+const ABSOLUTE_FILE_REFERENCE_RE =
+  /(?:^|[\s(\[`])((?:\/[\p{L}\p{N}_. -]+)+\.[A-Za-z0-9][A-Za-z0-9.]*)(?=$|[\s,.，。 、;；:：!?！？)\]"'])/gu;
+const MARKDOWN_LINK_TARGET_RE = /\[[^\]\n]+\]\(([^()\s]+)\)/g;
+const FILE_EXTENSION_PATTERN =
+  '(?:html?|pdf|rtf|epub|docx?|docm|dotx?|xlsx?|xlsm|xlsb|xltx?|pptx?|pptm|ppsx?|potx?|odt|ods|odp|odg|pages|numbers|keynote|png|apng|jpe?g|svg|webp|gif|avif|bmp|ico|tiff?|heic|heif|csv|tsv|json|jsonl|md|markdown|rmd|qmd|rds|rda|rdata|h5ad|loom|h5|hdf5|mtx|txt|log|ya?ml|toml|ini|env|xml|zip|tar|tar\\.gz|tgz|gz|bz2|xz|js|jsx|mjs|cjs|ts|tsx|css|scss|less|vue|svelte|py|pyi|ipynb|r|rproj|sh|bash|zsh|fish|sql|java|kt|kts|go|rs|c|h|cc|cpp|hpp|cs|rb|php|swift|scala|pl|pm|lua|ex|exs|erl|hrl|fs|fsx|gradle|properties|lock|dockerfile|makefile|bed|bedgraph|bam|bai|sam|cram|vcf|bcf|gtf|gff|gff3|fasta|fa|fna|fastq|fq|nwk|newick)';
+const ARTIFACT_FILENAME_RE = new RegExp(
+  `([\\p{L}\\p{N}_.-]+\\.${FILE_EXTENSION_PATTERN})(?=$|[\\s,.，。 、;；:：!?！？)\\]"'])`,
+  'giu',
+);
 const INLINE_CODE_RE = /`([^`\n]+)`/g;
 const EXACT_INTERNAL_URI_RE = /^biof3:\/\/(?:artifact|workspace)\/[^\s)\]\>"']+$/i;
 const EXACT_TOOLS_FILE_URL_RE =
   /^\/api\/(?:[^/]+\/)?tools\/file\/([A-Za-z0-9._-]+)\/([^\s)\]\>"']+)$/i;
 const EXACT_PROJECT_RELATIVE_RE =
-  /^(?:\.{0,2}\/)?(?:[A-Za-z0-9_.-]+\/)+[A-Za-z0-9_.-]+\.[A-Za-z0-9]+$/;
-const EXACT_ARTIFACT_FILENAME_RE =
-  /^[A-Za-z0-9_.-]+\.(?:html?|htm|pdf|png|jpe?g|svg|webp|gif|csv|tsv|xlsx?|json|jsonl|md|markdown|rds|rda|h5ad|loom|h5|mtx|txt|log|yaml|yml|zip|tar\.gz|tgz)$/i;
-
-const COMMON_ARTIFACT_STOPWORDS = new Set([
-  'package.json',
-  'package-lock.json',
-  'tsconfig.json',
-  'vite.config.ts',
-  'vitest.config.ts',
-  'README.md',
-  'index.html',
-  'index.ts',
-  'index.tsx',
-  'favicon.ico',
-]);
+  /^(?:\.{0,2}\/)?(?:[^/\n]+\/)+[^/\n]+\.[A-Za-z0-9][A-Za-z0-9.]*$/;
+const EXACT_ABSOLUTE_FILE_REFERENCE_RE =
+  /^(?:\/[\p{L}\p{N}_. -]+)+\.[A-Za-z0-9][A-Za-z0-9.]*$/u;
+const EXACT_ARTIFACT_FILENAME_RE = new RegExp(
+  `^[\\p{L}\\p{N}_. -]+\\.${FILE_EXTENSION_PATTERN}$`,
+  'iu',
+);
 
 export function stripCodeRegions(markdown: string): string {
   let out = markdown.replace(/```[\s\S]*?(?:```|$)/g, (block) => block.replace(/[^\n]/g, ' '));
@@ -156,9 +157,8 @@ export function isFileReferenceCandidate(raw: string): boolean {
   const value = (raw || '').trim();
   if (!value || value.length > 256 || /[\u0000-\u001F\u007F]/.test(value)) return false;
   if (EXACT_INTERNAL_URI_RE.test(value) || EXACT_TOOLS_FILE_URL_RE.test(value)) return true;
-  if (EXACT_PROJECT_RELATIVE_RE.test(value)) return true;
-  if (!EXACT_ARTIFACT_FILENAME_RE.test(value)) return false;
-  return !COMMON_ARTIFACT_STOPWORDS.has(value.toLowerCase());
+  if (EXACT_PROJECT_RELATIVE_RE.test(value) || EXACT_ABSOLUTE_FILE_REFERENCE_RE.test(value)) return true;
+  return EXACT_ARTIFACT_FILENAME_RE.test(value);
 }
 
 function pushUnique(target: string[], next: string | null | undefined): void {
@@ -207,9 +207,23 @@ export function extractFileReferenceCandidates(
     collect(candidate);
   }
 
+  for (const m of cleaned.matchAll(QUOTED_FILE_REFERENCE_RE)) {
+    const candidate = (m[2] || '').trim();
+    if (isFileReferenceCandidate(candidate)) collect(candidate);
+  }
+
+  for (const m of cleaned.matchAll(ABSOLUTE_FILE_REFERENCE_RE)) {
+    const candidate = (m[1] || '').trim();
+    if (isFileReferenceCandidate(candidate)) collect(candidate);
+  }
+
+  for (const m of cleaned.matchAll(MARKDOWN_LINK_TARGET_RE)) {
+    const candidate = (m[1] || '').trim();
+    if (isFileReferenceCandidate(candidate)) collect(candidate);
+  }
+
   for (const m of cleaned.matchAll(ARTIFACT_FILENAME_RE)) {
     const name = m[1] || '';
-    if (COMMON_ARTIFACT_STOPWORDS.has(name.toLowerCase())) continue;
     if (opts.activeArtifactName && name.toLowerCase() === opts.activeArtifactName.toLowerCase())
       continue;
     collect(name);

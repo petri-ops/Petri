@@ -101,8 +101,11 @@ test('classifyReference rejects dangerous protocols', () => {
   }
 });
 
-test('classifyReference rejects absolute local paths and unknown schemes', () => {
-  assert.equal(helpers.classifyReference('/Users/x/Desktop/secret.csv'), null);
+test('classifyReference defers absolute local paths to the route containment gate', () => {
+  assert.deepEqual(helpers.classifyReference('/Users/x/Desktop/secret.csv'), {
+    kind: 'absolute_path',
+    normalized: '/Users/x/Desktop/secret.csv',
+  });
   assert.equal(helpers.classifyReference('C:\\Users\\x\\secret.csv'), null);
   assert.equal(helpers.classifyReference('http://localhost/secret.csv'), null);
   assert.equal(helpers.classifyReference('https://example.com/foo.csv'), null);
@@ -222,9 +225,14 @@ test('route: tools file URL resolves to artifact', async () => {
   assert.equal(r.body.results[0].resolved.jobId, jobId);
 });
 
-test('route: bare filename only resolves against the activeJobId', async () => {
+test('route: bare filename prefers active artifacts and otherwise requires a unique workspace match', async () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-fr-'));
   const workspaceRoot = path.join(tmp, 'project');
+  makeWorkspaceTree(workspaceRoot, [
+    'frontend/src/model-registry.ts',
+    'data/duplicate.csv',
+    'results/duplicate.csv',
+  ]);
   const activeJobId = 'tj_active';
   const otherJobId = 'tj_other';
   for (const id of [activeJobId, otherJobId]) {
@@ -268,9 +276,15 @@ test('route: bare filename only resolves against the activeJobId', async () => {
   });
   const invoke = loadResolveRoute(dbStub);
 
-  const r0 = await invoke({ projectId: 'p_001', references: ['summary.csv'] });
-  assert.equal(r0.body.results[0].resolved, null);
-  assert.equal(r0.body.results[0].reason, 'no_active_job_for_bare_filename');
+  const r0 = await invoke({ projectId: 'p_001', references: ['model-registry.ts'] });
+  assert.equal(r0.body.results[0].resolved.kind, 'workspace');
+  assert.equal(r0.body.results[0].resolved.relativePath, 'frontend/src/model-registry.ts');
+
+  const ambiguous = await invoke({ projectId: 'p_001', references: ['duplicate.csv'] });
+  // Multiple matches used to be rejected as ambiguous; now the shallowest
+  // path wins so the user gets a usable link instead of a dead reference.
+  assert.equal(ambiguous.body.results[0].resolved.kind, 'workspace');
+  assert.equal(ambiguous.body.results[0].resolved.relativePath, 'data/duplicate.csv');
 
   const r1 = await invoke({ projectId: 'p_001', activeJobId, references: ['summary.csv'] });
   assert.equal(r1.body.results[0].resolved.kind, 'artifact');
@@ -278,7 +292,7 @@ test('route: bare filename only resolves against the activeJobId', async () => {
 
   const r2 = await invoke({ projectId: 'p_001', activeJobId, references: ['other-only.csv'] });
   assert.equal(r2.body.results[0].resolved, null);
-  assert.equal(r2.body.results[0].reason, 'artifact_missing');
+  assert.equal(r2.body.results[0].reason, 'file_not_found_or_ambiguous');
 });
 
 test('route: project relative-absolute path must be inside the workspace root', async () => {
@@ -299,13 +313,20 @@ test('route: project relative-absolute path must be inside the workspace root', 
   const nested = await invoke({ projectId: 'p_001', references: ['data/sub/nested.csv'] });
   assert.equal(nested.body.results[0].resolved.relativePath, 'data/sub/nested.csv');
 
+  const absoluteInside = await invoke({
+    projectId: 'p_001',
+    references: [path.join(workspaceRoot, 'data', 'sample.csv')],
+  });
+  assert.equal(absoluteInside.body.results[0].resolved.kind, 'workspace');
+  assert.equal(absoluteInside.body.results[0].resolved.relativePath, 'data/sample.csv');
+
   const traversal = await invoke({ projectId: 'p_001', references: ['../sibling/leak.csv'] });
   assert.equal(traversal.body.results[0].resolved, null);
   assert.equal(traversal.body.results[0].reason, 'workspace_out_of_root');
 
   const absolute = await invoke({ projectId: 'p_001', references: [path.join(sibling, 'leak.csv')] });
   assert.equal(absolute.body.results[0].resolved, null);
-  assert.equal(absolute.body.results[0].reason, 'dangerous_or_unsupported');
+  assert.equal(absolute.body.results[0].reason, 'absolute_path_out_of_workspace');
 });
 
 test('route: rejects dangerous protocols and unknown schemes', async () => {
@@ -317,12 +338,18 @@ test('route: rejects dangerous protocols and unknown schemes', async () => {
     'file:///etc/passwd',
     'javascript:alert(1)',
     'http://localhost/secret.csv',
-    '/Users/x/Desktop/secret.csv',
   ]) {
     const r = await invoke({ projectId: 'p_001', references: [ref] });
     assert.equal(r.body.results[0].resolved, null);
     assert.equal(r.body.results[0].reason, 'dangerous_or_unsupported');
   }
+
+  const outside = await invoke({
+    projectId: 'p_001',
+    references: ['/Users/x/Desktop/secret.csv'],
+  });
+  assert.equal(outside.body.results[0].resolved, null);
+  assert.equal(outside.body.results[0].reason, 'absolute_path_out_of_workspace');
 });
 
 test('route: missing truth (job not found, artifact missing, project mismatch, forbidden)', async () => {
@@ -350,6 +377,27 @@ test('route: missing truth (job not found, artifact missing, project mismatch, f
   const invoke2 = loadResolveRoute(crossProjectStub);
   const r3 = await invoke2({ projectId: 'p_001', references: ['biof3://artifact/tj_x/x.csv'] });
   assert.equal(r3.body.results[0].reason, 'project_mismatch');
+
+  const legacyJobStub = buildDbStub({
+    workspacePath: workspaceRoot,
+    jobs: [['tj_legacy', {
+      id: 'tj_legacy',
+      user_id: 'u_local',
+      project_id: null,
+      tool_id: 'volcano-plot',
+      result_json: JSON.stringify({
+        artifactTruth: { status: 'valid', blocking: false },
+        artifacts: [{ name: 'legacy.csv' }],
+      }),
+    }]],
+  });
+  const invokeLegacy = loadResolveRoute(legacyJobStub);
+  const legacy = await invokeLegacy({
+    projectId: 'p_001',
+    references: ['biof3://artifact/tj_legacy/legacy.csv'],
+  });
+  assert.equal(legacy.body.results[0].resolved, null);
+  assert.equal(legacy.body.results[0].reason, 'project_mismatch');
 
   const r4 = await invoke({ projectId: 'p_does_not_exist', references: ['data/foo.csv'] });
   assert.equal(r4.status, 404);

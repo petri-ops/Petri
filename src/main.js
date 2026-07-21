@@ -1381,12 +1381,39 @@ function setupFileDialogIpc() {
         return { ok: false, error: "invalid path" };
       }
       if (!fs.existsSync(targetPath)) {
-        fs.mkdirSync(targetPath, { recursive: true });
+        return { ok: false, error: "path does not exist" };
       }
       const error = await shell.openPath(targetPath);
       return error ? { ok: false, error } : { ok: true };
     } catch (e) {
       console.error("[desktop] open path failed:", e.message);
+      return { ok: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle("file:open-workspace-file", async (_event, workspacePath, relativePath) => {
+    try {
+      if (
+        typeof workspacePath !== "string" ||
+        typeof relativePath !== "string" ||
+        !workspacePath ||
+        !relativePath ||
+        path.isAbsolute(relativePath)
+      ) {
+        return { ok: false, error: "invalid workspace file path" };
+      }
+      const realRoot = fs.realpathSync(workspacePath);
+      const realTarget = fs.realpathSync(path.resolve(realRoot, relativePath));
+      if (realTarget !== realRoot && !realTarget.startsWith(realRoot + path.sep)) {
+        return { ok: false, error: "file is outside the project workspace" };
+      }
+      if (!fs.statSync(realTarget).isFile()) {
+        return { ok: false, error: "target is not a file" };
+      }
+      const error = await shell.openPath(realTarget);
+      return error ? { ok: false, error } : { ok: true };
+    } catch (e) {
+      console.error("[desktop] open workspace file failed:", e.message);
       return { ok: false, error: e.message };
     }
   });

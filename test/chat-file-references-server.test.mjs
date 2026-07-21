@@ -48,10 +48,14 @@ test('rejects malformed encoding and dangerous protocols without throwing', () =
   assert.equal(normalizeReference('data:text/html,boom'), null);
 });
 
-test('classifies traversal as a path for the route containment gate', () => {
+test('classifies traversal and absolute paths for the route containment gate', () => {
   assert.deepEqual(classifyReference('../outside/secret.csv'), {
     kind: 'project_relative_path',
     normalized: '../outside/secret.csv',
+  });
+  assert.deepEqual(classifyReference('/Users/demo/project/data/sample.csv'), {
+    kind: 'absolute_path',
+    normalized: '/Users/demo/project/data/sample.csv',
   });
 });
 

@@ -59,7 +59,7 @@ function classifyReference(reference) {
   }
 
   if (path.isAbsolute(normalized) || /^[A-Za-z]:[\\/]/.test(normalized)) {
-    return null;
+    return { kind: 'absolute_path', normalized };
   }
 
   const trimmedLeading = normalized.replace(/^\.\/+/, '');
@@ -96,6 +96,7 @@ function normalizeReference(reference) {
     classification.kind === 'workspace' ||
     classification.kind === 'artifact_tools_url' ||
     classification.kind === 'project_relative_path' ||
+    classification.kind === 'absolute_path' ||
     classification.kind === 'bare_filename'
   ) {
     return {

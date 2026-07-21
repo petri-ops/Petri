@@ -78,6 +78,7 @@ export interface ProjectOpenWorkspaceFileDetail {
   projectId: string;
   relativePath: string;
   name?: string;
+  openWithSystemApp?: boolean;
 }
 
 export type BioF3EventMap = {

@@ -325,7 +325,137 @@ function normalizeRelativePath(value) {
 }
 
 function dangerousPathSegment(segment) {
-  return /(^|\/|\\)(node_modules|\.git|\.env|\.ssh|\.biof3-secrets)(\/|$|\\)/i.test(segment);
+  return /(^|\/|\\)(node_modules|\.git|\.env|\.ssh|\.biof3-secrets|\.venv|venv|__pycache__|\.Rproj\.user|\.quarto|\.cache|\.next|\.vite|\.parquet|\.ipynb_checkpoints|\.pytest_cache|\.mypy_cache|\.ruff_cache|\.tox|target|dist|build|out|\.direnv|\.idea|\.vscode|\.history)(?=\/|$|\\)/i.test(segment);
+}
+
+// Directories we treat as "snapshots" — useful to humans but noise to the
+// resolver. Their entries are indexed under a shadow `byNameBackup` map so we
+// can still resolve unambiguous names that only exist in a snapshot, but a
+// name that lives in both the live workspace and a snapshot resolves to the
+// live path only.
+function isBackupSegment(segment) {
+  return /(^|\/|\\)(results_backup(?:_\d+)*|.*_backup|.*_bak|.*\.bak|.*_old|.*_snapshot)(?=\/|$|\\)/i.test(segment);
+}
+
+function relativeWorkspacePathForAbsolute(workspacePath, absolutePath) {
+  if (!workspacePath || !absolutePath) return null;
+  try {
+    const realRoot = fs.realpathSync(workspacePath);
+    const realTarget = fs.realpathSync(absolutePath);
+    if (!isRealPathInsideRoot(realRoot, realTarget) || !fs.statSync(realTarget).isFile()) return null;
+    const relative = normalizeRelativePath(path.relative(realRoot, realTarget));
+    return relative && !dangerousPathSegment(relative) ? relative : null;
+  } catch {
+    return null;
+  }
+}
+
+function buildWorkspaceFileNameIndex(workspacePath, maxEntries = 50000) {
+  const byName = new Map();
+  const byNameBackup = new Map();
+  if (!workspacePath) return { byName, byNameBackup, visited: 0, skipped: 0, maxEntries };
+  const maxPerDir = 2000;
+  let visited = 0;
+  let skipped = 0;
+  let overCapDirs = 0;
+  let backupDirs = 0;
+  const visit = (dir, relativeDir = '') => {
+    if (visited >= maxEntries) return;
+    let entries;
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    if (entries.length > maxPerDir) {
+      // Single directory with thousands of files (e.g. barcode matrices,
+      // raw FASTQ dumps, large node_modules) — skip it instead of letting
+      // it crowd out the workspace entries the chat actually references.
+      overCapDirs += 1;
+      skipped += entries.length;
+      return;
+    }
+    for (const entry of entries) {
+      if (visited >= maxEntries) return;
+      visited += 1;
+      const relative = normalizeRelativePath(path.join(relativeDir, entry.name));
+      if (!relative || dangerousPathSegment(relative)) {
+        skipped += 1;
+        continue;
+      }
+      const isBackup = isBackupSegment(relative);
+      if (entry.isDirectory()) {
+        if (isBackup) backupDirs += 1;
+        visit(path.join(dir, entry.name), relative);
+      } else if (entry.isFile()) {
+        const target = isBackup ? byNameBackup : byName;
+        const matches = target.get(entry.name) || [];
+        matches.push(relative);
+        target.set(entry.name, matches);
+      }
+    }
+  };
+  visit(workspacePath);
+  return { byName, byNameBackup, visited, skipped, maxEntries, overCapDirs, backupDirs };
+}
+
+function findUniqueWorkspaceFileByName(index, backupIndex, fileName) {
+  // All indexed paths live inside the user's `projects.workspace_path` —
+  // there is no separate "live vs backup" concept: the user owns the whole
+  // workspace. When the same bare filename appears in multiple places we
+  // prefer the *shallowest* match (shortest relative path / fewest segments)
+  // because that is almost always the artifact the agent most recently
+  // produced or the one the user is actively working on. Ties on depth are
+  // broken alphabetically so the result is deterministic across runs.
+  const candidates = [];
+  const push = (map) => {
+    if (!map || typeof map.get !== 'function') return;
+    const matches = map.get(fileName) || [];
+    for (const m of matches) candidates.push(m);
+  };
+  push(index);
+  push(backupIndex);
+  if (candidates.length === 0) return null;
+  if (candidates.length === 1) return candidates[0];
+  candidates.sort((a, b) => {
+    const da = a.split('/').filter(Boolean).length;
+    const db = b.split('/').filter(Boolean).length;
+    if (da !== db) return da - db;
+    return a < b ? -1 : a > b ? 1 : 0;
+  });
+  return candidates[0];
+}
+
+function combinedUniqueCount(liveMap, backupMap) {
+  const seen = new Set();
+  let count = 0;
+  const tally = (map) => {
+    if (!map || typeof map.entries !== 'function') return;
+    for (const [name, matches] of map.entries()) {
+      if (seen.has(name)) continue;
+      seen.add(name);
+      if (matches.length === 1) count += 1;
+    }
+  };
+  tally(liveMap);
+  tally(backupMap);
+  return count;
+}
+
+function combinedAmbiguousCount(liveMap, backupMap) {
+  const seen = new Set();
+  let count = 0;
+  const tally = (map) => {
+    if (!map || typeof map.entries !== 'function') return;
+    for (const [name, matches] of map.entries()) {
+      if (seen.has(name)) continue;
+      seen.add(name);
+      if (matches.length > 1) count += 1;
+    }
+  };
+  tally(liveMap);
+  tally(backupMap);
+  return count;
 }
 
 module.exports = function registerHarnessRoutes(app) {
@@ -613,6 +743,40 @@ module.exports = function registerHarnessRoutes(app) {
       }
 
       const activeJobArtifactNames = activeJob ? listJobArtifactNames(activeJob) : [];
+      const needsWorkspaceNameIndex = references.some((reference) => {
+        if (typeof reference !== 'string') return false;
+        return normalizeReference(reference)?.kind === 'bare_filename';
+      });
+      const workspaceFileNameIndexResult = needsWorkspaceNameIndex
+        ? buildWorkspaceFileNameIndex(projectWorkspacePath)
+        : { byName: new Map(), byNameBackup: new Map(), visited: 0, skipped: 0, maxEntries: 50000 };
+      const workspaceFileNameIndex = workspaceFileNameIndexResult.byName;
+      const workspaceFileNameIndexBackup = workspaceFileNameIndexResult.byNameBackup;
+      const workspaceIndexStats = needsWorkspaceNameIndex
+        ? workspaceFileNameIndexResult
+        : null;
+      const workspaceBareFilenameNames = new Set(
+        references
+          .filter((reference) => typeof reference === 'string')
+          .map((reference) => {
+            const normalized = normalizeReference(reference);
+            if (!normalized || normalized.kind !== 'bare_filename') return null;
+            return path.basename(normalized.normalized);
+          })
+          .filter(Boolean)
+      );
+      const ambiguousWorkspaceNames = new Set();
+      if (workspaceIndexStats) {
+        for (const name of workspaceBareFilenameNames) {
+          const matches = workspaceFileNameIndex.get(name) || [];
+          if (matches.length === 0 || matches.length > 1) ambiguousWorkspaceNames.add(name);
+        }
+        if (workspaceBareFilenameNames.size > 0) {
+          console.log(
+            `[file-references] project=${projectId} scanned=${workspaceIndexStats.visited} skipped=${workspaceIndexStats.skipped} maxEntries=${workspaceIndexStats.maxEntries} hits=${[...workspaceBareFilenameNames].filter((name) => (workspaceFileNameIndex.get(name) || []).length === 1).length} missingOrAmbiguous=${[...ambiguousWorkspaceNames].join(',')}`,
+          );
+        }
+      }
 
       const results = [];
       for (const raw of references) {
@@ -644,7 +808,7 @@ module.exports = function registerHarnessRoutes(app) {
             results.push(noResolution(reference, 'forbidden'));
             continue;
           }
-          if (job.project_id && projectId && job.project_id !== projectId) {
+          if (job.project_id !== projectId) {
             results.push(noResolution(reference, 'project_mismatch'));
             continue;
           }
@@ -671,7 +835,7 @@ module.exports = function registerHarnessRoutes(app) {
             results.push(noResolution(reference, 'forbidden'));
             continue;
           }
-          if (job.project_id && projectId && job.project_id !== projectId) {
+          if (job.project_id !== projectId) {
             results.push(noResolution(reference, 'project_mismatch'));
             continue;
           }
@@ -705,6 +869,16 @@ module.exports = function registerHarnessRoutes(app) {
           continue;
         }
 
+        if (normalized.kind === 'absolute_path') {
+          const relative = relativeWorkspacePathForAbsolute(projectWorkspacePath, normalized.normalized);
+          if (!relative) {
+            results.push(noResolution(reference, 'absolute_path_out_of_workspace'));
+            continue;
+          }
+          results.push({ reference, resolved: { kind: 'workspace', ...buildWorkspaceInfo(project, relative) } });
+          continue;
+        }
+
         if (normalized.kind === 'project_relative_path') {
           if (isAbsoluteReference(reference)) {
             results.push(noResolution(reference, 'absolute_path_not_supported'));
@@ -728,28 +902,49 @@ module.exports = function registerHarnessRoutes(app) {
         }
 
         if (normalized.kind === 'bare_filename') {
-          if (!activeJob) {
-            results.push(noResolution(reference, 'no_active_job_for_bare_filename'));
-            continue;
-          }
-          if (activeJob.project_id && projectId && activeJob.project_id !== projectId) {
-            results.push(noResolution(reference, 'project_mismatch'));
-            continue;
-          }
           const baseName = path.basename(normalized.normalized);
-          if (!baseName || !activeJobArtifactNames.includes(baseName)) {
-            results.push(noResolution(reference, 'artifact_missing'));
+          if (
+            activeJob &&
+            activeJob.project_id === projectId &&
+            baseName &&
+            activeJobArtifactNames.includes(baseName)
+          ) {
+            const resolved = buildArtifactInfo(activeJob, baseName);
+            results.push({ reference, resolved: { kind: 'artifact', ...resolved } });
             continue;
           }
-          const resolved = buildArtifactInfo(activeJob, baseName);
-          results.push({ reference, resolved: { kind: 'artifact', ...resolved } });
+          const workspaceMatch = findUniqueWorkspaceFileByName(workspaceFileNameIndex, workspaceFileNameIndexBackup, baseName);
+          if (workspaceMatch) {
+            results.push({
+              reference,
+              resolved: { kind: 'workspace', ...buildWorkspaceInfo(project, workspaceMatch) },
+            });
+            continue;
+          }
+          results.push(noResolution(reference, activeJob ? 'file_not_found_or_ambiguous' : 'workspace_file_not_found_or_ambiguous'));
           continue;
         }
 
         results.push(noResolution(reference, 'unsupported_reference_kind'));
       }
 
-      return res.json({ ok: true, results });
+      return res.json({
+        ok: true,
+        results,
+        ...(workspaceIndexStats
+          ? {
+              workspaceIndex: {
+                scanned: workspaceIndexStats.visited,
+                skipped: workspaceIndexStats.skipped,
+                overCapDirs: workspaceIndexStats.overCapDirs || 0,
+                uniqueNames: combinedUniqueCount(workspaceFileNameIndex, workspaceFileNameIndexBackup),
+                ambiguousNames: combinedAmbiguousCount(workspaceFileNameIndex, workspaceFileNameIndexBackup),
+                maxEntries: workspaceIndexStats.maxEntries,
+                workspacePath: projectWorkspacePath || null,
+              },
+            }
+          : {}),
+      });
     } catch (error) {
       res.status(500).json({ ok: false, error: error.message });
     }
