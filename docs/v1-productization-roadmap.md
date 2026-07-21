@@ -190,7 +190,7 @@ UI 不得制造第二套状态真相，模型层不得绕过确认/审计边界�
 
 ## 6. Stage 4：首个稳定产品版本
 
-状态：✅ macOS arm64 RC 出口完成；`rc.6` 已发布且公开更新链路通过。签名/公证和 x64 分析 Runtime 是后续发行层级边界。执行台账见 [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md)。
+状态：✅ macOS arm64 RC 工程出口完成；`rc.7` 已完成公开分发链路，但仍属于工程候选版，不等于正式产品上线。签名/公证不作为本项目必需条件；x64 分析 Runtime 是否建设另行决策。执行台账见 [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md)。
 
 主模块：`P-06 桌面集成与交付`；覆盖全部质量关注点。
 
@@ -238,4 +238,4 @@ Stage 1–4 的 macOS arm64 RC 出口均已关闭。当前没有新的功能开�
 3. ✅ 用正式 `rc.4` 数据副本验证迁移与设置/插件兼容。
 4. ✅ 完成 arm64 完整链和 x64 壳层构建/启动门禁；x64 Runtime 缺失已列为限制。
 5. ✅ 发布 `v0.0.1-rc.6`，验证 OSS 更新、公开下载、SHA-512 和 DMG 打开链。
-6. 观察 rc.6 真实使用反馈；后续 Stage、签名/公证或 x64 Runtime 需单独立项。
+6. 观察 rc.7 真实使用反馈；UI-032 与后续产品阶段需单独立项。

@@ -6,7 +6,7 @@
 
 `v0.0.1-rc.7` 是当前 OSS 线上版本，已完成代码、自动化、双架构构建、安装候选启动验收和公开更新链核验。Stage 1 UI 产品化、Stage 2 模型层、Stage 3 Harness 与标准流程、Stage 4 首个稳定产品版本及 Harness Phase 7 均已关闭。
 
-当前没有默认进入实施的新工作包。下一步观察 rc.7 的真实使用反馈；UI-032 仍是唯一已明确的短项，完成设置页 capability bundle 的真实证据后再决定签名/公证、x64 Runtime 或新的产品阶段。不得把候选方向写成已承诺计划，也不得将本 RC 描述为 GA。
+当前没有默认进入实施的新工作包。下一步观察 rc.7 的真实使用反馈，并完成 UI-032 设置页 capability bundle 的真实证据。签名/公证不属于本项目必需条件；OSS 上有包只代表技术分发链已打通，不代表产品已经正式上线。rc.7 仍是工程候选版，不得描述为 GA。
 
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 
@@ -43,10 +43,9 @@ Phase 7 未建立第二套 analysis executor、job、artifact 或 workflow truth
 以下是需要真实反馈或单独授权后才能开启的候选方向，不是当前实施任务：
 
 1. rc.7 使用反馈与缺陷修复。
-2. Apple Developer ID 签名与公证。
-3. x64 分析 Runtime。
-4. UI-032 设置页真实 capability bundle 视图验收。
-5. 新产品阶段；若重开 P7-F，必须先有至少 3 个合格真实任务的可复现证据。
+2. x64 分析 Runtime。
+3. UI-032 设置页真实 capability bundle 视图验收。
+4. 新产品阶段；若重开 P7-F，必须先有至少 3 个合格真实任务的可复现证据。
 
 禁止借后续收尾扩大命令权限、增加任意网络工具、批量增加分析流程，或绕过现有确认、安全、审计与 artifact truth 边界。
 
