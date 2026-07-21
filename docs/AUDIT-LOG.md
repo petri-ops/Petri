@@ -5,7 +5,7 @@
 > 非主 agent 每次完成审计后，必须把发现追加到本文件并提交，不要只写在单独报告里。
 >
 > 维护方：非主 agent（只读审计 + 阻断性回归修复通道）
-> 最后更新：2026-07-21（rc.7 候选收口）
+> 最后更新：2026-07-21（rc.7 OSS 发布完成）
 
 ---
 
@@ -332,3 +332,4 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
 | 2026-07-19 | Stage 4 第一批：修复 migration 系统 Node / Electron ABI 边界（问题 I），全量根测试首次 0 fail；开发态与 arm64 打包态空目录启动通过 | 主 agent |
 | 2026-07-19 | Stage 4 rc.6：处理 Runtime 首装契约、诊断导出隐私和 DESeq2 首次成功产物缺口（问题 J/K/L）；完成真实 OSS Runtime、bundle、rc.4 数据副本与双架构验证 | 主 agent |
 | 2026-07-19 | 发布 `v0.0.1-rc.6`：main/tag/OSS 一致；公开更新选择、下载、大小/SHA-512、DMG 挂载及包内版本/架构验证通过，Stage 4 arm64 RC 出口关闭 | 主 agent |
+| 2026-07-21 | 发布 `v0.0.1-rc.7`：修复打包态诊断模块路径，完成 arm64/x64 构建、UI-033/UI-034 收口、OSS 四对象上传及公开 `latest-mac.yml`/SHA-256 反向核验 | 主 agent |
