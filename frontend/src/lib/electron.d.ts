@@ -59,6 +59,7 @@ declare global {
       aiSettings: {
         get: () => Promise<Record<string, unknown>>;
         save: (settings: Record<string, unknown>) => Promise<void>;
+        getCredential: (credentialId: string) => Promise<{ ok: boolean; apiKey: string; error?: string }>;
         test: (providerOrProfile: string | Record<string, unknown>, apiKey: string) => Promise<{ ok: boolean; message: string }>;
         listModels: (providerOrProfile: string | Record<string, unknown>, apiKey: string) => Promise<{ ok: boolean; models: string[]; message: string }>;
       };

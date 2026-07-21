@@ -7,6 +7,8 @@ export interface EndpointTransferProfile {
   defaultModel: string;
   provider?: string;
   hasApiKey?: boolean;
+  /** Included only for an explicit user-requested credential export. */
+  apiKey?: string;
 }
 
 export interface ParsedEndpointTransfer {
@@ -48,6 +50,7 @@ function normalizeProfile(input: unknown, index: number): EndpointTransferProfil
     defaultModel: defaultModel.slice(0, 200),
     provider: clean(raw.provider) || undefined,
     hasApiKey: boolValue(raw.hasApiKey ?? raw.has_api_key),
+    apiKey: clean(raw.apiKey ?? raw.api_key ?? raw.key) || undefined,
   };
 }
 
@@ -56,7 +59,10 @@ function csvEscape(value: unknown): string {
   return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
-export function endpointProfilesForTransfer(profiles: ChatModelPreset[]): EndpointTransferProfile[] {
+export function endpointProfilesForTransfer(
+  profiles: ChatModelPreset[],
+  apiKeys: Record<string, string> = {}
+): EndpointTransferProfile[] {
   return profiles.map((profile) => ({
     id: profile.id,
     supplier: profile.label || profile.provider,
@@ -64,24 +70,28 @@ export function endpointProfilesForTransfer(profiles: ChatModelPreset[]): Endpoi
     defaultModel: profile.defaultModel || profile.model,
     provider: profile.provider,
     hasApiKey: undefined,
+    ...(apiKeys[profile.id] ? { apiKey: apiKeys[profile.id] } : {}),
   })).filter((profile) => profile.baseUrl && profile.defaultModel);
 }
 
-export function exportEndpointProfilesJson(profiles: ChatModelPreset[]): string {
+export function exportEndpointProfilesJson(profiles: ChatModelPreset[], apiKeys: Record<string, string> = {}): string {
   return JSON.stringify({
     format: 'biof3-api-endpoints',
     version: 1,
     exportedAt: new Date().toISOString(),
-    note: 'API keys are intentionally excluded. Re-enter keys after import.',
-    profiles: endpointProfilesForTransfer(profiles),
+    note: Object.keys(apiKeys).length
+      ? 'API keys were included because the user explicitly requested a credential export.'
+      : 'API keys were not available for this export.',
+    profiles: endpointProfilesForTransfer(profiles, apiKeys),
   }, null, 2);
 }
 
-export function exportEndpointProfilesCsv(profiles: ChatModelPreset[]): string {
-  const rows = endpointProfilesForTransfer(profiles).map((profile) =>
-    CSV_HEADERS.map((header) => csvEscape(profile[header as keyof EndpointTransferProfile])).join(',')
+export function exportEndpointProfilesCsv(profiles: ChatModelPreset[], apiKeys: Record<string, string> = {}): string {
+  const headers = [...CSV_HEADERS, 'apiKey'];
+  const rows = endpointProfilesForTransfer(profiles, apiKeys).map((profile) =>
+    headers.map((header) => csvEscape(profile[header as keyof EndpointTransferProfile])).join(',')
   );
-  return `\uFEFF${CSV_HEADERS.join(',')}\n${rows.join('\n')}\n`;
+  return `\uFEFF${headers.join(',')}\n${rows.join('\n')}\n`;
 }
 
 function parseCsv(text: string): Record<string, string>[] {
@@ -126,9 +136,6 @@ export function parseEndpointProfiles(text: string, format: 'json' | 'csv'): Par
   const profiles: EndpointTransferProfile[] = [];
   rawProfiles.forEach((raw, index) => {
     const record = raw && typeof raw === 'object' ? raw as Record<string, unknown> : {};
-    if (record.apiKey || record.api_key || record.key) {
-      warnings.push(`第 ${index + 1} 行包含 Key 字段，已忽略；请在设置页重新填写。`);
-    }
     const profile = normalizeProfile(raw, index);
     if (profile) profiles.push(profile);
     else warnings.push(`第 ${index + 1} 行缺少有效 Base URL 或默认模型，已跳过。`);

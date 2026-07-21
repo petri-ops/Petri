@@ -992,6 +992,18 @@ function setupAiSettingsIpc() {
     }
   });
 
+  ipcMain.handle("ai-settings:get-credential", async (event, credentialId) => {
+    try {
+      const { getApiKey } = require(
+        resolveCore("r-server", "helpers", "ai-settings.js"),
+      );
+      const apiKey = getApiKey(String(credentialId || ""));
+      return { ok: true, apiKey };
+    } catch (e) {
+      return { ok: false, apiKey: "", error: e.message };
+    }
+  });
+
   ipcMain.handle("ai-settings:test", async (event, providerOrProfile, apiKey) => {
     try {
       const { testApiKey } = require(

@@ -650,6 +650,8 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   const [fallbackBindings, setFallbackBindings] = useState<Partial<Record<ModelRole, string[]>>>({});
   const [credentialInputs, setCredentialInputs] = useState<Record<string, string>>({});
   const [credentialStatus, setCredentialStatus] = useState<Record<string, boolean>>({});
+  const [visibleCredentialIds, setVisibleCredentialIds] = useState<Record<string, boolean>>({});
+  const [copiedCredentialId, setCopiedCredentialId] = useState<string | null>(null);
   const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
   const [credentialBackend, setCredentialBackend] = useState('local');
   const [endpointTransferMessage, setEndpointTransferMessage] = useState<string | null>(null);
@@ -832,16 +834,51 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     URL.revokeObjectURL(url);
   }
 
-  function exportEndpoints(format: 'json' | 'csv') {
+  async function readCredential(id: string): Promise<string> {
+    const inline = credentialInputs[id]?.trim();
+    if (inline) return inline;
+    const result = await window.biof3Desktop?.aiSettings.getCredential(id);
+    return result?.ok ? result.apiKey : '';
+  }
+
+  async function revealCredential(id: string) {
+    const value = await readCredential(id);
+    if (!value) {
+      setEndpointTransferMessage('当前渠道没有可读取的 Key，请重新填写后保存。');
+      return;
+    }
+    setCredentialInputs((current) => ({ ...current, [id]: value }));
+    setVisibleCredentialIds((current) => ({ ...current, [id]: true }));
+  }
+
+  async function copyCredential(id: string) {
+    const value = await readCredential(id);
+    if (!value) {
+      setEndpointTransferMessage('当前渠道没有可复制的 Key，请重新填写后保存。');
+      return;
+    }
+    await navigator.clipboard.writeText(value);
+    setCopiedCredentialId(id);
+    setTimeout(() => setCopiedCredentialId((current) => current === id ? null : current), 1600);
+  }
+
+  async function exportEndpoints(format: 'json' | 'csv') {
+    if (!window.biof3Desktop?.aiSettings.getCredential) return;
+    if (!window.confirm('导出文件将包含 API Key 明文。请仅保存到安全位置，确定继续吗？')) return;
+    const apiKeys: Record<string, string> = {};
+    await Promise.all(userModelProfiles.map(async (profile) => {
+      const value = await readCredential(credentialId(profile));
+      if (value) apiKeys[profile.id] = value;
+    }));
     const content = format === 'json'
-      ? exportEndpointProfilesJson(userModelProfiles)
-      : exportEndpointProfilesCsv(userModelProfiles);
+      ? exportEndpointProfilesJson(userModelProfiles, apiKeys)
+      : exportEndpointProfilesCsv(userModelProfiles, apiKeys);
     downloadEndpointFile(
       `biof3-api-endpoints.${format}`,
       content,
       format === 'json' ? 'application/json;charset=utf-8' : 'text/csv;charset=utf-8'
     );
-    setEndpointTransferMessage(`已导出 ${userModelProfiles.length} 个渠道（不含 Key）`);
+    setEndpointTransferMessage(`已导出 ${userModelProfiles.length} 个渠道（含 ${Object.keys(apiKeys).length} 个 Key）`);
   }
 
   async function importEndpoints(file: File) {
@@ -849,6 +886,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
       const format = file.name.toLowerCase().endsWith('.csv') ? 'csv' : 'json';
       const parsed = parseEndpointProfiles(await file.text(), format);
       const imported = parsed.profiles;
+      const importedCredentials: Record<string, string> = {};
       setModelProfiles((current) => {
         const next = [...current];
         imported.forEach((item) => {
@@ -873,11 +911,15 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
             roles: existing?.roles || [],
             parameters: existing?.parameters || {},
           };
+          if (item.apiKey) importedCredentials[credentialId(profile)] = item.apiKey;
           if (existingIndex >= 0) next[existingIndex] = profile;
           else next.push(profile);
         });
         return next;
       });
+      if (Object.keys(importedCredentials).length > 0) {
+        setCredentialInputs((current) => ({ ...current, ...importedCredentials }));
+      }
       const warning = parsed.warnings.length ? `；${parsed.warnings.join(' ')}` : '';
       setEndpointTransferMessage(`已导入 ${imported.length} 个渠道，已合并现有配置${warning}`);
     } catch (error) {
@@ -977,7 +1019,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                 />
                 {endpointTransferMessage && <span className="biof3-field__hint">{endpointTransferMessage}</span>}
               </div>
-              <p className="biof3-field__hint">导出文件不包含 API Key；导入会合并同 ID 或 Base URL 渠道，新渠道需重新填写 Key。</p>
+              <p className="biof3-field__hint">Key 默认隐藏，可点击眼睛显示或复制；导出前会确认是否把 Key 写入文件，请仅保存到安全位置。</p>
             </div>
             <div className="biof3-model-list">
               {userModelProfiles.length > 0 && (
@@ -1044,22 +1086,45 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       aria-label="Base URL"
                       title={endpointBaseUrl(profile)}
                     />
-                    <input
-                      type="password"
-                      className="biof3-input"
-                      value={credentialInputs[id] || ''}
-                      onChange={(e) => {
-                        setCredentialInputs((current) => ({ ...current, [id]: e.target.value }));
-                        setAvailableModels((current) => ({ ...current, [profile.id]: [] }));
-                        setTestResult((current) => {
-                          const next = { ...current };
-                          delete next[profile.id];
-                          return next;
-                        });
-                      }}
-                      placeholder={configured ? 'Key 已配置' : 'API Key'}
-                      aria-label={configured ? 'API Key 已配置，输入新 Key 可覆盖' : 'API Key'}
-                    />
+                    <div className="biof3-endpoint-key-field">
+                      <input
+                        type={visibleCredentialIds[id] ? 'text' : 'password'}
+                        className="biof3-input"
+                        value={credentialInputs[id] || ''}
+                        onChange={(e) => {
+                          setCredentialInputs((current) => ({ ...current, [id]: e.target.value }));
+                          setAvailableModels((current) => ({ ...current, [profile.id]: [] }));
+                          setTestResult((current) => {
+                            const next = { ...current };
+                            delete next[profile.id];
+                            return next;
+                          });
+                        }}
+                        placeholder={configured ? 'Key 已配置' : 'API Key'}
+                        aria-label={configured ? 'API Key 已配置，输入新 Key 可覆盖' : 'API Key'}
+                      />
+                      {configured && !credentialInputs[id] && (
+                        <span className="biof3-endpoint-key-status" aria-hidden="true">已配置</span>
+                      )}
+                      <button
+                        type="button"
+                        className="biof3-endpoint-key-action"
+                        onClick={() => void revealCredential(id)}
+                        aria-label="显示 API Key"
+                        title="显示 API Key"
+                      >
+                        <Icon name={visibleCredentialIds[id] ? 'eye-off' : 'eye'} size={13} />
+                      </button>
+                      <button
+                        type="button"
+                        className="biof3-endpoint-key-action"
+                        onClick={() => void copyCredential(id)}
+                        aria-label="复制 API Key"
+                        title="复制 API Key"
+                      >
+                        {copiedCredentialId === id ? <Icon name="check" size={13} /> : <Icon name="copy" size={13} />}
+                      </button>
+                    </div>
                     <select
                       className="biof3-select"
                       value={configuredDefault}

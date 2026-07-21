@@ -25,6 +25,12 @@ describe('model endpoint transfer', () => {
     });
   });
 
+  it('includes credentials only when the caller explicitly supplies them', () => {
+    const output = exportEndpointProfilesJson(profiles as never, { 'model-lab': 'sk-test' });
+    expect(output).toContain('sk-test');
+    expect(parseEndpointProfiles(output, 'json').profiles[0].apiKey).toBe('sk-test');
+  });
+
   it('exports and imports quoted CSV fields', () => {
     const output = exportEndpointProfilesCsv([{ ...profiles[0], label: '实验室,主渠道' }] as never);
     const parsed = parseEndpointProfiles(output, 'csv');
@@ -32,13 +38,13 @@ describe('model endpoint transfer', () => {
     expect(parsed.profiles[0].baseUrl).toBe('https://llm.example.com/v1');
   });
 
-  it('rejects invalid rows and ignores plaintext keys', () => {
+  it('imports an explicit key while still rejecting invalid rows', () => {
     const parsed = parseEndpointProfiles(JSON.stringify({ profiles: [
       { supplier: '有效', baseUrl: 'https://example.com/v1', defaultModel: 'model-a', apiKey: 'secret' },
       { supplier: '无效', baseUrl: 'file:///tmp', defaultModel: 'model-b' },
     ] }), 'json');
     expect(parsed.profiles).toHaveLength(1);
-    expect(parsed.warnings.join(' ')).toContain('Key');
+    expect(parsed.profiles[0].apiKey).toBe('secret');
     expect(parsed.warnings.join(' ')).toContain('跳过');
   });
 });

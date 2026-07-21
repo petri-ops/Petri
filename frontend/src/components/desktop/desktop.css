@@ -535,6 +535,47 @@
   margin-bottom: 8px;
 }
 
+.biof3-endpoint-key-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.biof3-endpoint-key-field .biof3-input {
+  min-width: 0;
+  padding-right: 52px;
+}
+
+.biof3-endpoint-key-status {
+  position: absolute;
+  right: 52px;
+  color: var(--biof3-text-tertiary);
+  font-size: 0.68rem;
+  pointer-events: none;
+}
+
+.biof3-endpoint-key-action {
+  position: relative;
+  z-index: 1;
+  width: 24px;
+  height: 24px;
+  margin-left: -26px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--biof3-text-tertiary);
+  cursor: pointer;
+}
+
+.biof3-endpoint-key-action + .biof3-endpoint-key-action {
+  margin-left: 0;
+}
+
+.biof3-endpoint-key-action:hover {
+  color: var(--biof3-text);
+}
+
 .biof3-model-preset__actions {
   grid-column: 1 / -1;
   display: flex;

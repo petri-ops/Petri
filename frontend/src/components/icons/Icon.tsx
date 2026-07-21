@@ -35,6 +35,9 @@ export type IconName =
   | 'arrow-right'
   | 'arrow-up'
   | 'check'
+  | 'copy'
+  | 'eye'
+  | 'eye-off'
   | 'refresh'
   | 'flag'
   | 'pin'
@@ -224,6 +227,25 @@ const paths: Record<IconName, React.ReactNode> = {
     </>
   ),
   check: <polyline points="20 6 9 17 4 12" />,
+  copy: (
+    <>
+      <rect x="9" y="9" width="11" height="11" rx="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </>
+  ),
+  eye: (
+    <>
+      <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+      <circle cx="12" cy="12" r="2.5" />
+    </>
+  ),
+  'eye-off': (
+    <>
+      <path d="m3 3 18 18" />
+      <path d="M10.6 6.2A10.8 10.8 0 0 1 12 6c6.5 0 10 6 10 6a18.7 18.7 0 0 1-3.1 3.7" />
+      <path d="M6.3 6.4C3.6 8.2 2 12 2 12s3.5 6 10 6a10.8 10.8 0 0 0 2.1-.2" />
+    </>
+  ),
   refresh: (
     <>
       <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
