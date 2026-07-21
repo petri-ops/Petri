@@ -4,6 +4,7 @@ import {
   formatToolSideEffects,
   mergeToolCallActivity,
   mergeToolResultActivity,
+  summarizeToolCall,
 } from './toolActivity';
 
 const structuredResult = {
@@ -110,5 +111,16 @@ describe('tool activity projection', () => {
     expect(formatToolSideEffects(structuredResult.toolResult.sideEffects)).toBeNull();
     expect(formatToolSideEffects({ type: 'none', riskTier: 'R0', resources: [] }))
       .toBeNull();
+  });
+
+  it('projects safe Codex-style activity details without exposing write content', () => {
+    expect(summarizeToolCall('workspace_exec', { command: 'pwd' }))
+      .toEqual({ actionLabel: '已运行', actionDetail: 'pwd' });
+    expect(summarizeToolCall('workspace_read', { path: 'scripts/dev-electron.js', startLine: 1 }))
+      .toEqual({ actionLabel: '已读取', actionDetail: 'scripts/dev-electron.js · 第 1 行起' });
+    expect(summarizeToolCall('workspace_write', {
+      path: 'notes.txt',
+      content: 'Authorization: secret-value',
+    })).toEqual({ actionLabel: '已修改', actionDetail: 'notes.txt' });
   });
 });

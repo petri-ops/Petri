@@ -432,9 +432,10 @@
 /* Tool activity */
 .sc-tool-activity-list {
   display: grid;
-  gap: 6px;
+  gap: 0;
   align-self: stretch;
   margin-left: 38px;
+  border-bottom: 1px solid var(--biof3-border);
 }
 
 .sc-tool-activity-summary {
@@ -442,11 +443,12 @@
   align-items: center;
   gap: 7px;
   width: 100%;
-  min-height: 34px;
-  padding: 7px 10px;
-  border: 1px solid var(--biof3-border);
-  border-radius: 9px;
-  background: var(--biof3-bg-subtle);
+  min-height: 32px;
+  padding: 6px 2px;
+  border: 0;
+  border-top: 1px solid var(--biof3-border);
+  border-radius: 0;
+  background: transparent;
   color: var(--biof3-text-secondary);
   cursor: pointer;
   font: inherit;
@@ -454,19 +456,19 @@
 }
 
 .sc-tool-activity-summary:hover {
-  border-color: var(--biof3-accent-border);
+  background: var(--biof3-bg-subtle);
   color: var(--biof3-text);
 }
 
 .sc-tool-activity-summary-label {
   color: var(--biof3-text);
-  font-size: 12px;
-  font-weight: 650;
+  font-size: 13px;
+  font-weight: 600;
 }
 
-.sc-tool-activity-summary-status {
+.sc-tool-activity-summary-count {
+  color: var(--biof3-text-tertiary);
   font-size: 11px;
-  font-weight: 650;
 }
 
 .sc-tool-activity-summary-hint {
@@ -478,24 +480,23 @@
 .sc-tool-activity {
   display: flex;
   align-items: flex-start;
-  gap: 9px;
+  gap: 8px;
   min-width: 0;
-  padding: 8px 10px;
-  border: 1px solid var(--biof3-border);
-  border-radius: 9px;
-  background: var(--biof3-bg-subtle);
+  padding: 7px 2px;
+  border: 0;
+  border-top: 1px solid var(--biof3-border);
+  border-radius: 0;
+  background: transparent;
   color: var(--biof3-text-secondary);
 }
 
 .sc-tool-activity-running {
-  border-color: var(--biof3-accent-border);
-  background: var(--biof3-accent-surface);
+  color: var(--biof3-accent);
 }
 
 .sc-tool-activity-error,
 .sc-tool-activity-denied {
-  border-color: var(--biof3-status-warning-border);
-  background: var(--biof3-status-warning-bg);
+  color: var(--biof3-status-warning-fg);
 }
 
 .sc-tool-activity-icon {
@@ -533,6 +534,28 @@
   font-size: 12px;
   font-weight: 700;
   overflow-wrap: anywhere;
+}
+
+.sc-tool-activity-action {
+  color: var(--biof3-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sc-tool-activity-command {
+  max-width: min(720px, 70vw);
+  overflow: hidden;
+  color: var(--biof3-text);
+  font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sc-tool-activity-tool {
+  color: var(--biof3-text-tertiary);
+  font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
+  font-size: 10px;
 }
 
 .sc-tool-activity-status {

@@ -739,13 +739,18 @@ function ToolActivityList({ activities }: { activities: ToolActivityItem[] }): R
   const failed = activities.filter(
     (activity) => activity.status === 'error' || activity.status === 'denied'
   ).length;
+  const totalDurationMs = activities.reduce(
+    (total, activity) => total + (typeof activity.durationMs === 'number' ? activity.durationMs : 0),
+    0
+  );
+  const totalDuration = formatToolDuration(totalDurationMs);
   const summary = running > 0
     ? '正在处理'
     : awaiting > 0
       ? '等待确认'
       : failed > 0
         ? `${failed} 项未完成`
-        : '处理完成';
+        : `已处理${totalDuration ? ` ${totalDuration}` : ''}`;
 
   return (
     <div className="sc-tool-activity-list" aria-label="工具活动">
@@ -756,8 +761,8 @@ function ToolActivityList({ activities }: { activities: ToolActivityItem[] }): R
         onClick={() => setExpanded((current) => !current)}
       >
         <Icon name={expanded ? 'chevron-down' : 'chevron-right'} size={14} />
-        <span className="sc-tool-activity-summary-label">本轮使用了 {activities.length} 次工具</span>
-        <span className="sc-tool-activity-summary-status">{summary}</span>
+        <span className="sc-tool-activity-summary-label">{summary}</span>
+        <span className="sc-tool-activity-summary-count">{activities.length} 次工具</span>
         <span className="sc-tool-activity-summary-hint">{expanded ? '收起详情' : '展开追溯'}</span>
       </button>
       {expanded && activities.map((activity) => {
@@ -774,10 +779,14 @@ function ToolActivityList({ activities }: { activities: ToolActivityItem[] }): R
             </span>
             <div className="sc-tool-activity-body">
               <div className="sc-tool-activity-head">
-                <span className="sc-tool-activity-name">{activity.name}</span>
+                <span className="sc-tool-activity-action">{activity.actionLabel}</span>
+                {activity.actionDetail && (
+                  <code className="sc-tool-activity-command">{activity.actionDetail}</code>
+                )}
                 <span className="sc-tool-activity-status">{statusLabels[activity.status]}</span>
               </div>
               <div className="sc-tool-activity-meta">
+                <span className="sc-tool-activity-tool">{activity.name}</span>
                 {duration && <span>{duration}</span>}
                 {activity.truncated && <span>结果已截断</span>}
                 {sideEffects && <span>副作用摘要：{sideEffects}</span>}

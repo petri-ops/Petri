@@ -17,6 +17,8 @@ export interface ToolActivityItem {
   terminationReason?: string;
   sideEffects?: ToolSideEffects;
   summary?: string;
+  actionLabel: string;
+  actionDetail?: string;
 }
 
 function legacyKey(name: string, traceId?: string): string {
@@ -25,6 +27,42 @@ function legacyKey(name: string, traceId?: string): string {
 
 function callKey(event: ToolCallEvent): string {
   return event.callId || legacyKey(event.name, event.traceId);
+}
+
+function compactDetail(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const normalized = value.replace(/\s+/g, ' ').trim();
+  if (!normalized) return undefined;
+  return normalized.length > 140 ? `${normalized.slice(0, 137)}…` : normalized;
+}
+
+/** Convert tool arguments into a safe, user-facing Codex-style activity line. */
+export function summarizeToolCall(
+  name: string,
+  args: Record<string, unknown> = {}
+): { actionLabel: string; actionDetail?: string } {
+  switch (name) {
+    case 'workspace_exec':
+      return { actionLabel: '已运行', actionDetail: compactDetail(args.command) || '命令' };
+    case 'workspace_read': {
+      const path = compactDetail(args.path) || '文件';
+      const start = Number.isInteger(args.startLine) ? ` · 第 ${args.startLine} 行起` : '';
+      return { actionLabel: '已读取', actionDetail: `${path}${start}` };
+    }
+    case 'workspace_list':
+      return { actionLabel: '已读取', actionDetail: `目录 ${compactDetail(args.path) || '.'}` };
+    case 'workspace_find':
+      return { actionLabel: '已查找', actionDetail: compactDetail(args.pattern) || '文件' };
+    case 'workspace_search':
+      return { actionLabel: '已搜索', actionDetail: compactDetail(args.query) || '文本' };
+    case 'workspace_write':
+    case 'workspace_replace':
+      return { actionLabel: '已修改', actionDetail: compactDetail(args.path) || '文件' };
+    case 'run_tool':
+      return { actionLabel: '已运行', actionDetail: compactDetail(args.toolId) || '分析工具' };
+    default:
+      return { actionLabel: '已调用', actionDetail: name };
+  }
 }
 
 function nextLegacyCallKey(current: ToolActivityItem[], event: ToolCallEvent): string {
@@ -55,6 +93,7 @@ export function mergeToolCallActivity(
         callId: event.callId || current[index].callId,
         traceId: event.traceId || current[index].traceId,
         name: event.name,
+        ...summarizeToolCall(event.name, event.args),
       };
       return next;
     }
@@ -68,6 +107,7 @@ export function mergeToolCallActivity(
       traceId: event.traceId,
       name: event.name,
       status: 'running',
+      ...summarizeToolCall(event.name, event.args),
     },
   ];
 }
@@ -98,6 +138,7 @@ export function mergeToolResultActivity(
     }
   }
 
+  const fallbackAction = summarizeToolCall(name);
   const item: ToolActivityItem = {
     key: index >= 0 ? current[index].key : key,
     callId: result?.callId || (index >= 0 ? current[index].callId : undefined),
@@ -111,6 +152,8 @@ export function mergeToolResultActivity(
     terminationReason: result?.terminationReason,
     sideEffects: result?.sideEffects,
     summary: event.summary,
+    actionLabel: index >= 0 ? current[index].actionLabel : fallbackAction.actionLabel,
+    actionDetail: index >= 0 ? current[index].actionDetail : fallbackAction.actionDetail,
   };
 
   if (index < 0) return [...current, item];
