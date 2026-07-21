@@ -254,7 +254,18 @@ class DeepSeekProvider {
     const t = telemetry || {};
     const startedAt = Date.now();
     const recordAiUsage = getRecordAiUsage();
-    const streamBody = { ...(body || {}), stream: true, stream_options: { include_usage: true } };
+    const profileProvider = options && options.profile && options.profile.provider;
+    const streamBody = {
+      ...(body || {}),
+      stream: true,
+      // `stream_options` is a DeepSeek/OpenAI extension and is rejected by
+      // several otherwise-compatible gateways. Keep usage streaming for the
+      // native DeepSeek path, but use the portable OpenAI-compatible shape for
+      // custom channels, Ollama, LM Studio, and vLLM.
+      ...(!profileProvider || profileProvider === 'deepseek'
+        ? { stream_options: { include_usage: true } }
+        : {}),
+    };
     let data;
     try {
       data = JSON.stringify(streamBody);
@@ -271,6 +282,7 @@ class DeepSeekProvider {
       let finishReason = null;
       let sseBuffer = '';
       let errorBuffer = '';
+      let sawChoice = false;
       let settled = false;
       let req; // eslint-disable-line prefer-const
 
@@ -292,6 +304,10 @@ class DeepSeekProvider {
         finish(result, code);
       };
       const complete = () => {
+        if (!sawChoice) {
+          fail('parse_error', '模型响应未包含可识别的 choices');
+          return;
+        }
         emit({ type: 'done', usage });
         finish({
           choices: [
@@ -331,7 +347,28 @@ class DeepSeekProvider {
         }
         const choice = parsed.choices && parsed.choices[0];
         if (!choice) return;
+        sawChoice = true;
         if (choice.finish_reason) finishReason = choice.finish_reason;
+
+        // Some OpenAI-compatible gateways advertise streaming but return a
+        // regular chat-completions JSON envelope. Accept that shape instead
+        // of silently completing with an empty assistant message.
+        if (choice.message && typeof choice.message === 'object') {
+          const message = choice.message;
+          if (typeof message.content === 'string' && message.content) {
+            contentParts.push(message.content);
+            emit({ type: 'content_delta', content: message.content });
+          }
+          if (Array.isArray(message.tool_calls)) {
+            for (let index = 0; index < message.tool_calls.length; index += 1) {
+              const toolCall = { ...message.tool_calls[index], index };
+              appendToolCall(toolCalls, toolCall);
+              emit({ type: 'tool_call_delta', delta: toolCall });
+            }
+          }
+          complete();
+          return;
+        }
         const delta = choice.delta || {};
         if (typeof delta.content === 'string' && delta.content) {
           contentParts.push(delta.content);

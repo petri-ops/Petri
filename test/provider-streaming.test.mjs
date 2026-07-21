@@ -146,6 +146,92 @@ test('chatStream reassembles split tool calls and handles glued SSE frames', asy
   }
 });
 
+test('chatStream accepts a regular chat-completions JSON envelope from a compatible gateway', async () => {
+  const { server, baseUrl } = await startServer((req, res) => {
+    req.resume();
+    req.on('end', () => {
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({
+        choices: [{
+          finish_reason: 'stop',
+          message: { role: 'assistant', content: '普通 JSON 回复' },
+        }],
+        usage: { prompt_tokens: 2, completion_tokens: 3 },
+      }));
+    });
+  });
+
+  try {
+    const events = [];
+    const result = await new DeepSeekProvider().chatStream(
+      'key',
+      { model: 'compatible-model', messages: [] },
+      {},
+      (event) => events.push(event),
+      { baseUrl }
+    );
+    assert.equal(result.choices[0].message.content, '普通 JSON 回复');
+    assert.deepEqual(events.map((event) => event.type), ['usage', 'content_delta', 'done']);
+  } finally {
+    await closeServer(server);
+  }
+});
+
+test('generic OpenAI-compatible profiles omit the DeepSeek-only stream_options extension', async () => {
+  let receivedBody;
+  const { server, baseUrl } = await startServer((req, res) => {
+    let body = '';
+    req.on('data', (chunk) => (body += chunk));
+    req.on('end', () => {
+      receivedBody = JSON.parse(body);
+      res.writeHead(200, { 'content-type': 'text/event-stream' });
+      res.end('data: {"choices":[{"delta":{"content":"ok"},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n');
+    });
+  });
+
+  try {
+    const result = await new OpenAICompatibleProvider({
+      name: 'gateway-test',
+      requiresApiKey: false,
+    }).chatStream(
+      '',
+      { model: 'gateway-model', messages: [] },
+      {},
+      () => {},
+      { baseUrl, profile: { provider: 'openai-compatible' } }
+    );
+    assert.equal(result.choices[0].message.content, 'ok');
+    assert.equal(receivedBody.stream, true);
+    assert.equal(receivedBody.stream_options, undefined);
+  } finally {
+    await closeServer(server);
+  }
+});
+
+test('chatStream reports an unrecognized successful response instead of an empty reply', async () => {
+  const { server, baseUrl } = await startServer((req, res) => {
+    req.resume();
+    req.on('end', () => {
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ object: 'unknown_response' }));
+    });
+  });
+
+  try {
+    const result = await new DeepSeekProvider().chatStream(
+      'key',
+      { model: 'compatible-model', messages: [] },
+      {},
+      () => {},
+      { baseUrl }
+    );
+    assert.equal(result.error, 'parse_error');
+    assert.match(result.message, /choices/);
+  } finally {
+    await closeServer(server);
+  }
+});
+
 test('chatStream reports HTTP errors and cancellation', async () => {
   const errorServer = await startServer((_req, res) => {
     res.writeHead(401, { 'content-type': 'application/json' });
