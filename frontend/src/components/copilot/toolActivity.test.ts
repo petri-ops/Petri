@@ -48,6 +48,39 @@ describe('tool activity projection', () => {
     expect(mergeToolResultActivity(denied, structuredResult)).toHaveLength(1);
   });
 
+  it('keeps successful bounded results distinct from tool failures', () => {
+    const running = mergeToolCallActivity([], {
+      name: 'workspace_list',
+      args: { path: 'data' },
+      traceId: 'trace_summary',
+      callId: 'call_summary',
+    });
+    const summarized = mergeToolResultActivity(running, {
+      name: 'workspace_list',
+      summary: 'ok',
+      toolResult: {
+        contractVersion: '1.0.0',
+        traceId: 'trace_summary',
+        callId: 'call_summary',
+        tool: 'workspace_list',
+        status: 'success',
+        terminationReason: 'success',
+        durationMs: 5,
+        sourceTruncated: true,
+        previewTruncated: true,
+        truncated: true,
+        sideEffects: { type: 'none', riskTier: 'R0', resources: [] },
+      },
+    });
+
+    expect(summarized[0]).toMatchObject({
+      status: 'success',
+      sourceTruncated: true,
+      previewTruncated: true,
+      truncated: true,
+    });
+  });
+
   it('correlates legacy results with the newest same-name running call', () => {
     let activities = mergeToolCallActivity([], { name: 'query', args: {} });
     activities = mergeToolResultActivity(activities, { name: 'query', summary: 'ok' });

@@ -788,7 +788,7 @@ function ToolActivityList({ activities }: { activities: ToolActivityItem[] }): R
               <div className="sc-tool-activity-meta">
                 <span className="sc-tool-activity-tool">{activity.name}</span>
                 {duration && <span>{duration}</span>}
-                {activity.truncated && <span>结果已截断</span>}
+                {activity.truncated && activity.status === 'success' && <span>仅显示摘要</span>}
                 {sideEffects && <span>副作用摘要：{sideEffects}</span>}
                 {showReason && activity.terminationReason && (
                   <span className="sc-tool-activity-reason">

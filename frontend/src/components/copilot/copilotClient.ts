@@ -106,6 +106,11 @@ export interface StructuredToolResult {
   status: 'success' | 'error' | 'denied';
   terminationReason: string;
   durationMs: number;
+  /** The source result exceeded a configured safety bound. */
+  sourceTruncated?: boolean;
+  /** The UI-facing preview was shortened for compact activity rendering. */
+  previewTruncated?: boolean;
+  /** Legacy combined flag; retained for older event producers. */
   truncated: boolean;
   sideEffects: ToolSideEffects;
   data?: unknown;
@@ -171,7 +176,17 @@ export function parseToolResultEvent(obj: Record<string, unknown>): ToolResultEv
   return {
     name: String(obj.name || ''),
     summary: typeof obj.summary === 'string' ? obj.summary : '',
-    toolResult: obj.toolResult as StructuredToolResult | undefined,
+    toolResult: obj.toolResult && typeof obj.toolResult === 'object'
+      ? {
+        ...(obj.toolResult as StructuredToolResult),
+        sourceTruncated: typeof (obj.toolResult as Record<string, unknown>).sourceTruncated === 'boolean'
+          ? (obj.toolResult as Record<string, unknown>).sourceTruncated as boolean
+          : undefined,
+        previewTruncated: typeof (obj.toolResult as Record<string, unknown>).previewTruncated === 'boolean'
+          ? (obj.toolResult as Record<string, unknown>).previewTruncated as boolean
+          : undefined,
+      }
+      : undefined,
     actType: obj.actType as string | undefined,
     message: obj.message as string | undefined,
     undoToken: obj.undoToken as string | undefined,

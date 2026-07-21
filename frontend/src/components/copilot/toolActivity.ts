@@ -13,6 +13,8 @@ export interface ToolActivityItem {
   name: string;
   status: ToolActivityStatus;
   durationMs?: number;
+  sourceTruncated?: boolean;
+  previewTruncated?: boolean;
   truncated?: boolean;
   terminationReason?: string;
   sideEffects?: ToolSideEffects;
@@ -148,6 +150,8 @@ export function mergeToolResultActivity(
       ? 'awaiting_confirmation'
       : result?.status || inferLegacyStatus(event),
     durationMs: result?.durationMs,
+    sourceTruncated: result?.sourceTruncated,
+    previewTruncated: result?.previewTruncated,
     truncated: result?.truncated,
     terminationReason: result?.terminationReason,
     sideEffects: result?.sideEffects,

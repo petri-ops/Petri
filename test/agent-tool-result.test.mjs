@@ -65,6 +65,26 @@ test('initial ToolResult truncation is measured from raw data before redaction',
   assert.equal(projected.includes(rawCredentialMessage), false);
 });
 
+test('successful large results expose neutral truncation metadata', () => {
+  const envelope = {
+    contractVersion: '1.0.0',
+    traceId: 'trace_preview_summary',
+    callId: 'call_preview_summary',
+    tool: 'workspace_list',
+    status: 'success',
+    terminationReason: 'success',
+    durationMs: 4,
+    truncated: false,
+    sideEffects: { type: 'none', riskTier: 'R0', resources: [] },
+    data: { entries: Array.from({ length: 100 }, (_, index) => ({ path: `file-${index}.txt` })) },
+  };
+  const event = buildToolResultEvent(envelope, {});
+  assert.equal(event.toolResult.status, 'success');
+  assert.equal(event.toolResult.previewTruncated, true);
+  assert.equal(event.toolResult.sourceTruncated, false);
+  assert.equal(event.toolResult.truncated, true);
+});
+
 test('successful read-only operations report no observed side effects', async () => {
   const runToolList = await executeToolCall('run_tool', { op: 'list' }, { userId: 'local-user' });
   assert.equal(runToolList.status, 'success');

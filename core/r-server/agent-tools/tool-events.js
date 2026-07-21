@@ -54,6 +54,11 @@ function buildToolResultEvent(envelope, args = {}) {
       status: envelope.status,
       terminationReason: envelope.terminationReason,
       durationMs: envelope.durationMs,
+      // `status` is the execution outcome. These flags describe bounded
+      // representations of a result and must not be treated as a tool failure
+      // by clients.
+      sourceTruncated: Boolean(envelope.truncated),
+      previewTruncated: Boolean(published.truncated),
       truncated: Boolean(envelope.truncated || published.truncated),
       sideEffects: envelope.sideEffects,
       data: published.data,
