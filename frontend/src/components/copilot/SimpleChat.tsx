@@ -97,6 +97,7 @@ export function SimpleChat({
   inputHeight: _inputHeight = 120,
 }: SimpleChatProps): React.ReactElement {
   const [messages, setMessages] = useState<SimpleMessage[]>([]);
+  const [copiedMessageKey, setCopiedMessageKey] = useState<string | null>(null);
   const [input, setInput] = useState('');
   const [starting, setStarting] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -183,6 +184,18 @@ export function SimpleChat({
       });
     }
   }, [projectId]);
+
+  const copyMessage = useCallback(async (messageKey: string, content: string) => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopiedMessageKey(messageKey);
+      window.setTimeout(() => {
+        setCopiedMessageKey((current) => current === messageKey ? null : current);
+      }, 1500);
+    } catch {
+      // Clipboard may be unavailable in an embedded or non-secure preview.
+    }
+  }, []);
 
   useEffect(() => {
     if (!pendingApproval?.params) {
@@ -609,6 +622,20 @@ export function SimpleChat({
                       />
                     ) : (
                       <div className="sc-msg-text">{m.content}</div>
+                    )}
+                    {m.role === 'assistant' && m.content && !m.pending && (
+                      <div className="sc-msg-actions">
+                        <button
+                          type="button"
+                          className="sc-msg-action"
+                          onClick={() => void copyMessage(key, m.content)}
+                          title="复制回复"
+                          aria-label="复制回复"
+                        >
+                          <Icon name={copiedMessageKey === key ? 'check' : 'copy'} size={14} />
+                          {copiedMessageKey === key ? '已复制' : '复制'}
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>

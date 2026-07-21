@@ -447,6 +447,29 @@ function renderInlineTokens(
   });
 }
 
+const STATUS_MARKS: Record<string, { symbol: string; className: string }> = {
+  '✅': { symbol: '✓', className: 'cp-status-mark-success' },
+  '❌': { symbol: '×', className: 'cp-status-mark-error' },
+  '⚠️': { symbol: '!', className: 'cp-status-mark-warning' },
+  '⚠': { symbol: '!', className: 'cp-status-mark-warning' },
+  '🔄': { symbol: '↻', className: 'cp-status-mark-progress' },
+};
+
+function renderStatusText(text: string, keyPrefix: string): React.ReactNode[] {
+  const pattern = /(✅|❌|⚠️|⚠|🔄)/g;
+  const parts = text.split(pattern);
+  return parts.filter(Boolean).map((part, index) => {
+    const mark = STATUS_MARKS[part];
+    return mark ? (
+      <span key={`${keyPrefix}-status-${index}`} className={`cp-status-mark ${mark.className}`} aria-label={part}>
+        {mark.symbol}
+      </span>
+    ) : (
+      <React.Fragment key={`${keyPrefix}-text-${index}`}>{part}</React.Fragment>
+    );
+  });
+}
+
 function buildInternalReference(
   href: string,
   kind: LinkKind,
@@ -472,7 +495,7 @@ function renderAutolinks(
     .filter((entry): entry is [string, ResolvedReference] => Boolean(entry[0] && entry[1]))
     .sort((a, b) => b[0].length - a[0].length);
   if (candidates.length === 0)
-    return [<React.Fragment key={`${keyPrefix}-text`}>{text}</React.Fragment>];
+    return renderStatusText(text, keyPrefix);
 
   const nodes: React.ReactNode[] = [];
   let cursor = 0;
@@ -487,9 +510,7 @@ function renderAutolinks(
     if (!next) break;
     if (next.index > cursor) {
       nodes.push(
-        <React.Fragment key={`${keyPrefix}-t-${counter++}`}>
-          {text.slice(cursor, next.index)}
-        </React.Fragment>
+        ...renderStatusText(text.slice(cursor, next.index), `${keyPrefix}-t-${counter++}`),
       );
     }
     nodes.push(
@@ -506,7 +527,7 @@ function renderAutolinks(
     cursor = next.index + next.raw.length;
   }
   if (cursor < text.length) {
-    nodes.push(<React.Fragment key={`${keyPrefix}-tail`}>{text.slice(cursor)}</React.Fragment>);
+    nodes.push(...renderStatusText(text.slice(cursor), `${keyPrefix}-tail`));
   }
   return nodes;
 }
@@ -602,6 +623,28 @@ function CodeBlock({ lang, code }: { lang?: string; code: string }) {
   );
 }
 
+function CopyButton({ text, label = '复制' }: { text: string; label?: string }) {
+  const [copied, setCopied] = React.useState(false);
+  const onCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* clipboard access can be unavailable in non-secure previews */
+    }
+  };
+  return (
+    <button type="button" className="cp-copy-button" onClick={() => void onCopy()}>
+      {copied ? '已复制' : label}
+    </button>
+  );
+}
+
+function tableCopyText(header: string[], rows: string[][]): string {
+  return [header, ...rows].map((row) => row.join('\t')).join('\n');
+}
+
 // ---------------------------------------------------------------------------
 // Renderer
 // ---------------------------------------------------------------------------
@@ -689,6 +732,10 @@ export function CopilotMarkdown({
           const cols = b.header ? b.header.length : 0;
           return (
             <div key={idx} className="cp-table-wrap">
+              <div className="cp-table-head">
+                <span>表格</span>
+                <CopyButton text={tableCopyText(b.header || [], b.rows || [])} />
+              </div>
               <table className="cp-table">
                 <thead>
                   <tr>
@@ -721,7 +768,7 @@ export function CopilotMarkdown({
         if (b.type === 'h') {
           const Tag = `h${Math.min(6, (b.level || 2) + 2)}` as 'h3' | 'h4' | 'h5';
           return (
-            <Tag key={idx} className="cp-h">
+            <Tag key={idx} className={`cp-h cp-h-${b.level || 2}`}>
               {renderInlineTokens(tokenizeInline(b.lines[0] || ''), `${idx}-h`, renderOptions)}
             </Tag>
           );

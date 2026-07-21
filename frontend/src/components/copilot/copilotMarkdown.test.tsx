@@ -73,4 +73,19 @@ describe('CopilotMarkdown file references', () => {
     expect(screen.queryByRole('link', { name: 'missing.csv' })).toBeNull();
     expect(screen.getAllByText(/missing\.csv/)).toHaveLength(2);
   });
+
+  it('renders status marks neutrally and provides table copy', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('navigator', { clipboard: { writeText } });
+    render(
+      <CopilotMarkdown
+        text={'## 结果\n\n| 文件 | 状态 |\n| --- | --- |\n| Fig1 | ✅ 完成 |\n| Fig8 | ❌ 未完成 |'}
+      />,
+    );
+
+    expect(screen.getByLabelText('✅').textContent).toBe('✓');
+    expect(screen.getByLabelText('❌').textContent).toBe('×');
+    fireEvent.click(screen.getByRole('button', { name: '复制' }));
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith('文件\t状态\nFig1\t✅ 完成\nFig8\t❌ 未完成'));
+  });
 });

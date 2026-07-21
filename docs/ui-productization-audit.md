@@ -2,7 +2,7 @@
 
 最后更新：2026-07-21
 
-状态：**Stage 1 验收完成（31/31 verified）；UI-031、UI-032、UI-033 与 UI-034 已实机验收；UI-035 工具活动收缩、UI-036 模型配置简化、UI-037 并行后台会话、UI-038 Endpoint 默认模型与导入导出待实机验收**
+状态：**Stage 1 验收完成（31/31 verified）；UI-031、UI-032、UI-033 与 UI-034 已实机验收；UI-035 工具活动收缩、UI-036 模型配置简化、UI-037 并行后台会话、UI-038 Endpoint 默认模型与导入导出、UI-039 聊天回复阅读与复制体验待实机验收**
 
 本文件是 [`docs/v1-productization-roadmap.md`](./v1-productization-roadmap.md) Stage 1 的唯一 UI 问题清单。它记录真实可复现问题，不用来收集没有目标层级的泛化审美意见。
 
@@ -146,6 +146,7 @@ npm run check
 | UI-036 | in_progress | P2 | P-07 | C-02, C-04 | 设置 / 模型接口与聊天选择器 | 模型配置暴露接口类型和能力开关，渠道卡密度偏高；聊天模型入口未把供应商与模型拆开选择 | 设置页每个渠道压缩为一行，仅保留供应商、Base URL、Key、默认模型、连通性和删除；协议适配由 Endpoint 自动推断，能力元数据继续在 Gateway 内部保留。聊天输入区拆成供应商和对应模型两个入口。前端代码门禁已通过，待用户实机确认单行密度、保存重开、连接状态和双入口选择 | MODEL-UX refinement |
 | UI-037 | in_progress | P1 | W-03 | C-02, C-04, C-06 | Agent 会话 / 会话切换 | `SimpleChat` 把消息、流式状态和工具活动绑定在单个组件实例上；切换会话或离开聊天视图后，旧流会与新会话冲突，新会话也可能被全局 `streaming` 状态阻塞 | 新增按 `conversationId` 隔离的共享运行注册表：视图卸载只取消 UI 订阅，不停止 Agent task；返回会话可继续看到流式进度并在完成后从 SQLite 对账。不同会话可并行、同一会话禁止重叠请求，侧栏以脉冲点标识后台运行。后端既有每用户最多 3 路 task 并发边界不变；前端 23 文件 169 项测试通过，待用户实机验证 A/B 会话并行、离开聊天视图继续和完成后持久化 | CONVERSATION-RUNTIME |
 | UI-038 | in_progress | P1 | P-07 | C-02, C-04 | 设置 / API Endpoint 与聊天模型选择器 | 供应商切换后模型没有明确使用该渠道的配置默认值；渠道配置无法备份或批量迁移 | ModelProfile 新增独立 `defaultModel`，`model` 保留最近激活模型；聊天选择供应商时自动激活该渠道默认模型，用户手动切换后保留手动选择。API Endpoint 提供 JSON/CSV 导出与导入；Key 默认隐藏，可主动显示/复制，用户确认后导出可包含 Key 明文，导入后进入待保存凭据输入并按 ID/Base URL 合并。模型设置内容区从固定 720px 改为最大 1180px 自适应，Endpoint 列按内容伸缩，Key 操作按钮独立占位且窄窗保留横向滚动；待用户实机验证 | MODEL-UX |
+| UI-039 | in_progress | P2 | W-03 | C-04, C-06 | Agent 会话 / Markdown 回复 | 回复内容虽然完整，但表格边框、状态 emoji 和复制入口缺乏统一的 Codex 风格，长回复阅读密度偏高 | 轻量 Markdown 渲染保留原始信息，标题层级、表格容器和状态标记改为克制的文档样式；表格提供 TSV 复制，代码块保留复制，assistant 回复底部增加悬停显示的整段复制按钮；待用户实机验证长表格、代码块、文件卡片和明暗主题 | MODEL-UX refinement |
 
 - UI-032 属于 `P-07 模型网关与 AI Provider` 的 Harness 能力子系统（Stage 3 M1），现已与 UI-031/UI-033/UI-034 一起完成实机验收。
 - 不允许破坏：设置页窄窗布局、计算与数据分类既有 `ComputeExecution`/`DataManagement` 组件、`run_tool → tool_job → artifact truth` 执行链。
