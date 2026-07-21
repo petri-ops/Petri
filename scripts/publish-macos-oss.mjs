@@ -16,6 +16,8 @@ const endpoint = process.env.OSS_ENDPOINT || 'oss-cn-hangzhou.aliyuncs.com';
 const prefix = (process.env.BIOF3_OSS_UPDATE_PREFIX || 'desktop/updates/macos').replace(/^\/+|\/+$/g, '');
 const publicBaseUrl = process.env.BIOF3_OSS_UPDATE_URL ||
   `https://${bucket}.${endpoint}/${prefix}`;
+const uploadTimeout = Number(process.env.BIOF3_OSS_UPLOAD_TIMEOUT_MS || 600000);
+const uploadPartSize = Number(process.env.BIOF3_OSS_UPLOAD_PART_SIZE || 10 * 1024 * 1024);
 const dryRun = process.argv.includes('--dry-run');
 const prepareOnly = process.argv.includes('--prepare-only');
 
@@ -133,7 +135,10 @@ if (!dryRun) {
     accessKeySecret,
     bucket,
     secure: true,
+    timeout: uploadTimeout,
+    partSize: uploadPartSize,
   });
+  console.log(`[oss-update] upload timeout=${uploadTimeout}ms partSize=${uploadPartSize}`);
 }
 
 // Immutable versioned objects are uploaded first. The channel manifest is the

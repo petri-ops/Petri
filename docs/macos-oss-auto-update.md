@@ -49,6 +49,9 @@ export OSS_ENDPOINT=oss-cn-hangzhou.aliyuncs.com
 
 发布脚本也兼容项目旧变量 `OSS_AK` / `OSS_SK`，但优先使用官方变量名。
 
+大于百 MB 的 DMG 默认使用 10 分钟上传响应超时和 10 MiB 分片；网络较慢时可通过
+`BIOF3_OSS_UPLOAD_TIMEOUT_MS` / `BIOF3_OSS_UPLOAD_PART_SIZE` 临时调大，不能绕过版本、标签、清单或 SHA 校验。
+
 本机已有的仓库根目录 `.biof3-secrets` 会由 `scripts/publish-macos-oss.sh` 自动加载。该文件必须保持 `chmod 600`，已加入 `.gitignore`，禁止提交或把内容复制到聊天和日志。
 
 ## 固定发布流程
