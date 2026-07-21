@@ -47,6 +47,20 @@ export function modelChoiceId(profileId: string, model: string): string {
   return `${profileId}::${encodeURIComponent(model)}`;
 }
 
+/** Infer the transport adapter from the endpoint instead of exposing it in UI. */
+export function inferUserModelProvider(profile: {
+  label?: string;
+  baseUrl?: string;
+}): 'deepseek' | 'openai-compatible' {
+  try {
+    const hostname = profile.baseUrl ? new URL(profile.baseUrl).hostname.toLowerCase() : '';
+    if (hostname === 'api.deepseek.com' || hostname.endsWith('.deepseek.com')) return 'deepseek';
+  } catch {
+    // Validation reports malformed URLs separately; keep the generic adapter here.
+  }
+  return 'openai-compatible';
+}
+
 export interface UserModelProfileLike {
   id?: string;
   provider?: string;

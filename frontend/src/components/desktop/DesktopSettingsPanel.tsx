@@ -16,8 +16,8 @@ import type { ComputeSettings } from '@/lib/electron';
 import { deleteProject, listProjects, setProjectStatus } from '@/lib/project-store';
 import type { Project } from '@/lib/project-types';
 import {
-  USER_MODEL_PROVIDER_OPTIONS,
   endpointBaseUrl,
+  inferUserModelProvider,
   isChatSelectableProfile,
   isUserConfigurableModelProvider,
   validateUserModelProfile,
@@ -62,15 +62,6 @@ const MODEL_ROLES: Array<{ id: ModelRole; label: string; capability: ModelCapabi
   { id: 'summary', label: '低成本摘要', capability: 'chat', hint: '会话与文档摘要' },
   { id: 'report', label: '报告生成', capability: 'chat', hint: '分析报告撰写' },
   { id: 'explanation', label: '结果解释', capability: 'chat', hint: 'Artifact 结果解读' },
-];
-
-const MODEL_CAPABILITIES: Array<{ id: ModelCapability; label: string }> = [
-  { id: 'chat', label: 'Chat' },
-  { id: 'streaming', label: '流式' },
-  { id: 'tools', label: '工具调用' },
-  { id: 'vision', label: '视觉' },
-  { id: 'embedding', label: 'Embedding' },
-  { id: 'reasoning', label: '推理' },
 ];
 
 function providerDefaults(provider: string, id: string): Partial<ChatModelPreset> {
@@ -778,17 +769,21 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   }
 
   function updateProfile(id: string, patch: Partial<ChatModelPreset>) {
-    setModelProfiles((profiles) => profiles.map((profile) => profile.id === id ? { ...profile, ...patch, id } : profile));
-  }
-
-  function changeProvider(profile: ChatModelPreset, provider: string) {
-    setAvailableModels((current) => ({ ...current, [profile.id]: [] }));
-    setTestResult((current) => {
-      const next = { ...current };
-      delete next[profile.id];
+    setModelProfiles((profiles) => profiles.map((profile) => {
+      if (profile.id !== id) return profile;
+      const next = { ...profile, ...patch, id };
+      if (Object.prototype.hasOwnProperty.call(patch, 'baseUrl')) {
+        const provider = inferUserModelProvider({ label: next.label, baseUrl: next.baseUrl });
+        next.provider = provider;
+        next.protocol = 'openai-compatible';
+        next.credentialRef = provider === 'deepseek'
+          ? 'provider:deepseek'
+          : `credential:${id}`;
+        if (provider === 'deepseek') next.label = 'DeepSeek';
+        else if (profile.provider === 'deepseek') next.label = '自定义 API';
+      }
       return next;
-    });
-    updateProfile(profile.id, { provider, ...providerDefaults(provider, profile.id) });
+    }));
   }
 
   function addProfile() {
@@ -808,15 +803,6 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     setModelProfiles((profiles) => profiles.filter((profile) => profile.id !== id));
     setRoleBindings((bindings) => Object.fromEntries(Object.entries(bindings).filter(([, value]) => value !== id)));
     setFallbackBindings((bindings) => Object.fromEntries(Object.entries(bindings).map(([role, ids]) => [role, (ids || []).filter((value) => value !== id)])));
-  }
-
-  function toggleCapability(profile: ChatModelPreset, capability: ModelCapability) {
-    const current = profile.capabilities || [];
-    updateProfile(profile.id, {
-      capabilities: current.includes(capability)
-        ? current.filter((item) => item !== capability)
-        : [...current, capability],
-    });
   }
 
   const activeSectionMeta = SETTINGS_SECTIONS.find((item) => item.id === activeSection) || SETTINGS_SECTIONS[0];
@@ -884,11 +870,21 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
             <div className="biof3-settings-section__heading">
               <h3>API Endpoint</h3>
               <p>
-                每个供应商独立配置 URL、Key 和可承担的功能；模型列表由 Endpoint 自动返回。Key
+                每个供应商只需配置供应商、Base URL、Key 和默认模型；接口协议与模型能力由后端自动适配。Key
                 {credentialBackend === 'keychain' ? ' 保存在 macOS Keychain。' : ' 保存在独立本地凭据存储。'}
               </p>
             </div>
             <div className="biof3-model-list">
+              {userModelProfiles.length > 0 && (
+                <div className="biof3-endpoint-list-header" aria-hidden="true">
+                  <span>供应商</span>
+                  <span>Base URL</span>
+                  <span>Key</span>
+                  <span>默认模型</span>
+                  <span>连通性</span>
+                  <span />
+                </div>
+              )}
               {userModelProfiles.map((profile) => {
                 const id = credentialId(profile);
                 const configured = !!credentialStatus[id];
@@ -897,109 +893,104 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                   ? [profile.model, ...discoveredModels]
                   : discoveredModels;
                 const discovering = loadingModels[profile.id] === true;
+                const profileError = profileErrors[profile.id];
+                const connectionResult = testResult[profile.id];
                 const chatReady =
                   isChatSelectableProfile(profile) &&
-                  validateUserModelProfile(profile) === null;
+                  validateUserModelProfile(profile) === null &&
+                  connectionResult?.ok === true;
+                const connectionLabel = discovering
+                  ? '测试中'
+                  : profileError
+                    ? '需补全'
+                    : connectionResult?.ok
+                      ? '已连接'
+                      : connectionResult
+                        ? '重试'
+                        : '测试';
+                const connectionTitle = profileError
+                  || connectionResult?.message
+                  || (chatReady ? '连接正常，可在聊天窗口选择' : '测试接口并获取模型列表');
                 return (
                 <div key={profile.id} className="biof3-model-preset biof3-endpoint-card">
-                  <div className="biof3-endpoint-card__grid">
-                    <label className="biof3-endpoint-field">
-                      <span>接口类型</span>
-                      <select className="biof3-select" value={profile.provider} onChange={(e) => changeProvider(profile, e.target.value)} aria-label="接口类型">
-                        {USER_MODEL_PROVIDER_OPTIONS.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
-                      </select>
-                    </label>
-                    <label className="biof3-endpoint-field">
-                      <span>供应商</span>
-                      <input
-                        className="biof3-input"
-                        value={profile.provider === 'deepseek' ? 'DeepSeek' : profile.label}
-                        onChange={(e) => updateProfile(profile.id, { label: e.target.value })}
-                        placeholder="例如：火山方舟"
-                        readOnly={profile.provider === 'deepseek'}
-                      />
-                    </label>
-                    <label className="biof3-endpoint-field">
-                      <span>默认模型</span>
-                      <select
-                        className="biof3-select"
-                        value={profile.model}
-                        onChange={(e) => updateProfile(profile.id, { model: e.target.value })}
-                        disabled={discovering || modelOptions.length === 0}
-                        aria-label="模型名称"
-                      >
-                        {modelOptions.length === 0 && (
-                          <option value="">{discovering ? '正在获取模型…' : '请先获取模型列表'}</option>
-                        )}
-                        {modelOptions.map((model) => <option key={model} value={model}>{model}</option>)}
-                      </select>
-                    </label>
-                    <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm biof3-endpoint-card__delete" onClick={() => removeProfile(profile.id)}>
-                      删除
-                    </button>
-                    <label className="biof3-endpoint-field biof3-endpoint-field--url">
-                      <span>API Base URL</span>
-                      <input
-                        className="biof3-input"
-                        value={endpointBaseUrl(profile)}
-                        onChange={(e) => {
-                          updateProfile(profile.id, { baseUrl: e.target.value || undefined });
-                          setAvailableModels((current) => ({ ...current, [profile.id]: [] }));
-                        }}
-                        placeholder="https://example.com/v1"
-                      />
-                    </label>
-                    <label className="biof3-endpoint-field">
-                      <span className="biof3-endpoint-field__title">
-                        API Key
-                        {configured && <span className="biof3-badge"><Icon name="check" size={12} /> 已配置</span>}
-                      </span>
-                      <input
-                        type="password"
-                        className="biof3-input"
-                        value={credentialInputs[id] || ''}
-                        onChange={(e) => {
-                          setCredentialInputs((current) => ({ ...current, [id]: e.target.value }));
-                          setAvailableModels((current) => ({ ...current, [profile.id]: [] }));
-                        }}
-                        placeholder={configured ? '已配置（输入新 Key 覆盖）' : '输入 API Key'}
-                      />
-                    </label>
+                  <div className="biof3-endpoint-card__grid" role="group" aria-label={`${profile.label || '自定义'} 模型渠道`}>
+                    <input
+                      className="biof3-input"
+                      value={profile.provider === 'deepseek' ? 'DeepSeek' : profile.label}
+                      onChange={(e) => updateProfile(profile.id, { label: e.target.value })}
+                      placeholder="供应商"
+                      aria-label="供应商"
+                      readOnly={profile.provider === 'deepseek'}
+                    />
+                    <input
+                      className="biof3-input"
+                      value={endpointBaseUrl(profile)}
+                      onChange={(e) => {
+                        updateProfile(profile.id, { baseUrl: e.target.value || undefined });
+                        setAvailableModels((current) => ({ ...current, [profile.id]: [] }));
+                        setTestResult((current) => {
+                          const next = { ...current };
+                          delete next[profile.id];
+                          return next;
+                        });
+                      }}
+                      placeholder="Base URL"
+                      aria-label="Base URL"
+                      title={endpointBaseUrl(profile)}
+                    />
+                    <input
+                      type="password"
+                      className="biof3-input"
+                      value={credentialInputs[id] || ''}
+                      onChange={(e) => {
+                        setCredentialInputs((current) => ({ ...current, [id]: e.target.value }));
+                        setAvailableModels((current) => ({ ...current, [profile.id]: [] }));
+                        setTestResult((current) => {
+                          const next = { ...current };
+                          delete next[profile.id];
+                          return next;
+                        });
+                      }}
+                      placeholder={configured ? 'Key 已配置' : 'API Key'}
+                      aria-label={configured ? 'API Key 已配置，输入新 Key 可覆盖' : 'API Key'}
+                    />
+                    <select
+                      className="biof3-select"
+                      value={profile.model}
+                      onChange={(e) => updateProfile(profile.id, { model: e.target.value })}
+                      disabled={discovering || modelOptions.length === 0}
+                      aria-label="默认模型"
+                      title={profile.model || '测试连接后选择模型'}
+                    >
+                      {modelOptions.length === 0 && (
+                        <option value="">{discovering ? '获取中…' : '先测试'}</option>
+                      )}
+                      {modelOptions.map((model) => <option key={model} value={model}>{model}</option>)}
+                    </select>
                     <button
                       type="button"
-                      className="biof3-btn biof3-btn--ghost biof3-btn--sm biof3-endpoint-card__test"
+                      className={`biof3-btn biof3-btn--ghost biof3-btn--sm biof3-endpoint-card__test${connectionResult?.ok ? ' is-ok' : connectionResult || profileError ? ' is-error' : ''}`}
                       onClick={() => void discoverModels(profile, credentialInputs[id] || '')}
                       disabled={
                         discovering ||
                         !endpointBaseUrl(profile).trim() ||
                         (profile.provider === 'deepseek' && !configured && !credentialInputs[id])
                       }
+                      title={connectionTitle}
                     >
-                      {discovering ? '获取中…' : discoveredModels.length > 0 ? '刷新模型' : '获取模型'}
+                      {connectionResult?.ok && <Icon name="check" size={12} />}
+                      {connectionLabel}
+                    </button>
+                    <button
+                      type="button"
+                      className="biof3-endpoint-card__delete"
+                      onClick={() => removeProfile(profile.id)}
+                      aria-label={`删除 ${profile.label || '该渠道'}`}
+                      title="删除渠道"
+                    >
+                      <Icon name="trash" size={14} />
                     </button>
                   </div>
-                  <div className="biof3-endpoint-card__capabilities">
-                    <strong>功能</strong>
-                    <div className="biof3-model-capabilities" aria-label="接口功能">
-                      {MODEL_CAPABILITIES.map((capability) => (
-                        <label key={capability.id}>
-                          <input type="checkbox" checked={(profile.capabilities || []).includes(capability.id)} onChange={() => toggleCapability(profile, capability.id)} />
-                          {capability.label}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  <p className={`biof3-endpoint-card__chat-status${chatReady ? ' is-ready' : ''}`}>
-                    {chatReady
-                      ? '保存后可在聊天输入框中选择'
-                      : '勾选 Chat 并从接口获取模型后，才会出现在聊天模型菜单'}
-                  </p>
-                  {profileErrors[profile.id] && (
-                    <p className="biof3-field__result biof3-field__result--err">
-                      {profileErrors[profile.id]}
-                    </p>
-                  )}
-                  {testResult[profile.id] && <p className={`biof3-field__result ${testResult[profile.id].ok ? 'biof3-field__result--ok' : 'biof3-field__result--err'}`}>{testResult[profile.id].ok ? '✓ ' : '✗ '}{testResult[profile.id].message}</p>}
                 </div>
               );
               })}

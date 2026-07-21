@@ -103,7 +103,8 @@ export function SimpleChat({
   const [paramDraft, setParamDraft] = useState<Record<string, string>>({});
   const [approvalRepair, setApprovalRepair] = useState<ApprovalRepairState>({ status: 'idle' });
   const autoApproveRef = useRef<string | null>(null);
-  const [modelMenuOpen, setModelMenuOpen] = useState(false);
+  const [modelMenuOpen, setModelMenuOpen] = useState<'supplier' | 'model' | null>(null);
+  const [modelSupplierKey, setModelSupplierKey] = useState<string | null>(null);
   const [accessMenuOpen, setAccessMenuOpen] = useState(false);
   const [accessMode, setAccessMode] = useState<'full' | 'read'>('full');
   const taRef = useRef<HTMLTextAreaElement>(null);
@@ -576,8 +577,14 @@ export function SimpleChat({
     },
     []
   );
+  const activeSupplierGroup = modelGroups.find((group) =>
+    group.presets.some((preset) => preset.id === activeModelId)
+  ) || modelGroups[0];
+  const selectedSupplierGroup = modelGroups.find((group) => group.key === modelSupplierKey)
+    || activeSupplierGroup;
   const selectModel = useCallback(async (preset: ChatModelPreset) => {
-    setModelMenuOpen(false);
+    setModelMenuOpen(null);
+    setModelSupplierKey(null);
     // Hook persists the new active id + llm_provider via electron
     // bridge (Plan 1.6 §4.5 — replaces the local get-then-save).
     await setActiveModelId(preset.id);
@@ -706,41 +713,64 @@ export function SimpleChat({
                 </div>
               </div>
               <div className="sc-composer-right">
-                <div className="sc-model-picker sc-model-picker-footer">
-                  <button
-                    type="button"
-                    className="sc-model-btn"
-                    onClick={() => setModelMenuOpen((value) => !value)}
-                    title="选择会话模型"
-                  >
-                    <span>
-                      {activeModel
-                        ? `${activeModel.label || activeModel.provider} · ${activeModel.model}`
-                        : 'DeepSeek · deepseek-chat'}
-                    </span>
-                    <Icon name="chevron-down" size={12} />
-                  </button>
+                <div className="sc-model-picker-pair">
+                  <div className="sc-model-picker sc-model-picker-footer">
+                    <button
+                      type="button"
+                      className="sc-model-btn sc-model-provider-btn"
+                      onClick={() => {
+                        setModelSupplierKey(activeSupplierGroup?.key || null);
+                        setModelMenuOpen((current) => current === 'supplier' ? null : 'supplier');
+                      }}
+                      title="选择供应商"
+                    >
+                      <span>{activeSupplierGroup?.supplier || activeModel?.label || '供应商'}</span>
+                      <Icon name="chevron-down" size={12} />
+                    </button>
+                  </div>
+                  <div className="sc-model-picker sc-model-picker-footer">
+                    <button
+                      type="button"
+                      className="sc-model-btn sc-model-name-btn"
+                      onClick={() => {
+                        setModelSupplierKey(selectedSupplierGroup?.key || null);
+                        setModelMenuOpen((current) => current === 'model' ? null : 'model');
+                      }}
+                      title="选择会话模型"
+                    >
+                      <span>{activeModel?.model || '选择模型'}</span>
+                      <Icon name="chevron-down" size={12} />
+                    </button>
+                  </div>
                   {modelMenuOpen && (
                     <>
-                      <div className="sc-model-overlay" onClick={() => setModelMenuOpen(false)} />
+                      <div className="sc-model-overlay" onClick={() => setModelMenuOpen(null)} />
                       <div className="sc-model-menu">
-                        {modelGroups.map((group) => (
-                          <div className="sc-model-group" key={group.key}>
-                            <div className="sc-model-group-title">{group.supplier}</div>
-                            {group.presets.map((preset) => (
-                              <button
-                                type="button"
-                                key={preset.id}
-                                className={`sc-model-option ${preset.id === activeModelId ? 'sc-model-option-active' : ''}`}
-                                onClick={() => selectModel(preset)}
-                              >
-                                <span className="sc-model-option-title">{preset.model}</span>
-                                <span className="sc-model-option-meta">
-                                  {preset.id === activeModelId ? '当前使用' : '点击切换'}
-                                </span>
-                              </button>
-                            ))}
-                          </div>
+                        {modelMenuOpen === 'supplier' ? modelGroups.map((group) => (
+                          <button
+                            type="button"
+                            key={group.key}
+                            className={`sc-model-option ${group.key === selectedSupplierGroup?.key ? 'sc-model-option-active' : ''}`}
+                            onClick={() => {
+                              setModelSupplierKey(group.key);
+                              setModelMenuOpen('model');
+                            }}
+                          >
+                            <span className="sc-model-option-title">{group.supplier}</span>
+                            <span className="sc-model-option-meta">{group.presets.length} 个模型</span>
+                          </button>
+                        )) : selectedSupplierGroup?.presets.map((preset) => (
+                          <button
+                            type="button"
+                            key={preset.id}
+                            className={`sc-model-option ${preset.id === activeModelId ? 'sc-model-option-active' : ''}`}
+                            onClick={() => selectModel(preset)}
+                          >
+                            <span className="sc-model-option-title">{preset.model}</span>
+                            <span className="sc-model-option-meta">
+                              {preset.id === activeModelId ? '当前使用' : '点击切换'}
+                            </span>
+                          </button>
                         ))}
                       </div>
                     </>

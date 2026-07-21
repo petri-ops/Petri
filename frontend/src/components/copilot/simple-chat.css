@@ -27,6 +27,23 @@
   align-self: center;
 }
 
+.sc-model-picker-pair {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sc-model-provider-btn {
+  max-width: 150px;
+  border-radius: 999px 0 0 999px;
+}
+
+.sc-model-name-btn {
+  max-width: 220px;
+  border-radius: 0 999px 999px 0;
+}
+
 .sc-model-btn {
   display: inline-flex;
   align-items: center;

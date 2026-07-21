@@ -2,7 +2,7 @@
 
 最后更新：2026-07-21
 
-状态：**Stage 1 验收完成（31/31 verified）；UI-031、UI-032、UI-033 与 UI-034 已实机验收；UI-035 工具活动收缩与中间叙述收口中**
+状态：**Stage 1 验收完成（31/31 verified）；UI-031、UI-032、UI-033 与 UI-034 已实机验收；UI-035 工具活动收缩、UI-036 模型配置简化待实机验收**
 
 本文件是 [`docs/v1-productization-roadmap.md`](./v1-productization-roadmap.md) Stage 1 的唯一 UI 问题清单。它记录真实可复现问题，不用来收集没有目标层级的泛化审美意见。
 
@@ -143,12 +143,14 @@ npm run check
 | UI-033 | verified | P1 | P-07 | C-02, C-04 | 设置 / 模型接口与聊天选择器 | 配置卡收敛为“供应商 Endpoint”，聊天菜单按供应商聚合实时模型并真实切换；身份回答直接披露供应商与模型 | 2026-07-21 实机：`acceptance/ui-034/dev-light-wide.png` 等明暗/窄窗矩阵显示 `DeepSeek · deepseek-v4-flash` 选择器；rc.7 安装候选使用同一模型真实完成只读工具调用并按供应商/模型身份回答。实现与既有真实 DeepSeek `list-models` 证据保持一致 | MODEL-UX |
 | UI-034 | verified | P1 | W-03 | C-03, C-04, C-06 | Agent 会话 / 工具活动 | Agent 工具调用使用结构化 ToolResult 和 Trace 呈现真实运行、等待确认、成功、失败、拒绝、耗时、截断、termination reason 与实际副作用摘要；task SSE 回放不得重复或把终态降级，停止订阅不得伪装工具已取消 | 2026-07-21 开发壳实机矩阵：`acceptance/ui-034/` 的浅色宽窗、深色宽/窄窗、右栏折叠、回放恢复 5 张证据；rc.7 安装候选另以真实 DeepSeek 只读调用确认 `workspace_list` 成功 5–6 ms、`workspace_find` 成功 8 ms 且显示截断。前端 parser/activity 7/7，后端 P7-D 与脱敏回归继续纳入根门禁 | P7-D |
 | UI-035 | in_progress | P2 | W-03 | C-04, C-06 | Agent 会话 / 工具活动 | 工具调用过程默认展示过多细节，且多轮工具前的模型中间叙述累积到最终回复，干扰用户阅读 | `SimpleChat` 折叠态已进一步收敛为无背景的“已处理时长 + 箭头”，不再展示工具次数或追溯提示；展开后才显示安全工具摘要。每轮工具活动和真实处理时长写入 assistant `meta_json`，重新打开会话可逐轮恢复；成功但受大小边界影响的结果使用中性“仅显示摘要”，与真实失败状态分离。前端 TypeScript 与 164 项测试通过；待用户实机确认折叠样式、逐轮恢复和最终答复顺序 | P7-D refinement |
+| UI-036 | in_progress | P2 | P-07 | C-02, C-04 | 设置 / 模型接口与聊天选择器 | 模型配置暴露接口类型和能力开关，渠道卡密度偏高；聊天模型入口未把供应商与模型拆开选择 | 设置页每个渠道压缩为一行，仅保留供应商、Base URL、Key、默认模型、连通性和删除；协议适配由 Endpoint 自动推断，能力元数据继续在 Gateway 内部保留。聊天输入区拆成供应商和对应模型两个入口。前端代码门禁已通过，待用户实机确认单行密度、保存重开、连接状态和双入口选择 | MODEL-UX refinement |
 
 - UI-032 属于 `P-07 模型网关与 AI Provider` 的 Harness 能力子系统（Stage 3 M1），现已与 UI-031/UI-033/UI-034 一起完成实机验收。
 - 不允许破坏：设置页窄窗布局、计算与数据分类既有 `ComputeExecution`/`DataManagement` 组件、`run_tool → tool_job → artifact truth` 执行链。
 - 验收同时覆盖无 bundle 的空状态与真实 bundle 条目状态；面板保持只读，不提供绕过 Harness 编排层的 provision/remove 操作。
 
 - UI-033 只收敛用户可配置层，不删除 Gateway 已支持的底层适配器，也不改写历史 profile。
+- UI-036 延续该边界：只隐藏实现型选项，不删除持久化的协议、能力或角色信息；窄窗口保持一条渠道一行并允许横向查看，不把字段重新折成多行卡片。
 
 ## 11. 2026-07-21 UI-033 / UI-034 实机收口
 

@@ -3,6 +3,7 @@ import {
   USER_MODEL_PROVIDER_OPTIONS,
   USER_MODEL_ROLE_IDS,
   endpointBaseUrl,
+  inferUserModelProvider,
   isChatSelectableProfile,
   isUserConfigurableModelProvider,
   modelChoiceId,
@@ -51,6 +52,11 @@ describe('user-facing model provider options', () => {
       baseUrl: 'https://api.example.com/v1',
     })).toBe('api.example.com');
     expect(modelChoiceId('endpoint-a', 'model/a')).toBe('endpoint-a::model%2Fa');
+  });
+
+  it('infers the transport adapter from the endpoint host', () => {
+    expect(inferUserModelProvider({ baseUrl: 'https://api.deepseek.com' })).toBe('deepseek');
+    expect(inferUserModelProvider({ baseUrl: 'https://ai.example.com/v1' })).toBe('openai-compatible');
   });
 
   it('uses one explicit contract for chat-selectable endpoints', () => {
