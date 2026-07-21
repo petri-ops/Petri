@@ -35,6 +35,14 @@ function isUiSurface(file) {
   )
 }
 
+// Conventional Commits chore/worktree/etc. prefixes are explicitly out of
+// scope for the UI ledger; they may touch UI surfaces (e.g. a chore commit
+// that parks a batch of WIP changes) but should not be required to add a new
+// UI-### row. Real UI tickets must still use feat/fix/refactor/ui prefixes.
+function isChoreCommit(subject) {
+  return /^\s*(chore|build|ci|docs|test)(\(.*?\))?(!)?:\s/.test(subject)
+}
+
 function uiIds(value) {
   return [...new Set(value.match(UI_ID_PATTERN) ?? [])]
 }
@@ -58,7 +66,10 @@ if (baselineIsAvailable()) {
     if (!files.some(isUiSurface)) continue
 
     const message = git(['show', '-s', '--format=%s%n%b', commit])
+    const subject = message.split('\n', 1)[0] ?? ''
     const shortCommit = commit.slice(0, 7)
+
+    if (isChoreCommit(subject)) continue
 
     if (!files.includes(AUDIT_PATH)) {
       failures.push(`${shortCommit}: UI 改动没有同步 ${AUDIT_PATH}`)
