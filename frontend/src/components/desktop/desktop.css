@@ -384,6 +384,10 @@
   margin: 0 auto;
 }
 
+.biof3-settings-section--models {
+  width: min(100%, 1180px);
+}
+
 .biof3-settings-section__heading {
   margin-bottom: 14px;
   padding-bottom: 10px;
@@ -440,7 +444,7 @@
 
 .biof3-endpoint-card {
   display: block;
-  min-width: 620px;
+  min-width: 880px;
   padding: 6px;
   background: transparent;
 }
@@ -448,13 +452,19 @@
 .biof3-endpoint-list-header,
 .biof3-endpoint-card__grid {
   display: grid;
-  grid-template-columns: minmax(76px, 0.65fr) minmax(148px, 1.55fr) minmax(96px, 0.9fr) minmax(112px, 1fr) 78px 30px;
+  grid-template-columns:
+    minmax(112px, 0.8fr)
+    minmax(240px, 2fr)
+    minmax(176px, 1.25fr)
+    minmax(180px, 1.25fr)
+    96px
+    32px;
   align-items: center;
   gap: 6px;
 }
 
 .biof3-endpoint-list-header {
-  min-width: 620px;
+  min-width: 880px;
   padding: 0 7px;
   color: var(--biof3-text-secondary);
   font-size: 0.66rem;
@@ -536,43 +546,33 @@
 }
 
 .biof3-endpoint-key-field {
-  position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 26px 26px;
   align-items: center;
+  gap: 2px;
   min-width: 0;
 }
 
 .biof3-endpoint-key-field .biof3-input {
   min-width: 0;
-  padding-right: 52px;
-}
-
-.biof3-endpoint-key-status {
-  position: absolute;
-  right: 52px;
-  color: var(--biof3-text-tertiary);
-  font-size: 0.68rem;
-  pointer-events: none;
 }
 
 .biof3-endpoint-key-action {
-  position: relative;
-  z-index: 1;
-  width: 24px;
-  height: 24px;
-  margin-left: -26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 30px;
   padding: 0;
   border: 0;
+  border-radius: 6px;
   background: transparent;
   color: var(--biof3-text-tertiary);
   cursor: pointer;
 }
 
-.biof3-endpoint-key-action + .biof3-endpoint-key-action {
-  margin-left: 0;
-}
-
 .biof3-endpoint-key-action:hover {
+  background: var(--biof3-hover);
   color: var(--biof3-text);
 }
 

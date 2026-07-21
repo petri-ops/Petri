@@ -990,7 +990,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         )}
 
         {activeSection === 'models' && (
-          <section className="biof3-settings-section">
+          <section className="biof3-settings-section biof3-settings-section--models">
             <div className="biof3-settings-section__heading">
               <h3>API Endpoint</h3>
               <p>
@@ -1103,9 +1103,6 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                         placeholder={configured ? 'Key 已配置' : 'API Key'}
                         aria-label={configured ? 'API Key 已配置，输入新 Key 可覆盖' : 'API Key'}
                       />
-                      {configured && !credentialInputs[id] && (
-                        <span className="biof3-endpoint-key-status" aria-hidden="true">已配置</span>
-                      )}
                       <button
                         type="button"
                         className="biof3-endpoint-key-action"
