@@ -2,7 +2,7 @@
 
 最后更新：2026-07-21
 
-状态：**Stage 1 验收完成（31/31 verified）；UI-031、UI-032、UI-033 与 UI-034 已实机验收；UI-035 工具活动收缩、UI-036 模型配置简化、UI-037 并行后台会话、UI-038 Endpoint 默认模型与导入导出、UI-039 聊天回复阅读与复制体验待实机验收**
+状态：**Stage 1 验收完成（31/31 verified）；UI-031、UI-032、UI-033 与 UI-034 已实机验收；UI-035 工具活动收缩、UI-036 模型配置简化、UI-037 并行后台会话、UI-038 Endpoint 默认模型与导入导出、UI-039 聊天回复阅读与复制体验、UI-040 设置面板四项安全与可达性微调、UI-041 设置面板背景统一与 Endpoint 工具栏整理、UI-042 Endpoint 渠道卡片外框收敛、UI-044 工作台右侧栏“显示侧边栏”冗余按钮清理、UI-045 设置面板 header 化简待实机验收**
 
 本文件是 [`docs/v1-productization-roadmap.md`](./v1-productization-roadmap.md) Stage 1 的唯一 UI 问题清单。它记录真实可复现问题，不用来收集没有目标层级的泛化审美意见。
 
@@ -146,7 +146,12 @@ npm run check
 | UI-036 | in_progress | P2 | P-07 | C-02, C-04 | 设置 / 模型接口与聊天选择器 | 模型配置暴露接口类型和能力开关，渠道卡密度偏高；聊天模型入口未把供应商与模型拆开选择 | 设置页每个渠道压缩为一行，仅保留供应商、Base URL、Key、默认模型、连通性和删除；协议适配由 Endpoint 自动推断，能力元数据继续在 Gateway 内部保留。聊天输入区拆成供应商和对应模型两个入口。前端代码门禁已通过，待用户实机确认单行密度、保存重开、连接状态和双入口选择 | MODEL-UX refinement |
 | UI-037 | in_progress | P1 | W-03 | C-02, C-04, C-06 | Agent 会话 / 会话切换 | `SimpleChat` 把消息、流式状态和工具活动绑定在单个组件实例上；切换会话或离开聊天视图后，旧流会与新会话冲突，新会话也可能被全局 `streaming` 状态阻塞 | 新增按 `conversationId` 隔离的共享运行注册表：视图卸载只取消 UI 订阅，不停止 Agent task；返回会话可继续看到流式进度并在完成后从 SQLite 对账。不同会话可并行、同一会话禁止重叠请求，侧栏以脉冲点标识后台运行。后端既有每用户最多 3 路 task 并发边界不变；前端 23 文件 169 项测试通过，待用户实机验证 A/B 会话并行、离开聊天视图继续和完成后持久化 | CONVERSATION-RUNTIME |
 | UI-038 | in_progress | P1 | P-07 | C-02, C-04 | 设置 / API Endpoint 与聊天模型选择器 | 供应商切换后模型没有明确使用该渠道的配置默认值；渠道配置无法备份或批量迁移 | ModelProfile 新增独立 `defaultModel`，`model` 保留最近激活模型；聊天选择供应商时自动激活该渠道默认模型，用户手动切换后保留手动选择。API Endpoint 提供 JSON/CSV 导出与导入；Key 默认隐藏，可主动显示/复制，用户确认后导出可包含 Key 明文，导入后进入待保存凭据输入并按 ID/Base URL 合并。模型设置内容区从固定 720px 改为最大 1180px 自适应，Endpoint 列按内容伸缩，Key 操作按钮独立占位且窄窗保留横向滚动；待用户实机验证 | MODEL-UX |
-| UI-039 | in_progress | P2 | W-03 | C-04, C-06 | Agent 会话 / Markdown 回复 | 回复内容虽然完整，但表格边框、状态 emoji 和复制入口缺乏统一的 Codex 风格，长回复阅读密度偏高 | 轻量 Markdown 渲染保留原始信息，标题层级、表格容器和状态标记改为克制的文档样式；表格提供 TSV 复制，代码块保留复制，assistant 回复底部增加悬停显示的整段复制按钮；待用户实机验证长表格、代码块、文件卡片和明暗主题 | MODEL-UX refinement |
+| UI-039 | in_progress | P2 | W-03 | C-04, C-06 | Agent 会话 / Markdown 回复 | 回复内容虽然完整，但表格边框、代码展示和复制入口缺乏统一的 Codex 风格，长回复阅读密度偏高；影响 W-06 文件预览 | Markdown 表格已移除完整外框和高密度网格，只保留弱化表头层级与低对比度横向分隔，最末行继续保留同强度底线；TSV 复制位于表格外的独立右对齐工具行。聊天 fenced code 复用安全语法高亮，Python/R/Shell 等真实代码保留紧凑语言栏；text/plaintext/txt/tree 与无语言块不显示语言栏，进一步移除灰底、圆角和四边框，以透明背景与上下两条低对比度细线界定内容，复制图标位于预留的右上操作区且不覆盖首行。文件浏览器按扩展名高亮常见脚本，纯文本保持原样；待用户实机验证长表格、代码块、文件结构、脚本预览及明暗/窄窗主题 | MODEL-UX refinement |
+| UI-040 | in_progress | P2 | W-01 | C-03, C-04 | 设置 / 安全性与可达性 | 模型渠道删除无确认可误删已配置 URL/Key；回收站语义错放于“隐私与维护”；主题当前偏好不可见；“添加自定义 API”措辞含糊 | 模型卡片删除按钮包 `window.confirm` 并按渠道命名；`TrashManagement` 移入“计算与数据”末尾，与 `ComputeExecution`/`DataManagement`/`HarnessEnvironment` 之间增加细线视觉分隔；`ThemeControl` 旁渲染 `当前：跟随系统/日间/夜间` badge 直接披露偏好；按钮文本改为“添加 API 渠道”。改动遵循 UI-036/UI-038 既定的一行卡片、窄窗横向滚动与 Endpoint 列自适应原则，未调整卡片结构。前端 197 项测试与 ui:audit:check 通过，待用户实机验证 confirm 文案、回收站路径、主题 badge 文案与分隔线密度 | SETTING-FIX |
+| UI-041 | in_progress | P2 | W-01 | C-01, C-04 | 设置 / 视觉一致性与工具栏密度 | 设置页左侧 nav、Endpoint 卡片、凭据卡、维护行、回收站项与数据目录区共 6 个容器使用 `--biof3-bg-subtle` 浅灰底，与右侧主面板白底不一致；`API Endpoint` 标题区内联的导出 JSON/CSV、导入配置三个按钮挤在描述段落之间，既占首屏面积又与“添加 API 渠道”主行动混淆 | 设置页 6 个容器背景统一为 `var(--biof3-bg-surface)` 白色，仅靠 `var(--biof3-border)` 区分边界；plugin store 的徽章/chip 灰底保持不变以保留对比线索。Endpoint 工具栏从 heading 抽出为 `.biof3-endpoint-list-actions`，左侧保留“添加 API 渠道”主行动，右侧（`margin-left: auto`）放置导出 JSON/CSV、导入配置与 transfer message，仅 `userModelProfiles.length > 0` 时渲染以避免空状态噪声；功能契约保留 UI-038 的导出/导入约束。前端 197 项测试与 ui:audit:check 通过，待用户实机验证 nav/卡片底色统一、工具栏在小/中/大窗口的换行与空状态折叠 | SETTING-FIX |
+| UI-042 | in_progress | P2 | W-01 | C-01, C-04 | 设置 / Endpoint 卡片密度 | 每个渠道渲染 `.biof3-model-preset` 完整外框（1px border + 10px 圆角）+ 嵌套 `.biof3-endpoint-card` 内 padding 6px + 独立 list gap 6px，5 条渠道即产生 10 条内外框线和 4 道分隔线，密度与 UI-036 一行卡片原则相悖 | 渠道卡片去掉 1px 外框与圆角，改为底部 1px 分隔线让多条渠道聚合为列表；最后一条去除底 border 避免双线；嵌套 card padding 由 6px 收敛为 0 去除双层内边距；list 行间距 6px 收紧为 2px；header 行加底 border 与弱化色（`--biof3-text-tertiary`）形成“表头—行—行”单一分组结构，保留 UI-038 的窄窗横向滚动与 UI-036 的一行卡片约束。前端 197 项测试与 ui:audit:check 通过，待用户实机验证多渠道（5 条）、单渠道、空状态与窄窗视觉 | SETTING-FIX |
+| UI-044 | in_progress | P2 | W-02 | C-01, C-06 | 工作台 / RightPanel 折叠入口冗余 | `RightPanel.tsx` 当 `visible=false` 且 `workspaceMode ∈ {chat, scheduled}` 时渲染一个绝对定位“显示右侧侧边栏”按钮（绝对 0/0、width 40px、半透明 + backdrop-blur）；与 TitleBar 的 panel-right toggle 功能重复，且隐藏在右栏折叠区边缘，被设置/报告/工具面板遮挡，在打开设置等场景下被误识别为设置内按钮 | 删除 `RightPanel.tsx` 中的 `if (!visible) { return <button ... /> }` 折叠分支，保留 `return null` 早返；清理 `Icon` 未用 import 与 `project-workspace.module.css` 里 `.workspaceRightPanelToggle`/`:hover` 样式块；`useWorkspacePanels.toggleRight` 保留供 TitleBar 调用，前端测试与 ui:audit:check 通过，待用户实机验证“右侧栏折叠后无浮按钮，只用 TitleBar 右上 panel-right 按钮恢复” | RIGHTPANEL-FIX |
+| UI-045 | in_progress | P2 | W-01 | C-01, C-06 | 设置 / Panel header 装饰冗余 | 设置面板 header 含 32px 装饰齿轮圆 + “设置”标题 + 分类副标题 + 28px 关闭按钮；齿轮圆只重复左侧 nav icon 语义、副标题又只列当前分类一句话、关闭按钮与 dock 入口功能重复 | 删除装饰齿轮圆 (`<span className=...__icon>` 与 `<Icon name=settings>`)、副标题 (`<p className=...__subtitle>`) 与关闭按钮 (`<button className=...__close>`)；标题改为当前分类 label (`activeSectionMeta.label`)，与左侧 nav 形成“当前定位”锚点；header 简化为“单行标题 + 1px border-bottom”，padding 14/18 → 12/18、字号 1rem → 0.95rem；CSS 删除 `.biof3-desktop-panel__icon`/`.__subtitle`/`.__close` 块及其 dark 与 nav-panel 上下文选择器；dock 入口承担 toggle 职责，前端测试与 ui:audit:check 通过，待用户实机验证“打开设置 → 仅单行分类标题，无齿轮/副标题/关闭按钮，点 dock 齿轮可关闭” | SETTING-FIX |
 
 - UI-032 属于 `P-07 模型网关与 AI Provider` 的 Harness 能力子系统（Stage 3 M1），现已与 UI-031/UI-033/UI-034 一起完成实机验收。
 - 不允许破坏：设置页窄窗布局、计算与数据分类既有 `ComputeExecution`/`DataManagement` 组件、`run_tool → tool_job → artifact truth` 执行链。
@@ -154,6 +159,11 @@ npm run check
 
 - UI-033 只收敛用户可配置层，不删除 Gateway 已支持的底层适配器，也不改写历史 profile。
 - UI-036 延续该边界：只隐藏实现型选项，不删除持久化的协议、能力或角色信息；窄窗口保持一条渠道一行并允许横向查看，不把字段重新折成多行卡片。
+- UI-040 不破坏：UI-036/UI-038 既定的渠道一行卡片与窄窗横向滚动，只在调用点增加 confirm、跨子模块加视觉分隔，并在 ThemeControl 旁加可读 badge；不重构 `TrashManagement`、`ComputeExecution`、`DataManagement` 的 props 或 IPC 契约。
+- UI-041 不破坏：UI-036/UI-038 既定的一行卡片与窄窗横向滚动；只把 `--biof3-bg-subtle` 在设置页 6 个容器替换为 `--biof3-bg-surface`，并把转移按钮从 heading 移出到列表底部；保留导入/导出函数、`endpointImportRef`、`endpointTransferMessage` 全部状态、Key 是否写入导出的确认弹窗。
+- UI-042 不破坏 UI-036/UI-038：保留一行网格、窄窗横向滚动与 Endpoint 列自适应；只把卡片外框改为底部分隔线、移除嵌套 padding 并收紧 list 行间距，未改动 DOM 结构与 React props。
+- UI-044 不破坏 hook/折叠语义：只清理 `RightPanel.tsx` 里“visible=false 浮按钮”分支，保留 collapsed panel `return null`；右侧栏折叠后无恢复入口复用，与 TitleBar panel-right toggle 形成“单入口恢复”约定，避免与底部终端/左栏 toggle 视觉冗余。
+- UI-045 不破坏 dock toggle 语义：只清理 panel header 的装饰齿轮/副标题/关闭按钮，`activeSectionMeta.label` 仍由 `SETTINGS_SECTIONS` 注入（4 个分类各有 description）；header 唯一锚点为单行标题，关闭走 dock 齿轮按钮 toggle；不动 `.biof3-desktop-panel` 主框架与其他面板样式。
 - UI-037 不创建第二套后台任务系统：仍使用既有 Agent task、`task_events` SSE 回放和 `copilot_messages` 持久化；本次只修复 renderer 按会话隔离、订阅存续和完成对账。
 
 ## 11. 2026-07-21 UI-033 / UI-034 实机收口

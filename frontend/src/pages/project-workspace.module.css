@@ -1260,32 +1260,6 @@
   overflow: hidden;
 }
 
-.workspaceRightPanelToggle {
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 42;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-left: 1px solid rgba(226, 232, 240, 0.7);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.7);
-  border-radius: 0 0 0 10px;
-  background: var(--biof3-surface-translucent);
-  color: var(--biof3-text-secondary);
-  box-shadow: none;
-  backdrop-filter: blur(10px);
-  cursor: pointer;
-}
-
-.workspaceRightPanelToggle:hover {
-  background: var(--biof3-surface-translucent);
-  color: var(--biof3-text);
-}
-
 .rightPanelCollapseBtn {
   flex-shrink: 0;
   color: var(--biof3-text-secondary);
@@ -5035,15 +5009,47 @@ body.biof3-resizing-columns * {
   text-overflow: ellipsis;
 }
 
-.workspacePreviewOpen {
-  flex-shrink: 0;
-  color: var(--biof3-accent);
-  font-size: 12px;
-  text-decoration: none;
+.workspacePreviewActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
-.workspacePreviewOpen:hover {
-  text-decoration: underline;
+.workspacePreviewOpen {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  min-height: 26px;
+  padding: 3px 6px;
+  border: 1px solid color-mix(in srgb, var(--biof3-border) 56%, transparent);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.workspacePreviewOpen:hover:not(:disabled) {
+  border-color: var(--biof3-border-strong);
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text);
+}
+
+.workspacePreviewOpen:disabled {
+  cursor: progress;
+  opacity: 0.56;
+}
+
+.workspacePreviewError {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--biof3-border);
+  background: color-mix(in srgb, var(--biof3-danger) 7%, transparent);
+  color: var(--biof3-danger);
+  font-size: 11px;
 }
 
 .workspacePreviewBody {
@@ -5069,6 +5075,121 @@ body.biof3-resizing-columns * {
   margin: 0;
   font-size: 12px;
   color: var(--biof3-text-tertiary);
+}
+
+.workspaceBinaryTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--biof3-text);
+}
+
+.workspaceOfficeDoc,
+.workspaceOfficeSheet,
+.workspaceOfficeListing {
+  padding: 18px 22px;
+  background: var(--biof3-bg-surface);
+  color: var(--biof3-text);
+  font-size: 13px;
+  line-height: 1.7;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.workspaceOfficeHeader {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--biof3-text-secondary);
+  text-transform: uppercase;
+}
+
+.workspaceOfficeText {
+  margin: 0;
+  padding: 14px 16px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: var(--biof3-bg-subtle);
+  border: 1px solid var(--biof3-border);
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--biof3-text);
+}
+
+.workspaceOfficeHint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--biof3-text-tertiary);
+}
+
+.workspaceOfficeSheet table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.workspaceOfficeSheet th,
+.workspaceOfficeSheet td {
+  border: 1px solid var(--biof3-border);
+  padding: 5px 8px;
+  text-align: left;
+  white-space: nowrap;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workspaceOfficeSheet td:first-child {
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text-secondary);
+  font-weight: 600;
+}
+
+.workspaceOfficeAssets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.workspaceOfficeAsset {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 6px;
+  background: var(--biof3-bg);
+  font: inherit;
+  color: inherit;
+  cursor: zoom-in;
+}
+
+.workspaceOfficeAsset img {
+  max-height: 120px;
+  object-fit: contain;
+}
+
+.workspaceOfficeAsset span {
+  font-size: 11px;
+  color: var(--biof3-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspaceOfficeListing ul {
+  margin: 0;
+  padding: 8px 16px;
+  background: var(--biof3-bg-subtle);
+  border: 1px solid var(--biof3-border);
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  list-style-type: square;
 }
 
 .workspacePdfObject,
@@ -5129,22 +5250,21 @@ body.biof3-resizing-columns * {
 }
 
 .workspaceCodePreview {
-  min-height: 100%;
-  background: var(--biof3-bg-surface);
-}
-
-.workspaceCodePreview pre {
   margin: 0;
-  padding: 14px;
+  padding: 14px 16px;
   min-height: 100%;
   overflow: auto;
-  font-size: 12px;
-  line-height: 1.55;
   background: var(--biof3-bg-surface);
+  color: var(--biof3-text);
+  font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  tab-size: 2;
+  white-space: pre;
 }
 
 .workspaceCodePreview code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  display: block;
+  min-width: max-content;
+  font: inherit;
 }
 
 .workspaceMarkdownPreview {

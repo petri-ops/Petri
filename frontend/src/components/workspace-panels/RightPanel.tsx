@@ -1,5 +1,4 @@
 import React from 'react';
-import { Icon } from '@/components/icons/Icon';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
 import type { Project, ToolJob } from '@/lib/project-types';
 import type { BackendStatus } from '@/lib/electron';
@@ -98,19 +97,6 @@ export function RightPanel({
   );
 
   if (!visible) {
-    if (workspaceMode !== 'chat' && workspaceMode !== 'scheduled') {
-      return (
-        <button
-          type="button"
-          className={styles.workspaceRightPanelToggle}
-          onClick={() => ctx.setRightOpen(true)}
-          title="显示右侧侧边栏"
-          aria-label="显示右侧侧边栏"
-        >
-          <Icon name="panel-right" size={17} />
-        </button>
-      );
-    }
     return null;
   }
 

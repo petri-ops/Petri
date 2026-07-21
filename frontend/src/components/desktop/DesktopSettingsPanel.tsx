@@ -7,6 +7,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { ThemeControl } from './ThemeControl';
+import { useTheme } from '@/themes/ThemeProvider';
 import {
   useAiSettings,
   type ChatModelPreset,
@@ -657,6 +658,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   const [endpointTransferMessage, setEndpointTransferMessage] = useState<string | null>(null);
   const endpointImportRef = useRef<HTMLInputElement>(null);
   const { refresh: refreshAiSettings } = useAiSettings();
+  const { preference: themePreference } = useTheme();
   // M2-3：错误遥测开关（默认关闭）
   const [telemetryEnabled, setTelemetryEnabled] = useState(false);
 
@@ -938,21 +940,9 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   return (
     <div className="biof3-desktop-panel" role="dialog" aria-label="设置">
       <div className="biof3-desktop-panel__header">
-        <span className="biof3-desktop-panel__icon">
-          <Icon name="settings" size={18} />
-        </span>
         <div className="biof3-desktop-panel__titles">
-          <h2 className="biof3-desktop-panel__title">设置</h2>
-          <p className="biof3-desktop-panel__subtitle">{activeSectionMeta.description}</p>
+          <h2 className="biof3-desktop-panel__title">{activeSectionMeta.label}</h2>
         </div>
-        <button
-          type="button"
-          className="biof3-desktop-panel__close"
-          onClick={onClose}
-          aria-label="关闭"
-        >
-          <Icon name="x" size={16} />
-        </button>
       </div>
 
       <div className="biof3-settings-layout">
@@ -983,6 +973,14 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         <div className="biof3-field">
           <label className="biof3-field__label">外观主题</label>
           <ThemeControl menuPlacement="bottom" />
+          <span className="biof3-badge">
+            当前：
+            {themePreference === 'system'
+              ? '跟随系统'
+              : themePreference === 'light'
+                ? '日间'
+                : '夜间'}
+          </span>
           <p className="biof3-field__hint">可跟随 macOS 外观，或固定使用日间/夜间模式。</p>
         </div>
 
@@ -997,28 +995,6 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                 每个供应商只需配置供应商、Base URL、Key 和默认模型；接口协议与模型能力由后端自动适配。Key
                 {credentialBackend === 'keychain' ? ' 保存在 macOS Keychain。' : ' 保存在独立本地凭据存储。'}
               </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => exportEndpoints('json')}>
-                  导出 JSON
-                </button>
-                <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => exportEndpoints('csv')}>
-                  导出 CSV
-                </button>
-                <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => endpointImportRef.current?.click()}>
-                  导入配置
-                </button>
-                <input
-                  ref={endpointImportRef}
-                  type="file"
-                  accept=".json,.csv,application/json,text/csv"
-                  style={{ display: 'none' }}
-                  onChange={(event) => {
-                    const file = event.target.files?.[0];
-                    if (file) void importEndpoints(file);
-                  }}
-                />
-                {endpointTransferMessage && <span className="biof3-field__hint">{endpointTransferMessage}</span>}
-              </div>
               <p className="biof3-field__hint">Key 默认隐藏，可点击眼睛显示或复制；导出前会确认是否把 Key 写入文件，请仅保存到安全位置。</p>
             </div>
             <div className="biof3-model-list">
@@ -1152,7 +1128,11 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                     <button
                       type="button"
                       className="biof3-endpoint-card__delete"
-                      onClick={() => removeProfile(profile.id)}
+                      onClick={() => {
+                        const label = profile.label?.trim() || '该渠道';
+                        if (!window.confirm(`删除「${label}」？已保存的 URL、Key 与默认模型都会从面板移除，回收站不可恢复。`)) return;
+                        removeProfile(profile.id);
+                      }}
                       aria-label={`删除 ${profile.label || '该渠道'}`}
                       title="删除渠道"
                     >
@@ -1164,9 +1144,35 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
               })}
               {userModelProfiles.length === 0 && <p className="biof3-field__hint">尚未配置模型。添加一个自定义 API，或选择 DeepSeek。</p>}
             </div>
-            <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={addProfile}>
-              添加自定义 API
-            </button>
+            <div className="biof3-endpoint-list-actions">
+              <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={addProfile}>
+                添加 API 渠道
+              </button>
+              {userModelProfiles.length > 0 && (
+                <div className="biof3-endpoint-transfer-actions">
+                  <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => exportEndpoints('json')}>
+                    导出 JSON
+                  </button>
+                  <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => exportEndpoints('csv')}>
+                    导出 CSV
+                  </button>
+                  <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => endpointImportRef.current?.click()}>
+                    导入配置
+                  </button>
+                  <input
+                    ref={endpointImportRef}
+                    type="file"
+                    accept=".json,.csv,application/json,text/csv"
+                    style={{ display: 'none' }}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) void importEndpoints(file);
+                    }}
+                  />
+                  {endpointTransferMessage && <span className="biof3-field__hint">{endpointTransferMessage}</span>}
+                </div>
+              )}
+            </div>
 
           </section>
         )}
@@ -1179,9 +1185,17 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
             </div>
         <ComputeExecution />
 
+        <hr className="biof3-section-divider" />
+
         <DataManagement />
 
+        <hr className="biof3-section-divider" />
+
         <HarnessEnvironment />
+
+        <hr className="biof3-section-divider" />
+
+        <TrashManagement />
 
           </section>
         )}
@@ -1228,7 +1242,6 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
             <ExportDiagnostic />
           </div>
         </div>
-        <TrashManagement />
           </section>
         )}
         </div>
