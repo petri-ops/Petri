@@ -7,10 +7,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   ackRunTool,
-  streamChat,
   type ChatMessage,
-  type ToolCallEvent,
-  type ToolResultEvent,
 } from './copilotClient';
 import {
   getConversationMessages,
@@ -38,14 +35,27 @@ import { CopilotMarkdown } from './copilotMarkdown';
 import {
   formatToolDuration,
   formatToolSideEffects,
-  mergeToolCallActivity,
-  mergeToolResultActivity,
   restoreToolActivities,
   type ToolActivityItem,
 } from './toolActivity';
+import {
+  clearConversationPendingApproval,
+  clearConversationRun,
+  detachConversationRun,
+  isConversationRunning,
+  startConversationRun,
+  useConversationRun,
+  type ConversationPendingApproval,
+} from './conversationRunStore';
 import './simple-chat.css';
 import { Icon } from '@/components/icons/Icon';
 import { tools as staticTools } from '@/pages/_data';
+
+const conversationDrafts = new Map<string, string>();
+
+function conversationDraftKey(projectId: string, conversationId: string | null): string {
+  return `${projectId}:${conversationId || 'new'}`;
+}
 
 interface SimpleMessage {
   role: 'user' | 'assistant';
@@ -57,13 +67,7 @@ interface SimpleMessage {
   processingDurationMs?: number;
 }
 
-interface PendingApproval {
-  ackToken: string;
-  toolJobId?: string;
-  toolId?: string;
-  message?: string;
-  params?: Record<string, unknown>;
-}
+type PendingApproval = ConversationPendingApproval;
 
 type ApprovalRepairState =
   | { status: 'idle' }
@@ -93,13 +97,9 @@ export function SimpleChat({
   inputHeight: _inputHeight = 120,
 }: SimpleChatProps): React.ReactElement {
   const [messages, setMessages] = useState<SimpleMessage[]>([]);
-  const [toolActivities, setToolActivities] = useState<ToolActivityItem[]>([]);
-  const toolActivitiesRef = useRef<ToolActivityItem[]>([]);
-  const processingStartedAtRef = useRef<number | null>(null);
   const [input, setInput] = useState('');
-  const [streaming, setStreaming] = useState(false);
+  const [starting, setStarting] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [pendingApproval, setPendingApproval] = useState<PendingApproval | null>(null);
   const [paramDraft, setParamDraft] = useState<Record<string, string>>({});
   const [approvalRepair, setApprovalRepair] = useState<ApprovalRepairState>({ status: 'idle' });
   const autoApproveRef = useRef<string | null>(null);
@@ -109,8 +109,9 @@ export function SimpleChat({
   const [accessMode, setAccessMode] = useState<'full' | 'read'>('full');
   const taRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const abortRef = useRef<AbortController | null>(null);
-  const activeConvRef = useRef<string | null>(conversationId);
+  const activeRun = useConversationRun(conversationId);
+  const streaming = starting || activeRun?.status === 'running';
+  const pendingApproval = activeRun?.pendingApproval || null;
 
   // Plan 1.6 §4.2 — read Copilot context from React Context, not the
   // module-scope singleton. Captured into a ref so the latest value is
@@ -125,7 +126,10 @@ export function SimpleChat({
   // the chat header / future list UI stays in sync with sidebar mutations
   // without polling. The hook loads once on mount; `refresh` is invoked
   // after server-driven onConversation events append a new conv.
-  const { refresh: refreshConversations } = useConversations(projectId);
+  const {
+    refresh: refreshConversations,
+    create: createConversationForRun,
+  } = useConversations(projectId);
 
   // Plan 1.6 §4.5 — read presets + activeId from the shared SWR
   // hook (module-scope cache). The settings panel and this chat
@@ -137,9 +141,6 @@ export function SimpleChat({
     activePreset: activeModel,
     setActive: setActiveModelId,
   } = useAiSettings();
-
-  // Keep ref in sync
-  useEffect(() => { activeConvRef.current = conversationId; }, [conversationId]);
 
   // Resolve file references only after a message is fully settled —
   // streaming deltas would otherwise hammer the resolver and we never want
@@ -279,10 +280,9 @@ export function SimpleChat({
 
   // Load messages when conversationId changes
   useEffect(() => {
-    toolActivitiesRef.current = [];
-    setToolActivities([]);
+    setMessages([]);
     if (!conversationId) {
-      setMessages([]);
+      setLoading(false);
       return;
     }
     let cancelled = false;
@@ -299,24 +299,85 @@ export function SimpleChat({
           ? m.meta.processingDurationMs
           : undefined,
       }));
-      const lastMessage = ui[ui.length - 1];
-      const latestActivities = lastMessage?.role === 'assistant'
-        ? lastMessage.toolActivities || []
-        : [];
-      toolActivitiesRef.current = latestActivities;
-      setToolActivities(latestActivities);
       setMessages(ui);
       setLoading(false);
     })();
     return () => { cancelled = true; };
   }, [conversationId]);
 
+  // A completed run may have settled while this conversation was hidden or
+  // while the whole chat surface was unmounted. Reconcile from SQLite when it
+  // becomes visible again; running/error snapshots remain available in the
+  // shared store so switching views never loses live state.
+  const reconciledRunRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!conversationId || !activeRun || activeRun.status === 'running' || !activeRun.completedAt) return;
+    const reconciliationId = `${conversationId}:${activeRun.completedAt}`;
+    if (reconciledRunRef.current === reconciliationId) return;
+    let cancelled = false;
+    (async () => {
+      const persisted = await getConversationMessages(conversationId, 200);
+      if (cancelled) return;
+      reconciledRunRef.current = reconciliationId;
+      setMessages(persisted.map((m) => ({
+        role: m.role === 'system' ? 'assistant' : (m.role as 'user' | 'assistant'),
+        content: m.content,
+        ts: m.ts,
+        toolActivities: restoreToolActivities(m.meta?.toolActivities),
+        processingDurationMs: typeof m.meta?.processingDurationMs === 'number'
+          ? m.meta.processingDurationMs
+          : undefined,
+      })));
+      if (activeRun.status === 'done' && !activeRun.pendingApproval) {
+        clearConversationRun(conversationId);
+      }
+      await refreshConversations();
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeRun, conversationId, refreshConversations]);
+
+  const displayMessages = (() => {
+    if (!activeRun || activeRun.conversationId !== conversationId) return messages;
+    const next = messages.slice();
+    const lastUser = [...next].reverse().find((message) => message.role === 'user');
+    const runUserPersisted =
+      lastUser?.content === activeRun.userContent &&
+      lastUser.ts !== activeRun.historyLastUserTs;
+    if (activeRun.userContent && !runUserPersisted) {
+      next.push({
+        role: 'user',
+        content: activeRun.userContent,
+        ts: activeRun.userTs,
+      });
+    }
+    const lastAssistant = next[next.length - 1];
+    const assistantAlreadyPersisted =
+      lastAssistant?.role === 'assistant' &&
+      Boolean(activeRun.assistantContent) &&
+      lastAssistant.content === activeRun.assistantContent &&
+      Boolean(lastAssistant.ts && Date.parse(lastAssistant.ts) >= activeRun.startedAt);
+    if (!assistantAlreadyPersisted) {
+      next.push({
+        role: 'assistant',
+        content: activeRun.assistantContent,
+        pending: activeRun.assistantPending,
+        error: activeRun.assistantError,
+        ts: activeRun.assistantTs,
+        toolActivities: activeRun.toolActivities,
+        processingDurationMs: activeRun.processingDurationMs,
+      });
+    }
+    return next;
+  })();
+
   // Auto-scroll to bottom
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, toolActivities]);
+  }, [activeRun, messages]);
 
   const inputLength = input.trim().length;
   const composerWidth = Math.min(980, Math.max(560, 560 + Math.sqrt(inputLength) * 42));
@@ -333,160 +394,70 @@ export function SimpleChat({
     resizeTextarea(taRef.current);
   }, [input, resizeTextarea]);
 
+  useEffect(() => {
+    setInput(conversationDrafts.get(conversationDraftKey(projectId, conversationId)) || '');
+  }, [conversationId, projectId]);
+
   const onInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
+    conversationDrafts.set(conversationDraftKey(projectId, conversationId), e.target.value);
     resizeTextarea(e.target);
   };
 
   const send = useCallback(async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || streaming) return;
+    setStarting(true);
 
-    setInput('');
-    if (taRef.current) taRef.current.style.height = 'auto';
+    try {
+      let targetConversationId = conversationId;
+      if (!targetConversationId) {
+        const created = await createConversationForRun('新对话');
+        if (!created) return;
+        targetConversationId = created.id;
+        onConversationChange(created.id);
+      }
+      if (isConversationRunning(targetConversationId)) return;
 
-    const userMsg: SimpleMessage = {
-      role: 'user',
-      content: trimmed,
-      ts: new Date().toISOString(),
-    };
-    const assistantMsg: SimpleMessage = {
-      role: 'assistant',
-      content: '',
-      pending: true,
-      ts: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, userMsg, assistantMsg]);
-    toolActivitiesRef.current = [];
-    setToolActivities([]);
-    processingStartedAtRef.current = Date.now();
-    setStreaming(true);
+      // Build upstream messages from current history
+      const tagged: ChatMessage[] = messages
+        .filter((m) => !m.error && !m.pending)
+        .map((m) => ({ role: m.role, content: m.content }));
+      tagged.push({ role: 'user', content: trimmed });
 
-    const ctrl = new AbortController();
-    abortRef.current = ctrl;
-
-    // Build upstream messages from current history
-    const tagged: ChatMessage[] = messages
-      .filter((m) => !m.error && !m.pending)
-      .map((m) => ({ role: m.role, content: m.content }));
-    tagged.push({ role: 'user', content: trimmed });
-
-    let acc = '';
-
-    await streamChat({
-      messages: tagged,
-      modelPresetId: activeModel?.endpointProfileId || activeModelId,
-      modelName: activeModel?.model,
-      context: {
-        ...copilotCtxRef.current,
-        page: 'desktop-project',
+      const started = startConversationRun({
+        conversationId: targetConversationId,
         projectId,
-        accessMode,
-      },
-      signal: ctrl.signal,
-      conversationId: activeConvRef.current || undefined,
-      onIter: (iteration) => {
-        // Text emitted before a tool call is intermediate narration, not the
-        // final answer. Keep only the final tool-free iteration visible.
-        if (iteration <= 1) return;
-        acc = '';
-        setMessages((prev) => {
-          const copy = prev.slice();
-          const last = copy[copy.length - 1];
-          if (last && last.role === 'assistant') {
-            copy[copy.length - 1] = { ...last, content: '', pending: true };
-          }
-          return copy;
-        });
-      },
-      onDelta: (delta) => {
-        acc += delta;
-        setMessages((prev) => {
-          const copy = prev.slice();
-          const last = copy[copy.length - 1];
-          if (last && last.role === 'assistant') {
-            copy[copy.length - 1] = { ...last, content: acc, pending: false };
-          }
-          return copy;
-        });
-      },
-      onConversation: (info) => {
-        if (info.conversationId && info.conversationId !== activeConvRef.current) {
-          activeConvRef.current = info.conversationId;
-          onConversationChange(info.conversationId);
-          refreshConversations();
-        }
-      },
-      onToolCall: (event: ToolCallEvent) => {
-        setToolActivities((current) => {
-          const next = mergeToolCallActivity(current, event);
-          toolActivitiesRef.current = next;
-          return next;
-        });
-      },
-      onToolResult: (event: ToolResultEvent) => {
-        setToolActivities((current) => {
-          const next = mergeToolResultActivity(current, event);
-          toolActivitiesRef.current = next;
-          return next;
-        });
-        if (event.name === 'run_tool' && event.needApproval && event.ackToken) {
-          setPendingApproval({
-            ackToken: event.ackToken,
-            toolJobId: event.toolJobId,
-            toolId: event.toolId,
-            message: event.message,
-            params: event.params,
-          });
-        }
-      },
-      onDone: () => {
-        setStreaming(false);
-        const completedActivities = toolActivitiesRef.current;
-        const processingDurationMs = processingStartedAtRef.current == null
-          ? undefined
-          : Math.max(0, Date.now() - processingStartedAtRef.current);
-        processingStartedAtRef.current = null;
-        setMessages((prev) => {
-          const copy = prev.slice();
-          const last = copy[copy.length - 1];
-          if (last && last.role === 'assistant' && last.pending) {
-            copy[copy.length - 1] = {
-              ...last,
-              pending: false,
-              ...(completedActivities.length ? { toolActivities: completedActivities } : {}),
-              processingDurationMs,
-            };
-          }
-          return copy;
-        });
-        refreshConversations();
-      },
-      onError: (err) => {
-        setStreaming(false);
-        const completedActivities = toolActivitiesRef.current;
-        const processingDurationMs = processingStartedAtRef.current == null
-          ? undefined
-          : Math.max(0, Date.now() - processingStartedAtRef.current);
-        processingStartedAtRef.current = null;
-        setMessages((prev) => {
-          const copy = prev.slice();
-          const last = copy[copy.length - 1];
-          if (last && last.role === 'assistant') {
-            copy[copy.length - 1] = {
-              ...last,
-              content: '⚠️ ' + (err.message || '请求失败'),
-              pending: false,
-              error: true,
-              ...(completedActivities.length ? { toolActivities: completedActivities } : {}),
-              processingDurationMs,
-            };
-          }
-          return copy;
-        });
-      },
-    });
-  }, [streaming, messages, onConversationChange, refreshConversations, projectId, activeModelId, activeModel, accessMode]);
+        userContent: trimmed,
+        historyLastUserTs: [...messages].reverse().find((message) => message.role === 'user')?.ts,
+        messages: tagged,
+        modelPresetId: activeModel?.endpointProfileId || activeModelId,
+        modelName: activeModel?.model,
+        context: {
+          ...copilotCtxRef.current,
+          page: 'desktop-project',
+          projectId,
+          accessMode,
+        },
+      });
+      if (!started) return;
+      conversationDrafts.delete(conversationDraftKey(projectId, conversationId));
+      setInput('');
+      if (taRef.current) taRef.current.style.height = 'auto';
+    } finally {
+      setStarting(false);
+    }
+  }, [
+    accessMode,
+    activeModel,
+    activeModelId,
+    conversationId,
+    createConversationForRun,
+    messages,
+    onConversationChange,
+    projectId,
+    streaming,
+  ]);
 
   // Keep a ref to the latest send so the global event listener (mounted once) always
   // invokes the current closure without re-binding on every message change.
@@ -507,9 +478,8 @@ export function SimpleChat({
   }, []);
 
   const stop = useCallback(() => {
-    if (abortRef.current) abortRef.current.abort();
-    setStreaming(false);
-  }, []);
+    if (conversationId) detachConversationRun(conversationId);
+  }, [conversationId]);
 
   const approvePending = useCallback(async () => {
     if (!pendingApproval || streaming) return;
@@ -523,18 +493,18 @@ export function SimpleChat({
     });
     const { ackToken, toolId } = pendingApproval;
     await ackRunTool(ackToken, true);
-    setPendingApproval(null);
+    if (conversationId) clearConversationPendingApproval(conversationId);
     send(
       `用户已确认开始（ackToken=${ackToken}）。请重调 run_tool(op=run, toolId="${toolId ?? ''}", params=${JSON.stringify(mergedParams)}, ackToken="${ackToken}") 续跑该重操作。`
     );
-  }, [paramDraft, pendingApproval, send, streaming]);
+  }, [conversationId, paramDraft, pendingApproval, send, streaming]);
 
   const rejectPending = useCallback(async () => {
     if (!pendingApproval || streaming) return;
     await ackRunTool(pendingApproval.ackToken, false);
-    setPendingApproval(null);
+    if (conversationId) clearConversationPendingApproval(conversationId);
     send('用户取消了该重操作，不要重试。请简短说明已取消，并给出如需继续时应调整哪些参数。');
-  }, [pendingApproval, send, streaming]);
+  }, [conversationId, pendingApproval, send, streaming]);
 
   useEffect(() => {
     if (!pendingApproval || streaming || accessMode !== 'full') return;
@@ -556,11 +526,9 @@ export function SimpleChat({
 
   // Create new conversation
   const newConversation = useCallback(async () => {
-    if (streaming) stop();
     onConversationChange(null);
     setMessages([]);
-    setToolActivities([]);
-  }, [streaming, stop, onConversationChange]);
+  }, [onConversationChange]);
 
   // Expose via ref-like pattern through props is not needed here;
   // parent controls conversationId directly.
@@ -595,7 +563,7 @@ export function SimpleChat({
       <div className="sc-body">
         <div className="sc-messages" ref={scrollRef}>
           {loading && <div className="sc-loading">加载会话…</div>}
-          {!loading && messages.length === 0 && (
+          {!loading && displayMessages.length === 0 && (
             <div className="sc-empty">
               <div className="sc-empty-icon">
                 <Icon name="message-circle" size={32} />
@@ -604,12 +572,9 @@ export function SimpleChat({
               <span>在下方输入框中提问</span>
             </div>
           )}
-          {messages.map((m, i) => {
+          {displayMessages.map((m, i) => {
             const key = m.ts ? `${m.role}-${m.ts}-${i}` : `${m.role}-${i}`;
-            const isCurrentAssistant = m.role === 'assistant' && i === messages.length - 1;
-            const messageActivities = m.toolActivities?.length
-              ? m.toolActivities
-              : isCurrentAssistant ? toolActivities : [];
+            const messageActivities = m.toolActivities || [];
             return (
               <React.Fragment key={key}>
                 {messageActivities.length > 0 && (

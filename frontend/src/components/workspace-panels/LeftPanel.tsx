@@ -3,6 +3,7 @@ import { Icon } from '@/components/icons/Icon';
 import type { Project } from '@/lib/project-types';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
+import { useConversationRun } from '@/components/copilot/conversationRunStore';
 import styles from '@/pages/project-workspace.module.css';
 
 export interface LeftPanelContext {
@@ -299,6 +300,8 @@ function ConversationItem({ conversation, projectId, ctx, isCurrent }: {
 }): React.ReactElement {
   const [editing, setEditing] = React.useState(false);
   const [title, setTitle] = React.useState(conversation.title);
+  const conversationRun = useConversationRun(conversation.id);
+  const isRunning = conversationRun?.status === 'running';
 
   React.useEffect(() => setTitle(conversation.title), [conversation.title]);
 
@@ -322,7 +325,11 @@ function ConversationItem({ conversation, projectId, ctx, isCurrent }: {
         ctx.handleSwitchConversation(conversation.id);
       }}
     >
-      <Icon name="message-circle" size={12} />
+      {isRunning ? (
+        <span className={styles.convRunningDot} title="正在后台处理" aria-label="正在后台处理" />
+      ) : (
+        <Icon name="message-circle" size={12} />
+      )}
       {editing ? (
         <input
           className={styles.treeRenameInput}
@@ -360,7 +367,8 @@ function ConversationItem({ conversation, projectId, ctx, isCurrent }: {
             event.stopPropagation();
             void ctx.archiveConversation(conversation.id);
           }}
-          title="移入回收站"
+          title={isRunning ? '会话正在后台处理，完成后可移入回收站' : '移入回收站'}
+          disabled={isRunning}
         >
           <Icon name="trash" size={11} />
         </button>

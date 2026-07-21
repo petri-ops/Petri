@@ -888,6 +888,29 @@
   font-weight: 500;
 }
 
+.convRunningDot {
+  width: 8px;
+  height: 8px;
+  margin: 0 2px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--biof3-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--biof3-accent) 14%, transparent);
+  animation: conv-running-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes conv-running-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .convRunningDot {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 .convItemTitle {
   flex: 1;
   min-width: 0;
@@ -926,6 +949,11 @@
 .convItemTrashBtn:hover {
   background: var(--biof3-hover);
   color: var(--biof3-status-error-fg);
+}
+
+.convItemTrashBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.25;
 }
 
 .treeRenameInput {
