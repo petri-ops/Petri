@@ -940,9 +940,21 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   return (
     <div className="biof3-desktop-panel" role="dialog" aria-label="设置">
       <div className="biof3-desktop-panel__header">
+        <span className="biof3-desktop-panel__icon">
+          <Icon name="settings" size={18} />
+        </span>
         <div className="biof3-desktop-panel__titles">
-          <h2 className="biof3-desktop-panel__title">{activeSectionMeta.label}</h2>
+          <h2 className="biof3-desktop-panel__title">设置</h2>
+          <p className="biof3-desktop-panel__subtitle">{activeSectionMeta.description}</p>
         </div>
+        <button
+          type="button"
+          className="biof3-desktop-panel__close"
+          onClick={onClose}
+          aria-label="关闭"
+        >
+          <Icon name="x" size={16} />
+        </button>
       </div>
 
       <div className="biof3-settings-layout">
