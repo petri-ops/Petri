@@ -65,6 +65,7 @@ export interface UserModelProfileLike {
   id?: string;
   provider?: string;
   model?: string;
+  defaultModel?: string;
   baseUrl?: string;
   capabilities?: string[];
 }

@@ -30,6 +30,7 @@ test('ModelProfile v1 normalizes an OpenAI-compatible custom model', () => {
       provider: 'openai-compatible',
       protocol: 'openai-compatible',
       model: 'qwen3-32b',
+      defaultModel: 'qwen3-32b',
       baseUrl: 'http://127.0.0.1:8000/v1',
       credentialRef: 'provider:lab',
       capabilities: ['chat', 'streaming', 'tools'],

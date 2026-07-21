@@ -43,6 +43,8 @@ export interface ChatModelPreset {
   label: string;
   provider: string;
   model: string;
+  /** Configured supplier default; `model` is the last active choice. */
+  defaultModel?: string;
   baseUrl?: string;
   credentialRef?: string;
   protocol?: string;
@@ -112,6 +114,7 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
               endpointProfileId: profile.id,
               label: modelSupplierName(profile),
               model,
+              defaultModel: profile.defaultModel || profile.model,
             }));
           } catch {
             return [{
@@ -119,6 +122,7 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
               id: modelChoiceId(profile.id, profile.model),
               endpointProfileId: profile.id,
               label: modelSupplierName(profile),
+              defaultModel: profile.defaultModel || profile.model,
             }];
           }
         }));
@@ -297,6 +301,7 @@ export function useAiSettings(): UseAiSettingsResult {
       label: init.label || '自定义模型',
       provider: init.provider || presetsCache.presets[0]?.provider || 'deepseek',
       model: init.model || presetsCache.presets[0]?.model || 'deepseek-chat',
+      defaultModel: init.defaultModel || init.model || presetsCache.presets[0]?.defaultModel || presetsCache.presets[0]?.model || 'deepseek-chat',
       baseUrl: init.baseUrl,
       credentialRef: init.credentialRef,
       protocol: init.protocol,

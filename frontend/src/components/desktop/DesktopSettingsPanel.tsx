@@ -4,7 +4,7 @@
  * 内容与原 DesktopSettingsModal 相同，但渲染为浮动面板而非全屏遮罩模态。
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { ThemeControl } from './ThemeControl';
 import {
@@ -22,6 +22,11 @@ import {
   isUserConfigurableModelProvider,
   validateUserModelProfile,
 } from '@/lib/model-provider-options';
+import {
+  exportEndpointProfilesCsv,
+  exportEndpointProfilesJson,
+  parseEndpointProfiles,
+} from '@/lib/model-endpoint-transfer';
 import {
   archiveConversation,
   deleteConversation,
@@ -647,6 +652,8 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   const [credentialStatus, setCredentialStatus] = useState<Record<string, boolean>>({});
   const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
   const [credentialBackend, setCredentialBackend] = useState('local');
+  const [endpointTransferMessage, setEndpointTransferMessage] = useState<string | null>(null);
+  const endpointImportRef = useRef<HTMLInputElement>(null);
   const { refresh: refreshAiSettings } = useAiSettings();
   // M2-3：错误遥测开关（默认关闭）
   const [telemetryEnabled, setTelemetryEnabled] = useState(false);
@@ -662,7 +669,9 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     const profiles = Array.isArray(s.model_profiles)
       ? (s.model_profiles as ChatModelPreset[])
           .filter((profile) => profile?.id && profile?.model)
-          .map((profile) => profile.provider === 'deepseek' ? { ...profile, label: 'DeepSeek' } : profile)
+          .map((profile) => profile.provider === 'deepseek'
+            ? { ...profile, label: 'DeepSeek', defaultModel: profile.defaultModel || profile.model }
+            : { ...profile, defaultModel: profile.defaultModel || profile.model })
       : [];
     const statuses = (s.credential_status as Record<string, boolean>) || {};
     setModelProfiles(profiles);
@@ -700,7 +709,11 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     setProfileErrors({});
     const profiles = modelProfiles
       .filter((profile) => profile.id.trim() && profile.model.trim())
-      .map((profile) => ({ ...profile, roles: MODEL_ROLES.filter((role) => roleBindings[role.id] === profile.id).map((role) => role.id) }));
+      .map((profile) => ({
+        ...profile,
+        defaultModel: profile.defaultModel || profile.model,
+        roles: MODEL_ROLES.filter((role) => roleBindings[role.id] === profile.id).map((role) => role.id),
+      }));
     const chatProfile = profiles.find((profile) => profile.id === roleBindings.chat);
     const embedProfile = profiles.find((profile) => profile.id === roleBindings.embedding);
     await window.biof3Desktop.aiSettings.save({
@@ -711,7 +724,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
       credential_updates: Object.fromEntries(Object.entries(credentialInputs).filter(([, value]) => value.trim())),
       // Compatibility snapshot for older renderer builds. The Gateway only
       // reads ModelProfiles and role bindings.
-      chat_model_presets: profiles.filter((profile) => profile.capabilities?.includes('chat')).map(({ id, label, provider, model, baseUrl }) => ({ id, label, provider, model, baseUrl })),
+      chat_model_presets: profiles.filter((profile) => profile.capabilities?.includes('chat')).map(({ id, label, provider, model, defaultModel, baseUrl }) => ({ id, label, provider, model, defaultModel, baseUrl })),
       active_chat_model_id: roleBindings.chat,
       llm_provider: chatProfile?.provider,
       embed_provider: embedProfile?.provider,
@@ -752,9 +765,12 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
       setAvailableModels((current) => ({ ...current, [profile.id]: result.models }));
       setModelProfiles((profiles) => profiles.map((candidate) =>
         candidate.id === profile.id
-          ? {
+              ? {
               ...candidate,
               model: result.models.includes(candidate.model) ? candidate.model : result.models[0],
+              defaultModel: result.models.includes(candidate.defaultModel || candidate.model)
+                ? (candidate.defaultModel || candidate.model)
+                : result.models[0],
             }
           : candidate
       ));
@@ -793,6 +809,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
       label: '自定义 API',
       provider: 'openai-compatible',
       model: '',
+      defaultModel: '',
       ...providerDefaults('openai-compatible', id),
       roles: [],
       parameters: {},
@@ -803,6 +820,71 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     setModelProfiles((profiles) => profiles.filter((profile) => profile.id !== id));
     setRoleBindings((bindings) => Object.fromEntries(Object.entries(bindings).filter(([, value]) => value !== id)));
     setFallbackBindings((bindings) => Object.fromEntries(Object.entries(bindings).map(([role, ids]) => [role, (ids || []).filter((value) => value !== id)])));
+  }
+
+  function downloadEndpointFile(filename: string, content: string, type: string) {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportEndpoints(format: 'json' | 'csv') {
+    const content = format === 'json'
+      ? exportEndpointProfilesJson(userModelProfiles)
+      : exportEndpointProfilesCsv(userModelProfiles);
+    downloadEndpointFile(
+      `biof3-api-endpoints.${format}`,
+      content,
+      format === 'json' ? 'application/json;charset=utf-8' : 'text/csv;charset=utf-8'
+    );
+    setEndpointTransferMessage(`已导出 ${userModelProfiles.length} 个渠道（不含 Key）`);
+  }
+
+  async function importEndpoints(file: File) {
+    try {
+      const format = file.name.toLowerCase().endsWith('.csv') ? 'csv' : 'json';
+      const parsed = parseEndpointProfiles(await file.text(), format);
+      const imported = parsed.profiles;
+      setModelProfiles((current) => {
+        const next = [...current];
+        imported.forEach((item) => {
+          const existingIndex = next.findIndex((profile) =>
+            (item.id && profile.id === item.id) ||
+            (profile.baseUrl && profile.baseUrl.replace(/\/$/, '') === item.baseUrl)
+          );
+          const existing = existingIndex >= 0 ? next[existingIndex] : undefined;
+          const id = existing?.id || item.id || `model-${Date.now()}-${next.length}`;
+          const provider = inferUserModelProvider({ label: item.supplier, baseUrl: item.baseUrl });
+          const profile: ChatModelPreset = {
+            ...(existing || providerDefaults(provider, id)),
+            id,
+            label: provider === 'deepseek' ? 'DeepSeek' : item.supplier,
+            provider,
+            protocol: 'openai-compatible',
+            baseUrl: item.baseUrl,
+            model: existing?.model || item.defaultModel,
+            defaultModel: item.defaultModel,
+            credentialRef: existing?.credentialRef || (provider === 'deepseek' ? 'provider:deepseek' : `credential:${id}`),
+            capabilities: existing?.capabilities || ['chat', 'streaming', 'tools'],
+            roles: existing?.roles || [],
+            parameters: existing?.parameters || {},
+          };
+          if (existingIndex >= 0) next[existingIndex] = profile;
+          else next.push(profile);
+        });
+        return next;
+      });
+      const warning = parsed.warnings.length ? `；${parsed.warnings.join(' ')}` : '';
+      setEndpointTransferMessage(`已导入 ${imported.length} 个渠道，已合并现有配置${warning}`);
+    } catch (error) {
+      setEndpointTransferMessage(`导入失败：${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      if (endpointImportRef.current) endpointImportRef.current.value = '';
+    }
   }
 
   const activeSectionMeta = SETTINGS_SECTIONS.find((item) => item.id === activeSection) || SETTINGS_SECTIONS[0];
@@ -873,6 +955,29 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                 每个供应商只需配置供应商、Base URL、Key 和默认模型；接口协议与模型能力由后端自动适配。Key
                 {credentialBackend === 'keychain' ? ' 保存在 macOS Keychain。' : ' 保存在独立本地凭据存储。'}
               </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => exportEndpoints('json')}>
+                  导出 JSON
+                </button>
+                <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => exportEndpoints('csv')}>
+                  导出 CSV
+                </button>
+                <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={() => endpointImportRef.current?.click()}>
+                  导入配置
+                </button>
+                <input
+                  ref={endpointImportRef}
+                  type="file"
+                  accept=".json,.csv,application/json,text/csv"
+                  style={{ display: 'none' }}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) void importEndpoints(file);
+                  }}
+                />
+                {endpointTransferMessage && <span className="biof3-field__hint">{endpointTransferMessage}</span>}
+              </div>
+              <p className="biof3-field__hint">导出文件不包含 API Key；导入会合并同 ID 或 Base URL 渠道，新渠道需重新填写 Key。</p>
             </div>
             <div className="biof3-model-list">
               {userModelProfiles.length > 0 && (
@@ -889,8 +994,9 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                 const id = credentialId(profile);
                 const configured = !!credentialStatus[id];
                 const discoveredModels = availableModels[profile.id] || [];
-                const modelOptions = profile.model && !discoveredModels.includes(profile.model)
-                  ? [profile.model, ...discoveredModels]
+                const configuredDefault = profile.defaultModel || profile.model;
+                const modelOptions = configuredDefault && !discoveredModels.includes(configuredDefault)
+                  ? [configuredDefault, ...discoveredModels]
                   : discoveredModels;
                 const discovering = loadingModels[profile.id] === true;
                 const profileError = profileErrors[profile.id];
@@ -956,11 +1062,11 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                     />
                     <select
                       className="biof3-select"
-                      value={profile.model}
-                      onChange={(e) => updateProfile(profile.id, { model: e.target.value })}
+                      value={configuredDefault}
+                      onChange={(e) => updateProfile(profile.id, { defaultModel: e.target.value, model: profile.model || e.target.value })}
                       disabled={discovering || modelOptions.length === 0}
                       aria-label="默认模型"
-                      title={profile.model || '测试连接后选择模型'}
+                      title={configuredDefault || '测试连接后选择模型'}
                     >
                       {modelOptions.length === 0 && (
                         <option value="">{discovering ? '获取中…' : '先测试'}</option>

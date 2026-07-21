@@ -116,6 +116,7 @@ function normalizeModelProfile(input, index = 0) {
   const provider = _cleanString(input.provider) || 'deepseek';
   const model = _cleanString(input.model);
   if (!model) return null;
+  const defaultModel = _cleanString(input.defaultModel) || model;
   const id = _cleanString(input.id) || `${provider}-${model}-${index + 1}`;
   const inferredCapabilities = inferCapabilities(provider);
   const capabilities = _uniqueKnown(input.capabilities, MODEL_CAPABILITIES);
@@ -130,6 +131,7 @@ function normalizeModelProfile(input, index = 0) {
     provider,
     protocol: _cleanString(input.protocol) || inferProtocol(provider),
     model,
+    defaultModel,
     credentialRef: _cleanString(input.credentialRef) || `provider:${provider.replace(/-vision$/, '')}`,
     capabilities: capabilities.length ? capabilities : inferredCapabilities,
     roles,

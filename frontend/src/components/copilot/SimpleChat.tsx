@@ -534,13 +534,13 @@ export function SimpleChat({
   // parent controls conversationId directly.
 
   const accessModeLabel = accessMode === 'full' ? '完全访问' : '只读模式';
-  const modelGroups = modelPresets.reduce<Array<{ key: string; supplier: string; presets: ChatModelPreset[] }>>(
+  const modelGroups = modelPresets.reduce<Array<{ key: string; supplier: string; defaultModel: string; presets: ChatModelPreset[] }>>(
     (groups, preset) => {
       const supplier = preset.label || preset.provider;
       const key = preset.endpointProfileId || preset.provider;
       const existing = groups.find((group) => group.key === key);
       if (existing) existing.presets.push(preset);
-      else groups.push({ key, supplier, presets: [preset] });
+      else groups.push({ key, supplier, defaultModel: preset.defaultModel || preset.model, presets: [preset] });
       return groups;
     },
     []
@@ -550,6 +550,15 @@ export function SimpleChat({
   ) || modelGroups[0];
   const selectedSupplierGroup = modelGroups.find((group) => group.key === modelSupplierKey)
     || activeSupplierGroup;
+  const preferredPresetForSupplier = useCallback((group: typeof modelGroups[number]) => {
+    if (group.key === activeSupplierGroup?.key) {
+      return group.presets.find((preset) => preset.id === activeModelId)
+        || group.presets.find((preset) => preset.model === group.defaultModel)
+        || group.presets[0];
+    }
+    return group.presets.find((preset) => preset.model === group.defaultModel)
+      || group.presets[0];
+  }, [activeModelId, activeSupplierGroup?.key]);
   const selectModel = useCallback(async (preset: ChatModelPreset) => {
     setModelMenuOpen(null);
     setModelSupplierKey(null);
@@ -718,7 +727,8 @@ export function SimpleChat({
                             className={`sc-model-option ${group.key === selectedSupplierGroup?.key ? 'sc-model-option-active' : ''}`}
                             onClick={() => {
                               setModelSupplierKey(group.key);
-                              setModelMenuOpen('model');
+                              const preferred = preferredPresetForSupplier(group);
+                              if (preferred) void selectModel(preferred);
                             }}
                           >
                             <span className="sc-model-option-title">{group.supplier}</span>
