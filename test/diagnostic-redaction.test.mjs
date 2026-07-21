@@ -3,7 +3,24 @@ import test from "node:test";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const { redactSensitiveText } = require("../src/diagnostic-redaction.js");
+const {
+  redactSensitiveText,
+  resolveDiagnosticRedactionModule,
+} = require("../src/diagnostic-redaction.js");
+
+test("diagnostic redaction resolves the packaged core resource path", () => {
+  assert.equal(
+    resolveDiagnosticRedactionModule({
+      isPackaged: true,
+      resourcesPath: "/Applications/BioF3.app/Contents/Resources",
+    }),
+    "/Applications/BioF3.app/Contents/Resources/core/shared-backend/redaction.js",
+  );
+  assert.match(
+    resolveDiagnosticRedactionModule({ isPackaged: false }),
+    /desktop\/core\/shared-backend\/redaction\.js$/,
+  );
+});
 
 test("diagnostic redaction removes credential-bearing headers and fields", () => {
   const source = [

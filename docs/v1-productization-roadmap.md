@@ -1,10 +1,10 @@
 # BioF3 Desktop v1 产品化路线图
 
-最后更新：2026-07-17
+最后更新：2026-07-21
 
 ## 1. 决策与文档优先级
 
-本文件是 `rc.5` 之后、首个相对稳定产品版本的主执行路线图。当前 Stage 4 候选版本为 `rc.6`。后续无论使用 Codex、Claude Code、Cursor 或其他 Agent，都必须先读取本文件，再读取：
+本文件是 `rc.5` 之后、首个相对稳定产品版本的主执行路线图。Stage 4 基线为 `rc.6`，当前增量候选为 `rc.7`。后续无论使用 Codex、Claude Code、Cursor 或其他 Agent，都必须先读取本文件，再读取：
 
 1. [`docs/project-workspace-handoff.md`](./project-workspace-handoff.md)
 2. [`docs/development-module-map.md`](./development-module-map.md)
@@ -19,7 +19,7 @@
 
 ## 2. 当前基线
 
-- `v0.0.1-rc.6` 是 Stage 4 macOS 候选版本；最新 OSS 安装发布在显式发布动作前仍为 `rc.4`。
+- `v0.0.1-rc.6` 是当前 OSS 安装基线；`v0.0.1-rc.7` 已完成发布前候选验收。
 - macOS arm64/x64 本机构建、OSS 发布、最新版提示和 `rc.4 → rc.6` 公开更新链路已经通过。
 - Harness Phase 1–6、Plugin SDK、Agent workflow runtime、恢复与 fixture 门禁已经建立；Stage 1–2 期间保持可回归，不继续扩建第二套基础设施。
 - 当前聊天主链主要依赖 DeepSeek；DashScope 已用于 embedding/vision；OpenAI/Ollama 在设置页仍属于未来入口，模型调用链仍存在 DeepSeek 硬编码。

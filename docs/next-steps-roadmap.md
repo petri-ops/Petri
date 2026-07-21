@@ -4,7 +4,7 @@
 
 ## 当前结论
 
-`v0.0.1-rc.6` 是当前 OSS 线上版本。Stage 1 UI 产品化、Stage 2 模型层、Stage 3 Harness 与标准流程、Stage 4 首个稳定产品版本均已完成既定出口；发布后平台工程 Harness Phase 7 也已于 2026-07-21 关闭。
+`v0.0.1-rc.6` 仍是当前 OSS 线上版本，`v0.0.1-rc.7` 已完成代码、自动化、双架构构建和安装候选启动验收，等待本轮发布动作。Stage 1 UI 产品化、Stage 2 模型层、Stage 3 Harness 与标准流程、Stage 4 首个稳定产品版本及 Harness Phase 7 均已关闭。
 
 当前没有默认进入实施的新工作包。下一步先观察 rc.6 与 Phase 7 的真实使用反馈，再独立决定签名/公证、x64 Runtime 或新的产品阶段；不得把候选方向写成已承诺计划，也不得将本 RC 描述为 GA。
 
@@ -20,7 +20,7 @@ Phase 7 已补齐 7 个项目级文件/短命令工具、统一工具注册表�
 - P7-H 离线聚合门禁：`CI=1 TERM=dumb npm run harness:phase7` 实测 manifests 7/7、Phase 6 tests 64/64、Phase 7 核心 tests 68/68、产品检查 13/13，全部 0 fail。
 - 产品检查使用临时真实 workspace，经生产 interceptor / policy / preflight / handler 全链，不访问 Provider、凭据、用户数据库或科学分析 Job；脱敏证据位于 `acceptance/harness-phase7/product-acceptance.{json,md}`。
 - P7-F 后台任务控制面继续 `deferred`：符合门槛的真实 `>30s` 非科学任务为 0/3，未新增 process start/check/stop。
-- UI-034 继续 `in_progress`：后端离线产品验收不是开发壳或打包态视觉证据，只有独立实机验收后才能标记 `verified`。
+- UI-034 已完成独立实机视觉矩阵并标记 `verified`；UI-033 同轮完成供应商/模型选择器与真实身份抽查。
 
 固定不变量保持不变：
 
@@ -45,7 +45,7 @@ Phase 7 未建立第二套 analysis executor、job、artifact 或 workflow truth
 1. rc.6 使用反馈与缺陷修复。
 2. Apple Developer ID 签名与公证。
 3. x64 分析 Runtime。
-4. UI-034 开发壳或打包态视觉验收。
+4. UI-032 设置页真实 capability bundle 视图验收。
 5. 新产品阶段；若重开 P7-F，必须先有至少 3 个合格真实任务的可复现证据。
 
 禁止借后续收尾扩大命令权限、增加任意网络工具、批量增加分析流程，或绕过现有确认、安全、审计与 artifact truth 边界。

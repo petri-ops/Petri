@@ -2,7 +2,7 @@
 
 最后更新：2026-07-20
 
-状态：**Stage 1 验收完成（30/30 verified）；Stage 2 模型管理 UI 已验收（UI-031 verified）；UI-032、UI-033 与 Phase 7 工具活动 UI-034 待实机验收（in_progress）**
+状态：**Stage 1 验收完成（30/30 verified）；UI-031、UI-033 与 UI-034 已实机验收；UI-032 Harness 环境面板仍待真实 bundle 视图验收**
 
 本文件是 [`docs/v1-productization-roadmap.md`](./v1-productization-roadmap.md) Stage 1 的唯一 UI 问题清单。它记录真实可复现问题，不用来收集没有目标层级的泛化审美意见。
 
@@ -140,14 +140,20 @@ npm run check
 | ID | 状态 | 级别 | 主模块 | 关注点 | 页面/状态 | 问题摘要 | 证据 | 目标批次 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | UI-032 | in_progress | P2 | P-07 | C-04 | 设置 / 计算与数据 | Stage 3 M1 新增只读"Harness 分析环境"面板（`HarnessEnvironment` 组件），展示 Harness 已自备的运行时与 R 包 bundle 清单 | 代码实现：`frontend/src/components/desktop/DesktopSettingsPanel.tsx` `HarnessEnvironment` 组件；IPC：`harness-capabilities:list`；类型：`electron.d.ts HarnessCapabilityEntry`；暂无 bundle 可显示（Stage 3 M2 GO/KEGG 接入后才有真实条目）；待 M2 真实 bundle 装入后实机截图 | Stage 3 M2 |
-| UI-033 | in_progress | P1 | P-07 | C-02, C-04 | 设置 / 模型接口与聊天选择器 | 配置卡收敛为“供应商 Endpoint”，聊天菜单按供应商聚合实时模型并真实切换；身份回答去除产品品牌和 Copilot 称谓，直接披露供应商与模型；清除首次引导和聊天运行时的旧 Copilot/学习站定位 | DeepSeek/自定义 API 通过安全的 `ai-settings:list-models` IPC 获取模型；真实 DeepSeek API 返回 `deepseek-v4-flash`、`deepseek-v4-pro`；`useAiSettings` 将一个 Endpoint 展开为多个瞬时选择项；聊天请求分离 `profileId` 与 `modelName`，Gateway 对主 Endpoint 应用受控 `modelOverride`；`buildSystemPrompt(context, runtimeIdentity)` 在 Task、旧 Agent SSE 和 `/ai/chat` 三条路径注入真实供应商/模型；系统提示词收口到桌面项目工作台，历史消息只取事实且不得继承旧身份/固定推荐，学习推荐工具与前端固定分析链不再暴露；首次引导改为供应商无关的“AI 分析助手”；待新构建实机确认 | MODEL-UX |
-| UI-034 | in_progress | P1 | W-03 | C-03, C-04, C-06 | Agent 会话 / 工具活动 | Agent 工具调用使用结构化 ToolResult 和 Trace 呈现真实运行、等待确认、成功、失败、拒绝、耗时、截断、termination reason 与实际副作用摘要；task SSE 回放不得重复或把终态降级，停止订阅不得伪装工具已取消 | 代码：`SimpleChat.tsx`、`copilotClient.ts`、`toolActivity.ts`、`simple-chat.css`；后端兼容 SSE：`agent-tools/tool-events.js`；自动化：前端 parser/activity 7/7，后端 P7-D 6/6，P7-D + 既有审批 + diagnostic redaction 组合定向 18/18、0 fail。只读 operation 不误报静态最大副作用，普通文本中的常见 provider token 已覆盖脱敏。尚未取得开发壳或打包态明暗主题、窄窗和回放视觉证据，故保持 `in_progress` | P7-D |
+| UI-033 | verified | P1 | P-07 | C-02, C-04 | 设置 / 模型接口与聊天选择器 | 配置卡收敛为“供应商 Endpoint”，聊天菜单按供应商聚合实时模型并真实切换；身份回答直接披露供应商与模型 | 2026-07-21 实机：`acceptance/ui-034/dev-light-wide.png` 等明暗/窄窗矩阵显示 `DeepSeek · deepseek-v4-flash` 选择器；rc.7 安装候选使用同一模型真实完成只读工具调用并按供应商/模型身份回答。实现与既有真实 DeepSeek `list-models` 证据保持一致 | MODEL-UX |
+| UI-034 | verified | P1 | W-03 | C-03, C-04, C-06 | Agent 会话 / 工具活动 | Agent 工具调用使用结构化 ToolResult 和 Trace 呈现真实运行、等待确认、成功、失败、拒绝、耗时、截断、termination reason 与实际副作用摘要；task SSE 回放不得重复或把终态降级，停止订阅不得伪装工具已取消 | 2026-07-21 开发壳实机矩阵：`acceptance/ui-034/` 的浅色宽窗、深色宽/窄窗、右栏折叠、回放恢复 5 张证据；rc.7 安装候选另以真实 DeepSeek 只读调用确认 `workspace_list` 成功 5–6 ms、`workspace_find` 成功 8 ms 且显示截断。前端 parser/activity 7/7，后端 P7-D 与脱敏回归继续纳入根门禁 | P7-D |
 
 - UI-032 属于 `P-07 模型网关与 AI Provider` 的 Harness 能力子系统（Stage 3 M1），不影响 Stage 1/2 已关闭的 31 项结论。
 - 不允许破坏：设置页窄窗布局、计算与数据分类既有 `ComputeExecution`/`DataManagement` 组件、`run_tool → tool_job → artifact truth` 执行链。
 - 当前条目仅含空状态文案（暂无已预备的分析包），Stage 3 M2 GO/KEGG 插件接入后有真实 bundle 才能实机截图，届时更新为 `verified`。
 
 - UI-033 只收敛用户可配置层，不删除 Gateway 已支持的底层适配器，也不改写历史 profile。
+
+## 11. 2026-07-21 UI-033 / UI-034 实机收口
+
+- UI-034 使用脱敏视觉 fixture 覆盖明暗主题、窄窗、右侧栏折叠和 task SSE 回放；真实 Provider 仅用于安装候选的只读调用抽查，不把用户科学任务当 fixture。
+- UI-033 由同一明暗/窄窗矩阵中的供应商模型选择器，加上安装候选的真实 DeepSeek 身份与调用结果共同关闭。
+- UI-032 不随本轮顺带关闭；必须单独取得设置页“计算与数据”中真实 capability bundle 的可见证据。
 - 预期：只出现 DeepSeek 与“自定义 API”；每个 URL 在同一张 Endpoint 卡中配置 Base URL、模型名、Key、功能和连接测试，自定义 API 使用 OpenAI-compatible 协议。
 - “任务角色路由”不再显示；现有默认角色绑定和 fallback 配置仍按持久化设置工作，卡片功能声明与聊天模型选择保持为主要用户入口。
 - 不允许破坏：当前 DeepSeek 绑定、隐藏的 Vision/Embedding 系统服务、Keychain 不回显、fallback 默认关闭和现有聊天模型同步。
