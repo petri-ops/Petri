@@ -23,6 +23,50 @@ export interface ToolActivityItem {
   actionDetail?: string;
 }
 
+const ACTIVITY_STATUSES: ToolActivityStatus[] = [
+  'running',
+  'awaiting_confirmation',
+  'success',
+  'error',
+  'denied',
+];
+
+/** Restore only the safe, bounded activity shape persisted with a message. */
+export function restoreToolActivities(value: unknown): ToolActivityItem[] {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, 100).flatMap((item, index) => {
+    if (!item || typeof item !== 'object') return [];
+    const raw = item as Record<string, unknown>;
+    const name = typeof raw.name === 'string' ? raw.name : '';
+    const status = typeof raw.status === 'string' && ACTIVITY_STATUSES.includes(raw.status as ToolActivityStatus)
+      ? raw.status as ToolActivityStatus
+      : null;
+    if (!name || !status) return [];
+    const durationMs = typeof raw.durationMs === 'number' && Number.isFinite(raw.durationMs)
+      ? raw.durationMs
+      : undefined;
+    const sideEffects = raw.sideEffects && typeof raw.sideEffects === 'object'
+      ? raw.sideEffects as ToolSideEffects
+      : undefined;
+    return [{
+      key: typeof raw.key === 'string' ? raw.key : `restored:${index}:${name}`,
+      callId: typeof raw.callId === 'string' ? raw.callId : undefined,
+      traceId: typeof raw.traceId === 'string' ? raw.traceId : undefined,
+      name,
+      status,
+      durationMs,
+      sourceTruncated: typeof raw.sourceTruncated === 'boolean' ? raw.sourceTruncated : undefined,
+      previewTruncated: typeof raw.previewTruncated === 'boolean' ? raw.previewTruncated : undefined,
+      truncated: typeof raw.truncated === 'boolean' ? raw.truncated : undefined,
+      terminationReason: typeof raw.terminationReason === 'string' ? raw.terminationReason : undefined,
+      sideEffects,
+      summary: typeof raw.summary === 'string' ? raw.summary : undefined,
+      actionLabel: typeof raw.actionLabel === 'string' ? raw.actionLabel : '已调用',
+      actionDetail: typeof raw.actionDetail === 'string' ? raw.actionDetail : undefined,
+    }];
+  });
+}
+
 function legacyKey(name: string, traceId?: string): string {
   return `${traceId || 'legacy'}:${name}`;
 }
@@ -169,7 +213,14 @@ export function mergeToolResultActivity(
 export function formatToolDuration(durationMs?: number): string | null {
   if (typeof durationMs !== 'number' || !Number.isFinite(durationMs) || durationMs < 0) return null;
   if (durationMs < 1000) return `${Math.round(durationMs)} ms`;
-  return `${(durationMs / 1000).toFixed(durationMs < 10_000 ? 1 : 0)} s`;
+  const seconds = durationMs / 1000;
+  if (seconds < 60) return `${seconds.toFixed(durationMs < 10_000 ? 1 : 0)} s`;
+  const roundedSeconds = Math.round(seconds);
+  const minutes = Math.floor(roundedSeconds / 60);
+  const remainingSeconds = roundedSeconds % 60;
+  if (minutes < 60) return `${minutes}m ${remainingSeconds}s`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours}h ${minutes % 60}m`;
 }
 
 export function formatToolSideEffects(sideEffects?: ToolSideEffects): string | null {

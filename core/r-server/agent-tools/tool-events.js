@@ -125,4 +125,101 @@ function buildToolResultEvent(envelope, args = {}) {
   return redactSensitiveValue(evt);
 }
 
-module.exports = { buildToolCallEvent, buildToolResultEvent };
+function compactActivityDetail(value) {
+  if (typeof value !== 'string') return undefined;
+  const normalized = value.replace(/\s+/g, ' ').trim();
+  if (!normalized) return undefined;
+  return normalized.length > 140 ? `${normalized.slice(0, 137)}…` : normalized;
+}
+
+/** Safe, compact activity details suitable for conversation metadata. */
+function summarizeToolCallForActivity(name, args = {}) {
+  switch (name) {
+    case 'workspace_exec':
+      return { actionLabel: '已运行', actionDetail: compactActivityDetail(args.command) || '命令' };
+    case 'workspace_read': {
+      const path = compactActivityDetail(args.path) || '文件';
+      const start = Number.isInteger(args.startLine) ? ` · 第 ${args.startLine} 行起` : '';
+      return { actionLabel: '已读取', actionDetail: `${path}${start}` };
+    }
+    case 'workspace_list':
+      return { actionLabel: '已读取', actionDetail: `目录 ${compactActivityDetail(args.path) || '.'}` };
+    case 'workspace_find':
+      return { actionLabel: '已查找', actionDetail: compactActivityDetail(args.pattern) || '文件' };
+    case 'workspace_search':
+      return { actionLabel: '已搜索', actionDetail: compactActivityDetail(args.query) || '文本' };
+    case 'workspace_write':
+    case 'workspace_replace':
+      return { actionLabel: '已修改', actionDetail: compactActivityDetail(args.path) || '文件' };
+    case 'run_tool':
+      return { actionLabel: '已运行', actionDetail: compactActivityDetail(args.toolId) || '分析工具' };
+    default:
+      return { actionLabel: '已调用', actionDetail: name };
+  }
+}
+
+function createToolActivityRecorder() {
+  const items = [];
+
+  function recordCall({ name, args, traceId, callId }) {
+    const summary = summarizeToolCallForActivity(name, args);
+    items.push({
+      key: callId || `${traceId || 'legacy'}:${name}:${items.length + 1}`,
+      callId,
+      traceId,
+      name,
+      status: 'running',
+      ...summary,
+    });
+  }
+
+  function recordResult(event) {
+    const result = event && event.toolResult ? event.toolResult : {};
+    const name = result.tool || event.name || 'tool';
+    let index = result.callId
+      ? items.findIndex((item) => item.callId === result.callId)
+      : -1;
+    if (index < 0) {
+      for (let i = items.length - 1; i >= 0; i -= 1) {
+        if (items[i].name === name && items[i].status === 'running') {
+          index = i;
+          break;
+        }
+      }
+    }
+    const existing = index >= 0 ? items[index] : null;
+    const next = {
+      key: existing ? existing.key : (result.callId || `${result.traceId || 'legacy'}:${name}:${items.length + 1}`),
+      callId: result.callId || (existing && existing.callId),
+      traceId: result.traceId || (existing && existing.traceId),
+      name,
+      status: result.terminationReason === 'approval_required'
+        ? 'awaiting_confirmation'
+        : result.status || (event.summary && /^错误[:：]/.test(event.summary) ? 'error' : 'success'),
+      durationMs: result.durationMs,
+      sourceTruncated: result.sourceTruncated,
+      previewTruncated: result.previewTruncated,
+      truncated: result.truncated,
+      terminationReason: result.terminationReason,
+      sideEffects: result.sideEffects,
+      summary: event.summary,
+      actionLabel: existing ? existing.actionLabel : summarizeToolCallForActivity(name).actionLabel,
+      actionDetail: existing ? existing.actionDetail : summarizeToolCallForActivity(name).actionDetail,
+    };
+    if (index < 0) items.push(next);
+    else items[index] = next;
+  }
+
+  return {
+    recordCall,
+    recordResult,
+    snapshot: () => items.slice(0, 100),
+  };
+}
+
+module.exports = {
+  buildToolCallEvent,
+  buildToolResultEvent,
+  summarizeToolCallForActivity,
+  createToolActivityRecorder,
+};

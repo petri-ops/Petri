@@ -57,6 +57,7 @@ const {
   serializeToolResultForModel,
   buildToolCallEvent,
   buildToolResultEvent,
+  createToolActivityRecorder,
   MAX_AGENT_ITERS,
   MAX_AGENT_TOOL_CALLS,
   shouldFinalizeAgentIteration,
@@ -161,6 +162,7 @@ async function runAgentLoop({
   onEvent,
   shouldAbort,
 }) {
+  const turnStartedAt = Date.now();
   const isGuest = !userId;
   const ctxForPrompt =
     context && typeof context === 'object'
@@ -401,6 +403,7 @@ async function runAgentLoop({
   let assistantAcc = '';
   let pendingApprovalEmitted = false;
   const assistantResultCards = [];
+  const assistantToolActivities = createToolActivityRecorder();
 
   try {
     for (let iter = 0; iter < MAX_AGENT_ITERS && !aborted(); iter++) {
@@ -485,6 +488,7 @@ async function runAgentLoop({
           });
         },
         execute: async ({ name, args, callId }) => {
+          assistantToolActivities.recordCall({ name, args, traceId, callId });
           _emit(buildToolCallEvent({ name, args, traceId, callId }));
           let envelope = await executeToolCall(name, args, toolCtx, { traceId, callId });
           let result = localizeToolResult(envelope.data);
@@ -502,7 +506,9 @@ async function runAgentLoop({
               _pushUniqueResultCard(assistantResultCards, _buildResultCardFromRunTool(result, context));
             }
           }
-          _emit(buildToolResultEvent(envelope, args));
+          const toolResultEvent = buildToolResultEvent(envelope, args);
+          assistantToolActivities.recordResult(toolResultEvent);
+          _emit(toolResultEvent);
 
           if (ackInfo) {
             const ackResult = await ackInfo;
@@ -512,6 +518,7 @@ async function runAgentLoop({
                 (result.message || '操作已记录') + '（⚠ 前端没有响应——可能当前页面没监听这个事件）';
               const ackEvent = buildToolResultEvent({ ...envelope, data: result }, args);
               ackEvent.summary = 'unhandled';
+              assistantToolActivities.recordResult(ackEvent);
               _emit(ackEvent);
             } else if (ackResult && ackResult.info && ackResult.info.error) {
               result.unhandled = true;
@@ -523,11 +530,14 @@ async function runAgentLoop({
           return { envelope, result, args, name, callId };
         },
         reject: async ({ name, args, callId, error, message }) => {
+          assistantToolActivities.recordCall({ name, args, traceId, callId });
           _emit(buildToolCallEvent({ name, args, traceId, callId }));
           let envelope = createRejectedToolResult(name, error, message, toolCtx, { traceId, callId });
           const result = localizeToolResult(envelope.data);
           envelope = replaceToolResultData(envelope, result);
-          _emit(buildToolResultEvent(envelope, args));
+          const toolResultEvent = buildToolResultEvent(envelope, args);
+          assistantToolActivities.recordResult(toolResultEvent);
+          _emit(toolResultEvent);
           return { envelope, result, args, name, callId };
         },
         onResult: ({ outcome }) => {
@@ -561,7 +571,11 @@ async function runAgentLoop({
               const assistantMeta = {
                 page: context && context.page,
                 projectId: context && context.projectId,
+                processingDurationMs: Math.max(0, Date.now() - turnStartedAt),
                 ...(assistantResultCards.length ? { resultCards: assistantResultCards } : {}),
+                ...(assistantToolActivities.snapshot().length
+                  ? { toolActivities: assistantToolActivities.snapshot() }
+                  : {}),
               };
               appendMessageToConversation(_activeConv.id, 'assistant', assistantAcc.trim(), assistantMeta);
               try {

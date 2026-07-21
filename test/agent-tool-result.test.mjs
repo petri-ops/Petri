@@ -16,6 +16,7 @@ const {
   serializeToolResultForModel,
   buildToolCallEvent,
   buildToolResultEvent,
+  createToolActivityRecorder,
 } = require('../core/r-server/agent-tools');
 const { createToolTraceStore } = require('../core/r-server/agent-tools/tool-trace-store');
 
@@ -83,6 +84,34 @@ test('successful large results expose neutral truncation metadata', () => {
   assert.equal(event.toolResult.previewTruncated, true);
   assert.equal(event.toolResult.sourceTruncated, false);
   assert.equal(event.toolResult.truncated, true);
+});
+
+test('tool activity recorder keeps safe summaries for conversation restore', () => {
+  const recorder = createToolActivityRecorder();
+  recorder.recordCall({
+    name: 'workspace_write',
+    args: { path: 'notes/result.txt', content: 'secret content must not persist' },
+    traceId: 'trace_activity',
+    callId: 'call_activity',
+  });
+  recorder.recordResult(buildToolResultEvent({
+    contractVersion: '1.0.0',
+    traceId: 'trace_activity',
+    callId: 'call_activity',
+    tool: 'workspace_write',
+    status: 'success',
+    terminationReason: 'success',
+    durationMs: 8,
+    truncated: false,
+    sideEffects: { type: 'workspace-write', riskTier: 'R2', resources: ['notes/result.txt'] },
+    data: { ok: true },
+  }));
+
+  const snapshot = recorder.snapshot();
+  assert.equal(snapshot.length, 1);
+  assert.equal(snapshot[0].status, 'success');
+  assert.equal(snapshot[0].actionDetail, 'notes/result.txt');
+  assert.equal(JSON.stringify(snapshot).includes('secret content must not persist'), false);
 });
 
 test('successful read-only operations report no observed side effects', async () => {

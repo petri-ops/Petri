@@ -40,6 +40,7 @@ import {
   formatToolSideEffects,
   mergeToolCallActivity,
   mergeToolResultActivity,
+  restoreToolActivities,
   type ToolActivityItem,
 } from './toolActivity';
 import './simple-chat.css';
@@ -52,6 +53,8 @@ interface SimpleMessage {
   pending?: boolean;
   error?: boolean;
   ts?: string;
+  toolActivities?: ToolActivityItem[];
+  processingDurationMs?: number;
 }
 
 interface PendingApproval {
@@ -91,6 +94,8 @@ export function SimpleChat({
 }: SimpleChatProps): React.ReactElement {
   const [messages, setMessages] = useState<SimpleMessage[]>([]);
   const [toolActivities, setToolActivities] = useState<ToolActivityItem[]>([]);
+  const toolActivitiesRef = useRef<ToolActivityItem[]>([]);
+  const processingStartedAtRef = useRef<number | null>(null);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -273,6 +278,7 @@ export function SimpleChat({
 
   // Load messages when conversationId changes
   useEffect(() => {
+    toolActivitiesRef.current = [];
     setToolActivities([]);
     if (!conversationId) {
       setMessages([]);
@@ -287,7 +293,17 @@ export function SimpleChat({
         role: m.role === 'system' ? 'assistant' : (m.role as 'user' | 'assistant'),
         content: m.content,
         ts: m.ts,
+        toolActivities: restoreToolActivities(m.meta?.toolActivities),
+        processingDurationMs: typeof m.meta?.processingDurationMs === 'number'
+          ? m.meta.processingDurationMs
+          : undefined,
       }));
+      const lastMessage = ui[ui.length - 1];
+      const latestActivities = lastMessage?.role === 'assistant'
+        ? lastMessage.toolActivities || []
+        : [];
+      toolActivitiesRef.current = latestActivities;
+      setToolActivities(latestActivities);
       setMessages(ui);
       setLoading(false);
     })();
@@ -340,7 +356,9 @@ export function SimpleChat({
       ts: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, userMsg, assistantMsg]);
+    toolActivitiesRef.current = [];
     setToolActivities([]);
+    processingStartedAtRef.current = Date.now();
     setStreaming(true);
 
     const ctrl = new AbortController();
@@ -399,10 +417,18 @@ export function SimpleChat({
         }
       },
       onToolCall: (event: ToolCallEvent) => {
-        setToolActivities((current) => mergeToolCallActivity(current, event));
+        setToolActivities((current) => {
+          const next = mergeToolCallActivity(current, event);
+          toolActivitiesRef.current = next;
+          return next;
+        });
       },
       onToolResult: (event: ToolResultEvent) => {
-        setToolActivities((current) => mergeToolResultActivity(current, event));
+        setToolActivities((current) => {
+          const next = mergeToolResultActivity(current, event);
+          toolActivitiesRef.current = next;
+          return next;
+        });
         if (event.name === 'run_tool' && event.needApproval && event.ackToken) {
           setPendingApproval({
             ackToken: event.ackToken,
@@ -415,11 +441,21 @@ export function SimpleChat({
       },
       onDone: () => {
         setStreaming(false);
+        const completedActivities = toolActivitiesRef.current;
+        const processingDurationMs = processingStartedAtRef.current == null
+          ? undefined
+          : Math.max(0, Date.now() - processingStartedAtRef.current);
+        processingStartedAtRef.current = null;
         setMessages((prev) => {
           const copy = prev.slice();
           const last = copy[copy.length - 1];
           if (last && last.role === 'assistant' && last.pending) {
-            copy[copy.length - 1] = { ...last, pending: false };
+            copy[copy.length - 1] = {
+              ...last,
+              pending: false,
+              ...(completedActivities.length ? { toolActivities: completedActivities } : {}),
+              processingDurationMs,
+            };
           }
           return copy;
         });
@@ -427,6 +463,11 @@ export function SimpleChat({
       },
       onError: (err) => {
         setStreaming(false);
+        const completedActivities = toolActivitiesRef.current;
+        const processingDurationMs = processingStartedAtRef.current == null
+          ? undefined
+          : Math.max(0, Date.now() - processingStartedAtRef.current);
+        processingStartedAtRef.current = null;
         setMessages((prev) => {
           const copy = prev.slice();
           const last = copy[copy.length - 1];
@@ -436,6 +477,8 @@ export function SimpleChat({
               content: '⚠️ ' + (err.message || '请求失败'),
               pending: false,
               error: true,
+              ...(completedActivities.length ? { toolActivities: completedActivities } : {}),
+              processingDurationMs,
             };
           }
           return copy;
@@ -557,10 +600,16 @@ export function SimpleChat({
           {messages.map((m, i) => {
             const key = m.ts ? `${m.role}-${m.ts}-${i}` : `${m.role}-${i}`;
             const isCurrentAssistant = m.role === 'assistant' && i === messages.length - 1;
+            const messageActivities = m.toolActivities?.length
+              ? m.toolActivities
+              : isCurrentAssistant ? toolActivities : [];
             return (
               <React.Fragment key={key}>
-                {isCurrentAssistant && toolActivities.length > 0 && (
-                  <ToolActivityList activities={toolActivities} />
+                {messageActivities.length > 0 && (
+                  <ToolActivityList
+                    activities={messageActivities}
+                    processingDurationMs={m.processingDurationMs}
+                  />
                 )}
                 <div className={`sc-msg sc-msg-${m.role}`}>
                   <div className="sc-msg-avatar">
@@ -720,7 +769,13 @@ export function SimpleChat({
   );
 }
 
-function ToolActivityList({ activities }: { activities: ToolActivityItem[] }): React.ReactElement {
+function ToolActivityList({
+  activities,
+  processingDurationMs,
+}: {
+  activities: ToolActivityItem[];
+  processingDurationMs?: number;
+}): React.ReactElement {
   const [expanded, setExpanded] = useState(false);
   const statusLabels: Record<ToolActivityItem['status'], string> = {
     running: '运行中',
@@ -736,21 +791,16 @@ function ToolActivityList({ activities }: { activities: ToolActivityItem[] }): R
 
   const running = activities.filter((activity) => activity.status === 'running').length;
   const awaiting = activities.filter((activity) => activity.status === 'awaiting_confirmation').length;
-  const failed = activities.filter(
-    (activity) => activity.status === 'error' || activity.status === 'denied'
-  ).length;
   const totalDurationMs = activities.reduce(
     (total, activity) => total + (typeof activity.durationMs === 'number' ? activity.durationMs : 0),
     0
   );
-  const totalDuration = formatToolDuration(totalDurationMs);
+  const totalDuration = formatToolDuration(processingDurationMs ?? totalDurationMs);
   const summary = running > 0
     ? '正在处理'
     : awaiting > 0
       ? '等待确认'
-      : failed > 0
-        ? `${failed} 项未完成`
-        : `已处理${totalDuration ? ` ${totalDuration}` : ''}`;
+      : `已处理${totalDuration ? ` ${totalDuration}` : ''}`;
 
   return (
     <div className="sc-tool-activity-list" aria-label="工具活动">
@@ -758,12 +808,12 @@ function ToolActivityList({ activities }: { activities: ToolActivityItem[] }): R
         type="button"
         className="sc-tool-activity-summary"
         aria-expanded={expanded}
+        aria-label={expanded ? '收起处理详情' : '展开处理详情'}
+        title={expanded ? '收起处理详情' : '展开处理详情'}
         onClick={() => setExpanded((current) => !current)}
       >
-        <Icon name={expanded ? 'chevron-down' : 'chevron-right'} size={14} />
         <span className="sc-tool-activity-summary-label">{summary}</span>
-        <span className="sc-tool-activity-summary-count">{activities.length} 次工具</span>
-        <span className="sc-tool-activity-summary-hint">{expanded ? '收起详情' : '展开追溯'}</span>
+        <Icon name={expanded ? 'chevron-down' : 'chevron-right'} size={14} />
       </button>
       {expanded && activities.map((activity) => {
         const duration = formatToolDuration(activity.durationMs);

@@ -446,7 +446,6 @@
   min-height: 32px;
   padding: 6px 2px;
   border: 0;
-  border-top: 1px solid var(--biof3-border);
   border-radius: 0;
   background: transparent;
   color: var(--biof3-text-secondary);
@@ -456,25 +455,13 @@
 }
 
 .sc-tool-activity-summary:hover {
-  background: var(--biof3-bg-subtle);
   color: var(--biof3-text);
 }
 
 .sc-tool-activity-summary-label {
-  color: var(--biof3-text);
+  color: var(--biof3-text-secondary);
   font-size: 13px;
-  font-weight: 600;
-}
-
-.sc-tool-activity-summary-count {
-  color: var(--biof3-text-tertiary);
-  font-size: 11px;
-}
-
-.sc-tool-activity-summary-hint {
-  margin-left: auto;
-  color: var(--biof3-text-tertiary);
-  font-size: 11px;
+  font-weight: 500;
 }
 
 .sc-tool-activity {

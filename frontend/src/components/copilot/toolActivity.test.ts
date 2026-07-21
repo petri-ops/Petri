@@ -4,6 +4,7 @@ import {
   formatToolSideEffects,
   mergeToolCallActivity,
   mergeToolResultActivity,
+  restoreToolActivities,
   summarizeToolCall,
 } from './toolActivity';
 
@@ -135,6 +136,7 @@ describe('tool activity projection', () => {
   it('formats duration and side-effect summaries for the activity card', () => {
     expect(formatToolDuration(42.4)).toBe('42 ms');
     expect(formatToolDuration(1450)).toBe('1.4 s');
+    expect(formatToolDuration(329_000)).toBe('5m 29s');
     expect(formatToolDuration(undefined)).toBeNull();
     expect(formatToolSideEffects({
       type: 'state-write',
@@ -144,6 +146,24 @@ describe('tool activity projection', () => {
     expect(formatToolSideEffects(structuredResult.toolResult.sideEffects)).toBeNull();
     expect(formatToolSideEffects({ type: 'none', riskTier: 'R0', resources: [] }))
       .toBeNull();
+  });
+
+  it('restores bounded activity metadata from conversation history', () => {
+    expect(restoreToolActivities([{
+      key: 'call_history',
+      name: 'workspace_read',
+      status: 'success',
+      durationMs: 18,
+      actionLabel: '已读取',
+      actionDetail: 'README.md',
+    }])).toEqual([expect.objectContaining({
+      key: 'call_history',
+      name: 'workspace_read',
+      status: 'success',
+      durationMs: 18,
+      actionDetail: 'README.md',
+    })]);
+    expect(restoreToolActivities([{ name: 'workspace_read', status: 'unknown' }])).toEqual([]);
   });
 
   it('projects safe Codex-style activity details without exposing write content', () => {

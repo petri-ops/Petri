@@ -27,7 +27,11 @@ const {
   createAgentToolCallController,
   runAgentToolCallBatch,
 } = require('./agent-loop-control');
-const { buildToolCallEvent, buildToolResultEvent } = require('./tool-events');
+const {
+  buildToolCallEvent,
+  buildToolResultEvent,
+  createToolActivityRecorder,
+} = require('./tool-events');
 const { inferExecutionPolicy } = require('../helpers/agent-execution-policy');
 
 async function dispatchTool(name, argsObj, ctx = {}) {
@@ -47,6 +51,7 @@ module.exports = {
   serializeToolResultForModel,
   buildToolCallEvent,
   buildToolResultEvent,
+  createToolActivityRecorder,
   MAX_AGENT_ITERS,
   MAX_AGENT_TOOL_CALLS,
   shouldFinalizeAgentIteration,
