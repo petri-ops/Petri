@@ -21,6 +21,16 @@ const SETTINGS_FILE = path.join(SETTINGS_DIR, 'ai-settings.json');
 const credentialStore = createCredentialStore({ settingsDir: SETTINGS_DIR });
 
 let _cache = null;
+let _cacheSignature = null;
+
+function _settingsFileSignature() {
+  try {
+    const stat = fs.statSync(SETTINGS_FILE);
+    return `${stat.mtimeMs}:${stat.size}`;
+  } catch {
+    return null;
+  }
+}
 
 const DEFAULT_CHAT_MODEL_PRESETS = [
   {
@@ -42,7 +52,8 @@ function _ensureDir() {
  * @returns {object} - ModelProfiles, role bindings, credential status and non-secret preferences.
  */
 function getAiSettings() {
-  if (_cache) return _cache;
+  const signature = _settingsFileSignature();
+  if (_cache && signature === _cacheSignature) return _cache;
   try {
     const stored = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
     const migrated = _extractCredentialUpdates(stored);
@@ -56,9 +67,14 @@ function getAiSettings() {
       fs.chmodSync(SETTINGS_FILE, 0o600);
     }
   } catch {
+    // Another desktop process may be between truncate/write while saving.
+    // Keep the last valid snapshot and retry on the next read instead of
+    // briefly replacing the live Gateway configuration with defaults.
+    if (_cache) return _cache;
     _cache = {};
   }
   _cache = normalizeAiSettings(_cache);
+  _cacheSignature = _settingsFileSignature();
   return _cache;
 }
 
@@ -187,6 +203,7 @@ function saveAiSettings(settings) {
   _cache = normalizeAiSettings(merged);
   fs.writeFileSync(SETTINGS_FILE, JSON.stringify(_cache, null, 2));
   fs.chmodSync(SETTINGS_FILE, 0o600);
+  _cacheSignature = _settingsFileSignature();
 }
 
 /**

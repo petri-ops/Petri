@@ -999,6 +999,13 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   const userModelProfiles = modelProfiles.filter((profile) =>
     isUserConfigurableModelProvider(profile.provider)
   );
+  const agentPrimaryProfileId = roleBindings.agent || roleBindings.chat;
+  const agentFallbackProfileIds = fallbackBindings.agent || [];
+  const agentFallbackCandidates = modelProfiles.filter((profile) =>
+    profile.id !== agentPrimaryProfileId &&
+    profile.capabilities?.includes('chat') &&
+    profile.capabilities?.includes('tools')
+  );
 
   return (
     <div className="biof3-desktop-panel" role="dialog" aria-label="设置">
@@ -1218,6 +1225,43 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
               );
               })}
               {userModelProfiles.length === 0 && <p className="biof3-field__hint">尚未配置模型。添加一个自定义 API，或选择 DeepSeek。</p>}
+            </div>
+            <div className="biof3-model-fallback" aria-label="Agent 模型自动容错">
+              <label className="biof3-model-fallback__toggle">
+                <input
+                  type="checkbox"
+                  checked={fallbackEnabled}
+                  onChange={(event) => setFallbackEnabled(event.target.checked)}
+                />
+                <span>
+                  <strong>Agent 自动容错</strong>
+                  <small>主模型遇到限流、服务异常或最终整理协议失败时，按顺序尝试已选备用模型。</small>
+                </span>
+              </label>
+              <div className="biof3-model-fallback__choices" aria-label="Agent 备用模型">
+                {agentFallbackCandidates.map((profile) => {
+                  const selected = agentFallbackProfileIds.includes(profile.id);
+                  return (
+                    <label key={profile.id} className={selected ? 'is-selected' : ''}>
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={(event) => setFallbackBindings((current) => {
+                          const existing = current.agent || [];
+                          const nextAgent = event.target.checked
+                            ? [...existing.filter((id) => id !== profile.id), profile.id]
+                            : existing.filter((id) => id !== profile.id);
+                          return { ...current, agent: nextAgent };
+                        })}
+                      />
+                      <span>{profile.label || profile.model}</span>
+                    </label>
+                  );
+                })}
+                {agentFallbackCandidates.length === 0 && (
+                  <span className="biof3-field__hint">还没有其他支持工具调用的模型渠道。</span>
+                )}
+              </div>
             </div>
             <div className="biof3-endpoint-list-actions">
               <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" onClick={addProfile}>

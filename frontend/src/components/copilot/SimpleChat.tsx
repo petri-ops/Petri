@@ -66,6 +66,7 @@ import {
   clearConversationRun,
   stopConversationRun,
   isConversationRunning,
+  shouldClearReconciledConversationRun,
   startConversationRun,
   useConversationRun,
   type ConversationPendingApproval,
@@ -394,7 +395,10 @@ export function SimpleChat({
           ? m.meta.processingDurationMs
           : undefined,
       })));
-      if (activeRun.status === 'done' && !activeRun.pendingApproval) {
+      // Cancellation is persisted by the backend just like successful
+      // completion. Once SQLite has supplied that durable message, discard
+      // the local snapshot so progress and tool blocks are not duplicated.
+      if (shouldClearReconciledConversationRun(activeRun)) {
         clearConversationRun(conversationId);
       }
       await refreshConversations();

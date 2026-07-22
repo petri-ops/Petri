@@ -113,6 +113,12 @@ export function isConversationRunning(conversationId: string | null | undefined)
   return getConversationRunSnapshot(conversationId)?.status === 'running';
 }
 
+export function shouldClearReconciledConversationRun(
+  snapshot: Pick<ConversationRunSnapshot, 'status' | 'pendingApproval'>
+): boolean {
+  return (snapshot.status === 'done' || snapshot.status === 'stopped') && !snapshot.pendingApproval;
+}
+
 export function startConversationRun(options: StartConversationRunOptions): boolean {
   const { conversationId } = options;
   if (!conversationId || isConversationRunning(conversationId)) return false;

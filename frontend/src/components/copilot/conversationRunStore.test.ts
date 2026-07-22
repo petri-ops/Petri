@@ -17,6 +17,7 @@ vi.mock('./copilotClient', async (importOriginal) => {
 import {
   __resetConversationRunsForTests,
   getConversationRunSnapshot,
+  shouldClearReconciledConversationRun,
   startConversationRun,
   stopConversationRun,
   subscribeConversationRun,
@@ -252,5 +253,16 @@ describe('conversation run store', () => {
 
     expect(received).toEqual([{ toolJobId: 'tj-result-1', projectId: 'project-1' }]);
     unsubscribe();
+  });
+
+  it('clears durable completed and stopped snapshots after history reconciliation', () => {
+    expect(shouldClearReconciledConversationRun({ status: 'done', pendingApproval: null })).toBe(true);
+    expect(shouldClearReconciledConversationRun({ status: 'stopped', pendingApproval: null })).toBe(true);
+    expect(shouldClearReconciledConversationRun({ status: 'running', pendingApproval: null })).toBe(false);
+    expect(shouldClearReconciledConversationRun({ status: 'error', pendingApproval: null })).toBe(false);
+    expect(shouldClearReconciledConversationRun({
+      status: 'stopped',
+      pendingApproval: { ackToken: 'ack-1' },
+    })).toBe(false);
   });
 });
