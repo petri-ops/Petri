@@ -10,6 +10,8 @@
 
 产品阶段顺序仍以 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md) 为准；本文只负责 Stage 4 RC 之后的 Harness 工程增量，不重新定义 v1 阶段。
 
+Phase 7 已关闭。后续 P-03 真实科学任务翻译、可复现任务契约与证据化交付工作，以 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md) 为当前入口；本文保留 Phase 7 的历史实现证据与边界。
+
 ## 1. 目标与边界
 
 Phase 1–6 已经解决分析流程的识别、选型、修参、确认、运行、artifact 校验和恢复。Phase 7 要补齐通用 Agent 在项目内工作的基础能力：
@@ -69,8 +71,8 @@ P7-C 已完成：
 - `agent-tool-policy.js` 提供无 I/O 的 `allow | deny` 执行决策，按具体 operation 区分只读与有副作用调用，并返回稳定 `reason`、`error` 与 `messageKey`。
 - `agent-tool-interceptor.js` 统一执行注册表解析、最小递归 JSON Schema 校验、workspace preflight、纯策略判断和原 handler 调用；不可自动执行的 workspace 调用返回可操作的结构化拒绝且不执行 handler。
 - `workspace-tools.js` 公开共享 preflight，但 handler 继续重复路径、权限、symlink、命令、大小及并发检查；新文件使用原子 create-only 发布，已有文件修改在进程内按目标串行化并于发布前复核 `expectedSha256`，保留 TOCTOU defense-in-depth。
-- `workspace_exec` 的自动执行面收紧为内建 `pwd`，不启动 shell、不解析 `PATH` 或项目级工具配置；其他命令返回结构化拒绝。
-- `run_tool(op=run)` 继续委托既有真实 `tool_job + ackToken` 审批；workflow recovery token 与 `act` 执行后 ACK 保持各自语义，没有新建第三套确认协议。
+- Phase 7 关闭时 `workspace_exec` 的自动执行面曾收紧为内建 `pwd`。2026-07-22 用户根据真实科学实践明确调整产品语义：完全访问模式现为通用 shell，固定白名单已移除；只读模式继续拒绝执行。此项是 Phase 7 后的产品决策，不回写为当时验收能力。
+- `run_tool(op=run)` 继续委托既有真实 `tool_job` 执行真相；完全访问是用户预先授予的项目内本地分析执行权，DESeq2/WGCNA 等可复现计算直接执行并记录 `automationDecision`，不再创建仅用于二次点击的 pending approval。旧调用仍兼容 `tool_job + ackToken`，workflow recovery token 与 `act` 执行后 ACK 保持各自语义，没有新建第三套确认协议。不可逆外部影响、凭据/付费操作和缺少科学判断不纳入本自动执行边界。
 - 专项证据：policy/interceptor 12/12、既有 approval + workspace 20/20、registry + workspace 19/19，均为 TAP 0 fail。
 
 P7-D 已完成：
@@ -83,10 +85,10 @@ P7-D 已完成：
 P7-G 已完成：
 - 模型上下文不再只依赖统一 6000 字符截断，而由 `serializeToolResultForModel()` 按 list/find/search/read/write/replace/exec 类型生成有界投影；硬截断仍返回有效 JSON，并通过 `modelContext` 记录压缩比例与 read 去重状态。
 - read 去重限定在 `projectId + traceId + path`，且只提交真正进入模型的行段；Trace entry 携带 `projectId` 并支持项目精确查询。
-- task/legacy 两条 loop 已共用严格 5 次 Provider 请求/12 次工具调用边界；第 5 次请求为无工具最终整理轮，不再发起第 6 次请求，并结构化处理非法参数、重复 Provider call ID、批次超限和取消后剩余调用。
+- task/legacy 两条 loop 已改为目标驱动，正常路径不设置工具 iteration 或调用总量上限；创建计划后继续逐步执行，直到用户目标与真实产物完成。用户取消、确认门、工具/Provider 问题会暂停或停止；相同工具与相同参数连续第 3 次调用判定为异常循环并停止继续执行。自然最终答复无可展示正文时允许至多 1 次额外无工具恢复请求；若该模型继续返回空正文、非法格式或工具调用，Gateway 会在用户已启用 fallback 的前提下自动尝试配置的备用 Agent Profile。仍失败时根据异常循环、最后公开阶段和 Provider 原因生成“停止位置 / 原因 / 系统已处理 / 需要处理”，不要求用户重新描述或手动发送固定续跑口令。非法参数、重复 Provider call ID 和取消后剩余调用继续结构化处理；不改变工具审批和 artifact truth 边界。
 
 Phase 7 已完成：
-- P7-F 后台任务控制面已于 2026-07-20 经 decision gate 判定为 `deferred`：当前 `workspace_exec` 仍仅提供不启动进程的内建 `pwd`，且未新增 `workspace_process_start/check/stop`。
+- P7-F 后台任务控制面已于 2026-07-20 经 decision gate 判定为 `deferred`：当时 `workspace_exec` 仅提供不启动进程的内建 `pwd`。当前虽已具备同步通用 shell，但仍未新增 `workspace_process_start/check/stop`，因此后台进程控制结论不变。
 - P7-H 已于 2026-07-21 完成离线聚合门禁、CI 接线与真实产品链路验收：`harness:phase7` 覆盖 manifests 7/7、Phase 6 回归 64/64、Phase 7 核心回归 68/68，临时真实 workspace 经生产 interceptor / policy / preflight / handler 链完成 13/13 检查。
 - P7-A live Provider 证据继续作为人工验收：DeepSeek 与自定义 OpenAI-compatible 均为 8/8 PASS，不进入零网络、零凭据 CI。
 - UI-034 仍为 `in_progress`；本次离线后端产品验收不冒充开发壳或打包态视觉验收。
@@ -271,6 +273,8 @@ refactor(harness): unify agent tool contracts
 5. 新文件通过原子 create-only 发布，若目标在 preflight 后出现则返回 `content_conflict`；删除、提权、发布、远端 Git、远程脚本管道和越界路径继续硬拒绝。
 6. 原 handler 保留超时、输出、文件大小、递归深度、文件数和并发保护等局部检查；`run_tool(op=run)` 继续使用真实 `tool_job + ackToken` 审批，Harness recovery token 和 `act` 执行后 ACK 不合并、不改义。
 
+7. 2026-07-22 的完全访问产品决策覆盖上述历史审批表述：项目内可复现 `run_tool(op=run)` 直接进入真实 `tool_job → artifact truth`，旧调用继续兼容 `ackToken`；Harness recovery token 和 `act` ACK 不改义。
+
 边界：
 
 - prompt 只解释正确用法，不作为安全边界。
@@ -402,7 +406,7 @@ docs(harness): defer background process control
    - exec：保留状态、exitCode 与 stdout/stderr 尾部；cwd 统一显示 `[project workspace]`，`pwd` 不暴露绝对路径。
 2. 所有硬截断结果仍是可 `JSON.parse` 的有效 JSON；`modelContext` 记录 projection、原始/投影字符数、read 去重与压缩状态，使上下文缩减可测。
 3. Trace entry 新增 `projectId`，查询可按 `traceId + projectId` 精确过滤；read 去重状态同样包含项目作用域，不跨项目复用。
-4. task 与 legacy 两条 Agent loop 共用 `agent-loop-control.js`，统一为最多 5 次 Provider 请求 / 12 次工具调用；第 5 次请求固定为无工具最终整理轮，不再追加第 6 次请求。工具批次先严格 reserve，只把已接受调用写入 assistant history，并为每个调用生成配对 tool result。
+4. task 与 legacy 两条 Agent loop 共用 `agent-loop-control.js`，正常路径不设置 iteration 或工具调用总量上限，以用户目标和真实产物为终止条件。若模型自然结束但没有可展示正文，允许追加至多 1 次无工具恢复请求；恢复请求会把空正文、非法格式或仍调用工具识别为协议异常，并仅在用户已启用 fallback 时转交备用 Agent Profile。若相同工具和参数连续请求第 3 次，则拒绝该次调用并进入异常说明；异常元数据、自动恢复次数和 fallback 路由随 assistant 消息持久化。工具批次先严格 reserve，只把已接受调用写入 assistant history，并为每个调用生成配对 tool result。
 5. malformed JSON、数组或 null 参数返回 `invalid_arguments` 且不执行 handler；重复 Provider call ID 返回 `duplicate_tool_call` 且不执行 handler，写入协议 history 前使用唯一 ID，同时保留原始 `providerCallId` 供诊断。
 6. 观察到用户取消后，不再启动剩余已 reserve 的 handler，也不发起后续 Provider 请求；剩余调用返回 `request_canceled`。当前没有公共 `AbortSignal`，因此不声称能中断已开始执行的 handler。
 7. 未增加 Provider 特定 prompt，也未改变科学计算的 `run_tool → tool_job → artifact truth`。
@@ -411,7 +415,7 @@ docs(harness): defer background process control
 
 - `CI=1 TERM=dumb node --test test/agent-tool-result.test.mjs test/agent-provider-boundary.test.mjs`：18 tests / 18 pass / 0 fail。
 - ToolResult 回归覆盖按类型投影、有效 JSON 截断、原始数据截断语义、read 实际入模范围去重、`projectId` Trace 隔离和模型上下文测量元数据。
-- 零网络 Provider 边界回归覆盖严格 5 次 Provider 请求/12 次工具调用、无工具最终轮、严格批次上限、malformed/non-object 参数、重复及跨轮碰撞 call ID、协议配对和取消后不再启动后续 handler。
+- 零网络 Provider 边界回归覆盖无正常轮数/调用数上限、连续相同调用异常熔断、可注入有限测试保护、一次无工具空答复恢复、malformed/non-object 参数、重复及跨轮碰撞 call ID、协议配对和取消后不再启动后续 handler。
 - 原始 ToolResult/SSE/handler 数据未压缩，P7-D 的 UI、审批、result cards 与兼容调用方保持原契约。
 
 提交：
@@ -513,6 +517,6 @@ git rev-parse origin/main
 
 Phase 7 已于 2026-07-21 完成，不再存在待执行的 Phase 7 工作包。P7-H 的离线聚合门禁、CI 接线和产品链路验收已落地；P7-A live Provider 证据继续保留为人工验收，不进入 CI。
 
-后续先观察 `v0.0.1-rc.6` 与 Phase 7 的真实使用反馈，再独立决定发布签名/公证、x64 Runtime 或新的产品阶段；不得借“收尾”继续扩大命令权限、增加分析流程或改变 `run_tool → tool_job → artifact truth`。
+后续先观察真实使用反馈，再独立决定发布签名/公证、x64 Runtime 或新的产品阶段。完全访问的通用命令能力不得被解释为第二套分析流程，也不得改变 `run_tool → tool_job → artifact truth`。
 
 P7-D 的 UI-034 仍为 `in_progress`，只在取得开发壳或打包态视觉证据后单独标记 `verified`，不影响后端 Phase 7 出口结论。P7-F 继续 `deferred`，只有至少 3 个合格真实任务的可复现证据进入仓库后才能重新评审；P7-E 仍未引入 `workspace_patch`。

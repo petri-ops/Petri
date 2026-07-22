@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "acceptance": "post-hrt-runtime-control",
+  "privacy": "repository_fixture_only",
+  "network": "disabled_by_contract",
+  "checks": [
+    "read_only_workspace_commands",
+    "resource_snapshot_ttl",
+    "low_memory_classification",
+    "restart_recovery_projection",
+    "frontend_typecheck"
+  ],
+  "commands": [
+    {
+      "label": "runtime-control-tests",
+      "command": "node --test test/agent-tool-policy.test.mjs test/harness-workspace-tools.test.mjs test/runtime-resource-snapshot.test.mjs test/harness-workflow-state.test.mjs test/scientific-task-persistence.test.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "label": "frontend-typecheck",
+      "command": "npm run check --prefix frontend",
+      "exitCode": 0,
+      "signal": null
+    }
+  ],
+  "passed": true,
+  "generatedAt": "2026-07-22T08:47:20.655Z"
+}

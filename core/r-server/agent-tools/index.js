@@ -22,8 +22,16 @@ const {
 } = require('./tool-execution');
 const {
   MAX_AGENT_ITERS,
+  MAX_AGENT_TOOL_ITERS,
   MAX_AGENT_TOOL_CALLS,
+  MAX_IDENTICAL_TOOL_CALLS,
+  MAX_FINALIZATION_ATTEMPTS,
   shouldFinalizeAgentIteration,
+  assessFinalizationResult,
+  buildFinalizationRetryRequest,
+  buildFinalizationFallbackMessage,
+  finalizationFallbackReason,
+  createAgentProgressRecorder,
   createAgentToolCallController,
   runAgentToolCallBatch,
 } = require('./agent-loop-control');
@@ -53,8 +61,16 @@ module.exports = {
   buildToolResultEvent,
   createToolActivityRecorder,
   MAX_AGENT_ITERS,
+  MAX_AGENT_TOOL_ITERS,
   MAX_AGENT_TOOL_CALLS,
+  MAX_IDENTICAL_TOOL_CALLS,
+  MAX_FINALIZATION_ATTEMPTS,
   shouldFinalizeAgentIteration,
+  assessFinalizationResult,
+  buildFinalizationRetryRequest,
+  buildFinalizationFallbackMessage,
+  finalizationFallbackReason,
+  createAgentProgressRecorder,
   createAgentToolCallController,
   runAgentToolCallBatch,
 };

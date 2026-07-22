@@ -1,14 +1,23 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-07-21
+最后更新：2026-07-23
 
 ## 当前结论
 
 `v0.0.1-rc.7` 是当前 OSS 线上版本，已完成代码、自动化、双架构构建、安装候选启动验收和公开更新链核验。Stage 1 UI 产品化、Stage 2 模型层、Stage 3 Harness 与标准流程、Stage 4 首个稳定产品版本及 Harness Phase 7 均已关闭。
 
-当前没有默认进入实施的新工作包。下一步只观察 rc.7 的真实使用反馈和缺陷，不默认扩展功能。UI-032 已完成；签名/公证不属于本项目必需条件；OSS 上有包只代表技术分发链已打通，不代表产品已经正式上线。rc.7 仍是工程候选版，不得描述为 GA。
+当前不默认扩展分析功能；用户已确认进入一个新的 P-03 工程工作包：以真实生信/科学数据分析任务为输入，升级 Harness 的模糊需求翻译、任务契约、证据校验与交付复现能力。UI-032 已完成；签名/公证不属于本项目必需条件；OSS 上有包只代表技术分发链已打通，不代表产品已经正式上线。rc.7 仍是工程候选版，不得描述为 GA。
 
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
+当前工作包计划见 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md)。
+
+## 当前 P-03 工作包
+
+`Harness Scientific Task Contract v1` 已完成 HRT-0（24/24）、HRT-1（14/14）、HRT-2（4/4）、HRT-3（确认/执行门 4/4、SQLite/Job 绑定 1/1）、HRT-4 执行事实/Artifact provenance（2/2）、HRT-5、HRT-6 和 HRT-7。HRT-7 新增统一 `npm run harness:scientific-task` 离线聚合门禁，覆盖固定大小窗口、summary 失败回退、结构化任务契约、持久化、交付、漂移分类和数据库外 R 重放；证据位于 `acceptance/harness-scientific-task/hrt7-scientific-task-gate.json`。后续运行控制面已补齐完全访问模式的通用会话命令行、RuntimeResourceSnapshot、UI-051 用量/资源面板、UI-053 文件树/活动预览自动刷新、UI-054 最终答复空响应自动恢复、UI-035 阶段进展持久化/紧凑工具摘要、UI-055 以用户目标和真实产物为终止条件的科学工作流连续执行、UI-060 异常自动恢复与可操作故障说明，以及重启中断 Job 的 `recovery_required` 投影；只读模式继续禁止命令执行。真实进程峰值采样、GPU adapter、跨平台 bundle、OSS 远程接手及 UI-035/UI-054/UI-055/UI-060 真实 Provider 触发复验仍是扩展/验收项。
+
+UI-061 已把完全访问解释为项目内可复现分析的预授权：DESeq2/WGCNA 等本地计算不再生成二次确认卡，直接进入真实 Job/Artifact 链并由 Agent 检查、修复和重试；兼容确认卡补齐“开始 / 取消”，仅供旧调用或未来真正需要用户决定的边界使用。
+
+P-04 内置插件稳定性已完成一轮真实 Mac 收口：10 个插件统一使用 `job_dir` 执行协议，必需文件先行校验，插件主动阻断保留结构化 `failureMode`，每次成功运行由 Harness 统一生成脚本/参数/输入/输出哈希证据。隔离用户已安装旧版本后的生产链验收为 **31 passed / 0 failed / 4 skipped**；证据位于 `acceptance/harness-plugins/macos-arm64-acceptance.{json,md}`，入口为 `npm run harness:plugins:acceptance:update` 与 `npm run harness:plugins:acceptance`。
 
 ## Harness Phase 7 完成状态
 
@@ -46,7 +55,7 @@ Phase 7 未建立第二套 analysis executor、job、artifact 或 workflow truth
 2. x64 分析 Runtime。
 3. 新产品阶段；若重开 P7-F，必须先有至少 3 个合格真实任务的可复现证据。
 
-禁止借后续收尾扩大命令权限、增加任意网络工具、批量增加分析流程，或绕过现有确认、安全、审计与 artifact truth 边界。
+完全访问模式已经由用户明确定位为通用命令执行授权，不再维护固定命令白名单；只读模式仍禁止命令。不得借通用命令行建立第二套科学结果真相：正式分析交付仍必须进入确认、审计与 `run_tool → tool_job → artifact truth`。
 
 ## 当前入口
 

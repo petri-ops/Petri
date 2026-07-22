@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "runtime": { "language": "r", "version": ">=4.4.0", "builtAgainst": "4.5", "platforms": ["macos-arm64"] },
+  "capabilities": [
+    {
+      "id": "r-enrichment",
+      "version": "1.0.0",
+      "source": "harness-capability-manifest",
+      "provision": "before-run",
+      "integrity": "sha256",
+      "network": "provisioning-only"
+    }
+  ],
+  "packages": {
+    "r": {
+      "clusterProfiler": "4.16.x",
+      "org.Hs.eg.db": "3.19.x",
+      "enrichplot": "1.24.x",
+      "ggplot2": "3.4.x"
+    }
+  },
+  "policy": {
+    "installInScript": false,
+    "networkDuringAnalysis": false,
+    "recordPackageVersions": true,
+    "recordRuntimeVersion": true
+  }
+}

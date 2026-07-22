@@ -1,0 +1,110 @@
+.fileIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 18px;
+  line-height: 1;
+}
+
+.glyph {
+  color: var(--biof3-text-tertiary);
+}
+
+.badge {
+  border-radius: 5px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.fileIcon[data-kind='folder'] {
+  color: #b58a2a;
+}
+
+.fileIcon[data-kind='r'] {
+  color: #2468a2;
+  background: rgb(36 104 162 / 11%);
+}
+
+.fileIcon[data-kind='python'] {
+  color: #3674a8;
+  background: rgb(54 116 168 / 11%);
+}
+
+.fileIcon[data-kind='notebook'] {
+  color: #dc6b2f;
+  background: rgb(220 107 47 / 11%);
+}
+
+.fileIcon[data-kind='typescript'] {
+  color: #1687c9;
+  background: rgb(22 135 201 / 11%);
+}
+
+.fileIcon[data-kind='javascript'] {
+  color: #a78300;
+  background: rgb(167 131 0 / 11%);
+}
+
+.fileIcon[data-kind='data'] {
+  color: #168269;
+  background: rgb(22 130 105 / 11%);
+  font-size: 7px;
+}
+
+.fileIcon[data-kind='config'] {
+  color: #d56a24;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.fileIcon[data-kind='markdown'] {
+  color: #24914d;
+  background: transparent;
+  font-size: 10px;
+}
+
+.fileIcon[data-kind='document'] {
+  color: #6d7786;
+  background: rgb(109 119 134 / 10%);
+  font-size: 7px;
+}
+
+.fileIcon[data-kind='pdf'] {
+  color: #cf4545;
+  background: rgb(207 69 69 / 10%);
+  font-size: 7px;
+}
+
+.fileIcon[data-kind='image'] {
+  color: #9a55b8;
+}
+
+.fileIcon[data-kind='web'] {
+  color: #d8752c;
+  background: rgb(216 117 44 / 10%);
+  font-size: 12px;
+}
+
+.fileIcon[data-kind='style'] {
+  color: #6659c6;
+  background: rgb(102 89 198 / 10%);
+  font-size: 7px;
+}
+
+.fileIcon[data-kind='shell'] {
+  color: #66707d;
+}
+
+.fileIcon[data-kind='archive'] {
+  color: #8b6a35;
+  background: rgb(139 106 53 / 10%);
+  font-size: 7px;
+}
+
+.fileIcon[data-kind='generic'] {
+  color: var(--biof3-text-tertiary);
+}

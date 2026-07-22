@@ -84,6 +84,10 @@ const stmts = {
     `UPDATE tasks SET agent_status = ?, status = ?, error = ?, finished_at = ?
      WHERE id = ? AND type = 'agent_loop'`
   ),
+  requestCancel: db.prepare(
+    `UPDATE tasks SET agent_status = 'cancel_requested'
+     WHERE id = ? AND type = 'agent_loop' AND status = 'running'`
+  ),
 };
 
 function insertAgentTask({ taskId, userId, params }) {
@@ -147,6 +151,26 @@ function markAgentTaskFailed(taskId, error) {
   );
 }
 
+function requestAgentTaskCancel(taskId) {
+  const result = stmts.requestCancel.run(taskId);
+  return result.changes > 0;
+}
+
+function isAgentTaskCancellationRequested(taskId) {
+  const task = getAgentTask(taskId);
+  return task?.agentStatus === 'cancel_requested' || task?.agentStatus === 'cancelled';
+}
+
+function markAgentTaskCancelled(taskId) {
+  stmts.updateStatus.run(
+    'cancelled',
+    'cancelled',
+    null,
+    new Date().toISOString(),
+    taskId
+  );
+}
+
 function tryParse(value) {
   if (!value) return null;
   try {
@@ -163,4 +187,7 @@ module.exports = {
   getAgentTaskEventsSince,
   markAgentTaskDone,
   markAgentTaskFailed,
+  requestAgentTaskCancel,
+  isAgentTaskCancellationRequested,
+  markAgentTaskCancelled,
 };

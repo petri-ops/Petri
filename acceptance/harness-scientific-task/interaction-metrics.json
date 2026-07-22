@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "measurementKind": "offline_fixture_baseline",
+  "cases": [
+    { "taskId": "novice-bulk-rna-success", "questionTurns": 1, "recommendation": "contrast_confirmation", "userDecision": "fixture_accept", "abandoned": false, "blockReason": null },
+    { "taskId": "bulk-rna-multistep-lineage", "questionTurns": 1, "recommendation": "verified_artifact_dag", "userDecision": "fixture_accept", "abandoned": false, "blockReason": null },
+    { "taskId": "ambiguous-metadata-block", "questionTurns": 1, "recommendation": "supply_group_mapping", "userDecision": "fixture_unresolved", "abandoned": false, "blockReason": "scientific_evidence_insufficient" }
+  ],
+  "liveUserStudyStatus": "not_run",
+  "thresholdFrozen": false
+}

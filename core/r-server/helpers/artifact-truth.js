@@ -9,6 +9,9 @@ const INTERNAL_FILES = new Set([
   '_biof3-theme.R',
   'report-template.html',
   'manifest.json',
+  'artifact-manifest.json',
+  'provenance.json',
+  'delivery-manifest.json',
 ]);
 
 function artifactName(item) {
@@ -130,7 +133,16 @@ function reconcileArtifactTruth({
     if (match) {
       const name = artifactName(match);
       if (required && name) requiredNames.add(name);
-      if (!declared.some((entry) => artifactName(entry) === name)) declared.push(match);
+      const declaredIndex = declared.findIndex((entry) => artifactName(entry) === name);
+      if (declaredIndex >= 0) {
+        // The runtime may discover a file before the plugin output contract is
+        // applied. Preserve runtime fields, but restore the stable contract id,
+        // label and type so downstream delivery coverage never depends on a
+        // generated artifact_N identifier.
+        declared[declaredIndex] = { ...declared[declaredIndex], ...item, name, filename: name };
+      } else {
+        declared.push({ ...match, ...item, name, filename: name });
+      }
       continue;
     }
     if (required) {

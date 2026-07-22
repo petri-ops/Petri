@@ -119,6 +119,7 @@ function projectHarnessWorkflowJob(job = {}) {
   const terminal = ['completed', 'failed', 'cancelled'].includes(status) &&
     !stageList.some((stage) => ['pending', 'in_progress'].includes(stage.status));
   const recoverable =
+    String(job.error || '').includes('recovery_required') ||
     truth?.status === 'degraded' ||
     truth?.status === 'blocked' ||
     diagnostics.some((issue) => issue && issue.recoverable !== false);
@@ -132,6 +133,7 @@ function projectHarnessWorkflowJob(job = {}) {
     ackStatus,
     terminal,
     recoverable,
+    recoveryRequired: String(job.error || '').includes('recovery_required'),
     resumeFrom: firstIncompleteStage(stages),
     artifactTruth: truth,
     artifactDiagnostics: diagnostics,

@@ -5,6 +5,7 @@ import {
   subscribeBioF3Event,
   type ProjectOpenArtifactDetail,
   type ProjectOpenWorkspaceFileDetail,
+  type ProjectWorkspaceChangedDetail,
 } from './events';
 
 afterEach(() => {
@@ -59,8 +60,22 @@ describe('events typed bus', () => {
     expect(calls).toHaveLength(1);
   });
 
+  it('projectWorkspaceChanged carries project scope and source', () => {
+    const received: ProjectWorkspaceChangedDetail[] = [];
+    const unsub = subscribeBioF3Event(biof3Events.projectWorkspaceChanged, (detail) => {
+      received.push(detail);
+    });
+    dispatchBioF3Event(biof3Events.projectWorkspaceChanged, {
+      projectId: 'proj-1',
+      source: 'agent',
+    });
+    expect(received).toEqual([{ projectId: 'proj-1', source: 'agent' }]);
+    unsub();
+  });
+
   it('exposes biof3Events constants', () => {
     expect(biof3Events.projectOpenArtifact).toBe('biof3:project-open-artifact');
     expect(biof3Events.projectOpenWorkspaceFile).toBe('biof3:project-open-workspace-file');
+    expect(biof3Events.projectWorkspaceChanged).toBe('biof3:project-workspace-changed');
   });
 });

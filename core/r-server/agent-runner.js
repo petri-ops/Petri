@@ -5,7 +5,7 @@
  * runAgentLoop 在 API 进程内异步跑（不 fork worker），通过 onEvent 推事件 +
  * appendTaskEvent 持久化事件流，支持断线重连。
  *
- * 阶段 1 单进程：act ack / actRegistry / 并发锁零改造（同进程内存 Map 有效）。
+ * 阶段 1 单进程：act ack / 并发锁零改造（同进程内存 Map 有效）。
  * 阶段 2 多进程预留：task_events 表跨进程共享，shouldAbort 由调用方注入。
  */
 
@@ -60,7 +60,13 @@ const {
   createToolActivityRecorder,
   MAX_AGENT_ITERS,
   MAX_AGENT_TOOL_CALLS,
+  MAX_FINALIZATION_ATTEMPTS,
   shouldFinalizeAgentIteration,
+  assessFinalizationResult,
+  buildFinalizationRetryRequest,
+  buildFinalizationFallbackMessage,
+  finalizationFallbackReason,
+  createAgentProgressRecorder,
   createAgentToolCallController,
   runAgentToolCallBatch,
 } = require('./agent-tools');
@@ -244,7 +250,7 @@ async function runAgentLoop({
   systemPrompt +=
     '\n- 用户提出多步骤标准分析时，先用 run_tool(op="plan", templateId, initialInputs) 获取 Agent 主导计划；不要一次性自动执行全部步骤。每一步 run 完先检查 tool_job/artifact truth，再用 run_tool(op="bind_artifact", workflowPlan, fromToolJobId, fromStepId, toStepId, inputId, artifactId) 把真实 verified artifact 绑定到下游，然后再决定是否继续。';
   systemPrompt +=
-    '\n- 重操作确认：deseq2/wgcna/ml-*/rsf-survival 等重操作 run_tool 跑前会返回 {needApproval, ackToken}，前端弹确认卡。用户点"开始"后，重调 run_tool(op=run, toolId, params, ackToken=<返回的 ackToken>) 才真跑。单图小工具（volcano-plot/gene-correlation/pca-explorer）直接跑不拦截。';
+    '\n- 自动化边界：完全访问模式下，deseq2/wgcna 等项目内可复现分析直接执行；读取结果并在不改变科学问题的前提下自动诊断、修参和重试，不要请求用户点击开始。只有不可逆外部影响、凭据/付费操作或缺少科学判断时才请求用户决定。';
   systemPrompt +=
     '\n- 分析现场卡住时（不确定某工具参数、忘了某流程怎么走、用户报错对应不上某个分析步骤）：主动调 read_page(url="/plugin/<id>/<slug>") 或 search(scope="plugins") 查已装内容插件的教程片段，再继续回答/推进。不要凭空猜参数。';
   systemPrompt += '\n- 工具调用后再判断下一步：可能继续调用，也可能直接回答用户';
@@ -274,20 +280,7 @@ async function runAgentLoop({
     '\n- 创建 plan(create) 时，把触发该计划的用户原话（一句话总结即可）作为 chatExcerpt 字段传入，方便用户日后回顾。';
   systemPrompt +=
     '\n- 当用户在 FigCode 页面要求修改代码时（例如"换成横向条形图"/"配色改成 Nature 风格"/"加 facet"等），不要让用户自己复制粘贴。直接调用 act(type="update_figcode_editor", code="<完整新代码>", autoRun=true)，前端会自动替换并运行。';
-  systemPrompt += '\n\n=== 通用 act handler 注册表（动态扩展） ===';
-  systemPrompt +=
-    '\n网站会注册一些自定义的 act handler（如 scroll_to_heading / copy_to_clipboard / toggle_theme 等）。';
-  systemPrompt +=
-    '\n- 不确定能干什么时，调用 discover_capabilities 看完整列表（带 description / pages / payloadSchema / example）。';
-  systemPrompt +=
-    '\n- 看到合适的 handlerId 后用 act_generic({handlerId, payload}) 调用，参数照 example 写。';
-  systemPrompt += '\n- 优先用通用 handler，比硬塞导航或写一长串解释更好。';
-  systemPrompt +=
-    '\n- 收到 unknown_handler 错误时不要重试相同 id，先 discover_capabilities 重新看一次。';
-  systemPrompt += '\n- 收到 wrong_page 时按 expected 列表先 emit navigate action 跳过去再 act。';
-  // agent-led 阶段2 Task2/4：run_tool 跑完推结果 + agent 看图引导
-  systemPrompt +=
-    '\n- run_tool 跑完后，仅在当前页面真实注册了 open_result handler 时展示该 job 的结果。toolJobId 从 run_tool 返回中读取。';
+  // run_tool 成功事件由客户端确定性打开结果；模型只在用户明确要求时解读图片。
   systemPrompt +=
     '\n- agent 看图（read_image）：当用户问图内容（如"图里上调基因集中在哪""这张图说明了什么"），调 read_image(toolJobId) 让 vision 角色模型解读图，返回的 description 可直接据此回答。token 较贵，仅用户明确问图内容时调，不要每次出图都读。';
   systemPrompt += '\n\n=== 学习路径推荐 ===';
@@ -384,7 +377,6 @@ async function runAgentLoop({
     dashscopeEmbed,
     cosineSim,
     conversationId: _activeConv && _activeConv.id, // PLAN_CONV_LINK_v1
-    actRegistry: require('./helpers/runtime').actRegistryGet(userId), // ACT_GENERIC_v1
     gatherAnalysisContextForMethods: _gatherAnalysisContextForMethods, // GENERATE_METHODS_v1
     renderMethodsParagraph: _renderMethodsParagraph,
   };
@@ -401,7 +393,12 @@ async function runAgentLoop({
   });
   const aborted = () => (typeof shouldAbort === 'function' ? shouldAbort() : false);
   let assistantAcc = '';
+  const assistantProgress = createAgentProgressRecorder();
+  let finalizationAttempts = 0;
+  let finalizationFailureReason = null;
+  let finalizationRouting = null;
   let pendingApprovalEmitted = false;
+  let cancellationObserved = false;
   const assistantResultCards = [];
   const assistantToolActivities = createToolActivityRecorder();
 
@@ -409,16 +406,15 @@ async function runAgentLoop({
     for (let iter = 0; iter < MAX_AGENT_ITERS && !aborted(); iter++) {
       _emit({ event: 'iter', n: iter + 1 });
 
-      // The fifth Provider round is the finalization round. Reaching the
-      // tool-call cap also finalizes immediately, so one request never exceeds
-      // MAX_AGENT_ITERS Provider calls.
+      // Normal scientific work has no iteration boundary. Only an anomaly (or
+      // an explicitly injected finite test cap) forces a tool-free explanation.
       const finalizing = shouldFinalizeAgentIteration(iter, toolCallController);
       if (finalizing) {
         fullMessages.push({
           role: 'system',
           content: toolCallController.capHit()
-            ? `已达到工具调用上限（${MAX_AGENT_TOOL_CALLS} 次/请求）。请基于已收到的工具结果直接给出最终答复，不要再调用工具。`
-            : '这是本轮最后一次模型调用。请基于已收到的工具结果直接给出最终答复，不要再调用工具。',
+            ? '已达到显式配置的工具调用保护上限。请基于已收到的工具结果直接说明停止原因、已完成工作和未执行步骤，不要再调用工具，也不得声称尚未启动的工作正在执行。'
+            : '检测到相同工具和参数反复调用，任务可能陷入异常循环。请停止调用工具，直接说明异常、已完成工作和未执行步骤；不得声称尚未启动的工作正在执行。',
         });
       }
       const reqBody = {
@@ -431,24 +427,86 @@ async function runAgentLoop({
       };
 
       let streamedText = '';
-      const upJson = await callChatProvider(
-        providerName,
-        apiKey,
-        reqBody,
-        {
-          userId,
-          conversationId: _activeConv && _activeConv.id,
-          kind: 'agent_iter',
-        },
-        (event) => {
-          if (event.type === 'content_delta' && event.content && !aborted()) {
-            streamedText += event.content;
-            _emit({ choices: [{ delta: { content: event.content } }] });
+      let upJson;
+      let attemptBody = reqBody;
+      const attemptLimit = finalizing ? MAX_FINALIZATION_ATTEMPTS : 1;
+      for (let attempt = 1; attempt <= attemptLimit && !aborted(); attempt++) {
+        streamedText = '';
+        const protocolRecoveryAttempt = finalizing && attempt > 1;
+        upJson = await callChatProvider(
+          providerName,
+          apiKey,
+          attemptBody,
+          {
+            userId,
+            conversationId: _activeConv && _activeConv.id,
+            kind: attempt > 1 ? 'agent_finalization_retry' : 'agent_iter',
+          },
+          protocolRecoveryAttempt ? undefined : (event) => {
+            if (event.type === 'content_delta' && event.content && !aborted()) {
+              streamedText += event.content;
+              _emit({ choices: [{ delta: { content: event.content } }] });
+            }
+          },
+          {
+            baseUrl,
+            profileId,
+            modelOverride: modelName,
+            ...(protocolRecoveryAttempt ? { fallbackWhen: finalizationFallbackReason } : {}),
           }
-        },
-        { baseUrl, profileId, modelOverride: modelName }
-      );
+        );
+        if (finalizing && upJson && upJson.modelRouting) finalizationRouting = upJson.modelRouting;
+        if (!finalizing) break;
+        finalizationAttempts = Math.max(finalizationAttempts, attempt);
+        const assessment = assessFinalizationResult(upJson, streamedText);
+        finalizationFailureReason = assessment.usable ? null : assessment.reason;
+        if (protocolRecoveryAttempt && assessment.usable && assessment.content) {
+          _emit({ choices: [{ delta: { content: assessment.content } }] });
+        }
+        if (assessment.usable || !assessment.retryable || attempt >= attemptLimit) break;
+        _emit({
+          event: 'agent_status',
+          phase: 'finalization_retry',
+          attempt: attempt + 1,
+          maxAttempts: attemptLimit,
+          reason: assessment.reason,
+          message: '模型未返回可展示的最终说明，正在自动重试整理…',
+        });
+        attemptBody = buildFinalizationRetryRequest(reqBody);
+      }
+      if (!finalizing && (!upJson || upJson.error || !upJson.choices)) {
+        const assessment = assessFinalizationResult(upJson, streamedText);
+        if (assessment.retryable && !aborted()) {
+          _emit({
+            event: 'agent_status',
+            phase: 'provider_retry',
+            attempt: 2,
+            maxAttempts: 2,
+            reason: assessment.reason,
+            message: '上游响应暂时异常，正在自动重试当前阶段…',
+          });
+          streamedText = '';
+          upJson = await callChatProvider(
+            providerName,
+            apiKey,
+            reqBody,
+            {
+              userId,
+              conversationId: _activeConv && _activeConv.id,
+              kind: 'agent_iter_retry',
+            },
+            (event) => {
+              if (event.type === 'content_delta' && event.content && !aborted()) {
+                streamedText += event.content;
+                _emit({ choices: [{ delta: { content: event.content } }] });
+              }
+            },
+            { baseUrl, profileId, modelOverride: modelName }
+          );
+        }
+      }
       if (!upJson || upJson.error || !upJson.choices) {
+        if (finalizing && finalizationAttempts > 0) break;
         _emit({
           error:
             (upJson && (upJson.message || upJson.error || (upJson.choices ? 'no choice' : 'bad response'))) ||
@@ -461,18 +519,59 @@ async function runAgentLoop({
       const msg = choice.message || {};
       const toolCalls = msg.tool_calls || [];
 
-      if (toolCalls.length === 0) {
-        assistantAcc = streamedText || msg.content || '';
-        _emit({ event: 'done' });
-        break;
-      }
       if (finalizing) {
-        // A Provider that ignores the tool-free finalization request must not
-        // start another handler or trigger a sixth Provider request.
-        assistantAcc = streamedText || msg.content || '';
+        const assessment = assessFinalizationResult(upJson, streamedText);
+        assistantAcc = assessment.content;
+        finalizationFailureReason = assessment.usable ? null : assessment.reason;
+        if (assessment.usable) _emit({ event: 'done' });
         break;
       }
 
+      if (toolCalls.length === 0) {
+        let assessment = assessFinalizationResult(upJson, streamedText);
+        finalizationAttempts = 1;
+        finalizationFailureReason = assessment.usable ? null : assessment.reason;
+        if (!assessment.usable && assessment.retryable && !aborted()) {
+          _emit({
+            event: 'agent_status',
+            phase: 'finalization_retry',
+            attempt: 2,
+            maxAttempts: MAX_FINALIZATION_ATTEMPTS,
+            reason: assessment.reason,
+            message: '模型未返回可展示的最终说明，正在自动重试整理…',
+          });
+          streamedText = '';
+          const retryJson = await callChatProvider(
+            providerName,
+            apiKey,
+            buildFinalizationRetryRequest(reqBody),
+            {
+              userId,
+              conversationId: _activeConv && _activeConv.id,
+              kind: 'agent_finalization_retry',
+            },
+            undefined,
+            {
+              baseUrl,
+              profileId,
+              modelOverride: modelName,
+              fallbackWhen: finalizationFallbackReason,
+            }
+          );
+          finalizationAttempts = 2;
+          if (retryJson && retryJson.modelRouting) finalizationRouting = retryJson.modelRouting;
+          assessment = assessFinalizationResult(retryJson, streamedText);
+          finalizationFailureReason = assessment.usable ? null : assessment.reason;
+          if (assessment.usable && assessment.content) {
+            _emit({ choices: [{ delta: { content: assessment.content } }] });
+          }
+        }
+        assistantAcc = assessment.content;
+        if (assessment.usable) _emit({ event: 'done' });
+        break;
+      }
+      const progress = assistantProgress.record(streamedText || msg.content, iter + 1);
+      if (progress) _emit({ event: 'agent_progress', ...progress });
       await runAgentToolCallBatch({
         controller: toolCallController,
         toolCalls,
@@ -488,8 +587,8 @@ async function runAgentLoop({
           });
         },
         execute: async ({ name, args, callId }) => {
-          assistantToolActivities.recordCall({ name, args, traceId, callId });
-          _emit(buildToolCallEvent({ name, args, traceId, callId }));
+          assistantToolActivities.recordCall({ name, args, traceId, callId, iteration: iter + 1 });
+          _emit(buildToolCallEvent({ name, args, traceId, callId, iteration: iter + 1 }));
           let envelope = await executeToolCall(name, args, toolCtx, { traceId, callId });
           let result = localizeToolResult(envelope.data);
           envelope = replaceToolResultData(envelope, result);
@@ -506,7 +605,7 @@ async function runAgentLoop({
               _pushUniqueResultCard(assistantResultCards, _buildResultCardFromRunTool(result, context));
             }
           }
-          const toolResultEvent = buildToolResultEvent(envelope, args);
+          const toolResultEvent = buildToolResultEvent(envelope, args, { iteration: iter + 1 });
           assistantToolActivities.recordResult(toolResultEvent);
           _emit(toolResultEvent);
 
@@ -516,7 +615,11 @@ async function runAgentLoop({
               result.unhandled = true;
               result.message =
                 (result.message || '操作已记录') + '（⚠ 前端没有响应——可能当前页面没监听这个事件）';
-              const ackEvent = buildToolResultEvent({ ...envelope, data: result }, args);
+              const ackEvent = buildToolResultEvent(
+                { ...envelope, data: result },
+                args,
+                { iteration: iter + 1 }
+              );
               ackEvent.summary = 'unhandled';
               assistantToolActivities.recordResult(ackEvent);
               _emit(ackEvent);
@@ -530,12 +633,12 @@ async function runAgentLoop({
           return { envelope, result, args, name, callId };
         },
         reject: async ({ name, args, callId, error, message }) => {
-          assistantToolActivities.recordCall({ name, args, traceId, callId });
-          _emit(buildToolCallEvent({ name, args, traceId, callId }));
+          assistantToolActivities.recordCall({ name, args, traceId, callId, iteration: iter + 1 });
+          _emit(buildToolCallEvent({ name, args, traceId, callId, iteration: iter + 1 }));
           let envelope = createRejectedToolResult(name, error, message, toolCtx, { traceId, callId });
           const result = localizeToolResult(envelope.data);
           envelope = replaceToolResultData(envelope, result);
-          const toolResultEvent = buildToolResultEvent(envelope, args);
+          const toolResultEvent = buildToolResultEvent(envelope, args, { iteration: iter + 1 });
           assistantToolActivities.recordResult(toolResultEvent);
           _emit(toolResultEvent);
           return { envelope, result, args, name, callId };
@@ -553,17 +656,23 @@ async function runAgentLoop({
       });
     }
 
-    // The fifth Provider round is already tool-free finalization. Do not make
-    // a sixth request; keep only the local non-empty fallback for empty output.
-    if (!aborted() && assistantAcc.trim().length <= 20) {
-      const fallbackMsg =
-        '抱歉，这次对话我调用了多次工具但没能整理出最终答复。请把你的需求再描述一下，或者换个问法试试。';
+    cancellationObserved = aborted();
+    if (cancellationObserved) {
+      assistantAcc = '任务已由用户停止。已完成的阶段结论、工具记录和结果已保留，未开始的步骤不会继续执行。';
+      _emit({ event: 'agent_cancelled', reason: 'user_cancelled' });
+    } else if (assistantAcc.trim().length === 0) {
+      const fallbackMsg = buildFinalizationFallbackMessage({
+        attempts: finalizationAttempts,
+        reason: finalizationFailureReason,
+        anomaly: toolCallController.anomaly,
+        lastStageConclusion: assistantProgress.snapshot().slice(-1)[0]?.content,
+      });
       _emit({ choices: [{ delta: { content: fallbackMsg } }] });
       assistantAcc = fallbackMsg;
     }
 
     // ---------- 持久化 assistant 消息 + 下游管线（搬迁自 ai-agent.js L592-703）----------
-    if (assistantAcc.trim().length > 20) {
+    if (assistantAcc.trim().length > 0) {
       try {
         if (userId) {
           try {
@@ -572,6 +681,31 @@ async function runAgentLoop({
                 page: context && context.page,
                 projectId: context && context.projectId,
                 processingDurationMs: Math.max(0, Date.now() - turnStartedAt),
+                ...(cancellationObserved ? {
+                  interruption: {
+                    reason: 'user_cancelled',
+                    preservedProgressCount: assistantProgress.snapshot().length,
+                    preservedToolActivityCount: assistantToolActivities.snapshot().length,
+                  },
+                } : {}),
+                ...(assistantProgress.snapshot().length
+                  ? { progressUpdates: assistantProgress.snapshot() }
+                  : {}),
+                ...(finalizationAttempts ? {
+                  finalization: {
+                    attempts: finalizationAttempts,
+                    recovered: !finalizationFailureReason,
+                    ...(finalizationFailureReason ? { failureReason: finalizationFailureReason } : {}),
+                    ...(finalizationRouting ? { routing: finalizationRouting } : {}),
+                  },
+                } : {}),
+                ...(finalizationFailureReason || toolCallController.anomaly ? {
+                  incident: {
+                    code: toolCallController.anomaly?.code || finalizationFailureReason || 'agent_failure',
+                    autoRecoveryAttempts: finalizationAttempts,
+                    ...(toolCallController.anomaly?.tool ? { tool: toolCallController.anomaly.tool } : {}),
+                  },
+                } : {}),
                 ...(assistantResultCards.length ? { resultCards: assistantResultCards } : {}),
                 ...(assistantToolActivities.snapshot().length
                   ? { toolActivities: assistantToolActivities.snapshot() }
@@ -662,11 +796,15 @@ async function runAgentLoop({
       } catch {}
     }
   } catch (e) {
+    cancellationObserved = cancellationObserved || aborted();
     _emit({ error: e.message });
   } finally {
     // 释放 task 生命周期锁 + 标记 task 终态（无论成功/失败/异常）
     try {
-      if (assistantAcc.trim().length > 20 || pendingApprovalEmitted) {
+      cancellationObserved = cancellationObserved || aborted();
+      if (cancellationObserved) {
+        agentTaskStore.markAgentTaskCancelled(taskId);
+      } else if (assistantAcc.trim().length > 20 || pendingApprovalEmitted) {
         agentTaskStore.markAgentTaskDone(taskId);
       } else {
         agentTaskStore.markAgentTaskFailed(taskId, 'agent loop 未生成有效回复');

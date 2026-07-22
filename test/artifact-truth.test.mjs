@@ -111,6 +111,24 @@ test('matches required output ids to real files and adds unlisted disk artifacts
   assert.equal(reconciled.artifacts[0].canonicalPath, '/work/result/volcano.png');
 });
 
+test('restores stable output contract metadata onto disk-discovered artifacts', () => {
+  const resultDir = tempResultDir();
+  fs.writeFileSync(join(resultDir, 'qc_summary.json'), '{"status":"valid"}');
+  const reconciled = reconcileArtifactTruth({
+    resultDir,
+    result: { artifacts: [{ id: 'artifact_1', filename: 'qc_summary.json' }] },
+    expectedArtifacts: [
+      { id: 'qc_summary', filename: 'qc_summary.json', type: 'json', label: 'QC summary' },
+    ],
+  });
+
+  assert.equal(reconciled.blocking, false);
+  assert.equal(reconciled.artifactTruth.status, 'valid');
+  assert.equal(reconciled.artifacts[0].id, 'qc_summary');
+  assert.equal(reconciled.artifacts[0].label, 'QC summary');
+  assert.equal(reconciled.artifacts[0].required, true);
+});
+
 test('treats empty required files as blocking', () => {
   const resultDir = tempResultDir();
   fs.writeFileSync(join(resultDir, 'result.csv'), '');

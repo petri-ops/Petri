@@ -93,6 +93,7 @@ test('tool activity recorder keeps safe summaries for conversation restore', () 
     args: { path: 'notes/result.txt', content: 'secret content must not persist' },
     traceId: 'trace_activity',
     callId: 'call_activity',
+    iteration: 3,
   });
   recorder.recordResult(buildToolResultEvent({
     contractVersion: '1.0.0',
@@ -105,11 +106,12 @@ test('tool activity recorder keeps safe summaries for conversation restore', () 
     truncated: false,
     sideEffects: { type: 'workspace-write', riskTier: 'R2', resources: ['notes/result.txt'] },
     data: { ok: true },
-  }));
+  }, {}, { iteration: 3 }));
 
   const snapshot = recorder.snapshot();
   assert.equal(snapshot.length, 1);
   assert.equal(snapshot[0].status, 'success');
+  assert.equal(snapshot[0].iteration, 3);
   assert.equal(snapshot[0].actionDetail, 'notes/result.txt');
   assert.equal(JSON.stringify(snapshot).includes('secret content must not persist'), false);
 });
@@ -172,10 +174,15 @@ test('workspace dry-run reports no side effects while a real write remains R2', 
 });
 
 test('executeToolCall keeps pending run_tool approval truthful and records only the created job', async () => {
+  const inputDir = await fs.mkdtemp(path.join(os.tmpdir(), 'biof3-tool-approval-'));
+  const countsPath = path.join(inputDir, 'counts.csv');
+  const coldataPath = path.join(inputDir, 'coldata.csv');
+  await fs.writeFile(countsPath, 'gene,sample\ngene1,1\n');
+  await fs.writeFile(coldataPath, 'sample,condition\nsample,control\n');
   const result = await executeToolCall('run_tool', {
     op: 'run',
     toolId: 'deseq2',
-    params: { counts: '/fake/counts.csv' },
+    params: { counts: countsPath, coldata: coldataPath },
   }, { userId: 'local-user', allowExecution: true }, {
     traceId: 'trace_approval',
     callId: 'call_approval',
@@ -197,6 +204,7 @@ test('executeToolCall keeps pending run_tool approval truthful and records only 
     if (result.data.toolJobId) {
       db.getDatabase().prepare('DELETE FROM tool_jobs WHERE id=?').run(result.data.toolJobId);
     }
+    await fs.rm(inputDir, { recursive: true, force: true });
   }
 });
 

@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "harness": "scientific-task",
+  "phase": "HRT-7",
+  "privacy": "synthetic_or_repository_demo_data_only",
+  "network": "disabled_by_contract",
+  "credentials": "not_loaded",
+  "startedAt": "2026-07-22T04:29:39.403Z",
+  "finishedAt": "2026-07-22T04:29:42.808Z",
+  "commands": [
+    {
+      "label": "harness:scientific-task:evaluate",
+      "command": "npm run harness:scientific-task:evaluate",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "label": "harness:scientific-task:test",
+      "command": "npm run harness:scientific-task:test",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "label": "harness:scientific-task:planner:test",
+      "command": "npm run harness:scientific-task:planner:test",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "label": "harness:scientific-task:confirmation:test",
+      "command": "npm run harness:scientific-task:confirmation:test",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "label": "harness:scientific-task:persistence:test",
+      "command": "npm run harness:scientific-task:persistence:test",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "label": "harness:scientific-task:provenance:test",
+      "command": "npm run harness:scientific-task:provenance:test",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "label": "harness:scientific-task:delivery:test",
+      "command": "npm run harness:scientific-task:delivery:test",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "label": "harness:scientific-task:replay:test",
+      "command": "npm run harness:scientific-task:replay:test",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "label": "harness:scientific-task:replay:acceptance",
+      "command": "npm run harness:scientific-task:replay:acceptance",
+      "exitCode": 0,
+      "signal": null
+    }
+  ],
+  "passed": true,
+  "requiredCoverage": [
+    "small_window",
+    "large_window",
+    "summary_failure_fallback",
+    "database_free_replay",
+    "drift_classification"
+  ]
+}

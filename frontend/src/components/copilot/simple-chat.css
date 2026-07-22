@@ -354,6 +354,41 @@
   white-space: pre-wrap;
 }
 
+.sc-agent-progress {
+  display: grid;
+  gap: 4px;
+  margin: 0 0 9px;
+  color: var(--biof3-text-secondary);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.sc-agent-progress-item {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr);
+  gap: 6px;
+  align-items: start;
+  min-width: 0;
+  padding: 1px 0;
+}
+
+.sc-agent-progress-item .cp-md {
+  display: block;
+  min-width: 0;
+}
+
+.sc-agent-progress-dot {
+  width: 5px;
+  height: 5px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: var(--biof3-text-tertiary);
+}
+
+.sc-agent-progress-current {
+  color: var(--biof3-text-tertiary);
+}
+
 .cp-md {
   display: grid;
   gap: 9px;
@@ -655,7 +690,7 @@
   gap: 0;
   align-self: stretch;
   margin-left: 38px;
-  border-bottom: 1px solid var(--biof3-border);
+  border-bottom: 1px solid color-mix(in srgb, var(--biof3-border) 72%, transparent);
 }
 
 .sc-tool-activity-summary {
@@ -663,8 +698,8 @@
   align-items: center;
   gap: 7px;
   width: 100%;
-  min-height: 32px;
-  padding: 6px 2px;
+  min-height: 28px;
+  padding: 4px 2px;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -686,12 +721,12 @@
 
 .sc-tool-activity {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
   min-width: 0;
-  padding: 7px 2px;
+  padding: 4px 2px;
   border: 0;
-  border-top: 1px solid var(--biof3-border);
+  border-top: 1px solid color-mix(in srgb, var(--biof3-border) 58%, transparent);
   border-radius: 0;
   background: transparent;
   color: var(--biof3-text-secondary);
@@ -725,6 +760,16 @@
 .sc-tool-activity-body {
   min-width: 0;
   flex: 1;
+}
+
+.sc-tool-activity-detail {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3px 7px;
+  color: var(--biof3-text-tertiary);
+  font-size: 10.5px;
+  line-height: 1.35;
 }
 
 .sc-tool-activity-head,

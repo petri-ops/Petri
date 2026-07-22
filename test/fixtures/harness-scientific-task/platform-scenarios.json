@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "durabilityCases": [
+    { "id": "restart-and-reopen", "expected": "raw_messages_and_task_refs_recovered" },
+    { "id": "new-conversation", "expected": "old_authorization_not_inherited" },
+    { "id": "switch-project", "expected": "project_scope_isolated" },
+    { "id": "missing-artifact-file", "expected": "partial_history_or_recovery_required" },
+    { "id": "corrupt-checkpoint", "expected": "raw_message_rebuild_or_explicit_gap" },
+    { "id": "delete-conversation", "expected": "derived_context_deleted_but_job_truth_retained" }
+  ],
+  "cacheCases": [
+    { "id": "repeat-file-probe", "expected": "local_cache_hit_with_source_hash" },
+    { "id": "same-replay", "expected": "verified_artifact_reuse_only_if_all_keys_match" },
+    { "id": "file-change", "expected": "cache_invalidated" },
+    { "id": "model-switch", "expected": "provider_cache_not_assumed_reusable" },
+    { "id": "cache-failure", "expected": "quality_and_policy_unchanged" }
+  ],
+  "resourceCases": [
+    { "id": "ready", "expected": "resource_ready" },
+    { "id": "price-unknown", "expected": "cost_unknown_not_zero" },
+    { "id": "runtime-missing", "expected": "resource_unavailable" },
+    { "id": "disk-low", "expected": "resource_warning_or_unavailable" },
+    { "id": "estimated-oom", "expected": "confirmation_or_block" },
+    { "id": "stale-snapshot", "expected": "refresh_required" },
+    { "id": "cross-ui-reference", "expected": "same_snapshot_ref_and_job_peak" }
+  ]
+}

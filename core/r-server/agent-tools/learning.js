@@ -1,112 +1,11 @@
 /**
- * agent-tools/learning.js — Learning & discovery tools
- * (discover_capabilities, act_generic, generate_methods, suggest_next_steps,
+ * agent-tools/learning.js — Learning and reporting tools
+ * (generate_methods, suggest_next_steps,
  *  verify_understanding, suggest_review, record_learning_signal)
  */
 const dbMod = require('../db');
 const sqlite = dbMod.getDatabase();
-// ponytail: cross-module refs from act-tools.js (isAgentPaused, _pendingActAcks, recordAudit)
-const { isAgentPaused, _pendingActAcks, recordAudit } = require('./act-tools');
-
 // SUGGEST_NEXT_STEPS_BRIDGE_v1 marker
-// ACT_GENERIC_TOOL_v1 — frontend-registered handlers + introspection
-async function tool_discover_capabilities(args, ctx) {
-  const reg = (ctx && ctx.actRegistry) || {};
-  const ids = Object.keys(reg);
-  if (ids.length === 0) {
-    return {
-      ok: true,
-      handlers: {},
-      note: '当前用户没有上传 act 注册表（可能页面还没加载完，或者前端没注册 generic handler）。常规 act tool 仍可用。',
-    };
-  }
-  return { ok: true, handlers: reg, count: ids.length };
-}
-
-async function tool_act_generic(args, ctx) {
-  const userId = ctx && ctx.userId;
-  if (!userId) throw new Error('未授权');
-  if (typeof isAgentPaused === 'function' && isAgentPaused(userId)) {
-    return { error: 'agent_paused', message: '用户已暂停 agent 自主操作。' };
-  }
-  if (!args || !args.handlerId) return { error: 'missing_handlerId' };
-  const reg = (ctx && ctx.actRegistry) || {};
-  const def = reg[args.handlerId];
-  if (!def) {
-    return {
-      error: 'unknown_handler',
-      message:
-        '没有注册名为 "' + args.handlerId + '" 的 handler。先调用 discover_capabilities 看清单。',
-    };
-  }
-  // page check
-  const currentPage = (ctx && ctx.context && ctx.context.page) || null;
-  if (def.pages && def.pages !== '*') {
-    if (Array.isArray(def.pages) && !def.pages.includes(currentPage)) {
-      return {
-        error: 'wrong_page',
-        expected: def.pages,
-        actual: currentPage || '(unknown)',
-        message:
-          '此 handler 只能在 [' +
-          def.pages.join(', ') +
-          '] 页面使用，当前在 ' +
-          (currentPage || '未知') +
-          '。先 navigate 过去。',
-      };
-    }
-  }
-  // Rate limit reuse same store: max 5 generic acts / minute
-  try {
-    const db = sqlite;
-    const since = new Date(Date.now() - 60_000).toISOString();
-    const recent = db
-      .prepare('SELECT COUNT(*) AS n FROM agent_audit WHERE user_id=? AND ts >= ?')
-      .get(userId, since);
-    if (recent && recent.n >= 5) {
-      return { error: 'rate_limited', message: '1 分钟内已执行 5 次写操作，请稍后。' };
-    }
-  } catch {}
-
-  // Generate ackToken so the frontend confirms receipt
-  const ackToken = (function _genTok() {
-    const { v4: uuidv4 } = require('uuid');
-    return 'ack_' + uuidv4().slice(0, 12);
-  })();
-  const ackPromise = (function _registerAck() {
-    return new Promise((resolve) => {
-      const timer = setTimeout(() => {
-        _pendingActAcks.delete(ackToken);
-        resolve({ timedOut: true });
-      }, 800);
-      _pendingActAcks.set(ackToken, {
-        resolve: (info) => {
-          clearTimeout(timer);
-          resolve({ timedOut: false, info });
-        },
-        expiresAt: Date.now() + 800,
-      });
-    });
-  })();
-
-  // audit
-  let undoToken = null;
-  try {
-    undoToken = recordAudit(userId, 'generic:' + args.handlerId, args.payload || {}, { ok: true });
-  } catch {}
-
-  return {
-    ok: true,
-    actType: 'generic',
-    handlerId: args.handlerId,
-    payload: args.payload || {},
-    message: '已派发 ' + args.handlerId + ' 到前端，等待 ack。',
-    ackToken,
-    undoToken,
-    undoableUntil: Date.now() + 5000,
-    _ackPromise: ackPromise,
-  };
-}
 
 // GENERATE_METHODS_v1 — academic Methods paragraph generator
 async function tool_generate_methods(args, ctx) {
@@ -734,6 +633,16 @@ const HEAVY_TOOLS = new Set([
 ]);
 const APPROVAL_TIMEOUT_MS = 5 * 60 * 1000; // 5 分钟内未确认自动取消
 
+function shouldAutoExecuteLocalAnalysis(ctx) {
+  return Boolean(ctx && ctx.accessMode === 'full' && ctx.allowExecution !== false);
+}
+
+function runToolExecutor(ctx) {
+  return ctx && typeof ctx.executeRunTool === 'function'
+    ? ctx.executeRunTool
+    : _executeRunTool;
+}
+
 async function tool_run_tool(args, ctx) {
   const userId = ctx && ctx.userId;
   if (!userId) throw new Error('未授权');
@@ -841,14 +750,63 @@ async function tool_run_tool(args, ctx) {
     // 注册表是唯一工具事实源。先拒绝不存在的工具，避免旧步骤 ID 在确认阶段
     // 提前生成永远无法执行的 tool_job。
     const registeredTools = await _getRegistry().listTools();
-    if (!registeredTools.some((tool) => tool.name === toolId)) {
+    const registeredTool = registeredTools.find((tool) => tool.name === toolId);
+    if (!registeredTool) {
       return { ok: false, error: 'unknown_tool', message: `未知工具: ${toolId}`, toolId };
     }
+    const requiredFileInputs = (registeredTool._inputs || []).filter(
+      (input) => input && input.type === 'file' && input.required !== false
+    );
+    const missingFileInputs = requiredFileInputs
+      .map((input) => input.id)
+      .filter((id) => {
+        const value = params && params[id];
+        if (typeof value !== 'string' || !value.trim()) return true;
+        try { return !require('fs').statSync(value).isFile(); } catch { return true; }
+      });
+    if (missingFileInputs.length > 0) {
+      return {
+        ok: false,
+        error: 'missing_required_file_inputs',
+        toolId,
+        missing: missingFileInputs,
+        message: `缺少必需输入文件: ${missingFileInputs.join(', ')}`,
+      };
+    }
 
-    // TOOL_JOB_APPROVAL_v1（阶段2 Task3）：重操作强制确认。
-    // HEAVY_TOOLS 跑前先落 tool_jobs 记录 ack_status='pending'，返回 needApproval。
-    // 前端确认卡 ack 后（ackStatus='approved'）才续跑；5min 超时/拒绝则取消。
+    // HRT-3 scientific task path: a scientificTaskRef is a strict gate, not
+    // metadata decoration. It must resolve to a confirmed, same-project,
+    // unbound task whose selected tool and final params still match.
+    let scientificTask = null;
+    if (args.scientificTaskRef) {
+      const ref = args.scientificTaskRef;
+      scientificTask = dbMod.getScientificTaskSpec(ref.taskId, Number(ref.version || 1));
+      const { validateScientificTaskExecution } = require('../../shared-backend/scientific-task-confirmation');
+      const gate = validateScientificTaskExecution({ persistedTask: scientificTask, projectId: ctx.projectId, toolId, params });
+      if (!gate.ok) return gate;
+      const executed = await _executeRunTool(toolId, params, userId, null, ctx.projectId, {
+        taskId: ref.taskId,
+        version: Number(ref.version || 1),
+      });
+      return { ...executed, scientificTaskRef: { taskId: ref.taskId, version: Number(ref.version || 1) } };
+    }
+
+    // Full access is an explicit delegation boundary. Local, reproducible
+    // scientific computation can run without a second UI confirmation; its
+    // ToolResult/Job/Artifact facts remain fully audited. The legacy approval
+    // path stays available for callers that do not carry this delegation.
     if (HEAVY_TOOLS.has(toolId)) {
+      if (shouldAutoExecuteLocalAnalysis(ctx)) {
+        const executed = await runToolExecutor(ctx)(toolId, params, userId, null, ctx && ctx.projectId);
+        return {
+          ...executed,
+          automationDecision: {
+            mode: 'full',
+            decision: 'auto_execute',
+            reason: 'local_reproducible_analysis',
+          },
+        };
+      }
       // 已带 ackToken 且 ackStatus='approved' → 续跑（第二轮调用）
       if (args.ackToken) {
         const job = dbMod.getToolJobByAckToken(args.ackToken);
@@ -971,13 +929,18 @@ async function tool_run_tool(args, ctx) {
 }
 
 // 实际执行 callTool（重操作确认通过后 + 非重操作都走这里）
-async function _executeRunTool(toolId, params, userId, ackToken, projectId) {
+async function _executeRunTool(toolId, params, userId, ackToken, projectId, scientificTaskRef = null) {
+  let scientificJob = null;
   try {
     const approvedJob = ackToken ? dbMod.getToolJobByAckToken(ackToken) : null;
+    if (scientificTaskRef) {
+      scientificJob = dbMod.createToolJob({ toolId, userId, params, status: 'pending', name: `${toolId} scientific task`, projectId });
+      dbMod.bindScientificTaskToolJob({ taskId: scientificTaskRef.taskId, version: scientificTaskRef.version, toolJobId: scientificJob.id });
+    }
     const result = await _getRegistry().callTool(toolId, params, {
       userId,
       projectId,
-      toolJobId: approvedJob && approvedJob.id,
+      toolJobId: (scientificJob && scientificJob.id) || (approvedJob && approvedJob.id),
     });
     const text = result.content && result.content[0] && result.content[0].text;
     let parsed = null;
@@ -988,11 +951,13 @@ async function _executeRunTool(toolId, params, userId, ackToken, projectId) {
         error: 'tool_failed',
         message: text,
         toolId,
+        ...(parsed && typeof parsed === 'object' ? { result: parsed } : {}),
         ...(result.toolJobId ? { toolJobId: result.toolJobId } : {}),
       };
     }
     // 透传 callTool 返回的 toolJobId（tool_jobs 表的真实 id，tj_xxx），
-    // 供 agent 调 read_image / plan(update_step, toolJobId) / open_result 用。
+    // 供 agent 调 read_image / plan(update_step, toolJobId) 使用；结果面板由前端
+    // 根据成功的 run_tool 事件确定性打开，不再依赖模型调用页面动作。
     // 注意：toolJobId 是 db.createToolJob 生成的 tj_xxx，不是 summary.jobDir 里的 mcp_xxx。
     return {
       ok: true,
@@ -1002,6 +967,9 @@ async function _executeRunTool(toolId, params, userId, ackToken, projectId) {
       ...(ackToken ? { ackToken } : {}),
     };
   } catch (e) {
+    if (scientificJob?.id) {
+      try { dbMod.updateToolJob(scientificJob.id, { status: 'failed', error: e.message, completedAt: Date.now() }); } catch {}
+    }
     return { ok: false, error: 'run_exception', message: e.message, toolId };
   }
 }
@@ -1012,9 +980,8 @@ async function _executeRunTool(toolId, params, userId, ackToken, projectId) {
  */
 
 module.exports = {
-  tool_discover_capabilities,
-  tool_act_generic,
   tool_run_tool,
+  shouldAutoExecuteLocalAnalysis,
   tool_generate_methods,
   tool_suggest_next_steps,
   tool_verify_understanding,

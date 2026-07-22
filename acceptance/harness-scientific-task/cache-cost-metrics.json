@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "measurementKind": "gap_baseline",
+  "provider": { "cacheReadPersisted": false, "cacheCreationPersisted": false, "inputTokens": null, "outputTokens": null, "estimatedCost": null, "latencyMs": null },
+  "local": { "fileIndexCacheObserved": true, "sourceHashRequired": true, "repeatProbeCaseDefined": true },
+  "replay": { "verifiedArtifactOnly": true, "allKeyMatchRequired": true, "observedHit": null },
+  "invalidationCases": ["file_change", "task_spec_change", "permission_change", "model_switch", "plugin_or_runtime_change", "artifact_truth_change", "ttl"],
+  "cacheFailurePolicy": "quality_and_safety_must_not_degrade",
+  "productionStatus": "gap",
+  "gapOwner": "usage_cache_followup",
+  "thresholdFrozen": false
+}

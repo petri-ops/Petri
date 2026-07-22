@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "privacy": "synthetic_or_repository_demo_data_only",
+  "cases": [
+    {
+      "id": "novice-bulk-rna-success",
+      "kind": "scientific_task",
+      "covers": [1, 4, 5, 6, 8, 12, 17, 18, 19, 20],
+      "persona": "no_bioinformatics_background",
+      "originalRequest": "我有处理组和对照组的数据，帮我看看发生了什么，最好告诉我哪些功能可能受影响。",
+      "inputs": [
+        { "role": "counts", "path": "resources/built-in-plugins/deseq2/demo-data/counts.csv" },
+        { "role": "metadata", "path": "resources/built-in-plugins/deseq2/demo-data/metadata.csv" }
+      ],
+      "plainLanguagePreview": {
+        "found": "发现一份基因计数矩阵和一份样本分组表。",
+        "plan": "先核对样本和分组，再做质量检查、差异分析和功能富集。",
+        "missing": "正式运行前需要确认哪一组是处理组、哪一组是对照组。"
+      },
+      "expectedDeliverables": ["validated_inputs", "qc_summary", "deg_table", "plots", "enrichment_tables", "evidence_report", "reproduction_bundle"],
+      "automation": {
+        "guided": { "auto": ["workspace_index", "bounded_read", "runtime_probe"], "confirm": ["contrast", "execute_scientific_job"] },
+        "confirm": { "auto": ["workspace_index", "bounded_read"], "confirm": ["runtime_probe", "contrast", "execute_scientific_job"] },
+        "trusted": { "auto": ["workspace_index", "bounded_read", "runtime_probe", "execute_confirmed_plan"], "confirm": ["contrast_if_ambiguous"] }
+      },
+      "commandPolicy": {
+        "auto": ["pwd", "read_only_runtime_probe", "replay_verified_script"],
+        "confirm": ["long_running_analysis", "package_provisioning"],
+        "deny": ["remote_git_mutation", "script_install_packages", "workspace_escape"]
+      },
+      "failureBoundary": "样本分组、contrast 或运行环境不能由证据确定时停止，不静默猜测。",
+      "noviceSuccessPath": "展示发现、计划和缺失信息；确认分组后运行；用通俗语言交付统计事实、限制和复现入口。"
+    },
+    {
+      "id": "bulk-rna-multistep-lineage",
+      "kind": "scientific_task",
+      "covers": [2, 20],
+      "persona": "bioinformatics_engineer",
+      "originalRequest": "比较 KO 和 WT，并用 GO/KEGG 与 GSEA 判断功能方向，所有下游结果必须能追溯到同一份差异结果。",
+      "inputs": [
+        { "role": "counts", "path": "resources/built-in-plugins/deseq2/demo-data/demo-counts.csv" },
+        { "role": "metadata", "path": "resources/built-in-plugins/deseq2/demo-data/demo-coldata.csv" }
+      ],
+      "moduleDag": ["sample-metadata-validator", "expression-qc", "deseq2", "deg-standardizer", "volcano-plot", "go-kegg", "gsea", "evidence-delivery-pack"],
+      "lineageRules": ["downstream_requires_verified_artifact", "artifact_type_must_match", "no_chat_text_binding", "each_final_artifact_has_script_or_explicit_dependency"],
+      "expectedDeliverables": ["run_manifest", "verified_deg_artifact", "bound_downstream_artifacts", "argument_and_limitations", "reproduction_bundle"],
+      "automation": {
+        "guided": { "auto": ["verify_upstream_artifact"], "confirm": ["contrast", "execute_each_scientific_stage"] },
+        "confirm": { "auto": ["verify_upstream_artifact"], "confirm": ["bind_artifact", "execute_each_scientific_stage"] },
+        "trusted": { "auto": ["verify_upstream_artifact", "bind_artifact", "execute_confirmed_dag"], "confirm": ["new_scientific_decision"] }
+      },
+      "failureBoundary": "degraded、missing 或类型不匹配的上游 Artifact 禁止绑定到下游。",
+      "noviceSuccessPath": "把每一步为什么运行、消费哪个结果和支持什么结论展示为证据链。"
+    },
+    {
+      "id": "ambiguous-metadata-block",
+      "kind": "scientific_task",
+      "covers": [3, 6, 7, 9],
+      "persona": "no_bioinformatics_background",
+      "originalRequest": "文件都在这里，直接帮我比较两组。",
+      "inputs": [
+        { "role": "unknown_table", "path": "test/fixtures/harness-scientific-task/data/metadata-disguised.csv" },
+        { "role": "counts", "path": "resources/built-in-plugins/deseq2/demo-data/counts.csv" }
+      ],
+      "probeSequence": ["detect_content_not_extension", "read_headers_only", "compare_sample_ids", "report_ambiguity"],
+      "expectedDecision": "cannot_reliably_answer",
+      "scientificEvidenceGap": "表中只有 sample 和 batch，没有处理/对照分组；任何自动化模式都不能推断 contrast。",
+      "automation": {
+        "guided": { "auto": ["bounded_probe"], "confirm": ["user_supplies_group_mapping"] },
+        "confirm": { "auto": ["bounded_probe"], "confirm": ["user_supplies_group_mapping"] },
+        "trusted": { "auto": ["bounded_probe"], "confirm": ["user_supplies_group_mapping"] }
+      },
+      "expectedDeliverables": ["probe_evidence", "blocking_reason", "required_user_information"],
+      "failureBoundary": "权限足够不等于科学证据足够；缺 group/contrast 时不运行。",
+      "noviceSuccessPath": "说明文件实际结构、为什么不能比较，以及用户只需补充哪一项信息。"
+    },
+    {
+      "id": "non-task-chat-and-context-assist",
+      "kind": "conversation_control",
+      "covers": [10],
+      "persona": "general_user",
+      "originalRequest": "火山图是什么？",
+      "inputs": [],
+      "expectedMode": "conversation",
+      "mustNotCreate": ["ScientificTaskSpec", "tool_job", "artifact"],
+      "contextAssistVariant": "这个项目里的火山图用了什么阈值？",
+      "contextAssistExpected": ["read_active_artifact_manifest", "answer_with_source"],
+      "expectedDeliverables": ["plain_answer_or_sourced_context_answer"],
+      "automation": { "guided": { "auto": ["answer_general_question"], "confirm": [] }, "confirm": { "auto": ["answer_general_question"], "confirm": [] }, "trusted": { "auto": ["answer_general_question"], "confirm": [] } },
+      "failureBoundary": "普通问答不误触任务；项目精确问题没有证据时不猜测阈值。",
+      "noviceSuccessPath": "普通概念直接解释，需要项目事实时读取最小充分证据。"
+    },
+    {
+      "id": "context-edit-compaction-model-switch",
+      "kind": "context_integrity",
+      "covers": [11, 13, 14],
+      "persona": "developer",
+      "originalRequest": "修改明确引用的配置文件，保留我早先否定的条件；长会话压缩和模型切换后也不能丢。",
+      "inputs": [{ "role": "edit_fixture", "path": "test/fixtures/harness-scientific-task/context-scenarios.json" }],
+      "expectedDeliverables": ["edit_manifest", "two_context_checkpoints", "model_switch_rebuild_result"],
+      "automation": { "guided": { "auto": ["read", "dry_run"], "confirm": ["write"] }, "confirm": { "auto": ["read"], "confirm": ["dry_run", "write"] }, "trusted": { "auto": ["read", "dry_run", "sha_guarded_write"], "confirm": ["ambiguous_multi_file_change"] } },
+      "failureBoundary": "同名歧义、重复片段、SHA 漂移、最小关键上下文放不下时拒绝或保守回退。",
+      "noviceSuccessPath": "展示要改哪个文件、改什么、冲突或上下文不足时为什么停下。"
+    },
+    {
+      "id": "durability-cache-resource-baseline",
+      "kind": "platform_baseline",
+      "covers": [15, 16, 17, 18, 19],
+      "persona": "returning_user",
+      "originalRequest": "重启后继续昨天的分析，并确认缓存、用量和当前机器资源是否允许重跑。",
+      "inputs": [{ "role": "durability_fixture", "path": "test/fixtures/harness-scientific-task/platform-scenarios.json" }],
+      "expectedDeliverables": ["reopen_status", "authorization_recheck", "cache_decision", "resource_snapshot_decision", "honest_gap_report"],
+      "automation": { "guided": { "auto": ["read_history", "read_resource_snapshot"], "confirm": ["replay"] }, "confirm": { "auto": ["read_history"], "confirm": ["resource_probe", "replay"] }, "trusted": { "auto": ["read_history", "resource_probe", "replay_verified_job"], "confirm": ["new_authorization"] } },
+      "failureBoundary": "会话删除不删除 Job 真相；旧授权不继承；过期/缺失资源快照、未知价格或损坏文件必须诚实提示。",
+      "noviceSuccessPath": "说明恢复了什么、哪些内容缺失、这次运行预计成本和资源是否可用。"
+    }
+  ]
+}

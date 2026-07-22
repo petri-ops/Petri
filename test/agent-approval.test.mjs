@@ -18,6 +18,16 @@ const learning = req(R_SERVER + '/agent-tools/learning.js');
 const { dispatchTool, inferExecutionPolicy } = req(R_SERVER + '/agent-tools/index.js');
 
 const CTX = { userId: 'local-user' };
+const DESEQ2_PARAMS = {
+  counts: resolve(__dirname, '..', 'resources', 'built-in-plugins', 'deseq2', 'demo-data', 'demo-counts.csv'),
+  coldata: resolve(__dirname, '..', 'resources', 'built-in-plugins', 'deseq2', 'demo-data', 'demo-coldata.csv'),
+};
+
+test('完全访问把项目内可复现分析判定为自动执行', () => {
+  assert.equal(learning.shouldAutoExecuteLocalAnalysis({ accessMode: 'full', allowExecution: true }), true);
+  assert.equal(learning.shouldAutoExecuteLocalAnalysis({ accessMode: 'read', allowExecution: true }), false);
+  assert.equal(learning.shouldAutoExecuteLocalAnalysis({ accessMode: 'full', allowExecution: false }), false);
+});
 
 test('只读检查请求禁止 run，但允许 list', async () => {
   const policy = inferExecutionPolicy([
@@ -53,7 +63,7 @@ test('明确确认续跑不被只读关键词误拦截', () => {
 test('deseq2 首次 run 返回 needApproval + ackToken', async () => {
   // 用 deseq2（在 HEAVY_TOOLS 白名单）
   const r = await learning.tool_run_tool(
-    { op: 'run', toolId: 'deseq2', params: { counts: '/fake/counts.csv' } },
+    { op: 'run', toolId: 'deseq2', params: DESEQ2_PARAMS },
     CTX
   );
   assert.equal(r.ok, true);
@@ -74,7 +84,7 @@ test('deseq2 首次 run 返回 needApproval + ackToken', async () => {
 
 test('ack(approve) 后 ack_status 变 approved', async () => {
   const r = await learning.tool_run_tool(
-    { op: 'run', toolId: 'deseq2', params: {} },
+    { op: 'run', toolId: 'deseq2', params: DESEQ2_PARAMS },
     CTX
   );
   const job = db.ackToolJob(r.ackToken, true);
@@ -86,12 +96,12 @@ test('ack(approve) 后 ack_status 变 approved', async () => {
 
 test('ack(reject) 后重调 ackToken 返回 user_rejected', async () => {
   const r = await learning.tool_run_tool(
-    { op: 'run', toolId: 'deseq2', params: {} },
+    { op: 'run', toolId: 'deseq2', params: DESEQ2_PARAMS },
     CTX
   );
   db.ackToolJob(r.ackToken, false);
   const r2 = await learning.tool_run_tool(
-    { op: 'run', toolId: 'deseq2', params: {}, ackToken: r.ackToken },
+    { op: 'run', toolId: 'deseq2', params: DESEQ2_PARAMS, ackToken: r.ackToken },
     CTX
   );
   assert.equal(r2.ok, false);

@@ -90,6 +90,7 @@ export interface ToolCallEvent {
   args: Record<string, unknown>;
   traceId?: string;
   callId?: string;
+  iteration?: number;
 }
 
 export interface ToolSideEffects {
@@ -119,6 +120,7 @@ export interface StructuredToolResult {
 export interface ToolResultEvent {
   name: string;
   summary: string;
+  iteration?: number;
   toolResult?: StructuredToolResult;
   actType?: string;
   message?: string;
@@ -156,9 +158,6 @@ export interface ToolResultEvent {
   toolJobId?: string;
   /** 6.4 — 参数确认卡片：agent 返回的参数供用户审阅/微调 */
   params?: Record<string, unknown>;
-  /** ACT_GENERIC_v1 — generic handler dispatch */
-  handlerId?: string;
-  payload?: Record<string, unknown>;
 }
 
 export function parseToolCallEvent(obj: Record<string, unknown>): ToolCallEvent {
@@ -169,6 +168,7 @@ export function parseToolCallEvent(obj: Record<string, unknown>): ToolCallEvent 
       : {},
     traceId: typeof obj.traceId === 'string' ? obj.traceId : undefined,
     callId: typeof obj.callId === 'string' ? obj.callId : undefined,
+    iteration: typeof obj.iteration === 'number' ? obj.iteration : undefined,
   };
 }
 
@@ -176,6 +176,7 @@ export function parseToolResultEvent(obj: Record<string, unknown>): ToolResultEv
   return {
     name: String(obj.name || ''),
     summary: typeof obj.summary === 'string' ? obj.summary : '',
+    iteration: typeof obj.iteration === 'number' ? obj.iteration : undefined,
     toolResult: obj.toolResult && typeof obj.toolResult === 'object'
       ? {
         ...(obj.toolResult as StructuredToolResult),
@@ -214,8 +215,6 @@ export function parseToolResultEvent(obj: Record<string, unknown>): ToolResultEv
     needApproval: obj.needApproval as boolean | undefined,
     toolJobId: obj.toolJobId as string | undefined,
     params: obj.params as Record<string, unknown> | undefined,
-    handlerId: obj.handlerId as string | undefined,
-    payload: obj.payload as Record<string, unknown> | undefined,
   };
 }
 
@@ -234,6 +233,16 @@ export interface StreamChatOptions {
   onError?: (err: Error) => void;
   /** Agent iteration started (1-indexed) */
   onIter?: (n: number) => void;
+  /** Agent runtime status that should be visible while no answer text is available. */
+  onAgentStatus?: (status: {
+    phase: string;
+    message: string;
+    attempt?: number;
+    maxAttempts?: number;
+    reason?: string;
+  }) => void;
+  /** Model-authored, user-facing progress emitted before a tool batch. */
+  onAgentProgress?: (progress: { iteration: number; content: string }) => void;
   /** Tool call started */
   onToolCall?: (e: ToolCallEvent) => void;
   /** Tool call returned */
@@ -242,6 +251,8 @@ export interface StreamChatOptions {
   onConversation?: (info: { conversationId: string; title?: string }) => void;
   /** Server detected the user has pivoted to a new topic mid-conversation */
   onTopicShift?: (info: { conversationId: string; reason: string }) => void;
+  /** Background task created for this run. Used by the UI to request a real cancellation. */
+  onTaskStarted?: (taskId: string) => void;
 }
 
 /**
@@ -298,6 +309,7 @@ async function streamChatViaTask(opts: StreamChatOptions): Promise<void> {
   const { onDone } = opts;
   try {
     const taskId = await submitAgentTask(opts);
+    opts.onTaskStarted?.(taskId);
     // 存 localStorage 供重连发现（CopilotChat mount 时检查）
     try {
       localStorage.setItem(
@@ -314,6 +326,26 @@ async function streamChatViaTask(opts: StreamChatOptions): Promise<void> {
     } catch {
       opts.onError?.(err instanceof Error ? err : new Error(String(err)));
     }
+  }
+}
+
+/** Request cancellation of a persisted background Agent task. */
+export async function cancelAgentTask(taskId: string): Promise<void> {
+  if (!taskId) return;
+  const resp = await fetch(
+    `${getApiPrefix()}/ai/agent/task/${encodeURIComponent(taskId)}/cancel`,
+    {
+      method: 'POST',
+      headers: { ...getAuthHeader() },
+    }
+  );
+  if (!resp.ok) {
+    let message = `HTTP ${resp.status}`;
+    try {
+      const body = await resp.json();
+      message = String(body?.error || body?.message || message);
+    } catch {}
+    throw new Error(message);
   }
 }
 
@@ -406,6 +438,8 @@ function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
     onDone,
     onError,
     onIter,
+    onAgentStatus,
+    onAgentProgress,
     onToolCall,
     onToolResult,
     onConversation,
@@ -425,6 +459,26 @@ function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
   }
   if (obj.event === 'iter') {
     onIter?.(obj.n || 1);
+    return;
+  }
+  if (obj.event === 'agent_status') {
+    onAgentStatus?.({
+      phase: String(obj.phase || ''),
+      message: String(obj.message || ''),
+      attempt: typeof obj.attempt === 'number' ? obj.attempt : undefined,
+      maxAttempts: typeof obj.maxAttempts === 'number' ? obj.maxAttempts : undefined,
+      reason: obj.reason ? String(obj.reason) : undefined,
+    });
+    return;
+  }
+  if (obj.event === 'agent_progress') {
+    const content = String(obj.content || '').trim();
+    if (content) {
+      onAgentProgress?.({
+        iteration: typeof obj.iteration === 'number' ? obj.iteration : 1,
+        content,
+      });
+    }
     return;
   }
   if (obj.event === 'tool_call') {

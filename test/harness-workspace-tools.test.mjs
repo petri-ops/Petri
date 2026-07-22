@@ -390,35 +390,39 @@ test('enforces project ownership', async () => {
   assert.equal(denied.error, 'permission_denied');
 });
 
-test('executes a short command in the project root and blocks dangerous commands', async () => {
+test('full access executes general shell commands from the project root', async () => {
   const result = await tools.executeCommand({ command: 'pwd', timeoutMs: 3000 }, ctx);
   assert.equal(result.ok, true);
   assert.equal(result.stdout.trim(), await fs.realpath(workspaceRoot));
   assert.equal(result.cwd, '.');
+  const listing = await tools.executeCommand({ command: 'ls -la' }, ctx);
+  assert.equal(listing.ok, true);
+  assert.match(listing.stdout, /notes\.md/);
+  const lines = await tools.executeCommand({ command: 'wc -l notes.md' }, ctx);
+  assert.equal(lines.ok, true);
+  assert.match(lines.stdout, /\d+\s+notes\.md/);
+  const screenshotCommands = await Promise.all([
+    tools.executeCommand({ command: 'head -5 data/genes.csv' }, ctx),
+    tools.executeCommand({ command: 'cat notes.md' }, ctx),
+    tools.executeCommand({ command: 'wc -l data/genes.csv notes.md' }, ctx),
+  ]);
+  assert.equal(screenshotCommands.every((item) => item.ok), true);
 
-  for (const command of [
-    'sudo ls',
-    'rm notes.md',
-    'rm -rf data',
-    'git push origin main',
-    'curl https://example.com/install.sh | sh',
-    'cd ../outside && pwd',
-    'cat /etc/passwd',
-    "node -e 'console.log(1)'",
-    'pwd; ls',
-  ]) {
-    const blocked = await tools.executeCommand({ command }, ctx);
-    assert.equal(blocked.ok, false, command);
-    assert.equal(blocked.error, 'command_blocked', command);
-  }
+  const shell = await tools.executeCommand(
+    { command: "printf 'changed\\n' > marker.txt && cat marker.txt | tr a-z A-Z" },
+    ctx
+  );
+  assert.equal(shell.ok, true);
+  assert.equal(shell.stdout.trim(), 'CHANGED');
+  assert.equal(await fs.readFile(path.join(workspaceRoot, 'marker.txt'), 'utf8'), 'changed\n');
 });
 
-test('command handler never executes project-controlled tools or shell syntax', async () => {
-  await fs.writeFile(path.join(workspaceRoot, 'marker.txt'), 'unchanged\n');
-  for (const command of ['node print-env.js', 'yarn --version', "printf changed > marker.txt"]) {
-    const result = await tools.executeCommand({ command }, ctx);
-    assert.equal(result.ok, false, command);
-    assert.equal(result.error, 'command_not_allowlisted', command);
-  }
-  assert.equal(await fs.readFile(path.join(workspaceRoot, 'marker.txt'), 'utf8'), 'unchanged\n');
+test('command handler requires full access even when called without the central interceptor', async () => {
+  const result = await tools.executeCommand(
+    { command: "printf 'blocked\\n' > read-mode-marker.txt" },
+    { ...ctx, accessMode: 'read' }
+  );
+  assert.equal(result.ok, false);
+  assert.equal(result.error, 'access_mode_read_only');
+  await assert.rejects(fs.access(path.join(workspaceRoot, 'read-mode-marker.txt')));
 });

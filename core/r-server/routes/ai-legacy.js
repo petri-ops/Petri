@@ -11,7 +11,6 @@ const {
   callDeepSeekSimple,
   buildInterpretPrompt,
 } = require('../helpers/interpret');
-const {actRegistrySet, actRegistryGet} = require('../helpers/runtime');
 const {ackActToken} = require('../agent-tools');
 const dbMod = require('../db');
 
@@ -80,33 +79,4 @@ module.exports = function mountAiLegacy(app) {
     res.json({status: 'ok', ackStatus: job.ack_status, toolJobId: job.id});
   });
 
-  app.post('/api/ai/act-registry', express.json({limit: '256kb'}), (req, res) => {
-    const userId = req.user && req.user.id;
-    if (!userId) return res.status(401).json({status:'error', error:'未授权'});
-    const snapshot = req.body && req.body.snapshot;
-    if (!snapshot || typeof snapshot !== 'object') {
-      return res.status(400).json({status:'error', error:'snapshot 必须是对象'});
-    }
-
-    const cleaned = {};
-    for (const [id, def] of Object.entries(snapshot)) {
-      if (typeof id !== 'string' || !/^[a-z][a-z0-9_]{1,63}$/.test(id)) continue;
-      if (!def || typeof def !== 'object') continue;
-      cleaned[id] = {
-        id,
-        description: String(def.description || '').slice(0, 1000),
-        pages: Array.isArray(def.pages) ? def.pages.slice(0, 12).map(String) : (def.pages === '*' ? '*' : null),
-        payloadSchema: (def.payloadSchema && typeof def.payloadSchema === 'object') ? def.payloadSchema : undefined,
-        example: (def.example && typeof def.example === 'object') ? def.example : undefined,
-      };
-    }
-    actRegistrySet(userId, cleaned);
-    res.json({status:'ok', count: Object.keys(cleaned).length});
-  });
-
-  app.get('/api/ai/act-registry', (req, res) => {
-    const userId = req.user && req.user.id;
-    if (!userId) return res.status(401).json({status:'error', error:'未授权'});
-    res.json({status:'ok', registry: actRegistryGet(userId)});
-  });
 };

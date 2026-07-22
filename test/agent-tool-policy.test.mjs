@@ -82,7 +82,6 @@ test('operation-aware policy preserves read-only plan and run_tool operations', 
   for (const [name, args, metadata] of [
     ['plan', { op: 'create' }, contract('state-write', 'R1', 'planning')],
     ['act', { type: 'open' }, contract('execution', 'R2', 'action')],
-    ['act_generic', { handlerId: 'x' }, contract('state-write', 'R2', 'action')],
     ['run_tool', { op: 'run' }, contract('execution', 'R2', 'analysis')],
   ]) {
     assert.equal(
@@ -389,43 +388,46 @@ test('replace without sha is denied without mutation and matching sha executes',
   assert.equal(await fs.readFile(path.join(workspaceRoot, 'replace.txt'), 'utf8'), 'after\n');
 });
 
-test('only allowlisted command executes while unknown, Git, and dangerous commands deny', async () => {
+test('full access permits general commands while read mode denies execution', async () => {
   const pwd = await interceptWorkspace('workspace_exec', { command: 'pwd' }, workspaceCtx);
   assert.equal(pwd.ok, true);
   assert.equal(pwd.stdout.trim(), await fs.realpath(workspaceRoot));
 
   const marker = path.join(workspaceRoot, 'marker.txt');
-  const unknown = await interceptWorkspace(
+  const shell = await interceptWorkspace(
     'workspace_exec',
     { command: 'printf changed > marker.txt' },
     workspaceCtx
   );
-  assert.equal(unknown.error, 'command_not_allowlisted');
-  assert.equal(unknown.reason, 'command_not_allowlisted');
-  await assert.rejects(fs.access(marker));
+  assert.equal(shell.ok, true);
+  assert.equal(await fs.readFile(marker, 'utf8'), 'changed');
 
-  const gitStatus = await interceptWorkspace('workspace_exec', { command: 'git status --short' }, workspaceCtx);
-  assert.equal(gitStatus.error, 'command_not_allowlisted');
-  assert.equal(gitStatus.reason, 'command_not_allowlisted');
-
-  const dangerous = await interceptWorkspace('workspace_exec', { command: 'rm existing.txt' }, workspaceCtx);
-  assert.equal(dangerous.error, 'command_blocked');
-  assert.equal(dangerous.reason, 'policy_denied');
-  assert.equal(await fs.readFile(path.join(workspaceRoot, 'existing.txt'), 'utf8'), 'changed\n');
+  const readMode = await interceptWorkspace(
+    'workspace_exec',
+    { command: 'printf denied > read-marker.txt' },
+    { ...workspaceCtx, accessMode: 'read' }
+  );
+  assert.equal(readMode.error, 'access_mode_read_only');
+  await assert.rejects(fs.access(path.join(workspaceRoot, 'read-marker.txt')));
 });
 
-test('central dispatcher keeps run_tool approval on a real pending tool_job', async () => {
+test('central dispatcher auto-executes local analysis in full access without a pending approval', async () => {
+  const deseq2Params = {
+    counts: path.resolve('resources/built-in-plugins/deseq2/demo-data/demo-counts.csv'),
+    coldata: path.resolve('resources/built-in-plugins/deseq2/demo-data/demo-coldata.csv'),
+  };
   const result = await dispatchTool(
     'run_tool',
-    { op: 'run', toolId: 'deseq2', params: { counts: '/fake/counts.csv' } },
-    { userId: 'local-user', allowExecution: true, accessMode: 'full' }
+    { op: 'run', toolId: 'deseq2', params: deseq2Params },
+    {
+      userId: 'local-user',
+      allowExecution: true,
+      accessMode: 'full',
+      executeRunTool: async (toolId, params) => ({ ok: true, toolId, result: { params } }),
+    }
   );
   assert.equal(result.ok, true);
-  assert.equal(result.needApproval, true);
-  assert.ok(result.ackToken);
-  assert.ok(result.toolJobId);
-  const job = db.getToolJob(result.toolJobId);
-  assert.equal(job.ack_status, 'pending');
-  assert.equal(job.ack_token, result.ackToken);
-  db.getDatabase().prepare('DELETE FROM tool_jobs WHERE id=?').run(result.toolJobId);
+  assert.equal(result.needApproval, undefined);
+  assert.equal(result.automationDecision.decision, 'auto_execute');
+  assert.equal(result.automationDecision.reason, 'local_reproducible_analysis');
 });

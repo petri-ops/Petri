@@ -146,10 +146,10 @@ export function RightPanel({
                 {tab === 'files' && (
                   <RightFileTree
                     project={ctx.project}
+                    active={ctx.rightTab === 'files'}
                     openFiles={ctx.openWorkspaceFiles}
                     activeFile={ctx.activeWorkspaceFile}
                     onOpenFile={ctx.handleOpenWorkspaceFile}
-                    onSelectFile={ctx.setActiveWorkspaceFile}
                     onCloseFile={ctx.handleCloseWorkspaceFile}
                   />
                 )}

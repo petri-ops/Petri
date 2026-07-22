@@ -10,6 +10,7 @@ export interface ToolActivityItem {
   key: string;
   callId?: string;
   traceId?: string;
+  iteration?: number;
   name: string;
   status: ToolActivityStatus;
   durationMs?: number;
@@ -52,6 +53,9 @@ export function restoreToolActivities(value: unknown): ToolActivityItem[] {
       key: typeof raw.key === 'string' ? raw.key : `restored:${index}:${name}`,
       callId: typeof raw.callId === 'string' ? raw.callId : undefined,
       traceId: typeof raw.traceId === 'string' ? raw.traceId : undefined,
+      iteration: typeof raw.iteration === 'number' && Number.isFinite(raw.iteration)
+        ? raw.iteration
+        : undefined,
       name,
       status,
       durationMs,
@@ -151,6 +155,7 @@ export function mergeToolCallActivity(
       key,
       callId: event.callId,
       traceId: event.traceId,
+      iteration: event.iteration,
       name: event.name,
       status: 'running',
       ...summarizeToolCall(event.name, event.args),
@@ -189,6 +194,7 @@ export function mergeToolResultActivity(
     key: index >= 0 ? current[index].key : key,
     callId: result?.callId || (index >= 0 ? current[index].callId : undefined),
     traceId: result?.traceId || (index >= 0 ? current[index].traceId : undefined),
+    iteration: event.iteration || (index >= 0 ? current[index].iteration : undefined),
     name,
     status: result?.terminationReason === 'approval_required'
       ? 'awaiting_confirmation'

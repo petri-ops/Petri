@@ -7,7 +7,9 @@
 > 所有约定均以仓库现有内置插件（`resources/built-in-plugins/go-kegg`、`deseq2`、`wgcna`）
 > 为真实样板，可直接对照复制。
 >
-> 最后更新：2026-07-18
+> 最后更新：2026-07-22
+>
+> 可直接复制的原型：[`acceptance/harness-plugin-prototype`](../acceptance/harness-plugin-prototype)。该目录不自动注册，专门用于新插件开发、评审和交接。
 
 ---
 
@@ -36,6 +38,38 @@ resources/built-in-plugins/<id>/
 ├── <id>-report-template.html   # 可选：解读报告模板
 └── demo-data/             # 可选：自带样例，保证零配置可试跑
 ```
+
+建议额外保留 `environment.json`：它把 `requiresBundle`、R 版本、包版本和“脚本不得安装/联网”的策略固定下来。`plugin.json` 是发现与 readiness 的声明，`environment.json` 是开发和验收的环境证据；两者不一致时必须阻断发布。
+
+## 1.1 脚本可提取与二次修改
+
+插件是可复用的模块，但结果不能只保存成一张“最终图片”。现有本地执行器会把插件源脚本复制为 Job 目录中的 `run-script.R`/`run-script.py`；正式交付必须保留这份**本次实际执行的脚本快照**，并在 artifact provenance 中记录：源插件版本、脚本 SHA-256、运行快照路径、参数、输入 hash 和环境版本。
+
+因此 Agent 二次修改结果时遵循：
+
+```text
+读取原始插件脚本 / 本次 run-script 快照
+  → 说明要改的统计或展示逻辑
+  → 生成新版本或本次 Job 的修改脚本
+  → dry-run / 重新执行 / 比较 artifact
+  → 交付新脚本、参数和新结果
+```
+
+修改不能直接覆盖历史 Job 的脚本。历史结果永远绑定原脚本和原参数；修改应生成新的插件版本、workflow step 或可追踪的 patch，并保留 parent script SHA-256。交付包至少应包含脚本、输入引用、参数 JSON、环境清单和重放命令。
+
+## 1.2 跨平台边界
+
+插件的“科学逻辑”可以跨平台复用，但运行能力不是天然跨平台。必须分别验收：
+
+| 层 | 是否可复用 | 约束 |
+|---|---|---|
+| R/Python 源脚本 | 通常可以 | 禁止硬编码 `/Users/...`、shell 专属命令和平台路径；使用 job 相对路径与参数。 |
+| Plugin/tool 契约 | 可以 | `supportedPlatforms` 和 runtime/capability 版本必须明确。 |
+| Runtime | 不一定 | R/Python 可执行文件、原生库、字体和系统依赖要按平台构建。 |
+| Capability bundle | 不一定 | 每个 bundle 必须有平台 artifact、SHA-256 和版本；不能把 macOS 包静默用于 Windows/Linux。 |
+| 产物验证 | 可以 | 表格 schema、artifact 类型和统计规则应跨平台一致；图像像素允许声明容差。 |
+
+当前原型只承诺 `macos-arm64`，Windows、macOS x64 和 Linux 显式标记为 planned。后续扩展顺序是：先完成 macOS 真实运行与重放，再为每个平台分别构建 runtime/bundle、补平台 fixture 和 CI 矩阵；平台缺少可验证依赖时返回 `platform_not_supported`，不得自动降级到另一平台。
 
 三方通过商店分发时，同样的 L1 目录打成 zip，`manifest.json` 用真实 `https://` URL + SHA-256
 描述；内置插件用 `built-in://<id>` 伪 URL（见 §7）。
@@ -132,11 +166,10 @@ Harness 用 `detect` 把原始报错归类成结构化可恢复项，驱动 `dec
 
 约定：
 
-- 入参：R 脚本读 `--args params.json`，Python 读 `--params params.json`。
-- executor 会把脚本复制成 `jobDir/run-script.R`、附带 `_biof3-theme.R`（复用即得统一绘图主题），
-  并注入 `R_LIBS_USER`（见 §5），然后 `Rscript run-script.R --args params.json`。
-- 产物：写到 output dir + 一份 manifest；**结果为空 / ID 映射失败等务必输出可被 `detect` 正则
-  命中的结构化诊断文本**，否则失败模式无法归类。
+- 入参：R/Python 插件统一接收第一个位置参数 `job_dir`，并读取 `job_dir/params.json`；不要自行发明 `--args` / `--params` 协议。
+- executor 会把脚本复制成 `jobDir/run-script.R` / `run-script.py`，R 脚本附带 `_biof3-theme.R`，并注入 `R_LIBS_USER`（见 §5）。
+- 科研产物只写到 `job_dir/output/`。`artifact-manifest.json` 与 `provenance.json` 是 Harness 依据实际执行脚本、参数、输入和输出统一生成的内部证据，不得声明为用户科研产物。
+- **结果为空 / ID 映射失败等务必输出可被 `detect` 正则命中的结构化诊断文本**；若插件主动阻断，还应保存 `status=blocked` 与 `failureMode`，执行层会原样保留。
 - 不要在脚本里自己下载重包或联网；依赖由 `requiresBundle` + provisioning 负责。
 
 ---
@@ -204,6 +237,8 @@ manifest 合规 + 目录就位即被自动发现/注册/可运行，**无需改�
 ```bash
 npm run harness:check          # manifest 合规（inputs/outputs/failureModes 齐全）
 npm run harness:phase6         # plugin-sdk + workflow fixture 回归
+npm run harness:plugins:acceptance:update # 10 个内置插件走真实生产执行链并更新证据
+npm run harness:plugins:acceptance        # 校验已落盘的 macOS 验收证据
 node --test test/*.test.mjs    # 全量回归不引入基线外失败
 npm run check                  # 静态检查 + harness:check + ui:audit
 ```
@@ -217,12 +252,14 @@ Plugin SDK + fixture + artifact truth 接入。
 
 - [ ] `resources/built-in-plugins/<id>/` 目录建好，`id` 三处一致（目录/脚本/manifest key）。
 - [ ] `plugin.json`：身份 + `packages` + `runtime`；重包声明 `requiresBundle`。
+- [ ] `environment.json`：runtime/capability/package 版本与安装、联网策略；与 `plugin.json` 一致。
 - [ ] `tool-definition.json`：inputs（select 给 options + default）、outputs（type 明确）、failureModes（含 detect 正则）。
-- [ ] `scripts/<id>.R`：读 `--args params.json`，产物写 output+manifest，失败输出可被 detect 命中的诊断。
+- [ ] `scripts/<id>.R` / `.py`：第一个位置参数读取 `job_dir`，从 `job_dir/params.json` 取参数，产物写入 `job_dir/output/`，失败输出结构化 `failureMode`。
 - [ ] 若依赖重包：确认对应 bundle 在分发 manifest 有条目，host 在白名单内。
 - [ ] `manifest.json` 登记 `built-in://<id>`（内置）或真实 URL+SHA-256（商店）。
 - [ ] `test/fixtures/harness/<id>-*.json` 覆盖 valid/degraded/blocked 三态。
 - [ ] 四条门禁全绿；产物二跳绑定验证通过。
+- [ ] `acceptance.json` 的硬性证据齐全：重复运行、失败恢复、lineage、无隐藏安装、脚本/参数/输入哈希可重放。
 
 ---
 
@@ -234,4 +271,4 @@ Plugin SDK + fixture + artifact truth 接入。
 | 带 bundle + 二跳输入 | `go-kegg`（requiresBundle=r-enrichment，deg_table 二跳） |
 | 复用同一 bundle | `gsea`（与 go-kegg 同用 r-enrichment） |
 | 独立 bundle + 多产物 | `wgcna`（requiresBundle=r-wgcna，13 个 artifact） |
-| Python 插件 | `pca-explorer`（language=python，读 --params） |
+| Python 插件 | `pca-explorer`（language=python，与 R 统一读取第一个位置参数 `job_dir`） |

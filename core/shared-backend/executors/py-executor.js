@@ -13,6 +13,7 @@ const logger = require('../logger');
 const {
   getPythonRuntimeExecutable,
   getPythonSitePackagesDir,
+  findExecutableOnPath,
 } = require('../runtime-paths');
 
 // 从 config-helper 读取配置（断点1：斩断对 py-server/config 的反向 require）
@@ -32,7 +33,7 @@ class PythonExecutor {
   get binPath() {
     const cfg = getPyConfig();
     const runtimeHome = cfg.pyHome || path.join(__dirname, '../../py-server/Python');
-    return getPythonRuntimeExecutable(runtimeHome) || path.join(runtimeHome, 'python.exe');
+    return getPythonRuntimeExecutable(runtimeHome) || findExecutableOnPath(getPythonExecutableNames());
   }
 
   /**
@@ -123,6 +124,11 @@ class PythonExecutor {
     return satisfiesVersion(current, required);
   }
 
+  /** 返回本次实际可执行文件的 Python 版本，供 provenance 固化。 */
+  getRuntimeVersion() {
+    return this._getPyVersion();
+  }
+
   /**
    * 校验插件包的 builtAgainst 与当前 Python 的 major.minor 是否兼容。
    * Python C 扩展在 X.Y 编译，加载到 X.Z（不同 minor）会 ABI 不兼容。
@@ -201,3 +207,9 @@ function satisfiesVersion(current, requirement) {
 }
 
 module.exports = { PythonExecutor };
+
+function getPythonExecutableNames() {
+  return process.platform === 'win32'
+    ? ['python.exe', 'python3.exe', 'python3.11.exe']
+    : ['python3', 'python'];
+}

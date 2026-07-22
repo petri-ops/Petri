@@ -68,6 +68,9 @@ function preflightDenial(preflight) {
   ) {
     return deny('policy_denied', error, preflight.message || '工具调用被安全策略拒绝。');
   }
+  if (error === 'access_mode_read_only') {
+    return deny('read_only', error, preflight.message || '聊天当前处于只读模式，禁止执行命令。');
+  }
   return deny('invalid_arguments', error, preflight.message || '工具参数或目标无效。');
 }
 
@@ -121,11 +124,11 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
       '文本替换前必须先读取文件并传入 expectedSha256。'
     );
   }
-  if (name === 'workspace_exec' && preflight.commandRisk !== 'read_only') {
+  if (name === 'workspace_exec' && (ctx.accessMode !== 'full' || preflight.commandRisk !== 'full_access')) {
     return deny(
-      'command_not_allowlisted',
-      'command_not_allowlisted',
-      '该命令不在自动执行白名单中，当前调用未执行。'
+      'read_only',
+      'access_mode_read_only',
+      '聊天当前处于只读模式，禁止执行命令。'
     );
   }
 

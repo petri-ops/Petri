@@ -22,17 +22,18 @@ function publicData(data) {
   };
 }
 
-function buildToolCallEvent({ name, args, traceId, callId }) {
+function buildToolCallEvent({ name, args, traceId, callId, iteration }) {
   return {
     event: 'tool_call',
     name,
     args: redactSensitiveValue(args || {}),
     traceId,
     callId,
+    ...(Number.isFinite(iteration) ? { iteration } : {}),
   };
 }
 
-function buildToolResultEvent(envelope, args = {}) {
+function buildToolResultEvent(envelope, args = {}, options = {}) {
   const result = envelope.data;
   const published = publicData(result);
   const summary = result && typeof result === 'object'
@@ -46,6 +47,7 @@ function buildToolResultEvent(envelope, args = {}) {
     event: 'tool_result',
     name: envelope.tool,
     summary,
+    ...(Number.isFinite(options.iteration) ? { iteration: options.iteration } : {}),
     toolResult: {
       contractVersion: envelope.contractVersion,
       traceId: envelope.traceId,
@@ -97,14 +99,6 @@ function buildToolResultEvent(envelope, args = {}) {
     if (result.type === 'upload_data_hint') evt.scUploadHint = true;
     if (result.type === 'open_figcode_plot') evt.figcardId = result.figcardId;
     if (result.type === 'open_tool' && result.toolId) evt.toolId = result.toolId;
-  }
-
-  if (envelope.tool === 'act_generic' && result && typeof result === 'object') {
-    if (result.actType) evt.actType = result.actType;
-    if (result.handlerId) evt.handlerId = result.handlerId;
-    if (result.payload) evt.payload = result.payload;
-    if (result.message) evt.message = result.message;
-    if (result.ackToken) evt.ackToken = result.ackToken;
   }
 
   if (envelope.tool === 'run_tool' && result && typeof result === 'object') {
@@ -161,12 +155,13 @@ function summarizeToolCallForActivity(name, args = {}) {
 function createToolActivityRecorder() {
   const items = [];
 
-  function recordCall({ name, args, traceId, callId }) {
+  function recordCall({ name, args, traceId, callId, iteration }) {
     const summary = summarizeToolCallForActivity(name, args);
     items.push({
       key: callId || `${traceId || 'legacy'}:${name}:${items.length + 1}`,
       callId,
       traceId,
+      ...(Number.isFinite(iteration) ? { iteration } : {}),
       name,
       status: 'running',
       ...summary,
@@ -192,6 +187,9 @@ function createToolActivityRecorder() {
       key: existing ? existing.key : (result.callId || `${result.traceId || 'legacy'}:${name}:${items.length + 1}`),
       callId: result.callId || (existing && existing.callId),
       traceId: result.traceId || (existing && existing.traceId),
+      iteration: Number.isFinite(event.iteration)
+        ? event.iteration
+        : (existing && existing.iteration),
       name,
       status: result.terminationReason === 'approval_required'
         ? 'awaiting_confirmation'

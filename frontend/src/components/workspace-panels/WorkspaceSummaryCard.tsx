@@ -4,6 +4,7 @@ import type { ToolJob } from '@/lib/project-types';
 import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import type { BackendStatus } from '@/lib/electron';
 import styles from '@/pages/project-workspace.module.css';
+import { useRuntimeResourceSnapshot } from '@/hooks/useRuntimeResourceSnapshot';
 
 export interface WorkspaceSummaryCardProps {
   open: boolean;
@@ -43,6 +44,7 @@ export function WorkspaceSummaryCard({
   onOpenScheduled,
   onSelectJob,
 }: WorkspaceSummaryCardProps): React.ReactElement | null {
+  const { snapshot: resources, error: resourceError } = useRuntimeResourceSnapshot();
   if (visibility === 'hidden') return null;
 
   const currentJob = activeJob || liveJobsPreview[0] || null;
@@ -57,6 +59,10 @@ export function WorkspaceSummaryCard({
           : currentJob?.status || 'pending';
   const runningCount = jobStats.running + jobStats.pending;
   const totalCount = runningCount + jobStats.done + jobStats.failed;
+  const historyJobs = (recentJobs.length > 0 ? recentJobs : liveJobsPreview).slice(0, workflow ? 2 : 3);
+  const additionalLiveJobs = liveJobsPreview
+    .filter((job) => job.id !== currentJob?.id)
+    .slice(0, 2);
   const statusLabel =
     currentJobStatus === 'done'
       ? '已完成'
@@ -81,7 +87,7 @@ export function WorkspaceSummaryCard({
       <div className={styles.workspacePinnedSummaryTopBar}>
         <div className={styles.workspacePinnedSummaryTopBarLeft}>
           <div className={styles.workspacePinnedSummaryHeaderText}>
-            <div className={styles.workspacePinnedSummaryEyebrow}>SESSION SUMMARY</div>
+            <div className={styles.workspacePinnedSummaryEyebrow}>项目摘要</div>
             <div className={styles.workspacePinnedSummaryTitleRow}>
               <div className={styles.workspacePinnedSummaryTitle}>{projectName}</div>
               <span
@@ -97,15 +103,17 @@ export function WorkspaceSummaryCard({
       </div>
 
       <div className={styles.workspacePinnedSummaryBody}>
-        <section className={styles.workspacePinnedSummarySection}>
+        <section className={styles.workspacePinnedSummaryOverview} aria-label="任务概览">
           <div className={styles.workspacePinnedSummarySectionHeading}>
-            <div className={styles.workspacePinnedSummarySectionTitle}>当前活动</div>
-            <button type="button" onClick={onOpenScheduled}>分析记录</button>
+            <div className={styles.workspacePinnedSummarySectionTitle}>任务</div>
+            <span className={styles.workspacePinnedSummaryQueueLabel}>
+              {runningCount > 0 ? `${runningCount} 项活动` : '无活动'}
+            </span>
           </div>
           {currentJob ? (
             <button
               type="button"
-              className={styles.workspacePinnedSummaryActivity}
+              className={styles.workspacePinnedSummaryPrimaryCard}
               onClick={() => onSelectJob(currentJob.id)}
             >
               <span
@@ -121,11 +129,45 @@ export function WorkspaceSummaryCard({
               <Icon name="chevron-right" size={13} />
             </button>
           ) : (
-            <div className={styles.workspacePinnedSummaryEmpty}>
-              <Icon name="check" size={15} />
-              当前没有运行中的任务
+            <div className={styles.workspacePinnedSummaryPrimaryCard}>
+              <span className={styles.workspacePinnedSummaryActivityIcon} data-status="done">
+                <Icon name="check" size={14} />
+              </span>
+              <span className={styles.workspacePinnedSummaryActivityText}>
+                <strong>暂无运行任务</strong>
+                <small>会话任务与后台任务会显示在这里</small>
+              </span>
             </div>
           )}
+
+          {additionalLiveJobs.map((job) => (
+            <button
+              key={job.id}
+              type="button"
+              className={styles.workspacePinnedSummaryTaskRow}
+              onClick={() => onSelectJob(job.id)}
+            >
+              <span className={styles.workspacePinnedSummaryActivityIcon} data-status={job.status}>
+                <Icon name="terminal" size={13} />
+              </span>
+              <span className={styles.workspacePinnedSummaryActivityText}>
+                <strong>{job.name || job.tool_id}</strong>
+                <small>{job.status === 'running' ? '后台运行中' : '等待执行'} · {formatDate(job.created_at)}</small>
+              </span>
+              <Icon name="chevron-right" size={13} />
+            </button>
+          ))}
+
+          <div className={styles.workspacePinnedSummaryMetricGrid}>
+            <button type="button" className={styles.workspacePinnedSummaryMetricCard} onClick={onOpenScheduled}>
+              <span><Icon name="bar-chart" size={14} /> 分析记录</span>
+              <strong>{totalCount}<small> 次</small></strong>
+            </button>
+            <div className={styles.workspacePinnedSummaryMetricCard}>
+              <span><Icon name="terminal" size={14} /> 运行队列</span>
+              <strong>{runningCount}<small> 项</small></strong>
+            </div>
+          </div>
         </section>
 
         {workflow && (
@@ -153,64 +195,94 @@ export function WorkspaceSummaryCard({
           </section>
         )}
 
-        <section className={styles.workspacePinnedSummarySection}>
-          <div className={styles.workspacePinnedSummarySectionHeading}>
-            <div className={styles.workspacePinnedSummarySectionTitle}>最近分析</div>
-            <button type="button" onClick={onOpenScheduled}>查看全部</button>
-          </div>
-          <div className={styles.workspacePinnedSummaryHistory}>
-            {(recentJobs.length > 0 ? recentJobs : liveJobsPreview).slice(0, workflow ? 2 : 3).map((job) => {
-              const statusLabel =
-                job.status === 'done'
-                  ? '已完成'
-                  : job.status === 'failed'
-                    ? '失败'
-                    : job.status === 'running'
-                      ? '运行中'
-                      : '等待中';
-              return (
-                <button
-                  key={job.id}
-                  type="button"
-                  className={styles.workspacePinnedSummaryHistoryItem}
-                  onClick={() => onSelectJob(job.id)}
-                >
-                  <span
-                    className={styles.workspacePinnedSummaryActivityIcon}
-                    data-status={job.status}
+        {historyJobs.length > 0 && (
+          <section className={styles.workspacePinnedSummarySection}>
+            <div className={styles.workspacePinnedSummarySectionHeading}>
+              <div className={styles.workspacePinnedSummarySectionTitle}>最近分析</div>
+              <button type="button" onClick={onOpenScheduled}>查看全部</button>
+            </div>
+            <div className={styles.workspacePinnedSummaryHistory}>
+              {historyJobs.map((job) => {
+                const historyStatusLabel =
+                  job.status === 'done'
+                    ? '已完成'
+                    : job.status === 'failed'
+                      ? '失败'
+                      : job.status === 'running'
+                        ? '运行中'
+                        : '等待中';
+                return (
+                  <button
+                    key={job.id}
+                    type="button"
+                    className={styles.workspacePinnedSummaryHistoryItem}
+                    onClick={() => onSelectJob(job.id)}
                   >
-                    <Icon name={job.status === 'failed' ? 'flag' : 'terminal'} size={13} />
-                  </span>
-                  <span className={styles.workspacePinnedSummaryActivityText}>
-                    <strong>{job.name || job.tool_id}</strong>
-                    <small>{statusLabel} · {formatDate(job.created_at)}</small>
-                  </span>
-                  <Icon name="chevron-right" size={13} />
-                </button>
-              );
-            })}
+                    <span
+                      className={styles.workspacePinnedSummaryActivityIcon}
+                      data-status={job.status}
+                    >
+                      <Icon name={job.status === 'failed' ? 'flag' : 'terminal'} size={13} />
+                    </span>
+                    <span className={styles.workspacePinnedSummaryActivityText}>
+                      <strong>{job.name || job.tool_id}</strong>
+                      <small>{historyStatusLabel} · {formatDate(job.created_at)}</small>
+                    </span>
+                    <Icon name="chevron-right" size={13} />
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        <section className={styles.workspacePinnedSummaryEnvironment}>
+          <div className={styles.workspacePinnedSummarySectionHeading}>
+            <div className={styles.workspacePinnedSummarySectionTitle}>运行环境</div>
+          </div>
+          <div className={styles.workspacePinnedSummaryEnvironmentCard}>
+            <div className={styles.workspacePinnedSummaryEnvironmentRow}>
+              <span className={styles.workspacePinnedSummaryEnvironmentLabel}>
+                <Icon name="cpu" size={15} /> 计算后端
+              </span>
+              <span className={styles.workspacePinnedSummaryRuntimes} aria-label="后端运行状态">
+                <RuntimeStatusChip
+                  label="R"
+                  runtimeReady={backendStatus.rRuntime}
+                  serverUp={backendStatus.rServerUp}
+                  downReason={backendStatus.downReason}
+                />
+                <RuntimeStatusChip
+                  label="Py"
+                  runtimeReady={backendStatus.pyRuntime}
+                  serverUp={backendStatus.pyServerUp}
+                />
+              </span>
+            </div>
+            <div className={styles.workspacePinnedSummaryEnvironmentRow} data-state={resources?.state || 'unknown'}>
+              <span className={styles.workspaceResourceSummaryState}>
+                <i />
+                {resources
+                  ? resources.state === 'ready' ? '资源正常' : resources.state === 'warning' ? '资源需注意' : '资源不足'
+                  : resourceError ? '资源不可用' : '资源检查中'}
+              </span>
+              {resources && (
+                <span className={styles.workspacePinnedSummaryResourceFacts}>
+                  内存 {formatBytes(resources.memory.availableBytes)} · 磁盘 {formatBytes(resources.disk.availableBytes)} · {resources.cpu.logicalCores} 核
+                </span>
+              )}
+            </div>
           </div>
         </section>
-
-        <div className={styles.workspacePinnedSummaryFooter}>
-          <span className={styles.workspacePinnedSummaryRuntimes} aria-label="后端运行状态">
-            <RuntimeStatusChip
-              label="R"
-              runtimeReady={backendStatus.rRuntime}
-              serverUp={backendStatus.rServerUp}
-              downReason={backendStatus.downReason}
-            />
-            <RuntimeStatusChip
-              label="Py"
-              runtimeReady={backendStatus.pyRuntime}
-              serverUp={backendStatus.pyServerUp}
-            />
-          </span>
-          <span>{runningCount} 运行中 · {totalCount} 次</span>
-        </div>
       </div>
     </aside>
   );
+}
+
+function formatBytes(value: number | null): string {
+  if (value == null || !Number.isFinite(value)) return '未知';
+  if (value >= 1024 ** 3) return `${(value / 1024 ** 3).toFixed(1)} GB`;
+  return `${(value / 1024 ** 2).toFixed(0)} MB`;
 }
 
 function RuntimeStatusChip({

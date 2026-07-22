@@ -30,12 +30,12 @@ const structuredResult = {
 
 describe('tool activity projection', () => {
   it('updates by callId and does not downgrade a terminal replay', () => {
-    const call = { name: 'run_tool', args: {}, traceId: 'trace_1', callId: 'call_1' };
+    const call = { name: 'run_tool', args: {}, traceId: 'trace_1', callId: 'call_1', iteration: 2 };
     const running = mergeToolCallActivity([], call);
     expect(running).toHaveLength(1);
     expect(running[0].status).toBe('running');
 
-    const denied = mergeToolResultActivity(running, structuredResult);
+    const denied = mergeToolResultActivity(running, { ...structuredResult, iteration: 2 });
     expect(denied).toHaveLength(1);
     expect(denied[0]).toMatchObject({
       key: 'call_1',
@@ -43,6 +43,7 @@ describe('tool activity projection', () => {
       terminationReason: 'read_only',
       durationMs: 12.4,
       truncated: true,
+      iteration: 2,
     });
 
     expect(mergeToolCallActivity(denied, call)).toBe(denied);

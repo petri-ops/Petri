@@ -362,6 +362,7 @@ function listToolsForMCP() {
     // 透传元数据，供 callTool / Harness 执行时用
     _language: manifest.language,
     _pluginVersion: manifest.version,
+    _inputs: manifest.inputs,
     _outputs: manifest.outputs,
     _manifest: {
       pluginManifestVersion: manifest.pluginManifestVersion,

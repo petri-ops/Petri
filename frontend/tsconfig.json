@@ -31,9 +31,7 @@
       "@biof3/shared/api-inject": ["../core/packages/shared-copilot/api-inject.ts"],
       "@biof3/shared/copilotMarkdown": ["../core/packages/shared-copilot/copilotMarkdown.tsx"],
       "@biof3/shared/ActResultCard": ["../core/packages/shared-copilot/ActResultCard.tsx"],
-      "@biof3/shared/ActionCard": ["../core/packages/shared-copilot/ActionCard.tsx"],
-      "@biof3/shared/copilotActRegistry": ["../core/packages/shared-copilot/copilotActRegistry.ts"],
-      "@biof3/shared/copilotActRegistryBoot": ["../core/packages/shared-copilot/copilotActRegistryBoot.ts"]
+      "@biof3/shared/ActionCard": ["../core/packages/shared-copilot/ActionCard.tsx"]
     }
   },
   "include": ["src"]

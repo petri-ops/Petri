@@ -14,6 +14,8 @@ import {
 } from '@/hooks/useAiSettings';
 import { useAutoUpdate } from '@/hooks/useAutoUpdate';
 import type { ComputeSettings } from '@/lib/electron';
+import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
+import { useRuntimeResourceSnapshot } from '@/hooks/useRuntimeResourceSnapshot';
 import { deleteProject, listProjects, setProjectStatus } from '@/lib/project-store';
 import type { Project } from '@/lib/project-types';
 import {
@@ -39,7 +41,7 @@ interface Props {
   onClose: () => void;
 }
 
-type SettingsSection = 'general' | 'models' | 'compute' | 'maintenance';
+type SettingsSection = 'general' | 'models' | 'compute' | 'usage' | 'maintenance';
 
 const SETTINGS_SECTIONS: Array<{
   id: SettingsSection;
@@ -50,8 +52,69 @@ const SETTINGS_SECTIONS: Array<{
   { id: 'general', label: '常规', description: '外观与应用偏好', icon: 'settings' },
   { id: 'models', label: '模型接口', description: 'URL、模型与 Key', icon: 'brain' },
   { id: 'compute', label: '计算与数据', description: '执行位置与存储', icon: 'cpu' },
+  { id: 'usage', label: '用量与资源', description: '成本、缓存与机器状态', icon: 'cpu' },
   { id: 'maintenance', label: '隐私与维护', description: '反馈、诊断与更新', icon: 'wrench' },
 ];
+
+interface UsageSummary {
+  calls: number;
+  prompt_tokens: number;
+  completion_tokens: number;
+  cache_read_tokens: number;
+  cache_creation_tokens: number;
+  estimated_cost_cny: number;
+  unknown_cost_calls: number;
+  cache_hit_rate: number;
+  cost_status: 'partial' | 'estimated';
+}
+
+function formatMetricBytes(value: number | null | undefined): string {
+  if (value == null || !Number.isFinite(value)) return '未知';
+  return value >= 1024 ** 3 ? `${(value / 1024 ** 3).toFixed(1)} GB` : `${(value / 1024 ** 2).toFixed(0)} MB`;
+}
+
+function UsageResourcePanel(): React.ReactElement {
+  const { snapshot, loading, error, refresh } = useRuntimeResourceSnapshot();
+  const [usage, setUsage] = useState<UsageSummary | null>(null);
+  const [usageError, setUsageError] = useState('');
+  useEffect(() => {
+    const token = getToken();
+    void fetch(`${getPlatformApiPrefix()}/ai/usage-mine?days=30`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    }).then(async (response) => {
+      const data = await response.json();
+      if (!response.ok || data?.status !== 'ok') throw new Error(data?.error || '用量不可用');
+      setUsage(data);
+      setUsageError('');
+    }).catch((reason) => setUsageError(reason instanceof Error ? reason.message : String(reason)));
+  }, []);
+  const resourceLabel = snapshot?.state === 'ready' ? '资源正常' : snapshot?.state === 'warning' ? '需要注意' : snapshot ? '资源不足' : '检查中';
+  return (
+    <div className="biof3-usage-resource">
+      <div className="biof3-metric-grid">
+        <div><small>30 天调用</small><strong>{usage?.calls ?? '—'}</strong></div>
+        <div><small>输入 / 输出 Token</small><strong>{usage ? `${usage.prompt_tokens || 0} / ${usage.completion_tokens || 0}` : '—'}</strong></div>
+        <div><small>缓存命中</small><strong>{usage ? `${((usage.cache_hit_rate || 0) * 100).toFixed(1)}%` : '—'}</strong></div>
+        <div><small>估算成本</small><strong>{usage ? `¥${Number(usage.estimated_cost_cny || 0).toFixed(4)}` : '—'}</strong></div>
+      </div>
+      <p className="biof3-field__hint">
+        {usageError || (usage?.cost_status === 'partial' ? `${usage.unknown_cost_calls} 次调用缺少可靠价格，金额仅为部分估算。` : '成本来自已知价格表；供应商未返回价格时不会伪造金额。')}
+      </p>
+      <hr className="biof3-section-divider" />
+      <div className="biof3-resource-heading">
+        <div><strong>{resourceLabel}</strong><p>{snapshot ? `${snapshot.platform} · 观测于 ${new Date(snapshot.observedAt).toLocaleTimeString()}` : error || '正在读取机器状态'}</p></div>
+        <button type="button" className="biof3-btn biof3-btn--ghost biof3-btn--sm" disabled={loading} onClick={() => void refresh()}>刷新</button>
+      </div>
+      <div className="biof3-metric-grid">
+        <div><small>CPU</small><strong>{snapshot ? `${snapshot.cpu.logicalCores} 核 · ${snapshot.cpu.load1m?.toFixed(2) ?? '—'}` : '—'}</strong></div>
+        <div><small>可用内存</small><strong>{formatMetricBytes(snapshot?.memory.availableBytes)}</strong></div>
+        <div><small>可用磁盘</small><strong>{formatMetricBytes(snapshot?.disk.availableBytes)}</strong></div>
+        <div><small>活跃 Job</small><strong>{snapshot?.activeJobs ?? '—'}</strong></div>
+      </div>
+      <p className="biof3-field__hint">资源快照每 10 秒刷新、30 秒失效。GPU 仅在运行时能够可靠探测时展示。</p>
+    </div>
+  );
+}
 
 // ChatModelPreset type + DEFAULT_CHAT_MODEL_PRESETS live in
 // `@/hooks/useAiSettings` — Plan 1.6 §4.5 [HIGH] type dedup.
@@ -1209,6 +1272,16 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
 
         <TrashManagement />
 
+          </section>
+        )}
+
+        {activeSection === 'usage' && (
+          <section className="biof3-settings-section">
+            <div className="biof3-settings-section__heading">
+              <h3>用量与资源</h3>
+              <p>查看模型成本、缓存命中和当前机器容量，不保存原始数据或密钥。</p>
+            </div>
+            <UsageResourcePanel />
           </section>
         )}
 

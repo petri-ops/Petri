@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "editCases": [
+    { "id": "explicit-file-unique-replace", "expected": "dry_run_then_sha_guarded_write" },
+    { "id": "same-name-ambiguity", "expected": "candidate_list_and_confirm" },
+    { "id": "duplicate-snippet", "expected": "reject_non_unique_replace" },
+    { "id": "concurrent-drift", "expected": "sha_conflict_no_write" },
+    { "id": "multi-file-partial-failure", "expected": "stop_remaining_and_report_applied_files" },
+    { "id": "long-conversation-topic-switch", "expected": "new_task_scope_without_old_authorization" }
+  ],
+  "checkpointCases": [
+    {
+      "id": "two-checkpoint-recovery",
+      "checkpointCount": 2,
+      "mustPreserve": ["negative_constraint", "later_correction", "unresolved_question", "file_ref", "tool_failure", "task_boundary"],
+      "exactQuestionPolicy": "reread_raw_message_or_trace"
+    }
+  ],
+  "modelSwitchCases": [
+    { "id": "large-small-large", "expected": "rebuild_from_raw_and_structured_state" },
+    { "id": "summary-role-unavailable", "expected": "compatible_context_envelope" },
+    { "id": "capability-missing", "expected": "conservative_fallback" },
+    { "id": "minimum-context-too-large", "expected": "context_capacity_insufficient" }
+  ]
+}

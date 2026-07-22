@@ -1,0 +1,77 @@
+{
+  "id": "ranked-go-enrichment",
+  "title": "排序基因 GO-BP 富集（原型）",
+  "subtitle": "一个可独立验证的科学分析模块",
+  "category": "bulk RNA-seq / functional enrichment",
+  "language": "r",
+  "supportedPlatforms": ["macos-arm64"],
+  "inputs": [
+    {
+      "id": "ranked_genes",
+      "label": "全基因排序表（CSV）",
+      "type": "file",
+      "required": true,
+      "accept": ".csv",
+      "hint": "必须包含 gene 与 score 两列；score 越大表示越靠前。原型 fixture 至少需要 10 个有效基因；生产模块应按物种和统计方法提高质量门槛。可由 DESeq2/limma 的 valid artifact 二跳绑定。"
+    },
+    {
+      "id": "organism",
+      "label": "物种",
+      "type": "select",
+      "default": "human",
+      "options": ["human"],
+      "hint": "原型只锁定人类 org.Hs.eg.db，扩展物种必须增加独立 fixture。"
+    },
+    {
+      "id": "min_size",
+      "label": "最小基因集大小",
+      "type": "number",
+      "default": 10
+    },
+    {
+      "id": "max_size",
+      "label": "最大基因集大小",
+      "type": "number",
+      "default": 500
+    }
+  ],
+  "outputs": [
+    { "id": "go_bp_results", "filename": "go_bp_results.csv", "type": "table", "label": "GO-BP 富集结果表" },
+    { "id": "go_bp_dotplot", "filename": "go_bp_dotplot.png", "type": "plot", "label": "GO-BP 气泡图" },
+    { "id": "report", "filename": "report.html", "type": "report", "label": "可复现分析报告" }
+  ],
+  "failureModes": [
+    {
+      "code": "missing_required_file_inputs",
+      "title": "缺少排序表",
+      "description": "没有找到 ranked_genes.csv。",
+      "recoverable": true,
+      "suggestedFix": "从项目文件中选择排序表，或把上游差异分析的 valid deg_table 绑定到 ranked_genes。",
+      "detect": "missing required file inputs|ranked_genes.csv not found"
+    },
+    {
+      "code": "invalid_ranked_table",
+      "title": "排序表结构不完整",
+      "description": "输入必须包含 gene 和 score 两列，且 score 至少有 10 个有效值；生产任务应使用更完整的全基因排序。",
+      "recoverable": true,
+      "suggestedFix": "优先保留全基因排序，不要只上传显著基因；检查列名和数值列。",
+      "detect": "required columns: gene, score|fewer than 10 valid ranked genes"
+    },
+    {
+      "code": "gene_id_mapping_failed",
+      "title": "基因 ID 映射不足",
+      "description": "输入基因无法可靠映射到 ENTREZID。",
+      "recoverable": true,
+      "suggestedFix": "确认使用人类 gene symbol，或在任务中声明正确的 gene ID 类型。",
+      "detect": "gene ID mapping rate below|No gene can be mapped|org.Hs.eg.db"
+    },
+    {
+      "code": "runtime_not_ready",
+      "title": "R 环境未就绪",
+      "description": "R runtime 或 r-enrichment capability 尚未准备好。",
+      "recoverable": true,
+      "suggestedFix": "由 Harness readiness/provisioning gate 准备环境后重试。",
+      "detect": "there is no package|cannot load package|runtime not ready|Rscript not found"
+    }
+  ]
+}

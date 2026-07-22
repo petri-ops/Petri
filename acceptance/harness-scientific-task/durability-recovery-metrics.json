@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "measurementKind": "mixed_existing_and_gap_baseline",
+  "permanenceInvariant": "no_canonical_conversation_task_or_artifact_data_is_deleted_without_explicit_user_cleanup",
+  "existingEvidence": ["conversation_messages_sqlite", "task_events_sqlite", "scientific_jobs_on_disk"],
+  "cases": [
+    { "id": "restart-and-reopen", "status": "partial" },
+    { "id": "new-conversation", "status": "fixture_defined" },
+    { "id": "switch-project", "status": "existing_isolation_primitives" },
+    { "id": "missing-artifact-file", "status": "gap" },
+    { "id": "corrupt-checkpoint", "status": "gap" },
+    { "id": "delete-conversation", "status": "partial" }
+  ],
+  "backupExportVerified": false,
+  "hashVerificationVerified": false,
+  "migrationVerified": false,
+  "authorizationIsolationVerified": false,
+  "gapOwner": "durability_followup"
+}

@@ -64,7 +64,7 @@ import {
 import {
   clearConversationPendingApproval,
   clearConversationRun,
-  detachConversationRun,
+  stopConversationRun,
   isConversationRunning,
   startConversationRun,
   useConversationRun,
@@ -89,6 +89,27 @@ interface SimpleMessage {
   ts?: string;
   toolActivities?: ToolActivityItem[];
   processingDurationMs?: number;
+  statusMessage?: string;
+  progressUpdates?: Array<{ iteration: number; content: string }>;
+}
+
+interface AgentProgressUpdate {
+  iteration: number;
+  content: string;
+}
+
+function restoreProgressUpdates(value: unknown): Array<{ iteration: number; content: string }> {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, 50).flatMap((item, index) => {
+    if (!item || typeof item !== 'object') return [];
+    const raw = item as Record<string, unknown>;
+    const content = typeof raw.content === 'string' ? raw.content.trim().slice(0, 4000) : '';
+    if (!content) return [];
+    return [{
+      iteration: typeof raw.iteration === 'number' ? raw.iteration : index + 1,
+      content,
+    }];
+  });
 }
 
 type PendingApproval = ConversationPendingApproval;
@@ -262,16 +283,22 @@ export function SimpleChat({
           return;
         }
         const activeArtifact = copilotCtxRef.current.activeArtifact;
-        let response = activeArtifact
-          ? await repairHarnessParams({
+        let response = null;
+        if (activeArtifact) {
+          try {
+            response = await repairHarnessParams({
               scope: 'artifact',
               jobId: activeArtifact.jobId,
               activeArtifactName: activeArtifact.name,
               manifest,
               params: originalParams,
               maxFiles: 500,
-            })
-          : null;
+            });
+          } catch {
+            // A stale result directory must not block project-level recovery.
+            response = null;
+          }
+        }
         if (!response || response.diagnostics?.status === 'blocked') {
           response = await repairHarnessParams({
             scope: 'project',
@@ -332,6 +359,7 @@ export function SimpleChat({
         content: m.content,
         ts: m.ts,
         toolActivities: restoreToolActivities(m.meta?.toolActivities),
+        progressUpdates: restoreProgressUpdates(m.meta?.progressUpdates),
         processingDurationMs: typeof m.meta?.processingDurationMs === 'number'
           ? m.meta.processingDurationMs
           : undefined,
@@ -361,6 +389,7 @@ export function SimpleChat({
         content: m.content,
         ts: m.ts,
         toolActivities: restoreToolActivities(m.meta?.toolActivities),
+        progressUpdates: restoreProgressUpdates(m.meta?.progressUpdates),
         processingDurationMs: typeof m.meta?.processingDurationMs === 'number'
           ? m.meta.processingDurationMs
           : undefined,
@@ -404,6 +433,8 @@ export function SimpleChat({
         ts: activeRun.assistantTs,
         toolActivities: activeRun.toolActivities,
         processingDurationMs: activeRun.processingDurationMs,
+        statusMessage: activeRun.statusMessage,
+        progressUpdates: activeRun.progressUpdates,
       });
     }
     return next;
@@ -515,7 +546,7 @@ export function SimpleChat({
   }, []);
 
   const stop = useCallback(() => {
-    if (conversationId) detachConversationRun(conversationId);
+    if (conversationId) stopConversationRun(conversationId);
   }, [conversationId]);
 
   const approvePending = useCallback(async () => {
@@ -638,8 +669,15 @@ export function SimpleChat({
                     )}
                   </div>
                   <div className="sc-msg-body">
+                    {m.progressUpdates && m.progressUpdates.length > 0 && (
+                      <AgentProgressList
+                        updates={m.progressUpdates}
+                        pending={Boolean(m.pending)}
+                        onFileReferenceClick={handleFileReferenceClick}
+                      />
+                    )}
                     <CopilotMarkdown
-                      text={m.content || (m.pending ? '…' : '')}
+                      text={m.content || m.statusMessage || (m.pending ? '…' : '')}
                       onFileReferenceClick={handleFileReferenceClick}
                       resolveContext={m.pending || (m.role === 'assistant' && streaming) ? null : settledContext}
                       resolveNonce={resolveNonce}
@@ -666,10 +704,13 @@ export function SimpleChat({
               </React.Fragment>
             );
           })}
-          {pendingApproval && (
+          {pendingApproval && accessMode !== 'full' && (
             <ApprovalCard
               approval={pendingApproval}
               repairState={approvalRepair}
+              onApprove={() => void approvePending()}
+              onReject={() => void rejectPending()}
+              busy={streaming}
             />
           )}
         </div>
@@ -731,7 +772,7 @@ export function SimpleChat({
                           }}
                         >
                           <span className="sc-access-option-title">完全访问</span>
-                          <span className="sc-access-option-sub">可执行受控操作与工具调用</span>
+                          <span className="sc-access-option-sub">允许命令行、文件修改与工具调用</span>
                         </button>
                         <button
                           type="button"
@@ -837,6 +878,60 @@ export function SimpleChat({
   );
 }
 
+function AgentProgressList({
+  updates,
+  pending,
+  onFileReferenceClick,
+}: {
+  updates: AgentProgressUpdate[];
+  pending: boolean;
+  onFileReferenceClick: (detail: FileReferenceClickDetail) => void;
+}): React.ReactElement {
+  // Every progress update after the first starts with the previous stage's
+  // public conclusion (enforced by the agent prompt). The first update is only
+  // an intention, so it is deliberately omitted from the conclusion trail.
+  const conclusions = updates.slice(1).map((progress) => ({
+    key: `${progress.iteration}:${progress.content}`,
+    content: compactStageConclusion(progress.content),
+  })).filter((item) => item.content);
+
+  return (
+    <div className="sc-agent-progress" aria-label="阶段结论">
+      {conclusions.map((conclusion) => (
+        <div key={conclusion.key} className="sc-agent-progress-item">
+          <span className="sc-agent-progress-dot" aria-hidden="true" />
+          <CopilotMarkdown
+            text={conclusion.content}
+            onFileReferenceClick={onFileReferenceClick}
+            resolveContext={null}
+          />
+        </div>
+      ))}
+      {pending && (
+        <div className="sc-agent-progress-item sc-agent-progress-current">
+          <span className="sc-agent-progress-dot" aria-hidden="true" />
+          <span>当前阶段执行中</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function compactStageConclusion(content: string, maxLength = 240): string {
+  const normalized = String(content || '')
+    .trim()
+    .replace(/^(?:好的?|可以)[，,：:]\s*/u, '')
+    .replace(/\s+/gu, ' ');
+  if (!normalized) return '';
+
+  const sentenceEnd = normalized.search(/[。！？]/u);
+  const firstSentence = sentenceEnd >= 0
+    ? normalized.slice(0, sentenceEnd + 1)
+    : normalized;
+  if (firstSentence.length <= maxLength) return firstSentence;
+  return `${firstSentence.slice(0, Math.max(1, maxLength - 1)).trimEnd()}…`;
+}
+
 function ToolActivityList({
   activities,
   processingDurationMs,
@@ -859,16 +954,28 @@ function ToolActivityList({
 
   const running = activities.filter((activity) => activity.status === 'running').length;
   const awaiting = activities.filter((activity) => activity.status === 'awaiting_confirmation').length;
+  const attention = activities.filter(
+    (activity) => activity.status === 'error' || activity.status === 'denied'
+  ).length;
   const totalDurationMs = activities.reduce(
     (total, activity) => total + (typeof activity.durationMs === 'number' ? activity.durationMs : 0),
     0
   );
   const totalDuration = formatToolDuration(processingDurationMs ?? totalDurationMs);
+  const actionCounts = activities.reduce<Record<string, number>>((counts, activity) => {
+    const action = activity.actionLabel.replace(/^已/, '') || '处理';
+    counts[action] = (counts[action] || 0) + 1;
+    return counts;
+  }, {});
+  const actionSummary = Object.entries(actionCounts)
+    .slice(0, 3)
+    .map(([action, count]) => `${action} ${count}`)
+    .join(' · ');
   const summary = running > 0
-    ? '正在处理'
+    ? `正在处理 ${running}/${activities.length} 项${actionSummary ? ` · ${actionSummary}` : ''}`
     : awaiting > 0
-      ? '等待确认'
-      : `已处理${totalDuration ? ` ${totalDuration}` : ''}`;
+      ? `等待确认 ${awaiting} 项`
+      : `已完成 ${activities.length} 项${attention ? ` · ${attention} 项需注意` : ''}${actionSummary ? ` · ${actionSummary}` : ''}${totalDuration ? ` · ${totalDuration}` : ''}`;
 
   return (
     <div className="sc-tool-activity-list" aria-label="工具活动">
@@ -895,28 +1002,19 @@ function ToolActivityList({
             <span className="sc-tool-activity-icon" aria-hidden="true">
               <Icon name={activity.status === 'success' ? 'check' : 'wrench'} size={14} />
             </span>
-            <div className="sc-tool-activity-body">
-              <div className="sc-tool-activity-head">
-                <span className="sc-tool-activity-action">{activity.actionLabel}</span>
-                {activity.actionDetail && (
-                  <code className="sc-tool-activity-command">{activity.actionDetail}</code>
-                )}
-                <span className="sc-tool-activity-status">{statusLabels[activity.status]}</span>
-              </div>
-              <div className="sc-tool-activity-meta">
-                <span className="sc-tool-activity-tool">{activity.name}</span>
-                {duration && <span>{duration}</span>}
-                {activity.truncated && activity.status === 'success' && <span>仅显示摘要</span>}
-                {sideEffects && <span>副作用摘要：{sideEffects}</span>}
-                {showReason && activity.terminationReason && (
-                  <span className="sc-tool-activity-reason">
-                    原因：{activity.terminationReason}
-                  </span>
-                )}
-                {!activity.terminationReason && activity.summary && activity.status !== 'running' && (
-                  <span>{activity.summary}</span>
-                )}
-              </div>
+            <div className="sc-tool-activity-body sc-tool-activity-detail">
+              <span className="sc-tool-activity-action">{activity.actionLabel}</span>
+              {activity.actionDetail && (
+                <code className="sc-tool-activity-command">{activity.actionDetail}</code>
+              )}
+              <span className="sc-tool-activity-status">{statusLabels[activity.status]}</span>
+              {duration && <span>{duration}</span>}
+              <span className="sc-tool-activity-tool">{activity.name}</span>
+              {activity.truncated && activity.status === 'success' && <span>仅显示摘要</span>}
+              {sideEffects && <span>影响：{sideEffects}</span>}
+              {showReason && activity.terminationReason && (
+                <span className="sc-tool-activity-reason">原因：{activity.terminationReason}</span>
+              )}
             </div>
           </div>
         );
@@ -979,9 +1077,15 @@ function formatHarnessDiagnosticIssue(issue: HarnessDiagnosticIssue): string {
 function ApprovalCard({
   approval,
   repairState,
+  onApprove,
+  onReject,
+  busy,
 }: {
   approval: PendingApproval;
   repairState: ApprovalRepairState;
+  onApprove: () => void;
+  onReject: () => void;
+  busy: boolean;
 }): React.ReactElement {
   const repairItems = repairState.status === 'ready' ? repairState.repair.repairs || [] : [];
   const warningItems = repairState.status === 'ready' ? repairState.repair.warnings || [] : [];
@@ -1013,6 +1117,26 @@ function ApprovalCard({
       />
       <div className="sc-approval-risk">
         正式分析会写入项目任务记录，并生成可复现的参数、输入和结果产物。
+      </div>
+      <div className="sc-approval-actions">
+        <button
+          type="button"
+          className="sc-approval-btn sc-approval-approve"
+          onClick={onApprove}
+          disabled={busy}
+        >
+          <Icon name="check" size={13} />
+          开始
+        </button>
+        <button
+          type="button"
+          className="sc-approval-btn sc-approval-cancel"
+          onClick={onReject}
+          disabled={busy}
+        >
+          <Icon name="x" size={13} />
+          取消
+        </button>
       </div>
     </div>
   );

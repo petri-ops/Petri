@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "phase": "HRT-0",
+  "status": "complete",
+  "meaning": "representative_tasks_and_honest_gap_baseline_established",
+  "notProductAcceptance": true,
+  "taskCount": 6,
+  "requiredCoverage": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+  "coveredRequirements": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+  "primaryScientificTask": "novice-bulk-rna-success",
+  "knownGaps": [
+    { "id": "scientific_task_spec_not_frozen", "owner": "HRT-1" },
+    { "id": "conversation_checkpoint_not_durable", "owner": "context_checkpoint_followup" },
+    { "id": "tool_trace_short_lived", "owner": "durability_followup" },
+    { "id": "cached_token_usage_not_persisted", "owner": "usage_cache_followup" },
+    { "id": "resource_monitoring_not_product_complete", "owner": "resource_ui_followup" },
+    { "id": "reproduction_bundle_export_not_product_complete", "owner": "HRT-6" },
+    { "id": "non_macos_capabilities_not_accepted", "owner": "platform_followup" }
+  ],
+  "evidenceFiles": [
+    "test/fixtures/harness-scientific-task/tasks.json",
+    "test/fixtures/harness-scientific-task/context-scenarios.json",
+    "test/fixtures/harness-scientific-task/platform-scenarios.json",
+    "acceptance/harness-scientific-task/task-catalog.md",
+    "acceptance/harness-scientific-task/interaction-metrics.json",
+    "acceptance/harness-scientific-task/context-edit-metrics.json",
+    "acceptance/harness-scientific-task/context-compaction-metrics.json",
+    "acceptance/harness-scientific-task/durability-recovery-metrics.json",
+    "acceptance/harness-scientific-task/tool-locator-metrics.json",
+    "acceptance/harness-scientific-task/cache-cost-metrics.json",
+    "acceptance/harness-scientific-task/usage-resource-metrics.json"
+  ]
+}

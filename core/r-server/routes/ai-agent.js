@@ -36,7 +36,6 @@ const {
 const {
   aiConcurrencyAcquire,
   aiConcurrencyRelease,
-  actRegistryGet,
 } = require('../helpers/runtime');
 
 // Agent tools
@@ -54,7 +53,13 @@ const {
   createToolActivityRecorder,
   MAX_AGENT_ITERS,
   MAX_AGENT_TOOL_CALLS,
+  MAX_FINALIZATION_ATTEMPTS,
   shouldFinalizeAgentIteration,
+  assessFinalizationResult,
+  buildFinalizationRetryRequest,
+  buildFinalizationFallbackMessage,
+  finalizationFallbackReason,
+  createAgentProgressRecorder,
   createAgentToolCallController,
   runAgentToolCallBatch,
 } = require('../agent-tools');
@@ -227,7 +232,9 @@ module.exports = function registerAiAgentRoute(app) {
           onEvent: () => {
             /* 实时推进程内订阅（阶段 1 订阅端点轮询 task_events，onEvent 暂留空） */
           },
-          shouldAbort: () => false, // 阶段 1：用户关浏览器不 abort，loop 继续跑
+          // Closing a subscription does not cancel the task. Only the explicit
+          // cancellation endpoint below flips this persisted flag.
+          shouldAbort: () => agentTaskStore.isAgentTaskCancellationRequested(taskId),
         }).catch((e) => {
           try {
             agentTaskStore.markAgentTaskFailed(taskId, e && e.message ? e.message : String(e));
@@ -374,11 +381,11 @@ module.exports = function registerAiAgentRoute(app) {
     systemPrompt +=
       '\n- 多步骤标准分析先用 run_tool(op="plan", templateId, initialInputs) 生成 Agent 主导计划，禁止一次性偷偷执行全部步骤。每一步完成后先验证 tool_job/artifact truth，再用 run_tool(op="bind_artifact", workflowPlan, fromToolJobId, fromStepId, toStepId, inputId, artifactId) 绑定真实产物并继续。';
     systemPrompt +=
-      '\n- run_tool 跑完出图后，立即调用 act_generic(handlerId="open_result", payload={toolJobId}) 把结果展示给用户（主面板自动加载该 job 的图/表）。toolJobId 从 run_tool 的返回里取。不要让用户自己去翻 history。';
+      '\n- run_tool 成功后客户端会自动打开对应结果；不要额外调用页面控制工具。';
     systemPrompt +=
       '\n- agent 看图（read_image）：当用户问图内容（如"图里上调基因集中在哪""这张图说明了什么"），调 read_image(toolJobId) 让 vision 角色模型解读图，返回的 description 可直接据此回答。token 较贵，仅用户明确问图内容时调，不要每次出图都读。';
     systemPrompt +=
-      '\n- 重操作确认：run_tool 跑前判断——若工具属多步骤全流程（如 DESeq2 完整差异分析、WGCNA、ML 建模）或预计耗时较长，先在对话里告诉用户"将运行 X，约 N 秒，开始？"，等用户确认后再 run_tool。单图小工具（画火山图、PCA、热图等秒级完成的）直接跑，不用问。';
+      '\n- 自动化边界：完全访问模式下，DESeq2、WGCNA、ML 等项目内可复现分析直接执行，不询问“是否开始”；读取结果并自动诊断、选择安全修复和重试。只有不可逆外部影响、凭据/付费操作或缺少科学判断时才请求用户决定。';
     systemPrompt += '\n- 工具调用后再判断下一步：可能继续调用，也可能直接回答用户';
     systemPrompt +=
       '\n- 最终回答里：页面跳转或外部链接可用 ```action 块（navigate / external_link）';
@@ -409,19 +416,6 @@ module.exports = function registerAiAgentRoute(app) {
       '\n- 创建 plan(create) 时，把触发该计划的用户原话（一句话总结即可）作为 chatExcerpt 字段传入，方便用户日后回顾。';
     systemPrompt +=
       '\n- 当用户在 FigCode 页面要求修改代码时（例如"换成横向条形图"/"配色改成 Nature 风格"/"加 facet"等），不要让用户自己复制粘贴。直接调用 act(type="update_figcode_editor", code="<完整新代码>", autoRun=true)，前端会自动替换并运行。';
-    // ACT_GENERIC_PROMPT_v1 — point AI at the dynamic registry
-    systemPrompt += '\n\n=== 通用 act handler 注册表（动态扩展） ===';
-    systemPrompt +=
-      '\n网站会注册一些自定义的 act handler（如 scroll_to_heading / copy_to_clipboard / toggle_theme 等）。';
-    systemPrompt +=
-      '\n- 不确定能干什么时，调用 discover_capabilities 看完整列表（带 description / pages / payloadSchema / example）。';
-    systemPrompt +=
-      '\n- 看到合适的 handlerId 后用 act_generic({handlerId, payload}) 调用，参数照 example 写。';
-    systemPrompt += '\n- 优先用通用 handler，比硬塞导航或写一长串解释更好。';
-    systemPrompt +=
-      '\n- 收到 unknown_handler 错误时不要重试相同 id，先 discover_capabilities 重新看一次。';
-    systemPrompt += '\n- 收到 wrong_page 时按 expected 列表先 emit navigate action 跳过去再 act。';
-
     // SUGGEST_NEXT_STEPS_PROMPT_v1
     systemPrompt += '\n\n=== 学习路径推荐 ===';
     systemPrompt += '\n不要调用旧版学习路径推荐工具。';
@@ -526,7 +520,6 @@ module.exports = function registerAiAgentRoute(app) {
       dashscopeEmbed,
       cosineSim,
       conversationId: _activeConv && _activeConv.id, // PLAN_CONV_LINK_v1
-      actRegistry: actRegistryGet(req.user && req.user.id), // ACT_GENERIC_v1
       gatherAnalysisContextForMethods: _gatherAnalysisContextForMethods, // GENERATE_METHODS_v1
       renderMethodsParagraph: _renderMethodsParagraph,
     };
@@ -547,6 +540,10 @@ module.exports = function registerAiAgentRoute(app) {
     });
 
     let assistantAcc = '';
+    const assistantProgress = createAgentProgressRecorder();
+    let finalizationAttempts = 0;
+    let finalizationFailureReason = null;
+    let finalizationRouting = null;
     const assistantResultCards = [];
     const assistantToolActivities = createToolActivityRecorder();
 
@@ -554,16 +551,15 @@ module.exports = function registerAiAgentRoute(app) {
       for (let iter = 0; iter < MAX_AGENT_ITERS && !aborted; iter++) {
         sseSend({ event: 'iter', n: iter + 1 });
 
-        // The fifth Provider round is the finalization round. Reaching the
-        // tool-call cap also finalizes immediately, so one request never exceeds
-        // MAX_AGENT_ITERS Provider calls.
+        // Normal scientific work has no iteration boundary. Only an anomaly (or
+        // an explicitly injected finite test cap) forces a tool-free explanation.
         const finalizing = shouldFinalizeAgentIteration(iter, toolCallController);
         if (finalizing) {
           fullMessages.push({
             role: 'system',
             content: toolCallController.capHit()
-              ? `已达到工具调用上限（${MAX_AGENT_TOOL_CALLS} 次/请求）。请基于已收到的工具结果直接给出最终答复，不要再调用工具。`
-              : '这是本轮最后一次模型调用。请基于已收到的工具结果直接给出最终答复，不要再调用工具。',
+              ? '已达到显式配置的工具调用保护上限。请基于已收到的工具结果直接说明停止原因、已完成工作和未执行步骤，不要再调用工具，也不得声称尚未启动的工作正在执行。'
+              : '检测到相同工具和参数反复调用，任务可能陷入异常循环。请停止调用工具，直接说明异常、已完成工作和未执行步骤；不得声称尚未启动的工作正在执行。',
           });
         }
         const reqBody = {
@@ -576,24 +572,86 @@ module.exports = function registerAiAgentRoute(app) {
         };
 
         let streamedText = '';
-        const upJson = await callChatProvider(
-          providerName,
-          apiKey,
-          reqBody,
-          {
-            userId: req.user && req.user.id,
-            conversationId: _activeConv && _activeConv.id,
-            kind: 'agent_iter',
-          },
-          (event) => {
-            if (event.type === 'content_delta' && event.content && !aborted) {
-              streamedText += event.content;
-              sseSend({ choices: [{ delta: { content: event.content } }] });
+        let upJson;
+        let attemptBody = reqBody;
+        const attemptLimit = finalizing ? MAX_FINALIZATION_ATTEMPTS : 1;
+        for (let attempt = 1; attempt <= attemptLimit && !aborted; attempt++) {
+          streamedText = '';
+          const protocolRecoveryAttempt = finalizing && attempt > 1;
+          upJson = await callChatProvider(
+            providerName,
+            apiKey,
+            attemptBody,
+            {
+              userId: req.user && req.user.id,
+              conversationId: _activeConv && _activeConv.id,
+              kind: attempt > 1 ? 'agent_finalization_retry' : 'agent_iter',
+            },
+            protocolRecoveryAttempt ? undefined : (event) => {
+              if (event.type === 'content_delta' && event.content && !aborted) {
+                streamedText += event.content;
+                sseSend({ choices: [{ delta: { content: event.content } }] });
+              }
+            },
+            {
+              baseUrl,
+              profileId: selectedPreset && selectedPreset.id,
+              modelOverride: modelName,
+              ...(protocolRecoveryAttempt ? { fallbackWhen: finalizationFallbackReason } : {}),
             }
-          },
-          { baseUrl, profileId: selectedPreset && selectedPreset.id, modelOverride: modelName }
-        );
+          );
+          if (finalizing && upJson && upJson.modelRouting) finalizationRouting = upJson.modelRouting;
+          if (!finalizing) break;
+          finalizationAttempts = Math.max(finalizationAttempts, attempt);
+          const assessment = assessFinalizationResult(upJson, streamedText);
+          finalizationFailureReason = assessment.usable ? null : assessment.reason;
+          if (protocolRecoveryAttempt && assessment.usable && assessment.content) {
+            sseSend({ choices: [{ delta: { content: assessment.content } }] });
+          }
+          if (assessment.usable || !assessment.retryable || attempt >= attemptLimit) break;
+          sseSend({
+            event: 'agent_status',
+            phase: 'finalization_retry',
+            attempt: attempt + 1,
+            maxAttempts: attemptLimit,
+            reason: assessment.reason,
+            message: '模型未返回可展示的最终说明，正在自动重试整理…',
+          });
+          attemptBody = buildFinalizationRetryRequest(reqBody);
+        }
+        if (!finalizing && (!upJson || upJson.error || !upJson.choices)) {
+          const assessment = assessFinalizationResult(upJson, streamedText);
+          if (assessment.retryable && !aborted) {
+            sseSend({
+              event: 'agent_status',
+              phase: 'provider_retry',
+              attempt: 2,
+              maxAttempts: 2,
+              reason: assessment.reason,
+              message: '上游响应暂时异常，正在自动重试当前阶段…',
+            });
+            streamedText = '';
+            upJson = await callChatProvider(
+              providerName,
+              apiKey,
+              reqBody,
+              {
+                userId: req.user && req.user.id,
+                conversationId: _activeConv && _activeConv.id,
+                kind: 'agent_iter_retry',
+              },
+              (event) => {
+                if (event.type === 'content_delta' && event.content && !aborted) {
+                  streamedText += event.content;
+                  sseSend({ choices: [{ delta: { content: event.content } }] });
+                }
+              },
+              { baseUrl, profileId: selectedPreset && selectedPreset.id, modelOverride: modelName }
+            );
+          }
+        }
         if (!upJson || upJson.error || !upJson.choices) {
+          if (finalizing && finalizationAttempts > 0) break;
           sseSend({
             error:
               (upJson && (upJson.message || upJson.error || (upJson.choices ? 'no choice' : 'bad response'))) ||
@@ -606,18 +664,59 @@ module.exports = function registerAiAgentRoute(app) {
         const msg = choice.message || {};
         const toolCalls = msg.tool_calls || [];
 
-        if (toolCalls.length === 0) {
-          assistantAcc = streamedText || msg.content || '';
-          sseSend({ event: 'done' });
-          break;
-        }
         if (finalizing) {
-          // A Provider that ignores the tool-free finalization request must not
-          // start another handler or trigger a sixth Provider request.
-          assistantAcc = streamedText || msg.content || '';
+          const assessment = assessFinalizationResult(upJson, streamedText);
+          assistantAcc = assessment.content;
+          finalizationFailureReason = assessment.usable ? null : assessment.reason;
+          if (assessment.usable) sseSend({ event: 'done' });
           break;
         }
 
+        if (toolCalls.length === 0) {
+          let assessment = assessFinalizationResult(upJson, streamedText);
+          finalizationAttempts = 1;
+          finalizationFailureReason = assessment.usable ? null : assessment.reason;
+          if (!assessment.usable && assessment.retryable && !aborted) {
+            sseSend({
+              event: 'agent_status',
+              phase: 'finalization_retry',
+              attempt: 2,
+              maxAttempts: MAX_FINALIZATION_ATTEMPTS,
+              reason: assessment.reason,
+              message: '模型未返回可展示的最终说明，正在自动重试整理…',
+            });
+            streamedText = '';
+            const retryJson = await callChatProvider(
+              providerName,
+              apiKey,
+              buildFinalizationRetryRequest(reqBody),
+              {
+                userId: req.user && req.user.id,
+                conversationId: _activeConv && _activeConv.id,
+                kind: 'agent_finalization_retry',
+              },
+              undefined,
+              {
+                baseUrl,
+                profileId: selectedPreset && selectedPreset.id,
+                modelOverride: modelName,
+                fallbackWhen: finalizationFallbackReason,
+              }
+            );
+            finalizationAttempts = 2;
+            if (retryJson && retryJson.modelRouting) finalizationRouting = retryJson.modelRouting;
+            assessment = assessFinalizationResult(retryJson, streamedText);
+            finalizationFailureReason = assessment.usable ? null : assessment.reason;
+            if (assessment.usable && assessment.content) {
+              sseSend({ choices: [{ delta: { content: assessment.content } }] });
+            }
+          }
+          assistantAcc = assessment.content;
+          if (assessment.usable) sseSend({ event: 'done' });
+          break;
+        }
+        const progress = assistantProgress.record(streamedText || msg.content, iter + 1);
+        if (progress) sseSend({ event: 'agent_progress', ...progress });
         await runAgentToolCallBatch({
           controller: toolCallController,
           toolCalls,
@@ -632,8 +731,8 @@ module.exports = function registerAiAgentRoute(app) {
             });
           },
           execute: async ({ name, args, callId }) => {
-            assistantToolActivities.recordCall({ name, args, traceId, callId });
-            sseSend(buildToolCallEvent({ name, args, traceId, callId }));
+            assistantToolActivities.recordCall({ name, args, traceId, callId, iteration: iter + 1 });
+            sseSend(buildToolCallEvent({ name, args, traceId, callId, iteration: iter + 1 }));
             let envelope = await executeToolCall(name, args, toolCtx, { traceId, callId });
             let result = localizeToolResult(envelope.data);
             envelope = replaceToolResultData(envelope, result);
@@ -647,7 +746,7 @@ module.exports = function registerAiAgentRoute(app) {
             if (name === 'run_tool' && result && typeof result === 'object' && result.toolJobId && !result.needApproval) {
               _pushUniqueResultCard(assistantResultCards, _buildResultCardFromRunTool(result, context));
             }
-            const toolResultEvent = buildToolResultEvent(envelope, args);
+            const toolResultEvent = buildToolResultEvent(envelope, args, { iteration: iter + 1 });
             assistantToolActivities.recordResult(toolResultEvent);
             sseSend(toolResultEvent);
 
@@ -657,7 +756,11 @@ module.exports = function registerAiAgentRoute(app) {
                 result.unhandled = true;
                 result.message =
                   (result.message || '操作已记录') + '（⚠ 前端没有响应——可能当前页面没监听这个事件）';
-              const ackEvent = buildToolResultEvent({ ...envelope, data: result }, args);
+              const ackEvent = buildToolResultEvent(
+                { ...envelope, data: result },
+                args,
+                { iteration: iter + 1 }
+              );
               ackEvent.summary = 'unhandled';
               assistantToolActivities.recordResult(ackEvent);
               sseSend(ackEvent);
@@ -671,12 +774,12 @@ module.exports = function registerAiAgentRoute(app) {
             return { envelope, result, args, name, callId };
           },
           reject: async ({ name, args, callId, error, message }) => {
-            assistantToolActivities.recordCall({ name, args, traceId, callId });
-            sseSend(buildToolCallEvent({ name, args, traceId, callId }));
+            assistantToolActivities.recordCall({ name, args, traceId, callId, iteration: iter + 1 });
+            sseSend(buildToolCallEvent({ name, args, traceId, callId, iteration: iter + 1 }));
             let envelope = createRejectedToolResult(name, error, message, toolCtx, { traceId, callId });
             const result = localizeToolResult(envelope.data);
             envelope = replaceToolResultData(envelope, result);
-            const toolResultEvent = buildToolResultEvent(envelope, args);
+            const toolResultEvent = buildToolResultEvent(envelope, args, { iteration: iter + 1 });
             assistantToolActivities.recordResult(toolResultEvent);
             sseSend(toolResultEvent);
             return { envelope, result, args, name, callId };
@@ -694,16 +797,18 @@ module.exports = function registerAiAgentRoute(app) {
         });
       }
 
-      // The fifth Provider round is already tool-free finalization. Do not make
-      // a sixth request; keep only the local non-empty fallback for empty output.
-      if (!aborted && assistantAcc.trim().length <= 20) {
-        const fallbackMsg =
-          '抱歉，这次对话我调用了多次工具但没能整理出最终答复。请把你的需求再描述一下，或者换个问法试试。';
+      if (!aborted && assistantAcc.trim().length === 0) {
+        const fallbackMsg = buildFinalizationFallbackMessage({
+          attempts: finalizationAttempts,
+          reason: finalizationFailureReason,
+          anomaly: toolCallController.anomaly,
+          lastStageConclusion: assistantProgress.snapshot().slice(-1)[0]?.content,
+        });
         sseSend({ choices: [{ delta: { content: fallbackMsg } }] });
         assistantAcc = fallbackMsg;
       }
 
-      if (assistantAcc.trim().length > 20) {
+      if (assistantAcc.trim().length > 0) {
         try {
           const userId = req.user && req.user.id;
           if (userId) {
@@ -714,6 +819,24 @@ module.exports = function registerAiAgentRoute(app) {
                   page: context && context.page,
                   projectId: context && context.projectId,
                   processingDurationMs: Math.max(0, Date.now() - requestStartedAt),
+                  ...(assistantProgress.snapshot().length
+                    ? { progressUpdates: assistantProgress.snapshot() }
+                    : {}),
+                  ...(finalizationAttempts ? {
+                    finalization: {
+                      attempts: finalizationAttempts,
+                      recovered: !finalizationFailureReason,
+                      ...(finalizationFailureReason ? { failureReason: finalizationFailureReason } : {}),
+                      ...(finalizationRouting ? { routing: finalizationRouting } : {}),
+                    },
+                  } : {}),
+                  ...(finalizationFailureReason || toolCallController.anomaly ? {
+                    incident: {
+                      code: toolCallController.anomaly?.code || finalizationFailureReason || 'agent_failure',
+                      autoRecoveryAttempts: finalizationAttempts,
+                      ...(toolCallController.anomaly?.tool ? { tool: toolCallController.anomaly.tool } : {}),
+                    },
+                  } : {}),
                   ...(assistantResultCards.length ? { resultCards: assistantResultCards } : {}),
                   ...(assistantToolActivities.snapshot().length
                     ? { toolActivities: assistantToolActivities.snapshot() }
@@ -830,6 +953,30 @@ module.exports = function registerAiAgentRoute(app) {
     res.end();
   });
 
+  // ===== AGENT_TASK_MODE_v1：显式取消端点 =====
+  app.post('/api/ai/agent/task/:taskId/cancel', async (req, res) => {
+    const userId = req.user && req.user.id;
+    if (!userId) {
+      return res.status(401).json({ status: 'error', error: '未登录' });
+    }
+    const { taskId } = req.params;
+    let task;
+    try {
+      task = agentTaskStore.getAgentTask(taskId);
+    } catch {
+      return res.status(500).json({ status: 'error', error: '查询 task 失败' });
+    }
+    if (!task) return res.status(404).json({ status: 'error', error: 'task 不存在' });
+    if (task.user_id && task.user_id !== userId) {
+      return res.status(403).json({ status: 'error', error: '无权取消该 task' });
+    }
+    if (task.agent_status === 'done' || task.agent_status === 'failed' || task.agent_status === 'cancelled') {
+      return res.json({ status: task.agent_status, taskId, alreadyTerminal: true });
+    }
+    agentTaskStore.requestAgentTaskCancel(taskId);
+    return res.json({ status: 'cancel_requested', taskId });
+  });
+
   // ===== AGENT_TASK_MODE_v1：SSE 订阅端点（套 tools-metadata.js 模板）=====
   // 前端 POST /api/ai/agent 拿 taskId 后，订阅本端点拿事件流（回放 + 实时）。
   // 支持断线重连：?afterSeq=N 从第 N+1 条开始（前端记 lastSeq，重连时续传）。
@@ -868,7 +1015,7 @@ module.exports = function registerAiAgentRoute(app) {
     };
 
     let lastSeq = afterSeq;
-    const isTerminal = (t) => t && (t.agent_status === 'done' || t.agent_status === 'failed');
+    const isTerminal = (t) => t && ['done', 'failed', 'cancelled'].includes(t.agent_status);
 
     // 1. 回放已存事件（afterSeq+1 起）
     try {
@@ -884,6 +1031,8 @@ module.exports = function registerAiAgentRoute(app) {
     if (isTerminal(freshTask)) {
       if (freshTask.agent_status === 'failed') {
         sseSend({ event: 'error', error: freshTask.error || 'agent task 失败' });
+      } else if (freshTask.agent_status === 'cancelled') {
+        sseSend({ event: 'agent_cancelled' });
       } else {
         sseSend({ event: 'done' });
       }
@@ -904,6 +1053,8 @@ module.exports = function registerAiAgentRoute(app) {
           clearInterval(poll);
           if (t.agent_status === 'failed') {
             sseSend({ event: 'error', error: t.error || 'agent task 失败' });
+          } else if (t.agent_status === 'cancelled') {
+            sseSend({ event: 'agent_cancelled' });
           } else {
             sseSend({ event: 'done' });
           }

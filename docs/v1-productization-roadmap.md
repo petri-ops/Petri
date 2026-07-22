@@ -101,7 +101,7 @@ UI 不得制造第二套状态真相，模型层不得绕过确认/审计边界�
 
 ## 4. Stage 2：模型层与多 Provider
 
-状态：**当前唯一实现阶段**。
+状态：✅ 2026-07-17 已完成出口验收；后续只接受独立、可验证的模型层回归或明确授权的增量工作包。
 
 主模块：`P-07 模型网关与 AI Provider`；影响模块：`W-03`、`P-01`、`P-03`、`P-06`；主要关注点：`C-03`、`C-04`、`C-05`。
 
@@ -231,7 +231,7 @@ UI 不得制造第二套状态真相，模型层不得绕过确认/审计边界�
 
 ## 8. 当前立即执行项
 
-Stage 1–4 的 macOS arm64 RC 出口均已关闭。当前没有新的功能开发主线：
+Stage 1–4 的 macOS arm64 RC 出口均已关闭。当前不扩展分析内容；经用户确认，新增的工程主线是 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md) 中的 P-03 Harness Scientific Task Contract v1：
 
 1. 功能冻结，只修复发布阻断、数据错误、安全问题和明确回归。
 2. ✅ 全新用户目录完成 Runtime、项目、DESeq2 与 GO/KEGG 真实分析。
@@ -239,3 +239,4 @@ Stage 1–4 的 macOS arm64 RC 出口均已关闭。当前没有新的功能开�
 4. ✅ 完成 arm64 完整链和 x64 壳层构建/启动门禁；x64 Runtime 缺失已列为限制。
 5. ✅ 发布 `v0.0.1-rc.6`，验证 OSS 更新、公开下载、SHA-512 和 DMG 打开链。
 6. 观察 rc.7 真实使用反馈；后续产品阶段需单独立项。
+7. ✅ HRT-0 已建立成功、多步骤 lineage、歧义/失败恢复等六类脱敏任务和七组指标，离线门禁 24/24；当前进入 HRT-1 冻结 TaskSpec/Context schema，HRT-0 已知缺口不冒充产品验收。

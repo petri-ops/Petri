@@ -325,6 +325,12 @@
 - Bulk RNA 与单细胞 JSON fixture 覆盖 valid lineage、degraded recovery、确认断点和不可恢复阻塞；`npm run harness:phase6`、全量 `npm test`、Harness/Agent 评测和 adapter 回归均已通过。
 - Core `dcd2043` 与 Desktop `2d000d5` 已提交并推送，Desktop `.vendor-lock` 与 submodule 指针一致；Phase 6 正式关闭。
 
+2026-07-23 插件稳定性复验：
+
+- 10 个内置插件通过独立临时 DB/结果目录/插件目录走真实 `run_tool → tool_job → artifact truth`；用户已安装版本不会覆盖 built-in 验收源码。
+- macOS arm64 证据为 31 PASS、0 FAIL、4 个健康运行时下不适用的负向场景 SKIP；结构化失败、必需输入预检和每次执行的脚本/参数/输入/输出哈希均已覆盖。
+- `artifact-manifest.json` 与 `provenance.json` 明确归属 Harness 内部证据，不再冒充用户科研产物。
+
 ### Phase 7：通用基础工具与运行控制面
 
 状态：`completed`（2026-07-21；P7-A 至 P7-H 出口已关闭，P7-F 有证据地 `deferred`）。
@@ -341,12 +347,12 @@
 Phase 7 完成记录：
 
 1. ✅ P7-A：DeepSeek `deepseek-chat` 与自定义 OpenAI-compatible `gpt-5.6-sol` 的同一 8 场景 live Provider 矩阵均 8/8 PASS，作为人工验收保留。
-2. ✅ P7-B：18 个模型可见工具的 definition、handler 与内部 contract 收敛为单一注册表，并保持 Provider-safe schema 投影。
+2. ✅ P7-B：模型可见工具的 definition、handler 与内部 contract 收敛为单一注册表，并保持 Provider-safe schema 投影；2026-07-22 退役 2 个旧页面动作工具后当前为 16 个。
 3. ✅ P7-C：中央 dispatcher 统一经过 schema 校验、workspace preflight 与纯 `allow | deny` policy；写入、替换、命令和真实 `run_tool` 审批边界保持后端强制。
 4. ✅ P7-D：ToolResult envelope、兼容 SSE、脱敏 Trace 与 SimpleChat 工具活动投影已完成；UI-034 已完成实机视觉验收。UI-035（工具活动默认收缩与中间叙述收口）作为后续阅读密度优化单独跟踪。
 5. ✅ P7-E：write/replace 支持真实 dry-run、变更摘要、原子发布和 SHA 并发保护；未引入 `workspace_patch`。
 6. ⏸ P7-F：后台长任务 decision gate 因合格真实任务为 0/3 而 `deferred`，未新增 process start/check/stop。
-7. ✅ P7-G：按工具类型的有界模型投影和严格 5 次 Provider 请求/12 次工具调用边界已完成，零网络定向回归 18/18。
+7. ✅ P7-G：按工具类型的有界模型投影和目标驱动 Agent loop 已完成；正常路径不设置 iteration/工具调用总量上限，原 4 个可用工具轮导致真实差异分析创建计划后停止的问题已由 UI-055 修复，并以连续相同调用异常熔断、取消、确认和错误处理保留工程边界。
 8. ✅ P7-H：单一 `npm run harness:phase7` 已接入 CI；离线结果为 manifests 7/7、Phase 6 tests 64/64、Phase 7 核心 tests 68/68、临时真实 workspace 产品检查 13/13，全部 0 fail。脱敏证据位于 `acceptance/harness-phase7/product-acceptance.{json,md}`。
 
 SSH、远程执行、批量替换和任意网络工具不进入本阶段。

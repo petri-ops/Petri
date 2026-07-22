@@ -14,8 +14,11 @@ const fs = require('fs');
 const os = require('os');
 const { execFile } = require('child_process');
 const { reconcileArtifactTruth } = require('../helpers/artifact-truth');
+const { createResultArchive } = require('../helpers/result-archive');
 const { createExecutionContext } = require('../../shared-backend/execution-context');
 const { resolveProjectRunLayout } = require('../../shared-backend/project-run-layout');
+const { createExecutionProvenance, attachProvenanceToResult } = require('../../shared-backend/execution-provenance');
+const { collectExecutionInputs, writeArtifactManifest } = require('../../shared-backend/artifact-manifest');
 
 // 路径解析（dev/pack 两种模式）
 // 下沉后 r-server 自己 require 自己，路径变简单：
@@ -333,7 +336,7 @@ async function _runPluginScript(
     // Phase 3: 先创建/准备正式 tool_job，再以 tool_job.id 创建物理目录。
     // 方案 C（agent-led Task 1）：跑前建 tool_jobs 记录，跑完更新状态。
     // user_id 用调用方传入的 userId（agent 登录态下跑 = 真实用户 id，
-    // 这样用户能在 history 看到、open_result 能按 jobId 加载）。
+    // 这样用户能在 history 看到，客户端能按 jobId 加载）。
     let toolJobId = existingToolJobId || null;
     if (db) {
       try {
@@ -447,6 +450,9 @@ async function _runPluginScript(
             command: null,
             reason: `未找到 ${plugin.language || 'unknown'} 执行器`,
           };
+    const runtimeVersion = runtimeReady.ready && typeof executor.getRuntimeVersion === 'function'
+      ? executor.getRuntimeVersion()
+      : null;
     const { context: initialExecutionContext, canonicalizePath } = _createMcpExecutionContext({
       jobDir,
       outputDir,
@@ -454,8 +460,35 @@ async function _runPluginScript(
       runtimeCommand: executor && executor.binPath,
       runtimeReady,
     });
+    const provenanceFor = ({ artifacts = [], command = null, startedAt: provenanceStartedAt = null, completedAt = new Date().toISOString() } = {}) => {
+      const scientificTask = db && toolJobId && typeof db.getScientificTaskByToolJob === 'function'
+        ? db.getScientificTaskByToolJob(toolJobId)
+        : null;
+      const provenance = createExecutionProvenance({
+        toolJobId,
+        projectId,
+        scientificTask,
+        plugin: pluginLoader.getPluginManifest(plugin.id) || plugin,
+        params: args || {},
+        inputs: collectExecutionInputs({
+          inputDefinitions: toolDef && Array.isArray(toolDef.inputs) ? toolDef.inputs : [],
+          params: args || {},
+          jobDir,
+        }),
+        runtime: { name: plugin.language || null, command: executor && executor.binPath, version: runtimeVersion, ready: runtimeReady.ready },
+        runScriptPath: runScript,
+        command,
+        artifacts,
+        startedAt: provenanceStartedAt,
+        completedAt,
+      });
+      const provenancePath = path.join(jobDir, 'provenance.json');
+      fs.writeFileSync(provenancePath, JSON.stringify(provenance, null, 2));
+      return { provenance, provenancePath };
+    };
     if (!runtimeReady.ready) {
       const errText = `执行失败: ${runtimeReady.reason}`;
+      const failedProvenance = provenanceFor();
       if (db && toolJobId) {
         try {
           db.updateToolJob(toolJobId, {
@@ -473,6 +506,9 @@ async function _runPluginScript(
                 version: plugin.version || null,
                 language: plugin.language || null,
               },
+              failure: { phase: 'runtime', reason: runtimeReady.reason },
+              executionProvenance: failedProvenance.provenance,
+              provenanceRef: { provenanceHash: failedProvenance.provenance.provenanceHash, path: failedProvenance.provenancePath, toolJobId },
             },
             completedAt: Date.now(),
           });
@@ -497,26 +533,64 @@ async function _runPluginScript(
       const resolvedEnv = resolveRLibsForPlugin(plugin);
       if (resolvedEnv) runEnv = resolvedEnv;
     } else {
-      // Python 走 buildSpawnCommand（--params 约定）
+      // Harness Python 插件与 R 插件统一使用第一个位置参数传 job_dir。
+      // 旧的 --params 约定属于 FigCode/非插件执行，不得混入插件协议。
+      runCmd = [executor.binPath, runScript, jobDir];
       const spawnCmd = executor.buildSpawnCommand(runScript, jobDir, args || {});
-      runCmd = [spawnCmd.cmd, ...spawnCmd.args];
       if (spawnCmd.env) runEnv = spawnCmd.env;
     }
 
     // 4. 执行
+    const startedAt = new Date().toISOString();
     execFile(
       runCmd[0],
       runCmd.slice(1),
       { timeout: 300000, maxBuffer: 10 * 1024 * 1024, env: runEnv },
-      (err, stdout, stderr) => {
+      async (err, stdout, stderr) => {
         if (err) {
           const errText = `执行失败: ${err.killed ? '超时（>300s）' : stderr || err.message}\n\nSTDOUT:\n${stdout || ''}`;
+          const blockedManifestPath = [
+            path.join(outputDir, 'artifact-manifest.json'),
+            path.join(jobDir, 'artifact-manifest.json'),
+          ].find((candidate) => fs.existsSync(candidate));
+          let blockedManifest = null;
+          if (blockedManifestPath) {
+            try {
+              const parsed = JSON.parse(fs.readFileSync(blockedManifestPath, 'utf8'));
+              if (parsed && parsed.status === 'blocked') blockedManifest = parsed;
+            } catch (manifestError) {
+              console.warn('[mcp-registry] blocked artifact manifest parse failed:', manifestError.message);
+            }
+          }
+          const failedProvenance = provenanceFor({
+            command: { executable: runCmd[0], args: runCmd.slice(1), cwd: jobDir },
+          });
+          const structuredFailureMode = blockedManifest?.failureMode || null;
+          const failureResult = {
+            toolJobId,
+            jobDir,
+            outputDir,
+            tool: { id: plugin.id, version: plugin.version || null, language: plugin.language || null },
+            status: blockedManifest ? 'blocked' : 'failed',
+            failureMode: structuredFailureMode,
+            manifest: blockedManifest,
+            failure: {
+              phase: blockedManifest ? 'plugin_validation' : 'execution',
+              reason: structuredFailureMode || (err.killed ? 'timeout' : 'nonzero_exit'),
+              exitCode: err.code ?? null,
+              stderr: String(stderr || '').slice(-2000),
+              stdout: String(stdout || '').slice(-2000),
+            },
+            executionProvenance: failedProvenance.provenance,
+            provenanceRef: { provenanceHash: failedProvenance.provenance.provenanceHash, path: failedProvenance.provenancePath, toolJobId },
+          };
           // 失败：更新 tool_jobs 状态
           if (db && toolJobId) {
             try {
               db.updateToolJob(toolJobId, {
                 status: 'failed',
                 error: errText,
+                resultJson: failureResult,
                 completedAt: Date.now(),
               });
               // 同步 plan step 状态（方案 C，agent-led Task 2）
@@ -526,7 +600,7 @@ async function _runPluginScript(
             }
           }
           return resolve({
-            content: [{ type: 'text', text: errText }],
+            content: [{ type: 'text', text: JSON.stringify(failureResult) }],
             isError: true,
             _jobDir: jobDir,
             toolJobId,
@@ -536,11 +610,32 @@ async function _runPluginScript(
         // 产物位置有两种约定：(a) output/ 子目录（deseq2，tools-executor 标准）
         // (b) jobDir 根（volcano-plot 等独立插件脚本，setwd(jobDir) 后直接写）。
         // 先查 output/，再查 jobDir 根。
-        let manifestPath = path.join(outputDir, 'manifest.json');
-        let resultDir = outputDir;
-        if (!fs.existsSync(manifestPath)) {
-          manifestPath = path.join(jobDir, 'manifest.json');
-          resultDir = jobDir;
+        const manifestCandidates = [
+          path.join(outputDir, 'manifest.json'),
+          path.join(outputDir, 'artifact-manifest.json'),
+          path.join(jobDir, 'manifest.json'),
+          path.join(jobDir, 'artifact-manifest.json'),
+        ];
+        const manifestPath = manifestCandidates.find((candidate) => fs.existsSync(candidate)) || manifestCandidates[0];
+        const resultDir = path.dirname(manifestPath);
+        const runtimeToolDefinition = pluginLoader.getToolDefinition(plugin.id) || {};
+        const archiveArtifact = Array.isArray(runtimeToolDefinition.outputs)
+          ? runtimeToolDefinition.outputs.find((item) => item && item.id === 'zip' && item.required !== false)
+          : null;
+        if (archiveArtifact) {
+          try {
+            await createResultArchive(
+              resultDir,
+              archiveArtifact.filename || archiveArtifact.name || 'all_results.zip'
+            );
+          } catch (archiveError) {
+            return resolve({
+              content: [{ type: 'text', text: `执行失败: 结果归档失败: ${archiveError.message}` }],
+              isError: true,
+              _jobDir: jobDir,
+              toolJobId,
+            });
+          }
         }
         let manifest = null;
         try {
@@ -549,7 +644,13 @@ async function _runPluginScript(
           }
         } catch {}
         // manifest 有两种格式：(a) {outputs:[{id,filename,...}]} (b) {files:[{name,type,...}]}
-        const manifestItems = manifest?.outputs || manifest?.files || [];
+        const manifestItems = Array.isArray(manifest?.artifacts)
+          ? manifest.artifacts
+          : Array.isArray(manifest?.outputs)
+            ? manifest.outputs
+            : Array.isArray(manifest?.files)
+              ? manifest.files
+              : [];
         const outFiles = fs.existsSync(resultDir)
           ? fs
               .readdirSync(resultDir, { withFileTypes: true })
@@ -613,14 +714,27 @@ async function _runPluginScript(
           manifest: manifest,
           stdout: (stdout || '').slice(-2000),
         };
-        const toolDefinition = pluginLoader.getToolDefinition(plugin.id) || {};
+        const toolDefinition = runtimeToolDefinition;
         const truth = reconcileArtifactTruth({
           result: rawSummary,
           resultDir,
           expectedArtifacts: Array.isArray(toolDefinition.outputs) ? toolDefinition.outputs : [],
           canonicalizePath,
         });
-        const summary = truth.result;
+        const successfulProvenance = provenanceFor({
+          artifacts: truth.artifacts,
+          command: { executable: runCmd[0], args: runCmd.slice(1), cwd: jobDir },
+          startedAt,
+        });
+        const provenance = successfulProvenance.provenance;
+        const provenancePath = successfulProvenance.provenancePath;
+        const summary = attachProvenanceToResult(truth.result, provenance, provenancePath);
+        writeArtifactManifest({
+          outputDir: resultDir,
+          result: summary,
+          provenance,
+          plugin: pluginLoader.getPluginManifest(plugin.id) || plugin,
+        });
         if (truth.blocking) {
           const truthError =
             truth.issues
@@ -686,7 +800,7 @@ async function callTool(name, args, opts = {}) {
     console.warn('[mcp-registry] refresh plugins before callTool failed:', e.message);
   }
   // opts.userId：归属用户（agent 在登录态下跑，写进 tool_jobs.user_id，
-  // 这样用户能在 history 看到、open_result 能按 jobId 加载结果）。
+  // 这样用户能在 history 看到，客户端能按 jobId 加载结果）。
   // 兜底 'agent'（无用户上下文，如 MCP 直连场景）。
   const userId = (opts && opts.userId) || 'agent';
   const projectId = (opts && opts.projectId) || null;

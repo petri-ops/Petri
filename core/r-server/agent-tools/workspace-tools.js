@@ -10,6 +10,9 @@
 const crypto = require('crypto');
 const fsp = require('fs/promises');
 const path = require('path');
+const { promisify } = require('util');
+const { execFile } = require('child_process');
+const execFileAsync = promisify(execFile);
 
 const DEFAULT_MAX_ENTRIES = 200;
 const DEFAULT_MAX_READ_LINES = 240;
@@ -44,24 +47,10 @@ const SENSITIVE_SEGMENTS = new Set([
   'keychain',
 ]);
 
-const READ_ONLY_COMMAND_PATTERNS = [/^pwd$/];
-
-const BLOCKED_COMMAND_PATTERNS = [
-  { pattern: /(^|[;&|]\s*)sudo\b/i, reason: 'sudo is not allowed' },
-  { pattern: /(?:^|[^\\])[;&|`]|&&|\|\||\$\(/, reason: 'shell chaining, pipes, and command substitution are not allowed' },
-  { pattern: /(^|[\s"'=])\/(?!\/|dev\/null\b)/, reason: 'absolute filesystem paths are not allowed' },
-  { pattern: /(^|[\s"'=])~(?:\/|\s|$)|(?:^|[\s"'=])\.\.(?:\/|\s|$)/, reason: 'paths outside the project workspace are not allowed' },
-  { pattern: /\b(?:mkfs|shutdown|reboot|halt)\b/i, reason: 'system administration command is not allowed' },
-  { pattern: /\b(?:rm|rmdir|unlink)\b/i, reason: 'file deletion is not allowed' },
-  { pattern: /\bgit\s+(?:push|reset\s+--hard|clean\s+-[^\s]*f|checkout\s+--|restore\s+--source)\b/i, reason: 'destructive or remote git operation is not allowed' },
-  { pattern: /\b(?:npm|pnpm|yarn|cargo)\s+publish\b/i, reason: 'package publishing is not allowed' },
-  { pattern: /\b(?:docker\s+(?:rm|rmi|system\s+prune)|kubectl\s+delete|terraform\s+destroy)\b/i, reason: 'destructive infrastructure operation is not allowed' },
-  { pattern: /(?:curl|wget)[^\n|]*\|\s*(?:sh|bash|zsh)\b/i, reason: 'piping remote content to a shell is not allowed' },
-  { pattern: /(?:^|[\s;&|])cd\s+\.\.(?:\/|\s|$)/i, reason: 'leaving the project workspace is not allowed' },
-  { pattern: /(?:^|[\s;&|])(?:source|\.)\s+\/|(?:^|[\s;&|])(?:sh|bash|zsh)\s+\//i, reason: 'executing an absolute-path script is not allowed' },
-  { pattern: /(?:^|[^>])>{1,2}\s*\/(?!dev\/null\b)/i, reason: 'redirecting output outside the project workspace is not allowed' },
-  { pattern: /\b(?:node|python3?|rscript|r)\s+(?:-e|-c)\b/i, reason: 'inline interpreter programs are not allowed' },
-];
+const MAX_COMMAND_BYTES = 64 * 1024;
+const MAX_COMMAND_OUTPUT_BYTES = 1024 * 1024;
+const DEFAULT_COMMAND_TIMEOUT_MS = 120000;
+const MAX_COMMAND_TIMEOUT_MS = 30 * 60 * 1000;
 
 function sha256(content) {
   return crypto.createHash('sha256').update(content).digest('hex');
@@ -605,27 +594,36 @@ function createWorkspaceTools(options = {}) {
   function commandVerdict(command) {
     const normalized = String(command || '').trim();
     if (!normalized) return { ok: false, reason: 'command 不能为空' };
-    if (normalized.length > 4000) return { ok: false, reason: 'command 过长' };
-    if (normalized.includes('\0') || normalized.includes('\n') || normalized.includes('\r')) {
-      return { ok: false, reason: 'command 必须是单行命令' };
-    }
-    for (const rule of BLOCKED_COMMAND_PATTERNS) {
-      if (rule.pattern.test(normalized)) return { ok: false, reason: rule.reason };
-    }
+    if (Buffer.byteLength(normalized) > MAX_COMMAND_BYTES) return { ok: false, reason: 'command 过长' };
+    if (normalized.includes('\0')) return { ok: false, reason: 'command 不能包含空字节' };
     return { ok: true };
+  }
+
+  function shellInvocation(command) {
+    if (process.platform === 'win32') {
+      return {
+        executable: process.env.ComSpec || 'cmd.exe',
+        args: ['/d', '/s', '/c', command],
+      };
+    }
+    return {
+      executable: process.env.SHELL && path.isAbsolute(process.env.SHELL) ? process.env.SHELL : '/bin/sh',
+      args: ['-lc', command],
+    };
   }
 
   async function preflightTool(name, args = {}, ctx = {}) {
     return withWorkspace(ctx, async ({ root }) => {
       if (name === 'workspace_exec') {
+        if (ctx.accessMode !== 'full') {
+          return errorResult('access_mode_read_only', '聊天当前处于只读模式，禁止执行命令');
+        }
         const command = String(args.command || '').trim();
         const verdict = commandVerdict(command);
         if (!verdict.ok) return errorResult('command_blocked', verdict.reason);
         return {
           ok: true,
-          commandRisk: READ_ONLY_COMMAND_PATTERNS.some((pattern) => pattern.test(command))
-            ? 'read_only'
-            : 'unknown',
+          commandRisk: 'full_access',
         };
       }
 
@@ -648,23 +646,49 @@ function createWorkspaceTools(options = {}) {
   }
 
   async function executeCommand(args = {}, ctx = {}) {
+    if (ctx.accessMode !== 'full') {
+      return errorResult('access_mode_read_only', '聊天当前处于只读模式，禁止执行命令');
+    }
     const command = String(args.command || '').trim();
     const verdict = commandVerdict(command);
     if (!verdict.ok) return errorResult('command_blocked', verdict.reason);
-    if (!READ_ONLY_COMMAND_PATTERNS.some((pattern) => pattern.test(command))) {
-      return errorResult('command_not_allowlisted', '该命令不在自动执行白名单中');
-    }
-    return withWorkspace(ctx, async ({ root }) => ({
-      ok: true,
-      command,
-      cwd: '.',
-      exitCode: 0,
-      signal: null,
-      timedOut: false,
-      stdout: `${root}\n`,
-      stderr: '',
-      truncated: false,
-    }));
+    return withWorkspace(ctx, async ({ root }) => {
+      const invocation = shellInvocation(command);
+      try {
+        const result = await execFileAsync(invocation.executable, invocation.args, {
+          cwd: root,
+          shell: false,
+          timeout: clampInteger(args.timeoutMs, DEFAULT_COMMAND_TIMEOUT_MS, 100, MAX_COMMAND_TIMEOUT_MS),
+          maxBuffer: MAX_COMMAND_OUTPUT_BYTES,
+          windowsHide: true,
+        });
+        const stdout = String(result.stdout || '');
+        const stderr = String(result.stderr || '');
+        return {
+          ok: true,
+          command,
+          cwd: '.',
+          exitCode: 0,
+          signal: null,
+          timedOut: false,
+          stdout: stdout.slice(0, MAX_COMMAND_OUTPUT_BYTES),
+          stderr: stderr.slice(0, MAX_COMMAND_OUTPUT_BYTES),
+          truncated: Buffer.byteLength(stdout) > MAX_COMMAND_OUTPUT_BYTES || Buffer.byteLength(stderr) > MAX_COMMAND_OUTPUT_BYTES,
+        };
+      } catch (error) {
+        return {
+          ok: false,
+          command,
+          cwd: '.',
+          exitCode: Number.isInteger(error.code) ? error.code : 1,
+          signal: error.signal || null,
+          timedOut: error.killed === true,
+          stdout: String(error.stdout || '').slice(0, MAX_COMMAND_OUTPUT_BYTES),
+          stderr: String(error.stderr || error.message || '').slice(0, MAX_COMMAND_OUTPUT_BYTES),
+          truncated: Boolean(error && error.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER'),
+        };
+      }
+    });
   }
 
   return {

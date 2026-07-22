@@ -52,6 +52,7 @@ function callDeepSeekStream(apiKey, body, telemetry, onEvent, options) {
     modelOverride: options && options.modelOverride,
     signal: options && options.signal,
     apiKeyOverride: apiKey,
+    fallbackWhen: options && options.fallbackWhen,
   });
 }
 
@@ -65,6 +66,7 @@ async function callChatProvider(providerName, apiKey, body, telemetry, onEvent, 
     onEvent,
     signal: options && options.signal,
     apiKeyOverride: apiKey,
+    fallbackWhen: options && options.fallbackWhen,
   });
 }
 

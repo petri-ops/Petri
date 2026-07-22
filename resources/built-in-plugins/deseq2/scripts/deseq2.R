@@ -148,7 +148,13 @@ ggsave_biof3(p_vol, file.path(output_dir, "volcano"), width = 6.5, height = 5)
 # Step 5b: PCA (ggplot2 系)
 # ============================================================
 cat("[deseq2] Step 5b: PCA...\n")
-vsd <- vst(dds, blind = TRUE)
+# vst() 默认从最多 1000 个基因拟合趋势；小型验证集或靶向 panel 少于该数量时，
+# 使用同一 DESeq2 官方变换的直接实现，避免把合法的小矩阵误判为执行异常。
+vsd <- if (nrow(dds) < 1000) {
+  varianceStabilizingTransformation(dds, blind = TRUE)
+} else {
+  vst(dds, blind = TRUE)
+}
 pca_data <- plotPCA(vsd, intgroup = design_col, returnData = TRUE)
 pca_var <- round(100 * attr(pca_data, "percentVar"))
 pca_pal <- biof3_palette(2)  # 2 个组用 NPG 前 2 色

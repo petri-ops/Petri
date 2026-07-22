@@ -130,23 +130,193 @@
         "python": "3.11"
       }
     },
-    "single-cell-tutorial": {
-      "id": "single-cell-tutorial",
-      "title": "单细胞教程（试点插件）",
+    "sample-metadata-validator": {
+      "id": "sample-metadata-validator",
+      "title": "样本元数据校验",
       "version": "1.0.0",
       "kind": "plugin",
-      "type": "content-plugin",
-      "contentType": "tutorial",
-      "omics": "single-cell",
-      "description": "M2-9 content-plugin 试点：演示教程插件如何通过 plugin-manager 注册到 docs 页面（manifest + 示例 md，无语言包）。",
+      "language": "r",
+      "description": "在进入表达 QC 和差异分析之前，验证 counts 矩阵和 metadata 是否能够支持指定的实验设计与 contrast。检查样本对齐、重复、分组完整性、重复数、混淆设计等。",
       "artifacts": {
         "macos-arm64": {
-          "url": "built-in://single-cell-tutorial",
+          "url": "built-in://sample-metadata-validator",
           "sha256": null,
           "sizeBytes": 0
         }
       },
-      "checksumAlgorithm": "sha256"
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "jsonlite": ">=1.8.0",
+          "digest": ">=0.6.0"
+        }
+      },
+      "runtime": {
+        "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5"
+      }
+    },
+    "expression-qc": {
+      "id": "expression-qc",
+      "title": "表达矩阵质量控制",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "r",
+      "description": "检查表达/counts 矩阵的数据质量：基因×样本方向、非数值列、NA/Inf、负counts、小数counts、重复gene ID、全零基因、低表达基因比例、library size、样本相关性、样本离群、PCA与设计分组关系、metadata对齐状态。只做QC和质量门，不执行差异表达，不自动删除样本。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://expression-qc",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "jsonlite": ">=1.8.0",
+          "digest": ">=0.6.0"
+        }
+      },
+      "runtime": {
+        "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5"
+      }
+    },
+    "deg-standardizer": {
+      "id": "deg-standardizer",
+      "title": "DEG 标准化",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "r",
+      "description": "将 DESeq2、limma 或兼容差异结果表转换为稳定、可供下游插件消费的标准 DEG Artifact。不覆盖上游原始结果，不伪造缺失 p 值或 padj，缺少 padj 时阻断。ranked_genes 保留全部基因排序，不只保留显著基因。阈值属于参数和科学决策，必须记录。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://deg-standardizer",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "jsonlite": ">=1.8.0",
+          "digest": ">=0.6.0"
+        }
+      },
+      "runtime": {
+        "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5"
+      }
+    },
+    "go-kegg": {
+      "id": "go-kegg",
+      "title": "GO/KEGG 富集分析",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "r",
+      "description": "基因功能富集分析（clusterProfiler enrichGO + 离线 KEGG），支持基因列表或 DESeq2 差异结果输入。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://go-kegg",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "clusterProfiler": ">=4.18.0",
+          "enrichplot": ">=1.30.0",
+          "DOSE": ">=4.4.0",
+          "org.Hs.eg.db": ">=3.22.0",
+          "org.Mm.eg.db": ">=3.22.0",
+          "KEGGREST": ">=1.50.0",
+          "ggplot2": ">=4.0.0",
+          "jsonlite": ">=1.8.0",
+          "base64enc": ">=0.1-3"
+        }
+      },
+      "runtime": {
+        "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5"
+      }
+    },
+    "gsea": {
+      "id": "gsea",
+      "title": "GSEA 基因集富集分析",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "r",
+      "description": "Gene Set Enrichment Analysis（GSEA）：基于全基因组排序的基因集富集（clusterProfiler gseGO/gseKEGG/Hallmark），无需预设显著阈值，支持基因排序列表或 DESeq2 差异结果输入。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://gsea",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "clusterProfiler": ">=4.18.0",
+          "enrichplot": ">=1.30.0",
+          "DOSE": ">=4.4.0",
+          "org.Hs.eg.db": ">=3.22.0",
+          "org.Mm.eg.db": ">=3.22.0",
+          "msigdbr": ">=26.1.0",
+          "KEGGREST": ">=1.50.0",
+          "ggplot2": ">=4.0.0",
+          "jsonlite": ">=1.8.0",
+          "base64enc": ">=0.1-3"
+        }
+      },
+      "runtime": {
+        "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5"
+      }
+    },
+    "wgcna": {
+      "id": "wgcna",
+      "title": "WGCNA 加权基因共表达网络分析",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "r",
+      "description": "WGCNA 标准流程（Tutorial I）：QC → 软阈值 → 网络构建 → 模块识别 → 模块-性状关联 → Hub 基因。输入表达矩阵 + 数值型性状表，输出模块-性状热图、模块基因表、Hub 基因与完整网络 RDS。上限 ~10000 基因 × ~500 样本。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://wgcna",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "WGCNA": ">=1.74",
+          "flashClust": ">=1.1.4",
+          "impute": ">=1.84.0",
+          "ggplot2": ">=4.0.0",
+          "dplyr": ">=1.1.0",
+          "jsonlite": ">=1.8.0",
+          "base64enc": ">=0.1-3"
+        }
+      },
+      "runtime": {
+        "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5"
+      }
     },
     "figcode-volcano-animated": {
       "id": "figcode-volcano-animated",

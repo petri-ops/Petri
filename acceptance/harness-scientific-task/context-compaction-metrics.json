@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "measurementKind": "gap_baseline",
+  "checkpointCase": "two-checkpoint-recovery",
+  "checkpointCount": 2,
+  "requiredPreservedFields": ["negative_constraint", "later_correction", "unresolved_question", "file_ref", "tool_failure", "task_boundary"],
+  "observedMissingFields": null,
+  "rawRereadCount": null,
+  "contradictionCount": null,
+  "modelSwitchCases": ["large-small-large", "summary-role-unavailable", "capability-missing", "minimum-context-too-large"],
+  "productionStatus": "gap",
+  "gapOwner": "context_checkpoint_followup",
+  "thresholdFrozen": false
+}

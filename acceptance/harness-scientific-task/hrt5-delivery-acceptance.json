@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "privacy": "repository_demo_data_only",
+  "generatedAt": "2026-07-22T04:20:37.374Z",
+  "pluginDiscovery": {
+    "sourceCount": 1,
+    "candidateCount": 10,
+    "validCount": 10,
+    "errorCount": 0,
+    "warningCount": 0
+  },
+  "cases": [
+    {
+      "id": "metadata-validation",
+      "toolId": "sample-metadata-validator",
+      "toolJobId": "tj_mrvkqzsb_57x6",
+      "jobStatus": "completed",
+      "artifactTruth": "valid",
+      "artifactCount": 6,
+      "deliveryStatus": "valid",
+      "deliveryManifestHash": "4adb429e401f762a373dcc4a341baa743b2dc99c9bf613788ca3c1bec86179a6",
+      "deliveryRelativePath": "results/jobs/tj_mrvkqzsb_57x6/output/delivery-manifest.json",
+      "reproducibility": [
+        "available",
+        "available",
+        "available",
+        "available",
+        "available",
+        "available"
+      ]
+    },
+    {
+      "id": "expression-qc",
+      "toolId": "expression-qc",
+      "toolJobId": "tj_mrvkr01m_4wss",
+      "jobStatus": "completed",
+      "artifactTruth": "valid",
+      "artifactCount": 10,
+      "deliveryStatus": "valid",
+      "deliveryManifestHash": "2483add315825c562fe3a2b59f021d770fa5311a6d9b4727b2afeade7da11dc0",
+      "deliveryRelativePath": "results/jobs/tj_mrvkr01m_4wss/output/delivery-manifest.json",
+      "reproducibility": [
+        "available",
+        "available",
+        "available",
+        "available",
+        "available",
+        "available",
+        "available",
+        "available",
+        "available",
+        "available"
+      ]
+    },
+    {
+      "id": "deg-standardization",
+      "toolId": "deg-standardizer",
+      "toolJobId": "tj_mrvkr0ei_lcmz",
+      "jobStatus": "completed",
+      "artifactTruth": "valid",
+      "artifactCount": 7,
+      "deliveryStatus": "valid",
+      "deliveryManifestHash": "4f74fac8f55c691535b970735df4e9ab0954d2f0f14604a8269e79d124fa71ff",
+      "deliveryRelativePath": "results/jobs/tj_mrvkr0ei_lcmz/output/delivery-manifest.json",
+      "reproducibility": [
+        "available",
+        "available",
+        "available",
+        "available",
+        "available",
+        "available",
+        "available"
+      ]
+    }
+  ],
+  "passed": true
+}

@@ -28,6 +28,48 @@ try {
   db.pragma('wal_checkpoint(TRUNCATE)');
 } catch {}
 
+// HRT-3: durable ScientificTaskSpec + confirmation ledger. The immutable
+// spec hash and confirmation record are stored separately from tool_jobs;
+// execution still uses tool_jobs as the only runtime truth.
+try {
+  db.exec(`CREATE TABLE IF NOT EXISTS scientific_task_specs (
+    task_id TEXT NOT NULL,
+    version INTEGER NOT NULL,
+    project_id TEXT NOT NULL,
+    conversation_id TEXT NOT NULL,
+    status TEXT NOT NULL,
+    spec_json TEXT NOT NULL,
+    spec_hash TEXT NOT NULL,
+    confirmation_json TEXT,
+    tool_job_id TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    PRIMARY KEY (task_id, version)
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_scientific_task_project ON scientific_task_specs(project_id, updated_at DESC)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_scientific_task_conversation ON scientific_task_specs(conversation_id, updated_at DESC)');
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_scientific_task_hash ON scientific_task_specs(spec_hash)');
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_scientific_task_job ON scientific_task_specs(tool_job_id) WHERE tool_job_id IS NOT NULL');
+} catch {}
+
+// HRT-6: durable, source-addressed context checkpoints used by exported
+// scientific replay/handoff packages. Raw conversation text remains in the
+// conversation ledger; checkpoints store only the validated structured
+// projection and its source digest.
+try {
+  db.exec(`CREATE TABLE IF NOT EXISTS context_checkpoints (
+    checkpoint_id TEXT PRIMARY KEY,
+    project_id TEXT NOT NULL,
+    conversation_id TEXT NOT NULL,
+    source_digest TEXT NOT NULL,
+    checkpoint_json TEXT NOT NULL,
+    supersedes TEXT,
+    created_at TEXT NOT NULL
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_context_checkpoint_conversation ON context_checkpoints(project_id, conversation_id, created_at DESC)');
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_context_checkpoint_source ON context_checkpoints(project_id, conversation_id, source_digest)');
+} catch {}
+
 // ============================================================
 // Schema
 // ============================================================
@@ -560,6 +602,117 @@ function updateToolJob(id, { status, resultJson, completedAt, error }) {
   return getToolJob(id);
 }
 
+function saveScientificTaskSpec({ spec, specHash, confirmation = null, version = 1, toolJobId = null }) {
+  if (!spec || !spec.taskId || !spec.projectId || !spec.conversationId || !specHash) {
+    throw new Error('scientific_task_spec_persistence_fields_required');
+  }
+  const timestamp = new Date().toISOString();
+  const existing = getScientificTaskSpec(spec.taskId, version);
+  if (existing && existing.spec_hash !== specHash) {
+    throw new Error('scientific_task_version_immutable');
+  }
+  db.prepare(`
+    INSERT INTO scientific_task_specs(
+      task_id, version, project_id, conversation_id, status, spec_json,
+      spec_hash, confirmation_json, tool_job_id, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(task_id, version) DO UPDATE SET
+      confirmation_json=COALESCE(excluded.confirmation_json, scientific_task_specs.confirmation_json),
+      tool_job_id=COALESCE(excluded.tool_job_id, scientific_task_specs.tool_job_id),
+      updated_at=excluded.updated_at
+  `).run(
+    spec.taskId, version, spec.projectId, spec.conversationId, spec.status,
+    JSON.stringify(spec), specHash, confirmation ? JSON.stringify(confirmation) : null,
+    toolJobId, timestamp, timestamp
+  );
+  return getScientificTaskSpec(spec.taskId, version);
+}
+
+function parseScientificTaskRow(row) {
+  if (!row) return null;
+  return {
+    ...row,
+    spec: JSON.parse(row.spec_json),
+    confirmation: row.confirmation_json ? JSON.parse(row.confirmation_json) : null,
+  };
+}
+
+function getScientificTaskSpec(taskId, version = null) {
+  const row = version == null
+    ? db.prepare('SELECT * FROM scientific_task_specs WHERE task_id=? ORDER BY version DESC LIMIT 1').get(taskId)
+    : db.prepare('SELECT * FROM scientific_task_specs WHERE task_id=? AND version=?').get(taskId, version);
+  return parseScientificTaskRow(row);
+}
+
+function listConversationScientificTasks(conversationId) {
+  return db.prepare('SELECT * FROM scientific_task_specs WHERE conversation_id=? ORDER BY updated_at DESC').all(conversationId).map(parseScientificTaskRow);
+}
+
+function getScientificTaskByToolJob(toolJobId) {
+  return parseScientificTaskRow(db.prepare('SELECT * FROM scientific_task_specs WHERE tool_job_id=?').get(toolJobId));
+}
+
+function bindScientificTaskToolJob({ taskId, version = 1, toolJobId }) {
+  const job = getToolJob(toolJobId);
+  const task = getScientificTaskSpec(taskId, version);
+  if (!task) throw new Error('scientific_task_not_found');
+  if (!job) throw new Error('tool_job_not_found');
+  if (task.project_id !== job.project_id) throw new Error('scientific_task_job_project_mismatch');
+  if (task.status !== 'confirmed') throw new Error('scientific_task_not_confirmed');
+  db.prepare('UPDATE scientific_task_specs SET tool_job_id=?, updated_at=? WHERE task_id=? AND version=?')
+    .run(toolJobId, new Date().toISOString(), taskId, version);
+  return getScientificTaskSpec(taskId, version);
+}
+
+function saveContextCheckpoint(checkpoint) {
+  if (!checkpoint?.checkpointId || !checkpoint.projectId || !checkpoint.conversationId || !checkpoint.sourceDigest || !checkpoint.createdAt) {
+    throw new Error('context_checkpoint_persistence_fields_required');
+  }
+  const existing = getContextCheckpoint(checkpoint.checkpointId);
+  if (existing && existing.sourceDigest !== checkpoint.sourceDigest) throw new Error('context_checkpoint_immutable');
+  db.prepare(`
+    INSERT INTO context_checkpoints(
+      checkpoint_id, project_id, conversation_id, source_digest,
+      checkpoint_json, supersedes, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(checkpoint_id) DO NOTHING
+  `).run(
+    checkpoint.checkpointId,
+    checkpoint.projectId,
+    checkpoint.conversationId,
+    checkpoint.sourceDigest,
+    JSON.stringify(checkpoint),
+    checkpoint.supersedes || null,
+    checkpoint.createdAt
+  );
+  return getContextCheckpoint(checkpoint.checkpointId);
+}
+
+function parseContextCheckpointRow(row) {
+  if (!row) return null;
+  return JSON.parse(row.checkpoint_json);
+}
+
+function getContextCheckpoint(checkpointId) {
+  return parseContextCheckpointRow(db.prepare('SELECT * FROM context_checkpoints WHERE checkpoint_id=?').get(checkpointId));
+}
+
+function listContextCheckpoints(projectId, conversationId) {
+  return db.prepare(`
+    SELECT * FROM context_checkpoints
+    WHERE project_id=? AND conversation_id=?
+    ORDER BY created_at DESC
+  `).all(projectId, conversationId).map(parseContextCheckpointRow);
+}
+
+function getLatestContextCheckpoint(projectId, conversationId) {
+  return parseContextCheckpointRow(db.prepare(`
+    SELECT * FROM context_checkpoints
+    WHERE project_id=? AND conversation_id=?
+    ORDER BY created_at DESC LIMIT 1
+  `).get(projectId, conversationId));
+}
+
 function updateToolJobParams(id, params) {
   stmts.updateToolJobParams.run(JSON.stringify(params || {}), id);
   return getToolJob(id);
@@ -616,6 +769,14 @@ function listStalledAnalyses() {
       "SELECT id, name, task_id FROM analyses WHERE status IN ('running', 'pending', 'queued')"
     )
     .all();
+}
+
+function markStalledToolJobsRecovery(now = Date.now()) {
+  const rows = db.prepare("SELECT id FROM tool_jobs WHERE status='running'").all();
+  if (rows.length > 0) {
+    db.prepare("UPDATE tool_jobs SET status='failed', error='recovery_required_after_restart', completed_at=? WHERE status='running'").run(now);
+  }
+  return rows.map((row) => row.id);
 }
 
 function countAnalysesForUserSince(userId, sinceIso) {
@@ -969,12 +1130,22 @@ module.exports = {
   listProjectToolJobs,
   createToolJob,
   updateToolJob,
+  saveScientificTaskSpec,
+  getScientificTaskSpec,
+  listConversationScientificTasks,
+  getScientificTaskByToolJob,
+  bindScientificTaskToolJob,
+  saveContextCheckpoint,
+  getContextCheckpoint,
+  listContextCheckpoints,
+  getLatestContextCheckpoint,
   updateToolJobParams,
   prepareToolJobForRun,
   setToolJobApproval,
   ackToolJob,
   getToolJobByAckToken,
   listStalledAnalyses,
+  markStalledToolJobsRecovery,
   countAnalysesForUserSince,
   getProjectStats,
   getDatasetStats,

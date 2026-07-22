@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "measurementKind": "gap_baseline",
+  "usage": { "promptCompletionTokensPersisted": true, "cachedTokensPersisted": false, "priceKnownBehavior": "unknown_not_zero", "uiVerified": false },
+  "resource": { "snapshotRefRequired": true, "snapshotTtlRequired": true, "jobPeakRequired": true, "liveCpuInLongSummaryForbidden": true, "uiVerified": false },
+  "decisionCases": [
+    { "id": "ready", "expected": "resource_ready" },
+    { "id": "price-unknown", "expected": "cost_unknown" },
+    { "id": "runtime-missing", "expected": "resource_unavailable" },
+    { "id": "disk-low", "expected": "resource_warning_or_unavailable" },
+    { "id": "estimated-oom", "expected": "confirmation_or_block" },
+    { "id": "stale-snapshot", "expected": "refresh_required" },
+    { "id": "cross-ui-reference", "expected": "same_snapshot_ref" }
+  ],
+  "productionStatus": "gap",
+  "gapOwner": "resource_ui_followup"
+}

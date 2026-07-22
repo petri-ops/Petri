@@ -83,6 +83,9 @@ process.on('uncaughtException', (err) => {
 try {
   const dbMod = require('./db');
   const stalled = dbMod.listStalledAnalyses();
+  const stalledToolJobs = typeof dbMod.markStalledToolJobsRecovery === 'function'
+    ? dbMod.markStalledToolJobsRecovery()
+    : [];
   if (stalled.length > 0) {
     console.log('[Recovery] Marking ' + stalled.length + ' stalled tasks as failed');
     const errMsg = '服务重启时此任务被中断，请重新提交';
@@ -90,6 +93,9 @@ try {
     for (const a of stalled) {
       dbMod.updateAnalysis(a.id, { status: 'failed', error: errMsg, finishedAt });
     }
+  }
+  if (stalledToolJobs.length > 0) {
+    console.log('[Recovery] Preserved ' + stalledToolJobs.length + ' interrupted tool jobs as recovery_required');
   }
 } catch (e) {
   console.error('[Recovery] Failed:', e.message);

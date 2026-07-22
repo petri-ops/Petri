@@ -1295,11 +1295,12 @@
 
 .workspacePinnedSummary {
   position: relative;
-  width: 224px;
-  height: 340px;
+  width: 300px;
+  height: auto;
+  max-height: calc(100% - 16px);
   max-width: calc(100% - 24px);
   border: 1px solid var(--biof3-border);
-  border-radius: 13px;
+  border-radius: 16px;
   background: var(--biof3-bg-elevated);
   box-shadow: none;
   overflow: hidden;
@@ -1318,8 +1319,8 @@
   justify-content: space-between;
   gap: 8px;
   flex-shrink: 0;
-  min-height: 44px;
-  padding: 8px 10px;
+  min-height: 52px;
+  padding: 10px 13px 9px;
   border-bottom: 1px solid rgba(15, 23, 42, 0.065);
 }
 
@@ -1355,12 +1356,12 @@
 .workspacePinnedSummaryHeaderText {
   min-width: 0;
   display: grid;
-  gap: 1px;
+  gap: 3px;
   width: 100%;
 }
 
 .workspacePinnedSummaryEyebrow {
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 650;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -1368,15 +1369,17 @@
 }
 
 .workspacePinnedSummaryTitleRow {
-  display: grid;
-  gap: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   min-width: 0;
 }
 
 .workspacePinnedSummaryTitle {
   min-width: 0;
   flex: 1;
-  font-size: 13px;
+  font-size: 16px;
   line-height: 1.2;
   font-weight: 650;
   color: var(--biof3-text);
@@ -1390,8 +1393,7 @@
   align-items: center;
   gap: 5px;
   flex-shrink: 0;
-  justify-self: start;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--biof3-text-secondary);
 }
 
@@ -1420,9 +1422,10 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 6px 9px 8px;
-  overflow: hidden;
+  gap: 10px;
+  padding: 9px 13px 12px;
+  overflow-x: hidden;
+  overflow-y: auto;
   position: relative;
 }
 
@@ -1432,11 +1435,134 @@
   min-width: 0;
 }
 
+.workspacePinnedSummaryOverview {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+}
+
+.workspacePinnedSummaryPrimaryCard {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 7px 3px;
+  border: 0;
+  border-top: 1px solid var(--biof3-border-subtle);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+button.workspacePinnedSummaryPrimaryCard {
+  cursor: pointer;
+}
+
+button.workspacePinnedSummaryPrimaryCard:hover {
+  background: transparent;
+  color: var(--biof3-accent);
+}
+
+.workspacePinnedSummaryPrimaryCard > svg {
+  flex-shrink: 0;
+  color: var(--biof3-text-tertiary);
+}
+
+.workspacePinnedSummaryMetricGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--biof3-border-subtle);
+  border-bottom: 1px solid var(--biof3-border-subtle);
+}
+
+.workspacePinnedSummaryMetricCard {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 34px;
+  padding: 6px 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.workspacePinnedSummaryMetricCard + .workspacePinnedSummaryMetricCard {
+  padding-left: 10px;
+  border-left: 1px solid var(--biof3-border-subtle);
+}
+
+button.workspacePinnedSummaryMetricCard {
+  cursor: pointer;
+}
+
+button.workspacePinnedSummaryMetricCard:hover {
+  background: transparent;
+  color: var(--biof3-accent);
+}
+
+.workspacePinnedSummaryMetricCard > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--biof3-text-tertiary);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.workspacePinnedSummaryMetricCard > strong {
+  margin-left: auto;
+  color: var(--biof3-text);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1;
+}
+
+.workspacePinnedSummaryMetricCard > strong small {
+  color: var(--biof3-text-tertiary);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.workspacePinnedSummaryTaskRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 6px 3px;
+  border: 0;
+  border-top: 1px solid var(--biof3-border-subtle);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.workspacePinnedSummaryTaskRow:hover {
+  color: var(--biof3-accent);
+}
+
+.workspacePinnedSummaryTaskRow > svg {
+  flex-shrink: 0;
+  color: var(--biof3-text-tertiary);
+}
+
 .workspacePinnedSummarySectionHeading {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 7px;
+  min-height: 24px;
 }
 
 .workspacePinnedSummarySectionHeading > button {
@@ -1512,29 +1638,34 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
-  border-radius: 7px;
-  background: var(--biof3-bg-subtle);
+  border-radius: 0;
+  background: transparent;
   color: var(--biof3-text-secondary);
 }
 
 .workspacePinnedSummaryActivityIcon[data-status='running'] {
-  background: var(--biof3-status-success-bg);
+  background: transparent;
   color: var(--biof3-status-success-fg);
 }
 
 .workspacePinnedSummaryActivityIcon[data-status='failed'] {
-  background: var(--biof3-status-error-bg);
+  background: transparent;
   color: var(--biof3-status-error-fg);
 }
 
 .workspacePinnedSummarySectionTitle {
-  padding: 0 6px;
+  padding: 0;
   font-size: 10px;
   font-weight: 600;
   color: var(--biof3-text-tertiary);
+}
+
+.workspacePinnedSummaryQueueLabel {
+  color: var(--biof3-text-tertiary);
+  font-size: 9px;
 }
 
 .workspaceWorkflowStateLabel {
@@ -1615,7 +1746,12 @@
 
 .workspacePinnedSummaryHistory {
   display: grid;
-  gap: 4px;
+  gap: 0;
+  padding: 0;
+  border-top: 1px solid var(--biof3-border-subtle);
+  border-bottom: 1px solid var(--biof3-border-subtle);
+  border-radius: 0;
+  background: transparent;
 }
 
 .workspacePinnedSummaryHistoryItem {
@@ -1624,8 +1760,8 @@
   gap: 8px;
   width: 100%;
   border: none;
-  border-radius: 8px;
-  padding: 5px 6px;
+  border-radius: 0;
+  padding: 6px 3px;
   background: transparent;
   color: inherit;
   text-align: left;
@@ -1633,7 +1769,12 @@
 }
 
 .workspacePinnedSummaryHistoryItem:hover {
-  background: var(--biof3-user-bubble-bg);
+  background: transparent;
+  color: var(--biof3-accent);
+}
+
+.workspacePinnedSummaryHistoryItem + .workspacePinnedSummaryHistoryItem {
+  border-top: 1px solid var(--biof3-border-subtle);
 }
 
 .workspacePinnedSummaryEmpty {
@@ -1643,6 +1784,54 @@
   padding: 4px 6px;
   color: var(--biof3-text-tertiary);
   font-size: 11px;
+}
+
+.workspacePinnedSummaryEnvironment {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.workspacePinnedSummaryEnvironmentCard {
+  overflow: hidden;
+  border-top: 1px solid var(--biof3-border-subtle);
+  border-bottom: 1px solid var(--biof3-border-subtle);
+  border-radius: 0;
+  background: transparent;
+}
+
+.workspacePinnedSummaryEnvironmentRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 32px;
+  padding: 6px 3px;
+  color: var(--biof3-text-secondary);
+  font-size: 10px;
+}
+
+.workspacePinnedSummaryEnvironmentRow + .workspacePinnedSummaryEnvironmentRow {
+  border-top: 1px solid var(--biof3-border-subtle);
+}
+
+.workspacePinnedSummaryEnvironmentLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  color: var(--biof3-text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.workspacePinnedSummaryResourceFacts {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--biof3-text-tertiary);
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .workspacePinnedSummaryFooter {
@@ -1659,6 +1848,44 @@
   color: var(--biof3-text-tertiary);
 }
 
+.workspaceResourceSummary {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--biof3-border-subtle);
+  color: var(--biof3-text-muted);
+  font-size: 11px;
+}
+
+.workspaceResourceSummaryState {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--biof3-text-secondary);
+  white-space: nowrap;
+}
+
+.workspaceResourceSummaryState i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--biof3-status-online);
+}
+
+.workspacePinnedSummaryEnvironmentRow[data-state='warning'] .workspaceResourceSummaryState i {
+  background: var(--biof3-status-warning-fg);
+}
+
+.workspacePinnedSummaryEnvironmentRow[data-state='unavailable'] .workspaceResourceSummaryState i,
+.workspacePinnedSummaryEnvironmentRow[data-state='unknown'] .workspaceResourceSummaryState i {
+  background: var(--biof3-danger);
+}
+
+.workspaceResourceSummary[data-state='warning'] .workspaceResourceSummaryState i { background: var(--biof3-status-warning-fg); }
+.workspaceResourceSummary[data-state='unavailable'] .workspaceResourceSummaryState i,
+.workspaceResourceSummary[data-state='unknown'] .workspaceResourceSummaryState i { background: var(--biof3-danger); }
+
 .workspacePinnedSummaryFooter span {
   display: inline-flex;
   align-items: center;
@@ -1666,6 +1893,8 @@
 }
 
 .workspacePinnedSummaryRuntimes {
+  display: inline-flex;
+  align-items: center;
   gap: 7px !important;
   flex-shrink: 0;
 }
@@ -1698,13 +1927,22 @@
 }
 
 
-.workspacePinnedSummaryCompactMode .workspacePinnedSummarySection:nth-of-type(3) {
+.workspacePinnedSummaryCompactMode .workspacePinnedSummaryMetricCard {
+  min-height: 32px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.workspacePinnedSummaryCompactMode .workspacePinnedSummaryHistoryItem:nth-child(n + 3) {
   display: none;
 }
 
 .workspacePinnedSummaryHeader:focus-visible,
 .workspacePinnedSummaryRow:focus-visible,
 .workspacePinnedSummarySource:focus-visible,
+.workspacePinnedSummaryPrimaryCard:focus-visible,
+.workspacePinnedSummaryMetricCard:focus-visible,
+.workspacePinnedSummaryTaskRow:focus-visible,
 .workspacePinnedSummaryActionBtn:focus-visible,
 .workspacePinnedSummaryFooterBtn:focus-visible {
   outline: 2px solid rgba(13, 148, 136, 0.35);
@@ -2212,6 +2450,124 @@
   padding: 8px 12px;
   border-bottom: 1px solid var(--biof3-border);
   background: var(--biof3-surface-alt);
+}
+
+.resultScientificDelivery {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--biof3-border);
+  border-left: 3px solid var(--biof3-status-online);
+  background: var(--biof3-bg-surface);
+}
+
+.resultScientificDelivery[data-status='degraded'] {
+  border-left-color: var(--biof3-warning-text);
+}
+
+.resultScientificDelivery[data-status='blocked'] {
+  border-left-color: var(--biof3-danger);
+}
+
+.resultScientificDeliveryHeader,
+.resultScientificDeliveryMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.resultScientificDeliveryMeta {
+  flex-wrap: wrap;
+}
+
+.resultScientificDeliveryHeader strong {
+  font-size: 12px;
+  color: var(--biof3-text);
+}
+
+.resultScientificDeliveryHeader span,
+.resultScientificDeliveryMeta {
+  font-size: 10px;
+  color: var(--biof3-text-tertiary);
+}
+
+.resultScientificDeliveryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 8px 0;
+}
+
+.resultScientificDeliveryGrid small {
+  color: var(--biof3-text-tertiary);
+  font-size: 10px;
+}
+
+.resultScientificDeliveryGrid p {
+  margin: 3px 0 0;
+  color: var(--biof3-text-secondary);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.resultScientificDeliveryActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resultScientificDeliveryMeta a,
+.resultScientificDeliveryActions button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--biof3-accent);
+  font: inherit;
+  font-size: 10px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.resultScientificDeliveryActions button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.resultReplayPackageMessage {
+  margin-top: 6px;
+  color: var(--biof3-text-tertiary);
+  font-size: 10px;
+}
+
+.resultReportReproductionActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.resultReportReproductionActions a,
+.resultReportReproductionActions button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--biof3-accent);
+  font: inherit;
+  font-size: 10px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+@media (max-width: 860px) {
+  .resultScientificDeliveryGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@container (max-width: 520px) {
+  .resultScientificDeliveryGrid {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
 }
 
 .resultDeliveryCopy {
@@ -4743,23 +5099,46 @@ body.biof3-resizing-columns * {
 .fileTreeRow {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 4px;
+  width: 100%;
+  min-width: 0;
+  gap: 5px;
+  min-height: 27px;
+  padding-top: 3px;
+  padding-right: 6px;
+  padding-bottom: 3px;
+  border: 0;
+  color: var(--biof3-text);
+  background: transparent;
+  text-align: left;
   cursor: pointer;
-  border-radius: 4px;
-  transition: background 0.1s;
+  border-radius: 6px;
+  transition: background 0.12s ease, box-shadow 0.12s ease;
   font-size: 13px;
+  font-family: inherit;
 }
 
 .fileTreeRow:hover {
   background: var(--biof3-hover);
-  color: var(--biof3-text);
+}
+
+.fileTreeRow:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--biof3-accent);
 }
 
 .fileTreeRowActive {
   background: var(--biof3-accent-bg);
-  color: var(--biof3-accent);
-  font-weight: 500;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--biof3-accent) 46%, transparent);
+}
+
+.fileTreeChevron {
+  width: 13px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 13px;
+  color: var(--biof3-text-tertiary);
 }
 
 .fileTreeName {
@@ -4770,32 +5149,32 @@ body.biof3-resizing-columns * {
 }
 
 .fileTreeLink {
-  border: none;
-  background: transparent;
-  padding: 0;
   color: var(--biof3-text);
-  text-decoration: none;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1;
   min-width: 0;
-  text-align: left;
-  cursor: pointer;
-}
-
-.fileTreeLink:hover {
-  color: var(--biof3-accent);
 }
 
 .fileTreeSize {
-  font-size: 10px;
+  font-size: 9px;
   color: var(--biof3-text-tertiary);
   flex-shrink: 0;
   margin-left: auto;
+  opacity: 0;
+  font-variant-numeric: tabular-nums;
+  transition: opacity 0.12s ease;
+}
+
+.fileTreeRow:hover .fileTreeSize,
+.fileTreeRow:focus-visible .fileTreeSize,
+.fileTreeRowActive .fileTreeSize {
+  opacity: 0.72;
 }
 
 .workspaceFiles {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -4827,75 +5206,57 @@ body.biof3-resizing-columns * {
   background: var(--biof3-surface);
 }
 
-.workspaceFileTabs {
+.workspaceBreadcrumb {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   flex: 1;
   min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.workspaceFileTabs::-webkit-scrollbar {
-  display: none;
-}
-
-.workspaceTabsEmpty {
-  color: var(--biof3-text-tertiary);
+  overflow: hidden;
+  color: var(--biof3-text-secondary);
   font-size: 12px;
-  padding: 0 4px;
 }
 
-.workspaceFileTab {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  flex: 0 0 auto;
-  max-width: 180px;
-  height: 28px;
-  border: 1px solid transparent;
-  border-radius: 7px;
-  padding: 0 6px 0 8px;
+.workspaceBreadcrumbSegment {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 150px;
+  overflow: hidden;
+  padding: 3px 2px;
+  border: 0;
+  border-radius: 4px;
   background: transparent;
   color: var(--biof3-text-secondary);
+  font: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   cursor: pointer;
-  font-size: 12px;
 }
 
-.workspaceFileTab:hover {
+.workspaceBreadcrumbSegment:hover {
   background: var(--biof3-hover);
   color: var(--biof3-text);
 }
 
-.workspaceFileTabActive {
-  background: var(--biof3-hover);
-  border-color: var(--biof3-border);
+.workspaceBreadcrumbSeparator {
+  flex: 0 0 auto;
+  color: var(--biof3-text-tertiary);
+}
+
+.workspaceBreadcrumbFile {
+  flex: 0 1 auto;
+  min-width: 32px;
+  overflow: hidden;
   color: var(--biof3-text);
   font-weight: 600;
-}
-
-.workspaceFileTab span:not(.workspaceFileTabClose) {
-  min-width: 0;
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.workspaceFileTabClose {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
+.workspaceBreadcrumbEmpty {
+  flex: 0 0 auto;
+  padding-left: 4px;
   color: var(--biof3-text-tertiary);
-}
-
-.workspaceFileTabClose:hover {
-  background: var(--biof3-border);
-  color: var(--biof3-text);
 }
 
 .workspaceTreeToggle {
@@ -4906,7 +5267,7 @@ body.biof3-resizing-columns * {
   justify-content: center;
   gap: 2px;
   flex-shrink: 0;
-  margin-left: auto;
+  margin-left: 0;
   width: 36px;
   height: 30px;
   border: none;
@@ -4982,39 +5343,12 @@ body.biof3-resizing-columns * {
   font-size: 13px;
 }
 
-.workspacePreviewHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  min-height: 40px;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--biof3-border);
-}
-
-.workspacePreviewTitle {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  color: var(--biof3-text);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.workspacePreviewTitle span {
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .workspacePreviewActions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 4px;
-  flex-wrap: wrap;
+  flex: 0 0 auto;
 }
 
 .workspacePreviewOpen {
@@ -5042,6 +5376,12 @@ body.biof3-resizing-columns * {
 .workspacePreviewOpen:disabled {
   cursor: progress;
   opacity: 0.56;
+}
+
+@container (max-width: 640px) {
+  .workspaceFilesToolbar {
+    gap: 4px;
+  }
 }
 
 .workspacePreviewError {

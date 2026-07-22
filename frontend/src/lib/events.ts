@@ -33,6 +33,13 @@ export const biof3Events = {
   projectOpenWorkspaceFile: 'biof3:project-open-workspace-file',
 
   /**
+   * Signals that files in one project may have changed. Agent workspace
+   * writes emit this immediately; the Files panel also polls while visible
+   * so terminal and external-editor writes converge without manual reload.
+   */
+  projectWorkspaceChanged: 'biof3:project-workspace-changed',
+
+  /**
    * Fired by project-workspace (handleAskAgent); listened by SimpleChat to inject
    * a prompt into the chat input without navigating.
    */
@@ -81,12 +88,18 @@ export interface ProjectOpenWorkspaceFileDetail {
   openWithSystemApp?: boolean;
 }
 
+export interface ProjectWorkspaceChangedDetail {
+  projectId: string;
+  source: 'agent' | 'terminal' | 'external' | 'manual';
+}
+
 export type BioF3EventMap = {
   [biof3Events.onboardingDone]: undefined;
   [biof3Events.softRefresh]: undefined;
   [biof3Events.projectOpenResult]: ProjectOpenResultDetail;
   [biof3Events.projectOpenArtifact]: ProjectOpenArtifactDetail;
   [biof3Events.projectOpenWorkspaceFile]: ProjectOpenWorkspaceFileDetail;
+  [biof3Events.projectWorkspaceChanged]: ProjectWorkspaceChangedDetail;
   [biof3Events.copilotAsk]: CopilotAskDetail;
   [biof3Events.browserBack]: undefined;
   [biof3Events.browserForward]: undefined;

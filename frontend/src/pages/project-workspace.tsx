@@ -16,6 +16,7 @@ import { BottomTerminal } from '@/components/workspace-panels/BottomTerminal';
 import { CenterPanel, type CenterPanelContext } from '@/components/workspace-panels/CenterPanel';
 import { LeftPanel, type LeftPanelContext } from '@/components/workspace-panels/LeftPanel';
 import { RightPanel, type RightPanelContext } from '@/components/workspace-panels/RightPanel';
+import { WorkspaceFileIcon } from '@/components/workspace-panels/WorkspaceFileIcon';
 import { getProject, listProjectJobs, listDatasetsByProject, listProjects, updateProject, createProject, setProjectStatus } from '@/lib/project-store';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
@@ -833,7 +834,11 @@ export function ProjectWorkspace(): React.ReactElement {
   );
 
   const showPinnedSummary = workspaceMode === 'chat' || workspaceMode === 'scheduled';
-  const summaryOpenWidth = Math.min(224, Math.max(0, sessionFrameWidth - 36));
+  const summaryOpenWidth = sessionFrameWidth === 0
+    ? 300
+    : summaryVisibility === 'expanded'
+      ? Math.min(312, Math.max(292, Math.round(sessionFrameWidth * 0.26)))
+      : Math.min(292, Math.max(276, Math.round(sessionFrameWidth * 0.32)));
   const summaryCardOpen = summaryVisibility !== 'hidden' && summaryOpen;
   const { workflow: activeWorkflow } = useHarnessWorkflowStatus(
     activeJob?.id,
@@ -1266,7 +1271,7 @@ interface FileEntry {
   name: string;
   type: 'file' | 'dir';
   size?: number;
-  mtime?: number;
+  modifiedAt?: number;
 }
 
 function FileTreeList({
@@ -1278,6 +1283,7 @@ function FileTreeList({
   fileUrlFor,
   onOpenFile,
   activePath,
+  refreshVersion,
   depth = 0,
 }: {
   entries: FileEntry[];
@@ -1288,11 +1294,20 @@ function FileTreeList({
   fileUrlFor: (path: string) => string;
   onOpenFile: (file: ActiveWorkspaceFile) => void;
   activePath?: string | null;
+  refreshVersion: number;
   depth?: number;
 }): React.ReactElement {
+  const orderedEntries = useMemo(
+    () => [...entries].sort((left, right) => {
+      if (left.type !== right.type) return left.type === 'dir' ? -1 : 1;
+      return left.name.localeCompare(right.name, undefined, { numeric: true, sensitivity: 'base' });
+    }),
+    [entries]
+  );
+
   return (
-    <ul className={styles.fileTree} style={{ paddingLeft: depth > 0 ? 16 : 0 }}>
-      {entries.map((entry) => {
+    <ul className={styles.fileTree} role={depth === 0 ? 'tree' : 'group'}>
+      {orderedEntries.map((entry) => {
         const fullPath = prefix ? `${prefix}/${entry.name}` : entry.name;
         const isExpanded = expandedDirs.has(fullPath);
         return (
@@ -1308,6 +1323,7 @@ function FileTreeList({
             fileUrlFor={fileUrlFor}
             onOpenFile={onOpenFile}
             activePath={activePath}
+            refreshVersion={refreshVersion}
           />
         );
       })}
@@ -1326,6 +1342,7 @@ function FileTreeItem({
   fileUrlFor,
   onOpenFile,
   activePath,
+  refreshVersion,
 }: {
   entry: FileEntry;
   fullPath: string;
@@ -1337,6 +1354,7 @@ function FileTreeItem({
   fileUrlFor: (path: string) => string;
   onOpenFile: (file: ActiveWorkspaceFile) => void;
   activePath?: string | null;
+  refreshVersion: number;
 }): React.ReactElement {
   const [children, setChildren] = useState<FileEntry[]>([]);
 
@@ -1344,49 +1362,53 @@ function FileTreeItem({
     if (isExpanded && entry.type === 'dir') {
       onFetchDir(fullPath).then(setChildren);
     }
-  }, [isExpanded, entry.type, fullPath, onFetchDir]);
+  }, [isExpanded, entry.type, fullPath, onFetchDir, refreshVersion]);
 
   const fileUrl = fileUrlFor(fullPath);
   const isActive = entry.type === 'file' && activePath === fullPath;
 
   return (
-    <li className={styles.fileTreeNode}>
-      <div
+    <li className={styles.fileTreeNode} role="none">
+      <button
+        type="button"
         className={`${styles.fileTreeRow} ${isActive ? styles.fileTreeRowActive : ''}`}
-        style={{ paddingLeft: depth * 16 }}
-        onClick={() => entry.type === 'dir' && onToggleDir(fullPath)}
+        style={{ paddingLeft: 5 + depth * 16 }}
+        onClick={() => {
+          if (entry.type === 'dir') {
+            onToggleDir(fullPath);
+            return;
+          }
+          onOpenFile({
+            path: fullPath,
+            name: entry.name,
+            url: fileUrl,
+            size: entry.size,
+          });
+        }}
+        role="treeitem"
+        aria-expanded={entry.type === 'dir' ? isExpanded : undefined}
+        aria-selected={entry.type === 'file' ? isActive : undefined}
+        title={entry.type === 'dir' ? `${isExpanded ? '收起' : '展开'} ${entry.name}` : `预览 ${entry.name}`}
       >
         {entry.type === 'dir' ? (
           <>
-            <Icon name={isExpanded ? 'chevron-down' : 'chevron-right'} size={12} />
-            <Icon name="folder" size={14} />
+            <span className={styles.fileTreeChevron}>
+              <Icon name={isExpanded ? 'chevron-down' : 'chevron-right'} size={13} />
+            </span>
+            <WorkspaceFileIcon name={entry.name} type="dir" />
             <span className={styles.fileTreeName}>{entry.name}</span>
           </>
         ) : (
           <>
-            <span style={{ width: 12, display: 'inline-block' }} />
-            <Icon name="file" size={14} />
-            <button
-              className={styles.fileTreeLink}
-              onClick={(event) => {
-                event.stopPropagation();
-                onOpenFile({
-                  path: fullPath,
-                  name: entry.name,
-                  url: fileUrl,
-                  size: entry.size,
-                });
-              }}
-              title="预览文件"
-            >
-              {entry.name}
-            </button>
+            <span className={styles.fileTreeChevron} />
+            <WorkspaceFileIcon name={entry.name} type="file" />
+            <span className={styles.fileTreeLink}>{entry.name}</span>
             {entry.size != null && (
               <span className={styles.fileTreeSize}>{formatSize(entry.size)}</span>
             )}
           </>
         )}
-      </div>
+      </button>
       {isExpanded && entry.type === 'dir' && children.length > 0 && (
         <FileTreeList
           entries={children}
@@ -1397,6 +1419,7 @@ function FileTreeItem({
           fileUrlFor={fileUrlFor}
           onOpenFile={onOpenFile}
           activePath={activePath}
+          refreshVersion={refreshVersion}
           depth={depth + 1}
         />
       )}
@@ -1505,17 +1528,17 @@ function HarnessIndexCard({
 
 export function RightFileTree({
   project,
+  active,
   openFiles,
   activeFile,
   onOpenFile,
-  onSelectFile,
   onCloseFile,
 }: {
   project: Project;
+  active: boolean;
   openFiles: ActiveWorkspaceFile[];
   activeFile: ActiveWorkspaceFile | null;
   onOpenFile: (file: ActiveWorkspaceFile) => void;
-  onSelectFile: (file: ActiveWorkspaceFile) => void;
   onCloseFile: (path: string) => void;
 }): React.ReactElement {
   const [tree, setTree] = useState<FileEntry[]>([]);
@@ -1526,6 +1549,12 @@ export function RightFileTree({
   const [harnessIndex, setHarnessIndex] = useState<HarnessIndexSummary | null>(null);
   const [harnessLoading, setHarnessLoading] = useState(false);
   const [harnessError, setHarnessError] = useState('');
+  const [refreshVersion, setRefreshVersion] = useState(0);
+  const [previewVersion, setPreviewVersion] = useState(0);
+  const [openError, setOpenError] = useState('');
+  const [opening, setOpening] = useState(false);
+  const activeFileSignatureRef = useRef<string | null>(null);
+  const harnessRequestRef = useRef(0);
 
   const fetchDir = useCallback(async (prefix: string) => {
     try {
@@ -1538,35 +1567,96 @@ export function RightFileTree({
     return [];
   }, [project.id]);
 
-  useEffect(() => {
-    setLoading(true);
-    fetchDir('').then((entries) => {
-      setTree(entries);
-      setLoading(false);
-    });
-  }, [fetchDir, project.id]);
+  const refreshFiles = useCallback(async (forcePreview = false) => {
+    const rootEntries = await fetchDir('');
+    setTree(rootEntries);
+    setLoading(false);
+    setRefreshVersion((value) => value + 1);
+
+    if (!activeFile?.path) return;
+    const segments = activeFile.path.split('/').filter(Boolean);
+    const fileName = segments.pop() || activeFile.name;
+    const parent = segments.join('/');
+    const entries = parent ? await fetchDir(parent) : rootEntries;
+    const current = entries.find((entry) => entry.type === 'file' && entry.name === fileName);
+    const signature = current
+      ? `${current.size ?? -1}:${current.modifiedAt ?? -1}`
+      : 'missing';
+    const previous = activeFileSignatureRef.current;
+    activeFileSignatureRef.current = signature;
+    if (forcePreview || (previous !== null && previous !== signature)) {
+      setPreviewVersion((value) => value + 1);
+    }
+  }, [activeFile?.name, activeFile?.path, fetchDir]);
+
+  const refreshHarnessIndex = useCallback(async (showLoading = false) => {
+    const requestId = harnessRequestRef.current + 1;
+    harnessRequestRef.current = requestId;
+    if (showLoading) setHarnessLoading(true);
+    setHarnessError('');
+    try {
+      const data = await fetchHarnessIndex({ scope: 'project', projectId: project.id, maxFiles: 120 });
+      if (harnessRequestRef.current === requestId) setHarnessIndex(data.index || null);
+    } catch (error) {
+      if (harnessRequestRef.current !== requestId) return;
+      setHarnessIndex(null);
+      setHarnessError((error as Error).message || '识别失败');
+    } finally {
+      if (showLoading && harnessRequestRef.current === requestId) setHarnessLoading(false);
+    }
+  }, [project.id]);
 
   useEffect(() => {
-    let cancelled = false;
-    setHarnessLoading(true);
-    setHarnessError('');
-    fetchHarnessIndex({ scope: 'project', projectId: project.id, maxFiles: 120 })
-      .then((data) => {
-        if (cancelled) return;
-        setHarnessIndex(data.index || null);
-      })
-      .catch((error: Error) => {
-        if (cancelled) return;
-        setHarnessIndex(null);
-        setHarnessError(error.message || '识别失败');
-      })
-      .finally(() => {
-        if (!cancelled) setHarnessLoading(false);
+    activeFileSignatureRef.current = null;
+    setOpenError('');
+    setOpening(false);
+    if (activeFile?.path) {
+      const segments = activeFile.path.split('/').filter(Boolean);
+      segments.pop();
+      setExpandedDirs((current) => {
+        const next = new Set(current);
+        segments.forEach((_segment, index) => {
+          next.add(segments.slice(0, index + 1).join('/'));
+        });
+        return next;
       });
+    }
+  }, [activeFile?.path]);
+
+  useEffect(() => {
+    setLoading(true);
+    void refreshFiles();
+  }, [project.id, refreshFiles]);
+
+  useEffect(() => {
+    if (!active) return;
+    void refreshFiles();
+    const timer = window.setInterval(() => {
+      if (!document.hidden) void refreshFiles();
+    }, 2000);
+    const unsubscribe = subscribeBioF3Event(biof3Events.projectWorkspaceChanged, (detail) => {
+      if (detail.projectId === project.id) {
+        void refreshFiles(true);
+        void refreshHarnessIndex(false);
+      }
+    });
     return () => {
-      cancelled = true;
+      window.clearInterval(timer);
+      unsubscribe();
     };
-  }, [project.id]);
+  }, [active, project.id, refreshFiles, refreshHarnessIndex]);
+
+  useEffect(() => {
+    void refreshHarnessIndex(true);
+  }, [project.id, refreshHarnessIndex]);
+
+  useEffect(() => {
+    if (!active) return;
+    const timer = window.setInterval(() => {
+      if (!document.hidden) void refreshHarnessIndex(false);
+    }, 10000);
+    return () => window.clearInterval(timer);
+  }, [active, refreshHarnessIndex]);
 
   const toggleDir = useCallback(async (dirPath: string) => {
     setExpandedDirs((prev) => {
@@ -1580,6 +1670,62 @@ export function RightFileTree({
   const handleOpenFile = useCallback((file: ActiveWorkspaceFile) => {
     onOpenFile(file);
   }, [onOpenFile]);
+
+  const activePreviewUrl = useMemo(() => {
+    if (!activeFile?.url) return '';
+    const separator = activeFile.url.includes('?') ? '&' : '?';
+    return `${activeFile.url}${separator}workspaceRevision=${previewVersion}`;
+  }, [activeFile?.url, previewVersion]);
+
+  const openWithSystemApp = useCallback(async () => {
+    if (!activeFile || !project.workspacePath) return;
+    const filesBridge = getBridge('files');
+    if (!filesBridge?.openWorkspaceFile) {
+      setOpenError('桌面文件打开能力不可用');
+      return;
+    }
+    setOpening(true);
+    setOpenError('');
+    try {
+      const result = await filesBridge.openWorkspaceFile(project.workspacePath, activeFile.path);
+      if (!result.ok) setOpenError(result.error || '系统应用无法打开该文件');
+    } catch (error) {
+      setOpenError((error as Error).message || '系统应用无法打开该文件');
+    } finally {
+      setOpening(false);
+    }
+  }, [activeFile, project.workspacePath]);
+
+  const downloadActiveFile = useCallback(() => {
+    if (!activeFile || !activePreviewUrl) return;
+    const link = document.createElement('a');
+    link.href = activePreviewUrl;
+    link.download = activeFile.name;
+    link.rel = 'noopener';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }, [activeFile, activePreviewUrl]);
+
+  const breadcrumbSegments = useMemo(
+    () => activeFile?.path.split('/').filter(Boolean) || [],
+    [activeFile?.path]
+  );
+  const workspaceRootName = useMemo(() => {
+    const pathSegments = String(project.workspacePath || '').split(/[\\/]/).filter(Boolean);
+    return pathSegments[pathSegments.length - 1] || project.name;
+  }, [project.name, project.workspacePath]);
+
+  const revealBreadcrumbDirectory = useCallback((index: number) => {
+    setTreeOpen(true);
+    setExpandedDirs((current) => {
+      const next = new Set(current);
+      for (let cursor = 0; cursor <= index; cursor += 1) {
+        next.add(breadcrumbSegments.slice(0, cursor + 1).join('/'));
+      }
+      return next;
+    });
+  }, [breadcrumbSegments]);
 
   const startTreeResize = useCallback((event: React.MouseEvent) => {
     event.preventDefault();
@@ -1603,41 +1749,34 @@ export function RightFileTree({
   return (
     <div className={styles.workspaceFiles}>
       <div className={styles.workspaceFilesToolbar}>
-        <div className={styles.workspaceFileTabs}>
-          {openFiles.length === 0 ? (
-            <span className={styles.workspaceTabsEmpty}>选择文件预览</span>
-          ) : (
-            openFiles.map((file) => (
-              <button
-                key={file.path}
-                className={`${styles.workspaceFileTab} ${activeFile?.path === file.path ? styles.workspaceFileTabActive : ''}`}
-                onClick={() => onSelectFile(file)}
-                title={file.path}
-              >
-                <Icon name={isImageFile(file.name) ? 'image' : 'file'} size={13} />
-                <span>{file.name}</span>
-                <span
-                  className={styles.workspaceFileTabClose}
-                  role="button"
-                  tabIndex={0}
-                  title="关闭"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onCloseFile(file.path);
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      onCloseFile(file.path);
-                    }
-                  }}
-                >
-                  <Icon name="x" size={12} />
-                </span>
-              </button>
-            ))
-          )}
+        <div className={styles.workspaceBreadcrumb} title={activeFile?.path || project.workspacePath || project.name}>
+          <button
+            type="button"
+            className={styles.workspaceBreadcrumbSegment}
+            onClick={() => setTreeOpen(true)}
+          >
+            {workspaceRootName}
+          </button>
+          {breadcrumbSegments.map((segment, index) => {
+            const isFile = index === breadcrumbSegments.length - 1;
+            return (
+              <React.Fragment key={`${segment}-${index}`}>
+                <Icon name="chevron-right" size={12} className={styles.workspaceBreadcrumbSeparator} />
+                {isFile ? (
+                  <span className={styles.workspaceBreadcrumbFile}>{segment}</span>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.workspaceBreadcrumbSegment}
+                    onClick={() => revealBreadcrumbDirectory(index)}
+                  >
+                    {segment}
+                  </button>
+                )}
+              </React.Fragment>
+            );
+          })}
+          {!activeFile && <span className={styles.workspaceBreadcrumbEmpty}>选择文件预览</span>}
         </div>
         <button
           className={styles.workspaceTreeToggle}
@@ -1647,10 +1786,28 @@ export function RightFileTree({
           <Icon name={treeOpen ? 'chevron-down' : 'chevron-right'} size={13} />
           <Icon name="folder" size={14} />
         </button>
+        {activeFile && (
+          <button
+            type="button"
+            className={styles.workspaceTreeToggle}
+            onClick={() => onCloseFile(activeFile.path)}
+            title={openFiles.length > 1 ? `关闭当前文件（另有 ${openFiles.length - 1} 个已打开文件）` : '关闭当前文件'}
+            aria-label="关闭当前文件"
+          >
+            <Icon name="x" size={13} />
+          </button>
+        )}
       </div>
       <div className={styles.workspaceFilesMain}>
         <div className={styles.workspaceFilePreviewPane}>
-          <WorkspaceFilePreview file={activeFile} workspacePath={project.workspacePath || ''} />
+          <WorkspaceFilePreview
+            file={activeFile}
+            refreshVersion={previewVersion}
+            openError={openError}
+            opening={opening}
+            onOpen={openWithSystemApp}
+            onDownload={downloadActiveFile}
+          />
         </div>
         {treeOpen && (
           <aside
@@ -1679,6 +1836,7 @@ export function RightFileTree({
                   }
                   onOpenFile={handleOpenFile}
                   activePath={activeFile?.path || null}
+                  refreshVersion={refreshVersion}
                   depth={0}
                 />
               )}
@@ -1692,18 +1850,24 @@ export function RightFileTree({
 
 function WorkspaceFilePreview({
   file,
-  workspacePath,
+  refreshVersion,
+  openError,
+  opening,
+  onOpen,
+  onDownload,
 }: {
   file: ActiveWorkspaceFile | null;
-  workspacePath: string;
+  refreshVersion: number;
+  openError: string;
+  opening: boolean;
+  onOpen: () => void | Promise<void>;
+  onDownload: () => void;
 }): React.ReactElement {
   const { resolvedTheme } = useTheme();
   const [text, setText] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'unsupported' | 'error'>('idle');
   const [previewData, setPreviewData] = useState<string[][] | null>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
-  const [openError, setOpenError] = useState('');
-  const [opening, setOpening] = useState(false);
   const [officePreview, setOfficePreview] = useState<OfficePreviewModel | null>(null);
   const [officeStatus, setOfficeStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
 
@@ -1716,6 +1880,11 @@ function WorkspaceFilePreview({
   const isJson = isJsonFile(file?.name);
   const officeKind = detectOfficeKind(file?.name);
   const codeLanguage = codeLanguageForFile(file?.name);
+  const previewUrl = useMemo(() => {
+    if (!file?.url) return '';
+    const separator = file.url.includes('?') ? '&' : '?';
+    return `${file.url}${separator}workspaceRevision=${refreshVersion}`;
+  }, [file?.url, refreshVersion]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1734,7 +1903,7 @@ function WorkspaceFilePreview({
     if (officeKind) {
       setOfficeStatus('loading');
       loadOfficePreview({
-        url: file.url,
+        url: previewUrl,
         name: file.name,
         authToken: getToken() || undefined,
       })
@@ -1757,7 +1926,7 @@ function WorkspaceFilePreview({
       return () => { cancelled = true; };
     }
     setStatus('loading');
-    fetch(file.url)
+    fetch(previewUrl, { cache: 'no-store' })
       .then((resp) => {
         if (!resp.ok) throw new Error('preview failed');
         return resp.text();
@@ -1779,42 +1948,7 @@ function WorkspaceFilePreview({
         if (!cancelled) setStatus('error');
       });
     return () => { cancelled = true; };
-  }, [file, isCsv, isHtml, isImage, isJson, isPdf, isText, officeKind]);
-
-  useEffect(() => {
-    setOpenError('');
-    setOpening(false);
-  }, [file?.path]);
-
-  const openWithSystemApp = useCallback(async () => {
-    if (!file || !workspacePath) return;
-    const filesBridge = getBridge('files');
-    if (!filesBridge?.openWorkspaceFile) {
-      setOpenError('桌面文件打开能力不可用');
-      return;
-    }
-    setOpening(true);
-    setOpenError('');
-    try {
-      const result = await filesBridge.openWorkspaceFile(workspacePath, file.path);
-      if (!result.ok) setOpenError(result.error || '系统应用无法打开该文件');
-    } catch (error) {
-      setOpenError((error as Error).message || '系统应用无法打开该文件');
-    } finally {
-      setOpening(false);
-    }
-  }, [file, workspacePath]);
-
-  const downloadCopy = useCallback(() => {
-    if (!file) return;
-    const link = document.createElement('a');
-    link.href = file.url;
-    link.download = file.name;
-    link.rel = 'noopener';
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  }, [file]);
+  }, [file, isCsv, isHtml, isImage, isJson, isPdf, isText, officeKind, previewUrl]);
 
   if (!file) {
     return (
@@ -1837,33 +1971,6 @@ function WorkspaceFilePreview({
 
   return (
     <div className={styles.workspacePreview}>
-      <div className={styles.workspacePreviewHeader}>
-        <div className={styles.workspacePreviewTitle}>
-          <Icon name={isImage ? 'image' : 'file'} size={14} />
-          <span>{file.name}</span>
-        </div>
-        <div className={styles.workspacePreviewActions}>
-          <button
-            type="button"
-            className={styles.workspacePreviewOpen}
-            onClick={() => void openWithSystemApp()}
-            disabled={opening}
-            title="使用系统默认应用打开"
-          >
-            <Icon name="file" size={13} />
-            {opening ? '打开中' : '系统打开'}
-          </button>
-          <button
-            type="button"
-            className={styles.workspacePreviewOpen}
-            onClick={downloadCopy}
-            title="下载文件副本"
-          >
-            <Icon name="download" size={13} />
-            下载副本
-          </button>
-        </div>
-      </div>
       {openError && <div className={styles.workspacePreviewError}>{openError}</div>}
       <div className={styles.workspacePreviewBody}>
         {status === 'loading' && <p className={styles.panelEmpty}>加载预览…</p>}
@@ -1872,16 +1979,16 @@ function WorkspaceFilePreview({
           <BinaryPreviewCard
             file={file}
             opening={opening}
-            onOpen={openWithSystemApp}
-            onDownload={downloadCopy}
+            onOpen={onOpen}
+            onDownload={onDownload}
           />
         )}
         {status === 'unsupported' && officePreview && officePreview.fallback && (
           <BinaryPreviewCard
             file={file}
             opening={opening}
-            onOpen={openWithSystemApp}
-            onDownload={downloadCopy}
+            onOpen={onOpen}
+            onDownload={onDownload}
             reason={officePreview.fallback.reason}
           />
         )}
@@ -1892,19 +1999,19 @@ function WorkspaceFilePreview({
           <OfficePreviewPane preview={officePreview} onAssetOpen={setLightboxSrc} />
         )}
         {status === 'ready' && fallbackKind === 'image' && (
-          <button className={styles.workspaceImageButton} onClick={() => setLightboxSrc(file.url)}>
-            <img src={file.url} alt={file.name} className={styles.workspaceImagePreview} />
+          <button className={styles.workspaceImageButton} onClick={() => setLightboxSrc(previewUrl)}>
+            <img src={previewUrl} alt={file.name} className={styles.workspaceImagePreview} />
           </button>
         )}
         {status === 'ready' && fallbackKind === 'pdf' && (
           <object
-            data={file.url}
+            data={previewUrl}
             type="application/pdf"
             className={styles.workspacePdfObject}
             aria-label={file.name}
           >
             <iframe
-              src={file.url}
+              src={previewUrl}
               title={file.name}
               className={styles.workspacePdfIframe}
             />
@@ -1912,7 +2019,7 @@ function WorkspaceFilePreview({
         )}
         {status === 'ready' && fallbackKind === 'html' && (
           <iframe
-            src={withReportTheme(file.url, resolvedTheme)}
+            src={withReportTheme(previewUrl, resolvedTheme)}
             title={file.name}
             className={styles.workspaceHtmlIframe}
             sandbox=""
@@ -2789,6 +2896,17 @@ interface JobResultFile {
   download?: boolean;
 }
 
+interface DeliveryManifestSummary {
+  status: 'valid' | 'degraded' | 'blocked';
+  manifestHash?: string;
+  artifacts?: Array<{ reproducibility?: { status?: 'available' | 'verified' | 'unavailable' } }>;
+  summary?: {
+    conclusion?: string;
+    whatWasDone?: string;
+    cautions?: string[];
+  };
+}
+
 interface JobResult {
   artifacts?: JobResultFile[];
   files?: JobResultFile[];
@@ -2801,6 +2919,7 @@ interface JobResult {
   manifest?: unknown;
   stdout?: string;
   summary?: unknown;
+  deliveryManifest?: DeliveryManifestSummary;
 }
 
 interface JobDetailMeta {
@@ -2929,6 +3048,8 @@ function ResultArtifactShell({
   const [finalReportUrl, setFinalReportUrl] = useState('');
   const [finalReportGeneratedAt, setFinalReportGeneratedAt] = useState('');
   const [reportGenerationError, setReportGenerationError] = useState('');
+  const [replayPackageBusy, setReplayPackageBusy] = useState(false);
+  const [replayPackageMessage, setReplayPackageMessage] = useState('');
 
   const tool = useMemo(
     () => (job ? staticTools.find((t) => t.id === job.tool_id) || null : null),
@@ -2955,6 +3076,12 @@ function ResultArtifactShell({
     },
     [job, lang]
   );
+  const scientificScriptUrl = useMemo(() => {
+    if (!job || !result?.deliveryManifest) return '';
+    const token = getToken();
+    const query = token ? `?token=${encodeURIComponent(token)}` : '';
+    return `${getApiPrefix(lang)}/harness/scientific-task-by-job/${encodeURIComponent(job.id)}/script${query}`;
+  }, [job, lang, result?.deliveryManifest]);
 
   useEffect(() => {
     if (!job) {
@@ -3465,6 +3592,31 @@ function ResultArtifactShell({
     }
   };
 
+  const exportReplayPackage = async () => {
+    if (!job) return;
+    setReplayPackageBusy(true);
+    setReplayPackageMessage('');
+    try {
+      const token = getToken();
+      const response = await fetch(`${getApiPrefix(lang)}/harness/scientific-task-by-job/${encodeURIComponent(job.id)}/replay-package`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({}),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.error || '复现包导出失败');
+      const completeness = data.replayPackageRef?.status === 'complete' ? '完整历史' : '历史部分可用';
+      setReplayPackageMessage(`复现包已写入项目结果目录 · ${completeness}`);
+    } catch (error) {
+      setReplayPackageMessage(error instanceof Error ? error.message : '复现包导出失败');
+    } finally {
+      setReplayPackageBusy(false);
+    }
+  };
+
   const workflowBar = workflow ? (
     <div className={styles.resultWorkflowBar} data-state={workflow.resumeFrom || 'completed'}>
       <div className={styles.resultWorkflowBarMain}>
@@ -3561,6 +3713,47 @@ function ResultArtifactShell({
     <>
       {workflowBar}
       {recoveryConfirmation}
+      {result.deliveryManifest && (
+        <section className={styles.resultScientificDelivery} data-status={result.deliveryManifest.status}>
+          <div className={styles.resultScientificDeliveryHeader}>
+            <strong>
+              {result.deliveryManifest.status === 'valid'
+                ? '交付已通过'
+                : result.deliveryManifest.status === 'degraded'
+                  ? '交付需要复核'
+                  : '交付已阻断'}
+            </strong>
+            <span>{result.deliveryManifest.status}</span>
+          </div>
+          <div className={styles.resultScientificDeliveryGrid}>
+            <div>
+              <small>结论摘要</small>
+              <p>{result.deliveryManifest.summary?.conclusion || '暂无结论摘要'}</p>
+            </div>
+            <div>
+              <small>我做了什么</small>
+              <p>{result.deliveryManifest.summary?.whatWasDone || '暂无执行摘要'}</p>
+            </div>
+            <div>
+              <small>需要注意什么</small>
+              <p>{result.deliveryManifest.summary?.cautions?.join('；') || '暂无额外注意事项'}</p>
+            </div>
+          </div>
+          <div className={styles.resultScientificDeliveryMeta}>
+            <span>
+              复现：{result.deliveryManifest.artifacts?.filter((item) => item.reproducibility?.status === 'verified').length || 0} 已验证 ·{' '}
+              {result.deliveryManifest.artifacts?.filter((item) => item.reproducibility?.status === 'available').length || 0} 可用
+            </span>
+            <div className={styles.resultScientificDeliveryActions}>
+              <a href={buildUrl('delivery-manifest.json')} target="_blank" rel="noreferrer">查看交付清单</a>
+              <button type="button" disabled={replayPackageBusy} onClick={() => void exportReplayPackage()}>
+                {replayPackageBusy ? '导出中…' : '导出复现包'}
+              </button>
+            </div>
+          </div>
+          {replayPackageMessage && <div className={styles.resultReplayPackageMessage}>{replayPackageMessage}</div>}
+        </section>
+      )}
       <section className={styles.resultDeliveryCard}>
         <div className={styles.resultDeliveryCopy}>
           <strong>最终 HTML 报告</strong>
@@ -3722,6 +3915,19 @@ function ResultArtifactShell({
                       <a className={styles.resultReportActiveLink} href={selectedArtifactUrl} target="_blank" rel="noreferrer">
                         打开原文件
                       </a>
+                    )}
+                    {result.deliveryManifest && (
+                      <div className={styles.resultReportReproductionActions}>
+                        {scientificScriptUrl && (
+                          <a href={scientificScriptUrl} target="_blank" rel="noreferrer">查看脚本</a>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => onAskAgent(`请为任务 ${job.id} 的产物 ${selectedArtifactName} 发起重放验证；先展示输入、资源和副作用确认摘要，不要直接执行。`)}
+                        >
+                          重放验证
+                        </button>
+                      </div>
                     )}
                   </div>
                 )}

@@ -407,6 +407,28 @@
   font-size: 0.76rem;
 }
 
+.biof3-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.biof3-metric-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--biof3-border-subtle);
+  border-radius: 10px;
+  background: var(--biof3-bg-subtle);
+}
+
+.biof3-metric-grid small { color: var(--biof3-text-muted); }
+.biof3-metric-grid strong { color: var(--biof3-text); font-size: 14px; overflow-wrap: anywhere; }
+.biof3-resource-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.biof3-resource-heading p { margin: 4px 0 0; color: var(--biof3-text-muted); font-size: 12px; }
+
 .biof3-model-preset {
   display: grid;
   grid-template-columns: minmax(150px, 1.2fr) minmax(120px, 1fr);

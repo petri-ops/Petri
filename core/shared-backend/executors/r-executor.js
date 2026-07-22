@@ -10,6 +10,7 @@ const path = require('path');
 const fs = require('fs');
 const { execFileSync, spawn } = require('child_process');
 const logger = require('../logger');
+const { findExecutableOnPath } = require('../runtime-paths');
 
 // 从 config-helper 读取配置（断点1：斩断对 r-server/config 的反向 require）
 // 调用方启动时通过 require('shared-backend').configure({getConfig}) 注入；
@@ -27,7 +28,9 @@ class RExecutor {
   /** Rscript 可执行文件路径（内嵌 R）。 */
   get binPath() {
     const cfg = getRConfig();
-    return path.join(cfg.rHome || path.join(__dirname, '../../r-server/R'), 'bin', 'Rscript');
+    const embedded = path.join(cfg.rHome || path.join(__dirname, '../../r-server/R'), 'bin', 'Rscript');
+    if (fs.existsSync(embedded)) return embedded;
+    return findExecutableOnPath(process.platform === 'win32' ? ['Rscript.exe', 'Rscript'] : ['Rscript']);
   }
 
   /**
@@ -102,6 +105,11 @@ class RExecutor {
     return satisfiesVersion(current, required);
   }
 
+  /** 返回本次实际可执行文件的 R 版本，供 provenance 固化。 */
+  getRuntimeVersion() {
+    return this._getRVersion();
+  }
+
   /**
    * 校验插件包的 builtAgainst 与当前 R 的 major.minor 是否兼容。
    * R 包在 X.Y 编译，加载到 X.Z（不同 minor）会报 "package built under R X.Y" 警告/错误。
@@ -116,11 +124,9 @@ class RExecutor {
   }
 
   _getRVersion() {
-    const cfg = getRConfig();
     try {
-      const rBin = path.join(cfg.rHome || '', 'bin', 'R');
-      const out = execFileSync(rBin, ['--version'], { encoding: 'utf8', timeout: 5000 });
-      return out.match(/R version (\d+\.\d+\.\d+)/)?.[1] || '0.0.0';
+      const out = execFileSync(this.binPath, ['--version'], { encoding: 'utf8', timeout: 5000 });
+      return out.match(/(?:Rscript \(R\)|R) version (\d+\.\d+\.\d+)/)?.[1] || '0.0.0';
     } catch {
       return '0.0.0';
     }

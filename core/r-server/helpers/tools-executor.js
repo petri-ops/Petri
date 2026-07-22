@@ -14,6 +14,9 @@ const {
 } = require('../../shared-backend/project-run-layout');
 const { resolveRLibsForPlugin } = require('../../shared-backend/r-libs-resolver');
 const { ensureBundlesForPlugin } = require('../../shared-backend/capability-bundles');
+const { createExecutionProvenance, attachProvenanceToResult } = require('../../shared-backend/execution-provenance');
+const { collectExecutionInputs, writeArtifactManifest } = require('../../shared-backend/artifact-manifest');
+const { createRuntimeResourceSnapshot } = require('../../shared-backend/runtime-resource-snapshot');
 
 function isManagedResultDir(candidate, jobsDir) {
   if (!candidate || !jobsDir) return false;
@@ -631,6 +634,7 @@ function createToolsExecutor({
     let runEnv = undefined;
     let runtimeReady = null;
     let runtimeCommand = null;
+    let runtimeVersion = null;
     {
       const { getExecutor } = require('../../shared-backend/executors');
       const executor = getExecutor(cfg.lang);
@@ -644,6 +648,9 @@ function createToolsExecutor({
               command: null,
               reason: `未找到 ${cfg.lang || 'unknown'} 执行器`,
             };
+      runtimeVersion = runtimeReady.ready && typeof executor.getRuntimeVersion === 'function'
+        ? executor.getRuntimeVersion()
+        : null;
       if (!runtimeReady.ready) {
         await markJobFailed(jobId, runtimeReady.reason, 'runtime');
         return;
@@ -684,13 +691,50 @@ function createToolsExecutor({
           if (resolvedEnv) runEnv = resolvedEnv;
         }
       } else {
-        // Python 工具脚本约定：--params <paramFile>（buildSpawnCommand）
         const spawnCmd = executor.buildSpawnCommand(scriptPath, jobDir, {});
-        runCmd = [spawnCmd.cmd, ...spawnCmd.args];
+        if (cfg._isPlugin) {
+          runCmd = [executor.binPath, scriptPath, jobDir];
+        } else {
+          runCmd = [spawnCmd.cmd, ...spawnCmd.args];
+        }
         if (spawnCmd.env) runEnv = spawnCmd.env;
       }
     }
 
+    const startedAt = new Date().toISOString();
+    const resourceStart = createRuntimeResourceSnapshot({
+      runtime: { r: cfg.lang === 'r' && runtimeReady?.ready, python: cfg.lang === 'python' && runtimeReady?.ready },
+      activeJobs: activeToolJobs.size + 1,
+      observedAt: startedAt,
+    });
+    const buildProvenance = (artifacts = []) => {
+      const dbMod = require('../db');
+      const pluginLoader = require('../plugin-loader');
+      const toolDefinition = pluginLoader.getToolDefinition(toolId) || {};
+      const pluginManifest = pluginLoader.getPluginManifest(toolId) || cfg;
+      const scientificTask = typeof dbMod.getScientificTaskByToolJob === 'function' ? dbMod.getScientificTaskByToolJob(jobId) : null;
+      const provenance = createExecutionProvenance({
+        toolJobId: jobId,
+        projectId: job.project_id || null,
+        scientificTask,
+        plugin: pluginManifest,
+        params: job.params || {},
+        inputs: collectExecutionInputs({
+          inputDefinitions: Array.isArray(toolDefinition.inputs) ? toolDefinition.inputs : [],
+          params: job.params || {},
+          jobDir,
+        }),
+        runtime: { name: cfg.lang || null, command: runtimeCommand, version: runtimeVersion, ready: runtimeReady?.ready },
+        runScriptPath: scriptPath,
+        command: { executable: runCmd[0], args: runCmd.slice(1), cwd: jobDir },
+        artifacts,
+        startedAt,
+        completedAt: new Date().toISOString(),
+      });
+      const provenancePath = path.join(jobDir, 'provenance.json');
+      fs.writeFileSync(provenancePath, JSON.stringify(provenance, null, 2));
+      return { provenance, provenancePath, pluginManifest };
+    };
     const child = execFile(
       runCmd[0],
       runCmd.slice(1),
@@ -714,6 +758,16 @@ function createToolsExecutor({
         }
 
         if (err) {
+          try {
+            const failed = buildProvenance();
+            await db.prepare('UPDATE tool_jobs SET result_json=? WHERE id=?').run(JSON.stringify({
+              toolJobId: jobId,
+              failure: { phase: 'execute', reason: err.killed ? 'timeout' : 'nonzero_exit', exitCode: err.code ?? null },
+              resourceUsage: { start: resourceStart, end: createRuntimeResourceSnapshot({ observedAt: new Date().toISOString() }), peakStatus: 'unavailable_without_process_sampler' },
+              executionProvenance: failed.provenance,
+              provenanceRef: { provenanceHash: failed.provenance.provenanceHash, path: failed.provenancePath, toolJobId: jobId },
+            }), jobId);
+          } catch {}
           await markJobFailed(jobId, stderr || err.message || '', 'execute');
           return;
         }
@@ -776,6 +830,15 @@ function createToolsExecutor({
         result.canonicalOutputDir = canonicalizePath(outputDir);
         result.canonicalResultDir = canonicalizePath(outputDir);
         result.execution = executionContext;
+        result.resourceUsage = {
+          start: resourceStart,
+          end: createRuntimeResourceSnapshot({
+            runtime: { r: cfg.lang === 'r' && runtimeReady?.ready, python: cfg.lang === 'python' && runtimeReady?.ready },
+            activeJobs: activeToolJobs.size,
+            observedAt: new Date().toISOString(),
+          }),
+          peakStatus: 'unavailable_without_process_sampler',
+        };
         result.artifactSchemaVersion = result.artifactSchemaVersion || 1;
         if (Array.isArray(result.outputs)) {
           result.outputs = result.outputs.map((item) => {
@@ -807,7 +870,14 @@ function createToolsExecutor({
           expectedArtifacts,
           canonicalizePath,
         });
-        result = truth.result;
+        const recorded = buildProvenance(truth.artifacts);
+        result = attachProvenanceToResult(truth.result, recorded.provenance, recorded.provenancePath);
+        writeArtifactManifest({
+          outputDir,
+          result,
+          provenance: recorded.provenance,
+          plugin: recorded.pluginManifest,
+        });
         if (truth.blocking) {
           const truthError =
             truth.issues

@@ -1,6 +1,6 @@
 /**
  * routes/ai-misc.js — misc small AI endpoints (settings, audit, undo,
- * docs-index, site-snapshot, health, usage-mine, act-registry).
+ * docs-index, site-snapshot, health, usage-mine).
  * Migrated from server.js as part of MODULES_BATCH2_v1.
  *
  * DB access goes through the shared desktop SQLite handle.
@@ -61,7 +61,9 @@ module.exports = function mountMisc(app) {
     const days = Math.max(1, Math.min(60, parseInt(req.query.days) || 30));
     const cutoff = new Date(Date.now() - days * 86400000).toISOString();
     try {
-      const total = await adb.prepare(`SELECT COUNT(*) AS calls, SUM(prompt_tokens) AS prompt_tokens, SUM(completion_tokens) AS completion_tokens, AVG(latency_ms) AS avg_latency FROM ai_usage WHERE user_id=? AND ts >= ?`).get(userId, cutoff);
+      const total = await adb.prepare(`SELECT COUNT(*) AS calls, SUM(prompt_tokens) AS prompt_tokens, SUM(completion_tokens) AS completion_tokens, SUM(COALESCE(cache_read_tokens,0)) AS cache_read_tokens, SUM(COALESCE(cache_creation_tokens,0)) AS cache_creation_tokens, SUM(COALESCE(cost_cny,0)) AS estimated_cost_cny, SUM(CASE WHEN COALESCE(cost_status,'unknown')='unknown' THEN 1 ELSE 0 END) AS unknown_cost_calls, AVG(latency_ms) AS avg_latency FROM ai_usage WHERE user_id=? AND ts >= ?`).get(userId, cutoff);
+      total.cache_hit_rate = Number(total.prompt_tokens) > 0 ? Number(total.cache_read_tokens || 0) / Number(total.prompt_tokens) : 0;
+      total.cost_status = Number(total.unknown_cost_calls || 0) > 0 ? 'partial' : 'estimated';
       res.json({status:'ok', days, ...total});
     } catch (e) { res.status(500).json({status:'error', error: e.message}); }
   });

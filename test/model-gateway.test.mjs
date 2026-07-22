@@ -176,6 +176,44 @@ test('gateway only falls back when explicitly enabled and records the switch', a
   });
 });
 
+test('gateway can switch profiles when a caller rejects a non-streamed protocol result', async () => {
+  const calls = [];
+  const gateway = new ModelGateway({
+    getSettings: () => ({
+      model_profiles: [
+        { id: 'a', provider: 'first', model: 'a', capabilities: ['chat', 'tools'] },
+        { id: 'b', provider: 'second', model: 'b', capabilities: ['chat', 'tools'] },
+      ],
+      model_role_bindings: { agent: 'a' },
+      model_fallback_enabled: true,
+      model_fallback_bindings: { agent: ['b'] },
+    }),
+    getCredential: () => 'key',
+    getProvider: (name) => ({
+      async chat() {
+        calls.push(name);
+        return name === 'first'
+          ? { choices: [{ message: { tool_calls: [{ id: 'unexpected' }] } }] }
+          : { choices: [{ message: { content: 'recovered summary' } }] };
+      },
+    }),
+  });
+
+  const result = await gateway.chat({
+    role: 'agent',
+    body: { messages: [] },
+    fallbackWhen: (candidate) => candidate.choices?.[0]?.message?.tool_calls
+      ? { code: 'unexpected_tool_calls_in_finalization' }
+      : null,
+  });
+
+  assert.deepEqual(calls, ['first', 'second']);
+  assert.equal(result.choices[0].message.content, 'recovered summary');
+  assert.deepEqual(result.modelRouting.fallbackReason, {
+    code: 'unexpected_tool_calls_in_finalization',
+  });
+});
+
 test('gateway does not switch on auth errors or after streamed output begins', async () => {
   for (const failure of [
     { result: { error: 'api_error', status: 401 }, emitContent: false },

@@ -13,8 +13,6 @@ const { tool_query, tool_read_page, tool_search } = require('./query-tools');
 const { tool_act } = require('./act-tools');
 const { tool_plan } = require('./plan-ui-tools');
 const {
-  tool_discover_capabilities,
-  tool_act_generic,
   tool_run_tool,
   tool_generate_methods,
 } = require('./learning');
@@ -38,7 +36,6 @@ const CATEGORIES = new Set([
   'retrieval',
   'action',
   'planning',
-  'capability',
   'analysis',
   'vision',
   'reporting',
@@ -65,8 +62,6 @@ const HANDLERS = {
   search: tool_search,
   act: tool_act,
   plan: tool_plan,
-  discover_capabilities: tool_discover_capabilities,
-  act_generic: tool_act_generic,
   run_tool: tool_run_tool,
   read_image: tool_read_image,
   generate_methods: tool_generate_methods,
@@ -100,8 +95,6 @@ const CONTRACTS = {
   search: contract('retrieval', 'external-request', 'R1', ['project.database', 'plugin.content', 'llm.provider'], 30000),
   act: contract('action', 'execution', 'R2', ['user.account', 'project.database', 'ui.session', 'local.process'], 30000),
   plan: contract('planning', 'state-write', 'R1', ['project.database'], 500),
-  discover_capabilities: contract('capability', 'none', 'R0', ['ui.session'], 100),
-  act_generic: contract('action', 'state-write', 'R2', ['ui.session', 'project.database'], 1000),
   run_tool: contract('analysis', 'execution', 'R2', ['tool_jobs', 'artifacts', 'local.process'], 300000),
   read_image: contract('vision', 'external-request', 'R1', ['artifacts', 'llm.provider'], 30000),
   generate_methods: contract('reporting', 'external-request', 'R1', ['project.database', 'llm.provider'], 30000),

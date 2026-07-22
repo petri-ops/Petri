@@ -123,12 +123,12 @@ const WORKSPACE_TOOL_DEFS = [
     function: {
       name: 'workspace_exec',
       description:
-        '返回当前项目工作区根目录。P7-C 自动执行白名单仅接受 pwd，不经 shell、PATH 或项目级工具配置；其他命令返回结构化拒绝。只读模式或只检查请求中禁止调用。',
+        '在当前项目工作区打开通用命令行。完全访问模式允许使用 shell 执行用户机器上可用的命令、脚本、管道和重定向；只读模式或用户明确要求仅检查/规划时禁止调用。科学分析正式结果仍应通过 run_tool 进入 tool_job 与 artifact truth。',
       parameters: {
         type: 'object',
         properties: {
-          command: { type: 'string', description: '当前仅支持 pwd' },
-          timeoutMs: { type: 'integer', description: '兼容字段；内建 pwd 不启动进程，不使用超时' },
+          command: { type: 'string', description: '要在项目工作目录中执行的 shell 命令，例如 "head -5 counts.csv"、"cat metadata.csv" 或 "Rscript scripts/qc.R"' },
+          timeoutMs: { type: 'integer', description: '超时毫秒，默认 120000，最大 1800000' },
         },
         required: ['command'],
       },
@@ -367,42 +367,6 @@ const TOOL_DEFS = [
       },
     },
   },
-  // ACT_GENERIC_TOOL_v1
-  {
-    type: 'function',
-    function: {
-      name: 'discover_capabilities',
-      description:
-        '查看当前网站注册的所有可调用的 generic act handler。每次会话开始时**先调用一次**，了解你能干什么。返回 {handler_id: {description, pages, payloadSchema, example}}。注意：这是**当前用户当前会话**的注册表，不同页面/版本可能不同。',
-      parameters: {
-        type: 'object',
-        properties: {},
-      },
-    },
-  },
-  {
-    type: 'function',
-    function: {
-      name: 'act_generic',
-      description:
-        '通用执行通道。前端注册的任何 act handler 都可以通过此工具调用，不需要每次都加新的工具定义。**先调用 discover_capabilities 看可用 handler 列表**，再用此工具执行。如果某个 handler 不存在，会返回 unknown_handler；如果当前页面不允许，会返回 wrong_page。',
-      parameters: {
-        type: 'object',
-        properties: {
-          handlerId: {
-            type: 'string',
-            description: '注册表里的 handler id，例如 "violin_plot_open" 或 "export_dataset_csv"。',
-          },
-          payload: {
-            type: 'object',
-            description:
-              '该 handler 期望的 payload 对象，参考 discover_capabilities 返回的 payloadSchema 和 example。',
-          },
-        },
-        required: ['handlerId'],
-      },
-    },
-  },
   // RUN_TOOL_v1 — 跑 BioF3 分析工具（deseq2/volcano-plot 等），真实执行出图
   {
     type: 'function',
@@ -421,7 +385,7 @@ const TOOL_DEFS = [
         '\n用户说"帮我跑差异分析"/"画火山图"/"做 DESeq2"/"分析这个 count 矩阵"时使用。' +
         '\n注意：file 类型参数传**本地绝对路径**（如 /Users/.../counts.csv）。执行返回 jobDir + 输出文件路径 + toolJobId，可读取出图/表。' +
         '\nplan 联动：跑完返回 toolJobId，若当前在 plan 推进中，立刻调 plan(op=update_step, toolJobId=<返回的 toolJobId>) 绑定，分析状态（completed/failed）自动同步 step。' +
-        '\n重操作确认：deseq2/wgcna/ml-*/rsf-survival/lasso-cox/consensus-cluster/seurat-standard/cellchat/maftools-mutation/mo-* 等重操作，首次 op=run 会返回 {needApproval, ackToken} 而非立即执行。前端确认卡用户点"开始"后，重调 run_tool(op=run, toolId, params, ackToken=<返回的 ackToken>) 才真跑。单图小工具（volcano-plot/gene-correlation/pca-explorer）直接跑，不拦截。',
+        '\n自动化边界：完全访问模式下，deseq2/wgcna 等项目内可复现分析直接执行，由 Agent 检查结果并在安全范围内诊断重试，不弹二次确认。旧调用或非完全访问边界仍可能返回 {needApproval, ackToken}，此时必须遵守确认协议。',
       parameters: {
         type: 'object',
         properties: {
@@ -469,7 +433,16 @@ const TOOL_DEFS = [
           ackToken: {
             type: 'string',
             description:
-              '重操作确认用：当首次 op=run 返回 needApproval=true 时，前端用户确认后，重调 run_tool 传这个 ackToken 才会真跑。非重操作不需要。',
+              '兼容确认用：仅当 run_tool 返回 needApproval=true 时原样传回；完全访问模式的项目内分析通常不需要。',
+          },
+          scientificTaskRef: {
+            type: 'object',
+            description: 'HRT-3 科学任务执行引用。存在时必须指向已确认且尚未绑定 Job 的 TaskSpec 版本。',
+            properties: {
+              taskId: { type: 'string' },
+              version: { type: 'integer', minimum: 1 },
+            },
+            required: ['taskId'],
           },
         },
         required: ['op'],

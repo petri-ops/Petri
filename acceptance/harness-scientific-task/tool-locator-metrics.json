@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "measurementKind": "local_offline_benchmark",
+  "runsPerFixture": { "small": 7, "large": 5 },
+  "fixtures": [
+    { "id": "deseq2-demo", "kind": "repository_demo", "fileCount": 4, "coldMs": { "p50": 0.384, "p95": 3.299 }, "hotMs": { "p50": 0.147, "p95": 0.551 }, "indexHitExpected": true },
+    { "id": "synthetic-400-files", "kind": "temporary_synthetic", "fileCount": 400, "coldMs": { "p50": 17.719, "p95": 22.648 }, "hotMs": { "p50": 4.088, "p95": 4.951 }, "indexHitExpected": true }
+  ],
+  "defaultToolSequence": ["explicit_ref", "active_artifact", "incremental_index", "filename_glob", "header_search", "rank_candidates", "bounded_read"],
+  "thresholdFrozen": false,
+  "environmentNote": "single local macos-arm64 observation; refresh before performance acceptance"
+}

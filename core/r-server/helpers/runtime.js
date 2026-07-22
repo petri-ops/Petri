@@ -4,7 +4,6 @@
  * Extracted from server.js. Contains:
  *   - AI streaming concurrency guard (per-worker + per-user)
  *   - Dashscope embedding rate limit
- *   - Frontend-registered act registry
  *
  * Pure module: no DB, no external services.
  *
@@ -12,7 +11,6 @@
  *   aiConcurrencyAcquire(userId), aiConcurrencyRelease(userId)
  *   getActiveStreamCount() — for /api/ai/health
  *   _checkEmbedRateLimit(userId)
- *   actRegistrySet(userId, snapshot), actRegistryGet(userId) → snapshot|{}
  */
 
 // ============================================================
@@ -102,24 +100,6 @@ function _checkEmbedRateLimit(userId) {
   return {ok: true};
 }
 
-// ============================================================
-// ACT_GENERIC_v1 — frontend-registered act handlers (in-memory cache)
-// ============================================================
-const _copilotActRegistry = new Map();   // userId → {snapshot, ts}
-
-function actRegistrySet(userId, snapshot) {
-  if (!userId) return;
-  _copilotActRegistry.set(userId, {snapshot: snapshot || {}, ts: Date.now()});
-}
-
-function actRegistryGet(userId) {
-  if (!userId) return {};
-  const entry = _copilotActRegistry.get(userId);
-  if (!entry) return {};
-  if (Date.now() - entry.ts > 4 * 60 * 60 * 1000) return {};
-  return entry.snapshot || {};
-}
-
 module.exports = {
   aiConcurrencyAcquire,
   aiConcurrencyRelease,
@@ -127,6 +107,4 @@ module.exports = {
   aiTaskConcurrencyRelease,
   getActiveStreamCount,
   _checkEmbedRateLimit,
-  actRegistrySet,
-  actRegistryGet,
 };

@@ -112,6 +112,7 @@
 
 - 固定阶段：`inspect → infer → select → repair → confirm → run → verify → report`。
 - 包含：文件索引、readiness、tool selection、workflow state、恢复动作、二跳 artifact 绑定。
+- 当前增量工作包还负责：模糊科学需求的结构化 TaskSpec、用户决策门、需求/输入/Job/Artifact/交付证据的可追溯绑定。
 - 不拥有执行真相；状态必须投影自 P-02。
 - 主要路径：`scripts/harness-*`、`core/shared-backend/agent-workflow.js`、Core Harness routes/helpers。
 
@@ -120,8 +121,10 @@
 负责可安装、可校验、可发现的真实分析能力。
 
 - 包含：`plugin.json`、`tool-definition.json`、输入/参数/output schema、failureModes、执行脚本、fixture、内置/安装/开发来源。
+- 分析内容最小单位是可独立验证的科学分析模块；R/Python 包属于 runtime capability，多个模块的组合属于 workflow/task pack，最终论据由 evidence/delivery pack 组织。
 - 新增分析流程原则上通过插件接入，不修改 Agent 主 prompt、核心执行器或结果 UI。
 - 主要路径：`resources/built-in-plugins/`、`src/plugin-manager.js`、Core `plugin-loader.js`、`shared-backend/plugin-sdk.js`、`scripts/scaffold-harness-tool.mjs`。
+- Mac 真实执行验收：`scripts/harness-plugin-acceptance.mjs` 与 `acceptance/harness-plugins/`；必须隔离用户安装目录，并走 P-02 的真实 Job/Artifact 链。
 
 ### P-05 Runtime 与平台适配（Runtime & Adapters）
 

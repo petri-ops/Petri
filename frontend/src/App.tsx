@@ -12,10 +12,9 @@ import { biof3Events, subscribeBioF3Event } from '@/lib/events';
 import HomePage from '@/pages/home';
 // NOTE: Legacy pages (tools, admin, docs, figcode, single-cell, spatial) have been removed
 // as the desktop application now uses the Agent-based workflow through ProjectWorkspace.
-import '@/components/copilot/copilotActRegistryBoot';
 import { ProjectWorkspace } from '@/pages/project-workspace';
 import '@/components/desktop/desktop.css';
-// 断点6：注入平台 API 给 @biof3/shared 渲染层组件（ActResultCard/copilotActRegistry）
+// 断点6：注入平台 API 给 @biof3/shared 渲染层组件（如 ActResultCard）
 import { configureApi } from '../../core/packages/shared-copilot/api-inject';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 configureApi({ getApiPrefix: () => getApiPrefix(), getToken });

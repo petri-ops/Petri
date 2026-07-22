@@ -21,6 +21,20 @@ function getPythonRuntimeExecutable(runtimeHome, platform = process.platform) {
   return null;
 }
 
+function findExecutableOnPath(names, envPath = process.env.PATH || '') {
+  const candidates = Array.isArray(names) ? names : [names];
+  for (const dir of String(envPath).split(path.delimiter).filter(Boolean)) {
+    for (const name of candidates) {
+      const full = path.join(dir, name);
+      try {
+        fs.accessSync(full, fs.constants.X_OK);
+        return full;
+      } catch {}
+    }
+  }
+  return null;
+}
+
 function getPythonSitePackagesDir(runtimeHome) {
   if (!runtimeHome) return null;
   const candidates = [path.join(runtimeHome, 'Lib', 'site-packages'), path.join(runtimeHome, 'site-packages')];
@@ -46,4 +60,5 @@ module.exports = {
   getPythonExecutableCandidates,
   getPythonRuntimeExecutable,
   getPythonSitePackagesDir,
+  findExecutableOnPath,
 };

@@ -18,9 +18,7 @@
     "./api-inject": "./api-inject.ts",
     "./copilotMarkdown": "./copilotMarkdown.tsx",
     "./ActResultCard": "./ActResultCard.tsx",
-    "./ActionCard": "./ActionCard.tsx",
-    "./copilotActRegistry": "./copilotActRegistry.ts",
-    "./copilotActRegistryBoot": "./copilotActRegistryBoot.ts"
+    "./ActionCard": "./ActionCard.tsx"
   },
   "files": [
     "*.ts",

@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "volcano-plot",
+  "pluginVersion": "1.0.0",
+  "platforms": ["macos-arm64", "macos-x64", "windows-x64"],
+  "fixtures": [
+    {
+      "id": "valid",
+      "description": "12 genes with mix of significant and non-significant",
+      "inputs": {
+        "deg_table": "demo-data/demo_deg.csv",
+        "gene_col": "gene",
+        "lfc_col": "log2FoldChange",
+        "pval_col": "pvalue",
+        "padj_col": "padj",
+        "padj_threshold": 0.05,
+        "lfc_threshold": 1
+      },
+      "expectedStatus": "valid",
+      "expectedOutputs": ["volcano.png", "classified_table.csv", "report.html"]
+    },
+    {
+      "id": "empty-result",
+      "description": "No significant genes — volcano plot still rendered",
+      "inputs": {
+        "deg_table": "demo-data/demo_deg.csv",
+        "gene_col": "gene",
+        "lfc_col": "log2FoldChange",
+        "pval_col": "pvalue",
+        "padj_col": "padj",
+        "padj_threshold": 0.001,
+        "lfc_threshold": 5
+      },
+      "expectedStatus": "valid",
+      "expectedNote": "No significant genes highlighted — valid empty visual result"
+    },
+    {
+      "id": "missing-inputs",
+      "description": "No DEG file provided",
+      "inputs": {},
+      "expectedStatus": "blocked",
+      "expectedFailureMode": "missing_required_file_inputs"
+    }
+  ],
+  "reproducibility": {
+    "requireScriptSha256": true,
+    "requireParamsHash": true,
+    "requireInputSha256": true,
+    "requireOutputSha256": true,
+    "requireRVersion": true,
+    "requirePackageVersions": true,
+    "evidenceSource": "runtime-generated artifact-manifest.json + provenance.json"
+  }
+}

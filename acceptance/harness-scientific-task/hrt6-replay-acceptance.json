@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "privacy": "repository_demo_data_only",
+  "generatedAt": "2026-07-22T04:29:42.799Z",
+  "package": {
+    "status": "complete",
+    "packageDigest": "04bcc1f8ee27bdf27840c9d5901d9d3694ed48254d5cca978c00f82ff99dfe02",
+    "sourceDigest": "0649f0fe218a6d376c6544fb334399fbaed35cd5c7c2c5707707c0cc5a1d008d",
+    "fileCount": 14,
+    "artifactEntrypoints": [
+      "repro/artifacts/result_table.json"
+    ]
+  },
+  "checks": {
+    "databaseFreeValidation": true,
+    "wrapperIntegrity": true,
+    "controlledReplayBoundary": true,
+    "readiness": true,
+    "offlineRReplayExitCode": 0,
+    "deterministicArtifactHashMatch": true,
+    "expectedArtifactSha256": "1e8fceb43e1fa83fb2c08a282712dc817c97fc20a1f2ae584b75c2e4610fcb20",
+    "replayedArtifactSha256": "1e8fceb43e1fa83fb2c08a282712dc817c97fc20a1f2ae584b75c2e4610fcb20",
+    "driftKinds": [
+      "environment_drift",
+      "execution_failure",
+      "input_drift",
+      "parameter_drift",
+      "plugin_drift"
+    ],
+    "driftClassificationComplete": true,
+    "packageContainsRawMessageText": false,
+    "packageContainsCredentials": false
+  },
+  "passed": true
+}

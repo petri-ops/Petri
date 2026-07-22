@@ -109,7 +109,7 @@ class ModelGateway {
     return event;
   }
 
-  async chat({ role = 'chat', profileId, modelOverride, body, telemetry, onEvent, signal, apiKeyOverride } = {}) {
+  async chat({ role = 'chat', profileId, modelOverride, body, telemetry, onEvent, signal, apiKeyOverride, fallbackWhen } = {}) {
     const primary = this._prepare(role, profileId, apiKeyOverride);
     if (primary.error) return primary;
     const attempts = [primary.profile.id, ...this._fallbackProfileIds(role, primary.profile.id)];
@@ -157,10 +157,18 @@ class ModelGateway {
       } else {
         result = await provider.chat(apiKey, requestBody, telemetry || {}, options);
       }
-      const canFallback = !emittedOutput && isRetryableProviderError(result) && index < attempts.length - 1;
+      let resultFallbackReason = null;
+      if (!emittedOutput && typeof fallbackWhen === 'function') {
+        try {
+          resultFallbackReason = fallbackWhen(result) || null;
+        } catch {}
+      }
+      const canFallback = !emittedOutput && (
+        isRetryableProviderError(result) || resultFallbackReason
+      ) && index < attempts.length - 1;
       if (canFallback) {
         previousProfileId = profile.id;
-        previousReason = routingReason(result);
+        previousReason = resultFallbackReason || routingReason(result);
         lastResult = result;
         continue;
       }

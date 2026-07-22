@@ -1,0 +1,28 @@
+{
+  "id": "ranked-go-enrichment",
+  "pluginManifestVersion": 1,
+  "title": "排序基因 GO-BP 富集（原型）",
+  "version": "0.1.0",
+  "language": "r",
+  "description": "以全基因排序表为输入，生成 GO-BP 富集表、气泡图和可复现报告。",
+  "requiresBundle": "r-enrichment",
+  "requiresBundleVersion": "1.0.0",
+  "packages": {
+    "r": {
+      "clusterProfiler": ">=4.16.0",
+      "org.Hs.eg.db": ">=3.19.0",
+      "enrichplot": ">=1.24.0",
+      "ggplot2": ">=3.4.0"
+    }
+  },
+  "runtime": { "r": ">=4.4.0" },
+  "builtAgainst": { "r": "4.5" },
+  "platform": ["macos-arm64"],
+  "supportedPlatforms": ["macos-arm64"],
+  "platformSupport": {
+    "macos-arm64": { "status": "supported", "runtime": "bundled-r-4.5" },
+    "macos-x64": { "status": "planned" },
+    "windows-x64": { "status": "planned" },
+    "linux-x64": { "status": "planned" }
+  }
+}

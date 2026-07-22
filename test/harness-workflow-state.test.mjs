@@ -29,6 +29,18 @@ test('workflow projects queued and running jobs without inventing verification',
   assert.equal(running.resumeFrom, 'run');
 });
 
+test('restart-interrupted tool job becomes explicitly recoverable from run stage', () => {
+  const workflow = projectHarnessWorkflowJob({
+    id: 'tj_restart',
+    status: 'failed',
+    error: 'recovery_required_after_restart',
+  });
+  assert.equal(workflow.recoveryRequired, true);
+  assert.equal(workflow.recoverable, true);
+  assert.equal(workflow.resumeFrom, 'run');
+  assert.ok(workflow.nextActions.some((action) => action.id === 'retry_run'));
+});
+
 test('completed job waits for artifact truth before report', () => {
   const workflow = projectHarnessWorkflowJob({
     id: 'tj_completed',

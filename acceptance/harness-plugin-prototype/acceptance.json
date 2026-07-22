@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "ranked-go-enrichment",
+  "status": "prototype",
+  "hardRequirements": [
+    { "id": "contract", "evidence": "plugin.json + tool-definition.json pass harness manifest validation" },
+    { "id": "environment", "evidence": "environment.json matches requiresBundle and records runtime/package versions" },
+    { "id": "valid_run", "evidence": "one real run produces three declared, non-empty scientific artifacts plus Harness-owned provenance evidence" },
+    { "id": "reproducible", "evidence": "second run with same input/config has same input SHA, parameter digest and deterministic table digest" },
+    { "id": "failure_recovery", "evidence": "missing file and invalid columns map to declared recoverable failure modes" },
+    { "id": "lineage", "evidence": "ranked_genes accepts an upstream valid artifact and records source job/artifact IDs" },
+    { "id": "no_hidden_install", "evidence": "script contains no install.packages/BiocManager/network download" },
+    { "id": "script_snapshot", "evidence": "job output preserves the exact run-script.R plus source script digest, and delivery exposes an exportable reproduction bundle" },
+    { "id": "platform_boundary", "evidence": "macos-arm64 is executable; other platforms are explicitly marked planned or blocked, never silently substituted" },
+    { "id": "delivery", "evidence": "artifact-manifest.json records command, params, input hashes, runtime, package versions and script digest" }
+  ],
+  "commands": [
+    "npm run harness:check",
+    "npm run harness:phase6",
+    "npm run check",
+    "node --test test/harness-workflow-fixtures.test.mjs test/plugin-sdk.test.mjs"
+  ],
+  "not_yet_accepted": [
+    "未注册到 resources/built-in-plugins/manifest.json",
+    "未在当前机器上宣称 R 包已安装；必须由 Harness capability provisioning 提供证据",
+    "未替代完整 bulk RNA-seq 任务；下游报告需由多个模块编排"
+  ]
+}

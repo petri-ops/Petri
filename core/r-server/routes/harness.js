@@ -19,6 +19,20 @@ const {
 } = require('../helpers/chat-file-references');
 const { reconcileToolJobArtifacts } = require('./tools-metadata');
 const pluginLoader = require('../plugin-loader');
+const { planScientificTaskFromIndex } = require('../../shared-backend/scientific-task-planner');
+const {
+  createScientificTaskConfirmationPreview,
+  confirmScientificTask,
+} = require('../../shared-backend/scientific-task-confirmation');
+const { createDeliveryManifest, writeDeliveryManifest } = require('../../shared-backend/delivery-manifest');
+const { buildScientificReplayPackage, relativeInside } = require('../../shared-backend/scientific-replay-package');
+const {
+  validateContextCheckpoint,
+  validateCheckpointSupersession,
+} = require('../../shared-backend/scientific-task-spec');
+const { resolveProjectRunLayout } = require('../../shared-backend/project-run-layout');
+const { createRuntimeResourceSnapshot } = require('../../shared-backend/runtime-resource-snapshot');
+const cacheManager = require('../cache-manager');
 
 const DEFAULT_MAX_FILES = 500;
 const RECOVERY_CONFIRMATION_TTL_MS = 5 * 60 * 1000;
@@ -459,6 +473,28 @@ function combinedAmbiguousCount(liveMap, backupMap) {
 }
 
 module.exports = function registerHarnessRoutes(app) {
+  app.get('/api/harness/resource-snapshot', async (_req, res) => {
+    try {
+      const disk = typeof cacheManager.getLocalDiskStats === 'function'
+        ? await cacheManager.getLocalDiskStats()
+        : null;
+      let primaryMount = disk && Array.isArray(disk.mounts) ? disk.mounts[0] : null;
+      if (!primaryMount && typeof fs.statfsSync === 'function') {
+        const statfs = fs.statfsSync(process.cwd());
+        const totalBytes = Number(statfs.blocks) * Number(statfs.bsize);
+        const availableBytes = Number(statfs.bavail) * Number(statfs.bsize);
+        primaryMount = {
+          totalBytes,
+          availableBytes,
+          usePercent: totalBytes > 0 ? Math.round((1 - availableBytes / totalBytes) * 100) : 0,
+        };
+      }
+      const activeJobs = typeof db.listRunningToolJobs === 'function' ? db.listRunningToolJobs().length : 0;
+      return res.json({ ok: true, snapshot: createRuntimeResourceSnapshot({ disk: primaryMount, activeJobs }) });
+    } catch (error) {
+      return res.status(500).json({ ok: false, error: 'resource_snapshot_failed', message: error.message });
+    }
+  });
   app.post('/api/harness/workflow/action/:jobId', express.json({ limit: '32kb' }), async (req, res) => {
     try {
       const job = await db.getToolJob(req.params.jobId);
@@ -707,6 +743,203 @@ module.exports = function registerHarnessRoutes(app) {
       });
     } catch (error) {
       res.status(500).json({ ok: false, error: error.message });
+    }
+  });
+
+  // HRT-2: evidence-first scientific planning. This endpoint only indexes,
+  // discovers manifests and returns a plan; it never creates a tool_job.
+  app.post('/api/harness/scientific-task/plan', express.json({ limit: '1mb' }), async (req, res) => {
+    try {
+      const options = authorizeAndResolveOptions(req, res);
+      if (!options) return;
+      const taskSpec = req.body && req.body.taskSpec;
+      if (!taskSpec || typeof taskSpec !== 'object') {
+        return res.status(400).json({ ok: false, error: 'missing_task_spec' });
+      }
+      const harness = await loadHarnessModule();
+      const scoped = harness.indexHarnessScope({ ...options, hash: true });
+      const plan = planScientificTaskFromIndex({
+        taskSpec,
+        index: scoped.index,
+        manifests: availableHarnessManifests(),
+        runtime: req.body.runtime || null,
+      });
+      res.json({ ok: true, scope: scoped.scope, index: scoped.promptSummary, plan });
+    } catch (error) {
+      res.status(500).json({ ok: false, error: error.message });
+    }
+  });
+
+  app.post('/api/harness/scientific-task/confirmation-preview', express.json({ limit: '1mb' }), (req, res) => {
+    try {
+      const taskSpec = req.body?.taskSpec;
+      const project = taskSpec?.projectId ? db.getProject(taskSpec.projectId) : null;
+      if (!taskSpec) return res.status(400).json({ ok: false, error: 'missing_task_spec' });
+      if (!project || !canAccessProject(req, project)) return res.status(project ? 403 : 404).json({ ok: false, error: project ? 'forbidden' : 'project_not_found' });
+      const result = createScientificTaskConfirmationPreview({
+        taskSpec,
+        plan: req.body.plan,
+        evidence: req.body.evidence || [],
+        estimatedResources: req.body.estimatedResources || null,
+      });
+      res.status(result.ok ? 200 : 422).json(result);
+    } catch (error) {
+      res.status(500).json({ ok: false, error: error.message });
+    }
+  });
+
+  app.post('/api/harness/scientific-task/confirm', express.json({ limit: '1mb' }), (req, res) => {
+    try {
+      const taskSpec = req.body?.taskSpec;
+      const project = taskSpec?.projectId ? db.getProject(taskSpec.projectId) : null;
+      if (!taskSpec) return res.status(400).json({ ok: false, error: 'missing_task_spec' });
+      if (!project || !canAccessProject(req, project)) return res.status(project ? 403 : 404).json({ ok: false, error: project ? 'forbidden' : 'project_not_found' });
+      const confirmation = { ...(req.body.confirmation || {}), userId: userId(req) || 'local-user' };
+      const result = confirmScientificTask({ taskSpec, plan: req.body.plan, confirmation });
+      if (!result.ok) return res.status(422).json(result);
+      const persisted = db.saveScientificTaskSpec({
+        spec: result.spec,
+        specHash: result.taskSpecHash,
+        confirmation: result.confirmation,
+        version: Number(req.body.version || 1),
+      });
+      res.json({ ...result, persisted: { taskId: persisted.task_id, version: persisted.version, status: persisted.status } });
+    } catch (error) {
+      res.status(500).json({ ok: false, error: error.message });
+    }
+  });
+
+  app.get('/api/harness/scientific-task/:taskId', (req, res) => {
+    try {
+      const task = db.getScientificTaskSpec(req.params.taskId, req.query.version ? Number(req.query.version) : null);
+      if (!task) return res.status(404).json({ ok: false, error: 'scientific_task_not_found' });
+      const project = db.getProject(task.project_id);
+      if (!canAccessProject(req, project)) return res.status(403).json({ ok: false, error: 'forbidden' });
+      res.json({ ok: true, task });
+    } catch (error) {
+      res.status(500).json({ ok: false, error: error.message });
+    }
+  });
+
+  app.get('/api/harness/scientific-task-by-job/:toolJobId', (req, res) => {
+    try {
+      const task = db.getScientificTaskByToolJob(req.params.toolJobId);
+      if (!task) return res.status(404).json({ ok: false, error: 'scientific_task_not_found' });
+      const project = db.getProject(task.project_id);
+      if (!canAccessProject(req, project)) return res.status(403).json({ ok: false, error: 'forbidden' });
+      res.json({ ok: true, task });
+    } catch (error) {
+      res.status(500).json({ ok: false, error: error.message });
+    }
+  });
+
+  app.get('/api/harness/scientific-task-by-job/:toolJobId/script', (req, res) => {
+    try {
+      const task = db.getScientificTaskByToolJob(req.params.toolJobId);
+      const job = db.getToolJob(req.params.toolJobId);
+      if (!task || !job) return res.status(404).json({ ok: false, error: 'scientific_task_not_found' });
+      const project = db.getProject(task.project_id);
+      if (!project || !canAccessProject(req, project)) return res.status(project ? 403 : 404).json({ ok: false, error: project ? 'forbidden' : 'project_not_found' });
+      const result = parseJsonMaybe(job.result_json || job.result, {});
+      const scriptPath = result.executionProvenance?.script?.snapshotPath;
+      const layout = resolveProjectRunLayout({ projectId: project.id, toolJobId: job.id, db, skipPermissionCheck: true, ensureDirs: false });
+      if (!scriptPath || !isRealPathInsideRoot(layout.jobRoot, scriptPath) || !fs.existsSync(scriptPath)) {
+        return res.status(404).json({ ok: false, error: 'script_snapshot_not_found' });
+      }
+      return res.sendFile(path.resolve(scriptPath));
+    } catch (error) {
+      res.status(500).json({ ok: false, error: error.message });
+    }
+  });
+
+  app.post('/api/harness/scientific-task/:taskId/bind-job', express.json({ limit: '64kb' }), (req, res) => {
+    try {
+      const task = db.getScientificTaskSpec(req.params.taskId, Number(req.body?.version || 1));
+      if (!task) return res.status(404).json({ ok: false, error: 'scientific_task_not_found' });
+      const project = db.getProject(task.project_id);
+      if (!canAccessProject(req, project)) return res.status(403).json({ ok: false, error: 'forbidden' });
+      const bound = db.bindScientificTaskToolJob({ taskId: req.params.taskId, version: Number(req.body?.version || 1), toolJobId: req.body?.toolJobId });
+      res.json({ ok: true, task: bound });
+    } catch (error) {
+      res.status(422).json({ ok: false, error: error.message });
+    }
+  });
+
+  app.post('/api/harness/scientific-task/:taskId/delivery-manifest', express.json({ limit: '256kb' }), (req, res) => {
+    try {
+      const version = Number(req.body?.version || 1);
+      const task = db.getScientificTaskSpec(req.params.taskId, version);
+      if (!task) return res.status(404).json({ ok: false, error: 'scientific_task_not_found' });
+      const project = db.getProject(task.project_id);
+      if (!project || !canAccessProject(req, project)) return res.status(project ? 403 : 404).json({ ok: false, error: project ? 'forbidden' : 'project_not_found' });
+      if (!task.tool_job_id) return res.status(422).json({ ok: false, error: 'scientific_task_job_not_bound' });
+      const job = db.getToolJob(task.tool_job_id);
+      if (!job) return res.status(404).json({ ok: false, error: 'tool_job_not_found' });
+      const layout = resolveProjectRunLayout({ projectId: project.id, toolJobId: job.id, db, userId: userId(req), skipPermissionCheck: isAdminOrInternal(req), ensureDirs: true });
+      const manifest = createDeliveryManifest({ taskRecord: task, job, projectRoot: layout.workspaceRoot, findings: req.body?.findings || {} });
+      const target = path.join(layout.outputDir, 'delivery-manifest.json');
+      const written = writeDeliveryManifest({ manifest, outputPath: target, projectRoot: layout.workspaceRoot });
+      const currentResult = parseJsonMaybe(job.result_json || job.result, {});
+      db.updateToolJob(job.id, { resultJson: { ...currentResult, deliveryManifest: manifest, deliveryManifestRef: written } });
+      res.status(manifest.status === 'blocked' ? 422 : 200).json({ ok: manifest.status !== 'blocked', manifest, written });
+    } catch (error) {
+      res.status(500).json({ ok: false, error: error.message });
+    }
+  });
+
+  app.post('/api/harness/context-checkpoint', express.json({ limit: '256kb' }), (req, res) => {
+    try {
+      const validated = validateContextCheckpoint(req.body?.checkpoint);
+      if (!validated.ok) return res.status(422).json({ ok: false, error: 'context_checkpoint_invalid', issues: validated.issues });
+      const checkpoint = validated.checkpoint;
+      const project = db.getProject(checkpoint.projectId);
+      if (!project || !canAccessProject(req, project)) return res.status(project ? 403 : 404).json({ ok: false, error: project ? 'forbidden' : 'project_not_found' });
+      if (checkpoint.supersedes) {
+        const previous = db.getContextCheckpoint(checkpoint.supersedes);
+        if (!previous) return res.status(422).json({ ok: false, error: 'context_checkpoint_supersedes_not_found' });
+        const supersession = validateCheckpointSupersession(checkpoint, previous);
+        if (!supersession.ok) return res.status(422).json({ ok: false, error: supersession.error, issues: supersession.issues || [] });
+      }
+      const stored = db.saveContextCheckpoint(checkpoint);
+      return res.json({ ok: true, checkpoint: stored });
+    } catch (error) {
+      return res.status(422).json({ ok: false, error: error.message });
+    }
+  });
+
+  app.post('/api/harness/scientific-task-by-job/:toolJobId/replay-package', express.json({ limit: '256kb' }), (req, res) => {
+    try {
+      const task = db.getScientificTaskByToolJob(req.params.toolJobId);
+      const job = db.getToolJob(req.params.toolJobId);
+      if (!task || !job) return res.status(404).json({ ok: false, error: 'scientific_task_not_found' });
+      const project = db.getProject(task.project_id);
+      if (!project || !canAccessProject(req, project)) return res.status(project ? 403 : 404).json({ ok: false, error: project ? 'forbidden' : 'project_not_found' });
+      const checkpoint = req.body?.checkpointId
+        ? db.getContextCheckpoint(String(req.body.checkpointId))
+        : db.getLatestContextCheckpoint(task.project_id, task.conversation_id);
+      if (req.body?.checkpointId && !checkpoint) return res.status(404).json({ ok: false, error: 'context_checkpoint_not_found' });
+      const layout = resolveProjectRunLayout({ projectId: project.id, toolJobId: job.id, db, userId: userId(req), skipPermissionCheck: isAdminOrInternal(req), ensureDirs: true });
+      const packageDir = path.join(layout.outputDir, 'replay-package');
+      const built = buildScientificReplayPackage({
+        taskRecord: task,
+        job,
+        projectRoot: layout.workspaceRoot,
+        packageDir,
+        contextCheckpoint: checkpoint,
+        workflowPlan: req.body?.workflowPlan || null,
+        includeFixtureInputs: false,
+        privacyMode: 'references_only',
+      });
+      const currentResult = parseJsonMaybe(job.result_json || job.result, {});
+      const replayPackageRef = {
+        relativePath: relativeInside(layout.workspaceRoot, packageDir),
+        packageDigest: built.packageManifest.packageDigest,
+        status: built.packageManifest.status,
+      };
+      db.updateToolJob(job.id, { resultJson: { ...currentResult, replayPackageRef } });
+      return res.json({ ok: true, replayPackageRef, packageManifest: built.packageManifest, replay: built.replay });
+    } catch (error) {
+      return res.status(422).json({ ok: false, error: error.message });
     }
   });
 

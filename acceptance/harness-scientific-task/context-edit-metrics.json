@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "measurementKind": "offline_contract_baseline",
+  "cases": [
+    { "id": "explicit-file-unique-replace", "locatorAttempts": 1, "candidateAmbiguity": false, "boundedRead": true, "editConflict": false, "expected": "verified" },
+    { "id": "same-name-ambiguity", "locatorAttempts": 1, "candidateAmbiguity": true, "boundedRead": false, "editConflict": false, "expected": "confirm_required" },
+    { "id": "duplicate-snippet", "locatorAttempts": 1, "candidateAmbiguity": false, "boundedRead": true, "editConflict": true, "expected": "rejected" },
+    { "id": "concurrent-drift", "locatorAttempts": 1, "candidateAmbiguity": false, "boundedRead": true, "editConflict": true, "expected": "sha_conflict" },
+    { "id": "multi-file-partial-failure", "locatorAttempts": 2, "candidateAmbiguity": false, "boundedRead": true, "editConflict": true, "expected": "partial_report" }
+  ],
+  "contextBytes": null,
+  "firstEvidenceMs": null,
+  "thresholdFrozen": false
+}

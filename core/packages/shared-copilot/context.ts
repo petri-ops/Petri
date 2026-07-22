@@ -51,9 +51,6 @@ export interface CopilotContext {
   toolName?: string;
   toolResult?: unknown;
   availableTools?: string[];
-  // agent-led 阶段2 Task2：agent run_tool 跑完后，open_result 把 toolJobId 推到这里，
-  // Copilot 内嵌结果面板订阅它，fetch /tools/status/:id 渲染图（不再跳 /tools 页）。
-  activeResultJobId?: string;
   /** Current artifact/file being viewed inside the project result panel */
   activeArtifact?: {
     jobId: string;

@@ -1,6 +1,8 @@
 import { useCallback, useSyncExternalStore } from 'react';
 import type { CopilotContext } from '@/lib/copilotContext';
+import { biof3Events, dispatchBioF3Event } from '@/lib/events';
 import {
+  cancelAgentTask,
   streamChat,
   type ChatMessage,
   type ToolCallEvent,
@@ -20,7 +22,7 @@ export interface ConversationPendingApproval {
   params?: Record<string, unknown>;
 }
 
-export type ConversationRunStatus = 'running' | 'done' | 'error';
+export type ConversationRunStatus = 'running' | 'done' | 'error' | 'stopped';
 
 export interface ConversationRunSnapshot {
   conversationId: string;
@@ -33,11 +35,14 @@ export interface ConversationRunSnapshot {
   assistantTs: string;
   assistantPending: boolean;
   assistantError: boolean;
+  statusMessage?: string;
+  progressUpdates: Array<{ iteration: number; content: string }>;
   toolActivities: ToolActivityItem[];
   pendingApproval: ConversationPendingApproval | null;
   processingDurationMs?: number;
   startedAt: number;
   completedAt?: number;
+  taskId?: string;
 }
 
 interface StartConversationRunOptions {
@@ -129,6 +134,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     assistantTs: new Date(startedAt + 1).toISOString(),
     assistantPending: true,
     assistantError: false,
+    progressUpdates: [],
     toolActivities: [],
     pendingApproval: null,
     startedAt,
@@ -146,6 +152,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
         : current.assistantContent,
       assistantPending: false,
       assistantError: status === 'error',
+      statusMessage: undefined,
       processingDurationMs: Math.max(0, completedAt - current.startedAt),
       completedAt,
     }));
@@ -165,7 +172,35 @@ export function startConversationRun(options: StartConversationRunOptions): bool
         ...current,
         assistantContent: '',
         assistantPending: true,
+        statusMessage: undefined,
       }));
+    },
+    onTaskStarted: (taskId) => {
+      replaceRun(conversationId, (current) => ({ ...current, taskId }));
+    },
+    onAgentStatus: (status) => {
+      replaceRun(conversationId, (current) => ({
+        ...current,
+        statusMessage: status.message,
+        assistantPending: true,
+      }));
+    },
+    onAgentProgress: (progress) => {
+      assistantAcc = '';
+      replaceRun(conversationId, (current) => {
+        const duplicate = current.progressUpdates.some(
+          (item) => item.iteration === progress.iteration && item.content === progress.content
+        );
+        return {
+          ...current,
+          progressUpdates: duplicate
+            ? current.progressUpdates
+            : [...current.progressUpdates, progress].slice(-50),
+          assistantContent: '',
+          assistantPending: true,
+          statusMessage: undefined,
+        };
+      });
     },
     onDelta: (delta) => {
       assistantAcc += delta;
@@ -173,6 +208,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
         ...current,
         assistantContent: assistantAcc,
         assistantPending: false,
+        statusMessage: undefined,
       }));
     },
     onToolCall: (event: ToolCallEvent) => {
@@ -196,6 +232,26 @@ export function startConversationRun(options: StartConversationRunOptions): bool
               }
             : current.pendingApproval,
       }));
+      if (
+        event.toolResult?.status === 'success' &&
+        ['workspace_write', 'workspace_replace', 'workspace_exec'].includes(event.toolResult.tool || event.name)
+      ) {
+        dispatchBioF3Event(biof3Events.projectWorkspaceChanged, {
+          projectId: options.projectId,
+          source: 'agent',
+        });
+      }
+      if (
+        event.name === 'run_tool' &&
+        event.toolResult?.status === 'success' &&
+        !event.needApproval &&
+        event.toolJobId
+      ) {
+        dispatchBioF3Event(biof3Events.projectOpenResult, {
+          toolJobId: event.toolJobId,
+          projectId: options.projectId,
+        });
+      }
     },
     onDone: () => finish('done'),
     onError: (error) => finish('error', error),
@@ -216,10 +272,32 @@ export function clearConversationRun(conversationId: string): void {
   if (runs.delete(conversationId)) emit(conversationId);
 }
 
-export function detachConversationRun(conversationId: string): void {
+export function stopConversationRun(conversationId: string): void {
+  const current = runs.get(conversationId);
+  if (!current || current.status !== 'running') return;
+  const completedAt = Date.now();
+  replaceRun(conversationId, (snapshot) => ({
+    ...snapshot,
+    status: 'stopped',
+    assistantContent: snapshot.assistantContent.trim()
+      ? snapshot.assistantContent
+      : '任务已停止，已完成的阶段结论和工具记录已保留。',
+    assistantPending: false,
+    assistantError: false,
+    statusMessage: undefined,
+    processingDurationMs: Math.max(0, completedAt - snapshot.startedAt),
+    completedAt,
+  }));
+  if (current.taskId) {
+    void cancelAgentTask(current.taskId).catch((error) => {
+      replaceRun(conversationId, (snapshot) => ({
+        ...snapshot,
+        statusMessage: `后台停止请求未确认：${error instanceof Error ? error.message : String(error)}`,
+      }));
+    });
+  }
   controllers.get(conversationId)?.abort();
   controllers.delete(conversationId);
-  if (runs.delete(conversationId)) emit(conversationId);
 }
 
 export function __resetConversationRunsForTests(): void {
