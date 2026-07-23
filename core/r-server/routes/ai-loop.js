@@ -39,6 +39,9 @@ function registerAiLoopRoutes(app) {
 
   // Auth middleware — ensure userId is available
   function requireUser(req, res, next) {
+    // Desktop bootstrap intentionally provides req.user only (single local
+    // identity); web/test middleware may provide req.userId. Normalize both.
+    req.userId = req.userId || (req.user && req.user.id) || null;
     if (!req.userId) return res.status(401).json({ ok: false, error: 'unauthenticated' });
     next();
   }

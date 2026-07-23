@@ -1,6 +1,6 @@
 # Harness Loop Engineering v1 — 生产接线收口计划
 
-最后更新：2026-07-23
+最后更新：2026-07-24
 
 状态：`in_progress`（HLE-C1～C3 完成；HLE-C4 功能接线完成、视觉验收进行中；HLE-C5 Step 7 待真实产品验收）
 
@@ -268,6 +268,8 @@ failed Job 存在部分文件时必须：
 > - `useDurableConversationLoop` 在打开、切换、重开会话时从 SQLite 回放，并与 live SSE 按 iterationId 幂等合并；聊天停止后阶段记录不再随 transient run 清除。
 > - 摘要同步显示恢复状态、当前/后台 Loop 数、Token、缓存口径与成本状态；资源仍由 RuntimeResourceSnapshot 提供。
 > - 自动证据：真实 Router 18 项、Contract/Repository 64 项、前端 226 项、根测试 1067（1056 pass/0 fail/11 skip）。
+> - 真实 Desktop 纠偏：bounded AI Loop API 必须先于 legacy `/api/loop/:loopRunId` 注册；desktop-local 的 `req.user.id` 统一归一化为 `req.userId`。否则独立 router 测试虽绿，真实产品仍会分别返回 404/401。
+> - 无 assistant 消息的历史会话仍直接渲染 durable LoopStatusPanel，避免恢复事实因消息形态缺失而不可见。
 > - 待续仅剩实机视觉矩阵；未取得证据前 UI-101 不标 verified。
 
 首选位置：

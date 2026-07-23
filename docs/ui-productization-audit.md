@@ -229,4 +229,5 @@ npm run check
 - 不允许破坏：`run_tool → tool_job → artifact truth` 执行链、既有 `onIter`/`onAgentStatus`/`onAgentProgress`/`toolActivities`、stop/switch/reopen 阶段记录留存、`StreamChatOptions` 既有字段签名。
 - 代码验证：`npm --prefix frontend run check`（tsc 0）、`npm test --prefix frontend`（`conversationRunStore` 15/15 通过，含 loop 幂等/取消保留/blocked-非绿）、`npm run check`。
 - **2026-07-24 功能收口（状态仍为 `in_progress`）**：新增 `session-summary` 有界 API 与 `useDurableConversationLoop`；打开/切换/重开会话会从 SQLite 自动回放 latest LoopRun 与公开 iterations，并与 live SSE 按 iterationId 幂等合并。后端真实落盘 completed/blocked/cancelled；摘要接入 active/background、recovery、conversation Token/cache/cost，停止后 transient run 清除也不丢阶段记录。自动验证：真实 Router 18 项、前端 226 项、根测试 1067（1056 pass/0 fail/11 skip）。
+- **2026-07-24 真实 Desktop 纠偏（仍为 `in_progress`）**：生产注册顺序把 bounded AI Loop API 前置于 legacy `/api/loop/:loopRunId`，Loop API 同时兼容 desktop-local 的 `req.user.id` 身份；无 assistant 消息的历史会话也显示独立 LoopStatusPanel。两项 route 回归锁定真实产品中曾出现的 404/401，视觉矩阵完成前不升级为 `verified`。
 - 未验证项（保持 `in_progress`）：明暗/820px 窄窗/停止恢复视觉矩阵；真实产品实机三轨、双 Provider 与应用重启（属 HLE-C5 Step 7）。当前功能证据不冒充实机视觉验收。

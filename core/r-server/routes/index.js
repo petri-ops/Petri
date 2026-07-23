@@ -19,12 +19,15 @@ module.exports = async function registerRoutes(app) {
     ['AI progress', () => require('./ai-progress')(app)],
     ['Data CRUD', () => { app.use('/api/data', require('../api-data')); }],
     ['Files', () => require('./files')(app)],
+    // Must precede Harness: harness.js retains the legacy
+    // GET /api/loop/:loopRunId catch-all, which would otherwise swallow
+    // /runs, /session-summary, /iterations, /recovery, etc.
+    ['AI Loop API', () => require('./ai-loop').registerAiLoopRoutes(app)],
     ['Harness', () => require('./harness')(app)],
     ['Tools', () => require('./tools')(app)],
     ['Feedback', () => require('./feedback')(app)],
     ['AI chat', () => require('./ai-chat')(app)],
     ['AI agent', () => require('./ai-agent')(app)],
-    ['AI Loop API', () => require('./ai-loop').registerAiLoopRoutes(app)],
     ['AI settings', () => require('./ai-settings-api').registerAiSettingsRoutes(app)],
     ['R compute', () => require('./r-compute').registerRCompute(app)],
   ];

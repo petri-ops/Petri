@@ -417,7 +417,13 @@ export function SimpleChat({
   const displayMessages = (() => {
     if (!activeRun || activeRun.conversationId !== conversationId) {
       if (!durableLoop.loop) return messages;
-      const lastAssistantIndex = messages.findLastIndex((message) => message.role === 'assistant');
+      let lastAssistantIndex = -1;
+      for (let index = messages.length - 1; index >= 0; index -= 1) {
+        if (messages[index].role === 'assistant') {
+          lastAssistantIndex = index;
+          break;
+        }
+      }
       if (lastAssistantIndex < 0) return messages;
       const next = messages.slice();
       next[lastAssistantIndex] = { ...next[lastAssistantIndex], loop: durableLoop.loop };
@@ -457,6 +463,9 @@ export function SimpleChat({
     }
     return next;
   })();
+  const standaloneDurableLoop = durableLoop.loop && !displayMessages.some((message) => message.loop)
+    ? durableLoop.loop
+    : null;
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -725,6 +734,16 @@ export function SimpleChat({
               </React.Fragment>
             );
           })}
+          {standaloneDurableLoop && (
+            <div className="sc-msg sc-msg-assistant" aria-label="历史任务循环">
+              <div className="sc-msg-avatar">
+                <Icon name="cpu" size={16} />
+              </div>
+              <div className="sc-msg-body">
+                <LoopStatusPanel loop={standaloneDurableLoop} pending={false} />
+              </div>
+            </div>
+          )}
           {pendingApproval && accessMode !== 'full' && (
             <ApprovalCard
               approval={pendingApproval}

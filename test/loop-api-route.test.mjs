@@ -30,6 +30,7 @@ import os from 'node:os';
 import fs from 'node:fs';
 import http from 'node:http';
 import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 
@@ -79,11 +80,12 @@ async function apiPost(pathname, { userId, role } = {}) {
   return apiRequest('POST', pathname, { userId, role });
 }
 
-function apiRequest(method, pathname, { userId, role } = {}) {
+function apiRequest(method, pathname, { userId, role, userObjectOnly = false } = {}) {
   return new Promise((resolve, reject) => {
     const headers = {};
     if (userId) headers['x-mock-user'] = userId;
     if (role) headers['x-mock-role'] = role;
+    if (userObjectOnly) headers['x-mock-user-object-only'] = '1';
     const req = http.request(baseUrl + pathname, { method, headers }, (res) => {
       let data = '';
       res.on('data', (c) => { data += c; });
@@ -122,7 +124,7 @@ before(async () => {
     const uid = req.headers['x-mock-user'];
     const role = req.headers['x-mock-role'];
     if (uid) {
-      req.userId = String(uid);
+      if (!req.headers['x-mock-user-object-only']) req.userId = String(uid);
       req.user = { id: String(uid), role: role ? String(role) : 'user' };
     }
     next();
@@ -384,4 +386,23 @@ test('RT-18 session summary enforces project ownership', async () => {
     { userId: OTHER_ID },
   );
   assert.strictEqual(res.status, 403);
+});
+
+test('RT-19 production route registry mounts bounded Loop API before the legacy catch-all', () => {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const source = fs.readFileSync(path.join(repoRoot, 'core/r-server/routes/index.js'), 'utf8');
+  const loopApi = source.indexOf("['AI Loop API'");
+  const harness = source.indexOf("['Harness'");
+  assert.ok(loopApi >= 0 && harness >= 0);
+  assert.ok(loopApi < harness, 'AI Loop API must mount before Harness legacy /api/loop/:loopRunId');
+});
+
+test('RT-20 desktop req.user identity is normalized without req.userId', async () => {
+  const run = persistRun({ projectId: ownedProjectId, conversationId: 'conv_desktop_identity' });
+  const res = await apiGet(`/api/loop/runs/${run.loopRunId}`, {
+    userId: OWNER_ID,
+    userObjectOnly: true,
+  });
+  assert.strictEqual(res.status, 200);
+  assert.strictEqual(res.body.run.loopRunId, run.loopRunId);
 });
