@@ -906,6 +906,27 @@ function listLoopRunsForConversation(projectId, conversationId, { limit = 50 } =
   }));
 }
 
+function listRunningLoopRuns() {
+  return db.prepare(`
+    SELECT * FROM loop_runs
+    WHERE loop_status = 'running'
+    ORDER BY updated_at ASC
+  `).all().map((row) => ({
+    loopRunId: row.loop_run_id,
+    projectId: row.project_id,
+    conversationId: row.conversation_id,
+    taskSpecRef: row.task_spec_ref,
+    automationMode: row.automation_mode,
+    loopStatus: row.loop_status,
+    loopStatusHash: row.loop_status_hash,
+    loopStatusJson: row.loop_status_json,
+    isPartial: !!row.is_partial,
+    partialReason: row.partial_reason || null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
+}
+
 function persistLoopIteration(iteration) {
   if (!iteration?.iterationId || !iteration?.loopRunId || !iteration?.hash) {
     throw new Error('loop_iteration_persistence_fields_required');
@@ -1718,6 +1739,7 @@ module.exports = {
   updateLoopRunStatus,
   getLoopRun,
   listLoopRunsForConversation,
+  listRunningLoopRuns,
   persistLoopIteration,
   getLoopIteration,
   listLoopIterations,

@@ -279,7 +279,7 @@ failed Job 存在部分文件时必须：
 
 ### HLE-C5：真实 SPT-1 与产品出口
 
-状态：`planned`
+状态：`completed`
 
 必须交付：
 

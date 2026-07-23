@@ -418,7 +418,8 @@ function decideNextAction(ctx) {
   if (failedJob && (failedJob.status === 'failed' || failedJob.status === 'blocked')) {
     // Import lazily to avoid circular require
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { diagnoseFailure, selectRepairStrategy } = require('./loop-failure-diagnoser');
+    const { diagnoseFailure } = require('./loop-failure-diagnoser');
+    const { selectRepairStrategy } = require('./loop-repair-strategy');
 
     const diagnosis = diagnoseFailure(failedJob, {
       toolId: failedJob.tool_id || null,

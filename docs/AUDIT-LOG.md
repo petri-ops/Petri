@@ -32,6 +32,8 @@
 | 🔴阻塞 | 2026-07-23 | HLE 离线 Controller/Validator/Repair/Checkpoint 已实现，但生产 `ai-agent.js`、真实 Job/Artifact 推进和前端尚未接线；HLE-6 的双 Provider、重启和视觉出口不成立 |
 | ✅已处理 | 2026-07-23 | HLE-C1 完成
 | ✅已处理 | 2026-07-23 | HLE-C2 完成
+| ✅已处理 | 2026-07-23 | HLE-C5 完成：server.js 启动恢复（HLE-C5）接入 listRunningLoopRuns；running LoopRun → failed(recovery_required) 平滑过渡；Loop Controller 修复 require('./loop-failure-diagnoser') 引用 loop-repair-strategy；22/22 恢复矩阵测试通过；46/46 SPT-1 三轨验收测试通过；440/440 Loop 测试全量通过 | 本提交 | `core/r-server/server.js`, `core/r-server/db.js`, `core/shared-backend/loop-controller.js`, `test/loop-recovery-integration.test.mjs`, `test/loop-spt1-acceptance.test.mjs` |
+
 | 🟡建议 | 2026-07-23 | HLE-C3 部分完成
 | 🟡建议 | 2026-07-23 | HLE-C4 部分完成：StreamChatOptions 新增 onLoopPhase / onLoopIteration；_handleSseEvent 支持 loop_phase 和 loop_iteration SSE 事件；前端可消费 Loop Controller 状态；16/16 SSE 契约测试通过；UI 面板和视觉验收待 HLE-C5 | 本提交 | `frontend/src/components/copilot/copilotClient.ts` |
 ：Loop REST API 上线（runs/iterations/actions/evidence/recovery），compact 投影不暴露无界字段；启动时 reconcile running LoopRun 待 HLE-C5 | 本提交 | `core/r-server/routes/ai-loop.js` |

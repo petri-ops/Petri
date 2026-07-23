@@ -97,6 +97,32 @@ try {
   if (stalledToolJobs.length > 0) {
     console.log('[Recovery] Preserved ' + stalledToolJobs.length + ' interrupted tool jobs as recovery_required');
   }
+  // HLE-C5: Recover running LoopRuns from previous session
+  try {
+    const runningLoopRuns = dbMod.listRunningLoopRuns();
+    if (runningLoopRuns.length > 0) {
+      console.log('[Recovery] Found ' + runningLoopRuns.length + ' running LoopRun(s) from previous session');
+      for (const run of runningLoopRuns) {
+        // Update status to 'failed' with recovery_required since we can't safely resume mid-session
+        // The LoopRun was interrupted by server restart — log it for manual review
+        console.log('[Recovery] LoopRun ' + run.loopRunId + ' (project=' + run.projectId + ') marked as recovery_required');
+        try {
+          const statusJson = run.loopStatusJson ? JSON.parse(run.loopStatusJson) : {};
+          dbMod.updateLoopRunStatus(run.loopRunId, {
+            loopStatus: 'failed',
+            hash: run.loopStatusHash,
+            json: JSON.stringify({ ...statusJson, recovery_required: true, recovery_reason: 'server_restart_during_active_loop' }),
+            updatedAt: new Date().toISOString(),
+          });
+          console.log('[Recovery] LoopRun ' + run.loopRunId + ' → failed (recovery_required=true)');
+        } catch (err) {
+          console.error('[Recovery] Failed to update LoopRun ' + run.loopRunId + ':', err.message);
+        }
+      }
+    }
+  } catch (e) {
+    console.error('[Recovery] LoopRun recovery failed:', e.message);
+  }
 } catch (e) {
   console.error('[Recovery] Failed:', e.message);
 }
