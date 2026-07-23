@@ -123,7 +123,7 @@ const WORKSPACE_TOOL_DEFS = [
     function: {
       name: 'workspace_exec',
       description:
-        '在当前项目工作区打开通用命令行。完全访问模式允许使用 shell 执行用户机器上可用的命令、脚本、管道和重定向；只读模式或用户明确要求仅检查/规划时禁止调用。科学分析正式结果仍应通过 run_tool 进入 tool_job 与 artifact truth。',
+        '在当前项目工作区打开通用命令行。完全访问模式允许使用 shell 执行用户机器上可用的命令、脚本、管道和重定向；交互式提权、不可恢复删除、静默远端推送和远程脚本管道仍由安全边界拒绝。只读模式或用户明确要求仅检查/规划时禁止调用。科学分析正式结果仍应通过 run_tool 进入 tool_job 与 artifact truth。',
       parameters: {
         type: 'object',
         properties: {

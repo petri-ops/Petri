@@ -596,6 +596,26 @@ function createWorkspaceTools(options = {}) {
     if (!normalized) return { ok: false, reason: 'command 不能为空' };
     if (Buffer.byteLength(normalized) > MAX_COMMAND_BYTES) return { ok: false, reason: 'command 过长' };
     if (normalized.includes('\0')) return { ok: false, reason: 'command 不能包含空字节' };
+    const nonNegotiableRisks = [
+      {
+        pattern: /(^|[;&|]\s*)(sudo|doas)(\s|$)/i,
+        reason: '禁止通过命令行发起交互式提权',
+      },
+      {
+        pattern: /(^|[;&|]\s*)rm(\s|$)/i,
+        reason: '禁止通过命令行执行不可恢复删除；请使用受控文件操作',
+      },
+      {
+        pattern: /(^|[;&|]\s*)git(?:\s+-C\s+\S+)?\s+push(\s|$)/i,
+        reason: '禁止由工作区命令静默推送远端',
+      },
+      {
+        pattern: /\b(curl|wget)\b[^|]*\|\s*(sh|bash|zsh|fish|python(?:3)?|perl|ruby)\b/i,
+        reason: '禁止下载远程内容后直接管道执行',
+      },
+    ];
+    const blocked = nonNegotiableRisks.find(({ pattern }) => pattern.test(normalized));
+    if (blocked) return { ok: false, reason: blocked.reason };
     return { ok: true };
   }
 
