@@ -38,6 +38,20 @@
       "label": "实验组（treatment level）",
       "type": "text",
       "default": "KO"
+    },
+    {
+      "id": "padj_cutoff",
+      "label": "padj 阈值",
+      "type": "number",
+      "default": 0.05,
+      "required": false
+    },
+    {
+      "id": "lfc_cutoff",
+      "label": "|log2FC| 阈值",
+      "type": "number",
+      "default": 1,
+      "required": false
     }
   ],
   "outputs": [
@@ -69,7 +83,31 @@
       "description": "counts 列名与 coldata 行名不一致，DESeq2 无法对齐。",
       "recoverable": true,
       "suggestedFix": "提示用户检查 metadata.csv 的 sample 列是否与 counts 的列名完全一致。",
-      "detect": "sample|mismatch|not in coldata|counts and coldata"
+      "detect": "对齐失败|无交集|sample.*mismatch|counts and coldata"
+    },
+    {
+      "code": "design_column_missing",
+      "title": "design 列不存在",
+      "description": "传入的 design 列名在 coldata 中不存在。R 脚本不再静默回退。",
+      "recoverable": true,
+      "suggestedFix": "检查 coldata 的列名，在 Job 参数中设置正确的 design 列名。",
+      "detect": "design 列.*不存在|design column.*not found|可用的列名"
+    },
+    {
+      "code": "contrast_level_missing",
+      "title": "contrast level 不在 design 列中",
+      "description": "contrast_ref 或 contrast_treat 指定的值在 design 列的 levels 中不存在。",
+      "recoverable": true,
+      "suggestedFix": "检查 coldata 的 design 列实际 levels，设置匹配的 contrast_ref 和 contrast_treat。",
+      "detect": "对照组.*不在|实验组.*不在|实际 levels"
+    },
+    {
+      "code": "insufficient_replicates",
+      "title": "生物学重复不足",
+      "description": "每个条件至少需要 2 个生物学重复。",
+      "recoverable": true,
+      "suggestedFix": "增加每个条件的生物学重复数至至少 2 个。",
+      "detect": "每个条件至少需要.*个生物学重复"
     }
   ]
 }

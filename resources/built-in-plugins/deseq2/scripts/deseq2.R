@@ -64,38 +64,88 @@ read_matrix <- function(f) {
   else read.csv(f, row.names = 1, check.names = FALSE)
 }
 
+# Preflight checks — fail fast before expensive computation
 counts_file <- list.files(job_dir, pattern = "^counts", full.names = TRUE)[1]
 coldata_file <- list.files(job_dir, pattern = "^coldata", full.names = TRUE)[1]
 
-counts <- as.matrix(read_matrix(counts_file))
-coldata <- read_matrix(coldata_file)
+if (is.na(counts_file) || !file.exists(counts_file)) {
+  stop("[deseq2] counts 文件未找到。期望 job 目录包含以 'counts' 开头的 CSV 文件。")
+}
+if (is.na(coldata_file) || !file.exists(coldata_file)) {
+  stop("[deseq2] coldata 文件未找到。期望 job 目录包含以 'coldata' 开头的 CSV 文件。")
+}
 
-# Ensure counts are integers (CSV round-trip may introduce floats)
+counts_raw <- as.matrix(read_matrix(counts_file))
+coldata_raw <- read_matrix(coldata_file)
+
+# Preflight 1: sample name alignment
+coldata_samples <- rownames(coldata_raw)
+counts_samples <- colnames(counts_raw)
+aligned <- intersect(counts_samples, coldata_samples)
+if (length(aligned) == 0) {
+  stop(paste0(
+    "[deseq2] 样本名对齐失败。counts 列名 (", length(counts_samples), "): ",
+    paste(head(counts_samples, 5), collapse=", "),
+    if(length(counts_samples) > 5) "..." else "",
+    "。coldata 行名 (", length(coldata_samples), "): ",
+    paste(head(coldata_samples, 5), collapse=", "),
+    if(length(coldata_samples) > 5) "..." else "",
+    ". 无交集，无法对齐。"
+  ))
+}
+cat(sprintf("[deseq2] Preflight: %d/%d counts 列名与 coldata 行名对齐\n", length(aligned), ncol(counts_raw)))
+
+# Preflight 2: design column must exist
+if (!design_col %in% colnames(coldata_raw)) {
+  available <- paste(colnames(coldata_raw), collapse=", ")
+  stop(paste0(
+    "[deseq2] design 列 '", design_col, "' 不存在于 coldata。",
+    "可用的列名: ", available,
+    "。请在 Job 参数中设置正确的 design 列名，或确保 coldata 包含 '", design_col, "' 列。"
+  ))
+}
+
+# Preflight 3: contrast levels must exist in design column
+design_levels <- unique(as.character(coldata_raw[[design_col]]))
+if (!(ref %in% design_levels)) {
+  stop(paste0(
+    "[deseq2] 对照组 '", ref, "' 不在 design 列 '", design_col, "' 中。",
+    "实际 levels: ", paste(design_levels, collapse=", ")
+  ))
+}
+if (!(treat %in% design_levels)) {
+  stop(paste0(
+    "[deseq2] 实验组 '", treat, "' 不在 design 列 '", design_col, "' 中。",
+    "实际 levels: ", paste(design_levels, collapse=", ")
+  ))
+}
+
+# Preflight 4: minimum replicates
+n_ref <- sum(coldata_raw[[design_col]] == ref)
+n_treat <- sum(coldata_raw[[design_col]] == treat)
+if (n_ref < 2 || n_treat < 2) {
+  stop(paste0(
+    "[deseq2] 每个条件至少需要 2 个生物学重复。当前: 对照组(", ref, ")=", n_ref,
+    ", 实验组(", treat, ")=", n_treat, "。"
+  ))
+}
+
+# Preflight 5: integer counts
+if (any(round(counts_raw) < 0)) {
+  stop("[deseq2] counts 矩阵包含负值，不是合法的 counts 数据。")
+}
+
+cat(sprintf("[deseq2] Preflight passed: %d samples (%s=%d, %s=%d), design='%s'\n",
+  ncol(counts_raw), ref, n_ref, treat, n_treat, design_col))
+
+# Apply sample alignment
+counts <- counts_raw[, aligned, drop = FALSE]
+coldata <- coldata_raw[aligned, , drop = FALSE]
+
+# Ensure counts are integers
 counts <- round(counts)
 storage.mode(counts) <- "integer"
 
-# Ensure coldata rows match counts columns
-common <- intersect(colnames(counts), rownames(coldata))
-counts <- counts[, common]
-coldata <- coldata[common, , drop = FALSE]
-
-# Set factor levels
-if (!design_col %in% colnames(coldata)) {
-  fallback_cols <- setdiff(colnames(coldata), character(0))
-  if (length(fallback_cols) > 0) {
-    warning(sprintf(
-      "[deseq2] design column '%s' not found; falling back to '%s'",
-      design_col,
-      fallback_cols[1]
-    ))
-    design_col <- fallback_cols[1]
-  } else {
-    stop(sprintf(
-      "[deseq2] design column '%s' not found and coldata has no usable columns",
-      design_col
-    ))
-  }
-}
 coldata[[design_col]] <- factor(coldata[[design_col]], levels = c(ref, treat))
 
 # Filter low-expression genes
