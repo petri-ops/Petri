@@ -306,6 +306,8 @@ failed Job 存在部分文件时必须：
 
 状态：`in_progress`（HLE-C5R 基础设施完成，真实产品验收待 Step 7：Plugin Contract 已统一（biof3.deg.v1、lfc_col、DESeq2 preflight）、bulk-rna-core 4-step DAG 已完成、Repair Boundary 已建立、scientific-task-planner coldataBinding 已完成、false-success 检测已修复。1032/1032 测试全量通过，插件契约 lint 0 错误。真实产品路径三轨（Normal/Repairable/Blocking）和 UI/Provider/重启验收待 Step 7。）
 
+Provider 验收入口已覆盖 DeepSeek、Anthropic 与产品通用 OpenAI-compatible Profile；只有 key/base URL/model 环境变量齐备的目标才参与人工矩阵，报告不保存凭据、请求头、完整 Provider 响应或 endpoint URL。
+
 必须交付：
 
 - SPT-1 从真实聊天请求和生产 route 启动。

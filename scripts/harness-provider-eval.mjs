@@ -30,7 +30,8 @@
  *
  * Usage:
  *   source .biof3-secrets && npm run harness:provider-eval
- *   # optional: EVAL_TARGETS=deepseek,anthropic  EVAL_REPORT_DIR=eval-reports
+ *   # optional: EVAL_TARGETS=deepseek,anthropic,openai-compatible
+ *               EVAL_REPORT_DIR=eval-reports
  *
  * Exit code: 0 when at least two providers each clear the required-probe bar;
  *            1 otherwise (so it can gate a manual acceptance run).
@@ -66,7 +67,7 @@ function env(name) {
  * .biof3-secrets keeps working.
  */
 export function resolveTargets(getEnv = env) {
-  const selected = (getEnv('EVAL_TARGETS') || 'deepseek,anthropic')
+  const selected = (getEnv('EVAL_TARGETS') || 'deepseek,anthropic,openai-compatible')
     .split(',')
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean);
@@ -90,7 +91,25 @@ export function resolveTargets(getEnv = env) {
       apiKey: getEnv('ANTHROPIC_API_KEY'),
     });
   }
+  if (
+    selected.includes('openai-compatible') &&
+    getEnv('OPENAI_COMPATIBLE_API_KEY') &&
+    getEnv('OPENAI_COMPATIBLE_BASE_URL') &&
+    getEnv('OPENAI_COMPATIBLE_MODEL')
+  ) {
+    targets.push({
+      name: 'openai-compatible',
+      provider: 'openai-compatible',
+      model: getEnv('OPENAI_COMPATIBLE_MODEL'),
+      baseUrl: getEnv('OPENAI_COMPATIBLE_BASE_URL'),
+      apiKey: getEnv('OPENAI_COMPATIBLE_API_KEY'),
+    });
+  }
   return targets;
+}
+
+export function formatTargetLabel(target) {
+  return `评测中：${target.name} (provider=${target.provider})`;
 }
 
 function makeGateway(target) {
@@ -490,7 +509,9 @@ async function main() {
 
   const rows = [];
   for (const target of targets) {
-    console.log(`评测中：${target.name} (provider=${target.provider} model=${target.model || '?'}${target.baseUrl ? ` baseUrl=${target.baseUrl}` : ''})`);
+    // Keep live acceptance logs shareable: endpoint URLs, credentials and
+    // deployment-specific model names are intentionally omitted.
+    console.log(formatTargetLabel(target));
     let probes;
     try {
       probes = await runProbesForTarget(target);

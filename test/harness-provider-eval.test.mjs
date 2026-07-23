@@ -11,6 +11,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   resolveTargets,
+  formatTargetLabel,
   extractJsonObject,
   evalIntent,
   evalToolSelect,
@@ -57,6 +58,35 @@ test('resolveTargets: EVAL_TARGETS filters which targets are built', () => {
   const targets = resolveTargets((k) => env[k]);
   assert.equal(targets.length, 1);
   assert.equal(targets[0].name, 'deepseek');
+});
+
+test('resolveTargets: openai-compatible requires key, base URL, and model', () => {
+  const env = {
+    EVAL_TARGETS: 'openai-compatible',
+    OPENAI_COMPATIBLE_API_KEY: 'sk-compatible',
+    OPENAI_COMPATIBLE_BASE_URL: 'https://gateway.example.test/v1',
+    OPENAI_COMPATIBLE_MODEL: 'provider-model',
+  };
+  const targets = resolveTargets((k) => env[k]);
+  assert.equal(targets.length, 1);
+  assert.equal(targets[0].name, 'openai-compatible');
+  assert.equal(targets[0].provider, 'openai-compatible');
+  assert.equal(targets[0].model, 'provider-model');
+  assert.equal(targets[0].baseUrl, 'https://gateway.example.test/v1');
+});
+
+test('formatTargetLabel omits endpoint URL, credential, and deployment model', () => {
+  const label = formatTargetLabel({
+    name: 'openai-compatible',
+    provider: 'openai-compatible',
+    model: 'private-model',
+    baseUrl: 'https://private.example.test/v1',
+    apiKey: 'sk-secret',
+  });
+  assert.equal(label, '评测中：openai-compatible (provider=openai-compatible)');
+  assert.equal(label.includes('private.example.test'), false);
+  assert.equal(label.includes('private-model'), false);
+  assert.equal(label.includes('sk-secret'), false);
 });
 
 // ── extractJsonObject ────────────────────────────────────────────────────────
