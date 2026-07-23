@@ -1016,7 +1016,7 @@ npm run build:mac-arm64
 - 不使用 `git add .` 或 `git add -A`；显式 stage 文件。
 - 任何 UI 状态、Provider、发布和无关清理不得混入 P-03 子包提交。
 
-## 9. 当前下一步
+## 9. 完成状态与后续入口
 
 HRT-0 已完成，证据位于 `acceptance/harness-scientific-task/` 与 `test/fixtures/harness-scientific-task/`，门禁为 `npm run harness:scientific-task:evaluate`。
 
@@ -1026,6 +1026,6 @@ HRT-1 已完成。契约实现和测试位于：
 - `test/scientific-task-spec.test.mjs`
 - `core/shared-backend/index.js`
 
-HRT-2、HRT-3、HRT-4、HRT-5、HRT-6 已完成。HRT-6 任务包包含 TaskSpec、ContextCheckpoint 或明确的 `partial_history`、Workflow Plan、Job/Artifact/Delivery/Provenance、来源 digest、脱敏参数、脚本快照、逐 artifact 入口、完整性清单和 HANDOFF；真实任务默认只保存输入引用/哈希，仓库脱敏 fixture 才允许携带输入副本。`acceptance/harness-scientific-task/hrt6-replay-acceptance.json` 证明数据库移除后仍可验证和运行：离线 R 重放退出码 0、确定性产物哈希完全一致，输入/插件/参数/环境/真实计算失败五类漂移均被分类。UI-050 实机点击为 6 个产物生成 18 文件任务包，旧任务缺 checkpoint 时正确显示“历史部分可用”，控制台 0 error。下一阶段进入 HRT-7：聚合门禁与稳定化。继续保持普通聊天不误创建 TaskSpec、`cannot_reliably_answer` 不因自动化模式提升而变成可执行，并保持 `run_tool → tool_job → artifact truth` 唯一执行真相。
+HRT-2、HRT-3、HRT-4、HRT-5、HRT-6 和 HRT-7 已完成。HRT-6 任务包包含 TaskSpec、ContextCheckpoint 或明确的 `partial_history`、Workflow Plan、Job/Artifact/Delivery/Provenance、来源 digest、脱敏参数、脚本快照、逐 artifact 入口、完整性清单和 HANDOFF；真实任务默认只保存输入引用/哈希，仓库脱敏 fixture 才允许携带输入副本。`acceptance/harness-scientific-task/hrt6-replay-acceptance.json` 证明数据库移除后仍可验证和运行：离线 R 重放退出码 0、确定性产物哈希完全一致，输入/插件/参数/环境/真实计算失败五类漂移均被分类。UI-050 实机点击为 6 个产物生成 18 文件任务包，旧任务缺 checkpoint 时正确显示“历史部分可用”，控制台 0 error。HRT-7 聚合门禁证据为 `acceptance/harness-scientific-task/hrt7-scientific-task-gate.json`。后续入口为 [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md)；继续保持普通聊天不误创建 TaskSpec、`cannot_reliably_answer` 不因自动化模式提升而变成可执行，并保持 `run_tool → tool_job → artifact truth` 唯一执行真相。
 
 该顺序保证 Harness 的工程能力由真实需求驱动，同时不把具体分析内容误写成 Harness Core。

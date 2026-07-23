@@ -231,12 +231,12 @@ UI 不得制造第二套状态真相，模型层不得绕过确认/审计边界�
 
 ## 8. 当前立即执行项
 
-Stage 1–4 的 macOS arm64 RC 出口均已关闭。当前不扩展分析内容；经用户确认，新增的工程主线是 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md) 中的 P-03 Harness Scientific Task Contract v1：
+Stage 1–4 的 macOS arm64 RC 出口均已关闭。P-03 Harness Scientific Task Contract v1 的 HRT-0～HRT-7 也已关闭。当前不扩展分析内容；经用户确认，新增的工程主线是 [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md) 中的 Harness Loop Engineering v1：在现有 TaskSpec、DAG、Plugin、Job/Artifact、Delivery 和 Replay 之上，把持续推进、验证、故障修复、受影响子图重规划、耐久恢复与目标终止升级为可持久化、可审计的控制契约。
 
-1. 功能冻结，只修复发布阻断、数据错误、安全问题和明确回归。
-2. ✅ 全新用户目录完成 Runtime、项目、DESeq2 与 GO/KEGG 真实分析。
-3. ✅ 用正式 `rc.4` 数据副本验证迁移与设置/插件兼容。
-4. ✅ 完成 arm64 完整链和 x64 壳层构建/启动门禁；x64 Runtime 缺失已列为限制。
-5. ✅ 发布 `v0.0.1-rc.6`，验证 OSS 更新、公开下载、SHA-512 和 DMG 打开链。
-6. 观察 rc.7 真实使用反馈；后续产品阶段需单独立项。
-7. ✅ HRT-0 已建立成功、多步骤 lineage、歧义/失败恢复等六类脱敏任务和七组指标，离线门禁 24/24；当前进入 HRT-1 冻结 TaskSpec/Context schema，HRT-0 已知缺口不冒充产品验收。
+1. HLE-0：用 SPT-1 Bulk RNA-seq 脱敏任务建立正常、可自动修复和必须阻断三类 Loop 基线。
+2. HLE-1～HLE-2：冻结 Loop Contract/持久化，并把 task/legacy loop 收敛到统一 Controller 与退出判定。
+3. HLE-3～HLE-4：以确定性和科学验证器判定完成，加入故障分类、lineage-safe 修复和受影响子图重规划。
+4. HLE-5：完成耐久恢复、成本资源投影和紧凑 Loop UI；没有实机证据的 UI 继续保持 `in_progress`。
+5. HLE-6：完成 SPT-1 产品验收、双 Provider 人工矩阵和零网络 `npm run harness:loop` 聚合门禁。
+6. 全阶段保持 `run_tool → tool_job → artifact truth`；不得借 Loop、命令行或后台进程建立第二套执行真相。
+7. rc.7 缺陷、x64 Runtime、P7-F 或新插件扩展独立评估，不混入当前 HLE 子包。

@@ -1,6 +1,6 @@
 # BioF3 开发模块地图
 
-最后更新：2026-07-16
+最后更新：2026-07-23
 
 这份文档是 BioF3 Desktop 的统一开发词典。需求、缺陷、交接、提交和测试都应使用这里的模块名，避免把“右侧栏”“结果页”“后端”“主题”等不同层级的概念混在一起。
 
@@ -113,6 +113,7 @@
 - 固定阶段：`inspect → infer → select → repair → confirm → run → verify → report`。
 - 包含：文件索引、readiness、tool selection、workflow state、恢复动作、二跳 artifact 绑定。
 - 当前增量工作包还负责：模糊科学需求的结构化 TaskSpec、用户决策门、需求/输入/Job/Artifact/交付证据的可追溯绑定。
+- Loop Engineering 属于本模块内部控制层：负责观察目标差距、选择下一动作、调用既有执行链、验证证据、诊断/修复/重规划、耐久恢复和目标终止。它不得成为与 Harness 并行的系统。
 - 不拥有执行真相；状态必须投影自 P-02。
 - 主要路径：`scripts/harness-*`、`core/shared-backend/agent-workflow.js`、Core Harness routes/helpers。
 
@@ -174,7 +175,8 @@
 | “报告浏览器” | 报告内容/生成属于 W-04；通用地址栏/WebView 容器属于 W-05。 |
 | “结果页宽度” | 外层拖拽与持久化属于 W-02；结果内部排版属于 W-04。 |
 | “终端执行失败” | xterm/终端会话属于 W-07；正式分析任务失败属于 P-02；运行时缺失属于 P-05。 |
-| “Agent 没跑对” | 消息交互属于 W-03；选型/修参属于 P-03；插件计算属于 P-04；job/artifact 状态属于 P-02。 |
+| “Agent 没跑对” | 消息交互属于 W-03；选型、Loop 决策、验证/修复/重规划属于 P-03；插件计算属于 P-04；job/artifact 状态属于 P-02。 |
+| “Loop 工程包” | 指 P-03 Harness 内部升级，不创建平行模块；正式执行仍由 P-02 的 `run_tool → tool_job → artifact truth` 提供。 |
 | “模型不够用” | 会话选择器属于 W-03；Provider、Endpoint、能力和凭据属于 P-07；模型导致的选型/修参效果属于 P-03。 |
 | “主题没统一” | 仍需指定主模块，并附加关注点 C-01。 |
 | “后端问题” | 明确为 P-01 上下文、P-02 执行真相、P-03 工作流、P-04 插件或 P-05 runtime。 |
@@ -183,8 +185,8 @@
 
 ### 当前活跃
 
-- v1 Stage 1 只实现 UI 产品化：W-01/W-02 桌面壳、布局、面板与拖拽；W-03 Agent 会话；W-04/W-05/W-06/W-07 结果、浏览器、文件与终端容器。
-- C-01/C-02/C-04/C-06：主题联动、布局责任、跨面板状态和交互性能。
+- P-03 `Harness Loop Engineering v1`：按 HLE-0～HLE-6，以 SPT-1 Bulk RNA-seq 任务建设并验收可持久化、可验证、可修复的目标驱动 Loop。
+- 影响 P-01/P-02/P-04/P-07/W-03/W-04；关注 C-03/C-04/C-05/C-06，但不改变各模块所有权。
 
 ### 架构去耦已完成（2026-07）
 
@@ -192,19 +194,19 @@
 - 移除三条 web/ECS 时代双模式分支：**OSS 存储**（走本地文件存储）、**PostgreSQL**（纯 SQLite）、**docker 执行**（内嵌 R/Python 本地执行）。
 - 详见 [`dependency-decoupling-checkpoint.md`](./dependency-decoupling-checkpoint.md)。
 
-### 基础能力已建立，后续以稳定化为主
+### 基础能力已建立，后续以 Loop 工程稳定化为主
 
 - P-02：`tool_job + artifact truth` 唯一执行事实链。
-- P-03：Harness Phase 1–6、Agent workflow runtime、恢复与 fixture 门禁。
-- P-04：Plugin SDK、三来源发现、manifest 校验和内置样板插件。
+- P-03：Harness Phase 1–7、Scientific Task Contract HRT-0～HRT-7、Agent workflow runtime、恢复、交付/重放与 fixture 门禁均已建立；当前只增量建设 Loop 控制契约。
+- P-04：Plugin SDK、三来源发现、manifest 校验、内置样板和 10 个插件 Mac 真实链验收已建立。
 - P-05/P-06：canonical execution context、跨平台 adapter、Electron 集成与 CI。
-- P-07：已有 DeepSeek/DashScope 局部实现和 Provider 接口，但统一 Gateway、多 Provider、凭据分离和能力路由尚未完成；等待 v1 Stage 2。
+- P-07：统一 Gateway、多 Provider、凭据分离、能力路由和显式 fallback 已建立；HLE 只能消费这些能力，不能直接绑定 Provider。
 
 ### 后续主线
 
-- 固定顺序以 `docs/v1-productization-roadmap.md` 为准：Stage 1 UI → Stage 2 P-07 模型层 → Stage 3 P-03/P-04 Harness 与标准流程 → Stage 4 P-06 稳定发布。
-- Stage 1 期间不展开模型 Provider 或 Harness 内容扩充；Stage 2 期间保持 Harness 可回归但不批量增加流程。
-- Stage 3 由 P-03 编排插件、P-02 记录真实 job/artifact、P-07 提供模型能力、W-03/W-04 交付和继续分析。
+- Stage 1～4 与 Harness Phase 7、HRT-0～HRT-7 已关闭；当前入口为 `docs/harness-loop-engineering-plan.md`。
+- HLE 由 P-03 控制目标推进，P-02 记录真实 Job/Artifact，P-04 提供科学模块及领域验证器，P-07 提供可切换模型能力，W-03/W-04 展示进度和交付。
+- 每次只完成一个 HLE 子包；未经真实任务证据不得提前扩展多 Agent、通用后台进程或新的科学插件集合。
 
 ## 7. 任务与提交模板
 
