@@ -93,7 +93,7 @@ test('createAgentWorkflowPlan marks steps without available tools as blocked', (
 test('createAgentWorkflowPlan marks steps with satisfied dependencies as ready', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
     initialInputs: { counts: '/data/counts.csv' },
   });
   const ready = plan.steps.filter((s) => s.status === 'ready');
@@ -105,7 +105,7 @@ test('createAgentWorkflowPlan marks steps with satisfied dependencies as ready',
 test('createAgentWorkflowPlan sets status to ready when no steps are blocked', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   assert.equal(plan.status, 'ready');
   assert.equal(plan.autoExecute, false);
@@ -115,7 +115,7 @@ test('createAgentWorkflowPlan sets status to ready when no steps are blocked', (
 test('createAgentWorkflowPlan passes initialInputs only to root steps', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
     initialInputs: { counts: '/data/counts.csv', coldata: '/data/groups.csv' },
   });
   const differential = plan.steps.find((s) => s.id === 'differential');
@@ -217,12 +217,13 @@ test('projectStepStatuses is stable on null/undefined job arrays', () => {
 test('projectWorkflowPlan marks plan complete when all steps complete', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   const jobs = [
     { id: 'tj_1', status: 'completed', result_json: JSON.stringify({ artifactTruth: { status: 'valid' }, artifacts: [] }), stepId: 'differential' },
-    { id: 'tj_2', status: 'completed', result_json: JSON.stringify({ artifactTruth: { status: 'valid' }, artifacts: [] }), stepId: 'volcano' },
-    { id: 'tj_3', status: 'completed', result_json: JSON.stringify({ artifactTruth: { status: 'valid' }, artifacts: [] }), stepId: 'enrichment' },
+    { id: 'tj_2', status: 'completed', result_json: JSON.stringify({ artifactTruth: { status: 'valid' }, artifacts: [] }), stepId: 'deg-standardization' },
+    { id: 'tj_3', status: 'completed', result_json: JSON.stringify({ artifactTruth: { status: 'valid' }, artifacts: [] }), stepId: 'volcano' },
+    { id: 'tj_4', status: 'completed', result_json: JSON.stringify({ artifactTruth: { status: 'valid' }, artifacts: [] }), stepId: 'enrichment' },
   ];
   const result = projectWorkflowPlan(plan, jobs);
   assert.equal(result.status, 'complete');
@@ -235,12 +236,13 @@ test('projectWorkflowPlan marks plan complete when all steps complete', () => {
 test('projectWorkflowPlan reports readyStepIds from satisfied dependencies', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   const jobs = [
     { id: 'tj_1', status: 'completed', result_json: JSON.stringify({ artifactTruth: { status: 'valid' }, artifacts: [] }), stepId: 'differential' },
-    { id: 'tj_2', status: 'queued', stepId: 'volcano' },
-    { id: 'tj_3', status: 'queued', stepId: 'enrichment' },
+    { id: 'tj_2', status: 'completed', result_json: JSON.stringify({ artifactTruth: { status: 'valid' }, artifacts: [] }), stepId: 'deg-standardization' },
+    { id: 'tj_3', status: 'queued', stepId: 'volcano' },
+    { id: 'tj_4', status: 'queued', stepId: 'enrichment' },
   ];
   const result = projectWorkflowPlan(plan, jobs);
   assert.ok(result.readyStepIds.includes('volcano'), 'volcano 的依赖已完成，应在 readyStepIds');
@@ -251,12 +253,13 @@ test('projectWorkflowPlan reports readyStepIds from satisfied dependencies', () 
 test('projectWorkflowPlan sets resumeFromStepId to first incomplete non-terminal step', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   const jobs = [
     { id: 'tj_1', status: 'completed', result_json: JSON.stringify({ artifactTruth: { status: 'valid' }, artifacts: [] }), stepId: 'differential' },
-    { id: 'tj_2', status: 'queued', stepId: 'volcano' },
-    { id: 'tj_3', status: 'blocked', stepId: 'enrichment' },
+    { id: 'tj_2', status: 'completed', result_json: JSON.stringify({ artifactTruth: { status: 'valid' }, artifacts: [] }), stepId: 'deg-standardization' },
+    { id: 'tj_3', status: 'queued', stepId: 'volcano' },
+    { id: 'tj_4', status: 'blocked', stepId: 'enrichment' },
   ];
   const result = projectWorkflowPlan(plan, jobs);
   assert.equal(result.resumeFromStepId, 'volcano', 'volcano 是第一个非 terminal 的步骤');
@@ -265,12 +268,13 @@ test('projectWorkflowPlan sets resumeFromStepId to first incomplete non-terminal
 test('projectWorkflowPlan sets recoverable when any step is recoverable', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   const jobs = [
     { id: 'tj_1', status: 'failed', result_json: JSON.stringify({ artifactTruth: { status: 'degraded' }, artifacts: [] }), stepId: 'differential' },
-    { id: 'tj_2', status: 'queued', stepId: 'volcano' },
-    { id: 'tj_3', status: 'queued', stepId: 'enrichment' },
+    { id: 'tj_2', status: 'queued', stepId: 'deg-standardization' },
+    { id: 'tj_3', status: 'queued', stepId: 'volcano' },
+    { id: 'tj_4', status: 'queued', stepId: 'enrichment' },
   ];
   const result = projectWorkflowPlan(plan, jobs);
   assert.equal(result.recoverable, true);
@@ -279,12 +283,13 @@ test('projectWorkflowPlan sets recoverable when any step is recoverable', () => 
 test('projectWorkflowPlan generates nextActions for waiting_for_confirmation steps', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   const jobs = [
     { id: 'tj_1', status: 'pending', ack_status: 'pending', stepId: 'differential' },
-    { id: 'tj_2', status: 'queued', stepId: 'volcano' },
-    { id: 'tj_3', status: 'queued', stepId: 'enrichment' },
+    { id: 'tj_2', status: 'queued', stepId: 'deg-standardization' },
+    { id: 'tj_3', status: 'queued', stepId: 'volcano' },
+    { id: 'tj_4', status: 'queued', stepId: 'enrichment' },
   ];
   const result = projectWorkflowPlan(plan, jobs);
   assert.ok(result.nextActions.some((a) => a.id === 'confirm_differential'), '应有 confirm_differential action');
@@ -293,7 +298,7 @@ test('projectWorkflowPlan generates nextActions for waiting_for_confirmation ste
 test('projectWorkflowPlan generates nextActions for recoverable steps', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   const jobs = [
     { id: 'tj_1', status: 'failed', result_json: JSON.stringify({ artifactTruth: { status: 'degraded' }, artifacts: [] }), stepId: 'differential' },
@@ -318,7 +323,7 @@ test('projectWorkflowPlan returns original plan when version mismatch', () => {
 test('bindVerifiedArtifact rejects invalid artifactTruth', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   assert.throws(
     () => bindVerifiedArtifact(plan, {
@@ -335,7 +340,7 @@ test('bindVerifiedArtifact rejects invalid artifactTruth', () => {
 test('bindVerifiedArtifact rejects wrong dependency', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   assert.throws(
     () => bindVerifiedArtifact(plan, {
@@ -352,17 +357,17 @@ test('bindVerifiedArtifact rejects wrong dependency', () => {
 test('bindVerifiedArtifact binds valid artifact and marks step ready', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   const result = bindVerifiedArtifact(plan, {
     fromStepId: 'differential',
-    toStepId: 'volcano',
-    inputId: 'deg_table',
+    toStepId: 'deg-standardization',
+    inputId: 'deg_results',
     artifact: { path: '/results/deg.csv', name: 'deg.csv' },
     artifactTruth: { status: 'valid' },
   });
-  const volcano = result.steps.find((s) => s.id === 'volcano');
-  assert.equal(volcano.inputs.deg_table, '/results/deg.csv');
+  const degStd = result.steps.find((s) => s.id === 'deg-standardization');
+  assert.equal(degStd.inputs.deg_results, '/results/deg.csv');
   assert.equal(result.lineage.length, 1);
   assert.equal(result.lineage[0].artifactTruthStatus, 'valid');
 });
@@ -370,12 +375,12 @@ test('bindVerifiedArtifact binds valid artifact and marks step ready', () => {
 test('bindVerifiedArtifact is idempotent on duplicate bind', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   const opts = {
     fromStepId: 'differential',
-    toStepId: 'volcano',
-    inputId: 'deg_table',
+    toStepId: 'deg-standardization',
+    inputId: 'deg_results',
     artifact: { path: '/results/deg.csv', name: 'deg.csv' },
     artifactTruth: { status: 'valid' },
   };
@@ -388,11 +393,11 @@ test('bindVerifiedArtifact is idempotent on duplicate bind', () => {
 test('bindVerifiedArtifact rejects missing artifact value', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   assert.throws(
     () => bindVerifiedArtifact(plan, {
-      fromStepId: 'differential',
+      fromStepId: 'deg-standardization',
       toStepId: 'volcano',
       inputId: 'deg_table',
       artifact: {},
@@ -405,10 +410,10 @@ test('bindVerifiedArtifact rejects missing artifact value', () => {
 test('bindVerifiedArtifact prefers canonicalPath over path', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   const result = bindVerifiedArtifact(plan, {
-    fromStepId: 'differential',
+    fromStepId: 'deg-standardization',
     toStepId: 'volcano',
     inputId: 'deg_table',
     artifact: { path: '/local/results.csv', canonicalPath: '/work/biof3/results.csv' },
@@ -424,12 +429,12 @@ test('bindVerifiedArtifact prefers canonicalPath over path', () => {
 test('validateLineageEntry returns ok for valid entry', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   const entry = {
     fromStepId: 'differential',
-    toStepId: 'volcano',
-    inputId: 'deg_table',
+    toStepId: 'deg-standardization',
+    inputId: 'deg_results',
     artifactTruthStatus: 'valid',
     artifactPath: '/results/deg.csv',
     artifactType: 'table',
@@ -441,7 +446,7 @@ test('validateLineageEntry returns ok for valid entry', () => {
 test('validateLineageEntry rejects non-valid artifactTruthStatus', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   const entry = {
     fromStepId: 'differential',
@@ -458,7 +463,7 @@ test('validateLineageEntry rejects non-valid artifactTruthStatus', () => {
 test('validateLineageEntry rejects missing artifactPath', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   const entry = {
     fromStepId: 'differential',
@@ -474,7 +479,7 @@ test('validateLineageEntry rejects missing artifactPath', () => {
 test('validateLineageEntry rejects artifact type mismatch', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   const entry = {
     fromStepId: 'differential',
@@ -496,7 +501,7 @@ test('validateLineageEntry rejects artifact type mismatch', () => {
 test('runToolJobs returns empty array when getToolJobFn is not a function', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   plan.steps[0].toolJobId = 'tj_1';
   assert.deepEqual(runToolJobs(plan, null), []);
@@ -506,21 +511,22 @@ test('runToolJobs returns empty array when getToolJobFn is not a function', () =
 test('runToolJobs returns enriched jobs with _stepId', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
-  plan.steps[0].toolJobId = 'tj_diff';
-  plan.steps[1].toolJobId = 'tj_vol';
+  // New DAG: [differential, deg-standardization, volcano, enrichment]
+  plan.steps[0].toolJobId = 'tj_diff';    // differential
+  plan.steps[1].toolJobId = 'tj_deg';     // deg-standardization
   const getJob = (id) => ({ id, tool_id: 'deseq2', status: 'completed', result_json: '{}' });
   const result = runToolJobs(plan, getJob);
   assert.equal(result.length, 2);
   assert.equal(result[0]._stepId, 'differential');
-  assert.equal(result[1]._stepId, 'volcano');
+  assert.equal(result[1]._stepId, 'deg-standardization');
 });
 
 test('runToolJobs skips steps without toolJobId', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   // No toolJobId set on any steps
   const result = runToolJobs(plan, (id) => ({ id }));
@@ -530,7 +536,7 @@ test('runToolJobs skips steps without toolJobId', () => {
 test('runToolJobs skips null jobs returned by getToolJobFn', () => {
   const plan = createAgentWorkflowPlan({
     templateId: 'bulk-rna-core',
-    availableToolIds: ['deseq2', 'volcano-plot', 'enrichment'],
+    availableToolIds: ['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea'],
   });
   plan.steps[0].toolJobId = 'tj_gone';
   const getJob = (id) => (id === 'tj_gone' ? null : { id, tool_id: 'x', status: 'completed' });
@@ -557,12 +563,12 @@ test('listAgentWorkflowTemplates marks template unavailable when tools are missi
   const bulk = result.find((t) => t.id === 'bulk-rna-core');
   assert.equal(bulk.available, false);
   assert.equal(bulk.supportedStepCount, 1);
-  assert.equal(bulk.stepCount, 3);
+  assert.equal(bulk.stepCount, 4); // [differential, deg-standardization, volcano, enrichment]
 });
 
 test('listAgentWorkflowTemplates marks template available when all tools present', () => {
-  const result = listAgentWorkflowTemplates(['deseq2', 'volcano-plot', 'enrichment']);
+  const result = listAgentWorkflowTemplates(['deseq2', 'deg-standardizer', 'volcano-plot', 'go-kegg', 'gsea']);
   const bulk = result.find((t) => t.id === 'bulk-rna-core');
   assert.equal(bulk.available, true);
-  assert.equal(bulk.supportedStepCount, 3);
+  assert.equal(bulk.supportedStepCount, 4);
 });

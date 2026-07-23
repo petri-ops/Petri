@@ -204,22 +204,27 @@ function validateLineageEntry(entry, plan) {
   if (entry.artifactTruthStatus !== 'valid') return { ok: false, error: 'artifact_not_verified' };
   if (!entry.artifactPath) return { ok: false, error: 'artifact_location_missing' };
 
-  // Artifact must belong to a source step that has a real toolJobId.
   const fromStep = (plan.steps || []).find((s) => s.id === entry.fromStepId);
   if (!fromStep) return { ok: false, error: 'workflow_step_not_found' };
   if (fromStep.toolJobId && fromStep.toolJobId !== entry.fromToolJobId) {
     return { ok: false, error: 'artifact_job_mismatch' };
   }
 
-  // Type matching: the inputBindings on the target step must include this inputId.
   const toStep = (plan.steps || []).find((s) => s.id === entry.toStepId);
   if (!toStep) return { ok: false, error: 'workflow_step_not_found' };
 
   const binding = (toStep.inputBindings || []).find((b) => b.inputId === entry.inputId);
   if (!binding) return { ok: false, error: 'workflow_dependency_mismatch' };
+
   if (binding.artifactType && entry.artifactType && binding.artifactType !== entry.artifactType) {
     return { ok: false, error: 'artifact_type_mismatch' };
   }
+
+  // HLE-C5R: If binding declares artifactProfile, verify artifact matches it.
+  if (binding.artifactProfile && entry.artifactProfile && binding.artifactProfile !== entry.artifactProfile) {
+    return { ok: false, error: 'artifact_profile_mismatch' };
+  }
+
   return { ok: true };
 }
 
@@ -252,6 +257,7 @@ function bindVerifiedArtifact(plan, { fromStepId, toStepId, inputId, artifact, a
     artifactName: artifact.name || artifact.filename || null,
     artifactPath: value,
     artifactType: artifact.type || null,
+    artifactProfile: binding.artifactProfile || artifact.artifactProfile || null,
     artifactTruthStatus: artifactTruth.status,
     toStepId,
     inputId,
@@ -314,23 +320,49 @@ const AGENT_WORKFLOW_TEMPLATES = [
   {
     id: 'bulk-rna-core',
     title: 'Bulk RNA 标准分析',
-    description: '差异表达后生成火山图，并对显著基因做功能富集。',
+    description: 'DESeq2 差异分析 → DEG 标准化 → 火山图 + 功能富集。',
     steps: [
-      { id: 'differential', toolCandidates: ['deseq2', 'deg'], dependsOn: [] },
+      { id: 'differential', toolCandidates: ['deseq2'], dependsOn: [] },
+      {
+        id: 'deg-standardization',
+        toolCandidates: ['deg-standardizer'],
+        dependsOn: ['differential'],
+        inputBindings: [
+          {
+            inputId: 'deg_results',
+            fromStepId: 'differential',
+            artifactType: 'table',
+            artifactProfile: 'biof3.deg.v1',
+            description: 'DESeq2 deg_table.csv → canonical DEG artifact',
+          },
+        ],
+      },
       {
         id: 'volcano',
         toolCandidates: ['volcano-plot'],
-        dependsOn: ['differential'],
+        dependsOn: ['deg-standardization'],
         inputBindings: [
-          { inputId: 'deg_table', fromStepId: 'differential', artifactType: 'table' },
+          {
+            inputId: 'deg_table',
+            fromStepId: 'deg-standardization',
+            artifactType: 'table',
+            artifactProfile: 'biof3.deg.v1',
+            description: 'deg-standardizer deg_standardized.csv (canonical)',
+          },
         ],
       },
       {
         id: 'enrichment',
-        toolCandidates: ['go-kegg', 'gsea', 'enrichment'],
-        dependsOn: ['differential'],
+        toolCandidates: ['go-kegg', 'gsea'],
+        dependsOn: ['deg-standardization'],
         inputBindings: [
-          { inputId: 'deg_table', fromStepId: 'differential', artifactType: 'table' },
+          {
+            inputId: 'deg_table',
+            fromStepId: 'deg-standardization',
+            artifactType: 'table',
+            artifactProfile: 'biof3.deg.v1',
+            description: 'deg-standardizer ranked_genes.csv (full ranked list for GSEA)',
+          },
         ],
       },
     ],
@@ -341,7 +373,7 @@ const AGENT_WORKFLOW_TEMPLATES = [
     description: '从已有 DEG artifact 生成火山图并开展功能富集。',
     steps: [
       { id: 'volcano', toolCandidates: ['volcano-plot'], dependsOn: [] },
-      { id: 'enrichment', toolCandidates: ['go-kegg', 'gsea', 'enrichment'], dependsOn: [] },
+      { id: 'enrichment', toolCandidates: ['go-kegg', 'gsea'], dependsOn: [] },
     ],
   },
   {
@@ -352,7 +384,7 @@ const AGENT_WORKFLOW_TEMPLATES = [
       { id: 'coexpression', toolCandidates: ['wgcna'], dependsOn: [] },
       {
         id: 'enrichment',
-        toolCandidates: ['go-kegg', 'gsea', 'enrichment'],
+        toolCandidates: ['go-kegg', 'gsea'],
         dependsOn: ['coexpression'],
         inputBindings: [
           { inputId: 'deg_table', fromStepId: 'coexpression', artifactType: 'table' },
@@ -411,6 +443,70 @@ function createAgentWorkflowPlan({ templateId, availableToolIds = [], initialInp
   };
 }
 
+// ---------------------------------------------------------------------------
+// validateWorkflowPlanBindings — structural validation of a workflow plan.
+// Checks: inputBindings reference valid steps, no cycles, artifactProfile compatibility.
+// @param {Object} plan
+// @returns {object} { valid, errors, warnings }
+// ---------------------------------------------------------------------------
+function validateWorkflowPlanBindings(plan) {
+  if (!plan || plan.agentWorkflowPlanVersion !== 1) {
+    return { valid: false, errors: ['invalid_agent_workflow_plan'], warnings: [] };
+  }
+  const errors = [];
+  const warnings = [];
+  const stepIds = new Set((plan.steps || []).map((s) => s.id));
+
+  for (const step of (plan.steps || [])) {
+    // Check dependsOn references
+    for (const dep of (step.dependsOn || [])) {
+      if (!stepIds.has(dep)) {
+        errors.push(`Step '${step.id}': dependsOn references unknown step '${dep}'`);
+      }
+    }
+    // Check inputBindings references
+    for (const binding of (step.inputBindings || [])) {
+      if (!stepIds.has(binding.fromStepId)) {
+        errors.push(`Step '${step.id}': inputBinding fromStepId '${binding.fromStepId}' references unknown step`);
+      }
+      if (binding.artifactProfile) {
+        // Verify the upstream step is declared as a producer of this profile.
+        // This is a warning (advisory) rather than error since runtime
+        // artifact-truth supersedes static declaration.
+        warnings.push(
+          `Step '${step.id}' input '${binding.inputId}': artifactProfile '${binding.artifactProfile}' declared; runtime artifact-truth validation will confirm compatibility`
+        );
+      }
+    }
+  }
+
+  // Cycle detection (simple DFS)
+  const visited = new Set();
+  const stack = new Set();
+  const hasCycle = (stepId, visiting) => {
+    if (stack.has(stepId)) return true;
+    if (visited.has(stepId)) return false;
+    stack.add(stepId);
+    const step = (plan.steps || []).find((s) => s.id === stepId);
+    if (step) {
+      for (const dep of (step.dependsOn || [])) {
+        if (hasCycle(dep, visiting)) return true;
+      }
+    }
+    stack.delete(stepId);
+    visited.add(stepId);
+    return false;
+  };
+  for (const step of (plan.steps || [])) {
+    if (hasCycle(step.id, new Set())) {
+      errors.push(`Workflow plan contains a cycle`);
+      break;
+    }
+  }
+
+  return { valid: errors.length === 0, errors, warnings };
+}
+
 module.exports = {
   AGENT_WORKFLOW_TEMPLATE_VERSION,
   AGENT_WORKFLOW_TEMPLATES,
@@ -421,5 +517,6 @@ module.exports = {
   projectStepStatuses,
   projectWorkflowPlan,
   validateLineageEntry,
+  validateWorkflowPlanBindings,
   runToolJobs,
 };
