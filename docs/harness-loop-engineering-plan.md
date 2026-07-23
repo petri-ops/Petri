@@ -416,7 +416,7 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 
 ### HLE-2：统一 Loop Controller 与退出判定
 
-状态：`planned`
+状态：`in_progress`
 
 目标：让 task/legacy 两条现有 Agent loop 复用一个控制层，所有动作先经过观察、决策和前置校验。
 

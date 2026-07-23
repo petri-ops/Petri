@@ -147,12 +147,10 @@ const SEMANTIC_FIELD_KEYS = Object.freeze({
     'sequence',
     'observedStateDigest',
     'goalGapIds',
-    'proposedAction',
     'decision',
     'decisionReasonCode',
     'publicConclusion',
     'status',
-    'createdAt',
   ]),
   action: Object.freeze([
     'actionKey',
