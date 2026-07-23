@@ -420,6 +420,7 @@ async function runAgentLoop({
     '\n- 当你写 update_figcode_editor 的代码时，**不要**在代码里硬编码 width/height/dpi/base_size 这些参数 —— 用户的右侧面板设置会被前端自动注入到代码顶部。如果用户问"为什么我改 width 不生效"，告诉他们看右侧的尺寸面板。';
   systemPrompt += '\n- 不要再用 navigate 把用户送到 FigCode 主页让他再点 Run 按钮。一步到位。';
   systemPrompt += '\n- 提到工具产物（toolJobId / harness 摘要里的文件）或项目工作区文件时，渲染为 Markdown 链接：[产物.csv](biof3://artifact/<toolJobId>/<产物名>) 或 [data.csv](biof3://workspace/<projectId>/<relativePath>)。严禁出现 file:// 或 /Users/... 这类本地绝对路径。详见 system prompt 末尾【文件引用格式】。';
+  systemPrompt += '\n- 科学源数据不可变：不得用 workspace_write/workspace_replace/workspace_exec 原地修改已有 CSV/TSV/H5AD/RDS/测序文件来迎合插件。格式或标签修复必须写入 derived/ 或由转换插件生成新 Artifact，保留原文件和输入 hash，再把派生 Artifact 绑定给下游 Job。';
   systemPrompt += '\n\n旧的【结果页】UI 控制：';
   systemPrompt +=
     '\n- act(type="switch_result_tab", tab="preview|plots|data|params") 切 tab；' +
@@ -642,23 +643,33 @@ async function runAgentLoop({
       .filter((activity) => activity.name === 'run_tool' && activity.callId)
       .map((activity) => {
         const event = toolResultEventsByCallId[activity.callId];
-        const toolJobId = event?.toolResult?.data?.toolJobId || null;
+        const resultData = event?.toolResult?.data || {};
+        const toolJobId = resultData.toolJobId || null;
         let job = null;
         if (toolJobId) {
           try { job = getToolJob(toolJobId) || null; } catch {}
         }
+        const resultFailed = resultData.ok === false || Boolean(resultData.error);
         return {
           id: toolJobId || activity.callId,
           toolJobId,
-          toolId: job?.tool_id || event?.toolResult?.data?.toolId || null,
+          toolId: job?.tool_id || resultData.toolId || null,
           status: job?.status || (
-            activity.status === 'success'
+            resultFailed
+              ? 'failed'
+              : activity.status === 'success'
               ? 'completed'
               : activity.status === 'awaiting_confirmation'
                 ? 'pending'
                 : 'failed'
           ),
-          error: job?.error || null,
+          error: job?.error || resultData.error || resultData.message || null,
+          requiresUserInput: [
+            'missing_required_file_inputs',
+            'scientific_task_not_confirmed',
+            'scientific_task_params_changed',
+            'scientific_task_tool_changed',
+          ].includes(resultData.error),
           finished_at: job?.completed_at || null,
         };
       });
@@ -677,9 +688,14 @@ async function runAgentLoop({
     let reasonCode = REASON_CODES.TOOL_SUCCEEDED;
     let publicConclusion = latestProgress || `本阶段已完成 ${batch.length} 项操作，继续推进。`;
     if (failedCount > 0) {
-      decision = 'retry';
-      reasonCode = REASON_CODES.TRANSIENT_RUNTIME_RETRY;
-      publicConclusion = `本阶段有 ${failedCount} 个工具任务未成功，已保留 Job 证据并进入自动诊断。`;
+      const requiresUserInput = runToolJobs.some((job) => job.requiresUserInput);
+      decision = requiresUserInput ? 'wait' : 'retry';
+      reasonCode = requiresUserInput
+        ? REASON_CODES.SCIENTIFIC_DESIGN_MISSING
+        : REASON_CODES.TRANSIENT_RUNTIME_RETRY;
+      publicConclusion = requiresUserInput
+        ? '执行前置条件不完整，未创建非法 Job；需要补齐关键输入或科学确认。'
+        : `本阶段有 ${failedCount} 个工具任务未成功，已保留 Job 证据并进入自动诊断。`;
     } else if (pendingCount > 0) {
       decision = 'wait';
       publicConclusion = `本阶段有 ${pendingCount} 个工具任务仍在执行或等待，继续监控。`;
@@ -1061,9 +1077,10 @@ async function runAgentLoop({
         .map((a) => {
           // HLE-C2: Read real job truth from DB (authoritative source)
           const evt = toolResultEventsByCallId && toolResultEventsByCallId[a.callId];
-          const toolJobId = evt && evt.toolResult && evt.toolResult.data
-            ? evt.toolResult.data.toolJobId
-            : null;
+          const resultData = evt && evt.toolResult && evt.toolResult.data
+            ? evt.toolResult.data
+            : {};
+          const toolJobId = resultData.toolJobId || null;
           let jobTruth = null;
           if (toolJobId) {
             try {
@@ -1080,11 +1097,14 @@ async function runAgentLoop({
               }
             } catch {}
           }
+          const resultFailed = resultData.ok === false || Boolean(resultData.error);
           const status = jobTruth
             ? jobTruth.status
-            : (evt && evt.toolResult && evt.toolResult.status)
-            ? evt.toolResult.status
-            : (a.status === 'error' ? 'failed' : a.status === 'success' ? 'completed' : 'unknown');
+            : resultFailed
+              ? 'failed'
+              : (evt && evt.toolResult && evt.toolResult.status)
+                ? evt.toolResult.status
+                : (a.status === 'error' ? 'failed' : a.status === 'success' ? 'completed' : 'unknown');
           return {
             toolJobId: toolJobId || null,
             callId: a.callId,
@@ -1092,6 +1112,14 @@ async function runAgentLoop({
             status,
             iteration: a.iteration,
             jobTruth,
+            error: jobTruth?.error || resultData.error || resultData.message || null,
+            reasonCode: resultData.reasonCode || resultData.reason_code || null,
+            requiresUserInput: [
+              'missing_required_file_inputs',
+              'scientific_task_not_confirmed',
+              'scientific_task_params_changed',
+              'scientific_task_tool_changed',
+            ].includes(resultData.error),
           };
         });
 
@@ -1170,7 +1198,8 @@ async function runAgentLoop({
             {
               ...(primaryFailed.jobTruth || {}),
               tool_id: primaryFailed.jobTruth ? primaryFailed.jobTruth.tool_id : null,
-              error: primaryFailed.jobTruth ? primaryFailed.jobTruth.error : null,
+              error: primaryFailed.jobTruth ? primaryFailed.jobTruth.error : primaryFailed.error,
+              reason_code: primaryFailed.reasonCode,
               status: primaryFailed.jobTruth ? primaryFailed.jobTruth.status : primaryFailed.status,
             },
             {
@@ -1305,6 +1334,14 @@ async function runAgentLoop({
         let decision = 'continue';
         let decisionReasonCode = REASON_CODES.TOOL_SUCCEEDED;
         let publicConclusion = null;
+        const requiresUserDecision = unresolvedFailedJobs.some((job) => job.requiresUserInput) ||
+          (
+            unresolvedFailedJobs.length > 0 &&
+            (
+              diagnosis?.defaultBehavior === 'require_user' ||
+              repairAttempt?.requiresUserAuth === true
+            )
+          );
 
         if (falseSuccessJobs.length > 0) {
           decision = 'block';
@@ -1318,6 +1355,11 @@ async function runAgentLoop({
           decision = 'block';
           decisionReasonCode = REASON_CODES.ARTIFACT_VALIDATION_FAILED;
           publicConclusion = `验证失败（failed）：${validatorResults.filter((vr) => vr.overallStatus === 'failed').length} 个产物验证未通过。`;
+        } else if (requiresUserDecision) {
+          decision = 'wait';
+          decisionReasonCode = REASON_CODES.SCIENTIFIC_DESIGN_MISSING;
+          publicConclusion = '关键输入或科学设计尚未确认；系统未创建非法 Job，等待补齐必要信息。';
+          loopActiveJobs = [];
         } else if (unresolvedFailedJobs.length > 0) {
           decision = 'retry';
           decisionReasonCode = REASON_CODES.TRANSIENT_RUNTIME_RETRY;
@@ -1380,6 +1422,10 @@ async function runAgentLoop({
           loopState = 'blocked';
           loopPublicConclusion = iteration.publicConclusion;
           _loopPersistPhase('blocked', iteration.publicConclusion);
+        } else if (decision === 'wait') {
+          loopState = 'waiting_for_user';
+          loopPublicConclusion = iteration.publicConclusion;
+          _loopPersistPhase('waiting_for_user', iteration.publicConclusion);
         }
       }
     }

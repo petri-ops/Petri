@@ -312,6 +312,8 @@ Provider 验收入口已覆盖 DeepSeek、Anthropic 与产品通用 OpenAI-compa
 
 Loop 创建与阶段 durability 同步纠偏：普通 execution-capable 对话不再在模型首轮误建 Loop；只有首次 `run_tool`（包括 plan 或被 preflight 阻断的科学执行意图）才创建/恢复。每个工具批次完成即持久化公开阶段 iteration、Job 摘要、hash chain 和 checkpoint，终答另落终态 iteration；同工具失败父 Job 被后续成功 Job 替换时保留 `parentJobId + replacementJobId`，终态只受未修复失败控制。
 
+源数据不可变边界已在真实 SPT-1 验收中验证并加固：Agent 不得为适配插件原地修改已有 CSV/TSV/H5AD/RDS/测序输入。`workspace_write`/`workspace_replace` 对科学源文件返回 `source_data_immutable`，格式修复必须生成 `derived/` 或转换插件 Artifact，保留原始 hash 与 lineage；通用命令行也不得用来绕过这条 Harness 工程约束。
+
 必须交付：
 
 - SPT-1 从真实聊天请求和生产 route 启动。

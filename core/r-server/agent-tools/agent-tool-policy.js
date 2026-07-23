@@ -8,6 +8,21 @@
 const MUTATING_SIDE_EFFECTS = new Set(['state-write', 'workspace-write', 'execution']);
 const READ_ONLY_RUN_TOOL_OPS = new Set(['list', 'plan', 'status', 'next', 'bind_artifact']);
 const READ_ONLY_PLAN_OPS = new Set(['list', 'get']);
+const SCIENTIFIC_SOURCE_EXTENSIONS = new Set([
+  '.csv', '.tsv', '.h5ad', '.h5', '.loom', '.rds', '.rdata', '.mtx',
+  '.vcf', '.bam', '.sam', '.fastq', '.fq', '.bed', '.gff', '.gtf',
+  '.xlsx', '.xls',
+]);
+const DERIVED_DATA_PREFIXES = ['results/', 'derived/', 'outputs/', 'work/', '.biof3/'];
+
+function isProtectedScientificSource(relativePath) {
+  const normalized = String(relativePath || '').replaceAll('\\', '/').replace(/^\.\/+/, '');
+  if (!normalized || DERIVED_DATA_PREFIXES.some((prefix) => normalized.startsWith(prefix))) return false;
+  const basename = normalized.split('/').pop() || '';
+  const dot = basename.lastIndexOf('.');
+  const extension = dot >= 0 ? basename.slice(dot).toLowerCase() : '';
+  return SCIENTIFIC_SOURCE_EXTENSIONS.has(extension);
+}
 
 function allow(reason = 'policy_allowed', extra = {}) {
   return {
@@ -108,6 +123,17 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
   }
   if (preflight.ok === false) return preflightDenial(preflight);
 
+  if (
+    preflight.exists &&
+    (name === 'workspace_write' || name === 'workspace_replace') &&
+    isProtectedScientificSource(preflight.relativePath)
+  ) {
+    return deny(
+      'source_data_immutable',
+      'source_data_immutable',
+      '科学源数据不可原地修改。请在 derived/ 或 results/ 下创建派生文件，并保留原始输入 hash。'
+    );
+  }
   if (name === 'workspace_write' && preflight.exists) {
     if (args.overwrite !== true || !args.expectedSha256) {
       return deny(
@@ -140,4 +166,5 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
 module.exports = {
   decideAgentToolCall,
   effectiveOperation,
+  isProtectedScientificSource,
 };

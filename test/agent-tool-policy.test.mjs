@@ -7,7 +7,10 @@ import os from 'node:os';
 import path from 'node:path';
 
 const require = createRequire(import.meta.url);
-const { decideAgentToolCall } = require('../core/r-server/agent-tools/agent-tool-policy.js');
+const {
+  decideAgentToolCall,
+  isProtectedScientificSource,
+} = require('../core/r-server/agent-tools/agent-tool-policy.js');
 const {
   createAgentToolInterceptor,
   validateToolArguments,
@@ -103,6 +106,15 @@ test('run_tool run delegates approval instead of inventing a policy confirmation
   assert.equal(result.delegatedApproval, true);
 });
 
+test('scientific source classifier protects existing inputs but allows derived outputs', () => {
+  assert.equal(isProtectedScientificSource('metadata.csv'), true);
+  assert.equal(isProtectedScientificSource('inputs/cohort.tsv'), true);
+  assert.equal(isProtectedScientificSource('sample.h5ad'), true);
+  assert.equal(isProtectedScientificSource('derived/metadata-normalized.csv'), false);
+  assert.equal(isProtectedScientificSource('results/jobs/j1/output.csv'), false);
+  assert.equal(isProtectedScientificSource('src/config.ts'), false);
+});
+
 test('minimal schema validation reports required, type, enum, and nested errors', () => {
   const schema = {
     type: 'object',
@@ -181,6 +193,9 @@ before(async () => {
   await fs.mkdir(outsideRoot, { recursive: true });
   await fs.writeFile(path.join(workspaceRoot, 'existing.txt'), 'original\n');
   await fs.writeFile(path.join(workspaceRoot, 'replace.txt'), 'before\n');
+  await fs.writeFile(path.join(workspaceRoot, 'metadata.csv'), 'sample,condition\ns1,control\n');
+  await fs.mkdir(path.join(workspaceRoot, 'derived'), { recursive: true });
+  await fs.writeFile(path.join(workspaceRoot, 'derived', 'metadata-normalized.csv'), 'sample,condition\ns1,Control\n');
   await fs.writeFile(path.join(outsideRoot, 'secret.txt'), 'outside\n');
   await fs.symlink(outsideRoot, path.join(workspaceRoot, 'escape'));
 
@@ -386,6 +401,41 @@ test('replace without sha is denied without mutation and matching sha executes',
   );
   assert.equal(replaced.ok, true);
   assert.equal(await fs.readFile(path.join(workspaceRoot, 'replace.txt'), 'utf8'), 'after\n');
+});
+
+test('existing scientific inputs are immutable while derived CSV remains editable', async () => {
+  const source = await fs.readFile(path.join(workspaceRoot, 'metadata.csv'));
+  const denied = await interceptWorkspace(
+    'workspace_replace',
+    {
+      path: 'metadata.csv',
+      oldText: 'control',
+      newText: 'Control',
+      expectedSha256: hash(source),
+    },
+    workspaceCtx
+  );
+  assert.equal(denied.error, 'source_data_immutable');
+  assert.equal(denied.reason, 'source_data_immutable');
+  assert.equal(
+    await fs.readFile(path.join(workspaceRoot, 'metadata.csv'), 'utf8'),
+    'sample,condition\ns1,control\n'
+  );
+
+  const derivedPath = path.join(workspaceRoot, 'derived', 'metadata-normalized.csv');
+  const derived = await fs.readFile(derivedPath);
+  const replaced = await interceptWorkspace(
+    'workspace_replace',
+    {
+      path: 'derived/metadata-normalized.csv',
+      oldText: 'Control',
+      newText: 'Treatment',
+      expectedSha256: hash(derived),
+    },
+    workspaceCtx
+  );
+  assert.equal(replaced.ok, true);
+  assert.equal(await fs.readFile(derivedPath, 'utf8'), 'sample,condition\ns1,Treatment\n');
 });
 
 test('full access permits general commands while read mode denies execution', async () => {
