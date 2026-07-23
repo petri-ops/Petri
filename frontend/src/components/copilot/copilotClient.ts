@@ -251,6 +251,10 @@ export interface StreamChatOptions {
   onConversation?: (info: { conversationId: string; title?: string }) => void;
   /** Server detected the user has pivoted to a new topic mid-conversation */
   onTopicShift?: (info: { conversationId: string; reason: string }) => void;
+  /** HLE-C4: Loop Controller phase change (started / cancelled / blocked / completed) */
+  onLoopPhase?: (info: { phase: string; loopRunId?: string; publicConclusion?: string; reason?: string; automationMode?: string }) => void;
+  /** HLE-C4: Loop Controller iteration recorded after each agent turn */
+  onLoopIteration?: (info: { loopRunId: string; iterationId: string; sequence: number; decision: string; decisionReasonCode: string; publicConclusion: string; status: string; proposedActionKey: string | null; actionKeyHash: string | null }) => void;
   /** Background task created for this run. Used by the UI to request a real cancellation. */
   onTaskStarted?: (taskId: string) => void;
 }
@@ -444,6 +448,8 @@ function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
     onToolResult,
     onConversation,
     onTopicShift,
+    onLoopPhase,
+    onLoopIteration,
   } = opts;
   if (obj.error) {
     onError?.(new Error(obj.error));
@@ -455,6 +461,31 @@ function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
   }
   if (obj.event === 'topic_shift') {
     onTopicShift?.({ conversationId: obj.conversationId, reason: obj.reason || '' });
+    return;
+  }
+  // HLE-C4: Loop Controller events
+  if (obj.event === 'loop_phase') {
+    onLoopPhase?.({
+      phase: String(obj.phase || ''),
+      loopRunId: obj.loopRunId ? String(obj.loopRunId) : undefined,
+      publicConclusion: obj.publicConclusion ? String(obj.publicConclusion) : undefined,
+      reason: obj.reason ? String(obj.reason) : undefined,
+      automationMode: obj.automationMode ? String(obj.automationMode) : undefined,
+    });
+    return;
+  }
+  if (obj.event === 'loop_iteration') {
+    onLoopIteration?.({
+      loopRunId: String(obj.loopRunId || ''),
+      iterationId: String(obj.iterationId || ''),
+      sequence: typeof obj.sequence === 'number' ? obj.sequence : 0,
+      decision: String(obj.decision || ''),
+      decisionReasonCode: String(obj.decisionReasonCode || ''),
+      publicConclusion: String(obj.publicConclusion || ''),
+      status: String(obj.status || ''),
+      proposedActionKey: obj.proposedActionKey ? String(obj.proposedActionKey) : null,
+      actionKeyHash: obj.actionKeyHash ? String(obj.actionKeyHash) : null,
+    });
     return;
   }
   if (obj.event === 'iter') {

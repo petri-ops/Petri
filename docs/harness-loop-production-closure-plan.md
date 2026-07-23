@@ -245,7 +245,7 @@ failed Job 存在部分文件时必须：
 
 ### HLE-C4：会话与摘要 UI 接线
 
-状态：`planned`
+状态：`partial`
 
 首选位置：
 

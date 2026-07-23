@@ -32,7 +32,9 @@
 | 🔴阻塞 | 2026-07-23 | HLE 离线 Controller/Validator/Repair/Checkpoint 已实现，但生产 `ai-agent.js`、真实 Job/Artifact 推进和前端尚未接线；HLE-6 的双 Provider、重启和视觉出口不成立 |
 | ✅已处理 | 2026-07-23 | HLE-C1 完成
 | ✅已处理 | 2026-07-23 | HLE-C2 完成
-| 🟡建议 | 2026-07-23 | HLE-C3 部分完成：Loop REST API 上线（runs/iterations/actions/evidence/recovery），compact 投影不暴露无界字段；启动时 reconcile running LoopRun 待 HLE-C5 | 本提交 | `core/r-server/routes/ai-loop.js` |
+| 🟡建议 | 2026-07-23 | HLE-C3 部分完成
+| 🟡建议 | 2026-07-23 | HLE-C4 部分完成：StreamChatOptions 新增 onLoopPhase / onLoopIteration；_handleSseEvent 支持 loop_phase 和 loop_iteration SSE 事件；前端可消费 Loop Controller 状态；16/16 SSE 契约测试通过；UI 面板和视觉验收待 HLE-C5 | 本提交 | `frontend/src/components/copilot/copilotClient.ts` |
+：Loop REST API 上线（runs/iterations/actions/evidence/recovery），compact 投影不暴露无界字段；启动时 reconcile running LoopRun 待 HLE-C5 | 本提交 | `core/r-server/routes/ai-loop.js` |
 ：Validator Registry 接入生产 orchestration，运行真实 job truth 读取；Diagnoser 分类故障并选 Repair Strategy；blocked/failed 验证结果阻止完成；假成功（failed job + partial files）稳定阻断；38/38 集成测试通过 | 本提交 | `core/r-server/agent-runner.js` + `test/loop-validator-diagnoser.test.mjs` |
 ：Loop Controller 接入 agent-runner.js，惰性初始化 LoopRun、按轮持久化 Iteration、发出 loop_phase/loop_iteration SSE 事件、记录用户取消和 Controller 终止；非执行轮不创建 LoopRun；19/19 集成测试通过 | 本提交 | `core/r-server/agent-runner.js` + `test/loop-agent-integration.test.mjs` |
  HLE 生产代码与实机审计 | 按 [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) HLE-C0～HLE-C5 收口；failed Job 即使存在部分文件也不得宣称任务完成 |

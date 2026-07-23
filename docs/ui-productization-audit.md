@@ -213,3 +213,12 @@ npm run check
   - 注：上述 `acceptance/stage2/` 验收工具目录（含本节及 UI-031 表格行引用的 `live-provider-check.mjs` 等）已于 2026-07-17（commit `498a661`）移除；相关路径引用仅作历史验收记录留存，验收结论以本记录为准。
 - 不变量保持：`run_tool → tool_job → artifact truth` 执行链未因模型层改造分叉；fallback 默认关闭；Key 不回显、不入 `ai-settings.json`/日志/诊断。
 - **2026-07-19 功能边界加固（UI-031 状态不变）**：SimpleChat 的“完全访问 / 只读模式”现在随会话 context 传到 Agent runtime；中央工具 dispatcher 会在只读模式阻断项目文件写入、精确替换和短命令执行。没有改变控件布局、模型选择或已验收视觉状态。
+
+
+## HLE-C4: Loop SSE 事件接线（Stage 2, HLE-C4）
+
+- UI-100 属于 `HLE-C4: 会话与摘要 UI 接线`；前端 StreamChatOptions 新增 `onLoopPhase` / `onLoopIteration` SSE 回调，`_handleSseEvent` 分发 `loop_phase` 和 `loop_iteration` 事件。消费端待 HLE-C5 面板实现。
+- 预期：前端组件可通过 `onLoopPhase` 收到 `phase=started|cancelled|blocked|completed`，通过 `onLoopIteration` 收到每次 Agent turn 的 `decision`/`status`/`publicConclusion`。现有 `onIter`/`onAgentStatus`/`onAgentProgress` 不受影响。
+- 不允许破坏：`run_tool → tool_job → artifact truth` 执行链、`onIter`/`onAgentStatus`/`onAgentProgress` 既有回调、`task_execute` / `task_draft` / `context_assist` 三路由语义、`StreamChatOptions` 既有字段签名。
+- 代码验证：`npm --prefix frontend run check`、`npm run ui:audit:check`、`npm run check`。
+- **2026-07-23 代码完成（HLE-C4 → in_progress）**：StreamChatOptions + _handleSseEvent SSE 接线（commit `74a3efe`）；UI 面板/实机验收待 HLE-C5。
