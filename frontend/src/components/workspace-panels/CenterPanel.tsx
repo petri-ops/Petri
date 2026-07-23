@@ -1,5 +1,6 @@
 import React from 'react';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
+import { useConversationRun } from '@/components/copilot/conversationRunStore';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
@@ -185,6 +186,10 @@ function SessionFrameView({
   children: React.ReactNode;
   variant?: 'default' | 'chat';
 }): React.ReactElement {
+  // HLE-C4R: surface the active conversation's durable-loop projection in the
+  // pinned summary. Reads the same shared run store the chat renders from, so
+  // there is no second source of completion truth.
+  const activeRun = useConversationRun(ctx.activeConvId);
   return (
     <div
       className={`${styles.workspaceSessionFrame} ${
@@ -213,6 +218,7 @@ function SessionFrameView({
               liveJobsPreview={ctx.liveJobsPreview}
               jobStats={ctx.jobStats}
               backendStatus={ctx.backendStatus}
+              loop={activeRun?.loop ?? null}
               onOpenScheduled={ctx.openScheduledResults}
               onSelectJob={(jobId) => {
                 ctx.setActiveJobId(jobId);

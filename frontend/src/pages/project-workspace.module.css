@@ -1663,6 +1663,70 @@ button.workspacePinnedSummaryMetricCard:hover {
   color: var(--biof3-text-tertiary);
 }
 
+.workspaceLoopBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--biof3-text-tertiary);
+}
+
+.workspaceLoopBadge::before {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  content: '';
+}
+
+.workspaceLoopBadge[data-tone='running'] {
+  color: var(--biof3-accent);
+}
+
+.workspaceLoopBadge[data-tone='success'] {
+  color: var(--biof3-status-success-fg);
+}
+
+.workspaceLoopBadge[data-tone='warning'] {
+  color: var(--biof3-status-warning-fg);
+}
+
+.workspaceLoopRecovery {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 2px 3px;
+  color: var(--biof3-status-warning-fg);
+  font-size: 9.5px;
+  line-height: 1.35;
+}
+
+.workspaceLoopConclusion {
+  display: -webkit-box;
+  min-width: 0;
+  overflow: hidden;
+  padding: 1px 3px;
+  color: var(--biof3-text-secondary);
+  font-size: 10px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.workspaceLoopMeta {
+  min-width: 0;
+  overflow: hidden;
+  padding: 0 3px;
+  color: var(--biof3-text-tertiary);
+  font-size: 9px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .workspacePinnedSummaryQueueLabel {
   color: var(--biof3-text-tertiary);
   font-size: 9px;

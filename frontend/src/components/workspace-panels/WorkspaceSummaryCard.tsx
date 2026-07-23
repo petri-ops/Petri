@@ -5,6 +5,8 @@ import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import type { BackendStatus } from '@/lib/electron';
 import styles from '@/pages/project-workspace.module.css';
 import { useRuntimeResourceSnapshot } from '@/hooks/useRuntimeResourceSnapshot';
+import type { ConversationLoopState } from '@/components/copilot/conversationRunStore';
+import { deriveLoopDisplay, loopDecisionLabel } from '@/lib/loop-client';
 
 export interface WorkspaceSummaryCardProps {
   open: boolean;
@@ -17,6 +19,8 @@ export interface WorkspaceSummaryCardProps {
   liveJobsPreview: ToolJob[];
   jobStats: { running: number; failed: number; done: number; pending: number };
   backendStatus: BackendStatus;
+  /** HLE-C4R: live durable-loop projection for the active conversation (or null). */
+  loop?: ConversationLoopState | null;
   onOpenScheduled: () => void;
   onSelectJob: (id: string) => void;
 }
@@ -41,11 +45,17 @@ export function WorkspaceSummaryCard({
   liveJobsPreview,
   jobStats,
   backendStatus,
+  loop,
   onOpenScheduled,
   onSelectJob,
 }: WorkspaceSummaryCardProps): React.ReactElement | null {
   const { snapshot: resources, error: resourceError } = useRuntimeResourceSnapshot();
   if (visibility === 'hidden') return null;
+
+  // HLE-C4R: derive an honest loop display. Completion/blocked come only from
+  // the backend loop truth — never inferred here — and blocked/failed/cancelled
+  // never render as a green completion.
+  const loopDisplay = loop ? deriveLoopDisplay(loop, loop.phase === 'started' || loop.phase === 'resumed' || loop.phase === 'running') : null;
 
   const currentJob = activeJob || liveJobsPreview[0] || null;
   const currentJobStatus: ToolJob['status'] = workflow?.jobStatus === 'completed'
@@ -169,6 +179,31 @@ export function WorkspaceSummaryCard({
             </div>
           </div>
         </section>
+
+        {loop && loopDisplay && (
+          <section className={styles.workspacePinnedSummarySection} aria-label="任务循环">
+            <div className={styles.workspacePinnedSummarySectionHeading}>
+              <div className={styles.workspacePinnedSummarySectionTitle}>任务循环</div>
+              <span className={styles.workspaceLoopBadge} data-tone={loopDisplay.tone}>
+                {loopDisplay.label}
+              </span>
+            </div>
+            {loop.recoveryRequired && (
+              <div className={styles.workspaceLoopRecovery}>
+                <Icon name="flag" size={12} /> 任务在中断后需要恢复
+              </div>
+            )}
+            {loop.latestConclusion && (
+              <div className={styles.workspaceLoopConclusion}>{loop.latestConclusion}</div>
+            )}
+            {loopDisplay.attempts > 0 && (
+              <div className={styles.workspaceLoopMeta}>
+                {loopDisplay.attempts} 轮
+                {loop.lastDecision ? ` · 最近决策：${loopDecisionLabel(loop.lastDecision)}` : ''}
+              </div>
+            )}
+          </section>
+        )}
 
         {workflow && (
           <section className={styles.workspacePinnedSummarySection}>
