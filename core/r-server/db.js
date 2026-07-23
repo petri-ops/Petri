@@ -844,8 +844,8 @@ function persistLoopRun(loopRun) {
     JSON.stringify(loopRun),
     loopRun.isPartial ? 1 : 0,
     loopRun.partialReason || null,
-    loopRun.createdAt,
-    loopRun.updatedAt || loopRun.createdAt,
+    loopRun.createdAt || new Date().toISOString(),
+    loopRun.updatedAt || loopRun.createdAt || new Date().toISOString(),
   );
   return getLoopRun(loopRun.loopRunId);
 }
@@ -864,7 +864,7 @@ function updateLoopRunStatus(loopRunId, { loopStatus, hash, json, updatedAt }) {
   db.prepare(`
     UPDATE loop_runs SET loop_status=?, loop_status_hash=?, loop_status_json=?, updated_at=?
     WHERE loop_run_id=?
-  `).run(loopStatus, hash, json || null, updatedAt, loopRunId);
+  `).run(loopStatus, hash, json || null, updatedAt || new Date().toISOString(), loopRunId);
   return getLoopRun(loopRunId);
 }
 
