@@ -1,6 +1,6 @@
 # HLE-0: Harness Loop Engineering Baseline
 
-## Status: `in_progress`
+## Status: `in_progress`（离线门禁已完成，真实产品证据由 `production/` 收口）
 
 ## Exit Criteria
 
@@ -14,6 +14,7 @@
 - [x] `scripts/harness-loop.mjs` — aggregate gate script
 - [x] `test/loop-fixtures.test.mjs` — Node.js test suite
 - [x] All files pass `node --check` and `node test/loop-fixtures.test.mjs`
+- [ ] `production/` — SPT-1 三轨、双 Provider、应用重启和视觉矩阵
 
 ## Background
 
@@ -67,3 +68,15 @@ The Loop Controller must consume the existing `tool_job` / `artifact` truth chai
 ## Privacy
 
 All fixtures are marked `uses_repository_demo_data_only`. No synthetic or real user data is included.
+
+真实产品证据使用单独的显式更新命令：
+
+```bash
+npm run harness:loop:production:update
+npm run harness:loop:production
+```
+
+更新命令要求通过环境变量显式指定本地 SQLite、三条验收会话、重启
+LoopRun 和脱敏 Provider 报告。提交目录只保存状态、计数、hash、reason
+code、相对路径和不透明 ID；不保存用户消息、文件正文、绝对路径、凭据、
+endpoint、请求头或 Provider 原始响应。默认命令只读验证，绝不自动改证据。

@@ -63,6 +63,8 @@
     "harness:loop:evaluate": "node scripts/harness-loop-evaluate.mjs",
     "harness:loop:test": "node test/loop-fixtures.test.mjs",
     "harness:loop": "node scripts/harness-loop.mjs",
+    "harness:loop:production": "node scripts/harness-loop-production-acceptance.mjs",
+    "harness:loop:production:update": "node scripts/harness-loop-production-acceptance.mjs --write-evidence",
     "harness:loop:contract:test": "node --test test/loop-contract.test.mjs",
     "harness:loop:repository:test": "node --test test/loop-repository.test.mjs",
     "harness:loop:contract": "node scripts/harness-loop-contract.mjs",
