@@ -6,6 +6,7 @@
 
 1. [`scientific-intelligence-os-vision.md`](./scientific-intelligence-os-vision.md) — BioF3 长期产品愿景、当前定位、阶段跃迁条件与禁止跨阶段建设规则。它约束方向，但不替代当前工作包。
 2. [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) — HLE 完整关闭后启动的永久 G0 可信基础层工作包；定义不变量、动态进化、资格门禁与长期维护机制。
+3. [`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md) — G0-LF0 之后的数据契约与适配基线；让不规则数据通过 Profiler、语义绑定、可复现 Adapter、Plugin I/O Contract 和 typed DAG 安全进入科学插件。
 
 ## 当前开发必读
 
