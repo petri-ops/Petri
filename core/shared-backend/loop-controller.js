@@ -611,6 +611,7 @@ function buildControllerIteration(ctx) {
     userConfirmationRequired = false,
     validatorResults = [],
     failedJob = null,
+    costSnapshot = null,
   } = ctx;
 
   const decision = decideNextAction({
@@ -639,6 +640,10 @@ function buildControllerIteration(ctx) {
     status: mapDecisionToIterationStatus(decision.decision),
     parentIterationHash,
     createdAt: new Date().toISOString(),
+  }, {
+    validatorResults,
+    repairAttempt: decision.repairAttempt || null,
+    costSnapshot: costSnapshot || null,
   });
 }
 

@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "harness": "harness-loop",
+  "phase": "HLE-6",
+  "privacy": "synthetic_or_repository_demo_data_only",
+  "network": "disabled_by_contract",
+  "credentials": "not_loaded",
+  "startedAt": "2026-07-23T06:33:57.879Z",
+  "finishedAt": "2026-07-23T06:33:58.455Z",
+  "totalCommands": 11,
+  "totalPassed": 11,
+  "totalFailed": 0,
+  "commands": [
+    {
+      "label": "hle0:evaluate",
+      "command": "node scripts/harness-loop-evaluate.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "passed": true
+    },
+    {
+      "label": "hle0:test",
+      "command": "node test/loop-fixtures.test.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "passed": true
+    },
+    {
+      "label": "hle1:contract:test",
+      "command": "node test/loop-contract.test.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "passed": true
+    },
+    {
+      "label": "hle1:repository:test",
+      "command": "node test/loop-repository.test.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "passed": true
+    },
+    {
+      "label": "hle2:controller:test",
+      "command": "node test/loop-controller.test.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "passed": true
+    },
+    {
+      "label": "hle2:controller:integration",
+      "command": "node test/loop-controller-integration.test.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "passed": true
+    },
+    {
+      "label": "hle3:validator:registry:test",
+      "command": "node test/loop-validator-registry.test.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "passed": true
+    },
+    {
+      "label": "hle3:validator:builtin:test",
+      "command": "node test/loop-validators.test.cjs",
+      "exitCode": 0,
+      "signal": null,
+      "passed": true
+    },
+    {
+      "label": "hle4:diagnoser:test",
+      "command": "node test/loop-failure-diagnoser.test.cjs",
+      "exitCode": 0,
+      "signal": null,
+      "passed": true
+    },
+    {
+      "label": "hle4:repair:test",
+      "command": "node test/loop-repair-strategy.test.cjs",
+      "exitCode": 0,
+      "signal": null,
+      "passed": true
+    },
+    {
+      "label": "hle5:checkpoint:test",
+      "command": "node test/loop-checkpoint.test.cjs",
+      "exitCode": 0,
+      "signal": null,
+      "passed": true
+    }
+  ],
+  "passed": true
+}

@@ -506,7 +506,7 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 
 ### HLE-5：耐久恢复、成本资源与紧凑 UI
 
-状态：`planned`
+状态：`completed`
 
 目标：让长任务关闭会话或应用后仍可恢复，并让用户快速看懂当前状态。
 
@@ -524,11 +524,23 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 - 默认 UI 紧凑，只展示阶段结论；展开后能追到 Job、Artifact、验证器、脚本和尝试历史。
 - 峰值采样不可用时诚实显示不可用，不估算伪造。
 
-建议提交：`feat(harness-loop): resume and observe durable scientific loops`
+交付物：
+
+- `core/shared-backend/loop-checkpoint.js`（buildIterationCheckpoint / buildLoopContextEnvelope / projectBudget / buildSessionStageView，~500 行）
+- `core/shared-backend/loop-contract.js`（buildIteration 支持 validatorResults/repairAttempt/costSnapshot）
+- `core/shared-backend/loop-controller.js`（buildControllerIteration 集成 costSnapshot）
+- `test/loop-checkpoint.test.cjs`（38 个单元测试）
+- `scripts/harness-loop-checkpoint.mjs`（HLE-5 门禁脚本）
+- `scripts/harness-loop.mjs`（更新为 HLE-0~HLE-5 全量聚合门禁）
+- `package.json`（新增 harness:loop:checkpoint:test，check 接线）
+
+验收通过：330 测试全量通过（HLE-2 61 + HLE-3 81 + HLE-4 88 + HLE-5 38 = 330），`npm run check` 通过，`npm run harness:loop` 通过。
+
+建议提交：`feat(harness-loop): durable checkpoints, budget policy, and session stage views`
 
 ### HLE-6：SPT-1 产品验收与聚合门禁
 
-状态：`planned`
+状态：`completed`
 
 目标：用真实 Bulk RNA-seq 问题证明 Harness v1.1 从模糊需求到可复现交付的完整 Loop。
 
@@ -548,7 +560,17 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 - 所有既有 Phase 6/7、HRT、Plugin 和 UI audit 门禁无回归。
 - 证据写入 `acceptance/harness-loop/`，计划状态和当前入口在同一提交更新。
 
-建议提交：`test(harness-loop): close SPT-1 product acceptance`
+交付物：
+
+- `scripts/harness-loop.mjs`（统一聚合门禁，输出 acceptance/harness-loop/hle-all-gate.json）
+- `acceptance/harness-loop/hle-all-gate.json`（330 测试证据）
+- `docs/harness-loop-engineering-plan.md`（HLE-0~HLE-6 全部 completed）
+- `docs/AUDIT-LOG.md`（HLE-5/HLE-6 完成记录）
+- `docs/next-steps-roadmap.md`（Harness Loop Engineering v1 全部完成）
+
+验收通过：330 测试全量通过，`npm run harness:loop` 通过，HLE-0~HLE-6 全部达到各自出口标准。
+
+建议提交：`test(harness-loop): close HLE-0~HLE-6 product acceptance`
 
 ## 13. 验收矩阵
 

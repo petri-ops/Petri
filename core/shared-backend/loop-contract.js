@@ -392,7 +392,8 @@ function buildLoopRun(input) {
   return { ...base, hash };
 }
 
-function buildIteration(input, { allowPartial = true } = {}) {
+function buildIteration(input, options = {}) {
+  const { allowPartial = true, ...extra } = options;
   const base = {
     iterationId: input.iterationId || generateId('iter'),
     loopRunId: input.loopRunId,
@@ -410,6 +411,14 @@ function buildIteration(input, { allowPartial = true } = {}) {
     status: input.status || 'pending',
     createdAt: input.createdAt || nowIso(),
     parentIterationHash: input.parentIterationHash || null,
+    // HLE-5: extended fields
+    validatorResults: extra.validatorResults
+      ? Object.freeze([...extra.validatorResults])
+      : null,
+    repairAttempt: extra.repairAttempt || null,
+    costSnapshot: extra.costSnapshot
+      ? Object.freeze({ ...extra.costSnapshot })
+      : null,
   };
   validateIteration(base, { allowPartial });
   const hash = stableHash(pickSemanticFields(base, SEMANTIC_FIELD_KEYS.iteration));
