@@ -46,6 +46,31 @@ const {
   MAX_CONTENT_LEN,
 } = require('./helpers/memory-vectors');
 const { aiTaskConcurrencyRelease } = require('./helpers/runtime');
+
+const { v4: uuidv4 } = require('uuid');
+
+// HLE-C1: Loop Controller + Ledger imports
+const {
+  buildIteration,
+  stableHash,
+  generateActionKey,
+  deriveObservedStateDigest,
+  computeGoalGapIds,
+  computeResolvedGapIds,
+  decideNextAction,
+  mapDecisionToIterationStatus,
+  REASON_CODES,
+} = require('../shared-backend/loop-contract');
+
+const {
+  persistLoopRun,
+  updateLoopRunStatus,
+  getLoopRun,
+  listLoopRunsForConversation,
+  persistLoopIteration,
+  persistLoopAction,
+  getLoopActionByKey,
+} = require('./db');
 const {
   getToolDefs,
   createCallId,
@@ -357,6 +382,68 @@ async function runAgentLoop({
     _emit({ event: 'conversation', conversationId: _activeConv.id, title: _activeConv.title });
   }
 
+  // HLE-C1: Loop state — created lazily on first real execution turn (task_execute detection)
+  // Ordinary Q&A and context_assist do NOT create a LoopRun.
+  let loopState = null;
+  let loopRunId = null;
+  let loopSequence = 0;
+  let loopIterations = [];       // persisted iterations for this run
+  let loopActiveJobs = [];       // in-flight tool_job_ids observed this turn
+  let loopFirstIterationDone = false;
+  let loopAbortedByController = false;
+  let loopPublicConclusion = null;
+
+  function _loopInit(projectId, conversationId) {
+    // idempotent: only create once
+    if (loopRunId) return;
+    const { v4: loopUuid } = require('uuid');
+    loopRunId = loopUuid();
+    const taskSpecHash = stableHash({
+      projectId: String(projectId || ''),
+      conversationId: String(conversationId || ''),
+      automationMode: executionPolicy.allowExecution ? 'task_execute' : 'task_draft',
+    });
+    const runHash = stableHash({
+      loopRunId,
+      projectId: String(projectId || ''),
+      conversationId: String(conversationId || ''),
+      automationMode: executionPolicy.allowExecution ? 'task_execute' : 'task_draft',
+      startedAt: new Date().toISOString(),
+    });
+    loopState = 'running';
+    persistLoopRun({
+      loopRunId,
+      projectId: String(projectId || ''),
+      conversationId: String(conversationId || ''),
+      taskSpecRef: taskSpecHash,
+      automationMode: executionPolicy.allowExecution ? 'task_execute' : 'task_draft',
+      loopStatus: 'running',
+      hash: runHash,
+      json: JSON.stringify({ taskSpecHash, automationMode: executionPolicy.allowExecution ? 'task_execute' : 'task_draft' }),
+    });
+    _emit({
+      event: 'loop_phase',
+      phase: 'started',
+      loopRunId,
+      automationMode: executionPolicy.allowExecution ? 'task_execute' : 'task_draft',
+    });
+  }
+
+  function _loopEmitIterationEvent(iteration, decision, actionKey) {
+    _emit({
+      event: 'loop_iteration',
+      loopRunId,
+      iterationId: iteration.iterationId,
+      sequence: iteration.sequence,
+      decision: iteration.decision,
+      decisionReasonCode: iteration.decisionReasonCode,
+      publicConclusion: iteration.publicConclusion,
+      status: iteration.status,
+      proposedActionKey: actionKey || null,
+      actionKeyHash: actionKey ? stableHash(actionKey) : null,
+    });
+  }
+
   systemPrompt = appendDesktopAgentInstructions(systemPrompt);
   const executionPolicy = inferExecutionPolicy(messages);
   if (!executionPolicy.allowExecution) {
@@ -401,10 +488,36 @@ async function runAgentLoop({
   let cancellationObserved = false;
   const assistantResultCards = [];
   const assistantToolActivities = createToolActivityRecorder();
+  // HLE-C1: map callId → envelope for Loop post-turn iteration reading
+  const toolResultEventsByCallId = {};
 
   try {
     for (let iter = 0; iter < MAX_AGENT_ITERS && !aborted(); iter++) {
       _emit({ event: 'iter', n: iter + 1 });
+
+      // HLE-C1: Lazy Loop init on first execution-capable turn.
+      // Only task_execute creates a LoopRun; Q&A / context_assist do NOT.
+      // We detect first run_tool(op="run") call and init there.
+      // Init idempotently so re-connect / retry don't recreate.
+      if (!loopRunId && executionPolicy.allowExecution) {
+        _loopInit(toolCtx.projectId, toolCtx.conversationId);
+      }
+
+      // HLE-C1: Pre-turn Loop Controller decision.
+      // Block/abort before calling the model if the loop is already resolved.
+      if (loopRunId && loopState && loopState !== 'running') {
+        _emit({
+          event: 'loop_phase',
+          phase: loopState,
+          loopRunId,
+          publicConclusion: loopPublicConclusion,
+          reason: 'controller_aborted',
+        });
+        loopAbortedByController = true;
+        cancellationObserved = true;
+        assistantAcc = loopPublicConclusion || '任务已被 Loop Controller 终止。已完成工作已保留。';
+        break;
+      }
 
       // Normal scientific work has no iteration boundary. Only an anomaly (or
       // an explicitly injected finite test cap) forces a tool-free explanation.
@@ -608,6 +721,8 @@ async function runAgentLoop({
           const toolResultEvent = buildToolResultEvent(envelope, args, { iteration: iter + 1 });
           assistantToolActivities.recordResult(toolResultEvent);
           _emit(toolResultEvent);
+          // HLE-C1: track by callId for Loop post-turn state reading
+          if (callId) toolResultEventsByCallId[callId] = toolResultEvent;
 
           if (ackInfo) {
             const ackResult = await ackInfo;
@@ -657,7 +772,133 @@ async function runAgentLoop({
     }
 
     cancellationObserved = aborted();
-    if (cancellationObserved) {
+
+    // HLE-C1: Persist Loop iteration after each agent turn.
+    // Only do this if a LoopRun has been initialized (execution-capable turns).
+    // Track in-flight tool_job_ids; read real status from envelope after execution.
+    if (loopRunId) {
+      // Gather observed state from this turn's tool results
+      const activities = assistantToolActivities.snapshot();
+      const toolJobs = activities
+        .filter((a) => a.name === 'run_tool' && a.callId)
+        .map((a) => {
+          // Try to read real job status from the recorded event
+          const evt = toolResultEventsByCallId && toolResultEventsByCallId[a.callId];
+          const status = evt && evt.toolResult && evt.toolResult.status
+            ? evt.toolResult.status
+            : (a.status === 'error' ? 'failed' : a.status === 'success' ? 'completed' : 'unknown');
+          return {
+            toolJobId: (evt && evt.toolResult && evt.toolResult.data && evt.toolResult.data.toolJobId) || null,
+            callId: a.callId,
+            name: a.name,
+            status,
+            iteration: a.iteration,
+          };
+        });
+
+      // Derive state digest from tool activities
+      const stateDigest = deriveObservedStateDigest({
+        iterations: loopIterations,
+        activeJobs: toolJobs.filter((j) => j.status === 'running' || j.status === 'pending'),
+        toolActivities: activities,
+      });
+
+      const activeJobs = toolJobs.filter((j) => j.status === 'running' || j.status === 'pending');
+      const failedJobs = toolJobs.filter((j) => j.status === 'failed' || j.status === 'blocked');
+
+      // Check for cancellation
+      if (cancellationObserved || loopAbortedByController) {
+        loopSequence += 1;
+        const parentHash = loopIterations.length > 0
+          ? loopIterations[loopIterations.length - 1].hash
+          : null;
+        const iteration = buildIteration({
+          loopRunId,
+          sequence: loopSequence,
+          observedStateDigest: stateDigest,
+          goalGapIds: [],
+          proposedAction: null,
+          decision: 'cancel',
+          decisionReasonCode: REASON_CODES.TRANSIENT_RUNTIME_RETRY,
+          publicConclusion: cancellationObserved
+            ? '用户取消。已完成的阶段已保留。'
+            : 'Loop Controller 已终止任务。',
+          status: 'skipped',
+          parentIterationHash: parentHash,
+          createdAt: new Date().toISOString(),
+        }, {
+          validatorResults: [],
+          repairAttempt: null,
+          costSnapshot: null,
+        });
+        try {
+          persistLoopIteration(iteration);
+          loopIterations.push(iteration);
+        } catch {}
+        loopState = 'cancelled';
+        loopPublicConclusion = iteration.publicConclusion;
+        _loopEmitIterationEvent(iteration, 'cancel', null);
+      } else {
+        // Determine decision based on tool results
+        let decision = 'continue';
+        let decisionReasonCode = REASON_CODES.TOOL_SUCCEEDED;
+        let publicConclusion = null;
+        let blockedReason = null;
+
+        if (failedJobs.length > 0) {
+          // A tool failed — Controller will classify in next pre-turn decision
+          decision = 'continue'; // Let controller see it in next iteration
+          decisionReasonCode = REASON_CODES.TRANSIENT_RUNTIME_RETRY;
+          publicConclusion = `工具执行失败（${failedJobs.length} 个）。Loop Controller 将在下一轮决策中处理。`;
+          // Store failed jobs for diagnoser
+          loopActiveJobs = toolJobs;
+        } else if (activeJobs.length > 0) {
+          decision = 'continue';
+          decisionReasonCode = REASON_CODES.TOOL_SUCCEEDED;
+          publicConclusion = `工具执行中（${activeJobs.length} 个运行中）。继续监控。`;
+          loopActiveJobs = activeJobs;
+        } else if (activities.length === 0) {
+          // No tool calls this turn — normal finalization
+          decision = 'complete';
+          decisionReasonCode = REASON_CODES.TOOL_SUCCEEDED;
+          publicConclusion = '本轮无工具调用，已整理最终答复。';
+          loopActiveJobs = [];
+        } else {
+          loopActiveJobs = toolJobs;
+        }
+
+        loopSequence += 1;
+        const parentHash = loopIterations.length > 0
+          ? loopIterations[loopIterations.length - 1].hash
+          : null;
+
+        const iteration = buildIteration({
+          loopRunId,
+          sequence: loopSequence,
+          observedStateDigest: stateDigest,
+          goalGapIds: [],
+          proposedAction: null,   // decisions happen pre-turn; post-turn records results
+          decision,
+          decisionReasonCode,
+          publicConclusion,
+          status: mapDecisionToIterationStatus(decision),
+          parentIterationHash: parentHash,
+          createdAt: new Date().toISOString(),
+        }, {
+          validatorResults: [],
+          repairAttempt: null,
+          costSnapshot: null,
+        });
+
+        try {
+          persistLoopIteration(iteration);
+          loopIterations.push(iteration);
+        } catch {}
+        _loopEmitIterationEvent(iteration, decision, null);
+      }
+    }
+
+    if (cancellationObserved || loopAbortedByController) {
       assistantAcc = '任务已由用户停止。已完成的阶段结论、工具记录和结果已保留，未开始的步骤不会继续执行。';
       _emit({ event: 'agent_cancelled', reason: 'user_cancelled' });
     } else if (assistantAcc.trim().length === 0) {

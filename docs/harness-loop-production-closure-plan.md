@@ -152,7 +152,7 @@ failed Job 存在部分文件时必须：
 
 ### HLE-C1：接入真实 task/legacy Agent loop
 
-状态：`planned`
+状态：`completed`
 
 首选位置：
 
