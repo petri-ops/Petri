@@ -14,7 +14,7 @@
 
 ## 当前 P-03 Loop 工程包
 
-`Harness Loop Engineering v1` 当前状态为 `in_progress`（HLE-0 完成；HLE-1 完成：LoopRun/Iteration/Action/Evidence/Decision/Snapshot 契约与 SQLite 持久化已上线；HLE-2 完成：统一 Loop Controller 与退出判定、no-progress/oscillation/repeat 检测、validateAction 前置校验、evaluateExit 退出判定、toStructuredDecision Provider 安全决策；HLE-3 实施中：Validator Registry 与内置验证器、decideNextAction 集成 validatorResults、ARTIFACT_VALIDATION_FAILED/WARNING reason codes），实施顺序固定为 HLE-0～HLE-6。HLE-0 先用 SPT-1 Bulk RNA-seq 脱敏任务记录正常、可修复和必须阻断三类真实基线；随后依次实现 Loop Contract/持久化、统一 Controller/退出判定、Validator Registry、故障修复与受影响子图重规划、耐久恢复/成本资源/紧凑 UI，最后以双 Provider 人工矩阵和零网络聚合门禁完成产品验收。
+`Harness Loop Engineering v1` 当前状态为 `in_progress`（HLE-0 完成；HLE-1 完成：LoopRun/Iteration/Action/Evidence/Decision/Snapshot 契约与 SQLite 持久化已上线；HLE-2 完成：统一 Loop Controller 与退出判定、no-progress/oscillation/repeat 检测、validateAction 前置校验、evaluateExit 退出判定、toStructuredDecision Provider 安全决策；HLE-3 完成：Validator Registry 与内置验证器、decideNextAction 集成 validatorResults、ARTIFACT_VALIDATION_FAILED/WARNING reason codes；HLE-4 完成：故障诊断与修复策略、decideNextAction repair decision、computeAffectedSubgraph 保留 verified artifacts；HLE-5 实施中），实施顺序固定为 HLE-0～HLE-6。HLE-0 先用 SPT-1 Bulk RNA-seq 脱敏任务记录正常、可修复和必须阻断三类真实基线；随后依次实现 Loop Contract/持久化、统一 Controller/退出判定、Validator Registry、故障修复与受影响子图重规划、耐久恢复/成本资源/紧凑 UI，最后以双 Provider 人工矩阵和零网络聚合门禁完成产品验收。
 
 Loop 工程包继续复用 TaskSpec、Workflow Plan、Plugin、ToolResult、Job、Artifact、Delivery 和 Replay，不得创建第二套 executor、job、artifact 或 workflow truth。正常路径不使用任意固定轮数提前停止；重复、无进展、振荡、同类故障和资源/成本异常必须进入可审计的保护状态。节点和任务完成由验证器与 Artifact 证据判定，不能由模型口头声明。
 

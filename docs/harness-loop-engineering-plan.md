@@ -472,7 +472,7 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 
 ### HLE-4：故障诊断、修复与受影响子图重规划
 
-状态：`planned`
+状态：`completed`
 
 目标：根据稳定故障分类选择最小修复范围，并保留完整 lineage。
 
@@ -489,6 +489,18 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 - 只重跑第一个失效节点及其下游；未受影响的 verified Artifact 保持可复用。
 - 科学设计变化、不可逆动作和证据不足不会被 trusted/full 自动越权。
 - 修复失败不会覆盖原始脚本、参数或 Artifact。
+
+交付物：
+
+- `core/shared-backend/loop-failure-diagnoser.js`（10 类故障分类器，36 条规则，支持 HLE-3 validator 结果集成）
+- `core/shared-backend/loop-repair-strategy.js`（12 个 repair strategy，parent lineage，safety level，cost multiplier）
+- `core/shared-backend/loop-controller.js`（decideNextAction 集成 failedJob → repair decision + decision='retry'）
+- `test/loop-failure-diagnoser.test.cjs`（54 个单元测试）
+- `test/loop-repair-strategy.test.cjs`（34 个单元测试）
+- `scripts/harness-loop-repair.mjs`（聚合门禁脚本）
+- `package.json`（新增 harness:loop:repair:test + harness:loop:repair，check 接线）
+
+验收通过：88 测试全量通过，`npm run check` 通过，`npm run harness:loop:repair` 通过。
 
 建议提交：`feat(harness-loop): repair failures with lineage-safe replanning`
 

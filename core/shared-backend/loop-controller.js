@@ -367,6 +367,7 @@ function decideNextAction(ctx) {
     runtimeReady = true,
     userConfirmationRequired = false,
     validatorResults = [],
+    failedJob = null,
   } = ctx;
 
   const currentGapSet = new Set(goalGapIds);
@@ -408,6 +409,59 @@ function decideNextAction(ctx) {
         decisionReasonCode: REASON_CODES.ARTIFACT_VALIDATION_WARNING,
         proposedAction: null,
         publicConclusion: `验证警告：${summary}。任务可继续但结果可能受影响。`,
+      };
+    }
+  }
+
+  // HLE-4: Repair decision — classify failure and propose repair action
+  // Integration: integration layer passes failedJob when decision='block' from prior iteration
+  if (failedJob && (failedJob.status === 'failed' || failedJob.status === 'blocked')) {
+    // Import lazily to avoid circular require
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { diagnoseFailure, selectRepairStrategy } = require('./loop-failure-diagnoser');
+
+    const diagnosis = diagnoseFailure(failedJob, {
+      toolId: failedJob.tool_id || null,
+      artifactValidationResults: validatorResults,
+    });
+
+    if (diagnosis.defaultBehavior === 'auto_repair' || diagnosis.defaultBehavior === 'auto_retry') {
+      const context = {
+        parentJobId: failedJob.id || failedJob.tool_job_id || null,
+        originalToolId: failedJob.tool_id || null,
+        originalParams: failedJob.params || null,
+        originalInputs: failedJob.inputs || null,
+        parentArtifactIds: failedJob.artifact_ids || [],
+        dag,
+        fallbackProvider: null,
+      };
+      const repairAttempt = selectRepairStrategy(diagnosis, context);
+      if (repairAttempt && repairAttempt.isActionable) {
+        return {
+          decision: 'retry',
+          decisionReasonCode: REASON_CODES.TRANSIENT_RUNTIME_RETRY,
+          proposedAction: repairAttempt.isActionable
+            ? buildAction({
+                actionType: 'repair',
+                toolId: repairAttempt.newToolId || failedJob.tool_id || null,
+                inputs: repairAttempt.newInputs,
+                params: { ...(repairAttempt.newParams || {}), _repairStrategyId: repairAttempt.strategyId },
+              })
+            : null,
+          publicConclusion: `自动修复（${diagnosis.faultType}）：${repairAttempt.publicMessage}`,
+          repairDiagnosis: diagnosis,
+          repairAttempt,
+        };
+      }
+    }
+
+    if (diagnosis.defaultBehavior === 'require_user' || diagnosis.defaultBehavior === 'block') {
+      return {
+        decision: 'block',
+        decisionReasonCode: REASON_CODES.TRANSIENT_RUNTIME_RETRY,
+        proposedAction: null,
+        publicConclusion: `故障类型：${diagnosis.faultType}。${diagnosis.message}。需人工介入。`,
+        repairDiagnosis: diagnosis,
       };
     }
   }
@@ -556,6 +610,7 @@ function buildControllerIteration(ctx) {
     runtimeReady = true,
     userConfirmationRequired = false,
     validatorResults = [],
+    failedJob = null,
   } = ctx;
 
   const decision = decideNextAction({
@@ -569,6 +624,7 @@ function buildControllerIteration(ctx) {
     runtimeReady,
     userConfirmationRequired,
     validatorResults,
+    failedJob,
   });
 
   return buildIteration({
