@@ -16,10 +16,23 @@
 
 const express = require('express');
 
+const db = require('../db');
 const {
   getLoopRun,
   listLoopRunsForConversation,
-} = require('../db');
+} = db;
+
+// HLE-C3R: project-ownership isolation. A LoopRun belongs to a project; a user
+// may only read runs for projects they own (or public / ownerless legacy
+// projects, or as admin). Returns true when access is allowed.
+function userMayAccessProject(req, projectId) {
+  if (!projectId) return true; // legacy runs without a project ref
+  if (req.user && req.user.role === 'admin') return true;
+  let project = null;
+  try { project = db.getProject(projectId); } catch { project = null; }
+  if (!project) return false;
+  return Boolean(project.is_public) || !project.user_id || project.user_id === req.userId;
+}
 
 function registerAiLoopRoutes(app) {
   const router = express.Router();
@@ -28,6 +41,21 @@ function registerAiLoopRoutes(app) {
   function requireUser(req, res, next) {
     if (!req.userId) return res.status(401).json({ ok: false, error: 'unauthenticated' });
     next();
+  }
+
+  // Load a run and enforce ownership. Sends 404 when missing, 403 when the
+  // requesting user does not own the run's project. Returns the run or null.
+  function loadRunAuthorized(req, res, loopRunId) {
+    const run = getLoopRun(loopRunId);
+    if (!run) {
+      res.status(404).json({ ok: false, error: 'loop_run_not_found' });
+      return null;
+    }
+    if (!userMayAccessProject(req, run.projectId)) {
+      res.status(403).json({ ok: false, error: 'forbidden' });
+      return null;
+    }
+    return run;
   }
 
   /**
@@ -40,8 +68,8 @@ function registerAiLoopRoutes(app) {
     if (!loopRunId) return res.status(400).json({ ok: false, error: 'missing loopRunId' });
 
     try {
-      const run = getLoopRun(loopRunId);
-      if (!run) return res.status(404).json({ ok: false, error: 'loop_run_not_found' });
+      const run = loadRunAuthorized(req, res, loopRunId);
+      if (!run) return undefined;
 
       // Compact projection: strip raw unbounded fields
       const compact = {
@@ -51,12 +79,37 @@ function registerAiLoopRoutes(app) {
         taskSpecRef: run.taskSpecRef,
         automationMode: run.automationMode,
         loopStatus: run.loopStatus,
-        hash: run.loopStatusHash || run.hash,
+        hash: run.hash,
         isPartial: Boolean(run.isPartial),
         partialReason: run.partialReason || null,
         createdAt: run.createdAt,
         updatedAt: run.updatedAt,
       };
+
+      // HLE-C3R: optional expanded projection with durable recovery detail.
+      if (req.query.expanded === '1' || req.query.expanded === 'true') {
+        let iterations = [];
+        let evidenceCount = 0;
+        try {
+          iterations = (db.listLoopIterations(loopRunId, { limit: 20 }) || []).map((it) => ({
+            iterationId: it.iterationId,
+            sequence: it.sequence,
+            decision: it.decision,
+            decisionReasonCode: it.decisionReasonCode,
+            status: it.status,
+            publicConclusion: it.publicConclusion,
+            createdAt: it.createdAt,
+          }));
+        } catch {}
+        try { evidenceCount = (db.listLoopEvidence(loopRunId, { limit: 500 }) || []).length; } catch {}
+        const record = run.record && typeof run.record === 'object' ? run.record : {};
+        compact.recoveryRequired = Boolean(record.recovery_required);
+        compact.recoveryReason = record.recovery_reason || null;
+        compact.abortedByUser = Boolean(record.abortedByUser);
+        compact.recentIterations = iterations;
+        compact.evidenceCount = evidenceCount;
+      }
+
       res.json({ ok: true, run: compact });
     } catch (err) {
       res.status(500).json({ ok: false, error: err.message });
@@ -77,7 +130,8 @@ function registerAiLoopRoutes(app) {
     }
 
     try {
-      const runs = listLoopRunsForConversation(projectId || null, conversationId || null, { limit: parsedLimit });
+      const runs = listLoopRunsForConversation(projectId || null, conversationId || null, { limit: parsedLimit })
+        .filter((run) => userMayAccessProject(req, run.projectId));
       const compact = runs.map((run) => ({
         loopRunId: run.loopRunId,
         projectId: run.projectId,
@@ -104,6 +158,7 @@ function registerAiLoopRoutes(app) {
   router.get('/iterations/:loopRunId', requireUser, (req, res) => {
     const { loopRunId } = req.params;
     if (!loopRunId) return res.status(400).json({ ok: false, error: 'missing loopRunId' });
+    if (!loadRunAuthorized(req, res, loopRunId)) return undefined;
 
     try {
       const { listLoopIterations } = require('../db');
@@ -136,6 +191,7 @@ function registerAiLoopRoutes(app) {
   router.get('/actions/:loopRunId', requireUser, (req, res) => {
     const { loopRunId } = req.params;
     if (!loopRunId) return res.status(400).json({ ok: false, error: 'missing loopRunId' });
+    if (!loadRunAuthorized(req, res, loopRunId)) return undefined;
 
     try {
       const { listLoopActions } = require('../db');
@@ -167,6 +223,7 @@ function registerAiLoopRoutes(app) {
   router.get('/evidence/:loopRunId', requireUser, (req, res) => {
     const { loopRunId } = req.params;
     if (!loopRunId) return res.status(400).json({ ok: false, error: 'missing loopRunId' });
+    if (!loadRunAuthorized(req, res, loopRunId)) return undefined;
 
     try {
       const { listLoopEvidence } = require('../db');
@@ -204,18 +261,19 @@ function registerAiLoopRoutes(app) {
     if (!loopRunId) return res.status(400).json({ ok: false, error: 'missing loopRunId' });
 
     try {
-      const run = getLoopRun(loopRunId);
-      if (!run) return res.status(404).json({ ok: false, error: 'loop_run_not_found' });
+      const run = loadRunAuthorized(req, res, loopRunId);
+      if (!run) return undefined;
 
-      // Parse status json
-      let statusJson = {};
-      try {
-        statusJson = run.loopStatusJson ? JSON.parse(run.loopStatusJson) : {};
-      } catch {}
+      // getLoopRun() returns the parsed status JSON under `record` (NOT
+      // loopStatusJson — that field does not exist on the projection).
+      const statusJson = (run.record && typeof run.record === 'object') ? run.record : {};
 
-      // Determine recovery state
+      // Determine recovery state. A server restart marks an interrupted run
+      // failed(recovery_required=true); surface that as needing recovery even
+      // though the status is terminal, but do NOT report it as safely resumable.
       const isTerminal = ['completed', 'failed', 'cancelled'].includes(run.loopStatus);
-      const needsRecovery = run.loopStatus === 'running';
+      const recoveryRequired = Boolean(statusJson.recovery_required);
+      const needsRecovery = run.loopStatus === 'running' || recoveryRequired;
 
       // Get last iteration
       let lastIteration = null;
@@ -242,7 +300,8 @@ function registerAiLoopRoutes(app) {
         automationMode: run.automationMode,
         isTerminal,
         needsRecovery,
-        canResume: needsRecovery && !isTerminal,
+        recoveryRequired,
+        canResume: run.loopStatus === 'running' && !recoveryRequired,
         lastIteration,
         statusJson,
         recoveryHint: _buildRecoveryHint(run, lastIteration, statusJson),
@@ -264,17 +323,17 @@ function registerAiLoopRoutes(app) {
     if (!loopRunId) return res.status(400).json({ ok: false, error: 'missing loopRunId' });
 
     try {
-      const run = getLoopRun(loopRunId);
-      if (!run) return res.status(404).json({ ok: false, error: 'loop_run_not_found' });
+      const run = loadRunAuthorized(req, res, loopRunId);
+      if (!run) return undefined;
       if (['completed', 'failed', 'cancelled'].includes(run.loopStatus)) {
         return res.status(409).json({ ok: false, error: 'loop_already_terminal' });
       }
 
       const { updateLoopRunStatus } = require('../db');
-      const statusJson = { ...(run.loopStatusJson ? JSON.parse(run.loopStatusJson) : {}), abortedByUser: true, abortedAt: new Date().toISOString() };
-      const updated = updateLoopRunStatus(loopRunId, {
+      const statusJson = { ...(run.record || {}), abortedByUser: true, abortedAt: new Date().toISOString() };
+      updateLoopRunStatus(loopRunId, {
         loopStatus: run.loopStatus, // keep running
-        hash: run.loopStatusHash || run.hash,
+        hash: run.hash,
         json: JSON.stringify(statusJson),
         updatedAt: new Date().toISOString(),
       });

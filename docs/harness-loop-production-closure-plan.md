@@ -211,7 +211,7 @@ failed Job 存在部分文件时必须：
 
 ### HLE-C3：耐久恢复、查询 API 与上下文重建
 
-状态：`partial`
+状态：`completed`（HLE-C3R 收口）
 
 必须交付：
 
@@ -233,15 +233,21 @@ failed Job 存在部分文件时必须：
 
 建议提交：`feat(harness-loop): resume durable runs from execution truth`
 
-> HLE-C3 部分完成（REST API 完成，启动恢复待 HLE-C5）：
-> - `/api/loop/runs/:loopRunId` — 单条 LoopRun 查询（compact projection）
+> HLE-C3R 完成（耐久恢复收口，2026-07-23）：
+> REST API（HLE-C3 首批，已上线）：
+> - `/api/loop/runs/:loopRunId`（?expanded=1 追加 recoveryRequired/recoveryReason/abortedByUser/recentIterations/evidenceCount）
 > - `/api/loop/runs?conversationId=&projectId=` — 按会话/项目查询
-> - `/api/loop/iterations/:loopRunId` — 所有 iteration compact 投影
-> - `/api/loop/actions/:loopRunId` — 所有 action compact 投影
-> - `/api/loop/evidence/:loopRunId` — 所有 evidence compact 投影
-> - `/api/loop/recovery/:loopRunId` — 恢复投影（含 canResume/needsRecovery/recoveryHint）
+> - `/api/loop/iterations|actions|evidence/:loopRunId` — compact 投影
+> - `/api/loop/recovery/:loopRunId` — 恢复投影（canResume/needsRecovery/recoveryHint）
 > - `/api/loop/runs/:loopRunId/abort` — 中止信号写入
-> - 后端启动时 reconcile running LoopRun 待 HLE-C5
+>
+> C3R 补齐（本轮）：
+> - **耐久 resume**：`db.getActiveLoopRunForConversation(projectId, conversationId)` 解析最近的非终止 LoopRun；`agent-runner._loopInit` 先 resume 再新建，多轮任务复用同一 LoopRun 而非每轮新建；resume 时从 `listLoopIterations` 重建 sequence + parentHash 链；`planned`→`running` 在首个执行轮推进。
+> - **终止即恢复**：server 重启 reconcile 写 `failed(recovery_required)`；`getActiveLoopRunForConversation` 只取 `planned`/`running`，重启中断的 run 不被静默 resume，改由 recovery API 暴露（`canResume=false`）。
+> - **checkpoint 不是唯一副本**：新增 `_loopSaveCheckpoint`（`buildIterationCheckpoint`→`saveContextCheckpoint`），每轮 iteration 落一份脱敏 checkpoint；`buildLoopContextEnvelope` 可从持久 checkpoint 重建（模型切换只换决策方，不换 TaskSpec/Truth/验收）。
+> - **API 收口**：修复 recovery/abort 读错字段（`run.loopStatusJson/loopStatusHash`→`run.record/run.hash`），补 `listLoopActions`（此前 `/actions` 端点空转），补项目归属隔离（`userMayAccessProject`：owner/public/ownerless/admin，非属主 403）。
+> - 证据：`test/loop-durable-resume.test.mjs`（11）+ `test/loop-api-route.test.mjs`（15，真实挂载 router + 真实 DB + mock auth）；641 loop + 1049 全量 pass / 0 fail，`npm run check` 绿。
+> - 待 HLE-C5R：真实应用重启矩阵、真实模型切换矩阵和视觉恢复态仍属 Step 7 实机验收，不因离线通过而声明。
 
 ### HLE-C4：会话与摘要 UI 接线
 

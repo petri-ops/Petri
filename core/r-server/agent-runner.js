@@ -70,12 +70,19 @@ const {
   updateLoopRunStatus,
   getLoopRun,
   listLoopRunsForConversation,
+  getActiveLoopRunForConversation,
   persistLoopIteration,
+  listLoopIterations,
   persistLoopAction,
   getLoopActionByKey,
   getToolJob,
   persistLoopEvidence,
+  saveContextCheckpoint,
 } = require('./db');
+
+// HLE-C3R: durable checkpoint builder — persists a compact, redacted snapshot
+// per iteration so the conversation summary is not the only copy of loop state.
+const { buildIterationCheckpoint } = require('../shared-backend/loop-checkpoint');
 
 // HLE-C2: Validator, Diagnoser, Repair imports
 const {
@@ -437,38 +444,87 @@ async function runAgentLoop({
   }
 
   function _loopInit(projectId, conversationId) {
-    // idempotent: only create once
+    // idempotent: only create once per turn closure
     if (loopRunId) return;
+    const pid = String(projectId || '');
+    const cid = String(conversationId || '');
+    const automationMode = executionPolicy.allowExecution ? 'task_execute' : 'task_draft';
+
+    // HLE-C3R: durable resume. A multi-turn task must reuse ONE LoopRun rather
+    // than mint a new run every turn. Look up the latest non-terminal run for
+    // this (project, conversation, automationMode) and resume it. Terminal runs
+    // (incl. failed(recovery_required) set by a server restart) are excluded by
+    // getActiveLoopRunForConversation, so recovery is surfaced via the recovery
+    // API instead of being silently resumed here.
+    let resumed = null;
+    try {
+      resumed = getActiveLoopRunForConversation(pid, cid);
+    } catch { resumed = null; }
+
+    if (resumed && resumed.loopRunId) {
+      loopRunId = resumed.loopRunId;
+      loopState = resumed.loopStatus === 'planned' ? 'running' : resumed.loopStatus;
+      // Rebuild the in-memory iteration chain (ASC) so sequence + parent hash
+      // continue from durable truth, not from an empty per-turn array.
+      try {
+        const prior = listLoopIterations(loopRunId, { limit: 500 }) || [];
+        loopIterations = prior.slice().sort((a, b) => (a.sequence || 0) - (b.sequence || 0));
+        loopSequence = loopIterations.reduce((m, it) => Math.max(m, it.sequence || 0), 0);
+      } catch {
+        loopIterations = [];
+        loopSequence = 0;
+      }
+      // A resumed 'planned' run advances to 'running' on first execution turn.
+      if (resumed.loopStatus === 'planned' && executionPolicy.allowExecution) {
+        try {
+          updateLoopRunStatus(loopRunId, {
+            loopStatus: 'running',
+            hash: resumed.hash,
+            json: JSON.stringify(resumed.record || {}),
+            updatedAt: new Date().toISOString(),
+          });
+        } catch {}
+      }
+      _emit({
+        event: 'loop_phase',
+        phase: 'resumed',
+        loopRunId,
+        automationMode,
+        resumedFromSequence: loopSequence,
+      });
+      return;
+    }
+
     const { v4: loopUuid } = require('uuid');
     loopRunId = loopUuid();
     const taskSpecHash = stableHash({
-      projectId: String(projectId || ''),
-      conversationId: String(conversationId || ''),
-      automationMode: executionPolicy.allowExecution ? 'task_execute' : 'task_draft',
+      projectId: pid,
+      conversationId: cid,
+      automationMode,
     });
     const runHash = stableHash({
       loopRunId,
-      projectId: String(projectId || ''),
-      conversationId: String(conversationId || ''),
-      automationMode: executionPolicy.allowExecution ? 'task_execute' : 'task_draft',
+      projectId: pid,
+      conversationId: cid,
+      automationMode,
       startedAt: new Date().toISOString(),
     });
     loopState = 'running';
     persistLoopRun({
       loopRunId,
-      projectId: String(projectId || ''),
-      conversationId: String(conversationId || ''),
+      projectId: pid,
+      conversationId: cid,
       taskSpecRef: taskSpecHash,
-      automationMode: executionPolicy.allowExecution ? 'task_execute' : 'task_draft',
+      automationMode,
       loopStatus: 'running',
       hash: runHash,
-      json: JSON.stringify({ taskSpecHash, automationMode: executionPolicy.allowExecution ? 'task_execute' : 'task_draft' }),
+      json: JSON.stringify({ taskSpecHash, automationMode }),
     });
     _emit({
       event: 'loop_phase',
       phase: 'started',
       loopRunId,
-      automationMode: executionPolicy.allowExecution ? 'task_execute' : 'task_draft',
+      automationMode,
     });
   }
 
@@ -485,6 +541,39 @@ async function runAgentLoop({
       proposedActionKey: actionKey || null,
       actionKeyHash: actionKey ? stableHash(actionKey) : null,
     });
+  }
+
+  // HLE-C3R: persist a durable context checkpoint for each iteration so the
+  // chat summary is NOT the only copy of loop state. ContextEnvelope rebuild
+  // (model switch / app restart) reads these checkpoints. Best-effort: a
+  // checkpoint failure must never break the turn.
+  function _loopSaveCheckpoint(iteration, projectId, conversationId, extra = {}) {
+    if (!loopRunId || !iteration || !iteration.iterationId) return;
+    try {
+      const cp = buildIterationCheckpoint({
+        loopRunId,
+        loopRunHash: iteration.hash,
+        sequence: iteration.sequence,
+        observedStateDigest: iteration.observedStateDigest || iteration.hash,
+        goalGapIds: iteration.goalGapIds || [],
+        decision: iteration.decision,
+        decisionReasonCode: iteration.decisionReasonCode,
+        publicConclusion: iteration.publicConclusion,
+        status: iteration.status,
+        proposedActionHash: extra.proposedActionHash || null,
+        validatorResults: extra.validatorResults || [],
+        repairAttempt: extra.repairAttempt || null,
+        toolJobId: extra.toolJobId || null,
+        artifactIds: extra.artifactIds || [],
+        costSnapshot: extra.costSnapshot || null,
+      });
+      saveContextCheckpoint({
+        ...cp,
+        projectId: String(projectId || ''),
+        conversationId: String(conversationId || ''),
+        sourceDigest: cp.observedStateDigest || cp.checkpointId,
+      });
+    } catch { /* best-effort: never break the turn on checkpoint failure */ }
   }
 
   systemPrompt = appendDesktopAgentInstructions(systemPrompt);
@@ -1022,6 +1111,9 @@ async function runAgentLoop({
           costSnapshot: null,
         });
         try { persistLoopIteration(iteration); loopIterations.push(iteration); } catch {}
+        _loopSaveCheckpoint(iteration, toolCtx.projectId, toolCtx.conversationId, {
+          validatorResults: validatorResults.slice(),
+        });
         loopState = 'cancelled';
         loopPublicConclusion = iteration.publicConclusion;
         _loopEmitIterationEvent(iteration, 'cancel', null);
@@ -1089,6 +1181,10 @@ async function runAgentLoop({
         });
 
         try { persistLoopIteration(iteration); loopIterations.push(iteration); } catch {}
+        _loopSaveCheckpoint(iteration, toolCtx.projectId, toolCtx.conversationId, {
+          validatorResults: validatorResults.slice(),
+          repairAttempt,
+        });
         _loopEmitIterationEvent(iteration, decision, null);
       }
     }

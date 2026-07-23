@@ -927,6 +927,39 @@ function listRunningLoopRuns() {
   }));
 }
 
+// HLE-C3R: Durable resume resolver. Returns the latest NON-TERMINAL LoopRun
+// for a conversation so a multi-turn task reuses one run instead of minting a
+// new run every turn. Terminal runs (completed/failed/cancelled) are excluded,
+// so a run that a server restart marked failed(recovery_required) is NOT
+// silently resumed here — recovery is surfaced through the recovery API.
+//
+// Resolution is by (projectId, conversationId) only. automationMode is
+// deliberately NOT a filter: the closure-plan uniqueness key is
+// projectId+conversationId+taskSpecHash, and a task_draft(planned) run must be
+// resumable+advanceable by a later task_execute turn (draft -> execute is one
+// logical run). 'planned' is included so that first-execution resume can
+// advance it to 'running'.
+function getActiveLoopRunForConversation(projectId, conversationId) {
+  if (!projectId || !conversationId) return null;
+  const row = db.prepare(`
+    SELECT loop_run_id FROM loop_runs
+    WHERE project_id=? AND conversation_id=?
+      AND loop_status IN ('planned','running')
+    ORDER BY updated_at DESC LIMIT 1
+  `).get(projectId, conversationId);
+  if (!row) return null;
+  return getLoopRun(row.loop_run_id);
+}
+
+function listLoopActions(loopRunId, { limit = 200 } = {}) {
+  if (!loopRunId) return [];
+  return db.prepare(`
+    SELECT * FROM loop_actions
+    WHERE loop_run_id=?
+    ORDER BY sequence DESC LIMIT ?
+  `).all(loopRunId, limit).map(parseLoopActionRow);
+}
+
 function persistLoopIteration(iteration) {
   if (!iteration?.iterationId || !iteration?.loopRunId || !iteration?.hash) {
     throw new Error('loop_iteration_persistence_fields_required');
@@ -1740,6 +1773,7 @@ module.exports = {
   getLoopRun,
   listLoopRunsForConversation,
   listRunningLoopRuns,
+  getActiveLoopRunForConversation,
   persistLoopIteration,
   getLoopIteration,
   listLoopIterations,
@@ -1747,6 +1781,7 @@ module.exports = {
   persistLoopAction,
   getLoopAction,
   getLoopActionByKey,
+  listLoopActions,
   persistLoopEvidence,
   getLoopEvidence,
   listLoopEvidence,

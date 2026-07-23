@@ -29,16 +29,17 @@
 | ✅已处理 | 2026-07-19 | Stage 4: 诊断导出范围过宽且原始日志未脱敏，可能携带用户数据 | 本文件 §6 | [§6 问题 K](#问题-k诊断导出隐私边界过宽) |
 | ✅已处理 | 2026-07-19 | Stage 4: DESeq2 可产生科学文件却缺必需 ZIP/报告模板，golden-path 曾用补救逻辑掩盖失败 | 本文件 §6 | [§6 问题 L](#问题-ldeseq2-首次成功产物契约不完整) |
 | ✅已处理 | 2026-07-21 | rc.7: `diagnostic-redaction.js` 在打包态仍从 app.asar 相邻目录解析 `core/`，主进程启动即报模块缺失 | rc.7 安装候选实机 | 已改为 `Resources/core/shared-backend/redaction.js`，补开发/打包双路径回归并完成安装启动验证 |
-| 🔴阻塞 | 2026-07-23 | HLE 离线 Controller/Validator/Repair/Checkpoint 已实现，但生产 `ai-agent.js`、真实 Job/Artifact 推进和前端尚未接线；HLE-6 的双 Provider、重启和视觉出口不成立 |
+| 🟡进行中 | 2026-07-23 | 状态纠偏（原🔴）：生产 Agent loop **已接线**（HLE-C1，`agent-runner.js` 惰性创建/持久化 LoopRun 与 Iteration、发 loop_phase/loop_iteration SSE），Validator/Diagnoser/Repair **已按真实 Job/Artifact Truth 强制执行**（HLE-C2，failed+partial 假成功稳定阻断）。原表述「生产 ai-agent.js 尚未接线」现已失真，予以纠正。**HLE-C3R 已完成**（见下方 ✅ 条目）。**仍未完成**：HLE-C4R 前端接线、HLE-C5 Step 7 三轨真实产品出口与双 Provider/重启/视觉证据。 | 生产收口计划 | [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) HLE-C4~C5 |
+| ✅已处理 | 2026-07-23 | HLE-C3R 耐久恢复收口：`_loopInit` 改为先 `getActiveLoopRunForConversation` 复用同会话未终结 LoopRun（planned/running）并重建内存 iteration 链，不再每轮新建；server-restart 标为 failed(recovery_required) 的 run 被排除、只经恢复 API 暴露不静默复用。新增 `db.getActiveLoopRunForConversation` 与 `db.listLoopActions`（修复此前空转的 `/api/loop/actions`）。checkpoint-on-success 接线：每轮 `buildIterationCheckpoint→saveContextCheckpoint`，聊天摘要不再是 loop 状态唯一副本，ContextEnvelope 可从持久化 checkpoint 重建（模型切换仅换决策提供者，不改重建状态）。修复 `ai-loop.js` 三处真实 bug：recovery/abort 读错字段（`run.loopStatusJson/loopStatusHash` → `run.record/run.hash`，此前 statusJson 恒为 `{}`、recovery_required 永不暴露）、无项目归属隔离（新增 `userMayAccessProject`+`loadRunAuthorized`，跨用户 403、public/admin 放行）、expanded 投影暴露 recoveryRequired/recoveryReason。新增 11 durable-resume + 15 route 集成测试（挂真实 router+DB+mock auth）；641 loop 测试、`npm test` 1049 pass/0 fail、`npm run check` 全绿。 | 本提交 | `core/r-server/db.js`, `core/r-server/agent-runner.js`, `core/r-server/routes/ai-loop.js`, `test/loop-durable-resume.test.mjs`, `test/loop-api-route.test.mjs` |
+| 🟡待评估 | 2026-07-23 | 契约漂移（HLE-C3R 途中发现，未阻塞）：`loop-contract.js#validateLoopRun` 要求 `automationMode ∈ {guided,confirm,trusted}`，但生产 `agent-runner.js#_loopInit` 经 `persistLoopRun`（不校验）落盘 `task_execute`/`task_draft`（每轮执行意图），两套取值互不相交。DB 层不校验故未报错，但 `buildLoopRun` 路径会抛。当前 `_loopInit` 调用点由 `executionPolicy.allowExecution` 守卫，实际只写 `task_execute`（`task_draft` 分支不可达）。建议后续统一：要么把执行意图另存字段、`automationMode` 仅存契约枚举，要么扩展契约枚举含 task_* 值。 | 本文件 §7 | 见 §7 |
 | ✅已处理 | 2026-07-23 | HLE-C1 完成
 | ✅已处理 | 2026-07-23 | HLE-C2 完成
 | ✅已处理 | 2026-07-23 | HLE-C5R：真实 Bulk RNA 聊天路径发现 Plugin Contract 未统一——DESeq2 coldata 绑定丢失、log2FoldChange/log2FC 列名漂移、volcano-plot 硬编码 log2FC、Workflow DAG 缺少 deg-standardizer、failed Job 假成功防护基于文件存在而非 artifactTruth、metadata→coldata 映射未进入 Job 参数。合成测试通过但产品路径失败。修复：biof3.deg.v1 profile、volcano-plot lfc_col 参数、DESeq2 preflight、bulk-rna-core 4-step DAG、Repair Boundary、scientific-task-planner coldataBinding、agent-runner false-success 检测。1032/1032 测试全量通过，插件契约 lint 0 错误。真实产品验收待 Step 7。 |
 | ✅已处理 | 2026-07-23 | DESeq2 存在 built-in、新旧 installed 快照和 `tool-scripts` 三条脚本来源，真实加载被 6 月 installed 副本覆盖。现以 `resources/built-in-plugins/deseq2` 为 builtin-canonical 唯一源码：移除 installed 台账/本机副本和 legacy R 脚本，普通 installed 不得覆盖，显式 development 仍可调试覆盖，并补充来源选择回归。 |
 | ✅已处理 | 2026-07-23 | HLE-C5 离线基础：server.js 启动恢复（HLE-C5）接入 listRunningLoopRuns；running LoopRun → failed(recovery_required) 平滑过渡；Loop Controller 修复 require('./loop-failure-diagnoser') 引用 loop-repair-strategy；22/22 恢复矩阵测试通过；46/46 SPT-1 三轨离线验收测试通过；440/440 Loop 离线测试全量通过。注意：离线测试通过不等于真实产品路径通过，HLE-C5 真实产品验收待 HLE-C5R 完成。 | 本提交 | `core/r-server/server.js`, `core/r-server/db.js`, `core/shared-backend/loop-controller.js`, `test/loop-recovery-integration.test.mjs`, `test/loop-spt1-acceptance.test.mjs` |
 
-| 🟡建议 | 2026-07-23 | HLE-C3 部分完成
-| 🟡建议 | 2026-07-23 | HLE-C4 部分完成：StreamChatOptions 新增 onLoopPhase / onLoopIteration；_handleSseEvent 支持 loop_phase 和 loop_iteration SSE 事件；前端可消费 Loop Controller 状态；16/16 SSE 契约测试通过；UI 面板和视觉验收待 HLE-C5 | 本提交 | `frontend/src/components/copilot/copilotClient.ts` |
-：Loop REST API 上线（runs/iterations/actions/evidence/recovery），compact 投影不暴露无界字段；启动时 reconcile running LoopRun 待 HLE-C5 | 本提交 | `core/r-server/routes/ai-loop.js` |
+| ✅已处理 | 2026-07-23 | HLE-C3（REST API 部分）完成，耐久恢复由 HLE-C3R 收口（见上方 ✅ 条目）：Loop REST API 上线（runs/iterations/actions/evidence/recovery/abort），compact 投影不暴露无界字段 | 本提交 | `core/r-server/routes/ai-loop.js` |
+| 🟡建议 | 2026-07-23 | HLE-C4 部分完成：StreamChatOptions 新增 onLoopPhase / onLoopIteration；_handleSseEvent 支持 loop_phase 和 loop_iteration SSE 事件；前端可消费 Loop Controller 状态；16/16 SSE 契约测试通过；UI 面板和视觉验收待 HLE-C4R | 本提交 | `frontend/src/components/copilot/copilotClient.ts` |
 ：Validator Registry 接入生产 orchestration，运行真实 job truth 读取；Diagnoser 分类故障并选 Repair Strategy；blocked/failed 验证结果阻止完成；假成功（failed job + partial files）稳定阻断；38/38 集成测试通过 | 本提交 | `core/r-server/agent-runner.js` + `test/loop-validator-diagnoser.test.mjs` |
 ：Loop Controller 接入 agent-runner.js，惰性初始化 LoopRun、按轮持久化 Iteration、发出 loop_phase/loop_iteration SSE 事件、记录用户取消和 Controller 终止；非执行轮不创建 LoopRun；19/19 集成测试通过 | 本提交 | `core/r-server/agent-runner.js` + `test/loop-agent-integration.test.mjs` |
  HLE 生产代码与实机审计 | 按 [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) HLE-C0～HLE-C5 收口；failed Job 即使存在部分文件也不得宣称任务完成 |
@@ -306,6 +307,22 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
 
 ---
 
+## §7 HLE-C3R 耐久恢复收口审计（2026-07-23）
+
+### 问题 M：LoopRun.automationMode 分类漂移（契约与生产不一致）
+
+- **位置**：`core/shared-backend/loop-contract.js#validateLoopRun`（枚举 `guided|confirm|trusted`） vs `core/r-server/agent-runner.js#_loopInit`（写入 `task_execute|task_draft`）。
+- **现象**：契约校验器要求 `automationMode ∈ {guided, confirm, trusted}`，但生产 `_loopInit` 经 `db.persistLoopRun`（**不过 `buildLoopRun` 校验**）直接落库 `task_execute`/`task_draft`。两套词表并存：契约描述的是"自动化信任级别"，生产存的是"本轮执行意图"。
+- **性质**：与问题 D/H 同类的**"文档/契约说一套、生产存另一套"**。`persistLoopRun` 是裸仓储写入、不校验 `automationMode`，因此漂移长期未被测试捕获（HLE-C3R 新测试经 `buildLoopRun` 才暴露）。
+- **当前影响**：低。`automationMode` 目前只作展示/查询投影字段，不参与决策或恢复分支；`getActiveLoopRunForConversation` 已**刻意不按 automationMode 过滤**（draft→execute 属同一 LoopRun 生命周期，见 closure plan §4.1）。
+- **不阻塞 C3R**：耐久恢复不依赖该字段取值。
+- **状态**：🟡建议（待 HLE-C5 前统一）。建议二选一并补 `persistLoopRun` 校验：
+  1. 契约新增 `task_draft|task_execute` 作为合法 `automationMode`（承认它是"执行意图"）；或
+  2. 生产改用 `guided|confirm|trusted` 并把"执行意图"移到独立字段。
+- **对验收影响**：无（当前字段不参与真相链与恢复判定）。
+
+---
+
 ## 审计发现追加规范
 
 非主 agent 完成新审计后，按以下格式追加到"当前待处理项"表格：
@@ -352,3 +369,4 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
 | 2026-07-23 | HLE-5/HLE-6 完成（离线基础设施）：实现耐久检查点、预算策略和会话阶段视图；scripts/harness-loop.mjs 升级为统一全量聚合门禁，输出 acceptance/harness-loop/hle-all-gate.json。验收通过：330 测试全量通过（HLE-2 61 + HLE-3 81 + HLE-4 88 + HLE-5 38 = 330），npm run harness:loop 通过。注意：离线门禁通过不等于生产验收完成——HLE-C0 审计确认 ai-agent 未接入 Loop Controller、前端未消费 Loop 状态、双 Provider/重启/视觉证据待补。生产接线由 HLE-C1~C5 实施 | 主 agent |
 
 | 2026-07-23 | HLE-C0 完成：事实审计、状态纠偏与生产基线；HLE-0~HLE-5 后端原语和离线测试确认存在（7 个 loop-*.js + 10 个离线测试，330 测试全量通过）；发现生产接线尚未完成：agent-loop-control.js 未调用 Loop Controller/Validator/Repair，`harness.js` 路由未接线 Validator/Repair 到真实 Job/Artifact，前端完全未消费 Loop 状态，HLE-6 只验证离线门禁无 Provider/重启/视觉证据；文档状态纠偏：HLE-0~HLE-2 离线基础设施状态修正为 completed，HLE-3~HLE-5 保持 in_progress（HLE-C1~C5 待实施），HLE-6 保持 pending；新增 test/loop-false-success-regression.test.mjs（10 个测试，验证 failed Job + partial files 假成功回归被正确阻断），新增 test/loop-iterate-route.test.mjs（38 个测试，验证 /api/loop/iterate 路由边界：鉴权/FMS/sequence/idempotency/hash 不变/跨项目隔离）；两个测试 48/48 通过，`npm run check` 通过；HLE-C1~C5 生产接线待实施，HLE 主计划总状态保持 in_progress | 主 agent |
+| 2026-07-23 | HLE-C3R 完成：耐久恢复收口。生产纠偏——`agent-runner._loopInit` 先 `getActiveLoopRunForConversation` 复用同会话未终结 LoopRun（planned/running）并从 `listLoopIterations` 重建内存序列/parent 链，不再每轮新建；restart 标为 failed(recovery_required) 的 run 被排除、仅经恢复 API 暴露。新增 `db.getActiveLoopRunForConversation` + `db.listLoopActions`（修复空转的 `/api/loop/actions`）。checkpoint-on-success 接线：每轮 `buildIterationCheckpoint→saveContextCheckpoint`，摘要不再是 loop 状态唯一副本，ContextEnvelope 可从持久化 checkpoint 重建（模型切换只换决策提供者）。修 `ai-loop.js` 三真 bug：recovery/abort 读错字段（`loopStatusJson/loopStatusHash`→`record/hash`，此前 statusJson 恒 `{}`、recovery_required 永不暴露）、缺项目归属隔离（`userMayAccessProject`+`loadRunAuthorized`：跨用户 403，public/admin 放行）、expanded 投影补 recoveryRequired/recoveryReason。新增 `test/loop-durable-resume.test.mjs`（11）+ `test/loop-api-route.test.mjs`（15，挂真实 router+DB+mock auth）；641 loop 测试、`npm test` 1049 pass/0 fail/11 skip、`npm run check` 全绿。途中发现 automationMode 契约漂移记入 §7 问题 M（🟡 不阻塞）。 | 主 agent |
