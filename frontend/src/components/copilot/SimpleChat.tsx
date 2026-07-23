@@ -70,7 +70,9 @@ import {
   startConversationRun,
   useConversationRun,
   type ConversationPendingApproval,
+  type ConversationLoopState,
 } from './conversationRunStore';
+import { deriveLoopDisplay, loopDecisionLabel } from '@/lib/loop-client';
 import './simple-chat.css';
 import { Icon } from '@/components/icons/Icon';
 import { HighlightedCode } from '@/components/ui/CodeHighlight';
@@ -92,6 +94,8 @@ interface SimpleMessage {
   processingDurationMs?: number;
   statusMessage?: string;
   progressUpdates?: Array<{ iteration: number; content: string }>;
+  /** HLE-C4R: live durable-loop projection for the running assistant turn. */
+  loop?: ConversationLoopState | null;
 }
 
 interface AgentProgressUpdate {
@@ -439,6 +443,7 @@ export function SimpleChat({
         processingDurationMs: activeRun.processingDurationMs,
         statusMessage: activeRun.statusMessage,
         progressUpdates: activeRun.progressUpdates,
+        loop: activeRun.loop,
       });
     }
     return next;
@@ -673,6 +678,9 @@ export function SimpleChat({
                     )}
                   </div>
                   <div className="sc-msg-body">
+                    {m.role === 'assistant' && m.loop && m.loop.loopRunId && (
+                      <LoopStatusPanel loop={m.loop} pending={Boolean(m.pending)} />
+                    )}
                     {m.progressUpdates && m.progressUpdates.length > 0 && (
                       <AgentProgressList
                         updates={m.progressUpdates}
@@ -878,6 +886,63 @@ export function SimpleChat({
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function LoopStatusPanel({
+  loop,
+  pending,
+}: {
+  loop: ConversationLoopState;
+  pending: boolean;
+}): React.ReactElement {
+  const [expanded, setExpanded] = useState(false);
+  const display = deriveLoopDisplay(loop, pending);
+  const iterations = loop.iterations || [];
+  // Only surface public conclusions — never hidden reasoning. The backend
+  // already redacts these; blocked/failed turns must read as "not complete".
+  const conclusions = iterations.filter(
+    (it) => it.publicConclusion && it.publicConclusion.trim()
+  );
+
+  return (
+    <div className={`sc-loop-panel sc-loop-tone-${display.tone}`} aria-label="任务循环状态">
+      <button
+        type="button"
+        className="sc-loop-summary"
+        aria-expanded={expanded}
+        aria-label={expanded ? '收起循环详情' : '展开循环详情'}
+        onClick={() => setExpanded((current) => !current)}
+      >
+        <span className="sc-loop-status-dot" aria-hidden="true" />
+        <span className="sc-loop-status-label">{display.label}</span>
+        {display.attempts > 0 && (
+          <span className="sc-loop-attempts">· {display.attempts} 轮</span>
+        )}
+        {loop.latestConclusion && (
+          <span className="sc-loop-latest">
+            · {compactStageConclusion(loop.latestConclusion, 80)}
+          </span>
+        )}
+        {conclusions.length > 0 && <Icon name={expanded ? 'chevron-down' : 'chevron-right'} size={13} />}
+      </button>
+      {expanded && conclusions.length > 0 && (
+        <div className="sc-loop-iterations">
+          {conclusions.map((it) => (
+            <div
+              key={it.iterationId}
+              className={`sc-loop-iteration sc-loop-iteration-${it.status}`}
+            >
+              <span className="sc-loop-iteration-seq" aria-hidden="true">#{it.sequence}</span>
+              <span className="sc-loop-iteration-decision">{loopDecisionLabel(it.decision)}</span>
+              <span className="sc-loop-iteration-conclusion">
+                {compactStageConclusion(it.publicConclusion, 200)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

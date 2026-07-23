@@ -1300,3 +1300,110 @@
 .sc-stop-btn:hover {
   background: var(--biof3-status-error-fg);
 }
+
+/* HLE-C4R: durable loop status panel. Shows the backend loop phase, attempt
+   count and public stage conclusions. Colour tone is honest — a blocked /
+   false-success loop uses the warning tone and must never look like a green
+   success. */
+.sc-loop-panel {
+  margin: 0 0 9px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 12px;
+  background: var(--biof3-bg-surface);
+  font-size: 12.5px;
+  overflow: hidden;
+}
+
+.sc-loop-summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 7px 11px;
+  border: 0;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sc-loop-summary:hover {
+  background: var(--biof3-user-bubble-bg);
+}
+
+.sc-loop-status-dot {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--biof3-text-tertiary);
+}
+
+.sc-loop-status-label {
+  font-weight: 600;
+  color: var(--biof3-text);
+}
+
+.sc-loop-attempts {
+  color: var(--biof3-text-tertiary);
+}
+
+.sc-loop-latest {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--biof3-text-secondary);
+}
+
+.sc-loop-panel .sc-loop-summary :last-child {
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+/* Tones — running (blue), success (green), warning (blocked/failed), neutral */
+.sc-loop-tone-running .sc-loop-status-dot { background: #2f6feb; }
+.sc-loop-tone-success .sc-loop-status-dot { background: #1f9d55; }
+.sc-loop-tone-warning .sc-loop-status-dot { background: #d9822b; }
+.sc-loop-tone-warning .sc-loop-status-label { color: #b5641a; }
+.sc-loop-tone-neutral .sc-loop-status-dot { background: var(--biof3-text-tertiary); }
+
+.sc-loop-iterations {
+  display: grid;
+  gap: 6px;
+  padding: 4px 11px 10px;
+  border-top: 1px solid var(--biof3-border);
+}
+
+.sc-loop-iteration {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  min-width: 0;
+  color: var(--biof3-text-secondary);
+}
+
+.sc-loop-iteration-seq {
+  color: var(--biof3-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.sc-loop-iteration-decision {
+  font-weight: 600;
+  color: var(--biof3-text);
+}
+
+.sc-loop-iteration-conclusion {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.sc-loop-iteration-blocked .sc-loop-iteration-decision { color: #b5641a; }
+.sc-loop-iteration-failed .sc-loop-iteration-decision { color: #c23b3b; }
+
+[data-theme='dark'] .sc-loop-tone-warning .sc-loop-status-label { color: #e0a35e; }
+[data-theme='dark'] .sc-loop-iteration-blocked .sc-loop-iteration-decision { color: #e0a35e; }
+[data-theme='dark'] .sc-loop-iteration-failed .sc-loop-iteration-decision { color: #e88; }

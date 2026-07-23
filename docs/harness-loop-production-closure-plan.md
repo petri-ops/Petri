@@ -251,7 +251,14 @@ failed Job 存在部分文件时必须：
 
 ### HLE-C4：会话与摘要 UI 接线
 
-状态：`partial`
+状态：`partial`（HLE-C4R 聊天消费端完成：loop-client + store 接线 + 聊天面板 + 单测；摘要卡 / 历史 API 回放 / 视觉矩阵待续）
+
+> HLE-C4R 进度（2026-07-23，聊天消费端）：
+> - `frontend/src/lib/loop-client.ts`：`/api/loop/*` 类型化 REST 客户端 + SSE 事件类型（LoopPhaseEvent/LoopIterationEvent）+ 展示辅助（isLoopComplete / isLoopUnsuccessfulTerminal / loopStatusLabel / deriveLoopDisplay / loopDecisionLabel）。聊天与摘要共用同一 loop 词表，杜绝第二套完成状态。
+> - `conversationRunStore.ts`：`ConversationRunSnapshot.loop` 投影；`startConversationRun` 接入 `onLoopPhase`/`onLoopIteration`（此前被丢弃）；`mergeLoopIteration` 按 iterationId 去重、sequence 排序 → SSE + API 回放幂等；loop 投影在 stop/finish 后保留（spread）。
+> - `SimpleChat.tsx` + `simple-chat.css`：`LoopStatusPanel` 紧凑显示阶段状态 + 轮次 + 最近公开结论，可展开逐轮 decision/publicConclusion；blocked/failed/cancelled 一律非绿（tone=warning/neutral）；只展示 publicConclusion，不展示隐藏思维链。
+> - 测试：conversationRunStore 15/15（含 4 个 loop 用例：phase 投影、iteration 幂等去重、stop 后保留、blocked 非绿）；frontend 全量 223/223；`npm --prefix frontend run build:check` 通过；根 `npm run check` 全绿。
+> - 待续（保持 in_progress，无实机证据不得 verified）：摘要卡 loop/recovery/active-background/token-cost 区块；历史会话经 `/api/loop/runs` 回放；明暗 / 820px 窄窗 / 停止恢复视觉矩阵；真实产品实机（属 HLE-C5 Step 7）。
 
 首选位置：
 

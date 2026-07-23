@@ -222,3 +222,10 @@ npm run check
 - 不允许破坏：`run_tool → tool_job → artifact truth` 执行链、`onIter`/`onAgentStatus`/`onAgentProgress` 既有回调、`task_execute` / `task_draft` / `context_assist` 三路由语义、`StreamChatOptions` 既有字段签名。
 - 代码验证：`npm --prefix frontend run check`、`npm run ui:audit:check`、`npm run check`。
 - **2026-07-23 代码完成（HLE-C4 → in_progress）**：StreamChatOptions + _handleSseEvent SSE 接线（commit `74a3efe`）；UI 面板/实机验收待 HLE-C5。
+
+- UI-101 属于 `HLE-C4: 会话与摘要 UI 接线`（HLE-C4R 消费端，聊天面板）：`conversationRunStore` 新增 `loop` 投影，`startConversationRun` 接入此前被丢弃的 `onLoopPhase`/`onLoopIteration` 回调；`SimpleChat` 渲染 `LoopStatusPanel` —— 紧凑显示阶段状态（执行中/已完成/已阻断/已取消/重试中）+ 轮次 + 最近公开结论，可展开查看逐轮 decision/publicConclusion。新增 `frontend/src/lib/loop-client.ts`：`/api/loop/*` 类型化 REST 客户端 + SSE 事件类型 + 展示辅助（`isLoopComplete`/`loopStatusLabel`/`deriveLoopDisplay`），供聊天与摘要共用同一 loop 词表，避免第二套完成状态。
+- 诚实完成语义：blocked/failed/cancelled 一律不显示为绿色完成（`deriveLoopDisplay` tone=warning/neutral）；假成功（failed job + partial files）的阻断结论按后端 `publicConclusion` 原样展示。iterations 按 `iterationId` 去重、`sequence` 排序，SSE 与后续 API 回放幂等合并。loop 投影在停止生成后保留（`stopConversationRun` 保留 loop 字段）。
+- 只消费后端真相：UI 不自行推导完成，完成/阻断只来自后端 `loop_phase`/`loop_iteration`；只展示 `publicConclusion`，不展示或保存隐藏思维链。
+- 不允许破坏：`run_tool → tool_job → artifact truth` 执行链、既有 `onIter`/`onAgentStatus`/`onAgentProgress`/`toolActivities`、stop/switch/reopen 阶段记录留存、`StreamChatOptions` 既有字段签名。
+- 代码验证：`npm --prefix frontend run check`（tsc 0）、`npm test --prefix frontend`（`conversationRunStore` 15/15 通过，含 loop 幂等/取消保留/blocked-非绿）、`npm run check`。
+- 未验证项（保持 `in_progress`）：摘要卡 loop/recovery/token-cost 区块、历史会话经 `/api/loop/runs` 回放接线、明暗/820px 窄窗/停止恢复视觉矩阵、真实产品实机三轨（属 HLE-C5 Step 7）。

@@ -13,6 +13,7 @@ import {
   mergeToolResultActivity,
   type ToolActivityItem,
 } from './toolActivity';
+import type { LoopPhaseEvent, LoopIterationEvent } from '@/lib/loop-client';
 
 export interface ConversationPendingApproval {
   ackToken: string;
@@ -23,6 +24,27 @@ export interface ConversationPendingApproval {
 }
 
 export type ConversationRunStatus = 'running' | 'done' | 'error' | 'stopped';
+
+/**
+ * HLE-C4R: durable-loop projection carried alongside the transient run.
+ * Sourced ONLY from backend loop_phase / loop_iteration SSE events; the UI
+ * never derives loop completion itself. Iterations are deduped by iterationId
+ * so SSE + API replay merge idempotently.
+ */
+export interface ConversationLoopState {
+  loopRunId: string;
+  /** last phase the backend announced: started | resumed | cancelled | blocked | completed | ... */
+  phase: string;
+  automationMode?: string;
+  /** most recent public conclusion (phase or iteration), safe to display. */
+  latestConclusion?: string;
+  /** true once the backend reports the run was interrupted and needs recovery. */
+  recoveryRequired: boolean;
+  /** per-turn iterations, ordered by sequence, deduped by iterationId. */
+  iterations: LoopIterationEvent[];
+  /** last decision the controller made this run. */
+  lastDecision?: string;
+}
 
 export interface ConversationRunSnapshot {
   conversationId: string;
@@ -43,6 +65,8 @@ export interface ConversationRunSnapshot {
   startedAt: number;
   completedAt?: number;
   taskId?: string;
+  /** HLE-C4R: live durable-loop projection (null until the backend starts a LoopRun). */
+  loop?: ConversationLoopState | null;
 }
 
 interface StartConversationRunOptions {
@@ -72,6 +96,50 @@ function replaceRun(
   if (!current) return;
   runs.set(conversationId, update(current));
   emit(conversationId);
+}
+
+/**
+ * HLE-C4R: fold a loop_phase event into the durable-loop projection. Pure.
+ * Never derives completion — it only records the phase the backend announced.
+ */
+function mergeLoopPhase(
+  current: ConversationLoopState | null | undefined,
+  info: LoopPhaseEvent
+): ConversationLoopState {
+  const loopRunId = info.loopRunId || current?.loopRunId || '';
+  return {
+    loopRunId,
+    phase: info.phase || current?.phase || 'running',
+    automationMode: info.automationMode || current?.automationMode,
+    latestConclusion: info.publicConclusion || current?.latestConclusion,
+    recoveryRequired: current?.recoveryRequired ?? false,
+    iterations: current?.iterations || [],
+    lastDecision: current?.lastDecision,
+  };
+}
+
+/**
+ * HLE-C4R: fold a loop_iteration event into the projection. Pure + idempotent:
+ * iterations dedupe by iterationId and stay ordered by sequence ASC, so an SSE
+ * event and a later API replay of the same iteration merge to one entry.
+ */
+function mergeLoopIteration(
+  current: ConversationLoopState | null | undefined,
+  info: LoopIterationEvent
+): ConversationLoopState {
+  const loopRunId = info.loopRunId || current?.loopRunId || '';
+  const prior = current?.iterations || [];
+  const withoutDup = prior.filter((it) => it.iterationId !== info.iterationId);
+  const iterations = [...withoutDup, info].sort((a, b) => (a.sequence || 0) - (b.sequence || 0));
+  return {
+    loopRunId,
+    phase: current?.phase || 'running',
+    automationMode: current?.automationMode,
+    latestConclusion: info.publicConclusion || current?.latestConclusion,
+    recoveryRequired: current?.recoveryRequired ?? false,
+    iterations,
+    lastDecision: info.decision || current?.lastDecision,
+  };
 }
 
 export function getConversationRunSnapshot(
@@ -258,6 +326,18 @@ export function startConversationRun(options: StartConversationRunOptions): bool
           projectId: options.projectId,
         });
       }
+    },
+    onLoopPhase: (info) => {
+      replaceRun(conversationId, (current) => ({
+        ...current,
+        loop: mergeLoopPhase(current.loop, info),
+      }));
+    },
+    onLoopIteration: (info) => {
+      replaceRun(conversationId, (current) => ({
+        ...current,
+        loop: mergeLoopIteration(current.loop, info),
+      }));
     },
     onDone: () => finish('done'),
     onError: (error) => finish('error', error),

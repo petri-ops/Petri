@@ -23,6 +23,7 @@ import {
   subscribeConversationRun,
 } from './conversationRunStore';
 import { biof3Events, subscribeBioF3Event } from '@/lib/events';
+import { deriveLoopDisplay } from '@/lib/loop-client';
 
 function start(conversationId: string, userContent: string): void {
   startConversationRun({
@@ -264,5 +265,107 @@ describe('conversation run store', () => {
       status: 'stopped',
       pendingApproval: { ackToken: 'ack-1' },
     })).toBe(false);
+  });
+
+  // ---------------------------------------------------------------------------
+  // HLE-C4R: durable-loop projection wiring (loop_phase / loop_iteration)
+  // ---------------------------------------------------------------------------
+
+  it('records loop_phase into the durable-loop projection', () => {
+    start('conversation-a', 'run bulk rna-seq');
+    const callbacks = streamChatMock.mock.calls[0][0];
+
+    callbacks.onLoopPhase({
+      phase: 'started',
+      loopRunId: 'loop-1',
+      automationMode: 'task_execute',
+    });
+
+    expect(getConversationRunSnapshot('conversation-a')?.loop).toMatchObject({
+      loopRunId: 'loop-1',
+      phase: 'started',
+      automationMode: 'task_execute',
+      recoveryRequired: false,
+      iterations: [],
+    });
+  });
+
+  it('appends loop iterations ordered by sequence and tracks the latest conclusion', () => {
+    start('conversation-a', 'run bulk rna-seq');
+    const callbacks = streamChatMock.mock.calls[0][0];
+
+    callbacks.onLoopPhase({ phase: 'started', loopRunId: 'loop-1' });
+    callbacks.onLoopIteration({
+      loopRunId: 'loop-1', iterationId: 'iter-2', sequence: 2,
+      decision: 'continue', decisionReasonCode: 'TOOL_SUCCEEDED',
+      publicConclusion: 'DESeq2 完成', status: 'succeeded',
+      proposedActionKey: null, actionKeyHash: null,
+    });
+    callbacks.onLoopIteration({
+      loopRunId: 'loop-1', iterationId: 'iter-1', sequence: 1,
+      decision: 'continue', decisionReasonCode: 'TOOL_SUCCEEDED',
+      publicConclusion: '已生成 counts 矩阵', status: 'succeeded',
+      proposedActionKey: null, actionKeyHash: null,
+    });
+
+    const loop = getConversationRunSnapshot('conversation-a')?.loop;
+    expect(loop?.iterations.map((it) => it.sequence)).toEqual([1, 2]);
+    // latestConclusion tracks the most recently RECEIVED iteration, not seq order
+    expect(loop?.latestConclusion).toBe('已生成 counts 矩阵');
+    expect(loop?.lastDecision).toBe('continue');
+  });
+
+  it('is idempotent: an SSE event and a replay of the same iterationId merge to one entry', () => {
+    start('conversation-a', 'run bulk rna-seq');
+    const callbacks = streamChatMock.mock.calls[0][0];
+
+    const iter = {
+      loopRunId: 'loop-1', iterationId: 'iter-1', sequence: 1,
+      decision: 'continue' as const, decisionReasonCode: 'TOOL_SUCCEEDED',
+      publicConclusion: '第一轮', status: 'succeeded',
+      proposedActionKey: null, actionKeyHash: null,
+    };
+    callbacks.onLoopIteration(iter);
+    // Replay the same iteration (e.g. API backfill) with an updated conclusion.
+    callbacks.onLoopIteration({ ...iter, publicConclusion: '第一轮（更新）' });
+
+    const loop = getConversationRunSnapshot('conversation-a')?.loop;
+    expect(loop?.iterations).toHaveLength(1);
+    expect(loop?.iterations[0].publicConclusion).toBe('第一轮（更新）');
+  });
+
+  it('preserves the loop projection when the user stops the run', () => {
+    start('conversation-a', 'run bulk rna-seq');
+    const callbacks = streamChatMock.mock.calls[0][0];
+    callbacks.onLoopPhase({ phase: 'started', loopRunId: 'loop-1' });
+    callbacks.onLoopIteration({
+      loopRunId: 'loop-1', iterationId: 'iter-1', sequence: 1,
+      decision: 'continue', decisionReasonCode: 'TOOL_SUCCEEDED',
+      publicConclusion: '已完成对齐', status: 'succeeded',
+      proposedActionKey: null, actionKeyHash: null,
+    });
+
+    stopConversationRun('conversation-a');
+
+    const loop = getConversationRunSnapshot('conversation-a')?.loop;
+    expect(loop?.loopRunId).toBe('loop-1');
+    expect(loop?.iterations).toHaveLength(1);
+  });
+
+  it('a blocked iteration never renders as a green completion', () => {
+    start('conversation-a', 'run bulk rna-seq');
+    const callbacks = streamChatMock.mock.calls[0][0];
+    callbacks.onLoopIteration({
+      loopRunId: 'loop-1', iterationId: 'iter-1', sequence: 1,
+      decision: 'block', decisionReasonCode: 'ARTIFACT_VALIDATION_FAILED',
+      publicConclusion: '检测到假成功：任务失败但产生了文件。禁止宣称完成。',
+      status: 'blocked', proposedActionKey: null, actionKeyHash: null,
+    });
+
+    const loop = getConversationRunSnapshot('conversation-a')?.loop;
+    const display = deriveLoopDisplay(loop, false);
+    expect(display.status).toBe('blocked');
+    expect(display.tone).toBe('warning');
+    expect(display.tone).not.toBe('success');
   });
 });
