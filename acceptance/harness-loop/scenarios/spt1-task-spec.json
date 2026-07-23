@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "taskSpecId": "spt1-bulk-rnaseq",
+  "version": 1,
+  "hash": "sha256_placeholder",
+  "scientificGoal": "在给定的实验设计和样本质量前提下，处理条件是否导致可靠的基因表达变化？这些变化是否得到 GO/KEGG/GSEA 功能通路证据支持？",
+  "originalRequest": {
+    "text": "我有处理组和对照组的数据，帮我看看发生了什么，最好告诉我哪些功能可能受影响。",
+    "language": "zh"
+  },
+  "inputs": {
+    "counts": {
+      "type": "file",
+      "path": "resources/built-in-plugins/deseq2/demo-data/counts.csv",
+      "description": "基因表达矩阵，列为样本（WT_1, WT_2, KO_1, KO_2），行为基因",
+      "format": "csv",
+      "required": true
+    },
+    "metadata": {
+      "type": "file",
+      "path": "resources/built-in-plugins/deseq2/demo-data/metadata.csv",
+      "description": "样本元数据，包含 sample 列和 condition 列（WT/KO）",
+      "format": "csv",
+      "required": true
+    }
+  },
+  "automationModes": {
+    "guided": {
+      "description": "用户逐步确认每一步分析决策",
+      "commandPolicy": ["auto"],
+      "userConfirmationPoints": ["design", "contrast", "threshold"]
+    },
+    "confirm": {
+      "description": "关键结果需用户确认后继续",
+      "commandPolicy": ["auto", "confirm"],
+      "userConfirmationPoints": ["deg_threshold", "enrichment_significance"]
+    },
+    "trusted": {
+      "description": "全流程自动执行，仅报告结果",
+      "commandPolicy": ["auto", "confirm", "deny"],
+      "userConfirmationPoints": []
+    }
+  },
+  "accessMode": "full",
+  "expectedDeliverables": [
+    "validated_inputs",
+    "qc_summary",
+    "deg_table",
+    "volcano_plot",
+    "enrichment_tables",
+    "evidence_report",
+    "reproduction_bundle"
+  ],
+  "dag": {
+    "nodes": [
+      {
+        "nodeId": "sample-metadata-validator",
+        "name": "样本与元数据校验",
+        "toolId": "sample-metadata-validator",
+        "dependsOn": [],
+        "passPredicate": "样本数与 metadata 行数匹配，condition 列存在，WT/KO 两组均可估计",
+        "failPredicate": "样本列名不匹配，group 列缺失，无法建立映射",
+        "outputArtifacts": ["validated_metadata"]
+      },
+      {
+        "nodeId": "expression-qc",
+        "name": "表达矩阵质控",
+        "toolId": "expression-qc",
+        "dependsOn": ["sample-metadata-validator"],
+        "passPredicate": "样本间相关性 > 0.8，PCA 无严重离群点",
+        "failPredicate": "样本离群，批次效应显著",
+        "outputArtifacts": ["qc_report"]
+      },
+      {
+        "nodeId": "deseq2",
+        "name": "差异表达分析",
+        "toolId": "deseq2",
+        "dependsOn": ["expression-qc"],
+        "params": {
+          "design": "~condition",
+          "contrast": ["condition", "KO", "WT"],
+          "alpha": 0.05,
+          "lfcThreshold": 1
+        },
+        "passPredicate": "DESeq2 完成，输出 DEG table，padj < 0.05 且 |log2FC| > 1 的基因数 > 0",
+        "failPredicate": "DESeq2 崩溃，矩阵奇异性，无法估计 dispersion",
+        "outputArtifacts": ["deseq2_results", "deg_table"]
+      },
+      {
+        "nodeId": "deg-standardizer",
+        "name": "DEG 标准化",
+        "toolId": "deg-standardizer",
+        "dependsOn": ["deseq2"],
+        "passPredicate": "DEG 标准化完成，包含 gene, baseMean, log2FC, pvalue, padj 字段",
+        "failPredicate": "列映射错误，数据类型不匹配",
+        "outputArtifacts": ["standardized_deg"]
+      },
+      {
+        "nodeId": "volcano-plot",
+        "name": "火山图可视化",
+        "toolId": "volcano-plot",
+        "dependsOn": ["deg-standardizer"],
+        "passPredicate": "火山图生成，包含上调/下调/无差异基因标注",
+        "failPredicate": "绑定数据缺失，图例不完整",
+        "outputArtifacts": ["volcano_plot"]
+      },
+      {
+        "nodeId": "go-kegg",
+        "name": "GO/KEGG 富集分析",
+        "toolId": "go-kegg",
+        "dependsOn": ["deg-standardizer"],
+        "passPredicate": "富集结果包含显著通路（padj < 0.05），至少 3 个 GO term",
+        "failPredicate": "基因 ID 格式不支持，背景基因集缺失",
+        "outputArtifacts": ["go_enrichment", "kegg_enrichment"]
+      },
+      {
+        "nodeId": "gsea",
+        "name": "GSEA 基因集富集分析",
+        "toolId": "gsea",
+        "dependsOn": ["deg-standardizer"],
+        "passPredicate": "GSEA 结果包含显著通路（padj < 0.05）",
+        "failPredicate": "排序基因列表缺失，基因集数据库不可用",
+        "outputArtifacts": ["gsea_results"]
+      }
+    ]
+  },
+  "evidenceReport": {
+    "summary": "处理条件（KO vs WT）导致了可靠的基因表达变化；富集通路包括 DNA 复制、细胞周期等。",
+    "degCount": {
+      "total": 123,
+      "upregulated": 67,
+      "downregulated": 56,
+      "criteria": "padj < 0.05, |log2FC| > 1"
+    },
+    "topEnrichedPathways": [
+      "DNA replication (hsa03030)",
+      "Cell cycle (hsa04110)",
+      "p53 signaling pathway (hsa04115)"
+    ],
+    "scientificIntegrity": "valid",
+    "limitations": "样本量较小（n=2/组），建议后续验证"
+  },
+  "privacyNote": "uses_repository_demo_data_only"
+}

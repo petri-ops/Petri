@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "phase": "HLE-0",
+  "harnessPackage": "Harness Loop Engineering v1",
+  "spt": "SPT-1 Bulk RNA-seq",
+  "status": "baseline_established",
+  "notProductAcceptance": true,
+  "scenarioCount": 3,
+  "scenarios": ["normal", "repairable", "blocking"],
+  "totalTestCases": 10,
+  "evidenceFiles": [
+    "acceptance/harness-loop/scenarios/spt1-normal.json",
+    "acceptance/harness-loop/scenarios/spt1-repairable.json",
+    "acceptance/harness-loop/scenarios/spt1-blocking.json",
+    "acceptance/harness-loop/scenarios/spt1-task-spec.json",
+    "acceptance/harness-loop/loop-baseline-metrics.json"
+  ],
+  "knownBaselineGaps": [
+    {"id": "loop_contract_not_implemented", "owner": "HLE-1"},
+    {"id": "loop_controller_not_centralized", "owner": "HLE-2"},
+    {"id": "validator_registry_incomplete", "owner": "HLE-3"},
+    {"id": "repair_strategies_not_defined", "owner": "HLE-4"},
+    {"id": "durable_recovery_ui_not_implemented", "owner": "HLE-5"}
+  ]
+}

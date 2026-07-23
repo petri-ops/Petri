@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "scenarioId": "spt1-blocking",
+  "scenarioType": "blocking",
+  "taskSpecRef": "spt1-bulk-rnaseq",
+  "description": "metadata 列名与 counts 列名不匹配，无法自动推断，必须询问用户",
+  "initialState": {
+    "projectId": "hle0-blocking-fixture",
+    "conversationId": "hle0-blocking-conv",
+    "taskSpecVersion": 1,
+    "dagStatus": "planned",
+    "activeNodes": [],
+    "completedNodes": [],
+    "failedNodes": []
+  },
+  "expectedTrajectory": {
+    "iterations": [
+      {
+        "sequence": 1,
+        "observedStateDigest": "plan_generated",
+        "goalGapIds": ["no_workflow_plan"],
+        "proposedAction": {"type": "plan"},
+        "decision": "continue",
+        "decisionReasonCode": "NORMAL_PLAN_GENERATED",
+        "publicConclusion": "已生成 DAG。"
+      },
+      {
+        "sequence": 2,
+        "observedStateDigest": "metadata_column_mismatch",
+        "goalGapIds": ["metadata_annotation_ambiguous"],
+        "proposedAction": {"type": "run_tool", "toolId": "sample-metadata-validator"},
+        "decision": "block",
+        "decisionReasonCode": "INPUT_FORMAT_MISMATCH",
+        "publicConclusion": "metadata 中样本列名（sample）与 counts 列名（gene,WT_1,WT_2,KO_1,KO_2）无法自动对齐：metadata.sample 包含 'WT_1','KO_1'，但 counts 列不含 'sample' 列，无法建立样本到条件的映射。请确认 metadata 中的 group 列名。"
+      },
+      {
+        "sequence": 3,
+        "observedStateDigest": "awaiting_user_decision",
+        "goalGapIds": [],
+        "proposedAction": {"type": "wait_for_user", "question": "metadata 列名不匹配。当前 metadata 的哪些列对应 counts 的列名？请指明 group 列。"},
+        "decision": "wait",
+        "decisionReasonCode": "SCIENTIFIC_DESIGN_MISSING",
+        "publicConclusion": "等待用户提供样本分组映射。"
+      }
+    ]
+  },
+  "expectedOutcomes": {
+    "loopStatus": "waiting_for_user",
+    "completedNodes": 0,
+    "failedNodes": 0,
+    "blockedNodes": ["sample-metadata-validator"],
+    "userInterruptions": 0,
+    "totalIterations": 3,
+    "totalRetryCount": 0,
+    "deliveryComplete": false,
+    "replayPackageComplete": false,
+    "finalConclusion": "metadata 列名不匹配：无法自动将样本映射到处理组。必须用户提供 group 列名映射，不能通过 trusted/full 绕过科学设计缺失。",
+    "scientificIntegrity": "blocked_by_design_gap",
+    "loopIntegrity": "blocked",
+    "repeatableActionCount": 0,
+    "oscillationCount": 0,
+    "noProgressCycles": 0,
+    "userDecisionRequired": true,
+    "userDecisionQuestion": "metadata 列名不匹配，无法建立样本到条件的映射。当前 metadata 的哪些列对应 counts 列名？"
+  },
+  "failureInjection": {
+    "injectionPoint": "initial_input",
+    "targetNode": "sample-metadata-validator",
+    "failureClass": "input_format",
+    "triggerCondition": "metadata_column_name_mismatch",
+    "simulatedError": {"reasonCode": "INPUT_FORMAT_MISMATCH", "detail": "metadata.sample 样本列与 counts 列名无法自动对齐，group 列缺失"},
+    "expectedRepairStrategy": null,
+    "expectedRepairOutcome": "cannot_repair_automatically",
+    "userActionRequired": true
+  },
+  "privacyNote": "uses_repository_demo_data_only"
+}

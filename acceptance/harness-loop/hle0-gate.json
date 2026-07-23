@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "harness": "harness-loop",
+  "phase": "HLE-0",
+  "privacy": "synthetic_or_repository_demo_data_only",
+  "network": "disabled_by_contract",
+  "credentials": "not_loaded",
+  "startedAt": "2026-07-23T01:25:49.984Z",
+  "finishedAt": "2026-07-23T01:25:50.076Z",
+  "commands": [
+    {
+      "label": "hle0:evaluate",
+      "command": "node scripts/harness-loop-evaluate.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "label": "hle0:test",
+      "command": "node test/loop-fixtures.test.mjs",
+      "exitCode": 0,
+      "signal": null
+    }
+  ],
+  "passed": true
+}

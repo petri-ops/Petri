@@ -70,6 +70,105 @@ try {
   db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_context_checkpoint_source ON context_checkpoints(project_id, conversation_id, source_digest)');
 } catch {}
 
+// HLE-1: durable Loop ledger — LoopRun / Iteration / Action / Evidence / Decision
+// / Snapshot. JSON columns hold the canonical contract objects produced by
+// core/shared-backend/loop-contract.js; the hash columns enable stable
+// dedupe and replay. Loop ledger is append-only; idempotent actionKey
+// prevents double execution. Raw Provider responses and stack traces
+// never enter these columns (handled by loop-contract redaction).
+try {
+  db.exec(`CREATE TABLE IF NOT EXISTS loop_runs (
+    loop_run_id TEXT PRIMARY KEY,
+    project_id TEXT NOT NULL,
+    conversation_id TEXT NOT NULL,
+    task_spec_ref TEXT,
+    automation_mode TEXT,
+    loop_status TEXT NOT NULL,
+    loop_status_hash TEXT NOT NULL,
+    loop_status_json TEXT NOT NULL,
+    is_partial INTEGER NOT NULL DEFAULT 0,
+    partial_reason TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_loop_run_conversation ON loop_runs(project_id, conversation_id, updated_at DESC)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_loop_run_status ON loop_runs(loop_status)');
+
+  db.exec(`CREATE TABLE IF NOT EXISTS loop_iterations (
+    iteration_id TEXT PRIMARY KEY,
+    loop_run_id TEXT NOT NULL,
+    sequence INTEGER NOT NULL,
+    observed_state_digest TEXT,
+    goal_gap_ids_json TEXT,
+    decision TEXT NOT NULL,
+    decision_reason_code TEXT NOT NULL,
+    confidence REAL,
+    notes TEXT,
+    public_conclusion TEXT,
+    status TEXT NOT NULL,
+    hash TEXT NOT NULL,
+    parent_iteration_hash TEXT,
+    created_at TEXT NOT NULL,
+    UNIQUE(loop_run_id, sequence)
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_loop_iter_run ON loop_iterations(loop_run_id, sequence DESC)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_loop_iter_hash ON loop_iterations(hash)');
+
+  db.exec(`CREATE TABLE IF NOT EXISTS loop_actions (
+    action_id TEXT PRIMARY KEY,
+    action_key TEXT NOT NULL UNIQUE,
+    iteration_id TEXT,
+    loop_run_id TEXT NOT NULL,
+    sequence INTEGER NOT NULL,
+    action_type TEXT NOT NULL,
+    tool_id TEXT,
+    inputs_json TEXT,
+    params_json TEXT,
+    expected_artifact_kinds_json TEXT,
+    attempt INTEGER NOT NULL DEFAULT 1,
+    hash TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_loop_action_run ON loop_actions(loop_run_id, sequence DESC)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_loop_action_iter ON loop_actions(iteration_id)');
+
+  db.exec(`CREATE TABLE IF NOT EXISTS loop_evidence (
+    evidence_id TEXT PRIMARY KEY,
+    loop_run_id TEXT NOT NULL,
+    iteration_id TEXT,
+    kind TEXT NOT NULL,
+    ref TEXT NOT NULL,
+    summary_digest TEXT,
+    parent_evidence_hash TEXT,
+    hash TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_loop_evidence_run ON loop_evidence(loop_run_id, created_at DESC)');
+
+  db.exec(`CREATE TABLE IF NOT EXISTS loop_decisions (
+    decision_id TEXT PRIMARY KEY,
+    iteration_id TEXT NOT NULL,
+    loop_run_id TEXT NOT NULL,
+    decision TEXT NOT NULL,
+    decision_reason_code TEXT NOT NULL,
+    confidence REAL,
+    notes TEXT,
+    hash TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_loop_decision_iter ON loop_decisions(iteration_id)');
+
+  db.exec(`CREATE TABLE IF NOT EXISTS loop_state_snapshots (
+    snapshot_id TEXT PRIMARY KEY,
+    loop_run_id TEXT NOT NULL,
+    sequence_at INTEGER NOT NULL,
+    snapshot_json TEXT NOT NULL,
+    source_hash TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_loop_snapshot_run ON loop_state_snapshots(loop_run_id, sequence_at DESC)');
+} catch {}
+
 // ============================================================
 // Schema
 // ============================================================
@@ -713,6 +812,444 @@ function getLatestContextCheckpoint(projectId, conversationId) {
   `).get(projectId, conversationId));
 }
 
+// HLE-1: LoopRun / Iteration / Action / Evidence / Decision / Snapshot repository.
+// Persistence layer for core/shared-backend/loop-contract.js. Idempotent on
+// action_key (UNIQUE) and on (loop_run_id, sequence) for iterations. Legacy
+// conversations without a loop_run row fall back to projectLoopRunPartial()
+// in loop-contract.js and must NOT be fabricated here.
+
+function persistLoopRun(loopRun) {
+  if (!loopRun?.loopRunId || !loopRun?.projectId || !loopRun?.conversationId || !loopRun?.hash) {
+    throw new Error('loop_run_persistence_fields_required');
+  }
+  const existing = db.prepare('SELECT loop_status_hash AS hash FROM loop_runs WHERE loop_run_id=?').get(loopRun.loopRunId);
+  if (existing && existing.hash !== loopRun.hash) {
+    throw new Error('loop_run_immutable');
+  }
+  db.prepare(`
+    INSERT INTO loop_runs(
+      loop_run_id, project_id, conversation_id, task_spec_ref, automation_mode,
+      loop_status, loop_status_hash, loop_status_json,
+      is_partial, partial_reason, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(loop_run_id) DO NOTHING
+  `).run(
+    loopRun.loopRunId,
+    loopRun.projectId,
+    loopRun.conversationId,
+    loopRun.taskSpecRef || null,
+    loopRun.automationMode || null,
+    loopRun.loopStatus,
+    loopRun.hash,
+    JSON.stringify(loopRun),
+    loopRun.isPartial ? 1 : 0,
+    loopRun.partialReason || null,
+    loopRun.createdAt,
+    loopRun.updatedAt || loopRun.createdAt,
+  );
+  return getLoopRun(loopRun.loopRunId);
+}
+
+function updateLoopRunStatus(loopRunId, { loopStatus, hash, json, updatedAt }) {
+  if (!loopRunId || !loopStatus || !hash) {
+    throw new Error('loop_run_status_fields_required');
+  }
+  const existingRow = db.prepare('SELECT loop_status FROM loop_runs WHERE loop_run_id=?').get(loopRunId);
+  if (!existingRow) throw new Error('loop_run_not_found');
+  const transition = require('../shared-backend/loop-contract').checkLoopStatusTransition(
+    existingRow.loop_status,
+    loopStatus,
+  );
+  if (transition instanceof Error) throw transition;
+  db.prepare(`
+    UPDATE loop_runs SET loop_status=?, loop_status_hash=?, loop_status_json=?, updated_at=?
+    WHERE loop_run_id=?
+  `).run(loopStatus, hash, json || null, updatedAt, loopRunId);
+  return getLoopRun(loopRunId);
+}
+
+function getLoopRun(loopRunId) {
+  if (!loopRunId) return null;
+  const row = db.prepare('SELECT * FROM loop_runs WHERE loop_run_id=?').get(loopRunId);
+  if (!row) return null;
+  return {
+    loopRunId: row.loop_run_id,
+    projectId: row.project_id,
+    conversationId: row.conversation_id,
+    taskSpecRef: row.task_spec_ref,
+    automationMode: row.automation_mode,
+    loopStatus: row.loop_status,
+    hash: row.loop_status_hash,
+    isPartial: !!row.is_partial,
+    partialReason: row.partial_reason,
+    record: safeParseJson(row.loop_status_json),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function listLoopRunsForConversation(projectId, conversationId, { limit = 50 } = {}) {
+  if (!projectId || !conversationId) return [];
+  return db.prepare(`
+    SELECT * FROM loop_runs
+    WHERE project_id=? AND conversation_id=?
+    ORDER BY updated_at DESC LIMIT ?
+  `).all(projectId, conversationId, limit).map((row) => ({
+    loopRunId: row.loop_run_id,
+    projectId: row.project_id,
+    conversationId: row.conversation_id,
+    loopStatus: row.loop_status,
+    hash: row.loop_status_hash,
+    isPartial: !!row.is_partial,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
+}
+
+function persistLoopIteration(iteration) {
+  if (!iteration?.iterationId || !iteration?.loopRunId || !iteration?.hash) {
+    throw new Error('loop_iteration_persistence_fields_required');
+  }
+  if (!Number.isInteger(iteration.sequence) || iteration.sequence < 1) {
+    throw new Error('loop_iteration_sequence_invalid');
+  }
+  const existing = db.prepare('SELECT hash FROM loop_iterations WHERE iteration_id=?').get(iteration.iterationId);
+  if (existing && existing.hash !== iteration.hash) {
+    throw new Error('loop_iteration_immutable');
+  }
+  const tx = db.transaction(() => {
+    db.prepare(`
+      INSERT INTO loop_iterations(
+        iteration_id, loop_run_id, sequence,
+        observed_state_digest, goal_gap_ids_json,
+        decision, decision_reason_code, confidence, notes,
+        public_conclusion, status, hash, parent_iteration_hash, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(iteration_id) DO NOTHING
+    `).run(
+      iteration.iterationId,
+      iteration.loopRunId,
+      iteration.sequence,
+      iteration.observedStateDigest || null,
+      JSON.stringify(iteration.goalGapIds || []),
+      iteration.decision,
+      iteration.decisionReasonCode,
+      iteration.confidence,
+      iteration.notes || null,
+      iteration.publicConclusion || null,
+      iteration.status,
+      iteration.hash,
+      iteration.parentIterationHash || null,
+      iteration.createdAt,
+    );
+    if (iteration.proposedAction && iteration.proposedAction.actionId) {
+      persistLoopAction({
+        ...iteration.proposedAction,
+        loopRunId: iteration.loopRunId,
+        sequence: iteration.sequence,
+        iterationId: iteration.iterationId,
+      });
+    }
+    if (iteration.decision || iteration.decisionReasonCode) {
+      const decisionHash = require('../shared-backend/loop-contract').stableHash({
+        decision: iteration.decision,
+        decisionReasonCode: iteration.decisionReasonCode,
+        confidence: iteration.confidence,
+        notes: iteration.notes,
+      });
+      persistLoopDecision({
+        loopRunId: iteration.loopRunId,
+        iterationId: iteration.iterationId,
+        decision: iteration.decision,
+        decisionReasonCode: iteration.decisionReasonCode,
+        confidence: iteration.confidence,
+        notes: iteration.notes,
+        hash: decisionHash,
+      });
+    }
+  });
+  tx();
+  return getLoopIteration(iteration.iterationId);
+}
+
+function getLoopIteration(iterationId) {
+  if (!iterationId) return null;
+  const row = db.prepare('SELECT * FROM loop_iterations WHERE iteration_id=?').get(iterationId);
+  if (!row) return null;
+  return {
+    iterationId: row.iteration_id,
+    loopRunId: row.loop_run_id,
+    sequence: row.sequence,
+    observedStateDigest: row.observed_state_digest,
+    goalGapIds: safeParseJson(row.goal_gap_ids_json) || [],
+    decision: row.decision,
+    decisionReasonCode: row.decision_reason_code,
+    confidence: row.confidence,
+    notes: row.notes,
+    publicConclusion: row.public_conclusion,
+    status: row.status,
+    hash: row.hash,
+    parentIterationHash: row.parent_iteration_hash,
+    createdAt: row.created_at,
+  };
+}
+
+function listLoopIterations(loopRunId, { limit = 200 } = {}) {
+  if (!loopRunId) return [];
+  return db.prepare(`
+    SELECT * FROM loop_iterations
+    WHERE loop_run_id=?
+    ORDER BY sequence DESC LIMIT ?
+  `).all(loopRunId, limit).map((row) => ({
+    iterationId: row.iteration_id,
+    loopRunId: row.loop_run_id,
+    sequence: row.sequence,
+    observedStateDigest: row.observed_state_digest,
+    goalGapIds: safeParseJson(row.goal_gap_ids_json) || [],
+    decision: row.decision,
+    decisionReasonCode: row.decision_reason_code,
+    confidence: row.confidence,
+    notes: row.notes,
+    publicConclusion: row.public_conclusion,
+    status: row.status,
+    hash: row.hash,
+    parentIterationHash: row.parent_iteration_hash,
+    createdAt: row.created_at,
+  }));
+}
+
+function findLoopIterationByActionKey(actionKey) {
+  if (!actionKey) return null;
+  const row = db.prepare(`
+    SELECT li.* FROM loop_iterations li
+    JOIN loop_actions la ON la.iteration_id = li.iteration_id
+    WHERE la.action_key=?
+    ORDER BY li.sequence DESC LIMIT 1
+  `).get(actionKey);
+  if (!row) return null;
+  return getLoopIteration(row.iteration_id);
+}
+
+function persistLoopAction(action) {
+  if (!action?.actionId || !action?.actionKey || !action?.hash) {
+    throw new Error('loop_action_persistence_fields_required');
+  }
+  const existing = db.prepare('SELECT action_id FROM loop_actions WHERE action_key=?').get(action.actionKey);
+  if (existing && existing.action_id !== action.actionId) {
+    throw new Error('loop_action_duplicate_action_key');
+  }
+  db.prepare(`
+    INSERT INTO loop_actions(
+      action_id, action_key, iteration_id, loop_run_id, sequence,
+      action_type, tool_id, inputs_json, params_json,
+      expected_artifact_kinds_json, attempt, hash, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(action_id) DO NOTHING
+  `).run(
+    action.actionId,
+    action.actionKey,
+    action.iterationId || null,
+    action.loopRunId,
+    action.sequence,
+    action.actionType,
+    action.toolId || null,
+    JSON.stringify(action.inputs || null),
+    JSON.stringify(action.params || null),
+    JSON.stringify(action.expectedArtifactKinds || []),
+    action.attempt || 1,
+    action.hash,
+    action.createdAt || new Date().toISOString(),
+  );
+  return getLoopAction(action.actionId);
+}
+
+function getLoopAction(actionId) {
+  if (!actionId) return null;
+  const row = db.prepare('SELECT * FROM loop_actions WHERE action_id=?').get(actionId);
+  if (!row) return null;
+  return parseLoopActionRow(row);
+}
+
+function getLoopActionByKey(actionKey) {
+  if (!actionKey) return null;
+  const row = db.prepare('SELECT * FROM loop_actions WHERE action_key=?').get(actionKey);
+  if (!row) return null;
+  return parseLoopActionRow(row);
+}
+
+function parseLoopActionRow(row) {
+  return {
+    actionId: row.action_id,
+    actionKey: row.action_key,
+    iterationId: row.iteration_id,
+    loopRunId: row.loop_run_id,
+    sequence: row.sequence,
+    actionType: row.action_type,
+    toolId: row.tool_id,
+    inputs: safeParseJson(row.inputs_json),
+    params: safeParseJson(row.params_json),
+    expectedArtifactKinds: safeParseJson(row.expected_artifact_kinds_json) || [],
+    attempt: row.attempt,
+    hash: row.hash,
+    createdAt: row.created_at,
+  };
+}
+
+function persistLoopEvidence(evidence) {
+  if (!evidence?.evidenceId || !evidence?.hash || !evidence?.loopRunId) {
+    throw new Error('loop_evidence_persistence_fields_required');
+  }
+  db.prepare(`
+    INSERT INTO loop_evidence(
+      evidence_id, loop_run_id, iteration_id, kind, ref,
+      summary_digest, parent_evidence_hash, hash, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(evidence_id) DO NOTHING
+  `).run(
+    evidence.evidenceId,
+    evidence.loopRunId,
+    evidence.iterationId || null,
+    evidence.kind,
+    evidence.ref,
+    evidence.summaryDigest || null,
+    evidence.parentEvidenceHash || null,
+    evidence.hash,
+    evidence.createdAt || new Date().toISOString(),
+  );
+  return getLoopEvidence(evidence.evidenceId);
+}
+
+function getLoopEvidence(evidenceId) {
+  if (!evidenceId) return null;
+  const row = db.prepare('SELECT * FROM loop_evidence WHERE evidence_id=?').get(evidenceId);
+  if (!row) return null;
+  return {
+    evidenceId: row.evidence_id,
+    loopRunId: row.loop_run_id,
+    iterationId: row.iteration_id,
+    kind: row.kind,
+    ref: row.ref,
+    summaryDigest: row.summary_digest,
+    parentEvidenceHash: row.parent_evidence_hash,
+    hash: row.hash,
+    createdAt: row.created_at,
+  };
+}
+
+function listLoopEvidence(loopRunId, { limit = 100 } = {}) {
+  if (!loopRunId) return [];
+  return db.prepare(`
+    SELECT * FROM loop_evidence WHERE loop_run_id=?
+    ORDER BY created_at DESC LIMIT ?
+  `).all(loopRunId, limit).map((row) => ({
+    evidenceId: row.evidence_id,
+    loopRunId: row.loop_run_id,
+    iterationId: row.iteration_id,
+    kind: row.kind,
+    ref: row.ref,
+    summaryDigest: row.summary_digest,
+    parentEvidenceHash: row.parent_evidence_hash,
+    hash: row.hash,
+    createdAt: row.created_at,
+  }));
+}
+
+function persistLoopDecision(decision) {
+  if (!decision?.iterationId || !decision?.decision || !decision?.decisionReasonCode) {
+    throw new Error('loop_decision_persistence_fields_required');
+  }
+  const decisionId = decision.decisionId || `dec_${decision.iterationId}`;
+  db.prepare(`
+    INSERT INTO loop_decisions(
+      decision_id, iteration_id, loop_run_id, decision,
+      decision_reason_code, confidence, notes, hash, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(decision_id) DO NOTHING
+  `).run(
+    decisionId,
+    decision.iterationId,
+    decision.loopRunId,
+    decision.decision,
+    decision.decisionReasonCode,
+    decision.confidence ?? null,
+    decision.notes || null,
+    decision.hash || null,
+    decision.createdAt || new Date().toISOString(),
+  );
+  return getLoopDecision(decisionId);
+}
+
+function getLoopDecision(decisionId) {
+  if (!decisionId) return null;
+  const row = db.prepare('SELECT * FROM loop_decisions WHERE decision_id=?').get(decisionId);
+  if (!row) return null;
+  return {
+    decisionId: row.decision_id,
+    iterationId: row.iteration_id,
+    loopRunId: row.loop_run_id,
+    decision: row.decision,
+    decisionReasonCode: row.decision_reason_code,
+    confidence: row.confidence,
+    notes: row.notes,
+    hash: row.hash,
+    createdAt: row.created_at,
+  };
+}
+
+function persistLoopSnapshot(snapshot) {
+  if (!snapshot?.snapshotId || !snapshot?.loopRunId || !snapshot?.sourceHash) {
+    throw new Error('loop_snapshot_persistence_fields_required');
+  }
+  db.prepare(`
+    INSERT INTO loop_state_snapshots(
+      snapshot_id, loop_run_id, sequence_at, snapshot_json, source_hash, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?)
+    ON CONFLICT(snapshot_id) DO NOTHING
+  `).run(
+    snapshot.snapshotId,
+    snapshot.loopRunId,
+    snapshot.sequenceAt,
+    JSON.stringify(snapshot.payload || {}),
+    snapshot.sourceHash,
+    snapshot.createdAt || new Date().toISOString(),
+  );
+  return getLoopSnapshot(snapshot.snapshotId);
+}
+
+function getLoopSnapshot(snapshotId) {
+  if (!snapshotId) return null;
+  const row = db.prepare('SELECT * FROM loop_state_snapshots WHERE snapshot_id=?').get(snapshotId);
+  if (!row) return null;
+  return {
+    snapshotId: row.snapshot_id,
+    loopRunId: row.loop_run_id,
+    sequenceAt: row.sequence_at,
+    payload: safeParseJson(row.snapshot_json) || {},
+    sourceHash: row.source_hash,
+    createdAt: row.created_at,
+  };
+}
+
+function getLatestLoopSnapshot(loopRunId) {
+  if (!loopRunId) return null;
+  const row = db.prepare(`
+    SELECT * FROM loop_state_snapshots
+    WHERE loop_run_id=?
+    ORDER BY sequence_at DESC LIMIT 1
+  `).get(loopRunId);
+  if (!row) return null;
+  return getLoopSnapshot(row.snapshot_id);
+}
+
+function safeParseJson(value) {
+  if (value === null || value === undefined || value === '') return null;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
+
 function updateToolJobParams(id, params) {
   stmts.updateToolJobParams.run(JSON.stringify(params || {}), id);
   return getToolJob(id);
@@ -1176,6 +1713,26 @@ module.exports = {
   createCellLabel,
   deleteCellLabel,
   getLabelsSummary,
+  // HLE-1 Loop ledger
+  persistLoopRun,
+  updateLoopRunStatus,
+  getLoopRun,
+  listLoopRunsForConversation,
+  persistLoopIteration,
+  getLoopIteration,
+  listLoopIterations,
+  findLoopIterationByActionKey,
+  persistLoopAction,
+  getLoopAction,
+  getLoopActionByKey,
+  persistLoopEvidence,
+  getLoopEvidence,
+  listLoopEvidence,
+  persistLoopDecision,
+  getLoopDecision,
+  persistLoopSnapshot,
+  getLoopSnapshot,
+  getLatestLoopSnapshot,
   db,
   getDatabase,
   getAsyncDatabase,

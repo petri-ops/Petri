@@ -1,0 +1,1786 @@
+{
+  "schemaVersion": 1,
+  "phase": "HLE-0",
+  "passed": true,
+  "totalChecks": 250,
+  "passedChecks": 250,
+  "allChecks": [
+    {
+      "id": "schema_version",
+      "passed": true,
+      "evidence": {
+        "schemaVersion": 1
+      }
+    },
+    {
+      "id": "scenario_id_unique",
+      "passed": true,
+      "evidence": {
+        "scenarioId": "spt1-normal"
+      }
+    },
+    {
+      "id": "scenario_type_valid",
+      "passed": true,
+      "evidence": {
+        "scenarioType": "normal"
+      }
+    },
+    {
+      "id": "task_spec_ref",
+      "passed": true,
+      "evidence": {
+        "taskSpecRef": "spt1-bulk-rnaseq"
+      }
+    },
+    {
+      "id": "description_present",
+      "passed": true,
+      "evidence": {
+        "descriptionLength": 43
+      }
+    },
+    {
+      "id": "privacy_note",
+      "passed": true,
+      "evidence": {
+        "privacyNote": "uses_repository_demo_data_only"
+      }
+    },
+    {
+      "id": "initial_state_fields",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "initial_state_values",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "iterations_exist",
+      "passed": true,
+      "evidence": {
+        "iterationCount": 8
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 1
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "continue",
+        "sequence": 1
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 1
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 1
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "plan",
+        "sequence": 1
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "NORMAL_PLAN_GENERATED",
+        "sequence": 1
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 2
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "continue",
+        "sequence": 2
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 2
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 2
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "run_tool",
+        "sequence": 2
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "VALID_INPUTS_CONFIRMED",
+        "sequence": 2
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 3
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "continue",
+        "sequence": 3
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 3
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 3
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "run_tool",
+        "sequence": 3
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "QC_PASSED",
+        "sequence": 3
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 4
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "continue",
+        "sequence": 4
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 4
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 4
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "run_tool",
+        "sequence": 4
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "DESEQ2_COMPLETED",
+        "sequence": 4
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 5
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "continue",
+        "sequence": 5
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 5
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 5
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "run_tool",
+        "sequence": 5
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "DEG_STANDARDIZED",
+        "sequence": 5
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 6
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "continue",
+        "sequence": 6
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 6
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 6
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "run_tool",
+        "sequence": 6
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "VOLCANO_GENERATED",
+        "sequence": 6
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 7
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "continue",
+        "sequence": 7
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 7
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 7
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "run_tool",
+        "sequence": 7
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "ENRICHMENT_COMPLETED",
+        "sequence": 7
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 8
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "complete",
+        "sequence": 8
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 8
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 8
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "run_tool",
+        "sequence": 8
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "ALL_NODES_VERIFIED",
+        "sequence": 8
+      }
+    },
+    {
+      "id": "sequence_numbers_unique",
+      "passed": true,
+      "evidence": {
+        "sequenceCount": 8
+      }
+    },
+    {
+      "id": "sequence_numbers_sequential",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "expected_outcomes_loop_status",
+      "passed": true,
+      "evidence": {
+        "loopStatus": "completed"
+      }
+    },
+    {
+      "id": "expected_outcomes_loop_integrity",
+      "passed": true,
+      "evidence": {
+        "loopIntegrity": "clean"
+      }
+    },
+    {
+      "id": "expected_outcomes_counts",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "loop_status_completed",
+      "passed": true,
+      "evidence": {
+        "loopStatus": "completed"
+      }
+    },
+    {
+      "id": "delivery_complete",
+      "passed": true,
+      "evidence": {
+        "deliveryComplete": true
+      }
+    },
+    {
+      "id": "replay_complete",
+      "passed": true,
+      "evidence": {
+        "replayPackageComplete": true
+      }
+    },
+    {
+      "id": "integrity_repeatableActionCount",
+      "passed": true,
+      "evidence": {
+        "field": "repeatableActionCount",
+        "value": 0
+      }
+    },
+    {
+      "id": "integrity_oscillationCount",
+      "passed": true,
+      "evidence": {
+        "field": "oscillationCount",
+        "value": 0
+      }
+    },
+    {
+      "id": "integrity_noProgressCycles",
+      "passed": true,
+      "evidence": {
+        "field": "noProgressCycles",
+        "value": 0
+      }
+    },
+    {
+      "id": "schema_version",
+      "passed": true,
+      "evidence": {
+        "schemaVersion": 1
+      }
+    },
+    {
+      "id": "scenario_id_unique",
+      "passed": true,
+      "evidence": {
+        "scenarioId": "spt1-repairable"
+      }
+    },
+    {
+      "id": "scenario_type_valid",
+      "passed": true,
+      "evidence": {
+        "scenarioType": "repairable"
+      }
+    },
+    {
+      "id": "task_spec_ref",
+      "passed": true,
+      "evidence": {
+        "taskSpecRef": "spt1-bulk-rnaseq"
+      }
+    },
+    {
+      "id": "description_present",
+      "passed": true,
+      "evidence": {
+        "descriptionLength": 37
+      }
+    },
+    {
+      "id": "privacy_note",
+      "passed": true,
+      "evidence": {
+        "privacyNote": "uses_repository_demo_data_only"
+      }
+    },
+    {
+      "id": "initial_state_fields",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "initial_state_values",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "iterations_exist",
+      "passed": true,
+      "evidence": {
+        "iterationCount": 9
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 1
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "continue",
+        "sequence": 1
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 1
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 1
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "plan",
+        "sequence": 1
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "NORMAL_PLAN_GENERATED",
+        "sequence": 1
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 2
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "continue",
+        "sequence": 2
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 2
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 2
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "run_tool",
+        "sequence": 2
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "INPUTS_VALID",
+        "sequence": 2
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 3
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "continue",
+        "sequence": 3
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 3
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 3
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "run_tool",
+        "sequence": 3
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "QC_PASSED",
+        "sequence": 3
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 4
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "retry",
+        "sequence": 4
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 4
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 4
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "run_tool",
+        "sequence": 4
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "TRANSIENT_RUNTIME_RETRY",
+        "sequence": 4
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 5
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "continue",
+        "sequence": 5
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 5
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 5
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "run_tool",
+        "sequence": 5
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "DESEQ2_REPAIRED",
+        "sequence": 5
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 6
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "continue",
+        "sequence": 6
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 6
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 6
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "run_tool",
+        "sequence": 6
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "DEG_STANDARDIZED",
+        "sequence": 6
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 7
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "continue",
+        "sequence": 7
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 7
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 7
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "run_tool",
+        "sequence": 7
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "VOLCANO_GENERATED",
+        "sequence": 7
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 8
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "continue",
+        "sequence": 8
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 8
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 8
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "run_tool",
+        "sequence": 8
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "ENRICHMENT_COMPLETED",
+        "sequence": 8
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 9
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "complete",
+        "sequence": 9
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 9
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 9
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "run_tool",
+        "sequence": 9
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "ALL_NODES_VERIFIED",
+        "sequence": 9
+      }
+    },
+    {
+      "id": "sequence_numbers_unique",
+      "passed": true,
+      "evidence": {
+        "sequenceCount": 9
+      }
+    },
+    {
+      "id": "sequence_numbers_sequential",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "expected_outcomes_loop_status",
+      "passed": true,
+      "evidence": {
+        "loopStatus": "completed"
+      }
+    },
+    {
+      "id": "expected_outcomes_loop_integrity",
+      "passed": true,
+      "evidence": {
+        "loopIntegrity": "clean"
+      }
+    },
+    {
+      "id": "expected_outcomes_counts",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "loop_status_completed",
+      "passed": true,
+      "evidence": {
+        "loopStatus": "completed"
+      }
+    },
+    {
+      "id": "delivery_complete",
+      "passed": true,
+      "evidence": {
+        "deliveryComplete": true
+      }
+    },
+    {
+      "id": "replay_complete",
+      "passed": true,
+      "evidence": {
+        "replayPackageComplete": true
+      }
+    },
+    {
+      "id": "failure_injection_point",
+      "passed": true,
+      "evidence": {
+        "injectionPoint": "iteration_4"
+      }
+    },
+    {
+      "id": "failure_injection_class",
+      "passed": true,
+      "evidence": {
+        "failureClass": "transient_runtime"
+      }
+    },
+    {
+      "id": "failure_injection_expected_strategy",
+      "passed": true,
+      "evidence": {
+        "expectedRepairStrategy": "transient_runtime_retry"
+      }
+    },
+    {
+      "id": "failure_injection_repair_outcome",
+      "passed": true,
+      "evidence": {
+        "expectedRepairOutcome": "success_on_retry"
+      }
+    },
+    {
+      "id": "retry_count",
+      "passed": true,
+      "evidence": {
+        "totalRetryCount": 1
+      }
+    },
+    {
+      "id": "repair_actions",
+      "passed": true,
+      "evidence": {
+        "repairActionCount": 1
+      }
+    },
+    {
+      "id": "integrity_repeatableActionCount",
+      "passed": true,
+      "evidence": {
+        "field": "repeatableActionCount",
+        "value": 0
+      }
+    },
+    {
+      "id": "integrity_oscillationCount",
+      "passed": true,
+      "evidence": {
+        "field": "oscillationCount",
+        "value": 0
+      }
+    },
+    {
+      "id": "integrity_noProgressCycles",
+      "passed": true,
+      "evidence": {
+        "field": "noProgressCycles",
+        "value": 0
+      }
+    },
+    {
+      "id": "schema_version",
+      "passed": true,
+      "evidence": {
+        "schemaVersion": 1
+      }
+    },
+    {
+      "id": "scenario_id_unique",
+      "passed": true,
+      "evidence": {
+        "scenarioId": "spt1-blocking"
+      }
+    },
+    {
+      "id": "scenario_type_valid",
+      "passed": true,
+      "evidence": {
+        "scenarioType": "blocking"
+      }
+    },
+    {
+      "id": "task_spec_ref",
+      "passed": true,
+      "evidence": {
+        "taskSpecRef": "spt1-bulk-rnaseq"
+      }
+    },
+    {
+      "id": "description_present",
+      "passed": true,
+      "evidence": {
+        "descriptionLength": 39
+      }
+    },
+    {
+      "id": "privacy_note",
+      "passed": true,
+      "evidence": {
+        "privacyNote": "uses_repository_demo_data_only"
+      }
+    },
+    {
+      "id": "initial_state_fields",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "initial_state_values",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "iterations_exist",
+      "passed": true,
+      "evidence": {
+        "iterationCount": 3
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 1
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "continue",
+        "sequence": 1
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 1
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 1
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "plan",
+        "sequence": 1
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "NORMAL_PLAN_GENERATED",
+        "sequence": 1
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 2
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "block",
+        "sequence": 2
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 2
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 2
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "run_tool",
+        "sequence": 2
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "INPUT_FORMAT_MISMATCH",
+        "sequence": 2
+      }
+    },
+    {
+      "id": "iteration_sequence",
+      "passed": true,
+      "evidence": {
+        "sequence": 3
+      }
+    },
+    {
+      "id": "iteration_decision",
+      "passed": true,
+      "evidence": {
+        "decision": "wait",
+        "sequence": 3
+      }
+    },
+    {
+      "id": "iteration_public_conclusion",
+      "passed": true,
+      "evidence": {
+        "sequence": 3
+      }
+    },
+    {
+      "id": "iteration_state_digest",
+      "passed": true,
+      "evidence": {
+        "sequence": 3
+      }
+    },
+    {
+      "id": "iteration_proposed_action",
+      "passed": true,
+      "evidence": {
+        "type": "wait_for_user",
+        "sequence": 3
+      }
+    },
+    {
+      "id": "iteration_decision_reason",
+      "passed": true,
+      "evidence": {
+        "reasonCode": "SCIENTIFIC_DESIGN_MISSING",
+        "sequence": 3
+      }
+    },
+    {
+      "id": "sequence_numbers_unique",
+      "passed": true,
+      "evidence": {
+        "sequenceCount": 3
+      }
+    },
+    {
+      "id": "sequence_numbers_sequential",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "expected_outcomes_loop_status",
+      "passed": true,
+      "evidence": {
+        "loopStatus": "waiting_for_user"
+      }
+    },
+    {
+      "id": "expected_outcomes_loop_integrity",
+      "passed": true,
+      "evidence": {
+        "loopIntegrity": "blocked"
+      }
+    },
+    {
+      "id": "expected_outcomes_counts",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "loop_status_blocking",
+      "passed": true,
+      "evidence": {
+        "loopStatus": "waiting_for_user"
+      }
+    },
+    {
+      "id": "delivery_incomplete",
+      "passed": true,
+      "evidence": {
+        "deliveryComplete": false
+      }
+    },
+    {
+      "id": "blocking_scientific_design_gap",
+      "passed": true,
+      "evidence": {
+        "scientificIntegrity": "blocked_by_design_gap"
+      }
+    },
+    {
+      "id": "user_decision_required",
+      "passed": true,
+      "evidence": {
+        "userDecisionRequired": true
+      }
+    },
+    {
+      "id": "blocking_user_action_required",
+      "passed": true,
+      "evidence": {
+        "userActionRequired": true
+      }
+    },
+    {
+      "id": "blocking_no_repair_strategy",
+      "passed": true,
+      "evidence": {
+        "expectedRepairStrategy": null
+      }
+    },
+    {
+      "id": "blocking_cannot_repair",
+      "passed": true,
+      "evidence": {
+        "expectedRepairOutcome": "cannot_repair_automatically"
+      }
+    },
+    {
+      "id": "integrity_repeatableActionCount",
+      "passed": true,
+      "evidence": {
+        "field": "repeatableActionCount",
+        "value": 0
+      }
+    },
+    {
+      "id": "integrity_oscillationCount",
+      "passed": true,
+      "evidence": {
+        "field": "oscillationCount",
+        "value": 0
+      }
+    },
+    {
+      "id": "integrity_noProgressCycles",
+      "passed": true,
+      "evidence": {
+        "field": "noProgressCycles",
+        "value": 0
+      }
+    },
+    {
+      "id": "schema_version",
+      "passed": true,
+      "evidence": {
+        "schemaVersion": 1
+      }
+    },
+    {
+      "id": "task_spec_id",
+      "passed": true,
+      "evidence": {
+        "taskSpecId": "spt1-bulk-rnaseq"
+      }
+    },
+    {
+      "id": "version",
+      "passed": true,
+      "evidence": {
+        "version": 1
+      }
+    },
+    {
+      "id": "hash_placeholder",
+      "passed": true,
+      "evidence": {
+        "hash": "sha256_placeholder"
+      }
+    },
+    {
+      "id": "scientific_goal",
+      "passed": true,
+      "evidence": {
+        "goalLength": 66
+      }
+    },
+    {
+      "id": "original_request",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "inputs_counts",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "inputs_metadata",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "counts_file_exists",
+      "passed": true,
+      "evidence": {
+        "path": "resources/built-in-plugins/deseq2/demo-data/counts.csv"
+      }
+    },
+    {
+      "id": "metadata_file_exists",
+      "passed": true,
+      "evidence": {
+        "path": "resources/built-in-plugins/deseq2/demo-data/metadata.csv"
+      }
+    },
+    {
+      "id": "automation_modes",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "access_mode",
+      "passed": true,
+      "evidence": {
+        "accessMode": "full"
+      }
+    },
+    {
+      "id": "expected_deliverables",
+      "passed": true,
+      "evidence": {
+        "count": 7
+      }
+    },
+    {
+      "id": "dag_nodes",
+      "passed": true,
+      "evidence": {
+        "nodeCount": 7
+      }
+    },
+    {
+      "id": "node_id_unique",
+      "passed": true,
+      "evidence": {
+        "nodeId": "sample-metadata-validator"
+      }
+    },
+    {
+      "id": "node_fields",
+      "passed": true,
+      "evidence": {
+        "nodeId": "sample-metadata-validator"
+      }
+    },
+    {
+      "id": "node_pass_predicate",
+      "passed": true,
+      "evidence": {
+        "nodeId": "sample-metadata-validator"
+      }
+    },
+    {
+      "id": "node_fail_predicate",
+      "passed": true,
+      "evidence": {
+        "nodeId": "sample-metadata-validator"
+      }
+    },
+    {
+      "id": "node_id_unique",
+      "passed": true,
+      "evidence": {
+        "nodeId": "expression-qc"
+      }
+    },
+    {
+      "id": "node_fields",
+      "passed": true,
+      "evidence": {
+        "nodeId": "expression-qc"
+      }
+    },
+    {
+      "id": "node_pass_predicate",
+      "passed": true,
+      "evidence": {
+        "nodeId": "expression-qc"
+      }
+    },
+    {
+      "id": "node_fail_predicate",
+      "passed": true,
+      "evidence": {
+        "nodeId": "expression-qc"
+      }
+    },
+    {
+      "id": "node_id_unique",
+      "passed": true,
+      "evidence": {
+        "nodeId": "deseq2"
+      }
+    },
+    {
+      "id": "node_fields",
+      "passed": true,
+      "evidence": {
+        "nodeId": "deseq2"
+      }
+    },
+    {
+      "id": "node_pass_predicate",
+      "passed": true,
+      "evidence": {
+        "nodeId": "deseq2"
+      }
+    },
+    {
+      "id": "node_fail_predicate",
+      "passed": true,
+      "evidence": {
+        "nodeId": "deseq2"
+      }
+    },
+    {
+      "id": "node_id_unique",
+      "passed": true,
+      "evidence": {
+        "nodeId": "deg-standardizer"
+      }
+    },
+    {
+      "id": "node_fields",
+      "passed": true,
+      "evidence": {
+        "nodeId": "deg-standardizer"
+      }
+    },
+    {
+      "id": "node_pass_predicate",
+      "passed": true,
+      "evidence": {
+        "nodeId": "deg-standardizer"
+      }
+    },
+    {
+      "id": "node_fail_predicate",
+      "passed": true,
+      "evidence": {
+        "nodeId": "deg-standardizer"
+      }
+    },
+    {
+      "id": "node_id_unique",
+      "passed": true,
+      "evidence": {
+        "nodeId": "volcano-plot"
+      }
+    },
+    {
+      "id": "node_fields",
+      "passed": true,
+      "evidence": {
+        "nodeId": "volcano-plot"
+      }
+    },
+    {
+      "id": "node_pass_predicate",
+      "passed": true,
+      "evidence": {
+        "nodeId": "volcano-plot"
+      }
+    },
+    {
+      "id": "node_fail_predicate",
+      "passed": true,
+      "evidence": {
+        "nodeId": "volcano-plot"
+      }
+    },
+    {
+      "id": "node_id_unique",
+      "passed": true,
+      "evidence": {
+        "nodeId": "go-kegg"
+      }
+    },
+    {
+      "id": "node_fields",
+      "passed": true,
+      "evidence": {
+        "nodeId": "go-kegg"
+      }
+    },
+    {
+      "id": "node_pass_predicate",
+      "passed": true,
+      "evidence": {
+        "nodeId": "go-kegg"
+      }
+    },
+    {
+      "id": "node_fail_predicate",
+      "passed": true,
+      "evidence": {
+        "nodeId": "go-kegg"
+      }
+    },
+    {
+      "id": "node_id_unique",
+      "passed": true,
+      "evidence": {
+        "nodeId": "gsea"
+      }
+    },
+    {
+      "id": "node_fields",
+      "passed": true,
+      "evidence": {
+        "nodeId": "gsea"
+      }
+    },
+    {
+      "id": "node_pass_predicate",
+      "passed": true,
+      "evidence": {
+        "nodeId": "gsea"
+      }
+    },
+    {
+      "id": "node_fail_predicate",
+      "passed": true,
+      "evidence": {
+        "nodeId": "gsea"
+      }
+    },
+    {
+      "id": "privacy_note",
+      "passed": true,
+      "evidence": {
+        "privacyNote": "uses_repository_demo_data_only"
+      }
+    }
+  ],
+  "baselineChecks": [
+    {
+      "id": "baseline_schema",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "baseline_phase",
+      "passed": true,
+      "evidence": {
+        "phase": "HLE-0"
+      }
+    },
+    {
+      "id": "baseline_status",
+      "passed": true,
+      "evidence": {
+        "status": "baseline_established"
+      }
+    },
+    {
+      "id": "baseline_not_product",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "baseline_scenario_count",
+      "passed": true,
+      "evidence": {
+        "scenarioCount": 3
+      }
+    },
+    {
+      "id": "baseline_scenarios",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "baseline_evidence_files",
+      "passed": true,
+      "evidence": {
+        "evidenceFileCount": 5
+      }
+    },
+    {
+      "id": "baseline_gaps",
+      "passed": true,
+      "evidence": {
+        "gapCount": 5
+      }
+    }
+  ],
+  "metricsChecks": [
+    {
+      "id": "metrics_schema",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "metrics_phase",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "metrics_baseline_version",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "metrics_captured_at",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "metrics_target_completion_rate",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "metrics_fault_classification",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "metrics_repair_effectiveness",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "metrics_user_intervention_rate",
+      "passed": true,
+      "evidence": {}
+    },
+    {
+      "id": "metrics_scope",
+      "passed": true,
+      "evidence": {}
+    }
+  ],
+  "evidence": {
+    "scenarios": [
+      "acceptance/harness-loop/scenarios/spt1-normal.json",
+      "acceptance/harness-loop/scenarios/spt1-repairable.json",
+      "acceptance/harness-loop/scenarios/spt1-blocking.json"
+    ],
+    "taskSpec": "acceptance/harness-loop/scenarios/spt1-task-spec.json",
+    "baseline": "acceptance/harness-loop/baseline.json",
+    "metrics": "acceptance/harness-loop/loop-baseline-metrics.json"
+  }
+}

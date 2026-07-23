@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "scenarioId": "spt1-repairable",
+  "scenarioType": "repairable",
+  "taskSpecRef": "spt1-bulk-rnaseq",
+  "description": "SPT-1 遇到 transient_runtime 故障，自动修复并完成",
+  "initialState": {
+    "projectId": "hle0-repairable-fixture",
+    "conversationId": "hle0-repairable-conv",
+    "taskSpecVersion": 1,
+    "dagStatus": "planned",
+    "activeNodes": [],
+    "completedNodes": [],
+    "failedNodes": []
+  },
+  "expectedTrajectory": {
+    "iterations": [
+      {
+        "sequence": 1,
+        "observedStateDigest": "plan_generated",
+        "goalGapIds": ["no_workflow_plan"],
+        "proposedAction": {"type": "plan"},
+        "decision": "continue",
+        "decisionReasonCode": "NORMAL_PLAN_GENERATED",
+        "publicConclusion": "已生成 DAG。"
+      },
+      {
+        "sequence": 2,
+        "observedStateDigest": "validator_done",
+        "goalGapIds": [],
+        "proposedAction": {"type": "run_tool", "toolId": "sample-metadata-validator"},
+        "decision": "continue",
+        "decisionReasonCode": "INPUTS_VALID",
+        "publicConclusion": "输入校验通过。"
+      },
+      {
+        "sequence": 3,
+        "observedStateDigest": "qc_done",
+        "goalGapIds": [],
+        "proposedAction": {"type": "run_tool", "toolId": "expression-qc"},
+        "decision": "continue",
+        "decisionReasonCode": "QC_PASSED",
+        "publicConclusion": "质控通过。"
+      },
+      {
+        "sequence": 4,
+        "observedStateDigest": "deseq2_first_attempt_failed",
+        "goalGapIds": ["deseq2_node_failed"],
+        "proposedAction": {"type": "run_tool", "toolId": "deseq2"},
+        "decision": "retry",
+        "decisionReasonCode": "TRANSIENT_RUNTIME_RETRY",
+        "publicConclusion": "DESeq2 首次失败：R 进程因临时文件锁退出，重试中。"
+      },
+      {
+        "sequence": 5,
+        "observedStateDigest": "deseq2_retry_success",
+        "goalGapIds": [],
+        "proposedAction": {"type": "run_tool", "toolId": "deseq2", "attempt": 2},
+        "decision": "continue",
+        "decisionReasonCode": "DESEQ2_REPAIRED",
+        "publicConclusion": "DESeq2 重试成功。"
+      },
+      {
+        "sequence": 6,
+        "observedStateDigest": "standardizer_done",
+        "goalGapIds": [],
+        "proposedAction": {"type": "run_tool", "toolId": "deg-standardizer"},
+        "decision": "continue",
+        "decisionReasonCode": "DEG_STANDARDIZED",
+        "publicConclusion": "DEG 标准化完成。"
+      },
+      {
+        "sequence": 7,
+        "observedStateDigest": "volcano_done",
+        "goalGapIds": [],
+        "proposedAction": {"type": "run_tool", "toolId": "volcano-plot"},
+        "decision": "continue",
+        "decisionReasonCode": "VOLCANO_GENERATED",
+        "publicConclusion": "火山图生成。"
+      },
+      {
+        "sequence": 8,
+        "observedStateDigest": "gokegg_done",
+        "goalGapIds": [],
+        "proposedAction": {"type": "run_tool", "toolId": "go-kegg"},
+        "decision": "continue",
+        "decisionReasonCode": "ENRICHMENT_COMPLETED",
+        "publicConclusion": "GO/KEGG 富集完成。"
+      },
+      {
+        "sequence": 9,
+        "observedStateDigest": "gsea_done",
+        "goalGapIds": [],
+        "proposedAction": {"type": "run_tool", "toolId": "gsea"},
+        "decision": "complete",
+        "decisionReasonCode": "ALL_NODES_VERIFIED",
+        "publicConclusion": "所有节点验证通过，任务完成（含 1 次自动修复）。"
+      }
+    ]
+  },
+  "expectedOutcomes": {
+    "loopStatus": "completed",
+    "completedNodes": 7,
+    "failedNodes": 0,
+    "userInterruptions": 0,
+    "totalIterations": 9,
+    "totalRetryCount": 1,
+    "repairActions": [
+      {
+        "attempt": 1,
+        "strategyId": "transient_runtime_retry",
+        "success": true,
+        "originalFailure": {"reasonCode": "TRANSIENT_RUNTIME", "jobId": "job_deseq2_attempt1"}
+      }
+    ],
+    "deliveryComplete": true,
+    "replayPackageComplete": true,
+    "finalConclusion": "处理条件（KO vs WT）导致了可靠的基因表达变化。含 1 次自动修复（DESeq2 transient_runtime）。共发现 123 个差异表达基因（padj < 0.05，|log2FC| > 1）。",
+    "scientificIntegrity": "valid",
+    "loopIntegrity": "clean",
+    "repeatableActionCount": 0,
+    "oscillationCount": 0,
+    "noProgressCycles": 0
+  },
+  "failureInjection": {
+    "injectionPoint": "iteration_4",
+    "targetNode": "deseq2",
+    "failureClass": "transient_runtime",
+    "triggerCondition": "first_attempt",
+    "simulatedError": {"exitCode": 1, "stderrContains": "lock", "recoverable": true},
+    "expectedRepairStrategy": "transient_runtime_retry",
+    "expectedRepairOutcome": "success_on_retry"
+  },
+  "privacyNote": "uses_repository_demo_data_only"
+}

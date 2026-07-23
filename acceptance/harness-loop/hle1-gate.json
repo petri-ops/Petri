@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "harness": "harness-loop",
+  "phase": "HLE-1",
+  "privacy": "synthetic_or_repository_demo_data_only",
+  "network": "disabled_by_contract",
+  "credentials": "not_loaded",
+  "startedAt": "2026-07-23T02:03:18.219Z",
+  "finishedAt": "2026-07-23T02:03:18.533Z",
+  "files": [
+    "core/shared-backend/loop-contract.js",
+    "core/r-server/db.js",
+    "core/r-server/routes/harness.js"
+  ],
+  "commands": [
+    {
+      "label": "check:loop-contract.js",
+      "command": "node --check core/shared-backend/loop-contract.js",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "label": "check:db.js",
+      "command": "node --check core/r-server/db.js",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "label": "check:harness.js",
+      "command": "node --check core/r-server/routes/harness.js",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "label": "hle1:contract:test",
+      "command": "node --test test/loop-contract.test.mjs",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "label": "hle1:repository:test",
+      "command": "node --test test/loop-repository.test.mjs",
+      "exitCode": 0,
+      "signal": null
+    }
+  ],
+  "passed": true
+}

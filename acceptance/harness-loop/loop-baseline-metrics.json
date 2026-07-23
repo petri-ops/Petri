@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "phase": "HLE-0",
+  "baselineVersion": 1,
+  "capturedAt": "2026-07-23T00:00:00.000Z",
+  "metrics": {
+    "targetCompletionRate": {
+      "normal": {"description": "正常路径完成率", "expected": 1.0, "measured": null, "status": "baseline"},
+      "repairable": {"description": "可修复故障恢复率", "expected": 1.0, "measured": null, "status": "baseline"},
+      "blocking": {"description": "阻断场景正确识别率", "expected": 1.0, "measured": null, "status": "baseline"}
+    },
+    "faultClassificationAccuracy": {
+      "description": "故障分类准确率",
+      "expected": 1.0,
+      "categories": ["transient_runtime", "invalid_arguments", "input_format", "runtime_not_ready", "method_not_applicable"],
+      "measured": null,
+      "status": "baseline"
+    },
+    "repairEffectiveness": {
+      "description": "自动修复有效率",
+      "expected": 1.0,
+      "measured": null,
+      "status": "baseline",
+      "note": "只记录可修复场景的修复次数/总尝试"
+    },
+    "userInterventionRate": {
+      "description": "用户干预率（阻断场景应 = 1.0，正常/可修复应 = 0.0）",
+      "normal": {"expected": 0.0, "measured": null},
+      "repairable": {"expected": 0.0, "measured": null},
+      "blocking": {"expected": 1.0, "measured": null}
+    },
+    "noProgressCycles": {
+      "description": "无进展循环次数（应为 0）",
+      "normal": {"expected": 0, "measured": null},
+      "repairable": {"expected": 0, "measured": null},
+      "blocking": {"expected": 0, "measured": null}
+    },
+    "oscillationCount": {
+      "description": "计划振荡次数（应为 0）",
+      "normal": {"expected": 0, "measured": null},
+      "repairable": {"expected": 0, "measured": null},
+      "blocking": {"expected": 0, "measured": null}
+    },
+    "repeatableActions": {
+      "description": "重复工具调用次数（应为 0）",
+      "normal": {"expected": 0, "measured": null},
+      "repairable": {"expected": 0, "measured": null},
+      "blocking": {"expected": 0, "measured": null}
+    },
+    "deliveryIntegrity": {
+      "description": "交付完整性",
+      "normal": {"expected": "complete", "measured": null},
+      "repairable": {"expected": "complete", "measured": null},
+      "blocking": {"expected": "incomplete", "measured": null}
+    },
+    "replayIntegrity": {
+      "description": "重放包完整性",
+      "normal": {"expected": "complete", "measured": null},
+      "repairable": {"expected": "complete", "measured": null},
+      "blocking": {"expected": "incomplete", "measured": null}
+    }
+  },
+  "scope": {
+    "taskSpec": "SPT-1 Bulk RNA-seq",
+    "platform": "macos-arm64",
+    "runtime": "R 4.x + Python 3.x",
+    "providerScenarios": "manual_acceptance_only",
+    "privacy": "synthetic_or_repository_demo_data_only"
+  }
+}
