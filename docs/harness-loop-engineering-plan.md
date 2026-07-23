@@ -401,7 +401,7 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 
 ### HLE-1：Loop Contract 与持久化骨架
 
-状态：`in_progress`
+状态：`completed`
 
 目标：实现版本化 LoopRun/Iteration/Evidence/Decision/Checkpoint 契约和数据库状态迁移。
 
@@ -422,7 +422,7 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 
 ### HLE-2：统一 Loop Controller 与退出判定
 
-状态：`in_progress`
+状态：`completed`
 
 目标：让 task/legacy 两条现有 Agent loop 复用一个控制层，所有动作先经过观察、决策和前置校验。
 
@@ -445,7 +445,7 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 
 ### HLE-3：Validator Registry 与科学完成判定
 
-状态：`completed`
+状态：`in_progress`（离线验证器已建立；生产接线已由 HLE-C2 完成；**当前补充：Plugin Contract 统一后重新验证 artifact profile 校验**）
 
 目标：建立通用验证器注册表，让节点/任务完成由证据决定。
 
@@ -472,13 +472,13 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 - `scripts/harness-loop-validator.mjs`（聚合门禁脚本）
 - `package.json`（新增 harness:loop:validator:test + harness:loop:validator）
 
-验收通过：142 测试全量通过，`npm run check` 通过。
+核心实现证据：相关离线测试通过，`npm run check` 通过；这不等于生产假成功阻断已经验收。
 
 建议提交：`feat(harness-loop): verify scientific completion from artifacts`
 
 ### HLE-4：故障诊断、修复与受影响子图重规划
 
-状态：`completed`
+状态：`in_progress`（离线 Diagnoser/Repair 已建立；生产接线已由 HLE-C2 完成；**当前补充：Repair Boundary 细化（禁止生成假数据）**）
 
 目标：根据稳定故障分类选择最小修复范围，并保留完整 lineage。
 
@@ -506,13 +506,13 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 - `scripts/harness-loop-repair.mjs`（聚合门禁脚本）
 - `package.json`（新增 harness:loop:repair:test + harness:loop:repair，check 接线）
 
-验收通过：88 测试全量通过，`npm run check` 通过，`npm run harness:loop:repair` 通过。
+核心实现证据：88 项相关离线测试通过，`npm run check` 与 `npm run harness:loop:repair` 通过；尚未完成真实 Job 修复矩阵。
 
 建议提交：`feat(harness-loop): repair failures with lineage-safe replanning`
 
 ### HLE-5：耐久恢复、成本资源与紧凑 UI
 
-状态：`completed`
+状态：`in_progress`（离线基础设施已建立；生产恢复已由 HLE-C5 完成；前端面板待 UI agent）
 
 目标：让长任务关闭会话或应用后仍可恢复，并让用户快速看懂当前状态。
 
@@ -540,13 +540,13 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 - `scripts/harness-loop.mjs`（更新为 HLE-0~HLE-5 全量聚合门禁）
 - `package.json`（新增 harness:loop:checkpoint:test，check 接线）
 
-验收通过：330 测试全量通过（HLE-2 61 + HLE-3 81 + HLE-4 88 + HLE-5 38 = 330），`npm run check` 通过，`npm run harness:loop` 通过。
+核心实现证据：HLE-2～HLE-5 相关离线测试通过，`npm run check` 与 `npm run harness:loop` 通过；尚无前端改动、真实重启恢复或视觉矩阵，不能作为 HLE-5 产品出口。
 
 建议提交：`feat(harness-loop): durable checkpoints, budget policy, and session stage views`
 
 ### HLE-6：SPT-1 产品验收与聚合门禁
 
-状态：`completed`
+状态：`pending`（HLE-C5R 真实产品回归中——当前需先完成 Plugin Contract 统一和 Workflow DAG 修复）
 
 目标：用真实 Bulk RNA-seq 问题证明 Harness v1.1 从模糊需求到可复现交付的完整 Loop。
 
@@ -566,15 +566,15 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 - 所有既有 Phase 6/7、HRT、Plugin 和 UI audit 门禁无回归。
 - 证据写入 `acceptance/harness-loop/`，计划状态和当前入口在同一提交更新。
 
-交付物：
+当前已有离线交付物：
 
 - `scripts/harness-loop.mjs`（统一聚合门禁，输出 acceptance/harness-loop/hle-all-gate.json）
 - `acceptance/harness-loop/hle-all-gate.json`（330 测试证据）
-- `docs/harness-loop-engineering-plan.md`（HLE-0~HLE-6 全部 completed）
-- `docs/AUDIT-LOG.md`（HLE-5/HLE-6 完成记录）
-- `docs/next-steps-roadmap.md`（Harness Loop Engineering v1 全部完成）
+- `docs/harness-loop-engineering-plan.md`（保留真实完成状态）
+- `docs/AUDIT-LOG.md`（保留历史提交记录，并登记生产接线阻塞）
+- `docs/next-steps-roadmap.md`（指向 HLE 生产收口计划）
 
-验收通过：330 测试全量通过，`npm run harness:loop` 通过，HLE-0~HLE-6 全部达到各自出口标准。
+当前证据只证明离线门禁通过。双 Provider、生产 Agent route、重启恢复和实机 UI 矩阵尚未完成，不能据此关闭 HLE-6。
 
 建议提交：`test(harness-loop): close HLE-0~HLE-6 product acceptance`
 
@@ -672,4 +672,3 @@ npm run harness:plugins:acceptance
 最终完成不等于“Agent 能多调用几次工具”，而是：
 
 > 对一个真实科学目标，系统能持续获得证据、验证每一步、在合理范围内自主修复、在证据不足时诚实停止，并在中断后恢复，最终交付可追溯、可复现的结果；全过程没有产生第二套执行真相。
-

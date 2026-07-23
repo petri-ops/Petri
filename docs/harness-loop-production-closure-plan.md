@@ -279,7 +279,7 @@ failed Job 存在部分文件时必须：
 
 ### HLE-C5：真实 SPT-1 与产品出口
 
-状态：`completed`
+状态：`in_progress`（HLE-C5R 生产回归中——Plugin Contract 未统一、Workflow DAG 缺少 deg-standardizer、false-success 防护不足、metadata→coldata 映射缺失）
 
 必须交付：
 
