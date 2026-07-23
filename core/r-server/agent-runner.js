@@ -56,16 +56,21 @@ const {
   buildIteration,
   buildEvidence,
   stableHash,
-  generateActionKey,
-  deriveObservedStateDigest,
-  computeGoalGapIds,
-  computeResolvedGapIds,
-  decideNextAction,
-  mapDecisionToIterationStatus,
   REASON_CODES,
   EVIDENCE_KINDS,
   normalizeLoopAutomationMode,
 } = require('../shared-backend/loop-contract');
+const {
+  deriveObservedStateDigest,
+  mapDecisionToIterationStatus,
+} = require('../shared-backend/loop-controller');
+
+if (
+  typeof deriveObservedStateDigest !== 'function' ||
+  typeof mapDecisionToIterationStatus !== 'function'
+) {
+  throw new TypeError('Harness Loop Controller runtime exports are incomplete');
+}
 
 const {
   persistLoopRun,
@@ -132,6 +137,25 @@ const {
 } = require('./helpers/methods-export');
 const agentTaskStore = require('./agent-task-store');
 const logger = require('./logger');
+
+function resolveAgentTaskTerminal({
+  cancelled = false,
+  fatalError = null,
+  assistantText = '',
+  pendingApproval = false,
+} = {}) {
+  if (cancelled) return { status: 'cancelled', error: null };
+  if (fatalError) {
+    return {
+      status: 'failed',
+      error: fatalError.message || String(fatalError) || 'agent loop failed',
+    };
+  }
+  if (String(assistantText || '').trim().length > 20 || pendingApproval) {
+    return { status: 'completed', error: null };
+  }
+  return { status: 'failed', error: 'agent loop 未生成有效回复' };
+}
 
 function _buildResultCardFromRunTool(result, context) {
   if (!result || typeof result !== 'object' || !result.toolJobId || result.needApproval) return null;
@@ -649,6 +673,8 @@ async function runAgentLoop({
   let finalizationRouting = null;
   let pendingApprovalEmitted = false;
   let cancellationObserved = false;
+  let modelFinalized = false;
+  let fatalAgentError = null;
   const assistantResultCards = [];
   const assistantToolActivities = createToolActivityRecorder();
   // HLE-C1: map callId → envelope for Loop post-turn iteration reading
@@ -799,7 +825,7 @@ async function runAgentLoop({
         const assessment = assessFinalizationResult(upJson, streamedText);
         assistantAcc = assessment.content;
         finalizationFailureReason = assessment.usable ? null : assessment.reason;
-        if (assessment.usable) _emit({ event: 'done' });
+        modelFinalized = assessment.usable;
         break;
       }
 
@@ -843,7 +869,7 @@ async function runAgentLoop({
           }
         }
         assistantAcc = assessment.content;
-        if (assessment.usable) _emit({ event: 'done' });
+        modelFinalized = assessment.usable;
         break;
       }
       const progress = assistantProgress.record(streamedText || msg.content, iter + 1);
@@ -1093,9 +1119,17 @@ async function runAgentLoop({
 
       // Derive state digest
       const stateDigest = deriveObservedStateDigest({
-        iterations: loopIterations,
-        activeJobs: toolJobs.filter((j) => j.status === 'running' || j.status === 'pending'),
-        toolActivities: activities,
+        toolJobs: toolJobs.map((job) => ({
+          id: job.toolJobId || job.callId,
+          status: job.status,
+          error: job.jobTruth && job.jobTruth.error,
+          finished_at: job.jobTruth && job.jobTruth.completed_at,
+        })),
+        conversationSummary: assistantProgress.snapshot().slice(-1)[0]?.content || '',
+        dagProgress: {
+          persistedIterations: loopIterations.length,
+          toolActivities: activities.length,
+        },
       });
 
       const activeJobs = toolJobs.filter((j) => j.status === 'running' || j.status === 'pending');
@@ -1178,10 +1212,12 @@ async function runAgentLoop({
           decisionReasonCode = REASON_CODES.TOOL_SUCCEEDED;
           publicConclusion = `工具执行中（${activeJobs.length} 个运行中）。继续监控。`;
           loopActiveJobs = activeJobs;
-        } else if (activities.length === 0) {
+        } else if (modelFinalized || activities.length === 0) {
           decision = 'complete';
           decisionReasonCode = REASON_CODES.GOAL_ACHIEVED;
-          publicConclusion = '本轮无工具调用，已整理最终答复。';
+          publicConclusion = modelFinalized
+            ? '已根据真实工具与产物状态完成本轮交付。'
+            : '本轮无工具调用，已整理最终答复。';
           loopActiveJobs = [];
         } else {
           loopActiveJobs = toolJobs;
@@ -1228,6 +1264,10 @@ async function runAgentLoop({
           _loopPersistPhase('blocked', iteration.publicConclusion);
         }
       }
+    }
+
+    if (!cancellationObserved && !loopAbortedByController && modelFinalized) {
+      _emit({ event: 'done' });
     }
 
     if (cancellationObserved || loopAbortedByController) {
@@ -1375,18 +1415,28 @@ async function runAgentLoop({
       } catch {}
     }
   } catch (e) {
+    fatalAgentError = e;
     cancellationObserved = cancellationObserved || aborted();
     _emit({ error: e.message });
+    if (loopRunId && !cancellationObserved) {
+      _loopPersistPhase('failed', 'Harness Loop 收口失败，执行记录与已有产物已保留。');
+    }
   } finally {
     // 释放 task 生命周期锁 + 标记 task 终态（无论成功/失败/异常）
     try {
       cancellationObserved = cancellationObserved || aborted();
-      if (cancellationObserved) {
+      const terminal = resolveAgentTaskTerminal({
+        cancelled: cancellationObserved,
+        fatalError: fatalAgentError,
+        assistantText: assistantAcc,
+        pendingApproval: pendingApprovalEmitted,
+      });
+      if (terminal.status === 'cancelled') {
         agentTaskStore.markAgentTaskCancelled(taskId);
-      } else if (assistantAcc.trim().length > 20 || pendingApprovalEmitted) {
+      } else if (terminal.status === 'completed') {
         agentTaskStore.markAgentTaskDone(taskId);
       } else {
-        agentTaskStore.markAgentTaskFailed(taskId, 'agent loop 未生成有效回复');
+        agentTaskStore.markAgentTaskFailed(taskId, terminal.error);
       }
     } catch {}
     try {
@@ -1397,4 +1447,4 @@ async function runAgentLoop({
   return { assistantText: assistantAcc };
 }
 
-module.exports = { runAgentLoop };
+module.exports = { runAgentLoop, resolveAgentTaskTerminal };

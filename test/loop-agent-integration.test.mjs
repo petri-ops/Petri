@@ -31,6 +31,10 @@ const {
 const {
   deriveObservedStateDigest,
 } = require(resolve(__dirname, '../core/shared-backend/loop-controller'));
+const {
+  runAgentLoop,
+  resolveAgentTaskTerminal,
+} = require(resolve(__dirname, '../core/r-server/agent-runner'));
 
 function mapDecisionToIterationStatus(decision) {
   switch (decision) {
@@ -109,6 +113,29 @@ function makeToolResultEvent(envelope, callId = 'call-1') {
 // ---------------------------------------------------------------------------
 
 describe('HLE-C1: Loop Agent Integration', () => {
+
+  describe('production runtime boundary', () => {
+    it('loads the real Agent runner with callable Loop Controller dependencies', () => {
+      assert.equal(typeof runAgentLoop, 'function');
+    });
+
+    it('fatal post-processing errors override already-streamed assistant text', () => {
+      const terminal = resolveAgentTaskTerminal({
+        fatalError: new TypeError('loop persistence failed'),
+        assistantText: '这段模型正文已经足够长，但不能掩盖 Harness 收口异常。',
+      });
+      assert.equal(terminal.status, 'failed');
+      assert.equal(terminal.error, 'loop persistence failed');
+    });
+
+    it('a finalized answer without a runtime error remains completed', () => {
+      const terminal = resolveAgentTaskTerminal({
+        assistantText: '已根据真实工具和产物状态完成分析，并保存可复现脚本。',
+      });
+      assert.equal(terminal.status, 'completed');
+      assert.equal(terminal.error, null);
+    });
+  });
 
   describe('buildIteration produces correct fields', () => {
     it('cancelled iteration has correct reason code and status', () => {

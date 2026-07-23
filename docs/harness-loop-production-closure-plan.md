@@ -308,6 +308,8 @@ failed Job 存在部分文件时必须：
 
 Provider 验收入口已覆盖 DeepSeek、Anthropic 与产品通用 OpenAI-compatible Profile；只有 key/base URL/model 环境变量齐备的目标才参与人工矩阵，报告不保存凭据、请求头、完整 Provider 响应或 endpoint URL。
 
+2026-07-24 真实主轨纠偏：Agent 最终正文不能先于 Loop ledger 收口被视为 done；Loop Controller 运行时依赖启动即校验，post-processing fatal error 必须把 task/Loop 标为 failed。真实 observed-state digest 由 Job 状态、最近公开进度和持久化 iteration 计数组成，不再使用被控制器忽略的字段。
+
 必须交付：
 
 - SPT-1 从真实聊天请求和生产 route 启动。
