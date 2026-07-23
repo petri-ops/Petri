@@ -439,7 +439,7 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 
 ### HLE-3：Validator Registry 与科学完成判定
 
-状态：`planned`
+状态：`completed`
 
 目标：建立通用验证器注册表，让节点/任务完成由证据决定。
 
@@ -455,6 +455,18 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 - “exit 0 但缺必需文件”“文件存在但 hash/列不对”“图引用旧结果”等假成功全部被阻断。
 - 非显著结果仍可在结构和方法成立时正确完成，不通过追求显著性触发重试。
 - 更换模型不改变确定性 validator 结果。
+
+交付物：
+
+- `core/shared-backend/loop-validator-registry.js`（纯函数注册表）
+- `core/shared-backend/loop-validators.js`（7 个内置验证器）
+- `core/shared-backend/loop-controller.js`（decideNextAction 集成 validatorResults）
+- `test/loop-validator-registry.test.mjs`（33 个单元测试）
+- `test/loop-validators.test.cjs`（48 个内置验证器测试）
+- `scripts/harness-loop-validator.mjs`（聚合门禁脚本）
+- `package.json`（新增 harness:loop:validator:test + harness:loop:validator）
+
+验收通过：142 测试全量通过，`npm run check` 通过。
 
 建议提交：`feat(harness-loop): verify scientific completion from artifacts`
 

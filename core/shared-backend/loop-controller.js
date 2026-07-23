@@ -366,6 +366,7 @@ function decideNextAction(ctx) {
     toolMetadata = {},
     runtimeReady = true,
     userConfirmationRequired = false,
+    validatorResults = [],
   } = ctx;
 
   const currentGapSet = new Set(goalGapIds);
@@ -382,6 +383,33 @@ function decideNextAction(ctx) {
       publicConclusion:
         '检测到计划振荡（反复尝试同一工具），请确认设计或参数后继续。',
     };
+  }
+
+  // Validator results — block on blocked/delivery artifacts before proposing new actions
+  if (validatorResults.length > 0 && goalGapIds.length > 0) {
+    const blocked = validatorResults.filter((r) => r.status === 'blocked');
+    if (blocked.length > 0) {
+      const findings = blocked.flatMap((r) => r.findings || []);
+      const summary = findings.length > 0
+        ? findings.map((f) => f.code).join(', ')
+        : `${blocked.length} 个验证器报告 blocked`;
+      return {
+        decision: 'block',
+        decisionReasonCode: REASON_CODES.ARTIFACT_VALIDATION_FAILED,
+        proposedAction: null,
+        publicConclusion: `验证失败：${summary}。请修复后再继续。`,
+      };
+    }
+    const degraded = validatorResults.filter((r) => r.status === 'degraded');
+    if (degraded.length > 0) {
+      const summary = degraded.flatMap((r) => r.findings || []).map((f) => f.code).join(', ');
+      return {
+        decision: 'continue',
+        decisionReasonCode: REASON_CODES.ARTIFACT_VALIDATION_WARNING,
+        proposedAction: null,
+        publicConclusion: `验证警告：${summary}。任务可继续但结果可能受影响。`,
+      };
+    }
   }
 
   // Repeated action
@@ -510,6 +538,7 @@ function buildProposedAction(gapId, dag, activeJobs) {
  * @param {string} ctx.loopRunId
  * @param {number} ctx.sequence   - 1-based iteration sequence
  * @param {string} [ctx.parentIterationHash]
+ * @param {Array}  [ctx.validatorResults] - optional ValidatorResult[] from validateArtifact/validateDelivery
  * @returns {Object} full iteration record (not yet persisted)
  */
 function buildControllerIteration(ctx) {
@@ -526,6 +555,7 @@ function buildControllerIteration(ctx) {
     toolMetadata = {},
     runtimeReady = true,
     userConfirmationRequired = false,
+    validatorResults = [],
   } = ctx;
 
   const decision = decideNextAction({
@@ -538,6 +568,7 @@ function buildControllerIteration(ctx) {
     toolMetadata,
     runtimeReady,
     userConfirmationRequired,
+    validatorResults,
   });
 
   return buildIteration({
