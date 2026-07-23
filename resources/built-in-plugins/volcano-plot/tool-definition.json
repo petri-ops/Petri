@@ -8,10 +8,18 @@
   "inputs": [
     {
       "id": "deg_table",
-      "label": "差异分析结果表 (CSV: gene, log2FC, pvalue)",
+      "label": "差异分析结果表 (CSV: gene, log2FoldChange|log2FC, pvalue[, padj])",
       "type": "file",
       "required": true,
       "accept": ".csv"
+    },
+    {
+      "id": "lfc_col",
+      "label": "LFC 列名",
+      "type": "text",
+      "required": false,
+      "hint": "log2FoldChange 列名。默认自动探测：优先 log2FoldChange（deg-standardizer 输出），fallback log2FC（DESeq2 直接输出）",
+      "default": null
     },
     {
       "id": "fc_threshold",
@@ -62,7 +70,7 @@
       "description": "输入 CSV 必须包含 gene、log2FC、pvalue 三列或可被后续探测层映射的等价列。",
       "recoverable": true,
       "suggestedFix": "探测表头并尝试把 symbol/gene_name 映射为 gene，把 logFC/avg_log2FC 映射为 log2FC，把 p_val/padj 映射为 pvalue。",
-      "detect": "missing required columns|gene|log2fc|pvalue|table header"
+      "detect": "missing required columns|LFC 列|log2FoldChange|log2FC|实际列名"
     },
     {
       "code": "invalid_numeric_values",

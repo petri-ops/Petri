@@ -2,7 +2,10 @@
 # ============================================================
 # volcano-plot.R — 火山图绘制插件
 #
-# 输入: CSV (gene, log2FC, pvalue)
+# 输入: CSV (gene, log2FoldChange|log2FC, pvalue[, padj])
+#      lfc_col 参数指定 LFC 列名，默认自动探测：
+#      - log2FoldChange（deg-standardizer 输出，canonical）
+#      - log2FC（DESeq2 直接输出）
 # 输出: 火山图 PNG/PDF + 分类结果表 CSV
 # ============================================================
 
@@ -22,24 +25,73 @@ setwd(work_dir)
 # 读参数
 params <- fromJSON(file.path(work_dir, "params.json"))
 deg_path <- params$deg_table
+gene_col  <- params$gene_col  %||% params$gene_id_column  %||% "gene"
+lfc_col   <- params$lfc_col   %||% params$lfc_column     %||% NULL
+pval_col  <- params$pval_col  %||% params$pval_column    %||% "pvalue"
 fc_threshold <- as.numeric(params$fc_threshold %||% 1)
 pval_threshold <- as.numeric(params$pval_threshold %||% 1.3)
 top_n <- as.integer(params$top_n %||% 10)
 
 # 读数据
 deg <- read.csv(deg_path, stringsAsFactors = FALSE)
-if (!all(c("gene", "log2FC", "pvalue") %in% names(deg))) {
-  stop("CSV 必须包含列: gene, log2FC, pvalue")
+
+# 列名探测：canonical = log2FoldChange (deg-standardizer)，fallback = log2FC (DESeq2 direct)
+known_lfc_names <- c("log2FoldChange", "log2FC", "logFC", "avg_log2FC", "log2.Ratio")
+if (is.null(lfc_col)) {
+  found_lfc <- intersect(known_lfc_names, names(deg))
+  if (length(found_lfc) == 0) {
+    stop(paste0(
+      "[volcano-plot] 无法找到 LFC 列。期望列名: ",
+      paste(known_lfc_names, collapse = ", "),
+      "。实际列名: ",
+      paste(names(deg), collapse = ", ")
+    ))
+  }
+  lfc_col <- found_lfc[1]
+  cat(sprintf("[volcano-plot] 探测到 LFC 列: '%s'\n", lfc_col))
+} else {
+  if (!(lfc_col %in% names(deg))) {
+    stop(paste0(
+      "[volcano-plot] 指定的 LFC 列 '", lfc_col, "' 不存在。实际列名: ",
+      paste(names(deg), collapse = ", ")
+    ))
+  }
 }
 
+# 必需列检查（gene 列可参数化）
+required <- c("pvalue")
+missing <- setdiff(required, names(deg))
+if (length(missing) > 0) {
+  stop(paste0("[volcano-plot] 缺少必需列: ", paste(missing, collapse = ", ")))
+}
+# gene 列名参数化（默认为 gene）
+if (!(gene_col %in% names(deg))) {
+  stop(paste0("[volcano-plot] 指定的 gene 列 '", gene_col, "' 不存在。实际列名: ", paste(names(deg), collapse = ", ")))
+}
+# 重命名基因列
+if (gene_col != "gene") {
+  names(deg)[names(deg) == gene_col] <- "gene"
+}
+
+# 标准化命名：内部统一用 log2FoldChange，输出用 canonical 名称
+deg$log2FoldChange <- as.numeric(deg[[lfc_col]])
+if (any(is.na(deg$log2FoldChange) & !is.na(deg[[lfc_col]]))) {
+  warning("[volcano-plot] LFC 列存在非数值，替换为 NA")
+}
+
+# 参数化 pvalue 列（接受 pvalue 或 padj）
+deg$pvalue <- as.numeric(deg[[pval_col]])
+if (any(is.na(deg$pvalue) & !is.na(deg[[pval_col]]))) {
+  warning("[volcano-plot] pvalue 列存在非数值，替换为 NA")
+}
 deg$neg_log10_p <- -log10(deg$pvalue + 1e-300)
 deg$sig <- "NS"
-deg$sig[deg$log2FC > fc_threshold & deg$neg_log10_p > pval_threshold] <- "Up"
-deg$sig[deg$log2FC < -fc_threshold & deg$neg_log10_p > pval_threshold] <- "Down"
+deg$sig[deg$log2FoldChange > fc_threshold & deg$neg_log10_p > pval_threshold] <- "Up"
+deg$sig[deg$log2FoldChange < -fc_threshold & deg$neg_log10_p > pval_threshold] <- "Down"
 deg$sig <- factor(deg$sig, levels = c("Up", "NS", "Down"))
 
 # top N 标注
-deg$rank_score <- abs(deg$log2FC) * deg$neg_log10_p
+deg$rank_score <- abs(deg$log2FoldChange) * deg$neg_log10_p
 deg$label <- ""
 top_idx <- order(deg$rank_score, decreasing = TRUE)[1:min(top_n, nrow(deg))]
 deg$label[top_idx] <- deg$gene[top_idx]
@@ -48,7 +100,7 @@ deg$label[top_idx] <- deg$gene[top_idx]
 colors <- c(Up = "#dc2626", NS = "#94a3b8", Down = "#2563eb")
 
 # 绘图
-p <- ggplot(deg, aes(x = log2FC, y = neg_log10_p, color = sig)) +
+p <- ggplot(deg, aes(x = log2FoldChange, y = neg_log10_p, color = sig)) +
   geom_point(alpha = 0.6, size = 1.8) +
   geom_text_repel(
     aes(label = label),
@@ -75,8 +127,11 @@ p <- ggplot(deg, aes(x = log2FC, y = neg_log10_p, color = sig)) +
 ggsave("volcano.png", p, width = 7, height = 5, dpi = 300, bg = "white")
 ggsave("volcano.pdf", p, width = 7, height = 5)
 
-# 分类表
-classified <- deg[, c("gene", "log2FC", "pvalue", "sig")]
+# 分类表（输出 canonical 列名）
+classified <- deg[, c("gene", "log2FoldChange", "pvalue", "sig")]
+if ("padj" %in% names(deg)) {
+  classified$padj <- deg$padj
+}
 write.csv(classified, "classified_table.csv", row.names = FALSE)
 
 summary_counts <- list(
@@ -94,12 +149,12 @@ html_escape <- function(x) {
   x
 }
 
-top_rows <- head(classified[order(-abs(classified$log2FC), classified$pvalue), ], 12)
+top_rows <- head(classified[order(-abs(classified$log2FoldChange), classified$pvalue), ], 12)
 top_gene_rows_html <- paste(apply(top_rows, 1, function(row) {
   paste0(
     "<tr>",
     "<td>", html_escape(row[["gene"]]), "</td>",
-    "<td>", sprintf("%.3f", as.numeric(row[["log2FC"]])), "</td>",
+    "<td>", sprintf("%.3f", as.numeric(row[["log2FoldChange"]])), "</td>",
     "<td>", format(as.numeric(row[["pvalue"]]), scientific = TRUE, digits = 3), "</td>",
     "<td><span class=\"badge badge-", tolower(html_escape(row[["sig"]])), "\">", html_escape(row[["sig"]]), "</span></td>",
     "</tr>"
