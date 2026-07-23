@@ -872,38 +872,43 @@ function getLoopRun(loopRunId) {
   if (!loopRunId) return null;
   const row = db.prepare('SELECT * FROM loop_runs WHERE loop_run_id=?').get(loopRunId);
   if (!row) return null;
+  const record = safeParseJson(row.loop_status_json);
+  const {
+    normalizeLoopAutomationMode,
+    normalizeLoopExecutionIntent,
+  } = require('../shared-backend/loop-contract');
   return {
     loopRunId: row.loop_run_id,
     projectId: row.project_id,
     conversationId: row.conversation_id,
     taskSpecRef: row.task_spec_ref,
-    automationMode: row.automation_mode,
+    automationMode: normalizeLoopAutomationMode(row.automation_mode),
+    executionIntent: normalizeLoopExecutionIntent(
+      record?.executionIntent,
+      row.automation_mode,
+    ),
     loopStatus: row.loop_status,
     hash: row.loop_status_hash,
     isPartial: !!row.is_partial,
     partialReason: row.partial_reason,
-    record: safeParseJson(row.loop_status_json),
+    record,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
 }
 
 function listLoopRunsForConversation(projectId, conversationId, { limit = 50 } = {}) {
-  if (!projectId || !conversationId) return [];
-  return db.prepare(`
-    SELECT * FROM loop_runs
-    WHERE project_id=? AND conversation_id=?
+  if (!projectId && !conversationId) return [];
+  const clauses = [];
+  const params = [];
+  if (projectId) { clauses.push('project_id=?'); params.push(projectId); }
+  if (conversationId) { clauses.push('conversation_id=?'); params.push(conversationId); }
+  const rows = db.prepare(`
+    SELECT loop_run_id FROM loop_runs
+    WHERE ${clauses.join(' AND ')}
     ORDER BY updated_at DESC LIMIT ?
-  `).all(projectId, conversationId, limit).map((row) => ({
-    loopRunId: row.loop_run_id,
-    projectId: row.project_id,
-    conversationId: row.conversation_id,
-    loopStatus: row.loop_status,
-    hash: row.loop_status_hash,
-    isPartial: !!row.is_partial,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  }));
+  `).all(...params, limit);
+  return rows.map((row) => getLoopRun(row.loop_run_id));
 }
 
 function listRunningLoopRuns() {
@@ -911,20 +916,14 @@ function listRunningLoopRuns() {
     SELECT * FROM loop_runs
     WHERE loop_status = 'running'
     ORDER BY updated_at ASC
-  `).all().map((row) => ({
-    loopRunId: row.loop_run_id,
-    projectId: row.project_id,
-    conversationId: row.conversation_id,
-    taskSpecRef: row.task_spec_ref,
-    automationMode: row.automation_mode,
-    loopStatus: row.loop_status,
-    loopStatusHash: row.loop_status_hash,
-    loopStatusJson: row.loop_status_json,
-    isPartial: !!row.is_partial,
-    partialReason: row.partial_reason || null,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  }));
+  `).all().map((row) => {
+    const run = getLoopRun(row.loop_run_id);
+    return {
+      ...run,
+      loopStatusHash: run.hash,
+      loopStatusJson: row.loop_status_json,
+    };
+  });
 }
 
 // HLE-C3R: Durable resume resolver. Returns the latest NON-TERMINAL LoopRun

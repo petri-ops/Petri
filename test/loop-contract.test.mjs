@@ -16,6 +16,8 @@ import lc from '../core/shared-backend/loop-contract.js';
 const {
   LOOP_CONTRACT_VERSION,
   LOOP_RUN_STATUSES,
+  LOOP_AUTOMATION_MODES,
+  LOOP_EXECUTION_INTENTS,
   ITERATION_STATUSES,
   ACTION_TYPES,
   DECISION_OUTCOMES,
@@ -41,6 +43,8 @@ const {
   buildEvidence,
   buildDecision,
   projectLoopRunPartial,
+  normalizeLoopAutomationMode,
+  normalizeLoopExecutionIntent,
 } = lc;
 
 describe('LC schema and enums', () => {
@@ -51,6 +55,8 @@ describe('LC schema and enums', () => {
   it('LC-2 status enums are frozen and non-empty', () => {
     for (const [name, list] of [
       ['LOOP_RUN_STATUSES', LOOP_RUN_STATUSES],
+      ['LOOP_AUTOMATION_MODES', LOOP_AUTOMATION_MODES],
+      ['LOOP_EXECUTION_INTENTS', LOOP_EXECUTION_INTENTS],
       ['ITERATION_STATUSES', ITERATION_STATUSES],
       ['ACTION_TYPES', ACTION_TYPES],
       ['DECISION_OUTCOMES', DECISION_OUTCOMES],
@@ -276,6 +282,30 @@ describe('LC validators', () => {
         { allowPartial: true },
       ),
     );
+  });
+
+  it('LC-17b keeps automation mode and execution intent as separate enums', () => {
+    const base = {
+      loopRunId: 'l',
+      projectId: 'p',
+      conversationId: 'c',
+      taskSpecRef: 'spec',
+      loopStatus: 'running',
+    };
+    assert.doesNotThrow(() => validateLoopRun({
+      ...base,
+      automationMode: 'trusted',
+      executionIntent: 'task_execute',
+    }));
+    assert.throws(() => validateLoopRun({ ...base, automationMode: 'task_execute' }), /automationMode/);
+    assert.throws(() => validateLoopRun({ ...base, executionIntent: 'trusted' }), /executionIntent/);
+  });
+
+  it('LC-17c normalizes legacy rows without allowing new invalid writes', () => {
+    assert.strictEqual(normalizeLoopAutomationMode('task_execute'), 'trusted');
+    assert.strictEqual(normalizeLoopAutomationMode('task_draft'), 'guided');
+    assert.strictEqual(normalizeLoopExecutionIntent(null, 'task_execute'), 'task_execute');
+    assert.strictEqual(normalizeLoopExecutionIntent('task_draft'), 'task_draft');
   });
 
   it('LC-18 validateIteration requires positive integer sequence', () => {

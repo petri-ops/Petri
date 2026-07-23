@@ -52,6 +52,7 @@ const { v4: uuidv4 } = require('uuid');
 
 // HLE-C1: Loop Controller + Ledger imports
 const {
+  buildLoopRun,
   buildIteration,
   buildEvidence,
   stableHash,
@@ -63,6 +64,7 @@ const {
   mapDecisionToIterationStatus,
   REASON_CODES,
   EVIDENCE_KINDS,
+  normalizeLoopAutomationMode,
 } = require('../shared-backend/loop-contract');
 
 const {
@@ -448,7 +450,11 @@ async function runAgentLoop({
     if (loopRunId) return;
     const pid = String(projectId || '');
     const cid = String(conversationId || '');
-    const automationMode = executionPolicy.allowExecution ? 'task_execute' : 'task_draft';
+    const executionIntent = executionPolicy.allowExecution ? 'task_execute' : 'task_draft';
+    const automationMode = normalizeLoopAutomationMode(
+      context && context.automationMode,
+      toolCtx.accessMode === 'full' ? 'trusted' : 'guided',
+    );
 
     // HLE-C3R: durable resume. A multi-turn task must reuse ONE LoopRun rather
     // than mint a new run every turn. Look up the latest non-terminal run for
@@ -489,42 +495,36 @@ async function runAgentLoop({
         event: 'loop_phase',
         phase: 'resumed',
         loopRunId,
-        automationMode,
+        automationMode: resumed.automationMode || automationMode,
+        executionIntent: resumed.executionIntent || executionIntent,
         resumedFromSequence: loopSequence,
       });
       return;
     }
 
-    const { v4: loopUuid } = require('uuid');
-    loopRunId = loopUuid();
     const taskSpecHash = stableHash({
       projectId: pid,
       conversationId: cid,
-      automationMode,
+      executionIntent,
     });
-    const runHash = stableHash({
-      loopRunId,
-      projectId: pid,
-      conversationId: cid,
-      automationMode,
-      startedAt: new Date().toISOString(),
-    });
-    loopState = 'running';
-    persistLoopRun({
-      loopRunId,
+    const run = buildLoopRun({
       projectId: pid,
       conversationId: cid,
       taskSpecRef: taskSpecHash,
       automationMode,
+      executionIntent,
       loopStatus: 'running',
-      hash: runHash,
-      json: JSON.stringify({ taskSpecHash, automationMode }),
+      metadata: { taskSpecHash },
     });
+    loopRunId = run.loopRunId;
+    loopState = 'running';
+    persistLoopRun(run);
     _emit({
       event: 'loop_phase',
       phase: 'started',
       loopRunId,
       automationMode,
+      executionIntent,
     });
   }
 
@@ -541,6 +541,37 @@ async function runAgentLoop({
       proposedActionKey: actionKey || null,
       actionKeyHash: actionKey ? stableHash(actionKey) : null,
     });
+  }
+
+  function _loopPersistPhase(nextStatus, publicConclusion) {
+    if (!loopRunId || !nextStatus || nextStatus === 'running') return;
+    try {
+      const current = getLoopRun(loopRunId);
+      if (!current || current.loopStatus === nextStatus) return;
+      updateLoopRunStatus(loopRunId, {
+        loopStatus: nextStatus,
+        hash: current.hash,
+        json: JSON.stringify({
+          ...(current.record || {}),
+          loopStatus: nextStatus,
+          publicConclusion: publicConclusion || null,
+          completedAt: ['completed', 'failed', 'cancelled'].includes(nextStatus)
+            ? new Date().toISOString()
+            : null,
+        }),
+        updatedAt: new Date().toISOString(),
+      });
+      _emit({
+        event: 'loop_phase',
+        phase: nextStatus,
+        loopRunId,
+        publicConclusion: publicConclusion || undefined,
+        automationMode: current.automationMode,
+        executionIntent: current.executionIntent,
+      });
+    } catch (error) {
+      console.warn('[harness-loop] failed to persist phase:', error && error.message);
+    }
   }
 
   // HLE-C3R: persist a durable context checkpoint for each iteration so the
@@ -1117,6 +1148,7 @@ async function runAgentLoop({
         loopState = 'cancelled';
         loopPublicConclusion = iteration.publicConclusion;
         _loopEmitIterationEvent(iteration, 'cancel', null);
+        _loopPersistPhase('cancelled', iteration.publicConclusion);
       } else {
         let decision = 'continue';
         let decisionReasonCode = REASON_CODES.TOOL_SUCCEEDED;
@@ -1186,6 +1218,15 @@ async function runAgentLoop({
           repairAttempt,
         });
         _loopEmitIterationEvent(iteration, decision, null);
+        if (decision === 'complete') {
+          loopState = 'completed';
+          loopPublicConclusion = iteration.publicConclusion;
+          _loopPersistPhase('completed', iteration.publicConclusion);
+        } else if (decision === 'block') {
+          loopState = 'blocked';
+          loopPublicConclusion = iteration.publicConclusion;
+          _loopPersistPhase('blocked', iteration.publicConclusion);
+        }
       }
     }
 
@@ -1242,6 +1283,12 @@ async function runAgentLoop({
                 ...(assistantToolActivities.snapshot().length
                   ? { toolActivities: assistantToolActivities.snapshot() }
                   : {}),
+                ...(loopRunId ? {
+                  loopRef: {
+                    loopRunId,
+                    phase: loopState || 'running',
+                  },
+                } : {}),
               };
               appendMessageToConversation(_activeConv.id, 'assistant', assistantAcc.trim(), assistantMeta);
               try {

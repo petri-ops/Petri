@@ -15,7 +15,7 @@ import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 // ---------------------------------------------------------------------------
 
 /** Terminal + in-flight loop statuses as persisted by the backend ledger. */
-export type LoopStatus = 'planned' | 'running' | 'completed' | 'failed' | 'cancelled' | 'blocked';
+export type LoopStatus = 'planned' | 'running' | 'waiting_for_user' | 'completed' | 'failed' | 'cancelled' | 'blocked';
 
 /** Controller decision outcomes surfaced per iteration. */
 export type LoopDecision = 'continue' | 'retry' | 'block' | 'wait' | 'complete' | 'cancel';
@@ -26,6 +26,7 @@ export interface LoopRunCompact {
   conversationId: string;
   taskSpecRef: string | null;
   automationMode: string | null;
+  executionIntent: 'task_draft' | 'task_execute' | null;
   loopStatus: LoopStatus;
   hash: string;
   isPartial: boolean;
@@ -84,6 +85,7 @@ export interface LoopRecovery {
   conversationId: string;
   loopStatus: LoopStatus;
   automationMode: string | null;
+  executionIntent: 'task_draft' | 'task_execute' | null;
   isTerminal: boolean;
   needsRecovery: boolean;
   recoveryRequired: boolean;
@@ -100,6 +102,30 @@ export interface LoopRecovery {
   recoveryHint: string;
 }
 
+export interface LoopUsageSummary {
+  calls: number;
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheCreationTokens: number;
+  estimatedCostCny: number;
+  unknownCostCalls: number;
+  failedCalls: number;
+  cacheHitRate: number;
+  costStatus: 'partial' | 'estimated';
+}
+
+export interface LoopSessionSummary {
+  run: (LoopRunCompact & {
+    recoveryRequired: boolean;
+    recoveryReason: string | null;
+  }) | null;
+  iterations: LoopIterationCompact[];
+  activeCount: number;
+  backgroundCount: number;
+  usage: LoopUsageSummary;
+}
+
 // ---------------------------------------------------------------------------
 // SSE event shapes — emitted live by agent-runner during a run. These mirror
 // the onLoopPhase / onLoopIteration callback payloads in copilotClient.ts so
@@ -112,6 +138,7 @@ export interface LoopPhaseEvent {
   publicConclusion?: string;
   reason?: string;
   automationMode?: string;
+  executionIntent?: 'task_draft' | 'task_execute';
 }
 
 export interface LoopIterationEvent {
@@ -176,6 +203,21 @@ export async function fetchLoopRuns(input: {
   if (input.limit) params.set('limit', String(input.limit));
   const data = await getJson<{ runs: LoopRunCompact[] }>(`${loopBase()}/runs?${params.toString()}`);
   return data.runs || [];
+}
+
+/** GET /api/loop/session-summary — bounded cold-start/reopen projection. */
+export async function fetchLoopSessionSummary(input: {
+  conversationId: string;
+  projectId: string;
+}): Promise<LoopSessionSummary> {
+  const params = new URLSearchParams({
+    conversationId: input.conversationId,
+    projectId: input.projectId,
+  });
+  const data = await getJson<{ summary: LoopSessionSummary }>(
+    `${loopBase()}/session-summary?${params.toString()}`
+  );
+  return data.summary;
 }
 
 /** GET /api/loop/iterations/:loopRunId */

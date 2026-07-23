@@ -59,6 +59,79 @@ function registerAiLoopRoutes(app) {
   }
 
   /**
+   * GET /api/loop/session-summary?projectId=&conversationId=
+   * One bounded projection for cold start/reopen: latest durable run, public
+   * conclusions, project activity counts, recovery state and conversation
+   * token/cost usage. All fields come from SQLite truth.
+   */
+  router.get('/session-summary', requireUser, (req, res) => {
+    const projectId = String(req.query.projectId || '');
+    const conversationId = String(req.query.conversationId || '');
+    if (!projectId || !conversationId) {
+      return res.status(400).json({ ok: false, error: 'projectId and conversationId required' });
+    }
+    if (!userMayAccessProject(req, projectId)) {
+      return res.status(403).json({ ok: false, error: 'forbidden' });
+    }
+    try {
+      const projectRuns = listLoopRunsForConversation(projectId, null, { limit: 100 });
+      const conversationRuns = projectRuns.filter((run) => run.conversationId === conversationId);
+      const run = conversationRuns[0] || null;
+      let iterations = [];
+      if (run) {
+        iterations = (db.listLoopIterations(run.loopRunId, { limit: 200 }) || [])
+          .slice()
+          .sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
+          .map((iteration) => ({
+            iterationId: iteration.iterationId,
+            loopRunId: iteration.loopRunId,
+            sequence: iteration.sequence,
+            decision: iteration.decision,
+            decisionReasonCode: iteration.decisionReasonCode,
+            status: iteration.status,
+            publicConclusion: iteration.publicConclusion,
+            createdAt: iteration.createdAt,
+          }));
+      }
+      const activeRuns = projectRuns.filter((item) =>
+        ['planned', 'running', 'waiting_for_user'].includes(item.loopStatus)
+      );
+      const record = run?.record && typeof run.record === 'object' ? run.record : {};
+      const usage = require('../helpers/ai-usage').summarizeAiUsage({
+        userId: req.userId,
+        conversationId,
+      });
+      res.json({
+        ok: true,
+        summary: {
+          run: run ? {
+            loopRunId: run.loopRunId,
+            projectId: run.projectId,
+            conversationId: run.conversationId,
+            taskSpecRef: run.taskSpecRef,
+            automationMode: run.automationMode,
+            executionIntent: run.executionIntent,
+            loopStatus: run.loopStatus,
+            hash: run.hash,
+            isPartial: Boolean(run.isPartial),
+            partialReason: run.partialReason || null,
+            recoveryRequired: Boolean(record.recovery_required),
+            recoveryReason: record.recovery_reason || null,
+            createdAt: run.createdAt,
+            updatedAt: run.updatedAt,
+          } : null,
+          iterations,
+          activeCount: activeRuns.length,
+          backgroundCount: activeRuns.filter((item) => item.conversationId !== conversationId).length,
+          usage,
+        },
+      });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: err.message });
+    }
+  });
+
+  /**
    * GET /api/loop/runs/:loopRunId
    * Returns a single LoopRun with compact projection.
    * Does NOT return unbounded logs or raw full tool_results.
@@ -78,6 +151,7 @@ function registerAiLoopRoutes(app) {
         conversationId: run.conversationId,
         taskSpecRef: run.taskSpecRef,
         automationMode: run.automationMode,
+        executionIntent: run.executionIntent,
         loopStatus: run.loopStatus,
         hash: run.hash,
         isPartial: Boolean(run.isPartial),
@@ -138,6 +212,7 @@ function registerAiLoopRoutes(app) {
         conversationId: run.conversationId,
         taskSpecRef: run.taskSpecRef,
         automationMode: run.automationMode,
+        executionIntent: run.executionIntent,
         loopStatus: run.loopStatus,
         hash: run.loopStatusHash || run.hash,
         isPartial: Boolean(run.isPartial),
@@ -298,6 +373,7 @@ function registerAiLoopRoutes(app) {
         conversationId: run.conversationId,
         loopStatus: run.loopStatus,
         automationMode: run.automationMode,
+        executionIntent: run.executionIntent,
         isTerminal,
         needsRecovery,
         recoveryRequired,

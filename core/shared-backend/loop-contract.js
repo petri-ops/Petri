@@ -47,6 +47,15 @@ const LOOP_RUN_STATUSES = Object.freeze([
   'cancelled',
 ]);
 
+/**
+ * How independently the Loop may act. This is deliberately separate from
+ * executionIntent: a trusted run may execute a task, while a guided run may
+ * still be a draft-only turn. Keeping the two axes distinct prevents UI access
+ * modes and task classification from corrupting the durable contract.
+ */
+const LOOP_AUTOMATION_MODES = Object.freeze(['guided', 'confirm', 'trusted']);
+const LOOP_EXECUTION_INTENTS = Object.freeze(['task_draft', 'task_execute']);
+
 const ITERATION_STATUSES = Object.freeze([
   'pending',
   'running',
@@ -140,6 +149,7 @@ const SEMANTIC_FIELD_KEYS = Object.freeze({
     'conversationId',
     'taskSpecRef',
     'automationMode',
+    'executionIntent',
     'loopStatus',
     'createdAt',
     'updatedAt',
@@ -270,14 +280,30 @@ function validateLoopRun(input, { allowPartial = false } = {}) {
       throw new TypeError('loopRun.taskSpecRef must be a non-empty string');
     }
     if (input.automationMode) {
-      requireEnum(
-        input.automationMode,
-        ['guided', 'confirm', 'trusted'],
-        'loopRun.automationMode',
-      );
+      requireEnum(input.automationMode, LOOP_AUTOMATION_MODES, 'loopRun.automationMode');
+    }
+    if (input.executionIntent) {
+      requireEnum(input.executionIntent, LOOP_EXECUTION_INTENTS, 'loopRun.executionIntent');
     }
   }
   return input;
+}
+
+/**
+ * Read compatibility for rows written before automationMode and
+ * executionIntent were separated. New writes must always use buildLoopRun.
+ */
+function normalizeLoopAutomationMode(value, fallback = 'guided') {
+  if (LOOP_AUTOMATION_MODES.includes(value)) return value;
+  if (value === 'task_execute') return 'trusted';
+  if (value === 'task_draft') return 'guided';
+  return LOOP_AUTOMATION_MODES.includes(fallback) ? fallback : 'guided';
+}
+
+function normalizeLoopExecutionIntent(value, legacyAutomationMode = null) {
+  if (LOOP_EXECUTION_INTENTS.includes(value)) return value;
+  if (LOOP_EXECUTION_INTENTS.includes(legacyAutomationMode)) return legacyAutomationMode;
+  return null;
 }
 
 function validateIteration(input, { allowPartial = false } = {}) {
@@ -381,7 +407,11 @@ function buildLoopRun(input) {
     projectId: input.projectId,
     conversationId: input.conversationId,
     taskSpecRef: input.taskSpecRef || null,
-    automationMode: input.automationMode || 'guided',
+    automationMode: normalizeLoopAutomationMode(input.automationMode),
+    executionIntent: normalizeLoopExecutionIntent(
+      input.executionIntent,
+      input.automationMode,
+    ),
     loopStatus: input.loopStatus || 'planned',
     createdAt: input.createdAt || nowIso(),
     updatedAt: input.updatedAt || nowIso(),
@@ -513,6 +543,8 @@ function projectLoopRunPartial(loopRun) {
 module.exports = {
   LOOP_CONTRACT_VERSION,
   LOOP_RUN_STATUSES,
+  LOOP_AUTOMATION_MODES,
+  LOOP_EXECUTION_INTENTS,
   ITERATION_STATUSES,
   ACTION_TYPES,
   DECISION_OUTCOMES,
@@ -528,6 +560,8 @@ module.exports = {
   generateId,
   generateActionKey,
   validateLoopRun,
+  normalizeLoopAutomationMode,
+  normalizeLoopExecutionIntent,
   validateIteration,
   validateAction,
   validateEvidence,

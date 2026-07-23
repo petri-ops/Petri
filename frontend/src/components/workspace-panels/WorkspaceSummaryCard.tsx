@@ -6,7 +6,7 @@ import type { BackendStatus } from '@/lib/electron';
 import styles from '@/pages/project-workspace.module.css';
 import { useRuntimeResourceSnapshot } from '@/hooks/useRuntimeResourceSnapshot';
 import type { ConversationLoopState } from '@/components/copilot/conversationRunStore';
-import { deriveLoopDisplay, loopDecisionLabel } from '@/lib/loop-client';
+import { deriveLoopDisplay, loopDecisionLabel, type LoopSessionSummary } from '@/lib/loop-client';
 
 export interface WorkspaceSummaryCardProps {
   open: boolean;
@@ -21,6 +21,7 @@ export interface WorkspaceSummaryCardProps {
   backendStatus: BackendStatus;
   /** HLE-C4R: live durable-loop projection for the active conversation (or null). */
   loop?: ConversationLoopState | null;
+  loopSummary?: LoopSessionSummary | null;
   onOpenScheduled: () => void;
   onSelectJob: (id: string) => void;
 }
@@ -46,6 +47,7 @@ export function WorkspaceSummaryCard({
   jobStats,
   backendStatus,
   loop,
+  loopSummary,
   onOpenScheduled,
   onSelectJob,
 }: WorkspaceSummaryCardProps): React.ReactElement | null {
@@ -200,6 +202,14 @@ export function WorkspaceSummaryCard({
               <div className={styles.workspaceLoopMeta}>
                 {loopDisplay.attempts} 轮
                 {loop.lastDecision ? ` · 最近决策：${loopDecisionLabel(loop.lastDecision)}` : ''}
+              </div>
+            )}
+            {loopSummary && (
+              <div className={styles.workspaceLoopMeta}>
+                活动 {loopSummary.activeCount} · 后台 {loopSummary.backgroundCount}
+                {' · '}Token {(loopSummary.usage.inputTokens + loopSummary.usage.outputTokens).toLocaleString()}
+                {' · '}¥{Number(loopSummary.usage.estimatedCostCny || 0).toFixed(4)}
+                {loopSummary.usage.costStatus === 'partial' ? '（部分估算）' : ''}
               </div>
             )}
           </section>

@@ -73,6 +73,7 @@ import {
   type ConversationLoopState,
 } from './conversationRunStore';
 import { deriveLoopDisplay, loopDecisionLabel } from '@/lib/loop-client';
+import { useDurableConversationLoop } from '@/hooks/useDurableConversationLoop';
 import './simple-chat.css';
 import { Icon } from '@/components/icons/Icon';
 import { HighlightedCode } from '@/components/ui/CodeHighlight';
@@ -161,6 +162,7 @@ export function SimpleChat({
   const taRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeRun = useConversationRun(conversationId);
+  const durableLoop = useDurableConversationLoop(projectId, conversationId, activeRun?.loop);
   const streaming = starting || activeRun?.status === 'running';
   const pendingApproval = activeRun?.pendingApproval || null;
 
@@ -413,7 +415,14 @@ export function SimpleChat({
   }, [activeRun, conversationId, refreshConversations]);
 
   const displayMessages = (() => {
-    if (!activeRun || activeRun.conversationId !== conversationId) return messages;
+    if (!activeRun || activeRun.conversationId !== conversationId) {
+      if (!durableLoop.loop) return messages;
+      const lastAssistantIndex = messages.findLastIndex((message) => message.role === 'assistant');
+      if (lastAssistantIndex < 0) return messages;
+      const next = messages.slice();
+      next[lastAssistantIndex] = { ...next[lastAssistantIndex], loop: durableLoop.loop };
+      return next;
+    }
     const next = messages.slice();
     const lastUser = [...next].reverse().find((message) => message.role === 'user');
     const runUserPersisted =
@@ -443,7 +452,7 @@ export function SimpleChat({
         processingDurationMs: activeRun.processingDurationMs,
         statusMessage: activeRun.statusMessage,
         progressUpdates: activeRun.progressUpdates,
-        loop: activeRun.loop,
+        loop: durableLoop.loop || activeRun.loop,
       });
     }
     return next;
@@ -454,7 +463,7 @@ export function SimpleChat({
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [activeRun, messages]);
+  }, [activeRun, durableLoop.loop, messages]);
 
   const inputLength = input.trim().length;
   const composerWidth = Math.min(980, Math.max(560, 560 + Math.sqrt(inputLength) * 42));

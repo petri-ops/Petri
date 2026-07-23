@@ -51,23 +51,25 @@ let publicProjectId;
 function nowIso() { return new Date().toISOString(); }
 
 let runSeq = 0;
-function persistRun({ projectId, conversationId, automationMode = 'task_execute', loopStatus = 'running', json = null }) {
+function persistRun({
+  projectId,
+  conversationId,
+  automationMode = 'trusted',
+  executionIntent = 'task_execute',
+  loopStatus = 'running',
+}) {
   runSeq += 1;
-  const loopRunId = `loop_route_${Date.now()}_${runSeq}`;
-  const taskSpecRef = lc.stableHash({ projectId, conversationId, automationMode });
-  const hash = lc.stableHash({ loopRunId, projectId, conversationId, n: runSeq });
-  return db.persistLoopRun({
-    loopRunId,
+  return db.persistLoopRun(lc.buildLoopRun({
+    loopRunId: `loop_route_${Date.now()}_${runSeq}`,
     projectId,
     conversationId,
-    taskSpecRef,
+    taskSpecRef: lc.stableHash({ projectId, conversationId, executionIntent }),
     automationMode,
+    executionIntent,
     loopStatus,
-    hash,
-    json: json || JSON.stringify({ taskSpecRef, automationMode }),
     createdAt: nowIso(),
     updatedAt: nowIso(),
-  });
+  }));
 }
 
 async function apiGet(pathname, { userId, role } = {}) {
@@ -325,5 +327,61 @@ test('RT-14 actions endpoint returns persisted actions', async () => {
 test('RT-15 actions endpoint is 403 for a non-owner', async () => {
   const run = persistRun({ projectId: ownedProjectId, conversationId: 'conv_actions_iso' });
   const res = await apiGet(`/api/loop/actions/${run.loopRunId}`, { userId: OTHER_ID });
+  assert.strictEqual(res.status, 403);
+});
+
+test('RT-16 project-only list returns complete normalized contract fields', async () => {
+  const run = persistRun({ projectId: ownedProjectId, conversationId: 'conv_project_only' });
+  const res = await apiGet(`/api/loop/runs?projectId=${ownedProjectId}`, { userId: OWNER_ID });
+  assert.strictEqual(res.status, 200);
+  const found = res.body.runs.find((item) => item.loopRunId === run.loopRunId);
+  assert.ok(found);
+  assert.strictEqual(found.automationMode, 'trusted');
+  assert.strictEqual(found.executionIntent, 'task_execute');
+  assert.ok(found.taskSpecRef);
+});
+
+test('RT-17 session summary replays public iterations, activity and conversation usage', async () => {
+  const conversationId = 'conv_session_summary';
+  const run = persistRun({ projectId: ownedProjectId, conversationId });
+  const iteration = lc.buildIteration({
+    loopRunId: run.loopRunId,
+    sequence: 1,
+    observedStateDigest: 'state',
+    decision: 'continue',
+    decisionReasonCode: 'TOOL_SUCCEEDED',
+    publicConclusion: '表达矩阵质控完成',
+  });
+  db.persistLoopIteration(iteration);
+  const { recordAiUsage } = require('../core/r-server/helpers/ai-usage.js');
+  recordAiUsage({
+    userId: OWNER_ID,
+    conversationId,
+    kind: 'agent_iter',
+    model: 'deepseek-chat',
+    promptTokens: 100,
+    completionTokens: 25,
+    cacheReadTokens: 40,
+    costCny: 0.001,
+    costStatus: 'estimated',
+  });
+  const res = await apiGet(
+    `/api/loop/session-summary?projectId=${ownedProjectId}&conversationId=${conversationId}`,
+    { userId: OWNER_ID },
+  );
+  assert.strictEqual(res.status, 200);
+  assert.strictEqual(res.body.summary.run.loopRunId, run.loopRunId);
+  assert.strictEqual(res.body.summary.iterations[0].publicConclusion, '表达矩阵质控完成');
+  assert.ok(res.body.summary.activeCount >= 1);
+  assert.strictEqual(res.body.summary.usage.inputTokens, 100);
+  assert.strictEqual(res.body.summary.usage.outputTokens, 25);
+  assert.strictEqual(res.body.summary.usage.cacheReadTokens, 40);
+});
+
+test('RT-18 session summary enforces project ownership', async () => {
+  const res = await apiGet(
+    `/api/loop/session-summary?projectId=${ownedProjectId}&conversationId=conv_forbidden_summary`,
+    { userId: OTHER_ID },
+  );
   assert.strictEqual(res.status, 403);
 });

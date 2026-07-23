@@ -68,10 +68,11 @@ function recordAiUsage({userId, kind, model, promptTokens, completionTokens, cac
   }
 }
 
-function summarizeAiUsage({ userId = null, since = null } = {}) {
+function summarizeAiUsage({ userId = null, conversationId = null, since = null } = {}) {
   const clauses = [];
   const params = [];
   if (userId) { clauses.push('user_id = ?'); params.push(userId); }
+  if (conversationId) { clauses.push('conversation_id = ?'); params.push(conversationId); }
   if (since) { clauses.push('ts >= ?'); params.push(since); }
   const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
   const row = sqlite.prepare(`SELECT COUNT(*) AS calls,

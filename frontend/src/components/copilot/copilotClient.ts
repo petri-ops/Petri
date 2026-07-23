@@ -252,7 +252,7 @@ export interface StreamChatOptions {
   /** Server detected the user has pivoted to a new topic mid-conversation */
   onTopicShift?: (info: { conversationId: string; reason: string }) => void;
   /** HLE-C4: Loop Controller phase change (started / cancelled / blocked / completed) */
-  onLoopPhase?: (info: { phase: string; loopRunId?: string; publicConclusion?: string; reason?: string; automationMode?: string }) => void;
+  onLoopPhase?: (info: { phase: string; loopRunId?: string; publicConclusion?: string; reason?: string; automationMode?: string; executionIntent?: 'task_draft' | 'task_execute' }) => void;
   /** HLE-C4: Loop Controller iteration recorded after each agent turn */
   onLoopIteration?: (info: { loopRunId: string; iterationId: string; sequence: number; decision: string; decisionReasonCode: string; publicConclusion: string; status: string; proposedActionKey: string | null; actionKeyHash: string | null }) => void;
   /** Background task created for this run. Used by the UI to request a real cancellation. */
@@ -471,6 +471,9 @@ function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
       publicConclusion: obj.publicConclusion ? String(obj.publicConclusion) : undefined,
       reason: obj.reason ? String(obj.reason) : undefined,
       automationMode: obj.automationMode ? String(obj.automationMode) : undefined,
+      executionIntent: obj.executionIntent === 'task_draft' || obj.executionIntent === 'task_execute'
+        ? obj.executionIntent
+        : undefined,
     });
     return;
   }

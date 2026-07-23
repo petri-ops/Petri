@@ -2,7 +2,7 @@
 
 最后更新：2026-07-23
 
-状态：`planned`
+状态：`in_progress`（HLE-C1～C3 完成；HLE-C4 功能接线完成、视觉验收进行中；HLE-C5 Step 7 待真实产品验收）
 
 主模块：`P-03 Harness 与 Agent 工作流`
 
@@ -251,7 +251,7 @@ failed Job 存在部分文件时必须：
 
 ### HLE-C4：会话与摘要 UI 接线
 
-状态：`partial`（HLE-C4R 实时消费端完成：loop-client + store 接线 + 聊天面板 + 摘要卡当前会话投影 + 单测；历史 API 回放 / recovery / token-cost / 视觉矩阵待续）
+状态：`in_progress`（功能接线完成：实时 SSE、历史回放、recovery、active/background、token/cache/cost；明暗/820px/停止恢复视觉矩阵待验）
 
 > HLE-C4R 进度（2026-07-23，聊天消费端）：
 > - `frontend/src/lib/loop-client.ts`：`/api/loop/*` 类型化 REST 客户端 + SSE 事件类型（LoopPhaseEvent/LoopIterationEvent）+ 展示辅助（isLoopComplete / isLoopUnsuccessfulTerminal / loopStatusLabel / deriveLoopDisplay / loopDecisionLabel）。聊天与摘要共用同一 loop 词表，杜绝第二套完成状态。
@@ -259,7 +259,16 @@ failed Job 存在部分文件时必须：
 > - `SimpleChat.tsx` + `simple-chat.css`：`LoopStatusPanel` 紧凑显示阶段状态 + 轮次 + 最近公开结论，可展开逐轮 decision/publicConclusion；blocked/failed/cancelled 一律非绿（tone=warning/neutral）；只展示 publicConclusion，不展示隐藏思维链。
 > - `CenterPanel.tsx` + `WorkspaceSummaryCard.tsx`：从同一个 conversation run store 读取当前会话 loop 投影；摘要卡紧凑显示后端状态、轮次、最近公开结论和最近决策，未创建 LoopRun 时不显示。未建立第二套完成状态。
 > - 测试：conversationRunStore 15/15（含 4 个 loop 用例：phase 投影、iteration 幂等去重、stop 后保留、blocked 非绿）；frontend 全量 223/223；`npm --prefix frontend run build:check` 通过；根 `npm run check` 全绿。
-> - 待续（保持 in_progress，无实机证据不得 verified）：摘要卡 active/background、重启 recovery 和 token-cost 数据接线；历史会话经 `/api/loop/runs` 回放；明暗 / 820px 窄窗 / 停止恢复视觉矩阵；真实产品实机（属 HLE-C5 Step 7）。
+> - 2026-07-23 时记录的历史回放、摘要 active/background/recovery/token-cost 功能缺口已于 2026-07-24 关闭；保持 in_progress 的仅是明暗 / 820px 窄窗 / 停止恢复视觉矩阵与 HLE-C5 Step 7。
+>
+> HLE-C4R 功能收口（2026-07-24）：
+> - `automationMode` 与 `executionIntent` 分离；新运行走 `buildLoopRun`，旧 task_* 行只读兼容。
+> - Loop 每轮结束会真实持久化 completed/blocked/cancelled，不再依赖瞬时 SSE 表示终态。
+> - `/api/loop/session-summary` 提供有界冷启动投影：latest run、公开 iterations、recovery、active/background 和 conversation usage。
+> - `useDurableConversationLoop` 在打开、切换、重开会话时从 SQLite 回放，并与 live SSE 按 iterationId 幂等合并；聊天停止后阶段记录不再随 transient run 清除。
+> - 摘要同步显示恢复状态、当前/后台 Loop 数、Token、缓存口径与成本状态；资源仍由 RuntimeResourceSnapshot 提供。
+> - 自动证据：真实 Router 18 项、Contract/Repository 64 项、前端 226 项、根测试 1067（1056 pass/0 fail/11 skip）。
+> - 待续仅剩实机视觉矩阵；未取得证据前 UI-101 不标 verified。
 
 首选位置：
 

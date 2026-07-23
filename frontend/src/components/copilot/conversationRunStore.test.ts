@@ -278,13 +278,15 @@ describe('conversation run store', () => {
     callbacks.onLoopPhase({
       phase: 'started',
       loopRunId: 'loop-1',
-      automationMode: 'task_execute',
+      automationMode: 'trusted',
+      executionIntent: 'task_execute',
     });
 
     expect(getConversationRunSnapshot('conversation-a')?.loop).toMatchObject({
       loopRunId: 'loop-1',
       phase: 'started',
-      automationMode: 'task_execute',
+      automationMode: 'trusted',
+      executionIntent: 'task_execute',
       recoveryRequired: false,
       iterations: [],
     });

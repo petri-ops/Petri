@@ -12,7 +12,8 @@
  *  - A run that a server restart marked failed(recovery_required) is EXCLUDED
  *    from active resolution (recovery is surfaced via the recovery API, not
  *    silently resumed).
- *  - automationMode filtering keeps task_draft and task_execute runs distinct.
+ *  - automationMode and executionIntent remain separate, with legacy rows
+ *    projected compatibly.
  *  - listLoopActions returns persisted actions (fixes the previously-dead
  *    /api/loop/actions endpoint).
  *  - Context checkpoints persist per iteration so the chat summary is NOT the
@@ -60,31 +61,26 @@ function uniqueConv() {
   return `conv_c3r_${Date.now()}_${seq}`;
 }
 
-// Persist a LoopRun exactly the way the production agent-runner does: via the
-// raw db.persistLoopRun repository call (NOT lc.buildLoopRun). Production
-// deliberately bypasses loop-contract validation here and stores automationMode
-// = 'task_execute' / 'task_draft' (the per-turn execution intent). This helper
-// mirrors that real path so the test validates production reality rather than
-// an idealized contract that production does not use. See AUDIT-LOG automationMode
-// taxonomy drift note.
 let runSeq = 0;
-function persistRun({ projectId, conversationId, automationMode = 'task_execute', loopStatus = 'running' }) {
+function persistRun({
+  projectId,
+  conversationId,
+  automationMode = 'trusted',
+  executionIntent = 'task_execute',
+  loopStatus = 'running',
+}) {
   runSeq += 1;
-  const loopRunId = `loop_c3r_${Date.now()}_${runSeq}`;
-  const taskSpecRef = lc.stableHash({ projectId, conversationId, automationMode });
-  const hash = lc.stableHash({ loopRunId, projectId, conversationId, automationMode, startedAt: nowIso(), n: runSeq });
-  return db.persistLoopRun({
-    loopRunId,
+  return db.persistLoopRun(lc.buildLoopRun({
+    loopRunId: `loop_c3r_${Date.now()}_${runSeq}`,
     projectId,
     conversationId,
-    taskSpecRef,
+    taskSpecRef: lc.stableHash({ projectId, conversationId, executionIntent }),
     automationMode,
+    executionIntent,
     loopStatus,
-    hash,
-    json: JSON.stringify({ taskSpecRef, automationMode }),
     createdAt: nowIso(),
     updatedAt: nowIso(),
-  });
+  }));
 }
 
 function runningRun(opts) {
@@ -135,7 +131,7 @@ test('C3R-3 returns the latest non-terminal run when several exist', () => {
   assert.notStrictEqual(active.loopRunId, older.loopRunId);
 });
 
-test('C3R-4 resolves a planned run and ignores automationMode (draft->execute is one run)', () => {
+test('C3R-4 resolves a planned run and ignores executionIntent (draft->execute is one run)', () => {
   // A task_draft turn may create a `planned` run; a later task_execute turn must
   // resume THAT run (planned -> running), not mint a second run. The resolver
   // therefore matches on (project, conversation) regardless of automationMode.
@@ -143,13 +139,16 @@ test('C3R-4 resolves a planned run and ignores automationMode (draft->execute is
   const planned = persistRun({
     projectId: 'proj_c3r',
     conversationId,
-    automationMode: 'task_draft',
+    automationMode: 'guided',
+    executionIntent: 'task_draft',
     loopStatus: 'planned',
   });
   const active = db.getActiveLoopRunForConversation('proj_c3r', conversationId);
   assert.ok(active, 'a planned run must be resolvable as active for resume');
   assert.strictEqual(active.loopRunId, planned.loopRunId);
   assert.strictEqual(active.loopStatus, 'planned');
+  assert.strictEqual(active.automationMode, 'guided');
+  assert.strictEqual(active.executionIntent, 'task_draft');
 });
 
 test('C3R-5 cross-conversation isolation', () => {
@@ -165,6 +164,30 @@ test('C3R-6 returns null for missing project/conversation', () => {
   assert.strictEqual(db.getActiveLoopRunForConversation(null, 'x'), null);
   assert.strictEqual(db.getActiveLoopRunForConversation('x', null), null);
   assert.strictEqual(db.getActiveLoopRunForConversation('nope', 'nope'), null);
+});
+
+test('C3R-6b list projection supports project-only and conversation-only filters', () => {
+  const conversationId = uniqueConv();
+  const run = runningRun({ projectId: 'proj_filter', conversationId });
+  assert.ok(db.listLoopRunsForConversation('proj_filter', null).some((item) => item.loopRunId === run.loopRunId));
+  assert.ok(db.listLoopRunsForConversation(null, conversationId).some((item) => item.loopRunId === run.loopRunId));
+});
+
+test('C3R-6c legacy task_execute automationMode projects as trusted execution intent', () => {
+  runSeq += 1;
+  const loopRunId = `legacy_${runSeq}`;
+  db.persistLoopRun({
+    loopRunId,
+    projectId: 'proj_legacy',
+    conversationId: uniqueConv(),
+    taskSpecRef: 'legacy-spec',
+    automationMode: 'task_execute',
+    loopStatus: 'running',
+    hash: lc.stableHash({ loopRunId }),
+  });
+  const run = db.getLoopRun(loopRunId);
+  assert.strictEqual(run.automationMode, 'trusted');
+  assert.strictEqual(run.executionIntent, 'task_execute');
 });
 
 // ---------------------------------------------------------------------------

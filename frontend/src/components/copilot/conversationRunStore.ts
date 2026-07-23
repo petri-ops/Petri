@@ -36,6 +36,7 @@ export interface ConversationLoopState {
   /** last phase the backend announced: started | resumed | cancelled | blocked | completed | ... */
   phase: string;
   automationMode?: string;
+  executionIntent?: 'task_draft' | 'task_execute';
   /** most recent public conclusion (phase or iteration), safe to display. */
   latestConclusion?: string;
   /** true once the backend reports the run was interrupted and needs recovery. */
@@ -111,6 +112,7 @@ function mergeLoopPhase(
     loopRunId,
     phase: info.phase || current?.phase || 'running',
     automationMode: info.automationMode || current?.automationMode,
+    executionIntent: info.executionIntent || current?.executionIntent,
     latestConclusion: info.publicConclusion || current?.latestConclusion,
     recoveryRequired: current?.recoveryRequired ?? false,
     iterations: current?.iterations || [],
@@ -135,6 +137,7 @@ function mergeLoopIteration(
     loopRunId,
     phase: current?.phase || 'running',
     automationMode: current?.automationMode,
+    executionIntent: current?.executionIntent,
     latestConclusion: info.publicConclusion || current?.latestConclusion,
     recoveryRequired: current?.recoveryRequired ?? false,
     iterations,

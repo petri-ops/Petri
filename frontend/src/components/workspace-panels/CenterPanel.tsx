@@ -1,6 +1,7 @@
 import React from 'react';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
 import { useConversationRun } from '@/components/copilot/conversationRunStore';
+import { useDurableConversationLoop } from '@/hooks/useDurableConversationLoop';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
@@ -190,6 +191,11 @@ function SessionFrameView({
   // pinned summary. Reads the same shared run store the chat renders from, so
   // there is no second source of completion truth.
   const activeRun = useConversationRun(ctx.activeConvId);
+  const durableLoop = useDurableConversationLoop(
+    ctx.project.id,
+    ctx.activeConvId,
+    activeRun?.loop
+  );
   return (
     <div
       className={`${styles.workspaceSessionFrame} ${
@@ -218,7 +224,8 @@ function SessionFrameView({
               liveJobsPreview={ctx.liveJobsPreview}
               jobStats={ctx.jobStats}
               backendStatus={ctx.backendStatus}
-              loop={activeRun?.loop ?? null}
+              loop={durableLoop.loop}
+              loopSummary={durableLoop.summary}
               onOpenScheduled={ctx.openScheduledResults}
               onSelectJob={(jobId) => {
                 ctx.setActiveJobId(jobId);
