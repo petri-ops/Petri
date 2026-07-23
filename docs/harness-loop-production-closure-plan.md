@@ -2,7 +2,7 @@
 
 最后更新：2026-07-24
 
-状态：`in_progress`（HLE-C1～C3 完成；HLE-C4 功能接线完成、视觉验收进行中；HLE-C5 Step 7 待真实产品验收）
+状态：`completed`（HLE-C0～HLE-C5 生产出口、UI-101 与 SPT-1 Step 7 均已验收）
 
 主模块：`P-03 Harness 与 Agent 工作流`
 
@@ -23,7 +23,7 @@
 - Checkpoint、ContextEnvelope、预算投影和 SessionStageView 纯函数。
 - HLE-0 脱敏 fixture 与 HLE-0～HLE-5 离线测试。
 
-当前尚未完成：
+收口前审计发现的缺口（现均已关闭）：
 
 1. 生产 `ai-agent.js` 没有调用 Loop Controller。
 2. 工具执行结果没有自动形成 Loop Iteration/Evidence/Decision。
@@ -32,6 +32,11 @@
 5. `harness:loop` 只聚合离线测试，不等于真实 Provider、重启恢复或视觉验收。
 6. 正式计划、提交标题和实际证据之间存在状态漂移。
 7. 真实历史会话出现过“Job 为 failed，但因目录存在部分文件而宣称整个分析完成”的错误行为。
+
+2026-07-24 完成对账：生产 Agent、逐阶段 ledger、Validator/Repair、
+历史/重启恢复、紧凑 UI、7 节点 SPT-1、双 Provider、Delivery/Replay
+与视觉矩阵均有当前 Git 状态绑定的脱敏证据。后续新增插件和工作流必须
+继续通过同一门禁，但不重开本计划。
 
 固定不变量：
 
@@ -51,7 +56,7 @@ Loop 只能消费、验证和编排这条真相链。任何 failed/cancelled/run
 | HLE-5 | Checkpoint/Context/UI projection 纯函数已实现 | 已完成前端和重启恢复矩阵 |
 | HLE-6 | 离线聚合命令通过 | 已完成双 Provider 和产品验收 |
 
-HLE-C0～HLE-C5 完成前，HLE 主计划总状态保持 `in_progress`。
+HLE-C0～HLE-C5 已全部满足出口；HLE 主计划同步升级为 `completed`。
 
 ## 3. 唯一生产控制流
 
@@ -247,11 +252,11 @@ failed Job 存在部分文件时必须：
 > - **checkpoint 不是唯一副本**：新增 `_loopSaveCheckpoint`（`buildIterationCheckpoint`→`saveContextCheckpoint`），每轮 iteration 落一份脱敏 checkpoint；`buildLoopContextEnvelope` 可从持久 checkpoint 重建（模型切换只换决策方，不换 TaskSpec/Truth/验收）。
 > - **API 收口**：修复 recovery/abort 读错字段（`run.loopStatusJson/loopStatusHash`→`run.record/run.hash`），补 `listLoopActions`（此前 `/actions` 端点空转），补项目归属隔离（`userMayAccessProject`：owner/public/ownerless/admin，非属主 403）。
 > - 证据：`test/loop-durable-resume.test.mjs`（11）+ `test/loop-api-route.test.mjs`（15，真实挂载 router + 真实 DB + mock auth）；641 loop + 1049 全量 pass / 0 fail，`npm run check` 绿。
-> - 待 HLE-C5R：真实应用重启矩阵、真实模型切换矩阵和视觉恢复态仍属 Step 7 实机验收，不因离线通过而声明。
+> - 该轮当时尚待 HLE-C5R 的真实应用重启、模型切换和视觉恢复矩阵；这些 Step 7 缺口已于 2026-07-24 关闭。
 
 ### HLE-C4：会话与摘要 UI 接线
 
-状态：`in_progress`（功能接线完成：实时 SSE、历史回放、recovery、active/background、token/cache/cost；明暗/820px/停止恢复视觉矩阵待验）
+状态：`completed`（实时 SSE、历史回放、recovery、active/background、token/cache/cost 及明暗/820px/停止恢复视觉矩阵均已验）
 
 > HLE-C4R 进度（2026-07-23，聊天消费端）：
 > - `frontend/src/lib/loop-client.ts`：`/api/loop/*` 类型化 REST 客户端 + SSE 事件类型（LoopPhaseEvent/LoopIterationEvent）+ 展示辅助（isLoopComplete / isLoopUnsuccessfulTerminal / loopStatusLabel / deriveLoopDisplay / loopDecisionLabel）。聊天与摘要共用同一 loop 词表，杜绝第二套完成状态。
@@ -259,7 +264,7 @@ failed Job 存在部分文件时必须：
 > - `SimpleChat.tsx` + `simple-chat.css`：`LoopStatusPanel` 紧凑显示阶段状态 + 轮次 + 最近公开结论，可展开逐轮 decision/publicConclusion；blocked/failed/cancelled 一律非绿（tone=warning/neutral）；只展示 publicConclusion，不展示隐藏思维链。
 > - `CenterPanel.tsx` + `WorkspaceSummaryCard.tsx`：从同一个 conversation run store 读取当前会话 loop 投影；摘要卡紧凑显示后端状态、轮次、最近公开结论和最近决策，未创建 LoopRun 时不显示。未建立第二套完成状态。
 > - 测试：conversationRunStore 15/15（含 4 个 loop 用例：phase 投影、iteration 幂等去重、stop 后保留、blocked 非绿）；frontend 全量 223/223；`npm --prefix frontend run build:check` 通过；根 `npm run check` 全绿。
-> - 2026-07-23 时记录的历史回放、摘要 active/background/recovery/token-cost 功能缺口已于 2026-07-24 关闭；保持 in_progress 的仅是明暗 / 820px 窄窗 / 停止恢复视觉矩阵与 HLE-C5 Step 7。
+> - 2026-07-23 时记录的历史回放、摘要 active/background/recovery/token-cost 功能缺口已于 2026-07-24 关闭；当时余下的明暗 / 820px 窄窗 / 停止恢复视觉矩阵与 HLE-C5 Step 7 也已在本轮关闭。
 >
 > HLE-C4R 功能收口（2026-07-24）：
 > - `automationMode` 与 `executionIntent` 分离；新运行走 `buildLoopRun`，旧 task_* 行只读兼容。
@@ -270,7 +275,7 @@ failed Job 存在部分文件时必须：
 > - 自动证据：真实 Router 18 项、Contract/Repository 64 项、前端 226 项、根测试 1067（1056 pass/0 fail/11 skip）。
 > - 真实 Desktop 纠偏：bounded AI Loop API 必须先于 legacy `/api/loop/:loopRunId` 注册；desktop-local 的 `req.user.id` 统一归一化为 `req.userId`。否则独立 router 测试虽绿，真实产品仍会分别返回 404/401。
 > - 无 assistant 消息的历史会话仍直接渲染 durable LoopStatusPanel，避免恢复事实因消息形态缺失而不可见。
-> - 待续仅剩实机视觉矩阵；未取得证据前 UI-101 不标 verified。
+> - 视觉矩阵已写入 `acceptance/harness-loop/production/ui-matrix.md`；UI-101 已标 `verified`。
 
 首选位置：
 
@@ -304,7 +309,7 @@ failed Job 存在部分文件时必须：
 
 ### HLE-C5：真实 SPT-1 与产品出口
 
-状态：`in_progress`（HLE-C5R 基础设施完成，真实产品验收待 Step 7：Plugin Contract 已统一（biof3.deg.v1、lfc_col、DESeq2 preflight）、bulk-rna-core 4-step DAG 已完成、Repair Boundary 已建立、scientific-task-planner coldataBinding 已完成、false-success 检测已修复。1032/1032 测试全量通过，插件契约 lint 0 错误。真实产品路径三轨（Normal/Repairable/Blocking）和 UI/Provider/重启验收待 Step 7。）
+状态：`completed`（真实 Normal/Repairable/Blocking、双 Provider、应用重启、Delivery/Replay 与视觉 Step 7 已验收）
 
 Provider 验收入口已覆盖 DeepSeek、Anthropic 与产品通用 OpenAI-compatible Profile；只有 key/base URL/model 环境变量齐备的目标才参与人工矩阵，报告不保存凭据、请求头、完整 Provider 响应或 endpoint URL。
 
@@ -313,6 +318,15 @@ Provider 验收入口已覆盖 DeepSeek、Anthropic 与产品通用 OpenAI-compa
 Loop 创建与阶段 durability 同步纠偏：普通 execution-capable 对话不再在模型首轮误建 Loop；只有首次 `run_tool`（包括 plan 或被 preflight 阻断的科学执行意图）才创建/恢复。每个工具批次完成即持久化公开阶段 iteration、Job 摘要、hash chain 和 checkpoint，终答另落终态 iteration；同工具失败父 Job 被后续成功 Job 替换时保留 `parentJobId + replacementJobId`，终态只受未修复失败控制。
 
 源数据不可变边界已在真实 SPT-1 验收中验证并加固：Agent 不得为适配插件原地修改已有 CSV/TSV/H5AD/RDS/测序输入。`workspace_write`/`workspace_replace` 对科学源文件返回 `source_data_immutable`，格式修复必须生成 `derived/` 或转换插件 Artifact，保留原始 hash 与 lineage；通用命令行也不得用来绕过这条 Harness 工程约束。
+
+2026-07-24 真实出口：
+
+- Normal：同一真实聊天完成 `sample-metadata-validator → expression-qc → deseq2 → deg-standardizer → volcano-plot → go-kegg → gsea` 七节点；所有 Job 为 completed、Artifact Truth 为 valid，源 `counts.csv`/`metadata.csv` SHA-256 未变。
+- Normal 的 GO/KEGG 与 GSEA 分别绑定不可变 ScientificTaskSpec；DeliveryManifest 为 valid，数据库外 ReplayPackage 为 complete，脚本、参数、输入和输出 hash 均可追溯。
+- Repairable：保留失败 parent Job 与成功 replacement Job，checkpoint 持久化 `parentJobId + replacementJobId + repaired=true`，旧失败不污染新验证结果。
+- Blocking：科学设计信息不足时进入 `waiting_for_user`，未创建非法 Job。
+- DeepSeek 与通用 OpenAI-compatible 两个真实 Provider 均通过必需探针；凭据、endpoint 和原始响应不进入提交证据。
+- 重启中断 Loop 为 `failed(recovery_required)`；renderer 覆盖明暗、1280/820、running/completed/waiting/cancelled/recovery。
 
 必须交付：
 
@@ -328,7 +342,7 @@ Loop 创建与阶段 durability 同步纠偏：普通 execution-capable 对话�
 
 出口：
 
-- 三条轨迹都创建真实 LoopRun 和真实 Job/Artifact。
+- 三条轨迹都创建真实 LoopRun；Normal/Repairable 创建真实 Job/Artifact，Blocking 在科学信息不足时保持零非法 Job。
 - 正常任务满足 TaskSpec、DAG、Validator、Delivery 和 Replay。
 - 可修复任务保留失败 Job、parent lineage 和新 verified Job。
 - 阻断任务不创建非法 Job，只询问关键科学问题。

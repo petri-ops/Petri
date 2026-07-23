@@ -17,8 +17,8 @@
 3. [`project-workspace-handoff.md`](./project-workspace-handoff.md) — 当前可恢复工程检查点。
 4. [`ui-productization-audit.md`](./ui-productization-audit.md) — 已完成的 Stage 1 验收台账。
 5. [`development-module-map.md`](./development-module-map.md) — W/P/C 责任边界。
-6. [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md) — 当前 P-03 Harness Loop Engineering v1（HLE-0～HLE-6）工作包。
-7. [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) — 当前 HLE 生产 Agent、Validator/Repair、恢复、UI 与真实 SPT-1 收口入口。
+6. [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md) — 已完成的 P-03 Harness Loop Engineering v1（HLE-0～HLE-6）基线。
+7. [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) — 已完成的 HLE 生产 Agent、Validator/Repair、恢复、UI 与真实 SPT-1 验收记录。
 8. [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md) — 已完成的 P-03 真实科学任务翻译与交付工作包计划。
 9. [`../acceptance/harness-scientific-task/task-catalog.md`](../acceptance/harness-scientific-task/task-catalog.md) — HRT-0 六类任务、20 项覆盖和已知缺口基线。
 10. [`../core/shared-backend/scientific-task-spec.js`](../core/shared-backend/scientific-task-spec.js) — HRT-1 ScientificTaskSpec/ContextEnvelope/Checkpoint 契约实现。
@@ -33,7 +33,7 @@
 - [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md) — Stage 4 RC 之后的通用基础工具、策略控制面、Trace 与跨工具接手计划。
 - [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md) — Phase 7 之后的真实需求翻译、可复现任务契约与证据化交付计划。
 - [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md) — 在既有 Task/Job/Artifact Truth 上增加持续验证、修复、恢复与目标终止的当前升级计划。
-- [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) — 将 HLE 后端原语接入真实 Agent、Job/Artifact 和 UI 的当前收口计划。
+- [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) — HLE 后端原语接入真实 Agent、Job/Artifact 和 UI 的已完成收口记录。
 - [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md) — 当前稳定版本收口台账、出口矩阵与实机证据。
 - [`releases/v0.0.1-rc.6.md`](./releases/v0.0.1-rc.6.md) — Stage 4 macOS 候选版发布说明与已知边界。
 - [`releases/v0.0.1-rc.7.md`](./releases/v0.0.1-rc.7.md) — Phase 7、模型 UX 与 ToolResult 实机收口发布版。

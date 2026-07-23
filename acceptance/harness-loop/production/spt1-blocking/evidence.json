@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "label": "spt1-blocking",
+  "conversationId": "conv_3daab34f-a53",
+  "taskId": "9bb1fc4d-8708-47fc-8202-3e1ea539b105",
+  "taskIds": [
+    "9bb1fc4d-8708-47fc-8202-3e1ea539b105"
+  ],
+  "taskStatus": "completed",
+  "agentStatus": "done",
+  "loopRunId": "loop_932f1a8444228011ec5692aa",
+  "loopStatus": "waiting_for_user",
+  "projectRefHash": "79bbdd94b6309f2382eaac08cefd38559752877a36b455d25055aeafb8fb7188",
+  "iterationCount": 4,
+  "iterations": [
+    {
+      "sequence": 1,
+      "decision": "continue",
+      "decision_reason_code": "TOOL_SUCCEEDED",
+      "status": "succeeded",
+      "hash": "601372b59435f5c1161d9d1e55b8868d93e23d4ba6c48e32c1a6090497e7887d",
+      "parent_iteration_hash": null
+    },
+    {
+      "sequence": 2,
+      "decision": "continue",
+      "decision_reason_code": "TOOL_SUCCEEDED",
+      "status": "succeeded",
+      "hash": "662bdd076a1c409b03e0fa2a2a2924153de7b3cc606db2ada51333e3caf126ae",
+      "parent_iteration_hash": "601372b59435f5c1161d9d1e55b8868d93e23d4ba6c48e32c1a6090497e7887d"
+    },
+    {
+      "sequence": 3,
+      "decision": "wait",
+      "decision_reason_code": "SCIENTIFIC_DESIGN_MISSING",
+      "status": "pending",
+      "hash": "4d17fc1585e2d6c6ac1f752ab64366f3b234c5136ea37542cefdb659d5a6a0c1",
+      "parent_iteration_hash": "662bdd076a1c409b03e0fa2a2a2924153de7b3cc606db2ada51333e3caf126ae"
+    },
+    {
+      "sequence": 4,
+      "decision": "wait",
+      "decision_reason_code": "SCIENTIFIC_DESIGN_MISSING",
+      "status": "pending",
+      "hash": "9b7aa3a756782f06dacf222c07428dedaae33fbbc0813aaf4935cb75cb1a342c",
+      "parent_iteration_hash": "4d17fc1585e2d6c6ac1f752ab64366f3b234c5136ea37542cefdb659d5a6a0c1"
+    }
+  ],
+  "checkpointCount": 4,
+  "checkpoints": [
+    {
+      "checkpointId": "cp_90fa95045916cb5c",
+      "sequence": 1,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_fd5d11bf4010beb2",
+      "sequence": 2,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_f84d1fc056b79d6b",
+      "sequence": 3,
+      "decision": "wait",
+      "status": "pending",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_3dd346fe38b59d9d",
+      "sequence": 4,
+      "decision": "wait",
+      "status": "pending",
+      "toolJobId": null,
+      "repairAttempt": null
+    }
+  ],
+  "evidenceCount": 0,
+  "jobs": [],
+  "scientificTasks": []
+}

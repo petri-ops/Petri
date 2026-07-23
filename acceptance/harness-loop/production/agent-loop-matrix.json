@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "d531300a6fac0eaae151c1dc19db92d7fc31753e",
+  "tracks": [
+    {
+      "label": "spt1-normal",
+      "taskId": "1d1e89f5-0e67-4025-9637-3038535ab6a7",
+      "loopRunId": "loop_3f14808aa418f3530ce70764",
+      "taskStatus": "completed",
+      "loopStatus": "completed",
+      "iterations": 10,
+      "jobs": 7
+    },
+    {
+      "label": "spt1-repairable",
+      "taskId": "ee725502-7bd3-483c-b791-83212b6ea2d7",
+      "loopRunId": "loop_2d0776a0f4c921a163a9b936",
+      "taskStatus": "completed",
+      "loopStatus": "completed",
+      "iterations": 4,
+      "jobs": 2
+    },
+    {
+      "label": "spt1-blocking",
+      "taskId": "9bb1fc4d-8708-47fc-8202-3e1ea539b105",
+      "loopRunId": "loop_932f1a8444228011ec5692aa",
+      "taskStatus": "completed",
+      "loopStatus": "waiting_for_user",
+      "iterations": 4,
+      "jobs": 0
+    }
+  ]
+}

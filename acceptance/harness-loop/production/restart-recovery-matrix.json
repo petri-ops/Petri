@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "d531300a6fac0eaae151c1dc19db92d7fc31753e",
+  "loopRunId": "loop_5054dea9e62c2ca3bb755069",
+  "loopStatus": "failed",
+  "recoveryRequired": true,
+  "recoveryReason": "server_restart_during_active_loop",
+  "passed": true
+}

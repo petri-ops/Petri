@@ -33,17 +33,17 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 
 正式计划：[`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md)。HRT-0 至 HRT-7 已完成。HRT-7 新增统一 `npm run harness:scientific-task` 离线聚合门禁，证据为 `acceptance/harness-scientific-task/hrt7-scientific-task-gate.json`；HRT-6 的持久化 ContextCheckpoint、ReplayPackage v1、逐 artifact 入口、五类漂移分类、真实离线 R 重放和数据库外接手仍由 `hrt6-replay-acceptance.json` 证明。UI-050 已实机点击导出 6 个逐产物入口/18 文件任务包，旧任务缺 checkpoint 时显示“历史部分可用”，控制台 0 error。后续运行控制面继续保持 `run_tool → tool_job → artifact truth` 唯一执行真相。
 
-用户已确认下一阶段为 [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md)：这是 P-03 Harness 的增量升级，不是并行系统。当前状态 `in_progress`（HLE-0 完成；HLE-1 实施中：LoopRun/Iteration/Action/Evidence/Decision/Snapshot 契约与 SQLite 持久化已上线；固定按 HLE-0～HLE-6 实施）；HLE-0 从 SPT-1 Bulk RNA-seq 真实任务基线开始。Loop 负责观察、决策、验证、修复、重规划、恢复和终止，继续复用现有 TaskSpec/DAG/Plugin/Job/Artifact/Delivery/Replay。任何 Agent 不得把它实现为第二套 executor、job 表、artifact 仓库或 workflow truth，也不得让模型口头“完成”替代确定性和科学验证器。
+用户已确认 [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md) 是 P-03 Harness 的增量升级而非并行系统；HLE-0～HLE-6 当前已完成并成为长期基线。Loop 负责观察、决策、验证、修复、重规划、恢复和终止，继续复用现有 TaskSpec/DAG/Plugin/Job/Artifact/Delivery/Replay。任何 Agent 不得把它扩展为第二套 executor、job 表、artifact 仓库或 workflow truth，也不得让模型口头“完成”替代确定性和科学验证器。
 
-2026-07-24 当前入口是 [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md)。生产 Agent loop、真实 Job/Artifact Validator/Diagnoser/Repair 与耐久恢复已分别由 HLE-C1～C3R 接线；HLE-C4R 功能接线已完成：实时 SSE、历史会话 SQLite 回放、真实终态、recovery、active/background 与 conversation token/cache/cost 共用同一投影，仍保持 `in_progress` 等待实机视觉。**仍未完成**：明暗/820px/停止恢复视觉矩阵，以及 HLE-C5 Step 7 三轨真实产品出口、双 Provider 与应用重启证据。按 HLE-C0～HLE-C5 收口，禁止把自动门禁或提交标题解释为 Harness v1.1 已完整验收。
+2026-07-24 HLE-C0～HLE-C5 已完成：生产 Agent loop、真实 Job/Artifact Validator/Diagnoser/Repair、耐久恢复、UI-101、SPT-1 七节点三轨、双 Provider、应用重启、Delivery/Replay 和明暗/820px/停止恢复视觉矩阵均已验收。证据位于 `acceptance/harness-loop/production/`。当前入口切换为 G0 Living Foundation 的 `G0-START` / `G0-LF0`；HLE 作为长期不变量继续存在，不重开第二套 executor、Job、Artifact 或 workflow truth。
 
 Post-HRT 运行控制面已于 2026-07-22 增加通用 `workspace_exec`、RuntimeResourceSnapshot v1、AI usage cache/cost 字段、设置页“用量与资源”、会话资源摘要和重启中断 Job 的 `recovery_required_after_restart` 投影。用户随后明确完全访问模式不应再受固定命令白名单限制：`accessMode=full` 现在从项目目录启动真实 shell，支持系统现有命令、脚本、管道和重定向；`read` 仍在 policy 与 handler 两层禁止执行。UI-051 真实项目/820px 窄窗验收通过，低内存能正确显示“资源不足”，控制台 0 error。Job 只记录开始/结束主机快照，真实进程峰值仍标记 `unavailable_without_process_sampler`，不得冒充已完成峰值采样。
 
 UI-053 已补齐右侧文件面板实时一致性：Agent workspace 写入/替换/命令成功后广播项目刷新，文件页可见时以 2 秒轻量轮询覆盖终端与外部编辑器；展开目录自动收敛，活动预览只在 size/modifiedAt 改变时使用版本 URL 重读，Harness 文件摘要以 10 秒周期更新。真实临时项目验证了“已打开内容变化 + 新文件出现”均无需点击，控制台 0 error，验收数据已清理。
 
-UI-054 已补齐 Agent 最终答复恢复：模型自然返回无工具最终答复时，若正文为空、响应非法或仍意外请求工具，会额外进行至多 1 次无工具整理请求；可重试的暂时性 Provider 错误则重试当前阶段。前端显示自动重试状态，且任何重试都不会重复执行已经完成的工具。两次仍无正文时保留工具结果，并明确提示用户可基于当前会话继续，不再要求重新描述需求。持久化消息 meta 记录 finalization attempts/recovered/failureReason；尚待真实 Provider 实机触发恢复，状态为 in_progress。
+UI-054 已补齐并完成真实 Provider 验收：模型自然返回无工具最终答复时，若正文为空、响应非法或仍意外请求工具，会额外进行至多 1 次无工具整理请求；可重试的暂时性 Provider 错误则重试当前阶段。前端显示自动重试状态，且任何重试都不会重复执行已经完成的工具。两次仍无正文时保留工具结果，并明确提示用户可基于当前会话继续，不再要求重新描述需求。持久化消息 meta 记录 finalization attempts/recovered/failureReason；2026-07-23 真实 Provider 已覆盖连续空答复失败与第 2 次整理恢复，状态为 verified。
 
-UI-035 继续收敛多轮工具体验：模型在工具批次前输出的用户可见阶段说明通过 `agent_progress` 固化，下一 iteration 不再令其消失，并随 assistant `meta_json.progressUpdates` 永久恢复；这只保存公开正文，不采集隐藏推理链。工具活动默认仅显示动作分类、数量和总耗时，点击后才展开紧凑单行明细。待真实多轮 Provider 会话完成实机复验，状态保持 in_progress。
+UI-035 已完成多轮工具体验收敛与实机验收：模型在工具批次前输出的用户可见阶段说明通过 `agent_progress` 固化，下一 iteration 不再令其消失，并随 assistant `meta_json.progressUpdates` 永久恢复；这只保存公开正文，不采集隐藏推理链。工具活动默认仅显示动作分类、数量和总耗时，点击后才展开紧凑单行明细。2026-07-23 Ark 真实长任务已覆盖 28 轮、32 次工具调用及历史重开，状态为 verified。
 
 ### Stage 4 之后的 Harness 工程主线
 

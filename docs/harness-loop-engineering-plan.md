@@ -1,6 +1,6 @@
 # Harness Loop Engineering v1 — 工程升级工作包
 
-最后更新：2026-07-23
+最后更新：2026-07-24
 
 状态：`completed`
 
@@ -34,11 +34,11 @@ Loop Controller 只能编排和投影这条事实链，不得创建第二套 exe
 
 完成本工作包后，版本语义为 `Harness v1.1 / Loop Engineering v1`。
 
-### 当前生产接线审计（2026-07-23）
+### 生产接线审计与关闭（2026-07-23～2026-07-24）
 
-HLE-0～HLE-5 已形成后端合同、纯函数、SQLite ledger 与离线测试基础，但尚未全部接入生产 Agent、真实 Job/Artifact 验证和前端。提交标题或离线 `harness:loop` 聚合通过不能替代真实 Provider、重启恢复和视觉产品验收。
+2026-07-23 的审计结论是：HLE-0～HLE-5 当时仅形成后端合同、纯函数、SQLite ledger 与离线测试基础，尚未全部接入生产 Agent、真实 Job/Artifact 验证和前端。该历史缺口不能由提交标题或离线 `harness:loop` 聚合替代。
 
-剩余工作统一由 [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) 的 HLE-C0～HLE-C5 收口。完成前，本文件保持 `in_progress`，且不得宣称 `Harness v1.1` 已完成。
+生产接线已由 [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) 的 HLE-C0～HLE-C5 完成收口。`Harness v1.1 / Loop Engineering v1` 现为已验收基线；未来新增插件、Provider 或工作流只扩展矩阵，不建立第二套执行真相。
 
 ## 2. 术语与责任边界
 
@@ -445,7 +445,7 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 
 ### HLE-3：Validator Registry 与科学完成判定
 
-状态：`in_progress`（离线验证器已建立；生产接线已由 HLE-C2 完成；**当前补充：Plugin Contract 统一后重新验证 artifact profile 校验**）
+状态：`completed`（离线验证器与真实 Job/Artifact/Plugin Contract 产品矩阵均已通过）
 
 目标：建立通用验证器注册表，让节点/任务完成由证据决定。
 
@@ -478,7 +478,7 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 
 ### HLE-4：故障诊断、修复与受影响子图重规划
 
-状态：`in_progress`（离线 Diagnoser/Repair 已建立；生产接线已由 HLE-C2 完成；**当前补充：Repair Boundary 细化（禁止生成假数据）**）
+状态：`completed`（真实失败 parent、replacement 与 checkpoint lineage 已通过）
 
 目标：根据稳定故障分类选择最小修复范围，并保留完整 lineage。
 
@@ -512,7 +512,7 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 
 ### HLE-5：耐久恢复、成本资源与紧凑 UI
 
-状态：`in_progress`（离线基础设施已建立；生产恢复已由 HLE-C5 完成；前端面板待 UI agent）
+状态：`completed`（耐久恢复、成本资源摘要、前端面板及视觉矩阵均已通过）
 
 目标：让长任务关闭会话或应用后仍可恢复，并让用户快速看懂当前状态。
 
@@ -540,13 +540,13 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 - `scripts/harness-loop.mjs`（更新为 HLE-0~HLE-5 全量聚合门禁）
 - `package.json`（新增 harness:loop:checkpoint:test，check 接线）
 
-核心实现证据：HLE-2～HLE-5 相关离线测试通过，`npm run check` 与 `npm run harness:loop` 通过；尚无前端改动、真实重启恢复或视觉矩阵，不能作为 HLE-5 产品出口。
+核心实现证据：HLE-2～HLE-5 离线与生产门禁通过；真实重启恢复、停止后历史保留、active/background、Token/cost/resource 摘要及明暗/820px 视觉证据见 `acceptance/harness-loop/production/`。
 
 建议提交：`feat(harness-loop): durable checkpoints, budget policy, and session stage views`
 
 ### HLE-6：SPT-1 产品验收与聚合门禁
 
-状态：`pending`（HLE-C5R 真实产品回归中——当前需先完成 Plugin Contract 统一和 Workflow DAG 修复）
+状态：`completed`（SPT-1 七节点、三轨、双 Provider、重启、Delivery/Replay 与 UI 矩阵通过）
 
 目标：用真实 Bulk RNA-seq 问题证明 Harness v1.1 从模糊需求到可复现交付的完整 Loop。
 
@@ -566,15 +566,16 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 - 所有既有 Phase 6/7、HRT、Plugin 和 UI audit 门禁无回归。
 - 证据写入 `acceptance/harness-loop/`，计划状态和当前入口在同一提交更新。
 
-当前已有离线交付物：
+最终交付物：
 
 - `scripts/harness-loop.mjs`（统一聚合门禁，输出 acceptance/harness-loop/hle-all-gate.json）
-- `acceptance/harness-loop/hle-all-gate.json`（330 测试证据）
+- `acceptance/harness-loop/hle-all-gate.json`（聚合测试证据，数量由门禁运行结果生成）
 - `docs/harness-loop-engineering-plan.md`（保留真实完成状态）
 - `docs/AUDIT-LOG.md`（保留历史提交记录，并登记生产接线阻塞）
 - `docs/next-steps-roadmap.md`（指向 HLE 生产收口计划）
+- `acceptance/harness-loop/production/`（当前提交绑定的真实三轨、双 Provider、重启、交付/回放与视觉证据）
 
-当前证据只证明离线门禁通过。双 Provider、生产 Agent route、重启恢复和实机 UI 矩阵尚未完成，不能据此关闭 HLE-6。
+最终证据同时覆盖离线门禁与真实产品出口：双 Provider、生产 Agent route、三轨 Job/Artifact、重启恢复、Delivery/Replay 和实机 UI 矩阵均已完成，可关闭 HLE-6。
 
 建议提交：`test(harness-loop): close HLE-0~HLE-6 product acceptance`
 

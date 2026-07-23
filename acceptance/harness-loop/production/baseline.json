@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-23T20:12:55.215Z",
+  "sourceCommit": "d531300a6fac0eaae151c1dc19db92d7fc31753e",
+  "privacy": "sanitized_status_hashes_and_relative_paths_only",
+  "executionTruth": "run_tool -> tool_job -> artifact truth",
+  "tracks": [
+    "spt1-normal",
+    "spt1-repairable",
+    "spt1-blocking"
+  ]
+}

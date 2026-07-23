@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "d531300a6fac0eaae151c1dc19db92d7fc31753e",
+  "tests": [
+    "RT-1..RT-20",
+    "desktop req.user identity",
+    "bounded Loop API route precedence"
+  ],
+  "passed": true
+}

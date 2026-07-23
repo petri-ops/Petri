@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "harness": "harness-loop",
   "phase": "HLE-6",
-  "privacy": "synthetic_or_repository_demo_data_only",
-  "network": "disabled_by_contract",
+  "privacy": "synthetic_fixtures_and_sanitized_production_evidence",
+  "network": "disabled_during_gate; live_provider_evidence_pre_recorded",
   "credentials": "not_loaded",
-  "startedAt": "2026-07-23T14:24:13.997Z",
-  "finishedAt": "2026-07-23T14:24:14.597Z",
-  "totalCommands": 11,
-  "totalPassed": 11,
+  "startedAt": "2026-07-23T20:19:01.243Z",
+  "finishedAt": "2026-07-23T20:19:02.481Z",
+  "totalCommands": 12,
+  "totalPassed": 12,
   "totalFailed": 0,
   "commands": [
     {
@@ -84,6 +84,13 @@
     {
       "label": "hle5:checkpoint:test",
       "command": "node test/loop-checkpoint.test.cjs",
+      "exitCode": 0,
+      "signal": null,
+      "passed": true
+    },
+    {
+      "label": "hle-c5:production:evidence",
+      "command": "node scripts/harness-loop-production-acceptance.mjs",
       "exitCode": 0,
       "signal": null,
       "passed": true

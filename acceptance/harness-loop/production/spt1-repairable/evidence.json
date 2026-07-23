@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "label": "spt1-repairable",
+  "conversationId": "conv_e56e989f-189",
+  "taskId": "ee725502-7bd3-483c-b791-83212b6ea2d7",
+  "taskIds": [
+    "ee725502-7bd3-483c-b791-83212b6ea2d7"
+  ],
+  "taskStatus": "completed",
+  "agentStatus": "done",
+  "loopRunId": "loop_2d0776a0f4c921a163a9b936",
+  "loopStatus": "completed",
+  "projectRefHash": "79bbdd94b6309f2382eaac08cefd38559752877a36b455d25055aeafb8fb7188",
+  "iterationCount": 4,
+  "iterations": [
+    {
+      "sequence": 1,
+      "decision": "continue",
+      "decision_reason_code": "TOOL_SUCCEEDED",
+      "status": "succeeded",
+      "hash": "f6ebb76dfcd0071232c1882dc3b439c6c80cf72684f3f08e95c741e9c5babefc",
+      "parent_iteration_hash": null
+    },
+    {
+      "sequence": 2,
+      "decision": "retry",
+      "decision_reason_code": "TRANSIENT_RUNTIME_RETRY",
+      "status": "failed",
+      "hash": "d4f2d97c0a3bef5d7cb2ed39e075bb8da683a9c43f5854c96a1fc0fa18389cbb",
+      "parent_iteration_hash": "f6ebb76dfcd0071232c1882dc3b439c6c80cf72684f3f08e95c741e9c5babefc"
+    },
+    {
+      "sequence": 3,
+      "decision": "continue",
+      "decision_reason_code": "TOOL_SUCCEEDED",
+      "status": "succeeded",
+      "hash": "67009360e21a88bbe486892228f7d7a66a30e48e24ab97c60a3594cf1e899ae1",
+      "parent_iteration_hash": "d4f2d97c0a3bef5d7cb2ed39e075bb8da683a9c43f5854c96a1fc0fa18389cbb"
+    },
+    {
+      "sequence": 4,
+      "decision": "complete",
+      "decision_reason_code": "GOAL_ACHIEVED",
+      "status": "succeeded",
+      "hash": "0b1c906ca7494c574045cad53dea993bdd2119bceeeb915eeb6e500f02e8cdef",
+      "parent_iteration_hash": "67009360e21a88bbe486892228f7d7a66a30e48e24ab97c60a3594cf1e899ae1"
+    }
+  ],
+  "checkpointCount": 4,
+  "checkpoints": [
+    {
+      "checkpointId": "cp_9dea7dc2520da8be",
+      "sequence": 1,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_96de8bafc554ff80",
+      "sequence": 2,
+      "decision": "retry",
+      "status": "failed",
+      "toolJobId": "tj_mrxy5b9h_8a6w",
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_1ede0d9912e8ff44",
+      "sequence": 3,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": "tj_mrxy5h4l_gpgq",
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_f0a28c8124ef4654",
+      "sequence": 4,
+      "decision": "complete",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": {
+        "strategyId": "observed_same_tool_replacement",
+        "parentJobId": "tj_mrxy5b9h_8a6w",
+        "replacementJobId": "tj_mrxy5h4l_gpgq",
+        "repaired": true
+      }
+    }
+  ],
+  "evidenceCount": 2,
+  "jobs": [
+    {
+      "jobId": "tj_mrxy5b9h_8a6w",
+      "toolId": "sample-metadata-validator",
+      "status": "failed",
+      "artifactTruthStatus": "blocked",
+      "relativeJobPath": "results/jobs/tj_mrxy5b9h_8a6w",
+      "hashes": {
+        "manifestSha256": "1a0ad0419298a414aa3976f40923912618a236a769b5e78344423c4273e713d8",
+        "paramsSha256": "3e02eb12c89e2500c0ee61684361425e154e48a12cf40cf09f737749ef2fa4b4",
+        "provenanceSha256": "e81a1fee255f3f7f27530a947cd2620c5c4c41b41795bb4deba58c914642e9b7",
+        "scriptSha256": "7cbab522b8defa11aaab4afbf9ce431d4288b619b39c09ea49807a2c5174db85",
+        "inputCount": 2,
+        "outputCount": 4,
+        "deliveryManifestSha256": null,
+        "replayPackageManifestSha256": null
+      },
+      "delivery": {
+        "status": null,
+        "manifestHash": null
+      },
+      "replay": {
+        "status": null,
+        "packageDigest": null
+      }
+    },
+    {
+      "jobId": "tj_mrxy5h4l_gpgq",
+      "toolId": "sample-metadata-validator",
+      "status": "completed",
+      "artifactTruthStatus": "valid",
+      "relativeJobPath": "results/jobs/tj_mrxy5h4l_gpgq",
+      "hashes": {
+        "manifestSha256": "ca08dfd3038ef433b7a8dd0ce0b32e51f75bea59a350723c826f20368a3a7a7e",
+        "paramsSha256": "9ca507faa3c187e2dd17811c895b862816bdd2acb75bd83eaa0d3a56db273f32",
+        "provenanceSha256": "d8a5ce8e2e94a61f82ad31d1f854fd04c5614a6cb87daa1c9c163db424241241",
+        "scriptSha256": "7cbab522b8defa11aaab4afbf9ce431d4288b619b39c09ea49807a2c5174db85",
+        "inputCount": 2,
+        "outputCount": 5,
+        "deliveryManifestSha256": null,
+        "replayPackageManifestSha256": null
+      },
+      "delivery": {
+        "status": null,
+        "manifestHash": null
+      },
+      "replay": {
+        "status": null,
+        "packageDigest": null
+      }
+    }
+  ],
+  "scientificTasks": []
+}

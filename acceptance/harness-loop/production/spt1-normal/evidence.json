@@ -1,0 +1,847 @@
+{
+  "schemaVersion": 1,
+  "label": "spt1-normal",
+  "conversationId": "conv_aac7a5c7-67e",
+  "taskId": "1d1e89f5-0e67-4025-9637-3038535ab6a7",
+  "taskIds": [
+    "196ccb2b-8061-4c44-8950-0842bc1cbe57",
+    "1d1e89f5-0e67-4025-9637-3038535ab6a7"
+  ],
+  "taskStatus": "completed",
+  "agentStatus": "done",
+  "loopRunId": "loop_3f14808aa418f3530ce70764",
+  "loopStatus": "completed",
+  "projectRefHash": "79bbdd94b6309f2382eaac08cefd38559752877a36b455d25055aeafb8fb7188",
+  "iterationCount": 10,
+  "iterations": [
+    {
+      "sequence": 1,
+      "decision": "continue",
+      "decision_reason_code": "TOOL_SUCCEEDED",
+      "status": "succeeded",
+      "hash": "1210ba10b4b32d0fd768d838222b4dc41045070f1d0ec09f432150e3caa95da6",
+      "parent_iteration_hash": null
+    },
+    {
+      "sequence": 2,
+      "decision": "continue",
+      "decision_reason_code": "TOOL_SUCCEEDED",
+      "status": "succeeded",
+      "hash": "ed2b4b577e95f1d28761f894934a7e2b3d9cb41361476ce9200135e0c3067068",
+      "parent_iteration_hash": "1210ba10b4b32d0fd768d838222b4dc41045070f1d0ec09f432150e3caa95da6"
+    },
+    {
+      "sequence": 3,
+      "decision": "continue",
+      "decision_reason_code": "TOOL_SUCCEEDED",
+      "status": "succeeded",
+      "hash": "1ac79e1b1a693028138ff43a822101a2948a4d63d3699abd72ddb8879ad75e07",
+      "parent_iteration_hash": "ed2b4b577e95f1d28761f894934a7e2b3d9cb41361476ce9200135e0c3067068"
+    },
+    {
+      "sequence": 4,
+      "decision": "continue",
+      "decision_reason_code": "TOOL_SUCCEEDED",
+      "status": "succeeded",
+      "hash": "1d2f38623ba13cc673cf31d2c4c6359ae8157c9f6cd30178bcc7dc9f99a78274",
+      "parent_iteration_hash": "1ac79e1b1a693028138ff43a822101a2948a4d63d3699abd72ddb8879ad75e07"
+    },
+    {
+      "sequence": 5,
+      "decision": "continue",
+      "decision_reason_code": "TOOL_SUCCEEDED",
+      "status": "succeeded",
+      "hash": "24e7e773014a2893a6c2ee4e095dccd14cefb3251cce6d704060deba05931c09",
+      "parent_iteration_hash": "1d2f38623ba13cc673cf31d2c4c6359ae8157c9f6cd30178bcc7dc9f99a78274"
+    },
+    {
+      "sequence": 6,
+      "decision": "continue",
+      "decision_reason_code": "TOOL_SUCCEEDED",
+      "status": "succeeded",
+      "hash": "b20940a3254342f138d805bcd9363423896570480bf68a352cf16d08bac310a5",
+      "parent_iteration_hash": "24e7e773014a2893a6c2ee4e095dccd14cefb3251cce6d704060deba05931c09"
+    },
+    {
+      "sequence": 7,
+      "decision": "continue",
+      "decision_reason_code": "TOOL_SUCCEEDED",
+      "status": "succeeded",
+      "hash": "cff09ecbefdb13af4b5933a6c30ea16bcdfe22d157ab176afbbddde0020f83e6",
+      "parent_iteration_hash": "b20940a3254342f138d805bcd9363423896570480bf68a352cf16d08bac310a5"
+    },
+    {
+      "sequence": 8,
+      "decision": "continue",
+      "decision_reason_code": "TOOL_SUCCEEDED",
+      "status": "succeeded",
+      "hash": "a5f2d7e74a761a5e8bd2966c07beec5658e8bf60304c65e8571b94540fe88cf7",
+      "parent_iteration_hash": "cff09ecbefdb13af4b5933a6c30ea16bcdfe22d157ab176afbbddde0020f83e6"
+    },
+    {
+      "sequence": 9,
+      "decision": "continue",
+      "decision_reason_code": "TOOL_SUCCEEDED",
+      "status": "succeeded",
+      "hash": "046df3a43644ef74663def8c29305e503c45abc36f2f37e5bf55cc87759032ef",
+      "parent_iteration_hash": "a5f2d7e74a761a5e8bd2966c07beec5658e8bf60304c65e8571b94540fe88cf7"
+    },
+    {
+      "sequence": 10,
+      "decision": "complete",
+      "decision_reason_code": "GOAL_ACHIEVED",
+      "status": "succeeded",
+      "hash": "d5e612a1005612c2131e07cda3024af562d3cafa3a39564380275e51a16c1bbf",
+      "parent_iteration_hash": "046df3a43644ef74663def8c29305e503c45abc36f2f37e5bf55cc87759032ef"
+    }
+  ],
+  "checkpointCount": 69,
+  "checkpoints": [
+    {
+      "checkpointId": "cp_41e5fd5992827366",
+      "sequence": 1,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_938cd9f0ef8b6985",
+      "sequence": 2,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_6a209abec83f23c7",
+      "sequence": 3,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_5d9c8a0a518c7f01",
+      "sequence": 4,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_b56d1767517009bc",
+      "sequence": 5,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_6f40013af13da1e1",
+      "sequence": 6,
+      "decision": "retry",
+      "status": "failed",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_a2156389ca81eea6",
+      "sequence": 7,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_3b353aae4283c4d2",
+      "sequence": 8,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_dbed4b5b59742d84",
+      "sequence": 9,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_ccb043994af2bc66",
+      "sequence": 10,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_52f1082c715ee642",
+      "sequence": 11,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_960756fc82bf9488",
+      "sequence": 12,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_5f6043150d308a10",
+      "sequence": 13,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_6bdb7bff0209ef5d",
+      "sequence": 14,
+      "decision": "wait",
+      "status": "pending",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_ea999f8b843231da",
+      "sequence": 15,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_1c0b945f8b1088c7",
+      "sequence": 16,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_5ccd592d614056ac",
+      "sequence": 17,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_b5a9ebe36a109cf2",
+      "sequence": 18,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_56f988ab6caf949c",
+      "sequence": 19,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_a5bc49d2fe048d3a",
+      "sequence": 20,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_22371d94e84d747f",
+      "sequence": 21,
+      "decision": "wait",
+      "status": "pending",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_923c00c8ef9d382f",
+      "sequence": 22,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_17c33de3204b8b01",
+      "sequence": 23,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_0abcbc9c1172f1cf",
+      "sequence": 24,
+      "decision": "retry",
+      "status": "failed",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_d9c330ff16675b83",
+      "sequence": 25,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_24dcf29033772d12",
+      "sequence": 26,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_dd73f533e42b3b0c",
+      "sequence": 27,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_9cb74d47793447c0",
+      "sequence": 28,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_3f9840bbe50a90ab",
+      "sequence": 29,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_9cd5731360b6f459",
+      "sequence": 30,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_9dffd70bba6f8866",
+      "sequence": 31,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_78bd8269f03088e8",
+      "sequence": 32,
+      "decision": "retry",
+      "status": "failed",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_21229a887f8a402f",
+      "sequence": 33,
+      "decision": "retry",
+      "status": "failed",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_426d0a3b4e1030d0",
+      "sequence": 34,
+      "decision": "retry",
+      "status": "failed",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_6e9bcf1d5caced4c",
+      "sequence": 35,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_be30779dfef15111",
+      "sequence": 36,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_d404647e8bc38d8c",
+      "sequence": 37,
+      "decision": "wait",
+      "status": "pending",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_82a71e45e4c4cfde",
+      "sequence": 38,
+      "decision": "retry",
+      "status": "failed",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_6c56db253dbb631a",
+      "sequence": 1,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_5c92f705fd93eae2",
+      "sequence": 2,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_dba0eefcc2f5de9e",
+      "sequence": 3,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_1829f890fb5d4d74",
+      "sequence": 4,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_0ac14de4b8bac943",
+      "sequence": 5,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": "tj_mrxv0t56_9uka",
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_2051b78c61e8e087",
+      "sequence": 6,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_e85902c3f9ba78b8",
+      "sequence": 7,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": "tj_mrxv1t13_rgm0",
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_9eb29b570c422075",
+      "sequence": 8,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_ebe59330fed71fa1",
+      "sequence": 9,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": "tj_mrxv2l9e_ri1e",
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_6867d0d9a36fd9e0",
+      "sequence": 10,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_b2314efa8fa3dc60",
+      "sequence": 11,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": "tj_mrxv3dtl_gpnd",
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_771f658a5767b700",
+      "sequence": 12,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_8ac719e9df9b2b9b",
+      "sequence": 13,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": "tj_mrxv47rq_5d8a",
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_901acd98a5494323",
+      "sequence": 14,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_926883cd280cb151",
+      "sequence": 15,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_3896457a4c056ee6",
+      "sequence": 16,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": "tj_mrxv59ij_b4hk",
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_a2918ff81eb1dbf9",
+      "sequence": 17,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_21e8b690d63b7e39",
+      "sequence": 18,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_f7226d5e2e2d9276",
+      "sequence": 19,
+      "decision": "complete",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "ctxcp_hle_c5_normal_20260724",
+      "sequence": null,
+      "decision": null,
+      "status": null,
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_704756f268e9705b",
+      "sequence": 1,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_b6e7443c6a536401",
+      "sequence": 2,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_02e87de9f2da40c8",
+      "sequence": 3,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": "tj_mrxwetr1_f88t",
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_6d12e2190ad2189d",
+      "sequence": 4,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_20bd0cba64c3369d",
+      "sequence": 5,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_3de295b843ac137e",
+      "sequence": 6,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_fd5be451c6f9bd5c",
+      "sequence": 7,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_11fbc08fa0cc9a59",
+      "sequence": 8,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_da8ccaa1d81c80da",
+      "sequence": 9,
+      "decision": "continue",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "cp_077cba3f75be4023",
+      "sequence": 10,
+      "decision": "complete",
+      "status": "succeeded",
+      "toolJobId": null,
+      "repairAttempt": null
+    },
+    {
+      "checkpointId": "ctxcp_hle_c5_normal_gsea_20260724",
+      "sequence": null,
+      "decision": null,
+      "status": null,
+      "toolJobId": null,
+      "repairAttempt": null
+    }
+  ],
+  "evidenceCount": 0,
+  "jobs": [
+    {
+      "jobId": "tj_mrxv0t56_9uka",
+      "toolId": "sample-metadata-validator",
+      "status": "completed",
+      "artifactTruthStatus": "valid",
+      "relativeJobPath": "results/jobs/tj_mrxv0t56_9uka",
+      "hashes": {
+        "manifestSha256": "b189995427ffb36f1b1cbcce93662164f7d7749b4837837012b534563afc5b73",
+        "paramsSha256": "fa90d7025c45999f4c185523939fd7b3c906daf4c6e5cb30232614fc1536dde4",
+        "provenanceSha256": "28b683075838537026366a34ed8aabbf7587b876001e5ac6f39b702a3fef7d63",
+        "scriptSha256": "7cbab522b8defa11aaab4afbf9ce431d4288b619b39c09ea49807a2c5174db85",
+        "inputCount": 2,
+        "outputCount": 5,
+        "deliveryManifestSha256": null,
+        "replayPackageManifestSha256": null
+      },
+      "delivery": {
+        "status": null,
+        "manifestHash": null
+      },
+      "replay": {
+        "status": null,
+        "packageDigest": null
+      }
+    },
+    {
+      "jobId": "tj_mrxv1t13_rgm0",
+      "toolId": "expression-qc",
+      "status": "completed",
+      "artifactTruthStatus": "valid",
+      "relativeJobPath": "results/jobs/tj_mrxv1t13_rgm0",
+      "hashes": {
+        "manifestSha256": "93d014c4310aa887015c5eb74b1425eda97d057b1288ee7c324eab30c55c0e2b",
+        "paramsSha256": "be59b188e95eaa8b219f5175d1fd9b5ae5b314c594969582bbc98dfb92386c7b",
+        "provenanceSha256": "368a153a512b6dd803f5e19833fbfd4960ee867d54cadf03b93dc4b42bf77385",
+        "scriptSha256": "e459f70aeb78655e508594cfd8978672ae11c1ebb827293990eacf2a454a29da",
+        "inputCount": 1,
+        "outputCount": 9,
+        "deliveryManifestSha256": null,
+        "replayPackageManifestSha256": null
+      },
+      "delivery": {
+        "status": null,
+        "manifestHash": null
+      },
+      "replay": {
+        "status": null,
+        "packageDigest": null
+      }
+    },
+    {
+      "jobId": "tj_mrxv2l9e_ri1e",
+      "toolId": "deseq2",
+      "status": "completed",
+      "artifactTruthStatus": "valid",
+      "relativeJobPath": "results/jobs/tj_mrxv2l9e_ri1e",
+      "hashes": {
+        "manifestSha256": "3bc3364426bdd9bd2ff16e6cbc6191b6c142238f477bef5c9b3a3d518788cff0",
+        "paramsSha256": "d2968f781c5587b18c2c3f43fe426cf79a30fe4493a5d483ccc6410b9ffb969e",
+        "provenanceSha256": "6167cdb97212094048e0053083f6d674880c405a28b8b76671c9bdf8fced39f1",
+        "scriptSha256": "7c8b1cacdd3c7cb70cc45e841bb6620e7acdeba36a0d138752e69d988035fd4a",
+        "inputCount": 2,
+        "outputCount": 23,
+        "deliveryManifestSha256": null,
+        "replayPackageManifestSha256": null
+      },
+      "delivery": {
+        "status": null,
+        "manifestHash": null
+      },
+      "replay": {
+        "status": null,
+        "packageDigest": null
+      }
+    },
+    {
+      "jobId": "tj_mrxv3dtl_gpnd",
+      "toolId": "deg-standardizer",
+      "status": "completed",
+      "artifactTruthStatus": "valid",
+      "relativeJobPath": "results/jobs/tj_mrxv3dtl_gpnd",
+      "hashes": {
+        "manifestSha256": "637274a6ec57facdfc3b56dc2241175d602003fdd4c51427c85200d06f02ea02",
+        "paramsSha256": "cbd139f73bc7b0a0f3e977e40e06899aa192b13547d842338bfc2d5cb2909ddc",
+        "provenanceSha256": "b370cce40657513e8ab8a82bfc68d348ec226b203786def1aeed31dc7c9e6f7f",
+        "scriptSha256": "160691305c3d3fae29607e9a2394a26645692c0389756158fa826ba2d514c530",
+        "inputCount": 1,
+        "outputCount": 6,
+        "deliveryManifestSha256": null,
+        "replayPackageManifestSha256": null
+      },
+      "delivery": {
+        "status": null,
+        "manifestHash": null
+      },
+      "replay": {
+        "status": null,
+        "packageDigest": null
+      }
+    },
+    {
+      "jobId": "tj_mrxv47rq_5d8a",
+      "toolId": "volcano-plot",
+      "status": "completed",
+      "artifactTruthStatus": "valid",
+      "relativeJobPath": "results/jobs/tj_mrxv47rq_5d8a",
+      "hashes": {
+        "manifestSha256": null,
+        "paramsSha256": "fc4d9048a88fe52d3347f87daecbe4933301e86be312e934d56bec824b5eec80",
+        "provenanceSha256": "dfd967e63c21f59d540514981e8356a0f58f03257009e3d53029ec49e8e3ea08",
+        "scriptSha256": "d4f80d05be6c03d4ab60868918db1f49f058587810e4c785841f8f82bba41ed9",
+        "inputCount": 0,
+        "outputCount": 0,
+        "deliveryManifestSha256": null,
+        "replayPackageManifestSha256": null
+      },
+      "delivery": {
+        "status": null,
+        "manifestHash": null
+      },
+      "replay": {
+        "status": null,
+        "packageDigest": null
+      }
+    },
+    {
+      "jobId": "tj_mrxv59ij_b4hk",
+      "toolId": "go-kegg",
+      "status": "completed",
+      "artifactTruthStatus": "valid",
+      "relativeJobPath": "results/jobs/tj_mrxv59ij_b4hk",
+      "hashes": {
+        "manifestSha256": "4061a1170194792187408080b1185a7d64879144346811d8b7a1349de0d818d8",
+        "paramsSha256": "73bdb7b3dfe0fb16b758dce646d74761d8e646c8ca0cb9274b274b9ddd52025c",
+        "provenanceSha256": "aeb1896f8ae34d019271b41d77203159cd6b54ffd92d73e0b4ea7bf264f2e527",
+        "scriptSha256": "a6b5103ca1d281daa2a0dae59591dde0bf05552191057eb517f74f81ba5d90db",
+        "inputCount": 1,
+        "outputCount": 41,
+        "deliveryManifestSha256": "14a6c0f96c5e6b9f96d2cd2ab0daae9427b52c050f4896af4b890fae61cf25e7",
+        "replayPackageManifestSha256": "9d4ebe855779557d96a1aa0e8d7f66e12d04e762618987a36f93613bb8724034"
+      },
+      "delivery": {
+        "status": "valid",
+        "manifestHash": "73eb88ab64c1f7e671277c76f44595a664245ed95c8de220002d27db0b93a336"
+      },
+      "replay": {
+        "status": "complete",
+        "packageDigest": "814ef75b0ccf470dee464ec454c3daecd4c1afd0daf424e7b668c132dbaabca1"
+      }
+    },
+    {
+      "jobId": "tj_mrxwetr1_f88t",
+      "toolId": "gsea",
+      "status": "completed",
+      "artifactTruthStatus": "valid",
+      "relativeJobPath": "results/jobs/tj_mrxwetr1_f88t",
+      "hashes": {
+        "manifestSha256": "3d2422b9df54c858a4ac618d497cae34eea7d79bac8048517f62c09295b01bb2",
+        "paramsSha256": "b60880badff092b6a385d2bae56a28a7cc963e922e4b073e9252cb75b2615050",
+        "provenanceSha256": "10394fb8274f58c488493bd25ace6cbcc86d24baaf5dcaf95b719a87a887388f",
+        "scriptSha256": "6b750bd37a07a244967cafa3459353e25eae4daaec2b57c89ccf5c5e86ca958b",
+        "inputCount": 1,
+        "outputCount": 24,
+        "deliveryManifestSha256": "36b1c4993b9f8d737c2d0b0bc3bab0efb64ce31a788f644ab12525e2e849f1ee",
+        "replayPackageManifestSha256": "d6edbac31ef4560ab3f78903afefcfd6e5c237a638d2a03b9edbe5cbc5bd4e26"
+      },
+      "delivery": {
+        "status": "valid",
+        "manifestHash": "e13071875265bd800d567c060817d2494dfa55062be81529799877cc383b4863"
+      },
+      "replay": {
+        "status": "complete",
+        "packageDigest": "2ef10e2296ce92e2869b6a8b8bdca1c4602bba46489ddfafb69758a4d86dc879"
+      }
+    }
+  ],
+  "scientificTasks": [
+    {
+      "task_id": "spt1-normal-gsea-20260724",
+      "version": 1,
+      "status": "confirmed",
+      "tool_job_id": "tj_mrxwetr1_f88t",
+      "spec_hash": "4e7aa13e060413ffba90199ea2d84239ccf73c103bb06e2c636947f9abb2c8ab"
+    },
+    {
+      "task_id": "spt1-normal-go-kegg-20260724",
+      "version": 1,
+      "status": "confirmed",
+      "tool_job_id": "tj_mrxv59ij_b4hk",
+      "spec_hash": "e14496b9e499e9f0558a0fe57445ff3c3c1b9109d9eea12ab634f66ef61be041"
+    }
+  ]
+}

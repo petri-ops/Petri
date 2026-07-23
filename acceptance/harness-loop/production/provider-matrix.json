@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "d531300a6fac0eaae151c1dc19db92d7fc31753e",
+  "generatedAt": "2026-07-23T19:48:52.072Z",
+  "workflow": "GO/KEGG 富集",
+  "privacy": "no_credentials_urls_headers_or_provider_responses",
+  "passedProviders": 2,
+  "totalProviders": 2,
+  "targets": [
+    {
+      "name": "deepseek",
+      "passed": 6,
+      "total": 6,
+      "passedBar": true,
+      "requiredFailures": [],
+      "failures": []
+    },
+    {
+      "name": "openai-compatible",
+      "passed": 5,
+      "total": 6,
+      "passedBar": true,
+      "requiredFailures": [],
+      "failures": [
+        {
+          "probe": "result_interpret",
+          "classification": "ungrounded_interpretation"
+        }
+      ]
+    }
+  ],
+  "passed": true
+}

@@ -1,6 +1,6 @@
 # HLE-0: Harness Loop Engineering Baseline
 
-## Status: `in_progress`（离线门禁已完成，真实产品证据由 `production/` 收口）
+## Status: `completed`（离线门禁与 `production/` 真实产品证据均已收口）
 
 ## Exit Criteria
 
@@ -14,7 +14,7 @@
 - [x] `scripts/harness-loop.mjs` — aggregate gate script
 - [x] `test/loop-fixtures.test.mjs` — Node.js test suite
 - [x] All files pass `node --check` and `node test/loop-fixtures.test.mjs`
-- [ ] `production/` — SPT-1 三轨、双 Provider、应用重启和视觉矩阵
+- [x] `production/` — SPT-1 七节点三轨、双 Provider、应用重启、Delivery/Replay 和视觉矩阵
 
 ## Background
 
@@ -45,15 +45,15 @@ The Loop Controller must consume the existing `tool_job` / `artifact` truth chai
 - No credentials, API keys, or secrets in fixtures
 - All paths are repo-relative (no absolute paths in fixtures)
 
-## Known Baseline Gaps (HLE-1 → HLE-5)
+## Historical Baseline Gaps (closed by HLE-C1 → HLE-C5)
 
-| Gap | Owner | Description |
+| Gap | Owner | Closure |
 |---|---|---|
-| `loop_contract_not_implemented` | HLE-1 | Loop contract (decision, repair strategy) not codified |
-| `loop_controller_not_centralized` | HLE-2 | Loop controller logic scattered across components |
-| `validator_registry_incomplete` | HLE-3 | Fault classification validators incomplete |
-| `repair_strategies_not_defined` | HLE-4 | Repair strategies not defined for failure classes |
-| `durable_recovery_ui_not_implemented` | HLE-5 | Recovery UI for blocking scenarios not implemented |
+| `loop_contract_not_implemented` | HLE-1 | Closed: immutable contract and SQLite ledger |
+| `loop_controller_not_centralized` | HLE-2 | Closed: production Agent controller |
+| `validator_registry_incomplete` | HLE-3 | Closed: real Job/Artifact validation |
+| `repair_strategies_not_defined` | HLE-4 | Closed: parent/replacement repair lineage |
+| `durable_recovery_ui_not_implemented` | HLE-5 | Closed: restart/history recovery and UI-101 |
 
 ## SPT-1 DAG Nodes
 
@@ -76,7 +76,7 @@ npm run harness:loop:production:update
 npm run harness:loop:production
 ```
 
-更新命令要求通过环境变量显式指定本地 SQLite、三条验收会话、重启
+更新命令要求通过环境变量显式指定本地 SQLite、正常轨 Task IDs、三条验收会话、重启
 LoopRun 和脱敏 Provider 报告。提交目录只保存状态、计数、hash、reason
 code、相对路径和不透明 ID；不保存用户消息、文件正文、绝对路径、凭据、
 endpoint、请求头或 Provider 原始响应。默认命令只读验证，绝不自动改证据。
