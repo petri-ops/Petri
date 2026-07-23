@@ -631,6 +631,96 @@ async function runAgentLoop({
     } catch { /* best-effort: never break the turn on checkpoint failure */ }
   }
 
+  function _loopPersistProgressIteration(providerIteration) {
+    if (!loopRunId) return;
+    const batch = assistantToolActivities
+      .snapshot()
+      .filter((activity) => activity.iteration === providerIteration);
+    if (batch.length === 0) return;
+
+    const runToolJobs = batch
+      .filter((activity) => activity.name === 'run_tool' && activity.callId)
+      .map((activity) => {
+        const event = toolResultEventsByCallId[activity.callId];
+        const toolJobId = event?.toolResult?.data?.toolJobId || null;
+        let job = null;
+        if (toolJobId) {
+          try { job = getToolJob(toolJobId) || null; } catch {}
+        }
+        return {
+          id: toolJobId || activity.callId,
+          toolJobId,
+          toolId: job?.tool_id || event?.toolResult?.data?.toolId || null,
+          status: job?.status || (
+            activity.status === 'success'
+              ? 'completed'
+              : activity.status === 'awaiting_confirmation'
+                ? 'pending'
+                : 'failed'
+          ),
+          error: job?.error || null,
+          finished_at: job?.completed_at || null,
+        };
+      });
+    const failedCount = runToolJobs.filter((job) => ['failed', 'blocked'].includes(job.status)).length;
+    const pendingCount = runToolJobs.filter((job) => ['pending', 'queued', 'running'].includes(job.status)).length;
+    const completedTools = [...new Set(runToolJobs
+      .filter((job) => job.status === 'completed')
+      .map((job) => job.toolId)
+      .filter(Boolean))];
+    const latestProgress = assistantProgress
+      .snapshot()
+      .filter((progress) => progress.iteration === providerIteration)
+      .slice(-1)[0]?.content;
+
+    let decision = 'continue';
+    let reasonCode = REASON_CODES.TOOL_SUCCEEDED;
+    let publicConclusion = latestProgress || `本阶段已完成 ${batch.length} 项操作，继续推进。`;
+    if (failedCount > 0) {
+      decision = 'retry';
+      reasonCode = REASON_CODES.TRANSIENT_RUNTIME_RETRY;
+      publicConclusion = `本阶段有 ${failedCount} 个工具任务未成功，已保留 Job 证据并进入自动诊断。`;
+    } else if (pendingCount > 0) {
+      decision = 'wait';
+      publicConclusion = `本阶段有 ${pendingCount} 个工具任务仍在执行或等待，继续监控。`;
+    } else if (completedTools.length > 0) {
+      publicConclusion = `${completedTools.join('、')} 已生成真实 Job/Artifact，继续验证下游目标。`;
+    }
+
+    loopSequence += 1;
+    const parentHash = loopIterations.length > 0
+      ? loopIterations[loopIterations.length - 1].hash
+      : null;
+    const iteration = buildIteration({
+      loopRunId,
+      sequence: loopSequence,
+      observedStateDigest: deriveObservedStateDigest({
+        toolJobs: runToolJobs,
+        conversationSummary: publicConclusion,
+        dagProgress: { providerIteration, persistedIterations: loopIterations.length },
+      }),
+      goalGapIds: [],
+      proposedAction: null,
+      decision,
+      decisionReasonCode: reasonCode,
+      publicConclusion,
+      status: mapDecisionToIterationStatus(decision),
+      parentIterationHash: parentHash,
+      createdAt: new Date().toISOString(),
+    }, {
+      validatorResults: [],
+      repairAttempt: null,
+      costSnapshot: null,
+    });
+    persistLoopIteration(iteration);
+    loopIterations.push(iteration);
+    loopFirstIterationDone = true;
+    _loopSaveCheckpoint(iteration, toolCtx.projectId, toolCtx.conversationId, {
+      toolJobId: runToolJobs.slice(-1)[0]?.toolJobId || null,
+    });
+    _loopEmitIterationEvent(iteration, decision, null);
+  }
+
   systemPrompt = appendDesktopAgentInstructions(systemPrompt);
   const executionPolicy = inferExecutionPolicy(messages);
   if (!executionPolicy.allowExecution) {
@@ -683,14 +773,6 @@ async function runAgentLoop({
   try {
     for (let iter = 0; iter < MAX_AGENT_ITERS && !aborted(); iter++) {
       _emit({ event: 'iter', n: iter + 1 });
-
-      // HLE-C1: Lazy Loop init on first execution-capable turn.
-      // Only task_execute creates a LoopRun; Q&A / context_assist do NOT.
-      // We detect first run_tool(op="run") call and init there.
-      // Init idempotently so re-connect / retry don't recreate.
-      if (!loopRunId && executionPolicy.allowExecution) {
-        _loopInit(toolCtx.projectId, toolCtx.conversationId);
-      }
 
       // HLE-C1: Pre-turn Loop Controller decision.
       // Block/abort before calling the model if the loop is already resolved.
@@ -889,6 +971,9 @@ async function runAgentLoop({
           });
         },
         execute: async ({ name, args, callId }) => {
+          if (name === 'run_tool' && executionPolicy.allowExecution) {
+            _loopInit(toolCtx.projectId, toolCtx.conversationId);
+          }
           assistantToolActivities.recordCall({ name, args, traceId, callId, iteration: iter + 1 });
           _emit(buildToolCallEvent({ name, args, traceId, callId, iteration: iter + 1 }));
           let envelope = await executeToolCall(name, args, toolCtx, { traceId, callId });
@@ -937,6 +1022,9 @@ async function runAgentLoop({
           return { envelope, result, args, name, callId };
         },
         reject: async ({ name, args, callId, error, message }) => {
+          if (name === 'run_tool' && executionPolicy.allowExecution) {
+            _loopInit(toolCtx.projectId, toolCtx.conversationId);
+          }
           assistantToolActivities.recordCall({ name, args, traceId, callId, iteration: iter + 1 });
           _emit(buildToolCallEvent({ name, args, traceId, callId, iteration: iter + 1 }));
           let envelope = createRejectedToolResult(name, error, message, toolCtx, { traceId, callId });
@@ -958,6 +1046,7 @@ async function runAgentLoop({
           });
         },
       });
+      _loopPersistProgressIteration(iter + 1);
     }
 
     cancellationObserved = aborted();
@@ -1059,6 +1148,21 @@ async function runAgentLoop({
       let repairAttempt = null;
       let diagnosis = null;
       const failedJobs = toolJobs.filter((j) => j.status === 'failed' || j.status === 'blocked');
+      const replacementByFailedJobId = new Map();
+      for (const failed of failedJobs) {
+        const failedToolId = failed.jobTruth?.tool_id || null;
+        if (!failedToolId || !failed.toolJobId) continue;
+        const replacement = toolJobs.find((candidate) =>
+          candidate.status === 'completed' &&
+          candidate.toolJobId &&
+          candidate.iteration > failed.iteration &&
+          candidate.jobTruth?.tool_id === failedToolId
+        );
+        if (replacement) replacementByFailedJobId.set(failed.toolJobId, replacement);
+      }
+      const unresolvedFailedJobs = failedJobs.filter((failed) =>
+        !failed.toolJobId || !replacementByFailedJobId.has(failed.toolJobId)
+      );
       if (failedJobs.length > 0) {
         const primaryFailed = failedJobs[0];
         try {
@@ -1097,6 +1201,16 @@ async function runAgentLoop({
               fallbackProvider: null,
             };
             repairAttempt = selectRepairStrategy(diagnosis, repairCtx);
+            const replacement = primaryFailed.toolJobId
+              ? replacementByFailedJobId.get(primaryFailed.toolJobId)
+              : null;
+            if (repairAttempt && replacement) {
+              repairAttempt = {
+                ...repairAttempt,
+                replacementJobId: replacement.toolJobId,
+                repaired: true,
+              };
+            }
             if (repairAttempt && repairAttempt.isActionable) {
               try {
                 const repairEvidence = buildEvidence({
@@ -1133,14 +1247,18 @@ async function runAgentLoop({
       });
 
       const activeJobs = toolJobs.filter((j) => j.status === 'running' || j.status === 'pending');
-      const hasBlocked = validatorResults.some((vr) => vr.overallStatus === 'blocked');
-      const hasFailedValidation = validatorResults.some((vr) => vr.overallStatus === 'failed');
+      const repairedFailedJobIds = new Set(replacementByFailedJobId.keys());
+      const effectiveValidatorResults = validatorResults.filter((result) =>
+        !result.toolJobId || !repairedFailedJobIds.has(result.toolJobId)
+      );
+      const hasBlocked = effectiveValidatorResults.some((vr) => vr.overallStatus === 'blocked');
+      const hasFailedValidation = effectiveValidatorResults.some((vr) => vr.overallStatus === 'failed');
 
       // HLE-C2: Check for false-success — failed job with files BUT artifact truth is NOT valid.
       // A failed job may produce partial files; those files cannot be used as valid upstream artifacts.
       // HLE-C5R: Check artifactTruth.status explicitly, not just file existence.
       const falseSuccessJobs = [];
-      for (const failed of failedJobs) {
+      for (const failed of unresolvedFailedJobs) {
         if (!failed.toolJobId || !loopArtifactCache[failed.toolJobId]) continue;
         const cache = loopArtifactCache[failed.toolJobId];
         if (!cache.files || cache.files.length === 0) continue;
@@ -1200,12 +1318,12 @@ async function runAgentLoop({
           decision = 'block';
           decisionReasonCode = REASON_CODES.ARTIFACT_VALIDATION_FAILED;
           publicConclusion = `验证失败（failed）：${validatorResults.filter((vr) => vr.overallStatus === 'failed').length} 个产物验证未通过。`;
-        } else if (failedJobs.length > 0) {
+        } else if (unresolvedFailedJobs.length > 0) {
           decision = 'retry';
           decisionReasonCode = REASON_CODES.TRANSIENT_RUNTIME_RETRY;
           publicConclusion = diagnosis && diagnosis.message
             ? `故障分类：${diagnosis.faultType}。${diagnosis.message}`
-            : `工具执行失败（${failedJobs.length} 个）。Loop Controller 将在下一轮决策中处理。`;
+            : `工具执行失败（${unresolvedFailedJobs.length} 个）。Loop Controller 将在下一轮决策中处理。`;
           loopActiveJobs = toolJobs;
         } else if (activeJobs.length > 0) {
           decision = 'continue';

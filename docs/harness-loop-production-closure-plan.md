@@ -310,6 +310,8 @@ Provider 验收入口已覆盖 DeepSeek、Anthropic 与产品通用 OpenAI-compa
 
 2026-07-24 真实主轨纠偏：Agent 最终正文不能先于 Loop ledger 收口被视为 done；Loop Controller 运行时依赖启动即校验，post-processing fatal error 必须把 task/Loop 标为 failed。真实 observed-state digest 由 Job 状态、最近公开进度和持久化 iteration 计数组成，不再使用被控制器忽略的字段。
 
+Loop 创建与阶段 durability 同步纠偏：普通 execution-capable 对话不再在模型首轮误建 Loop；只有首次 `run_tool`（包括 plan 或被 preflight 阻断的科学执行意图）才创建/恢复。每个工具批次完成即持久化公开阶段 iteration、Job 摘要、hash chain 和 checkpoint，终答另落终态 iteration；同工具失败父 Job 被后续成功 Job 替换时保留 `parentJobId + replacementJobId`，终态只受未修复失败控制。
+
 必须交付：
 
 - SPT-1 从真实聊天请求和生产 route 启动。
