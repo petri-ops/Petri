@@ -30,7 +30,9 @@
 | ✅已处理 | 2026-07-19 | Stage 4: DESeq2 可产生科学文件却缺必需 ZIP/报告模板，golden-path 曾用补救逻辑掩盖失败 | 本文件 §6 | [§6 问题 L](#问题-ldeseq2-首次成功产物契约不完整) |
 | ✅已处理 | 2026-07-21 | rc.7: `diagnostic-redaction.js` 在打包态仍从 app.asar 相邻目录解析 `core/`，主进程启动即报模块缺失 | rc.7 安装候选实机 | 已改为 `Resources/core/shared-backend/redaction.js`，补开发/打包双路径回归并完成安装启动验证 |
 | 🔴阻塞 | 2026-07-23 | HLE 离线 Controller/Validator/Repair/Checkpoint 已实现，但生产 `ai-agent.js`、真实 Job/Artifact 推进和前端尚未接线；HLE-6 的双 Provider、重启和视觉出口不成立 |
-| ✅已处理 | 2026-07-23 | HLE-C1 完成：Loop Controller 接入 agent-runner.js，惰性初始化 LoopRun、按轮持久化 Iteration、发出 loop_phase/loop_iteration SSE 事件、记录用户取消和 Controller 终止；非执行轮不创建 LoopRun；19/19 集成测试通过 | 本提交 | `core/r-server/agent-runner.js` + `test/loop-agent-integration.test.mjs` |
+| ✅已处理 | 2026-07-23 | HLE-C1 完成
+| ✅已处理 | 2026-07-23 | HLE-C2 完成：Validator Registry 接入生产 orchestration，运行真实 job truth 读取；Diagnoser 分类故障并选 Repair Strategy；blocked/failed 验证结果阻止完成；假成功（failed job + partial files）稳定阻断；38/38 集成测试通过 | 本提交 | `core/r-server/agent-runner.js` + `test/loop-validator-diagnoser.test.mjs` |
+：Loop Controller 接入 agent-runner.js，惰性初始化 LoopRun、按轮持久化 Iteration、发出 loop_phase/loop_iteration SSE 事件、记录用户取消和 Controller 终止；非执行轮不创建 LoopRun；19/19 集成测试通过 | 本提交 | `core/r-server/agent-runner.js` + `test/loop-agent-integration.test.mjs` |
  HLE 生产代码与实机审计 | 按 [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) HLE-C0～HLE-C5 收口；failed Job 即使存在部分文件也不得宣称任务完成 |
 
 **状态图例**：🔴 阻塞验收必须处理 | 🟡 建议处理不阻塞 | 🟢 待合并零风险 | ⚪ 可清理 | ✅ 已处理

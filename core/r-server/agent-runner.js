@@ -52,6 +52,7 @@ const { v4: uuidv4 } = require('uuid');
 // HLE-C1: Loop Controller + Ledger imports
 const {
   buildIteration,
+  buildEvidence,
   stableHash,
   generateActionKey,
   deriveObservedStateDigest,
@@ -60,6 +61,7 @@ const {
   decideNextAction,
   mapDecisionToIterationStatus,
   REASON_CODES,
+  EVIDENCE_KINDS,
 } = require('../shared-backend/loop-contract');
 
 const {
@@ -70,7 +72,25 @@ const {
   persistLoopIteration,
   persistLoopAction,
   getLoopActionByKey,
+  getToolJob,
+  persistLoopEvidence,
 } = require('./db');
+
+// HLE-C2: Validator, Diagnoser, Repair imports
+const {
+  validateArtifact,
+  validateDelivery,
+  registerValidator,
+  buildResult,
+} = require('../shared-backend/loop-validator-registry');
+
+const {
+  diagnoseFailure,
+} = require('../shared-backend/loop-failure-diagnoser');
+
+const {
+  selectRepairStrategy,
+} = require('../shared-backend/loop-repair-strategy');
 const {
   getToolDefs,
   createCallId,
@@ -392,6 +412,32 @@ async function runAgentLoop({
   let loopFirstIterationDone = false;
   let loopAbortedByController = false;
   let loopPublicConclusion = null;
+  // HLE-C2: accumulated validator results for this run (used in pre-turn decision)
+  let loopValidatorResults = [];
+  // HLE-C2: toolJobId → artifact data from result_json (used for validation + false-success check)
+  const loopArtifactCache = {};
+
+  // HLE-C2: Extract artifact filenames from result_json (mirrors harness.js logic)
+  function _extractArtifactFiles(parsed) {
+    if (!parsed || typeof parsed !== 'object') return [];
+    const out = new Set();
+    const INTERNAL_FILES = new Set([
+      '.tool_manifest.json', '.params.json', '.log', '.lock',
+      '__MACOSX', '.DS_Store', 'Thumbs.db',
+    ]);
+    const sources = [parsed.artifacts, parsed.outputs, parsed.files];
+    for (const list of sources) {
+      if (!Array.isArray(list)) continue;
+      for (const item of list) {
+        if (!item) continue;
+        const name = typeof item === 'string' ? item : item.name || item.filename;
+        if (!name) continue;
+        const base = typeof name === 'string' ? require('path').basename(name) : String(name);
+        if (base && !INTERNAL_FILES.has(base)) out.add(base);
+      }
+    }
+    return Array.from(out);
+  }
 
   function _loopInit(projectId, conversationId) {
     // idempotent: only create once
@@ -774,29 +820,161 @@ async function runAgentLoop({
     cancellationObserved = aborted();
 
     // HLE-C1: Persist Loop iteration after each agent turn.
-    // Only do this if a LoopRun has been initialized (execution-capable turns).
-    // Track in-flight tool_job_ids; read real status from envelope after execution.
+    // HLE-C2: Augments with real job truth, Validator, Diagnoser, Repair.
     if (loopRunId) {
       // Gather observed state from this turn's tool results
       const activities = assistantToolActivities.snapshot();
       const toolJobs = activities
         .filter((a) => a.name === 'run_tool' && a.callId)
         .map((a) => {
-          // Try to read real job status from the recorded event
+          // HLE-C2: Read real job truth from DB (authoritative source)
           const evt = toolResultEventsByCallId && toolResultEventsByCallId[a.callId];
-          const status = evt && evt.toolResult && evt.toolResult.status
+          const toolJobId = evt && evt.toolResult && evt.toolResult.data
+            ? evt.toolResult.data.toolJobId
+            : null;
+          let jobTruth = null;
+          if (toolJobId) {
+            try {
+              jobTruth = getToolJob(toolJobId) || null;
+              if (jobTruth) {
+                // Cache artifact data from result_json for validator use
+                const parsed = jobTruth.result_json ? JSON.parse(jobTruth.result_json) : null;
+                loopArtifactCache[toolJobId] = {
+                  toolJobId,
+                  job: jobTruth,
+                  result_json: parsed,
+                  files: _extractArtifactFiles(parsed),
+                };
+              }
+            } catch {}
+          }
+          const status = jobTruth
+            ? jobTruth.status
+            : (evt && evt.toolResult && evt.toolResult.status)
             ? evt.toolResult.status
             : (a.status === 'error' ? 'failed' : a.status === 'success' ? 'completed' : 'unknown');
           return {
-            toolJobId: (evt && evt.toolResult && evt.toolResult.data && evt.toolResult.data.toolJobId) || null,
+            toolJobId: toolJobId || null,
             callId: a.callId,
             name: a.name,
             status,
             iteration: a.iteration,
+            jobTruth,
           };
         });
 
-      // Derive state digest from tool activities
+      // HLE-C2: Run Validator Registry on completed job artifacts
+      const validatorResults = [];
+      for (const job of toolJobs) {
+        if (!job.toolJobId || !loopArtifactCache[job.toolJobId]) continue;
+        const cache = loopArtifactCache[job.toolJobId];
+        if (!cache.result_json) continue;
+        const sources = [
+          ...(cache.result_json.artifacts || []),
+          ...(cache.result_json.outputs || []),
+          ...(cache.result_json.files || []),
+        ];
+        for (const item of sources) {
+          if (!item || typeof item !== 'object') continue;
+          const artifact = {
+            kind: item.type || item.kind || cache.result_json.toolId || 'unknown',
+            type: item.type || item.kind || 'unknown',
+            name: item.name || item.filename || 'unknown',
+            url: item.url || null,
+            metadata: item,
+          };
+          try {
+            const vr = validateArtifact(artifact, {
+              toolJobId: job.toolJobId,
+              projectId: toolCtx.projectId,
+              userId,
+            });
+            if (vr.overallStatus !== 'unavailable' || (vr.findings && vr.findings.length > 0)) {
+              validatorResults.push({ ...vr, toolJobId: job.toolJobId, artifactName: artifact.name });
+            }
+          } catch {}
+        }
+        if (validatorResults.length > 0) {
+          const lastVr = validatorResults[validatorResults.length - 1];
+          try {
+            const evidence = buildEvidence({
+              loopRunId,
+              iterationId: null,
+              kind: EVIDENCE_KINDS.OBSERVATION,
+              ref: `tool_job:${job.toolJobId}/${lastVr.overallStatus}`,
+              summaryDigest: stableHash(lastVr),
+              parentEvidenceHash: null,
+            });
+            evidence.toolJobId = job.toolJobId;
+            evidence.validatorResults = lastVr;
+            try { persistLoopEvidence(evidence); } catch {}
+          } catch {}
+        }
+      }
+
+      // HLE-C2: Diagnose failed jobs and propose repair
+      let repairAttempt = null;
+      let diagnosis = null;
+      const failedJobs = toolJobs.filter((j) => j.status === 'failed' || j.status === 'blocked');
+      if (failedJobs.length > 0) {
+        const primaryFailed = failedJobs[0];
+        try {
+          diagnosis = diagnoseFailure(
+            {
+              ...(primaryFailed.jobTruth || {}),
+              tool_id: primaryFailed.jobTruth ? primaryFailed.jobTruth.tool_id : null,
+              error: primaryFailed.jobTruth ? primaryFailed.jobTruth.error : null,
+              status: primaryFailed.jobTruth ? primaryFailed.jobTruth.status : primaryFailed.status,
+            },
+            {
+              toolId: primaryFailed.jobTruth ? primaryFailed.jobTruth.tool_id : null,
+              artifactValidationResults: validatorResults.filter((vr) => vr.toolJobId === primaryFailed.toolJobId),
+            }
+          );
+        } catch (e) {
+          diagnosis = {
+            faultType: 'unknown_failure',
+            defaultBehavior: 'require_user',
+            strategies: ['ask_user_design'],
+            message: `诊断失败: ${e.message}`,
+            confidence: 0.1,
+          };
+        }
+        if (diagnosis) {
+          try {
+            const repairCtx = {
+              parentJobId: primaryFailed.toolJobId,
+              originalToolId: primaryFailed.jobTruth ? primaryFailed.jobTruth.tool_id : null,
+              originalParams: primaryFailed.jobTruth && primaryFailed.jobTruth.params_json
+                ? JSON.parse(primaryFailed.jobTruth.params_json)
+                : null,
+              originalInputs: null,
+              parentArtifactIds: [],
+              dag: null,
+              fallbackProvider: null,
+            };
+            repairAttempt = selectRepairStrategy(diagnosis, repairCtx);
+            if (repairAttempt && repairAttempt.isActionable) {
+              try {
+                const repairEvidence = buildEvidence({
+                  loopRunId,
+                  iterationId: null,
+                  kind: EVIDENCE_KINDS.OBSERVATION,
+                  ref: `repair:${primaryFailed.toolJobId}/${repairAttempt.strategyId}`,
+                  summaryDigest: stableHash({ strategyId: repairAttempt.strategyId, faultType: diagnosis.faultType }),
+                  parentEvidenceHash: null,
+                });
+                repairEvidence.repairStrategy = repairAttempt;
+                repairEvidence.diagnosis = diagnosis;
+                repairEvidence.toolJobId = primaryFailed.toolJobId;
+                persistLoopEvidence(repairEvidence);
+              } catch {}
+            }
+          } catch {}
+        }
+      }
+
+      // Derive state digest
       const stateDigest = deriveObservedStateDigest({
         iterations: loopIterations,
         activeJobs: toolJobs.filter((j) => j.status === 'running' || j.status === 'pending'),
@@ -804,9 +982,20 @@ async function runAgentLoop({
       });
 
       const activeJobs = toolJobs.filter((j) => j.status === 'running' || j.status === 'pending');
-      const failedJobs = toolJobs.filter((j) => j.status === 'failed' || j.status === 'blocked');
+      const hasBlocked = validatorResults.some((vr) => vr.overallStatus === 'blocked');
+      const hasFailedValidation = validatorResults.some((vr) => vr.overallStatus === 'failed');
 
-      // Check for cancellation
+      // HLE-C2: Check for false-success — failed job but files exist
+      const falseSuccessJobs = [];
+      for (const failed of failedJobs) {
+        if (failed.toolJobId && loopArtifactCache[failed.toolJobId]) {
+          const cache = loopArtifactCache[failed.toolJobId];
+          if (cache.files && cache.files.length > 0) {
+            falseSuccessJobs.push(failed.toolJobId);
+          }
+        }
+      }
+
       if (cancellationObserved || loopAbortedByController) {
         loopSequence += 1;
         const parentHash = loopIterations.length > 0
@@ -827,30 +1016,37 @@ async function runAgentLoop({
           parentIterationHash: parentHash,
           createdAt: new Date().toISOString(),
         }, {
-          validatorResults: [],
+          validatorResults: validatorResults.slice(),
           repairAttempt: null,
           costSnapshot: null,
         });
-        try {
-          persistLoopIteration(iteration);
-          loopIterations.push(iteration);
-        } catch {}
+        try { persistLoopIteration(iteration); loopIterations.push(iteration); } catch {}
         loopState = 'cancelled';
         loopPublicConclusion = iteration.publicConclusion;
         _loopEmitIterationEvent(iteration, 'cancel', null);
       } else {
-        // Determine decision based on tool results
         let decision = 'continue';
         let decisionReasonCode = REASON_CODES.TOOL_SUCCEEDED;
         let publicConclusion = null;
-        let blockedReason = null;
 
-        if (failedJobs.length > 0) {
-          // A tool failed — Controller will classify in next pre-turn decision
-          decision = 'continue'; // Let controller see it in next iteration
+        if (falseSuccessJobs.length > 0) {
+          decision = 'block';
+          decisionReasonCode = REASON_CODES.ARTIFACT_VALIDATION_FAILED;
+          publicConclusion = `检测到假成功：任务失败但产生了文件（${falseSuccessJobs.length} 个）。已验证结果不完整，禁止宣称完成。`;
+        } else if (hasBlocked) {
+          decision = 'block';
+          decisionReasonCode = REASON_CODES.ARTIFACT_VALIDATION_FAILED;
+          publicConclusion = `验证失败（blocked）：${validatorResults.filter((vr) => vr.overallStatus === 'blocked').length} 个产物未通过验证，任务无法继续。`;
+        } else if (hasFailedValidation) {
+          decision = 'block';
+          decisionReasonCode = REASON_CODES.ARTIFACT_VALIDATION_FAILED;
+          publicConclusion = `验证失败（failed）：${validatorResults.filter((vr) => vr.overallStatus === 'failed').length} 个产物验证未通过。`;
+        } else if (failedJobs.length > 0) {
+          decision = 'retry';
           decisionReasonCode = REASON_CODES.TRANSIENT_RUNTIME_RETRY;
-          publicConclusion = `工具执行失败（${failedJobs.length} 个）。Loop Controller 将在下一轮决策中处理。`;
-          // Store failed jobs for diagnoser
+          publicConclusion = diagnosis && diagnosis.message
+            ? `故障分类：${diagnosis.faultType}。${diagnosis.message}`
+            : `工具执行失败（${failedJobs.length} 个）。Loop Controller 将在下一轮决策中处理。`;
           loopActiveJobs = toolJobs;
         } else if (activeJobs.length > 0) {
           decision = 'continue';
@@ -858,14 +1054,15 @@ async function runAgentLoop({
           publicConclusion = `工具执行中（${activeJobs.length} 个运行中）。继续监控。`;
           loopActiveJobs = activeJobs;
         } else if (activities.length === 0) {
-          // No tool calls this turn — normal finalization
           decision = 'complete';
-          decisionReasonCode = REASON_CODES.TOOL_SUCCEEDED;
+          decisionReasonCode = REASON_CODES.GOAL_ACHIEVED;
           publicConclusion = '本轮无工具调用，已整理最终答复。';
           loopActiveJobs = [];
         } else {
           loopActiveJobs = toolJobs;
         }
+
+        loopValidatorResults = loopValidatorResults.concat(validatorResults);
 
         loopSequence += 1;
         const parentHash = loopIterations.length > 0
@@ -877,7 +1074,7 @@ async function runAgentLoop({
           sequence: loopSequence,
           observedStateDigest: stateDigest,
           goalGapIds: [],
-          proposedAction: null,   // decisions happen pre-turn; post-turn records results
+          proposedAction: null,
           decision,
           decisionReasonCode,
           publicConclusion,
@@ -885,15 +1082,12 @@ async function runAgentLoop({
           parentIterationHash: parentHash,
           createdAt: new Date().toISOString(),
         }, {
-          validatorResults: [],
-          repairAttempt: null,
+          validatorResults: validatorResults.slice(),
+          repairAttempt,
           costSnapshot: null,
         });
 
-        try {
-          persistLoopIteration(iteration);
-          loopIterations.push(iteration);
-        } catch {}
+        try { persistLoopIteration(iteration); loopIterations.push(iteration); } catch {}
         _loopEmitIterationEvent(iteration, decision, null);
       }
     }

@@ -186,7 +186,7 @@ failed Job 存在部分文件时必须：
 
 ### HLE-C2：接入 Validator、Diagnoser 与 Repair
 
-状态：`planned`
+状态：`completed`
 
 必须交付：
 
