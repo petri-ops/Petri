@@ -279,7 +279,7 @@ failed Job 存在部分文件时必须：
 
 ### HLE-C5：真实 SPT-1 与产品出口
 
-状态：`in_progress`（HLE-C5R 生产回归中——Plugin Contract 未统一、Workflow DAG 缺少 deg-standardizer、false-success 防护不足、metadata→coldata 映射缺失）
+状态：`in_progress`（HLE-C5R 基础设施完成，真实产品验收待 Step 7：Plugin Contract 已统一（biof3.deg.v1、lfc_col、DESeq2 preflight）、bulk-rna-core 4-step DAG 已完成、Repair Boundary 已建立、scientific-task-planner coldataBinding 已完成、false-success 检测已修复。1032/1032 测试全量通过，插件契约 lint 0 错误。真实产品路径三轨（Normal/Repairable/Blocking）和 UI/Provider/重启验收待 Step 7。）
 
 必须交付：
 
