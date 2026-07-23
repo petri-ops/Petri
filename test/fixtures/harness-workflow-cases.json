@@ -4,7 +4,7 @@
     {
       "id": "bulk-rna-valid-lineage",
       "templateId": "bulk-rna-core",
-      "availableToolIds": ["deseq2", "volcano-plot", "enrichment"],
+      "availableToolIds": ["deseq2", "deg-standardizer", "volcano-plot", "go-kegg", "gsea"],
       "jobs": [
         {
           "stepId": "differential",
@@ -22,21 +22,74 @@
       "bindings": [
         {
           "fromStepId": "differential",
-          "toStepId": "volcano",
-          "inputId": "deg_table",
-          "artifact": { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" },
-          "artifactTruth": { "status": "valid" }
-        },
-        {
-          "fromStepId": "differential",
-          "toStepId": "enrichment",
-          "inputId": "deg_table",
+          "toStepId": "deg-standardization",
+          "inputId": "deg_results",
           "artifact": { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" },
           "artifactTruth": { "status": "valid" }
         }
       ],
       "expected": {
-        "stepStatuses": { "differential": "complete", "volcano": "ready", "enrichment": "ready" },
+        "stepStatuses": { "differential": "complete", "deg-standardization": "ready", "volcano": "waiting_for_artifact", "enrichment": "waiting_for_artifact" },
+        "readyStepIds": ["deg-standardization"],
+        "recoverable": false,
+        "terminal": false
+      }
+    },
+    {
+      "id": "bulk-rna-valid-complete",
+      "templateId": "bulk-rna-core",
+      "availableToolIds": ["deseq2", "deg-standardizer", "volcano-plot", "go-kegg", "gsea"],
+      "jobs": [
+        {
+          "stepId": "differential",
+          "id": "tj_bulk_deg",
+          "tool_id": "deseq2",
+          "status": "completed",
+          "result": {
+            "artifactTruth": { "status": "valid", "validCount": 1 },
+            "artifacts": [
+              { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" }
+            ]
+          }
+        },
+        {
+          "stepId": "deg-standardization",
+          "id": "tj_deg_std",
+          "tool_id": "deg-standardizer",
+          "status": "completed",
+          "result": {
+            "artifactTruth": { "status": "valid", "validCount": 1 },
+            "artifacts": [
+              { "id": "deg_standardized", "type": "table", "canonicalPath": "/work/biof3/results/deg_standardized.csv" }
+            ]
+          }
+        }
+      ],
+      "bindings": [
+        {
+          "fromStepId": "differential",
+          "toStepId": "deg-standardization",
+          "inputId": "deg_results",
+          "artifact": { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" },
+          "artifactTruth": { "status": "valid" }
+        },
+        {
+          "fromStepId": "deg-standardization",
+          "toStepId": "volcano",
+          "inputId": "deg_table",
+          "artifact": { "id": "deg_standardized", "type": "table", "canonicalPath": "/work/biof3/results/deg_standardized.csv" },
+          "artifactTruth": { "status": "valid" }
+        },
+        {
+          "fromStepId": "deg-standardization",
+          "toStepId": "enrichment",
+          "inputId": "deg_table",
+          "artifact": { "id": "deg_standardized", "type": "table", "canonicalPath": "/work/biof3/results/deg_standardized.csv" },
+          "artifactTruth": { "status": "valid" }
+        }
+      ],
+      "expected": {
+        "stepStatuses": { "differential": "complete", "deg-standardization": "complete", "volcano": "ready", "enrichment": "ready" },
         "readyStepIds": ["volcano", "enrichment"],
         "recoverable": false,
         "terminal": false
@@ -45,7 +98,7 @@
     {
       "id": "bulk-rna-degraded-recovery",
       "templateId": "bulk-rna-core",
-      "availableToolIds": ["deseq2", "volcano-plot", "enrichment"],
+      "availableToolIds": ["deseq2", "deg-standardizer", "volcano-plot", "go-kegg", "gsea"],
       "jobs": [
         {
           "stepId": "differential",
@@ -61,7 +114,7 @@
         }
       ],
       "expected": {
-        "stepStatuses": { "differential": "recoverable" },
+        "stepStatuses": { "differential": "recoverable", "deg-standardization": "waiting_for_artifact", "volcano": "waiting_for_artifact", "enrichment": "waiting_for_artifact" },
         "readyStepIds": [],
         "recoverable": true,
         "terminal": false,
@@ -71,7 +124,7 @@
     {
       "id": "bulk-rna-waiting-for-approval",
       "templateId": "bulk-rna-core",
-      "availableToolIds": ["deseq2", "volcano-plot", "enrichment"],
+      "availableToolIds": ["deseq2", "deg-standardizer", "volcano-plot", "go-kegg", "gsea"],
       "jobs": [
         {
           "stepId": "differential",
@@ -82,7 +135,7 @@
         }
       ],
       "expected": {
-        "stepStatuses": { "differential": "waiting_for_confirmation" },
+        "stepStatuses": { "differential": "waiting_for_confirmation", "deg-standardization": "waiting_for_artifact", "volcano": "waiting_for_artifact", "enrichment": "waiting_for_artifact" },
         "readyStepIds": [],
         "recoverable": false,
         "terminal": false,
@@ -92,7 +145,7 @@
     {
       "id": "bulk-rna-failed-blocked",
       "templateId": "bulk-rna-core",
-      "availableToolIds": ["deseq2", "volcano-plot", "enrichment"],
+      "availableToolIds": ["deseq2", "deg-standardizer", "volcano-plot", "go-kegg", "gsea"],
       "jobs": [
         {
           "stepId": "differential",
@@ -108,7 +161,7 @@
         }
       ],
       "expected": {
-        "stepStatuses": { "differential": "blocked" },
+        "stepStatuses": { "differential": "blocked", "deg-standardization": "waiting_for_artifact", "volcano": "waiting_for_artifact", "enrichment": "waiting_for_artifact" },
         "readyStepIds": [],
         "recoverable": false,
         "terminal": false
@@ -117,7 +170,7 @@
     {
       "id": "go-kegg-enrichment-lineage",
       "templateId": "bulk-rna-core",
-      "availableToolIds": ["deseq2", "volcano-plot", "go-kegg"],
+      "availableToolIds": ["deseq2", "deg-standardizer", "volcano-plot", "go-kegg", "gsea"],
       "jobs": [
         {
           "stepId": "differential",
@@ -130,26 +183,45 @@
               { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" }
             ]
           }
+        },
+        {
+          "stepId": "deg-standardization",
+          "id": "tj_deg_std_go_kegg",
+          "tool_id": "deg-standardizer",
+          "status": "completed",
+          "result": {
+            "artifactTruth": { "status": "valid", "validCount": 1 },
+            "artifacts": [
+              { "id": "deg_standardized", "type": "table", "canonicalPath": "/work/biof3/results/deg_std.csv" }
+            ]
+          }
         }
       ],
       "bindings": [
         {
           "fromStepId": "differential",
-          "toStepId": "volcano",
-          "inputId": "deg_table",
+          "toStepId": "deg-standardization",
+          "inputId": "deg_results",
           "artifact": { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" },
           "artifactTruth": { "status": "valid" }
         },
         {
-          "fromStepId": "differential",
+          "fromStepId": "deg-standardization",
+          "toStepId": "volcano",
+          "inputId": "deg_table",
+          "artifact": { "id": "deg_standardized", "type": "table", "canonicalPath": "/work/biof3/results/deg_std.csv" },
+          "artifactTruth": { "status": "valid" }
+        },
+        {
+          "fromStepId": "deg-standardization",
           "toStepId": "enrichment",
           "inputId": "deg_table",
-          "artifact": { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" },
+          "artifact": { "id": "deg_standardized", "type": "table", "canonicalPath": "/work/biof3/results/deg_std.csv" },
           "artifactTruth": { "status": "valid" }
         }
       ],
       "expected": {
-        "stepStatuses": { "differential": "complete", "volcano": "ready", "enrichment": "ready" },
+        "stepStatuses": { "differential": "complete", "deg-standardization": "complete", "volcano": "ready", "enrichment": "ready" },
         "readyStepIds": ["volcano", "enrichment"],
         "recoverable": false,
         "terminal": false

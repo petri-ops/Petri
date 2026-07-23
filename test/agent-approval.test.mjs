@@ -192,20 +192,22 @@ test('Agent 只能把真实 tool_job 中已验证的 artifact 绑定到下游', 
     },
     completedAt: Date.now(),
   });
+  // HLE-C5R: bulk-rna-core now has 4 steps: differential → deg-standardization → volcano/enrichment
+  // Must bind from differential to deg-standardization first
   const bound = await learning.tool_run_tool(
     {
       op: 'bind_artifact',
       workflowPlan: planned.plan,
       fromToolJobId: job.id,
       fromStepId: 'differential',
-      toStepId: 'volcano',
-      inputId: 'deg_table',
+      toStepId: 'deg-standardization',
+      inputId: 'deg_results',
       artifactId: 'deg_table',
     },
     CTX,
   );
   assert.equal(bound.ok, true);
-  assert.equal(bound.plan.steps.find((step) => step.id === 'volcano').inputs.deg_table, '/results/deg.csv');
+  assert.equal(bound.plan.steps.find((step) => step.id === 'deg-standardization').inputs.deg_results, '/results/deg.csv');
   assert.equal(bound.plan.lineage[0].fromToolJobId, job.id);
   const sqlite = db.getDatabase();
   sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(job.id);
