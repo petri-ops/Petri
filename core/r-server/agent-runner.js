@@ -985,14 +985,18 @@ async function runAgentLoop({
       const hasBlocked = validatorResults.some((vr) => vr.overallStatus === 'blocked');
       const hasFailedValidation = validatorResults.some((vr) => vr.overallStatus === 'failed');
 
-      // HLE-C2: Check for false-success — failed job but files exist
+      // HLE-C2: Check for false-success — failed job with files BUT artifact truth is NOT valid.
+      // A failed job may produce partial files; those files cannot be used as valid upstream artifacts.
+      // HLE-C5R: Check artifactTruth.status explicitly, not just file existence.
       const falseSuccessJobs = [];
       for (const failed of failedJobs) {
-        if (failed.toolJobId && loopArtifactCache[failed.toolJobId]) {
-          const cache = loopArtifactCache[failed.toolJobId];
-          if (cache.files && cache.files.length > 0) {
-            falseSuccessJobs.push(failed.toolJobId);
-          }
+        if (!failed.toolJobId || !loopArtifactCache[failed.toolJobId]) continue;
+        const cache = loopArtifactCache[failed.toolJobId];
+        if (!cache.files || cache.files.length === 0) continue;
+        // artifactTruth must be checked — partial/degraded/blocked files do NOT make a failed job valid
+        const truth = cache.result_json?.artifactTruth;
+        if (!truth || truth.status !== 'valid') {
+          falseSuccessJobs.push(failed.toolJobId);
         }
       }
 
