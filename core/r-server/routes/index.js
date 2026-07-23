@@ -24,6 +24,7 @@ module.exports = async function registerRoutes(app) {
     ['Feedback', () => require('./feedback')(app)],
     ['AI chat', () => require('./ai-chat')(app)],
     ['AI agent', () => require('./ai-agent')(app)],
+    ['AI Loop API', () => require('./ai-loop').registerAiLoopRoutes(app)],
     ['AI settings', () => require('./ai-settings-api').registerAiSettingsRoutes(app)],
     ['R compute', () => require('./r-compute').registerRCompute(app)],
   ];

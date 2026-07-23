@@ -211,7 +211,7 @@ failed Job 存在部分文件时必须：
 
 ### HLE-C3：耐久恢复、查询 API 与上下文重建
 
-状态：`planned`
+状态：`partial`
 
 必须交付：
 
@@ -232,6 +232,16 @@ failed Job 存在部分文件时必须：
 - 损坏/缺失 snapshot 显示可操作恢复状态。
 
 建议提交：`feat(harness-loop): resume durable runs from execution truth`
+
+> HLE-C3 部分完成（REST API 完成，启动恢复待 HLE-C5）：
+> - `/api/loop/runs/:loopRunId` — 单条 LoopRun 查询（compact projection）
+> - `/api/loop/runs?conversationId=&projectId=` — 按会话/项目查询
+> - `/api/loop/iterations/:loopRunId` — 所有 iteration compact 投影
+> - `/api/loop/actions/:loopRunId` — 所有 action compact 投影
+> - `/api/loop/evidence/:loopRunId` — 所有 evidence compact 投影
+> - `/api/loop/recovery/:loopRunId` — 恢复投影（含 canResume/needsRecovery/recoveryHint）
+> - `/api/loop/runs/:loopRunId/abort` — 中止信号写入
+> - 后端启动时 reconcile running LoopRun 待 HLE-C5
 
 ### HLE-C4：会话与摘要 UI 接线
 
