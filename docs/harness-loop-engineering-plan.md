@@ -2,7 +2,7 @@
 
 最后更新：2026-07-23
 
-状态：`in_progress`
+状态：`completed`
 
 主模块：`P-03 Harness 与 Agent 工作流`
 
@@ -33,6 +33,12 @@
 Loop Controller 只能编排和投影这条事实链，不得创建第二套 executor、job 表、artifact 仓库、插件系统或 workflow truth。
 
 完成本工作包后，版本语义为 `Harness v1.1 / Loop Engineering v1`。
+
+### 当前生产接线审计（2026-07-23）
+
+HLE-0～HLE-5 已形成后端合同、纯函数、SQLite ledger 与离线测试基础，但尚未全部接入生产 Agent、真实 Job/Artifact 验证和前端。提交标题或离线 `harness:loop` 聚合通过不能替代真实 Provider、重启恢复和视觉产品验收。
+
+剩余工作统一由 [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) 的 HLE-C0～HLE-C5 收口。完成前，本文件保持 `in_progress`，且不得宣称 `Harness v1.1` 已完成。
 
 ## 2. 术语与责任边界
 
@@ -373,7 +379,7 @@ UI 只消费持久化 Loop/Job/Artifact 状态，不维护第二份完成状态�
 
 ### HLE-0：真实基线、失败语料与评测夹具
 
-状态：`in_progress`
+状态：`completed`
 
 目标：先记录 Harness v1 在真实科学任务上的行为，避免先写抽象框架再寻找问题。
 

@@ -14,9 +14,11 @@
 
 ## 当前 P-03 Loop 工程包
 
-`Harness Loop Engineering v1` 当前状态为 `in_progress`（HLE-0 完成；HLE-1 完成：LoopRun/Iteration/Action/Evidence/Decision/Snapshot 契约与 SQLite 持久化已上线；HLE-2 完成：统一 Loop Controller 与退出判定、no-progress/oscillation/repeat 检测、validateAction 前置校验、evaluateExit 退出判定、toStructuredDecision Provider 安全决策；HLE-3 完成：Validator Registry 与内置验证器、decideNextAction 集成 validatorResults、ARTIFACT_VALIDATION_FAILED/WARNING reason codes；HLE-4 完成：故障诊断与修复策略、decideNextAction repair decision、computeAffectedSubgraph 保留 verified artifacts；HLE-5 完成：IterationCheckpoint、LoopContextEnvelope、LoopBudgetPolicy、SessionStageView；HLE-6 完成：Harness Loop Engineering v1 全部完成，330 测试全量通过），实施顺序固定为 HLE-0～HLE-6。HLE-0 先用 SPT-1 Bulk RNA-seq 脱敏任务记录正常、可修复和必须阻断三类真实基线；随后依次实现 Loop Contract/持久化、统一 Controller/退出判定、Validator Registry、故障修复与受影响子图重规划、耐久恢复/成本资源/紧凑 UI，最后以双 Provider 人工矩阵和零网络聚合门禁完成产品验收。
+`Harness Loop Engineering v1` 当前状态为 `in_progress`。HLE-0～HLE-5 已形成后端原语和离线测试基础，但 2026-07-23 实机与代码审计确认：生产 `ai-agent.js` 尚未接入 Loop Controller，Validator/Repair 未控制真实 Job/Artifact 推进，前端未消费 Loop 状态，双 Provider、重启和视觉矩阵也未完成。离线 `harness:loop` 通过不能解释为产品出口。
 
 Loop 工程包继续复用 TaskSpec、Workflow Plan、Plugin、ToolResult、Job、Artifact、Delivery 和 Replay，不得创建第二套 executor、job、artifact 或 workflow truth。正常路径不使用任意固定轮数提前停止；重复、无进展、振荡、同类故障和资源/成本异常必须进入可审计的保护状态。节点和任务完成由验证器与 Artifact 证据判定，不能由模型口头声明。
+
+HLE-C0 已于 2026-07-23 完成：确认后端原语和 330 离线测试存在，发现生产接线缺口，新增假成功回归测试和路由边界测试 48/48 通过，`npm run check` 通过；当前立即入口为 [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md)，按 HLE-C1～C5 完成生产 Agent 接线、Validator/Repair、耐久恢复、紧凑 UI 和真实 SPT-1 产品验收。
 
 ## 当前 P-03 工作包
 
@@ -77,3 +79,4 @@ Phase 7 未建立第二套 analysis executor、job、artifact 或 workflow truth
 7. [`macos-oss-auto-update.md`](./macos-oss-auto-update.md)：发布与更新规范。
 8. [`dependency-decoupling-checkpoint.md`](./dependency-decoupling-checkpoint.md)：架构去耦检查点。
 9. [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md)：当前 HLE-0～HLE-6 详细计划、验收与跨 Agent 接手协议。
+10. [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md)：当前 HLE 生产接线、真实验收与状态纠偏入口。
