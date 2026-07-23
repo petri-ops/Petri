@@ -170,24 +170,23 @@ function taskToolJobIds(db, taskId) {
   return ids;
 }
 
+function taskLoopRunIds(db, taskId) {
+  const rows = db.prepare(
+    "SELECT payload FROM task_events WHERE task_id=? AND event_type IN ('loop_phase','loop_iteration') ORDER BY seq"
+  ).all(taskId);
+  const ids = [];
+  for (const row of rows) {
+    const event = parseJson(row.payload);
+    const id = event.loopRunId || null;
+    if (id && !ids.includes(id)) ids.push(id);
+  }
+  return ids;
+}
+
 function captureTrack(db, label, conversationId, explicitTaskIds = []) {
-  const task = latestTaskForConversation(db, conversationId);
-  assert(task, `${label}: task not found`);
-  const taskParams = parseJson(task.params);
-  const projectId = taskParams?.context?.projectId;
-  assert(projectId, `${label}: project missing`);
-  const project = db.prepare('SELECT workspace_path FROM projects WHERE id=?').get(projectId);
-  assert(project?.workspace_path, `${label}: workspace missing`);
-  const run = db.prepare(
-    'SELECT * FROM loop_runs WHERE conversation_id=? ORDER BY updated_at DESC LIMIT 1'
-  ).get(conversationId);
-  assert(run, `${label}: loop run missing`);
-  const iterations = db.prepare(
-    'SELECT sequence, decision, decision_reason_code, status, hash, parent_iteration_hash FROM loop_iterations WHERE loop_run_id=? ORDER BY sequence'
-  ).all(run.loop_run_id);
   const selectedTaskIds = explicitTaskIds.length > 0
     ? explicitTaskIds
-    : [task.id];
+    : [latestTaskForConversation(db, conversationId)?.id].filter(Boolean);
   const selectedTasks = selectedTaskIds.map((taskId) =>
     db.prepare('SELECT * FROM tasks WHERE id=?').get(taskId)
   );
@@ -197,6 +196,27 @@ function captureTrack(db, label, conversationId, explicitTaskIds = []) {
     ),
     `${label}: explicit task scope mismatch`,
   );
+  const task = selectedTasks[selectedTasks.length - 1] || null;
+  assert(task, `${label}: task not found`);
+  const taskParams = parseJson(task.params);
+  const projectId = taskParams?.context?.projectId;
+  assert(projectId, `${label}: project missing`);
+  const project = db.prepare('SELECT workspace_path FROM projects WHERE id=?').get(projectId);
+  assert(project?.workspace_path, `${label}: workspace missing`);
+  const scopedLoopRunIds = [
+    ...new Set(selectedTaskIds.flatMap((taskId) => taskLoopRunIds(db, taskId))),
+  ];
+  const run = scopedLoopRunIds.length > 0
+    ? db.prepare('SELECT * FROM loop_runs WHERE loop_run_id=?').get(
+        scopedLoopRunIds[scopedLoopRunIds.length - 1]
+      )
+    : db.prepare(
+        'SELECT * FROM loop_runs WHERE conversation_id=? ORDER BY updated_at DESC LIMIT 1'
+      ).get(conversationId);
+  assert(run && run.conversation_id === conversationId, `${label}: loop run missing or out of scope`);
+  const iterations = db.prepare(
+    'SELECT sequence, decision, decision_reason_code, status, hash, parent_iteration_hash FROM loop_iterations WHERE loop_run_id=? ORDER BY sequence'
+  ).all(run.loop_run_id);
   const jobIds = [...new Set(
     selectedTaskIds.flatMap((taskId) => taskToolJobIds(db, taskId))
   )];

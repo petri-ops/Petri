@@ -34,6 +34,7 @@ const {
 const {
   runAgentLoop,
   resolveAgentTaskTerminal,
+  buildLoopObservationEvidence,
 } = require(resolve(__dirname, '../core/r-server/agent-runner'));
 
 function mapDecisionToIterationStatus(decision) {
@@ -134,6 +135,18 @@ describe('HLE-C1: Loop Agent Integration', () => {
       });
       assert.equal(terminal.status, 'completed');
       assert.equal(terminal.error, null);
+    });
+
+    it('builds a valid observation evidence record for persistence', () => {
+      const evidence = buildLoopObservationEvidence({
+        loopRunId: 'loop-1',
+        ref: 'repair:parent-job/observed_same_tool_replacement',
+        summaryDigest: stableHash({ repaired: true }),
+      });
+      assert.equal(evidence.kind, 'observation');
+      assert.equal(evidence.loopRunId, 'loop-1');
+      assert.ok(evidence.evidenceId);
+      assert.ok(evidence.hash);
     });
   });
 
@@ -445,6 +458,28 @@ describe('HLE-C1: Loop Agent Integration', () => {
         'replacement-job',
       );
       assert.equal(resolved.repairedFailedJobIds.has('parent-job'), true);
+    });
+
+    it('records an observed replacement even when no deterministic repair strategy matched', async () => {
+      const { buildObservedReplacementAttempt } = await import('../core/r-server/agent-runner.js');
+      const attempt = buildObservedReplacementAttempt(
+        { faultType: 'unknown_failure' },
+        {
+          toolJobId: 'parent-job',
+          toolId: 'sample-metadata-validator',
+          status: 'failed',
+        },
+        {
+          toolJobId: 'replacement-job',
+          toolId: 'sample-metadata-validator',
+          status: 'completed',
+        },
+      );
+      assert.equal(attempt.strategyId, 'observed_same_tool_replacement');
+      assert.equal(attempt.parentLineage.parentJobId, 'parent-job');
+      assert.equal(attempt.replacementJobId, 'replacement-job');
+      assert.equal(attempt.repaired, true);
+      assert.equal(attempt.isActionable, false);
     });
   });
 

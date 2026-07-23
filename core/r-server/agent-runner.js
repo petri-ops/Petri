@@ -57,7 +57,6 @@ const {
   buildEvidence,
   stableHash,
   REASON_CODES,
-  EVIDENCE_KINDS,
   normalizeLoopAutomationMode,
 } = require('../shared-backend/loop-contract');
 const {
@@ -190,6 +189,45 @@ function resolveFailedJobReplacements(toolJobs = []) {
         .map((failed) => failed.toolJobId)
     ),
   };
+}
+
+function buildObservedReplacementAttempt(diagnosis, failedJob, replacementJob) {
+  if (!failedJob?.toolJobId || !replacementJob?.toolJobId) return null;
+  const toolId =
+    replacementJob.toolId ||
+    replacementJob.jobTruth?.tool_id ||
+    failedJob.toolId ||
+    failedJob.jobTruth?.tool_id ||
+    null;
+  return {
+    strategyId: 'observed_same_tool_replacement',
+    strategyVersion: '1.0.0',
+    newToolId: toolId,
+    newInputs: null,
+    newParams: null,
+    parentLineage: {
+      parentJobId: failedJob.toolJobId,
+      parentArtifactIds: [],
+      parentPlanHash: null,
+      repairReason: diagnosis?.faultType || 'unclassified_failure',
+    },
+    replacementJobId: replacementJob.toolJobId,
+    repaired: true,
+    invalidatedArtifactIds: [],
+    preservedArtifactIds: [],
+    isActionable: false,
+    requiresUserAuth: false,
+    publicMessage: '已验证同一工具的新 Job 成功替换失败 Job，并保留 parent/replacement lineage。',
+    costMultiplier: 1,
+    safetyLevel: 'safe',
+  };
+}
+
+function buildLoopObservationEvidence(input) {
+  return buildEvidence({
+    ...input,
+    kind: 'observation',
+  });
 }
 
 function _buildResultCardFromRunTool(result, context) {
@@ -1197,10 +1235,9 @@ async function runAgentLoop({
         if (validatorResults.length > 0) {
           const lastVr = validatorResults[validatorResults.length - 1];
           try {
-            const evidence = buildEvidence({
+            const evidence = buildLoopObservationEvidence({
               loopRunId,
               iterationId: null,
-              kind: EVIDENCE_KINDS.OBSERVATION,
               ref: `tool_job:${job.toolJobId}/${lastVr.overallStatus}`,
               summaryDigest: stableHash(lastVr),
               parentEvidenceHash: null,
@@ -1263,6 +1300,13 @@ async function runAgentLoop({
             const replacement = replacementByFailureKey.get(
               primaryFailed.toolJobId || primaryFailed.callId
             );
+            if (!repairAttempt && replacement) {
+              repairAttempt = buildObservedReplacementAttempt(
+                diagnosis,
+                primaryFailed,
+                replacement,
+              );
+            }
             if (repairAttempt && replacement) {
               repairAttempt = {
                 ...repairAttempt,
@@ -1270,12 +1314,11 @@ async function runAgentLoop({
                 repaired: true,
               };
             }
-            if (repairAttempt && repairAttempt.isActionable) {
+            if (repairAttempt && (repairAttempt.isActionable || repairAttempt.repaired)) {
               try {
-                const repairEvidence = buildEvidence({
+                const repairEvidence = buildLoopObservationEvidence({
                   loopRunId,
                   iterationId: null,
-                  kind: EVIDENCE_KINDS.OBSERVATION,
                   ref: `repair:${primaryFailed.toolJobId}/${repairAttempt.strategyId}`,
                   summaryDigest: stableHash({ strategyId: repairAttempt.strategyId, faultType: diagnosis.faultType }),
                   parentEvidenceHash: null,
@@ -1644,4 +1687,6 @@ module.exports = {
   runAgentLoop,
   resolveAgentTaskTerminal,
   resolveFailedJobReplacements,
+  buildObservedReplacementAttempt,
+  buildLoopObservationEvidence,
 };
