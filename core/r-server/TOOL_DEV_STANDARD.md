@@ -2,6 +2,11 @@
 
 > 以 DESeq2 + GO/KEGG ORA 为标准模板，后续所有工具按此模式开发。
 > 更新于 2026-05-21
+>
+> DESeq2 已迁移为 builtin-canonical 插件，唯一源码位于
+> `resources/built-in-plugins/deseq2/`。`core/r-server/tool-scripts/` 不再保留
+> DESeq2 执行脚本；普通 installed 副本不得覆盖它，只有显式 development
+> 插件来源可以临时覆盖。
 
 ## 一、完整文件清单
 
@@ -47,12 +52,12 @@
 **已有工具 ID 映射：**
 | ID | 显示名 | R 脚本 |
 |----|--------|--------|
-| `deseq2` | DESeq2 | `deseq2.R` |
+| `deseq2` | DESeq2 | `resources/built-in-plugins/deseq2/scripts/deseq2.R` |
 | `go-kegg` | GO/KEGG ORA | `go-kegg.R` |
 | `gsea` | GSEA | `gsea.R` |
 | `km-survival` | KM 生存分析 | `km-survival.R` |
 
-## 三、R 脚本标准结构（参考 deseq2.R / go-kegg.R）
+## 三、R 脚本标准结构（参考 `resources/built-in-plugins/deseq2/scripts/deseq2.R` / `go-kegg.R`）
 
 ```r
 #!/usr/bin/env Rscript
@@ -344,7 +349,7 @@ bash scripts/_dev/verify-template-defense.sh
 2. 在 `_data.ts` 中添加工具定义（inputs/outputs/metadata）
 3. 在 `routes/tools.js` → `getToolConfig` 中注册 + `toolNames` 添加显示名
 4. 在 `index.tsx` 中注册 `TOOL_COLORS` + `REPORT_URLS`
-5. 编写 R 分析脚本（参考 deseq2.R / go-kegg.R 结构）
+5. 编写 R 分析脚本（插件参考 `resources/built-in-plugins/deseq2/scripts/deseq2.R` 结构）
 6. ★ 确保保存所有中间数据（CSV + RDS）
 7. 从 `_report-template-boilerplate.html` 复制，编写报告模板
 8. **★ 跑 §6.2 的 grep 自检**，确认 DOM-CSS 一致性 + `position: relative` 都对（机器层）

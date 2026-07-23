@@ -22,6 +22,36 @@ function _getPluginsMap() {
   return globalThis._biof3Plugins;
 }
 
+function _resolveBuiltInPluginsDir() {
+  return (
+    process.env.BIOF3_BUILT_IN_PLUGINS_DIR ||
+    path.resolve(__dirname, '..', '..', 'resources', 'built-in-plugins')
+  );
+}
+
+function _getCanonicalBuiltInPlugin(pluginId, builtInDir = _resolveBuiltInPluginsDir()) {
+  if (!pluginId || !builtInDir) return null;
+  const pluginDir = path.join(builtInDir, pluginId);
+  const pluginPath = path.join(pluginDir, 'plugin.json');
+  const toolDefinitionPath = path.join(pluginDir, 'tool-definition.json');
+  try {
+    if (!fs.existsSync(pluginPath) || !fs.existsSync(toolDefinitionPath)) return null;
+    const plugin = JSON.parse(fs.readFileSync(pluginPath, 'utf8'));
+    if (plugin.sourcePolicy !== 'builtin-canonical') return null;
+    return {
+      ...plugin,
+      id: plugin.id || pluginId,
+      pluginDir,
+      scriptPath: path.join(pluginDir, 'scripts'),
+      _builtIn: true,
+      _sourceType: 'builtin',
+      _fromCanonicalBuiltIn: true,
+    };
+  } catch {
+    return null;
+  }
+}
+
 /**
  * 获取已注册的所有插件。
  */
@@ -468,6 +498,18 @@ function loadPluginsFromDisk(pluginsDir) {
     // 没有 plugin.json，跳过（由 plugin-manager.js 管理环境变量）
     if (plug.type === 'runtime') continue;
 
+    const canonicalBuiltIn = _getCanonicalBuiltInPlugin(plug.id);
+    if (canonicalBuiltIn) {
+      const existing = map.get(plug.id);
+      if (!existing || existing._sourceType !== 'development') {
+        map.set(plug.id, canonicalBuiltIn);
+      }
+      logger.warn(
+        `[plugin-loader] ${plug.id}: stale installed copy ignored; using builtin-canonical source`
+      );
+      continue;
+    }
+
     const pluginDir = path.join(dir, plug.id);
     const metaPath = path.join(pluginDir, 'plugin.json');
     try {
@@ -542,16 +584,26 @@ function loadBuiltInPlugins(builtInDir) {
     // 只注册 built-in 工具插件：url 是 built-in:// 且非 runtime/figcode/content 类型
     if (!meta.url || !meta.url.startsWith('built-in://')) continue;
     if (meta.type && NON_TOOL_TYPES.includes(meta.type)) continue;
-    // 去重：已装的（map 已有）跳过，已装版本优先
-    if (map.has(id)) continue;
     const pluginDir = path.join(builtInDir, id);
     if (!fs.existsSync(path.join(pluginDir, 'plugin.json'))) continue;
+    const canonicalBuiltIn = _getCanonicalBuiltInPlugin(id, builtInDir);
+    const existing = map.get(id);
+    // 普通内置插件保持历史优先级；builtin-canonical 可以替换历史安装副本，
+    // 但显式开发者来源仍可覆盖，便于本地插件开发。
+    if (
+      existing &&
+      !(canonicalBuiltIn && existing._sourceType !== 'development')
+    ) {
+      continue;
+    }
     map.set(id, {
       ...meta,
       id,
       pluginDir,
       scriptPath: path.join(pluginDir, 'scripts'),
       _builtIn: true,
+      _sourceType: 'builtin',
+      ...(canonicalBuiltIn ? { sourcePolicy: 'builtin-canonical', _fromCanonicalBuiltIn: true } : {}),
     });
     count++;
   }
@@ -574,7 +626,18 @@ function loadPluginsFromSources({ builtInDir, installedDir, developmentDirs = []
   for (const candidate of result.candidates) {
     if (!candidate.valid || !candidate.manifest) continue;
     const existing = map.get(candidate.manifest.id);
-    if (existing && !existing._fromSdkSource && candidate.sourceType === 'builtin') continue;
+    const canonicalBuiltIn =
+      candidate.sourceType === 'builtin' &&
+      candidate.plugin &&
+      candidate.plugin.sourcePolicy === 'builtin-canonical';
+    if (
+      existing &&
+      !existing._fromSdkSource &&
+      candidate.sourceType === 'builtin' &&
+      !(canonicalBuiltIn && existing._sourceType !== 'development')
+    ) {
+      continue;
+    }
     const currentFingerprint = candidate.manifest.execution.scriptFingerprint;
     const installedFingerprint = candidate.plugin._installedFingerprint || null;
     const manifestDrift = !!(

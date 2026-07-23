@@ -9,6 +9,7 @@ const express = require('express');
 // Helpers
 const { buildSystemPrompt, localizeToolResult } = require('../helpers/system-prompt');
 const { appendDesktopAgentInstructions } = require('../helpers/desktop-agent-prompt');
+const { renderPluginDemoPathsForPrompt } = require('../helpers/plugin-demo-prompt');
 const { callChatProvider } = require('../helpers/llm-client');
 const { buildSiteSnapshotAsync, renderSiteSnapshotForPrompt } = require('../helpers/site-snapshot');
 const { buildFactsBlockAsync, backgroundExtractFacts } = require('../helpers/user-facts');
@@ -371,11 +372,7 @@ module.exports = function registerAiAgentRoute(app) {
     systemPrompt += '\n- 用户问的细节超出 prompt 列表 → 调用 query';
     systemPrompt += '\n- 用户想了解某个教程内容 → 调用 read_page';
     systemPrompt += '\n- 用户问"BioF3 里有没有..."这种探索性问题 → 调用 search';
-    systemPrompt +=
-      '\n- demo 数据路径（用户说"用 demo 数据"时用这些绝对路径）：'
-      + '\n  volcano-plot: /Users/zhangdiandian/Documents/BioF3-Local/plugins/volcano-plot/demo-data/demo_deg.csv'
-      + '\n  deseq2: /Users/zhangdiandian/Documents/BioF3-Local/plugins/deseq2/demo-data/demo-counts.csv（counts）+ /Users/zhangdiandian/Documents/BioF3-Local/plugins/deseq2/demo-data/demo-coldata.csv（coldata）'
-      + '\n  其他工具的 demo 数据在 /Users/zhangdiandian/Documents/BioF3-Local/plugins/<toolId>/demo-data/ 目录下，先用 run_tool(op=list) 看 toolId，再拼路径。';
+    systemPrompt += renderPluginDemoPathsForPrompt();
     systemPrompt +=
       '\n- 用户想**跑分析/出图/出表**（如"帮我跑 DESeq2""画火山图""分析这个 count 矩阵""做差异分析"）→ 调用 run_tool。先用 run_tool(op="list") 看可用工具+参数契约，再 run_tool(op="run", toolId, params) 执行。file 参数传本地绝对路径。**不要凭空判断运行时未装——先调 run_tool，执行报错再据错引导。**';
     systemPrompt +=

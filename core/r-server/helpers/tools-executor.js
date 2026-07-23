@@ -553,7 +553,7 @@ function createToolsExecutor({
     try {
       const { getToolConfig: getRegistryConfig } = require('../tool-registry');
       const cfg = getRegistryConfig(toolId);
-      if (cfg && cfg.lang === 'r') {
+      if (cfg && cfg.lang === 'r' && cfg.pluginOnly !== true) {
         return {
           script: cfg.script,
           lang: cfg.lang,

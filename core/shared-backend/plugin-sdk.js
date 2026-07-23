@@ -166,6 +166,26 @@ function discoverPluginCandidates({ sources = [] } = {}) {
     const pluginId =
       candidate.toolDefinition.id || candidate.plugin.id || path.basename(candidate.pluginDir);
     const previous = selected.get(pluginId);
+    const previousIsCanonicalBuiltin =
+      previous &&
+      previous.sourceType === 'builtin' &&
+      previous.plugin &&
+      previous.plugin.sourcePolicy === 'builtin-canonical';
+    if (
+      previousIsCanonicalBuiltin &&
+      candidate.sourceType === 'installed'
+    ) {
+      diagnostics.push(
+        diagnostic('plugin_source_ignored', 'warning', 'discover', {
+          sourceType: candidate.sourceType,
+          pluginId,
+          path: candidate.pluginDir,
+          message: `installed plugin is ignored because '${pluginId}' declares builtin-canonical source policy.`,
+          suggestedFix: 'Remove the stale installed copy. Use an explicit development source for local overrides.',
+        })
+      );
+      continue;
+    }
     if (previous) {
       diagnostics.push(
         diagnostic('plugin_source_shadowed', 'warning', 'discover', {

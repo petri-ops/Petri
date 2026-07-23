@@ -30,8 +30,9 @@
 const TOOLS = {
   'deseq2': {
     displayName: 'DESeq2',
-    script: 'deseq2.R',
+    script: null,
     lang: 'r',
+    pluginOnly: true,
     description: 'Bulk RNA-seq 差异表达分析(DESeq2)',
     csvInputs: ['counts', 'coldata'],
     sizeLimitMB: 100,

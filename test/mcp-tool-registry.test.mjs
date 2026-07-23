@@ -150,21 +150,24 @@ test('callTool 跑通 volcano-plot 出 PNG（live）', { skip: !RUN_LIVE }, asyn
   }
 });
 
-// 真实跑已装的 deseq2（需本地 R + DESeq2 + deseq2 插件已装）。
+// 真实跑内置 canonical deseq2（需本地 R + DESeq2）。
 // 验证 file-input 复制到 jobDir 约定 + output/ 子目录 manifest 读取。
 test('callTool 跑通 deseq2 全流程出图（live）', { skip: !RUN_LIVE }, async () => {
-  const os = await import('node:os');
-  const demoDir = path.join(os.homedir(), 'Documents', 'BioF3-Local', 'plugins', 'deseq2', 'demo-data');
+  const demoDir = path.resolve(__dirname, '..', 'resources', 'built-in-plugins', 'deseq2', 'demo-data');
   const fs2 = await import('node:fs');
   const hasDemo = fs2.existsSync(path.join(demoDir, 'demo-counts.csv'));
   if (!hasDemo) {
     console.log('跳过：deseq2 demo 数据不存在');
     return;
   }
-  // 用真实已装的 deseq2 插件（loadPluginsFromDisk 已注册到 globalThis）
+  // 显式从三源加载器注册；builtin-canonical 不得被历史安装副本覆盖。
   globalThis._biof3Plugins = new Map();
   const pluginLoaderFresh = await import(R_SERVER + '/plugin-loader.js');
-  pluginLoaderFresh.loadPluginsFromDisk();
+  pluginLoaderFresh.loadPluginsFromSources({
+    builtInDir: path.resolve(__dirname, '..', 'resources', 'built-in-plugins'),
+    installedDir: path.resolve(__dirname, 'fixtures', 'empty-plugins'),
+    developmentDirs: [],
+  });
   try {
     const result = await callTool('deseq2', {
       counts: path.join(demoDir, 'demo-counts.csv'),

@@ -65,6 +65,43 @@ test('Plugin SDK discovers built-in, installed, and development sources with exp
   }
 });
 
+test('builtin-canonical blocks installed shadowing but allows explicit development override', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-plugin-sdk-canonical-'));
+  try {
+    const builtin = path.join(tmp, 'builtin');
+    const installed = path.join(tmp, 'installed');
+    const development = path.join(tmp, 'development');
+    writePlugin(builtin, 'canonical-tool', {
+      plugin: { version: '1.0.0', sourcePolicy: 'builtin-canonical' },
+    });
+    writePlugin(installed, 'canonical-tool', { plugin: { version: '2.0.0' } });
+    fs.writeFileSync(path.join(installed, 'installed.json'), JSON.stringify([{ id: 'canonical-tool' }]));
+
+    const withoutDevelopment = inspect([
+      { type: 'builtin', root: builtin },
+      { type: 'installed', root: installed },
+    ]);
+    assert.equal(withoutDevelopment.ok, true);
+    assert.equal(withoutDevelopment.candidates[0].sourceType, 'builtin');
+    assert.equal(withoutDevelopment.manifests[0].version, '1.0.0');
+    assert.ok(
+      withoutDevelopment.diagnostics.some((item) => item.code === 'plugin_source_ignored')
+    );
+
+    writePlugin(development, 'canonical-tool', { plugin: { version: '3.0.0' } });
+    const withDevelopment = inspect([
+      { type: 'builtin', root: builtin },
+      { type: 'installed', root: installed },
+      { type: 'development', root: development },
+    ]);
+    assert.equal(withDevelopment.ok, true);
+    assert.equal(withDevelopment.candidates[0].sourceType, 'development');
+    assert.equal(withDevelopment.manifests[0].version, '3.0.0');
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
 test('Plugin SDK returns structured diagnostics for incomplete plugins', () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-plugin-sdk-invalid-'));
   try {

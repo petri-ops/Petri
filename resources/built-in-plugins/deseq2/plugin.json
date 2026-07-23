@@ -4,6 +4,7 @@
   "title": "DESeq2 差异分析",
   "version": "1.0.0",
   "language": "r",
+  "sourcePolicy": "builtin-canonical",
   "description": "Bulk RNA-seq 差异表达基因检测（DESeq2 + lfcShrink(apeglm)）。",
   "packages": {
     "r": {
