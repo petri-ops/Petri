@@ -33,6 +33,111 @@
 const { REASON_CODES } = require('./loop-contract');
 
 // ---------------------------------------------------------------------------
+// HLE-C5R: Strict Repair Boundary
+// Defines what automatic repair CAN and CANNOT do.
+// These rules are enforced BEFORE any isActionable check.
+// ---------------------------------------------------------------------------
+
+/**
+ * Explicit ALLOWED automatic repair actions (safe parameter/infrastructure fixes).
+ * Anything not on this list requires explicit user authorization or is blocked.
+ */
+const REPAIR_BOUNDARY_ALLOW = new Set([
+  // Safe automatic repairs (deterministic, non-destructive)
+  'metadata_to_coldata_mapping',     // metadata.csv → coldata parameter alias
+  'column_name_mapping',             // known alias mapping (log2FC → log2FoldChange)
+  'path_resolution',                  // relative → absolute path within project
+  'runtime_readiness',               // R/Python/package missing → provisioning
+  'retry_same_params',               // transient failure, same params
+  'retry_with_reconcile',            // transient + state reconciliation
+  'provider_backoff_retry',         // rate limit, exponential backoff
+  'fix_schema_violation',            // missing optional field with known default
+  'fix_enum_or_range',               // enum/range fix from known valid values
+  'transform_input_format',           //无损格式转换（TSV↔CSV、编码）
+  'ensure_capability',               // bundle/capability provisioning
+  'rerun_upstream',                  // upstream failed, rerun first verified node
+  'reduce_resource_request',         // OOM/disk-full: lower resource request (safe)
+  'chunk_workflow',                  // split large workflow into smaller chunks
+]);
+
+/**
+ * EXPLICITLY BLOCKED automatic repair actions.
+ * These require explicit user authorization or must block.
+ * No strategy may set isActionable=true for these fault types.
+ */
+const REPAIR_BOUNDARY_BLOCK = new Set([
+  // Data fabrication — NEVER auto-generate data
+  'fabricate_gene_data',             // adding genes to make results significant
+  'fabricate_sample_data',            // creating fake samples
+  'pad_data_to_reach_threshold',      // padding data to reach minimum counts
+
+  // Scientific design changes
+  'change_contrast',                 // modifying comparison groups
+  'change_design_formula',           // changing statistical model
+  'change_statistical_method',       // DESeq2 → limma without user consent
+  'downgrade_significance_threshold', // lowering padj cutoff to get sig results
+  'change_p_value_adjustment',       // BH → Bonferroni without user consent
+
+  // Data manipulation
+  'delete_outlier_samples',          // removing "bad" samples to improve results
+  'impute_missing_values',           // filling in data without user consent
+  'filter_genes_to_subset',         // narrowing gene set to make results look better
+
+  // Plugin source modification
+  'modify_plugin_source',            // changing plugin R/Python scripts
+  'inject_workspace_external',        // writing outside project directory
+  'suppress_validation_error',       // hiding validator failures
+
+  // Irreversible operations
+  'delete_artifacts',                // deleting existing results
+  'overwrite_input_hash',           // modifying source data hash
+  'replay_with_modified_params',    // rerunning with undeclared parameter changes
+]);
+
+/**
+ * Check if a strategyId or faultType is allowed for automatic repair.
+ * @returns {{ allowed: boolean, reason?: string }}
+ */
+function repairBoundaryCheck(strategyId, faultType, actionDescription) {
+  // HLE-C5R: Block data/scientific modification for scientific_design_missing
+  if (faultType === 'scientific_design_missing') {
+    const prohibited = [
+      'replan_subgraph',       // changes contrast/method
+      'substitute_data',       // generates/replaces data
+      'padj_threshold_relax',  // lowers thresholds
+      'lfc_threshold_relax',   // adjusts fold change
+      'delete_outliers',       // removes samples
+      'add_samples',           // adds synthetic data
+      'augment_samples',       // modifies sample counts
+      'method_substitution',    // swaps statistical method
+    ];
+    if (prohibited.includes(strategyId)) {
+      return {
+        allowed: false,
+        reason: `Scientific design/contrast decision requires user. Strategy '${strategyId}' would modify scientific method or data.`,
+        blockedStrategy: strategyId,
+      };
+    }
+  }
+
+  // Block explicitly forbidden strategies or fault types
+  if (REPAIR_BOUNDARY_BLOCK.has(strategyId) || REPAIR_BOUNDARY_BLOCK.has(faultType)) {
+    return {
+      allowed: false,
+      reason: `Repair boundary block: strategy '${strategyId}' or fault '${faultType}' is explicitly forbidden for automatic repair. Requires user authorization.`,
+    };
+  }
+  // Strategy must be in allow list
+  if (!REPAIR_BOUNDARY_ALLOW.has(strategyId)) {
+    return {
+      allowed: false,
+      reason: `Repair boundary: strategy '${strategyId}' is not on the automatic repair allowlist. Requires user authorization.`,
+    };
+  }
+  return { allowed: true };
+}
+
+// ---------------------------------------------------------------------------
 // Strategy definitions
 // ---------------------------------------------------------------------------
 
@@ -680,6 +785,20 @@ function selectRepairStrategy(diagnosis, context = {}) {
   });
 
   const best = applicable[0].strategy;
+
+  // HLE-C5R: Enforce strict repair boundary before returning
+  const boundary = repairBoundaryCheck(best.strategyId, diagnosis.faultType, best.description);
+  if (!boundary.allowed) {
+    const attempt = best.attempt(diagnosis, context);
+    // Boundary blocked: return new (unfrozen) object with override fields
+    return {
+      ...attempt,
+      isActionable: false,
+      requiresUserAuth: true,
+      publicMessage: `自动修复 '${best.strategyId}' 被 Repair Boundary 阻断：${boundary.reason} 当前决定：等待用户授权或人工处理。`,
+    };
+  }
+  // Allowed: return original frozen attempt
   return best.attempt(diagnosis, context);
 }
 
@@ -839,6 +958,9 @@ function getStrategy(strategyId) {
 
 module.exports = {
   REPAIR_STRATEGIES,
+  REPAIR_BOUNDARY_ALLOW,
+  REPAIR_BOUNDARY_BLOCK,
+  repairBoundaryCheck,
   selectRepairStrategy,
   buildRepairAttempt,
   computeAffectedSubgraph,

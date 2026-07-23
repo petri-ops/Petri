@@ -243,22 +243,26 @@ describe('RS-7 artifact_invalid repair', () => {
 // ---------------------------------------------------------------------------
 
 describe('RS-8 scientific_design_missing repair', () => {
-  it('contrast missing → require_user', () => {
+  it('contrast missing → require_user (boundary blocked)', () => {
     const d = fd.diagnoseFailure({ error: 'contrast not specified: define treatment vs control' });
     const s = selectRepairStrategy(d, {});
     assert.strictEqual(s?.strategyId, 'replan_subgraph');
     assert.strictEqual(s?.isActionable, false);
     assert.strictEqual(s?.requiresUserAuth, true);
+    // HLE-C5R: boundary blocks replan_subgraph for scientific_design_missing
     assert.strictEqual(s?.safetyLevel, 'risky');
     assert.strictEqual(s?.costMultiplier, 2.0);
-    assert.ok(s?.publicMessage.includes('contrast'));
+    // Boundary message confirms blocking
+    assert.ok(s?.publicMessage?.includes('阻断'), 'Should mention boundary block');
+    assert.ok(s?.publicMessage?.includes('Scientific design/contrast') || s?.publicMessage?.includes('Repair Boundary'), 'Should mention scientific decision');
   });
 
   it('method_not_applicable → replan_subgraph', () => {
     const d = fd.diagnoseFailure({ error: 'method preconditions not met' });
     const s = selectRepairStrategy(d, {});
     assert.strictEqual(s?.strategyId, 'replan_subgraph');
-    assert.strictEqual(s?.requiresUserAuth, false);
+    // HLE-C5R: replan_subgraph blocked - requires scientific decision
+    assert.strictEqual(s?.requiresUserAuth, true);
   });
 });
 
@@ -356,7 +360,16 @@ describe('RS-11 computeAffectedSubgraph', () => {
 // ---------------------------------------------------------------------------
 
 describe('RS-12 buildRepairAttempt output shape', () => {
-  it('result is frozen', () => {
+  // HLE-C5R: boundary-blocked results return new unfrozen object
+  it('boundary-blocked result is unfrozen', () => {
+    const d = fd.diagnoseFailure({ error: 'method preconditions not met' });
+    const s = selectRepairStrategy(d, {});
+    assert.strictEqual(s?.strategyId, 'replan_subgraph');
+    assert.strictEqual(s?.requiresUserAuth, true);
+    assert.ok(!Object.isFrozen(s));
+  });
+
+  it('normal result is frozen', () => {
     const d = fd.diagnoseFailure({ error: 'OOM' });
     const s = selectRepairStrategy(d, {});
     assert.ok(Object.isFrozen(s));
