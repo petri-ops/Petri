@@ -650,14 +650,43 @@ async function tool_run_tool(args, ctx) {
   if (op === 'list') {
     const tools = await _getRegistry().listTools();
     const { listAgentWorkflowTemplates } = require('../../shared-backend/agent-workflow');
+    const requestedToolId = args && args.toolId;
+    if (requestedToolId) {
+      const tool = tools.find((item) => item.name === requestedToolId);
+      if (!tool) {
+        return {
+          ok: false,
+          error: 'unknown_tool',
+          message: `未知工具: ${requestedToolId}`,
+          availableToolIds: tools.map((item) => item.name),
+        };
+      }
+      return {
+        ok: true,
+        tool: {
+          name: tool.name,
+          description: tool.description,
+          inputSchema: tool.inputSchema,
+          outputSchema: tool.outputSchema,
+          pluginVersion: tool._pluginVersion,
+          language: tool._language,
+          inputs: tool._inputs || [],
+          outputs: tool._outputs || [],
+          _isStep: tool._isStep || false,
+        },
+      };
+    }
     return {
       ok: true,
       count: tools.length,
+      // Keep the catalog below projection limits so every registered tool ID
+      // remains visible. Full schemas are fetched deterministically by passing
+      // toolId to op=list; the Agent must never guess an ID.
       tools: tools.map((t) => ({
         name: t.name,
-        description: t.description,
-        inputSchema: t.inputSchema,
-        outputSchema: t.outputSchema,
+        summary: String(t.description || '').replace(/\s+/g, ' ').trim().slice(0, 96),
+        inputIds: Object.keys(t.inputSchema?.properties || {}),
+        requiredInputIds: Array.isArray(t.inputSchema?.required) ? t.inputSchema.required : [],
         pluginVersion: t._pluginVersion,
         language: t._language,
         _isStep: t._isStep || false,

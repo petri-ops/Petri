@@ -92,6 +92,20 @@ function writeText(filePath, value) {
   fs.writeFileSync(filePath, value);
 }
 
+/**
+ * Context checkpoints and durable Loop iteration checkpoints intentionally
+ * share one append-only persistence table. Replay packages may only embed the
+ * former contract, so callers must select the newest compatible record instead
+ * of assuming that the newest row is a ContextCheckpoint.
+ */
+function selectReplayContextCheckpoint(candidates = []) {
+  for (const candidate of Array.isArray(candidates) ? candidates : []) {
+    const validated = validateContextCheckpoint(candidate);
+    if (validated.ok) return validated.checkpoint;
+  }
+  return null;
+}
+
 function collectPackageFiles(packageDir, excluded = new Set()) {
   const files = [];
   const walk = (dir) => {
@@ -394,6 +408,7 @@ module.exports = {
   hashFile,
   relativeInside,
   sanitizeParams,
+  selectReplayContextCheckpoint,
   buildScientificReplayPackage,
   validateScientificReplayPackage,
   assessReplayReadiness,

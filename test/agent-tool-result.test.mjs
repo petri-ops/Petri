@@ -86,6 +86,30 @@ test('successful large results expose neutral truncation metadata', () => {
   assert.equal(event.toolResult.truncated, true);
 });
 
+test('large run_tool results keep promoted tool_job lineage outside bounded preview', () => {
+  const event = buildToolResultEvent({
+    contractVersion: '1.0.0',
+    traceId: 'trace_large_run_tool',
+    callId: 'call_large_run_tool',
+    tool: 'run_tool',
+    status: 'success',
+    terminationReason: 'success',
+    durationMs: 12,
+    truncated: true,
+    sideEffects: { type: 'execution', riskTier: 'R2', resources: ['tool_jobs'] },
+    data: {
+      ok: true,
+      toolId: 'sample-metadata-validator',
+      toolJobId: 'tj_exact_lineage',
+      result: { files: Array.from({ length: 200 }, (_, index) => `artifact-${index}`) },
+    },
+  }, {});
+  assert.equal(event.toolResult.previewTruncated, true);
+  assert.equal(event.toolResult.data.toolJobId, undefined);
+  assert.equal(event.toolJobId, 'tj_exact_lineage');
+  assert.equal(event.toolId, 'sample-metadata-validator');
+});
+
 test('tool activity recorder keeps safe summaries for conversation restore', () => {
   const recorder = createToolActivityRecorder();
   recorder.recordCall({

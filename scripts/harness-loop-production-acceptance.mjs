@@ -9,8 +9,10 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
-const Database = require('better-sqlite3');
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+// The R server owns the production SQLite ABI. Reuse that dependency instead
+// of the Electron-rebuilt root copy so this gate runs under the project Node.
+const Database = require(path.join(repoRoot, 'core/r-server/node_modules/better-sqlite3'));
 const evidenceDir = path.join(repoRoot, 'acceptance/harness-loop/production');
 const requiredJson = [
   'baseline.json',
@@ -97,6 +99,19 @@ function jobEvidence(row, workspacePath) {
   ];
   const manifestPath = manifestCandidates.find((candidate) => fs.existsSync(candidate)) || null;
   const manifest = manifestPath ? parseJson(fs.readFileSync(manifestPath, 'utf8')) : {};
+  const deliveryPath = path.join(jobDir, 'output', 'delivery-manifest.json');
+  const replayManifestPath = path.join(
+    jobDir,
+    'output',
+    'replay-package',
+    'package-manifest.json',
+  );
+  const delivery = fs.existsSync(deliveryPath)
+    ? parseJson(fs.readFileSync(deliveryPath, 'utf8'))
+    : {};
+  const replay = fs.existsSync(replayManifestPath)
+    ? parseJson(fs.readFileSync(replayManifestPath, 'utf8'))
+    : {};
   const reproducibility = manifest.reproducibility || {};
   const inputHashes = reproducibility.inputSha256 || {};
   const outputHashes = reproducibility.outputSha256 || {};
@@ -120,6 +135,16 @@ function jobEvidence(row, workspacePath) {
         hashFile(path.join(jobDir, 'run-script.py')),
       inputCount: Object.keys(inputHashes).length,
       outputCount: Object.keys(outputHashes).length,
+      deliveryManifestSha256: hashFile(deliveryPath),
+      replayPackageManifestSha256: hashFile(replayManifestPath),
+    },
+    delivery: {
+      status: delivery.status || null,
+      manifestHash: delivery.manifestHash || null,
+    },
+    replay: {
+      status: replay.status || null,
+      packageDigest: replay.packageDigest || null,
     },
   };
 }
@@ -129,7 +154,23 @@ function latestTaskForConversation(db, conversationId) {
   return rows.find((row) => parseJson(row.params).conversationId === conversationId) || null;
 }
 
-function captureTrack(db, label, conversationId) {
+function taskToolJobIds(db, taskId) {
+  const rows = db.prepare(
+    "SELECT payload FROM task_events WHERE task_id=? AND event_type='tool_result' ORDER BY seq"
+  ).all(taskId);
+  const ids = [];
+  for (const row of rows) {
+    const event = parseJson(row.payload);
+    if (event?.name !== 'run_tool') continue;
+    // Large results are bounded under toolResult.data.preview. The stable Job
+    // identity is promoted to the event envelope by buildToolResultEvent.
+    const id = event.toolJobId || event?.toolResult?.data?.toolJobId || null;
+    if (id && !ids.includes(id)) ids.push(id);
+  }
+  return ids;
+}
+
+function captureTrack(db, label, conversationId, explicitTaskIds = []) {
   const task = latestTaskForConversation(db, conversationId);
   assert(task, `${label}: task not found`);
   const taskParams = parseJson(task.params);
@@ -144,14 +185,46 @@ function captureTrack(db, label, conversationId) {
   const iterations = db.prepare(
     'SELECT sequence, decision, decision_reason_code, status, hash, parent_iteration_hash FROM loop_iterations WHERE loop_run_id=? ORDER BY sequence'
   ).all(run.loop_run_id);
-  const startedAt = Date.parse(task.created_at);
-  const finishedAt = task.finished_at ? Date.parse(task.finished_at) : Date.now();
-  const jobs = db.prepare(
-    'SELECT * FROM tool_jobs WHERE project_id=? AND created_at>=? AND created_at<=? ORDER BY created_at'
-  ).all(projectId, startedAt, finishedAt + 5000);
-  const checkpointCount = db.prepare(
-    'SELECT COUNT(*) AS count FROM context_checkpoints WHERE conversation_id=?'
-  ).get(conversationId).count;
+  const selectedTaskIds = explicitTaskIds.length > 0
+    ? explicitTaskIds
+    : [task.id];
+  const selectedTasks = selectedTaskIds.map((taskId) =>
+    db.prepare('SELECT * FROM tasks WHERE id=?').get(taskId)
+  );
+  assert(
+    selectedTasks.every((selected) =>
+      selected && parseJson(selected.params).conversationId === conversationId
+    ),
+    `${label}: explicit task scope mismatch`,
+  );
+  const jobIds = [...new Set(
+    selectedTaskIds.flatMap((taskId) => taskToolJobIds(db, taskId))
+  )];
+  const jobs = jobIds.length > 0
+    ? db.prepare(
+        `SELECT * FROM tool_jobs WHERE project_id=? AND id IN (${jobIds.map(() => '?').join(',')}) ORDER BY created_at`
+      ).all(projectId, ...jobIds)
+    : [];
+  const checkpoints = db.prepare(
+    'SELECT checkpoint_id, checkpoint_json FROM context_checkpoints WHERE conversation_id=? ORDER BY created_at'
+  ).all(conversationId).map((row) => {
+    const checkpoint = parseJson(row.checkpoint_json);
+    return {
+      checkpointId: row.checkpoint_id,
+      sequence: checkpoint.sequence ?? null,
+      decision: checkpoint.decision || null,
+      status: checkpoint.status || null,
+      toolJobId: checkpoint.toolJobId || null,
+      repairAttempt: checkpoint.repairAttempt
+        ? {
+            strategyId: checkpoint.repairAttempt.strategyId || null,
+            parentJobId: checkpoint.repairAttempt.parentLineage?.parentJobId || null,
+            replacementJobId: checkpoint.repairAttempt.replacementJobId || null,
+            repaired: checkpoint.repairAttempt.repaired === true,
+          }
+        : null,
+    };
+  });
   const evidenceCount = db.prepare(
     'SELECT COUNT(*) AS count FROM loop_evidence WHERE loop_run_id=?'
   ).get(run.loop_run_id).count;
@@ -163,6 +236,7 @@ function captureTrack(db, label, conversationId) {
     label,
     conversationId,
     taskId: task.id,
+    taskIds: selectedTaskIds,
     taskStatus: task.status,
     agentStatus: task.agent_status,
     loopRunId: run.loop_run_id,
@@ -170,7 +244,8 @@ function captureTrack(db, label, conversationId) {
     projectRefHash: sha256(projectId),
     iterationCount: iterations.length,
     iterations,
-    checkpointCount,
+    checkpointCount: checkpoints.length,
+    checkpoints,
     evidenceCount,
     jobs: jobs.map((job) => jobEvidence(job, project.workspace_path)),
     scientificTasks,
@@ -212,9 +287,48 @@ function verifyEvidence() {
   assert(normal.jobs.filter((job) => job.status === 'completed').every((job) =>
     job.hashes.scriptSha256 && job.hashes.paramsSha256 && job.hashes.provenanceSha256
   ), 'normal reproducibility hashes');
+  const deliveredTasks = normal.scientificTasks.filter((task) =>
+    task.status === 'confirmed' &&
+    task.tool_job_id &&
+    normal.jobs.some((job) => job.jobId === task.tool_job_id)
+  );
+  assert(deliveredTasks.length >= 2, 'normal scientific task bindings');
+  for (const deliveredTask of deliveredTasks) {
+    const deliveryJob = normal.jobs.find((job) => job.jobId === deliveredTask.tool_job_id);
+    assert(
+      deliveryJob?.delivery?.status === 'valid' &&
+      deliveryJob?.hashes?.deliveryManifestSha256,
+      `normal delivery manifest: ${deliveredTask.task_id}`,
+    );
+    assert(
+      deliveryJob?.replay?.status === 'complete' &&
+      deliveryJob?.hashes?.replayPackageManifestSha256,
+      `normal replay package: ${deliveredTask.task_id}`,
+    );
+  }
+  const expectedNormalTools = new Set([
+    'sample-metadata-validator',
+    'expression-qc',
+    'deseq2',
+    'deg-standardizer',
+    'volcano-plot',
+    'go-kegg',
+    'gsea',
+  ]);
+  for (const toolId of expectedNormalTools) {
+    assert(
+      normal.jobs.some((job) => job.toolId === toolId && job.status === 'completed'),
+      `normal missing completed tool: ${toolId}`,
+    );
+  }
   assert(repairable.taskStatus === 'completed' && repairable.loopStatus === 'completed', 'repairable terminal');
   const failedTools = new Set(repairable.jobs.filter((job) => job.status === 'failed').map((job) => job.toolId));
   assert(repairable.jobs.some((job) => job.status === 'completed' && failedTools.has(job.toolId)), 'repair replacement');
+  assert(repairable.checkpoints.some((checkpoint) =>
+    checkpoint.repairAttempt?.parentJobId &&
+    checkpoint.repairAttempt?.replacementJobId &&
+    checkpoint.repairAttempt?.repaired === true
+  ), 'repair lineage checkpoint');
   assert(['waiting_for_user', 'blocked'].includes(blocking.loopStatus), 'blocking terminal');
   assert(blocking.jobs.length === 0, 'blocking created illegal job');
   const provider = readJson(path.join(evidenceDir, 'provider-matrix.json'));
@@ -229,6 +343,10 @@ function verifyEvidence() {
 function updateEvidence() {
   const dbPath = process.env.HLE_DB_PATH;
   const normalConversationId = process.env.HLE_NORMAL_CONVERSATION_ID;
+  const normalTaskIds = String(process.env.HLE_NORMAL_TASK_IDS || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
   const repairableConversationId = process.env.HLE_REPAIRABLE_CONVERSATION_ID;
   const blockingConversationId = process.env.HLE_BLOCKING_CONVERSATION_ID;
   const restartLoopId = process.env.HLE_RESTART_LOOP_ID;
@@ -236,6 +354,7 @@ function updateEvidence() {
   for (const [name, value] of Object.entries({
     HLE_DB_PATH: dbPath,
     HLE_NORMAL_CONVERSATION_ID: normalConversationId,
+    HLE_NORMAL_TASK_IDS: normalTaskIds.length > 0 ? normalTaskIds.join(',') : '',
     HLE_REPAIRABLE_CONVERSATION_ID: repairableConversationId,
     HLE_BLOCKING_CONVERSATION_ID: blockingConversationId,
     HLE_RESTART_LOOP_ID: restartLoopId,
@@ -245,12 +364,16 @@ function updateEvidence() {
   const commit = currentCommit();
   const db = new Database(dbPath, { readonly: true, fileMustExist: true });
   try {
-    const normal = captureTrack(db, 'spt1-normal', normalConversationId);
+    const normal = captureTrack(db, 'spt1-normal', normalConversationId, normalTaskIds);
     const repairable = captureTrack(db, 'spt1-repairable', repairableConversationId);
     const blocking = captureTrack(db, 'spt1-blocking', blockingConversationId);
     const restart = db.prepare('SELECT * FROM loop_runs WHERE loop_run_id=?').get(restartLoopId);
     assert(restart, 'restart loop missing');
     const restartRecord = parseJson(restart.loop_status_json);
+    const recoveryRequired =
+      restartRecord.recovery_required === true || restartRecord.recoveryRequired === true;
+    const recoveryReason =
+      restartRecord.recovery_reason || restartRecord.recoveryReason || null;
     const provider = sanitizeProviderReport(readJson(providerReportPath), commit);
     const generatedAt = new Date().toISOString();
     const baseline = {
@@ -297,9 +420,9 @@ function updateEvidence() {
       sourceCommit: commit,
       loopRunId: restart.loop_run_id,
       loopStatus: restart.loop_status,
-      recoveryRequired: Boolean(restartRecord.recoveryRequired),
-      recoveryReason: restartRecord.recoveryReason || null,
-      passed: restart.loop_status === 'failed' && restartRecord.recoveryRequired === true,
+      recoveryRequired,
+      recoveryReason,
+      passed: restart.loop_status === 'failed' && recoveryRequired,
     });
     writeJson('provider-matrix.json', provider);
   } finally {

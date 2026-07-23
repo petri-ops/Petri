@@ -398,7 +398,7 @@ describe('HLE-C1: Loop Agent Integration', () => {
         makeToolResultEnvelope('run_tool', { ok: false, error: 'runtime error' }, 'call-b'), 'call-b');
 
       const toolJobs = Object.entries(toolResultEventsByCallId).map(([callId, evt]) => ({
-        toolJobId: evt.toolResult?.data?.toolJobId || null,
+        toolJobId: evt.toolJobId || evt.toolResult?.data?.toolJobId || null,
         callId,
         name: evt.toolResult?.tool || 'run_tool',
         status: evt.toolResult?.status === 'success' ? 'completed'
@@ -408,6 +408,43 @@ describe('HLE-C1: Loop Agent Integration', () => {
       const failedJobs = toolJobs.filter((j) => j.status === 'failed');
       assert.equal(failedJobs.length, 1);
       assert.equal(failedJobs[0].callId, 'call-b');
+    });
+  });
+
+  describe('Repair lineage resolution', () => {
+    it('treats a preflight failure as resolved by a later completed same-tool Job', async () => {
+      const { resolveFailedJobReplacements } = await import('../core/r-server/agent-runner.js');
+      const resolved = resolveFailedJobReplacements([
+        {
+          callId: 'preflight-call',
+          toolJobId: null,
+          toolId: 'sample-metadata-validator',
+          status: 'failed',
+          iteration: 2,
+          requiresUserInput: true,
+        },
+        {
+          callId: 'failed-job-call',
+          toolJobId: 'parent-job',
+          toolId: 'sample-metadata-validator',
+          status: 'failed',
+          iteration: 3,
+        },
+        {
+          callId: 'replacement-call',
+          toolJobId: 'replacement-job',
+          toolId: 'sample-metadata-validator',
+          status: 'completed',
+          iteration: 4,
+        },
+      ]);
+      assert.equal(resolved.unresolvedFailedJobs.length, 0);
+      assert.equal(resolved.primaryFailed.toolJobId, 'parent-job');
+      assert.equal(
+        resolved.replacementByFailureKey.get('parent-job').toolJobId,
+        'replacement-job',
+      );
+      assert.equal(resolved.repairedFailedJobIds.has('parent-job'), true);
     });
   });
 

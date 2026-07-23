@@ -17,6 +17,28 @@ const INITIAL_STATUS: BackendStatus = {
 
 const Ctx = createContext<BackendStatus>(INITIAL_STATUS);
 
+async function readBackendStatus(): Promise<BackendStatus | null> {
+  const desktopStatus = await window.biof3Desktop?.backend?.status();
+  if (desktopStatus) return desktopStatus;
+  // Vite's renderer-only development mode has no preload bridge. Probe the
+  // same local services so the real workspace UI remains available for visual
+  // regression and accessibility acceptance; packaged builds never use this.
+  if (!import.meta.env.DEV) return null;
+  const [rServerUp, pyServerUp] = await Promise.all([
+    fetch('http://127.0.0.1:3001/api/health').then((response) => response.ok).catch(() => false),
+    fetch('http://127.0.0.1:3004/api/health').then((response) => response.ok).catch(() => false),
+  ]);
+  return {
+    rRuntime: rServerUp,
+    pyRuntime: pyServerUp,
+    rServerUp,
+    pyServerUp,
+    plumberUp: false,
+    isReady: rServerUp,
+    downReason: rServerUp ? null : '本地分析服务尚未就绪',
+  };
+}
+
 export function useBackendStatus(): BackendStatus {
   return useContext(Ctx);
 }
@@ -30,7 +52,7 @@ export function BackendStatusProvider({
 
   const tick = useCallback(async () => {
     try {
-      const s = await window.biof3Desktop?.backend?.status();
+      const s = await readBackendStatus();
       if (s) setStatus(s);
     } catch {
       // IPC 失败时保持上次状态，不闪烁
@@ -41,7 +63,7 @@ export function BackendStatusProvider({
     let alive = true;
     const safeTick = async () => {
       try {
-        const s = await window.biof3Desktop?.backend?.status();
+        const s = await readBackendStatus();
         if (alive && s) setStatus(s);
       } catch {
         // 忽略

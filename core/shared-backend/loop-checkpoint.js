@@ -802,6 +802,8 @@ function sanitizeRepairAttempt(attempt) {
           repairReason: attempt.parentLineage.repairReason || null,
         })
       : null,
+    replacementJobId: attempt.replacementJobId || null,
+    repaired: attempt.repaired === true,
     invalidatedArtifactIds: Object.freeze([...(attempt.invalidatedArtifactIds || [])]),
     preservedArtifactIds: Object.freeze([...(attempt.preservedArtifactIds || [])]),
   });

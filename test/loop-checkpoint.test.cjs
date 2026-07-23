@@ -186,6 +186,8 @@ describe('CHECKPOINT-2 buildLoopContextEnvelope', () => {
         requiresUserAuth: false,
         publicMessage: 'Re-running after reconciliation.',
         parentLineage: { parentJobId: 'job_123' },
+        replacementJobId: 'job_124',
+        repaired: true,
         invalidatedArtifactIds: [],
         preservedArtifactIds: [],
       },
@@ -193,6 +195,9 @@ describe('CHECKPOINT-2 buildLoopContextEnvelope', () => {
     const env = buildLoopContextEnvelope({ loopRunId: 'lr_1', checkpoints: [cp] });
     assert.strictEqual(env.recoveryHint.action, 'auto_repair');
     assert.strictEqual(env.recoveryHint.strategyId, 'retry_with_reconcile');
+    assert.strictEqual(cp.repairAttempt.parentLineage.parentJobId, 'job_123');
+    assert.strictEqual(cp.repairAttempt.replacementJobId, 'job_124');
+    assert.strictEqual(cp.repairAttempt.repaired, true);
   });
 
   it('failure history collected', () => {

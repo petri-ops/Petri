@@ -25,7 +25,11 @@ const {
   confirmScientificTask,
 } = require('../../shared-backend/scientific-task-confirmation');
 const { createDeliveryManifest, writeDeliveryManifest } = require('../../shared-backend/delivery-manifest');
-const { buildScientificReplayPackage, relativeInside } = require('../../shared-backend/scientific-replay-package');
+const {
+  buildScientificReplayPackage,
+  relativeInside,
+  selectReplayContextCheckpoint,
+} = require('../../shared-backend/scientific-replay-package');
 const {
   validateContextCheckpoint,
   validateCheckpointSupersession,
@@ -915,10 +919,19 @@ module.exports = function registerHarnessRoutes(app) {
       if (!task || !job) return res.status(404).json({ ok: false, error: 'scientific_task_not_found' });
       const project = db.getProject(task.project_id);
       if (!project || !canAccessProject(req, project)) return res.status(project ? 403 : 404).json({ ok: false, error: project ? 'forbidden' : 'project_not_found' });
-      const checkpoint = req.body?.checkpointId
-        ? db.getContextCheckpoint(String(req.body.checkpointId))
-        : db.getLatestContextCheckpoint(task.project_id, task.conversation_id);
-      if (req.body?.checkpointId && !checkpoint) return res.status(404).json({ ok: false, error: 'context_checkpoint_not_found' });
+      const explicitCheckpointId = req.body?.checkpointId
+        ? String(req.body.checkpointId)
+        : null;
+      const checkpointCandidates = explicitCheckpointId
+        ? [db.getContextCheckpoint(explicitCheckpointId)].filter(Boolean)
+        : db.listContextCheckpoints(task.project_id, task.conversation_id);
+      if (explicitCheckpointId && checkpointCandidates.length === 0) {
+        return res.status(404).json({ ok: false, error: 'context_checkpoint_not_found' });
+      }
+      const checkpoint = selectReplayContextCheckpoint(checkpointCandidates);
+      if (explicitCheckpointId && !checkpoint) {
+        return res.status(422).json({ ok: false, error: 'context_checkpoint_incompatible' });
+      }
       const layout = resolveProjectRunLayout({ projectId: project.id, toolJobId: job.id, db, userId: userId(req), skipPermissionCheck: isAdminOrInternal(req), ensureDirs: true });
       const packageDir = path.join(layout.outputDir, 'replay-package');
       const built = buildScientificReplayPackage({

@@ -157,6 +157,16 @@ test('已移除的单细胞步骤不会生成待确认 tool_job', async () => {
 test('Agent 可以获取只规划不自动执行的标准分析计划', async () => {
   const listed = await learning.tool_run_tool({ op: 'list' }, CTX);
   assert.ok(listed.workflowTemplates.some((item) => item.id === 'bulk-rna-core'));
+  assert.ok(listed.tools.some((item) => item.name === 'go-kegg'));
+  assert.equal(JSON.stringify(listed).length < 8_000, true);
+  assert.equal(listed.tools.some((item) => item.inputSchema), false);
+  const described = await learning.tool_run_tool(
+    { op: 'list', toolId: 'sample-metadata-validator' },
+    CTX,
+  );
+  assert.equal(described.ok, true);
+  assert.equal(described.tool.name, 'sample-metadata-validator');
+  assert.ok(described.tool.inputSchema);
   const planned = await learning.tool_run_tool(
     {
       op: 'plan',

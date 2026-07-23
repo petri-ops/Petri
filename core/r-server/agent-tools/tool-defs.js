@@ -375,7 +375,7 @@ const TOOL_DEFS = [
       description:
         '执行 BioF3 的分析工具，真实跑 R/Python 脚本出图出表（不是模拟）。' +
         '\n六个操作：' +
-        '\n - op=list：列出所有可用工具 + 参数契约（首次调用前先 list 看参数）' +
+        '\n - op=list：不带 toolId 时列紧凑工具目录；带 toolId 时返回该工具完整参数契约。先列目录再精确查询，禁止猜测工具 ID' +
         '\n - op=plan：按标准模板生成 Agent 主导的多步骤计划，只规划、不自动执行' +
         '\n - op=status：从真实 tool jobs 和 artifact truth 重建计划状态' +
         '\n - op=next：返回当前可执行步骤与恢复建议，不自动执行' +
@@ -396,7 +396,7 @@ const TOOL_DEFS = [
           },
           toolId: {
             type: 'string',
-            description: 'op=run 用：工具 id（如 deseq2、volcano-plot）。先 op=list 看 id',
+            description: 'op=run 用于执行；op=list 时用于读取单个工具完整契约。先用不带 toolId 的 list 获取真实 id',
           },
           params: {
             type: 'object',

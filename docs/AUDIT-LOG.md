@@ -5,7 +5,7 @@
 > 非主 agent 每次完成审计后，必须把发现追加到本文件并提交，不要只写在单独报告里。
 >
 > 维护方：非主 agent（只读审计 + 阻断性回归修复通道）
-> 最后更新：2026-07-24（HLE-C4R 真实桌面路由与历史回放收口）
+> 最后更新：2026-07-24（HLE-C4R/HLE-C5 生产验收收口）
 
 ---
 
@@ -29,7 +29,9 @@
 | ✅已处理 | 2026-07-19 | Stage 4: 诊断导出范围过宽且原始日志未脱敏，可能携带用户数据 | 本文件 §6 | [§6 问题 K](#问题-k诊断导出隐私边界过宽) |
 | ✅已处理 | 2026-07-19 | Stage 4: DESeq2 可产生科学文件却缺必需 ZIP/报告模板，golden-path 曾用补救逻辑掩盖失败 | 本文件 §6 | [§6 问题 L](#问题-ldeseq2-首次成功产物契约不完整) |
 | ✅已处理 | 2026-07-21 | rc.7: `diagnostic-redaction.js` 在打包态仍从 app.asar 相邻目录解析 `core/`，主进程启动即报模块缺失 | rc.7 安装候选实机 | 已改为 `Resources/core/shared-backend/redaction.js`，补开发/打包双路径回归并完成安装启动验证 |
-| 🟡进行中 | 2026-07-24 | HLE-C4R 功能接线已收口：历史会话自动回放、终态/恢复投影、active/background 与会话 token/cache/cost 摘要均来自 SQLite，SSE 与回放按 iterationId 合并；仍需完成明暗/820px/停止恢复视觉矩阵。HLE-C5 Step 7 三轨真实产品出口、双 Provider 与应用重启证据仍未完成。 | 生产收口计划 | [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) HLE-C4~C5 |
+| ✅已处理 | 2026-07-24 | HLE-C4R/HLE-C5 已完成生产收口：历史/终态/恢复/active-background/token-cost 均由 SQLite 投影；真实 SPT-1 正常 7 节点、可修复、科学阻断三轨，双 Provider、应用重启及明暗/820px/停止恢复视觉矩阵均已形成脱敏证据。 | 生产收口计划 | [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) HLE-C4~C5 |
+| ✅已处理 | 2026-07-24 | ReplayPackage 取最新 checkpoint 时会把共表的 Loop iteration checkpoint 当成 ContextCheckpoint，导致真实交付回放报 `replay_package_context_checkpoint_invalid`。现按 ContextCheckpoint 契约从新到旧选择兼容记录；显式指定不兼容记录时诚实返回 422，并补回归。 | HRT-6 / HLE-C5 | `scientific-replay-package.js`, `routes/harness.js`, `scientific-replay-package.test.mjs` |
+| ✅已处理 | 2026-07-24 | 全量插件 schema 在 ToolResult 投影中截断，模型看不到后部插件 ID 后会猜测名称；现 `run_tool(op=list)` 返回完整紧凑目录，`op=list, toolId=...)` 返回单工具精确契约，unknown 也返回真实 ID 列表。真实正常轨据此稳定完成 go-kegg 与 gsea。 | P-03 / P-04 / HLE-C5 | `agent-tools/learning.js`, `agent-tools/tool-defs.js`, `agent-approval.test.mjs` |
 | ✅已处理 | 2026-07-24 | 真实 Desktop 启动发现 Loop API 被 legacy `/api/loop/:loopRunId` 路由吞掉、desktop-local 只注入 `req.user` 导致 401、无 assistant 消息的历史会话不展示已恢复 Loop。现将 bounded AI Loop API 前置注册、统一归一化 `req.user.id`，并为无 assistant 历史提供独立 LoopStatusPanel；新增生产注册顺序与桌面身份回归。 | HLE-C4R / UI-101 | `routes/index.js`, `routes/ai-loop.js`, `SimpleChat.tsx`, `loop-api-route.test.mjs` |
 | ✅已处理 | 2026-07-24 | Provider 人工验收工具不识别产品已支持的通用 OpenAI-compatible Profile，双 Provider 验收只能依赖固定 DeepSeek/Anthropic 环境变量；控制台还会打印自定义 endpoint/model。现增加 `openai-compatible` 目标（key/base URL/model 三字段齐备才启用），日志只显示目标/协议，报告保持脱敏。 | P-07 / HLE-C5 | `scripts/harness-provider-eval.mjs`, `test/harness-provider-eval.test.mjs` |
 | ✅已处理 | 2026-07-24 | 真实 Bulk RNA 主轨生成最终答案后，Loop 收口从 `loop-contract` 错误解构 `deriveObservedStateDigest`，异常又被已有 assistant 正文掩盖：task=completed、Loop=running、iterations=0。现改从 Loop Controller 导入并启动即校验依赖；真实 state digest 纳入 Job/进度事实；模型终答只有在 Loop 收口成功后才发 done；任何 post-processing fatal error 优先标 task/Loop failed，不能由文本长度升级成功。 | P-03 / HLE-C5 | `agent-runner.js`, `loop-agent-integration.test.mjs` |
@@ -44,7 +46,7 @@
 | ✅已处理 | 2026-07-23 | HLE-C5 离线基础：server.js 启动恢复（HLE-C5）接入 listRunningLoopRuns；running LoopRun → failed(recovery_required) 平滑过渡；Loop Controller 修复 require('./loop-failure-diagnoser') 引用 loop-repair-strategy；22/22 恢复矩阵测试通过；46/46 SPT-1 三轨离线验收测试通过；440/440 Loop 离线测试全量通过。注意：离线测试通过不等于真实产品路径通过，HLE-C5 真实产品验收待 HLE-C5R 完成。 | 本提交 | `core/r-server/server.js`, `core/r-server/db.js`, `core/shared-backend/loop-controller.js`, `test/loop-recovery-integration.test.mjs`, `test/loop-spt1-acceptance.test.mjs` |
 
 | ✅已处理 | 2026-07-23 | HLE-C3（REST API 部分）完成，耐久恢复由 HLE-C3R 收口（见上方 ✅ 条目）：Loop REST API 上线（runs/iterations/actions/evidence/recovery/abort），compact 投影不暴露无界字段 | 本提交 | `core/r-server/routes/ai-loop.js` |
-| 🟡进行中 | 2026-07-24 | HLE-C4R 功能接线完成：新增有界 `session-summary` API 与 `useDurableConversationLoop`，打开/切换/重开会话会自动回放 LoopRun 和公开阶段结论；摘要显示 active/background、恢复、Token/缓存/成本；后端真实落盘 completed/blocked/cancelled 终态。blocked/failed/cancelled 非绿，不展示隐藏思维链。自动门禁已通过，视觉矩阵完成前保持 `in_progress`。 | UI-101 | `loop-client.ts`, `useDurableConversationLoop.ts`, `SimpleChat.tsx`, `CenterPanel.tsx`, `WorkspaceSummaryCard.tsx` |
+| ✅已处理 | 2026-07-24 | HLE-C4R 功能与视觉接线完成：有界 `session-summary`、历史回放、active/background、恢复、Token/缓存/成本及 completed/blocked/cancelled 终态全部来自持久化真相；blocked/failed/cancelled 非绿，不展示隐藏思维链。真实 renderer 明暗、820px、停止/恢复矩阵通过，UI-101 已 verified。 | UI-101 | `loop-client.ts`, `useDurableConversationLoop.ts`, `SimpleChat.tsx`, `CenterPanel.tsx`, `WorkspaceSummaryCard.tsx`, `acceptance/harness-loop/production/ui-matrix.md` |
 ：Validator Registry 接入生产 orchestration，运行真实 job truth 读取；Diagnoser 分类故障并选 Repair Strategy；blocked/failed 验证结果阻止完成；假成功（failed job + partial files）稳定阻断；38/38 集成测试通过 | 本提交 | `core/r-server/agent-runner.js` + `test/loop-validator-diagnoser.test.mjs` |
 ：Loop Controller 接入 agent-runner.js，惰性初始化 LoopRun、按轮持久化 Iteration、发出 loop_phase/loop_iteration SSE 事件、记录用户取消和 Controller 终止；非执行轮不创建 LoopRun；19/19 集成测试通过 | 本提交 | `core/r-server/agent-runner.js` + `test/loop-agent-integration.test.mjs` |
  HLE 生产代码与实机审计 | 按 [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) HLE-C0～HLE-C5 收口；failed Job 即使存在部分文件也不得宣称任务完成 |

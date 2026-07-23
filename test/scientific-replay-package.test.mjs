@@ -217,3 +217,23 @@ test('HRT-6 source digest changes when checkpoint or execution evidence changes'
   const b = replayPackage.buildScientificReplayPackage({ taskRecord: right.taskRecord, job: right.job, projectRoot: right.projectRoot, packageDir: right.packageDir, contextCheckpoint: right.contextCheckpoint });
   assert.notEqual(a.packageManifest.sourceDigest, b.packageManifest.sourceDigest);
 });
+
+test('HRT-6 selects the newest compatible context checkpoint when Loop checkpoints share persistence', () => {
+  const f = fixture();
+  const loopCheckpoint = {
+    schemaVersion: 1,
+    checkpointId: 'cp_loop_1',
+    projectId: 'project_1',
+    conversationId: 'conversation_1',
+    sourceDigest: 'e'.repeat(64),
+    createdAt: '2026-07-22T01:00:00.000Z',
+    loopRunId: 'loop_1',
+    sequence: 2,
+    decision: 'continue',
+  };
+  assert.equal(
+    replayPackage.selectReplayContextCheckpoint([loopCheckpoint, f.contextCheckpoint]).checkpointId,
+    f.contextCheckpoint.checkpointId,
+  );
+  assert.equal(replayPackage.selectReplayContextCheckpoint([loopCheckpoint]), null);
+});

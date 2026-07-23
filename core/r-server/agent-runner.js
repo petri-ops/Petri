@@ -157,6 +157,41 @@ function resolveAgentTaskTerminal({
   return { status: 'failed', error: 'agent loop 未生成有效回复' };
 }
 
+function resolveFailedJobReplacements(toolJobs = []) {
+  const failedJobs = toolJobs.filter((job) => ['failed', 'blocked'].includes(job.status));
+  const replacementByFailureKey = new Map();
+  for (const failed of failedJobs) {
+    const failedToolId = failed.toolId || failed.jobTruth?.tool_id || null;
+    if (!failedToolId) continue;
+    const replacement = toolJobs.find((candidate) =>
+      candidate.status === 'completed' &&
+      candidate.toolJobId &&
+      candidate.iteration > failed.iteration &&
+      (candidate.toolId || candidate.jobTruth?.tool_id) === failedToolId
+    );
+    if (replacement) {
+      replacementByFailureKey.set(failed.toolJobId || failed.callId, replacement);
+    }
+  }
+  const unresolvedFailedJobs = failedJobs.filter(
+    (failed) => !replacementByFailureKey.has(failed.toolJobId || failed.callId)
+  );
+  const primaryFailed = failedJobs.find((failed) =>
+    failed.toolJobId && replacementByFailureKey.has(failed.toolJobId)
+  ) || failedJobs.find((failed) => failed.toolJobId) || failedJobs[0] || null;
+  return {
+    failedJobs,
+    unresolvedFailedJobs,
+    primaryFailed,
+    replacementByFailureKey,
+    repairedFailedJobIds: new Set(
+      failedJobs
+        .filter((failed) => failed.toolJobId && replacementByFailureKey.has(failed.toolJobId))
+        .map((failed) => failed.toolJobId)
+    ),
+  };
+}
+
 function _buildResultCardFromRunTool(result, context) {
   if (!result || typeof result !== 'object' || !result.toolJobId || result.needApproval) return null;
   const toolId = String(result.toolId || 'analysis');
@@ -644,7 +679,11 @@ async function runAgentLoop({
       .map((activity) => {
         const event = toolResultEventsByCallId[activity.callId];
         const resultData = event?.toolResult?.data || {};
-        const toolJobId = resultData.toolJobId || null;
+        // Public ToolResult payloads are deliberately bounded. Large plugin
+        // results become data.preview, while the stable execution identity is
+        // promoted to the event envelope. Always read the promoted field first
+        // so Loop persistence never loses run_tool -> tool_job lineage.
+        const toolJobId = event?.toolJobId || resultData.toolJobId || null;
         let job = null;
         if (toolJobId) {
           try { job = getToolJob(toolJobId) || null; } catch {}
@@ -1080,7 +1119,7 @@ async function runAgentLoop({
           const resultData = evt && evt.toolResult && evt.toolResult.data
             ? evt.toolResult.data
             : {};
-          const toolJobId = resultData.toolJobId || null;
+          const toolJobId = evt?.toolJobId || resultData.toolJobId || null;
           let jobTruth = null;
           if (toolJobId) {
             try {
@@ -1107,6 +1146,7 @@ async function runAgentLoop({
                 : (a.status === 'error' ? 'failed' : a.status === 'success' ? 'completed' : 'unknown');
           return {
             toolJobId: toolJobId || null,
+            toolId: jobTruth?.tool_id || resultData.toolId || evt?.toolId || null,
             callId: a.callId,
             name: a.name,
             status,
@@ -1175,24 +1215,14 @@ async function runAgentLoop({
       // HLE-C2: Diagnose failed jobs and propose repair
       let repairAttempt = null;
       let diagnosis = null;
-      const failedJobs = toolJobs.filter((j) => j.status === 'failed' || j.status === 'blocked');
-      const replacementByFailedJobId = new Map();
-      for (const failed of failedJobs) {
-        const failedToolId = failed.jobTruth?.tool_id || null;
-        if (!failedToolId || !failed.toolJobId) continue;
-        const replacement = toolJobs.find((candidate) =>
-          candidate.status === 'completed' &&
-          candidate.toolJobId &&
-          candidate.iteration > failed.iteration &&
-          candidate.jobTruth?.tool_id === failedToolId
-        );
-        if (replacement) replacementByFailedJobId.set(failed.toolJobId, replacement);
-      }
-      const unresolvedFailedJobs = failedJobs.filter((failed) =>
-        !failed.toolJobId || !replacementByFailedJobId.has(failed.toolJobId)
-      );
+      const {
+        failedJobs,
+        unresolvedFailedJobs,
+        primaryFailed,
+        replacementByFailureKey,
+        repairedFailedJobIds,
+      } = resolveFailedJobReplacements(toolJobs);
       if (failedJobs.length > 0) {
-        const primaryFailed = failedJobs[0];
         try {
           diagnosis = diagnoseFailure(
             {
@@ -1230,9 +1260,9 @@ async function runAgentLoop({
               fallbackProvider: null,
             };
             repairAttempt = selectRepairStrategy(diagnosis, repairCtx);
-            const replacement = primaryFailed.toolJobId
-              ? replacementByFailedJobId.get(primaryFailed.toolJobId)
-              : null;
+            const replacement = replacementByFailureKey.get(
+              primaryFailed.toolJobId || primaryFailed.callId
+            );
             if (repairAttempt && replacement) {
               repairAttempt = {
                 ...repairAttempt,
@@ -1276,7 +1306,6 @@ async function runAgentLoop({
       });
 
       const activeJobs = toolJobs.filter((j) => j.status === 'running' || j.status === 'pending');
-      const repairedFailedJobIds = new Set(replacementByFailedJobId.keys());
       const effectiveValidatorResults = validatorResults.filter((result) =>
         !result.toolJobId || !repairedFailedJobIds.has(result.toolJobId)
       );
@@ -1611,4 +1640,8 @@ async function runAgentLoop({
   return { assistantText: assistantAcc };
 }
 
-module.exports = { runAgentLoop, resolveAgentTaskTerminal };
+module.exports = {
+  runAgentLoop,
+  resolveAgentTaskTerminal,
+  resolveFailedJobReplacements,
+};

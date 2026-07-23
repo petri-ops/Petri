@@ -11,7 +11,10 @@
  *  - HLE-4: Failure Diagnoser + Repair Strategy
  *  - HLE-5: Checkpoint, ContextEnvelope, Budget, SessionStageView
  *
- * HLE-6: All of the above (zero-network, offline-safe).
+ *  - HLE-C5: Sanitized production evidence (three tracks, providers, restart,
+ *    responsive UI). The verifier itself is zero-network and offline-safe.
+ *
+ * HLE-6: All of the above.
  *
  * Outputs: acceptance/harness-loop/hle-all-gate.json
  */
@@ -82,6 +85,14 @@ results.push(run('hle4:repair:test', 'node test/loop-repair-strategy.test.cjs'))
 results.push(run('hle5:checkpoint:test', 'node test/loop-checkpoint.test.cjs'));
 
 // ---------------------------------------------------------------------------
+// HLE-C5: Pre-recorded production acceptance evidence
+// ---------------------------------------------------------------------------
+results.push(run(
+  'hle-c5:production:evidence',
+  'node scripts/harness-loop-production-acceptance.mjs',
+));
+
+// ---------------------------------------------------------------------------
 // Compute pass/fail
 // ---------------------------------------------------------------------------
 const passed = results.every((item) => item.exitCode === 0);
@@ -91,8 +102,8 @@ const report = {
   schemaVersion: 1,
   harness: 'harness-loop',
   phase: 'HLE-6',
-  privacy: 'synthetic_or_repository_demo_data_only',
-  network: 'disabled_by_contract',
+  privacy: 'synthetic_fixtures_and_sanitized_production_evidence',
+  network: 'disabled_during_gate; live_provider_evidence_pre_recorded',
   credentials: 'not_loaded',
   startedAt,
   finishedAt: new Date().toISOString(),
