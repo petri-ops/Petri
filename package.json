@@ -39,6 +39,8 @@
     "harness:phase6": "node --test test/plugin-sdk.test.mjs test/harness-manifest.test.mjs test/harness-tool-template.test.mjs test/harness-workflow-fixtures.test.mjs test/agent-workflow-phase6.test.mjs test/agent-workflow.test.mjs",
     "harness:plugins:acceptance": "node scripts/harness-plugin-acceptance.mjs --verify-evidence",
     "harness:plugins:acceptance:update": "node scripts/harness-plugin-acceptance.mjs --write-evidence",
+    "harness:plugins:contract": "node scripts/plugin-contract-lint.js",
+    "harness:plugins": "npm run harness:plugins:contract && npm run harness:plugins:acceptance",
     "harness:phase7:acceptance": "node scripts/harness-phase7-acceptance.mjs --verify-evidence",
     "harness:phase7:acceptance:update": "node scripts/harness-phase7-acceptance.mjs --write-evidence",
     "harness:phase7": "npm run harness:check && npm run harness:phase6 && node --test test/agent-tool-registry.test.mjs test/agent-tool-policy.test.mjs test/harness-workspace-tools.test.mjs test/agent-tool-result.test.mjs test/agent-provider-boundary.test.mjs test/agent-approval.test.mjs test/project-memory-isolation.test.mjs test/diagnostic-redaction.test.mjs && npm run harness:phase7:acceptance",

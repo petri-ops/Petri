@@ -18,8 +18,22 @@
       "label": "LFC 列名",
       "type": "text",
       "required": false,
-      "hint": "log2FoldChange 列名。默认自动探测：优先 log2FoldChange（deg-standardizer 输出），fallback log2FC（DESeq2 直接输出）",
+      "hint": "log2FoldChange 列名。默认自动探测：优先 log2FoldChange（canonical），fallback log2FC（DESeq2 直接输出）",
       "default": null
+    },
+    {
+      "id": "gene_col",
+      "label": "gene ID 列名",
+      "type": "text",
+      "required": false,
+      "default": "gene"
+    },
+    {
+      "id": "pval_col",
+      "label": "pvalue 列名",
+      "type": "text",
+      "required": false,
+      "default": "pvalue"
     },
     {
       "id": "fc_threshold",

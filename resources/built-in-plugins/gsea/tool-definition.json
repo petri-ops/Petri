@@ -42,6 +42,14 @@
       "label": "最大基因集大小",
       "type": "number",
       "default": 500
+    },
+    {
+      "id": "gene_id_type",
+      "label": "gene ID 类型",
+      "type": "text",
+      "required": false,
+      "default": "symbol",
+      "hint": "symbol | ensembl | entrez"
     }
   ],
   "outputs": [
