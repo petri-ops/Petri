@@ -185,7 +185,7 @@
 
 ### 当前活跃
 
-- P-03 `Harness Loop Engineering v1`：按 HLE-0～HLE-6，以 SPT-1 Bulk RNA-seq 任务建设并验收可持久化、可验证、可修复的目标驱动 Loop。
+- P-03 `Harness Loop Engineering v1`：后端原语与离线测试基础已建立；当前按 `harness-loop-production-closure-plan.md` 的 HLE-C0～HLE-C5 接入真实 Agent、Job/Artifact、恢复和 UI。
 - 影响 P-01/P-02/P-04/P-07/W-03/W-04；关注 C-03/C-04/C-05/C-06，但不改变各模块所有权。
 
 ### 架构去耦已完成（2026-07）
@@ -204,7 +204,7 @@
 
 ### 后续主线
 
-- Stage 1～4 与 Harness Phase 7、HRT-0～HRT-7 已关闭；当前入口为 `docs/harness-loop-engineering-plan.md`。
+- Stage 1～4 与 Harness Phase 7、HRT-0～HRT-7 已关闭；当前入口为 `docs/harness-loop-production-closure-plan.md`，总设计仍以 `docs/harness-loop-engineering-plan.md` 为准。
 - HLE 由 P-03 控制目标推进，P-02 记录真实 Job/Artifact，P-04 提供科学模块及领域验证器，P-07 提供可切换模型能力，W-03/W-04 展示进度和交付。
 - 每次只完成一个 HLE 子包；未经真实任务证据不得提前扩展多 Agent、通用后台进程或新的科学插件集合。
 
