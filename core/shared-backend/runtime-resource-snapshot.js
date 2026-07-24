@@ -1,6 +1,7 @@
 'use strict';
 
 const os = require('os');
+const { probeAvailableMemoryBytes } = require('./runtime-resource-probe');
 
 const SNAPSHOT_VERSION = 1;
 
@@ -23,7 +24,7 @@ function classifyResourceState({ availableMemoryBytes, diskAvailableBytes, estim
 
 function createRuntimeResourceSnapshot({ disk = null, runtime = {}, activeJobs = 0, estimatedMemoryBytes = 0, totalMemoryBytes: totalMemoryOverride, availableMemoryBytes: availableMemoryOverride, observedAt = new Date().toISOString() } = {}) {
   const totalMemoryBytes = positiveNumber(totalMemoryOverride, os.totalmem());
-  const availableMemoryBytes = positiveNumber(availableMemoryOverride, os.freemem());
+  const availableMemoryBytes = positiveNumber(availableMemoryOverride, probeAvailableMemoryBytes());
   const cpuCount = os.cpus().length;
   const snapshot = {
     schemaVersion: SNAPSHOT_VERSION,
