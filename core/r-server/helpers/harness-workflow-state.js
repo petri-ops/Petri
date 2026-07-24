@@ -124,6 +124,7 @@ function projectHarnessWorkflowJob(job = {}) {
     truth?.status === 'blocked' ||
     diagnostics.some((issue) => issue && issue.recoverable !== false);
   const nextActions = recoveryActions({ stages, ackStatus, truth, status });
+  const truthProjection = buildTruthProjection({ job });
 
   return {
     harnessWorkflowStateVersion: 1,
@@ -142,6 +143,7 @@ function projectHarnessWorkflowJob(job = {}) {
     recoveryHistory,
     nextActions,
     stages: stageList,
+    truthProjection,
   };
 }
 
@@ -149,3 +151,4 @@ module.exports = {
   WORKFLOW_STAGE_IDS,
   projectHarnessWorkflowJob,
 };
+const { buildTruthProjection } = require('../../shared-backend/g0-truth-projection');

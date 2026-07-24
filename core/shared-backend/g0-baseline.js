@@ -7,6 +7,10 @@ const manifest = require('./g0/baseline-manifest.json');
 const registry = require('./g0/baseline-registry.json');
 const supportMatrix = require('./g0/support-matrix.json');
 const governanceVocabulary = require('./g0/governance-vocabulary.json');
+const truthLattice = require('./g0/truth-lattice.json');
+const durableStateInventory = require('./g0/durable-state-inventory.json');
+const capabilitySupplyChain = require('./g0/capability-supply-chain.json');
+const securityPermissionMatrix = require('./g0/security-permission-matrix.json');
 
 const LEGACY_BASELINE_ID = 'legacy-unversioned';
 const PROJECT_BASELINE_RECORD_VERSION = 1;
@@ -22,7 +26,17 @@ function deepFreeze(value) {
   return Object.freeze(value);
 }
 
-[constitution, manifest, registry, supportMatrix, governanceVocabulary].forEach(deepFreeze);
+[
+  constitution,
+  manifest,
+  registry,
+  supportMatrix,
+  governanceVocabulary,
+  truthLattice,
+  durableStateInventory,
+  capabilitySupplyChain,
+  securityPermissionMatrix,
+].forEach(deepFreeze);
 
 function canonicalStringify(value) {
   if (value === null || typeof value !== 'object') return JSON.stringify(value);
@@ -51,6 +65,8 @@ function currentContractVersions() {
   const replay = require('./scientific-replay-package');
   const resources = require('./runtime-resource-snapshot');
   const artifactProfiles = require('./artifact-profiles');
+  const truthProjection = require('./g0-truth-projection');
+  const durableState = require('./g0-durable-state');
   const artifactProfileVersions = Object.values(artifactProfiles.ARTIFACT_PROFILES || {})
     .map((profile) => Number(profile.schemaVersion))
     .filter(Number.isInteger);
@@ -71,6 +87,10 @@ function currentContractVersions() {
       : null,
     pluginManifest: 1,
     projectBaselineRecord: PROJECT_BASELINE_RECORD_VERSION,
+    truthProjection: truthProjection.TRUTH_PROJECTION_VERSION,
+    durableState: durableState.DURABLE_STATE_VERSION,
+    capabilitySupplyChain: require('./g0/capability-supply-chain.json').contractVersion,
+    securityPermissionMatrix: require('./g0/security-permission-matrix.json').contractVersion,
   };
 }
 
@@ -82,6 +102,10 @@ function getCurrentG0Baseline() {
     registry,
     supportMatrix,
     governanceVocabulary,
+    truthLattice,
+    durableStateInventory,
+    capabilitySupplyChain,
+    securityPermissionMatrix,
   });
   return Object.freeze({
     schemaVersion: manifest.schemaVersion,
@@ -121,6 +145,10 @@ function validateG0BaselineBundle() {
   if (registry.schemaVersion !== 1) issues.push('registry_schema_version_unsupported');
   if (supportMatrix.schemaVersion !== 1) issues.push('support_matrix_schema_version_unsupported');
   if (governanceVocabulary.schemaVersion !== 1) issues.push('governance_vocabulary_schema_version_unsupported');
+  if (truthLattice.schemaVersion !== 1) issues.push('truth_lattice_schema_version_unsupported');
+  if (durableStateInventory.schemaVersion !== 1) issues.push('durable_state_inventory_schema_version_unsupported');
+  if (capabilitySupplyChain.schemaVersion !== 1) issues.push('capability_supply_chain_schema_version_unsupported');
+  if (securityPermissionMatrix.schemaVersion !== 1) issues.push('security_permission_matrix_schema_version_unsupported');
   if (manifest.baselineId !== registry.currentBaselineId) issues.push('registry_current_baseline_mismatch');
   if (manifest.baselineId !== supportMatrix.baselineId) issues.push('support_matrix_baseline_mismatch');
   if (manifest.constitutionId !== constitution.constitutionId) issues.push('constitution_id_mismatch');
@@ -280,6 +308,10 @@ module.exports = {
   registry,
   supportMatrix,
   governanceVocabulary,
+  truthLattice,
+  durableStateInventory,
+  capabilitySupplyChain,
+  securityPermissionMatrix,
   canonicalStringify,
   sha256,
   parseMajor,

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": 1,
+  "sources": ["builtin-canonical", "installed", "development-explicit"],
+  "requiredControls": [
+    "manifest_schema",
+    "source_identity",
+    "package_and_runtime_readiness",
+    "script_snapshot",
+    "parameter_snapshot",
+    "input_and_output_hashes",
+    "failure_modes",
+    "validators",
+    "platform_support",
+    "download_https_host_policy",
+    "archive_path_safety",
+    "content_hash_verification"
+  ],
+  "forbidden": [
+    "installed_overrides_builtin_without_explicit_development_mode",
+    "plugin_owned_job_or_artifact_ledger",
+    "formal_output_without_extractable_script",
+    "unverified_platform_claim"
+  ]
+}

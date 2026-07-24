@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "baselineId": "g0-lf0-establishing-0.1",
-  "baselineVersion": "0.1.0",
+  "baselineId": "g0-first-wave-establishing-0.2",
+  "baselineVersion": "0.2.0",
   "lifecycleStatus": "establishing",
   "qualificationStatus": "not_yet_qualified",
   "constitutionId": "biof3-g0-constitution-v1",
@@ -23,7 +23,11 @@
     "runtimeResourceSnapshot": 1,
     "artifactProfile": 1,
     "pluginManifest": 1,
-    "projectBaselineRecord": 1
+    "projectBaselineRecord": 1,
+    "truthProjection": 1,
+    "durableState": 1,
+    "capabilitySupplyChain": 1,
+    "securityPermissionMatrix": 1
   },
   "database": {
     "engine": "sqlite",
@@ -42,7 +46,11 @@
     "constitution": "core/shared-backend/g0/constitution.json",
     "registry": "core/shared-backend/g0/baseline-registry.json",
     "supportMatrix": "core/shared-backend/g0/support-matrix.json",
-    "governanceVocabulary": "core/shared-backend/g0/governance-vocabulary.json"
+    "governanceVocabulary": "core/shared-backend/g0/governance-vocabulary.json",
+    "truthLattice": "core/shared-backend/g0/truth-lattice.json",
+    "durableStateInventory": "core/shared-backend/g0/durable-state-inventory.json",
+    "capabilitySupplyChain": "core/shared-backend/g0/capability-supply-chain.json",
+    "securityPermissionMatrix": "core/shared-backend/g0/security-permission-matrix.json"
   },
   "evidenceRefs": [
     "acceptance/harness-loop/production/baseline.json",

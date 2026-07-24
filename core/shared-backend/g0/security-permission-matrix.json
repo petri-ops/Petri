@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": 1,
+  "modes": ["read", "guided", "confirm", "full"],
+  "dimensions": ["filesystem", "command", "network", "plugin", "provider", "external_application"],
+  "nonOverridableBoundaries": [
+    "project_scope_isolation",
+    "credential_redaction",
+    "scientific_input_immutability",
+    "irreversible_action_protection",
+    "external_side_effect_audit",
+    "single_execution_truth"
+  ],
+  "decisions": ["allow", "deny", "require_user", "not_supported"],
+  "fullAccessStillBlocks": [
+    "privilege_escalation",
+    "destructive_recursive_delete",
+    "unreviewed_remote_script_pipe",
+    "unrequested_git_push",
+    "credential_exfiltration",
+    "cross_project_access",
+    "scientific_source_overwrite"
+  ]
+}

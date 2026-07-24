@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "baselineId": "g0-lf0-establishing-0.1",
+  "baselineId": "g0-first-wave-establishing-0.2",
   "qualificationBoundary": "No capability is marked qualified before G0-LF12.",
   "platforms": [
     {

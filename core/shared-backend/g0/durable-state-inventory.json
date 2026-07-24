@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "inventoryVersion": 1,
+  "allowedRecoveryOutcomes": ["resume_safe", "retry_safe", "recovery_required", "waiting_for_user", "partial_history", "blocked"],
+  "objects": [
+    { "id": "project", "owner": "projects", "store": "sqlite", "recovery": "resume_safe" },
+    { "id": "conversation", "owner": "copilot_conversations", "store": "sqlite", "recovery": "resume_safe" },
+    { "id": "message", "owner": "copilot_messages", "store": "sqlite", "recovery": "resume_safe" },
+    { "id": "task_spec", "owner": "scientific_task_specs", "store": "sqlite", "recovery": "resume_safe" },
+    { "id": "workflow_plan", "owner": "agent_workflow_plans", "store": "sqlite", "recovery": "resume_safe" },
+    { "id": "loop_run", "owner": "loop_runs", "store": "sqlite_append_ledger", "recovery": "recovery_required" },
+    { "id": "loop_iteration", "owner": "loop_iterations", "store": "sqlite_append_ledger", "recovery": "resume_safe" },
+    { "id": "tool_job", "owner": "tool_jobs", "store": "sqlite", "recovery": "recovery_required" },
+    { "id": "artifact", "owner": "artifact_manifest_and_project_files", "store": "filesystem_plus_hash", "recovery": "recovery_required" },
+    { "id": "context_checkpoint", "owner": "context_checkpoints", "store": "sqlite", "recovery": "partial_history" },
+    { "id": "delivery_manifest", "owner": "delivery_manifest", "store": "project_filesystem", "recovery": "retry_safe" },
+    { "id": "replay_package", "owner": "replay_package", "store": "project_filesystem", "recovery": "retry_safe" },
+    { "id": "g0_baseline", "owner": "project_g0_baselines", "store": "sqlite", "recovery": "blocked" }
+  ],
+  "failureClasses": [
+    "renderer_exit",
+    "main_process_exit",
+    "analysis_server_exit",
+    "operating_system_shutdown",
+    "provider_stream_interruption",
+    "user_cancellation",
+    "sqlite_interruption",
+    "partial_artifact_write",
+    "checkpoint_corruption",
+    "migration_failure"
+  ]
+}

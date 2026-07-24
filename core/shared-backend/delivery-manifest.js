@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { stableStringify } = require('./scientific-task-spec');
+const { buildTruthProjection } = require('./g0-truth-projection');
 
 const DELIVERY_MANIFEST_VERSION = 1;
 const DELIVERY_STATUSES = Object.freeze(['valid', 'degraded', 'blocked']);
@@ -85,7 +86,16 @@ function createDeliveryManifest({ taskRecord, job, projectRoot = null, findings 
     unresolved: [...unresolved.map((item) => ({ code: 'deliverable_unresolved', requirement: item.requirement })), ...(status === 'blocked' ? [{ code: 'delivery_blocked', reason: job.error || truth?.status || 'artifact_validation_failed' }] : [])],
     generatedAt: new Date().toISOString(),
   };
-  return { ...manifest, manifestHash: crypto.createHash('sha256').update(stableStringify(manifest)).digest('hex') };
+  const manifestHash = crypto.createHash('sha256').update(stableStringify(manifest)).digest('hex');
+  const withHash = { ...manifest, manifestHash };
+  return {
+    ...withHash,
+    truthProjection: buildTruthProjection({
+      job,
+      deliveryManifest: withHash,
+      scientificValidation: result.scientificValidation || null,
+    }),
+  };
 }
 
 function writeDeliveryManifest({ manifest, outputPath, projectRoot } = {}) {

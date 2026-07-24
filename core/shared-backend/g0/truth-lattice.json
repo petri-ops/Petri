@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "projectionVersion": 1,
+  "levels": [
+    { "id": "job", "authority": "tool_jobs", "terminalSuccess": ["completed"] },
+    { "id": "artifact", "authority": "artifactTruth", "terminalSuccess": ["valid"] },
+    { "id": "scientific", "authority": "validatorEvidence", "terminalSuccess": ["valid", "not_applicable"] },
+    { "id": "delivery", "authority": "DeliveryManifest", "terminalSuccess": ["valid"] },
+    { "id": "presentation", "authority": "derived_projection_only", "terminalSuccess": ["completed"] }
+  ],
+  "precedence": ["recovery_required", "blocked", "failed", "cancelled", "needs_review", "running", "pending", "completed"],
+  "completionRule": "All authoritative job, artifact, scientific and delivery levels must be terminal-success; presentation cannot promote upstream truth.",
+  "invalidationFingerprintFields": ["inputs", "parameters", "environment", "code", "artifacts"]
+}
