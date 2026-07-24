@@ -544,7 +544,7 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 
 ## 16. G0-LF7：Capability Supply Chain
 
-状态：`in_progress`（第一波基础契约已建立）
+状态：`completed`（2026-07-24）
 
 ### 目标
 
@@ -568,11 +568,16 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 - 插件自行定义第二套 Job/Artifact 状态。
 - 大量增加未进入真实任务和 Conformance 的插件。
 
-第一波已固定 canonical source、Manifest/Runtime/脚本/参数/输入输出 Hash、failureModes、Validator、平台声明、下载与解压安全等必需控制。完整 LF7 仍需后续跨平台 Adapter 与插件升级 Replay/Drift 证据，不在本轮冒充 completed。
+### 已落地
+
+- 能力描述符统一固定插件身份、版本、来源策略、Manifest/Runtime/脚本/包 Hash、平台、failureModes、Validator、产物与资源画像。
+- 一图一表一结果必须携带独立可复现脚本；Runtime 与平台差异只通过显式 Adapter 声明。
+- 插件升级必须提供当前平台资格证据与历史 Replay/Drift 报告；科学实质漂移、未知漂移或缺少 Replay 一律阻断。
+- 平台资格只覆盖已有证据的平台，不以 macOS 结果推断 Windows/Linux 已合格；能力供应链继续复用唯一 Job/Artifact/Workflow truth。
 
 ## 17. G0-LF8：Security & Permission
 
-状态：`in_progress`（第一波基础契约已建立）
+状态：`completed`（2026-07-24）
 
 ### 目标
 
@@ -598,7 +603,11 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 - 诊断包默认最小化并脱敏。
 - 插件和 Runtime 供应链安全纳入发布门。
 
-第一波已把 filesystem、command、network、plugin、Provider 与 external application 六个维度及不可覆盖边界写成机器契约；完全访问仍不能绕过项目隔离、凭据保护、科学源数据不可变、不可逆操作与外部副作用审计。开发者/普通用户完整能力矩阵仍留在 LF8 后续收口。
+### 已落地
+
+- filesystem、command、network、plugin、Provider 与 external application 六个维度统一按模式、项目作用域、风险、可逆性、外部副作用和硬边界决策。
+- 完全访问可自动执行项目内低风险、可恢复动作，但不能绕过跨项目隔离、凭据保护、科学源数据不可变、提权、远端推送和远程脚本管道等硬边界。
+- 不可逆或具有重大外部副作用的动作进入确认门；普通、完全访问与开发者模式均使用同一审计决策契约，不建立静态命令 allowlist 特例。
 
 ## 18. G0-LF9：Observable Experience
 
@@ -630,6 +639,8 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 
 ## 19. G0-LF10：Resilience Lab
 
+状态：`completed`（2026-07-24）
+
 ### 目标
 
 不等待用户遇到事故，而是系统性制造事故来证明 G0。
@@ -659,6 +670,12 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 ### 规则
 
 每个生产事故必须进入 Fault Matrix 或 Replay Corpus，形成系统“免疫记忆”。
+
+### 已落地
+
+- 八域机器 Fault Matrix 已固定 Provider、Runtime、Storage、Database、Resource、User、Plugin 与 Model 的代表性故障、预期结果和恢复策略。
+- 故障实验统一断言：不得假成功、审计必须保留、项目必须隔离、科学真相不得变化、重试必须有界。
+- Resilience Lab 复用生产 Plugin SDK、权限策略、诊断脱敏、ActionKey、重启恢复、Validator 与 false-success shield，不建立测试专用第二执行器。
 
 ## 20. G0-LF11：Evolution Pipeline
 
@@ -859,15 +876,15 @@ G1 可以在 `G0 Baseline v1` qualified 后启动；G0 同时转入 maintained�
 
 ## 28. 当前行动
 
-`G0-START`、`G0-LF0`～`G0-LF6` 与 `G0-LF9` 已完成；LF7/LF8 第一波基础契约已建立但整体仍为 `in_progress`。G0 处于 `establishing`，尚未 `qualified`。
+`G0-START` 与 `G0-LF0`～`G0-LF10` 已完成。G0 处于 `establishing`，尚未 `qualified`。
 
 下一主线按依赖启动：
 
-1. 收口 `G0-LF7 Capability Supply Chain` 与 `G0-LF8 Security & Permission` 的生产证据。
-2. 启动 `G0-LF10 Resilience Lab`，系统性执行故障注入、压力、耐久和恢复矩阵。
-3. LF11/LF12 必须等待 LF7/LF8/LF10 的真实结果。
+1. 启动 `G0-LF11 Evolution Pipeline`，固定变化分级、Promotion Gate、回放、迁移与回滚。
+2. 在 LF11 真实证据完成后启动 `G0-LF12 Baseline Qualification`。
+3. LF12 通过前不得将 G0 写成 qualified 或 G0 Baseline v1。
 
-任何后续工作仍须通过四代 G0 门禁（含 `npm run g0:third-wave`），且不得把当前 `not_yet_qualified` 基线写成 qualified。
+任何后续工作仍须通过五代 G0 门禁（含 `npm run g0:fourth-wave`），且不得把当前 `not_yet_qualified` 基线写成 qualified。
 
 ## 29. 守护语句
 

@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-FOURTH-WAVE",
+  "sourceCommit": "00400cbf262ec789ec57a8478c9066a02543f818",
+  "baseline": {
+    "schemaVersion": 1,
+    "baselineId": "g0-fourth-wave-establishing-0.5",
+    "baselineVersion": "0.5.0",
+    "lifecycleStatus": "establishing",
+    "qualificationStatus": "not_yet_qualified",
+    "constitutionId": "biof3-g0-constitution-v1",
+    "manifestDigest": "48cf51ef8bb279a1266484aaa7930e90e4382544f2bd20f219cc36c3bee61833",
+    "bundleDigest": "16cdd9976bd6bc44bcb630bea85da34a9292892dc0fbae4bbd52d01f0d4442c8"
+  },
+  "privacy": "digests_and_counts_only_no_raw_data_credentials_urls_or_provider_responses",
+  "checks": [
+    {
+      "id": "G0-W4-01",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/baseline-manifest.json"
+      ],
+      "detail": "Fourth-wave baseline is consistent and not qualified."
+    },
+    {
+      "id": "G0-W4-02",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/capability-supply-chain.json"
+      ],
+      "detail": "LF7 production controls are complete."
+    },
+    {
+      "id": "G0-W4-03",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/plugin-sdk.js"
+      ],
+      "detail": "LF7 reuses canonical Plugin SDK without a second ledger."
+    },
+    {
+      "id": "G0-W4-04",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/plugin-sdk.js",
+        "core/shared-backend/g0-capability-supply-chain.js"
+      ],
+      "detail": "Plugin failure and validator contracts are enforced."
+    },
+    {
+      "id": "G0-W4-05",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/security-permission-matrix.json"
+      ],
+      "detail": "LF8 evaluates mode, scope, risk, path and side effects."
+    },
+    {
+      "id": "G0-W4-06",
+      "passed": true,
+      "evidence": [
+        "core/r-server/agent-tools/agent-tool-policy.js",
+        "core/r-server/agent-tools/workspace-tools.js"
+      ],
+      "detail": "LF8 production boundaries remain wired."
+    },
+    {
+      "id": "G0-W4-07",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/security-permission-matrix.json"
+      ],
+      "detail": "Full access retains non-negotiable blocks."
+    },
+    {
+      "id": "G0-W4-08",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/resilience-lab.json"
+      ],
+      "detail": "LF10 covers eight fault domains."
+    },
+    {
+      "id": "G0-W4-09",
+      "passed": true,
+      "evidence": [
+        "core/r-server/server.js"
+      ],
+      "detail": "LF10 requires no false success, audit, isolation, stable science and bounded retry."
+    },
+    {
+      "id": "G0-W4-10",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/constitution.json"
+      ],
+      "detail": "No second execution or fault truth exists."
+    },
+    {
+      "id": "G0-W4-11",
+      "passed": true,
+      "evidence": [
+        "docs/g0-living-foundation-plan.md"
+      ],
+      "detail": "LF7/LF8/LF10 completion recorded."
+    },
+    {
+      "id": "G0-W4-12",
+      "passed": true,
+      "evidence": [
+        "acceptance/g0-living-foundation/g0-fourth-wave-acceptance.json"
+      ],
+      "detail": "All command gates passed."
+    }
+  ],
+  "verification": {
+    "generatedAt": "2026-07-24T02:23:13.339Z",
+    "commands": [
+      {
+        "label": "fourth-wave-test",
+        "command": "node --test test/g0-fourth-wave.test.mjs test/g0-third-wave.test.mjs test/plugin-sdk.test.mjs test/agent-tool-policy.test.mjs test/harness-workspace-tools.test.mjs test/diagnostic-redaction.test.mjs test/loop-recovery-integration.test.mjs test/loop-false-success-regression.test.mjs",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "3b19567ed05d880cedd47359b771cadc77340f763644f806f97cef07d7299dcf",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "root-test",
+        "command": "npm test",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "1719781180cb52bb3758114105138a7ad80bf7bb754bf13eb4df850e19bd2b4d",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "frontend-test",
+        "command": "npm test --prefix frontend",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "9009028ab43ec4557d6ed961dc94c36c9f5b2389187e05bb7d38b1dd6f4a5675",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "frontend-build",
+        "command": "npm run build --prefix frontend",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "e73c166b274c4febe069e62dd0134d6ebca6c3ae3a914fdaf8036ebde3c0f3c1",
+        "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
+      },
+      {
+        "label": "root-check",
+        "command": "npm run check",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "1b0434a20ae4dfc351770dd54853eaae4c1f70a5d33df51aac1b28962dfa6c16",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "plugins",
+        "command": "npm run harness:plugins",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "e776b0d161914c82eba6a95eed07c8fa7e3c5880cde52c2e5c4f1aa434d5b1cb",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "hle-production",
+        "command": "npm run harness:loop:production",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "57789c94e8055b84bd654c83f2574ee0cc4bbafa60b3135bacda7e473f5222d7",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "runtime-control",
+        "command": "npm run harness:runtime-control",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "2789f8032d6077ba6aac597b449ec836d16de2220e9c4a6c5c3b59c7493c680e",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "passed": true,
+  "generatedAt": "2026-07-24T02:23:13.339Z"
+}

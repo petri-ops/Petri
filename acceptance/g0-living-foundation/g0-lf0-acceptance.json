@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-LF0",
-  "sourceCommit": "7beae8f740d7a0be574837e18e6140401112666f",
+  "sourceCommit": "00400cbf262ec789ec57a8478c9066a02543f818",
   "baseline": {
     "schemaVersion": 1,
-    "baselineId": "g0-third-wave-establishing-0.4",
-    "baselineVersion": "0.4.0",
+    "baselineId": "g0-fourth-wave-establishing-0.5",
+    "baselineVersion": "0.5.0",
     "lifecycleStatus": "establishing",
     "qualificationStatus": "not_yet_qualified",
     "constitutionId": "biof3-g0-constitution-v1",
-    "manifestDigest": "4bfb56b4504fff315f9fcaf04973c38823d1eb5a0787fa8fb08ba531829f1d2d",
-    "bundleDigest": "22bed2fe0bbb66cf5175416c6f5198386e8ff75fb95a52ca74a83e6e5f159180"
+    "manifestDigest": "48cf51ef8bb279a1266484aaa7930e90e4382544f2bd20f219cc36c3bee61833",
+    "bundleDigest": "16cdd9976bd6bc44bcb630bea85da34a9292892dc0fbae4bbd52d01f0d4442c8"
   },
   "privacy": "no_credentials_urls_headers_raw_provider_responses_or_command_output",
   "startGate": {
@@ -43,7 +43,8 @@
         "core/shared-backend/g0/reproducibility-lab.json",
         "core/shared-backend/g0/adaptive-runtime.json",
         "core/shared-backend/g0/model-memory-cost.json",
-        "core/shared-backend/g0/observable-experience.json"
+        "core/shared-backend/g0/observable-experience.json",
+        "core/shared-backend/g0/resilience-lab.json"
       ],
       "detail": "Constitution, manifest, registry, support and governance resources are internally consistent."
     },
@@ -125,7 +126,7 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-24T02:01:50.400Z",
+    "generatedAt": "2026-07-24T02:19:12.959Z",
     "commands": [
       {
         "label": "g0-lf0-test",
@@ -133,7 +134,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "0861fa2c6e7bfbfbd7228214ae9c7648bba965384953d1aeaa8ddbeaa721930e",
+        "stdoutSha256": "4d5052e745606a2b54225d2476f18b87f8709f75c7bd84bd53a1b38ef9a4e189",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -142,7 +143,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "d4f3095d39535bc4e609c709c11e0d3e84f4c92f8a800f8461e7c27de4a918e9",
+        "stdoutSha256": "8d26aec82e6285b6388c00da0901f1e79c378ae32515fa4aaafdd58d7c368b7d",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -151,7 +152,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "fc704631f76cb0fbdb39b7af5a8528e5fed9de42c6dd54975d43dc7bc2f116fa",
+        "stdoutSha256": "e91f01a6b91500eb3560d149fc92696941a58c3a4213b2cf7874383ecdbcc95d",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -160,7 +161,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "b700f3d5a4fec6aba8e02836652670390c1af750d730ee625ab783424b281f26",
+        "stdoutSha256": "69b40cabc39a8ea1c3107fec3f0d22af71549259a777db181c17712fd40990d3",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -169,7 +170,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "fd93bd392c23a00d8d3eaddd98ee87cae28b6ce58340b0e95eceebcfd69b30ab",
+        "stdoutSha256": "ab3aae14d9a87a421d845f0f561275dbefa4a95e393f93bae5af80a3198b1f1f",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -184,5 +185,5 @@
     ]
   },
   "passed": true,
-  "generatedAt": "2026-07-24T02:01:50.400Z"
+  "generatedAt": "2026-07-24T02:19:12.959Z"
 }

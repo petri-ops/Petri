@@ -6,7 +6,7 @@
 
 `v0.0.1-rc.7` 是当前 OSS 线上版本，已完成代码、自动化、双架构构建、安装候选启动验收和公开更新链核验。Stage 1 UI 产品化、Stage 2 模型层、Stage 3 Harness 与标准流程、Stage 4 首个稳定产品版本及 Harness Phase 7 均已关闭。
 
-当前不默认扩展分析功能。`G0-START`、LF0～LF6 与 LF9 已完成，LF7/LF8 第一波基础契约已建立；当前基线为 `0.4.0 establishing / not_yet_qualified`。下一阶段收口 LF7/LF8 并启动 LF10 Resilience Lab。UI-032 已完成；rc.7 仍是工程候选版，不得描述为 GA。
+当前不默认扩展分析功能。`G0-START` 与 LF0～LF10 已完成；当前基线为 `0.5.0 establishing / not_yet_qualified`。下一阶段启动 LF11 Evolution Pipeline，随后进入 LF12 Baseline Qualification。UI-032 已完成；rc.7 仍是工程候选版，不得描述为 GA。
 
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 已完成的 Scientific Task Contract 工作包记录见 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md)。
@@ -14,9 +14,9 @@
 
 ## 当前 G0 Living Foundation
 
-`G0-START`、LF0～LF6 与 LF9 已通过。0.4.0 基线增加资源调度、模型/压缩/缓存/成本与统一可观察投影；四代 G0 门禁均进入根检查。
+`G0-START` 与 LF0～LF10 已通过。0.5.0 基线增加能力供应链、权限决策和八域韧性实验室；五代 G0 门禁均进入根检查。
 
-G0 仍处于 `establishing`，不得宣称 qualified。下一顺序为 LF7/LF8 生产收口与 LF10；数据契约继续作为 LF7 的真实任务轨。
+G0 仍处于 `establishing`，不得宣称 qualified。下一顺序为 LF11 Evolution Pipeline 与 LF12 Baseline Qualification；数据契约继续作为能力供应链的真实任务轨。
 
 ## 已完成的 P-03 Loop 工程包
 

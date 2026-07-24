@@ -5,7 +5,7 @@
 ## 长期核心指引
 
 1. [`scientific-intelligence-os-vision.md`](./scientific-intelligence-os-vision.md) — BioF3 长期产品愿景、当前定位、阶段跃迁条件与禁止跨阶段建设规则。它约束方向，但不替代当前工作包。
-2. [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) — 当前永久 G0 可信基础层主线；G0-START/LF0～LF6/LF9 已完成，下一步为 LF7/LF8/LF10。
+2. [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) — 当前永久 G0 可信基础层主线；G0-START/LF0～LF10 已完成，下一步为 LF11/LF12。
 3. [`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md) — 已进入 LF3/LF7 依赖链的数据契约与适配基线。
 
 ## 当前开发必读
@@ -21,7 +21,7 @@
 7. [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md) — 已完成的 P-03 Harness Loop Engineering v1（HLE-0～HLE-6）基线。
 8. [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) — 已完成的 HLE 生产 Agent、Validator/Repair、恢复、UI 与真实 SPT-1 验收记录。
 9. [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md) — 已完成的 P-03 真实科学任务翻译与交付工作包计划。
-10. [`../acceptance/g0-living-foundation/g0-third-wave-acceptance.json`](../acceptance/g0-living-foundation/g0-third-wave-acceptance.json) — G0 LF5/LF6/LF9 的脱敏机器验收证据。
+10. [`../acceptance/g0-living-foundation/g0-fourth-wave-acceptance.json`](../acceptance/g0-living-foundation/g0-fourth-wave-acceptance.json) — G0 LF7/LF8/LF10 的脱敏机器验收证据。
 
 ## 当前有效专项规范
 
