@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": 1,
+  "cacheLayers": ["prompt", "provider", "tool", "artifact", "replay"],
+  "cacheFingerprintFields": ["project", "model", "prompt", "tool", "inputs", "parameters", "contract", "environment"],
+  "durableFactKinds": ["task_spec", "public_conclusion", "structured_decision", "action", "tool_result", "artifact_evidence", "limitation"],
+  "compressionTriggers": ["context_pressure", "phase_boundary", "model_switch", "provider_fallback", "long_running_task"],
+  "fallbackRules": ["capability_compatible", "policy_allowed", "audit_recorded", "scientific_gates_unchanged"],
+  "usageDimensions": ["input_tokens", "output_tokens", "cache_read_tokens", "cache_write_tokens", "cost", "currency"],
+  "zeroTolerance": ["credential_in_context_or_cache", "durable_fact_loss", "cross_project_cache_reuse", "silent_provider_fallback"]
+}

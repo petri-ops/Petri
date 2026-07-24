@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": 1,
+  "consumers": ["chat", "summary", "task_detail", "file_tree", "result_view"],
+  "sources": ["truth_projection", "durable_state", "scientific_validation", "drift_report", "runtime_snapshot", "usage_ledger"],
+  "defaultDetail": "public_stage_conclusion",
+  "expandableDetail": ["actions", "tools", "logs", "evidence"],
+  "errorFields": ["reason", "impact", "action", "retryStatus"],
+  "persistenceRules": ["tool_transition", "user_cancel", "failure", "recovery", "application_restart"],
+  "prohibited": ["hidden_reasoning_display", "ui_inferred_completion", "ephemeral_only_stage_conclusion"]
+}

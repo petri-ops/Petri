@@ -41,7 +41,7 @@ function inspect(verification = null, bootstrap = false) {
     statistics: { adjustedP: 0.8, alpha: 0.05, multipleTesting: 'BH', unit: 'effect', direction: 'none' },
   });
   const checks = [
-    item('G0-W2-01', g0.validateG0BaselineBundle().ok && g0.manifest.baselineVersion === '0.3.0' && g0.manifest.qualificationStatus === 'not_yet_qualified', ['core/shared-backend/g0/baseline-manifest.json'], 'Second-wave establishing baseline is internally consistent and not qualified.'),
+    item('G0-W2-01', g0.validateG0BaselineBundle().ok && Number(g0.manifest.baselineVersion.split('.')[1]) >= 3 && g0.manifest.qualificationStatus === 'not_yet_qualified', ['core/shared-backend/g0/baseline-manifest.json'], 'Compatible baseline retains second-wave contracts and remains not qualified.'),
     item('G0-W2-02', science.validateScientificAccuracyContract().ok && science.contract.requiredChecks.length >= 8, ['core/shared-backend/g0/scientific-accuracy.json'], 'Scientific applicability, assumptions and statistical semantics are machine contracts.'),
     item('G0-W2-03', negative.outcome === 'not_significant' && negative.truthStatus === 'passed' && negative.blocking === false, ['core/shared-backend/g0-scientific-accuracy.js'], 'Non-significance is a valid bounded conclusion, not failure.'),
     item('G0-W2-04', science.contract.prohibited.includes('retry_until_significant') && science.contract.prohibited.includes('threshold_tuning_for_expected_result'), ['core/shared-backend/g0/scientific-accuracy.json'], 'Scientific integrity prohibitions are explicit.'),
@@ -86,6 +86,7 @@ function runCommands() {
         G0_LF0_BOOTSTRAP: '1',
         G0_FIRST_WAVE_BOOTSTRAP: '1',
         G0_SECOND_WAVE_BOOTSTRAP: '1',
+        G0_THIRD_WAVE_BOOTSTRAP: '1',
       },
     });
     return {

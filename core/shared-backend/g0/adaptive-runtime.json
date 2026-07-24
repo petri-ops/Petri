@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": 1,
+  "resourceDimensions": ["cpu", "memory", "disk", "process", "queue", "temporary_space"],
+  "actions": ["run", "queue", "chunk", "pause", "cancel", "resume", "block"],
+  "safeAdjustments": ["concurrency", "chunk_size", "queue_priority", "temporary_location", "cache_strategy"],
+  "scientificBoundary": "A runtime adjustment that changes method, parameters, random seed semantics or sample inclusion is a scientific design change, not resource repair.",
+  "terminalControlRules": {
+    "pause": "checkpoint_before_stop",
+    "cancel": "preserve_audit_and_partial_artifact_truth",
+    "resume": "reconcile_durable_state_before_execution"
+  },
+  "readinessRequired": ["runtime", "packages", "plugin", "disk", "memory"]
+}

@@ -79,6 +79,7 @@ function runCommands() {
         G0_FIRST_WAVE_BOOTSTRAP: '1',
         G0_LF0_BOOTSTRAP: '1',
         G0_SECOND_WAVE_BOOTSTRAP: '1',
+        G0_THIRD_WAVE_BOOTSTRAP: '1',
       },
     });
     return {

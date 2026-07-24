@@ -13,6 +13,9 @@ const capabilitySupplyChain = require('./g0/capability-supply-chain.json');
 const securityPermissionMatrix = require('./g0/security-permission-matrix.json');
 const scientificAccuracy = require('./g0/scientific-accuracy.json');
 const reproducibilityLab = require('./g0/reproducibility-lab.json');
+const adaptiveRuntime = require('./g0/adaptive-runtime.json');
+const modelMemoryCost = require('./g0/model-memory-cost.json');
+const observableExperience = require('./g0/observable-experience.json');
 
 const LEGACY_BASELINE_ID = 'legacy-unversioned';
 const PROJECT_BASELINE_RECORD_VERSION = 1;
@@ -40,6 +43,9 @@ function deepFreeze(value) {
   securityPermissionMatrix,
   scientificAccuracy,
   reproducibilityLab,
+  adaptiveRuntime,
+  modelMemoryCost,
+  observableExperience,
 ].forEach(deepFreeze);
 
 function canonicalStringify(value) {
@@ -73,6 +79,9 @@ function currentContractVersions() {
   const durableState = require('./g0-durable-state');
   const scientificAccuracyModule = require('./g0-scientific-accuracy');
   const reproducibilityLabModule = require('./g0-reproducibility-lab');
+  const adaptiveRuntimeModule = require('./g0-adaptive-runtime');
+  const modelMemoryCostModule = require('./g0-model-memory-cost');
+  const observableExperienceModule = require('./g0-observable-experience');
   const artifactProfileVersions = Object.values(artifactProfiles.ARTIFACT_PROFILES || {})
     .map((profile) => Number(profile.schemaVersion))
     .filter(Number.isInteger);
@@ -99,6 +108,9 @@ function currentContractVersions() {
     securityPermissionMatrix: require('./g0/security-permission-matrix.json').contractVersion,
     scientificAccuracy: scientificAccuracyModule.SCIENTIFIC_ACCURACY_VERSION,
     reproducibilityLab: reproducibilityLabModule.REPRODUCIBILITY_LAB_VERSION,
+    adaptiveRuntime: adaptiveRuntimeModule.ADAPTIVE_RUNTIME_VERSION,
+    modelMemoryCost: modelMemoryCostModule.MODEL_MEMORY_COST_VERSION,
+    observableExperience: observableExperienceModule.OBSERVABLE_EXPERIENCE_VERSION,
   };
 }
 
@@ -116,6 +128,9 @@ function getCurrentG0Baseline() {
     securityPermissionMatrix,
     scientificAccuracy,
     reproducibilityLab,
+    adaptiveRuntime,
+    modelMemoryCost,
+    observableExperience,
   });
   return Object.freeze({
     schemaVersion: manifest.schemaVersion,
@@ -161,6 +176,9 @@ function validateG0BaselineBundle() {
   if (securityPermissionMatrix.schemaVersion !== 1) issues.push('security_permission_matrix_schema_version_unsupported');
   if (scientificAccuracy.schemaVersion !== 1) issues.push('scientific_accuracy_schema_version_unsupported');
   if (reproducibilityLab.schemaVersion !== 1) issues.push('reproducibility_lab_schema_version_unsupported');
+  if (adaptiveRuntime.schemaVersion !== 1) issues.push('adaptive_runtime_schema_version_unsupported');
+  if (modelMemoryCost.schemaVersion !== 1) issues.push('model_memory_cost_schema_version_unsupported');
+  if (observableExperience.schemaVersion !== 1) issues.push('observable_experience_schema_version_unsupported');
   if (manifest.baselineId !== registry.currentBaselineId) issues.push('registry_current_baseline_mismatch');
   if (manifest.baselineId !== supportMatrix.baselineId) issues.push('support_matrix_baseline_mismatch');
   if (manifest.constitutionId !== constitution.constitutionId) issues.push('constitution_id_mismatch');
@@ -326,6 +344,9 @@ module.exports = {
   securityPermissionMatrix,
   scientificAccuracy,
   reproducibilityLab,
+  adaptiveRuntime,
+  modelMemoryCost,
+  observableExperience,
   canonicalStringify,
   sha256,
   parseMajor,

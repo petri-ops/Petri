@@ -69,7 +69,7 @@ const taskRecord = {
 test('second-wave baseline remains establishing and exposes LF3/LF4 contracts', () => {
   const validation = g0.validateG0BaselineBundle();
   assert.equal(validation.ok, true, validation.issues.join('\n'));
-  assert.equal(g0.manifest.baselineVersion, '0.3.0');
+  assert.ok(Number(g0.manifest.baselineVersion.split('.')[1]) >= 3);
   assert.equal(g0.manifest.qualificationStatus, 'not_yet_qualified');
   assert.equal(g0.scientificAccuracy.contractVersion, 1);
   assert.equal(g0.reproducibilityLab.contractVersion, 1);

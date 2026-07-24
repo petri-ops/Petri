@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "baselineId": "g0-second-wave-establishing-0.3",
-  "baselineVersion": "0.3.0",
+  "baselineId": "g0-third-wave-establishing-0.4",
+  "baselineVersion": "0.4.0",
   "lifecycleStatus": "establishing",
   "qualificationStatus": "not_yet_qualified",
   "constitutionId": "biof3-g0-constitution-v1",
@@ -29,7 +29,10 @@
     "capabilitySupplyChain": 1,
     "securityPermissionMatrix": 1,
     "scientificAccuracy": 1,
-    "reproducibilityLab": 1
+    "reproducibilityLab": 1,
+    "adaptiveRuntime": 1,
+    "modelMemoryCost": 1,
+    "observableExperience": 1
   },
   "database": {
     "engine": "sqlite",
@@ -54,7 +57,10 @@
     "capabilitySupplyChain": "core/shared-backend/g0/capability-supply-chain.json",
     "securityPermissionMatrix": "core/shared-backend/g0/security-permission-matrix.json",
     "scientificAccuracy": "core/shared-backend/g0/scientific-accuracy.json",
-    "reproducibilityLab": "core/shared-backend/g0/reproducibility-lab.json"
+    "reproducibilityLab": "core/shared-backend/g0/reproducibility-lab.json",
+    "adaptiveRuntime": "core/shared-backend/g0/adaptive-runtime.json",
+    "modelMemoryCost": "core/shared-backend/g0/model-memory-cost.json",
+    "observableExperience": "core/shared-backend/g0/observable-experience.json"
   },
   "evidenceRefs": [
     "acceptance/harness-loop/production/baseline.json",
@@ -62,6 +68,7 @@
     "acceptance/g0-living-foundation/g0-start-audit.json",
     "acceptance/g0-living-foundation/g0-lf0-acceptance.json",
     "acceptance/g0-living-foundation/g0-first-wave-acceptance.json",
-    "acceptance/g0-living-foundation/g0-second-wave-acceptance.json"
+    "acceptance/g0-living-foundation/g0-second-wave-acceptance.json",
+    "acceptance/g0-living-foundation/g0-third-wave-acceptance.json"
   ]
 }
