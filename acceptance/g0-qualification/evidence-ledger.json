@@ -1,0 +1,553 @@
+{
+  "schemaVersion": 1,
+  "subjectBaselineId": "g0-fifth-wave-establishing-0.6",
+  "subjectBaselineVersion": "0.6.0",
+  "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
+  "sourceCommit": "225fbb4c48b7bcd7bfcbd88bb4a718d11b7a101d",
+  "privacy": "indexes_digests_counts_and_bounded_status_only_no_raw_data_credentials_urls_or_absolute_paths",
+  "entries": [
+    {
+      "evidenceId": "current-constitution_baseline",
+      "evidenceClass": "constitution_baseline",
+      "schemaVersion": 1,
+      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
+      "platform": "macos-arm64",
+      "architecture": "arm64",
+      "appMode": "qualification-harness",
+      "runtimeSummary": null,
+      "providerSummary": null,
+      "commandOrEntry": "npm run g0:lf0",
+      "generatedAt": "2026-07-24T07:31:04.986Z",
+      "freshnessStatus": "fresh",
+      "counts": {
+        "checksPassed": 10,
+        "checksTotal": 10,
+        "commandsPassed": 6,
+        "commandsTotal": 6
+      },
+      "hashes": {
+        "reportSha256": "983f8a70e32193b9886e872eb138caec818bcbb16cf2d2c0e6a7586e91b5d2a7"
+      },
+      "boundedResult": "passed",
+      "privacyClassification": "no_credentials_urls_headers_raw_provider_responses_or_command_output",
+      "applicableClaims": [],
+      "status": "passed",
+      "blockerRefs": [],
+      "integrity": "valid",
+      "integrityIssues": []
+    },
+    {
+      "evidenceId": "current-migration_upgrade",
+      "evidenceClass": "migration_upgrade",
+      "schemaVersion": 1,
+      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
+      "platform": "macos-arm64",
+      "architecture": "arm64",
+      "appMode": "qualification-harness",
+      "runtimeSummary": null,
+      "providerSummary": null,
+      "commandOrEntry": "npm run g0:lf0",
+      "generatedAt": "2026-07-24T07:31:04.986Z",
+      "freshnessStatus": "fresh",
+      "counts": {
+        "checksPassed": 10,
+        "checksTotal": 10,
+        "commandsPassed": 6,
+        "commandsTotal": 6
+      },
+      "hashes": {
+        "reportSha256": "983f8a70e32193b9886e872eb138caec818bcbb16cf2d2c0e6a7586e91b5d2a7"
+      },
+      "boundedResult": "passed",
+      "privacyClassification": "no_credentials_urls_headers_raw_provider_responses_or_command_output",
+      "applicableClaims": [],
+      "status": "passed",
+      "blockerRefs": [],
+      "integrity": "valid",
+      "integrityIssues": []
+    },
+    {
+      "evidenceId": "current-truth_lattice",
+      "evidenceClass": "truth_lattice",
+      "schemaVersion": 1,
+      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
+      "platform": "macos-arm64",
+      "architecture": "arm64",
+      "appMode": "qualification-harness",
+      "runtimeSummary": null,
+      "providerSummary": null,
+      "commandOrEntry": "npm run g0:first-wave",
+      "generatedAt": "2026-07-24T07:32:15.269Z",
+      "freshnessStatus": "fresh",
+      "counts": {
+        "checksPassed": 12,
+        "checksTotal": 12,
+        "commandsPassed": 7,
+        "commandsTotal": 7
+      },
+      "hashes": {
+        "reportSha256": "affe166a1113be3a1a19009a402d989d12f261564f8e91aa771ea77d05ecf369"
+      },
+      "boundedResult": "passed",
+      "privacyClassification": "status_and_output_digests_only_no_raw_output_credentials_headers_urls_or_provider_responses",
+      "applicableClaims": [],
+      "status": "passed",
+      "blockerRefs": [],
+      "integrity": "valid",
+      "integrityIssues": []
+    },
+    {
+      "evidenceId": "current-durable_state",
+      "evidenceClass": "durable_state",
+      "schemaVersion": 1,
+      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
+      "platform": "macos-arm64",
+      "architecture": "arm64",
+      "appMode": "qualification-harness",
+      "runtimeSummary": null,
+      "providerSummary": null,
+      "commandOrEntry": "npm run g0:first-wave",
+      "generatedAt": "2026-07-24T07:32:15.269Z",
+      "freshnessStatus": "fresh",
+      "counts": {
+        "checksPassed": 12,
+        "checksTotal": 12,
+        "commandsPassed": 7,
+        "commandsTotal": 7
+      },
+      "hashes": {
+        "reportSha256": "affe166a1113be3a1a19009a402d989d12f261564f8e91aa771ea77d05ecf369"
+      },
+      "boundedResult": "passed",
+      "privacyClassification": "status_and_output_digests_only_no_raw_output_credentials_headers_urls_or_provider_responses",
+      "applicableClaims": [],
+      "status": "passed",
+      "blockerRefs": [],
+      "integrity": "valid",
+      "integrityIssues": []
+    },
+    {
+      "evidenceId": "current-scientific_accuracy",
+      "evidenceClass": "scientific_accuracy",
+      "schemaVersion": 1,
+      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
+      "platform": "macos-arm64",
+      "architecture": "arm64",
+      "appMode": "qualification-harness",
+      "runtimeSummary": null,
+      "providerSummary": null,
+      "commandOrEntry": "npm run g0:second-wave",
+      "generatedAt": "2026-07-24T07:33:25.623Z",
+      "freshnessStatus": "fresh",
+      "counts": {
+        "checksPassed": 12,
+        "checksTotal": 12,
+        "commandsPassed": 7,
+        "commandsTotal": 7
+      },
+      "hashes": {
+        "reportSha256": "46295c9ebb42c2d8c1b60338ee4b6343af910a38f6b324f75cce82550ec541ed"
+      },
+      "boundedResult": "passed",
+      "privacyClassification": "status_counts_and_output_digests_only_no_raw_data_credentials_headers_urls_or_provider_responses",
+      "applicableClaims": [],
+      "status": "passed",
+      "blockerRefs": [],
+      "integrity": "valid",
+      "integrityIssues": []
+    },
+    {
+      "evidenceId": "current-replay_drift",
+      "evidenceClass": "replay_drift",
+      "schemaVersion": 1,
+      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
+      "platform": "macos-arm64",
+      "architecture": "arm64",
+      "appMode": "qualification-harness",
+      "runtimeSummary": null,
+      "providerSummary": null,
+      "commandOrEntry": "npm run g0:second-wave",
+      "generatedAt": "2026-07-24T07:33:25.623Z",
+      "freshnessStatus": "fresh",
+      "counts": {
+        "checksPassed": 12,
+        "checksTotal": 12,
+        "commandsPassed": 7,
+        "commandsTotal": 7
+      },
+      "hashes": {
+        "reportSha256": "46295c9ebb42c2d8c1b60338ee4b6343af910a38f6b324f75cce82550ec541ed"
+      },
+      "boundedResult": "passed",
+      "privacyClassification": "status_counts_and_output_digests_only_no_raw_data_credentials_headers_urls_or_provider_responses",
+      "applicableClaims": [],
+      "status": "passed",
+      "blockerRefs": [],
+      "integrity": "valid",
+      "integrityIssues": []
+    },
+    {
+      "evidenceId": "current-runtime_resource",
+      "evidenceClass": "runtime_resource",
+      "schemaVersion": 1,
+      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
+      "platform": "macos-arm64",
+      "architecture": "arm64",
+      "appMode": "qualification-harness",
+      "runtimeSummary": null,
+      "providerSummary": null,
+      "commandOrEntry": "npm run g0:third-wave",
+      "generatedAt": "2026-07-24T07:34:34.096Z",
+      "freshnessStatus": "fresh",
+      "counts": {
+        "checksPassed": 12,
+        "checksTotal": 12,
+        "commandsPassed": 7,
+        "commandsTotal": 7
+      },
+      "hashes": {
+        "reportSha256": "d00526df996d77a7a339980956a78866ab798e851a84647c3062830e76080e1e"
+      },
+      "boundedResult": "passed",
+      "privacyClassification": "digests_and_counts_only_no_raw_data_credentials_urls_or_provider_responses",
+      "applicableClaims": [],
+      "status": "passed",
+      "blockerRefs": [],
+      "integrity": "valid",
+      "integrityIssues": []
+    },
+    {
+      "evidenceId": "current-model_memory_cost",
+      "evidenceClass": "model_memory_cost",
+      "schemaVersion": 1,
+      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
+      "platform": "macos-arm64",
+      "architecture": "arm64",
+      "appMode": "qualification-harness",
+      "runtimeSummary": null,
+      "providerSummary": null,
+      "commandOrEntry": "npm run g0:third-wave",
+      "generatedAt": "2026-07-24T07:34:34.096Z",
+      "freshnessStatus": "fresh",
+      "counts": {
+        "checksPassed": 12,
+        "checksTotal": 12,
+        "commandsPassed": 7,
+        "commandsTotal": 7
+      },
+      "hashes": {
+        "reportSha256": "d00526df996d77a7a339980956a78866ab798e851a84647c3062830e76080e1e"
+      },
+      "boundedResult": "passed",
+      "privacyClassification": "digests_and_counts_only_no_raw_data_credentials_urls_or_provider_responses",
+      "applicableClaims": [],
+      "status": "passed",
+      "blockerRefs": [],
+      "integrity": "valid",
+      "integrityIssues": []
+    },
+    {
+      "evidenceId": "current-observable_experience",
+      "evidenceClass": "observable_experience",
+      "schemaVersion": 1,
+      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
+      "platform": "macos-arm64",
+      "architecture": "arm64",
+      "appMode": "qualification-harness",
+      "runtimeSummary": null,
+      "providerSummary": null,
+      "commandOrEntry": "npm run g0:third-wave",
+      "generatedAt": "2026-07-24T07:34:34.096Z",
+      "freshnessStatus": "fresh",
+      "counts": {
+        "checksPassed": 12,
+        "checksTotal": 12,
+        "commandsPassed": 7,
+        "commandsTotal": 7
+      },
+      "hashes": {
+        "reportSha256": "d00526df996d77a7a339980956a78866ab798e851a84647c3062830e76080e1e"
+      },
+      "boundedResult": "passed",
+      "privacyClassification": "digests_and_counts_only_no_raw_data_credentials_urls_or_provider_responses",
+      "applicableClaims": [],
+      "status": "passed",
+      "blockerRefs": [],
+      "integrity": "valid",
+      "integrityIssues": []
+    },
+    {
+      "evidenceId": "current-plugin_supply_chain",
+      "evidenceClass": "plugin_supply_chain",
+      "schemaVersion": 1,
+      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
+      "platform": "macos-arm64",
+      "architecture": "arm64",
+      "appMode": "qualification-harness",
+      "runtimeSummary": null,
+      "providerSummary": null,
+      "commandOrEntry": "npm run g0:fourth-wave",
+      "generatedAt": "2026-07-24T07:35:45.627Z",
+      "freshnessStatus": "fresh",
+      "counts": {
+        "checksPassed": 12,
+        "checksTotal": 12,
+        "commandsPassed": 8,
+        "commandsTotal": 8
+      },
+      "hashes": {
+        "reportSha256": "78914ec27a916635c9645b5952ef1f5c2b59994ad1b264526199451a98d6f09a"
+      },
+      "boundedResult": "passed",
+      "privacyClassification": "digests_and_counts_only_no_raw_data_credentials_urls_or_provider_responses",
+      "applicableClaims": [],
+      "status": "passed",
+      "blockerRefs": [],
+      "integrity": "valid",
+      "integrityIssues": []
+    },
+    {
+      "evidenceId": "current-security_permission",
+      "evidenceClass": "security_permission",
+      "schemaVersion": 1,
+      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
+      "platform": "macos-arm64",
+      "architecture": "arm64",
+      "appMode": "qualification-harness",
+      "runtimeSummary": null,
+      "providerSummary": null,
+      "commandOrEntry": "npm run g0:fourth-wave",
+      "generatedAt": "2026-07-24T07:35:45.627Z",
+      "freshnessStatus": "fresh",
+      "counts": {
+        "checksPassed": 12,
+        "checksTotal": 12,
+        "commandsPassed": 8,
+        "commandsTotal": 8
+      },
+      "hashes": {
+        "reportSha256": "78914ec27a916635c9645b5952ef1f5c2b59994ad1b264526199451a98d6f09a"
+      },
+      "boundedResult": "passed",
+      "privacyClassification": "digests_and_counts_only_no_raw_data_credentials_urls_or_provider_responses",
+      "applicableClaims": [],
+      "status": "passed",
+      "blockerRefs": [],
+      "integrity": "valid",
+      "integrityIssues": []
+    },
+    {
+      "evidenceId": "current-resilience_fault_matrix",
+      "evidenceClass": "resilience_fault_matrix",
+      "schemaVersion": 1,
+      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
+      "platform": "macos-arm64",
+      "architecture": "arm64",
+      "appMode": "qualification-harness",
+      "runtimeSummary": null,
+      "providerSummary": null,
+      "commandOrEntry": "npm run g0:fourth-wave",
+      "generatedAt": "2026-07-24T07:35:45.627Z",
+      "freshnessStatus": "fresh",
+      "counts": {
+        "checksPassed": 12,
+        "checksTotal": 12,
+        "commandsPassed": 8,
+        "commandsTotal": 8
+      },
+      "hashes": {
+        "reportSha256": "78914ec27a916635c9645b5952ef1f5c2b59994ad1b264526199451a98d6f09a"
+      },
+      "boundedResult": "passed",
+      "privacyClassification": "digests_and_counts_only_no_raw_data_credentials_urls_or_provider_responses",
+      "applicableClaims": [],
+      "status": "passed",
+      "blockerRefs": [],
+      "integrity": "valid",
+      "integrityIssues": []
+    },
+    {
+      "evidenceId": "historical-real-provider-matrix",
+      "evidenceClass": "real_provider",
+      "schemaVersion": 1,
+      "sourceCommit": "d531300a6fac0eaae151c1dc19db92d7fc31753e",
+      "baselineDigest": "legacy-unbound",
+      "platform": "macos-arm64",
+      "architecture": "arm64",
+      "appMode": "historical-real-evidence",
+      "runtimeSummary": null,
+      "providerSummary": {
+        "passedProviders": 2,
+        "totalProviders": 2
+      },
+      "commandOrEntry": "npm run harness:provider-eval",
+      "generatedAt": "2026-07-23T20:21:02.000Z",
+      "freshnessStatus": "stale",
+      "counts": {
+        "passedProviders": 2,
+        "totalProviders": 2
+      },
+      "hashes": {
+        "reportSha256": "0cd6002c8afaa50ae2bb68ba91d76ace3c1bf90646bfe75601772cd24477951e"
+      },
+      "boundedResult": "passed",
+      "privacyClassification": "historical_bounded_evidence_requires_current_baseline_replay",
+      "applicableClaims": [],
+      "status": "passed",
+      "blockerRefs": [
+        "current_baseline_replay_required:real_provider"
+      ],
+      "integrity": "valid",
+      "integrityIssues": []
+    },
+    {
+      "evidenceId": "historical-packaged-ui-smoke",
+      "evidenceClass": "packaged_app",
+      "schemaVersion": 1,
+      "sourceCommit": "07f468ea69ce4928008fc151c62e6f649a3b76b9",
+      "baselineDigest": "legacy-unbound",
+      "platform": "macos-arm64",
+      "architecture": "arm64",
+      "appMode": "historical-real-evidence",
+      "runtimeSummary": null,
+      "providerSummary": {
+        "historicalMatrix": 1
+      },
+      "commandOrEntry": "manual packaged macOS UI smoke",
+      "generatedAt": "2026-07-21T03:36:43.000Z",
+      "freshnessStatus": "stale",
+      "counts": {
+        "historicalMatrix": 1
+      },
+      "hashes": {
+        "reportSha256": "c9d347b2254cf29dc8bffd26d82e4e2bb00e05d0a2f10ee5b1d49d4849bafd15"
+      },
+      "boundedResult": "degraded",
+      "privacyClassification": "historical_bounded_evidence_requires_current_baseline_replay",
+      "applicableClaims": [],
+      "status": "degraded",
+      "blockerRefs": [
+        "current_baseline_replay_required:packaged_app"
+      ],
+      "integrity": "valid",
+      "integrityIssues": []
+    },
+    {
+      "evidenceId": "historical-visual-state-matrix",
+      "evidenceClass": "visual_state_convergence",
+      "schemaVersion": 1,
+      "sourceCommit": "07f468ea69ce4928008fc151c62e6f649a3b76b9",
+      "baselineDigest": "legacy-unbound",
+      "platform": "macos-arm64",
+      "architecture": "arm64",
+      "appMode": "historical-real-evidence",
+      "runtimeSummary": null,
+      "providerSummary": {
+        "historicalMatrix": 1
+      },
+      "commandOrEntry": "manual renderer visual matrix",
+      "generatedAt": "2026-07-21T03:36:43.000Z",
+      "freshnessStatus": "stale",
+      "counts": {
+        "historicalMatrix": 1
+      },
+      "hashes": {
+        "reportSha256": "c9d347b2254cf29dc8bffd26d82e4e2bb00e05d0a2f10ee5b1d49d4849bafd15"
+      },
+      "boundedResult": "passed",
+      "privacyClassification": "historical_bounded_evidence_requires_current_baseline_replay",
+      "applicableClaims": [],
+      "status": "passed",
+      "blockerRefs": [
+        "current_baseline_replay_required:visual_state_convergence"
+      ],
+      "integrity": "valid",
+      "integrityIssues": []
+    }
+  ],
+  "classStatus": {
+    "constitution_baseline": "satisfied",
+    "truth_lattice": "satisfied",
+    "durable_state": "satisfied",
+    "scientific_accuracy": "satisfied",
+    "replay_drift": "satisfied",
+    "runtime_resource": "satisfied",
+    "model_memory_cost": "satisfied",
+    "plugin_supply_chain": "satisfied",
+    "security_permission": "satisfied",
+    "observable_experience": "satisfied",
+    "resilience_fault_matrix": "satisfied",
+    "migration_upgrade": "satisfied",
+    "real_provider": "stale",
+    "packaged_app": "degraded",
+    "soak_endurance": "missing",
+    "visual_state_convergence": "stale"
+  },
+  "zeroToleranceObservations": [
+    {
+      "id": "ZT-01",
+      "violations": 0,
+      "evidenceRef": "current-truth_lattice"
+    },
+    {
+      "id": "ZT-02",
+      "violations": 0,
+      "evidenceRef": "current-durable_state"
+    },
+    {
+      "id": "ZT-03",
+      "violations": 0,
+      "evidenceRef": "current-scientific_accuracy"
+    },
+    {
+      "id": "ZT-04",
+      "violations": 0,
+      "evidenceRef": "current-security_permission"
+    },
+    {
+      "id": "ZT-05",
+      "violations": 0,
+      "evidenceRef": "qualification-privacy-scan"
+    },
+    {
+      "id": "ZT-06",
+      "violations": 0,
+      "evidenceRef": "current-security_permission"
+    },
+    {
+      "id": "ZT-07",
+      "violations": 0,
+      "evidenceRef": "current-model_memory_cost"
+    },
+    {
+      "id": "ZT-08",
+      "violations": 0,
+      "evidenceRef": "current-migration_upgrade"
+    },
+    {
+      "id": "ZT-09",
+      "violations": 0,
+      "evidenceRef": "current-security_permission"
+    },
+    {
+      "id": "ZT-10",
+      "violations": 0,
+      "evidenceRef": "current-constitution_baseline"
+    }
+  ],
+  "zeroToleranceIntegrityIssues": [],
+  "invalidEntryCount": 0,
+  "ledgerHash": "4cc724239e13a23257221526ebe5d2a7e06be3fb6d25f55ada64e1af37bcb1bd"
+}

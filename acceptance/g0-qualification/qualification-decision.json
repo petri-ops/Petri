@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "decisionPolicyVersion": 1,
+  "subjectBaselineId": "g0-fifth-wave-establishing-0.6",
+  "subjectBaselineVersion": "0.6.0",
+  "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
+  "sourceCommit": "225fbb4c48b7bcd7bfcbd88bb4a718d11b7a101d",
+  "state": "not_yet_qualified",
+  "satisfiedClaims": [
+    "capability-supply-chain-governed",
+    "deterministic-scientific-truth",
+    "permission-boundary-enforced",
+    "runtime-resource-adaptive"
+  ],
+  "limitedClaims": [
+    "local-file-sqlite-durability",
+    "macos-arm64-packaged-local-execution",
+    "real-provider-science-neutral"
+  ],
+  "unsupportedClaims": [],
+  "blockers": [
+    "mandatory_evidence_degraded:packaged_app",
+    "mandatory_evidence_missing:soak_endurance",
+    "mandatory_evidence_stale:real_provider",
+    "mandatory_evidence_stale:visual_state_convergence",
+    "support_claim_unsatisfied:local-file-sqlite-durability",
+    "support_claim_unsatisfied:macos-arm64-packaged-local-execution",
+    "support_claim_unsatisfied:real-provider-science-neutral"
+  ],
+  "zeroToleranceViolations": [],
+  "requiredRequalification": [
+    "baseline_bundle_digest_change",
+    "new_g0_major",
+    "support_scope_expansion",
+    "evidence_expiry",
+    "reintroduced_incident"
+  ],
+  "modelMayDecide": false,
+  "decisionHash": "ee8bd1a5b98ae877fb66197969206bc3f7c46539ff1a713d6ed3fa2e5599b6d0"
+}

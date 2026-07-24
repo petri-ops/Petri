@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": 1,
+  "decisionPolicyVersion": 1,
+  "qualificationId": "g0-baseline-v1-qualification",
+  "subjectBaselineId": "g0-fifth-wave-establishing-0.6",
+  "subjectBaselineVersion": "0.6.0",
+  "subjectLifecycleStatus": "establishing",
+  "subjectQualificationStatus": "not_yet_qualified",
+  "manifestDigest": "0c6dbb71acc20e18e4952c2a62c23a9d5655a5a0326dbdb45a8549d75dfd02cf",
+  "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
+  "qualificationScope": {
+    "platform": "macos-arm64",
+    "application": "packaged_desktop_app",
+    "storage": "local_files_plus_sqlite",
+    "runtimes": [
+      "node-local",
+      "r-local",
+      "python-local"
+    ],
+    "providers": "deterministic_mock_plus_at_least_two_real_providers",
+    "scientificTasks": "conformance_admitted_real_task_tracks_only",
+    "permissions": [
+      "read",
+      "full",
+      "developer"
+    ],
+    "boundary": "A single platform, provider or task success never infers qualification of any other scope."
+  },
+  "requiredEvidenceClasses": [
+    {
+      "id": "constitution_baseline",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic"
+    },
+    {
+      "id": "truth_lattice",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic"
+    },
+    {
+      "id": "durable_state",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic"
+    },
+    {
+      "id": "scientific_accuracy",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic"
+    },
+    {
+      "id": "replay_drift",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic"
+    },
+    {
+      "id": "runtime_resource",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic"
+    },
+    {
+      "id": "model_memory_cost",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic"
+    },
+    {
+      "id": "plugin_supply_chain",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic"
+    },
+    {
+      "id": "security_permission",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic"
+    },
+    {
+      "id": "observable_experience",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic"
+    },
+    {
+      "id": "resilience_fault_matrix",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic"
+    },
+    {
+      "id": "migration_upgrade",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic"
+    },
+    {
+      "id": "real_provider",
+      "enforcement": "mandatory",
+      "evidenceMode": "real_execution"
+    },
+    {
+      "id": "packaged_app",
+      "enforcement": "mandatory",
+      "evidenceMode": "real_execution"
+    },
+    {
+      "id": "soak_endurance",
+      "enforcement": "mandatory",
+      "evidenceMode": "real_execution"
+    },
+    {
+      "id": "visual_state_convergence",
+      "enforcement": "mandatory",
+      "evidenceMode": "real_execution"
+    }
+  ],
+  "zeroToleranceInvariants": [
+    "ZT-01",
+    "ZT-02",
+    "ZT-03",
+    "ZT-04",
+    "ZT-05",
+    "ZT-06",
+    "ZT-07",
+    "ZT-08",
+    "ZT-09",
+    "ZT-10"
+  ],
+  "supportClaims": [
+    "macos-arm64-packaged-local-execution",
+    "local-file-sqlite-durability",
+    "deterministic-scientific-truth",
+    "real-provider-science-neutral",
+    "runtime-resource-adaptive",
+    "capability-supply-chain-governed",
+    "permission-boundary-enforced"
+  ],
+  "excludedClaims": [
+    "windows-support",
+    "linux-support",
+    "macos-x64-support",
+    "cloud-or-postgres-storage",
+    "arbitrary-omics-auto-support",
+    "multi-agent-orchestration",
+    "result-studio-editing"
+  ],
+  "freshnessPolicy": {
+    "rule": "An evidence entry is fresh only when its baselineDigest equals the subject baseline bundleDigest and its sourceCommit is an ancestor of the qualification commit.",
+    "unboundReal": "Real-execution evidence that predates or is not bound to the subject baseline bundleDigest is treated as degraded, never as satisfied.",
+    "requalificationTriggers": [
+      "baseline_bundle_digest_change",
+      "new_g0_major",
+      "support_scope_expansion",
+      "evidence_expiry",
+      "reintroduced_incident"
+    ]
+  },
+  "sourceCommit": "225fbb4c48b7bcd7bfcbd88bb4a718d11b7a101d",
+  "generatedAt": "2026-07-24T10:36:58.482Z",
+  "manifestObjectHash": "f4baa827a1bf679381012c2043455a395798c52ccea48ce246ed4d0b210ed600"
+}
