@@ -2,6 +2,13 @@
 
 最后更新：2026-07-24
 
+## 项目治理入口
+
+1. [`document-governance.md`](./document-governance.md) — 计划、Goal、Handoff、证据、状态与归档的生命周期规范。
+2. [`worktree-governance.md`](./worktree-governance.md) — Worktree 启动门、所有权、环境隔离、合并与清理纪律。
+3. [`DOC-REGISTRY.json`](./DOC-REGISTRY.json) — 非归档 Markdown 的机器可读目录与 canonical truth 注册表。
+4. [`AUDIT-LOG.md`](./AUDIT-LOG.md) — 每次 Agent 会话优先处理的审计广播台。
+
 ## 长期核心指引
 
 1. [`scientific-intelligence-os-vision.md`](./scientific-intelligence-os-vision.md) — BioF3 长期产品愿景、当前定位、阶段跃迁条件与禁止跨阶段建设规则。它约束方向，但不替代当前工作包。
@@ -31,6 +38,7 @@
 - [`codex-style-workbench-direction.md`](./codex-style-workbench-direction.md) — UI 产品方向。
 - [`macos-oss-auto-update.md`](./macos-oss-auto-update.md) — macOS 构建、OSS 发布与更新。
 - [`plugin-artifact-schema.md`](./plugin-artifact-schema.md) — Plugin/Artifact 兼容契约。
+- [`third-party-plugin-guide.md`](./third-party-plugin-guide.md) — 第三方插件结构、环境、验收与发布规范。
 - [`harness-engine-spec.md`](./harness-engine-spec.md) — 已完成 Harness 基础技术规范，Stage 3 继续复用。
 - [`harness-roadmap.md`](./harness-roadmap.md) — Harness Phase 1–6 完成记录与 Stage 3 技术参考。
 - [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md) — Stage 4 RC 之后的通用基础工具、策略控制面、Trace 与跨工具接手计划。
@@ -54,6 +62,9 @@
 
 ## 维护规则
 
+- 创建计划、阶段收口、Handoff、归档或 Worktree 操作时使用 `$biof3-project-governance`。
+- 新建非归档 Markdown 必须同步登记 `DOC-REGISTRY.json` 并通过 `npm run docs:check`。
+- 工作包完成前运行 `npm run docs:reconcile`，逐项判断保留、替代或归档，不自动批量搬迁。
 - 当前状态只写 handoff/next steps，不继续向其中追加长篇历史。
 - 阶段顺序只写 v1 roadmap。
 - UI 问题只写 UI audit。

@@ -1,0 +1,359 @@
+{
+  "schemaVersion": 1,
+  "policyVersion": "1.0.0",
+  "coverage": {
+    "managedRoots": [
+      "docs"
+    ],
+    "excludedPrefixes": [
+      "docs/archive/"
+    ],
+    "requireRegistration": true
+  },
+  "documents": [
+    {
+      "id": "AUDIT-LOG",
+      "path": "docs/AUDIT-LOG.md",
+      "kind": "audit",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "project-audit-broadcast",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "DOC-INDEX",
+      "path": "docs/README.md",
+      "kind": "governance",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "project-document-index",
+      "entrypoint": "AGENTS.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "AGENT-HANDOFF-PROMPT",
+      "path": "docs/agent-handoff-prompt.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "archivePolicy": "manual_review"
+    },
+    {
+      "id": "BRANCH-HANDOFF",
+      "path": "docs/branch-handoff.md",
+      "kind": "handoff",
+      "status": "reference",
+      "canonical": false,
+      "archivePolicy": "manual_review"
+    },
+    {
+      "id": "UI-WORKBENCH-DIRECTION",
+      "path": "docs/codex-style-workbench-direction.md",
+      "kind": "vision",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "workbench-ui-direction",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "DEPENDENCY-DECOUPLING",
+      "path": "docs/dependency-decoupling-checkpoint.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "MODULE-MAP",
+      "path": "docs/development-module-map.md",
+      "kind": "governance",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "module-responsibility-map",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "GOV-DOC-1",
+      "path": "docs/document-governance.md",
+      "kind": "governance",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "project-document-lifecycle",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "FIRST-SUCCESS-PATH",
+      "path": "docs/first-success-path.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "G0-LF12",
+      "path": "docs/g0-lf12-baseline-qualification-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "g0-current-work-package",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "G0-LF",
+      "path": "docs/g0-living-foundation-plan.md",
+      "kind": "living-plan",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "g0-living-foundation",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "G0-RS",
+      "path": "docs/g0-result-studio-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "g0-result-studio",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "G0-SDC",
+      "path": "docs/g0-scientific-data-contract-plan.md",
+      "kind": "living-plan",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "g0-scientific-data-contract",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "HARNESS-ENGINE-V1",
+      "path": "docs/harness-engine-spec.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "harness-engine-contract",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "HLE-V1",
+      "path": "docs/harness-loop-engineering-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "HLE-PRODUCTION-CLOSURE",
+      "path": "docs/harness-loop-production-closure-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "HARNESS-PHASE7",
+      "path": "docs/harness-phase7-completion-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "HARNESS-ROADMAP",
+      "path": "docs/harness-roadmap.md",
+      "kind": "roadmap",
+      "status": "reference",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "HRT-V1",
+      "path": "docs/harness-scientific-task-contract-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "HARNESS-TOOL-TEMPLATE",
+      "path": "docs/harness-tool-template.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "harness-tool-template",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "MACOS-OSS-UPDATE",
+      "path": "docs/macos-oss-auto-update.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "macos-oss-update",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "MODEL-PROVIDER-AUDIT",
+      "path": "docs/model-provider-audit.md",
+      "kind": "audit",
+      "status": "completed",
+      "canonical": false,
+      "archivePolicy": "archive_after_completion"
+    },
+    {
+      "id": "ROADMAP-NEXT",
+      "path": "docs/next-steps-roadmap.md",
+      "kind": "roadmap",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "current-priorities",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "PLUGIN-ARTIFACT-SCHEMA",
+      "path": "docs/plugin-artifact-schema.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "plugin-artifact-contract",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "WORKSPACE-HANDOFF",
+      "path": "docs/project-workspace-handoff.md",
+      "kind": "handoff",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "recoverable-workspace-state",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "RELEASE-RC2",
+      "path": "docs/releases/v0.0.1-rc.2.md",
+      "kind": "release",
+      "status": "reference",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "RELEASE-RC6",
+      "path": "docs/releases/v0.0.1-rc.6.md",
+      "kind": "release",
+      "status": "reference",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "RELEASE-RC7",
+      "path": "docs/releases/v0.0.1-rc.7.md",
+      "kind": "release",
+      "status": "reference",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "VISION-SCIENTIFIC-OS",
+      "path": "docs/scientific-intelligence-os-vision.md",
+      "kind": "vision",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "long-term-product-direction",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "STAGE2-ACCEPTANCE-AUDIT",
+      "path": "docs/stage2-acceptance-audit.md",
+      "kind": "audit",
+      "status": "completed",
+      "canonical": false,
+      "archivePolicy": "archive_after_completion"
+    },
+    {
+      "id": "STAGE3-M1-AUDIT",
+      "path": "docs/stage3-m1-audit.md",
+      "kind": "audit",
+      "status": "completed",
+      "canonical": false,
+      "archivePolicy": "archive_after_completion"
+    },
+    {
+      "id": "STAGE3-WORKFLOWS-DESIGN",
+      "path": "docs/stage3-standard-workflows-design.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "STAGE4-STABLE-RELEASE",
+      "path": "docs/stage4-stable-release-checklist.md",
+      "kind": "release",
+      "status": "completed",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "PLUGIN-THIRD-PARTY-GUIDE",
+      "path": "docs/third-party-plugin-guide.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "third-party-plugin-development",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "UI-035-064-ACCEPTANCE",
+      "path": "docs/ui-035-064-real-acceptance.md",
+      "kind": "audit",
+      "status": "completed",
+      "canonical": false,
+      "archivePolicy": "archive_after_completion"
+    },
+    {
+      "id": "UI-PRODUCTIZATION-AUDIT",
+      "path": "docs/ui-productization-audit.md",
+      "kind": "audit",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "ui-productization-status",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "ROADMAP-V1",
+      "path": "docs/v1-productization-roadmap.md",
+      "kind": "roadmap",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "product-stage-sequence",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "GOV-WT-1",
+      "path": "docs/worktree-governance.md",
+      "kind": "governance",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "git-worktree-lifecycle",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    }
+  ]
+}

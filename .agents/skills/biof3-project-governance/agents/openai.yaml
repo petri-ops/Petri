@@ -1,0 +1,4 @@
+interface:
+  display_name: "BioF3 项目治理"
+  short_description: "管理 BioF3 计划、文档、交接、Worktree 与阶段收口"
+  default_prompt: "Use $biof3-project-governance to reconcile this BioF3 work package and its documentation."

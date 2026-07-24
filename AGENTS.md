@@ -87,6 +87,15 @@ desktop/
 - 处理完成后，将对应条目状态改为 ✅ 并在"处理记录"登记。
 - 非主 agent 完成新审计后，必须把发现追加到 `docs/AUDIT-LOG.md` 并提交，不要只写在单独报告里。
 
+### 项目治理与文档生命周期
+
+- 创建或修改计划、Goal、工作包，完成阶段收口、Handoff、归档/替代文档，或创建/移除 Git Worktree 时，必须使用 `$biof3-project-governance`。
+- 项目当前文档从 [`docs/README.md`](docs/README.md) 进入；完整规则见 [`docs/document-governance.md`](docs/document-governance.md)，机器目录见 [`docs/DOC-REGISTRY.json`](docs/DOC-REGISTRY.json)。
+- 未运行 `npm run docs:reconcile` 并通过 `npm run docs:check`，不得宣布工作包 `completed`、`qualified`、`verified` 或已归档收口。
+- 不得在存在未知 WIP 时批量移动、删除、暂存或提交文档；Acceptance 证据不得被普通文档归档替代。
+- 当前状态必须回写 canonical roadmap/handoff/工作包，禁止多个 active canonical 计划宣称同一事实。
+- Worktree 纪律见 [`docs/worktree-governance.md`](docs/worktree-governance.md)；LF12 形成 qualified + maintained 干净 checkpoint 前，不得启动正式 Result Studio Worktree。
+
 ### UI 进度自动对账
 
 - 不得把 `docs/ui-productization-audit.md` 中的旧状态直接当成未实现结论；先核对已有 Git 提交证据，避免重复开发。
