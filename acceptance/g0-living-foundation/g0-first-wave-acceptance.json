@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-FIRST-WAVE",
+  "sourceCommit": "87ad3963b1a025e104735d25b19632008a628175",
+  "baseline": {
+    "schemaVersion": 1,
+    "baselineId": "g0-first-wave-establishing-0.2",
+    "baselineVersion": "0.2.0",
+    "lifecycleStatus": "establishing",
+    "qualificationStatus": "not_yet_qualified",
+    "constitutionId": "biof3-g0-constitution-v1",
+    "manifestDigest": "469bcd26d862ecb08901b3c8adc40da7a3744ec26c504672504b72ef838d0a1d",
+    "bundleDigest": "da6f540e25c5ade3d1757e0323318aa46bebc21236d961b2f444a61ae74c051e"
+  },
+  "privacy": "status_and_output_digests_only_no_raw_output_credentials_headers_urls_or_provider_responses",
+  "checks": [
+    {
+      "id": "G0-W1-01",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/baseline-manifest.json"
+      ],
+      "detail": "Compatible establishing baseline, not qualified."
+    },
+    {
+      "id": "G0-W1-02",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/truth-lattice.json"
+      ],
+      "detail": "Five truth levels have fixed authorities."
+    },
+    {
+      "id": "G0-W1-03",
+      "passed": true,
+      "evidence": [
+        "core/r-server/helpers/harness-workflow-state.js",
+        "core/shared-backend/delivery-manifest.js"
+      ],
+      "detail": "Workflow and Delivery use the shared projection."
+    },
+    {
+      "id": "G0-W1-04",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/truth-lattice.json",
+        "test/g0-first-wave.test.mjs"
+      ],
+      "detail": "Presentation cannot promote upstream truth."
+    },
+    {
+      "id": "G0-W1-05",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0-truth-projection.js"
+      ],
+      "detail": "Invalidation and event reduction are deterministic."
+    },
+    {
+      "id": "G0-W1-06",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/durable-state-inventory.json"
+      ],
+      "detail": "Durable objects have owners, stores and recovery outcomes."
+    },
+    {
+      "id": "G0-W1-07",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0-durable-state.js",
+        "core/r-server/db.js",
+        "core/r-server/server.js"
+      ],
+      "detail": "Failure inventory reuses production recovery."
+    },
+    {
+      "id": "G0-W1-08",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/capability-supply-chain.json",
+        "core/r-server/plugin-loader.js"
+      ],
+      "detail": "LF7 foundation fixes source and supply controls."
+    },
+    {
+      "id": "G0-W1-09",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/security-permission-matrix.json",
+        "core/r-server/agent-tools/agent-tool-policy.js"
+      ],
+      "detail": "LF8 foundation keeps full-access invariants."
+    },
+    {
+      "id": "G0-W1-10",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/constitution.json"
+      ],
+      "detail": "No second execution truth exists."
+    },
+    {
+      "id": "G0-W1-11",
+      "passed": true,
+      "evidence": [
+        "docs/g0-living-foundation-plan.md"
+      ],
+      "detail": "LF1/LF2 completion recorded."
+    },
+    {
+      "id": "G0-W1-12",
+      "passed": true,
+      "evidence": [
+        "acceptance/g0-living-foundation/g0-first-wave-acceptance.json"
+      ],
+      "detail": "All required command gates passed."
+    }
+  ],
+  "verification": {
+    "generatedAt": "2026-07-24T01:25:56.170Z",
+    "commands": [
+      {
+        "label": "first-wave-test",
+        "command": "node --test test/g0-first-wave.test.mjs test/g0-baseline.test.mjs test/g0-project-baseline.test.mjs test/harness-workflow-state.test.mjs",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "311acdceee7cd67d0806d9cc7e2ecdc6edd4ed18a5d381ec51179adebc5d2085",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "root-test",
+        "command": "npm test",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "e06e4e2003b0e8251b3ef509b6bfa772b9c7504780b3c955b1672b84e98ce930",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "frontend-test",
+        "command": "npm test --prefix frontend",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "3d54053bb3624007a49c4cf04c0a9afd62fde73781696aca27766f66f07ec020",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "frontend-build",
+        "command": "npm run build --prefix frontend",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "bbcaa71cb08ce6937a8443639212fdf9edcb428d150f9ea206d63a809de843e7",
+        "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
+      },
+      {
+        "label": "root-check",
+        "command": "npm run check",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "bbb4e49c81faf7445d67de0d6079afe3f0192a81df7605ecc499637a66d4613f",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "hle-production",
+        "command": "npm run harness:loop:production",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "57789c94e8055b84bd654c83f2574ee0cc4bbafa60b3135bacda7e473f5222d7",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "plugin-contracts",
+        "command": "npm run harness:check",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "1e1d81e8b0c69fc16ee5f580322192ccdbe2abb5909eccb8f94909b995e00dcf",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "passed": true,
+  "generatedAt": "2026-07-24T01:25:56.170Z"
+}

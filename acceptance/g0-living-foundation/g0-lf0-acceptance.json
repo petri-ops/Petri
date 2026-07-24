@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-LF0",
-  "sourceCommit": "b6a5c448fc047cc90555382ccd3dbda5d8bc025d",
+  "sourceCommit": "87ad3963b1a025e104735d25b19632008a628175",
   "baseline": {
     "schemaVersion": 1,
-    "baselineId": "g0-lf0-establishing-0.1",
-    "baselineVersion": "0.1.0",
+    "baselineId": "g0-first-wave-establishing-0.2",
+    "baselineVersion": "0.2.0",
     "lifecycleStatus": "establishing",
     "qualificationStatus": "not_yet_qualified",
     "constitutionId": "biof3-g0-constitution-v1",
-    "manifestDigest": "606889ca339023b6482caff54a8e7ea90246af7b33e16be6d29d7b992a3254bd",
-    "bundleDigest": "d54e88cf35ed594a3c9e669fc27da064fa9dfa27f0ac07746a2d362f021f2034"
+    "manifestDigest": "469bcd26d862ecb08901b3c8adc40da7a3744ec26c504672504b72ef838d0a1d",
+    "bundleDigest": "da6f540e25c5ade3d1757e0323318aa46bebc21236d961b2f444a61ae74c051e"
   },
   "privacy": "no_credentials_urls_headers_raw_provider_responses_or_command_output",
   "startGate": {
@@ -34,7 +34,11 @@
         "core/shared-backend/g0/constitution.json",
         "core/shared-backend/g0/baseline-registry.json",
         "core/shared-backend/g0/support-matrix.json",
-        "core/shared-backend/g0/governance-vocabulary.json"
+        "core/shared-backend/g0/governance-vocabulary.json",
+        "core/shared-backend/g0/truth-lattice.json",
+        "core/shared-backend/g0/durable-state-inventory.json",
+        "core/shared-backend/g0/capability-supply-chain.json",
+        "core/shared-backend/g0/security-permission-matrix.json"
       ],
       "detail": "Constitution, manifest, registry, support and governance resources are internally consistent."
     },
@@ -116,7 +120,7 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-24T00:53:52.197Z",
+    "generatedAt": "2026-07-24T01:24:51.216Z",
     "commands": [
       {
         "label": "g0-lf0-test",
@@ -124,7 +128,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "3e70cb543a5235a4ee1a1cfb2fd56f99d1865c2c03b4bcbaabfaccad0cd0e8ce",
+        "stdoutSha256": "aa30d8c8160231e898dfa6482ed327ace670a6dde3a5e477cc318022fd82c6ab",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -133,7 +137,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "6e16e257fdbd1015d332c026e801f12222d198ab801d081948e58ffcd8f4bc56",
+        "stdoutSha256": "de7c7f2e6ae05bcfa40cafed0dee3acefe178872956806d344b2f2e241de1df5",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -142,7 +146,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "acee64db60533725c786b81310b2d7b19c70b93a37bc8ca6b2c6482f8b6bfba6",
+        "stdoutSha256": "57437cb16eebba6ad26bec865b1996c735d323d1f651a49d5fed40590661b44d",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -151,7 +155,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "7c5c5dec323532b642170b0d0b35dd819e587f43134d3d976de5d0d73bdf5bbd",
+        "stdoutSha256": "3b67a2451c58a5b56096443742be96f81bc43e635a961942fbfef430ceddb05e",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -160,7 +164,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "089da8e0771671ae8cf895eb6d95fb1bd48c9d97926589215990bf92c8076407",
+        "stdoutSha256": "73adc88d4e3cd81138b3719844005b5739f36ccd5693a07704f38f9cf9919b0f",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -175,5 +179,5 @@
     ]
   },
   "passed": true,
-  "generatedAt": "2026-07-24T00:53:52.197Z"
+  "generatedAt": "2026-07-24T01:24:51.216Z"
 }

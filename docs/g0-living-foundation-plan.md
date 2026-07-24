@@ -342,6 +342,8 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 
 ## 10. G0-LF1：Truth Lattice
 
+状态：`completed`（2026-07-24）
+
 ### 目标
 
 让 Job、Artifact、科学验证、交付和 UI 的状态无法互相矛盾。
@@ -362,7 +364,16 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 - UI 显示完成但正式真相未完成：0。
 - 无 lineage 的正式结果：0。
 
+### 已落地
+
+- `g0-truth-projection.js` 统一投影 Job、Artifact、科学验证、Delivery 与 Presentation 五层真相。
+- Presentation 只能消费投影，不能把上游 pending/blocked/failed 提升为 completed。
+- 输入、参数、环境、代码和 Artifact 指纹决定失效；重复、乱序和迟到事件确定性归并。
+- 现有 Harness Workflow 与 DeliveryManifest 已携带同一投影，没有建立第二套执行或持久化真相。
+
 ## 11. G0-LF2：Durable State
+
+状态：`completed`（2026-07-24）
 
 ### 目标
 
@@ -400,6 +411,13 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 - 明确等待
 
 不得无声丢失、重复执行不可逆动作或伪造完成。
+
+### 已落地
+
+- `durable-state-inventory.json` 为 13 类长期对象指定唯一 owner、store 与允许恢复结果，并覆盖 10 类故障。
+- `g0-durable-state.js` 将中断 Job/Loop、矛盾 Artifact、损坏 Checkpoint、迁移与数据库完整性问题收敛为安全恢复计划。
+- 项目级耐久导出 Manifest 绑定对象和文件 Hash，支持确定性完整性校验；恢复审计保持 append-only、幂等并拒绝同 ID 冲突。
+- 生产启动恢复继续复用现有 SQLite、Loop ledger、ContextCheckpoint、Replay 与 `recovery_required` 路径。
 
 ## 12. G0-LF3：Scientific Accuracy
 
@@ -493,6 +511,8 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 
 ## 16. G0-LF7：Capability Supply Chain
 
+状态：`in_progress`（第一波基础契约已建立）
+
 ### 目标
 
 让插件、R/Python 包和 Runtime 成为可验证、可替换、可迁移的科学能力。
@@ -515,7 +535,11 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 - 插件自行定义第二套 Job/Artifact 状态。
 - 大量增加未进入真实任务和 Conformance 的插件。
 
+第一波已固定 canonical source、Manifest/Runtime/脚本/参数/输入输出 Hash、failureModes、Validator、平台声明、下载与解压安全等必需控制。完整 LF7 仍需后续跨平台 Adapter 与插件升级 Replay/Drift 证据，不在本轮冒充 completed。
+
 ## 17. G0-LF8：Security & Permission
+
+状态：`in_progress`（第一波基础契约已建立）
 
 ### 目标
 
@@ -540,6 +564,8 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 - 开发者模式能力与普通用户能力明确隔离。
 - 诊断包默认最小化并脱敏。
 - 插件和 Runtime 供应链安全纳入发布门。
+
+第一波已把 filesystem、command、network、plugin、Provider 与 external application 六个维度及不可覆盖边界写成机器契约；完全访问仍不能绕过项目隔离、凭据保护、科学源数据不可变、不可逆操作与外部副作用审计。开发者/普通用户完整能力矩阵仍留在 LF8 后续收口。
 
 ## 18. G0-LF9：Observable Experience
 
@@ -793,15 +819,15 @@ G1 可以在 `G0 Baseline v1` qualified 后启动；G0 同时转入 maintained�
 
 ## 28. 当前行动
 
-`G0-START` 与 `G0-LF0` 已完成，G0 处于 `establishing`，尚未 `qualified`。
+`G0-START`、`G0-LF0`、`G0-LF1` 与 `G0-LF2` 已完成；LF7/LF8 第一波基础契约已建立但整体仍为 `in_progress`。G0 处于 `establishing`，尚未 `qualified`。
 
 下一主线按依赖启动：
 
-1. `G0-LF1 Truth Lattice`：统一 Job、Artifact、科学验证、Delivery 与 UI 的完成投影。
-2. `G0-LF2 Durable State`：建立跨崩溃、关机和版本升级的全对象恢复矩阵。
-3. `G0-SDC` 已满足启动前置，可作为 LF1/LF7 的真实数据契约轨进入计划，但不得绕过 LF1/LF2 或直接批量扩张插件。
+1. `G0-LF3 Scientific Accuracy`：方法、统计、不确定性、负例与科学阻断基线。
+2. `G0-LF4 Reproducibility Lab`：基于 LF1/LF2 建立历史 Replay Corpus 与 Drift Report。
+3. `G0-SDC` 可作为 LF3/LF7 的真实数据契约轨进入，但不得直接批量扩张插件。
 
-任何后续工作仍须通过 `npm run g0:lf0`，且不得把当前 `not_yet_qualified` 基线写成 qualified。
+任何后续工作仍须通过 `npm run g0:lf0` 与 `npm run g0:first-wave`，且不得把当前 `not_yet_qualified` 基线写成 qualified。
 
 ## 29. 守护语句
 
