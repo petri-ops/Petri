@@ -1,8 +1,8 @@
 # G0 Scientific Data Contract & Adaptation Baseline
 
-最后更新：2026-07-23
+最后更新：2026-07-24
 
-状态：`ready_after_g0_lf0`
+状态：`ready`
 
 计划编号：`G0-SDC`
 
@@ -15,8 +15,10 @@
 前置条件：
 
 1. ✅ HLE-C0～HLE-C5 真实产品出口全部满足（2026-07-24）。
-2. `G0-START` 审计通过。
-3. `G0-LF0` 已建立 Constitution、Baseline Registry、版本身份和 Support Matrix。
+2. ✅ `G0-START` 审计通过（10/10，2026-07-24）。
+3. ✅ `G0-LF0` 已建立 Constitution、Baseline Registry、版本身份和 Support Matrix（2026-07-24）。
+
+启动边界：本计划前置已满足，但生产实现仍须按 G0 主线与 LF1/LF7 的依赖安排启动；`ready` 不等于已实现或已验收。
 
 ## 1. 决策结论
 

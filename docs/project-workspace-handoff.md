@@ -1,6 +1,6 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-07-23
+最后更新：2026-07-24
 
 ## 1. 恢复顺序
 
@@ -27,7 +27,13 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 
 ## 3. 当前立即任务
 
-### 3.0 当前主线：真实科学任务驱动的 Harness 升级
+### 3.0 当前主线：G0 Living Foundation establishing
+
+2026-07-24 `G0-START` 10/10 与 `G0-LF0` 10/10 已关闭。源码基线提交为 `fbd36fd`：`core/shared-backend/g0/` 与 `g0-baseline.js` 固定 Constitution、Baseline Registry/Manifest、Support Matrix、治理词汇和版本校验；`project_g0_baselines` 记录项目创建/打开身份，legacy 项目显式采用，未来主版本或同版本摘要冲突保持可读但阻断正式执行/写入；API 与前端项目投影同步。永久门禁 `npm run g0:lf0` 已进入根 `npm run check`，脱敏证据位于 `acceptance/g0-living-foundation/`。
+
+G0 当前状态是 `establishing / not_yet_qualified`。下一主线按 [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) 启动 LF1 Truth Lattice 与 LF2 Durable State；G0-SDC 只标记 ready，必须在 LF1/LF7 依赖内推进。不得把 LF0 完成写成 G0 qualified，也不得建立第二套 executor、Job、Artifact、Loop 或 workflow truth。
+
+### 3.1 已完成基线：真实科学任务驱动的 Harness 升级
 
 用户已确认 Harness 应承担“把模糊科学需求转化为数据语言、可执行计划、验证证据和交付结果”的工程职责，而不是收集每一个分析需求点。当前采用增量升级，不重建 P-02 执行真相，不新增第二套 executor、job、artifact 或 workflow truth。
 
@@ -35,7 +41,7 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 
 用户已确认 [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md) 是 P-03 Harness 的增量升级而非并行系统；HLE-0～HLE-6 当前已完成并成为长期基线。Loop 负责观察、决策、验证、修复、重规划、恢复和终止，继续复用现有 TaskSpec/DAG/Plugin/Job/Artifact/Delivery/Replay。任何 Agent 不得把它扩展为第二套 executor、job 表、artifact 仓库或 workflow truth，也不得让模型口头“完成”替代确定性和科学验证器。
 
-2026-07-24 HLE-C0～HLE-C5 已完成：生产 Agent loop、真实 Job/Artifact Validator/Diagnoser/Repair、耐久恢复、UI-101、SPT-1 七节点三轨、双 Provider、应用重启、Delivery/Replay 和明暗/820px/停止恢复视觉矩阵均已验收。证据位于 `acceptance/harness-loop/production/`。当前入口切换为 G0 Living Foundation 的 `G0-START` / `G0-LF0`；HLE 作为长期不变量继续存在，不重开第二套 executor、Job、Artifact 或 workflow truth。
+2026-07-24 HLE-C0～HLE-C5 已完成：生产 Agent loop、真实 Job/Artifact Validator/Diagnoser/Repair、耐久恢复、UI-101、SPT-1 七节点三轨、双 Provider、应用重启、Delivery/Replay 和明暗/820px/停止恢复视觉矩阵均已验收。证据位于 `acceptance/harness-loop/production/`。G0-START / G0-LF0 已在此基础上关闭；HLE 作为长期不变量继续存在，不重开第二套 executor、Job、Artifact 或 workflow truth。
 
 Post-HRT 运行控制面已于 2026-07-22 增加通用 `workspace_exec`、RuntimeResourceSnapshot v1、AI usage cache/cost 字段、设置页“用量与资源”、会话资源摘要和重启中断 Job 的 `recovery_required_after_restart` 投影。用户随后明确完全访问模式不应再受固定命令白名单限制：`accessMode=full` 现在从项目目录启动真实 shell，支持系统现有命令、脚本、管道和重定向；`read` 仍在 policy 与 handler 两层禁止执行。UI-051 真实项目/820px 窄窗验收通过，低内存能正确显示“资源不足”，控制台 0 error。Job 只记录开始/结束主机快照，真实进程峰值仍标记 `unavailable_without_process_sampler`，不得冒充已完成峰值采样。
 

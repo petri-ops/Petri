@@ -1,14 +1,14 @@
 # G0 Living Foundation Engineering — 永久可信基础层计划
 
-最后更新：2026-07-23
+最后更新：2026-07-24
 
-状态：`queued_after_hle`
+状态：`establishing`
 
 计划编号：`G0-LF`
 
 主模块：`P-01`～`P-07` 的共同基础契约
 
-当前前置工作：`HLE-C0～HLE-C5`
+当前前置工作：`HLE-C0～HLE-C5 completed`、`G0-START completed`
 
 启动条件：第 4 节的 `G0-START` 全部满足
 
@@ -24,7 +24,7 @@ G1～G6 只能建立在 G0 之上。任何上层能力只要破坏 G0 的执行�
 
 HLE-C0～HLE-C5 只完成 G0 中的 Harness Loop 生产控制闭环。它是本计划的关键前置条件，但不等于 G0 已经建立完成。
 
-本计划在 HLE 完整关闭前只允许维护文档和验收设计，不允许提前实施，以免两条主线争夺同一生产链。
+HLE 已于 2026-07-24 完成生产收口。G0-START 与 G0-LF0 随后通过机器验收；当前继续在同一执行真相上建立 LF1～LF12，不重开 Harness 或第二套执行链。
 
 ## 2. G0 的核心定义
 
@@ -130,20 +130,20 @@ proposal
 
 ## 4. HLE 完成后的启动门 `G0-START`
 
-只有以下条件同时满足，本计划才能从 `queued_after_hle` 改为 `in_progress`：
+以下条件已于 2026-07-24 同时满足，本计划已从 `queued_after_hle` 进入 `establishing`：
 
-- [ ] HLE-C0～HLE-C5 状态和代码事实一致。
-- [ ] SPT-1 正常、自动修复、科学阻断三条生产轨迹有证据。
-- [ ] failed Job + partial files 的生产假成功回归稳定阻断。
-- [ ] 软件重启后 Loop、Job、阶段结论和恢复动作可重建。
-- [ ] 双 Provider 真实轨迹完成，未把 mock 当真实验收。
-- [ ] 前端开发壳或打包态完成 Loop、恢复和结果视觉核对。
-- [ ] Replay Package、脚本、参数、输入和输出 Hash 可从真实任务验证。
-- [ ] 根检查、测试、前端测试和构建没有未解释回归。
-- [ ] HLE 主计划、生产收口计划、Audit Log 和 handoff 状态一致。
-- [ ] 当前基线提交已安全落盘并可从 Git 恢复。
+- [x] HLE-C0～HLE-C5 状态和代码事实一致。
+- [x] SPT-1 正常、自动修复、科学阻断三条生产轨迹有证据。
+- [x] failed Job + partial files 的生产假成功回归稳定阻断。
+- [x] 软件重启后 Loop、Job、阶段结论和恢复动作可重建。
+- [x] 双 Provider 真实轨迹完成，未把 mock 当真实验收。
+- [x] 前端开发壳或打包态完成 Loop、恢复和结果视觉核对。
+- [x] Replay Package、脚本、参数、输入和输出 Hash 可从真实任务验证。
+- [x] 根检查、测试、前端测试和构建没有未解释回归。
+- [x] HLE 主计划、生产收口计划、Audit Log 和 handoff 状态一致。
+- [x] 当前基线提交已安全落盘并可从 Git 恢复。
 
-任一项不满足时继续完成 HLE，不得通过改名提前启动 G0-LF。
+`G0-START`：`completed`。机器证据位于 `acceptance/g0-living-foundation/g0-start-audit.json`；任何一项以后回归都会由根 `npm run check` 阻断。
 
 ## 5. G0 的六项品质契约
 
@@ -309,6 +309,8 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 
 ## 9. G0-LF0：宪章与 Baseline Registry
 
+状态：`completed`（2026-07-24）
+
 ### 目标
 
 把“G0 是什么”从文档口号变成可检查的基线身份。
@@ -327,6 +329,16 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 - 任意项目可以回答“由哪个 G0 基线创建、当前由哪个基线打开”。
 - 不支持的版本组合明确阻断或迁移，不发生静默降级。
 - 当前只宣称真实验收过的平台；macOS 之外未验证项不得伪装支持。
+
+### 已落地
+
+- `core/shared-backend/g0/` 保存 Constitution、Baseline Manifest/Registry、Support Matrix 与固定治理词汇。
+- `core/shared-backend/g0-baseline.js` 对机器资源、现行契约版本、摘要和项目兼容性执行确定性校验。
+- `project_g0_baselines` 记录项目创建/打开时的 baseline、manifest 与 bundle 身份；legacy 项目标记未知创建基线，未来主版本或同版本摘要冲突保持可读但阻断正式写入/执行。
+- `/api/data/g0-baseline` 与 `/api/data/projects/:id/g0-baseline` 提供有界公开投影，前端项目类型同步携带该身份。
+- `npm run g0:lf0` 已接入根 `npm run check`；验收证据位于 `acceptance/g0-living-foundation/`。
+
+`G0-LF0`：`completed`。这只表示首个 `establishing` 基线身份已经建立，不表示 G0 已 `qualified`；资格状态必须等待 LF1～LF12。
 
 ## 10. G0-LF1：Truth Lattice
 
@@ -781,14 +793,15 @@ G1 可以在 `G0 Baseline v1` qualified 后启动；G0 同时转入 maintained�
 
 ## 28. 当前行动
 
-HLE-C0～HLE-C5 完成前：
+`G0-START` 与 `G0-LF0` 已完成，G0 处于 `establishing`，尚未 `qualified`。
 
-- 本计划保持 `queued_after_hle`。
-- 可以补充事实、风险和验收设计。
-- 不得启动 G0-LF0 的代码实现。
-- 不得以 G0 名义绕开 HLE 当前收口主线。
+下一主线按依赖启动：
 
-HLE 完成后的第一项工作不是新增科学插件，而是执行 `G0-START` 审计并启动 `G0-LF0`。
+1. `G0-LF1 Truth Lattice`：统一 Job、Artifact、科学验证、Delivery 与 UI 的完成投影。
+2. `G0-LF2 Durable State`：建立跨崩溃、关机和版本升级的全对象恢复矩阵。
+3. `G0-SDC` 已满足启动前置，可作为 LF1/LF7 的真实数据契约轨进入计划，但不得绕过 LF1/LF2 或直接批量扩张插件。
+
+任何后续工作仍须通过 `npm run g0:lf0`，且不得把当前 `not_yet_qualified` 基线写成 qualified。
 
 ## 29. 守护语句
 

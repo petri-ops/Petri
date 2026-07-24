@@ -5,7 +5,7 @@
 > 非主 agent 每次完成审计后，必须把发现追加到本文件并提交，不要只写在单独报告里。
 >
 > 维护方：非主 agent（只读审计 + 阻断性回归修复通道）
-> 最后更新：2026-07-24（HLE-C4R/HLE-C5 生产验收收口）
+> 最后更新：2026-07-24（G0-START / G0-LF0 建立）
 
 ---
 
@@ -19,6 +19,7 @@
 | ✅已处理 | 2026-07-18 | Stage 3 M1: `capability-provisioning` 加 host 白名单（https-only + 精确/后缀匹配 + env 覆盖），下载前 gate；顺带纠正设计文档失实描述（plugin-manager 从无 host 白名单） | 本文件 §4 | [§4 问题 D](#问题-ddefaultdownload-缺少-host-白名单) |
 | ✅已处理 | 2026-07-17 | `fix/qa-smoke-stale-css-paths` 已合并，themes 门禁恢复 7/7 | 分支备忘录 | [§2.1](#21-fixqa-smoke-stale-css-paths-) |
 | 🟡待评估 | 2026-07-17 | `codex/fix-collapsed-right-titlebar` 分支待评估，三文件两边改过 | 分支备忘录 | [§2.2](#22-codexfix-collapsed-right-titlebar-) |
+| ✅已处理 | 2026-07-24 | G0-START 10/10 与 G0-LF0 10/10 建立：机器可读 Constitution、Baseline Manifest/Registry、Support Matrix 和治理词汇落地；项目持久记录创建/打开 baseline、manifest/bundle 摘要，legacy 显式采用，未来主版本或同版本摘要冲突保持可读但阻断正式写入；API/前端投影及永久根门禁均有脱敏证据。G0 仍为 establishing/not_yet_qualified。 | G0-LF0 / P-01～P-07 | `core/shared-backend/g0/`, `g0-baseline.js`, `project_g0_baselines`, `acceptance/g0-living-foundation/` |
 | ✅已处理 | 2026-07-17 | 5 个 codex/* 已合并残留分支已删除（连带 prune 6 个失效 worktree 注册） | 分支备忘录 | [§2.3](#23-已合并残留分支可安全删除-) |
 | ✅已处理 | 2026-07-17 | `sanitizer.js` 死模块 + 其测试已删除（全仓零生产引用） | 本文件 §4 | [§4 问题 E](#问题-esanitizerjs-死模块) |
 | ✅已处理 | 2026-07-17 | `core/test/` 门禁盲区已收口：3 个单测迁入 `test/*.test.mjs`，死模块测试删除，4 个联网 smoke 保留在 core/test/ | 本文件 §4 | [§4 问题 F](#问题-fcoretest-目录不在门禁范围) |

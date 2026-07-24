@@ -428,7 +428,7 @@ G0 不是静态冻结层。它把变化分为：
 4. 可扩展能力：Plugin、Task Pack、Runtime 和 Adapter。
 5. 实验隔离：候选策略先经过 fixture、历史回放和 shadow evaluation。
 
-当前 HLE 目标只负责建立 G0 的任务执行循环：
+已完成的 HLE 负责建立 G0 的任务执行循环：
 
 - 完成 Harness Loop 生产接线。
 - 让真实 Job/Artifact/Validator 决定任务状态。
@@ -436,7 +436,7 @@ G0 不是静态冻结层。它把变化分为：
 - 让会话和摘要展示可恢复 Loop 进度。
 - 用 SPT-1 完成真实产品验收。
 
-HLE-C0～HLE-C5 完成后不直接离开 G0，而是启动 [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md)，系统加固：
+HLE-C0～HLE-C5 已完成；G0-START 与 G0-LF0 已于 2026-07-24 建立 `establishing` 基线。当前按 [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) 继续系统加固：
 
 - 五层真相一致性。
 - 跨崩溃、关机和升级的耐久恢复。
@@ -701,7 +701,7 @@ Lab Scientific OS
 
 当前唯一主线仍是：
 
-> 完成 Harness Loop 生产接线与 SPT-1 真实产品出口。
+> 在已完成的 HLE、G0-START 与 G0-LF0 上，依次建立 G0-LF1 Truth Lattice 和 G0-LF2 Durable State，持续保持永久 Conformance。
 
 与愿景相关但当前只记录、不实施的方向：
 
@@ -712,11 +712,11 @@ Lab Scientific OS
 - 第三方插件生态。
 - Continuous Research。
 
-当前阶段完成后，优先决策顺序：
+当前阶段的优先决策顺序：
 
-1. 执行 `G0-START`，证明 HLE 状态、代码和真实验收一致。
-2. 启动 `G0-LF0`，建立 Constitution、Baseline Registry 和版本身份。
-3. 按 G0-LF1～LF12 完成真相、耐久、准确、复现、资源、安全、故障和兼容资格。
+1. `G0-START` 与 `G0-LF0` 已完成，永久 `g0:lf0` 门禁必须保持通过。
+2. 启动 G0-LF1/LF2，完成真相投影与全对象耐久恢复。
+3. 按 G0-LF3～LF12 完成准确、复现、资源、安全、故障和兼容资格。
 4. G0 Baseline v1 qualified 后转入永久 maintained。
 5. 在继续维护 G0 的同时，才选择第二和第三个旗舰科学任务进入 G1。
 6. 只有满足第 8.3 节条件后，立项 Evidence Graph v1。

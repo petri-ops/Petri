@@ -1,24 +1,30 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-07-23
+最后更新：2026-07-24
 
 ## 当前结论
 
 `v0.0.1-rc.7` 是当前 OSS 线上版本，已完成代码、自动化、双架构构建、安装候选启动验收和公开更新链核验。Stage 1 UI 产品化、Stage 2 模型层、Stage 3 Harness 与标准流程、Stage 4 首个稳定产品版本及 Harness Phase 7 均已关闭。
 
-当前不默认扩展分析功能。`Harness Scientific Task Contract v1` 已完成；用户已确认下一主线为 P-03 内部的 `Harness Loop Engineering v1` 增量升级，以真实科学任务验证持续推进、证据验证、故障修复、受影响子图重规划、耐久恢复和目标终止。它不是并行系统，也不改变 P-02 执行真相。UI-032 已完成；签名/公证不属于本项目必需条件；OSS 上有包只代表技术分发链已打通，不代表产品已经正式上线。rc.7 仍是工程候选版，不得描述为 GA。
+当前不默认扩展分析功能。`Harness Scientific Task Contract v1` 与 `Harness Loop Engineering v1` 已完成；`G0-START` 和 `G0-LF0` 已建立首个 `establishing / not_yet_qualified` 基线。当前主线留在 G0，下一工作包为 LF1 Truth Lattice 与 LF2 Durable State。UI-032 已完成；签名/公证不属于本项目必需条件；OSS 上有包只代表技术分发链已打通，不代表产品已经正式上线。rc.7 仍是工程候选版，不得描述为 GA。
 
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 已完成的 Scientific Task Contract 工作包记录见 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md)。
-当前 Loop 升级计划见 [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md)。
+当前 G0 主计划见 [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md)。
 
-## 当前 P-03 Loop 工程包
+## 当前 G0 Living Foundation
+
+`G0-START` 10/10 与 `G0-LF0` 10/10 已通过。机器可读的 Constitution、Baseline Manifest/Registry、Support Matrix、治理词汇和项目基线身份已落地；legacy 项目显式采用，未来主版本或同版本摘要冲突保持可读但阻断正式写入。永久入口为 `npm run g0:lf0`，并已接入根 `npm run check`。
+
+G0 仍处于 `establishing`，不得宣称 qualified。下一顺序为 LF1、LF2；[`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md) 前置已满足并标记 ready，但须在 LF1/LF7 依赖内进入，不直接批量扩张插件。
+
+## 已完成的 P-03 Loop 工程包
 
 `Harness Loop Engineering v1` 已于 2026-07-24 完成生产验收。生产 Agent、Validator/Repair、耐久恢复、UI-101、SPT-1 七节点三轨、双 Provider、应用重启、Delivery/Replay 与视觉矩阵均有脱敏证据；执行真相仍唯一为 `run_tool → tool_job → artifact truth`。
 
 Loop 工程包继续复用 TaskSpec、Workflow Plan、Plugin、ToolResult、Job、Artifact、Delivery 和 Replay，不得创建第二套 executor、job、artifact 或 workflow truth。正常路径不使用任意固定轮数提前停止；重复、无进展、振荡、同类故障和资源/成本异常必须进入可审计的保护状态。节点和任务完成由验证器与 Artifact 证据判定，不能由模型口头声明。
 
-HLE-C0～HLE-C5 已全部关闭；[`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) 现为验收记录而非当前开发入口。下一阶段按 G0 顺序先执行 `G0-START` / `G0-LF0`，再启动 [`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md)，不直接跳到批量插件扩张。
+HLE-C0～HLE-C5 已全部关闭；[`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) 现为验收记录而非当前开发入口。`G0-START` / `G0-LF0` 也已关闭，后续按 LF1/LF2 顺序继续，不直接跳到批量插件扩张。
 
 ## 当前 P-03 工作包
 
@@ -64,19 +70,20 @@ Phase 7 未建立第二套 analysis executor、job、artifact 或 workflow truth
 2. x64 分析 Runtime。
 3. 新产品阶段；若重开 P7-F，必须先有至少 3 个合格真实任务的可复现证据。
 
-Harness Loop Engineering v1 已成为长期基线。下一工程阶段进入 G0 Living Foundation 的 `G0-START` / `G0-LF0`；科学长任务继续走正式 Job/Artifact 链，不能借通用后台进程工具绕过。
+Harness Loop Engineering v1 已成为长期基线。G0 Living Foundation 已进入 `establishing`；下一工程阶段是 `G0-LF1` / `G0-LF2`。科学长任务继续走正式 Job/Artifact 链，不能借通用后台进程工具绕过。
 
 完全访问模式已经由用户明确定位为通用命令执行授权，不再维护固定命令白名单；只读模式仍禁止命令。不得借通用命令行建立第二套科学结果真相：正式分析交付仍必须进入确认、审计与 `run_tool → tool_job → artifact truth`。
 
 ## 当前入口
 
 1. [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)：产品阶段路线图。
-2. [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)：Phase 7 完成证据与边界。
+2. [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md)：当前 G0 工作包、依赖与永久门禁。
 3. [`project-workspace-handoff.md`](./project-workspace-handoff.md)：当前恢复检查点。
 4. [`ui-productization-audit.md`](./ui-productization-audit.md)：UI 执行台账。
 5. [`development-module-map.md`](./development-module-map.md)：模块责任边界。
 6. [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md)：稳定版本出口矩阵。
 7. [`macos-oss-auto-update.md`](./macos-oss-auto-update.md)：发布与更新规范。
 8. [`dependency-decoupling-checkpoint.md`](./dependency-decoupling-checkpoint.md)：架构去耦检查点。
-9. [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md)：已完成的 HLE-0～HLE-6 基线、验收与跨 Agent 接手协议。
-10. [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md)：已完成的 HLE 生产接线、真实验收与状态纠偏记录。
+9. [`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md)：前置已满足、等待按 LF1/LF7 依赖启动的数据契约轨。
+10. [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md)：已完成的 HLE-0～HLE-6 基线、验收与跨 Agent 接手协议。
+11. [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md)：已完成的 HLE 生产接线、真实验收与状态纠偏记录。

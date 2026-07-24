@@ -1,12 +1,12 @@
 # BioF3 Desktop 文档入口
 
-最后更新：2026-07-23
+最后更新：2026-07-24
 
 ## 长期核心指引
 
 1. [`scientific-intelligence-os-vision.md`](./scientific-intelligence-os-vision.md) — BioF3 长期产品愿景、当前定位、阶段跃迁条件与禁止跨阶段建设规则。它约束方向，但不替代当前工作包。
-2. [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) — HLE 完整关闭后启动的永久 G0 可信基础层工作包；定义不变量、动态进化、资格门禁与长期维护机制。
-3. [`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md) — G0-LF0 之后的数据契约与适配基线；让不规则数据通过 Profiler、语义绑定、可复现 Adapter、Plugin I/O Contract 和 typed DAG 安全进入科学插件。
+2. [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) — 当前永久 G0 可信基础层主线；G0-START/LF0 已完成，下一步为 LF1/LF2。
+3. [`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md) — 前置已满足并标记 ready 的数据契约与适配基线；须按 LF1/LF7 依赖启动。
 
 ## 当前开发必读
 
@@ -17,11 +17,11 @@
 3. [`project-workspace-handoff.md`](./project-workspace-handoff.md) — 当前可恢复工程检查点。
 4. [`ui-productization-audit.md`](./ui-productization-audit.md) — 已完成的 Stage 1 验收台账。
 5. [`development-module-map.md`](./development-module-map.md) — W/P/C 责任边界。
-6. [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md) — 已完成的 P-03 Harness Loop Engineering v1（HLE-0～HLE-6）基线。
-7. [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) — 已完成的 HLE 生产 Agent、Validator/Repair、恢复、UI 与真实 SPT-1 验收记录。
-8. [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md) — 已完成的 P-03 真实科学任务翻译与交付工作包计划。
-9. [`../acceptance/harness-scientific-task/task-catalog.md`](../acceptance/harness-scientific-task/task-catalog.md) — HRT-0 六类任务、20 项覆盖和已知缺口基线。
-10. [`../core/shared-backend/scientific-task-spec.js`](../core/shared-backend/scientific-task-spec.js) — HRT-1 ScientificTaskSpec/ContextEnvelope/Checkpoint 契约实现。
+6. [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) — 当前 G0-LF 工作包顺序、状态与验收规范。
+7. [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md) — 已完成的 P-03 Harness Loop Engineering v1（HLE-0～HLE-6）基线。
+8. [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) — 已完成的 HLE 生产 Agent、Validator/Repair、恢复、UI 与真实 SPT-1 验收记录。
+9. [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md) — 已完成的 P-03 真实科学任务翻译与交付工作包计划。
+10. [`../acceptance/g0-living-foundation/g0-lf0-acceptance.json`](../acceptance/g0-living-foundation/g0-lf0-acceptance.json) — G0-START/LF0 脱敏机器验收证据。
 
 ## 当前有效专项规范
 

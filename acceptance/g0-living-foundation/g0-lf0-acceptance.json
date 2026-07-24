@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-LF0",
+  "sourceCommit": "b6a5c448fc047cc90555382ccd3dbda5d8bc025d",
+  "baseline": {
+    "schemaVersion": 1,
+    "baselineId": "g0-lf0-establishing-0.1",
+    "baselineVersion": "0.1.0",
+    "lifecycleStatus": "establishing",
+    "qualificationStatus": "not_yet_qualified",
+    "constitutionId": "biof3-g0-constitution-v1",
+    "manifestDigest": "606889ca339023b6482caff54a8e7ea90246af7b33e16be6d29d7b992a3254bd",
+    "bundleDigest": "d54e88cf35ed594a3c9e669fc27da064fa9dfa27f0ac07746a2d362f021f2034"
+  },
+  "privacy": "no_credentials_urls_headers_raw_provider_responses_or_command_output",
+  "startGate": {
+    "passed": true,
+    "checkCount": 10
+  },
+  "checks": [
+    {
+      "id": "G0-LF0-01",
+      "passed": true,
+      "evidence": [
+        "acceptance/g0-living-foundation/g0-start-audit.json"
+      ],
+      "detail": "G0-START is closed before LF0 promotion."
+    },
+    {
+      "id": "G0-LF0-02",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0-baseline.js",
+        "core/shared-backend/g0/constitution.json",
+        "core/shared-backend/g0/baseline-registry.json",
+        "core/shared-backend/g0/support-matrix.json",
+        "core/shared-backend/g0/governance-vocabulary.json"
+      ],
+      "detail": "Constitution, manifest, registry, support and governance resources are internally consistent."
+    },
+    {
+      "id": "G0-LF0-03",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0-baseline.js",
+        "core/shared-backend/g0/constitution.json",
+        "core/shared-backend/g0/baseline-manifest.json",
+        "core/shared-backend/g0/baseline-registry.json",
+        "core/shared-backend/g0/support-matrix.json",
+        "core/shared-backend/g0/governance-vocabulary.json",
+        "test/g0-baseline.test.mjs",
+        "test/g0-project-baseline.test.mjs",
+        "test/g0-api-route.test.mjs"
+      ],
+      "detail": "Machine-readable LF0 resources and contract tests are present."
+    },
+    {
+      "id": "G0-LF0-04",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/support-matrix.json",
+        "core/shared-backend/g0/governance-vocabulary.json"
+      ],
+      "detail": "Support claims use the fixed vocabulary and do not pre-claim LF12 qualification."
+    },
+    {
+      "id": "G0-LF0-05",
+      "passed": true,
+      "evidence": [
+        "core/r-server/db.js"
+      ],
+      "detail": "Projects persist creating/opening baseline identity and compatibility verdict."
+    },
+    {
+      "id": "G0-LF0-06",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0-baseline.js",
+        "core/shared-backend/project-run-layout.js",
+        "core/r-server/agent-tools/workspace-tools.js"
+      ],
+      "detail": "Future or identity-conflicting projects remain readable but formal execution and writes are blocked."
+    },
+    {
+      "id": "G0-LF0-07",
+      "passed": true,
+      "evidence": [
+        "core/r-server/api-data.js",
+        "frontend/src/lib/project-types.ts"
+      ],
+      "detail": "Current and per-project baseline identities are exposed through the existing project API."
+    },
+    {
+      "id": "G0-LF0-08",
+      "passed": true,
+      "evidence": [
+        "package.json"
+      ],
+      "detail": "LF0 conformance is a permanent root check, not an optional document claim."
+    },
+    {
+      "id": "G0-LF0-09",
+      "passed": true,
+      "evidence": [
+        "docs/g0-living-foundation-plan.md"
+      ],
+      "detail": "The G0 plan records establishing lifecycle and completed START/LF0 packages."
+    },
+    {
+      "id": "G0-LF0-10",
+      "passed": true,
+      "evidence": [
+        "acceptance/g0-living-foundation/g0-lf0-acceptance.json"
+      ],
+      "detail": "Root, frontend, build and HLE product gates are captured with output digests."
+    }
+  ],
+  "verification": {
+    "generatedAt": "2026-07-24T00:53:52.197Z",
+    "commands": [
+      {
+        "label": "g0-lf0-test",
+        "command": "node --test test/g0-baseline.test.mjs test/g0-project-baseline.test.mjs test/g0-api-route.test.mjs",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "3e70cb543a5235a4ee1a1cfb2fd56f99d1865c2c03b4bcbaabfaccad0cd0e8ce",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "root-test",
+        "command": "npm test",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "6e16e257fdbd1015d332c026e801f12222d198ab801d081948e58ffcd8f4bc56",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "frontend-test",
+        "command": "npm test --prefix frontend",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "acee64db60533725c786b81310b2d7b19c70b93a37bc8ca6b2c6482f8b6bfba6",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "frontend-build",
+        "command": "npm run build --prefix frontend",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "7c5c5dec323532b642170b0d0b35dd819e587f43134d3d976de5d0d73bdf5bbd",
+        "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
+      },
+      {
+        "label": "root-check",
+        "command": "npm run check",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "089da8e0771671ae8cf895eb6d95fb1bd48c9d97926589215990bf92c8076407",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "hle-production",
+        "command": "npm run harness:loop:production",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "57789c94e8055b84bd654c83f2574ee0cc4bbafa60b3135bacda7e473f5222d7",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "passed": true,
+  "generatedAt": "2026-07-24T00:53:52.197Z"
+}
