@@ -485,6 +485,8 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 
 ## 14. G0-LF5：Adaptive Runtime
 
+状态：`completed`（2026-07-24）
+
 ### 目标
 
 让本地执行根据真实硬件和任务特点动态调整，同时保持结果契约稳定。
@@ -503,7 +505,14 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 
 资源不足时可以调整调度、分块和缓存；如果调整会改变科学可比性，必须留下决策并进入科学边界处理。
 
+### 已落地
+
+- `g0-adaptive-runtime.js` 复用 RuntimeResourceSnapshot 与 readiness，确定性决定 run/queue/chunk/pause/block。
+- 资源修复不能改变方法、参数、随机种子语义或样本纳入；暂停、取消与恢复保留 checkpoint 和审计。
+
 ## 15. G0-LF6：Model、Memory、Cache 与 Cost
+
+状态：`completed`（2026-07-24）
 
 ### 目标
 
@@ -527,6 +536,11 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 - 凭据进入消息、日志、缓存或诊断包：0。
 - 压缩导致必要科学事实永久丢失：0。
 - 缓存跨错误项目或错误输入复用：0。
+
+### 已落地
+
+- `g0-model-memory-cost.js` 固定 durable fact 完整性压缩、五层缓存与八字段身份、统一 Token/缓存/费用投影。
+- Provider fallback 必须能力兼容、策略允许、写入审计且不改变科学门禁；模型切换从 checkpoint 重建。
 
 ## 16. G0-LF7：Capability Supply Chain
 
@@ -588,6 +602,8 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 
 ## 18. G0-LF9：Observable Experience
 
+状态：`completed`（2026-07-24）
+
 ### 目标
 
 让用户看到的是准确、紧凑、可追溯的系统状态。
@@ -606,6 +622,11 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 ### 状态收敛验收
 
 同一任务在聊天、摘要、任务详情、文件和结果视图中不能出现互相冲突的状态。
+
+### 已落地
+
+- `g0-observable-experience.js` 汇聚 Truth、Durable、Scientific、Drift、Runtime 与 Usage，供五类视图统一消费。
+- 阶段结论持久化；异常提供 reason、impact、action、retryStatus；禁止 UI 推断完成或展示隐藏推理。
 
 ## 19. G0-LF10：Resilience Lab
 
@@ -838,16 +859,15 @@ G1 可以在 `G0 Baseline v1` qualified 后启动；G0 同时转入 maintained�
 
 ## 28. 当前行动
 
-`G0-START` 与 `G0-LF0`～`G0-LF4` 已完成；LF7/LF8 第一波基础契约已建立但整体仍为 `in_progress`。G0 处于 `establishing`，尚未 `qualified`。
+`G0-START`、`G0-LF0`～`G0-LF6` 与 `G0-LF9` 已完成；LF7/LF8 第一波基础契约已建立但整体仍为 `in_progress`。G0 处于 `establishing`，尚未 `qualified`。
 
 下一主线按依赖启动：
 
-1. `G0-LF5 Adaptive Runtime`：用第二波 Corpus 验证资源感知、长任务、调度与恢复。
-2. `G0-LF6 Model/Memory/Cache/Cost`：验证模型切换、压缩、缓存与成本不改变科学真相。
-3. `G0-LF9 Observable Experience`：让 UI 消费 LF1～LF6 的同一投影；可先做契约接线，最终状态收敛随 LF5/LF6 一并验收。
-4. LF7/LF8 在上述工作中持续作为插件供应链与权限门禁，不得直接批量扩张插件。
+1. 收口 `G0-LF7 Capability Supply Chain` 与 `G0-LF8 Security & Permission` 的生产证据。
+2. 启动 `G0-LF10 Resilience Lab`，系统性执行故障注入、压力、耐久和恢复矩阵。
+3. LF11/LF12 必须等待 LF7/LF8/LF10 的真实结果。
 
-任何后续工作仍须通过 `npm run g0:lf0`、`npm run g0:first-wave` 与 `npm run g0:second-wave`，且不得把当前 `not_yet_qualified` 基线写成 qualified。
+任何后续工作仍须通过四代 G0 门禁（含 `npm run g0:third-wave`），且不得把当前 `not_yet_qualified` 基线写成 qualified。
 
 ## 29. 守护语句
 

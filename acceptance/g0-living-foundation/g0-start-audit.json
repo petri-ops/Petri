@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "gate": "G0-START",
-  "sourceCommit": "13fcc2d036bcb7ed4a117f2ee4dd1a0981d86627",
+  "sourceCommit": "7beae8f740d7a0be574837e18e6140401112666f",
   "sourceTree": "ce60872d489f6b3e7866601dd47c5669cfe2fe980d8d61784fb7a260fbeca5ae",
   "privacy": "sanitized_status_hashes_relative_paths_and_command_digests_only",
   "checks": [
@@ -94,9 +94,9 @@
     }
   ],
   "passed": true,
-  "generatedAt": "2026-07-24T01:41:30.090Z",
+  "generatedAt": "2026-07-24T02:01:50.400Z",
   "verification": {
-    "generatedAt": "2026-07-24T01:41:30.090Z",
+    "generatedAt": "2026-07-24T02:01:50.400Z",
     "commands": [
       {
         "label": "g0-lf0-test",
@@ -104,7 +104,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "225224dfa9ab46db7cba834f2d44b378fe3cfe3de702046fa19644a3a6620a7d",
+        "stdoutSha256": "0861fa2c6e7bfbfbd7228214ae9c7648bba965384953d1aeaa8ddbeaa721930e",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -113,7 +113,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "6562b8616ee0c0c7951284c01dfdf72d1684ff40859ad6110b022e62cfde6ee2",
+        "stdoutSha256": "d4f3095d39535bc4e609c709c11e0d3e84f4c92f8a800f8461e7c27de4a918e9",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -122,7 +122,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "102b771e999c35f43a7e6214730fd36ab703789ba99cd4079ffbd46a9a8782f6",
+        "stdoutSha256": "fc704631f76cb0fbdb39b7af5a8528e5fed9de42c6dd54975d43dc7bc2f116fa",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -131,7 +131,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "0068ff53b69bfae364c9bab1f434f541e278195159778894f8413303913164b9",
+        "stdoutSha256": "b700f3d5a4fec6aba8e02836652670390c1af750d730ee625ab783424b281f26",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -140,7 +140,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "c3ef3b60644923f75b37d1d8a9ea54cae4db23c51d5f4c90bfc72f2be01104fc",
+        "stdoutSha256": "fd93bd392c23a00d8d3eaddd98ee87cae28b6ce58340b0e95eceebcfd69b30ab",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {

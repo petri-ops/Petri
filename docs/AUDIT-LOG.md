@@ -5,7 +5,7 @@
 > 非主 agent 每次完成审计后，必须把发现追加到本文件并提交，不要只写在单独报告里。
 >
 > 维护方：非主 agent（只读审计 + 阻断性回归修复通道）
-> 最后更新：2026-07-24（G0 第二波 LF3/LF4 收口）
+> 最后更新：2026-07-24（G0 第三波 LF5/LF6/LF9 收口）
 
 ---
 
@@ -22,6 +22,7 @@
 | ✅已处理 | 2026-07-24 | G0-START 10/10 与 G0-LF0 10/10 建立：机器可读 Constitution、Baseline Manifest/Registry、Support Matrix 和治理词汇落地；项目持久记录创建/打开 baseline、manifest/bundle 摘要，legacy 显式采用，未来主版本或同版本摘要冲突保持可读但阻断正式写入；API/前端投影及永久根门禁均有脱敏证据。G0 仍为 establishing/not_yet_qualified。 | G0-LF0 / P-01～P-07 | `core/shared-backend/g0/`, `g0-baseline.js`, `project_g0_baselines`, `acceptance/g0-living-foundation/` |
 | ✅已处理 | 2026-07-24 | G0 第一波完成：LF1 五层 Truth Projection 已接入 Workflow/Delivery，Presentation 不得提升上游真相；LF2 为 13 类对象和 10 类故障建立恢复契约、项目导出校验与 append-only 审计；LF7/LF8 第一波供应链和权限基础契约落地。基线兼容升级为 0.2.0，仍为 establishing/not_yet_qualified。 | G0-LF1 / G0-LF2 / LF7-LF8 foundation | `g0-truth-projection.js`, `g0-durable-state.js`, `acceptance/g0-living-foundation/g0-first-wave-acceptance.json` |
 | ✅已处理 | 2026-07-24 | G0 第二波完成：LF3 固定方法适用性、假设、统计语义、科学设计变化和非显著/低功效/矛盾/阻断状态；LF4 建立七类 Corpus、三类 Artifact 比较和四类 Drift Report，并接入现有 Truth/Delivery/Replay。基线兼容升级为 0.3.0，仍为 establishing/not_yet_qualified。 | G0-LF3 / G0-LF4 | `g0-scientific-accuracy.js`, `g0-reproducibility-lab.js`, `acceptance/g0-living-foundation/g0-second-wave-acceptance.json` |
+| ✅已处理 | 2026-07-24 | G0 第三波完成：LF5 固定资源与安全调度；LF6 固定事实完整压缩、缓存、用量和 fallback；LF9 固定五视图统一投影与可行动异常。基线升级 0.4.0，仍为 establishing/not_yet_qualified。 | G0-LF5 / G0-LF6 / G0-LF9 | `g0-adaptive-runtime.js`, `g0-model-memory-cost.js`, `g0-observable-experience.js` |
 | ✅已处理 | 2026-07-17 | 5 个 codex/* 已合并残留分支已删除（连带 prune 6 个失效 worktree 注册） | 分支备忘录 | [§2.3](#23-已合并残留分支可安全删除-) |
 | ✅已处理 | 2026-07-17 | `sanitizer.js` 死模块 + 其测试已删除（全仓零生产引用） | 本文件 §4 | [§4 问题 E](#问题-esanitizerjs-死模块) |
 | ✅已处理 | 2026-07-17 | `core/test/` 门禁盲区已收口：3 个单测迁入 `test/*.test.mjs`，死模块测试删除，4 个联网 smoke 保留在 core/test/ | 本文件 §4 | [§4 问题 F](#问题-fcoretest-目录不在门禁范围) |

@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-SECOND-WAVE",
-  "sourceCommit": "13fcc2d036bcb7ed4a117f2ee4dd1a0981d86627",
+  "sourceCommit": "7beae8f740d7a0be574837e18e6140401112666f",
   "baseline": {
     "schemaVersion": 1,
-    "baselineId": "g0-second-wave-establishing-0.3",
-    "baselineVersion": "0.3.0",
+    "baselineId": "g0-third-wave-establishing-0.4",
+    "baselineVersion": "0.4.0",
     "lifecycleStatus": "establishing",
     "qualificationStatus": "not_yet_qualified",
     "constitutionId": "biof3-g0-constitution-v1",
-    "manifestDigest": "0bedbdc1e34a0c32de6da46750f174b485631269dd311b51711240ab1572c83b",
-    "bundleDigest": "8416d60c1245c8c916be7c30df3fe488cf4ba211b4b3122e69087655d9f8e169"
+    "manifestDigest": "4bfb56b4504fff315f9fcaf04973c38823d1eb5a0787fa8fb08ba531829f1d2d",
+    "bundleDigest": "22bed2fe0bbb66cf5175416c6f5198386e8ff75fb95a52ca74a83e6e5f159180"
   },
   "privacy": "status_counts_and_output_digests_only_no_raw_data_credentials_headers_urls_or_provider_responses",
   "checks": [
@@ -20,7 +20,7 @@
       "evidence": [
         "core/shared-backend/g0/baseline-manifest.json"
       ],
-      "detail": "Second-wave establishing baseline is internally consistent and not qualified."
+      "detail": "Compatible baseline retains second-wave contracts and remains not qualified."
     },
     {
       "id": "G0-W2-02",
@@ -113,7 +113,7 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-24T01:43:42.029Z",
+    "generatedAt": "2026-07-24T02:04:06.871Z",
     "commands": [
       {
         "label": "second-wave-test",
@@ -121,7 +121,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "6cdb4ab3ee0dd6636d9dddc33a581ac7124351c6bdd720b2163cc9d932f3848b",
+        "stdoutSha256": "843415524c5a6100d6a1a43b5fd6c18a22fc4af190556692090aaea4bbfd02da",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -130,7 +130,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "a56fa383bc6a1bbf947f92bf6491e1d4187c9600ea68ba5c73a839c9a50c3a54",
+        "stdoutSha256": "1be4a5d93d2e5c67fb6f50cabbf171f5461390d18df2701543f5ba001c97f587",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -139,7 +139,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "cc003b7fed6aeffa40668cae467a3bb9f78ff13718c7ebedfb5237c27b11e6ef",
+        "stdoutSha256": "0218144aba01e50cd3ea7c27617eef0006842cdf6ef28fdfd8064c9f6678198f",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -148,7 +148,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "4b9a84516ac22a001b0211b71a838f99c9fc186f0910c825b2bd1e3eb53db118",
+        "stdoutSha256": "06ff9d20bb3fee017574fb707e512d2d1ddfa038a6370672a2145da3c5869670",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -157,7 +157,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "41826bbe8b4e1e814c6ed2d49c3d4d3007807301599f66296b11c0c74c6adb56",
+        "stdoutSha256": "40d669f201446990ccdf22db07fe56588c6239977f6a3f38b9a0a5dba42c06f8",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -166,7 +166,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "a33d19ae4a1607c99038407192ec2c28bb4c9e10f67e6be0e959699c33e6faa8",
+        "stdoutSha256": "efd4e76a1dfafa3843a125f90061a75de209a45056ef1f2bac5401de4f4c407d",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -181,5 +181,5 @@
     ]
   },
   "passed": true,
-  "generatedAt": "2026-07-24T01:43:42.029Z"
+  "generatedAt": "2026-07-24T02:04:06.871Z"
 }

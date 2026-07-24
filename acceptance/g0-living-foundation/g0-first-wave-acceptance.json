@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-FIRST-WAVE",
-  "sourceCommit": "13fcc2d036bcb7ed4a117f2ee4dd1a0981d86627",
+  "sourceCommit": "7beae8f740d7a0be574837e18e6140401112666f",
   "baseline": {
     "schemaVersion": 1,
-    "baselineId": "g0-second-wave-establishing-0.3",
-    "baselineVersion": "0.3.0",
+    "baselineId": "g0-third-wave-establishing-0.4",
+    "baselineVersion": "0.4.0",
     "lifecycleStatus": "establishing",
     "qualificationStatus": "not_yet_qualified",
     "constitutionId": "biof3-g0-constitution-v1",
-    "manifestDigest": "0bedbdc1e34a0c32de6da46750f174b485631269dd311b51711240ab1572c83b",
-    "bundleDigest": "8416d60c1245c8c916be7c30df3fe488cf4ba211b4b3122e69087655d9f8e169"
+    "manifestDigest": "4bfb56b4504fff315f9fcaf04973c38823d1eb5a0787fa8fb08ba531829f1d2d",
+    "bundleDigest": "22bed2fe0bbb66cf5175416c6f5198386e8ff75fb95a52ca74a83e6e5f159180"
   },
   "privacy": "status_and_output_digests_only_no_raw_output_credentials_headers_urls_or_provider_responses",
   "checks": [
@@ -118,7 +118,7 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-24T01:42:34.602Z",
+    "generatedAt": "2026-07-24T02:02:59.678Z",
     "commands": [
       {
         "label": "first-wave-test",
@@ -126,7 +126,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "06eb766fac7bf13526e53360902381b54ba6523acd6a32bf2d50b501887e3abe",
+        "stdoutSha256": "fd370ddaefcb01d00a4fb6ac20f0eb0f93a939716a542588e2b38c70781ffd98",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -135,7 +135,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "c596cc2b3d43f439c9161dd46b0b797ed2b8b9962de36da12a6eeb4fd46dc7fb",
+        "stdoutSha256": "28403cc49a31c805a9918a48ff7be37a65cd81bd41ffdcc12ee01603689f9f9f",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -144,7 +144,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "7697efa2054e9fb0d04f429654a914ed9154c54feef567ce52f8d0bfdd12f5d2",
+        "stdoutSha256": "ba78be4ddcc1e04fa35dc70454205759812ea6752499c1e2e4f2e6fd1283ff43",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -153,7 +153,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "7ec79485da114259fb626030662da151ad6f166109283dcfe2f74cb56059c158",
+        "stdoutSha256": "0068ff53b69bfae364c9bab1f434f541e278195159778894f8413303913164b9",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -162,7 +162,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "eabc5d7e14465b0d7d4e2b7b9322b880915bb1ff96d7be7689a4ecc4b6bebd64",
+        "stdoutSha256": "54c572d1b990473aeb513e0e38a4662e06ed6f657f1ebe8448855b8e5f9ee6af",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -186,5 +186,5 @@
     ]
   },
   "passed": true,
-  "generatedAt": "2026-07-24T01:42:34.602Z"
+  "generatedAt": "2026-07-24T02:02:59.678Z"
 }
