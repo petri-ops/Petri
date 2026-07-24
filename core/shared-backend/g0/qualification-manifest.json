@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": 1,
+  "decisionPolicyVersion": 1,
+  "qualificationId": "g0-baseline-v1-qualification",
+  "subjectBaselineId": "g0-fifth-wave-establishing-0.6",
+  "subjectBaselineVersion": "0.6.0",
+  "qualificationScope": {
+    "platform": "macos-arm64",
+    "application": "packaged_desktop_app",
+    "storage": "local_files_plus_sqlite",
+    "runtimes": ["node-local", "r-local", "python-local"],
+    "providers": "deterministic_mock_plus_at_least_two_real_providers",
+    "scientificTasks": "conformance_admitted_real_task_tracks_only",
+    "permissions": ["read", "full", "developer"],
+    "boundary": "A single platform, provider or task success never infers qualification of any other scope."
+  },
+  "decisionStates": {
+    "qualified": "All mandatory evidence classes are satisfied with fresh baseline-bound passing evidence and every zero-tolerance count is zero.",
+    "not_yet_qualified": "No zero-tolerance violation and no integrity failure, but at least one mandatory evidence class is missing, unavailable, stale or degraded.",
+    "blocked": "A zero-tolerance invariant was violated or committed evidence failed integrity or freshness binding; qualification is refused, not merely pending."
+  },
+  "reasonCodes": [
+    "zero_tolerance_violation",
+    "evidence_integrity_failure",
+    "mandatory_evidence_missing",
+    "mandatory_evidence_unavailable",
+    "mandatory_evidence_stale",
+    "mandatory_evidence_degraded",
+    "mandatory_evidence_blocked",
+    "support_claim_unsatisfied",
+    "excluded_claim_promoted"
+  ],
+  "evidenceStatuses": {
+    "passed": "The evidence entry demonstrates a bounded successful result for its class.",
+    "degraded": "The evidence exists but is partial, unbound to the subject baseline digest, or produced outside the qualification harness.",
+    "blocked": "The evidence demonstrates an explicit blocked outcome for its class.",
+    "unavailable": "No evidence of the required kind exists for the subject baseline."
+  },
+  "freshnessPolicy": {
+    "rule": "An evidence entry is fresh only when its baselineDigest equals the subject baseline bundleDigest and its sourceCommit is an ancestor of the qualification commit.",
+    "unboundReal": "Real-execution evidence that predates or is not bound to the subject baseline bundleDigest is treated as degraded, never as satisfied.",
+    "requalificationTriggers": [
+      "baseline_bundle_digest_change",
+      "new_g0_major",
+      "support_scope_expansion",
+      "evidence_expiry",
+      "reintroduced_incident"
+    ]
+  },
+  "requiredEvidenceClasses": [
+    {
+      "id": "constitution_baseline",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic",
+      "coreProof": "Manifest, Registry, Support Matrix and live contract versions agree and no capability is prematurely qualified."
+    },
+    {
+      "id": "truth_lattice",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic",
+      "coreProof": "Job, Artifact, Scientific, Delivery and Presentation truth never override each other."
+    },
+    {
+      "id": "durable_state",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic",
+      "coreProof": "Interrupt, restart, duplicate event and partial write recover or honestly block without silent loss."
+    },
+    {
+      "id": "scientific_accuracy",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic",
+      "coreProof": "Normal, negative, boundary, non-significant, low-power, contradictory and missing-design outcomes stay honest."
+    },
+    {
+      "id": "replay_drift",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic",
+      "coreProof": "Input, parameter, script, environment and conclusion drift are classified, not hidden by wording."
+    },
+    {
+      "id": "runtime_resource",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic",
+      "coreProof": "Long task, memory, CPU, disk, queue, cancel and resume never change the scientific standard."
+    },
+    {
+      "id": "model_memory_cost",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic",
+      "coreProof": "Compression, cache identity, usage ledger and fallback stay science-neutral and credential-safe."
+    },
+    {
+      "id": "plugin_supply_chain",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic",
+      "coreProof": "Source, hash, runtime, independent script, validators and upgrade replay are governed."
+    },
+    {
+      "id": "security_permission",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic",
+      "coreProof": "Project isolation, credentials, source immutability, command, network and external side effects stay bounded."
+    },
+    {
+      "id": "observable_experience",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic",
+      "coreProof": "Chat, summary, task, file and result views converge on one honest status without hidden reasoning."
+    },
+    {
+      "id": "resilience_fault_matrix",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic",
+      "coreProof": "Eight fault domains resolve to bounded honest outcomes with preserved audit and no false success."
+    },
+    {
+      "id": "migration_upgrade",
+      "enforcement": "mandatory",
+      "evidenceMode": "offline_deterministic",
+      "coreProof": "Old projects, old contracts and interrupted upgrades stay readable and block unsafe formal writes."
+    },
+    {
+      "id": "real_provider",
+      "enforcement": "mandatory",
+      "evidenceMode": "real_execution",
+      "coreProof": "At least two real providers plus deterministic mock complete conformance tracks without changing scientific verdicts.",
+      "realEntryPoint": "npm run g0:qualification:provider"
+    },
+    {
+      "id": "packaged_app",
+      "enforcement": "mandatory",
+      "evidenceMode": "real_execution",
+      "coreProof": "The packaged macOS arm64 app completes a real conformance task; dev-shell success cannot substitute.",
+      "realEntryPoint": "npm run g0:qualification:packaged"
+    },
+    {
+      "id": "soak_endurance",
+      "enforcement": "mandatory",
+      "evidenceMode": "real_execution",
+      "coreProof": "Endurance and soak runs keep durable truth, resource governance and recovery honest over time.",
+      "realEntryPoint": "npm run g0:qualification:soak"
+    },
+    {
+      "id": "visual_state_convergence",
+      "enforcement": "mandatory",
+      "evidenceMode": "real_execution",
+      "coreProof": "Real renderer across light/dark, 820px, wide and history-recovery shows converged, non-green-for-blocked states.",
+      "realEntryPoint": "npm run g0:qualification:visual"
+    }
+  ],
+  "zeroToleranceInvariants": [
+    { "id": "ZT-01", "statement": "A failed, blocked or unverified Job is presented as complete." },
+    { "id": "ZT-02", "statement": "Session, Task, Loop, Job, Artifact, Checkpoint, Delivery or audit truth is silently lost." },
+    { "id": "ZT-03", "statement": "A formal result lacks input, parameters, script, environment, Job, Validator or lineage." },
+    { "id": "ZT-04", "statement": "Data, Artifact, session, credential or permission crosses project scope." },
+    { "id": "ZT-05", "statement": "API key, Authorization, provider response, absolute user path or private data enters committed evidence." },
+    { "id": "ZT-06", "statement": "Source data, an existing formal Artifact or unrelated user Git WIP is overwritten to advance flow." },
+    { "id": "ZT-07", "statement": "Model, cache, compression, fallback or UI text overrides scientific or execution truth." },
+    { "id": "ZT-08", "statement": "A migration failure silently fabricates new history or fakes a successful upgrade." },
+    { "id": "ZT-09", "statement": "An irreversible action, remote publish or major external side effect bypasses the permission boundary." },
+    { "id": "ZT-10", "statement": "A second executor, Job, Artifact, Loop, Workflow or version truth is created for qualification." }
+  ],
+  "supportClaims": [
+    {
+      "id": "macos-arm64-packaged-local-execution",
+      "description": "BioF3 Desktop packaged app runs local scientific execution on macOS arm64 with converged UI.",
+      "requiredEvidenceClasses": [
+        "constitution_baseline",
+        "truth_lattice",
+        "durable_state",
+        "scientific_accuracy",
+        "plugin_supply_chain",
+        "security_permission",
+        "observable_experience",
+        "resilience_fault_matrix",
+        "packaged_app",
+        "visual_state_convergence"
+      ]
+    },
+    {
+      "id": "local-file-sqlite-durability",
+      "description": "Local file plus SQLite storage keeps durable research truth across restart, upgrade and rollback.",
+      "requiredEvidenceClasses": ["durable_state", "migration_upgrade", "soak_endurance"]
+    },
+    {
+      "id": "deterministic-scientific-truth",
+      "description": "Scientific verdicts are deterministic, reproducible and drift-classified.",
+      "requiredEvidenceClasses": ["truth_lattice", "scientific_accuracy", "replay_drift"]
+    },
+    {
+      "id": "real-provider-science-neutral",
+      "description": "Real provider text never changes deterministic scientific acceptance.",
+      "requiredEvidenceClasses": ["model_memory_cost", "real_provider"]
+    },
+    {
+      "id": "runtime-resource-adaptive",
+      "description": "Local runtime adapts to real resources while preserving result contracts.",
+      "requiredEvidenceClasses": ["runtime_resource", "resilience_fault_matrix"]
+    },
+    {
+      "id": "capability-supply-chain-governed",
+      "description": "Plugins, runtimes and packages are verifiable, replaceable and upgrade-checked.",
+      "requiredEvidenceClasses": ["plugin_supply_chain"]
+    },
+    {
+      "id": "permission-boundary-enforced",
+      "description": "Read, full and developer modes obey non-negotiable safety boundaries.",
+      "requiredEvidenceClasses": ["security_permission"]
+    }
+  ],
+  "excludedClaims": [
+    { "id": "windows-support", "reason": "no_current_product_acceptance" },
+    { "id": "linux-support", "reason": "not_currently_packaged" },
+    { "id": "macos-x64-support", "reason": "analysis_runtime_not_product_qualified" },
+    { "id": "cloud-or-postgres-storage", "reason": "local_only_architecture" },
+    { "id": "arbitrary-omics-auto-support", "reason": "only_conformance_admitted_tracks" },
+    { "id": "multi-agent-orchestration", "reason": "not_a_g0_baseline_capability" },
+    { "id": "result-studio-editing", "reason": "planned_after_qualification_not_in_scope" }
+  ],
+  "forbidden": [
+    "second_qualification_execution_truth",
+    "faking_qualified_without_full_mandatory_evidence",
+    "promoting_excluded_or_unsupported_claim",
+    "lowering_assertions_or_deleting_failed_fixtures_to_pass",
+    "model_decided_qualification_verdict"
+  ]
+}

@@ -6,7 +6,9 @@
 
 1. [`scientific-intelligence-os-vision.md`](./scientific-intelligence-os-vision.md) — BioF3 长期产品愿景、当前定位、阶段跃迁条件与禁止跨阶段建设规则。它约束方向，但不替代当前工作包。
 2. [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) — 当前永久 G0 可信基础层主线；G0-START/LF0～LF11 已完成，下一步为 LF12 Baseline Qualification。
-3. [`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md) — 已进入 LF3/LF7 依赖链的数据契约与适配基线。
+3. [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) — 当前下一工作包；对 G0 全栈执行 Q0～Q7 资格认证，未满足真实证据前保持 not_yet_qualified。
+4. [`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md) — 已进入 LF3/LF7 依赖链的数据契约与适配基线。
+5. [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) — LF12 通过后启动的结果交互、Git-backed ChangeSet/Revision、比较、采用、撤销与恢复计划。
 
 ## 当前开发必读
 
@@ -22,6 +24,7 @@
 8. [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) — 已完成的 HLE 生产 Agent、Validator/Repair、恢复、UI 与真实 SPT-1 验收记录。
 9. [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md) — 已完成的 P-03 真实科学任务翻译与交付工作包计划。
 10. [`../acceptance/g0-living-foundation/g0-fifth-wave-acceptance.json`](../acceptance/g0-living-foundation/g0-fifth-wave-acceptance.json) — G0 LF11 Evolution Pipeline 的脱敏机器验收证据。
+11. [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) — 当前 LF12 Q0～Q7 执行顺序、证据范围、资格裁决与完成定义。
 
 ## 当前有效专项规范
 

@@ -33,6 +33,8 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 
 G0 当前状态仍是 `establishing / not_yet_qualified`。下一主线进入 LF12 Baseline Qualification；资格证据完成前不得宣称 qualified，也不得建立第二套资源、成本、会话、执行或 UI truth。
 
+LF12 详细计划为 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md)，按 Q0～Q7 分波推进。Result Studio 计划已记录在 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md)，其结果交互与 Git-backed 版本能力必须等待 LF12 qualified checkpoint 后启动。
+
 ### 3.1 已完成基线：真实科学任务驱动的 Harness 升级
 
 用户已确认 Harness 应承担“把模糊科学需求转化为数据语言、可执行计划、验证证据和交付结果”的工程职责，而不是收集每一个分析需求点。当前采用增量升级，不重建 P-02 执行真相，不新增第二套 executor、job、artifact 或 workflow truth。

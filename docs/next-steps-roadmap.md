@@ -8,6 +8,8 @@
 
 当前不默认扩展分析功能。`G0-START` 与 LF0～LF11 已完成；当前基线为 `0.6.0 establishing / not_yet_qualified`。下一阶段启动 LF12 Baseline Qualification。UI-032 已完成；rc.7 仍是工程候选版，不得描述为 GA。
 
+LF12 按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 执行。当前先建立 Qualification Manifest、Evidence Ledger 与确定性裁决，再补真实 Provider、macOS arm64 packaged、soak、视觉、迁移和故障证据。Result Studio 已有独立计划，但必须等待 LF12 形成 qualified checkpoint。
+
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 已完成的 Scientific Task Contract 工作包记录见 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md)。
 当前 G0 主计划见 [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md)。

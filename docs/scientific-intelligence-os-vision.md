@@ -701,7 +701,7 @@ Lab Scientific OS
 
 当前唯一主线仍是：
 
-> 在已完成的 HLE、G0-START 与 LF0～LF10 上，启动 LF11 Evolution Pipeline，再以 LF12 完成首个基线资格评审，持续保持永久 Conformance。
+> 在已完成的 HLE、G0-START 与 LF0～LF11 上，按 LF12 Q0～Q7 完成首个基线资格评审，持续保持永久 Conformance。
 
 与愿景相关但当前只记录、不实施的方向：
 
@@ -715,7 +715,7 @@ Lab Scientific OS
 当前阶段的优先决策顺序：
 
 1. `G0-START` 与 `G0-LF0` 已完成，永久 `g0:lf0` 门禁必须保持通过。
-2. G0-LF0～LF10 已完成；启动 LF11 变化晋级流水线，随后进入 LF12 基线资格评审。
+2. G0-LF0～LF11 已完成；当前进入 LF12 基线资格评审。
 3. 按 G0-LF3～LF12 完成准确、复现、资源、安全、故障和兼容资格。
 4. G0 Baseline v1 qualified 后转入永久 maintained。
 5. 在继续维护 G0 的同时，才选择第二和第三个旗舰科学任务进入 G1。

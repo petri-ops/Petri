@@ -725,6 +725,8 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 
 ## 21. G0-LF12：Baseline Qualification
 
+详细执行计划：[`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md)。该工作包包含 Q0～Q7，不是一次证据汇总或版本号修改。
+
 ### 目标
 
 建立第一个可长期维护的 `G0 Baseline v1`。
