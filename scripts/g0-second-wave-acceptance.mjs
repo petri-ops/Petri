@@ -41,7 +41,7 @@ function inspect(verification = null, bootstrap = false) {
     statistics: { adjustedP: 0.8, alpha: 0.05, multipleTesting: 'BH', unit: 'effect', direction: 'none' },
   });
   const checks = [
-    item('G0-W2-01', g0.validateG0BaselineBundle().ok && Number(g0.manifest.baselineVersion.split('.')[1]) >= 3 && g0.manifest.qualificationStatus === 'not_yet_qualified', ['core/shared-backend/g0/baseline-manifest.json'], 'Compatible baseline retains second-wave contracts and remains not qualified.'),
+    item('G0-W2-01', g0.validateG0BaselineBundle().ok && g0.manifest.lifecycleStatus === 'maintained' && g0.manifest.qualificationStatus === 'qualified', ['core/shared-backend/g0/baseline-manifest.json'], 'Maintained qualified baseline retains second-wave contracts.'),
     item('G0-W2-02', science.validateScientificAccuracyContract().ok && science.contract.requiredChecks.length >= 8, ['core/shared-backend/g0/scientific-accuracy.json'], 'Scientific applicability, assumptions and statistical semantics are machine contracts.'),
     item('G0-W2-03', negative.outcome === 'not_significant' && negative.truthStatus === 'passed' && negative.blocking === false, ['core/shared-backend/g0-scientific-accuracy.js'], 'Non-significance is a valid bounded conclusion, not failure.'),
     item('G0-W2-04', science.contract.prohibited.includes('retry_until_significant') && science.contract.prohibited.includes('threshold_tuning_for_expected_result'), ['core/shared-backend/g0/scientific-accuracy.json'], 'Scientific integrity prohibitions are explicit.'),
@@ -127,7 +127,7 @@ function verifyEvidence() {
   if (!existsSync(evidencePath)) throw new Error('evidence missing; run npm run g0:second-wave:update');
   const stored = JSON.parse(readFileSync(evidencePath, 'utf8'));
   if (!isAncestor(stored.sourceCommit)) throw new Error('evidence source commit is not an ancestor of HEAD');
-  if (stored.baseline?.bundleDigest !== g0.getCurrentG0Baseline().bundleDigest) throw new Error('baseline changed without refreshed evidence/version');
+  if (stored.baseline?.bundleDigest !== g0.getQualificationSubjectBaseline().bundleDigest) throw new Error('qualified subject changed without requalification');
   const current = inspect(stored.verification);
   if (!stored.passed || !current.passed) throw new Error(current.checks.filter((entry) => !entry.passed).map((entry) => entry.id).join(', '));
   console.log('[G0-SECOND-WAVE] PASS — 12/12');

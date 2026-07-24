@@ -13,11 +13,11 @@ const descriptor = {
   platform: 'darwin-arm64', failureModes: ['bad_input'], validators: ['deg'], artifacts: ['table'],
 };
 
-test('fourth-wave baseline remains establishing and closes LF7/LF8/LF10 contracts', () => {
+test('maintained v1 retains LF7/LF8/LF10 contracts', () => {
   const validation = g0.validateG0BaselineBundle();
   assert.equal(validation.ok, true, validation.issues.join('\n'));
-  assert.ok(Number(g0.manifest.baselineVersion.split('.')[1]) >= 5);
-  assert.equal(g0.manifest.qualificationStatus, 'not_yet_qualified');
+  assert.ok(g0.parseMajor(g0.manifest.baselineVersion) >= 1);
+  assert.equal(g0.manifest.qualificationStatus, 'qualified');
   assert.equal(g0.capabilitySupplyChain.contractVersion, 2);
   assert.equal(g0.securityPermissionMatrix.contractVersion, 2);
   assert.equal(g0.resilienceLab.contractVersion, 1);

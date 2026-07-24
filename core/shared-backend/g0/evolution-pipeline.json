@@ -39,6 +39,12 @@
       "new_permanent_regression"
     ]
   },
+  "requalificationGate": {
+    "triggerSource": "core/shared-backend/g0/qualification-manifest.json#freshnessPolicy.requalificationTriggers",
+    "requiredDecisionState": "qualified",
+    "requiredEvidenceDigest": true,
+    "failClosed": true
+  },
   "policyLearning": {
     "outputKind": "candidate_only",
     "requiredControls": [

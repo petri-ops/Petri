@@ -90,7 +90,7 @@ test('future-baseline projects remain readable but formal layouts and writes are
       created_baseline_version = ?,
       created_manifest_digest = ?
      WHERE project_id = ?`
-  ).run('g0-future-1', '1.0.0', 'f'.repeat(64), project.id);
+  ).run('g0-future-2', '2.0.0', 'f'.repeat(64), project.id);
 
   const reopened = db.getProject(project.id);
   assert.equal(reopened.g0_baseline.compatibilityStatus, 'blocked');

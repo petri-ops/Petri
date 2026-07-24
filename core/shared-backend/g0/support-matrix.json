@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "baselineId": "g0-fifth-wave-establishing-0.6",
-  "qualificationBoundary": "No capability is marked qualified before G0-LF12.",
+  "baselineId": "g0-baseline-v1",
+  "qualificationBoundary": "Only the explicit macOS arm64, local runtime, provider-neutral and DESeq2 conformance scope qualified by G0-LF12 is maintained; all other scope remains available, experimental or unavailable.",
   "platforms": [
     {
       "id": "macos-arm64",
-      "status": "available",
+      "status": "qualified",
       "scope": "desktop_shell_and_local_scientific_execution",
       "evidenceRefs": [
         "acceptance/harness-loop/production/ui-matrix.md",
@@ -31,13 +31,13 @@
   "providers": [
     {
       "id": "deepseek",
-      "status": "available",
-      "evidenceRef": "acceptance/harness-loop/production/provider-matrix.json"
+      "status": "qualified",
+      "evidenceRef": "acceptance/g0-qualification/real-provider.json"
     },
     {
       "id": "openai-compatible",
-      "status": "available",
-      "evidenceRef": "acceptance/harness-loop/production/provider-matrix.json"
+      "status": "qualified",
+      "evidenceRef": "acceptance/g0-qualification/real-provider.json"
     },
     {
       "id": "other-configured-providers",
@@ -48,17 +48,17 @@
   "runtimes": [
     {
       "id": "node-local",
-      "status": "available",
+      "status": "qualified",
       "platform": "macos-arm64"
     },
     {
       "id": "r-local",
-      "status": "available",
+      "status": "qualified",
       "platform": "macos-arm64"
     },
     {
       "id": "python-local",
-      "status": "available",
+      "status": "qualified",
       "platform": "macos-arm64"
     }
   ],
@@ -73,7 +73,8 @@
     },
     {
       "id": "deseq2",
-      "status": "available"
+      "status": "qualified",
+      "evidenceRef": "acceptance/g0-qualification/packaged-app.json"
     },
     {
       "id": "deg-standardizer",
@@ -113,6 +114,11 @@
     {
       "id": "g0-major-0",
       "status": "available",
+      "openPolicy": "compatible"
+    },
+    {
+      "id": "g0-major-1",
+      "status": "qualified",
       "openPolicy": "compatible"
     },
     {

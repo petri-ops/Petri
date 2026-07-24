@@ -105,7 +105,7 @@ test('project baseline endpoint reports a future identity as blocked without hid
       created_baseline_version = ?,
       created_manifest_digest = ?
      WHERE project_id = ?`,
-  ).run('g0-future-1', '1.0.0', 'f'.repeat(64), project.id);
+  ).run('g0-future-2', '2.0.0', 'f'.repeat(64), project.id);
 
   const response = await request(`/api/data/projects/${project.id}/g0-baseline`);
   assert.equal(response.status, 200);

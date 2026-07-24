@@ -5,13 +5,14 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const g0 = require('../core/shared-backend/g0-baseline');
 
-test('G0-LF0 bundle is internally consistent and matches live contract versions', () => {
+test('G0 Baseline v1 is maintained, qualified and matches live contract versions', () => {
   const result = g0.validateG0BaselineBundle();
   assert.equal(result.ok, true, result.issues.join('\n'));
   assert.deepEqual(result.issues, []);
   assert.equal(result.baseline.baselineId, g0.registry.currentBaselineId);
-  assert.equal(result.baseline.lifecycleStatus, 'establishing');
-  assert.equal(result.baseline.qualificationStatus, 'not_yet_qualified');
+  assert.equal(result.baseline.baselineVersion, '1.0.0');
+  assert.equal(result.baseline.lifecycleStatus, 'maintained');
+  assert.equal(result.baseline.qualificationStatus, 'qualified');
   assert.match(result.baseline.manifestDigest, /^[a-f0-9]{64}$/);
   assert.match(result.baseline.bundleDigest, /^[a-f0-9]{64}$/);
   assert.deepEqual(result.actualContracts, g0.manifest.contracts);
@@ -29,20 +30,22 @@ test('G0 Constitution freezes the single execution truth and durable public evid
   }, TypeError);
 });
 
-test('G0-LF0 support matrix makes no premature qualified claim', () => {
+test('support matrix qualifies only the explicit LF12 scope', () => {
   const groups = ['platforms', 'providers', 'runtimes', 'plugins', 'projectFormats'];
   for (const group of groups) {
     assert.ok(Array.isArray(g0.supportMatrix[group]));
-    assert.equal(g0.supportMatrix[group].some((item) => item.status === 'qualified'), false);
   }
   assert.equal(
     g0.supportMatrix.platforms.find((item) => item.id === 'macos-arm64')?.status,
-    'available',
+    'qualified',
   );
   assert.equal(
     g0.supportMatrix.platforms.find((item) => item.id === 'windows-x64')?.status,
     'unavailable',
   );
+  assert.equal(g0.supportMatrix.plugins.find((item) => item.id === 'deseq2')?.status, 'qualified');
+  assert.equal(g0.supportMatrix.plugins.find((item) => item.id === 'wgcna')?.status, 'experimental');
+  assert.equal(g0.supportMatrix.projectFormats.find((item) => item.id === 'g0-major-1')?.status, 'qualified');
 });
 
 test('legacy unversioned projects are explicitly adopted without rewriting creator history', () => {
@@ -90,7 +93,7 @@ test('current baseline projects are executable only with a matching identity dig
 test('future or malformed project baselines block formal execution instead of silently degrading', () => {
   const future = g0.evaluateProjectBaselineCompatibility({
     createdBaselineId: 'g0-future',
-    createdBaselineVersion: '1.0.0',
+    createdBaselineVersion: '2.0.0',
   });
   assert.equal(future.status, 'blocked');
   assert.equal(future.reason, 'future_baseline_unsupported');

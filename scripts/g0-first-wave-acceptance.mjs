@@ -34,7 +34,7 @@ function inspect(verification = null, bootstrap = false) {
   const plan = read('docs/g0-living-foundation-plan.md');
   const commands = verification?.commands || [];
   const checks = [
-    item('G0-W1-01', g0.validateG0BaselineBundle().ok && Number(g0.manifest.baselineVersion.split('.')[1]) >= 2 && g0.manifest.qualificationStatus === 'not_yet_qualified', ['core/shared-backend/g0/baseline-manifest.json'], 'Compatible establishing baseline retains first-wave contracts and remains not qualified.'),
+    item('G0-W1-01', g0.validateG0BaselineBundle().ok && g0.manifest.lifecycleStatus === 'maintained' && g0.manifest.qualificationStatus === 'qualified', ['core/shared-backend/g0/baseline-manifest.json'], 'Maintained qualified baseline retains first-wave contracts.'),
     item('G0-W1-02', g0.truthLattice.levels.map((entry) => entry.id).join(',') === 'job,artifact,scientific,delivery,presentation', ['core/shared-backend/g0/truth-lattice.json'], 'Five truth levels have fixed authorities.'),
     item('G0-W1-03', /buildTruthProjection/.test(workflow) && /truthProjection/.test(delivery), ['core/r-server/helpers/harness-workflow-state.js', 'core/shared-backend/delivery-manifest.js'], 'Workflow and Delivery use the shared projection.'),
     item('G0-W1-04', g0.truthLattice.completionRule.includes('presentation cannot promote'), ['core/shared-backend/g0/truth-lattice.json', 'test/g0-first-wave.test.mjs'], 'Presentation cannot promote upstream truth.'),
@@ -120,7 +120,7 @@ function verifyEvidence() {
   if (!existsSync(evidencePath)) throw new Error('evidence missing; run npm run g0:first-wave:update');
   const stored = JSON.parse(readFileSync(evidencePath, 'utf8'));
   if (!isAncestor(stored.sourceCommit)) throw new Error('evidence source commit is not an ancestor of HEAD');
-  if (stored.baseline?.bundleDigest !== g0.getCurrentG0Baseline().bundleDigest) throw new Error('baseline changed without refreshed evidence/version');
+  if (stored.baseline?.bundleDigest !== g0.getQualificationSubjectBaseline().bundleDigest) throw new Error('qualified subject changed without requalification');
   const current = inspect(stored.verification);
   if (!stored.passed || !current.passed) throw new Error(current.checks.filter((entry) => !entry.passed).map((entry) => entry.id).join(', '));
   console.log('[G0-FIRST-WAVE] PASS — 12/12');

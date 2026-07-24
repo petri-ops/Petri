@@ -3,7 +3,7 @@
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { basename, dirname, join } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -11,7 +11,11 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const evidenceDir = join(root, 'acceptance/g0-qualification/packaged-ui');
 const evidencePath = join(root, 'acceptance/g0-qualification/visual-state-convergence.json');
 const inspectionPath = join(evidenceDir, 'inspection.json');
-const appBuildSubjectPath = join(root, 'dist/mac-arm64/BioF3.app/Contents/Resources/g0-build-subject.json');
+const appPath = resolve(
+  process.env.G0_QUALIFICATION_APP_PATH
+    || join(root, 'dist/mac-arm64/BioF3.app'),
+);
+const appBuildSubjectPath = join(appPath, 'Contents/Resources/g0-build-subject.json');
 const require = createRequire(import.meta.url);
 const qualification = require('../core/shared-backend/g0-baseline-qualification');
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');

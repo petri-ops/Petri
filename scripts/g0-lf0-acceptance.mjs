@@ -80,8 +80,9 @@ function inspectLf0(startReport, verification = null, options = {}) {
     makeCheck(
       'G0-LF0-02',
       bundle.ok === true
-        && bundle.baseline.lifecycleStatus === 'establishing'
-        && bundle.baseline.qualificationStatus === 'not_yet_qualified',
+        && bundle.baseline.lifecycleStatus === 'maintained'
+        && bundle.baseline.qualificationStatus === 'qualified'
+        && g0.getQualificationSubjectBaseline().baselineVersion === '0.6.0',
       ['core/shared-backend/g0-baseline.js', ...expectedResources],
       'Constitution, manifest, registry, support and governance resources are internally consistent.',
     ),
@@ -98,9 +99,10 @@ function inspectLf0(startReport, verification = null, options = {}) {
       supportGroups.every((group) => g0.supportMatrix[group].every((item) =>
         Object.hasOwn(g0.governanceVocabulary.capabilityStatuses, item.status)
       ))
-        && supportGroups.every((group) => g0.supportMatrix[group].every((item) => item.status !== 'qualified')),
+        && g0.manifest.lifecycleStatus === 'maintained'
+        && g0.manifest.qualificationStatus === 'qualified',
       ['core/shared-backend/g0/support-matrix.json', 'core/shared-backend/g0/governance-vocabulary.json'],
-      'Support claims use the fixed vocabulary and do not pre-claim LF12 qualification.',
+      'Support claims use the fixed vocabulary and expose qualification only after LF12 promotion.',
     ),
     makeCheck(
       'G0-LF0-05',
@@ -118,7 +120,7 @@ function inspectLf0(startReport, verification = null, options = {}) {
       /futureMajorPolicy/.test(JSON.stringify(g0.manifest))
         && g0.evaluateProjectBaselineCompatibility({
           createdBaselineId: 'future',
-          createdBaselineVersion: '1.0.0',
+          createdBaselineVersion: '2.0.0',
         }).status === 'blocked'
         && /assertProjectG0Compatible/.test(layoutSource)
         && /requireCompatible/.test(workspaceSource),
@@ -286,7 +288,7 @@ function verifyEvidence() {
   if (!isAncestor(storedLf0.sourceCommit)) throw new Error('LF0 evidence source commit is not an ancestor of HEAD');
   const startReport = inspectG0Start({ verification: storedStart.verification });
   const report = inspectLf0(startReport, storedLf0.verification);
-  if (storedLf0.baseline?.bundleDigest !== g0.getCurrentG0Baseline().bundleDigest) {
+  if (storedLf0.baseline?.bundleDigest !== g0.getQualificationSubjectBaseline().bundleDigest) {
     throw new Error('G0 baseline bundle changed without refreshed evidence/version');
   }
   if (!storedStart.passed || !storedLf0.passed || !startReport.passed || !report.passed) {

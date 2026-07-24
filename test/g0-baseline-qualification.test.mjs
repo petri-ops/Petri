@@ -50,15 +50,20 @@ function zeroObservations(overrides = {}) {
   }));
 }
 
-test('LF12 manifest binds but does not mutate the sealed 0.6 establishing baseline', () => {
+test('LF12 manifest remains bound to the sealed 0.6 subject after v1 promotion', () => {
   const before = g0.getCurrentG0Baseline();
   const result = manifest();
   const after = g0.getCurrentG0Baseline();
 
-  assert.equal(result.subjectBaselineId, before.baselineId);
+  assert.equal(before.baselineId, 'g0-baseline-v1');
+  assert.equal(before.lifecycleStatus, 'maintained');
+  assert.equal(before.qualificationStatus, 'qualified');
+  assert.equal(result.subjectBaselineId, 'g0-fifth-wave-establishing-0.6');
   assert.equal(result.subjectBaselineVersion, '0.6.0');
-  assert.equal(result.subjectQualificationStatus, 'not_yet_qualified');
-  assert.equal(result.bundleDigest, before.bundleDigest);
+  assert.equal(result.subjectLifecycleStatus, 'maintained');
+  assert.equal(result.subjectQualificationStatus, 'qualified');
+  assert.equal(result.bundleDigest, g0.manifest.qualification.qualifiedFrom.bundleDigest);
+  assert.notEqual(result.bundleDigest, before.bundleDigest);
   assert.deepEqual(after, before);
   assert.equal(result.qualificationScope.platform, 'macos-arm64');
 });

@@ -10,12 +10,13 @@ const fullEvidence = [
   'scientific_and_compatibility_risk', 'data_migration', 'rollback_path', 'new_permanent_regression',
 ];
 
-test('fifth-wave baseline is versioned 0.6.0 and remains not yet qualified', () => {
+test('maintained v1 retains the fifth-wave evolution contracts', () => {
   const validation = g0.validateG0BaselineBundle();
   assert.equal(validation.ok, true, validation.issues.join('\n'));
-  assert.equal(g0.manifest.baselineVersion, '0.6.0');
-  assert.equal(g0.manifest.qualificationStatus, 'not_yet_qualified');
-  assert.equal(g0.manifest.lifecycleStatus, 'establishing');
+  assert.equal(g0.manifest.baselineVersion, '1.0.0');
+  assert.equal(g0.manifest.qualificationStatus, 'qualified');
+  assert.equal(g0.manifest.lifecycleStatus, 'maintained');
+  assert.equal(g0.getQualificationSubjectBaseline().baselineVersion, '0.6.0');
   assert.equal(g0.manifest.contracts.evolutionPipeline, 1);
   assert.equal(evolution.EVOLUTION_PIPELINE_VERSION, 1);
 });
@@ -74,6 +75,35 @@ test('LF11 breaking and migration classes demand new major and migration flags',
   });
   assert.equal(migration.allowed, false);
   assert.ok(migration.reasons.includes('migration_required'));
+});
+
+test('LF11 fails closed when an LF12 requalification trigger lacks a qualified decision', () => {
+  const missing = evolution.evaluatePromotionGate({
+    changeClass: 'policy',
+    providedEvidence: [...fullEvidence, 'metrics', 'replay', 'rollback'],
+    requalificationTrigger: 'baseline_bundle_digest_change',
+  });
+  assert.equal(missing.allowed, false);
+  assert.ok(missing.reasons.includes('requalification_decision_not_qualified'));
+  assert.ok(missing.reasons.includes('requalification_evidence_digest_missing'));
+
+  const qualified = evolution.evaluatePromotionGate({
+    changeClass: 'policy',
+    providedEvidence: [...fullEvidence, 'metrics', 'replay', 'rollback'],
+    requalificationTrigger: 'baseline_bundle_digest_change',
+    requalificationDecision: 'qualified',
+    requalificationEvidenceDigest: 'a'.repeat(64),
+  });
+  assert.equal(qualified.allowed, true, qualified.reasons.join('\n'));
+  assert.equal(qualified.requalification.required, true);
+
+  const unknown = evolution.evaluateRequalificationGate({
+    trigger: 'model_made_up_trigger',
+    decisionState: 'qualified',
+    evidenceDigest: 'a'.repeat(64),
+  });
+  assert.equal(unknown.allowed, false);
+  assert.ok(unknown.reasons.some((reason) => reason.startsWith('requalification_trigger_unknown:')));
 });
 
 test('LF11 policy learning stays candidate-only and never drifts scientific thresholds', () => {

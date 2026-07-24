@@ -27,7 +27,7 @@ function inspect(verification = null, bootstrap = false) {
   const summary = read('frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx');
   const commands = verification?.commands || [];
   const checks = [
-    check('G0-W3-01', g0.validateG0BaselineBundle().ok && Number(g0.manifest.baselineVersion.split('.')[1]) >= 4 && g0.manifest.qualificationStatus === 'not_yet_qualified', ['core/shared-backend/g0/baseline-manifest.json'], 'Compatible baseline retains third-wave contracts and remains not qualified.'),
+    check('G0-W3-01', g0.validateG0BaselineBundle().ok && g0.manifest.lifecycleStatus === 'maintained' && g0.manifest.qualificationStatus === 'qualified', ['core/shared-backend/g0/baseline-manifest.json'], 'Maintained qualified baseline retains third-wave contracts.'),
     check('G0-W3-02', runtime.contract.resourceDimensions.length === 6 && runtime.contract.actions.length >= 7, ['core/shared-backend/g0/adaptive-runtime.json'], 'LF5 resource and control decisions are bounded.'),
     check('G0-W3-03', /createRuntimeResourceSnapshot/.test(executor) && runtime.contract.readinessRequired.length === 5, ['core/r-server/helpers/tools-executor.js'], 'LF5 reuses production resource and readiness truth.'),
     check('G0-W3-04', runtime.contract.scientificBoundary.includes('scientific design change'), ['core/shared-backend/g0/adaptive-runtime.json'], 'Runtime repair cannot silently alter science.'),
@@ -72,7 +72,7 @@ try {
   } else {
     if (!existsSync(evidencePath)) throw new Error('evidence missing; run npm run g0:third-wave:update');
     const stored = JSON.parse(readFileSync(evidencePath, 'utf8'));
-    if (!ancestor(stored.sourceCommit) || stored.baseline?.bundleDigest !== g0.getCurrentG0Baseline().bundleDigest || !stored.passed || !inspect(stored.verification).passed) throw new Error('stored evidence invalid or stale');
+    if (!ancestor(stored.sourceCommit) || stored.baseline?.bundleDigest !== g0.getQualificationSubjectBaseline().bundleDigest || !stored.passed || !inspect(stored.verification).passed) throw new Error('stored evidence invalid or stale');
     console.log('[G0-THIRD-WAVE] PASS — 12/12');
   }
 } catch (error) { console.error(`[G0-THIRD-WAVE] FAIL — ${error.message}`); process.exitCode = 1; }

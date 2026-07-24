@@ -18,6 +18,7 @@ const modelMemoryCost = require('./g0/model-memory-cost.json');
 const observableExperience = require('./g0/observable-experience.json');
 const resilienceLab = require('./g0/resilience-lab.json');
 const evolutionPipeline = require('./g0/evolution-pipeline.json');
+const qualificationManifest = require('./g0/qualification-manifest.json');
 
 const LEGACY_BASELINE_ID = 'legacy-unversioned';
 const PROJECT_BASELINE_RECORD_VERSION = 1;
@@ -50,6 +51,7 @@ function deepFreeze(value) {
   observableExperience,
   resilienceLab,
   evolutionPipeline,
+  qualificationManifest,
 ].forEach(deepFreeze);
 
 function canonicalStringify(value) {
@@ -119,6 +121,7 @@ function currentContractVersions() {
     observableExperience: observableExperienceModule.OBSERVABLE_EXPERIENCE_VERSION,
     resilienceLab: resilienceLabModule.RESILIENCE_LAB_VERSION,
     evolutionPipeline: evolutionPipelineModule.EVOLUTION_PIPELINE_VERSION,
+    baselineQualification: qualificationManifest.contractVersion,
   };
 }
 
@@ -141,6 +144,7 @@ function getCurrentG0Baseline() {
     observableExperience,
     resilienceLab,
     evolutionPipeline,
+    qualificationManifest,
   });
   return Object.freeze({
     schemaVersion: manifest.schemaVersion,
@@ -224,6 +228,7 @@ function validateG0BaselineBundle() {
   if (observableExperience.schemaVersion !== 1) issues.push('observable_experience_schema_version_unsupported');
   if (resilienceLab.schemaVersion !== 1) issues.push('resilience_lab_schema_version_unsupported');
   if (evolutionPipeline.schemaVersion !== 1) issues.push('evolution_pipeline_schema_version_unsupported');
+  if (qualificationManifest.schemaVersion !== 1) issues.push('qualification_manifest_schema_version_unsupported');
   if (manifest.baselineId !== registry.currentBaselineId) issues.push('registry_current_baseline_mismatch');
   if (manifest.baselineId !== supportMatrix.baselineId) issues.push('support_matrix_baseline_mismatch');
   if (manifest.constitutionId !== constitution.constitutionId) issues.push('constitution_id_mismatch');
@@ -250,8 +255,39 @@ function validateG0BaselineBundle() {
   for (const group of ['platforms', 'providers', 'runtimes', 'plugins', 'projectFormats']) {
     for (const capability of supportMatrix[group] || []) {
       if (!allowedStatuses.has(capability.status)) issues.push(`capability_status_invalid:${group}:${capability.id}`);
-      if (capability.status === 'qualified') issues.push(`premature_qualification:${group}:${capability.id}`);
+      if (
+        capability.status === 'qualified'
+        && (manifest.lifecycleStatus !== 'maintained' || manifest.qualificationStatus !== 'qualified')
+      ) issues.push(`premature_qualification:${group}:${capability.id}`);
     }
+  }
+  if (manifest.lifecycleStatus === 'maintained' || manifest.qualificationStatus === 'qualified') {
+    const qualifiedFrom = manifest.qualification?.qualifiedFrom;
+    if (manifest.lifecycleStatus !== 'maintained') issues.push('qualified_baseline_not_maintained');
+    if (manifest.qualificationStatus !== 'qualified') issues.push('maintained_baseline_not_qualified');
+    if (manifest.qualification?.decisionState !== 'qualified') issues.push('qualification_decision_state_invalid');
+    if (!/^[a-f0-9]{40}$/.test(String(manifest.qualification?.sourceCommit || ''))) {
+      issues.push('qualification_source_commit_invalid');
+    }
+    if (!/^[a-f0-9]{64}$/.test(String(manifest.qualification?.decisionHash || ''))) {
+      issues.push('qualification_decision_hash_invalid');
+    }
+    if (!/^[a-f0-9]{64}$/.test(String(manifest.qualification?.ledgerHash || ''))) {
+      issues.push('qualification_ledger_hash_invalid');
+    }
+    if (
+      !qualifiedFrom
+      || qualifiedFrom.baselineId !== qualificationManifest.subjectBaselineId
+      || qualifiedFrom.baselineVersion !== qualificationManifest.subjectBaselineVersion
+      || !/^[a-f0-9]{64}$/.test(String(qualifiedFrom.manifestDigest || ''))
+      || !/^[a-f0-9]{64}$/.test(String(qualifiedFrom.bundleDigest || ''))
+    ) issues.push('qualification_subject_binding_invalid');
+    const currentRegistryEntry = registry.baselines.find((item) => item.baselineId === manifest.baselineId);
+    if (
+      currentRegistryEntry?.lifecycleStatus !== 'maintained'
+      || currentRegistryEntry?.qualificationStatus !== 'qualified'
+      || currentRegistryEntry?.qualifiedFromBaselineId !== qualifiedFrom?.baselineId
+    ) issues.push('qualified_registry_entry_invalid');
   }
   if (parseMajor(manifest.baselineVersion) !== manifest.projectFormat.currentMajor) {
     issues.push('project_format_major_mismatch');
@@ -394,6 +430,7 @@ module.exports = {
   observableExperience,
   resilienceLab,
   evolutionPipeline,
+  qualificationManifest,
   canonicalStringify,
   sha256,
   parseMajor,
