@@ -29,9 +29,9 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 
 ### 3.0 当前主线：G0 Living Foundation establishing
 
-2026-07-24 `G0-START`、LF0、LF1 与 LF2 已关闭。0.2.0 establishing 基线在既有 Job/Artifact 链上增加五层 Truth Projection、完成门、失效/幂等规则、13 类 Durable Inventory、恢复计划、项目导出完整性和 append-only 恢复审计；LF7/LF8 第一波供应链与权限基础契约已建立但整体仍为 in_progress。永久门禁 `npm run g0:lf0` 与 `npm run g0:first-wave` 已进入根检查，脱敏证据位于 `acceptance/g0-living-foundation/`。
+2026-07-24 `G0-START` 与 LF0～LF4 已关闭。0.3.0 establishing 基线在 Truth/Durable 上增加方法适用性、假设、统计语义、科学阻断状态、七类 Replay Corpus、三类 Artifact 比较和四类 Drift Report；Delivery 与 ReplayPackage 消费同一科学证据，没有第二套真相。永久门禁 `npm run g0:lf0`、`npm run g0:first-wave` 与 `npm run g0:second-wave` 已进入根检查，脱敏证据位于 `acceptance/g0-living-foundation/`。
 
-G0 当前状态仍是 `establishing / not_yet_qualified`。下一主线按 [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) 启动 LF3 Scientific Accuracy 与 LF4 Reproducibility Lab；G0-SDC 可作为 LF3/LF7 的真实轨。不得把第一波完成写成 G0 qualified，也不得建立第二套 executor、Job、Artifact、Loop 或 workflow truth。
+G0 当前状态仍是 `establishing / not_yet_qualified`。下一主线按 [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) 推进 LF5 Adaptive Runtime、LF6 Model/Memory/Cache/Cost 与 LF9 Observable Experience。不得把第二波完成写成 G0 qualified，也不得建立第二套 executor、Job、Artifact、Loop、Validation 或 Replay truth。
 
 ### 3.1 已完成基线：真实科学任务驱动的 Harness 升级
 

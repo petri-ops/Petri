@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-SECOND-WAVE",
+  "sourceCommit": "13fcc2d036bcb7ed4a117f2ee4dd1a0981d86627",
+  "baseline": {
+    "schemaVersion": 1,
+    "baselineId": "g0-second-wave-establishing-0.3",
+    "baselineVersion": "0.3.0",
+    "lifecycleStatus": "establishing",
+    "qualificationStatus": "not_yet_qualified",
+    "constitutionId": "biof3-g0-constitution-v1",
+    "manifestDigest": "0bedbdc1e34a0c32de6da46750f174b485631269dd311b51711240ab1572c83b",
+    "bundleDigest": "8416d60c1245c8c916be7c30df3fe488cf4ba211b4b3122e69087655d9f8e169"
+  },
+  "privacy": "status_counts_and_output_digests_only_no_raw_data_credentials_headers_urls_or_provider_responses",
+  "checks": [
+    {
+      "id": "G0-W2-01",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/baseline-manifest.json"
+      ],
+      "detail": "Second-wave establishing baseline is internally consistent and not qualified."
+    },
+    {
+      "id": "G0-W2-02",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/scientific-accuracy.json"
+      ],
+      "detail": "Scientific applicability, assumptions and statistical semantics are machine contracts."
+    },
+    {
+      "id": "G0-W2-03",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0-scientific-accuracy.js"
+      ],
+      "detail": "Non-significance is a valid bounded conclusion, not failure."
+    },
+    {
+      "id": "G0-W2-04",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/scientific-accuracy.json"
+      ],
+      "detail": "Scientific integrity prohibitions are explicit."
+    },
+    {
+      "id": "G0-W2-05",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/delivery-manifest.js",
+        "core/shared-backend/g0-truth-projection.js"
+      ],
+      "detail": "LF3 reuses Delivery and Truth Projection."
+    },
+    {
+      "id": "G0-W2-06",
+      "passed": true,
+      "evidence": [
+        "test/fixtures/g0-second-wave/replay-corpus.json"
+      ],
+      "detail": "Corpus covers normal, boundary, negative, contradictory, failure, legacy and sanitized real cases."
+    },
+    {
+      "id": "G0-W2-07",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/reproducibility-lab.json"
+      ],
+      "detail": "Artifact comparison modes are explicit."
+    },
+    {
+      "id": "G0-W2-08",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/reproducibility-lab.json"
+      ],
+      "detail": "Drift classes are fixed and reviewable."
+    },
+    {
+      "id": "G0-W2-09",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/scientific-replay-package.js"
+      ],
+      "detail": "Replay binds provenance and produces a structured Drift Report."
+    },
+    {
+      "id": "G0-W2-10",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/constitution.json"
+      ],
+      "detail": "No second executor, Job, Artifact, Validation or Replay truth exists."
+    },
+    {
+      "id": "G0-W2-11",
+      "passed": true,
+      "evidence": [
+        "docs/g0-living-foundation-plan.md"
+      ],
+      "detail": "LF3/LF4 completion recorded."
+    },
+    {
+      "id": "G0-W2-12",
+      "passed": true,
+      "evidence": [
+        "acceptance/g0-living-foundation/g0-second-wave-acceptance.json"
+      ],
+      "detail": "All required command gates passed."
+    }
+  ],
+  "verification": {
+    "generatedAt": "2026-07-24T01:43:42.029Z",
+    "commands": [
+      {
+        "label": "second-wave-test",
+        "command": "node --test test/g0-second-wave.test.mjs test/g0-first-wave.test.mjs test/delivery-manifest.test.mjs test/scientific-replay-package.test.mjs",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "6cdb4ab3ee0dd6636d9dddc33a581ac7124351c6bdd720b2163cc9d932f3848b",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "root-test",
+        "command": "npm test",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "a56fa383bc6a1bbf947f92bf6491e1d4187c9600ea68ba5c73a839c9a50c3a54",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "frontend-test",
+        "command": "npm test --prefix frontend",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "cc003b7fed6aeffa40668cae467a3bb9f78ff13718c7ebedfb5237c27b11e6ef",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "frontend-build",
+        "command": "npm run build --prefix frontend",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "4b9a84516ac22a001b0211b71a838f99c9fc186f0910c825b2bd1e3eb53db118",
+        "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
+      },
+      {
+        "label": "root-check",
+        "command": "npm run check",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "41826bbe8b4e1e814c6ed2d49c3d4d3007807301599f66296b11c0c74c6adb56",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "scientific-replay",
+        "command": "npm run harness:scientific-task:replay:test",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "a33d19ae4a1607c99038407192ec2c28bb4c9e10f67e6be0e959699c33e6faa8",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "hle-production",
+        "command": "npm run harness:loop:production",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "57789c94e8055b84bd654c83f2574ee0cc4bbafa60b3135bacda7e473f5222d7",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "passed": true,
+  "generatedAt": "2026-07-24T01:43:42.029Z"
+}

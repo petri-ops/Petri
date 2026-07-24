@@ -701,7 +701,7 @@ Lab Scientific OS
 
 当前唯一主线仍是：
 
-> 在已完成的 HLE、G0-START、LF0、LF1 与 LF2 上，依次建立 G0-LF3 Scientific Accuracy 和 G0-LF4 Reproducibility Lab，持续保持永久 Conformance。
+> 在已完成的 HLE、G0-START 与 LF0～LF4 上，推进 LF5 Adaptive Runtime、LF6 Model/Memory/Cache/Cost 和 LF9 Observable Experience，并持续保持永久 Conformance。
 
 与愿景相关但当前只记录、不实施的方向：
 
@@ -715,7 +715,7 @@ Lab Scientific OS
 当前阶段的优先决策顺序：
 
 1. `G0-START` 与 `G0-LF0` 已完成，永久 `g0:lf0` 门禁必须保持通过。
-2. 启动 G0-LF3/LF4，完成科学准确性与历史 Replay/Drift 基线。
+2. G0-LF3/LF4 已完成；启动 LF5/LF6/LF9，使用同一 Replay Corpus 检验运行、模型、记忆、成本和可观察体验。
 3. 按 G0-LF3～LF12 完成准确、复现、资源、安全、故障和兼容资格。
 4. G0 Baseline v1 qualified 后转入永久 maintained。
 5. 在继续维护 G0 的同时，才选择第二和第三个旗舰科学任务进入 G1。

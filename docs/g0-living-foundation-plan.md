@@ -421,6 +421,8 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 
 ## 12. G0-LF3：Scientific Accuracy
 
+状态：`completed`（2026-07-24）
+
 ### 目标
 
 把“算出了文件”升级为“科学上可以准确解释其含义和边界”。
@@ -442,7 +444,17 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 - 用模型常识替代数据证据。
 - 把低置信度推断包装为事实。
 
+### 已落地
+
+- `scientific-accuracy.json` 固定方法适用性、假设、样本匹配、统计字段、单位、方向、多重校正和证据等级检查，以及七类科学结果状态。
+- `g0-scientific-accuracy.js` 确定性产出带 Hash 的 `scientificValidation`；非显著是有效有界结论，低功效与矛盾进入复核，缺少设计、假设违反和无效统计明确阻断。
+- 工程修复与科学设计变化分开分类；contrast、cohort、covariates、阈值等变化不能伪装成自动排错。
+- DeliveryManifest 与五层 Truth Projection 消费同一 `scientificValidation`，不新增 Validator、Job 或 Artifact 真相。
+- 正常、非显著、低功效、矛盾、缺少设计、假设违反和统计错误均有永久负例回归。
+
 ## 13. G0-LF4：Reproducibility Lab
+
+状态：`completed`（2026-07-24）
 
 ### 目标
 
@@ -463,6 +475,13 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 - 支持范围内的旧项目可以重放。
 - 科学实质变化必须被检测和审阅。
 - 报告措辞变化不能掩盖底层统计漂移。
+
+### 已落地
+
+- `reproducibility-lab.json` 固定 deterministic、tolerance-based、narrative 三类 Artifact 比较，以及 expected、compatible、scientifically_material、unknown 四类 Drift。
+- `g0-reproducibility-lab.js` 以 Hash、数值容差或结构化 claim/evidence 比较结果；叙述措辞变化不等于科学结论变化。
+- Corpus 覆盖 normal、boundary、negative、contradictory、failure、legacy 与 real_sanitized 七类任务，已修复的部分产物假成功与 checkpoint 契约事故进入长期语料。
+- 现有 ReplayPackage 继续作为唯一重放入口，新增比较模式与结构化 Drift Report；输入、参数、Runtime、插件、脚本、包、环境、随机种子及缓存来源由基线契约约束。
 
 ## 14. G0-LF5：Adaptive Runtime
 
@@ -819,15 +838,16 @@ G1 可以在 `G0 Baseline v1` qualified 后启动；G0 同时转入 maintained�
 
 ## 28. 当前行动
 
-`G0-START`、`G0-LF0`、`G0-LF1` 与 `G0-LF2` 已完成；LF7/LF8 第一波基础契约已建立但整体仍为 `in_progress`。G0 处于 `establishing`，尚未 `qualified`。
+`G0-START` 与 `G0-LF0`～`G0-LF4` 已完成；LF7/LF8 第一波基础契约已建立但整体仍为 `in_progress`。G0 处于 `establishing`，尚未 `qualified`。
 
 下一主线按依赖启动：
 
-1. `G0-LF3 Scientific Accuracy`：方法、统计、不确定性、负例与科学阻断基线。
-2. `G0-LF4 Reproducibility Lab`：基于 LF1/LF2 建立历史 Replay Corpus 与 Drift Report。
-3. `G0-SDC` 可作为 LF3/LF7 的真实数据契约轨进入，但不得直接批量扩张插件。
+1. `G0-LF5 Adaptive Runtime`：用第二波 Corpus 验证资源感知、长任务、调度与恢复。
+2. `G0-LF6 Model/Memory/Cache/Cost`：验证模型切换、压缩、缓存与成本不改变科学真相。
+3. `G0-LF9 Observable Experience`：让 UI 消费 LF1～LF6 的同一投影；可先做契约接线，最终状态收敛随 LF5/LF6 一并验收。
+4. LF7/LF8 在上述工作中持续作为插件供应链与权限门禁，不得直接批量扩张插件。
 
-任何后续工作仍须通过 `npm run g0:lf0` 与 `npm run g0:first-wave`，且不得把当前 `not_yet_qualified` 基线写成 qualified。
+任何后续工作仍须通过 `npm run g0:lf0`、`npm run g0:first-wave` 与 `npm run g0:second-wave`，且不得把当前 `not_yet_qualified` 基线写成 qualified。
 
 ## 29. 守护语句
 
