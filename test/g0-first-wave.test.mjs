@@ -138,6 +138,32 @@ test('LF2 migration or database integrity failure blocks instead of fabricating 
   assert.equal(plan.safeToResume, false);
 });
 
+test('LF2 project export is deterministic, path-bounded and integrity-verifiable', () => {
+  const manifest = durable.buildDurableExportManifest({
+    projectId: 'project_export',
+    objects: [{ type: 'task_spec', id: 'task_1', version: 1, digest: 'b'.repeat(64) }],
+    files: [{ relativePath: 'results/job_1/deg.csv', sha256: 'a'.repeat(64), sizeBytes: 42 }],
+  });
+  assert.equal(durable.verifyDurableExportManifest(manifest).ok, true);
+  assert.match(manifest.manifestHash, /^[a-f0-9]{64}$/);
+  assert.equal(durable.verifyDurableExportManifest({ ...manifest, projectId: 'tampered' }).ok, false);
+});
+
+test('LF2 recovery audit is append-only, idempotent and conflict-detecting', () => {
+  const event = {
+    eventId: 'recovery_1',
+    occurredAt: '2026-07-24T00:00:00.000Z',
+    outcome: 'recovery_required',
+  };
+  const once = durable.appendRecoveryAudit([], event);
+  const twice = durable.appendRecoveryAudit(once, event);
+  assert.equal(twice.length, 1);
+  assert.throws(
+    () => durable.appendRecoveryAudit(once, { ...event, outcome: 'resume_safe' }),
+    /recovery_audit_event_conflict/,
+  );
+});
+
 test('LF7 and LF8 foundation contracts preserve supply-chain and full-access invariants', () => {
   assert.ok(g0.capabilitySupplyChain.requiredControls.includes('content_hash_verification'));
   assert.ok(g0.capabilitySupplyChain.forbidden.includes('plugin_owned_job_or_artifact_ledger'));

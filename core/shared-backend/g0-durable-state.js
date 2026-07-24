@@ -40,6 +40,51 @@ function buildRecoveryPlan(snapshot = {}) {
   return Object.freeze({ ...plan, planHash: hash(plan) });
 }
 
+function buildDurableExportManifest({ projectId, objects = [], files = [] } = {}) {
+  if (!projectId) throw new Error('durable_export_project_required');
+  const normalizedObjects = objects.map((item) => ({
+    type: item.type,
+    id: item.id,
+    version: item.version ?? null,
+    digest: item.digest,
+  })).sort((a, b) => `${a.type}:${a.id}`.localeCompare(`${b.type}:${b.id}`));
+  const normalizedFiles = files.map((item) => ({
+    relativePath: item.relativePath,
+    sha256: item.sha256,
+    sizeBytes: item.sizeBytes,
+  })).sort((a, b) => a.relativePath.localeCompare(b.relativePath));
+  const body = {
+    durableExportVersion: DURABLE_STATE_VERSION,
+    projectId,
+    objects: normalizedObjects,
+    files: normalizedFiles,
+  };
+  return Object.freeze({ ...body, manifestHash: hash(body) });
+}
+
+function verifyDurableExportManifest(manifest = {}) {
+  const { manifestHash, ...body } = manifest;
+  const issues = [];
+  if (!manifest.projectId) issues.push('project_missing');
+  if (!Array.isArray(manifest.objects) || !Array.isArray(manifest.files)) issues.push('inventory_missing');
+  if (manifestHash !== hash(body)) issues.push('manifest_hash_mismatch');
+  for (const file of manifest.files || []) {
+    if (!file.relativePath || file.relativePath.startsWith('/') || file.relativePath.includes('..')) issues.push('file_path_invalid');
+    if (!/^[a-f0-9]{64}$/.test(file.sha256 || '')) issues.push('file_hash_invalid');
+  }
+  return Object.freeze({ ok: issues.length === 0, issues: Object.freeze([...new Set(issues)]) });
+}
+
+function appendRecoveryAudit(timeline = [], event = {}) {
+  if (!event.eventId || !event.occurredAt || !event.outcome) throw new Error('recovery_audit_event_invalid');
+  const existing = timeline.find((item) => item.eventId === event.eventId);
+  if (existing) {
+    if (JSON.stringify(existing) !== JSON.stringify(event)) throw new Error('recovery_audit_event_conflict');
+    return Object.freeze(timeline.map((item) => Object.freeze({ ...item })));
+  }
+  return Object.freeze([...timeline, Object.freeze({ ...event })]);
+}
+
 function validateDurableInventory() {
   const ids = inventory.objects.map((item) => item.id);
   const outcomes = new Set(inventory.allowedRecoveryOutcomes);
@@ -52,4 +97,12 @@ function validateDurableInventory() {
   return Object.freeze({ ok: issues.length === 0, issues: Object.freeze(issues) });
 }
 
-module.exports = { DURABLE_STATE_VERSION, inventory, buildRecoveryPlan, validateDurableInventory };
+module.exports = {
+  DURABLE_STATE_VERSION,
+  inventory,
+  buildRecoveryPlan,
+  buildDurableExportManifest,
+  verifyDurableExportManifest,
+  appendRecoveryAudit,
+  validateDurableInventory,
+};
