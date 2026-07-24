@@ -42,10 +42,11 @@ function allEntries() {
 }
 
 function zeroObservations(overrides = {}) {
-  return qualification.contract.zeroToleranceInvariants.map(({ id }) => ({
+  const evidenceClasses = qualification.contract.requiredEvidenceClasses.map(({ id }) => id);
+  return qualification.contract.zeroToleranceInvariants.map(({ id }, index) => ({
     id,
     violations: overrides[id] || 0,
-    evidenceRef: `zero-${id}`,
+    evidenceRef: `evidence-${evidenceClasses[index % evidenceClasses.length]}`,
   }));
 }
 
@@ -141,6 +142,23 @@ test('LF12 never treats an unobserved zero-tolerance invariant as zero violation
 
   assert.equal(decision.state, 'not_yet_qualified');
   assert.ok(decision.blockers.includes('zero_tolerance_unobserved:ZT-01'));
+});
+
+test('LF12 requires every zero-tolerance observation to cite fresh passing evidence', () => {
+  const activeManifest = manifest();
+  const observations = zeroObservations();
+  observations[0] = { ...observations[0], evidenceRef: 'missing-evidence' };
+  const ledger = qualification.buildEvidenceLedger({
+    manifest: activeManifest,
+    entries: allEntries(),
+    zeroToleranceObservations: observations,
+  });
+  const decision = qualification.evaluateQualificationDecision({ manifest: activeManifest, ledger });
+
+  assert.ok(ledger.zeroToleranceIntegrityIssues.includes(
+    'zero_tolerance_evidence_ref_not_fresh_passing:ZT-01'
+  ));
+  assert.equal(decision.state, 'blocked');
 });
 
 test('LF12 rejects duplicate, credential, URL and absolute-path evidence', () => {

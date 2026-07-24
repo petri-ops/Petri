@@ -154,6 +154,39 @@ function getCurrentG0Baseline() {
   });
 }
 
+/**
+ * Return the immutable bundle that LF12 qualifies. Before promotion this is
+ * simply the current establishing baseline. Once a maintained baseline is
+ * published, its qualification metadata points back to the exact sealed
+ * subject bundle so evidence validation never forms a digest cycle by trying
+ * to qualify the qualification metadata itself.
+ */
+function getQualificationSubjectBaseline() {
+  const current = getCurrentG0Baseline();
+  const qualifiedFrom = manifest.qualification?.qualifiedFrom;
+  if (
+    manifest.lifecycleStatus === 'maintained'
+    && manifest.qualificationStatus === 'qualified'
+    && qualifiedFrom
+    && typeof qualifiedFrom.baselineId === 'string'
+    && typeof qualifiedFrom.baselineVersion === 'string'
+    && /^[a-f0-9]{64}$/.test(String(qualifiedFrom.bundleDigest || ''))
+    && /^[a-f0-9]{64}$/.test(String(qualifiedFrom.manifestDigest || ''))
+  ) {
+    return Object.freeze({
+      schemaVersion: current.schemaVersion,
+      baselineId: qualifiedFrom.baselineId,
+      baselineVersion: qualifiedFrom.baselineVersion,
+      lifecycleStatus: 'establishing',
+      qualificationStatus: 'not_yet_qualified',
+      constitutionId: current.constitutionId,
+      manifestDigest: qualifiedFrom.manifestDigest,
+      bundleDigest: qualifiedFrom.bundleDigest,
+    });
+  }
+  return current;
+}
+
 function getPublicG0BaselineSummary() {
   const current = getCurrentG0Baseline();
   return {
@@ -366,6 +399,7 @@ module.exports = {
   parseMajor,
   currentContractVersions,
   getCurrentG0Baseline,
+  getQualificationSubjectBaseline,
   getPublicG0BaselineSummary,
   validateG0BaselineBundle,
   evaluateProjectBaselineCompatibility,

@@ -94,7 +94,8 @@ function computeFreshness(entry, subjectBundleDigest, subjectSourceCommit = null
  * the subject. Never mutates the baseline; only references its digests.
  */
 function buildQualificationManifest({ sourceCommit = null, generatedAt = null } = {}) {
-  const baseline = g0.getCurrentG0Baseline();
+  const currentBaseline = g0.getCurrentG0Baseline();
+  const baseline = g0.getQualificationSubjectBaseline();
   const manifest = {
     schemaVersion: QUALIFICATION_VERSION,
     contractVersion: contract.contractVersion,
@@ -102,8 +103,8 @@ function buildQualificationManifest({ sourceCommit = null, generatedAt = null } 
     qualificationId: contract.qualificationId,
     subjectBaselineId: baseline.baselineId,
     subjectBaselineVersion: baseline.baselineVersion,
-    subjectLifecycleStatus: baseline.lifecycleStatus,
-    subjectQualificationStatus: baseline.qualificationStatus,
+    subjectLifecycleStatus: currentBaseline.lifecycleStatus,
+    subjectQualificationStatus: currentBaseline.qualificationStatus,
     manifestDigest: baseline.manifestDigest,
     bundleDigest: baseline.bundleDigest,
     qualificationScope: contract.qualificationScope,
@@ -194,6 +195,11 @@ function buildEvidenceLedger({
 
   const observationIds = new Set();
   const observationIntegrityIssues = [];
+  const freshPassingEvidenceIds = new Set(
+    normalized
+      .filter((entry) => entry.integrity === 'valid' && entry.freshnessStatus === 'fresh' && entry.status === 'passed')
+      .map((entry) => entry.evidenceId),
+  );
   const observations = zeroToleranceObservations.map((obs) => {
     const known = contract.zeroToleranceInvariants.some((item) => item.id === obs.id);
     const duplicate = observationIds.has(obs.id);
@@ -205,6 +211,8 @@ function buildEvidenceLedger({
     }
     if (!obs.evidenceRef || typeof obs.evidenceRef !== 'string') {
       observationIntegrityIssues.push(`zero_tolerance_evidence_ref_missing:${obs.id || 'missing'}`);
+    } else if (!freshPassingEvidenceIds.has(obs.evidenceRef)) {
+      observationIntegrityIssues.push(`zero_tolerance_evidence_ref_not_fresh_passing:${obs.id || 'missing'}`);
     }
     return Object.freeze({
       id: obs.id || null,

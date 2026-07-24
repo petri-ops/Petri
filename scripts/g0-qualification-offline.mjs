@@ -68,7 +68,7 @@ function runSpec(spec) {
 }
 
 function buildReport() {
-  const baseline = g0.getCurrentG0Baseline();
+  const baseline = g0.getQualificationSubjectBaseline();
   const sourceCommit = git('rev-parse', 'HEAD');
   const commands = specs.map(runSpec);
   const classStatus = {};
@@ -92,6 +92,7 @@ function buildReport() {
     appMode: 'qualification-harness',
     privacy: 'command_status_and_output_digests_only_no_raw_output_credentials_urls_or_absolute_paths',
     commands,
+    runnerSha256: sha256(readFileSync(fileURLToPath(import.meta.url))),
     classStatus,
     passed: Object.values(classStatus).every((status) => status === 'passed') && commands.every((command) => command.passed),
     generatedAt: new Date().toISOString(),
@@ -110,13 +111,14 @@ function isAncestor(commit) {
 function verifyStored() {
   if (!existsSync(evidencePath)) throw new Error('offline_conformance_evidence_missing');
   const stored = JSON.parse(readFileSync(evidencePath, 'utf8'));
-  const baseline = g0.getCurrentG0Baseline();
+  const baseline = g0.getQualificationSubjectBaseline();
   const offlineIds = qualification.contract.requiredEvidenceClasses
     .filter((item) => item.evidenceMode === 'offline_deterministic')
     .map((item) => item.id);
   if (!stored.passed) throw new Error('offline_conformance_not_passed');
   if (!isAncestor(stored.sourceCommit)) throw new Error('offline_conformance_source_not_ancestor');
   if (stored.baseline?.bundleDigest !== baseline.bundleDigest) throw new Error('offline_conformance_baseline_stale');
+  if (stored.runnerSha256 !== sha256(readFileSync(fileURLToPath(import.meta.url)))) throw new Error('offline_conformance_runner_stale');
   if (!offlineIds.every((id) => stored.classStatus?.[id] === 'passed')) throw new Error('offline_conformance_class_missing');
   if (!Array.isArray(stored.commands) || stored.commands.length !== specs.length || !stored.commands.every((item) => item.passed)) {
     throw new Error('offline_conformance_command_failure');

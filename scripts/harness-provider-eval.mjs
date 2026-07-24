@@ -30,7 +30,8 @@
  *
  * Usage:
  *   source .biof3-secrets && npm run harness:provider-eval
- *   # optional: EVAL_TARGETS=deepseek,anthropic,openai-compatible
+ *   # optional: EVAL_TARGETS=deepseek,anthropic,openai-compatible,ollama
+ *               OLLAMA_MODEL=qwen3.5:4b-q4_K_M
  *               EVAL_REPORT_DIR=eval-reports
  *
  * Exit code: 0 when at least two providers each clear the required-probe bar;
@@ -103,6 +104,15 @@ export function resolveTargets(getEnv = env) {
       model: getEnv('OPENAI_COMPATIBLE_MODEL'),
       baseUrl: getEnv('OPENAI_COMPATIBLE_BASE_URL'),
       apiKey: getEnv('OPENAI_COMPATIBLE_API_KEY'),
+    });
+  }
+  if (selected.includes('ollama') && getEnv('OLLAMA_MODEL')) {
+    targets.push({
+      name: 'ollama',
+      provider: 'ollama',
+      model: getEnv('OLLAMA_MODEL'),
+      baseUrl: getEnv('OLLAMA_BASE_URL') || 'http://127.0.0.1:11434/v1',
+      apiKey: '',
     });
   }
   return targets;
@@ -386,7 +396,7 @@ export function renderJson(rows, meta = {}) {
 
 // ── live probes (network; not unit-tested) ───────────────────────────────────
 
-async function runProbesForTarget(target) {
+export async function runProbesForTarget(target) {
   const gateway = makeGateway(target);
   const probes = {};
 
@@ -396,7 +406,8 @@ async function runProbesForTarget(target) {
       role: 'chat',
       body: {
         messages: [{ role: 'user', content: '我有一份 DESeq2 差异表达结果，想知道这些基因参与了哪些生物学通路和功能。应该做哪种分析？只用一句话回答分析名称。' }],
-        max_tokens: 120,
+        temperature: 0,
+        max_tokens: 1024,
       },
       telemetry: { kind: 'eval_intent' },
     });
@@ -412,7 +423,8 @@ async function runProbesForTarget(target) {
           role: 'user',
           content: `从以下工具中选出做功能富集分析最合适的一个，只回复工具 id：${GO_KEGG_TOOLS.join(', ')}`,
         }],
-        max_tokens: 40,
+        temperature: 0,
+        max_tokens: 1024,
       },
       telemetry: { kind: 'eval_tool_select' },
     });
@@ -428,7 +440,8 @@ async function runProbesForTarget(target) {
           role: 'user',
           content: '为人类样本的 GO 和 KEGG 富集分析生成参数 JSON。可选字段：species(human|mouse)、analysis_type(all|GO|GO-BP|GO-MF|GO-CC|KEGG)、gene_id_type(SYMBOL|ENSEMBL|ENTREZID|auto)。基因名是标准 symbol。只输出 JSON。',
         }],
-        max_tokens: 200,
+        temperature: 0,
+        max_tokens: 1024,
       },
       telemetry: { kind: 'eval_param_fill' },
     });
@@ -443,7 +456,8 @@ async function runProbesForTarget(target) {
         messages: [{ role: 'user', content: '请对人类样本调用 run_go_kegg 工具做全部富集分析（GO+KEGG），基因名是标准 symbol。你必须调用该工具。' }],
         tools: [ENRICH_TOOL_SCHEMA],
         tool_choice: 'auto',
-        max_tokens: 256,
+        temperature: 0,
+        max_tokens: 1024,
       },
       telemetry: { kind: 'eval_tool_calling' },
     });
@@ -459,7 +473,8 @@ async function runProbesForTarget(target) {
           role: 'user',
           content: 'GO/KEGG 富集分析报错：bitr 无法把基因名映射到 ENTREZID，"no gene can be mapped"。当前 gene_id_type=SYMBOL。应该怎么修复？简短回答。',
         }],
-        max_tokens: 160,
+        temperature: 0,
+        max_tokens: 1024,
       },
       telemetry: { kind: 'eval_failure_recovery' },
     });
@@ -477,7 +492,8 @@ async function runProbesForTarget(target) {
           role: 'user',
           content: 'GO/KEGG 富集结果 top 通路：apoptosis (p=0.001), cell cycle (p=0.003), p53 signaling (p=0.008)。请用两句话解读这些结果的生物学意义，只基于给出的通路。',
         }],
-        max_tokens: 220,
+        temperature: 0,
+        max_tokens: 1024,
       },
       telemetry: { kind: 'eval_result_interpret' },
     });

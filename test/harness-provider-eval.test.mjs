@@ -75,6 +75,20 @@ test('resolveTargets: openai-compatible requires key, base URL, and model', () =
   assert.equal(targets[0].baseUrl, 'https://gateway.example.test/v1');
 });
 
+test('resolveTargets: ollama is explicit, local and credential-free', () => {
+  const env = {
+    EVAL_TARGETS: 'ollama',
+    OLLAMA_MODEL: 'qwen-local',
+  };
+  const targets = resolveTargets((k) => env[k]);
+  assert.equal(targets.length, 1);
+  assert.equal(targets[0].name, 'ollama');
+  assert.equal(targets[0].provider, 'ollama');
+  assert.equal(targets[0].model, 'qwen-local');
+  assert.equal(targets[0].baseUrl, 'http://127.0.0.1:11434/v1');
+  assert.equal(targets[0].apiKey, '');
+});
+
 test('formatTargetLabel omits endpoint URL, credential, and deployment model', () => {
   const label = formatTargetLabel({
     name: 'openai-compatible',

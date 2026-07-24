@@ -120,6 +120,47 @@ function legacyEntry({ evidenceId, evidenceClass, path, command, status, source,
   };
 }
 
+function currentEntry({
+  evidenceId,
+  evidenceClass,
+  path,
+  command,
+  report,
+  counts,
+  providerSummary = null,
+}) {
+  return {
+    evidenceId,
+    evidenceClass,
+    schemaVersion: 1,
+    sourceCommit: report.sourceCommit,
+    baselineDigest: report.baseline?.bundleDigest,
+    platform: report.platform,
+    architecture: report.architecture,
+    appMode: report.appMode,
+    runtimeSummary: report.runtime || null,
+    providerSummary,
+    commandOrEntry: command,
+    generatedAt: report.generatedAt,
+    counts,
+    hashes: { reportSha256: sha256(readText(path)) },
+    boundedResult: report.passed === true ? 'passed' : 'failed',
+    privacyClassification: report.privacy,
+    applicableClaims: [],
+    status: report.passed === true ? 'passed' : 'blocked',
+    blockerRefs: report.passed === true ? [] : [`current_evidence_failed:${evidenceClass}`],
+  };
+}
+
+function evidencePrivacyIssues(value) {
+  const serialized = JSON.stringify(value);
+  const issues = [];
+  if (/https?:\/\//i.test(serialized)) issues.push('url');
+  if (/Bearer\s+/i.test(serialized) || /sk-[A-Za-z0-9]{12,}/.test(serialized)) issues.push('credential');
+  if (/\/Users\/[^/]+\//.test(serialized) || /\/home\/[^/]+\//.test(serialized)) issues.push('absolute_user_path');
+  return issues;
+}
+
 function buildEntries() {
   const offlinePath = 'acceptance/g0-qualification/offline-conformance.json';
   let entries;
@@ -155,8 +196,65 @@ function buildEntries() {
     )));
   }
 
+  const currentSpecs = [
+    {
+      path: 'acceptance/g0-qualification/real-provider.json',
+      evidenceId: 'qualification-real-provider',
+      evidenceClass: 'real_provider',
+      command: 'npm run g0:qualification:provider',
+      counts: (report) => ({
+        passedProviderClasses: report.passedProviderClasses?.length || 0,
+        evaluatedTargets: report.results?.length || 0,
+      }),
+      providerSummary: (report) => ({
+        requiredProviderCount: report.requiredProviderCount || 0,
+        passedProviderClasses: report.passedProviderClasses?.length || 0,
+      }),
+    },
+    {
+      path: 'acceptance/g0-qualification/packaged-app.json',
+      evidenceId: 'qualification-packaged-app',
+      evidenceClass: 'packaged_app',
+      command: 'npm run g0:qualification:packaged',
+      counts: (report) => ({
+        launchCount: report.launchCount || 0,
+        taskCyclesCompleted: report.taskCyclesCompleted || 0,
+        artifactManifests: report.artifacts?.artifactManifests || 0,
+      }),
+    },
+    {
+      path: 'acceptance/g0-qualification/soak-endurance.json',
+      evidenceId: 'qualification-soak-endurance',
+      evidenceClass: 'soak_endurance',
+      command: 'npm run g0:qualification:soak',
+      counts: (report) => ({
+        observationMs: report.observationMs || 0,
+        healthPassed: report.health?.passed || 0,
+        healthFailed: report.health?.failed || 0,
+        taskCyclesCompleted: report.taskCyclesCompleted || 0,
+      }),
+    },
+    {
+      path: 'acceptance/g0-qualification/visual-state-convergence.json',
+      evidenceId: 'qualification-visual-state-convergence',
+      evidenceClass: 'visual_state_convergence',
+      command: 'npm run g0:qualification:visual',
+      counts: (report) => ({ states: report.states?.length || 0 }),
+    },
+  ];
+  for (const spec of currentSpecs) {
+    if (!existsSync(join(root, spec.path))) continue;
+    const report = readJson(spec.path);
+    entries.push(currentEntry({
+      ...spec,
+      report,
+      counts: spec.counts(report),
+      providerSummary: spec.providerSummary ? spec.providerSummary(report) : null,
+    }));
+  }
+
   const providerPath = 'acceptance/harness-loop/production/provider-matrix.json';
-  if (existsSync(join(root, providerPath))) {
+  if (!existsSync(join(root, currentSpecs[0].path)) && existsSync(join(root, providerPath))) {
     const provider = readJson(providerPath);
     entries.push(legacyEntry({
       evidenceId: 'historical-real-provider-matrix',
@@ -173,7 +271,10 @@ function buildEntries() {
   }
 
   const uiPath = 'acceptance/ui-034/UI-034-acceptance.md';
-  if (existsSync(join(root, uiPath))) {
+  if (
+    (!existsSync(join(root, currentSpecs[1].path)) || !existsSync(join(root, currentSpecs[3].path)))
+    && existsSync(join(root, uiPath))
+  ) {
     const uiSource = git('log', '-1', '--format=%H', '--', uiPath);
     entries.push(legacyEntry({
       evidenceId: 'historical-packaged-ui-smoke',
@@ -195,21 +296,46 @@ function buildEntries() {
     }));
   }
 
+  const privacyPaths = [offlinePath, ...currentSpecs.map((spec) => spec.path)]
+    .filter((path) => existsSync(join(root, path)));
+  const privacyIssues = privacyPaths.flatMap((path) => evidencePrivacyIssues(readJson(path)));
+  entries.push({
+    evidenceId: 'qualification-privacy-scan',
+    evidenceClass: 'security_permission',
+    schemaVersion: 1,
+    sourceCommit,
+    baselineDigest: qualification.buildQualificationManifest({ sourceCommit, generatedAt }).bundleDigest,
+    platform: 'macos-arm64',
+    architecture: 'arm64',
+    appMode: 'qualification-privacy-gate',
+    runtimeSummary: null,
+    providerSummary: null,
+    commandOrEntry: 'npm run g0:qualification:audit',
+    generatedAt,
+    counts: { filesScanned: privacyPaths.length, privacyIssues: privacyIssues.length },
+    hashes: { inputSetSha256: sha256(privacyPaths.map((path) => sha256(readText(path))).sort().join('\n')) },
+    boundedResult: privacyIssues.length === 0 ? 'passed' : 'failed',
+    privacyClassification: 'digests_counts_and_issue_classes_only',
+    applicableClaims: [],
+    status: privacyIssues.length === 0 ? 'passed' : 'blocked',
+    blockerRefs: privacyIssues.length === 0 ? [] : ['qualification_privacy_failure'],
+  });
+
   return entries;
 }
 
 function buildZeroToleranceObservations() {
   const refs = {
-    'ZT-01': 'current-truth_lattice',
-    'ZT-02': 'current-durable_state',
-    'ZT-03': 'current-scientific_accuracy',
-    'ZT-04': 'current-security_permission',
+    'ZT-01': 'qualification-offline-truth_lattice',
+    'ZT-02': 'qualification-offline-durable_state',
+    'ZT-03': 'qualification-offline-scientific_accuracy',
+    'ZT-04': 'qualification-offline-security_permission',
     'ZT-05': 'qualification-privacy-scan',
-    'ZT-06': 'current-security_permission',
-    'ZT-07': 'current-model_memory_cost',
-    'ZT-08': 'current-migration_upgrade',
-    'ZT-09': 'current-security_permission',
-    'ZT-10': 'current-constitution_baseline',
+    'ZT-06': 'qualification-offline-security_permission',
+    'ZT-07': 'qualification-offline-model_memory_cost',
+    'ZT-08': 'qualification-offline-migration_upgrade',
+    'ZT-09': 'qualification-offline-security_permission',
+    'ZT-10': 'qualification-offline-constitution_baseline',
   };
   return qualification.contract.zeroToleranceInvariants.map(({ id }) => ({
     id,
