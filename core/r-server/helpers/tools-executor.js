@@ -85,6 +85,19 @@ function validateUploadedFiles(toolId, jobDir, files) {
   return null;
 }
 
+function hydrateExecutionJob(row) {
+  if (!row || typeof row !== 'object') return null;
+  let params = {};
+  try {
+    params = row.params_json
+      ? (typeof row.params_json === 'string' ? JSON.parse(row.params_json) : row.params_json)
+      : {};
+  } catch {
+    params = {};
+  }
+  return { ...row, params };
+}
+
 
 function createToolsExecutor({
   db,
@@ -572,6 +585,13 @@ function createToolsExecutor({
       .run('running', jobId, 'pending');
     if (!started || started.changes < 1) {
       console.log('[tools] Job ' + jobId + ' not started because it is no longer pending');
+      return;
+    }
+    const job = hydrateExecutionJob(
+      await db.prepare('SELECT * FROM tool_jobs WHERE id = ?').get(jobId)
+    );
+    if (!job) {
+      await markJobFailed(jobId, 'Tool job disappeared before execution.', 'setup');
       return;
     }
     const outputDir = path.join(jobDir, 'output');
@@ -1114,5 +1134,5 @@ const R_ERROR_TRANSLATIONS = [
 
 module.exports = {
   createToolsExecutor,
-  _test: { isManagedResultDir, validateUploadedFiles },
+  _test: { isManagedResultDir, validateUploadedFiles, hydrateExecutionJob },
 };

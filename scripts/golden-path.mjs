@@ -192,6 +192,28 @@ let countsText, coldataText;
   log('INFO', `✓ demo inputs ready (counts=${countsText.length}B, coldata=${coldataText.length}B)`);
 }
 
+function inferDemoContrast(csvText, designColumn = 'condition') {
+  const rows = String(csvText || '').trim().split(/\r?\n/).filter(Boolean);
+  if (rows.length < 3) throw new Error('demo coldata must contain at least two samples');
+  const headers = rows[0].split(',').map((value) => value.trim());
+  const columnIndex = headers.indexOf(designColumn);
+  if (columnIndex < 0) throw new Error(`demo coldata missing design column: ${designColumn}`);
+  const levels = [...new Set(rows.slice(1).map((row) => row.split(',')[columnIndex]?.trim()).filter(Boolean))];
+  if (levels.length < 2) throw new Error(`demo design column requires at least two levels: ${designColumn}`);
+  const reference = levels.find((value) => /^(control|ctrl|wt|normal|reference)$/i.test(value)) || levels[0];
+  const treatment = levels.find((value) => value !== reference && /^(treatment|treated|ko|case|disease)$/i.test(value))
+    || levels.find((value) => value !== reference);
+  return { design: designColumn, contrast_ref: reference, contrast_treat: treatment, levels };
+}
+
+let contrast;
+try {
+  contrast = inferDemoContrast(coldataText);
+  log('INFO', `✓ demo contrast ready (design=${contrast.design}, levels=${contrast.levels.join('|')})`);
+} catch (error) {
+  bail(`demo contrast inference failed: ${error.message}`);
+}
+
 // ── 步骤 4：提交任务 ────────────────────────────────────────
 let jobId = null;
 {
@@ -200,9 +222,9 @@ let jobId = null;
     body: {
       toolId: TOOL_ID,
       params: {
-        design: 'condition',
-        contrast_ref: 'Control',
-        contrast_treat: 'Treatment',
+        design: contrast.design,
+        contrast_ref: contrast.contrast_ref,
+        contrast_treat: contrast.contrast_treat,
       },
       files: {
         counts: Buffer.from(countsText, 'utf8').toString('base64'),
