@@ -4,8 +4,8 @@
   "subjectBaselineId": "g0-fifth-wave-establishing-0.6",
   "subjectBaselineVersion": "0.6.0",
   "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
-  "sourceCommit": "8c26dd001b03b7db78a3f041de80339f35fc60af",
-  "state": "not_yet_qualified",
+  "sourceCommit": "2edb1fe0e7d46e633b174bb749adfa135c7e70c2",
+  "state": "qualified",
   "mandatoryClassStatus": {
     "constitution_baseline": "satisfied",
     "truth_lattice": "satisfied",
@@ -19,26 +19,14 @@
     "observable_experience": "satisfied",
     "resilience_fault_matrix": "satisfied",
     "migration_upgrade": "satisfied",
-    "real_provider": "stale",
-    "packaged_app": "degraded",
-    "soak_endurance": "missing",
-    "visual_state_convergence": "stale"
+    "real_provider": "satisfied",
+    "packaged_app": "satisfied",
+    "soak_endurance": "satisfied",
+    "visual_state_convergence": "satisfied"
   },
-  "blockers": [
-    "mandatory_evidence_degraded:packaged_app",
-    "mandatory_evidence_missing:soak_endurance",
-    "mandatory_evidence_stale:real_provider",
-    "mandatory_evidence_stale:visual_state_convergence",
-    "support_claim_unsatisfied:local-file-sqlite-durability",
-    "support_claim_unsatisfied:macos-arm64-packaged-local-execution",
-    "support_claim_unsatisfied:real-provider-science-neutral"
-  ],
-  "limitedClaims": [
-    "local-file-sqlite-durability",
-    "macos-arm64-packaged-local-execution",
-    "real-provider-science-neutral"
-  ],
+  "blockers": [],
+  "limitedClaims": [],
   "unsupportedClaims": [],
   "privacy": "ids_counts_hashes_and_bounded_status_only",
-  "generatedAt": "2026-07-24T10:41:53.050Z"
+  "generatedAt": "2026-07-24T12:53:56.633Z"
 }

@@ -727,6 +727,8 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 
 详细执行计划：[`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md)。该工作包包含 Q0～Q7，不是一次证据汇总或版本号修改。
 
+状态：`completed`（2026-07-24）
+
 ### 目标
 
 建立第一个可长期维护的 `G0 Baseline v1`。
@@ -755,6 +757,15 @@ G0 Baseline v1 = qualified + maintained
 ```
 
 它不是“完成归档”。以后每次产品发布都要重新执行适用门禁；每次 G0 变更都要重新资格确认。
+
+### 已落地
+
+- 16 类强制证据全部 satisfied，10 条零容忍观测均为 0，最终确定性裁决为 qualified。
+- Baseline Manifest/Registry/Support Matrix 晋升为 `g0-baseline-v1 / 1.0.0 / qualified + maintained`，但 Qualification subject 继续固定为封存的 0.6 digest，避免资格摘要循环。
+- 真实 Provider、macOS arm64 packaged、5 分钟 soak 与五态视觉矩阵分别形成脱敏证据；canonical DESeq2 的参数、Artifact、Provenance、独立脚本和报告通过真实执行。
+- 永久 `g0:qualification` 门验证当前 maintained bundle、封存 subject、Evidence Ledger、零容忍、支持边界和六个独立子门。
+- LF11 Promotion Gate 接入 LF12 requalification；触发器缺少新的 qualified 决策或证据摘要时 fail-closed。
+- 完整报告见 [`../acceptance/g0-qualification/qualification-report.md`](../acceptance/g0-qualification/qualification-report.md)。
 
 ## 22. 永久 Conformance Matrix
 
@@ -887,14 +898,14 @@ G1 可以在 `G0 Baseline v1` qualified 后启动；G0 同时转入 maintained�
 
 ## 28. 当前行动
 
-`G0-START` 与 `G0-LF0`～`G0-LF11` 已完成。G0 处于 `establishing`，尚未 `qualified`。基线兼容升级为 `0.6.0`。
+`G0-START` 与 `G0-LF0`～`G0-LF12` 已完成。G0 Baseline v1 处于永久 `qualified + maintained`，不会归档或冻结演进。
 
 下一主线按依赖启动：
 
-1. 启动 `G0-LF12 Baseline Qualification`，汇总五层 Truth、Durable、Scientific、Replay、Resource、Model/Memory/Cost、Supply-chain、Security、Experience、Fault Matrix 与 Migration/Rollback 证据，评审 `G0 Baseline v1` 资格。
-2. LF12 通过前不得将 G0 写成 qualified 或 G0 Baseline v1。
+1. 保持 G0 永久门禁优先；任何触发器变化先完成 Promotion + requalification。
+2. 从干净 checkpoint 启动 `G0 Result Studio` 的独立工作包，不把结果编辑能力反写成 LF12 已资格能力。
 
-任何后续工作仍须通过六代 G0 门禁（含 `npm run g0:fifth-wave`），且不得把当前 `not_yet_qualified` 基线写成 qualified。
+任何后续工作仍须通过六代兼容门与永久 `npm run g0:qualification`；不得把本次限定资格扩张到未验收平台、插件或科学任务。
 
 ## 29. 守护语句
 

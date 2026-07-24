@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "qualificationId": "g0-baseline-v1-qualification",
-  "sourceCommit": "8c26dd001b03b7db78a3f041de80339f35fc60af",
+  "sourceCommit": "2edb1fe0e7d46e633b174bb749adfa135c7e70c2",
   "baseline": {
     "baselineId": "g0-fifth-wave-establishing-0.6",
     "baselineVersion": "0.6.0",
@@ -22,7 +22,7 @@
       "exitCode": 0,
       "signal": null,
       "passed": true,
-      "stdoutSha256": "f75f55bbf6301b50a1dffdae09ef9d91fed7025ed5f7267bb494b1b01d0b345d",
+      "stdoutSha256": "d16105940de3efe908079b2463f8a4f9324e49f799cf5cca7c6f3ef921f1ec5e",
       "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
@@ -35,7 +35,7 @@
       "exitCode": 0,
       "signal": null,
       "passed": true,
-      "stdoutSha256": "5d0d23fc690821e6afd8539f5033697d1c2423ab2f4678fdba3cca5b5045273d",
+      "stdoutSha256": "bcf0dff2a93f2a64b44fe78dda098d89a1c204d012f2b74d4fcd48725330fa72",
       "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
@@ -48,7 +48,7 @@
       "exitCode": 0,
       "signal": null,
       "passed": true,
-      "stdoutSha256": "32bde17fc49dd6652e833b5c8038d1105c9c35b684888fe5ebae9d32cd10511f",
+      "stdoutSha256": "eea1b9a03acea4e28eaa3a608d813596daeb02752950baaa08577de8842b8d0a",
       "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
@@ -62,7 +62,7 @@
       "exitCode": 0,
       "signal": null,
       "passed": true,
-      "stdoutSha256": "731be4677cbcdad7586c3acc30b26e53e33d9a93bfd07a9b0ec79b1d43080384",
+      "stdoutSha256": "7a9726260772f8f0ef90cf32e2884b9e3d165e165023f773067b84c319573ec0",
       "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
@@ -76,10 +76,11 @@
       "exitCode": 0,
       "signal": null,
       "passed": true,
-      "stdoutSha256": "6c0fff6e98e8ca180c555f971acec47dad892a89d21177476337b6cfa3f3eded",
+      "stdoutSha256": "5c1fd465d9f03611e7d27fdf808f947e2e4fdbb0a1916a83a07acf8135f3e372",
       "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ],
+  "runnerSha256": "3445b9d0a61e868099ccca85c3fd703a36f6c35e7564c41ab3748aff2883322f",
   "classStatus": {
     "constitution_baseline": "passed",
     "truth_lattice": "passed",
@@ -95,5 +96,5 @@
     "migration_upgrade": "passed"
   },
   "passed": true,
-  "generatedAt": "2026-07-24T10:41:52.680Z"
+  "generatedAt": "2026-07-24T12:53:56.235Z"
 }

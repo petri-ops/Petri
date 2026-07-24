@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "qualificationId": "g0-baseline-v1-qualification",
+  "sourceCommit": "4ff72a355c5601ed4d8c4ec39345b330cbd88e72",
+  "baseline": {
+    "baselineId": "g0-fifth-wave-establishing-0.6",
+    "baselineVersion": "0.6.0",
+    "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3"
+  },
+  "platform": "macos-arm64",
+  "architecture": "arm64",
+  "appMode": "real-provider-qualification",
+  "privacy": "target_ids_provider_classes_probe_booleans_failure_codes_and_hashes_only_no_credentials_urls_models_or_responses",
+  "requiredProviderCount": 2,
+  "discoveredProviderClasses": [
+    "deepseek",
+    "openai-compatible"
+  ],
+  "passedProviderClasses": [
+    "deepseek",
+    "openai-compatible"
+  ],
+  "results": [
+    {
+      "targetId": "qualification-target-1",
+      "providerClass": "deepseek",
+      "passedBar": true,
+      "passedProbeCount": 5,
+      "totalProbeCount": 6,
+      "requiredFailures": [],
+      "failureCodes": [
+        "result_interpret:ungrounded_interpretation"
+      ],
+      "probeStatus": {
+        "intent": true,
+        "tool_select": true,
+        "param_fill": true,
+        "tool_calling": true,
+        "failure_recovery": true,
+        "result_interpret": false
+      }
+    },
+    {
+      "targetId": "qualification-target-2",
+      "providerClass": "openai-compatible",
+      "passedBar": true,
+      "passedProbeCount": 5,
+      "totalProbeCount": 6,
+      "requiredFailures": [],
+      "failureCodes": [
+        "result_interpret:ungrounded_interpretation"
+      ],
+      "probeStatus": {
+        "intent": true,
+        "tool_select": true,
+        "param_fill": true,
+        "tool_calling": true,
+        "failure_recovery": true,
+        "result_interpret": false
+      }
+    }
+  ],
+  "runnerHashes": {
+    "qualificationProviderSha256": "96440580cc2d947bf72ecf0db47efe3c87bdbc8742b12e83052322c314f5c0cc",
+    "providerEvalSha256": "32efbb08869add0a32cdae789a4e736cfe8d39eef30207cbd97de16f782a643e"
+  },
+  "passed": true,
+  "generatedAt": "2026-07-24T11:38:04.879Z"
+}

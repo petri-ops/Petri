@@ -2,7 +2,7 @@
 
 最后更新：2026-07-24
 
-状态：`ready_next`
+状态：`completed`（2026-07-24）
 
 计划编号：`G0-LF12`
 
@@ -12,7 +12,11 @@
 
 跨模块关注点：`C-03 安全、确认与审计`、`C-04 状态与事件同步`、`C-05 测试与质量门禁`、`C-06 性能与交互手感`
 
-前置条件：`G0-START` 与 `G0-LF0`～`G0-LF11` 已形成已提交、已推送、可恢复的干净基线；当前基线仍为 `0.6.0 establishing / not_yet_qualified`
+资格对象：`0.6.0 establishing / not_yet_qualified` 封存基线
+
+晋升结果：`G0 Baseline v1 = 1.0.0 qualified + maintained`
+
+机器裁决：`16 / 16` 强制证据满足、`10 / 10` 零容忍观测为 `0`、`0` blocker
 
 ## 1. 决策结论
 
@@ -343,16 +347,18 @@ acceptance/g0-qualification/
 
 只有全部满足时 LF12 才能标记完成：
 
-- [ ] Q0～Q7 均有实现、测试和证据。
-- [ ] 首轮支持范围明确且没有越界宣称。
-- [ ] 十二类资格证据完整、有效、脱敏且绑定同一源码基线。
-- [ ] 零容忍不变量失败数为 0。
-- [ ] 自动化、真实 Provider、packaged、视觉、soak 和 migration 证据分别真实完成。
-- [ ] 所有 blocker 已关闭或对应能力明确排除在支持范围外。
-- [ ] 根检查、资格门禁、前端测试/构建和发布门通过。
-- [ ] 干净 checkout 可以重建资格裁决。
-- [ ] Baseline Manifest、Registry、Support Matrix、文档和 UI 状态一致。
-- [ ] `G0 Baseline v1 = qualified + maintained` 由机器裁决支持，而非人工口头声明。
+- [x] Q0～Q7 均有实现、测试和证据。
+- [x] 首轮支持范围明确且没有越界宣称。
+- [x] 十六类资格证据完整、有效、脱敏且绑定同一封存基线。
+- [x] 零容忍不变量失败数为 0。
+- [x] 自动化、真实 Provider、packaged、视觉、soak 和 migration 证据分别真实完成。
+- [x] 所有 blocker 已关闭或对应能力明确排除在支持范围外。
+- [x] 根检查、资格门禁、前端测试/构建和发布门通过。
+- [x] 干净 checkout 可以重建资格裁决。
+- [x] Baseline Manifest、Registry、Support Matrix、文档和 UI 状态一致。
+- [x] `G0 Baseline v1 = qualified + maintained` 由机器裁决支持，而非人工口头声明。
+
+完成证据见 [`../acceptance/g0-qualification/qualification-report.md`](../acceptance/g0-qualification/qualification-report.md)。资格后任何 bundle、major、支持范围、证据有效性或事故状态变化均进入 LF11 Promotion + LF12 requalification，不允许沿用本次结论静默晋升。
 
 ## 11. LF12 之后
 

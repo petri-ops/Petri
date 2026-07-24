@@ -1,7 +1,7 @@
 // agent-led Task 1 测试：run_tool 跑完写 tool_jobs 记录，返回 toolJobId
 // 运行：cd desktop-app && node --test test/agent-run-tool.test.mjs
 // live 测试：RUN_AGENT_LIVE=1 node --test test/agent-run-tool.test.mjs（需本地 R + volcano-plot 插件）
-import { test } from 'node:test';
+import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve, join } from 'node:path';
@@ -13,11 +13,22 @@ const path = { join };
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const R_SERVER = resolve(__dirname, '..', 'core', 'r-server');
 const req = createRequire(import.meta.url);
+const TEST_DB_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-agent-run-tool-'));
+process.env.BIOF3_DB_PATH = path.join(TEST_DB_DIR, 'biof3.db');
 
 // db.js 是 CJS，用 createRequire 拿到 module.exports 的具名函数（await import 只能拿 default）
 const db = req(R_SERVER + '/db.js');
+// 单测绕过 server.js 启动；显式复用真实启动路径的 Plan 表初始化，避免依赖开发机旧 SQLite。
+req(R_SERVER + '/ai-bridge.js');
 const registry = req(R_SERVER + '/mcp/registry.js');
 const { callTool, _test } = registry;
+
+after(() => {
+  try {
+    db.db.close();
+  } catch {}
+  fs.rmSync(TEST_DB_DIR, { recursive: true, force: true });
+});
 
 // === DB 层单测：createToolJob/updateToolJob/getToolJob（非 live，默认跑）===
 

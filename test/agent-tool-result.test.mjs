@@ -1,12 +1,17 @@
 import assert from 'node:assert/strict';
-import test from 'node:test';
+import test, { after } from 'node:test';
 import { createRequire } from 'node:module';
+import fsSync from 'node:fs';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
 const require = createRequire(import.meta.url);
+const TEST_DB_DIR = fsSync.mkdtempSync(path.join(os.tmpdir(), 'biof3-agent-tool-result-'));
+process.env.BIOF3_DB_PATH = path.join(TEST_DB_DIR, 'biof3.db');
 const db = require('../core/r-server/db.js');
+// 单测绕过 server.js 启动；显式复用真实启动路径的 Plan 表初始化，确保干净工作树可运行。
+require('../core/r-server/ai-bridge.js');
 const {
   createModelResultState,
   createRejectedToolResult,
@@ -19,6 +24,13 @@ const {
   createToolActivityRecorder,
 } = require('../core/r-server/agent-tools');
 const { createToolTraceStore } = require('../core/r-server/agent-tools/tool-trace-store');
+
+after(() => {
+  try {
+    db.db.close();
+  } catch {}
+  fsSync.rmSync(TEST_DB_DIR, { recursive: true, force: true });
+});
 
 test('executeToolCall wraps a denied unknown tool while dispatchTool stays raw', async () => {
   const raw = await dispatchTool('missing_p7d_tool', {}, {});

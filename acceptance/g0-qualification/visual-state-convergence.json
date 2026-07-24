@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "qualificationId": "g0-baseline-v1-qualification",
+  "sourceCommit": "2edb1fe0e7d46e633b174bb749adfa135c7e70c2",
+  "baseline": {
+    "baselineId": "g0-fifth-wave-establishing-0.6",
+    "baselineVersion": "0.6.0",
+    "manifestDigest": "0c6dbb71acc20e18e4952c2a62c23a9d5655a5a0326dbdb45a8549d75dfd02cf",
+    "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3"
+  },
+  "platform": "macos-arm64",
+  "architecture": "arm64",
+  "appMode": "packaged-visual-state-convergence",
+  "privacy": "sanitized_fixture_screenshot_hashes_dimensions_and_bounded_manual_observations_only",
+  "states": [
+    {
+      "id": "chat-summary-light-wide",
+      "file": "chat-summary-light-wide.png",
+      "theme": "light",
+      "viewport": "wide",
+      "width": 1310,
+      "height": 768,
+      "bytes": 263897,
+      "imageSha256": "bb54acfff19d6ec23b686f1b6ec1a333e4d3f3797efe8534a72233836db5ad3b"
+    },
+    {
+      "id": "chat-summary-dark-wide",
+      "file": "chat-summary-dark-wide.png",
+      "theme": "dark",
+      "viewport": "wide",
+      "width": 1310,
+      "height": 768,
+      "bytes": 207696,
+      "imageSha256": "edac00e5183068f699c0466bd41521abd5473680047ee5acf87a10909a121dd1"
+    },
+    {
+      "id": "result-light-wide",
+      "file": "result-light-wide.png",
+      "theme": "light",
+      "viewport": "wide",
+      "width": 1310,
+      "height": 768,
+      "bytes": 152748,
+      "imageSha256": "cc06d3d12d3f8bc84443e4c37a7004fa55498a2a76e5395f1012ba89c7391ab4"
+    },
+    {
+      "id": "chat-summary-dark-narrow",
+      "file": "chat-summary-dark-narrow.png",
+      "theme": "dark",
+      "viewport": "narrow",
+      "width": 820,
+      "height": 768,
+      "bytes": 189539,
+      "imageSha256": "b851203a8237c23ed24d50417f15c930b0ddcb83b1a9d6d7c61bddfb092e1c79"
+    },
+    {
+      "id": "restart-restored-light-wide",
+      "file": "restart-restored-light-wide.png",
+      "theme": "light",
+      "viewport": "wide",
+      "width": 1310,
+      "height": 768,
+      "bytes": 263897,
+      "imageSha256": "bb54acfff19d6ec23b686f1b6ec1a333e4d3f3797efe8534a72233836db5ad3b"
+    }
+  ],
+  "inspection": {
+    "schemaVersion": 1,
+    "method": "computer-use-accessibility-and-screenshot-review",
+    "visibleSurfaces": [
+      "chat",
+      "summary",
+      "task",
+      "files",
+      "result"
+    ],
+    "terminalStateTruthful": true,
+    "stageConclusionsOnly": true,
+    "hiddenReasoningAbsent": true,
+    "narrowLayoutUsable": true,
+    "pageHorizontalOverflow": false,
+    "restartRestoredConversation": true,
+    "restartRestoredTask": true,
+    "restartRestoredFiles": true,
+    "restartRestoredResult": true,
+    "observations": {
+      "completedLoopIterations": 4,
+      "visibleArtifactCount": 25,
+      "visibleChartCount": 7,
+      "resourceState": "ready",
+      "themesReviewed": 2,
+      "viewportsReviewed": 2,
+      "applicationRestartsReviewed": 3
+    },
+    "privacy": "sanitized_fixture_bounded_counts_booleans_and_public_stage_conclusions_only"
+  },
+  "runnerHashes": {
+    "visualQualificationSha256": "0d2f2181425d1132149f68ea2cb4ff70f3aec863f275780a1977d326543332a7",
+    "visualSeedSha256": "a3fd561afe66cb31f37ca68e0dbe141b79d516a113e1c39a96e9d16e4dddd4a0"
+  },
+  "generatedAt": "2026-07-24T12:48:15.282Z",
+  "checks": {
+    "allStatesPresent": true,
+    "screenshotsValid": true,
+    "themeMatrix": true,
+    "viewportMatrix": true,
+    "productionSurfaces": true,
+    "truthfulStates": true,
+    "responsive": true,
+    "restartConvergence": true,
+    "accessibilityInspection": true,
+    "privacy": true
+  },
+  "passed": true
+}

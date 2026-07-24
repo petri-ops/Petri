@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "qualificationId": "g0-baseline-v1-qualification",
+  "sourceCommit": "57857455e2df69a273f575f90eea32680c16c423",
+  "currentBaseline": {
+    "schemaVersion": 1,
+    "baselineId": "g0-baseline-v1",
+    "baselineVersion": "1.0.0",
+    "lifecycleStatus": "maintained",
+    "qualificationStatus": "qualified",
+    "constitutionId": "biof3-g0-constitution-v1",
+    "manifestDigest": "d5d03f6d8e028b6faa02d3070b9db30e5fdef41c103a5dc8d14dadc4f6c51c89",
+    "bundleDigest": "d8acb951fa238f3918e3b986e46a75835c5e8105dfe883e4fe6d17f51f583334"
+  },
+  "subjectBaseline": {
+    "schemaVersion": 1,
+    "baselineId": "g0-fifth-wave-establishing-0.6",
+    "baselineVersion": "0.6.0",
+    "lifecycleStatus": "establishing",
+    "qualificationStatus": "not_yet_qualified",
+    "constitutionId": "biof3-g0-constitution-v1",
+    "manifestDigest": "0c6dbb71acc20e18e4952c2a62c23a9d5655a5a0326dbdb45a8549d75dfd02cf",
+    "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3"
+  },
+  "decisionHash": "3166ff20b9d45da94d7c8329a04c4237673a707c58f964dca9480a1409f87aca",
+  "ledgerHash": "f92ac200925ce83651719190dbea8f7afb8045a4e8d998be22f42b50e2f1c66f",
+  "privacy": "baseline_ids_digests_counts_booleans_and_command_output_hashes_only",
+  "commandGates": [
+    {
+      "id": "audit",
+      "command": "node scripts/g0-qualification-audit.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "passed": true,
+      "stdoutSha256": "bb64091d3d957db4feeda5cbeebb302c7c7ccb5fca27164abd6c0e29a9d0e2f9",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "offline",
+      "command": "node scripts/g0-qualification-offline.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "passed": true,
+      "stdoutSha256": "9ef066e39cca6d21b604723e5a85cd2755ee92de4da75b6126a42fcd475ad391",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "provider",
+      "command": "node scripts/g0-qualification-provider.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "passed": true,
+      "stdoutSha256": "782cf4417878ab9b639d4b3d2cbe7355602707370c025cd49cc3b7538de8b9ba",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "packaged",
+      "command": "node scripts/g0-qualification-packaged.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "passed": true,
+      "stdoutSha256": "dd6287f65bbb69631d1f8b7d3ede61515a860090e399a4e5102de124724ffc9b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "soak",
+      "command": "node scripts/g0-qualification-soak.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "passed": true,
+      "stdoutSha256": "145977bc06052791a415eb4100febb900b0a37f26e4ba98d57f3567d15bdbc7a",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "visual",
+      "command": "node scripts/g0-qualification-visual.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "passed": true,
+      "stdoutSha256": "6cb4b3d1a612baaeb8a7782ce1def8816b35b9c8252444ce223f78e1deb57a45",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "checks": {
+    "baselineBundle": true,
+    "maintainedQualified": true,
+    "sealedSubject": true,
+    "qualificationDecision": true,
+    "mandatoryEvidence": true,
+    "zeroTolerance": true,
+    "evidenceIntegrity": true,
+    "promotionBinding": true,
+    "supportBoundary": true,
+    "singleExecutionTruth": true,
+    "commandGates": true
+  },
+  "passed": true,
+  "runnerSha256": "eb2bd6c85b1564d609948d7dec48d1acc360227ffed27d29ad7777522c705163",
+  "generatedAt": "2026-07-24T13:23:31.302Z"
+}

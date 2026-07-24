@@ -2,7 +2,7 @@
 
 最后更新：2026-07-24
 
-状态：`planned_after_g0_lf12_qualification`
+状态：`ready_next_after_g0_lf12_checkpoint`
 
 计划编号：`G0-RS`
 
@@ -12,7 +12,7 @@
 
 跨模块关注点：`C-03 安全、确认与审计`、`C-04 状态与事件同步`、`C-05 测试与质量门禁`、`C-06 性能与交互手感`
 
-前置条件：`G0-LF12` 完成首个 `G0 Baseline v1 = qualified + maintained` 并形成干净 checkpoint；`run_tool → tool_job → artifact truth`、源数据不可变、Loop 恢复与交付复现契约不得回归
+前置条件：`G0-LF12` 已完成首个 `G0 Baseline v1 = qualified + maintained`；待 LF12 源码、证据与文档提交全部推送形成干净 checkpoint 后启动。`run_tool → tool_job → artifact truth`、源数据不可变、Loop 恢复与交付复现契约不得回归
 
 范围边界：Result Studio 不属于 LF12 待资格功能。LF12 只验证当前结果投影与 UI 状态收敛；Result Studio 在 LF12 通过后按本计划独立启动。
 

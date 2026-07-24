@@ -27,13 +27,13 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 
 ## 3. 当前立即任务
 
-### 3.0 当前主线：G0 Living Foundation establishing
+### 3.0 当前主线：G0 Living Foundation maintained
 
-2026-07-24 `G0-START` 与 LF0～LF11 已关闭。0.6.0 establishing 基线在能力供应链、权限决策与八域韧性实验室之上增加 Evolution Pipeline；六代永久门禁已进入根检查。
+2026-07-24 `G0-START` 与 LF0～LF12 已关闭。`G0 Baseline v1 / 1.0.0` 已通过 16 类强制证据、10 条零容忍、真实 Provider、macOS arm64 packaged、5 分钟 soak 和五态视觉矩阵，进入 `qualified + maintained`。
 
-G0 当前状态仍是 `establishing / not_yet_qualified`。下一主线进入 LF12 Baseline Qualification；资格证据完成前不得宣称 qualified，也不得建立第二套资源、成本、会话、执行或 UI truth。
+G0 资格只覆盖 Support Matrix 明示范围，不覆盖 Windows/Linux/macOS x64、任意插件或任意科学任务。永久 `g0:qualification` 与 LF11 requalification 继续优先；任何触发器缺少新证据时 fail-closed。
 
-LF12 详细计划为 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md)，按 Q0～Q7 分波推进。Result Studio 计划已记录在 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md)，其结果交互与 Git-backed 版本能力必须等待 LF12 qualified checkpoint 后启动。
+LF12 完成记录为 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md)，报告位于 [`../acceptance/g0-qualification/qualification-report.md`](../acceptance/g0-qualification/qualification-report.md)。下一主线可按 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) 从独立干净 checkpoint 启动，结果交互与 Git-backed 版本能力仍不得冒充 LF12 已资格能力。
 
 ### 3.1 已完成基线：真实科学任务驱动的 Harness 升级
 

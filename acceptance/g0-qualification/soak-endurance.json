@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "qualificationId": "g0-baseline-v1-qualification",
+  "sourceCommit": "2edb1fe0e7d46e633b174bb749adfa135c7e70c2",
+  "baseline": {
+    "baselineId": "g0-fifth-wave-establishing-0.6",
+    "baselineVersion": "0.6.0",
+    "manifestDigest": "0c6dbb71acc20e18e4952c2a62c23a9d5655a5a0326dbdb45a8549d75dfd02cf",
+    "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3"
+  },
+  "platform": "macos-arm64",
+  "architecture": "arm64",
+  "appMode": "packaged-macos-arm64-soak",
+  "privacy": "source_commit_digests_counts_booleans_and_bounded_resource_metrics_only",
+  "executableArchitectures": [
+    "arm64"
+  ],
+  "codeSignatureVerified": false,
+  "resourceChecksPassed": 5,
+  "resourceChecksTotal": 5,
+  "resourceBundleSha256": "1ce56c80cb799184e927633ed2594babb85da4c1f2a7932adfd4be4439a58792",
+  "executableSha256": "1f0105d7af09ae4aa5058be8e19542d5f405c7c467def031583e81a3fa94d0e4",
+  "infoPlistSha256": "6e9198cf6fec49746c722d701411e281b41094516aafd8631da8b5391e5ed3b7",
+  "buildSubjectSha256": "83251c0a2d301a62f9bdf372641061f7773aa6981724f410089b4f6959727cb2",
+  "runnerHashes": {
+    "packagedQualificationSha256": "0f504bca779f2ac562c69a3e64dd649b5fc94d5887331a39cecfc5642594acb4",
+    "goldenPathSha256": "95bfa7aa9347a7f1bf6a8b5bbe1126916e8a825283cbc5735e9220f285783086",
+    "afterPackSha256": "2c971f02c7e0b08227a579e833ce3e604dcc11dad5c01c9ff01b02b50cf90609",
+    "soakQualificationSha256": "c8bc860ef79d14726ac8831ec2fd304f31933b245f929c35260608d6a5f01ac5"
+  },
+  "runtime": {
+    "r": true,
+    "python": true,
+    "capabilities": true
+  },
+  "launchCount": 2,
+  "taskCyclesCompleted": 2,
+  "artifacts": {
+    "artifactManifests": 2,
+    "params": 2,
+    "provenance": 2,
+    "independentScripts": 2,
+    "deliveryManifests": 0,
+    "replayPackageManifests": 0,
+    "htmlReports": 10,
+    "artifactManifestSetSha256": "d9b6d6d54ad7b898efe69093e79288de451f460b284137530c062c27c70bf94c"
+  },
+  "persistence": {
+    "projectsBeforeRestart": 2,
+    "projectsAfterRestart": 2
+  },
+  "health": {
+    "passed": 121,
+    "failed": 0,
+    "samples": 121
+  },
+  "resources": {
+    "sampleCount": 121,
+    "firstTreeRssBytes": 1105461248,
+    "lastTreeRssBytes": 1133084672,
+    "maxTreeRssBytes": 1880014848
+  },
+  "shutdown": [
+    {
+      "exited": true,
+      "backendStopped": true
+    },
+    {
+      "exited": true,
+      "backendStopped": true
+    }
+  ],
+  "observationMs": 307005,
+  "totalDurationMs": 308408,
+  "generatedAt": "2026-07-24T12:22:41.348Z",
+  "checks": {
+    "buildBinding": true,
+    "architecture": true,
+    "bundleIntegrity": true,
+    "packagedResources": true,
+    "appLaunch": true,
+    "realTasks": true,
+    "artifactTruth": true,
+    "restartPersistence": true,
+    "ownedBackendShutdown": true,
+    "endurance": true,
+    "privacy": true
+  },
+  "passed": true
+}

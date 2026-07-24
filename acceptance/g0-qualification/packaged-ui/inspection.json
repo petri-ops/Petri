@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "method": "computer-use-accessibility-and-screenshot-review",
+  "visibleSurfaces": [
+    "chat",
+    "summary",
+    "task",
+    "files",
+    "result"
+  ],
+  "terminalStateTruthful": true,
+  "stageConclusionsOnly": true,
+  "hiddenReasoningAbsent": true,
+  "narrowLayoutUsable": true,
+  "pageHorizontalOverflow": false,
+  "restartRestoredConversation": true,
+  "restartRestoredTask": true,
+  "restartRestoredFiles": true,
+  "restartRestoredResult": true,
+  "observations": {
+    "completedLoopIterations": 4,
+    "visibleArtifactCount": 25,
+    "visibleChartCount": 7,
+    "resourceState": "ready",
+    "themesReviewed": 2,
+    "viewportsReviewed": 2,
+    "applicationRestartsReviewed": 3
+  },
+  "privacy": "sanitized_fixture_bounded_counts_booleans_and_public_stage_conclusions_only"
+}
