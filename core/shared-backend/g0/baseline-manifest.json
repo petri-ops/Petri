@@ -81,6 +81,8 @@
     "acceptance/g0-qualification/qualification-manifest.json",
     "acceptance/g0-qualification/evidence-ledger.json",
     "acceptance/g0-qualification/qualification-decision.json",
+    "acceptance/g0-qualification/qualification-gate.json",
+    "acceptance/g0-qualification/qualification-report.md",
     "acceptance/g0-qualification/visual-state-convergence.json"
   ],
   "qualification": {

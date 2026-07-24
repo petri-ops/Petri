@@ -8,8 +8,9 @@
       "status": "qualified",
       "scope": "desktop_shell_and_local_scientific_execution",
       "evidenceRefs": [
-        "acceptance/harness-loop/production/ui-matrix.md",
-        "acceptance/harness-loop/production/restart-recovery-matrix.json"
+        "acceptance/g0-qualification/packaged-app.json",
+        "acceptance/g0-qualification/soak-endurance.json",
+        "acceptance/g0-qualification/visual-state-convergence.json"
       ]
     },
     {
