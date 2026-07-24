@@ -221,6 +221,7 @@ function runVerificationCommands() {
       env: {
         ...process.env,
         G0_LF0_BOOTSTRAP: '1',
+        G0_FIRST_WAVE_BOOTSTRAP: '1',
       },
     });
     return {
