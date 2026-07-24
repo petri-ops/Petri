@@ -4,7 +4,7 @@
 // All modules import from here instead of module-specific stores.
 // ============================================================
 
-import type { Project, ToolJob, Dataset, ProjectModality } from './project-types';
+import type { Project, ProjectG0Baseline, ToolJob, Dataset, ProjectModality } from './project-types';
 import { getPlatformApiPrefix } from './authClient';
 
 const API_BASE = () => getPlatformApiPrefix() + '/data';
@@ -150,6 +150,9 @@ export async function deleteDataset(id: string): Promise<void> {
 // ============================================================
 
 function mapProject(p: Record<string, unknown>): Project {
+  const baseline = p.g0_baseline && typeof p.g0_baseline === 'object'
+    ? p.g0_baseline as Record<string, unknown>
+    : null;
   return {
     id: String(p.id),
     name: String(p.name || ''),
@@ -159,6 +162,31 @@ function mapProject(p: Record<string, unknown>): Project {
     modality: p.modality ? String(p.modality) : undefined,
     workspacePath: p.workspace_path ? String(p.workspace_path) : undefined,
     status: p.status === 'archived' ? 'archived' : 'active',
+    g0Baseline: baseline ? mapProjectG0Baseline(baseline) : undefined,
+  };
+}
+
+function mapProjectG0Baseline(value: Record<string, unknown>): ProjectG0Baseline {
+  const compatibilityStatus = value.compatibilityStatus;
+  return {
+    recordVersion: Number(value.recordVersion || 1),
+    createdBaselineId: String(value.createdBaselineId || 'legacy-unversioned'),
+    createdBaselineVersion: value.createdBaselineVersion ? String(value.createdBaselineVersion) : null,
+    createdManifestDigest: value.createdManifestDigest ? String(value.createdManifestDigest) : null,
+    createdBundleDigest: value.createdBundleDigest ? String(value.createdBundleDigest) : null,
+    openedBaselineId: String(value.openedBaselineId || ''),
+    openedBaselineVersion: String(value.openedBaselineVersion || ''),
+    openedManifestDigest: String(value.openedManifestDigest || ''),
+    openedBundleDigest: String(value.openedBundleDigest || ''),
+    compatibilityStatus:
+      compatibilityStatus === 'blocked' || compatibilityStatus === 'migration_required'
+        ? compatibilityStatus
+        : 'compatible',
+    compatibilityReason: String(value.compatibilityReason || ''),
+    executionAllowed: value.executionAllowed === true,
+    migrationRequired: value.migrationRequired === true,
+    firstRecordedAt: value.firstRecordedAt ? String(value.firstRecordedAt) : null,
+    lastOpenedAt: value.lastOpenedAt ? String(value.lastOpenedAt) : null,
   };
 }
 

@@ -10,6 +10,12 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { v4: _uuidv4 } = require('uuid');
+const {
+  LEGACY_BASELINE_ID,
+  PROJECT_BASELINE_RECORD_VERSION,
+  getCurrentG0Baseline,
+  evaluateProjectBaselineCompatibility,
+} = require('../shared-backend/g0-baseline');
 
 const DB_PATH = process.env.BIOF3_DB_PATH || path.join(__dirname, 'biof3.db');
 const db = new Database(DB_PATH);
@@ -219,6 +225,29 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_analyses_task ON analyses(task_id);
 `);
 
+// G0-LF0: every project records the baseline that created it (or an explicit
+// legacy marker), the baseline that most recently opened it, and the current
+// compatibility verdict. This is metadata about the existing project truth;
+// it does not create a second task, Job, Artifact or workflow ledger.
+db.exec(`CREATE TABLE IF NOT EXISTS project_g0_baselines (
+  project_id TEXT PRIMARY KEY,
+  record_version INTEGER NOT NULL,
+  created_baseline_id TEXT NOT NULL,
+  created_baseline_version TEXT,
+  created_manifest_digest TEXT,
+  created_bundle_digest TEXT,
+  opened_baseline_id TEXT NOT NULL,
+  opened_baseline_version TEXT NOT NULL,
+  opened_manifest_digest TEXT NOT NULL,
+  opened_bundle_digest TEXT NOT NULL,
+  compatibility_status TEXT NOT NULL,
+  compatibility_reason TEXT NOT NULL,
+  first_recorded_at TEXT NOT NULL,
+  last_opened_at TEXT NOT NULL,
+  FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+)`);
+db.exec('CREATE INDEX IF NOT EXISTS idx_project_g0_compatibility ON project_g0_baselines(compatibility_status, last_opened_at DESC)');
+
 // Migration: add users table
 try {
   db.exec(`CREATE TABLE IF NOT EXISTS users (
@@ -403,6 +432,28 @@ const stmts = {
   ),
   deleteProject: db.prepare('DELETE FROM projects WHERE id = ?'),
   touchProject: db.prepare('UPDATE projects SET updated_at = ? WHERE id = ?'),
+  getProjectG0Baseline: db.prepare('SELECT * FROM project_g0_baselines WHERE project_id = ?'),
+  insertProjectG0Baseline: db.prepare(
+    `INSERT INTO project_g0_baselines (
+      project_id, record_version,
+      created_baseline_id, created_baseline_version, created_manifest_digest, created_bundle_digest,
+      opened_baseline_id, opened_baseline_version, opened_manifest_digest, opened_bundle_digest,
+      compatibility_status, compatibility_reason,
+      first_recorded_at, last_opened_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ),
+  updateProjectG0BaselineOpen: db.prepare(
+    `UPDATE project_g0_baselines SET
+      opened_baseline_id = ?,
+      opened_baseline_version = ?,
+      opened_manifest_digest = ?,
+      opened_bundle_digest = ?,
+      compatibility_status = ?,
+      compatibility_reason = ?,
+      last_opened_at = ?
+    WHERE project_id = ?`
+  ),
+  deleteProjectG0Baseline: db.prepare('DELETE FROM project_g0_baselines WHERE project_id = ?'),
 
   // Datasets
   listDatasets: db.prepare('SELECT * FROM datasets WHERE project_id = ? ORDER BY uploaded_at DESC'),
@@ -497,23 +548,132 @@ function hydrateProjectWorkspace(project) {
   return { ...project, workspace_path: workspacePath };
 }
 
+function projectBaselineView(row, compatibility) {
+  const current = compatibility.current || getCurrentG0Baseline();
+  return {
+    recordVersion: Number(row.record_version || PROJECT_BASELINE_RECORD_VERSION),
+    createdBaselineId: row.created_baseline_id,
+    createdBaselineVersion: row.created_baseline_version || null,
+    createdManifestDigest: row.created_manifest_digest || null,
+    createdBundleDigest: row.created_bundle_digest || null,
+    openedBaselineId: row.opened_baseline_id || current.baselineId,
+    openedBaselineVersion: row.opened_baseline_version || current.baselineVersion,
+    openedManifestDigest: row.opened_manifest_digest || current.manifestDigest,
+    openedBundleDigest: row.opened_bundle_digest || current.bundleDigest,
+    compatibilityStatus: compatibility.status,
+    compatibilityReason: compatibility.reason,
+    executionAllowed: compatibility.executionAllowed === true,
+    migrationRequired: compatibility.migrationRequired === true,
+    firstRecordedAt: row.first_recorded_at || null,
+    lastOpenedAt: row.last_opened_at || null,
+  };
+}
+
+function ensureProjectG0Baseline(project, options = {}) {
+  if (!project) return project;
+  const current = getCurrentG0Baseline();
+  const existing = stmts.getProjectG0Baseline.get(project.id);
+  const ts = now();
+
+  if (!existing) {
+    const createdByCurrent = options.createdByCurrent === true;
+    const seed = {
+      record_version: PROJECT_BASELINE_RECORD_VERSION,
+      created_baseline_id: createdByCurrent ? current.baselineId : LEGACY_BASELINE_ID,
+      created_baseline_version: createdByCurrent ? current.baselineVersion : null,
+      created_manifest_digest: createdByCurrent ? current.manifestDigest : null,
+      created_bundle_digest: createdByCurrent ? current.bundleDigest : null,
+      opened_baseline_id: current.baselineId,
+      opened_baseline_version: current.baselineVersion,
+      opened_manifest_digest: current.manifestDigest,
+      opened_bundle_digest: current.bundleDigest,
+      first_recorded_at: ts,
+      last_opened_at: ts,
+    };
+    const compatibility = evaluateProjectBaselineCompatibility(seed);
+    if (options.persist !== false) {
+      stmts.insertProjectG0Baseline.run(
+        project.id,
+        seed.record_version,
+        seed.created_baseline_id,
+        seed.created_baseline_version,
+        seed.created_manifest_digest,
+        seed.created_bundle_digest,
+        current.baselineId,
+        current.baselineVersion,
+        current.manifestDigest,
+        current.bundleDigest,
+        compatibility.status,
+        compatibility.reason,
+        ts,
+        ts,
+      );
+    }
+    return {
+      ...project,
+      g0_baseline: projectBaselineView(seed, compatibility),
+    };
+  }
+
+  const compatibility = evaluateProjectBaselineCompatibility(existing);
+  const shouldRefresh =
+    existing.opened_baseline_id !== current.baselineId
+    || existing.opened_baseline_version !== current.baselineVersion
+    || existing.opened_manifest_digest !== current.manifestDigest
+    || existing.opened_bundle_digest !== current.bundleDigest
+    || existing.compatibility_status !== compatibility.status
+    || existing.compatibility_reason !== compatibility.reason;
+  if (options.recordOpen === true && shouldRefresh) {
+    stmts.updateProjectG0BaselineOpen.run(
+      current.baselineId,
+      current.baselineVersion,
+      current.manifestDigest,
+      current.bundleDigest,
+      compatibility.status,
+      compatibility.reason,
+      ts,
+      project.id,
+    );
+  }
+  return {
+    ...project,
+    g0_baseline: projectBaselineView(
+      {
+        ...existing,
+        ...(options.recordOpen === true && shouldRefresh ? {
+          opened_baseline_id: current.baselineId,
+          opened_baseline_version: current.baselineVersion,
+          opened_manifest_digest: current.manifestDigest,
+          opened_bundle_digest: current.bundleDigest,
+        } : {}),
+        last_opened_at: options.recordOpen === true && shouldRefresh ? ts : existing.last_opened_at,
+      },
+      compatibility,
+    ),
+  };
+}
+
+function hydrateProject(project, options = {}) {
+  return ensureProjectG0Baseline(hydrateProjectWorkspace(project), options);
+}
+
 // ---- Projects ----
 
 function listProjects(status = 'active') {
   const normalizedStatus = status === 'archived' ? 'archived' : 'active';
-  return stmts.listProjects.all(normalizedStatus).map(hydrateProjectWorkspace);
+  return stmts.listProjects.all(normalizedStatus).map((project) => hydrateProject(project, { persist: false }));
 }
 
 // W1-3: list projects by modality (single-cell | spatial | bulk).
 // Pass null/undefined to get everything (back-compat with existing callers).
 function listProjectsByModality(modality, status = 'active') {
   const normalizedStatus = status === 'archived' ? 'archived' : 'active';
-  if (!modality) return stmts.listProjects.all(normalizedStatus).map(hydrateProjectWorkspace);
-  return stmts.listProjectsByModality.all(modality, normalizedStatus).map(hydrateProjectWorkspace);
+  if (!modality) return stmts.listProjects.all(normalizedStatus).map((project) => hydrateProject(project, { persist: false }));
+  return stmts.listProjectsByModality.all(modality, normalizedStatus).map((project) => hydrateProject(project, { persist: false }));
 }
 
 function getProject(id) {
-  return hydrateProjectWorkspace(stmts.getProject.get(id) || null);
+  return hydrateProject(stmts.getProject.get(id) || null, { recordOpen: true });
 }
 
 function createProject({ name, description, modality, userId, workspacePath }) {
@@ -522,7 +682,15 @@ function createProject({ name, description, modality, userId, workspacePath }) {
   const finalWorkspacePath = workspacePath || defaultProjectWorkspacePath({ id, name });
   ensureWorkspaceDir(finalWorkspacePath);
   stmts.insertProject.run(id, name, description || '', ts, ts, modality || 'single-cell', finalWorkspacePath);
-  return stmts.getProject.get(id);
+  return hydrateProject(stmts.getProject.get(id), {
+    createdByCurrent: true,
+    recordOpen: true,
+  });
+}
+
+function getProjectG0Baseline(projectId) {
+  const project = stmts.getProject.get(projectId);
+  return project ? hydrateProject(project, { recordOpen: true }).g0_baseline : null;
 }
 
 function setProjectUserId(projectId, userId) {
@@ -537,13 +705,13 @@ function setProjectPublic(projectId, isPublic) {
 function updateProject(id, { name, description, workspacePath }) {
   if (workspacePath) ensureWorkspaceDir(workspacePath);
   stmts.updateProject.run(name || null, description ?? null, workspacePath || null, now(), id);
-  return hydrateProjectWorkspace(stmts.getProject.get(id));
+  return hydrateProject(stmts.getProject.get(id), { recordOpen: true });
 }
 
 function setProjectStatus(id, status) {
   const normalizedStatus = status === 'archived' ? 'archived' : 'active';
   stmts.updateProjectStatus.run(normalizedStatus, now(), id);
-  return hydrateProjectWorkspace(stmts.getProject.get(id));
+  return hydrateProject(stmts.getProject.get(id), { recordOpen: true });
 }
 
 function deleteProject(id) {
@@ -552,6 +720,7 @@ function deleteProject(id) {
     stmts.deleteAnalysesByDataset.run(ds.id);
   }
   db.prepare('DELETE FROM datasets WHERE project_id = ?').run(id);
+  stmts.deleteProjectG0Baseline.run(id);
   stmts.deleteProject.run(id);
 }
 
@@ -1696,6 +1865,7 @@ module.exports = {
   listProjects,
   getProject,
   createProject,
+  getProjectG0Baseline,
   setProjectUserId,
   setProjectPublic,
   updateProject,

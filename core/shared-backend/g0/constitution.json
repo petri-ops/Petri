@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "constitutionId": "biof3-g0-constitution-v1",
+  "appliesToBaselineMajor": 0,
+  "executionTruthChain": [
+    "run_tool",
+    "tool_job",
+    "artifact_truth"
+  ],
+  "invariants": [
+    {
+      "id": "G0-INV-001",
+      "name": "single_execution_truth",
+      "statement": "Formal scientific execution has exactly one truth chain: run_tool -> tool_job -> artifact truth.",
+      "changeLevel": "breaking"
+    },
+    {
+      "id": "G0-INV-002",
+      "name": "evidence_over_text",
+      "statement": "Model or UI text cannot override Job, file, statistic, Validator, Delivery or Replay facts.",
+      "changeLevel": "breaking"
+    },
+    {
+      "id": "G0-INV-003",
+      "name": "no_false_completion",
+      "statement": "Failed or blocked work cannot be declared complete because partial files or narrative text exist.",
+      "changeLevel": "breaking"
+    },
+    {
+      "id": "G0-INV-004",
+      "name": "scientific_integrity",
+      "statement": "Thresholds, methods and retries cannot be manipulated to manufacture an expected scientific conclusion.",
+      "changeLevel": "breaking"
+    },
+    {
+      "id": "G0-INV-005",
+      "name": "scope_isolation",
+      "statement": "Projects, data, credentials, cache entries, memory and artifacts cannot cross authorization scope.",
+      "changeLevel": "breaking"
+    },
+    {
+      "id": "G0-INV-006",
+      "name": "formal_artifact_lineage",
+      "statement": "Every formal artifact remains traceable to input, parameters, script, runtime, Job and validation evidence.",
+      "changeLevel": "breaking"
+    },
+    {
+      "id": "G0-INV-007",
+      "name": "durable_research_truth",
+      "statement": "Unless explicitly cleared by the user, durable task facts survive conversation closure, compaction, restart and upgrade.",
+      "changeLevel": "breaking"
+    },
+    {
+      "id": "G0-INV-008",
+      "name": "bounded_side_effects",
+      "statement": "Irreversible actions, scientific-design changes and external side effects obey explicit permission and audit boundaries.",
+      "changeLevel": "breaking"
+    }
+  ],
+  "forbiddenOverrides": [
+    "model_prompt",
+    "plugin_configuration",
+    "provider_response",
+    "ordinary_user_setting",
+    "ui_projection"
+  ],
+  "reasoningBoundary": {
+    "persistHiddenReasoning": false,
+    "durableSubstitutes": [
+      "public_stage_conclusion",
+      "structured_decision",
+      "tool_activity",
+      "job_and_artifact_evidence"
+    ]
+  },
+  "changeControl": {
+    "breaking": {
+      "requires": [
+        "rfc",
+        "migration_plan",
+        "new_g0_major",
+        "requalification"
+      ]
+    },
+    "migration": {
+      "requires": [
+        "migration_plan",
+        "rollback_plan",
+        "compatibility_evidence"
+      ]
+    },
+    "compatible-contract": {
+      "requires": [
+        "version_increment",
+        "conformance_evidence"
+      ]
+    },
+    "policy": {
+      "requires": [
+        "bounded_policy_evidence"
+      ]
+    }
+  }
+}

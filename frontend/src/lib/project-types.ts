@@ -6,6 +6,24 @@
 
 export type ProjectModality = 'single-cell' | 'spatial' | 'general' | string;
 
+export interface ProjectG0Baseline {
+  recordVersion: number;
+  createdBaselineId: string;
+  createdBaselineVersion?: string | null;
+  createdManifestDigest?: string | null;
+  createdBundleDigest?: string | null;
+  openedBaselineId: string;
+  openedBaselineVersion: string;
+  openedManifestDigest: string;
+  openedBundleDigest: string;
+  compatibilityStatus: 'compatible' | 'migration_required' | 'blocked';
+  compatibilityReason: string;
+  executionAllowed: boolean;
+  migrationRequired: boolean;
+  firstRecordedAt?: string | null;
+  lastOpenedAt?: string | null;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -15,6 +33,7 @@ export interface Project {
   modality?: ProjectModality;
   workspacePath?: string;
   status?: 'active' | 'archived';
+  g0Baseline?: ProjectG0Baseline;
 }
 
 export interface ToolJob {

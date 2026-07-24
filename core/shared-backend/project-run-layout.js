@@ -19,6 +19,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { assertProjectG0Compatible } = require('./g0-baseline');
 
 /**
  * 解析项目运行目录布局
@@ -78,6 +79,18 @@ function resolveProjectRunLayout(options) {
   // 3. 检查项目状态
   if (project.status === 'archived') {
     throw new Error(`[project-run-layout] Project is archived: ${projectId}`);
+  }
+
+  // G0-LF0: legacy projects are explicitly adopted; future, unsupported or
+  // identity-conflicting baselines remain readable but cannot create a formal
+  // Job/Artifact layout until an explicit migration is available.
+  try {
+    assertProjectG0Compatible(project);
+  } catch (error) {
+    const wrapped = new Error(`[project-run-layout] ${error.message}`);
+    wrapped.code = error.code || 'project_g0_baseline_incompatible';
+    wrapped.compatibility = error.compatibility || null;
+    throw wrapped;
   }
 
   // 4. 权限检查

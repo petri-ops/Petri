@@ -12,6 +12,7 @@ const fsp = require('fs/promises');
 const path = require('path');
 const { promisify } = require('util');
 const { execFile } = require('child_process');
+const { assertProjectG0Compatible } = require('../../shared-backend/g0-baseline');
 const execFileAsync = promisify(execFile);
 
 const DEFAULT_MAX_ENTRIES = 200;
@@ -194,13 +195,24 @@ function createWorkspaceTools(options = {}) {
     }
     const db = dbProvider();
     const createRoot = options.createRoot !== false;
-    const project = !createRoot && typeof db.getDatabase === 'function'
+    let project = !createRoot && typeof db.getDatabase === 'function'
       ? db.getDatabase().prepare('SELECT * FROM projects WHERE id = ?').get(projectId) || null
       : db.getProject(projectId);
     if (!project) {
       throw Object.assign(new Error('项目不存在'), { code: 'project_not_found' });
     }
     authorizeProject(project, ctx && ctx.userId, db);
+    if (options.requireCompatible === true) {
+      if (!project.g0_baseline && typeof db.getDatabase === 'function') {
+        try {
+          const baseline = db.getDatabase()
+            .prepare('SELECT * FROM project_g0_baselines WHERE project_id = ?')
+            .get(projectId);
+          if (baseline) project = { ...project, g0_baseline: baseline };
+        } catch {}
+      }
+      assertProjectG0Compatible(project);
+    }
     if (!project.workspace_path || !path.isAbsolute(project.workspace_path)) {
       throw Object.assign(new Error('项目工作区路径未配置或不是绝对路径'), { code: 'workspace_unavailable' });
     }
@@ -535,7 +547,7 @@ function createWorkspaceTools(options = {}) {
           changeSummary,
         };
       });
-    }, { createRoot: args.dryRun !== true });
+    }, { createRoot: args.dryRun !== true, requireCompatible: true });
   }
 
   async function replaceText(args = {}, ctx = {}) {
@@ -588,7 +600,7 @@ function createWorkspaceTools(options = {}) {
           changeSummary,
         };
       });
-    }, { createRoot: args.dryRun !== true });
+    }, { createRoot: args.dryRun !== true, requireCompatible: true });
   }
 
   function commandVerdict(command) {
@@ -662,7 +674,10 @@ function createWorkspaceTools(options = {}) {
         exists,
         relativePath: resolved.relativePath,
       };
-    }, { createRoot: args.dryRun !== true });
+    }, {
+      createRoot: args.dryRun !== true,
+      requireCompatible: ['workspace_write', 'workspace_replace', 'workspace_exec'].includes(name),
+    });
   }
 
   async function executeCommand(args = {}, ctx = {}) {
@@ -708,7 +723,7 @@ function createWorkspaceTools(options = {}) {
           truncated: Boolean(error && error.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER'),
         };
       }
-    });
+    }, { requireCompatible: true });
   }
 
   return {

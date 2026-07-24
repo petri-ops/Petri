@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "capabilityStatuses": {
+    "available": "Implemented and supported by current product evidence, but not yet promoted through G0-LF12 qualification.",
+    "qualified": "Passed the applicable G0 Baseline Qualification and remains under permanent conformance.",
+    "experimental": "Available only for bounded development or evaluation; not a supported scientific delivery promise.",
+    "unavailable": "Not implemented, not packaged, not validated, or explicitly outside the current support boundary."
+  },
+  "changeClasses": {
+    "policy": "Changes adaptive behavior inside existing contracts and safety limits.",
+    "compatible-contract": "Adds a backward-compatible versioned contract capability.",
+    "migration": "Changes persisted state and requires explicit upgrade and rollback behavior.",
+    "breaking": "Changes a G0 invariant or removes compatibility and requires a new G0 major plus requalification."
+  },
+  "projectCompatibilityStatuses": {
+    "compatible": "The project can execute under the current baseline.",
+    "migration_required": "The project is readable but formal writes and execution require an explicit migration.",
+    "blocked": "The project baseline is newer, unsupported, or has an identity conflict; formal writes and execution are refused."
+  }
+}

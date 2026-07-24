@@ -42,6 +42,7 @@ module.exports = {
   deliveryManifest: require('./delivery-manifest'),
   scientificReplayPackage: require('./scientific-replay-package'),
   runtimeResourceSnapshot: require('./runtime-resource-snapshot'),
+  g0Baseline: require('./g0-baseline'),
   executors: require('./executors'),
   storage: require('./storage'),
   llmProviders: require('./llm-providers'),

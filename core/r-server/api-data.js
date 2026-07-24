@@ -5,6 +5,7 @@
 
 const express = require('express');
 const db = require('./db');
+const { getPublicG0BaselineSummary } = require('../shared-backend/g0-baseline');
 
 const router = express.Router();
 
@@ -168,6 +169,10 @@ router.get('/projects', (req, res) => {
   res.json({ status: 'ok', projects });
 });
 
+router.get('/g0-baseline', (_req, res) => {
+  res.json({ status: 'ok', baseline: getPublicG0BaselineSummary() });
+});
+
 router.get('/projects/:id', (req, res) => {
   if (!checkOwnership(req, res, req.params.id)) return;
 
@@ -175,6 +180,18 @@ router.get('/projects/:id', (req, res) => {
   if (!p) return res.status(404).json({ status: 'error', error: '项目不存在' });
   const stats = db.getProjectStats(p.id);
   res.json({ status: 'ok', project: p, stats });
+});
+
+router.get('/projects/:id/g0-baseline', (req, res) => {
+  if (!checkOwnership(req, res, req.params.id)) return;
+  const project = db.getProject(req.params.id);
+  if (!project) return res.status(404).json({ status: 'error', error: '项目不存在' });
+  res.json({
+    status: 'ok',
+    projectId: project.id,
+    baseline: project.g0_baseline,
+    currentBaseline: getPublicG0BaselineSummary(),
+  });
 });
 
 router.post('/projects', (req, res) => {

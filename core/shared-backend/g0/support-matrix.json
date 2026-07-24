@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "baselineId": "g0-lf0-establishing-0.1",
+  "qualificationBoundary": "No capability is marked qualified before G0-LF12.",
+  "platforms": [
+    {
+      "id": "macos-arm64",
+      "status": "available",
+      "scope": "desktop_shell_and_local_scientific_execution",
+      "evidenceRefs": [
+        "acceptance/harness-loop/production/ui-matrix.md",
+        "acceptance/harness-loop/production/restart-recovery-matrix.json"
+      ]
+    },
+    {
+      "id": "macos-x64",
+      "status": "unavailable",
+      "reason": "analysis_runtime_not_product_qualified"
+    },
+    {
+      "id": "windows-x64",
+      "status": "unavailable",
+      "reason": "no_current_product_acceptance"
+    },
+    {
+      "id": "linux-x64",
+      "status": "unavailable",
+      "reason": "not_currently_packaged"
+    }
+  ],
+  "providers": [
+    {
+      "id": "deepseek",
+      "status": "available",
+      "evidenceRef": "acceptance/harness-loop/production/provider-matrix.json"
+    },
+    {
+      "id": "openai-compatible",
+      "status": "available",
+      "evidenceRef": "acceptance/harness-loop/production/provider-matrix.json"
+    },
+    {
+      "id": "other-configured-providers",
+      "status": "experimental",
+      "reason": "not_in_current_g0_start_product_matrix"
+    }
+  ],
+  "runtimes": [
+    {
+      "id": "node-local",
+      "status": "available",
+      "platform": "macos-arm64"
+    },
+    {
+      "id": "r-local",
+      "status": "available",
+      "platform": "macos-arm64"
+    },
+    {
+      "id": "python-local",
+      "status": "available",
+      "platform": "macos-arm64"
+    }
+  ],
+  "plugins": [
+    {
+      "id": "sample-metadata-validator",
+      "status": "available"
+    },
+    {
+      "id": "expression-qc",
+      "status": "available"
+    },
+    {
+      "id": "deseq2",
+      "status": "available"
+    },
+    {
+      "id": "deg-standardizer",
+      "status": "available"
+    },
+    {
+      "id": "volcano-plot",
+      "status": "available"
+    },
+    {
+      "id": "go-kegg",
+      "status": "available"
+    },
+    {
+      "id": "gsea",
+      "status": "available"
+    },
+    {
+      "id": "gene-correlation",
+      "status": "experimental"
+    },
+    {
+      "id": "pca-explorer",
+      "status": "experimental"
+    },
+    {
+      "id": "wgcna",
+      "status": "experimental"
+    }
+  ],
+  "projectFormats": [
+    {
+      "id": "legacy-unversioned",
+      "status": "available",
+      "openPolicy": "adopt_with_unknown_creator"
+    },
+    {
+      "id": "g0-major-0",
+      "status": "available",
+      "openPolicy": "compatible"
+    },
+    {
+      "id": "future-g0-major",
+      "status": "unavailable",
+      "openPolicy": "block"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "baselineId": "g0-lf0-establishing-0.1",
+  "baselineVersion": "0.1.0",
+  "lifecycleStatus": "establishing",
+  "qualificationStatus": "not_yet_qualified",
+  "constitutionId": "biof3-g0-constitution-v1",
+  "executionTruthChain": [
+    "run_tool",
+    "tool_job",
+    "artifact_truth"
+  ],
+  "contracts": {
+    "scientificTaskSpec": 1,
+    "conversationContextEnvelope": 1,
+    "contextCheckpoint": 1,
+    "agentWorkflowTemplate": 1,
+    "loopContract": 1,
+    "loopCheckpoint": 1,
+    "loopContextEnvelope": 1,
+    "deliveryManifest": 1,
+    "replayPackage": 1,
+    "runtimeResourceSnapshot": 1,
+    "artifactProfile": 1,
+    "pluginManifest": 1,
+    "projectBaselineRecord": 1
+  },
+  "database": {
+    "engine": "sqlite",
+    "schemaIdentity": "biof3-local-inline-v1",
+    "migrationLedgerSchemaVersion": 1,
+    "projectBaselineRecordVersion": 1
+  },
+  "projectFormat": {
+    "currentMajor": 0,
+    "minimumReadableMajor": 0,
+    "legacyPolicy": "adopt_with_unknown_creator",
+    "futureMajorPolicy": "block",
+    "digestMismatchPolicy": "block_until_versioned"
+  },
+  "resourceRefs": {
+    "constitution": "core/shared-backend/g0/constitution.json",
+    "registry": "core/shared-backend/g0/baseline-registry.json",
+    "supportMatrix": "core/shared-backend/g0/support-matrix.json",
+    "governanceVocabulary": "core/shared-backend/g0/governance-vocabulary.json"
+  },
+  "evidenceRefs": [
+    "acceptance/harness-loop/production/baseline.json",
+    "acceptance/harness-loop/hle-all-gate.json",
+    "acceptance/g0-living-foundation/g0-start-audit.json",
+    "acceptance/g0-living-foundation/g0-lf0-acceptance.json"
+  ]
+}
