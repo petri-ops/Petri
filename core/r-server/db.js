@@ -248,6 +248,48 @@ db.exec(`CREATE TABLE IF NOT EXISTS project_g0_baselines (
 )`);
 db.exec('CREATE INDEX IF NOT EXISTS idx_project_g0_compatibility ON project_g0_baselines(compatibility_status, last_opened_at DESC)');
 
+// The LF0 schema may already exist from an earlier establishing build. SQLite's
+// CREATE TABLE IF NOT EXISTS does not add later columns, so upgrade the record
+// in place before preparing statements. Creator bundle identity is backfilled
+// only when the stored baseline id/version/manifest still exactly match the
+// current baseline; legacy or ambiguous creator history remains null.
+const projectG0Columns = new Set(
+  db.prepare('PRAGMA table_info(project_g0_baselines)').all().map((column) => column.name)
+);
+if (!projectG0Columns.has('created_bundle_digest')) {
+  db.exec('ALTER TABLE project_g0_baselines ADD COLUMN created_bundle_digest TEXT');
+}
+if (!projectG0Columns.has('opened_bundle_digest')) {
+  db.exec('ALTER TABLE project_g0_baselines ADD COLUMN opened_bundle_digest TEXT');
+}
+const g0MigrationBaseline = getCurrentG0Baseline();
+db.prepare(
+  `UPDATE project_g0_baselines
+   SET opened_bundle_digest = ?
+   WHERE opened_bundle_digest IS NULL
+     AND opened_baseline_id = ?
+     AND opened_baseline_version = ?
+     AND opened_manifest_digest = ?`
+).run(
+  g0MigrationBaseline.bundleDigest,
+  g0MigrationBaseline.baselineId,
+  g0MigrationBaseline.baselineVersion,
+  g0MigrationBaseline.manifestDigest,
+);
+db.prepare(
+  `UPDATE project_g0_baselines
+   SET created_bundle_digest = ?
+   WHERE created_bundle_digest IS NULL
+     AND created_baseline_id = ?
+     AND created_baseline_version = ?
+     AND created_manifest_digest = ?`
+).run(
+  g0MigrationBaseline.bundleDigest,
+  g0MigrationBaseline.baselineId,
+  g0MigrationBaseline.baselineVersion,
+  g0MigrationBaseline.manifestDigest,
+);
+
 // Migration: add users table
 try {
   db.exec(`CREATE TABLE IF NOT EXISTS users (

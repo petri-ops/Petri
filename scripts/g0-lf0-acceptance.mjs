@@ -150,8 +150,8 @@ function inspectLf0(startReport, verification = null, options = {}) {
       'G0-LF0-09',
       bootstrap || (
         /状态：`establishing`/.test(plan)
-        && /G0-START：`completed`/.test(plan)
-        && /G0-LF0：`completed`/.test(plan)
+        && /`G0-START`：`completed`/.test(plan)
+        && /`G0-LF0`：`completed`/.test(plan)
       ),
       ['docs/g0-living-foundation-plan.md'],
       bootstrap
@@ -250,7 +250,13 @@ function writeEvidence() {
       ...startReport.checks.filter((item) => !item.passed).map((item) => item.id),
       ...lf0Report.checks.filter((item) => !item.passed).map((item) => item.id),
     ];
-    throw new Error(`cannot write failed G0 evidence: ${failed.join(', ')}`);
+    const failedCommands = verification.commands
+      .filter((command) => !command.passed)
+      .map((command) => `${command.label}(exit=${command.exitCode},signal=${command.signal || 'none'})`);
+    throw new Error(
+      `cannot write failed G0 evidence: ${failed.join(', ')}`
+      + (failedCommands.length > 0 ? `; commands: ${failedCommands.join(', ')}` : ''),
+    );
   }
   writeStartEvidence(startReport);
   mkdirSync(dirname(LF0_EVIDENCE_PATH), { recursive: true });

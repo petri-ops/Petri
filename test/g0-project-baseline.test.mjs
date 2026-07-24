@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test, { after } from 'node:test';
 import { createRequire } from 'node:module';
+import { spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -139,4 +140,65 @@ test('deleting a project deletes its G0 identity record', () => {
     db.db.prepare('SELECT COUNT(*) AS count FROM project_g0_baselines WHERE project_id = ?').get(project.id).count,
     0,
   );
+});
+
+test('an earlier LF0 project baseline table upgrades idempotently and backfills exact identities', () => {
+  const migrationDbPath = join(tempRoot, 'g0-lf0-old-schema.db');
+  const Database = require('../core/r-server/node_modules/better-sqlite3');
+  const migrationDb = new Database(migrationDbPath);
+  const current = g0.getCurrentG0Baseline();
+  migrationDb.exec(`CREATE TABLE project_g0_baselines (
+    project_id TEXT PRIMARY KEY,
+    record_version INTEGER NOT NULL,
+    created_baseline_id TEXT NOT NULL,
+    created_baseline_version TEXT,
+    created_manifest_digest TEXT,
+    opened_baseline_id TEXT NOT NULL,
+    opened_baseline_version TEXT NOT NULL,
+    opened_manifest_digest TEXT NOT NULL,
+    compatibility_status TEXT NOT NULL,
+    compatibility_reason TEXT NOT NULL,
+    first_recorded_at TEXT NOT NULL,
+    last_opened_at TEXT NOT NULL
+  )`);
+  migrationDb.prepare(
+    `INSERT INTO project_g0_baselines VALUES (?, 1, ?, ?, ?, ?, ?, ?, 'compatible', 'current_baseline', ?, ?)`,
+  ).run(
+    'old_schema_project',
+    current.baselineId,
+    current.baselineVersion,
+    current.manifestDigest,
+    current.baselineId,
+    current.baselineVersion,
+    current.manifestDigest,
+    new Date().toISOString(),
+    new Date().toISOString(),
+  );
+  migrationDb.close();
+
+  const probe = spawnSync(
+    process.execPath,
+    ['-e', `
+      const db = require('./core/r-server/db');
+      const columns = db.db.prepare('PRAGMA table_info(project_g0_baselines)').all().map((item) => item.name);
+      const row = db.db.prepare('SELECT * FROM project_g0_baselines WHERE project_id = ?').get('old_schema_project');
+      process.stdout.write(JSON.stringify({ columns, row }));
+      db.db.close();
+    `],
+    {
+      cwd: process.cwd(),
+      env: {
+        ...process.env,
+        BIOF3_DB_PATH: migrationDbPath,
+        BIOF3_LOCAL_DATA_DIR: join(tempRoot, 'old-schema-local-data'),
+      },
+      encoding: 'utf8',
+    },
+  );
+  assert.equal(probe.status, 0, probe.stderr);
+  const result = JSON.parse(probe.stdout);
+  assert.ok(result.columns.includes('created_bundle_digest'));
+  assert.ok(result.columns.includes('opened_bundle_digest'));
+  assert.equal(result.row.created_bundle_digest, current.bundleDigest);
+  assert.equal(result.row.opened_bundle_digest, current.bundleDigest);
 });
