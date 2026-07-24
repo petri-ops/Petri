@@ -27,7 +27,7 @@ function inspect(verification = null, bootstrap = false) {
   const summary = read('frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx');
   const commands = verification?.commands || [];
   const checks = [
-    check('G0-W3-01', g0.validateG0BaselineBundle().ok && g0.manifest.baselineVersion === '0.4.0' && g0.manifest.qualificationStatus === 'not_yet_qualified', ['core/shared-backend/g0/baseline-manifest.json'], 'Third-wave baseline is consistent and not qualified.'),
+    check('G0-W3-01', g0.validateG0BaselineBundle().ok && Number(g0.manifest.baselineVersion.split('.')[1]) >= 4 && g0.manifest.qualificationStatus === 'not_yet_qualified', ['core/shared-backend/g0/baseline-manifest.json'], 'Compatible baseline retains third-wave contracts and remains not qualified.'),
     check('G0-W3-02', runtime.contract.resourceDimensions.length === 6 && runtime.contract.actions.length >= 7, ['core/shared-backend/g0/adaptive-runtime.json'], 'LF5 resource and control decisions are bounded.'),
     check('G0-W3-03', /createRuntimeResourceSnapshot/.test(executor) && runtime.contract.readinessRequired.length === 5, ['core/r-server/helpers/tools-executor.js'], 'LF5 reuses production resource and readiness truth.'),
     check('G0-W3-04', runtime.contract.scientificBoundary.includes('scientific design change'), ['core/shared-backend/g0/adaptive-runtime.json'], 'Runtime repair cannot silently alter science.'),
@@ -54,7 +54,7 @@ function commands() {
     ['runtime-control', 'npm', ['run', 'harness:runtime-control']],
   ];
   return specs.map(([label, bin, args]) => {
-    const result = spawnSync(bin, args, { cwd: root, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024, env: { ...process.env, G0_LF0_BOOTSTRAP: '1', G0_FIRST_WAVE_BOOTSTRAP: '1', G0_SECOND_WAVE_BOOTSTRAP: '1', G0_THIRD_WAVE_BOOTSTRAP: '1' } });
+    const result = spawnSync(bin, args, { cwd: root, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024, env: { ...process.env, G0_LF0_BOOTSTRAP: '1', G0_FIRST_WAVE_BOOTSTRAP: '1', G0_SECOND_WAVE_BOOTSTRAP: '1', G0_THIRD_WAVE_BOOTSTRAP: '1', G0_FOURTH_WAVE_BOOTSTRAP: '1' } });
     return { label, command: [bin, ...args].join(' '), exitCode: result.status, signal: result.signal || null, passed: result.status === 0, stdoutSha256: sha(result.stdout || ''), stderrSha256: sha(result.stderr || '') };
   });
 }

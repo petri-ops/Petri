@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": 1,
+  "contractVersion": 2,
   "sources": ["builtin-canonical", "installed", "development-explicit"],
   "requiredControls": [
     "manifest_schema",
@@ -14,7 +14,11 @@
     "platform_support",
     "download_https_host_policy",
     "archive_path_safety",
-    "content_hash_verification"
+    "content_hash_verification",
+    "independent_result_script",
+    "resource_profile",
+    "platform_adapter_boundary",
+    "upgrade_replay_and_drift"
   ],
   "forbidden": [
     "installed_overrides_builtin_without_explicit_development_mode",

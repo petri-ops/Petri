@@ -20,7 +20,7 @@ const readiness = { runtime: true, packages: true, plugin: true, disk: true, mem
 test('third-wave baseline remains establishing and exposes LF5/LF6/LF9 contracts', () => {
   const validation = g0.validateG0BaselineBundle();
   assert.equal(validation.ok, true, validation.issues.join('\n'));
-  assert.equal(g0.manifest.baselineVersion, '0.4.0');
+  assert.ok(Number(g0.manifest.baselineVersion.split('.')[1]) >= 4);
   assert.equal(g0.manifest.qualificationStatus, 'not_yet_qualified');
   assert.equal(g0.adaptiveRuntime.contractVersion, 1);
   assert.equal(g0.modelMemoryCost.contractVersion, 1);

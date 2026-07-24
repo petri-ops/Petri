@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "contractVersion": 1,
-  "modes": ["read", "guided", "confirm", "full"],
+  "contractVersion": 2,
+  "modes": ["read", "guided", "confirm", "full", "developer"],
   "dimensions": ["filesystem", "command", "network", "plugin", "provider", "external_application"],
   "nonOverridableBoundaries": [
     "project_scope_isolation",
@@ -11,7 +11,8 @@
     "external_side_effect_audit",
     "single_execution_truth"
   ],
-  "decisions": ["allow", "deny", "require_user", "not_supported"],
+  "riskFactors": ["scope", "path", "reversibility", "external_side_effect", "credential", "scientific_design_change"],
+  "decisions": ["auto", "confirm", "block", "not_supported"],
   "fullAccessStillBlocks": [
     "privilege_escalation",
     "destructive_recursive_delete",

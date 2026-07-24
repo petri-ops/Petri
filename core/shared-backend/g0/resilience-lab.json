@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": 1,
+  "faultDomains": ["provider", "runtime", "storage", "database", "resource", "user", "plugin", "model"],
+  "allowedOutcomes": ["auto_recovered", "retry_safe", "recovery_required", "waiting", "cancelled", "blocked"],
+  "requiredAssertions": ["no_false_success", "audit_preserved", "project_isolated", "scientific_truth_unchanged", "bounded_retry"],
+  "faults": [
+    {"id":"provider_timeout","domain":"provider","expected":"retry_safe"},
+    {"id":"runtime_process_exit","domain":"runtime","expected":"recovery_required"},
+    {"id":"partial_artifact_write","domain":"storage","expected":"recovery_required"},
+    {"id":"migration_interrupted","domain":"database","expected":"blocked"},
+    {"id":"memory_pressure","domain":"resource","expected":"waiting"},
+    {"id":"user_cancel","domain":"user","expected":"cancelled"},
+    {"id":"plugin_schema_drift","domain":"plugin","expected":"blocked"},
+    {"id":"context_compaction_drift","domain":"model","expected":"blocked"}
+  ]
+}
