@@ -3,34 +3,32 @@
   "subjectBaselineId": "g0-fifth-wave-establishing-0.6",
   "subjectBaselineVersion": "0.6.0",
   "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
-  "sourceCommit": "225fbb4c48b7bcd7bfcbd88bb4a718d11b7a101d",
+  "sourceCommit": "8c26dd001b03b7db78a3f041de80339f35fc60af",
   "privacy": "indexes_digests_counts_and_bounded_status_only_no_raw_data_credentials_urls_or_absolute_paths",
   "entries": [
     {
-      "evidenceId": "current-constitution_baseline",
+      "evidenceId": "qualification-offline-constitution_baseline",
       "evidenceClass": "constitution_baseline",
       "schemaVersion": 1,
-      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "sourceCommit": "8c26dd001b03b7db78a3f041de80339f35fc60af",
       "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
       "platform": "macos-arm64",
       "architecture": "arm64",
       "appMode": "qualification-harness",
       "runtimeSummary": null,
       "providerSummary": null,
-      "commandOrEntry": "npm run g0:lf0",
-      "generatedAt": "2026-07-24T07:31:04.986Z",
+      "commandOrEntry": "npm run g0:qualification:offline",
+      "generatedAt": "2026-07-24T10:41:52.680Z",
       "freshnessStatus": "fresh",
       "counts": {
-        "checksPassed": 10,
-        "checksTotal": 10,
-        "commandsPassed": 6,
-        "commandsTotal": 6
+        "commandsPassed": 5,
+        "commandsTotal": 5
       },
       "hashes": {
-        "reportSha256": "983f8a70e32193b9886e872eb138caec818bcbb16cf2d2c0e6a7586e91b5d2a7"
+        "reportSha256": "f7afe46580c93248b911aefaafe3166209fef80db4d859e3ec41478f7007dc38"
       },
       "boundedResult": "passed",
-      "privacyClassification": "no_credentials_urls_headers_raw_provider_responses_or_command_output",
+      "privacyClassification": "command_status_and_output_digests_only_no_raw_output_credentials_urls_or_absolute_paths",
       "applicableClaims": [],
       "status": "passed",
       "blockerRefs": [],
@@ -38,61 +36,28 @@
       "integrityIssues": []
     },
     {
-      "evidenceId": "current-migration_upgrade",
-      "evidenceClass": "migration_upgrade",
-      "schemaVersion": 1,
-      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
-      "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
-      "platform": "macos-arm64",
-      "architecture": "arm64",
-      "appMode": "qualification-harness",
-      "runtimeSummary": null,
-      "providerSummary": null,
-      "commandOrEntry": "npm run g0:lf0",
-      "generatedAt": "2026-07-24T07:31:04.986Z",
-      "freshnessStatus": "fresh",
-      "counts": {
-        "checksPassed": 10,
-        "checksTotal": 10,
-        "commandsPassed": 6,
-        "commandsTotal": 6
-      },
-      "hashes": {
-        "reportSha256": "983f8a70e32193b9886e872eb138caec818bcbb16cf2d2c0e6a7586e91b5d2a7"
-      },
-      "boundedResult": "passed",
-      "privacyClassification": "no_credentials_urls_headers_raw_provider_responses_or_command_output",
-      "applicableClaims": [],
-      "status": "passed",
-      "blockerRefs": [],
-      "integrity": "valid",
-      "integrityIssues": []
-    },
-    {
-      "evidenceId": "current-truth_lattice",
+      "evidenceId": "qualification-offline-truth_lattice",
       "evidenceClass": "truth_lattice",
       "schemaVersion": 1,
-      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "sourceCommit": "8c26dd001b03b7db78a3f041de80339f35fc60af",
       "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
       "platform": "macos-arm64",
       "architecture": "arm64",
       "appMode": "qualification-harness",
       "runtimeSummary": null,
       "providerSummary": null,
-      "commandOrEntry": "npm run g0:first-wave",
-      "generatedAt": "2026-07-24T07:32:15.269Z",
+      "commandOrEntry": "npm run g0:qualification:offline",
+      "generatedAt": "2026-07-24T10:41:52.680Z",
       "freshnessStatus": "fresh",
       "counts": {
-        "checksPassed": 12,
-        "checksTotal": 12,
-        "commandsPassed": 7,
-        "commandsTotal": 7
+        "commandsPassed": 5,
+        "commandsTotal": 5
       },
       "hashes": {
-        "reportSha256": "affe166a1113be3a1a19009a402d989d12f261564f8e91aa771ea77d05ecf369"
+        "reportSha256": "f7afe46580c93248b911aefaafe3166209fef80db4d859e3ec41478f7007dc38"
       },
       "boundedResult": "passed",
-      "privacyClassification": "status_and_output_digests_only_no_raw_output_credentials_headers_urls_or_provider_responses",
+      "privacyClassification": "command_status_and_output_digests_only_no_raw_output_credentials_urls_or_absolute_paths",
       "applicableClaims": [],
       "status": "passed",
       "blockerRefs": [],
@@ -100,30 +65,28 @@
       "integrityIssues": []
     },
     {
-      "evidenceId": "current-durable_state",
+      "evidenceId": "qualification-offline-durable_state",
       "evidenceClass": "durable_state",
       "schemaVersion": 1,
-      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "sourceCommit": "8c26dd001b03b7db78a3f041de80339f35fc60af",
       "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
       "platform": "macos-arm64",
       "architecture": "arm64",
       "appMode": "qualification-harness",
       "runtimeSummary": null,
       "providerSummary": null,
-      "commandOrEntry": "npm run g0:first-wave",
-      "generatedAt": "2026-07-24T07:32:15.269Z",
+      "commandOrEntry": "npm run g0:qualification:offline",
+      "generatedAt": "2026-07-24T10:41:52.680Z",
       "freshnessStatus": "fresh",
       "counts": {
-        "checksPassed": 12,
-        "checksTotal": 12,
-        "commandsPassed": 7,
-        "commandsTotal": 7
+        "commandsPassed": 5,
+        "commandsTotal": 5
       },
       "hashes": {
-        "reportSha256": "affe166a1113be3a1a19009a402d989d12f261564f8e91aa771ea77d05ecf369"
+        "reportSha256": "f7afe46580c93248b911aefaafe3166209fef80db4d859e3ec41478f7007dc38"
       },
       "boundedResult": "passed",
-      "privacyClassification": "status_and_output_digests_only_no_raw_output_credentials_headers_urls_or_provider_responses",
+      "privacyClassification": "command_status_and_output_digests_only_no_raw_output_credentials_urls_or_absolute_paths",
       "applicableClaims": [],
       "status": "passed",
       "blockerRefs": [],
@@ -131,30 +94,28 @@
       "integrityIssues": []
     },
     {
-      "evidenceId": "current-scientific_accuracy",
+      "evidenceId": "qualification-offline-scientific_accuracy",
       "evidenceClass": "scientific_accuracy",
       "schemaVersion": 1,
-      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "sourceCommit": "8c26dd001b03b7db78a3f041de80339f35fc60af",
       "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
       "platform": "macos-arm64",
       "architecture": "arm64",
       "appMode": "qualification-harness",
       "runtimeSummary": null,
       "providerSummary": null,
-      "commandOrEntry": "npm run g0:second-wave",
-      "generatedAt": "2026-07-24T07:33:25.623Z",
+      "commandOrEntry": "npm run g0:qualification:offline",
+      "generatedAt": "2026-07-24T10:41:52.680Z",
       "freshnessStatus": "fresh",
       "counts": {
-        "checksPassed": 12,
-        "checksTotal": 12,
-        "commandsPassed": 7,
-        "commandsTotal": 7
+        "commandsPassed": 5,
+        "commandsTotal": 5
       },
       "hashes": {
-        "reportSha256": "46295c9ebb42c2d8c1b60338ee4b6343af910a38f6b324f75cce82550ec541ed"
+        "reportSha256": "f7afe46580c93248b911aefaafe3166209fef80db4d859e3ec41478f7007dc38"
       },
       "boundedResult": "passed",
-      "privacyClassification": "status_counts_and_output_digests_only_no_raw_data_credentials_headers_urls_or_provider_responses",
+      "privacyClassification": "command_status_and_output_digests_only_no_raw_output_credentials_urls_or_absolute_paths",
       "applicableClaims": [],
       "status": "passed",
       "blockerRefs": [],
@@ -162,30 +123,28 @@
       "integrityIssues": []
     },
     {
-      "evidenceId": "current-replay_drift",
+      "evidenceId": "qualification-offline-replay_drift",
       "evidenceClass": "replay_drift",
       "schemaVersion": 1,
-      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "sourceCommit": "8c26dd001b03b7db78a3f041de80339f35fc60af",
       "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
       "platform": "macos-arm64",
       "architecture": "arm64",
       "appMode": "qualification-harness",
       "runtimeSummary": null,
       "providerSummary": null,
-      "commandOrEntry": "npm run g0:second-wave",
-      "generatedAt": "2026-07-24T07:33:25.623Z",
+      "commandOrEntry": "npm run g0:qualification:offline",
+      "generatedAt": "2026-07-24T10:41:52.680Z",
       "freshnessStatus": "fresh",
       "counts": {
-        "checksPassed": 12,
-        "checksTotal": 12,
-        "commandsPassed": 7,
-        "commandsTotal": 7
+        "commandsPassed": 5,
+        "commandsTotal": 5
       },
       "hashes": {
-        "reportSha256": "46295c9ebb42c2d8c1b60338ee4b6343af910a38f6b324f75cce82550ec541ed"
+        "reportSha256": "f7afe46580c93248b911aefaafe3166209fef80db4d859e3ec41478f7007dc38"
       },
       "boundedResult": "passed",
-      "privacyClassification": "status_counts_and_output_digests_only_no_raw_data_credentials_headers_urls_or_provider_responses",
+      "privacyClassification": "command_status_and_output_digests_only_no_raw_output_credentials_urls_or_absolute_paths",
       "applicableClaims": [],
       "status": "passed",
       "blockerRefs": [],
@@ -193,30 +152,28 @@
       "integrityIssues": []
     },
     {
-      "evidenceId": "current-runtime_resource",
+      "evidenceId": "qualification-offline-runtime_resource",
       "evidenceClass": "runtime_resource",
       "schemaVersion": 1,
-      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "sourceCommit": "8c26dd001b03b7db78a3f041de80339f35fc60af",
       "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
       "platform": "macos-arm64",
       "architecture": "arm64",
       "appMode": "qualification-harness",
       "runtimeSummary": null,
       "providerSummary": null,
-      "commandOrEntry": "npm run g0:third-wave",
-      "generatedAt": "2026-07-24T07:34:34.096Z",
+      "commandOrEntry": "npm run g0:qualification:offline",
+      "generatedAt": "2026-07-24T10:41:52.680Z",
       "freshnessStatus": "fresh",
       "counts": {
-        "checksPassed": 12,
-        "checksTotal": 12,
-        "commandsPassed": 7,
-        "commandsTotal": 7
+        "commandsPassed": 5,
+        "commandsTotal": 5
       },
       "hashes": {
-        "reportSha256": "d00526df996d77a7a339980956a78866ab798e851a84647c3062830e76080e1e"
+        "reportSha256": "f7afe46580c93248b911aefaafe3166209fef80db4d859e3ec41478f7007dc38"
       },
       "boundedResult": "passed",
-      "privacyClassification": "digests_and_counts_only_no_raw_data_credentials_urls_or_provider_responses",
+      "privacyClassification": "command_status_and_output_digests_only_no_raw_output_credentials_urls_or_absolute_paths",
       "applicableClaims": [],
       "status": "passed",
       "blockerRefs": [],
@@ -224,30 +181,28 @@
       "integrityIssues": []
     },
     {
-      "evidenceId": "current-model_memory_cost",
+      "evidenceId": "qualification-offline-model_memory_cost",
       "evidenceClass": "model_memory_cost",
       "schemaVersion": 1,
-      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "sourceCommit": "8c26dd001b03b7db78a3f041de80339f35fc60af",
       "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
       "platform": "macos-arm64",
       "architecture": "arm64",
       "appMode": "qualification-harness",
       "runtimeSummary": null,
       "providerSummary": null,
-      "commandOrEntry": "npm run g0:third-wave",
-      "generatedAt": "2026-07-24T07:34:34.096Z",
+      "commandOrEntry": "npm run g0:qualification:offline",
+      "generatedAt": "2026-07-24T10:41:52.680Z",
       "freshnessStatus": "fresh",
       "counts": {
-        "checksPassed": 12,
-        "checksTotal": 12,
-        "commandsPassed": 7,
-        "commandsTotal": 7
+        "commandsPassed": 5,
+        "commandsTotal": 5
       },
       "hashes": {
-        "reportSha256": "d00526df996d77a7a339980956a78866ab798e851a84647c3062830e76080e1e"
+        "reportSha256": "f7afe46580c93248b911aefaafe3166209fef80db4d859e3ec41478f7007dc38"
       },
       "boundedResult": "passed",
-      "privacyClassification": "digests_and_counts_only_no_raw_data_credentials_urls_or_provider_responses",
+      "privacyClassification": "command_status_and_output_digests_only_no_raw_output_credentials_urls_or_absolute_paths",
       "applicableClaims": [],
       "status": "passed",
       "blockerRefs": [],
@@ -255,61 +210,28 @@
       "integrityIssues": []
     },
     {
-      "evidenceId": "current-observable_experience",
-      "evidenceClass": "observable_experience",
-      "schemaVersion": 1,
-      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
-      "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
-      "platform": "macos-arm64",
-      "architecture": "arm64",
-      "appMode": "qualification-harness",
-      "runtimeSummary": null,
-      "providerSummary": null,
-      "commandOrEntry": "npm run g0:third-wave",
-      "generatedAt": "2026-07-24T07:34:34.096Z",
-      "freshnessStatus": "fresh",
-      "counts": {
-        "checksPassed": 12,
-        "checksTotal": 12,
-        "commandsPassed": 7,
-        "commandsTotal": 7
-      },
-      "hashes": {
-        "reportSha256": "d00526df996d77a7a339980956a78866ab798e851a84647c3062830e76080e1e"
-      },
-      "boundedResult": "passed",
-      "privacyClassification": "digests_and_counts_only_no_raw_data_credentials_urls_or_provider_responses",
-      "applicableClaims": [],
-      "status": "passed",
-      "blockerRefs": [],
-      "integrity": "valid",
-      "integrityIssues": []
-    },
-    {
-      "evidenceId": "current-plugin_supply_chain",
+      "evidenceId": "qualification-offline-plugin_supply_chain",
       "evidenceClass": "plugin_supply_chain",
       "schemaVersion": 1,
-      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "sourceCommit": "8c26dd001b03b7db78a3f041de80339f35fc60af",
       "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
       "platform": "macos-arm64",
       "architecture": "arm64",
       "appMode": "qualification-harness",
       "runtimeSummary": null,
       "providerSummary": null,
-      "commandOrEntry": "npm run g0:fourth-wave",
-      "generatedAt": "2026-07-24T07:35:45.627Z",
+      "commandOrEntry": "npm run g0:qualification:offline",
+      "generatedAt": "2026-07-24T10:41:52.680Z",
       "freshnessStatus": "fresh",
       "counts": {
-        "checksPassed": 12,
-        "checksTotal": 12,
-        "commandsPassed": 8,
-        "commandsTotal": 8
+        "commandsPassed": 5,
+        "commandsTotal": 5
       },
       "hashes": {
-        "reportSha256": "78914ec27a916635c9645b5952ef1f5c2b59994ad1b264526199451a98d6f09a"
+        "reportSha256": "f7afe46580c93248b911aefaafe3166209fef80db4d859e3ec41478f7007dc38"
       },
       "boundedResult": "passed",
-      "privacyClassification": "digests_and_counts_only_no_raw_data_credentials_urls_or_provider_responses",
+      "privacyClassification": "command_status_and_output_digests_only_no_raw_output_credentials_urls_or_absolute_paths",
       "applicableClaims": [],
       "status": "passed",
       "blockerRefs": [],
@@ -317,30 +239,28 @@
       "integrityIssues": []
     },
     {
-      "evidenceId": "current-security_permission",
+      "evidenceId": "qualification-offline-security_permission",
       "evidenceClass": "security_permission",
       "schemaVersion": 1,
-      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "sourceCommit": "8c26dd001b03b7db78a3f041de80339f35fc60af",
       "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
       "platform": "macos-arm64",
       "architecture": "arm64",
       "appMode": "qualification-harness",
       "runtimeSummary": null,
       "providerSummary": null,
-      "commandOrEntry": "npm run g0:fourth-wave",
-      "generatedAt": "2026-07-24T07:35:45.627Z",
+      "commandOrEntry": "npm run g0:qualification:offline",
+      "generatedAt": "2026-07-24T10:41:52.680Z",
       "freshnessStatus": "fresh",
       "counts": {
-        "checksPassed": 12,
-        "checksTotal": 12,
-        "commandsPassed": 8,
-        "commandsTotal": 8
+        "commandsPassed": 5,
+        "commandsTotal": 5
       },
       "hashes": {
-        "reportSha256": "78914ec27a916635c9645b5952ef1f5c2b59994ad1b264526199451a98d6f09a"
+        "reportSha256": "f7afe46580c93248b911aefaafe3166209fef80db4d859e3ec41478f7007dc38"
       },
       "boundedResult": "passed",
-      "privacyClassification": "digests_and_counts_only_no_raw_data_credentials_urls_or_provider_responses",
+      "privacyClassification": "command_status_and_output_digests_only_no_raw_output_credentials_urls_or_absolute_paths",
       "applicableClaims": [],
       "status": "passed",
       "blockerRefs": [],
@@ -348,30 +268,86 @@
       "integrityIssues": []
     },
     {
-      "evidenceId": "current-resilience_fault_matrix",
-      "evidenceClass": "resilience_fault_matrix",
+      "evidenceId": "qualification-offline-observable_experience",
+      "evidenceClass": "observable_experience",
       "schemaVersion": 1,
-      "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+      "sourceCommit": "8c26dd001b03b7db78a3f041de80339f35fc60af",
       "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
       "platform": "macos-arm64",
       "architecture": "arm64",
       "appMode": "qualification-harness",
       "runtimeSummary": null,
       "providerSummary": null,
-      "commandOrEntry": "npm run g0:fourth-wave",
-      "generatedAt": "2026-07-24T07:35:45.627Z",
+      "commandOrEntry": "npm run g0:qualification:offline",
+      "generatedAt": "2026-07-24T10:41:52.680Z",
       "freshnessStatus": "fresh",
       "counts": {
-        "checksPassed": 12,
-        "checksTotal": 12,
-        "commandsPassed": 8,
-        "commandsTotal": 8
+        "commandsPassed": 5,
+        "commandsTotal": 5
       },
       "hashes": {
-        "reportSha256": "78914ec27a916635c9645b5952ef1f5c2b59994ad1b264526199451a98d6f09a"
+        "reportSha256": "f7afe46580c93248b911aefaafe3166209fef80db4d859e3ec41478f7007dc38"
       },
       "boundedResult": "passed",
-      "privacyClassification": "digests_and_counts_only_no_raw_data_credentials_urls_or_provider_responses",
+      "privacyClassification": "command_status_and_output_digests_only_no_raw_output_credentials_urls_or_absolute_paths",
+      "applicableClaims": [],
+      "status": "passed",
+      "blockerRefs": [],
+      "integrity": "valid",
+      "integrityIssues": []
+    },
+    {
+      "evidenceId": "qualification-offline-resilience_fault_matrix",
+      "evidenceClass": "resilience_fault_matrix",
+      "schemaVersion": 1,
+      "sourceCommit": "8c26dd001b03b7db78a3f041de80339f35fc60af",
+      "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
+      "platform": "macos-arm64",
+      "architecture": "arm64",
+      "appMode": "qualification-harness",
+      "runtimeSummary": null,
+      "providerSummary": null,
+      "commandOrEntry": "npm run g0:qualification:offline",
+      "generatedAt": "2026-07-24T10:41:52.680Z",
+      "freshnessStatus": "fresh",
+      "counts": {
+        "commandsPassed": 5,
+        "commandsTotal": 5
+      },
+      "hashes": {
+        "reportSha256": "f7afe46580c93248b911aefaafe3166209fef80db4d859e3ec41478f7007dc38"
+      },
+      "boundedResult": "passed",
+      "privacyClassification": "command_status_and_output_digests_only_no_raw_output_credentials_urls_or_absolute_paths",
+      "applicableClaims": [],
+      "status": "passed",
+      "blockerRefs": [],
+      "integrity": "valid",
+      "integrityIssues": []
+    },
+    {
+      "evidenceId": "qualification-offline-migration_upgrade",
+      "evidenceClass": "migration_upgrade",
+      "schemaVersion": 1,
+      "sourceCommit": "8c26dd001b03b7db78a3f041de80339f35fc60af",
+      "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
+      "platform": "macos-arm64",
+      "architecture": "arm64",
+      "appMode": "qualification-harness",
+      "runtimeSummary": null,
+      "providerSummary": null,
+      "commandOrEntry": "npm run g0:qualification:offline",
+      "generatedAt": "2026-07-24T10:41:52.680Z",
+      "freshnessStatus": "fresh",
+      "counts": {
+        "commandsPassed": 5,
+        "commandsTotal": 5
+      },
+      "hashes": {
+        "reportSha256": "f7afe46580c93248b911aefaafe3166209fef80db4d859e3ec41478f7007dc38"
+      },
+      "boundedResult": "passed",
+      "privacyClassification": "command_status_and_output_digests_only_no_raw_output_credentials_urls_or_absolute_paths",
       "applicableClaims": [],
       "status": "passed",
       "blockerRefs": [],
@@ -549,5 +525,5 @@
   ],
   "zeroToleranceIntegrityIssues": [],
   "invalidEntryCount": 0,
-  "ledgerHash": "4cc724239e13a23257221526ebe5d2a7e06be3fb6d25f55ada64e1af37bcb1bd"
+  "ledgerHash": "01cf396768d30ba43950f583d5808aa0cf828476dc2cbd79adf3abc58c6fd31c"
 }

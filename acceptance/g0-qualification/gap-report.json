@@ -4,7 +4,7 @@
   "subjectBaselineId": "g0-fifth-wave-establishing-0.6",
   "subjectBaselineVersion": "0.6.0",
   "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
-  "sourceCommit": "225fbb4c48b7bcd7bfcbd88bb4a718d11b7a101d",
+  "sourceCommit": "8c26dd001b03b7db78a3f041de80339f35fc60af",
   "state": "not_yet_qualified",
   "mandatoryClassStatus": {
     "constitution_baseline": "satisfied",
@@ -40,5 +40,5 @@
   ],
   "unsupportedClaims": [],
   "privacy": "ids_counts_hashes_and_bounded_status_only",
-  "generatedAt": "2026-07-24T10:36:58.482Z"
+  "generatedAt": "2026-07-24T10:41:53.050Z"
 }

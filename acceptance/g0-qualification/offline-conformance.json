@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "qualificationId": "g0-baseline-v1-qualification",
+  "sourceCommit": "8c26dd001b03b7db78a3f041de80339f35fc60af",
+  "baseline": {
+    "baselineId": "g0-fifth-wave-establishing-0.6",
+    "baselineVersion": "0.6.0",
+    "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3"
+  },
+  "platform": "macos-arm64",
+  "architecture": "arm64",
+  "appMode": "qualification-harness",
+  "privacy": "command_status_and_output_digests_only_no_raw_output_credentials_urls_or_absolute_paths",
+  "commands": [
+    {
+      "label": "constitution-baseline-migration",
+      "command": "node --test test/g0-baseline.test.mjs test/g0-project-baseline.test.mjs test/g0-api-route.test.mjs",
+      "evidenceClasses": [
+        "constitution_baseline",
+        "migration_upgrade"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "passed": true,
+      "stdoutSha256": "f75f55bbf6301b50a1dffdae09ef9d91fed7025ed5f7267bb494b1b01d0b345d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "truth-durable-recovery",
+      "command": "node --test test/g0-first-wave.test.mjs test/harness-workflow-state.test.mjs test/loop-recovery-integration.test.mjs",
+      "evidenceClasses": [
+        "truth_lattice",
+        "durable_state"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "passed": true,
+      "stdoutSha256": "5d0d23fc690821e6afd8539f5033697d1c2423ab2f4678fdba3cca5b5045273d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "science-replay-drift",
+      "command": "node --test test/g0-second-wave.test.mjs test/delivery-manifest.test.mjs test/scientific-replay-package.test.mjs",
+      "evidenceClasses": [
+        "scientific_accuracy",
+        "replay_drift"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "passed": true,
+      "stdoutSha256": "32bde17fc49dd6652e833b5c8038d1105c9c35b684888fe5ebae9d32cd10511f",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "runtime-model-observable",
+      "command": "node --test test/g0-third-wave.test.mjs test/runtime-resource-snapshot.test.mjs test/model-gateway.test.mjs test/loop-checkpoint.test.cjs",
+      "evidenceClasses": [
+        "runtime_resource",
+        "model_memory_cost",
+        "observable_experience"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "passed": true,
+      "stdoutSha256": "731be4677cbcdad7586c3acc30b26e53e33d9a93bfd07a9b0ec79b1d43080384",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "supply-security-resilience",
+      "command": "node --test test/g0-fourth-wave.test.mjs test/plugin-sdk.test.mjs test/agent-tool-policy.test.mjs test/harness-workspace-tools.test.mjs test/diagnostic-redaction.test.mjs test/loop-false-success-regression.test.mjs",
+      "evidenceClasses": [
+        "plugin_supply_chain",
+        "security_permission",
+        "resilience_fault_matrix"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "passed": true,
+      "stdoutSha256": "6c0fff6e98e8ca180c555f971acec47dad892a89d21177476337b6cfa3f3eded",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "classStatus": {
+    "constitution_baseline": "passed",
+    "truth_lattice": "passed",
+    "durable_state": "passed",
+    "scientific_accuracy": "passed",
+    "replay_drift": "passed",
+    "runtime_resource": "passed",
+    "model_memory_cost": "passed",
+    "plugin_supply_chain": "passed",
+    "security_permission": "passed",
+    "observable_experience": "passed",
+    "resilience_fault_matrix": "passed",
+    "migration_upgrade": "passed"
+  },
+  "passed": true,
+  "generatedAt": "2026-07-24T10:41:52.680Z"
+}
