@@ -97,10 +97,8 @@
       "id": "G0-LF12",
       "path": "docs/g0-lf12-baseline-qualification-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "g0-current-work-package",
-      "entrypoint": "docs/README.md",
+      "status": "completed",
+      "canonical": false,
       "archivePolicy": "retain_stable_path"
     },
     {

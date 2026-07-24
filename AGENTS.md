@@ -94,7 +94,7 @@ desktop/
 - 未运行 `npm run docs:reconcile` 并通过 `npm run docs:check`，不得宣布工作包 `completed`、`qualified`、`verified` 或已归档收口。
 - 不得在存在未知 WIP 时批量移动、删除、暂存或提交文档；Acceptance 证据不得被普通文档归档替代。
 - 当前状态必须回写 canonical roadmap/handoff/工作包，禁止多个 active canonical 计划宣称同一事实。
-- Worktree 纪律见 [`docs/worktree-governance.md`](docs/worktree-governance.md)；LF12 形成 qualified + maintained 干净 checkpoint 前，不得启动正式 Result Studio Worktree。
+- Worktree 纪律见 [`docs/worktree-governance.md`](docs/worktree-governance.md)。LF12 已 `qualified + maintained`，该前置已解除；正式 Result Studio Worktree 仍必须先通过 `G0-RS-WT0` 启动门（已推送的干净 base checkpoint + 运行环境隔离验收）。
 
 ### UI 进度自动对账
 

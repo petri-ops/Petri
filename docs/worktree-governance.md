@@ -25,6 +25,8 @@ G0-LF12 qualified + maintained 并形成干净、已提交 checkpoint
 
 LF12 完成前不得为了提前开发 Result Studio 创建正式 RS Worktree。`G0-RS-WT0` 的详细交付和验收仍以 `g0-result-studio-plan.md` 为准，本文件提供跨阶段长期纪律。
 
+当前状态：LF12 已 `qualified + maintained`，该前置条件不再阻塞。剩余启动条件只有 `G0-RS-WT0` 本身——base checkpoint 已提交并推送、工作区 clean、运行环境隔离验收通过。
+
 ## 3. 适用标准
 
 只有满足以下条件才适合新建 Worktree：

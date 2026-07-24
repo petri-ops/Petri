@@ -116,7 +116,9 @@ Canonical 文档还必须声明唯一 `truthDomain`。处于 `active` 或 `plann
 
 2026-07-24 建立首个注册基线时，现存非归档 Markdown 全部纳入机器覆盖，但不批量移动历史文件。后续每次工作包收口只处理与该 Plan ID 相关的文档候选，逐步降低历史噪声。
 
-LF12 的 qualification 证据正在形成，任何治理动作不得修改、搬迁或重新生成其 WIP 证据。Result Studio 与正式长期 Worktree 必须等待 LF12 的 qualified + maintained 干净 checkpoint。
+LF12 已完成资格裁决并晋升 `G0 Baseline v1 = 1.0.0 qualified + maintained`，注册表中 `G0-LF12` 随之收口为 `completed`，`g0-current-work-package` 这一 truthDomain 已释放给下一个正式启动的工作包。其 acceptance 证据是长期资格记录，任何治理动作不得按普通文档搬迁、改写或重新生成。
+
+Result Studio 与正式长期 Worktree 的 LF12 阻塞条件已解除，启动仍须满足 `G0-RS-WT0`：从已推送的干净 checkpoint 创建，并完成运行环境隔离验收。
 
 ## 6. 门禁命令
 
