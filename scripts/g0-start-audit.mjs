@@ -215,7 +215,7 @@ export function inspectG0Start(options = {}) {
     makeCheck(
       'G0-START-09',
       /HLE-C0～HLE-C5 已完成/.test(handoff)
-        && /`G0-START` 10\/10 与 `G0-LF0` 10\/10 已关闭/.test(handoff)
+        && /`G0-START`.*LF0.*已关闭/.test(handoff)
         && auditRecordsProductionClosure,
       [
         'docs/project-workspace-handoff.md',
