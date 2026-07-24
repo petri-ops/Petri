@@ -121,9 +121,39 @@ function legacyEntry({ evidenceId, evidenceClass, path, command, status, source,
 }
 
 function buildEntries() {
-  const entries = waveSpecs.flatMap((spec) => spec.classes.map((evidenceClass) => (
-    entryFromWave(spec, evidenceClass)
-  )));
+  const offlinePath = 'acceptance/g0-qualification/offline-conformance.json';
+  let entries;
+  if (existsSync(join(root, offlinePath))) {
+    const report = readJson(offlinePath);
+    entries = Object.entries(report.classStatus || {}).map(([evidenceClass, status]) => ({
+      evidenceId: `qualification-offline-${evidenceClass}`,
+      evidenceClass,
+      schemaVersion: 1,
+      sourceCommit: report.sourceCommit,
+      baselineDigest: report.baseline?.bundleDigest,
+      platform: report.platform,
+      architecture: report.architecture,
+      appMode: report.appMode,
+      runtimeSummary: null,
+      providerSummary: null,
+      commandOrEntry: 'npm run g0:qualification:offline',
+      generatedAt: report.generatedAt,
+      counts: {
+        commandsPassed: report.commands?.filter((item) => item.passed).length || 0,
+        commandsTotal: report.commands?.length || 0,
+      },
+      hashes: { reportSha256: sha256(readText(offlinePath)) },
+      boundedResult: status,
+      privacyClassification: report.privacy,
+      applicableClaims: [],
+      status: status === 'passed' ? 'passed' : 'blocked',
+      blockerRefs: status === 'passed' ? [] : [`offline_conformance_failed:${evidenceClass}`],
+    }));
+  } else {
+    entries = waveSpecs.flatMap((spec) => spec.classes.map((evidenceClass) => (
+      entryFromWave(spec, evidenceClass)
+    )));
+  }
 
   const providerPath = 'acceptance/harness-loop/production/provider-matrix.json';
   if (existsSync(join(root, providerPath))) {
