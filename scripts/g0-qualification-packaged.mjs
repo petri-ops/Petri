@@ -220,7 +220,7 @@ function treeRssBytes(pid) {
   return totalKb * 1024;
 }
 
-async function runGoldenPath(port, reportDir) {
+async function runGoldenPath(port, reportDir, demoInputDir) {
   mkdirSync(reportDir, { recursive: true });
   return await new Promise((resolveRun, rejectRun) => {
     let stderr = '';
@@ -228,6 +228,7 @@ async function runGoldenPath(port, reportDir) {
       join(root, 'scripts/golden-path.mjs'),
       '--skip-install',
       '--report-out', reportDir,
+      '--demo-input', demoInputDir,
       '--timeout-ms', '600000',
     ], {
       cwd: root,
@@ -315,7 +316,7 @@ export async function runPackagedQualification({
     join(paths.resources, 'core/r-server/server.js'),
     join(paths.resources, 'core/shared-backend/g0-baseline.js'),
     join(paths.resources, 'built-in-plugins/manifest.json'),
-    join(paths.resources, 'built-in-plugins/deseq2/src/run_deseq2.R'),
+    join(paths.resources, 'built-in-plugins/deseq2/scripts/deseq2.R'),
   ];
   const tempRoot = mkdtempSync(join(tmpdir(), 'biof3-lf12-packaged-'));
   const sandbox = {
@@ -356,7 +357,11 @@ export async function runPackagedQualification({
     for (let index = 0; index < taskCycles; index += 1) {
       const reportDir = join(tempRoot, `report-${index + 1}`);
       reportDirs.push(reportDir);
-      await runGoldenPath(firstInstance.state.port, reportDir);
+      await runGoldenPath(
+        firstInstance.state.port,
+        reportDir,
+        join(paths.resources, 'built-in-plugins/deseq2/demo-data'),
+      );
     }
     const remaining = minimumObservationMs - (Date.now() - observationStartedAt);
     if (remaining > 0) await delay(remaining);

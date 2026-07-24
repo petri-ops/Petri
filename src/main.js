@@ -32,6 +32,7 @@ const {
   getRuntimeBinName,
   getOpenShellPlan,
   getSessionShellSpec,
+  getBuiltInPluginsDir,
 } = require("./platform-compat");
 const runtimePathsModule = app.isPackaged
   ? path.join(process.resourcesPath, "core", "shared-backend", "runtime-paths.js")
@@ -460,10 +461,11 @@ function setupDesktopEnv(backendPorts) {
   // in-memory plugin registry. Give them the exact packaged/dev built-in root
   // so HTTP execution resolves the same plugin metadata as MCP (including
   // requiresBundle declarations).
-  process.env.BIOF3_BUILT_IN_PLUGINS_DIR = resolveResource(
-    "resources",
-    "built-in-plugins",
-  );
+  process.env.BIOF3_BUILT_IN_PLUGINS_DIR = getBuiltInPluginsDir({
+    isPackaged: !IS_DEV,
+    projectRoot: PROJECT_ROOT,
+    resourcesPath: process.resourcesPath,
+  });
 
   // 计算执行配置：默认本地优先；若用户已保存远端集群配置，则一并注入
   _applyComputeSettings(_loadComputeSettings());

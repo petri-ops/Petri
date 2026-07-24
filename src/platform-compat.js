@@ -1,3 +1,5 @@
+const path = require('path');
+
 function getNodeLocator(platform = process.platform) {
   return platform === 'win32' ? 'where' : 'which';
 }
@@ -56,10 +58,16 @@ function getSessionShellSpec(env = process.env, platform = process.platform) {
   return { shellPath: env.SHELL || '/bin/bash', args: ['-l'] };
 }
 
+function getBuiltInPluginsDir({ isPackaged, projectRoot, resourcesPath }) {
+  if (isPackaged) return path.join(resourcesPath, 'built-in-plugins');
+  return path.join(projectRoot, 'resources', 'built-in-plugins');
+}
+
 module.exports = {
   getNodeLocator,
   getRuntimeBinCandidates,
   getRuntimeBinName,
   getOpenShellPlan,
   getSessionShellSpec,
+  getBuiltInPluginsDir,
 };

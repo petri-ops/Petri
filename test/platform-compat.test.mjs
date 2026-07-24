@@ -38,3 +38,22 @@ test('python runtime path helpers cover Windows and Unix layouts', () => {
   ]);
   assert.deepEqual(runtimePaths.getPythonExecutableCandidates('linux'), ['python3', 'python']);
 });
+
+test('built-in plugin root matches electron-builder extraResources layout', () => {
+  assert.equal(
+    compat.getBuiltInPluginsDir({
+      isPackaged: false,
+      projectRoot: '/repo/desktop',
+      resourcesPath: '/app/Contents/Resources',
+    }),
+    '/repo/desktop/resources/built-in-plugins',
+  );
+  assert.equal(
+    compat.getBuiltInPluginsDir({
+      isPackaged: true,
+      projectRoot: '/app/Contents/Resources',
+      resourcesPath: '/app/Contents/Resources',
+    }),
+    '/app/Contents/Resources/built-in-plugins',
+  );
+});
