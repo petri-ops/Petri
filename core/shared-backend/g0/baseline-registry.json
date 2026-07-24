@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "registryId": "biof3-g0-baseline-registry",
-  "currentBaselineId": "g0-fourth-wave-establishing-0.5",
+  "currentBaselineId": "g0-fifth-wave-establishing-0.6",
   "baselines": [
     {
       "baselineId": "g0-lf0-establishing-0.1",
@@ -65,6 +65,17 @@
       "constitutionRef": "core/shared-backend/g0/constitution.json",
       "supportMatrixRef": "core/shared-backend/g0/support-matrix.json",
       "introducedBy": "G0-FOURTH-WAVE",
+      "readableProjectMajorRange": {"minimum": 0, "maximum": 0}
+    },
+    {
+      "baselineId": "g0-fifth-wave-establishing-0.6",
+      "baselineVersion": "0.6.0",
+      "lifecycleStatus": "establishing",
+      "qualificationStatus": "not_yet_qualified",
+      "manifestRef": "core/shared-backend/g0/baseline-manifest.json",
+      "constitutionRef": "core/shared-backend/g0/constitution.json",
+      "supportMatrixRef": "core/shared-backend/g0/support-matrix.json",
+      "introducedBy": "G0-FIFTH-WAVE",
       "readableProjectMajorRange": {"minimum": 0, "maximum": 0}
     }
   ]

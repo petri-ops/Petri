@@ -679,6 +679,8 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 
 ## 20. G0-LF11：Evolution Pipeline
 
+状态：`completed`（2026-07-24）
+
 ### 目标
 
 让 G0 可以长期进化而不漂移。
@@ -713,6 +715,13 @@ LF1～LF9 可在 LF0 完成后按文件边界有限并行，但 LF10～LF12 必�
 - 训练/统计数据必须有隐私边界。
 - 策略必须可解释、版本化、回放和回滚。
 - 科学阈值和结论规则不能通过隐式在线学习漂移。
+
+### 已落地
+
+- 四级变更（policy / compatible-contract / migration / breaking）固定各自的 `requiredEvidence`、是否需要新主版本与是否需要迁移，直接复用 `governance-vocabulary` 的 changeClasses 词汇，不新增第二套分级。
+- Promotion Gate 要求八项证据（问题、影响范围、对照基线、Replay/Shadow、科学与兼容风险、数据迁移、回滚路径、新增永久回归）齐全，且叠加当前变更等级要求的证据；缺任意一项即拒绝进入基线。
+- 动态策略学习固定为 candidate_only：必须携带隐私边界、可解释、版本化、可回放、可回滚控制；科学阈值与结论规则被列为 immutable，禁止隐式在线漂移；禁止从学习直接修改正式基线。
+- 基线兼容升级为 `0.6.0`，仍为 `establishing / not_yet_qualified`；Evolution Pipeline 契约进入 Baseline Manifest/Registry 与永久根门禁（`npm run g0:fifth-wave`），执行真相仍唯一为 `run_tool → tool_job → artifact_truth`，未建立第二套执行、Job、Artifact 或 Workflow truth。
 
 ## 21. G0-LF12：Baseline Qualification
 
@@ -876,15 +885,14 @@ G1 可以在 `G0 Baseline v1` qualified 后启动；G0 同时转入 maintained�
 
 ## 28. 当前行动
 
-`G0-START` 与 `G0-LF0`～`G0-LF10` 已完成。G0 处于 `establishing`，尚未 `qualified`。
+`G0-START` 与 `G0-LF0`～`G0-LF11` 已完成。G0 处于 `establishing`，尚未 `qualified`。基线兼容升级为 `0.6.0`。
 
 下一主线按依赖启动：
 
-1. 启动 `G0-LF11 Evolution Pipeline`，固定变化分级、Promotion Gate、回放、迁移与回滚。
-2. 在 LF11 真实证据完成后启动 `G0-LF12 Baseline Qualification`。
-3. LF12 通过前不得将 G0 写成 qualified 或 G0 Baseline v1。
+1. 启动 `G0-LF12 Baseline Qualification`，汇总五层 Truth、Durable、Scientific、Replay、Resource、Model/Memory/Cost、Supply-chain、Security、Experience、Fault Matrix 与 Migration/Rollback 证据，评审 `G0 Baseline v1` 资格。
+2. LF12 通过前不得将 G0 写成 qualified 或 G0 Baseline v1。
 
-任何后续工作仍须通过五代 G0 门禁（含 `npm run g0:fourth-wave`），且不得把当前 `not_yet_qualified` 基线写成 qualified。
+任何后续工作仍须通过六代 G0 门禁（含 `npm run g0:fifth-wave`），且不得把当前 `not_yet_qualified` 基线写成 qualified。
 
 ## 29. 守护语句
 

@@ -24,7 +24,7 @@ function inspect(verification = null, bootstrap = false) {
   const server = read('core/r-server/server.js');
   const commands = verification?.commands || [];
   const checks = [
-    item('G0-W4-01', g0.validateG0BaselineBundle().ok && g0.manifest.baselineVersion === '0.5.0' && g0.manifest.qualificationStatus === 'not_yet_qualified', ['core/shared-backend/g0/baseline-manifest.json'], 'Fourth-wave baseline is consistent and not qualified.'),
+    item('G0-W4-01', g0.validateG0BaselineBundle().ok && Number(g0.manifest.baselineVersion.split('.')[1]) >= 5 && g0.manifest.qualificationStatus === 'not_yet_qualified', ['core/shared-backend/g0/baseline-manifest.json'], 'Compatible baseline retains fourth-wave contracts and remains not qualified.'),
     item('G0-W4-02', g0.capabilitySupplyChain.contractVersion === 2 && g0.capabilitySupplyChain.requiredControls.length >= 16, ['core/shared-backend/g0/capability-supply-chain.json'], 'LF7 production controls are complete.'),
     item('G0-W4-03', /builtin-canonical/.test(loader) && supply.contract.forbidden.includes('plugin_owned_job_or_artifact_ledger'), ['core/shared-backend/plugin-sdk.js'], 'LF7 reuses canonical Plugin SDK without a second ledger.'),
     item('G0-W4-04', /failureModes/.test(loader) && /validators/.test(read('core/shared-backend/g0-capability-supply-chain.js')), ['core/shared-backend/plugin-sdk.js', 'core/shared-backend/g0-capability-supply-chain.js'], 'Plugin failure and validator contracts are enforced.'),
@@ -45,7 +45,7 @@ function runCommands() {
     ['root-test','npm',['test']], ['frontend-test','npm',['test','--prefix','frontend']], ['frontend-build','npm',['run','build','--prefix','frontend']],
     ['root-check','npm',['run','check']], ['plugins','npm',['run','harness:plugins']], ['hle-production','npm',['run','harness:loop:production']], ['runtime-control','npm',['run','harness:runtime-control']],
   ];
-  return specs.map(([label,bin,args]) => { const r=spawnSync(bin,args,{cwd:root,encoding:'utf8',maxBuffer:32*1024*1024,env:{...process.env,G0_LF0_BOOTSTRAP:'1',G0_FIRST_WAVE_BOOTSTRAP:'1',G0_SECOND_WAVE_BOOTSTRAP:'1',G0_THIRD_WAVE_BOOTSTRAP:'1',G0_FOURTH_WAVE_BOOTSTRAP:'1'}}); return {label,command:[bin,...args].join(' '),exitCode:r.status,signal:r.signal||null,passed:r.status===0,stdoutSha256:sha(r.stdout||''),stderrSha256:sha(r.stderr||'')}; });
+  return specs.map(([label,bin,args]) => { const r=spawnSync(bin,args,{cwd:root,encoding:'utf8',maxBuffer:32*1024*1024,env:{...process.env,G0_LF0_BOOTSTRAP:'1',G0_FIRST_WAVE_BOOTSTRAP:'1',G0_SECOND_WAVE_BOOTSTRAP:'1',G0_THIRD_WAVE_BOOTSTRAP:'1',G0_FOURTH_WAVE_BOOTSTRAP:'1',G0_FIFTH_WAVE_BOOTSTRAP:'1'}}); return {label,command:[bin,...args].join(' '),exitCode:r.status,signal:r.signal||null,passed:r.status===0,stdoutSha256:sha(r.stdout||''),stderrSha256:sha(r.stderr||'')}; });
 }
 try {
   if (process.argv.includes('--write-evidence')) { const verification={generatedAt:new Date().toISOString(),commands:runCommands()}; const report={...inspect(verification),generatedAt:verification.generatedAt}; if(!report.passed) throw new Error([...report.checks.filter(x=>!x.passed).map(x=>x.id),...verification.commands.filter(x=>!x.passed).map(x=>`${x.label}:${x.exitCode}`)].join(',')); mkdirSync(dirname(evidencePath),{recursive:true}); writeFileSync(evidencePath,`${JSON.stringify(report,null,2)}\n`); console.log('[G0-FOURTH-WAVE] PASS — evidence updated'); }

@@ -29,9 +29,9 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 
 ### 3.0 当前主线：G0 Living Foundation establishing
 
-2026-07-24 `G0-START` 与 LF0～LF10 已关闭。0.5.0 establishing 基线增加能力供应链、权限决策与八域韧性实验室；五代永久门禁已进入根检查。
+2026-07-24 `G0-START` 与 LF0～LF11 已关闭。0.6.0 establishing 基线在能力供应链、权限决策与八域韧性实验室之上增加 Evolution Pipeline；六代永久门禁已进入根检查。
 
-G0 当前状态仍是 `establishing / not_yet_qualified`。下一主线启动 LF11 Evolution Pipeline，随后才进入 LF12 Baseline Qualification；不得建立第二套资源、成本、会话、执行或 UI truth。
+G0 当前状态仍是 `establishing / not_yet_qualified`。下一主线进入 LF12 Baseline Qualification；资格证据完成前不得宣称 qualified，也不得建立第二套资源、成本、会话、执行或 UI truth。
 
 ### 3.1 已完成基线：真实科学任务驱动的 Harness 升级
 

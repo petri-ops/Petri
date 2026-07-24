@@ -225,6 +225,7 @@ function runVerificationCommands() {
         G0_SECOND_WAVE_BOOTSTRAP: '1',
         G0_THIRD_WAVE_BOOTSTRAP: '1',
         G0_FOURTH_WAVE_BOOTSTRAP: '1',
+        G0_FIFTH_WAVE_BOOTSTRAP: '1',
       },
     });
     return {

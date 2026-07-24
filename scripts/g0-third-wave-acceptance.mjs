@@ -54,7 +54,7 @@ function commands() {
     ['runtime-control', 'npm', ['run', 'harness:runtime-control']],
   ];
   return specs.map(([label, bin, args]) => {
-    const result = spawnSync(bin, args, { cwd: root, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024, env: { ...process.env, G0_LF0_BOOTSTRAP: '1', G0_FIRST_WAVE_BOOTSTRAP: '1', G0_SECOND_WAVE_BOOTSTRAP: '1', G0_THIRD_WAVE_BOOTSTRAP: '1', G0_FOURTH_WAVE_BOOTSTRAP: '1' } });
+    const result = spawnSync(bin, args, { cwd: root, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024, env: { ...process.env, G0_LF0_BOOTSTRAP: '1', G0_FIRST_WAVE_BOOTSTRAP: '1', G0_SECOND_WAVE_BOOTSTRAP: '1', G0_THIRD_WAVE_BOOTSTRAP: '1', G0_FOURTH_WAVE_BOOTSTRAP: '1', G0_FIFTH_WAVE_BOOTSTRAP: '1' } });
     return { label, command: [bin, ...args].join(' '), exitCode: result.status, signal: result.signal || null, passed: result.status === 0, stdoutSha256: sha(result.stdout || ''), stderrSha256: sha(result.stderr || '') };
   });
 }

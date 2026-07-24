@@ -6,7 +6,7 @@
 
 `v0.0.1-rc.7` 是当前 OSS 线上版本，已完成代码、自动化、双架构构建、安装候选启动验收和公开更新链核验。Stage 1 UI 产品化、Stage 2 模型层、Stage 3 Harness 与标准流程、Stage 4 首个稳定产品版本及 Harness Phase 7 均已关闭。
 
-当前不默认扩展分析功能。`G0-START` 与 LF0～LF10 已完成；当前基线为 `0.5.0 establishing / not_yet_qualified`。下一阶段启动 LF11 Evolution Pipeline，随后进入 LF12 Baseline Qualification。UI-032 已完成；rc.7 仍是工程候选版，不得描述为 GA。
+当前不默认扩展分析功能。`G0-START` 与 LF0～LF11 已完成；当前基线为 `0.6.0 establishing / not_yet_qualified`。下一阶段启动 LF12 Baseline Qualification。UI-032 已完成；rc.7 仍是工程候选版，不得描述为 GA。
 
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 已完成的 Scientific Task Contract 工作包记录见 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md)。
@@ -14,9 +14,9 @@
 
 ## 当前 G0 Living Foundation
 
-`G0-START` 与 LF0～LF10 已通过。0.5.0 基线增加能力供应链、权限决策和八域韧性实验室；五代 G0 门禁均进入根检查。
+`G0-START` 与 LF0～LF11 已通过。0.6.0 基线在能力供应链、权限决策和八域韧性实验室之上增加 Evolution Pipeline：变更分级、Promotion Gate、动态策略学习边界；六代 G0 门禁均进入根检查。
 
-G0 仍处于 `establishing`，不得宣称 qualified。下一顺序为 LF11 Evolution Pipeline 与 LF12 Baseline Qualification；数据契约继续作为能力供应链的真实任务轨。
+G0 仍处于 `establishing`，不得宣称 qualified。下一顺序为 LF12 Baseline Qualification；数据契约继续作为能力供应链的真实任务轨。
 
 ## 已完成的 P-03 Loop 工程包
 
@@ -24,7 +24,7 @@ G0 仍处于 `establishing`，不得宣称 qualified。下一顺序为 LF11 Evol
 
 Loop 工程包继续复用 TaskSpec、Workflow Plan、Plugin、ToolResult、Job、Artifact、Delivery 和 Replay，不得创建第二套 executor、job、artifact 或 workflow truth。正常路径不使用任意固定轮数提前停止；重复、无进展、振荡、同类故障和资源/成本异常必须进入可审计的保护状态。节点和任务完成由验证器与 Artifact 证据判定，不能由模型口头声明。
 
-HLE-C0～HLE-C5 已全部关闭；[`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) 现为验收记录。G0 LF0～LF4 已关闭，后续按 LF5/LF6/LF9 质量集群继续。
+HLE-C0～HLE-C5 已全部关闭；[`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) 现为验收记录。G0 LF0～LF11 已关闭，下一顺序为 LF12 Baseline Qualification。
 
 ## 当前 P-03 工作包
 
@@ -70,7 +70,7 @@ Phase 7 未建立第二套 analysis executor、job、artifact 或 workflow truth
 2. x64 分析 Runtime。
 3. 新产品阶段；若重开 P7-F，必须先有至少 3 个合格真实任务的可复现证据。
 
-Harness Loop Engineering v1 已成为长期基线。G0 Living Foundation 已进入 `establishing`，LF1～LF4 已关闭；下一工程阶段是 LF5/LF6/LF9 质量集群。科学长任务继续走正式 Job/Artifact 链，不能借通用后台进程工具绕过。
+Harness Loop Engineering v1 已成为长期基线。G0 Living Foundation 已进入 `establishing`，LF0～LF11 已关闭；下一工程阶段是 LF12 Baseline Qualification。科学长任务继续走正式 Job/Artifact 链，不能借通用后台进程工具绕过。
 
 完全访问模式已经由用户明确定位为通用命令执行授权，不再维护固定命令白名单；只读模式仍禁止命令。不得借通用命令行建立第二套科学结果真相：正式分析交付仍必须进入确认、审计与 `run_tool → tool_job → artifact truth`。
 

@@ -17,6 +17,7 @@ const adaptiveRuntime = require('./g0/adaptive-runtime.json');
 const modelMemoryCost = require('./g0/model-memory-cost.json');
 const observableExperience = require('./g0/observable-experience.json');
 const resilienceLab = require('./g0/resilience-lab.json');
+const evolutionPipeline = require('./g0/evolution-pipeline.json');
 
 const LEGACY_BASELINE_ID = 'legacy-unversioned';
 const PROJECT_BASELINE_RECORD_VERSION = 1;
@@ -48,6 +49,7 @@ function deepFreeze(value) {
   modelMemoryCost,
   observableExperience,
   resilienceLab,
+  evolutionPipeline,
 ].forEach(deepFreeze);
 
 function canonicalStringify(value) {
@@ -85,6 +87,7 @@ function currentContractVersions() {
   const modelMemoryCostModule = require('./g0-model-memory-cost');
   const observableExperienceModule = require('./g0-observable-experience');
   const resilienceLabModule = require('./g0-resilience-lab');
+  const evolutionPipelineModule = require('./g0-evolution-pipeline');
   const artifactProfileVersions = Object.values(artifactProfiles.ARTIFACT_PROFILES || {})
     .map((profile) => Number(profile.schemaVersion))
     .filter(Number.isInteger);
@@ -115,6 +118,7 @@ function currentContractVersions() {
     modelMemoryCost: modelMemoryCostModule.MODEL_MEMORY_COST_VERSION,
     observableExperience: observableExperienceModule.OBSERVABLE_EXPERIENCE_VERSION,
     resilienceLab: resilienceLabModule.RESILIENCE_LAB_VERSION,
+    evolutionPipeline: evolutionPipelineModule.EVOLUTION_PIPELINE_VERSION,
   };
 }
 
@@ -136,6 +140,7 @@ function getCurrentG0Baseline() {
     modelMemoryCost,
     observableExperience,
     resilienceLab,
+    evolutionPipeline,
   });
   return Object.freeze({
     schemaVersion: manifest.schemaVersion,
@@ -185,6 +190,7 @@ function validateG0BaselineBundle() {
   if (modelMemoryCost.schemaVersion !== 1) issues.push('model_memory_cost_schema_version_unsupported');
   if (observableExperience.schemaVersion !== 1) issues.push('observable_experience_schema_version_unsupported');
   if (resilienceLab.schemaVersion !== 1) issues.push('resilience_lab_schema_version_unsupported');
+  if (evolutionPipeline.schemaVersion !== 1) issues.push('evolution_pipeline_schema_version_unsupported');
   if (manifest.baselineId !== registry.currentBaselineId) issues.push('registry_current_baseline_mismatch');
   if (manifest.baselineId !== supportMatrix.baselineId) issues.push('support_matrix_baseline_mismatch');
   if (manifest.constitutionId !== constitution.constitutionId) issues.push('constitution_id_mismatch');
@@ -354,6 +360,7 @@ module.exports = {
   modelMemoryCost,
   observableExperience,
   resilienceLab,
+  evolutionPipeline,
   canonicalStringify,
   sha256,
   parseMajor,

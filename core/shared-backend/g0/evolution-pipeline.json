@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": 1,
+  "changeClasses": {
+    "policy": {
+      "description": "Changes adaptive behavior inside existing contracts and safety limits.",
+      "requiredEvidence": ["metrics", "replay", "rollback"],
+      "requiresNewMajor": false,
+      "requiresMigration": false
+    },
+    "compatible-contract": {
+      "description": "Adds a backward-compatible versioned contract capability.",
+      "requiredEvidence": ["contract_test", "legacy_fixture", "replay"],
+      "requiresNewMajor": false,
+      "requiresMigration": false
+    },
+    "migration": {
+      "description": "Changes persisted state and requires explicit upgrade and rollback behavior.",
+      "requiredEvidence": ["migration", "backup", "rollback", "replay"],
+      "requiresNewMajor": false,
+      "requiresMigration": true
+    },
+    "breaking": {
+      "description": "Changes a G0 invariant or removes compatibility and requires a new G0 major plus requalification.",
+      "requiredEvidence": ["rfc", "requalification", "migration", "rollback"],
+      "requiresNewMajor": true,
+      "requiresMigration": true
+    }
+  },
+  "promotionGate": {
+    "requiredEvidence": [
+      "problem_evidence",
+      "impact_scope",
+      "baseline_comparison",
+      "replay_shadow_result",
+      "scientific_and_compatibility_risk",
+      "data_migration",
+      "rollback_path",
+      "new_permanent_regression"
+    ]
+  },
+  "policyLearning": {
+    "outputKind": "candidate_only",
+    "requiredControls": [
+      "privacy_boundary",
+      "explainable",
+      "versioned",
+      "replayable",
+      "rollbackable"
+    ],
+    "immutableWithoutQualification": [
+      "scientific_threshold",
+      "conclusion_rule"
+    ]
+  },
+  "forbidden": [
+    "second_execution_or_workflow_truth",
+    "direct_baseline_mutation_from_learning",
+    "implicit_online_scientific_threshold_drift",
+    "silent_promotion_without_gate"
+  ]
+}

@@ -5,7 +5,7 @@
 > 非主 agent 每次完成审计后，必须把发现追加到本文件并提交，不要只写在单独报告里。
 >
 > 维护方：非主 agent（只读审计 + 阻断性回归修复通道）
-> 最后更新：2026-07-24（G0 第四波 LF7/LF8/LF10 收口）
+> 最后更新：2026-07-24（G0 第五波 LF11 Evolution Pipeline 收口）
 
 ---
 
@@ -24,6 +24,7 @@
 | ✅已处理 | 2026-07-24 | G0 第二波完成：LF3 固定方法适用性、假设、统计语义、科学设计变化和非显著/低功效/矛盾/阻断状态；LF4 建立七类 Corpus、三类 Artifact 比较和四类 Drift Report，并接入现有 Truth/Delivery/Replay。基线兼容升级为 0.3.0，仍为 establishing/not_yet_qualified。 | G0-LF3 / G0-LF4 | `g0-scientific-accuracy.js`, `g0-reproducibility-lab.js`, `acceptance/g0-living-foundation/g0-second-wave-acceptance.json` |
 | ✅已处理 | 2026-07-24 | G0 第三波完成：LF5 固定资源与安全调度；LF6 固定事实完整压缩、缓存、用量和 fallback；LF9 固定五视图统一投影与可行动异常。基线升级 0.4.0，仍为 establishing/not_yet_qualified。 | G0-LF5 / G0-LF6 / G0-LF9 | `g0-adaptive-runtime.js`, `g0-model-memory-cost.js`, `g0-observable-experience.js` |
 | ✅已处理 | 2026-07-24 | G0 第四波完成：LF7 固定能力描述符、独立脚本、平台资格与升级 Replay/Drift；LF8 固定多维权限决策和不可覆盖边界；LF10 固定八域 Fault Matrix 与无假成功恢复断言。基线升级 0.5.0，仍为 establishing/not_yet_qualified。 | G0-LF7 / G0-LF8 / G0-LF10 | `g0-capability-supply-chain.js`, `g0-security-permission.js`, `g0-resilience-lab.js` |
+| ✅已处理 | 2026-07-24 | G0 第五波完成：LF11 Evolution Pipeline 固定四级变更分级（policy/compatible-contract/migration/breaking）及各自所需证据、八项 Promotion Gate 强制证据，以及动态策略学习「只产候选、隐私边界/可解释/版本化/可回放/可回滚、科学阈值与结论规则不得隐式在线漂移」约束。基线升级 0.6.0，仍为 establishing/not_yet_qualified；六波证据全部按新 bundleDigest 刷新，第五波门禁进入根检查。下一波 LF12 Baseline Qualification。 | G0-LF11 | `g0-evolution-pipeline.js`, `g0/evolution-pipeline.json`, `acceptance/g0-living-foundation/g0-fifth-wave-acceptance.json` |
 | ✅已处理 | 2026-07-17 | 5 个 codex/* 已合并残留分支已删除（连带 prune 6 个失效 worktree 注册） | 分支备忘录 | [§2.3](#23-已合并残留分支可安全删除-) |
 | ✅已处理 | 2026-07-17 | `sanitizer.js` 死模块 + 其测试已删除（全仓零生产引用） | 本文件 §4 | [§4 问题 E](#问题-esanitizerjs-死模块) |
 | ✅已处理 | 2026-07-17 | `core/test/` 门禁盲区已收口：3 个单测迁入 `test/*.test.mjs`，死模块测试删除，4 个联网 smoke 保留在 core/test/ | 本文件 §4 | [§4 问题 F](#问题-fcoretest-目录不在门禁范围) |
