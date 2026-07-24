@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-FIFTH-WAVE",
+  "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
+  "baseline": {
+    "schemaVersion": 1,
+    "baselineId": "g0-fifth-wave-establishing-0.6",
+    "baselineVersion": "0.6.0",
+    "lifecycleStatus": "establishing",
+    "qualificationStatus": "not_yet_qualified",
+    "constitutionId": "biof3-g0-constitution-v1",
+    "manifestDigest": "0c6dbb71acc20e18e4952c2a62c23a9d5655a5a0326dbdb45a8549d75dfd02cf",
+    "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3"
+  },
+  "privacy": "digests_and_counts_only_no_raw_data_credentials_urls_or_provider_responses",
+  "checks": [
+    {
+      "id": "G0-W5-01",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/baseline-manifest.json"
+      ],
+      "detail": "Fifth-wave baseline is consistent, versioned 0.6.0 and not qualified."
+    },
+    {
+      "id": "G0-W5-02",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/evolution-pipeline.json"
+      ],
+      "detail": "LF11 defines the four change classes."
+    },
+    {
+      "id": "G0-W5-03",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/evolution-pipeline.json"
+      ],
+      "detail": "Promotion Gate requires all eight evidence items."
+    },
+    {
+      "id": "G0-W5-04",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/evolution-pipeline.json"
+      ],
+      "detail": "Policy learning is candidate-only and cannot drift scientific thresholds or conclusion rules."
+    },
+    {
+      "id": "G0-W5-05",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0-evolution-pipeline.js"
+      ],
+      "detail": "Change classification separates breaking (new major + migration) from policy."
+    },
+    {
+      "id": "G0-W5-06",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0-evolution-pipeline.js"
+      ],
+      "detail": "Promotion Gate allows only complete evidence and never creates a second ledger."
+    },
+    {
+      "id": "G0-W5-07",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0-evolution-pipeline.js"
+      ],
+      "detail": "Policy learning rejects immutable scientific targets and never mutates the baseline directly."
+    },
+    {
+      "id": "G0-W5-08",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/baseline-manifest.json",
+        "core/shared-backend/g0/governance-vocabulary.json"
+      ],
+      "detail": "Evolution contract is registered and aligned with governance vocabulary."
+    },
+    {
+      "id": "G0-W5-09",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/constitution.json"
+      ],
+      "detail": "No second execution or workflow truth is introduced."
+    },
+    {
+      "id": "G0-W5-10",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/evolution-pipeline.json"
+      ],
+      "detail": "LF11 forbids second truth, direct baseline mutation and implicit scientific drift."
+    },
+    {
+      "id": "G0-W5-11",
+      "passed": true,
+      "evidence": [
+        "docs/g0-living-foundation-plan.md"
+      ],
+      "detail": "LF11 completion recorded."
+    },
+    {
+      "id": "G0-W5-12",
+      "passed": true,
+      "evidence": [
+        "acceptance/g0-living-foundation/g0-fifth-wave-acceptance.json"
+      ],
+      "detail": "All command gates passed."
+    }
+  ],
+  "verification": {
+    "generatedAt": "2026-07-24T07:36:58.455Z",
+    "commands": [
+      {
+        "label": "fifth-wave-test",
+        "command": "node --test test/g0-fifth-wave.test.mjs test/g0-fourth-wave.test.mjs test/g0-third-wave.test.mjs",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "a7304fc1e8dfb0d821dac1fe026ca78038edb1214b0217d2bc2e6ee52c072a71",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "root-test",
+        "command": "npm test",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "e8f119ea164f71ee1ffc755ed8cfd0a3375a79312d3830075f91ffd2018c40d4",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "frontend-test",
+        "command": "npm test --prefix frontend",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "18f1a8b3859c164b266045e52015747cd5fdb00f7fb0868d4e0d456084efef50",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "frontend-build",
+        "command": "npm run build --prefix frontend",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "afddd4145eb82b92041208aae865c8844d7329efbe25a5ba721c463b3c8a1694",
+        "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
+      },
+      {
+        "label": "root-check",
+        "command": "npm run check",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "5d4c75dbb03c720fe42427fa8b2b8a497d3c79e27c80d018c9474f809646216f",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "plugins",
+        "command": "npm run harness:plugins",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "e776b0d161914c82eba6a95eed07c8fa7e3c5880cde52c2e5c4f1aa434d5b1cb",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "hle-production",
+        "command": "npm run harness:loop:production",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "57789c94e8055b84bd654c83f2574ee0cc4bbafa60b3135bacda7e473f5222d7",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "runtime-control",
+        "command": "npm run harness:runtime-control",
+        "exitCode": 0,
+        "signal": null,
+        "passed": true,
+        "stdoutSha256": "9912b78bde686a30e28a38c43edbe1f542ed6707b5e259b420fe40a18ec0a725",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "passed": true,
+  "generatedAt": "2026-07-24T07:36:58.455Z"
+}

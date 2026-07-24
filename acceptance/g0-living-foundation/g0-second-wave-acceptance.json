@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-SECOND-WAVE",
-  "sourceCommit": "00400cbf262ec789ec57a8478c9066a02543f818",
+  "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
   "baseline": {
     "schemaVersion": 1,
-    "baselineId": "g0-fourth-wave-establishing-0.5",
-    "baselineVersion": "0.5.0",
+    "baselineId": "g0-fifth-wave-establishing-0.6",
+    "baselineVersion": "0.6.0",
     "lifecycleStatus": "establishing",
     "qualificationStatus": "not_yet_qualified",
     "constitutionId": "biof3-g0-constitution-v1",
-    "manifestDigest": "48cf51ef8bb279a1266484aaa7930e90e4382544f2bd20f219cc36c3bee61833",
-    "bundleDigest": "16cdd9976bd6bc44bcb630bea85da34a9292892dc0fbae4bbd52d01f0d4442c8"
+    "manifestDigest": "0c6dbb71acc20e18e4952c2a62c23a9d5655a5a0326dbdb45a8549d75dfd02cf",
+    "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3"
   },
   "privacy": "status_counts_and_output_digests_only_no_raw_data_credentials_headers_urls_or_provider_responses",
   "checks": [
@@ -113,7 +113,7 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-24T02:21:12.603Z",
+    "generatedAt": "2026-07-24T07:33:25.623Z",
     "commands": [
       {
         "label": "second-wave-test",
@@ -121,7 +121,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "22a7f0397ca3648e8dc46140ca8e08f78893153da6cfa9f4cb0a4124a503441c",
+        "stdoutSha256": "dea089a21b6617da02c9d0512e52262cc57f5cfdb5f915fbcaf6fb3e6ee79742",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -130,7 +130,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "adc003b89c617589bc48bb8f9aa2176f22ae57285932ce157c90606451ca37ef",
+        "stdoutSha256": "8cecd33f98b08c9d6b3d55af8caf2c46d667d04aa05b95142a7df441fff45476",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -139,7 +139,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "e9e56b7528e2d501a2b20a356d38fdbe348744fd53d4977baf6f1b7f306df5d4",
+        "stdoutSha256": "12c75e34776100a0fc7e91cb03edfa36d32264aefa72eeb5df491aec09eb7dfd",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -148,7 +148,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "4751d572337a142b58f98aa57054df0f46923a10081c81c5f34556f7cba18590",
+        "stdoutSha256": "253a87b396f8fe0b2fabcf44f1afe80f25d67484918e9f48dffcda9ac1972307",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -157,7 +157,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "6b64cda394ec3424b256eac2c4894658f30c331e3c6dddcc7a72a5282960f6bb",
+        "stdoutSha256": "70685dae1b7e47faa32ac086472469456cc57e8b5b26b535843ce9ec18120dac",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -166,7 +166,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "062b2cb58c13e4815dbc6d4a33b21096f6ef3da526f7782ac7f907a807dccfe9",
+        "stdoutSha256": "d6bf56481c5d5155e3fd957dae91b3996dd16f4762b0649a29c3e8bc69e9f6f8",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -181,5 +181,5 @@
     ]
   },
   "passed": true,
-  "generatedAt": "2026-07-24T02:21:12.603Z"
+  "generatedAt": "2026-07-24T07:33:25.623Z"
 }

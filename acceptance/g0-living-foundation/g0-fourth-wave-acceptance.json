@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-FOURTH-WAVE",
-  "sourceCommit": "00400cbf262ec789ec57a8478c9066a02543f818",
+  "sourceCommit": "e19bacd1e3747c2e24dd4f3c766c15357e50b679",
   "baseline": {
     "schemaVersion": 1,
-    "baselineId": "g0-fourth-wave-establishing-0.5",
-    "baselineVersion": "0.5.0",
+    "baselineId": "g0-fifth-wave-establishing-0.6",
+    "baselineVersion": "0.6.0",
     "lifecycleStatus": "establishing",
     "qualificationStatus": "not_yet_qualified",
     "constitutionId": "biof3-g0-constitution-v1",
-    "manifestDigest": "48cf51ef8bb279a1266484aaa7930e90e4382544f2bd20f219cc36c3bee61833",
-    "bundleDigest": "16cdd9976bd6bc44bcb630bea85da34a9292892dc0fbae4bbd52d01f0d4442c8"
+    "manifestDigest": "0c6dbb71acc20e18e4952c2a62c23a9d5655a5a0326dbdb45a8549d75dfd02cf",
+    "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3"
   },
   "privacy": "digests_and_counts_only_no_raw_data_credentials_urls_or_provider_responses",
   "checks": [
@@ -20,7 +20,7 @@
       "evidence": [
         "core/shared-backend/g0/baseline-manifest.json"
       ],
-      "detail": "Fourth-wave baseline is consistent and not qualified."
+      "detail": "Compatible baseline retains fourth-wave contracts and remains not qualified."
     },
     {
       "id": "G0-W4-02",
@@ -114,7 +114,7 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-24T02:23:13.339Z",
+    "generatedAt": "2026-07-24T07:35:45.627Z",
     "commands": [
       {
         "label": "fourth-wave-test",
@@ -122,7 +122,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "3b19567ed05d880cedd47359b771cadc77340f763644f806f97cef07d7299dcf",
+        "stdoutSha256": "95782a3050fc2abf710c52eaa4dd8399b59b2f9e648513fa9f5d929331884cb5",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -131,7 +131,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "1719781180cb52bb3758114105138a7ad80bf7bb754bf13eb4df850e19bd2b4d",
+        "stdoutSha256": "aaadc82887d69f511d413c3949fc67435dda3726a9708f6d317cc078bc21fa80",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -140,7 +140,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "9009028ab43ec4557d6ed961dc94c36c9f5b2389187e05bb7d38b1dd6f4a5675",
+        "stdoutSha256": "abbf62deb910231a2819c0051f637687efecf39de1d982db3cbd798111376aeb",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -149,7 +149,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "e73c166b274c4febe069e62dd0134d6ebca6c3ae3a914fdaf8036ebde3c0f3c1",
+        "stdoutSha256": "0c4e6f62543774444437e19db18414dd9aa0b0e9543a2a7cfba6e485a5b3aeac",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -158,7 +158,7 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "1b0434a20ae4dfc351770dd54853eaae4c1f70a5d33df51aac1b28962dfa6c16",
+        "stdoutSha256": "ede749d1ecc1038297a731fc6a8e0b25b942ae770831513766bb58e700272067",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -185,11 +185,11 @@
         "exitCode": 0,
         "signal": null,
         "passed": true,
-        "stdoutSha256": "2789f8032d6077ba6aac597b449ec836d16de2220e9c4a6c5c3b59c7493c680e",
+        "stdoutSha256": "260c663ff81151b4091a94ccb32f9bd527b03cf6dc322a6bb2d8199a898780fc",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     ]
   },
   "passed": true,
-  "generatedAt": "2026-07-24T02:23:13.339Z"
+  "generatedAt": "2026-07-24T07:35:45.627Z"
 }
