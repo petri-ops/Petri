@@ -222,6 +222,7 @@ function runVerificationCommands() {
         ...process.env,
         G0_LF0_BOOTSTRAP: '1',
         G0_FIRST_WAVE_BOOTSTRAP: '1',
+        G0_SECOND_WAVE_BOOTSTRAP: '1',
       },
     });
     return {

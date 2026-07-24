@@ -1,0 +1,51 @@
+[
+  {
+    "caseId": "bulk-rna-normal",
+    "kind": "normal",
+    "incidentRef": null,
+    "fingerprints": {"inputs":"i1","script":"s1","parameters":"p1","runtime":"r1","packages":"k1","plugin":"g1","environment":"e1","seed":"42","cacheSource":"none"},
+    "artifacts": [{"artifactId":"deg","comparisonMode":"deterministic","sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]
+  },
+  {
+    "caseId": "adjusted-p-boundary",
+    "kind": "boundary",
+    "incidentRef": null,
+    "fingerprints": {"inputs":"i2","script":"s2","parameters":"p2","runtime":"r1","packages":"k1","plugin":"g1","environment":"e1","seed":"42","cacheSource":"none"},
+    "artifacts": [{"artifactId":"stat","comparisonMode":"tolerance_based","values":[0.05],"tolerance":{"absolute":0.000001,"relative":0}}]
+  },
+  {
+    "caseId": "no-significant-result",
+    "kind": "negative",
+    "incidentRef": null,
+    "fingerprints": {"inputs":"i3","script":"s3","parameters":"p3","runtime":"r1","packages":"k1","plugin":"g1","environment":"e1","seed":"42","cacheSource":"none"},
+    "artifacts": [{"artifactId":"conclusion","comparisonMode":"narrative","claims":[{"claimId":"no_supported_effect","evidenceRef":"stat-1"}]}]
+  },
+  {
+    "caseId": "contradictory-evidence",
+    "kind": "contradictory",
+    "incidentRef": null,
+    "fingerprints": {"inputs":"i4","script":"s4","parameters":"p4","runtime":"r1","packages":"k1","plugin":"g1","environment":"e1","seed":"42","cacheSource":"none"},
+    "artifacts": [{"artifactId":"conclusion","comparisonMode":"narrative","claims":[{"claimId":"mixed_direction","evidenceRef":"stat-2"}]}]
+  },
+  {
+    "caseId": "partial-artifact-incident",
+    "kind": "failure",
+    "incidentRef": "AUDIT-LOG:required-artifact-false-success",
+    "fingerprints": {"inputs":"i5","script":"s5","parameters":"p5","runtime":"r1","packages":"k1","plugin":"g1","environment":"e1","seed":"42","cacheSource":"none"},
+    "artifacts": [{"artifactId":"missing","comparisonMode":"deterministic","sha256":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}]
+  },
+  {
+    "caseId": "legacy-replay-package-v1",
+    "kind": "legacy",
+    "incidentRef": "AUDIT-LOG:checkpoint-contract-selection",
+    "fingerprints": {"inputs":"i6","script":"s6","parameters":"p6","runtime":"r0","packages":"k0","plugin":"g0","environment":"e0","seed":"unknown","cacheSource":"none"},
+    "artifacts": [{"artifactId":"legacy","comparisonMode":"deterministic","sha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}]
+  },
+  {
+    "caseId": "spt1-sanitized",
+    "kind": "real_sanitized",
+    "incidentRef": "HLE-C5:SPT-1",
+    "fingerprints": {"inputs":"i7","script":"s7","parameters":"p7","runtime":"r1","packages":"k1","plugin":"g1","environment":"e1","seed":"42","cacheSource":"artifact-cache:g0-bound"},
+    "artifacts": [{"artifactId":"delivery","comparisonMode":"narrative","claims":[{"claimId":"task_completed_with_valid_artifacts","evidenceRef":"delivery-manifest"}]}]
+  }
+]

@@ -51,10 +51,11 @@ function buildTruthProjection({ job = {}, deliveryManifest = null, scientificVal
     result.executionProvenance?.provenanceHash,
     result.artifactManifest?.manifestHash,
   ]);
+  const scientificState = scientific?.truthStatus || scientific?.status;
   const scientificStatus = scientific
-    ? scientific.blocking === true || scientific.status === 'blocked' ? 'blocked'
-      : ['valid', 'not_applicable', 'passed'].includes(scientific.status) ? 'completed'
-        : scientific.status === 'degraded' ? 'needs_review' : 'pending'
+    ? scientific.blocking === true || scientificState === 'blocked' ? 'blocked'
+      : ['valid', 'not_applicable', 'passed'].includes(scientificState) ? 'completed'
+        : ['degraded', 'needs_review'].includes(scientificState) ? 'needs_review' : 'pending'
     : artifactStatus === 'completed' ? 'pending' : artifactStatus;
   const scientificLayer = layer('scientific', scientificStatus, 'validatorEvidence', [
     scientific?.evidenceHash,

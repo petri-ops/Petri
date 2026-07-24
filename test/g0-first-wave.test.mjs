@@ -22,12 +22,12 @@ function validJob(overrides = {}) {
   };
 }
 
-test('first-wave baseline is a compatible 0.x evolution and remains unqualified', () => {
+test('first-wave contracts remain valid across compatible later 0.x baselines', () => {
   const validation = g0.validateG0BaselineBundle();
   assert.equal(validation.ok, true, validation.issues.join('\n'));
-  assert.equal(g0.manifest.baselineVersion, '0.2.0');
+  assert.ok(Number(g0.manifest.baselineVersion.split('.')[1]) >= 2);
   assert.equal(g0.manifest.qualificationStatus, 'not_yet_qualified');
-  assert.equal(g0.registry.baselines.length, 2);
+  assert.ok(g0.registry.baselines.length >= 2);
   const old = g0.evaluateProjectBaselineCompatibility({
     createdBaselineId: 'g0-lf0-establishing-0.1',
     createdBaselineVersion: '0.1.0',

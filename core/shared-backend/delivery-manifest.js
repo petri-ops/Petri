@@ -44,6 +44,7 @@ function createDeliveryManifest({ taskRecord, job, projectRoot = null, findings 
   if (!taskRecord?.spec || !job) throw new Error('delivery_task_and_job_required');
   const result = parseJson(job.result_json || job.result, {});
   const truth = result.artifactTruth || null;
+  const scientificValidation = result.scientificValidation || null;
   const provenance = result.executionProvenance || null;
   const artifacts = Array.isArray(result.artifacts) ? result.artifacts : [];
   const normalizedArtifacts = artifacts.map((artifact) => ({
@@ -59,8 +60,21 @@ function createDeliveryManifest({ taskRecord, job, projectRoot = null, findings 
   const unresolved = coverage.filter((item) => item.status !== 'satisfied');
   const unavailable = normalizedArtifacts.filter((item) => item.reproducibility.status === 'unavailable');
   let status = 'valid';
-  if (job.status !== 'completed' || !truth || truth.status === 'blocked' || truth.blocking === true || normalizedArtifacts.length === 0) status = 'blocked';
-  else if (truth.status === 'degraded' || unavailable.length || unresolved.length) status = 'degraded';
+  if (
+    job.status !== 'completed'
+    || !truth
+    || truth.status === 'blocked'
+    || truth.blocking === true
+    || scientificValidation?.blocking === true
+    || scientificValidation?.truthStatus === 'blocked'
+    || normalizedArtifacts.length === 0
+  ) status = 'blocked';
+  else if (
+    truth.status === 'degraded'
+    || ['degraded', 'needs_review'].includes(scientificValidation?.truthStatus || scientificValidation?.status)
+    || unavailable.length
+    || unresolved.length
+  ) status = 'degraded';
   const manifest = {
     deliveryManifestVersion: DELIVERY_MANIFEST_VERSION,
     status,
@@ -69,6 +83,7 @@ function createDeliveryManifest({ taskRecord, job, projectRoot = null, findings 
     method: taskRecord.spec.method,
     lockedInputs: (taskRecord.spec.inputs || []).map((input) => ({ role: input.role, relativePath: input.relativePath, sha256: input.sha256, sizeBytes: input.sizeBytes })),
     artifactTruth: truth,
+    scientificValidation,
     artifactDiagnostics: result.artifactDiagnostics || [],
     artifacts: normalizedArtifacts,
     requirementCoverage: coverage,
@@ -79,9 +94,19 @@ function createDeliveryManifest({ taskRecord, job, projectRoot = null, findings 
       limitations: Array.isArray(findings.limitations) ? findings.limitations : [],
     },
     summary: {
-      conclusion: status === 'blocked' ? '结果未通过交付校验，不能作为完成结果交付。' : status === 'degraded' ? '已有可审阅结果，但存在缺失项或需要人工复核。' : '结果、产物和复现证据均通过交付校验。',
+      conclusion: status === 'blocked'
+        ? '结果未通过科学或交付校验，不能作为完成结果交付。'
+        : status === 'degraded'
+          ? '已有可审阅结果，但存在科学限制、缺失项或需要复核。'
+          : scientificValidation?.outcome === 'not_significant'
+            ? '分析有效完成；在声明的阈值下没有获得支持目标效应的证据。'
+            : '结果、科学校验、产物和复现证据均通过交付校验。',
       whatWasDone: `${job.tool_id || '分析工具'} 产生 ${normalizedArtifacts.length} 个已登记产物。`,
-      cautions: [...unresolved.map((item) => `未满足交付项：${item.requirement}`), ...unavailable.map((item) => `${item.label} 缺少复现入口`)],
+      cautions: [
+        ...(scientificValidation?.findings || []).map((item) => `科学校验：${item.code}`),
+        ...unresolved.map((item) => `未满足交付项：${item.requirement}`),
+        ...unavailable.map((item) => `${item.label} 缺少复现入口`),
+      ],
     },
     unresolved: [...unresolved.map((item) => ({ code: 'deliverable_unresolved', requirement: item.requirement })), ...(status === 'blocked' ? [{ code: 'delivery_blocked', reason: job.error || truth?.status || 'artifact_validation_failed' }] : [])],
     generatedAt: new Date().toISOString(),
@@ -93,7 +118,7 @@ function createDeliveryManifest({ taskRecord, job, projectRoot = null, findings 
     truthProjection: buildTruthProjection({
       job,
       deliveryManifest: withHash,
-      scientificValidation: result.scientificValidation || null,
+      scientificValidation,
     }),
   };
 }

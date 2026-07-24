@@ -34,7 +34,7 @@ function inspect(verification = null, bootstrap = false) {
   const plan = read('docs/g0-living-foundation-plan.md');
   const commands = verification?.commands || [];
   const checks = [
-    item('G0-W1-01', g0.validateG0BaselineBundle().ok && g0.manifest.baselineVersion === '0.2.0' && g0.manifest.qualificationStatus === 'not_yet_qualified', ['core/shared-backend/g0/baseline-manifest.json'], 'Compatible establishing baseline, not qualified.'),
+    item('G0-W1-01', g0.validateG0BaselineBundle().ok && Number(g0.manifest.baselineVersion.split('.')[1]) >= 2 && g0.manifest.qualificationStatus === 'not_yet_qualified', ['core/shared-backend/g0/baseline-manifest.json'], 'Compatible establishing baseline retains first-wave contracts and remains not qualified.'),
     item('G0-W1-02', g0.truthLattice.levels.map((entry) => entry.id).join(',') === 'job,artifact,scientific,delivery,presentation', ['core/shared-backend/g0/truth-lattice.json'], 'Five truth levels have fixed authorities.'),
     item('G0-W1-03', /buildTruthProjection/.test(workflow) && /truthProjection/.test(delivery), ['core/r-server/helpers/harness-workflow-state.js', 'core/shared-backend/delivery-manifest.js'], 'Workflow and Delivery use the shared projection.'),
     item('G0-W1-04', g0.truthLattice.completionRule.includes('presentation cannot promote'), ['core/shared-backend/g0/truth-lattice.json', 'test/g0-first-wave.test.mjs'], 'Presentation cannot promote upstream truth.'),
@@ -74,7 +74,12 @@ function runCommands() {
       cwd: repoRoot,
       encoding: 'utf8',
       maxBuffer: 32 * 1024 * 1024,
-      env: { ...process.env, G0_FIRST_WAVE_BOOTSTRAP: '1', G0_LF0_BOOTSTRAP: '1' },
+      env: {
+        ...process.env,
+        G0_FIRST_WAVE_BOOTSTRAP: '1',
+        G0_LF0_BOOTSTRAP: '1',
+        G0_SECOND_WAVE_BOOTSTRAP: '1',
+      },
     });
     return {
       label,

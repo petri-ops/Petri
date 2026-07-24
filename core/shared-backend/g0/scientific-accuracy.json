@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": 1,
+  "evidenceLevels": [
+    "descriptive",
+    "statistical",
+    "validated",
+    "cross_validated"
+  ],
+  "outcomes": {
+    "valid": {
+      "truthStatus": "passed",
+      "blocking": false
+    },
+    "not_significant": {
+      "truthStatus": "passed",
+      "blocking": false
+    },
+    "low_power": {
+      "truthStatus": "needs_review",
+      "blocking": false
+    },
+    "contradictory": {
+      "truthStatus": "needs_review",
+      "blocking": false
+    },
+    "missing_design": {
+      "truthStatus": "blocked",
+      "blocking": true
+    },
+    "assumption_violation": {
+      "truthStatus": "blocked",
+      "blocking": true
+    },
+    "invalid_statistics": {
+      "truthStatus": "blocked",
+      "blocking": true
+    }
+  },
+  "requiredChecks": [
+    "method_applicability",
+    "method_assumptions",
+    "sample_identity_match",
+    "statistical_field_semantics",
+    "units",
+    "direction",
+    "multiple_testing",
+    "evidence_level"
+  ],
+  "scientificDesignFields": [
+    "method",
+    "design",
+    "contrast",
+    "cohort",
+    "covariates",
+    "threshold",
+    "multipleTesting",
+    "exclusionCriteria"
+  ],
+  "engineeringRepairFields": [
+    "path",
+    "columnAlias",
+    "fileEncoding",
+    "runtimeLocation",
+    "packageLocation",
+    "outputFilename"
+  ],
+  "prohibited": [
+    "threshold_tuning_for_expected_result",
+    "retry_until_significant",
+    "model_knowledge_as_data_evidence",
+    "low_confidence_claim_as_fact",
+    "source_data_overwrite_for_plugin_compatibility"
+  ]
+}

@@ -8,6 +8,7 @@ const {
   stableStringify,
   validateContextCheckpoint,
 } = require('./scientific-task-spec');
+const { buildDriftReport } = require('./g0-reproducibility-lab');
 
 const REPLAY_PACKAGE_VERSION = 1;
 const REPLAY_DRIFT_KINDS = Object.freeze([
@@ -239,6 +240,11 @@ function buildScientificReplayPackage({
       deterministic: provenance.runtime?.seed == null,
       seed: provenance.runtime?.seed ?? null,
       tolerance: provenance.runtime?.tolerance ?? null,
+      comparisonMode: provenance.runtime?.tolerance
+        ? 'tolerance_based'
+        : ['markdown', 'text', 'report'].includes(String(artifact.type || '').toLowerCase())
+          ? 'narrative'
+          : 'deterministic',
       controlledReplay: { requiresConfirmation: true, target: artifact.id || artifactId },
     };
     writeJson(path.join(packageDir, 'repro', 'artifacts', `${artifactId}.json`), entry);
@@ -399,7 +405,26 @@ function assessReplayReadiness({
       if (source && artifact.expected?.sha256 && hashFile(source) !== artifact.expected.sha256) drift.push({ kind: 'artifact_drift', artifactId: artifact.artifactId, expected: artifact.expected.sha256, actual: hashFile(source) });
     }
   }
-  return { ok: drift.length === 0, status: drift.length ? 'blocked' : 'ready_for_confirmation', requiresConfirmation: true, drift };
+  const driftReport = buildDriftReport({
+    replayCaseId: replay.task?.taskId || null,
+    sourceDigest: replay.sourceDigest || null,
+    targetDigest: sha256Buffer(Buffer.from(stableStringify({
+      plugin: currentPluginFingerprint,
+      params: currentParams,
+      runtime: currentRuntimeVersion,
+    }))),
+    contextDrifts: drift.map((item) => ({
+      ...item,
+      scientificallyMaterial: ['input_drift', 'parameter_drift'].includes(item.kind),
+    })),
+  });
+  return {
+    ok: drift.length === 0,
+    status: drift.length ? 'blocked' : 'ready_for_confirmation',
+    requiresConfirmation: true,
+    drift,
+    driftReport,
+  };
 }
 
 module.exports = {

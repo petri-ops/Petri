@@ -45,6 +45,8 @@ module.exports = {
   g0Baseline: require('./g0-baseline'),
   g0TruthProjection: require('./g0-truth-projection'),
   g0DurableState: require('./g0-durable-state'),
+  g0ScientificAccuracy: require('./g0-scientific-accuracy'),
+  g0ReproducibilityLab: require('./g0-reproducibility-lab'),
   executors: require('./executors'),
   storage: require('./storage'),
   llmProviders: require('./llm-providers'),

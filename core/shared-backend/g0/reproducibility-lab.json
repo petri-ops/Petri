@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": 1,
+  "artifactComparisonModes": [
+    "deterministic",
+    "tolerance_based",
+    "narrative"
+  ],
+  "corpusCaseKinds": [
+    "normal",
+    "boundary",
+    "negative",
+    "contradictory",
+    "failure",
+    "legacy",
+    "real_sanitized"
+  ],
+  "driftClasses": [
+    "expected",
+    "compatible",
+    "scientifically_material",
+    "unknown"
+  ],
+  "scientificallyMaterialKinds": [
+    "input_drift",
+    "parameter_drift",
+    "scientific_conclusion_drift",
+    "statistical_direction_drift",
+    "significance_drift"
+  ],
+  "requiredFingerprintFields": [
+    "inputs",
+    "script",
+    "parameters",
+    "runtime",
+    "packages",
+    "plugin",
+    "environment",
+    "seed",
+    "cacheSource"
+  ],
+  "incidentPolicy": "Every repaired scientific or replay incident becomes a stable corpus case.",
+  "narrativePolicy": "Compare structured claims and evidence references, never wording similarity alone."
+}

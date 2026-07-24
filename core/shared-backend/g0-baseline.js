@@ -11,6 +11,8 @@ const truthLattice = require('./g0/truth-lattice.json');
 const durableStateInventory = require('./g0/durable-state-inventory.json');
 const capabilitySupplyChain = require('./g0/capability-supply-chain.json');
 const securityPermissionMatrix = require('./g0/security-permission-matrix.json');
+const scientificAccuracy = require('./g0/scientific-accuracy.json');
+const reproducibilityLab = require('./g0/reproducibility-lab.json');
 
 const LEGACY_BASELINE_ID = 'legacy-unversioned';
 const PROJECT_BASELINE_RECORD_VERSION = 1;
@@ -36,6 +38,8 @@ function deepFreeze(value) {
   durableStateInventory,
   capabilitySupplyChain,
   securityPermissionMatrix,
+  scientificAccuracy,
+  reproducibilityLab,
 ].forEach(deepFreeze);
 
 function canonicalStringify(value) {
@@ -67,6 +71,8 @@ function currentContractVersions() {
   const artifactProfiles = require('./artifact-profiles');
   const truthProjection = require('./g0-truth-projection');
   const durableState = require('./g0-durable-state');
+  const scientificAccuracyModule = require('./g0-scientific-accuracy');
+  const reproducibilityLabModule = require('./g0-reproducibility-lab');
   const artifactProfileVersions = Object.values(artifactProfiles.ARTIFACT_PROFILES || {})
     .map((profile) => Number(profile.schemaVersion))
     .filter(Number.isInteger);
@@ -91,6 +97,8 @@ function currentContractVersions() {
     durableState: durableState.DURABLE_STATE_VERSION,
     capabilitySupplyChain: require('./g0/capability-supply-chain.json').contractVersion,
     securityPermissionMatrix: require('./g0/security-permission-matrix.json').contractVersion,
+    scientificAccuracy: scientificAccuracyModule.SCIENTIFIC_ACCURACY_VERSION,
+    reproducibilityLab: reproducibilityLabModule.REPRODUCIBILITY_LAB_VERSION,
   };
 }
 
@@ -106,6 +114,8 @@ function getCurrentG0Baseline() {
     durableStateInventory,
     capabilitySupplyChain,
     securityPermissionMatrix,
+    scientificAccuracy,
+    reproducibilityLab,
   });
   return Object.freeze({
     schemaVersion: manifest.schemaVersion,
@@ -149,6 +159,8 @@ function validateG0BaselineBundle() {
   if (durableStateInventory.schemaVersion !== 1) issues.push('durable_state_inventory_schema_version_unsupported');
   if (capabilitySupplyChain.schemaVersion !== 1) issues.push('capability_supply_chain_schema_version_unsupported');
   if (securityPermissionMatrix.schemaVersion !== 1) issues.push('security_permission_matrix_schema_version_unsupported');
+  if (scientificAccuracy.schemaVersion !== 1) issues.push('scientific_accuracy_schema_version_unsupported');
+  if (reproducibilityLab.schemaVersion !== 1) issues.push('reproducibility_lab_schema_version_unsupported');
   if (manifest.baselineId !== registry.currentBaselineId) issues.push('registry_current_baseline_mismatch');
   if (manifest.baselineId !== supportMatrix.baselineId) issues.push('support_matrix_baseline_mismatch');
   if (manifest.constitutionId !== constitution.constitutionId) issues.push('constitution_id_mismatch');
@@ -312,6 +324,8 @@ module.exports = {
   durableStateInventory,
   capabilitySupplyChain,
   securityPermissionMatrix,
+  scientificAccuracy,
+  reproducibilityLab,
   canonicalStringify,
   sha256,
   parseMajor,

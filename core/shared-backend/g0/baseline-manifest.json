@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "baselineId": "g0-first-wave-establishing-0.2",
-  "baselineVersion": "0.2.0",
+  "baselineId": "g0-second-wave-establishing-0.3",
+  "baselineVersion": "0.3.0",
   "lifecycleStatus": "establishing",
   "qualificationStatus": "not_yet_qualified",
   "constitutionId": "biof3-g0-constitution-v1",
@@ -27,7 +27,9 @@
     "truthProjection": 1,
     "durableState": 1,
     "capabilitySupplyChain": 1,
-    "securityPermissionMatrix": 1
+    "securityPermissionMatrix": 1,
+    "scientificAccuracy": 1,
+    "reproducibilityLab": 1
   },
   "database": {
     "engine": "sqlite",
@@ -50,12 +52,16 @@
     "truthLattice": "core/shared-backend/g0/truth-lattice.json",
     "durableStateInventory": "core/shared-backend/g0/durable-state-inventory.json",
     "capabilitySupplyChain": "core/shared-backend/g0/capability-supply-chain.json",
-    "securityPermissionMatrix": "core/shared-backend/g0/security-permission-matrix.json"
+    "securityPermissionMatrix": "core/shared-backend/g0/security-permission-matrix.json",
+    "scientificAccuracy": "core/shared-backend/g0/scientific-accuracy.json",
+    "reproducibilityLab": "core/shared-backend/g0/reproducibility-lab.json"
   },
   "evidenceRefs": [
     "acceptance/harness-loop/production/baseline.json",
     "acceptance/harness-loop/hle-all-gate.json",
     "acceptance/g0-living-foundation/g0-start-audit.json",
-    "acceptance/g0-living-foundation/g0-lf0-acceptance.json"
+    "acceptance/g0-living-foundation/g0-lf0-acceptance.json",
+    "acceptance/g0-living-foundation/g0-first-wave-acceptance.json",
+    "acceptance/g0-living-foundation/g0-second-wave-acceptance.json"
   ]
 }
