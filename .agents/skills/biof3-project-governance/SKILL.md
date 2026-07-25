@@ -1,6 +1,6 @@
 ---
 name: biof3-project-governance
-description: Govern BioF3 plans, Goals, work packages, canonical documentation, handoffs, audits, stage closeout, archival, and Git worktrees. Use when Codex creates or changes a plan, completes a task or phase, updates roadmap or handoff state, reconciles documentation, archives or supersedes files, creates or removes a worktree, or is about to claim that a BioF3 work package is complete.
+description: Govern BioF3 plans, Goals, work packages, canonical documentation, handoffs, audits, validation scope, stage closeout, archival, and Git worktrees. Use when Codex creates or changes a plan, chooses tests or acceptance gates, completes a task or phase, updates roadmap or handoff state, reconciles documentation, archives or supersedes files, creates or removes a worktree, or is about to claim that a BioF3 work package is complete.
 ---
 
 # BioF3 Project Governance
@@ -66,7 +66,17 @@ Keep one recoverable project truth while preserving code, evidence, user work, a
 - `npm run docs:check`: enforce registry schema, paths, canonical truth uniqueness, entrypoints, and managed Markdown coverage.
 - `npm run docs:reconcile`: list unregistered, orphaned, archival, and retained-reference candidates without moving files.
 
-Run the narrowest relevant project tests as well. Documentation gates complement code, scientific, UI, Provider, packaged-app, and acceptance gates; they never replace them.
+## Choose the smallest sufficient validation scope
+
+- During implementation, run only tests and static checks that cover the changed module, contract, or observed failure. Do not run `npm test`, `npm run check`, Provider matrices, packaged-app checks, visual matrices, or soak tests after every edit.
+- Before a focused commit, run affected tests plus the directly relevant TypeScript, syntax, UI-audit, or documentation gate. Documentation-only changes normally need documentation/UI gates, not unrelated scientific or runtime suites.
+- At a Goal or P-stage close, run each declared full-project gate at most once after focused checks are green and the source tree is stable. Run heavyweight root gates serially; never run `npm test` and `npm run check` concurrently on the same workspace.
+- Reserve Provider, packaged-app, plugin-platform, restart, long-task, performance, and soak matrices for the stage that owns that evidence or for final qualification/release. Do not repeat them in an earlier stage without a relevant contract change or reproduced failure.
+- Reuse a current last-green result only when its exact source/dependency digest still matches and the evidence belongs to the same worktree, platform, and gate contract. Any relevant source, test, environment, or contract change invalidates that reuse.
+- Re-run a full gate only when it failed for a product reason, relevant code changed after the run, its evidence expired, or the governing plan explicitly requires a fresh run. Isolate and re-run a timeout or environment failure narrowly before deciding that the product is broken.
+- Never replace a required acceptance class with a smaller test, and never report an unrun, skipped, deferred, or reused gate as freshly passed. Record its real evidence status.
+
+Documentation gates complement code, scientific, UI, Provider, packaged-app, and acceptance gates; they never replace them. The objective is sufficient evidence with minimum redundant execution, not maximum test volume.
 
 ## Guardrails
 
