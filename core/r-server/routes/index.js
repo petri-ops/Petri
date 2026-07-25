@@ -25,6 +25,7 @@ module.exports = async function registerRoutes(app) {
     ['AI Loop API', () => require('./ai-loop').registerAiLoopRoutes(app)],
     ['Harness', () => require('./harness')(app)],
     ['Tools', () => require('./tools')(app)],
+    ['Result Studio', () => require('./result-studio')(app)],
     ['Feedback', () => require('./feedback')(app)],
     ['AI chat', () => require('./ai-chat')(app)],
     ['AI agent', () => require('./ai-agent')(app)],

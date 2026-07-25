@@ -60,6 +60,12 @@ import {
   type ResultArtifactRecord,
   type NormalizedResultManifest,
 } from '@/lib/result-manifest';
+import {
+  isSameSelection,
+  type ArtifactInteractionManifest,
+  type ArtifactSelection,
+  type InteractionCapability,
+} from '@/lib/artifact-selection';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
 import type { BackendStatus } from '@/lib/electron';
@@ -85,6 +91,20 @@ const markdownSanitizeSchema = {
   },
 };
 
+/**
+ * G0-RS3：activeArtifact 从"文件级"升级为 revision / semantic / selection-aware。
+ *
+ * 升级前它只是 `{jobId, toolId, name, type, label?, url?}` —— 一个文件坐标，
+ * 无法回答"这是哪个版本""这些行是哪些基因""用户当前选了什么"。
+ *
+ * 三个新维度都是可选字段：
+ * - revision 维度（`revisionId` / `artifactFamilyId`）由 RS5/RS6 接入 RS2 的
+ *   `artifact_revisions` 后填充；RS3 只把类型与身份比较打通，不伪造数据。
+ * - semantic 维度（`entityType` / `idField` / `selectionDurable`）来自后端
+ *   `GET /api/result-studio/interaction`，它基于**完整文件**判定稳定 ID 列；
+ *   浏览器侧 40 行预览样本没有资格做这个判定。
+ * - selection 维度（`selection`）由表格行列/过滤/排序与图形点选产生。
+ */
 interface ActiveArtifact {
   jobId: string;
   toolId: string;
@@ -92,6 +112,14 @@ interface ActiveArtifact {
   type: string;
   label?: string;
   url?: string;
+  revisionId?: string | null;
+  artifactFamilyId?: string | null;
+  semanticKind?: ResultArtifactKind;
+  entityType?: string | null;
+  idField?: string | null;
+  selectionDurable?: boolean;
+  interactionCapabilities?: InteractionCapability[];
+  selection?: ArtifactSelection | null;
 }
 
 interface ActiveWorkspaceFile {
@@ -3032,6 +3060,9 @@ function ResultArtifactShell({
   const [previewText, setPreviewText] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<string[][] | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  // RS3：交互清单由后端基于完整文件判定（稳定 ID 列、可选维度），前端只消费。
+  const [interactionManifest, setInteractionManifest] = useState<ArtifactInteractionManifest | null>(null);
+  const [artifactSelection, setArtifactSelection] = useState<ArtifactSelection | null>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [harnessIndex, setHarnessIndex] = useState<HarnessIndexSummary | null>(null);
   const [harnessLoading, setHarnessLoading] = useState(false);
@@ -3376,6 +3407,35 @@ function ResultArtifactShell({
     }
   }, [artifacts, onPendingArtifactConsumed, pendingArtifactName]);
 
+  // RS3：交互清单只能由后端基于**完整文件**产出。浏览器侧只有 buildPreviewTable
+  // 解析出的前 40 行样本，用它判定"哪一列是稳定实体 ID"会在 10 万行表上出错。
+  // artifact 一变就重取，并清空上一份选择——旧选择属于旧 artifact，不能顺延。
+  useEffect(() => {
+    setInteractionManifest(null);
+    setArtifactSelection(null);
+    if (!job || effectiveJobStatus !== 'done' || !selectedArtifactName) return;
+    if (selectedArtifactKind !== 'table' && selectedArtifactKind !== 'plot') return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const token = getToken();
+        const query = `?jobId=${encodeURIComponent(job.id)}&artifact=${encodeURIComponent(selectedArtifactName)}`;
+        const resp = await fetch(`${getApiPrefix(lang)}/result-studio/interaction${query}`, {
+          headers: token ? { Authorization: 'Bearer ' + token } : {},
+        });
+        if (!resp.ok) return;
+        const data = await resp.json();
+        if (cancelled) return;
+        if (data && data.manifest) setInteractionManifest(data.manifest as ArtifactInteractionManifest);
+      } catch {
+        // 清单拿不到不应连带影响结果展示：保持 null，交互能力按"不支持"处理。
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [effectiveJobStatus, job, lang, selectedArtifactKind, selectedArtifactName]);
+
   useEffect(() => {
     if (!job || effectiveJobStatus !== 'done' || !selectedArtifact) {
       onActiveArtifactChange(null);
@@ -3388,15 +3448,40 @@ function ResultArtifactShell({
       type: selectedArtifact.type || selectedArtifactKind,
       label: selectedArtifact.label || selectedArtifact.title,
       url: selectedArtifactUrl,
+      // RS3 semantic 维度：来自后端基于完整文件产出的交互清单。
+      // 清单还没到（或该类型不支持交互）时保持 null，不猜测。
+      semanticKind: selectedArtifactKind,
+      revisionId: interactionManifest?.revisionId ?? null,
+      entityType: interactionManifest?.entityType ?? null,
+      idField: interactionManifest?.idField ?? null,
+      selectionDurable: interactionManifest?.selectionDurable ?? false,
+      interactionCapabilities: interactionManifest?.capabilities ?? [],
+      selection: artifactSelection,
     };
+    // 身份比较必须覆盖 revision 与 selection：只比 jobId+name 会让
+    // "同一文件换了版本" 或 "用户改了选择" 无法向上传播。
     if (
       !activeArtifact ||
       activeArtifact.jobId !== artifact.jobId ||
-      activeArtifact.name !== artifact.name
+      activeArtifact.name !== artifact.name ||
+      (activeArtifact.revisionId ?? null) !== (artifact.revisionId ?? null) ||
+      (activeArtifact.entityType ?? null) !== (artifact.entityType ?? null) ||
+      (activeArtifact.idField ?? null) !== (artifact.idField ?? null) ||
+      !isSameSelection(activeArtifact.selection ?? null, artifact.selection ?? null)
     ) {
       onActiveArtifactChange(artifact);
     }
-  }, [activeArtifact, effectiveJobStatus, job, onActiveArtifactChange, selectedArtifact, selectedArtifactKind, selectedArtifactUrl]);
+  }, [
+    activeArtifact,
+    artifactSelection,
+    effectiveJobStatus,
+    interactionManifest,
+    job,
+    onActiveArtifactChange,
+    selectedArtifact,
+    selectedArtifactKind,
+    selectedArtifactUrl,
+  ]);
 
   useEffect(() => {
     let cancelled = false;

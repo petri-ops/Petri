@@ -56,7 +56,13 @@ RS2 实测修正的两个真实缺陷：其一，`canTransitionChangeSet()` 返�
 
 migration 现状更正：RS0 审计称 `src/migrations/` 只有 `.gitkeep`，实际该目录**根本不存在**，`runMigrations()` 因 `readdirSync` 抛错走 catch 分支静默返回，从未真正执行过。RS2 已建立该目录与首个 migration，并用 `test/result-studio-migration.test.mjs` 覆盖空库首装、重复执行幂等、已有库升级不动现有表、坏 SQL 事务回滚且不记版本、缺目录静默 no-op、`BIOF3_BETTER_SQLITE3_ROOT` ABI 路径，以及 `.sql` 与 schema 模块逐字节一致。
 
-下一阶段：`G0-RS3` Artifact Interaction 与 Selection Context。注意 `ActiveArtifact`（`frontend/src/pages/project-workspace.tsx`）目前仍是文件级标识，不含 revision/语义/选择状态，RS3 需要改造该类型及其全部流转路径，而不是新增旁路。
+- `G0-RS3` Artifact Interaction 与 Selection Context —— 新增 `core/shared-backend/artifact-interaction.js`（稳定实体 ID 判定、表格/图形交互清单、选择解析与有界 Agent 摘要）、`core/r-server/routes/result-studio.js`（6 个端点）、`frontend/src/lib/artifact-selection.ts`（前端选择语义镜像层）。`ActiveArtifact` 已从文件级升级为 revision / semantic / selection-aware。聚合门禁 `npm run g0:result-studio` 实测 104/104（git 24 + contract/repository 45 + migration 9 + interaction 26），前端 246/246，已接入根 `npm run check`。台账登记为 `UI-102`（`in_progress`，待实机）。
+
+RS3 已固化的边界：交互清单只能由**后端基于完整文件**产出，浏览器侧 40 行预览样本（`buildPreviewTable`）无权判定稳定 ID 列，前端只消费不自建第二套判定；`idStrategy='positional'` 时 `selectionDurable` 必须为 false，绝不把行号伪装成实体身份，且交互能力里不含 `row_select`；声明的 ID 列若在抽样中实测不唯一则拒绝采用并回退 positional，不产出错误的实体映射；超过阈值的选择以 `filterExpression` + hash 为权威表达，`entityIds` 只作抽样证据，计数如实反映真实规模；给 Agent 的摘要恒定有界且不可持久时必须带 caveat。
+
+RS3 实测修正的三个真实缺陷：其一，我在路由里使用了 `app.locals.requireAuth` 与 `require('../db')` 直接当句柄 —— 前者在 `core/` 中**根本不存在**（桌面版 loopback 单用户，鉴权由全局 `localIdentityMiddleware` 注入 `req.user`），后者是模块对象而非 better-sqlite3 实例；两者都会让整个模块被 `routes/index.js` 的 try/catch 静默吞掉、6 个端点变成死代码，已改为裸注册 + 内联 `canAccessProject` + `require('../db').db` + 惰性仓库。其二，`ActiveArtifact` 的身份比较原本只比 `jobId + name`，导致"同一文件换了版本"或"用户改了选择"无法向上传播，已扩展为覆盖 revision / entityType / idField / selection。其三，前端 hash 不能冒充 sha256（浏览器无同步 sha256，`crypto.subtle` 是异步的），已改为 FNV-1a 双种子并在命名上不声称加密强度。
+
+下一阶段：`G0-RS4` AI Edit Intent 与受影响范围。注意 RS3 只打通了 revision 维度的**类型与比较**，`revisionId` / `artifactFamilyId` 目前恒为 null —— 真正与 RS2 `artifact_revisions` 表接线属于 RS5/RS6，不要误判为已完成。
 
 ### 3.1 已完成基线：真实科学任务驱动的 Harness 升级
 

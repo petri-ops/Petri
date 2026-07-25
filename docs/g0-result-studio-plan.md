@@ -2,7 +2,7 @@
 
 最后更新：2026-07-24
 
-状态：`in_progress`（RS0 ✅ / RS1 ✅ / RS2 ✅ 已收口；当前下一阶段为 `G0-RS3`，单线串行）
+状态：`in_progress`（RS0 ✅ / RS1 ✅ / RS2 ✅ / RS3 ✅ 已收口；当前下一阶段为 `G0-RS4`，单线串行）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -778,25 +778,38 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 - 进程中断后可恢复。
 - 重复 adopt/revert 幂等。
 
-### G0-RS3：Artifact Interaction 与 Selection Context
+### G0-RS3：Artifact Interaction 与 Selection Context ✅ 已完成（2026-07-25）
 
 目标：让用户选择成为 Agent 可理解的结构化上下文。
 
 交付：
 
-- ArtifactInteractionManifest v1。
-- SelectionContext v1。
-- 表格行列/过滤/排序选择。
-- 图形 point/region 选择接口。
-- selection 持久化和有界摘要。
-- activeArtifact 从文件级升级到 revision/semantic/selection-aware。
+- ✅ ArtifactInteractionManifest v1：`core/shared-backend/artifact-interaction.js`。`buildTableInteractionManifest()` / `buildPlotInteractionManifest()` 产出 `idField` / `idStrategy` / `entityType` / `selectionDurable` / `capabilities`。
+- ✅ 稳定 ID 判定：`resolveEntityIdField()` 三级策略 `declared_column`（调用方声明）→ `inferred_column`（29 个生物学候选列名 + **实测唯一性**验证）→ `positional`（回退且必附诊断）。声明列不唯一时拒绝声明、不产出错误实体映射。
+- ✅ SelectionContext v1：沿用 RS2 的 `validateSelectionContext()` 与 `result_selection_contexts` 表，不新建第二套选择契约。
+- ✅ 表格行列/过滤/排序选择 + 图形 point/region 选择：前端 `frontend/src/lib/artifact-selection.ts`，`buildRowSelection` / `buildColumnSelection` / `buildQuerySelection` / `buildPointSelection` / `buildRegionSelection`。
+- ✅ selection 持久化与有界摘要：`POST/GET/DELETE /api/result-studio/selection`，`describeSelectionForAgent()` 与 `summarizeSelectionForAgent()` 恒定有界（≤12 个样本 ID），永不外泄完整 ID 列表。
+- ✅ HTTP 边界：`core/r-server/routes/result-studio.js` 6 个端点，已注册进 `routes/index.js`。
+- ✅ `activeArtifact` 从文件级升级到 revision/semantic/selection-aware（UI-102）：新增 `revisionId` / `artifactFamilyId` / `semanticKind` / `entityType` / `idField` / `selectionDurable` / `interactionCapabilities` / `selection`，并把身份比较从 `jobId+name` 扩展到覆盖 revision 与 selection。
 
-验收：
+验收（`test/artifact-interaction.test.mjs` 26/26 + `frontend/src/lib/artifact-selection.test.ts` 20/20）：
 
-- 稳定实体 ID，不依赖行号。
-- 10 万行表格仍可用 query/hash 表达选择。
-- 切换会话和重启后选择可恢复。
-- Agent 能准确回答“这些基因”对应的真实 ID。
+- ✅ 稳定实体 ID，不依赖行号：`idStrategy` 为 `positional` 时 `selectionDurable` 强制为 false，且 `describeSelectionForAgent()` 附 `caveat` 明示"重算后可能不指向同一实体"；契约校验拒绝 `positional` + `selectionDurable=true` 的自相矛盾组合。
+- ✅ 10 万行表格仍可用 query/hash 表达选择：实测 10 万行仅抽样 39 行即判定 `inferred_column`/`gene_id`/durable；超过 2000 个实体的选择以 `filterExpression` + `filterHash` 为权威表达，`entityIds` 仅作抽样证据，`matchedCount` 如实反映真实规模。
+- ✅ 切换会话和重启后选择可恢复：选择落 RS2 的 `result_selection_contexts`，`toPersistPayload()` / `fromPersistedSelection()` 往返保持 `entityIdsHash` 与计数。
+- ✅ Agent 能准确回答"这些基因"对应的真实 ID：摘要携带 `entityType`、真实 `sampleEntityIds`、总数与 `truncated` 标记；不可持久时显式给出 caveat，不把行号伪装成基因身份。
+
+补充边界：
+
+- 交互清单必须由**后端基于完整文件**产出。浏览器侧只解析前 40 行预览（`buildPreviewTable`），那个样本没有资格判定"哪一列是稳定实体 ID"；前端只消费清单，不自建第二套判定。
+- artifact 路径一律经 `resolveProjectRunLayout` + 包含性检查派生，不接受调用方传入任意路径；读取体积设上限。
+- revision 维度（`revisionId` / `artifactFamilyId`）在 RS3 只打通类型与身份比较，实际填充待 RS5/RS6 接入 `artifact_revisions`，不伪造数据。
+
+实现期修正的真实缺陷（3 项，全部为集成层，均由实跑捕获）：
+
+1. 路由用了**不存在**的 `requireAuth` 中间件。桌面版是 loopback-only 单用户（`core/r-server/auth.js` 的 `localIdentityMiddleware` 全局注入 `req.user`），故意不提供 `requireAuth`；原写法会让整个模块永远走 skip 分支静默不注册，RS3 持久化沦为死代码。已改为 harness 既有模式：裸注册 + 每端点内联 `canAccessProject`。
+2. `require('../db')` 返回模块对象而非 better-sqlite3 实例，`db.prepare(...)` 运行时必抛；且仓库在注册期 eager 创建，抛错会被 `routes/index.js` 的 try/catch 吞掉。已改为 `require('../db').db` 真实句柄 + 惰性构造。
+3. 我的验证脚本三次用错入参名（`totalRowCount` 应为 `rowCount`、`filterExpression` 应为 `filter`、`rows` 需为列名键对象数组），一度把正确实现误判为 `positional` 回退。模块本身无误，记录于此以免后续复现同类误判。
 
 ### G0-RS4：AI Edit Intent 与受影响范围
 
