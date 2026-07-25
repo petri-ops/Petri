@@ -2,7 +2,7 @@
 
 最后更新：2026-07-25
 
-状态：`active / implemented_unverified`（RS0～RS8 引擎基础保留；`G0-RS-P0`、`G0-RS-P1` 已完成，下一阶段仅允许 `G0-RS-P2`）
+状态：`active / implemented_unverified`（RS0～RS8 引擎基础保留；`G0-RS-P0`～`G0-RS-P2` 已完成，下一阶段仅允许 `G0-RS-P3`）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -1263,6 +1263,8 @@ Result Studio 当前按三层事实表达：
 
 ### G0-RS-P2：Scientific Interaction 与 SelectionContext
 
+状态：`completed`（2026-07-25）；关闭 P2 bounded product-development 验收，不升级 `result-studio-editing` 产品资格。
+
 目标：把“这些基因、这些样本、这个区域”变成真实、耐久、可复现的数据引用。
 
 交付：
@@ -1280,6 +1282,17 @@ Result Studio 当前按三层事实表达：
 - 真实插件结果完成单选、多选、过滤后全选、框选、跨标签切换、会话重开和应用重启恢复。
 - 选择对象经 Agent tool call 实际用于下游 GO/KEGG 或重绘，不只验证序列化函数。
 - 10 万行级表只渲染视口行；选择、排序和过滤不阻塞主线程且统计不说谎。
+
+实现与证据：
+
+- 后端权威表查询基于完整 CSV/TSV 执行字段类型推断、排序、过滤、稳定实体摘要与分页；单页最多 250 行，renderer 永不接收完整 10 万实体 ID。前端以 200 行权威页、18 行视口窗口完成虚拟滚动，跨页等待时不短暂显示上一页错误实体。
+- 通用 `ScientificInteractionViewer` 覆盖表格行/列、过滤后全选，散点 point/region/legend，以及矩阵行基因/列样本选择。DESeq2、volcano-plot、gene-correlation、GO/KEGG 的交互 mapping 进入 Plugin SDK fail-closed lint；没有稳定 entity mapping 的结果显式只读。
+- SelectionContext 以持久 `selectionId`、显式实体集合 SHA-256 或 query/filter + hash 表达，贯通主画布高亮、Context Bar、Inspector、Agent composer 与 SQLite；只有 `compatible` 选择进入 Agent 上下文，`stale/invalid` 只展示状态，不把旧行号映射到新结果。选择写入串行化，保存或清除失败回滚到最后一个已提交 SQLite 状态。
+- 正式 Agent 工具 `result_selection_run` 从同项目当前 Revision 解析稳定 gene ID，验证源 Artifact/Revision/hash 与插件派生动作，生成独立 `materialize-selection.R`、参数 JSON 和 `gene-list.csv`，再进入唯一 `run_tool → tool_job → artifact truth` 链；路径型 selectionId、显式 hash 漂移和 query 证据漂移均在创建下游工作前阻断。
+- 机器捕获的真实 admitted 链为 valid DESeq2 25 项 Artifact → 3 gene SelectionContext → valid GO/KEGG 36 项 Artifact；选择创建时间早于当前 r-server 进程并从 SQLite 恢复为 compatible。DEG table、volcano scatter、heatmap matrix、130 行 enrichment table 均由真实 API/Artifact/Revision 读取，原始 ID、URL、路径和结果值未进入证据。
+- 自动 renderer 性能证据：10 万行权威表的滚动、选择、排序和过滤反馈均低于 P1 冻结的 100ms 预算；当前精确采样值由 acceptance JSON 保存，不在 canonical 文档复制易漂移数值。明暗主题 × 1440/1024/820 六格矩阵均恢复 3 个勾选、无页面横向溢出；820px 隐藏 Inspector，主题恢复“跟随系统”。
+- 脱敏证据：`acceptance/g0-result-studio/rs-p2-live-observation.json`、`rs-p2-ui-observation.json` 与 `rs-p2-scientific-interaction.json`（17/17）。这些是 P2 live local/product-development evidence；packaged continuous trace、双 Provider 和产品重新资格仍只属于 P7。
+- 日常验收改为自动化优先：`npm run g0:result-studio:p2:update` 生成当前源码哈希、专项、strict build、renderer 性能和证据；`npm run g0:result-studio:p2` 验证证据未过期。Electron/真实 Provider 只在所属阶段出口抽检，不能被省略或由较小测试替代。
 
 ### G0-RS-P3：Agent Context 与 Edit Orchestration
 
@@ -1445,7 +1458,7 @@ G0-RS-P0 Truth Correction
 
 阶段状态规则：
 
-- 同一时间只有一个 `G0-RS-P*` 阶段处于 `in_progress`；`G0-RS-P0`、`G0-RS-P1` 已完成，当前没有进行中实现，下一阶段只允许 `G0-RS-P2`。
+- 同一时间只有一个 `G0-RS-P*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P2` 已完成，当前没有进行中实现，下一阶段只允许 `G0-RS-P3`。
 - 每阶段先补失败测试/fixture，再实现，再形成与证据类型匹配的验收；不得提前开发下一阶段。
 - 单元测试证明契约，fixture 证明确定性集成，真实 Provider 证明模型边界，packaged Electron 证明产品链；四者不能互相替代。
 - 未运行 `npm run docs:reconcile` 与 `npm run docs:check` 不得宣布阶段 completed/verified/qualified。
@@ -1462,4 +1475,13 @@ G0-RS-P0 Truth Correction
 5. [x] 捕获当前真实产品基线，不把截图存在等同于操作通过。
 6. [x] 跑专项、G0、文档、UI 和全量测试；根门禁在最终文档收口后复跑。
 
-`G0-RS-P1` 已按本节证据收口。下一 Goal 只允许实施 `G0-RS-P2`，不得提前进入 P3～P7。
+`G0-RS-P1`、`G0-RS-P2` 已按本节证据收口。下一 Goal 只允许实施 `G0-RS-P3`，不得提前进入 P4～P7。
+
+`G0-RS-P2` 交付结果：
+
+1. [x] 完整表权威查询、字段类型、排序、过滤、虚拟化、行列选择与 filter/query 全选。
+2. [x] point/region/legend 与矩阵 gene/sample 选择；缺 stable mapping 时只读 fail-closed。
+3. [x] 单一 SelectionContext 贯通 Canvas、Inspector、Composer、SQLite 恢复和 compatible/stale/invalid。
+4. [x] 真实 admitted DESeq2 → 选择物化 → GO/KEGG Job/Artifact Truth 下游链。
+5. [x] 10 万行反馈预算、明暗 × 1440/1024/820、服务重启恢复和脱敏机器证据。
+6. [x] UI-102/UI-107、canonical 文档、P2 永久门与根级门禁收口；未实现 P3～P7。

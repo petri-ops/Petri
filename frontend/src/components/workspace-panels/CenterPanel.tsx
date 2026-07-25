@@ -188,6 +188,7 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
             {ctx.activeJob ? (
               <ResultView
                 project={ctx.project}
+                conversationId={ctx.activeConvId}
                 job={ctx.activeJob}
                 workflow={ctx.activeWorkflow}
                 activeArtifact={ctx.activeArtifact}

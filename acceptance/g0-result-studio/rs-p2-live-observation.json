@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS-P2",
+  "evidenceClass": "live_local_product_observation_non_qualifying",
+  "capturedAt": "2026-07-25T14:48:05.434Z",
+  "qualificationEligible": false,
+  "privacy": "digests_counts_timings_and_bounded_statuses_only_no_ids_urls_paths_credentials_prompts_or_result_values",
+  "scopeDigest": "14af6bd91defe96f4ae00516787c310754acd8ef000ffe631c57e7995444ad2e",
+  "responseDigests": {
+    "sourceStatus": "a3d4d3db32805a3906f12d3d9aed58a63426e912f72c03625d380426c8942731",
+    "downstreamStatus": "ba0253ede10a8a54455f376c50ef6485775506202ffcfaffa2c55abaa3c71ae2",
+    "selection": "c208abf49a8dc403190fc23f58e03ba3e8ac7dc99b69cdfa32f2f23306d278c0",
+    "sourceQuery": "cb621f7d2e58f83a1d7f26662cc43a0677fb6e788bbc1e8e89457f9bd06f4cb2",
+    "enrichmentQuery": "fb9188c2030eda90b9aff86a3f2807ac3253730cdfc4ea4806768a3bd4f328ad"
+  },
+  "jobs": {
+    "source": {
+      "tool": "deseq2",
+      "truth": "valid",
+      "artifactCount": 25
+    },
+    "downstream": {
+      "tool": "go-kegg",
+      "truth": "valid",
+      "artifactCount": 36
+    },
+    "formalChain": "run_tool -> tool_job -> artifact_truth"
+  },
+  "selection": {
+    "entityType": "gene",
+    "entityCount": 3,
+    "entityIdsHash": "9a0dacca52e3f4bf731d671c85265ba453e55c1c28c654572ac7f0ea94cf4a04",
+    "compatibility": "compatible",
+    "recoveredAcrossServerRestart": true,
+    "createdBeforeServerStartMs": 1904707
+  },
+  "interactions": {
+    "degTable": {
+      "responseSha256": "19b2901afa31f9f56981e464c2cad091e8465f6c31047d140bb41d51839f7834",
+      "mode": "table",
+      "entityType": "gene",
+      "durable": true,
+      "backingRows": 0,
+      "backingEntityHashPresent": false,
+      "revisionValid": true,
+      "reproducibilityAvailable": true,
+      "sourceScriptHashPresent": true
+    },
+    "volcano": {
+      "responseSha256": "4a224df98d1a33ac271729f439840a5381c76b2ebe2ff6f67035cb8aa04b3578",
+      "mode": "scatter",
+      "entityType": "gene",
+      "durable": true,
+      "backingRows": 10,
+      "backingEntityHashPresent": true,
+      "revisionValid": true,
+      "reproducibilityAvailable": true,
+      "sourceScriptHashPresent": true
+    },
+    "heatmap": {
+      "responseSha256": "bcceeccb38e060e3c7dd171d9f3e4ec6a216968242bb86c90229432337f9e77c",
+      "mode": "matrix",
+      "entityType": "gene",
+      "durable": true,
+      "backingRows": 10,
+      "backingEntityHashPresent": true,
+      "revisionValid": true,
+      "reproducibilityAvailable": true,
+      "sourceScriptHashPresent": true
+    },
+    "enrichmentTable": {
+      "responseSha256": "e108b24cd5b31d4b1b1c47755c78e99c258f29f5e1e6e01e9c9eb2614f2a4f72",
+      "mode": "table",
+      "entityType": "pathway",
+      "durable": true,
+      "backingRows": 0,
+      "backingEntityHashPresent": false,
+      "revisionValid": true,
+      "reproducibilityAvailable": true,
+      "sourceScriptHashPresent": true
+    }
+  },
+  "authoritativeTables": {
+    "sourceRows": 10,
+    "sourceEntityCount": 10,
+    "enrichmentRows": 130,
+    "enrichmentEntityCount": 130
+  },
+  "materialization": {
+    "independentFiles": 3,
+    "entityCount": 3,
+    "parameterSha256": "851c96600a86686529c610ad8c013d9128af0271e162797dfc066a11aba4dc7f",
+    "scriptSha256": "2938c214163195471561a485d01aed488d6b43d0dd82f50040db7222d8950ff0",
+    "outputSha256": "cbee5f314d882825189c5446d54809078e2b3ce77480872ef58cadc8c78656e6"
+  },
+  "checks": {
+    "sourceJobValid": true,
+    "downstreamJobValid": true,
+    "formalChainOrdered": true,
+    "selectionCompatible": true,
+    "restartRecovery": true,
+    "tableMapping": true,
+    "scatterMapping": true,
+    "matrixMapping": true,
+    "enrichmentMapping": true,
+    "authoritativeQueries": true,
+    "independentMaterialization": true
+  },
+  "passed": true
+}

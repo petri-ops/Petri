@@ -633,6 +633,24 @@ const TOOL_DEFS = [
   {
     type: 'function',
     function: {
+      name: 'result_selection_run',
+      description: 'RESULT_SELECTION_ACTION_v1 — 将当前兼容 SelectionContext 解析为稳定科学实体，生成独立物化脚本/参数/基因表，并通过既有 run_tool→tool_job→artifact truth 执行正式 GO/KEGG。选择过期、来源哈希漂移、插件未声明动作或无法权威重建时会阻断。',
+      parameters: {
+        type: 'object',
+        properties: {
+          selectionId: { type: 'string', description: '当前主画布持久化 SelectionContext id' },
+          action: { type: 'string', enum: ['go_kegg'], description: '当前支持的插件声明下游动作' },
+          species: { type: 'string', enum: ['human', 'mouse'] },
+          geneIdType: { type: 'string', enum: ['auto', 'SYMBOL', 'ENSEMBL', 'ENTREZID'] },
+          analysisType: { type: 'string', enum: ['all', 'GO', 'GO-BP', 'GO-MF', 'GO-CC', 'KEGG'] },
+        },
+        required: ['selectionId', 'action'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'verify_state',
       description:
         'VERIFY_STATE_v1 — 确认某个实体的当前状态符合预期。在执行写操作后调用此工具核实，避免在没有真实反馈时声称"已完成"。' +

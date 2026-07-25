@@ -1,0 +1,244 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS-P2",
+  "sourceCommit": "d0d880089efca50d60b44fad9d9dd5923d17341b",
+  "captureMode": "automated_contract_renderer_performance_and_live_local_product_plus_bounded_visual_spot_check",
+  "qualificationEligible": false,
+  "privacy": "repository_relative_paths_digests_counts_dimensions_timings_and_bounded_statuses_only_no_project_job_conversation_selection_url_credential_prompt_or_result_data",
+  "sourceHashes": {
+    "tableQuery": "01c22f09b3c8682a39e7c2e591a72a46318d8a66f5f097fcc6e174e0fd2a8f76",
+    "interaction": "f8bdbb733d4cffc1d051e7d074ac8c61d33e528613b512f1666bf4a9967cb54f",
+    "contracts": "52e4c29e14dd384add9305c48e4399e92986973eb4d04e8c5069b8df3642a3a0",
+    "repository": "a857412dda082cc575d844f66eb43a6c77421937786431fb7417c52d23470050",
+    "pluginSdk": "44e057e3ef5a3cbd736ce3af1fa169706f6c466ddca4c645ac9a9fc06ff0ffaa",
+    "routes": "c8f91a054c42adc9281068351b7439e3671059565db348146bb54b5600db2b4e",
+    "selectionTool": "7bd62361d54847cffc6245933c862e34f44f9d486c1a7b683bdc74e99a75a81d",
+    "toolDefinitions": "d17df41c6ed05a32255eba83916ae8741731920af5f684eee35fddf8b8f3feb1",
+    "toolRegistry": "59efd3f3f12ec66e2edbded0990057299c4b00db7ccaa189464b5e6cf6b11ad9",
+    "viewer": "0b165e23bf9a915e658db9bb3c2240e32a741d2c86f434fb5681dddb6f44dbc2",
+    "viewerStyle": "2f320233486b31fe7744d7d44730c4373edb4f3ff54f91faf84ee83a16bd2fdf",
+    "selectionClient": "414d8a2d6aa468a0e76fec6b7eb27ec80f2ae46f0d312c50695733a7d95b9e8b",
+    "workspace": "fddb8c342f4a6c70f0b0d889398f210a6d67da9c2c1c2c6f7391ee84df8ad2c6",
+    "viewerTest": "7087a4647f97980bbb42e6cd4f22fde702175df72385eca5b7669060b1f1e0e5",
+    "selectionLogic": "2156ef151d014b654d54f533663d2b7f5f086024161b464ecb45bb5b07fbafe2",
+    "selectionLogicTest": "b02e4b21b7fd1452171ad31b6aa5f5c8e5dfede1a2c5fb8d2fb302f9ccb79407",
+    "deseq2Descriptor": "085143916e4ace65656888430c7931639506eed6c31c52a2584d21fd2733f0ee",
+    "volcanoDescriptor": "a749c0126eff3130ba0983fe46975063c30030030001c3876bace12191388d17",
+    "heatmapDescriptor": "e14278ea8aadafc021690265d3685f3326c21492f39e94c519b198eedbec7afa",
+    "enrichmentDescriptor": "ab2c9da63527fae81d553e5d33b5fe0bcc52155448e8df18305e5f845c20b092",
+    "selectionToolTest": "9154ebf32a96bce443a07ddb0be06bccb344a8092bb83f895a5a501d279420f8",
+    "tableQueryTest": "c4c97d306b5297aef630d228637d2d40b4ea40962765bf875729aeda712568c7",
+    "liveCapture": "4af77d83afd4b0e0c3f2bf973800d4695b81a59097ead690c03bae18017fddf0",
+    "acceptanceScript": "8c94a694d87a5c1e7344e2b64d4cf0b6adc8f093267b9096b389655ee5845768",
+    "liveObservation": "b0da52317f9e9eb8fbb759fd5d61f9cf00332d07f9fdb04efe9548fbaa068860",
+    "uiObservation": "a266e6458c260713d79144f6a7fc8870922bb0060d6a99ed5c6cc3c854dc1a5b",
+    "packageScripts": "01d18cba08b38463d345423b6fb3d38097f5defd486b69834cc3c3568ec43bf5"
+  },
+  "productObservation": {
+    "captureMode": "automated_contract_renderer_performance_and_live_local_product_plus_bounded_visual_spot_check",
+    "qualificationEligible": false,
+    "qualificationReason": "P2 closes the bounded scientific-interaction stage; packaged continuous product qualification remains reserved for G0-RS-P7.",
+    "interactionEvidence": {
+      "tableSingleMultiAndRestart": "interactive_real_plugin",
+      "scatterPoint": "interactive_real_plugin",
+      "scatterRegionAndLegend": "automated_real_mapping_contract",
+      "matrixRowAndColumn": "live_real_plugin_backing_contract_plus_automated_ui",
+      "missingMappingReadOnly": "interactive_real_plugin",
+      "largeTable": "controlled_100k_authoritative_query_and_renderer"
+    },
+    "visualEvidence": "acceptance/g0-result-studio/rs-p2-ui-observation.json"
+  },
+  "checks": [
+    {
+      "id": "RS-P2-01",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-studio-table-query.js"
+      ],
+      "detail": "Complete-file filtering, sorting and bounded authoritative selection evidence are implemented."
+    },
+    {
+      "id": "RS-P2-02",
+      "passed": true,
+      "evidence": [
+        "frontend/src/components/result-studio/ScientificInteractionViewer.tsx"
+      ],
+      "detail": "The renderer keeps a bounded viewport for a controlled 100k-row authoritative table."
+    },
+    {
+      "id": "RS-P2-03",
+      "passed": true,
+      "evidence": [
+        "frontend/src/components/result-studio/ScientificInteractionViewer.tsx"
+      ],
+      "detail": "Table row selection, query selection, filtering and sorting share one interaction component."
+    },
+    {
+      "id": "RS-P2-04",
+      "passed": true,
+      "evidence": [
+        "frontend/src/components/result-studio/ScientificInteractionViewer.tsx"
+      ],
+      "detail": "Scatter point, region and legend interactions resolve through stable entity mappings."
+    },
+    {
+      "id": "RS-P2-05",
+      "passed": true,
+      "evidence": [
+        "frontend/src/components/result-studio/ScientificInteractionViewer.tsx"
+      ],
+      "detail": "Matrix row and column selections use declared row/column entity semantics."
+    },
+    {
+      "id": "RS-P2-06",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-studio-plugin-sdk.js",
+        "core/shared-backend/artifact-interaction.js"
+      ],
+      "detail": "Plugin mappings are explicit and missing mappings remain read-only."
+    },
+    {
+      "id": "RS-P2-07",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-studio-contracts.js"
+      ],
+      "detail": "Selection compatibility is classified as compatible, stale or invalid without row remapping."
+    },
+    {
+      "id": "RS-P2-08",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-studio-repository.js"
+      ],
+      "detail": "Restart recovery can reuse only an unscoped selection and never another conversation selection."
+    },
+    {
+      "id": "RS-P2-09",
+      "passed": true,
+      "evidence": [
+        "core/r-server/routes/result-studio.js"
+      ],
+      "detail": "Production APIs expose complete table query and durable current-selection recovery."
+    },
+    {
+      "id": "RS-P2-10",
+      "passed": true,
+      "evidence": [
+        "core/r-server/agent-tools/result-selection-tools.js"
+      ],
+      "detail": "Selection actions materialize independent inputs before entering the formal execution chain."
+    },
+    {
+      "id": "RS-P2-11",
+      "passed": true,
+      "evidence": [
+        "frontend/src/pages/project-workspace.tsx"
+      ],
+      "detail": "Context Bar, Inspector and Agent projection share one compatible selection identity."
+    },
+    {
+      "id": "RS-P2-12",
+      "passed": true,
+      "evidence": [
+        "acceptance/g0-result-studio/rs-p2-live-observation.json"
+      ],
+      "detail": "A machine-captured real plugin selection predates the current server process and restored from SQLite as compatible."
+    },
+    {
+      "id": "RS-P2-13",
+      "passed": true,
+      "evidence": [
+        "acceptance/g0-result-studio/rs-p2-live-observation.json"
+      ],
+      "detail": "A real admitted DESeq2 selection produced independent materialization files and a valid GO/KEGG Job through the formal execution truth."
+    },
+    {
+      "id": "RS-P2-14",
+      "passed": true,
+      "evidence": [
+        "acceptance/g0-result-studio/rs-p2-ui-observation.json"
+      ],
+      "detail": "Automated light/dark and 1440/1024/820px renderer captures preserve the restored selection without page overflow."
+    },
+    {
+      "id": "RS-P2-15",
+      "passed": true,
+      "evidence": [
+        "acceptance/g0-result-studio/rs-p2-scientific-interaction.json"
+      ],
+      "detail": "All declared P2 command gates passed."
+    },
+    {
+      "id": "RS-P2-16",
+      "passed": true,
+      "evidence": [
+        "frontend/src/components/result-studio/ScientificInteractionViewer.test.tsx",
+        "acceptance/g0-result-studio/rs-p2-scientific-interaction.json"
+      ],
+      "detail": "Automated 100k-table renderer scroll, selection, sort and filter feedback each stayed below the frozen 100ms budget."
+    },
+    {
+      "id": "RS-P2-17",
+      "passed": true,
+      "evidence": [
+        "acceptance/g0-result-studio/rs-p2-live-observation.json"
+      ],
+      "detail": "Machine-captured admitted results cover DEG, volcano, heatmap and enrichment interaction contracts."
+    }
+  ],
+  "verification": {
+    "generatedAt": "2026-07-25T15:13:34.085Z",
+    "commands": [
+      {
+        "label": "backend-p2",
+        "command": "node --test test/result-studio-table-query.test.mjs test/result-selection-tools.test.mjs test/artifact-interaction.test.mjs test/result-studio-contracts.test.mjs test/result-studio-repository.test.mjs test/result-studio-plugin-sdk.test.mjs test/agent-tool-registry.test.mjs",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "c11e85721cf829ed364c840dd71831a6d9dc9607e5909a4731d405f30e6f944a",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "frontend-p2",
+        "command": "npm test --prefix frontend -- ScientificInteractionViewer.test.tsx artifact-selection.test.ts CenterPanel.test.tsx ResultStudioSurface.test.tsx",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "df18b4eb2ab11f6ecc1a857d36a2b4a43a81faab3f8be39be4f66cd64933c7f5",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "rendererPerformance": {
+          "budgetMs": 100,
+          "scrollFeedbackMs": 3.003,
+          "selectionFeedbackMs": 4.645,
+          "sortFeedbackMs": 6.048,
+          "filterFeedbackMs": 1.223
+        }
+      },
+      {
+        "label": "frontend-build",
+        "command": "npm run build:check --prefix frontend",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "6faa0977e488abb98bbf9bcc8ca996e1ac4507357dbec8b50a6a6a15d83a944e",
+        "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
+      },
+      {
+        "label": "syntax",
+        "command": "node --check scripts/g0-rs-p2-acceptance.mjs",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "invariants": {
+    "executionTruth": "run_tool -> tool_job -> artifact_truth",
+    "secondSelectionSystem": false,
+    "resultStudioQualificationClaimed": false,
+    "futureStagesImplemented": false
+  },
+  "passed": true,
+  "generatedAt": "2026-07-25T15:13:34.085Z",
+  "privacyClean": true
+}

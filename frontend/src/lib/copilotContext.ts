@@ -98,6 +98,27 @@ export interface CopilotContext {
     type: string;
     label?: string;
     url?: string;
+    revisionId?: string | null;
+    artifactFamilyId?: string | null;
+    entityType?: string | null;
+    idField?: string | null;
+    selectionId?: string | null;
+    selectionCompatibility?: 'compatible' | 'stale' | 'invalid' | null;
+    selection?: {
+      artifactId: string;
+      revisionId: string | null;
+      entityType: string;
+      origin: string;
+      entityIdCount: number;
+      truncated: boolean;
+      durable: boolean;
+      sampleEntityIds: string[];
+      entityIdsHash: string | null;
+      fields: string[];
+      hasFilter: boolean;
+      filterDescription: string | null;
+      sort: Array<{ field: string; direction: 'asc' | 'desc' }>;
+    } | null;
   } | null;
 }
 

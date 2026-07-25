@@ -25,6 +25,7 @@ export interface ResultInspectorArtifact {
   idField?: string | null;
   selectionDurable?: boolean;
   selection?: ArtifactSelection | null;
+  selectionId?: string | null;
 }
 
 export function ResultStudioCanvas({
@@ -159,6 +160,7 @@ export function ResultStudioInspector({
           <dt>Revision</dt><dd>{artifact.revisionId || '未建立'}</dd>
           <dt>实体</dt><dd>{artifact.entityType || '未声明'}</dd>
           <dt>ID 字段</dt><dd>{artifact.idField || '未声明'}</dd>
+          <dt>Selection</dt><dd>{artifact.selectionId || '未选择'}</dd>
         </dl>
       </details>
     </div>

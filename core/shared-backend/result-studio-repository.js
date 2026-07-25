@@ -112,6 +112,7 @@ function rowToRevision(row) {
 
 function rowToSelection(row) {
   if (!row) return null;
+  const displayState = fromJson(row.display_state_json, null);
   return {
     contractVersion: row.contract_version,
     selectionId: row.selection_id,
@@ -124,10 +125,11 @@ function rowToSelection(row) {
     entityIdCount: row.entity_id_count,
     entityIdsTruncated: row.entity_ids_truncated === 1,
     entityIdsHash: row.entity_ids_hash || null,
+    filterHash: displayState?.filterHash || null,
     filterExpression: fromJson(row.filter_expression_json, null),
     sort: fromJson(row.sort_json, []),
     viewport: fromJson(row.viewport_json, null),
-    displayState: fromJson(row.display_state_json, null),
+    displayState,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -575,6 +577,10 @@ function createResultStudioRepository(db, options = {}) {
         throw new ResultStudioRepositoryError('selection_invalid', 'SelectionContext failed validation.', validated.errors);
       }
       const sel = validated.selection;
+      const displayState = {
+        ...(sel.displayState || {}),
+        filterHash: sel.filterHash || null,
+      };
       const existing = db.prepare('SELECT selection_id FROM result_selection_contexts WHERE selection_id = ?')
         .get(sel.selectionId);
       if (existing) {
@@ -587,7 +593,7 @@ function createResultStudioRepository(db, options = {}) {
           .run(
             sel.artifactId, sel.revisionId, sel.entityType, toJson(sel.entityIds),
             sel.entityIdCount, sel.entityIdsTruncated ? 1 : 0, sel.entityIdsHash,
-            toJson(sel.filterExpression), toJson(sel.sort), toJson(sel.viewport), toJson(sel.displayState),
+            toJson(sel.filterExpression), toJson(sel.sort), toJson(sel.viewport), toJson(displayState),
             nowIso(), sel.selectionId
           );
       } else {
@@ -600,7 +606,7 @@ function createResultStudioRepository(db, options = {}) {
             sel.selectionId, sel.contractVersion, sel.projectId, sel.conversationId, sel.artifactId,
             sel.revisionId, sel.entityType, toJson(sel.entityIds), sel.entityIdCount,
             sel.entityIdsTruncated ? 1 : 0, sel.entityIdsHash, toJson(sel.filterExpression),
-            toJson(sel.sort), toJson(sel.viewport), toJson(sel.displayState), sel.createdAt, sel.updatedAt
+            toJson(sel.sort), toJson(sel.viewport), toJson(displayState), sel.createdAt, sel.updatedAt
           );
       }
       return api.getSelection(sel.selectionId);
@@ -610,6 +616,27 @@ function createResultStudioRepository(db, options = {}) {
       return rowToSelection(
         db.prepare('SELECT * FROM result_selection_contexts WHERE selection_id = ?').get(selectionId)
       );
+    },
+
+    findLatestSelection({ projectId, conversationId = null, artifactId }) {
+      if (!projectId || !artifactId) return null;
+      let row = conversationId
+        ? db.prepare(`SELECT * FROM result_selection_contexts
+            WHERE project_id = ? AND conversation_id = ? AND artifact_id = ?
+            ORDER BY updated_at DESC, rowid DESC LIMIT 1`).get(projectId, conversationId, artifactId)
+        : db.prepare(`SELECT * FROM result_selection_contexts
+            WHERE project_id = ? AND conversation_id IS NULL AND artifact_id = ?
+            ORDER BY updated_at DESC, rowid DESC LIMIT 1`).get(projectId, artifactId);
+      // A result can be selected before the first chat message creates a
+      // conversation. Once that conversation exists, preserve the explicitly
+      // project-scoped selection instead of making it appear to vanish. Never
+      // fall back to a selection owned by another conversation.
+      if (!row && conversationId) {
+        row = db.prepare(`SELECT * FROM result_selection_contexts
+            WHERE project_id = ? AND conversation_id IS NULL AND artifact_id = ?
+            ORDER BY updated_at DESC, rowid DESC LIMIT 1`).get(projectId, artifactId);
+      }
+      return rowToSelection(row);
     },
 
     deleteSelection(selectionId) {

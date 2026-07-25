@@ -101,6 +101,8 @@ describe('artifact-selection · 大规模选择', () => {
       sort: [{ field: 'padj', direction: 'asc' }],
       matchedEntityIds: ['ENSG001', 'ENSG002'],
       matchedCount: 100000,
+      entityIdsHash: 'a'.repeat(64),
+      filterHash: 'b'.repeat(64),
     });
     expect(selection.entityIdCount).toBe(100000);
     expect(selection.entityIdsTruncated).toBe(true);
@@ -186,6 +188,8 @@ describe('artifact-selection · 摘要与持久化', () => {
       filterExpression: { logic: 'and', clauses: [{ field: 'padj', op: 'lt', value: 0.05 }] },
       matchedEntityIds: ['ENSG001'],
       matchedCount: 27,
+      entityIdsHash: 'a'.repeat(64),
+      filterHash: 'b'.repeat(64),
     });
     expect(formatSelectionChip(selection)).toBe('已选择 27 个 gene · padj<0.05');
   });

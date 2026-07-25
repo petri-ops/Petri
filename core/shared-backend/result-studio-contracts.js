@@ -419,10 +419,38 @@ function validateSelectionContext(input) {
   if (!isNonEmptyString(entityType)) fail(errors, 'entity_type_required', 'entityType is required.');
 
   const allEntityIds = stringArray(input.entityIds);
-  const truncated = allEntityIds.length > MAX_PERSISTED_ENTITY_IDS;
+  const suppliedCount = Number(input.entityIdCount);
+  const authoritativeCount = Number.isInteger(suppliedCount) && suppliedCount >= allEntityIds.length
+    ? suppliedCount
+    : allEntityIds.length;
+  const suppliedHash = nullableTrimmed(input.entityIdsHash);
+  const filterHash = nullableTrimmed(input.filterHash);
+  const explicitIdsHash = allEntityIds.length > 0
+    ? sha256Hex(stableStringify([...allEntityIds].sort()))
+    : null;
+  const queryBacked = authoritativeCount > allEntityIds.length;
+
+  if (suppliedHash && !SHA256_PATTERN.test(suppliedHash)) {
+    fail(errors, 'entity_ids_hash_invalid', 'entityIdsHash must be a lowercase sha256 digest.');
+  }
+  if (filterHash && !SHA256_PATTERN.test(filterHash)) {
+    fail(errors, 'filter_hash_invalid', 'filterHash must be a lowercase sha256 digest.');
+  }
+  if (queryBacked && !input.filterExpression) {
+    fail(errors, 'query_selection_requires_filter', 'A query-backed selection requires filterExpression.');
+  }
+  if (queryBacked && (!suppliedHash || !filterHash)) {
+    fail(errors, 'query_selection_requires_evidence', 'A query-backed selection requires entityIdsHash and filterHash.');
+  }
+  if (!queryBacked && suppliedHash && explicitIdsHash && suppliedHash !== explicitIdsHash) {
+    fail(errors, 'entity_ids_hash_mismatch', 'entityIdsHash does not match the explicit entity ID set.');
+  }
+
+  const truncated = authoritativeCount > MAX_PERSISTED_ENTITY_IDS || queryBacked;
   const persistedEntityIds = truncated ? allEntityIds.slice(0, MAX_PERSISTED_ENTITY_IDS) : allEntityIds;
-  // hash 覆盖全部 ID（不只是持久化的那部分），因此截断不影响变更检测。
-  const entityIdsHash = allEntityIds.length > 0 ? sha256Hex(stableStringify(allEntityIds)) : null;
+  // Query 选择的全量 hash 由权威表查询器计算；显式小选择则在这里重算，
+  // 永不信任浏览器为显式 ID 集合自报的摘要。
+  const entityIdsHash = queryBacked ? suppliedHash : explicitIdsHash;
 
   if (truncated && !input.filterExpression) {
     // 没有 filter 就无法在截断后重建完整选择 → 选择将不可复现。
@@ -439,9 +467,10 @@ function validateSelectionContext(input) {
     revisionId: nullableTrimmed(input.revisionId),
     entityType,
     entityIds: persistedEntityIds,
-    entityIdCount: allEntityIds.length,
+    entityIdCount: authoritativeCount,
     entityIdsTruncated: truncated,
     entityIdsHash,
+    filterHash,
     filterExpression: input.filterExpression && typeof input.filterExpression === 'object' ? input.filterExpression : null,
     sort: Array.isArray(input.sort)
       ? input.sort
@@ -458,6 +487,56 @@ function validateSelectionContext(input) {
 }
 
 /**
+ * 判断一个持久 SelectionContext 是否仍能用于当前 Artifact/Revision。
+ *
+ * - compatible：同一 Revision，或跨 Revision 但权威 filter/entity hash 完全一致；
+ * - stale：Artifact 相同但 Revision/内容证据发生变化，可展示、不可自动交给 Agent；
+ * - invalid：跨项目/跨 Artifact、缺稳定身份或选择本身不可持久。
+ */
+function assessSelectionCompatibility({
+  selection,
+  projectId,
+  artifactId,
+  revisionId = null,
+  entityIdsHash = null,
+  filterHash = null,
+  selectionDurable = true,
+} = {}) {
+  if (!selection || typeof selection !== 'object') {
+    return { status: 'invalid', reason: 'selection_missing' };
+  }
+  if (selection.projectId !== projectId) {
+    return { status: 'invalid', reason: 'project_mismatch' };
+  }
+  if (selection.artifactId !== artifactId) {
+    return { status: 'invalid', reason: 'artifact_mismatch' };
+  }
+  if (!selectionDurable || selection.displayState?.durable === false) {
+    return { status: 'invalid', reason: 'selection_not_durable' };
+  }
+  const hasIdentity = selection.entityIdCount > 0
+    ? SHA256_PATTERN.test(selection.entityIdsHash || '')
+    : Array.isArray(selection.displayState?.fields) && selection.displayState.fields.length > 0;
+  if (!hasIdentity) return { status: 'invalid', reason: 'selection_identity_missing' };
+
+  const sameRevision = (selection.revisionId || null) === (revisionId || null);
+  const entityMatches = !entityIdsHash || selection.entityIdsHash === entityIdsHash;
+  const filterMatches = !selection.filterHash || !filterHash || selection.filterHash === filterHash;
+  if (sameRevision && entityMatches && filterMatches) {
+    return { status: 'compatible', reason: 'same_revision' };
+  }
+  if (!sameRevision
+      && entityIdsHash && selection.entityIdsHash === entityIdsHash
+      && (!selection.filterHash || (filterHash && selection.filterHash === filterHash))) {
+    return { status: 'compatible', reason: 'equivalent_entity_evidence' };
+  }
+  return {
+    status: 'stale',
+    reason: sameRevision ? 'selection_evidence_changed' : 'revision_changed',
+  };
+}
+
+/**
  * 供 Agent 上下文使用的紧凑摘要。永不返回完整 ID 列表。
  */
 function summarizeSelection(selection, { maxSampleIds = 12 } = {}) {
@@ -471,6 +550,7 @@ function summarizeSelection(selection, { maxSampleIds = 12 } = {}) {
     truncated: selection.entityIdsTruncated === true,
     sampleEntityIds: (selection.entityIds || []).slice(0, maxSampleIds),
     entityIdsHash: selection.entityIdsHash || null,
+    filterHash: selection.filterHash || null,
     hasFilter: !!selection.filterExpression,
     sort: selection.sort || [],
   };
@@ -594,6 +674,7 @@ module.exports = {
   canTransitionChangeSet,
   validateArtifactRevision,
   validateSelectionContext,
+  assessSelectionCompatibility,
   summarizeSelection,
   computeCheckpointHash,
   validateWorkspaceCheckpoint,

@@ -67,6 +67,10 @@
       { "id": "heatmap", "type": "plot", "filename": "heatmap.png" },
       { "id": "corr_matrix", "type": "table", "filename": "corr_matrix.csv" }
     ],
+    "interactionMappings": [
+      { "artifactId": "corr_matrix", "mode": "matrix", "dataArtifactId": "corr_matrix", "entityType": "gene", "rowIdField": "row_id", "rowEntityType": "gene", "columnEntityType": "gene" },
+      { "artifactId": "heatmap", "mode": "matrix", "dataArtifactId": "corr_matrix", "entityType": "gene", "rowIdField": "row_id", "rowEntityType": "gene", "columnEntityType": "gene" }
+    ],
     "validator": { "id": "gene_correlation_result_truth_v1", "checks": ["artifact_truth_valid", "script_sha256", "input_sha256", "output_sha256", "symmetric_matrix"] },
     "goldenFixture": { "path": "golden-revisions/result-studio-v1.json" },
     "upgradePolicy": { "sameMajor": "compatible_if_contract_digests_match", "contractDrift": "migration_required", "missingMigration": "read_only_legacy" }

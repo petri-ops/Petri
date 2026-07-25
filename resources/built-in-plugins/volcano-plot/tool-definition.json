@@ -91,6 +91,10 @@
       { "id": "volcano", "type": "plot", "filename": "volcano.png" },
       { "id": "classified_table", "type": "table", "filename": "classified_table.csv" }
     ],
+    "interactionMappings": [
+      { "artifactId": "classified_table", "mode": "table", "entityType": "gene", "idField": "gene" },
+      { "artifactId": "volcano", "mode": "scatter", "dataArtifactId": "classified_table", "entityType": "gene", "idField": "gene", "xField": "log2FoldChange", "yField": "pvalue", "yTransform": "neg_log10", "legendField": "sig" }
+    ],
     "validator": { "id": "volcano_result_truth_v1", "checks": ["artifact_truth_valid", "script_sha256", "input_sha256", "output_sha256", "finite_statistics"] },
     "goldenFixture": { "path": "golden-revisions/result-studio-v1.json" },
     "upgradePolicy": { "sameMajor": "compatible_if_contract_digests_match", "contractDrift": "migration_required", "missingMigration": "read_only_legacy" }

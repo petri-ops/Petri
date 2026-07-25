@@ -62,6 +62,7 @@ export interface SelectionProjectionInput {
   entityIdCount?: number;
   fields?: string[];
   durable?: boolean;
+  compatibility?: 'compatible' | 'stale' | 'invalid';
 }
 
 export function resolveResultViewerAdapter(input: {
@@ -132,7 +133,11 @@ export function describeSelection(selection: SelectionProjectionInput | null | u
   const count = Math.max(0, Number(selection.entityIdCount || 0));
   const fieldCount = Array.isArray(selection.fields) ? selection.fields.length : 0;
   if (count === 0 && fieldCount === 0) return '未选择对象';
-  const scope = selection.durable ? '可恢复' : '当前会话';
+  const scope = selection.compatibility === 'stale'
+    ? '已过期'
+    : selection.compatibility === 'invalid'
+      ? '不可用'
+      : selection.durable ? '可恢复' : '当前会话';
   if (count > 0) return `已选择 ${count} 个对象 · ${scope}`;
   return `已选择 ${fieldCount} 列 · ${scope}`;
 }

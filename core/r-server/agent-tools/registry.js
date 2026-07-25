@@ -28,6 +28,7 @@ const {
   tool_artifact_revision_list,
   tool_artifact_revision_restore,
 } = require('./result-edit-tools');
+const { tool_result_selection_run } = require('./result-selection-tools');
 const {
   tool_workspace_list,
   tool_workspace_find,
@@ -85,6 +86,7 @@ const HANDLERS = {
   result_changeset_revert: tool_result_changeset_revert,
   artifact_revision_list: tool_artifact_revision_list,
   artifact_revision_restore: tool_artifact_revision_restore,
+  result_selection_run: tool_result_selection_run,
 };
 
 function contract(category, sideEffect, riskTier, resources, estimatedDurationMs) {
@@ -126,6 +128,7 @@ const CONTRACTS = {
   result_changeset_revert: contract('result-studio', 'state-write', 'R2', ['artifacts', 'project.database', 'project.files'], 1000),
   artifact_revision_list: contract('result-studio', 'none', 'R0', ['artifacts', 'project.database'], 500),
   artifact_revision_restore: contract('result-studio', 'state-write', 'R2', ['artifacts', 'project.database', 'project.files'], 1500),
+  result_selection_run: contract('result-studio', 'execution', 'R2', ['tool_jobs', 'artifacts', 'project.database', 'project.files', 'local.process'], 300000),
 };
 
 function cloneJson(value) {

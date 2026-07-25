@@ -107,6 +107,12 @@
       { "id": "go_bp_dotplot", "type": "plot", "filename": "go_bp_dotplot.png" },
       { "id": "kegg_dotplot", "type": "plot", "filename": "kegg_dotplot.png" }
     ],
+    "interactionMappings": [
+      { "artifactId": "go_bp_results", "mode": "table", "entityType": "pathway", "idField": "ID" },
+      { "artifactId": "kegg_results", "mode": "table", "entityType": "pathway", "idField": "ID" },
+      { "artifactId": "go_bp_dotplot", "mode": "scatter", "dataArtifactId": "go_bp_results", "entityType": "pathway", "idField": "ID", "xField": "GeneRatio", "yField": "p.adjust", "yTransform": "neg_log10" },
+      { "artifactId": "kegg_dotplot", "mode": "scatter", "dataArtifactId": "kegg_results", "entityType": "pathway", "idField": "ID", "xField": "GeneRatio", "yField": "p.adjust", "yTransform": "neg_log10" }
+    ],
     "validator": { "id": "functional_enrichment_result_truth_v1", "checks": ["artifact_truth_valid", "script_sha256", "input_sha256", "output_sha256", "stable_term_id", "empty_result_is_valid"] },
     "goldenFixture": { "path": "golden-revisions/result-studio-v1.json" },
     "upgradePolicy": { "sameMajor": "compatible_if_contract_digests_match", "contractDrift": "migration_required", "missingMigration": "read_only_legacy" }

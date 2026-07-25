@@ -10,7 +10,7 @@
 
 LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口。RS9 曾新增第 17 类 `result_studio_product`，但后续复核发现其五条任务由独立测试拼装、Provider 未执行真实工具闭环、视觉验收依赖人工布尔值、大表由 seed 直接构造；该证据现降级为 unit/synthetic/renderer historical evidence。`result-studio-editing` 在 RS-P7 前暂停 qualified support claim，不能影响或冒充 LF12 原始核心资格。
 
-Result Studio（[`g0-result-studio-plan.md`](./g0-result-studio-plan.md)）是当前唯一 active 工作包。已有 Git Adapter、Revision/ChangeSet、Job/Artifact binding、比较/采用/撤销、checkpoint、恢复和 Plugin SDK 基础继续复用；真实缺口集中在中央结果主画布、表格/图形选择、Agent 完整上下文、Schema 驱动手动编辑、科学差异、真实插件连续任务和 packaged Electron 重新资格。
+Result Studio（[`g0-result-studio-plan.md`](./g0-result-studio-plan.md)）是当前唯一 active 工作包。已有 Git Adapter、Revision/ChangeSet、Job/Artifact binding、比较/采用/撤销、checkpoint、恢复、Plugin SDK、中央结果主画布和科学选择交互继续复用；剩余缺口集中在 Agent 完整 ContextEnvelope 与 context-bound 编排、Schema 驱动手动/AI 统一编辑、真实科学差异、故障恢复矩阵和 packaged Electron 重新资格。
 
 Result Studio 旧实现的 11 个提交已位于 `main`（检查点 `03e5826`）；`SDC-0 Profile Registry 与版本治理` 也已在分支 `codex/g0-sdc` 的 `7284921` 收口并推送，六个 canonical Profile 与 fail-closed typed DAG 边继续保留。按单工作包串行，`SDC-1`～`SDC-7` deferred，当前不创建 Worktree。
 
@@ -28,7 +28,7 @@ G0-RS-P0 资格与证据纠偏
   → 重新评估 SDC-1
 ```
 
-`G0-RS-P0` 已完成资格纠偏；`G0-RS-P1 Result Surface` 已于 2026-07-25 收口：同一 ProjectWorkspace 现具备中央结果主画布、紧凑检查器、六类 viewer、三档响应式布局和无损返回 Agent 会话，证据为 `acceptance/g0-result-studio/rs-p1-result-surface.json`。该开发态 renderer 证据不升级产品资格。下一阶段只允许启动 `G0-RS-P2 Scientific Interaction + SelectionContext`，不得提前实现 P3～P7。
+`G0-RS-P0`～`G0-RS-P2` 已依次收口。P2 在同一 ProjectWorkspace/SelectionContext 真相上交付完整表排序过滤、18 行视口虚拟化、行列与 query 全选、scatter point/region/legend、matrix gene/sample 选择及缺 mapping 只读；兼容选择贯通 Canvas、Inspector、Agent composer 和 SQLite，保存/清除失败会回滚已提交状态。真实 admitted DESeq2 25 Artifact → 3 gene SelectionContext → GO/KEGG 36 Artifact 链及服务重启恢复已机器捕获，10 万行四类 renderer 反馈均低于 100ms；明暗 × 1440/1024/820 六格无溢出。证据为 `acceptance/g0-result-studio/rs-p2-{live-observation,ui-observation,scientific-interaction}.json`，仍属 non-qualifying P2 evidence。下一阶段只允许启动 `G0-RS-P3 Agent Context 与 Edit Orchestration`，不得提前实现 P4～P7。
 
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 已完成的 Scientific Task Contract 工作包记录见 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md)。

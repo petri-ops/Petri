@@ -32,6 +32,7 @@ const INTERACTION_CAPABILITIES = Object.freeze([
   'sort',
   'point_select',
   'region_select',
+  'legend_select',
 ]);
 
 /**
@@ -243,8 +244,10 @@ function buildPlotInteractionManifest(input = {}) {
   const hasEntityMapping = !!idField;
   const axes = input.axes && typeof input.axes === 'object' ? input.axes : {};
 
-  const capabilities = ['region_select'];
-  if (hasEntityMapping) capabilities.unshift('point_select');
+  // 没有稳定实体映射时保持只读。仅保存坐标区域会在缩放、重绘或换版本后
+  // 指向另一批实体，因此不能把它包装成“可选择”。
+  const capabilities = hasEntityMapping ? ['point_select', 'region_select'] : [];
+  if (hasEntityMapping && trimmed(input.legendField)) capabilities.push('legend_select');
 
   return {
     interactionVersion: ARTIFACT_INTERACTION_VERSION,
@@ -261,10 +264,11 @@ function buildPlotInteractionManifest(input = {}) {
       x: trimmed(axes.x) || null,
       y: trimmed(axes.y) || null,
     },
+    legendField: trimmed(input.legendField) || null,
     capabilities,
     diagnostics: hasEntityMapping ? [] : [{
       code: 'plot_without_entity_mapping',
-      message: 'Plot has no entity id mapping; only coordinate regions can be expressed and they are not durable.',
+      message: 'Plot has no stable entity mapping and is read-only.',
     }],
   };
 }

@@ -63,6 +63,7 @@ import {
 } from '@/lib/result-manifest';
 import {
   isSameSelection,
+  summarizeSelectionForAgent,
   type ArtifactInteractionManifest,
   type ArtifactSelection,
   type InteractionCapability,
@@ -70,6 +71,14 @@ import {
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
 import { ResultStudioChangeSetPanel } from '@/components/result-studio/ResultStudioChangeSetPanel';
+import { ScientificInteractionViewer } from '@/components/result-studio/ScientificInteractionViewer';
+import {
+  deleteResultStudioSelection,
+  fetchArtifactInteraction,
+  restoreResultStudioSelection,
+  saveResultStudioSelection,
+  type ResultTableQuery,
+} from '@/lib/result-studio-interaction-client';
 import {
   beginResultSurfaceMeasure,
   chooseResultArtifactName,
@@ -131,6 +140,7 @@ interface ActiveArtifact {
   selectionDurable?: boolean;
   interactionCapabilities?: InteractionCapability[];
   selection?: ArtifactSelection | null;
+  selectionId?: string | null;
   truthStatus?: 'valid' | 'degraded' | 'blocked' | null;
   conclusion?: string | null;
 }
@@ -951,7 +961,25 @@ export function ProjectWorkspace(): React.ReactElement {
           projectHarnessSummary: toCopilotHarnessSummary(copilotHarnessIndex),
           activeJobHarnessSummary: toCopilotHarnessSummary(activeJobHarnessIndex),
           activeJobId: activeJobId ?? undefined,
-          activeArtifact,
+          activeArtifact: activeArtifact ? {
+            jobId: activeArtifact.jobId,
+            toolId: activeArtifact.toolId,
+            name: activeArtifact.name,
+            type: activeArtifact.type,
+            label: activeArtifact.label,
+            url: activeArtifact.url,
+            revisionId: activeArtifact.revisionId,
+            artifactFamilyId: activeArtifact.artifactFamilyId,
+            entityType: activeArtifact.entityType,
+            idField: activeArtifact.idField,
+            selectionId: activeArtifact.selection?.compatibility === 'compatible'
+              ? activeArtifact.selectionId
+              : null,
+            selection: activeArtifact.selection?.compatibility === 'compatible'
+              ? summarizeSelectionForAgent(activeArtifact.selection)
+              : null,
+            selectionCompatibility: activeArtifact.selection?.compatibility || null,
+          } : null,
         }
       : {}
   );
@@ -3075,6 +3103,7 @@ function buildPreviewTable(text: string, fileName: string): string[][] {
 
 function ResultArtifactShell({
   project,
+  conversationId,
   job,
   workflow,
   activeArtifact,
@@ -3088,6 +3117,7 @@ function ResultArtifactShell({
   onOpenBrowser,
 }: {
   project: Project;
+  conversationId?: string | null;
   job: ToolJob | null;
   workflow: HarnessWorkflowJobState | null;
   activeArtifact: ActiveArtifact | null;
@@ -3122,7 +3152,16 @@ function ResultArtifactShell({
   const [previewLoading, setPreviewLoading] = useState(false);
   // RS3：交互清单由后端基于完整文件判定（稳定 ID 列、可选维度），前端只消费。
   const [interactionManifest, setInteractionManifest] = useState<ArtifactInteractionManifest | null>(null);
+  const [interactionBackingTable, setInteractionBackingTable] = useState<ResultTableQuery | null>(null);
   const [artifactSelection, setArtifactSelection] = useState<ArtifactSelection | null>(null);
+  const [selectionError, setSelectionError] = useState('');
+  // SelectionContext 是 SQLite 真相的乐观投影。连续点击必须按发生顺序写入，
+  // 且保存/删除失败时回到最后一次真正提交的选择，不能把未落库状态交给 Agent。
+  const selectionMutationEpochRef = useRef(0);
+  const selectionMutationVersionRef = useRef(0);
+  const selectionMutationQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const visibleSelectionRef = useRef<ArtifactSelection | null>(null);
+  const committedSelectionRef = useRef<ArtifactSelection | null>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [harnessIndex, setHarnessIndex] = useState<HarnessIndexSummary | null>(null);
   const [harnessLoading, setHarnessLoading] = useState(false);
@@ -3457,30 +3496,117 @@ function ResultArtifactShell({
   // 解析出的前 40 行样本，用它判定"哪一列是稳定实体 ID"会在 10 万行表上出错。
   // artifact 一变就重取，并清空上一份选择——旧选择属于旧 artifact，不能顺延。
   useEffect(() => {
+    const epoch = selectionMutationEpochRef.current + 1;
+    selectionMutationEpochRef.current = epoch;
     setInteractionManifest(null);
+    setInteractionBackingTable(null);
     setArtifactSelection(null);
+    visibleSelectionRef.current = null;
+    committedSelectionRef.current = null;
+    setSelectionError('');
     if (!job || effectiveJobStatus !== 'done' || !selectedArtifactName) return;
     if (selectedArtifactKind !== 'table' && selectedArtifactKind !== 'plot') return;
     let cancelled = false;
     (async () => {
       try {
-        const token = getToken();
-        const query = `?jobId=${encodeURIComponent(job.id)}&artifact=${encodeURIComponent(selectedArtifactName)}`;
-        const resp = await fetch(`${getApiPrefix(lang)}/result-studio/interaction${query}`, {
-          headers: token ? { Authorization: 'Bearer ' + token } : {},
+        const data = await fetchArtifactInteraction({
+          language: lang,
+          jobId: job.id,
+          artifact: selectedArtifactName,
         });
-        if (!resp.ok) return;
-        const data = await resp.json();
         if (cancelled) return;
-        if (data && data.manifest) setInteractionManifest(data.manifest as ArtifactInteractionManifest);
+        if (data?.manifest) {
+          setInteractionManifest(data.manifest);
+          setInteractionBackingTable(data.backingTable || null);
+          const restored = await restoreResultStudioSelection({
+            language: lang,
+            projectId: project.id,
+            conversationId,
+            artifactId: data.manifest.artifactId,
+            revisionId: data.manifest.revisionId,
+            selectionDurable: data.manifest.selectionDurable,
+          });
+          if (!cancelled && selectionMutationEpochRef.current === epoch) {
+            visibleSelectionRef.current = restored;
+            committedSelectionRef.current = restored;
+            setArtifactSelection(restored);
+          }
+        }
       } catch {
         // 清单拿不到不应连带影响结果展示：保持 null，交互能力按"不支持"处理。
       }
     })();
     return () => {
       cancelled = true;
+      if (selectionMutationEpochRef.current === epoch) selectionMutationEpochRef.current += 1;
     };
-  }, [effectiveJobStatus, job?.id, lang, selectedArtifactKind, selectedArtifactName]);
+  }, [conversationId, effectiveJobStatus, job?.id, lang, project.id, selectedArtifactKind, selectedArtifactName]);
+
+  const handleSelectionChange = useCallback((next: ArtifactSelection | null) => {
+    const epoch = selectionMutationEpochRef.current;
+    const version = selectionMutationVersionRef.current + 1;
+    selectionMutationVersionRef.current = version;
+    const previousVisible = visibleSelectionRef.current;
+    setSelectionError('');
+    if (!next) {
+      visibleSelectionRef.current = null;
+      setArtifactSelection(null);
+      if (!previousVisible?.selectionId) return;
+      selectionMutationQueueRef.current = selectionMutationQueueRef.current
+        .catch(() => undefined)
+        .then(async () => {
+          try {
+            await deleteResultStudioSelection({ language: lang, selectionId: previousVisible.selectionId! });
+            if (selectionMutationEpochRef.current !== epoch) return;
+            committedSelectionRef.current = null;
+          } catch (error) {
+            if (selectionMutationEpochRef.current !== epoch
+                || selectionMutationVersionRef.current !== version) return;
+            const rollback = committedSelectionRef.current;
+            visibleSelectionRef.current = rollback;
+            setArtifactSelection(rollback);
+            setSelectionError(error instanceof Error ? error.message : '清除选择失败');
+          }
+        });
+      return;
+    }
+    const randomId = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const selectionId = previousVisible?.selectionId
+      || committedSelectionRef.current?.selectionId
+      || `sel_${randomId}`;
+    const optimistic = { ...next, selectionId, compatibility: 'compatible' as const };
+    visibleSelectionRef.current = optimistic;
+    setArtifactSelection(optimistic);
+    selectionMutationQueueRef.current = selectionMutationQueueRef.current
+      .catch(() => undefined)
+      .then(async () => {
+        try {
+          const saved = await saveResultStudioSelection({
+            language: lang,
+            selection: optimistic,
+            selectionId,
+            projectId: project.id,
+            conversationId,
+          });
+          if (selectionMutationEpochRef.current !== epoch) return;
+          const committed = { ...saved, compatibility: 'compatible' as const };
+          committedSelectionRef.current = committed;
+          if (selectionMutationVersionRef.current === version) {
+            visibleSelectionRef.current = committed;
+            setArtifactSelection(committed);
+          }
+        } catch (error) {
+          if (selectionMutationEpochRef.current !== epoch
+              || selectionMutationVersionRef.current !== version) return;
+          const rollback = committedSelectionRef.current;
+          visibleSelectionRef.current = rollback;
+          setArtifactSelection(rollback);
+          setSelectionError(error instanceof Error ? error.message : '保存选择失败');
+        }
+      });
+  }, [conversationId, lang, project.id]);
 
   useEffect(() => {
     if (!job || effectiveJobStatus !== 'done' || !selectedArtifact) {
@@ -3504,6 +3630,7 @@ function ResultArtifactShell({
       selectionDurable: interactionManifest?.selectionDurable ?? false,
       interactionCapabilities: interactionManifest?.capabilities ?? [],
       selection: artifactSelection,
+      selectionId: artifactSelection?.selectionId || null,
       truthStatus: result?.deliveryManifest?.status ?? null,
       conclusion: result?.deliveryManifest?.summary?.conclusion ?? null,
     };
@@ -3587,6 +3714,19 @@ function ResultArtifactShell({
   const renderPreview = () => {
     if (!selectedArtifact) {
       return <div className={styles.resultPreviewPlaceholder}>未发现可预览的结果文件</div>;
+    }
+    if (interactionManifest?.interactionMode && interactionManifest.interactionMode !== 'read_only') {
+      return (
+        <ScientificInteractionViewer
+          language={lang}
+          jobId={job!.id}
+          artifactName={selectedArtifactName}
+          manifest={interactionManifest}
+          backingTable={interactionBackingTable}
+          selection={artifactSelection}
+          onSelectionChange={(next) => void handleSelectionChange(next)}
+        />
+      );
     }
     if (viewerAdapter === 'report' && selectedArtifactUrl) {
       return (
@@ -3954,6 +4094,7 @@ function ResultArtifactShell({
         </div>
       </section>
       <section className={isSidebar ? styles.resultSidebarReportCard : styles.resultReportSection}>
+        {selectionError && <div className={styles.resultWorkflowError}>{selectionError}</div>}
         {showReportRail ? (
           <div
             className={styles.resultReportShell}
@@ -4127,6 +4268,7 @@ function ResultArtifactShell({
 
 export function ResultView({
   project,
+  conversationId,
   job,
   workflow = null,
   activeArtifact,
@@ -4138,6 +4280,7 @@ export function ResultView({
   onOpenBrowser,
 }: {
   project: Project;
+  conversationId?: string | null;
   job: ToolJob;
   workflow?: HarnessWorkflowJobState | null;
   activeArtifact: ActiveArtifact | null;
@@ -4151,6 +4294,7 @@ export function ResultView({
   return (
     <ResultArtifactShell
       project={project}
+      conversationId={conversationId}
       job={job}
       workflow={workflow}
       activeArtifact={activeArtifact}
@@ -4167,6 +4311,7 @@ export function ResultView({
 
 export function ResultSidebarPanel({
   project,
+  conversationId,
   job,
   workflow,
   activeArtifact,
@@ -4178,6 +4323,7 @@ export function ResultSidebarPanel({
   onOpenBrowser,
 }: {
   project: Project;
+  conversationId?: string | null;
   job: ToolJob | null;
   workflow: HarnessWorkflowJobState | null;
   activeArtifact: ActiveArtifact | null;
@@ -4191,6 +4337,7 @@ export function ResultSidebarPanel({
   return (
     <ResultArtifactShell
       project={project}
+      conversationId={conversationId}
       job={job}
       workflow={workflow}
       activeArtifact={activeArtifact}

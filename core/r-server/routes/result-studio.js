@@ -26,6 +26,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const db = require('../db');
+const pluginLoader = require('../plugin-loader');
 
 // core/r-server/db.js 导出的是模块对象；真实 better-sqlite3 句柄在 `.db` 上。
 // 直接对模块对象调用 prepare() 会在运行时抛错。
@@ -49,7 +50,15 @@ const {
 const {
   createResultStudioRepository,
 } = require('../../shared-backend/result-studio-repository');
-const { validateSelectionContext, summarizeSelection } = require('../../shared-backend/result-studio-contracts');
+const {
+  assessSelectionCompatibility,
+  validateSelectionContext,
+  summarizeSelection,
+} = require('../../shared-backend/result-studio-contracts');
+const {
+  queryResultTable,
+  ResultStudioTableQueryError,
+} = require('../../shared-backend/result-studio-table-query');
 const { createRuntimeResourceSnapshot } = require('../../shared-backend/runtime-resource-snapshot');
 const {
   inspectResultStudioWorkspace,
@@ -211,6 +220,28 @@ function findArtifactRecord(result, absolutePath, artifactName) {
   return matches.length === 1 ? matches[0] : null;
 }
 
+function resolveInteractionDescriptor(toolId, artifactRecord, artifactName) {
+  const plugin = pluginLoader.getPluginManifest(toolId);
+  const descriptor = plugin?.resultStudio || null;
+  if (!descriptor) return { descriptor: null, artifactDescriptor: null, mapping: null };
+  const artifactDescriptor = descriptor.artifacts.find((artifact) =>
+    artifact.id === artifactRecord?.id || artifact.filename === artifactName) || null;
+  const mapping = artifactDescriptor
+    ? descriptor.interactionMappings.find((item) => item.artifactId === artifactDescriptor.id) || null
+    : null;
+  return { descriptor, artifactDescriptor, mapping };
+}
+
+function backingArtifactName(interaction) {
+  const { descriptor, mapping, artifactDescriptor } = interaction;
+  if (!mapping) return null;
+  if (mapping.dataFile) return mapping.dataFile;
+  if (mapping.dataArtifactId) {
+    return descriptor?.artifacts.find((artifact) => artifact.id === mapping.dataArtifactId)?.filename || null;
+  }
+  return artifactDescriptor?.filename || null;
+}
+
 /**
  * 把 artifact 名解析为工作区内的真实路径。
  *
@@ -328,6 +359,7 @@ module.exports = function registerResultStudioRoutes(app) {
       return res.status(415).json({ error: 'artifact_kind_not_interactive' });
     }
     const artifactRecord = findArtifactRecord(loaded.job.result || {}, resolved.absolutePath, artifactName);
+    const interaction = resolveInteractionDescriptor(loaded.job.tool_id, artifactRecord, artifactName);
 
     let revision = null;
     let revisionDiagnostic = null;
@@ -414,14 +446,40 @@ module.exports = function registerResultStudioRoutes(app) {
     try {
       if (TABLE_EXTENSIONS.test(artifactName)) {
         const sample = readTableSample(resolved.absolutePath, artifactName);
+        const mapping = interaction.mapping;
+        let backingTable = null;
+        if (mapping?.mode === 'matrix') {
+          const backingName = backingArtifactName(interaction) || artifactName;
+          const backing = backingName === artifactName
+            ? resolved
+            : resolveArtifactPath({ req, job: loaded.job, project: loaded.project, artifactName: backingName });
+          if (!backing.error) {
+            backingTable = queryResultTable({
+              filePath: backing.absolutePath,
+              idField: mapping.rowIdField || null,
+              limit: 100,
+            });
+          }
+        }
         const manifest = buildTableInteractionManifest({
           artifactId: stableArtifactId,
           revisionId,
-          columns: sample.columns,
-          rows: sample.rows,
-          rowCount: sample.rowCount === null ? undefined : sample.rowCount,
-          declaredIdField: String(req.query.idField || '').trim() || null,
+          columns: backingTable ? backingTable.columns.map((column) => column.field) : sample.columns,
+          rows: backingTable ? backingTable.rows : sample.rows,
+          rowCount: backingTable?.totalRows ?? (sample.rowCount === null ? undefined : sample.rowCount),
+          declaredIdField: mapping?.idField || mapping?.rowIdField || null,
+          declaredEntityType: mapping?.entityType || mapping?.rowEntityType || null,
         });
+        manifest.interactionMode = mapping?.mode || 'read_only';
+        manifest.mapping = mapping || null;
+        if (!mapping) {
+          manifest.capabilities = [];
+          manifest.selectionDurable = false;
+          manifest.diagnostics = [...manifest.diagnostics, {
+            code: 'plugin_interaction_mapping_missing',
+            message: 'Plugin descriptor does not declare a stable interaction mapping; artifact is read-only.',
+          }];
+        }
         if (sample.truncated) {
           manifest.diagnostics = [
             ...manifest.diagnostics,
@@ -433,22 +491,96 @@ module.exports = function registerResultStudioRoutes(app) {
         }
         manifest.artifactFamilyId = revision?.artifactFamilyId || null;
         if (revisionDiagnostic) manifest.diagnostics = [...manifest.diagnostics, revisionDiagnostic];
-        return res.json({ manifest, revision, sampledRows: sample.rows.length, truncated: sample.truncated });
+        return res.json({
+          manifest,
+          revision,
+          backingTable,
+          sampledRows: backingTable?.rows.length || sample.rows.length,
+          truncated: backingTable ? !!backingTable.nextOffset : sample.truncated,
+        });
       }
 
       if (PLOT_EXTENSIONS.test(artifactName)) {
+        const mapping = interaction.mapping;
         const manifest = buildPlotInteractionManifest({
           artifactId: stableArtifactId,
           revisionId,
-          // 目前没有图形→实体的映射来源，诚实声明为不可持久选择。
-          entityMapping: null,
+          declaredIdField: mapping?.idField || mapping?.rowIdField || null,
+          declaredEntityType: mapping?.entityType || mapping?.rowEntityType || null,
+          axes: { x: mapping?.xField || null, y: mapping?.yField || null },
+          legendField: mapping?.legendField || null,
         });
+        manifest.interactionMode = mapping?.mode || 'read_only';
+        manifest.mapping = mapping || null;
+        if (mapping?.mode === 'matrix') {
+          manifest.artifactKind = 'matrix';
+          manifest.capabilities = ['row_select', 'column_select'];
+        }
         manifest.artifactFamilyId = revision?.artifactFamilyId || null;
         if (revisionDiagnostic) manifest.diagnostics = [...manifest.diagnostics, revisionDiagnostic];
-        return res.json({ manifest, revision, sampledRows: 0, truncated: false });
+        let backingTable = null;
+        const backingName = backingArtifactName(interaction);
+        if (mapping && backingName) {
+          const backing = resolveArtifactPath({
+            req, job: loaded.job, project: loaded.project, artifactName: backingName,
+          });
+          if (!backing.error) {
+            backingTable = queryResultTable({
+              filePath: backing.absolutePath,
+              idField: mapping.idField || mapping.rowIdField || null,
+              limit: 250,
+            });
+          } else {
+            manifest.capabilities = [];
+            manifest.selectionDurable = false;
+            manifest.diagnostics = [...manifest.diagnostics, {
+              code: 'interaction_backing_data_unavailable',
+              message: 'Declared interaction backing data is unavailable; artifact is read-only.',
+            }];
+          }
+        }
+        if (mapping?.mode === 'matrix' && !backingTable) {
+          manifest.capabilities = [];
+          manifest.selectionDurable = false;
+        }
+        return res.json({ manifest, revision, backingTable, sampledRows: backingTable?.rows?.length || 0, truncated: !!backingTable?.nextOffset });
       }
     } catch (error) {
       return res.status(500).json({ error: 'interaction_manifest_failed', message: error && error.message });
+    }
+  });
+
+  /** 权威完整表查询；排序/过滤永远不基于浏览器中的前缀预览。 */
+  app.post('/api/result-studio/table/query', (req, res) => {
+    const body = req.body && typeof req.body === 'object' ? req.body : {};
+    const jobId = String(body.jobId || '').trim();
+    const artifactName = String(body.artifact || '').trim();
+    if (!jobId || !artifactName) return res.status(400).json({ error: 'job_and_artifact_required' });
+    const loaded = loadJobAndProject(req, jobId);
+    if (loaded.error) return res.status(loaded.error.status).json({ error: loaded.error.code });
+    const resolved = resolveArtifactPath({ req, job: loaded.job, project: loaded.project, artifactName });
+    if (resolved.error) return res.status(resolved.error.status).json({ error: resolved.error.code });
+    const artifactRecord = findArtifactRecord(loaded.job.result || {}, resolved.absolutePath, artifactName);
+    const interaction = resolveInteractionDescriptor(loaded.job.tool_id, artifactRecord, artifactName);
+    const mapping = interaction.mapping;
+    if (!mapping) return res.status(409).json({ error: 'plugin_interaction_mapping_missing' });
+    const queryName = backingArtifactName(interaction) || artifactName;
+    const queryPath = queryName === artifactName
+      ? resolved
+      : resolveArtifactPath({ req, job: loaded.job, project: loaded.project, artifactName: queryName });
+    if (queryPath.error) return res.status(queryPath.error.status).json({ error: queryPath.error.code });
+    try {
+      return res.json(queryResultTable({
+        filePath: queryPath.absolutePath,
+        idField: mapping.idField || mapping.rowIdField || null,
+        filterExpression: body.filterExpression,
+        sort: body.sort,
+        offset: Number(body.offset),
+        limit: Number(body.limit),
+      }));
+    } catch (error) {
+      const status = error instanceof ResultStudioTableQueryError ? 400 : 500;
+      return res.status(status).json({ error: error.code || 'table_query_failed', message: error.message, detail: error.detail || null });
     }
   });
 
@@ -472,6 +604,9 @@ module.exports = function registerResultStudioRoutes(app) {
       revisionId: body.revisionId,
       entityType: body.entityType,
       entityIds: body.entityIds,
+      entityIdCount: body.entityIdCount,
+      entityIdsHash: body.entityIdsHash,
+      filterHash: body.filterHash,
       filterExpression: body.filterExpression,
       sort: body.sort,
       viewport: body.viewport,
@@ -487,6 +622,27 @@ module.exports = function registerResultStudioRoutes(app) {
     } catch (error) {
       return res.status(500).json({ error: 'selection_persist_failed', message: error && error.message });
     }
+  });
+
+  /** 按项目+会话+Artifact 恢复最后选择，并返回兼容性状态。 */
+  app.get('/api/result-studio/selection/current', (req, res) => {
+    const projectId = String(req.query.projectId || '').trim();
+    const artifactId = String(req.query.artifactId || '').trim();
+    const conversationId = String(req.query.conversationId || '').trim() || null;
+    if (!projectId || !artifactId) return res.status(400).json({ error: 'project_and_artifact_required' });
+    const project = sqlite.prepare('SELECT * FROM projects WHERE id = ?').get(projectId);
+    if (!project) return res.status(404).json({ error: 'project_not_found' });
+    if (!canAccessProject(req, project)) return res.status(403).json({ error: 'forbidden' });
+    const selection = repo().findLatestSelection({ projectId, conversationId, artifactId });
+    if (!selection) return res.status(404).json({ error: 'selection_not_found' });
+    const compatibility = assessSelectionCompatibility({
+      selection,
+      projectId,
+      artifactId,
+      revisionId: String(req.query.revisionId || '').trim() || null,
+      selectionDurable: String(req.query.selectionDurable || 'true') !== 'false',
+    });
+    return res.json({ selection, compatibility, summary: summarizeSelection(selection) });
   });
 
   /** 按 id 恢复选择。 */

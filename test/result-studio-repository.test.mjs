@@ -383,6 +383,41 @@ test('RS2 persists and restores a selection context', (context) => {
   assert.equal(repo.getSelection('sel_1'), null);
 });
 
+test('RS-P2 restores only the latest selection in the same project conversation and artifact', (context) => {
+  const { repo } = makeRepo(context);
+  const base = {
+    projectId: 'project_1', conversationId: 'conv_1', artifactId: 'deg_table',
+    revisionId: 'rev_1', entityType: 'gene', filterExpression: { logic: 'and', clauses: [] },
+  };
+  repo.saveSelection({ ...base, selectionId: 'sel_old', entityIds: ['TP53'] });
+  repo.saveSelection({ ...base, selectionId: 'sel_new', entityIds: ['EGFR'] });
+  repo.saveSelection({ ...base, selectionId: 'sel_other_conv', conversationId: 'conv_2', entityIds: ['MYC'] });
+  repo.saveSelection({ ...base, selectionId: 'sel_other_artifact', artifactId: 'other', entityIds: ['KRAS'] });
+  assert.equal(repo.findLatestSelection({
+    projectId: 'project_1', conversationId: 'conv_1', artifactId: 'deg_table',
+  }).selectionId, 'sel_new');
+  assert.equal(repo.findLatestSelection({
+    projectId: 'project_1', conversationId: 'conv_2', artifactId: 'deg_table',
+  }).selectionId, 'sel_other_conv');
+});
+
+test('RS-P2 falls back only to an unscoped artifact selection when a conversation is created later', (context) => {
+  const { repo } = makeRepo(context);
+  const base = {
+    projectId: 'project_1', artifactId: 'deg_table', revisionId: 'rev_1',
+    entityType: 'gene', filterExpression: { logic: 'and', clauses: [] },
+  };
+  repo.saveSelection({ ...base, selectionId: 'sel_unscoped', entityIds: ['TP53'] });
+  repo.saveSelection({ ...base, selectionId: 'sel_other_conv', conversationId: 'conv_other', entityIds: ['MYC'] });
+
+  assert.equal(repo.findLatestSelection({
+    projectId: 'project_1', conversationId: 'conv_created_later', artifactId: 'deg_table',
+  }).selectionId, 'sel_unscoped');
+  assert.equal(repo.findLatestSelection({
+    projectId: 'project_1', conversationId: 'conv_other', artifactId: 'deg_table',
+  }).selectionId, 'sel_other_conv');
+});
+
 test('RS2 checkpoint hash detects tampering and survives reopen', (context) => {
   const { db, repo } = makeRepo(context);
   newChangeSet(repo, { changeSetId: 'cs_cp' });

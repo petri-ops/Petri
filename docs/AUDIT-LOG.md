@@ -5,7 +5,7 @@
 > 非主 agent 每次完成审计后，必须把发现追加到本文件并提交，不要只写在单独报告里。
 >
 > 维护方：非主 agent（只读审计 + 阻断性回归修复通道）
-> 最后更新：2026-07-25（G0-RS-P1 Result Surface 收口）
+> 最后更新：2026-07-25（G0-RS-P2 Scientific Interaction + SelectionContext 收口）
 
 ---
 
@@ -33,6 +33,7 @@
 | ✅已处理 | 2026-07-25 | G0-RS8 完成：ChangeSet 全阶段 WorkspaceCheckpoint、Git/SQLite/Artifact 漂移自愈或阻断、content-addressed Artifact 去重、plan-token 安全 GC、1 MiB byte-cursor 大表渐进加载和 preview 资源/并发预算进入生产/API/UI；GC 永不删除 Artifact 或 Revision 历史。UI-105 功能完成、待 RS9 真实矩阵。 | G0-RS8 / UI-105 | `result-studio-lifecycle.js`, `routes/result-studio.js`, `ResultStudioChangeSetPanel.tsx`, `rs8-lifecycle-acceptance.json` |
 | ✅已处理 | 2026-07-25 | G0-RS9 产品资格被复核撤销并由 G0-RS-P0 完成机器纠偏：Baseline 1.1.1 保留 LF12 核心 16/16 qualified + maintained；`result-studio-editing` 为 experimental/excluded，RS9 product/provider/visual/table-seed 全部标记 non-qualifying；Product Trace v1 强制 14 步连续来源证据并拒绝人工布尔值/提示词 JSON/测试摘要/常量。UI-102/UI-103/UI-105 保持 in_progress，UI-106～UI-111 已登记；SDC-1～SDC-7 在 RS-P7 前 deferred。 | G0-RS-P0 / UI-102～UI-111 | `rs-p0-truth-correction.json`、`rs-p0-ui-baseline.json`、`result-studio-qualification.js` |
 | ✅已处理 | 2026-07-25 | G0-RS-P1 完成：同一 ProjectWorkspace 建立中央 ResultStudioCanvas、紧凑 Inspector/ContextBar、六类 viewer adapter 与 conversation/task/result/compare 投影；Agent 会话保持挂载，草稿和布局往返不丢失。明暗与 1440/1024/820px 真实开发态 renderer 无页面溢出，性能低于冻结预算。UI-106 verified；证据明确为 non-qualifying product-development evidence，未升级 Result Studio 产品资格。 | G0-RS-P1 / UI-106 | `ResultStudioSurface.tsx`、`resultSurface.ts`、`rs-p1-result-surface.json` |
+| ✅已处理 | 2026-07-25 | G0-RS-P2 完成：权威完整表排序/过滤、10 万行虚拟化、行列/query 与 point/region/legend/matrix 选择进入中央画布；稳定 SelectionContext 贯通 Inspector/Composer/SQLite compatible-stale-invalid，缺 mapping 只读。真实 admitted DESeq2 25 Artifact → 3 gene 选择 → 独立脚本/参数/gene-list → GO/KEGG 36 Artifact 与服务重启恢复均由机器捕获；明暗 × 1440/1024/820、四类 <100ms 反馈通过。UI-102/UI-107 verified；证据 non-qualifying，P3～P7 未提前实现。 | G0-RS-P2 / UI-102 / UI-107 | `rs-p2-live-observation.json`、`rs-p2-ui-observation.json`、`rs-p2-scientific-interaction.json` |
 | ✅已处理 | 2026-07-25 | G0-SDC0 完成：`artifact-profiles.js` 从 DEG 单种子升级为正式 Registry，六个 canonical Profile（counts-matrix / sample-metadata / expression-matrix / deg / gene-list / enrichment-table）落地并区分 data/artifact/display 三类 Kind；新增 profile 身份、contract digest、compatible/migration/breaking 分级与 fail-closed 兼容判定；未注册 Profile 经 `agent-workflow` 返回 `unregistered_artifact_profile`，不能成为 typed DAG 正式边。DEG 及 legacy alias 保持兼容，未创建第二套执行真相。SDC-0 只覆盖离线契约层，真实不规则数据端到端验收仍属 SDC-7。 | G0-SDC0 | `artifact-profiles.js`, `agent-workflow.js`, `test/g0-sdc0-profile-registry.test.mjs`, `acceptance/g0-scientific-data-contract/profile-registry.json` |
 | ✅已处理 | 2026-07-17 | 5 个 codex/* 已合并残留分支已删除（连带 prune 6 个失效 worktree 注册） | 分支备忘录 | [§2.3](#23-已合并残留分支可安全删除-) |
 | ✅已处理 | 2026-07-17 | `sanitizer.js` 死模块 + 其测试已删除（全仓零生产引用） | 本文件 §4 | [§4 问题 E](#问题-esanitizerjs-死模块) |
@@ -410,3 +411,4 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
 | 2026-07-25 | G0-RS9 收口：Result Studio 5/5 科学任务、9/9 环境、7/7 证据、双 Provider、五态 renderer 和 G0 第 17 类 mandatory evidence 通过；基线兼容升级 1.1.0，UI-102/UI-103/UI-105 verified，工作包状态 completed。 | 主 agent |
 | 2026-07-25 | Result Studio 产品复核：确认 RS9 证据不能证明连续真实产品任务，撤销完整产品资格结论；重开 G0-RS 为唯一 active 工作包，建立 RS-P0～P7 收口计划，SDC-0 保留、SDC-1～SDC-7 deferred。红色阻塞项待 RS-P0 修正机器 Support Claim/qualification gate 后关闭。 | 主 agent |
 | 2026-07-25 | G0-RS-P0 收口：机器 Support Claim 与 Qualification Manifest 已纠偏，G0 Baseline patch 1.1.1 保持核心资格，旧 RS9 证据完成非资格分类，连续 Product Trace v1 和真实界面缺口基线落地；审计红项关闭，下一阶段 RS-P1。 | 主 agent |
+| 2026-07-25 | G0-RS-P2 收口：完成科学表/图选择、SelectionContext 耐久恢复、真实选择驱动 GO/KEGG 链、10 万行反馈预算和六格自动视觉矩阵；UI-102/UI-107 verified，P2 证据保持 non-qualifying，下一阶段仅 P3。 | 主 agent |

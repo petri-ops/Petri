@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const RESULT_STUDIO_PLUGIN_CONTRACT_VERSION = 1;
 const IMPACT_CLASSES = new Set(['view', 'presentation', 'data', 'scientific', 'workflow']);
 const EDITABLE_ARTIFACT_TYPES = new Set(['plot', 'table']);
+const INTERACTION_MODES = new Set(['table', 'scatter', 'matrix']);
 const SHA256 = /^[a-f0-9]{64}$/;
 
 function stableJson(value) {
@@ -37,6 +38,7 @@ function normalizeResultStudioDescriptor(raw) {
       ? raw.parameterImpacts : {},
     actions: Array.isArray(raw.actions) ? raw.actions : [],
     artifacts: Array.isArray(raw.artifacts) ? raw.artifacts : [],
+    interactionMappings: Array.isArray(raw.interactionMappings) ? raw.interactionMappings : [],
   };
 }
 
@@ -140,6 +142,63 @@ function validateResultStudioDescriptor({ plugin = {}, toolDefinition = {}, plug
     }
   }
 
+  const mappedInteractions = new Set();
+  for (const [index, mapping] of descriptor.interactionMappings.entries()) {
+    const field = `interactionMappings[${index}]`;
+    if (!mapping || typeof mapping !== 'object' || Array.isArray(mapping)) {
+      fail('interaction_mapping_invalid', field, 'mapping must be an object');
+      continue;
+    }
+    if (!declaredArtifacts.has(mapping.artifactId)) {
+      fail('interaction_artifact_unknown', `${field}.artifactId`, 'must reference a Result Studio artifact');
+    }
+    if (mappedInteractions.has(mapping.artifactId)) {
+      fail('interaction_artifact_duplicate', `${field}.artifactId`, String(mapping.artifactId));
+    }
+    mappedInteractions.add(mapping.artifactId);
+    if (!INTERACTION_MODES.has(mapping.mode)) {
+      fail('interaction_mode_invalid', `${field}.mode`, 'must be table, scatter, or matrix');
+      continue;
+    }
+    if (typeof mapping.entityType !== 'string' || !mapping.entityType.trim()) {
+      fail('interaction_entity_type_missing', `${field}.entityType`, 'stable entity semantics are required');
+    }
+    if (mapping.dataArtifactId && !outputById.has(mapping.dataArtifactId)) {
+      fail('interaction_data_artifact_unknown', `${field}.dataArtifactId`, String(mapping.dataArtifactId));
+    }
+    if (mapping.dataFile && (typeof mapping.dataFile !== 'string'
+        || path.basename(mapping.dataFile) !== mapping.dataFile || mapping.dataFile.includes('..'))) {
+      fail('interaction_data_file_unsafe', `${field}.dataFile`, String(mapping.dataFile));
+    }
+    if (mapping.mode === 'table' && (typeof mapping.idField !== 'string' || !mapping.idField.trim())) {
+      fail('interaction_id_field_missing', `${field}.idField`, 'table selection requires a stable id field');
+    }
+    if (mapping.mode === 'scatter') {
+      if (!mapping.dataArtifactId && !mapping.dataFile) {
+        fail('interaction_backing_data_missing', field, 'scatter selection requires backing data');
+      }
+      for (const required of ['idField', 'xField', 'yField']) {
+        if (typeof mapping[required] !== 'string' || !mapping[required].trim()) {
+          fail('interaction_scatter_field_missing', `${field}.${required}`, `${required} is required`);
+        }
+      }
+      if (mapping.yTransform && mapping.yTransform !== 'neg_log10') {
+        fail('interaction_transform_invalid', `${field}.yTransform`, String(mapping.yTransform));
+      }
+    }
+    if (mapping.mode === 'matrix') {
+      if (!mapping.dataArtifactId && !mapping.dataFile) {
+        fail('interaction_backing_data_missing', field, 'matrix selection requires backing data');
+      }
+      if (typeof mapping.rowIdField !== 'string' || !mapping.rowIdField.trim()) {
+        fail('interaction_matrix_row_id_missing', `${field}.rowIdField`, 'rowIdField is required');
+      }
+      if (typeof mapping.rowEntityType !== 'string' || typeof mapping.columnEntityType !== 'string') {
+        fail('interaction_matrix_entity_missing', field, 'rowEntityType and columnEntityType are required');
+      }
+    }
+  }
+
   if (!descriptor.validator || typeof descriptor.validator.id !== 'string'
       || !Array.isArray(descriptor.validator.checks) || descriptor.validator.checks.length === 0) {
     fail('validator_invalid', 'validator', 'stable validator id and checks are required');
@@ -211,4 +270,5 @@ module.exports = {
   validateResultStudioDescriptor,
   lintResultStudioPlugin,
   evaluateRevisionCompatibility,
+  INTERACTION_MODES,
 };

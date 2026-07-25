@@ -28,9 +28,10 @@ export type InteractionCapability =
   | 'filter'
   | 'sort'
   | 'point_select'
-  | 'region_select';
+  | 'region_select'
+  | 'legend_select';
 
-export type SelectionOrigin = 'row_select' | 'column_select' | 'query' | 'point_select' | 'region_select';
+export type SelectionOrigin = 'row_select' | 'column_select' | 'query' | 'point_select' | 'region_select' | 'legend_select';
 
 export interface ArtifactInteractionColumn {
   field: string;
@@ -55,6 +56,22 @@ export interface ArtifactInteractionManifest {
   sampledRowCount?: number;
   capabilities: InteractionCapability[];
   diagnostics?: Array<{ code: string; message: string }>;
+  interactionMode?: 'table' | 'scatter' | 'matrix' | 'read_only';
+  mapping?: {
+    artifactId: string;
+    mode: 'table' | 'scatter' | 'matrix';
+    entityType: string;
+    dataArtifactId?: string;
+    dataFile?: string;
+    idField?: string;
+    xField?: string;
+    yField?: string;
+    yTransform?: 'neg_log10';
+    legendField?: string;
+    rowIdField?: string;
+    rowEntityType?: string;
+    columnEntityType?: string;
+  } | null;
 }
 
 export interface SelectionFilterClause {
@@ -86,6 +103,7 @@ export interface ArtifactSelection {
   entityIdsTruncated: boolean;
   /** 覆盖**全部** ID 的哈希，截断不影响变更检测。 */
   entityIdsHash: string | null;
+  filterHash?: string | null;
   /** 选中的列（column_select）。 */
   fields: string[];
   filterExpression: SelectionFilterExpression | null;
@@ -95,6 +113,8 @@ export interface ArtifactSelection {
   /** 选择是否可跨会话恢复。false 时 UI 不得声称"已保存选择"。 */
   durable: boolean;
   createdAt: string;
+  selectionId?: string | null;
+  compatibility?: 'compatible' | 'stale' | 'invalid';
 }
 
 export interface AgentSelectionSummary {
@@ -240,6 +260,8 @@ export function buildQuerySelection(
     sort?: SelectionSortSpec[];
     matchedEntityIds?: string[];
     matchedCount?: number;
+    entityIdsHash?: string | null;
+    filterHash?: string | null;
   },
 ): ArtifactSelection {
   const matched = uniqueStrings(options.matchedEntityIds || []);
@@ -251,8 +273,10 @@ export function buildQuerySelection(
     selection.entityIdCount = Math.max(options.matchedCount, matched.length);
     selection.entityIdsTruncated = selection.entityIdCount > selection.entityIds.length;
   }
+  if (options.entityIdsHash) selection.entityIdsHash = options.entityIdsHash;
+  selection.filterHash = options.filterHash || null;
   // query 选择即使超上限也可复现：filter 本身就是复现依据。
-  selection.durable = true;
+  selection.durable = !!selection.entityIdsHash && !!selection.filterHash;
   return selection;
 }
 
@@ -263,6 +287,15 @@ export function buildPointSelection(
 ): ArtifactSelection {
   const ids = uniqueStrings(points.map((point) => readEntityId(manifest, point) || ''));
   return baseSelection(manifest, 'point_select', ids);
+}
+
+/** 图例选择最终仍解析为稳定实体 ID，不把颜色标签本身冒充科学实体。 */
+export function buildLegendSelection(
+  manifest: ArtifactInteractionManifest,
+  points: Array<Record<string, unknown>>,
+): ArtifactSelection {
+  const ids = uniqueStrings(points.map((point) => readEntityId(manifest, point) || ''));
+  return baseSelection(manifest, 'legend_select', ids);
 }
 
 /**
@@ -391,6 +424,10 @@ export function toPersistPayload(
     revisionId: selection.revisionId,
     entityType: selection.entityType,
     entityIds: selection.entityIds,
+    entityIdCount: selection.entityIdCount,
+    // 显式小选择由后端重算 SHA-256；query 选择才传权威完整集合摘要。
+    entityIdsHash: selection.origin === 'query' ? selection.entityIdsHash : null,
+    filterHash: selection.origin === 'query' ? selection.filterHash || null : null,
     filterExpression: selection.filterExpression,
     sort: selection.sort,
     displayState: {
@@ -421,13 +458,16 @@ export function fromPersistedSelection(
     entityIds,
     entityIdCount: Number.isFinite(rawCount) ? rawCount : entityIds.length,
     entityIdsTruncated: persisted.entityIdsTruncated === true,
-    // 后端存的是 sha256，前端算的是 FNV；两者不可比较，恢复后按前端口径重算。
-    entityIdsHash: hashEntityIds(entityIds),
+    entityIdsHash: typeof persisted.entityIdsHash === 'string'
+      ? persisted.entityIdsHash
+      : hashEntityIds(entityIds),
+    filterHash: typeof persisted.filterHash === 'string' ? persisted.filterHash : null,
     fields: Array.isArray(display?.fields) ? uniqueStrings(display!.fields as unknown[]) : [],
     filterExpression: (persisted.filterExpression as SelectionFilterExpression) || null,
     sort: Array.isArray(persisted.sort) ? (persisted.sort as SelectionSortSpec[]) : [],
     region: (display?.region as ArtifactSelection['region']) || null,
     durable: display?.durable === undefined ? true : display.durable === true,
     createdAt: String(persisted.createdAt || new Date().toISOString()),
+    selectionId: typeof persisted.selectionId === 'string' ? persisted.selectionId : null,
   };
 }
