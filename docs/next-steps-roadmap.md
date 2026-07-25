@@ -12,7 +12,7 @@ LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualif
 
 Result Studio（[`g0-result-studio-plan.md`](./g0-result-studio-plan.md)）状态 `completed / qualified`。`G0-RS0`～`G0-RS9` 已依次收口：Git Adapter、Revision 持久化、Artifact Interaction/Selection（UI-102）、AI Edit Intent/affected subgraph、无 Worktree 隔离 ChangeSet/独立脚本/真实 Job-backed Revision（UI-103）、Codex-like Diff/原子采用与恢复（UI-104）、首批四类科学插件 SDK 适配、耐久恢复/存储/大表治理（UI-105），以及 5 条科学任务、9 类环境、双真实 Provider 和五态 renderer 的生产资格矩阵。`result-studio-editing` 已成为 G0 qualified support claim。
 
-当前没有第二个 active 工作包。下一候选是已登记为 `planned` 的 [`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md)，必须在后续显式启动时继续遵守单工作包串行；本次 RS9 不提前实现该工作包。`G0-RS-WT0` 保持 `deferred`，当前仍不创建 Worktree。
+Result Studio 的 11 个提交已 fast-forward 合并并推送至 `main`（检查点 `03e5826`）。当前唯一 active 工作包为 [`G0-SDC`](./g0-scientific-data-contract-plan.md)，工作分支 `codex/g0-sdc`。`SDC-0 Profile Registry 与版本治理` 已收口：六个 canonical Profile、版本身份、compatible/migration/breaking 变更分级、fail-closed 兼容判定与「未注册 Profile 不得成为 typed DAG 边」已落地，门禁 `npm run g0:sdc0` 实测 10/10 并接入根 `npm run check` 的 postcheck。`SDC-1`～`SDC-7` 仍未启动。`G0-RS-WT0` 保持 `deferred`，当前仍不创建 Worktree。
 
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 已完成的 Scientific Task Contract 工作包记录见 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md)。
@@ -76,7 +76,7 @@ Phase 7 未建立第二套 analysis executor、job、artifact 或 workflow truth
 2. x64 分析 Runtime。
 3. 新产品阶段；若重开 P7-F，必须先有至少 3 个合格真实任务的可复现证据。
 
-Harness Loop Engineering v1 与 Result Studio 已成为长期基线。G0 Living Foundation 保持 `qualified + maintained`；下一候选工作包为 Scientific Data Contract，但尚未启动。科学长任务继续走正式 Job/Artifact 链，不能借通用后台进程工具绕过。
+Harness Loop Engineering v1 与 Result Studio 已成为长期基线。G0 Living Foundation 保持 `qualified + maintained`；Scientific Data Contract 已启动，SDC-0 已收口，下一阶段为 SDC-1 Data Profiler（尚未开始）。科学长任务继续走正式 Job/Artifact 链，不能借通用后台进程工具绕过。
 
 完全访问模式已经由用户明确定位为通用命令执行授权，不再维护固定命令白名单；只读模式仍禁止命令。不得借通用命令行建立第二套科学结果真相：正式分析交付仍必须进入确认、审计与 `run_tool → tool_job → artifact truth`。
 

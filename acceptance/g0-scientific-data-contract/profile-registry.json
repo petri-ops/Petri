@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-SDC0",
+  "sourceCommit": "03e5826ef7022cab8e8ffbeb386f65d004f0f16b",
+  "privacy": "profile_ids_contract_digests_counts_and_repository_relative_paths_only",
+  "registryVersion": 1,
+  "registryDigest": "f7f5bfa3f631c1c2b6ad8873cd22e3da1773b088923a7fd086fbc53a6f7f0669",
+  "profileCount": 6,
+  "profileIdentities": [
+    {
+      "profileId": "biof3.counts-matrix.v1",
+      "familyId": "biof3.counts-matrix",
+      "version": "v1",
+      "majorVersion": 1,
+      "lifecycleStatus": "active",
+      "registryContractVersion": 1,
+      "contractDigest": "075956b3bd84ab5cff70d9fdc43f9a2f3dbbae65bf3f59b0a94c0d252cb25772"
+    },
+    {
+      "profileId": "biof3.deg.v1",
+      "familyId": "biof3.deg",
+      "version": "v1",
+      "majorVersion": 1,
+      "lifecycleStatus": "active",
+      "registryContractVersion": 1,
+      "contractDigest": "e1944a85bc67eb4c0f58fff9d72281b8b8182cc52473d0c0c4905ea3416ae981"
+    },
+    {
+      "profileId": "biof3.enrichment-table.v1",
+      "familyId": "biof3.enrichment-table",
+      "version": "v1",
+      "majorVersion": 1,
+      "lifecycleStatus": "active",
+      "registryContractVersion": 1,
+      "contractDigest": "26c36bc11d38e48abc6abf4dee340c735f60f42a43ccb65308e78c144dd20294"
+    },
+    {
+      "profileId": "biof3.expression-matrix.v1",
+      "familyId": "biof3.expression-matrix",
+      "version": "v1",
+      "majorVersion": 1,
+      "lifecycleStatus": "active",
+      "registryContractVersion": 1,
+      "contractDigest": "c6a8de1be1c900165699f648e938cf1ced869d24bdcec51609c82ba193cefdbf"
+    },
+    {
+      "profileId": "biof3.gene-list.v1",
+      "familyId": "biof3.gene-list",
+      "version": "v1",
+      "majorVersion": 1,
+      "lifecycleStatus": "active",
+      "registryContractVersion": 1,
+      "contractDigest": "10444aa3042b8ecbc8e00b087cae750b0c77bb609530e1ddb096c4dbd778b9cc"
+    },
+    {
+      "profileId": "biof3.sample-metadata.v1",
+      "familyId": "biof3.sample-metadata",
+      "version": "v1",
+      "majorVersion": 1,
+      "lifecycleStatus": "active",
+      "registryContractVersion": 1,
+      "contractDigest": "2aa8cc198e4989bbeb3fa0a73bf3f3ba2689f78b24c094c2edd49a735b52f952"
+    }
+  ],
+  "changeClasses": [
+    "compatible",
+    "migration",
+    "breaking"
+  ],
+  "checks": [
+    {
+      "id": "SDC0-01",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/artifact-profiles.js"
+      ],
+      "detail": "Registry validates with exactly six initial canonical profiles."
+    },
+    {
+      "id": "SDC0-02",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/artifact-profiles.js"
+      ],
+      "detail": "Data, scientific Artifact and Display Artifact kinds are distinct."
+    },
+    {
+      "id": "SDC0-03",
+      "passed": true,
+      "evidence": [
+        "test/g0-sdc0-profile-registry.test.mjs"
+      ],
+      "detail": "Every profile has a valid versioned machine contract."
+    },
+    {
+      "id": "SDC0-04",
+      "passed": true,
+      "evidence": [
+        "acceptance/g0-scientific-data-contract/profile-registry.json"
+      ],
+      "detail": "Each profile has a stable, distinct contract digest."
+    },
+    {
+      "id": "SDC0-05",
+      "passed": true,
+      "evidence": [
+        "test/hle-c5r-regression.test.mjs"
+      ],
+      "detail": "The admitted DEG profile remains backward compatible."
+    },
+    {
+      "id": "SDC0-06",
+      "passed": true,
+      "evidence": [
+        "test/g0-sdc0-profile-registry.test.mjs"
+      ],
+      "detail": "Change classification covers compatible, migration and breaking outcomes."
+    },
+    {
+      "id": "SDC0-07",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/agent-workflow.js"
+      ],
+      "detail": "An unregistered profile cannot become a typed workflow edge."
+    },
+    {
+      "id": "SDC0-08",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/artifact-profiles.js"
+      ],
+      "detail": "Compatibility is exact and unknown versions fail closed."
+    },
+    {
+      "id": "SDC0-09",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0-baseline.js"
+      ],
+      "detail": "The G0 contract projection carries the registry schema version."
+    },
+    {
+      "id": "SDC0-10",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/g0/baseline-manifest.json"
+      ],
+      "detail": "SDC-0 does not create a second execution truth."
+    }
+  ],
+  "passed": true,
+  "generatedAt": "2026-07-25T09:00:01.501Z"
+}

@@ -1,8 +1,8 @@
 # G0 Scientific Data Contract & Adaptation Baseline
 
-最后更新：2026-07-24
+最后更新：2026-07-25
 
-状态：`ready`
+状态：`active / SDC-0 completed`
 
 计划编号：`G0-SDC`
 
@@ -18,7 +18,7 @@
 2. ✅ `G0-START` 审计通过（10/10，2026-07-24）。
 3. ✅ `G0-LF0` 已建立 Constitution、Baseline Registry、版本身份和 Support Matrix（2026-07-24）。
 
-启动边界：本计划前置已满足，但生产实现仍须按 G0 主线与 LF1/LF7 的依赖安排启动；`ready` 不等于已实现或已验收。
+启动边界：本计划已于 2026-07-25 从完成并推送的 `G0 Baseline v1.1.0 + Result Studio` 干净检查点启动，当前只实施 `SDC-0`。单工作包串行不变，`SDC-1`～`SDC-7` 不得提前实现或宣称验收。
 
 ## 1. 决策结论
 
@@ -233,7 +233,17 @@ cannot_reliably_answer
 
 ### SDC-0：Profile Registry 与版本治理
 
-状态：`pending`
+状态：`completed`（2026-07-25）
+
+收口证据：
+
+- `core/shared-backend/artifact-profiles.js` 已成为版本化 Registry，首批六个 Canonical Profile 全部落地，并区分 `data / artifact / display` 三类。
+- `core/shared-backend/agent-workflow.js` 对未注册 Profile 返回 `unregistered_artifact_profile`，未注册 Profile 无法成为 typed DAG 正式边。
+- 变更分级与兼容判定：`classifyProfileChange` 覆盖 compatible / migration / breaking，`resolveProfileCompatibility` 精确匹配且未知版本 fail-closed。
+- `test/g0-sdc0-profile-registry.test.mjs` 7/7 通过；`npm run g0:sdc0` 10/10 通过，脱敏证据为 `acceptance/g0-scientific-data-contract/profile-registry.json`。
+- 门禁接线：`npm run check` 的 `postcheck` 已包含 `g0:sdc0`，本轮全量 `npm run check` 通过，`npm test` 1339 pass / 0 fail / 11 skipped。
+
+尚未验证：本子包为契约层，未包含真实不规则数据端到端产品验收（属 SDC-7 范围），因此本计划整体仍为 `active`，不得宣称 `qualified`。
 
 目标：
 

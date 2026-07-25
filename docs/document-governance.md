@@ -127,7 +127,7 @@ Canonical 文档还必须声明唯一 `truthDomain`。处于 `active` 或 `plann
 
 2026-07-24 建立首个注册基线时，现存非归档 Markdown 全部纳入机器覆盖，但不批量移动历史文件。后续每次工作包收口只处理与该 Plan ID 相关的文档候选，逐步降低历史噪声。
 
-LF12 已完成首次资格裁决，RS9 又完成 Result Studio 兼容范围重资格；当前为 `G0 Baseline v1 = 1.1.0 qualified + maintained`。注册表中 `G0-LF12` 与 `G0-RS` 均为 `completed`，当前没有 active 工作包。其 acceptance 证据是长期资格记录，任何治理动作不得按普通文档搬迁、改写或重新生成。
+LF12 已完成首次资格裁决，RS9 又完成 Result Studio 兼容范围重资格；当前为 `G0 Baseline v1 = 1.1.0 qualified + maintained`。注册表中 `G0-LF12` 与 `G0-RS` 均为 `completed`，`G0-SDC` 是唯一 active 工作包且当前只推进 SDC-0。既有 qualification 与 Result Studio acceptance 证据是长期资格记录，任何治理动作不得按普通文档搬迁、改写或重新生成。
 
 Result Studio 与正式长期 Worktree 的 LF12 阻塞条件已解除，启动仍须满足 `G0-RS-WT0`：从已推送的干净 checkpoint 创建，并完成运行环境隔离验收。
 

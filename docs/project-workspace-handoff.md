@@ -37,7 +37,13 @@ LF12 完成记录为 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseli
 
 2026-07-24 后续治理收口：新增文档生命周期治理层（[`document-governance.md`](./document-governance.md)、[`worktree-governance.md`](./worktree-governance.md)、[`DOC-REGISTRY.json`](./DOC-REGISTRY.json)、`scripts/docs-governance.mjs`、`npm run docs:status|check|reconcile`，`docs:check` 已接入根 `npm run check`）；注册表中 `G0-LF12` 已收口为 `completed / canonical:false`，释放 `g0-current-work-package` truthDomain。干净 checkpoint 为 `38d3de2`（已推送，工作区 clean）。
 
-Result Studio 工作包已收口，仍由主工作区分支 `codex/g0-result-studio` 承载最终提交；本轮未创建 Git Worktree。当前没有第二个 active 工作包，`G0-SDC` 仅为下一候选且尚未启动。
+Result Studio 工作包已收口，其 11 个提交已于 2026-07-25 fast-forward 合并并推送至 `main`，检查点为 `03e5826`。当前唯一 active 工作包是 `G0-SDC`，主工作区分支为 `codex/g0-sdc`，本轮不创建 Git Worktree。
+
+`SDC-0 Profile Registry 与版本治理` 已于 2026-07-25 收口：`core/shared-backend/artifact-profiles.js` 从单个 DEG 种子升级为正式 Registry，落地 `biof3.counts-matrix.v1`、`biof3.sample-metadata.v1`、`biof3.expression-matrix.v1`、`biof3.deg.v1`、`biof3.gene-list.v1`、`biof3.enrichment-table.v1` 六个 canonical Profile，并区分 data / artifact / display 三类 Profile Kind。新增 profile 身份解析、registry 校验、contract digest、compatible/migration/breaking 变更分级和 fail-closed 兼容判定；`core/shared-backend/agent-workflow.js` 对未注册 Profile 返回 `unregistered_artifact_profile`，使其无法成为 typed DAG 正式边。`biof3.deg.v1` 及其 legacy alias（含 `log2FC → log2FoldChange`）保持向后兼容，未创建第二套执行真相。
+
+SDC-0 证据与门禁：`acceptance/g0-scientific-data-contract/profile-registry.json`（10/10，锚定 `03e5826`）、`test/g0-sdc0-profile-registry.test.mjs`（7/7）、`scripts/g0-sdc0-profile-registry-acceptance.mjs`，命令 `npm run g0:sdc0`（含 `g0:sdc0:test`）已挂入 `postcheck`。实测 `npm test` 1339 pass / 0 fail / 11 skipped，`npm run check` 全绿（末尾 `[G0-SDC0] PASS — 10/10`）。SDC-0 只完成离线契约层，真实不规则数据端到端产品验收属于 SDC-7，不得由本阶段冒充。
+
+下一阶段为 `SDC-1 Data Profiler`，尚未开始；按单工作包串行，SDC-1 启动前不得实现 SDC-2～SDC-7。
 
 已收口阶段：
 

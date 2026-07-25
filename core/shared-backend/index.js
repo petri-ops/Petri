@@ -42,6 +42,7 @@ module.exports = {
   deliveryManifest: require('./delivery-manifest'),
   scientificReplayPackage: require('./scientific-replay-package'),
   runtimeResourceSnapshot: require('./runtime-resource-snapshot'),
+  artifactProfiles: require('./artifact-profiles'),
   resultStudioPluginSdk: require('./result-studio-plugin-sdk'),
   resultStudioLifecycle: require('./result-studio-lifecycle'),
   resultStudioQualification: require('./result-studio-qualification'),

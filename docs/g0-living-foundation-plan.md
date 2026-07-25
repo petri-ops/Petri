@@ -904,7 +904,7 @@ G1 可以在 `G0 Baseline v1` qualified 后启动；G0 同时转入 maintained�
 下一主线按依赖启动：
 
 1. 保持 G0 永久门禁优先；任何触发器变化先完成 Promotion + requalification。
-2. 从干净 checkpoint 启动 `G0 Result Studio` 的独立工作包，不把结果编辑能力反写成 LF12 已资格能力。
+2. `G0 Result Studio` 已完成并进入 v1.1.0 maintained 基线；从已推送检查点 `03e5826` 启动 `G0-SDC`，按 SDC-0～SDC-7 串行建设科学数据契约，当前只实施 SDC-0。
 
 任何后续工作仍须通过六代兼容门与永久 `npm run g0:qualification`；不得把本次限定资格扩张到未验收平台、插件或科学任务。
 
