@@ -4,7 +4,7 @@
   "subjectBaselineId": "g0-fifth-wave-establishing-0.6",
   "subjectBaselineVersion": "0.6.0",
   "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
-  "sourceCommit": "c74c434732725a8497bd073ba0899b873b462d55",
+  "sourceCommit": "728492102a12b4138fc386dd4cd6982086c98136",
   "state": "qualified",
   "satisfiedClaims": [
     "capability-supply-chain-governed",
@@ -13,7 +13,6 @@
     "macos-arm64-packaged-local-execution",
     "permission-boundary-enforced",
     "real-provider-science-neutral",
-    "result-studio-editing",
     "runtime-resource-adaptive"
   ],
   "limitedClaims": [],
@@ -28,5 +27,5 @@
     "reintroduced_incident"
   ],
   "modelMayDecide": false,
-  "decisionHash": "8b30fd964724c8bdbfb0e33809e961c041b2addde1cfb7aa3e17dac43181c8c7"
+  "decisionHash": "3166ff20b9d45da94d7c8329a04c4237673a707c58f964dca9480a1409f87aca"
 }

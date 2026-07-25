@@ -29,7 +29,7 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 
 ### 3.0 当前主线：G0 Living Foundation maintained
 
-2026-07-25 `G0-START`、LF0～LF12 与 Result Studio RS0～RS9 已关闭。`G0 Baseline v1 / 1.1.0` 已通过 17 类强制证据、10 条零容忍、双真实 Provider、macOS arm64 packaged、5 分钟 soak、基础五态视觉和 Result Studio 五态视觉矩阵，保持 `qualified + maintained`。
+2026-07-25 `G0-START`、LF0～LF12 核心资格已关闭并进入 maintained。Result Studio RS0～RS8 的引擎基础存在，但后续产品复核确认 RS9 的第 17 类证据不能证明连续真实产品任务；`result-studio-editing` 支持声明暂停，当前状态为 `active / implemented_unverified`。
 
 G0 资格只覆盖 Support Matrix 明示范围，不覆盖 Windows/Linux/macOS x64、任意插件或任意科学任务。永久 `g0:qualification` 与 LF11 requalification 继续优先；任何触发器缺少新证据时 fail-closed。
 
@@ -37,13 +37,15 @@ LF12 完成记录为 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseli
 
 2026-07-24 后续治理收口：新增文档生命周期治理层（[`document-governance.md`](./document-governance.md)、[`worktree-governance.md`](./worktree-governance.md)、[`DOC-REGISTRY.json`](./DOC-REGISTRY.json)、`scripts/docs-governance.mjs`、`npm run docs:status|check|reconcile`，`docs:check` 已接入根 `npm run check`）；注册表中 `G0-LF12` 已收口为 `completed / canonical:false`，释放 `g0-current-work-package` truthDomain。干净 checkpoint 为 `38d3de2`（已推送，工作区 clean）。
 
-Result Studio 工作包已收口，其 11 个提交已于 2026-07-25 fast-forward 合并并推送至 `main`，检查点为 `03e5826`。当前唯一 active 工作包是 `G0-SDC`，主工作区分支为 `codex/g0-sdc`，本轮不创建 Git Worktree。
+Result Studio 旧实现的 11 个提交已于 2026-07-25 fast-forward 合并并推送至 `main`，检查点为 `03e5826`。SDC-0 已在 `codex/g0-sdc` 的 `7284921` 完成并推送；当前单线实现分支为 `codex/g0-result-studio-product`，从该检查点创建，不使用 Git Worktree。当前唯一 active 工作包为 `G0-RS`。
+
+`G0-RS-P0` 已完成资格纠偏：Baseline patch 为 1.1.1，LF12 核心 16/16 evidence 继续 qualified + maintained；`result-studio-editing` 为 experimental/excluded，旧 RS9 product/provider/visual/table-seed 为 non-qualifying historical evidence。Product Trace v1 要求 14 步连续来源证据并拒绝人工布尔值、提示词指定 JSON、测试摘要和常量不变量。真实开发态基线确认中央结果画布缺失、结果仍位于 340px 右栏。证据位于 `acceptance/g0-result-studio/rs-p0-{truth-correction,ui-baseline}.json`。下一阶段只允许 `G0-RS-P1`。
 
 `SDC-0 Profile Registry 与版本治理` 已于 2026-07-25 收口：`core/shared-backend/artifact-profiles.js` 从单个 DEG 种子升级为正式 Registry，落地 `biof3.counts-matrix.v1`、`biof3.sample-metadata.v1`、`biof3.expression-matrix.v1`、`biof3.deg.v1`、`biof3.gene-list.v1`、`biof3.enrichment-table.v1` 六个 canonical Profile，并区分 data / artifact / display 三类 Profile Kind。新增 profile 身份解析、registry 校验、contract digest、compatible/migration/breaking 变更分级和 fail-closed 兼容判定；`core/shared-backend/agent-workflow.js` 对未注册 Profile 返回 `unregistered_artifact_profile`，使其无法成为 typed DAG 正式边。`biof3.deg.v1` 及其 legacy alias（含 `log2FC → log2FoldChange`）保持向后兼容，未创建第二套执行真相。
 
 SDC-0 证据与门禁：`acceptance/g0-scientific-data-contract/profile-registry.json`（10/10，锚定 `03e5826`）、`test/g0-sdc0-profile-registry.test.mjs`（7/7）、`scripts/g0-sdc0-profile-registry-acceptance.mjs`，命令 `npm run g0:sdc0`（含 `g0:sdc0:test`）已挂入 `postcheck`。实测 `npm test` 1339 pass / 0 fail / 11 skipped，`npm run check` 全绿（末尾 `[G0-SDC0] PASS — 10/10`）。SDC-0 只完成离线契约层，真实不规则数据端到端产品验收属于 SDC-7，不得由本阶段冒充。
 
-下一阶段为 `SDC-1 Data Profiler`，尚未开始；按单工作包串行，SDC-1 启动前不得实现 SDC-2～SDC-7。
+`SDC-1 Data Profiler`～`SDC-7` 均 deferred；待 `G0-RS-P7` 重新资格完成后再评估恢复，不得与 Result Studio 并行实现。
 
 已收口阶段：
 
@@ -78,7 +80,9 @@ RS3 实测修正的三个真实缺陷：其一，我在路由里使用了 `app.l
 
 `G0-RS8` 已收口：每个 ChangeSet 阶段持久化 WorkspaceCheckpoint；重启后只在 candidate ref、Revision、completed Job 与 valid Artifact Truth 全部一致时自动恢复 preview。Git/SQLite/Artifact 漂移分类为自愈或阻断；存储摘要、content-addressed hardlink 去重和 plan-token GC 均不删除正式 Artifact/Revision 历史。大表通过 1 MiB 有界 byte cursor 渐进加载，preview Job 受真实资源快照和并发预算约束且不修改科学参数。UI-105 功能完成但待 RS9 真实重启/大表/视觉矩阵，保持 `in_progress`。下一阶段：`G0-RS9` 真实产品验收与基线晋升。
 
-`G0-RS9` 已收口：资格判定器要求 5/5 科学任务、9/9 环境、7/7 证据类型和 2/2 真实 Provider 类同时通过。隔离真实 renderer 覆盖明暗、宽屏、820px、五万行 DEG 表与服务中断/重启；五万行仅渲染 24 个可见行，820px 无页面横向溢出，重启后候选 ChangeSet/Revision/存储摘要仍恢复。`result-studio-editing` 已从 excluded claim 晋升为 qualified support claim，新增第 17 类 mandatory evidence；G0 兼容升级到 v1.1.0。UI-102/UI-103/UI-105 均有 RS9 真实矩阵并标记 `verified`。证据位于 `acceptance/g0-result-studio/rs9-{product,provider,visual}-acceptance.json` 与 `rs9-ui/`。
+`G0-RS9` 历史实现保留，但资格结论已撤销：复核确认 5 条任务由独立单测/fixture/截图拼装，Provider 探针没有执行真实 Result Studio tool calling，大表由 seed 直接构造数据库记录，视觉脚本主要消费人工 inspection 布尔值。证据继续位于 `acceptance/g0-result-studio/rs9-{product,provider,visual}-acceptance.json` 与 `rs9-ui/`，但只按 unit/synthetic/renderer historical evidence 使用。UI-102/UI-103/UI-105 回退 `in_progress`；UI-104 仅保留窄范围版本操作验证。
+
+Result Studio 新顺序为 `RS-P0 Truth Correction → P1 Result Surface → P2 Scientific Interaction → P3 Agent Context → P4 Unified Editing → P5 Real Scientific Editing → P6 Durability & UX → P7 Requalification`。完整范围和阶段验收见 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) §22～§26。
 
 ### 3.1 已完成基线：真实科学任务驱动的 Harness 升级
 

@@ -80,7 +80,7 @@
     },
     {
       "baselineId": "g0-baseline-v1",
-      "baselineVersion": "1.1.0",
+      "baselineVersion": "1.1.1",
       "lifecycleStatus": "maintained",
       "qualificationStatus": "qualified",
       "manifestRef": "core/shared-backend/g0/baseline-manifest.json",
@@ -88,7 +88,7 @@
       "supportMatrixRef": "core/shared-backend/g0/support-matrix.json",
       "qualificationDecisionRef": "acceptance/g0-qualification/qualification-decision.json",
       "qualificationLedgerRef": "acceptance/g0-qualification/evidence-ledger.json",
-      "introducedBy": "G0-LF12 + G0-RS9 compatible qualification expansion",
+      "introducedBy": "G0-LF12 core qualification + G0-RS-P0 support-scope correction",
       "qualifiedFromBaselineId": "g0-fifth-wave-establishing-0.6",
       "readableProjectMajorRange": {"minimum": 0, "maximum": 1}
     }

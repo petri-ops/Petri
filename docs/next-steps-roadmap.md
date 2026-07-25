@@ -6,13 +6,29 @@
 
 `v0.0.1-rc.7` 是当前 OSS 线上版本，已完成代码、自动化、双架构构建、安装候选启动验收和公开更新链核验。Stage 1 UI 产品化、Stage 2 模型层、Stage 3 Harness 与标准流程、Stage 4 首个稳定产品版本及 Harness Phase 7 均已关闭。
 
-当前不默认扩展分析功能。`G0-START`、LF0～LF12 与 Result Studio RS0～RS9 已完成；当前基线为 `G0 Baseline v1 / 1.1.0 / qualified + maintained`。UI-032 已完成；rc.7 仍是工程候选版，不得描述为 GA。
+当前不默认扩展分析功能。`G0-START`、LF0～LF12 的核心资格保持 maintained；RS0～RS8 的 Result Studio 引擎基础保留，但 2026-07-25 产品复核撤销了 RS9 的完整产品资格结论。Result Studio 当前为 `active / implemented_unverified`，rc.7 仍是工程候选版，不得描述为 GA。
 
-LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口；RS9 在不改变封存 qualification subject 的前提下新增第 17 类 `result_studio_product` 强制证据并完成兼容重资格。当前 17/17 强制证据、10/10 零容忍和永久维护门全部通过。
+LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口。RS9 曾新增第 17 类 `result_studio_product`，但后续复核发现其五条任务由独立测试拼装、Provider 未执行真实工具闭环、视觉验收依赖人工布尔值、大表由 seed 直接构造；该证据现降级为 unit/synthetic/renderer historical evidence。`result-studio-editing` 在 RS-P7 前暂停 qualified support claim，不能影响或冒充 LF12 原始核心资格。
 
-Result Studio（[`g0-result-studio-plan.md`](./g0-result-studio-plan.md)）状态 `completed / qualified`。`G0-RS0`～`G0-RS9` 已依次收口：Git Adapter、Revision 持久化、Artifact Interaction/Selection（UI-102）、AI Edit Intent/affected subgraph、无 Worktree 隔离 ChangeSet/独立脚本/真实 Job-backed Revision（UI-103）、Codex-like Diff/原子采用与恢复（UI-104）、首批四类科学插件 SDK 适配、耐久恢复/存储/大表治理（UI-105），以及 5 条科学任务、9 类环境、双真实 Provider 和五态 renderer 的生产资格矩阵。`result-studio-editing` 已成为 G0 qualified support claim。
+Result Studio（[`g0-result-studio-plan.md`](./g0-result-studio-plan.md)）是当前唯一 active 工作包。已有 Git Adapter、Revision/ChangeSet、Job/Artifact binding、比较/采用/撤销、checkpoint、恢复和 Plugin SDK 基础继续复用；真实缺口集中在中央结果主画布、表格/图形选择、Agent 完整上下文、Schema 驱动手动编辑、科学差异、真实插件连续任务和 packaged Electron 重新资格。
 
-Result Studio 的 11 个提交已 fast-forward 合并并推送至 `main`（检查点 `03e5826`）。当前唯一 active 工作包为 [`G0-SDC`](./g0-scientific-data-contract-plan.md)，工作分支 `codex/g0-sdc`。`SDC-0 Profile Registry 与版本治理` 已收口：六个 canonical Profile、版本身份、compatible/migration/breaking 变更分级、fail-closed 兼容判定与「未注册 Profile 不得成为 typed DAG 边」已落地，门禁 `npm run g0:sdc0` 实测 10/10 并接入根 `npm run check` 的 postcheck。`SDC-1`～`SDC-7` 仍未启动。`G0-RS-WT0` 保持 `deferred`，当前仍不创建 Worktree。
+Result Studio 旧实现的 11 个提交已位于 `main`（检查点 `03e5826`）；`SDC-0 Profile Registry 与版本治理` 也已在分支 `codex/g0-sdc` 的 `7284921` 收口并推送，六个 canonical Profile 与 fail-closed typed DAG 边继续保留。按单工作包串行，`SDC-1`～`SDC-7` deferred，当前不创建 Worktree。
+
+当前固定顺序：
+
+```text
+G0-RS-P0 资格与证据纠偏
+  → RS-P1 中央结果主画布
+  → RS-P2 科学选择交互
+  → RS-P3 Agent 上下文编排
+  → RS-P4 手动与 AI 统一编辑
+  → RS-P5 真实科学编辑与差异
+  → RS-P6 恢复、性能和产品解释
+  → RS-P7 诚实重新资格
+  → 重新评估 SDC-1
+```
+
+`G0-RS-P0` 已完成：Baseline 1.1.1 保持 LF12 核心 16/16 qualified + maintained，Result Studio 产品声明降为 experimental/excluded，旧 RS9 证据机器分类为 non-qualifying，并建立 Product Trace v1 与真实界面缺口基线。下一阶段只允许启动 `G0-RS-P1 Result Surface`，不得提前实现 P2～P7。
 
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 已完成的 Scientific Task Contract 工作包记录见 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md)。
@@ -20,7 +36,7 @@ Result Studio 的 11 个提交已 fast-forward 合并并推送至 `main`（检�
 
 ## 当前 G0 Living Foundation
 
-`G0-START` 与 LF0～LF12 已通过。1.1.0 maintained 基线保留能力供应链、权限决策、八域韧性实验室和 Evolution Pipeline，并增加 LF12 确定性资格总账、Result Studio product qualification 与永久维护门。
+`G0-START` 与 LF0～LF12 已通过。1.1.1 maintained 基线保留能力供应链、权限决策、八域韧性实验室、Evolution Pipeline、LF12 确定性资格总账与永久维护门；Result Studio 产品资格已暂停，只保留 experimental 引擎基础。
 
 G0 处于永久 `qualified + maintained`，资格仅覆盖明确的 macOS arm64、本地 Runtime/存储、双 Provider、admitted 科学插件与 Result Studio 任务矩阵。任何扩展必须重新证明，不得从本次资格外推。
 
@@ -30,7 +46,7 @@ G0 处于永久 `qualified + maintained`，资格仅覆盖明确的 macOS arm64�
 
 Loop 工程包继续复用 TaskSpec、Workflow Plan、Plugin、ToolResult、Job、Artifact、Delivery 和 Replay，不得创建第二套 executor、job、artifact 或 workflow truth。正常路径不使用任意固定轮数提前停止；重复、无进展、振荡、同类故障和资源/成本异常必须进入可审计的保护状态。节点和任务完成由验证器与 Artifact 证据判定，不能由模型口头声明。
 
-HLE-C0～HLE-C5 已全部关闭；[`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) 现为验收记录。G0 LF0～LF12 与 Result Studio RS0～RS9 均已关闭，继续由永久 G0 门维护。
+HLE-C0～HLE-C5 已全部关闭；[`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) 现为验收记录。G0 LF0～LF12 核心继续由永久 G0 门维护；Result Studio 已重开为 RS-P0～P7 产品收口，不再使用“RS0～RS9 全部关闭”描述当前状态。
 
 ## 当前 P-03 工作包
 
@@ -76,7 +92,7 @@ Phase 7 未建立第二套 analysis executor、job、artifact 或 workflow truth
 2. x64 分析 Runtime。
 3. 新产品阶段；若重开 P7-F，必须先有至少 3 个合格真实任务的可复现证据。
 
-Harness Loop Engineering v1 与 Result Studio 已成为长期基线。G0 Living Foundation 保持 `qualified + maintained`；Scientific Data Contract 已启动，SDC-0 已收口，下一阶段为 SDC-1 Data Profiler（尚未开始）。科学长任务继续走正式 Job/Artifact 链，不能借通用后台进程工具绕过。
+Harness Loop Engineering v1 与 Result Studio 引擎基础继续复用。G0 Living Foundation 的 LF12 核心保持 maintained；Result Studio 产品资格暂停并从 RS-P0 重新收口。Scientific Data Contract 的 SDC-0 已收口，SDC-1～SDC-7 延后到 RS-P7 之后重新评估。科学长任务继续走正式 Job/Artifact 链，不能借通用后台进程工具绕过。
 
 完全访问模式已经由用户明确定位为通用命令执行授权，不再维护固定命令白名单；只读模式仍禁止命令。不得借通用命令行建立第二套科学结果真相：正式分析交付仍必须进入确认、审计与 `run_tool → tool_job → artifact truth`。
 

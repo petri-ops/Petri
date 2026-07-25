@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "qualificationId": "g0-baseline-v1-qualification",
-  "sourceCommit": "c74c434732725a8497bd073ba0899b873b462d55",
+  "sourceCommit": "728492102a12b4138fc386dd4cd6982086c98136",
   "currentBaseline": {
     "schemaVersion": 1,
     "baselineId": "g0-baseline-v1",
-    "baselineVersion": "1.1.0",
+    "baselineVersion": "1.1.1",
     "lifecycleStatus": "maintained",
     "qualificationStatus": "qualified",
     "constitutionId": "biof3-g0-constitution-v1",
-    "manifestDigest": "17af3a7231558a9146dab5e81286dc0fa31df4de43f61ed92db2bd7d6fa43d74",
-    "bundleDigest": "d619be0d4cf7ea2457b967471c496618587a6a7238c1402723a9067976d9d54a"
+    "manifestDigest": "5c8a0246bd263a304f520e853dd9a4576a3be0fbb668523e67b028add1d70df5",
+    "bundleDigest": "8799d7678debeab413628832872fdfceee73c0a9fe6ae46b414260797819df86"
   },
   "subjectBaseline": {
     "schemaVersion": 1,
@@ -22,8 +22,8 @@
     "manifestDigest": "0c6dbb71acc20e18e4952c2a62c23a9d5655a5a0326dbdb45a8549d75dfd02cf",
     "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3"
   },
-  "decisionHash": "8b30fd964724c8bdbfb0e33809e961c041b2addde1cfb7aa3e17dac43181c8c7",
-  "ledgerHash": "d8a67ddf82d49ddf53ec980f9e6153579985c120a8ef3968e655674f71f04eb3",
+  "decisionHash": "3166ff20b9d45da94d7c8329a04c4237673a707c58f964dca9480a1409f87aca",
+  "ledgerHash": "23b9bf65b58281ba9a0c9ddbadb2dbf4c58bdbd8b9804774ae4842cd64de90a0",
   "privacy": "baseline_ids_digests_counts_booleans_and_command_output_hashes_only",
   "commandGates": [
     {
@@ -50,7 +50,7 @@
       "exitCode": 0,
       "signal": null,
       "passed": true,
-      "stdoutSha256": "102a12ab3482a2a017f88e907c3f5e8b57249d412c59c09fcdef6ec5c106726c",
+      "stdoutSha256": "9c6d271ae28665e898c3fc990b4396211cf1b8a66e26c3d03b20bcaadef9ac5e",
       "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
@@ -95,6 +95,6 @@
     "commandGates": true
   },
   "passed": true,
-  "runnerSha256": "d5c55b5e6c61f37f9126773caa2bcfb4d169c1a3f0116e0d80389743a60cd59f",
-  "generatedAt": "2026-07-25T08:07:23.502Z"
+  "runnerSha256": "1cd25cba937cb89c153de2994d9b4c6908e2b513a5edf48875272dbb2566154d",
+  "generatedAt": "2026-07-25T10:30:14.400Z"
 }

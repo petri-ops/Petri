@@ -2,7 +2,7 @@
 
 最后更新：2026-07-25
 
-状态：`active / SDC-0 completed`
+状态：`planned / SDC-0 completed / SDC-1 deferred`（2026-07-25 因 Result Studio 产品复核让出唯一 active 工作包；已完成代码与证据保留）
 
 计划编号：`G0-SDC`
 
@@ -18,7 +18,7 @@
 2. ✅ `G0-START` 审计通过（10/10，2026-07-24）。
 3. ✅ `G0-LF0` 已建立 Constitution、Baseline Registry、版本身份和 Support Matrix（2026-07-24）。
 
-启动边界：本计划已于 2026-07-25 从完成并推送的 `G0 Baseline v1.1.0 + Result Studio` 干净检查点启动，当前只实施 `SDC-0`。单工作包串行不变，`SDC-1`～`SDC-7` 不得提前实现或宣称验收。
+启动边界：本计划已于 2026-07-25 完成 `SDC-0` Profile Registry 与版本治理。产品复核确认 Result Studio 尚未具备真实结果选择、编辑和资格闭环，因此 `SDC-1`～`SDC-7` 暂不启动；当前唯一 active 工作包回到 `G0-RS`，待 `G0-RS-P7` 收口后再评估恢复 `SDC-1`。单工作包串行不变，已完成的 SDC-0 不回滚、不冒充完整数据适配能力。
 
 ## 1. 决策结论
 

@@ -10,7 +10,7 @@ test('G0 Baseline v1 is maintained, qualified and matches live contract versions
   assert.equal(result.ok, true, result.issues.join('\n'));
   assert.deepEqual(result.issues, []);
   assert.equal(result.baseline.baselineId, g0.registry.currentBaselineId);
-  assert.equal(result.baseline.baselineVersion, '1.1.0');
+  assert.equal(result.baseline.baselineVersion, '1.1.1');
   assert.equal(result.baseline.lifecycleStatus, 'maintained');
   assert.equal(result.baseline.qualificationStatus, 'qualified');
   assert.match(result.baseline.manifestDigest, /^[a-f0-9]{64}$/);
@@ -30,7 +30,7 @@ test('G0 Constitution freezes the single execution truth and durable public evid
   }, TypeError);
 });
 
-test('support matrix qualifies only the explicit LF12 and RS9 scope', () => {
+test('support matrix keeps LF12 core qualified while Result Studio product editing is experimental', () => {
   const groups = ['platforms', 'providers', 'runtimes', 'plugins', 'projectFormats', 'productCapabilities'];
   for (const group of groups) {
     assert.ok(Array.isArray(g0.supportMatrix[group]));
@@ -46,7 +46,9 @@ test('support matrix qualifies only the explicit LF12 and RS9 scope', () => {
   assert.equal(g0.supportMatrix.plugins.find((item) => item.id === 'deseq2')?.status, 'qualified');
   assert.equal(g0.supportMatrix.plugins.find((item) => item.id === 'wgcna')?.status, 'experimental');
   assert.equal(g0.supportMatrix.projectFormats.find((item) => item.id === 'g0-major-1')?.status, 'qualified');
-  assert.equal(g0.supportMatrix.productCapabilities.find((item) => item.id === 'result-studio-editing')?.status, 'qualified');
+  assert.equal(g0.supportMatrix.productCapabilities.find((item) => item.id === 'result-studio-editing')?.status, 'experimental');
+  assert.equal(g0.qualificationManifest.excludedClaims.some((item) => item.id === 'result-studio-editing'), true);
+  assert.equal(g0.qualificationManifest.supportClaims.some((item) => item.id === 'result-studio-editing'), false);
 });
 
 test('legacy unversioned projects are explicitly adopted without rewriting creator history', () => {

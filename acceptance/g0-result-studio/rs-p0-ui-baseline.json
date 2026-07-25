@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS-P0",
+  "sourceCommit": "728492102a12b4138fc386dd4cd6982086c98136",
+  "captureMode": "interactive_dev_renderer_observation",
+  "qualificationEligible": false,
+  "qualificationReason": "development renderer observation documents the current gap but cannot substitute for packaged continuous product traces",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "screenshot": {
+    "sha256": "72d9ac997b2e2e11d58944d3201efb8e476ba15327c4de64328214fbefa54ab7",
+    "bytes": 49208,
+    "stored": false,
+    "retention": "ephemeral audit capture; hash only"
+  },
+  "console": {
+    "browserCapturedErrors": 0,
+    "browserCapturedWarnings": 2,
+    "warningClass": "react_router_v7_future_flags"
+  },
+  "observations": [
+    {
+      "id": "result_mode_active",
+      "status": "observed",
+      "evidence": "top result tab is pressed and a validated six-artifact result is open"
+    },
+    {
+      "id": "central_result_canvas_absent",
+      "status": "observed",
+      "centralMainRect": {
+        "x": 241,
+        "y": 38,
+        "width": 698,
+        "height": 682
+      },
+      "centralMainVisibleText": "返回对话"
+    },
+    {
+      "id": "result_confined_to_right_panel",
+      "status": "observed",
+      "resultPanelRect": {
+        "x": 940,
+        "y": 38,
+        "width": 340,
+        "height": 682
+      },
+      "evidence": "version review, report controls, artifact navigation and table preview share the narrow right panel"
+    },
+    {
+      "id": "direct_scientific_edit_controls_absent_in_observed_state",
+      "status": "observed",
+      "evidence": "the open table exposes preview/navigation and compare controls, but no row selection, filter, manual parameter editor or AI edit composer"
+    }
+  ],
+  "privacy": "layout_rectangles_bounded_visible_labels_and_screenshot_hash_only",
+  "generatedAt": "2026-07-25T10:34:04Z"
+}

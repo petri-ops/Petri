@@ -2,7 +2,7 @@
 
 最后更新：2026-07-25
 
-状态：`completed / qualified`（RS0～RS9 已全部收口；Result Studio 已进入 G0 Baseline v1.1 长期维护门）
+状态：`active / implemented_unverified`（RS0～RS8 引擎基础保留；`G0-RS-P0` 已完成资格纠偏，下一阶段 `G0-RS-P1` planned）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -16,7 +16,7 @@
 
 前置条件：已满足。`G0-LF12` 已完成首个 `G0 Baseline v1 = qualified + maintained`，源码、证据与文档提交已全部推送形成干净 checkpoint，base commit 为 `38d3de2`（`main` 与 `origin/main` 同步、工作区 clean）。`run_tool → tool_job → artifact truth`、源数据不可变、Loop 恢复与交付复现契约不得回归
 
-范围边界：Result Studio 不属于 LF12 待资格功能。LF12 只验证当前结果投影与 UI 状态收敛；Result Studio 在 LF12 通过后按本计划独立启动。
+范围边界：Result Studio 不属于 LF12 原始资格范围。RS0～RS8 已形成 Git/SQLite/Artifact/ChangeSet/Revision 引擎基础，但 2026-07-25 产品复核确认选择 UI、图形实体映射、Agent 上下文、手动编辑器、主画布和真实端到端资格证据不足。`result-studio-editing` 的产品支持声明在 `G0-RS-P7` 重新资格前保持暂停，不从既有合成证据外推。
 
 ## 1. 决策结论
 
@@ -992,6 +992,8 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 
 ### G0-RS9：真实产品验收与基线晋升
 
+状态：`qualification_withdrawn / evidence_reclassified`（2026-07-25 产品复核）。本节保留当时目标与历史实现记录，但其中“真实产品”“qualified”“verified”的晋升结论不再决定当前事实；新的产品资格只由 §22 的 `G0-RS-P7` 裁决。
+
 目标：将 Result Studio 晋升为 G0 长期基线。
 
 真实任务：
@@ -1021,7 +1023,7 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 - adopt/revert/restart 轨迹。
 - 性能和存储数据。
 
-实现与验收结论：
+历史实现与验收声明（已降级为单元、fixture、合成集成与 renderer 证据）：
 
 - 新增确定性 `result-studio-qualification.js`：只有 5/5 科学任务、9/9 环境、7/7 证据类型、至少 2 类真实 Provider、全部独立脚本及零假成功/半采用/静默丢失同时成立才允许晋升；任一缺项都 fail-closed。
 - DEG 表精确选择 27 个稳定 `gene_id`，以 filter/hash 和 12 个有界样本进入 Agent 上下文；科学阈值修改确定性覆盖 DEG、火山图与富集下游节点，并保持科学确认门。
@@ -1029,8 +1031,8 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 - 真实 renderer 使用隔离 SQLite、项目目录和 BioF3 托管 Git：明亮/夜间、1440×900、820×900、五万行 DEG 大表、服务中断/重启共 5 态通过。820px 下 `innerWidth = clientWidth = scrollWidth = 820`；五万行表仅渲染当前可见 24 行，显示 4 个版本、逻辑占用与可去重空间，重启后仍恢复同一候选现场。
 - Git Adapter 专项继续覆盖非 Git、已有 clean Git 和已有 dirty Git；ChangeSet/Review/Lifecycle 专项覆盖 AI/手动同一契约、失败/取消、compare/adopt/revert/restore、checkpoint、Artifact hash、ref 自愈/阻断与安全 GC。
 - 脱敏证据：`rs9-product-acceptance.json`、`rs9-provider-acceptance.json`、`rs9-visual-acceptance.json` 及 `rs9-ui/` 五张截图。聚合结果为 5/5 tasks、9/9 environments、7/7 evidence classes。
-- `result-studio-editing` 已从 Qualification excluded claims 移除并成为显式 support claim；新增 mandatory `result_studio_product` 证据类，Support Matrix 标记 qualified。兼容升级为 `G0 Baseline v1.1.0 / qualified + maintained`，执行真相仍唯一为 `run_tool → tool_job → artifact truth`。
-- UI-102、UI-103、UI-105 随 RS9 真实矩阵晋升 `verified`；没有从本次 macOS arm64、四个 admitted 插件及明确任务矩阵外推到任意组学、Windows/Linux 或未适配插件。
+- 历史实现曾把 `result-studio-editing` 晋升为 qualified support claim；产品复核发现五条任务由独立测试、fixture 与截图组合推导，Provider 探针未执行真实工具闭环，视觉检查依赖人工布尔值，大表由数据库 seed 构造。因此该资格声明暂停，待 `G0-RS-P0` 修正机器声明、`G0-RS-P7` 重新资格。
+- UI-102、UI-103、UI-105 的历史 `verified` 已回退为 `in_progress`；UI-104 只保留“候选版本比较/采用/撤销引擎和紧凑侧栏”这一窄范围验证，不代表 Result Studio 产品完成。
 
 ## 15. 质量门禁
 
@@ -1094,23 +1096,23 @@ npm run g0:result-studio:acceptance
 
 ## 20. 完成定义
 
-只有同时满足以下条件，`G0-RS` 才能从 `planned` 晋升为 `qualified`：
+RS0～RS9 的旧勾选记录已被 2026-07-25 产品复核撤销。只有同时满足以下条件，`G0-RS` 才能重新晋升为 `qualified`：
 
 - [x] 使用真实 Git，不是模拟 commit/diff。
-- [x] 非 Git 与已有 Git 项目均有安全路径。
-- [x] 用户无须理解 Git 即可完成完整版本操作。
-- [x] AI 和手动编辑进入同一 ChangeSet/Revision 流程。
-- [x] 每个正式图表和表格有独立可执行脚本。
+- [x] 非 Git与已有 Git 项目均有安全路径。
+- [ ] 普通用户无须理解 Git、内部 ID 或路径即可完成完整版本操作。
+- [ ] AI 和真实手动编辑控件进入同一 ChangeSet/Revision 流程。
+- [x] 已适配 Artifact 具备独立、可追溯脚本基础；仍需在真实编辑旅程验证可直接重跑。
 - [x] 原始脚本、源数据和历史 Artifact 不被覆盖。
-- [x] 展示重绘与科学重算被可靠区分。
-- [x] 新结果有 Job、Artifact Truth、Validator 和 lineage。
-- [x] 表格、图形选择可结构化进入 Agent 上下文。
-- [x] Diff、视觉比较、采用、撤销和恢复均通过真实 UI 验收。
-- [x] 应用重启、任务中断和脏 Git 工作区通过恢复矩阵。
-- [x] 大型科研数据未被错误提交普通 Git。
-- [x] 至少一个完整 Bulk RNA-seq 任务从原始结果完成多轮编辑与二次分析。
-- [x] 根检查、专项门禁、真实 Provider 和视觉证据全部闭环。
-- [x] `G0-RS8` 的运行时隔离（临时 Electron `userData`、SQLite、results/tmp/logs）通过破坏性耐久测试；不以 Worktree 作为完成条件。
+- [ ] 展示重绘、数据变换、科学重算和流程重规划在真实 UI/Agent 链可靠区分。
+- [x] 新结果可绑定 Job、Artifact Truth、Validator 和 lineage。
+- [ ] 表格和图形的真实选择控件可结构化进入 Agent 上下文并跨重启恢复。
+- [ ] 主画布、Diff、科学差异、采用、撤销和恢复通过真实 UI 验收。
+- [ ] 应用重启、任务中断、Provider 中断和脏 Git 工作区通过连续产品恢复矩阵。
+- [x] 大型科研数据不进入普通 Git object database。
+- [ ] 至少一个完整 Bulk RNA-seq 任务从真实原始结果完成多轮编辑与二次分析。
+- [ ] 根检查、专项门禁、真实 Provider tool calling、packaged Electron 和视觉证据全部闭环。
+- [x] `G0-RS8` 的运行时隔离基础存在；破坏性产品旅程仍须在 `G0-RS-P6/P7` 重验。
 
 ## 21. 推荐启动顺序
 
@@ -1138,3 +1140,314 @@ G0-RS0 只读审计与 ADR
 - 每个阶段的进展回写本文件，不按日期新建进度文档。
 
 本计划是 G0 qualified 后的首个重要产品升级，不得以 UI 先行掩盖版本、执行和 Artifact 契约问题。
+
+## 22. 2026-07-25 产品复核与重开决策
+
+### 22.1 当前裁决
+
+Result Studio 当前按三层事实表达：
+
+| 层级 | 当前状态 | 已有能力 | 不得宣称 |
+|---|---|---|---|
+| Engine foundation | `implemented` | Git Adapter、Revision、ChangeSet、Job/Artifact binding、比较、采用、撤销、checkpoint、恢复与存储治理 | 不等于用户可完成结果编辑 |
+| Product surface | `incomplete` | 右侧紧凑版本面板与部分预览 | 不得宣称中央结果工作台、真实选择、手动编辑器已经可用 |
+| Qualification | `under_review` | 单元、fixture、合成集成和 renderer 截图证据可继续用于回归 | 不得把这些证据称为真实连续科学任务或完整 Provider tool-calling 资格 |
+
+本次重开不删除 RS0～RS8 的代码或历史证据。`G0-SDC0` 作为已完成的数据契约种子保留，`SDC-1`～`SDC-7` 延后；SDC-1 只有在 `G0-RS-P7` 收口后才重新排期。
+
+### 22.2 复核确认的产品缺口
+
+1. `artifactSelection` 在真实工作区没有表格/图形操作入口，Selection helper 主要停留在函数与测试层。
+2. 通用图形 Artifact 没有稳定 mark-to-entity mapping，无法诚实点选基因、样本或区域。
+3. Agent 系统上下文没有自动获得 artifact/revision/family/selection/workflow node/script/editable schema 全套坐标。
+4. 产品不存在 Schema 驱动的 Manual Parameter Editor 与统一 AI Edit Composer。
+5. 结果被压缩在右侧工具栏，无法承担大图、大表、报告、比较和科学解释的主要工作空间。
+6. 版本 UI 偏向内部 ChangeSet/Revision 状态，缺少面向用户的“改了什么、为什么、结论怎么变、下一步做什么”。
+7. RS9 的五条任务不是一条连续 trace；Provider 探针主要验证结构化回答，未验证真实 tool calling 与重跑。
+8. 五万行表通过数据库 seed 构造，只证明 renderer fixture，不证明真实插件、选择、修改、采用和恢复。
+9. 视觉矩阵主要验证截图存在、尺寸和人工布尔值，没有证明用户可在 820px 完成结果任务。
+10. UI 台账历史 `verified` 与代码中“图形控件后续实现、表格实机待验”互相矛盾。
+
+### 22.3 产品模式与布局原则
+
+工作区保持 Agent 主导，不点击结果时仍是聊天与任务流。只有用户打开 Artifact、Revision 或候选结果时，中央区域进入 Result Studio：
+
+```text
+默认：Agent 对话/任务模式
+  └─ 点击结果
+      → Result Studio 结果模式
+          ├─ 中央：图 / 表 / 报告主画布
+          ├─ 右侧：参数 / 版本 / 血缘检查器
+          └─ 可展开：Agent 协作面板
+              └─ 产生候选后进入比较模式
+```
+
+四种模式共享同一个 Project、Conversation、Workflow、Job、Artifact、Revision 和 Selection 真相，不复制状态：
+
+| 模式 | 中央焦点 | Agent 角色 | 退出方式 |
+|---|---|---|---|
+| 对话模式 | 会话与阶段结论 | 主导需求理解、DAG 和执行 | 点击 Artifact 进入结果 |
+| 任务模式 | DAG、运行状态和节点证据 | 主导诊断、修复与继续 | 打开节点结果或回到对话 |
+| 结果模式 | 单个图、表或报告 | 解释、选择感知、辅助编辑 | 返回对话或进入比较 |
+| 比较模式 | 当前版本与候选版本 | 解释视觉/参数/科学差异 | 采用、撤销或返回结果 |
+
+布局必须满足：
+
+- 结果打开后中央主画布占主要可用面积，右侧仅承载检查器，不再把结果锁在窄栏。
+- 聊天不消失；宽屏使用可收起侧边协作面板，中/小屏使用明确的“结果 / Agent”切换。
+- 文件、浏览器和终端仍是工具视图，不与 Result Studio 争夺同一主状态。
+- 打开、关闭和切换模式只改变投影与焦点，不改变 Artifact current Revision。
+
+## 23. G0-RS-P0～P7 产品收口计划
+
+### G0-RS-P0：Truth Correction 与可执行基线
+
+状态：`completed`（2026-07-25）。
+
+目标：先让机器声明、文档和证据分类与代码事实一致，冻结一条可比较的产品基线。
+
+范围：
+
+- 将 `result-studio-editing` Support Claim 降为 `experimental/limited` 或重新加入 excluded claims；不影响 LF12 原始核心资格。
+- 将 RS9 product/provider/visual/table-seed 证据分类为 unit、synthetic integration、renderer fixture 或 historical evidence。
+- UI-102、UI-103、UI-105 回退 `in_progress`；UI-104 只保留窄范围版本操作验证。
+- 建立现状实机截图、操作录像/trace 索引、DOM 可达性和关键交互失败基线。
+- 冻结真实产品 trace schema，禁止脚本用常量或独立测试拼装“完整任务通过”。
+
+验收：
+
+- 文档、Support Matrix、qualification gate、UI audit 与运行时投影不再声称未证实能力。
+- 旧证据不删除但有明确 provenance/classification；资格门对缺真实 trace fail-closed。
+- `npm run docs:reconcile`、`npm run docs:check`、G0 qualification 回归通过；若 Support Claim 降级导致门禁失败，应通过正式兼容变更修复，不能篡改旧证据。
+
+实现与证据：
+
+- G0 Baseline patch 升级为 `1.1.1`，LF12 核心仍为 `qualified + maintained`；强制证据恢复为原始 `16/16`，`result_studio_product` 不再冒充核心 mandatory evidence。
+- `result-studio-editing` 在 Support Matrix 标为 `experimental`，Qualification Manifest 中进入 excluded claims；旧 RS9 三类证据和 table seed 全部机器分类为 non-qualifying historical evidence。
+- `Result Studio Product Trace v1` 固定 14 个连续步骤、7 个来源支持的不变量、允许/禁止证据类型；旧 RS9 汇总因无 continuous traces 被资格器 v2 确定性拒绝。
+- 开发态真实界面观察确认：1280×720 下中央 698×682 区域只有“返回对话”，结果集中在右侧 340px 面板；该观察明确为 non-qualifying baseline，不替代 packaged 资格。
+- 脱敏证据：`acceptance/g0-result-studio/rs-p0-truth-correction.json` 与 `rs-p0-ui-baseline.json`。
+- 专项 `25/25`、全量 `1353`（1342 pass / 0 fail / 11 skip）、G0 permanent qualification、G0-START 与文档/UI 门禁通过；最终根检查 `npm run check` 已于 2026-07-25 完整通过（exit 0）。
+
+### G0-RS-P1：Result Surface 与中央主画布
+
+状态：`planned`；P0 收口后唯一允许启动的下一阶段。
+
+目标：让结果成为可阅读、可操作的主要空间，同时保持默认 Agent 主导。
+
+交付：
+
+- 在既有 `ProjectWorkspace` 状态机中增加 conversation/task/result/compare 四种投影模式，不新建第二个项目工作区。
+- 建立 `ResultStudioCanvas`、`ResultInspector`、`ResultContextBar` 与响应式模式切换。
+- 图、表、报告、文本/JSON、不可预览二进制使用统一 shell、各自 viewer adapter。
+- 顶部只显示标题、可信状态、一句话结论、当前版本、选择摘要与最相关动作；技术 ID 收进高级详情。
+- 宽屏、中屏、820px 小屏分别定义布局；结果模式可全屏、可返回原会话滚动位置。
+
+验收：
+
+- 从聊天、任务节点、文件/Artifact 导航打开同一结果，均进入同一主画布且不会创建第二份 current 状态。
+- 明暗主题、1440px、1024px、820px 无页面级溢出；键盘和屏幕阅读器可到达核心动作。
+- 关闭结果后 Agent 对话、输入草稿、滚动位置和运行中任务不丢失。
+
+### G0-RS-P2：Scientific Interaction 与 SelectionContext
+
+目标：把“这些基因、这些样本、这个区域”变成真实、耐久、可复现的数据引用。
+
+交付：
+
+- 大表虚拟化、字段类型、排序、过滤、行/列选择、全选查询、选择摘要和清除/恢复。
+- 图形 point/region/legend selection；插件 descriptor 必须提供稳定 entity mapping，缺映射时显式只读，不猜实体。
+- SelectionContext 使用稳定 ID 或可复现 query/filter + hash；大选择只向 Agent 投影计数、规则和有界样本。
+- 选择 chip 与主画布高亮、Inspector、Agent Composer 使用同一 selectionId。
+- Artifact/Revision 改变时执行 compatible、stale、invalid 三态判定，禁止把旧行号静默映射到新结果。
+
+首批场景：DEG 表 gene_id 选择、火山图基因点选/框选、热图基因/样本选择、富集表 pathway 选择。
+
+验收：
+
+- 真实插件结果完成单选、多选、过滤后全选、框选、跨标签切换、会话重开和应用重启恢复。
+- 选择对象经 Agent tool call 实际用于下游 GO/KEGG 或重绘，不只验证序列化函数。
+- 10 万行级表只渲染视口行；选择、排序和过滤不阻塞主线程且统计不说谎。
+
+### G0-RS-P3：Agent Context 与 Edit Orchestration
+
+目标：用户只表达目标，Harness 自动补齐 Result Studio 的工程坐标和执行步骤。
+
+交付：
+
+- 构建版本化 `ResultStudioContextEnvelope`，至少包含 project/conversation/workflow node/job/artifact/family/revision/selection/plugin/script/editable schema/validation/reproducibility。
+- 上下文由当前 UI 状态和后端真相自动投影；用户、模型都不需要手写内部 ID。
+- Agent 工具支持 context-bound plan/create/status/compare/adopt/revert，服务端校验上下文 token 与当前 Revision，防止陈旧操作。
+- 公开进度统一为“理解意图 → 判断影响 → 执行/重算 → 验证 → 候选可比较”，只展示阶段结论，不展示隐藏推理链。
+- context 缺失、选择陈旧、来源脚本不足或归因只能到 Job 时诚实阻断，并给 Agent 可行动修复路径。
+
+验收：
+
+- 至少两个真实 Provider 在不提供任何内部 ID 的情况下，从当前结果和选择完成真实 tool calling。
+- 工具调用必须生成同一项目中的 ChangeSet、正式 Job/Artifact 和候选 Revision；失败不得回退为模型口头成功。
+- 切换模型、压缩会话和重开应用后 ContextEnvelope 可以从 SQLite/Artifact/Revision 重建。
+
+### G0-RS-P4：Manual + AI Unified Editing
+
+目标：手动调整和自然语言修改共用一条可审计、可撤销、可复现的编辑链。
+
+交付：
+
+- 根据 Plugin SDK editable schema 生成参数面板，不为每个插件手写孤立结果页。
+- 首批控件覆盖配色、字体、尺寸、图例、标签、导出格式，以及经过插件声明的科学参数。
+- `AI Edit Composer` 自动引用当前 Artifact/Revision/Selection；用户可在执行前看到解释后的参数 Patch 与影响级别。
+- 手动输入和 AI 结果都归一化为 `ResultEditIntent → ScientificChangeSet`，进入相同 validation、preview、compare、adopt/revert。
+- presentation、data transform、scientific recompute、workflow replan 分级；未知参数保守按重算或阻断，绝不猜成样式修改。
+
+验收：
+
+- 同一火山图分别通过手动控件与 AI 完成等价配色/标签修改，生成可比较、可恢复的 ChangeSet。
+- 修改科学阈值必须展示影响节点和科学确认语义；纯样式修改不得重跑 DESeq2。
+- 任一控件不得直接覆盖 Artifact、源数据或 current Revision 文件。
+
+### G0-RS-P5：Real Scientific Editing 与科学差异
+
+目标：证明 Result Studio 可以修改真实科学结果，而不只是操作版本元数据。
+
+首批真实任务：
+
+1. DEG 表筛选稳定 gene_id 并继续 GO/KEGG。
+2. 火山图选择基因后修改标签、颜色、尺寸并导出 SVG/PNG。
+3. 热图修改配色、聚类展示和注释，区分展示变化与计算变化。
+4. 修改 DEG 阈值，重算 affected subgraph 并比较显著基因与富集结果。
+5. 从历史版本创建替代方案，比较后采用，再撤销并恢复为新 Revision。
+
+交付：
+
+- 每个正式图/表/报告都能定位和导出其独立脚本、参数、输入引用、环境与 validator。
+- 比较视图同时显示视觉差异、参数/脚本差异、表格统计差异和科学结论差异。
+- 科学差异至少覆盖显著实体数量、关键实体变化、通路排名/方向和受影响下游节点。
+- 插件 descriptor 缺少交互或影响元数据时 fail-closed，修复进入插件 SDK 工作，不在 Harness Core 写插件特例。
+
+验收：
+
+- 五条任务都从真实 admitted 插件执行开始，不能直接 seed Revision/ChangeSet/数据库。
+- 所有候选产物走 `run_tool → tool_job → artifact truth` 并通过插件 validator。
+- 源数据哈希不变；脚本可在 ReplayPackage 中独立重跑并复现采用版本。
+
+### G0-RS-P6：Durability、Recovery、Performance 与产品可解释性
+
+目标：让长时间、多轮结果工作在中断、失败和资源压力下仍可理解、可恢复。
+
+故障矩阵：
+
+- 用户停止、Provider 暂时失败、R 进程失败、validator blocked、应用崩溃、系统重启。
+- dirty Git、ref 漂移、SQLite/Artifact/Git 不一致、磁盘不足、内存压力、预览超预算。
+- 选择陈旧、候选过期、插件升级、脚本缺失、Artifact 文件外部修改。
+
+交付与验收：
+
+- 每个阶段 checkpoint 可恢复；重开后明确显示停止位置、已保留内容、系统自动处理和下一动作。
+- 可逆且不改变科学设计的问题由 Agent 自动修复；科学歧义、不可逆外部影响或缺少输入时才请求用户。
+- 真实 10 万行表、复杂 SVG/PNG、长报告和多 Revision 项目满足冻结的交互预算。
+- CPU/内存/磁盘/Job 峰值与 Token/cache/cost 以同一任务摘要投影，不把估算冒充精确计量。
+- GC 永不删除 current、历史 Revision、可达脚本、采用证据或未终态 ChangeSet。
+
+### G0-RS-P7：Honest Product Requalification
+
+目标：只用真实连续产品旅程重新决定 Result Studio 是否可以成为 supported/qualified 能力。
+
+每条任务必须保存一条脱敏、连续、机器可核对的 trace：
+
+```text
+conversation
+→ open artifact
+→ selection/manual edit
+→ Agent context envelope
+→ provider tool call
+→ ResultEditIntent
+→ ChangeSet
+→ real Job
+→ Artifact Truth + Validator
+→ candidate Revision
+→ compare
+→ adopt/revert
+→ restart/reopen
+→ replay verification
+```
+
+资格矩阵：
+
+- 两个真实 Provider，其中至少一个 OpenAI-compatible；必须真实调用工具，不能复述 Prompt 中给出的 JSON。
+- macOS arm64 packaged Electron；开发 renderer 只能作为调试证据。
+- 明暗主题，1440px、1024px、820px；每个尺寸必须完成操作，不只是无横向溢出。
+- 非 Git、clean Git、dirty Git、任务中断、应用重启、Provider/执行失败恢复。
+- 五条 RS-P5 科学任务；至少一条从用户导入数据开始并完成多轮编辑和二次分析。
+
+零容忍：
+
+- 假成功、半采用、源数据覆盖、内部 ID 要求用户填写、选择错绑、历史丢失、无脚本正式结果、隐藏错误、证据常量冒充观测，任一出现即不 qualified。
+
+出口：
+
+- 独立资格器从 trace、数据库、Git、Artifact 和截图/操作事件读取事实，不读取人工“通过”布尔值作为唯一依据。
+- `result-studio-editing` 只有在完整矩阵通过后才重新进入 Support Matrix；否则保持 experimental/limited 并列出精确边界。
+- 完成时同步本计划、G0 Living Foundation、qualification ledger、UI audit、handoff、next steps 和审计台，并运行 `docs:reconcile`、`docs:check`、根检查、前端检查、真实 Provider 与 packaged-app 门禁。
+
+## 24. 横向工程规范
+
+### 24.1 单一真相与组件边界
+
+- `ProjectWorkspace` 继续负责工作区模式与选择协调；viewer 不持久化自己的第二套 current Revision。
+- `desktopBridge.ts` 是 Electron IPC 唯一前端入口；Result Studio HTTP/API client 继续使用既有后端身份和项目隔离。
+- Selection、ChangeSet、Revision、Job、Artifact、Loop 均复用既有数据库与服务，不创建平行表或“轻量结果状态”。
+- 前端状态只做可丢弃投影；重开后的事实从 SQLite、Git 和 Artifact Truth 重建。
+
+### 24.2 插件与跨平台
+
+- Result Studio 控件由通用 schema/descriptor 驱动，插件独立声明实体映射、editable properties、影响级别和 validator。
+- 首批资格范围仍是 macOS arm64 admitted plugins；Windows/Linux/macOS x64 只有独立证据后才能扩张。
+- 缺少声明的插件保持只读预览，不因 UI 能显示就冒充可编辑。
+
+### 24.3 UI 与可访问性
+
+- 新 UI 保持无重背景、紧凑层级和渐进披露；不把每个工具调用做成大卡片。
+- 公开展示阶段结论、操作和证据摘要，不展示模型隐藏思维链。
+- 主操作必须具备键盘路径、清晰焦点、可读状态和非颜色唯一编码。
+- 技术字段、Git commit、hash、完整日志放入高级详情，普通视图优先回答“这是什么、是否可信、我能做什么”。
+
+### 24.4 性能预算冻结时点
+
+`G0-RS-P1` 以真实机器采样冻结具体阈值，至少监控：首次主画布可见、Artifact 切换、表格滚动、选择反馈、参数预览、比较打开、重启恢复和内存增长。后续阶段不得用降低数据真实性或截断选择来换取指标。
+
+## 25. 串行顺序、依赖与完成语义
+
+唯一顺序：
+
+```text
+G0-RS-P0 Truth Correction
+  → G0-RS-P1 Result Surface
+  → G0-RS-P2 Scientific Interaction
+  → G0-RS-P3 Agent Context
+  → G0-RS-P4 Unified Editing
+  → G0-RS-P5 Real Scientific Editing
+  → G0-RS-P6 Durability & UX
+  → G0-RS-P7 Requalification
+  → 恢复评估 G0-SDC1
+```
+
+阶段状态规则：
+
+- 同一时间只有一个 `G0-RS-P*` 阶段处于 `in_progress`；`G0-RS-P0` 已完成，当前没有进行中实现，下一阶段只允许 `G0-RS-P1`。
+- 每阶段先补失败测试/fixture，再实现，再形成与证据类型匹配的验收；不得提前开发下一阶段。
+- 单元测试证明契约，fixture 证明确定性集成，真实 Provider 证明模型边界，packaged Electron 证明产品链；四者不能互相替代。
+- 未运行 `npm run docs:reconcile` 与 `npm run docs:check` 不得宣布阶段 completed/verified/qualified。
+- `G0-RS-P7` 之前只允许使用 `implemented_unverified`、`in_progress`、`experimental/limited` 等诚实状态。
+
+## 26. 第一阶段交付清单
+
+`G0-RS-P0` 交付结果：
+
+1. [x] 修正 Support Matrix、Baseline Registry/Manifest 与 qualification gate 的 Result Studio 声明。
+2. [x] 对 RS9 三类证据和 table seed 建立机器可读 classification/provenance。
+3. [x] 冻结 continuous product trace schema 和禁止常量冒充观测的 validator。
+4. [x] 回退 UI-102/UI-103/UI-105 状态并登记 UI-106～UI-111 产品增量。
+5. [x] 捕获当前真实产品基线，不把截图存在等同于操作通过。
+6. [x] 跑专项、G0、文档、UI 和全量测试；根门禁在最终文档收口后复跑。
+
+下一 Goal 只允许实施 `G0-RS-P1`，不得提前进入 P2～P7。

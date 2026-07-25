@@ -4,13 +4,13 @@
 
 资格对象：`g0-fifth-wave-establishing-0.6 / 0.6.0`
 
-当前晋升结果：`g0-baseline-v1 / 1.1.0`（LF12 首次晋升为 1.0.0；RS9 完成兼容支持范围重资格）
+当前晋升结果：`g0-baseline-v1 / 1.1.1`（LF12 首次晋升为 1.0.0；RS-P0 通过 patch 版本纠正 Result Studio 支持范围）
 
 执行真相：`run_tool → tool_job → artifact_truth`
 
 ## 最终裁决
 
-- 强制证据：`17 / 17 satisfied`
+- 强制证据：`16 / 16 satisfied`
 - 零容忍不变量：`10 / 10 observed`，违规数均为 `0`
 - Evidence Ledger 无效条目：`0`
 - blocker：`0`
@@ -21,7 +21,7 @@
 
 资格裁决绑定封存的 0.6 subject digest；晋升后的 v1 Manifest、Registry、Support Matrix 和 LF11 requalification 接线形成新的 maintained bundle，不反向改变被资格评审的对象。
 
-RS9 新增 `result_studio_product` mandatory evidence，并将 `result-studio-editing` 从 excluded claim 晋升为显式 support claim；五条科学任务、九类环境、双真实 Provider、五态 renderer 与零假成功边界见 `acceptance/g0-result-studio/rs9-*-acceptance.json`。
+2026-07-25 的 RS-P0 复核确认：RS9 的 product/provider/visual 汇总分别属于合成集成摘要、Provider Prompt 探针和 renderer fixture review，大表由直接数据库 seed 构造，不能证明连续真实产品任务。`result_studio_product` 已退出 G0 核心 mandatory evidence，`result-studio-editing` 回到 excluded/experimental；历史证据保留并由 `acceptance/g0-result-studio/rs-p0-truth-correction.json` 机器分类。只有 G0-RS-P7 的 packaged continuous product trace 可以重新申请支持声明。
 
 ## 强制证据覆盖
 
@@ -55,7 +55,7 @@ RS9 新增 `result_studio_product` mandatory evidence，并将 `result-studio-ed
 - canonical `deseq2` conformance track。
 - read、full、developer 权限模式及不可覆盖安全边界。
 
-Windows、Linux、macOS x64、云/PostgreSQL、任意组学自动支持、任意插件科学资格、Multi-Agent 编排和 Result Studio 编辑能力均未被本次资格推断或晋升。
+Windows、Linux、macOS x64、云/PostgreSQL、任意组学自动支持、任意插件科学资格、Multi-Agent 编排和 Result Studio 产品编辑能力均未被本次资格推断或晋升。Result Studio 的 Git/SQLite/Artifact Revision 引擎基础可以继续回归，但产品能力保持 experimental。
 
 ## 迁移与回滚
 

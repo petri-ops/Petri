@@ -17,7 +17,7 @@ function fixture() {
   const sourceCommit = 'e'.repeat(40);
   return {
     baselineValidation: { ok: true },
-    currentBaseline: { baselineVersion: '1.1.0', lifecycleStatus: 'maintained', qualificationStatus: 'qualified' },
+    currentBaseline: { baselineVersion: '1.1.1', lifecycleStatus: 'maintained', qualificationStatus: 'qualified' },
     subjectBaseline: subject,
     qualificationManifest: { bundleDigest: subject.bundleDigest },
     ledger: {
@@ -41,7 +41,7 @@ function fixture() {
       providers: [{ id: 'deepseek', status: 'qualified' }, { id: 'openai-compatible', status: 'qualified' }],
       runtimes: [{ id: 'node-local', status: 'qualified' }, { id: 'r-local', status: 'qualified' }, { id: 'python-local', status: 'qualified' }],
       plugins: [{ id: 'deseq2', status: 'qualified' }],
-      productCapabilities: [{ id: 'result-studio-editing', status: 'qualified' }],
+      productCapabilities: [{ id: 'result-studio-editing', status: 'experimental' }],
     },
     baselineManifest: {
       executionTruthChain: ['run_tool', 'tool_job', 'artifact_truth'],

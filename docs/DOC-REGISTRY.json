@@ -115,8 +115,10 @@
       "id": "G0-RS",
       "path": "docs/g0-result-studio-plan.md",
       "kind": "work-package",
-      "status": "completed",
-      "canonical": false,
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "g0-current-work-package",
+      "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path"
     },
     {
@@ -133,7 +135,7 @@
       "id": "G0-SDC",
       "path": "docs/g0-scientific-data-contract-plan.md",
       "kind": "living-plan",
-      "status": "active",
+      "status": "planned",
       "canonical": true,
       "truthDomain": "g0-scientific-data-contract",
       "entrypoint": "docs/README.md",
