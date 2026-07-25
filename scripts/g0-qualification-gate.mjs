@@ -72,7 +72,7 @@ export function evaluateQualificationGate({
   const observations = new Map((ledger?.zeroToleranceObservations || []).map((item) => [item.id, item]));
   const checks = {
     baselineBundle: baselineValidation?.ok === true,
-    maintainedQualified: currentBaseline?.baselineVersion === '1.0.0'
+    maintainedQualified: currentBaseline?.baselineVersion === '1.1.0'
       && currentBaseline?.lifecycleStatus === 'maintained'
       && currentBaseline?.qualificationStatus === 'qualified',
     sealedSubject: subjectBaseline?.baselineId === qualification.contract.subjectBaselineId
@@ -83,7 +83,7 @@ export function evaluateQualificationGate({
       && Array.isArray(decision?.blockers) && decision.blockers.length === 0
       && Array.isArray(decision?.limitedClaims) && decision.limitedClaims.length === 0
       && Array.isArray(decision?.unsupportedClaims) && decision.unsupportedClaims.length === 0,
-    mandatoryEvidence: requiredClassIds.length === 16
+    mandatoryEvidence: requiredClassIds.length === 17
       && requiredClassIds.every((id) => ledger?.classStatus?.[id] === 'satisfied'),
     zeroTolerance: zeroToleranceIds.length === 10
       && zeroToleranceIds.every((id) => observations.get(id)?.violations === 0)
@@ -102,6 +102,7 @@ export function evaluateQualificationGate({
       && qualified('runtimes', 'r-local')
       && qualified('runtimes', 'python-local')
       && qualified('plugins', 'deseq2')
+      && qualified('productCapabilities', 'result-studio-editing')
       && supportMatrix?.platforms?.find((item) => item.id === 'windows-x64')?.status === 'unavailable',
     singleExecutionTruth: baselineManifest?.executionTruthChain?.join(',') === 'run_tool,tool_job,artifact_truth',
     commandGates: commandGates.length === commandSpecs.length && commandGates.every((item) => item.passed),

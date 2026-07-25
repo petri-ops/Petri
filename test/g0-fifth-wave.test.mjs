@@ -13,7 +13,7 @@ const fullEvidence = [
 test('maintained v1 retains the fifth-wave evolution contracts', () => {
   const validation = g0.validateG0BaselineBundle();
   assert.equal(validation.ok, true, validation.issues.join('\n'));
-  assert.equal(g0.manifest.baselineVersion, '1.0.0');
+  assert.equal(g0.manifest.baselineVersion, '1.1.0');
   assert.equal(g0.manifest.qualificationStatus, 'qualified');
   assert.equal(g0.manifest.lifecycleStatus, 'maintained');
   assert.equal(g0.getQualificationSubjectBaseline().baselineVersion, '0.6.0');

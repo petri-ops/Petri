@@ -115,10 +115,8 @@
       "id": "G0-RS",
       "path": "docs/g0-result-studio-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "g0-result-studio",
-      "entrypoint": "docs/README.md",
+      "status": "completed",
+      "canonical": false,
       "archivePolicy": "retain_stable_path"
     },
     {

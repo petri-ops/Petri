@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": 1,
+  "contractVersion": 2,
   "decisionPolicyVersion": 1,
   "qualificationId": "g0-baseline-v1-qualification",
   "subjectBaselineId": "g0-fifth-wave-establishing-0.6",
@@ -148,6 +148,13 @@
       "evidenceMode": "real_execution",
       "coreProof": "Real renderer across light/dark, 820px, wide and history-recovery shows converged, non-green-for-blocked states.",
       "realEntryPoint": "npm run g0:qualification:visual"
+    },
+    {
+      "id": "result_studio_product",
+      "enforcement": "mandatory",
+      "evidenceMode": "real_execution",
+      "coreProof": "Five admitted scientific result-editing tracks pass real Git, Revision, Job/Artifact, restart, Provider, storage and renderer matrices without creating a second truth.",
+      "realEntryPoint": "npm run g0:result-studio:acceptance"
     }
   ],
   "zeroToleranceInvariants": [
@@ -208,6 +215,24 @@
       "id": "permission-boundary-enforced",
       "description": "Read, full and developer modes obey non-negotiable safety boundaries.",
       "requiredEvidenceClasses": ["security_permission"]
+    },
+    {
+      "id": "result-studio-editing",
+      "description": "Admitted scientific tables and plots support durable selection, isolated AI/manual edits, review, atomic adoption, revert, restore and restart-safe history.",
+      "requiredEvidenceClasses": [
+        "truth_lattice",
+        "durable_state",
+        "scientific_accuracy",
+        "replay_drift",
+        "runtime_resource",
+        "plugin_supply_chain",
+        "security_permission",
+        "observable_experience",
+        "resilience_fault_matrix",
+        "real_provider",
+        "visual_state_convergence",
+        "result_studio_product"
+      ]
     }
   ],
   "excludedClaims": [
@@ -216,8 +241,7 @@
     { "id": "macos-x64-support", "reason": "analysis_runtime_not_product_qualified" },
     { "id": "cloud-or-postgres-storage", "reason": "local_only_architecture" },
     { "id": "arbitrary-omics-auto-support", "reason": "only_conformance_admitted_tracks" },
-    { "id": "multi-agent-orchestration", "reason": "not_a_g0_baseline_capability" },
-    { "id": "result-studio-editing", "reason": "planned_after_qualification_not_in_scope" }
+    { "id": "multi-agent-orchestration", "reason": "not_a_g0_baseline_capability" }
   ],
   "forbidden": [
     "second_qualification_execution_truth",

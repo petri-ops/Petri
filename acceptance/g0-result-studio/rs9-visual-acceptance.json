@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS9",
+  "sourceCommit": "c74c434732725a8497bd073ba0899b873b462d55",
+  "platform": "macos-arm64",
+  "appMode": "real-renderer-isolated-result-studio-matrix",
+  "privacy": "sanitized_fixture_screenshot_hashes_dimensions_and_bounded_observations_only",
+  "states": [
+    {
+      "id": "result-light-wide",
+      "file": "result-light-wide.jpg",
+      "theme": "light",
+      "viewport": "wide",
+      "height": 900,
+      "width": 1417,
+      "format": "jpeg",
+      "bytes": 34114,
+      "imageSha256": "1bb387567d09596b4931c99d67f6bb33261a7b8ab2d65a985a3d8d376c2aa582"
+    },
+    {
+      "id": "result-dark-wide",
+      "file": "result-dark-wide.jpg",
+      "theme": "dark",
+      "viewport": "wide",
+      "height": 900,
+      "width": 1417,
+      "format": "jpeg",
+      "bytes": 37249,
+      "imageSha256": "7e262e30f0141168c3e4b7ab753c7cb2bdb9f07b5af78f0a5468acbe20c5c7b0"
+    },
+    {
+      "id": "result-dark-820",
+      "file": "result-dark-820.jpg",
+      "theme": "dark",
+      "viewport": "820",
+      "height": 900,
+      "width": 820,
+      "format": "jpeg",
+      "bytes": 15356,
+      "imageSha256": "b32e414c62752c8a24130a7af6474d4518dd2df43cdd3ab13f0f8e10a18a154f"
+    },
+    {
+      "id": "large-table-light-wide",
+      "file": "large-table-light-wide.jpg",
+      "theme": "light",
+      "viewport": "wide",
+      "height": 900,
+      "width": 1417,
+      "format": "jpeg",
+      "bytes": 52984,
+      "imageSha256": "017fa00047041e972f5b66d2a17c396bafb3b0505298fb1abc5c0d28369c7432"
+    },
+    {
+      "id": "restart-restored-light-wide",
+      "file": "restart-restored-light-wide.jpg",
+      "theme": "light",
+      "viewport": "wide",
+      "height": 900,
+      "width": 1417,
+      "format": "jpeg",
+      "bytes": 49941,
+      "imageSha256": "a692753c9d7589cec2e31ddc38cc06b358e4b36070030ffcb66bcd6c65f16513"
+    }
+  ],
+  "inspection": {
+    "method": "real-renderer-accessibility-and-screenshot-review",
+    "diffBeforeAfterReadable": true,
+    "gitDetailsProgressivelyDisclosed": true,
+    "restartRecovered": true,
+    "interruptedProgressPreserved": true,
+    "largeTablePaged": true,
+    "localScrollOnly": true,
+    "pageHorizontalOverflow": false,
+    "viewport820Usable": true,
+    "blockedNeverGreen": true,
+    "singleCurrentRevision": true
+  },
+  "runnerSha256": "cc40e667bc48d223ccd5d892cc87f7f1d99b030dbd049427404d8d07b113d3fb",
+  "generatedAt": "2026-07-25T08:01:14.594Z",
+  "checks": {
+    "stateMatrix": true,
+    "imagesValid": true,
+    "themeMatrix": true,
+    "viewportMatrix": true,
+    "diffReadable": true,
+    "lifecycleVisible": true,
+    "largeTableProgressive": true,
+    "responsive": true,
+    "truthProjection": true,
+    "privacy": true
+  },
+  "passed": true
+}

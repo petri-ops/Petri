@@ -4,13 +4,13 @@
 
 资格对象：`g0-fifth-wave-establishing-0.6 / 0.6.0`
 
-晋升结果：`g0-baseline-v1 / 1.0.0`
+当前晋升结果：`g0-baseline-v1 / 1.1.0`（LF12 首次晋升为 1.0.0；RS9 完成兼容支持范围重资格）
 
 执行真相：`run_tool → tool_job → artifact_truth`
 
 ## 最终裁决
 
-- 强制证据：`16 / 16 satisfied`
+- 强制证据：`17 / 17 satisfied`
 - 零容忍不变量：`10 / 10 observed`，违规数均为 `0`
 - Evidence Ledger 无效条目：`0`
 - blocker：`0`
@@ -20,6 +20,8 @@
 - 永久维护门：`11 / 11 passed`
 
 资格裁决绑定封存的 0.6 subject digest；晋升后的 v1 Manifest、Registry、Support Matrix 和 LF11 requalification 接线形成新的 maintained bundle，不反向改变被资格评审的对象。
+
+RS9 新增 `result_studio_product` mandatory evidence，并将 `result-studio-editing` 从 excluded claim 晋升为显式 support claim；五条科学任务、九类环境、双真实 Provider、五态 renderer 与零假成功边界见 `acceptance/g0-result-studio/rs9-*-acceptance.json`。
 
 ## 强制证据覆盖
 

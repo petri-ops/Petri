@@ -2,7 +2,7 @@
 
 最后更新：2026-07-25
 
-状态：`in_progress`（RS0 ✅ / RS1 ✅ / RS2 ✅ / RS3 ✅ / RS4 ✅ / RS5 ✅ / RS6 ✅ / RS7 ✅ / RS8 ✅ 已收口；当前下一阶段为 `G0-RS9`，单线串行）
+状态：`completed / qualified`（RS0～RS9 已全部收口；Result Studio 已进入 G0 Baseline v1.1 长期维护门）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -1021,6 +1021,17 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 - adopt/revert/restart 轨迹。
 - 性能和存储数据。
 
+实现与验收结论：
+
+- 新增确定性 `result-studio-qualification.js`：只有 5/5 科学任务、9/9 环境、7/7 证据类型、至少 2 类真实 Provider、全部独立脚本及零假成功/半采用/静默丢失同时成立才允许晋升；任一缺项都 fail-closed。
+- DEG 表精确选择 27 个稳定 `gene_id`，以 filter/hash 和 12 个有界样本进入 Agent 上下文；科学阈值修改确定性覆盖 DEG、火山图与富集下游节点，并保持科学确认门。
+- DeepSeek 与 OpenAI-compatible 两类真实 Provider 通过 Result Studio 展示修改、科学阈值、27 基因继续富集和未知参数保守分级矩阵；不保存模型、URL、响应或凭据。
+- 真实 renderer 使用隔离 SQLite、项目目录和 BioF3 托管 Git：明亮/夜间、1440×900、820×900、五万行 DEG 大表、服务中断/重启共 5 态通过。820px 下 `innerWidth = clientWidth = scrollWidth = 820`；五万行表仅渲染当前可见 24 行，显示 4 个版本、逻辑占用与可去重空间，重启后仍恢复同一候选现场。
+- Git Adapter 专项继续覆盖非 Git、已有 clean Git 和已有 dirty Git；ChangeSet/Review/Lifecycle 专项覆盖 AI/手动同一契约、失败/取消、compare/adopt/revert/restore、checkpoint、Artifact hash、ref 自愈/阻断与安全 GC。
+- 脱敏证据：`rs9-product-acceptance.json`、`rs9-provider-acceptance.json`、`rs9-visual-acceptance.json` 及 `rs9-ui/` 五张截图。聚合结果为 5/5 tasks、9/9 environments、7/7 evidence classes。
+- `result-studio-editing` 已从 Qualification excluded claims 移除并成为显式 support claim；新增 mandatory `result_studio_product` 证据类，Support Matrix 标记 qualified。兼容升级为 `G0 Baseline v1.1.0 / qualified + maintained`，执行真相仍唯一为 `run_tool → tool_job → artifact truth`。
+- UI-102、UI-103、UI-105 随 RS9 真实矩阵晋升 `verified`；没有从本次 macOS arm64、四个 admitted 插件及明确任务矩阵外推到任意组学、Windows/Linux 或未适配插件。
+
 ## 15. 质量门禁
 
 建议新增：
@@ -1085,21 +1096,21 @@ npm run g0:result-studio:acceptance
 
 只有同时满足以下条件，`G0-RS` 才能从 `planned` 晋升为 `qualified`：
 
-- [ ] 使用真实 Git，不是模拟 commit/diff。
-- [ ] 非 Git 与已有 Git 项目均有安全路径。
-- [ ] 用户无须理解 Git 即可完成完整版本操作。
-- [ ] AI 和手动编辑进入同一 ChangeSet/Revision 流程。
-- [ ] 每个正式图表和表格有独立可执行脚本。
-- [ ] 原始脚本、源数据和历史 Artifact 不被覆盖。
-- [ ] 展示重绘与科学重算被可靠区分。
-- [ ] 新结果有 Job、Artifact Truth、Validator 和 lineage。
-- [ ] 表格、图形选择可结构化进入 Agent 上下文。
-- [ ] Diff、视觉比较、采用、撤销和恢复均通过真实 UI 验收。
-- [ ] 应用重启、任务中断和脏 Git 工作区通过恢复矩阵。
-- [ ] 大型科研数据未被错误提交普通 Git。
-- [ ] 至少一个完整 Bulk RNA-seq 任务从原始结果完成多轮编辑与二次分析。
-- [ ] 根检查、专项门禁、真实 Provider 和视觉证据全部闭环。
-- [ ] `G0-RS8` 的运行时隔离（临时 Electron `userData`、SQLite、results/tmp/logs）通过破坏性耐久测试；不以 Worktree 作为完成条件。
+- [x] 使用真实 Git，不是模拟 commit/diff。
+- [x] 非 Git 与已有 Git 项目均有安全路径。
+- [x] 用户无须理解 Git 即可完成完整版本操作。
+- [x] AI 和手动编辑进入同一 ChangeSet/Revision 流程。
+- [x] 每个正式图表和表格有独立可执行脚本。
+- [x] 原始脚本、源数据和历史 Artifact 不被覆盖。
+- [x] 展示重绘与科学重算被可靠区分。
+- [x] 新结果有 Job、Artifact Truth、Validator 和 lineage。
+- [x] 表格、图形选择可结构化进入 Agent 上下文。
+- [x] Diff、视觉比较、采用、撤销和恢复均通过真实 UI 验收。
+- [x] 应用重启、任务中断和脏 Git 工作区通过恢复矩阵。
+- [x] 大型科研数据未被错误提交普通 Git。
+- [x] 至少一个完整 Bulk RNA-seq 任务从原始结果完成多轮编辑与二次分析。
+- [x] 根检查、专项门禁、真实 Provider 和视觉证据全部闭环。
+- [x] `G0-RS8` 的运行时隔离（临时 Electron `userData`、SQLite、results/tmp/logs）通过破坏性耐久测试；不以 Worktree 作为完成条件。
 
 ## 21. 推荐启动顺序
 

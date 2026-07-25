@@ -185,7 +185,7 @@ test('LF12 rejects duplicate, credential, URL and absolute-path evidence', () =>
   assert.equal(decision.state, 'blocked');
 });
 
-test('LF12 decision is deterministic and excludes unsupported scope and Result Studio editing', () => {
+test('RS9 requalification keeps deterministic unsupported scope while promoting Result Studio editing', () => {
   const activeManifest = manifest();
   const args = {
     manifest: activeManifest,
@@ -199,7 +199,8 @@ test('LF12 decision is deterministic and excludes unsupported scope and Result S
 
   assert.equal(firstLedger.ledgerHash, secondLedger.ledgerHash);
   assert.equal(first.decisionHash, second.decisionHash);
-  assert.ok(qualification.contract.excludedClaims.some(({ id }) => id === 'result-studio-editing'));
+  assert.equal(qualification.contract.excludedClaims.some(({ id }) => id === 'result-studio-editing'), false);
+  assert.ok(qualification.contract.supportClaims.some(({ id }) => id === 'result-studio-editing'));
   assert.ok(qualification.contract.excludedClaims.some(({ id }) => id === 'windows-support'));
   assert.equal(g0.manifest.executionTruthChain.join(','), 'run_tool,tool_job,artifact_truth');
 });

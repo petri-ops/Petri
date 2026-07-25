@@ -201,6 +201,11 @@ function getPublicG0BaselineSummary() {
       providers: supportMatrix.providers.map(({ id, status, reason }) => ({ id, status, ...(reason ? { reason } : {}) })),
       runtimes: supportMatrix.runtimes.map(({ id, status, platform }) => ({ id, status, ...(platform ? { platform } : {}) })),
       plugins: supportMatrix.plugins.map(({ id, status }) => ({ id, status })),
+      productCapabilities: (supportMatrix.productCapabilities || []).map(({ id, status, scope }) => ({
+        id,
+        status,
+        ...(scope ? { scope } : {}),
+      })),
     },
   };
 }
@@ -252,7 +257,7 @@ function validateG0BaselineBundle() {
       issues.push(`contract_version_drift:${name}:${expected}:${actualContracts[name]}`);
     }
   }
-  for (const group of ['platforms', 'providers', 'runtimes', 'plugins', 'projectFormats']) {
+  for (const group of ['platforms', 'providers', 'runtimes', 'plugins', 'projectFormats', 'productCapabilities']) {
     for (const capability of supportMatrix[group] || []) {
       if (!allowedStatuses.has(capability.status)) issues.push(`capability_status_invalid:${group}:${capability.id}`);
       if (

@@ -1,0 +1,13 @@
+{
+  "method": "real-renderer-accessibility-and-screenshot-review",
+  "diffBeforeAfterReadable": true,
+  "gitDetailsProgressivelyDisclosed": true,
+  "restartRecovered": true,
+  "interruptedProgressPreserved": true,
+  "largeTablePaged": true,
+  "localScrollOnly": true,
+  "pageHorizontalOverflow": false,
+  "viewport820Usable": true,
+  "blockedNeverGreen": true,
+  "singleCurrentRevision": true
+}

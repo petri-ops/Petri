@@ -1,6 +1,6 @@
 # BioF3 Desktop 文档入口
 
-最后更新：2026-07-24
+最后更新：2026-07-25
 
 ## 项目治理入口
 
@@ -12,10 +12,10 @@
 ## 长期核心指引
 
 1. [`scientific-intelligence-os-vision.md`](./scientific-intelligence-os-vision.md) — BioF3 长期产品愿景、当前定位、阶段跃迁条件与禁止跨阶段建设规则。它约束方向，但不替代当前工作包。
-2. [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) — 当前永久 G0 可信基础层主线；G0-START/LF0～LF12 已完成，Baseline v1 已进入 qualified + maintained。
+2. [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) — 当前永久 G0 可信基础层主线；G0-START/LF0～LF12 与 RS9 兼容重资格已完成，Baseline v1.1 已进入 qualified + maintained。
 3. [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) — 已完成的 G0 Baseline v1 资格认证、证据边界与永久维护契约。
 4. [`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md) — 已进入 LF3/LF7 依赖链的数据契约与适配基线。
-5. [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) — 当前下一工作包；在 maintained G0 上建设结果交互、Git-backed ChangeSet/Revision、比较、采用、撤销与恢复能力。
+5. [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) — 已完成的 Result Studio RS0～RS9 工作包；记录结果交互、Git-backed ChangeSet/Revision、比较、采用、撤销、恢复和生产资格矩阵。
 6. [`g0-rs0-result-studio-audit.md`](./g0-rs0-result-studio-audit.md) — G0-RS0 现状审计与架构 ADR；Result Studio 的复用/新增边界、契约缺陷与 Git 风险矩阵的唯一裁决记录。
 
 ## 当前开发必读

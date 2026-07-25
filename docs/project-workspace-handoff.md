@@ -29,7 +29,7 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 
 ### 3.0 当前主线：G0 Living Foundation maintained
 
-2026-07-24 `G0-START` 与 LF0～LF12 已关闭。`G0 Baseline v1 / 1.0.0` 已通过 16 类强制证据、10 条零容忍、真实 Provider、macOS arm64 packaged、5 分钟 soak 和五态视觉矩阵，进入 `qualified + maintained`。
+2026-07-25 `G0-START`、LF0～LF12 与 Result Studio RS0～RS9 已关闭。`G0 Baseline v1 / 1.1.0` 已通过 17 类强制证据、10 条零容忍、双真实 Provider、macOS arm64 packaged、5 分钟 soak、基础五态视觉和 Result Studio 五态视觉矩阵，保持 `qualified + maintained`。
 
 G0 资格只覆盖 Support Matrix 明示范围，不覆盖 Windows/Linux/macOS x64、任意插件或任意科学任务。永久 `g0:qualification` 与 LF11 requalification 继续优先；任何触发器缺少新证据时 fail-closed。
 
@@ -37,7 +37,7 @@ LF12 完成记录为 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseli
 
 2026-07-24 后续治理收口：新增文档生命周期治理层（[`document-governance.md`](./document-governance.md)、[`worktree-governance.md`](./worktree-governance.md)、[`DOC-REGISTRY.json`](./DOC-REGISTRY.json)、`scripts/docs-governance.mjs`、`npm run docs:status|check|reconcile`，`docs:check` 已接入根 `npm run check`）；注册表中 `G0-LF12` 已收口为 `completed / canonical:false`，释放 `g0-current-work-package` truthDomain。干净 checkpoint 为 `38d3de2`（已推送，工作区 clean）。
 
-当前主线：[`g0-result-studio-plan.md`](./g0-result-studio-plan.md) 已启动，**单工作包串行、主工作区分支 `codex/g0-result-studio`，不使用 Git Worktree**（`G0-RS-WT0` = `deferred`，判据见该计划 §14）。结果交互与 Git-backed 版本能力仍不得冒充 LF12 已资格能力。
+Result Studio 工作包已收口，仍由主工作区分支 `codex/g0-result-studio` 承载最终提交；本轮未创建 Git Worktree。当前没有第二个 active 工作包，`G0-SDC` 仅为下一候选且尚未启动。
 
 已收口阶段：
 
@@ -71,6 +71,8 @@ RS3 实测修正的三个真实缺陷：其一，我在路由里使用了 `app.l
 `G0-RS7` 已收口：Result Studio Plugin SDK v1 对 descriptor 与 golden Revision 执行 fail-closed lint；DESeq2、volcano、gene-correlation heatmap、GO/KEGG 的 12 个正式 table/plot 全部映射，每个 required file input 都有 Artifact binding。RS5 的 canonical `analysis/scripts/<family>/<revision>/<artifact>.R` 继续保证每个正式结果独立脚本，不拆分插件执行器、不建立插件内版本系统。相同 major/contract 的历史可读，漂移要求迁移，缺迁移时显式 `read_only_legacy`。下一阶段：`G0-RS8` 耐久恢复、性能与存储治理；不得提前实现 RS9 基线晋升。
 
 `G0-RS8` 已收口：每个 ChangeSet 阶段持久化 WorkspaceCheckpoint；重启后只在 candidate ref、Revision、completed Job 与 valid Artifact Truth 全部一致时自动恢复 preview。Git/SQLite/Artifact 漂移分类为自愈或阻断；存储摘要、content-addressed hardlink 去重和 plan-token GC 均不删除正式 Artifact/Revision 历史。大表通过 1 MiB 有界 byte cursor 渐进加载，preview Job 受真实资源快照和并发预算约束且不修改科学参数。UI-105 功能完成但待 RS9 真实重启/大表/视觉矩阵，保持 `in_progress`。下一阶段：`G0-RS9` 真实产品验收与基线晋升。
+
+`G0-RS9` 已收口：资格判定器要求 5/5 科学任务、9/9 环境、7/7 证据类型和 2/2 真实 Provider 类同时通过。隔离真实 renderer 覆盖明暗、宽屏、820px、五万行 DEG 表与服务中断/重启；五万行仅渲染 24 个可见行，820px 无页面横向溢出，重启后候选 ChangeSet/Revision/存储摘要仍恢复。`result-studio-editing` 已从 excluded claim 晋升为 qualified support claim，新增第 17 类 mandatory evidence；G0 兼容升级到 v1.1.0。UI-102/UI-103/UI-105 均有 RS9 真实矩阵并标记 `verified`。证据位于 `acceptance/g0-result-studio/rs9-{product,provider,visual}-acceptance.json` 与 `rs9-ui/`。
 
 ### 3.1 已完成基线：真实科学任务驱动的 Harness 升级
 

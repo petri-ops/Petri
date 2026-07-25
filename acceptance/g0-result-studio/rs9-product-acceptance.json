@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS9",
+  "sourceCommit": "c74c434732725a8497bd073ba0899b873b462d55",
+  "baseline": {
+    "baselineId": "g0-fifth-wave-establishing-0.6",
+    "baselineVersion": "0.6.0",
+    "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3"
+  },
+  "platform": "macos-arm64",
+  "appMode": "real-product-result-studio-qualification",
+  "privacy": "repository_relative_refs_hashes_counts_statuses_and_bounded_invariants_only",
+  "tasks": [
+    {
+      "id": "deg_selection_to_enrichment",
+      "status": "passed",
+      "evidenceRefs": [
+        "selection-and-scientific-intent",
+        "productionPlugins"
+      ]
+    },
+    {
+      "id": "volcano_ai_presentation_edit",
+      "status": "passed",
+      "evidenceRefs": [
+        "changeset-review-history",
+        "plugins",
+        "visual"
+      ]
+    },
+    {
+      "id": "heatmap_manual_then_ai_edit",
+      "status": "passed",
+      "evidenceRefs": [
+        "changeset-review-history",
+        "plugins",
+        "visual"
+      ]
+    },
+    {
+      "id": "scientific_threshold_recompute",
+      "status": "passed",
+      "evidenceRefs": [
+        "selection-and-scientific-intent",
+        "providers"
+      ]
+    },
+    {
+      "id": "historical_alternative_compare",
+      "status": "passed",
+      "evidenceRefs": [
+        "changeset-review-history",
+        "visual"
+      ]
+    }
+  ],
+  "environments": [
+    {
+      "id": "managed_non_git",
+      "status": "passed"
+    },
+    {
+      "id": "existing_clean_git",
+      "status": "passed"
+    },
+    {
+      "id": "existing_dirty_git",
+      "status": "passed"
+    },
+    {
+      "id": "restart_and_interruption",
+      "status": "passed"
+    },
+    {
+      "id": "light_theme",
+      "status": "passed"
+    },
+    {
+      "id": "dark_theme",
+      "status": "passed"
+    },
+    {
+      "id": "viewport_820",
+      "status": "passed"
+    },
+    {
+      "id": "viewport_wide",
+      "status": "passed"
+    },
+    {
+      "id": "two_real_providers",
+      "status": "passed"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "git_commits_refs",
+      "status": "passed",
+      "digest": "0cfe99d6ecae1b0b6bf4ae6f0c9a9b976753ee8d2e7a6dca453a9c0e83778305"
+    },
+    {
+      "id": "changesets_revisions",
+      "status": "passed",
+      "digest": "0cfe99d6ecae1b0b6bf4ae6f0c9a9b976753ee8d2e7a6dca453a9c0e83778305"
+    },
+    {
+      "id": "job_artifact_truth",
+      "status": "passed",
+      "digest": "8c1e737fff386a2528a5dcfe53459a86425ba3742c5c4184393f00299102f7d7"
+    },
+    {
+      "id": "scripts_parameters",
+      "status": "passed",
+      "digest": "0cfe99d6ecae1b0b6bf4ae6f0c9a9b976753ee8d2e7a6dca453a9c0e83778305"
+    },
+    {
+      "id": "diff_compare_visuals",
+      "status": "passed",
+      "digest": "33c91aab16b116c7a427e5fe0960cf6986effa1a0bdd741b36b802a78ce4d82c"
+    },
+    {
+      "id": "adopt_revert_restart",
+      "status": "passed",
+      "digest": "1568057aa3dd28f3df344371b2b73a4721addb8cd8d918d8407467dc91566334"
+    },
+    {
+      "id": "performance_storage",
+      "status": "passed",
+      "digest": "1568057aa3dd28f3df344371b2b73a4721addb8cd8d918d8407467dc91566334"
+    }
+  ],
+  "providers": [
+    {
+      "providerClass": "deepseek",
+      "status": "passed"
+    },
+    {
+      "providerClass": "openai-compatible",
+      "status": "blocked"
+    },
+    {
+      "providerClass": "openai-compatible",
+      "status": "blocked"
+    },
+    {
+      "providerClass": "openai-compatible",
+      "status": "blocked"
+    },
+    {
+      "providerClass": "openai-compatible",
+      "status": "passed"
+    }
+  ],
+  "commands": [
+    {
+      "id": "selection-and-scientific-intent",
+      "command": "node --test test/result-studio-qualification.test.mjs test/artifact-interaction.test.mjs test/result-edit-intent.test.mjs",
+      "exitCode": 0,
+      "passed": true,
+      "stdoutSha256": "f4273eaf87a9202a9242211921c8e1c8754808642f90bb7d4c694c554f4c6b1b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "changeset-review-history",
+      "command": "node --test test/result-changeset-service.test.mjs test/result-compare-service.test.mjs",
+      "exitCode": 0,
+      "passed": true,
+      "stdoutSha256": "284adbfa4d47d712177951799d906286d6c0583fab216f9604b493e03e1b0920",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "git-environment-matrix",
+      "command": "node --test test/git-adapter.test.mjs",
+      "exitCode": 0,
+      "passed": true,
+      "stdoutSha256": "b3c62e26c724178b7df559a8c678b17a2a5f23719e189e06d41c2904ed25094f",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "restart-performance-storage",
+      "command": "node --test test/result-studio-lifecycle.test.mjs test/result-studio-repository.test.mjs",
+      "exitCode": 0,
+      "passed": true,
+      "stdoutSha256": "12646f27cabcb9c0bff035d4c38be116a74049f0f3e0c71465ee8032e5a0e5ca",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "plugin-independent-scripts",
+      "command": "node --test test/result-studio-plugin-sdk.test.mjs",
+      "exitCode": 0,
+      "passed": true,
+      "stdoutSha256": "9e1ed6e4173473c9437eabc354ffd0dd63371b7d668b2ccddfa93b180e316caa",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "renderer-components",
+      "command": "npm run test --prefix frontend -- --run src/components/result-studio/ResultStudioChangeSetPanel.test.tsx",
+      "exitCode": 0,
+      "passed": true,
+      "stdoutSha256": "815345f5715f0147b9c25af8c5f3d59285fe8051cdc1756053dc1fbb26b85583",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "invariants": {
+    "executionTruth": "run_tool -> tool_job -> artifact_truth",
+    "sourceDataPreserved": true,
+    "artifactHistoryPreserved": true,
+    "unrelatedGitWipPreserved": true,
+    "falseSuccessCount": 0,
+    "partialAdoptCount": 0,
+    "silentLossCount": 0,
+    "formalArtifactCount": 12,
+    "formalArtifactsWithIndependentScripts": 12
+  },
+  "inputEvidenceHashes": {
+    "plugins": "0cfe99d6ecae1b0b6bf4ae6f0c9a9b976753ee8d2e7a6dca453a9c0e83778305",
+    "lifecycle": "1568057aa3dd28f3df344371b2b73a4721addb8cd8d918d8407467dc91566334",
+    "providers": "90c7400d46fb57c6163ac7db0ddca735d6acffe9e470f65fd5b702c45eb3dd19",
+    "visual": "33c91aab16b116c7a427e5fe0960cf6986effa1a0bdd741b36b802a78ce4d82c",
+    "productionPlugins": "8c1e737fff386a2528a5dcfe53459a86425ba3742c5c4184393f00299102f7d7"
+  },
+  "runnerSha256": "22acc8ad10c69caa9d98610562d5690ed95c3cc6f99a6c0b59d5c3895e114fcd",
+  "generatedAt": "2026-07-25T08:02:32.955Z",
+  "privacyClean": true,
+  "qualification": {
+    "passed": true,
+    "checks": {
+      "schema": true,
+      "taskMatrix": true,
+      "environmentMatrix": true,
+      "evidenceMatrix": true,
+      "twoRealProviders": true,
+      "commandsPassed": true,
+      "singleExecutionTruth": true,
+      "immutableHistory": true,
+      "honestRecovery": true,
+      "independentScripts": true,
+      "privacy": true
+    },
+    "missingTasks": [],
+    "missingEnvironments": [],
+    "missingEvidence": [],
+    "providerClassCount": 2,
+    "qualificationDigest": "e69613bfe5eba6e3b2c28c4e8f60333605fb9c96c749066760eb5072d4225682"
+  },
+  "passed": true
+}

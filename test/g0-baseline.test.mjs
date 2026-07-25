@@ -10,7 +10,7 @@ test('G0 Baseline v1 is maintained, qualified and matches live contract versions
   assert.equal(result.ok, true, result.issues.join('\n'));
   assert.deepEqual(result.issues, []);
   assert.equal(result.baseline.baselineId, g0.registry.currentBaselineId);
-  assert.equal(result.baseline.baselineVersion, '1.0.0');
+  assert.equal(result.baseline.baselineVersion, '1.1.0');
   assert.equal(result.baseline.lifecycleStatus, 'maintained');
   assert.equal(result.baseline.qualificationStatus, 'qualified');
   assert.match(result.baseline.manifestDigest, /^[a-f0-9]{64}$/);
@@ -30,8 +30,8 @@ test('G0 Constitution freezes the single execution truth and durable public evid
   }, TypeError);
 });
 
-test('support matrix qualifies only the explicit LF12 scope', () => {
-  const groups = ['platforms', 'providers', 'runtimes', 'plugins', 'projectFormats'];
+test('support matrix qualifies only the explicit LF12 and RS9 scope', () => {
+  const groups = ['platforms', 'providers', 'runtimes', 'plugins', 'projectFormats', 'productCapabilities'];
   for (const group of groups) {
     assert.ok(Array.isArray(g0.supportMatrix[group]));
   }
@@ -46,6 +46,7 @@ test('support matrix qualifies only the explicit LF12 scope', () => {
   assert.equal(g0.supportMatrix.plugins.find((item) => item.id === 'deseq2')?.status, 'qualified');
   assert.equal(g0.supportMatrix.plugins.find((item) => item.id === 'wgcna')?.status, 'experimental');
   assert.equal(g0.supportMatrix.projectFormats.find((item) => item.id === 'g0-major-1')?.status, 'qualified');
+  assert.equal(g0.supportMatrix.productCapabilities.find((item) => item.id === 'result-studio-editing')?.status, 'qualified');
 });
 
 test('legacy unversioned projects are explicitly adopted without rewriting creator history', () => {
@@ -121,6 +122,7 @@ test('public G0 summary exposes support claims but no mutable internal object', 
   assert.equal(summary.baselineId, g0.manifest.baselineId);
   assert.deepEqual(summary.executionTruthChain, ['run_tool', 'tool_job', 'artifact_truth']);
   assert.ok(summary.support.providers.some((item) => item.id === 'deepseek'));
+  assert.ok(summary.support.productCapabilities.some((item) => item.id === 'result-studio-editing'));
   summary.executionTruthChain.push('unsafe');
   assert.deepEqual(g0.manifest.executionTruthChain, ['run_tool', 'tool_job', 'artifact_truth']);
 });

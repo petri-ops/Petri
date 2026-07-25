@@ -760,11 +760,12 @@ G0 Baseline v1 = qualified + maintained
 
 ### 已落地
 
-- 16 类强制证据全部 satisfied，10 条零容忍观测均为 0，最终确定性裁决为 qualified。
-- Baseline Manifest/Registry/Support Matrix 晋升为 `g0-baseline-v1 / 1.0.0 / qualified + maintained`，但 Qualification subject 继续固定为封存的 0.6 digest，避免资格摘要循环。
+- LF12 原始 16 类证据与 RS9 新增 `result_studio_product` 合计 17 类强制证据全部 satisfied，10 条零容忍观测均为 0，最终确定性裁决为 qualified。
+- Baseline Manifest/Registry/Support Matrix 经 RS9 兼容范围扩展升级为 `g0-baseline-v1 / 1.1.0 / qualified + maintained`；Qualification subject 继续固定为封存的 0.6 digest，避免资格摘要循环。
 - 真实 Provider、macOS arm64 packaged、5 分钟 soak 与五态视觉矩阵分别形成脱敏证据；canonical DESeq2 的参数、Artifact、Provenance、独立脚本和报告通过真实执行。
 - 永久 `g0:qualification` 门验证当前 maintained bundle、封存 subject、Evidence Ledger、零容忍、支持边界和六个独立子门。
 - LF11 Promotion Gate 接入 LF12 requalification；触发器缺少新的 qualified 决策或证据摘要时 fail-closed。
+- `result-studio-editing` 已从 excluded claim 移除，只有 RS9 的 5/5 科学任务、9/9 环境、7/7 证据、双 Provider 和五态 renderer 同时通过时才成为 qualified support claim。
 - 完整报告见 [`../acceptance/g0-qualification/qualification-report.md`](../acceptance/g0-qualification/qualification-report.md)。
 
 ## 22. 永久 Conformance Matrix

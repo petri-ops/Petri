@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "contractVersion": 1,
+  "contractVersion": 2,
   "decisionPolicyVersion": 1,
   "qualificationId": "g0-baseline-v1-qualification",
   "subjectBaselineId": "g0-fifth-wave-establishing-0.6",
   "subjectBaselineVersion": "0.6.0",
-  "subjectLifecycleStatus": "establishing",
-  "subjectQualificationStatus": "not_yet_qualified",
+  "subjectLifecycleStatus": "maintained",
+  "subjectQualificationStatus": "qualified",
   "manifestDigest": "0c6dbb71acc20e18e4952c2a62c23a9d5655a5a0326dbdb45a8549d75dfd02cf",
   "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
   "qualificationScope": {
@@ -107,6 +107,11 @@
       "id": "visual_state_convergence",
       "enforcement": "mandatory",
       "evidenceMode": "real_execution"
+    },
+    {
+      "id": "result_studio_product",
+      "enforcement": "mandatory",
+      "evidenceMode": "real_execution"
     }
   ],
   "zeroToleranceInvariants": [
@@ -128,7 +133,8 @@
     "real-provider-science-neutral",
     "runtime-resource-adaptive",
     "capability-supply-chain-governed",
-    "permission-boundary-enforced"
+    "permission-boundary-enforced",
+    "result-studio-editing"
   ],
   "excludedClaims": [
     "windows-support",
@@ -136,8 +142,7 @@
     "macos-x64-support",
     "cloud-or-postgres-storage",
     "arbitrary-omics-auto-support",
-    "multi-agent-orchestration",
-    "result-studio-editing"
+    "multi-agent-orchestration"
   ],
   "freshnessPolicy": {
     "rule": "An evidence entry is fresh only when its baselineDigest equals the subject baseline bundleDigest and its sourceCommit is an ancestor of the qualification commit.",
@@ -150,7 +155,7 @@
       "reintroduced_incident"
     ]
   },
-  "sourceCommit": "2edb1fe0e7d46e633b174bb749adfa135c7e70c2",
-  "generatedAt": "2026-07-24T12:53:56.633Z",
-  "manifestObjectHash": "f6358158519e95a8a0a40425fd7d8380b2e2eab912b1152731d01de81c1d6876"
+  "sourceCommit": "c74c434732725a8497bd073ba0899b873b462d55",
+  "generatedAt": "2026-07-25T08:05:36.800Z",
+  "manifestObjectHash": "cea63fb6da6a1daf77e61a2243d78b0e6eb323708803bda8b244e841da66ecba"
 }

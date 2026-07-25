@@ -6,13 +6,13 @@
 
 `v0.0.1-rc.7` 是当前 OSS 线上版本，已完成代码、自动化、双架构构建、安装候选启动验收和公开更新链核验。Stage 1 UI 产品化、Stage 2 模型层、Stage 3 Harness 与标准流程、Stage 4 首个稳定产品版本及 Harness Phase 7 均已关闭。
 
-当前不默认扩展分析功能。`G0-START` 与 LF0～LF12 已完成；当前基线为 `G0 Baseline v1 / 1.0.0 / qualified + maintained`。UI-032 已完成；rc.7 仍是工程候选版，不得描述为 GA。
+当前不默认扩展分析功能。`G0-START`、LF0～LF12 与 Result Studio RS0～RS9 已完成；当前基线为 `G0 Baseline v1 / 1.1.0 / qualified + maintained`。UI-032 已完成；rc.7 仍是工程候选版，不得描述为 GA。
 
-LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口；16/16 强制证据、10/10 零容忍和永久维护门全部通过。
+LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口；RS9 在不改变封存 qualification subject 的前提下新增第 17 类 `result_studio_product` 强制证据并完成兼容重资格。当前 17/17 强制证据、10/10 零容忍和永久维护门全部通过。
 
-当前立即任务：Result Studio（[`g0-result-studio-plan.md`](./g0-result-studio-plan.md)）状态 `in_progress`。`G0-RS0`～`G0-RS8` 已依次收口：Git Adapter、Revision 持久化、Artifact Interaction/Selection（UI-102）、AI Edit Intent/affected subgraph、无 Worktree 隔离 ChangeSet/独立脚本/真实 Job-backed Revision（UI-103）、Codex-like Diff/原子采用与恢复（UI-104）、首批四类科学插件 SDK 适配，以及耐久 checkpoint、Git/SQLite/Artifact 漂移治理、content-addressed 去重、安全 GC、大表渐进分页与 preview 资源预算（UI-105）。**下一阶段为 `G0-RS9` 真实产品验收与基线晋升。**
+Result Studio（[`g0-result-studio-plan.md`](./g0-result-studio-plan.md)）状态 `completed / qualified`。`G0-RS0`～`G0-RS9` 已依次收口：Git Adapter、Revision 持久化、Artifact Interaction/Selection（UI-102）、AI Edit Intent/affected subgraph、无 Worktree 隔离 ChangeSet/独立脚本/真实 Job-backed Revision（UI-103）、Codex-like Diff/原子采用与恢复（UI-104）、首批四类科学插件 SDK 适配、耐久恢复/存储/大表治理（UI-105），以及 5 条科学任务、9 类环境、双真实 Provider 和五态 renderer 的生产资格矩阵。`result-studio-editing` 已成为 G0 qualified support claim。
 
-开发形态为**单工作包串行、主工作区分支 `codex/g0-result-studio`**；`G0-RS-WT0` Worktree 启动门已标 `deferred`，判据与重开条件见该计划 §14。G0 `qualified + maintained` 门禁继续永久优先；`excludedClaims` 的 `result-studio-editing` 在 RS9 之前不得改动。
+当前没有第二个 active 工作包。下一候选是已登记为 `planned` 的 [`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md)，必须在后续显式启动时继续遵守单工作包串行；本次 RS9 不提前实现该工作包。`G0-RS-WT0` 保持 `deferred`，当前仍不创建 Worktree。
 
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 已完成的 Scientific Task Contract 工作包记录见 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md)。
@@ -20,9 +20,9 @@ LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualif
 
 ## 当前 G0 Living Foundation
 
-`G0-START` 与 LF0～LF12 已通过。1.0.0 maintained 基线保留能力供应链、权限决策、八域韧性实验室和 Evolution Pipeline，并增加 LF12 确定性资格总账与永久维护门。
+`G0-START` 与 LF0～LF12 已通过。1.1.0 maintained 基线保留能力供应链、权限决策、八域韧性实验室和 Evolution Pipeline，并增加 LF12 确定性资格总账、Result Studio product qualification 与永久维护门。
 
-G0 处于永久 `qualified + maintained`，资格仅覆盖明确的 macOS arm64、本地 Runtime/存储、Provider-neutral 与 canonical DESeq2 conformance scope。任何扩展必须重新证明，不得从本次资格外推。
+G0 处于永久 `qualified + maintained`，资格仅覆盖明确的 macOS arm64、本地 Runtime/存储、双 Provider、admitted 科学插件与 Result Studio 任务矩阵。任何扩展必须重新证明，不得从本次资格外推。
 
 ## 已完成的 P-03 Loop 工程包
 
@@ -30,7 +30,7 @@ G0 处于永久 `qualified + maintained`，资格仅覆盖明确的 macOS arm64�
 
 Loop 工程包继续复用 TaskSpec、Workflow Plan、Plugin、ToolResult、Job、Artifact、Delivery 和 Replay，不得创建第二套 executor、job、artifact 或 workflow truth。正常路径不使用任意固定轮数提前停止；重复、无进展、振荡、同类故障和资源/成本异常必须进入可审计的保护状态。节点和任务完成由验证器与 Artifact 证据判定，不能由模型口头声明。
 
-HLE-C0～HLE-C5 已全部关闭；[`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) 现为验收记录。G0 LF0～LF12 已关闭，下一顺序为 Result Studio 独立工作包与永久 G0 维护并行。
+HLE-C0～HLE-C5 已全部关闭；[`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) 现为验收记录。G0 LF0～LF12 与 Result Studio RS0～RS9 均已关闭，继续由永久 G0 门维护。
 
 ## 当前 P-03 工作包
 
@@ -76,7 +76,7 @@ Phase 7 未建立第二套 analysis executor、job、artifact 或 workflow truth
 2. x64 分析 Runtime。
 3. 新产品阶段；若重开 P7-F，必须先有至少 3 个合格真实任务的可复现证据。
 
-Harness Loop Engineering v1 已成为长期基线。G0 Living Foundation 已成为 `qualified + maintained` 永久基线；下一工程阶段可启动 Result Studio。科学长任务继续走正式 Job/Artifact 链，不能借通用后台进程工具绕过。
+Harness Loop Engineering v1 与 Result Studio 已成为长期基线。G0 Living Foundation 保持 `qualified + maintained`；下一候选工作包为 Scientific Data Contract，但尚未启动。科学长任务继续走正式 Job/Artifact 链，不能借通用后台进程工具绕过。
 
 完全访问模式已经由用户明确定位为通用命令执行授权，不再维护固定命令白名单；只读模式仍禁止命令。不得借通用命令行建立第二套科学结果真相：正式分析交付仍必须进入确认、审计与 `run_tool → tool_job → artifact truth`。
 

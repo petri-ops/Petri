@@ -241,6 +241,20 @@ function buildEntries() {
       command: 'npm run g0:qualification:visual',
       counts: (report) => ({ states: report.states?.length || 0 }),
     },
+    {
+      path: 'acceptance/g0-result-studio/rs9-product-acceptance.json',
+      evidenceId: 'qualification-result-studio-product',
+      evidenceClass: 'result_studio_product',
+      command: 'npm run g0:result-studio:acceptance',
+      counts: (report) => ({
+        tasksPassed: report.tasks?.filter((item) => item.status === 'passed').length || 0,
+        environmentsPassed: report.environments?.filter((item) => item.status === 'passed').length || 0,
+        evidenceClassesPassed: report.evidence?.filter((item) => item.status === 'passed').length || 0,
+      }),
+      providerSummary: (report) => ({
+        passedProviderClasses: new Set((report.providers || []).filter((item) => item.status === 'passed').map((item) => item.providerClass)).size,
+      }),
+    },
   ];
   for (const spec of currentSpecs) {
     if (!existsSync(join(root, spec.path))) continue;

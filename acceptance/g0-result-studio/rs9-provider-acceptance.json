@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS9",
+  "sourceCommit": "c74c434732725a8497bd073ba0899b873b462d55",
+  "baseline": {
+    "baselineId": "g0-fifth-wave-establishing-0.6",
+    "baselineVersion": "0.6.0",
+    "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3"
+  },
+  "platform": "macos-arm64",
+  "appMode": "real-provider-result-studio-intent-matrix",
+  "privacy": "provider_classes_probe_booleans_counts_and_hashes_only_no_credentials_urls_models_prompts_or_responses",
+  "requiredProviderCount": 2,
+  "passedProviderClasses": [
+    "deepseek",
+    "openai-compatible"
+  ],
+  "results": [
+    {
+      "targetId": "rs9-target-1",
+      "providerClass": "deepseek",
+      "status": "passed",
+      "passedProbeCount": 4,
+      "probeCount": 4,
+      "probes": {
+        "presentation": true,
+        "threshold": true,
+        "selection": true,
+        "unknown": true
+      }
+    },
+    {
+      "targetId": "rs9-target-2",
+      "providerClass": "openai-compatible",
+      "status": "blocked",
+      "passedProbeCount": 3,
+      "probeCount": 4,
+      "probes": {
+        "presentation": true,
+        "threshold": true,
+        "selection": true,
+        "unknown": false
+      }
+    },
+    {
+      "targetId": "rs9-target-3",
+      "providerClass": "openai-compatible",
+      "status": "blocked",
+      "passedProbeCount": 0,
+      "probeCount": 4,
+      "probes": {
+        "presentation": false,
+        "threshold": false,
+        "selection": false,
+        "unknown": false
+      }
+    },
+    {
+      "targetId": "rs9-target-4",
+      "providerClass": "openai-compatible",
+      "status": "blocked",
+      "passedProbeCount": 0,
+      "probeCount": 4,
+      "probes": {
+        "presentation": false,
+        "threshold": false,
+        "selection": false,
+        "unknown": false
+      }
+    },
+    {
+      "targetId": "rs9-target-5",
+      "providerClass": "openai-compatible",
+      "status": "passed",
+      "passedProbeCount": 4,
+      "probeCount": 4,
+      "probes": {
+        "presentation": true,
+        "threshold": true,
+        "selection": true,
+        "unknown": true
+      }
+    }
+  ],
+  "runnerSha256": "30bd77091e42e3faa98d141fe0ece97082fc5d74ff7db8b7485417f6ed9219ab",
+  "passed": true,
+  "generatedAt": "2026-07-25T07:50:53.182Z"
+}

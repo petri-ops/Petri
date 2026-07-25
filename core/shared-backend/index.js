@@ -44,6 +44,7 @@ module.exports = {
   runtimeResourceSnapshot: require('./runtime-resource-snapshot'),
   resultStudioPluginSdk: require('./result-studio-plugin-sdk'),
   resultStudioLifecycle: require('./result-studio-lifecycle'),
+  resultStudioQualification: require('./result-studio-qualification'),
   g0Baseline: require('./g0-baseline'),
   g0TruthProjection: require('./g0-truth-projection'),
   g0DurableState: require('./g0-durable-state'),
