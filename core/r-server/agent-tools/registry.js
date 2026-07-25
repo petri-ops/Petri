@@ -22,6 +22,11 @@ const {
   tool_result_edit_plan,
   tool_result_changeset_create,
   tool_result_changeset_status,
+  tool_result_changeset_compare,
+  tool_result_changeset_adopt,
+  tool_result_changeset_revert,
+  tool_artifact_revision_list,
+  tool_artifact_revision_restore,
 } = require('./result-edit-tools');
 const {
   tool_workspace_list,
@@ -75,6 +80,11 @@ const HANDLERS = {
   result_edit_plan: tool_result_edit_plan,
   result_changeset_create: tool_result_changeset_create,
   result_changeset_status: tool_result_changeset_status,
+  result_changeset_compare: tool_result_changeset_compare,
+  result_changeset_adopt: tool_result_changeset_adopt,
+  result_changeset_revert: tool_result_changeset_revert,
+  artifact_revision_list: tool_artifact_revision_list,
+  artifact_revision_restore: tool_artifact_revision_restore,
 };
 
 function contract(category, sideEffect, riskTier, resources, estimatedDurationMs) {
@@ -111,6 +121,11 @@ const CONTRACTS = {
   result_edit_plan: contract('result-studio', 'none', 'R0', ['tool_jobs', 'artifacts', 'project.database'], 500),
   result_changeset_create: contract('result-studio', 'execution', 'R2', ['tool_jobs', 'artifacts', 'project.database', 'project.files', 'local.process'], 300000),
   result_changeset_status: contract('result-studio', 'none', 'R0', ['tool_jobs', 'artifacts', 'project.database'], 500),
+  result_changeset_compare: contract('result-studio', 'none', 'R0', ['artifacts', 'project.database', 'project.files'], 1500),
+  result_changeset_adopt: contract('result-studio', 'state-write', 'R2', ['artifacts', 'project.database', 'project.files'], 1000),
+  result_changeset_revert: contract('result-studio', 'state-write', 'R2', ['artifacts', 'project.database', 'project.files'], 1000),
+  artifact_revision_list: contract('result-studio', 'none', 'R0', ['artifacts', 'project.database'], 500),
+  artifact_revision_restore: contract('result-studio', 'state-write', 'R2', ['artifacts', 'project.database', 'project.files'], 1500),
 };
 
 function cloneJson(value) {

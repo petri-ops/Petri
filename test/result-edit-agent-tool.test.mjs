@@ -142,3 +142,64 @@ test('RS5 ChangeSet status refuses a cross-project record', async () => {
   assert.equal(result.ok, false);
   assert.equal(result.error, 'change_set_not_found');
 });
+
+test('RS6 Agent review tools share project scope and the canonical services', async () => {
+  const calls = [];
+  const repository = {
+    saveRepositoryBinding: () => {},
+    getChangeSet: () => ({ changeSetId: 'cs_1', projectId: 'p_1' }),
+    listRevisions: () => [{ revisionId: 'rev_1', projectId: 'p_1' }],
+    getCurrentRevision: () => ({ revisionId: 'rev_1', projectId: 'p_1' }),
+  };
+  const tools = createResultChangeSetTools({
+    db: {
+      db: {},
+      getProject: () => ({ id: 'p_1', user_id: 'u_1', workspace_path: '/tmp/p_1' }),
+      getToolJob: () => null,
+    },
+    createResultStudioRepository: () => repository,
+    bindProjectRepository: () => ({
+      status: 'ready', mode: 'managed', workspaceRoot: '/tmp/p_1', managedPaths: [], reason: null,
+      inspection: { runtime: {} }, adapter: { gitDir: '/tmp/git', workTree: '/tmp/p_1' },
+    }),
+    compareResultChangeSet: (input) => { calls.push(['compare', input]); return { summary: { status: 'preview_ready' } }; },
+    adoptResultChangeSet: (input) => { calls.push(['adopt', input]); return { changeSet: { status: 'adopted' } }; },
+    revertResultChangeSet: (input) => { calls.push(['revert', input]); return { changeSet: { status: 'reverted' } }; },
+    restoreArtifactRevision: (input) => { calls.push(['restore', input]); return { revision: { revisionId: 'rev_restored' } }; },
+  });
+  const ctx = { projectId: 'p_1', userId: 'u_1', conversationId: 'conv_1' };
+  assert.equal((await tools.compare({ changeSetId: 'cs_1' }, ctx)).ok, true);
+  assert.equal((await tools.adopt({ changeSetId: 'cs_1' }, ctx)).ok, true);
+  assert.equal((await tools.revert({ changeSetId: 'cs_1' }, ctx)).ok, true);
+  assert.equal((await tools.listRevisions({ artifactFamilyId: 'family' }, ctx)).revisions.length, 1);
+  assert.equal((await tools.restore({ revisionId: 'rev_1' }, ctx)).ok, true);
+  assert.deepEqual(calls.map(([name]) => name), ['compare', 'adopt', 'revert', 'restore']);
+  assert.equal(calls.every(([, input]) => input.projectId === 'p_1'), true);
+});
+
+test('RS6 Agent can read history in a dirty existing repository but cannot write it', async () => {
+  const repository = {
+    saveRepositoryBinding: () => {},
+    getChangeSet: () => ({ changeSetId: 'cs_1', projectId: 'p_1' }),
+    listRevisions: () => [{ revisionId: 'rev_1', projectId: 'p_1' }],
+    getCurrentRevision: () => ({ revisionId: 'rev_1', projectId: 'p_1' }),
+  };
+  const tools = createResultChangeSetTools({
+    db: {
+      db: {},
+      getProject: () => ({ id: 'p_1', user_id: 'u_1', workspace_path: '/tmp/p_1' }),
+      getToolJob: () => null,
+    },
+    createResultStudioRepository: () => repository,
+    bindProjectRepository: () => ({
+      status: 'blocked', mode: 'existing', workspaceRoot: '/tmp/p_1', managedPaths: [],
+      reason: 'blocked_dirty_conflict', inspection: { runtime: {}, existing: { workspaceRelativeToRepository: 'project' } },
+      adapter: { gitDir: '/tmp/git', workTree: '/tmp/repo' },
+    }),
+    compareResultChangeSet: () => ({ summary: { status: 'preview_ready' } }),
+  });
+  const ctx = { projectId: 'p_1', userId: 'u_1' };
+  assert.equal((await tools.compare({ changeSetId: 'cs_1' }, ctx)).ok, true);
+  assert.equal((await tools.listRevisions({ artifactFamilyId: 'family' }, ctx)).ok, true);
+  assert.equal((await tools.adopt({ changeSetId: 'cs_1' }, ctx)).error, 'blocked_dirty_conflict');
+});

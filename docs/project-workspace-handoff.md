@@ -64,7 +64,9 @@ RS3 实测修正的三个真实缺陷：其一，我在路由里使用了 `app.l
 
 `G0-RS4` 已收口：`result_edit_plan` 能基于真实 Job/Artifact/provenance 和显式 DAG 生成 `ResultEditIntent v1`；插件无受信影响声明时未知参数保守进入科学重算，来源/脚本/输入/Revision/DAG 任一缺失即阻断。
 
-`G0-RS5` 已收口：真实 valid Job Artifact 首次进入 Result Studio 时建立确定性 baseline v1 并把 `revisionId/artifactFamilyId` 投影回 `ActiveArtifact`；AI 与手动编辑共用 ChangeSet 服务，在 `.biof3/revision/<changeSetId>` 私有 staging 中派生独立脚本/参数，通过临时 Git index 生成不触碰工作树的 candidate commit，再复用正式 `run_tool → tool_job → artifact truth` 执行并登记 v2。候选仅为 `preview_ready/adopted:false`；失败、取消、并发冲突和恢复扫描均不改变 current。`result_edit_progress` 已接入 SSE 与前端有界 run store（UI-103 `in_progress`，未做 RS6 视觉卡片）。下一阶段：`G0-RS6` Diff、比较、采用与撤销；不得提前采用候选或建立第二套结果状态。
+`G0-RS5` 已收口：真实 valid Job Artifact 首次进入 Result Studio 时建立确定性 baseline v1 并把 `revisionId/artifactFamilyId` 投影回 `ActiveArtifact`；AI 与手动编辑共用 ChangeSet 服务，在 `.biof3/revision/<changeSetId>` 私有 staging 中派生独立脚本/参数，通过临时 Git index 生成不触碰工作树的 candidate commit，再复用正式 `run_tool → tool_job → artifact truth` 执行并登记 v2。候选仅为 `preview_ready/adopted:false`；失败、取消、并发冲突和恢复扫描均不改变 current。`result_edit_progress` 已接入 SSE 与前端有界 run store（UI-103 仍为 `in_progress`，待真实长修改失败/取消/历史恢复矩阵）。
+
+`G0-RS6` 已收口：同一 Revision/ChangeSet 真相提供有界文本、JSON、表格与图像比较；Git current ref CAS 与 SQLite current 指针在一个 fail-closed 操作中切换，baseline 不可撤销，历史恢复生成新 commit/ChangeSet/Revision 而不改写旧版本。结果侧栏默认紧凑，展开后提供前后图、语义/字段/文本 diff、history 与折叠 Git 信息；真实隔离链已完成 v1 → 采用 v2 → 撤销 v1 → 恢复 v3，明亮/夜间/820×900 通过，UI-104 `verified`。下一阶段：`G0-RS7` Plugin SDK 首批适配；不得提前实现 RS8 存储治理。
 
 ### 3.1 已完成基线：真实科学任务驱动的 Harness 升级
 

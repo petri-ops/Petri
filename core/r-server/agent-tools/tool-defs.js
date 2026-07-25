@@ -570,6 +570,69 @@ const TOOL_DEFS = [
   {
     type: 'function',
     function: {
+      name: 'result_changeset_compare',
+      description: '读取一个 Result Studio ChangeSet 的紧凑摘要、Git 文本 diff、JSON 字段 diff、表格语义比较、视觉版本引用和历史；只读且结果有界。',
+      parameters: {
+        type: 'object',
+        properties: { changeSetId: { type: 'string' } },
+        required: ['changeSetId'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'result_changeset_adopt',
+      description: '采用已验证且仍基于当前父版本的 preview_ready ChangeSet。会以 Git CAS 与 SQLite 事务原子切换 current；仅在用户明确要求采用当前候选时调用。',
+      parameters: {
+        type: 'object',
+        properties: { changeSetId: { type: 'string' } },
+        required: ['changeSetId'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'result_changeset_revert',
+      description: '撤销未采用候选，或在其仍为 current 时撤销已采用 ChangeSet；不会删除历史。较旧版本已被新版本覆盖时应使用 artifact_revision_restore。',
+      parameters: {
+        type: 'object',
+        properties: {
+          changeSetId: { type: 'string' },
+          reason: { type: 'string' },
+        },
+        required: ['changeSetId'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'artifact_revision_list',
+      description: '列出当前项目一个 Artifact family 的版本历史和唯一 current Revision；只读。',
+      parameters: {
+        type: 'object',
+        properties: { artifactFamilyId: { type: 'string' } },
+        required: ['artifactFamilyId'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'artifact_revision_restore',
+      description: '将历史 ArtifactRevision 恢复为一个新的 commit、ChangeSet 和 Revision 后采用；不改写或删除旧历史。仅在用户明确要求恢复该版本时调用。',
+      parameters: {
+        type: 'object',
+        properties: { revisionId: { type: 'string' } },
+        required: ['revisionId'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'verify_state',
       description:
         'VERIFY_STATE_v1 — 确认某个实体的当前状态符合预期。在执行写操作后调用此工具核实，避免在没有真实反馈时声称"已完成"。' +

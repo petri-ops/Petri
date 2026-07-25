@@ -1,0 +1,148 @@
+.root {
+  border-top: 1px solid var(--biof3-border);
+  border-bottom: 1px solid var(--biof3-border);
+  color: var(--biof3-text);
+  padding: 8px 0;
+}
+
+.header,
+.summary,
+.actions,
+.historyRow,
+.diffMeta,
+.jsonRow {
+  align-items: center;
+  display: flex;
+}
+
+.header {
+  gap: 8px;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.title {
+  align-items: baseline;
+  display: flex;
+  gap: 7px;
+  min-width: 0;
+}
+
+.title strong { font-size: 12px; font-weight: 650; }
+.title span,
+.summary,
+.diffMeta,
+.historyRow small { color: var(--biof3-text-tertiary); font-size: 11px; }
+
+.status {
+  border: 1px solid var(--biof3-border);
+  border-radius: 999px;
+  color: var(--biof3-text-secondary);
+  flex: 0 0 auto;
+  font-size: 10px;
+  line-height: 18px;
+  padding: 0 7px;
+}
+
+.status[data-state='preview_ready'] { color: var(--biof3-accent); }
+.status[data-state='adopted'] { color: var(--biof3-status-online); }
+.status[data-state='validation_failed'],
+.status[data-state='abandoned'] { color: var(--biof3-danger); }
+
+.summary {
+  flex-wrap: wrap;
+  gap: 5px 10px;
+  margin-top: 5px;
+}
+
+.actions {
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 7px;
+}
+
+.actions button,
+.historyRow button,
+.toggle {
+  background: transparent;
+  border: 1px solid var(--biof3-border);
+  border-radius: 5px;
+  color: var(--biof3-text-secondary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  line-height: 24px;
+  padding: 0 8px;
+}
+
+.actions button:hover,
+.historyRow button:hover,
+.toggle:hover { border-color: var(--biof3-border-strong); color: var(--biof3-text); }
+.actions button:disabled,
+.historyRow button:disabled { cursor: default; opacity: .5; }
+.actions .primary { border-color: color-mix(in srgb, var(--biof3-accent) 50%, var(--biof3-border)); color: var(--biof3-accent); }
+.actions .danger { color: var(--biof3-danger); }
+
+.error { color: var(--biof3-danger); font-size: 11px; margin-top: 6px; }
+.loading { color: var(--biof3-text-tertiary); font-size: 11px; padding: 2px 0; }
+
+.details {
+  border-top: 1px solid var(--biof3-border);
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.section + .section { border-top: 1px solid var(--biof3-border); margin-top: 9px; padding-top: 9px; }
+.section h4 { font-size: 11px; font-weight: 650; margin: 0 0 6px; }
+
+.visualGrid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.visualFigure { margin: 0; min-width: 0; }
+.visualFigure figcaption { color: var(--biof3-text-tertiary); font-size: 10px; margin-bottom: 4px; }
+.visualFigure img { border: 1px solid var(--biof3-border); display: block; max-height: 280px; object-fit: contain; width: 100%; }
+
+.tableCompare {
+  border-collapse: collapse;
+  font-size: 10px;
+  width: 100%;
+}
+.tableCompare td { border-bottom: 1px solid var(--biof3-border); padding: 4px 5px; text-align: left; vertical-align: top; }
+.tableCompare td:first-child { color: var(--biof3-text-tertiary); width: 96px; }
+
+.jsonList { display: grid; gap: 3px; }
+.jsonRow { gap: 6px; min-width: 0; }
+.jsonRow code { color: var(--biof3-text-secondary); font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.jsonRow span { color: var(--biof3-text-tertiary); flex: 0 0 auto; font-size: 10px; }
+
+.patch {
+  border: 1px solid var(--biof3-border);
+  color: var(--biof3-text-secondary);
+  font-size: 10px;
+  line-height: 1.45;
+  margin: 5px 0 0;
+  max-height: 320px;
+  overflow: auto;
+  padding: 7px;
+  white-space: pre;
+}
+
+.advanced summary { color: var(--biof3-text-tertiary); cursor: pointer; font-size: 10px; }
+.advanced dl { display: grid; font-size: 10px; gap: 3px 8px; grid-template-columns: 64px minmax(0, 1fr); margin: 6px 0 0; }
+.advanced dt { color: var(--biof3-text-tertiary); }
+.advanced dd { margin: 0; overflow-wrap: anywhere; }
+
+.history { display: grid; gap: 2px; }
+.historyRow { gap: 7px; justify-content: space-between; min-width: 0; padding: 3px 0; }
+.historyIdentity { min-width: 0; }
+.historyIdentity strong { display: block; font-size: 11px; font-weight: 550; }
+.historyIdentity small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@container (max-width: 520px) {
+  .visualGrid { grid-template-columns: 1fr; }
+  .header { align-items: flex-start; }
+  .actions button { flex: 1 1 auto; }
+}

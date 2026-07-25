@@ -68,6 +68,7 @@ import {
 } from '@/lib/artifact-selection';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
+import { ResultStudioChangeSetPanel } from '@/components/result-studio/ResultStudioChangeSetPanel';
 import type { BackendStatus } from '@/lib/electron';
 import { getBridge } from '@/lib/desktopBridge';
 import {
@@ -3799,6 +3800,22 @@ function ResultArtifactShell({
     <>
       {workflowBar}
       {recoveryConfirmation}
+      {interactionManifest?.artifactFamilyId && (
+        <ResultStudioChangeSetPanel
+          projectId={project.id}
+          artifactFamilyId={interactionManifest.artifactFamilyId}
+          activeRevisionId={interactionManifest.revisionId}
+          onRevisionActivated={(revision) => {
+            if (!revision.toolJobId) return;
+            dispatchBioF3Event(biof3Events.projectOpenArtifact, {
+              projectId: project.id,
+              jobId: revision.toolJobId,
+              artifactName: revision.outputPath.split('/').pop() || revision.artifactId,
+            });
+            onWorkflowChanged?.();
+          }}
+        />
+      )}
       {result.deliveryManifest && (
         <section className={styles.resultScientificDelivery} data-status={result.deliveryManifest.status}>
           <div className={styles.resultScientificDeliveryHeader}>

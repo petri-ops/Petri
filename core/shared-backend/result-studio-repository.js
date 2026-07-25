@@ -429,7 +429,7 @@ function createResultStudioRepository(db, options = {}) {
      * 幂等：已 adopted 时直接返回同一结果，不重复切换。
      * 原子：状态与 current 指针在同一事务内完成，异常退出不留"部分采用"。
      */
-    adoptChangeSet({ changeSetId, candidateCommit = undefined } = {}) {
+    adoptChangeSet({ changeSetId, candidateCommit = undefined, beforeCommit = null } = {}) {
       const current = api.getChangeSet(changeSetId);
       if (!current) {
         throw new ResultStudioRepositoryError('change_set_not_found', `Unknown ChangeSet: ${changeSetId}`);
@@ -476,6 +476,9 @@ function createResultStudioRepository(db, options = {}) {
             candidate_commit = COALESCE(?, candidate_commit)
           WHERE change_set_id = ? AND status = ?`)
           .run(timestamp, timestamp, candidateCommit === undefined ? null : candidateCommit, changeSetId, current.status);
+        if (typeof beforeCommit === 'function') {
+          beforeCommit({ changeSet: current, revisions });
+        }
       });
       apply();
       const updated = api.getChangeSet(changeSetId);
@@ -496,7 +499,7 @@ function createResultStudioRepository(db, options = {}) {
      * 已采用 → 把每个 family 的 current 回退到该 ChangeSet 之前的最高 ordinal；
      *          历史 Revision 一律保留（计划 §3.2：不自动消失）。
      */
-    revertChangeSet({ changeSetId, reason = null } = {}) {
+    revertChangeSet({ changeSetId, reason = null, beforeCommit = null } = {}) {
       const current = api.getChangeSet(changeSetId);
       if (!current) {
         throw new ResultStudioRepositoryError('change_set_not_found', `Unknown ChangeSet: ${changeSetId}`);
@@ -534,6 +537,13 @@ function createResultStudioRepository(db, options = {}) {
             status = 'reverted', status_reason = ?, reverted_at = ?, updated_at = ?
           WHERE change_set_id = ? AND status = ?`)
           .run(reason, timestamp, timestamp, changeSetId, current.status);
+        if (typeof beforeCommit === 'function') {
+          beforeCommit({
+            changeSet: current,
+            revisions,
+            restoredRevisions: restored.map((revisionId) => api.getRevision(revisionId)).filter(Boolean),
+          });
+        }
       });
       apply();
       const updated = api.getChangeSet(changeSetId);

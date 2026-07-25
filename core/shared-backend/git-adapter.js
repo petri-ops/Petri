@@ -475,6 +475,37 @@ function createGitAdapter(options = {}) {
       return output.ok ? output.stdout.trim() || null : null;
     },
 
+    /**
+     * 以 compare-and-swap 更新一个 BioF3 refs/heads 引用。
+     * 调用方必须给出预期旧值；不存在的 ref 使用 40 个 0。
+     */
+    updateRefCas({ ref, newCommit, expectedOld } = {}) {
+      if (typeof ref !== 'string' || !/^refs\/heads\/biof3\/[A-Za-z0-9][A-Za-z0-9._\-/]*$/.test(ref)) {
+        throw new GitAdapterError('ref_invalid', 'A refs/heads/biof3/* destination is required.');
+      }
+      if (!/^[a-f0-9]{40}$/.test(String(newCommit || ''))) {
+        throw new GitAdapterError('new_commit_invalid', 'newCommit must be a full git object id.');
+      }
+      if (!/^[a-f0-9]{40}$/.test(String(expectedOld || ''))) {
+        throw new GitAdapterError('expected_old_invalid', 'expectedOld must be a full git object id or forty zeroes.');
+      }
+      const updated = run(['update-ref', ref, newCommit, expectedOld], { allowFailure: true });
+      if (!updated.ok) throw new GitAdapterError('git_ref_conflict', 'Git ref changed concurrently.', updated);
+      return { ref, commit: newCommit, previous: expectedOld };
+    },
+
+    deleteRefCas({ ref, expectedOld } = {}) {
+      if (typeof ref !== 'string' || !/^refs\/heads\/biof3\/[A-Za-z0-9][A-Za-z0-9._\-/]*$/.test(ref)) {
+        throw new GitAdapterError('ref_invalid', 'A refs/heads/biof3/* destination is required.');
+      }
+      if (!/^[a-f0-9]{40}$/.test(String(expectedOld || ''))) {
+        throw new GitAdapterError('expected_old_invalid', 'expectedOld must be a full git object id.');
+      }
+      const deleted = run(['update-ref', '-d', ref, expectedOld], { allowFailure: true });
+      if (!deleted.ok) throw new GitAdapterError('git_ref_conflict', 'Git ref changed concurrently.', deleted);
+      return { ref, deleted: true, previous: expectedOld };
+    },
+
     /** 读取某个提交中的文件内容，用于版本恢复与前后比较。 */
     showFile({ ref, filePath } = {}) {
       if (typeof ref !== 'string' || ref.trim() === '' || ref.startsWith('-')) {

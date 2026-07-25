@@ -7,6 +7,12 @@ const pluginLoader = require('../plugin-loader');
 const mcpRegistry = require('../mcp/registry');
 const { planResultEdit } = require('../../shared-backend/result-edit-intent');
 const { createResultChangeSet, inspectResultEditRecovery } = require('../../shared-backend/result-changeset-service');
+const {
+  compareResultChangeSet,
+  adoptResultChangeSet,
+  revertResultChangeSet,
+  restoreArtifactRevision,
+} = require('../../shared-backend/result-compare-service');
 const { createResultStudioRepository } = require('../../shared-backend/result-studio-repository');
 const { bindProjectRepository } = require('../../shared-backend/git-repository-binding');
 const { isPathContained } = require('../../shared-backend/project-run-layout');
@@ -65,8 +71,12 @@ function createResultChangeSetTools(options = {}) {
   const makeRepository = options.createResultStudioRepository || createResultStudioRepository;
   const runChangeSet = options.createResultChangeSet || createResultChangeSet;
   const inspectRecovery = options.inspectResultEditRecovery || inspectResultEditRecovery;
+  const compareChangeSet = options.compareResultChangeSet || compareResultChangeSet;
+  const adoptChangeSet = options.adoptResultChangeSet || adoptResultChangeSet;
+  const revertChangeSet = options.revertResultChangeSet || revertResultChangeSet;
+  const restoreRevision = options.restoreArtifactRevision || restoreArtifactRevision;
 
-  function context(ctx) {
+  function context(ctx, { write = false } = {}) {
     const projectId = String(ctx.projectId || '').trim();
     if (!projectId) return { error: 'project_context_required' };
     const project = dbModule.getProject(projectId);
@@ -78,7 +88,7 @@ function createResultChangeSetTools(options = {}) {
       preferManaged: false,
       allowExistingRepository: true,
     });
-    if (!binding || binding.status !== 'ready' || !binding.adapter) {
+    if (!binding?.adapter || (write && binding.status !== 'ready')) {
       return { error: binding?.reason || binding?.status || 'repository_binding_failed', binding };
     }
     repository.saveRepositoryBinding({
@@ -96,7 +106,7 @@ function createResultChangeSetTools(options = {}) {
   }
 
   async function create(args = {}, ctx = {}) {
-    const scoped = context(ctx);
+    const scoped = context(ctx, { write: true });
     if (scoped.error) return { ok: false, error: scoped.error, message: 'Result Studio project or Git binding is unavailable.' };
     const revisionId = args.intent && args.intent.artifactRef && args.intent.artifactRef.revisionId;
     const sourceRevision = scoped.repository.getRevision(revisionId);
@@ -192,12 +202,122 @@ function createResultChangeSetTools(options = {}) {
     };
   }
 
-  return { create, status };
+  async function compare(args = {}, ctx = {}) {
+    const scoped = context(ctx);
+    if (scoped.error) return { ok: false, error: scoped.error };
+    const changeSet = scoped.repository.getChangeSet(args.changeSetId);
+    if (!changeSet || changeSet.projectId !== scoped.projectId) return { ok: false, error: 'change_set_not_found' };
+    try {
+      return {
+        ok: true,
+        comparison: compareChangeSet({
+          projectId: scoped.projectId,
+          workspaceRoot: scoped.project.workspace_path,
+          changeSetId: changeSet.changeSetId,
+        }, {
+          repository: scoped.repository,
+          adapter: scoped.binding.adapter,
+          gitPathPrefix: scoped.binding.mode === 'existing'
+            ? scoped.binding.inspection?.existing?.workspaceRelativeToRepository
+            : '',
+        }),
+      };
+    } catch (error) {
+      return { ok: false, error: error.code || 'compare_failed', message: error.message };
+    }
+  }
+
+  async function adopt(args = {}, ctx = {}) {
+    const scoped = context(ctx, { write: true });
+    if (scoped.error) return { ok: false, error: scoped.error };
+    try {
+      return {
+        ok: true,
+        ...adoptChangeSet({
+          projectId: scoped.projectId,
+          workspaceRoot: scoped.project.workspace_path,
+          changeSetId: args.changeSetId,
+        }, {
+          repository: scoped.repository,
+          adapter: scoped.binding.adapter,
+          gitPathPrefix: scoped.binding.mode === 'existing'
+            ? scoped.binding.inspection?.existing?.workspaceRelativeToRepository
+            : '',
+          getToolJob: dbModule.getToolJob,
+        }),
+      };
+    } catch (error) {
+      return { ok: false, error: error.code || 'adopt_failed', message: error.message };
+    }
+  }
+
+  async function revert(args = {}, ctx = {}) {
+    const scoped = context(ctx, { write: true });
+    if (scoped.error) return { ok: false, error: scoped.error };
+    try {
+      return {
+        ok: true,
+        ...revertChangeSet({
+          projectId: scoped.projectId,
+          workspaceRoot: scoped.project.workspace_path,
+          changeSetId: args.changeSetId,
+          reason: args.reason || 'agent_reverted',
+        }, { repository: scoped.repository, adapter: scoped.binding.adapter }),
+      };
+    } catch (error) {
+      return { ok: false, error: error.code || 'revert_failed', message: error.message };
+    }
+  }
+
+  async function listRevisions(args = {}, ctx = {}) {
+    const scoped = context(ctx);
+    if (scoped.error) return { ok: false, error: scoped.error };
+    const revisions = scoped.repository.listRevisions({ artifactFamilyId: args.artifactFamilyId, limit: 100 })
+      .filter((revision) => revision.projectId === scoped.projectId);
+    return {
+      ok: true,
+      revisions,
+      currentRevision: scoped.repository.getCurrentRevision(args.artifactFamilyId),
+    };
+  }
+
+  async function restore(args = {}, ctx = {}) {
+    const scoped = context(ctx, { write: true });
+    if (scoped.error) return { ok: false, error: scoped.error };
+    try {
+      return {
+        ok: true,
+        ...restoreRevision({
+          projectId: scoped.projectId,
+          workspaceRoot: scoped.project.workspace_path,
+          revisionId: args.revisionId,
+          conversationId: ctx.conversationId || null,
+          createdBy: 'agent',
+        }, {
+          repository: scoped.repository,
+          adapter: scoped.binding.adapter,
+          gitPathPrefix: scoped.binding.mode === 'existing'
+            ? scoped.binding.inspection?.existing?.workspaceRelativeToRepository
+            : '',
+          getToolJob: dbModule.getToolJob,
+        }),
+      };
+    } catch (error) {
+      return { ok: false, error: error.code || 'restore_failed', message: error.message };
+    }
+  }
+
+  return { create, status, compare, adopt, revert, listRevisions, restore };
 }
 
 const resultChangeSetTools = createResultChangeSetTools();
 const tool_result_changeset_create = resultChangeSetTools.create;
 const tool_result_changeset_status = resultChangeSetTools.status;
+const tool_result_changeset_compare = resultChangeSetTools.compare;
+const tool_result_changeset_adopt = resultChangeSetTools.adopt;
+const tool_result_changeset_revert = resultChangeSetTools.revert;
+const tool_artifact_revision_list = resultChangeSetTools.listRevisions;
+const tool_artifact_revision_restore = resultChangeSetTools.restore;
 
 module.exports = {
   createResultEditPlanTool,
@@ -205,4 +325,9 @@ module.exports = {
   tool_result_edit_plan,
   tool_result_changeset_create,
   tool_result_changeset_status,
+  tool_result_changeset_compare,
+  tool_result_changeset_adopt,
+  tool_result_changeset_revert,
+  tool_artifact_revision_list,
+  tool_artifact_revision_restore,
 };

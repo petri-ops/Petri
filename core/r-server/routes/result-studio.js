@@ -24,6 +24,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const db = require('../db');
 
 // core/r-server/db.js 导出的是模块对象；真实 better-sqlite3 句柄在 `.db` 上。
@@ -32,6 +33,12 @@ const sqlite = db.db;
 const { resolveProjectRunLayout, isPathContained } = require('../../shared-backend/project-run-layout');
 const { bindProjectRepository } = require('../../shared-backend/git-repository-binding');
 const { ensureBaselineArtifactRevision } = require('../../shared-backend/result-changeset-service');
+const {
+  compareResultChangeSet,
+  adoptResultChangeSet,
+  revertResultChangeSet,
+  restoreArtifactRevision,
+} = require('../../shared-backend/result-compare-service');
 const {
   buildTableInteractionManifest,
   buildPlotInteractionManifest,
@@ -52,6 +59,22 @@ const MAX_READ_BYTES = 8 * 1024 * 1024;
 
 const TABLE_EXTENSIONS = /\.(csv|tsv)$/i;
 const PLOT_EXTENSIONS = /\.(png|jpe?g|gif|svg|webp)$/i;
+
+function hashFile(filePath) {
+  const hash = crypto.createHash('sha256');
+  const handle = fs.openSync(filePath, 'r');
+  try {
+    const buffer = Buffer.alloc(1024 * 1024);
+    let bytesRead;
+    do {
+      bytesRead = fs.readSync(handle, buffer, 0, buffer.length, null);
+      if (bytesRead > 0) hash.update(buffer.subarray(0, bytesRead));
+    } while (bytesRead > 0);
+  } finally {
+    fs.closeSync(handle);
+  }
+  return hash.digest('hex');
+}
 
 function userId(req) {
   return (req.user && (req.user.id || req.user.userId)) || null;
@@ -215,6 +238,53 @@ module.exports = function registerResultStudioRoutes(app) {
   function repo() {
     if (!repositoryInstance) repositoryInstance = createResultStudioRepository(sqlite);
     return repositoryInstance;
+  }
+
+  function projectContext(req, projectId, { write = false } = {}) {
+    const project = db.getProject(projectId);
+    if (!project) return { error: { status: 404, code: 'project_not_found' } };
+    if (!canAccessProject(req, project)) return { error: { status: 403, code: 'forbidden' } };
+    const binding = bindProjectRepository({
+      workspaceRoot: project.workspace_path,
+      projectId,
+      preferManaged: false,
+      allowExistingRepository: true,
+    });
+    if (!binding?.adapter || (write && binding.status !== 'ready')) {
+      return {
+        error: {
+          status: 409,
+          code: binding?.reason || binding?.status || 'repository_binding_failed',
+          bindingStatus: binding?.status || null,
+        },
+      };
+    }
+    repo().saveRepositoryBinding({
+      projectId,
+      mode: binding.mode,
+      workspaceRoot: binding.workspaceRoot,
+      gitDir: binding.adapter.gitDir,
+      workTree: binding.adapter.workTree,
+      managedPaths: binding.managedPaths,
+      status: binding.status,
+      reason: binding.reason,
+      gitVersion: binding.inspection?.runtime?.versionRaw || null,
+    });
+    return {
+      project,
+      binding,
+      repository: repo(),
+      gitPathPrefix: binding.mode === 'existing'
+        ? binding.inspection?.existing?.workspaceRelativeToRepository
+        : '',
+    };
+  }
+
+  function changeSetContext(req, changeSetId, options = {}) {
+    const changeSet = repo().getChangeSet(changeSetId);
+    if (!changeSet) return { error: { status: 404, code: 'change_set_not_found' } };
+    const context = projectContext(req, changeSet.projectId, options);
+    return context.error ? context : { ...context, changeSet };
   }
 
   /**
@@ -463,6 +533,126 @@ module.exports = function registerResultStudioRoutes(app) {
       return res.json(resolved);
     } catch (error) {
       return res.status(400).json({ error: error.code || 'resolve_failed', message: error && error.message });
+    }
+  });
+
+  // ----------------------------------------------------------- RS6 review UI
+
+  app.get('/api/result-studio/changesets', (req, res) => {
+    const projectId = String(req.query.projectId || '').trim();
+    if (!projectId) return res.status(400).json({ error: 'projectId_required' });
+    const context = projectContext(req, projectId);
+    if (context.error) return res.status(context.error.status).json({ error: context.error.code });
+    const artifactFamilyId = String(req.query.artifactFamilyId || '').trim() || null;
+    let changeSets = context.repository.listChangeSets({ projectId, limit: 100 });
+    if (artifactFamilyId) {
+      changeSets = changeSets.filter((changeSet) => context.repository
+        .listRevisionsByChangeSet(changeSet.changeSetId)
+        .some((revision) => revision.artifactFamilyId === artifactFamilyId));
+    }
+    return res.json({
+      changeSets,
+      currentRevision: artifactFamilyId ? context.repository.getCurrentRevision(artifactFamilyId) : null,
+      revisions: artifactFamilyId ? context.repository.listRevisions({ artifactFamilyId, limit: 100 }) : [],
+    });
+  });
+
+  app.get('/api/result-studio/changesets/:changeSetId/compare', (req, res) => {
+    const context = changeSetContext(req, String(req.params.changeSetId || '').trim());
+    if (context.error) return res.status(context.error.status).json({ error: context.error.code });
+    try {
+      return res.json(compareResultChangeSet({
+        projectId: context.project.id,
+        workspaceRoot: context.project.workspace_path,
+        changeSetId: context.changeSet.changeSetId,
+      }, {
+        repository: context.repository,
+        adapter: context.binding.adapter,
+        gitPathPrefix: context.gitPathPrefix,
+      }));
+    } catch (error) {
+      return res.status(409).json({ error: error.code || 'compare_failed', message: error.message, detail: error.detail || null });
+    }
+  });
+
+  app.post('/api/result-studio/changesets/:changeSetId/adopt', (req, res) => {
+    const context = changeSetContext(req, String(req.params.changeSetId || '').trim(), { write: true });
+    if (context.error) return res.status(context.error.status).json({ error: context.error.code, bindingStatus: context.error.bindingStatus });
+    try {
+      const result = adoptResultChangeSet({
+        projectId: context.project.id,
+        workspaceRoot: context.project.workspace_path,
+        changeSetId: context.changeSet.changeSetId,
+      }, {
+        repository: context.repository,
+        adapter: context.binding.adapter,
+        gitPathPrefix: context.gitPathPrefix,
+        getToolJob: db.getToolJob,
+      });
+      return res.json({ ok: true, ...result });
+    } catch (error) {
+      return res.status(409).json({ error: error.code || 'adopt_failed', message: error.message, detail: error.detail || null });
+    }
+  });
+
+  app.post('/api/result-studio/changesets/:changeSetId/revert', (req, res) => {
+    const context = changeSetContext(req, String(req.params.changeSetId || '').trim(), { write: true });
+    if (context.error) return res.status(context.error.status).json({ error: context.error.code, bindingStatus: context.error.bindingStatus });
+    try {
+      const result = revertResultChangeSet({
+        projectId: context.project.id,
+        workspaceRoot: context.project.workspace_path,
+        changeSetId: context.changeSet.changeSetId,
+        reason: req.body?.reason || 'user_reverted',
+      }, {
+        repository: context.repository,
+        adapter: context.binding.adapter,
+      });
+      return res.json({ ok: true, ...result });
+    } catch (error) {
+      return res.status(409).json({ error: error.code || 'revert_failed', message: error.message, detail: error.detail || null });
+    }
+  });
+
+  app.post('/api/result-studio/revisions/:revisionId/restore', (req, res) => {
+    const revision = repo().getRevision(String(req.params.revisionId || '').trim());
+    if (!revision) return res.status(404).json({ error: 'revision_not_found' });
+    const context = projectContext(req, revision.projectId, { write: true });
+    if (context.error) return res.status(context.error.status).json({ error: context.error.code, bindingStatus: context.error.bindingStatus });
+    try {
+      const result = restoreArtifactRevision({
+        projectId: context.project.id,
+        workspaceRoot: context.project.workspace_path,
+        revisionId: revision.revisionId,
+        conversationId: req.body?.conversationId || null,
+        createdBy: 'user',
+      }, {
+        repository: context.repository,
+        adapter: context.binding.adapter,
+        gitPathPrefix: context.gitPathPrefix,
+        getToolJob: db.getToolJob,
+      });
+      return res.json({ ok: true, ...result });
+    } catch (error) {
+      return res.status(409).json({ error: error.code || 'restore_failed', message: error.message, detail: error.detail || null });
+    }
+  });
+
+  app.get('/api/result-studio/revisions/:revisionId/artifact', (req, res) => {
+    const revision = repo().getRevision(String(req.params.revisionId || '').trim());
+    if (!revision) return res.status(404).json({ error: 'revision_not_found' });
+    const context = projectContext(req, revision.projectId);
+    if (context.error) return res.status(context.error.status).json({ error: context.error.code });
+    try {
+      const workspace = fs.realpathSync(context.project.workspace_path);
+      const artifact = fs.realpathSync(path.join(workspace, revision.outputPath));
+      if (!isPathContained(workspace, artifact)) throw new Error('artifact_path_escape');
+      if (!revision.outputHash || hashFile(artifact) !== revision.outputHash) {
+        throw new Error('artifact_hash_mismatch');
+      }
+      return res.sendFile(artifact);
+    } catch (error) {
+      return res.status(404).json({ error: 'revision_artifact_unavailable', message: error.message });
     }
   });
 };

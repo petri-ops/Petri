@@ -2,7 +2,7 @@
 
 最后更新：2026-07-25
 
-状态：`in_progress`（RS0 ✅ / RS1 ✅ / RS2 ✅ / RS3 ✅ / RS4 ✅ / RS5 ✅ 已收口；当前下一阶段为 `G0-RS6`，单线串行）
+状态：`in_progress`（RS0 ✅ / RS1 ✅ / RS2 ✅ / RS3 ✅ / RS4 ✅ / RS5 ✅ / RS6 ✅ 已收口；当前下一阶段为 `G0-RS7`，单线串行）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -881,6 +881,8 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 
 目标：形成核心产品体验。
 
+状态：`completed`（2026-07-25）。
+
 交付：
 
 - 紧凑 ChangeSet 摘要。
@@ -897,6 +899,21 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 - 一次操作可恢复全部关联脚本、参数和 Artifact。
 - 820px、明暗主题和大量修改文件场景可用。
 - 详细信息不会淹没主预览。
+
+实现与边界：
+
+- `result-compare-service.js` 在同一 ChangeSet/ArtifactRevision 真相上提供有界文本 Git diff、JSON 字段 diff、CSV/TSV 语义 diff、图像/SVG Revision 对照和 history；200k 字符、500 JSON 字段、4 MiB 表格前缀与 20 行样本上限均显式返回截断状态。
+- adopt 仅接受 `preview_ready`、candidate ref/commit 一致、父 Revision 仍为 current、脚本哈希与真实 completed Job/Artifact Truth 均有效的候选。Git `refs/heads/biof3/current/*` 以 CAS 更新并在 SQLite transaction 回调内切 current；并发漂移或任一失败均回滚，不留下部分采用。
+- revert 只允许撤销仍为 current 的非 baseline ChangeSet；未采用候选只删除自己的临时 ref，baseline 永远不能撤销。restore 不改写历史，而是产生新的 commit、ChangeSet 和 Revision；重复恢复同一目标幂等返回同一新版本。
+- 5 个 Agent 工具和 6 个 HTTP 端点复用相同服务与项目权限边界；Revision Artifact 下载再次校验工作区包含性与 SHA-256。普通用户默认只看当前版本、状态、来源、文件数和操作，高级 Git 信息折叠披露。
+- `ResultStudioChangeSetPanel` 已接入真实结果侧栏；默认紧凑，展开后显示前后图、表格/JSON/文本差异和历史。采用/恢复后打开返回的真实 Job/Artifact，不建立第二套结果预览或版本状态。
+
+验收证据：
+
+- 服务专项 9/9 覆盖采用/撤销/恢复、幂等、baseline 禁止撤销、跨项目拒绝、CAS 冲突不改 SQLite，以及大 JSON/大表有界截断；组件专项 4/4 覆盖紧凑/展开、采用、撤销与 baseline 边界、恢复为新版本。
+- 隔离真实 R Server/SQLite/Git fixture 完成 v1 → 采用 v2 → 撤销回 v1 → 历史恢复为新 v3；重复恢复幂等，Revision Artifact 下载返回 200。
+- 真实 renderer 已覆盖明亮、夜间与 820×900；窄窗 `innerWidth=clientWidth=scrollWidth=820`，无页面级横向溢出。矩阵记录见 [`../acceptance/g0-result-studio/rs6-visual-matrix.md`](../acceptance/g0-result-studio/rs6-visual-matrix.md)，UI-104 为 `verified`。
+- UI-102 仍待真实大表选择/重启/positional caveat；UI-103 仍待真实长修改失败/取消/历史恢复，不借 RS6 证据提前关闭。
 
 ### G0-RS7：Plugin SDK 首批适配
 
