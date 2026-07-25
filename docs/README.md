@@ -16,6 +16,7 @@
 3. [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) — 已完成的 G0 Baseline v1 资格认证、证据边界与永久维护契约。
 4. [`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md) — 已进入 LF3/LF7 依赖链的数据契约与适配基线。
 5. [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) — 当前下一工作包；在 maintained G0 上建设结果交互、Git-backed ChangeSet/Revision、比较、采用、撤销与恢复能力。
+6. [`g0-rs0-result-studio-audit.md`](./g0-rs0-result-studio-audit.md) — G0-RS0 现状审计与架构 ADR；Result Studio 的复用/新增边界、契约缺陷与 Git 风险矩阵的唯一裁决记录。
 
 ## 当前开发必读
 

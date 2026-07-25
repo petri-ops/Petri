@@ -667,22 +667,26 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 
 保留策略：`worktree-governance.md` 继续是 `git-worktree-lifecycle` 的 canonical 规范并保持 `active policy`，仅正式 rollout 记为 deferred。重开时不得临时另立一套简化流程。
 
-### G0-RS0：现状审计与 ADR
+### G0-RS0：现状审计与 ADR（`completed` 2026-07-24）
 
 目标：固定边界，避免在当前 G0 未提交工作上直接扩张。
 
+产出记录：[`g0-rs0-result-studio-audit.md`](./g0-rs0-result-studio-audit.md)（`G0-RS0`，`result-studio-architecture` canonical）。
+
 交付：
 
-- 当前 ResultView、Artifact Truth、project-run-layout、ReplayPackage、Plugin SDK、Git 可用性审计。
-- ADR：Git-backed + Artifact Store 双层版本架构。
-- 现有 Git 项目/非 Git 项目/dirty workspace 风险矩阵。
-- UI 原型流程图，不做装饰性高保真先行。
+- ✅ 当前 ResultView、Artifact Truth、project-run-layout、ReplayPackage、Plugin SDK、Git 可用性审计。
+- ✅ ADR：Git-backed + Artifact Store 双层版本架构（ADR-1～ADR-6）。
+- ✅ 现有 Git 项目/非 Git 项目/dirty workspace 风险矩阵。
+- ✅ UI 原型流程图（文本流程，未做高保真先行）。
 
 验收：
 
-- 明确哪些现有表和路径复用，哪些新增。
-- 明确不建立第二套 executor/artifact truth。
-- 明确与当前 G0-LF 阶段的合并顺序。
+- ✅ 复用/新增边界已裁决：复用 `tool_jobs` 执行真相与 `reconcileArtifactTruth`；新增 5 张 RS 表走 `src/migrations/001+`。
+- ✅ 明确不建立第二套 executor/artifact truth；正式重算仍唯一走 `run_tool → tool_job → artifact truth`。
+- ✅ 与 G0 的关系已裁决：G0 为常驻 `maintained` 门禁，每次 RS 提交保持 `g0:qualification` 通过；RS9 晋升前必须处理 `excludedClaims` 的 `result-studio-editing` 并重资格。
+
+审计发现的三项契约缺陷已登记，必须在对应阶段修正，不得沿用计划原文：`validationStatus` 词表冲突（RS2）、`sourceScriptRef` 语义不足（RS5）、`ActiveArtifact` 仍是文件级（RS3）。
 
 ### G0-RS1：Git Adapter 与 Repository Binding
 

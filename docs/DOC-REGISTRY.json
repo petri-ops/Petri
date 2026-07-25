@@ -122,6 +122,16 @@
       "archivePolicy": "retain_stable_path"
     },
     {
+      "id": "G0-RS0",
+      "path": "docs/g0-rs0-result-studio-audit.md",
+      "kind": "audit",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "result-studio-architecture",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
       "id": "G0-SDC",
       "path": "docs/g0-scientific-data-contract-plan.md",
       "kind": "living-plan",
