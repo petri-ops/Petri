@@ -82,7 +82,9 @@ job_dir 执行协议（事实定义在 `tools-executor.js`）：脚本以 `argv[
 
 `src/migration-runner.js`：`schema_migrations(version, applied_at)`，扫 `migrationsDir/*.sql`，命名 `NNN_description.sql`，每个文件包在 `db.transaction` 内。注册点在 `src/main.js`，通过 `spawnSync` 以外部 Node（`ELECTRON_RUN_AS_NODE=1`，受 `BIOF3_BETTER_SQLITE3_ROOT` 控制）执行，用于规避 Electron/Node ABI 冲突。
 
-**现状**：`src/migrations/` 目录只有 `.gitkeep`，**零个 .sql 文件**。现有全部 schema 都写在 `core/r-server/db.js` 的命令式 `CREATE TABLE IF NOT EXISTS` + `try { ALTER TABLE } catch {}` 里。
+**现状**：现有全部 schema 都写在 `core/r-server/db.js` 的命令式 `CREATE TABLE IF NOT EXISTS` + `try { ALTER TABLE } catch {}` 里。
+
+> RS2 更正（2026-07-25）：RS0 原记为「`src/migrations/` 只有 `.gitkeep`」，实测该目录**根本不存在**。`runMigrations()` 的 `readdirSync` 会命中 `catch` 分支并直接 `return applied`，因此 migration 机制此前是**静默 no-op**，连"目录为空"的日志都不会产生。结论方向不变（runner 从未被真实使用），但失效方式比原描述更彻底。目录已由 RS2 建立并投入使用。
 
 ### 2.7 Git 可用性
 

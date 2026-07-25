@@ -48,7 +48,15 @@ RS1 已固化的边界：整树 pathspec（`.`/`-A`/`-u`/`*`/`:` 等）在 Adapt
 
 RS1 实测修正的一个真实缺陷：`git status --untracked-files=normal` 会把完全未跟踪目录折叠成单条（新建 `analysis/scripts/x.R` 只报告 `analysis/`），导致受管理路径下的用户新建文件漏判。冲突检测已改为 `untracked='all'` 并使用双向前缀匹配。
 
-下一阶段：`G0-RS2` Revision Contract 与持久化。注意 `src/migrations/` 至今为空，migration runner 从未真实使用过，RS2 必须包含 runner 首次使用验证（空库首装、已有库升级、事务回滚、`BIOF3_BETTER_SQLITE3_ROOT` ABI 路径）。
+- `G0-RS2` Revision Contract 与持久化 —— 新增 `core/shared-backend/result-studio-schema.js`（5 张新表 DDL 的唯一来源）、`result-studio-contracts.js`（ChangeSet / ArtifactRevision / SelectionContext / WorkspaceCheckpoint v1 校验与状态机）、`result-studio-repository.js`（CRUD、状态迁移、幂等 adopt/revert、可达性），以及项目首个正式 migration `src/migrations/001_result_studio.sql`。聚合门禁 `npm run g0:result-studio` 实测 78/78，已接入根 `npm run check`。
+
+RS2 已固化的边界：`validationStatus`（valid/degraded/blocked，来自 `reconcileArtifactTruth`）与 `reproducibilityStatus`（unavailable/available/verified，来自 delivery manifest）是两个独立字段，不合并成一套词汇；`validationStatus='valid'` 的 Revision 必须绑定 `toolJobId`，守住 `run_tool → tool_job → artifact truth`；含 `blocked` Revision 的 ChangeSet 不可采用；ChangeSet 只能以 `draft` 创建，不能凭空造出 `adopted`；`adopted → reverted` 合法（撤销已采用），`reverted`/`abandoned` 为完全关闭态；同 family 的当前版本由 partial unique index 在库层保证唯一，不存在两个"当前版本"；adopt/revert 同状态重放幂等；大于 2000 个实体的选择必须携带 `filterExpression` 才可持久化，计数如实反映真实规模。
+
+RS2 实测修正的两个真实缺陷：其一，`canTransitionChangeSet()` 返回 `{allowed,...}` 对象，而三处守卫写成 `!canTransitionChangeSet(...)` —— 对象取反恒为 false，状态机守卫完全失效、放行所有非法迁移（含跳过预览直接采用）；已改为读 `.allowed`。其二，可达性分析无条件保护每个 family 的 ordinal 1，导致"用户新建 family 后放弃"的孤立 Revision 永久占盘；已改为仅当该 family 存在 current 或 adopted Revision 时才保护原始版本。
+
+migration 现状更正：RS0 审计称 `src/migrations/` 只有 `.gitkeep`，实际该目录**根本不存在**，`runMigrations()` 因 `readdirSync` 抛错走 catch 分支静默返回，从未真正执行过。RS2 已建立该目录与首个 migration，并用 `test/result-studio-migration.test.mjs` 覆盖空库首装、重复执行幂等、已有库升级不动现有表、坏 SQL 事务回滚且不记版本、缺目录静默 no-op、`BIOF3_BETTER_SQLITE3_ROOT` ABI 路径，以及 `.sql` 与 schema 模块逐字节一致。
+
+下一阶段：`G0-RS3` Artifact Interaction 与 Selection Context。注意 `ActiveArtifact`（`frontend/src/pages/project-workspace.tsx`）目前仍是文件级标识，不含 revision/语义/选择状态，RS3 需要改造该类型及其全部流转路径，而不是新增旁路。
 
 ### 3.1 已完成基线：真实科学任务驱动的 Harness 升级
 

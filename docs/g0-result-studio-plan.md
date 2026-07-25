@@ -2,7 +2,7 @@
 
 最后更新：2026-07-24
 
-状态：`in_progress`（RS0 ✅ / RS1 ✅ 已收口；当前下一阶段为 `G0-RS2`，单线串行）
+状态：`in_progress`（RS0 ✅ / RS1 ✅ / RS2 ✅ 已收口；当前下一阶段为 `G0-RS3`，单线串行）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -724,19 +724,54 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 
 实现期修正的真实缺陷：`--untracked-files=normal` 会把完全未跟踪的目录折叠成单条（新建的 `analysis/scripts/x.R` 只报告 `analysis/`），导致受管理路径下的用户新建文件在冲突检测中漏判、RS 随后可能覆盖它。已改为 `untracked='all'` 并加双向前缀匹配 `pathsOverlap()`。该缺陷由验收测试捕获，不是推测。
 
-### G0-RS2：Revision Contract 与持久化
+### G0-RS2：Revision Contract 与持久化 ✅ 已完成（2026-07-25）
 
 目标：实现 ChangeSet、ArtifactRevision、Checkpoint。
 
+实现文件：
+
+- `core/shared-backend/result-studio-schema.js` — canonical DDL（5 张新表 + 索引）、`ensureResultStudioSchema()`、`inspectResultStudioSchema()`、`buildMigrationSql()`。
+- `src/migrations/001_result_studio.sql` — 由 `buildMigrationSql()` 生成，逐字节一致由测试强制。
+- `core/shared-backend/result-studio-contracts.js` — 4 个契约的 validator + 状态机 + checkpoint hash。
+- `core/shared-backend/result-studio-repository.js` — CRUD、状态迁移、幂等 adopt/revert、中断扫描、可达性分析。
+
 交付：
 
-- JSON Schema/JS validator/TypeScript 类型。
-- SQLite migration 与 CRUD。
-- Git commit ↔ ChangeSet ↔ ArtifactRevision 映射。
-- crash-safe 状态机。
-- content hash 和 reachability。
+- ✅ JS validator：`validateScientificChangeSet` / `validateArtifactRevision` / `validateSelectionContext` / `validateWorkspaceCheckpoint`，统一返回 `{ ok, errors, <entity> }`，错误带稳定 `code`。TypeScript 类型留待 RS3 前端接入时生成，后端契约以本层为准。
+- ✅ SQLite migration 与 CRUD：5 张新表 `git_repository_bindings`、`scientific_change_sets`、`artifact_revisions`、`result_selection_contexts`、`workspace_revision_checkpoints`；不修改任何现有表。
+- ✅ Git commit ↔ ChangeSet ↔ ArtifactRevision 映射：ChangeSet 持有 `base_commit`/`candidate_commit`/`working_branch_ref`，Revision 持有 `source_commit` 与 `change_set_id`。
+- ✅ crash-safe 状态机：迁移表显式声明，条件更新 `WHERE status = ?` 防并发覆盖，adopt/revert 全程单事务。
+- ✅ content hash 与 reachability：`checkpoint_hash` 检测外部改写；`analyzeRevisionReachability()` 只产出 `gcCandidates`，不删除任何东西。
 
-验收：
+按 RS0 登记的契约缺陷修正：
+
+- ✅ `validationStatus` 词表冲突已拆分：`validation_status`（`valid|degraded|blocked`，必须来自 `reconcileArtifactTruth()`）与 `reproducibility_status`（`unavailable|available|verified`，必须来自 delivery-manifest 的 artifact 级判定）。未新造第三套词汇。
+- ✅ 增加 `valid_revision_requires_job`：`validationStatus='valid'` 的 Revision 必须携带 `toolJobId`，把「正式结果必须来自真实 Job」写成契约而非约定。
+
+验收（`test/result-studio-contracts.test.mjs` 26/26、`test/result-studio-repository.test.mjs` 19/19、`test/result-studio-migration.test.mjs` 9/9，合计 54/54 pass；仓库测试使用临时目录中的真实 better-sqlite3 数据库）：
+
+- ✅ draft→running→preview_ready→adopted 完整轨；采用后 `is_current` 原子切换。
+- ✅ `validation_failed`、`reverted`、`abandoned` 终态；`validation_failed` 不能直接被采用。
+- ✅ 进程中断后可恢复：真实关闭并重开数据库后状态、Revision、checkpoint 全部保留；`findInterruptedChangeSets()` 把 `running` 分类为 `recovery_required_after_restart`、`preview_ready` 为 `awaiting_user_decision`，只报告不自动改写。
+- ✅ 重复 adopt/revert 幂等：返回 `idempotent: true`，不重复切换 current 指针。
+- ✅ 一个 family 永不出现两个 current：由 partial unique index `WHERE is_current = 1` 在 DB 层保证，绕过仓库直接写库也会失败。
+- ✅ migration runner 首次使用验证（RS0 要求）：空库首装、已有库升级不动现存表、坏 SQL 事务回滚且不记版本、重复执行幂等、缺目录时的静默 no-op 行为、`BIOF3_BETTER_SQLITE3_ROOT` 下的 ABI 路径。
+- ✅ migration 文件与 schema 模块逐字节一致，且不含 `BEGIN/COMMIT`（runner 已包事务，自带会导致嵌套失败）、`PRAGMA`、`AUTOINCREMENT`、`INSERT OR REPLACE`、`DROP/ALTER TABLE`。
+
+实现期修正的真实缺陷（均由验收测试捕获）：
+
+1. **状态机守卫全线失效**：`canTransitionChangeSet()` 返回 `{ allowed, idempotent, reason }` 对象，而 `transitionChangeSet`/`adoptChangeSet`/`revertChangeSet` 三处都写成 `!canTransitionChangeSet(...)`。对象取反恒为 `false`，守卫从未生效，任意非法迁移（含 `draft → adopted` 跳过预览）都会被放行。已全部改为读 `.allowed`。
+2. **`adopted` 被误列为完全终态**：迁移表允许 `adopted → reverted`（撤销已采用是真实用户动作），与 `TERMINAL` 语义自相矛盾。已拆分为 `CHANGE_SET_CLOSED_STATUSES`（`reverted`/`abandoned`，无任何向外迁移）与 `CHANGE_SET_SETTLED_STATUSES`（含 `adopted`，不再进行中但可撤销）。
+3. **可达性规则会永久泄漏磁盘**：原 `original_revision` 规则无条件保护每个 family 的 ordinal 1，导致「用户新建 artifact family 后放弃」的 Revision 永不可回收。已改为只保护「仍有 current 或 adopted Revision」的活跃 family 的原始版本。
+4. RS0 审计中「`src/migrations/` 只有 `.gitkeep`」不准确：该目录当时**根本不存在**，`runMigrations` 走 `readdirSync` 的 catch 分支静默返回。已在审计文件更正，并由 migration 测试固化该行为。
+
+范围外（留给后续阶段）：
+
+- 前端 TypeScript 类型与 `ActiveArtifact` 升级 → RS3。
+- `sourceScriptRef` 的图表级语义（当前只存 `relativePath`/`sha256`/`entryPoint` 三元组）→ RS5。
+- 真实 Git 提交与 ChangeSet 的联动写入（本层只持久化映射字段，不调用 Adapter）→ RS5。
+
+### G0-RS2 原始验收清单（保留对照）
 
 - draft→preview_ready→adopted 完整轨。
 - validation_failed、reverted、abandoned 终态。
