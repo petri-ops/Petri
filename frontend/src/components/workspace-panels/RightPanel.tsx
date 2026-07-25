@@ -4,12 +4,12 @@ import type { Project, ToolJob } from '@/lib/project-types';
 import type { BackendStatus } from '@/lib/electron';
 import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
+import { ResultStudioInspector } from '@/components/result-studio/ResultStudioSurface';
 import {
   type RightPanelMode,
   type ActiveArtifact,
   type ActiveWorkspaceFile,
   EmptyResult,
-  ResultSidebarPanel,
   RightFileTree,
   TerminalPanel,
   BrowserPanel,
@@ -106,6 +106,7 @@ export function RightPanel({
       <aside
         className={styles.rightCol}
         style={{ width: ctx.width }}
+        data-workspace-mode={workspaceMode}
       >
         <div className={styles.resultPanel}>
           <div className={styles.resultPanelBody}>
@@ -127,20 +128,17 @@ export function RightPanel({
                   />
                 )}
                 {tab === 'results' && (
-                  <ResultSidebarPanel
-                    project={ctx.project}
-                    job={ctx.activeJob}
-                    workflow={ctx.activeWorkflow}
-                    onWorkflowChanged={ctx.onWorkflowChanged}
-                    activeArtifact={ctx.activeArtifact}
-                    onActiveArtifactChange={ctx.setActiveArtifact}
+                  <ResultStudioInspector
+                    artifact={ctx.activeArtifact}
+                    jobStatus={ctx.activeWorkflow?.jobStatus || ctx.activeJob?.status}
+                    truthStatus={
+                      typeof ctx.activeArtifact?.truthStatus === 'string'
+                        ? ctx.activeArtifact.truthStatus
+                        : typeof ctx.activeWorkflow?.artifactTruth?.status === 'string'
+                          ? ctx.activeWorkflow.artifactTruth.status
+                          : null
+                    }
                     onAskAgent={ctx.handleAskAgent}
-                    pendingArtifactName={ctx.pendingArtifactName}
-                    onPendingArtifactConsumed={ctx.onPendingArtifactConsumed}
-                    onOpenBrowser={(url) => {
-                      ctx.setBrowserUrl(url);
-                      ctx.openRightPanel('browser');
-                    }}
                   />
                 )}
                 {tab === 'files' && (

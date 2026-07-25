@@ -2,7 +2,7 @@
 
 最后更新：2026-07-25
 
-状态：`active / implemented_unverified`（RS0～RS8 引擎基础保留；`G0-RS-P0` 已完成资格纠偏，下一阶段 `G0-RS-P1` planned）
+状态：`active / implemented_unverified`（RS0～RS8 引擎基础保留；`G0-RS-P0`、`G0-RS-P1` 已完成，下一阶段仅允许 `G0-RS-P2`）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -1231,7 +1231,7 @@ Result Studio 当前按三层事实表达：
 
 ### G0-RS-P1：Result Surface 与中央主画布
 
-状态：`planned`；P0 收口后唯一允许启动的下一阶段。
+状态：`completed`（2026-07-25）；开发态真实 renderer 与代码门禁已收口，不升级 `result-studio-editing` 产品资格。
 
 目标：让结果成为可阅读、可操作的主要空间，同时保持默认 Agent 主导。
 
@@ -1248,6 +1248,18 @@ Result Studio 当前按三层事实表达：
 - 从聊天、任务节点、文件/Artifact 导航打开同一结果，均进入同一主画布且不会创建第二份 current 状态。
 - 明暗主题、1440px、1024px、820px 无页面级溢出；键盘和屏幕阅读器可到达核心动作。
 - 关闭结果后 Agent 对话、输入草稿、滚动位置和运行中任务不丢失。
+
+实现与证据：
+
+- 在同一 `ProjectWorkspace` 状态机中加入 `result` / `compare` 投影；Agent 会话组件保持挂载，仅切换可见投影，不建立第二份项目、会话或 Artifact current 状态。
+- `ResultStudioCanvas`、`ResultStudioContextBar` 与紧凑 `ResultStudioInspector` 已接线；顶部结果入口、任务/Artifact 打开与 URL 模式统一进入中央主画布，返回会话恢复进入前的布局状态。
+- report / image / table / JSON / text / binary 六类 viewer adapter 明确落地；相对、协议相对和危险 scheme 统一回落到受控 Job 文件端点，manifest-only 可预览文件不依赖 Job files 重复登记。
+- 真实开发态 renderer 覆盖明暗主题和 1440×900、1024×900、820×900：中央画布宽度分别为 858、683、820px，均无页面级横向溢出；820px 隐藏检查器。报告在后台刷新后保持当前选择。
+- Agent 对话草稿经结果往返后原样保留并在验收后清空；进入前关闭的左栏返回后仍关闭。核心动作均具有稳定 role/name，技术 ID 默认折叠。
+- 实测首次画布 3.2ms、Artifact 切换 0.7ms、返回会话 2.6ms，均低于 1000/500/250ms 冻结预算；同时冻结表格滚动 100ms、选择反馈 100ms、参数预览 500ms、比较打开 1000ms、重启恢复 5000ms 和切换内存增长 64MiB 的后续硬预算。尚未交付的交互不得伪造实测值，分别由 P2/P4/P5/P6 在真实功能与可观测运行环境中验证。
+- 脱敏证据：`acceptance/g0-result-studio/rs-p1-result-surface.json`。该证据只关闭 P1 bounded renderer/product-development 验收，`result-studio-editing` 继续为 experimental/excluded，完整产品资格仍只允许在 P7 连续产品 trace 后裁决。
+- P0 历史纠偏门改为校验封存证据与当前资格政策，不再要求 P1～P7 的演进源码永远保持 P0 哈希；RS9 历史输入和 P0 UI baseline 仍保持不可变校验。
+- P1 专项 12/12、前端全量 266/266、TypeScript strict、UI/文档/根门禁按收口记录通过。
 
 ### G0-RS-P2：Scientific Interaction 与 SelectionContext
 
@@ -1433,7 +1445,7 @@ G0-RS-P0 Truth Correction
 
 阶段状态规则：
 
-- 同一时间只有一个 `G0-RS-P*` 阶段处于 `in_progress`；`G0-RS-P0` 已完成，当前没有进行中实现，下一阶段只允许 `G0-RS-P1`。
+- 同一时间只有一个 `G0-RS-P*` 阶段处于 `in_progress`；`G0-RS-P0`、`G0-RS-P1` 已完成，当前没有进行中实现，下一阶段只允许 `G0-RS-P2`。
 - 每阶段先补失败测试/fixture，再实现，再形成与证据类型匹配的验收；不得提前开发下一阶段。
 - 单元测试证明契约，fixture 证明确定性集成，真实 Provider 证明模型边界，packaged Electron 证明产品链；四者不能互相替代。
 - 未运行 `npm run docs:reconcile` 与 `npm run docs:check` 不得宣布阶段 completed/verified/qualified。
@@ -1450,4 +1462,4 @@ G0-RS-P0 Truth Correction
 5. [x] 捕获当前真实产品基线，不把截图存在等同于操作通过。
 6. [x] 跑专项、G0、文档、UI 和全量测试；根门禁在最终文档收口后复跑。
 
-下一 Goal 只允许实施 `G0-RS-P1`，不得提前进入 P2～P7。
+`G0-RS-P1` 已按本节证据收口。下一 Goal 只允许实施 `G0-RS-P2`，不得提前进入 P3～P7。

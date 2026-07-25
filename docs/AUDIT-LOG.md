@@ -5,7 +5,7 @@
 > 非主 agent 每次完成审计后，必须把发现追加到本文件并提交，不要只写在单独报告里。
 >
 > 维护方：非主 agent（只读审计 + 阻断性回归修复通道）
-> 最后更新：2026-07-24（G0 第五波 LF11 Evolution Pipeline 收口）
+> 最后更新：2026-07-25（G0-RS-P1 Result Surface 收口）
 
 ---
 
@@ -32,6 +32,7 @@
 | ✅已处理 | 2026-07-25 | G0-RS7 完成：Result Studio Plugin SDK v1 fail-closed lint 接入生产 normalize 与插件 contract lint；DESeq2 table、volcano、heatmap、GO/KEGG 共 12 个正式图表完成 descriptor、Artifact binding、per-Artifact Revision 脚本路径与 golden Revision 适配。兼容升级保持可读，contract drift 缺迁移时明确 read-only legacy；四插件真实 valid 生产 fixture 保持通过。 | G0-RS7 | `result-studio-plugin-sdk.js`, `resources/built-in-plugins/*/golden-revisions/result-studio-v1.json`, `rs7-plugin-acceptance.json` |
 | ✅已处理 | 2026-07-25 | G0-RS8 完成：ChangeSet 全阶段 WorkspaceCheckpoint、Git/SQLite/Artifact 漂移自愈或阻断、content-addressed Artifact 去重、plan-token 安全 GC、1 MiB byte-cursor 大表渐进加载和 preview 资源/并发预算进入生产/API/UI；GC 永不删除 Artifact 或 Revision 历史。UI-105 功能完成、待 RS9 真实矩阵。 | G0-RS8 / UI-105 | `result-studio-lifecycle.js`, `routes/result-studio.js`, `ResultStudioChangeSetPanel.tsx`, `rs8-lifecycle-acceptance.json` |
 | ✅已处理 | 2026-07-25 | G0-RS9 产品资格被复核撤销并由 G0-RS-P0 完成机器纠偏：Baseline 1.1.1 保留 LF12 核心 16/16 qualified + maintained；`result-studio-editing` 为 experimental/excluded，RS9 product/provider/visual/table-seed 全部标记 non-qualifying；Product Trace v1 强制 14 步连续来源证据并拒绝人工布尔值/提示词 JSON/测试摘要/常量。UI-102/UI-103/UI-105 保持 in_progress，UI-106～UI-111 已登记；SDC-1～SDC-7 在 RS-P7 前 deferred。 | G0-RS-P0 / UI-102～UI-111 | `rs-p0-truth-correction.json`、`rs-p0-ui-baseline.json`、`result-studio-qualification.js` |
+| ✅已处理 | 2026-07-25 | G0-RS-P1 完成：同一 ProjectWorkspace 建立中央 ResultStudioCanvas、紧凑 Inspector/ContextBar、六类 viewer adapter 与 conversation/task/result/compare 投影；Agent 会话保持挂载，草稿和布局往返不丢失。明暗与 1440/1024/820px 真实开发态 renderer 无页面溢出，性能低于冻结预算。UI-106 verified；证据明确为 non-qualifying product-development evidence，未升级 Result Studio 产品资格。 | G0-RS-P1 / UI-106 | `ResultStudioSurface.tsx`、`resultSurface.ts`、`rs-p1-result-surface.json` |
 | ✅已处理 | 2026-07-25 | G0-SDC0 完成：`artifact-profiles.js` 从 DEG 单种子升级为正式 Registry，六个 canonical Profile（counts-matrix / sample-metadata / expression-matrix / deg / gene-list / enrichment-table）落地并区分 data/artifact/display 三类 Kind；新增 profile 身份、contract digest、compatible/migration/breaking 分级与 fail-closed 兼容判定；未注册 Profile 经 `agent-workflow` 返回 `unregistered_artifact_profile`，不能成为 typed DAG 正式边。DEG 及 legacy alias 保持兼容，未创建第二套执行真相。SDC-0 只覆盖离线契约层，真实不规则数据端到端验收仍属 SDC-7。 | G0-SDC0 | `artifact-profiles.js`, `agent-workflow.js`, `test/g0-sdc0-profile-registry.test.mjs`, `acceptance/g0-scientific-data-contract/profile-registry.json` |
 | ✅已处理 | 2026-07-17 | 5 个 codex/* 已合并残留分支已删除（连带 prune 6 个失效 worktree 注册） | 分支备忘录 | [§2.3](#23-已合并残留分支可安全删除-) |
 | ✅已处理 | 2026-07-17 | `sanitizer.js` 死模块 + 其测试已删除（全仓零生产引用） | 本文件 §4 | [§4 问题 E](#问题-esanitizerjs-死模块) |

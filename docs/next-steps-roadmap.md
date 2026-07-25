@@ -28,7 +28,7 @@ G0-RS-P0 资格与证据纠偏
   → 重新评估 SDC-1
 ```
 
-`G0-RS-P0` 已完成：Baseline 1.1.1 保持 LF12 核心 16/16 qualified + maintained，Result Studio 产品声明降为 experimental/excluded，旧 RS9 证据机器分类为 non-qualifying，并建立 Product Trace v1 与真实界面缺口基线。下一阶段只允许启动 `G0-RS-P1 Result Surface`，不得提前实现 P2～P7。
+`G0-RS-P0` 已完成资格纠偏；`G0-RS-P1 Result Surface` 已于 2026-07-25 收口：同一 ProjectWorkspace 现具备中央结果主画布、紧凑检查器、六类 viewer、三档响应式布局和无损返回 Agent 会话，证据为 `acceptance/g0-result-studio/rs-p1-result-surface.json`。该开发态 renderer 证据不升级产品资格。下一阶段只允许启动 `G0-RS-P2 Scientific Interaction + SelectionContext`，不得提前实现 P3～P7。
 
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 已完成的 Scientific Task Contract 工作包记录见 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md)。

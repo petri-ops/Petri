@@ -39,7 +39,9 @@ LF12 完成记录为 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseli
 
 Result Studio 旧实现的 11 个提交已于 2026-07-25 fast-forward 合并并推送至 `main`，检查点为 `03e5826`。SDC-0 已在 `codex/g0-sdc` 的 `7284921` 完成并推送；当前单线实现分支为 `codex/g0-result-studio-product`，从该检查点创建，不使用 Git Worktree。当前唯一 active 工作包为 `G0-RS`。
 
-`G0-RS-P0` 已完成资格纠偏：Baseline patch 为 1.1.1，LF12 核心 16/16 evidence 继续 qualified + maintained；`result-studio-editing` 为 experimental/excluded，旧 RS9 product/provider/visual/table-seed 为 non-qualifying historical evidence。Product Trace v1 要求 14 步连续来源证据并拒绝人工布尔值、提示词指定 JSON、测试摘要和常量不变量。真实开发态基线确认中央结果画布缺失、结果仍位于 340px 右栏。证据位于 `acceptance/g0-result-studio/rs-p0-{truth-correction,ui-baseline}.json`。下一阶段只允许 `G0-RS-P1`。
+`G0-RS-P0` 已完成资格纠偏：Baseline patch 为 1.1.1，LF12 核心 16/16 evidence 继续 qualified + maintained；`result-studio-editing` 为 experimental/excluded，旧 RS9 product/provider/visual/table-seed 为 non-qualifying historical evidence。Product Trace v1 要求 14 步连续来源证据并拒绝人工布尔值、提示词指定 JSON、测试摘要和常量不变量。证据位于 `acceptance/g0-result-studio/rs-p0-{truth-correction,ui-baseline}.json`。
+
+`G0-RS-P1 Result Surface` 已于 2026-07-25 收口：中央 `ResultStudioCanvas`、紧凑 Inspector/ContextBar、六类 viewer adapter、受控 Artifact URL、无损 Agent 会话投影与 1440/1024/820px 响应式布局已进入同一 `ProjectWorkspace` 状态机。真实开发态 renderer 证据位于 `acceptance/g0-result-studio/rs-p1-result-surface.json`；P1 专项 12/12、前端 266/266、TypeScript strict 与治理门禁通过。该证据不升级产品资格；下一阶段只允许 `G0-RS-P2 Scientific Interaction + SelectionContext`。
 
 `SDC-0 Profile Registry 与版本治理` 已于 2026-07-25 收口：`core/shared-backend/artifact-profiles.js` 从单个 DEG 种子升级为正式 Registry，落地 `biof3.counts-matrix.v1`、`biof3.sample-metadata.v1`、`biof3.expression-matrix.v1`、`biof3.deg.v1`、`biof3.gene-list.v1`、`biof3.enrichment-table.v1` 六个 canonical Profile，并区分 data / artifact / display 三类 Profile Kind。新增 profile 身份解析、registry 校验、contract digest、compatible/migration/breaking 变更分级和 fail-closed 兼容判定；`core/shared-backend/agent-workflow.js` 对未注册 Profile 返回 `unregistered_artifact_profile`，使其无法成为 typed DAG 正式边。`biof3.deg.v1` 及其 legacy alias（含 `log2FC → log2FoldChange`）保持向后兼容，未创建第二套执行真相。
 

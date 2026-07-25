@@ -11,8 +11,20 @@ import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import type { BackendStatus } from '@/lib/electron';
 import { WorkspaceSummaryCard } from '@/components/workspace-panels/WorkspaceSummaryCard';
 import {
+  ResultStudioCanvas,
+  ResultStudioContextBar,
+} from '@/components/result-studio/ResultStudioSurface';
+import {
+  completeResultSurfaceMeasure,
+  describeSelection,
+  describeTruthStatus,
+  RESULT_SURFACE_PERFORMANCE_MARKS,
+  shortRevisionLabel,
+} from '@/components/result-studio/resultSurface';
+import {
   WorkspaceSearchPanel,
   ScheduledWorkspacePanel,
+  ResultView,
   type ActiveArtifact,
   type JobStats,
 } from '@/pages/project-workspace';
@@ -50,6 +62,7 @@ export interface CenterPanelContext {
   activeWorkflow: HarnessWorkflowJobState | null;
   activeArtifact: ActiveArtifact | null;
   activeJobId: string | null;
+  pendingArtifactName: string | null;
   recentJobs: ToolJob[];
   liveJobsPreview: ToolJob[];
   jobStats: JobStats;
@@ -76,6 +89,9 @@ export interface CenterPanelContext {
   handleOpenResult: (jobId: string, projectId?: string | null) => void | Promise<void>;
   handleAskAgent: (prompt: string) => void;
   handleOpenWorkspacePath: () => void | Promise<void>;
+  onPendingArtifactConsumed: () => void;
+  onWorkflowChanged: () => void;
+  openResultBrowser: (url: string) => void;
   openScheduledResults: () => void;
   startColumnResize: (which: 'left' | 'right' | 'input') => (e: React.MouseEvent) => void;
 }
@@ -94,17 +110,52 @@ export interface CenterPanelProps {
  */
 export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
   const { workspaceMode, bottomTerminalOpen, bottomTerminalHeight, centerColRef } = ctx;
+  const [returnConversationMs, setReturnConversationMs] = React.useState<number | null>(null);
+  const resultMode = workspaceMode === 'result' || workspaceMode === 'compare';
+  const truthStatus = typeof ctx.activeArtifact?.truthStatus === 'string'
+    ? ctx.activeArtifact.truthStatus
+    : typeof ctx.activeWorkflow?.artifactTruth?.status === 'string'
+      ? ctx.activeWorkflow.artifactTruth.status
+      : null;
+  const contextTitle = ctx.activeArtifact?.label || ctx.activeArtifact?.name || ctx.activeJob?.name || ctx.activeJob?.tool_id || '分析结果';
+  const contextConclusion = ctx.activeArtifact?.conclusion || (
+    truthStatus === 'valid'
+      ? '结果已经过产物校验，可继续查看、比较或交给 Agent 解释。'
+      : truthStatus === 'blocked'
+        ? '结果当前被阻断，请先查看原因或让 Agent 处理。'
+        : '正在读取结果与可信状态，不会把未知信息标记为成功。'
+  );
+
+  const askAboutCurrentResult = React.useCallback(() => {
+    ctx.handleAskAgent(`请解释当前结果“${contextTitle}”的主要结论、可信边界和最合适的下一步。`);
+    ctx.updateWorkspaceMode('chat');
+  }, [contextTitle, ctx.handleAskAgent, ctx.updateWorkspaceMode]);
+
+  React.useLayoutEffect(() => {
+    if (workspaceMode !== 'chat') return;
+    const duration = completeResultSurfaceMeasure({
+      start: RESULT_SURFACE_PERFORMANCE_MARKS.returnStart,
+      end: RESULT_SURFACE_PERFORMANCE_MARKS.returnEnd,
+      measure: RESULT_SURFACE_PERFORMANCE_MARKS.returnMeasure,
+    });
+    if (duration !== null) setReturnConversationMs(duration);
+  }, [workspaceMode]);
 
   return (
     <main
       className={styles.centerCol}
       ref={centerColRef}
       style={{ paddingBottom: bottomTerminalOpen ? bottomTerminalHeight : 0 }}
+      data-return-conversation-ms={returnConversationMs === null ? undefined : returnConversationMs.toFixed(2)}
     >
       {workspaceMode === 'search' && (
         <WorkspaceSearchView ctx={ctx} />
       )}
-      {workspaceMode === 'chat' && (
+      <div
+        className={`${styles.workspaceProjectionLayer} ${workspaceMode === 'chat' ? styles.workspaceProjectionLayerActive : ''}`}
+        aria-hidden={workspaceMode !== 'chat'}
+        data-projection="conversation"
+      >
         <SessionFrameView ctx={ctx} variant="chat">
           <div className={styles.agentMain}>
             {ctx.project && ctx.projectId && (
@@ -117,6 +168,41 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
             )}
           </div>
         </SessionFrameView>
+      </div>
+      {resultMode && (
+        <div className={`${styles.workspaceProjectionLayer} ${styles.workspaceProjectionLayerActive}`} data-projection={workspaceMode}>
+          <ResultStudioCanvas
+            mode={workspaceMode}
+            contextBar={(
+              <ResultStudioContextBar
+                title={contextTitle}
+                trust={describeTruthStatus(truthStatus, ctx.activeJob?.status)}
+                conclusion={contextConclusion}
+                revisionLabel={shortRevisionLabel(ctx.activeArtifact?.revisionId)}
+                selectionLabel={describeSelection(ctx.activeArtifact?.selection)}
+                onBack={() => ctx.updateWorkspaceMode('chat')}
+                onAskAgent={askAboutCurrentResult}
+              />
+            )}
+          >
+            {ctx.activeJob ? (
+              <ResultView
+                project={ctx.project}
+                job={ctx.activeJob}
+                workflow={ctx.activeWorkflow}
+                activeArtifact={ctx.activeArtifact}
+                onActiveArtifactChange={ctx.setActiveArtifact}
+                onAskAgent={ctx.handleAskAgent}
+                onWorkflowChanged={ctx.onWorkflowChanged}
+                pendingArtifactName={ctx.pendingArtifactName}
+                onPendingArtifactConsumed={ctx.onPendingArtifactConsumed}
+                onOpenBrowser={ctx.openResultBrowser}
+              />
+            ) : (
+              <div className={styles.resultSurfaceEmpty}>尚未选择分析结果</div>
+            )}
+          </ResultStudioCanvas>
+        </div>
       )}
       {workspaceMode === 'scheduled' && (
         <SessionFrameView ctx={ctx}>

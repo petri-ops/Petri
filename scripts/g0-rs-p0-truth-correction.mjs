@@ -33,6 +33,15 @@ const SOURCE_INPUTS = Object.freeze({
   uiBaseline: 'acceptance/g0-result-studio/rs-p0-ui-baseline.json',
 });
 
+// P0 is a sealed historical correction, not a prohibition on later product
+// work. These inputs are the immutable evidence that P0 classified. The other
+// SOURCE_INPUTS describe the then-current product gap and are expected to
+// evolve under P1-P7 without invalidating the historical P0 decision.
+const IMMUTABLE_P0_INPUT_IDS = Object.freeze([
+  ...Object.keys(HISTORICAL_INPUTS),
+  'uiBaseline',
+]);
+
 const readRelative = (relativePath) => readFileSync(join(root, relativePath), 'utf8');
 const hashRelative = (relativePath) => sha256(readFileSync(join(root, relativePath)));
 
@@ -194,21 +203,24 @@ function verifyStored(live) {
   if (!stored.passed || !Object.values(stored.checks || {}).every(Boolean)) throw new Error('rs_p0_truth_correction_failed');
   if (!isAncestor(stored.sourceCommit)) throw new Error('rs_p0_source_not_ancestor');
   if (stored.baseline?.bundleDigest !== live.baseline.bundleDigest) throw new Error('rs_p0_baseline_stale');
-  if (stored.runnerSha256 !== live.runnerSha256) throw new Error('rs_p0_runner_stale');
-  for (const [id, digest] of Object.entries(live.inputHashes)) {
-    if (stored.inputHashes?.[id] !== digest) throw new Error(`rs_p0_input_stale:${id}`);
+  for (const id of IMMUTABLE_P0_INPUT_IDS) {
+    if (stored.inputHashes?.[id] !== live.inputHashes?.[id]) throw new Error(`rs_p0_input_stale:${id}`);
   }
+  const currentPolicyChecks = Object.entries(live.checks || {})
+    .filter(([id]) => id !== 'productGapsObserved');
+  const failedCurrentPolicy = currentPolicyChecks.filter(([, passed]) => !passed).map(([id]) => id);
+  if (failedCurrentPolicy.length > 0) throw new Error(`rs_p0_current_policy_failed:${failedCurrentPolicy.join(',')}`);
   return stored;
 }
 
 export function main(argv = process.argv.slice(2)) {
   try {
     const report = buildReport();
-    if (!report.passed) {
-      const failed = Object.entries(report.checks).filter(([, passed]) => !passed).map(([id]) => id);
-      throw new Error(`rs_p0_truth_correction_failed:${failed.join(',')}`);
-    }
     if (argv.includes('--write-evidence')) {
+      if (!report.passed) {
+        const failed = Object.entries(report.checks).filter(([, passed]) => !passed).map(([id]) => id);
+        throw new Error(`rs_p0_truth_correction_failed:${failed.join(',')}`);
+      }
       mkdirSync(dirname(evidencePath), { recursive: true });
       writeFileSync(evidencePath, `${JSON.stringify(report, null, 2)}\n`);
       console.log('[G0-RS-P0] PASS — truth corrected; Result Studio product claim remains experimental');

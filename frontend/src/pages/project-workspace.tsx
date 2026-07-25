@@ -34,6 +34,7 @@ import { useResizableColumns } from '@/hooks/useResizableColumns';
 import { useWorkspaceLayout } from '@/hooks/useWorkspaceLayout';
 import { useRightPanelTabs } from '@/hooks/useRightPanelTabs';
 import { usePluginStore } from '@/hooks/usePluginStore';
+import { parseWorkspaceMode, type WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import { isDirectRecoveryAction, useHarnessWorkflowStatus } from '@/hooks/useHarnessWorkflowStatus';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import type { HarnessContextSummary } from '@/lib/copilotContext';
@@ -69,6 +70,15 @@ import {
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
 import { ResultStudioChangeSetPanel } from '@/components/result-studio/ResultStudioChangeSetPanel';
+import {
+  beginResultSurfaceMeasure,
+  chooseResultArtifactName,
+  chooseResultSectionLandingName,
+  completeResultSurfaceMeasure,
+  RESULT_SURFACE_PERFORMANCE_MARKS,
+  resolveResultArtifactUrl,
+  resolveResultViewerAdapter,
+} from '@/components/result-studio/resultSurface';
 import type { BackendStatus } from '@/lib/electron';
 import { getBridge } from '@/lib/desktopBridge';
 import {
@@ -121,6 +131,8 @@ interface ActiveArtifact {
   selectionDurable?: boolean;
   interactionCapabilities?: InteractionCapability[];
   selection?: ArtifactSelection | null;
+  truthStatus?: 'valid' | 'degraded' | 'blocked' | null;
+  conclusion?: string | null;
 }
 
 interface ActiveWorkspaceFile {
@@ -143,13 +155,6 @@ export type {
   JobStats,
 };
 
-type WorkspaceMode =
-  | 'chat'
-  | 'search'
-  | 'scheduled'
-  | 'plugins'
-  | 'settings';
-
 export type RightPanelMode = 'home' | 'results' | 'files' | 'terminal' | 'browser' | 'chat';
 
 const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconName }> = [
@@ -159,19 +164,6 @@ const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconNa
   { id: 'browser', label: '浏览器', icon: 'globe' },
   { id: 'chat', label: '聊天', icon: 'sidebar' },
 ];
-
-const WORKSPACE_MODES: WorkspaceMode[] = [
-  'chat',
-  'search',
-  'scheduled',
-  'plugins',
-  'settings',
-];
-
-function parseWorkspaceMode(value: string | null): WorkspaceMode | null {
-  if (!value) return null;
-  return WORKSPACE_MODES.includes(value as WorkspaceMode) ? (value as WorkspaceMode) : null;
-}
 
 function toCopilotHarnessSummary(index: HarnessIndexSummary | null | undefined): HarnessContextSummary | undefined {
   if (!index) return undefined;
@@ -288,6 +280,26 @@ export function ProjectWorkspace(): React.ReactElement {
     sessionFrameRef,
     sessionFrameWidth,
   } = useWorkspaceLayout();
+  const resultPanelRestoreRef = useRef<{ leftOpen: boolean; rightOpen: boolean } | null>(null);
+
+  useEffect(() => {
+    const resultProjection = workspaceMode === 'result' || workspaceMode === 'compare';
+    if (resultProjection) {
+      if (!resultPanelRestoreRef.current) {
+        resultPanelRestoreRef.current = { leftOpen, rightOpen };
+      }
+      if (viewportWidth < 1200) setLeftOpen(false);
+      else if (resultPanelRestoreRef.current.leftOpen) setLeftOpen(true);
+      if (viewportWidth <= 960) setRightOpen(false);
+      else if (resultPanelRestoreRef.current.rightOpen) setRightOpen(true);
+      return;
+    }
+    const restore = resultPanelRestoreRef.current;
+    if (!restore) return;
+    setLeftOpen(restore.leftOpen);
+    setRightOpen(restore.rightOpen);
+    resultPanelRestoreRef.current = null;
+  }, [setLeftOpen, setRightOpen, viewportWidth, workspaceMode]);
 
   const {
     rightTab,
@@ -337,14 +349,29 @@ export function ProjectWorkspace(): React.ReactElement {
   // Bidirectional sync: setWorkspaceMode + URL param. Exists here (not in
   // useWorkspaceRouting) because project-workspace owns workspaceMode state.
   const updateWorkspaceMode = useCallback((nextMode: WorkspaceMode, replace = true, jobId?: string | null) => {
+    const currentIsResult = workspaceMode === 'result' || workspaceMode === 'compare';
+    const nextIsResult = nextMode === 'result' || nextMode === 'compare';
+    if (nextIsResult && !currentIsResult) {
+      // Capture the conversation layout before result-opening handlers enqueue
+      // their own panel changes. React batches those setters, so waiting for the
+      // result-mode effect would otherwise remember the already-forced layout.
+      if (!resultPanelRestoreRef.current) {
+        resultPanelRestoreRef.current = { leftOpen, rightOpen };
+      }
+      beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.openStart);
+    } else if (nextMode === 'chat' && currentIsResult) {
+      beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.returnStart);
+    }
     setWorkspaceMode(nextMode);
     const nextParams = new URLSearchParams(searchParams);
     if (nextMode === 'chat') nextParams.delete('mode');
     else nextParams.set('mode', nextMode);
-    if (nextMode === 'scheduled' && jobId) nextParams.set('job', jobId);
+    if ((nextMode === 'scheduled' || nextMode === 'result' || nextMode === 'compare') && jobId) {
+      nextParams.set('job', jobId);
+    }
     else nextParams.delete('job');
     setSearchParams(nextParams, { replace });
-  }, [searchParams, setSearchParams]);
+  }, [leftOpen, rightOpen, searchParams, setSearchParams, workspaceMode]);
 
   // openRightPanel: collapses left in compactLayout, opens right tab.
   const openRightPanel = useCallback((tab: RightPanelMode) => {
@@ -514,7 +541,12 @@ export function ProjectWorkspace(): React.ReactElement {
 
   const handleOpenRightResults = useCallback(() => {
     openRightPanel('results');
-  }, [openRightPanel]);
+    const nextJobId = activeJobId || jobs[0]?.id || null;
+    if (nextJobId) {
+      setActiveJobId(nextJobId);
+      updateWorkspaceMode('result', true, nextJobId);
+    }
+  }, [activeJobId, jobs, openRightPanel, updateWorkspaceMode]);
 
   const handleOpenRightBrowser = useCallback(() => {
     openRightPanel('browser');
@@ -726,6 +758,10 @@ export function ProjectWorkspace(): React.ReactElement {
       tabs: titleBarTabs,
       activeTabId: rightTab === 'home' ? null : rightTab,
       onSelectTab: (tabId) => {
+        if (tabId === 'results') {
+          handleOpenRightResults();
+          return;
+        }
         setRightTab(tabId as RightPanelMode);
         setRightToolMenuOpen(false);
         setRightOpen(true);
@@ -740,6 +776,11 @@ export function ProjectWorkspace(): React.ReactElement {
         isOpen: openRightTabs.includes(item.id),
       })),
       onSelectToolItem: (tabId) => {
+        if (tabId === 'results') {
+          handleOpenRightResults();
+          setRightToolMenuOpen(false);
+          return;
+        }
         openRightPanel(tabId as RightPanelMode);
         setRightToolMenuOpen(false);
       },
@@ -785,6 +826,7 @@ export function ProjectWorkspace(): React.ReactElement {
     project?.workspacePath,
     rightTab,
     effectiveRightWidth,
+    handleOpenRightResults,
     rightToolMenuOpen,
     setRightOpen,
     setRightToolMenuOpen,
@@ -871,7 +913,12 @@ export function ProjectWorkspace(): React.ReactElement {
   const summaryCardOpen = summaryVisibility !== 'hidden' && summaryOpen;
   const { workflow: activeWorkflow } = useHarnessWorkflowStatus(
     activeJob?.id,
-    !!activeJob && (summaryCardOpen || (rightOpen && rightTab === 'results')),
+    !!activeJob && (
+      summaryCardOpen ||
+      (rightOpen && rightTab === 'results') ||
+      workspaceMode === 'result' ||
+      workspaceMode === 'compare'
+    ),
     workflowRefreshKey,
   );
 
@@ -938,7 +985,7 @@ export function ProjectWorkspace(): React.ReactElement {
     const currentProjectId = projectId || null;
     const resolvedTargetProjectId = targetProjectId ?? currentProjectId;
     if (resolvedTargetProjectId && currentProjectId && resolvedTargetProjectId !== currentProjectId) {
-      const mode = options?.preserveWorkspaceMode ? 'chat' : 'scheduled';
+      const mode = options?.preserveWorkspaceMode ? 'chat' : 'result';
       navigate(`/project/${resolvedTargetProjectId}?mode=${mode}&job=${encodeURIComponent(jobId)}`);
       return;
     }
@@ -965,7 +1012,7 @@ export function ProjectWorkspace(): React.ReactElement {
           };
           nextProjectId = nextJob.project_id || nextProjectId;
           if (nextProjectId && currentProjectId && nextProjectId !== currentProjectId) {
-            const mode = options?.preserveWorkspaceMode ? 'chat' : 'scheduled';
+            const mode = options?.preserveWorkspaceMode ? 'chat' : 'result';
             navigate(`/project/${nextProjectId}?mode=${mode}&job=${encodeURIComponent(nextJob.id)}`);
             return;
           }
@@ -980,7 +1027,7 @@ export function ProjectWorkspace(): React.ReactElement {
       setRightOpen(true);
       openRightPanel('results');
       if (!options?.preserveWorkspaceMode) {
-        updateWorkspaceMode('scheduled', true, nextJob.id);
+        updateWorkspaceMode('result', true, nextJob.id);
       }
     }
   }, [jobs, navigate, normalizeToolStatus, openRightPanel, projectId, setRightOpen, updateWorkspaceMode]);
@@ -998,7 +1045,10 @@ export function ProjectWorkspace(): React.ReactElement {
         pendingArtifactJobIdRef.current = requestedJobId;
         setPendingArtifactName(requestedArtifactName);
       }
-      if (activeJobId === requestedJobId && workspaceMode === 'scheduled') return;
+      if (
+        activeJobId === requestedJobId &&
+        (workspaceMode === 'result' || workspaceMode === 'compare' || workspaceMode === 'chat')
+      ) return;
       if (autoOpenedJobRef.current === requestedJobId) return;
       autoOpenedJobRef.current = requestedJobId;
       void handleOpenResult(requestedJobId, projectId, {
@@ -1095,10 +1145,11 @@ export function ProjectWorkspace(): React.ReactElement {
     const nextJobId = activeJobId || jobs[0]?.id || null;
     if (nextJobId) {
       setActiveJobId(nextJobId);
+      updateWorkspaceMode('result', true, nextJobId);
     }
     setRightOpen(true);
     openRightPanel('results');
-  }, [activeJobId, jobs, openRightPanel, setRightOpen]);
+  }, [activeJobId, jobs, openRightPanel, setRightOpen, updateWorkspaceMode]);
 
   if (loading) {
     return (
@@ -1145,6 +1196,7 @@ export function ProjectWorkspace(): React.ReactElement {
     activeWorkflow,
     activeArtifact,
     activeJobId,
+    pendingArtifactName: pendingArtifactJobIdRef.current === activeJob?.id ? pendingArtifactName : null,
     recentJobs: jobs,
     liveJobsPreview,
     jobStats,
@@ -1167,6 +1219,16 @@ export function ProjectWorkspace(): React.ReactElement {
     handleOpenResult,
     handleAskAgent,
     handleOpenWorkspacePath,
+    onPendingArtifactConsumed: () => {
+      pendingArtifactNameRef.current = null;
+      pendingArtifactJobIdRef.current = null;
+      setPendingArtifactName(null);
+    },
+    onWorkflowChanged: () => setWorkflowRefreshKey((value) => value + 1),
+    openResultBrowser: (url: string) => {
+      setBrowserUrl(url);
+      openRightPanel('browser');
+    },
     openScheduledResults,
     startColumnResize,
   };
@@ -3053,9 +3115,6 @@ function ResultArtifactShell({
   const [manifestRaw, setManifestRaw] = useState<unknown>(null);
   const [manifestLoading, setManifestLoading] = useState(false);
   const [manifestError, setManifestError] = useState('');
-  const [unavailableArtifactNames, setUnavailableArtifactNames] = useState<Set<string>>(
-    () => new Set()
-  );
   const [selectedName, setSelectedName] = useState('');
   const [selectedSectionId, setSelectedSectionId] = useState('');
   const [previewText, setPreviewText] = useState<string | null>(null);
@@ -3082,10 +3141,11 @@ function ResultArtifactShell({
   const [reportGenerationError, setReportGenerationError] = useState('');
   const [replayPackageBusy, setReplayPackageBusy] = useState(false);
   const [replayPackageMessage, setReplayPackageMessage] = useState('');
+  const [artifactSwitchMs, setArtifactSwitchMs] = useState<number | null>(null);
 
   const tool = useMemo(
     () => (job ? staticTools.find((t) => t.id === job.tool_id) || null : null),
-    [job]
+    [job?.tool_id]
   );
   const lang: 'r' | 'python' = tool?.language === 'python' ? 'python' : 'r';
   const effectiveJobStatus: ToolJob['status'] = workflow?.jobStatus === 'completed'
@@ -3106,14 +3166,14 @@ function ResultArtifactShell({
       const tokenQs = token ? `?token=${encodeURIComponent(token)}` : '';
       return `${base}/tools/file/${job.id}/${encodeURIComponent(name)}${tokenQs}`;
     },
-    [job, lang]
+    [job?.id, lang]
   );
   const scientificScriptUrl = useMemo(() => {
     if (!job || !result?.deliveryManifest) return '';
     const token = getToken();
     const query = token ? `?token=${encodeURIComponent(token)}` : '';
     return `${getApiPrefix(lang)}/harness/scientific-task-by-job/${encodeURIComponent(job.id)}/script${query}`;
-  }, [job, lang, result?.deliveryManifest]);
+  }, [job?.id, lang, result?.deliveryManifest]);
 
   useEffect(() => {
     if (!job) {
@@ -3173,7 +3233,7 @@ function ResultArtifactShell({
       setPreviewData(null);
       setPreviewLoading(false);
     }
-  }, [effectiveJobStatus, job, lang]);
+  }, [effectiveJobStatus, job?.id, lang]);
 
   useEffect(() => {
     if (!job || effectiveJobStatus !== 'done' || !showHarnessIndex) {
@@ -3260,19 +3320,16 @@ function ResultArtifactShell({
     [fallbackArtifacts, manifestRaw]
   );
   const manifestArtifacts = manifest?.artifacts?.length ? manifest.artifacts : fallbackArtifacts;
-  const artifacts = useMemo(
-    () => manifestArtifacts.filter((artifact) => !unavailableArtifactNames.has(artifact.name)),
-    [manifestArtifacts, unavailableArtifactNames]
-  );
+  const artifacts = manifestArtifacts;
   const coreArtifacts = useMemo(
     () => artifacts.filter((artifact) => classifyArtifact(artifact) !== 'report'),
     [artifacts]
   );
   const navSections = useMemo(
-    () => buildResultArtifactNavigation(manifest, coreArtifacts),
-    [coreArtifacts, manifest]
+    () => buildResultArtifactNavigation(manifest, artifacts),
+    [artifacts, manifest]
   );
-  const artifactSummary = useMemo(() => compactArtifactKindSummary(coreArtifacts), [coreArtifacts]);
+  const artifactSummary = useMemo(() => compactArtifactKindSummary(artifacts), [artifacts]);
   const reportArtifact = useMemo(
     () =>
       artifacts.find((artifact) => classifyArtifact(artifact) === 'report') ||
@@ -3301,25 +3358,36 @@ function ResultArtifactShell({
   }, [artifacts, coreArtifacts, pendingArtifactName, preferredArtifactName, selectedName]);
   const selectedArtifactName = selectedArtifact?.name || '';
   const selectedArtifactUrl = selectedArtifact
-    ? selectedArtifact.url || buildUrl(selectedArtifact.name)
+    ? resolveResultArtifactUrl(selectedArtifact.url, buildUrl(selectedArtifact.name))
     : '';
   const selectedArtifactKind = selectedArtifact ? classifyArtifact(selectedArtifact) : 'file';
   const selectedArtifactLabel = selectedArtifact
     ? selectedArtifact.label || selectedArtifact.title || selectedArtifact.name
     : '';
-  const activeFile = useMemo(() => {
-    if (!selectedArtifactName) return null;
-    return files.find((file) => artifactName(file) === selectedArtifactName) || null;
-  }, [files, selectedArtifactName]);
   const activeIsHtml = selectedArtifactKind === 'report' || /\.html?$/i.test(selectedArtifactName);
   const activeIsText =
     !activeIsHtml &&
     (selectedArtifactKind === 'text' || isTextFile(selectedArtifactName) || isMarkdownFile(selectedArtifactName) || /\.json$/i.test(selectedArtifactName) || /\.(csv|tsv)$/i.test(selectedArtifactName));
-  const activeIsImage = selectedArtifactKind === 'plot' || (selectedArtifactName ? isImageFile(selectedArtifactName) : false);
   const activeIsPreviewText = activeIsText && !activeIsHtml;
+  const viewerAdapter = selectedArtifact
+    ? resolveResultViewerAdapter({
+        kind: selectedArtifactKind,
+        fileName: selectedArtifactName,
+        preview: selectedArtifact.preview,
+      })
+    : 'binary';
 
   useEffect(() => {
-    setUnavailableArtifactNames(new Set());
+    if (!selectedArtifactName) return;
+    const duration = completeResultSurfaceMeasure({
+      start: RESULT_SURFACE_PERFORMANCE_MARKS.artifactStart,
+      end: RESULT_SURFACE_PERFORMANCE_MARKS.artifactEnd,
+      measure: RESULT_SURFACE_PERFORMANCE_MARKS.artifactMeasure,
+    });
+    if (duration !== null) setArtifactSwitchMs(duration);
+  }, [selectedArtifactName]);
+
+  useEffect(() => {
     setPendingRecovery(null);
     setRecoveryError('');
     setFinalReportUrl('');
@@ -3331,27 +3399,6 @@ function ResultArtifactShell({
     if (!materializedReportArtifact) return;
     setFinalReportUrl(materializedReportArtifact.url || buildUrl(materializedReportArtifact.name));
   }, [buildUrl, materializedReportArtifact]);
-
-  useEffect(() => {
-    if (!activeIsHtml || !selectedArtifactName || !selectedArtifactUrl) return;
-    let cancelled = false;
-    fetch(selectedArtifactUrl)
-      .then((response) => {
-        if (cancelled || response.ok) return;
-        setUnavailableArtifactNames((current) => {
-          if (current.has(selectedArtifactName)) return current;
-          const next = new Set(current);
-          next.add(selectedArtifactName);
-          return next;
-        });
-      })
-      .catch(() => {
-        // A transient network failure must not permanently hide a valid report.
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [activeIsHtml, selectedArtifactName, selectedArtifactUrl]);
 
   const activeSection = useMemo(() => {
     if (!navSections.length) return null;
@@ -3372,18 +3419,16 @@ function ResultArtifactShell({
   }, [navSections, selectedArtifactName]);
 
   useEffect(() => {
-    if (!job || effectiveJobStatus !== 'done' || coreArtifacts.length === 0) return;
-    const preferred = pickPreferredArtifact(coreArtifacts, preferredArtifactName) || coreArtifacts[0];
+    if (!job || effectiveJobStatus !== 'done' || artifacts.length === 0) return;
+    const preferredPool = coreArtifacts.length > 0 ? coreArtifacts : artifacts;
+    const preferred = pickPreferredArtifact(preferredPool, preferredArtifactName) || preferredPool[0];
     const preferredName = preferred ? preferred.name : '';
-    setSelectedName((current) => {
-      // Pending artifact name (from chat click) wins over the user's prior
-      // selection — the chat is the trigger that brought us here.
-      if (pendingArtifactName && artifacts.some((artifact) => artifact.name === pendingArtifactName)) {
-        return pendingArtifactName;
-      }
-      if (current && coreArtifacts.some((artifact) => artifact.name === current)) return current;
-      return preferredName;
-    });
+    setSelectedName((current) => chooseResultArtifactName({
+      currentName: current,
+      pendingName: pendingArtifactName,
+      preferredName,
+      availableNames: artifacts.map((artifact) => artifact.name),
+    }));
     setSelectedSectionId((current) => {
       if (current && navSections.some((section) => section.id === current)) return current;
       const focusName =
@@ -3395,7 +3440,7 @@ function ResultArtifactShell({
         navSections[0];
       return nextSection?.id || '';
     });
-  }, [artifacts, coreArtifacts, effectiveJobStatus, job, navSections, pendingArtifactName, preferredArtifactName]);
+  }, [artifacts, coreArtifacts, effectiveJobStatus, job?.id, navSections, pendingArtifactName, preferredArtifactName]);
 
   // Clear the pending artifact after it's been applied so a subsequent
   // unrelated render doesn't keep forcing it.
@@ -3435,7 +3480,7 @@ function ResultArtifactShell({
     return () => {
       cancelled = true;
     };
-  }, [effectiveJobStatus, job, lang, selectedArtifactKind, selectedArtifactName]);
+  }, [effectiveJobStatus, job?.id, lang, selectedArtifactKind, selectedArtifactName]);
 
   useEffect(() => {
     if (!job || effectiveJobStatus !== 'done' || !selectedArtifact) {
@@ -3459,6 +3504,8 @@ function ResultArtifactShell({
       selectionDurable: interactionManifest?.selectionDurable ?? false,
       interactionCapabilities: interactionManifest?.capabilities ?? [],
       selection: artifactSelection,
+      truthStatus: result?.deliveryManifest?.status ?? null,
+      conclusion: result?.deliveryManifest?.summary?.conclusion ?? null,
     };
     // 身份比较必须覆盖 revision 与 selection：只比 jobId+name 会让
     // "同一文件换了版本" 或 "用户改了选择" 无法向上传播。
@@ -3469,6 +3516,8 @@ function ResultArtifactShell({
       (activeArtifact.revisionId ?? null) !== (artifact.revisionId ?? null) ||
       (activeArtifact.entityType ?? null) !== (artifact.entityType ?? null) ||
       (activeArtifact.idField ?? null) !== (artifact.idField ?? null) ||
+      (activeArtifact.truthStatus ?? null) !== (artifact.truthStatus ?? null) ||
+      (activeArtifact.conclusion ?? null) !== (artifact.conclusion ?? null) ||
       !isSameSelection(activeArtifact.selection ?? null, artifact.selection ?? null)
     ) {
       onActiveArtifactChange(artifact);
@@ -3480,6 +3529,8 @@ function ResultArtifactShell({
     interactionManifest,
     job,
     onActiveArtifactChange,
+    result?.deliveryManifest?.status,
+    result?.deliveryManifest?.summary?.conclusion,
     selectedArtifact,
     selectedArtifactKind,
     selectedArtifactUrl,
@@ -3487,7 +3538,7 @@ function ResultArtifactShell({
 
   useEffect(() => {
     let cancelled = false;
-    if (!activeFile || !activeIsPreviewText) {
+    if (!selectedArtifact || !selectedArtifactUrl || !activeIsPreviewText) {
       setPreviewText(null);
       setPreviewData(null);
       setPreviewLoading(false);
@@ -3496,8 +3547,7 @@ function ResultArtifactShell({
       };
     }
     setPreviewLoading(true);
-    const url = selectedArtifactUrl || activeFile.url || '';
-    fetch(url)
+    fetch(selectedArtifactUrl)
       .then((resp) => {
         if (!resp.ok) throw new Error('preview failed');
         return resp.text();
@@ -3532,16 +3582,23 @@ function ResultArtifactShell({
     return () => {
       cancelled = true;
     };
-  }, [activeFile, activeIsPreviewText, selectedArtifactName, selectedArtifactUrl]);
+  }, [activeIsPreviewText, selectedArtifact, selectedArtifactName, selectedArtifactUrl]);
 
   const renderPreview = () => {
     if (!selectedArtifact) {
       return <div className={styles.resultPreviewPlaceholder}>未发现可预览的结果文件</div>;
     }
-    if (selectedArtifactKind === 'report' && selectedArtifactUrl) {
-      return <div className={styles.resultPreviewPlaceholder}>报告属于后置交付物，请从上方报告卡生成最终 HTML。</div>;
+    if (viewerAdapter === 'report' && selectedArtifactUrl) {
+      return (
+        <iframe
+          className={styles.resultReportPreview}
+          src={selectedArtifactUrl}
+          title={selectedArtifactLabel || selectedArtifact.name}
+          sandbox="allow-same-origin"
+        />
+      );
     }
-    if (activeIsImage && selectedArtifactUrl) {
+    if (viewerAdapter === 'image' && selectedArtifactUrl) {
       return (
         <button
           type="button"
@@ -3559,7 +3616,7 @@ function ResultArtifactShell({
     if (previewLoading && !previewText && !previewData) {
       return <div className={styles.resultPreviewPlaceholder}>加载预览中…</div>;
     }
-    if (previewData && previewData.length > 0) {
+    if (viewerAdapter === 'table' && previewData && previewData.length > 0) {
       const [header, ...rows] = previewData;
       return (
         <div className={styles.csvPreviewBody}>
@@ -3584,12 +3641,16 @@ function ResultArtifactShell({
         </div>
       );
     }
-    if (previewText) {
+    if ((viewerAdapter === 'json' || viewerAdapter === 'text') && previewText) {
       return <pre className={styles.textPreview}>{previewText}</pre>;
     }
     return (
       <div className={styles.resultPreviewPlaceholder}>
-        当前文件暂不支持内嵌预览。
+        <strong>当前文件暂不支持内嵌预览</strong>
+        <span>{selectedArtifact.name}</span>
+        {selectedArtifactUrl && (
+          <a href={selectedArtifactUrl} target="_blank" rel="noreferrer">打开或下载原文件</a>
+        )}
       </div>
     );
   };
@@ -3930,6 +3991,7 @@ function ResultArtifactShell({
                           type="button"
                           className={`${styles.resultReportArtifactTab} ${active ? styles.resultReportArtifactTabActive : ''}`}
                           onClick={() => {
+                            beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.artifactStart);
                             setSelectedName(artifact.name);
                             if (activeSection) setSelectedSectionId(activeSection.id);
                           }}
@@ -3985,9 +4047,10 @@ function ResultArtifactShell({
                             type="button"
                             className={styles.resultReportSectionButton}
                             onClick={() => {
+                              beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.artifactStart);
                               setSelectedSectionId(section.id);
-                              const first = section.artifacts[0];
-                              if (first) setSelectedName(first.name);
+                              const landingName = chooseResultSectionLandingName(section.artifacts);
+                              if (landingName) setSelectedName(landingName);
                             }}
                           >
                             <span className={styles.resultReportSectionTitle}>
@@ -4052,7 +4115,10 @@ function ResultArtifactShell({
       {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
     </div>
   ) : (
-    <div className={styles.resultView}>
+    <div
+      className={styles.resultView}
+      data-artifact-switch-ms={artifactSwitchMs === null ? undefined : artifactSwitchMs.toFixed(2)}
+    >
       {shellBody}
       {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
     </div>
@@ -4066,8 +4132,10 @@ export function ResultView({
   activeArtifact,
   onActiveArtifactChange,
   onAskAgent,
+  onWorkflowChanged,
   pendingArtifactName = null,
   onPendingArtifactConsumed,
+  onOpenBrowser,
 }: {
   project: Project;
   job: ToolJob;
@@ -4075,8 +4143,10 @@ export function ResultView({
   activeArtifact: ActiveArtifact | null;
   onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
   onAskAgent: (prompt: string) => void;
+  onWorkflowChanged?: () => void;
   pendingArtifactName?: string | null;
   onPendingArtifactConsumed?: () => void;
+  onOpenBrowser?: (url: string) => void;
 }): React.ReactElement {
   return (
     <ResultArtifactShell
@@ -4086,8 +4156,10 @@ export function ResultView({
       activeArtifact={activeArtifact}
       onActiveArtifactChange={onActiveArtifactChange}
       onAskAgent={onAskAgent}
+      onWorkflowChanged={onWorkflowChanged}
       pendingArtifactName={pendingArtifactName}
       onPendingArtifactConsumed={onPendingArtifactConsumed}
+      onOpenBrowser={onOpenBrowser}
       variant="center"
     />
   );
