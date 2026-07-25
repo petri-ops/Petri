@@ -33,7 +33,11 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 
 G0 资格只覆盖 Support Matrix 明示范围，不覆盖 Windows/Linux/macOS x64、任意插件或任意科学任务。永久 `g0:qualification` 与 LF11 requalification 继续优先；任何触发器缺少新证据时 fail-closed。
 
-LF12 完成记录为 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md)，报告位于 [`../acceptance/g0-qualification/qualification-report.md`](../acceptance/g0-qualification/qualification-report.md)。下一主线可按 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) 从独立干净 checkpoint 启动，结果交互与 Git-backed 版本能力仍不得冒充 LF12 已资格能力。
+LF12 完成记录为 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md)，报告位于 [`../acceptance/g0-qualification/qualification-report.md`](../acceptance/g0-qualification/qualification-report.md)。
+
+2026-07-24 后续治理收口：新增文档生命周期治理层（[`document-governance.md`](./document-governance.md)、[`worktree-governance.md`](./worktree-governance.md)、[`DOC-REGISTRY.json`](./DOC-REGISTRY.json)、`scripts/docs-governance.mjs`、`npm run docs:status|check|reconcile`，`docs:check` 已接入根 `npm run check`）；注册表中 `G0-LF12` 已收口为 `completed / canonical:false`，释放 `g0-current-work-package` truthDomain。干净 checkpoint 为 `38d3de2`（已推送，工作区 clean）。
+
+下一主线：按 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) 从 `G0-RS0` 顺序启动，**单工作包串行、主工作区分支 `codex/g0-result-studio`，不使用 Git Worktree**（`G0-RS-WT0` = `deferred`，判据见该计划 §14）。结果交互与 Git-backed 版本能力仍不得冒充 LF12 已资格能力。
 
 ### 3.1 已完成基线：真实科学任务驱动的 Harness 升级
 

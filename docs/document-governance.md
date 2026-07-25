@@ -35,6 +35,17 @@
 
 Git、SQLite、Artifact Truth、Acceptance Evidence 和实机结果优先于文档描述。发现不一致时先降级文档结论，再修复或补证据。
 
+### 2.1 单工作包串行
+
+项目采用单线串行开发：同一时间只有一个工作包处于 `active`，且该工作包内只有一个阶段处于进行中。上一阶段的交付、门禁与证据收口后才启动下一个。
+
+因此：
+
+- 不为提高并发而同时开启多个工作包，也不提前实现后续阶段的契约、迁移或 UI。
+- 需要调整顺序时先修改 canonical 计划，再执行，不在实现中默默改序。
+- `g0-current-work-package` 这一 truthDomain 由当前正式启动的工作包按需声明；无人声明时保持空缺，当前任务事实以 `next-steps-roadmap.md` 为准。
+- 并行开发与 Worktree 属于例外，需满足 `worktree-governance.md` 的重开条件后才可启用。
+
 ## 3. 注册表契约
 
 `docs/DOC-REGISTRY.json` 对 `docs/` 下除 `docs/archive/` 外的 Markdown 强制完整注册；已归档条目可按追溯需要继续保留在注册表。每项至少包含：

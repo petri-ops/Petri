@@ -8,7 +8,9 @@
 
 当前不默认扩展分析功能。`G0-START` 与 LF0～LF12 已完成；当前基线为 `G0 Baseline v1 / 1.0.0 / qualified + maintained`。UI-032 已完成；rc.7 仍是工程候选版，不得描述为 GA。
 
-LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口；16/16 强制证据、10/10 零容忍和永久维护门全部通过。下一产品主线可从干净 checkpoint 启动 Result Studio，同时 G0 门禁继续永久优先。
+LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口；16/16 强制证据、10/10 零容忍和永久维护门全部通过。
+
+当前立即任务：按 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) 从 `G0-RS0`（只读审计与 ADR）启动 Result Studio，base commit `38d3de2`。开发形态为**单工作包串行、主工作区分支**；`G0-RS-WT0` Worktree 启动门已标 `deferred`，判据与重开条件见该计划 §14。G0 `qualified + maintained` 门禁继续永久优先。
 
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 已完成的 Scientific Task Contract 工作包记录见 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md)。

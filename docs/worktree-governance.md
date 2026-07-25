@@ -4,7 +4,7 @@
 
 规范编号：`GOV-WT-1`
 
-状态：`active policy / formal rollout gated by G0-RS-WT0`
+状态：`active policy / formal rollout deferred`（2026-07-24 决策：当前采用单线串行开发，不启用 Worktree；本规范继续作为重开时的唯一纪律来源）
 
 ## 1. 定位
 
@@ -14,18 +14,11 @@ BioF3 使用 Worktree 的目标是隔离有边界的并行开发和运行环境�
 
 ## 2. 正式启动门
 
-当前正式 Worktree 主线固定为：
+当前没有活跃 Worktree，也没有待创建的 Worktree。
 
-```text
-G0-LF12 qualified + maintained 并形成干净、已提交 checkpoint
-  → G0-RS-WT0 Codex Worktree Readiness
-  → 创建 Result Studio 永久 Worktree
-  → G0-RS0～G0-RS9
-```
+历史上曾规划的路径是 `G0-LF12 干净 checkpoint → G0-RS-WT0 → 创建 Result Studio 永久 Worktree → G0-RS0～G0-RS9`。LF12 已 `qualified + maintained`，该前置条件不再阻塞；但 2026-07-24 复核认定隔离收益已随 LF 开发线关闭而消失，`G0-RS-WT0` 标记 `deferred`，Result Studio 改为在主工作区单线串行开发。判据与重开条件记录在 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) §14。
 
-LF12 完成前不得为了提前开发 Result Studio 创建正式 RS Worktree。`G0-RS-WT0` 的详细交付和验收仍以 `g0-result-studio-plan.md` 为准，本文件提供跨阶段长期纪律。
-
-当前状态：LF12 已 `qualified + maintained`，该前置条件不再阻塞。剩余启动条件只有 `G0-RS-WT0` 本身——base checkpoint 已提交并推送、工作区 clean、运行环境隔离验收通过。
+因此本规范当前是**休眠纪律**：不主动创建 Worktree，但一旦重开条件成立，仍以本文件 §3～§8 为唯一执行标准，不得临时另立一套简化流程。
 
 ## 3. 适用标准
 

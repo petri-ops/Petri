@@ -2,7 +2,9 @@
 
 最后更新：2026-07-24
 
-状态：`ready_next_after_g0_lf12_checkpoint`
+状态：`ready_to_start`（LF12 checkpoint 已推送；按 §21 顺序从 RS0 启动，单线串行）
+
+开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
 计划编号：`G0-RS`
 
@@ -12,7 +14,7 @@
 
 跨模块关注点：`C-03 安全、确认与审计`、`C-04 状态与事件同步`、`C-05 测试与质量门禁`、`C-06 性能与交互手感`
 
-前置条件：`G0-LF12` 已完成首个 `G0 Baseline v1 = qualified + maintained`；待 LF12 源码、证据与文档提交全部推送形成干净 checkpoint 后启动。`run_tool → tool_job → artifact truth`、源数据不可变、Loop 恢复与交付复现契约不得回归
+前置条件：已满足。`G0-LF12` 已完成首个 `G0 Baseline v1 = qualified + maintained`，源码、证据与文档提交已全部推送形成干净 checkpoint，base commit 为 `38d3de2`（`main` 与 `origin/main` 同步、工作区 clean）。`run_tool → tool_job → artifact truth`、源数据不可变、Loop 恢复与交付复现契约不得回归
 
 范围边界：Result Studio 不属于 LF12 待资格功能。LF12 只验证当前结果投影与 UI 状态收敛；Result Studio 在 LF12 通过后按本计划独立启动。
 
@@ -637,47 +639,33 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 
 ## 14. 分阶段开发计划
 
-### G0-RS-WT0：Codex Worktree Readiness 启动门
+### G0-RS-WT0：开发环境隔离（`deferred`）
 
-目标：在当前 G0-LF 形成干净 checkpoint 后，为 Result Studio 建立可长期使用的独立开发环境，避免 RS 智能体污染 LF 主工作区或共享运行状态。
+2026-07-24 决策：**不使用 Git Worktree**。Result Studio 在主工作区以单线串行方式开发，分支为 `codex/g0-result-studio`。
 
-推荐形态：
+原设计（LF 留在 `main`、RS 使用 Codex 永久 Worktree）的目的是隔离与 LF 并行的开发线。该前提在 LF12 收口后已不存在，因此启动门不成立并标记 `deferred`。
 
-- LF 继续使用本地 `main` 工作区。
-- RS 使用 Codex 创建的永久 Worktree。
-- Worktree 从已验证、已提交的 LF checkpoint 创建。
-- RS 稳定后在 Worktree 内创建 `codex/g0-result-studio` 分支。
-- 通过 Codex Handoff 或标准 Git 合并流程交付，不复制目录或手工搬运 Patch。
+判据：
 
-交付：
+- 隔离对象已消失：LF0～LF12 全部关闭，G0 转为常驻 `maintained` 门禁，不存在与 RS 并行的 LF 开发线。
+- 无并行所有者：`git worktree list` 仅主工作区；当前只有一个活跃开发线程。
+- 成本可量化：每个 Worktree 需独立 `node_modules`（527M + frontend 209M）与独立 electron-rebuild（`better-sqlite3` × `electron 30.5.1` ABI）；项目已有一次 native 架构错配事故记录，复制环境会放大该类问题。
+- 参照实例已存在：`/Applications/BioF3.app`（rc.7）与 `dist/mac-arm64/BioF3.app` 已提供 `userData` 独立的稳定对照，无需第二份 checkout。
+- 非技术前置：`G0-RS1` 的 Git Adapter 面向**用户项目目录**，其 非Git / clean / dirty 矩阵由临时 fixture 仓库覆盖，与 BioF3 仓库自身的 Worktree 无关。WT0 不是 RS1～RS9 的技术前置。
 
-- Codex Worktree 创建与恢复操作说明。
-- Worktree local-environment/setup script。
-- 根目录 `.worktreeinclude` 策略；只复制明确需要的忽略文件，敏感配置默认不复制。
-- 每个 Worktree 独立的 Electron `userData`、SQLite、results/uploads/tmp/logs 路径。
-- Vite Renderer URL/端口隔离。
-- R/Python/Plumber 后端端口和进程归属核对。
-- `node_modules`、原生模块 ABI、前端依赖和构建目录初始化策略。
-- Worktree 名称、分支、Agent 和任务包的一一对应规则。
-- Worktree 清理前的 commit、snapshot、Artifact 和未采用 ChangeSet 检查。
+替代做法：
 
-安全规则：
+- 单分支 `codex/g0-result-studio`，小步提交并频繁与 `main` 集成，避免长期分叉后一次性重资格。
+- 需要与旧行为对照时使用已安装 rc.7，不新建开发实例。
+- `G0-RS8` 的破坏性耐久测试通过环境变量把 Electron `userData`、SQLite、results/uploads/tmp/logs 指向临时目录；只隔离运行时，不复制源码树。
 
-- 不从含未提交 LF 改动的工作区直接启动 RS 生产开发。
-- 不让两个 Worktree 共用开发 SQLite、Electron userData 或临时结果目录。
-- 不自动复制 API Key、凭据或项目外私有数据。
-- 不因 Worktree 隔离而允许两个 Agent 同时拥有同一核心文件的模糊所有权。
-- Worktree 只隔离源码和开发运行环境，不改变项目级 Artifact Truth 与正式数据权限边界。
+重开条件（任一成立即重新评估，并按 [`worktree-governance.md`](./worktree-governance.md) §3～§8 执行）：
 
-验收：
+1. 出现第二个真实并行开发者或 Agent，且核心文件所有权可清晰划分。
+2. RS 需要让 `main` 持续不稳定超过一周，同时必须保留可发布的热修线。
+3. `G0-RS8` 需要一个允许被故意破坏、且不影响主开发环境的完整实例。
 
-- `git worktree list` 可明确识别 LF 与 RS 工作区。
-- RS Worktree 可以独立安装、检查、测试和构建。
-- LF 与 RS 开发实例同时启动时，Renderer、后端端口、SQLite、日志和用户数据互不串扰。
-- 任一实例停止、清理缓存或删除测试项目不影响另一实例。
-- RS commit 不包含 LF 未提交文件；LF commit 不包含 RS 文件。
-- Codex 重开 RS 聊天后返回原永久 Worktree，并能恢复未完成上下文。
-- Worktree 移除前已形成可恢复 commit/snapshot，未丢失脚本、ChangeSet 或 Artifact 引用。
+保留策略：`worktree-governance.md` 继续是 `git-worktree-lifecycle` 的 canonical 规范并保持 `active policy`，仅正式 rollout 记为 deferred。重开时不得临时另立一套简化流程。
 
 ### G0-RS0：现状审计与 ADR
 
@@ -967,18 +955,16 @@ npm run g0:result-studio:acceptance
 - [ ] 大型科研数据未被错误提交普通 Git。
 - [ ] 至少一个完整 Bulk RNA-seq 任务从原始结果完成多轮编辑与二次分析。
 - [ ] 根检查、专项门禁、真实 Provider 和视觉证据全部闭环。
-- [ ] Codex 永久 Worktree、独立运行目录和双实例隔离通过 G0-RS-WT0。
+- [ ] `G0-RS8` 的运行时隔离（临时 Electron `userData`、SQLite、results/tmp/logs）通过破坏性耐久测试；不以 Worktree 作为完成条件。
 
 ## 21. 推荐启动顺序
 
-LF12 资格工作涉及执行、持久化、UI 和证据核心文件，因此不要在 LF12 尚未形成 qualified checkpoint 时并行实现 Result Studio。
+LF12 已形成 qualified checkpoint（`38d3de2`），前置解除。`G0-RS-WT0` 已 `deferred`，不再是启动步骤。
 
-推荐顺序：
+执行顺序（单线串行，一次只推进一个阶段）：
 
 ```text
-G0-LF12 形成 qualified + maintained 干净 checkpoint
-  → G0-RS-WT0 Codex Worktree Readiness
-  → G0-RS0 只读审计与 ADR
+G0-RS0 只读审计与 ADR
   → G0-RS1 Git Adapter
   → G0-RS2 Revision Contract
   → G0-RS3 Selection Context
@@ -990,4 +976,10 @@ G0-LF12 形成 qualified + maintained 干净 checkpoint
   → G0-RS9 真实生产验收
 ```
 
-本计划是 G0 qualified 后的首个重要产品升级，但不得打断 LF12 资格工作，也不得以 UI 先行掩盖版本、执行和 Artifact 契约问题。
+串行纪律：
+
+- 同一时间只有一个 RS 阶段处于进行中；当前阶段的交付、门禁和证据收口后才启动下一个。
+- 不因为"顺手"提前实现后续阶段的契约或 UI；发现必要的顺序调整时先改本计划，再执行。
+- 每个阶段的进展回写本文件，不按日期新建进度文档。
+
+本计划是 G0 qualified 后的首个重要产品升级，不得以 UI 先行掩盖版本、执行和 Artifact 契约问题。

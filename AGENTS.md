@@ -94,7 +94,9 @@ desktop/
 - 未运行 `npm run docs:reconcile` 并通过 `npm run docs:check`，不得宣布工作包 `completed`、`qualified`、`verified` 或已归档收口。
 - 不得在存在未知 WIP 时批量移动、删除、暂存或提交文档；Acceptance 证据不得被普通文档归档替代。
 - 当前状态必须回写 canonical roadmap/handoff/工作包，禁止多个 active canonical 计划宣称同一事实。
-- Worktree 纪律见 [`docs/worktree-governance.md`](docs/worktree-governance.md)。LF12 已 `qualified + maintained`，该前置已解除；正式 Result Studio Worktree 仍必须先通过 `G0-RS-WT0` 启动门（已推送的干净 base checkpoint + 运行环境隔离验收）。
+- 开发形态为**单工作包串行**：同一时间只有一个 active 工作包与一个进行中阶段，收口后才启动下一个。不并行开新工作包，不提前实现后续阶段。
+- 当前不使用 Git Worktree（`G0-RS-WT0` 已 `deferred`，判据见 [`docs/g0-result-studio-plan.md`](docs/g0-result-studio-plan.md) §14）；Result Studio 在主工作区分支 `codex/g0-result-studio` 上开发。
+- [`docs/worktree-governance.md`](docs/worktree-governance.md) 当前是休眠纪律：只有其中记录的重开条件成立才可创建 Worktree，且必须按该文件 §3～§8 执行，不得临时另立简化流程。
 
 ### UI 进度自动对账
 
