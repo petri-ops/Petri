@@ -2,7 +2,7 @@
 
 最后更新：2026-07-24
 
-状态：`ready_to_start`（LF12 checkpoint 已推送；按 §21 顺序从 RS0 启动，单线串行）
+状态：`in_progress`（RS0 ✅ / RS1 ✅ 已收口；当前下一阶段为 `G0-RS2`，单线串行）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -688,26 +688,41 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 
 审计发现的三项契约缺陷已登记，必须在对应阶段修正，不得沿用计划原文：`validationStatus` 词表冲突（RS2）、`sourceScriptRef` 语义不足（RS5）、`ActiveArtifact` 仍是文件级（RS3）。
 
-### G0-RS1：Git Adapter 与 Repository Binding
+### G0-RS1：Git Adapter 与 Repository Binding（`completed`）
 
 目标：建立真实 Git 基础能力。
 
+实现：
+
+- `core/shared-backend/git-adapter.js` — 唯一 Git 命令边界（`GIT_ADAPTER_VERSION = 1`）。
+- `core/shared-backend/git-repository-binding.js` — 项目到版本后端的绑定（`REPOSITORY_BINDING_VERSION = 1`）。
+- 门禁：`npm run g0:result-studio:git`（= `node --test test/git-adapter.test.mjs`），已接入根 `npm run check`。
+
 交付：
 
-- Git readiness/版本/路径检测。
-- 托管 Git repository binding。
-- 现有 Git repository 安全绑定。
-- 精确路径 status/diff/commit/ref/worktree Adapter。
-- dirty/untracked/conflict/lock/submodule 检测。
-- 脱敏诊断。
+- ✅ Git readiness/版本/路径检测：`detectGitRuntime()`，最低版本 `2.20.0`（低于该版本不保证 `--porcelain=v1 -z` 与 worktree 子命令行为一致）。
+- ✅ 托管 Git repository binding：`mode='managed'`，git 元数据落 `<workspace>/.biof3/git`，工作区仍是项目目录，用户浏览项目时看不到 `.git`。
+- ✅ 现有 Git repository 安全绑定：`mode='existing'`，只操作 `MANAGED_RELATIVE_PATHS`（当前为 `analysis/scripts`、`analysis/workflows`）；项目为仓库子目录时自动加相对前缀。
+- ✅ 精确路径 status/diff/commit/ref/branch/ls-files Adapter；`commit()` 使用 `--only` + 显式 pathspec。
+- ✅ dirty/untracked/conflict/lock/mid-operation/submodule/linked-worktree 检测；5 类 `blocked_*` 状态。
+- ✅ 脱敏诊断：`redactGitDiagnostic()` 替换 gitdir/workspace/home/tmp 绝对路径，屏蔽疑似凭据，截断到 2000 字符。
 
-验收：
+验收（`test/git-adapter.test.mjs`，24/24 pass，全部使用临时目录中的真实 git 仓库，不访问网络、不读用户数据）：
 
-- 不使用 `git add .`/`git add -A`。
-- 不触碰无关用户 WIP。
-- 非 Git 项目可创建真实 commit 并恢复。
-- 已有 dirty Git 项目只修改显式目标。
-- Git 不可用时诚实阻断。
+- ✅ 不使用 `git add .`/`git add -A`：`FORBIDDEN_PATHSPECS` 在 `assertSafePathspecs()` 层拒绝 `.`、`./`、`..`、`*`、`:`、`:/`、`-A`、`--all`、`-u`、`--update`、`-a`；另拒绝选项注入（`-` 前缀）、pathspec magic（`:` 前缀）、`..` 逃逸、NUL、工作区外绝对路径与工作区根本身。所有写操作必须携带显式 pathspec。
+- ✅ 不触碰无关用户 WIP：`analysis/` 外的用户改动不被 stage、不被提交、不被改写；`detectDirtyConflict()` 的返回值只暴露受管理范围内的冲突路径，用户其他 WIP 仅以计数出现。
+- ✅ 非 Git 项目可创建真实 commit 并恢复：托管仓库产生真实 commit hash，`showFile({ ref })` 能取回历史版本内容；用户目录不出现 `.git`。
+- ✅ 已有 dirty Git 项目只修改显式目标：受管理路径有未提交改动 → `blocked_dirty_conflict`，不覆盖不 stash；WIP 在受管理路径外 → `ready` 并只提交自己的路径。
+- ✅ Git 不可用时诚实阻断：`blocked_git_unavailable`，不降级为不可恢复编辑。
+
+补充边界：
+
+- 参数以数组传入 `execFileSync`，不经 shell，因此不存在命令注入面。
+- 托管仓库通过 `core.hooksPath` 指向不存在目录 + `--no-verify` 双重禁用 hooks。
+- 未实现 `push`/`force push`/`rebase`/删除分支，Adapter 层不存在这些方法。
+- `existing` 模式遇 linked worktree、submodule 或 `.git` 为文件时一律阻断，不猜测用户意图、不删 `index.lock`。
+
+实现期修正的真实缺陷：`--untracked-files=normal` 会把完全未跟踪的目录折叠成单条（新建的 `analysis/scripts/x.R` 只报告 `analysis/`），导致受管理路径下的用户新建文件在冲突检测中漏判、RS 随后可能覆盖它。已改为 `untracked='all'` 并加双向前缀匹配 `pathsOverlap()`。该缺陷由验收测试捕获，不是推测。
 
 ### G0-RS2：Revision Contract 与持久化
 

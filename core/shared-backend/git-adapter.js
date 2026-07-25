@@ -1,0 +1,516 @@
+'use strict';
+
+/**
+ * shared-backend/git-adapter.js
+ *
+ * G0-RS1 — Result Studio 的唯一 Git 命令边界。
+ *
+ * 决策来源：docs/g0-rs0-result-studio-audit.md ADR-RS-3
+ * - 以子进程调用系统 git，不引入 simple-git / isomorphic-git / nodegit / dugite。
+ * - 所有命令由本文件生成；UI 与 Harness 不得自行拼接 git shell 命令。
+ *
+ * 不变量：
+ * - 永不使用 `git add .` / `git add -A` / `git add -u`；所有暴露的写操作必须携带显式 pathspec。
+ * - 参数以数组传入 execFileSync，不经过 shell，因此不存在命令注入面。
+ * - 以 `-` 开头的 pathspec 一律拒绝，避免把用户路径解释成 git 选项。
+ * - 托管仓库默认不执行任何 git hooks。
+ * - 诊断信息在返回前脱敏：绝对路径、home 目录与疑似凭据不外泄。
+ * - 本模块不判定科学有效性，也不写 Artifact；它只负责文本版本事实。
+ */
+
+const { execFileSync } = require('child_process');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+
+const GIT_ADAPTER_VERSION = 1;
+
+/** 低于该版本不保证 `--porcelain=v1 -z` 与 worktree 子命令行为一致。 */
+const MINIMUM_GIT_VERSION = Object.freeze({ major: 2, minor: 20, patch: 0 });
+
+/**
+ * 整树暂存与等价写法一律禁止。RS 的每次修改都必须能回答"改了哪些路径"。
+ */
+const FORBIDDEN_PATHSPECS = Object.freeze(new Set([
+  '.', './', '..', '*', ':', ':/', ':/.',
+  '-A', '--all', '-u', '--update', '--no-all', '-a',
+]));
+
+const SENSITIVE_VALUE = /(?:sk-[A-Za-z0-9_-]{20,}|github_pat_[A-Za-z0-9_]{20,}|gh[pousr]_[A-Za-z0-9_]{20,}|xox[baprs]-[A-Za-z0-9-]{20,}|AKIA[A-Z0-9]{16}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,})/g;
+
+const MAX_STATUS_ENTRIES = 5000;
+const MAX_DIAGNOSTIC_LENGTH = 2000;
+
+class GitAdapterError extends Error {
+  constructor(code, message, detail = null) {
+    super(message);
+    this.name = 'GitAdapterError';
+    this.code = code;
+    this.detail = detail;
+  }
+}
+
+/**
+ * 脱敏诊断文本：先替换工作区/home 绝对路径，再屏蔽疑似凭据，最后截断。
+ *
+ * @param {string} value
+ * @param {{ workTree?: string|null, gitDir?: string|null }} [scope]
+ * @returns {string}
+ */
+function redactGitDiagnostic(value, scope = {}) {
+  if (value == null) return '';
+  let text = String(value);
+  const replacements = [
+    [scope.gitDir, '<gitdir>'],
+    [scope.workTree, '<workspace>'],
+    [os.homedir(), '<home>'],
+    [os.tmpdir(), '<tmp>'],
+  ];
+  for (const [absolute, token] of replacements) {
+    if (!absolute) continue;
+    const resolved = path.resolve(absolute);
+    while (text.includes(resolved)) text = text.replace(resolved, token);
+  }
+  text = text.replace(SENSITIVE_VALUE, '<redacted>');
+  text = text.replace(/\s+$/, '');
+  if (text.length > MAX_DIAGNOSTIC_LENGTH) {
+    return `${text.slice(0, MAX_DIAGNOSTIC_LENGTH)}…[truncated]`;
+  }
+  return text;
+}
+
+function parseGitVersion(raw) {
+  const match = /git version (\d+)\.(\d+)(?:\.(\d+))?/.exec(String(raw || ''));
+  if (!match) return null;
+  return {
+    major: Number(match[1]),
+    minor: Number(match[2]),
+    patch: Number(match[3] || 0),
+  };
+}
+
+function versionAtLeast(actual, minimum) {
+  if (!actual) return false;
+  if (actual.major !== minimum.major) return actual.major > minimum.major;
+  if (actual.minor !== minimum.minor) return actual.minor > minimum.minor;
+  return actual.patch >= minimum.patch;
+}
+
+function baseEnv() {
+  return {
+    PATH: process.env.PATH || '/usr/bin:/bin:/usr/sbin:/sbin',
+    HOME: process.env.HOME || os.homedir(),
+    // 稳定输出、绝不交互、不弹凭据窗口。
+    LC_ALL: 'C',
+    GIT_TERMINAL_PROMPT: '0',
+    GIT_ASKPASS: '',
+    SSH_ASKPASS: '',
+  };
+}
+
+/**
+ * 检测系统 git 可用性。不缓存，调用方自行决定是否复用结果。
+ *
+ * @param {{ gitBin?: string }} [options]
+ * @returns {{ available: boolean, gitBin: string, version: object|null, versionRaw: string|null,
+ *            meetsMinimum: boolean, reason: string|null, minimum: object }}
+ */
+function detectGitRuntime(options = {}) {
+  const gitBin = options.gitBin || 'git';
+  const result = {
+    gitAdapterVersion: GIT_ADAPTER_VERSION,
+    available: false,
+    gitBin,
+    version: null,
+    versionRaw: null,
+    meetsMinimum: false,
+    reason: null,
+    minimum: MINIMUM_GIT_VERSION,
+  };
+  let raw;
+  try {
+    raw = execFileSync(gitBin, ['--version'], {
+      encoding: 'utf8',
+      env: baseEnv(),
+      timeout: 10000,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+  } catch (error) {
+    result.reason = error && error.code === 'ENOENT'
+      ? 'git_executable_not_found'
+      : 'git_version_probe_failed';
+    return result;
+  }
+  const version = parseGitVersion(raw);
+  result.versionRaw = String(raw || '').trim();
+  result.version = version;
+  if (!version) {
+    result.reason = 'git_version_unparsable';
+    return result;
+  }
+  result.available = true;
+  result.meetsMinimum = versionAtLeast(version, MINIMUM_GIT_VERSION);
+  if (!result.meetsMinimum) result.reason = 'git_version_below_minimum';
+  return result;
+}
+
+/**
+ * 校验并规范化 pathspec 列表。
+ *
+ * 拒绝整树写法、选项注入、绝对路径、`..` 逃逸与 NUL。
+ *
+ * @param {string[]} paths
+ * @param {{ workTree?: string|null }} [scope]
+ * @returns {string[]} posix 相对路径
+ * @throws {GitAdapterError}
+ */
+function assertSafePathspecs(paths, scope = {}) {
+  if (!Array.isArray(paths) || paths.length === 0) {
+    throw new GitAdapterError('pathspec_required', 'Explicit pathspecs are required; whole-tree operations are forbidden.');
+  }
+  const normalized = [];
+  for (const candidate of paths) {
+    if (typeof candidate !== 'string' || candidate.trim() === '') {
+      throw new GitAdapterError('pathspec_invalid', 'Each pathspec must be a non-empty string.');
+    }
+    const raw = candidate.trim();
+    if (raw.includes('\0')) {
+      throw new GitAdapterError('pathspec_invalid', 'Pathspec must not contain NUL.');
+    }
+    if (FORBIDDEN_PATHSPECS.has(raw)) {
+      throw new GitAdapterError('pathspec_whole_tree_forbidden', `Whole-tree pathspec is forbidden: ${raw}`);
+    }
+    if (raw.startsWith('-')) {
+      throw new GitAdapterError('pathspec_option_like', `Pathspec must not start with "-": ${raw}`);
+    }
+    if (raw.startsWith(':')) {
+      throw new GitAdapterError('pathspec_magic_forbidden', `Pathspec magic is not allowed: ${raw}`);
+    }
+    let relative = raw.split(path.sep).join('/');
+    if (path.isAbsolute(raw)) {
+      if (!scope.workTree) {
+        throw new GitAdapterError('pathspec_absolute', `Absolute pathspec requires a work tree: ${raw}`);
+      }
+      const workTree = path.resolve(scope.workTree);
+      const resolved = path.resolve(raw);
+      if (resolved !== workTree && !resolved.startsWith(workTree + path.sep)) {
+        throw new GitAdapterError('pathspec_outside_worktree', 'Pathspec resolves outside the work tree.');
+      }
+      relative = path.relative(workTree, resolved).split(path.sep).join('/');
+      if (relative === '') {
+        throw new GitAdapterError('pathspec_whole_tree_forbidden', 'Pathspec must not target the work tree root.');
+      }
+    }
+    if (relative.split('/').includes('..')) {
+      throw new GitAdapterError('pathspec_traversal', `Pathspec must not traverse upwards: ${raw}`);
+    }
+    const posix = path.posix.normalize(relative);
+    if (posix === '.' || posix === '/' || posix === '') {
+      throw new GitAdapterError('pathspec_whole_tree_forbidden', 'Pathspec must not target the work tree root.');
+    }
+    normalized.push(posix.replace(/^\.\//, ''));
+  }
+  return [...new Set(normalized)];
+}
+
+function parsePorcelainZ(stdout) {
+  const entries = [];
+  const chunks = String(stdout || '').split('\0');
+  let truncated = false;
+  for (let index = 0; index < chunks.length; index += 1) {
+    const chunk = chunks[index];
+    if (!chunk) continue;
+    if (entries.length >= MAX_STATUS_ENTRIES) {
+      truncated = true;
+      break;
+    }
+    const indexStatus = chunk[0];
+    const worktreeStatus = chunk[1];
+    let filePath = chunk.slice(3);
+    // 重命名/复制条目把来源路径放在下一个 NUL 分段。
+    let originalPath = null;
+    if (indexStatus === 'R' || indexStatus === 'C') {
+      originalPath = chunks[index + 1] || null;
+      index += 1;
+    }
+    entries.push({
+      path: filePath,
+      originalPath,
+      indexStatus,
+      worktreeStatus,
+      staged: indexStatus !== ' ' && indexStatus !== '?',
+      untracked: indexStatus === '?' && worktreeStatus === '?',
+      conflicted: indexStatus === 'U' || worktreeStatus === 'U'
+        || (indexStatus === 'A' && worktreeStatus === 'A')
+        || (indexStatus === 'D' && worktreeStatus === 'D'),
+    });
+  }
+  return { entries, truncated };
+}
+
+/**
+ * 创建绑定到具体仓库的 Adapter。
+ *
+ * @param {{ gitDir: string, workTree: string, gitBin?: string, allowHooks?: boolean,
+ *           identity?: { name: string, email: string }|null }} options
+ */
+function createGitAdapter(options = {}) {
+  const { gitDir, workTree } = options;
+  if (!gitDir || typeof gitDir !== 'string') {
+    throw new GitAdapterError('git_dir_required', 'gitDir is required.');
+  }
+  if (!workTree || typeof workTree !== 'string') {
+    throw new GitAdapterError('work_tree_required', 'workTree is required.');
+  }
+  const resolvedGitDir = path.resolve(gitDir);
+  const resolvedWorkTree = path.resolve(workTree);
+  const gitBin = options.gitBin || 'git';
+  const allowHooks = options.allowHooks === true;
+  const identity = options.identity || null;
+  const scope = { gitDir: resolvedGitDir, workTree: resolvedWorkTree };
+
+  /**
+   * 执行一条 git 命令。参数以数组传入，不经 shell。
+   *
+   * @param {string[]} args
+   * @param {{ allowFailure?: boolean, readOnly?: boolean, timeout?: number }} [runOptions]
+   */
+  function run(args, runOptions = {}) {
+    const prefix = ['--git-dir', resolvedGitDir, '--work-tree', resolvedWorkTree];
+    if (!allowHooks) {
+      // 指向一个我们从不创建的目录 → git 找不到任何 hook，等价于禁用。
+      prefix.unshift('-c', `core.hooksPath=${path.join(resolvedGitDir, 'biof3-disabled-hooks')}`);
+    }
+    const env = baseEnv();
+    if (runOptions.readOnly) env.GIT_OPTIONAL_LOCKS = '0';
+    let stdout = '';
+    try {
+      stdout = execFileSync(gitBin, [...prefix, ...args], {
+        encoding: 'utf8',
+        cwd: fs.existsSync(resolvedWorkTree) ? resolvedWorkTree : undefined,
+        env,
+        timeout: runOptions.timeout || 60000,
+        maxBuffer: 32 * 1024 * 1024,
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+      return { ok: true, stdout: stdout == null ? '' : String(stdout), stderr: '', status: 0 };
+    } catch (error) {
+      const failure = {
+        ok: false,
+        stdout: error && error.stdout ? String(error.stdout) : '',
+        stderr: redactGitDiagnostic(error && error.stderr ? String(error.stderr) : (error && error.message), scope),
+        status: error && typeof error.status === 'number' ? error.status : null,
+        code: error && error.code === 'ENOENT' ? 'git_executable_not_found' : 'git_command_failed',
+      };
+      if (runOptions.allowFailure) return failure;
+      throw new GitAdapterError(failure.code, `git ${args[0] || ''} failed`, failure);
+    }
+  }
+
+  function identityArgs() {
+    if (!identity || !identity.name || !identity.email) return [];
+    return ['-c', `user.name=${identity.name}`, '-c', `user.email=${identity.email}`];
+  }
+
+  return {
+    gitAdapterVersion: GIT_ADAPTER_VERSION,
+    gitDir: resolvedGitDir,
+    workTree: resolvedWorkTree,
+    gitBin,
+
+    run,
+
+    /** 该 gitDir 是否已经是一个仓库。 */
+    isRepository() {
+      if (!fs.existsSync(path.join(resolvedGitDir, 'HEAD'))) return false;
+      return run(['rev-parse', '--git-dir'], { allowFailure: true, readOnly: true }).ok;
+    },
+
+    /**
+     * 初始化托管仓库（git 元数据与工作区分离，用户目录不出现 .git）。
+     * 幂等：已存在则只补齐本地身份配置。
+     */
+    initManaged() {
+      fs.mkdirSync(path.dirname(resolvedGitDir), { recursive: true });
+      if (!fs.existsSync(path.join(resolvedGitDir, 'HEAD'))) {
+        const init = run(['init', '--quiet'], { allowFailure: true });
+        if (!init.ok) throw new GitAdapterError('git_init_failed', 'Managed repository init failed.', init);
+      }
+      // 托管仓库自带提交身份，避免机器没有 global identity 时提交失败。
+      run(['config', 'user.name', identity?.name || 'BioF3'], { allowFailure: true });
+      run(['config', 'user.email', identity?.email || 'biof3@localhost'], { allowFailure: true });
+      // 托管历史不对外推送，显式关闭 gc 自动打包外的远程行为面。
+      run(['config', 'core.logAllRefUpdates', 'true'], { allowFailure: true });
+      return this.repositoryState();
+    },
+
+    /** 仓库运行态：锁、中途操作、submodule、linked worktree、HEAD。 */
+    repositoryState() {
+      const hasIndexLock = fs.existsSync(path.join(resolvedGitDir, 'index.lock'));
+      const mergeInProgress = fs.existsSync(path.join(resolvedGitDir, 'MERGE_HEAD'));
+      const cherryPickInProgress = fs.existsSync(path.join(resolvedGitDir, 'CHERRY_PICK_HEAD'));
+      const revertInProgress = fs.existsSync(path.join(resolvedGitDir, 'REVERT_HEAD'));
+      const rebaseInProgress = fs.existsSync(path.join(resolvedGitDir, 'rebase-merge'))
+        || fs.existsSync(path.join(resolvedGitDir, 'rebase-apply'));
+      const hasSubmodules = fs.existsSync(path.join(resolvedWorkTree, '.gitmodules'));
+      const headRef = run(['symbolic-ref', '--quiet', '--short', 'HEAD'], { allowFailure: true, readOnly: true });
+      const headCommit = run(['rev-parse', '--verify', '--quiet', 'HEAD'], { allowFailure: true, readOnly: true });
+      const worktrees = run(['worktree', 'list', '--porcelain'], { allowFailure: true, readOnly: true });
+      const linkedWorktreeCount = worktrees.ok
+        ? Math.max(0, worktrees.stdout.split('\n').filter((line) => line.startsWith('worktree ')).length - 1)
+        : 0;
+      return {
+        gitAdapterVersion: GIT_ADAPTER_VERSION,
+        initialized: fs.existsSync(path.join(resolvedGitDir, 'HEAD')),
+        headRef: headRef.ok ? headRef.stdout.trim() || null : null,
+        headCommit: headCommit.ok ? headCommit.stdout.trim() || null : null,
+        detached: headRef.ok ? false : !!(headCommit.ok && headCommit.stdout.trim()),
+        unborn: !(headCommit.ok && headCommit.stdout.trim()),
+        hasIndexLock,
+        mergeInProgress,
+        cherryPickInProgress,
+        revertInProgress,
+        rebaseInProgress,
+        midOperation: mergeInProgress || cherryPickInProgress || revertInProgress || rebaseInProgress,
+        hasSubmodules,
+        linkedWorktreeCount,
+      };
+    },
+
+    /**
+     * 路径受限状态查询。必须提供显式 pathspec。
+     *
+     * 默认 `untracked='all'`：`normal` 会把完全未跟踪的目录折叠成一个条目
+     * （例如新建的 `analysis/scripts/x.R` 只报告 `analysis/`），
+     * 会让受管理路径下的用户新文件在冲突检测中漏判。
+     */
+    status({ paths, untracked = 'all' } = {}) {
+      const safe = assertSafePathspecs(paths, scope);
+      const mode = ['no', 'normal', 'all'].includes(untracked) ? untracked : 'all';
+      const output = run(
+        ['status', '--porcelain=v1', '-z', `--untracked-files=${mode}`, '--', ...safe],
+        { allowFailure: true, readOnly: true }
+      );
+      if (!output.ok) throw new GitAdapterError('git_status_failed', 'Scoped git status failed.', output);
+      const parsed = parsePorcelainZ(output.stdout);
+      return {
+        scope: 'paths',
+        paths: safe,
+        ...parsed,
+        dirty: parsed.entries.some((entry) => !entry.untracked),
+        hasUntracked: parsed.entries.some((entry) => entry.untracked),
+        hasConflict: parsed.entries.some((entry) => entry.conflicted),
+      };
+    },
+
+    /**
+     * 仓库级状态。仅用于绑定既有用户仓库时判断 clean/dirty；
+     * 托管模式下工作区可能包含大量科学数据，不应调用。
+     */
+    repositoryStatus({ untracked = 'normal' } = {}) {
+      const mode = ['no', 'normal', 'all'].includes(untracked) ? untracked : 'normal';
+      const output = run(
+        ['status', '--porcelain=v1', '-z', `--untracked-files=${mode}`],
+        { allowFailure: true, readOnly: true }
+      );
+      if (!output.ok) throw new GitAdapterError('git_status_failed', 'Repository git status failed.', output);
+      const parsed = parsePorcelainZ(output.stdout);
+      return {
+        scope: 'repository',
+        ...parsed,
+        dirty: parsed.entries.some((entry) => !entry.untracked),
+        hasUntracked: parsed.entries.some((entry) => entry.untracked),
+        hasConflict: parsed.entries.some((entry) => entry.conflicted),
+      };
+    },
+
+    /** 路径受限 diff。`staged` 走 --cached；给定 refs 则比较两个提交。 */
+    diff({ paths, staged = false, fromRef = null, toRef = null } = {}) {
+      const safe = assertSafePathspecs(paths, scope);
+      const args = ['diff', '--no-color', '--no-ext-diff'];
+      if (staged) args.push('--cached');
+      if (fromRef) args.push(fromRef);
+      if (toRef) args.push(toRef);
+      args.push('--', ...safe);
+      const output = run(args, { allowFailure: true, readOnly: true });
+      if (!output.ok) throw new GitAdapterError('git_diff_failed', 'Scoped git diff failed.', output);
+      return { paths: safe, patch: output.stdout };
+    },
+
+    /** 显式路径暂存。整树写法在 assertSafePathspecs 层已被拒绝。 */
+    stage({ paths } = {}) {
+      const safe = assertSafePathspecs(paths, scope);
+      const output = run(['add', '--', ...safe], { allowFailure: true });
+      if (!output.ok) throw new GitAdapterError('git_stage_failed', 'Scoped git add failed.', output);
+      return { staged: safe };
+    },
+
+    /**
+     * 路径受限提交：只提交给定 pathspec，不会带入其他已暂存内容。
+     */
+    commit({ message, paths } = {}) {
+      if (typeof message !== 'string' || message.trim() === '') {
+        throw new GitAdapterError('commit_message_required', 'Commit message is required.');
+      }
+      const safe = assertSafePathspecs(paths, scope);
+      this.stage({ paths: safe });
+      const args = [...identityArgs(), 'commit', '--quiet', '--no-verify', '-m', message, '--only', '--', ...safe];
+      const output = run(args, { allowFailure: true });
+      if (!output.ok) throw new GitAdapterError('git_commit_failed', 'Scoped git commit failed.', output);
+      const head = run(['rev-parse', 'HEAD'], { allowFailure: true, readOnly: true });
+      return {
+        commit: head.ok ? head.stdout.trim() : null,
+        paths: safe,
+        message,
+      };
+    },
+
+    revParse(ref) {
+      if (typeof ref !== 'string' || ref.trim() === '' || ref.startsWith('-')) {
+        throw new GitAdapterError('ref_invalid', 'Invalid git ref.');
+      }
+      const output = run(['rev-parse', '--verify', '--quiet', ref], { allowFailure: true, readOnly: true });
+      return output.ok ? output.stdout.trim() || null : null;
+    },
+
+    /** 读取某个提交中的文件内容，用于版本恢复与前后比较。 */
+    showFile({ ref, filePath } = {}) {
+      if (typeof ref !== 'string' || ref.trim() === '' || ref.startsWith('-')) {
+        throw new GitAdapterError('ref_invalid', 'Invalid git ref.');
+      }
+      const [safe] = assertSafePathspecs([filePath], scope);
+      const output = run(['show', `${ref}:${safe}`], { allowFailure: true, readOnly: true });
+      if (!output.ok) return null;
+      return output.stdout;
+    },
+
+    /** 创建隔离分支。不切换当前 HEAD 的调用方需自行决定。 */
+    createBranch({ name, startPoint = 'HEAD' } = {}) {
+      if (typeof name !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._\-/]*$/.test(name)) {
+        throw new GitAdapterError('branch_name_invalid', 'Invalid branch name.');
+      }
+      const output = run(['branch', name, startPoint], { allowFailure: true });
+      if (!output.ok) throw new GitAdapterError('git_branch_failed', 'Branch creation failed.', output);
+      return { branch: name, startPoint };
+    },
+
+    listTrackedFiles({ paths } = {}) {
+      const safe = assertSafePathspecs(paths, scope);
+      const output = run(['ls-files', '-z', '--', ...safe], { allowFailure: true, readOnly: true });
+      if (!output.ok) throw new GitAdapterError('git_ls_files_failed', 'Scoped ls-files failed.', output);
+      return output.stdout.split('\0').filter(Boolean);
+    },
+  };
+}
+
+module.exports = {
+  GIT_ADAPTER_VERSION,
+  MINIMUM_GIT_VERSION,
+  FORBIDDEN_PATHSPECS,
+  GitAdapterError,
+  detectGitRuntime,
+  assertSafePathspecs,
+  redactGitDiagnostic,
+  parseGitVersion,
+  createGitAdapter,
+};

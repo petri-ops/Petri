@@ -37,7 +37,18 @@ LF12 完成记录为 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseli
 
 2026-07-24 后续治理收口：新增文档生命周期治理层（[`document-governance.md`](./document-governance.md)、[`worktree-governance.md`](./worktree-governance.md)、[`DOC-REGISTRY.json`](./DOC-REGISTRY.json)、`scripts/docs-governance.mjs`、`npm run docs:status|check|reconcile`，`docs:check` 已接入根 `npm run check`）；注册表中 `G0-LF12` 已收口为 `completed / canonical:false`，释放 `g0-current-work-package` truthDomain。干净 checkpoint 为 `38d3de2`（已推送，工作区 clean）。
 
-下一主线：按 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) 从 `G0-RS0` 顺序启动，**单工作包串行、主工作区分支 `codex/g0-result-studio`，不使用 Git Worktree**（`G0-RS-WT0` = `deferred`，判据见该计划 §14）。结果交互与 Git-backed 版本能力仍不得冒充 LF12 已资格能力。
+当前主线：[`g0-result-studio-plan.md`](./g0-result-studio-plan.md) 已启动，**单工作包串行、主工作区分支 `codex/g0-result-studio`，不使用 Git Worktree**（`G0-RS-WT0` = `deferred`，判据见该计划 §14）。结果交互与 Git-backed 版本能力仍不得冒充 LF12 已资格能力。
+
+已收口阶段：
+
+- `G0-RS0` 只读审计与 ADR —— [`g0-rs0-result-studio-audit.md`](./g0-rs0-result-studio-audit.md)，含 6 条 ADR 与 3 项计划契约缺陷登记（`validationStatus` 词表冲突归 RS2、`sourceScriptRef` 语义归 RS5、`ActiveArtifact` 文件级归 RS3）。
+- `G0-RS1` Git Adapter 与 Repository Binding —— 新增 `core/shared-backend/git-adapter.js`（系统 git CLI 单一边界，无 git 库依赖）与 `core/shared-backend/git-repository-binding.js`（managed / existing 双模式）。门禁 `npm run g0:result-studio:git` 实测 24/24，已接入根 `npm run check`。
+
+RS1 已固化的边界：整树 pathspec（`.`/`-A`/`-u`/`*`/`:` 等）在 Adapter 层结构化拒绝；选项形参数、pathspec magic、`..` 逃逸、越界绝对路径同样拒绝；提交走 `--only` + 显式 pathspec，不携带其他已暂存内容；托管模式 git 元数据落 `<workspace>/.biof3/git`，绝不对用户目录 `git init`；既有仓库模式下受管理路径与用户未提交改动相交即 `blocked_dirty_conflict`，不 stash、不覆盖；index.lock、merge/rebase/cherry-pick 中途态、submodule、linked worktree 一律先阻断；git 缺失或低于 2.20 时诚实 `blocked_git_unavailable`；诊断输出脱敏绝对路径与疑似凭据。
+
+RS1 实测修正的一个真实缺陷：`git status --untracked-files=normal` 会把完全未跟踪目录折叠成单条（新建 `analysis/scripts/x.R` 只报告 `analysis/`），导致受管理路径下的用户新建文件漏判。冲突检测已改为 `untracked='all'` 并使用双向前缀匹配。
+
+下一阶段：`G0-RS2` Revision Contract 与持久化。注意 `src/migrations/` 至今为空，migration runner 从未真实使用过，RS2 必须包含 runner 首次使用验证（空库首装、已有库升级、事务回滚、`BIOF3_BETTER_SQLITE3_ROOT` ABI 路径）。
 
 ### 3.1 已完成基线：真实科学任务驱动的 Harness 升级
 

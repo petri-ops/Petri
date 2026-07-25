@@ -41,6 +41,9 @@ eval-reports/
 # Cursor IDE local settings (machine-local)
 .cursor/
 
+# Kiro local agent hooks/settings (machine-local, not shared)
+.kiro/
+
 # Absorbed core (formerly vendor/biof3-core submodule) — runtime/generated files.
 # node_modules/ and *.log are already ignored globally above; these are the
 # core-specific dev databases, caches, backups, and large demo datasets.

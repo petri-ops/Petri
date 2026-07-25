@@ -10,7 +10,9 @@
 
 LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口；16/16 强制证据、10/10 零容忍和永久维护门全部通过。
 
-当前立即任务：按 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) 从 `G0-RS0`（只读审计与 ADR）启动 Result Studio，base commit `38d3de2`。开发形态为**单工作包串行、主工作区分支**；`G0-RS-WT0` Worktree 启动门已标 `deferred`，判据与重开条件见该计划 §14。G0 `qualified + maintained` 门禁继续永久优先。
+当前立即任务：Result Studio（[`g0-result-studio-plan.md`](./g0-result-studio-plan.md)）已启动，状态 `in_progress`。`G0-RS0` 只读审计与 ADR 已收口（[`g0-rs0-result-studio-audit.md`](./g0-rs0-result-studio-audit.md)）；`G0-RS1` Git Adapter 与 Repository Binding 已收口，门禁 `npm run g0:result-studio:git` 实测 24/24 且已接入根 `npm run check`。**下一阶段为 `G0-RS2` Revision Contract 与持久化。**
+
+开发形态为**单工作包串行、主工作区分支 `codex/g0-result-studio`**；`G0-RS-WT0` Worktree 启动门已标 `deferred`，判据与重开条件见该计划 §14。G0 `qualified + maintained` 门禁继续永久优先；`excludedClaims` 的 `result-studio-editing` 在 RS9 之前不得改动。
 
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 已完成的 Scientific Task Contract 工作包记录见 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md)。
