@@ -42,6 +42,7 @@ module.exports = {
   deliveryManifest: require('./delivery-manifest'),
   scientificReplayPackage: require('./scientific-replay-package'),
   runtimeResourceSnapshot: require('./runtime-resource-snapshot'),
+  resultStudioPluginSdk: require('./result-studio-plugin-sdk'),
   g0Baseline: require('./g0-baseline'),
   g0TruthProjection: require('./g0-truth-projection'),
   g0DurableState: require('./g0-durable-state'),

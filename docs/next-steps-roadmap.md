@@ -10,7 +10,7 @@
 
 LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口；16/16 强制证据、10/10 零容忍和永久维护门全部通过。
 
-当前立即任务：Result Studio（[`g0-result-studio-plan.md`](./g0-result-studio-plan.md)）状态 `in_progress`。`G0-RS0`～`G0-RS6` 已依次收口：Git Adapter、Revision 持久化、Artifact Interaction/Selection（UI-102）、AI Edit Intent/affected subgraph、无 Worktree 隔离 ChangeSet/独立脚本/真实 Job-backed Revision（UI-103），以及 Codex-like Diff、比较、原子采用/撤销、恢复为新 Revision 与紧凑结果版本 UI（UI-104）均已进入永久门禁。真实隔离链已完成 v1 → 采用 v2 → 撤销 v1 → 恢复为新 v3，失败、冲突和重复请求不会产生部分采用或改写历史。**下一阶段为 `G0-RS7` Plugin SDK 首批适配。**
+当前立即任务：Result Studio（[`g0-result-studio-plan.md`](./g0-result-studio-plan.md)）状态 `in_progress`。`G0-RS0`～`G0-RS7` 已依次收口：Git Adapter、Revision 持久化、Artifact Interaction/Selection（UI-102）、AI Edit Intent/affected subgraph、无 Worktree 隔离 ChangeSet/独立脚本/真实 Job-backed Revision（UI-103）、Codex-like Diff/原子采用与恢复（UI-104），以及首批四类科学插件 SDK 适配。DESeq2 table、volcano、heatmap、GO/KEGG 共 12 个正式图表已具备 fail-closed descriptor、输入 Artifact binding、独立 Revision 脚本和 golden Revision 升级契约。**下一阶段为 `G0-RS8` 耐久恢复、性能与存储治理。**
 
 开发形态为**单工作包串行、主工作区分支 `codex/g0-result-studio`**；`G0-RS-WT0` Worktree 启动门已标 `deferred`，判据与重开条件见该计划 §14。G0 `qualified + maintained` 门禁继续永久优先；`excludedClaims` 的 `result-studio-editing` 在 RS9 之前不得改动。
 

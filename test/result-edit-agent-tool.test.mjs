@@ -71,12 +71,13 @@ test('RS4 Agent tool requires an active project and a real source job', async ()
   assert.equal((await noJob(args, { projectId: 'p_1' })).error, 'source_job_not_found');
 });
 
-test('RS4 plugin normalization preserves an optional trusted Result Studio descriptor', () => {
+test('RS4 plugin normalization rejects incomplete Result Studio metadata', () => {
   const manifest = normalizePluginManifest(
     { id: 'plotter', version: '1.0.0', language: 'r' },
     { id: 'plotter', resultStudio: { parameterImpacts: { palette: 'presentation' } } }
   );
-  assert.deepEqual(manifest.resultStudio, { parameterImpacts: { palette: 'presentation' } });
+  assert.equal(manifest.resultStudio, null);
+  assert.equal(manifest.resultStudioValidation.valid, false);
   assert.equal(normalizePluginManifest({ id: 'legacy' }, { id: 'legacy' }).resultStudio, null);
 });
 

@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS7",
+  "sourceCommit": "54493b43465bafe4c5b122c7c0ebe3cde5d3c6fa",
+  "privacy": "digests_counts_and_repository_relative_paths_only",
+  "pluginCount": 4,
+  "formalArtifactCount": 12,
+  "productionEvidenceSha256": "8c1e737fff386a2528a5dcfe53459a86425ba3742c5c4184393f00299102f7d7",
+  "checks": [
+    {
+      "id": "RS7-deseq2-contract",
+      "passed": true,
+      "evidence": [
+        "resources/built-in-plugins/deseq2/tool-definition.json",
+        "resources/built-in-plugins/deseq2/golden-revisions/result-studio-v1.json"
+      ],
+      "detail": "4 formal table/plot outputs mapped."
+    },
+    {
+      "id": "RS7-deseq2-production",
+      "passed": true,
+      "evidence": [
+        "acceptance/harness-plugins/macos-arm64-acceptance.json"
+      ],
+      "detail": "The valid fixture completed through run_tool → tool_job → artifact_truth."
+    },
+    {
+      "id": "RS7-deseq2-revision",
+      "passed": true,
+      "evidence": [
+        "resources/built-in-plugins/deseq2/golden-revisions/result-studio-v1.json"
+      ],
+      "detail": "Compatible history remains readable; unmigrated contract drift is explicit read-only legacy."
+    },
+    {
+      "id": "RS7-volcano-plot-contract",
+      "passed": true,
+      "evidence": [
+        "resources/built-in-plugins/volcano-plot/tool-definition.json",
+        "resources/built-in-plugins/volcano-plot/golden-revisions/result-studio-v1.json"
+      ],
+      "detail": "2 formal table/plot outputs mapped."
+    },
+    {
+      "id": "RS7-volcano-plot-production",
+      "passed": true,
+      "evidence": [
+        "acceptance/harness-plugins/macos-arm64-acceptance.json"
+      ],
+      "detail": "The valid fixture completed through run_tool → tool_job → artifact_truth."
+    },
+    {
+      "id": "RS7-volcano-plot-revision",
+      "passed": true,
+      "evidence": [
+        "resources/built-in-plugins/volcano-plot/golden-revisions/result-studio-v1.json"
+      ],
+      "detail": "Compatible history remains readable; unmigrated contract drift is explicit read-only legacy."
+    },
+    {
+      "id": "RS7-gene-correlation-contract",
+      "passed": true,
+      "evidence": [
+        "resources/built-in-plugins/gene-correlation/tool-definition.json",
+        "resources/built-in-plugins/gene-correlation/golden-revisions/result-studio-v1.json"
+      ],
+      "detail": "2 formal table/plot outputs mapped."
+    },
+    {
+      "id": "RS7-gene-correlation-production",
+      "passed": true,
+      "evidence": [
+        "acceptance/harness-plugins/macos-arm64-acceptance.json"
+      ],
+      "detail": "The valid fixture completed through run_tool → tool_job → artifact_truth."
+    },
+    {
+      "id": "RS7-gene-correlation-revision",
+      "passed": true,
+      "evidence": [
+        "resources/built-in-plugins/gene-correlation/golden-revisions/result-studio-v1.json"
+      ],
+      "detail": "Compatible history remains readable; unmigrated contract drift is explicit read-only legacy."
+    },
+    {
+      "id": "RS7-go-kegg-contract",
+      "passed": true,
+      "evidence": [
+        "resources/built-in-plugins/go-kegg/tool-definition.json",
+        "resources/built-in-plugins/go-kegg/golden-revisions/result-studio-v1.json"
+      ],
+      "detail": "4 formal table/plot outputs mapped."
+    },
+    {
+      "id": "RS7-go-kegg-production",
+      "passed": true,
+      "evidence": [
+        "acceptance/harness-plugins/macos-arm64-acceptance.json"
+      ],
+      "detail": "The valid fixture completed through run_tool → tool_job → artifact_truth."
+    },
+    {
+      "id": "RS7-go-kegg-revision",
+      "passed": true,
+      "evidence": [
+        "resources/built-in-plugins/go-kegg/golden-revisions/result-studio-v1.json"
+      ],
+      "detail": "Compatible history remains readable; unmigrated contract drift is explicit read-only legacy."
+    },
+    {
+      "id": "RS7-single-version-truth",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-changeset-service.js"
+      ],
+      "detail": "All adapters use canonical per-Artifact Revision snapshots; no plugin-local version system."
+    }
+  ],
+  "passed": true,
+  "generatedAt": "2026-07-25T06:53:25.310Z"
+}

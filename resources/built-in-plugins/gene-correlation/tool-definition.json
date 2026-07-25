@@ -49,6 +49,28 @@
       "label": "相关系数矩阵"
     }
   ],
+  "resultStudio": {
+    "contractVersion": 1,
+    "descriptorVersion": 1,
+    "semanticType": "gene_correlation_heatmap",
+    "entity": { "type": "gene_pair_correlation", "idField": "gene_pair", "fields": { "gene_pair": "string", "gene_x": "string", "gene_y": "string", "correlation": "number" } },
+    "source": { "strategy": "execution_snapshot_per_artifact", "entryPoint": "scripts/gene-correlation.R" },
+    "independentScriptPathTemplate": "analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.R",
+    "inputBindings": [{ "inputId": "expr_matrix", "required": true, "acceptsArtifactTypes": ["table"], "semanticRole": "expression_matrix" }],
+    "parameters": {
+      "top_n": { "type": "number", "default": 30, "minimum": 2 },
+      "method": { "type": "select", "default": "pearson", "options": ["pearson", "spearman"] }
+    },
+    "parameterImpacts": { "top_n": "data", "method": "scientific" },
+    "actions": ["select_gene_pairs", "derive_gene_set", "recompute"],
+    "artifacts": [
+      { "id": "heatmap", "type": "plot", "filename": "heatmap.png" },
+      { "id": "corr_matrix", "type": "table", "filename": "corr_matrix.csv" }
+    ],
+    "validator": { "id": "gene_correlation_result_truth_v1", "checks": ["artifact_truth_valid", "script_sha256", "input_sha256", "output_sha256", "symmetric_matrix"] },
+    "goldenFixture": { "path": "golden-revisions/result-studio-v1.json" },
+    "upgradePolicy": { "sameMajor": "compatible_if_contract_digests_match", "contractDrift": "migration_required", "missingMigration": "read_only_legacy" }
+  },
   "failureModes": [
     {
       "code": "non_numeric_expression_matrix",

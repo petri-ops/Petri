@@ -69,6 +69,32 @@
       "label": "分类结果表"
     }
   ],
+  "resultStudio": {
+    "contractVersion": 1,
+    "descriptorVersion": 1,
+    "semanticType": "differential_expression_volcano",
+    "entity": { "type": "classified_gene", "idField": "gene", "fields": { "gene": "string", "log2FoldChange": "number", "pvalue": "number", "classification": "string" } },
+    "source": { "strategy": "execution_snapshot_per_artifact", "entryPoint": "scripts/volcano-plot.R" },
+    "independentScriptPathTemplate": "analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.R",
+    "inputBindings": [{ "inputId": "deg_table", "required": true, "acceptsArtifactTypes": ["table"], "semanticRole": "differential_expression_table" }],
+    "parameters": {
+      "lfc_col": { "type": "text", "default": null },
+      "gene_col": { "type": "text", "default": "gene" },
+      "pval_col": { "type": "text", "default": "pvalue" },
+      "fc_threshold": { "type": "number", "default": 1, "minimum": 0 },
+      "pval_threshold": { "type": "number", "default": 1.3, "minimum": 0 },
+      "top_n": { "type": "number", "default": 10, "minimum": 0 }
+    },
+    "parameterImpacts": { "lfc_col": "data", "gene_col": "data", "pval_col": "data", "fc_threshold": "scientific", "pval_threshold": "scientific", "top_n": "data" },
+    "actions": ["select_genes", "classify_rows", "recompute"],
+    "artifacts": [
+      { "id": "volcano", "type": "plot", "filename": "volcano.png" },
+      { "id": "classified_table", "type": "table", "filename": "classified_table.csv" }
+    ],
+    "validator": { "id": "volcano_result_truth_v1", "checks": ["artifact_truth_valid", "script_sha256", "input_sha256", "output_sha256", "finite_statistics"] },
+    "goldenFixture": { "path": "golden-revisions/result-studio-v1.json" },
+    "upgradePolicy": { "sameMajor": "compatible_if_contract_digests_match", "contractDrift": "migration_required", "missingMigration": "read_only_legacy" }
+  },
   "failureModes": [
     {
       "code": "missing_required_file_inputs",

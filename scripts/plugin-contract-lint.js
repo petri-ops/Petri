@@ -18,6 +18,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { lintResultStudioPlugin } = require('../core/shared-backend/result-studio-plugin-sdk');
 
 const PLUGIN_DIR = path.join(__dirname, '..', 'resources', 'built-in-plugins');
 
@@ -43,6 +44,18 @@ function lintPlugin(pluginId) {
 
   if (!pluginJson || !toolDef) {
     return { pluginId, errors, warnings, status: 'skipped' };
+  }
+
+  // Result Studio descriptors are trusted execution metadata. If present they
+  // must pass the SDK in full; partial metadata is more dangerous than absence.
+  if (toolDef.resultStudio || pluginJson.resultStudio) {
+    const resultStudio = lintResultStudioPlugin({ plugin: pluginJson, toolDefinition: toolDef, pluginDir });
+    for (const issue of resultStudio.errors) {
+      errors.push(`[${pluginId}] resultStudio ${issue.code} (${issue.field}): ${issue.detail}`);
+    }
+    for (const issue of resultStudio.warnings) {
+      warnings.push(`[${pluginId}] resultStudio ${issue.code} (${issue.field}): ${issue.detail}`);
+    }
   }
 
   // Collect tool-definition input IDs

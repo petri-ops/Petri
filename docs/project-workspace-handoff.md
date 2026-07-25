@@ -1,6 +1,6 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-07-24
+最后更新：2026-07-25
 
 ## 1. 恢复顺序
 
@@ -66,7 +66,9 @@ RS3 实测修正的三个真实缺陷：其一，我在路由里使用了 `app.l
 
 `G0-RS5` 已收口：真实 valid Job Artifact 首次进入 Result Studio 时建立确定性 baseline v1 并把 `revisionId/artifactFamilyId` 投影回 `ActiveArtifact`；AI 与手动编辑共用 ChangeSet 服务，在 `.biof3/revision/<changeSetId>` 私有 staging 中派生独立脚本/参数，通过临时 Git index 生成不触碰工作树的 candidate commit，再复用正式 `run_tool → tool_job → artifact truth` 执行并登记 v2。候选仅为 `preview_ready/adopted:false`；失败、取消、并发冲突和恢复扫描均不改变 current。`result_edit_progress` 已接入 SSE 与前端有界 run store（UI-103 仍为 `in_progress`，待真实长修改失败/取消/历史恢复矩阵）。
 
-`G0-RS6` 已收口：同一 Revision/ChangeSet 真相提供有界文本、JSON、表格与图像比较；Git current ref CAS 与 SQLite current 指针在一个 fail-closed 操作中切换，baseline 不可撤销，历史恢复生成新 commit/ChangeSet/Revision 而不改写旧版本。结果侧栏默认紧凑，展开后提供前后图、语义/字段/文本 diff、history 与折叠 Git 信息；真实隔离链已完成 v1 → 采用 v2 → 撤销 v1 → 恢复 v3，明亮/夜间/820×900 通过，UI-104 `verified`。下一阶段：`G0-RS7` Plugin SDK 首批适配；不得提前实现 RS8 存储治理。
+`G0-RS6` 已收口：同一 Revision/ChangeSet 真相提供有界文本、JSON、表格与图像比较；Git current ref CAS 与 SQLite current 指针在一个 fail-closed 操作中切换，baseline 不可撤销，历史恢复生成新 commit/ChangeSet/Revision 而不改写旧版本。结果侧栏默认紧凑，展开后提供前后图、语义/字段/文本 diff、history 与折叠 Git 信息；真实隔离链已完成 v1 → 采用 v2 → 撤销 v1 → 恢复 v3，明亮/夜间/820×900 通过，UI-104 `verified`。
+
+`G0-RS7` 已收口：Result Studio Plugin SDK v1 对 descriptor 与 golden Revision 执行 fail-closed lint；DESeq2、volcano、gene-correlation heatmap、GO/KEGG 的 12 个正式 table/plot 全部映射，每个 required file input 都有 Artifact binding。RS5 的 canonical `analysis/scripts/<family>/<revision>/<artifact>.R` 继续保证每个正式结果独立脚本，不拆分插件执行器、不建立插件内版本系统。相同 major/contract 的历史可读，漂移要求迁移，缺迁移时显式 `read_only_legacy`。下一阶段：`G0-RS8` 耐久恢复、性能与存储治理；不得提前实现 RS9 基线晋升。
 
 ### 3.1 已完成基线：真实科学任务驱动的 Harness 升级
 

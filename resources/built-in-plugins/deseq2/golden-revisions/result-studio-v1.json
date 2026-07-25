@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "deseq2",
+  "pluginVersion": "1.0.0",
+  "descriptorVersion": 1,
+  "sourceScriptSha256": "8348d44fc11934464abcdca0edf6b21c45c791c1e4c8c2768f1c3e4c6d18383e",
+  "inputBindingDigest": "42937e704e3fca8dd421dfaa0e5522740a28696556e360205d826fded3966776",
+  "artifactContractDigest": "3f7bc958bba8587ee841cb5e92b0d4122fc4f41dbb45c8577bfacbe42a83ce96",
+  "revisionSourceStrategy": "execution_snapshot_per_artifact",
+  "independentScriptPathTemplate": "analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.R",
+  "fixtureInput": "demo-data/demo-counts.csv + demo-data/demo-coldata.csv",
+  "expectedArtifactIds": ["deg_table", "volcano", "pca", "heatmap"]
+}

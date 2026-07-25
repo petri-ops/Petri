@@ -14,6 +14,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const logger = require('../shared-backend/logger');
+const { validateResultStudioDescriptor } = require('../shared-backend/result-studio-plugin-sdk');
 
 // 已注册插件 Map（id → { ...meta, pluginDir, scriptPath }）
 let _lastPluginsDir = null;
@@ -276,6 +277,11 @@ function normalizePluginManifest(plugin, def) {
   for (const mode of GLOBAL_ARTIFACT_FAILURE_MODES) {
     if (!failureCodes.has(mode.code)) mergedFailureModes.push(mode);
   }
+  const resultStudioValidation = validateResultStudioDescriptor({
+    plugin,
+    toolDefinition: toolDef,
+    pluginDir: plugin.pluginDir || null,
+  });
   return {
     pluginManifestVersion: Number(plugin.pluginManifestVersion || toolDef.pluginManifestVersion || 1),
     id,
@@ -304,7 +310,12 @@ function normalizePluginManifest(plugin, def) {
     estimatedMinutes: toolDef.estimatedMinutes || plugin.estimatedMinutes || null,
     // Optional Result Studio descriptor. Absence is meaningful: RS4 must then
     // classify unknown parameter edits as scientific recomputation.
-    resultStudio: toolDef.resultStudio || plugin.resultStudio || null,
+    resultStudio: resultStudioValidation.valid ? resultStudioValidation.descriptor : null,
+    resultStudioValidation: {
+      valid: resultStudioValidation.valid,
+      errors: resultStudioValidation.errors,
+      warnings: resultStudioValidation.warnings,
+    },
     execution: {
       scriptPath: plugin.scriptPath || null,
       pluginDir: plugin.pluginDir || null,

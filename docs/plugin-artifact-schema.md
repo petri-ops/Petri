@@ -30,6 +30,22 @@ Each normalized runnable analysis plugin exposes:
 
 The runtime converts `inputs` into MCP `inputSchema`, and exposes `outputSchema.artifacts` to the agent through `run_tool(op="list")`.
 
+## Result Studio Plugin Contract v1
+
+Plugins that opt into editable Result Studio behavior declare `resultStudio` in `tool-definition.json`. The metadata is executable trust, not optional UI copy, so `core/shared-backend/result-studio-plugin-sdk.js` validates it fail-closed before RS4 can use parameter impact rules.
+
+The descriptor must declare stable result semantics and entity IDs, the canonical source entry point, required input Artifact bindings, real editable parameters and their impact classes, every formal table/plot output, a validator, a golden Revision fixture, and an explicit upgrade policy. Unknown parameters are never guessed as presentation-only.
+
+Every formal Artifact Revision uses an independent materialized script path:
+
+```text
+analysis/scripts/<artifactFamilyId>/<revisionId>/<artifactId>.R
+```
+
+The source may remain the plugin's complete multi-output execution script. This preserves required output validation while giving each formal Artifact its own immutable script snapshot; it does not create a plugin-local version system or a second executor.
+
+Golden Revision fixtures bind the canonical script, input binding contract, and formal Artifact contract with SHA-256 digests. Same-major upgrades are readable only when contract digests match. Contract drift is `migration_required`; absent a declared migration, the historical Revision remains available as `read_only_legacy` rather than being silently reinterpreted.
+
 Minimal normalized shape:
 
 ```json

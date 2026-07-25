@@ -2,7 +2,7 @@
 
 最后更新：2026-07-25
 
-状态：`in_progress`（RS0 ✅ / RS1 ✅ / RS2 ✅ / RS3 ✅ / RS4 ✅ / RS5 ✅ / RS6 ✅ 已收口；当前下一阶段为 `G0-RS7`，单线串行）
+状态：`in_progress`（RS0 ✅ / RS1 ✅ / RS2 ✅ / RS3 ✅ / RS4 ✅ / RS5 ✅ / RS6 ✅ / RS7 ✅ 已收口；当前下一阶段为 `G0-RS8`，单线串行）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -917,6 +917,8 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 
 ### G0-RS7：Plugin SDK 首批适配
 
+状态：`completed`（2026-07-25）
+
 目标：以真实科学结果证明通用协议。
 
 交付：
@@ -934,6 +936,20 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 - 每个正式图/表都有独立脚本。
 - 输入输出可无缝绑定。
 - 插件版本升级后历史 Revision 仍可读取或明确迁移。
+
+实现与边界：
+
+- 新增 `result-studio-plugin-sdk.js`，对结果语义、稳定实体 schema、来源脚本、输入 Artifact binding、参数类型与影响级别、正式 Artifact、Validator、golden Revision 和升级策略执行 fail-closed lint；无效或不完整元数据不会进入 RS4 受信参数影响规则。
+- 首批适配 canonical `deseq2`、`volcano-plot`、`gene-correlation`（heatmap）与 `go-kegg`。四者共 12 个正式 table/plot 输出全部映射，所有 required file input 全部具备 Artifact binding；未虚构插件并不存在的颜色或样式参数。
+- 每个插件保留一个 canonical R 执行入口，但 RS5 已按 Artifact/Revision 将其快照到 `analysis/scripts/<artifactFamilyId>/<revisionId>/<artifactId>.R`。因此每个正式图/表拥有独立、可追溯、可继续修改的脚本，同时仍由原插件一次性满足 required outputs，不引入第二个 executor、Artifact 或插件内版本系统。
+- 每个插件新增 `golden-revisions/result-studio-v1.json`，固定源码、输入绑定与 Artifact contract 三类 SHA-256。相同 major 且 contract digest 一致的历史 Revision 继续可读；major 或 contract 漂移要求迁移，缺迁移时明确降级为 `read_only_legacy`。
+- 正式 `plugin-contract-lint` 已接入 Result Studio SDK；`npm run g0:result-studio:plugin` 与聚合门成为永久离线门禁。
+
+验收证据：
+
+- SDK 专项 5/5，覆盖四插件完整 lint、图表映射、binding、golden digest、伪造影响元数据拒绝和升级兼容。
+- 四插件既有真实 macOS arm64 valid fixture 均已通过 `run_tool → tool_job → artifact_truth`；RS7 脱敏汇总位于 `acceptance/g0-result-studio/rs7-plugin-acceptance.json`，13/13 checks。
+- `harness:plugins:contract` 为 10 plugins / 0 errors；既有 warnings 不属于 RS7 contract failure，未借本阶段虚构修复。
 
 ### G0-RS8：耐久恢复、性能与存储治理
 
