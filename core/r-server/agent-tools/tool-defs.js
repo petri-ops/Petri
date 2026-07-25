@@ -497,6 +497,37 @@ const TOOL_DEFS = [
   {
     type: 'function',
     function: {
+      name: 'result_edit_plan',
+      description:
+        'RESULT_EDIT_INTENT_v1 — 对已有科学结果的修改请求做只读规划：精确定位来源 Job/Artifact/脚本/输入，区分查看、重绘、转换、重算或工作流重规划，并计算受影响 DAG。此工具不修改文件、不创建 Job 或 ChangeSet；缺少真实来源或 DAG 时会明确阻断。',
+      parameters: {
+        type: 'object',
+        properties: {
+          toolJobId: { type: 'string', description: '产生当前结果的真实 tool_job id' },
+          artifactId: { type: 'string', description: 'Artifact 的稳定 id；不能用文件名代替' },
+          revisionId: { type: 'string', description: '当前持久化 ArtifactRevision id' },
+          requestedOutcome: { type: 'string', description: '用户希望得到的结果变化' },
+          requestedEditClass: {
+            type: 'string',
+            enum: ['view_only', 'presentation_rerender', 'data_transform', 'scientific_recompute', 'workflow_replan'],
+            description: '可选的用户意图类别；参数影响规则可以保守升级它，不能被它降级',
+          },
+          proposedParameterPatch: { type: 'object', description: '拟议参数 Patch；未知参数自动按科学重算处理' },
+          workflowPlan: {
+            type: 'object',
+            description: '包含唯一 steps[].id/toolJobId/dependsOn 的真实 AgentWorkflowPlan；不会从文件名猜 DAG',
+          },
+          selectionId: { type: 'string', description: '可选 SelectionContext id' },
+          sourceNodeId: { type: 'string', description: '可选来源节点 id；不传时由 toolJobId 唯一匹配' },
+          userMessageId: { type: 'string', description: '可选来源用户消息 id' },
+        },
+        required: ['toolJobId', 'artifactId', 'revisionId', 'requestedOutcome'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'verify_state',
       description:
         'VERIFY_STATE_v1 — 确认某个实体的当前状态符合预期。在执行写操作后调用此工具核实，避免在没有真实反馈时声称"已完成"。' +

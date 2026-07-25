@@ -302,6 +302,9 @@ function normalizePluginManifest(plugin, def) {
         : [],
     failureModes: mergedFailureModes.map(_normalizeFailureMode).filter(Boolean),
     estimatedMinutes: toolDef.estimatedMinutes || plugin.estimatedMinutes || null,
+    // Optional Result Studio descriptor. Absence is meaningful: RS4 must then
+    // classify unknown parameter edits as scientific recomputation.
+    resultStudio: toolDef.resultStudio || plugin.resultStudio || null,
     execution: {
       scriptPath: plugin.scriptPath || null,
       pluginDir: plugin.pluginDir || null,

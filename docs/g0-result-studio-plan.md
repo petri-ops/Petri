@@ -1,8 +1,8 @@
 # G0 Result Studio — 意图驱动、可编辑、Git-backed 的科研结果工作台计划
 
-最后更新：2026-07-24
+最后更新：2026-07-25
 
-状态：`in_progress`（RS0 ✅ / RS1 ✅ / RS2 ✅ / RS3 ✅ 已收口；当前下一阶段为 `G0-RS4`，单线串行）
+状态：`in_progress`（RS0 ✅ / RS1 ✅ / RS2 ✅ / RS3 ✅ / RS4 ✅ 已收口；当前下一阶段为 `G0-RS5`，单线串行）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -811,25 +811,32 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 2. `require('../db')` 返回模块对象而非 better-sqlite3 实例，`db.prepare(...)` 运行时必抛；且仓库在注册期 eager 创建，抛错会被 `routes/index.js` 的 try/catch 吞掉。已改为 `require('../db').db` 真实句柄 + 惰性构造。
 3. 我的验证脚本三次用错入参名（`totalRowCount` 应为 `rowCount`、`filterExpression` 应为 `filter`、`rows` 需为列名键对象数组），一度把正确实现误判为 `positional` 回退。模块本身无误，记录于此以免后续复现同类误判。
 
-### G0-RS4：AI Edit Intent 与受影响范围
+### G0-RS4：AI Edit Intent 与受影响范围 ✅ 已完成（2026-07-25）
 
 目标：可靠区分查看、重绘、转换、重算和重规划。
 
-交付：
+实现：
 
-- ResultEditIntent v1。
-- 确定性参数影响规则。
-- 来源节点和脚本定位。
-- affected subgraph 计算。
-- 科学确认门规则。
-- Agent edit tools。
+- `core/shared-backend/result-edit-intent.js`：`ResultEditIntent v1` validator、确定性参数影响分类、来源定位、DAG 校验与 affected subgraph 计算、科学确认门及只读规划器。
+- `core/r-server/agent-tools/result-edit-tools.js`：新增只读/R0 的 `result_edit_plan`。只从已加载插件 manifest 的可选 `resultStudio.parameterImpacts` 读取受信声明，Agent 参数不能自行伪造轻量影响规则。
+- `core/r-server/plugin-loader.js`：仅透传可选 Result Studio 描述符；未给现有插件批量补声明。描述符缺失或参数未知时一律保守升级为 `scientific_recompute + requiresScientificConfirmation`。
+- `package.json`：新增 `g0:result-studio:syntax` / `g0:result-studio:intent` 并纳入聚合 `g0:result-studio` 与根 `check`。
 
-验收：
+不变量与边界：
 
-- 改颜色只重跑绘图节点。
-- 改显著性阈值按插件声明重跑必要节点。
-- 改 design formula 进入科学确认/重算。
-- 不能定位脚本或输入时不猜测执行。
+- 精确来源必须同时满足同项目 `tool_job`、`completed`、非阻断 valid Artifact Truth、Artifact **id** 唯一命中、与 Job/Artifact 对齐的 execution provenance、带 hash 的脚本快照和输入；有上游依赖的来源节点还必须有显式 `sourceArtifactRef`，文件名永不作为 Artifact 身份或 lineage 推断依据。
+- `design` / formula / contrast 族字段无条件进入科学确认与重算；method/tool/plugin/workflow 族字段升级为 `workflow_replan`，插件的较弱声明不能覆盖这些保护字段。
+- `view_only` 不产生受影响节点；`presentation_rerender` 只包含来源节点；转换/重算/重规划包含来源节点及所有确定性下游。DAG 缭乱、循环、缺边、来源节点歧义均 fail-closed。
+- RS4 只规划：返回值固定声明 `performed=false / toolJobCreated=false / changeSetCreated=false`。未创建 ChangeSet、未 materialize 脚本、未执行重跑，RS5 边界未提前实现。
+
+验收（`test/result-edit-intent.test.mjs` + `test/result-edit-agent-tool.test.mjs` + registry 回归）：
+
+- ✅ 受信 manifest 明确声明的 palette 修改仅重绘来源绘图节点。
+- ✅ 显式科学阈值重算来源及下游节点；design formula 强制科学确认；method 变化升级工作流重规划。
+- ✅ 未知参数即使名称是 `color` 也不会猜成展示修改，保守进入科学重算。
+- ✅ 缺脚本、输入、Artifact、Revision 或 DAG 时结构化阻断；文件名不能冒充 Artifact id。
+- ✅ 跨项目来源在加载插件描述符前拒绝；Agent 工具只读且不创建新 Job。
+- ✅ `npm run g0:result-studio` 聚合门由 104 项提升为 126 项，全部通过。
 
 ### G0-RS5：隔离编辑与独立脚本
 
