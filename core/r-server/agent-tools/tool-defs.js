@@ -528,6 +528,48 @@ const TOOL_DEFS = [
   {
     type: 'function',
     function: {
+      name: 'result_changeset_create',
+      description:
+        'RESULT_CHANGESET_v1 — 根据 result_edit_plan 返回的完整 ResultEditIntent 创建隔离候选版本。它会派生独立脚本与参数、创建真实 Git candidate commit，并通过现有 run_tool→tool_job→artifact truth 执行和验证；不会采用候选或覆盖当前结果。科学重算必须 scientificConfirmed=true。',
+      parameters: {
+        type: 'object',
+        properties: {
+          intent: { type: 'object', description: 'result_edit_plan 返回且状态为 ready/confirmation_required 的完整 intent 对象' },
+          scriptPatch: {
+            type: 'array',
+            description: '可选的精确脚本替换；每段 oldText 必须唯一匹配',
+            items: {
+              type: 'object',
+              properties: {
+                oldText: { type: 'string' },
+                newText: { type: 'string' },
+              },
+              required: ['oldText', 'newText'],
+            },
+          },
+          scientificConfirmed: { type: 'boolean', description: '科学参数/方法变化已完成确认时为 true' },
+        },
+        required: ['intent'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'result_changeset_status',
+      description: '读取当前项目中一个 Result Studio ChangeSet、候选 Revision 和恢复状态；只读，不采用、不撤销。',
+      parameters: {
+        type: 'object',
+        properties: {
+          changeSetId: { type: 'string', description: 'ChangeSet id' },
+        },
+        required: ['changeSetId'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'verify_state',
       description:
         'VERIFY_STATE_v1 — 确认某个实体的当前状态符合预期。在执行写操作后调用此工具核实，避免在没有真实反馈时声称"已完成"。' +

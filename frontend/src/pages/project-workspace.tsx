@@ -3452,6 +3452,7 @@ function ResultArtifactShell({
       // 清单还没到（或该类型不支持交互）时保持 null，不猜测。
       semanticKind: selectedArtifactKind,
       revisionId: interactionManifest?.revisionId ?? null,
+      artifactFamilyId: interactionManifest?.artifactFamilyId ?? null,
       entityType: interactionManifest?.entityType ?? null,
       idField: interactionManifest?.idField ?? null,
       selectionDurable: interactionManifest?.selectionDurable ?? false,

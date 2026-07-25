@@ -29,7 +29,9 @@ const db = require('../db');
 // core/r-server/db.js 导出的是模块对象；真实 better-sqlite3 句柄在 `.db` 上。
 // 直接对模块对象调用 prepare() 会在运行时抛错。
 const sqlite = db.db;
-const { resolveProjectRunLayout } = require('../../shared-backend/project-run-layout');
+const { resolveProjectRunLayout, isPathContained } = require('../../shared-backend/project-run-layout');
+const { bindProjectRepository } = require('../../shared-backend/git-repository-binding');
+const { ensureBaselineArtifactRevision } = require('../../shared-backend/result-changeset-service');
 const {
   buildTableInteractionManifest,
   buildPlotInteractionManifest,
@@ -141,7 +143,7 @@ function readTableSample(absolutePath, fileName) {
 }
 
 function loadJobAndProject(req, jobId) {
-  const job = sqlite.prepare('SELECT * FROM tool_jobs WHERE id = ?').get(jobId);
+  const job = db.getToolJob(jobId);
   if (!job) return { error: { status: 404, code: 'job_not_found' } };
   const project = job.project_id
     ? sqlite.prepare('SELECT * FROM projects WHERE id = ?').get(job.project_id)
@@ -149,6 +151,19 @@ function loadJobAndProject(req, jobId) {
   if (!project) return { error: { status: 404, code: 'project_not_found' } };
   if (!canAccessProject(req, project)) return { error: { status: 403, code: 'forbidden' } };
   return { job, project };
+}
+
+function findArtifactRecord(result, absolutePath, artifactName) {
+  const artifacts = Array.isArray(result && result.artifacts) ? result.artifacts : [];
+  let realTarget = null;
+  try { realTarget = fs.realpathSync(absolutePath); } catch { /* resolved earlier */ }
+  const matches = artifacts.filter((artifact) => {
+    if (!artifact || !artifact.id) return false;
+    if (artifact.id === artifactName || artifact.name === artifactName || artifact.filename === artifactName) return true;
+    if (!realTarget || !artifact.path) return false;
+    try { return fs.realpathSync(artifact.path) === realTarget; } catch { return false; }
+  });
+  return matches.length === 1 ? matches[0] : null;
 }
 
 /**
@@ -217,14 +232,98 @@ module.exports = function registerResultStudioRoutes(app) {
     if (resolved.error) {
       return res.status(resolved.error.status).json({ error: resolved.error.code, message: resolved.error.message });
     }
+    if (!TABLE_EXTENSIONS.test(artifactName) && !PLOT_EXTENSIONS.test(artifactName)) {
+      return res.status(415).json({ error: 'artifact_kind_not_interactive' });
+    }
+    const artifactRecord = findArtifactRecord(loaded.job.result || {}, resolved.absolutePath, artifactName);
 
-    const revisionId = String(req.query.revisionId || '').trim() || null;
+    let revision = null;
+    let revisionDiagnostic = null;
+    const explicitRevisionId = String(req.query.revisionId || '').trim() || null;
+    try {
+      if (explicitRevisionId) {
+        const candidate = repo().getRevision(explicitRevisionId);
+        if (candidate && artifactRecord && candidate.projectId === loaded.project.id
+          && candidate.toolJobId === loaded.job.id && candidate.artifactId === artifactRecord.id) {
+          revision = candidate;
+        } else {
+          revisionDiagnostic = { code: 'revision_not_bound_to_artifact', message: 'Requested revision is not bound to this Job.' };
+        }
+      } else {
+        const result = loaded.job.result || {};
+        if (!artifactRecord) {
+          revisionDiagnostic = { code: 'artifact_identity_unavailable', message: 'Artifact identity is not unique in the completed Job.' };
+        } else {
+          const existing = repo().findRevisionByJobArtifact({
+            projectId: loaded.project.id,
+            toolJobId: loaded.job.id,
+            artifactId: artifactRecord.id,
+          });
+          if (existing) {
+            revision = existing;
+          } else {
+            const snapshot = result.executionProvenance?.script;
+            if (!snapshot?.snapshotPath || !snapshot.sha256) {
+              throw Object.assign(new Error('Execution script snapshot is unavailable.'), { code: 'source_script_missing' });
+            }
+            const realWorkspace = fs.realpathSync(loaded.project.workspace_path);
+            const sourceScriptPath = fs.realpathSync(snapshot.snapshotPath);
+            if (!isPathContained(realWorkspace, sourceScriptPath)) {
+              throw Object.assign(new Error('Execution script snapshot escaped the project.'), { code: 'source_script_outside_project' });
+            }
+            const binding = bindProjectRepository({
+              workspaceRoot: loaded.project.workspace_path,
+              projectId: loaded.project.id,
+              preferManaged: false,
+              allowExistingRepository: true,
+            });
+            if (!binding || binding.status !== 'ready' || !binding.adapter) {
+              throw Object.assign(new Error(binding?.reason || 'Git binding is unavailable.'), { code: 'repository_binding_failed' });
+            }
+            repo().saveRepositoryBinding({
+              projectId: loaded.project.id,
+              mode: binding.mode,
+              workspaceRoot: binding.workspaceRoot,
+              gitDir: binding.adapter.gitDir,
+              workTree: binding.adapter.workTree,
+              managedPaths: binding.managedPaths,
+              status: binding.status,
+              reason: binding.reason,
+              gitVersion: binding.inspection?.runtime?.versionRaw || null,
+            });
+            revision = ensureBaselineArtifactRevision({
+              projectId: loaded.project.id,
+              workspaceRoot: loaded.project.workspace_path,
+              sourceJob: loaded.job,
+              artifactId: artifactRecord.id,
+              pluginId: loaded.job.tool_id,
+              language: result.tool?.language || (/\.py$/i.test(sourceScriptPath) ? 'python' : 'r'),
+              sourceScriptContent: fs.readFileSync(sourceScriptPath, 'utf8'),
+              sourceScriptSha256: snapshot.sha256,
+            }, {
+              repository: repo(),
+              adapter: binding.adapter,
+              gitPathPrefix: binding.mode === 'existing'
+                ? binding.inspection?.existing?.workspaceRelativeToRepository
+                : '',
+            }).revision;
+          }
+        }
+      }
+    } catch (error) {
+      revisionDiagnostic = {
+        code: error && error.code || 'baseline_revision_unavailable',
+        message: error && error.message || 'Baseline revision could not be registered.',
+      };
+    }
+    const revisionId = revision?.revisionId || null;
+    const stableArtifactId = artifactRecord?.id || artifactName;
 
     try {
       if (TABLE_EXTENSIONS.test(artifactName)) {
         const sample = readTableSample(resolved.absolutePath, artifactName);
         const manifest = buildTableInteractionManifest({
-          artifactId: artifactName,
+          artifactId: stableArtifactId,
           revisionId,
           columns: sample.columns,
           rows: sample.rows,
@@ -240,20 +339,22 @@ module.exports = function registerResultStudioRoutes(app) {
             },
           ];
         }
-        return res.json({ manifest, sampledRows: sample.rows.length, truncated: sample.truncated });
+        manifest.artifactFamilyId = revision?.artifactFamilyId || null;
+        if (revisionDiagnostic) manifest.diagnostics = [...manifest.diagnostics, revisionDiagnostic];
+        return res.json({ manifest, revision, sampledRows: sample.rows.length, truncated: sample.truncated });
       }
 
       if (PLOT_EXTENSIONS.test(artifactName)) {
         const manifest = buildPlotInteractionManifest({
-          artifactId: artifactName,
+          artifactId: stableArtifactId,
           revisionId,
           // 目前没有图形→实体的映射来源，诚实声明为不可持久选择。
           entityMapping: null,
         });
-        return res.json({ manifest, sampledRows: 0, truncated: false });
+        manifest.artifactFamilyId = revision?.artifactFamilyId || null;
+        if (revisionDiagnostic) manifest.diagnostics = [...manifest.diagnostics, revisionDiagnostic];
+        return res.json({ manifest, revision, sampledRows: 0, truncated: false });
       }
-
-      return res.status(415).json({ error: 'artifact_kind_not_interactive' });
     } catch (error) {
       return res.status(500).json({ error: 'interaction_manifest_failed', message: error && error.message });
     }

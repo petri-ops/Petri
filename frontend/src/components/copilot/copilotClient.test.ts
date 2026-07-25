@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseToolCallEvent, parseToolResultEvent } from './copilotClient';
+import { parseResultEditProgressEvent, parseToolCallEvent, parseToolResultEvent } from './copilotClient';
 
 describe('copilot SSE tool event projection', () => {
   it('preserves structured call correlation fields', () => {
@@ -66,6 +66,22 @@ describe('copilot SSE tool event projection', () => {
       summary: 'ok',
       actType: 'switch_result_tab',
       toolResult: undefined,
+    });
+  });
+
+  it('projects RS5 result edit progress without exposing unbounded payloads', () => {
+    expect(parseResultEditProgressEvent({
+      event: 'result_edit_progress', sequence: 3, changeSetId: 'cs_1',
+      stage: 'job', status: 'completed', toolJobId: 'tj_1',
+    })).toEqual({
+      resultEditProgressVersion: 1,
+      sequence: 3,
+      changeSetId: 'cs_1',
+      stage: 'job',
+      status: 'completed',
+      reason: undefined,
+      toolJobId: 'tj_1',
+      revisionId: undefined,
     });
   });
 });

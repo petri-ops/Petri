@@ -507,6 +507,7 @@ module.exports = function registerAiAgentRoute(app) {
         '\n只陈述建议，不要用“要开干吗”“是否立即开始”等措辞主动邀请执行。';
     }
 
+    let aborted = false;
     const toolCtx = {
       userId: req.user && req.user.id,
       projectId: context && context.projectId,
@@ -519,6 +520,8 @@ module.exports = function registerAiAgentRoute(app) {
       conversationId: _activeConv && _activeConv.id, // PLAN_CONV_LINK_v1
       gatherAnalysisContextForMethods: _gatherAnalysisContextForMethods, // GENERATE_METHODS_v1
       renderMethodsParagraph: _renderMethodsParagraph,
+      isCancelled: () => aborted,
+      emitResultEditProgress: (progress) => sseSend({ event: 'result_edit_progress', ...progress }),
     };
 
     const fullMessages = [{ role: 'system', content: systemPrompt }, ...messages];
@@ -531,7 +534,6 @@ module.exports = function registerAiAgentRoute(app) {
       projectId: toolCtx.projectId,
       traceId,
     });
-    let aborted = false;
     req.on('close', () => {
       aborted = true;
     });

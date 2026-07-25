@@ -160,6 +160,30 @@ export interface ToolResultEvent {
   params?: Record<string, unknown>;
 }
 
+export interface ResultEditProgressEvent {
+  resultEditProgressVersion: 1;
+  sequence: number;
+  changeSetId: string;
+  stage: string;
+  status: string;
+  reason?: string;
+  toolJobId?: string;
+  revisionId?: string;
+}
+
+export function parseResultEditProgressEvent(obj: Record<string, unknown>): ResultEditProgressEvent {
+  return {
+    resultEditProgressVersion: 1,
+    sequence: typeof obj.sequence === 'number' ? obj.sequence : 0,
+    changeSetId: String(obj.changeSetId || ''),
+    stage: String(obj.stage || ''),
+    status: String(obj.status || ''),
+    reason: obj.reason ? String(obj.reason) : undefined,
+    toolJobId: obj.toolJobId ? String(obj.toolJobId) : undefined,
+    revisionId: obj.revisionId ? String(obj.revisionId) : undefined,
+  };
+}
+
 export function parseToolCallEvent(obj: Record<string, unknown>): ToolCallEvent {
   return {
     name: String(obj.name || ''),
@@ -243,6 +267,8 @@ export interface StreamChatOptions {
   }) => void;
   /** Model-authored, user-facing progress emitted before a tool batch. */
   onAgentProgress?: (progress: { iteration: number; content: string }) => void;
+  /** RS5: durable ChangeSet materialization / Job / Revision stage progress. */
+  onResultEditProgress?: (progress: ResultEditProgressEvent) => void;
   /** Tool call started */
   onToolCall?: (e: ToolCallEvent) => void;
   /** Tool call returned */
@@ -444,6 +470,7 @@ function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
     onIter,
     onAgentStatus,
     onAgentProgress,
+    onResultEditProgress,
     onToolCall,
     onToolResult,
     onConversation,
@@ -513,6 +540,10 @@ function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
         content,
       });
     }
+    return;
+  }
+  if (obj.event === 'result_edit_progress') {
+    onResultEditProgress?.(parseResultEditProgressEvent(obj));
     return;
   }
   if (obj.event === 'tool_call') {

@@ -390,6 +390,16 @@ function createResultStudioRepository(db, options = {}) {
       );
     },
 
+    findRevisionByJobArtifact({ projectId, toolJobId, artifactId } = {}) {
+      if (!projectId || !toolJobId || !artifactId) return null;
+      return rowToRevision(
+        db.prepare(`SELECT * FROM artifact_revisions
+          WHERE project_id = ? AND tool_job_id = ? AND artifact_id = ?
+          ORDER BY revision_ordinal DESC LIMIT 1`)
+          .get(projectId, toolJobId, artifactId)
+      );
+    },
+
     listRevisions({ artifactFamilyId, limit = 100 } = {}) {
       const bounded = Number.isInteger(limit) && limit > 0 && limit <= 1000 ? limit : 100;
       return db.prepare(`SELECT * FROM artifact_revisions WHERE artifact_family_id = ?

@@ -274,6 +274,55 @@ test('RS1 creates isolation branches for change sets', { skip: !gitReady }, (con
   throwsWithCode(() => adapter.createBranch({ name: '--dangerous' }), 'branch_name_invalid');
 });
 
+test('RS5 creates an isolated virtual commit without touching the work tree', { skip: !gitReady }, (context) => {
+  const root = makeWorkspace(context);
+  const binding = bindProjectRepository({ workspaceRoot: root, projectId: 'project_rs5_virtual' });
+  const adapter = binding.adapter;
+  writeManagedScript(root, 'analysis/scripts/base.R', 'base\n');
+  const base = adapter.commit({ message: 'RS5 base', paths: ['analysis/scripts/base.R'] });
+  const ref = 'refs/heads/biof3/changeset/cs_virtual';
+  const candidate = adapter.commitVirtualFiles({
+    parentCommit: base.commit,
+    ref,
+    expectedOld: '0'.repeat(40),
+    message: 'RS5 isolated candidate',
+    files: [
+      { path: 'analysis/scripts/volcano/rev_2/volcano_plot.R', content: 'palette <- "blue"\n' },
+      { path: 'analysis/scripts/volcano/rev_2/parameters.json', content: '{"palette":"blue"}\n' },
+    ],
+  });
+  assert.match(candidate.commit, /^[a-f0-9]{40}$/);
+  assert.equal(adapter.revParse(ref), candidate.commit);
+  assert.equal(
+    adapter.showFile({ ref, filePath: 'analysis/scripts/volcano/rev_2/volcano_plot.R' }),
+    'palette <- "blue"\n'
+  );
+  assert.equal(existsSync(join(root, 'analysis/scripts/volcano/rev_2/volcano_plot.R')), false);
+  assert.equal(readFileSync(join(root, 'analysis/scripts/base.R'), 'utf8'), 'base\n');
+});
+
+test('RS5 virtual ref update fails closed on a concurrent ref change', { skip: !gitReady }, (context) => {
+  const root = makeWorkspace(context);
+  const binding = bindProjectRepository({ workspaceRoot: root, projectId: 'project_rs5_race' });
+  const adapter = binding.adapter;
+  const ref = 'refs/heads/biof3/changeset/cs_race';
+  const first = adapter.commitVirtualFiles({
+    ref,
+    expectedOld: '0'.repeat(40),
+    message: 'first',
+    files: [{ path: 'analysis/scripts/race/first.R', content: 'first\n' }],
+  });
+  assert.match(first.commit, /^[a-f0-9]{40}$/);
+  throwsWithCode(() => adapter.commitVirtualFiles({
+    parentCommit: first.commit,
+    ref,
+    expectedOld: '0'.repeat(40),
+    message: 'stale writer',
+    files: [{ path: 'analysis/scripts/race/second.R', content: 'second\n' }],
+  }), 'git_ref_conflict');
+  assert.equal(adapter.revParse(ref), first.commit);
+});
+
 // ---------------------------------------------------------------------------
 // 4. 既有用户仓库：clean 接入、dirty 阻断、WIP 不受影响
 // ---------------------------------------------------------------------------

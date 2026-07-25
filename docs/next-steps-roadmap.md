@@ -1,6 +1,6 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-07-24
+最后更新：2026-07-25
 
 ## 当前结论
 
@@ -10,7 +10,7 @@
 
 LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口；16/16 强制证据、10/10 零容忍和永久维护门全部通过。
 
-当前立即任务：Result Studio（[`g0-result-studio-plan.md`](./g0-result-studio-plan.md)）状态 `in_progress`。`G0-RS0`～`G0-RS4` 已依次收口：Git Adapter、Revision 持久化、Artifact Interaction/Selection（UI-102）以及 AI Edit Intent/affected subgraph 均已进入永久门禁。聚合门禁 `npm run g0:result-studio` 实测 126/126（git 24 + contract/repository 45 + migration 9 + interaction 26 + intent/Agent/registry 22），前端 `artifact-selection` 20/20。**下一阶段为 `G0-RS5` 隔离编辑与独立脚本。**
+当前立即任务：Result Studio（[`g0-result-studio-plan.md`](./g0-result-studio-plan.md)）状态 `in_progress`。`G0-RS0`～`G0-RS5` 已依次收口：Git Adapter、Revision 持久化、Artifact Interaction/Selection（UI-102）、AI Edit Intent/affected subgraph，以及不依赖 Worktree 的隔离 ChangeSet/独立脚本/真实 Job-backed Revision（UI-103）均已进入永久门禁。普通 valid Job Artifact 会按 root Job/Artifact 建立不可变 baseline v1；候选 v2 固定停在 `preview_ready`，失败、取消或冲突不改变 current。**下一阶段为 `G0-RS6` Codex-like Diff、比较、采用与撤销 UI。**
 
 开发形态为**单工作包串行、主工作区分支 `codex/g0-result-studio`**；`G0-RS-WT0` Worktree 启动门已标 `deferred`，判据与重开条件见该计划 §14。G0 `qualified + maintained` 门禁继续永久优先；`excludedClaims` 的 `result-studio-editing` 在 RS9 之前不得改动。
 

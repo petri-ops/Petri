@@ -43,6 +43,7 @@ export interface ArtifactInteractionManifest {
   interactionVersion: number;
   artifactId: string;
   revisionId: string | null;
+  artifactFamilyId?: string | null;
   artifactKind: string;
   entityType: string;
   idField: string | null;

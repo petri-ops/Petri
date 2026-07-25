@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createRequire } from 'node:module';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 const require = createRequire(import.meta.url);
-const { createResultEditPlanTool } = require('../core/r-server/agent-tools/result-edit-tools');
+const { createResultEditPlanTool, createResultChangeSetTools } = require('../core/r-server/agent-tools/result-edit-tools');
 const { normalizePluginManifest } = require('../core/r-server/plugin-loader');
 
 function makeJob(projectId = 'p_1') {
@@ -75,4 +78,67 @@ test('RS4 plugin normalization preserves an optional trusted Result Studio descr
   );
   assert.deepEqual(manifest.resultStudio, { parameterImpacts: { palette: 'presentation' } });
   assert.equal(normalizePluginManifest({ id: 'legacy' }, { id: 'legacy' }).resultStudio, null);
+});
+
+test('RS5 Agent ChangeSet tool scopes the source and emits durable progress', async (context) => {
+  const root = mkdtempSync(join(tmpdir(), 'biof3-rs5-agent-'));
+  context.after(() => rmSync(root, { recursive: true, force: true }));
+  const script = join(root, 'results/jobs/tj_plot/run-script.R');
+  mkdirSync(join(script, '..'), { recursive: true });
+  writeFileSync(script, 'print(1)\n');
+  const project = { id: 'p_1', user_id: 'u_1', workspace_path: root };
+  const job = makeJob();
+  job.result.executionProvenance.script = { snapshotPath: script, sha256: 'a'.repeat(64) };
+  const revision = { revisionId: 'rev_1', projectId: 'p_1', artifactId: 'volcano_plot', toolJobId: 'tj_plot' };
+  const repository = {
+    saveRepositoryBinding: () => {},
+    getRevision: () => revision,
+    getChangeSet: () => ({ changeSetId: 'cs_1', projectId: 'p_1' }),
+    listRevisionsByChangeSet: () => [],
+  };
+  const emitted = [];
+  let received;
+  const tools = createResultChangeSetTools({
+    db: { db: {}, getProject: () => project, getToolJob: () => job, getUserById: () => ({ role: 'user' }) },
+    getPlugin: () => ({ id: 'volcano-plot', language: 'r' }),
+    createResultStudioRepository: () => repository,
+    bindProjectRepository: () => ({
+      status: 'ready', mode: 'managed', workspaceRoot: root, managedPaths: ['analysis/scripts'], reason: null,
+      inspection: { runtime: { versionRaw: 'git version test' } },
+      adapter: { gitDir: join(root, '.biof3/git'), workTree: root },
+    }),
+    createResultChangeSet: async (input, dependencies) => {
+      received = input;
+      dependencies.onProgress({ stage: 'materialize', status: 'completed' });
+      return { ok: true, changeSet: { changeSetId: 'cs_1', status: 'preview_ready' } };
+    },
+  });
+  const result = await tools.create({ intent: { artifactRef: { revisionId: 'rev_1' } } }, {
+    projectId: 'p_1', userId: 'u_1', conversationId: 'conv_1',
+    emitResultEditProgress: (event) => emitted.push(event),
+  });
+  assert.equal(result.ok, true);
+  assert.equal(received.projectId, 'p_1');
+  assert.equal(received.sourceRevision, revision);
+  assert.equal(received.sourceJob, job);
+  assert.equal(received.createdBy, 'agent');
+  assert.deepEqual(emitted, [{ stage: 'materialize', status: 'completed' }]);
+});
+
+test('RS5 ChangeSet status refuses a cross-project record', async () => {
+  const repository = {
+    saveRepositoryBinding: () => {},
+    getChangeSet: () => ({ changeSetId: 'cs_other', projectId: 'p_other' }),
+  };
+  const tools = createResultChangeSetTools({
+    db: { db: {}, getProject: () => ({ id: 'p_1', user_id: 'u_1', workspace_path: '/tmp/p_1' }) },
+    createResultStudioRepository: () => repository,
+    bindProjectRepository: () => ({
+      status: 'ready', mode: 'managed', workspaceRoot: '/tmp/p_1', managedPaths: [], reason: null,
+      inspection: { runtime: {} }, adapter: { gitDir: '/tmp/git', workTree: '/tmp/p_1' },
+    }),
+  });
+  const result = await tools.status({ changeSetId: 'cs_other' }, { projectId: 'p_1', userId: 'u_1' });
+  assert.equal(result.ok, false);
+  assert.equal(result.error, 'change_set_not_found');
 });

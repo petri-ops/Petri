@@ -824,6 +824,7 @@ async function runAgentLoop({
       '\n只陈述建议，不要用“要开干吗”“是否立即开始”等措辞主动邀请执行。';
   }
 
+  const aborted = () => (typeof shouldAbort === 'function' ? shouldAbort() : false);
   const toolCtx = {
     userId,
     projectId: context && context.projectId,
@@ -836,6 +837,8 @@ async function runAgentLoop({
     conversationId: _activeConv && _activeConv.id, // PLAN_CONV_LINK_v1
     gatherAnalysisContextForMethods: _gatherAnalysisContextForMethods, // GENERATE_METHODS_v1
     renderMethodsParagraph: _renderMethodsParagraph,
+    isCancelled: aborted,
+    emitResultEditProgress: (progress) => _emit({ event: 'result_edit_progress', ...progress }),
   };
   // Refresh docs index in background if stale
 
@@ -848,7 +851,6 @@ async function runAgentLoop({
     projectId: toolCtx.projectId,
     traceId,
   });
-  const aborted = () => (typeof shouldAbort === 'function' ? shouldAbort() : false);
   let assistantAcc = '';
   const assistantProgress = createAgentProgressRecorder();
   let finalizationAttempts = 0;

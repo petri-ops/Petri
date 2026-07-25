@@ -69,6 +69,24 @@ describe('conversation run store', () => {
     });
   });
 
+  it('keeps RS5 ChangeSet progress ordered and visible as a compact status', () => {
+    start('conversation-rs5', 'change the palette');
+    const callbacks = streamChatMock.mock.calls[0][0];
+    callbacks.onResultEditProgress({
+      resultEditProgressVersion: 1, sequence: 2, changeSetId: 'cs_1', stage: 'job', status: 'running',
+    });
+    callbacks.onResultEditProgress({
+      resultEditProgressVersion: 1, sequence: 1, changeSetId: 'cs_1', stage: 'materialize', status: 'completed',
+    });
+    expect(getConversationRunSnapshot('conversation-rs5')).toMatchObject({
+      statusMessage: '正在生成独立脚本与参数',
+      resultEditProgress: [
+        { sequence: 1, stage: 'materialize' },
+        { sequence: 2, stage: 'job' },
+      ],
+    });
+  });
+
   it('continues updating after the visible conversation unsubscribes', () => {
     start('conversation-a', 'keep working');
     const listener = vi.fn();

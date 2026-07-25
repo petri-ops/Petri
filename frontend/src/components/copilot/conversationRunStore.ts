@@ -7,6 +7,7 @@ import {
   type ChatMessage,
   type ToolCallEvent,
   type ToolResultEvent,
+  type ResultEditProgressEvent,
 } from './copilotClient';
 import {
   mergeToolCallActivity,
@@ -60,6 +61,7 @@ export interface ConversationRunSnapshot {
   assistantError: boolean;
   statusMessage?: string;
   progressUpdates: Array<{ iteration: number; content: string }>;
+  resultEditProgress: ResultEditProgressEvent[];
   toolActivities: ToolActivityItem[];
   pendingApproval: ConversationPendingApproval | null;
   processingDurationMs?: number;
@@ -212,6 +214,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     assistantPending: true,
     assistantError: false,
     progressUpdates: [],
+    resultEditProgress: [],
     toolActivities: [],
     pendingApproval: null,
     startedAt,
@@ -276,6 +279,31 @@ export function startConversationRun(options: StartConversationRunOptions): bool
           assistantContent: '',
           assistantPending: true,
           statusMessage: undefined,
+        };
+      });
+    },
+    onResultEditProgress: (progress) => {
+      const labels: Record<string, string> = {
+        change_set: '正在创建隔离修改',
+        materialize: '正在生成独立脚本与参数',
+        commit: '已保存候选版本',
+        job: '正在运行结果重绘/重算',
+        revision: '正在验证并登记结果版本',
+        preview: '候选结果已就绪',
+        cancelled: '结果修改已取消',
+        failed: '结果修改未完成',
+      };
+      replaceRun(conversationId, (current) => {
+        const withoutSameSequence = current.resultEditProgress.filter(
+          (item) => item.changeSetId !== progress.changeSetId || item.sequence !== progress.sequence
+        );
+        return {
+          ...current,
+          resultEditProgress: [...withoutSameSequence, progress]
+            .sort((a, b) => a.sequence - b.sequence)
+            .slice(-30),
+          statusMessage: labels[progress.stage] || '正在处理结果修改',
+          assistantPending: true,
         };
       });
     },

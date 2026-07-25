@@ -62,7 +62,9 @@ RS3 已固化的边界：交互清单只能由**后端基于完整文件**产出
 
 RS3 实测修正的三个真实缺陷：其一，我在路由里使用了 `app.locals.requireAuth` 与 `require('../db')` 直接当句柄 —— 前者在 `core/` 中**根本不存在**（桌面版 loopback 单用户，鉴权由全局 `localIdentityMiddleware` 注入 `req.user`），后者是模块对象而非 better-sqlite3 实例；两者都会让整个模块被 `routes/index.js` 的 try/catch 静默吞掉、6 个端点变成死代码，已改为裸注册 + 内联 `canAccessProject` + `require('../db').db` + 惰性仓库。其二，`ActiveArtifact` 的身份比较原本只比 `jobId + name`，导致"同一文件换了版本"或"用户改了选择"无法向上传播，已扩展为覆盖 revision / entityType / idField / selection。其三，前端 hash 不能冒充 sha256（浏览器无同步 sha256，`crypto.subtle` 是异步的），已改为 FNV-1a 双种子并在命名上不声称加密强度。
 
-`G0-RS4` 已收口：`result_edit_plan` 现在能基于真实 Job/Artifact/provenance 和显式 DAG 生成 `ResultEditIntent v1`；插件无受信影响声明时未知参数保守进入科学重算，来源/脚本/输入/Revision/DAG 任一缺失即阻断。该工具只规划，不创建 Job 或 ChangeSet。下一阶段：`G0-RS5` 隔离编辑与独立脚本。注意 RS3 只打通了 revision 维度的**类型与比较**，`revisionId` / `artifactFamilyId` 当前生产投影仍可能为 null；RS4 因此会诚实阻断未绑定 Revision 的结果，真正接入 `artifact_revisions` 与脚本 materialization 属于 RS5/RS6。
+`G0-RS4` 已收口：`result_edit_plan` 能基于真实 Job/Artifact/provenance 和显式 DAG 生成 `ResultEditIntent v1`；插件无受信影响声明时未知参数保守进入科学重算，来源/脚本/输入/Revision/DAG 任一缺失即阻断。
+
+`G0-RS5` 已收口：真实 valid Job Artifact 首次进入 Result Studio 时建立确定性 baseline v1 并把 `revisionId/artifactFamilyId` 投影回 `ActiveArtifact`；AI 与手动编辑共用 ChangeSet 服务，在 `.biof3/revision/<changeSetId>` 私有 staging 中派生独立脚本/参数，通过临时 Git index 生成不触碰工作树的 candidate commit，再复用正式 `run_tool → tool_job → artifact truth` 执行并登记 v2。候选仅为 `preview_ready/adopted:false`；失败、取消、并发冲突和恢复扫描均不改变 current。`result_edit_progress` 已接入 SSE 与前端有界 run store（UI-103 `in_progress`，未做 RS6 视觉卡片）。下一阶段：`G0-RS6` Diff、比较、采用与撤销；不得提前采用候选或建立第二套结果状态。
 
 ### 3.1 已完成基线：真实科学任务驱动的 Harness 升级
 

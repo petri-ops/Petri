@@ -12,6 +12,7 @@
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const crypto = require('crypto');
 const { execFile } = require('child_process');
 const { reconcileArtifactTruth } = require('../helpers/artifact-truth');
 const { createResultArchive } = require('../helpers/result-archive');
@@ -793,6 +794,24 @@ async function _runPluginScript(
  * 执行已注册插件工具。
  * @returns {Promise<{content: Array, isError: boolean}>}
  */
+function resolveResultStudioScriptOverride({ override, plugin, projectId, dbModule = db } = {}) {
+  if (!projectId || !dbModule || typeof dbModule.getProject !== 'function') throw new Error('project_context_required');
+  const project = dbModule.getProject(projectId);
+  if (!project || !project.workspace_path) throw new Error('project_not_found');
+  const changeSetId = String(override && override.changeSetId || '');
+  if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(changeSetId)) throw new Error('change_set_id_invalid');
+  const allowedRoot = fs.realpathSync(path.join(project.workspace_path, '.biof3', 'revision', changeSetId));
+  const resolved = fs.realpathSync(String(override && override.path || ''));
+  if (resolved !== allowedRoot && !resolved.startsWith(`${allowedRoot}${path.sep}`)) {
+    throw new Error('materialized_script_outside_changeset');
+  }
+  const expectedExtension = plugin.language === 'python' ? '.py' : '.R';
+  if (path.extname(resolved) !== expectedExtension) throw new Error('materialized_script_language_mismatch');
+  const actualHash = crypto.createHash('sha256').update(fs.readFileSync(resolved)).digest('hex');
+  if (!override.sha256 || actualHash !== override.sha256) throw new Error('materialized_script_hash_mismatch');
+  return resolved;
+}
+
 async function callTool(name, args, opts = {}) {
   try {
     refreshPluginSources();
@@ -808,7 +827,21 @@ async function callTool(name, args, opts = {}) {
   // 插件分支
   const plugin = pluginLoader.getPlugin(name);
   if (plugin) {
-    const scriptPath = pluginLoader.getScriptForTool(name);
+    let scriptPath = pluginLoader.getScriptForTool(name);
+    if (opts && opts.resultStudioMaterializedScript) {
+      try {
+        scriptPath = resolveResultStudioScriptOverride({
+          override: opts.resultStudioMaterializedScript,
+          plugin,
+          projectId,
+        });
+      } catch (error) {
+        return {
+          content: [{ type: 'text', text: `result_studio_script_rejected: ${error.message}` }],
+          isError: true,
+        };
+      }
+    }
     if (!scriptPath || !fs.existsSync(scriptPath)) {
       return {
         content: [{ type: 'text', text: `插件 ${name} 脚本未找到: ${scriptPath}` }],
@@ -835,6 +868,7 @@ module.exports = {
     createMcpExecutionContext: _createMcpExecutionContext,
     normalizeArtifacts: _normalizeArtifacts,
     resolveMcpJobLayout: _resolveMcpJobLayout,
+    resolveResultStudioScriptOverride,
     GLOBAL_JOBS_DIR,
   },
 };

@@ -82,6 +82,7 @@ const VALIDATION_STATUSES = Object.freeze(['valid', 'degraded', 'blocked']);
 
 /** 来自 delivery-manifest 的 artifact 级 reproducibility。 */
 const REPRODUCIBILITY_STATUSES = Object.freeze(['unavailable', 'available', 'verified']);
+const SOURCE_SCRIPT_ORIGINS = Object.freeze(['canonical_plugin', 'execution_snapshot', 'project_materialized']);
 
 const CHANGE_SET_ORIGINS = Object.freeze(['user', 'agent']);
 
@@ -335,6 +336,35 @@ function validateArtifactRevision(input) {
     fail(errors, 'revision_ordinal_invalid', 'revisionOrdinal must be a positive integer.');
   }
 
+  let sourceScriptRef = null;
+  if (input.sourceScriptRef && typeof input.sourceScriptRef === 'object') {
+    sourceScriptRef = {
+      relativePath: nullableTrimmed(input.sourceScriptRef.relativePath),
+      sha256: nullableTrimmed(input.sourceScriptRef.sha256),
+      entryPoint: nullableTrimmed(input.sourceScriptRef.entryPoint),
+      artifactId: nullableTrimmed(input.sourceScriptRef.artifactId),
+      rendererId: nullableTrimmed(input.sourceScriptRef.rendererId),
+      language: nullableTrimmed(input.sourceScriptRef.language),
+      origin: nullableTrimmed(input.sourceScriptRef.origin),
+    };
+    if (sourceScriptRef.relativePath && !isSafeRelativePath(sourceScriptRef.relativePath)) {
+      fail(errors, 'source_script_path_invalid', 'sourceScriptRef.relativePath must be project-relative and path-safe.');
+    }
+    if (sourceScriptRef.sha256 && !SHA256_PATTERN.test(sourceScriptRef.sha256)) {
+      fail(errors, 'source_script_hash_invalid', 'sourceScriptRef.sha256 must be a lowercase sha256 digest.');
+    }
+    if (sourceScriptRef.artifactId && sourceScriptRef.artifactId !== artifactId) {
+      fail(errors, 'source_script_artifact_mismatch', 'sourceScriptRef.artifactId must match the revision artifactId.');
+    }
+    if (sourceScriptRef.origin && !SOURCE_SCRIPT_ORIGINS.includes(sourceScriptRef.origin)) {
+      fail(errors, 'source_script_origin_invalid', `sourceScriptRef.origin must be one of: ${SOURCE_SCRIPT_ORIGINS.join(', ')}.`);
+    }
+    if (sourceScriptRef.origin === 'project_materialized'
+      && (!sourceScriptRef.relativePath || !sourceScriptRef.sha256 || !sourceScriptRef.artifactId || !sourceScriptRef.rendererId)) {
+      fail(errors, 'materialized_script_ref_incomplete', 'A project-materialized sourceScriptRef requires path, hash, artifactId and rendererId.');
+    }
+  }
+
   const revision = {
     contractVersion: RESULT_STUDIO_CONTRACT_VERSION,
     revisionId,
@@ -343,13 +373,7 @@ function validateArtifactRevision(input) {
     artifactId,
     parentRevisionIds: stringArray(input.parentRevisionIds),
     sourceCommit,
-    sourceScriptRef: input.sourceScriptRef && typeof input.sourceScriptRef === 'object'
-      ? {
-        relativePath: nullableTrimmed(input.sourceScriptRef.relativePath),
-        sha256: nullableTrimmed(input.sourceScriptRef.sha256),
-        entryPoint: nullableTrimmed(input.sourceScriptRef.entryPoint),
-      }
-      : null,
+    sourceScriptRef,
     inputArtifactRefs,
     parametersRef: nullableTrimmed(input.parametersRef),
     parametersHash: nullableTrimmed(input.parametersHash),
@@ -560,6 +584,7 @@ module.exports = {
   CHANGE_SET_ORIGINS,
   VALIDATION_STATUSES,
   REPRODUCIBILITY_STATUSES,
+  SOURCE_SCRIPT_ORIGINS,
   BINDING_PERSIST_MODES,
   KNOWN_ENTITY_TYPES,
   MAX_PERSISTED_ENTITY_IDS,

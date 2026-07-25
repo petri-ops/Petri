@@ -2,7 +2,7 @@
 
 最后更新：2026-07-25
 
-状态：`in_progress`（RS0 ✅ / RS1 ✅ / RS2 ✅ / RS3 ✅ / RS4 ✅ 已收口；当前下一阶段为 `G0-RS5`，单线串行）
+状态：`in_progress`（RS0 ✅ / RS1 ✅ / RS2 ✅ / RS3 ✅ / RS4 ✅ / RS5 ✅ 已收口；当前下一阶段为 `G0-RS6`，单线串行）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -840,6 +840,8 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 
 ### G0-RS5：隔离编辑与独立脚本
 
+状态：`completed`（2026-07-25）。
+
 目标：AI/手动编辑都不污染正式结果。
 
 交付：
@@ -857,6 +859,23 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 - v2 有独立脚本、参数、commit、Job、Artifact 和 validator。
 - 中止或失败不会留下部分采用状态。
 - AI 与手动编辑生成相同类型 ChangeSet。
+
+实现与边界：
+
+- 不启用 Git Worktree。`GitAdapter.commitVirtualFiles()` 使用临时 `GIT_INDEX_FILE` 和 Git plumbing 构造 candidate commit，并以 `update-ref <new> <expected-old>` 做 CAS；不 checkout、不改工作树、不携带用户 WIP，现有仓库子目录保留 `gitPathPrefix`。
+- `.biof3/revision/<changeSetId>/` 是私有执行 staging；脚本、参数和 materialization manifest 通过临时目录原子发布。正式可追溯脚本同时写入 candidate commit 的 `analysis/scripts/<artifactFamily>/<revision>/`，源脚本、源数据、旧 Artifact 与旧 Revision 保持不可变。
+- 首次打开一个真实 `completed + Artifact Truth valid` 的交互式 Artifact 时，若尚无 Revision，基于 Job/Artifact/输出 hash 建立确定性的 baseline ChangeSet、独立脚本和 current v1。每个普通 root Job/Artifact 建立独立 family，无法证明同源时不擅自合并；RS5 candidate Job 已绑定 Revision 时直接复用，不自动覆盖 current。
+- `result_changeset_create` 复用 RS4 的完整 `ResultEditIntent`，科学变化必须通过确认门；执行仍唯一进入现有 MCP 插件执行器，产生真实 `tool_job → artifact truth → provenance`，再登记 v2 Revision。候选只到 `preview_ready`，固定返回 `adopted:false`；RS6 才能采用或撤销。
+- materialized override 只接受真实位于该 ChangeSet 私有目录、语言扩展匹配且 SHA-256 精确匹配的脚本；任意工作区路径、symlink escape、hash 漂移均拒绝。
+- 失败进入 `validation_failed`，取消进入 `abandoned`，并发 ref 漂移稳定报 `git_ref_conflict`；均不得切换 current。中断的 running ChangeSet 可从 SQLite、candidate ref 与 materialization manifest 恢复检查，但永远不会因恢复扫描而自动采用。
+- `sourceScriptRef` 已升级为 artifact/renderer 级引用，包含 path/hash/entryPoint/artifactId/rendererId/language/origin；`project_materialized` 缺任一关键身份即校验失败。
+- 修改进度以 `result_edit_progress` SSE 发出 change_set/materialize/commit/job/revision/preview/failed/cancelled 阶段；前端 run store 有界去重并投影为紧凑状态。当前只完成进度消费，不提前实现 RS6 ChangeSet 卡片和比较 UI。
+
+验收证据：
+
+- `npm run g0:result-studio`：syntax、Git Adapter、Revision/Repository、migration、interaction、Intent/Agent registry 与 ChangeSet service 全绿。
+- `test/result-changeset-service.test.mjs` 覆盖真实 baseline、私有 materialization、成功候选、AI/手动同契约、existing Git 子目录、失败/取消、跨项目、科学确认、crash recovery 与 override 路径/hash 边界。
+- 前端 `artifact-selection + copilotClient + conversationRunStore` 40/40，`npm run build:check --prefix frontend` 通过。UI-102/UI-103 因尚未完成真实 renderer 视觉验收继续保持 `in_progress`，不写 `verified`。
 
 ### G0-RS6：Codex-like Diff、比较、采用与撤销
 

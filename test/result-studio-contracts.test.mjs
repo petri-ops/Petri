@@ -216,6 +216,36 @@ test('RS2 accepts a well formed revision', () => {
   assert.equal(result.revision.isCurrent, false);
 });
 
+test('RS5 sourceScriptRef binds one materialized renderer to its artifact', () => {
+  const result = validateArtifactRevision(baseRevision({
+    toolJobId: 'job_rs5',
+    sourceScriptRef: {
+      relativePath: 'analysis/scripts/family_volcano/rev_2/volcano_plot.R',
+      sha256: HASH,
+      artifactId: 'volcano_plot',
+      rendererId: 'volcano-plot:volcano_plot',
+      language: 'r',
+      origin: 'project_materialized',
+    },
+  }));
+  assert.equal(result.ok, true, JSON.stringify(result.errors));
+  assert.equal(result.revision.sourceScriptRef.artifactId, 'volcano_plot');
+  assert.equal(result.revision.sourceScriptRef.rendererId, 'volcano-plot:volcano_plot');
+
+  const mismatch = validateArtifactRevision(baseRevision({
+    toolJobId: 'job_rs5',
+    sourceScriptRef: {
+      relativePath: 'analysis/scripts/family_volcano/rev_2/plot.R',
+      sha256: HASH,
+      artifactId: 'other_plot',
+      rendererId: 'volcano-plot:other_plot',
+      origin: 'project_materialized',
+    },
+  }));
+  assert.equal(mismatch.ok, false);
+  assert.equal(mismatch.errors.some((error) => error.code === 'source_script_artifact_mismatch'), true);
+});
+
 test('RS2 requires family, artifact, output path and change set on a revision', () => {
   for (const [field, code] of [
     ['revisionId', 'revision_id_required'],

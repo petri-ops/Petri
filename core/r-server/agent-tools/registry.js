@@ -18,7 +18,11 @@ const {
 } = require('./learning');
 const { tool_verify_state } = require('./verify-dispatch');
 const { tool_read_image } = require('./vision-tools');
-const { tool_result_edit_plan } = require('./result-edit-tools');
+const {
+  tool_result_edit_plan,
+  tool_result_changeset_create,
+  tool_result_changeset_status,
+} = require('./result-edit-tools');
 const {
   tool_workspace_list,
   tool_workspace_find,
@@ -69,6 +73,8 @@ const HANDLERS = {
   generate_methods: tool_generate_methods,
   verify_state: tool_verify_state,
   result_edit_plan: tool_result_edit_plan,
+  result_changeset_create: tool_result_changeset_create,
+  result_changeset_status: tool_result_changeset_status,
 };
 
 function contract(category, sideEffect, riskTier, resources, estimatedDurationMs) {
@@ -103,6 +109,8 @@ const CONTRACTS = {
   generate_methods: contract('reporting', 'external-request', 'R1', ['project.database', 'llm.provider'], 30000),
   verify_state: contract('verification', 'none', 'R0', ['project.database', 'ui.session'], 500),
   result_edit_plan: contract('result-studio', 'none', 'R0', ['tool_jobs', 'artifacts', 'project.database'], 500),
+  result_changeset_create: contract('result-studio', 'execution', 'R2', ['tool_jobs', 'artifacts', 'project.database', 'project.files', 'local.process'], 300000),
+  result_changeset_status: contract('result-studio', 'none', 'R0', ['tool_jobs', 'artifacts', 'project.database'], 500),
 };
 
 function cloneJson(value) {

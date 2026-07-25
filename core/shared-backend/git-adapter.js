@@ -19,6 +19,7 @@
  */
 
 const { execFileSync } = require('child_process');
+const { randomUUID } = require('crypto');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -288,10 +289,11 @@ function createGitAdapter(options = {}) {
       stdout = execFileSync(gitBin, [...prefix, ...args], {
         encoding: 'utf8',
         cwd: fs.existsSync(resolvedWorkTree) ? resolvedWorkTree : undefined,
-        env,
+        env: { ...env, ...(runOptions.env || {}) },
+        input: runOptions.input,
         timeout: runOptions.timeout || 60000,
         maxBuffer: 32 * 1024 * 1024,
-        stdio: ['ignore', 'pipe', 'pipe'],
+        stdio: [runOptions.input === undefined ? 'ignore' : 'pipe', 'pipe', 'pipe'],
       });
       return { ok: true, stdout: stdout == null ? '' : String(stdout), stderr: '', status: 0 };
     } catch (error) {
@@ -492,6 +494,85 @@ function createGitAdapter(options = {}) {
       const output = run(['branch', name, startPoint], { allowFailure: true });
       if (!output.ok) throw new GitAdapterError('git_branch_failed', 'Branch creation failed.', output);
       return { branch: name, startPoint };
+    },
+
+    /**
+     * 从内存文件构造隔离 commit，不 checkout、不改写工作区。
+     * 临时 index + Git plumbing 只更新指定 ref，并以 expectedOld 做 CAS。
+     */
+    commitVirtualFiles({ parentCommit = null, ref, expectedOld = null, message, files } = {}) {
+      if (parentCommit && !/^[a-f0-9]{7,40}$/.test(parentCommit)) {
+        throw new GitAdapterError('parent_commit_invalid', 'parentCommit must be a git object id.');
+      }
+      if (typeof ref !== 'string' || !/^refs\/heads\/[A-Za-z0-9][A-Za-z0-9._\-/]*$/.test(ref)) {
+        throw new GitAdapterError('ref_invalid', 'A refs/heads/* destination is required.');
+      }
+      if (typeof message !== 'string' || message.trim() === '') {
+        throw new GitAdapterError('commit_message_required', 'Commit message is required.');
+      }
+      if (!Array.isArray(files) || files.length === 0) {
+        throw new GitAdapterError('virtual_files_required', 'At least one virtual file is required.');
+      }
+      const safePaths = assertSafePathspecs(files.map((file) => file && file.path), scope);
+      if (new Set(safePaths).size !== files.length) {
+        throw new GitAdapterError('virtual_file_duplicate', 'Virtual file paths must be unique.');
+      }
+      const indexPath = path.join(resolvedGitDir, `biof3-index-${randomUUID()}`);
+      const isolatedEnv = { GIT_INDEX_FILE: indexPath };
+      try {
+        const readTree = parentCommit
+          ? run(['read-tree', parentCommit], { allowFailure: true, env: isolatedEnv })
+          : run(['read-tree', '--empty'], { allowFailure: true, env: isolatedEnv });
+        if (!readTree.ok) throw new GitAdapterError('git_read_tree_failed', 'Cannot initialize isolated Git index.', readTree);
+
+        for (let index = 0; index < files.length; index += 1) {
+          const content = files[index].content;
+          if (typeof content !== 'string' && !Buffer.isBuffer(content)) {
+            throw new GitAdapterError('virtual_file_content_invalid', `Virtual file content is invalid: ${safePaths[index]}`);
+          }
+          const blob = run(['hash-object', '-w', '--stdin'], {
+            allowFailure: true,
+            env: isolatedEnv,
+            input: content,
+          });
+          if (!blob.ok || !/^[a-f0-9]{40}$/.test(blob.stdout.trim())) {
+            throw new GitAdapterError('git_hash_object_failed', 'Cannot write isolated Git blob.', blob);
+          }
+          const update = run(
+            ['update-index', '--add', '--cacheinfo', '100644', blob.stdout.trim(), safePaths[index]],
+            { allowFailure: true, env: isolatedEnv }
+          );
+          if (!update.ok) throw new GitAdapterError('git_update_index_failed', 'Cannot update isolated Git index.', update);
+        }
+
+        const tree = run(['write-tree'], { allowFailure: true, env: isolatedEnv });
+        if (!tree.ok || !/^[a-f0-9]{40}$/.test(tree.stdout.trim())) {
+          throw new GitAdapterError('git_write_tree_failed', 'Cannot write isolated Git tree.', tree);
+        }
+        const commitArgs = [...identityArgs(), 'commit-tree', tree.stdout.trim()];
+        if (parentCommit) commitArgs.push('-p', parentCommit);
+        commitArgs.push('-m', message);
+        const commit = run(commitArgs, { allowFailure: true, env: isolatedEnv });
+        if (!commit.ok || !/^[a-f0-9]{40}$/.test(commit.stdout.trim())) {
+          throw new GitAdapterError('git_commit_tree_failed', 'Cannot create isolated Git commit.', commit);
+        }
+        const existingRef = this.revParse(ref);
+        const old = expectedOld || existingRef || '0'.repeat(40);
+        const updateRef = run(['update-ref', ref, commit.stdout.trim(), old], { allowFailure: true });
+        if (!updateRef.ok) {
+          throw new GitAdapterError('git_ref_conflict', 'Isolation ref changed concurrently.', updateRef);
+        }
+        return {
+          commit: commit.stdout.trim(),
+          tree: tree.stdout.trim(),
+          ref,
+          parentCommit,
+          paths: safePaths,
+        };
+      } finally {
+        try { fs.unlinkSync(indexPath); } catch { /* temporary index may not exist */ }
+        try { fs.unlinkSync(`${indexPath}.lock`); } catch { /* best effort */ }
+      }
     },
 
     listTrackedFiles({ paths } = {}) {
