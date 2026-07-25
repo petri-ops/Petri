@@ -7,6 +7,9 @@ import type { ArtifactRevision, ResultStudioChangeSet, ResultStudioComparison } 
 const client = vi.hoisted(() => ({
   listResultChangeSets: vi.fn(),
   compareResultChangeSet: vi.fn(),
+  getResultStudioWorkspaceStatus: vi.fn(),
+  recoverResultStudioWorkspace: vi.fn(),
+  readRevisionTablePage: vi.fn(),
   adoptResultChangeSet: vi.fn(),
   revertResultChangeSet: vi.fn(),
   restoreArtifactRevision: vi.fn(),
@@ -54,6 +57,12 @@ describe('ResultStudioChangeSetPanel', () => {
     vi.clearAllMocks();
     client.listResultChangeSets.mockResolvedValue({ changeSets: [changeSet], currentRevision: baseline, revisions: [baseline, candidate] });
     client.compareResultChangeSet.mockResolvedValue(comparison);
+    client.getResultStudioWorkspaceStatus.mockResolvedValue({
+      lifecycle: { status: 'ready', interrupted: [], checkpoint: null, revisionIntegrity: { revisionCount: 2, intact: true, issues: [] } },
+      storage: { revisionCount: 2, logicalArtifactBytes: 2048, uniqueArtifactBytes: 2048, deduplicableBytes: 0, duplicateGroupCount: 0, privateStorage: { bytes: 0, files: 0, truncated: false } },
+    });
+    client.recoverResultStudioWorkspace.mockResolvedValue({ ok: true, recovered: false, repaired: [], after: { status: 'ready' } });
+    client.readRevisionTablePage.mockResolvedValue({ columns: ['gene'], rows: [['TP53']], cursor: 0, nextCursor: null, limit: 50, totalRows: null, totalRowsIsUnknown: true, virtualized: false, caveat: '' });
     client.adoptResultChangeSet.mockResolvedValue({ ok: true, changeSet: { ...changeSet, status: 'adopted' }, currentRevisions: [{ ...candidate, isCurrent: true }] });
     client.revertResultChangeSet.mockResolvedValue({ ok: true, changeSet: { ...changeSet, status: 'reverted' }, restoredRevisionIds: ['rev_1'] });
     client.restoreArtifactRevision.mockResolvedValue({ ok: true, revision: { ...baseline, revisionId: 'rev_3', revisionOrdinal: 3, isCurrent: true }, changeSet: { ...changeSet, changeSetId: 'cs_3', status: 'adopted' } });
@@ -111,5 +120,21 @@ describe('ResultStudioChangeSetPanel', () => {
     const restoreButtons = await screen.findAllByText('恢复为新版本');
     fireEvent.click(restoreButtons[0]);
     await waitFor(() => expect(client.restoreArtifactRevision).toHaveBeenCalledWith('rev_2'));
+  });
+
+  it('shows durable storage status without expanding technical detail', async () => {
+    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" />);
+    expect(await screen.findByText('版本存储正常')).toBeTruthy();
+    expect(screen.getByText('2 个版本 · 2 KB')).toBeTruthy();
+  });
+
+  it('loads table candidates progressively instead of rendering the whole file', async () => {
+    const tableComparison = { ...comparison, artifacts: [{ ...comparison.artifacts[0], kind: 'table' as const, table: { status: 'available', before: { columns: ['gene'], rowCount: 1, rowCountIsLowerBound: false, bytes: 10 }, after: { columns: ['gene'], rowCount: 1, rowCountIsLowerBound: false, bytes: 10 }, addedColumns: [], removedColumns: [], sampleChanges: [], truncated: true } }] };
+    client.compareResultChangeSet.mockResolvedValueOnce(tableComparison);
+    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" />);
+    fireEvent.click(await screen.findByText('比较结果'));
+    fireEvent.click(await screen.findByText('渐进查看候选表'));
+    expect(await screen.findByText('TP53')).toBeTruthy();
+    expect(client.readRevisionTablePage).toHaveBeenCalledWith('rev_2', 0, 50);
   });
 });

@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS8",
+  "sourceCommit": "508b905bc9540bb4440f3273f1689ca6ec84f755",
+  "privacy": "digests_counts_and_repository_relative_paths_only",
+  "checks": [
+    {
+      "id": "RS8-01",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-changeset-service.js"
+      ],
+      "detail": "ChangeSet stages persist one durable WorkspaceCheckpoint lineage."
+    },
+    {
+      "id": "RS8-02",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-studio-lifecycle.js"
+      ],
+      "detail": "Restart inspection and bounded recovery are production functions."
+    },
+    {
+      "id": "RS8-03",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-studio-lifecycle.js"
+      ],
+      "detail": "Git, SQLite checkpoint and Artifact drift fail closed."
+    },
+    {
+      "id": "RS8-04",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-studio-lifecycle.js"
+      ],
+      "detail": "Only evidence-complete previews and missing refs self-heal."
+    },
+    {
+      "id": "RS8-05",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-studio-lifecycle.js"
+      ],
+      "detail": "Storage summary and exact-hash content deduplication are available."
+    },
+    {
+      "id": "RS8-06",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-studio-lifecycle.js"
+      ],
+      "detail": "GC cannot delete formal Artifact or Revision history."
+    },
+    {
+      "id": "RS8-07",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-studio-lifecycle.js",
+        "core/r-server/routes/result-studio.js"
+      ],
+      "detail": "Large tables use a bounded progressive cursor API."
+    },
+    {
+      "id": "RS8-08",
+      "passed": true,
+      "evidence": [
+        "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx"
+      ],
+      "detail": "Result UI incrementally renders candidate table pages."
+    },
+    {
+      "id": "RS8-09",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-studio-lifecycle.js"
+      ],
+      "detail": "Preview resource pressure blocks or queues without changing science."
+    },
+    {
+      "id": "RS8-10",
+      "passed": true,
+      "evidence": [
+        "core/r-server/routes/result-studio.js"
+      ],
+      "detail": "Project-scoped lifecycle, recovery, GC and dedup APIs are wired."
+    },
+    {
+      "id": "RS8-11",
+      "passed": true,
+      "evidence": [
+        "acceptance/g0-result-studio/rs8-lifecycle-acceptance.json"
+      ],
+      "detail": "All RS8 command gates pass."
+    },
+    {
+      "id": "RS8-12",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-studio-lifecycle.js"
+      ],
+      "detail": "Lifecycle service never erases revision records."
+    }
+  ],
+  "verification": {
+    "generatedAt": "2026-07-25T07:31:58.560Z",
+    "commands": [
+      {
+        "label": "lifecycle-tests",
+        "command": "node --test test/result-studio-lifecycle.test.mjs test/result-changeset-service.test.mjs test/result-studio-repository.test.mjs",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "0a3ca8fd48220054bd37fec8a44a0d84c6bedd1950b3cd3b51c1d102e4555b03",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "frontend-result-studio",
+        "command": "npm test --prefix frontend -- --run src/components/result-studio/ResultStudioChangeSetPanel.test.tsx",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "adf974b4b5e845873c6399abf8d2d55919868a2bd4709795d1b67afe0afcb709",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "syntax",
+        "command": "node --check core/shared-backend/result-studio-lifecycle.js",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "passed": true,
+  "generatedAt": "2026-07-25T07:31:58.560Z"
+}

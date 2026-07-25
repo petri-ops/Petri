@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const { isPathContained } = require('./project-run-layout');
 const { stableStringify } = require('./scientific-task-spec');
+const { saveResultEditCheckpoint } = require('./result-changeset-service');
 
 const RESULT_COMPARE_SERVICE_VERSION = 1;
 const ZERO_OID = '0'.repeat(40);
@@ -371,7 +372,16 @@ function adoptResultChangeSet(input = {}, dependencies = {}) {
         });
       },
     });
-    return { ...adopted, currentRevisions: revisions.map((revision) => repository.getRevision(revision.revisionId)) };
+    const currentRevisions = revisions.map((revision) => repository.getRevision(revision.revisionId));
+    saveResultEditCheckpoint({
+      repository,
+      projectId: changeSet.projectId,
+      conversationId: changeSet.conversationId,
+      changeSetId: changeSet.changeSetId,
+      candidateCommit: changeSet.candidateCommit,
+      stage: 'adopted',
+    });
+    return { ...adopted, currentRevisions };
   } catch (error) {
     for (const entry of refUpdates.reverse()) {
       try {
@@ -441,6 +451,14 @@ function revertResultChangeSet(input = {}, dependencies = {}) {
         try { fs.rmSync(staging, { recursive: true, force: true }); } catch { /* RS8 GC can remove a residue */ }
       }
     }
+    saveResultEditCheckpoint({
+      repository,
+      projectId: changeSet.projectId,
+      conversationId: changeSet.conversationId,
+      changeSetId: changeSet.changeSetId,
+      candidateCommit: changeSet.candidateCommit,
+      stage: 'reverted',
+    });
     return reverted;
   } catch (error) {
     for (const entry of refUpdates.reverse()) {

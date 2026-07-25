@@ -50,6 +50,18 @@ const {
   createResultStudioRepository,
 } = require('../../shared-backend/result-studio-repository');
 const { validateSelectionContext, summarizeSelection } = require('../../shared-backend/result-studio-contracts');
+const { createRuntimeResourceSnapshot } = require('../../shared-backend/runtime-resource-snapshot');
+const {
+  inspectResultStudioWorkspace,
+  recoverResultStudioWorkspace,
+  inspectResultStudioStorage,
+  planArtifactDeduplication,
+  executeArtifactDeduplication,
+  planResultStudioGc,
+  executeResultStudioGc,
+  evaluatePreviewResourceBudget,
+  readTablePage,
+} = require('../../shared-backend/result-studio-lifecycle');
 
 /** 用于 ID 推断的抽样上限。够判定唯一性，又不至于把大文件全读进内存。 */
 const ID_INFERENCE_SAMPLE_ROWS = 500;
@@ -74,6 +86,16 @@ function hashFile(filePath) {
     fs.closeSync(handle);
   }
   return hash.digest('hex');
+}
+
+function resolveWorkspaceFileForRevision(workspaceRoot, revision) {
+  const workspace = fs.realpathSync(workspaceRoot);
+  const target = fs.realpathSync(path.join(workspace, revision.outputPath));
+  if (!isPathContained(workspace, target)) throw Object.assign(new Error('Revision output escaped the project.'), { code: 'revision_output_escape' });
+  if (!revision.outputHash || hashFile(target) !== revision.outputHash) {
+    throw Object.assign(new Error('Revision output hash no longer matches Artifact Truth.'), { code: 'revision_output_hash_drift' });
+  }
+  return target;
 }
 
 function userId(req) {
@@ -572,6 +594,144 @@ module.exports = function registerResultStudioRoutes(app) {
       }));
     } catch (error) {
       return res.status(409).json({ error: error.code || 'compare_failed', message: error.message, detail: error.detail || null });
+    }
+  });
+
+  // ---------------------------------------------------------- RS8 lifecycle
+
+  app.get('/api/result-studio/workspace/status', (req, res) => {
+    const projectId = String(req.query.projectId || '').trim();
+    if (!projectId) return res.status(400).json({ error: 'projectId_required' });
+    const context = projectContext(req, projectId);
+    if (context.error) return res.status(context.error.status).json({ error: context.error.code });
+    try {
+      return res.json({
+        lifecycle: inspectResultStudioWorkspace({
+          repository: context.repository,
+          adapter: context.binding.adapter,
+          workspaceRoot: context.project.workspace_path,
+          projectId,
+          conversationId: String(req.query.conversationId || '').trim() || null,
+        }),
+        storage: inspectResultStudioStorage({
+          repository: context.repository,
+          workspaceRoot: context.project.workspace_path,
+          projectId,
+        }),
+      });
+    } catch (error) {
+      return res.status(409).json({ error: error.code || 'workspace_inspection_failed', message: error.message });
+    }
+  });
+
+  app.post('/api/result-studio/workspace/recover', (req, res) => {
+    const projectId = String(req.body?.projectId || '').trim();
+    const context = projectContext(req, projectId, { write: true });
+    if (context.error) return res.status(context.error.status).json({ error: context.error.code });
+    try {
+      const result = recoverResultStudioWorkspace({
+        workspaceRoot: context.project.workspace_path,
+        projectId,
+        conversationId: String(req.body?.conversationId || '').trim() || null,
+      }, {
+        repository: context.repository,
+        adapter: context.binding.adapter,
+        getToolJob: db.getToolJob,
+      });
+      return res.status(result.after.status === 'blocked' ? 409 : 200).json({ ok: result.after.status !== 'blocked', ...result });
+    } catch (error) {
+      return res.status(409).json({ error: error.code || 'workspace_recovery_failed', message: error.message });
+    }
+  });
+
+  app.get('/api/result-studio/storage/gc', (req, res) => {
+    const projectId = String(req.query.projectId || '').trim();
+    const context = projectContext(req, projectId);
+    if (context.error) return res.status(context.error.status).json({ error: context.error.code });
+    try {
+      return res.json(planResultStudioGc({
+        workspaceRoot: context.project.workspace_path,
+        projectId,
+      }, { repository: context.repository, adapter: context.binding.adapter }));
+    } catch (error) {
+      return res.status(409).json({ error: error.code || 'gc_plan_failed', message: error.message });
+    }
+  });
+
+  app.get('/api/result-studio/storage/deduplicate', (req, res) => {
+    const projectId = String(req.query.projectId || '').trim();
+    const context = projectContext(req, projectId);
+    if (context.error) return res.status(context.error.status).json({ error: context.error.code });
+    try {
+      return res.json(planArtifactDeduplication({ workspaceRoot: context.project.workspace_path, projectId }, { repository: context.repository }));
+    } catch (error) {
+      return res.status(409).json({ error: error.code || 'dedup_plan_failed', message: error.message });
+    }
+  });
+
+  app.post('/api/result-studio/storage/deduplicate', (req, res) => {
+    const projectId = String(req.body?.projectId || '').trim();
+    const context = projectContext(req, projectId, { write: true });
+    if (context.error) return res.status(context.error.status).json({ error: context.error.code });
+    try {
+      return res.json(executeArtifactDeduplication({
+        workspaceRoot: context.project.workspace_path,
+        projectId,
+        planToken: String(req.body?.planToken || ''),
+      }, { repository: context.repository }));
+    } catch (error) {
+      return res.status(409).json({ error: error.code || 'dedup_execute_failed', message: error.message });
+    }
+  });
+
+  app.post('/api/result-studio/storage/gc', (req, res) => {
+    const projectId = String(req.body?.projectId || '').trim();
+    const context = projectContext(req, projectId, { write: true });
+    if (context.error) return res.status(context.error.status).json({ error: context.error.code });
+    try {
+      return res.json(executeResultStudioGc({
+        workspaceRoot: context.project.workspace_path,
+        projectId,
+        planToken: String(req.body?.planToken || ''),
+      }, { repository: context.repository, adapter: context.binding.adapter }));
+    } catch (error) {
+      return res.status(409).json({ error: error.code || 'gc_execute_failed', message: error.message });
+    }
+  });
+
+  app.get('/api/result-studio/preview-budget', (req, res) => {
+    const projectId = String(req.query.projectId || '').trim();
+    const context = projectContext(req, projectId);
+    if (context.error) return res.status(context.error.status).json({ error: context.error.code });
+    let disk = null;
+    try {
+      if (typeof fs.statfsSync === 'function') {
+        const stat = fs.statfsSync(context.project.workspace_path);
+        disk = { availableBytes: Number(stat.bavail) * Number(stat.bsize), totalBytes: Number(stat.blocks) * Number(stat.bsize) };
+      }
+    } catch { /* snapshot reports unknown disk */ }
+    const activePreviewJobs = context.repository.listChangeSets({ projectId, status: 'running', limit: 500 }).length;
+    const estimatedMemoryBytes = Math.max(0, Number(req.query.estimatedMemoryBytes || 0));
+    const estimatedDiskBytes = Math.max(0, Number(req.query.estimatedDiskBytes || 0));
+    const snapshot = createRuntimeResourceSnapshot({ disk, activeJobs: activePreviewJobs, estimatedMemoryBytes });
+    return res.json({ snapshot, budget: evaluatePreviewResourceBudget({ resourceSnapshot: snapshot, estimatedMemoryBytes, estimatedDiskBytes, activePreviewJobs }) });
+  });
+
+  app.get('/api/result-studio/revisions/:revisionId/table-page', (req, res) => {
+    const revision = repo().getRevision(String(req.params.revisionId || '').trim());
+    if (!revision) return res.status(404).json({ error: 'revision_not_found' });
+    const context = projectContext(req, revision.projectId);
+    if (context.error) return res.status(context.error.status).json({ error: context.error.code });
+    if (!TABLE_EXTENSIONS.test(revision.outputPath)) return res.status(415).json({ error: 'revision_not_table' });
+    try {
+      const filePath = resolveWorkspaceFileForRevision(context.project.workspace_path, revision);
+      return res.json(readTablePage({
+        filePath,
+        cursor: Number(req.query.cursor || 0),
+        limit: Number(req.query.limit || 100),
+      }));
+    } catch (error) {
+      return res.status(409).json({ error: error.code || 'table_page_failed', message: error.message });
     }
   });
 

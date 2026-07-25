@@ -224,6 +224,11 @@ test('RS5 success creates commit, Job-backed Revision and preview without adopti
   assert.equal(fx.repository.getCurrentRevision('volcano_family').revisionId, 'rev_source');
   assert.deepEqual(events.map((event) => event.sequence), events.map((_, index) => index + 1));
   assert.equal(events.at(-1).stage, 'preview');
+  const checkpoint = fx.repository.getLatestCheckpoint({ projectId: 'p_1', conversationId: 'conv_1' });
+  assert.equal(checkpoint.changeSetId, result.changeSet.changeSetId);
+  assert.equal(checkpoint.changeSetStatus, 'preview_ready');
+  assert.equal(checkpoint.pendingPreview.stage, 'preview_ready');
+  assert.deepEqual(checkpoint.pendingPreview.revisionIds, [result.revision.revisionId]);
 });
 
 test('RS5 AI and manual edits use the same ChangeSet and Revision contracts', async (context) => {

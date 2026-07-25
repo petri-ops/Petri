@@ -2,7 +2,7 @@
 
 最后更新：2026-07-25
 
-状态：`in_progress`（RS0 ✅ / RS1 ✅ / RS2 ✅ / RS3 ✅ / RS4 ✅ / RS5 ✅ / RS6 ✅ / RS7 ✅ 已收口；当前下一阶段为 `G0-RS8`，单线串行）
+状态：`in_progress`（RS0 ✅ / RS1 ✅ / RS2 ✅ / RS3 ✅ / RS4 ✅ / RS5 ✅ / RS6 ✅ / RS7 ✅ / RS8 ✅ 已收口；当前下一阶段为 `G0-RS9`，单线串行）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -953,6 +953,8 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 
 ### G0-RS8：耐久恢复、性能与存储治理
 
+状态：`completed`（2026-07-25）
+
 目标：长时间使用仍稳定丝滑。
 
 交付：
@@ -971,6 +973,22 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 - 大文件不进入普通 Git。
 - 版本历史增长不会明显拖慢打开结果页。
 - 清理不会删除仍被历史/正式结果引用的对象。
+
+实现与边界：
+
+- `createResultChangeSet()` 在 change_set、materialized、candidate_committed、preview_ready 和失败/取消阶段持续更新同一 `WorkspaceCheckpoint`；关闭会话或进程中断后不依赖 renderer 内存恢复修改现场。
+- `result-studio-lifecycle.js` 联合校验 checkpoint hash、ChangeSet 状态、candidate/current Git refs、Revision current 指针、source commit 与 Artifact SHA-256。只有已存在 candidate ref、valid Revision、completed Job 和 valid Artifact Truth 的 running ChangeSet 才可自动恢复到 `preview_ready`；缺失 current ref 可从 SQLite+commit 自愈，冲突 ref、Artifact 漂移、checkpoint 损坏或半采用状态一律阻断。
+- 存储摘要按 Artifact SHA-256 区分 logical/unique/deduplicable bytes；精确重复结果可通过 plan token + 哈希前后条件物化为项目内 content-addressed hardlink，不触碰源数据或改变 Artifact 内容。Git 继续承担文本对象自身的 content-addressed 去重。
+- 安全 GC 先生成稳定 plan token，执行时重新核对。可删除范围仅限超过年龄门的关闭态/临时 `.biof3/revision` staging 和仍匹配 candidate commit 的内部 ref；`artifactDeletionCount` 永远为 0，不删除 Artifact 文件、Revision 记录、current/adopted/selection/checkpoint 引用对象。
+- 大表新增最多 1 MiB / 200 行的 byte cursor API，结果侧栏按 50 行渐进加载候选表并在局部滚动容器渲染，不读取完整文件、不阻塞首屏。RFC4180 multiline cell 边界明确披露，不冒充完整 CSV 引擎。
+- preview Job 在创建 ChangeSet 前读取真实内存/磁盘快照和 active preview 数；资源不足 fail-closed，并发饱和返回 queued，绝不通过修改科学参数换取运行。项目级 status/recover/storage/deduplicate/gc/preview-budget API 与紧凑 UI 状态均复用同一 SQLite/Git/Artifact 真相。
+
+验收证据：
+
+- `test/result-studio-lifecycle.test.mjs` 6/6：重启恢复、Artifact drift、ref 自愈、内容去重/GC、渐进分页、资源预算。
+- RS5/Repository 联合专项覆盖 checkpoint 每阶段落库与 selection/checkpoint 对 GC reachability 的保护；Result Studio 前端专项 6/6。
+- 脱敏验收位于 `acceptance/g0-result-studio/rs8-lifecycle-acceptance.json`，12/12 checks；不包含绝对路径、URL、凭据或原始科学数据。
+- UI-105 已登记为 `in_progress`：功能与组件门禁完成，真实大表、应用重启和明暗/820px 视觉证据留给 RS9 产品矩阵，不借离线测试提前标记 verified。
 
 ### G0-RS9：真实产品验收与基线晋升
 

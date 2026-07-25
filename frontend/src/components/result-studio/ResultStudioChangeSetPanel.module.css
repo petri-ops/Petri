@@ -55,6 +55,17 @@
   margin-top: 5px;
 }
 
+.lifecycle {
+  color: var(--biof3-text-tertiary);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 10px;
+  gap: 4px 9px;
+  margin-top: 4px;
+}
+
+.lifecycle[data-state='blocked'] { color: var(--biof3-danger); }
+
 .actions {
   flex-wrap: wrap;
   gap: 6px;
@@ -112,6 +123,29 @@
 }
 .tableCompare td { border-bottom: 1px solid var(--biof3-border); padding: 4px 5px; text-align: left; vertical-align: top; }
 .tableCompare td:first-child { color: var(--biof3-text-tertiary); width: 96px; }
+
+.tablePageButton {
+  background: transparent;
+  border: 0;
+  color: var(--biof3-accent);
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  margin-top: 5px;
+  padding: 0;
+}
+
+.virtualTable {
+  border: 1px solid var(--biof3-border);
+  margin-top: 6px;
+  max-height: 260px;
+  overflow: auto;
+}
+
+.virtualTable table { border-collapse: collapse; font-size: 10px; min-width: 100%; width: max-content; }
+.virtualTable th,
+.virtualTable td { border-bottom: 1px solid var(--biof3-border); max-width: 220px; overflow: hidden; padding: 3px 5px; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.virtualTable th { background: var(--biof3-surface); position: sticky; top: 0; }
 
 .jsonList { display: grid; gap: 3px; }
 .jsonRow { gap: 6px; min-width: 0; }

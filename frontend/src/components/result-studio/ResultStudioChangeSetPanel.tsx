@@ -2,13 +2,18 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   adoptResultChangeSet,
   compareResultChangeSet,
+  getResultStudioWorkspaceStatus,
   listResultChangeSets,
+  recoverResultStudioWorkspace,
+  readRevisionTablePage,
   restoreArtifactRevision,
   revertResultChangeSet,
   revisionArtifactUrl,
   type ArtifactRevision,
   type ResultStudioChangeSet,
   type ResultStudioComparison,
+  type ResultStudioWorkspaceStatus,
+  type ResultStudioTablePage,
 } from './resultStudioClient';
 import styles from './ResultStudioChangeSetPanel.module.css';
 
@@ -52,6 +57,8 @@ export function ResultStudioChangeSetPanel({
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [workspaceStatus, setWorkspaceStatus] = useState<ResultStudioWorkspaceStatus | null>(null);
+  const [tablePages, setTablePages] = useState<Record<string, ResultStudioTablePage>>({});
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -79,6 +86,24 @@ export function ResultStudioChangeSetPanel({
 
   useEffect(() => { void refresh(); }, [refresh]);
 
+  useEffect(() => {
+    let active = true;
+    void getResultStudioWorkspaceStatus(projectId).then(async (status) => {
+      if (!active) return;
+      setWorkspaceStatus(status);
+      if (status.lifecycle.interrupted.some((entry) => entry.status === 'running')) {
+        try {
+          await recoverResultStudioWorkspace(projectId);
+          if (active) {
+            setWorkspaceStatus(await getResultStudioWorkspaceStatus(projectId));
+            await refresh();
+          }
+        } catch { /* the lifecycle status remains visible and fail-closed */ }
+      }
+    }).catch(() => { /* version UI remains usable if lifecycle inspection is unavailable */ });
+    return () => { active = false; };
+  }, [projectId, refresh]);
+
   const selected = useMemo(
     () => changeSets.find((item) => item.changeSetId === selectedId) || null,
     [changeSets, selectedId]
@@ -101,7 +126,23 @@ export function ResultStudioChangeSetPanel({
   useEffect(() => {
     setComparison(null);
     setExpanded(false);
+    setTablePages({});
   }, [selectedId]);
+
+  const loadTablePage = async (revisionId: string, more = false) => {
+    setBusy(true);
+    setError('');
+    try {
+      const current = tablePages[revisionId];
+      const page = await readRevisionTablePage(revisionId, more ? current?.nextCursor || 0 : 0, 50);
+      setTablePages((previous) => ({
+        ...previous,
+        [revisionId]: more && current ? { ...page, rows: [...current.rows, ...page.rows] } : page,
+      }));
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : '表格分页加载失败');
+    } finally { setBusy(false); }
+  };
 
   const runAction = async (action: 'adopt' | 'revert', changeSet: ResultStudioChangeSet) => {
     setBusy(true);
@@ -154,6 +195,14 @@ export function ResultStudioChangeSetPanel({
         </div>
         {selected && <span className={styles.status} data-state={selected.status}>{STATUS_LABEL[selected.status] || selected.status}</span>}
       </div>
+
+      {workspaceStatus && (
+        <div className={styles.lifecycle} data-state={workspaceStatus.lifecycle.status}>
+          <span>{workspaceStatus.lifecycle.status === 'blocked' ? '版本存储需要处理' : workspaceStatus.lifecycle.interrupted.length > 0 ? '修改现场已恢复' : '版本存储正常'}</span>
+          <span>{workspaceStatus.storage.revisionCount} 个版本 · {Math.ceil(workspaceStatus.storage.logicalArtifactBytes / 1024)} KB</span>
+          {workspaceStatus.storage.deduplicableBytes > 0 && <span>可去重 {Math.ceil(workspaceStatus.storage.deduplicableBytes / 1024)} KB</span>}
+        </div>
+      )}
 
       {selected && (
         <>
@@ -217,6 +266,21 @@ export function ResultStudioChangeSetPanel({
                 <tr><td>移除列</td><td>{artifact.table?.removedColumns?.join('、') || '无'}</td></tr>
                 <tr><td>抽样变化</td><td>{artifact.table?.sampleChanges?.length || 0} 行</td></tr>
               </tbody></table>
+              {!tablePages[artifact.afterRevisionId] ? (
+                <button className={styles.tablePageButton} type="button" disabled={busy} onClick={() => void loadTablePage(artifact.afterRevisionId)}>渐进查看候选表</button>
+              ) : (
+                <div className={styles.virtualTable}>
+                  <table>
+                    <thead><tr>{tablePages[artifact.afterRevisionId].columns.map((column) => <th key={column}>{column}</th>)}</tr></thead>
+                    <tbody>{tablePages[artifact.afterRevisionId].rows.map((row, rowIndex) => (
+                      <tr key={`${artifact.afterRevisionId}:${rowIndex}`}>{row.map((cell, cellIndex) => <td key={cellIndex}>{cell}</td>)}</tr>
+                    ))}</tbody>
+                  </table>
+                  {tablePages[artifact.afterRevisionId].nextCursor !== null && (
+                    <button className={styles.tablePageButton} type="button" disabled={busy} onClick={() => void loadTablePage(artifact.afterRevisionId, true)}>继续加载</button>
+                  )}
+                </div>
+              )}
             </section>
           ))}
 

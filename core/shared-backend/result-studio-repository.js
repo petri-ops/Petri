@@ -408,6 +408,14 @@ function createResultStudioRepository(db, options = {}) {
         .map(rowToRevision);
     },
 
+    listProjectRevisions(projectId, { limit = 5000 } = {}) {
+      const bounded = Number.isInteger(limit) && limit > 0 && limit <= 10000 ? limit : 5000;
+      return db.prepare(`SELECT * FROM artifact_revisions WHERE project_id = ?
+          ORDER BY created_at ASC LIMIT ?`)
+        .all(projectId, bounded)
+        .map(rowToRevision);
+    },
+
     getCurrentRevision(artifactFamilyId) {
       return rowToRevision(
         db.prepare('SELECT * FROM artifact_revisions WHERE artifact_family_id = ? AND is_current = 1')
@@ -609,6 +617,14 @@ function createResultStudioRepository(db, options = {}) {
       return { deleted: result.changes > 0 };
     },
 
+    listProjectSelections(projectId, { limit = 5000 } = {}) {
+      const bounded = Number.isInteger(limit) && limit > 0 && limit <= 10000 ? limit : 5000;
+      return db.prepare(`SELECT * FROM result_selection_contexts WHERE project_id = ?
+          ORDER BY updated_at DESC LIMIT ?`)
+        .all(projectId, bounded)
+        .map(rowToSelection);
+    },
+
     // -------------------------------------------------------------- checkpoint
 
     saveCheckpoint(input) {
@@ -662,6 +678,14 @@ function createResultStudioRepository(db, options = {}) {
       return rowToCheckpoint(row);
     },
 
+    listProjectCheckpoints(projectId, { limit = 5000 } = {}) {
+      const bounded = Number.isInteger(limit) && limit > 0 && limit <= 10000 ? limit : 5000;
+      return db.prepare(`SELECT * FROM workspace_revision_checkpoints WHERE project_id = ?
+          ORDER BY updated_at DESC LIMIT ?`)
+        .all(projectId, bounded)
+        .map(rowToCheckpoint);
+    },
+
     /** 校验落库的 checkpoint hash 是否与内容一致（检测外部改写/损坏）。 */
     verifyCheckpointIntegrity(checkpointId) {
       const stored = api.getCheckpoint(checkpointId);
@@ -711,12 +735,24 @@ function createResultStudioRepository(db, options = {}) {
         db.prepare("SELECT change_set_id FROM scientific_change_sets WHERE project_id = ? AND status = 'adopted'")
           .all(projectId).map((row) => row.change_set_id)
       );
+      const pendingChangeSets = new Set(
+        db.prepare("SELECT change_set_id FROM scientific_change_sets WHERE project_id = ? AND status IN ('draft', 'running', 'preview_ready')")
+          .all(projectId).map((row) => row.change_set_id)
+      );
       const referenced = new Set();
       for (const rev of all) {
         for (const parentId of rev.parentRevisionIds) referenced.add(parentId);
         for (const ref of rev.inputArtifactRefs) {
           if (ref && ref.artifactId) referenced.add(ref.artifactId);
         }
+      }
+      for (const selection of api.listProjectSelections(projectId)) {
+        if (selection.revisionId) referenced.add(selection.revisionId);
+      }
+      for (const checkpoint of api.listProjectCheckpoints(projectId)) {
+        for (const revisionId of checkpoint.currentRevisionIds || []) referenced.add(revisionId);
+        const pendingRevisionIds = checkpoint.pendingPreview?.revisionIds;
+        if (Array.isArray(pendingRevisionIds)) pendingRevisionIds.forEach((revisionId) => referenced.add(revisionId));
       }
       // "保护原始版本"只对**活跃 family** 成立：family 内存在 current 或
       // 由已采用 ChangeSet 产生的版本，才有"可以回退到的基线"这层含义。
@@ -735,6 +771,7 @@ function createResultStudioRepository(db, options = {}) {
         const reasons = [];
         if (rev.isCurrent) reasons.push('current_revision');
         if (adoptedChangeSets.has(rev.changeSetId)) reasons.push('adopted_change_set');
+        if (pendingChangeSets.has(rev.changeSetId)) reasons.push('pending_change_set');
         if (referenced.has(rev.revisionId)) reasons.push('referenced_by_descendant');
         if (rev.revisionOrdinal === 1 && liveFamilies.has(rev.artifactFamilyId)) {
           reasons.push('original_revision_of_live_family');

@@ -70,6 +70,8 @@ RS3 实测修正的三个真实缺陷：其一，我在路由里使用了 `app.l
 
 `G0-RS7` 已收口：Result Studio Plugin SDK v1 对 descriptor 与 golden Revision 执行 fail-closed lint；DESeq2、volcano、gene-correlation heatmap、GO/KEGG 的 12 个正式 table/plot 全部映射，每个 required file input 都有 Artifact binding。RS5 的 canonical `analysis/scripts/<family>/<revision>/<artifact>.R` 继续保证每个正式结果独立脚本，不拆分插件执行器、不建立插件内版本系统。相同 major/contract 的历史可读，漂移要求迁移，缺迁移时显式 `read_only_legacy`。下一阶段：`G0-RS8` 耐久恢复、性能与存储治理；不得提前实现 RS9 基线晋升。
 
+`G0-RS8` 已收口：每个 ChangeSet 阶段持久化 WorkspaceCheckpoint；重启后只在 candidate ref、Revision、completed Job 与 valid Artifact Truth 全部一致时自动恢复 preview。Git/SQLite/Artifact 漂移分类为自愈或阻断；存储摘要、content-addressed hardlink 去重和 plan-token GC 均不删除正式 Artifact/Revision 历史。大表通过 1 MiB 有界 byte cursor 渐进加载，preview Job 受真实资源快照和并发预算约束且不修改科学参数。UI-105 功能完成但待 RS9 真实重启/大表/视觉矩阵，保持 `in_progress`。下一阶段：`G0-RS9` 真实产品验收与基线晋升。
+
 ### 3.1 已完成基线：真实科学任务驱动的 Harness 升级
 
 用户已确认 Harness 应承担“把模糊科学需求转化为数据语言、可执行计划、验证证据和交付结果”的工程职责，而不是收集每一个分析需求点。当前采用增量升级，不重建 P-02 执行真相，不新增第二套 executor、job、artifact 或 workflow truth。

@@ -6,6 +6,8 @@ const path = require('path');
 const { stableStringify } = require('./scientific-task-spec');
 const { validateResultEditIntent } = require('./result-edit-intent');
 const { isPathContained } = require('./project-run-layout');
+const { createRuntimeResourceSnapshot } = require('./runtime-resource-snapshot');
+const { evaluatePreviewResourceBudget } = require('./result-studio-lifecycle');
 
 const RESULT_CHANGESET_SERVICE_VERSION = 1;
 const MAX_SCRIPT_BYTES = 2 * 1024 * 1024;
@@ -252,6 +254,30 @@ function resolveBaseCommit(adapter, projectId) {
   }).commit;
 }
 
+function saveResultEditCheckpoint({ repository, projectId, conversationId, changeSetId, candidateCommit = null, stage, recovery = null }) {
+  if (!repository || typeof repository.saveCheckpoint !== 'function') return null;
+  const changeSet = repository.getChangeSet(changeSetId);
+  if (!changeSet) return null;
+  const revisionIds = repository.listRevisionsByChangeSet(changeSetId).map((revision) => revision.revisionId);
+  const currentRevisionIds = repository.listCurrentRevisions(projectId).map((revision) => revision.revisionId);
+  return repository.saveCheckpoint({
+    checkpointId: deterministicId('rscp', projectId, conversationId || '', changeSetId),
+    projectId,
+    conversationId: conversationId || null,
+    baseCommit: changeSet.baseCommit,
+    candidateCommit: candidateCommit || changeSet.candidateCommit || null,
+    changeSetId,
+    changeSetStatus: changeSet.status,
+    currentRevisionIds,
+    pendingPreview: {
+      stage,
+      revisionIds,
+      recovery,
+    },
+    jobRefs: changeSet.jobRefs,
+  });
+}
+
 /**
  * 把一个已经完成且 Artifact Truth=valid 的普通 Job 登记成 lineage 的 v1。
  *
@@ -465,6 +491,24 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
   }
   const projectId = String(input.projectId || '').trim();
   const workspaceRoot = path.resolve(input.workspaceRoot || '');
+  let disk = null;
+  try {
+    if (typeof fs.statfsSync === 'function') {
+      const stat = fs.statfsSync(workspaceRoot);
+      disk = { availableBytes: Number(stat.bavail) * Number(stat.bsize), totalBytes: Number(stat.blocks) * Number(stat.bsize) };
+    }
+  } catch { /* unknown disk state remains explicit in the snapshot */ }
+  const estimatedMemoryBytes = Math.max(0, Number(input.previewResourceEstimate?.memoryBytes || 0));
+  const estimatedDiskBytes = Math.max(0, Number(input.previewResourceEstimate?.diskBytes || 0));
+  const activePreviewJobs = Math.max(0, Number(dependencies.activePreviewJobs || 0));
+  const resourceSnapshot = createRuntimeResourceSnapshot({ disk, activeJobs: activePreviewJobs, estimatedMemoryBytes });
+  const previewBudget = evaluatePreviewResourceBudget({ resourceSnapshot, estimatedMemoryBytes, estimatedDiskBytes, activePreviewJobs });
+  if (previewBudget.decision === 'blocked') {
+    throw new ResultChangeSetError('preview_resource_budget_blocked', 'Preview Job cannot start within the current resource budget.', previewBudget);
+  }
+  if (previewBudget.decision === 'queued') {
+    throw new ResultChangeSetError('preview_resource_queued', 'Preview Job is queued because the background preview budget is saturated.', previewBudget);
+  }
   const sourceRevision = input.sourceRevision;
   const sourceJob = input.sourceJob;
   if (!sourceRevision || sourceRevision.projectId !== projectId
@@ -524,6 +568,7 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
     });
     changeSetCreated = true;
     repository.transitionChangeSet({ changeSetId, to: 'running' });
+    saveResultEditCheckpoint({ repository, projectId, conversationId: input.conversationId, changeSetId, stage: 'change_set' });
     if (cancelled()) throw new ResultChangeSetError('edit_cancelled', 'Edit was cancelled before materialization.');
 
     emit('materialize', 'running');
@@ -544,6 +589,7 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
       intentId: input.intent.intentId,
     });
     emit('materialize', 'completed', { scriptSha256: materialized.scriptSha256 });
+    saveResultEditCheckpoint({ repository, projectId, conversationId: input.conversationId, changeSetId, stage: 'materialized' });
 
     const gitPathPrefix = String(dependencies.gitPathPrefix || '').replace(/^\/+|\/+$/g, '');
     const candidate = adapter.commitVirtualFiles({
@@ -557,6 +603,7 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
       })),
     });
     emit('commit', 'completed', { candidateCommit: candidate.commit });
+    saveResultEditCheckpoint({ repository, projectId, conversationId: input.conversationId, changeSetId, candidateCommit: candidate.commit, stage: 'candidate_committed' });
     if (cancelled()) throw new ResultChangeSetError('edit_cancelled', 'Edit was cancelled before execution.');
 
     emit('job', 'running');
@@ -647,6 +694,7 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
     }).changeSet;
     emit('revision', 'completed', { revisionId: revision.revisionId });
     emit('preview', 'ready');
+    saveResultEditCheckpoint({ repository, projectId, conversationId: input.conversationId, changeSetId, candidateCommit: candidate.commit, stage: 'preview_ready', recovery: 'awaiting_user_decision' });
     return {
       ok: true,
       resultChangeSetServiceVersion: RESULT_CHANGESET_SERVICE_VERSION,
@@ -662,6 +710,7 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
       },
       progress,
       adopted: false,
+      previewBudget,
     };
   } catch (error) {
     if (changeSetCreated) {
@@ -680,6 +729,16 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
           }
         }
       } catch { /* preserve the original failure; recovery scanner sees remaining state */ }
+      try {
+        saveResultEditCheckpoint({
+          repository,
+          projectId,
+          conversationId: input.conversationId,
+          changeSetId,
+          stage: error && error.code === 'edit_cancelled' ? 'cancelled' : 'failed',
+          recovery: error && error.code || 'result_edit_failed',
+        });
+      } catch { /* original failure remains authoritative */ }
     }
     emit(error && error.code === 'edit_cancelled' ? 'cancelled' : 'failed', 'terminal', {
       reason: error && error.code || 'result_edit_failed',
@@ -727,5 +786,6 @@ module.exports = {
   resolveBaseCommit,
   ensureBaselineArtifactRevision,
   createResultChangeSet,
+  saveResultEditCheckpoint,
   inspectResultEditRecovery,
 };

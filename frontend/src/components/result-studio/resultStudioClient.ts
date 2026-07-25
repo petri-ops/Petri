@@ -90,6 +90,23 @@ interface ChangeSetListResponse {
   revisions: ArtifactRevision[];
 }
 
+export interface ResultStudioWorkspaceStatus {
+  lifecycle: {
+    status: 'ready' | 'recovery_available' | 'blocked';
+    interrupted: Array<{ changeSetId: string; status: ChangeSetStatus; recovery: string; revisionIds: string[] }>;
+    checkpoint: { checkpointId: string; changeSetId?: string | null; pendingPreview?: { stage?: string; recovery?: string } | null } | null;
+    revisionIntegrity: { revisionCount: number; intact: boolean; issues: Array<{ revisionId: string; kind: string }> };
+  };
+  storage: {
+    revisionCount: number;
+    logicalArtifactBytes: number;
+    uniqueArtifactBytes: number;
+    deduplicableBytes: number;
+    duplicateGroupCount: number;
+    privateStorage: { bytes: number; files: number; truncated: boolean };
+  };
+}
+
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   const token = getToken();
   const response = await fetch(`${getPlatformApiPrefix()}/result-studio${path}`, {
@@ -111,6 +128,30 @@ export function listResultChangeSets(projectId: string, artifactFamilyId: string
 
 export function compareResultChangeSet(changeSetId: string): Promise<ResultStudioComparison> {
   return requestJson(`/changesets/${encodeURIComponent(changeSetId)}/compare`);
+}
+
+export function getResultStudioWorkspaceStatus(projectId: string): Promise<ResultStudioWorkspaceStatus> {
+  return requestJson(`/workspace/status?projectId=${encodeURIComponent(projectId)}`);
+}
+
+export function recoverResultStudioWorkspace(projectId: string): Promise<{ ok: boolean; recovered: boolean; repaired: unknown[]; after: ResultStudioWorkspaceStatus['lifecycle'] }> {
+  return requestJson('/workspace/recover', { method: 'POST', body: JSON.stringify({ projectId }) });
+}
+
+export interface ResultStudioTablePage {
+  columns: string[];
+  rows: string[][];
+  cursor: number;
+  nextCursor: number | null;
+  limit: number;
+  totalRows: null;
+  totalRowsIsUnknown: true;
+  virtualized: boolean;
+  caveat: string;
+}
+
+export function readRevisionTablePage(revisionId: string, cursor = 0, limit = 100): Promise<ResultStudioTablePage> {
+  return requestJson(`/revisions/${encodeURIComponent(revisionId)}/table-page?cursor=${cursor}&limit=${limit}`);
 }
 
 export function adoptResultChangeSet(changeSetId: string): Promise<{ ok: true; changeSet: ResultStudioChangeSet; currentRevisions: ArtifactRevision[] }> {
