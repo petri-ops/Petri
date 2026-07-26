@@ -2,7 +2,7 @@
 
 最后更新：2026-07-16
 
-把下面代码块整段粘贴给下一个工程 Agent（Claude Code / Codex 等），用于接手 BioF3 Desktop 的下一轮清理与规范化。配套背景见 [`dependency-decoupling-checkpoint.md`](./dependency-decoupling-checkpoint.md)。
+把下面代码块整段粘贴给下一个工程 Agent（Claude Code / Codex 等），用于接手 BioF3 Desktop 的下一轮清理与规范化。配套背景见 [`dependency-decoupling-checkpoint.md`](../../dependency-decoupling-checkpoint.md)。
 
 ```
 你是 BioF3 Desktop 项目的工程 Agent。这是一个 Electron + Vite/React + Node 核心后端的本地桌面应用，仓库根在 desktop/。

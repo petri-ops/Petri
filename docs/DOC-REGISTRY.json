@@ -33,19 +33,19 @@
     },
     {
       "id": "AGENT-HANDOFF-PROMPT",
-      "path": "docs/agent-handoff-prompt.md",
+      "path": "docs/archive/checkpoints/agent-handoff-prompt.md",
       "kind": "reference",
-      "status": "reference",
+      "status": "archived",
       "canonical": false,
-      "archivePolicy": "manual_review"
+      "archivePolicy": "archive_after_completion"
     },
     {
       "id": "BRANCH-HANDOFF",
-      "path": "docs/branch-handoff.md",
+      "path": "docs/archive/checkpoints/branch-handoff.md",
       "kind": "handoff",
-      "status": "reference",
+      "status": "archived",
       "canonical": false,
-      "archivePolicy": "manual_review"
+      "archivePolicy": "archive_after_completion"
     },
     {
       "id": "UI-WORKBENCH-DIRECTION",

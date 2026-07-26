@@ -1,6 +1,6 @@
 # BioF3 Desktop 文档入口
 
-最后更新：2026-07-25
+最后更新：2026-07-26
 
 ## 项目治理入口
 
@@ -20,19 +20,14 @@
 
 ## 当前开发必读
 
-按顺序读取：
+默认只按顺序读取四项：
 
-1. [`v1-productization-roadmap.md`](./v1-productization-roadmap.md) — 唯一阶段路线图。
-2. [`next-steps-roadmap.md`](./next-steps-roadmap.md) — 当前阶段与立即任务摘要。
-3. [`project-workspace-handoff.md`](./project-workspace-handoff.md) — 当前可恢复工程检查点。
-4. [`ui-productization-audit.md`](./ui-productization-audit.md) — 已完成的 Stage 1 验收台账。
-5. [`development-module-map.md`](./development-module-map.md) — W/P/C 责任边界。
-6. [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) — 当前 G0-LF 工作包顺序、状态与验收规范。
-7. [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md) — 已完成的 P-03 Harness Loop Engineering v1（HLE-0～HLE-6）基线。
-8. [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) — 已完成的 HLE 生产 Agent、Validator/Repair、恢复、UI 与真实 SPT-1 验收记录。
-9. [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md) — 已完成的 P-03 真实科学任务翻译与交付工作包计划。
-10. [`../acceptance/g0-living-foundation/g0-fifth-wave-acceptance.json`](../acceptance/g0-living-foundation/g0-fifth-wave-acceptance.json) — G0 LF11 Evolution Pipeline 的脱敏机器验收证据。
-11. [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) — 已完成的 LF12 Q0～Q7、证据范围、资格裁决与永久维护定义；最终报告见 [`../acceptance/g0-qualification/qualification-report.md`](../acceptance/g0-qualification/qualification-report.md)。
+1. [`AUDIT-LOG.md`](./AUDIT-LOG.md) — 活跃阻塞、待合并和当前进行中阶段。
+2. [`next-steps-roadmap.md`](./next-steps-roadmap.md) — 当前立即任务。
+3. [`project-workspace-handoff.md`](./project-workspace-handoff.md) — 当前可恢复 Git/工程检查点。
+4. [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) — 当前唯一 active 工作包及阶段完成门。
+
+只有任务实际涉及阶段顺序、UI 或模块边界时，才读取 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)、[`ui-productization-audit.md`](./ui-productization-audit.md) 或 [`development-module-map.md`](./development-module-map.md)。其他 G0 资格、插件、发布和历史材料从上方核心指引、下方专项规范或 `DOC-REGISTRY.json` 按需定位；已完成工作包和 Acceptance 不属于默认启动上下文。
 
 ## 当前有效专项规范
 
@@ -42,10 +37,7 @@
 - [`third-party-plugin-guide.md`](./third-party-plugin-guide.md) — 第三方插件结构、环境、验收与发布规范。
 - [`harness-engine-spec.md`](./harness-engine-spec.md) — 已完成 Harness 基础技术规范，Stage 3 继续复用。
 - [`harness-roadmap.md`](./harness-roadmap.md) — Harness Phase 1–6 完成记录与 Stage 3 技术参考。
-- [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md) — Stage 4 RC 之后的通用基础工具、策略控制面、Trace 与跨工具接手计划。
-- [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md) — Phase 7 之后的真实需求翻译、可复现任务契约与证据化交付计划。
-- [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md) — 在既有 Task/Job/Artifact Truth 上增加持续验证、修复、恢复与目标终止的当前升级计划。
-- [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) — HLE 后端原语接入真实 Agent、Job/Artifact 和 UI 的已完成收口记录。
+- 已完成的 Harness Phase 7、Scientific Task Contract 与 Loop 工程计划保留在注册表中，只在回归对应契约或追溯验收时读取。
 - [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md) — 当前稳定版本收口台账、出口矩阵与实机证据。
 - [`releases/v0.0.1-rc.6.md`](./releases/v0.0.1-rc.6.md) — Stage 4 macOS 候选版发布说明与已知边界。
 - [`releases/v0.0.1-rc.7.md`](./releases/v0.0.1-rc.7.md) — Phase 7、模型 UX 与 ToolResult 实机收口发布版。
@@ -64,6 +56,7 @@
 ## 维护规则
 
 - 创建计划、阶段收口、Handoff、归档或 Worktree 操作时使用 `$biof3-project-governance`。
+- 默认启动上下文只使用“当前开发必读”四项；不要扫描全部 `docs/` 或 `acceptance/` 猜测当前状态。
 - 新建非归档 Markdown 必须同步登记 `DOC-REGISTRY.json` 并通过 `npm run docs:check`。
 - 工作包完成前运行 `npm run docs:reconcile`，逐项判断保留、替代或归档，不自动批量搬迁。
 - 当前状态只写 handoff/next steps，不继续向其中追加长篇历史。
