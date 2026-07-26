@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P4R-0",
-  "sourceCommit": "e1f841c8ada919250c01f5cde76586ef2375bdc6",
+  "sourceCommit": "2004008a55f49dceef9adbb410ddcdf099a878da",
   "captureMode": "real_chain_corpus_plus_server_request_waterfall_and_event_loop_histogram_in_disposable_root",
   "qualificationEligible": false,
   "qualificationReason": "P4R-0 only captures a baseline and freezes budgets. It does not implement the fast path, and it does not measure any client-side metric. Result Studio product qualification remains reserved for P7.",
@@ -18,7 +18,7 @@
     "corpusTest": "2446b80e933ecdc47871fa2b22c1d13be62d2bbb30c776b28d237ab9881caf43",
     "baselineTest": "613b1f5b07f215963ca45b9ea351f581ec6f3518956f8127d48f156a9a5c7cf4",
     "invariantTest": "8255133b145b09abf27b2bc57a6a54f0d8d6854cc04e2ba523d0b5cb94e0694a",
-    "acceptanceScript": "329c09e576b62d31c37f76279997e415914dda775f5e5c4d48b61351c4eaca5f"
+    "acceptanceScript": "3a1f51f293abff470ffec494dd6c9b68752a36bb02cb6c78890b6962aa2397da"
   },
   "budgets": {
     "eventLoopMaxMs": {
@@ -41,10 +41,77 @@
     "versionSwitchMs": "deferred_to_G0-RS-P4R-1: no read-only version switch surface exists yet",
     "codeOpenMs": "deferred_to_G0-RS-P4R-5: no revision source projection route exists (23 routes checked)"
   },
+  "frozenBaseline": {
+    "capturedAtCommit": "e1f841c8ada919250c01f5cde76586ef2375bdc6",
+    "revisionCount": 1,
+    "calibration": {
+      "gitSpawnMedianMs": 9.559,
+      "pathEntries": 31,
+      "invokedUnderNpm": false
+    },
+    "requests": [
+      {
+        "id": "job-status",
+        "role": "render-blocking",
+        "status": 200,
+        "coldMs": 5.492,
+        "warmMs": 2.229,
+        "oneTimeCostMs": 3.263
+      },
+      {
+        "id": "artifact-bytes",
+        "role": "render-blocking",
+        "status": 200,
+        "coldMs": 5.043,
+        "warmMs": 2.174,
+        "oneTimeCostMs": 2.869
+      },
+      {
+        "id": "interaction",
+        "role": "secondary",
+        "status": 200,
+        "coldMs": 389.139,
+        "warmMs": 9.9,
+        "oneTimeCostMs": 379.239
+      },
+      {
+        "id": "context-envelope",
+        "role": "secondary",
+        "status": 409,
+        "coldMs": 4.235,
+        "warmMs": 1.719,
+        "oneTimeCostMs": 2.516
+      },
+      {
+        "id": "changesets",
+        "role": "secondary",
+        "status": 200,
+        "coldMs": 45.73,
+        "warmMs": 42.102,
+        "oneTimeCostMs": 3.628
+      },
+      {
+        "id": "workspace-status",
+        "role": "secondary",
+        "status": 200,
+        "coldMs": 64.925,
+        "warmMs": 64.862,
+        "oneTimeCostMs": 0.063
+      }
+    ],
+    "eventLoop": {
+      "resolutionMs": 10,
+      "samples": 16,
+      "minMs": 9.839,
+      "meanMs": 58.073,
+      "maxMs": 394.265,
+      "percentilesOmitted": "sample count too low for p95/p99 to be meaningful"
+    }
+  },
   "baselineObservation": {
     "captureMode": "real_run_tool_chain_in_disposable_root_with_env_gated_probe",
     "calibration": {
-      "gitSpawnMedianMs": 9.559,
+      "gitSpawnMedianMs": 9.643,
       "pathEntries": 31,
       "invokedUnderNpm": false
     },
@@ -53,17 +120,17 @@
     "corpus": [
       {
         "toolId": "deseq2",
-        "durationMs": 6058,
+        "durationMs": 5990,
         "artifactCount": 23
       },
       {
         "toolId": "volcano-plot",
-        "durationMs": 1050,
+        "durationMs": 1038,
         "artifactCount": 5
       },
       {
         "toolId": "gene-correlation",
-        "durationMs": 391,
+        "durationMs": 385,
         "artifactCount": 4
       }
     ],
@@ -72,107 +139,107 @@
         "id": "job-status",
         "role": "render-blocking",
         "status": 200,
-        "totalMs": 5.492,
-        "coldMs": 5.492,
-        "warmMs": 2.229,
+        "totalMs": 5.84,
+        "coldMs": 5.84,
+        "warmMs": 1.893,
         "warmSamplesMs": [
-          1.886,
-          2.229,
-          3.161
+          1.846,
+          1.893,
+          3.231
         ],
-        "warmSpreadMs": 1.275,
-        "oneTimeCostMs": 3.263,
+        "warmSpreadMs": 1.385,
+        "oneTimeCostMs": 3.947,
         "bytes": 74633
       },
       {
         "id": "artifact-bytes",
         "role": "render-blocking",
         "status": 200,
-        "totalMs": 5.043,
-        "coldMs": 5.043,
-        "warmMs": 2.174,
+        "totalMs": 4.726,
+        "coldMs": 4.726,
+        "warmMs": 1.999,
         "warmSamplesMs": [
-          1.692,
-          2.174,
-          2.579
+          1.488,
+          1.999,
+          2.283
         ],
-        "warmSpreadMs": 0.887,
-        "oneTimeCostMs": 2.869,
-        "bytes": 144997
+        "warmSpreadMs": 0.795,
+        "oneTimeCostMs": 2.727,
+        "bytes": 146101
       },
       {
         "id": "interaction",
         "role": "secondary",
         "status": 200,
-        "totalMs": 389.139,
-        "coldMs": 389.139,
-        "warmMs": 9.9,
+        "totalMs": 318.782,
+        "coldMs": 318.782,
+        "warmMs": 9.371,
         "warmSamplesMs": [
-          9.331,
-          9.9,
-          11.314
+          9.158,
+          9.371,
+          11.851
         ],
-        "warmSpreadMs": 1.983,
-        "oneTimeCostMs": 379.239,
+        "warmSpreadMs": 2.693,
+        "oneTimeCostMs": 309.411,
         "bytes": 46212
       },
       {
         "id": "context-envelope",
         "role": "secondary",
         "status": 409,
-        "totalMs": 4.235,
-        "coldMs": 4.235,
-        "warmMs": 1.719,
+        "totalMs": 3.051,
+        "coldMs": 3.051,
+        "warmMs": 1.813,
         "warmSamplesMs": [
-          1.695,
-          1.719,
-          1.85
+          1.562,
+          1.813,
+          1.931
         ],
-        "warmSpreadMs": 0.155,
-        "oneTimeCostMs": 2.516,
+        "warmSpreadMs": 0.369,
+        "oneTimeCostMs": 1.238,
         "bytes": 188
       },
       {
         "id": "changesets",
         "role": "secondary",
         "status": 200,
-        "totalMs": 45.73,
-        "coldMs": 45.73,
-        "warmMs": 42.102,
+        "totalMs": 1.979,
+        "coldMs": 1.979,
+        "warmMs": 1.273,
         "warmSamplesMs": [
-          41.497,
-          42.102,
-          43.721
+          1.085,
+          1.273,
+          1.397
         ],
-        "warmSpreadMs": 2.224,
-        "oneTimeCostMs": 3.628,
+        "warmSpreadMs": 0.312,
+        "oneTimeCostMs": 0.706,
         "bytes": 1643
       },
       {
         "id": "workspace-status",
         "role": "secondary",
         "status": 200,
-        "totalMs": 64.925,
-        "coldMs": 64.925,
-        "warmMs": 64.862,
+        "totalMs": 25.656,
+        "coldMs": 25.656,
+        "warmMs": 23.928,
         "warmSamplesMs": [
-          62.913,
-          64.862,
-          69.684
+          23.448,
+          23.928,
+          25.133
         ],
-        "warmSpreadMs": 6.771,
-        "oneTimeCostMs": 0.063,
+        "warmSpreadMs": 1.685,
+        "oneTimeCostMs": 1.728,
         "bytes": 837
       }
     ],
-    "renderBlockingTotalMs": 10.535,
+    "renderBlockingTotalMs": 10.566,
     "slowestRequest": "interaction",
     "eventLoop": {
       "resolutionMs": 10,
-      "samples": 16,
-      "minMs": 9.839,
-      "meanMs": 58.073,
-      "maxMs": 394.265,
+      "samples": 13,
+      "minMs": 9.961,
+      "meanMs": 40.975,
+      "maxMs": 324.01,
       "percentilesOmitted": "sample count too low for p95/p99 to be meaningful"
     },
     "unmeasured": [
@@ -198,17 +265,48 @@
       }
     ]
   },
+  "improvementVsBaseline": [
+    {
+      "id": "job-status",
+      "baselineWarmMs": 2.229,
+      "currentWarmMs": 1.893,
+      "deltaPct": -15.1
+    },
+    {
+      "id": "artifact-bytes",
+      "baselineWarmMs": 2.174,
+      "currentWarmMs": 1.999,
+      "deltaPct": -8
+    },
+    {
+      "id": "interaction",
+      "baselineWarmMs": 9.9,
+      "currentWarmMs": 9.371,
+      "deltaPct": -5.3
+    },
+    {
+      "id": "changesets",
+      "baselineWarmMs": 42.102,
+      "currentWarmMs": 1.273,
+      "deltaPct": -97
+    },
+    {
+      "id": "workspace-status",
+      "baselineWarmMs": 64.862,
+      "currentWarmMs": 23.928,
+      "deltaPct": -63.1
+    }
+  ],
   "budgetStatus": {
     "eventLoopMaxMs": "violated_by_current_implementation",
-    "observedMaxMs": 394.265,
+    "observedMaxMs": 324.01,
     "attributedTo": "interaction",
-    "steadyStateWorstMs": 64.862,
+    "steadyStateWorstMs": 23.928,
     "steadyStateWorstRoute": "workspace-status",
     "oneTimeDominated": [
       "job-status",
       "artifact-bytes",
-      "interaction",
-      "context-envelope"
+      "interaction"
     ],
     "note": "The frozen 250ms budget is exceeded by the current implementation. This is the P4R-0 finding, not a P4R-0 failure: P4R-1 owns the fix. The budget must not be raised to accommodate it.",
     "absoluteTimingsAreLoadSensitive": true,
@@ -306,6 +404,14 @@
       "detail": "The four plan invariants exist as tests written against code reality, each naming the concrete defect it fails on. They are deliberately NOT aggregated into this gate: three fail today, which is P4R-0 delivering a definition of done for P4R-1 and P4R-5, not a passing claim."
     },
     {
+      "id": "RS-P4R0-13",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-acceptance.mjs"
+      ],
+      "detail": "The P4R-0 baseline is a frozen constant, not a re-measured value. Its numbers are pinned so a later run cannot quietly replace the record it exists to preserve."
+    },
+    {
       "id": "RS-P4R0-9",
       "passed": true,
       "evidence": [
@@ -324,14 +430,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-26T14:45:57.652Z",
+    "generatedAt": "2026-07-26T15:52:55.142Z",
     "commands": [
       {
         "label": "probe-and-harness",
         "command": "node --test test/perf-probe.test.mjs test/p4r-capture.test.mjs test/p4r-corpus.test.mjs test/p4r-baseline.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "f0d69678bac7d1c97928ecbf849319ace673d34e518725807faeef2a1034a8b9",
+        "stdoutSha256": "19b908ecebbac4f077212ccc9e7217814b8db4be789ef695cfdc424d855b34d0",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -339,7 +445,7 @@
         "command": "node --test test/test-affected.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "84a97100fb7bb928f106f8ee982a24c2a7f0b645c737a3c6f87a82378cb2c297",
+        "stdoutSha256": "5acfb631b1513cfc0d05081e1548cfe6ce80263c59f1668353f5fd6be1407346",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -354,6 +460,6 @@
   },
   "executionTruth": "run_tool -> tool_job -> artifact_truth",
   "passed": true,
-  "generatedAt": "2026-07-26T14:45:57.652Z",
+  "generatedAt": "2026-07-26T15:52:55.142Z",
   "privacyClean": true
 }

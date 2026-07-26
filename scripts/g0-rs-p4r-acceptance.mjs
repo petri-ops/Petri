@@ -84,6 +84,89 @@ const DEFERRED_BUDGETS = Object.freeze({
   codeOpenMs: 'deferred_to_G0-RS-P4R-5: no revision source projection route exists (23 routes checked)',
 });
 
+/**
+ * The P4R-0 baseline, frozen as a CONSTANT.
+ *
+ * A baseline is a record of how the system behaved at a moment, so it must not
+ * be re-measured. Until this was added, `--write-evidence` re-ran the capture
+ * and overwrote these numbers, and the gate stayed green while doing it — so
+ * running the documented update command after a P4R-1 optimisation would have
+ * silently destroyed the evidence that the optimisation improved anything.
+ * That is the same shape as the defects this stage spent its time removing: an
+ * operation that looks routine and quietly erases the thing it reports on.
+ *
+ * Captured at e1f841c8, revisionCount 1, on an idle machine
+ * (gitSpawnMedianMs 9.559, not under npm). Later runs re-measure into
+ * `currentObservation` and are compared against this; they never replace it.
+ */
+export const FROZEN_BASELINE = Object.freeze({
+    "capturedAtCommit": "e1f841c8ada919250c01f5cde76586ef2375bdc6",
+    "revisionCount": 1,
+    "calibration": {
+      "gitSpawnMedianMs": 9.559,
+      "pathEntries": 31,
+      "invokedUnderNpm": false
+    },
+    "requests": [
+      {
+        "id": "job-status",
+        "role": "render-blocking",
+        "status": 200,
+        "coldMs": 5.492,
+        "warmMs": 2.229,
+        "oneTimeCostMs": 3.263
+      },
+      {
+        "id": "artifact-bytes",
+        "role": "render-blocking",
+        "status": 200,
+        "coldMs": 5.043,
+        "warmMs": 2.174,
+        "oneTimeCostMs": 2.869
+      },
+      {
+        "id": "interaction",
+        "role": "secondary",
+        "status": 200,
+        "coldMs": 389.139,
+        "warmMs": 9.9,
+        "oneTimeCostMs": 379.239
+      },
+      {
+        "id": "context-envelope",
+        "role": "secondary",
+        "status": 409,
+        "coldMs": 4.235,
+        "warmMs": 1.719,
+        "oneTimeCostMs": 2.516
+      },
+      {
+        "id": "changesets",
+        "role": "secondary",
+        "status": 200,
+        "coldMs": 45.73,
+        "warmMs": 42.102,
+        "oneTimeCostMs": 3.628
+      },
+      {
+        "id": "workspace-status",
+        "role": "secondary",
+        "status": 200,
+        "coldMs": 64.925,
+        "warmMs": 64.862,
+        "oneTimeCostMs": 0.063
+      }
+    ],
+    "eventLoop": {
+      "resolutionMs": 10,
+      "samples": 16,
+      "minMs": 9.839,
+      "meanMs": 58.073,
+      "maxMs": 394.265,
+      "percentilesOmitted": "sample count too low for p95/p99 to be meaningful"
+    }
+  });
+
 /** Routes whose real cost the baseline must have measured. */
 const MUST_BE_MEASURED = ['job-status', 'artifact-bytes', 'interaction', 'changesets', 'workspace-status'];
 
@@ -211,6 +294,23 @@ function runInvariantSuite() {
   return { passed, failed, total: passed + failed };
 }
 
+/** Compare a fresh measurement against the frozen baseline, warm path only. */
+function compareToBaseline(observation) {
+  const baseline = new Map(FROZEN_BASELINE.requests.map((r) => [r.id, r]));
+  return (observation?.requests || [])
+    .filter((r) => r.status === 200 && Number.isFinite(r.warmMs))
+    .map((r) => {
+      const was = baseline.get(r.id);
+      if (!was || !Number.isFinite(was.warmMs)) return { id: r.id, baselineWarmMs: null, currentWarmMs: r.warmMs };
+      return {
+        id: r.id,
+        baselineWarmMs: was.warmMs,
+        currentWarmMs: r.warmMs,
+        deltaPct: Number((((r.warmMs - was.warmMs) / was.warmMs) * 100).toFixed(1)),
+      };
+    });
+}
+
 function inspect(verification, observation) {
   const capture = read(sourceFiles.capture);
   const corpus = read(sourceFiles.corpus);
@@ -301,6 +401,16 @@ function inspect(verification, observation) {
       [sourceFiles.invariantTest],
       'The four plan invariants exist as tests written against code reality, each naming the concrete defect it fails on. They are deliberately NOT aggregated into this gate: three fail today, which is P4R-0 delivering a definition of done for P4R-1 and P4R-5, not a passing claim.'),
 
+    // Fails if the frozen baseline is edited to match a later measurement.
+    // A baseline that drifts toward the present proves nothing.
+    item('RS-P4R0-13',
+      FROZEN_BASELINE.capturedAtCommit === 'e1f841c8ada919250c01f5cde76586ef2375bdc6'
+      && FROZEN_BASELINE.revisionCount === 1
+      && (FROZEN_BASELINE.requests.find((r) => r.id === 'workspace-status') || {}).warmMs === 64.862
+      && (FROZEN_BASELINE.requests.find((r) => r.id === 'changesets') || {}).warmMs === 42.102,
+      [sourceFiles.acceptanceScript],
+      'The P4R-0 baseline is a frozen constant, not a re-measured value. Its numbers are pinned so a later run cannot quietly replace the record it exists to preserve.'),
+
     item('RS-P4R0-9', commands.length >= 3 && commands.every((command) => command.passed),
       [evidencePath.replace(`${root}/`, '')],
       'All declared P4R-0 command gates passed.'),
@@ -329,7 +439,11 @@ function inspect(verification, observation) {
     sourceHashes: sourceHashes(),
     budgets: BUDGETS,
     deferredBudgets: DEFERRED_BUDGETS,
+    // The frozen record and a fresh measurement, kept apart on purpose. Only
+    // `currentObservation` moves; `frozenBaseline` is a constant in this file.
+    frozenBaseline: FROZEN_BASELINE,
     baselineObservation: observation,
+    improvementVsBaseline: compareToBaseline(observation),
     budgetStatus: {
       eventLoopMaxMs: budgetMet ? 'met' : 'violated_by_current_implementation',
       observedMaxMs: eventLoop.maxMs ?? null,
