@@ -3244,6 +3244,13 @@ function ResultArtifactShell({
   const { resolvedTheme } = useTheme();
   const isSidebar = variant === 'sidebar';
   const [result, setResult] = useState<JobResult | null>(null);
+  // Which job the currently displayed body belongs to. Without this the
+  // effects below cannot tell "re-observing the same job" from "a different
+  // job", and cleared unconditionally for both.
+  const bodyJobRef = useRef<string | null>(null);
+  // Which artifact the interaction manifest belongs to, so the manifest effect
+  // can tell an artifact change from an unrelated dependency change.
+  const manifestArtifactRef = useRef<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [jobMeta, setJobMeta] = useState<JobDetailMeta | null>(null);
   const [manifestRaw, setManifestRaw] = useState<unknown>(null);
@@ -3320,6 +3327,7 @@ function ResultArtifactShell({
 
   useEffect(() => {
     if (!job) {
+      bodyJobRef.current = null;
       setResult(null);
       setJobMeta(null);
       setManifestRaw(null);
@@ -3338,10 +3346,17 @@ function ResultArtifactShell({
 
     if (effectiveJobStatus === 'done') {
       setLoading(true);
-      setResult(null);
-      setJobMeta(null);
-      setSelectedName('');
-      setSelectedSectionId('');
+      // result_fetch_started: re-fetching the SAME job keeps what is on screen.
+      // The old body stays valid until the new one arrives; clearing here
+      // blanked a perfectly good result on every refetch.
+      // See components/result-studio/resultBodyState.ts.
+      if (bodyJobRef.current !== job.id) {
+        bodyJobRef.current = null;
+        setResult(null);
+        setJobMeta(null);
+        setSelectedName('');
+        setSelectedSectionId('');
+      }
       (async () => {
         try {
           const token = getToken();
@@ -3350,6 +3365,7 @@ function ResultArtifactShell({
           });
           const data = await resp.json();
           if (data.ok && data.result) {
+            bodyJobRef.current = job.id;
             setResult(data.result);
             setJobMeta({
               params: data.params || {},
@@ -3363,7 +3379,18 @@ function ResultArtifactShell({
           setLoading(false);
         }
       })();
+    } else if (bodyJobRef.current === job.id) {
+      // job_status_observed from the 15s job-list fetch, which is never updated
+      // in place for an already-present job — so its status may be arbitrarily
+      // stale and must not replace a rendered artifact with a spinner. Losing
+      // an observation is not observing a change.
+      //
+      // Guarded on the ref rather than on `result`: this effect's deps are
+      // [effectiveJobStatus, job?.id, lang], so a `result` read here would be a
+      // stale closure value.
+      setLoading(false);
     } else {
+      bodyJobRef.current = null;
       setResult(null);
       setJobMeta(null);
       setLoading(false);
@@ -3602,12 +3629,21 @@ function ResultArtifactShell({
   useEffect(() => {
     const epoch = selectionMutationEpochRef.current + 1;
     selectionMutationEpochRef.current = epoch;
-    setInteractionManifest(null);
-    setInteractionBackingTable(null);
-    setArtifactSelection(null);
-    visibleSelectionRef.current = null;
-    committedSelectionRef.current = null;
-    setSelectionError('');
+    // 只在 artifact 真的换了时才清空。这个 effect 的依赖还包含 conversationId
+    // 与 effectiveJobStatus，因此 artifact 没变也会重跑；而下面的 catch 是空的，
+    // 于是一次刷新失败就会永久丢掉交互视图——次级失败降级了主体能力。
+    // 清空本身的理由（旧选择属于旧 artifact）依然成立，只是收窄到它真正适用的条件。
+    // 见 components/result-studio/resultBodyState.ts。
+    const manifestKey = `${job?.id || ''}::${selectedArtifactName || ''}`;
+    if (manifestArtifactRef.current !== manifestKey) {
+      manifestArtifactRef.current = manifestKey;
+      setInteractionManifest(null);
+      setInteractionBackingTable(null);
+      setArtifactSelection(null);
+      visibleSelectionRef.current = null;
+      committedSelectionRef.current = null;
+      setSelectionError('');
+    }
     if (!job || effectiveJobStatus !== 'done' || !selectedArtifactName) return;
     if (selectedArtifactKind !== 'table' && selectedArtifactKind !== 'plot') return;
     let cancelled = false;

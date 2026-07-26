@@ -266,7 +266,12 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
     );
     assert.ok(existsSync(specPath), `${BODY_STATE_SPEC} must exist; nothing else covers this path`);
 
-    const result = spawnSync('npm', ['run', 'test:files', '--prefix', 'frontend', '--', BODY_STATE_SPEC], {
+    // vitest runs with cwd=frontend and include 'src/**', so the filter must be
+    // frontend-relative. Passing the repo-relative path matches nothing — and
+    // test:files exits 1 on no matches, which is why this surfaced rather than
+    // passing silently.
+    const specFilter = BODY_STATE_SPEC.replace(/^frontend\//, '');
+    const result = spawnSync('npm', ['run', 'test:files', '--prefix', 'frontend', '--', specFilter], {
       cwd: REPO_ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024,
     });
     assert.equal(result.status, 0, `the body-state spec must pass:\n${(result.stdout || '').slice(-1500)}`);

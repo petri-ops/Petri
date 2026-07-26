@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P4R-0",
-  "sourceCommit": "2004008a55f49dceef9adbb410ddcdf099a878da",
+  "sourceCommit": "b6e7e91dcd6292b0b18c71b3200988a3d0d736d3",
   "captureMode": "real_chain_corpus_plus_server_request_waterfall_and_event_loop_histogram_in_disposable_root",
   "qualificationEligible": false,
   "qualificationReason": "P4R-0 only captures a baseline and freezes budgets. It does not implement the fast path, and it does not measure any client-side metric. Result Studio product qualification remains reserved for P7.",
@@ -17,7 +17,7 @@
     "captureTest": "8c4cec8a66f34e42e87c64eda758dbc1be78740b2d1c272c538d0766ec8956cd",
     "corpusTest": "2446b80e933ecdc47871fa2b22c1d13be62d2bbb30c776b28d237ab9881caf43",
     "baselineTest": "613b1f5b07f215963ca45b9ea351f581ec6f3518956f8127d48f156a9a5c7cf4",
-    "invariantTest": "8255133b145b09abf27b2bc57a6a54f0d8d6854cc04e2ba523d0b5cb94e0694a",
+    "invariantTest": "16b99403fef031929979c0313b6b77f7c32fc95699936c5daa8fbbff2c0375e6",
     "acceptanceScript": "3a1f51f293abff470ffec494dd6c9b68752a36bb02cb6c78890b6962aa2397da"
   },
   "budgets": {
@@ -111,7 +111,7 @@
   "baselineObservation": {
     "captureMode": "real_run_tool_chain_in_disposable_root_with_env_gated_probe",
     "calibration": {
-      "gitSpawnMedianMs": 9.643,
+      "gitSpawnMedianMs": 9.61,
       "pathEntries": 31,
       "invokedUnderNpm": false
     },
@@ -120,17 +120,17 @@
     "corpus": [
       {
         "toolId": "deseq2",
-        "durationMs": 5990,
+        "durationMs": 6052,
         "artifactCount": 23
       },
       {
         "toolId": "volcano-plot",
-        "durationMs": 1038,
+        "durationMs": 1052,
         "artifactCount": 5
       },
       {
         "toolId": "gene-correlation",
-        "durationMs": 385,
+        "durationMs": 394,
         "artifactCount": 4
       }
     ],
@@ -141,105 +141,105 @@
         "status": 200,
         "totalMs": 5.84,
         "coldMs": 5.84,
-        "warmMs": 1.893,
+        "warmMs": 2.008,
         "warmSamplesMs": [
-          1.846,
-          1.893,
-          3.231
+          1.975,
+          2.008,
+          3.214
         ],
-        "warmSpreadMs": 1.385,
-        "oneTimeCostMs": 3.947,
+        "warmSpreadMs": 1.239,
+        "oneTimeCostMs": 3.832,
         "bytes": 74633
       },
       {
         "id": "artifact-bytes",
         "role": "render-blocking",
         "status": 200,
-        "totalMs": 4.726,
-        "coldMs": 4.726,
-        "warmMs": 1.999,
+        "totalMs": 5.033,
+        "coldMs": 5.033,
+        "warmMs": 2.22,
         "warmSamplesMs": [
-          1.488,
-          1.999,
-          2.283
+          1.499,
+          2.22,
+          2.237
         ],
-        "warmSpreadMs": 0.795,
-        "oneTimeCostMs": 2.727,
-        "bytes": 146101
+        "warmSpreadMs": 0.738,
+        "oneTimeCostMs": 2.813,
+        "bytes": 142887
       },
       {
         "id": "interaction",
         "role": "secondary",
         "status": 200,
-        "totalMs": 318.782,
-        "coldMs": 318.782,
-        "warmMs": 9.371,
+        "totalMs": 328.901,
+        "coldMs": 328.901,
+        "warmMs": 9.643,
         "warmSamplesMs": [
-          9.158,
-          9.371,
-          11.851
+          9.245,
+          9.643,
+          11.147
         ],
-        "warmSpreadMs": 2.693,
-        "oneTimeCostMs": 309.411,
+        "warmSpreadMs": 1.902,
+        "oneTimeCostMs": 319.258,
         "bytes": 46212
       },
       {
         "id": "context-envelope",
         "role": "secondary",
         "status": 409,
-        "totalMs": 3.051,
-        "coldMs": 3.051,
-        "warmMs": 1.813,
+        "totalMs": 2.624,
+        "coldMs": 2.624,
+        "warmMs": 1.667,
         "warmSamplesMs": [
-          1.562,
-          1.813,
-          1.931
+          1.547,
+          1.667,
+          1.914
         ],
-        "warmSpreadMs": 0.369,
-        "oneTimeCostMs": 1.238,
+        "warmSpreadMs": 0.367,
+        "oneTimeCostMs": 0.957,
         "bytes": 188
       },
       {
         "id": "changesets",
         "role": "secondary",
         "status": 200,
-        "totalMs": 1.979,
-        "coldMs": 1.979,
-        "warmMs": 1.273,
+        "totalMs": 2.498,
+        "coldMs": 2.498,
+        "warmMs": 1.543,
         "warmSamplesMs": [
-          1.085,
-          1.273,
-          1.397
+          1.258,
+          1.543,
+          1.553
         ],
-        "warmSpreadMs": 0.312,
-        "oneTimeCostMs": 0.706,
+        "warmSpreadMs": 0.295,
+        "oneTimeCostMs": 0.955,
         "bytes": 1643
       },
       {
         "id": "workspace-status",
         "role": "secondary",
         "status": 200,
-        "totalMs": 25.656,
-        "coldMs": 25.656,
-        "warmMs": 23.928,
+        "totalMs": 25.608,
+        "coldMs": 25.608,
+        "warmMs": 24.084,
         "warmSamplesMs": [
-          23.448,
-          23.928,
-          25.133
+          24.002,
+          24.084,
+          25.119
         ],
-        "warmSpreadMs": 1.685,
-        "oneTimeCostMs": 1.728,
+        "warmSpreadMs": 1.117,
+        "oneTimeCostMs": 1.524,
         "bytes": 837
       }
     ],
-    "renderBlockingTotalMs": 10.566,
+    "renderBlockingTotalMs": 10.873,
     "slowestRequest": "interaction",
     "eventLoop": {
       "resolutionMs": 10,
-      "samples": 13,
-      "minMs": 9.961,
-      "meanMs": 40.975,
-      "maxMs": 324.01,
+      "samples": 12,
+      "minMs": 10.093,
+      "meanMs": 44.871,
+      "maxMs": 334.234,
       "percentilesOmitted": "sample count too low for p95/p99 to be meaningful"
     },
     "unmeasured": [
@@ -269,39 +269,39 @@
     {
       "id": "job-status",
       "baselineWarmMs": 2.229,
-      "currentWarmMs": 1.893,
-      "deltaPct": -15.1
+      "currentWarmMs": 2.008,
+      "deltaPct": -9.9
     },
     {
       "id": "artifact-bytes",
       "baselineWarmMs": 2.174,
-      "currentWarmMs": 1.999,
-      "deltaPct": -8
+      "currentWarmMs": 2.22,
+      "deltaPct": 2.1
     },
     {
       "id": "interaction",
       "baselineWarmMs": 9.9,
-      "currentWarmMs": 9.371,
-      "deltaPct": -5.3
+      "currentWarmMs": 9.643,
+      "deltaPct": -2.6
     },
     {
       "id": "changesets",
       "baselineWarmMs": 42.102,
-      "currentWarmMs": 1.273,
-      "deltaPct": -97
+      "currentWarmMs": 1.543,
+      "deltaPct": -96.3
     },
     {
       "id": "workspace-status",
       "baselineWarmMs": 64.862,
-      "currentWarmMs": 23.928,
-      "deltaPct": -63.1
+      "currentWarmMs": 24.084,
+      "deltaPct": -62.9
     }
   ],
   "budgetStatus": {
     "eventLoopMaxMs": "violated_by_current_implementation",
-    "observedMaxMs": 324.01,
+    "observedMaxMs": 334.234,
     "attributedTo": "interaction",
-    "steadyStateWorstMs": 23.928,
+    "steadyStateWorstMs": 24.084,
     "steadyStateWorstRoute": "workspace-status",
     "oneTimeDominated": [
       "job-status",
@@ -430,14 +430,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-26T15:52:55.142Z",
+    "generatedAt": "2026-07-26T16:16:45.574Z",
     "commands": [
       {
         "label": "probe-and-harness",
         "command": "node --test test/perf-probe.test.mjs test/p4r-capture.test.mjs test/p4r-corpus.test.mjs test/p4r-baseline.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "19b908ecebbac4f077212ccc9e7217814b8db4be789ef695cfdc424d855b34d0",
+        "stdoutSha256": "0f2d46b0b54d73542fb7e081082dfc5c090365dfcac957c0ce49abfa56d4796d",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -445,7 +445,7 @@
         "command": "node --test test/test-affected.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "5acfb631b1513cfc0d05081e1548cfe6ce80263c59f1668353f5fd6be1407346",
+        "stdoutSha256": "e27360a21bdde9441fee9132d6457c5beeff4162568f5af0b848069005ec1263",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -460,6 +460,6 @@
   },
   "executionTruth": "run_tool -> tool_job -> artifact_truth",
   "passed": true,
-  "generatedAt": "2026-07-26T15:52:55.142Z",
+  "generatedAt": "2026-07-26T16:16:45.574Z",
   "privacyClean": true
 }
