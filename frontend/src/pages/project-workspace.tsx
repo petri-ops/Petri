@@ -71,6 +71,7 @@ import {
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
 import { ResultStudioChangeSetPanel } from '@/components/result-studio/ResultStudioChangeSetPanel';
+import { shouldShowDeliveryCard } from '@/components/result-studio/resultFirstScreen';
 import { ScientificInteractionViewer } from '@/components/result-studio/ScientificInteractionViewer';
 import {
   deleteResultStudioSelection,
@@ -4198,6 +4199,14 @@ function ResultArtifactShell({
           {replayPackageMessage && <div className={styles.resultReplayPackageMessage}>{replayPackageMessage}</div>}
         </section>
       )}
+      {/*
+        主体首屏化：这张卡此前无条件渲染在主体正上方，而没有 reportArtifact 时它
+        完全不可操作——「生成」按钮 disabled，「查看」「导出」根本不渲染，
+        文案只是「分析结果确认后按需生成」。于是用户为了看结果，先要滚过一段
+        告诉他「你现在还不能用这个功能」的说明。
+        有可生成的产物或已生成的报告时才渲染；两者皆无时不占首屏。
+      */}
+      {shouldShowDeliveryCard({ reportArtifact, finalReportUrl }) && (
       <section className={styles.resultDeliveryCard}>
         <div className={styles.resultDeliveryCopy}>
           <strong>最终 HTML 报告</strong>
@@ -4233,6 +4242,7 @@ function ResultArtifactShell({
           )}
         </div>
       </section>
+      )}
       <section className={isSidebar ? styles.resultSidebarReportCard : styles.resultReportSection}>
         {selectionError && <div className={styles.resultWorkflowError}>{selectionError}</div>}
         {showReportRail ? (
