@@ -318,17 +318,24 @@ module.exports = function registerResultStudioRoutes(app) {
         },
       };
     }
-    repo().saveRepositoryBinding({
-      projectId,
-      mode: binding.mode,
-      workspaceRoot: binding.workspaceRoot,
-      gitDir: binding.adapter.gitDir,
-      workTree: binding.adapter.workTree,
-      managedPaths: binding.managedPaths,
-      status: binding.status,
-      reason: binding.reason,
-      gitVersion: binding.inspection?.runtime?.versionRaw || null,
-    });
+    // 只在写路径记录绑定。此前无视自己声明的 `write` 标志无条件写入，
+    // 于是纯 GET（含只读查看历史 Revision）也会 upsert 一行并盖上 updated_at，
+    // 违反「查看不写入」契约。生产代码没有任何一处读回该行
+    // （`getRepositoryBinding` 仅被测试消费），因此它是审计记录：
+    // 在真正用到 git 的时候记录才有意义。
+    if (write) {
+      repo().saveRepositoryBinding({
+        projectId,
+        mode: binding.mode,
+        workspaceRoot: binding.workspaceRoot,
+        gitDir: binding.adapter.gitDir,
+        workTree: binding.adapter.workTree,
+        managedPaths: binding.managedPaths,
+        status: binding.status,
+        reason: binding.reason,
+        gitVersion: binding.inspection?.runtime?.versionRaw || null,
+      });
+    }
     return {
       project,
       binding,
