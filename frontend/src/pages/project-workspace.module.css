@@ -3622,7 +3622,7 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   margin: 0;
   overflow: hidden;
   background: transparent;
-  container-type: inline-size;
+  /* container-type moved to .resultView — see below. */
 }
 
 .resultWorkflowBar {
@@ -4063,6 +4063,17 @@ body.biof3-resizing-columns * {
 
 /* Result view */
 .resultView {
+  /*
+    Establishes the inline-size container that UI-049's fix depends on.
+    That fix collapses .resultScientificDeliveryGrid below 520px via
+    @container, replacing a whole-window @media query that mis-judged a
+    ~340px column. It was verified on .resultSidebarRoot — and then
+    5f3cd5e (G0-RS-P1) moved the result surface to the centre and removed
+    the sidebar mount, leaving the query with no container ancestor on the
+    branch users actually see. The two are sibling returns in
+    ResultArtifactShell, not nested, so nothing inherited it.
+  */
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   height: 100%;
