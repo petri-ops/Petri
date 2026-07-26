@@ -46,6 +46,30 @@ const SERVER_ENTRY = path.join(REPO_ROOT, 'core', 'r-server', 'server.js');
 const MIGRATIONS_DIR = path.join(REPO_ROOT, 'src', 'migrations');
 const REPO_DB = path.join(REPO_ROOT, 'core', 'r-server', 'biof3.db');
 
+/**
+ * Every environment variable that decides where the backend WRITES.
+ *
+ * Declared once and consumed by both createCaptureEnv() and assertIsolated(),
+ * so a path can never be redirected without also being guarded — the first
+ * version of this file set four of these and guarded the same four, which left
+ * BIOF3_LOCAL_DATA_DIR, BIOF3_PLUGINS_DIR and BIOF3_HARNESS_LOCAL_ROOT falling
+ * back to ~/Documents/BioF3-Local, the real user data root.
+ *
+ * Each entry maps the variable to its subdirectory inside the disposable root.
+ * Sources: config.js (db/temp/results/uploads), db.js:550 getLocalDataRoot,
+ * server.js:63 + plugin-loader.js:492 + mcp/registry.js:131 (plugins),
+ * mcp/registry.js:167 + helpers/tools-executor.js:116 (harness root).
+ */
+export const ISOLATED_PATH_ENV = Object.freeze({
+  BIOF3_DB_PATH: 'biof3.db',
+  BIOF3_TEMP_DIR: 'tmp',
+  BIOF3_LOCAL_RESULTS_DIR: 'results',
+  BIOF3_LOCAL_UPLOADS_DIR: 'uploads',
+  BIOF3_LOCAL_DATA_DIR: 'data',
+  BIOF3_PLUGINS_DIR: 'plugins',
+  BIOF3_HARNESS_LOCAL_ROOT: 'results',
+});
+
 /** Tables `001_result_studio.sql` must create for the RS paths to be reachable. */
 export const REQUIRED_RS_TABLES = [
   'git_repository_bindings',
@@ -78,12 +102,7 @@ async function findFreePort() {
  */
 export function assertIsolated(env, root) {
   const resolvedRoot = path.resolve(root);
-  const guarded = [
-    ['BIOF3_DB_PATH', env.BIOF3_DB_PATH],
-    ['BIOF3_TEMP_DIR', env.BIOF3_TEMP_DIR],
-    ['BIOF3_LOCAL_RESULTS_DIR', env.BIOF3_LOCAL_RESULTS_DIR],
-    ['BIOF3_LOCAL_UPLOADS_DIR', env.BIOF3_LOCAL_UPLOADS_DIR],
-  ];
+  const guarded = Object.keys(ISOLATED_PATH_ENV).map((key) => [key, env[key]]);
 
   // Checked before the containment rule below: pointing at the repository
   // database is the most damaging mistake available here, so it earns the
@@ -106,19 +125,18 @@ export function assertIsolated(env, root) {
 /** Build a disposable root plus the environment that points the server at it. */
 export function createCaptureEnv({ port, root } = {}) {
   const captureRoot = root || mkdtempSync(path.join(tmpdir(), 'biof3-p4r-capture-'));
-  const dirs = {
-    temp: path.join(captureRoot, 'tmp'),
-    results: path.join(captureRoot, 'results'),
-    uploads: path.join(captureRoot, 'uploads'),
-  };
-  for (const dir of Object.values(dirs)) mkdirSync(dir, { recursive: true });
+
+  const paths = Object.fromEntries(
+    Object.entries(ISOLATED_PATH_ENV).map(([key, leaf]) => [key, path.join(captureRoot, leaf)]),
+  );
+  // BIOF3_DB_PATH names a file; the rest are directories the backend expects to exist.
+  for (const [key, value] of Object.entries(paths)) {
+    if (key !== 'BIOF3_DB_PATH') mkdirSync(value, { recursive: true });
+  }
 
   const env = {
     ...process.env,
-    BIOF3_DB_PATH: path.join(captureRoot, 'biof3.db'),
-    BIOF3_TEMP_DIR: dirs.temp,
-    BIOF3_LOCAL_RESULTS_DIR: dirs.results,
-    BIOF3_LOCAL_UPLOADS_DIR: dirs.uploads,
+    ...paths,
     BIOF3_PERF_PROBE: '1',
     BIOF3_DESKTOP: '1',
     R_SERVER_PORT: String(port ?? 0),
@@ -127,7 +145,7 @@ export function createCaptureEnv({ port, root } = {}) {
   };
 
   assertIsolated(env, captureRoot);
-  return { root: captureRoot, env, dirs };
+  return { root: captureRoot, env, paths };
 }
 
 /** Apply `src/migrations/*.sql` to the disposable database. */
@@ -230,7 +248,7 @@ export async function resetProbe(baseUrl) {
  */
 export async function capture({ scenarios, keep = false, onLog } = {}) {
   const port = await findFreePort();
-  const { root, env, dirs } = createCaptureEnv({ port });
+  const { root, env } = createCaptureEnv({ port });
   let server = null;
 
   try {

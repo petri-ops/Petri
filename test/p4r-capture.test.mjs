@@ -9,12 +9,13 @@
 
 import { strict as assert } from 'node:assert';
 import { existsSync, mkdtempSync, rmSync, statSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import {
+  ISOLATED_PATH_ENV,
   REQUIRED_RS_TABLES,
   assertIsolated,
   capture,
@@ -25,14 +26,53 @@ import {
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO_DB = path.join(REPO_ROOT, 'core', 'r-server', 'biof3.db');
 
+/**
+ * Paths that fall back to ~/Documents/BioF3-Local — the real user data root,
+ * holding the live database and 150 project directories — when their variable
+ * is unset. The first version of this harness redirected four paths and
+ * guarded the same four, silently leaving these three pointing at real data.
+ */
+const MUST_BE_ISOLATED = [
+  'BIOF3_DB_PATH',
+  'BIOF3_TEMP_DIR',
+  'BIOF3_LOCAL_RESULTS_DIR',
+  'BIOF3_LOCAL_UPLOADS_DIR',
+  'BIOF3_LOCAL_DATA_DIR',
+  'BIOF3_PLUGINS_DIR',
+  'BIOF3_HARNESS_LOCAL_ROOT',
+];
+
+test('every path that can reach the real user data root is redirected and guarded', () => {
+  // Regression: these three defaulted to ~/Documents/BioF3-Local, which holds
+  // the live database and 150 project directories.
+  for (const key of MUST_BE_ISOLATED) {
+    assert.ok(key in ISOLATED_PATH_ENV, `${key} must be redirected into the disposable root`);
+  }
+
+  const { root, env } = createCaptureEnv({ port: 1 });
+  try {
+    for (const key of MUST_BE_ISOLATED) {
+      assert.ok(env[key]?.startsWith(root + path.sep), `${key} must point inside the capture root`);
+    }
+    // Guarding must be derived from the same list, not restated — that drift is
+    // exactly what let the three escape.
+    for (const key of MUST_BE_ISOLATED) {
+      assert.throws(
+        () => assertIsolated({ ...env, [key]: path.join(homedir(), 'Documents', 'BioF3-Local') }, root),
+        /capture isolation/,
+        `${key} pointing at the real data root must abort the run`,
+      );
+    }
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('isolation fails closed when a path escapes the disposable root', () => {
   const root = '/tmp/biof3-capture-root';
-  const good = {
-    BIOF3_DB_PATH: path.join(root, 'biof3.db'),
-    BIOF3_TEMP_DIR: path.join(root, 'tmp'),
-    BIOF3_LOCAL_RESULTS_DIR: path.join(root, 'results'),
-    BIOF3_LOCAL_UPLOADS_DIR: path.join(root, 'uploads'),
-  };
+  const good = Object.fromEntries(
+    Object.entries(ISOLATED_PATH_ENV).map(([key, leaf]) => [key, path.join(root, leaf)]),
+  );
   assert.equal(assertIsolated(good, root), true);
 
   for (const key of Object.keys(good)) {
@@ -73,14 +113,16 @@ test('isolation refuses to capture against the repository database', () => {
 });
 
 test('a built environment points every writable path into its own root', () => {
-  const { root, env, dirs } = createCaptureEnv({ port: 12345 });
+  const { root, env, paths } = createCaptureEnv({ port: 12345 });
   try {
     for (const key of ['BIOF3_DB_PATH', 'BIOF3_TEMP_DIR', 'BIOF3_LOCAL_RESULTS_DIR', 'BIOF3_LOCAL_UPLOADS_DIR']) {
       assert.ok(env[key].startsWith(root + path.sep), `${key} must live under the disposable root`);
     }
     assert.equal(env.BIOF3_PERF_PROBE, '1', 'the probe must be armed for a capture run');
     assert.equal(env.R_SERVER_PORT, '12345');
-    for (const dir of Object.values(dirs)) assert.ok(statSync(dir).isDirectory());
+    for (const [key, value] of Object.entries(paths)) {
+      if (key !== 'BIOF3_DB_PATH') assert.ok(statSync(value).isDirectory(), `${key} must be created`);
+    }
     assert.notEqual(path.resolve(env.BIOF3_DB_PATH), path.resolve(REPO_DB));
   } finally {
     rmSync(root, { recursive: true, force: true });
