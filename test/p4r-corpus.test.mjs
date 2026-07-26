@@ -16,6 +16,7 @@ import path from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
+import { fingerprintRealDataRoot } from '../scripts/g0-rs-p4r-capture.mjs';
 import { CORPUS_INPUTS, CORPUS_STEPS, generateCorpus } from '../scripts/g0-rs-p4r-corpus.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -80,7 +81,7 @@ test(
   { timeout: 600000, skip: R_BLOCKER ?? false },
   async () => {
     const devDbBefore = existsSync(REPO_DB) ? statSync(REPO_DB).mtimeMs : null;
-    const realRootBefore = existsSync(REAL_DATA_ROOT) ? statSync(REAL_DATA_ROOT).mtimeMs : null;
+    const realRootBefore = fingerprintRealDataRoot(REAL_DATA_ROOT);
 
     const result = await generateCorpus({ keep: true, quiet: true });
     try {
@@ -116,8 +117,8 @@ test(
       devDbBefore,
       'the developer database must be untouched by corpus generation',
     );
-    assert.equal(
-      existsSync(REAL_DATA_ROOT) ? statSync(REAL_DATA_ROOT).mtimeMs : null,
+    assert.deepEqual(
+      fingerprintRealDataRoot(REAL_DATA_ROOT),
       realRootBefore,
       'the real user data root must be untouched by corpus generation',
     );

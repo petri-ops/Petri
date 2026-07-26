@@ -21,6 +21,7 @@ import path from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
+import { fingerprintRealDataRoot } from '../scripts/g0-rs-p4r-capture.mjs';
 import { captureBaseline } from '../scripts/g0-rs-p4r-baseline.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -49,7 +50,7 @@ test(
   { timeout: 900000, skip: R_BLOCKER ?? false },
   async () => {
     const devDbBefore = existsSync(REPO_DB) ? statSync(REPO_DB).mtimeMs : null;
-    const realRootBefore = existsSync(REAL_DATA_ROOT) ? statSync(REAL_DATA_ROOT).mtimeMs : null;
+    const realRootBefore = fingerprintRealDataRoot(REAL_DATA_ROOT);
 
     const result = await captureBaseline({ quiet: true });
 
@@ -89,8 +90,8 @@ test(
       devDbBefore,
       'the developer database must be untouched',
     );
-    assert.equal(
-      existsSync(REAL_DATA_ROOT) ? statSync(REAL_DATA_ROOT).mtimeMs : null,
+    assert.deepEqual(
+      fingerprintRealDataRoot(REAL_DATA_ROOT),
       realRootBefore,
       'the real user data root must be untouched',
     );

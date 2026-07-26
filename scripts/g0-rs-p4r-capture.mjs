@@ -29,7 +29,7 @@
 
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
-import { mkdtempSync, mkdirSync, rmSync, existsSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readdirSync, rmSync, existsSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -64,6 +64,35 @@ export const ISOLATED_PATH_ENV = Object.freeze({
   BIOF3_PLUGINS_DIR: 'plugins',
   BIOF3_HARNESS_LOCAL_ROOT: 'results',
 });
+
+/**
+ * Bounded fingerprint of the real user data root, for tests that must prove a
+ * run stayed out of it.
+ *
+ * A directory's mtime does NOT change when a file inside it is rewritten, nor
+ * when anything is created in a subdirectory — so the obvious
+ * `statSync(root).mtimeMs` check cannot see the leaks it appears to guard, and
+ * an earlier version of these tests used exactly that. This instead samples the
+ * things a leak actually produces: a new project directory, a new top-level
+ * entry, or a write to the live database.
+ *
+ * Deliberately bounded: the root holds ~85k files and a recursive walk costs
+ * ~2s per sample. This does not detect a modification deep inside an existing
+ * project. It does detect every creation shape a capture run could produce.
+ */
+export function fingerprintRealDataRoot(realRoot) {
+  if (!existsSync(realRoot)) return { present: false };
+  const list = (dir) => (existsSync(dir) ? readdirSync(dir).sort().join('\n') : null);
+  const dbPath = path.join(realRoot, 'biof3.db');
+  const db = existsSync(dbPath) ? statSync(dbPath) : null;
+  return {
+    present: true,
+    rootEntries: list(realRoot),
+    projectEntries: list(path.join(realRoot, 'projects')),
+    dbSize: db ? db.size : null,
+    dbMtimeMs: db ? db.mtimeMs : null,
+  };
+}
 
 /** Tables `001_result_studio.sql` must create for the RS paths to be reachable. */
 export const REQUIRED_RS_TABLES = [
