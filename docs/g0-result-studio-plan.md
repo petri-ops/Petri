@@ -641,7 +641,7 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 
 ### G0-RS-WT0：开发环境隔离（`deferred`）
 
-2026-07-24 决策：**不使用 Git Worktree**。Result Studio 在主工作区以单线串行方式开发，分支为 `codex/g0-result-studio`。
+2026-07-24 决策：**不使用 Git Worktree**。Result Studio 在主工作区以单线串行方式开发，分支为 `codex/g0-result-studio-product`。
 
 原设计（LF 留在 `main`、RS 使用 Codex 永久 Worktree）的目的是隔离与 LF 并行的开发线。该前提在 LF12 收口后已不存在，因此启动门不成立并标记 `deferred`。
 
@@ -655,7 +655,7 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 
 替代做法：
 
-- 单分支 `codex/g0-result-studio`，小步提交并频繁与 `main` 集成，避免长期分叉后一次性重资格。
+- 单分支 `codex/g0-result-studio-product`，小步提交并频繁与 `main` 集成，避免长期分叉后一次性重资格。
 - 需要与旧行为对照时使用已安装 rc.7，不新建开发实例。
 - `G0-RS8` 的破坏性耐久测试通过环境变量把 Electron `userData`、SQLite、results/uploads/tmp/logs 指向临时目录；只隔离运行时，不复制源码树。
 
