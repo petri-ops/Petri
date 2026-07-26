@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P2",
-  "sourceCommit": "03181522e4958cb27c0ae95286808ac96e9fe864",
+  "sourceCommit": "b5d073a4ebe0561ec50c7ffe25266c18be38aa0d",
   "captureMode": "automated_contract_renderer_performance_and_live_local_product_plus_bounded_visual_spot_check",
   "qualificationEligible": false,
   "privacy": "repository_relative_paths_digests_counts_dimensions_timings_and_bounded_statuses_only_no_project_job_conversation_selection_url_credential_prompt_or_result_data",
@@ -11,14 +11,14 @@
     "contracts": "52e4c29e14dd384add9305c48e4399e92986973eb4d04e8c5069b8df3642a3a0",
     "repository": "a857412dda082cc575d844f66eb43a6c77421937786431fb7417c52d23470050",
     "pluginSdk": "44e057e3ef5a3cbd736ce3af1fa169706f6c466ddca4c645ac9a9fc06ff0ffaa",
-    "routes": "25b17720b4e6a8f6571c7772cf2fcb5c13f42a145da12c0879ca28f981df3c7e",
+    "routes": "c2be0db2bd6720172675664385968b34dfe818e13bdbad748e437ed07a55c7ce",
     "selectionTool": "7bd62361d54847cffc6245933c862e34f44f9d486c1a7b683bdc74e99a75a81d",
     "toolDefinitions": "85759f4aade139c050f917b6b97c1ba6ed337c9e4cec4af9f475b38fabd82a50",
     "toolRegistry": "f53dc7d881955cd23efecf466452bac448e9b915d590bed1d783722e6166d5a6",
     "viewer": "0b165e23bf9a915e658db9bb3c2240e32a741d2c86f434fb5681dddb6f44dbc2",
     "viewerStyle": "2f320233486b31fe7744d7d44730c4373edb4f3ff54f91faf84ee83a16bd2fdf",
     "selectionClient": "22683cc18a4fdf9900e27d0cf1b16a317ecaa8522c56b51809bac68cb75639ad",
-    "workspace": "ebe8db884d035cab9a6ff2cb2dd65c572b6980b32229f1e84d0ac143fee1230b",
+    "workspace": "08324dcbd519580bc1617fb5a276f90515fa6be98b8ee9c8e2e9948099735ac7",
     "viewerTest": "7087a4647f97980bbb42e6cd4f22fde702175df72385eca5b7669060b1f1e0e5",
     "selectionLogic": "2156ef151d014b654d54f533663d2b7f5f086024161b464ecb45bb5b07fbafe2",
     "selectionLogicTest": "b02e4b21b7fd1452171ad31b6aa5f5c8e5dfede1a2c5fb8d2fb302f9ccb79407",
@@ -189,14 +189,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-26T13:18:14.841Z",
+    "generatedAt": "2026-07-26T16:18:34.020Z",
     "commands": [
       {
         "label": "backend-p2",
         "command": "node --test test/result-studio-table-query.test.mjs test/result-selection-tools.test.mjs test/artifact-interaction.test.mjs test/result-studio-contracts.test.mjs test/result-studio-repository.test.mjs test/result-studio-plugin-sdk.test.mjs test/agent-tool-registry.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "cd9a7ec9dc4ef58b33ec00739c678d4382aa38696cb97139bbe26f908ac50439",
+        "stdoutSha256": "a36e8edee33f7402a5390c0b1e88e3ded789761887ac4cebf2d19b2c678b6180",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -204,14 +204,14 @@
         "command": "npm run test:files --prefix frontend -- ScientificInteractionViewer.test.tsx artifact-selection.test.ts CenterPanel.test.tsx ResultStudioSurface.test.tsx",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "a84b8f80e22b0184fa3fd9165694267f2bf1a355ffc2d934acbdad50ab44aa90",
+        "stdoutSha256": "aca3dcc1a3e422c6057da4d4aa2923646a8885c1b2cc64f9d41b7850b4f4564f",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "rendererPerformance": {
           "budgetMs": 100,
-          "scrollFeedbackMs": 2.544,
-          "selectionFeedbackMs": 4.749,
-          "sortFeedbackMs": 5.192,
-          "filterFeedbackMs": 0.915
+          "scrollFeedbackMs": 2.887,
+          "selectionFeedbackMs": 4.536,
+          "sortFeedbackMs": 5.434,
+          "filterFeedbackMs": 0.919
         }
       },
       {
@@ -219,7 +219,7 @@
         "command": "npm run build:check --prefix frontend",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "cba8dcd698bd843de5d7b0913b82379cf8f70c35bfe13a239e12832d05881750",
+        "stdoutSha256": "f83a94f0d8d4954f2fd8aebcb34f1e93d604939140be85bc7465fd9809ebdc11",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -239,6 +239,6 @@
     "futureStagesImplemented": false
   },
   "passed": true,
-  "generatedAt": "2026-07-26T13:18:14.841Z",
+  "generatedAt": "2026-07-26T16:18:34.020Z",
   "privacyClean": true
 }
