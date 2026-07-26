@@ -18,10 +18,13 @@
 import { createHash } from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { captureBaseline } from './g0-rs-p4r-baseline.mjs';
+import { ISOLATED_PATH_ENV, assertIsolated } from './g0-rs-p4r-capture.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const evidencePath = join(root, 'acceptance/g0-result-studio/rs-p4r-performance.json');
@@ -119,18 +122,93 @@ function toObservation(capture) {
   return {
     captureMode: 'real_run_tool_chain_in_disposable_root_with_env_gated_probe',
     calibration: capture.calibration,
+    revisionCount: capture.revisionCount ?? null,
+    scalingNote: 'workspace-status is linear in revisionCount. This capture is the cheapest case; the route grows and crosses the frozen 250ms budget well before the 5000-revision cap. P4R-1 must re-capture with revisionCount swept before choosing any cache key.',
     corpus: capture.corpus.map(({ toolId, durationMs, artifactCount }) => ({ toolId, durationMs, artifactCount })),
     requests: capture.requests.map(({ id, role, status, totalMs, coldMs, warmMs, warmSamplesMs, warmSpreadMs, oneTimeCostMs, bytes }) =>
       ({ id, role, status, totalMs, coldMs, warmMs, warmSamplesMs, warmSpreadMs, oneTimeCostMs, bytes })),
     renderBlockingTotalMs: Number(renderBlocking.reduce((sum, request) => sum + request.totalMs, 0).toFixed(3)),
     slowestRequest: capture.requests.reduce((worst, request) => (request.totalMs > (worst?.totalMs ?? -1) ? request : worst), null)?.id ?? null,
-    eventLoop: capture.eventLoop,
+    // p95/p99 are dropped deliberately: these runs record ~17 samples, at which
+    // percentile(99) returns max exactly, so publishing them invents precision.
+    // Report the sample count and the peak, and let the reader judge.
+    eventLoop: capture.eventLoop
+      ? {
+        resolutionMs: capture.eventLoop.resolutionMs,
+        samples: capture.eventLoop.samples,
+        minMs: capture.eventLoop.minMs,
+        meanMs: capture.eventLoop.meanMs,
+        maxMs: capture.eventLoop.maxMs,
+        percentilesOmitted: 'sample count too low for p95/p99 to be meaningful',
+      }
+      : null,
     unmeasured: [
       ...Object.entries(capture.clientMetrics).map(([key, metric]) => ({ metric: key, reason: metric.status })),
       // Recorded so the gap cannot be mistaken for a measured zero.
       { metric: 'context-envelope', reason: `route returned ${byId.get('context-envelope')?.status ?? 'unknown'}; excluded from the baseline` },
     ],
   };
+}
+
+/**
+ * Exercise the isolation list instead of reading its source.
+ *
+ * Deleting the real keys from ISOLATED_PATH_ENV must fail this. The previous
+ * source-regex version stayed green because the same variable names appear in
+ * the capture script's own doc comment.
+ */
+function probeIsolationBehaviour() {
+  const REQUIRED = [
+    'BIOF3_DB_PATH', 'BIOF3_TEMP_DIR', 'BIOF3_LOCAL_RESULTS_DIR', 'BIOF3_LOCAL_UPLOADS_DIR',
+    'BIOF3_LOCAL_DATA_DIR', 'BIOF3_PLUGINS_DIR', 'BIOF3_HARNESS_LOCAL_ROOT',
+  ];
+  const allGuarded = REQUIRED.every((key) => key in ISOLATED_PATH_ENV);
+  const fakeRoot = '/tmp/biof3-acceptance-probe';
+  const env = Object.fromEntries(
+    Object.entries(ISOLATED_PATH_ENV).map(([key, leaf]) => [key, join(fakeRoot, leaf)]),
+  );
+  let rejectsRealDataRoot = false;
+  try {
+    assertIsolated({ ...env, BIOF3_LOCAL_DATA_DIR: join(homedir(), 'Documents', 'BioF3-Local') }, fakeRoot);
+  } catch {
+    rejectsRealDataRoot = true;
+  }
+  return { allGuarded, rejectsRealDataRoot };
+}
+
+/** Exercise the probe rather than grepping it: off by default, real samples when armed. */
+function probeBehaviourCheck() {
+  const perfProbe = createRequire(import.meta.url)(join(root, 'core/r-server/helpers/perf-probe.js'));
+  const hadFlag = process.env.BIOF3_PERF_PROBE;
+  delete process.env.BIOF3_PERF_PROBE;
+  perfProbe.disableProbe();
+  const offByDefault = perfProbe.enableProbe() === false
+    && perfProbe.snapshotProbe().enabled === false;
+
+  perfProbe.enableProbe({ force: true });
+  const snapshot = perfProbe.snapshotProbe();
+  const resolutionMs = snapshot.eventLoop ? snapshot.eventLoop.resolutionMs : null;
+  // An unsampled histogram must report null rather than its int64 sentinel.
+  const reportsRealSamples = snapshot.eventLoop !== null
+    && (snapshot.eventLoop.samples === 0 ? snapshot.eventLoop.maxMs === null : true);
+  perfProbe.disableProbe();
+  if (hadFlag !== undefined) process.env.BIOF3_PERF_PROBE = hadFlag;
+  return { offByDefault, resolutionMs, reportsRealSamples };
+}
+
+/** Run the invariant suite and parse its real outcome. */
+function runInvariantSuite() {
+  const result = spawnSync('node', ['--test', sourceFiles.invariantTest], {
+    cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024,
+  });
+  const out = `${result.stdout || ''}`;
+  const num = (label) => {
+    const match = new RegExp(`^# ${label} (\\d+)$`, 'm').exec(out);
+    return match ? Number(match[1]) : Number((new RegExp(`\u2139 ${label} (\\d+)`).exec(out) || [])[1] ?? NaN);
+  };
+  const passed = num('pass');
+  const failed = num('fail');
+  return { passed, failed, total: passed + failed };
 }
 
 function inspect(verification, observation) {
@@ -140,6 +218,10 @@ function inspect(verification, observation) {
   const probe = read(sourceFiles.probe);
   const commands = verification?.commands || [];
 
+  const isolationBehaviour = probeIsolationBehaviour();
+  const probeBehaviour = probeBehaviourCheck();
+  const invariantRun = runInvariantSuite();
+  const packageScripts = JSON.parse(read('package.json')).scripts || {};
   const byId = new Map((observation?.requests || []).map((request) => [request.id, request]));
   const measuredAll = MUST_BE_MEASURED.every((id) => byId.get(id)?.status === 200);
   const eventLoop = observation?.eventLoop || {};
@@ -169,8 +251,11 @@ function inspect(verification, observation) {
       [sourceFiles.probe],
       'Event-loop delay came from a real histogram sample, not the empty-histogram sentinel.'),
 
+    // Was `BUDGETS.x.signal.includes('monitorEventLoopDelay')` — a constant
+    // asserted against itself. Now exercises the probe: a live histogram must
+    // report a real resolution and real samples.
     item('RS-P4R0-4',
-      /monitorEventLoopDelay/.test(probe) && BUDGETS.eventLoopMaxMs.signal.includes('monitorEventLoopDelay'),
+      probeBehaviour.resolutionMs === 10 && probeBehaviour.reportsRealSamples === true,
       [sourceFiles.probe],
       'The authoritative >250ms signal is declared as the 10ms-resolution histogram; the 1Hz tick sampler is explicitly rejected as unable to resolve it.'),
 
@@ -180,20 +265,24 @@ function inspect(verification, observation) {
       [sourceFiles.baseline],
       'Metrics with no producer are recorded as unmeasured with a stated reason, never estimated or defaulted to zero.'),
 
-    item('RS-P4R0-6',
-      /ISOLATED_PATH_ENV/.test(capture) && /assertIsolated/.test(capture)
-      && /BIOF3_LOCAL_DATA_DIR/.test(capture) && /BIOF3_PLUGINS_DIR/.test(capture)
-      && /BIOF3_HARNESS_LOCAL_ROOT/.test(capture),
+    // Was five regexes over scripts/g0-rs-p4r-capture.mjs. All three variable
+    // names also appear in that file's own doc comment, so deleting the real
+    // keys from ISOLATED_PATH_ENV left this green while its claim became false.
+    // Now imports the list and exercises the guard.
+    item('RS-P4R0-6', isolationBehaviour.allGuarded === true && isolationBehaviour.rejectsRealDataRoot === true,
       [sourceFiles.capture, sourceFiles.captureTest],
       'Every writable path is redirected and guarded from one declared list, so a capture cannot reach the developer database or the real user data root.'),
 
-    item('RS-P4R0-7',
-      /envEnabled/.test(probe) && /BIOF3_PERF_PROBE/.test(probe),
+    item('RS-P4R0-7', probeBehaviour.offByDefault === true,
       [sourceFiles.probe, sourceFiles.probeRoutes],
       'The probe is env-gated: with the flag unset every export is a no-op and the /api/__perf surface is not mounted.'),
 
+    // A grep for 'createProject' matched this script's own prose too. The
+    // measurement itself proves it: without an owned project every
+    // result-studio route rejects, so 200s ARE the evidence.
     item('RS-P4R0-8',
-      /createProject/.test(corpus) && /setProjectUserId/.test(corpus),
+      MUST_BE_MEASURED.filter((id) => id.startsWith('changesets') || id.startsWith('workspace'))
+        .every((id) => byId.get(id)?.status === 200),
       [sourceFiles.corpus],
       'The corpus creates and owns a real project, without which every Result Studio route rejects and the baseline would time validation.'),
 
@@ -203,10 +292,12 @@ function inspect(verification, observation) {
       [sourceFiles.baseline],
       'Every measured route records both a first-call and a second-call timing, so one-time creation cost cannot be reported as steady-state viewing cost.'),
 
+    // Was three literal greps, all of which also occur in that file's comments,
+    // so deleting every assertion kept this green. Now RUNS the suite and
+    // asserts its real shape: four invariants present, and at least one failing
+    // (a suite that all passes would mean P4R-1's targets no longer exist).
     item('RS-P4R0-12',
-      /nextResultBodyState/.test(read(sourceFiles.invariantTest))
-      && /revisions\/rev_does_not_exist\/source/.test(read(sourceFiles.invariantTest))
-      && /saveRepositoryBinding/.test(read(sourceFiles.invariantTest)),
+      invariantRun.total >= 4 && invariantRun.failed >= 1 && invariantRun.passed >= 1,
       [sourceFiles.invariantTest],
       'The four plan invariants exist as tests written against code reality, each naming the concrete defect it fails on. They are deliberately NOT aggregated into this gate: three fail today, which is P4R-0 delivering a definition of done for P4R-1 and P4R-5, not a passing claim.'),
 
@@ -217,10 +308,13 @@ function inspect(verification, observation) {
     // Checks the recorded commands, not this file's own source: an earlier
     // version grepped the script for the pattern and matched the check's own
     // code, which is a self-referential assertion rather than a real one.
+    // Reads package.json rather than this script's own command literals: the
+    // vacuous-gate class lives in the npm scripts, so that is what must be checked.
     item('RS-P4R0-10',
       commands.length > 0
-      && commands.every((command) => !/\bnpm test\b/.test(command.command)),
-      [evidencePath.replace(`${root}/`, '')],
+      && commands.every((command) => !/\bnpm test\b/.test(command.command))
+      && Object.values(packageScripts).every((value) => !/npm test --prefix frontend/.test(String(value))),
+      [evidencePath.replace(`${root}/`, ''), 'package.json'],
       'No recorded gate invokes bare `npm test`, which under a file filter resolves to `vitest run --changed`, selects nothing and reports success for a zero-test run.'),
   ];
 
@@ -260,20 +354,19 @@ function inspect(verification, observation) {
       // the cleanest run exceeds 250ms.
       absoluteTimingsAreLoadSensitive: true,
       observedColdRangeMsAcrossRuns: [383.491, 4072.669],
-      loadSensitivityCause: 'process-spawn cost scales with the inherited PATH: git --version measured 9.7ms at 31 PATH entries and 122.5ms at the 40 entries npm run injects. detectGitRuntime() is uncached, so every git-touching route pays it per call. See baselineObservation.calibration.',
+      loadSensitivityCause: 'Process-spawn cost swings roughly 12x with invocation context (measured ~9-11ms direct, ~117-122ms under npm), and detectGitRuntime() is uncached so every git-touching route pays it per call. An earlier revision of this file blamed PATH length; that explanation was tested and DISPROVED, and the real cause is not established. Compare readings only within the same calibration — see baselineObservation.calibration.',
       violationRobustAtRangeFloor: true,
       structuralFinding: 'interaction is one-time dominated (its cost disappears on a second call); changesets and workspace-status are recurring costs paid by every view. P4R-1 should target the recurring pair, not the one-time creation.',
+      // Said plainly so P4R-1 is not judged against work it is not chartered to do.
+      violationAttribution: 'The recorded peak is the one-time interaction ChangeSet creation, which is OUT of P4R-1 scope. The routes P4R-1 owns are under budget at this revisionCount and exceed it as revisions accumulate. P4R-1 is accountable for the recurring pair and for the growth term, not for this peak.',
     },
     checks,
     verification,
-    invariants: {
-      executionTruth: 'run_tool -> tool_job -> artifact_truth',
-      secondExecutorCreated: false,
-      developerDatabaseTouched: false,
-      realUserDataTouched: false,
-      clientMetricsFabricated: false,
-      resultStudioQualificationClaimed: false,
-    },
+    // No hand-written invariant booleans. This script's own stated principle
+    // rejects manual assertions, and six unchecked booleans (secondExecutorCreated,
+    // developerDatabaseTouched, ...) had no check behind them and were referenced
+    // by none of the checks. What is actually verified lives in checks[].
+    executionTruth: 'run_tool -> tool_job -> artifact_truth',
     passed: checks.every((check) => check.passed),
   };
 }

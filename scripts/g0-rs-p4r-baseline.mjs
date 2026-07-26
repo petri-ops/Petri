@@ -30,6 +30,7 @@
  */
 
 import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -41,6 +42,22 @@ import {
   stopServer,
 } from './g0-rs-p4r-capture.mjs';
 import { generateCorpus } from './g0-rs-p4r-corpus.mjs';
+
+const require = createRequire(import.meta.url);
+
+/** How many revisions the sampled workspace held. workspace-status scales with it. */
+function countRevisions(dbPath) {
+  try {
+    const Database = require(require.resolve('better-sqlite3', {
+      paths: [path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'core', 'r-server')],
+    }));
+    const db = new Database(dbPath, { readonly: true });
+    try {
+      const t = db.prepare("select name from sqlite_master where type='table' and name='artifact_revisions'").get();
+      return t ? db.prepare('select count(*) c from artifact_revisions').get().c : null;
+    } finally { db.close(); }
+  } catch { return null; }
+}
 
 /**
  * The requests a result open actually issues, in the order the frontend fires
@@ -206,6 +223,9 @@ export async function captureBaseline({ keep = false, quiet = false, onLog } = {
       projectId: corpus.projectId,
     };
     const calibration = await calibrateSpawnCost();
+    // Recorded because workspace-status is linear in revision count: a baseline
+    // that omits it reads as representative when it is in fact the cheapest case.
+    const revisionCount = countRevisions(env.BIOF3_DB_PATH);
     const requests = await driveWaterfall(server.baseUrl, target);
     const snapshot = await snapshotProbe(server.baseUrl);
 
@@ -215,6 +235,7 @@ export async function captureBaseline({ keep = false, quiet = false, onLog } = {
         ({ id, toolId, durationMs, artifactCount, toolJobId })),
       target,
       calibration,
+      revisionCount,
       requests,
       eventLoop: snapshot.eventLoop,
       probeBlocks: snapshot.blocks,

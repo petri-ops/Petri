@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P4R-0",
-  "sourceCommit": "03181522e4958cb27c0ae95286808ac96e9fe864",
+  "sourceCommit": "44cec5020b5b7e069c96b8a11ddc489ea0beb55a",
   "captureMode": "real_chain_corpus_plus_server_request_waterfall_and_event_loop_histogram_in_disposable_root",
   "qualificationEligible": false,
   "qualificationReason": "P4R-0 only captures a baseline and freezes budgets. It does not implement the fast path, and it does not measure any client-side metric. Result Studio product qualification remains reserved for P7.",
@@ -12,13 +12,13 @@
     "bootstrap": "035c37e4f18edec051ec59c20313ab396e0c2276aac7e136b8ec5037c32d90f5",
     "capture": "99f9eb3fe4efa643e5a87925098dfdd815664b703907b90333e9e240edd317ac",
     "corpus": "7885fa8b409d16da0628d0f3413354c47e6cc0a0350188309d678418b833c8af",
-    "baseline": "268b42272438b5d3ee928886b7535c25365e865b2ff44d2222ceef895b731eb3",
+    "baseline": "3b7f2cf19f51ddafc9c0ffd99db1bbbc5c3688518610c965eeda991852769047",
     "probeTest": "72e55812ae8fd3c5d5b02c17a64bf18581e3e0c0759b0e37315641f025960abe",
     "captureTest": "8c4cec8a66f34e42e87c64eda758dbc1be78740b2d1c272c538d0766ec8956cd",
     "corpusTest": "2446b80e933ecdc47871fa2b22c1d13be62d2bbb30c776b28d237ab9881caf43",
     "baselineTest": "613b1f5b07f215963ca45b9ea351f581ec6f3518956f8127d48f156a9a5c7cf4",
     "invariantTest": "6bbb1d52ebd7fde9d00fb0212fc130a93d309bc5092c01eaf13c22a1126bb659",
-    "acceptanceScript": "5217872f2f789ab2cfe06791b92928cb539430d1cc4ab450db1dc8f7cc71c858"
+    "acceptanceScript": "329c09e576b62d31c37f76279997e415914dda775f5e5c4d48b61351c4eaca5f"
   },
   "budgets": {
     "eventLoopMaxMs": {
@@ -44,24 +44,26 @@
   "baselineObservation": {
     "captureMode": "real_run_tool_chain_in_disposable_root_with_env_gated_probe",
     "calibration": {
-      "gitSpawnMedianMs": 10.149,
+      "gitSpawnMedianMs": 10.091,
       "pathEntries": 31,
       "invokedUnderNpm": false
     },
+    "revisionCount": 0,
+    "scalingNote": "workspace-status is linear in revisionCount. This capture is the cheapest case; the route grows and crosses the frozen 250ms budget well before the 5000-revision cap. P4R-1 must re-capture with revisionCount swept before choosing any cache key.",
     "corpus": [
       {
         "toolId": "deseq2",
-        "durationMs": 6055,
+        "durationMs": 5929,
         "artifactCount": 23
       },
       {
         "toolId": "volcano-plot",
-        "durationMs": 1059,
+        "durationMs": 1041,
         "artifactCount": 5
       },
       {
         "toolId": "gene-correlation",
-        "durationMs": 406,
+        "durationMs": 392,
         "artifactCount": 4
       }
     ],
@@ -70,110 +72,108 @@
         "id": "job-status",
         "role": "render-blocking",
         "status": 200,
-        "totalMs": 5.165,
-        "coldMs": 5.165,
-        "warmMs": 2.076,
+        "totalMs": 5.272,
+        "coldMs": 5.272,
+        "warmMs": 2.102,
         "warmSamplesMs": [
-          1.913,
-          2.076,
-          4.277
+          1.872,
+          2.102,
+          3.195
         ],
-        "warmSpreadMs": 2.364,
-        "oneTimeCostMs": 3.089,
+        "warmSpreadMs": 1.323,
+        "oneTimeCostMs": 3.17,
         "bytes": 74633
       },
       {
         "id": "artifact-bytes",
         "role": "render-blocking",
         "status": 200,
-        "totalMs": 4.981,
-        "coldMs": 4.981,
-        "warmMs": 2.598,
+        "totalMs": 6.075,
+        "coldMs": 6.075,
+        "warmMs": 2.285,
         "warmSamplesMs": [
-          1.789,
-          2.598,
-          3.083
+          1.778,
+          2.285,
+          2.908
         ],
-        "warmSpreadMs": 1.294,
-        "oneTimeCostMs": 2.383,
-        "bytes": 142862
+        "warmSpreadMs": 1.13,
+        "oneTimeCostMs": 3.79,
+        "bytes": 143077
       },
       {
         "id": "interaction",
         "role": "secondary",
         "status": 200,
-        "totalMs": 416.978,
-        "coldMs": 416.978,
-        "warmMs": 11.18,
+        "totalMs": 398.384,
+        "coldMs": 398.384,
+        "warmMs": 10.622,
         "warmSamplesMs": [
-          9.424,
-          11.18,
-          11.491
+          9.055,
+          10.622,
+          11.122
         ],
         "warmSpreadMs": 2.067,
-        "oneTimeCostMs": 405.798,
+        "oneTimeCostMs": 387.762,
         "bytes": 46212
       },
       {
         "id": "context-envelope",
         "role": "secondary",
         "status": 409,
-        "totalMs": 3.022,
-        "coldMs": 3.022,
-        "warmMs": 1.511,
+        "totalMs": 4.213,
+        "coldMs": 4.213,
+        "warmMs": 1.589,
         "warmSamplesMs": [
-          1.46,
-          1.511,
-          2.502
+          1.472,
+          1.589,
+          1.983
         ],
-        "warmSpreadMs": 1.042,
-        "oneTimeCostMs": 1.511,
+        "warmSpreadMs": 0.511,
+        "oneTimeCostMs": 2.624,
         "bytes": 188
       },
       {
         "id": "changesets",
         "role": "secondary",
         "status": 200,
-        "totalMs": 46.691,
-        "coldMs": 46.691,
-        "warmMs": 44.74,
+        "totalMs": 44.572,
+        "coldMs": 44.572,
+        "warmMs": 44.075,
         "warmSamplesMs": [
-          44.214,
-          44.74,
-          46.413
+          43.327,
+          44.075,
+          45.186
         ],
-        "warmSpreadMs": 2.199,
-        "oneTimeCostMs": 1.951,
+        "warmSpreadMs": 1.859,
+        "oneTimeCostMs": 0.497,
         "bytes": 1643
       },
       {
         "id": "workspace-status",
         "role": "secondary",
         "status": 200,
-        "totalMs": 68.012,
-        "coldMs": 68.012,
-        "warmMs": 66.529,
+        "totalMs": 65.728,
+        "coldMs": 65.728,
+        "warmMs": 63.41,
         "warmSamplesMs": [
-          66.3,
-          66.529,
-          66.599
+          63.068,
+          63.41,
+          64.584
         ],
-        "warmSpreadMs": 0.299,
-        "oneTimeCostMs": 1.483,
+        "warmSpreadMs": 1.516,
+        "oneTimeCostMs": 2.318,
         "bytes": 837
       }
     ],
-    "renderBlockingTotalMs": 10.146,
+    "renderBlockingTotalMs": 11.347,
     "slowestRequest": "interaction",
     "eventLoop": {
       "resolutionMs": 10,
       "samples": 17,
-      "minMs": 9.937,
-      "meanMs": 57.445,
-      "p50Ms": 46.268,
-      "p95Ms": 68.42,
-      "p99Ms": 417.858,
-      "maxMs": 417.858
+      "minMs": 10.101,
+      "meanMs": 55.604,
+      "maxMs": 400.818,
+      "percentilesOmitted": "sample count too low for p95/p99 to be meaningful"
     },
     "unmeasured": [
       {
@@ -200,12 +200,13 @@
   },
   "budgetStatus": {
     "eventLoopMaxMs": "violated_by_current_implementation",
-    "observedMaxMs": 417.858,
+    "observedMaxMs": 400.818,
     "attributedTo": "interaction",
-    "steadyStateWorstMs": 66.529,
+    "steadyStateWorstMs": 63.41,
     "steadyStateWorstRoute": "workspace-status",
     "oneTimeDominated": [
       "job-status",
+      "artifact-bytes",
       "interaction",
       "context-envelope"
     ],
@@ -215,9 +216,10 @@
       383.491,
       4072.669
     ],
-    "loadSensitivityCause": "process-spawn cost scales with the inherited PATH: git --version measured 9.7ms at 31 PATH entries and 122.5ms at the 40 entries npm run injects. detectGitRuntime() is uncached, so every git-touching route pays it per call. See baselineObservation.calibration.",
+    "loadSensitivityCause": "Process-spawn cost swings roughly 12x with invocation context (measured ~9-11ms direct, ~117-122ms under npm), and detectGitRuntime() is uncached so every git-touching route pays it per call. An earlier revision of this file blamed PATH length; that explanation was tested and DISPROVED, and the real cause is not established. Compare readings only within the same calibration — see baselineObservation.calibration.",
     "violationRobustAtRangeFloor": true,
-    "structuralFinding": "interaction is one-time dominated (its cost disappears on a second call); changesets and workspace-status are recurring costs paid by every view. P4R-1 should target the recurring pair, not the one-time creation."
+    "structuralFinding": "interaction is one-time dominated (its cost disappears on a second call); changesets and workspace-status are recurring costs paid by every view. P4R-1 should target the recurring pair, not the one-time creation.",
+    "violationAttribution": "The recorded peak is the one-time interaction ChangeSet creation, which is OUT of P4R-1 scope. The routes P4R-1 owns are under budget at this revisionCount and exceed it as revisions accumulate. P4R-1 is accountable for the recurring pair and for the growth term, not for this peak."
   },
   "checks": [
     {
@@ -315,20 +317,21 @@
       "id": "RS-P4R0-10",
       "passed": true,
       "evidence": [
-        "acceptance/g0-result-studio/rs-p4r-performance.json"
+        "acceptance/g0-result-studio/rs-p4r-performance.json",
+        "package.json"
       ],
       "detail": "No recorded gate invokes bare `npm test`, which under a file filter resolves to `vitest run --changed`, selects nothing and reports success for a zero-test run."
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-26T13:14:59.423Z",
+    "generatedAt": "2026-07-26T14:32:07.702Z",
     "commands": [
       {
         "label": "probe-and-harness",
         "command": "node --test test/perf-probe.test.mjs test/p4r-capture.test.mjs test/p4r-corpus.test.mjs test/p4r-baseline.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "f52124ca1094787066093d9c980a2fa2ace226e195edad7a5f4b5580fa34ca44",
+        "stdoutSha256": "8b6c3a21824998ee2d0de877bdec4d2c89890fa061fd5202634086a7b674be9a",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -336,7 +339,7 @@
         "command": "node --test test/test-affected.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "1f15e4beb8609bfe2384c7c6eedfbb66bbb06ae399041d00432162f891e1ea2d",
+        "stdoutSha256": "75b4c856b10de5e91f45a8f79a09e6343a62f12a50d2043b6253109a58256ffa",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -349,15 +352,8 @@
       }
     ]
   },
-  "invariants": {
-    "executionTruth": "run_tool -> tool_job -> artifact_truth",
-    "secondExecutorCreated": false,
-    "developerDatabaseTouched": false,
-    "realUserDataTouched": false,
-    "clientMetricsFabricated": false,
-    "resultStudioQualificationClaimed": false
-  },
+  "executionTruth": "run_tool -> tool_job -> artifact_truth",
   "passed": true,
-  "generatedAt": "2026-07-26T13:14:59.423Z",
+  "generatedAt": "2026-07-26T14:32:07.702Z",
   "privacyClean": true
 }
