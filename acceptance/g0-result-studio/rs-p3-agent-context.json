@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P3",
-  "sourceCommit": "0cad18d407906f555b633d449b76e41d521ec080",
+  "sourceCommit": "42878a9a97be6a06a6d7c05e98201eeb3efd8fde",
   "captureMode": "automated_contract_registry_prompt_and_strict_build_offline_verification",
   "qualificationEligible": false,
   "privacy": "repository_relative_paths_digests_counts_and_bounded_statuses_only_no_project_job_conversation_selection_url_credential_prompt_or_result_data",
@@ -23,8 +23,8 @@
     "promptTest": "938ca534253c2fb5a53b9b2de8f95c4180f81af9909454de688355be4f66be0a",
     "registryTest": "73aa421cba9f4f29e93b31834a20ce99b5698442e1b098427c59f53b0b9ad01d",
     "readinessTest": "cf49ed539c038b60a1463146d034487f274020a706fccd8d1db052d2e484f054",
-    "acceptanceScript": "c345d633a053d64ea0a6d4a17351395da12c9e8e578c83f0b0638b1d33f25800",
-    "packageScripts": "173e733cc0d31e10e4422e1100fd96bc29cbcce0fcad117b21d23427f71fa87f"
+    "acceptanceScript": "343843d7c40c81231255c89b8e64319dd31cfa6ed2fa53427e73e97c2efec40e",
+    "packageScripts": "8b2c4cd4fe6bb0303259024030a2b0bf3583ba7d4b99025576e020984881b0c3"
   },
   "productObservation": {
     "captureMode": "automated_contract_registry_prompt_and_strict_build_offline_verification",
@@ -211,22 +211,22 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-26T03:17:30.766Z",
+    "generatedAt": "2026-07-26T09:38:04.272Z",
     "commands": [
       {
         "label": "backend-p3",
         "command": "node --test test/result-studio-context.test.mjs test/system-prompt-result-context.test.mjs test/agent-tool-registry.test.mjs test/result-edit-intent.test.mjs test/result-edit-agent-tool.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "0caabd98522b7d56b56f505ae88f171c57ee464bc47574e8b4622cfd6cb58dd0",
+        "stdoutSha256": "1d2fc42c564cd841dce29bf949c96e0166ad1f9462dc844468dbd2e179c0c653",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
         "label": "frontend-p3",
-        "command": "npm test --prefix frontend -- ResultStudioContextReadiness.test.tsx ResultStudioSurface.test.tsx",
+        "command": "npm run test:files --prefix frontend -- ResultStudioContextReadiness.test.tsx ResultStudioSurface.test.tsx",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "a455106ab799d01141001c2f767bb413f217b719f605d5a2b1f2697c2291dce3",
+        "stdoutSha256": "7c7eec457c9c8e2124e6abd3f7176894a5916f3d6505d32d2d789215b7889168",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -234,7 +234,7 @@
         "command": "npm run build:check --prefix frontend",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "8a3ae26e1b6e10261b384dc4bc487ca6c986d7ba917f6beae5bba5f97f82b8ff",
+        "stdoutSha256": "18ea1b62ea8655ed9726410d959eda6d5b3010cbf87cc7b5f845a9c8f1baa5a1",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -254,6 +254,6 @@
     "futureStagesImplemented": false
   },
   "passed": true,
-  "generatedAt": "2026-07-26T03:17:30.766Z",
+  "generatedAt": "2026-07-26T09:38:04.272Z",
   "privacyClean": true
 }

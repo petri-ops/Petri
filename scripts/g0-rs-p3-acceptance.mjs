@@ -81,7 +81,10 @@ function runCommands() {
       'test/result-edit-intent.test.mjs',
       'test/result-edit-agent-tool.test.mjs',
     ]],
-    ['frontend-p3', 'npm', ['test', '--prefix', 'frontend', '--',
+    // `npm test` in frontend is `vitest run --changed`, which combines with these
+    // filters to select nothing and exit 0 — recording passed:true for a run that
+    // executed no tests. `test:files` is plain `vitest run`, matching the gate.
+    ['frontend-p3', 'npm', ['run', 'test:files', '--prefix', 'frontend', '--',
       'ResultStudioContextReadiness.test.tsx',
       'ResultStudioSurface.test.tsx',
     ]],

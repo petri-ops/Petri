@@ -70,7 +70,10 @@ function runCommands() {
       'test/result-studio-qualification.test.mjs',
       'test/agent-tool-registry.test.mjs',
     ]],
-    ['frontend-p4', 'npm', ['test', '--prefix', 'frontend', '--',
+    // `npm test` in frontend is `vitest run --changed`, which combines with these
+    // filters to select nothing and exit 0 — recording passed:true for a run that
+    // executed no tests. `test:files` is plain `vitest run`, matching the gate.
+    ['frontend-p4', 'npm', ['run', 'test:files', '--prefix', 'frontend', '--',
       'ResultEditPanel.test.tsx',
       'ResultStudioContextReadiness.test.tsx',
       'ResultStudioSurface.test.tsx',

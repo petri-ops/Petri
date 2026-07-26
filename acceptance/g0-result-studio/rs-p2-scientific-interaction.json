@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P2",
-  "sourceCommit": "0cad18d407906f555b633d449b76e41d521ec080",
+  "sourceCommit": "42878a9a97be6a06a6d7c05e98201eeb3efd8fde",
   "captureMode": "automated_contract_renderer_performance_and_live_local_product_plus_bounded_visual_spot_check",
   "qualificationEligible": false,
   "privacy": "repository_relative_paths_digests_counts_dimensions_timings_and_bounded_statuses_only_no_project_job_conversation_selection_url_credential_prompt_or_result_data",
@@ -29,10 +29,10 @@
     "selectionToolTest": "9154ebf32a96bce443a07ddb0be06bccb344a8092bb83f895a5a501d279420f8",
     "tableQueryTest": "c4c97d306b5297aef630d228637d2d40b4ea40962765bf875729aeda712568c7",
     "liveCapture": "4af77d83afd4b0e0c3f2bf973800d4695b81a59097ead690c03bae18017fddf0",
-    "acceptanceScript": "8c94a694d87a5c1e7344e2b64d4cf0b6adc8f093267b9096b389655ee5845768",
+    "acceptanceScript": "58018eb2bbd76f98ac6a5b03d3282d38aca9c260697598f56f67b7a86e61f933",
     "liveObservation": "b0da52317f9e9eb8fbb759fd5d61f9cf00332d07f9fdb04efe9548fbaa068860",
     "uiObservation": "a266e6458c260713d79144f6a7fc8870922bb0060d6a99ed5c6cc3c854dc1a5b",
-    "packageScripts": "173e733cc0d31e10e4422e1100fd96bc29cbcce0fcad117b21d23427f71fa87f"
+    "packageScripts": "8b2c4cd4fe6bb0303259024030a2b0bf3583ba7d4b99025576e020984881b0c3"
   },
   "productObservation": {
     "captureMode": "automated_contract_renderer_performance_and_live_local_product_plus_bounded_visual_spot_check",
@@ -189,29 +189,29 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-26T03:16:19.901Z",
+    "generatedAt": "2026-07-26T09:37:36.651Z",
     "commands": [
       {
         "label": "backend-p2",
         "command": "node --test test/result-studio-table-query.test.mjs test/result-selection-tools.test.mjs test/artifact-interaction.test.mjs test/result-studio-contracts.test.mjs test/result-studio-repository.test.mjs test/result-studio-plugin-sdk.test.mjs test/agent-tool-registry.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "05598e7edd30aedc45d8ee4d4319db16fd2b468fa079b07fca016e47be041871",
+        "stdoutSha256": "d39296aa5c4be978d01236835279182a2e1245a9e28df0c22226b6a3e439a6ea",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
         "label": "frontend-p2",
-        "command": "npm test --prefix frontend -- ScientificInteractionViewer.test.tsx artifact-selection.test.ts CenterPanel.test.tsx ResultStudioSurface.test.tsx",
+        "command": "npm run test:files --prefix frontend -- ScientificInteractionViewer.test.tsx artifact-selection.test.ts CenterPanel.test.tsx ResultStudioSurface.test.tsx",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "9e7cb64655d3188f0d562ef2e4519432e1b60844ccf22be9d80d0d1310d36300",
+        "stdoutSha256": "61d67820faf508d06bf7ca40fec9ac846547907e6b9150a399944c2936f9c223",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "rendererPerformance": {
           "budgetMs": 100,
-          "scrollFeedbackMs": 2.764,
-          "selectionFeedbackMs": 4.495,
-          "sortFeedbackMs": 5.593,
-          "filterFeedbackMs": 0.961
+          "scrollFeedbackMs": 3.027,
+          "selectionFeedbackMs": 4.481,
+          "sortFeedbackMs": 5.482,
+          "filterFeedbackMs": 0.95
         }
       },
       {
@@ -219,7 +219,7 @@
         "command": "npm run build:check --prefix frontend",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "1046936dfaf6379493cb80762699944789c95449e93e444db07005419971d4f4",
+        "stdoutSha256": "acf27c96ce03a563c6dc76b7a89ddf5f9ccb703d79c4956a4ca66671c0907c35",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -239,6 +239,6 @@
     "futureStagesImplemented": false
   },
   "passed": true,
-  "generatedAt": "2026-07-26T03:16:19.901Z",
+  "generatedAt": "2026-07-26T09:37:36.651Z",
   "privacyClean": true
 }
