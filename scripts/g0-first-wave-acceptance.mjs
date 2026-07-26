@@ -63,7 +63,7 @@ function runCommands() {
   const specs = [
     ['first-wave-test', 'node', ['--test', 'test/g0-first-wave.test.mjs', 'test/g0-baseline.test.mjs', 'test/g0-project-baseline.test.mjs', 'test/harness-workflow-state.test.mjs']],
     ['root-test', 'npm', ['test']],
-    ['frontend-test', 'npm', ['test', '--prefix', 'frontend']],
+    ['frontend-test', 'npm', ['run', 'test:files', '--prefix', 'frontend']],
     ['frontend-build', 'npm', ['run', 'build', '--prefix', 'frontend']],
     ['root-check', 'npm', ['run', 'check']],
     ['hle-production', 'npm', ['run', 'harness:loop:production']],

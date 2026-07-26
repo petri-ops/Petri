@@ -42,7 +42,7 @@ function inspect(verification = null, bootstrap = false) {
 function runCommands() {
   const specs = [
     ['fourth-wave-test','node',['--test','test/g0-fourth-wave.test.mjs','test/g0-third-wave.test.mjs','test/plugin-sdk.test.mjs','test/agent-tool-policy.test.mjs','test/harness-workspace-tools.test.mjs','test/diagnostic-redaction.test.mjs','test/loop-recovery-integration.test.mjs','test/loop-false-success-regression.test.mjs']],
-    ['root-test','npm',['test']], ['frontend-test','npm',['test','--prefix','frontend']], ['frontend-build','npm',['run','build','--prefix','frontend']],
+    ['root-test','npm',['test']], ['frontend-test','npm',['run','test:files','--prefix','frontend']], ['frontend-build','npm',['run','build','--prefix','frontend']],
     ['root-check','npm',['run','check']], ['plugins','npm',['run','harness:plugins']], ['hle-production','npm',['run','harness:loop:production']], ['runtime-control','npm',['run','harness:runtime-control']],
   ];
   return specs.map(([label,bin,args]) => { const r=spawnSync(bin,args,{cwd:root,encoding:'utf8',maxBuffer:32*1024*1024,env:{...process.env,G0_LF0_BOOTSTRAP:'1',G0_FIRST_WAVE_BOOTSTRAP:'1',G0_SECOND_WAVE_BOOTSTRAP:'1',G0_THIRD_WAVE_BOOTSTRAP:'1',G0_FOURTH_WAVE_BOOTSTRAP:'1',G0_FIFTH_WAVE_BOOTSTRAP:'1'}}); return {label,command:[bin,...args].join(' '),exitCode:r.status,signal:r.signal||null,passed:r.status===0,stdoutSha256:sha(r.stdout||''),stderrSha256:sha(r.stderr||'')}; });
