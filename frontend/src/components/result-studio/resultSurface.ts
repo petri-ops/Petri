@@ -122,10 +122,29 @@ export function describeTruthStatus(
   return { tone: 'unknown', label: '尚未核验' };
 }
 
-export function shortRevisionLabel(revisionId: string | null | undefined): string {
+/**
+ * The version a user reads in the result header.
+ *
+ * The acceptance matrix asks for 「结果名称 · vN · validation」, but the only
+ * available input used to be the Revision ID, which this truncated into
+ * 「版本 a3f9c21b」 — an opaque fragment presented where an ordinal was
+ * promised. `revision_ordinal` existed in SQL from the start
+ * (001_result_studio.sql:62, unique per family) and the interaction endpoint
+ * already returned it; the client simply discarded it.
+ *
+ * With an ordinal, this reads `v2`. Without one it degrades to a statement of
+ * what is known — never to a truncated id dressed up as a version.
+ */
+export function shortRevisionLabel(
+  revisionId: string | null | undefined,
+  revisionOrdinal?: number | null,
+): string {
+  if (Number.isInteger(revisionOrdinal) && (revisionOrdinal as number) >= 1) {
+    return `v${revisionOrdinal}`;
+  }
   if (!revisionId) return '原始结果';
-  const normalized = revisionId.replace(/^rev(?:ision)?[-_:]?/i, '');
-  return `版本 ${(normalized || revisionId).slice(0, 8)}`;
+  // Honest degradation: we know a revision exists but not which number it is.
+  return '当前版本';
 }
 
 export function describeSelection(selection: SelectionProjectionInput | null | undefined): string {

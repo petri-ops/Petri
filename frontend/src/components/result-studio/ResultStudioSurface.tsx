@@ -20,6 +20,7 @@ export interface ResultInspectorArtifact {
   label?: string;
   url?: string;
   revisionId?: string | null;
+  revisionOrdinal?: number | null;
   artifactFamilyId?: string | null;
   entityType?: string | null;
   idField?: string | null;
@@ -186,7 +187,7 @@ export function ResultStudioInspector({
         <span className={styles.truthBadge} data-tone={trust.tone}>{trust.label}</span>
       </div>
       <dl className={styles.inspectorFacts}>
-        <div><dt>版本</dt><dd>{shortRevisionLabel(artifact.revisionId)}</dd></div>
+        <div><dt>版本</dt><dd>{shortRevisionLabel(artifact.revisionId, artifact.revisionOrdinal)}</dd></div>
         <div><dt>类型</dt><dd>{artifact.type || '文件'}</dd></div>
         <div><dt>选择</dt><dd>{selectionLabel}</dd></div>
         <div><dt>来源</dt><dd>{artifact.toolId || '未知工具'}</dd></div>

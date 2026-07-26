@@ -183,7 +183,7 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
                 title={contextTitle}
                 trust={describeTruthStatus(truthStatus, ctx.activeJob?.status)}
                 conclusion={contextConclusion}
-                revisionLabel={shortRevisionLabel(ctx.activeArtifact?.revisionId)}
+                revisionLabel={shortRevisionLabel(ctx.activeArtifact?.revisionId, ctx.activeArtifact?.revisionOrdinal)}
                 selectionLabel={describeSelection(ctx.activeArtifact?.selection)}
                 onBack={() => ctx.updateWorkspaceMode('chat')}
                 onAskAgent={askAboutCurrentResult}

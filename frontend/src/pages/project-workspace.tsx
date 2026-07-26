@@ -70,6 +70,7 @@ import {
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
 import { ResultStudioChangeSetPanel } from '@/components/result-studio/ResultStudioChangeSetPanel';
+import type { ArtifactRevision } from '@/components/result-studio/resultStudioClient';
 import { shouldShowDeliveryCard } from '@/components/result-studio/resultFirstScreen';
 import { ScientificInteractionViewer } from '@/components/result-studio/ScientificInteractionViewer';
 import {
@@ -128,6 +129,20 @@ const markdownSanitizeSchema = {
  *   浏览器侧 40 行预览样本没有资格做这个判定。
  * - selection 维度（`selection`）由表格行列/过滤/排序与图形点选产生。
  */
+/**
+ * Narrow the interaction endpoint's `revision` to the fields the header needs.
+ * Returns null rather than casting: revisionOrdinal decides what a user reads
+ * as the version, so a malformed payload must degrade visibly instead of
+ * rendering a wrong number.
+ */
+function toArtifactRevision(input: unknown): ArtifactRevision | null {
+  if (!input || typeof input !== 'object') return null;
+  const candidate = input as Partial<ArtifactRevision>;
+  if (typeof candidate.revisionId !== 'string') return null;
+  if (!Number.isInteger(candidate.revisionOrdinal) || (candidate.revisionOrdinal as number) < 1) return null;
+  return candidate as ArtifactRevision;
+}
+
 interface ActiveArtifact {
   jobId: string;
   toolId: string;
@@ -136,6 +151,13 @@ interface ActiveArtifact {
   label?: string;
   url?: string;
   revisionId?: string | null;
+  /**
+   * 1-based ordinal within the artifact family, for showing a real "v2"
+   * instead of a truncated Revision ID. The interaction endpoint already
+   * returns it on `revision` (routes/result-studio.js:559); the client used
+   * to read only `manifest` and discard it.
+   */
+  revisionOrdinal?: number | null;
   artifactFamilyId?: string | null;
   semanticKind?: ResultArtifactKind;
   entityType?: string | null;
@@ -2842,6 +2864,7 @@ function ResultArtifactShell({
   const [previewData, setPreviewData] = useState<string[][] | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   // RS3：交互清单由后端基于完整文件判定（稳定 ID 列、可选维度），前端只消费。
+  const [interactionRevision, setInteractionRevision] = useState<ArtifactRevision | null>(null);
   const [interactionManifest, setInteractionManifest] = useState<ArtifactInteractionManifest | null>(null);
   const [interactionBackingTable, setInteractionBackingTable] = useState<ResultTableQuery | null>(null);
   const [artifactSelection, setArtifactSelection] = useState<ArtifactSelection | null>(null);
@@ -3204,6 +3227,7 @@ function ResultArtifactShell({
         if (cancelled) return;
         if (data?.manifest) {
           setInteractionManifest(data.manifest);
+          setInteractionRevision(toArtifactRevision(data.revision));
           setInteractionBackingTable(data.backingTable || null);
           const restored = await restoreResultStudioSelection({
             language: lang,
@@ -3311,6 +3335,7 @@ function ResultArtifactShell({
       // 清单还没到（或该类型不支持交互）时保持 null，不猜测。
       semanticKind: selectedArtifactKind,
       revisionId: interactionManifest?.revisionId ?? null,
+      revisionOrdinal: interactionRevision?.revisionOrdinal ?? null,
       artifactFamilyId: interactionManifest?.artifactFamilyId ?? null,
       entityType: interactionManifest?.entityType ?? null,
       idField: interactionManifest?.idField ?? null,
@@ -3328,6 +3353,7 @@ function ResultArtifactShell({
       activeArtifact.jobId !== artifact.jobId ||
       activeArtifact.name !== artifact.name ||
       (activeArtifact.revisionId ?? null) !== (artifact.revisionId ?? null) ||
+      (activeArtifact.revisionOrdinal ?? null) !== (artifact.revisionOrdinal ?? null) ||
       (activeArtifact.entityType ?? null) !== (artifact.entityType ?? null) ||
       (activeArtifact.idField ?? null) !== (artifact.idField ?? null) ||
       (activeArtifact.truthStatus ?? null) !== (artifact.truthStatus ?? null) ||

@@ -25,8 +25,20 @@ describe('G0-RS-P1 result surface projection', () => {
     expect(describeTruthStatus('valid', 'done')).toEqual({ tone: 'valid', label: '可信结果' });
     expect(describeTruthStatus(null, 'done')).toEqual({ tone: 'unknown', label: '尚未核验' });
     expect(describeTruthStatus('blocked', 'done')).toEqual({ tone: 'blocked', label: '结果已阻断' });
-    expect(shortRevisionLabel('revision-abcdef123456')).toBe('版本 abcdef12');
+    // The ordinal is the version. This assertion used to pin the opposite —
+    // shortRevisionLabel('revision-abcdef12...') === '版本 abcdef12' — inside a
+    // test named for not inventing missing facts, while presenting an id
+    // fragment where the acceptance matrix promises vN.
+    expect(shortRevisionLabel('revision-abcdef123456', 2)).toBe('v2');
+    expect(shortRevisionLabel('revision-abcdef123456', 1)).toBe('v1');
+    // A revision exists but its ordinal did not arrive: say what is known.
+    expect(shortRevisionLabel('revision-abcdef123456')).toBe('当前版本');
+    expect(shortRevisionLabel('revision-abcdef123456', null)).toBe('当前版本');
+    // Non-ordinals must not be rendered as one.
+    expect(shortRevisionLabel('revision-abcdef123456', 0)).toBe('当前版本');
+    expect(shortRevisionLabel('revision-abcdef123456', 1.5)).toBe('当前版本');
     expect(shortRevisionLabel(null)).toBe('原始结果');
+    expect(shortRevisionLabel(null, 3)).toBe('v3');
     expect(describeSelection(null)).toBe('未选择对象');
     expect(describeSelection({ entityIdCount: 27, fields: [], durable: true })).toBe('已选择 27 个对象 · 可恢复');
     expect(describeSelection({ entityIdCount: 0, fields: ['padj', 'log2FC'], durable: false })).toBe('已选择 2 列 · 当前会话');
