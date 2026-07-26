@@ -6,6 +6,11 @@ import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import { ResultStudioInspector } from '@/components/result-studio/ResultStudioSurface';
 import {
+  ResultEditPanel,
+  type ResultEditSubmission,
+} from '@/components/result-studio/ResultEditPanel';
+import type { ResultStudioEditControls } from '@/lib/result-studio-interaction-client';
+import {
   type RightPanelMode,
   type ActiveArtifact,
   type ActiveWorkspaceFile,
@@ -49,6 +54,10 @@ export interface RightPanelContext {
     selectionUsable?: boolean;
     selectionCompatibility?: 'compatible' | 'stale' | 'invalid' | null;
   } | null;
+  /** G0-RS-P4: Schema 驱动的编辑控件，与 Agent 可见参数同源。 */
+  resultEditControls?: ResultStudioEditControls | null;
+  resultEditSubmitting?: boolean;
+  onResultEditSubmit?: (submission: ResultEditSubmission) => void;
   openWorkspaceFiles: ActiveWorkspaceFile[];
   activeWorkspaceFile: ActiveWorkspaceFile | null;
   setActiveWorkspaceFile: (f: ActiveWorkspaceFile | null) => void;
@@ -147,6 +156,20 @@ export function RightPanel({
                     }
                     onAskAgent={ctx.handleAskAgent}
                     context={ctx.resultContext ?? null}
+                  />
+                )}
+                {tab === 'results' && ctx.activeArtifact && ctx.onResultEditSubmit && (
+                  <ResultEditPanel
+                    editControls={ctx.resultEditControls ?? null}
+                    disabledReason={
+                      ctx.resultContext?.status === 'blocked'
+                        ? ctx.resultContext.reason || '当前结果缺少可复现的来源坐标，暂时无法修改。'
+                        : ctx.resultContext?.status === 'loading'
+                          ? '正在读取结果坐标…'
+                          : null
+                    }
+                    submitting={ctx.resultEditSubmitting === true}
+                    onSubmit={ctx.onResultEditSubmit}
                   />
                 )}
                 {tab === 'files' && (

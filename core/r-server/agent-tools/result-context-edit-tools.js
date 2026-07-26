@@ -23,6 +23,7 @@ const {
 } = require('./result-context-tools');
 const { createResultEditPlanTool, createResultChangeSetTools } = require('./result-edit-tools');
 const { projectPublicEditPhase, PUBLIC_EDIT_PHASES } = require('../../shared-backend/result-studio-context');
+const { normalizeEditSubmission, explainEditImpact } = require('../../shared-backend/result-edit-controls');
 
 /** 公开进度：只暴露阶段结论，不暴露隐藏推理链或 Git 细节。 */
 function publicProgress(events) {
@@ -67,13 +68,48 @@ function createResultContextEditTools(options = {}) {
     const guarded = guardContextOperation(ctx, args, options, { requireToken: false });
     if (!guarded.ok) return guarded.response;
     const envelope = guarded.resolved.envelope;
+
+    // G0-RS-P4：手动控件与 AI 提议共用同一个归一化闸门。任何一方提出的参数
+    // 都必须先通过受信 descriptor 的类型/范围/枚举校验，未声明参数一律拒绝。
+    // 归一化在 planResultEdit 之前，因此两条来源进入的是同一条编辑链。
+    let submission = null;
+    if (args.proposedParameterPatch && typeof args.proposedParameterPatch === 'object') {
+      submission = normalizeEditSubmission({
+        descriptor: guarded.resolved.descriptor,
+        proposedValues: args.proposedParameterPatch,
+        origin: args.editOrigin === 'manual' ? 'manual' : 'agent',
+        currentValues: guarded.resolved.currentParameters || {},
+      });
+      if (submission.rejected.length > 0) {
+        return {
+          ok: false,
+          status: 'blocked',
+          error: 'edit_parameters_rejected',
+          message: '部分参数不在插件声明的可编辑范围内或超出允许取值，已阻断。',
+          rejected: submission.rejected,
+          diagnostics: submission.diagnostics,
+          context: contextView(envelope),
+        };
+      }
+      if (submission.changed.length === 0) {
+        return {
+          ok: false,
+          status: 'blocked',
+          error: 'edit_no_effective_change',
+          message: '提议的参数与当前生效值相同，不创建候选版本。',
+          unchanged: submission.unchanged,
+          context: contextView(envelope),
+        };
+      }
+    }
+
     const planned = await planTool({
       toolJobId: envelope.job.toolJobId,
       artifactId: envelope.artifact.artifactId,
       revisionId: envelope.revision.revisionId,
       requestedOutcome: args.requestedOutcome,
       requestedEditClass: args.requestedEditClass,
-      proposedParameterPatch: args.proposedParameterPatch,
+      proposedParameterPatch: submission ? submission.patch : args.proposedParameterPatch,
       workflowPlan: args.workflowPlan,
       selectionId: envelope.selection ? envelope.selection.selectionId : undefined,
       userMessageId: args.userMessageId,
@@ -81,6 +117,11 @@ function createResultContextEditTools(options = {}) {
     return {
       ...planned,
       context: contextView(envelope),
+      editOrigin: submission ? submission.origin : null,
+      // 执行前的影响说明：用户在点"生成候选"之前就能看到会不会重算科学结论。
+      impact: submission
+        ? explainEditImpact(submission.classification, { affectedNodeIds: planned.intent?.affectedNodeIds || [] })
+        : null,
       publicPhase: projectPublicEditPhase(planned.ok ? 'plan' : 'intent').phase,
       publicPhases: [...PUBLIC_EDIT_PHASES],
     };

@@ -29,6 +29,7 @@ const {
   summarizeContextForAgent,
   PUBLIC_EDIT_PHASES,
 } = require('../../shared-backend/result-studio-context');
+const { buildEditControlSchema } = require('../../shared-backend/result-edit-controls');
 
 const OPERATOR_LABELS = Object.freeze({
   eq: '=', ne: '≠', lt: '<', lte: '≤', gt: '>', gte: '≥', in: '∈', contains: '包含',
@@ -267,6 +268,16 @@ function resolveResultStudioContext(ctx = {}, dependencies = {}) {
     workflow: null,
   });
 
+  // G0-RS-P4：当前生效参数取自该 Job 的执行 provenance 归一化参数，
+  // 用于剔除"提交了但与现状相同"的改动，避免生成空 ChangeSet。
+  // 不回退到 descriptor 默认值：默认值不等于这次运行真正用过的值。
+  const currentParameters = result.executionProvenance
+    && result.executionProvenance.params
+    && typeof result.executionProvenance.params.normalized === 'object'
+    && result.executionProvenance.params.normalized !== null
+    ? result.executionProvenance.params.normalized
+    : {};
+
   return {
     ok: built.ok,
     envelope: built.envelope,
@@ -276,6 +287,7 @@ function resolveResultStudioContext(ctx = {}, dependencies = {}) {
     revision,
     job,
     descriptor,
+    currentParameters,
   };
 }
 
@@ -335,9 +347,17 @@ function createResultStudioContextTool(options = {}) {
       projectId: resolved.envelope.projectId,
       artifactFamilyId: resolved.envelope.artifact.artifactFamilyId,
     });
+    // G0-RS-P4：控件 schema 与 Agent 看到的可编辑参数出自同一 descriptor 投影，
+    // 手动面板和 AI 意图因此不可能看到两套不同的参数契约。
+    const controlSchema = buildEditControlSchema(resolved.descriptor);
     return {
       ok: true,
       context: summarizeContextForAgent(resolved.envelope),
+      editControls: {
+        controlsVersion: controlSchema.controlsVersion,
+        groups: controlSchema.groups,
+        controls: controlSchema.controls,
+      },
       pendingChange: changeSet.ok
         ? { status: changeSet.changeSet.status, hasCandidate: !!changeSet.changeSet.candidateCommit }
         : null,

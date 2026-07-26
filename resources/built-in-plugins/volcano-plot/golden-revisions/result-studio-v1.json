@@ -3,11 +3,14 @@
   "pluginId": "volcano-plot",
   "pluginVersion": "1.0.0",
   "descriptorVersion": 1,
-  "sourceScriptSha256": "f4e292d8d9fc2e746a6e33b96fb4ffd585c35412f84b79730d1ecf586bcb5723",
+  "sourceScriptSha256": "46ebc7285b3fbe7bbbef196cb5de63e2540836024e7bf1fe0852d68264ca94df",
   "inputBindingDigest": "017fe2933ad576efb85f8ace71265b0eb89f89bb87272a0a5d3e3a15d46acb7b",
   "artifactContractDigest": "418a64180e9b9e2a55759ef95d41d404afa487c72d727c01a0bc09c4a7d8261e",
   "revisionSourceStrategy": "execution_snapshot_per_artifact",
   "independentScriptPathTemplate": "analysis/scripts/{artifactFamilyId}/{revisionId}/{artifactId}.R",
   "fixtureInput": "demo-data/demo_deg.csv",
-  "expectedArtifactIds": ["volcano", "classified_table"]
+  "expectedArtifactIds": [
+    "volcano",
+    "classified_table"
+  ]
 }

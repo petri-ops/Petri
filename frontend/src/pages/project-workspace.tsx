@@ -78,8 +78,10 @@ import {
   fetchResultStudioContext,
   restoreResultStudioSelection,
   saveResultStudioSelection,
+  type ResultStudioEditControls,
   type ResultTableQuery,
 } from '@/lib/result-studio-interaction-client';
+import type { ResultEditSubmission } from '@/components/result-studio/ResultEditPanel';
 import {
   beginResultSurfaceMeasure,
   chooseResultArtifactName,
@@ -232,6 +234,10 @@ export function ProjectWorkspace(): React.ReactElement {
     selectionUsable?: boolean;
     selectionCompatibility?: 'compatible' | 'stale' | 'invalid' | null;
   } | null>(null);
+  // G0-RS-P4: Schema 驱动控件与该 Job 真实执行过的参数值。两者都由后端
+  // descriptor 投影，前端不合成控件也不用默认值冒充"当前生效值"。
+  const [resultEditControls, setResultEditControls] = useState<ResultStudioEditControls | null>(null);
+  const [resultEditSubmitting, setResultEditSubmitting] = useState(false);
   const [browserCanGoBack, setBrowserCanGoBack] = useState(false);
   const [browserCanGoForward, setBrowserCanGoForward] = useState(false);
   const [openWorkspaceFiles, setOpenWorkspaceFiles] = useState<ActiveWorkspaceFile[]>([]);
@@ -996,6 +1002,7 @@ export function ProjectWorkspace(): React.ReactElement {
   useEffect(() => {
     setActiveArtifact(null);
     setResultContextState(null);
+    setResultEditControls(null);
   }, [activeJobId]);
 
   // G0-RS-P3: 每当打开的结果或其版本变化，就从后端重新投影一次上下文。
@@ -1030,10 +1037,13 @@ export function ProjectWorkspace(): React.ReactElement {
           selectionUsable: result.agentView?.selectionState.usableByAgent === true,
           selectionCompatibility: result.agentView?.selectionState.compatibility ?? null,
         });
+        // G0-RS-P4: 控件 schema 与 Agent 可见参数出自同一后端投影。
+        setResultEditControls(result.editControls ?? null);
       })
       .catch(() => {
         if (!cancelled) {
           setResultContextState({ status: 'blocked', reason: '无法连接本地服务读取结果上下文。' });
+          setResultEditControls(null);
         }
       });
     return () => {
@@ -1229,6 +1239,36 @@ export function ProjectWorkspace(): React.ReactElement {
     dispatchBioF3Event(biof3Events.copilotAsk, { prompt });
   }, []);
 
+  // G0-RS-P4: 手动控件与 AI Composer 的提交都在这里汇合成同一句自然语言意图，
+  // 交给同一个 Agent 会话执行 result_edit_plan_in_context → changeset_create。
+  // 前端不自己调用编辑 API，也不自己拼内部 id：坐标由后端 ContextEnvelope 补齐，
+  // 因此手动路径和 AI 路径共用完全相同的校验、预览、比较与撤销链。
+  const handleResultEditSubmit = useCallback((submission: ResultEditSubmission) => {
+    const changed = Object.keys(submission.parameterPatch);
+    setResultEditSubmitting(true);
+    try {
+      if (submission.origin === 'manual' && changed.length > 0) {
+        const rendered = changed
+          .map((name) => `${name}=${JSON.stringify(submission.parameterPatch[name])}`)
+          .join('、');
+        dispatchBioF3Event(biof3Events.copilotAsk, {
+          prompt: `请修改当前打开的结果：${submission.requestedOutcome}。`
+            + `\n先调用 result_studio_context 获取当前坐标，再用 result_edit_plan_in_context`
+            + `（editOrigin="manual"，proposedParameterPatch={${rendered}}）规划，`
+            + `确认影响级别后生成候选版本${submission.scientificConfirmed ? '（我已确认科学参数变化）' : ''}。`,
+        });
+      } else {
+        dispatchBioF3Event(biof3Events.copilotAsk, {
+          prompt: `请修改当前打开的结果：${submission.requestedOutcome}。`
+            + `\n先调用 result_studio_context 获取当前坐标，再用 result_edit_plan_in_context 规划，`
+            + `执行前先说明会改哪些参数和影响级别。`,
+        });
+      }
+    } finally {
+      setResultEditSubmitting(false);
+    }
+  }, []);
+
   const openScheduledResults = useCallback(() => {
     const nextJobId = activeJobId || jobs[0]?.id || null;
     if (nextJobId) {
@@ -1370,6 +1410,9 @@ export function ProjectWorkspace(): React.ReactElement {
     activeArtifact,
     setActiveArtifact,
     resultContext: resultContextState,
+    resultEditControls,
+    resultEditSubmitting,
+    onResultEditSubmit: handleResultEditSubmit,
     openWorkspaceFiles,
     activeWorkspaceFile,
     setActiveWorkspaceFile,

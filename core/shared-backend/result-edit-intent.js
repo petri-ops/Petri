@@ -71,16 +71,37 @@ function classifyParameterPatch({ proposedParameterPatch = {}, parameterImpactRu
 
   for (const field of fields) {
     const normalizedField = field.trim().toLowerCase().replace(/[.\s-]+/g, '_');
+    // 保护字段是**下限**，不是覆盖：它保证 `design`、`method` 这类字段永远不会
+    // 被当成样式改动，但当受信 descriptor 声明了更高影响时（例如 DESeq2 把
+    // `design` 声明为 workflow），必须采用更高的那个。此前的 if/else 链让保护
+    // 字段抢先命中并把已声明的 workflow_replan 降级成 scientific_recompute，
+    // 等于让"重新规划下游"被静默说成"只重算本节点"。
+    let floorImpact = null;
+    let floorSource = null;
+    if (WORKFLOW_FIELDS.has(normalizedField)) {
+      floorImpact = 'workflow_replan';
+      floorSource = 'protected_workflow_field';
+    } else if (SCIENTIFIC_FIELDS.has(normalizedField)) {
+      floorImpact = 'scientific_recompute';
+      floorSource = 'protected_scientific_field';
+    }
+    const declaredImpact = rules[field] || null;
     let impact;
     let source;
-    if (WORKFLOW_FIELDS.has(normalizedField)) {
-      impact = 'workflow_replan';
-      source = 'protected_workflow_field';
-    } else if (SCIENTIFIC_FIELDS.has(normalizedField)) {
-      impact = 'scientific_recompute';
-      source = 'protected_scientific_field';
-    } else if (rules[field]) {
-      impact = rules[field];
+    if (declaredImpact && floorImpact) {
+      // 取两者中更保守（rank 更高）的一个，绝不向下取。
+      if (CLASS_RANK.get(declaredImpact) >= CLASS_RANK.get(floorImpact)) {
+        impact = declaredImpact;
+        source = 'declared_parameter_impact';
+      } else {
+        impact = floorImpact;
+        source = floorSource;
+      }
+    } else if (floorImpact) {
+      impact = floorImpact;
+      source = floorSource;
+    } else if (declaredImpact) {
+      impact = declaredImpact;
       source = 'declared_parameter_impact';
     } else {
       impact = 'scientific_recompute';

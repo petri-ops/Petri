@@ -672,7 +672,15 @@ const TOOL_DEFS = [
             enum: ['view_only', 'presentation_rerender', 'data_transform', 'scientific_recompute', 'workflow_replan'],
             description: '可选意图类别；插件影响规则可保守升级它，不能被它降级',
           },
-          proposedParameterPatch: { type: 'object', description: '拟议参数 Patch；未知参数按科学重算处理' },
+          proposedParameterPatch: {
+            type: 'object',
+            description: '拟议参数 Patch。只能使用 result_studio_context 的 editControls 声明过的参数名；未声明参数会被拒绝，未知影响按科学重算处理',
+          },
+          editOrigin: {
+            type: 'string',
+            enum: ['manual', 'agent'],
+            description: '参数来源，仅用于审计与解释文案；不影响校验强度或影响分级',
+          },
           workflowPlan: { type: 'object', description: '可选：真实 AgentWorkflowPlan，用于计算受影响下游节点' },
           userMessageId: { type: 'string', description: '可选来源用户消息 id' },
           contextToken: { type: 'string', description: '可选：result_studio_context 返回的 token' },

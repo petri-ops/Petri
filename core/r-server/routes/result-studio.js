@@ -65,6 +65,7 @@ const {
   PUBLIC_EDIT_PHASES,
 } = require('../../shared-backend/result-studio-context');
 const { resolveResultStudioContext } = require('../agent-tools/result-context-tools');
+const { buildEditControlSchema } = require('../../shared-backend/result-edit-controls');
 const {
   inspectResultStudioWorkspace,
   recoverResultStudioWorkspace,
@@ -752,9 +753,20 @@ module.exports = function registerResultStudioRoutes(app) {
         diagnostics: resolved.diagnostics,
       });
     }
+    // G0-RS-P4：手动控件 schema 与 Agent 可见的可编辑参数出自同一 descriptor
+    // 投影，因此前端参数面板不可能显示插件未声明的参数，也不会与 AI 看到的
+    // 契约分叉。currentValues 取该 Job 真实执行过的归一化参数，不用默认值冒充。
+    const controlSchema = buildEditControlSchema(resolved.descriptor);
     return res.json({
       envelope: resolved.envelope,
       agentView: summarizeContextForAgent(resolved.envelope),
+      editControls: {
+        controlsVersion: controlSchema.controlsVersion,
+        groups: controlSchema.groups,
+        controls: controlSchema.controls,
+        diagnostics: controlSchema.diagnostics,
+        currentValues: resolved.currentParameters || {},
+      },
       publicPhases: [...PUBLIC_EDIT_PHASES],
     });
   });

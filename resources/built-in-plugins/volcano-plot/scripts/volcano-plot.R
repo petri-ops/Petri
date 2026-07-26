@@ -32,6 +32,43 @@ fc_threshold <- as.numeric(params$fc_threshold %||% 1)
 pval_threshold <- as.numeric(params$pval_threshold %||% 1.3)
 top_n <- as.integer(params$top_n %||% 10)
 
+# G0-RS-P4 presentation 参数。
+# 这些只影响呈现，不参与显著性判定：阈值与分类逻辑仍只由 fc_threshold /
+# pval_threshold 决定，改配色或字号不会改变任何科学结论。
+plot_title <- params$plot_title %||% "Volcano Plot"
+color_up <- params$color_up %||% "#dc2626"
+color_down <- params$color_down %||% "#2563eb"
+color_ns <- params$color_ns %||% "#94a3b8"
+point_size <- as.numeric(params$point_size %||% 1.8)
+point_alpha <- as.numeric(params$point_alpha %||% 0.6)
+label_size <- as.numeric(params$label_size %||% 3)
+base_font_size <- as.numeric(params$base_font_size %||% 12)
+legend_position <- params$legend_position %||% "right"
+plot_width <- as.numeric(params$plot_width %||% 7)
+plot_height <- as.numeric(params$plot_height %||% 5)
+export_dpi <- as.numeric(params$export_dpi %||% 300)
+
+# 呈现参数越界时收敛到契约声明的范围，不静默接受非法值也不中断科学计算。
+clamp <- function(value, low, high, fallback) {
+  if (!is.finite(value)) return(fallback)
+  min(max(value, low), high)
+}
+is_hex_color <- function(value) {
+  is.character(value) && length(value) == 1 && grepl("^#[0-9A-Fa-f]{6}$", value)
+}
+if (!is_hex_color(color_up)) color_up <- "#dc2626"
+if (!is_hex_color(color_down)) color_down <- "#2563eb"
+if (!is_hex_color(color_ns)) color_ns <- "#94a3b8"
+point_size <- clamp(point_size, 0.2, 6, 1.8)
+point_alpha <- clamp(point_alpha, 0.05, 1, 0.6)
+label_size <- clamp(label_size, 1, 8, 3)
+base_font_size <- clamp(base_font_size, 6, 24, 12)
+plot_width <- clamp(plot_width, 3, 20, 7)
+plot_height <- clamp(plot_height, 3, 20, 5)
+export_dpi <- clamp(export_dpi, 72, 1200, 300)
+if (!(legend_position %in% c("right", "left", "top", "bottom", "none"))) legend_position <- "right"
+plot_title <- if (is.character(plot_title) && length(plot_title) == 1) substr(plot_title, 1, 120) else "Volcano Plot"
+
 # 读数据
 deg <- read.csv(deg_path, stringsAsFactors = FALSE)
 
@@ -97,15 +134,15 @@ top_idx <- order(deg$rank_score, decreasing = TRUE)[1:min(top_n, nrow(deg))]
 deg$label[top_idx] <- deg$gene[top_idx]
 
 # 配色
-colors <- c(Up = "#dc2626", NS = "#94a3b8", Down = "#2563eb")
+colors <- c(Up = color_up, NS = color_ns, Down = color_down)
 
 # 绘图
 p <- ggplot(deg, aes(x = log2FoldChange, y = neg_log10_p, color = sig)) +
-  geom_point(alpha = 0.6, size = 1.8) +
+  geom_point(alpha = point_alpha, size = point_size) +
   geom_text_repel(
     aes(label = label),
     data = subset(deg, label != ""),
-    size = 3, max.overlaps = 20,
+    size = label_size, max.overlaps = 20,
     box.padding = 0.4, segment.color = "grey50"
   ) +
   scale_color_manual(values = colors, name = "") +
@@ -114,18 +151,18 @@ p <- ggplot(deg, aes(x = log2FoldChange, y = neg_log10_p, color = sig)) +
   labs(
     x = expression(log[2](Fold~Change)),
     y = expression(-log[10](italic(p))),
-    title = "Volcano Plot"
+    title = plot_title
   ) +
-  theme_minimal(base_size = 12) +
+  theme_minimal(base_size = base_font_size) +
   theme(
     panel.border = element_rect(color = "black", fill = NA, linewidth = 0.6),
     axis.line = element_blank(),
-    legend.position = "right"
+    legend.position = legend_position
   )
 
 # 保存
-ggsave("volcano.png", p, width = 7, height = 5, dpi = 300, bg = "white")
-ggsave("volcano.pdf", p, width = 7, height = 5)
+ggsave("volcano.png", p, width = plot_width, height = plot_height, dpi = export_dpi, bg = "white")
+ggsave("volcano.pdf", p, width = plot_width, height = plot_height)
 
 # 分类表（输出 canonical 列名）
 classified <- deg[, c("gene", "log2FoldChange", "pvalue", "sig")]

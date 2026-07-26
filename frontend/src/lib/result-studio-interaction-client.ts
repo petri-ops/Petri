@@ -163,9 +163,45 @@ export interface ResultStudioContextDiagnostic {
   message: string;
 }
 
+/**
+ * G0-RS-P4 — Schema 驱动的参数控件。
+ *
+ * 控件完全由后端从受信插件 descriptor 投影，前端不硬编码任何插件的参数集合，
+ * 也不自行推断 impact。`scientificallyNeutral` 只在 presentation 分组为真，
+ * UI 只能在为真时声称"不改变科学结论"。
+ */
+export interface ResultStudioEditControl {
+  name: string;
+  controlType: 'number' | 'text' | 'select' | 'color' | 'boolean';
+  impact: string;
+  group: 'presentation' | 'data' | 'scientific' | 'workflow';
+  default: unknown;
+  required: boolean;
+  minimum?: number | null;
+  maximum?: number | null;
+  options?: string[];
+  scientificallyNeutral: boolean;
+}
+
+export interface ResultStudioEditControlGroup {
+  group: 'presentation' | 'data' | 'scientific' | 'workflow';
+  label: string;
+  parameterNames: string[];
+}
+
+export interface ResultStudioEditControls {
+  controlsVersion: 1;
+  groups: ResultStudioEditControlGroup[];
+  controls: ResultStudioEditControl[];
+  diagnostics: ResultStudioContextDiagnostic[];
+  /** 该 Job 真实执行过的归一化参数值；不是 descriptor 默认值。 */
+  currentValues: Record<string, unknown>;
+}
+
 export interface ResultStudioContextResult {
   status: 'ready' | 'blocked';
   agentView: ResultStudioContextAgentView | null;
+  editControls: ResultStudioEditControls | null;
   diagnostics: ResultStudioContextDiagnostic[];
 }
 
@@ -197,11 +233,12 @@ export async function fetchResultStudioContext(input: {
     const diagnostics = Array.isArray(data?.diagnostics) && data.diagnostics.length > 0
       ? (data.diagnostics as ResultStudioContextDiagnostic[])
       : [{ code: String(data?.error || 'context_unavailable'), message: String(data?.message || '无法读取当前结果上下文。') }];
-    return { status: 'blocked', agentView: null, diagnostics };
+    return { status: 'blocked', agentView: null, editControls: null, diagnostics };
   }
   return {
     status: 'ready',
     agentView: (data.agentView as ResultStudioContextAgentView) || null,
+    editControls: (data.editControls as ResultStudioEditControls) || null,
     diagnostics: [],
   };
 }

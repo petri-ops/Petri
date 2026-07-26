@@ -1,6 +1,6 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-07-25
+最后更新：2026-07-26
 
 ## 当前结论
 
@@ -10,7 +10,7 @@
 
 LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口。RS9 曾新增第 17 类 `result_studio_product`，但后续复核发现其五条任务由独立测试拼装、Provider 未执行真实工具闭环、视觉验收依赖人工布尔值、大表由 seed 直接构造；该证据现降级为 unit/synthetic/renderer historical evidence。`result-studio-editing` 在 RS-P7 前暂停 qualified support claim，不能影响或冒充 LF12 原始核心资格。
 
-Result Studio（[`g0-result-studio-plan.md`](./g0-result-studio-plan.md)）是当前唯一 active 工作包。已有 Git Adapter、Revision/ChangeSet、Job/Artifact binding、比较/采用/撤销、checkpoint、恢复、Plugin SDK、中央结果主画布、科学选择交互和 Agent ContextEnvelope 与 context-bound 编排继续复用；剩余缺口集中在 P3 要求的双真实 Provider tool calling 复验、Schema 驱动手动/AI 统一编辑、真实科学差异、故障恢复矩阵和 packaged Electron 重新资格。
+Result Studio（[`g0-result-studio-plan.md`](./g0-result-studio-plan.md)）是当前唯一 active 工作包。已有 Git Adapter、Revision/ChangeSet、Job/Artifact binding、比较/采用/撤销、checkpoint、恢复、Plugin SDK、中央结果主画布、科学选择交互、Agent ContextEnvelope 与 P4 Core 统一编辑链继续复用；当前立即缺口是 `G0-RS-P4R Product Reframe`：快速结果打开、单结果聚焦、Agent-first 修改、可直接查看的版本选择器、Codex-like Change Review 和每结果/每版本精确代码。真实科学差异、故障恢复矩阵和 packaged Electron 资格分别继续属于 P5、P6、P7。
 
 Result Studio 旧实现的 11 个提交已位于 `main`（检查点 `03e5826`）；`SDC-0 Profile Registry 与版本治理` 也已在分支 `codex/g0-sdc` 的 `7284921` 收口并推送，六个 canonical Profile 与 fail-closed typed DAG 边继续保留。按单工作包串行，`SDC-1`～`SDC-7` deferred，当前不创建 Worktree。
 
@@ -21,14 +21,19 @@ G0-RS-P0 资格与证据纠偏
   → RS-P1 中央结果主画布
   → RS-P2 科学选择交互
   → RS-P3 Agent 上下文编排
-  → RS-P4 手动与 AI 统一编辑
+  → RS-P4 Core 手动与 AI 统一编辑
+  → RS-P4R Agent-first 聚焦结果体验
   → RS-P5 真实科学编辑与差异
   → RS-P6 恢复、性能和产品解释
   → RS-P7 诚实重新资格
   → 重新评估 SDC-1
 ```
 
-`G0-RS-P0`～`G0-RS-P3` 已依次收口。P3 建立 `ResultStudioContextEnvelope v1` 与 `contextToken`：artifact/family、job、revision（含 current 与 ordinal）、脚本相对路径与 sha256、参数摘要、插件可编辑参数与声明动作、selection、validation、reproducibility 全部由后端从 SQLite/`tool_jobs`/插件 descriptor 重新投影，前端 activeArtifact 只作线索。模型可见 schema 新增 7 个工具（注册表共 32 个），6 个 `*_in_context` 工具的参数中不含 toolJobId/artifactId/revisionId/artifactFamilyId/selectionId；写操作强制校验 token，陈旧上下文返回 `context_token_stale`，intent 指向别的 Revision 返回 `context_intent_mismatch`，"归因只能到 Job"与跨项目 revision 一律 fail-closed。公开进度固定为「理解意图 → 判断影响 → 执行/重算 → 验证 → 候选可比较」五阶段，不展示隐藏推理链。context-bound 工具复用既有 ChangeSet/Compare 服务，未建立第二套执行真相。证据为 `acceptance/g0-result-studio/rs-p3-agent-context.json`（20/20，non-qualifying 离线契约/注册表/提示词/strict build 证据）；P3 验收要求的双真实 Provider tool calling、真实候选 Revision 与重开重建尚未执行，故 P3 保持 `implemented_unverified`、UI-108 为 `in_progress`。下一阶段只允许启动 `G0-RS-P4 手动与 AI 统一编辑`，不得提前实现 P5～P7。
+`G0-RS-P0`～`G0-RS-P3` 已依次收口；P4 Core 已形成 18/18 离线实现检查点并保持 `implemented_unverified`。P3 建立 `ResultStudioContextEnvelope v1` 与 `contextToken`：artifact/family、job、revision（含 current 与 ordinal）、脚本相对路径与 sha256、参数摘要、插件可编辑参数与声明动作、selection、validation、reproducibility 全部由后端从 SQLite/`tool_jobs`/插件 descriptor 重新投影，前端 activeArtifact 只作线索。模型可见 schema 新增 7 个工具（注册表共 32 个），6 个 `*_in_context` 工具的参数中不含 toolJobId/artifactId/revisionId/artifactFamilyId/selectionId；写操作强制校验 token，陈旧上下文返回 `context_token_stale`，intent 指向别的 Revision 返回 `context_intent_mismatch`，"归因只能到 Job"与跨项目 revision 一律 fail-closed。公开进度固定为「理解意图 → 判断影响 → 执行/重算 → 验证 → 候选可比较」五阶段，不展示隐藏推理链。证据为 `acceptance/g0-result-studio/rs-p3-agent-context.json`（20/20，non-qualifying）。
+
+P4 Core 让手动调整与自然语言修改共用同一条编辑链：控件全部由插件 descriptor 的 `parameters` + `parameterImpacts` 投影，缺 impact 声明的参数不可编辑；`volcano-plot` 补齐配色/字体/尺寸/图例/标签/导出共 12 个 presentation 参数并接进真实 R 脚本（此前全为硬编码）。`normalizeEditSubmission` 是手动与 AI 的唯一归一化闸门，类型/范围/枚举 fail-closed 拒绝、未声明参数记为 rejected、与现状相同的提交不产出 patch，因此不会创建空 ChangeSet；影响分级只能由受信 descriptor 提升，调用方无法把科学或流程参数降级成样式修改，未声明 impact 的参数保守落到科学重算。过程中修复既有缺陷：保护字段表原先覆盖 descriptor，使 deseq2 声明为 `workflow` 的 `design` 被悄悄降级成 `scientific`，现在保护字段只作下限。`currentValues` 取自该 Job 真实执行过的归一化参数，不用默认值冒充。证据为 `acceptance/g0-result-studio/rs-p4-unified-editing.json`（18/18，non-qualifying 离线 descriptor 投影/插件接线/注册表/strict build 证据）；真实候选等价链尚未执行，故 UI-109 保持 `in_progress`。
+
+下一阶段只允许启动 `G0-RS-P4R Product Reframe`。P4R 按 P4R-0～P4R-6 串行完成失败基线与预算、Fast Result Path、Focused Result Surface、Agent-first Editing、Version/Change Review、Per-result Code & Reproduce 和整体验收。P4R 未收口前不得启动 P5～P7；详细范围、非目标、证据类型和出口见 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) §P4R。
 
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 已完成的 Scientific Task Contract 工作包记录见 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md)。

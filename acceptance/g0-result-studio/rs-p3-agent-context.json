@@ -1,30 +1,30 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P3",
-  "sourceCommit": "f526ea5b19a259f8ef121e2bf384b0ba8e192d79",
+  "sourceCommit": "0cad18d407906f555b633d449b76e41d521ec080",
   "captureMode": "automated_contract_registry_prompt_and_strict_build_offline_verification",
   "qualificationEligible": false,
   "privacy": "repository_relative_paths_digests_counts_and_bounded_statuses_only_no_project_job_conversation_selection_url_credential_prompt_or_result_data",
   "sourceHashes": {
     "contextContract": "c2c2dfe71e2d257032384c94fa799f21ea83411520a3131fb4094ee34a557995",
-    "contextTools": "53e59e5b8f29c832d2f5607562ac65d32d75dfa95ae46ae8fc042288d2b8947b",
-    "contextEditTools": "3a0338f94b33124b60d8db1cb527741c5af0cf9da18e4e5aa0e0eae651211ad9",
-    "toolDefinitions": "7ff701687940af1e04b0e8aac95e6643a95639138210363730c66ef43fd90bb0",
+    "contextTools": "43191ae01f38058cfb67dfbb3ddd00cce04ffc7123b9cb085558f6c0280ed72d",
+    "contextEditTools": "25c6d97e4e773204982f7c7874182ea5bf96bed2cdc97b4110e79bf9a9ff69eb",
+    "toolDefinitions": "85759f4aade139c050f917b6b97c1ba6ed337c9e4cec4af9f475b38fabd82a50",
     "toolRegistry": "f53dc7d881955cd23efecf466452bac448e9b915d590bed1d783722e6166d5a6",
     "systemPrompt": "76ebbc2862faaa824c9da003c507096ddda5f15c40939d4149d2c5bf4eb76158",
-    "routes": "6e38a56acfa0eaa0e2f5192c6179c384e4187e9159f8fc69a649131890e40486",
+    "routes": "25b17720b4e6a8f6571c7772cf2fcb5c13f42a145da12c0879ca28f981df3c7e",
     "editTools": "0485edee96061a3dbbc13855c6539c119250ed29bc7092e14f6c5a14023e8f3d",
-    "contextClient": "6ff7fc2d209c25b8a0674243dd4c8fc8ee88e8469a6c037658c99cf910b6f85a",
+    "contextClient": "22683cc18a4fdf9900e27d0cf1b16a317ecaa8522c56b51809bac68cb75639ad",
     "surface": "4f8127c85750a55526a932452845f39c923d25954392ac4d6386507129d64f75",
     "surfaceStyle": "7c421944e966c644c5c55bf4c5dcc7f5d038b1f53e327efa5a8d9b1aeb6d1bbd",
-    "rightPanel": "5673f3d0a74e48e1ad2aff75eff38207a2a980459d37ca2d350eb2f05cdeb745",
-    "workspace": "29f95edc2d37a8f7f1b9aa3745b783fbcfb31dbb014da98be051d7090bcbd25e",
+    "rightPanel": "6b4cdc222df827f2141179301d69b2a7bfccb9aeaac4956e36b9498f1cd9075e",
+    "workspace": "ebe8db884d035cab9a6ff2cb2dd65c572b6980b32229f1e84d0ac143fee1230b",
     "contextTest": "7846092bce979d62b06811a7f16c616b27689fddbbeed22b7408546be2eb0cf4",
     "promptTest": "938ca534253c2fb5a53b9b2de8f95c4180f81af9909454de688355be4f66be0a",
     "registryTest": "73aa421cba9f4f29e93b31834a20ce99b5698442e1b098427c59f53b0b9ad01d",
     "readinessTest": "cf49ed539c038b60a1463146d034487f274020a706fccd8d1db052d2e484f054",
     "acceptanceScript": "c345d633a053d64ea0a6d4a17351395da12c9e8e578c83f0b0638b1d33f25800",
-    "packageScripts": "acd702755e6ebd21336a2efa1c09b887652463845d9849c4fd75c16f1d2f9912"
+    "packageScripts": "173e733cc0d31e10e4422e1100fd96bc29cbcce0fcad117b21d23427f71fa87f"
   },
   "productObservation": {
     "captureMode": "automated_contract_registry_prompt_and_strict_build_offline_verification",
@@ -211,14 +211,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-25T16:47:11.755Z",
+    "generatedAt": "2026-07-26T03:17:30.766Z",
     "commands": [
       {
         "label": "backend-p3",
         "command": "node --test test/result-studio-context.test.mjs test/system-prompt-result-context.test.mjs test/agent-tool-registry.test.mjs test/result-edit-intent.test.mjs test/result-edit-agent-tool.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "90637ba76076c3e91dbaefa51a784db4916621a8c390597090b9853e6b82b0b4",
+        "stdoutSha256": "0caabd98522b7d56b56f505ae88f171c57ee464bc47574e8b4622cfd6cb58dd0",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -226,7 +226,7 @@
         "command": "npm test --prefix frontend -- ResultStudioContextReadiness.test.tsx ResultStudioSurface.test.tsx",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "ef208033db879d938160043d7c736515a5d75f6a1a56a2b3de42abb5d602fb1c",
+        "stdoutSha256": "a455106ab799d01141001c2f767bb413f217b719f605d5a2b1f2697c2291dce3",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -234,7 +234,7 @@
         "command": "npm run build:check --prefix frontend",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "f12e14040cdd7e842be4b3d0a096c7aa71540835bb7287aca2862b55e89a0d5a",
+        "stdoutSha256": "8a3ae26e1b6e10261b384dc4bc487ca6c986d7ba917f6beae5bba5f97f82b8ff",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -254,6 +254,6 @@
     "futureStagesImplemented": false
   },
   "passed": true,
-  "generatedAt": "2026-07-25T16:47:11.755Z",
+  "generatedAt": "2026-07-26T03:17:30.766Z",
   "privacyClean": true
 }
