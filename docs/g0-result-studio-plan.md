@@ -2,7 +2,7 @@
 
 最后更新：2026-07-26
 
-状态：`active / implemented_unverified`（RS0～RS8 引擎基础保留；`G0-RS-P0`～`G0-RS-P3` 已完成；`G0-RS-P4 Core` 已通过 18/18 离线门禁并提交；`G0-RS-RH0 Repository Hygiene Gate` 已完成，下一唯一阶段为 `G0-RS-P4R Product Reframe`，`G0-RS-P5` 继续阻断）
+状态：`active / implemented_unverified`（RS0～RS8 引擎基础保留；`G0-RS-P0`～`G0-RS-P3` 已完成；`G0-RS-P4 Core` 已通过 18/18 离线门禁并提交；`G0-RS-RH0 Repository Hygiene Gate` 已完成；当前阶段 `G0-RS-P4R Product Reframe` 已启动，处于 `P4R-0 Truth Baseline`——env 门控性能探针已提交 `340c09a`，P4R-0 尚未收口；`G0-RS-P5` 继续阻断）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -1385,7 +1385,7 @@ Result Studio 当前按三层事实表达：
 
 RH0 收口证据（2026-07-26）：`test/impact-map.json` 与 `scripts/test-affected.mjs` 已建立确定性、去重、fail-closed 的影响选择；`npm run test:changed` 定向 Node 41 项与前端 294 项通过，`npm run test:all:workspace` 最终基线为 Node 1581 pass / 0 fail / 11 skipped、前端 294 pass / 0 fail；`npm run docs:reconcile`（39 registered、0 unregistered、0 validation issues）、`npm run docs:check`、`npm run ui:audit:check` 与 `git diff --check` 全部通过。旧 `dev-desktop.sh`、已下线云端 smoke 与旧 DESeq2 MCP 验收脚本已删除；真实 JSON 证据迁移到 `test/fixtures/golden-path/deseq2-run.json`，`tmp` 历史日志/二进制已清理，QA/golden-path 日志保留上限为 20。后续审计确认 RS9 脚本仍被历史证据引用，因此保留文件但从日常 Result Studio syntax 热路径移出，新增显式 `g0:result-studio:historical:syntax`；历史代码仍可单独校验。该收口只改变工程治理，不改变任何执行/科学真相；P4R 启动门已满足，但 P4R 实现尚未开始。
 
-### G0-RS-P4R：Product Reframe — Agent-first Focused Result Experience（`planned`）
+### G0-RS-P4R：Product Reframe — Agent-first Focused Result Experience（`in_progress · P4R-0`）
 
 #### P4R.1 定位与启动门
 
@@ -1484,6 +1484,8 @@ P4R 完成后的默认产品形态固定为：
 #### P4R.5 串行实施阶段
 
 ##### P4R-0：Truth Baseline、失败测试与预算冻结
+
+进度（2026-07-26，`340c09a`）：观测工具已落地——`core/r-server/helpers/perf-probe.js` 提供事件循环直方图与按脱敏路由模板的请求计时，`core/r-server/routes/perf-probe.js` 暴露 `/api/__perf/{event-loop,reset}`。整套探针以 `BIOF3_PERF_PROBE=1` 门控：关闭时每个导出函数是 no-op、探针面不挂载，正常桌面运行成本与攻击面不变；计时只按脱敏路由模板归并，不记录结果内容、请求体、query、绝对路径、id 或凭据。定向测试 `test/perf-probe.test.mjs 9/9` + `test/test-affected.test.mjs 4/4` 通过（未跑全量）。**P4R-0 未收口**，仍需：canonical fixture（小/中/大 PNG/SVG、10 万行表、长报告、多 Revision）、四条不变量的失败测试先行、以及把真实采样的性能预算冻结进 `acceptance/g0-result-studio/rs-p4r-performance.json`。
 
 - 机器捕获结果点击的请求 waterfall、事件循环 lag、首次内容可见、Artifact 切换、版本切换和代码打开基线。
 - 建立小/中/大 PNG/SVG、10 万行表、长报告、多 Revision 的 canonical fixture；不使用数据库 seed 冒充真实产品旅程。
@@ -1783,7 +1785,7 @@ G0-RS-P0 Truth Correction
 
 `G0-RS-P4R` 计划交付：
 
-1. [ ] P4R-0 捕获真实失败基线、请求 waterfall 与事件循环阻塞，并冻结冷/热打开、版本切换和代码打开预算。
+1. [~] P4R-0 捕获真实失败基线、请求 waterfall 与事件循环阻塞，并冻结冷/热打开、版本切换和代码打开预算。（进行中 `340c09a`：env 门控观测探针已落地；仍缺 canonical fixture、失败测试先行与冻结的性能预算证据。）
 2. [ ] P4R-1 建立结果快路径；主体不等待 interaction/context/version/storage/code 次级请求。
 3. [ ] P4R-2 完成单结果聚焦画布、紧凑 header、按需结果抽屉和四种互斥模式。
 4. [ ] P4R-3 让自然语言 Agent 成为默认编辑入口，P4 Core 参数面板降为高级精调。
