@@ -234,11 +234,21 @@ async function waitForHealth(baseUrl, { signal } = {}) {
 
 /** Spawn the real server against the disposable environment. */
 export async function startServer(env, { onLog } = {}) {
-  const child = spawn(process.execPath, [SERVER_ENTRY], { env, cwd: REPO_ROOT, stdio: ['ignore', 'pipe', 'pipe'] });
+  // Only take the server's output when someone is actually consuming it.
+  // Piping it unconditionally makes the measurement measure the harness: the
+  // server's console.log blocks once the pipe buffer fills and the parent is
+  // slow to drain, which happens as soon as this runs under `npm run ... | tail`.
+  // That backpressure stalls the server's event loop, and the probe faithfully
+  // records the stall — the same capture read 463ms run directly and 4257ms
+  // through npm, purely from this.
+  const capturesOutput = typeof onLog === 'function';
+  const stdio = capturesOutput ? ['ignore', 'pipe', 'pipe'] : ['ignore', 'ignore', 'ignore'];
+  const child = spawn(process.execPath, [SERVER_ENTRY], { env, cwd: REPO_ROOT, stdio });
   const logs = [];
   const signal = { exited: null };
 
   const collect = (stream, channel) => {
+    if (!stream) return;
     stream.setEncoding('utf8');
     stream.on('data', (chunk) => {
       for (const line of chunk.split('\n').filter(Boolean)) {

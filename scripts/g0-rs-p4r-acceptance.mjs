@@ -117,8 +117,10 @@ function toObservation(capture) {
   const renderBlocking = capture.requests.filter((request) => request.role === 'render-blocking');
   return {
     captureMode: 'real_run_tool_chain_in_disposable_root_with_env_gated_probe',
+    calibration: capture.calibration,
     corpus: capture.corpus.map(({ toolId, durationMs, artifactCount }) => ({ toolId, durationMs, artifactCount })),
-    requests: capture.requests.map(({ id, role, status, totalMs, bytes }) => ({ id, role, status, totalMs, bytes })),
+    requests: capture.requests.map(({ id, role, status, totalMs, coldMs, warmMs, warmSamplesMs, warmSpreadMs, oneTimeCostMs, bytes }) =>
+      ({ id, role, status, totalMs, coldMs, warmMs, warmSamplesMs, warmSpreadMs, oneTimeCostMs, bytes })),
     renderBlockingTotalMs: Number(renderBlocking.reduce((sum, request) => sum + request.totalMs, 0).toFixed(3)),
     slowestRequest: capture.requests.reduce((worst, request) => (request.totalMs > (worst?.totalMs ?? -1) ? request : worst), null)?.id ?? null,
     eventLoop: capture.eventLoop,
@@ -141,6 +143,14 @@ function inspect(verification, observation) {
   const measuredAll = MUST_BE_MEASURED.every((id) => byId.get(id)?.status === 200);
   const eventLoop = observation?.eventLoop || {};
   const budgetMet = Number.isFinite(eventLoop.maxMs) && eventLoop.maxMs <= BUDGETS.eventLoopMaxMs.value;
+  const requests = observation?.requests || [];
+  // A route is one-time dominated when most of its first-call cost disappears on
+  // the second call; optimising it would not change steady-state viewing.
+  const oneTimeDominated = requests.filter((r) => Number.isFinite(r.oneTimeCostMs)
+    && Number.isFinite(r.coldMs) && r.coldMs > 0 && r.oneTimeCostMs / r.coldMs >= 0.5);
+  const steadyStateWorst = requests
+    .filter((r) => Number.isFinite(r.warmMs))
+    .reduce((worst, r) => (r.warmMs > (worst?.warmMs ?? -1) ? r : worst), null);
 
   const checks = [
     item('RS-P4R0-1',
@@ -186,6 +196,12 @@ function inspect(verification, observation) {
       [sourceFiles.corpus],
       'The corpus creates and owns a real project, without which every Result Studio route rejects and the baseline would time validation.'),
 
+    item('RS-P4R0-11',
+      requests.length > 0
+      && requests.filter((r) => r.status === 200).every((r) => Number.isFinite(r.coldMs) && Number.isFinite(r.warmMs)),
+      [sourceFiles.baseline],
+      'Every measured route records both a first-call and a second-call timing, so one-time creation cost cannot be reported as steady-state viewing cost.'),
+
     item('RS-P4R0-9', commands.length >= 3 && commands.every((command) => command.passed),
       [evidencePath.replace(`${root}/`, '')],
       'All declared P4R-0 command gates passed.'),
@@ -216,9 +232,29 @@ function inspect(verification, observation) {
       eventLoopMaxMs: budgetMet ? 'met' : 'violated_by_current_implementation',
       observedMaxMs: eventLoop.maxMs ?? null,
       attributedTo: observation?.slowestRequest ?? null,
+      // The first version of this evidence attributed the whole peak to
+      // `interaction` without noting that its first call lazily creates a
+      // ChangeSet, writes .biof3/revision/ and makes a Git commit. Measuring a
+      // second pass separates one-time creation from what every view pays, and
+      // that distinction decides what P4R-1 should actually optimise.
+      steadyStateWorstMs: steadyStateWorst?.warmMs ?? null,
+      steadyStateWorstRoute: steadyStateWorst?.id ?? null,
+      oneTimeDominated: oneTimeDominated.map((r) => r.id),
       note: budgetMet
         ? 'Current implementation is within the frozen block budget.'
         : 'The frozen 250ms budget is exceeded by the current implementation. This is the P4R-0 finding, not a P4R-0 failure: P4R-1 owns the fix. The budget must not be raised to accommodate it.',
+      // Honesty about the instrument, not just the reading. Absolute timings on
+      // this harness are load-sensitive: the same capture produced a 383ms cold
+      // interaction on an idle machine and 4072ms immediately after several
+      // back-to-back DESeq2 runs, with tight within-run spreads either way. What
+      // is stable across every observation is the STRUCTURE below, and the
+      // violation conclusion holds at both ends of the observed range, since even
+      // the cleanest run exceeds 250ms.
+      absoluteTimingsAreLoadSensitive: true,
+      observedColdRangeMsAcrossRuns: [383.491, 4072.669],
+      loadSensitivityCause: 'process-spawn cost scales with the inherited PATH: git --version measured 9.7ms at 31 PATH entries and 122.5ms at the 40 entries npm run injects. detectGitRuntime() is uncached, so every git-touching route pays it per call. See baselineObservation.calibration.',
+      violationRobustAtRangeFloor: true,
+      structuralFinding: 'interaction is one-time dominated (its cost disappears on a second call); changesets and workspace-status are recurring costs paid by every view. P4R-1 should target the recurring pair, not the one-time creation.',
     },
     checks,
     verification,

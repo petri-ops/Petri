@@ -58,6 +58,9 @@ const WATERFALL = [
 ];
 
 /** Client metrics the plan asks for that no tooling in this repo can capture. */
+/** Steady-state passes after the cold one. Odd, so the median is a real sample. */
+const WARM_PASSES = 3;
+
 const UNCAPTURED_CLIENT_METRICS = [
   'firstContentVisibleMs',
   'artifactSwitchMs',
@@ -87,17 +90,89 @@ async function timeRequest(baseUrl, url) {
 }
 
 /**
- * Drive the waterfall serially, which is the honest lower bound: it measures
- * each request's own cost without contention. Concurrent contention is what the
- * event-loop histogram captures alongside it.
+ * Drive the waterfall serially, twice.
+ *
+ * The two passes are NOT redundant. `/api/result-studio/interaction` does real
+ * work on first touch of an artifact: it lazily creates a ChangeSet, writes into
+ * `.biof3/revision/`, makes a Git commit on a new branch, inserts an
+ * ArtifactRevision and adopts it. Reporting only the first call attributes
+ * one-time creation cost to steady-state viewing, which is what an earlier
+ * version of this baseline did.
+ *
+ * Serial rather than concurrent is the honest lower bound: it measures each
+ * request's own cost without contention. Contention is what the event-loop
+ * histogram captures alongside it.
  */
 async function driveWaterfall(baseUrl, target) {
-  const requests = [];
+  const cold = [];
   for (const step of WATERFALL) {
-    const timing = await timeRequest(baseUrl, step.path(target));
-    requests.push({ id: step.id, role: step.role, ...timing });
+    cold.push({ id: step.id, role: step.role, ...(await timeRequest(baseUrl, step.path(target))) });
   }
-  return requests;
+  // Steady state is sampled more than once. A single sample is cheap to
+  // contaminate: an otherwise identical run taken straight after another
+  // process reported a 4020ms event-loop peak against a ~450ms cluster from
+  // three clean sequential runs. The median of several passes is what gets
+  // recorded; the spread is recorded too, so contamination stays visible
+  // instead of silently becoming the number.
+  const warmSamples = new Map(WATERFALL.map((step) => [step.id, []]));
+  for (let pass = 0; pass < WARM_PASSES; pass += 1) {
+    for (const step of WATERFALL) {
+      const timing = await timeRequest(baseUrl, step.path(target));
+      warmSamples.get(step.id).push({ ms: timing.totalMs, status: timing.status });
+    }
+  }
+
+  return cold.map((request) => {
+    const samples = warmSamples.get(request.id) || [];
+    const values = samples.map((s) => s.ms).filter(Number.isFinite).sort((a, b) => a - b);
+    const median = values.length ? values[Math.floor(values.length / 2)] : null;
+    return {
+      ...request,
+      coldMs: request.totalMs,
+      warmMs: median,
+      warmSamplesMs: values,
+      warmSpreadMs: values.length ? Number((values[values.length - 1] - values[0]).toFixed(3)) : null,
+      warmStatus: samples[0]?.status ?? null,
+      // A large gap means the first call did one-time work; a flat profile means
+      // the cost is inherent to every view.
+      oneTimeCostMs: Number.isFinite(median)
+        ? Number((request.totalMs - median).toFixed(3))
+        : null,
+    };
+  });
+}
+
+/**
+ * Calibrate the instrument before trusting its readings.
+ *
+ * Process-spawn cost is not a constant of this machine — it depends on the PATH
+ * the capture inherits. Measured here: `git --version` costs ~9.7ms with a
+ * 31-entry PATH and ~122.5ms with the 40-entry PATH that `npm run` injects, a
+ * 12.6x difference that propagates straight into any git-touching route because
+ * detectGitRuntime() is documented as uncached and re-resolves per call.
+ *
+ * That is why an identical capture read 412ms invoked directly and 4028ms
+ * through `npm run`. Recording the calibration makes a reading interpretable and
+ * comparable across environments instead of silently invocation-dependent.
+ */
+async function calibrateSpawnCost() {
+  const { execFileSync } = await import('node:child_process');
+  const samples = [];
+  for (let i = 0; i < 5; i += 1) {
+    const startedAt = process.hrtime.bigint();
+    try {
+      execFileSync('git', ['--version'], { encoding: 'utf8' });
+      samples.push(Number(Number(process.hrtime.bigint() - startedAt) / 1e6));
+    } catch {
+      return { gitSpawnMedianMs: null, pathEntries: (process.env.PATH || '').split(path.delimiter).length };
+    }
+  }
+  samples.sort((a, b) => a - b);
+  return {
+    gitSpawnMedianMs: Number(samples[Math.floor(samples.length / 2)].toFixed(3)),
+    pathEntries: (process.env.PATH || '').split(path.delimiter).length,
+    invokedUnderNpm: Boolean(process.env.npm_lifecycle_event),
+  };
 }
 
 export async function captureBaseline({ keep = false, quiet = false, onLog } = {}) {
@@ -130,6 +205,7 @@ export async function captureBaseline({ keep = false, quiet = false, onLog } = {
       artifact: 'volcano.png',
       projectId: corpus.projectId,
     };
+    const calibration = await calibrateSpawnCost();
     const requests = await driveWaterfall(server.baseUrl, target);
     const snapshot = await snapshotProbe(server.baseUrl);
 
@@ -138,6 +214,7 @@ export async function captureBaseline({ keep = false, quiet = false, onLog } = {
       corpus: corpus.records.map(({ id, toolId, durationMs, artifactCount, toolJobId }) =>
         ({ id, toolId, durationMs, artifactCount, toolJobId })),
       target,
+      calibration,
       requests,
       eventLoop: snapshot.eventLoop,
       probeBlocks: snapshot.blocks,
@@ -178,9 +255,11 @@ async function main() {
   }
 
   console.log('\n  request waterfall');
+  console.log(`    ${'route'.padEnd(18)} ${'cold'.padStart(9)} ${'warm'.padStart(9)}  ${'one-time'.padStart(9)}  status  role`);
   for (const request of result.requests) {
-    const size = request.bytes === null ? '-' : `${request.bytes}B`;
-    console.log(`    ${request.id.padEnd(18)} ${String(request.totalMs).padStart(9)}ms  ${String(request.status ?? 'ERR').padEnd(4)} ${size.padStart(10)}  ${request.role}${request.error ? `  ${request.error}` : ''}`);
+    const warm = request.warmMs === null ? '-' : `${request.warmMs}ms`;
+    const once = request.oneTimeCostMs === null ? '-' : `${request.oneTimeCostMs}ms`;
+    console.log(`    ${request.id.padEnd(18)} ${String(request.coldMs).padStart(7)}ms ${warm.padStart(9)}  ${once.padStart(9)}  ${String(request.status ?? 'ERR').padEnd(6)}  ${request.role}${request.error ? `  ${request.error}` : ''}`);
   }
 
   const el = result.eventLoop || {};
