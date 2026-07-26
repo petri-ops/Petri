@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P4",
-  "sourceCommit": "47b69a3ccf0a088d0f1275b6ec70261578586526",
+  "sourceCommit": "2225dde602b318891b7fb9ed124df01a63baf281",
   "captureMode": "automated_descriptor_projection_plugin_wiring_registry_and_strict_build_offline_verification",
   "qualificationEligible": false,
   "qualificationReason": "P4 closes the offline unified-editing contract; real manual-vs-AI equivalence on a live plugin run and packaged product qualification remain reserved for P5 and P7.",
@@ -25,7 +25,7 @@
     "volcanoGolden": "57640c9c3684de3d4110a8c42bbabf01b48432313e80bf46303056dc6aaed265",
     "controlsTest": "0a6a7e1c10733aef3bc2db145534a2510a0dac8748887d270c4d4e56c803536e",
     "acceptanceScript": "ba52c3f754538ca56f71c20376b347a63338026fef316574953731e84f95a4c7",
-    "packageScripts": "4b72c35aad4090631708d727ffd79fb593937dcccbccdd76d53a3d4d4d755273"
+    "packageScripts": "8b2c4cd4fe6bb0303259024030a2b0bf3583ba7d4b99025576e020984881b0c3"
   },
   "controlObservation": {
     "controlCount": 18,
@@ -243,14 +243,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-26T07:19:40.183Z",
+    "generatedAt": "2026-07-26T09:27:28.325Z",
     "commands": [
       {
         "label": "backend-p4",
         "command": "node --test test/result-edit-controls.test.mjs test/result-edit-intent.test.mjs test/result-studio-context.test.mjs test/result-studio-plugin-sdk.test.mjs test/result-studio-qualification.test.mjs test/agent-tool-registry.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "945fc7c6e4f1683da110c2fef0d01a61a7eab6d3d465365b7373149f55cfe08a",
+        "stdoutSha256": "400b6d22800adc2c1ae3a3619be9fc3311d1f9bdd7f4d6370b98b48eae1d74f9",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -266,7 +266,7 @@
         "command": "npm run build:check --prefix frontend",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "595cb7a727f2ab081bc13185e69cbc3f0892b34b21e3f5bce427c8b5c5b6f68e",
+        "stdoutSha256": "91b17a22c0e3cc9719dba20d882367515e67d36fef11d31bbfee061ffb9bbe21",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -286,6 +286,6 @@
     "futureStagesImplemented": false
   },
   "passed": true,
-  "generatedAt": "2026-07-26T07:19:40.183Z",
+  "generatedAt": "2026-07-26T09:27:28.325Z",
   "privacyClean": true
 }
