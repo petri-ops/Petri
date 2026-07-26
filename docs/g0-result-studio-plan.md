@@ -1555,10 +1555,24 @@ P4R 完成后的默认产品形态固定为：
 
 ##### P4R-2：Focused Result Surface
 
-- 主体首屏化；移除常驻 Honeycomb 结果导航、二级 Artifact rail、默认展开的存储/交付/报告卡。
-- 建立紧凑 header、返回结果列表、按需结果抽屉，以及 Result/Code/Compare/History 互斥模式。
-- Agent 会话保持挂载；进出结果、切换 Artifact/Revision 后草稿、选择、滚动和布局可恢复。
-- 1440/1024/820px、明暗主题和键盘焦点必须同时成立。
+**范围（2026-07-27 按代码实况收敛）**
+
+P4R-2 的可交付范围以代码实况为界，本阶段**不新增阶段、不借用后续阶段的工作**。四态互斥中只有 `result` 一态有实现基础：`WorkspaceMode`（`frontend/src/hooks/useWorkspaceRouting.ts:4`）中不存在 `code` 与 `history`；`compare` 在 `frontend/src` 内零写入者（无任何 `updateWorkspaceMode('compare')` 调用点，只能由手输 `?mode=compare` 经 `project-workspace.tsx:219` 进入），且每个消费点都写成 `result || compare`（`:311`、`:377-378`、`:394`、`:945`、`:1148`，`CenterPanel.tsx:114`），`ResultStudioCanvas` 只把 `mode` 落成 `data-mode` 属性（`ResultStudioSurface.tsx:53`）而 `ResultStudioSurface.module.css` 与 `project-workspace.module.css` 都不选择该属性，因此它与 `result` 渲染**完全相同**。Code 的数据源属 P4R-5：`core/r-server/routes/result-studio.js` 的 23 条路由无一投影 Revision 源，计划 §P4R.4(6) 与 §P4R-5 已把该只读源投影和「Result/Code 无损切换」明写为 P4R-5 的新工作；History 的版本选择器属 P4R-4（§P4R-4 第一条）。因此 P4R-2 独立可交付的只有三件事：(1) **首屏化**——主体之上不再出现无条件块，仍保留的每个块都要给出「为什么必须排在结果之前」的判据，判据抽成可测纯谓词放进 `frontend/src/components/result-studio/resultFirstScreen.ts`，不再埋在内联且不 export 的 `ResultArtifactShell` 里（当前对象：`workflowBar` `:4049`、`recoveryConfirmation` `:4073`、`ResultStudioChangeSetPanel` `:4145`、`resultScientificDelivery` `:4161-4162`；`resultDeliveryCard` 已由 `ba6b124` 处理）；(2) **header 收敛**——`ResultStudioContextBar`（`ResultStudioSurface.tsx:64-103`）已存在，要做的是消除它与 `workflowBar`（`:4059`）对同一 `artifactTruth.status` 的重复呈现，并把版本位从截断 Revision ID（`resultSurface.ts:125-129`）改为真实 `vN` 或如实降级；(3) **模式机制骨架**——只建立「一次只显示一态」的容器与状态载体，并在其上接入唯一有实现的 `result`，`code` 入口在 P4R-5 的源投影路由存在前不得渲染，`history` 随 P4R-4 接入，`compare` 保持不可达而非被本阶段伪装成可用。跨模式的草稿/选择/滚动/布局保持由 P4R-2 建立机制并**只对 `result↔chat` 验证**，其余组合随 P4R-4/P4R-5 补齐。附带可安全清理的死代码：`HistoryPanel`（`project-workspace.tsx:2777-2823`）、`ToolboxPanel`（`:2840-3106`）在 `frontend/src` 内零引用，`ResultSidebarPanel`（`:4462-4504`）虽 export 却无 import，使 `ResultArtifactShell` 中 6 处 `isSidebar` 分支（`:3246`、`:3947`、`:4090`、`:4095`、`:4246`、`:4403`）全部不可达，合计约 357 行。（行号钉在 `1a31ed3`；`project-workspace.tsx` 正在串行修改中，引用时按符号名重新定位。）
+
+**证据边界**
+
+P4R-2 的证据边界沿用 P4R-0 已确立的纪律：**没有生产者的指标一律记 `unmeasured` 并写明原因，绝不估算、绝不默认为 0、绝不用形状校验冒充测量**（先例见 `acceptance/g0-result-studio/rs-p4r-performance.json` 的 `unmeasured` 数组与 `budgets.visibleFeedbackMs` 的 `machineVerifiable:false` / `status:"frozen_target_not_yet_measurable"`）。可以机器证明的部分：模式容器一次只渲染一态、`resultFirstScreen.ts` 中每个首屏谓词的真值表、header 不再重复呈现 `artifactTruth.status`、版本位在拿不到 `revisionOrdinal` 时走降级文案而非截断 ID、焦点顺序与 `role`/`aria-*` 完整、核心路径键盘处理器可触发、状态不只依赖颜色、样式只引用已定义的 `--biof3-*` token——这些全部是 DOM 结构与纯函数断言，happy-dom 足以覆盖，写成 vitest 并经 `npm run test:files`（**不得用会退化成 `vitest run --changed` 的裸 `npm test`**，见 §P4R-0 证据门约束）。必须记为未测量的部分：`1440/1024/820px` 下的实际布局与横向溢出、明暗主题的真实渲染差异、以及「主体首屏可见」的像素判定。原因是实测的而非假设的——`frontend/vite.config.ts` 的 `test.environment` 为 `happy-dom`，本次核对临时跑的探针（用例已删除）得 `getBoundingClientRect() = 0×0`、`offsetWidth = 0`、`document.documentElement.scrollWidth = 0`、`clientWidth = 0`，`getComputedStyle` 只回显声明值，`window.innerWidth` 可设但不带布局；仓库内无 playwright/puppeteer；`scripts/g0-qualification-visual.mjs` 只校验既有 PNG 与人工 `inspection.json`（其 `accessibilityInspection` 断言 `method === 'computer-use-accessibility-and-screenshot-review'`），并不捕获。统一用 `not_captured_no_browser_automation_in_repo` 作为原因串，与 P4R-0 保持同一词表。另有两条不得重复的前例：其一，`acceptance/g0-result-studio/rs-p2-ui-observation.json` 在仓库内**没有任何生产者**（`scripts/g0-rs-p2-acceptance.mjs:131-144` 只校验其形状：六格矩阵、`pageHorizontalOverflow === false`、64 位 sha256），因此它不可重跑、不可复核，P4R-2 **不得**再产出同类「形状被校验、内容无来源」的 UI 证据；其二，§P4R.7 声明的 `npm run g0:result-studio:p4r:frontend` 与 `:ui` 两个入口在 `package.json` 中**尚不存在**（现有仅 `p4r:invariants`、`p4r:test`、`p4r`、`p4r:update`），P4R-2 若要落 `acceptance/g0-result-studio/rs-p4r-product-reframe.json`，必须同时新增真正执行断言的脚本入口，并沿用 `sourceHashes` 风格使源码漂移时证据失效。所有 P4R-2 证据保持 `qualificationEligible:false`，不升级 `result-studio-editing` 支持声明，产品资格仍由 P7 唯一裁决。
+
+
+- 主体首屏化。**删除对象按代码实况重新指定**：原文点名的三个对象经核对均不成立——Honeycomb 结果导航是网格列（`project-workspace.module.css:4086-4088`）且已可收起（`project-workspace.tsx:4257-4258`、`:3947`），删之得横向宽度而非首屏高度，其去留改为横向宽度问题单独裁决、不计入首屏化交付；存储卡已自抑制（`ResultStudioChangeSetPanel.tsx:56`、`:182`、`:184`）；二级 Artifact rail 已条件渲染（`project-workspace.tsx:3946`）。真正无条件占据首屏的是计划未点名的 `resultDeliveryCard`，已由 `ba6b124` 按 `resultFirstScreen.ts::shouldShowDeliveryCard` 条件化。
+- 本阶段剩余的首屏对象是主体之上仍会出现的四个条件块：`workflowBar`（`project-workspace.tsx:4049`）、`recoveryConfirmation`（`:4073`）、`ResultStudioChangeSetPanel`（`:4145`）与 `resultScientificDelivery`（`:4161-4162`）。每个都必须给出「为什么它必须排在结果之前」的判据；判据一律抽成可测纯谓词放进 `frontend/src/components/result-studio/resultFirstScreen.ts`，不再埋在内联且不可导出的 `ResultArtifactShell` 里——该组件定义在近 5000 行的 `project-workspace.tsx` 内且不 export，其内部决策此前无法被任何测试触及。
+- 顺带清理与首屏无关但同处该文件的死代码：`HistoryPanel`（`project-workspace.tsx:2777-2823`，47 行）与 `ToolboxPanel`（`:2840-3106`，267 行）在 `frontend/src` 内零引用；`ResultSidebarPanel`（`:4462-4504`，43 行）虽 `export` 却无任何 import，使 `ResultArtifactShell` 中 6 处 `isSidebar` 分支（`:3246`、`:3947`、`:4090`、`:4095`、`:4246`、`:4403`）全部不可达。
+- **收敛已有 header，不新建**：`ResultStudioContextBar`（`ResultStudioSurface.tsx:64-103`，挂载于 `CenterPanel.tsx:181-191`）已经是结果头。本阶段做三件事：去掉它与 `workflowBar`（`project-workspace.tsx:4049`、`:4059`）对同一 `artifactTruth.status` 的重复呈现；把版本位从截断 Revision ID（`resultSurface.ts:125-129`）改为 §P4R.3 要求的 `vN`——`ActiveArtifact`（`project-workspace.tsx:132-150`）不含 `revisionOrdinal`，因此要么由 P4R-2 补一条不阻塞主体的最小投影，要么如实显示「版本待确认」，**不得用截断 ID 冒充 `vN`**；保留返回入口，内部 ID 不进普通视图。
+- **返回目标按现状写为「返回会话」**：仓库内不存在结果列表界面，返回按钮的 `aria-label` 就是「返回对话」（`ResultStudioSurface.tsx:83`）并走 `updateWorkspaceMode('chat')`（`CenterPanel.tsx:188`），右栏 `results` tab 是单 Artifact Inspector（`RightPanel.tsx:146-174`）。§P4R.3 布局图中的「返回结果列表」同步改为「返回会话」；若要建结果列表，那是新增产品面，不属 P4R-2 且需单独立项。
+- **模式机制本阶段只能立骨架，不能立四态**：`WorkspaceMode`（`useWorkspaceRouting.ts:4`）中不存在 `code` 与 `history`；`compare` 零写入者且与 `result` 渲染完全相同（`ResultStudioSurface.tsx:53` 只落 `data-mode`，两份 module CSS 均不选择它）。因此 P4R-2 只交付「一次只显示一态」的容器与状态载体，并在其上接入唯一有实现的 `result`。`code` 入口在 P4R-5 的 Revision 源投影路由存在前不得渲染；`history`/版本选择器随 P4R-4 接入；`compare` 在 P4R-4 给出比较入口前保持不可达，**不得由本阶段把它伪装成可用的第四态**。
+- **[x] Agent 会话常驻（已交付 `8e58f98`）**。该条在原 charter 中被写成布局偏好，实测是**主路径上的静默数据丢失**：`ResultEditPanel`（`RightPanel.tsx:161-174`）提交后派发的 `copilotAsk` 经零缓冲的 `dispatchBioF3Event`（`lib/events.ts:109-113`）发出，唯一订阅者 `SimpleChat.tsx:579-585` 在 result 模式下未挂载，事件消失且 `finally` 同步把按钮重置为空闲，用户得不到任何失败提示。修复去掉了 `CenterPanel` 中冗余且具破坏性的 `{ctx.showPinnedSummary && children}` 门（可见性本由投影层 `aria-hidden` + CSS 承担，去掉后比原来**少**做工作），并新增 `ownsCopilotAsk`（默认 `false`，仅中央实例传 `true`，`CenterPanel.tsx:167`）避免右栏 chat tab 重复订阅。守门测试此前双重假绿（给所有模式硬编码 `showPinnedSummary: true` 并 mock 掉 `SimpleChat`），已改为按 mode 派生并新增 `copilotAskDelivery.test.tsx` 用真实订阅验证送达。记为**交付缺陷修复**，不记为布局改造。
+- 剩余项：进出结果、切换 Artifact/Revision 后草稿、选择、滚动可恢复。其中「布局」一项已由 `project-workspace.tsx:309-320`、`:377-386` 的 `resultPanelRestoreRef` 实现，本阶段只补回归断言；草稿的存活已由 `8e58f98` 从结构上保证（会话不再卸载）；因此本阶段真正待做的是**选择与滚动**的跨切换保持，且只能对 `result↔chat` 验证——Code/History/Compare 的对应验证分别随 P4R-5/P4R-4 补齐。
+- 1440/1024/820px、明暗主题和键盘焦点：**按可证明性拆成两半，不整条作为出口条件**。可在 happy-dom 单测中机器证明的部分必须成立并写进证据：模式容器在每个断点下渲染同一棵可达 DOM、焦点顺序与 `role`/`aria-*` 完整、核心路径的键盘处理器存在且可触发、状态不只靠颜色（以文本或 `data-*` 兜底）、样式只使用已定义的 `--biof3-*` token 因而明暗共用一套声明。不可证明的部分**必须按 P4R-0 先例记为未测量并给出原因**：`frontend/vite.config.ts` 用 happy-dom，实测 `getBoundingClientRect()`/`offsetWidth`/`scrollWidth`/`clientWidth` 全为 0，不做布局计算；仓库无 playwright/puppeteer；`scripts/g0-qualification-visual.mjs` 只校验既有 PNG 不捕获。因此 `pageHorizontalOverflow`、各断点实际可见高度与「主体首屏可见」的像素判定一律记 `unmeasured` + `not_captured_no_browser_automation_in_repo`，**不得估算、不得以 `innerWidth` 冒充布局、不得以人工提供而仓库内无生产者的 JSON 充作机器证据**。
 
 ##### P4R-3：Agent-first Editing
 
@@ -1598,9 +1612,9 @@ P4R 完成后的默认产品形态固定为：
    - P4R-0 冻结矩阵内无 Result Studio 同步任务造成 >250ms event-loop block；冷/热打开与版本切换预算全部通过。
 
 2. **单结果焦点**
-   - 主体首屏可见；没有常驻两级结果导航和结果前的大块元数据。
-   - 当前作用域明确显示“结果名称 · vN · validation”，后台节点不会自动切走。
-   - 切换模式和返回会话不丢失草稿、选择和布局。
+   - 主体之上不出现无条件块；每个仍排在主体之前的块都由 `resultFirstScreen.ts` 中的具名纯谓词决定其出现条件，并有对应单测（当前对象：`workflowBar`、`recoveryConfirmation`、`ResultStudioChangeSetPanel`、`resultScientificDelivery`、`resultDeliveryCard`）。结果导航保持可收起且第二级保持按需（`project-workspace.tsx:3946`、`:4257-4258`），不再以「常驻两级导航」描述现状。「主体首屏可见」的像素判定在本仓库无生产者，按 P4R-0 先例记为 `unmeasured` + `not_captured_no_browser_automation_in_repo`，不作为可重跑门的通过条件。
+   - 当前作用域显示“结果名称 · 版本 · validation”。版本位必须是真实序号 `vN`：`ActiveArtifact`（`project-workspace.tsx:132-150`）不含 `revisionOrdinal`，当前 header 显示的是 `shortRevisionLabel()` 截断出的 Revision ID（`resultSurface.ts:125-129`），因此 P4R-2 必须补一条不阻塞主体的最小序号投影（不得复用已被 P4R-0 归为 `secondary` 的 context-envelope，见 §P4R.4(2)），或在拿到序号前如实显示「版本待确认」。**以截断 Revision ID 冒充 `vN` 记为不通过。** 后台节点不会自动切走。
+   - 返回会话不丢失草稿、选择和布局；`result` 与会话之间往返可重复进行而状态不退化。其中草稿已由 `8e58f98`（会话在所有模式常驻）、布局已由 `resultPanelRestoreRef`（`project-workspace.tsx:309-320`、`:377-386`）成立，本阶段补回归断言；**待交付的是选择与滚动位置的保持**。跨 Code/History/Compare 的模式切换保持不属本阶段：`code`/`history` 不在 `WorkspaceMode` 内（`useWorkspaceRouting.ts:4`），`compare` 无写入者且与 `result` 渲染相同，相应验收随 P4R-5/P4R-4 一并补齐。
 
 3. **Agent 主导**
    - 用户不提供任何内部 ID，仅在当前结果输入自然语言即可得到真实 ChangeSet 候选。
@@ -1841,7 +1855,7 @@ G0-RS-P0 Truth Correction
 
 1. [~] P4R-0 捕获真实失败基线、请求 waterfall 与事件循环阻塞，并冻结冷/热打开、版本切换和代码打开预算。（进行中 `340c09a`：env 门控观测探针已落地；仍缺 canonical fixture、失败测试先行与冻结的性能预算证据。）
 2. [ ] P4R-1 建立结果快路径；主体不等待 interaction/context/version/storage/code 次级请求。
-3. [ ] P4R-2 完成单结果聚焦画布、紧凑 header、按需结果抽屉和四种互斥模式。
+3. [ ] P4R-2 完成主体首屏化（主体之上无无条件块，判据在 `resultFirstScreen.ts` 中可测）、收敛已有结果 header（去掉与 `workflowBar` 的真值重复，版本位显示真实 `vN` 或如实降级）、按需结果抽屉，以及**一次只显示一态的模式容器并接入唯一有实现的 `result`**。`code` 入口待 P4R-5 的 Revision 源投影路由，`history`/版本选择器待 P4R-4，`compare` 在 P4R-4 给出入口前保持不可达；四态齐备不属 P4R-2 出口。其中 Agent 会话常驻已由 `8e58f98` 交付（记为交付缺陷修复：提交被静默丢弃，非布局项）。
 4. [ ] P4R-3 让自然语言 Agent 成为默认编辑入口，P4 Core 参数面板降为高级精调。
 5. [ ] P4R-4 完成可直接查看的版本选择器与 Codex-like Change Review，查看旧版不产生任何写入。
 6. [ ] P4R-5 完成每个 Artifact/Revision 的精确代码、复制/下载/Agent 修改和受控复现入口。
