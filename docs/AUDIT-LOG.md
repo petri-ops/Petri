@@ -10,7 +10,7 @@
 
 | 状态 | 日期 | 事项 | 处置边界 |
 | --- | --- | --- | --- |
-| 🔵进行中 | 2026-07-26 | `G0-RS-RH0` 正在收缩 Agent 热上下文、建立定向测试和治理脚本/tmp 生命周期 | RH0 收口前不得启动 P4R 或 P5～P7 |
+| 🔵进行中 | 2026-07-26 | `G0-RS-P4R` 等待 RH0 可恢复提交后启动；P4R 是当前唯一允许阶段 | P4R 收口前不得启动 P5～P7 |
 | 🟡建议 | 2026-07-17 | `capability-provisioning.js` 的下载实现与 plugin-manager 各自维护 | host 白名单已经修复；共享下载 helper 只在改动该能力时评估，不阻塞 RH0 |
 | 🟡待评估 | 2026-07-17 | 本地分支 `codex/fix-collapsed-right-titlebar` 尚未采用，且与当前 UI 已有语义重叠 | 不直接 merge；进入相关 UI 工作时先比较当前实现，再决定删除或重做 |
 
@@ -23,6 +23,7 @@
 | 2026-07-26 | P4 Core 统一手动/Agent 编辑形成 18/18 离线实现检查点，状态保持 `implemented_unverified` | `e0a4c7d` |
 | 2026-07-26 | 四份已完成审计无损移入 `docs/archive/checkpoints/` | `e38d6b5` |
 | 2026-07-26 | RH0 作为 P4R 前唯一串行阶段写入 canonical | `2840673` |
+| 2026-07-26 | RH0 定向测试、脚本/tmp 生命周期和最终全量基线收口；下一阶段转为 P4R | RH0 closeout commit |
 
 ## 广播规则
 

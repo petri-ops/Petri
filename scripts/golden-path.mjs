@@ -31,7 +31,7 @@
  * 日志：写到 tmp/golden-path/<timestamp>.log（stdout 同步输出）
  */
 
-import { mkdirSync, writeFileSync, appendFileSync, existsSync, readFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, appendFileSync, existsSync, readFileSync, readdirSync, statSync, unlinkSync } from 'node:fs';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Buffer } from 'node:buffer';
@@ -71,6 +71,14 @@ const TOOL_ID = contract?.goldenPath?.tool || 'deseq2';
 const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
 const LOG_DIR = join(REPO_ROOT, 'tmp', 'golden-path');
 mkdirSync(LOG_DIR, { recursive: true });
+const MAX_LOGS = 20;
+const oldLogs = readdirSync(LOG_DIR)
+  .filter((entry) => entry.endsWith('.log'))
+  .map((entry) => ({ entry, mtime: statSync(join(LOG_DIR, entry)).mtimeMs }))
+  .sort((a, b) => b.mtime - a.mtime);
+for (const { entry } of oldLogs.slice(MAX_LOGS - 1)) {
+  unlinkSync(join(LOG_DIR, entry));
+}
 const LOG_PATH = join(LOG_DIR, `${timestamp}.log`);
 
 function log(level, msg) {

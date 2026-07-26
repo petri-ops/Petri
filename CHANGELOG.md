@@ -129,13 +129,12 @@ file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
   tools (file presence, schema, dimensional constraints,
   up/down regulation sanity checks).
 - `test/run-json.test.mjs` -- 27 assertions on the run.json
-  schema + 8 assertions on a real captured run
-  (`tmp/real-run/deseq2-job_6b3808816e0041b4.run.json`).
+  schema + 8 assertions on the JSON-only captured run fixture
+  (`test/fixtures/golden-path/deseq2-run.json`).
 - `docs/first-success-path.md` -- end-to-end walkthrough of the
   user journey + reproduction steps for the captured real run.
-- `tmp/real-run/deseq2-job_6b3808816e0041b4.run.json` +
-  `tmp/real-run/job_6b3808816e0041b4.zip` -- real captured
-  run from 2026-07-14: DESeq2 on the r-server's bundled demo
+- `test/fixtures/golden-path/deseq2-run.json` -- JSON-only record
+  of the real captured run from 2026-07-14: DESeq2 on the r-server's bundled demo
   data, 6 samples, 1978 genes tested, 82 sig genes (46 up / 36
   down), 23 artifacts.
 

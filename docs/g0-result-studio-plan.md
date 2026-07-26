@@ -2,7 +2,7 @@
 
 最后更新：2026-07-26
 
-状态：`active / implemented_unverified`（RS0～RS8 引擎基础保留；`G0-RS-P0`～`G0-RS-P3` 已完成；`G0-RS-P4 Core` 已通过 18/18 离线门禁并提交；当前仅 `G0-RS-RH0 Repository Hygiene Gate` 进行中，完成后才允许 `G0-RS-P4R Product Reframe`，`G0-RS-P5` 继续阻断）
+状态：`active / implemented_unverified`（RS0～RS8 引擎基础保留；`G0-RS-P0`～`G0-RS-P3` 已完成；`G0-RS-P4 Core` 已通过 18/18 离线门禁并提交；`G0-RS-RH0 Repository Hygiene Gate` 已完成，下一唯一阶段为 `G0-RS-P4R Product Reframe`，`G0-RS-P5` 继续阻断）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -1353,7 +1353,7 @@ Result Studio 当前按三层事实表达：
 - 脱敏证据 `acceptance/g0-result-studio/rs-p4-unified-editing.json`（18/18，`qualificationEligible: false`）。这是离线 descriptor 投影 / 插件接线 / 注册表 / strict build 证据；P4 验收要求的"同一火山图手动与 AI 各跑一次真实候选并比较恢复"属真实运行观测，尚未执行，因此本阶段保持 `implemented_unverified`，UI-109 记为 `in_progress`。
 - 日常验收：`npm run g0:result-studio:p4:update` 生成证据，`npm run g0:result-studio:p4` 校验未过期；两者已接入 `g0:result-studio:acceptance` 与根 `check`。
 
-### G0-RS-RH0：Repository Hygiene Gate（`in_progress`）
+### G0-RS-RH0：Repository Hygiene Gate（`completed`）
 
 目标：在 P4R 大规模产品交互开发前，把 Agent 热上下文、脚本入口、测试选择和临时产物生命周期收口为确定性工程契约。RH0 是现有 `G0-RS` 工作包内的串行前置门，不是第二份主计划，也不改变 Result Studio、Job、Artifact、Revision 或科学执行真相。
 
@@ -1382,6 +1382,8 @@ Result Studio 当前按三层事实表达：
 - `npm run test:all` 明确覆盖 Node MJS/CJS，前端提供对应 changed/all 入口；CI/发布职责与本地迭代职责不混淆。
 - `tmp` 无测试硬依赖；QA 测试不再无限生成日志；清理命令只作用于仓库内明确 `tmp` 子目录。
 - `docs:reconcile`、`docs:check`、`ui:audit:check`、RH0 定向测试和最终一次全量基线通过；工作区形成可恢复提交后才允许进入 P4R。
+
+RH0 收口证据（2026-07-26）：`test/impact-map.json` 与 `scripts/test-affected.mjs` 已建立确定性、去重、fail-closed 的影响选择；`npm run test:changed` 定向 Node 41 项与前端 294 项通过，`npm run test:all:workspace` 最终基线为 Node 1581 pass / 0 fail / 11 skipped、前端 294 pass / 0 fail；`npm run docs:reconcile`（39 registered、0 unregistered、0 validation issues）、`npm run docs:check`、`npm run ui:audit:check` 与 `git diff --check` 全部通过。旧 `dev-desktop.sh`、已下线云端 smoke 与旧 DESeq2 MCP 验收脚本已删除；真实 JSON 证据迁移到 `test/fixtures/golden-path/deseq2-run.json`，`tmp` 历史日志/二进制已清理，QA/golden-path 日志保留上限为 20。该收口只改变工程治理，不改变任何执行/科学真相；P4R 可在本阶段提交可恢复后启动。
 
 ### G0-RS-P4R：Product Reframe — Agent-first Focused Result Experience（`planned`）
 
@@ -1729,7 +1731,7 @@ G0-RS-P0 Truth Correction
 
 阶段状态规则：
 
-- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3` 已完成，`G0-RS-P4 Core` 已形成 18/18 离线实现检查点并提交。当前只允许 `G0-RS-RH0`；RH0 收口后才允许 P4R，P4R 收口前不得启动 P5。
+- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3` 已完成，`G0-RS-P4 Core` 已形成 18/18 离线实现检查点并提交，`G0-RS-RH0` 已完成。下一唯一阶段为 P4R；P4R 收口前不得启动 P5。
 - 每阶段先补失败测试/fixture，再实现，再形成与证据类型匹配的验收；不得提前开发下一阶段。
 - 单元测试证明契约，fixture 证明确定性集成，真实 Provider 证明模型边界，packaged Electron 证明产品链；四者不能互相替代。
 - 未运行 `npm run docs:reconcile` 与 `npm run docs:check` 不得宣布阶段 completed/verified/qualified。
@@ -1746,7 +1748,7 @@ G0-RS-P0 Truth Correction
 5. [x] 捕获当前真实产品基线，不把截图存在等同于操作通过。
 6. [x] 跑专项、G0、文档、UI 和全量测试；根门禁在最终文档收口后复跑。
 
-`G0-RS-P1`～`G0-RS-P3` 已按本节证据收口；`G0-RS-P4 Core` 已形成离线实现检查点但真实候选等价性仍未验证。当前 Goal 只允许实施 `G0-RS-RH0`，收口后才进入 P4R，不得提前进入 P5～P7。
+`G0-RS-P1`～`G0-RS-P3` 已按本节证据收口；`G0-RS-P4 Core` 已形成离线实现检查点但真实候选等价性仍未验证。`G0-RS-RH0` 已完成仓库治理门，当前 Goal 转入 P4R，不得提前进入 P5～P7。
 
 `G0-RS-P2` 交付结果：
 

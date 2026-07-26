@@ -10,7 +10,7 @@
 
 LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口。RS9 曾新增第 17 类 `result_studio_product`，但后续复核发现其五条任务由独立测试拼装、Provider 未执行真实工具闭环、视觉验收依赖人工布尔值、大表由 seed 直接构造；该证据现降级为 unit/synthetic/renderer historical evidence。`result-studio-editing` 在 RS-P7 前暂停 qualified support claim，不能影响或冒充 LF12 原始核心资格。
 
-Result Studio（[`g0-result-studio-plan.md`](./g0-result-studio-plan.md)）是当前唯一 active 工作包。P4 Core 已提交为 `e0a4c7d`，历史审计归档为 `e38d6b5`。当前只实施 `G0-RS-RH0 Repository Hygiene Gate`：收缩 Agent 热上下文、建立定向测试选择、分层脚本并治理临时产物；RH0 收口后才进入 `G0-RS-P4R Product Reframe`。真实科学差异、故障恢复矩阵和 packaged Electron 资格分别继续属于 P5、P6、P7。
+Result Studio（[`g0-result-studio-plan.md`](./g0-result-studio-plan.md)）是当前唯一 active 工作包。P4 Core 已提交为 `e0a4c7d`，历史审计归档为 `e38d6b5`。`G0-RS-RH0 Repository Hygiene Gate` 已完成：Agent 热上下文、定向测试选择、脚本分层和临时产物生命周期均有机器门禁；形成可恢复提交后下一唯一阶段为 `G0-RS-P4R Product Reframe`。真实科学差异、故障恢复矩阵和 packaged Electron 资格分别继续属于 P5、P6、P7。
 
 Result Studio 旧实现的 11 个提交已位于 `main`（检查点 `03e5826`）；`SDC-0 Profile Registry 与版本治理` 也已在分支 `codex/g0-sdc` 的 `7284921` 收口并推送，六个 canonical Profile 与 fail-closed typed DAG 边继续保留。按单工作包串行，`SDC-1`～`SDC-7` deferred，当前不创建 Worktree。
 
@@ -34,7 +34,7 @@ G0-RS-P0 资格与证据纠偏
 
 P4 Core 让手动调整与自然语言修改共用同一条编辑链：控件全部由插件 descriptor 的 `parameters` + `parameterImpacts` 投影，缺 impact 声明的参数不可编辑；`volcano-plot` 补齐配色/字体/尺寸/图例/标签/导出共 12 个 presentation 参数并接进真实 R 脚本（此前全为硬编码）。`normalizeEditSubmission` 是手动与 AI 的唯一归一化闸门，类型/范围/枚举 fail-closed 拒绝、未声明参数记为 rejected、与现状相同的提交不产出 patch，因此不会创建空 ChangeSet；影响分级只能由受信 descriptor 提升，调用方无法把科学或流程参数降级成样式修改，未声明 impact 的参数保守落到科学重算。过程中修复既有缺陷：保护字段表原先覆盖 descriptor，使 deseq2 声明为 `workflow` 的 `design` 被悄悄降级成 `scientific`，现在保护字段只作下限。`currentValues` 取自该 Job 真实执行过的归一化参数，不用默认值冒充。证据为 `acceptance/g0-result-studio/rs-p4-unified-editing.json`（18/18，non-qualifying 离线 descriptor 投影/插件接线/注册表/strict build 证据）；真实候选等价链尚未执行，故 UI-109 保持 `in_progress`。
 
-当前只允许推进 `G0-RS-RH0 Repository Hygiene Gate`。RH0 按 Truth Snapshot、Hot Context、Test Impact、Script/Temp Lifecycle、Acceptance 串行收口；完成并形成可恢复提交后才允许启动 `G0-RS-P4R Product Reframe`。P4R 未收口前不得启动 P5～P7；详细范围、非目标和出口见 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) §G0-RS-RH0 与 §P4R。
+RH0 已按 Truth Snapshot、Hot Context、Test Impact、Script/Temp Lifecycle、Acceptance 串行收口并通过最终基线。当前只允许准备并推进 `G0-RS-P4R Product Reframe`；P4R 未收口前不得启动 P5～P7。详细范围、非目标和出口见 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) §G0-RS-RH0 与 §P4R。
 
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 已完成的 Scientific Task Contract 工作包记录见 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md)。

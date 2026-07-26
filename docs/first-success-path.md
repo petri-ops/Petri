@@ -122,8 +122,10 @@ R_BASE=http://localhost:3003 node scripts/golden-path.mjs --skip-install
 # Result: run.json exit=passed; project sandbox contains all_results.zip
 ```
 
-The captured fixture at `tmp/real-run/` was produced by this
-procedure on 2026-07-14 and serves as Week 3A evidence.
+The JSON-only captured fixture at `test/fixtures/golden-path/deseq2-run.json`
+was produced by this procedure on 2026-07-14 and serves as Week 3A evidence.
+Binary archives and generated logs remain local runtime output under `tmp/`
+and are not repository fixtures.
 
 ## Historical note: 2026-07-14 rescue path
 
@@ -151,7 +153,7 @@ HEAD == origin/main confirms this is upstream, not a local lag).
 
 Verified by re-running on 2026-07-14 against the same local r-server config
 (`BIOF3_R_HOME=/Library/Frameworks/R.framework/Resources`). The new run
-produced a fully-populated run.json (`tmp/golden-path/report/deseq2-job_51d05ccdece3450c.run.json`)
+produced a fully-populated run.json under the local `tmp/golden-path/report/`
 with 22 artifacts harvested from `/status.result.files`.
 
 Rescue-path run.json shape remains asserted for compatibility with old installed

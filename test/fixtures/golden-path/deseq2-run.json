@@ -1,0 +1,37 @@
+{
+  "schema": "biof3/golden-path-run.v1",
+  "tool": "deseq2",
+  "jobId": "job_6b3808816e0041b4",
+  "projectId": "p_mrkp2m0j_6c4z",
+  "projectName": "golden-path-1784036168939",
+  "startedAt": "2026-07-14T13:36:08.913Z",
+  "finishedAt": "2026-07-14T13:36:17.581Z",
+  "durationMs": 8668,
+  "contract": { "goldenPath": "demo-deseq2-report", "version": "v0.1.0-beta" },
+  "inputs": { "countsBytes": 61419, "coldataBytes": 147, "source": "route:/api/tools/demo-data/deseq2" },
+  "params": { "design": "condition", "contrast_ref": "Control", "contrast_treat": "Treatment" },
+  "outputs": {
+    "html": "deseq2-job_6b3808816e0041b4.html",
+    "htmlBytes": 0,
+    "servedUrl": null,
+    "summary": {
+      "samples": 6,
+      "samples_per_condition": { "Treatment": 3, "Control": 3 },
+      "genes_tested": 1978,
+      "sig_genes": 82,
+      "up": 46,
+      "down": 36
+    },
+    "artifacts": 23,
+    "artifactList": [
+      "deg_table.csv", "up_genes.csv", "down_genes.csv", "volcano.png", "volcano.pdf",
+      "pca.png", "pca.pdf", "heatmap.png", "heatmap.pdf", "library_size.png", "library_size.pdf",
+      "dispersion.png", "dispersion.pdf", "ma_plot.png", "ma_plot.pdf", "sample_distance.png",
+      "sample_distance.pdf", "vst_matrix.csv", "coldata_info.csv", "dispersion_data.csv",
+      "summary.txt", "manifest.json", "run.log"
+    ],
+    "runtimes": { "r_server": "0.9.0", "r_version": "4.5.2", "r_packages": ["DESeq2", "ggplot2", "ggrepel", "pheatmap"] }
+  },
+  "exit": "analysis_succeeded_zip_packaging_pending",
+  "notes": "Real run captured 2026-07-14 against locally-bootstrapped r-server; JSON-only fixture keeps tests independent of binary archives and developer-specific tmp paths."
+}

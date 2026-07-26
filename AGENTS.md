@@ -35,11 +35,12 @@ npm run build:win    # Windows 构建
 # 检查
 npm run docs:check   # 文档治理门禁（必跑，秒级）
 npm run ui:audit:check  # UI 台账门禁（必跑，秒级）
-node --test test/<相关>.test.mjs        # 定向 Node 测试（默认方式）
-npm test --prefix frontend -- <相关文件>  # 定向前端测试（默认方式）
+npm run test:changed:list               # 根据 test/impact-map.json 预览影响范围
+npm run test:changed                    # 运行影响范围内的定向测试（默认方式）
+npm run test:files --prefix frontend -- <相关文件>  # 定向前端测试
 
 npm run check        # 全量静态检查 + 所有门禁（默认不跑，留给发布前 / CI）
-npm run test         # 全量 Node 测试 1300+ 项（默认不跑，留给发布前 / CI）
+npm run test:all:workspace # 全量 Node + 前端测试（默认不跑，留给发布前 / CI）
 ```
 
 ## 架构要点
@@ -105,11 +106,12 @@ desktop/
 
 ### 测试范围纪律（定向优先）
 
-- 默认**只跑与本次改动相关的测试**，不跑全量 `npm test`（1300+ 项，耗时数分钟）。
-- 判定相关范围的方法：先 grep 出引用了本次改动符号/模块的测试文件（如改 `buildSystemPrompt` 就找引用它的全部测试），再定向 `node --test <files>`；前端同理用 `npm test --prefix frontend -- <files>`。
+- 默认**只跑与本次改动相关的测试**，不跑全量 `npm run test:all:workspace`（1300+ 项，耗时数分钟）。
+- 影响范围由 `test/impact-map.json` 维护，`npm run test:changed:list` 必须可复现；未知生产路径 fail-closed，直接升级为全量 Node/前端检查，不得静默漏测。
+- 需要手工收窄时，使用 `node --test <files>` 或 `npm run test:files --prefix frontend -- <files>`；当前工作包专项门禁仍必须按计划执行。
 - 当前工作包的专项门禁必须跑（例如 `npm run g0:result-studio:p3`），它是该阶段的收口依据。
 - 治理门禁 `npm run docs:check` 与 `npm run ui:audit:check` 必须跑：它们是硬要求且只需数秒。
-- 根 `npm run check` 与全量 `npm test` 默认不跑，留给发布前或 CI。若因此存在未验证范围，必须在收口报告中如实说明，不得把定向通过表述为全量通过。
+- 根 `npm run check` 与全量 `npm run test:all:workspace` 默认不跑，留给发布前或 CI。若因此存在未验证范围，必须在收口报告中如实说明，不得把定向通过表述为全量通过。
 
 ### UI 进度自动对账
 
