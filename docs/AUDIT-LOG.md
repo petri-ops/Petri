@@ -25,6 +25,7 @@
 | 2026-07-26 | RH0 作为 P4R 前唯一串行阶段写入 canonical | `2840673` |
 | 2026-07-26 | RH0 定向测试、脚本/tmp 生命周期和最终全量基线收口；下一阶段转为 P4R | RH0 closeout commit |
 | 2026-07-26 | RS9 历史脚本仍被封存证据引用；移出日常 syntax，保留显式历史 syntax 入口 | repository governance follow-up |
+| 2026-07-26 | P4 治理后源哈希刷新，专项门恢复 `18/18`；未改变 `qualificationEligible:false` | P4 current evidence |
 
 ## 广播规则
 

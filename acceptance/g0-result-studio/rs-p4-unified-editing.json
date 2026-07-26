@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P4",
-  "sourceCommit": "0cad18d407906f555b633d449b76e41d521ec080",
+  "sourceCommit": "47b69a3ccf0a088d0f1275b6ec70261578586526",
   "captureMode": "automated_descriptor_projection_plugin_wiring_registry_and_strict_build_offline_verification",
   "qualificationEligible": false,
   "qualificationReason": "P4 closes the offline unified-editing contract; real manual-vs-AI equivalence on a live plugin run and packaged product qualification remain reserved for P5 and P7.",
@@ -25,7 +25,7 @@
     "volcanoGolden": "57640c9c3684de3d4110a8c42bbabf01b48432313e80bf46303056dc6aaed265",
     "controlsTest": "0a6a7e1c10733aef3bc2db145534a2510a0dac8748887d270c4d4e56c803536e",
     "acceptanceScript": "ba52c3f754538ca56f71c20376b347a63338026fef316574953731e84f95a4c7",
-    "packageScripts": "173e733cc0d31e10e4422e1100fd96bc29cbcce0fcad117b21d23427f71fa87f"
+    "packageScripts": "4b72c35aad4090631708d727ffd79fb593937dcccbccdd76d53a3d4d4d755273"
   },
   "controlObservation": {
     "controlCount": 18,
@@ -243,14 +243,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-26T03:08:57.988Z",
+    "generatedAt": "2026-07-26T07:19:40.183Z",
     "commands": [
       {
         "label": "backend-p4",
         "command": "node --test test/result-edit-controls.test.mjs test/result-edit-intent.test.mjs test/result-studio-context.test.mjs test/result-studio-plugin-sdk.test.mjs test/result-studio-qualification.test.mjs test/agent-tool-registry.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "ec74662a0a157c6050193dcdd1f1200dbfef90ac2e2f1f783d3102ed2dd5c3cf",
+        "stdoutSha256": "945fc7c6e4f1683da110c2fef0d01a61a7eab6d3d465365b7373149f55cfe08a",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -258,15 +258,15 @@
         "command": "npm test --prefix frontend -- ResultEditPanel.test.tsx ResultStudioContextReadiness.test.tsx ResultStudioSurface.test.tsx CenterPanel.test.tsx",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "a76593fa4eb03320d19c6f038766570cc3df4cfeda3c3132874cb3f53e5537af",
-        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        "stdoutSha256": "4e2a6405c93b5dbd824339aadd15357b77e0fb2739b5184e9f79fb760864eeab",
+        "stderrSha256": "6436adb626ae98e33aefc351fbf8f016cb40f39ebc13421f3ff5626feaef8ba9"
       },
       {
         "label": "frontend-build",
         "command": "npm run build:check --prefix frontend",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "32f0e0c35ee74f9c59bc450e84988fc1abd3acdb1f0d1c8280ee0173e01f0692",
+        "stdoutSha256": "595cb7a727f2ab081bc13185e69cbc3f0892b34b21e3f5bce427c8b5c5b6f68e",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -286,6 +286,6 @@
     "futureStagesImplemented": false
   },
   "passed": true,
-  "generatedAt": "2026-07-26T03:08:57.988Z",
+  "generatedAt": "2026-07-26T07:19:40.183Z",
   "privacyClean": true
 }
