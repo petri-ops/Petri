@@ -110,14 +110,44 @@ function baseEnv() {
 }
 
 /**
- * 检测系统 git 可用性。不缓存，调用方自行决定是否复用结果。
+ * 进程内 git 运行时探测缓存。键为 gitBin。
  *
- * @param {{ gitBin?: string }} [options]
+ * 同一进程内 git 的可用性与版本不会变化，而 `git --version` 在本机实测
+ * 约 9～11ms（不同调用环境下可达 ~117ms）。此前该函数不缓存，
+ * `bindProjectRepository()` 每次调用都会 fork 一次，而 Result Studio 的
+ * 每个只读请求都会 bind 一次（`routes/result-studio.js:302-338`），
+ * 因此该 fork 出现在结果查看的热路径上。
+ *
+ * 只缓存 available/version 这类进程生命周期常量；仓库运行态不在此列。
+ */
+const gitRuntimeCache = new Map();
+
+/** 清空运行时探测缓存。仅供测试与显式重新探测使用。 */
+function resetGitRuntimeCache() {
+  gitRuntimeCache.clear();
+}
+
+/**
+ * 检测系统 git 可用性。按 gitBin 在进程内缓存；用 `refresh: true` 强制重探。
+ *
+ * @param {{ gitBin?: string, refresh?: boolean }} [options]
  * @returns {{ available: boolean, gitBin: string, version: object|null, versionRaw: string|null,
  *            meetsMinimum: boolean, reason: string|null, minimum: object }}
  */
 function detectGitRuntime(options = {}) {
   const gitBin = options.gitBin || 'git';
+  if (!options.refresh && gitRuntimeCache.has(gitBin)) {
+    return gitRuntimeCache.get(gitBin);
+  }
+  const result = detectGitRuntimeUncached(gitBin);
+  // 只缓存成功探测。失败可能是暂时的（git 尚未安装、PATH 未就绪），
+  // 缓存它会把一次暂时故障变成本进程内的永久故障；而失败路径本就提前阻断，
+  // 不在热路径上。冻结以防调用方改到共享对象。
+  if (result.available) gitRuntimeCache.set(gitBin, Object.freeze(result));
+  return result;
+}
+
+function detectGitRuntimeUncached(gitBin) {
   const result = {
     gitAdapterVersion: GIT_ADAPTER_VERSION,
     available: false,
@@ -355,19 +385,55 @@ function createGitAdapter(options = {}) {
       const rebaseInProgress = fs.existsSync(path.join(resolvedGitDir, 'rebase-merge'))
         || fs.existsSync(path.join(resolvedGitDir, 'rebase-apply'));
       const hasSubmodules = fs.existsSync(path.join(resolvedWorkTree, '.gitmodules'));
-      const headRef = run(['symbolic-ref', '--quiet', '--short', 'HEAD'], { allowFailure: true, readOnly: true });
-      const headCommit = run(['rev-parse', '--verify', '--quiet', 'HEAD'], { allowFailure: true, readOnly: true });
-      const worktrees = run(['worktree', 'list', '--porcelain'], { allowFailure: true, readOnly: true });
-      const linkedWorktreeCount = worktrees.ok
-        ? Math.max(0, worktrees.stdout.split('\n').filter((line) => line.startsWith('worktree ')).length - 1)
-        : 0;
+      // 下面三个字段各需一次 git 子进程，而上面的锁/中途操作/submodule 判断
+      // 全是 fs.existsSync。`bindProjectRepository()` 在 managed 模式下只读
+      // fs 那几项（git-repository-binding.js:301-317），
+      // linkedWorktreeCount 仅在 `mode === 'existing'` 分支使用，
+      // 因此只读请求过去白付三次 fork。
+      //
+      // 改为惰性求值：对象形状与字段语义不变，读到才 fork，读一次缓存一次。
+      // 写路径（result-changeset-service.js:242 读 headCommit）照常付出代价。
+      let headProbe = null;
+      const probeHead = () => {
+        if (!headProbe) {
+          headProbe = {
+            ref: run(['symbolic-ref', '--quiet', '--short', 'HEAD'], { allowFailure: true, readOnly: true }),
+            commit: run(['rev-parse', '--verify', '--quiet', 'HEAD'], { allowFailure: true, readOnly: true }),
+          };
+        }
+        return headProbe;
+      };
+      let worktreeCount = null;
+      const probeWorktrees = () => {
+        if (worktreeCount === null) {
+          const worktrees = run(['worktree', 'list', '--porcelain'], { allowFailure: true, readOnly: true });
+          worktreeCount = worktrees.ok
+            ? Math.max(0, worktrees.stdout.split('\n').filter((line) => line.startsWith('worktree ')).length - 1)
+            : 0;
+        }
+        return worktreeCount;
+      };
       return {
         gitAdapterVersion: GIT_ADAPTER_VERSION,
         initialized: fs.existsSync(path.join(resolvedGitDir, 'HEAD')),
-        headRef: headRef.ok ? headRef.stdout.trim() || null : null,
-        headCommit: headCommit.ok ? headCommit.stdout.trim() || null : null,
-        detached: headRef.ok ? false : !!(headCommit.ok && headCommit.stdout.trim()),
-        unborn: !(headCommit.ok && headCommit.stdout.trim()),
+        // getter：读到才 fork。属性访问语义与原来完全一致，
+        // 既有读取方（result-changeset-service.js:242、test/git-adapter.test.mjs:208/:344）无需改动。
+        get headRef() {
+          const { ref } = probeHead();
+          return ref.ok ? ref.stdout.trim() || null : null;
+        },
+        get headCommit() {
+          const { commit } = probeHead();
+          return commit.ok ? commit.stdout.trim() || null : null;
+        },
+        get detached() {
+          const { ref, commit } = probeHead();
+          return ref.ok ? false : !!(commit.ok && commit.stdout.trim());
+        },
+        get unborn() {
+          const { commit } = probeHead();
+          return !(commit.ok && commit.stdout.trim());
+        },
         hasIndexLock,
         mergeInProgress,
         cherryPickInProgress,
@@ -375,7 +441,7 @@ function createGitAdapter(options = {}) {
         rebaseInProgress,
         midOperation: mergeInProgress || cherryPickInProgress || revertInProgress || rebaseInProgress,
         hasSubmodules,
-        linkedWorktreeCount,
+        get linkedWorktreeCount() { return probeWorktrees(); },
       };
     },
 
@@ -621,6 +687,7 @@ module.exports = {
   FORBIDDEN_PATHSPECS,
   GitAdapterError,
   detectGitRuntime,
+  resetGitRuntimeCache,
   assertSafePathspecs,
   redactGitDiagnostic,
   parseGitVersion,
