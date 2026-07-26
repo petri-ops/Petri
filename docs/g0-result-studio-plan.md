@@ -1487,6 +1487,26 @@ P4R 完成后的默认产品形态固定为：
 
 进度（2026-07-26，`340c09a`）：观测工具已落地——`core/r-server/helpers/perf-probe.js` 提供事件循环直方图与按脱敏路由模板的请求计时，`core/r-server/routes/perf-probe.js` 暴露 `/api/__perf/{event-loop,reset}`。整套探针以 `BIOF3_PERF_PROBE=1` 门控：关闭时每个导出函数是 no-op、探针面不挂载，正常桌面运行成本与攻击面不变；计时只按脱敏路由模板归并，不记录结果内容、请求体、query、绝对路径、id 或凭据。定向测试 `test/perf-probe.test.mjs 9/9` + `test/test-affected.test.mjs 4/4` 通过（未跑全量）。**P4R-0 未收口**，仍需：canonical fixture（小/中/大 PNG/SVG、10 万行表、长报告、多 Revision）、四条不变量的失败测试先行、以及把真实采样的性能预算冻结进 `acceptance/g0-result-studio/rs-p4r-performance.json`。
 
+运行时勘察（2026-07-26，只读检查开发库 `core/r-server/biof3.db`，只取计数与结构，不读结果内容）：
+
+| 事实 | 实测 | 对 P4R-0 的影响 |
+|---|---|---|
+| `tool_jobs` | 1921（failed 1427 / completed 420 / running 74） | 有真实历史可用 |
+| migrations 表 | **不存在** | `src/migrations/001_result_studio.sql` 从未在该库执行 |
+| RS2 的 5 张表 | 全部缺失 | Revision/ChangeSet/Selection/Checkpoint 路径在该库无法执行 |
+| completed 按工具 | `test-tool-2` 382、`deseq2` 35、`volcano-plot` 3 | 非合成语料仅 38 个 |
+| heatmap、GO/KEGG completed | 0 | P4R-5 要求的两类正式 Artifact 尚不存在 |
+| 卡在 `running` | 74 | 属重启中断 `recovery_required` 投影，是 P4R-0 应捕获的失败基线之一 |
+| 本机 R runtime | Rscript 4.5.2，DESeq2 可用 | 可在隔离环境真实生成基线语料 |
+
+由此产生三条对 §P4R.2 原有指控的纠偏，必须在捕获基线时一并验证，不得直接沿用：
+
+1. §P4R.2(1) 记录的「事件循环阻塞约 2.1～8.2 秒」是开发态人工观察。由于该库缺少全部 RS 表，该观察**不可能来自完整 Result Studio 打开链**；其真实来源需要在捕获阶段重新归因，不能预设为 Revision/ChangeSet/Git binding 造成。
+2. §P4R.2(1) 同时列举的「首次 baseline Revision / Git binding / ChangeSet / Workspace storage 检查」在该库中无表可查，因此当前开发态根本走不到这些分支；其代价必须在补齐 migration 的捕获环境中重新测量。
+3. 基线捕获不得使用用户开发库：其中含 6 个真实项目，且 420 个 completed 中 382 个为合成 `test-tool-2`，直接采样会同时污染用户数据并违反「不使用数据库 seed 冒充真实产品旅程」。
+
+因此 P4R-0 增加一个前置步骤：建立一次性可抛的捕获环境（沿用 `G0-RS8` 已确立的模式，用环境变量把 SQLite、results/uploads/tmp/logs 指向临时目录，只隔离运行时、不复制源码树），在其中执行 migration 并真实运行 deseq2 / volcano / heatmap / GO-KEGG 生成基线语料，再开始采样。
+
 - 机器捕获结果点击的请求 waterfall、事件循环 lag、首次内容可见、Artifact 切换、版本切换和代码打开基线。
 - 建立小/中/大 PNG/SVG、10 万行表、长报告、多 Revision 的 canonical fixture；不使用数据库 seed 冒充真实产品旅程。
 - 先补失败测试：结果显示不得等待 interaction/context/storage；查看历史版本不得改变 current；代码 hash 不符必须阻断；次级请求失败不得清空主体。
