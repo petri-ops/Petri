@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P4R-0",
-  "sourceCommit": "b27a5af9213a90a16cd83d32b35948498d5862cd",
+  "sourceCommit": "03181522e4958cb27c0ae95286808ac96e9fe864",
   "captureMode": "real_chain_corpus_plus_server_request_waterfall_and_event_loop_histogram_in_disposable_root",
   "qualificationEligible": false,
   "qualificationReason": "P4R-0 only captures a baseline and freezes budgets. It does not implement the fast path, and it does not measure any client-side metric. Result Studio product qualification remains reserved for P7.",
@@ -17,7 +17,8 @@
     "captureTest": "8c4cec8a66f34e42e87c64eda758dbc1be78740b2d1c272c538d0766ec8956cd",
     "corpusTest": "2446b80e933ecdc47871fa2b22c1d13be62d2bbb30c776b28d237ab9881caf43",
     "baselineTest": "613b1f5b07f215963ca45b9ea351f581ec6f3518956f8127d48f156a9a5c7cf4",
-    "acceptanceScript": "7159dd113819e6a584bd510402d6de104eb08bbd6dbc89fade63d76b0388e375"
+    "invariantTest": "6bbb1d52ebd7fde9d00fb0212fc130a93d309bc5092c01eaf13c22a1126bb659",
+    "acceptanceScript": "5217872f2f789ab2cfe06791b92928cb539430d1cc4ab450db1dc8f7cc71c858"
   },
   "budgets": {
     "eventLoopMaxMs": {
@@ -43,24 +44,24 @@
   "baselineObservation": {
     "captureMode": "real_run_tool_chain_in_disposable_root_with_env_gated_probe",
     "calibration": {
-      "gitSpawnMedianMs": 113.348,
-      "pathEntries": 39,
-      "invokedUnderNpm": true
+      "gitSpawnMedianMs": 10.149,
+      "pathEntries": 31,
+      "invokedUnderNpm": false
     },
     "corpus": [
       {
         "toolId": "deseq2",
-        "durationMs": 5986,
+        "durationMs": 6055,
         "artifactCount": 23
       },
       {
         "toolId": "volcano-plot",
-        "durationMs": 1050,
+        "durationMs": 1059,
         "artifactCount": 5
       },
       {
         "toolId": "gene-correlation",
-        "durationMs": 397,
+        "durationMs": 406,
         "artifactCount": 4
       }
     ],
@@ -69,110 +70,110 @@
         "id": "job-status",
         "role": "render-blocking",
         "status": 200,
-        "totalMs": 5.493,
-        "coldMs": 5.493,
-        "warmMs": 2.635,
+        "totalMs": 5.165,
+        "coldMs": 5.165,
+        "warmMs": 2.076,
         "warmSamplesMs": [
-          2.119,
-          2.635,
-          3.094
+          1.913,
+          2.076,
+          4.277
         ],
-        "warmSpreadMs": 0.975,
-        "oneTimeCostMs": 2.858,
+        "warmSpreadMs": 2.364,
+        "oneTimeCostMs": 3.089,
         "bytes": 74633
       },
       {
         "id": "artifact-bytes",
         "role": "render-blocking",
         "status": 200,
-        "totalMs": 4.687,
-        "coldMs": 4.687,
-        "warmMs": 2.164,
+        "totalMs": 4.981,
+        "coldMs": 4.981,
+        "warmMs": 2.598,
         "warmSamplesMs": [
-          2.131,
-          2.164,
-          2.202
+          1.789,
+          2.598,
+          3.083
         ],
-        "warmSpreadMs": 0.071,
-        "oneTimeCostMs": 2.523,
-        "bytes": 145996
+        "warmSpreadMs": 1.294,
+        "oneTimeCostMs": 2.383,
+        "bytes": 142862
       },
       {
         "id": "interaction",
         "role": "secondary",
         "status": 200,
-        "totalMs": 4001.594,
-        "coldMs": 4001.594,
-        "warmMs": 9.928,
+        "totalMs": 416.978,
+        "coldMs": 416.978,
+        "warmMs": 11.18,
         "warmSamplesMs": [
-          9.158,
-          9.928,
-          11.175
+          9.424,
+          11.18,
+          11.491
         ],
-        "warmSpreadMs": 2.017,
-        "oneTimeCostMs": 3991.666,
+        "warmSpreadMs": 2.067,
+        "oneTimeCostMs": 405.798,
         "bytes": 46212
       },
       {
         "id": "context-envelope",
         "role": "secondary",
         "status": 409,
-        "totalMs": 3.011,
-        "coldMs": 3.011,
-        "warmMs": 1.601,
+        "totalMs": 3.022,
+        "coldMs": 3.022,
+        "warmMs": 1.511,
         "warmSamplesMs": [
-          1.564,
-          1.601,
-          1.764
+          1.46,
+          1.511,
+          2.502
         ],
-        "warmSpreadMs": 0.2,
-        "oneTimeCostMs": 1.41,
+        "warmSpreadMs": 1.042,
+        "oneTimeCostMs": 1.511,
         "bytes": 188
       },
       {
         "id": "changesets",
         "role": "secondary",
         "status": 200,
-        "totalMs": 459.367,
-        "coldMs": 459.367,
-        "warmMs": 461.812,
+        "totalMs": 46.691,
+        "coldMs": 46.691,
+        "warmMs": 44.74,
         "warmSamplesMs": [
-          460.963,
-          461.812,
-          461.821
+          44.214,
+          44.74,
+          46.413
         ],
-        "warmSpreadMs": 0.858,
-        "oneTimeCostMs": -2.445,
+        "warmSpreadMs": 2.199,
+        "oneTimeCostMs": 1.951,
         "bytes": 1643
       },
       {
         "id": "workspace-status",
         "role": "secondary",
         "status": 200,
-        "totalMs": 695.335,
-        "coldMs": 695.335,
-        "warmMs": 698.61,
+        "totalMs": 68.012,
+        "coldMs": 68.012,
+        "warmMs": 66.529,
         "warmSamplesMs": [
-          687.213,
-          698.61,
-          703.12
+          66.3,
+          66.529,
+          66.599
         ],
-        "warmSpreadMs": 15.907,
-        "oneTimeCostMs": -3.275,
+        "warmSpreadMs": 0.299,
+        "oneTimeCostMs": 1.483,
         "bytes": 837
       }
     ],
-    "renderBlockingTotalMs": 10.18,
+    "renderBlockingTotalMs": 10.146,
     "slowestRequest": "interaction",
     "eventLoop": {
       "resolutionMs": 10,
-      "samples": 67,
-      "minMs": 9.699,
-      "meanMs": 138.324,
-      "p50Ms": 11.01,
-      "p95Ms": 695.73,
-      "p99Ms": 703.594,
-      "maxMs": 4003.463
+      "samples": 17,
+      "minMs": 9.937,
+      "meanMs": 57.445,
+      "p50Ms": 46.268,
+      "p95Ms": 68.42,
+      "p99Ms": 417.858,
+      "maxMs": 417.858
     },
     "unmeasured": [
       {
@@ -199,14 +200,14 @@
   },
   "budgetStatus": {
     "eventLoopMaxMs": "violated_by_current_implementation",
-    "observedMaxMs": 4003.463,
+    "observedMaxMs": 417.858,
     "attributedTo": "interaction",
-    "steadyStateWorstMs": 698.61,
+    "steadyStateWorstMs": 66.529,
     "steadyStateWorstRoute": "workspace-status",
     "oneTimeDominated": [
       "job-status",
-      "artifact-bytes",
-      "interaction"
+      "interaction",
+      "context-envelope"
     ],
     "note": "The frozen 250ms budget is exceeded by the current implementation. This is the P4R-0 finding, not a P4R-0 failure: P4R-1 owns the fix. The budget must not be raised to accommodate it.",
     "absoluteTimingsAreLoadSensitive": true,
@@ -295,6 +296,14 @@
       "detail": "Every measured route records both a first-call and a second-call timing, so one-time creation cost cannot be reported as steady-state viewing cost."
     },
     {
+      "id": "RS-P4R0-12",
+      "passed": true,
+      "evidence": [
+        "test/p4r-invariants.test.mjs"
+      ],
+      "detail": "The four plan invariants exist as tests written against code reality, each naming the concrete defect it fails on. They are deliberately NOT aggregated into this gate: three fail today, which is P4R-0 delivering a definition of done for P4R-1 and P4R-5, not a passing claim."
+    },
+    {
       "id": "RS-P4R0-9",
       "passed": true,
       "evidence": [
@@ -312,14 +321,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-26T12:12:58.191Z",
+    "generatedAt": "2026-07-26T13:14:59.423Z",
     "commands": [
       {
         "label": "probe-and-harness",
         "command": "node --test test/perf-probe.test.mjs test/p4r-capture.test.mjs test/p4r-corpus.test.mjs test/p4r-baseline.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "a71a214a27f7933e5a60220b3edc47d9c28307f5d1bf0adb7889585a3940b958",
+        "stdoutSha256": "f52124ca1094787066093d9c980a2fa2ace226e195edad7a5f4b5580fa34ca44",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -327,7 +336,7 @@
         "command": "node --test test/test-affected.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "72398824b1d5d2435fb7f971cbde98afb94feb783e1a8e8998194efc3acce55c",
+        "stdoutSha256": "1f15e4beb8609bfe2384c7c6eedfbb66bbb06ae399041d00432162f891e1ea2d",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -349,6 +358,6 @@
     "resultStudioQualificationClaimed": false
   },
   "passed": true,
-  "generatedAt": "2026-07-26T12:12:58.191Z",
+  "generatedAt": "2026-07-26T13:14:59.423Z",
   "privacyClean": true
 }

@@ -98,6 +98,7 @@
     "g0:result-studio:p4:frontend": "npm run test:files --prefix frontend -- ResultEditPanel.test.tsx ResultStudioContextReadiness.test.tsx ResultStudioSurface.test.tsx CenterPanel.test.tsx",
     "g0:result-studio:p4": "npm run g0:result-studio:p4:test && npm run g0:result-studio:p4:frontend && node scripts/g0-rs-p4-acceptance.mjs",
     "g0:result-studio:p4:update": "node scripts/g0-rs-p4-acceptance.mjs --write-evidence",
+    "g0:result-studio:p4r:invariants": "node --test test/p4r-invariants.test.mjs",
     "g0:result-studio:p4r:test": "node --test test/perf-probe.test.mjs test/p4r-capture.test.mjs test/p4r-corpus.test.mjs test/p4r-baseline.test.mjs",
     "g0:result-studio:p4r": "npm run g0:result-studio:p4r:test && node scripts/g0-rs-p4r-acceptance.mjs",
     "g0:result-studio:p4r:update": "node scripts/g0-rs-p4r-acceptance.mjs --write-evidence",

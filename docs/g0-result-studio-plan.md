@@ -1537,6 +1537,13 @@ P4R 完成后的默认产品形态固定为：
 - 机器捕获结果点击的请求 waterfall、事件循环 lag、首次内容可见、Artifact 切换、版本切换和代码打开基线。
 - 建立小/中/大 PNG/SVG、10 万行表、长报告、多 Revision 的 canonical fixture；不使用数据库 seed 冒充真实产品旅程。
 - 先补失败测试：结果显示不得等待 interaction/context/storage；查看历史版本不得改变 current；代码 hash 不符必须阻断；次级请求失败不得清空主体。
+  - ✅ 已交付于 `test/p4r-invariants.test.mjs`，入口 `npm run g0:result-studio:p4r:invariants`。**刻意不并入 `g0:result-studio:p4r` 聚合门**：三条今天为红，那是本阶段要交付的「完成定义」，不是失败。
+  - 每条按代码实况书写，不照本节原文写成笼统断言（笼统写法要么恒真要么红在错误原因上）：
+    - **① 通过**。服务端已成立：`/api/tools/file` 与 result-studio 路由无依赖关系，断言用于防回归。客户端那半属不变量 ④。
+    - **②a 通过**。重复读取不新增 Revision。
+    - **②b 红**。`routes/result-studio.js:320-330` 的 `projectContext()` 在**每个**请求上调 `saveRepositoryBinding()`，无视其自身 `write` 标志，故纯 GET 也写库并重跑未缓存的 `bindProjectRepository`（内含 git fork）。归 `P4R-1`。
+    - **③ 红**。23 条路由中无 Revision 源投影端点；阻断原语已存在（`result-studio.js:106-113`、`result-compare-service.js:287/:494`），缺的是端点本身。归 `P4R-5`。
+    - **④ 红**。两处确认违反均在内联的 `ResultArtifactShell`：`project-workspace.tsx:3602-3612`（请求前先清空 + 空 catch）与 `:3366-3378`（轮询失败让陈旧 `running` 胜出 → `setResult(null)`）。测试导入 `P4R-1` 须抽出的纯决策模块 `resultBodyState.ts`，因其不存在而红——不对源码做字符串匹配。归 `P4R-1`。
 - 冻结可机器验证的性能预算。最低要求：点击后 100ms 内有可见反馈；Result Studio 打开链不得产生超过 250ms 的同步事件循环阻塞；不同大小 Artifact 的首内容与版本切换精确阈值由本阶段真实采样写入 acceptance contract，后续不得放宽来换取通过。
 
 ##### P4R-1：Fast Result Path

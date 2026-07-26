@@ -41,6 +41,7 @@ const sourceFiles = {
   captureTest: 'test/p4r-capture.test.mjs',
   corpusTest: 'test/p4r-corpus.test.mjs',
   baselineTest: 'test/p4r-baseline.test.mjs',
+  invariantTest: 'test/p4r-invariants.test.mjs',
   acceptanceScript: 'scripts/g0-rs-p4r-acceptance.mjs',
 };
 
@@ -201,6 +202,13 @@ function inspect(verification, observation) {
       && requests.filter((r) => r.status === 200).every((r) => Number.isFinite(r.coldMs) && Number.isFinite(r.warmMs)),
       [sourceFiles.baseline],
       'Every measured route records both a first-call and a second-call timing, so one-time creation cost cannot be reported as steady-state viewing cost.'),
+
+    item('RS-P4R0-12',
+      /nextResultBodyState/.test(read(sourceFiles.invariantTest))
+      && /revisions\/rev_does_not_exist\/source/.test(read(sourceFiles.invariantTest))
+      && /saveRepositoryBinding/.test(read(sourceFiles.invariantTest)),
+      [sourceFiles.invariantTest],
+      'The four plan invariants exist as tests written against code reality, each naming the concrete defect it fails on. They are deliberately NOT aggregated into this gate: three fail today, which is P4R-0 delivering a definition of done for P4R-1 and P4R-5, not a passing claim.'),
 
     item('RS-P4R0-9', commands.length >= 3 && commands.every((command) => command.passed),
       [evidencePath.replace(`${root}/`, '')],

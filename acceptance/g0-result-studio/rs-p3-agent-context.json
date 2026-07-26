@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P3",
-  "sourceCommit": "e8e05b95a22f4c1a51a0d3128ecde7068b975670",
+  "sourceCommit": "03181522e4958cb27c0ae95286808ac96e9fe864",
   "captureMode": "automated_contract_registry_prompt_and_strict_build_offline_verification",
   "qualificationEligible": false,
   "privacy": "repository_relative_paths_digests_counts_and_bounded_statuses_only_no_project_job_conversation_selection_url_credential_prompt_or_result_data",
@@ -24,7 +24,7 @@
     "registryTest": "73aa421cba9f4f29e93b31834a20ce99b5698442e1b098427c59f53b0b9ad01d",
     "readinessTest": "cf49ed539c038b60a1463146d034487f274020a706fccd8d1db052d2e484f054",
     "acceptanceScript": "343843d7c40c81231255c89b8e64319dd31cfa6ed2fa53427e73e97c2efec40e",
-    "packageScripts": "7c3198b70f81342ea88c914122dc6e354ed0a5265cfad4bd6695068fc79a26c7"
+    "packageScripts": "58723cb19d3341c8a61ad6182858b1a56e1fe4479c68975c1fb53adc3b5eb467"
   },
   "productObservation": {
     "captureMode": "automated_contract_registry_prompt_and_strict_build_offline_verification",
@@ -211,14 +211,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-26T10:50:34.989Z",
+    "generatedAt": "2026-07-26T13:19:29.322Z",
     "commands": [
       {
         "label": "backend-p3",
         "command": "node --test test/result-studio-context.test.mjs test/system-prompt-result-context.test.mjs test/agent-tool-registry.test.mjs test/result-edit-intent.test.mjs test/result-edit-agent-tool.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "35b5d34041e7e6ce63a2c158824e4b86f66dfa01053a966ac5d411eb69a2b49d",
+        "stdoutSha256": "7ce457e44f470913b890c0ff508e67406510db411a3c2deb5a78b61ee029b1d0",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -226,7 +226,7 @@
         "command": "npm run test:files --prefix frontend -- ResultStudioContextReadiness.test.tsx ResultStudioSurface.test.tsx",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "ef55116ae25148e059dd5eef10775ccefe7b101e2ab5fa0d222d216080e88aba",
+        "stdoutSha256": "ac8bac499ce07c5d4006e9feab11ad5a7ba916767709a01cd4226acc5b5dccec",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -234,7 +234,7 @@
         "command": "npm run build:check --prefix frontend",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "a6e3d53b13b322b1b274ae7fbd17a8d0abebfebbf15b68c0eb63803a86f0213c",
+        "stdoutSha256": "3c7dcad8bdfbe7ba26b887f1c1c269d57fe2b2282c38376fc5c7efed02c1bc14",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -254,6 +254,6 @@
     "futureStagesImplemented": false
   },
   "passed": true,
-  "generatedAt": "2026-07-26T10:50:34.989Z",
+  "generatedAt": "2026-07-26T13:19:29.322Z",
   "privacyClean": true
 }
