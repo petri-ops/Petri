@@ -59,7 +59,6 @@ import {
   artifactKindLabel,
   type ResultArtifactKind,
   type ResultArtifactRecord,
-  type NormalizedResultManifest,
 } from '@/lib/result-manifest';
 import {
   isSameSelection,
@@ -1698,57 +1697,7 @@ function formatPreviewText(name: string, text: string): string {
   return text;
 }
 
-function summarizeRecord(record?: Record<string, number>, limit = 4): string {
-  const entries = Object.entries(record || {})
-    .filter(([, count]) => count > 0)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, limit);
-  return entries.length ? entries.map(([key, count]) => `${key}×${count}`).join(' · ') : '暂无';
-}
 
-function HarnessIndexCard({
-  title,
-  index,
-  loading,
-  error,
-}: {
-  title: string;
-  index: HarnessIndexSummary | null;
-  loading: boolean;
-  error?: string;
-}): React.ReactElement | null {
-  if (!loading && !index && !error) return null;
-  const entries = index?.entries || [];
-  return (
-    <div className={styles.harnessIndexCard}>
-      <div className={styles.harnessIndexCardHeader}>
-        <span>{title}</span>
-        {loading && <em>识别中…</em>}
-        {!loading && index && <em>{index.fileCount || 0} 个文件</em>}
-      </div>
-      {error && !loading ? (
-        <p className={styles.harnessIndexMuted}>暂未生成识别摘要：{error}</p>
-      ) : index ? (
-        <>
-          <div className={styles.harnessIndexStats}>
-            <span>类型：{summarizeRecord(index.byKind)}</span>
-            <span>角色：{summarizeRecord(index.byRole)}</span>
-          </div>
-          {entries.length > 0 && (
-            <div className={styles.harnessIndexEntries}>
-              {entries.slice(0, 4).map((entry) => (
-                <div key={entry.relativePath} className={styles.harnessIndexEntry} title={entry.relativePath}>
-                  <span>{entry.relativePath}</span>
-                  <em>{entry.role || entry.kind}</em>
-                </div>
-              ))}
-            </div>
-          )}
-        </>
-      ) : null}
-    </div>
-  );
-}
 
 export function RightFileTree({
   project,
@@ -2737,340 +2686,8 @@ export function ScheduledWorkspacePanel({
   );
 }
 
-// ============================================================
-// HistoryPanel — right column (Phase7)
-// ============================================================
 
-function HistoryPanel({
-  jobs,
-  activeJobId,
-  onSelectJob,
-}: {
-  jobs: ToolJob[];
-  activeJobId: string | null;
-  onSelectJob: (id: string) => void;
-}): React.ReactElement {
-  return (
-    <div className={styles.panelInner}>
-      <div className={styles.panelSection}>
-        <h3 className={styles.panelHeading}>
-          <Icon name="clock" size={14} /> 分析历史
-        </h3>
-        {jobs.length === 0 ? (
-          <p className={styles.panelEmpty}>还没有分析记录</p>
-        ) : (
-          <ul className={styles.timeline}>
-            {jobs.map((job) => (
-              <li
-                key={job.id}
-                className={`${styles.timelineItem} ${
-                  activeJobId === job.id ? styles.timelineItemActive : ''
-                }`}
-                onClick={() => onSelectJob(job.id)}
-              >
-                <div className={styles.timelineDot} data-status={job.status} />
-                <div className={styles.timelineContent}>
-                  <span className={styles.timelineTitle}>
-                    {job.name || job.tool_id}
-                  </span>
-                  <span className={styles.timelineTime}>
-                    {formatDate(job.created_at)}
-                  </span>
-                  <span className={styles.timelineStatus} data-status={job.status}>
-                    {job.status}
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
-  );
-}
 
-// ============================================================
-// ToolboxPanel — right column (Phase7: tool catalog + 7.3 plugin list)
-// ============================================================
-
-// Plan 1.6 §4.6 — InstalledPlugin / RemotePlugin shapes are now
-// exported from `@/hooks/usePluginStore`. The local
-// `InstalledPluginInfo` / `RemotePluginInfo` aliases were
-// previously used inline; the hook now owns the canonical type
-// and the panel reads through it.
-
-const PLUGIN_TYPE_LABELS: Record<string, string> = {
-  runtime: '运行时',
-  tool: '工具',
-};
-
-function ToolboxPanel({
-  onAskAgent,
-}: {
-  onAskAgent: (prompt: string) => void;
-}): React.ReactElement {
-  const [query, setQuery] = useState('');
-  const [activeCat, setActiveCat] = useState<string>('全部');
-  const [tab, setTab] = useState<'tools' | 'plugins'>('tools');
-
-  // --- Plugin state — Plan 1.6 §4.6 [HIGH] dedup ---
-  // Shares the same SWR catalog as PluginStorePanel. `autoLoad: false`
-  // because the toolbox only wants the catalog when its plugins tab
-  // is opened (no point burning the bridge on every workspace mount).
-  // We dispatch refresh() ourselves when the tab activates.
-  const {
-    installed,
-    remote,
-    install: hookInstall,
-    uninstall: hookUninstall,
-    refresh: refreshPluginCatalog,
-  } = usePluginStore({ autoLoad: false });
-  const [installing, setInstalling] = useState<string | null>(null);
-  const [uninstalling, setUninstalling] = useState<string | null>(null);
-  const [pluginError, setPluginError] = useState<string | null>(null);
-
-  // Group tools by category
-  const categories = useMemo(() => {
-    const cats = new Set<string>();
-    staticTools.forEach((t) => cats.add(t.category));
-    return ['全部', ...Array.from(cats).sort()];
-  }, []);
-
-  const filteredTools = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return staticTools.filter((t) => {
-      if (activeCat !== '全部' && t.category !== activeCat) return false;
-      if (!q) return true;
-      return (
-        t.title.toLowerCase().includes(q) ||
-        t.subtitle.toLowerCase().includes(q) ||
-        t.id.toLowerCase().includes(q)
-      );
-    });
-  }, [query, activeCat]);
-
-  // --- Load plugins when tab is first activated ---
-  useEffect(() => {
-    if (tab !== 'plugins') return;
-    // The shared cache may already have data from the sidebar
-    // PluginStorePanel; refresh() will short-circuit the IPC
-    // roundtrip via the cache hit (or fetch fresh if the user
-    // hasn't visited the store yet).
-    refreshPluginCatalog();
-  }, [tab, refreshPluginCatalog]);
-
-  async function handleInstall(pluginId: string) {
-    setInstalling(pluginId);
-    setPluginError(null);
-    try {
-      const result = await hookInstall(pluginId);
-      if (!result.ok) {
-        setPluginError(result.error || '安装失败');
-      }
-    } catch (e) {
-      setPluginError(e instanceof Error ? e.message : '安装失败');
-    } finally {
-      setInstalling(null);
-    }
-  }
-
-  async function handleUninstall(pluginId: string) {
-    if (!confirm(`确定卸载插件「${pluginId}」？`)) return;
-    setUninstalling(pluginId);
-    setPluginError(null);
-    try {
-      const result = await hookUninstall(pluginId);
-      if (!result.ok) {
-        setPluginError(result.error || '卸载失败');
-      }
-    } catch (e) {
-      setPluginError(e instanceof Error ? e.message : '卸载失败');
-    } finally {
-      setUninstalling(null);
-    }
-  }
-
-  const remotePlugins = remote.plugins || {};
-
-  const installedIds = useMemo(() => new Set(installed.map((p) => p.id)), [installed]);
-
-  const availablePlugins = useMemo(() => {
-    return Object.entries(remotePlugins)
-      .filter(([id]) => !installedIds.has(id))
-      .sort((a, b) => {
-        const ta = a[1].title ?? a[0];
-        const tb = b[1].title ?? b[0];
-        return ta.localeCompare(tb);
-      });
-  }, [remotePlugins, installedIds]);
-
-  return (
-    <div className={styles.panelInner}>
-      <div className={styles.panelSection}>
-        <h3 className={styles.panelHeading}>
-          <Icon name="wrench" size={14} /> 工具箱
-        </h3>
-
-        {/* Tab switcher */}
-        <div className={styles.toolboxTabs}>
-          <button
-            className={`${styles.toolboxTab} ${tab === 'tools' ? styles.toolboxTabActive : ''}`}
-            onClick={() => setTab('tools')}
-          >
-            工具
-          </button>
-          <button
-            className={`${styles.toolboxTab} ${tab === 'plugins' ? styles.toolboxTabActive : ''}`}
-            onClick={() => setTab('plugins')}
-          >
-            插件
-            {installed.length > 0 && (
-              <span className={styles.toolboxTabBadge}>{installed.length}</span>
-            )}
-          </button>
-        </div>
-
-        {tab === 'tools' ? (
-          <>
-            {/* Search box */}
-            <input
-              className={styles.toolSearch}
-              type="text"
-              placeholder="搜索工具…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-
-            {/* Category chips */}
-            <div className={styles.toolCats}>
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  className={`${styles.toolCat} ${
-                    activeCat === cat ? styles.toolCatActive : ''
-                  }`}
-                  onClick={() => setActiveCat(cat)}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-
-            {/* Tool list */}
-            <ul className={styles.toolList}>
-              {filteredTools.map((tool) => (
-                <li
-                  key={tool.id}
-                  className={styles.toolItem}
-                  onClick={() =>
-                    onAskAgent(
-                      `请帮我使用工具「${tool.title}」(${tool.id}) 进行分析。`
-                    )
-                  }
-                  title={tool.description}
-                >
-                  <span
-                    className={styles.toolDot}
-                    style={{ background: tool.color }}
-                  />
-                  <div className={styles.toolMeta}>
-                    <span className={styles.toolName}>{tool.title}</span>
-                    <span className={styles.toolSub}>{tool.subtitle}</span>
-                  </div>
-                  {tool.comingSoon && (
-                    <span className={styles.toolBadge}>即将上线</span>
-                  )}
-                </li>
-              ))}
-              {filteredTools.length === 0 && (
-                <p className={styles.panelEmpty}>没有匹配的工具</p>
-              )}
-            </ul>
-          </>
-        ) : (
-          <>
-            {pluginError && (
-              <p className={styles.pluginError}>{pluginError}</p>
-            )}
-
-            {/* Installed plugins */}
-            <div className={styles.pluginSection}>
-              <h4 className={styles.pluginSectionTitle}>
-                已安装 ({installed.length})
-              </h4>
-              {installed.length === 0 ? (
-                <p className={styles.panelEmpty}>暂无已安装插件</p>
-              ) : (
-                <ul className={styles.toolList}>
-                  {installed.map((p) => {
-                    const info = remotePlugins[p.id];
-                    const label = PLUGIN_TYPE_LABELS[p.type ?? ''] ?? p.type ?? '插件';
-                    return (
-                      <li key={p.id} className={styles.pluginItem}>
-                        <div className={styles.pluginMeta}>
-                          <span className={styles.pluginName}>
-                            {info?.title ?? p.id}
-                          </span>
-                          <span className={styles.pluginSub}>
-                            v{p.version} · {label}
-                            {p.language ? ` · ${p.language}` : ''}
-                          </span>
-                        </div>
-                        <button
-                          className={styles.pluginBtnUninstall}
-                          disabled={uninstalling === p.id}
-                          onClick={() => handleUninstall(p.id)}
-                        >
-                          {uninstalling === p.id ? '…' : '卸载'}
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-
-            {/* Available (remote) plugins */}
-            <div className={styles.pluginSection}>
-              <h4 className={styles.pluginSectionTitle}>
-                可用 ({availablePlugins.length})
-              </h4>
-              {availablePlugins.length === 0 ? (
-                <p className={styles.panelEmpty}>所有插件均已安装</p>
-              ) : (
-                <ul className={styles.toolList}>
-                  {availablePlugins.map(([id, info]) => {
-                    const label = PLUGIN_TYPE_LABELS[info.type ?? ''] ?? info.type ?? '插件';
-                    return (
-                      <li key={id} className={styles.pluginItem}>
-                        <div className={styles.pluginMeta}>
-                          <span className={styles.pluginName}>
-                            {info.title ?? id}
-                          </span>
-                          <span className={styles.pluginSub}>
-                            {info.version ? `v${info.version} · ` : ''}{label}
-                            {info.language ? ` · ${info.language}` : ''}
-                          </span>
-                        </div>
-                        <button
-                          className={styles.pluginBtnInstall}
-                          disabled={installing === id}
-                          onClick={() => handleInstall(id)}
-                        >
-                          {installing === id ? '…' : '安装'}
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
 
 // ============================================================
 // ResultView — center column result display (Phase5: actual results)
@@ -3182,8 +2799,6 @@ function ResultArtifactShell({
   onActiveArtifactChange,
   onAskAgent,
   onWorkflowChanged,
-  variant,
-  showHarnessIndex = false,
   pendingArtifactName = null,
   onPendingArtifactConsumed,
   onOpenBrowser,
@@ -3196,8 +2811,6 @@ function ResultArtifactShell({
   onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
   onAskAgent: (prompt: string) => void;
   onWorkflowChanged?: () => void;
-  variant: 'center' | 'sidebar';
-  showHarnessIndex?: boolean;
   /**
    * Optional artifact name the host wants pre-selected once the manifest
    * (or fallback artifacts) becomes available. Populated by the chat
@@ -3210,7 +2823,6 @@ function ResultArtifactShell({
   onOpenBrowser?: (url: string) => void;
 }): React.ReactElement {
   const { resolvedTheme } = useTheme();
-  const isSidebar = variant === 'sidebar';
   const [result, setResult] = useState<JobResult | null>(null);
   // Which job the currently displayed body belongs to. Without this the
   // effects below cannot tell "re-observing the same job" from "a different
@@ -3878,7 +3490,7 @@ function ResultArtifactShell({
   const showReportRail = sectionTabs.length > 0 && artifacts.length > 0;
   const activeSectionArtifacts = activeSection?.artifacts || [];
   const showArtifactRail = activeSectionArtifacts.length > 1;
-  const resultNavWidth = navCollapsed ? 0 : (isSidebar ? 184 : 224);
+  const resultNavWidth = navCollapsed ? 0 : 224;
   const recoveryAction = workflow?.nextActions?.[0] || null;
   const actionRunsDirectly = isDirectRecoveryAction(recoveryAction?.id);
 
@@ -4021,12 +3633,12 @@ function ResultArtifactShell({
   ) : null;
 
   const stateBlock = (title: string, body: React.ReactNode, status: 'running' | 'pending' | 'failed' | 'done') => {
-    const containerClass = isSidebar ? styles.resultSidebarCard : styles.resultView;
+    const containerClass = styles.resultView;
     return (
       <div className={containerClass}>
         {workflowBar}
         {recoveryConfirmation}
-        <div className={isSidebar ? styles.resultSidebarTitleRow : styles.resultHeader}>
+        <div className={styles.resultHeader}>
           <strong>{title}</strong>
           <span className={styles.resultStatus} data-status={status}>
             {status === 'running' ? '运行中…' : status === 'pending' ? '排队中' : status === 'failed' ? '失败' : '完成'}
@@ -4177,7 +3789,7 @@ function ResultArtifactShell({
         </div>
       </section>
       )}
-      <section className={isSidebar ? styles.resultSidebarReportCard : styles.resultReportSection}>
+      <section className={styles.resultReportSection}>
         {selectionError && <div className={styles.resultWorkflowError}>{selectionError}</div>}
         {showReportRail ? (
           <div
@@ -4334,12 +3946,7 @@ function ResultArtifactShell({
     </>
   );
 
-  return isSidebar ? (
-    <div className={styles.resultSidebarRoot}>
-      {shellBody}
-      {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
-    </div>
-  ) : (
+  return (
     <div
       className={styles.resultView}
       data-artifact-switch-ms={artifactSwitchMs === null ? undefined : artifactSwitchMs.toFixed(2)}
@@ -4388,54 +3995,10 @@ export function ResultView({
       pendingArtifactName={pendingArtifactName}
       onPendingArtifactConsumed={onPendingArtifactConsumed}
       onOpenBrowser={onOpenBrowser}
-      variant="center"
     />
   );
 }
 
-export function ResultSidebarPanel({
-  project,
-  conversationId,
-  job,
-  workflow,
-  activeArtifact,
-  onActiveArtifactChange,
-  onAskAgent,
-  onWorkflowChanged,
-  pendingArtifactName = null,
-  onPendingArtifactConsumed,
-  onOpenBrowser,
-}: {
-  project: Project;
-  conversationId?: string | null;
-  job: ToolJob | null;
-  workflow: HarnessWorkflowJobState | null;
-  activeArtifact: ActiveArtifact | null;
-  onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
-  onAskAgent: (prompt: string) => void;
-  onWorkflowChanged: () => void;
-  pendingArtifactName?: string | null;
-  onPendingArtifactConsumed?: () => void;
-  onOpenBrowser?: (url: string) => void;
-}): React.ReactElement {
-  return (
-    <ResultArtifactShell
-      project={project}
-      conversationId={conversationId}
-      job={job}
-      workflow={workflow}
-      activeArtifact={activeArtifact}
-      onActiveArtifactChange={onActiveArtifactChange}
-      onAskAgent={onAskAgent}
-      onWorkflowChanged={onWorkflowChanged}
-      pendingArtifactName={pendingArtifactName}
-      onPendingArtifactConsumed={onPendingArtifactConsumed}
-      onOpenBrowser={onOpenBrowser}
-      variant="sidebar"
-      showHarnessIndex
-    />
-  );
-}
 
 // EmbeddedTerminalPanel moved to @/components/workspace-panels/BottomTerminal (PR-3.1)
 
