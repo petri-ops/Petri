@@ -160,6 +160,11 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
           <div className={styles.agentMain}>
             {ctx.project && ctx.projectId && (
               <SimpleChat
+                // The center conversation is the single owner of copilotAsk: it
+                // stays mounted in every mode, so a prompt dispatched from a
+                // result reaches it. The right-panel chat tab must not also
+                // subscribe.
+                ownsCopilotAsk
                 projectId={ctx.projectId}
                 conversationId={ctx.activeConvId}
                 onConversationChange={ctx.setActiveConvId}
@@ -294,7 +299,24 @@ function SessionFrameView({
         <div className={styles.workspaceSessionInset}>
           <div className={styles.workspaceSessionSurface}>
             <div className={styles.workspaceSessionContent}>
-              {ctx.showPinnedSummary && children}
+              {/*
+                The conversation stays mounted in every mode. Visibility is already
+                handled by CSS on the projection layer above (aria-hidden plus
+                display:none/flex), so this React gate only destroyed the subtree.
+
+                It made copilotAsk undeliverable: dispatchBioF3Event is a bare
+                window.dispatchEvent with no buffering (lib/events.ts:113) and
+                SimpleChat.tsx:568 is its only subscriber, so a manual edit
+                submitted from ResultEditPanel — reachable from every result-opening
+                path via openRightPanel('results') — was dropped in silence while
+                handleResultEditSubmit's synchronous finally reset the button to
+                idle. Unmounting also discarded and rebuilt the chat on every mode
+                change, so keeping it does less work, not more.
+
+                The sibling gate below still applies to the summary CARD, which is
+                genuinely chat-only.
+              */}
+              {children}
             </div>
           </div>
         </div>

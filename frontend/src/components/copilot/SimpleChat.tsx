@@ -139,6 +139,11 @@ interface SimpleChatProps {
   conversationId: string | null;
   onConversationChange: (id: string | null) => void;
   inputHeight?: number;
+  /**
+   * Whether this instance handles the copilotAsk event. Exactly one mounted
+   * instance may, so it defaults to false and the owner opts in explicitly.
+   */
+  ownsCopilotAsk?: boolean;
 }
 
 export function SimpleChat({
@@ -146,6 +151,7 @@ export function SimpleChat({
   conversationId,
   onConversationChange,
   inputHeight: _inputHeight = 120,
+  ownsCopilotAsk = false,
 }: SimpleChatProps): React.ReactElement {
   const [messages, setMessages] = useState<SimpleMessage[]>([]);
   const [copiedMessageKey, setCopiedMessageKey] = useState<string | null>(null);
@@ -565,12 +571,18 @@ export function SimpleChat({
   // Toolbox clicks / "explain current result" / chain recommendations dispatch this
   // event with a ready-to-send prompt; we pick it up here and send it.
   useEffect(() => {
+    // Exactly one instance may own this event. Two can be mounted at once — the
+    // center conversation and a right-panel chat tab, which RightPanel keeps
+    // alive via openRightTabs.map — and both subscribing would send the prompt
+    // twice. When no conversation exists yet, createConversationForRun is
+    // awaited before the running check, so each would also create its own.
+    if (!ownsCopilotAsk) return undefined;
     const unsub = subscribeBioF3Event(biof3Events.copilotAsk, ({ prompt }) => {
       const p = typeof prompt === 'string' ? prompt.trim() : '';
       if (p) sendRef.current(p);
     });
     return unsub;
-  }, []);
+  }, [ownsCopilotAsk]);
 
   const stop = useCallback(() => {
     if (conversationId) stopConversationRun(conversationId);

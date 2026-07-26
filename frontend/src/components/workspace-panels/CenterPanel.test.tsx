@@ -26,7 +26,12 @@ function context(mode: CenterPanelContext['workspaceMode']): CenterPanelContext 
     project: { id: 'project-1', name: 'Project One' },
     projectId: 'project-1',
     allProjects: [], activeConvId: 'conversation-1', conversations: [], projectConversations: {}, searchConversationIndex: {},
-    workspaceMode: mode, workspaceSearchQuery: '', showPinnedSummary: true,
+    workspaceMode: mode, workspaceSearchQuery: '',
+    // Derived exactly as production does (project-workspace.tsx:932). Hardcoding
+    // this to true put the fixture in a state production cannot reach, so the
+    // assertion below passed while the conversation was in fact unmounted in
+    // result mode — the precise requirement this test is named for.
+    showPinnedSummary: mode === 'chat' || mode === 'scheduled',
     centerColRef: { current: null }, sessionFrameRef: { current: null },
     bottomTerminalOpen: false, bottomTerminalHeight: 0, leftOpen: true, rightOpen: true, inputHeight: 120,
     summaryCardOpen: false, summaryVisibility: 'hidden', summaryOpenWidth: 0,
