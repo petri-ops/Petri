@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P4",
-  "sourceCommit": "42878a9a97be6a06a6d7c05e98201eeb3efd8fde",
+  "sourceCommit": "e8e05b95a22f4c1a51a0d3128ecde7068b975670",
   "captureMode": "automated_descriptor_projection_plugin_wiring_registry_and_strict_build_offline_verification",
   "qualificationEligible": false,
   "qualificationReason": "P4 closes the offline unified-editing contract; real manual-vs-AI equivalence on a live plugin run and packaged product qualification remain reserved for P5 and P7.",
@@ -25,7 +25,7 @@
     "volcanoGolden": "57640c9c3684de3d4110a8c42bbabf01b48432313e80bf46303056dc6aaed265",
     "controlsTest": "0a6a7e1c10733aef3bc2db145534a2510a0dac8748887d270c4d4e56c803536e",
     "acceptanceScript": "53eb91bd1b0c6ceb07d5efc997209769222866592489fce211ebf4dc3baaafe7",
-    "packageScripts": "8b2c4cd4fe6bb0303259024030a2b0bf3583ba7d4b99025576e020984881b0c3"
+    "packageScripts": "7c3198b70f81342ea88c914122dc6e354ed0a5265cfad4bd6695068fc79a26c7"
   },
   "controlObservation": {
     "controlCount": 18,
@@ -243,14 +243,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-26T09:38:24.283Z",
+    "generatedAt": "2026-07-26T10:50:58.483Z",
     "commands": [
       {
         "label": "backend-p4",
         "command": "node --test test/result-edit-controls.test.mjs test/result-edit-intent.test.mjs test/result-studio-context.test.mjs test/result-studio-plugin-sdk.test.mjs test/result-studio-qualification.test.mjs test/agent-tool-registry.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "1b50398b42bbd8b4e40d1fe3d9c197c6dd815eea376013d50ae8d3c7979a0be4",
+        "stdoutSha256": "721725d41a171691a2052c2d92ea2d1f05a1cb7ad835452d9c172fb4f69bee39",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -258,7 +258,7 @@
         "command": "npm run test:files --prefix frontend -- ResultEditPanel.test.tsx ResultStudioContextReadiness.test.tsx ResultStudioSurface.test.tsx CenterPanel.test.tsx",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "57d5fb61b26f3de5801306380abd3e7f48f84710a04f4e6a5a57be9b1a21de70",
+        "stdoutSha256": "7a3f5fabde928779a2bec191216ecb1408ed75c0d0a51b97ebd5883d035f003f",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -286,6 +286,6 @@
     "futureStagesImplemented": false
   },
   "passed": true,
-  "generatedAt": "2026-07-26T09:38:24.283Z",
+  "generatedAt": "2026-07-26T10:50:58.483Z",
   "privacyClean": true
 }

@@ -1,0 +1,272 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS-P4R-0",
+  "sourceCommit": "e8e05b95a22f4c1a51a0d3128ecde7068b975670",
+  "captureMode": "real_chain_corpus_plus_server_request_waterfall_and_event_loop_histogram_in_disposable_root",
+  "qualificationEligible": false,
+  "qualificationReason": "P4R-0 only captures a baseline and freezes budgets. It does not implement the fast path, and it does not measure any client-side metric. Result Studio product qualification remains reserved for P7.",
+  "privacy": "repository_relative_paths_digests_counts_timings_and_bounded_statuses_only_no_project_job_conversation_selection_url_credential_prompt_or_result_data",
+  "sourceHashes": {
+    "probe": "61711144b7daadc08d903512676fdf7b1d506ae8b565d98191e59be181e64006",
+    "probeRoutes": "3805eeabcc510874b7af03a9a219450db3d53d438d181a34323e489e5759877e",
+    "bootstrap": "035c37e4f18edec051ec59c20313ab396e0c2276aac7e136b8ec5037c32d90f5",
+    "capture": "4379ec85be2ddf07477d0e7849c2be8a0ff7025d9357d7cb5d643391e4ad7921",
+    "corpus": "7885fa8b409d16da0628d0f3413354c47e6cc0a0350188309d678418b833c8af",
+    "baseline": "4ca8cf7ce6dbd5566f0835fa8a6642b5b833f3d92e75fdf9e8e8c1ca3c658b3c",
+    "probeTest": "72e55812ae8fd3c5d5b02c17a64bf18581e3e0c0759b0e37315641f025960abe",
+    "captureTest": "8c4cec8a66f34e42e87c64eda758dbc1be78740b2d1c272c538d0766ec8956cd",
+    "corpusTest": "add6c02195eedd2df9d33d0f51e6269acff1533491001cf4bc4dcd0b8cf6f79b",
+    "baselineTest": "0786a7ee81a7c8a9c2bae5bf21ae3752c138e17bfba2a2ad33e19e85bdc276c4",
+    "acceptanceScript": "30154bcf2bd92d82ca3e2dc46d4b238cf39c949896f00d3b8d6a6405d33ce6c6"
+  },
+  "budgets": {
+    "eventLoopMaxMs": {
+      "value": 250,
+      "source": "G0-RS-P4R-0 plan: no synchronous Result Studio block may exceed 250ms",
+      "signal": "perf-probe eventLoop.maxMs (monitorEventLoopDelay, 10ms resolution)",
+      "rejectedSignal": "server.js startEventLoopMonitor tick sampler (1Hz, 2000ms threshold)",
+      "machineVerifiable": true
+    },
+    "visibleFeedbackMs": {
+      "value": 100,
+      "source": "G0-RS-P4R-0 plan: visible feedback within 100ms of a result click",
+      "signal": "client-side; no producer exists in this repository",
+      "machineVerifiable": false,
+      "status": "frozen_target_not_yet_measurable"
+    }
+  },
+  "deferredBudgets": {
+    "firstContentBySizeMs": "deferred_to_G0-RS-P4R-1: sampling the pre-fast-path implementation would freeze the defect as the standard",
+    "versionSwitchMs": "deferred_to_G0-RS-P4R-1: no read-only version switch surface exists yet",
+    "codeOpenMs": "deferred_to_G0-RS-P4R-5: no revision source projection route exists (23 routes checked)"
+  },
+  "baselineObservation": {
+    "captureMode": "real_run_tool_chain_in_disposable_root_with_env_gated_probe",
+    "corpus": [
+      {
+        "toolId": "deseq2",
+        "durationMs": 7840,
+        "artifactCount": 23
+      },
+      {
+        "toolId": "volcano-plot",
+        "durationMs": 1161,
+        "artifactCount": 5
+      },
+      {
+        "toolId": "gene-correlation",
+        "durationMs": 496,
+        "artifactCount": 4
+      }
+    ],
+    "requests": [
+      {
+        "id": "job-status",
+        "role": "render-blocking",
+        "status": 200,
+        "totalMs": 11.174,
+        "bytes": 74633
+      },
+      {
+        "id": "artifact-bytes",
+        "role": "render-blocking",
+        "status": 200,
+        "totalMs": 10.175,
+        "bytes": 142974
+      },
+      {
+        "id": "interaction",
+        "role": "secondary",
+        "status": 200,
+        "totalMs": 539.384,
+        "bytes": 46212
+      },
+      {
+        "id": "context-envelope",
+        "role": "secondary",
+        "status": 409,
+        "totalMs": 2.777,
+        "bytes": 188
+      },
+      {
+        "id": "changesets",
+        "role": "secondary",
+        "status": 200,
+        "totalMs": 45.115,
+        "bytes": 1643
+      },
+      {
+        "id": "workspace-status",
+        "role": "secondary",
+        "status": 200,
+        "totalMs": 65.803,
+        "bytes": 837
+      }
+    ],
+    "renderBlockingTotalMs": 21.349,
+    "slowestRequest": "interaction",
+    "eventLoop": {
+      "resolutionMs": 10,
+      "samples": 4,
+      "minMs": 9.953,
+      "meanMs": 166.198,
+      "p50Ms": 47.743,
+      "p95Ms": 541.065,
+      "p99Ms": 541.065,
+      "maxMs": 541.065
+    },
+    "unmeasured": [
+      {
+        "metric": "firstContentVisibleMs",
+        "reason": "not_captured_no_browser_automation_in_repo"
+      },
+      {
+        "metric": "artifactSwitchMs",
+        "reason": "not_captured_no_browser_automation_in_repo"
+      },
+      {
+        "metric": "versionSwitchMs",
+        "reason": "not_captured_no_browser_automation_in_repo"
+      },
+      {
+        "metric": "codeOpenMs",
+        "reason": "not_captured_no_browser_automation_in_repo"
+      },
+      {
+        "metric": "context-envelope",
+        "reason": "route returned 409; excluded from the baseline"
+      }
+    ]
+  },
+  "budgetStatus": {
+    "eventLoopMaxMs": "violated_by_current_implementation",
+    "observedMaxMs": 541.065,
+    "attributedTo": "interaction",
+    "note": "The frozen 250ms budget is exceeded by the current implementation. This is the P4R-0 finding, not a P4R-0 failure: P4R-1 owns the fix. The budget must not be raised to accommodate it."
+  },
+  "checks": [
+    {
+      "id": "RS-P4R0-1",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-corpus.mjs"
+      ],
+      "detail": "Baseline corpus was produced by real run_tool -> tool_job -> artifact truth runs, not a database seed."
+    },
+    {
+      "id": "RS-P4R0-2",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-baseline.mjs",
+        "test/p4r-baseline.test.mjs"
+      ],
+      "detail": "Every route the baseline must measure returned 200, so the timings are the real path and not argument validation."
+    },
+    {
+      "id": "RS-P4R0-3",
+      "passed": true,
+      "evidence": [
+        "core/r-server/helpers/perf-probe.js"
+      ],
+      "detail": "Event-loop delay came from a real histogram sample, not the empty-histogram sentinel."
+    },
+    {
+      "id": "RS-P4R0-4",
+      "passed": true,
+      "evidence": [
+        "core/r-server/helpers/perf-probe.js"
+      ],
+      "detail": "The authoritative >250ms signal is declared as the 10ms-resolution histogram; the 1Hz tick sampler is explicitly rejected as unable to resolve it."
+    },
+    {
+      "id": "RS-P4R0-5",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-baseline.mjs"
+      ],
+      "detail": "Metrics with no producer are recorded as unmeasured with a stated reason, never estimated or defaulted to zero."
+    },
+    {
+      "id": "RS-P4R0-6",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-capture.mjs",
+        "test/p4r-capture.test.mjs"
+      ],
+      "detail": "Every writable path is redirected and guarded from one declared list, so a capture cannot reach the developer database or the real user data root."
+    },
+    {
+      "id": "RS-P4R0-7",
+      "passed": true,
+      "evidence": [
+        "core/r-server/helpers/perf-probe.js",
+        "core/r-server/routes/perf-probe.js"
+      ],
+      "detail": "The probe is env-gated: with the flag unset every export is a no-op and the /api/__perf surface is not mounted."
+    },
+    {
+      "id": "RS-P4R0-8",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-corpus.mjs"
+      ],
+      "detail": "The corpus creates and owns a real project, without which every Result Studio route rejects and the baseline would time validation."
+    },
+    {
+      "id": "RS-P4R0-9",
+      "passed": true,
+      "evidence": [
+        "acceptance/g0-result-studio/rs-p4r-performance.json"
+      ],
+      "detail": "All declared P4R-0 command gates passed."
+    },
+    {
+      "id": "RS-P4R0-10",
+      "passed": true,
+      "evidence": [
+        "acceptance/g0-result-studio/rs-p4r-performance.json"
+      ],
+      "detail": "No recorded gate invokes bare `npm test`, which under a file filter resolves to `vitest run --changed`, selects nothing and reports success for a zero-test run."
+    }
+  ],
+  "verification": {
+    "generatedAt": "2026-07-26T10:45:58.449Z",
+    "commands": [
+      {
+        "label": "probe-and-harness",
+        "command": "node --test test/perf-probe.test.mjs test/p4r-capture.test.mjs test/p4r-corpus.test.mjs test/p4r-baseline.test.mjs",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "383fdcf918f73c629d6b50f294f73ff23aff960b337d6caf327edf757a2a5721",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "impact-map",
+        "command": "node --test test/test-affected.test.mjs",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "5708431ff6d317bac482637d01faaa5b6c2a7b5dbc06dd1409215c056f74ecd3",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "syntax",
+        "command": "node --check scripts/g0-rs-p4r-acceptance.mjs",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "invariants": {
+    "executionTruth": "run_tool -> tool_job -> artifact_truth",
+    "secondExecutorCreated": false,
+    "developerDatabaseTouched": false,
+    "realUserDataTouched": false,
+    "clientMetricsFabricated": false,
+    "resultStudioQualificationClaimed": false
+  },
+  "passed": true,
+  "generatedAt": "2026-07-26T10:45:58.449Z",
+  "privacyClean": true
+}

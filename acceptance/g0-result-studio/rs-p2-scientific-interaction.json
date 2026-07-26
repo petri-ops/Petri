@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P2",
-  "sourceCommit": "42878a9a97be6a06a6d7c05e98201eeb3efd8fde",
+  "sourceCommit": "e8e05b95a22f4c1a51a0d3128ecde7068b975670",
   "captureMode": "automated_contract_renderer_performance_and_live_local_product_plus_bounded_visual_spot_check",
   "qualificationEligible": false,
   "privacy": "repository_relative_paths_digests_counts_dimensions_timings_and_bounded_statuses_only_no_project_job_conversation_selection_url_credential_prompt_or_result_data",
@@ -32,7 +32,7 @@
     "acceptanceScript": "58018eb2bbd76f98ac6a5b03d3282d38aca9c260697598f56f67b7a86e61f933",
     "liveObservation": "b0da52317f9e9eb8fbb759fd5d61f9cf00332d07f9fdb04efe9548fbaa068860",
     "uiObservation": "a266e6458c260713d79144f6a7fc8870922bb0060d6a99ed5c6cc3c854dc1a5b",
-    "packageScripts": "8b2c4cd4fe6bb0303259024030a2b0bf3583ba7d4b99025576e020984881b0c3"
+    "packageScripts": "7c3198b70f81342ea88c914122dc6e354ed0a5265cfad4bd6695068fc79a26c7"
   },
   "productObservation": {
     "captureMode": "automated_contract_renderer_performance_and_live_local_product_plus_bounded_visual_spot_check",
@@ -189,14 +189,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-26T09:37:36.651Z",
+    "generatedAt": "2026-07-26T10:50:00.177Z",
     "commands": [
       {
         "label": "backend-p2",
         "command": "node --test test/result-studio-table-query.test.mjs test/result-selection-tools.test.mjs test/artifact-interaction.test.mjs test/result-studio-contracts.test.mjs test/result-studio-repository.test.mjs test/result-studio-plugin-sdk.test.mjs test/agent-tool-registry.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "d39296aa5c4be978d01236835279182a2e1245a9e28df0c22226b6a3e439a6ea",
+        "stdoutSha256": "1b359e42d208e87d90eb0a79831b8182310ff888a00120f7720b71df42b58dea",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -204,14 +204,14 @@
         "command": "npm run test:files --prefix frontend -- ScientificInteractionViewer.test.tsx artifact-selection.test.ts CenterPanel.test.tsx ResultStudioSurface.test.tsx",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "61d67820faf508d06bf7ca40fec9ac846547907e6b9150a399944c2936f9c223",
+        "stdoutSha256": "184ace86888ad44e1c5d4b2c43e5c72ee072f03e946714f9236c0a193acdb53c",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "rendererPerformance": {
           "budgetMs": 100,
-          "scrollFeedbackMs": 3.027,
-          "selectionFeedbackMs": 4.481,
-          "sortFeedbackMs": 5.482,
-          "filterFeedbackMs": 0.95
+          "scrollFeedbackMs": 3.089,
+          "selectionFeedbackMs": 4.303,
+          "sortFeedbackMs": 5.33,
+          "filterFeedbackMs": 1.124
         }
       },
       {
@@ -219,7 +219,7 @@
         "command": "npm run build:check --prefix frontend",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "acf27c96ce03a563c6dc76b7a89ddf5f9ccb703d79c4956a4ca66671c0907c35",
+        "stdoutSha256": "31c9eedb9c020c352e04eb65097f86940b89b9486c3a31700f17414f15066a68",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -239,6 +239,6 @@
     "futureStagesImplemented": false
   },
   "passed": true,
-  "generatedAt": "2026-07-26T09:37:36.651Z",
+  "generatedAt": "2026-07-26T10:50:00.177Z",
   "privacyClean": true
 }
