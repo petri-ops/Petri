@@ -8,16 +8,11 @@
  * violate the plan's "no database seed pretending to be a real product
  * journey" rule.
  *
- * So every capture run gets a throwaway root instead. `core/r-server/config.js`
- * already reads every path it needs from the environment, so isolation needs no
- * production code change:
- *
- *   BIOF3_DB_PATH             SQLite database
- *   BIOF3_TEMP_DIR            scratch directory
- *   BIOF3_LOCAL_RESULTS_DIR   results directory
- *   BIOF3_LOCAL_UPLOADS_DIR   uploads directory
- *   R_SERVER_PORT             listen port
- *   BIOF3_PERF_PROBE=1        arms the probe from commit 340c09a
+ * So every capture run gets a throwaway root instead. The backend already reads
+ * every path it needs from the environment, so isolation needs no production
+ * code change. The authoritative list is ISOLATED_PATH_ENV below; on top of it
+ * a run sets R_SERVER_PORT and BIOF3_PERF_PROBE=1, which arms the probe from
+ * commit 340c09a.
  *
  * The isolation is asserted, not assumed: assertIsolated() refuses to run when
  * any path resolves outside the throwaway root or onto the repository database.
@@ -148,10 +143,28 @@ export function createCaptureEnv({ port, root } = {}) {
   return { root: captureRoot, env, paths };
 }
 
+/**
+ * Run `fn` with console.log suppressed.
+ *
+ * The migration runner logs progress to stdout, which corrupts `--json` output
+ * for the machine consumers that flag exists to serve. Errors still surface:
+ * console.error is untouched and exceptions propagate.
+ */
+export async function withQuietStdout(fn) {
+  const original = console.log;
+  console.log = () => {};
+  try {
+    return await fn();
+  } finally {
+    console.log = original;
+  }
+}
+
 /** Apply `src/migrations/*.sql` to the disposable database. */
-export async function applyMigrations(dbPath) {
+export async function applyMigrations(dbPath, { quiet = false } = {}) {
   const { runMigrations } = require(path.join(REPO_ROOT, 'src', 'migration-runner.js'));
-  return runMigrations(dbPath, MIGRATIONS_DIR);
+  const run = () => runMigrations(dbPath, MIGRATIONS_DIR);
+  return quiet ? withQuietStdout(run) : run();
 }
 
 /** Report which RS tables actually exist, so a capture cannot silently run half-migrated. */
@@ -246,13 +259,13 @@ export async function resetProbe(baseUrl) {
  * snapshot → tear down. `scenarios` receives { baseUrl, env, root } and drives
  * whatever the caller wants measured.
  */
-export async function capture({ scenarios, keep = false, onLog } = {}) {
+export async function capture({ scenarios, keep = false, quiet = false, onLog } = {}) {
   const port = await findFreePort();
   const { root, env } = createCaptureEnv({ port });
   let server = null;
 
   try {
-    const migration = await applyMigrations(env.BIOF3_DB_PATH);
+    const migration = await applyMigrations(env.BIOF3_DB_PATH, { quiet });
     const tables = inspectTables(env.BIOF3_DB_PATH);
     if (tables.missing.length) {
       throw new Error(`migration left RS tables missing: ${tables.missing.join(', ')}`);
@@ -279,6 +292,7 @@ async function main() {
 
   const result = await capture({
     keep,
+    quiet: asJson,
     onLog: verbose ? (channel, line) => console.error(`[server:${channel}] ${line}`) : undefined,
   });
 
