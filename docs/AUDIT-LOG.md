@@ -24,6 +24,7 @@
 | 2026-07-26 | 四份已完成审计无损移入 `docs/archive/checkpoints/` | `e38d6b5` |
 | 2026-07-26 | RH0 作为 P4R 前唯一串行阶段写入 canonical | `2840673` |
 | 2026-07-26 | RH0 定向测试、脚本/tmp 生命周期和最终全量基线收口；下一阶段转为 P4R | RH0 closeout commit |
+| 2026-07-26 | RS9 历史脚本仍被封存证据引用；移出日常 syntax，保留显式历史 syntax 入口 | repository governance follow-up |
 
 ## 广播规则
 
