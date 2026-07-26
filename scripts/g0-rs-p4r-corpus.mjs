@@ -125,6 +125,27 @@ async function runStepsInChild() {
   const spec = JSON.parse(process.argv[process.argv.indexOf('--child') + 1]);
 
   const { tool_run_tool: runTool } = require(path.join(REPO_ROOT, 'core', 'r-server', 'agent-tools', 'learning.js'));
+  const db = require(path.join(REPO_ROOT, 'core', 'r-server', 'db.js'));
+
+  // A project is REQUIRED, not cosmetic. Every Result Studio route
+  // (interaction, context-envelope, changesets, workspace/status) validates a
+  // projectId and rejects with 400/404 without one, so a project-less corpus
+  // would let a baseline capture "measure" argument validation instead of the
+  // real path. The workspace path lands inside BIOF3_LOCAL_DATA_DIR, which
+  // ISOLATED_PATH_ENV has already redirected into the disposable root.
+  const CORPUS_USER = 'p4r-corpus';
+  const project = db.createProject({
+    name: 'p4r-baseline-corpus',
+    description: 'G0-RS-P4R-0 disposable baseline corpus',
+    modality: 'bulk',
+    userId: CORPUS_USER,
+  });
+  // createProject accepts userId but does not persist it — its INSERT omits the
+  // column (db.js:463). Ownership is a separate call, and without it
+  // project-run-layout.js:97 denies every run, since the fallback admin check
+  // needs a users row this disposable database does not have.
+  db.setProjectUserId(project.id, CORPUS_USER);
+
   const steps = selectSteps({ withEnrichment: spec.withEnrichment });
   const outputs = {};
   const records = [];
@@ -137,7 +158,7 @@ async function runStepsInChild() {
     // produces a fully audited Job/Artifact trail.
     const result = await runTool(
       { op: 'run', toolId: step.toolId, params },
-      { userId: 'p4r-corpus', accessMode: 'full', allowExecution: true },
+      { userId: 'p4r-corpus', accessMode: 'full', allowExecution: true, projectId: project.id },
     );
 
     const record = {
@@ -160,7 +181,7 @@ async function runStepsInChild() {
     );
   }
 
-  process.stdout.write(`\n__CORPUS_RESULT__${JSON.stringify({ records, outputs })}\n`);
+  process.stdout.write(`\n__CORPUS_RESULT__${JSON.stringify({ records, outputs, projectId: project.id })}\n`);
 }
 
 /** Spawn the child with the isolated environment and collect its report. */
@@ -201,17 +222,19 @@ export async function runCorpusSteps(env, { withEnrichment = false, onLog } = {}
  * Full corpus lifecycle: disposable root -> migrate -> run real jobs -> report.
  * Returns the root when `keep` is set so a capture run can reuse it.
  */
-export async function generateCorpus({ keep = false, withEnrichment = false, quiet = false, onLog } = {}) {
-  const { root, env } = createCaptureEnv({ port: 0 });
+export async function generateCorpus({ root: reuseRoot, keep = false, withEnrichment = false, quiet = false, onLog } = {}) {
+  // A caller that will later boot a server must pass its own root, so the corpus
+  // and the server share one disposable environment.
+  const { root, env } = createCaptureEnv({ port: 0, root: reuseRoot });
   try {
     await applyMigrations(env.BIOF3_DB_PATH, { quiet });
     const tables = inspectTables(env.BIOF3_DB_PATH);
     if (tables.missing.length) throw new Error(`migration left RS tables missing: ${tables.missing.join(', ')}`);
 
-    const { records, outputs } = await runCorpusSteps(env, { withEnrichment, onLog });
+    const { records, outputs, projectId } = await runCorpusSteps(env, { withEnrichment, onLog });
     const failed = records.filter((record) => !record.ok);
 
-    return { root, env, tables, records, outputs, ok: failed.length === 0 && records.length > 0, kept: keep };
+    return { root, env, tables, records, outputs, projectId, ok: failed.length === 0 && records.length > 0, kept: keep };
   } finally {
     if (!keep && existsSync(root)) rmSync(root, { recursive: true, force: true });
   }
