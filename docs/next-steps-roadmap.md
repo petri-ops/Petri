@@ -10,7 +10,7 @@
 
 LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口。RS9 曾新增第 17 类 `result_studio_product`，但后续复核发现其五条任务由独立测试拼装、Provider 未执行真实工具闭环、视觉验收依赖人工布尔值、大表由 seed 直接构造；该证据现降级为 unit/synthetic/renderer historical evidence。`result-studio-editing` 在 RS-P7 前暂停 qualified support claim，不能影响或冒充 LF12 原始核心资格。
 
-Result Studio（[`g0-result-studio-plan.md`](./g0-result-studio-plan.md)）是当前唯一 active 工作包。P4 Core 已提交为 `e0a4c7d`，历史审计归档为 `e38d6b5`。`G0-RS-RH0 Repository Hygiene Gate` 已完成：Agent 热上下文、定向测试选择、脚本分层和临时产物生命周期均有机器门禁；形成可恢复提交后下一唯一阶段为 `G0-RS-P4R Product Reframe`。真实科学差异、故障恢复矩阵和 packaged Electron 资格分别继续属于 P5、P6、P7。
+Result Studio（[`g0-result-studio-plan.md`](./g0-result-studio-plan.md)）是当前唯一 active 工作包。P4 Core 已提交为 `e0a4c7d`，历史审计归档为 `e38d6b5`。`G0-RS-RH0 Repository Hygiene Gate` 已完成，并由 `95a7fe3`、`041e32e` 形成可恢复提交：Agent 热上下文、定向测试选择、脚本分层和临时产物生命周期均有机器门禁。下一唯一阶段为 `G0-RS-P4R Product Reframe`，目前尚未开始实现。真实科学差异、故障恢复矩阵和 packaged Electron 资格分别继续属于 P5、P6、P7。
 
 Result Studio 旧实现的 11 个提交已位于 `main`（检查点 `03e5826`）；`SDC-0 Profile Registry 与版本治理` 也已在分支 `codex/g0-sdc` 的 `7284921` 收口并推送，六个 canonical Profile 与 fail-closed typed DAG 边继续保留。按单工作包串行，`SDC-1`～`SDC-7` deferred，当前不创建 Worktree。
 

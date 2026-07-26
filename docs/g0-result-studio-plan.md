@@ -1381,9 +1381,9 @@ Result Studio 当前按三层事实表达：
 - `npm run test:changed` 对工作区/显式基线变化给出可解释、去重、确定性的测试集合；未映射生产文件必须非零退出。
 - `npm run test:all` 明确覆盖 Node MJS/CJS，前端提供对应 changed/all 入口；CI/发布职责与本地迭代职责不混淆。
 - `tmp` 无测试硬依赖；QA 测试不再无限生成日志；清理命令只作用于仓库内明确 `tmp` 子目录。
-- `docs:reconcile`、`docs:check`、`ui:audit:check`、RH0 定向测试和最终一次全量基线通过；工作区形成可恢复提交后才允许进入 P4R。
+- `docs:reconcile`、`docs:check`、`ui:audit:check`、RH0 定向测试和最终一次全量基线通过；RH0 已由 `95a7fe3`、`041e32e` 形成可恢复提交，满足 P4R 启动门，但 P4R 实现尚未开始。
 
-RH0 收口证据（2026-07-26）：`test/impact-map.json` 与 `scripts/test-affected.mjs` 已建立确定性、去重、fail-closed 的影响选择；`npm run test:changed` 定向 Node 41 项与前端 294 项通过，`npm run test:all:workspace` 最终基线为 Node 1581 pass / 0 fail / 11 skipped、前端 294 pass / 0 fail；`npm run docs:reconcile`（39 registered、0 unregistered、0 validation issues）、`npm run docs:check`、`npm run ui:audit:check` 与 `git diff --check` 全部通过。旧 `dev-desktop.sh`、已下线云端 smoke 与旧 DESeq2 MCP 验收脚本已删除；真实 JSON 证据迁移到 `test/fixtures/golden-path/deseq2-run.json`，`tmp` 历史日志/二进制已清理，QA/golden-path 日志保留上限为 20。后续审计确认 RS9 脚本仍被历史证据引用，因此保留文件但从日常 Result Studio syntax 热路径移出，新增显式 `g0:result-studio:historical:syntax`；历史代码仍可单独校验。该收口只改变工程治理，不改变任何执行/科学真相；P4R 可在本阶段提交可恢复后启动。
+RH0 收口证据（2026-07-26）：`test/impact-map.json` 与 `scripts/test-affected.mjs` 已建立确定性、去重、fail-closed 的影响选择；`npm run test:changed` 定向 Node 41 项与前端 294 项通过，`npm run test:all:workspace` 最终基线为 Node 1581 pass / 0 fail / 11 skipped、前端 294 pass / 0 fail；`npm run docs:reconcile`（39 registered、0 unregistered、0 validation issues）、`npm run docs:check`、`npm run ui:audit:check` 与 `git diff --check` 全部通过。旧 `dev-desktop.sh`、已下线云端 smoke 与旧 DESeq2 MCP 验收脚本已删除；真实 JSON 证据迁移到 `test/fixtures/golden-path/deseq2-run.json`，`tmp` 历史日志/二进制已清理，QA/golden-path 日志保留上限为 20。后续审计确认 RS9 脚本仍被历史证据引用，因此保留文件但从日常 Result Studio syntax 热路径移出，新增显式 `g0:result-studio:historical:syntax`；历史代码仍可单独校验。该收口只改变工程治理，不改变任何执行/科学真相；P4R 启动门已满足，但 P4R 实现尚未开始。
 
 ### G0-RS-P4R：Product Reframe — Agent-first Focused Result Experience（`planned`）
 
