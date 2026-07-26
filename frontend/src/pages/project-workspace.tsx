@@ -1770,15 +1770,12 @@ export function RightFileTree({
   const [loading, setLoading] = useState(true);
   const [treeOpen, setTreeOpen] = useState(true);
   const [treeWidth, setTreeWidth] = useState(220);
-  const [harnessIndex, setHarnessIndex] = useState<HarnessIndexSummary | null>(null);
-  const [harnessLoading, setHarnessLoading] = useState(false);
-  const [harnessError, setHarnessError] = useState('');
+
   const [refreshVersion, setRefreshVersion] = useState(0);
   const [previewVersion, setPreviewVersion] = useState(0);
   const [openError, setOpenError] = useState('');
   const [opening, setOpening] = useState(false);
   const activeFileSignatureRef = useRef<string | null>(null);
-  const harnessRequestRef = useRef(0);
 
   const fetchDir = useCallback(async (prefix: string) => {
     try {
@@ -1813,23 +1810,6 @@ export function RightFileTree({
     }
   }, [activeFile?.name, activeFile?.path, fetchDir]);
 
-  const refreshHarnessIndex = useCallback(async (showLoading = false) => {
-    const requestId = harnessRequestRef.current + 1;
-    harnessRequestRef.current = requestId;
-    if (showLoading) setHarnessLoading(true);
-    setHarnessError('');
-    try {
-      const data = await fetchHarnessIndex({ scope: 'project', projectId: project.id, maxFiles: 120 });
-      if (harnessRequestRef.current === requestId) setHarnessIndex(data.index || null);
-    } catch (error) {
-      if (harnessRequestRef.current !== requestId) return;
-      setHarnessIndex(null);
-      setHarnessError((error as Error).message || '识别失败');
-    } finally {
-      if (showLoading && harnessRequestRef.current === requestId) setHarnessLoading(false);
-    }
-  }, [project.id]);
-
   useEffect(() => {
     activeFileSignatureRef.current = null;
     setOpenError('');
@@ -1861,26 +1841,13 @@ export function RightFileTree({
     const unsubscribe = subscribeBioF3Event(biof3Events.projectWorkspaceChanged, (detail) => {
       if (detail.projectId === project.id) {
         void refreshFiles(true);
-        void refreshHarnessIndex(false);
       }
     });
     return () => {
       window.clearInterval(timer);
       unsubscribe();
     };
-  }, [active, project.id, refreshFiles, refreshHarnessIndex]);
-
-  useEffect(() => {
-    void refreshHarnessIndex(true);
-  }, [project.id, refreshHarnessIndex]);
-
-  useEffect(() => {
-    if (!active) return;
-    const timer = window.setInterval(() => {
-      if (!document.hidden) void refreshHarnessIndex(false);
-    }, 10000);
-    return () => window.clearInterval(timer);
-  }, [active, refreshHarnessIndex]);
+  }, [active, project.id, refreshFiles]);
 
   const toggleDir = useCallback(async (dirPath: string) => {
     setExpandedDirs((prev) => {
@@ -3275,9 +3242,7 @@ function ResultArtifactShell({
   const visibleSelectionRef = useRef<ArtifactSelection | null>(null);
   const committedSelectionRef = useRef<ArtifactSelection | null>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
-  const [harnessIndex, setHarnessIndex] = useState<HarnessIndexSummary | null>(null);
-  const [harnessLoading, setHarnessLoading] = useState(false);
-  const [harnessError, setHarnessError] = useState('');
+
   const [navCollapsed, setNavCollapsed] = useState(false);
   const [pendingRecovery, setPendingRecovery] = useState<{
     actionId: string;
@@ -3339,9 +3304,6 @@ function ResultArtifactShell({
       setPreviewText(null);
       setPreviewData(null);
       setPreviewLoading(false);
-      setHarnessIndex(null);
-      setHarnessLoading(false);
-      setHarnessError('');
       return;
     }
 
@@ -3405,34 +3367,6 @@ function ResultArtifactShell({
       setPreviewLoading(false);
     }
   }, [effectiveJobStatus, job?.id, lang]);
-
-  useEffect(() => {
-    if (!job || effectiveJobStatus !== 'done' || !showHarnessIndex) {
-      setHarnessIndex(null);
-      setHarnessError('');
-      setHarnessLoading(false);
-      return;
-    }
-    let cancelled = false;
-    setHarnessLoading(true);
-    setHarnessError('');
-    fetchHarnessIndex({ scope: 'artifact', jobId: job.id, maxFiles: 120 })
-      .then((data) => {
-        if (!cancelled) setHarnessIndex(data.index || null);
-      })
-      .catch((error: Error) => {
-        if (!cancelled) {
-          setHarnessIndex(null);
-          setHarnessError(error.message || '识别失败');
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setHarnessLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [effectiveJobStatus, job?.id, showHarnessIndex]);
 
   const files = result?.artifacts || result?.files || [];
   const fallbackArtifacts = useMemo<ResultArtifactRecord[]>(
