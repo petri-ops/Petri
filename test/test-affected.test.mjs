@@ -1,4 +1,5 @@
 import { strict as assert } from 'node:assert';
+import { readdirSync } from 'node:fs';
 import { test } from 'node:test';
 import { resolveImpact } from '../scripts/test-affected.mjs';
 
@@ -30,6 +31,19 @@ test('documentation changes select docs governance without scientific tests', ()
   assert.deepEqual(plan.unknown, []);
   assert.deepEqual(plan.tests, []);
   assert.deepEqual(plan.commands, ['docs-check']);
+});
+
+test('stored acceptance evidence selects its reader and never blocks on unmapped paths', () => {
+  const trees = readdirSync(new URL('../acceptance/', import.meta.url), { withFileTypes: true })
+    .filter((entry) => entry.isDirectory()).map((entry) => `acceptance/${entry.name}/evidence.json`);
+  assert.ok(trees.length > 0);
+  assert.deepEqual(resolveImpact(trees).unknown, []);
+
+  const resultStudio = resolveImpact(['acceptance/g0-result-studio/rs-p4r-performance.json']);
+  assert.deepEqual(resultStudio.unknown, []);
+  assert.deepEqual(resultStudio.tests, ['test/result-studio-qualification.test.mjs']);
+
+  assert.deepEqual(resolveImpact(['acceptance/g0-new-tree/evidence.json']).unknown, ['acceptance/g0-new-tree/evidence.json']);
 });
 
 test('directly edited tests are included and unknown production paths fail closed', () => {
