@@ -1505,7 +1505,34 @@ P4R 完成后的默认产品形态固定为：
 2. §P4R.2(1) 同时列举的「首次 baseline Revision / Git binding / ChangeSet / Workspace storage 检查」在该库中无表可查，因此当前开发态根本走不到这些分支；其代价必须在补齐 migration 的捕获环境中重新测量。
 3. 基线捕获不得使用用户开发库：其中含 6 个真实项目，且 420 个 completed 中 382 个为合成 `test-tool-2`，直接采样会同时污染用户数据并违反「不使用数据库 seed 冒充真实产品旅程」。
 
-因此 P4R-0 增加一个前置步骤：建立一次性可抛的捕获环境（沿用 `G0-RS8` 已确立的模式，用环境变量把 SQLite、results/uploads/tmp/logs 指向临时目录，只隔离运行时、不复制源码树），在其中执行 migration 并真实运行 deseq2 / volcano / heatmap / GO-KEGG 生成基线语料，再开始采样。
+因此 P4R-0 增加一个前置步骤：建立一次性可抛的捕获环境（沿用 `G0-RS8` 已确立的模式，用环境变量把 SQLite、results/uploads/tmp/logs 指向临时目录，只隔离运行时、不复制源码树），在其中执行 migration 并真实运行 deseq2 / volcano / heatmap / GO-KEGG 生成基线语料，再开始采样。该环境已由 `scripts/g0-rs-p4r-capture.mjs` 实现（`2225dde`），隔离由 `assertIsolated()` fail-closed 断言，不依赖任何生产代码改动。
+
+代码勘察结论（2026-07-26，只读核对，全部带 path:line 依据）。以下条目是**计划与代码不一致**之处，按纪律登记而不擅自裁决：
+
+| # | 计划原文 | 代码实际 | 处置 |
+|---|---|---|---|
+| 1 | §P4R.2(1) 把 ContextEnvelope 列为阻塞元凶 | `core/r-server/agent-tools/result-context-tools.js` 全 414 行零 fs/crypto/child_process，纯 SQLite + 缓存 descriptor | **纠正**：不得按同步 fs 热点计预算 |
+| 2 | §12 的 13 个组件文件与 6 个 Viewer Adapter | 一个都不存在；全部逻辑在 `frontend/src/pages/project-workspace.tsx:3209-4371` 的内联 `ResultArtifactShell`，adapter 是 `resultSurface.ts:68-81` 的字符串联合 | **降级**：§12 是提案，不是现状描述 |
+| 3 | §P4R.3「查看不写入」 | 字面成立（不改 current 指针/ref），但 `routes/result-studio.js:320-330` 在**每个** result-studio 请求（含纯 GET 读历史 artifact）无条件 `saveRepositoryBinding()` + 未缓存 git 探测 | **待裁决**：契约指「完全不写」还是「不改 current」，计划未区分 |
+| 4 | P4R-0 要求捕获「代码打开」基线 | `routes/result-studio.js` 23 条路由中无 revision source 投影；§P4R.4(6) 自己也说这是新工作 | 基线只能记 `not_implemented`，不能记时间 |
+| 5 | P4R-0 要求机器捕获首屏内容可见/切换 | 仓库无 playwright/puppeteer；`g0-qualification-visual.mjs` 只校验既有 PNG，不捕获 | **已决策**：只冻服务端预算，客户端记 `ObservedMs:null` + 状态串，沿用 RS-P1 先例 |
+| 6 | P4R-0 设 >250ms 事件循环阻塞门 | `server.js:178-193` 的 tick 采样器 `TICK_MS=1000`/阈值 2000ms，分辨不出 250ms | 权威信号必须声明为 `snapshotProbe().eventLoop.maxMs`（10ms 分辨率直方图） |
+| 7 | §P4R.6(1) 暗示主体普遍等待次级请求 | 静态图片/报告主体**已经不等** interaction/context/version/storage；真正阻塞的是 `/tools/status`（所有主体）、interaction manifest（仅交互表/散点）、以及 CSV/JSON/文本主体的第二次全文件下载 | 失败测试必须针对这三处具体耦合，不能写成笼统断言 |
+| 8 | RS-P1 已冻结 `firstCanvasVisibleMs=1000` | 该指标在 `ResultStudioSurface.tsx:40-48` 的 `useLayoutEffect(...,[])` 里量**画布挂载**，非内容；用户等数秒也会通过 | 必须替换为内容锚定指标。**替换不等于放宽**，但计划未给出区分机制，须在证据中显式注明 |
+| 9 | §P4R.7 列两份证据文件 | 未说明哪个子阶段写 `rs-p4r-product-reframe.json`，也未指定两种证据风格取哪种 | P4R-0 只写 `rs-p4r-performance.json`，采用 sourceHashes 风格以便源码漂移时失效 |
+
+已确认的性能事实（可直接作为 P4R-1 的目标，不需重新论证）：
+
+- `routes/result-studio.js:1021` 在**每个**图片请求上对整个文件重算 sha256（`hashFile` 是同步 openSync/readSync 循环）后才 `sendFile`。计划 §P4R.4(2) 末条指控**属实**。
+- `/api/result-studio/workspace/status` 最重：`inspectRevisionIntegrity` 遍历至多 5000 个 revision，**每个**算全文件 sha256 并 fork 1～2 次 `git rev-parse`（execFileSync 阻塞），随后 `inspectResultStudioStorage` 再遍历一次并递归 walk 至多 10000 个文件。
+- 打开 PNG **并不豁免**表格解析：绘图分支对声明的 backing CSV 调 `queryResultTable`，`limit:250` 只限制返回行数，`readDelimitedTable` 仍 `readFileSync` 整个文件（上限 64 MiB / 250k 行）并算 sha256。
+- git-adapter 全部使用 `execFileSync`，且 `detectGitRuntime()` 明确不缓存，因此该路径上每次 binding 都要 fork 若干次进程。
+
+证据门机制的既有约束（影响 P4R 全程，不只 P4R-0）：
+
+- p2/p3/p4 的 `sourceHashes` 同时包含 `package.json`、`frontend/src/pages/project-workspace.tsx` 和（p3/p4）`core/r-server/routes/result-studio.js`。这三者正是 P4R 每阶段必改的文件，因此**刷新 p2/p3/p4 证据是 P4R 全程的每次提交税，不是 npm 接线时的一次性成本**。
+- `test/result-studio-qualification.test.mjs`（影响图为 `acceptance/g0-result-studio/**` 选中的测试）并不读取 `rs-p4r-performance.json`，因此真实校验必须写在生成脚本或新增专用测试里，不能依赖该测试。
+- 三份验收脚本原本内部调用 `npm test --prefix frontend`（= `vitest run --changed`），叠加文件过滤后选中 0 个测试并退出 0，被记为 `passed:true`；已于 `be0a6de` 统一改为 `npm run test:files`。新增 P4R 脚本必须同样使用 `test:files`，否则会静默空转。
 
 - 机器捕获结果点击的请求 waterfall、事件循环 lag、首次内容可见、Artifact 切换、版本切换和代码打开基线。
 - 建立小/中/大 PNG/SVG、10 万行表、长报告、多 Revision 的 canonical fixture；不使用数据库 seed 冒充真实产品旅程。
