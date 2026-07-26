@@ -651,6 +651,124 @@ const TOOL_DEFS = [
   {
     type: 'function',
     function: {
+      name: 'result_studio_context',
+      description:
+        'RESULT_STUDIO_CONTEXT_v1 — 读取用户当前打开结果的完整工程坐标（结果名/工具/版本序号/验证与复现状态/可编辑参数/插件动作/当前选择）。优先调用它，然后使用返回的 contextToken 调用 *_in_context 工具；不要向用户索要或自行猜测 job、artifact、revision、changeset、selection 等内部 id。返回值有界，不含完整实体 ID 列表、路径或结果值。',
+      parameters: { type: 'object', properties: {} },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'result_edit_plan_in_context',
+      description:
+        'RESULT_EDIT_INTENT_v1（context-bound）— 只读规划当前打开结果的修改：来源 Job/Artifact/Revision/脚本坐标由后端上下文自动补齐，用户和模型都不需要提供内部 id。区分查看、重绘、转换、重算与工作流重规划，未知参数保守按科学重算；不修改文件、不创建 Job 或 ChangeSet。归因只能到 Job、选择已过期或缺 DAG 时明确阻断并给出修复路径。',
+      parameters: {
+        type: 'object',
+        properties: {
+          requestedOutcome: { type: 'string', description: '用户希望得到的结果变化（自然语言）' },
+          requestedEditClass: {
+            type: 'string',
+            enum: ['view_only', 'presentation_rerender', 'data_transform', 'scientific_recompute', 'workflow_replan'],
+            description: '可选意图类别；插件影响规则可保守升级它，不能被它降级',
+          },
+          proposedParameterPatch: { type: 'object', description: '拟议参数 Patch；未知参数按科学重算处理' },
+          workflowPlan: { type: 'object', description: '可选：真实 AgentWorkflowPlan，用于计算受影响下游节点' },
+          userMessageId: { type: 'string', description: '可选来源用户消息 id' },
+          contextToken: { type: 'string', description: '可选：result_studio_context 返回的 token' },
+        },
+        required: ['requestedOutcome'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'result_changeset_create_in_context',
+      description:
+        'RESULT_CHANGESET_v1（context-bound）— 用 result_edit_plan_in_context 返回的 intent 在当前打开结果上创建隔离候选版本，经既有 run_tool→tool_job→artifact truth 执行与验证，不采用候选也不覆盖当前结果。必须携带 contextToken：结果、版本或选择在规划后发生变化时拒绝执行。科学重算需 scientificConfirmed=true。',
+      parameters: {
+        type: 'object',
+        properties: {
+          contextToken: { type: 'string', description: 'result_studio_context 返回的 token' },
+          intent: { type: 'object', description: 'result_edit_plan_in_context 返回的完整 intent' },
+          scriptPatch: {
+            type: 'array',
+            description: '可选的精确脚本替换；每段 oldText 必须唯一匹配',
+            items: {
+              type: 'object',
+              properties: { oldText: { type: 'string' }, newText: { type: 'string' } },
+              required: ['oldText', 'newText'],
+            },
+          },
+          scientificConfirmed: { type: 'boolean', description: '科学参数或方法变化已完成确认时为 true' },
+        },
+        required: ['contextToken', 'intent'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'result_changeset_status_in_context',
+      description: '读取当前打开结果上进行中修改的阶段结论、候选版本与恢复状态；ChangeSet 由上下文自动绑定，只读。存在多个进行中修改时要求先确认，不自行猜测。',
+      parameters: {
+        type: 'object',
+        properties: {
+          contextToken: { type: 'string' },
+          changeSetId: { type: 'string', description: '可选：显式指定要查看的修改' },
+        },
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'result_changeset_compare_in_context',
+      description: '比较当前打开结果的候选版本与当前版本：视觉/表格语义/JSON 字段/文本差异与版本历史；ChangeSet 由上下文自动绑定，只读且结果有界。',
+      parameters: {
+        type: 'object',
+        properties: {
+          contextToken: { type: 'string' },
+          changeSetId: { type: 'string' },
+        },
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'result_changeset_adopt_in_context',
+      description: '采用当前打开结果上已验证的候选版本，以 Git CAS + SQLite 事务原子切换 current；仅在用户明确要求采用时调用。必须携带 contextToken，父版本已变化时拒绝。',
+      parameters: {
+        type: 'object',
+        properties: {
+          contextToken: { type: 'string' },
+          changeSetId: { type: 'string' },
+        },
+        required: ['contextToken'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'result_changeset_revert_in_context',
+      description: '撤销当前打开结果上的候选修改，或在其仍为 current 时撤销已采用修改；不删除任何历史。必须携带 contextToken。较旧版本已被覆盖时应使用 artifact_revision_restore。',
+      parameters: {
+        type: 'object',
+        properties: {
+          contextToken: { type: 'string' },
+          changeSetId: { type: 'string' },
+          reason: { type: 'string' },
+        },
+        required: ['contextToken'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'verify_state',
       description:
         'VERIFY_STATE_v1 — 确认某个实体的当前状态符合预期。在执行写操作后调用此工具核实，避免在没有真实反馈时声称"已完成"。' +

@@ -168,6 +168,7 @@ function buildSystemPrompt(context, runtimeIdentity = {}) {
       maxEntries: 20,
     });
     if (context.activeJobId) base += '\n\n当前结果：jobId=' + context.activeJobId;
+    base += renderResultStudioContextForPrompt(context);
   }
 
   if (typeof context.pageContent === 'string' && context.pageContent.length > 0) {
@@ -175,6 +176,49 @@ function buildSystemPrompt(context, runtimeIdentity = {}) {
   }
   base += renderFileReferenceHints(context);
   return base;
+}
+
+/**
+ * G0-RS-P3 — 渲染当前 Result Studio 上下文。
+ *
+ * 关键约束：这里**只描述**用户当前打开了什么，绝不把 job / artifact /
+ * revision / selection 的内部 id 写进 prompt。模型需要坐标时必须调用
+ * `result_studio_context` 从后端真相拿 contextToken，而不是从提示词里
+ * 复制 id、也不是向用户索要 id。
+ */
+function renderResultStudioContextForPrompt(context) {
+  const artifact = context && context.activeArtifact;
+  if (!artifact || typeof artifact !== 'object') return '';
+  let block = '\n\n=== 当前结果上下文 (RESULT_STUDIO_CONTEXT_v1) ===';
+  const name = typeof artifact.label === 'string' && artifact.label.trim()
+    ? artifact.label.trim()
+    : String(artifact.name || '').trim();
+  if (name) block += '\n- 用户正在查看的结果：' + name;
+  if (artifact.type) block += '（类型：' + artifact.type + '）';
+  if (artifact.toolId) block += '\n- 产生它的工具：' + artifact.toolId;
+  block += '\n- 版本已建立：' + (artifact.revisionId ? '是' : '否');
+  if (artifact.entityType) block += '\n- 可选择实体类型：' + artifact.entityType;
+
+  const compatibility = artifact.selectionCompatibility || null;
+  const selection = artifact.selection || null;
+  if (selection && compatibility === 'compatible') {
+    block += '\n- 当前选择：' + (selection.entityIdCount || 0) + ' 个 ' + (selection.entityType || 'row');
+    if (selection.truncated) block += '（大选择，按 filter 表达）';
+    if (selection.filterDescription) block += '，筛选条件：' + selection.filterDescription;
+  } else if (compatibility === 'stale') {
+    block += '\n- 当前选择已过期（结果发生变化）：不得沿用它，先让用户重新选择。';
+  } else if (compatibility === 'invalid') {
+    block += '\n- 当前选择不可用：不得把行号当成实体身份。';
+  } else {
+    block += '\n- 当前没有选择。';
+  }
+
+  block += '\n【调用纪律】';
+  block += '\n- 需要对这个结果做修改、比较、采用或撤销时，先调用 result_studio_context 获取 contextToken，再调用对应的 *_in_context 工具。';
+  block += '\n- 不要向用户索要 jobId、artifactId、revisionId、changeSetId、artifactFamilyId 或 selectionId；这些坐标由后端上下文补齐。';
+  block += '\n- 不要凭记忆或猜测构造上述任何 id。上下文过期时工具会返回 context_token_stale，此时重新调用 result_studio_context。';
+  block += '\n- 对外只汇报「理解意图 → 判断影响 → 执行/重算 → 验证 → 候选可比较」这五个阶段结论，不展示隐藏推理链或 Git 内部细节。';
+  return block;
 }
 
 function renderFileReferenceHints(context) {
@@ -201,5 +245,6 @@ module.exports = {
   buildSystemPrompt,
   localizeToolResult,
   renderFileReferenceHints,
+  renderResultStudioContextForPrompt,
   ERROR_I18N,
 };

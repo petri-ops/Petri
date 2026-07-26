@@ -42,6 +42,13 @@ export interface RightPanelContext {
   onWorkflowChanged: () => void;
   activeArtifact: ActiveArtifact | null;
   setActiveArtifact: (a: ActiveArtifact | null) => void;
+  /** G0-RS-P3: Agent 上下文就绪状态，由后端 context-envelope 投影而来。 */
+  resultContext?: {
+    status: 'ready' | 'blocked' | 'loading';
+    reason?: string | null;
+    selectionUsable?: boolean;
+    selectionCompatibility?: 'compatible' | 'stale' | 'invalid' | null;
+  } | null;
   openWorkspaceFiles: ActiveWorkspaceFile[];
   activeWorkspaceFile: ActiveWorkspaceFile | null;
   setActiveWorkspaceFile: (f: ActiveWorkspaceFile | null) => void;
@@ -139,6 +146,7 @@ export function RightPanel({
                           : null
                     }
                     onAskAgent={ctx.handleAskAgent}
+                    context={ctx.resultContext ?? null}
                   />
                 )}
                 {tab === 'files' && (

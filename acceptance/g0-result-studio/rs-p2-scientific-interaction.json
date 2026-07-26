@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P2",
-  "sourceCommit": "d0d880089efca50d60b44fad9d9dd5923d17341b",
+  "sourceCommit": "f526ea5b19a259f8ef121e2bf384b0ba8e192d79",
   "captureMode": "automated_contract_renderer_performance_and_live_local_product_plus_bounded_visual_spot_check",
   "qualificationEligible": false,
   "privacy": "repository_relative_paths_digests_counts_dimensions_timings_and_bounded_statuses_only_no_project_job_conversation_selection_url_credential_prompt_or_result_data",
@@ -11,14 +11,14 @@
     "contracts": "52e4c29e14dd384add9305c48e4399e92986973eb4d04e8c5069b8df3642a3a0",
     "repository": "a857412dda082cc575d844f66eb43a6c77421937786431fb7417c52d23470050",
     "pluginSdk": "44e057e3ef5a3cbd736ce3af1fa169706f6c466ddca4c645ac9a9fc06ff0ffaa",
-    "routes": "c8f91a054c42adc9281068351b7439e3671059565db348146bb54b5600db2b4e",
+    "routes": "6e38a56acfa0eaa0e2f5192c6179c384e4187e9159f8fc69a649131890e40486",
     "selectionTool": "7bd62361d54847cffc6245933c862e34f44f9d486c1a7b683bdc74e99a75a81d",
-    "toolDefinitions": "d17df41c6ed05a32255eba83916ae8741731920af5f684eee35fddf8b8f3feb1",
-    "toolRegistry": "59efd3f3f12ec66e2edbded0990057299c4b00db7ccaa189464b5e6cf6b11ad9",
+    "toolDefinitions": "7ff701687940af1e04b0e8aac95e6643a95639138210363730c66ef43fd90bb0",
+    "toolRegistry": "f53dc7d881955cd23efecf466452bac448e9b915d590bed1d783722e6166d5a6",
     "viewer": "0b165e23bf9a915e658db9bb3c2240e32a741d2c86f434fb5681dddb6f44dbc2",
     "viewerStyle": "2f320233486b31fe7744d7d44730c4373edb4f3ff54f91faf84ee83a16bd2fdf",
-    "selectionClient": "414d8a2d6aa468a0e76fec6b7eb27ec80f2ae46f0d312c50695733a7d95b9e8b",
-    "workspace": "fddb8c342f4a6c70f0b0d889398f210a6d67da9c2c1c2c6f7391ee84df8ad2c6",
+    "selectionClient": "6ff7fc2d209c25b8a0674243dd4c8fc8ee88e8469a6c037658c99cf910b6f85a",
+    "workspace": "29f95edc2d37a8f7f1b9aa3745b783fbcfb31dbb014da98be051d7090bcbd25e",
     "viewerTest": "7087a4647f97980bbb42e6cd4f22fde702175df72385eca5b7669060b1f1e0e5",
     "selectionLogic": "2156ef151d014b654d54f533663d2b7f5f086024161b464ecb45bb5b07fbafe2",
     "selectionLogicTest": "b02e4b21b7fd1452171ad31b6aa5f5c8e5dfede1a2c5fb8d2fb302f9ccb79407",
@@ -32,7 +32,7 @@
     "acceptanceScript": "8c94a694d87a5c1e7344e2b64d4cf0b6adc8f093267b9096b389655ee5845768",
     "liveObservation": "b0da52317f9e9eb8fbb759fd5d61f9cf00332d07f9fdb04efe9548fbaa068860",
     "uiObservation": "a266e6458c260713d79144f6a7fc8870922bb0060d6a99ed5c6cc3c854dc1a5b",
-    "packageScripts": "01d18cba08b38463d345423b6fb3d38097f5defd486b69834cc3c3568ec43bf5"
+    "packageScripts": "acd702755e6ebd21336a2efa1c09b887652463845d9849c4fd75c16f1d2f9912"
   },
   "productObservation": {
     "captureMode": "automated_contract_renderer_performance_and_live_local_product_plus_bounded_visual_spot_check",
@@ -189,14 +189,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-25T15:13:34.085Z",
+    "generatedAt": "2026-07-25T16:55:59.766Z",
     "commands": [
       {
         "label": "backend-p2",
         "command": "node --test test/result-studio-table-query.test.mjs test/result-selection-tools.test.mjs test/artifact-interaction.test.mjs test/result-studio-contracts.test.mjs test/result-studio-repository.test.mjs test/result-studio-plugin-sdk.test.mjs test/agent-tool-registry.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "c11e85721cf829ed364c840dd71831a6d9dc9607e5909a4731d405f30e6f944a",
+        "stdoutSha256": "0350d13f548f2312977eaaf1c79f2f192e43095b85102c8c463883b0edff8b84",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -204,14 +204,14 @@
         "command": "npm test --prefix frontend -- ScientificInteractionViewer.test.tsx artifact-selection.test.ts CenterPanel.test.tsx ResultStudioSurface.test.tsx",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "df18b4eb2ab11f6ecc1a857d36a2b4a43a81faab3f8be39be4f66cd64933c7f5",
+        "stdoutSha256": "6beea878d2c45642de990977a2f80ceb798fb844aec4917ba7375f1f1c406e89",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "rendererPerformance": {
           "budgetMs": 100,
-          "scrollFeedbackMs": 3.003,
-          "selectionFeedbackMs": 4.645,
-          "sortFeedbackMs": 6.048,
-          "filterFeedbackMs": 1.223
+          "scrollFeedbackMs": 2.665,
+          "selectionFeedbackMs": 4.669,
+          "sortFeedbackMs": 4.959,
+          "filterFeedbackMs": 0.899
         }
       },
       {
@@ -219,7 +219,7 @@
         "command": "npm run build:check --prefix frontend",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "6faa0977e488abb98bbf9bcc8ca996e1ac4507357dbec8b50a6a6a15d83a944e",
+        "stdoutSha256": "5bb6a98d05d899d75ad1556320742434b884b7fe0c8af2cf5a814f6fb3e31d29",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -239,6 +239,6 @@
     "futureStagesImplemented": false
   },
   "passed": true,
-  "generatedAt": "2026-07-25T15:13:34.085Z",
+  "generatedAt": "2026-07-25T16:55:59.766Z",
   "privacyClean": true
 }

@@ -75,6 +75,7 @@ import { ScientificInteractionViewer } from '@/components/result-studio/Scientif
 import {
   deleteResultStudioSelection,
   fetchArtifactInteraction,
+  fetchResultStudioContext,
   restoreResultStudioSelection,
   saveResultStudioSelection,
   type ResultTableQuery,
@@ -223,6 +224,14 @@ export function ProjectWorkspace(): React.ReactElement {
   const autoOpenedJobRef = useRef<string | null>(null);
   const [activeArtifact, setActiveArtifact] = useState<ActiveArtifact | null>(null);
   const [activeWorkspaceFile, setActiveWorkspaceFile] = useState<ActiveWorkspaceFile | null>(null);
+  // G0-RS-P3: Agent 上下文就绪状态。真相来自后端 context-envelope 投影，
+  // 前端不自行判断"坐标是否齐备"，也不把缺失坐标伪装成可用。
+  const [resultContextState, setResultContextState] = useState<{
+    status: 'ready' | 'blocked' | 'loading';
+    reason?: string | null;
+    selectionUsable?: boolean;
+    selectionCompatibility?: 'compatible' | 'stale' | 'invalid' | null;
+  } | null>(null);
   const [browserCanGoBack, setBrowserCanGoBack] = useState(false);
   const [browserCanGoForward, setBrowserCanGoForward] = useState(false);
   const [openWorkspaceFiles, setOpenWorkspaceFiles] = useState<ActiveWorkspaceFile[]>([]);
@@ -986,7 +995,58 @@ export function ProjectWorkspace(): React.ReactElement {
 
   useEffect(() => {
     setActiveArtifact(null);
+    setResultContextState(null);
   }, [activeJobId]);
+
+  // G0-RS-P3: 每当打开的结果或其版本变化，就从后端重新投影一次上下文。
+  // 这里只提供 job/文件名/revision 线索，坐标齐备与否由后端裁决；
+  // 409 时如实记录阻断原因，UI 不把它显示成"Agent 可以直接改"。
+  useEffect(() => {
+    if (!projectId || !activeArtifact?.jobId || !activeArtifact.name) {
+      setResultContextState(null);
+      return;
+    }
+    let cancelled = false;
+    setResultContextState({ status: 'loading' });
+    fetchResultStudioContext({
+      language: 'r',
+      projectId,
+      conversationId: activeConvId,
+      jobId: activeArtifact.jobId,
+      artifact: activeArtifact.name,
+      revisionId: activeArtifact.revisionId ?? null,
+    })
+      .then((result) => {
+        if (cancelled) return;
+        if (result.status === 'blocked') {
+          setResultContextState({
+            status: 'blocked',
+            reason: result.diagnostics[0]?.message || null,
+          });
+          return;
+        }
+        setResultContextState({
+          status: 'ready',
+          selectionUsable: result.agentView?.selectionState.usableByAgent === true,
+          selectionCompatibility: result.agentView?.selectionState.compatibility ?? null,
+        });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setResultContextState({ status: 'blocked', reason: '无法连接本地服务读取结果上下文。' });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    projectId,
+    activeConvId,
+    activeArtifact?.jobId,
+    activeArtifact?.name,
+    activeArtifact?.revisionId,
+    activeArtifact?.selectionId,
+  ]);
 
   useEffect(() => {
     if (loading) return;
@@ -1309,6 +1369,7 @@ export function ProjectWorkspace(): React.ReactElement {
     onWorkflowChanged: () => setWorkflowRefreshKey((value) => value + 1),
     activeArtifact,
     setActiveArtifact,
+    resultContext: resultContextState,
     openWorkspaceFiles,
     activeWorkspaceFile,
     setActiveWorkspaceFile,

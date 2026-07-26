@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS-P3",
+  "sourceCommit": "f526ea5b19a259f8ef121e2bf384b0ba8e192d79",
+  "captureMode": "automated_contract_registry_prompt_and_strict_build_offline_verification",
+  "qualificationEligible": false,
+  "privacy": "repository_relative_paths_digests_counts_and_bounded_statuses_only_no_project_job_conversation_selection_url_credential_prompt_or_result_data",
+  "sourceHashes": {
+    "contextContract": "c2c2dfe71e2d257032384c94fa799f21ea83411520a3131fb4094ee34a557995",
+    "contextTools": "53e59e5b8f29c832d2f5607562ac65d32d75dfa95ae46ae8fc042288d2b8947b",
+    "contextEditTools": "3a0338f94b33124b60d8db1cb527741c5af0cf9da18e4e5aa0e0eae651211ad9",
+    "toolDefinitions": "7ff701687940af1e04b0e8aac95e6643a95639138210363730c66ef43fd90bb0",
+    "toolRegistry": "f53dc7d881955cd23efecf466452bac448e9b915d590bed1d783722e6166d5a6",
+    "systemPrompt": "76ebbc2862faaa824c9da003c507096ddda5f15c40939d4149d2c5bf4eb76158",
+    "routes": "6e38a56acfa0eaa0e2f5192c6179c384e4187e9159f8fc69a649131890e40486",
+    "editTools": "0485edee96061a3dbbc13855c6539c119250ed29bc7092e14f6c5a14023e8f3d",
+    "contextClient": "6ff7fc2d209c25b8a0674243dd4c8fc8ee88e8469a6c037658c99cf910b6f85a",
+    "surface": "4f8127c85750a55526a932452845f39c923d25954392ac4d6386507129d64f75",
+    "surfaceStyle": "7c421944e966c644c5c55bf4c5dcc7f5d038b1f53e327efa5a8d9b1aeb6d1bbd",
+    "rightPanel": "5673f3d0a74e48e1ad2aff75eff38207a2a980459d37ca2d350eb2f05cdeb745",
+    "workspace": "29f95edc2d37a8f7f1b9aa3745b783fbcfb31dbb014da98be051d7090bcbd25e",
+    "contextTest": "7846092bce979d62b06811a7f16c616b27689fddbbeed22b7408546be2eb0cf4",
+    "promptTest": "938ca534253c2fb5a53b9b2de8f95c4180f81af9909454de688355be4f66be0a",
+    "registryTest": "73aa421cba9f4f29e93b31834a20ce99b5698442e1b098427c59f53b0b9ad01d",
+    "readinessTest": "cf49ed539c038b60a1463146d034487f274020a706fccd8d1db052d2e484f054",
+    "acceptanceScript": "c345d633a053d64ea0a6d4a17351395da12c9e8e578c83f0b0638b1d33f25800",
+    "packageScripts": "acd702755e6ebd21336a2efa1c09b887652463845d9849c4fd75c16f1d2f9912"
+  },
+  "productObservation": {
+    "captureMode": "automated_contract_registry_prompt_and_strict_build_offline_verification",
+    "qualificationEligible": false,
+    "qualificationReason": "P3 closes the offline Agent-context contract stage. Two real Providers completing tool calling with no internal ids, and packaged continuous product trace, remain reserved for G0-RS-P7.",
+    "notCoveredByThisStage": [
+      "real_provider_tool_calling",
+      "packaged_electron_continuous_trace",
+      "manual_parameter_panels",
+      "real_scientific_diff"
+    ]
+  },
+  "modelVisibleTools": {
+    "total": 32,
+    "contextBound": 7,
+    "internalIdParametersExposed": 0
+  },
+  "checks": [
+    {
+      "id": "RS-P3-01",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-studio-context.js"
+      ],
+      "detail": "ResultStudioContextEnvelope v1 carries project, conversation, job, artifact, family, revision, selection, plugin, script, validation and reproducibility coordinates."
+    },
+    {
+      "id": "RS-P3-02",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-studio-context.js"
+      ],
+      "detail": "A content-addressed contextToken exists and stale operations are rejected fail-closed."
+    },
+    {
+      "id": "RS-P3-03",
+      "passed": true,
+      "evidence": [
+        "core/r-server/agent-tools/registry.js",
+        "core/r-server/agent-tools/tool-defs.js"
+      ],
+      "detail": "All seven context-bound tools are registered with definition, handler and contract parity."
+    },
+    {
+      "id": "RS-P3-04",
+      "passed": true,
+      "evidence": [
+        "core/r-server/agent-tools/tool-defs.js"
+      ],
+      "detail": "No context-bound tool exposes toolJobId, artifactId, revisionId, artifactFamilyId or selectionId to the model."
+    },
+    {
+      "id": "RS-P3-05",
+      "passed": true,
+      "evidence": [
+        "core/r-server/agent-tools/tool-defs.js"
+      ],
+      "detail": "Create, adopt and revert require contextToken in their model-visible schema."
+    },
+    {
+      "id": "RS-P3-06",
+      "passed": true,
+      "evidence": [
+        "core/r-server/agent-tools/result-context-tools.js"
+      ],
+      "detail": "Coordinates are re-resolved from SQLite, tool_jobs and plugin descriptors instead of trusting client-declared identity."
+    },
+    {
+      "id": "RS-P3-07",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-studio-context.js"
+      ],
+      "detail": "Job-only attribution and a missing revision block honestly rather than fabricating script coordinates."
+    },
+    {
+      "id": "RS-P3-08",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-studio-context.js",
+        "core/r-server/agent-tools/result-context-tools.js"
+      ],
+      "detail": "Only a compatible selection enters the agent context; stale and invalid selections report actionable state."
+    },
+    {
+      "id": "RS-P3-09",
+      "passed": true,
+      "evidence": [
+        "core/r-server/agent-tools/result-context-tools.js"
+      ],
+      "detail": "Change sets are bound from context and ambiguity is refused instead of guessed."
+    },
+    {
+      "id": "RS-P3-10",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-studio-context.js",
+        "core/r-server/agent-tools/result-context-edit-tools.js"
+      ],
+      "detail": "Public progress is fixed to the five phases and projected from engineering stages without exposing hidden reasoning."
+    },
+    {
+      "id": "RS-P3-11",
+      "passed": true,
+      "evidence": [
+        "core/r-server/agent-tools/result-context-edit-tools.js",
+        "core/r-server/agent-tools/result-edit-tools.js"
+      ],
+      "detail": "Context-bound tools delegate to the existing ChangeSet and compare services, creating no second execution truth."
+    },
+    {
+      "id": "RS-P3-12",
+      "passed": true,
+      "evidence": [
+        "core/r-server/agent-tools/result-context-edit-tools.js"
+      ],
+      "detail": "An intent planned against another revision cannot be materialized in the current context."
+    },
+    {
+      "id": "RS-P3-13",
+      "passed": true,
+      "evidence": [
+        "core/r-server/routes/result-studio.js"
+      ],
+      "detail": "The production API exposes the same envelope projection under existing project authorization."
+    },
+    {
+      "id": "RS-P3-14",
+      "passed": true,
+      "evidence": [
+        "core/r-server/helpers/system-prompt.js"
+      ],
+      "detail": "The system prompt describes the open result and forbids asking the user for internal ids."
+    },
+    {
+      "id": "RS-P3-15",
+      "passed": true,
+      "evidence": [
+        "core/r-server/helpers/system-prompt.js"
+      ],
+      "detail": "The prompt never interpolates a revision, job, changeset or selection id into model-visible text."
+    },
+    {
+      "id": "RS-P3-16",
+      "passed": true,
+      "evidence": [
+        "frontend/src/lib/result-studio-interaction-client.ts"
+      ],
+      "detail": "The frontend reads the same envelope and normalizes backend blocking into an honest state."
+    },
+    {
+      "id": "RS-P3-17",
+      "passed": true,
+      "evidence": [
+        "frontend/src/components/result-studio/ResultStudioSurface.tsx",
+        "frontend/src/pages/project-workspace.tsx",
+        "frontend/src/components/workspace-panels/RightPanel.tsx"
+      ],
+      "detail": "Inspector readiness is wired to the real projection and reports stale or unusable selections truthfully."
+    },
+    {
+      "id": "RS-P3-18",
+      "passed": true,
+      "evidence": [
+        "core/r-server/agent-tools/tool-defs.js"
+      ],
+      "detail": "The original explicit-id RS4-RS6 tools remain available for scripted use and were not replaced."
+    },
+    {
+      "id": "RS-P3-19",
+      "passed": true,
+      "evidence": [
+        "acceptance/g0-result-studio/rs-p3-agent-context.json"
+      ],
+      "detail": "All declared P3 command gates passed, including frontend strict build."
+    },
+    {
+      "id": "RS-P3-20",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p3-acceptance.mjs"
+      ],
+      "detail": "This stage explicitly declares itself non-qualifying; real Provider and packaged trace stay with P7."
+    }
+  ],
+  "verification": {
+    "generatedAt": "2026-07-25T16:47:11.755Z",
+    "commands": [
+      {
+        "label": "backend-p3",
+        "command": "node --test test/result-studio-context.test.mjs test/system-prompt-result-context.test.mjs test/agent-tool-registry.test.mjs test/result-edit-intent.test.mjs test/result-edit-agent-tool.test.mjs",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "90637ba76076c3e91dbaefa51a784db4916621a8c390597090b9853e6b82b0b4",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "frontend-p3",
+        "command": "npm test --prefix frontend -- ResultStudioContextReadiness.test.tsx ResultStudioSurface.test.tsx",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "ef208033db879d938160043d7c736515a5d75f6a1a56a2b3de42abb5d602fb1c",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "frontend-build",
+        "command": "npm run build:check --prefix frontend",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "f12e14040cdd7e842be4b3d0a096c7aa71540835bb7287aca2862b55e89a0d5a",
+        "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
+      },
+      {
+        "label": "syntax",
+        "command": "node --check scripts/g0-rs-p3-acceptance.mjs",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "invariants": {
+    "executionTruth": "run_tool -> tool_job -> artifact_truth",
+    "secondExecutionTruth": false,
+    "resultStudioQualificationClaimed": false,
+    "futureStagesImplemented": false
+  },
+  "passed": true,
+  "generatedAt": "2026-07-25T16:47:11.755Z",
+  "privacyClean": true
+}

@@ -245,3 +245,27 @@
   .inspectorActions button,
   .inspectorActions a { transition: none; }
 }
+
+/* G0-RS-P3 — Agent 上下文就绪状态。诚实展示阻断原因，不用绿色掩盖不可用。 */
+.contextReadiness {
+  margin: 0;
+  padding: 7px 8px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 6px;
+  color: var(--biof3-text-secondary);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.contextReadiness[data-state='ready'] {
+  border-color: color-mix(in srgb, var(--biof3-status-online) 40%, var(--biof3-border));
+}
+
+.contextReadiness[data-state='blocked'] {
+  border-color: color-mix(in srgb, var(--biof3-status-loading) 45%, var(--biof3-border));
+  color: var(--biof3-text-primary);
+}
+
+.contextReadiness[data-state='loading'] {
+  color: var(--biof3-text-tertiary);
+}

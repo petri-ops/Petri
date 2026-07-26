@@ -102,16 +102,68 @@ export function ResultStudioContextBar({
   );
 }
 
+/**
+ * G0-RS-P3 — Agent 上下文就绪状态。
+ *
+ * 只有后端真的投影出完整坐标时才显示"可交给 Agent"。归因只能到 Job、
+ * 缺正式版本或选择过期时如实展示原因，不静默退化成"看起来可用"。
+ */
+export function ResultStudioContextReadiness({
+  context,
+}: {
+  context: {
+    status: 'ready' | 'blocked' | 'loading';
+    reason?: string | null;
+    selectionUsable?: boolean;
+    selectionCompatibility?: 'compatible' | 'stale' | 'invalid' | null;
+  } | null;
+}): React.ReactElement | null {
+  if (!context) return null;
+  if (context.status === 'loading') {
+    return (
+      <p className={styles.contextReadiness} data-state="loading" role="status">
+        正在读取 Agent 可用的结果坐标…
+      </p>
+    );
+  }
+  if (context.status === 'blocked') {
+    return (
+      <p className={styles.contextReadiness} data-state="blocked" role="status">
+        Agent 暂时无法直接修改这个结果：{context.reason || '缺少可复现的来源坐标。'}
+      </p>
+    );
+  }
+  const selectionNote = context.selectionUsable
+    ? '当前选择会一并交给 Agent。'
+    : context.selectionCompatibility === 'stale'
+      ? '当前选择已过期，不会交给 Agent，请重新选择。'
+      : context.selectionCompatibility === 'invalid'
+        ? '当前选择不可用，不会交给 Agent。'
+        : '当前没有选择。';
+  return (
+    <p className={styles.contextReadiness} data-state="ready" role="status">
+      Agent 已掌握这个结果的版本与来源，你只需说明想要的变化。{selectionNote}
+    </p>
+  );
+}
+
 export function ResultStudioInspector({
   artifact,
   jobStatus,
   truthStatus,
   onAskAgent,
+  context = null,
 }: {
   artifact: ResultInspectorArtifact | null;
   jobStatus: string | null | undefined;
   truthStatus: string | null | undefined;
   onAskAgent: (prompt: string) => void;
+  context?: {
+    status: 'ready' | 'blocked' | 'loading';
+    reason?: string | null;
+    selectionUsable?: boolean;
+    selectionCompatibility?: 'compatible' | 'stale' | 'invalid' | null;
+  } | null;
 }): React.ReactElement {
   const trust = describeTruthStatus(truthStatus, jobStatus);
   if (!artifact) {
@@ -139,6 +191,7 @@ export function ResultStudioInspector({
         <div><dt>选择</dt><dd>{selectionLabel}</dd></div>
         <div><dt>来源</dt><dd>{artifact.toolId || '未知工具'}</dd></div>
       </dl>
+      <ResultStudioContextReadiness context={context} />
       <div className={styles.inspectorActions}>
         <button
           type="button"

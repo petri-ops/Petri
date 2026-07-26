@@ -2,7 +2,7 @@
 
 最后更新：2026-07-25
 
-状态：`active / implemented_unverified`（RS0～RS8 引擎基础保留；`G0-RS-P0`～`G0-RS-P2` 已完成，下一阶段仅允许 `G0-RS-P3`）
+状态：`active / implemented_unverified`（RS0～RS8 引擎基础保留；`G0-RS-P0`～`G0-RS-P3` 已完成，下一阶段仅允许 `G0-RS-P4`）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -1312,6 +1312,16 @@ Result Studio 当前按三层事实表达：
 - 工具调用必须生成同一项目中的 ChangeSet、正式 Job/Artifact 和候选 Revision；失败不得回退为模型口头成功。
 - 切换模型、压缩会话和重开应用后 ContextEnvelope 可以从 SQLite/Artifact/Revision 重建。
 
+实现状态（2026-07-25，`implemented_unverified`）：
+
+- `core/shared-backend/result-studio-context.js` 建立 `ResultStudioContextEnvelope v1`：artifact/family、job、revision（含 current 与 ordinal）、script（相对路径 + sha256 + language + origin）、parameters、plugin 可编辑参数与声明动作、selection、validation、reproducibility、workflow 与五阶段公开词表。`contextToken` 为覆盖上述身份与选择证据的 SHA-256，任一项变化即失效。
+- `core/r-server/agent-tools/result-context-tools.js` 只把前端 activeArtifact 当线索，坐标全部从 SQLite/`tool_jobs`/插件 descriptor 重新解析；跨项目 revision、未打开结果、缺正式 Revision 与"归因只能到 Job"均 fail-closed。只有 `compatible` 选择进入上下文，stale/invalid 只回报可行动状态。
+- `result-context-edit-tools.js` 提供 context-bound plan/create/status/compare/adopt/revert，复用既有 `result-changeset-service` 与 `result-compare-service`，不建立第二套执行真相；写操作强制校验 `contextToken`，陈旧 token 返回 `context_token_stale` 并指向 `result_studio_context`；intent 指向另一 Revision 时返回 `context_intent_mismatch`。
+- 模型可见 schema 新增 7 个工具（注册表共 32 个），其中 6 个 `*_in_context` 工具的参数中不含 toolJobId/artifactId/revisionId/artifactFamilyId/selectionId；系统提示描述当前结果但不写入任何内部 ID，并固定五阶段公开进度、禁止向用户索要内部 ID。
+- `GET /api/result-studio/context-envelope` 与前端 `fetchResultStudioContext` 共用同一投影；Inspector 的 `ResultStudioContextReadiness` 如实显示 loading/blocked/ready 与选择是否交给 Agent，不把缺失坐标伪装成可用。
+- 脱敏证据 `acceptance/g0-result-studio/rs-p3-agent-context.json`（20/20，`qualificationEligible: false`）。这是离线契约/注册表/提示词/strict build 证据；P3 验收要求的双真实 Provider tool calling、真实 ChangeSet/Job/候选 Revision 与重开重建仍未执行，因此本阶段保持 `implemented_unverified`，UI-108 记为 `in_progress`，不外推 P7 产品资格。
+- 日常验收：`npm run g0:result-studio:p3:update` 生成证据，`npm run g0:result-studio:p3` 校验未过期；两者已接入 `g0:result-studio:acceptance` 与根 `check`。
+
 ### G0-RS-P4：Manual + AI Unified Editing
 
 目标：手动调整和自然语言修改共用一条可审计、可撤销、可复现的编辑链。
@@ -1458,7 +1468,7 @@ G0-RS-P0 Truth Correction
 
 阶段状态规则：
 
-- 同一时间只有一个 `G0-RS-P*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P2` 已完成，当前没有进行中实现，下一阶段只允许 `G0-RS-P3`。
+- 同一时间只有一个 `G0-RS-P*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3` 已完成，当前没有进行中实现，下一阶段只允许 `G0-RS-P4`。
 - 每阶段先补失败测试/fixture，再实现，再形成与证据类型匹配的验收；不得提前开发下一阶段。
 - 单元测试证明契约，fixture 证明确定性集成，真实 Provider 证明模型边界，packaged Electron 证明产品链；四者不能互相替代。
 - 未运行 `npm run docs:reconcile` 与 `npm run docs:check` 不得宣布阶段 completed/verified/qualified。
@@ -1475,7 +1485,7 @@ G0-RS-P0 Truth Correction
 5. [x] 捕获当前真实产品基线，不把截图存在等同于操作通过。
 6. [x] 跑专项、G0、文档、UI 和全量测试；根门禁在最终文档收口后复跑。
 
-`G0-RS-P1`、`G0-RS-P2` 已按本节证据收口。下一 Goal 只允许实施 `G0-RS-P3`，不得提前进入 P4～P7。
+`G0-RS-P1`、`G0-RS-P2`、`G0-RS-P3` 已按本节证据收口。下一 Goal 只允许实施 `G0-RS-P4`，不得提前进入 P5～P7。
 
 `G0-RS-P2` 交付结果：
 
@@ -1485,3 +1495,13 @@ G0-RS-P0 Truth Correction
 4. [x] 真实 admitted DESeq2 → 选择物化 → GO/KEGG Job/Artifact Truth 下游链。
 5. [x] 10 万行反馈预算、明暗 × 1440/1024/820、服务重启恢复和脱敏机器证据。
 6. [x] UI-102/UI-107、canonical 文档、P2 永久门与根级门禁收口；未实现 P3～P7。
+
+`G0-RS-P3` 交付结果：
+
+1. [x] `ResultStudioContextEnvelope v1` 覆盖 project/conversation/artifact/family/job/revision/script/parameters/plugin schema/selection/validation/reproducibility/workflow，并由 `contextToken` 绑定当前身份与选择证据。
+2. [x] 坐标全部由后端从 SQLite/`tool_jobs`/插件 descriptor 重新投影；模型可见 schema 中 6 个 `*_in_context` 工具不含任何内部 ID 参数。
+3. [x] context-bound plan/create/status/compare/adopt/revert 复用既有 ChangeSet 与 Compare 服务；写操作强制 token 校验，陈旧返回 `context_token_stale`。
+4. [x] 公开进度固定五阶段词表，不展示隐藏推理链或 Git 内部细节。
+5. [x] context 缺失、选择陈旧、脚本不足、归因只能到 Job 与跨项目 revision 均 fail-closed 并给出可行动修复路径。
+6. [x] UI-108 记为 `in_progress`、canonical 文档、P3 永久门与根级门禁收口；未实现 P4～P7。
+7. [ ] 双真实 Provider tool calling、真实候选 Revision 与重开重建复验——属 P3 验收剩余项，未完成前保持 `implemented_unverified`。
