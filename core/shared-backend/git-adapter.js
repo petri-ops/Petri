@@ -542,6 +542,61 @@ function createGitAdapter(options = {}) {
     },
 
     /**
+     * 批量解析多个 ref/commit：一次子进程替代 N 次 revParse。
+     *
+     * `inspectRevisionIntegrity` 过去按 revision 逐个 revParse，实测约
+     * 20ms/revision（每 revision 两次 fork × ~10ms），于是 workspace/status
+     * 的开销随项目历史线性增长，约 10 个 revision 就会撞破 250ms 事件循环预算。
+     *
+     * 用 `cat-file --batch-check` 一次读完 stdin 上的全部对象。返回 Map，
+     * 语义与 revParse 对齐：解析不到的键映射为 null。
+     */
+    resolveManyRefs(refs) {
+      const wanted = [...new Set((refs || []).filter(
+        (ref) => typeof ref === 'string' && ref.trim() !== '' && !ref.startsWith('-'),
+      ))];
+      const resolved = new Map(wanted.map((ref) => [ref, null]));
+      if (wanted.length === 0) return resolved;
+      const output = run(['cat-file', '--batch-check=%(objectname) %(rest)'], {
+        allowFailure: true,
+        readOnly: true,
+        // %(rest) 回显该行 ref 之后的内容，用它把结果对回请求的键，
+        // 避免依赖行序或对 peel 后的名字做猜测。
+        input: `${wanted.map((ref) => `${ref} ${ref}`).join('\n')}\n`,
+      });
+      if (!output.ok) return resolved;
+      for (const line of output.stdout.split('\n')) {
+        if (!line.trim()) continue;
+        // 命中: "<sha> <原始键>"；未命中: "<原始键> missing"
+        const hit = /^([a-f0-9]{40,64})\s+(.+)$/.exec(line);
+        if (hit && resolved.has(hit[2])) resolved.set(hit[2], hit[1]);
+      }
+      return resolved;
+    },
+
+    /**
+     * 一次列出某前缀下的全部 ref。
+     *
+     * 替代「对每个 current revision 各 revParse 一次」的写法。
+     */
+    listRefs(prefix) {
+      if (typeof prefix !== 'string' || prefix.trim() === '' || prefix.startsWith('-')) {
+        throw new GitAdapterError('ref_invalid', 'Invalid git ref prefix.');
+      }
+      const output = run(['for-each-ref', '--format=%(refname) %(objectname)', prefix], {
+        allowFailure: true,
+        readOnly: true,
+      });
+      const refs = new Map();
+      if (!output.ok) return refs;
+      for (const line of output.stdout.split('\n')) {
+        const match = /^(\S+)\s+([a-f0-9]{40,64})$/.exec(line.trim());
+        if (match) refs.set(match[1], match[2]);
+      }
+      return refs;
+    },
+
+    /**
      * 以 compare-and-swap 更新一个 BioF3 refs/heads 引用。
      * 调用方必须给出预期旧值；不存在的 ref 使用 40 个 0。
      */

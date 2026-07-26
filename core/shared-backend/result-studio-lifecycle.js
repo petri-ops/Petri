@@ -56,6 +56,16 @@ function resolveWorkspaceFile(workspaceRoot, relativePath, { mustExist = true } 
 function inspectRevisionIntegrity({ repository, adapter, workspaceRoot, projectId }) {
   const revisions = repository.listProjectRevisions(projectId);
   const issues = [];
+
+  // 两次常量开销的子进程，替代每 revision 一到两次 revParse。
+  // 逐个解析时实测约 20ms/revision，使该函数随项目历史线性增长并在约
+  // 10 个 revision 处撞破 250ms 事件循环预算；上限是 5000 个 revision
+  // （result-studio-repository.js:413-414），最坏情况约一万次 fork。
+  const sourceCommits = adapter.resolveManyRefs(
+    revisions.map((revision) => revision.sourceCommit).filter(Boolean),
+  );
+  const currentRefs = adapter.listRefs('refs/heads/biof3/current/');
+
   for (const revision of revisions) {
     let actualHash = null;
     try { actualHash = hashFile(resolveWorkspaceFile(workspaceRoot, revision.outputPath)); } catch (error) {
@@ -65,12 +75,13 @@ function inspectRevisionIntegrity({ repository, adapter, workspaceRoot, projectI
     if (!revision.outputHash || actualHash !== revision.outputHash) {
       issues.push({ revisionId: revision.revisionId, kind: 'artifact_hash_drift', blocking: true });
     }
-    if (revision.sourceCommit && !adapter.revParse(revision.sourceCommit)) {
+    if (revision.sourceCommit && !sourceCommits.get(revision.sourceCommit)) {
       issues.push({ revisionId: revision.revisionId, kind: 'source_commit_missing', blocking: true });
     }
     if (revision.isCurrent) {
       const ref = `refs/heads/biof3/current/${revision.artifactFamilyId}`;
-      const actual = adapter.revParse(ref);
+      // listRefs 只返回存在的 ref；缺失即为 null，与 revParse 语义一致。
+      const actual = currentRefs.get(ref) || null;
       if (actual !== revision.sourceCommit) {
         issues.push({ revisionId: revision.revisionId, kind: actual ? 'current_ref_drift' : 'current_ref_missing', blocking: !!actual, recoverable: !actual, ref });
       }
