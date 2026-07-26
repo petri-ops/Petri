@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P4R-0",
-  "sourceCommit": "44cec5020b5b7e069c96b8a11ddc489ea0beb55a",
+  "sourceCommit": "e1f841c8ada919250c01f5cde76586ef2375bdc6",
   "captureMode": "real_chain_corpus_plus_server_request_waterfall_and_event_loop_histogram_in_disposable_root",
   "qualificationEligible": false,
   "qualificationReason": "P4R-0 only captures a baseline and freezes budgets. It does not implement the fast path, and it does not measure any client-side metric. Result Studio product qualification remains reserved for P7.",
@@ -12,12 +12,12 @@
     "bootstrap": "035c37e4f18edec051ec59c20313ab396e0c2276aac7e136b8ec5037c32d90f5",
     "capture": "99f9eb3fe4efa643e5a87925098dfdd815664b703907b90333e9e240edd317ac",
     "corpus": "7885fa8b409d16da0628d0f3413354c47e6cc0a0350188309d678418b833c8af",
-    "baseline": "3b7f2cf19f51ddafc9c0ffd99db1bbbc5c3688518610c965eeda991852769047",
+    "baseline": "cc6a431db7e271fcfd2af8ef2eeb2aad6299a22ae6661b31119f3cf4b5cc0fef",
     "probeTest": "72e55812ae8fd3c5d5b02c17a64bf18581e3e0c0759b0e37315641f025960abe",
     "captureTest": "8c4cec8a66f34e42e87c64eda758dbc1be78740b2d1c272c538d0766ec8956cd",
     "corpusTest": "2446b80e933ecdc47871fa2b22c1d13be62d2bbb30c776b28d237ab9881caf43",
     "baselineTest": "613b1f5b07f215963ca45b9ea351f581ec6f3518956f8127d48f156a9a5c7cf4",
-    "invariantTest": "6bbb1d52ebd7fde9d00fb0212fc130a93d309bc5092c01eaf13c22a1126bb659",
+    "invariantTest": "8255133b145b09abf27b2bc57a6a54f0d8d6854cc04e2ba523d0b5cb94e0694a",
     "acceptanceScript": "329c09e576b62d31c37f76279997e415914dda775f5e5c4d48b61351c4eaca5f"
   },
   "budgets": {
@@ -44,26 +44,26 @@
   "baselineObservation": {
     "captureMode": "real_run_tool_chain_in_disposable_root_with_env_gated_probe",
     "calibration": {
-      "gitSpawnMedianMs": 10.091,
+      "gitSpawnMedianMs": 9.559,
       "pathEntries": 31,
       "invokedUnderNpm": false
     },
-    "revisionCount": 0,
+    "revisionCount": 1,
     "scalingNote": "workspace-status is linear in revisionCount. This capture is the cheapest case; the route grows and crosses the frozen 250ms budget well before the 5000-revision cap. P4R-1 must re-capture with revisionCount swept before choosing any cache key.",
     "corpus": [
       {
         "toolId": "deseq2",
-        "durationMs": 5929,
+        "durationMs": 6058,
         "artifactCount": 23
       },
       {
         "toolId": "volcano-plot",
-        "durationMs": 1041,
+        "durationMs": 1050,
         "artifactCount": 5
       },
       {
         "toolId": "gene-correlation",
-        "durationMs": 392,
+        "durationMs": 391,
         "artifactCount": 4
       }
     ],
@@ -72,107 +72,107 @@
         "id": "job-status",
         "role": "render-blocking",
         "status": 200,
-        "totalMs": 5.272,
-        "coldMs": 5.272,
-        "warmMs": 2.102,
+        "totalMs": 5.492,
+        "coldMs": 5.492,
+        "warmMs": 2.229,
         "warmSamplesMs": [
-          1.872,
-          2.102,
-          3.195
+          1.886,
+          2.229,
+          3.161
         ],
-        "warmSpreadMs": 1.323,
-        "oneTimeCostMs": 3.17,
+        "warmSpreadMs": 1.275,
+        "oneTimeCostMs": 3.263,
         "bytes": 74633
       },
       {
         "id": "artifact-bytes",
         "role": "render-blocking",
         "status": 200,
-        "totalMs": 6.075,
-        "coldMs": 6.075,
-        "warmMs": 2.285,
+        "totalMs": 5.043,
+        "coldMs": 5.043,
+        "warmMs": 2.174,
         "warmSamplesMs": [
-          1.778,
-          2.285,
-          2.908
+          1.692,
+          2.174,
+          2.579
         ],
-        "warmSpreadMs": 1.13,
-        "oneTimeCostMs": 3.79,
-        "bytes": 143077
+        "warmSpreadMs": 0.887,
+        "oneTimeCostMs": 2.869,
+        "bytes": 144997
       },
       {
         "id": "interaction",
         "role": "secondary",
         "status": 200,
-        "totalMs": 398.384,
-        "coldMs": 398.384,
-        "warmMs": 10.622,
+        "totalMs": 389.139,
+        "coldMs": 389.139,
+        "warmMs": 9.9,
         "warmSamplesMs": [
-          9.055,
-          10.622,
-          11.122
+          9.331,
+          9.9,
+          11.314
         ],
-        "warmSpreadMs": 2.067,
-        "oneTimeCostMs": 387.762,
+        "warmSpreadMs": 1.983,
+        "oneTimeCostMs": 379.239,
         "bytes": 46212
       },
       {
         "id": "context-envelope",
         "role": "secondary",
         "status": 409,
-        "totalMs": 4.213,
-        "coldMs": 4.213,
-        "warmMs": 1.589,
+        "totalMs": 4.235,
+        "coldMs": 4.235,
+        "warmMs": 1.719,
         "warmSamplesMs": [
-          1.472,
-          1.589,
-          1.983
+          1.695,
+          1.719,
+          1.85
         ],
-        "warmSpreadMs": 0.511,
-        "oneTimeCostMs": 2.624,
+        "warmSpreadMs": 0.155,
+        "oneTimeCostMs": 2.516,
         "bytes": 188
       },
       {
         "id": "changesets",
         "role": "secondary",
         "status": 200,
-        "totalMs": 44.572,
-        "coldMs": 44.572,
-        "warmMs": 44.075,
+        "totalMs": 45.73,
+        "coldMs": 45.73,
+        "warmMs": 42.102,
         "warmSamplesMs": [
-          43.327,
-          44.075,
-          45.186
+          41.497,
+          42.102,
+          43.721
         ],
-        "warmSpreadMs": 1.859,
-        "oneTimeCostMs": 0.497,
+        "warmSpreadMs": 2.224,
+        "oneTimeCostMs": 3.628,
         "bytes": 1643
       },
       {
         "id": "workspace-status",
         "role": "secondary",
         "status": 200,
-        "totalMs": 65.728,
-        "coldMs": 65.728,
-        "warmMs": 63.41,
+        "totalMs": 64.925,
+        "coldMs": 64.925,
+        "warmMs": 64.862,
         "warmSamplesMs": [
-          63.068,
-          63.41,
-          64.584
+          62.913,
+          64.862,
+          69.684
         ],
-        "warmSpreadMs": 1.516,
-        "oneTimeCostMs": 2.318,
+        "warmSpreadMs": 6.771,
+        "oneTimeCostMs": 0.063,
         "bytes": 837
       }
     ],
-    "renderBlockingTotalMs": 11.347,
+    "renderBlockingTotalMs": 10.535,
     "slowestRequest": "interaction",
     "eventLoop": {
       "resolutionMs": 10,
-      "samples": 17,
-      "minMs": 10.101,
-      "meanMs": 55.604,
-      "maxMs": 400.818,
+      "samples": 16,
+      "minMs": 9.839,
+      "meanMs": 58.073,
+      "maxMs": 394.265,
       "percentilesOmitted": "sample count too low for p95/p99 to be meaningful"
     },
     "unmeasured": [
@@ -200,9 +200,9 @@
   },
   "budgetStatus": {
     "eventLoopMaxMs": "violated_by_current_implementation",
-    "observedMaxMs": 400.818,
+    "observedMaxMs": 394.265,
     "attributedTo": "interaction",
-    "steadyStateWorstMs": 63.41,
+    "steadyStateWorstMs": 64.862,
     "steadyStateWorstRoute": "workspace-status",
     "oneTimeDominated": [
       "job-status",
@@ -324,14 +324,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-26T14:32:07.702Z",
+    "generatedAt": "2026-07-26T14:45:57.652Z",
     "commands": [
       {
         "label": "probe-and-harness",
         "command": "node --test test/perf-probe.test.mjs test/p4r-capture.test.mjs test/p4r-corpus.test.mjs test/p4r-baseline.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "8b6c3a21824998ee2d0de877bdec4d2c89890fa061fd5202634086a7b674be9a",
+        "stdoutSha256": "f0d69678bac7d1c97928ecbf849319ace673d34e518725807faeef2a1034a8b9",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -339,7 +339,7 @@
         "command": "node --test test/test-affected.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "75b4c856b10de5e91f45a8f79a09e6343a62f12a50d2043b6253109a58256ffa",
+        "stdoutSha256": "84a97100fb7bb928f106f8ee982a24c2a7f0b645c737a3c6f87a82378cb2c297",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -354,6 +354,6 @@
   },
   "executionTruth": "run_tool -> tool_job -> artifact_truth",
   "passed": true,
-  "generatedAt": "2026-07-26T14:32:07.702Z",
+  "generatedAt": "2026-07-26T14:45:57.652Z",
   "privacyClean": true
 }

@@ -223,10 +223,11 @@ export async function captureBaseline({ keep = false, quiet = false, onLog } = {
       projectId: corpus.projectId,
     };
     const calibration = await calibrateSpawnCost();
-    // Recorded because workspace-status is linear in revision count: a baseline
-    // that omits it reads as representative when it is in fact the cheapest case.
-    const revisionCount = countRevisions(env.BIOF3_DB_PATH);
     const requests = await driveWaterfall(server.baseUrl, target);
+    // Sampled AFTER the waterfall: the first interaction call is what registers
+    // the baseline revision, so counting earlier reports 0 and understates the
+    // very term workspace-status scales with.
+    const revisionCount = countRevisions(env.BIOF3_DB_PATH);
     const snapshot = await snapshotProbe(server.baseUrl);
 
     return {
