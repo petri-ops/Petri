@@ -1,0 +1,284 @@
+#!/usr/bin/env node
+/**
+ * G0-RS-P4R-0 — disposable capture environment for the Result Studio baseline.
+ *
+ * P4R-0 has to measure the real open-result path, but the developer database
+ * holds real projects and 382 synthetic `test-tool-2` jobs, and it never had
+ * `001_result_studio.sql` applied. Sampling it would both touch user data and
+ * violate the plan's "no database seed pretending to be a real product
+ * journey" rule.
+ *
+ * So every capture run gets a throwaway root instead. `core/r-server/config.js`
+ * already reads every path it needs from the environment, so isolation needs no
+ * production code change:
+ *
+ *   BIOF3_DB_PATH             SQLite database
+ *   BIOF3_TEMP_DIR            scratch directory
+ *   BIOF3_LOCAL_RESULTS_DIR   results directory
+ *   BIOF3_LOCAL_UPLOADS_DIR   uploads directory
+ *   R_SERVER_PORT             listen port
+ *   BIOF3_PERF_PROBE=1        arms the probe from commit 340c09a
+ *
+ * The isolation is asserted, not assumed: assertIsolated() refuses to run when
+ * any path resolves outside the throwaway root or onto the repository database.
+ * It fails closed, because the cost of being wrong is the user's data.
+ *
+ * This module owns the environment lifecycle only. Which scenarios to drive is
+ * P4R-0's next unit; `capture()` takes them as a callback.
+ *
+ * Usage:
+ *   node scripts/g0-rs-p4r-capture.mjs            # smoke: boot, snapshot, tear down
+ *   node scripts/g0-rs-p4r-capture.mjs --keep     # keep the root for inspection
+ *   node scripts/g0-rs-p4r-capture.mjs --json     # machine-readable snapshot
+ */
+
+import { spawn } from 'node:child_process';
+import { createServer } from 'node:net';
+import { mkdtempSync, mkdirSync, rmSync, existsSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const require = createRequire(import.meta.url);
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const SERVER_ENTRY = path.join(REPO_ROOT, 'core', 'r-server', 'server.js');
+const MIGRATIONS_DIR = path.join(REPO_ROOT, 'src', 'migrations');
+const REPO_DB = path.join(REPO_ROOT, 'core', 'r-server', 'biof3.db');
+
+/** Tables `001_result_studio.sql` must create for the RS paths to be reachable. */
+export const REQUIRED_RS_TABLES = [
+  'git_repository_bindings',
+  'scientific_change_sets',
+  'artifact_revisions',
+  'result_selection_contexts',
+  'workspace_revision_checkpoints',
+];
+
+const HEALTH_TIMEOUT_MS = 30000;
+const HEALTH_POLL_MS = 100;
+const SHUTDOWN_GRACE_MS = 3000;
+
+/** Ask the OS for a free port. Racy in principle, fine for a local capture run. */
+async function findFreePort() {
+  return new Promise((resolve, reject) => {
+    const probe = createServer();
+    probe.on('error', reject);
+    probe.listen(0, '127.0.0.1', () => {
+      const { port } = probe.address();
+      probe.close(() => resolve(port));
+    });
+  });
+}
+
+/**
+ * Refuse to run unless every writable path sits inside the throwaway root.
+ * Fails closed: an unexpected path aborts the run rather than degrading to a
+ * capture that quietly writes into the developer database.
+ */
+export function assertIsolated(env, root) {
+  const resolvedRoot = path.resolve(root);
+  const guarded = [
+    ['BIOF3_DB_PATH', env.BIOF3_DB_PATH],
+    ['BIOF3_TEMP_DIR', env.BIOF3_TEMP_DIR],
+    ['BIOF3_LOCAL_RESULTS_DIR', env.BIOF3_LOCAL_RESULTS_DIR],
+    ['BIOF3_LOCAL_UPLOADS_DIR', env.BIOF3_LOCAL_UPLOADS_DIR],
+  ];
+
+  // Checked before the containment rule below: pointing at the repository
+  // database is the most damaging mistake available here, so it earns the
+  // specific message. The generic rule would otherwise swallow it, since the
+  // repository database is always outside a throwaway root.
+  if (env.BIOF3_DB_PATH && path.resolve(env.BIOF3_DB_PATH) === path.resolve(REPO_DB)) {
+    throw new Error('capture isolation: refusing to capture against the repository database');
+  }
+
+  for (const [key, value] of guarded) {
+    if (!value) throw new Error(`capture isolation: ${key} must be set explicitly`);
+    const resolved = path.resolve(value);
+    if (resolved !== resolvedRoot && !resolved.startsWith(resolvedRoot + path.sep)) {
+      throw new Error(`capture isolation: ${key} resolves outside the disposable root (${resolved})`);
+    }
+  }
+  return true;
+}
+
+/** Build a disposable root plus the environment that points the server at it. */
+export function createCaptureEnv({ port, root } = {}) {
+  const captureRoot = root || mkdtempSync(path.join(tmpdir(), 'biof3-p4r-capture-'));
+  const dirs = {
+    temp: path.join(captureRoot, 'tmp'),
+    results: path.join(captureRoot, 'results'),
+    uploads: path.join(captureRoot, 'uploads'),
+  };
+  for (const dir of Object.values(dirs)) mkdirSync(dir, { recursive: true });
+
+  const env = {
+    ...process.env,
+    BIOF3_DB_PATH: path.join(captureRoot, 'biof3.db'),
+    BIOF3_TEMP_DIR: dirs.temp,
+    BIOF3_LOCAL_RESULTS_DIR: dirs.results,
+    BIOF3_LOCAL_UPLOADS_DIR: dirs.uploads,
+    BIOF3_PERF_PROBE: '1',
+    BIOF3_DESKTOP: '1',
+    R_SERVER_PORT: String(port ?? 0),
+    // Keep a capture run off the network and out of the AI path entirely.
+    R_POOL_ENABLED: 'false',
+  };
+
+  assertIsolated(env, captureRoot);
+  return { root: captureRoot, env, dirs };
+}
+
+/** Apply `src/migrations/*.sql` to the disposable database. */
+export async function applyMigrations(dbPath) {
+  const { runMigrations } = require(path.join(REPO_ROOT, 'src', 'migration-runner.js'));
+  return runMigrations(dbPath, MIGRATIONS_DIR);
+}
+
+/** Report which RS tables actually exist, so a capture cannot silently run half-migrated. */
+export function inspectTables(dbPath) {
+  const Database = require(require.resolve('better-sqlite3', {
+    paths: [path.join(REPO_ROOT, 'core', 'r-server'), REPO_ROOT],
+  }));
+  const db = new Database(dbPath, { readonly: true });
+  try {
+    const present = new Set(
+      db.prepare("select name from sqlite_master where type='table'").all().map((r) => r.name),
+    );
+    return {
+      present: REQUIRED_RS_TABLES.filter((t) => present.has(t)),
+      missing: REQUIRED_RS_TABLES.filter((t) => !present.has(t)),
+    };
+  } finally {
+    db.close();
+  }
+}
+
+async function waitForHealth(baseUrl, { signal } = {}) {
+  const deadline = Date.now() + HEALTH_TIMEOUT_MS;
+  let lastError = 'no attempt made';
+  while (Date.now() < deadline) {
+    if (signal?.exited) throw new Error(`server exited before becoming healthy: ${signal.exited}`);
+    try {
+      const response = await fetch(`${baseUrl}/api/health`);
+      if (response.ok) return await response.json();
+      lastError = `status ${response.status}`;
+    } catch (error) {
+      lastError = error.message;
+    }
+    await new Promise((resolve) => { setTimeout(resolve, HEALTH_POLL_MS); });
+  }
+  throw new Error(`server did not become healthy within ${HEALTH_TIMEOUT_MS}ms (${lastError})`);
+}
+
+/** Spawn the real server against the disposable environment. */
+export async function startServer(env, { onLog } = {}) {
+  const child = spawn(process.execPath, [SERVER_ENTRY], { env, cwd: REPO_ROOT, stdio: ['ignore', 'pipe', 'pipe'] });
+  const logs = [];
+  const signal = { exited: null };
+
+  const collect = (stream, channel) => {
+    stream.setEncoding('utf8');
+    stream.on('data', (chunk) => {
+      for (const line of chunk.split('\n').filter(Boolean)) {
+        logs.push({ channel, line });
+        onLog?.(channel, line);
+      }
+    });
+  };
+  collect(child.stdout, 'stdout');
+  collect(child.stderr, 'stderr');
+  child.on('exit', (code, sig) => { signal.exited = `code=${code} signal=${sig}`; });
+
+  const baseUrl = `http://127.0.0.1:${env.R_SERVER_PORT}`;
+  try {
+    await waitForHealth(baseUrl, { signal });
+  } catch (error) {
+    child.kill('SIGKILL');
+    const tail = logs.slice(-15).map((l) => `  [${l.channel}] ${l.line}`).join('\n');
+    throw new Error(`${error.message}\n${tail}`);
+  }
+  return { child, baseUrl, logs };
+}
+
+export async function stopServer(child) {
+  if (!child || child.exitCode !== null) return;
+  child.kill('SIGTERM');
+  await new Promise((resolve) => {
+    const timer = setTimeout(() => { child.kill('SIGKILL'); resolve(); }, SHUTDOWN_GRACE_MS);
+    child.on('exit', () => { clearTimeout(timer); resolve(); });
+  });
+}
+
+export async function snapshotProbe(baseUrl) {
+  const response = await fetch(`${baseUrl}/api/__perf/event-loop`);
+  if (!response.ok) throw new Error(`probe snapshot failed: status ${response.status}`);
+  return response.json();
+}
+
+export async function resetProbe(baseUrl) {
+  const response = await fetch(`${baseUrl}/api/__perf/reset`, { method: 'POST' });
+  if (!response.ok) throw new Error(`probe reset failed: status ${response.status}`);
+  return response.json();
+}
+
+/**
+ * Full lifecycle: disposable root → migrate → boot with probe → run scenarios →
+ * snapshot → tear down. `scenarios` receives { baseUrl, env, root } and drives
+ * whatever the caller wants measured.
+ */
+export async function capture({ scenarios, keep = false, onLog } = {}) {
+  const port = await findFreePort();
+  const { root, env, dirs } = createCaptureEnv({ port });
+  let server = null;
+
+  try {
+    const migration = await applyMigrations(env.BIOF3_DB_PATH);
+    const tables = inspectTables(env.BIOF3_DB_PATH);
+    if (tables.missing.length) {
+      throw new Error(`migration left RS tables missing: ${tables.missing.join(', ')}`);
+    }
+
+    server = await startServer(env, { onLog });
+    await resetProbe(server.baseUrl);
+
+    const scenarioResult = scenarios ? await scenarios({ baseUrl: server.baseUrl, env, root }) : null;
+    const snapshot = await snapshotProbe(server.baseUrl);
+
+    return { root, port, migration, tables, snapshot, scenarioResult, kept: keep };
+  } finally {
+    await stopServer(server?.child);
+    if (!keep && existsSync(root)) rmSync(root, { recursive: true, force: true });
+  }
+}
+
+async function main() {
+  const argv = process.argv.slice(2);
+  const keep = argv.includes('--keep');
+  const asJson = argv.includes('--json');
+  const verbose = argv.includes('--verbose');
+
+  const result = await capture({
+    keep,
+    onLog: verbose ? (channel, line) => console.error(`[server:${channel}] ${line}`) : undefined,
+  });
+
+  if (asJson) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  console.log('G0-RS-P4R-0 capture environment');
+  console.log(`  disposable root : ${result.kept ? result.root : '(removed)'}`);
+  console.log(`  port            : ${result.port}`);
+  console.log(`  RS tables       : ${result.tables.present.length}/${REQUIRED_RS_TABLES.length} present`);
+  console.log(`  probe enabled   : ${result.snapshot.enabled}`);
+  console.log(`  event-loop      : ${result.snapshot.eventLoop?.samples ?? 0} samples`);
+  console.log(`  routes recorded : ${result.snapshot.requests.length}`);
+  console.log('\nEnvironment is reusable; scenario driving is the next P4R-0 unit.');
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((error) => { console.error(error.message); process.exit(1); });
+}
