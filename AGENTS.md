@@ -33,9 +33,13 @@ npm run build:mac    # macOS 构建
 npm run build:win    # Windows 构建
 
 # 检查
-npm run check        # 静态检查 + 依赖同步
-npm run test         # Node 测试
-npm run test --prefix frontend  # 前端测试
+npm run docs:check   # 文档治理门禁（必跑，秒级）
+npm run ui:audit:check  # UI 台账门禁（必跑，秒级）
+node --test test/<相关>.test.mjs        # 定向 Node 测试（默认方式）
+npm test --prefix frontend -- <相关文件>  # 定向前端测试（默认方式）
+
+npm run check        # 全量静态检查 + 所有门禁（默认不跑，留给发布前 / CI）
+npm run test         # 全量 Node 测试 1300+ 项（默认不跑，留给发布前 / CI）
 ```
 
 ## 架构要点
@@ -97,6 +101,14 @@ desktop/
 - 开发形态为**单工作包串行**：同一时间只有一个 active 工作包与一个进行中阶段，收口后才启动下一个。不并行开新工作包，不提前实现后续阶段。
 - 当前不使用 Git Worktree（`G0-RS-WT0` 已 `deferred`，判据见 [`docs/g0-result-studio-plan.md`](docs/g0-result-studio-plan.md) §14）；Result Studio 在主工作区分支 `codex/g0-result-studio` 上开发。
 - [`docs/worktree-governance.md`](docs/worktree-governance.md) 当前是休眠纪律：只有其中记录的重开条件成立才可创建 Worktree，且必须按该文件 §3～§8 执行，不得临时另立简化流程。
+
+### 测试范围纪律（定向优先）
+
+- 默认**只跑与本次改动相关的测试**，不跑全量 `npm test`（1300+ 项，耗时数分钟）。
+- 判定相关范围的方法：先 grep 出引用了本次改动符号/模块的测试文件（如改 `buildSystemPrompt` 就找引用它的全部测试），再定向 `node --test <files>`；前端同理用 `npm test --prefix frontend -- <files>`。
+- 当前工作包的专项门禁必须跑（例如 `npm run g0:result-studio:p3`），它是该阶段的收口依据。
+- 治理门禁 `npm run docs:check` 与 `npm run ui:audit:check` 必须跑：它们是硬要求且只需数秒。
+- 根 `npm run check` 与全量 `npm test` 默认不跑，留给发布前或 CI。若因此存在未验证范围，必须在收口报告中如实说明，不得把定向通过表述为全量通过。
 
 ### UI 进度自动对账
 
