@@ -131,7 +131,7 @@ git branch -D codex/fix-collapsed-right-titlebar-minimal \
 1. **先删除 5 个已合并残留分支**（零风险，清理工作区）
 2. **合并 `fix/qa-smoke-stale-css-paths`**（零冲突，恢复门禁绿色）
 3. **评估 `codex/fix-collapsed-right-titlebar`**（需人工 review，可能与 main 的 minimal 版本功能重复）
-4. **完成 MODEL 工作后**，执行 `docs/stage2-acceptance-audit.md` 第四节的实机验收
+4. **完成 MODEL 工作后**，执行 `docs/archive/checkpoints/stage2-acceptance-audit.md` 第四节的实机验收
 
 ---
 

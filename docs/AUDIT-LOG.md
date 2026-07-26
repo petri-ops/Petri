@@ -5,7 +5,7 @@
 > 非主 agent 每次完成审计后，必须把发现追加到本文件并提交，不要只写在单独报告里。
 >
 > 维护方：非主 agent（只读审计 + 阻断性回归修复通道）
-> 最后更新：2026-07-25（G0-RS-P3 Agent Context 与 Edit Orchestration 实现收口）
+> 最后更新：2026-07-26（G0-RS-P4 Manual + AI Unified Editing 实现收口）
 
 ---
 
@@ -35,6 +35,7 @@
 | ✅已处理 | 2026-07-25 | G0-RS-P1 完成：同一 ProjectWorkspace 建立中央 ResultStudioCanvas、紧凑 Inspector/ContextBar、六类 viewer adapter 与 conversation/task/result/compare 投影；Agent 会话保持挂载，草稿和布局往返不丢失。明暗与 1440/1024/820px 真实开发态 renderer 无页面溢出，性能低于冻结预算。UI-106 verified；证据明确为 non-qualifying product-development evidence，未升级 Result Studio 产品资格。 | G0-RS-P1 / UI-106 | `ResultStudioSurface.tsx`、`resultSurface.ts`、`rs-p1-result-surface.json` |
 | ✅已处理 | 2026-07-25 | G0-RS-P2 完成：权威完整表排序/过滤、10 万行虚拟化、行列/query 与 point/region/legend/matrix 选择进入中央画布；稳定 SelectionContext 贯通 Inspector/Composer/SQLite compatible-stale-invalid，缺 mapping 只读。真实 admitted DESeq2 25 Artifact → 3 gene 选择 → 独立脚本/参数/gene-list → GO/KEGG 36 Artifact 与服务重启恢复均由机器捕获；明暗 × 1440/1024/820、四类 <100ms 反馈通过。UI-102/UI-107 verified；证据 non-qualifying，P3～P7 未提前实现。 | G0-RS-P2 / UI-102 / UI-107 | `rs-p2-live-observation.json`、`rs-p2-ui-observation.json`、`rs-p2-scientific-interaction.json` |
 | ✅已处理 | 2026-07-25 | G0-RS-P3 完成实现（`implemented_unverified`）：`ResultStudioContextEnvelope v1` + `contextToken` 把 artifact/family、job、revision（含 current/ordinal）、脚本相对路径与 sha256、参数摘要、插件可编辑参数与动作、selection、validation、reproducibility 由后端从 SQLite/`tool_jobs`/插件 descriptor 重新投影，前端 activeArtifact 只作线索。模型可见 schema 新增 7 个工具（共 32 个），6 个 `*_in_context` 工具参数不含任何内部 ID；写操作强制 token 校验，陈旧返回 `context_token_stale`，intent 跨 Revision 返回 `context_intent_mismatch`，归因只能到 Job/跨项目 revision/未打开结果一律 fail-closed。公开进度固定五阶段，不展示隐藏推理链。context-bound 工具复用既有 ChangeSet/Compare 服务，未建第二套执行真相。双真实 Provider tool calling 与真实候选 Revision 复验未执行，UI-108 保持 in_progress。 | G0-RS-P3 / UI-108 | `result-studio-context.js`, `result-context-tools.js`, `result-context-edit-tools.js`, `acceptance/g0-result-studio/rs-p3-agent-context.json` |
+| ✅已处理 | 2026-07-26 | G0-RS-P4 完成实现（`implemented_unverified`）：控件全部由插件 descriptor `parameters` + `parameterImpacts` 投影，缺 impact 的参数不可编辑；volcano-plot 补齐配色/字体/尺寸/图例/标签/导出共 12 个 presentation 参数并接入真实 R 脚本（此前全为硬编码）。手动控件与 AI Composer 汇合到唯一 `normalizeEditSubmission → ResultEditIntent → ScientificChangeSet` 链；未声明参数、越界值、与现状相同的提交 fail-closed 拒绝，不产生空 ChangeSet；未知参数保守落到科学重算。修复 `classifyParameterPatch` 让保护字段表覆盖 descriptor 的缺陷（deseq2 的 `design` 曾被从 workflow 降级为 scientific），保护字段现在只作下限。currentValues 取自 Job 真实 `executionProvenance`，不用默认值冒充。面板不写 Artifact/源数据/current Revision。真实候选手动 vs AI 等价性观测未执行，UI-109 保持 in_progress。 | G0-RS-P4 / UI-109 | `result-edit-controls.js`, `result-edit-intent.js`, `ResultEditPanel.tsx`, `volcano-plot/tool-definition.json`, `acceptance/g0-result-studio/rs-p4-unified-editing.json` |
 | ✅已处理 | 2026-07-25 | G0-SDC0 完成：`artifact-profiles.js` 从 DEG 单种子升级为正式 Registry，六个 canonical Profile（counts-matrix / sample-metadata / expression-matrix / deg / gene-list / enrichment-table）落地并区分 data/artifact/display 三类 Kind；新增 profile 身份、contract digest、compatible/migration/breaking 分级与 fail-closed 兼容判定；未注册 Profile 经 `agent-workflow` 返回 `unregistered_artifact_profile`，不能成为 typed DAG 正式边。DEG 及 legacy alias 保持兼容，未创建第二套执行真相。SDC-0 只覆盖离线契约层，真实不规则数据端到端验收仍属 SDC-7。 | G0-SDC0 | `artifact-profiles.js`, `agent-workflow.js`, `test/g0-sdc0-profile-registry.test.mjs`, `acceptance/g0-scientific-data-contract/profile-registry.json` |
 | ✅已处理 | 2026-07-17 | 5 个 codex/* 已合并残留分支已删除（连带 prune 6 个失效 worktree 注册） | 分支备忘录 | [§2.3](#23-已合并残留分支可安全删除-) |
 | ✅已处理 | 2026-07-17 | `sanitizer.js` 死模块 + 其测试已删除（全仓零生产引用） | 本文件 §4 | [§4 问题 E](#问题-esanitizerjs-死模块) |
@@ -76,7 +77,7 @@
 
 ## §1 Stage 2 验收审计（已完成，归档）
 
-> 详细报告见 `docs/stage2-acceptance-audit.md`
+> 详细报告见 `docs/archive/checkpoints/stage2-acceptance-audit.md`
 > **状态：✅ 已被主 agent 完成验收，本审计归档**
 
 主 agent 已于 2026-07-17 完成 Stage 2 全部验收：
@@ -207,7 +208,7 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
   - gate 位置刻意在 readiness 之后：已就位的 capability 短路返回、不重新校验，收紧白名单不会 strand 已装 bundle。
   - 新增 5 个测试（off-allowlist 拒绝且不下载 / http 拒绝 / allowedHosts 覆盖 / checkUrlAllowed 匹配规则 / env 覆盖），本文件测试 13→18，全通过。
   - **顺带纠正设计文档失实描述**：设计文档 §3.3/§5.5 与本审计原文均称"复用 plugin-manager 的 host 白名单逻辑"——经核实 `src/plugin-manager.js#downloadFile`（及 `content-sync.js#downloadFile`）**从来没有 host 白名单**，都是裸 `https.get(url)`；全仓唯一做 host 校验的是 `macos-oss-updater.js#resolveArtifactUrl`（https + 同源）。因此本次是**新实现**而非复用，并已修正 `stage3-standard-workflows-design.md` §3.3/§5.2 的错误表述，避免后续 agent 继续被"现成白名单"误导。
-- **详细报告**：`docs/stage3-m1-audit.md`
+- **详细报告**：`docs/archive/checkpoints/stage3-m1-audit.md`
 
 ---
 
