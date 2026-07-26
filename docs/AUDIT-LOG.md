@@ -4,17 +4,19 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-07-26（G0-RS-P4R 已启动，处于 P4R-0 Truth Baseline；性能探针已落地）
+最后更新：2026-07-26（G0-RS-P4R-0 已收口；并行完整性审计发现 2 项 🔴 阻塞，见下）
 
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
 | --- | --- | --- | --- |
+| 🔴阻塞 | 2026-07-26 | **G0 `macos-arm64: qualified` 的视觉证据不成立。** `acceptance/g0-qualification/packaged-ui/` 5 张 PNG 只有 4 个唯一 sha256：`chat-summary-light-wide.png` 与 `restart-restored-light-wide.png` 逐字节相同（均为 `bb54acff…`），即「重启后恢复」证据是重启前截图的副本。`scripts/g0-qualification-visual.mjs:59-62` 只校验哈希格式/宽高/字节数，无唯一性断言；配套 `inspection.json` 为 811 字节九个人工布尔值，仓库内无任何写入者。该形态与 `core/shared-backend/result-studio-qualification.js:113-121` 判 RS9 non-qualifying 的理由（`inspection_booleans_are_human_assertions`）完全一致，但该理由未推及 G0 自身 | 仅登记事实。**不得**由 Agent 擅自变更 `core/shared-backend/g0/support-matrix.json` 的 `qualified` 状态或 `evidence-ledger.json` 的 `visual_state_convergence`——资格状态变更属用户决定。修补检查脚本（加 `distinctStates` 唯一性断言）会使当前 G0 门变红，需先获批 |
+| 🔴阻塞 | 2026-07-26 | **空转前端门共 8 处，`be0a6de` 只修了 p2/p3/p4 三处。** 残留：`g0-lf0-acceptance.mjs:203`、`g0-first-wave:66`、`g0-second-wave:73`、`g0-third-wave:50`、`g0-fourth-wave:45`、`g0-fifth-wave:46`、`g0-rs8-lifecycle:54`、`g0-rs9-product:34`。全部经 `npm run check` 链（59 门）可达，因此 underwrite G0 `maintained` 的 LF0/wave 验收门同样在零测试下报 `passed:true` | 按 `be0a6de` 同法改为 `npm run test:files` 并重生成各自证据。修复后可能暴露此前被掩盖的真实失败，属预期结果，不得为通过而回退 |
 | 🔵进行中 | 2026-07-26 | `G0-RS-P4R` 已启动并进入 `P4R-0 Truth Baseline`；env 门控性能探针已提交 `340c09a`（定向 13/13）。P4R-0 仍缺 canonical fixture、失败测试先行、以及冻结进 `acceptance/g0-result-studio/rs-p4r-performance.json` 的性能预算 | P4R 收口前不得启动 P5～P7；探针证据 non-qualifying |
 | 🟡建议 | 2026-07-17 | `capability-provisioning.js` 的下载实现与 plugin-manager 各自维护 | host 白名单已经修复；共享下载 helper 只在改动该能力时评估，不阻塞 RH0 |
 | 🟡待评估 | 2026-07-17 | 本地分支 `codex/fix-collapsed-right-titlebar` 尚未采用，且与当前 UI 已有语义重叠 | 不直接 merge；进入相关 UI 工作时先比较当前实现，再决定删除或重做 |
 
-当前没有 🔴 阻塞项，也没有 🟢 待合并项。
+当前有 2 项 🔴 阻塞（见上表），没有 🟢 待合并项。
 
 ## 最近处理记录
 
