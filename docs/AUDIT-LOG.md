@@ -20,6 +20,7 @@
 
 | 日期 | 结果 | 检查点 |
 | --- | --- | --- |
+| 2026-07-26 | 修复 p2/p3/p4 验收脚本的空转前端门：三者都用 `npm test --prefix frontend`（= `vitest run --changed`），叠加文件过滤后选中 0 个测试并退出 0，被记为 `passed:true`；是否真跑取决于 git 改动状态。仅 p2 因 `RS-P2-16` 读取 stdout 中的 renderer 性能标记而暴露。已统一改为 `npm run test:files` 并重生成三份证据（p2 17/17、p3 20/20、p4 18/18）；渲染器本身从未超预算 | `be0a6de` |
 | 2026-07-26 | P4R-0 起步：env 门控性能探针（事件循环直方图 + 按脱敏路由模板的请求计时），默认 off、`/api/__perf/*` 不挂载；只跑了定向测试 `perf-probe 9/9`+`test-affected 4/4`，未跑全量 | `340c09a` |
 | 2026-07-26 | P4 Core 统一手动/Agent 编辑形成 18/18 离线实现检查点，状态保持 `implemented_unverified` | `e0a4c7d` |
 | 2026-07-26 | 四份已完成审计无损移入 `docs/archive/checkpoints/` | `e38d6b5` |
