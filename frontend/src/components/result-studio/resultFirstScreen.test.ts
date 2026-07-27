@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { shouldShowDeliveryCard } from './resultFirstScreen';
+import { shouldShowDeliveryCard, shouldShowWorkflowBar } from './resultFirstScreen';
 
 describe('shouldShowDeliveryCard', () => {
   it('hides the card when there is nothing to generate and nothing generated', () => {
@@ -23,5 +23,28 @@ describe('shouldShowDeliveryCard', () => {
 
   it('treats an empty url as nothing generated', () => {
     expect(shouldShowDeliveryCard({ reportArtifact: null, finalReportUrl: '' })).toBe(false);
+  });
+});
+
+describe('shouldShowWorkflowBar', () => {
+  it('shows the bar while a stage is running', () => {
+    expect(shouldShowWorkflowBar({ hasWorkflow: true, resumeFrom: 'analysis' })).toBe(true);
+  });
+
+  it('shows the bar when a recovery action is waiting', () => {
+    expect(shouldShowWorkflowBar({ hasWorkflow: true, resumeFrom: null, hasRecoveryAction: true }))
+      .toBe(true);
+  });
+
+  it('hides the bar when it would only restate the header', () => {
+    // 「结果已校验 · N 项产物」 above the body says what describeTruthStatus
+    // already says in the header.
+    expect(shouldShowWorkflowBar({ hasWorkflow: true, resumeFrom: null, hasRecoveryAction: false }))
+      .toBe(false);
+  });
+
+  it('hides the bar when there is no workflow at all', () => {
+    expect(shouldShowWorkflowBar({ hasWorkflow: false, resumeFrom: 'analysis' })).toBe(false);
+    expect(shouldShowWorkflowBar({})).toBe(false);
   });
 });

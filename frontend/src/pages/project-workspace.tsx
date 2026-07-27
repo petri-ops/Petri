@@ -71,7 +71,7 @@ import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
 import { ResultStudioChangeSetPanel } from '@/components/result-studio/ResultStudioChangeSetPanel';
 import type { ArtifactRevision } from '@/components/result-studio/resultStudioClient';
-import { shouldShowDeliveryCard } from '@/components/result-studio/resultFirstScreen';
+import { shouldShowDeliveryCard, shouldShowWorkflowBar } from '@/components/result-studio/resultFirstScreen';
 import { ScientificInteractionViewer } from '@/components/result-studio/ScientificInteractionViewer';
 import {
   deleteResultStudioSelection,
@@ -3618,7 +3618,11 @@ function ResultArtifactShell({
     }
   };
 
-  const workflowBar = workflow ? (
+  const workflowBar = shouldShowWorkflowBar({
+    hasWorkflow: Boolean(workflow),
+    resumeFrom: workflow?.resumeFrom ?? null,
+    hasRecoveryAction: Boolean(recoveryAction),
+  }) && workflow ? (
     <div className={styles.resultWorkflowBar} data-state={workflow.resumeFrom || 'completed'}>
       <div className={styles.resultWorkflowBarMain}>
         <span className={styles.resultWorkflowDot} data-terminal={workflow.terminal} />

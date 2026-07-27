@@ -27,3 +27,23 @@ export function shouldShowDeliveryCard(input: {
 }): boolean {
   return Boolean(input.reportArtifact) || Boolean(input.finalReportUrl);
 }
+
+/**
+ * Should the workflow bar precede the result?
+ *
+ * It earns the space when it says something the header cannot: a stage is
+ * still running, or a recovery action is waiting. When the workflow is
+ * finished and no action is pending it renders 「结果已校验 · N 项产物」 —
+ * which restates the trust the header already shows via describeTruthStatus,
+ * in different words, directly above the result the user opened. That is the
+ * same duplication removed from the bar's raw 「truth valid」 line, in a
+ * friendlier costume.
+ */
+export function shouldShowWorkflowBar(input: {
+  hasWorkflow?: boolean;
+  resumeFrom?: string | null;
+  hasRecoveryAction?: boolean;
+}): boolean {
+  if (!input.hasWorkflow) return false;
+  return Boolean(input.resumeFrom) || Boolean(input.hasRecoveryAction);
+}
