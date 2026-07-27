@@ -65,8 +65,29 @@ test('RS4 explicit presentation metadata limits a palette edit to the source plo
   assert.equal(result.status, 'ready');
   assert.equal(result.intent.editClass, 'presentation_rerender');
   assert.deepEqual(result.intent.affectedNodeIds, ['plot']);
+  assert.equal(result.intent.affectedScope, 'workflow_subgraph');
   assert.equal(result.intent.requiresScientificConfirmation, false);
   assert.deepEqual(result.execution, { performed: false, toolJobCreated: false, changeSetCreated: false });
+});
+
+test('P4R-3 presentation rerender scopes honestly to the current result when no DAG exists', () => {
+  const result = plan({
+    workflowPlan: null,
+    proposedParameterPatch: { palette: 'viridis' },
+    parameterImpactRules: { palette: 'presentation' },
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.intent.editClass, 'presentation_rerender');
+  assert.equal(result.intent.affectedScope, 'current_result_only');
+  assert.deepEqual(result.intent.affectedNodeIds, []);
+
+  const scientific = plan({
+    workflowPlan: null,
+    proposedParameterPatch: { padj_cutoff: 0.01 },
+    parameterImpactRules: { padj_cutoff: 'scientific' },
+  });
+  assert.equal(scientific.ok, false);
+  assert.equal(scientific.diagnostics.some((item) => item.code === 'workflow_dag_missing'), true);
 });
 
 test('RS4 declared scientific threshold recomputes source and downstream nodes', () => {

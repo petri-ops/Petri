@@ -6,7 +6,7 @@ import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import { ResultStudioInspector } from '@/components/result-studio/ResultStudioSurface';
 import {
-  ResultEditPanel,
+  ResultEditAdvancedDrawer,
   type ResultEditSubmission,
 } from '@/components/result-studio/ResultEditPanel';
 import type { ResultStudioEditControls } from '@/lib/result-studio-interaction-client';
@@ -159,7 +159,7 @@ export function RightPanel({
                   />
                 )}
                 {tab === 'results' && ctx.activeArtifact && ctx.onResultEditSubmit && (
-                  <ResultEditPanel
+                  <ResultEditAdvancedDrawer
                     editControls={ctx.resultEditControls ?? null}
                     disabledReason={
                       ctx.resultContext?.status === 'blocked'

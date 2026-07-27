@@ -24,6 +24,19 @@ describe('G0-RS-P1 Result Studio surface', () => {
     expect(screen.getByText('火山图主体')).toBeTruthy();
   });
 
+  it('keeps the Agent Composer inside the same result-focus region after the body', () => {
+    render(
+      <ResultStudioCanvas mode="result" composer={<div>结果编辑 Composer</div>}>
+        <div>结果主体</div>
+      </ResultStudioCanvas>,
+    );
+    const region = screen.getByRole('region', { name: '结果主画布' });
+    expect(region.textContent).toContain('结果主体');
+    expect(region.textContent).toContain('结果编辑 Composer');
+    const children = [...region.children];
+    expect(children.at(-1)?.textContent).toContain('结果编辑 Composer');
+  });
+
   it('keeps the context bar compact and exposes its two core actions', () => {
     const onBack = vi.fn();
     const onAsk = vi.fn();

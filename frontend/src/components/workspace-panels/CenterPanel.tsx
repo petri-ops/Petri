@@ -1,6 +1,9 @@
 import React from 'react';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
-import { useConversationRun } from '@/components/copilot/conversationRunStore';
+import {
+  resultEditProgressForContext,
+  useConversationRun,
+} from '@/components/copilot/conversationRunStore';
 import { useDurableConversationLoop } from '@/hooks/useDurableConversationLoop';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
@@ -14,6 +17,11 @@ import {
   ResultStudioCanvas,
   ResultStudioContextBar,
 } from '@/components/result-studio/ResultStudioSurface';
+import {
+  ResultAgentComposer,
+  type ResultAgentComposerContext,
+} from '@/components/result-studio/ResultAgentComposer';
+import type { ResultEditSubmission } from '@/components/result-studio/ResultEditPanel';
 import {
   completeResultSurfaceMeasure,
   describeSelection,
@@ -61,6 +69,9 @@ export interface CenterPanelContext {
   activeJob: ToolJob | null;
   activeWorkflow: HarnessWorkflowJobState | null;
   activeArtifact: ActiveArtifact | null;
+  resultContext: ResultAgentComposerContext | null;
+  resultEditSubmitting: boolean;
+  resultAgentDraft: string;
   activeJobId: string | null;
   pendingArtifactName: string | null;
   recentJobs: ToolJob[];
@@ -81,6 +92,8 @@ export interface CenterPanelContext {
   setActiveConvId: (id: string | null) => void;
   setActiveJobId: (id: string | null) => void;
   setActiveArtifact: (a: ActiveArtifact | null) => void;
+  setResultAgentDraft: (draft: string) => void;
+  onResultEditSubmit: (submission: ResultEditSubmission) => boolean | void;
   setBottomTerminalOpen: (next: boolean | ((prev: boolean) => boolean)) => void;
   setLeftOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
   setRightOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
@@ -111,6 +124,14 @@ export interface CenterPanelProps {
 export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
   const { workspaceMode, bottomTerminalOpen, bottomTerminalHeight, centerColRef } = ctx;
   const [returnConversationMs, setReturnConversationMs] = React.useState<number | null>(null);
+  // Reuse the durable conversation run; the result Composer does not create a
+  // second progress store and therefore survives tool switches/stop/failure by
+  // the same rules as the conversation surface.
+  const activeRun = useConversationRun(ctx.activeConvId);
+  const activeResultProgress = resultEditProgressForContext(
+    activeRun,
+    ctx.resultContext?.status === 'ready' ? ctx.resultContext.contextToken : null,
+  );
   const resultMode = workspaceMode === 'result' || workspaceMode === 'compare';
   const truthStatus = typeof ctx.activeArtifact?.truthStatus === 'string'
     ? ctx.activeArtifact.truthStatus
@@ -178,6 +199,16 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
         <div className={`${styles.workspaceProjectionLayer} ${styles.workspaceProjectionLayerActive}`} data-projection={workspaceMode}>
           <ResultStudioCanvas
             mode={workspaceMode}
+            composer={ctx.activeArtifact ? (
+              <ResultAgentComposer
+                context={ctx.resultContext}
+                draft={ctx.resultAgentDraft}
+                onDraftChange={ctx.setResultAgentDraft}
+                onSubmit={ctx.onResultEditSubmit}
+                submitting={ctx.resultEditSubmitting}
+                progress={activeResultProgress}
+              />
+            ) : null}
             contextBar={(
               <ResultStudioContextBar
                 title={contextTitle}

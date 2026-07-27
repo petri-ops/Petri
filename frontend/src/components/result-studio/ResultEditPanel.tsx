@@ -10,8 +10,9 @@ import styles from './ResultEditPanel.module.css';
  * G0-RS-P4 — Schema 驱动的统一编辑面板。
  *
  * 不为任何插件手写结果页：控件全部来自后端投影的 descriptor schema，
- * 插件没声明的参数不会出现在这里。手动提交与 AI Composer 产出同一种
- * parameterPatch，随后进入同一条 ResultEditIntent → ChangeSet 链。
+ * 插件没声明的参数不会出现在这里。P4R-3 后本组件只承担高级精调；
+ * 默认入口是结果焦点区的自然语言 Composer。两者产出的 parameterPatch
+ * 仍进入同一条 ResultEditIntent → ChangeSet 链。
  *
  * 诚实边界：
  * - 只有 `scientificallyNeutral` 为真的分组才允许标注"不改变科学结论"。
@@ -26,6 +27,8 @@ export interface ResultEditSubmission {
   requestedOutcome: string;
   parameterPatch: Record<string, unknown>;
   scientificConfirmed: boolean;
+  /** P4R-3：只由结果焦点 Composer 携带；不渲染、不写进用户消息。 */
+  contextToken?: string | null;
 }
 
 const GROUP_HINTS: Record<string, string> = {
@@ -140,7 +143,6 @@ export function ResultEditPanel({
   const [draft, setDraft] = React.useState<Record<string, unknown>>({});
   const [outcome, setOutcome] = React.useState('');
   const [confirmed, setConfirmed] = React.useState(false);
-  const [aiIntent, setAiIntent] = React.useState('');
 
   const controls = editControls?.controls ?? [];
   const currentValues = editControls?.currentValues ?? {};
@@ -251,32 +253,40 @@ export function ResultEditPanel({
         </button>
       </div>
 
-      <div className={styles.composer}>
-        <label>
-          <span>或者直接描述你想要的变化</span>
-          <textarea
-            rows={2}
-            value={aiIntent}
-            placeholder="例如：把显著性阈值放宽到 0.1 并重新出图"
-            onChange={(event) => setAiIntent(event.target.value)}
-          />
-        </label>
-        <button
-          type="button"
-          disabled={!aiIntent.trim() || !!disabledReason || submitting}
-          onClick={() => onSubmit({
-            origin: 'agent',
-            requestedOutcome: aiIntent.trim(),
-            parameterPatch: {},
-            scientificConfirmed: false,
-          })}
-        >
-          交给 Agent 规划
-        </button>
-        <p className={styles.composerNote}>
-          Agent 会先解释要改哪些参数和影响级别，执行前你仍可确认或取消。
-        </p>
-      </div>
     </section>
+  );
+}
+
+/**
+ * P4R-3 — P4 Core 参数面板的产品位置。
+ *
+ * 使用原生 details 保留键盘/读屏语义，默认关闭；抽屉只改变显著性，
+ * 不改变 ResultEditPanel 的提交结构或科学确认边界。
+ */
+export function ResultEditAdvancedDrawer({
+  editControls,
+  disabledReason = null,
+  submitting = false,
+  onSubmit,
+}: {
+  editControls: ResultStudioEditControls | null;
+  disabledReason?: string | null;
+  submitting?: boolean;
+  onSubmit: (submission: ResultEditSubmission) => void;
+}): React.ReactElement | null {
+  if (!editControls) return null;
+  return (
+    <details className={styles.advancedDrawer} aria-label="高级精细调整">
+      <summary>
+        <span>高级精细调整</span>
+        <small>按插件参数逐项控制</small>
+      </summary>
+      <ResultEditPanel
+        editControls={editControls}
+        disabledReason={disabledReason}
+        submitting={submitting}
+        onSubmit={onSubmit}
+      />
+    </details>
   );
 }

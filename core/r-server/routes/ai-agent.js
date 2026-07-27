@@ -64,6 +64,11 @@ const {
   createAgentToolCallController,
   runAgentToolCallBatch,
 } = require('../agent-tools');
+const {
+  createResultEditProgressRecorder,
+  finalizeResultEditProgress,
+  projectResultStudioToolContext,
+} = require('../agent-tools/result-context-binding');
 const { inferExecutionPolicy } = require('../helpers/agent-execution-policy');
 const {
   _gatherAnalysisContextForMethods,
@@ -508,9 +513,11 @@ module.exports = function registerAiAgentRoute(app) {
     }
 
     let aborted = false;
+    const resultEditProgress = createResultEditProgressRecorder();
     const toolCtx = {
       userId: req.user && req.user.id,
       projectId: context && context.projectId,
+      ...projectResultStudioToolContext(context),
       accessMode: context && context.accessMode === 'read' ? 'read' : 'full',
       allowExecution: executionPolicy.allowExecution,
       executionPolicyReason: executionPolicy.reason,
@@ -521,7 +528,10 @@ module.exports = function registerAiAgentRoute(app) {
       gatherAnalysisContextForMethods: _gatherAnalysisContextForMethods, // GENERATE_METHODS_v1
       renderMethodsParagraph: _renderMethodsParagraph,
       isCancelled: () => aborted,
-      emitResultEditProgress: (progress) => sseSend({ event: 'result_edit_progress', ...progress }),
+      emitResultEditProgress: (progress) => sseSend({
+        event: 'result_edit_progress',
+        ...resultEditProgress.record(progress),
+      }),
     };
 
     const fullMessages = [{ role: 'system', content: systemPrompt }, ...messages];
@@ -539,6 +549,8 @@ module.exports = function registerAiAgentRoute(app) {
     });
 
     let assistantAcc = '';
+    let assistantMessagePersisted = false;
+    let providerFailureReason = null;
     const assistantProgress = createAgentProgressRecorder();
     let finalizationAttempts = 0;
     let finalizationFailureReason = null;
@@ -651,12 +663,11 @@ module.exports = function registerAiAgentRoute(app) {
         }
         if (!upJson || upJson.error || !upJson.choices) {
           if (finalizing && finalizationAttempts > 0) break;
-          sseSend({
-            error:
-              (upJson && (upJson.message || upJson.error || (upJson.choices ? 'no choice' : 'bad response'))) ||
-              'upstream error',
-          });
-          return res.end();
+          providerFailureReason = String(
+            (upJson && (upJson.message || upJson.error || (upJson.choices ? 'no choice' : 'bad response')))
+            || 'upstream error'
+          );
+          break;
         }
 
         const choice = upJson.choices[0];
@@ -796,7 +807,23 @@ module.exports = function registerAiAgentRoute(app) {
         });
       }
 
-      if (!aborted && assistantAcc.trim().length === 0) {
+      if (providerFailureReason && assistantAcc.trim().length === 0) {
+        const final = finalizeResultEditProgress(resultEditProgress, {
+          outcome: 'failed', reason: 'agent_run_failed',
+        });
+        if (final.terminal) sseSend({ event: 'result_edit_progress', ...final.terminal });
+        assistantAcc = final.assistantMessage;
+        sseSend({ choices: [{ delta: { content: assistantAcc } }] });
+        sseSend({ error: providerFailureReason });
+      } else if (aborted && resultEditProgress.snapshot().length > 0) {
+        const final = finalizeResultEditProgress(resultEditProgress, {
+          outcome: 'cancelled', reason: 'user_cancelled',
+        });
+        if (final.terminal) sseSend({ event: 'result_edit_progress', ...final.terminal });
+        assistantAcc = final.assistantMessage;
+      }
+
+      if (!providerFailureReason && !aborted && assistantAcc.trim().length === 0) {
         const fallbackMsg = buildFinalizationFallbackMessage({
           attempts: finalizationAttempts,
           reason: finalizationFailureReason,
@@ -821,6 +848,9 @@ module.exports = function registerAiAgentRoute(app) {
                   ...(assistantProgress.snapshot().length
                     ? { progressUpdates: assistantProgress.snapshot() }
                     : {}),
+                  ...(resultEditProgress.snapshot().length
+                    ? { resultEditProgress: resultEditProgress.snapshot() }
+                    : {}),
                   ...(finalizationAttempts ? {
                     finalization: {
                       attempts: finalizationAttempts,
@@ -829,9 +859,11 @@ module.exports = function registerAiAgentRoute(app) {
                       ...(finalizationRouting ? { routing: finalizationRouting } : {}),
                     },
                   } : {}),
-                  ...(finalizationFailureReason || toolCallController.anomaly ? {
+                  ...(providerFailureReason || finalizationFailureReason || toolCallController.anomaly ? {
                     incident: {
-                      code: toolCallController.anomaly?.code || finalizationFailureReason || 'agent_failure',
+                      code: providerFailureReason
+                        ? 'agent_provider_failed'
+                        : toolCallController.anomaly?.code || finalizationFailureReason || 'agent_failure',
                       autoRecoveryAttempts: finalizationAttempts,
                       ...(toolCallController.anomaly?.tool ? { tool: toolCallController.anomaly.tool } : {}),
                     },
@@ -851,6 +883,7 @@ module.exports = function registerAiAgentRoute(app) {
                 } else {
                   appendMessageToConversation(_activeConv.id, 'assistant', assistantAcc.trim(), assistantMeta);
                 }
+                assistantMessagePersisted = true;
                 // AUTO_TITLE_v1: best-effort async title generation
                 try {
                   _maybeAutoTitleConversation(_activeConv.id, userId);
@@ -946,6 +979,26 @@ module.exports = function registerAiAgentRoute(app) {
         } catch {}
       }
     } catch (e) {
+      if (!assistantMessagePersisted && _activeConv && resultEditProgress.snapshot().length > 0) {
+        const final = finalizeResultEditProgress(resultEditProgress, {
+          outcome: aborted ? 'cancelled' : 'failed',
+          reason: aborted ? 'user_cancelled' : 'agent_run_failed',
+        });
+        if (final.terminal) sseSend({ event: 'result_edit_progress', ...final.terminal });
+        const fallback = final.assistantMessage;
+        const meta = {
+          page: context && context.page,
+          projectId: context && context.projectId,
+          processingDurationMs: Math.max(0, Date.now() - requestStartedAt),
+          resultEditProgress: resultEditProgress.snapshot(),
+          incident: { code: aborted ? 'user_cancelled' : 'agent_run_failed', autoRecoveryAttempts: 0 },
+        };
+        try {
+          if (useConvAsync) await convAsync.appendMessageToConversation(_activeConv.id, 'assistant', fallback, meta);
+          else appendMessageToConversation(_activeConv.id, 'assistant', fallback, meta);
+          assistantMessagePersisted = true;
+        } catch {}
+      }
       sseSend({ error: e.message });
     }
 

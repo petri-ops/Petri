@@ -310,7 +310,7 @@ function normalizeEditSubmission({
  *
  * 只陈述受信分级得出的后果，不承诺"很快"或"没有风险"。
  */
-function explainEditImpact(classification, { affectedNodeIds = [] } = {}) {
+function explainEditImpact(classification, { affectedNodeIds = [], affectedScope = 'none' } = {}) {
   if (!classification) {
     return {
       editClass: null,
@@ -319,6 +319,7 @@ function explainEditImpact(classification, { affectedNodeIds = [] } = {}) {
       requiresScientificConfirmation: false,
       rerunsScience: false,
       affectedNodeCount: 0,
+      affectedScope: 'none',
       parameterImpacts: [],
     };
   }
@@ -341,6 +342,9 @@ function explainEditImpact(classification, { affectedNodeIds = [] } = {}) {
     rerunsScience,
     usedConservativeFallback: classification.usedConservativeFallback === true,
     affectedNodeCount: Array.isArray(affectedNodeIds) ? affectedNodeIds.length : 0,
+    affectedScope: ['current_result_only', 'workflow_subgraph'].includes(affectedScope)
+      ? affectedScope
+      : 'none',
     parameterImpacts: Array.isArray(classification.parameterImpacts) ? classification.parameterImpacts : [],
   };
 }

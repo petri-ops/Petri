@@ -1,7 +1,7 @@
 import React from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ResultEditPanel } from './ResultEditPanel';
+import { ResultEditAdvancedDrawer, ResultEditPanel } from './ResultEditPanel';
 import type { ResultStudioEditControls } from '@/lib/result-studio-interaction-client';
 
 afterEach(cleanup);
@@ -102,21 +102,7 @@ describe('G0-RS-P4 Schema 驱动统一编辑面板', () => {
     expect((screen.getByRole('button', { name: /生成候选版本/ }) as HTMLButtonElement).disabled).toBe(true);
   });
 
-  it('AI Composer 与手动控件提交同一种 patch 结构', () => {
-    const onSubmit = vi.fn();
-    render(<ResultEditPanel editControls={schema()} onSubmit={onSubmit} />);
-    fireEvent.change(screen.getByLabelText(/描述你想要的变化/), {
-      target: { value: '把阈值放宽到 0.1 并重新出图' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: /交给 Agent 规划/ }));
-    const submission = onSubmit.mock.calls[0][0];
-    expect(submission.origin).toBe('agent');
-    expect(submission.requestedOutcome).toBe('把阈值放宽到 0.1 并重新出图');
-    expect(submission.parameterPatch).toEqual({});
-    expect(submission.scientificConfirmed).toBe(false);
-  });
-
-  it('上下文阻断时禁用两条提交路径并显示原因', () => {
+  it('上下文阻断时禁用手动提交并显示原因', () => {
     render(
       <ResultEditPanel
         editControls={schema()}
@@ -127,8 +113,25 @@ describe('G0-RS-P4 Schema 驱动统一编辑面板', () => {
     expect(screen.getByText(/归因只能到 Job/)).toBeTruthy();
     fireEvent.change(screen.getByLabelText('point_size'), { target: { value: '3' } });
     expect((screen.getByRole('button', { name: /生成候选版本/ }) as HTMLButtonElement).disabled).toBe(true);
-    fireEvent.change(screen.getByLabelText(/描述你想要的变化/), { target: { value: '换个配色' } });
-    expect((screen.getByRole('button', { name: /交给 Agent 规划/ }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('作为高级精调抽屉时默认折叠，展开后仍提交同一种手动 patch', () => {
+    const onSubmit = vi.fn();
+    render(<ResultEditAdvancedDrawer editControls={schema()} onSubmit={onSubmit} />);
+
+    const drawer = document.querySelector('details[aria-label="高级精细调整"]') as HTMLDetailsElement;
+    expect(drawer).toBeTruthy();
+    expect(drawer.hasAttribute('open')).toBe(false);
+
+    drawer.setAttribute('open', '');
+    fireEvent.change(screen.getByLabelText('point_size'), { target: { value: '3' } });
+    fireEvent.click(screen.getByRole('button', { name: /生成候选版本/ }));
+
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
+      origin: 'manual',
+      parameterPatch: { point_size: 3 },
+    }));
+    expect(screen.queryByText(/或者直接描述/)).toBeNull();
   });
 
   it('放弃改动清空草稿与科学确认', () => {

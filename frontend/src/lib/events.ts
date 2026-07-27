@@ -5,7 +5,9 @@
  * Producers and consumers import from here; one typo now = TS compile error.
  *
  * Payload types mirror the actual `CustomEvent.detail` shape at each call-site.
- */
+*/
+
+import type { CopilotContext } from '@/lib/copilotContext';
 
 export const biof3Events = {
   /** Fired by DesktopOnboarding on completion; listened by App's DesktopOnboardingMount */
@@ -58,6 +60,15 @@ export type BioF3EventName = (typeof biof3Events)[keyof typeof biof3Events];
 
 export interface CopilotAskDetail {
   prompt: string;
+  /**
+   * P4R-3：结果 Composer 的原子上下文快照。token 不写入 prompt；
+   * SimpleChat 将该快照覆盖到本轮请求 context，避免异步建会话期间漂移。
+   */
+  resultContext?: {
+    contextToken: string;
+    activeArtifact: NonNullable<CopilotContext['activeArtifact']>;
+    editRequest: NonNullable<CopilotContext['resultEditRequest']>;
+  };
 }
 
 export interface ProjectOpenResultDetail {

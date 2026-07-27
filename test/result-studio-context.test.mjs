@@ -175,6 +175,25 @@ test('RS-P3 context token changes when the revision or selection evidence change
   assert.notEqual(base.contextToken, newSelection.contextToken);
 });
 
+test('P4R-3 context token covers column/filter/sort updates within one selection id', () => {
+  const selection = {
+    selectionId: 'sel_columns', entityType: 'column', entityIdCount: 0, truncated: false,
+    entityIdsHash: null, filterHash: null, sampleEntityIds: [], hasFilter: false,
+    fields: ['padj'], sort: [{ field: 'padj', direction: 'asc' }],
+    updatedAt: '2026-07-28T00:00:00.000Z', compatibility: 'compatible',
+  };
+  const first = buildResultStudioContextEnvelope(envelopeInput({ selection })).envelope;
+  const fieldsChanged = buildResultStudioContextEnvelope(envelopeInput({
+    selection: { ...selection, fields: ['log2FoldChange'], updatedAt: '2026-07-28T00:01:00.000Z' },
+  })).envelope;
+  const sortChanged = buildResultStudioContextEnvelope(envelopeInput({
+    selection: { ...selection, sort: [{ field: 'padj', direction: 'desc' }] },
+  })).envelope;
+  assert.notEqual(first.contextToken, fieldsChanged.contextToken);
+  assert.notEqual(first.contextToken, sortChanged.contextToken);
+  assert.deepEqual(summarizeContextForAgent(fieldsChanged).selection.fields, ['log2FoldChange']);
+});
+
 test('RS-P3 rejects a stale or absent context token on a write operation', () => {
   const envelope = buildResultStudioContextEnvelope(envelopeInput()).envelope;
   assert.equal(authorizeContextOperation({ envelope, presentedToken: envelope.contextToken }).ok, true);
@@ -186,7 +205,8 @@ test('RS-P3 rejects a stale or absent context token on a write operation', () =>
   const stale = authorizeContextOperation({ envelope, presentedToken: 'f'.repeat(64) });
   assert.equal(stale.ok, false);
   assert.equal(stale.diagnostics[0].code, 'context_token_stale');
-  assert.equal(stale.diagnostics[0].detail.expectedToken, envelope.contextToken);
+  assert.equal(stale.diagnostics[0].detail, undefined);
+  assert.equal(JSON.stringify(stale).includes(envelope.contextToken), false);
 
   // 只读操作允许无 token
   assert.equal(authorizeContextOperation({ envelope, presentedToken: null, requireToken: false }).ok, true);
@@ -430,21 +450,30 @@ test('RS-P3 binds the single open change set and refuses to guess between severa
 test('RS-P3 context-bound plan fills the internal ids the model never supplied', async () => {
   const fx = fixture();
   let received = null;
+  const progress = [];
   const tools = createResultContextEditTools({
     ...fx.dependencies,
     planTool: async (args) => { received = args; return { ok: true, status: 'ready', intent: { intentId: 'rei_1' } }; },
     changeSetTools: {},
   });
   const result = await tools.plan(
-    { requestedOutcome: '把显著基因标出来' },
-    { ...ctx, activeArtifact: { jobId: 'job_1', name: 'deg_table.csv' } }
+    { requestedOutcome: '把显著基因标出来', workflowPlan: { steps: [{ id: 'invented' }] } },
+    {
+      ...ctx,
+      activeArtifact: { jobId: 'job_1', name: 'deg_table.csv' },
+      emitResultEditProgress: (event) => progress.push(event),
+    }
   );
   assert.equal(result.ok, true);
   assert.equal(received.toolJobId, 'job_1');
   assert.equal(received.artifactId, 'deg_table');
   assert.equal(received.revisionId, 'rev_1');
   assert.equal(received.selectionId, 'sel_1');
+  assert.equal(received.workflowPlan, null);
   assert.equal(result.publicPhase, 'assess_impact');
+  assert.deepEqual(progress.map(({ stage, status }) => [stage, status]), [
+    ['intent', 'completed'], ['plan', 'running'], ['plan', 'completed'],
+  ]);
 });
 
 test('RS-P3 context-bound create rejects a stale token before any job or changeset exists', async () => {
@@ -488,7 +517,17 @@ test('RS-P3 context-bound create delegates to the existing changeset service and
   let delegated = null;
   const tools = createResultContextEditTools({
     ...fx.dependencies,
-    planTool: async () => ({ ok: true }),
+    planTool: async () => ({ ok: true, status: 'ready', intent: {
+      intentId: 'rei_trusted',
+      artifactRef: { artifactId: 'deg_table', revisionId: 'rev_1' },
+      selectionRef: 'sel_1',
+      requestedOutcome: '调整阈值',
+      proposedParameterPatch: { padj_cutoff: 0.01 },
+      editClass: 'scientific_recompute',
+      affectedNodeIds: [],
+      requiresJob: true,
+      requiresScientificConfirmation: true,
+    } }),
     changeSetTools: {
       create: async (args) => {
         delegated = args;
@@ -509,14 +548,16 @@ test('RS-P3 context-bound create delegates to the existing changeset service and
       },
     },
   });
-  const envelope = resolveResultStudioContext({ ...ctx, activeArtifact: { revisionId: 'rev_1' } }, fx.dependencies).envelope;
+  const runCtx = { ...ctx, activeArtifact: { revisionId: 'rev_1' } };
+  const planned = await tools.plan({ requestedOutcome: '调整阈值' }, runCtx);
+  const envelope = resolveResultStudioContext(runCtx, fx.dependencies).envelope;
   const result = await tools.create(
     {
       contextToken: envelope.contextToken,
-      intent: { artifactRef: { artifactId: 'deg_table', revisionId: 'rev_1' } },
+      intent: planned.intent,
       scientificConfirmed: true,
     },
-    { ...ctx, activeArtifact: { revisionId: 'rev_1' } }
+    runCtx
   );
   assert.equal(result.ok, true);
   assert.equal(delegated.scientificConfirmed, true);
@@ -524,6 +565,76 @@ test('RS-P3 context-bound create delegates to the existing changeset service and
     'assess_impact', 'execute_or_recompute', 'validate', 'candidate_comparable',
   ]);
   assert.equal(JSON.stringify(result.publicProgress).includes('commit'), false);
+});
+
+test('P4R-3 create rejects a model-mutated planned intent and any script patch', async () => {
+  const fx = fixture();
+  let created = false;
+  const canonical = {
+    intentId: 'rei_sealed',
+    artifactRef: { artifactId: 'deg_table', revisionId: 'rev_1' },
+    selectionRef: 'sel_1',
+    requestedOutcome: '调整阈值',
+    proposedParameterPatch: { padj_cutoff: 0.01 },
+    editClass: 'scientific_recompute',
+    affectedNodeIds: [],
+    requiresJob: true,
+    requiresScientificConfirmation: true,
+  };
+  const tools = createResultContextEditTools({
+    ...fx.dependencies,
+    planTool: async () => ({ ok: true, status: 'confirmation_required', intent: canonical }),
+    changeSetTools: { create: async () => { created = true; return { ok: true }; } },
+  });
+  const runCtx = { ...ctx, activeArtifact: { revisionId: 'rev_1' } };
+  const planned = await tools.plan({ requestedOutcome: '调整阈值' }, runCtx);
+  const envelope = resolveResultStudioContext(runCtx, fx.dependencies).envelope;
+
+  const downgraded = await tools.create({
+    contextToken: envelope.contextToken,
+    intent: { ...planned.intent, editClass: 'presentation_rerender', requiresScientificConfirmation: false },
+    scientificConfirmed: false,
+  }, runCtx);
+  assert.equal(downgraded.error, 'context_intent_untrusted');
+  assert.equal(created, false);
+
+  const scriptPatched = await tools.create({
+    contextToken: envelope.contextToken,
+    intent: planned.intent,
+    scientificConfirmed: true,
+    scriptPatch: [{ oldText: 'a', newText: 'b' }],
+  }, runCtx);
+  assert.equal(scriptPatched.error, 'context_script_patch_forbidden');
+  assert.equal(created, false);
+});
+
+test('P4R-3 selection change requires a fresh plan even when the caller learned the new token', async () => {
+  const fx = fixture();
+  let selection = fx.repository.findLatestSelection();
+  const repository = { ...fx.repository, findLatestSelection: () => selection };
+  const dependencies = { ...fx.dependencies, repository };
+  const canonical = {
+    intentId: 'rei_selection',
+    artifactRef: { artifactId: 'deg_table', revisionId: 'rev_1' },
+    selectionRef: 'sel_1', requestedOutcome: '标记所选基因', proposedParameterPatch: { padj_cutoff: 0.01 },
+    editClass: 'scientific_recompute', affectedNodeIds: [], requiresJob: true,
+    requiresScientificConfirmation: true,
+  };
+  let created = false;
+  const tools = createResultContextEditTools({
+    ...dependencies,
+    planTool: async () => ({ ok: true, status: 'confirmation_required', intent: canonical }),
+    changeSetTools: { create: async () => { created = true; return { ok: true }; } },
+  });
+  const runCtx = { ...ctx, activeArtifact: { revisionId: 'rev_1' } };
+  const planned = await tools.plan({ requestedOutcome: '标记所选基因' }, runCtx);
+  selection = { ...selection, selectionId: 'sel_2', entityIdsHash: 'd'.repeat(64), updatedAt: '2026-07-28T00:10:00.000Z' };
+  const refreshed = resolveResultStudioContext(runCtx, dependencies).envelope;
+  const replay = await tools.create({
+    contextToken: refreshed.contextToken, intent: planned.intent, scientificConfirmed: true,
+  }, runCtx);
+  assert.equal(replay.error, 'context_intent_selection_mismatch');
+  assert.equal(created, false);
 });
 
 test('RS-P3 context-bound adopt requires a token and binds the change set automatically', async () => {

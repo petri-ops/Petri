@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * G0-RS-P4R-1 / P4R-2 验收 — Fast Result Path 与 Focused Result Surface。
+ * G0-RS-P4R-1 / P4R-2 / P4R-3 验收 — Fast Result Path、Focused Result
+ * Surface 与 Agent-first Editing。
  *
  * 证据类型：真实服务端测量（与 P4R-0 冻结基线对比）+ 前端纯模块行为断言。
  * **不含**任何布局、主题或像素判定：vitest 在 happy-dom 下运行，
@@ -43,8 +44,59 @@ const sourceFiles = {
   mode: 'frontend/src/components/result-studio/resultMode.ts',
   modeSpec: 'frontend/src/components/result-studio/resultMode.test.ts',
   surface: 'frontend/src/components/result-studio/resultSurface.ts',
+  resultSurfaceSpec: 'frontend/src/components/result-studio/resultSurface.test.ts',
   centerPanel: 'frontend/src/components/workspace-panels/CenterPanel.tsx',
+  rightPanel: 'frontend/src/components/workspace-panels/RightPanel.tsx',
+  rightPanelSpec: 'frontend/src/components/workspace-panels/RightPanel.test.tsx',
+  projectWorkspace: 'frontend/src/pages/project-workspace.tsx',
+  resultAgentComposer: 'frontend/src/components/result-studio/ResultAgentComposer.tsx',
+  resultAgentComposerStyle: 'frontend/src/components/result-studio/ResultAgentComposer.module.css',
+  resultAgentComposerSpec: 'frontend/src/components/result-studio/ResultAgentComposer.test.tsx',
+  resultEditPanel: 'frontend/src/components/result-studio/ResultEditPanel.tsx',
+  resultEditPanelStyle: 'frontend/src/components/result-studio/ResultEditPanel.module.css',
+  resultEditPanelSpec: 'frontend/src/components/result-studio/ResultEditPanel.test.tsx',
+  resultStudioSurface: 'frontend/src/components/result-studio/ResultStudioSurface.tsx',
+  resultStudioSurfaceStyle: 'frontend/src/components/result-studio/ResultStudioSurface.module.css',
+  resultStudioSurfaceSpec: 'frontend/src/components/result-studio/ResultStudioSurface.test.tsx',
+  copilotAskDeliverySpec: 'frontend/src/components/result-studio/copilotAskDelivery.test.tsx',
+  centerPanelSpec: 'frontend/src/components/workspace-panels/CenterPanel.test.tsx',
+  copilotContext: 'frontend/src/lib/copilotContext.ts',
+  events: 'frontend/src/lib/events.ts',
+  resultEditAgentBridge: 'frontend/src/lib/result-edit-agent-bridge.ts',
+  resultEditAgentBridgeSpec: 'frontend/src/lib/result-edit-agent-bridge.test.ts',
+  simpleChat: 'frontend/src/components/copilot/SimpleChat.tsx',
+  simpleChatStyle: 'frontend/src/components/copilot/simple-chat.css',
+  copilotClient: 'frontend/src/components/copilot/copilotClient.ts',
+  copilotClientSpec: 'frontend/src/components/copilot/copilotClient.test.ts',
+  conversationRunStore: 'frontend/src/components/copilot/conversationRunStore.ts',
+  conversationRunStoreSpec: 'frontend/src/components/copilot/conversationRunStore.test.ts',
+  simpleChatProgressSpec: 'frontend/src/components/copilot/SimpleChat.progress.test.ts',
+  contextClient: 'frontend/src/lib/result-studio-interaction-client.ts',
+  contextContract: 'core/shared-backend/result-studio-context.js',
+  resultEditIntent: 'core/shared-backend/result-edit-intent.js',
+  resultEditControls: 'core/shared-backend/result-edit-controls.js',
+  resultContextTools: 'core/r-server/agent-tools/result-context-tools.js',
+  resultContextEditTools: 'core/r-server/agent-tools/result-context-edit-tools.js',
+  agentRunner: 'core/r-server/agent-runner.js',
+  agentRoute: 'core/r-server/routes/ai-agent.js',
+  agentInterceptor: 'core/r-server/agent-tools/agent-tool-interceptor.js',
+  resultContextBinding: 'core/r-server/agent-tools/result-context-binding.js',
+  toolDefinitions: 'core/r-server/agent-tools/tool-defs.js',
+  systemPrompt: 'core/r-server/helpers/system-prompt.js',
+  agentBindingSpec: 'test/result-studio-agent-binding.test.mjs',
+  systemPromptSpec: 'test/system-prompt-result-context.test.mjs',
+  resultStudioContextSpec: 'test/result-studio-context.test.mjs',
+  resultEditAgentToolSpec: 'test/result-edit-agent-tool.test.mjs',
+  agentToolPolicySpec: 'test/agent-tool-policy.test.mjs',
+  agentToolRegistrySpec: 'test/agent-tool-registry.test.mjs',
+  impactMap: 'test/impact-map.json',
+  impactMapSpec: 'test/test-affected.test.mjs',
+  packageScripts: 'package.json',
   acceptanceScript: 'scripts/g0-rs-p4r-product-acceptance.mjs',
+  performanceAcceptanceScript: 'scripts/g0-rs-p4r-acceptance.mjs',
+  baselineScript: 'scripts/g0-rs-p4r-baseline.mjs',
+  captureScript: 'scripts/g0-rs-p4r-capture.mjs',
+  corpusScript: 'scripts/g0-rs-p4r-corpus.mjs',
 };
 
 /**
@@ -60,8 +112,46 @@ const FRONTEND_SPECS = [
   'src/components/result-studio/resultMode.test.ts',
   'src/components/result-studio/resultSurface.test.ts',
   'src/components/result-studio/copilotAskDelivery.test.tsx',
+  'src/components/result-studio/ResultAgentComposer.test.tsx',
+  'src/components/result-studio/ResultEditPanel.test.tsx',
+  'src/components/result-studio/ResultStudioSurface.test.tsx',
   'src/components/workspace-panels/CenterPanel.test.tsx',
+  'src/components/workspace-panels/RightPanel.test.tsx',
+  'src/lib/result-edit-agent-bridge.test.ts',
+  'src/components/copilot/copilotClient.test.ts',
+  'src/components/copilot/conversationRunStore.test.ts',
+  'src/components/copilot/SimpleChat.progress.test.ts',
 ];
+
+const NODE_SPECS = [
+  'test/result-studio-agent-binding.test.mjs',
+  'test/system-prompt-result-context.test.mjs',
+  'test/result-studio-context.test.mjs',
+  'test/result-edit-agent-tool.test.mjs',
+  'test/agent-tool-policy.test.mjs',
+  'test/agent-tool-registry.test.mjs',
+];
+
+const REQUIRED_P4R3_FRONTEND_SPECS = Object.freeze([
+  'src/components/result-studio/ResultAgentComposer.test.tsx',
+  'src/components/result-studio/ResultEditPanel.test.tsx',
+  'src/components/result-studio/ResultStudioSurface.test.tsx',
+  'src/components/workspace-panels/CenterPanel.test.tsx',
+  'src/components/workspace-panels/RightPanel.test.tsx',
+  'src/lib/result-edit-agent-bridge.test.ts',
+  'src/components/copilot/copilotClient.test.ts',
+  'src/components/copilot/conversationRunStore.test.ts',
+  'src/components/copilot/SimpleChat.progress.test.ts',
+]);
+
+const REQUIRED_P4R3_NODE_SPECS = Object.freeze([
+  'test/result-studio-agent-binding.test.mjs',
+  'test/system-prompt-result-context.test.mjs',
+  'test/result-studio-context.test.mjs',
+  'test/result-edit-agent-tool.test.mjs',
+  'test/agent-tool-policy.test.mjs',
+  'test/agent-tool-registry.test.mjs',
+]);
 
 /** Client metrics the plan asks for that nothing in this repo can produce. */
 const UNMEASURED = Object.freeze({
@@ -74,6 +164,17 @@ const UNMEASURED = Object.freeze({
 
 function sourceHashes() {
   return Object.fromEntries(Object.entries(sourceFiles).map(([key, file]) => [key, sha(read(file))]));
+}
+
+function sourceCommitStatus(commit, hashes) {
+  if (!commit || spawnSync('git', ['merge-base', '--is-ancestor', commit, 'HEAD'], { cwd: root }).status !== 0) {
+    return { reachable: false, mismatches: Object.values(sourceFiles) };
+  }
+  const mismatches = Object.values(sourceFiles).filter((file) => {
+    const result = spawnSync('git', ['show', `${commit}:${file}`], { cwd: root });
+    return result.status !== 0 || sha(result.stdout) !== hashes[Object.entries(sourceFiles).find(([, path]) => path === file)?.[0]];
+  });
+  return { reachable: true, mismatches };
 }
 
 /** Run the frontend specs and report what actually happened. */
@@ -96,8 +197,26 @@ function runFrontendSpecs() {
   };
 }
 
+function runNodeSpecs() {
+  const result = spawnSync(process.execPath, ['--test', ...NODE_SPECS], {
+    cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024,
+  });
+  const stdout = `${result.stdout || ''}${result.stderr || ''}`;
+  const tests = /(?:^|\n)[ℹ#]\s*tests\s+(\d+)/m.exec(stdout);
+  const pass = /(?:^|\n)[ℹ#]\s*pass\s+(\d+)/m.exec(stdout);
+  return {
+    command: `node --test ${NODE_SPECS.length} specs`,
+    exitCode: result.status,
+    specCount: NODE_SPECS.length,
+    testsObserved: tests ? Number(tests[1]) : 0,
+    testsPassed: pass ? Number(pass[1]) : 0,
+    stdoutSha256: sha(stdout),
+  };
+}
+
 function inspect(verification, observation) {
   const frontend = verification?.frontend || {};
+  const node = verification?.node || {};
   const byId = new Map((observation?.requests || []).map((r) => [r.id, r]));
   const baseline = new Map(FROZEN_BASELINE.requests.map((r) => [r.id, r]));
 
@@ -144,15 +263,35 @@ function inspect(verification, observation) {
       Object.values(UNMEASURED).every((reason) => reason === 'not_captured_no_browser_automation_in_repo'),
       [sourceFiles.acceptanceScript],
       'Every metric with no producer is recorded as unmeasured with one stated reason, matching P4R-0 vocabulary. Nothing is estimated and nothing defaults to zero.'),
+
+    // ── P4R-3 ────────────────────────────────────────────────────────────
+    item('RS-P4R3-1',
+      frontend.exitCode === 0 && frontend.filesPassed === frontend.specCount && frontend.testsPassed > 0,
+      [sourceFiles.resultAgentComposerSpec, sourceFiles.resultEditPanelSpec, sourceFiles.resultEditAgentBridgeSpec],
+      'The central Composer, atomic context bridge, advanced drawer and persistent progress frontend contracts executed with non-zero tests.'),
+
+    item('RS-P4R3-2',
+      node.exitCode === 0 && node.testsObserved > 0 && node.testsPassed === node.testsObserved,
+      [sourceFiles.agentBindingSpec, sourceFiles.systemPromptSpec, sourceFiles.resultContextBinding],
+      'Context projection, pre-schema token binding, stale-token rejection and five-stage recording executed as Node tests; task/legacy imports are additionally protected by a static wiring guard.'),
+
+    item('RS-P4R3-3',
+      REQUIRED_P4R3_FRONTEND_SPECS.every((spec) => FRONTEND_SPECS.includes(spec))
+        && REQUIRED_P4R3_NODE_SPECS.every((spec) => NODE_SPECS.includes(spec))
+        && FRONTEND_SPECS.every((spec) => Object.values(sourceFiles).includes(`frontend/${spec}`))
+        && NODE_SPECS.every((spec) => Object.values(sourceFiles).includes(spec))
+        && frontend.specCount === FRONTEND_SPECS.length
+        && node.specCount === NODE_SPECS.length,
+      [sourceFiles.acceptanceScript, sourceFiles.packageScripts],
+      'Every executed frontend and Node spec is source-hashed, including the exact required P4R-3 UI, bridge, persistence, prompt, context and interceptor set.'),
   ];
 
   return {
     schemaVersion: 1,
-    workPackage: 'G0-RS-P4R-1/P4R-2',
-    sourceCommit: git('rev-parse', 'HEAD'),
-    captureMode: 'real_chain_server_measurement_plus_frontend_pure_module_behaviour',
+    workPackage: 'G0-RS-P4R-1/P4R-2/P4R-3',
+    captureMode: 'real_chain_server_measurement_plus_frontend_and_agent_binding_contracts',
     qualificationEligible: false,
-    qualificationReason: 'P4R-1 and P4R-2 deliver a faster read path and a focused surface. No layout, theme or pixel claim is made, and Result Studio product qualification remains reserved for P7.',
+    qualificationReason: 'P4R-1 through P4R-3 deliver a faster read path, focused surface and context-bound Agent-first editing implementation. No Provider, layout, theme or pixel claim is made, and Result Studio product qualification remains reserved for P7.',
     privacy: 'repository_relative_paths_digests_counts_timings_and_bounded_statuses_only',
     sourceHashes: sourceHashes(),
     frozenBaseline: { capturedAtCommit: FROZEN_BASELINE.capturedAtCommit, revisionCount: FROZEN_BASELINE.revisionCount },
@@ -187,12 +326,28 @@ try {
         ({ id, role, status, coldMs, warmMs, warmSpreadMs, oneTimeCostMs })),
       eventLoop: { samples: capture.eventLoop?.samples ?? null, maxMs: capture.eventLoop?.maxMs ?? null },
     };
-    const verification = { generatedAt: new Date().toISOString(), frontend: runFrontendSpecs() };
-    const report = { ...inspect(verification, observation), generatedAt: verification.generatedAt, privacyClean: true };
+    const verification = {
+      generatedAt: new Date().toISOString(),
+      frontend: runFrontendSpecs(),
+      node: runNodeSpecs(),
+    };
+    const hashes = sourceHashes();
+    const sourceCommit = git('rev-parse', 'HEAD');
+    const commitStatus = sourceCommitStatus(sourceCommit, hashes);
+    const report = {
+      ...inspect(verification, observation),
+      sourceCommit,
+      sourceCommitReachable: commitStatus.reachable,
+      sourceCommitMatchesSourceHashes: commitStatus.reachable && commitStatus.mismatches.length === 0,
+      sourceCommitMismatches: commitStatus.mismatches,
+      generatedAt: verification.generatedAt,
+      privacyClean: true,
+    };
+    if (!report.sourceCommitMatchesSourceHashes) throw new Error(`source commit mismatch: ${commitStatus.mismatches.join(',')}`);
     if (!report.passed) throw new Error(report.checks.filter((c) => !c.passed).map((c) => c.id).join(','));
     mkdirSync(dirname(evidencePath), { recursive: true });
     writeFileSync(evidencePath, `${JSON.stringify(report, null, 2)}\n`);
-    console.log(`[G0-RS-P4R-1/2] PASS — evidence updated (${report.checks.length}/${report.checks.length})`);
+    console.log(`[G0-RS-P4R-1/2/3] PASS — evidence updated (${report.checks.length}/${report.checks.length})`);
     for (const row of report.improvementVsBaseline) {
       if (row.deltaPct !== null) console.log(`  ${row.id.padEnd(18)} ${String(row.baselineWarmMs).padStart(8)}ms -> ${String(row.currentWarmMs).padStart(8)}ms  ${row.deltaPct}%`);
     }
@@ -200,13 +355,16 @@ try {
     if (!existsSync(evidencePath)) throw new Error('evidence missing; run npm run g0:result-studio:p4r:product:update');
     const stored = JSON.parse(readFileSync(evidencePath, 'utf8'));
     const current = inspect(stored.verification, stored.observation);
+    const storedCommit = sourceCommitStatus(stored.sourceCommit, stored.sourceHashes || {});
     if (!stored.passed || !current.passed
+      || !stored.sourceCommitMatchesSourceHashes
+      || !storedCommit.reachable || storedCommit.mismatches.length > 0
       || JSON.stringify(stored.sourceHashes) !== JSON.stringify(current.sourceHashes)) {
-      throw new Error('stored G0-RS-P4R-1/2 evidence is stale or invalid');
+      throw new Error('stored G0-RS-P4R-1/2/3 evidence is stale or invalid');
     }
-    console.log(`[G0-RS-P4R-1/2] PASS — ${current.checks.length}/${current.checks.length}`);
+    console.log(`[G0-RS-P4R-1/2/3] PASS — ${current.checks.length}/${current.checks.length}`);
   }
 } catch (error) {
-  console.error(`[G0-RS-P4R-1/2] FAIL — ${error.message}`);
+  console.error(`[G0-RS-P4R-1/2/3] FAIL — ${error.message}`);
   process.exitCode = 1;
 }

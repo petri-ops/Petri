@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { parseResultEditProgressEvent, parseToolCallEvent, parseToolResultEvent } from './copilotClient';
+import {
+  parseResultEditProgressEvent,
+  parseToolCallEvent,
+  parseToolResultEvent,
+  restoreResultEditProgressEvents,
+} from './copilotClient';
 
 describe('copilot SSE tool event projection', () => {
   it('preserves structured call correlation fields', () => {
@@ -83,5 +88,22 @@ describe('copilot SSE tool event projection', () => {
       toolJobId: 'tj_1',
       revisionId: undefined,
     });
+  });
+
+  it('restores persisted P4R-3 public edit stages in sequence order', () => {
+    expect(restoreResultEditProgressEvents([
+      {
+        resultEditProgressVersion: 1, sequence: 2, changeSetId: 'cs_1',
+        stage: 'job', status: 'completed', publicPhase: 'execute_or_recompute',
+        publicPhaseLabel: '执行/重算',
+      },
+      {
+        resultEditProgressVersion: 1, sequence: 1, changeSetId: '',
+        stage: 'plan', status: 'running', publicPhase: 'assess_impact', publicPhaseLabel: '判断影响',
+      },
+    ]).map((item) => [item.sequence, item.publicPhaseLabel])).toEqual([
+      [1, '判断影响'],
+      [2, '执行/重算'],
+    ]);
   });
 });

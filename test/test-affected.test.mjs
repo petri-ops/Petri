@@ -15,6 +15,7 @@ test('result studio backend changes select one deduplicated domain bundle', () =
   assert.equal(new Set(plan.tests).size, plan.tests.length);
   assert.ok(plan.tests.includes('test/result-edit-intent.test.mjs'));
   assert.ok(plan.tests.includes('test/result-studio-lifecycle.test.mjs'));
+  assert.ok(!plan.tests.includes('test/p4r-invariants.test.mjs'));
   assert.ok(!plan.tests.includes('test/loop-controller.test.mjs'));
 });
 
@@ -24,6 +25,32 @@ test('frontend source changes produce related frontend inputs and required gates
   assert.deepEqual(plan.frontendRelated, ['src/components/result-studio/ResultEditPanel.tsx']);
   assert.ok(plan.commands.includes('frontend-check'));
   assert.ok(plan.commands.includes('ui-audit'));
+});
+
+test('Result Studio Agent production wiring selects binding and prompt regressions', () => {
+  for (const file of [
+    'core/r-server/agent-runner.js',
+    'core/r-server/routes/ai-agent.js',
+    'core/r-server/helpers/system-prompt.js',
+  ]) {
+    const plan = resolveImpact([file]);
+    assert.deepEqual(plan.unknown, []);
+    assert.ok(plan.tests.includes('test/result-studio-agent-binding.test.mjs'));
+    assert.ok(plan.tests.includes('test/system-prompt-result-context.test.mjs'));
+  }
+});
+
+test('Git backend and interceptor changes never pull the explicit-only red invariant into the default gate', () => {
+  for (const file of ['core/shared-backend/git-adapter.js', 'core/shared-backend/git-repository-binding.js']) {
+    const plan = resolveImpact([file]);
+    assert.deepEqual(plan.unknown, []);
+    assert.ok(plan.tests.includes('test/git-adapter.test.mjs'));
+    assert.ok(!plan.tests.includes('test/p4r-invariants.test.mjs'));
+  }
+  const interceptor = resolveImpact(['core/r-server/agent-tools/agent-tool-interceptor.js']);
+  assert.deepEqual(interceptor.unknown, []);
+  assert.ok(interceptor.tests.includes('test/agent-tool-policy.test.mjs'));
+  assert.ok(interceptor.tests.includes('test/result-studio-agent-binding.test.mjs'));
 });
 
 test('documentation changes select docs governance without scientific tests', () => {

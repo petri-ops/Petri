@@ -166,6 +166,9 @@ export interface ResultEditProgressEvent {
   changeSetId: string;
   stage: string;
   status: string;
+  /** P4R-3 public projection; never exposes materialize/Git internals in result focus UI. */
+  publicPhase?: string;
+  publicPhaseLabel?: string;
   reason?: string;
   toolJobId?: string;
   revisionId?: string;
@@ -178,10 +181,25 @@ export function parseResultEditProgressEvent(obj: Record<string, unknown>): Resu
     changeSetId: String(obj.changeSetId || ''),
     stage: String(obj.stage || ''),
     status: String(obj.status || ''),
+    publicPhase: obj.publicPhase ? String(obj.publicPhase) : undefined,
+    publicPhaseLabel: obj.publicPhaseLabel ? String(obj.publicPhaseLabel) : undefined,
     reason: obj.reason ? String(obj.reason) : undefined,
     toolJobId: obj.toolJobId ? String(obj.toolJobId) : undefined,
     revisionId: obj.revisionId ? String(obj.revisionId) : undefined,
   };
+}
+
+export function restoreResultEditProgressEvents(value: unknown): ResultEditProgressEvent[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .slice(-30)
+    .flatMap((item) => item && typeof item === 'object'
+      ? [parseResultEditProgressEvent(item as Record<string, unknown>)]
+      : [])
+    // intent/plan and an early terminal failure legitimately precede any
+    // ChangeSet, so an empty changeSetId is not evidence of a malformed event.
+    .filter((item) => item.stage && item.status)
+    .sort((a, b) => a.sequence - b.sequence);
 }
 
 export function parseToolCallEvent(obj: Record<string, unknown>): ToolCallEvent {

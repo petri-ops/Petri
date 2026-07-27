@@ -48,6 +48,17 @@ const sourceFiles = {
   acceptanceScript: 'scripts/g0-rs-p4r-acceptance.mjs',
 };
 
+function sourceCommitStatus(commit, hashes) {
+  if (!commit || spawnSync('git', ['merge-base', '--is-ancestor', commit, 'HEAD'], { cwd: root }).status !== 0) {
+    return { reachable: false, mismatches: Object.values(sourceFiles) };
+  }
+  const mismatches = Object.entries(sourceFiles).flatMap(([key, file]) => {
+    const result = spawnSync('git', ['show', `${commit}:${file}`], { cwd: root, encoding: 'utf8' });
+    return result.status === 0 && sha(result.stdout) === hashes[key] ? [] : [file];
+  });
+  return { reachable: true, mismatches };
+}
+
 /**
  * Frozen budgets.
  *
@@ -399,7 +410,7 @@ function inspect(verification, observation) {
     item('RS-P4R0-12',
       invariantRun.total >= 4 && invariantRun.failed >= 1 && invariantRun.passed >= 1,
       [sourceFiles.invariantTest],
-      'The four plan invariants exist as tests written against code reality, each naming the concrete defect it fails on. They are deliberately NOT aggregated into this gate: three fail today, which is P4R-0 delivering a definition of done for P4R-1 and P4R-5, not a passing claim.'),
+      'The plan invariants exist as tests written against code reality and name concrete defects. They are deliberately NOT aggregated into this gate: the remaining source-projection invariant stays red until its owning P4R-5 phase, while the earlier P4R-1 invariants now pass.'),
 
     // Fails if the frozen baseline is edited to match a later measurement.
     // A baseline that drifts toward the present proves nothing.
@@ -498,6 +509,11 @@ try {
     const observation = toObservation(capture);
     const verification = { generatedAt: new Date().toISOString(), commands: runCommands() };
     const report = { ...inspect(verification, observation), generatedAt: verification.generatedAt, privacyClean: true };
+    const commitStatus = sourceCommitStatus(report.sourceCommit, report.sourceHashes);
+    report.sourceCommitReachable = commitStatus.reachable;
+    report.sourceCommitMatchesSourceHashes = commitStatus.reachable && commitStatus.mismatches.length === 0;
+    report.sourceCommitMismatches = commitStatus.mismatches;
+    if (!report.sourceCommitMatchesSourceHashes) throw new Error(`source commit mismatch: ${commitStatus.mismatches.join(',')}`);
     if (!report.passed) throw new Error(report.checks.filter((check) => !check.passed).map((check) => check.id).join(','));
     mkdirSync(dirname(evidencePath), { recursive: true });
     writeFileSync(evidencePath, `${JSON.stringify(report, null, 2)}\n`);
@@ -507,7 +523,9 @@ try {
     if (!existsSync(evidencePath)) throw new Error('evidence missing; run npm run g0:result-studio:p4r:update');
     const stored = JSON.parse(readFileSync(evidencePath, 'utf8'));
     const current = inspect(stored.verification, stored.baselineObservation);
-    if (!stored.passed || !current.passed
+    const commitStatus = sourceCommitStatus(stored.sourceCommit, stored.sourceHashes || {});
+    if (!stored.passed || !current.passed || !stored.sourceCommitMatchesSourceHashes
+      || !commitStatus.reachable || commitStatus.mismatches.length > 0
       || JSON.stringify(stored.sourceHashes) !== JSON.stringify(current.sourceHashes)) {
       throw new Error('stored G0-RS-P4R-0 evidence is stale or invalid');
     }

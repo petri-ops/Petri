@@ -145,6 +145,8 @@ export interface ResultStudioContextAgentView {
     sampleEntityIds: string[];
     hasFilter: boolean;
     filterDescription: string | null;
+    fields: string[];
+    sort: Array<{ field: string; direction: 'asc' | 'desc' }>;
   } | null;
   selectionState: {
     present: boolean;

@@ -38,7 +38,10 @@ const sourceFiles = {
   contextTest: 'test/result-studio-context.test.mjs',
   promptTest: 'test/system-prompt-result-context.test.mjs',
   registryTest: 'test/agent-tool-registry.test.mjs',
+  intentTest: 'test/result-edit-intent.test.mjs',
+  editAgentToolTest: 'test/result-edit-agent-tool.test.mjs',
   readinessTest: 'frontend/src/components/result-studio/ResultStudioContextReadiness.test.tsx',
+  surfaceTest: 'frontend/src/components/result-studio/ResultStudioSurface.test.tsx',
   acceptanceScript: 'scripts/g0-rs-p3-acceptance.mjs',
   packageScripts: 'package.json',
 };
@@ -70,6 +73,17 @@ const INTERNAL_ID_PARAMS = Object.freeze(['toolJobId', 'artifactId', 'revisionId
 
 function sourceHashes() {
   return Object.fromEntries(Object.entries(sourceFiles).map(([key, file]) => [key, sha(read(file))]));
+}
+
+function sourceCommitStatus(commit, hashes) {
+  if (!commit || spawnSync('git', ['merge-base', '--is-ancestor', commit, 'HEAD'], { cwd: root }).status !== 0) {
+    return { reachable: false, mismatches: Object.values(sourceFiles) };
+  }
+  const mismatches = Object.entries(sourceFiles).flatMap(([key, file]) => {
+    const result = spawnSync('git', ['show', `${commit}:${file}`], { cwd: root, encoding: 'utf8' });
+    return result.status === 0 && sha(result.stdout) === hashes[key] ? [] : [file];
+  });
+  return { reachable: true, mismatches };
 }
 
 function runCommands() {
@@ -266,6 +280,11 @@ try {
   if (process.argv.includes('--write-evidence')) {
     const verification = { generatedAt: new Date().toISOString(), commands: runCommands() };
     const report = { ...inspect(verification), generatedAt: verification.generatedAt, privacyClean: true };
+    const commitStatus = sourceCommitStatus(report.sourceCommit, report.sourceHashes);
+    report.sourceCommitReachable = commitStatus.reachable;
+    report.sourceCommitMatchesSourceHashes = commitStatus.reachable && commitStatus.mismatches.length === 0;
+    report.sourceCommitMismatches = commitStatus.mismatches;
+    if (!report.sourceCommitMatchesSourceHashes) throw new Error(`source commit mismatch: ${commitStatus.mismatches.join(',')}`);
     if (!report.passed) throw new Error(report.checks.filter((check) => !check.passed).map((check) => check.id).join(','));
     mkdirSync(dirname(evidencePath), { recursive: true });
     writeFileSync(evidencePath, `${JSON.stringify(report, null, 2)}\n`);
@@ -274,7 +293,10 @@ try {
     if (!existsSync(evidencePath)) throw new Error('evidence missing; run npm run g0:result-studio:p3:update');
     const stored = JSON.parse(readFileSync(evidencePath, 'utf8'));
     const current = inspect(stored.verification);
-    if (!stored.passed || !current.passed || JSON.stringify(stored.sourceHashes) !== JSON.stringify(current.sourceHashes)) {
+    const commitStatus = sourceCommitStatus(stored.sourceCommit, stored.sourceHashes || {});
+    if (!stored.passed || !current.passed || !stored.sourceCommitMatchesSourceHashes
+      || !commitStatus.reachable || commitStatus.mismatches.length > 0
+      || JSON.stringify(stored.sourceHashes) !== JSON.stringify(current.sourceHashes)) {
       throw new Error('stored G0-RS-P3 evidence is stale or invalid');
     }
     console.log(`[G0-RS-P3] PASS — ${current.checks.length}/${current.checks.length}`);

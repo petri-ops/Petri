@@ -213,6 +213,12 @@ function resolveResultStudioContext(ctx = {}, dependencies = {}) {
       entityIdCount: summary.entityIdCount,
       truncated: summary.truncated,
       entityIdsHash: summary.entityIdsHash,
+      filterHash: summary.filterHash,
+      fields: Array.isArray(persistedSelection.displayState?.fields)
+        ? persistedSelection.displayState.fields
+        : [],
+      sort: summary.sort,
+      updatedAt: persistedSelection.updatedAt,
       sampleEntityIds: summary.sampleEntityIds,
       hasFilter: summary.hasFilter,
       filterDescription: describeFilterExpression(persistedSelection.filterExpression),

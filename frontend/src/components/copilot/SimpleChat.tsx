@@ -7,7 +7,9 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   ackRunTool,
+  restoreResultEditProgressEvents,
   type ChatMessage,
+  type ResultEditProgressEvent,
 } from './copilotClient';
 import {
   getConversationMessages,
@@ -54,6 +56,7 @@ import {
   type ChatModelPreset,
 } from '@/hooks/useAiSettings';
 import type { CopilotContext } from '@/lib/copilotContext';
+import { copilotContextOverrideForAsk } from '@/lib/result-edit-agent-bridge';
 import { CopilotMarkdown } from './copilotMarkdown';
 import {
   formatToolDuration,
@@ -95,6 +98,7 @@ interface SimpleMessage {
   processingDurationMs?: number;
   statusMessage?: string;
   progressUpdates?: Array<{ iteration: number; content: string }>;
+  resultEditProgress?: ResultEditProgressEvent[];
   /** HLE-C4R: live durable-loop projection for the running assistant turn. */
   loop?: ConversationLoopState | null;
 }
@@ -373,6 +377,7 @@ export function SimpleChat({
         ts: m.ts,
         toolActivities: restoreToolActivities(m.meta?.toolActivities),
         progressUpdates: restoreProgressUpdates(m.meta?.progressUpdates),
+        resultEditProgress: restoreResultEditProgressEvents(m.meta?.resultEditProgress),
         processingDurationMs: typeof m.meta?.processingDurationMs === 'number'
           ? m.meta.processingDurationMs
           : undefined,
@@ -403,6 +408,7 @@ export function SimpleChat({
         ts: m.ts,
         toolActivities: restoreToolActivities(m.meta?.toolActivities),
         progressUpdates: restoreProgressUpdates(m.meta?.progressUpdates),
+        resultEditProgress: restoreResultEditProgressEvents(m.meta?.resultEditProgress),
         processingDurationMs: typeof m.meta?.processingDurationMs === 'number'
           ? m.meta.processingDurationMs
           : undefined,
@@ -464,6 +470,7 @@ export function SimpleChat({
         processingDurationMs: activeRun.processingDurationMs,
         statusMessage: activeRun.statusMessage,
         progressUpdates: activeRun.progressUpdates,
+        resultEditProgress: activeRun.resultEditProgress,
         loop: durableLoop.loop || activeRun.loop,
       });
     }
@@ -505,7 +512,7 @@ export function SimpleChat({
     resizeTextarea(e.target);
   };
 
-  const send = useCallback(async (text: string) => {
+  const send = useCallback(async (text: string, contextOverride?: Partial<CopilotContext>) => {
     const trimmed = text.trim();
     if (!trimmed || streaming) return;
     setStarting(true);
@@ -536,6 +543,7 @@ export function SimpleChat({
         modelName: activeModel?.model,
         context: {
           ...copilotCtxRef.current,
+          ...(contextOverride || {}),
           page: 'desktop-project',
           projectId,
           accessMode,
@@ -577,9 +585,13 @@ export function SimpleChat({
     // twice. When no conversation exists yet, createConversationForRun is
     // awaited before the running check, so each would also create its own.
     if (!ownsCopilotAsk) return undefined;
-    const unsub = subscribeBioF3Event(biof3Events.copilotAsk, ({ prompt }) => {
+    const unsub = subscribeBioF3Event(biof3Events.copilotAsk, (detail) => {
+      const { prompt } = detail;
       const p = typeof prompt === 'string' ? prompt.trim() : '';
-      if (p) sendRef.current(p);
+      // Snapshot override was created at click time. Pass it into send before
+      // send can await conversation creation, otherwise the result/token may
+      // drift to whichever Artifact happens to be open afterwards.
+      if (p) void sendRef.current(p, copilotContextOverrideForAsk(detail));
     });
     return unsub;
   }, [ownsCopilotAsk]);
@@ -717,6 +729,9 @@ export function SimpleChat({
                         pending={Boolean(m.pending)}
                         onFileReferenceClick={handleFileReferenceClick}
                       />
+                    )}
+                    {m.resultEditProgress && m.resultEditProgress.length > 0 && (
+                      <ResultEditProgressList events={m.resultEditProgress} />
                     )}
                     <CopilotMarkdown
                       text={m.content || m.statusMessage || (m.pending ? '…' : '')}
@@ -1021,6 +1036,31 @@ function AgentProgressList({
           <span className="sc-agent-progress-dot" aria-hidden="true" />
           <span>当前阶段执行中</span>
         </div>
+      )}
+    </div>
+  );
+}
+
+export function ResultEditProgressList({
+  events,
+}: {
+  events: ResultEditProgressEvent[];
+}): React.ReactElement {
+  const phases = new Map<string, { label: string; status: string }>();
+  for (const event of events) {
+    if (!event.publicPhase || !event.publicPhaseLabel) continue;
+    phases.set(event.publicPhase, { label: event.publicPhaseLabel, status: event.status });
+  }
+  const terminal = [...events].reverse().find((event) => event.status === 'terminal');
+  return (
+    <div className="sc-result-edit-progress" aria-label="结果修改五阶段进度">
+      {[...phases.entries()].map(([phase, item]) => (
+        <span key={phase} data-status={item.status}>
+          {item.label}
+        </span>
+      ))}
+      {terminal && (
+        <strong>{terminal.stage === 'cancelled' ? '修改已停止' : '修改未完成'}</strong>
       )}
     </div>
   );

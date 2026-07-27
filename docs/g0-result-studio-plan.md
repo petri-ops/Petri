@@ -1537,20 +1537,22 @@ P4R 完成后的默认产品形态固定为：
 - 机器捕获结果点击的请求 waterfall、事件循环 lag、首次内容可见、Artifact 切换、版本切换和代码打开基线。
 - 建立小/中/大 PNG/SVG、10 万行表、长报告、多 Revision 的 canonical fixture；不使用数据库 seed 冒充真实产品旅程。
 - 先补失败测试：结果显示不得等待 interaction/context/storage；查看历史版本不得改变 current；代码 hash 不符必须阻断；次级请求失败不得清空主体。
-  - ✅ 已交付于 `test/p4r-invariants.test.mjs`，入口 `npm run g0:result-studio:p4r:invariants`。**刻意不并入 `g0:result-studio:p4r` 聚合门**：三条今天为红，那是本阶段要交付的「完成定义」，不是失败。
+  - ✅ 已交付于 `test/p4r-invariants.test.mjs`，入口 `npm run g0:result-studio:p4r:invariants`。**刻意不并入 `g0:result-studio:p4r` 聚合门**：当前只剩 P4R-5 所属的源码投影一条为红，它是后续阶段的「完成定义」，不是 P4R-3 的失败。
   - 每条按代码实况书写，不照本节原文写成笼统断言（笼统写法要么恒真要么红在错误原因上）：
     - **① 通过**。服务端已成立：`/api/tools/file` 与 result-studio 路由无依赖关系，断言用于防回归。客户端那半属不变量 ④。
     - **②a 通过**。重复读取不新增 Revision。
-    - **②b 红**。`routes/result-studio.js:320-330` 的 `projectContext()` 在**每个**请求上调 `saveRepositoryBinding()`，无视其自身 `write` 标志，故纯 GET 也写库并重跑未缓存的 `bindProjectRepository`（内含 git fork）。归 `P4R-1`。
+    - **②b 已转绿（P4R-1）**。纯读路径不再写 repository binding。
     - **③ 红**。23 条路由中无 Revision 源投影端点；阻断原语已存在（`result-studio.js:106-113`、`result-compare-service.js:287/:494`），缺的是端点本身。归 `P4R-5`。
-    - **④ 红**。两处确认违反均在内联的 `ResultArtifactShell`：`project-workspace.tsx:3602-3612`（请求前先清空 + 空 catch）与 `:3366-3378`（轮询失败让陈旧 `running` 胜出 → `setResult(null)`）。测试导入 `P4R-1` 须抽出的纯决策模块 `resultBodyState.ts`，因其不存在而红——不对源码做字符串匹配。归 `P4R-1`。
+    - **④ 已转绿（P4R-1）**。主体状态决策已抽入并测试 `resultBodyState.ts`，次级失败不再清空已显示主体。
 - 冻结可机器验证的性能预算。最低要求：点击后 100ms 内有可见反馈；Result Studio 打开链不得产生超过 250ms 的同步事件循环阻塞；不同大小 Artifact 的首内容与版本切换精确阈值由本阶段真实采样写入 acceptance contract，后续不得放宽来换取通过。
 
 ##### P4R-1：Fast Result Path
 
+**范围细化（2026-07-27，基于 P4R-0 真实测量）**：原 charter 把相邻版本预取和大文件渐进加载列为先验必做项；测量证明主要阻塞来自重复 Git 子进程，工作区扫描为 0%、hashing <5%。因此 P4R-1 的出口按证据收敛为：消除只读写 binding、缓存 runtime、惰性 repository state、批量 rev-parse，以及次级请求失败不替换已显示主体。预取/渐进加载没有可证明收益且未实现，不计为交付；只在 P4R-6 真实矩阵重新观察到对应瓶颈时重开。该细化不放宽冻结性能预算。
+
 - 拆分 Job 状态/Artifact 字节与 interaction/context/version/storage 请求。
-- 将 baseline 注册、完整表查询、工作区扫描和 hash 移出预览关键路径；增加 hash/digest 驱动缓存和后台失效。
-- 对当前与相邻版本预取有界缩略图/元数据；大文件始终渐进加载。
+- 将重复 Git runtime/repository state/rev-parse 成本移出预览关键路径；只读路径不得写 binding。
+- 相邻版本预取与大文件渐进加载经测量未形成当前瓶颈，明确推迟到 P4R-6 真实性能矩阵出现对应回归时再评估，不作为 P4R-1 已交付项。
 - 增加请求级 timing、cache hit/miss 和 event-loop lag 观测，但不得记录结果内容、绝对路径或凭据。
 
 ##### P4R-2：Focused Result Surface
@@ -1561,7 +1563,7 @@ P4R-2 的可交付范围以代码实况为界，本阶段**不新增阶段、不
 
 **证据边界**
 
-P4R-2 的证据边界沿用 P4R-0 已确立的纪律：**没有生产者的指标一律记 `unmeasured` 并写明原因，绝不估算、绝不默认为 0、绝不用形状校验冒充测量**（先例见 `acceptance/g0-result-studio/rs-p4r-performance.json` 的 `unmeasured` 数组与 `budgets.visibleFeedbackMs` 的 `machineVerifiable:false` / `status:"frozen_target_not_yet_measurable"`）。可以机器证明的部分：模式容器一次只渲染一态、`resultFirstScreen.ts` 中每个首屏谓词的真值表、header 不再重复呈现 `artifactTruth.status`、版本位在拿不到 `revisionOrdinal` 时走降级文案而非截断 ID、焦点顺序与 `role`/`aria-*` 完整、核心路径键盘处理器可触发、状态不只依赖颜色、样式只引用已定义的 `--biof3-*` token——这些全部是 DOM 结构与纯函数断言，happy-dom 足以覆盖，写成 vitest 并经 `npm run test:files`（**不得用会退化成 `vitest run --changed` 的裸 `npm test`**，见 §P4R-0 证据门约束）。必须记为未测量的部分：`1440/1024/820px` 下的实际布局与横向溢出、明暗主题的真实渲染差异、以及「主体首屏可见」的像素判定。原因是实测的而非假设的——`frontend/vite.config.ts` 的 `test.environment` 为 `happy-dom`，本次核对临时跑的探针（用例已删除）得 `getBoundingClientRect() = 0×0`、`offsetWidth = 0`、`document.documentElement.scrollWidth = 0`、`clientWidth = 0`，`getComputedStyle` 只回显声明值，`window.innerWidth` 可设但不带布局；仓库内无 playwright/puppeteer；`scripts/g0-qualification-visual.mjs` 只校验既有 PNG 与人工 `inspection.json`（其 `accessibilityInspection` 断言 `method === 'computer-use-accessibility-and-screenshot-review'`），并不捕获。统一用 `not_captured_no_browser_automation_in_repo` 作为原因串，与 P4R-0 保持同一词表。另有两条不得重复的前例：其一，`acceptance/g0-result-studio/rs-p2-ui-observation.json` 在仓库内**没有任何生产者**（`scripts/g0-rs-p2-acceptance.mjs:131-144` 只校验其形状：六格矩阵、`pageHorizontalOverflow === false`、64 位 sha256），因此它不可重跑、不可复核，P4R-2 **不得**再产出同类「形状被校验、内容无来源」的 UI 证据；其二，§P4R.7 声明的 `npm run g0:result-studio:p4r:frontend` 与 `:ui` 两个入口在 `package.json` 中**尚不存在**（现有仅 `p4r:invariants`、`p4r:test`、`p4r`、`p4r:update`），P4R-2 若要落 `acceptance/g0-result-studio/rs-p4r-product-reframe.json`，必须同时新增真正执行断言的脚本入口，并沿用 `sourceHashes` 风格使源码漂移时证据失效。所有 P4R-2 证据保持 `qualificationEligible:false`，不升级 `result-studio-editing` 支持声明，产品资格仍由 P7 唯一裁决。
+P4R-2 的证据边界沿用 P4R-0 已确立的纪律：**没有生产者的指标一律记 `unmeasured` 并写明原因，绝不估算、绝不默认为 0、绝不用形状校验冒充测量**（先例见 `acceptance/g0-result-studio/rs-p4r-performance.json` 的 `unmeasured` 数组与 `budgets.visibleFeedbackMs` 的 `machineVerifiable:false` / `status:"frozen_target_not_yet_measurable"`）。可以机器证明的部分：模式容器一次只渲染一态、`resultFirstScreen.ts` 中每个首屏谓词的真值表、header 不再重复呈现 `artifactTruth.status`、版本位在拿不到 `revisionOrdinal` 时走降级文案而非截断 ID、焦点顺序与 `role`/`aria-*` 完整、核心路径键盘处理器可触发、状态不只依赖颜色、样式只引用已定义的 `--biof3-*` token——这些全部是 DOM 结构与纯函数断言，happy-dom 足以覆盖，写成 vitest 并经 `npm run test:files`（**不得用会退化成 `vitest run --changed` 的裸 `npm test`**，见 §P4R-0 证据门约束）。必须记为未测量的部分：`1440/1024/820px` 下的实际布局与横向溢出、明暗主题的真实渲染差异、以及「主体首屏可见」的像素判定。原因是实测的而非假设的——`frontend/vite.config.ts` 的 `test.environment` 为 `happy-dom`，本次核对临时跑的探针（用例已删除）得 `getBoundingClientRect() = 0×0`、`offsetWidth = 0`、`document.documentElement.scrollWidth = 0`、`clientWidth = 0`，`getComputedStyle` 只回显声明值，`window.innerWidth` 可设但不带布局；仓库内无 playwright/puppeteer；`scripts/g0-qualification-visual.mjs` 只校验既有 PNG 与人工 `inspection.json`（其 `accessibilityInspection` 断言 `method === 'computer-use-accessibility-and-screenshot-review'`），并不捕获。统一用 `not_captured_no_browser_automation_in_repo` 作为原因串，与 P4R-0 保持同一词表。另有两条不得重复的前例：其一，`acceptance/g0-result-studio/rs-p2-ui-observation.json` 在仓库内**没有任何生产者**（`scripts/g0-rs-p2-acceptance.mjs:131-144` 只校验其形状：六格矩阵、`pageHorizontalOverflow === false`、64 位 sha256），因此它不可重跑、不可复核，P4R-2 **不得**再产出同类「形状被校验、内容无来源」的 UI 证据；其二，`npm run g0:result-studio:p4r:frontend` 已建立并执行真实 frontend specs；不存在单独的 `:ui` 像素门，因为仓库仍无浏览器自动化。`acceptance/g0-result-studio/rs-p4r-product-reframe.json` 同时绑定 `sourceHashes` 与 source commit，生产源码或实际执行 spec 漂移都会令证据失效。所有 P4R-2 证据保持 `qualificationEligible:false`，不升级 `result-studio-editing` 支持声明，产品资格仍由 P7 唯一裁决。
 
 
 - 主体首屏化。**删除对象按代码实况重新指定**：原文点名的三个对象经核对均不成立——Honeycomb 结果导航是网格列（`project-workspace.module.css:4086-4088`）且已可收起（`project-workspace.tsx:4257-4258`、`:3947`），删之得横向宽度而非首屏高度，其去留改为横向宽度问题单独裁决、不计入首屏化交付；存储卡已自抑制（`ResultStudioChangeSetPanel.tsx:56`、`:182`、`:184`）；二级 Artifact rail 已条件渲染（`project-workspace.tsx:3946`）。真正无条件占据首屏的是计划未点名的 `resultDeliveryCard`，已由 `ba6b124` 按 `resultFirstScreen.ts::shouldShowDeliveryCard` 条件化。
@@ -1575,6 +1577,8 @@ P4R-2 的证据边界沿用 P4R-0 已确立的纪律：**没有生产者的指�
 - 1440/1024/820px、明暗主题和键盘焦点：**按可证明性拆成两半，不整条作为出口条件**。可在 happy-dom 单测中机器证明的部分必须成立并写进证据：模式容器在每个断点下渲染同一棵可达 DOM、焦点顺序与 `role`/`aria-*` 完整、核心路径的键盘处理器存在且可触发、状态不只靠颜色（以文本或 `data-*` 兜底）、样式只使用已定义的 `--biof3-*` token 因而明暗共用一套声明。不可证明的部分**必须按 P4R-0 先例记为未测量并给出原因**：`frontend/vite.config.ts` 用 happy-dom，实测 `getBoundingClientRect()`/`offsetWidth`/`scrollWidth`/`clientWidth` 全为 0，不做布局计算；仓库无 playwright/puppeteer；`scripts/g0-qualification-visual.mjs` 只校验既有 PNG 不捕获。因此 `pageHorizontalOverflow`、各断点实际可见高度与「主体首屏可见」的像素判定一律记 `unmeasured` + `not_captured_no_browser_automation_in_repo`，**不得估算、不得以 `innerWidth` 冒充布局、不得以人工提供而仓库内无生产者的 JSON 充作机器证据**。
 
 ##### P4R-3：Agent-first Editing
+
+进度（2026-07-28，实现候选，尚未阶段收口）：中央结果画布已接入独立 `ResultAgentComposer`，前端按 project/conversation/Artifact/Revision/Selection 完整 binding key 保存草稿与后端 `contextToken`；事件把 token、结果与结构化编辑请求放入不可见 request context，可见用户消息只保存用户自己的目标。task/legacy 两条 Agent 路径共用 `result-context-binding.js`，在 schema 校验前只为缺少 token 的 `*_in_context` 调用补入点击时 token，显式 stale token 不被替换，后端继续从 SQLite/Artifact Truth 重新投影并 fail-closed。绑定态仍先读 `result_studio_context` 的可信 editable schema，再 plan；create 只接受同一 Agent turn 中服务端保存的原始 intent，模型篡改分类/确认、旧 selection intent 配新 token、任意 script patch 与模型提供的 DAG 均 fail-closed。无 DAG 的纯展示重绘诚实限定为 `current_result_only`，科学/数据/流程变化继续因缺权威 DAG 阻断。`ResultEditPanel` 已降为右栏默认关闭的“高级精细调整”抽屉；手动 patch 与 Agent 意图仍汇合到同一 context-bound plan/ChangeSet 链。五阶段由后端真实发出并单调记录；实时 Composer 按 token 隔离，完成/停止/Provider 失败写入 terminal assistant meta，重开会话可从 SQLite 消息恢复且不渲染内部 reason。并发 run 拒绝提交且不清草稿。P4R-3 Node 专项当前 76/76、前端 P4R 定向 134/134、strict TypeScript 通过。**本段只记录实现候选**：实现提交、source-bound `rs-p4r-product-reframe.json`、旧 P2/P3/P4 证据刷新与治理门尚未完成前，本阶段仍是唯一 `in_progress`，不得推进 P4R-4。
 
 - 把自然语言 Composer 置于当前结果焦点内；自动绑定 Artifact/Revision/Selection/contextToken。
 - 用户只描述目标，Agent 输出紧凑参数 Patch、影响级别和受影响节点；不展示隐藏推理链。
@@ -1853,9 +1857,9 @@ G0-RS-P0 Truth Correction
 
 `G0-RS-P4R` 计划交付：
 
-1. [x] P4R-0 捕获真实失败基线、请求 waterfall 与事件循环阻塞，并冻结预算。证据 `rs-p4r-performance.json`（13/13）：基线已冻结为脚本内常量并由 `RS-P4R0-13` 钉住，重跑只写 `currentObservation` 与对比、不覆盖基线；四条不变量见 `test/p4r-invariants.test.mjs`（当前 3 绿 1 红，红的第 3 条属 P4R-5）。分尺寸阈值按 `deferredBudgets` 显式推迟——在快路径存在前采样只会把缺陷固化成标准。（进行中 `340c09a`：env 门控观测探针已落地；仍缺 canonical fixture、失败测试先行与冻结的性能预算证据。）
-2. [~] P4R-1 建立结果快路径。**服务端已完成**：实测推翻计划前提——工作区扫描占 0%、hashing <5%，93% 是每次只读请求都 `bindProjectRepository()` 带来的 git 子进程。故未做架构改造，改为 memo `detectGitRuntime`、`repositoryState()` 三次 fork 惰性化、`inspectRevisionIntegrity` 的每 revision rev-parse 批量成两次常量开销，并按已声明却被忽略的 `write` 标志停止只读路径写绑定。对比冻结基线：changesets 42.1→1.1ms（-97%）、workspace-status 64.9→22.4ms（-66%），每 revision 斜率 20ms→0.18ms（200 revision 由 4179ms 降至 66ms）。证据 `rs-p4r-product-reframe.json`（7/7）。**剩余**：客户端瀑布拆分与相邻版本预取/大文件渐进加载尚未评估。
-3. [~] P4R-2 完成主体首屏化（主体之上无无条件块，判据在 `resultFirstScreen.ts` 中可测）、收敛已有结果 header（去掉与 `workflowBar` 的真值重复，版本位显示真实 `vN` 或如实降级）、按需结果抽屉，以及**一次只显示一态的模式容器并接入唯一有实现的 `result`**。`code` 入口待 P4R-5 的 Revision 源投影路由，`history`/版本选择器待 P4R-4，`compare` 在 P4R-4 给出入口前保持不可达；四态齐备不属 P4R-2 出口。其中 Agent 会话常驻已由 `8e58f98` 交付（记为交付缺陷修复：提交被静默丢弃，非布局项）。
+1. [x] P4R-0 捕获真实失败基线、请求 waterfall 与事件循环阻塞，并冻结预算。证据 `rs-p4r-performance.json`（13/13）：基线已冻结为脚本内常量并由 `RS-P4R0-13` 钉住，重跑只写 `currentObservation` 与对比、不覆盖基线；四条不变量见 `test/p4r-invariants.test.mjs`（当前 3 绿 1 红，红的第 3 条属 P4R-5）。分尺寸阈值按 `deferredBudgets` 显式推迟——在快路径存在前采样只会把缺陷固化成标准。
+2. [x] P4R-1 按实测边界完成结果快路径。实测推翻计划前提——工作区扫描占 0%、hashing <5%，93% 是每次只读请求都 `bindProjectRepository()` 带来的 git 子进程；因此交付为 memo `detectGitRuntime`、`repositoryState()` 三次 fork 惰性化、`inspectRevisionIntegrity` 的每 revision rev-parse 批量成两次常量开销、只读请求不写 binding，以及客户端次级失败不替换已显示主体。对比冻结基线：changesets 42.1→1.1ms（-97%）、workspace-status 64.9→22.4ms（-66%），每 revision 斜率 20ms→0.18ms（200 revision 由 4179ms 降至 66ms）。证据 `rs-p4r-product-reframe.json`（7/7）。原 charter 的相邻版本预取与大文件渐进加载没有可证明收益且未实现，已从本子阶段出口移出，作为 P4R-6 真实性能矩阵出现回归时才重开的优化候选；不得描述为已交付。
+3. [x] P4R-2 按 §P4R-2 的代码实况收敛范围完成：主体之上无无条件块且判据进入 `resultFirstScreen.ts`，已有结果 header 显示真实 `vN` 或诚实降级，建立一次只显示一态的容器并只接入真实存在的 `result`，Agent 会话常驻，result↔chat 选择/草稿/滚动/布局保持。`code` 随 P4R-5、`history`/版本选择器随 P4R-4，`compare` 在 P4R-4 前保持不可达；四态齐备从未属于收敛后的 P4R-2 出口。按需结果抽屉未单独新建：现有导航已可收起且 artifact rail 已条件化，未把不存在的重构冒充交付。
 4. [ ] P4R-3 让自然语言 Agent 成为默认编辑入口，P4 Core 参数面板降为高级精调。
 5. [ ] P4R-4 完成可直接查看的版本选择器与 Codex-like Change Review，查看旧版不产生任何写入。
 6. [ ] P4R-5 完成每个 Artifact/Revision 的精确代码、复制/下载/Agent 修改和受控复现入口。

@@ -681,7 +681,6 @@ const TOOL_DEFS = [
             enum: ['manual', 'agent'],
             description: '参数来源，仅用于审计与解释文案；不影响校验强度或影响分级',
           },
-          workflowPlan: { type: 'object', description: '可选：真实 AgentWorkflowPlan，用于计算受影响下游节点' },
           userMessageId: { type: 'string', description: '可选来源用户消息 id' },
           contextToken: { type: 'string', description: '可选：result_studio_context 返回的 token' },
         },
@@ -700,15 +699,6 @@ const TOOL_DEFS = [
         properties: {
           contextToken: { type: 'string', description: 'result_studio_context 返回的 token' },
           intent: { type: 'object', description: 'result_edit_plan_in_context 返回的完整 intent' },
-          scriptPatch: {
-            type: 'array',
-            description: '可选的精确脚本替换；每段 oldText 必须唯一匹配',
-            items: {
-              type: 'object',
-              properties: { oldText: { type: 'string' }, newText: { type: 'string' } },
-              required: ['oldText', 'newText'],
-            },
-          },
           scientificConfirmed: { type: 'boolean', description: '科学参数或方法变化已完成确认时为 true' },
         },
         required: ['contextToken', 'intent'],

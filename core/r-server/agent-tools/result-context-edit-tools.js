@@ -24,6 +24,33 @@ const {
 const { createResultEditPlanTool, createResultChangeSetTools } = require('./result-edit-tools');
 const { projectPublicEditPhase, PUBLIC_EDIT_PHASES } = require('../../shared-backend/result-studio-context');
 const { normalizeEditSubmission, explainEditImpact } = require('../../shared-backend/result-edit-controls');
+const { isDeepStrictEqual } = require('node:util');
+
+// A context-bound intent is executable only in the Agent turn that received
+// the trusted plan. The model sees the JSON intent but cannot register or
+// replace this server-side copy. A restart/context change therefore requires
+// a fresh plan, which is the safe failure mode.
+const trustedIntentsByContext = new WeakMap();
+
+function rememberTrustedIntent(ctx, envelope, intent) {
+  if (!ctx || typeof ctx !== 'object' || !intent || typeof intent !== 'object' || !intent.intentId) return;
+  let registry = trustedIntentsByContext.get(ctx);
+  if (!registry) {
+    registry = new Map();
+    trustedIntentsByContext.set(ctx, registry);
+  }
+  registry.set(intent.intentId, {
+    contextToken: envelope.contextToken,
+    intent: JSON.parse(JSON.stringify(intent)),
+  });
+  while (registry.size > 8) registry.delete(registry.keys().next().value);
+}
+
+function trustedIntentFor(ctx, intentId) {
+  return ctx && typeof ctx === 'object'
+    ? trustedIntentsByContext.get(ctx)?.get(intentId) || null
+    : null;
+}
 
 /** 公开进度：只暴露阶段结论，不暴露隐藏推理链或 Git 细节。 */
 function publicProgress(events) {
@@ -49,6 +76,16 @@ function contextView(envelope) {
   };
 }
 
+function emitProgress(ctx, stage, status) {
+  if (typeof ctx.emitResultEditProgress !== 'function') return;
+  ctx.emitResultEditProgress({
+    resultEditProgressVersion: 1,
+    changeSetId: '',
+    stage,
+    status,
+  });
+}
+
 /**
  * 构建 context-bound 工具集合。
  *
@@ -68,6 +105,8 @@ function createResultContextEditTools(options = {}) {
     const guarded = guardContextOperation(ctx, args, options, { requireToken: false });
     if (!guarded.ok) return guarded.response;
     const envelope = guarded.resolved.envelope;
+    emitProgress(ctx, 'intent', 'completed');
+    emitProgress(ctx, 'plan', 'running');
 
     // G0-RS-P4：手动控件与 AI 提议共用同一个归一化闸门。任何一方提出的参数
     // 都必须先通过受信 descriptor 的类型/范围/枚举校验，未声明参数一律拒绝。
@@ -110,17 +149,25 @@ function createResultContextEditTools(options = {}) {
       requestedOutcome: args.requestedOutcome,
       requestedEditClass: args.requestedEditClass,
       proposedParameterPatch: submission ? submission.patch : args.proposedParameterPatch,
-      workflowPlan: args.workflowPlan,
+      // Never accept a DAG from model arguments. The current context resolver
+      // does not yet project a persisted authoritative DAG, so non-presentation
+      // edits correctly remain blocked instead of trusting an invented graph.
+      workflowPlan: null,
       selectionId: envelope.selection ? envelope.selection.selectionId : undefined,
       userMessageId: args.userMessageId,
     }, ctx);
+    emitProgress(ctx, 'plan', planned && planned.ok ? 'completed' : 'blocked');
+    if (planned && planned.ok && planned.intent) rememberTrustedIntent(ctx, envelope, planned.intent);
     return {
       ...planned,
       context: contextView(envelope),
       editOrigin: submission ? submission.origin : null,
       // 执行前的影响说明：用户在点"生成候选"之前就能看到会不会重算科学结论。
       impact: submission
-        ? explainEditImpact(submission.classification, { affectedNodeIds: planned.intent?.affectedNodeIds || [] })
+        ? explainEditImpact(submission.classification, {
+          affectedNodeIds: planned.intent?.affectedNodeIds || [],
+          affectedScope: planned.intent?.affectedScope || 'none',
+        })
         : null,
       publicPhase: projectPublicEditPhase(planned.ok ? 'plan' : 'intent').phase,
       publicPhases: [...PUBLIC_EDIT_PHASES],
@@ -144,6 +191,34 @@ function createResultContextEditTools(options = {}) {
         error: 'context_intent_mismatch',
         message: '该修改计划不属于当前打开的结果版本；请重新规划。',
         remediation: 'result_edit_plan_in_context',
+      };
+    }
+    const activeSelectionRef = envelope.selection ? envelope.selection.selectionId : null;
+    const plannedSelectionRef = typeof intent.selectionRef === 'string' && intent.selectionRef.trim()
+      ? intent.selectionRef.trim()
+      : null;
+    if (plannedSelectionRef !== activeSelectionRef) {
+      return {
+        ok: false,
+        error: 'context_intent_selection_mismatch',
+        message: '当前选择与修改计划不一致；请基于当前结果重新规划。',
+        remediation: 'result_edit_plan_in_context',
+      };
+    }
+    const trusted = trustedIntentFor(ctx, intent.intentId);
+    if (!trusted || trusted.contextToken !== envelope.contextToken || !isDeepStrictEqual(trusted.intent, intent)) {
+      return {
+        ok: false,
+        error: 'context_intent_untrusted',
+        message: '修改计划不是本轮由受信上下文生成的原始计划，或计划内容已变化；请重新规划。',
+        remediation: 'result_edit_plan_in_context',
+      };
+    }
+    if (Array.isArray(args.scriptPatch) && args.scriptPatch.length > 0) {
+      return {
+        ok: false,
+        error: 'context_script_patch_forbidden',
+        message: '结果焦点编辑只执行插件声明的参数 Patch；脚本修改不能通过此入口提交。',
       };
     }
     const created = await changeSetTools.create(args, ctx);

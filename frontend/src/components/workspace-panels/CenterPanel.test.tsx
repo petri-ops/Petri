@@ -6,7 +6,10 @@ import { CenterPanel, type CenterPanelContext } from './CenterPanel';
 vi.mock('@/components/copilot/SimpleChat', () => ({
   SimpleChat: () => <div data-testid="persistent-chat">Agent conversation</div>,
 }));
-vi.mock('@/components/copilot/conversationRunStore', () => ({ useConversationRun: () => null }));
+vi.mock('@/components/copilot/conversationRunStore', () => ({
+  useConversationRun: () => null,
+  resultEditProgressForContext: () => [],
+}));
 vi.mock('@/hooks/useDurableConversationLoop', () => ({
   useDurableConversationLoop: () => ({ loop: null, summary: null }),
 }));
@@ -41,11 +44,15 @@ function context(mode: CenterPanelContext['workspaceMode']): CenterPanelContext 
       jobId: 'job-1', toolId: 'deseq2', name: 'deg.csv', type: 'table', label: '差异表达结果',
       revisionId: 'revision-abcdef123456', truthStatus: 'valid', conclusion: '发现稳定差异表达信号。',
     },
+    resultContext: { status: 'ready', contextToken: 'a'.repeat(64) },
+    resultEditSubmitting: false,
+    resultAgentDraft: '',
     activeJobId: 'job-1', pendingArtifactName: null, recentJobs: [], liveJobsPreview: [],
     jobStats: { running: 0, failed: 0, done: 1, pending: 0 }, backendStatus: {} as CenterPanelContext['backendStatus'],
     jobs: [], datasets: [],
     updateWorkspaceMode: vi.fn(), setWorkspaceSearchQuery: vi.fn(), openRightPanel: vi.fn(), switchToProject: vi.fn(), navigate: vi.fn(),
     setActiveConvId: vi.fn(), setActiveJobId: vi.fn(), setActiveArtifact: vi.fn(), setBottomTerminalOpen: vi.fn(),
+    setResultAgentDraft: vi.fn(), onResultEditSubmit: vi.fn(),
     setLeftOpen: vi.fn(), setRightOpen: vi.fn(), setSummaryOpen: vi.fn(), handleShowPlugins: vi.fn(), handleOpenResult: vi.fn(),
     handleAskAgent: vi.fn(), handleOpenWorkspacePath: vi.fn(), onPendingArtifactConsumed: vi.fn(), onWorkflowChanged: vi.fn(),
     openResultBrowser: vi.fn(), openScheduledResults: vi.fn(), startColumnResize: vi.fn(),
@@ -60,6 +67,8 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     expect(screen.getByTestId('persistent-chat').closest('[data-projection="conversation"]')?.getAttribute('aria-hidden')).toBe('true');
     expect(screen.getAllByTestId('central-result-view')).toHaveLength(1);
     expect(screen.getByText('发现稳定差异表达信号。')).toBeTruthy();
+    const composer = screen.getByRole('region', { name: '用 Agent 修改当前结果' });
+    expect(composer.closest('[aria-label="结果主画布"]')).toBeTruthy();
   });
 
   it('returns to the same conversation projection through the visible context action', () => {

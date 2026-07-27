@@ -35,13 +35,28 @@ const sourceFiles = {
   panel: 'frontend/src/components/result-studio/ResultEditPanel.tsx',
   panelStyle: 'frontend/src/components/result-studio/ResultEditPanel.module.css',
   panelTest: 'frontend/src/components/result-studio/ResultEditPanel.test.tsx',
+  agentComposer: 'frontend/src/components/result-studio/ResultAgentComposer.tsx',
+  agentComposerTest: 'frontend/src/components/result-studio/ResultAgentComposer.test.tsx',
+  agentBridge: 'frontend/src/lib/result-edit-agent-bridge.ts',
+  agentBridgeTest: 'frontend/src/lib/result-edit-agent-bridge.test.ts',
+  simpleChat: 'frontend/src/components/copilot/SimpleChat.tsx',
   rightPanel: 'frontend/src/components/workspace-panels/RightPanel.tsx',
+  rightPanelTest: 'frontend/src/components/workspace-panels/RightPanel.test.tsx',
   workspace: 'frontend/src/pages/project-workspace.tsx',
   contextClient: 'frontend/src/lib/result-studio-interaction-client.ts',
+  systemPrompt: 'core/r-server/helpers/system-prompt.js',
   volcanoDescriptor: 'resources/built-in-plugins/volcano-plot/tool-definition.json',
   volcanoScript: 'resources/built-in-plugins/volcano-plot/scripts/volcano-plot.R',
   volcanoGolden: 'resources/built-in-plugins/volcano-plot/golden-revisions/result-studio-v1.json',
   controlsTest: 'test/result-edit-controls.test.mjs',
+  intentTest: 'test/result-edit-intent.test.mjs',
+  contextTest: 'test/result-studio-context.test.mjs',
+  pluginSdkTest: 'test/result-studio-plugin-sdk.test.mjs',
+  qualificationTest: 'test/result-studio-qualification.test.mjs',
+  registryTest: 'test/agent-tool-registry.test.mjs',
+  readinessTest: 'frontend/src/components/result-studio/ResultStudioContextReadiness.test.tsx',
+  surfaceTest: 'frontend/src/components/result-studio/ResultStudioSurface.test.tsx',
+  centerPanelTest: 'frontend/src/components/workspace-panels/CenterPanel.test.tsx',
   acceptanceScript: 'scripts/g0-rs-p4-acceptance.mjs',
   packageScripts: 'package.json',
 };
@@ -60,6 +75,17 @@ function sourceHashes() {
   return Object.fromEntries(Object.entries(sourceFiles).map(([key, file]) => [key, sha(read(file))]));
 }
 
+function sourceCommitStatus(commit, hashes) {
+  if (!commit || spawnSync('git', ['merge-base', '--is-ancestor', commit, 'HEAD'], { cwd: root }).status !== 0) {
+    return { reachable: false, mismatches: Object.values(sourceFiles) };
+  }
+  const mismatches = Object.entries(sourceFiles).flatMap(([key, file]) => {
+    const result = spawnSync('git', ['show', `${commit}:${file}`], { cwd: root, encoding: 'utf8' });
+    return result.status === 0 && sha(result.stdout) === hashes[key] ? [] : [file];
+  });
+  return { reachable: true, mismatches };
+}
+
 function runCommands() {
   const commands = [
     ['backend-p4', 'node', ['--test',
@@ -75,9 +101,12 @@ function runCommands() {
     // executed no tests. `test:files` is plain `vitest run`, matching the gate.
     ['frontend-p4', 'npm', ['run', 'test:files', '--prefix', 'frontend', '--',
       'ResultEditPanel.test.tsx',
+      'ResultAgentComposer.test.tsx',
+      'result-edit-agent-bridge.test.ts',
       'ResultStudioContextReadiness.test.tsx',
       'ResultStudioSurface.test.tsx',
       'CenterPanel.test.tsx',
+      'RightPanel.test.tsx',
     ]],
     ['frontend-build', 'npm', ['run', 'build:check', '--prefix', 'frontend']],
     ['syntax', 'node', ['--check', 'scripts/g0-rs-p4-acceptance.mjs']],
@@ -285,13 +314,16 @@ function inspect(verification = null) {
     item('RS-P4-14', !/fetch\(/.test(panel) && !/writeFile|localStorage/.test(panel),
       [sourceFiles.panel],
       'No control writes an Artifact, source data, or the current Revision: the panel only emits an edit request.'),
-    item('RS-P4-15', /result_edit_plan_in_context/.test(workspace)
-      && /result_studio_context/.test(workspace),
-      [sourceFiles.workspace],
-      'Both submission paths reach the backend through the context-bound tools, so no second editing chain exists.'),
-    item('RS-P4-16', /ResultEditPanel/.test(rightPanel) && /disabledReason/.test(rightPanel),
-      [sourceFiles.rightPanel],
-      'The panel is disabled with an honest reason when the backend cannot project reproducible coordinates.'),
+    item('RS-P4-15', commands.find((command) => command.label === 'frontend-p4')?.passed === true
+      && /buildResultEditCopilotAsk/.test(workspace)
+      && /copilotContextOverrideForAsk/.test(read(sourceFiles.simpleChat))
+      && /result_studio_context/.test(read(sourceFiles.systemPrompt))
+      && /result_edit_plan_in_context/.test(read(sourceFiles.systemPrompt)),
+      [sourceFiles.workspace, sourceFiles.agentBridge, sourceFiles.agentBridgeTest, sourceFiles.simpleChat, sourceFiles.systemPrompt],
+      'Manual and Agent submissions share the tested atomic context bridge; the production chat consumer preserves the click-time snapshot, then the hidden system orchestration reads the trusted schema before planning the edit.'),
+    item('RS-P4-16', /ResultEditAdvancedDrawer/.test(rightPanel) && /disabledReason/.test(rightPanel),
+      [sourceFiles.rightPanel, sourceFiles.panel, sourceFiles.panelTest],
+      'The schema panel is a default-closed advanced drawer and remains disabled with an honest reason when reproducible coordinates are unavailable.'),
     item('RS-P4-17', /createResultChangeSet/.test(changeSetService)
       && /run_tool|executeJob/.test(changeSetService),
       [sourceFiles.changeSetService],
@@ -333,6 +365,11 @@ try {
   if (process.argv.includes('--write-evidence')) {
     const verification = { generatedAt: new Date().toISOString(), commands: runCommands() };
     const report = { ...inspect(verification), generatedAt: verification.generatedAt, privacyClean: true };
+    const commitStatus = sourceCommitStatus(report.sourceCommit, report.sourceHashes);
+    report.sourceCommitReachable = commitStatus.reachable;
+    report.sourceCommitMatchesSourceHashes = commitStatus.reachable && commitStatus.mismatches.length === 0;
+    report.sourceCommitMismatches = commitStatus.mismatches;
+    if (!report.sourceCommitMatchesSourceHashes) throw new Error(`source commit mismatch: ${commitStatus.mismatches.join(',')}`);
     if (!report.passed) throw new Error(report.checks.filter((check) => !check.passed).map((check) => check.id).join(','));
     mkdirSync(dirname(evidencePath), { recursive: true });
     writeFileSync(evidencePath, `${JSON.stringify(report, null, 2)}\n`);
@@ -341,7 +378,9 @@ try {
     if (!existsSync(evidencePath)) throw new Error('evidence missing; run npm run g0:result-studio:p4:update');
     const stored = JSON.parse(readFileSync(evidencePath, 'utf8'));
     const current = inspect(stored.verification);
-    if (!stored.passed || !current.passed
+    const commitStatus = sourceCommitStatus(stored.sourceCommit, stored.sourceHashes || {});
+    if (!stored.passed || !current.passed || !stored.sourceCommitMatchesSourceHashes
+      || !commitStatus.reachable || commitStatus.mismatches.length > 0
       || JSON.stringify(stored.sourceHashes) !== JSON.stringify(current.sourceHashes)) {
       throw new Error('stored G0-RS-P4 evidence is stale or invalid');
     }

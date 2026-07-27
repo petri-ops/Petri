@@ -25,6 +25,10 @@ import type { Tool } from '@/pages/_data';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { HighlightedCode, codeLanguageForFile } from '@/components/ui/CodeHighlight';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
+import {
+  isConversationRunning,
+  useConversationRun,
+} from '@/components/copilot/conversationRunStore';
 import { listConversations, createConversation, renameConversation, archiveConversation, type ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import {
   useConversations,
@@ -37,7 +41,7 @@ import { usePluginStore } from '@/hooks/usePluginStore';
 import { parseWorkspaceMode, type WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import { isDirectRecoveryAction, useHarnessWorkflowStatus } from '@/hooks/useHarnessWorkflowStatus';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
-import type { HarnessContextSummary } from '@/lib/copilotContext';
+import type { CopilotContext, HarnessContextSummary } from '@/lib/copilotContext';
 import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
 import { getBrowserViewportSize, isBioF3LocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
@@ -85,6 +89,10 @@ import {
   type ResultTableQuery,
 } from '@/lib/result-studio-interaction-client';
 import type { ResultEditSubmission } from '@/components/result-studio/ResultEditPanel';
+import {
+  buildResultEditCopilotAsk,
+  isResultStudioContextToken,
+} from '@/lib/result-edit-agent-bridge';
 import {
   beginResultSurfaceMeasure,
   chooseResultArtifactName,
@@ -254,14 +262,21 @@ export function ProjectWorkspace(): React.ReactElement {
   // 前端不自行判断"坐标是否齐备"，也不把缺失坐标伪装成可用。
   const [resultContextState, setResultContextState] = useState<{
     status: 'ready' | 'blocked' | 'loading';
+    bindingKey: string;
+    contextToken?: string | null;
     reason?: string | null;
     selectionUsable?: boolean;
     selectionCompatibility?: 'compatible' | 'stale' | 'invalid' | null;
+    publicPhases?: string[];
   } | null>(null);
   // G0-RS-P4: Schema 驱动控件与该 Job 真实执行过的参数值。两者都由后端
   // descriptor 投影，前端不合成控件也不用默认值冒充"当前生效值"。
   const [resultEditControls, setResultEditControls] = useState<ResultStudioEditControls | null>(null);
   const [resultEditSubmitting, setResultEditSubmitting] = useState(false);
+  // P4R-3: result Composer drafts live above the conditional result surface,
+  // keyed by exact result/revision/selection so result↔chat does not discard a
+  // draft and a draft can never silently move onto a different context.
+  const [resultAgentDrafts, setResultAgentDrafts] = useState<Record<string, string>>({});
   const [browserCanGoBack, setBrowserCanGoBack] = useState(false);
   const [browserCanGoForward, setBrowserCanGoForward] = useState(false);
   const [openWorkspaceFiles, setOpenWorkspaceFiles] = useState<ActiveWorkspaceFile[]>([]);
@@ -284,6 +299,98 @@ export function ProjectWorkspace(): React.ReactElement {
     create: createConversationInProject,
   } = useConversations(projectId);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
+  const activeConversationRun = useConversationRun(activeConvId);
+  const resultEditBusy = resultEditSubmitting || activeConversationRun?.status === 'running';
+
+  const activeSelectionBindingKey = useMemo(() => {
+    const selection = activeArtifact?.selection;
+    if (!selection) return '';
+    return JSON.stringify({
+      selectionId: activeArtifact?.selectionId || null,
+      entityIdsHash: selection.entityIdsHash,
+      filterHash: selection.filterHash || null,
+      fields: selection.fields,
+      sort: selection.sort,
+      compatibility: selection.compatibility || null,
+      createdAt: selection.createdAt,
+    });
+  }, [
+    activeArtifact?.selectionId,
+    activeArtifact?.selection?.entityIdsHash,
+    activeArtifact?.selection?.filterHash,
+    activeArtifact?.selection?.fields,
+    activeArtifact?.selection?.sort,
+    activeArtifact?.selection?.compatibility,
+    activeArtifact?.selection?.createdAt,
+  ]);
+  const resultContextBindingKey = useMemo(() => {
+    if (!projectId || !activeArtifact) return '';
+    return [
+      projectId,
+      activeConvId || '',
+      activeArtifact.jobId,
+      activeArtifact.name,
+      activeArtifact.revisionId || '',
+      activeArtifact.artifactFamilyId || '',
+      activeSelectionBindingKey,
+    ].join('\u0000');
+  }, [
+    projectId,
+    activeConvId,
+    activeArtifact?.jobId,
+    activeArtifact?.name,
+    activeArtifact?.revisionId,
+    activeArtifact?.artifactFamilyId,
+    activeSelectionBindingKey,
+  ]);
+  const effectiveResultContextState = !activeArtifact
+    ? null
+    : resultContextState?.bindingKey === resultContextBindingKey
+      ? resultContextState
+      : !activeConvId
+        ? {
+            status: 'blocked' as const,
+            bindingKey: resultContextBindingKey,
+            contextToken: null,
+            reason: '请先创建或选择一个 Agent 会话，再修改当前结果。',
+          }
+        : { status: 'loading' as const, bindingKey: resultContextBindingKey, contextToken: null };
+  const effectiveResultEditControls = resultContextState?.bindingKey === resultContextBindingKey
+    ? resultEditControls
+    : null;
+
+  const resultAgentDraftKey = useMemo(() => {
+    if (!activeArtifact) return '';
+    return [
+      projectId || '',
+      activeConvId || '',
+      activeArtifact.jobId,
+      activeArtifact.name,
+      activeArtifact.revisionId || '',
+      activeArtifact.artifactFamilyId || '',
+      activeArtifact.selectionId || '',
+      activeSelectionBindingKey,
+    ].join('\u0000');
+  }, [
+    projectId,
+    activeConvId,
+    activeArtifact?.jobId,
+    activeArtifact?.name,
+    activeArtifact?.revisionId,
+    activeArtifact?.artifactFamilyId,
+    activeArtifact?.selectionId,
+    activeSelectionBindingKey,
+  ]);
+  const resultAgentDraft = resultAgentDraftKey ? resultAgentDrafts[resultAgentDraftKey] || '' : '';
+  const setResultAgentDraft = useCallback((draft: string) => {
+    if (!resultAgentDraftKey) return;
+    setResultAgentDrafts((current) => {
+      const next = { ...current, [resultAgentDraftKey]: draft };
+      const keys = Object.keys(next);
+      for (const key of keys.slice(0, Math.max(0, keys.length - 24))) delete next[key];
+      return next;
+    });
+  }, [resultAgentDraftKey]);
 
   // Plan 1.6 §4.3 — optimistic prepend for cross-project creations
   // (sidebar adds a conv under another project without switching pages).
@@ -971,6 +1078,34 @@ export function ProjectWorkspace(): React.ReactElement {
     workflowRefreshKey,
   );
 
+  const copilotActiveArtifact = useMemo<NonNullable<CopilotContext['activeArtifact']> | null>(() => {
+    if (!activeArtifact) return null;
+    const contextToken = effectiveResultContextState?.status === 'ready'
+      && isResultStudioContextToken(effectiveResultContextState.contextToken)
+      ? effectiveResultContextState.contextToken
+      : null;
+    return {
+      jobId: activeArtifact.jobId,
+      toolId: activeArtifact.toolId,
+      name: activeArtifact.name,
+      type: activeArtifact.type,
+      label: activeArtifact.label,
+      url: activeArtifact.url,
+      revisionId: activeArtifact.revisionId,
+      artifactFamilyId: activeArtifact.artifactFamilyId,
+      entityType: activeArtifact.entityType,
+      idField: activeArtifact.idField,
+      selectionId: activeArtifact.selection?.compatibility === 'compatible'
+        ? activeArtifact.selectionId
+        : null,
+      selection: activeArtifact.selection?.compatibility === 'compatible'
+        ? summarizeSelectionForAgent(activeArtifact.selection)
+        : null,
+      selectionCompatibility: activeArtifact.selection?.compatibility || null,
+      contextToken,
+    };
+  }, [activeArtifact, effectiveResultContextState?.contextToken, effectiveResultContextState?.status]);
+
   // 6.3 — Inject project context into SimpleChat (via shared copilot context).
   // Replaces the original useEffect that did an in-place setCopilotContext
   // patch on every render. useSetCopilotContext resets before applying,
@@ -1000,25 +1135,7 @@ export function ProjectWorkspace(): React.ReactElement {
           projectHarnessSummary: toCopilotHarnessSummary(copilotHarnessIndex),
           activeJobHarnessSummary: toCopilotHarnessSummary(activeJobHarnessIndex),
           activeJobId: activeJobId ?? undefined,
-          activeArtifact: activeArtifact ? {
-            jobId: activeArtifact.jobId,
-            toolId: activeArtifact.toolId,
-            name: activeArtifact.name,
-            type: activeArtifact.type,
-            label: activeArtifact.label,
-            url: activeArtifact.url,
-            revisionId: activeArtifact.revisionId,
-            artifactFamilyId: activeArtifact.artifactFamilyId,
-            entityType: activeArtifact.entityType,
-            idField: activeArtifact.idField,
-            selectionId: activeArtifact.selection?.compatibility === 'compatible'
-              ? activeArtifact.selectionId
-              : null,
-            selection: activeArtifact.selection?.compatibility === 'compatible'
-              ? summarizeSelectionForAgent(activeArtifact.selection)
-              : null,
-            selectionCompatibility: activeArtifact.selection?.compatibility || null,
-          } : null,
+          activeArtifact: copilotActiveArtifact,
         }
       : {}
   );
@@ -1035,10 +1152,22 @@ export function ProjectWorkspace(): React.ReactElement {
   useEffect(() => {
     if (!projectId || !activeArtifact?.jobId || !activeArtifact.name) {
       setResultContextState(null);
+      setResultEditControls(null);
+      return;
+    }
+    if (!activeConvId) {
+      setResultContextState({
+        status: 'blocked',
+        bindingKey: resultContextBindingKey,
+        contextToken: null,
+        reason: '请先创建或选择一个 Agent 会话，再修改当前结果。',
+      });
+      setResultEditControls(null);
       return;
     }
     let cancelled = false;
-    setResultContextState({ status: 'loading' });
+    setResultContextState({ status: 'loading', bindingKey: resultContextBindingKey, contextToken: null });
+    setResultEditControls(null);
     fetchResultStudioContext({
       language: 'r',
       projectId,
@@ -1052,21 +1181,43 @@ export function ProjectWorkspace(): React.ReactElement {
         if (result.status === 'blocked') {
           setResultContextState({
             status: 'blocked',
+            bindingKey: resultContextBindingKey,
+            contextToken: null,
             reason: result.diagnostics[0]?.message || null,
           });
+          setResultEditControls(null);
+          return;
+        }
+        const contextToken = result.agentView?.contextToken ?? null;
+        if (!isResultStudioContextToken(contextToken)) {
+          setResultContextState({
+            status: 'blocked',
+            bindingKey: resultContextBindingKey,
+            contextToken: null,
+            reason: '本地服务没有返回可验证的结果上下文，请刷新后重试。',
+          });
+          setResultEditControls(null);
           return;
         }
         setResultContextState({
           status: 'ready',
+          bindingKey: resultContextBindingKey,
+          contextToken,
           selectionUsable: result.agentView?.selectionState.usableByAgent === true,
           selectionCompatibility: result.agentView?.selectionState.compatibility ?? null,
+          publicPhases: result.agentView?.publicPhases || [],
         });
         // G0-RS-P4: 控件 schema 与 Agent 可见参数出自同一后端投影。
         setResultEditControls(result.editControls ?? null);
       })
       .catch(() => {
         if (!cancelled) {
-          setResultContextState({ status: 'blocked', reason: '无法连接本地服务读取结果上下文。' });
+          setResultContextState({
+            status: 'blocked',
+            bindingKey: resultContextBindingKey,
+            contextToken: null,
+            reason: '无法连接本地服务读取结果上下文。',
+          });
           setResultEditControls(null);
         }
       });
@@ -1079,7 +1230,10 @@ export function ProjectWorkspace(): React.ReactElement {
     activeArtifact?.jobId,
     activeArtifact?.name,
     activeArtifact?.revisionId,
+    activeArtifact?.artifactFamilyId,
     activeArtifact?.selectionId,
+    activeSelectionBindingKey,
+    resultContextBindingKey,
   ]);
 
   useEffect(() => {
@@ -1263,35 +1417,34 @@ export function ProjectWorkspace(): React.ReactElement {
     dispatchBioF3Event(biof3Events.copilotAsk, { prompt });
   }, []);
 
-  // G0-RS-P4: 手动控件与 AI Composer 的提交都在这里汇合成同一句自然语言意图，
-  // 交给同一个 Agent 会话执行 result_edit_plan_in_context → changeset_create。
-  // 前端不自己调用编辑 API，也不自己拼内部 id：坐标由后端 ContextEnvelope 补齐，
-  // 因此手动路径和 AI 路径共用完全相同的校验、预览、比较与撤销链。
+  // P4R-3: 焦点 Composer 与高级控件在这里汇合。可见 prompt 只包含用户目标/
+  // 手动 patch；opaque token + Artifact/Revision/Selection 快照走事件 context，
+  // 不进入消息文字。后端仍会重新投影真相并拒绝陈旧 token。
   const handleResultEditSubmit = useCallback((submission: ResultEditSubmission) => {
-    const changed = Object.keys(submission.parameterPatch);
+    if (!activeConvId || isConversationRunning(activeConvId)) {
+      setWorkspaceNotice('当前 Agent 仍在处理上一条请求；完成或停止后可继续修改结果。');
+      return false;
+    }
     setResultEditSubmitting(true);
     try {
-      if (submission.origin === 'manual' && changed.length > 0) {
-        const rendered = changed
-          .map((name) => `${name}=${JSON.stringify(submission.parameterPatch[name])}`)
-          .join('、');
-        dispatchBioF3Event(biof3Events.copilotAsk, {
-          prompt: `请修改当前打开的结果：${submission.requestedOutcome}。`
-            + `\n先调用 result_studio_context 获取当前坐标，再用 result_edit_plan_in_context`
-            + `（editOrigin="manual"，proposedParameterPatch={${rendered}}）规划，`
-            + `确认影响级别后生成候选版本${submission.scientificConfirmed ? '（我已确认科学参数变化）' : ''}。`,
-        });
-      } else {
-        dispatchBioF3Event(biof3Events.copilotAsk, {
-          prompt: `请修改当前打开的结果：${submission.requestedOutcome}。`
-            + `\n先调用 result_studio_context 获取当前坐标，再用 result_edit_plan_in_context 规划，`
-            + `执行前先说明会改哪些参数和影响级别。`,
-        });
+      const detail = buildResultEditCopilotAsk({
+        submission,
+        activeArtifact: copilotActiveArtifact,
+        currentContextToken: effectiveResultContextState?.status === 'ready'
+          ? effectiveResultContextState.contextToken
+          : null,
+      });
+      if (!detail) {
+        setWorkspaceNotice('当前结果上下文已经变化，请等待上下文刷新后再提交。');
+        return false;
       }
+      setWorkspaceNotice('');
+      dispatchBioF3Event(biof3Events.copilotAsk, detail);
+      return true;
     } finally {
       setResultEditSubmitting(false);
     }
-  }, []);
+  }, [activeConvId, copilotActiveArtifact, effectiveResultContextState?.contextToken, effectiveResultContextState?.status]);
 
   const openScheduledResults = useCallback(() => {
     const nextJobId = activeJobId || jobs[0]?.id || null;
@@ -1347,6 +1500,9 @@ export function ProjectWorkspace(): React.ReactElement {
     activeJob,
     activeWorkflow,
     activeArtifact,
+    resultContext: effectiveResultContextState,
+    resultEditSubmitting: resultEditBusy,
+    resultAgentDraft,
     activeJobId,
     pendingArtifactName: pendingArtifactJobIdRef.current === activeJob?.id ? pendingArtifactName : null,
     recentJobs: jobs,
@@ -1363,6 +1519,8 @@ export function ProjectWorkspace(): React.ReactElement {
     setActiveConvId,
     setActiveJobId,
     setActiveArtifact,
+    setResultAgentDraft,
+    onResultEditSubmit: handleResultEditSubmit,
     setBottomTerminalOpen,
     setSummaryOpen,
     setLeftOpen,
@@ -1433,9 +1591,9 @@ export function ProjectWorkspace(): React.ReactElement {
     onWorkflowChanged: () => setWorkflowRefreshKey((value) => value + 1),
     activeArtifact,
     setActiveArtifact,
-    resultContext: resultContextState,
-    resultEditControls,
-    resultEditSubmitting,
+    resultContext: effectiveResultContextState,
+    resultEditControls: effectiveResultEditControls,
+    resultEditSubmitting: resultEditBusy,
     onResultEditSubmit: handleResultEditSubmit,
     openWorkspaceFiles,
     activeWorkspaceFile,

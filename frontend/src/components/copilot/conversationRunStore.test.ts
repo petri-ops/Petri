@@ -17,6 +17,7 @@ vi.mock('./copilotClient', async (importOriginal) => {
 import {
   __resetConversationRunsForTests,
   getConversationRunSnapshot,
+  resultEditProgressForContext,
   shouldClearReconciledConversationRun,
   startConversationRun,
   stopConversationRun,
@@ -25,13 +26,21 @@ import {
 import { biof3Events, subscribeBioF3Event } from '@/lib/events';
 import { deriveLoopDisplay } from '@/lib/loop-client';
 
-function start(conversationId: string, userContent: string): void {
+function start(conversationId: string, userContent: string, contextToken?: string): void {
   startConversationRun({
     conversationId,
     projectId: 'project-1',
     userContent,
     messages: [{ role: 'user', content: userContent }],
-    context: { page: 'desktop-project', projectId: 'project-1' },
+    context: {
+      page: 'desktop-project',
+      projectId: 'project-1',
+      ...(contextToken ? {
+        activeArtifact: {
+          jobId: 'job-1', toolId: 'volcano-plot', name: 'plot.png', type: 'image', contextToken,
+        },
+      } : {}),
+    },
   });
 }
 
@@ -85,6 +94,22 @@ describe('conversation run store', () => {
         { sequence: 2, stage: 'job' },
       ],
     });
+  });
+
+  it('never projects one result run progress onto a different active context', () => {
+    const tokenA = 'a'.repeat(64);
+    const tokenB = 'b'.repeat(64);
+    start('conversation-scoped', 'change the palette', tokenA);
+    const callbacks = streamChatMock.mock.calls[0][0];
+    callbacks.onResultEditProgress({
+      resultEditProgressVersion: 1, sequence: 1, changeSetId: 'cs-a',
+      stage: 'plan', status: 'completed', publicPhase: 'assess_impact',
+      publicPhaseLabel: '判断影响',
+    });
+    const snapshot = getConversationRunSnapshot('conversation-scoped');
+    expect(resultEditProgressForContext(snapshot, tokenA)).toHaveLength(1);
+    expect(resultEditProgressForContext(snapshot, tokenB)).toEqual([]);
+    expect(resultEditProgressForContext(snapshot, null)).toEqual([]);
   });
 
   it('continues updating after the visible conversation unsubscribes', () => {
@@ -170,6 +195,15 @@ describe('conversation run store', () => {
       iteration: 1,
       content: '表达矩阵和样本信息已完成对齐。',
     });
+    callbacks.onResultEditProgress({
+      resultEditProgressVersion: 1,
+      sequence: 1,
+      changeSetId: 'cs-stop',
+      stage: 'job',
+      status: 'running',
+      publicPhase: 'execute_or_recompute',
+      publicPhaseLabel: '执行/重算',
+    });
     callbacks.onToolCall({ name: 'workspace_read', args: { path: 'counts.csv' } });
 
     stopConversationRun('conversation-a');
@@ -183,9 +217,36 @@ describe('conversation run store', () => {
         iteration: 1,
         content: '表达矩阵和样本信息已完成对齐。',
       }],
+      resultEditProgress: [{
+        sequence: 1,
+        publicPhase: 'execute_or_recompute',
+      }],
     });
     expect(getConversationRunSnapshot('conversation-a')?.toolActivities).toHaveLength(1);
     expect(cancelAgentTaskMock).toHaveBeenCalledWith('task-1');
+  });
+
+  it('keeps public result-edit stages after a failed Agent run', () => {
+    start('conversation-failed-edit', 'change the threshold');
+    const callbacks = streamChatMock.mock.calls[0][0];
+    callbacks.onResultEditProgress({
+      resultEditProgressVersion: 1,
+      sequence: 1,
+      changeSetId: 'cs-failed',
+      stage: 'failed',
+      status: 'terminal',
+      reason: 'validator blocked',
+    });
+    callbacks.onError(new Error('provider disconnected'));
+    expect(getConversationRunSnapshot('conversation-failed-edit')).toMatchObject({
+      status: 'error',
+      assistantPending: false,
+      resultEditProgress: [{
+        stage: 'failed',
+        status: 'terminal',
+        reason: 'validator blocked',
+      }],
+    });
   });
 
   it('prevents overlapping runs inside the same conversation', () => {

@@ -16,6 +16,11 @@
   overflow: hidden;
 }
 
+.composerSlot {
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
 .contextBar {
   display: grid;
   grid-template-columns: 32px minmax(0, 1fr) auto;

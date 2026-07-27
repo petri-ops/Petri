@@ -122,6 +122,10 @@ function computeContextToken(envelope) {
     parametersHash: envelope.script && envelope.script.parametersHash,
     selectionId: envelope.selection && envelope.selection.selectionId,
     selectionEntityIdsHash: envelope.selection && envelope.selection.entityIdsHash,
+    selectionFilterHash: envelope.selection && envelope.selection.filterHash,
+    selectionFields: envelope.selection && envelope.selection.fields,
+    selectionSort: envelope.selection && envelope.selection.sort,
+    selectionUpdatedAt: envelope.selection && envelope.selection.updatedAt,
   }));
 }
 
@@ -188,6 +192,16 @@ function buildResultStudioContextEnvelope(input = {}) {
         entityIdCount: Number.isInteger(selectionInput.entityIdCount) ? selectionInput.entityIdCount : 0,
         truncated: selectionInput.truncated === true,
         entityIdsHash: nullableTrimmed(selectionInput.entityIdsHash),
+        filterHash: nullableTrimmed(selectionInput.filterHash),
+        fields: Array.isArray(selectionInput.fields)
+          ? selectionInput.fields.map((item) => trimmed(item)).filter(Boolean)
+          : [],
+        sort: Array.isArray(selectionInput.sort)
+          ? selectionInput.sort
+            .filter((item) => item && trimmed(item.field))
+            .map((item) => ({ field: trimmed(item.field), direction: item.direction === 'desc' ? 'desc' : 'asc' }))
+          : [],
+        updatedAt: nullableTrimmed(selectionInput.updatedAt),
         sampleEntityIds: Array.isArray(selectionInput.sampleEntityIds)
           ? selectionInput.sampleEntityIds.slice(0, 12).map((item) => trimmed(item)).filter(Boolean)
           : [],
@@ -354,8 +368,7 @@ function authorizeContextOperation({ envelope, presentedToken = null, requireTok
       ok: false,
       diagnostics: [diagnostic(
         'context_token_stale',
-        'The current result, revision or selection changed after this context was captured; re-read result_studio_context before retrying.',
-        { expectedToken: envelope.contextToken }
+        'The current result, revision or selection changed after this context was captured; re-read result_studio_context and re-plan before retrying.'
       )],
     };
   }
@@ -391,6 +404,8 @@ function summarizeContextForAgent(envelope) {
         sampleEntityIds: envelope.selection.sampleEntityIds,
         hasFilter: envelope.selection.hasFilter,
         filterDescription: envelope.selection.filterDescription,
+        fields: envelope.selection.fields,
+        sort: envelope.selection.sort,
       }
       : null,
     selectionState: envelope.selectionState,

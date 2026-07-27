@@ -129,6 +129,11 @@ const {
   createAgentToolCallController,
   runAgentToolCallBatch,
 } = require('./agent-tools');
+const {
+  createResultEditProgressRecorder,
+  finalizeResultEditProgress,
+  projectResultStudioToolContext,
+} = require('./agent-tools/result-context-binding');
 const { inferExecutionPolicy } = require('./helpers/agent-execution-policy');
 const {
   _gatherAnalysisContextForMethods,
@@ -825,9 +830,11 @@ async function runAgentLoop({
   }
 
   const aborted = () => (typeof shouldAbort === 'function' ? shouldAbort() : false);
+  const resultEditProgress = createResultEditProgressRecorder();
   const toolCtx = {
     userId,
     projectId: context && context.projectId,
+    ...projectResultStudioToolContext(context),
     accessMode: context && context.accessMode === 'read' ? 'read' : 'full',
     allowExecution: executionPolicy.allowExecution,
     executionPolicyReason: executionPolicy.reason,
@@ -838,7 +845,10 @@ async function runAgentLoop({
     gatherAnalysisContextForMethods: _gatherAnalysisContextForMethods, // GENERATE_METHODS_v1
     renderMethodsParagraph: _renderMethodsParagraph,
     isCancelled: aborted,
-    emitResultEditProgress: (progress) => _emit({ event: 'result_edit_progress', ...progress }),
+    emitResultEditProgress: (progress) => _emit({
+      event: 'result_edit_progress',
+      ...resultEditProgress.record(progress),
+    }),
   };
   // Refresh docs index in background if stale
 
@@ -852,6 +862,8 @@ async function runAgentLoop({
     traceId,
   });
   let assistantAcc = '';
+  let assistantMessagePersisted = false;
+  let providerFailureReason = null;
   const assistantProgress = createAgentProgressRecorder();
   let finalizationAttempts = 0;
   let finalizationFailureReason = null;
@@ -986,11 +998,10 @@ async function runAgentLoop({
       }
       if (!upJson || upJson.error || !upJson.choices) {
         if (finalizing && finalizationAttempts > 0) break;
-        _emit({
-          error:
-            (upJson && (upJson.message || upJson.error || (upJson.choices ? 'no choice' : 'bad response'))) ||
-            'upstream error',
-        });
+        providerFailureReason = String(
+          (upJson && (upJson.message || upJson.error || (upJson.choices ? 'no choice' : 'bad response')))
+          || 'upstream error'
+        );
         break;
       }
 
@@ -1508,8 +1519,21 @@ async function runAgentLoop({
       _emit({ event: 'done' });
     }
 
-    if (cancellationObserved || loopAbortedByController) {
-      assistantAcc = '任务已由用户停止。已完成的阶段结论、工具记录和结果已保留，未开始的步骤不会继续执行。';
+    if (providerFailureReason) {
+      fatalAgentError = new Error(providerFailureReason);
+      const final = finalizeResultEditProgress(resultEditProgress, {
+        outcome: 'failed', reason: 'agent_run_failed',
+      });
+      if (final.terminal) _emit({ event: 'result_edit_progress', ...final.terminal });
+      assistantAcc = final.assistantMessage;
+      _emit({ choices: [{ delta: { content: assistantAcc } }] });
+      _emit({ error: providerFailureReason });
+    } else if (cancellationObserved || loopAbortedByController) {
+      const final = finalizeResultEditProgress(resultEditProgress, {
+        outcome: 'cancelled', reason: 'user_cancelled',
+      });
+      if (final.terminal) _emit({ event: 'result_edit_progress', ...final.terminal });
+      assistantAcc = final.assistantMessage;
       _emit({ event: 'agent_cancelled', reason: 'user_cancelled' });
     } else if (assistantAcc.trim().length === 0) {
       const fallbackMsg = buildFinalizationFallbackMessage({
@@ -1542,6 +1566,9 @@ async function runAgentLoop({
                 ...(assistantProgress.snapshot().length
                   ? { progressUpdates: assistantProgress.snapshot() }
                   : {}),
+                ...(resultEditProgress.snapshot().length
+                  ? { resultEditProgress: resultEditProgress.snapshot() }
+                  : {}),
                 ...(finalizationAttempts ? {
                   finalization: {
                     attempts: finalizationAttempts,
@@ -1550,9 +1577,11 @@ async function runAgentLoop({
                     ...(finalizationRouting ? { routing: finalizationRouting } : {}),
                   },
                 } : {}),
-                ...(finalizationFailureReason || toolCallController.anomaly ? {
+                ...(providerFailureReason || finalizationFailureReason || toolCallController.anomaly ? {
                   incident: {
-                    code: toolCallController.anomaly?.code || finalizationFailureReason || 'agent_failure',
+                    code: providerFailureReason
+                      ? 'agent_provider_failed'
+                      : toolCallController.anomaly?.code || finalizationFailureReason || 'agent_failure',
                     autoRecoveryAttempts: finalizationAttempts,
                     ...(toolCallController.anomaly?.tool ? { tool: toolCallController.anomaly.tool } : {}),
                   },
@@ -1569,6 +1598,7 @@ async function runAgentLoop({
                 } : {}),
               };
               appendMessageToConversation(_activeConv.id, 'assistant', assistantAcc.trim(), assistantMeta);
+              assistantMessagePersisted = true;
               try {
                 _maybeAutoTitleConversation(_activeConv.id, userId);
               } catch {}
@@ -1655,6 +1685,24 @@ async function runAgentLoop({
   } catch (e) {
     fatalAgentError = e;
     cancellationObserved = cancellationObserved || aborted();
+    if (!assistantMessagePersisted && _activeConv && resultEditProgress.snapshot().length > 0) {
+      const final = finalizeResultEditProgress(resultEditProgress, {
+        outcome: cancellationObserved ? 'cancelled' : 'failed',
+        reason: cancellationObserved ? 'user_cancelled' : 'agent_run_failed',
+      });
+      if (final.terminal) _emit({ event: 'result_edit_progress', ...final.terminal });
+      assistantAcc = final.assistantMessage;
+      try {
+        appendMessageToConversation(_activeConv.id, 'assistant', assistantAcc, {
+          page: context && context.page,
+          projectId: context && context.projectId,
+          processingDurationMs: Math.max(0, Date.now() - turnStartedAt),
+          resultEditProgress: resultEditProgress.snapshot(),
+          incident: { code: cancellationObserved ? 'user_cancelled' : 'agent_run_failed', autoRecoveryAttempts: 0 },
+        });
+        assistantMessagePersisted = true;
+      } catch {}
+    }
     _emit({ error: e.message });
     if (loopRunId && !cancellationObserved) {
       _loopPersistPhase('failed', 'Harness Loop 收口失败，执行记录与已有产物已保留。');

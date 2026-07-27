@@ -33,10 +33,12 @@ export interface ResultInspectorArtifact {
 export function ResultStudioCanvas({
   mode,
   contextBar,
+  composer,
   children,
 }: {
   mode: ResultSurfaceMode;
   contextBar?: React.ReactNode;
+  composer?: React.ReactNode;
   children: React.ReactNode;
 }): React.ReactElement {
   const [firstVisibleMs, setFirstVisibleMs] = React.useState<number | null>(null);
@@ -65,6 +67,7 @@ export function ResultStudioCanvas({
     >
       {contextBar}
       <div className={styles.canvasBody}>{children}</div>
+      {composer && <div className={styles.composerSlot}>{composer}</div>}
     </section>
   );
 }

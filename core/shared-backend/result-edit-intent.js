@@ -248,9 +248,29 @@ function validateWorkflow(workflowPlan) {
 }
 
 function computeResultAffectedSubgraph({ workflowPlan, sourceToolJobId, sourceNodeId, editClass } = {}) {
-  if (editClass === 'view_only') return { ok: true, sourceNodeId: null, affectedNodeIds: [], diagnostics: [] };
+  if (editClass === 'view_only') {
+    return { ok: true, sourceNodeId: null, affectedNodeIds: [], affectedScope: 'none', diagnostics: [] };
+  }
+  const workflowSteps = workflowPlan && Array.isArray(workflowPlan.steps) ? workflowPlan.steps : null;
+  // A presentation-only rerender has a truthful bounded scope even when this
+  // historical Job was not created from a persisted workflow DAG: it affects
+  // the current result only. Scientific/data/workflow changes still require a
+  // real DAG so downstream impact can never be guessed away.
+  if (editClass === 'presentation_rerender' && (!workflowSteps || workflowSteps.length === 0)) {
+    return {
+      ok: true,
+      sourceNodeId: null,
+      affectedNodeIds: [],
+      affectedScope: 'current_result_only',
+      diagnostics: [],
+    };
+  }
   const validated = validateWorkflow(workflowPlan);
-  if (!validated.ok) return { ok: false, sourceNodeId: null, affectedNodeIds: [], diagnostics: validated.diagnostics };
+  if (!validated.ok) {
+    return {
+      ok: false, sourceNodeId: null, affectedNodeIds: [], affectedScope: 'unknown', diagnostics: validated.diagnostics,
+    };
+  }
   let matches = [];
   if (trimmed(sourceNodeId)) matches = validated.steps.filter((step) => step.id === sourceNodeId);
   else matches = validated.steps.filter((step) => (step.toolJobId || step.tool_job_id) === sourceToolJobId);
@@ -259,12 +279,15 @@ function computeResultAffectedSubgraph({ workflowPlan, sourceToolJobId, sourceNo
       ok: false,
       sourceNodeId: null,
       affectedNodeIds: [],
+      affectedScope: 'unknown',
       diagnostics: [diagnostic('source_workflow_node_ambiguous', 'The source job must map to exactly one workflow node.')],
     };
   }
   const root = matches[0].id;
   if (editClass === 'presentation_rerender') {
-    return { ok: true, sourceNodeId: root, affectedNodeIds: [root], diagnostics: [] };
+    return {
+      ok: true, sourceNodeId: root, affectedNodeIds: [root], affectedScope: 'workflow_subgraph', diagnostics: [],
+    };
   }
   const affected = [];
   const queue = [root];
@@ -276,7 +299,9 @@ function computeResultAffectedSubgraph({ workflowPlan, sourceToolJobId, sourceNo
     affected.push(id);
     queue.push(...validated.downstream.get(id));
   }
-  return { ok: true, sourceNodeId: root, affectedNodeIds: affected, diagnostics: [] };
+  return {
+    ok: true, sourceNodeId: root, affectedNodeIds: affected, affectedScope: 'workflow_subgraph', diagnostics: [],
+  };
 }
 
 function validateResultEditIntent(intent) {
@@ -289,6 +314,12 @@ function validateResultEditIntent(intent) {
   if (!intent.artifactRef || !trimmed(intent.artifactRef.artifactId) || !trimmed(intent.artifactRef.revisionId)) errors.push(diagnostic('artifact_ref_incomplete', 'artifactId and revisionId are required.'));
   if (!RESULT_EDIT_CLASSES.includes(intent.editClass)) errors.push(diagnostic('edit_class_invalid', 'Unknown edit class.'));
   if (!Array.isArray(intent.affectedNodeIds)) errors.push(diagnostic('affected_nodes_invalid', 'affectedNodeIds must be an array.'));
+  // Additive P4R-3 field: historical persisted/test intents without it remain
+  // valid, while newly planned intents always carry an explicit honest scope.
+  if (intent.affectedScope != null
+      && !['none', 'current_result_only', 'workflow_subgraph'].includes(intent.affectedScope)) {
+    errors.push(diagnostic('affected_scope_invalid', 'affectedScope must describe the truthful impact boundary.'));
+  }
   if (typeof intent.requiresJob !== 'boolean') errors.push(diagnostic('requires_job_invalid', 'requiresJob must be boolean.'));
   if (typeof intent.requiresScientificConfirmation !== 'boolean') errors.push(diagnostic('scientific_confirmation_invalid', 'requiresScientificConfirmation must be boolean.'));
   if (!trimmed(intent.requestedOutcome)) errors.push(diagnostic('requested_outcome_required', 'requestedOutcome is required.'));
@@ -334,6 +365,7 @@ function planResultEdit(input = {}) {
       ? input.proposedParameterPatch
       : {},
     affectedNodeIds: blocked ? [] : graph.affectedNodeIds,
+    affectedScope: blocked ? 'unknown' : graph.affectedScope,
     requiresJob: classification.requiresJob,
     requiresScientificConfirmation: classification.requiresScientificConfirmation,
     classificationReason: classification.classificationReason,

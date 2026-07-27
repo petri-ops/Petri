@@ -62,6 +62,8 @@ export interface ConversationRunSnapshot {
   statusMessage?: string;
   progressUpdates: Array<{ iteration: number; content: string }>;
   resultEditProgress: ResultEditProgressEvent[];
+  /** Opaque click-time scope used only to prevent progress crossing results. */
+  resultContextToken?: string;
   toolActivities: ToolActivityItem[];
   pendingApproval: ConversationPendingApproval | null;
   processingDurationMs?: number;
@@ -186,6 +188,14 @@ export function isConversationRunning(conversationId: string | null | undefined)
   return getConversationRunSnapshot(conversationId)?.status === 'running';
 }
 
+export function resultEditProgressForContext(
+  snapshot: ConversationRunSnapshot | null | undefined,
+  contextToken: string | null | undefined,
+): ResultEditProgressEvent[] {
+  if (!snapshot || !contextToken || snapshot.resultContextToken !== contextToken) return [];
+  return snapshot.resultEditProgress;
+}
+
 export function shouldClearReconciledConversationRun(
   snapshot: Pick<ConversationRunSnapshot, 'status' | 'pendingApproval'>
 ): boolean {
@@ -215,6 +225,9 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     assistantError: false,
     progressUpdates: [],
     resultEditProgress: [],
+    resultContextToken: typeof options.context.activeArtifact?.contextToken === 'string'
+      ? options.context.activeArtifact.contextToken
+      : undefined,
     toolActivities: [],
     pendingApproval: null,
     startedAt,
