@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P4R-0",
-  "sourceCommit": "4f9d89f55c79a314fdbc9516424a1792ebd160de",
+  "sourceCommit": "59b33c406a1ed9d6e57990f6d41d99df166dd236",
   "captureMode": "real_chain_corpus_plus_server_request_waterfall_and_event_loop_histogram_in_disposable_root",
   "qualificationEligible": false,
   "qualificationReason": "P4R-0 only captures a baseline and freezes budgets. It does not implement the fast path, and it does not measure any client-side metric. Result Studio product qualification remains reserved for P7.",
@@ -9,7 +9,7 @@
   "sourceHashes": {
     "probe": "61711144b7daadc08d903512676fdf7b1d506ae8b565d98191e59be181e64006",
     "probeRoutes": "3805eeabcc510874b7af03a9a219450db3d53d438d181a34323e489e5759877e",
-    "bootstrap": "035c37e4f18edec051ec59c20313ab396e0c2276aac7e136b8ec5037c32d90f5",
+    "bootstrap": "618ce06f1b90a7fb4e6de9ca6f983c9c1805b4d59dd13846f98ecb008728b69c",
     "capture": "99f9eb3fe4efa643e5a87925098dfdd815664b703907b90333e9e240edd317ac",
     "corpus": "7885fa8b409d16da0628d0f3413354c47e6cc0a0350188309d678418b833c8af",
     "baseline": "cc6a431db7e271fcfd2af8ef2eeb2aad6299a22ae6661b31119f3cf4b5cc0fef",
@@ -18,7 +18,7 @@
     "corpusTest": "2446b80e933ecdc47871fa2b22c1d13be62d2bbb30c776b28d237ab9881caf43",
     "baselineTest": "613b1f5b07f215963ca45b9ea351f581ec6f3518956f8127d48f156a9a5c7cf4",
     "invariantTest": "ccdf69eb94b0cd896c3aac8a5ba845fbde128383b7987098ce5eb8a44ee58b69",
-    "acceptanceScript": "7004a21047ade2a82f299848635553390a792862c95ec8f9e15bfd328c8dcddc"
+    "acceptanceScript": "76e917f5c279574daddfda1d63ae56c267858fcccff41fe758b45f2c134c6b54"
   },
   "budgets": {
     "eventLoopMaxMs": {
@@ -111,8 +111,8 @@
   "baselineObservation": {
     "captureMode": "real_run_tool_chain_in_disposable_root_with_env_gated_probe",
     "calibration": {
-      "gitSpawnMedianMs": 120.877,
-      "pathEntries": 38,
+      "gitSpawnMedianMs": 108.284,
+      "pathEntries": 52,
       "invokedUnderNpm": true
     },
     "revisionCount": 1,
@@ -120,17 +120,17 @@
     "corpus": [
       {
         "toolId": "deseq2",
-        "durationMs": 7560,
+        "durationMs": 6214,
         "artifactCount": 23
       },
       {
         "toolId": "volcano-plot",
-        "durationMs": 1107,
+        "durationMs": 1068,
         "artifactCount": 5
       },
       {
         "toolId": "gene-correlation",
-        "durationMs": 388,
+        "durationMs": 402,
         "artifactCount": 4
       }
     ],
@@ -139,107 +139,107 @@
         "id": "job-status",
         "role": "render-blocking",
         "status": 200,
-        "totalMs": 7.94,
-        "coldMs": 7.94,
-        "warmMs": 3.855,
+        "totalMs": 6.165,
+        "coldMs": 6.165,
+        "warmMs": 2.171,
         "warmSamplesMs": [
-          2.815,
-          3.855,
-          4.8
+          2.036,
+          2.171,
+          2.927
         ],
-        "warmSpreadMs": 1.985,
-        "oneTimeCostMs": 4.085,
+        "warmSpreadMs": 0.891,
+        "oneTimeCostMs": 3.994,
         "bytes": 74633
       },
       {
         "id": "artifact-bytes",
         "role": "render-blocking",
         "status": 200,
-        "totalMs": 4.815,
-        "coldMs": 4.815,
-        "warmMs": 2.685,
+        "totalMs": 4.846,
+        "coldMs": 4.846,
+        "warmMs": 2.23,
         "warmSamplesMs": [
-          1.66,
-          2.685,
-          2.821
+          1.739,
+          2.23,
+          2.864
         ],
-        "warmSpreadMs": 1.161,
-        "oneTimeCostMs": 2.13,
-        "bytes": 146956
+        "warmSpreadMs": 1.125,
+        "oneTimeCostMs": 2.616,
+        "bytes": 142733
       },
       {
         "id": "interaction",
         "role": "secondary",
         "status": 200,
-        "totalMs": 3594.446,
-        "coldMs": 3594.446,
-        "warmMs": 10.741,
+        "totalMs": 3139.559,
+        "coldMs": 3139.559,
+        "warmMs": 11.447,
         "warmSamplesMs": [
-          10.588,
-          10.741,
-          14.631
+          9.457,
+          11.447,
+          11.784
         ],
-        "warmSpreadMs": 4.043,
-        "oneTimeCostMs": 3583.705,
+        "warmSpreadMs": 2.327,
+        "oneTimeCostMs": 3128.112,
         "bytes": 46212
       },
       {
         "id": "context-envelope",
         "role": "secondary",
         "status": 409,
-        "totalMs": 4.778,
-        "coldMs": 4.778,
-        "warmMs": 2.131,
+        "totalMs": 3.277,
+        "coldMs": 3.277,
+        "warmMs": 1.678,
         "warmSamplesMs": [
-          1.78,
-          2.131,
-          2.221
+          1.503,
+          1.678,
+          1.784
         ],
-        "warmSpreadMs": 0.441,
-        "oneTimeCostMs": 2.647,
+        "warmSpreadMs": 0.281,
+        "oneTimeCostMs": 1.599,
         "bytes": 188
       },
       {
         "id": "changesets",
         "role": "secondary",
         "status": 200,
-        "totalMs": 2.698,
-        "coldMs": 2.698,
-        "warmMs": 1.533,
+        "totalMs": 2.294,
+        "coldMs": 2.294,
+        "warmMs": 1.466,
         "warmSamplesMs": [
-          1.517,
-          1.533,
-          1.935
+          1.034,
+          1.466,
+          1.482
         ],
-        "warmSpreadMs": 0.418,
-        "oneTimeCostMs": 1.165,
+        "warmSpreadMs": 0.448,
+        "oneTimeCostMs": 0.828,
         "bytes": 1643
       },
       {
         "id": "workspace-status",
         "role": "secondary",
         "status": 200,
-        "totalMs": 265.932,
-        "coldMs": 265.932,
-        "warmMs": 279.453,
+        "totalMs": 232.781,
+        "coldMs": 232.781,
+        "warmMs": 227.961,
         "warmSamplesMs": [
-          267.764,
-          279.453,
-          283.651
+          226.306,
+          227.961,
+          237.634
         ],
-        "warmSpreadMs": 15.887,
-        "oneTimeCostMs": -13.521,
+        "warmSpreadMs": 11.328,
+        "oneTimeCostMs": 4.82,
         "bytes": 837
       }
     ],
-    "renderBlockingTotalMs": 12.755,
+    "renderBlockingTotalMs": 11.011,
     "slowestRequest": "interaction",
     "eventLoop": {
       "resolutionMs": 10,
-      "samples": 65,
-      "minMs": 10.035,
-      "meanMs": 82.891,
-      "maxMs": 3600.81,
+      "samples": 58,
+      "minMs": 9.134,
+      "meanMs": 80.933,
+      "maxMs": 3141.534,
       "percentilesOmitted": "sample count too low for p95/p99 to be meaningful"
     },
     "unmeasured": [
@@ -269,44 +269,44 @@
     {
       "id": "job-status",
       "baselineWarmMs": 2.229,
-      "currentWarmMs": 3.855,
-      "deltaPct": 72.9
+      "currentWarmMs": 2.171,
+      "deltaPct": -2.6
     },
     {
       "id": "artifact-bytes",
       "baselineWarmMs": 2.174,
-      "currentWarmMs": 2.685,
-      "deltaPct": 23.5
+      "currentWarmMs": 2.23,
+      "deltaPct": 2.6
     },
     {
       "id": "interaction",
       "baselineWarmMs": 9.9,
-      "currentWarmMs": 10.741,
-      "deltaPct": 8.5
+      "currentWarmMs": 11.447,
+      "deltaPct": 15.6
     },
     {
       "id": "changesets",
       "baselineWarmMs": 42.102,
-      "currentWarmMs": 1.533,
-      "deltaPct": -96.4
+      "currentWarmMs": 1.466,
+      "deltaPct": -96.5
     },
     {
       "id": "workspace-status",
       "baselineWarmMs": 64.862,
-      "currentWarmMs": 279.453,
-      "deltaPct": 330.8
+      "currentWarmMs": 227.961,
+      "deltaPct": 251.5
     }
   ],
   "budgetStatus": {
     "eventLoopMaxMs": "violated_by_current_implementation",
-    "observedMaxMs": 3600.81,
+    "observedMaxMs": 3141.534,
     "attributedTo": "interaction",
-    "steadyStateWorstMs": 279.453,
+    "steadyStateWorstMs": 227.961,
     "steadyStateWorstRoute": "workspace-status",
     "oneTimeDominated": [
       "job-status",
-      "interaction",
-      "context-envelope"
+      "artifact-bytes",
+      "interaction"
     ],
     "note": "The frozen 250ms budget is exceeded by the current implementation. This is the P4R-0 finding, not a P4R-0 failure: P4R-1 owns the fix. The budget must not be raised to accommodate it.",
     "absoluteTimingsAreLoadSensitive": true,
@@ -401,7 +401,7 @@
       "evidence": [
         "test/p4r-invariants.test.mjs"
       ],
-      "detail": "The four plan invariants exist as tests written against code reality, each naming the concrete defect it fails on. They are deliberately NOT aggregated into this gate: three fail today, which is P4R-0 delivering a definition of done for P4R-1 and P4R-5, not a passing claim."
+      "detail": "The plan invariants exist as tests written against code reality and name concrete defects. They are deliberately NOT aggregated into this gate: the remaining source-projection invariant stays red until its owning P4R-5 phase, while the earlier P4R-1 invariants now pass."
     },
     {
       "id": "RS-P4R0-13",
@@ -430,14 +430,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-27T06:31:07.555Z",
+    "generatedAt": "2026-07-27T17:12:01.001Z",
     "commands": [
       {
         "label": "probe-and-harness",
         "command": "node --test test/perf-probe.test.mjs test/p4r-capture.test.mjs test/p4r-corpus.test.mjs test/p4r-baseline.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "bee6a342983742452546e3d4e4b80a9a48d23dbb48cb6675d24a9df837f26e8f",
+        "stdoutSha256": "69f1814ae25f6fbcb6cd907f85df77840aab19279d2b0462550146197810a018",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -445,7 +445,7 @@
         "command": "node --test test/test-affected.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "75e287f49cd209a92ea1139b43088ceb11d0957e6ab000ee995bcab76cb0644e",
+        "stdoutSha256": "d9ad122d9f60c85c1cd8031bc8e8fd38ae78ea324532bdef0cfc9707211a6c76",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -460,6 +460,9 @@
   },
   "executionTruth": "run_tool -> tool_job -> artifact_truth",
   "passed": true,
-  "generatedAt": "2026-07-27T06:31:07.555Z",
-  "privacyClean": true
+  "generatedAt": "2026-07-27T17:12:01.001Z",
+  "privacyClean": true,
+  "sourceCommitReachable": true,
+  "sourceCommitMatchesSourceHashes": true,
+  "sourceCommitMismatches": []
 }

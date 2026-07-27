@@ -1,10 +1,9 @@
 {
   "schemaVersion": 1,
-  "workPackage": "G0-RS-P4R-1/P4R-2",
-  "sourceCommit": "4f9d89f55c79a314fdbc9516424a1792ebd160de",
-  "captureMode": "real_chain_server_measurement_plus_frontend_pure_module_behaviour",
+  "workPackage": "G0-RS-P4R-1/P4R-2/P4R-3",
+  "captureMode": "real_chain_server_measurement_plus_frontend_and_agent_binding_contracts",
   "qualificationEligible": false,
-  "qualificationReason": "P4R-1 and P4R-2 deliver a faster read path and a focused surface. No layout, theme or pixel claim is made, and Result Studio product qualification remains reserved for P7.",
+  "qualificationReason": "P4R-1 through P4R-3 deliver a faster read path, focused surface and context-bound Agent-first editing implementation. No Provider, layout, theme or pixel claim is made, and Result Studio product qualification remains reserved for P7.",
   "privacy": "repository_relative_paths_digests_counts_timings_and_bounded_statuses_only",
   "sourceHashes": {
     "gitAdapter": "db7a9030ee5a736ae03fbcefc7f548b7c98bd454198010169c92c86974dee255",
@@ -17,8 +16,59 @@
     "mode": "15b18c0215e2959a829d0c0b855cf57d1407c1726847067b0effca09c2366edd",
     "modeSpec": "6d471b8fb8f870ffd96a80ec0b38c1261d2d9e3384b5443fc25e6c68a9a1c1bb",
     "surface": "aa9b7a0127cf6c9afb40222757a76d0ba77b7598b509f7b90ba2092904bc8061",
-    "centerPanel": "11f0b29ed59bd84a9444b6038d1fec2238e0e0aa73bfeb695ce4707e985b187d",
-    "acceptanceScript": "1f3e93995bd4c4586e280909e2f0e6d80f3faa47d20b756444bcade93baea790"
+    "resultSurfaceSpec": "152a6ac542e2eeaf410f6343581757ca5bbd6b4f9cf54988bafe9f48e0603048",
+    "centerPanel": "7250a5256fcee867cb128d6d56bd311b731a361c3eed9e4ad84d1816d1ea4298",
+    "rightPanel": "3f9c1a781e3a7b8718dd71d5091863a48a020fc01e19d43fd297d43d326816ff",
+    "rightPanelSpec": "bbb2ba07c4ac3aa603b26e03656b80b052f5c54f53c86332d50ee5b898e9d08d",
+    "projectWorkspace": "1d71e4c609e27dbd14827ea35e2943885d2f927315ba02d7dee1510de0905137",
+    "resultAgentComposer": "5c0508cb07254b660ba9b5c63553011617dde37f7db26053329f8d97e8c5e9e1",
+    "resultAgentComposerStyle": "bff22344bed403c92b568fbe2ec1a719ed2def25f55c4bac60ffe5fc87a4b584",
+    "resultAgentComposerSpec": "cb703937db63adcafac6dc7f602816017cda04971dfa4fb27112d3167768a0ba",
+    "resultEditPanel": "9a1387cbb775978e1f5b325c079affe3700d298424cd60911eb87caf415af650",
+    "resultEditPanelStyle": "5b59a661514aa97d6a751dc8c9f5d3220c5ecc060f1c33854d23ed38affb89fd",
+    "resultEditPanelSpec": "38335ac744fb6450661cdb1a886c06b094b925befe1298751b50a0d09a752674",
+    "resultStudioSurface": "057c08ae36381536ff12b093492ffdb19522f353001a5a0104f3293e7aebf1ed",
+    "resultStudioSurfaceStyle": "65e94922e0ca10db1cc11ce0ef9f601cfd0992276ee8d0b0b5905e510f98c9c2",
+    "resultStudioSurfaceSpec": "94514de68e951f5e46f108614a5e32a889a8d7a170d3852fbdfed921336c5ac4",
+    "copilotAskDeliverySpec": "8158edb210aac33837d1871f39fa98834527d26e5db0be8c54e5200f332b1e3e",
+    "centerPanelSpec": "cd2a1637ec9cbd881115320a4c6da10376d6734aa78411d83dcd927dd888c7e8",
+    "copilotContext": "093cafd92346b33ed755938949b393c749d4bd8ee300d1cb4cafb5601aed3271",
+    "events": "2f98d2035d577157d992ce02513db50215fe91ef1f459840fa4f706cc2f54bff",
+    "resultEditAgentBridge": "cd5e05ad41b40622cb1ee63f7e7fefe40b055147b9fcb581a0595f9f215ea996",
+    "resultEditAgentBridgeSpec": "4993bc009a7937f6e8045ac9f2ce08fc5df5e90bd49ebf2a213db44abdffd248",
+    "simpleChat": "d6a2b6100e2f871ecf36c432abd4bea25769f607932ac731901a572749c2ac3c",
+    "simpleChatStyle": "71602839b587bd688ba655a0ebbf2f95f980aab1f3b952700f6cc9691c12fa9e",
+    "copilotClient": "d2e604017f7f91a1ed8b5f3e70aef91781602a86f5782db1eecac266b10119e7",
+    "copilotClientSpec": "3ea7d34d05da5ae8a3b6bf05aac9da4e638b8d5f229eed41e5ad2a2d61dfa291",
+    "conversationRunStore": "8183703db05831e71264f749bc5c0a4c47c1a766350879d69d47b3d616fcf68a",
+    "conversationRunStoreSpec": "d48e4103f1052a2b0c4348f44e4b7314ec95ef3b069074219cfd51e8b15642d8",
+    "simpleChatProgressSpec": "6f5db861ac90b06ba37b40902f6a0f04010ae132bedd06927862e6f007f77164",
+    "contextClient": "4ad936f787298db3a75186dbaab2c7cde3e24b1feb5ff4e7d2c031f6b3e594b8",
+    "contextContract": "8a29038a33a759b4b144549c79e16b16c8d7878df96c52a55081e67a9213b1a3",
+    "resultEditIntent": "3974400975fb8b98fd79b5ee6f06ab799ae4877d4e875d5cdf8d479672a86109",
+    "resultEditControls": "d241a97ea738d47f558c8e3050d963db128c5609a28471ffc83313ae39269de1",
+    "resultContextTools": "f702f5c1688a1dca27feb9560f84d32e67c51f4844573c95be3c5d6693e04a3f",
+    "resultContextEditTools": "3695f54aca1a59a45703935c71ce6264ecac6a2063a5206934b9774d69a1124b",
+    "agentRunner": "c80fd7dbb970c497971d3712a7c962b9cceb4280b1a5394f80ca4fd2b9823f65",
+    "agentRoute": "441c6a632659f8283081155f27761a7dc5e981baca69806c3a2fd0dcc7b2f516",
+    "agentInterceptor": "2791c9c0ac2d2cd49b666e98dd652e0cf4b9fe04b092e9c2c9d7b2e0f42aed63",
+    "resultContextBinding": "205dd70c0cf09b5bca89d837913894bcde33faa622c8c3ea89d1f0d4e2858429",
+    "toolDefinitions": "4e6ab4cc280a30e2a49da029db4d6d348d3f25d3d2bfe431b164ae490f47178f",
+    "systemPrompt": "70c94eacee8ee9b8fea73ffafaeff2c76f8b7a84b50abbe64307fd69c5ba67c1",
+    "agentBindingSpec": "e736410615f96f0158f4974a386c608a228fff18bc81e5b390c1c6f1dc8d82af",
+    "systemPromptSpec": "185834ceb684b683df93288008bb0b244e3743fe2c0d8627d0103c320a9924a1",
+    "resultStudioContextSpec": "e96aedbd59428d9a7c576710b67355e70fd149d2c99befa58340e2e609cc02de",
+    "resultEditAgentToolSpec": "7bc0d41a15ec4cfe2ac21297559a819890aecdc4538b2a04f90a4ba4ed183088",
+    "agentToolPolicySpec": "d275291158cf33369e1d3accc165ce60f5edbc60e8bdbe99a8c6aac0907e6906",
+    "agentToolRegistrySpec": "73aa421cba9f4f29e93b31834a20ce99b5698442e1b098427c59f53b0b9ad01d",
+    "impactMap": "e0e1009a585497f36067eafe44267a0427507573c39fb88e042f1ee5e0eb62bf",
+    "impactMapSpec": "7e5a1bc5e804c84b5492130080ca57626a6ba0a2f1be6c683f7e451fb42d16ed",
+    "packageScripts": "5e3627524475a0642e2dc82cfc3bfa297227e5f22b7ba3567bac53c42519c211",
+    "acceptanceScript": "832996f900b4329e474c512e40e4d9fdf46149a571f1d6a1c2d97cf2261c2174",
+    "performanceAcceptanceScript": "76e917f5c279574daddfda1d63ae56c267858fcccff41fe758b45f2c134c6b54",
+    "baselineScript": "cc6a431db7e271fcfd2af8ef2eeb2aad6299a22ae6661b31119f3cf4b5cc0fef",
+    "captureScript": "99f9eb3fe4efa643e5a87925098dfdd815664b703907b90333e9e240edd317ac",
+    "corpusScript": "7885fa8b409d16da0628d0f3413354c47e6cc0a0350188309d678418b833c8af"
   },
   "frozenBaseline": {
     "capturedAtCommit": "e1f841c8ada919250c01f5cde76586ef2375bdc6",
@@ -27,101 +77,116 @@
   "observation": {
     "revisionCount": 1,
     "calibration": {
-      "gitSpawnMedianMs": 11.715,
-      "pathEntries": 30,
-      "invokedUnderNpm": false
+      "gitSpawnMedianMs": 110.385,
+      "pathEntries": 52,
+      "invokedUnderNpm": true
     },
     "requests": [
       {
         "id": "job-status",
         "role": "render-blocking",
         "status": 200,
-        "coldMs": 6.552,
-        "warmMs": 2.363,
-        "warmSpreadMs": 1.045,
-        "oneTimeCostMs": 4.189
+        "coldMs": 5.809,
+        "warmMs": 1.935,
+        "warmSpreadMs": 1.283,
+        "oneTimeCostMs": 3.874
       },
       {
         "id": "artifact-bytes",
         "role": "render-blocking",
         "status": 200,
-        "coldMs": 5.891,
-        "warmMs": 2.569,
-        "warmSpreadMs": 0.924,
-        "oneTimeCostMs": 3.322
+        "coldMs": 5.206,
+        "warmMs": 2.046,
+        "warmSpreadMs": 0.513,
+        "oneTimeCostMs": 3.16
       },
       {
         "id": "interaction",
         "role": "secondary",
         "status": 200,
-        "coldMs": 331.887,
-        "warmMs": 10.702,
-        "warmSpreadMs": 3.005,
-        "oneTimeCostMs": 321.185
+        "coldMs": 3120.87,
+        "warmMs": 11.327,
+        "warmSpreadMs": 2.163,
+        "oneTimeCostMs": 3109.543
       },
       {
         "id": "context-envelope",
         "role": "secondary",
         "status": 409,
-        "coldMs": 2.705,
-        "warmMs": 1.939,
-        "warmSpreadMs": 0.408,
-        "oneTimeCostMs": 0.766
+        "coldMs": 3.55,
+        "warmMs": 1.821,
+        "warmSpreadMs": 0.278,
+        "oneTimeCostMs": 1.729
       },
       {
         "id": "changesets",
         "role": "secondary",
         "status": 200,
-        "coldMs": 2.892,
-        "warmMs": 1.287,
-        "warmSpreadMs": 1.121,
-        "oneTimeCostMs": 1.605
+        "coldMs": 2.336,
+        "warmMs": 1.203,
+        "warmSpreadMs": 0.21,
+        "oneTimeCostMs": 1.133
       },
       {
         "id": "workspace-status",
         "role": "secondary",
         "status": 200,
-        "coldMs": 26.536,
-        "warmMs": 27.37,
-        "warmSpreadMs": 0.352,
-        "oneTimeCostMs": -0.834
+        "coldMs": 227.108,
+        "warmMs": 225.17,
+        "warmSpreadMs": 8.246,
+        "oneTimeCostMs": 1.938
       }
     ],
     "eventLoop": {
-      "samples": 14,
-      "maxMs": 333.971
+      "samples": 57,
+      "maxMs": 3126.854
     }
   },
   "improvementVsBaseline": [
     {
       "id": "job-status",
       "baselineWarmMs": 2.229,
-      "currentWarmMs": 2.363,
-      "deltaPct": 6
+      "currentWarmMs": 1.935,
+      "deltaPct": -13.2,
+      "baselineWarmSpawnEquivalents": null,
+      "currentWarmSpawnEquivalents": null,
+      "calibratedDeltaPct": null
     },
     {
       "id": "artifact-bytes",
       "baselineWarmMs": 2.174,
-      "currentWarmMs": 2.569,
-      "deltaPct": 18.2
+      "currentWarmMs": 2.046,
+      "deltaPct": -5.9,
+      "baselineWarmSpawnEquivalents": null,
+      "currentWarmSpawnEquivalents": null,
+      "calibratedDeltaPct": null
     },
     {
       "id": "interaction",
       "baselineWarmMs": 9.9,
-      "currentWarmMs": 10.702,
-      "deltaPct": 8.1
+      "currentWarmMs": 11.327,
+      "deltaPct": 14.4,
+      "baselineWarmSpawnEquivalents": null,
+      "currentWarmSpawnEquivalents": null,
+      "calibratedDeltaPct": null
     },
     {
       "id": "changesets",
       "baselineWarmMs": 42.102,
-      "currentWarmMs": 1.287,
-      "deltaPct": -96.9
+      "currentWarmMs": 1.203,
+      "deltaPct": -97.1,
+      "baselineWarmSpawnEquivalents": null,
+      "currentWarmSpawnEquivalents": null,
+      "calibratedDeltaPct": null
     },
     {
       "id": "workspace-status",
       "baselineWarmMs": 64.862,
-      "currentWarmMs": 27.37,
-      "deltaPct": -57.8
+      "currentWarmMs": 225.17,
+      "deltaPct": 247.2,
+      "baselineWarmSpawnEquivalents": 6.785,
+      "currentWarmSpawnEquivalents": 2.04,
+      "calibratedDeltaPct": -69.9
     }
   ],
   "unmeasured": {
@@ -148,7 +213,7 @@
         "core/shared-backend/git-adapter.js",
         "core/shared-backend/result-studio-lifecycle.js"
       ],
-      "detail": "workspace-status steady-state cost fell measurably; its per-revision rev-parse pair is now two constant-cost spawns."
+      "detail": "workspace-status steady-state process-spawn equivalents fell by at least 30% against the frozen capture. Raw milliseconds remain recorded but are not compared across the npm/direct spawn-cost calibration mismatch."
     },
     {
       "id": "RS-P4R1-3",
@@ -191,20 +256,61 @@
         "scripts/g0-rs-p4r-product-acceptance.mjs"
       ],
       "detail": "Every metric with no producer is recorded as unmeasured with one stated reason, matching P4R-0 vocabulary. Nothing is estimated and nothing defaults to zero."
+    },
+    {
+      "id": "RS-P4R3-1",
+      "passed": true,
+      "evidence": [
+        "frontend/src/components/result-studio/ResultAgentComposer.test.tsx",
+        "frontend/src/components/result-studio/ResultEditPanel.test.tsx",
+        "frontend/src/lib/result-edit-agent-bridge.test.ts"
+      ],
+      "detail": "The central Composer, atomic context bridge, advanced drawer and persistent progress frontend contracts executed with non-zero tests."
+    },
+    {
+      "id": "RS-P4R3-2",
+      "passed": true,
+      "evidence": [
+        "test/result-studio-agent-binding.test.mjs",
+        "test/system-prompt-result-context.test.mjs",
+        "core/r-server/agent-tools/result-context-binding.js"
+      ],
+      "detail": "Context projection, pre-schema token binding, stale-token rejection and five-stage recording executed as Node tests; task/legacy imports are additionally protected by a static wiring guard."
+    },
+    {
+      "id": "RS-P4R3-3",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-product-acceptance.mjs",
+        "package.json"
+      ],
+      "detail": "Every executed frontend and Node spec is source-hashed, including the exact required P4R-3 UI, bridge, persistence, prompt, context and interceptor set."
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-27T06:39:29.620Z",
+    "generatedAt": "2026-07-27T17:12:51.095Z",
     "frontend": {
-      "command": "npm run test:files --prefix frontend -- 6 specs",
+      "command": "npm run test:files --prefix frontend -- 14 specs",
       "exitCode": 0,
-      "filesPassed": 6,
-      "testsPassed": 40,
+      "filesPassed": 14,
+      "testsPassed": 91,
+      "specCount": 14,
+      "stdoutSha256": "071baa45aacce76f80d21a10bfb71cf4fe0ce22613f795a0f39cf32410fce866"
+    },
+    "node": {
+      "command": "node --test 6 specs",
+      "exitCode": 0,
       "specCount": 6,
-      "stdoutSha256": "58bda7ea09482a704bcaa4eb651bfc01358a7078ee7835e7d304213c3be273e6"
+      "testsObserved": 76,
+      "testsPassed": 76,
+      "stdoutSha256": "06ea9887cb69b58c2f8499c5b66086d779afd24d958317062e7731cc6cb61903"
     }
   },
   "passed": true,
-  "generatedAt": "2026-07-27T06:39:29.620Z",
+  "sourceCommit": "59b33c406a1ed9d6e57990f6d41d99df166dd236",
+  "sourceCommitReachable": true,
+  "sourceCommitMatchesSourceHashes": true,
+  "sourceCommitMismatches": [],
+  "generatedAt": "2026-07-27T17:12:51.095Z",
   "privacyClean": true
 }

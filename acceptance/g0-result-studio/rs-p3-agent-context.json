@@ -1,30 +1,33 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P3",
-  "sourceCommit": "bc55fe0775a391746556633ac65fe16bfd43989d",
+  "sourceCommit": "59b33c406a1ed9d6e57990f6d41d99df166dd236",
   "captureMode": "automated_contract_registry_prompt_and_strict_build_offline_verification",
   "qualificationEligible": false,
   "privacy": "repository_relative_paths_digests_counts_and_bounded_statuses_only_no_project_job_conversation_selection_url_credential_prompt_or_result_data",
   "sourceHashes": {
-    "contextContract": "c2c2dfe71e2d257032384c94fa799f21ea83411520a3131fb4094ee34a557995",
-    "contextTools": "43191ae01f38058cfb67dfbb3ddd00cce04ffc7123b9cb085558f6c0280ed72d",
-    "contextEditTools": "25c6d97e4e773204982f7c7874182ea5bf96bed2cdc97b4110e79bf9a9ff69eb",
-    "toolDefinitions": "85759f4aade139c050f917b6b97c1ba6ed337c9e4cec4af9f475b38fabd82a50",
+    "contextContract": "8a29038a33a759b4b144549c79e16b16c8d7878df96c52a55081e67a9213b1a3",
+    "contextTools": "f702f5c1688a1dca27feb9560f84d32e67c51f4844573c95be3c5d6693e04a3f",
+    "contextEditTools": "3695f54aca1a59a45703935c71ce6264ecac6a2063a5206934b9774d69a1124b",
+    "toolDefinitions": "4e6ab4cc280a30e2a49da029db4d6d348d3f25d3d2bfe431b164ae490f47178f",
     "toolRegistry": "f53dc7d881955cd23efecf466452bac448e9b915d590bed1d783722e6166d5a6",
-    "systemPrompt": "76ebbc2862faaa824c9da003c507096ddda5f15c40939d4149d2c5bf4eb76158",
+    "systemPrompt": "70c94eacee8ee9b8fea73ffafaeff2c76f8b7a84b50abbe64307fd69c5ba67c1",
     "routes": "c2be0db2bd6720172675664385968b34dfe818e13bdbad748e437ed07a55c7ce",
     "editTools": "0485edee96061a3dbbc13855c6539c119250ed29bc7092e14f6c5a14023e8f3d",
-    "contextClient": "22683cc18a4fdf9900e27d0cf1b16a317ecaa8522c56b51809bac68cb75639ad",
-    "surface": "b161d3ae5251cf60fcc4491cf35c2f57ca3803181ea74171f45e7f04dd3dbffd",
-    "surfaceStyle": "7c421944e966c644c5c55bf4c5dcc7f5d038b1f53e327efa5a8d9b1aeb6d1bbd",
-    "rightPanel": "6b4cdc222df827f2141179301d69b2a7bfccb9aeaac4956e36b9498f1cd9075e",
-    "workspace": "f6f27e8a264f7b571aa36963c3e013c4d7eef9a0cd94d6ce64872226ab8ab741",
-    "contextTest": "7846092bce979d62b06811a7f16c616b27689fddbbeed22b7408546be2eb0cf4",
-    "promptTest": "938ca534253c2fb5a53b9b2de8f95c4180f81af9909454de688355be4f66be0a",
+    "contextClient": "4ad936f787298db3a75186dbaab2c7cde3e24b1feb5ff4e7d2c031f6b3e594b8",
+    "surface": "057c08ae36381536ff12b093492ffdb19522f353001a5a0104f3293e7aebf1ed",
+    "surfaceStyle": "65e94922e0ca10db1cc11ce0ef9f601cfd0992276ee8d0b0b5905e510f98c9c2",
+    "rightPanel": "3f9c1a781e3a7b8718dd71d5091863a48a020fc01e19d43fd297d43d326816ff",
+    "workspace": "1d71e4c609e27dbd14827ea35e2943885d2f927315ba02d7dee1510de0905137",
+    "contextTest": "e96aedbd59428d9a7c576710b67355e70fd149d2c99befa58340e2e609cc02de",
+    "promptTest": "185834ceb684b683df93288008bb0b244e3743fe2c0d8627d0103c320a9924a1",
     "registryTest": "73aa421cba9f4f29e93b31834a20ce99b5698442e1b098427c59f53b0b9ad01d",
+    "intentTest": "4fe9825b6933d18e0b1983db9f9d717296b564aac4c0221db5de84545e7b6a0f",
+    "editAgentToolTest": "7bc0d41a15ec4cfe2ac21297559a819890aecdc4538b2a04f90a4ba4ed183088",
     "readinessTest": "cf49ed539c038b60a1463146d034487f274020a706fccd8d1db052d2e484f054",
-    "acceptanceScript": "343843d7c40c81231255c89b8e64319dd31cfa6ed2fa53427e73e97c2efec40e",
-    "packageScripts": "6c9c6f0f7dd3ddd9ec50c11045715b42cdc18209539eed5816755959e68252f9"
+    "surfaceTest": "94514de68e951f5e46f108614a5e32a889a8d7a170d3852fbdfed921336c5ac4",
+    "acceptanceScript": "5a2777014e8aeca41f5483781c99a8e9c23b214ec7a9583577450a6c43a443ef",
+    "packageScripts": "5e3627524475a0642e2dc82cfc3bfa297227e5f22b7ba3567bac53c42519c211"
   },
   "productObservation": {
     "captureMode": "automated_contract_registry_prompt_and_strict_build_offline_verification",
@@ -211,14 +214,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-27T00:52:26.383Z",
+    "generatedAt": "2026-07-27T17:10:54.861Z",
     "commands": [
       {
         "label": "backend-p3",
         "command": "node --test test/result-studio-context.test.mjs test/system-prompt-result-context.test.mjs test/agent-tool-registry.test.mjs test/result-edit-intent.test.mjs test/result-edit-agent-tool.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "137f40131a15cd2374e1b1b62e29ac937b3f1798d66fdb14ed9f6efe60ab5848",
+        "stdoutSha256": "0b2513c212ca43035df824fb3fe9d63d63d71405e2074152578b26bab86f5701",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -226,7 +229,7 @@
         "command": "npm run test:files --prefix frontend -- ResultStudioContextReadiness.test.tsx ResultStudioSurface.test.tsx",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "9c9d67847075d1746ed2f3b9287fc0a059a4d6a5b10a1f9906ab4f3da03cc7de",
+        "stdoutSha256": "3dbc494b59809a5f07211813472274a14958b61aafb8d0dab49d07edeab61aac",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -234,7 +237,7 @@
         "command": "npm run build:check --prefix frontend",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "0acc2b96510a821360fb77661eccf21addc5031002d5158d999083b84a61d787",
+        "stdoutSha256": "f8aab06794168b8ec51e5e5771329e2c807144bca523bc0d22864b1013c97937",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -254,6 +257,9 @@
     "futureStagesImplemented": false
   },
   "passed": true,
-  "generatedAt": "2026-07-27T00:52:26.383Z",
-  "privacyClean": true
+  "generatedAt": "2026-07-27T17:10:54.861Z",
+  "privacyClean": true,
+  "sourceCommitReachable": true,
+  "sourceCommitMatchesSourceHashes": true,
+  "sourceCommitMismatches": []
 }

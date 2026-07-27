@@ -1,8 +1,8 @@
 # G0 Result Studio — 意图驱动、可编辑、Git-backed 的科研结果工作台计划
 
-最后更新：2026-07-27
+最后更新：2026-07-28
 
-状态：`active / implemented_unverified`（RS0～RS8 引擎基础与 P4R-0～P4R-2 保留；G0-CHF0 审计修复已重新真实收口；当前恢复 `P4R-3 Agent-first Editing`，`G0-RS-P5` 继续阻断）
+状态：`active / implemented_unverified`（RS0～RS8 引擎基础与 P4R-0～P4R-3 保留；G0-CHF0 审计修复已重新真实收口；当前阶段 `P4R-4 Version Selector + Codex-like Change Review`，`G0-RS-P5` 继续阻断）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -1578,7 +1578,7 @@ P4R-2 的证据边界沿用 P4R-0 已确立的纪律：**没有生产者的指�
 
 ##### P4R-3：Agent-first Editing
 
-进度（2026-07-28，实现候选，尚未阶段收口）：中央结果画布已接入独立 `ResultAgentComposer`，前端按 project/conversation/Artifact/Revision/Selection 完整 binding key 保存草稿与后端 `contextToken`；事件把 token、结果与结构化编辑请求放入不可见 request context，可见用户消息只保存用户自己的目标。task/legacy 两条 Agent 路径共用 `result-context-binding.js`，在 schema 校验前只为缺少 token 的 `*_in_context` 调用补入点击时 token，显式 stale token 不被替换，后端继续从 SQLite/Artifact Truth 重新投影并 fail-closed。绑定态仍先读 `result_studio_context` 的可信 editable schema，再 plan；create 只接受同一 Agent turn 中服务端保存的原始 intent，模型篡改分类/确认、旧 selection intent 配新 token、任意 script patch 与模型提供的 DAG 均 fail-closed。无 DAG 的纯展示重绘诚实限定为 `current_result_only`，科学/数据/流程变化继续因缺权威 DAG 阻断。`ResultEditPanel` 已降为右栏默认关闭的“高级精细调整”抽屉；手动 patch 与 Agent 意图仍汇合到同一 context-bound plan/ChangeSet 链。五阶段由后端真实发出并单调记录；实时 Composer 按 token 隔离，完成/停止/Provider 失败写入 terminal assistant meta，重开会话可从 SQLite 消息恢复且不渲染内部 reason。并发 run 拒绝提交且不清草稿。P4R-3 Node 专项当前 76/76、前端 P4R 定向 134/134、strict TypeScript 通过。**本段只记录实现候选**：实现提交、source-bound `rs-p4r-product-reframe.json`、旧 P2/P3/P4 证据刷新与治理门尚未完成前，本阶段仍是唯一 `in_progress`，不得推进 P4R-4。
+完成（2026-07-28）：中央结果画布已接入独立 `ResultAgentComposer`，前端按 project/conversation/Artifact/Revision/Selection 完整 binding key 保存草稿与后端 `contextToken`；事件把 token、结果与结构化编辑请求放入不可见 request context，可见用户消息只保存用户自己的目标。task/legacy 两条 Agent 路径共用 `result-context-binding.js`，在 schema 校验前只为缺少 token 的 `*_in_context` 调用补入点击时 token，显式 stale token 不被替换，后端继续从 SQLite/Artifact Truth 重新投影并 fail-closed。绑定态仍先读 `result_studio_context` 的可信 editable schema，再 plan；create 只接受同一 Agent turn 中服务端保存的原始 intent，模型篡改分类/确认、旧 selection intent 配新 token、任意 script patch 与模型提供的 DAG 均 fail-closed。无 DAG 的纯展示重绘诚实限定为 `current_result_only`，科学/数据/流程变化继续因缺权威 DAG 阻断。`ResultEditPanel` 已降为右栏默认关闭的“高级精细调整”抽屉；手动 patch 与 Agent 意图仍汇合到同一 context-bound plan/ChangeSet 链。五阶段由后端真实发出并单调记录；实时 Composer 按 token 隔离，完成/停止/Provider 失败写入 terminal assistant meta，重开会话可从 SQLite 消息恢复且不渲染内部 reason。并发 run 拒绝提交且不清草稿。P4R-3 Node 专项当前 76/76、前端 P4R 定向 134/134、strict TypeScript 通过。实现检查点为 `3d3eb29`，性能门校准修复为 `59b33c4`；P2 17/17、P3 20/20、P4 18/18、P4R-performance 13/13、P4R-product 10/10 均绑定可达 source commit。affected 门 700/700 Node、102/102 related frontend，专项 76/76 Node、134/134 frontend；本阶段已收口，当前阶段推进至 P4R-4。
 
 - 把自然语言 Composer 置于当前结果焦点内；自动绑定 Artifact/Revision/Selection/contextToken。
 - 用户只描述目标，Agent 输出紧凑参数 Patch、影响级别和受影响节点；不展示隐藏推理链。
@@ -1805,7 +1805,7 @@ G0-RS-P0 Truth Correction
 
 阶段状态规则：
 
-- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3` 已完成，`G0-RS-P4 Core` 已形成 18/18 离线实现检查点并提交，`G0-RS-RH0` 已完成，P4R-2 子阶段已完成（首屏化 + header 收敛 + 模式骨架 + 选择/滚动保持 + 死代码清理），当前唯一阶段为 P4R-3；P4R 收口前不得启动 P5。
+- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3` 已完成，`G0-RS-P4 Core` 已形成 18/18 离线实现检查点并提交，`G0-RS-RH0` 与 P4R-0～P4R-3 已完成，当前唯一阶段为 P4R-4；P4R 收口前不得启动 P5。
 - 每阶段先补失败测试/fixture，再实现，再形成与证据类型匹配的验收；不得提前开发下一阶段。
 - 单元测试证明契约，fixture 证明确定性集成，真实 Provider 证明模型边界，packaged Electron 证明产品链；四者不能互相替代。
 - 未运行 `npm run docs:reconcile` 与 `npm run docs:check` 不得宣布阶段 completed/verified/qualified。
@@ -1858,9 +1858,9 @@ G0-RS-P0 Truth Correction
 `G0-RS-P4R` 计划交付：
 
 1. [x] P4R-0 捕获真实失败基线、请求 waterfall 与事件循环阻塞，并冻结预算。证据 `rs-p4r-performance.json`（13/13）：基线已冻结为脚本内常量并由 `RS-P4R0-13` 钉住，重跑只写 `currentObservation` 与对比、不覆盖基线；四条不变量见 `test/p4r-invariants.test.mjs`（当前 3 绿 1 红，红的第 3 条属 P4R-5）。分尺寸阈值按 `deferredBudgets` 显式推迟——在快路径存在前采样只会把缺陷固化成标准。
-2. [x] P4R-1 按实测边界完成结果快路径。实测推翻计划前提——工作区扫描占 0%、hashing <5%，93% 是每次只读请求都 `bindProjectRepository()` 带来的 git 子进程；因此交付为 memo `detectGitRuntime`、`repositoryState()` 三次 fork 惰性化、`inspectRevisionIntegrity` 的每 revision rev-parse 批量成两次常量开销、只读请求不写 binding，以及客户端次级失败不替换已显示主体。对比冻结基线：changesets 42.1→1.1ms（-97%）、workspace-status 64.9→22.4ms（-66%），每 revision 斜率 20ms→0.18ms（200 revision 由 4179ms 降至 66ms）。证据 `rs-p4r-product-reframe.json`（7/7）。原 charter 的相邻版本预取与大文件渐进加载没有可证明收益且未实现，已从本子阶段出口移出，作为 P4R-6 真实性能矩阵出现回归时才重开的优化候选；不得描述为已交付。
+2. [x] P4R-1 按实测边界完成结果快路径。实测推翻计划前提——工作区扫描占 0%、hashing <5%，93% 是每次只读请求都 `bindProjectRepository()` 带来的 git 子进程；因此交付为 memo `detectGitRuntime`、`repositoryState()` 三次 fork 惰性化、`inspectRevisionIntegrity` 的每 revision rev-parse 批量成两次常量开销、只读请求不写 binding，以及客户端次级失败不替换已显示主体。对比冻结基线：changesets 42.102→1.203ms（-97.1%）；workspace-status 因 npm/direct 的 Git spawn 校准相差约 12 倍，不再比较不可比的裸毫秒，改用 6.785→2.040 spawn-equivalents（-69.9%）；每 revision 斜率 20ms→0.18ms（200 revision 由 4179ms 降至 66ms）。证据 `rs-p4r-product-reframe.json`（P4R-1～3 合计 10/10）。原 charter 的相邻版本预取与大文件渐进加载没有可证明收益且未实现，已从本子阶段出口移出，作为 P4R-6 真实性能矩阵出现回归时才重开的优化候选；不得描述为已交付。
 3. [x] P4R-2 按 §P4R-2 的代码实况收敛范围完成：主体之上无无条件块且判据进入 `resultFirstScreen.ts`，已有结果 header 显示真实 `vN` 或诚实降级，建立一次只显示一态的容器并只接入真实存在的 `result`，Agent 会话常驻，result↔chat 选择/草稿/滚动/布局保持。`code` 随 P4R-5、`history`/版本选择器随 P4R-4，`compare` 在 P4R-4 前保持不可达；四态齐备从未属于收敛后的 P4R-2 出口。按需结果抽屉未单独新建：现有导航已可收起且 artifact rail 已条件化，未把不存在的重构冒充交付。
-4. [ ] P4R-3 让自然语言 Agent 成为默认编辑入口，P4 Core 参数面板降为高级精调。
+4. [x] P4R-3 让自然语言 Agent 成为默认编辑入口，P4 Core 参数面板降为高级精调。实现检查点 `3d3eb29`；性能校准门修复 `59b33c4`；P2/P3/P4/P4R evidence 均 source-bound。安全边界：context-bound create 只接受同一 Agent turn 的受信原始 intent；科学/数据/流程修改在缺少权威持久 DAG 时 fail-closed，不接收模型自带 DAG。
 5. [ ] P4R-4 完成可直接查看的版本选择器与 Codex-like Change Review，查看旧版不产生任何写入。
 6. [ ] P4R-5 完成每个 Artifact/Revision 的精确代码、复制/下载/Agent 修改和受控复现入口。
 7. [ ] P4R-6 完成真实连续链、性能、明暗/响应式/键盘、异常降级、文档和脱敏证据收口。

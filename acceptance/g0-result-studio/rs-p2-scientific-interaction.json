@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P2",
-  "sourceCommit": "bc55fe0775a391746556633ac65fe16bfd43989d",
+  "sourceCommit": "59b33c406a1ed9d6e57990f6d41d99df166dd236",
   "captureMode": "automated_contract_renderer_performance_and_live_local_product_plus_bounded_visual_spot_check",
   "qualificationEligible": false,
   "privacy": "repository_relative_paths_digests_counts_dimensions_timings_and_bounded_statuses_only_no_project_job_conversation_selection_url_credential_prompt_or_result_data",
@@ -13,26 +13,33 @@
     "pluginSdk": "44e057e3ef5a3cbd736ce3af1fa169706f6c466ddca4c645ac9a9fc06ff0ffaa",
     "routes": "c2be0db2bd6720172675664385968b34dfe818e13bdbad748e437ed07a55c7ce",
     "selectionTool": "7bd62361d54847cffc6245933c862e34f44f9d486c1a7b683bdc74e99a75a81d",
-    "toolDefinitions": "85759f4aade139c050f917b6b97c1ba6ed337c9e4cec4af9f475b38fabd82a50",
+    "toolDefinitions": "4e6ab4cc280a30e2a49da029db4d6d348d3f25d3d2bfe431b164ae490f47178f",
     "toolRegistry": "f53dc7d881955cd23efecf466452bac448e9b915d590bed1d783722e6166d5a6",
     "viewer": "0b165e23bf9a915e658db9bb3c2240e32a741d2c86f434fb5681dddb6f44dbc2",
     "viewerStyle": "2f320233486b31fe7744d7d44730c4373edb4f3ff54f91faf84ee83a16bd2fdf",
-    "selectionClient": "22683cc18a4fdf9900e27d0cf1b16a317ecaa8522c56b51809bac68cb75639ad",
-    "workspace": "f6f27e8a264f7b571aa36963c3e013c4d7eef9a0cd94d6ce64872226ab8ab741",
+    "selectionClient": "4ad936f787298db3a75186dbaab2c7cde3e24b1feb5ff4e7d2c031f6b3e594b8",
+    "workspace": "1d71e4c609e27dbd14827ea35e2943885d2f927315ba02d7dee1510de0905137",
     "viewerTest": "7087a4647f97980bbb42e6cd4f22fde702175df72385eca5b7669060b1f1e0e5",
     "selectionLogic": "2156ef151d014b654d54f533663d2b7f5f086024161b464ecb45bb5b07fbafe2",
     "selectionLogicTest": "b02e4b21b7fd1452171ad31b6aa5f5c8e5dfede1a2c5fb8d2fb302f9ccb79407",
     "deseq2Descriptor": "085143916e4ace65656888430c7931639506eed6c31c52a2584d21fd2733f0ee",
-    "volcanoDescriptor": "55304b91467a95a89df74b6d0389c8b740659e8a9522245fbc3127daf43e8d03",
+    "volcanoDescriptor": "66604b604c81e053ede710dec9db3e124a12800563d9c66746767bdd7b36585b",
     "heatmapDescriptor": "e14278ea8aadafc021690265d3685f3326c21492f39e94c519b198eedbec7afa",
     "enrichmentDescriptor": "ab2c9da63527fae81d553e5d33b5fe0bcc52155448e8df18305e5f845c20b092",
     "selectionToolTest": "9154ebf32a96bce443a07ddb0be06bccb344a8092bb83f895a5a501d279420f8",
     "tableQueryTest": "c4c97d306b5297aef630d228637d2d40b4ea40962765bf875729aeda712568c7",
+    "artifactInteractionTest": "fc7b6dc14bfb2e190f118a4da5ef5b64344fe659311841139e43c2b81a70a332",
+    "contractsTest": "f74ed20ad293f3fc3a96ac2615bbd59d9bc560fd76b77ee02ebd3d0419ce982d",
+    "repositoryTest": "f99db454a2ddf17564351be5a6ea64efe218aefd6580db139adfae3ed1875fdc",
+    "pluginSdkTest": "f4c09da3aa89aa5cebc2b42fb0c8c2189c5b44a3e8cc844b6f37ada1923b99f4",
+    "registryTest": "73aa421cba9f4f29e93b31834a20ce99b5698442e1b098427c59f53b0b9ad01d",
+    "centerPanelTest": "cd2a1637ec9cbd881115320a4c6da10376d6734aa78411d83dcd927dd888c7e8",
+    "surfaceTest": "94514de68e951f5e46f108614a5e32a889a8d7a170d3852fbdfed921336c5ac4",
     "liveCapture": "4af77d83afd4b0e0c3f2bf973800d4695b81a59097ead690c03bae18017fddf0",
-    "acceptanceScript": "58018eb2bbd76f98ac6a5b03d3282d38aca9c260697598f56f67b7a86e61f933",
+    "acceptanceScript": "ea98ba3b00a69302b14c870180ea39fa3067fb5f4263beac9f9924064b049475",
     "liveObservation": "b0da52317f9e9eb8fbb759fd5d61f9cf00332d07f9fdb04efe9548fbaa068860",
     "uiObservation": "a266e6458c260713d79144f6a7fc8870922bb0060d6a99ed5c6cc3c854dc1a5b",
-    "packageScripts": "6c9c6f0f7dd3ddd9ec50c11045715b42cdc18209539eed5816755959e68252f9"
+    "packageScripts": "5e3627524475a0642e2dc82cfc3bfa297227e5f22b7ba3567bac53c42519c211"
   },
   "productObservation": {
     "captureMode": "automated_contract_renderer_performance_and_live_local_product_plus_bounded_visual_spot_check",
@@ -189,14 +196,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-27T00:52:01.105Z",
+    "generatedAt": "2026-07-27T17:10:31.936Z",
     "commands": [
       {
         "label": "backend-p2",
         "command": "node --test test/result-studio-table-query.test.mjs test/result-selection-tools.test.mjs test/artifact-interaction.test.mjs test/result-studio-contracts.test.mjs test/result-studio-repository.test.mjs test/result-studio-plugin-sdk.test.mjs test/agent-tool-registry.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "bd9c07fbc7e9c9237c1daa4a039e0d3d4c48814c30aacd67911898048aeb2e8c",
+        "stdoutSha256": "bab32399c6ccc4b66c3b52d05a9da5207434e7f25667b7a71fef0c43aa7042a8",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -204,14 +211,14 @@
         "command": "npm run test:files --prefix frontend -- ScientificInteractionViewer.test.tsx artifact-selection.test.ts CenterPanel.test.tsx ResultStudioSurface.test.tsx",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "fa7dfa9a0e6d0adbb4e0b1b20385511982155cd8d7570915a6f082306d87bd34",
+        "stdoutSha256": "92efc554e7e45996dcc1a09f9f202374c0acbfcde8e8f5d78e73050225c2a419",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "rendererPerformance": {
           "budgetMs": 100,
-          "scrollFeedbackMs": 2.664,
-          "selectionFeedbackMs": 4.314,
-          "sortFeedbackMs": 5.356,
-          "filterFeedbackMs": 0.904
+          "scrollFeedbackMs": 3.03,
+          "selectionFeedbackMs": 4.791,
+          "sortFeedbackMs": 5.074,
+          "filterFeedbackMs": 1.025
         }
       },
       {
@@ -219,7 +226,7 @@
         "command": "npm run build:check --prefix frontend",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "4962816c03408e4f26694d97f2bb88d83aba68f63153987843051502f0fe4d28",
+        "stdoutSha256": "128102a57e05382fcc3425d1be27cc24f08c58f302db76f86ea57398298b6c81",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -239,6 +246,9 @@
     "futureStagesImplemented": false
   },
   "passed": true,
-  "generatedAt": "2026-07-27T00:52:01.105Z",
-  "privacyClean": true
+  "generatedAt": "2026-07-27T17:10:31.936Z",
+  "privacyClean": true,
+  "sourceCommitReachable": true,
+  "sourceCommitMatchesSourceHashes": true,
+  "sourceCommitMismatches": []
 }
