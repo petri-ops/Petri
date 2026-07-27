@@ -1853,9 +1853,9 @@ G0-RS-P0 Truth Correction
 
 `G0-RS-P4R` 计划交付：
 
-1. [~] P4R-0 捕获真实失败基线、请求 waterfall 与事件循环阻塞，并冻结冷/热打开、版本切换和代码打开预算。（进行中 `340c09a`：env 门控观测探针已落地；仍缺 canonical fixture、失败测试先行与冻结的性能预算证据。）
-2. [ ] P4R-1 建立结果快路径；主体不等待 interaction/context/version/storage/code 次级请求。
-3. [ ] P4R-2 完成主体首屏化（主体之上无无条件块，判据在 `resultFirstScreen.ts` 中可测）、收敛已有结果 header（去掉与 `workflowBar` 的真值重复，版本位显示真实 `vN` 或如实降级）、按需结果抽屉，以及**一次只显示一态的模式容器并接入唯一有实现的 `result`**。`code` 入口待 P4R-5 的 Revision 源投影路由，`history`/版本选择器待 P4R-4，`compare` 在 P4R-4 给出入口前保持不可达；四态齐备不属 P4R-2 出口。其中 Agent 会话常驻已由 `8e58f98` 交付（记为交付缺陷修复：提交被静默丢弃，非布局项）。
+1. [x] P4R-0 捕获真实失败基线、请求 waterfall 与事件循环阻塞，并冻结预算。证据 `rs-p4r-performance.json`（13/13）：基线已冻结为脚本内常量并由 `RS-P4R0-13` 钉住，重跑只写 `currentObservation` 与对比、不覆盖基线；四条不变量见 `test/p4r-invariants.test.mjs`（当前 3 绿 1 红，红的第 3 条属 P4R-5）。分尺寸阈值按 `deferredBudgets` 显式推迟——在快路径存在前采样只会把缺陷固化成标准。（进行中 `340c09a`：env 门控观测探针已落地；仍缺 canonical fixture、失败测试先行与冻结的性能预算证据。）
+2. [~] P4R-1 建立结果快路径。**服务端已完成**：实测推翻计划前提——工作区扫描占 0%、hashing <5%，93% 是每次只读请求都 `bindProjectRepository()` 带来的 git 子进程。故未做架构改造，改为 memo `detectGitRuntime`、`repositoryState()` 三次 fork 惰性化、`inspectRevisionIntegrity` 的每 revision rev-parse 批量成两次常量开销，并按已声明却被忽略的 `write` 标志停止只读路径写绑定。对比冻结基线：changesets 42.1→1.1ms（-97%）、workspace-status 64.9→22.4ms（-66%），每 revision 斜率 20ms→0.18ms（200 revision 由 4179ms 降至 66ms）。证据 `rs-p4r-product-reframe.json`（7/7）。**剩余**：客户端瀑布拆分与相邻版本预取/大文件渐进加载尚未评估。
+3. [~] P4R-2 完成主体首屏化（主体之上无无条件块，判据在 `resultFirstScreen.ts` 中可测）、收敛已有结果 header（去掉与 `workflowBar` 的真值重复，版本位显示真实 `vN` 或如实降级）、按需结果抽屉，以及**一次只显示一态的模式容器并接入唯一有实现的 `result`**。`code` 入口待 P4R-5 的 Revision 源投影路由，`history`/版本选择器待 P4R-4，`compare` 在 P4R-4 给出入口前保持不可达；四态齐备不属 P4R-2 出口。其中 Agent 会话常驻已由 `8e58f98` 交付（记为交付缺陷修复：提交被静默丢弃，非布局项）。
 4. [ ] P4R-3 让自然语言 Agent 成为默认编辑入口，P4 Core 参数面板降为高级精调。
 5. [ ] P4R-4 完成可直接查看的版本选择器与 Codex-like Change Review，查看旧版不产生任何写入。
 6. [ ] P4R-5 完成每个 Artifact/Revision 的精确代码、复制/下载/Agent 修改和受控复现入口。
