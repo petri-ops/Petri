@@ -2,7 +2,7 @@
 
 最后更新：2026-07-27
 
-状态：`active / implemented_unverified`（RS0～RS8 引擎基础保留；`G0-RS-P0`～`G0-RS-P3` 已完成；`G0-RS-P4 Core` 已通过 18/18 离线门禁并提交；`G0-RS-RH0 Repository Hygiene Gate` 已完成；当前阶段 `G0-RS-P4R Product Reframe` 处于 `P4R-2 Focused Result Surface`：P4R-0 已收口，P4R-1 服务端已完成，P4R-2 主体部分已落地；`G0-RS-P5` 继续阻断）
+状态：`active / implemented_unverified`（RS0～RS8 引擎基础保留；`G0-RS-P0`～`G0-RS-P3` 已完成；`G0-RS-P4 Core` 已通过 18/18 离线门禁并提交；`G0-RS-RH0 Repository Hygiene Gate` 已完成；当前阶段 `G0-RS-P4R Product Reframe` 处于 `P4R-3 Agent-first Editing`：P4R-0 已收口，P4R-1 服务端已完成，P4R-2 子阶段已完成（首屏化 + header 收敛 + 模式骨架 + 选择/滚动保持 + 死代码清理），P4R-3 未开始；`G0-RS-P5` 继续阻断）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -1385,7 +1385,7 @@ Result Studio 当前按三层事实表达：
 
 RH0 收口证据（2026-07-26）：`test/impact-map.json` 与 `scripts/test-affected.mjs` 已建立确定性、去重、fail-closed 的影响选择；`npm run test:changed` 定向 Node 41 项与前端 294 项通过，`npm run test:all:workspace` 最终基线为 Node 1581 pass / 0 fail / 11 skipped、前端 294 pass / 0 fail；`npm run docs:reconcile`（39 registered、0 unregistered、0 validation issues）、`npm run docs:check`、`npm run ui:audit:check` 与 `git diff --check` 全部通过。旧 `dev-desktop.sh`、已下线云端 smoke 与旧 DESeq2 MCP 验收脚本已删除；真实 JSON 证据迁移到 `test/fixtures/golden-path/deseq2-run.json`，`tmp` 历史日志/二进制已清理，QA/golden-path 日志保留上限为 20。后续审计确认 RS9 脚本仍被历史证据引用，因此保留文件但从日常 Result Studio syntax 热路径移出，新增显式 `g0:result-studio:historical:syntax`；历史代码仍可单独校验。该收口只改变工程治理，不改变任何执行/科学真相；P4R 启动门已满足，P4R-0～P4R-2 已按当前证据推进。
 
-### G0-RS-P4R：Product Reframe — Agent-first Focused Result Experience（`in_progress · P4R-2`）
+### G0-RS-P4R：Product Reframe — Agent-first Focused Result Experience（`in_progress · P4R-3`）
 
 #### P4R.1 定位与启动门
 
@@ -1571,7 +1571,7 @@ P4R-2 的证据边界沿用 P4R-0 已确立的纪律：**没有生产者的指�
 - **返回目标按现状写为「返回会话」**：仓库内不存在结果列表界面，返回按钮的 `aria-label` 就是「返回对话」（`ResultStudioSurface.tsx:83`）并走 `updateWorkspaceMode('chat')`（`CenterPanel.tsx:188`），右栏 `results` tab 是单 Artifact Inspector（`RightPanel.tsx:146-174`）。§P4R.3 布局图中的「返回结果列表」同步改为「返回会话」；若要建结果列表，那是新增产品面，不属 P4R-2 且需单独立项。
 - **模式机制本阶段只能立骨架，不能立四态**：`WorkspaceMode`（`useWorkspaceRouting.ts:4`）中不存在 `code` 与 `history`；`compare` 零写入者且与 `result` 渲染完全相同（`ResultStudioSurface.tsx:53` 只落 `data-mode`，两份 module CSS 均不选择它）。因此 P4R-2 只交付「一次只显示一态」的容器与状态载体，并在其上接入唯一有实现的 `result`。`code` 入口在 P4R-5 的 Revision 源投影路由存在前不得渲染；`history`/版本选择器随 P4R-4 接入；`compare` 在 P4R-4 给出比较入口前保持不可达，**不得由本阶段把它伪装成可用的第四态**。
 - **[x] Agent 会话常驻（已交付 `8e58f98`）**。该条在原 charter 中被写成布局偏好，实测是**主路径上的静默数据丢失**：`ResultEditPanel`（`RightPanel.tsx:161-174`）提交后派发的 `copilotAsk` 经零缓冲的 `dispatchBioF3Event`（`lib/events.ts:109-113`）发出，唯一订阅者 `SimpleChat.tsx:579-585` 在 result 模式下未挂载，事件消失且 `finally` 同步把按钮重置为空闲，用户得不到任何失败提示。修复去掉了 `CenterPanel` 中冗余且具破坏性的 `{ctx.showPinnedSummary && children}` 门（可见性本由投影层 `aria-hidden` + CSS 承担，去掉后比原来**少**做工作），并新增 `ownsCopilotAsk`（默认 `false`，仅中央实例传 `true`，`CenterPanel.tsx:167`）避免右栏 chat tab 重复订阅。守门测试此前双重假绿（给所有模式硬编码 `showPinnedSummary: true` 并 mock 掉 `SimpleChat`），已改为按 mode 派生并新增 `copilotAskDelivery.test.tsx` 用真实订阅验证送达。记为**交付缺陷修复**，不记为布局改造。
-- 剩余项：进出结果、切换 Artifact/Revision 后草稿、选择、滚动可恢复。其中「布局」一项已由 `project-workspace.tsx:309-320`、`:377-386` 的 `resultPanelRestoreRef` 实现，本阶段只补回归断言；草稿的存活已由 `8e58f98` 从结构上保证（会话不再卸载）；因此本阶段真正待做的是**选择与滚动**的跨切换保持，且只能对 `result↔chat` 验证——Code/History/Compare 的对应验证分别随 P4R-5/P4R-4 补齐。
+- **[x] 选择与滚动保持（已交付）**：进出结果、切换 Artifact/Revision 后草稿、选择、滚动可恢复。其中「布局」一项已由 `project-workspace.tsx:309-320`、`:377-386` 的 `resultPanelRestoreRef` 实现；草稿的存活已由 `8e58f98` 从结构上保证（会话不再卸载）；**选择**状态因 `activeArtifact`（含 selection）是宿主 state、`updateWorkspaceMode` 不重置它、仅 `activeJobId` 变化才清空而天然保持；**滚动**位置由新增的 `frontend/src/components/result-studio/resultScrollMemory.ts`（按 jobId 缓存 `.resultView` scrollTop 的纯模块，7/7 单测）+ `ResultArtifactShell` 成功态 div 的 ref/onScroll 接线实现，result 层重新挂载时按 job.id 恢复。chat 侧 `sc-messages` 因 SimpleChat 常驻天然保持，无需额外机制。仅对 `result↔chat` 验证；Code/History/Compare 的对应验证分别随 P4R-5/P4R-4 补齐。滚动恢复的实机像素验证本仓库无浏览器自动化，按 P4R-0 先例记 `not_captured_no_browser_automation_in_repo`。
 - 1440/1024/820px、明暗主题和键盘焦点：**按可证明性拆成两半，不整条作为出口条件**。可在 happy-dom 单测中机器证明的部分必须成立并写进证据：模式容器在每个断点下渲染同一棵可达 DOM、焦点顺序与 `role`/`aria-*` 完整、核心路径的键盘处理器存在且可触发、状态不只靠颜色（以文本或 `data-*` 兜底）、样式只使用已定义的 `--biof3-*` token 因而明暗共用一套声明。不可证明的部分**必须按 P4R-0 先例记为未测量并给出原因**：`frontend/vite.config.ts` 用 happy-dom，实测 `getBoundingClientRect()`/`offsetWidth`/`scrollWidth`/`clientWidth` 全为 0，不做布局计算；仓库无 playwright/puppeteer；`scripts/g0-qualification-visual.mjs` 只校验既有 PNG 不捕获。因此 `pageHorizontalOverflow`、各断点实际可见高度与「主体首屏可见」的像素判定一律记 `unmeasured` + `not_captured_no_browser_automation_in_repo`，**不得估算、不得以 `innerWidth` 冒充布局、不得以人工提供而仓库内无生产者的 JSON 充作机器证据**。
 
 ##### P4R-3：Agent-first Editing
@@ -1801,7 +1801,7 @@ G0-RS-P0 Truth Correction
 
 阶段状态规则：
 
-- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3` 已完成，`G0-RS-P4 Core` 已形成 18/18 离线实现检查点并提交，`G0-RS-RH0` 已完成，当前唯一阶段为 P4R-2；P4R 收口前不得启动 P5。
+- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3` 已完成，`G0-RS-P4 Core` 已形成 18/18 离线实现检查点并提交，`G0-RS-RH0` 已完成，P4R-2 子阶段已完成（首屏化 + header 收敛 + 模式骨架 + 选择/滚动保持 + 死代码清理），当前唯一阶段为 P4R-3；P4R 收口前不得启动 P5。
 - 每阶段先补失败测试/fixture，再实现，再形成与证据类型匹配的验收；不得提前开发下一阶段。
 - 单元测试证明契约，fixture 证明确定性集成，真实 Provider 证明模型边界，packaged Electron 证明产品链；四者不能互相替代。
 - 未运行 `npm run docs:reconcile` 与 `npm run docs:check` 不得宣布阶段 completed/verified/qualified。

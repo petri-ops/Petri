@@ -43,6 +43,7 @@
 - [`releases/v0.0.1-rc.7.md`](./releases/v0.0.1-rc.7.md) — Phase 7、模型 UX 与 ToolResult 实机收口发布版。
 - [`harness-tool-template.md`](./harness-tool-template.md) — Harness 工具模板。
 - [`first-success-path.md`](./first-success-path.md) — demo/golden-path 回归说明，不是当前产品路线图。
+- [`project-wide-audit-2026-07.md`](./project-wide-audit-2026-07.md) - 2026-07-27 六维度横切审计（科学正确性/安全/用户旅程/后端/前端/治理）的范围依据；`qualificationEligible:false`，不升级任何资格声明，优先级与是否启动独立工作包属用户决定。
 
 ## 发布记录
 

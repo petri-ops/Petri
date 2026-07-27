@@ -362,6 +362,14 @@
       "truthDomain": "git-worktree-lifecycle",
       "entrypoint": "docs/README.md",
       "archivePolicy": "never_archive"
+    },
+    {
+      "id": "AUDIT-PROJECT-WIDE-2026-07",
+      "path": "docs/project-wide-audit-2026-07.md",
+      "kind": "audit",
+      "status": "reference",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
     }
   ]
 }
