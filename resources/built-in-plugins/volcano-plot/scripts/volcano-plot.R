@@ -95,12 +95,6 @@ if (is.null(lfc_col)) {
   }
 }
 
-# 必需列检查（gene 列可参数化）
-required <- c("pvalue")
-missing <- setdiff(required, names(deg))
-if (length(missing) > 0) {
-  stop(paste0("[volcano-plot] 缺少必需列: ", paste(missing, collapse = ", ")))
-}
 # gene 列名参数化（默认为 gene）
 if (!(gene_col %in% names(deg))) {
   stop(paste0("[volcano-plot] 指定的 gene 列 '", gene_col, "' 不存在。实际列名: ", paste(names(deg), collapse = ", ")))
@@ -112,8 +106,8 @@ if (gene_col != "gene") {
 
 # 标准化命名：内部统一用 log2FoldChange，输出用 canonical 名称
 deg$log2FoldChange <- as.numeric(deg[[lfc_col]])
-if (any(is.na(deg$log2FoldChange) & !is.na(deg[[lfc_col]]))) {
-  warning("[volcano-plot] LFC 列存在非数值，替换为 NA")
+if (any(is.na(deg$log2FoldChange)) || any(!is.finite(deg$log2FoldChange))) {
+  stop(sprintf("LFC 列 '%s' 含缺失、非数值或无限值，拒绝生成火山图", lfc_col))
 }
 
 # 显著性列必须由调用方明确选择；默认是多重校正后的 padj。
@@ -125,18 +119,27 @@ if (!(pval_col %in% names(deg))) {
     stop(sprintf("显著性列 '%s' 不存在；火山图默认要求校正后的 padj", pval_col))
   }
 }
-deg$pvalue <- as.numeric(deg[[pval_col]])
-if (any(is.na(deg$pvalue) & !is.na(deg[[pval_col]]))) {
-  stop(sprintf("显著性列 '%s' 含非数值，拒绝生成火山图", pval_col))
+parse_probability_column <- function(column_name) {
+  values <- suppressWarnings(as.numeric(deg[[column_name]]))
+  if (any(is.na(values)) || any(!is.finite(values))) {
+    stop(sprintf("显著性列 '%s' 含缺失、非数值或无限值，拒绝生成火山图", column_name))
+  }
+  if (any(values < 0 | values > 1)) {
+    stop(sprintf("显著性列 '%s' 必须位于 0 到 1 之间", column_name))
+  }
+  values
 }
-deg$neg_log10_p <- -log10(deg$pvalue + 1e-300)
+selected_significance <- parse_probability_column(pval_col)
+raw_pvalue <- if ("pvalue" %in% names(deg)) parse_probability_column("pvalue") else NULL
+adjusted_pvalue <- if ("padj" %in% names(deg)) parse_probability_column("padj") else NULL
+deg$neg_log10_significance <- -log10(selected_significance + 1e-300)
 deg$sig <- "NS"
-deg$sig[deg$log2FoldChange > fc_threshold & deg$neg_log10_p > pval_threshold] <- "Up"
-deg$sig[deg$log2FoldChange < -fc_threshold & deg$neg_log10_p > pval_threshold] <- "Down"
+deg$sig[deg$log2FoldChange > fc_threshold & deg$neg_log10_significance > pval_threshold] <- "Up"
+deg$sig[deg$log2FoldChange < -fc_threshold & deg$neg_log10_significance > pval_threshold] <- "Down"
 deg$sig <- factor(deg$sig, levels = c("Up", "NS", "Down"))
 
 # top N 标注
-deg$rank_score <- abs(deg$log2FoldChange) * deg$neg_log10_p
+deg$rank_score <- abs(deg$log2FoldChange) * deg$neg_log10_significance
 deg$label <- ""
 top_idx <- order(deg$rank_score, decreasing = TRUE)[1:min(top_n, nrow(deg))]
 deg$label[top_idx] <- deg$gene[top_idx]
@@ -145,7 +148,7 @@ deg$label[top_idx] <- deg$gene[top_idx]
 colors <- c(Up = color_up, NS = color_ns, Down = color_down)
 
 # 绘图
-p <- ggplot(deg, aes(x = log2FoldChange, y = neg_log10_p, color = sig)) +
+p <- ggplot(deg, aes(x = log2FoldChange, y = neg_log10_significance, color = sig)) +
   geom_point(alpha = point_alpha, size = point_size) +
   geom_text_repel(
     aes(label = label),
@@ -174,10 +177,10 @@ ggsave("volcano.pdf", p, width = plot_width, height = plot_height)
 
 # 分类表（输出 canonical 列名）
 classified <- deg[, c("gene", "log2FoldChange", "sig")]
-classified$significance <- deg[[pval_col]]
+classified$significance <- selected_significance
 classified$significance_column <- pval_col
-if ("pvalue" %in% names(deg) && pval_col != "pvalue") classified$pvalue <- deg$pvalue
-if ("padj" %in% names(deg) && pval_col != "padj") classified$padj <- deg$padj
+if (!is.null(raw_pvalue)) classified$pvalue <- raw_pvalue
+if (!is.null(adjusted_pvalue)) classified$padj <- adjusted_pvalue
 write.csv(classified, "classified_table.csv", row.names = FALSE)
 
 summary_counts <- list(
@@ -195,13 +198,13 @@ html_escape <- function(x) {
   x
 }
 
-top_rows <- head(classified[order(-abs(classified$log2FoldChange), classified$pvalue), ], 12)
+top_rows <- head(classified[order(-abs(classified$log2FoldChange), classified$significance), ], 12)
 top_gene_rows_html <- paste(apply(top_rows, 1, function(row) {
   paste0(
     "<tr>",
     "<td>", html_escape(row[["gene"]]), "</td>",
     "<td>", sprintf("%.3f", as.numeric(row[["log2FoldChange"]])), "</td>",
-    "<td>", format(as.numeric(row[["pvalue"]]), scientific = TRUE, digits = 3), "</td>",
+    "<td>", format(as.numeric(row[["significance"]]), scientific = TRUE, digits = 3), "</td>",
     "<td><span class=\"badge badge-", tolower(html_escape(row[["sig"]])), "\">", html_escape(row[["sig"]]), "</span></td>",
     "</tr>"
   )
@@ -222,6 +225,7 @@ if (file.exists(template_path)) {
     total_count = nrow(deg),
     fc_threshold = fc_threshold,
     pval_threshold = pval_threshold,
+    significance_column = html_escape(pval_col),
     top_n = top_n,
     top_gene_rows = top_gene_rows_html
   )
@@ -239,7 +243,7 @@ manifest <- list(
     list(id = "volcano", filename = "volcano.png", type = "plot", label = "火山图"),
     list(id = "classified_table", filename = "classified_table.csv", type = "table", label = "分类结果表")
   ),
-  summary = summary_counts,
+  summary = c(summary_counts, list(significance_column = pval_col)),
   title = "Honeycomb 火山图 Demo 结果",
   files = list(
     list(name = "volcano.png", type = "plot", label = "火山图", title = "火山图", preview = TRUE, download = TRUE),

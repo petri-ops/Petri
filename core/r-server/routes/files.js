@@ -157,8 +157,8 @@ module.exports = function registerFileRoutes(app) {
       }
     });
 
-    app.get('/api/files/:key(*)', requireTrustedDesktopOrigin, (req, res) => {
-      const key = req.params.key;
+    app.get(/^\/api\/files\/(.+)$/, requireTrustedDesktopOrigin, (req, res) => {
+      const key = Array.isArray(req.params[0]) ? req.params[0].join('/') : req.params[0];
       try {
         if (!isSafeStorageKey(key)) {
           return res.status(400).json({ status: 'error', error: 'invalid_storage_key' });

@@ -2,7 +2,7 @@
 
 最后更新：2026-07-27
 
-状态：`completed / implemented`
+状态：`active / audit_repair`（2026-07-27 复核撤销首次 completed 结论；当前阶段 `CHF0-R1 Contract & failing tests`）
 
 Plan ID：`G0-CHF0`
 
@@ -14,7 +14,7 @@ Result Studio 的既有实现与证据不回退；`G0-RS-P4R-3` 在本工作包�
 
 范围输入为 [`project-wide-audit-2026-07.md`](./project-wide-audit-2026-07.md)。该审计是问题依据，不是验收证据。
 
-收口进度（2026-07-27）：`CHF0-0`～`CHF0-4` 全部完成。R/Python 原始 `/api/run` 与 replot code 入口 fail-closed；`/api/files` 与 workspace 文件边界拒绝 traversal/绝对路径/symlink 逃逸；volcano 默认 `padj` 并对缺列/坏列阻断；PCA 真实 Python 运行验证未分组语义与 sample-ID 严格对齐；长任务具备可配置硬上限、心跳和 TERM→KILL 升级。专项 acceptance `G0-CHF0-7` 5 类通过，影响范围 Node 208 pass / 0 fail / 4 skipped，docs/UI 门通过。证据 `acceptance/g0-critical-crosscut-hardening/acceptance.json` 保持 `qualificationEligible:false`。
+首次收口结论已于 2026-07-27 的运行时反例复核中撤销：volcano 会把 `padj` 错标为 `pvalue` 且显式裸 `pvalue` 路径崩溃；PCA 接受表达矩阵重复/空 sample ID；Node 自刷 heartbeat 不能证明子进程活性；终止 helper 会在 `kill()` 返回 false 时虚报成功；专项 acceptance 未逐项覆盖计划验收且引用 amend 前的不可达提交。`G0-RS-P4R-3` 因单工作包串行纪律暂停，待本工作包重新真实收口后恢复。
 
 ## 2. 必须修复的范围
 
@@ -53,6 +53,14 @@ Result Studio 的既有实现与证据不回退；`G0-RS-P4R-3` 在本工作包�
 5. `CHF0-4 Acceptance & handoff`：完成定向验收、文档/UI 门、审计处置和 P4R-3 恢复。
 
 同一时间只推进一个 CHF0 子阶段。
+
+### 4.1 审计修复阶段（CHF0-R）
+
+1. `CHF0-R1 Contract & failing tests`：把已复现的科学、进程、HTTP 与 evidence 反例写成逐契约失败测试。
+2. `CHF0-R2 Scientific truth`：修复 volcano 统计量/输出/报告契约与 PCA sample-ID 完整性、descriptor。
+3. `CHF0-R3 Process and HTTP truth`：建立子进程可观测活性、真实 TERM→KILL 终态、取消/超时/恢复诊断及明确桌面来源边界。
+4. `CHF0-R4 Acceptance`：每个 check 绑定独立测试结果、当前可达 source commit 与完整 source/producer hashes。
+5. `CHF0-R5 Closeout`：运行影响范围、专项、docs/UI 门与 reconcile；只有全部绿后再次完成并恢复 P4R-3。
 
 ## 5. 验收与证据
 

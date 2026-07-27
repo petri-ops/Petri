@@ -457,6 +457,26 @@ function setupDesktopEnv(backendPorts) {
   process.env.R_SERVER_PORT = String(backendPorts.r);
   process.env.PY_SERVER_PORT = String(backendPorts.python);
   process.env.PLUMBER_PORT = String(backendPorts.plumber);
+  if (backendPorts.renderer) {
+    process.env.BIOF3_RENDERER_PORT = String(backendPorts.renderer);
+    process.env.BIOF3_RENDERER_ORIGIN = `http://localhost:${backendPorts.renderer}`;
+  }
+  const trustedRendererOrigins = new Set(
+    String(process.env.BIOF3_TRUSTED_DESKTOP_ORIGINS || '')
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean),
+  );
+  if (isDevMode) {
+    try {
+      trustedRendererOrigins.add(new URL(rendererDevUrl).origin);
+    } catch {}
+  }
+  if (backendPorts.renderer) {
+    trustedRendererOrigins.add(`http://localhost:${backendPorts.renderer}`);
+    trustedRendererOrigins.add(`http://127.0.0.1:${backendPorts.renderer}`);
+  }
+  process.env.BIOF3_TRUSTED_DESKTOP_ORIGINS = [...trustedRendererOrigins].join(',');
   // Child servers run in separate Node processes and cannot see Electron's
   // in-memory plugin registry. Give them the exact packaged/dev built-in root
   // so HTTP execution resolves the same plugin metadata as MCP (including
@@ -497,10 +517,12 @@ async function selectBackendPorts() {
   const r = await reserveAvailablePort(3001);
   const python = await reserveAvailablePort(3004);
   const plumber = await reserveAvailablePort(8787);
+  const renderer = isDevMode ? null : await reserveAvailablePort(3002);
   if (r !== 3001) console.warn(`[desktop] port 3001 occupied; using ${r} for r-server`);
   if (python !== 3004) console.warn(`[desktop] port 3004 occupied; using ${python} for py-server`);
   if (plumber !== 8787) console.warn(`[desktop] port 8787 occupied; using ${plumber} for plumber`);
-  return { r, python, plumber };
+  if (renderer && renderer !== 3002) console.warn(`[desktop] port 3002 occupied; using ${renderer} for renderer`);
+  return { r, python, plumber, renderer };
 }
 
 // ── 启动 r-server（子进程 spawn，避免原生模块 V8 版本冲突）─────
@@ -805,11 +827,11 @@ async function createWindow() {
     try {
       const { startStaticServer } = require("./static-server");
       const spaServer = await startStaticServer(spaBuildDir, {
-        port: 3002,
+        port: Number(process.env.BIOF3_RENDERER_PORT || 3002),
         baseUrl: "/",
         label: "spa-server",
         spaFallback: true,
-        fallbackToRandomPort: true,
+        fallbackToRandomPort: false,
       });
       const address = spaServer?.address();
       if (typeof address === "object" && address) {

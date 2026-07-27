@@ -15,8 +15,8 @@
 2. [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) — 当前永久 G0 可信基础层主线；LF12 原始核心资格保持 maintained，Result Studio 产品支持声明因证据复核暂停，等待 G0-RS-P7 重新资格。
 3. [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) — 已完成的 G0 Baseline v1 资格认证、证据边界与永久维护契约。
 4. [`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md) — SDC-0 已完成，SDC-1～SDC-7 因 Result Studio 产品收口优先而 deferred。
-5. [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) — 当前唯一 active canonical 工作包；P4R-0～P4R-2 已完成，当前恢复 P4R-3 Agent-first Editing。
-6. [`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md) — 已完成的独立横切修复工作包；保留 `/api/run`、`/api/files`、科学正确性与长任务生命周期的收口证据。
+5. [`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md) — 当前唯一 active canonical 工作包；首次 completed 结论已撤销，正在完成科学、进程、HTTP 与 Acceptance 审计修复。
+6. [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) — P4R-0～P4R-2 已完成；P4R-3 暂停至 G0-CHF0 真实收口。
 7. [`g0-rs0-result-studio-audit.md`](./g0-rs0-result-studio-audit.md) — G0-RS0 现状审计与架构 ADR；Result Studio 的复用/新增边界、契约缺陷与 Git 风险矩阵的唯一裁决记录。
 
 ## 当前开发必读

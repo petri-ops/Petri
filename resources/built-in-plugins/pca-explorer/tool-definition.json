@@ -19,7 +19,7 @@
       "type": "file",
       "required": false,
       "accept": ".csv",
-      "hint": "不提供则按样本顺序均分两组"
+      "hint": "不提供则显示明确的未分组投影，不猜测实验分组"
     },
     {
       "id": "n_components",

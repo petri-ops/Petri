@@ -63,15 +63,28 @@ function createToolsPlatformRoutes({
         if (!job) return res.status(404).json({ error: 'not_found' });
         if (!canAccessToolJob(req, job)) return res.status(403).json({ error: 'forbidden' });
         if (!isCancellableJob(job)) return res.json({ ok: true, message: 'already_finished' });
-        await db
-          .prepare('UPDATE tool_jobs SET status=?, completed_at=? WHERE id=?')
-          .run('cancelled', Date.now(), job.id);
         const local = killLocalToolJob(job.id);
         if (local && local.termination) {
-          local.termination = await local.termination;
-          local.killed = local.termination.terminated === true;
+          const termination = await local.termination;
+          local.killed = termination.terminated === true;
+          local.terminationResult = termination;
           delete local.termination;
         }
+        if (local && local.active && !local.killed) {
+          const reason = local.terminationResult?.reason || 'termination_unconfirmed';
+          await db
+            .prepare('UPDATE tool_jobs SET error=? WHERE id=? AND status IN (?,?)')
+            .run(`cancel_termination_unconfirmed:${reason}`, job.id, 'pending', 'running');
+          return res.status(409).json({
+            ok: false,
+            status: job.status,
+            error: 'termination_unconfirmed',
+            local,
+          });
+        }
+        await db
+          .prepare('UPDATE tool_jobs SET status=?, error=?, completed_at=? WHERE id=?')
+          .run('cancelled', null, Date.now(), job.id);
         res.json({ ok: true, status: 'cancelled', local });
       } catch (e) {
         res.status(500).json({ error: e.message });

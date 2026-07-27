@@ -17,7 +17,14 @@ const { ensureBundlesForPlugin } = require('../../shared-backend/capability-bund
 const { createExecutionProvenance, attachProvenanceToResult } = require('../../shared-backend/execution-provenance');
 const { collectExecutionInputs, writeArtifactManifest } = require('../../shared-backend/artifact-manifest');
 const { createRuntimeResourceSnapshot } = require('../../shared-backend/runtime-resource-snapshot');
-const { terminateChildProcess } = require('../helpers/process-lifecycle');
+const {
+  markUnownedStaleJobs,
+  recoverStaleActiveJobs,
+  refreshVerifiedHeartbeat,
+  resolveLifecycleDurations,
+  scheduleHardTimeout,
+  terminateChildProcess,
+} = require('../helpers/process-lifecycle');
 
 function isManagedResultDir(candidate, jobsDir) {
   if (!candidate || !jobsDir) return false;
@@ -159,7 +166,7 @@ function createToolsExecutor({
   function killLocalToolJob(jobId) {
     const active = activeToolJobs.get(jobId);
     if (!active || !active.process) return { active: false, killed: false };
-    active.cancelled = true;
+    active.cancelRequested = true;
     const result = { active: true, killed: false };
     result.termination = terminateChildProcess(active.process).then((termination) => {
       result.killed = termination.terminated;
@@ -424,30 +431,21 @@ function createToolsExecutor({
     }
   }
 
-  async function recoverZombieJobs() {
+  async function recoverZombieJobs({ startup = false } = {}) {
     try {
       const cutoff = Date.now() - ZOMBIE_TIMEOUT_MS;
-      for (const [jobId, active] of activeToolJobs) {
-        if (active.lastHeartbeatAt < cutoff) {
-          active.cancelled = true;
-          await terminateChildProcess(active.process);
-        }
-      }
-      const result = await db
-        .prepare(
-          "UPDATE tool_jobs SET status = 'failed', error = '任务超时或服务重启；进程归属无法在本次启动中证明，未发送信号', completed_at = ? WHERE status IN ('running', 'pending') AND COALESCE(heartbeat_at, created_at) < ?"
-        )
-        .run(Date.now(), cutoff);
+      await recoverStaleActiveJobs({ activeJobs: activeToolJobs, cutoff, db });
+      const result = await markUnownedStaleJobs({ db, cutoff });
       if (result.changes > 0) {
-        console.log(`[tools] Recovered ${result.changes} zombie job(s) on startup`);
+        console.log(`[tools] Recovered ${result.changes} unowned zombie job(s)`);
         try {
           notify.custom({
-            title: `⚠️ 启动恢复：${result.changes} 个 zombie 任务标 failed`,
+            title: `⚠️ ${startup ? '启动恢复' : '周期扫描'}：${result.changes} 个无主 zombie 任务标 failed`,
             template: 'orange',
-            dedupeKey: `zombie_startup:${result.changes}`,
+            dedupeKey: `zombie_${startup ? 'startup' : 'periodic'}:${result.changes}`,
             lines: [
-              '服务启动时发现遗留的 running/pending 任务（10 分钟以上无响应）。',
-              '可能是 pm2 重启 / 容器重启导致。已批量标 failed。',
+              '发现超过活性窗口且没有本次进程句柄的 running/pending 任务。',
+              '因无法证明 PID 归属，未发送信号；已如实标记 failed。',
             ],
           });
         } catch {}
@@ -458,34 +456,10 @@ function createToolsExecutor({
   }
 
   function startZombieRecovery() {
-    recoverZombieJobs();
+    recoverZombieJobs({ startup: true });
     setInterval(
       () => {
-        (async () => {
-          try {
-            const cutoff = Date.now() - ZOMBIE_TIMEOUT_MS;
-            const result = await db
-              .prepare(
-                "UPDATE tool_jobs SET status = 'failed', error = '任务超时；进程终止结果已记录', completed_at = ? WHERE status IN ('running', 'pending') AND COALESCE(heartbeat_at, created_at) < ?"
-              )
-              .run(Date.now(), cutoff);
-            if (result.changes > 0) {
-              console.log(`[tools] Zombie scan: marked ${result.changes} stale job(s) as failed`);
-              try {
-                notify.custom({
-                  title: `⚠️ 周期扫描：${result.changes} 个 zombie 任务标 failed`,
-                  template: 'orange',
-                  lines: [
-                    '5 分钟周期扫描发现 10 分钟以上无响应的任务。',
-                    '可能是本地运行时卡死或执行超时未被捕获。',
-                  ],
-                });
-              } catch {}
-            }
-          } catch (e) {
-            console.warn(`[tools] zombie scan failed: ${e.message} — will retry next cycle`);
-          }
-        })();
+        void recoverZombieJobs({ startup: false });
       },
       5 * 60 * 1000
     );
@@ -760,7 +734,7 @@ function createToolsExecutor({
       fs.writeFileSync(provenancePath, JSON.stringify(provenance, null, 2));
       return { provenance, provenancePath, pluginManifest };
     };
-    const hardTimeoutMs = Number(process.env.BIOF3_TOOL_HARD_TIMEOUT_MS || 30 * 60 * 1000);
+    const hardTimeoutMs = TOOL_LIFECYCLE.hardTimeoutMs;
     let hardTimeoutTimer = null;
     const child = execFile(
       runCmd[0],
@@ -782,6 +756,10 @@ function createToolsExecutor({
             .prepare('SELECT status, is_test_run FROM tool_jobs WHERE id=?')
             .get(jobId);
         } catch {}
+        if (active && active.cancelRequested) {
+          console.log('[tools] Job ' + jobId + ' cancellation requested; cancel route owns terminal status');
+          return;
+        }
         if (currentJob && currentJob.status === 'cancelled') {
           console.log('[tools] Job ' + jobId + ' cancelled; skip terminal status overwrite');
           return;
@@ -792,13 +770,20 @@ function createToolsExecutor({
             const failed = buildProvenance();
             await db.prepare('UPDATE tool_jobs SET result_json=? WHERE id=?').run(JSON.stringify({
               toolJobId: jobId,
-              failure: { phase: 'execute', reason: err.killed ? 'timeout' : 'nonzero_exit', exitCode: err.code ?? null },
+              failure: {
+                phase: 'execute',
+                reason: active?.timedOut ? 'hard_timeout' : err.killed ? 'terminated' : 'nonzero_exit',
+                exitCode: err.code ?? null,
+              },
               resourceUsage: { start: resourceStart, end: createRuntimeResourceSnapshot({ observedAt: new Date().toISOString() }), peakStatus: 'unavailable_without_process_sampler' },
               executionProvenance: failed.provenance,
               provenanceRef: { provenanceHash: failed.provenance.provenanceHash, path: failed.provenancePath, toolJobId: jobId },
             }), jobId);
           } catch {}
-          await markJobFailed(jobId, stderr || err.message || '', 'execute');
+          const failureMessage = active?.timedOut
+            ? `任务超过最大运行预算 ${hardTimeoutMs}ms；子进程退出已确认`
+            : stderr || err.message || '';
+          await markJobFailed(jobId, failureMessage, 'execute');
           return;
         }
 
@@ -944,20 +929,14 @@ function createToolsExecutor({
     await db.prepare('UPDATE tool_jobs SET process_pid=?, heartbeat_at=? WHERE id=?').run(child.pid || null, Date.now(), jobId);
     const active = activeToolJobs.get(jobId);
     active.heartbeatTimer = setInterval(() => {
-      active.lastHeartbeatAt = Date.now();
       try {
-        db.prepare('UPDATE tool_jobs SET heartbeat_at=? WHERE id=? AND status=?').run(active.lastHeartbeatAt, jobId, 'running');
+        refreshVerifiedHeartbeat({ active, jobId, db });
       } catch (error) {
         console.warn('[tools] heartbeat update failed:', error.message);
       }
     }, HEARTBEAT_INTERVAL_MS);
     active.heartbeatTimer.unref?.();
-    hardTimeoutTimer = setTimeout(() => {
-      active.timedOut = true;
-      active.cancelled = true;
-      void terminateChildProcess(child);
-    }, hardTimeoutMs);
-    hardTimeoutTimer.unref?.();
+    hardTimeoutTimer = scheduleHardTimeout({ active, jobId, db, hardTimeoutMs });
   }
 
   function translateRError(rawError) {
@@ -1099,8 +1078,9 @@ function createToolsExecutor({
   };
 }
 
-const ZOMBIE_TIMEOUT_MS = Number(process.env.BIOF3_TOOL_ZOMBIE_TIMEOUT_MS || 10 * 60 * 1000);
-const HEARTBEAT_INTERVAL_MS = Number(process.env.BIOF3_TOOL_HEARTBEAT_INTERVAL_MS || 30 * 1000);
+const TOOL_LIFECYCLE = resolveLifecycleDurations();
+const ZOMBIE_TIMEOUT_MS = TOOL_LIFECYCLE.zombieTimeoutMs;
+const HEARTBEAT_INTERVAL_MS = TOOL_LIFECYCLE.heartbeatIntervalMs;
 
 const R_ERROR_TRANSLATIONS = [
   {

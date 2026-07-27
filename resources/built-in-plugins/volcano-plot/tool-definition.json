@@ -182,8 +182,11 @@
    "fields": {
     "gene": "string",
     "log2FoldChange": "number",
+    "significance": "number",
+    "significance_column": "string",
     "pvalue": "number",
-    "classification": "string"
+    "padj": "number",
+    "sig": "string"
    }
   },
   "source": {
@@ -350,7 +353,7 @@
     "entityType": "gene",
     "idField": "gene",
     "xField": "log2FoldChange",
-    "yField": "pvalue",
+    "yField": "significance",
     "yTransform": "neg_log10",
     "legendField": "sig"
    }
@@ -386,15 +389,15 @@
   {
    "code": "missing_required_columns",
    "title": "缺少必需列",
-   "description": "输入 CSV 必须包含 gene、log2FC、pvalue 三列或可被后续探测层映射的等价列。",
+   "description": "输入 CSV 必须包含 gene、log2FC 和调用方选择的显著性列；默认显著性列为 padj。",
    "recoverable": true,
-   "suggestedFix": "探测表头并尝试把 symbol/gene_name 映射为 gene，把 logFC/avg_log2FC 映射为 log2FC，把 p_val/padj 映射为 pvalue。",
+   "suggestedFix": "探测表头并尝试把 symbol/gene_name 映射为 gene，把 logFC/avg_log2FC 映射为 log2FC；缺少 padj 时必须显式选择其他统计量。",
    "detect": "missing required columns|LFC 列|log2FoldChange|log2FC|实际列名"
   },
   {
    "code": "invalid_numeric_values",
    "title": "数值列不可解析",
-   "description": "log2FC 或 pvalue 存在非数字、空值或无限值，导致绘图失败。",
+   "description": "log2FC 或所选显著性列存在非数字、空值、无限值或超出 0 到 1，导致绘图失败。",
    "recoverable": true,
    "suggestedFix": "过滤无效行并提示用户确认阈值；如果有效行过少则中断并请求用户更换输入。",
    "detect": "invalid numeric values|non-numeric|nan|inf"

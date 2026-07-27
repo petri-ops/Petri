@@ -9,15 +9,66 @@
 import sys
 import os
 import json
-import pandas as pd
-import numpy as np
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
+
+
+class SampleIdValidationError(ValueError):
+    pass
+
+
+def _missing(value):
+    return value is None or value != value
+
+
+def normalize_sample_ids(values, source_label):
+    ids = []
+    for value in values:
+        if _missing(value):
+            raise SampleIdValidationError(f"{source_label} 包含缺失 sample ID")
+        sample_id = str(value).strip()
+        if not sample_id:
+            raise SampleIdValidationError(f"{source_label} 包含空 sample ID")
+        ids.append(sample_id)
+    if len(ids) != len(set(ids)):
+        raise SampleIdValidationError(f"{source_label} 包含重复 sample ID")
+    return ids
+
+
+def align_sample_groups(expr_values, metadata_values, group_values):
+    expr_ids = normalize_sample_ids(expr_values, "表达矩阵")
+    sample_ids = normalize_sample_ids(metadata_values, "分组文件")
+    groups = []
+    for value in group_values:
+        if _missing(value) or not str(value).strip():
+            raise SampleIdValidationError("分组文件包含缺失或空 group")
+        groups.append(str(value).strip())
+    if len(groups) != len(sample_ids):
+        raise SampleIdValidationError("分组文件的 sample 与 group 数量不一致")
+    if set(sample_ids) != set(expr_ids):
+        raise SampleIdValidationError("分组文件与表达矩阵的 sample ID 不完全匹配")
+    by_sample = dict(zip(sample_ids, groups))
+    ordered = [by_sample[sample_id] for sample_id in expr_ids]
+    return expr_ids, ordered, {sample_id: by_sample[sample_id] for sample_id in expr_ids}
+
+
+def validate_sample_id_cases(payload):
+    results = []
+    for case in payload.get("cases", []):
+        try:
+            align_sample_groups(case.get("expr"), case.get("samples"), case.get("groups"))
+            results.append({"valid": True, "error": None})
+        except SampleIdValidationError as error:
+            results.append({"valid": False, "error": str(error)})
+    return results
 
 def main():
+    import pandas as pd
+    import numpy as np
+    from sklearn.decomposition import PCA
+    from sklearn.preprocessing import StandardScaler
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
     if len(sys.argv) < 2:
         print("用法: python pca-explorer.py <work_dir>", file=sys.stderr)
         sys.exit(1)
@@ -37,6 +88,12 @@ def main():
     if expr.shape[0] < 3:
         print("表达矩阵至少需要 3 行（样本）", file=sys.stderr)
         sys.exit(1)
+    try:
+        expr_ids = normalize_sample_ids(expr.index, "表达矩阵")
+    except SampleIdValidationError as error:
+        print(str(error), file=sys.stderr)
+        sys.exit(1)
+    expr.index = expr_ids
 
     # 标准化
     X = expr.values
@@ -49,6 +106,7 @@ def main():
 
     # 分组
     groups = None
+    sample_groups = {}
     grouping_status = "unassigned"
     if group_path:
         if not os.path.exists(group_path):
@@ -58,16 +116,14 @@ def main():
         if "sample" not in gdf.columns or "group" not in gdf.columns:
             print("分组文件必须包含 sample 和 group 列，禁止按文件行顺序猜测", file=sys.stderr)
             sys.exit(1)
-        sample_ids = gdf["sample"].astype(str)
-        if sample_ids.duplicated().any():
-            print("分组文件包含重复 sample ID", file=sys.stderr)
+        try:
+            expr_ids, ordered_groups, sample_groups = align_sample_groups(
+                expr_ids, gdf["sample"], gdf["group"]
+            )
+        except SampleIdValidationError as error:
+            print(str(error), file=sys.stderr)
             sys.exit(1)
-        expr_ids = expr.index.astype(str)
-        if set(sample_ids) != set(expr_ids):
-            print("分组文件与表达矩阵的 sample ID 不完全匹配", file=sys.stderr)
-            sys.exit(1)
-        groups_by_sample = dict(zip(sample_ids, gdf["group"].astype(str)))
-        groups = np.array([groups_by_sample[str(sample_id)] for sample_id in expr_ids])
+        groups = np.array(ordered_groups)
         grouping_status = "matched_by_sample_id"
 
     # 没有分组信息时保持未分组语义，绝不按样本位置伪造 A/B。
@@ -127,6 +183,7 @@ def main():
             "pc1_variance": float(pca.explained_variance_ratio_[0]),
             "pc2_variance": float(pca.explained_variance_ratio_[1]),
             "grouping": grouping_status,
+            "sample_groups": sample_groups,
         },
     }
     with open("manifest.json", "w") as f:
@@ -135,4 +192,7 @@ def main():
     print("DONE")
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == "--validate-sample-ids-json":
+        print(json.dumps(validate_sample_id_cases(json.loads(sys.stdin.read())), ensure_ascii=False))
+    else:
+        main()

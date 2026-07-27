@@ -3,7 +3,7 @@
   "pluginId": "volcano-plot",
   "pluginVersion": "1.0.0",
   "descriptorVersion": 1,
-  "sourceScriptSha256": "46ebc7285b3fbe7bbbef196cb5de63e2540836024e7bf1fe0852d68264ca94df",
+  "sourceScriptSha256": "94a9bad712025a790211bc5b06973475d7e35eb0cbcf3b78fac71746dc4ce185",
   "inputBindingDigest": "017fe2933ad576efb85f8ace71265b0eb89f89bb87272a0a5d3e3a15d46acb7b",
   "artifactContractDigest": "418a64180e9b9e2a55759ef95d41d404afa487c72d727c01a0bc09c4a7d8261e",
   "revisionSourceStrategy": "execution_snapshot_per_artifact",

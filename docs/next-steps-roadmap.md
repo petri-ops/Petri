@@ -10,7 +10,7 @@
 
 LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口。RS9 曾新增第 17 类 `result_studio_product`，但后续复核发现其五条任务由独立测试拼装、Provider 未执行真实工具闭环、视觉验收依赖人工布尔值、大表由 seed 直接构造；该证据现降级为 unit/synthetic/renderer historical evidence。`result-studio-editing` 在 RS-P7 前暂停 qualified support claim，不能影响或冒充 LF12 原始核心资格。
 
-`G0-CHF0 Critical Cross-cutting Hardening`（[`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md)）已于 2026-07-27 收口：`/api/run` 执行边界、`/api/files` 路径边界、SCI-1～SCI-3 与长任务 timeout/zombie 生命周期均有当前代码与定向证据。Result Studio P4R-0～P4R-2 既有交付和 non-qualifying 证据不回退；当前唯一 active 工作包恢复为 `G0-RS`，阶段为 P4R-3 Agent-first Editing。
+`G0-CHF0 Critical Cross-cutting Hardening`（[`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md)）的首次 completed 结论已于 2026-07-27 被运行时反例撤销。当前唯一 active canonical 工作包重新为 `G0-CHF0`，按 CHF0-R1～R5 修复科学输出、PCA sample-ID、长任务/进程终态、HTTP 来源边界与 Acceptance 可追溯性。Result Studio P4R-0～P4R-2 既有交付和 non-qualifying 证据不回退；P4R-3 暂停至 CHF0 真实收口。
 
 Result Studio 旧实现的 11 个提交已位于 `main`（检查点 `03e5826`）；`SDC-0 Profile Registry 与版本治理` 也已在分支 `codex/g0-sdc` 的 `7284921` 收口并推送，六个 canonical Profile 与 fail-closed typed DAG 边继续保留。按单工作包串行，`SDC-1`～`SDC-7` deferred，当前不创建 Worktree。
 
