@@ -3627,9 +3627,15 @@ function ResultArtifactShell({
             ? `当前阶段：${workflowStageLabel(workflow.resumeFrom)}`
             : `结果已校验 · ${workflow.artifactCount} 项产物`}
         </span>
-        {workflow.artifactTruth && (
-          <small>truth {String(workflow.artifactTruth.status || 'unknown')}</small>
-        )}
+        {/*
+          Trust state is stated once, by ResultStudioContextBar, in words the
+          user can act on (可信结果 / 需要复核 / 结果已阻断) — see
+          describeTruthStatus in result-studio/resultSurface.ts. This rendered
+          the same fact a second time as the raw enum (「truth valid」), which
+          both duplicated the header and leaked an internal value into a normal
+          view, against plan §P4R.3. The bar keeps what only it knows: the
+          current stage, the artifact count and the recovery action.
+        */}
       </div>
       {recoveryAction && (
         <button
