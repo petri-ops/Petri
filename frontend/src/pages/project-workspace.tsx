@@ -73,6 +73,7 @@ import { ResultStudioChangeSetPanel } from '@/components/result-studio/ResultStu
 import type { ArtifactRevision } from '@/components/result-studio/resultStudioClient';
 import { shouldShowDeliveryCard, shouldShowWorkflowBar } from '@/components/result-studio/resultFirstScreen';
 import { nextResultBodyState, type ResultBodyState } from '@/components/result-studio/resultBodyState';
+import { getResultScrollPosition, setResultScrollPosition } from '@/components/result-studio/resultScrollMemory';
 import { ScientificInteractionViewer } from '@/components/result-studio/ScientificInteractionViewer';
 import {
   deleteResultStudioSelection,
@@ -2854,6 +2855,11 @@ function ResultArtifactShell({
   // Which artifact the interaction manifest belongs to, so the manifest effect
   // can tell an artifact change from an unrelated dependency change.
   const manifestArtifactRef = useRef<string | null>(null);
+  // P4R-2: result↔chat scroll preservation. `.resultView` is the scroll
+  // container; the result projection layer unmounts in chat mode, so the
+  // position is held in the module-level memory keyed by job id and restored
+  // once the body is mounted. See resultScrollMemory.ts.
+  const resultViewRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(false);
   const [jobMeta, setJobMeta] = useState<JobDetailMeta | null>(null);
   const [manifestRaw, setManifestRaw] = useState<unknown>(null);
@@ -3012,6 +3018,17 @@ function ResultArtifactShell({
       setPreviewLoading(false);
     }
   }, [effectiveJobStatus, job?.id, lang]);
+
+  // P4R-2: restore `.resultView` scroll position once the body is mounted.
+  // Runs only when there is a result to render (success-state return); the
+  // stateBlock exits have no scrollable content. Re-runs on artifact switch
+  // so a re-mount within the same job also restores.
+  useEffect(() => {
+    if (!result || !job?.id) return;
+    const el = resultViewRef.current;
+    if (!el) return;
+    el.scrollTop = getResultScrollPosition(job.id);
+  }, [result, job?.id]);
 
   const files = result?.artifacts || result?.files || [];
   const fallbackArtifacts = useMemo<ResultArtifactRecord[]>(
@@ -3995,6 +4012,8 @@ function ResultArtifactShell({
   return (
     <div
       className={styles.resultView}
+      ref={resultViewRef}
+      onScroll={(e) => setResultScrollPosition(job?.id, e.currentTarget.scrollTop)}
       data-artifact-switch-ms={artifactSwitchMs === null ? undefined : artifactSwitchMs.toFixed(2)}
     >
       {shellBody}
