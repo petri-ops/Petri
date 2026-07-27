@@ -10,6 +10,7 @@ import {
   type ResultSurfaceMode,
   type ResultTruthProjection,
 } from './resultSurface';
+import { resolveResultMode } from './resultMode';
 import styles from './ResultStudioSurface.module.css';
 
 export interface ResultInspectorArtifact {
@@ -48,10 +49,16 @@ export function ResultStudioCanvas({
     if (duration !== null) setFirstVisibleMs(duration);
   }, []);
 
+  // Resolve rather than trust: a mode with no surface behind it falls back to
+  // result. `compare` is reachable only by typing ?mode=compare, and it has
+  // always rendered identically to result — so honouring it would imply a
+  // comparison view exists. See resultMode.ts.
+  const activeMode = resolveResultMode(mode);
+
   return (
     <section
       className={styles.canvas}
-      data-mode={mode}
+      data-mode={activeMode}
       data-first-visible-ms={firstVisibleMs === null ? undefined : firstVisibleMs.toFixed(2)}
       role="region"
       aria-label="结果主画布"
