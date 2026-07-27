@@ -85,6 +85,14 @@ desktop/
 
 ## AI 行为指引
 
+### Codex / Claude Code 统一入口
+
+- `AGENTS.md` 是所有 AI Agent 共用的唯一工程指令；Codex、Claude Code 和其他 Agent 不得各自维护第二套项目规范。
+- `CLAUDE.md` 只作为 Claude Code 的兼容路由，必须指向本文件和同一组 canonical 文档，不重复保存当前阶段、分支、验收数量或工作包进度等易漂移事实。
+- 所有 Agent 按同一顺序恢复当前状态：先读 `docs/AUDIT-LOG.md`，再核对 Git/运行时/Acceptance 证据，最后读取 `docs/next-steps-roadmap.md`、`docs/project-workspace-handoff.md` 和当前唯一 active 工作包。
+- 当前阶段、下一步或资格状态发生变化时，只更新其 canonical 文档及必要台账；不得为了同步不同 Agent 而在 `CLAUDE.md`、临时 prompt 或聊天记录中复制一份状态。
+- 若入口文件与 canonical 文档冲突，以 Git、SQLite、Artifact Truth、Acceptance Evidence 和 canonical 文档为准，先降级冲突声明并修复入口，不能任选对实现最方便的一份。
+
 ### 审计广播台（最高优先级）
 
 - **每次会话开始时，必须先读 `docs/AUDIT-LOG.md`**，处理其中 🔴 阻塞项和 🟢 待合并项，再开始主线工作。

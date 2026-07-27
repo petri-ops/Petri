@@ -1,8 +1,8 @@
 # G0 Result Studio — 意图驱动、可编辑、Git-backed 的科研结果工作台计划
 
-最后更新：2026-07-26
+最后更新：2026-07-27
 
-状态：`active / implemented_unverified`（RS0～RS8 引擎基础保留；`G0-RS-P0`～`G0-RS-P3` 已完成；`G0-RS-P4 Core` 已通过 18/18 离线门禁并提交；`G0-RS-RH0 Repository Hygiene Gate` 已完成；当前阶段 `G0-RS-P4R Product Reframe` 已启动，处于 `P4R-0 Truth Baseline`——env 门控性能探针已提交 `340c09a`，P4R-0 尚未收口；`G0-RS-P5` 继续阻断）
+状态：`active / implemented_unverified`（RS0～RS8 引擎基础保留；`G0-RS-P0`～`G0-RS-P3` 已完成；`G0-RS-P4 Core` 已通过 18/18 离线门禁并提交；`G0-RS-RH0 Repository Hygiene Gate` 已完成；当前阶段 `G0-RS-P4R Product Reframe` 处于 `P4R-2 Focused Result Surface`：P4R-0 已收口，P4R-1 服务端已完成，P4R-2 主体部分已落地；`G0-RS-P5` 继续阻断）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -1381,11 +1381,11 @@ Result Studio 当前按三层事实表达：
 - `npm run test:changed` 对工作区/显式基线变化给出可解释、去重、确定性的测试集合；未映射生产文件必须非零退出。
 - `npm run test:all` 明确覆盖 Node MJS/CJS，前端提供对应 changed/all 入口；CI/发布职责与本地迭代职责不混淆。
 - `tmp` 无测试硬依赖；QA 测试不再无限生成日志；清理命令只作用于仓库内明确 `tmp` 子目录。
-- `docs:reconcile`、`docs:check`、`ui:audit:check`、RH0 定向测试和最终一次全量基线通过；RH0 已由 `95a7fe3`、`041e32e` 形成可恢复提交，满足 P4R 启动门，但 P4R 实现尚未开始。
+- `docs:reconcile`、`docs:check`、`ui:audit:check`、RH0 定向测试和最终一次全量基线通过；RH0 已由 `95a7fe3`、`041e32e` 形成可恢复提交，满足 P4R 启动门。
 
-RH0 收口证据（2026-07-26）：`test/impact-map.json` 与 `scripts/test-affected.mjs` 已建立确定性、去重、fail-closed 的影响选择；`npm run test:changed` 定向 Node 41 项与前端 294 项通过，`npm run test:all:workspace` 最终基线为 Node 1581 pass / 0 fail / 11 skipped、前端 294 pass / 0 fail；`npm run docs:reconcile`（39 registered、0 unregistered、0 validation issues）、`npm run docs:check`、`npm run ui:audit:check` 与 `git diff --check` 全部通过。旧 `dev-desktop.sh`、已下线云端 smoke 与旧 DESeq2 MCP 验收脚本已删除；真实 JSON 证据迁移到 `test/fixtures/golden-path/deseq2-run.json`，`tmp` 历史日志/二进制已清理，QA/golden-path 日志保留上限为 20。后续审计确认 RS9 脚本仍被历史证据引用，因此保留文件但从日常 Result Studio syntax 热路径移出，新增显式 `g0:result-studio:historical:syntax`；历史代码仍可单独校验。该收口只改变工程治理，不改变任何执行/科学真相；P4R 启动门已满足，但 P4R 实现尚未开始。
+RH0 收口证据（2026-07-26）：`test/impact-map.json` 与 `scripts/test-affected.mjs` 已建立确定性、去重、fail-closed 的影响选择；`npm run test:changed` 定向 Node 41 项与前端 294 项通过，`npm run test:all:workspace` 最终基线为 Node 1581 pass / 0 fail / 11 skipped、前端 294 pass / 0 fail；`npm run docs:reconcile`（39 registered、0 unregistered、0 validation issues）、`npm run docs:check`、`npm run ui:audit:check` 与 `git diff --check` 全部通过。旧 `dev-desktop.sh`、已下线云端 smoke 与旧 DESeq2 MCP 验收脚本已删除；真实 JSON 证据迁移到 `test/fixtures/golden-path/deseq2-run.json`，`tmp` 历史日志/二进制已清理，QA/golden-path 日志保留上限为 20。后续审计确认 RS9 脚本仍被历史证据引用，因此保留文件但从日常 Result Studio syntax 热路径移出，新增显式 `g0:result-studio:historical:syntax`；历史代码仍可单独校验。该收口只改变工程治理，不改变任何执行/科学真相；P4R 启动门已满足，P4R-0～P4R-2 已按当前证据推进。
 
-### G0-RS-P4R：Product Reframe — Agent-first Focused Result Experience（`in_progress · P4R-0`）
+### G0-RS-P4R：Product Reframe — Agent-first Focused Result Experience（`in_progress · P4R-2`）
 
 #### P4R.1 定位与启动门
 
@@ -1485,7 +1485,7 @@ P4R 完成后的默认产品形态固定为：
 
 ##### P4R-0：Truth Baseline、失败测试与预算冻结
 
-进度（2026-07-26，`340c09a`）：观测工具已落地——`core/r-server/helpers/perf-probe.js` 提供事件循环直方图与按脱敏路由模板的请求计时，`core/r-server/routes/perf-probe.js` 暴露 `/api/__perf/{event-loop,reset}`。整套探针以 `BIOF3_PERF_PROBE=1` 门控：关闭时每个导出函数是 no-op、探针面不挂载，正常桌面运行成本与攻击面不变；计时只按脱敏路由模板归并，不记录结果内容、请求体、query、绝对路径、id 或凭据。定向测试 `test/perf-probe.test.mjs 9/9` + `test/test-affected.test.mjs 4/4` 通过（未跑全量）。**P4R-0 未收口**，仍需：canonical fixture（小/中/大 PNG/SVG、10 万行表、长报告、多 Revision）、四条不变量的失败测试先行、以及把真实采样的性能预算冻结进 `acceptance/g0-result-studio/rs-p4r-performance.json`。
+进度（2026-07-27）：P4R-0 已收口。一次性隔离捕获环境、canonical corpus、失败测试先行和性能预算均已完成；`acceptance/g0-result-studio/rs-p4r-performance.json` 为 13/13，基线由 `RS-P4R0-13` 冻结，重跑只写 `currentObservation` 与对比，不覆盖基线。P4R 定向基础测试 19/19；不变量套件 5/6，唯一红项为尚未实现的 Revision source projection，明确归 P4R-5，不把它写成 P4R-0 回归。原始观测工具由 `340c09a` 引入并保持 `BIOF3_PERF_PROBE=1` 默认关闭。
 
 运行时勘察（2026-07-26，只读检查开发库 `core/r-server/biof3.db`，只取计数与结构，不读结果内容）：
 
@@ -1801,7 +1801,7 @@ G0-RS-P0 Truth Correction
 
 阶段状态规则：
 
-- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3` 已完成，`G0-RS-P4 Core` 已形成 18/18 离线实现检查点并提交，`G0-RS-RH0` 已完成。下一唯一阶段为 P4R；P4R 收口前不得启动 P5。
+- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3` 已完成，`G0-RS-P4 Core` 已形成 18/18 离线实现检查点并提交，`G0-RS-RH0` 已完成，当前唯一阶段为 P4R-2；P4R 收口前不得启动 P5。
 - 每阶段先补失败测试/fixture，再实现，再形成与证据类型匹配的验收；不得提前开发下一阶段。
 - 单元测试证明契约，fixture 证明确定性集成，真实 Provider 证明模型边界，packaged Electron 证明产品链；四者不能互相替代。
 - 未运行 `npm run docs:reconcile` 与 `npm run docs:check` 不得宣布阶段 completed/verified/qualified。
