@@ -266,6 +266,20 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
     );
     assert.ok(existsSync(specPath), `${BODY_STATE_SPEC} must exist; nothing else covers this path`);
 
+    // A tested module the product does not call proves nothing. The first
+    // version of this fix reimplemented the rule inline and left the module
+    // with zero production importers, so its spec was green while the
+    // component still decided for itself.
+    const consumers = spawnSync('grep', ['-rl', 'nextResultBodyState', 'frontend/src'], {
+      cwd: REPO_ROOT, encoding: 'utf8',
+    });
+    const files = (consumers.stdout || '').split('\n').filter(Boolean)
+      .filter((f) => !f.includes('.test.') && !f.endsWith(BODY_STATE_MODULE));
+    assert.ok(
+      files.length > 0,
+      'nextResultBodyState must be called by production code, not only by its own spec',
+    );
+
     // vitest runs with cwd=frontend and include 'src/**', so the filter must be
     // frontend-relative. Passing the repo-relative path matches nothing — and
     // test:files exits 1 on no matches, which is why this surfaced rather than

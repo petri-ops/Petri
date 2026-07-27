@@ -4,14 +4,13 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-07-27（G0-RS-P4R-0 已收口，P4R-1 主体已落地；仍有 1 项 🔴 阻塞，见下）
+最后更新：2026-07-27（G0-RS-P4R-0 已收口，P4R-1 服务端与 P4R-2 主体已落地；无 🔴 阻塞）
 
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
 | --- | --- | --- | --- |
 | 🟡待评估 | 2026-07-26 | **G0 `macos-arm64: qualified` 的视觉证据不成立。** `acceptance/g0-qualification/packaged-ui/` 5 张 PNG 只有 4 个唯一 sha256：`chat-summary-light-wide.png` 与 `restart-restored-light-wide.png` 逐字节相同（均为 `bb54acff…`），即「重启后恢复」证据是重启前截图的副本。`scripts/g0-qualification-visual.mjs:59-62` 只校验哈希格式/宽高/字节数，无唯一性断言；配套 `inspection.json` 为 811 字节九个人工布尔值，仓库内无任何写入者。该形态与 `core/shared-backend/result-studio-qualification.js:113-121` 判 RS9 non-qualifying 的理由（`inspection_booleans_are_human_assertions`）完全一致，但该理由未推及 G0 自身 | 仅登记事实。**不得**由 Agent 擅自变更 `core/shared-backend/g0/support-matrix.json` 的 `qualified` 状态或 `evidence-ledger.json` 的 `visual_state_convergence`——资格状态变更属用户决定。修补检查脚本（加 `distinctStates` 唯一性断言）会使当前 G0 门变红，需先获批。**2026-07-27 用户裁决：暂不发布，故本项降级为待评估、不阻塞开发。** 重开条件：任何对外发布、资格声明或 G0 重新资格之前必须先处理——发布时若仍以此证据支撑 `qualified`，即为不诚实声明 |
-| 🔴阻塞 | 2026-07-26 | **空转前端门共 8 处，`be0a6de` 只修了 p2/p3/p4 三处。** 残留：`g0-lf0-acceptance.mjs:203`、`g0-first-wave:66`、`g0-second-wave:73`、`g0-third-wave:50`、`g0-fourth-wave:45`、`g0-fifth-wave:46`、`g0-rs8-lifecycle:54`、`g0-rs9-product:34`。全部经 `npm run check` 链（59 门）可达，因此 underwrite G0 `maintained` 的 LF0/wave 验收门同样在零测试下报 `passed:true` | 按 `be0a6de` 同法改为 `npm run test:files` 并重生成各自证据。修复后可能暴露此前被掩盖的真实失败，属预期结果，不得为通过而回退 |
 | 🔵进行中 | 2026-07-27 | `G0-RS-P4R` 推进中：**P4R-0 已收口**（`rs-p4r-performance.json` 13/13，基线冻结为常量并由 `RS-P4R0-13` 钉住）；**P4R-1 服务端已完成**（changesets -97%、workspace-status -66%，每 revision 斜率 20ms→0.18ms，证据 `rs-p4r-product-reframe.json` 7/7）；**P4R-2 主体部分已完成**（手动编辑提交送达修复、首屏判据化、版本位显真实序号、信任状态去重、模式容器骨架、删除 437 行不可达代码）。四条不变量 3 绿 1 红（红的第 3 条归 P4R-5）。P4R-3～P4R-6 未开始 | 剩余工作中响应式/明暗/首屏像素判定本仓库无法验证（happy-dom 下 `getBoundingClientRect()` 返回 0×0，无浏览器自动化），已按计划证据边界统一记为 `not_captured_no_browser_automation_in_repo`，不得估算 |
 | 🟡待评估 | 2026-07-26 | **Result Studio 无同意即写入用户自有 Git 仓库。** `git-repository-binding.js:14` 自述 existing 模式「用户同意接入」，但默认 `allowExistingRepository = true`，且三个生产调用点（`result-edit-tools.js:89`、`routes/result-studio.js:310`、`:408`）全部硬编码 `true`；代码库内不存在任何同意开关。项目工作区只要落在某个 Git 仓库内，BioF3 即向其写入 object 与 `refs/heads/biof3/*` 分支。**当前未暴露**（已核实：真实数据根不在任何仓库内；4 条绑定全为 `managed`，`existing` 为 0，故改默认值无迁移代价） | 已试改为 opt-in 并撤回：该改动会改变产品行为，使 `test/git-adapter.test.mjs` 5 项 existing 模式测试转红（它们依赖旧的宽松默认）。属真实风险但非当前风险，让位于 P4R-1。重启时：默认改 `false` → 自动落 `managed` 模式（即计划已承诺的「只用 BioF3 托管历史」），5 个测试显式传 `true` 作为知情调用方，并为未接入情况补 `existing_repository_not_attached_without_consent` 诊断 |
 | 🟡建议 | 2026-07-17 | `capability-provisioning.js` 的下载实现与 plugin-manager 各自维护 | host 白名单已经修复；共享下载 helper 只在改动该能力时评估，不阻塞 RH0 |
@@ -23,6 +22,7 @@
 
 | 日期 | 结果 | 检查点 |
 | --- | --- | --- |
+| 2026-07-26 | 空转前端门共 8 处（`be0a6de` 只修了 p2/p3/p4）。实测确认比原判更糟：不带文件过滤的 `npm test --prefix frontend` 在工作树干净时同样返回「No test files found」并退出 0，而干净正是提交与验收时的常态，因此 underwrite G0 `maintained` 的 LF0/wave 门一直在用零测试的前端结果背书。已修 7 处活跃门（修后同一门真跑 39 文件 / 294 测试）；`g0-rs9-product-acceptance.mjs` 属 RH0 封存的历史证据读取器，刻意不动并单独登记 | `295dd73` |
 | 2026-07-27 | P4R-1 服务端与前端主体规则落地。实测推翻计划对成本构成的判断（工作区扫描 0%、hashing <5%，93% 为 git 子进程），故未做架构改造：`detectGitRuntime` memo、`repositoryState()` 三次 fork 改惰性、每 revision 的 rev-parse 批量化。`changesets` 42.1→1.3ms，`workspace-status` 64.9→23.9ms；增长斜率 20ms/revision → 0.18（200 revision：4179ms → 66ms）。另按 `write` 标志停止只读路径写绑定，并抽出 `resultBodyState.ts` 接线三处无条件清空点。不变量 2b 与 4 转绿，仅剩 3（归 P4R-5）。P4R-0 基线已冻结为常量，重跑不再覆盖 | `225ca0f` `2a160df` `2004008` `b6e7e91` `b5d073a` |
 | 2026-07-26 | P4R-0 补齐此前遗漏的「失败测试先行」交付物：`test/p4r-invariants.test.mjs` 四条不变量按代码实况书写，①/②a 通过（锁为防回归），②b/③/④ 如实为红并各自指向精确缺陷位置（`result-studio.js:320-330`、缺失的源投影路由、`project-workspace.tsx:3602-3612` 与 `:3366-3378`）。独立入口 `g0:result-studio:p4r:invariants`，**不并入聚合门**。专项门 `g0:result-studio:p4r` 12/12 | P4R-0 invariants |
 | 2026-07-26 | `g0:lf0` 红门根因查明并修复：`G0-START-01/09` 断言的是 `AUDIT-LOG.md` 里一句中文散文（`HLE-C4R/HLE-C5 已完成生产收口`），而 `5bb2263`（RH0 按治理规则压缩广播台）把它移入归档，于是遵守规则反而打断了 G0 门，并级联使 `G0-LF0-01` 失败。改为断言该句所报告的真实证据（`hle-all-gate` 12/12 + 三份生产矩阵 `passed` + agent 三轨），门恢复 START 10/10、LF0 10/10 | `g0:lf0` closeout |

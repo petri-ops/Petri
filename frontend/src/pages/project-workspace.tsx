@@ -72,6 +72,7 @@ import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel'
 import { ResultStudioChangeSetPanel } from '@/components/result-studio/ResultStudioChangeSetPanel';
 import type { ArtifactRevision } from '@/components/result-studio/resultStudioClient';
 import { shouldShowDeliveryCard, shouldShowWorkflowBar } from '@/components/result-studio/resultFirstScreen';
+import { nextResultBodyState, type ResultBodyState } from '@/components/result-studio/resultBodyState';
 import { ScientificInteractionViewer } from '@/components/result-studio/ScientificInteractionViewer';
 import {
   deleteResultStudioSelection,
@@ -2944,11 +2945,15 @@ function ResultArtifactShell({
 
     if (effectiveJobStatus === 'done') {
       setLoading(true);
-      // result_fetch_started: re-fetching the SAME job keeps what is on screen.
-      // The old body stays valid until the new one arrives; clearing here
-      // blanked a perfectly good result on every refetch.
-      // See components/result-studio/resultBodyState.ts.
-      if (bodyJobRef.current !== job.id) {
+      // The decision is the reducer's, not a condition restated here. An
+      // earlier version reimplemented the same rule inline and left
+      // resultBodyState.ts with no production importer — so its tests were
+      // green while nothing they described was running.
+      const shownBefore: ResultBodyState = bodyJobRef.current
+        ? { kind: 'artifact', jobId: bodyJobRef.current, artifactName: selectedName || '' }
+        : { kind: 'empty' };
+      const shownAfter = nextResultBodyState(shownBefore, { type: 'result_fetch_started', jobId: job.id });
+      if (shownAfter !== shownBefore) {
         bodyJobRef.current = null;
         setResult(null);
         setJobMeta(null);
@@ -2977,7 +2982,12 @@ function ResultArtifactShell({
           setLoading(false);
         }
       })();
-    } else if (bodyJobRef.current === job.id) {
+    } else if (nextResultBodyState(
+      bodyJobRef.current
+        ? { kind: 'artifact', jobId: bodyJobRef.current, artifactName: selectedName || '' }
+        : { kind: 'empty' },
+      { type: 'job_status_observed', jobId: job.id, status: String(effectiveJobStatus), source: 'job-list' },
+    ).kind === 'artifact') {
       // job_status_observed from the 15s job-list fetch, which is never updated
       // in place for an already-present job — so its status may be arbitrarily
       // stale and must not replace a rendered artifact with a spinner. Losing

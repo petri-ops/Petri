@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P4R-1/P4R-2",
-  "sourceCommit": "bc55fe0775a391746556633ac65fe16bfd43989d",
+  "sourceCommit": "750b1b32b52cce842c9b7ce1da0585bca6edb3da",
   "captureMode": "real_chain_server_measurement_plus_frontend_pure_module_behaviour",
   "qualificationEligible": false,
   "qualificationReason": "P4R-1 and P4R-2 deliver a faster read path and a focused surface. No layout, theme or pixel claim is made, and Result Studio product qualification remains reserved for P7.",
@@ -27,7 +27,7 @@
   "observation": {
     "revisionCount": 1,
     "calibration": {
-      "gitSpawnMedianMs": 8.895,
+      "gitSpawnMedianMs": 10.671,
       "pathEntries": 31,
       "invokedUnderNpm": false
     },
@@ -36,92 +36,92 @@
         "id": "job-status",
         "role": "render-blocking",
         "status": 200,
-        "coldMs": 5.288,
-        "warmMs": 2.164,
-        "warmSpreadMs": 1.181,
-        "oneTimeCostMs": 3.124
+        "coldMs": 5.721,
+        "warmMs": 2.313,
+        "warmSpreadMs": 1.242,
+        "oneTimeCostMs": 3.408
       },
       {
         "id": "artifact-bytes",
         "role": "render-blocking",
         "status": 200,
-        "coldMs": 4.527,
-        "warmMs": 1.965,
-        "warmSpreadMs": 0.766,
-        "oneTimeCostMs": 2.562
+        "coldMs": 5.566,
+        "warmMs": 1.689,
+        "warmSpreadMs": 1.066,
+        "oneTimeCostMs": 3.877
       },
       {
         "id": "interaction",
         "role": "secondary",
         "status": 200,
-        "coldMs": 291.983,
-        "warmMs": 8.844,
-        "warmSpreadMs": 1.755,
-        "oneTimeCostMs": 283.139
+        "coldMs": 341.387,
+        "warmMs": 9.963,
+        "warmSpreadMs": 2.25,
+        "oneTimeCostMs": 331.424
       },
       {
         "id": "context-envelope",
         "role": "secondary",
         "status": 409,
-        "coldMs": 2.806,
-        "warmMs": 1.5,
-        "warmSpreadMs": 0.082,
-        "oneTimeCostMs": 1.306
+        "coldMs": 2.795,
+        "warmMs": 1.593,
+        "warmSpreadMs": 0.058,
+        "oneTimeCostMs": 1.202
       },
       {
         "id": "changesets",
         "role": "secondary",
         "status": 200,
-        "coldMs": 1.643,
-        "warmMs": 1.105,
-        "warmSpreadMs": 0.326,
-        "oneTimeCostMs": 0.538
+        "coldMs": 2.749,
+        "warmMs": 1.535,
+        "warmSpreadMs": 0.449,
+        "oneTimeCostMs": 1.214
       },
       {
         "id": "workspace-status",
         "role": "secondary",
         "status": 200,
-        "coldMs": 24.283,
-        "warmMs": 22.398,
-        "warmSpreadMs": 0.77,
-        "oneTimeCostMs": 1.885
+        "coldMs": 27.321,
+        "warmMs": 24.793,
+        "warmSpreadMs": 0.671,
+        "oneTimeCostMs": 2.528
       }
     ],
     "eventLoop": {
       "samples": 13,
-      "maxMs": 292.815
+      "maxMs": 343.146
     }
   },
   "improvementVsBaseline": [
     {
       "id": "job-status",
       "baselineWarmMs": 2.229,
-      "currentWarmMs": 2.164,
-      "deltaPct": -2.9
+      "currentWarmMs": 2.313,
+      "deltaPct": 3.8
     },
     {
       "id": "artifact-bytes",
       "baselineWarmMs": 2.174,
-      "currentWarmMs": 1.965,
-      "deltaPct": -9.6
+      "currentWarmMs": 1.689,
+      "deltaPct": -22.3
     },
     {
       "id": "interaction",
       "baselineWarmMs": 9.9,
-      "currentWarmMs": 8.844,
-      "deltaPct": -10.7
+      "currentWarmMs": 9.963,
+      "deltaPct": 0.6
     },
     {
       "id": "changesets",
       "baselineWarmMs": 42.102,
-      "currentWarmMs": 1.105,
-      "deltaPct": -97.4
+      "currentWarmMs": 1.535,
+      "deltaPct": -96.4
     },
     {
       "id": "workspace-status",
       "baselineWarmMs": 64.862,
-      "currentWarmMs": 22.398,
-      "deltaPct": -65.5
+      "currentWarmMs": 24.793,
+      "deltaPct": -61.8
     }
   ],
   "unmeasured": {
@@ -194,17 +194,17 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-27T00:54:09.035Z",
+    "generatedAt": "2026-07-27T01:09:17.593Z",
     "frontend": {
       "command": "npm run test:files --prefix frontend -- 6 specs",
       "exitCode": 0,
       "filesPassed": 6,
       "testsPassed": 40,
       "specCount": 6,
-      "stdoutSha256": "265cca85aa4c8da0a792b3e4f37fe641cac3c43768883fe6eb3f33a62b881581"
+      "stdoutSha256": "bfbf8ca74c56002372466c840a811441da27431f9210580d2dc68e9d89b1a469"
     }
   },
   "passed": true,
-  "generatedAt": "2026-07-27T00:54:09.035Z",
+  "generatedAt": "2026-07-27T01:09:17.593Z",
   "privacyClean": true
 }
