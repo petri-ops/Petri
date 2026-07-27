@@ -2,7 +2,7 @@
 
 最后更新：2026-07-27
 
-状态：`active / audit_repair`（2026-07-27 复核撤销首次 completed 结论；当前阶段 `CHF0-R1 Contract & failing tests`）
+状态：`completed / implemented`（2026-07-27 CHF0-R1～R5 审计修复重新收口）
 
 Plan ID：`G0-CHF0`
 
@@ -14,7 +14,7 @@ Result Studio 的既有实现与证据不回退；`G0-RS-P4R-3` 在本工作包�
 
 范围输入为 [`project-wide-audit-2026-07.md`](./project-wide-audit-2026-07.md)。该审计是问题依据，不是验收证据。
 
-首次收口结论已于 2026-07-27 的运行时反例复核中撤销：volcano 会把 `padj` 错标为 `pvalue` 且显式裸 `pvalue` 路径崩溃；PCA 接受表达矩阵重复/空 sample ID；Node 自刷 heartbeat 不能证明子进程活性；终止 helper 会在 `kill()` 返回 false 时虚报成功；专项 acceptance 未逐项覆盖计划验收且引用 amend 前的不可达提交。`G0-RS-P4R-3` 因单工作包串行纪律暂停，待本工作包重新真实收口后恢复。
+首次收口结论曾于 2026-07-27 被运行时反例撤销；CHF0-R1～R5 现已重新真实收口。volcano 以独立 `significance/significance_column` 表达所选统计量，保留原始 `pvalue`/`padj`，默认与显式 `padj` 等价、显式裸 `pvalue` 可运行且被标记为科学变化；PCA 对表达矩阵与 metadata 的缺失、空、重复、缺失集合和多余 sample ID 全部 fail-closed，并按 ID 输出可核对映射。HTTP 只信任 Electron 选定 renderer origin，R/Python raw execution 均 410，真实 Express `/api/files` 路由拒绝 hostile origin、traversal 与 symlink 逃逸。heartbeat 只在 owned child PID 存活探针通过后落库；硬预算独立于 heartbeat，TERM→KILL 必须观察 exit 才能声称终止；取消失败保持可重试，active zombie 与未知 PID 重启恢复分别记录真实诊断。实现检查点 `41a365f`；`G0-CHF0-7` 逐契约 5/5、22 tests，29 个 source/producer hashes 与该可达提交逐一匹配，`qualificationEligible:false`。影响范围 206 pass / 0 fail / 4 skipped；未运行发布级全量或 packaged/Provider 矩阵。当前工作包归还 `G0-RS`，从 P4R-3 继续。
 
 ## 2. 必须修复的范围
 

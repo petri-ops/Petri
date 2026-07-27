@@ -115,8 +115,9 @@
       "id": "G0-RS",
       "path": "docs/g0-result-studio-plan.md",
       "kind": "work-package",
-      "status": "planned",
-      "canonical": false,
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "g0-current-work-package",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path"
     },
@@ -124,9 +125,8 @@
       "id": "G0-CHF0",
       "path": "docs/g0-critical-crosscut-hardening-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "canonical": true,
-      "truthDomain": "g0-current-work-package",
+      "status": "completed",
+      "canonical": false,
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path"
     },

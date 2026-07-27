@@ -4,24 +4,25 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-07-27（G0-CHF0 首次完成结论已撤销，当前进入审计修复；无 🟢 待合并项）
+最后更新：2026-07-27（G0-CHF0 审计修复已重新收口，当前恢复 P4R-3；无 🔴 阻塞或 🟢 待合并项）
 
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
 | --- | --- | --- | --- |
 | 🟡待评估 | 2026-07-26 | **G0 `macos-arm64: qualified` 的视觉证据不成立。** `acceptance/g0-qualification/packaged-ui/` 5 张 PNG 只有 4 个唯一 sha256：`chat-summary-light-wide.png` 与 `restart-restored-light-wide.png` 逐字节相同（均为 `bb54acff…`），即「重启后恢复」证据是重启前截图的副本。`scripts/g0-qualification-visual.mjs:59-62` 只校验哈希格式/宽高/字节数，无唯一性断言；配套 `inspection.json` 为 811 字节九个人工布尔值，仓库内无任何写入者。该形态与 `core/shared-backend/result-studio-qualification.js:113-121` 判 RS9 non-qualifying 的理由（`inspection_booleans_are_human_assertions`）完全一致，但该理由未推及 G0 自身 | 仅登记事实。**不得**由 Agent 擅自变更 `core/shared-backend/g0/support-matrix.json` 的 `qualified` 状态或 `evidence-ledger.json` 的 `visual_state_convergence`——资格状态变更属用户决定。修补检查脚本（加 `distinctStates` 唯一性断言）会使当前 G0 门变红，需先获批。**2026-07-27 用户裁决：暂不发布，故本项降级为待评估、不阻塞开发。** 重开条件：任何对外发布、资格声明或 G0 重新资格之前必须先处理——发布时若仍以此证据支撑 `qualified`，即为不诚实声明 |
-| 🔵进行中 | 2026-07-27 | `G0-CHF0` 首次 completed 结论经运行时反例复核后撤销：volcano 输出错标/显式 raw 路径崩溃、PCA 重复/空 ID 被接受、heartbeat 不代表子进程活性、kill false 虚报成功、acceptance 过度声明且 sourceCommit 不可达 | 当前唯一 active canonical 工作包，按 CHF0-R1～R5 一次性修复；P4R-3 暂停，既有 P4R-0～P4R-2 不回退 |
+| 🔵进行中 | 2026-07-27 | `G0-RS-P4R` 已恢复：P4R-0～P4R-2 已收口，当前阶段为 P4R-3 Agent-first Editing；G0-CHF0 审计修复已真实收口且证据保留 | 当前唯一 active canonical 工作包；P4R-3～P4R-6 继续串行 |
 | 🟡待评估 | 2026-07-26 | **Result Studio 无同意即写入用户自有 Git 仓库。** `git-repository-binding.js:14` 自述 existing 模式「用户同意接入」，但默认 `allowExistingRepository = true`，且三个生产调用点（`result-edit-tools.js:89`、`routes/result-studio.js:310`、`:408`）全部硬编码 `true`；代码库内不存在任何同意开关。项目工作区只要落在某个 Git 仓库内，BioF3 即向其写入 object 与 `refs/heads/biof3/*` 分支。**当前未暴露**（已核实：真实数据根不在任何仓库内；4 条绑定全为 `managed`，`existing` 为 0，故改默认值无迁移代价） | 已试改为 opt-in 并撤回：该改动会改变产品行为，使 `test/git-adapter.test.mjs` 5 项 existing 模式测试转红（它们依赖旧的宽松默认）。属真实风险但非当前风险，让位于 P4R-1。重启时：默认改 `false` → 自动落 `managed` 模式（即计划已承诺的「只用 BioF3 托管历史」），5 个测试显式传 `true` 作为知情调用方，并为未接入情况补 `existing_repository_not_attached_without_consent` 诊断 |
 | 🟡建议 | 2026-07-17 | `capability-provisioning.js` 的下载实现与 plugin-manager 各自维护 | host 白名单已经修复；共享下载 helper 只在改动该能力时评估，不阻塞 RH0 |
 | 🟡待评估 | 2026-07-17 | 本地分支 `codex/fix-collapsed-right-titlebar` 尚未采用，且与当前 UI 已有语义重叠 | 不直接 merge；进入相关 UI 工作时先比较当前实现，再决定删除或重做 |
 
-当前没有未接管的 🔴 阻塞项，也没有 🟢 待合并项；G0-CHF0 复核发现已纳入当前 active 工作包。
+当前没有 🔴 阻塞项，也没有 🟢 待合并项。
 
 ## 最近处理记录
 
 | 日期 | 结果 | 检查点 |
 | --- | --- | --- |
+| 2026-07-27 | G0-CHF0 首次完成结论经反例撤销后完成 CHF0-R1～R5 审计修复：volcano 统计量/输出/报告诚实，PCA sample-ID 严格，R/Python raw execution 与真实 `/api/files` 来源/路径边界 fail-closed，PID-gated heartbeat、独立硬预算、确认式 TERM→KILL、cancel/zombie DB 终态一致。专项 5/5、22 tests；29 个 source/producer hashes 与可达实现提交逐一匹配；影响范围 206 pass / 0 fail / 4 skipped | `41a365f` + `acceptance/g0-critical-crosscut-hardening/acceptance.json` |
 | 2026-07-27 | P4R-2 子阶段完成：实现 result↔chat 滚动位置保持（新增 `frontend/src/components/result-studio/resultScrollMemory.ts` 纯模块按 jobId 缓存 `.resultView` scrollTop，`ResultArtifactShell` 成功态 div 挂 ref/onScroll，mount 时恢复；选择状态因 `activeArtifact` 是宿主 state 且 `updateWorkspaceMode` 不重置而天然保持）。7/7 单测，result-studio 全量 84/84 无回归。证据 `rs-p4r-performance.json` 13/13、`rs-p4r-product-reframe.json` 7/7 已刷新至 HEAD `4f9d89f`（FROZEN_BASELINE 常量未动）。不变量 3 仍红（归 P4R-5）。当前阶段推进至 P4R-3 | P4R-2 scroll preservation |
 | 2026-07-27 | 六维度横切审计（科学正确性/安全/用户旅程/后端/前端/治理）完成，完整依据登记为 `docs/project-wide-audit-2026-07.md`（`AUDIT-PROJECT-WIDE-2026-07`，`status:reference`，`qualificationEligible:false`），`docs/README.md` 加入口，关键硬伤进本表 🟡待评估。发现 14 项科学正确性缺陷、8 项安全/隐私问题、`POST /api/run` 执行真相旁路、`fetchData` 错误不清 bug 等。审计只读代码未跑全量，不升级任何资格，不动 P4R 主线 | `project-wide-audit-2026-07.md` |
 | 2026-07-26 | 空转前端门共 8 处（`be0a6de` 只修了 p2/p3/p4）。实测确认比原判更糟：不带文件过滤的 `npm test --prefix frontend` 在工作树干净时同样返回「No test files found」并退出 0，而干净正是提交与验收时的常态，因此 underwrite G0 `maintained` 的 LF0/wave 门一直在用零测试的前端结果背书。已修 7 处活跃门（修后同一门真跑 39 文件 / 294 测试）；`g0-rs9-product-acceptance.mjs` 属 RH0 封存的历史证据读取器，刻意不动并单独登记 | `295dd73` |
