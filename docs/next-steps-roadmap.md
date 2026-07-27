@@ -10,7 +10,7 @@
 
 LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口。RS9 曾新增第 17 类 `result_studio_product`，但后续复核发现其五条任务由独立测试拼装、Provider 未执行真实工具闭环、视觉验收依赖人工布尔值、大表由 seed 直接构造；该证据现降级为 unit/synthetic/renderer historical evidence。`result-studio-editing` 在 RS-P7 前暂停 qualified support claim，不能影响或冒充 LF12 原始核心资格。
 
-Result Studio（[`g0-result-studio-plan.md`](./g0-result-studio-plan.md)）是当前唯一 active 工作包。P4 Core 已提交为 `e0a4c7d`，历史审计归档为 `e38d6b5`。`G0-RS-RH0 Repository Hygiene Gate` 已完成，并由 `95a7fe3`、`041e32e` 形成可恢复提交。当前唯一阶段为 `G0-RS-P4R Product Reframe`：P4R-0 已收口（`rs-p4r-performance.json` 13/13，基线由 `RS-P4R0-13` 冻结）；P4R-1 服务端已完成（`rs-p4r-product-reframe.json` 7/7）；P4R-2 子阶段已完成：首屏化（`resultFirstScreen.ts` 谓词化）、header 收敛（去重 + 真实 `vN` 序号）、模式容器骨架（只认有实现的 `result` 一态）、不可达代码清理（约 357 行）、选择与滚动跨 `result↔chat` 保持（新增 `resultScrollMemory.ts` + 7/7 单测，选择由宿主 state 天然保持）。当前阶段为 P4R-3 Agent-first Editing，P4R-3～P4R-6 尚未开始；证据均为 non-qualifying，不升级 `result-studio-editing` 支持声明。真实科学差异、故障恢复矩阵和 packaged Electron 资格分别继续属于 P5、P6、P7。
+`G0-CHF0 Critical Cross-cutting Hardening`（[`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md)）已于 2026-07-27 收口：`/api/run` 执行边界、`/api/files` 路径边界、SCI-1～SCI-3 与长任务 timeout/zombie 生命周期均有当前代码与定向证据。Result Studio P4R-0～P4R-2 既有交付和 non-qualifying 证据不回退；当前唯一 active 工作包恢复为 `G0-RS`，阶段为 P4R-3 Agent-first Editing。
 
 Result Studio 旧实现的 11 个提交已位于 `main`（检查点 `03e5826`）；`SDC-0 Profile Registry 与版本治理` 也已在分支 `codex/g0-sdc` 的 `7284921` 收口并推送，六个 canonical Profile 与 fail-closed typed DAG 边继续保留。按单工作包串行，`SDC-1`～`SDC-7` deferred，当前不创建 Worktree。
 
@@ -23,7 +23,9 @@ G0-RS-P0 资格与证据纠偏
   → RS-P3 Agent 上下文编排
   → RS-P4 Core 手动与 AI 统一编辑
   → RS-RH0 仓库治理与定向测试门
-  → RS-P4R Agent-first 聚焦结果体验
+  → RS-P4R-0～P4R-2 聚焦结果体验基础
+  → G0-CHF0 横切关键硬伤修复
+  → RS-P4R-3～P4R-6 Agent-first 聚焦结果体验
   → RS-P5 真实科学编辑与差异
   → RS-P6 恢复、性能和产品解释
   → RS-P7 诚实重新资格

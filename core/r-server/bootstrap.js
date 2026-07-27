@@ -10,6 +10,7 @@ const cors = require('cors');
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const { LOCAL_USER, setupAuthRoutes } = require('./auth');
+const { corsOrigin } = require('./helpers/local-request-boundary');
 
 function requestIdMiddleware(req, res, next) {
   const rid = req.headers['x-request-id'] || uuidv4().slice(0, 12);
@@ -48,7 +49,7 @@ function requestTimingMiddleware(req, res, next) {
 }
 
 function setupBootstrap(app, { db }) {
-  app.use(cors());
+  app.use(cors({ origin: corsOrigin }));
   app.use(express.json({ limit: '200mb' }));
   app.use(requestIdMiddleware);
   if (require('./helpers/perf-probe').envEnabled()) app.use(requestTimingMiddleware);

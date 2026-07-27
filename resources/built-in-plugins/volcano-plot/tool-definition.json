@@ -30,10 +30,10 @@
   },
   {
    "id": "pval_col",
-   "label": "pvalue 列名",
+   "label": "显著性列名（默认 padj）",
    "type": "text",
    "required": false,
-   "default": "pvalue"
+   "default": "padj"
   },
   {
    "id": "fc_threshold",
@@ -212,7 +212,7 @@
    },
    "pval_col": {
     "type": "text",
-    "default": "pvalue"
+    "default": "padj"
    },
    "fc_threshold": {
     "type": "number",
@@ -302,7 +302,7 @@
   "parameterImpacts": {
    "lfc_col": "data",
    "gene_col": "data",
-   "pval_col": "data",
+   "pval_col": "scientific",
    "fc_threshold": "scientific",
    "pval_threshold": "scientific",
    "top_n": "data",

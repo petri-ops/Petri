@@ -49,23 +49,34 @@ def main():
 
     # 分组
     groups = None
-    if group_path and os.path.exists(group_path):
+    grouping_status = "unassigned"
+    if group_path:
+        if not os.path.exists(group_path):
+            print("分组文件不存在，不能建立样本分组", file=sys.stderr)
+            sys.exit(1)
         gdf = pd.read_csv(group_path)
-        if "sample" in gdf.columns and "group" in gdf.columns:
-            gdf = gdf.set_index("sample")
-            groups = [gdf.loc[s, "group"] if s in gdf.index else "Unknown" for s in expr.index]
-        elif "group" in gdf.columns:
-            groups = list(gdf["group"].values)
-    if groups is None:
-        # 按样本顺序均分两组
-        mid = len(expr.index) // 2
-        groups = ["A"] * mid + ["B"] * (len(expr.index) - mid)
+        if "sample" not in gdf.columns or "group" not in gdf.columns:
+            print("分组文件必须包含 sample 和 group 列，禁止按文件行顺序猜测", file=sys.stderr)
+            sys.exit(1)
+        sample_ids = gdf["sample"].astype(str)
+        if sample_ids.duplicated().any():
+            print("分组文件包含重复 sample ID", file=sys.stderr)
+            sys.exit(1)
+        expr_ids = expr.index.astype(str)
+        if set(sample_ids) != set(expr_ids):
+            print("分组文件与表达矩阵的 sample ID 不完全匹配", file=sys.stderr)
+            sys.exit(1)
+        groups_by_sample = dict(zip(sample_ids, gdf["group"].astype(str)))
+        groups = np.array([groups_by_sample[str(sample_id)] for sample_id in expr_ids])
+        grouping_status = "matched_by_sample_id"
 
-    groups = np.array(groups)
+    # 没有分组信息时保持未分组语义，绝不按样本位置伪造 A/B。
+    if groups is None:
+        groups = np.array(["Unassigned"] * len(expr.index))
 
     # 散点图 PC1 vs PC2
     fig, ax = plt.subplots(figsize=(7, 5), dpi=300)
-    color_map = {"A": "#2563eb", "B": "#dc2626"}
+    color_map = {"A": "#2563eb", "B": "#dc2626", "Unassigned": "#64748b"}
     for g in sorted(set(groups)):
         mask = groups == g
         ax.scatter(
@@ -80,7 +91,14 @@ def main():
     ax.set_xlabel(f"PC1 ({pca.explained_variance_ratio_[0]*100:.1f}%)")
     ax.set_ylabel(f"PC2 ({pca.explained_variance_ratio_[1]*100:.1f}%)")
     ax.set_title("PCA Scatter Plot")
-    ax.legend(title="Group", loc="best", frameon=True)
+    if grouping_status == "matched_by_sample_id":
+        ax.legend(title="Group", loc="best", frameon=True)
+    else:
+        ax.text(
+            0.02, 0.98, "未提供分组信息（仅显示样本）",
+            transform=ax.transAxes, va="top", ha="left", fontsize=8,
+            color="#475569",
+        )
     ax.axhline(0, color="grey", linewidth=0.4, linestyle="--")
     ax.axvline(0, color="grey", linewidth=0.4, linestyle="--")
     fig.tight_layout()
@@ -108,6 +126,7 @@ def main():
             "n_genes": int(expr.shape[1]),
             "pc1_variance": float(pca.explained_variance_ratio_[0]),
             "pc2_variance": float(pca.explained_variance_ratio_[1]),
+            "grouping": grouping_status,
         },
     }
     with open("manifest.json", "w") as f:

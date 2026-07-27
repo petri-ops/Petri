@@ -8,6 +8,7 @@
 const path = require('path');
 const fs = require('fs');
 const logger = require('../logger');
+const { safeJoinUnder } = require('../path-safe');
 
 // 从 config-helper 读取配置（断点1：斩断对 r-server/config 的反向 require）
 const configHelper = require('../config-helper');
@@ -20,6 +21,25 @@ function _getResultsDir() {
   return (
     cfg.localResultsDir || path.join(require('os').homedir(), 'Documents', 'BioF3-Local', 'results')
   );
+}
+
+function _resolveKey(key, { mustExist = false } = {}) {
+  if (typeof key !== 'string' || key.length === 0 || key.includes('\0')) return null;
+  const resultsDir = path.resolve(_getResultsDir());
+  const target = safeJoinUnder(resultsDir, key);
+  if (!target) return null;
+  if (mustExist && !fs.existsSync(target)) return null;
+  try {
+    const realRoot = fs.realpathSync(resultsDir);
+    const realTarget = fs.realpathSync(target);
+    if (realTarget !== realRoot && !realTarget.startsWith(realRoot + path.sep)) return null;
+  } catch (error) {
+    if (mustExist || error.code !== 'ENOENT') return null;
+    const existingParent = fs.realpathSync(path.dirname(target));
+    const realRoot = fs.realpathSync(resultsDir);
+    if (existingParent !== realRoot && !existingParent.startsWith(realRoot + path.sep)) return null;
+  }
+  return target;
 }
 
 class LocalFileStorage {
@@ -35,8 +55,12 @@ class LocalFileStorage {
    */
   async upload(localPath, key) {
     const resultsDir = _getResultsDir();
-    const target = path.join(resultsDir, key);
-    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.mkdirSync(resultsDir, { recursive: true });
+    const candidate = safeJoinUnder(path.resolve(resultsDir), key);
+    if (!candidate) throw new Error('invalid_storage_key');
+    fs.mkdirSync(path.dirname(candidate), { recursive: true });
+    const target = _resolveKey(key);
+    if (!target) throw new Error('invalid_storage_key');
     fs.copyFileSync(localPath, target);
     logger.debug(`[local-storage] uploaded: ${key}`);
     return this.getUrl(key);
@@ -55,7 +79,8 @@ class LocalFileStorage {
    */
   async download(key, localPath) {
     const resultsDir = _getResultsDir();
-    const src = path.join(resultsDir, key);
+    const src = _resolveKey(key, { mustExist: true });
+    if (!src) throw new Error(`文件不存在或路径非法: ${key}`);
     if (!fs.existsSync(src)) {
       throw new Error(`文件不存在: ${key}`);
     }
@@ -68,7 +93,8 @@ class LocalFileStorage {
    */
   async delete(key) {
     const resultsDir = _getResultsDir();
-    const target = path.join(resultsDir, key);
+    const target = _resolveKey(key, { mustExist: true });
+    if (!target) throw new Error('invalid_storage_key');
     try {
       fs.unlinkSync(target);
       logger.debug(`[local-storage] deleted: ${key}`);
@@ -92,7 +118,7 @@ class LocalFileStorage {
    */
   exists(key) {
     const resultsDir = _getResultsDir();
-    return fs.existsSync(path.join(resultsDir, key));
+    return !!_resolveKey(key, { mustExist: true });
   }
 
   /**
@@ -100,8 +126,10 @@ class LocalFileStorage {
    */
   read(key) {
     const resultsDir = _getResultsDir();
-    return fs.readFileSync(path.join(resultsDir, key));
+    const target = _resolveKey(key, { mustExist: true });
+    if (!target) throw new Error('invalid_storage_key');
+    return fs.readFileSync(target);
   }
 }
 
-module.exports = { LocalFileStorage };
+module.exports = { LocalFileStorage, resolveLocalStorageKey: _resolveKey };

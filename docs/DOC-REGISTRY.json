@@ -122,6 +122,15 @@
       "archivePolicy": "retain_stable_path"
     },
     {
+      "id": "G0-CHF0",
+      "path": "docs/g0-critical-crosscut-hardening-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
       "id": "G0-RS0",
       "path": "docs/g0-rs0-result-studio-audit.md",
       "kind": "audit",

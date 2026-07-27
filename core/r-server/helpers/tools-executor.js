@@ -17,6 +17,7 @@ const { ensureBundlesForPlugin } = require('../../shared-backend/capability-bund
 const { createExecutionProvenance, attachProvenanceToResult } = require('../../shared-backend/execution-provenance');
 const { collectExecutionInputs, writeArtifactManifest } = require('../../shared-backend/artifact-manifest');
 const { createRuntimeResourceSnapshot } = require('../../shared-backend/runtime-resource-snapshot');
+const { terminateChildProcess } = require('../helpers/process-lifecycle');
 
 function isManagedResultDir(candidate, jobsDir) {
   if (!candidate || !jobsDir) return false;
@@ -160,13 +161,11 @@ function createToolsExecutor({
     if (!active || !active.process) return { active: false, killed: false };
     active.cancelled = true;
     const result = { active: true, killed: false };
-    try {
-      active.process.kill('SIGTERM');
-      result.killed = true;
-      result.signal = 'SIGTERM';
-    } catch (e) {
-      result.error = e.message;
-    }
+    result.termination = terminateChildProcess(active.process).then((termination) => {
+      result.killed = termination.terminated;
+      result.signal = termination.signal || (termination.escalated ? 'SIGKILL' : 'SIGTERM');
+      return termination;
+    });
     return result;
   }
 
@@ -428,9 +427,15 @@ function createToolsExecutor({
   async function recoverZombieJobs() {
     try {
       const cutoff = Date.now() - ZOMBIE_TIMEOUT_MS;
+      for (const [jobId, active] of activeToolJobs) {
+        if (active.lastHeartbeatAt < cutoff) {
+          active.cancelled = true;
+          await terminateChildProcess(active.process);
+        }
+      }
       const result = await db
         .prepare(
-          "UPDATE tool_jobs SET status = 'failed', error = '任务超时或服务重启，已自动标记失败', completed_at = ? WHERE status IN ('running', 'pending') AND created_at < ?"
+          "UPDATE tool_jobs SET status = 'failed', error = '任务超时或服务重启；进程归属无法在本次启动中证明，未发送信号', completed_at = ? WHERE status IN ('running', 'pending') AND COALESCE(heartbeat_at, created_at) < ?"
         )
         .run(Date.now(), cutoff);
       if (result.changes > 0) {
@@ -461,7 +466,7 @@ function createToolsExecutor({
             const cutoff = Date.now() - ZOMBIE_TIMEOUT_MS;
             const result = await db
               .prepare(
-                "UPDATE tool_jobs SET status = 'failed', error = '任务超时，已自动标记失败', completed_at = ? WHERE status IN ('running', 'pending') AND created_at < ?"
+                "UPDATE tool_jobs SET status = 'failed', error = '任务超时；进程终止结果已记录', completed_at = ? WHERE status IN ('running', 'pending') AND COALESCE(heartbeat_at, created_at) < ?"
               )
               .run(Date.now(), cutoff);
             if (result.changes > 0) {
@@ -755,11 +760,16 @@ function createToolsExecutor({
       fs.writeFileSync(provenancePath, JSON.stringify(provenance, null, 2));
       return { provenance, provenancePath, pluginManifest };
     };
+    const hardTimeoutMs = Number(process.env.BIOF3_TOOL_HARD_TIMEOUT_MS || 30 * 60 * 1000);
+    let hardTimeoutTimer = null;
     const child = execFile(
       runCmd[0],
       runCmd.slice(1),
-      { timeout: 300000, maxBuffer: 10 * 1024 * 1024, env: runEnv },
+      { timeout: 0, maxBuffer: 10 * 1024 * 1024, env: runEnv },
       async (err, stdout, stderr) => {
+        if (hardTimeoutTimer) clearTimeout(hardTimeoutTimer);
+        const active = activeToolJobs.get(jobId);
+        if (active && active.heartbeatTimer) clearInterval(active.heartbeatTimer);
         activeToolJobs.delete(jobId);
         try {
           const log = `=== STDOUT ===\n${stdout || ''}\n\n=== STDERR ===\n${stderr || ''}\n\n=== EXIT ===\n${err ? 'ERROR: ' + err.message : 'OK'}\nTimestamp: ${new Date().toISOString()}\n`;
@@ -928,8 +938,26 @@ function createToolsExecutor({
     activeToolJobs.set(jobId, {
       process: child,
       startedAt: Date.now(),
+      lastHeartbeatAt: Date.now(),
       toolId,
     });
+    await db.prepare('UPDATE tool_jobs SET process_pid=?, heartbeat_at=? WHERE id=?').run(child.pid || null, Date.now(), jobId);
+    const active = activeToolJobs.get(jobId);
+    active.heartbeatTimer = setInterval(() => {
+      active.lastHeartbeatAt = Date.now();
+      try {
+        db.prepare('UPDATE tool_jobs SET heartbeat_at=? WHERE id=? AND status=?').run(active.lastHeartbeatAt, jobId, 'running');
+      } catch (error) {
+        console.warn('[tools] heartbeat update failed:', error.message);
+      }
+    }, HEARTBEAT_INTERVAL_MS);
+    active.heartbeatTimer.unref?.();
+    hardTimeoutTimer = setTimeout(() => {
+      active.timedOut = true;
+      active.cancelled = true;
+      void terminateChildProcess(child);
+    }, hardTimeoutMs);
+    hardTimeoutTimer.unref?.();
   }
 
   function translateRError(rawError) {
@@ -1071,7 +1099,8 @@ function createToolsExecutor({
   };
 }
 
-const ZOMBIE_TIMEOUT_MS = 10 * 60 * 1000;
+const ZOMBIE_TIMEOUT_MS = Number(process.env.BIOF3_TOOL_ZOMBIE_TIMEOUT_MS || 10 * 60 * 1000);
+const HEARTBEAT_INTERVAL_MS = Number(process.env.BIOF3_TOOL_HEARTBEAT_INTERVAL_MS || 30 * 1000);
 
 const R_ERROR_TRANSLATIONS = [
   {

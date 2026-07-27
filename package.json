@@ -94,6 +94,7 @@
     "g0:result-studio:p3:frontend": "npm run test:files --prefix frontend -- ResultStudioContextReadiness.test.tsx ResultStudioSurface.test.tsx",
     "g0:result-studio:p3": "npm run g0:result-studio:p3:test && npm run g0:result-studio:p3:frontend && node scripts/g0-rs-p3-acceptance.mjs",
     "g0:result-studio:p3:update": "node scripts/g0-rs-p3-acceptance.mjs --write-evidence",
+    "g0:chf0": "node scripts/g0-chf0-acceptance.mjs",
     "g0:result-studio:p4:test": "node --test test/result-edit-controls.test.mjs test/result-edit-intent.test.mjs test/result-studio-context.test.mjs test/result-studio-plugin-sdk.test.mjs test/result-studio-qualification.test.mjs test/agent-tool-registry.test.mjs",
     "g0:result-studio:p4:frontend": "npm run test:files --prefix frontend -- ResultEditPanel.test.tsx ResultStudioContextReadiness.test.tsx ResultStudioSurface.test.tsx CenterPanel.test.tsx",
     "g0:result-studio:p4": "npm run g0:result-studio:p4:test && npm run g0:result-studio:p4:frontend && node scripts/g0-rs-p4-acceptance.mjs",

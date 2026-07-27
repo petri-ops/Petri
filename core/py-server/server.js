@@ -28,6 +28,7 @@ const logger = require('./logger');
 const { createPool } = require('./py-pool');
 const { getExecutor } = require('../shared-backend/executors');
 const { getPythonRuntimeExecutable } = require('../shared-backend/runtime-paths');
+const { corsOrigin, isTrustedDesktopOrigin } = require('../shared-backend/local-request-boundary');
 
 // 桌面版：注册执行器 + 存储适配器（必须在路由之前）
 try {
@@ -84,7 +85,7 @@ function getStorage() {
 // ============================================================
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: corsOrigin }));
 // W2-A: 路径相关 body limit
 // - /api/tools/* — 200mb（base64 上传大 h5ad 文件）
 // - 其他 — 1mb（fast-path /api/run 等只接受小 JSON）
@@ -223,6 +224,15 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 
 // Execute Python code (fast path)
 app.post('/api/run', async (req, res) => {
+  if (!isTrustedDesktopOrigin(req.headers && req.headers.origin)) {
+    return res.status(403).json({ status: 'error', error: 'untrusted_origin' });
+  }
+  return res.status(410).json({
+    status: 'error',
+    error: 'raw_python_execution_disabled',
+    message: '任意 Python 代码执行入口已停用；正式分析必须通过已注册工具和 tool_job 执行。',
+  });
+
   const ip = req.ip || req.socket.remoteAddress;
   if (!checkRateLimit(ip)) {
     return res.status(429).json({

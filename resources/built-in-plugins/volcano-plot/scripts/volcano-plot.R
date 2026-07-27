@@ -27,7 +27,7 @@ params <- fromJSON(file.path(work_dir, "params.json"))
 deg_path <- params$deg_table
 gene_col  <- params$gene_col  %||% params$gene_id_column  %||% "gene"
 lfc_col   <- params$lfc_col   %||% params$lfc_column     %||% NULL
-pval_col  <- params$pval_col  %||% params$pval_column    %||% "pvalue"
+pval_col  <- params$pval_col  %||% params$pval_column    %||% "padj"
 fc_threshold <- as.numeric(params$fc_threshold %||% 1)
 pval_threshold <- as.numeric(params$pval_threshold %||% 1.3)
 top_n <- as.integer(params$top_n %||% 10)
@@ -116,10 +116,18 @@ if (any(is.na(deg$log2FoldChange) & !is.na(deg[[lfc_col]]))) {
   warning("[volcano-plot] LFC 列存在非数值，替换为 NA")
 }
 
-# 参数化 pvalue 列（接受 pvalue 或 padj）
+# 显著性列必须由调用方明确选择；默认是多重校正后的 padj。
+# 不能在缺列时静默回退到裸 p 值，否则会把假阳性画成论文结论。
+if (!(pval_col %in% names(deg))) {
+  if (pval_col == "padj" && "adj.P.Val" %in% names(deg)) {
+    pval_col <- "adj.P.Val"
+  } else {
+    stop(sprintf("显著性列 '%s' 不存在；火山图默认要求校正后的 padj", pval_col))
+  }
+}
 deg$pvalue <- as.numeric(deg[[pval_col]])
 if (any(is.na(deg$pvalue) & !is.na(deg[[pval_col]]))) {
-  warning("[volcano-plot] pvalue 列存在非数值，替换为 NA")
+  stop(sprintf("显著性列 '%s' 含非数值，拒绝生成火山图", pval_col))
 }
 deg$neg_log10_p <- -log10(deg$pvalue + 1e-300)
 deg$sig <- "NS"
@@ -150,7 +158,7 @@ p <- ggplot(deg, aes(x = log2FoldChange, y = neg_log10_p, color = sig)) +
   geom_hline(yintercept = pval_threshold, linetype = "dashed", color = "grey60", linewidth = 0.4) +
   labs(
     x = expression(log[2](Fold~Change)),
-    y = expression(-log[10](italic(p))),
+    y = bquote(-log[10](.(pval_col))),
     title = plot_title
   ) +
   theme_minimal(base_size = base_font_size) +
@@ -165,10 +173,11 @@ ggsave("volcano.png", p, width = plot_width, height = plot_height, dpi = export_
 ggsave("volcano.pdf", p, width = plot_width, height = plot_height)
 
 # 分类表（输出 canonical 列名）
-classified <- deg[, c("gene", "log2FoldChange", "pvalue", "sig")]
-if ("padj" %in% names(deg)) {
-  classified$padj <- deg$padj
-}
+classified <- deg[, c("gene", "log2FoldChange", "sig")]
+classified$significance <- deg[[pval_col]]
+classified$significance_column <- pval_col
+if ("pvalue" %in% names(deg) && pval_col != "pvalue") classified$pvalue <- deg$pvalue
+if ("padj" %in% names(deg) && pval_col != "padj") classified$padj <- deg$padj
 write.csv(classified, "classified_table.csv", row.names = FALSE)
 
 summary_counts <- list(

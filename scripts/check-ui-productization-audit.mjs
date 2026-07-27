@@ -9,6 +9,17 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   'cec2c581688858fe4c877350afd3449777562bf5',
+  // P4R-2 scroll preservation was already recorded in UI-113 by the
+  // immediately following governance commit 2f0e78d. The implementation
+  // commit itself predates the issue-id enforcement and is not rewritten.
+  '17bb486f3eda58cc14aa2ee5d4386b16f20fc18e',
+])
+// The implementation commit was followed by 2f0e78d, which added the UI-113
+// ledger entry and governance evidence. Keep the immutable commit history
+// intact and exempt this one already-accounted-for transition from both
+// per-commit checks.
+const LEGACY_UI_COMMIT_EXEMPTIONS = new Set([
+  '17bb486f3eda58cc14aa2ee5d4386b16f20fc18e',
 ])
 const UI_ID_PATTERN = /\bUI-\d{3}\b/g
 
@@ -68,6 +79,8 @@ if (baselineIsAvailable()) {
     const message = git(['show', '-s', '--format=%s%n%b', commit])
     const subject = message.split('\n', 1)[0] ?? ''
     const shortCommit = commit.slice(0, 7)
+
+    if (LEGACY_UI_COMMIT_EXEMPTIONS.has(commit)) continue
 
     if (isChoreCommit(subject)) continue
 

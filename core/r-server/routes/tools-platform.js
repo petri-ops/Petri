@@ -67,6 +67,11 @@ function createToolsPlatformRoutes({
           .prepare('UPDATE tool_jobs SET status=?, completed_at=? WHERE id=?')
           .run('cancelled', Date.now(), job.id);
         const local = killLocalToolJob(job.id);
+        if (local && local.termination) {
+          local.termination = await local.termination;
+          local.killed = local.termination.terminated === true;
+          delete local.termination;
+        }
         res.json({ ok: true, status: 'cancelled', local });
       } catch (e) {
         res.status(500).json({ error: e.message });

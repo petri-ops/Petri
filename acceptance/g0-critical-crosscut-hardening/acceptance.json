@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "acceptanceId": "G0-CHF0-7",
+  "generatedAt": "2026-07-27T08:04:06.445Z",
+  "sourceCommit": "5e7f0771035536cd9d5edb28c62a787b6909f84d",
+  "qualificationEligible": false,
+  "passed": true,
+  "checks": [
+    {
+      "id": "CHF0-SEC-1",
+      "status": "tested",
+      "assertion": "R/Python raw execution and replot code routes fail closed"
+    },
+    {
+      "id": "CHF0-SEC-2",
+      "status": "tested",
+      "assertion": "Origin, traversal, absolute path and symlink boundaries reject"
+    },
+    {
+      "id": "CHF0-SCI-1",
+      "status": "tested",
+      "assertion": "Volcano defaults to adjusted significance and rejects invalid columns"
+    },
+    {
+      "id": "CHF0-SCI-2-3",
+      "status": "tested",
+      "assertion": "PCA uses explicit unassigned state and sample-ID alignment"
+    },
+    {
+      "id": "CHF0-BE-5",
+      "status": "tested",
+      "assertion": "Termination escalates SIGTERM to SIGKILL and heartbeats are persisted"
+    }
+  ],
+  "testOutputTail": "🔍 [2026-07-27T08:04:01.454Z] [local-storage] uploaded: results/job-1/plot.png\n✔ CHF0 origin boundary accepts BioF3 loopback and rejects foreign/null origins (0.461834ms)\n✔ CHF0 storage keys reject traversal and absolute paths (0.373042ms)\n✔ CHF0 local storage refuses symlink escape and still serves nested valid keys (3.3755ms)\n✔ CHF0 raw R and replot code routes are fail-closed (0.200917ms)\n✔ CHF0 process termination escalates from SIGTERM to SIGKILL (3.631583ms)\n✔ CHF0 PCA runtime does not invent groups or align by position (3900.882ms)\n✔ CHF0 volcano defaults to padj and classifies on adjusted significance (1075.029875ms)\nℹ tests 7\nℹ suites 0\nℹ pass 7\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 5046.677375\n",
+  "sourceHashes": {
+    "core/py-server/server.js": "5c330fb8279f43a5b71d1230546ba972a5d74adaa503f9cb3c9b7c89045059a9",
+    "core/r-server/bootstrap.js": "618ce06f1b90a7fb4e6de9ca6f983c9c1805b4d59dd13846f98ecb008728b69c",
+    "core/r-server/db.js": "0cc7fbca2bdb12221555c5a4e467cdc65f8ae8366608009f97db1f7a0761364c",
+    "core/r-server/helpers/local-request-boundary.js": "20ae30a4b8805a474700fd82b30f61342878531bc239098714e27698e174b7d1",
+    "core/r-server/helpers/process-lifecycle.js": "144a781f6601865df59f835b5d54926cad861699e9391d71b7d0a83f0dfa28d4",
+    "core/r-server/helpers/tools-executor.js": "db9acd4cac957123548a9380af74494c268804b99e7b9f88b2bf22cc636ebd97",
+    "core/r-server/routes/files.js": "88900dc4733ff21e6852eb258e26d59362d5e9397018ef13b55a21dbdb4c7708",
+    "core/r-server/routes/r-compute.js": "0829b40931e0b1a8b8a23e66ca36a580792669871e60a9ae3002264337a08e7b",
+    "core/r-server/routes/tools-platform.js": "9fa36c3a95093c4d0554d59abed940b2275cadaf5b348f241db3cddfa7b79d6d",
+    "core/shared-backend/local-request-boundary.js": "5a86d8fab9b8a54648a1d62bce321e2d5f7632410d7d5ba850509c513e53c98f",
+    "core/shared-backend/storage/local-storage.js": "e5a62abed382e5f941a8818f468881e91ae1876e25ae7141b75ae0beef20b182",
+    "resources/built-in-plugins/pca-explorer/scripts/pca-explorer.py": "0c70e2f64b5a34cb421392a95c26e4da24d6a10d94e78a24d2bf8c9fae591b24",
+    "resources/built-in-plugins/volcano-plot/scripts/volcano-plot.R": "da2b4f9fde031654a0efed0218a95bec5b7beeb685ee9ac0749e0d9b5e2d272b",
+    "resources/built-in-plugins/volcano-plot/tool-definition.json": "c1511a5234c9f28ffeea1e59cf73eb9b1d5e41e0c959eb60e894595fc7912fb9",
+    "test/g0-chf0-boundaries.test.mjs": "344a2f76bb043947b2f721debc6734be35b468966fc84e3883c4003780668fb7"
+  }
+}

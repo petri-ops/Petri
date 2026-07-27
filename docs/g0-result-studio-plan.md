@@ -2,7 +2,7 @@
 
 最后更新：2026-07-27
 
-状态：`active / implemented_unverified`（RS0～RS8 引擎基础保留；`G0-RS-P0`～`G0-RS-P3` 已完成；`G0-RS-P4 Core` 已通过 18/18 离线门禁并提交；`G0-RS-RH0 Repository Hygiene Gate` 已完成；当前阶段 `G0-RS-P4R Product Reframe` 处于 `P4R-3 Agent-first Editing`：P4R-0 已收口，P4R-1 服务端已完成，P4R-2 子阶段已完成（首屏化 + header 收敛 + 模式骨架 + 选择/滚动保持 + 死代码清理），P4R-3 未开始；`G0-RS-P5` 继续阻断）
+状态：`active / implemented_unverified`（RS0～RS8 引擎基础保留；P4R-0～P4R-2 已完成；G0-CHF0 已收口；当前恢复 `P4R-3 Agent-first Editing`，`G0-RS-P5` 继续阻断）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 

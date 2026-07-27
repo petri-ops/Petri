@@ -9,6 +9,8 @@ const path = require('path');
 const multer = require('multer');
 
 const config = require('../config');
+const { safeJoinUnder } = require('../../shared-backend/path-safe');
+const { requireTrustedDesktopOrigin } = require('../helpers/local-request-boundary');
 const TEMP_DIR = config.tempDir || '/tmp/biof3-tmp';
 
 // 本地存储适配器
@@ -73,13 +75,21 @@ function getProjectWorkspace(projectId) {
 }
 
 function resolveInside(root, relativePath) {
-  const safeRelative = String(relativePath || '').replace(/^[/\\]+/, '');
-  const target = path.resolve(root, safeRelative);
-  const normalizedRoot = path.resolve(root);
-  if (target !== normalizedRoot && !target.startsWith(normalizedRoot + path.sep)) {
-    return null;
+  const target = safeJoinUnder(root, String(relativePath || ''));
+  if (!target) return null;
+  try {
+    const realRoot = fs.realpathSync(root);
+    const realTarget = fs.realpathSync(target);
+    if (realTarget !== realRoot && !realTarget.startsWith(realRoot + path.sep)) return null;
+  } catch (error) {
+    if (error.code !== 'ENOENT') return null;
   }
   return target;
+}
+
+function isSafeStorageKey(key) {
+  if (typeof key !== 'string' || !key || key.includes('\0') || key.includes('%') || path.isAbsolute(key) || /^[/\\]/.test(key)) return false;
+  return !key.split(/[\\/]+/).some((segment) => segment === '..' || segment === '.');
 }
 
 const upload = multer({
@@ -132,7 +142,7 @@ module.exports = function registerFileRoutes(app) {
       }
     });
 
-    app.get('/api/workspaces/:projectId/file', (req, res) => {
+    app.get('/api/workspaces/:projectId/file', requireTrustedDesktopOrigin, (req, res) => {
       try {
         const root = getProjectWorkspace(req.params.projectId);
         if (!root) return res.status(404).json({ status: 'error', error: '项目工作目录不存在' });
@@ -141,16 +151,18 @@ module.exports = function registerFileRoutes(app) {
           return res.status(404).json({ status: 'error', error: '文件不存在' });
         }
         res.setHeader('Content-Type', contentTypeFor(target));
-        res.setHeader('Access-Control-Allow-Origin', '*');
         res.send(fs.readFileSync(target));
       } catch (e) {
         res.status(500).json({ status: 'error', error: e.message });
       }
     });
 
-    app.get('/api/files/:key(*)', (req, res) => {
+    app.get('/api/files/:key(*)', requireTrustedDesktopOrigin, (req, res) => {
       const key = req.params.key;
       try {
+        if (!isSafeStorageKey(key)) {
+          return res.status(400).json({ status: 'error', error: 'invalid_storage_key' });
+        }
         const storage = getStorage();
         if (!storage || !storage.exists(key)) {
           return res.status(404).json({ status: 'error', error: '文件不存在' });
@@ -158,7 +170,6 @@ module.exports = function registerFileRoutes(app) {
         const buf = storage.read(key);
         // 根据扩展名设置 Content-Type
         res.setHeader('Content-Type', contentTypeFor(key));
-        res.setHeader('Access-Control-Allow-Origin', '*');
         res.send(buf);
       } catch (e) {
         res.status(500).json({ status: 'error', error: e.message });
@@ -195,3 +206,5 @@ module.exports = function registerFileRoutes(app) {
     });
   });
 };
+
+module.exports.isSafeStorageKey = isSafeStorageKey;

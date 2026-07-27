@@ -1,6 +1,6 @@
 # BioF3 Desktop 文档入口
 
-最后更新：2026-07-26
+最后更新：2026-07-27
 
 ## 项目治理入口
 
@@ -15,8 +15,9 @@
 2. [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) — 当前永久 G0 可信基础层主线；LF12 原始核心资格保持 maintained，Result Studio 产品支持声明因证据复核暂停，等待 G0-RS-P7 重新资格。
 3. [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) — 已完成的 G0 Baseline v1 资格认证、证据边界与永久维护契约。
 4. [`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md) — SDC-0 已完成，SDC-1～SDC-7 因 Result Studio 产品收口优先而 deferred。
-5. [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) — 当前唯一 active 工作包；RS0～RS8 引擎基础保留，按 RS-P0～P7 建设中央主画布、真实选择、Agent 上下文、统一编辑、恢复与诚实重新资格。
-6. [`g0-rs0-result-studio-audit.md`](./g0-rs0-result-studio-audit.md) — G0-RS0 现状审计与架构 ADR；Result Studio 的复用/新增边界、契约缺陷与 Git 风险矩阵的唯一裁决记录。
+5. [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) — 当前唯一 active canonical 工作包；P4R-0～P4R-2 已完成，当前恢复 P4R-3 Agent-first Editing。
+6. [`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md) — 已完成的独立横切修复工作包；保留 `/api/run`、`/api/files`、科学正确性与长任务生命周期的收口证据。
+7. [`g0-rs0-result-studio-audit.md`](./g0-rs0-result-studio-audit.md) — G0-RS0 现状审计与架构 ADR；Result Studio 的复用/新增边界、契约缺陷与 Git 风险矩阵的唯一裁决记录。
 
 ## 当前开发必读
 
@@ -25,7 +26,7 @@
 1. [`AUDIT-LOG.md`](./AUDIT-LOG.md) — 活跃阻塞、待合并和当前进行中阶段。
 2. [`next-steps-roadmap.md`](./next-steps-roadmap.md) — 当前立即任务。
 3. [`project-workspace-handoff.md`](./project-workspace-handoff.md) — 当前可恢复 Git/工程检查点。
-4. [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) — 当前唯一 active 工作包及阶段完成门。
+4. [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) — 当前唯一 active canonical 工作包及阶段完成门。
 
 只有任务实际涉及阶段顺序、UI 或模块边界时，才读取 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)、[`ui-productization-audit.md`](./ui-productization-audit.md) 或 [`development-module-map.md`](./development-module-map.md)。其他 G0 资格、插件、发布和历史材料从上方核心指引、下方专项规范或 `DOC-REGISTRY.json` 按需定位；已完成工作包和 Acceptance 不属于默认启动上下文。
 

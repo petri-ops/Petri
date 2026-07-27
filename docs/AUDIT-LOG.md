@@ -4,18 +4,18 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-07-27（P4R-2 子阶段已完成，当前阶段推进至 P4R-3；无 🔴 阻塞；六维度横切审计 🟡待评估项）
+最后更新：2026-07-27（G0-CHF0 已收口，当前恢复 P4R-3；无 🔴 阻塞或 🟢 待合并项）
 
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
 | --- | --- | --- | --- |
 | 🟡待评估 | 2026-07-26 | **G0 `macos-arm64: qualified` 的视觉证据不成立。** `acceptance/g0-qualification/packaged-ui/` 5 张 PNG 只有 4 个唯一 sha256：`chat-summary-light-wide.png` 与 `restart-restored-light-wide.png` 逐字节相同（均为 `bb54acff…`），即「重启后恢复」证据是重启前截图的副本。`scripts/g0-qualification-visual.mjs:59-62` 只校验哈希格式/宽高/字节数，无唯一性断言；配套 `inspection.json` 为 811 字节九个人工布尔值，仓库内无任何写入者。该形态与 `core/shared-backend/result-studio-qualification.js:113-121` 判 RS9 non-qualifying 的理由（`inspection_booleans_are_human_assertions`）完全一致，但该理由未推及 G0 自身 | 仅登记事实。**不得**由 Agent 擅自变更 `core/shared-backend/g0/support-matrix.json` 的 `qualified` 状态或 `evidence-ledger.json` 的 `visual_state_convergence`——资格状态变更属用户决定。修补检查脚本（加 `distinctStates` 唯一性断言）会使当前 G0 门变红，需先获批。**2026-07-27 用户裁决：暂不发布，故本项降级为待评估、不阻塞开发。** 重开条件：任何对外发布、资格声明或 G0 重新资格之前必须先处理——发布时若仍以此证据支撑 `qualified`，即为不诚实声明 |
-| 🔵进行中 | 2026-07-27 | `G0-RS-P4R` 推进中：**P4R-0 已收口**（`rs-p4r-performance.json` 13/13，基线冻结为常量并由 `RS-P4R0-13` 钉住）；**P4R-1 服务端已完成**（changesets -97%、workspace-status -66%，每 revision 斜率 20ms→0.18ms，证据 `rs-p4r-product-reframe.json` 7/7）；**P4R-2 子阶段已完成**（首屏化 + header 收敛 + 模式骨架 + 选择/滚动保持 + 死代码清理；新增 `resultScrollMemory.ts` 7/7 单测，证据已刷新至 HEAD `4f9d89f`）。四条不变量 3 绿 1 红（红的第 3 条归 P4R-5）。**当前阶段为 P4R-3 Agent-first Editing，P4R-3～P4R-6 未开始** | 响应式/明暗/首屏像素判定本仓库无法验证（happy-dom 下 `getBoundingClientRect()` 返回 0×0，无浏览器自动化），已按计划证据边界统一记为 `not_captured_no_browser_automation_in_repo`，不得估算 |
+| 🔵进行中 | 2026-07-27 | `G0-RS-P4R` 已恢复：P4R-0～P4R-2 已收口，当前阶段为 P4R-3 Agent-first Editing；G0-CHF0 已完成且证据保留 | 当前唯一 active canonical 工作包；P4R-3～P4R-6 继续串行 |
 | 🟡待评估 | 2026-07-26 | **Result Studio 无同意即写入用户自有 Git 仓库。** `git-repository-binding.js:14` 自述 existing 模式「用户同意接入」，但默认 `allowExistingRepository = true`，且三个生产调用点（`result-edit-tools.js:89`、`routes/result-studio.js:310`、`:408`）全部硬编码 `true`；代码库内不存在任何同意开关。项目工作区只要落在某个 Git 仓库内，BioF3 即向其写入 object 与 `refs/heads/biof3/*` 分支。**当前未暴露**（已核实：真实数据根不在任何仓库内；4 条绑定全为 `managed`，`existing` 为 0，故改默认值无迁移代价） | 已试改为 opt-in 并撤回：该改动会改变产品行为，使 `test/git-adapter.test.mjs` 5 项 existing 模式测试转红（它们依赖旧的宽松默认）。属真实风险但非当前风险，让位于 P4R-1。重启时：默认改 `false` → 自动落 `managed` 模式（即计划已承诺的「只用 BioF3 托管历史」），5 个测试显式传 `true` 作为知情调用方，并为未接入情况补 `existing_repository_not_attached_without_consent` 诊断 |
 | 🟡建议 | 2026-07-17 | `capability-provisioning.js` 的下载实现与 plugin-manager 各自维护 | host 白名单已经修复；共享下载 helper 只在改动该能力时评估，不阻塞 RH0 |
 | 🟡待评估 | 2026-07-17 | 本地分支 `codex/fix-collapsed-right-titlebar` 尚未采用，且与当前 UI 已有语义重叠 | 不直接 merge；进入相关 UI 工作时先比较当前实现，再决定删除或重做 |
-| 🟡待评估 | 2026-07-27 | **六维度横切审计发现若干横切硬伤，严重程度超过 P4R 剩余 UI 工作，但按单工作包串行纪律不自动插队。** 完整依据见 [`project-wide-audit-2026-07.md`](./project-wide-audit-2026-07.md)（`qualificationEligible:false`，不升级任何资格声明）。最严重的三条：(1) **`POST /api/run` 执行任意 R 代码 + 完全绕过 tool_job + CORS 全开**（`r-compute.js:128`），任意网页可触发本地 R 执行，破坏唯一执行真相宣言且比 `/api/files` 读文件更严重；(2) **火山图默认用未校正 p 值判显著性**（`volcano-plot.R:30`），进论文那张图约 1000 个假阳性；(3) **5 分钟硬超时 + 10 分钟 zombie 回收只改 DB 不杀进程**（`tools-executor.js:761,428`），真实长分析几乎必失败。其余含 `/api/files` 路径穿越、LLM 后台自动外发未发表数据无开关、默认 `accessMode='full'` 自动批准、14 项科学正确性缺陷、`fetchData` 错误不清 bug 等 | 仅登记事实与范围依据。**不**由 Agent 擅自启动修复或变更资格状态；优先级排序、是否插队 P4R、是否开独立工作包属用户决定。审计文档已登记进 `DOC-REGISTRY.json`（`AUDIT-PROJECT-WIDE-2026-07`，`status:reference`）并在 `docs/README.md` 加入口。本条不阻塞当前 P4R 工作 |
+| ✅已处理 | 2026-07-27 | 六维度横切审计中的 `/api/run`、`/api/files`、SCI-1～SCI-3、timeout/zombie 已由 `G0-CHF0` 修复并通过专项 acceptance；证据 `acceptance/g0-critical-crosscut-hardening/acceptance.json` | 其余审计项继续保持待评估；本条不升级任何资格声明 |
 
 当前没有 🔴 阻塞项（视觉证据项经用户裁决降级为待评估，发布前必须重开），也没有 🟢 待合并项。
 

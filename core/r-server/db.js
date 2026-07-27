@@ -446,6 +446,8 @@ try {
   try { db.exec('ALTER TABLE tool_jobs ADD COLUMN ack_expires_at BIGINT'); } catch {}
   // 7.3: project_id column for project-scoped tool jobs
   try { db.exec('ALTER TABLE tool_jobs ADD COLUMN project_id TEXT'); } catch {}
+  try { db.exec('ALTER TABLE tool_jobs ADD COLUMN process_pid INTEGER'); } catch {}
+  try { db.exec('ALTER TABLE tool_jobs ADD COLUMN heartbeat_at BIGINT'); } catch {}
   try { db.exec('CREATE INDEX IF NOT EXISTS idx_tool_jobs_project ON tool_jobs(project_id)'); } catch {}
 } catch {}
 
