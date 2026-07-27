@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P2",
-  "sourceCommit": "b5d073a4ebe0561ec50c7ffe25266c18be38aa0d",
+  "sourceCommit": "bc55fe0775a391746556633ac65fe16bfd43989d",
   "captureMode": "automated_contract_renderer_performance_and_live_local_product_plus_bounded_visual_spot_check",
   "qualificationEligible": false,
   "privacy": "repository_relative_paths_digests_counts_dimensions_timings_and_bounded_statuses_only_no_project_job_conversation_selection_url_credential_prompt_or_result_data",
@@ -18,7 +18,7 @@
     "viewer": "0b165e23bf9a915e658db9bb3c2240e32a741d2c86f434fb5681dddb6f44dbc2",
     "viewerStyle": "2f320233486b31fe7744d7d44730c4373edb4f3ff54f91faf84ee83a16bd2fdf",
     "selectionClient": "22683cc18a4fdf9900e27d0cf1b16a317ecaa8522c56b51809bac68cb75639ad",
-    "workspace": "08324dcbd519580bc1617fb5a276f90515fa6be98b8ee9c8e2e9948099735ac7",
+    "workspace": "f6f27e8a264f7b571aa36963c3e013c4d7eef9a0cd94d6ce64872226ab8ab741",
     "viewerTest": "7087a4647f97980bbb42e6cd4f22fde702175df72385eca5b7669060b1f1e0e5",
     "selectionLogic": "2156ef151d014b654d54f533663d2b7f5f086024161b464ecb45bb5b07fbafe2",
     "selectionLogicTest": "b02e4b21b7fd1452171ad31b6aa5f5c8e5dfede1a2c5fb8d2fb302f9ccb79407",
@@ -32,7 +32,7 @@
     "acceptanceScript": "58018eb2bbd76f98ac6a5b03d3282d38aca9c260697598f56f67b7a86e61f933",
     "liveObservation": "b0da52317f9e9eb8fbb759fd5d61f9cf00332d07f9fdb04efe9548fbaa068860",
     "uiObservation": "a266e6458c260713d79144f6a7fc8870922bb0060d6a99ed5c6cc3c854dc1a5b",
-    "packageScripts": "58723cb19d3341c8a61ad6182858b1a56e1fe4479c68975c1fb53adc3b5eb467"
+    "packageScripts": "6c9c6f0f7dd3ddd9ec50c11045715b42cdc18209539eed5816755959e68252f9"
   },
   "productObservation": {
     "captureMode": "automated_contract_renderer_performance_and_live_local_product_plus_bounded_visual_spot_check",
@@ -189,14 +189,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-26T16:18:34.020Z",
+    "generatedAt": "2026-07-27T00:52:01.105Z",
     "commands": [
       {
         "label": "backend-p2",
         "command": "node --test test/result-studio-table-query.test.mjs test/result-selection-tools.test.mjs test/artifact-interaction.test.mjs test/result-studio-contracts.test.mjs test/result-studio-repository.test.mjs test/result-studio-plugin-sdk.test.mjs test/agent-tool-registry.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "a36e8edee33f7402a5390c0b1e88e3ded789761887ac4cebf2d19b2c678b6180",
+        "stdoutSha256": "bd9c07fbc7e9c9237c1daa4a039e0d3d4c48814c30aacd67911898048aeb2e8c",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -204,14 +204,14 @@
         "command": "npm run test:files --prefix frontend -- ScientificInteractionViewer.test.tsx artifact-selection.test.ts CenterPanel.test.tsx ResultStudioSurface.test.tsx",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "aca3dcc1a3e422c6057da4d4aa2923646a8885c1b2cc64f9d41b7850b4f4564f",
+        "stdoutSha256": "fa7dfa9a0e6d0adbb4e0b1b20385511982155cd8d7570915a6f082306d87bd34",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "rendererPerformance": {
           "budgetMs": 100,
-          "scrollFeedbackMs": 2.887,
-          "selectionFeedbackMs": 4.536,
-          "sortFeedbackMs": 5.434,
-          "filterFeedbackMs": 0.919
+          "scrollFeedbackMs": 2.664,
+          "selectionFeedbackMs": 4.314,
+          "sortFeedbackMs": 5.356,
+          "filterFeedbackMs": 0.904
         }
       },
       {
@@ -219,7 +219,7 @@
         "command": "npm run build:check --prefix frontend",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "f83a94f0d8d4954f2fd8aebcb34f1e93d604939140be85bc7465fd9809ebdc11",
+        "stdoutSha256": "4962816c03408e4f26694d97f2bb88d83aba68f63153987843051502f0fe4d28",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -239,6 +239,6 @@
     "futureStagesImplemented": false
   },
   "passed": true,
-  "generatedAt": "2026-07-26T16:18:34.020Z",
+  "generatedAt": "2026-07-27T00:52:01.105Z",
   "privacyClean": true
 }

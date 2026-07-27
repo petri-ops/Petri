@@ -485,8 +485,15 @@ function inspect(verification, observation) {
   };
 }
 
+// Guarded: this module also exports FROZEN_BASELINE, and importing that must
+// not run the gate. Without this, importing the constant regenerated this very
+// evidence file as a side effect of another script starting up.
+const invokedDirectly = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+
 try {
-  if (process.argv.includes('--write-evidence')) {
+  if (!invokedDirectly) {
+    // imported for FROZEN_BASELINE only
+  } else if (process.argv.includes('--write-evidence')) {
     const capture = await captureBaseline({ quiet: true });
     const observation = toObservation(capture);
     const verification = { generatedAt: new Date().toISOString(), commands: runCommands() };

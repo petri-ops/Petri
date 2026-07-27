@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P4",
-  "sourceCommit": "b5d073a4ebe0561ec50c7ffe25266c18be38aa0d",
+  "sourceCommit": "bc55fe0775a391746556633ac65fe16bfd43989d",
   "captureMode": "automated_descriptor_projection_plugin_wiring_registry_and_strict_build_offline_verification",
   "qualificationEligible": false,
   "qualificationReason": "P4 closes the offline unified-editing contract; real manual-vs-AI equivalence on a live plugin run and packaged product qualification remain reserved for P5 and P7.",
@@ -18,14 +18,14 @@
     "panelStyle": "1a77fb302efd06e1976732646e9a89822848a58158174507bbbcc950bbe381e9",
     "panelTest": "52f843369f6540370b99195b7bf45b0a332a284037d4155541420c3a173cedbb",
     "rightPanel": "6b4cdc222df827f2141179301d69b2a7bfccb9aeaac4956e36b9498f1cd9075e",
-    "workspace": "08324dcbd519580bc1617fb5a276f90515fa6be98b8ee9c8e2e9948099735ac7",
+    "workspace": "f6f27e8a264f7b571aa36963c3e013c4d7eef9a0cd94d6ce64872226ab8ab741",
     "contextClient": "22683cc18a4fdf9900e27d0cf1b16a317ecaa8522c56b51809bac68cb75639ad",
     "volcanoDescriptor": "55304b91467a95a89df74b6d0389c8b740659e8a9522245fbc3127daf43e8d03",
     "volcanoScript": "105120c771fabb0d83b079642b212c56db6c2470e7a1a2a7646069f36c8cf986",
     "volcanoGolden": "57640c9c3684de3d4110a8c42bbabf01b48432313e80bf46303056dc6aaed265",
     "controlsTest": "0a6a7e1c10733aef3bc2db145534a2510a0dac8748887d270c4d4e56c803536e",
     "acceptanceScript": "53eb91bd1b0c6ceb07d5efc997209769222866592489fce211ebf4dc3baaafe7",
-    "packageScripts": "58723cb19d3341c8a61ad6182858b1a56e1fe4479c68975c1fb53adc3b5eb467"
+    "packageScripts": "6c9c6f0f7dd3ddd9ec50c11045715b42cdc18209539eed5816755959e68252f9"
   },
   "controlObservation": {
     "controlCount": 18,
@@ -243,14 +243,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-26T16:20:42.383Z",
+    "generatedAt": "2026-07-27T00:52:51.052Z",
     "commands": [
       {
         "label": "backend-p4",
         "command": "node --test test/result-edit-controls.test.mjs test/result-edit-intent.test.mjs test/result-studio-context.test.mjs test/result-studio-plugin-sdk.test.mjs test/result-studio-qualification.test.mjs test/agent-tool-registry.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "ccc7cd11f6fa9a4eae75f88f53ce54b4803545146eebc02c6b56cc476acb99c5",
+        "stdoutSha256": "35495234f95f79bb08fbc375a840a3a78a727fe8e6acf8893c2bed5304f8f853",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -258,7 +258,7 @@
         "command": "npm run test:files --prefix frontend -- ResultEditPanel.test.tsx ResultStudioContextReadiness.test.tsx ResultStudioSurface.test.tsx CenterPanel.test.tsx",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "07a51e6172a691ef6ca72eb3a00854052927afb5401a7646ddb25441573c194a",
+        "stdoutSha256": "e644b7ed46ed4aa64a347cf967386c95fa949cb6fb381d1ba8752a03701af26f",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -266,7 +266,7 @@
         "command": "npm run build:check --prefix frontend",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "44fb32d10c4fdb89fb9d2e11144cbcf4d6a0ce3baa31ada7c6e24a7dd081107d",
+        "stdoutSha256": "481f50c11677ce127e5a42740c1ac26464c29268a56cdf1c2a1bfda71c443633",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -286,6 +286,6 @@
     "futureStagesImplemented": false
   },
   "passed": true,
-  "generatedAt": "2026-07-26T16:20:42.383Z",
+  "generatedAt": "2026-07-27T00:52:51.052Z",
   "privacyClean": true
 }

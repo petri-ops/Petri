@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS-P4R-1/P4R-2",
+  "sourceCommit": "bc55fe0775a391746556633ac65fe16bfd43989d",
+  "captureMode": "real_chain_server_measurement_plus_frontend_pure_module_behaviour",
+  "qualificationEligible": false,
+  "qualificationReason": "P4R-1 and P4R-2 deliver a faster read path and a focused surface. No layout, theme or pixel claim is made, and Result Studio product qualification remains reserved for P7.",
+  "privacy": "repository_relative_paths_digests_counts_timings_and_bounded_statuses_only",
+  "sourceHashes": {
+    "gitAdapter": "db7a9030ee5a736ae03fbcefc7f548b7c98bd454198010169c92c86974dee255",
+    "lifecycle": "40828528bed440d6e63da911cec720f291ca3728074092c51540a86fc1bf0d06",
+    "routes": "c2be0db2bd6720172675664385968b34dfe818e13bdbad748e437ed07a55c7ce",
+    "bodyState": "5a72f81934df8c621419dbdc9745c4cdd622eecc2fe44a5d9de1c21dc1f2156e",
+    "bodyStateSpec": "a8926eae3aa0ac4d3570ed0de70eb217099f65cac5788397cf6a9ad84db590b6",
+    "firstScreen": "0ec5a9dcb536caae6929ecf589c59911bfcbc6900f88371866554b33ce246c3f",
+    "firstScreenSpec": "6c9d28d17257c27368289b18d4b4e1c503a3c60d9b6d52e523350875a7fa40c5",
+    "mode": "15b18c0215e2959a829d0c0b855cf57d1407c1726847067b0effca09c2366edd",
+    "modeSpec": "6d471b8fb8f870ffd96a80ec0b38c1261d2d9e3384b5443fc25e6c68a9a1c1bb",
+    "surface": "aa9b7a0127cf6c9afb40222757a76d0ba77b7598b509f7b90ba2092904bc8061",
+    "centerPanel": "11f0b29ed59bd84a9444b6038d1fec2238e0e0aa73bfeb695ce4707e985b187d",
+    "acceptanceScript": "1f3e93995bd4c4586e280909e2f0e6d80f3faa47d20b756444bcade93baea790"
+  },
+  "frozenBaseline": {
+    "capturedAtCommit": "e1f841c8ada919250c01f5cde76586ef2375bdc6",
+    "revisionCount": 1
+  },
+  "observation": {
+    "revisionCount": 1,
+    "calibration": {
+      "gitSpawnMedianMs": 8.895,
+      "pathEntries": 31,
+      "invokedUnderNpm": false
+    },
+    "requests": [
+      {
+        "id": "job-status",
+        "role": "render-blocking",
+        "status": 200,
+        "coldMs": 5.288,
+        "warmMs": 2.164,
+        "warmSpreadMs": 1.181,
+        "oneTimeCostMs": 3.124
+      },
+      {
+        "id": "artifact-bytes",
+        "role": "render-blocking",
+        "status": 200,
+        "coldMs": 4.527,
+        "warmMs": 1.965,
+        "warmSpreadMs": 0.766,
+        "oneTimeCostMs": 2.562
+      },
+      {
+        "id": "interaction",
+        "role": "secondary",
+        "status": 200,
+        "coldMs": 291.983,
+        "warmMs": 8.844,
+        "warmSpreadMs": 1.755,
+        "oneTimeCostMs": 283.139
+      },
+      {
+        "id": "context-envelope",
+        "role": "secondary",
+        "status": 409,
+        "coldMs": 2.806,
+        "warmMs": 1.5,
+        "warmSpreadMs": 0.082,
+        "oneTimeCostMs": 1.306
+      },
+      {
+        "id": "changesets",
+        "role": "secondary",
+        "status": 200,
+        "coldMs": 1.643,
+        "warmMs": 1.105,
+        "warmSpreadMs": 0.326,
+        "oneTimeCostMs": 0.538
+      },
+      {
+        "id": "workspace-status",
+        "role": "secondary",
+        "status": 200,
+        "coldMs": 24.283,
+        "warmMs": 22.398,
+        "warmSpreadMs": 0.77,
+        "oneTimeCostMs": 1.885
+      }
+    ],
+    "eventLoop": {
+      "samples": 13,
+      "maxMs": 292.815
+    }
+  },
+  "improvementVsBaseline": [
+    {
+      "id": "job-status",
+      "baselineWarmMs": 2.229,
+      "currentWarmMs": 2.164,
+      "deltaPct": -2.9
+    },
+    {
+      "id": "artifact-bytes",
+      "baselineWarmMs": 2.174,
+      "currentWarmMs": 1.965,
+      "deltaPct": -9.6
+    },
+    {
+      "id": "interaction",
+      "baselineWarmMs": 9.9,
+      "currentWarmMs": 8.844,
+      "deltaPct": -10.7
+    },
+    {
+      "id": "changesets",
+      "baselineWarmMs": 42.102,
+      "currentWarmMs": 1.105,
+      "deltaPct": -97.4
+    },
+    {
+      "id": "workspace-status",
+      "baselineWarmMs": 64.862,
+      "currentWarmMs": 22.398,
+      "deltaPct": -65.5
+    }
+  ],
+  "unmeasured": {
+    "firstContentVisibleMs": "not_captured_no_browser_automation_in_repo",
+    "layoutAt1440_1024_820": "not_captured_no_browser_automation_in_repo",
+    "themeRenderingLightDark": "not_captured_no_browser_automation_in_repo",
+    "firstScreenPixelJudgement": "not_captured_no_browser_automation_in_repo",
+    "keyboardTraversalOnDevice": "not_captured_no_browser_automation_in_repo"
+  },
+  "checks": [
+    {
+      "id": "RS-P4R1-1",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/git-adapter.js",
+        "core/r-server/routes/result-studio.js"
+      ],
+      "detail": "changesets steady-state cost fell by at least half against the frozen P4R-0 baseline, measured on the real chain rather than asserted."
+    },
+    {
+      "id": "RS-P4R1-2",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/git-adapter.js",
+        "core/shared-backend/result-studio-lifecycle.js"
+      ],
+      "detail": "workspace-status steady-state cost fell measurably; its per-revision rev-parse pair is now two constant-cost spawns."
+    },
+    {
+      "id": "RS-P4R1-3",
+      "passed": true,
+      "evidence": [
+        "core/r-server/routes/result-studio.js"
+      ],
+      "detail": "Every measured route returned 200, so the numbers describe the real path and not argument validation."
+    },
+    {
+      "id": "RS-P4R1-4",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-baseline.mjs"
+      ],
+      "detail": "Cold and warm are recorded separately, so one-time creation cost cannot be reported as steady-state viewing cost."
+    },
+    {
+      "id": "RS-P4R2-1",
+      "passed": true,
+      "evidence": [
+        "frontend/src/components/result-studio/resultBodyState.test.ts",
+        "frontend/src/components/result-studio/resultFirstScreen.test.ts",
+        "frontend/src/components/result-studio/resultMode.test.ts"
+      ],
+      "detail": "The frontend behaviour specs really ran and really passed — file count and test count parsed from the run, not inferred from an exit code."
+    },
+    {
+      "id": "RS-P4R2-2",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-product-acceptance.mjs"
+      ],
+      "detail": "The specs run through test:files. Bare `npm test` is `vitest run --changed`, which selects nothing under a file filter and exits 0 for a zero-test run."
+    },
+    {
+      "id": "RS-P4R2-3",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-product-acceptance.mjs"
+      ],
+      "detail": "Every metric with no producer is recorded as unmeasured with one stated reason, matching P4R-0 vocabulary. Nothing is estimated and nothing defaults to zero."
+    }
+  ],
+  "verification": {
+    "generatedAt": "2026-07-27T00:54:09.035Z",
+    "frontend": {
+      "command": "npm run test:files --prefix frontend -- 6 specs",
+      "exitCode": 0,
+      "filesPassed": 6,
+      "testsPassed": 40,
+      "specCount": 6,
+      "stdoutSha256": "265cca85aa4c8da0a792b3e4f37fe641cac3c43768883fe6eb3f33a62b881581"
+    }
+  },
+  "passed": true,
+  "generatedAt": "2026-07-27T00:54:09.035Z",
+  "privacyClean": true
+}
