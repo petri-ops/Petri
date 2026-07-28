@@ -3045,11 +3045,14 @@ function ResultArtifactShell({
   const [manifestRaw, setManifestRaw] = useState<unknown>(null);
   const [manifestLoading, setManifestLoading] = useState(false);
   const [manifestError, setManifestError] = useState('');
+  const [manifestRetryVersion, setManifestRetryVersion] = useState(0);
   const [selectedName, setSelectedName] = useState('');
   const [selectedSectionId, setSelectedSectionId] = useState('');
   const [previewText, setPreviewText] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<string[][] | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState('');
+  const [previewRetryVersion, setPreviewRetryVersion] = useState(0);
   // RS3：交互清单由后端基于完整文件判定（稳定 ID 列、可选维度），前端只消费。
   const [interactionRevision, setInteractionRevision] = useState<ArtifactRevision | null>(null);
   // P4R-4: a historical Revision can share its Job with a later restored
@@ -3061,6 +3064,8 @@ function ResultArtifactShell({
   }, [job?.id]);
   const [interactionManifest, setInteractionManifest] = useState<ArtifactInteractionManifest | null>(null);
   const [interactionBackingTable, setInteractionBackingTable] = useState<ResultTableQuery | null>(null);
+  const [interactionError, setInteractionError] = useState('');
+  const [interactionRetryVersion, setInteractionRetryVersion] = useState(0);
   const [artifactSelection, setArtifactSelection] = useState<ArtifactSelection | null>(null);
   const [selectionError, setSelectionError] = useState('');
   // SelectionContext 是 SQLite 真相的乐观投影。连续点击必须按发生顺序写入，
@@ -3133,6 +3138,8 @@ function ResultArtifactShell({
       setPreviewText(null);
       setPreviewData(null);
       setPreviewLoading(false);
+      setPreviewError('');
+      setInteractionError('');
       return;
     }
 
@@ -3267,7 +3274,7 @@ function ResultArtifactShell({
     return () => {
       cancelled = true;
     };
-  }, [buildUrl, effectiveJobStatus, job?.id, result?.manifest]);
+  }, [buildUrl, effectiveJobStatus, job?.id, manifestRetryVersion, result?.manifest]);
 
   const manifest = useMemo(
     () => normalizeResultManifest(manifestRaw, fallbackArtifacts),
@@ -3429,6 +3436,7 @@ function ResultArtifactShell({
       setInteractionManifest(null);
       setInteractionRevision(null);
       setInteractionBackingTable(null);
+      setInteractionError('');
       setArtifactSelection(null);
       visibleSelectionRef.current = null;
       committedSelectionRef.current = null;
@@ -3439,6 +3447,7 @@ function ResultArtifactShell({
     let cancelled = false;
     (async () => {
       try {
+        setInteractionError('');
         const data = await fetchArtifactInteraction({
           language: lang,
           jobId: viewedRevision?.toolJobId || job.id,
@@ -3465,14 +3474,17 @@ function ResultArtifactShell({
           }
         }
       } catch {
-        // 清单拿不到不应连带影响结果展示：保持 null，交互能力按"不支持"处理。
+        if (!cancelled) {
+          // 次级交互失败不能清空主体结果；明确告诉用户当前降级及恢复动作。
+          setInteractionError('交互能力暂不可用；当前结果仍可查看。');
+        }
       }
     })();
     return () => {
       cancelled = true;
       if (selectionMutationEpochRef.current === epoch) selectionMutationEpochRef.current += 1;
     };
-  }, [conversationId, effectiveJobStatus, job?.id, lang, project.id, selectedArtifactKind, selectedArtifactName, viewedRevision]);
+  }, [conversationId, effectiveJobStatus, interactionRetryVersion, job?.id, lang, project.id, selectedArtifactKind, selectedArtifactName, viewedRevision]);
 
   const handleSelectionChange = useCallback((next: ArtifactSelection | null) => {
     const epoch = selectionMutationEpochRef.current;
@@ -3604,11 +3616,13 @@ function ResultArtifactShell({
       setPreviewText(null);
       setPreviewData(null);
       setPreviewLoading(false);
+      setPreviewError('');
       return () => {
         cancelled = true;
       };
     }
     setPreviewLoading(true);
+    setPreviewError('');
     fetch(selectedArtifactUrl)
       .then((resp) => {
         if (!resp.ok) throw new Error('preview failed');
@@ -3634,8 +3648,9 @@ function ResultArtifactShell({
       })
       .catch(() => {
         if (!cancelled) {
-          setPreviewText('无法读取预览内容');
+          setPreviewText(null);
           setPreviewData(null);
+          setPreviewError('当前文件预览暂不可用；文件本身仍保留。');
         }
       })
       .finally(() => {
@@ -3644,7 +3659,7 @@ function ResultArtifactShell({
     return () => {
       cancelled = true;
     };
-  }, [activeIsPreviewText, selectedArtifact, selectedArtifactName, selectedArtifactUrl]);
+  }, [activeIsPreviewText, previewRetryVersion, selectedArtifact, selectedArtifactName, selectedArtifactUrl]);
 
   const renderPreview = () => {
     if (!selectedArtifact) {
@@ -4085,6 +4100,28 @@ function ResultArtifactShell({
       )}
       <section className={styles.resultReportSection}>
         {selectionError && <div className={styles.resultWorkflowError}>{selectionError}</div>}
+        {manifestError && (
+          <div className={styles.resultWorkflowError} role="alert">
+            <span>结果清单暂不可用；已保留可直接读取的结果文件。</span>
+            <button type="button" disabled={manifestLoading} onClick={() => setManifestRetryVersion((value) => value + 1)}>
+              {manifestLoading ? '重试中…' : '重试结果清单'}
+            </button>
+          </div>
+        )}
+        {interactionError && (
+          <div className={styles.resultWorkflowError} role="alert">
+            <span>{interactionError}</span>
+            <button type="button" onClick={() => setInteractionRetryVersion((value) => value + 1)}>重试交互能力</button>
+          </div>
+        )}
+        {previewError && (
+          <div className={styles.resultWorkflowError} role="alert">
+            <span>{previewError}</span>
+            <button type="button" disabled={previewLoading} onClick={() => setPreviewRetryVersion((value) => value + 1)}>
+              {previewLoading ? '重试中…' : '重试当前预览'}
+            </button>
+          </div>
+        )}
         {showReportRail ? (
           <div
             className={styles.resultReportShell}

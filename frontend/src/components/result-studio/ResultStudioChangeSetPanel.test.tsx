@@ -179,4 +179,30 @@ describe('ResultStudioChangeSetPanel', () => {
     expect(await screen.findByText('plot · 前后对比')).toBeTruthy();
     expect(client.compareResultChangeSet).toHaveBeenCalledTimes(2);
   });
+
+  it('keeps a version-list failure actionable with an explicit retry', async () => {
+    client.listResultChangeSets
+      .mockRejectedValueOnce(new Error('版本服务暂不可用'))
+      .mockResolvedValueOnce({ changeSets: [changeSet], currentRevision: baseline, revisions: [baseline, candidate] });
+    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" />);
+    expect(await screen.findByText('版本服务暂不可用')).toBeTruthy();
+    expect(client.listResultChangeSets).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByText('重试版本'));
+    expect(await screen.findByText('当前 v1')).toBeTruthy();
+    expect(client.listResultChangeSets).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps workspace inspection failure separate and retryable', async () => {
+    client.getResultStudioWorkspaceStatus
+      .mockRejectedValueOnce(new Error('storage offline'))
+      .mockResolvedValueOnce({
+        lifecycle: { status: 'ready', interrupted: [], checkpoint: null, revisionIntegrity: { revisionCount: 2, intact: true, issues: [] } },
+        storage: { revisionCount: 2, logicalArtifactBytes: 2048, uniqueArtifactBytes: 2048, deduplicableBytes: 0, duplicateGroupCount: 0, privateStorage: { bytes: 0, files: 0, truncated: false } },
+      });
+    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" />);
+    expect(await screen.findByText('版本存储状态暂不可用；结果与版本列表仍可查看。')).toBeTruthy();
+    fireEvent.click(screen.getByText('重试存储状态'));
+    expect(await screen.findByText('版本存储正常')).toBeTruthy();
+    expect(client.getResultStudioWorkspaceStatus).toHaveBeenCalledTimes(2);
+  });
 });

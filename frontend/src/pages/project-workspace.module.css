@@ -3738,6 +3738,32 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   color: var(--biof3-status-error-fg);
 }
 
+.resultWorkflowError > span {
+  min-width: 0;
+  flex: 1;
+}
+
+.resultWorkflowError > button {
+  flex: 0 0 auto;
+  padding: 3px 8px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.resultView button:focus-visible,
+.resultView a:focus-visible,
+.resultView summary:focus-visible,
+.resultView input:focus-visible,
+.resultView select:focus-visible,
+.resultView textarea:focus-visible {
+  outline: 2px solid var(--biof3-accent);
+  outline-offset: 2px;
+}
+
 .resultSidebarReportCard {
   display: flex;
   flex-direction: column;

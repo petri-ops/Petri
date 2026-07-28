@@ -185,6 +185,25 @@ describe('ScientificInteractionViewer', () => {
     expect(onSelectionChange.mock.calls[0][0].entityIds).toEqual(['TP53']);
   });
 
+  it('lets keyboard users focus and select a scatter point', () => {
+    const onSelectionChange = vi.fn();
+    const query: ResultTableQuery = {
+      ...tableQuery(0),
+      rows: [{ gene: 'TP53', log2FoldChange: '2', pvalue: '0.001' }],
+      columns: [
+        { field: 'gene', type: 'string', sortable: true, filterable: true },
+        { field: 'log2FoldChange', type: 'number', sortable: true, filterable: true },
+        { field: 'pvalue', type: 'number', sortable: true, filterable: true },
+      ],
+    };
+    render(<ScientificInteractionViewer language="r" jobId="job_1" artifactName="volcano.png" manifest={manifest('scatter')} backingTable={query} selection={null} onSelectionChange={onSelectionChange} />);
+    const point = screen.getByRole('button', { name: '选择 TP53' });
+    point.focus();
+    expect(document.activeElement).toBe(point);
+    fireEvent.keyDown(point, { key: 'Enter' });
+    expect(onSelectionChange.mock.calls[0][0].entityIds).toEqual(['TP53']);
+  });
+
   it('maps a scatter legend and dragged region to stable entity ids', () => {
     const onSelectionChange = vi.fn();
     const scatterManifest = {

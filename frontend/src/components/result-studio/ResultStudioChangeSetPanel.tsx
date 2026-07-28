@@ -89,12 +89,16 @@ export function ResultStudioChangeSetPanel({
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [errorRetry, setErrorRetry] = useState<'versions' | 'compare' | null>(null);
   const [workspaceStatus, setWorkspaceStatus] = useState<ResultStudioWorkspaceStatus | null>(null);
+  const [workspaceError, setWorkspaceError] = useState('');
+  const [workspaceLoading, setWorkspaceLoading] = useState(false);
   const [tablePages, setTablePages] = useState<Record<string, ResultStudioTablePage>>({});
 
   const refresh = useCallback(async () => {
     setLoading(true);
     setError('');
+    setErrorRetry(null);
     try {
       const data = await listResultChangeSets(projectId, artifactFamilyId);
       setChangeSets(data.changeSets);
@@ -112,6 +116,7 @@ export function ResultStudioChangeSetPanel({
         : preferred?.changeSetId || null);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '版本信息加载失败');
+      setErrorRetry('versions');
     } finally {
       setLoading(false);
     }
@@ -119,14 +124,23 @@ export function ResultStudioChangeSetPanel({
 
   useEffect(() => { void refresh(); }, [refresh]);
 
-  useEffect(() => {
-    let active = true;
-    void getResultStudioWorkspaceStatus(projectId).then((status) => {
-      if (!active) return;
+  const refreshWorkspaceStatus = useCallback(async () => {
+    setWorkspaceLoading(true);
+    setWorkspaceError('');
+    try {
+      const status = await getResultStudioWorkspaceStatus(projectId);
       setWorkspaceStatus(status);
-    }).catch(() => { /* version UI remains usable if lifecycle inspection is unavailable */ });
-    return () => { active = false; };
+    } catch {
+      setWorkspaceStatus(null);
+      setWorkspaceError('版本存储状态暂不可用；结果与版本列表仍可查看。');
+    } finally {
+      setWorkspaceLoading(false);
+    }
   }, [projectId]);
+
+  useEffect(() => {
+    void refreshWorkspaceStatus();
+  }, [refreshWorkspaceStatus]);
 
   const selected = useMemo(
     () => changeSets.find((item) => item.changeSetId === selectedId) || null,
@@ -138,10 +152,12 @@ export function ResultStudioChangeSetPanel({
     setComparisonAttemptedFor(selected.changeSetId);
     setLoading(true);
     setError('');
+    setErrorRetry(null);
     try {
       setComparison(await compareResultChangeSet(selected.changeSetId));
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '比较加载失败');
+      setErrorRetry('compare');
     } finally {
       setLoading(false);
     }
@@ -243,7 +259,7 @@ export function ResultStudioChangeSetPanel({
 
   if (!artifactFamilyId) return null;
   if (loading && changeSets.length === 0) return <section className={styles.root}><div className={styles.loading}>正在读取结果版本…</div></section>;
-  if (mode === 'result' && !selected && revisions.length <= 1 && !error) return null;
+  if (mode === 'result' && !selected && revisions.length <= 1 && !error && !workspaceError) return null;
 
   const visual = comparison?.artifacts.filter((item) => item.kind === 'visual') || [];
   const tables = comparison?.artifacts.filter((item) => item.kind === 'table' && item.table) || [];
@@ -278,6 +294,14 @@ export function ResultStudioChangeSetPanel({
           {workspaceStatus.lifecycle.interrupted.length > 0 && (
             <button type="button" disabled={busy} onClick={() => void recoverWorkspace()}>恢复修改现场</button>
           )}
+        </div>
+      )}
+      {workspaceError && (
+        <div className={styles.lifecycle} data-state="unavailable" role="alert">
+          <span>{workspaceError}</span>
+          <button type="button" disabled={workspaceLoading} onClick={() => void refreshWorkspaceStatus()}>
+            {workspaceLoading ? '重试中…' : '重试存储状态'}
+          </button>
         </div>
       )}
 
@@ -353,8 +377,11 @@ export function ResultStudioChangeSetPanel({
       {error && (
         <div className={styles.error} role="alert">
           <span>{error}</span>
-          {mode === 'compare' && selected && !comparison && (
+          {errorRetry === 'compare' && selected && !comparison && (
             <button type="button" onClick={() => void loadComparison()}>重试比较</button>
+          )}
+          {errorRetry === 'versions' && (
+            <button type="button" onClick={() => void refresh()}>重试版本</button>
           )}
         </div>
       )}

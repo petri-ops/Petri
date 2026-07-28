@@ -37,6 +37,9 @@ const sourceFiles = {
   probe: 'core/r-server/helpers/perf-probe.js',
   probeRoutes: 'core/r-server/routes/perf-probe.js',
   bootstrap: 'core/r-server/bootstrap.js',
+  routes: 'core/r-server/routes/result-studio.js',
+  background: 'core/shared-backend/result-studio-background.js',
+  backgroundChild: 'core/shared-backend/result-studio-background-child.js',
   capture: 'scripts/g0-rs-p4r-capture.mjs',
   corpus: 'scripts/g0-rs-p4r-corpus.mjs',
   baseline: 'scripts/g0-rs-p4r-baseline.mjs',
@@ -45,6 +48,9 @@ const sourceFiles = {
   corpusTest: 'test/p4r-corpus.test.mjs',
   baselineTest: 'test/p4r-baseline.test.mjs',
   invariantTest: 'test/p4r-invariants.test.mjs',
+  backgroundTest: 'test/result-studio-background.test.mjs',
+  impactMap: 'test/impact-map.json',
+  packageScripts: 'package.json',
   acceptanceScript: 'scripts/g0-rs-p4r-acceptance.mjs',
 };
 
@@ -192,6 +198,7 @@ function runCommands() {
       'test/p4r-capture.test.mjs',
       'test/p4r-corpus.test.mjs',
       'test/p4r-baseline.test.mjs',
+      'test/result-studio-background.test.mjs',
     ]],
     ['impact-map', 'node', ['--test', 'test/test-affected.test.mjs']],
     ['syntax', 'node', ['--check', 'scripts/g0-rs-p4r-acceptance.mjs']],
@@ -451,15 +458,23 @@ function inspect(verification, observation) {
       && Object.values(packageScripts).every((value) => !/npm test --prefix frontend/.test(String(value))),
       [evidencePath.replace(`${root}/`, ''), 'package.json'],
       'No recorded gate invokes bare `npm test`, which under a file filter resolves to `vitest run --changed`, selects nothing and reports success for a zero-test run.'),
+
+    item('RS-P4R6-1',
+      budgetMet
+      && Number(eventLoop.maxMs) <= BUDGETS.eventLoopMaxMs.value
+      && byId.get('interaction')?.status === 200
+      && byId.get('workspace-status')?.status === 200,
+      [sourceFiles.routes, sourceFiles.background, sourceFiles.backgroundChild, sourceFiles.backgroundTest],
+      'P4R-6 closes the frozen event-loop budget on the real cold/warm chain: canonical baseline materialization and workspace inspection may complete asynchronously, but neither may block the Express event loop above 250ms.'),
   ];
 
   return {
     schemaVersion: 1,
-    workPackage: 'G0-RS-P4R-0',
+    workPackage: 'G0-RS-P4R-0/P4R-6',
     sourceCommit: git('rev-parse', 'HEAD'),
     captureMode: 'real_chain_corpus_plus_server_request_waterfall_and_event_loop_histogram_in_disposable_root',
     qualificationEligible: false,
-    qualificationReason: 'P4R-0 only captures a baseline and freezes budgets. It does not implement the fast path, and it does not measure any client-side metric. Result Studio product qualification remains reserved for P7.',
+    qualificationReason: 'P4R-6 closes the frozen server event-loop budget using the canonical Git/SQLite services in an isolated background process. Client layout and journey evidence is separate, and Provider/packaged Result Studio qualification remains reserved for P7.',
     privacy: 'repository_relative_paths_digests_counts_timings_and_bounded_statuses_only_no_project_job_conversation_selection_url_credential_prompt_or_result_data',
     sourceHashes: sourceHashes(),
     budgets: BUDGETS,
@@ -493,11 +508,12 @@ function inspect(verification, observation) {
       // the cleanest run exceeds 250ms.
       absoluteTimingsAreLoadSensitive: true,
       observedColdRangeMsAcrossRuns: [383.491, 4072.669],
-      loadSensitivityCause: 'Process-spawn cost swings roughly 12x with invocation context (measured ~9-11ms direct, ~117-122ms under npm), and detectGitRuntime() is uncached so every git-touching route pays it per call. An earlier revision of this file blamed PATH length; that explanation was tested and DISPROVED, and the real cause is not established. Compare readings only within the same calibration — see baselineObservation.calibration.',
-      violationRobustAtRangeFloor: true,
-      structuralFinding: 'interaction is one-time dominated (its cost disappears on a second call); changesets and workspace-status are recurring costs paid by every view. P4R-1 should target the recurring pair, not the one-time creation.',
-      // Said plainly so P4R-1 is not judged against work it is not chartered to do.
-      violationAttribution: 'The recorded peak is the one-time interaction ChangeSet creation, which is OUT of P4R-1 scope. The routes P4R-1 owns are under budget at this revisionCount and exceed it as revisions accumulate. P4R-1 is accountable for the recurring pair and for the growth term, not for this peak.',
+      loadSensitivityCause: 'Absolute request completion varies with R/Git process scheduling and host load. P4R-6 therefore freezes the 250ms budget on attributed event-loop blocking, while preserving cold/warm request completion separately; no request duration is re-labelled as event-loop delay.',
+      violationRobustAtRangeFloor: !budgetMet,
+      structuralFinding: 'Cold Interaction baseline materialization remains a one-time asynchronous secondary completion; workspace/status remains a recurring asynchronous inspection. The main thread stays responsive while both reuse the canonical Git/SQLite services.',
+      violationAttribution: budgetMet
+        ? 'No current Result Studio synchronous task violated the frozen 250ms event-loop budget in this source-bound observation.'
+        : 'The current source-bound observation still violates the frozen event-loop budget and P4R-6 cannot close.',
     },
     checks,
     verification,

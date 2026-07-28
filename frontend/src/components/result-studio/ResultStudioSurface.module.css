@@ -303,3 +303,10 @@
 .contextReadiness[data-state='loading'] {
   color: var(--biof3-text-tertiary);
 }
+
+.root button:focus-visible,
+.root a:focus-visible,
+.root summary:focus-visible {
+  outline: 2px solid var(--biof3-accent);
+  outline-offset: 2px;
+}

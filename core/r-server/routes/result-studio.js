@@ -34,7 +34,10 @@ const mcpRegistry = require('../mcp/registry');
 const sqlite = db.db;
 const { resolveProjectRunLayout, isPathContained } = require('../../shared-backend/project-run-layout');
 const { bindProjectRepository } = require('../../shared-backend/git-repository-binding');
-const { ensureBaselineArtifactRevision } = require('../../shared-backend/result-changeset-service');
+const {
+  createDeduplicatedBackgroundRunner,
+  runResultStudioBackground,
+} = require('../../shared-backend/result-studio-background');
 const {
   compareResultChangeSet,
   adoptResultChangeSet,
@@ -79,9 +82,7 @@ const {
 } = require('../agent-tools/result-context-tools');
 const { buildEditControlSchema } = require('../../shared-backend/result-edit-controls');
 const {
-  inspectResultStudioWorkspace,
   recoverResultStudioWorkspace,
-  inspectResultStudioStorage,
   planArtifactDeduplication,
   executeArtifactDeduplication,
   planResultStudioGc,
@@ -335,6 +336,13 @@ module.exports = function registerResultStudioRoutes(app) {
   // schema 有问题就返回 500 并带明确原因。
   let repositoryInstance = null;
   const replayService = createControlledReplayService();
+  const baselineWork = createDeduplicatedBackgroundRunner(runResultStudioBackground);
+  const workspaceInspectionWork = createDeduplicatedBackgroundRunner(runResultStudioBackground);
+  const configuredDatabasePath = sqlite.name || process.env.BIOF3_DB_PATH || null;
+  const databasePath = configuredDatabasePath && configuredDatabasePath !== ':memory:'
+    ? path.resolve(configuredDatabasePath)
+    : null;
+
   function repo() {
     // Production migrations own schema creation. A GET must never execute DDL
     // merely because this module is serving its first request.
@@ -403,7 +411,7 @@ module.exports = function registerResultStudioRoutes(app) {
   /**
    * 交互清单：告诉前端这个 artifact 能怎么选、哪一列是稳定实体 ID。
    */
-  app.get('/api/result-studio/interaction', (req, res) => {
+  app.get('/api/result-studio/interaction', async (req, res) => {
     const jobId = String(req.query.jobId || '').trim();
     const artifactName = String(req.query.artifact || '').trim();
     if (!jobId) return res.status(400).json({ error: 'jobId_required' });
@@ -455,27 +463,7 @@ module.exports = function registerResultStudioRoutes(app) {
             if (!isPathContained(realWorkspace, sourceScriptPath)) {
               throw Object.assign(new Error('Execution script snapshot escaped the project.'), { code: 'source_script_outside_project' });
             }
-            const binding = bindProjectRepository({
-              workspaceRoot: loaded.project.workspace_path,
-              projectId: loaded.project.id,
-              preferManaged: false,
-              allowExistingRepository: true,
-            });
-            if (!binding || binding.status !== 'ready' || !binding.adapter) {
-              throw Object.assign(new Error(binding?.reason || 'Git binding is unavailable.'), { code: 'repository_binding_failed' });
-            }
-            repo().saveRepositoryBinding({
-              projectId: loaded.project.id,
-              mode: binding.mode,
-              workspaceRoot: binding.workspaceRoot,
-              gitDir: binding.adapter.gitDir,
-              workTree: binding.adapter.workTree,
-              managedPaths: binding.managedPaths,
-              status: binding.status,
-              reason: binding.reason,
-              gitVersion: binding.inspection?.runtime?.versionRaw || null,
-            });
-            revision = ensureBaselineArtifactRevision({
+            const baselineInput = {
               projectId: loaded.project.id,
               workspaceRoot: loaded.project.workspace_path,
               sourceJob: loaded.job,
@@ -484,13 +472,19 @@ module.exports = function registerResultStudioRoutes(app) {
               language: result.tool?.language || (/\.py$/i.test(sourceScriptPath) ? 'python' : 'r'),
               sourceScriptContent: fs.readFileSync(sourceScriptPath, 'utf8'),
               sourceScriptSha256: snapshot.sha256,
-            }, {
-              repository: repo(),
-              adapter: binding.adapter,
-              gitPathPrefix: binding.mode === 'existing'
-                ? binding.inspection?.existing?.workspaceRelativeToRepository
-                : '',
-            }).revision;
+            };
+            const baselineKey = `${loaded.project.id}\0${loaded.job.id}\0${artifactRecord.id}`;
+            const ensured = await baselineWork.run(
+              baselineKey,
+              'ensure-baseline',
+              {
+                databasePath,
+                projectId: loaded.project.id,
+                workspaceRoot: loaded.project.workspace_path,
+                input: baselineInput,
+              },
+            );
+            revision = ensured.revision;
           }
         }
       }
@@ -992,26 +986,27 @@ module.exports = function registerResultStudioRoutes(app) {
 
   // ---------------------------------------------------------- RS8 lifecycle
 
-  app.get('/api/result-studio/workspace/status', (req, res) => {
+  app.get('/api/result-studio/workspace/status', async (req, res) => {
     const projectId = String(req.query.projectId || '').trim();
     if (!projectId) return res.status(400).json({ error: 'projectId_required' });
-    const context = projectContext(req, projectId);
+    // Validate identity/project ownership on the request thread, but move Git
+    // binding, full-history hashing and private-storage walking off it.
+    const context = projectContext(req, projectId, { git: false });
     if (context.error) return res.status(context.error.status).json({ error: context.error.code });
     try {
-      return res.json({
-        lifecycle: inspectResultStudioWorkspace({
-          repository: context.repository,
-          adapter: context.binding.adapter,
-          workspaceRoot: context.project.workspace_path,
+      const conversationId = String(req.query.conversationId || '').trim() || null;
+      const inspectionKey = `${projectId}\0${conversationId || ''}`;
+      const result = await workspaceInspectionWork.run(
+        inspectionKey,
+        'inspect-workspace',
+        {
+          databasePath,
           projectId,
-          conversationId: String(req.query.conversationId || '').trim() || null,
-        }),
-        storage: inspectResultStudioStorage({
-          repository: context.repository,
           workspaceRoot: context.project.workspace_path,
-          projectId,
-        }),
-      });
+          conversationId,
+        },
+      );
+      return res.json(result);
     } catch (error) {
       return res.status(409).json({ error: error.code || 'workspace_inspection_failed', message: error.message });
     }

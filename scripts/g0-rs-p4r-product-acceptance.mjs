@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * G0-RS-P4R-1 through P4R-5 验收 — Fast Result Path、Focused Result
- * Surface、Agent-first Editing、Version/Change Review 与 per-Revision Code。
+ * G0-RS-P4R-1 through P4R-6 验收 — Fast Result Path、Focused Result
+ * Surface、Agent-first Editing、Version/Change Review、per-Revision Code
+ * 与真实本地连续旅程/UI 矩阵。
  *
  * 证据类型：真实服务端测量（与 P4R-0 冻结基线对比）+ 前端纯模块行为断言。
  * **不含**任何布局、主题或像素判定：vitest 在 happy-dom 下运行，
@@ -28,6 +29,9 @@ import { FROZEN_BASELINE } from './g0-rs-p4r-acceptance.mjs';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const evidencePath = join(root, 'acceptance/g0-result-studio/rs-p4r-product-reframe.json');
 const sourceObservationPath = join(root, 'acceptance/g0-result-studio/rs-p4r-source-observation.json');
+const performanceObservationPath = join(root, 'acceptance/g0-result-studio/rs-p4r-performance.json');
+const liveObservationPath = join(root, 'acceptance/g0-result-studio/rs-p4r-live-observation.json');
+const uiObservationPath = join(root, 'acceptance/g0-result-studio/rs-p4r-ui-observation.json');
 const read = (file) => readFileSync(join(root, file), 'utf8');
 const sha = (value) => createHash('sha256').update(String(value)).digest('hex');
 const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
@@ -42,6 +46,8 @@ const sourceFiles = {
   changeSetService: 'core/shared-backend/result-changeset-service.js',
   revisionSource: 'core/shared-backend/result-revision-source.js',
   replayService: 'core/shared-backend/result-replay-service.js',
+  backgroundService: 'core/shared-backend/result-studio-background.js',
+  backgroundChild: 'core/shared-backend/result-studio-background-child.js',
   resultEditTools: 'core/r-server/agent-tools/result-edit-tools.js',
   harnessRoutes: 'core/r-server/routes/harness.js',
   contracts: 'core/shared-backend/result-studio-contracts.js',
@@ -58,6 +64,7 @@ const sourceFiles = {
   rightPanel: 'frontend/src/components/workspace-panels/RightPanel.tsx',
   rightPanelSpec: 'frontend/src/components/workspace-panels/RightPanel.test.tsx',
   projectWorkspace: 'frontend/src/pages/project-workspace.tsx',
+  projectWorkspaceStyle: 'frontend/src/pages/project-workspace.module.css',
   resultAgentComposer: 'frontend/src/components/result-studio/ResultAgentComposer.tsx',
   resultAgentComposerStyle: 'frontend/src/components/result-studio/ResultAgentComposer.module.css',
   resultAgentComposerSpec: 'frontend/src/components/result-studio/ResultAgentComposer.test.tsx',
@@ -74,6 +81,9 @@ const sourceFiles = {
   revisionCodeView: 'frontend/src/components/result-studio/RevisionCodeView.tsx',
   revisionCodeViewStyle: 'frontend/src/components/result-studio/RevisionCodeView.module.css',
   revisionCodeViewSpec: 'frontend/src/components/result-studio/RevisionCodeView.test.tsx',
+  scientificInteractionViewer: 'frontend/src/components/result-studio/ScientificInteractionViewer.tsx',
+  scientificInteractionViewerStyle: 'frontend/src/components/result-studio/ScientificInteractionViewer.module.css',
+  scientificInteractionViewerSpec: 'frontend/src/components/result-studio/ScientificInteractionViewer.test.tsx',
   versionRole: 'frontend/src/components/result-studio/resultVersionRole.ts',
   versionRoleSpec: 'frontend/src/components/result-studio/resultVersionRole.test.ts',
   copilotAskDeliverySpec: 'frontend/src/components/result-studio/copilotAskDelivery.test.tsx',
@@ -113,6 +123,9 @@ const sourceFiles = {
   revisionSourceSpec: 'test/result-revision-source.test.mjs',
   replayServiceSpec: 'test/result-replay-service.test.mjs',
   p4rInvariantSpec: 'test/p4r-invariants.test.mjs',
+  p4rBackgroundSpec: 'test/result-studio-background.test.mjs',
+  p4rLiveSpec: 'test/p4r-live-observation.test.mjs',
+  p4rUiSpec: 'test/p4r-ui-observation.test.mjs',
   resultEditAgentToolSpec: 'test/result-edit-agent-tool.test.mjs',
   agentToolPolicySpec: 'test/agent-tool-policy.test.mjs',
   agentToolRegistrySpec: 'test/agent-tool-registry.test.mjs',
@@ -126,6 +139,12 @@ const sourceFiles = {
   corpusScript: 'scripts/g0-rs-p4r-corpus.mjs',
   sourceObservation: 'scripts/g0-rs-p4r-source-observation.mjs',
   sourceObservationEvidence: 'acceptance/g0-result-studio/rs-p4r-source-observation.json',
+  liveObservation: 'scripts/g0-rs-p4r-live-observation.mjs',
+  uiObservation: 'scripts/g0-rs-p4r-ui-observation.mjs',
+  uiDriver: 'scripts/g0-rs-p4r-ui-driver.cjs',
+  performanceObservationEvidence: 'acceptance/g0-result-studio/rs-p4r-performance.json',
+  liveObservationEvidence: 'acceptance/g0-result-studio/rs-p4r-live-observation.json',
+  uiObservationEvidence: 'acceptance/g0-result-studio/rs-p4r-ui-observation.json',
   goKeggDefinition: 'resources/built-in-plugins/go-kegg/tool-definition.json',
 };
 
@@ -292,6 +311,12 @@ function inspect(verification, observation) {
   const baseline = new Map(FROZEN_BASELINE.requests.map((r) => [r.id, r]));
   let sourceObservation = null;
   try { sourceObservation = JSON.parse(readFileSync(sourceObservationPath, 'utf8')); } catch { /* missing evidence fails the check */ }
+  let performanceObservation = null;
+  try { performanceObservation = JSON.parse(readFileSync(performanceObservationPath, 'utf8')); } catch { /* missing evidence fails the check */ }
+  let liveObservation = null;
+  try { liveObservation = JSON.parse(readFileSync(liveObservationPath, 'utf8')); } catch { /* missing evidence fails the check */ }
+  let uiObservation = null;
+  try { uiObservation = JSON.parse(readFileSync(uiObservationPath, 'utf8')); } catch { /* missing evidence fails the check */ }
 
   const warmImprovement = (id) => {
     const now = byId.get(id);
@@ -421,14 +446,49 @@ function inspect(verification, observation) {
         && sourceObservation.observations.every((entry) => entry.status === 'verified' && entry.formalJobCompleted === true),
       [sourceFiles.sourceObservation, sourceFiles.sourceObservationEvidence, sourceFiles.goKeggDefinition],
       'The isolated real run_tool → tool_job → Artifact Truth chain produced formal DESeq2, standalone volcano, heatmap and GO-BP artifacts, then created and read each exact Revision source projection. The observation is source-bound and non-qualifying.'),
+
+    // ── P4R-6 ────────────────────────────────────────────────────────────
+    item('RS-P4R6-1',
+      performanceObservation?.passed === true
+        && performanceObservation?.sourceCommitMatchesSourceHashes === true
+        && Number(performanceObservation?.baselineObservation?.eventLoop?.maxMs) <= 250,
+      [sourceFiles.performanceAcceptanceScript, sourceFiles.performanceObservationEvidence,
+        sourceFiles.backgroundService, sourceFiles.backgroundChild, sourceFiles.p4rBackgroundSpec],
+      'The source-bound real-chain performance observation keeps the Express event loop within the frozen 250ms budget while cold canonical Git/SQLite work completes asynchronously.'),
+
+    item('RS-P4R6-2',
+      liveObservation?.passed === true
+        && liveObservation?.sourceCommitMatchesSourceHashes === true
+        && liveObservation?.qualificationEligible === false
+        && liveObservation?.providerBoundary?.realProviderUsed === false
+        && Array.isArray(liveObservation?.events)
+        && liveObservation.events.length >= 10
+        && Object.values(liveObservation?.checks || {}).every(Boolean),
+      [sourceFiles.liveObservation, sourceFiles.liveObservationEvidence, sourceFiles.p4rLiveSpec],
+      'One disposable source-bound chain opens a real completed Job, creates a deterministic context-bound Agent presentation candidate, compares, adopts, replays, discards, round-trips conversation truth and recovers after a real backend restart. It remains explicitly non-Provider and non-qualifying.'),
+
+    item('RS-P4R6-3',
+      uiObservation?.passed === true
+        && uiObservation?.sourceCommitMatchesSourceHashes === true
+        && uiObservation?.qualificationEligible === false
+        && uiObservation?.renderer?.passed === true
+        && uiObservation?.renderer?.allMatrixStatesCaptured === true
+        && uiObservation?.renderer?.noHorizontalOverflow === true
+        && uiObservation?.renderer?.primaryActionBudgetMet === true
+        && uiObservation?.renderer?.secondaryFailureRecoveryPassed === true
+        && uiObservation?.renderer?.continuousLifecyclePassed === true
+        && uiObservation?.renderer?.serviceRestartPassed === true,
+      [sourceFiles.uiObservation, sourceFiles.uiDriver, sourceFiles.uiObservationEvidence,
+        sourceFiles.p4rUiSpec, sourceFiles.projectWorkspace, sourceFiles.scientificInteractionViewer],
+      'One real Electron BrowserWindow covers light/dark × 1440/1024/820, keyboard/focus, bounded actions, candidate lifecycle, fail-closed secondary errors and stop/restart recovery without promoting this development renderer run to packaged or Provider qualification.'),
   ];
 
   return {
     schemaVersion: 1,
-    workPackage: 'G0-RS-P4R-1/P4R-2/P4R-3/P4R-4/P4R-5',
-    captureMode: 'real_chain_server_measurement_plus_frontend_and_agent_binding_contracts',
+    workPackage: 'G0-RS-P4R-1/P4R-2/P4R-3/P4R-4/P4R-5/P4R-6',
+    captureMode: 'real_chain_server_measurement_plus_frontend_agent_binding_live_journey_and_electron_renderer',
     qualificationEligible: false,
-    qualificationReason: 'P4R-1 through P4R-5 deliver a faster read path, focused surface, context-bound Agent-first editing, read-only version/change review and exact Revision Code projection. No Provider, layout, theme, device or pixel claim is made, and Result Studio product qualification remains reserved for P7.',
+    qualificationReason: 'P4R-1 through P4R-6 deliver a responsive read path, focused surface, context-bound Agent-first editing, version/change review, exact Revision Code projection and development Electron journey evidence. No real Provider or packaged-desktop qualification claim is made; product qualification remains reserved for P7.',
     privacy: 'repository_relative_paths_digests_counts_timings_and_bounded_statuses_only',
     sourceHashes: sourceHashes(),
     frozenBaseline: { capturedAtCommit: FROZEN_BASELINE.capturedAtCommit, revisionCount: FROZEN_BASELINE.revisionCount },
@@ -500,7 +560,7 @@ try {
     if (!report.passed) throw new Error(report.checks.filter((c) => !c.passed).map((c) => c.id).join(','));
     mkdirSync(dirname(evidencePath), { recursive: true });
     writeFileSync(evidencePath, `${JSON.stringify(report, null, 2)}\n`);
-    console.log(`[G0-RS-P4R-1/2/3/4/5] PASS — evidence updated (${report.checks.length}/${report.checks.length})`);
+    console.log(`[G0-RS-P4R-1/2/3/4/5/6] PASS — evidence updated (${report.checks.length}/${report.checks.length})`);
     for (const row of report.improvementVsBaseline) {
       if (row.deltaPct !== null) console.log(`  ${row.id.padEnd(18)} ${String(row.baselineWarmMs).padStart(8)}ms -> ${String(row.currentWarmMs).padStart(8)}ms  ${row.deltaPct}%`);
     }
@@ -515,9 +575,9 @@ try {
       || JSON.stringify(stored.sourceHashes) !== JSON.stringify(current.sourceHashes)) {
       throw new Error('stored G0-RS-P4R-1/2/3/4 evidence is stale or invalid');
     }
-    console.log(`[G0-RS-P4R-1/2/3/4/5] PASS — ${current.checks.length}/${current.checks.length}`);
+    console.log(`[G0-RS-P4R-1/2/3/4/5/6] PASS — ${current.checks.length}/${current.checks.length}`);
   }
 } catch (error) {
-  console.error(`[G0-RS-P4R-1/2/3/4/5] FAIL — ${error.message}`);
+  console.error(`[G0-RS-P4R-1/2/3/4/5/6] FAIL — ${error.message}`);
   process.exitCode = 1;
 }

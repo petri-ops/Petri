@@ -298,7 +298,7 @@ function ScientificScatter({ manifest, query, selection, onSelectionChange }: {
       <svg
         className={styles.scatter}
         viewBox="0 0 600 350"
-        role="img"
+        role="group"
         aria-label="可选择科学散点图"
         onPointerDown={(event) => { const box = event.currentTarget.getBoundingClientRect(); const x = (event.clientX - box.left) * 600 / box.width; const y = (event.clientY - box.top) * 350 / box.height; setDrag({ x0: x, y0: y, x1: x, y1: y }); }}
         onPointerMove={(event) => { if (!drag) return; const box = event.currentTarget.getBoundingClientRect(); setDrag({ ...drag, x1: (event.clientX - box.left) * 600 / box.width, y1: (event.clientY - box.top) * 350 / box.height }); }}
@@ -316,7 +316,29 @@ function ScientificScatter({ manifest, query, selection, onSelectionChange }: {
         {points.map((point) => {
           const id = readEntityId(manifest, point.row) || '';
           const active = !!id && selection?.entityIds.includes(id);
-          return <circle key={id || `${point.x}-${point.y}`} cx={px(point.x)} cy={py(point.y)} r={active ? 5 : 3} data-active={active} onPointerDown={(event) => event.stopPropagation()} onClick={() => onSelectionChange(buildPointSelection(manifest, [point.row]))}><title>{id}</title></circle>;
+          const selectPoint = () => onSelectionChange(buildPointSelection(manifest, [point.row]));
+          return (
+            <circle
+              key={id || `${point.x}-${point.y}`}
+              cx={px(point.x)}
+              cy={py(point.y)}
+              r={active ? 5 : 3}
+              data-active={active}
+              role="button"
+              tabIndex={id ? 0 : -1}
+              aria-label={id ? `选择 ${id}` : '该散点无稳定 ID'}
+              aria-pressed={active}
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={selectPoint}
+              onKeyDown={(event) => {
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                event.preventDefault();
+                selectPoint();
+              }}
+            >
+              <title>{id}</title>
+            </circle>
+          );
         })}
         {drag && <rect x={Math.min(drag.x0, drag.x1)} y={Math.min(drag.y0, drag.y1)} width={Math.abs(drag.x1 - drag.x0)} height={Math.abs(drag.y1 - drag.y0)} />}
         <text x="300" y="344">{mapping.xField}</text><text x="8" y="22">{mapping.yTransform === 'neg_log10' ? `-log10(${mapping.yField})` : mapping.yField}</text>
