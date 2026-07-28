@@ -88,6 +88,7 @@ interface ChangeSetListResponse {
   changeSets: ResultStudioChangeSet[];
   currentRevision: ArtifactRevision | null;
   revisions: ArtifactRevision[];
+  nextRevisionOffset?: number | null;
 }
 
 export interface ResultStudioWorkspaceStatus {
@@ -122,8 +123,8 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   return data as T;
 }
 
-export function listResultChangeSets(projectId: string, artifactFamilyId: string): Promise<ChangeSetListResponse> {
-  return requestJson(`/changesets?projectId=${encodeURIComponent(projectId)}&artifactFamilyId=${encodeURIComponent(artifactFamilyId)}`);
+export function listResultChangeSets(projectId: string, artifactFamilyId: string, revisionOffset = 0): Promise<ChangeSetListResponse> {
+  return requestJson(`/changesets?projectId=${encodeURIComponent(projectId)}&artifactFamilyId=${encodeURIComponent(artifactFamilyId)}&revisionOffset=${revisionOffset}&revisionLimit=100`);
 }
 
 export function compareResultChangeSet(changeSetId: string): Promise<ResultStudioComparison> {

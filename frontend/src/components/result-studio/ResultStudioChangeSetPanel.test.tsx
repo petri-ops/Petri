@@ -39,6 +39,7 @@ const changeSet: ResultStudioChangeSet = {
   changeSetId: 'cs_2', projectId: 'p_1', status: 'preview_ready', candidateCommit: 'c'.repeat(40),
   workingBranchRef: 'refs/heads/biof3/changeset/cs_2', createdBy: 'agent',
   changedPaths: [{ relativePath: 'analysis/scripts/plot.R', changeType: 'added' }],
+  validationSummary: { artifactTruthStatus: 'valid', intentSummary: '把火山图配色调整为蓝色', impactLevel: 'presentation_rerender' },
   createdAt: '2026-07-25T00:00:00Z', updatedAt: '2026-07-25T00:01:00Z',
 };
 
@@ -71,12 +72,14 @@ describe('ResultStudioChangeSetPanel', () => {
   afterEach(cleanup);
 
   it('keeps the default summary compact and expands typed comparisons on demand', async () => {
-    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" activeRevisionId="rev_1" />);
+    const { rerender } = render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" activeRevisionId="rev_1" />);
     expect(await screen.findByText('待采用')).toBeTruthy();
     expect(screen.getByText('当前 v1')).toBeTruthy();
     expect(screen.queryByText('高级 Git 信息')).toBeNull();
 
-    fireEvent.click(screen.getByText('比较结果'));
+    expect(screen.getByText('把火山图配色调整为蓝色')).toBeTruthy();
+    expect(screen.getByText('展示变化')).toBeTruthy();
+    rerender(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" activeRevisionId="rev_1" mode="compare" />);
     expect(await screen.findByText('plot · 前后对比')).toBeTruthy();
     expect(screen.getByText('参数与结构变化')).toBeTruthy();
     expect(screen.getByText('脚本与文本变化')).toBeTruthy();
@@ -115,8 +118,7 @@ describe('ResultStudioChangeSetPanel', () => {
   });
 
   it('restores a historical Revision as a new version instead of mutating history', async () => {
-    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" />);
-    fireEvent.click(await screen.findByText('比较结果'));
+    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" mode="history" />);
     const restoreButtons = await screen.findAllByText('恢复为新版本');
     fireEvent.click(restoreButtons[0]);
     await waitFor(() => expect(client.restoreArtifactRevision).toHaveBeenCalledWith('rev_2'));
@@ -131,10 +133,50 @@ describe('ResultStudioChangeSetPanel', () => {
   it('loads table candidates progressively instead of rendering the whole file', async () => {
     const tableComparison = { ...comparison, artifacts: [{ ...comparison.artifacts[0], kind: 'table' as const, table: { status: 'available', before: { columns: ['gene'], rowCount: 1, rowCountIsLowerBound: false, bytes: 10 }, after: { columns: ['gene'], rowCount: 1, rowCountIsLowerBound: false, bytes: 10 }, addedColumns: [], removedColumns: [], sampleChanges: [], truncated: true } }] };
     client.compareResultChangeSet.mockResolvedValueOnce(tableComparison);
-    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" />);
-    fireEvent.click(await screen.findByText('比较结果'));
+    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" mode="compare" />);
     fireEvent.click(await screen.findByText('渐进查看候选表'));
     expect(await screen.findByText('TP53')).toBeTruthy();
     expect(client.readRevisionTablePage).toHaveBeenCalledWith('rev_2', 0, 50);
+  });
+
+  it('views a historical Revision without invoking any write client', async () => {
+    const viewed = vi.fn();
+    render(<ResultStudioChangeSetPanel
+      projectId="p_1"
+      artifactFamilyId="family"
+      activeRevisionId="rev_1"
+      mode="history"
+      onRevisionViewed={viewed}
+    />);
+    fireEvent.click((await screen.findAllByText('查看'))[0]);
+    expect(viewed).toHaveBeenCalledWith(expect.objectContaining({ revisionId: 'rev_2' }));
+    expect(client.adoptResultChangeSet).not.toHaveBeenCalled();
+    expect(client.revertResultChangeSet).not.toHaveBeenCalled();
+    expect(client.restoreArtifactRevision).not.toHaveBeenCalled();
+    expect(client.recoverResultStudioWorkspace).not.toHaveBeenCalled();
+  });
+
+  it('requires an explicit action before recovering interrupted state', async () => {
+    client.getResultStudioWorkspaceStatus.mockResolvedValue({
+      lifecycle: { status: 'recovery_available', interrupted: [{ changeSetId: 'cs_2', status: 'running', recovery: 'resume', revisionIds: [] }], checkpoint: null, revisionIntegrity: { revisionCount: 2, intact: true, issues: [] } },
+      storage: { revisionCount: 2, logicalArtifactBytes: 2048, uniqueArtifactBytes: 2048, deduplicableBytes: 0, duplicateGroupCount: 0, privateStorage: { bytes: 0, files: 0, truncated: false } },
+    });
+    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" mode="history" />);
+    expect(await screen.findByText('检测到未完成的修改现场')).toBeTruthy();
+    expect(client.recoverResultStudioWorkspace).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByText('恢复修改现场'));
+    await waitFor(() => expect(client.recoverResultStudioWorkspace).toHaveBeenCalledWith('p_1'));
+  });
+
+  it('keeps compare failure actionable without entering an automatic retry loop', async () => {
+    client.compareResultChangeSet
+      .mockRejectedValueOnce(new Error('比较服务暂不可用'))
+      .mockResolvedValueOnce(comparison);
+    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" mode="compare" />);
+    expect(await screen.findByText('比较服务暂不可用')).toBeTruthy();
+    expect(client.compareResultChangeSet).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByText('重试比较'));
+    expect(await screen.findByText('plot · 前后对比')).toBeTruthy();
+    expect(client.compareResultChangeSet).toHaveBeenCalledTimes(2);
   });
 });

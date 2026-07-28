@@ -93,6 +93,35 @@
   font-size: 10px;
 }
 
+.modeSwitcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 7px;
+}
+
+.modeSwitcher button {
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--biof3-text-tertiary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  line-height: 22px;
+  padding: 0 7px;
+}
+
+.modeSwitcher button:hover {
+  background: var(--biof3-bg-hover);
+  color: var(--biof3-text);
+}
+
+.modeSwitcher button[aria-current='page'] {
+  background: color-mix(in srgb, var(--biof3-accent) 12%, transparent);
+  color: var(--biof3-accent);
+}
+
 .truthBadge {
   display: inline-flex;
   flex: 0 0 auto;

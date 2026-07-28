@@ -211,6 +211,13 @@ test('RS5 success creates commit, Job-backed Revision and preview without adopti
   });
   assert.equal(result.ok, true);
   assert.equal(result.changeSet.status, 'preview_ready');
+  assert.equal(result.changeSet.validationSummary.intentSummary, 'use blue palette');
+  assert.equal(result.changeSet.validationSummary.impactLevel, 'presentation_rerender');
+  assert.equal(result.changeSet.validationSummary.requiresJob, true);
+  assert.equal(result.changeSet.validationSummary.affectedNodeCount, 1);
+  const reopenedProjection = createResultStudioRepository(fx.db, { ensureSchema: false })
+    .getChangeSet(result.changeSet.changeSetId);
+  assert.deepEqual(reopenedProjection.validationSummary, result.changeSet.validationSummary);
   assert.equal(result.adopted, false);
   assert.equal(result.revision.parentRevisionIds[0], 'rev_source');
   assert.equal(result.revision.toolJobId, 'tj_candidate_CANDIDATE');

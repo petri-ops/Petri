@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-export type WorkspaceMode = 'chat' | 'search' | 'scheduled' | 'result' | 'compare' | 'plugins' | 'settings';
+export type WorkspaceMode = 'chat' | 'search' | 'scheduled' | 'result' | 'compare' | 'history' | 'plugins' | 'settings';
 
 export const WORKSPACE_MODES: ReadonlySet<WorkspaceMode> = new Set([
   'chat',
@@ -9,6 +9,7 @@ export const WORKSPACE_MODES: ReadonlySet<WorkspaceMode> = new Set([
   'scheduled',
   'result',
   'compare',
+  'history',
   'plugins',
   'settings',
 ]);

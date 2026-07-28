@@ -16,6 +16,7 @@ import {
   type ResultStudioTablePage,
 } from './resultStudioClient';
 import styles from './ResultStudioChangeSetPanel.module.css';
+import { resultVersionRoleLabel, resultVersionRoles } from './resultVersionRole';
 
 const STATUS_LABEL: Record<string, string> = {
   draft: '草稿',
@@ -26,6 +27,30 @@ const STATUS_LABEL: Record<string, string> = {
   reverted: '已撤销',
   abandoned: '已放弃',
 };
+
+const IMPACT_LABEL: Record<string, string> = {
+  view_only: '仅查看',
+  presentation_rerender: '展示变化',
+  data_transform: '数据变化',
+  scientific_recompute: '科学重算',
+  workflow_replan: '流程变化',
+  version_restore: '版本恢复',
+};
+
+const SCOPE_LABEL: Record<string, string> = {
+  none: '不影响结果',
+  current_result_only: '仅当前结果',
+  workflow_subgraph: '影响下游流程',
+  unknown: '影响范围待确认',
+};
+
+const VALIDATION_LABEL: Record<string, string> = {
+  valid: '验证通过',
+  degraded: '验证需要复核',
+  blocked: '验证已阻断',
+};
+
+export type ResultStudioReviewMode = 'result' | 'compare' | 'history';
 
 function fileName(path: string): string {
   return path.split('/').pop() || path;
@@ -42,18 +67,25 @@ export function ResultStudioChangeSetPanel({
   artifactFamilyId,
   activeRevisionId,
   onRevisionActivated,
+  onRevisionViewed,
+  mode = 'result',
+  onModeChange,
 }: {
   projectId: string;
   artifactFamilyId: string;
   activeRevisionId?: string | null;
   onRevisionActivated?: (revision: ArtifactRevision) => void;
+  onRevisionViewed?: (revision: ArtifactRevision) => void;
+  mode?: ResultStudioReviewMode;
+  onModeChange?: (mode: ResultStudioReviewMode) => void;
 }): React.ReactElement | null {
   const [changeSets, setChangeSets] = useState<ResultStudioChangeSet[]>([]);
   const [revisions, setRevisions] = useState<ArtifactRevision[]>([]);
   const [currentRevision, setCurrentRevision] = useState<ArtifactRevision | null>(null);
+  const [nextRevisionOffset, setNextRevisionOffset] = useState<number | null>(null);
   const [comparison, setComparison] = useState<ResultStudioComparison | null>(null);
+  const [comparisonAttemptedFor, setComparisonAttemptedFor] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -68,6 +100,7 @@ export function ResultStudioChangeSetPanel({
       setChangeSets(data.changeSets);
       setRevisions(data.revisions);
       setCurrentRevision(data.currentRevision);
+      setNextRevisionOffset(data.nextRevisionOffset ?? null);
       const nonBaseline = data.changeSets.filter((item) => !item.intentRef?.startsWith('baseline:'));
       const preferred = nonBaseline.find((item) => item.status === 'preview_ready')
         || nonBaseline.find((item) => item.status === 'adopted')
@@ -88,21 +121,12 @@ export function ResultStudioChangeSetPanel({
 
   useEffect(() => {
     let active = true;
-    void getResultStudioWorkspaceStatus(projectId).then(async (status) => {
+    void getResultStudioWorkspaceStatus(projectId).then((status) => {
       if (!active) return;
       setWorkspaceStatus(status);
-      if (status.lifecycle.interrupted.some((entry) => entry.status === 'running')) {
-        try {
-          await recoverResultStudioWorkspace(projectId);
-          if (active) {
-            setWorkspaceStatus(await getResultStudioWorkspaceStatus(projectId));
-            await refresh();
-          }
-        } catch { /* the lifecycle status remains visible and fail-closed */ }
-      }
     }).catch(() => { /* version UI remains usable if lifecycle inspection is unavailable */ });
     return () => { active = false; };
-  }, [projectId, refresh]);
+  }, [projectId]);
 
   const selected = useMemo(
     () => changeSets.find((item) => item.changeSetId === selectedId) || null,
@@ -111,11 +135,11 @@ export function ResultStudioChangeSetPanel({
 
   const loadComparison = useCallback(async () => {
     if (!selected) return;
+    setComparisonAttemptedFor(selected.changeSetId);
     setLoading(true);
     setError('');
     try {
       setComparison(await compareResultChangeSet(selected.changeSetId));
-      setExpanded(true);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '比较加载失败');
     } finally {
@@ -125,9 +149,14 @@ export function ResultStudioChangeSetPanel({
 
   useEffect(() => {
     setComparison(null);
-    setExpanded(false);
+    setComparisonAttemptedFor(null);
     setTablePages({});
   }, [selectedId]);
+
+  useEffect(() => {
+    if (mode !== 'compare' || !selected || comparison || loading || comparisonAttemptedFor === selected.changeSetId) return;
+    void loadComparison();
+  }, [comparison, comparisonAttemptedFor, loadComparison, loading, mode, selected]);
 
   const loadTablePage = async (revisionId: string, more = false) => {
     setBusy(true);
@@ -179,50 +208,136 @@ export function ResultStudioChangeSetPanel({
     }
   };
 
+  const recoverWorkspace = async () => {
+    setBusy(true);
+    setError('');
+    try {
+      await recoverResultStudioWorkspace(projectId);
+      setWorkspaceStatus(await getResultStudioWorkspaceStatus(projectId));
+      await refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : '修改现场恢复失败');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const loadMoreRevisions = async () => {
+    if (nextRevisionOffset === null) return;
+    setBusy(true);
+    setError('');
+    try {
+      const data = await listResultChangeSets(projectId, artifactFamilyId, nextRevisionOffset);
+      setRevisions((current) => {
+        const merged = new Map(current.map((revision) => [revision.revisionId, revision]));
+        for (const revision of data.revisions) merged.set(revision.revisionId, revision);
+        return [...merged.values()];
+      });
+      setNextRevisionOffset(data.nextRevisionOffset ?? null);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : '更多历史版本加载失败');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   if (!artifactFamilyId) return null;
   if (loading && changeSets.length === 0) return <section className={styles.root}><div className={styles.loading}>正在读取结果版本…</div></section>;
-  if (!selected && revisions.length <= 1 && !error) return null;
+  if (mode === 'result' && !selected && revisions.length <= 1 && !error) return null;
 
   const visual = comparison?.artifacts.filter((item) => item.kind === 'visual') || [];
   const tables = comparison?.artifacts.filter((item) => item.kind === 'table' && item.table) || [];
+  const intentSummary = selected
+    ? typeof selected.validationSummary?.intentSummary === 'string'
+      ? selected.validationSummary.intentSummary
+      : selected.intentRef?.startsWith('restore:')
+        ? '恢复一个历史版本作为新的正式版本'
+        : selected.intentRef?.startsWith('baseline:')
+          ? '原始分析结果'
+          : '结果修改候选'
+    : '';
+  const impactLevel = selected && typeof selected.validationSummary?.impactLevel === 'string'
+    ? selected.validationSummary.impactLevel
+    : null;
 
   return (
-    <section className={styles.root} aria-label="Result Studio 版本与变更">
+    <section className={styles.root} aria-label="Result Studio 版本与变更" data-mode={mode}>
       <div className={styles.header}>
         <div className={styles.title}>
           <strong>结果版本</strong>
           <span>{currentRevision ? `当前 v${currentRevision.revisionOrdinal}` : '尚无正式版本'}</span>
         </div>
-        {selected && <span className={styles.status} data-state={selected.status}>{STATUS_LABEL[selected.status] || selected.status}</span>}
+        {mode !== 'history' && selected && <span className={styles.status} data-state={selected.status}>{STATUS_LABEL[selected.status] || selected.status}</span>}
       </div>
 
       {workspaceStatus && (
         <div className={styles.lifecycle} data-state={workspaceStatus.lifecycle.status}>
-          <span>{workspaceStatus.lifecycle.status === 'blocked' ? '版本存储需要处理' : workspaceStatus.lifecycle.interrupted.length > 0 ? '修改现场已恢复' : '版本存储正常'}</span>
+          <span>{workspaceStatus.lifecycle.status === 'blocked' ? '版本存储需要处理' : workspaceStatus.lifecycle.interrupted.length > 0 ? '检测到未完成的修改现场' : '版本存储正常'}</span>
           <span>{workspaceStatus.storage.revisionCount} 个版本 · {Math.ceil(workspaceStatus.storage.logicalArtifactBytes / 1024)} KB</span>
           {workspaceStatus.storage.deduplicableBytes > 0 && <span>可去重 {Math.ceil(workspaceStatus.storage.deduplicableBytes / 1024)} KB</span>}
+          {workspaceStatus.lifecycle.interrupted.length > 0 && (
+            <button type="button" disabled={busy} onClick={() => void recoverWorkspace()}>恢复修改现场</button>
+          )}
         </div>
       )}
 
-      {selected && (
+      {mode === 'history' && (
+        <div className={styles.history}>
+          {revisions.slice().sort((left, right) => right.revisionOrdinal - left.revisionOrdinal).map((revision) => (
+            <div className={styles.historyRow} key={revision.revisionId}>
+              <div className={styles.historyIdentity}>
+                <strong>v{revision.revisionOrdinal}{revision.revisionId === activeRevisionId ? ' · 正在查看' : ''}</strong>
+                <small>{resultVersionRoleLabel(resultVersionRoles(
+                  revision,
+                  changeSets.find((item) => item.changeSetId === revision.changeSetId),
+                ))} · {revision.validationStatus} · {fileName(revision.outputPath)}</small>
+              </div>
+              <div className={styles.historyActions}>
+                {revision.revisionId !== activeRevisionId && (
+                  <button type="button" disabled={busy} onClick={() => onRevisionViewed?.(revision)}>查看</button>
+                )}
+                {!revision.isCurrent && (
+                  <button type="button" disabled={busy} onClick={() => void restore(revision)}>恢复为新版本</button>
+                )}
+              </div>
+            </div>
+          ))}
+          {nextRevisionOffset !== null && (
+            <button className={styles.loadMore} type="button" disabled={busy} onClick={() => void loadMoreRevisions()}>加载更早版本</button>
+          )}
+        </div>
+      )}
+
+      {mode !== 'history' && selected && (
         <>
+          <p className={styles.intentSummary}>{intentSummary}</p>
           <div className={styles.summary}>
             <span>{selected.createdBy === 'agent' ? 'Agent 修改' : '手动修改'}</span>
+            <span>{impactLevel ? IMPACT_LABEL[impactLevel] || '影响待确认' : '影响待确认'}</span>
+            {typeof selected.validationSummary?.affectedScope === 'string' && (
+              <span>{SCOPE_LABEL[selected.validationSummary.affectedScope] || '影响范围待确认'}{typeof selected.validationSummary.affectedNodeCount === 'number' && selected.validationSummary.affectedNodeCount > 0 ? ` · ${selected.validationSummary.affectedNodeCount} 个节点` : ''}</span>
+            )}
+            <span>{typeof selected.validationSummary?.artifactTruthStatus === 'string'
+              ? VALIDATION_LABEL[selected.validationSummary.artifactTruthStatus] || '验证状态待确认'
+              : '验证状态待确认'}</span>
             <span>{selected.changedPaths.length} 个文件</span>
             {comparison && <span>+{comparison.summary.additions} −{comparison.summary.deletions}</span>}
             <span>{new Date(selected.updatedAt).toLocaleString()}</span>
           </div>
+          {mode === 'compare' && changeSets.length > 1 && (
+            <label className={styles.changeSetPicker}>
+              <span>审查记录</span>
+              <select value={selectedId || ''} onChange={(event) => setSelectedId(event.target.value)}>
+                {changeSets.filter((item) => !item.intentRef?.startsWith('baseline:')).map((item) => (
+                  <option key={item.changeSetId} value={item.changeSetId}>{STATUS_LABEL[item.status] || item.status} · {new Date(item.updatedAt).toLocaleString()}</option>
+                ))}
+              </select>
+            </label>
+          )}
           <div className={styles.actions}>
-            <button
-              type="button"
-              disabled={busy || loading}
-              onClick={() => {
-                if (expanded) setExpanded(false);
-                else void loadComparison();
-              }}
-            >
-              {expanded ? '收起比较' : '比较结果'}
-            </button>
+            {mode === 'result' && (
+              <button type="button" disabled={busy || loading} onClick={() => onModeChange?.('compare')}>查看详细变化</button>
+            )}
             {selected.status === 'preview_ready' && (
               <>
                 <button className={styles.danger} type="button" disabled={busy} onClick={() => void runAction('revert', selected)}>放弃候选</button>
@@ -235,9 +350,18 @@ export function ResultStudioChangeSetPanel({
           </div>
         </>
       )}
-      {error && <div className={styles.error}>{error}</div>}
+      {error && (
+        <div className={styles.error} role="alert">
+          <span>{error}</span>
+          {mode === 'compare' && selected && !comparison && (
+            <button type="button" onClick={() => void loadComparison()}>重试比较</button>
+          )}
+        </div>
+      )}
 
-      {expanded && comparison && (
+      {mode === 'compare' && loading && !comparison && <div className={styles.loading} role="status">正在生成变更审查…</div>}
+
+      {mode === 'compare' && comparison && (
         <div className={styles.details}>
           {visual.map((artifact) => (
             <section className={styles.section} key={artifact.afterRevisionId}>
@@ -304,23 +428,6 @@ export function ResultStudioChangeSetPanel({
               <pre className={styles.patch}>{comparison.textDiff.patch}</pre>
             </section>
           )}
-
-          <section className={styles.section}>
-            <h4>版本历史</h4>
-            <div className={styles.history}>
-              {revisions.slice().reverse().map((revision) => (
-                <div className={styles.historyRow} key={revision.revisionId}>
-                  <div className={styles.historyIdentity}>
-                    <strong>v{revision.revisionOrdinal}{revision.isCurrent ? ' · 当前' : ''}{revision.revisionId === activeRevisionId ? ' · 正在查看' : ''}</strong>
-                    <small>{revision.validationStatus} · {fileName(revision.outputPath)}</small>
-                  </div>
-                  {!revision.isCurrent && (
-                    <button type="button" disabled={busy} onClick={() => void restore(revision)}>恢复为新版本</button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
 
           <details className={`${styles.section} ${styles.advanced}`}>
             <summary>高级 Git 信息</summary>

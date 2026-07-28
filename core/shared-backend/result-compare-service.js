@@ -218,6 +218,9 @@ function compareResultChangeSet(input = {}, dependencies = {}) {
 
   const artifacts = [];
   for (const revision of revisions) {
+    if (revision.projectId !== input.projectId) {
+      throw new ResultCompareError('revision_project_mismatch', 'ChangeSet contains a Revision from another project.');
+    }
     const parent = revision.parentRevisionIds.map((id) => repository.getRevision(id)).find(Boolean) || null;
     const ext = path.extname(revision.outputPath).toLowerCase();
     const kind = ['.csv', '.tsv'].includes(ext)
@@ -248,8 +251,8 @@ function compareResultChangeSet(input = {}, dependencies = {}) {
   }
   const histories = revisions.map((revision) => ({
     artifactFamilyId: revision.artifactFamilyId,
-    revisions: repository.listRevisions({ artifactFamilyId: revision.artifactFamilyId, limit: 100 }),
-    currentRevisionId: repository.getCurrentRevision(revision.artifactFamilyId)?.revisionId || null,
+    revisions: repository.listRevisions({ artifactFamilyId: revision.artifactFamilyId, projectId: input.projectId, limit: 100 }),
+    currentRevisionId: repository.getCurrentRevision(revision.artifactFamilyId, input.projectId)?.revisionId || null,
   }));
   return {
     resultCompareServiceVersion: RESULT_COMPARE_SERVICE_VERSION,
@@ -277,8 +280,14 @@ function compareResultChangeSet(input = {}, dependencies = {}) {
   };
 }
 
-function verifyRevisionForAdoption({ revision, parent, workspaceRoot, adapter, gitPathPrefix, getToolJob }) {
+function verifyRevisionForAdoption({ revision, parent, workspaceRoot, adapter, gitPathPrefix, getToolJob, candidateCommit }) {
   if (!parent) throw new ResultCompareError('parent_revision_missing', 'Candidate Revision has no recoverable parent.');
+  if (revision.projectId !== parent.projectId || revision.artifactFamilyId !== parent.artifactFamilyId) {
+    throw new ResultCompareError('parent_revision_mismatch', 'Candidate Revision parent belongs to another project or Artifact family.');
+  }
+  if (!candidateCommit || revision.sourceCommit !== candidateCommit) {
+    throw new ResultCompareError('candidate_source_commit_mismatch', 'Candidate Revision is not bound to the ChangeSet candidate commit.');
+  }
   resolveRevisionFile(workspaceRoot, revision);
   const sourcePath = projectGitPath(revision.sourceScriptRef?.relativePath, gitPathPrefix);
   const sourceText = revision.sourceCommit && sourcePath
@@ -286,6 +295,13 @@ function verifyRevisionForAdoption({ revision, parent, workspaceRoot, adapter, g
     : null;
   if (sourceText == null || sha256(sourceText) !== revision.sourceScriptRef?.sha256) {
     throw new ResultCompareError('candidate_script_hash_mismatch', 'Candidate script does not match its Git commit.');
+  }
+  const parametersPath = revision.parametersRef ? projectGitPath(revision.parametersRef, gitPathPrefix) : null;
+  const parametersText = revision.sourceCommit && parametersPath
+    ? adapter.showFile({ ref: revision.sourceCommit, filePath: parametersPath })
+    : null;
+  if (parametersText == null || !revision.parametersHash || sha256(parametersText) !== revision.parametersHash) {
+    throw new ResultCompareError('candidate_parameters_hash_mismatch', 'Candidate parameters do not match their Git commit.');
   }
   const job = typeof getToolJob === 'function' ? getToolJob(revision.toolJobId) : null;
   if (!job || job.status !== 'completed' || String(job.project_id || job.projectId || '') !== revision.projectId
@@ -340,8 +356,11 @@ function adoptResultChangeSet(input = {}, dependencies = {}) {
   if (revisions.length === 0) throw new ResultCompareError('change_set_has_no_revision', 'ChangeSet has no candidate Revision.');
   const parents = new Map();
   for (const revision of revisions) {
+    if (revision.projectId !== input.projectId) {
+      throw new ResultCompareError('revision_project_mismatch', 'ChangeSet contains a Revision from another project.');
+    }
     const parent = revision.parentRevisionIds.map((id) => repository.getRevision(id)).find(Boolean) || null;
-    const current = repository.getCurrentRevision(revision.artifactFamilyId);
+    const current = repository.getCurrentRevision(revision.artifactFamilyId, input.projectId);
     if (!parent || !current || current.revisionId !== parent.revisionId) {
       throw new ResultCompareError('adoption_base_stale', 'Current result changed after this preview was created.');
     }
@@ -352,6 +371,7 @@ function adoptResultChangeSet(input = {}, dependencies = {}) {
       adapter,
       gitPathPrefix: dependencies.gitPathPrefix,
       getToolJob,
+      candidateCommit: changeSet.candidateCommit,
     });
     parents.set(revision.revisionId, parent);
   }
@@ -370,17 +390,20 @@ function adoptResultChangeSet(input = {}, dependencies = {}) {
             next: () => changeSet.candidateCommit,
           },
         });
+        // Checkpoint is part of the same SQLite transaction as status/current.
+        // If it fails, better-sqlite3 rolls back and the outer catch restores
+        // the Git refs changed above.
+        saveResultEditCheckpoint({
+          repository,
+          projectId: changeSet.projectId,
+          conversationId: changeSet.conversationId,
+          changeSetId: changeSet.changeSetId,
+          candidateCommit: changeSet.candidateCommit,
+          stage: 'adopted',
+        });
       },
     });
     const currentRevisions = revisions.map((revision) => repository.getRevision(revision.revisionId));
-    saveResultEditCheckpoint({
-      repository,
-      projectId: changeSet.projectId,
-      conversationId: changeSet.conversationId,
-      changeSetId: changeSet.changeSetId,
-      candidateCommit: changeSet.candidateCommit,
-      stage: 'adopted',
-    });
     return { ...adopted, currentRevisions };
   } catch (error) {
     for (const entry of refUpdates.reverse()) {
@@ -405,7 +428,7 @@ function revertResultChangeSet(input = {}, dependencies = {}) {
   const revisions = repository.listRevisionsByChangeSet(changeSet.changeSetId);
   if (changeSet.status === 'adopted') {
     for (const revision of revisions) {
-      const current = repository.getCurrentRevision(revision.artifactFamilyId);
+      const current = repository.getCurrentRevision(revision.artifactFamilyId, input.projectId);
       if (!current || current.revisionId !== revision.revisionId) {
         throw new ResultCompareError('revert_not_current', 'A newer Revision is current; restore history instead of reverting this ChangeSet.');
       }
@@ -426,6 +449,14 @@ function revertResultChangeSet(input = {}, dependencies = {}) {
             adapter.deleteRefCas({ ref: changeSet.workingBranchRef, expectedOld: existing });
             refUpdates.push({ ref: changeSet.workingBranchRef, previous: existing, next: ZERO_OID, deleted: true });
           }
+          saveResultEditCheckpoint({
+            repository,
+            projectId: changeSet.projectId,
+            conversationId: changeSet.conversationId,
+            changeSetId: changeSet.changeSetId,
+            candidateCommit: changeSet.candidateCommit,
+            stage: 'reverted',
+          });
           return;
         }
         const restoredByFamily = new Map(restoredRevisions.map((revision) => [revision.artifactFamilyId, revision]));
@@ -442,6 +473,14 @@ function revertResultChangeSet(input = {}, dependencies = {}) {
             },
           },
         });
+        saveResultEditCheckpoint({
+          repository,
+          projectId: changeSet.projectId,
+          conversationId: changeSet.conversationId,
+          changeSetId: changeSet.changeSetId,
+          candidateCommit: changeSet.candidateCommit,
+          stage: 'reverted',
+        });
       },
     });
     if (changeSet.status !== 'adopted' && input.workspaceRoot) {
@@ -451,14 +490,6 @@ function revertResultChangeSet(input = {}, dependencies = {}) {
         try { fs.rmSync(staging, { recursive: true, force: true }); } catch { /* RS8 GC can remove a residue */ }
       }
     }
-    saveResultEditCheckpoint({
-      repository,
-      projectId: changeSet.projectId,
-      conversationId: changeSet.conversationId,
-      changeSetId: changeSet.changeSetId,
-      candidateCommit: changeSet.candidateCommit,
-      stage: 'reverted',
-    });
     return reverted;
   } catch (error) {
     for (const entry of refUpdates.reverse()) {
@@ -479,7 +510,7 @@ function restoreArtifactRevision(input = {}, dependencies = {}) {
   if (target.validationStatus === 'blocked') {
     throw new ResultCompareError('revision_not_restorable', 'A blocked Revision cannot become the formal result.');
   }
-  const current = repository.getCurrentRevision(target.artifactFamilyId);
+  const current = repository.getCurrentRevision(target.artifactFamilyId, input.projectId);
   if (!current) throw new ResultCompareError('current_revision_missing', 'Artifact family has no current Revision.');
   if (current.revisionId === target.revisionId) return { restored: false, idempotent: true, revision: current };
   const currentChangeSet = repository.getChangeSet(current.changeSetId);
@@ -487,11 +518,20 @@ function restoreArtifactRevision(input = {}, dependencies = {}) {
     return { restored: false, idempotent: true, revision: current, changeSet: currentChangeSet };
   }
   resolveRevisionFile(input.workspaceRoot, target);
-  const sourceGitPath = projectGitPath(target.sourceScriptRef?.relativePath, dependencies.gitPathPrefix);
-  const parametersGitPath = projectGitPath(target.parametersRef, dependencies.gitPathPrefix);
-  const sourceContent = adapter.showFile({ ref: target.sourceCommit, filePath: sourceGitPath });
-  const parametersContent = adapter.showFile({ ref: target.sourceCommit, filePath: parametersGitPath });
-  if (sourceContent == null || sha256(sourceContent) !== target.sourceScriptRef?.sha256 || parametersContent == null) {
+  const sourceGitPath = target.sourceScriptRef?.relativePath
+    ? projectGitPath(target.sourceScriptRef.relativePath, dependencies.gitPathPrefix)
+    : null;
+  const parametersGitPath = target.parametersRef
+    ? projectGitPath(target.parametersRef, dependencies.gitPathPrefix)
+    : null;
+  const sourceContent = target.sourceCommit && sourceGitPath
+    ? adapter.showFile({ ref: target.sourceCommit, filePath: sourceGitPath })
+    : null;
+  const parametersContent = target.sourceCommit && parametersGitPath
+    ? adapter.showFile({ ref: target.sourceCommit, filePath: parametersGitPath })
+    : null;
+  if (sourceContent == null || sha256(sourceContent) !== target.sourceScriptRef?.sha256
+      || parametersContent == null || !target.parametersHash || sha256(parametersContent) !== target.parametersHash) {
     throw new ResultCompareError('restore_material_unavailable', 'Historical script or parameters cannot be verified in Git.');
   }
   const revisionId = randomId('rev');
@@ -575,7 +615,16 @@ function restoreArtifactRevision(input = {}, dependencies = {}) {
       ],
       jobRefs: [target.toolJobId],
       candidateArtifactRefs: [revision.revisionId],
-      validationSummary: { restore: true, restoredFromRevisionId: target.revisionId, artifactTruthStatus: target.validationStatus },
+      validationSummary: {
+        restore: true,
+        restoredFromRevisionId: target.revisionId,
+        artifactTruthStatus: target.validationStatus,
+        intentSummary: `恢复 v${target.revisionOrdinal} 为新的正式版本`,
+        impactLevel: 'version_restore',
+        affectedScope: 'current_result_only',
+        requiresJob: false,
+        affectedNodeCount: 0,
+      },
     });
     const adopted = adoptResultChangeSet({
       projectId: input.projectId,

@@ -84,7 +84,7 @@ export interface CenterPanelContext {
   datasets: Dataset[];
 
   // Handlers
-  updateWorkspaceMode: (next: WorkspaceMode, replace?: boolean) => void;
+  updateWorkspaceMode: (next: WorkspaceMode, replace?: boolean, jobId?: string | null) => void;
   setWorkspaceSearchQuery: (q: string) => void;
   openRightPanel: (tab: 'home' | 'results' | 'files' | 'terminal' | 'browser' | 'chat') => void;
   switchToProject: (id: string) => void;
@@ -132,7 +132,7 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
     activeRun,
     ctx.resultContext?.status === 'ready' ? ctx.resultContext.contextToken : null,
   );
-  const resultMode = workspaceMode === 'result' || workspaceMode === 'compare';
+  const resultMode = workspaceMode === 'result' || workspaceMode === 'compare' || workspaceMode === 'history';
   const truthStatus = typeof ctx.activeArtifact?.truthStatus === 'string'
     ? ctx.activeArtifact.truthStatus
     : typeof ctx.activeWorkflow?.artifactTruth?.status === 'string'
@@ -199,7 +199,7 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
         <div className={`${styles.workspaceProjectionLayer} ${styles.workspaceProjectionLayerActive}`} data-projection={workspaceMode}>
           <ResultStudioCanvas
             mode={workspaceMode}
-            composer={ctx.activeArtifact ? (
+            composer={workspaceMode === 'result' && ctx.activeArtifact ? (
               <ResultAgentComposer
                 context={ctx.resultContext}
                 draft={ctx.resultAgentDraft}
@@ -218,6 +218,9 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
                 selectionLabel={describeSelection(ctx.activeArtifact?.selection)}
                 onBack={() => ctx.updateWorkspaceMode('chat')}
                 onAskAgent={askAboutCurrentResult}
+                activeMode={workspaceMode}
+                canReviewVersions={!!ctx.activeArtifact?.artifactFamilyId}
+                onModeChange={(mode) => ctx.updateWorkspaceMode(mode, true, ctx.activeJob?.id || null)}
               />
             )}
           >
@@ -234,6 +237,8 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
                 pendingArtifactName={ctx.pendingArtifactName}
                 onPendingArtifactConsumed={ctx.onPendingArtifactConsumed}
                 onOpenBrowser={ctx.openResultBrowser}
+                mode={workspaceMode}
+                onModeChange={(mode, jobId) => ctx.updateWorkspaceMode(mode, true, jobId || ctx.activeJob?.id || null)}
               />
             ) : (
               <div className={styles.resultSurfaceEmpty}>尚未选择分析结果</div>

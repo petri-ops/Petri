@@ -297,6 +297,41 @@ test('RS2 assigns increasing revision ordinals per family', (context) => {
   assert.equal(second.revisionOrdinal, 2);
 });
 
+test('P4R-4 family-scoped queries paginate every Revision without unrelated ChangeSet starvation', (context) => {
+  const { repo } = makeRepo(context);
+  newChangeSet(repo, { changeSetId: 'cs_target' });
+  for (let index = 1; index <= 150; index += 1) {
+    repo.appendRevision(revisionInput('cs_target', {
+      revisionId: `rev_target_${index}`,
+      artifactFamilyId: 'target-family',
+      outputPath: `results/target/v${index}/plot.png`,
+      toolJobId: `job_target_${String(index).padStart(6, '0')}`,
+    }));
+  }
+  for (let index = 1; index <= 105; index += 1) {
+    const changeSetId = `cs_other_${index}`;
+    newChangeSet(repo, { changeSetId, workingBranchRef: `refs/heads/biof3/changeset/${changeSetId}` });
+    repo.appendRevision(revisionInput(changeSetId, {
+      revisionId: `rev_other_${index}`,
+      artifactFamilyId: `other-family-${index}`,
+      outputPath: `results/other/${index}/plot.png`,
+      toolJobId: `job_other_${String(index).padStart(6, '0')}`,
+    }));
+  }
+  assert.deepEqual(
+    repo.listChangeSetsByArtifactFamily({ projectId: 'project_1', artifactFamilyId: 'target-family' })
+      .map((entry) => entry.changeSetId),
+    ['cs_target'],
+  );
+  const first = repo.listRevisions({ artifactFamilyId: 'target-family', projectId: 'project_1', order: 'desc', limit: 100 });
+  const second = repo.listRevisions({ artifactFamilyId: 'target-family', projectId: 'project_1', order: 'desc', limit: 100, offset: 100 });
+  assert.equal(first.length, 100);
+  assert.equal(second.length, 50);
+  assert.equal(first[0].revisionOrdinal, 150);
+  assert.equal(second.at(-1).revisionOrdinal, 1);
+  assert.equal(repo.listRevisions({ artifactFamilyId: 'target-family', projectId: 'project_other' }).length, 0);
+});
+
 // ---------------------------------------------------------------------------
 // 6. 中断恢复
 // ---------------------------------------------------------------------------

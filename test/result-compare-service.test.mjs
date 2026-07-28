@@ -225,6 +225,59 @@ test('RS6 adoption keeps SQLite unchanged when the current Git ref fails CAS', (
   assert.equal(fx.adapter.revParse('refs/heads/biof3/current/family'), fx.candidate.commit);
 });
 
+test('P4R-4 checkpoint failure rolls back adopt and revert across SQLite and Git', (context) => {
+  const fx = makeFixture(context);
+  const saveCheckpoint = fx.repository.saveCheckpoint;
+  fx.repository.saveCheckpoint = () => { throw new Error('checkpoint_fault'); };
+  assert.throws(
+    () => adoptResultChangeSet({ projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, changeSetId: 'cs_candidate' }, {
+      repository: fx.repository, adapter: fx.adapter, getToolJob: fx.getToolJob,
+    }),
+    /checkpoint_fault/
+  );
+  assert.equal(fx.repository.getChangeSet('cs_candidate').status, 'preview_ready');
+  assert.equal(fx.repository.getCurrentRevision('family').revisionId, 'rev_source');
+  assert.equal(fx.adapter.revParse('refs/heads/biof3/current/family'), null);
+
+  fx.repository.saveCheckpoint = saveCheckpoint;
+  adoptResultChangeSet({ projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, changeSetId: 'cs_candidate' }, {
+    repository: fx.repository, adapter: fx.adapter, getToolJob: fx.getToolJob,
+  });
+  const checkpointBefore = fx.repository.getLatestCheckpoint({ projectId: 'p_rs6' });
+  fx.repository.saveCheckpoint = () => { throw new Error('checkpoint_fault'); };
+  assert.throws(
+    () => revertResultChangeSet({ projectId: 'p_rs6', changeSetId: 'cs_candidate' }, {
+      repository: fx.repository, adapter: fx.adapter,
+    }),
+    /checkpoint_fault/
+  );
+  assert.equal(fx.repository.getChangeSet('cs_candidate').status, 'adopted');
+  assert.equal(fx.repository.getCurrentRevision('family').revisionId, 'rev_candidate');
+  assert.equal(fx.adapter.revParse('refs/heads/biof3/current/family'), fx.candidate.commit);
+  assert.equal(fx.repository.getLatestCheckpoint({ projectId: 'p_rs6' }).checkpointHash, checkpointBefore.checkpointHash);
+});
+
+test('P4R-4 adoption rejects source and parameter version drift', (context) => {
+  const fx = makeFixture(context);
+  const originalParametersHash = fx.repository.getRevision('rev_candidate').parametersHash;
+  fx.db.prepare("UPDATE artifact_revisions SET parameters_hash = ? WHERE revision_id = 'rev_candidate'")
+    .run('f'.repeat(64));
+  assert.throws(
+    () => adoptResultChangeSet({ projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, changeSetId: 'cs_candidate' }, {
+      repository: fx.repository, adapter: fx.adapter, getToolJob: fx.getToolJob,
+    }),
+    (error) => error instanceof ResultCompareError && error.code === 'candidate_parameters_hash_mismatch'
+  );
+  fx.db.prepare("UPDATE artifact_revisions SET parameters_hash = ?, source_commit = ? WHERE revision_id = 'rev_candidate'")
+    .run(originalParametersHash, fx.base.commit);
+  assert.throws(
+    () => adoptResultChangeSet({ projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, changeSetId: 'cs_candidate' }, {
+      repository: fx.repository, adapter: fx.adapter, getToolJob: fx.getToolJob,
+    }),
+    (error) => error instanceof ResultCompareError && error.code === 'candidate_source_commit_mismatch'
+  );
+});
+
 test('RS6 rejects cross-project access and root baseline revert', (context) => {
   const fx = makeFixture(context);
   for (const operation of [
@@ -275,4 +328,19 @@ test('RS6 restores history as a new commit and Revision without rewriting the ta
   }, { repository: fx.repository, adapter: fx.adapter, getToolJob: fx.getToolJob });
   assert.equal(repeated.idempotent, true);
   assert.equal(repeated.revision.revisionId, restored.revision.revisionId);
+});
+
+test('P4R-4 restore rejects historical parameter hash drift', (context) => {
+  const fx = makeFixture(context);
+  adoptResultChangeSet({ projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, changeSetId: 'cs_candidate' }, {
+    repository: fx.repository, adapter: fx.adapter, getToolJob: fx.getToolJob,
+  });
+  fx.db.prepare("UPDATE artifact_revisions SET parameters_hash = ? WHERE revision_id = 'rev_source'")
+    .run('f'.repeat(64));
+  assert.throws(
+    () => restoreArtifactRevision({
+      projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, revisionId: 'rev_source', createdBy: 'user',
+    }, { repository: fx.repository, adapter: fx.adapter, getToolJob: fx.getToolJob }),
+    (error) => error instanceof ResultCompareError && error.code === 'restore_material_unavailable'
+  );
 });

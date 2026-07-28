@@ -295,19 +295,25 @@ module.exports = function registerResultStudioRoutes(app) {
   // schema 有问题就返回 500 并带明确原因。
   let repositoryInstance = null;
   function repo() {
-    if (!repositoryInstance) repositoryInstance = createResultStudioRepository(sqlite);
+    // Production migrations own schema creation. A GET must never execute DDL
+    // merely because this module is serving its first request.
+    if (!repositoryInstance) repositoryInstance = createResultStudioRepository(sqlite, { ensureSchema: false });
     return repositoryInstance;
   }
 
-  function projectContext(req, projectId, { write = false } = {}) {
+  function projectContext(req, projectId, { write = false, git = true } = {}) {
     const project = db.getProject(projectId);
     if (!project) return { error: { status: 404, code: 'project_not_found' } };
     if (!canAccessProject(req, project)) return { error: { status: 403, code: 'forbidden' } };
+    if (!git) return { project, binding: null, repository: repo(), gitPathPrefix: '' };
     const binding = bindProjectRepository({
       workspaceRoot: project.workspace_path,
       projectId,
       preferManaged: false,
       allowExistingRepository: true,
+      // Read-only history/compare/status requests may inspect an existing
+      // repository but must not initialize .biof3/git as a side effect.
+      createManagedIfMissing: write,
     });
     if (!binding?.adapter || (write && binding.status !== 'ready')) {
       return {
@@ -781,19 +787,29 @@ module.exports = function registerResultStudioRoutes(app) {
   app.get('/api/result-studio/changesets', (req, res) => {
     const projectId = String(req.query.projectId || '').trim();
     if (!projectId) return res.status(400).json({ error: 'projectId_required' });
-    const context = projectContext(req, projectId);
+    const context = projectContext(req, projectId, { git: false });
     if (context.error) return res.status(context.error.status).json({ error: context.error.code });
     const artifactFamilyId = String(req.query.artifactFamilyId || '').trim() || null;
-    let changeSets = context.repository.listChangeSets({ projectId, limit: 100 });
-    if (artifactFamilyId) {
-      changeSets = changeSets.filter((changeSet) => context.repository
-        .listRevisionsByChangeSet(changeSet.changeSetId)
-        .some((revision) => revision.artifactFamilyId === artifactFamilyId));
-    }
+    const revisionOffset = Math.max(0, Number.parseInt(String(req.query.revisionOffset || '0'), 10) || 0);
+    const revisionLimit = Math.min(200, Math.max(1, Number.parseInt(String(req.query.revisionLimit || '100'), 10) || 100));
+    const changeSets = artifactFamilyId
+      ? context.repository.listChangeSetsByArtifactFamily({ projectId, artifactFamilyId, limit: 200 })
+      : context.repository.listChangeSets({ projectId, limit: 200 });
+    const revisionPage = artifactFamilyId
+      ? context.repository.listRevisions({
+          artifactFamilyId,
+          projectId,
+          limit: revisionLimit + 1,
+          offset: revisionOffset,
+          order: 'desc',
+        })
+      : [];
+    const hasMoreRevisions = revisionPage.length > revisionLimit;
     return res.json({
       changeSets,
-      currentRevision: artifactFamilyId ? context.repository.getCurrentRevision(artifactFamilyId) : null,
-      revisions: artifactFamilyId ? context.repository.listRevisions({ artifactFamilyId, limit: 100 }) : [],
+      currentRevision: artifactFamilyId ? context.repository.getCurrentRevision(artifactFamilyId, projectId) : null,
+      revisions: revisionPage.slice(0, revisionLimit),
+      nextRevisionOffset: hasMoreRevisions ? revisionOffset + revisionLimit : null,
     });
   });
 
@@ -938,7 +954,7 @@ module.exports = function registerResultStudioRoutes(app) {
   app.get('/api/result-studio/revisions/:revisionId/table-page', (req, res) => {
     const revision = repo().getRevision(String(req.params.revisionId || '').trim());
     if (!revision) return res.status(404).json({ error: 'revision_not_found' });
-    const context = projectContext(req, revision.projectId);
+    const context = projectContext(req, revision.projectId, { git: false });
     if (context.error) return res.status(context.error.status).json({ error: context.error.code });
     if (!TABLE_EXTENSIONS.test(revision.outputPath)) return res.status(415).json({ error: 'revision_not_table' });
     try {
@@ -1019,7 +1035,7 @@ module.exports = function registerResultStudioRoutes(app) {
   app.get('/api/result-studio/revisions/:revisionId/artifact', (req, res) => {
     const revision = repo().getRevision(String(req.params.revisionId || '').trim());
     if (!revision) return res.status(404).json({ error: 'revision_not_found' });
-    const context = projectContext(req, revision.projectId);
+    const context = projectContext(req, revision.projectId, { git: false });
     if (context.error) return res.status(context.error.status).json({ error: context.error.code });
     try {
       const workspace = fs.realpathSync(context.project.workspace_path);

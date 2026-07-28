@@ -37,6 +37,13 @@ describe('G0-RS-P1 Result Studio surface', () => {
     expect(children.at(-1)?.textContent).toContain('结果编辑 Composer');
   });
 
+  it('exposes real Compare and History canvas modes while Code remains outside P4R-4', () => {
+    const { rerender } = render(<ResultStudioCanvas mode="compare"><div>变更审查</div></ResultStudioCanvas>);
+    expect(screen.getByRole('region', { name: '结果主画布' }).getAttribute('data-mode')).toBe('compare');
+    rerender(<ResultStudioCanvas mode="history"><div>版本历史</div></ResultStudioCanvas>);
+    expect(screen.getByRole('region', { name: '结果主画布' }).getAttribute('data-mode')).toBe('history');
+  });
+
   it('keeps the context bar compact and exposes its two core actions', () => {
     const onBack = vi.fn();
     const onAsk = vi.fn();
@@ -56,6 +63,29 @@ describe('G0-RS-P1 Result Studio surface', () => {
     expect(onBack).toHaveBeenCalledTimes(1);
     expect(onAsk).toHaveBeenCalledTimes(1);
     expect(screen.getByText('处理组出现明确上调基因集合。')).toBeTruthy();
+  });
+
+  it('makes Result, Change Review and History reachable without exposing Code', () => {
+    const onModeChange = vi.fn();
+    render(
+      <ResultStudioContextBar
+        title="差异表达火山图"
+        trust={{ tone: 'valid', label: '可信结果' }}
+        conclusion="已验证"
+        revisionLabel="当前 v2"
+        selectionLabel="未选择对象"
+        onBack={() => undefined}
+        onAskAgent={() => undefined}
+        activeMode="result"
+        canReviewVersions
+        onModeChange={onModeChange}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: '审查修改' }));
+    fireEvent.click(screen.getByRole('button', { name: '版本历史' }));
+    expect(onModeChange).toHaveBeenNthCalledWith(1, 'compare');
+    expect(onModeChange).toHaveBeenNthCalledWith(2, 'history');
+    expect(screen.queryByRole('button', { name: '代码' })).toBeNull();
   });
 
   it('keeps technical identifiers inside progressive disclosure', () => {

@@ -56,9 +56,10 @@ async function parseResponse<T>(response: Response): Promise<T> {
 }
 
 export async function fetchArtifactInteraction(input: {
-  language: 'r' | 'python'; jobId: string; artifact: string;
+  language: 'r' | 'python'; jobId: string; artifact: string; revisionId?: string | null;
 }): Promise<InteractionResponse> {
   const query = new URLSearchParams({ jobId: input.jobId, artifact: input.artifact });
+  if (input.revisionId) query.set('revisionId', input.revisionId);
   return parseResponse(await fetch(`${getApiPrefix(input.language)}/result-studio/interaction?${query}`, {
     headers: headers(),
   }));

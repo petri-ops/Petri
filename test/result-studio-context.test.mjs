@@ -378,8 +378,25 @@ test('RS-P3 refuses a cross-project revision hint and an unopened result', () =>
   assert.equal(empty.diagnostics[0].code, 'context_artifact_not_open');
 });
 
-test('RS-P3 marks a selection stale instead of remapping it onto a newer revision', () => {
+test('P4R-4 restores a historical Revision selection even when current is newer', () => {
   const fx = fixture({ currentRevision: { revisionId: 'rev_2', artifactFamilyId: 'family_1' } });
+  const resolved = resolveResultStudioContext({ ...ctx, activeArtifact: { revisionId: 'rev_1' } }, fx.dependencies);
+  assert.equal(resolved.ok, true);
+  assert.equal(resolved.envelope.selection.selectionId, 'sel_1');
+  assert.equal(resolved.envelope.selectionState.compatibility, 'compatible');
+  assert.equal(resolved.envelope.revision.isCurrent, false);
+});
+
+test('P4R-4 never replays the current Revision selection into a historical view', () => {
+  const fx = fixture({
+    currentRevision: { revisionId: 'rev_2', artifactFamilyId: 'family_1' },
+    selection: {
+      selectionId: 'sel_current', projectId: 'project_1', conversationId: 'conv_1', artifactId: 'deg_table',
+      revisionId: 'rev_2', entityType: 'gene', entityIds: ['MYC'], entityIdCount: 1,
+      entityIdsTruncated: false, entityIdsHash: 'd'.repeat(64), filterHash: null,
+      filterExpression: null, sort: [], displayState: { durable: true },
+    },
+  });
   const resolved = resolveResultStudioContext({ ...ctx, activeArtifact: { revisionId: 'rev_1' } }, fx.dependencies);
   assert.equal(resolved.ok, true);
   assert.equal(resolved.envelope.selection, null);

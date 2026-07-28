@@ -11,6 +11,7 @@ import {
   type ResultTruthProjection,
 } from './resultSurface';
 import { resolveResultMode } from './resultMode';
+import type { ResultMode } from './resultMode';
 import styles from './ResultStudioSurface.module.css';
 
 export interface ResultInspectorArtifact {
@@ -51,11 +52,9 @@ export function ResultStudioCanvas({
     if (duration !== null) setFirstVisibleMs(duration);
   }, []);
 
-  // Resolve rather than trust: a mode with no surface behind it falls back to
-  // result. `compare` is reachable only by typing ?mode=compare, and it has
-  // always rendered identically to result — so honouring it would imply a
-  // comparison view exists. See resultMode.ts.
-  const activeMode = resolveResultMode(mode);
+  // P4R-4 supplies real Compare and History surfaces. Code remains gated until
+  // P4R-5 provides a source projection for the exact Revision.
+  const activeMode = resolveResultMode(mode, { canCompare: true, canSwitchVersions: true });
 
   return (
     <section
@@ -80,6 +79,9 @@ export function ResultStudioContextBar({
   selectionLabel,
   onBack,
   onAskAgent,
+  activeMode = 'result',
+  onModeChange,
+  canReviewVersions = false,
 }: {
   title: string;
   trust: ResultTruthProjection;
@@ -88,6 +90,9 @@ export function ResultStudioContextBar({
   selectionLabel: string;
   onBack: () => void;
   onAskAgent: () => void;
+  activeMode?: Extract<ResultMode, 'result' | 'compare' | 'history'>;
+  onModeChange?: (mode: Extract<ResultMode, 'result' | 'compare' | 'history'>) => void;
+  canReviewVersions?: boolean;
 }): React.ReactElement {
   return (
     <header className={styles.contextBar}>
@@ -104,6 +109,24 @@ export function ResultStudioContextBar({
           <span>{revisionLabel}</span>
           <span>{selectionLabel}</span>
         </div>
+        {canReviewVersions && onModeChange && (
+          <nav className={styles.modeSwitcher} aria-label="结果视图">
+            {([
+              ['result', '结果'],
+              ['compare', '审查修改'],
+              ['history', '版本历史'],
+            ] as const).map(([mode, label]) => (
+              <button
+                key={mode}
+                type="button"
+                aria-current={activeMode === mode ? 'page' : undefined}
+                onClick={() => onModeChange(mode)}
+              >
+                {label}
+              </button>
+            ))}
+          </nav>
+        )}
       </div>
       <button type="button" className={styles.askButton} onClick={onAskAgent} aria-label="询问 Agent">
         <Icon name="sparkles" size={14} />

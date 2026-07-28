@@ -19,7 +19,7 @@ vi.mock('@/components/workspace-panels/WorkspaceSummaryCard', () => ({ Workspace
 vi.mock('@/pages/project-workspace', () => ({
   WorkspaceSearchPanel: () => <div>search</div>,
   ScheduledWorkspacePanel: () => <div>task</div>,
-  ResultView: () => <div data-testid="central-result-view">result body</div>,
+  ResultView: ({ mode }: { mode: string }) => <div data-testid="central-result-view" data-mode={mode}>result body</div>,
 }));
 
 afterEach(cleanup);
@@ -42,7 +42,7 @@ function context(mode: CenterPanelContext['workspaceMode']): CenterPanelContext 
     activeWorkflow: { jobStatus: 'done', artifactTruth: { status: 'valid' } },
     activeArtifact: {
       jobId: 'job-1', toolId: 'deseq2', name: 'deg.csv', type: 'table', label: '差异表达结果',
-      revisionId: 'revision-abcdef123456', truthStatus: 'valid', conclusion: '发现稳定差异表达信号。',
+      revisionId: 'revision-abcdef123456', artifactFamilyId: 'family-1', truthStatus: 'valid', conclusion: '发现稳定差异表达信号。',
     },
     resultContext: { status: 'ready', contextToken: 'a'.repeat(64) },
     resultEditSubmitting: false,
@@ -76,5 +76,22 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     render(<CenterPanel ctx={ctx} />);
     fireEvent.click(screen.getByRole('button', { name: '返回对话' }));
     expect(ctx.updateWorkspaceMode).toHaveBeenCalledWith('chat');
+  });
+
+  it.each(['compare', 'history'] as const)('renders %s as a distinct central mode without the edit Composer', (mode) => {
+    const ctx = context(mode);
+    render(<CenterPanel ctx={ctx} />);
+    expect(screen.getByTestId('central-result-view').getAttribute('data-mode')).toBe(mode);
+    expect(screen.queryByRole('region', { name: '用 Agent 修改当前结果' })).toBeNull();
+    expect(screen.getByRole('region', { name: '结果主画布' }).getAttribute('data-mode')).toBe(mode);
+  });
+
+  it('routes the visible review and history actions through the workspace state owner', () => {
+    const ctx = context('result');
+    render(<CenterPanel ctx={ctx} />);
+    fireEvent.click(screen.getByRole('button', { name: '审查修改' }));
+    fireEvent.click(screen.getByRole('button', { name: '版本历史' }));
+    expect(ctx.updateWorkspaceMode).toHaveBeenCalledWith('compare', true, 'job-1');
+    expect(ctx.updateWorkspaceMode).toHaveBeenCalledWith('history', true, 'job-1');
   });
 });

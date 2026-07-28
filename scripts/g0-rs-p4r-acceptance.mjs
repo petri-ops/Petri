@@ -91,7 +91,7 @@ const BUDGETS = Object.freeze({
 
 const DEFERRED_BUDGETS = Object.freeze({
   firstContentBySizeMs: 'deferred_to_G0-RS-P4R-1: sampling the pre-fast-path implementation would freeze the defect as the standard',
-  versionSwitchMs: 'deferred_to_G0-RS-P4R-1: no read-only version switch surface exists yet',
+  versionSwitchMs: 'unmeasured_not_captured_no_browser_automation_in_repo',
   codeOpenMs: 'deferred_to_G0-RS-P4R-5: no revision source projection route exists (23 routes checked)',
 });
 

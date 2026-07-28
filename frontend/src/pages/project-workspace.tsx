@@ -74,7 +74,7 @@ import {
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
 import { ResultStudioChangeSetPanel } from '@/components/result-studio/ResultStudioChangeSetPanel';
-import type { ArtifactRevision } from '@/components/result-studio/resultStudioClient';
+import { revisionArtifactUrl, type ArtifactRevision } from '@/components/result-studio/resultStudioClient';
 import { shouldShowDeliveryCard, shouldShowWorkflowBar } from '@/components/result-studio/resultFirstScreen';
 import { nextResultBodyState, type ResultBodyState } from '@/components/result-studio/resultBodyState';
 import { getResultScrollPosition, setResultScrollPosition } from '@/components/result-studio/resultScrollMemory';
@@ -101,6 +101,7 @@ import {
   RESULT_SURFACE_PERFORMANCE_MARKS,
   resolveResultArtifactUrl,
   resolveResultViewerAdapter,
+  type ResultSurfaceMode,
 } from '@/components/result-studio/resultSurface';
 import type { BackendStatus } from '@/lib/electron';
 import { getBridge } from '@/lib/desktopBridge';
@@ -439,7 +440,7 @@ export function ProjectWorkspace(): React.ReactElement {
   const resultPanelRestoreRef = useRef<{ leftOpen: boolean; rightOpen: boolean } | null>(null);
 
   useEffect(() => {
-    const resultProjection = workspaceMode === 'result' || workspaceMode === 'compare';
+    const resultProjection = workspaceMode === 'result' || workspaceMode === 'compare' || workspaceMode === 'history';
     if (resultProjection) {
       if (!resultPanelRestoreRef.current) {
         resultPanelRestoreRef.current = { leftOpen, rightOpen };
@@ -505,8 +506,8 @@ export function ProjectWorkspace(): React.ReactElement {
   // Bidirectional sync: setWorkspaceMode + URL param. Exists here (not in
   // useWorkspaceRouting) because project-workspace owns workspaceMode state.
   const updateWorkspaceMode = useCallback((nextMode: WorkspaceMode, replace = true, jobId?: string | null) => {
-    const currentIsResult = workspaceMode === 'result' || workspaceMode === 'compare';
-    const nextIsResult = nextMode === 'result' || nextMode === 'compare';
+    const currentIsResult = workspaceMode === 'result' || workspaceMode === 'compare' || workspaceMode === 'history';
+    const nextIsResult = nextMode === 'result' || nextMode === 'compare' || nextMode === 'history';
     if (nextIsResult && !currentIsResult) {
       // Capture the conversation layout before result-opening handlers enqueue
       // their own panel changes. React batches those setters, so waiting for the
@@ -522,7 +523,7 @@ export function ProjectWorkspace(): React.ReactElement {
     const nextParams = new URLSearchParams(searchParams);
     if (nextMode === 'chat') nextParams.delete('mode');
     else nextParams.set('mode', nextMode);
-    if ((nextMode === 'scheduled' || nextMode === 'result' || nextMode === 'compare') && jobId) {
+    if ((nextMode === 'scheduled' || nextMode === 'result' || nextMode === 'compare' || nextMode === 'history') && jobId) {
       nextParams.set('job', jobId);
     }
     else nextParams.delete('job');
@@ -1073,7 +1074,8 @@ export function ProjectWorkspace(): React.ReactElement {
       summaryCardOpen ||
       (rightOpen && rightTab === 'results') ||
       workspaceMode === 'result' ||
-      workspaceMode === 'compare'
+      workspaceMode === 'compare' ||
+      workspaceMode === 'history'
     ),
     workflowRefreshKey,
   );
@@ -1323,7 +1325,7 @@ export function ProjectWorkspace(): React.ReactElement {
       }
       if (
         activeJobId === requestedJobId &&
-        (workspaceMode === 'result' || workspaceMode === 'compare' || workspaceMode === 'chat')
+        (workspaceMode === 'result' || workspaceMode === 'compare' || workspaceMode === 'history' || workspaceMode === 'chat')
       ) return;
       if (autoOpenedJobRef.current === requestedJobId) return;
       autoOpenedJobRef.current = requestedJobId;
@@ -2984,6 +2986,8 @@ function ResultArtifactShell({
   pendingArtifactName = null,
   onPendingArtifactConsumed,
   onOpenBrowser,
+  mode = 'result',
+  onModeChange,
 }: {
   project: Project;
   conversationId?: string | null;
@@ -3003,6 +3007,8 @@ function ResultArtifactShell({
   onPendingArtifactConsumed?: () => void;
   /** Opens a generated delivery report in the right-side Electron webview. */
   onOpenBrowser?: (url: string) => void;
+  mode?: ResultSurfaceMode;
+  onModeChange?: (mode: ResultSurfaceMode, jobId?: string | null) => void;
 }): React.ReactElement {
   const { resolvedTheme } = useTheme();
   const [result, setResult] = useState<JobResult | null>(null);
@@ -3030,6 +3036,13 @@ function ResultArtifactShell({
   const [previewLoading, setPreviewLoading] = useState(false);
   // RS3：交互清单由后端基于完整文件判定（稳定 ID 列、可选维度），前端只消费。
   const [interactionRevision, setInteractionRevision] = useState<ArtifactRevision | null>(null);
+  // P4R-4: a historical Revision can share its Job with a later restored
+  // Revision. Keep the clicked identity as disposable view state and pass it
+  // explicitly to the interaction route; do not infer it from job+artifact.
+  const [viewedRevision, setViewedRevision] = useState<ArtifactRevision | null>(null);
+  useEffect(() => {
+    setViewedRevision(null);
+  }, [job?.id]);
   const [interactionManifest, setInteractionManifest] = useState<ArtifactInteractionManifest | null>(null);
   const [interactionBackingTable, setInteractionBackingTable] = useState<ResultTableQuery | null>(null);
   const [artifactSelection, setArtifactSelection] = useState<ArtifactSelection | null>(null);
@@ -3281,10 +3294,15 @@ function ResultArtifactShell({
       null
     );
   }, [artifacts, coreArtifacts, pendingArtifactName, preferredArtifactName, selectedName]);
-  const selectedArtifactName = selectedArtifact?.name || '';
-  const selectedArtifactUrl = selectedArtifact
-    ? resolveResultArtifactUrl(selectedArtifact.url, buildUrl(selectedArtifact.name))
+  const viewedArtifactName = viewedRevision
+    ? viewedRevision.outputPath.split('/').pop() || viewedRevision.artifactId
     : '';
+  const selectedArtifactName = viewedArtifactName || selectedArtifact?.name || '';
+  const selectedArtifactUrl = viewedRevision
+    ? revisionArtifactUrl(viewedRevision.revisionId)
+    : selectedArtifact
+      ? resolveResultArtifactUrl(selectedArtifact.url, buildUrl(selectedArtifact.name))
+      : '';
   const selectedArtifactKind = selectedArtifact ? classifyArtifact(selectedArtifact) : 'file';
   const selectedArtifactLabel = selectedArtifact
     ? selectedArtifact.label || selectedArtifact.title || selectedArtifact.name
@@ -3389,10 +3407,11 @@ function ResultArtifactShell({
     // 于是一次刷新失败就会永久丢掉交互视图——次级失败降级了主体能力。
     // 清空本身的理由（旧选择属于旧 artifact）依然成立，只是收窄到它真正适用的条件。
     // 见 components/result-studio/resultBodyState.ts。
-    const manifestKey = `${job?.id || ''}::${selectedArtifactName || ''}`;
+    const manifestKey = `${viewedRevision?.revisionId || 'current'}::${viewedRevision?.toolJobId || job?.id || ''}::${selectedArtifactName || ''}`;
     if (manifestArtifactRef.current !== manifestKey) {
       manifestArtifactRef.current = manifestKey;
       setInteractionManifest(null);
+      setInteractionRevision(null);
       setInteractionBackingTable(null);
       setArtifactSelection(null);
       visibleSelectionRef.current = null;
@@ -3406,8 +3425,9 @@ function ResultArtifactShell({
       try {
         const data = await fetchArtifactInteraction({
           language: lang,
-          jobId: job.id,
+          jobId: viewedRevision?.toolJobId || job.id,
           artifact: selectedArtifactName,
+          revisionId: viewedRevision?.revisionId || null,
         });
         if (cancelled) return;
         if (data?.manifest) {
@@ -3436,7 +3456,7 @@ function ResultArtifactShell({
       cancelled = true;
       if (selectionMutationEpochRef.current === epoch) selectionMutationEpochRef.current += 1;
     };
-  }, [conversationId, effectiveJobStatus, job?.id, lang, project.id, selectedArtifactKind, selectedArtifactName]);
+  }, [conversationId, effectiveJobStatus, job?.id, lang, project.id, selectedArtifactKind, selectedArtifactName, viewedRevision]);
 
   const handleSelectionChange = useCallback((next: ArtifactSelection | null) => {
     const epoch = selectionMutationEpochRef.current;
@@ -3510,26 +3530,26 @@ function ResultArtifactShell({
       return;
     }
     const artifact: ActiveArtifact = {
-      jobId: job.id,
+      jobId: viewedRevision?.toolJobId || job.id,
       toolId: job.tool_id,
-      name: selectedArtifact.name,
+      name: selectedArtifactName,
       type: selectedArtifact.type || selectedArtifactKind,
       label: selectedArtifact.label || selectedArtifact.title,
       url: selectedArtifactUrl,
       // RS3 semantic 维度：来自后端基于完整文件产出的交互清单。
       // 清单还没到（或该类型不支持交互）时保持 null，不猜测。
       semanticKind: selectedArtifactKind,
-      revisionId: interactionManifest?.revisionId ?? null,
-      revisionOrdinal: interactionRevision?.revisionOrdinal ?? null,
-      artifactFamilyId: interactionManifest?.artifactFamilyId ?? null,
+      revisionId: viewedRevision?.revisionId ?? interactionManifest?.revisionId ?? null,
+      revisionOrdinal: viewedRevision?.revisionOrdinal ?? interactionRevision?.revisionOrdinal ?? null,
+      artifactFamilyId: viewedRevision?.artifactFamilyId ?? interactionManifest?.artifactFamilyId ?? null,
       entityType: interactionManifest?.entityType ?? null,
       idField: interactionManifest?.idField ?? null,
       selectionDurable: interactionManifest?.selectionDurable ?? false,
       interactionCapabilities: interactionManifest?.capabilities ?? [],
       selection: artifactSelection,
       selectionId: artifactSelection?.selectionId || null,
-      truthStatus: result?.deliveryManifest?.status ?? null,
-      conclusion: result?.deliveryManifest?.summary?.conclusion ?? null,
+      truthStatus: viewedRevision?.validationStatus ?? result?.deliveryManifest?.status ?? null,
+      conclusion: viewedRevision && !viewedRevision.isCurrent ? null : result?.deliveryManifest?.summary?.conclusion ?? null,
     };
     // 身份比较必须覆盖 revision 与 selection：只比 jobId+name 会让
     // "同一文件换了版本" 或 "用户改了选择" 无法向上传播。
@@ -3559,6 +3579,7 @@ function ResultArtifactShell({
     selectedArtifact,
     selectedArtifactKind,
     selectedArtifactUrl,
+    viewedRevision,
   ]);
 
   useEffect(() => {
@@ -3617,7 +3638,7 @@ function ResultArtifactShell({
       return (
         <ScientificInteractionViewer
           language={lang}
-          jobId={job!.id}
+          jobId={viewedRevision?.toolJobId || job!.id}
           artifactName={selectedArtifactName}
           manifest={interactionManifest}
           backingTable={interactionBackingTable}
@@ -3907,15 +3928,30 @@ function ResultArtifactShell({
 
   const shellBody = (
     <>
-      {workflowBar}
-      {recoveryConfirmation}
+      {mode === 'result' && workflowBar}
+      {mode === 'result' && recoveryConfirmation}
       {interactionManifest?.artifactFamilyId && (
         <ResultStudioChangeSetPanel
           projectId={project.id}
           artifactFamilyId={interactionManifest.artifactFamilyId}
           activeRevisionId={interactionManifest.revisionId}
+          mode={mode}
+          onModeChange={(nextMode) => onModeChange?.(nextMode, job.id)}
+          onRevisionViewed={(revision) => {
+            if (!revision.toolJobId) return;
+            setViewedRevision(revision);
+            setArtifactSelection(null);
+            visibleSelectionRef.current = null;
+            committedSelectionRef.current = null;
+            onModeChange?.('result', job.id);
+          }}
           onRevisionActivated={(revision) => {
             if (!revision.toolJobId) return;
+            setViewedRevision(revision);
+            setArtifactSelection(null);
+            visibleSelectionRef.current = null;
+            committedSelectionRef.current = null;
+            onModeChange?.('result', revision.toolJobId);
             dispatchBioF3Event(biof3Events.projectOpenArtifact, {
               projectId: project.id,
               jobId: revision.toolJobId,
@@ -3925,6 +3961,13 @@ function ResultArtifactShell({
           }}
         />
       )}
+      {mode === 'result' && (
+      viewedRevision && !viewedRevision.isCurrent ? (
+        <section className={styles.resultReportSection} data-viewing="historical-revision">
+          <div className={styles.resultSidebarPreviewBody}>{renderPreview()}</div>
+        </section>
+      ) : (
+      <>
       {result.deliveryManifest && (
         <section className={styles.resultScientificDelivery} data-status={result.deliveryManifest.status}>
           <div className={styles.resultScientificDeliveryHeader}>
@@ -4050,6 +4093,7 @@ function ResultArtifactShell({
                           className={`${styles.resultReportArtifactTab} ${active ? styles.resultReportArtifactTabActive : ''}`}
                           onClick={() => {
                             beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.artifactStart);
+                            setViewedRevision(null);
                             setSelectedName(artifact.name);
                             if (activeSection) setSelectedSectionId(activeSection.id);
                           }}
@@ -4106,6 +4150,7 @@ function ResultArtifactShell({
                             className={styles.resultReportSectionButton}
                             onClick={() => {
                               beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.artifactStart);
+                              setViewedRevision(null);
                               setSelectedSectionId(section.id);
                               const landingName = chooseResultSectionLandingName(section.artifacts);
                               if (landingName) setSelectedName(landingName);
@@ -4164,6 +4209,9 @@ function ResultArtifactShell({
           </div>
         )}
       </section>
+      </>
+      )
+      )}
     </>
   );
 
@@ -4192,6 +4240,8 @@ export function ResultView({
   pendingArtifactName = null,
   onPendingArtifactConsumed,
   onOpenBrowser,
+  mode = 'result',
+  onModeChange,
 }: {
   project: Project;
   conversationId?: string | null;
@@ -4204,6 +4254,8 @@ export function ResultView({
   pendingArtifactName?: string | null;
   onPendingArtifactConsumed?: () => void;
   onOpenBrowser?: (url: string) => void;
+  mode?: ResultSurfaceMode;
+  onModeChange?: (mode: ResultSurfaceMode, jobId?: string | null) => void;
 }): React.ReactElement {
   return (
     <ResultArtifactShell
@@ -4218,6 +4270,8 @@ export function ResultView({
       pendingArtifactName={pendingArtifactName}
       onPendingArtifactConsumed={onPendingArtifactConsumed}
       onOpenBrowser={onOpenBrowser}
+      mode={mode}
+      onModeChange={onModeChange}
     />
   );
 }

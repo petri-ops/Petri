@@ -19,7 +19,7 @@
 
 import { strict as assert } from 'node:assert';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { after, before, describe, test } from 'node:test';
@@ -98,6 +98,15 @@ function bindingWriteFingerprint(dbPath, projectId) {
     projectId,
   );
   return rows && rows.length ? rows[0] : null;
+}
+
+function resultStudioWriteFingerprint(dbPath, projectId) {
+  return {
+    changeSets: query(dbPath, 'select change_set_id, status, updated_at from scientific_change_sets where project_id = ? order by change_set_id', projectId),
+    revisions: query(dbPath, 'select revision_id, is_current from artifact_revisions where project_id = ? order by revision_id', projectId),
+    bindings: query(dbPath, 'select project_id, status, updated_at from git_repository_bindings where project_id = ? order by project_id', projectId),
+    checkpoints: query(dbPath, 'select checkpoint_id, checkpoint_hash from workspace_revision_checkpoints where project_id = ? order by checkpoint_id', projectId),
+  };
 }
 
 describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }, () => {
@@ -204,6 +213,30 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
       before,
       'a read-only route must not rewrite the repository binding row',
     );
+  });
+
+  test('2c: the first version-list GET does not initialize a managed Git repository or SQLite state', async () => {
+    const projectId = `${ctx.projectId}_readonly`;
+    const workspace = path.join(ctx.root, 'readonly-version-project');
+    mkdirSync(workspace, { recursive: true });
+    const Database = require(require.resolve('better-sqlite3', {
+      paths: [path.join(REPO_ROOT, 'core', 'r-server'), REPO_ROOT],
+    }));
+    const writable = new Database(ctx.env.BIOF3_DB_PATH);
+    try {
+      const now = new Date().toISOString();
+      writable.prepare(`insert into projects
+        (id, name, description, created_at, updated_at, modality, workspace_path, status)
+        values (?, ?, '', ?, ?, 'bulk', ?, 'active')`)
+        .run(projectId, 'read-only version fixture', now, now, workspace);
+    } finally {
+      writable.close();
+    }
+    const before = resultStudioWriteFingerprint(ctx.env.BIOF3_DB_PATH, projectId);
+    const response = await fetch(`${ctx.baseUrl}/api/result-studio/changesets?projectId=${projectId}&artifactFamilyId=missing-family`);
+    assert.equal(response.status, 200);
+    assert.deepEqual(resultStudioWriteFingerprint(ctx.env.BIOF3_DB_PATH, projectId), before);
+    assert.equal(existsSync(path.join(workspace, '.biof3', 'git')), false, 'a GET must not initialize .biof3/git');
   });
 
   // ── 3 ─────────────────────────────────────────────────────────────────────

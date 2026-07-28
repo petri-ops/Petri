@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * G0-RS-P4R-1 / P4R-2 / P4R-3 验收 — Fast Result Path、Focused Result
- * Surface 与 Agent-first Editing。
+ * G0-RS-P4R-1 / P4R-2 / P4R-3 / P4R-4 验收 — Fast Result Path、Focused
+ * Result Surface、Agent-first Editing 与 Version/Change Review。
  *
  * 证据类型：真实服务端测量（与 P4R-0 冻结基线对比）+ 前端纯模块行为断言。
  * **不含**任何布局、主题或像素判定：vitest 在 happy-dom 下运行，
@@ -37,6 +37,9 @@ const sourceFiles = {
   gitAdapter: 'core/shared-backend/git-adapter.js',
   lifecycle: 'core/shared-backend/result-studio-lifecycle.js',
   routes: 'core/r-server/routes/result-studio.js',
+  repository: 'core/shared-backend/result-studio-repository.js',
+  changeSetService: 'core/shared-backend/result-changeset-service.js',
+  compareService: 'core/shared-backend/result-compare-service.js',
   bodyState: 'frontend/src/components/result-studio/resultBodyState.ts',
   bodyStateSpec: 'frontend/src/components/result-studio/resultBodyState.test.ts',
   firstScreen: 'frontend/src/components/result-studio/resultFirstScreen.ts',
@@ -58,6 +61,12 @@ const sourceFiles = {
   resultStudioSurface: 'frontend/src/components/result-studio/ResultStudioSurface.tsx',
   resultStudioSurfaceStyle: 'frontend/src/components/result-studio/ResultStudioSurface.module.css',
   resultStudioSurfaceSpec: 'frontend/src/components/result-studio/ResultStudioSurface.test.tsx',
+  changeSetPanel: 'frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx',
+  changeSetPanelStyle: 'frontend/src/components/result-studio/ResultStudioChangeSetPanel.module.css',
+  changeSetPanelSpec: 'frontend/src/components/result-studio/ResultStudioChangeSetPanel.test.tsx',
+  resultStudioClient: 'frontend/src/components/result-studio/resultStudioClient.ts',
+  versionRole: 'frontend/src/components/result-studio/resultVersionRole.ts',
+  versionRoleSpec: 'frontend/src/components/result-studio/resultVersionRole.test.ts',
   copilotAskDeliverySpec: 'frontend/src/components/result-studio/copilotAskDelivery.test.tsx',
   centerPanelSpec: 'frontend/src/components/workspace-panels/CenterPanel.test.tsx',
   copilotContext: 'frontend/src/lib/copilotContext.ts',
@@ -72,6 +81,9 @@ const sourceFiles = {
   conversationRunStoreSpec: 'frontend/src/components/copilot/conversationRunStore.test.ts',
   simpleChatProgressSpec: 'frontend/src/components/copilot/SimpleChat.progress.test.ts',
   contextClient: 'frontend/src/lib/result-studio-interaction-client.ts',
+  contextClientSpec: 'frontend/src/lib/result-studio-interaction-client.test.ts',
+  workspaceRouting: 'frontend/src/hooks/useWorkspaceRouting.ts',
+  workspaceRoutingSpec: 'frontend/src/hooks/useWorkspaceRouting.test.ts',
   contextContract: 'core/shared-backend/result-studio-context.js',
   resultEditIntent: 'core/shared-backend/result-edit-intent.js',
   resultEditControls: 'core/shared-backend/result-edit-controls.js',
@@ -86,6 +98,9 @@ const sourceFiles = {
   agentBindingSpec: 'test/result-studio-agent-binding.test.mjs',
   systemPromptSpec: 'test/system-prompt-result-context.test.mjs',
   resultStudioContextSpec: 'test/result-studio-context.test.mjs',
+  resultCompareSpec: 'test/result-compare-service.test.mjs',
+  resultRepositorySpec: 'test/result-studio-repository.test.mjs',
+  resultChangeSetSpec: 'test/result-changeset-service.test.mjs',
   resultEditAgentToolSpec: 'test/result-edit-agent-tool.test.mjs',
   agentToolPolicySpec: 'test/agent-tool-policy.test.mjs',
   agentToolRegistrySpec: 'test/agent-tool-registry.test.mjs',
@@ -115,12 +130,16 @@ const FRONTEND_SPECS = [
   'src/components/result-studio/ResultAgentComposer.test.tsx',
   'src/components/result-studio/ResultEditPanel.test.tsx',
   'src/components/result-studio/ResultStudioSurface.test.tsx',
+  'src/components/result-studio/ResultStudioChangeSetPanel.test.tsx',
+  'src/components/result-studio/resultVersionRole.test.ts',
   'src/components/workspace-panels/CenterPanel.test.tsx',
   'src/components/workspace-panels/RightPanel.test.tsx',
   'src/lib/result-edit-agent-bridge.test.ts',
   'src/components/copilot/copilotClient.test.ts',
   'src/components/copilot/conversationRunStore.test.ts',
   'src/components/copilot/SimpleChat.progress.test.ts',
+  'src/hooks/useWorkspaceRouting.test.ts',
+  'src/lib/result-studio-interaction-client.test.ts',
 ];
 
 const NODE_SPECS = [
@@ -130,6 +149,9 @@ const NODE_SPECS = [
   'test/result-edit-agent-tool.test.mjs',
   'test/agent-tool-policy.test.mjs',
   'test/agent-tool-registry.test.mjs',
+  'test/result-compare-service.test.mjs',
+  'test/result-studio-repository.test.mjs',
+  'test/result-changeset-service.test.mjs',
 ];
 
 const REQUIRED_P4R3_FRONTEND_SPECS = Object.freeze([
@@ -151,6 +173,22 @@ const REQUIRED_P4R3_NODE_SPECS = Object.freeze([
   'test/result-edit-agent-tool.test.mjs',
   'test/agent-tool-policy.test.mjs',
   'test/agent-tool-registry.test.mjs',
+]);
+
+const REQUIRED_P4R4_FRONTEND_SPECS = Object.freeze([
+  'src/components/result-studio/ResultStudioChangeSetPanel.test.tsx',
+  'src/components/result-studio/ResultStudioSurface.test.tsx',
+  'src/components/result-studio/resultMode.test.ts',
+  'src/components/result-studio/resultVersionRole.test.ts',
+  'src/hooks/useWorkspaceRouting.test.ts',
+  'src/lib/result-studio-interaction-client.test.ts',
+]);
+
+const REQUIRED_P4R4_NODE_SPECS = Object.freeze([
+  'test/result-studio-context.test.mjs',
+  'test/result-compare-service.test.mjs',
+  'test/result-studio-repository.test.mjs',
+  'test/result-changeset-service.test.mjs',
 ]);
 
 /** Client metrics the plan asks for that nothing in this repo can produce. */
@@ -296,14 +334,35 @@ function inspect(verification, observation) {
         && node.specCount === NODE_SPECS.length,
       [sourceFiles.acceptanceScript, sourceFiles.packageScripts],
       'Every executed frontend and Node spec is source-hashed, including the exact required P4R-3 UI, bridge, persistence, prompt, context and interceptor set.'),
+
+    // ── P4R-4 ────────────────────────────────────────────────────────────
+    item('RS-P4R4-1',
+      frontend.exitCode === 0 && frontend.filesPassed === frontend.specCount && frontend.testsPassed > 0
+        && REQUIRED_P4R4_FRONTEND_SPECS.every((spec) => FRONTEND_SPECS.includes(spec)),
+      [sourceFiles.changeSetPanelSpec, sourceFiles.versionRoleSpec, sourceFiles.workspaceRoutingSpec],
+      'Version roles, read-only view actions, explicit Revision interaction binding and reachable Result/Compare/History surfaces executed as frontend tests.'),
+
+    item('RS-P4R4-2',
+      node.exitCode === 0 && node.testsObserved > 0 && node.testsPassed === node.testsObserved
+        && REQUIRED_P4R4_NODE_SPECS.every((spec) => NODE_SPECS.includes(spec)),
+      [sourceFiles.resultCompareSpec, sourceFiles.resultRepositorySpec, sourceFiles.resultStudioContextSpec],
+      'Family pagination, trusted review metadata, viewed-Revision selection binding, parameter drift and cross-store checkpoint rollback executed as Node tests.'),
+
+    item('RS-P4R4-3',
+      FRONTEND_SPECS.every((spec) => Object.values(sourceFiles).includes(`frontend/${spec}`))
+        && NODE_SPECS.every((spec) => Object.values(sourceFiles).includes(spec))
+        && frontend.specCount === FRONTEND_SPECS.length
+        && node.specCount === NODE_SPECS.length,
+      [sourceFiles.acceptanceScript, sourceFiles.packageScripts],
+      'Every P4R-4 implementation and executed spec is source-hashed; no untracked test outcome can underwrite the evidence.'),
   ];
 
   return {
     schemaVersion: 1,
-    workPackage: 'G0-RS-P4R-1/P4R-2/P4R-3',
+    workPackage: 'G0-RS-P4R-1/P4R-2/P4R-3/P4R-4',
     captureMode: 'real_chain_server_measurement_plus_frontend_and_agent_binding_contracts',
     qualificationEligible: false,
-    qualificationReason: 'P4R-1 through P4R-3 deliver a faster read path, focused surface and context-bound Agent-first editing implementation. No Provider, layout, theme or pixel claim is made, and Result Studio product qualification remains reserved for P7.',
+    qualificationReason: 'P4R-1 through P4R-4 deliver a faster read path, focused surface, context-bound Agent-first editing and read-only version/change review implementation. No Provider, layout, theme or pixel claim is made, and Result Studio product qualification remains reserved for P7.',
     privacy: 'repository_relative_paths_digests_counts_timings_and_bounded_statuses_only',
     sourceHashes: sourceHashes(),
     frozenBaseline: { capturedAtCommit: FROZEN_BASELINE.capturedAtCommit, revisionCount: FROZEN_BASELINE.revisionCount },
@@ -375,7 +434,7 @@ try {
     if (!report.passed) throw new Error(report.checks.filter((c) => !c.passed).map((c) => c.id).join(','));
     mkdirSync(dirname(evidencePath), { recursive: true });
     writeFileSync(evidencePath, `${JSON.stringify(report, null, 2)}\n`);
-    console.log(`[G0-RS-P4R-1/2/3] PASS — evidence updated (${report.checks.length}/${report.checks.length})`);
+    console.log(`[G0-RS-P4R-1/2/3/4] PASS — evidence updated (${report.checks.length}/${report.checks.length})`);
     for (const row of report.improvementVsBaseline) {
       if (row.deltaPct !== null) console.log(`  ${row.id.padEnd(18)} ${String(row.baselineWarmMs).padStart(8)}ms -> ${String(row.currentWarmMs).padStart(8)}ms  ${row.deltaPct}%`);
     }
@@ -388,11 +447,11 @@ try {
       || !stored.sourceCommitMatchesSourceHashes
       || !storedCommit.reachable || storedCommit.mismatches.length > 0
       || JSON.stringify(stored.sourceHashes) !== JSON.stringify(current.sourceHashes)) {
-      throw new Error('stored G0-RS-P4R-1/2/3 evidence is stale or invalid');
+      throw new Error('stored G0-RS-P4R-1/2/3/4 evidence is stale or invalid');
     }
-    console.log(`[G0-RS-P4R-1/2/3] PASS — ${current.checks.length}/${current.checks.length}`);
+    console.log(`[G0-RS-P4R-1/2/3/4] PASS — ${current.checks.length}/${current.checks.length}`);
   }
 } catch (error) {
-  console.error(`[G0-RS-P4R-1/2/3] FAIL — ${error.message}`);
+  console.error(`[G0-RS-P4R-1/2/3/4] FAIL — ${error.message}`);
   process.exitCode = 1;
 }

@@ -283,6 +283,18 @@ function createResultStudioRepository(db, options = {}) {
       return rows.map(rowToChangeSet);
     },
 
+    listChangeSetsByArtifactFamily({ projectId, artifactFamilyId, limit = 100, offset = 0 } = {}) {
+      const bounded = Number.isInteger(limit) && limit > 0 && limit <= 500 ? limit : 100;
+      const skipped = Number.isInteger(offset) && offset >= 0 ? offset : 0;
+      if (!projectId || !artifactFamilyId) return [];
+      return db.prepare(`SELECT DISTINCT cs.* FROM scientific_change_sets cs
+          INNER JOIN artifact_revisions revision ON revision.change_set_id = cs.change_set_id
+          WHERE cs.project_id = ? AND revision.project_id = ? AND revision.artifact_family_id = ?
+          ORDER BY cs.created_at DESC LIMIT ? OFFSET ?`)
+        .all(projectId, projectId, artifactFamilyId, bounded, skipped)
+        .map(rowToChangeSet);
+    },
+
     /**
      * 状态迁移。非法迁移抛错；终态到自身视为幂等 no-op。
      */
@@ -402,11 +414,20 @@ function createResultStudioRepository(db, options = {}) {
       );
     },
 
-    listRevisions({ artifactFamilyId, limit = 100 } = {}) {
+    listRevisions({ artifactFamilyId, projectId = null, limit = 100, offset = 0, order = 'asc' } = {}) {
       const bounded = Number.isInteger(limit) && limit > 0 && limit <= 1000 ? limit : 100;
-      return db.prepare(`SELECT * FROM artifact_revisions WHERE artifact_family_id = ?
-          ORDER BY revision_ordinal ASC LIMIT ?`)
-        .all(artifactFamilyId, bounded)
+      const skipped = Number.isInteger(offset) && offset >= 0 ? offset : 0;
+      const direction = order === 'desc' ? 'DESC' : 'ASC';
+      const sql = projectId
+        ? `SELECT * FROM artifact_revisions WHERE artifact_family_id = ? AND project_id = ?
+            ORDER BY revision_ordinal ${direction} LIMIT ? OFFSET ?`
+        : `SELECT * FROM artifact_revisions WHERE artifact_family_id = ?
+            ORDER BY revision_ordinal ${direction} LIMIT ? OFFSET ?`;
+      const args = projectId
+        ? [artifactFamilyId, projectId, bounded, skipped]
+        : [artifactFamilyId, bounded, skipped];
+      return db.prepare(sql)
+        .all(...args)
         .map(rowToRevision);
     },
 
@@ -418,10 +439,13 @@ function createResultStudioRepository(db, options = {}) {
         .map(rowToRevision);
     },
 
-    getCurrentRevision(artifactFamilyId) {
+    getCurrentRevision(artifactFamilyId, projectId = null) {
       return rowToRevision(
-        db.prepare('SELECT * FROM artifact_revisions WHERE artifact_family_id = ? AND is_current = 1')
-          .get(artifactFamilyId)
+        projectId
+          ? db.prepare('SELECT * FROM artifact_revisions WHERE artifact_family_id = ? AND project_id = ? AND is_current = 1')
+            .get(artifactFamilyId, projectId)
+          : db.prepare('SELECT * FROM artifact_revisions WHERE artifact_family_id = ? AND is_current = 1')
+            .get(artifactFamilyId)
       );
     },
 
@@ -477,8 +501,8 @@ function createResultStudioRepository(db, options = {}) {
         for (const rev of revisions) {
           // 先清空同 family 的旧 current，再置新 current；
           // partial unique index 保证任何中间态都不会出现两个 current。
-          db.prepare('UPDATE artifact_revisions SET is_current = 0 WHERE artifact_family_id = ? AND is_current = 1')
-            .run(rev.artifactFamilyId);
+          db.prepare('UPDATE artifact_revisions SET is_current = 0 WHERE artifact_family_id = ? AND project_id = ? AND is_current = 1')
+            .run(rev.artifactFamilyId, rev.projectId);
           db.prepare('UPDATE artifact_revisions SET is_current = 1 WHERE revision_id = ?').run(rev.revisionId);
         }
         db.prepare(`UPDATE scientific_change_sets SET
@@ -534,9 +558,9 @@ function createResultStudioRepository(db, options = {}) {
           for (const rev of revisions) {
             db.prepare('UPDATE artifact_revisions SET is_current = 0 WHERE revision_id = ?').run(rev.revisionId);
             const previous = db.prepare(`SELECT * FROM artifact_revisions
-                WHERE artifact_family_id = ? AND revision_ordinal < ? AND validation_status <> 'blocked'
+                WHERE artifact_family_id = ? AND project_id = ? AND revision_ordinal < ? AND validation_status <> 'blocked'
                 ORDER BY revision_ordinal DESC LIMIT 1`)
-              .get(rev.artifactFamilyId, rev.revisionOrdinal);
+              .get(rev.artifactFamilyId, rev.projectId, rev.revisionOrdinal);
             if (previous) {
               db.prepare('UPDATE artifact_revisions SET is_current = 1 WHERE revision_id = ?').run(previous.revision_id);
               restored.push(previous.revision_id);

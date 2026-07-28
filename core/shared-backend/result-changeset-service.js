@@ -690,6 +690,14 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
         sourceArtifactPreserved: true,
         scriptSha256: materialized.scriptSha256,
         outputSha256: outputHash,
+        // P4R-4 review projection: bounded user-facing intent and impact come
+        // from the validated, server-trusted ResultEditIntent. The UI must not
+        // guess them from an opaque intentRef or a Git message.
+        intentSummary: input.intent.requestedOutcome.slice(0, 500),
+        impactLevel: input.intent.editClass,
+        affectedScope: input.intent.affectedScope || 'unknown',
+        requiresJob: input.intent.requiresJob,
+        affectedNodeCount: Array.isArray(input.intent.affectedNodeIds) ? input.intent.affectedNodeIds.length : 0,
       },
     }).changeSet;
     emit('revision', 'completed', { revisionId: revision.revisionId });

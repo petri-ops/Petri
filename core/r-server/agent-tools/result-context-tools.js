@@ -190,8 +190,9 @@ function resolveResultStudioContext(ctx = {}, dependencies = {}) {
     ? descriptor.interactionMappings.find((item) => item && item.artifactId === revision.artifactId) || null
     : null;
   const currentRevision = repository.getCurrentRevision(revision.artifactFamilyId);
-
-  // 选择：从 SQLite 权威恢复，再按当前 Revision 判定兼容性。
+  // 选择：从 SQLite 权威恢复，再按用户正在查看的 Revision 判定兼容性。
+  // 历史查看不能借 current 的 selection，也不能把历史版本自己的 selection
+  // 错判为 stale；contextToken 必须绑定 viewed revision，而不是正式 current。
   const persistedSelection = repository.findLatestSelection({
     projectId,
     conversationId: trimmed(ctx.conversationId) || null,
@@ -203,7 +204,7 @@ function resolveResultStudioContext(ctx = {}, dependencies = {}) {
       selection: persistedSelection,
       projectId,
       artifactId: revision.artifactId,
-      revisionId: currentRevision ? currentRevision.revisionId : revision.revisionId,
+      revisionId: revision.revisionId,
       selectionDurable: persistedSelection.displayState?.durable !== false,
     });
     const summary = summarizeSelection(persistedSelection);
