@@ -2,7 +2,7 @@
 
 最后更新：2026-07-28
 
-状态：`active / implemented_unverified`（RS0～RS8 引擎基础与完整 P4R 已真实收口；G0-CHF0 审计修复已重新真实收口；`G0-RS-P5` 已解锁但尚未启动）
+状态：`active / implemented_unverified`（RS0～RS8 引擎基础与完整 P4R 已真实收口；G0-CHF0 审计修复已重新真实收口；`G0-RS-P5` 进行中）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -1689,6 +1689,10 @@ P4R 只有在 P4R-0～P4R-6 串行完成、所有声明证据当前、`docs:reco
 
 ### G0-RS-P5：Real Scientific Editing 与科学差异
 
+状态：`in_progress`（2026-07-28）。
+
+启动边界：P5 先以 SQLite、Job 与 Workflow Truth 建立可验证的权威持久 DAG 投影；在该投影及其下游影响证明缺失时，科学、数据和流程编辑必须继续 fail-closed。不得以模型提供的 `workflowPlan`、fixture 或 seeded Revision/ChangeSet/数据库替代这条真相链。P6 的 Provider/压力恢复与 P7 的 packaged/资格重新裁决仍不在本阶段范围。
+
 目标：证明 Result Studio 可以修改真实科学结果，而不只是操作版本元数据。
 
 首批真实任务：
@@ -1817,7 +1821,7 @@ G0-RS-P0 Truth Correction
 
 阶段状态规则：
 
-- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3`、`G0-RS-RH0` 与 P4R-0～P4R-6 已完成。P4R 已解锁 P5；启动 P5 前必须按本计划另立该阶段 Goal。
+- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3`、`G0-RS-RH0` 与 P4R-0～P4R-6 已完成；`G0-RS-P5` 已于 2026-07-28 建立 Goal 并处于 `in_progress`。P5 收口前不得启动 P6/P7。
 - 每阶段先补失败测试/fixture，再实现，再形成与证据类型匹配的验收；不得提前开发下一阶段。
 - 单元测试证明契约，fixture 证明确定性集成，真实 Provider 证明模型边界，packaged Electron 证明产品链；四者不能互相替代。
 - 未运行 `npm run docs:reconcile` 与 `npm run docs:check` 不得宣布阶段 completed/verified/qualified。
@@ -1834,7 +1838,7 @@ G0-RS-P0 Truth Correction
 5. [x] 捕获当前真实产品基线，不把截图存在等同于操作通过。
 6. [x] 跑专项、G0、文档、UI 和全量测试；根门禁在最终文档收口后复跑。
 
-`G0-RS-P1`～`G0-RS-P3` 已按本节证据收口；`G0-RS-P4 Core` 已形成离线实现检查点但真实候选等价性仍未验证。`G0-RS-RH0` 已完成仓库治理门，当前 Goal 转入 P4R，不得提前进入 P5～P7。
+`G0-RS-P1`～`G0-RS-P3` 已按本节证据收口；`G0-RS-P4 Core` 已形成离线实现检查点但真实候选等价性仍未验证。`G0-RS-RH0` 已完成仓库治理门，P4R 已完整收口，当前 Goal 为 P5；不得提前进入 P6/P7。
 
 `G0-RS-P2` 交付结果：
 

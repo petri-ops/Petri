@@ -37,7 +37,7 @@ LF12 完成记录为 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseli
 
 2026-07-24 后续治理收口：新增文档生命周期治理层（[`document-governance.md`](./document-governance.md)、[`worktree-governance.md`](./worktree-governance.md)、[`DOC-REGISTRY.json`](./DOC-REGISTRY.json)、`scripts/docs-governance.mjs`、`npm run docs:status|check|reconcile`，`docs:check` 已接入根 `npm run check`）；注册表中 `G0-LF12` 已收口为 `completed / canonical:false`，释放 `g0-current-work-package` truthDomain。干净 checkpoint 为 `38d3de2`（已推送，工作区 clean）。
 
-Result Studio 旧实现的 11 个提交已于 2026-07-25 fast-forward 合并并推送至 `main`，检查点为 `03e5826`。SDC-0 已在 `codex/g0-sdc` 的 `7284921` 完成并推送；当前单线实现分支为 `codex/g0-result-studio-product`，从该检查点创建，不使用 Git Worktree。G0-CHF0 已在实现检查点 `41a365f` 完成 CHF0-R1～R5 审计修复并重新真实收口；P4R-3 实现检查点为 `3d3eb29`、P4R-4 为 `f710261`、P4R-5 为 `f5c50db`，P4R-6 实现为 `cb73132`、runtime evidence 为 `c449e57`、product closeout 为 `252e806`。P4R 已真实收口；`G0-RS-P5` 已解锁但尚未启动。
+Result Studio 旧实现的 11 个提交已于 2026-07-25 fast-forward 合并并推送至 `main`，检查点为 `03e5826`。SDC-0 已在 `codex/g0-sdc` 的 `7284921` 完成并推送；当前单线实现分支为 `codex/g0-result-studio-product`，从该检查点创建，不使用 Git Worktree。G0-CHF0 已在实现检查点 `41a365f` 完成 CHF0-R1～R5 审计修复并重新真实收口；P4R-3 实现检查点为 `3d3eb29`、P4R-4 为 `f710261`、P4R-5 为 `f5c50db`，P4R-6 实现为 `cb73132`、runtime evidence 为 `c449e57`、product closeout 为 `252e806`。P4R 已真实收口；`G0-RS-P5` 已于 2026-07-28 建立 Goal 并进行中。第一收口前提是从 SQLite、Job 与 Workflow Truth 投影权威持久 DAG；在此前，所有科学/数据/流程编辑保持 fail-closed，不能用模型 `workflowPlan` 或 seeded 数据替代。
 
 `G0-RS-P0` 已完成资格纠偏：Baseline patch 为 1.1.1，LF12 核心 16/16 evidence 继续 qualified + maintained；`result-studio-editing` 为 experimental/excluded，旧 RS9 product/provider/visual/table-seed 为 non-qualifying historical evidence。Product Trace v1 要求 14 步连续来源证据并拒绝人工布尔值、提示词指定 JSON、测试摘要和常量不变量。证据位于 `acceptance/g0-result-studio/rs-p0-{truth-correction,ui-baseline}.json`。
 
@@ -51,7 +51,7 @@ Result Studio 旧实现的 11 个提交已于 2026-07-25 fast-forward 合并并�
 
 P4 Core 已于提交 `e0a4c7d` 形成可恢复检查点，四份历史审计于 `e38d6b5` 无损归档。2026-07-26 仓库静态审计随后确认：默认必读仍包含大量已完成材料，`AUDIT-LOG`/`CLAUDE.md` 膨胀，65 个脚本和 145 个 npm 命令缺少机器分层，定向测试仅有文字纪律，`tmp` 有 2013 个残留文件且测试依赖本机绝对路径。`G0-RS-RH0 Repository Hygiene Gate` 已完成上述收口并通过最终基线，治理提交为 `95a7fe3`、`041e32e`。
 
-RH0 已完成：Truth Snapshot → Hot Context → Test Impact → Script/Temp Lifecycle → Acceptance 全部收口。`test/impact-map.json` 与 `scripts/test-affected.mjs` 现在提供确定性定向测试，未知映射 fail-closed；RH0 不删除 Acceptance 证据、不修改科学或执行真相、不创建 Worktree。P4R-0～P4R-6 已完成并保留；下一步是按治理新建 `G0-RS-P5` Goal。
+RH0 已完成：Truth Snapshot → Hot Context → Test Impact → Script/Temp Lifecycle → Acceptance 全部收口。`test/impact-map.json` 与 `scripts/test-affected.mjs` 现在提供确定性定向测试，未知映射 fail-closed；RH0 不删除 Acceptance 证据、不修改科学或执行真相、不创建 Worktree。P4R-0～P4R-6 已完成并保留；当前按治理执行 `G0-RS-P5`，不得提前推进 P6/P7。
 
 P4R-5 收口事实：Revision source projector、Result/Code 路由、复制/下载/项目内打开门控、Agent 点击时 contextToken 绑定、历史版本脚本隔离以及缺失/越界/hash/commit/plugin/input/跨项目 fail-closed 已落地。对 `reproduction.replayable` 的 Revision 提供服务端两阶段 replay：预检重读 Git/SQLite/Job/Artifact Truth，确认后只走注册工具执行链并创建非 current 候选；不接受调用方 toolId、params、script、command、shell 或 workflowPlan，重复确认只返回同一候选，材料不足明确 `unavailable`。四类真实 completed Job（DESeq2、standalone volcano、gene-correlation heatmap、go-kegg GO-BP）exact source observation 为 4/4，source-bound 到 `f5c50db`；其中 volcano/heatmap replayable，DESeq2/GO-BP unavailable，真实 replay E2E 覆盖 standalone volcano。P4R 为 7 条核心不变量 + 1 条显式 skip guard（本机 8/8），P4R-5 Node 15/15；source-bound product runner 为前端 114/114、Node 137/137，umbrella 前端 151/151，P4R product 17/17。`qualificationEligible:false` 与 UI `in_progress` 不变。
 
