@@ -120,7 +120,7 @@ test('RS5 Agent ChangeSet tool scopes the source and emits durable progress', as
       inspection: { runtime: { versionRaw: 'git version test' } },
       adapter: {
         gitDir: join(root, '.biof3/git'), workTree: root,
-        revParse: (ref) => ref === sourceCommit ? sourceCommit : null,
+        revParse: (ref) => ref === `${sourceCommit}^{commit}` ? sourceCommit : null,
         showFile: ({ filePath }) => filePath.endsWith('plot.R') ? 'print(1)\n' : paramsText,
       },
     }),
