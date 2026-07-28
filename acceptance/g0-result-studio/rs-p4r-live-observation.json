@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "workPackage": "G0-RS-P4R-6",
   "evidenceClass": "live_local_continuous_journey_non_qualifying",
-  "capturedAt": "2026-07-28T11:07:17.728Z",
+  "capturedAt": "2026-07-28T11:39:24.730Z",
   "qualificationEligible": false,
   "providerBoundary": {
     "realProviderUsed": false,
@@ -22,7 +22,7 @@
     "promptsOrResultValuesPersisted": false,
     "credentialsPersisted": false
   },
-  "sourceCommit": "cb73132471bdfb73ae63e004917a40c9ba0db3d4",
+  "sourceCommit": "35a0760cf98c5865574507e03521795231307442",
   "sourceFiles": {
     "producer": "scripts/g0-rs-p4r-live-observation.mjs",
     "producerTest": "test/p4r-live-observation.test.mjs",
@@ -60,7 +60,7 @@
     "backgroundChild": "06209a3cd696af000f39d234eda29472583bf79b7fc45fb98e21d93c39bdf62d",
     "repository": "dc0d2d6fcd0b3308267102c2202e0a45e37c0157d04a5df2f57cb72b6744a81f",
     "conversations": "69d8c51ed1fe8d827221de3ad48425b57c92114d89d9c9c8717f2a0ee74864c3",
-    "packageScripts": "55d34913bc321e6a93cbd42c354d80d0e1f1a7ab01c161aa82018fc1007fb41b",
+    "packageScripts": "1e7f71e9fe0bed784930198260bbd0b081e8a11234af1e9ae7e27a56ef350669",
     "impactMap": "073cda5d914a50e7c3214b70f96dbd1294e0680c15364c0042d201ea0e6ce0c2"
   },
   "sourceCommitMatchesSourceHashes": true,
@@ -139,24 +139,24 @@
     "revisionCountAfterJourney": 3,
     "conversationMessageCount": 2,
     "sourceSha256": "f80012c9b61351ee783ee9a5b85c6c6b14fbcabe35e0c44629a9e7681cab81fd",
-    "adoptedArtifactSha256": "901de6e6bc61876012200c43b3d2a3042321a42ef5c7447cabb94ae9d7ee64ac",
-    "sourceTruthDigest": "09f481db207e4ed92ece310f93f1f583697e9d1ef637684c2a881b7aee9ac7d5",
-    "changeSetTruthDigest": "068c3138090409acabf956cea50452fef6a120d78f1189cc5d8abd56e137be13",
+    "adoptedArtifactSha256": "9569b2df91789d7e6ffc6f5571c05c905a8b5439469aa8e9b0741fcb7f74e29a",
+    "sourceTruthDigest": "9048cc167d44cec6ed41479fb9c4d7834a2daf775364d48936798b520e90eec1",
+    "changeSetTruthDigest": "bf9efeb344462e1019ac73f552a280197ca198a7dced8678d1f240d738403601",
     "conversationTruthDigest": "5bbc0d55f0702e8380f02b52a4201c2826739476cccb5132fe5baccf30c0b2df",
     "publicProgressPhaseCount": 4,
     "backendStartCount": 2,
     "disposableDesktopIdentityChanged": true,
     "timingsMs": {
-      "openResultMs": 3404.392,
-      "agentEditMs": 3733.256,
-      "compareMs": 767.613,
-      "codeOpenMs": 379.985,
-      "adoptMs": 625.279,
-      "replayPreflightMs": 393.421,
-      "replayConfirmMs": 3530.699,
-      "revertMs": 251.228
+      "openResultMs": 3032.635,
+      "agentEditMs": 3189.667,
+      "compareMs": 671.497,
+      "codeOpenMs": 334.488,
+      "adoptMs": 553.322,
+      "replayPreflightMs": 335.162,
+      "replayConfirmMs": 3003.263,
+      "revertMs": 217.686
     },
-    "totalDurationMs": 27346
+    "totalDurationMs": 23060
   },
   "checks": {
     "realCorpusCompleted": true,
