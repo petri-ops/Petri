@@ -1,0 +1,183 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS-P4R-6",
+  "evidenceClass": "live_local_continuous_journey_non_qualifying",
+  "capturedAt": "2026-07-28T11:07:17.728Z",
+  "qualificationEligible": false,
+  "providerBoundary": {
+    "realProviderUsed": false,
+    "mode": "deterministic_context_bound_agent_tool_invocation",
+    "deferredQualificationOwner": "G0-RS-P7"
+  },
+  "runtimeBoundary": {
+    "appMode": "local_backend_and_real_tool_runtime",
+    "packagedDesktopObserved": false,
+    "uiInteractionObserved": false
+  },
+  "privacy": {
+    "classification": "digests_counts_statuses_and_timings_only",
+    "rawInternalIdsPersisted": false,
+    "absolutePathsPersisted": false,
+    "urlsOrPortsPersisted": false,
+    "promptsOrResultValuesPersisted": false,
+    "credentialsPersisted": false
+  },
+  "sourceCommit": "cb73132471bdfb73ae63e004917a40c9ba0db3d4",
+  "sourceFiles": {
+    "producer": "scripts/g0-rs-p4r-live-observation.mjs",
+    "producerTest": "test/p4r-live-observation.test.mjs",
+    "corpus": "scripts/g0-rs-p4r-corpus.mjs",
+    "capture": "scripts/g0-rs-p4r-capture.mjs",
+    "routes": "core/r-server/routes/result-studio.js",
+    "contextTools": "core/r-server/agent-tools/result-context-tools.js",
+    "contextEditTools": "core/r-server/agent-tools/result-context-edit-tools.js",
+    "editTools": "core/r-server/agent-tools/result-edit-tools.js",
+    "changeSetService": "core/shared-backend/result-changeset-service.js",
+    "compareService": "core/shared-backend/result-compare-service.js",
+    "revisionSource": "core/shared-backend/result-revision-source.js",
+    "replayService": "core/shared-backend/result-replay-service.js",
+    "background": "core/shared-backend/result-studio-background.js",
+    "backgroundChild": "core/shared-backend/result-studio-background-child.js",
+    "repository": "core/shared-backend/result-studio-repository.js",
+    "conversations": "core/r-server/helpers/conversations.js",
+    "packageScripts": "package.json",
+    "impactMap": "test/impact-map.json"
+  },
+  "sourceHashes": {
+    "producer": "7fe88df4e806719834e7ff4a37cc4402450db560fd32429f338f31bafedd69be",
+    "producerTest": "f7fedd3985feeb2f37d056b77adf56fe797e269d2a5bee74f29e213c25456370",
+    "corpus": "359e202832c117f12c6e041706e0028caaaf4c063df3d97511be982ab703bf11",
+    "capture": "99f9eb3fe4efa643e5a87925098dfdd815664b703907b90333e9e240edd317ac",
+    "routes": "916cba5c6437fc2ed58f0a9b9c4a743eda492f4fb990c65cdf9f4e62525f65e3",
+    "contextTools": "f4eb572624ce0c2afd75cce11dad1236cf8f6cfba47c85cd9576dace9867fdc0",
+    "contextEditTools": "3695f54aca1a59a45703935c71ce6264ecac6a2063a5206934b9774d69a1124b",
+    "editTools": "824fdee932c03fb10cb662990edb35f3666ffb6e0da176bd2b7fc91fe9355904",
+    "changeSetService": "e45a182a10a74bef668cc265e64a1427662d4a48d568fb69ec274a27dbf6589d",
+    "compareService": "15e6e949bc1510bd5f86ef4ac6215b104c3db0771db9a0adf8c865c4d5502d93",
+    "revisionSource": "28004e2c885f5762028afcaead8c3c2c10fcd7ef1010be4dac03fa226c76482d",
+    "replayService": "f372bf8a348c868652a93b410374aa32c5079435defb709deeb74e317631b0a7",
+    "background": "0c8d74472ca99bf505967a1c3d0c4179e1d07dc0a81c6c3e301b251e93db0e16",
+    "backgroundChild": "06209a3cd696af000f39d234eda29472583bf79b7fc45fb98e21d93c39bdf62d",
+    "repository": "dc0d2d6fcd0b3308267102c2202e0a45e37c0157d04a5df2f57cb72b6744a81f",
+    "conversations": "69d8c51ed1fe8d827221de3ad48425b57c92114d89d9c9c8717f2a0ee74864c3",
+    "packageScripts": "55d34913bc321e6a93cbd42c354d80d0e1f1a7ab01c161aa82018fc1007fb41b",
+    "impactMap": "073cda5d914a50e7c3214b70f96dbd1294e0680c15364c0042d201ea0e6ce0c2"
+  },
+  "sourceCommitMatchesSourceHashes": true,
+  "sourceMismatches": [],
+  "executionTruthChain": [
+    "run_tool",
+    "tool_job",
+    "artifact_truth",
+    "artifact_revision",
+    "context_bound_edit",
+    "candidate_revision",
+    "compare",
+    "adopt",
+    "controlled_replay",
+    "discard_candidate",
+    "backend_restart",
+    "truth_reopen"
+  ],
+  "events": [
+    {
+      "step": "real_completed_job",
+      "status": "observed",
+      "digest": "e527cbdb843d8c7610d0eb905adf67ce5601687b7e127aa34d63abccae1d913f"
+    },
+    {
+      "step": "open_result",
+      "status": "observed",
+      "digest": "096c6df6e7a8c12e614bb503254d625e2d6d949894bfd4645e20c669c91148d1"
+    },
+    {
+      "step": "context_bound_agent_style_edit",
+      "status": "observed",
+      "digest": "eeb6e6f5e9b65a757b93a4228f598fc56befa3e0820cdb8827b2c5199a26d273"
+    },
+    {
+      "step": "candidate_compare",
+      "status": "observed",
+      "digest": "578200d7f1f9af6cf95630cfd6a86fd60db1301e23bdcf35a5f108ec18de3309"
+    },
+    {
+      "step": "revision_code",
+      "status": "observed",
+      "digest": "f1cab06b3ee8b9cf0d9b038abb6c1186b439b8a9ae1264de33ca85e9ba5025d0"
+    },
+    {
+      "step": "adopt_candidate",
+      "status": "observed",
+      "digest": "f00dad18df65a28372fc716c5540a128a5a2286e42863829019236f47b2249ef"
+    },
+    {
+      "step": "controlled_replay",
+      "status": "observed",
+      "digest": "e9032a4ea5d7f4778945b18190159a47e51fbaca220ce666968688048da62ac0"
+    },
+    {
+      "step": "discard_replay_candidate",
+      "status": "observed",
+      "digest": "774731c7642a4b3d259f06714d8f5dabcdf4b6a6f619363ed785a40725dd7d92"
+    },
+    {
+      "step": "conversation_roundtrip",
+      "status": "observed",
+      "digest": "8cc4a8cdfe4eb01349360077ea8efadfd4ba00c38a58b153b3f2cf23392f123b"
+    },
+    {
+      "step": "backend_restart_recovery",
+      "status": "observed",
+      "digest": "c2e5a9aab01cd72f2a1b468373e2c3d4172e9a287b905600ffed5308adec3170"
+    }
+  ],
+  "eventChainDigest": "c2e5a9aab01cd72f2a1b468373e2c3d4172e9a287b905600ffed5308adec3170",
+  "observations": {
+    "corpusToolCount": 3,
+    "initialRevisionOrdinal": 1,
+    "adoptedRevisionOrdinal": 2,
+    "revisionCountAfterJourney": 3,
+    "conversationMessageCount": 2,
+    "sourceSha256": "f80012c9b61351ee783ee9a5b85c6c6b14fbcabe35e0c44629a9e7681cab81fd",
+    "adoptedArtifactSha256": "901de6e6bc61876012200c43b3d2a3042321a42ef5c7447cabb94ae9d7ee64ac",
+    "sourceTruthDigest": "09f481db207e4ed92ece310f93f1f583697e9d1ef637684c2a881b7aee9ac7d5",
+    "changeSetTruthDigest": "068c3138090409acabf956cea50452fef6a120d78f1189cc5d8abd56e137be13",
+    "conversationTruthDigest": "5bbc0d55f0702e8380f02b52a4201c2826739476cccb5132fe5baccf30c0b2df",
+    "publicProgressPhaseCount": 4,
+    "backendStartCount": 2,
+    "disposableDesktopIdentityChanged": true,
+    "timingsMs": {
+      "openResultMs": 3404.392,
+      "agentEditMs": 3733.256,
+      "compareMs": 767.613,
+      "codeOpenMs": 379.985,
+      "adoptMs": 625.279,
+      "replayPreflightMs": 393.421,
+      "replayConfirmMs": 3530.699,
+      "revertMs": 251.228
+    },
+    "totalDurationMs": 27346
+  },
+  "checks": {
+    "realCorpusCompleted": true,
+    "disposableDesktopIdentityMatchesRuntime": true,
+    "formalResultOpened": true,
+    "userSuppliedNoInternalIds": true,
+    "deterministicAgentBoundaryHonest": true,
+    "agentCandidateValid": true,
+    "codeSourceExact": true,
+    "adoptedExactlyOnce": true,
+    "replayCreatedNonCurrentCandidate": true,
+    "replayConfirmationIdempotent": true,
+    "replayCandidateDiscarded": true,
+    "sourceAnalysisNotRerun": true,
+    "sourceArtifactPreserved": true,
+    "conversationDurable": true,
+    "backendActuallyRestarted": true,
+    "truthRecoveredAfterRestart": true,
+    "currentRecoveredAfterRestart": true,
+    "lifecycleRecoveredFromTruth": true,
+    "sourceAndArtifactReadableAfterRestart": true
+  },
+  "passed": true
+}
