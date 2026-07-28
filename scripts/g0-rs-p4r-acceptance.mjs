@@ -295,14 +295,22 @@ function runInvariantSuite() {
   const result = spawnSync('node', ['--test', sourceFiles.invariantTest], {
     cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024,
   });
-  const out = `${result.stdout || ''}`;
+  const out = `${result.stdout || ''}\n${result.stderr || ''}`;
   const num = (label) => {
     const match = new RegExp(`^# ${label} (\\d+)$`, 'm').exec(out);
     return match ? Number(match[1]) : Number((new RegExp(`\u2139 ${label} (\\d+)`).exec(out) || [])[1] ?? NaN);
   };
+  const total = num('tests');
   const passed = num('pass');
   const failed = num('fail');
-  return { passed, failed, total: passed + failed };
+  const skipped = num('skipped');
+  return {
+    passed,
+    failed,
+    skipped,
+    total,
+    skipGuardObserved: skipped === 0 || out.includes('[p4r-invariants] invariant coverage SKIPPED:'),
+  };
 }
 
 /** Compare a fresh measurement against the frozen baseline, warm path only. */
@@ -404,13 +412,19 @@ function inspect(verification, observation) {
       'Every measured route records both a first-call and a second-call timing, so one-time creation cost cannot be reported as steady-state viewing cost.'),
 
     // Was three literal greps, all of which also occur in that file's comments,
-    // so deleting every assertion kept this green. Now RUNS the suite and
-    // asserts its real shape: four invariants present, and at least one failing
-    // (a suite that all passes would mean P4R-1's targets no longer exist).
+    // so deleting every assertion kept this green. P4R-0 then deliberately
+    // required a red invariant owned by a later phase. P4R-5 has now closed the
+    // final source/replay invariant, so the durable contract is the opposite:
+    // no failures, the full current suite accounted for, and any runtime skip
+    // must be surfaced by the suite's explicit skip guard.
     item('RS-P4R0-12',
-      invariantRun.total >= 4 && invariantRun.failed >= 1 && invariantRun.passed >= 1,
+      invariantRun.total >= 8
+      && invariantRun.failed === 0
+      && invariantRun.passed + invariantRun.skipped === invariantRun.total
+      && invariantRun.passed >= 1
+      && invariantRun.skipGuardObserved === true,
       [sourceFiles.invariantTest],
-      'The plan invariants exist as tests written against code reality and name concrete defects. They are deliberately NOT aggregated into this gate: the remaining source-projection invariant stays red until its owning P4R-5 phase, while the earlier P4R-1 invariants now pass.'),
+      'The P4R invariants run against code reality with no failures. All current tests are accounted for; if the R runtime is unavailable, only the suite\'s explicit and visible skip guard may permit the bounded skip.'),
 
     // Fails if the frozen baseline is edited to match a later measurement.
     // A baseline that drifts toward the present proves nothing.
