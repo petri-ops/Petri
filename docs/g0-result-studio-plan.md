@@ -2,7 +2,7 @@
 
 最后更新：2026-07-28
 
-状态：`active / implemented_unverified`（RS0～RS8 引擎基础与 P4R-0～P4R-5 保留；G0-CHF0 审计修复已重新真实收口；当前阶段 `P4R-6 整体验收与交接`，`G0-RS-P5` 继续阻断）
+状态：`active / implemented_unverified`（RS0～RS8 引擎基础与完整 P4R 已真实收口；G0-CHF0 审计修复已重新真实收口；`G0-RS-P5` 已解锁但尚未启动）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -1385,7 +1385,7 @@ Result Studio 当前按三层事实表达：
 
 RH0 收口证据（2026-07-26）：`test/impact-map.json` 与 `scripts/test-affected.mjs` 已建立确定性、去重、fail-closed 的影响选择；`npm run test:changed` 定向 Node 41 项与前端 294 项通过，`npm run test:all:workspace` 最终基线为 Node 1581 pass / 0 fail / 11 skipped、前端 294 pass / 0 fail；`npm run docs:reconcile`（39 registered、0 unregistered、0 validation issues）、`npm run docs:check`、`npm run ui:audit:check` 与 `git diff --check` 全部通过。旧 `dev-desktop.sh`、已下线云端 smoke 与旧 DESeq2 MCP 验收脚本已删除；真实 JSON 证据迁移到 `test/fixtures/golden-path/deseq2-run.json`，`tmp` 历史日志/二进制已清理，QA/golden-path 日志保留上限为 20。后续审计确认 RS9 脚本仍被历史证据引用，因此保留文件但从日常 Result Studio syntax 热路径移出，新增显式 `g0:result-studio:historical:syntax`；历史代码仍可单独校验。该收口只改变工程治理，不改变任何执行/科学真相；P4R 启动门已满足，P4R-0～P4R-2 已按当前证据推进。
 
-### G0-RS-P4R：Product Reframe — Agent-first Focused Result Experience（`in_progress · P4R-6`）
+### G0-RS-P4R：Product Reframe — Agent-first Focused Result Experience（`completed · non-qualifying`）
 
 #### P4R.1 定位与启动门
 
@@ -1605,11 +1605,11 @@ Change Review 默认只呈现服务端受信并持久化的一句话意图、影
 
 完成（2026-07-28）：`07d8c92` 交付 exact Revision source 与 Code surface，`f5c50db` 补齐 replayable Revision 的 context-bound 两阶段受控重放、真实 `run_tool → tool_job → Artifact Truth → candidate Revision` 执行、重复确认幂等、current/history 不变、Job-root legacy Artifact 安全解析和 source commit 对象可达性检查。普通 Source API 不暴露 raw 参数；只有进程内 replay service 可读取 exact normalized values，调用方不能传 toolId/params/script/command/workflowPlan。前端预检明确展示工具、输入数、运行时和副作用，确认后只创建候选并进入 Change Review；非 replayable Revision 不提供伪执行入口。
 
-证据：P4R 套件为 7 条核心不变量 + 1 条显式 skip guard，本机 8/8；其中 standalone volcano 真实 replay invariant 创建一个且仅一个非 current 候选；source/replay 单测 7/7，P4R-5 聚合 Node 15/15；source-bound product runner 为前端 19 files / 114 tests、Node 12 specs / 137 tests，P4R umbrella 前端为 23 files / 151 tests。四类 source observation 4/4 exact source projection 且 `sourceCommitMatchesSourceHashes:true`；`rs-p4r-product-reframe.json` 17/17、`qualificationEligible:false`。历史重写后的 source observation / peeled-commit / 完成态 invariant gate 检查点依次为 `f72f8ac`、`ae6d9c4`、`c6b3d72`。UI-113/UI-114/UI-115 均保持 `in_progress`，实机明暗/响应式/键盘/连续旅程仍归 P4R-6。当前阶段推进至 P4R-6。
+证据：P4R 套件为 7 条核心不变量 + 1 条显式 skip guard，本机 8/8；其中 standalone volcano 真实 replay invariant 创建一个且仅一个非 current 候选；source/replay 单测 7/7，P4R-5 聚合 Node 15/15。P4R-6 追加 background 17/17、source-bound live chain、同一 Electron BrowserWindow UI matrix；聚合 product evidence 20/20，`qualificationEligible:false`。四类 source observation 4/4 exact source projection 及所有 P4R-6 evidence 都有 `sourceCommitMatchesSourceHashes:true`。UI-113/UI-114/UI-115 已由 renderer evidence 升为 `verified`；P4R 收口并解锁 P5。
 
 ##### P4R-6：整体验收与交接
 
-当前入口证据（2026-07-28）：刷新后的 `rs-p4r-performance.json` 为 source-bound 13/13，但其 `passed` 只表示基线/门禁契约有效，并不表示性能预算通过；`budgetStatus.eventLoopMaxMs` 仍为 `violated_by_current_implementation`，本轮隔离峰值 3015.705ms，steady-state 最慢路由为 `workspace-status` 220.127ms，且 evidence 明确标注绝对毫秒对负载敏感。P4R-6 必须用连续产品链和客户端观测重新裁决，不得把 13/13 外推为 250ms 产品预算已满足。
+完成（2026-07-28）：P4R-6 已把 canonical baseline materialization 与 workspace/storage inspection 移至持久后台子进程；真实 source-bound performance evidence 为 14/14，event-loop 峰值 19.661ms，低于冻结的 250ms 预算。连续 live evidence 从 completed Job 经 context-bound presentation candidate、Compare、exact Code、adopt、controlled replay、discard、conversation 与真实 backend restart/reopen 全链通过；Electron evidence 在同一 BrowserWindow 覆盖明暗 × 1440/1024/820、键盘/focus、失败降级/重试与重启恢复。product evidence 20/20。三份新证据均脱敏、source-bound、`qualificationEligible:false`；未使用真实 Provider，未声称 packaged 资格。
 
 - 从真实已完成 Job 打开结果，完成 Agent 样式修改、版本比较、代码查看、采用/放弃与会话往返。
 - 捕获开发态明暗 × 1440/1024/820 矩阵、键盘路径、错误/重试、次级 API 失败和基本服务重开恢复。
@@ -1666,14 +1666,14 @@ Change Review 默认只呈现服务端受信并持久化的一句话意图、影
 - `npm run g0:result-studio:p4r:invariants`：P4R 不变量与真实受控 replay 门；当前为 7 条核心不变量 + 1 条显式 runtime skip guard，本机 8/8，已由 `p4r:p5:test` 和影响映射纳入默认 P4R-5 范围。
 - `npm run g0:result-studio:p4r[:update]`：聚合/刷新当前源码哈希和脱敏证据。
 
-`g0:result-studio:p4r:perf`、`:live`、`:ui` 当前并不存在，不得冒充已交付入口。事件循环/waterfall 现由 `p4r[:update]` 生成的 performance evidence 承担；真实连续旅程与明暗 × 1440/1024/820、键盘矩阵属于 P4R-6 计划交付，届时只有在生产者和 npm 入口真实落地后才能登记。
+`npm run g0:result-studio:p4r:perf`、`:live`、`:ui` 与各自 `:update` 已真实落地；`p4r:update` 依序写入 performance、live、UI 与 product evidence。live/UI producer 分别执行 disposable local Truth 链和同一 Electron BrowserWindow；它们不是 Provider 或 packaged 资格替代物。
 
 计划证据位置：
 
 - `acceptance/g0-result-studio/rs-p4r-product-reframe.json`：契约、源码哈希与专项门。
 - `acceptance/g0-result-studio/rs-p4r-performance.json`：请求 waterfall、event-loop 和预算。
-- `acceptance/g0-result-studio/rs-p4r-live-observation.json`：P4R-6 计划证据，当前尚无生产者或文件。
-- `acceptance/g0-result-studio/rs-p4r-ui-observation.json`：P4R-6 计划证据，当前尚无生产者或文件。
+- `acceptance/g0-result-studio/rs-p4r-live-observation.json`：P4R-6 source-bound、脱敏的连续 local Truth 链证据。
+- `acceptance/g0-result-studio/rs-p4r-ui-observation.json`：P4R-6 source-bound、脱敏的 Electron UI 矩阵证据；截图位于同目录 `rs-p4r-ui/`。
 
 这些证据只能把 P4R 标记为 `implemented_unverified/product-development evidence`；不得升级 `result-studio-editing` 支持声明。P7 仍是唯一产品资格裁决点。
 
@@ -1817,7 +1817,7 @@ G0-RS-P0 Truth Correction
 
 阶段状态规则：
 
-- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3` 已完成，`G0-RS-P4 Core` 已形成 18/18 离线实现检查点并提交，`G0-RS-RH0` 与 P4R-0～P4R-5 已完成，当前唯一阶段为 P4R-6；P4R 收口前不得启动 P5。
+- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3`、`G0-RS-RH0` 与 P4R-0～P4R-6 已完成。P4R 已解锁 P5；启动 P5 前必须按本计划另立该阶段 Goal。
 - 每阶段先补失败测试/fixture，再实现，再形成与证据类型匹配的验收；不得提前开发下一阶段。
 - 单元测试证明契约，fixture 证明确定性集成，真实 Provider 证明模型边界，packaged Electron 证明产品链；四者不能互相替代。
 - 未运行 `npm run docs:reconcile` 与 `npm run docs:check` 不得宣布阶段 completed/verified/qualified。
@@ -1875,4 +1875,4 @@ G0-RS-P0 Truth Correction
 4. [x] P4R-3 让自然语言 Agent 成为默认编辑入口，P4 Core 参数面板降为高级精调。实现检查点 `3d3eb29`；性能校准门修复 `59b33c4`；P2/P3/P4/P4R evidence 均 source-bound。安全边界：context-bound create 只接受同一 Agent turn 的受信原始 intent；科学/数据/流程修改在缺少权威持久 DAG 时 fail-closed，不接收模型自带 DAG。
 5. [x] P4R-4 完成可直接查看的版本选择器与 Codex-like Change Review；实现检查点 `f710261`。历史主体/interaction/Selection/contextToken 均显式绑定 viewed Revision，首次 GET 不写 SQLite、不创建 managed Git；采用/撤销/恢复 checkpoint 与 SQLite/Git 原子回滚，项目/family/参数/source commit 漂移 fail-closed。P2/P3/P4/P4R 五份 evidence 均 source-bound；UI-113/UI-114 保持 `in_progress`，实机矩阵留 P4R-6。
 6. [x] P4R-5 完成具有正式 `sourceScriptRef` 的 ArtifactRevision 精确代码、复制/下载/Agent 解释与修改，并为 `replayable` Revision 提供两阶段受控复现；材料不足明确 `unavailable`。历史脚本、独立/共享 scope、缺失/越界/hash/commit/plugin/input/跨项目漂移全部 fail-closed。DESeq2、standalone volcano、gene-correlation heatmap、go-kegg GO-BP 四类正式 Artifact exact source observation 为 4/4；standalone volcano 真实 replay 只创建非 current 候选且重复确认幂等，不把 4/4 source projection 外推为四类都可 replay。
-7. [ ] P4R-6 完成真实连续链、性能、明暗/响应式/键盘、异常降级、文档和脱敏证据收口。
+7. [x] P4R-6 完成真实连续链、性能、明暗/响应式/键盘、异常降级、文档和脱敏 evidence 收口：background 14/14、live Truth 链通过、同一 Electron BrowserWindow 六格矩阵/键盘/失败/重启通过，product 20/20；均为 source-bound non-qualifying evidence。

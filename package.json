@@ -105,7 +105,7 @@
     "g0:result-studio:p4r:product": "node scripts/g0-rs-p4r-product-acceptance.mjs",
     "g0:result-studio:p4r:product:update": "node scripts/g0-rs-p4r-product-acceptance.mjs --write-evidence",
     "g0:result-studio:p4r:invariants": "node --test test/p4r-invariants.test.mjs",
-    "g0:result-studio:p4r:p5:test": "node --test test/result-revision-source.test.mjs test/result-replay-service.test.mjs test/p4r-invariants.test.mjs",
+    "g0:result-studio:p4r:p5:test": "node --test --test-concurrency=1 test/result-revision-source.test.mjs test/result-replay-service.test.mjs test/p4r-invariants.test.mjs",
     "g0:result-studio:p4r:p5:source-observation": "node scripts/g0-rs-p4r-source-observation.mjs",
     "g0:result-studio:p4r:p6:test": "node --test test/result-studio-background.test.mjs test/p4r-live-observation.test.mjs test/p4r-ui-observation.test.mjs",
     "g0:result-studio:p4r:perf": "node scripts/g0-rs-p4r-acceptance.mjs",
