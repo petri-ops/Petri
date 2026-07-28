@@ -8,10 +8,11 @@
   "sourceHashes": {
     "gitAdapter": "db7a9030ee5a736ae03fbcefc7f548b7c98bd454198010169c92c86974dee255",
     "lifecycle": "40828528bed440d6e63da911cec720f291ca3728074092c51540a86fc1bf0d06",
-    "routes": "562b2089bb1877cc049c766f4a551430163461b7be5e60176626319c0e650557",
+    "routes": "1f3c93c8ddf9f4fbfb098fdd5c3a276b249f6e72d7beac2ecafc607b6e9acbd3",
     "repository": "dc0d2d6fcd0b3308267102c2202e0a45e37c0157d04a5df2f57cb72b6744a81f",
     "changeSetService": "e45a182a10a74bef668cc265e64a1427662d4a48d568fb69ec274a27dbf6589d",
-    "revisionSource": "541237446ada090228100d8ecb57760c9666e74b25a0198629ed8c4b79405a75",
+    "revisionSource": "28004e2c885f5762028afcaead8c3c2c10fcd7ef1010be4dac03fa226c76482d",
+    "replayService": "f372bf8a348c868652a93b410374aa32c5079435defb709deeb74e317631b0a7",
     "resultEditTools": "824fdee932c03fb10cb662990edb35f3666ffb6e0da176bd2b7fc91fe9355904",
     "harnessRoutes": "99ca8c83103ffebb8890fc1503cf100462f97ebe843bf1e07d3983567e969612",
     "contracts": "7f3062bfb94d87e2017daceb2cedd073f5155d900de7fce4f118135232032531",
@@ -24,10 +25,10 @@
     "modeSpec": "6d471b8fb8f870ffd96a80ec0b38c1261d2d9e3384b5443fc25e6c68a9a1c1bb",
     "surface": "2eeda29f387d040ce9c544a568eb7ae2e83794ec10f5fbc328e58dbb248612f3",
     "resultSurfaceSpec": "152a6ac542e2eeaf410f6343581757ca5bbd6b4f9cf54988bafe9f48e0603048",
-    "centerPanel": "b200fc566ad14b0e1cbe80e24ae70b01b58d94dad64927550b6411ffd5893961",
+    "centerPanel": "dd002e0ecc39e7a56dd335dcaeaeb0f1282729559d95eb9eef451091a5b5199c",
     "rightPanel": "3f9c1a781e3a7b8718dd71d5091863a48a020fc01e19d43fd297d43d326816ff",
     "rightPanelSpec": "bbb2ba07c4ac3aa603b26e03656b80b052f5c54f53c86332d50ee5b898e9d08d",
-    "projectWorkspace": "0c05d060fdf2ef28b2e606984199bdf2709e00fb1f89fa6287c84be86a3de9ac",
+    "projectWorkspace": "0b7231158b44bbf0d9375dff612618707ee10e671f516e1da34a170fd75eebaf",
     "resultAgentComposer": "5c0508cb07254b660ba9b5c63553011617dde37f7db26053329f8d97e8c5e9e1",
     "resultAgentComposerStyle": "bff22344bed403c92b568fbe2ec1a719ed2def25f55c4bac60ffe5fc87a4b584",
     "resultAgentComposerSpec": "cb703937db63adcafac6dc7f602816017cda04971dfa4fb27112d3167768a0ba",
@@ -40,10 +41,10 @@
     "changeSetPanel": "9752d109b83be4c578866fdcce09b29b044971e7d7c6a1be9ae36a6f5f3f6deb",
     "changeSetPanelStyle": "b4385e5fa4f45db35241e14c3152455fd2e23183d4a9a425dbc0e9c594fb7780",
     "changeSetPanelSpec": "77e00c1202073436f2d8244b10d7279ab643732ed2c4f0e961603ddb62dd2bfe",
-    "resultStudioClient": "8d817234eec845b7952e3f2681ce6e0a6f1db860f8c5ec3efc25532e2dff36c9",
-    "revisionCodeView": "7b9aa0e870eb883832db1cc6e0e432d27355d7f98b0db53208b883bffa1a4af2",
-    "revisionCodeViewStyle": "c13486377bd71a44c51a28a72319c2d390f2d17aeeea492558958bc080c2f6da",
-    "revisionCodeViewSpec": "dd83ade59d1a6eebd5a54afd5e2c4486526129b508f7fd2bec291f4f6ffbeaf9",
+    "resultStudioClient": "0654d1409bf95dc03739d5cd72acc21e7643ded409eabf488d66b94ba5a7fe08",
+    "revisionCodeView": "6534f49cf39a42c0e7ef303e91e20346e4f51990151ae1aa357070f0f305e855",
+    "revisionCodeViewStyle": "0e1b9d71290c8f81c790aaac33162387ffabd65db973da1306d3034fc0a58ad7",
+    "revisionCodeViewSpec": "f22cbab29339a053a8f705a23ec712cada02c750884b1029a92f3552e5ffdca2",
     "versionRole": "e2c3a70adf15c1aa016823ba17c49bc608bbbf26fb0b2186ebee27a3bffef11e",
     "versionRoleSpec": "ad77ac2c2b376d40ecfccb1fdf03bf141e118d351ce7bbc41ec3838f21265d74",
     "copilotAskDeliverySpec": "8158edb210aac33837d1871f39fa98834527d26e5db0be8c54e5200f332b1e3e",
@@ -80,20 +81,23 @@
     "resultCompareSpec": "78a27eccec7ed2e529124f96651d5f17b3c7e36fe79cf090781d777d6e9eca9b",
     "resultRepositorySpec": "9a8bfe271d33c8f3b5ac92dbc14144e478e4a63a460fd05f778144f497173444",
     "resultChangeSetSpec": "82e21692f280d252efa63e48bab8a393938e3bf70b465d27b3d6d620ccca6c54",
-    "revisionSourceSpec": "5b062d65644c5b4f516453c2d338e68a9a6cacecf2d2af1d91c5ab9a80dca825",
-    "p4rInvariantSpec": "79f9a6156974b31514606de6cd103636c6edf22c5f340d1ed72d24db785e55d7",
-    "resultEditAgentToolSpec": "9d8bcc9978418599b95ae4b3460a6d2791c2ae38954da16f82167e095d8d3324",
+    "revisionSourceSpec": "8a3c04ff5f26148a7e5d551d5671da7c9688106af36cdd553ea671749744d80e",
+    "replayServiceSpec": "52c89779b8b3b1695454b1cdeb2f2ae7ff06e4e498dc0491a9329cc1165ea526",
+    "p4rInvariantSpec": "8b335f39f2be6716247aa11302f274d11a09522b7cd976d3040e550bf132cd03",
+    "resultEditAgentToolSpec": "5faf3d5eee6c4f4f519978e8084fefc26f5977a0e710b8a46894c702a9ca991f",
     "agentToolPolicySpec": "d275291158cf33369e1d3accc165ce60f5edbc60e8bdbe99a8c6aac0907e6906",
     "agentToolRegistrySpec": "73aa421cba9f4f29e93b31834a20ce99b5698442e1b098427c59f53b0b9ad01d",
-    "impactMap": "72c69422cc5f98cb57c6f27233649cf02c550f620cdd91fe91ee9f78cafb2186",
-    "impactMapSpec": "7e5a1bc5e804c84b5492130080ca57626a6ba0a2f1be6c683f7e451fb42d16ed",
-    "packageScripts": "1e90bed6c5d19fe2cbf37f9d209c52b7e09e5b3f9ae2b0d8bcd34a04b36b6b23",
-    "acceptanceScript": "bd9b8d95f488639d5564d73e8492e7e01d2600219cc4a5b3328a111aa74305a1",
-    "performanceAcceptanceScript": "51856b3f8319916303a60dc8aed86f1dc830583945ba0be5ea9deb02b2ed9bfe",
+    "impactMap": "7ddcf076ab2a5957687f60a785e2611f7afccd95da20000b388518c181aa9159",
+    "impactMapSpec": "bde81eeb7150ea549d8e22c33b554e6dbb2098b569e16e23a08608b64ec70b84",
+    "packageScripts": "6be918c4f3ae73d5ba2d1e4490fc90d01f754d0450bad6bc51f9fa7492d35797",
+    "acceptanceScript": "4a128af44cfc71bbad98ffe3a6ffd18113b17530cf613a415efda82d505cff82",
+    "performanceAcceptanceScript": "9d692dfbe6517a757185e55e5b8e47f795a604aa446b891e3d13a1ca31199d91",
     "baselineScript": "cc6a431db7e271fcfd2af8ef2eeb2aad6299a22ae6661b31119f3cf4b5cc0fef",
     "captureScript": "99f9eb3fe4efa643e5a87925098dfdd815664b703907b90333e9e240edd317ac",
-    "corpusScript": "7885fa8b409d16da0628d0f3413354c47e6cc0a0350188309d678418b833c8af",
-    "sourceObservation": "1bb1ab5e4dc019f2953874cf9c8bcf6ecf8f679185719a526a414066eb24d74f"
+    "corpusScript": "359e202832c117f12c6e041706e0028caaaf4c063df3d97511be982ab703bf11",
+    "sourceObservation": "97aa4943855fd349b035c4ab08c5d265a3ca2e25e7ac34b837325ac8832423fa",
+    "sourceObservationEvidence": "c32491290dd067ab07ac901c2ebb671d4e9900a183caed5bbe61cc4a3465b270",
+    "goKeggDefinition": "e8d54b3aab301f2f36da7eae74258b512a0c3cdfc66668e3af7f1b398a0ff790"
   },
   "frozenBaseline": {
     "capturedAtCommit": "e1f841c8ada919250c01f5cde76586ef2375bdc6",
@@ -102,7 +106,7 @@
   "observation": {
     "revisionCount": 1,
     "calibration": {
-      "gitSpawnMedianMs": 113.954,
+      "gitSpawnMedianMs": 108.255,
       "pathEntries": 52,
       "invokedUnderNpm": true
     },
@@ -111,68 +115,68 @@
         "id": "job-status",
         "role": "render-blocking",
         "status": 200,
-        "coldMs": 6.309,
-        "warmMs": 2.014,
-        "warmSpreadMs": 1.042,
-        "oneTimeCostMs": 4.295
+        "coldMs": 6.182,
+        "warmMs": 2.48,
+        "warmSpreadMs": 1.393,
+        "oneTimeCostMs": 3.702
       },
       {
         "id": "artifact-bytes",
         "role": "render-blocking",
         "status": 200,
-        "coldMs": 5.366,
-        "warmMs": 2.492,
-        "warmSpreadMs": 1.421,
-        "oneTimeCostMs": 2.874
+        "coldMs": 5.676,
+        "warmMs": 3.036,
+        "warmSpreadMs": 1.402,
+        "oneTimeCostMs": 2.64
       },
       {
         "id": "interaction",
         "role": "secondary",
         "status": 200,
-        "coldMs": 3138.813,
-        "warmMs": 9.933,
-        "warmSpreadMs": 2.188,
-        "oneTimeCostMs": 3128.88
+        "coldMs": 2991.799,
+        "warmMs": 9.882,
+        "warmSpreadMs": 1.728,
+        "oneTimeCostMs": 2981.917
       },
       {
         "id": "context-envelope",
         "role": "secondary",
         "status": 409,
-        "coldMs": 3.544,
-        "warmMs": 1.852,
-        "warmSpreadMs": 0.373,
-        "oneTimeCostMs": 1.692
+        "coldMs": 3.054,
+        "warmMs": 1.822,
+        "warmSpreadMs": 0.519,
+        "oneTimeCostMs": 1.232
       },
       {
         "id": "changesets",
         "role": "secondary",
         "status": 200,
-        "coldMs": 2.471,
-        "warmMs": 1.042,
-        "warmSpreadMs": 0.467,
-        "oneTimeCostMs": 1.429
+        "coldMs": 1.642,
+        "warmMs": 1.849,
+        "warmSpreadMs": 1.003,
+        "oneTimeCostMs": -0.207
       },
       {
         "id": "workspace-status",
         "role": "secondary",
         "status": 200,
-        "coldMs": 232.184,
-        "warmMs": 227.521,
-        "warmSpreadMs": 7.062,
-        "oneTimeCostMs": 4.663
+        "coldMs": 218.549,
+        "warmMs": 218.515,
+        "warmSpreadMs": 7.046,
+        "oneTimeCostMs": 0.034
       }
     ],
     "eventLoop": {
-      "samples": 62,
-      "maxMs": 3145.728
+      "samples": 60,
+      "maxMs": 2998.927
     }
   },
   "improvementVsBaseline": [
     {
       "id": "job-status",
       "baselineWarmMs": 2.229,
-      "currentWarmMs": 2.014,
-      "deltaPct": -9.6,
+      "currentWarmMs": 2.48,
+      "deltaPct": 11.3,
       "baselineWarmSpawnEquivalents": null,
       "currentWarmSpawnEquivalents": null,
       "calibratedDeltaPct": null
@@ -180,8 +184,8 @@
     {
       "id": "artifact-bytes",
       "baselineWarmMs": 2.174,
-      "currentWarmMs": 2.492,
-      "deltaPct": 14.6,
+      "currentWarmMs": 3.036,
+      "deltaPct": 39.7,
       "baselineWarmSpawnEquivalents": null,
       "currentWarmSpawnEquivalents": null,
       "calibratedDeltaPct": null
@@ -189,8 +193,8 @@
     {
       "id": "interaction",
       "baselineWarmMs": 9.9,
-      "currentWarmMs": 9.933,
-      "deltaPct": 0.3,
+      "currentWarmMs": 9.882,
+      "deltaPct": -0.2,
       "baselineWarmSpawnEquivalents": null,
       "currentWarmSpawnEquivalents": null,
       "calibratedDeltaPct": null
@@ -198,8 +202,8 @@
     {
       "id": "changesets",
       "baselineWarmMs": 42.102,
-      "currentWarmMs": 1.042,
-      "deltaPct": -97.5,
+      "currentWarmMs": 1.849,
+      "deltaPct": -95.6,
       "baselineWarmSpawnEquivalents": null,
       "currentWarmSpawnEquivalents": null,
       "calibratedDeltaPct": null
@@ -207,11 +211,11 @@
     {
       "id": "workspace-status",
       "baselineWarmMs": 64.862,
-      "currentWarmMs": 227.521,
-      "deltaPct": 250.8,
+      "currentWarmMs": 218.515,
+      "deltaPct": 236.9,
       "baselineWarmSpawnEquivalents": 6.785,
-      "currentWarmSpawnEquivalents": 1.997,
-      "calibratedDeltaPct": -70.6
+      "currentWarmSpawnEquivalents": 2.019,
+      "calibratedDeltaPct": -70.2
     }
   ],
   "unmeasured": {
@@ -369,32 +373,42 @@
         "package.json"
       ],
       "detail": "Every P4R-5 implementation and executed spec is source-hashed; no stale P4R-4-only producer can underwrite Code/reproduce claims."
+    },
+    {
+      "id": "RS-P4R5-4",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-source-observation.mjs",
+        "acceptance/g0-result-studio/rs-p4r-source-observation.json",
+        "resources/built-in-plugins/go-kegg/tool-definition.json"
+      ],
+      "detail": "The isolated real run_tool → tool_job → Artifact Truth chain produced formal DESeq2, standalone volcano, heatmap and GO-BP artifacts, then created and read each exact Revision source projection. The observation is source-bound and non-qualifying."
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-28T01:42:41.327Z",
+    "generatedAt": "2026-07-28T05:19:38.653Z",
     "frontend": {
       "command": "npm run test:files --prefix frontend -- 19 specs",
       "exitCode": 0,
       "filesPassed": 19,
-      "testsPassed": 113,
+      "testsPassed": 114,
       "specCount": 19,
-      "stdoutSha256": "5c6f816cfb56e2a2438d43d7342b4252ceac0b27d49d87d14134f1383ab018be"
+      "stdoutSha256": "24a04b24d33bd4802a9258d1b1d3ac248f0ae4d7eb4883ef44464a82d43eb302"
     },
     "node": {
-      "command": "node --test 11 specs",
+      "command": "node --test 12 specs",
       "exitCode": 0,
-      "specCount": 11,
-      "testsObserved": 132,
-      "testsPassed": 132,
-      "stdoutSha256": "d4278548bd004679df6cb21d5fb0f27cc70229e501a3a1eb982ef3608df09a27"
+      "specCount": 12,
+      "testsObserved": 137,
+      "testsPassed": 137,
+      "stdoutSha256": "ce88e4bd1d4ba7af7b7b746cbd369b374d8d36b0516e38fce91d039ff7e2759d"
     }
   },
   "passed": true,
-  "sourceCommit": "07d8c92bf6d670a4729a6fd758efc218cf840dcb",
+  "sourceCommit": "c6b3d72235aab1284f12f9a6e58f1331adbaa1d3",
   "sourceCommitReachable": true,
   "sourceCommitMatchesSourceHashes": true,
   "sourceCommitMismatches": [],
-  "generatedAt": "2026-07-28T01:42:41.327Z",
+  "generatedAt": "2026-07-28T05:19:38.653Z",
   "privacyClean": true
 }

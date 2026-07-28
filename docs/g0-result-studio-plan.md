@@ -2,7 +2,7 @@
 
 最后更新：2026-07-28
 
-状态：`active / implemented_unverified`（RS0～RS8 引擎基础与 P4R-0～P4R-4 保留；G0-CHF0 审计修复已重新真实收口；当前阶段 `P4R-5 Per-result Code & Reproduce`，`G0-RS-P5` 继续阻断）
+状态：`active / implemented_unverified`（RS0～RS8 引擎基础与 P4R-0～P4R-5 保留；G0-CHF0 审计修复已重新真实收口；当前阶段 `P4R-6 整体验收与交接`，`G0-RS-P5` 继续阻断）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -1385,7 +1385,7 @@ Result Studio 当前按三层事实表达：
 
 RH0 收口证据（2026-07-26）：`test/impact-map.json` 与 `scripts/test-affected.mjs` 已建立确定性、去重、fail-closed 的影响选择；`npm run test:changed` 定向 Node 41 项与前端 294 项通过，`npm run test:all:workspace` 最终基线为 Node 1581 pass / 0 fail / 11 skipped、前端 294 pass / 0 fail；`npm run docs:reconcile`（39 registered、0 unregistered、0 validation issues）、`npm run docs:check`、`npm run ui:audit:check` 与 `git diff --check` 全部通过。旧 `dev-desktop.sh`、已下线云端 smoke 与旧 DESeq2 MCP 验收脚本已删除；真实 JSON 证据迁移到 `test/fixtures/golden-path/deseq2-run.json`，`tmp` 历史日志/二进制已清理，QA/golden-path 日志保留上限为 20。后续审计确认 RS9 脚本仍被历史证据引用，因此保留文件但从日常 Result Studio syntax 热路径移出，新增显式 `g0:result-studio:historical:syntax`；历史代码仍可单独校验。该收口只改变工程治理，不改变任何执行/科学真相；P4R 启动门已满足，P4R-0～P4R-2 已按当前证据推进。
 
-### G0-RS-P4R：Product Reframe — Agent-first Focused Result Experience（`in_progress · P4R-5`）
+### G0-RS-P4R：Product Reframe — Agent-first Focused Result Experience（`in_progress · P4R-6`）
 
 #### P4R.1 定位与启动门
 
@@ -1477,7 +1477,7 @@ P4R 完成后的默认产品形态固定为：
 
 6. **Per-result Code & Reproduce**
    - 新增只读、项目隔离的 Revision source 投影：返回语言、精确脚本内容或受控 stream、relative path、sha256、origin、是否独立脚本以及对应参数/输入/环境摘要。
-   - 中央代码视图支持复制完整代码、下载脚本、在项目编辑器打开、让 Agent 解释/修改和发起受控重放。
+   - 中央代码视图支持复制完整代码、下载脚本、在项目编辑器打开、让 Agent 解释/修改；只有服务端投影为 `replayable` 的 Revision 才能发起受控重放，材料或输入不足时明确禁用。
    - 切换版本时代码同步切换；代码修改只能产生新 ChangeSet/Revision，不覆盖历史脚本。
    - 复现入口逐步披露参数 JSON、输入引用与 hash、Runtime/包/插件版本、随机种子、精确命令和输出 hash；完整 ReplayPackage 继续由现有 HRT-6 真相提供。
 
@@ -1485,7 +1485,7 @@ P4R 完成后的默认产品形态固定为：
 
 ##### P4R-0：Truth Baseline、失败测试与预算冻结
 
-进度（2026-07-28）：P4R-0 已收口。一次性隔离捕获环境、canonical corpus、失败测试先行和性能预算均已完成；`acceptance/g0-result-studio/rs-p4r-performance.json` 为 13/13，基线由 `RS-P4R0-13` 冻结，重跑只写 `currentObservation` 与对比，不覆盖基线。P4R 定向基础测试已通过；不变量套件当前 6/7，唯一红项为尚未实现的 Revision source projection，明确归 P4R-5，不把它写成 P4R-0/P4R-4 回归。原始观测工具由 `340c09a` 引入并保持 `BIOF3_PERF_PROBE=1` 默认关闭。
+进度（2026-07-28）：P4R-0 已收口。一次性隔离捕获环境、canonical corpus、失败测试先行和性能预算均已完成；`acceptance/g0-result-studio/rs-p4r-performance.json` 为 13/13，基线由 `RS-P4R0-13` 冻结，重跑只写 `currentObservation` 与对比，不覆盖基线。P4R-0 收口时不变量为 6/7，唯一红项 Revision source projection 已由 P4R-5 关闭；当前套件含 7 条核心不变量与 1 条显式 runtime skip guard，本机为 8/8。原始观测工具由 `340c09a` 引入并保持 `BIOF3_PERF_PROBE=1` 默认关闭。
 
 运行时勘察（2026-07-26，只读检查开发库 `core/r-server/biof3.db`，只取计数与结构，不读结果内容）：
 
@@ -1537,12 +1537,12 @@ P4R 完成后的默认产品形态固定为：
 - 机器捕获结果点击的请求 waterfall、事件循环 lag、首次内容可见、Artifact 切换、版本切换和代码打开基线。
 - 建立小/中/大 PNG/SVG、10 万行表、长报告、多 Revision 的 canonical fixture；不使用数据库 seed 冒充真实产品旅程。
 - 先补失败测试：结果显示不得等待 interaction/context/storage；查看历史版本不得改变 current；代码 hash 不符必须阻断；次级请求失败不得清空主体。
-  - ✅ 已交付于 `test/p4r-invariants.test.mjs`，入口 `npm run g0:result-studio:p4r:invariants`。**刻意不并入 `g0:result-studio:p4r` 聚合门**：当前只剩 P4R-5 所属的源码投影一条为红，它是后续阶段的「完成定义」，不是 P4R-3 的失败。
+  - ✅ 已交付于 `test/p4r-invariants.test.mjs`，入口 `npm run g0:result-studio:p4r:invariants`。P4R-5 已关闭原源码投影红项并加入真实受控 replay 不变量；当前为 7 条核心不变量 + 1 条显式 skip guard，且已进入 `p4r:p5:test` 与影响映射。
   - 每条按代码实况书写，不照本节原文写成笼统断言（笼统写法要么恒真要么红在错误原因上）：
     - **① 通过**。服务端已成立：`/api/tools/file` 与 result-studio 路由无依赖关系，断言用于防回归。客户端那半属不变量 ④。
     - **②a 通过**。重复读取不新增 Revision。
     - **②b 已转绿（P4R-1）**。纯读路径不再写 repository binding。
-    - **③ 红**。23 条路由中无 Revision 源投影端点；阻断原语已存在（`result-studio.js:106-113`、`result-compare-service.js:287/:494`），缺的是端点本身。归 `P4R-5`。
+    - **③ 已关闭于 P4R-5**。Revision source 端点、hash/commit/path/project fail-closed 与两阶段 replay 已落地；真实 source/replay 不变量持续防回归。
     - **④ 已转绿（P4R-1）**。主体状态决策已抽入并测试 `resultBodyState.ts`，次级失败不再清空已显示主体。
 - 冻结可机器验证的性能预算。最低要求：点击后 100ms 内有可见反馈；Result Studio 打开链不得产生超过 250ms 的同步事件循环阻塞；不同大小 Artifact 的首内容与版本切换精确阈值由本阶段真实采样写入 acceptance contract，后续不得放宽来换取通过。
 
@@ -1559,7 +1559,7 @@ P4R 完成后的默认产品形态固定为：
 
 **范围（2026-07-27 按代码实况收敛）**
 
-P4R-2 的可交付范围以代码实况为界，本阶段**不新增阶段、不借用后续阶段的工作**。四态互斥中只有 `result` 一态有实现基础：`WorkspaceMode`（`frontend/src/hooks/useWorkspaceRouting.ts:4`）中不存在 `code` 与 `history`；`compare` 在 `frontend/src` 内零写入者（无任何 `updateWorkspaceMode('compare')` 调用点，只能由手输 `?mode=compare` 经 `project-workspace.tsx:219` 进入），且每个消费点都写成 `result || compare`（`:311`、`:377-378`、`:394`、`:945`、`:1148`，`CenterPanel.tsx:114`），`ResultStudioCanvas` 只把 `mode` 落成 `data-mode` 属性（`ResultStudioSurface.tsx:53`）而 `ResultStudioSurface.module.css` 与 `project-workspace.module.css` 都不选择该属性，因此它与 `result` 渲染**完全相同**。Code 的数据源属 P4R-5：`core/r-server/routes/result-studio.js` 的 23 条路由无一投影 Revision 源，计划 §P4R.4(6) 与 §P4R-5 已把该只读源投影和「Result/Code 无损切换」明写为 P4R-5 的新工作；History 的版本选择器属 P4R-4（§P4R-4 第一条）。因此 P4R-2 独立可交付的只有三件事：(1) **首屏化**——主体之上不再出现无条件块，仍保留的每个块都要给出「为什么必须排在结果之前」的判据，判据抽成可测纯谓词放进 `frontend/src/components/result-studio/resultFirstScreen.ts`，不再埋在内联且不 export 的 `ResultArtifactShell` 里（当前对象：`workflowBar` `:4049`、`recoveryConfirmation` `:4073`、`ResultStudioChangeSetPanel` `:4145`、`resultScientificDelivery` `:4161-4162`；`resultDeliveryCard` 已由 `ba6b124` 处理）；(2) **header 收敛**——`ResultStudioContextBar`（`ResultStudioSurface.tsx:64-103`）已存在，要做的是消除它与 `workflowBar`（`:4059`）对同一 `artifactTruth.status` 的重复呈现，并把版本位从截断 Revision ID（`resultSurface.ts:125-129`）改为真实 `vN` 或如实降级；(3) **模式机制骨架**——只建立「一次只显示一态」的容器与状态载体，并在其上接入唯一有实现的 `result`，`code` 入口在 P4R-5 的源投影路由存在前不得渲染，`history` 随 P4R-4 接入，`compare` 保持不可达而非被本阶段伪装成可用。跨模式的草稿/选择/滚动/布局保持由 P4R-2 建立机制并**只对 `result↔chat` 验证**，其余组合随 P4R-4/P4R-5 补齐。附带可安全清理的死代码：`HistoryPanel`（`project-workspace.tsx:2777-2823`）、`ToolboxPanel`（`:2840-3106`）在 `frontend/src` 内零引用，`ResultSidebarPanel`（`:4462-4504`）虽 export 却无 import，使 `ResultArtifactShell` 中 6 处 `isSidebar` 分支（`:3246`、`:3947`、`:4090`、`:4095`、`:4246`、`:4403`）全部不可达，合计约 357 行。（行号钉在 `1a31ed3`；`project-workspace.tsx` 正在串行修改中，引用时按符号名重新定位。）
+P4R-2 的可交付范围以**该子阶段启动时**的代码实况为界，本阶段**不新增阶段、不借用后续阶段的工作**。当时四态互斥中只有 `result` 一态有实现基础：`WorkspaceMode`（`frontend/src/hooks/useWorkspaceRouting.ts:4`）中不存在 `code` 与 `history`；`compare` 在 `frontend/src` 内零写入者（无任何 `updateWorkspaceMode('compare')` 调用点，只能由手输 `?mode=compare` 经 `project-workspace.tsx:219` 进入），且每个消费点都写成 `result || compare`（`:311`、`:377-378`、`:394`、`:945`、`:1148`，`CenterPanel.tsx:114`），`ResultStudioCanvas` 只把 `mode` 落成 `data-mode` 属性（`ResultStudioSurface.tsx:53`）而 `ResultStudioSurface.module.css` 与 `project-workspace.module.css` 都不选择该属性，因此它与 `result` 渲染**完全相同**。Code 的数据源属 P4R-5：当时 `core/r-server/routes/result-studio.js` 的 23 条路由无一投影 Revision 源，计划 §P4R.4(6) 与 §P4R-5 已把该只读源投影和「Result/Code 无损切换」明写为 P4R-5 的新工作；History 的版本选择器属 P4R-4（§P4R-4 第一条）。因此 P4R-2 独立可交付的只有三件事：(1) **首屏化**——主体之上不再出现无条件块，仍保留的每个块都要给出「为什么必须排在结果之前」的判据，判据抽成可测纯谓词放进 `frontend/src/components/result-studio/resultFirstScreen.ts`，不再埋在内联且不 export 的 `ResultArtifactShell` 里（当前对象：`workflowBar` `:4049`、`recoveryConfirmation` `:4073`、`ResultStudioChangeSetPanel` `:4145`、`resultScientificDelivery` `:4161-4162`；`resultDeliveryCard` 已由 `ba6b124` 处理）；(2) **header 收敛**——`ResultStudioContextBar`（`ResultStudioSurface.tsx:64-103`）已存在，要做的是消除它与 `workflowBar`（`:4059`）对同一 `artifactTruth.status` 的重复呈现，并把版本位从截断 Revision ID（`resultSurface.ts:125-129`）改为真实 `vN` 或如实降级；(3) **模式机制骨架**——只建立「一次只显示一态」的容器与状态载体，并在其上接入唯一有实现的 `result`，`code` 入口在 P4R-5 的源投影路由存在前不得渲染，`history` 随 P4R-4 接入，`compare` 保持不可达而非被本阶段伪装成可用。跨模式的草稿/选择/滚动/布局保持由 P4R-2 建立机制并**只对 `result↔chat` 验证**，其余组合随 P4R-4/P4R-5 补齐。附带可安全清理的死代码：`HistoryPanel`（`project-workspace.tsx:2777-2823`）、`ToolboxPanel`（`:2840-3106`）在 `frontend/src` 内零引用，`ResultSidebarPanel`（`:4462-4504`）虽 export 却无 import，使 `ResultArtifactShell` 中 6 处 `isSidebar` 分支（`:3246`、`:3947`、`:4090`、`:4095`、`:4246`、`:4403`）全部不可达，合计约 357 行。（行号钉在 `1a31ed3`；`project-workspace.tsx` 正在串行修改中，引用时按符号名重新定位。）
 
 **证据边界**
 
@@ -1569,7 +1569,7 @@ P4R-2 的证据边界沿用 P4R-0 已确立的纪律：**没有生产者的指�
 - 主体首屏化。**删除对象按代码实况重新指定**：原文点名的三个对象经核对均不成立——Honeycomb 结果导航是网格列（`project-workspace.module.css:4086-4088`）且已可收起（`project-workspace.tsx:4257-4258`、`:3947`），删之得横向宽度而非首屏高度，其去留改为横向宽度问题单独裁决、不计入首屏化交付；存储卡已自抑制（`ResultStudioChangeSetPanel.tsx:56`、`:182`、`:184`）；二级 Artifact rail 已条件渲染（`project-workspace.tsx:3946`）。真正无条件占据首屏的是计划未点名的 `resultDeliveryCard`，已由 `ba6b124` 按 `resultFirstScreen.ts::shouldShowDeliveryCard` 条件化。
 - 本阶段剩余的首屏对象是主体之上仍会出现的四个条件块：`workflowBar`（`project-workspace.tsx:4049`）、`recoveryConfirmation`（`:4073`）、`ResultStudioChangeSetPanel`（`:4145`）与 `resultScientificDelivery`（`:4161-4162`）。每个都必须给出「为什么它必须排在结果之前」的判据；判据一律抽成可测纯谓词放进 `frontend/src/components/result-studio/resultFirstScreen.ts`，不再埋在内联且不可导出的 `ResultArtifactShell` 里——该组件定义在近 5000 行的 `project-workspace.tsx` 内且不 export，其内部决策此前无法被任何测试触及。
 - 顺带清理与首屏无关但同处该文件的死代码：`HistoryPanel`（`project-workspace.tsx:2777-2823`，47 行）与 `ToolboxPanel`（`:2840-3106`，267 行）在 `frontend/src` 内零引用；`ResultSidebarPanel`（`:4462-4504`，43 行）虽 `export` 却无任何 import，使 `ResultArtifactShell` 中 6 处 `isSidebar` 分支（`:3246`、`:3947`、`:4090`、`:4095`、`:4246`、`:4403`）全部不可达。
-- **收敛已有 header，不新建**：`ResultStudioContextBar`（`ResultStudioSurface.tsx:64-103`，挂载于 `CenterPanel.tsx:181-191`）已经是结果头。本阶段做三件事：去掉它与 `workflowBar`（`project-workspace.tsx:4049`、`:4059`）对同一 `artifactTruth.status` 的重复呈现；把版本位从截断 Revision ID（`resultSurface.ts:125-129`）改为 §P4R.3 要求的 `vN`——`ActiveArtifact`（`project-workspace.tsx:132-150`）不含 `revisionOrdinal`，因此要么由 P4R-2 补一条不阻塞主体的最小投影，要么如实显示「版本待确认」，**不得用截断 ID 冒充 `vN`**；保留返回入口，内部 ID 不进普通视图。
+- **收敛已有 header，不新建（P4R-2 启动判据）**：`ResultStudioContextBar`（`ResultStudioSurface.tsx:64-103`，挂载于 `CenterPanel.tsx:181-191`）已经是结果头。本阶段做三件事：去掉它与 `workflowBar`（`project-workspace.tsx:4049`、`:4059`）对同一 `artifactTruth.status` 的重复呈现；把版本位从截断 Revision ID（`resultSurface.ts:125-129`）改为 §P4R.3 要求的 `vN`——启动时 `ActiveArtifact`（`project-workspace.tsx:132-150`）不含 `revisionOrdinal`，P4R-2 最终选择补一条不阻塞主体的最小投影，并在载荷缺失时如实显示「当前版本」，**不得用截断 ID 冒充 `vN`**；保留返回入口，内部 ID 不进普通视图。
 - **返回目标按现状写为「返回会话」**：仓库内不存在结果列表界面，返回按钮的 `aria-label` 就是「返回对话」（`ResultStudioSurface.tsx:83`）并走 `updateWorkspaceMode('chat')`（`CenterPanel.tsx:188`），右栏 `results` tab 是单 Artifact Inspector（`RightPanel.tsx:146-174`）。§P4R.3 布局图中的「返回结果列表」同步改为「返回会话」；若要建结果列表，那是新增产品面，不属 P4R-2 且需单独立项。
 - **模式机制本阶段只能立骨架，不能立四态**：`WorkspaceMode`（`useWorkspaceRouting.ts:4`）中不存在 `code` 与 `history`；`compare` 零写入者且与 `result` 渲染完全相同（`ResultStudioSurface.tsx:53` 只落 `data-mode`，两份 module CSS 均不选择它）。因此 P4R-2 只交付「一次只显示一态」的容器与状态载体，并在其上接入唯一有实现的 `result`。`code` 入口在 P4R-5 的 Revision 源投影路由存在前不得渲染；`history`/版本选择器随 P4R-4 接入；`compare` 在 P4R-4 给出比较入口前保持不可达，**不得由本阶段把它伪装成可用的第四态**。
 - **[x] Agent 会话常驻（已交付 `8e58f98`）**。该条在原 charter 中被写成布局偏好，实测是**主路径上的静默数据丢失**：`ResultEditPanel`（`RightPanel.tsx:161-174`）提交后派发的 `copilotAsk` 经零缓冲的 `dispatchBioF3Event`（`lib/events.ts:109-113`）发出，唯一订阅者 `SimpleChat.tsx:579-585` 在 result 模式下未挂载，事件消失且 `finally` 同步把按钮重置为空闲，用户得不到任何失败提示。修复去掉了 `CenterPanel` 中冗余且具破坏性的 `{ctx.showPinnedSummary && children}` 门（可见性本由投影层 `aria-hidden` + CSS 承担，去掉后比原来**少**做工作），并新增 `ownsCopilotAsk`（默认 `false`，仅中央实例传 `true`，`CenterPanel.tsx:167`）避免右栏 chat tab 重复订阅。守门测试此前双重假绿（给所有模式硬编码 `showPinnedSummary: true` 并 mock 掉 `SimpleChat`），已改为按 mode 派生并新增 `copilotAskDelivery.test.tsx` 用真实订阅验证送达。记为**交付缺陷修复**，不记为布局改造。
@@ -1596,16 +1596,20 @@ Change Review 默认只呈现服务端受信并持久化的一句话意图、影
 - 查看旧版本不产生 Git/SQLite 写入；采用继续使用 Git CAS + SQLite transaction；恢复继续生成新 Revision。
 - 同一 active result 的版本切换和 Agent 上下文同步，陈旧 context token 明确刷新。
 
-##### P4R-5：Per-result Code & Reproduce（实现中，四类 source-bound 观测未闭合）
+##### P4R-5：Per-result Code & Reproduce（已完成）
 
 - 为每个有正式 `sourceScriptRef` 的 ArtifactRevision 提供精确代码投影和 Result/Code 无损切换。
-- 支持复制、下载、打开、Agent 解释/修改和受控重放；历史版本显示其自己的脚本。
+- 支持复制、下载、打开和 Agent 解释/修改；对 `reproduction.replayable` 的 Revision 提供两阶段受控重放，材料或输入不足的 Revision 明确返回 `unavailable`；历史版本显示其自己的脚本。
 - 独立脚本与共享 Job 脚本诚实区分；缺代码、越界路径、hash 漂移和跨项目访问全部 fail-closed。
-- 隔离 source-observation producer 已验证 DESeq2、standalone volcano、gene-correlation heatmap 的真实 Revision source；GO/KEGG 当前运行生成了 GO 文件但 Job 因 KEGG required artifact 缺失而为 failed，不能把 failed Job 伪装成正式 Artifact，故该条仍未完成。证据脚本：`scripts/g0-rs-p4r-source-observation.mjs`；重跑入口：`npm run g0:result-studio:p4r:p5:source-observation`。
+- 隔离 source-observation producer 已通过真实 `run_tool → tool_job → artifact truth → ArtifactRevision → revision source` 链验证 DESeq2 `deg_table`、standalone volcano、gene-correlation heatmap 与 go-kegg GO-BP 四类正式 Artifact；四项均为 completed Job、4/4 source projection verified，证据 source-bound 到 `f5c50db`。其中 volcano/heatmap 投影为 replayable，DESeq2/GO-BP 因当前材料不足诚实保持 `unavailable`；4/4 不外推为四类均已真实 replay。KEGG 条件性产物在无离线快照/REST 结果时保持 optional，GO-BP 结果与报告仍为 required，不再把一个真实完成的 GO Job 因条件性 KEGG 缺失错误标成 failed。
 
-实现检查点 `07d8c92` 已通过 P4R-5 source/invariant 10/10、前端定向 118/118、strict TypeScript 与 docs/UI 门；`rs-p4r-product-reframe.json` 已绑定该实现提交并扩展为 16/16。该实现证据证明 source projector 与 Code 契约，不替代上述四类正式 Artifact observation，故阶段仍保持 P4R-5。
+完成（2026-07-28）：`07d8c92` 交付 exact Revision source 与 Code surface，`f5c50db` 补齐 replayable Revision 的 context-bound 两阶段受控重放、真实 `run_tool → tool_job → Artifact Truth → candidate Revision` 执行、重复确认幂等、current/history 不变、Job-root legacy Artifact 安全解析和 source commit 对象可达性检查。普通 Source API 不暴露 raw 参数；只有进程内 replay service 可读取 exact normalized values，调用方不能传 toolId/params/script/command/workflowPlan。前端预检明确展示工具、输入数、运行时和副作用，确认后只创建候选并进入 Change Review；非 replayable Revision 不提供伪执行入口。
+
+证据：P4R 套件为 7 条核心不变量 + 1 条显式 skip guard，本机 8/8；其中 standalone volcano 真实 replay invariant 创建一个且仅一个非 current 候选；source/replay 单测 7/7，P4R-5 聚合 Node 15/15；source-bound product runner 为前端 19 files / 114 tests、Node 12 specs / 137 tests，P4R umbrella 前端为 23 files / 151 tests。四类 source observation 4/4 exact source projection 且 `sourceCommitMatchesSourceHashes:true`；`rs-p4r-product-reframe.json` 17/17、`qualificationEligible:false`。历史重写后的 source observation / peeled-commit / 完成态 invariant gate 检查点依次为 `f72f8ac`、`ae6d9c4`、`c6b3d72`。UI-113/UI-114/UI-115 均保持 `in_progress`，实机明暗/响应式/键盘/连续旅程仍归 P4R-6。当前阶段推进至 P4R-6。
 
 ##### P4R-6：整体验收与交接
+
+当前入口证据（2026-07-28）：刷新后的 `rs-p4r-performance.json` 为 source-bound 13/13，但其 `passed` 只表示基线/门禁契约有效，并不表示性能预算通过；`budgetStatus.eventLoopMaxMs` 仍为 `violated_by_current_implementation`，本轮隔离峰值 3015.705ms，steady-state 最慢路由为 `workspace-status` 220.127ms，且 evidence 明确标注绝对毫秒对负载敏感。P4R-6 必须用连续产品链和客户端观测重新裁决，不得把 13/13 外推为 250ms 产品预算已满足。
 
 - 从真实已完成 Job 打开结果，完成 Agent 样式修改、版本比较、代码查看、采用/放弃与会话往返。
 - 捕获开发态明暗 × 1440/1024/820 矩阵、键盘路径、错误/重试、次级 API 失败和基本服务重开恢复。
@@ -1623,8 +1627,8 @@ Change Review 默认只呈现服务端受信并持久化的一句话意图、影
 
 2. **单结果焦点**
    - 主体之上不出现无条件块；每个仍排在主体之前的块都由 `resultFirstScreen.ts` 中的具名纯谓词决定其出现条件，并有对应单测（当前对象：`workflowBar`、`recoveryConfirmation`、`ResultStudioChangeSetPanel`、`resultScientificDelivery`、`resultDeliveryCard`）。结果导航保持可收起且第二级保持按需（`project-workspace.tsx:3946`、`:4257-4258`），不再以「常驻两级导航」描述现状。「主体首屏可见」的像素判定在本仓库无生产者，按 P4R-0 先例记为 `unmeasured` + `not_captured_no_browser_automation_in_repo`，不作为可重跑门的通过条件。
-   - 当前作用域显示“结果名称 · 版本 · validation”。版本位必须是真实序号 `vN`：`ActiveArtifact`（`project-workspace.tsx:132-150`）不含 `revisionOrdinal`，当前 header 显示的是 `shortRevisionLabel()` 截断出的 Revision ID（`resultSurface.ts:125-129`），因此 P4R-2 必须补一条不阻塞主体的最小序号投影（不得复用已被 P4R-0 归为 `secondary` 的 context-envelope，见 §P4R.4(2)），或在拿到序号前如实显示「版本待确认」。**以截断 Revision ID 冒充 `vN` 记为不通过。** 后台节点不会自动切走。
-   - 返回会话不丢失草稿、选择和布局；`result` 与会话之间往返可重复进行而状态不退化。其中草稿已由 `8e58f98`（会话在所有模式常驻）、布局已由 `resultPanelRestoreRef`（`project-workspace.tsx:309-320`、`:377-386`）成立，本阶段补回归断言；**待交付的是选择与滚动位置的保持**。跨 Code/History/Compare 的模式切换保持不属本阶段：`code`/`history` 不在 `WorkspaceMode` 内（`useWorkspaceRouting.ts:4`），`compare` 无写入者且与 `result` 渲染相同，相应验收随 P4R-5/P4R-4 一并补齐。
+   - 当前作用域显示“结果名称 · 版本 · validation”。`revisionOrdinal` 已由 P4R-2 接入 `ActiveArtifact`，有序号显示真实 `vN`，载荷缺失时诚实降级为“当前版本”，不再用截断 Revision ID 冒充版本号。P4R-6 以真实尺寸/主题和历史 Revision 连续切换复验该投影，后台节点不会自动切走。
+   - 草稿、选择、滚动和布局保持已由 P4R-2 交付，Result/Code/Compare/History 已由 P4R-4/5 接入真实互斥模式。P4R-6 的剩余目标是连续实机回归：result↔chat 与四种结果模式往返后，草稿、Selection、主体滚动、viewed Revision 和布局都不退化，旧 Revision 不污染 current。
 
 3. **Agent 主导**
    - 用户不提供任何内部 ID，仅在当前结果输入自然语言即可得到真实 ChangeSet 候选。
@@ -1637,9 +1641,10 @@ Change Review 默认只呈现服务端受信并持久化的一句话意图、影
    - 采用、放弃、撤销和恢复均使用现有原子契约并可重放。
 
 5. **代码与复现**
-   - 任一资格内正式 Artifact 可从结果头进入当前 Revision 的精确代码。
+   - 任一具有正式 `sourceScriptRef` 的 ArtifactRevision 可从结果头进入精确代码；缺源材料时明确阻断。
    - 复制/下载内容与 `sourceScriptRef.sha256` 一致；版本切换后代码同步变化。
    - 代码修改产生候选 Revision；源数据、current Artifact 和历史脚本保持不可变。
+   - `replayable` Revision 可完成预检/确认并只生成非 current 候选；材料不足的 Revision 保持 `unavailable`，不得出现伪重放按钮。
 
 6. **异常与降级**
    - interaction/context/version/storage/code 任一请求失败时，已打开结果仍可查看，并提供自动重试或可行动说明。
@@ -1658,7 +1663,7 @@ Change Review 默认只呈现服务端受信并持久化的一句话意图、影
 - `npm run g0:result-studio:p4r:test`：fast-path、read-only revision view、source projection、Context/ChangeSet 不变量。
 - `npm run g0:result-studio:p4r:frontend`：Focused Result Surface、Agent Composer、Version Switcher、Change Review、Code View。
 - `npm run g0:result-studio:p4r:product`：P4R-1～当前子阶段的 source-bound 产品契约；`product:update` 刷新对应证据。
-- `npm run g0:result-studio:p4r:invariants`：显式失败测试门，刻意不并入聚合门；当前 6/7，P4R-5 source projection 红项继续保留。
+- `npm run g0:result-studio:p4r:invariants`：P4R 不变量与真实受控 replay 门；当前为 7 条核心不变量 + 1 条显式 runtime skip guard，本机 8/8，已由 `p4r:p5:test` 和影响映射纳入默认 P4R-5 范围。
 - `npm run g0:result-studio:p4r[:update]`：聚合/刷新当前源码哈希和脱敏证据。
 
 `g0:result-studio:p4r:perf`、`:live`、`:ui` 当前并不存在，不得冒充已交付入口。事件循环/waterfall 现由 `p4r[:update]` 生成的 performance evidence 承担；真实连续旅程与明暗 × 1440/1024/820、键盘矩阵属于 P4R-6 计划交付，届时只有在生产者和 npm 入口真实落地后才能登记。
@@ -1812,7 +1817,7 @@ G0-RS-P0 Truth Correction
 
 阶段状态规则：
 
-- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3` 已完成，`G0-RS-P4 Core` 已形成 18/18 离线实现检查点并提交，`G0-RS-RH0` 与 P4R-0～P4R-4 已完成，当前唯一阶段为 P4R-5；P4R 收口前不得启动 P5。
+- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3` 已完成，`G0-RS-P4 Core` 已形成 18/18 离线实现检查点并提交，`G0-RS-RH0` 与 P4R-0～P4R-5 已完成，当前唯一阶段为 P4R-6；P4R 收口前不得启动 P5。
 - 每阶段先补失败测试/fixture，再实现，再形成与证据类型匹配的验收；不得提前开发下一阶段。
 - 单元测试证明契约，fixture 证明确定性集成，真实 Provider 证明模型边界，packaged Electron 证明产品链；四者不能互相替代。
 - 未运行 `npm run docs:reconcile` 与 `npm run docs:check` 不得宣布阶段 completed/verified/qualified。
@@ -1864,10 +1869,10 @@ G0-RS-P0 Truth Correction
 
 `G0-RS-P4R` 计划交付：
 
-1. [x] P4R-0 捕获真实失败基线、请求 waterfall 与事件循环阻塞，并冻结预算。证据 `rs-p4r-performance.json`（13/13）：基线已冻结为脚本内常量并由 `RS-P4R0-13` 钉住，重跑只写 `currentObservation` 与对比、不覆盖基线；不变量见 `test/p4r-invariants.test.mjs`（当前 6/7，唯一红项属 P4R-5 source projection）。分尺寸阈值按 `deferredBudgets` 显式推迟——在快路径存在前采样只会把缺陷固化成标准。
+1. [x] P4R-0 捕获真实失败基线、请求 waterfall 与事件循环阻塞，并冻结预算。证据 `rs-p4r-performance.json`（13/13）：基线已冻结为脚本内常量并由 `RS-P4R0-13` 钉住，重跑只写 `currentObservation` 与对比、不覆盖基线；不变量见 `test/p4r-invariants.test.mjs`（7 条核心不变量 + 1 条显式 runtime skip guard，本机 8/8）。分尺寸阈值按 `deferredBudgets` 显式推迟——在快路径存在前采样只会把缺陷固化成标准。
 2. [x] P4R-1 按实测边界完成结果快路径。实测推翻计划前提——工作区扫描占 0%、hashing <5%，93% 是每次只读请求都 `bindProjectRepository()` 带来的 git 子进程；因此交付为 memo `detectGitRuntime`、`repositoryState()` 三次 fork 惰性化、`inspectRevisionIntegrity` 的每 revision rev-parse 批量成两次常量开销、只读请求不写 binding，以及客户端次级失败不替换已显示主体。对比冻结基线：changesets 42.102→1.203ms（-97.1%）；workspace-status 因 npm/direct 的 Git spawn 校准相差约 12 倍，不再比较不可比的裸毫秒，改用 6.785→2.040 spawn-equivalents（-69.9%）；每 revision 斜率 20ms→0.18ms（200 revision 由 4179ms 降至 66ms）。证据 `rs-p4r-product-reframe.json`（P4R-1～3 合计 10/10）。原 charter 的相邻版本预取与大文件渐进加载没有可证明收益且未实现，已从本子阶段出口移出，作为 P4R-6 真实性能矩阵出现回归时才重开的优化候选；不得描述为已交付。
 3. [x] P4R-2 按 §P4R-2 的代码实况收敛范围完成：主体之上无无条件块且判据进入 `resultFirstScreen.ts`，已有结果 header 显示真实 `vN` 或诚实降级，建立一次只显示一态的容器并只接入真实存在的 `result`，Agent 会话常驻，result↔chat 选择/草稿/滚动/布局保持。`code` 随 P4R-5、`history`/版本选择器随 P4R-4，`compare` 在 P4R-4 前保持不可达；四态齐备从未属于收敛后的 P4R-2 出口。按需结果抽屉未单独新建：现有导航已可收起且 artifact rail 已条件化，未把不存在的重构冒充交付。
 4. [x] P4R-3 让自然语言 Agent 成为默认编辑入口，P4 Core 参数面板降为高级精调。实现检查点 `3d3eb29`；性能校准门修复 `59b33c4`；P2/P3/P4/P4R evidence 均 source-bound。安全边界：context-bound create 只接受同一 Agent turn 的受信原始 intent；科学/数据/流程修改在缺少权威持久 DAG 时 fail-closed，不接收模型自带 DAG。
 5. [x] P4R-4 完成可直接查看的版本选择器与 Codex-like Change Review；实现检查点 `f710261`。历史主体/interaction/Selection/contextToken 均显式绑定 viewed Revision，首次 GET 不写 SQLite、不创建 managed Git；采用/撤销/恢复 checkpoint 与 SQLite/Git 原子回滚，项目/family/参数/source commit 漂移 fail-closed。P2/P3/P4/P4R 五份 evidence 均 source-bound；UI-113/UI-114 保持 `in_progress`，实机矩阵留 P4R-6。
-6. [ ] P4R-5 完成每个 Artifact/Revision 的精确代码、复制/下载/Agent 修改和受控复现入口；源码投影、Code surface、fail-closed 和三类真实 Artifact 已实现，GO/KEGG 正式 source-bound 观测仍阻断收口。
+6. [x] P4R-5 完成具有正式 `sourceScriptRef` 的 ArtifactRevision 精确代码、复制/下载/Agent 解释与修改，并为 `replayable` Revision 提供两阶段受控复现；材料不足明确 `unavailable`。历史脚本、独立/共享 scope、缺失/越界/hash/commit/plugin/input/跨项目漂移全部 fail-closed。DESeq2、standalone volcano、gene-correlation heatmap、go-kegg GO-BP 四类正式 Artifact exact source observation 为 4/4；standalone volcano 真实 replay 只创建非 current 候选且重复确认幂等，不把 4/4 source projection 外推为四类都可 replay。
 7. [ ] P4R-6 完成真实连续链、性能、明暗/响应式/键盘、异常降级、文档和脱敏证据收口。
