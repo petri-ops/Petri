@@ -1603,6 +1603,8 @@ Change Review 默认只呈现服务端受信并持久化的一句话意图、影
 - 独立脚本与共享 Job 脚本诚实区分；缺代码、越界路径、hash 漂移和跨项目访问全部 fail-closed。
 - 隔离 source-observation producer 已验证 DESeq2、standalone volcano、gene-correlation heatmap 的真实 Revision source；GO/KEGG 当前运行生成了 GO 文件但 Job 因 KEGG required artifact 缺失而为 failed，不能把 failed Job 伪装成正式 Artifact，故该条仍未完成。证据脚本：`scripts/g0-rs-p4r-source-observation.mjs`；重跑入口：`npm run g0:result-studio:p4r:p5:source-observation`。
 
+实现检查点 `07d8c92` 已通过 P4R-5 source/invariant 10/10、前端定向 118/118、strict TypeScript 与 docs/UI 门；`rs-p4r-product-reframe.json` 已绑定该实现提交并扩展为 16/16。该实现证据证明 source projector 与 Code 契约，不替代上述四类正式 Artifact observation，故阶段仍保持 P4R-5。
+
 ##### P4R-6：整体验收与交接
 
 - 从真实已完成 Job 打开结果，完成 Agent 样式修改、版本比较、代码查看、采用/放弃与会话往返。

@@ -1,42 +1,49 @@
 {
   "schemaVersion": 1,
-  "workPackage": "G0-RS-P4R-1/P4R-2/P4R-3/P4R-4",
+  "workPackage": "G0-RS-P4R-1/P4R-2/P4R-3/P4R-4/P4R-5",
   "captureMode": "real_chain_server_measurement_plus_frontend_and_agent_binding_contracts",
   "qualificationEligible": false,
-  "qualificationReason": "P4R-1 through P4R-4 deliver a faster read path, focused surface, context-bound Agent-first editing and read-only version/change review implementation. No Provider, layout, theme or pixel claim is made, and Result Studio product qualification remains reserved for P7.",
+  "qualificationReason": "P4R-1 through P4R-5 deliver a faster read path, focused surface, context-bound Agent-first editing, read-only version/change review and exact Revision Code projection. No Provider, layout, theme, device or pixel claim is made, and Result Studio product qualification remains reserved for P7.",
   "privacy": "repository_relative_paths_digests_counts_timings_and_bounded_statuses_only",
   "sourceHashes": {
     "gitAdapter": "db7a9030ee5a736ae03fbcefc7f548b7c98bd454198010169c92c86974dee255",
     "lifecycle": "40828528bed440d6e63da911cec720f291ca3728074092c51540a86fc1bf0d06",
-    "routes": "0332c98633a68fc0bd19614268221fba303bba02a879d9aea79ed745381a868b",
+    "routes": "562b2089bb1877cc049c766f4a551430163461b7be5e60176626319c0e650557",
     "repository": "dc0d2d6fcd0b3308267102c2202e0a45e37c0157d04a5df2f57cb72b6744a81f",
-    "changeSetService": "73668232b36a3f84f87df8544c61005ff7fb510c7073fceaf79bfd6b3ae52e0e",
+    "changeSetService": "e45a182a10a74bef668cc265e64a1427662d4a48d568fb69ec274a27dbf6589d",
+    "revisionSource": "541237446ada090228100d8ecb57760c9666e74b25a0198629ed8c4b79405a75",
+    "resultEditTools": "824fdee932c03fb10cb662990edb35f3666ffb6e0da176bd2b7fc91fe9355904",
+    "harnessRoutes": "99ca8c83103ffebb8890fc1503cf100462f97ebe843bf1e07d3983567e969612",
+    "contracts": "7f3062bfb94d87e2017daceb2cedd073f5155d900de7fce4f118135232032531",
     "compareService": "15e6e949bc1510bd5f86ef4ac6215b104c3db0771db9a0adf8c865c4d5502d93",
     "bodyState": "5a72f81934df8c621419dbdc9745c4cdd622eecc2fe44a5d9de1c21dc1f2156e",
     "bodyStateSpec": "a8926eae3aa0ac4d3570ed0de70eb217099f65cac5788397cf6a9ad84db590b6",
     "firstScreen": "0ec5a9dcb536caae6929ecf589c59911bfcbc6900f88371866554b33ce246c3f",
     "firstScreenSpec": "6c9d28d17257c27368289b18d4b4e1c503a3c60d9b6d52e523350875a7fa40c5",
-    "mode": "15b18c0215e2959a829d0c0b855cf57d1407c1726847067b0effca09c2366edd",
+    "mode": "311d0a5d2cd7e3be6643ea9308904ae1109fe6cd17d5d881ec8a62ec4f8cb9b5",
     "modeSpec": "6d471b8fb8f870ffd96a80ec0b38c1261d2d9e3384b5443fc25e6c68a9a1c1bb",
-    "surface": "68c6503eb8b94961e7a2895cd61786bcb57501244543c28f3db0d1ffcfff16a4",
+    "surface": "2eeda29f387d040ce9c544a568eb7ae2e83794ec10f5fbc328e58dbb248612f3",
     "resultSurfaceSpec": "152a6ac542e2eeaf410f6343581757ca5bbd6b4f9cf54988bafe9f48e0603048",
-    "centerPanel": "77869643047d98233e8e5c14841e96b2d06fefef8052c89f7bc72c2f6c0e4fb7",
+    "centerPanel": "b200fc566ad14b0e1cbe80e24ae70b01b58d94dad64927550b6411ffd5893961",
     "rightPanel": "3f9c1a781e3a7b8718dd71d5091863a48a020fc01e19d43fd297d43d326816ff",
     "rightPanelSpec": "bbb2ba07c4ac3aa603b26e03656b80b052f5c54f53c86332d50ee5b898e9d08d",
-    "projectWorkspace": "1702bac4c571367b993f3ffe1998fb23b2ff5d1945e216971d48679fdd505c1b",
+    "projectWorkspace": "0c05d060fdf2ef28b2e606984199bdf2709e00fb1f89fa6287c84be86a3de9ac",
     "resultAgentComposer": "5c0508cb07254b660ba9b5c63553011617dde37f7db26053329f8d97e8c5e9e1",
     "resultAgentComposerStyle": "bff22344bed403c92b568fbe2ec1a719ed2def25f55c4bac60ffe5fc87a4b584",
     "resultAgentComposerSpec": "cb703937db63adcafac6dc7f602816017cda04971dfa4fb27112d3167768a0ba",
     "resultEditPanel": "9a1387cbb775978e1f5b325c079affe3700d298424cd60911eb87caf415af650",
     "resultEditPanelStyle": "5b59a661514aa97d6a751dc8c9f5d3220c5ecc060f1c33854d23ed38affb89fd",
     "resultEditPanelSpec": "38335ac744fb6450661cdb1a886c06b094b925befe1298751b50a0d09a752674",
-    "resultStudioSurface": "945a1d00ff3cd232f091d063eb3367a83abf2a18bc31d2c6743fe560ba670b0c",
+    "resultStudioSurface": "fe026c47d099e4cc84e95b7133810620ee67bbdafcfd815ba322fb47ed03a545",
     "resultStudioSurfaceStyle": "63ff05201fffae1c70f9a9d412e6e839503f8e15161311ea12f4364437960763",
-    "resultStudioSurfaceSpec": "b909ac160caf228b36fc6288fff4dd44d735fe5f6a5432779ceea3a827f4807f",
+    "resultStudioSurfaceSpec": "97bf84d82dead98f90dc153da6a3514d15d9240493e67cc39063bb6451796503",
     "changeSetPanel": "9752d109b83be4c578866fdcce09b29b044971e7d7c6a1be9ae36a6f5f3f6deb",
     "changeSetPanelStyle": "b4385e5fa4f45db35241e14c3152455fd2e23183d4a9a425dbc0e9c594fb7780",
     "changeSetPanelSpec": "77e00c1202073436f2d8244b10d7279ab643732ed2c4f0e961603ddb62dd2bfe",
-    "resultStudioClient": "a42989baaf7988687c296efaccd1cd5316543ac467ebc55923a50ef5873d7dc1",
+    "resultStudioClient": "8d817234eec845b7952e3f2681ce6e0a6f1db860f8c5ec3efc25532e2dff36c9",
+    "revisionCodeView": "7b9aa0e870eb883832db1cc6e0e432d27355d7f98b0db53208b883bffa1a4af2",
+    "revisionCodeViewStyle": "c13486377bd71a44c51a28a72319c2d390f2d17aeeea492558958bc080c2f6da",
+    "revisionCodeViewSpec": "dd83ade59d1a6eebd5a54afd5e2c4486526129b508f7fd2bec291f4f6ffbeaf9",
     "versionRole": "e2c3a70adf15c1aa016823ba17c49bc608bbbf26fb0b2186ebee27a3bffef11e",
     "versionRoleSpec": "ad77ac2c2b376d40ecfccb1fdf03bf141e118d351ce7bbc41ec3838f21265d74",
     "copilotAskDeliverySpec": "8158edb210aac33837d1871f39fa98834527d26e5db0be8c54e5200f332b1e3e",
@@ -54,8 +61,8 @@
     "simpleChatProgressSpec": "6f5db861ac90b06ba37b40902f6a0f04010ae132bedd06927862e6f007f77164",
     "contextClient": "8a74968cef56b917742fe932c7f0bf33d74465ac3fcea6f78ca1cf1c52df4c79",
     "contextClientSpec": "85f325b818ed742613ca00e3b21c1a61842423b6592025e7f7bb710cc1dd4348",
-    "workspaceRouting": "2f42ba014c5ff9dc39d3b954de555ca19a99f7a6f690fb932b64bb999c6895d2",
-    "workspaceRoutingSpec": "59600d25782f274d67bd9a9bc09f9f4ac3e88bfc6a72ecff4d3d29e708d04743",
+    "workspaceRouting": "2b05c1d2f94c18cbbce965c629f2897b4144e407a8fb10980702e39d3f7307f3",
+    "workspaceRoutingSpec": "ae52ed61186b84ef6aba0afa4b613c03efb568438fd67717a89812c20d6511c6",
     "contextContract": "8a29038a33a759b4b144549c79e16b16c8d7878df96c52a55081e67a9213b1a3",
     "resultEditIntent": "3974400975fb8b98fd79b5ee6f06ab799ae4877d4e875d5cdf8d479672a86109",
     "resultEditControls": "d241a97ea738d47f558c8e3050d963db128c5609a28471ffc83313ae39269de1",
@@ -72,18 +79,21 @@
     "resultStudioContextSpec": "a9f8c25f68874edd722ea27ba8b1b22253213d902d44ce56a20d19cac0735417",
     "resultCompareSpec": "78a27eccec7ed2e529124f96651d5f17b3c7e36fe79cf090781d777d6e9eca9b",
     "resultRepositorySpec": "9a8bfe271d33c8f3b5ac92dbc14144e478e4a63a460fd05f778144f497173444",
-    "resultChangeSetSpec": "e0ac921ec1601c3b36f8a95031415019078fd54a752c12cf0182895974d93191",
-    "resultEditAgentToolSpec": "7bc0d41a15ec4cfe2ac21297559a819890aecdc4538b2a04f90a4ba4ed183088",
+    "resultChangeSetSpec": "82e21692f280d252efa63e48bab8a393938e3bf70b465d27b3d6d620ccca6c54",
+    "revisionSourceSpec": "5b062d65644c5b4f516453c2d338e68a9a6cacecf2d2af1d91c5ab9a80dca825",
+    "p4rInvariantSpec": "79f9a6156974b31514606de6cd103636c6edf22c5f340d1ed72d24db785e55d7",
+    "resultEditAgentToolSpec": "9d8bcc9978418599b95ae4b3460a6d2791c2ae38954da16f82167e095d8d3324",
     "agentToolPolicySpec": "d275291158cf33369e1d3accc165ce60f5edbc60e8bdbe99a8c6aac0907e6906",
     "agentToolRegistrySpec": "73aa421cba9f4f29e93b31834a20ce99b5698442e1b098427c59f53b0b9ad01d",
-    "impactMap": "e0e1009a585497f36067eafe44267a0427507573c39fb88e042f1ee5e0eb62bf",
+    "impactMap": "72c69422cc5f98cb57c6f27233649cf02c550f620cdd91fe91ee9f78cafb2186",
     "impactMapSpec": "7e5a1bc5e804c84b5492130080ca57626a6ba0a2f1be6c683f7e451fb42d16ed",
-    "packageScripts": "20d43c6d8bb8acf1eb911383f99162a32cb86d2011bfa5d56c5ec191235e3ba7",
-    "acceptanceScript": "f97bb1949d791e63c350247d0a2b90f6a5fc17a2f1ea8cdfa09ae4b81524642e",
-    "performanceAcceptanceScript": "8e3cb9119c9278c1d9749b6a029c2de45a04e3091568a7dd2561f468e994dbb5",
+    "packageScripts": "1e90bed6c5d19fe2cbf37f9d209c52b7e09e5b3f9ae2b0d8bcd34a04b36b6b23",
+    "acceptanceScript": "bd9b8d95f488639d5564d73e8492e7e01d2600219cc4a5b3328a111aa74305a1",
+    "performanceAcceptanceScript": "51856b3f8319916303a60dc8aed86f1dc830583945ba0be5ea9deb02b2ed9bfe",
     "baselineScript": "cc6a431db7e271fcfd2af8ef2eeb2aad6299a22ae6661b31119f3cf4b5cc0fef",
     "captureScript": "99f9eb3fe4efa643e5a87925098dfdd815664b703907b90333e9e240edd317ac",
-    "corpusScript": "7885fa8b409d16da0628d0f3413354c47e6cc0a0350188309d678418b833c8af"
+    "corpusScript": "7885fa8b409d16da0628d0f3413354c47e6cc0a0350188309d678418b833c8af",
+    "sourceObservation": "1bb1ab5e4dc019f2953874cf9c8bcf6ecf8f679185719a526a414066eb24d74f"
   },
   "frozenBaseline": {
     "capturedAtCommit": "e1f841c8ada919250c01f5cde76586ef2375bdc6",
@@ -92,7 +102,7 @@
   "observation": {
     "revisionCount": 1,
     "calibration": {
-      "gitSpawnMedianMs": 117.298,
+      "gitSpawnMedianMs": 113.954,
       "pathEntries": 52,
       "invokedUnderNpm": true
     },
@@ -101,68 +111,68 @@
         "id": "job-status",
         "role": "render-blocking",
         "status": 200,
-        "coldMs": 6.498,
-        "warmMs": 2.861,
-        "warmSpreadMs": 0.981,
-        "oneTimeCostMs": 3.637
+        "coldMs": 6.309,
+        "warmMs": 2.014,
+        "warmSpreadMs": 1.042,
+        "oneTimeCostMs": 4.295
       },
       {
         "id": "artifact-bytes",
         "role": "render-blocking",
         "status": 200,
-        "coldMs": 5.697,
-        "warmMs": 2.348,
-        "warmSpreadMs": 0.331,
-        "oneTimeCostMs": 3.349
+        "coldMs": 5.366,
+        "warmMs": 2.492,
+        "warmSpreadMs": 1.421,
+        "oneTimeCostMs": 2.874
       },
       {
         "id": "interaction",
         "role": "secondary",
         "status": 200,
-        "coldMs": 3123.619,
-        "warmMs": 9.868,
-        "warmSpreadMs": 2.752,
-        "oneTimeCostMs": 3113.751
+        "coldMs": 3138.813,
+        "warmMs": 9.933,
+        "warmSpreadMs": 2.188,
+        "oneTimeCostMs": 3128.88
       },
       {
         "id": "context-envelope",
         "role": "secondary",
         "status": 409,
-        "coldMs": 3.574,
-        "warmMs": 1.685,
-        "warmSpreadMs": 0.831,
-        "oneTimeCostMs": 1.889
+        "coldMs": 3.544,
+        "warmMs": 1.852,
+        "warmSpreadMs": 0.373,
+        "oneTimeCostMs": 1.692
       },
       {
         "id": "changesets",
         "role": "secondary",
         "status": 200,
-        "coldMs": 2.244,
-        "warmMs": 1.178,
-        "warmSpreadMs": 0.094,
-        "oneTimeCostMs": 1.066
+        "coldMs": 2.471,
+        "warmMs": 1.042,
+        "warmSpreadMs": 0.467,
+        "oneTimeCostMs": 1.429
       },
       {
         "id": "workspace-status",
         "role": "secondary",
         "status": 200,
-        "coldMs": 217.278,
-        "warmMs": 217.121,
-        "warmSpreadMs": 3.331,
-        "oneTimeCostMs": 0.157
+        "coldMs": 232.184,
+        "warmMs": 227.521,
+        "warmSpreadMs": 7.062,
+        "oneTimeCostMs": 4.663
       }
     ],
     "eventLoop": {
       "samples": 62,
-      "maxMs": 3131.048
+      "maxMs": 3145.728
     }
   },
   "improvementVsBaseline": [
     {
       "id": "job-status",
       "baselineWarmMs": 2.229,
-      "currentWarmMs": 2.861,
-      "deltaPct": 28.4,
+      "currentWarmMs": 2.014,
+      "deltaPct": -9.6,
       "baselineWarmSpawnEquivalents": null,
       "currentWarmSpawnEquivalents": null,
       "calibratedDeltaPct": null
@@ -170,8 +180,8 @@
     {
       "id": "artifact-bytes",
       "baselineWarmMs": 2.174,
-      "currentWarmMs": 2.348,
-      "deltaPct": 8,
+      "currentWarmMs": 2.492,
+      "deltaPct": 14.6,
       "baselineWarmSpawnEquivalents": null,
       "currentWarmSpawnEquivalents": null,
       "calibratedDeltaPct": null
@@ -179,8 +189,8 @@
     {
       "id": "interaction",
       "baselineWarmMs": 9.9,
-      "currentWarmMs": 9.868,
-      "deltaPct": -0.3,
+      "currentWarmMs": 9.933,
+      "deltaPct": 0.3,
       "baselineWarmSpawnEquivalents": null,
       "currentWarmSpawnEquivalents": null,
       "calibratedDeltaPct": null
@@ -188,8 +198,8 @@
     {
       "id": "changesets",
       "baselineWarmMs": 42.102,
-      "currentWarmMs": 1.178,
-      "deltaPct": -97.2,
+      "currentWarmMs": 1.042,
+      "deltaPct": -97.5,
       "baselineWarmSpawnEquivalents": null,
       "currentWarmSpawnEquivalents": null,
       "calibratedDeltaPct": null
@@ -197,11 +207,11 @@
     {
       "id": "workspace-status",
       "baselineWarmMs": 64.862,
-      "currentWarmMs": 217.121,
-      "deltaPct": 234.7,
+      "currentWarmMs": 227.521,
+      "deltaPct": 250.8,
       "baselineWarmSpawnEquivalents": 6.785,
-      "currentWarmSpawnEquivalents": 1.851,
-      "calibratedDeltaPct": -72.7
+      "currentWarmSpawnEquivalents": 1.997,
+      "calibratedDeltaPct": -70.6
     }
   ],
   "unmeasured": {
@@ -329,32 +339,62 @@
         "package.json"
       ],
       "detail": "Every P4R-4 implementation and executed spec is source-hashed; no untracked test outcome can underwrite the evidence."
+    },
+    {
+      "id": "RS-P4R5-1",
+      "passed": true,
+      "evidence": [
+        "frontend/src/components/result-studio/RevisionCodeView.tsx",
+        "frontend/src/components/result-studio/RevisionCodeView.test.tsx",
+        "frontend/src/components/result-studio/resultStudioClient.ts"
+      ],
+      "detail": "The exact Revision Code surface, four-mode routing and source request client executed through the real frontend runner."
+    },
+    {
+      "id": "RS-P4R5-2",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-revision-source.js",
+        "core/r-server/routes/result-studio.js",
+        "test/result-revision-source.test.mjs",
+        "test/p4r-invariants.test.mjs"
+      ],
+      "detail": "Revision source projection, hash/path/project fail-closed cases, read-only GET and the P4R invariant source route executed as Node tests."
+    },
+    {
+      "id": "RS-P4R5-3",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-product-acceptance.mjs",
+        "package.json"
+      ],
+      "detail": "Every P4R-5 implementation and executed spec is source-hashed; no stale P4R-4-only producer can underwrite Code/reproduce claims."
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-28T00:29:35.624Z",
+    "generatedAt": "2026-07-28T01:42:41.327Z",
     "frontend": {
-      "command": "npm run test:files --prefix frontend -- 18 specs",
+      "command": "npm run test:files --prefix frontend -- 19 specs",
       "exitCode": 0,
-      "filesPassed": 18,
-      "testsPassed": 110,
-      "specCount": 18,
-      "stdoutSha256": "494448ca156263f516dfb8a18aa8664e6dac372face59d48eb0d50085001da56"
+      "filesPassed": 19,
+      "testsPassed": 113,
+      "specCount": 19,
+      "stdoutSha256": "5c6f816cfb56e2a2438d43d7342b4252ceac0b27d49d87d14134f1383ab018be"
     },
     "node": {
-      "command": "node --test 9 specs",
+      "command": "node --test 11 specs",
       "exitCode": 0,
-      "specCount": 9,
-      "testsObserved": 122,
-      "testsPassed": 122,
-      "stdoutSha256": "7ed729476e1147b4e658c01190e0ccf5a999ad92cb086b3957aeca9fb9bb61f2"
+      "specCount": 11,
+      "testsObserved": 132,
+      "testsPassed": 132,
+      "stdoutSha256": "d4278548bd004679df6cb21d5fb0f27cc70229e501a3a1eb982ef3608df09a27"
     }
   },
   "passed": true,
-  "sourceCommit": "f710261d9cb0a556bd0aa9e9d22b06c08d118c24",
+  "sourceCommit": "07d8c92bf6d670a4729a6fd758efc218cf840dcb",
   "sourceCommitReachable": true,
   "sourceCommitMatchesSourceHashes": true,
   "sourceCommitMismatches": [],
-  "generatedAt": "2026-07-28T00:29:35.624Z",
+  "generatedAt": "2026-07-28T01:42:41.327Z",
   "privacyClean": true
 }
