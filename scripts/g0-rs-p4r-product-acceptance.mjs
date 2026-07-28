@@ -288,14 +288,17 @@ function runFrontendSpecs() {
 }
 
 function runNodeSpecs() {
-  const result = spawnSync(process.execPath, ['--test', ...NODE_SPECS], {
+  // These specs each exercise isolated Git/SQLite materialization.  Running
+  // their process files concurrently can make an otherwise valid replay race
+  // on the host Git object writer; keep the evidence gate deterministic.
+  const result = spawnSync(process.execPath, ['--test', '--test-concurrency=1', ...NODE_SPECS], {
     cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024,
   });
   const stdout = `${result.stdout || ''}${result.stderr || ''}`;
   const tests = /(?:^|\n)[ℹ#]\s*tests\s+(\d+)/m.exec(stdout);
   const pass = /(?:^|\n)[ℹ#]\s*pass\s+(\d+)/m.exec(stdout);
   return {
-    command: `node --test ${NODE_SPECS.length} specs`,
+    command: `node --test --test-concurrency=1 ${NODE_SPECS.length} specs`,
     exitCode: result.status,
     specCount: NODE_SPECS.length,
     testsObserved: tests ? Number(tests[1]) : 0,
