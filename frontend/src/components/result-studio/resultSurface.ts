@@ -1,6 +1,6 @@
 import type { ResultArtifactKind } from '@/lib/result-manifest';
 
-export type ResultSurfaceMode = 'result' | 'compare' | 'history';
+export type ResultSurfaceMode = 'result' | 'code' | 'compare' | 'history';
 export type ResultViewerAdapter = 'report' | 'image' | 'table' | 'json' | 'text' | 'binary';
 export type ResultTruthTone = 'valid' | 'degraded' | 'blocked' | 'running' | 'unknown';
 

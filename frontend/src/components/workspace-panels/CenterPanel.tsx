@@ -104,6 +104,7 @@ export interface CenterPanelContext {
   handleOpenWorkspacePath: () => void | Promise<void>;
   onPendingArtifactConsumed: () => void;
   onWorkflowChanged: () => void;
+  openRevisionWorkspaceFile: (relativePath: string) => void;
   openResultBrowser: (url: string) => void;
   openScheduledResults: () => void;
   startColumnResize: (which: 'left' | 'right' | 'input') => (e: React.MouseEvent) => void;
@@ -132,7 +133,7 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
     activeRun,
     ctx.resultContext?.status === 'ready' ? ctx.resultContext.contextToken : null,
   );
-  const resultMode = workspaceMode === 'result' || workspaceMode === 'compare' || workspaceMode === 'history';
+  const resultMode = workspaceMode === 'result' || workspaceMode === 'code' || workspaceMode === 'compare' || workspaceMode === 'history';
   const truthStatus = typeof ctx.activeArtifact?.truthStatus === 'string'
     ? ctx.activeArtifact.truthStatus
     : typeof ctx.activeWorkflow?.artifactTruth?.status === 'string'
@@ -151,6 +152,22 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
     ctx.handleAskAgent(`请解释当前结果“${contextTitle}”的主要结论、可信边界和最合适的下一步。`);
     ctx.updateWorkspaceMode('chat');
   }, [contextTitle, ctx.handleAskAgent, ctx.updateWorkspaceMode]);
+
+  const onRevisionAgentRequest = React.useCallback((request: 'explain' | 'modify' | 'replay') => {
+    if (ctx.resultContext?.status !== 'ready' || !ctx.resultContext.contextToken) return;
+    const requestedOutcome = request === 'explain'
+      ? '请解释当前 Revision 对应的精确代码、参数和复现边界，不要执行修改。'
+      : request === 'modify'
+        ? '请基于当前 Revision 的精确代码提出修改方案；先说明影响并等待确认，不要覆盖当前或历史版本。'
+        : '请先展示当前 Revision 的输入、参数、运行时和副作用确认摘要；未经明确确认不要执行受控重放。';
+    ctx.onResultEditSubmit({
+      origin: 'agent',
+      requestedOutcome,
+      parameterPatch: {},
+      scientificConfirmed: false,
+      contextToken: ctx.resultContext.contextToken,
+    });
+  }, [ctx.onResultEditSubmit, ctx.resultContext]);
 
   React.useLayoutEffect(() => {
     if (workspaceMode !== 'chat') return;
@@ -197,8 +214,9 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
       </div>
       {resultMode && (
         <div className={`${styles.workspaceProjectionLayer} ${styles.workspaceProjectionLayerActive}`} data-projection={workspaceMode}>
-          <ResultStudioCanvas
-            mode={workspaceMode}
+            <ResultStudioCanvas
+              mode={workspaceMode}
+            canProjectSource={Boolean(ctx.activeArtifact?.revisionId)}
             composer={workspaceMode === 'result' && ctx.activeArtifact ? (
               <ResultAgentComposer
                 context={ctx.resultContext}
@@ -220,6 +238,7 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
                 onAskAgent={askAboutCurrentResult}
                 activeMode={workspaceMode}
                 canReviewVersions={!!ctx.activeArtifact?.artifactFamilyId}
+                canProjectSource={Boolean(ctx.activeArtifact?.revisionId)}
                 onModeChange={(mode) => ctx.updateWorkspaceMode(mode, true, ctx.activeJob?.id || null)}
               />
             )}
@@ -234,6 +253,8 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
                 onActiveArtifactChange={ctx.setActiveArtifact}
                 onAskAgent={ctx.handleAskAgent}
                 onWorkflowChanged={ctx.onWorkflowChanged}
+                onAgentCodeRequest={onRevisionAgentRequest}
+                onOpenRevisionWorkspaceFile={ctx.openRevisionWorkspaceFile}
                 pendingArtifactName={ctx.pendingArtifactName}
                 onPendingArtifactConsumed={ctx.onPendingArtifactConsumed}
                 onOpenBrowser={ctx.openResultBrowser}

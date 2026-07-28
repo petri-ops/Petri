@@ -388,6 +388,16 @@ function validateArtifactRevision(input) {
     createdAt: nullableTrimmed(input.createdAt) || new Date().toISOString(),
   };
 
+  if (revision.parametersRef && !isSafeRelativePath(revision.parametersRef)) {
+    fail(errors, 'parameters_path_invalid', 'parametersRef must be project-relative and path-safe.');
+  }
+  if (revision.parametersHash && !SHA256_PATTERN.test(revision.parametersHash)) {
+    fail(errors, 'parameters_hash_invalid', 'parametersHash must be a lowercase sha256 digest.');
+  }
+  if ((revision.parametersRef && !revision.parametersHash) || (!revision.parametersRef && revision.parametersHash)) {
+    fail(errors, 'parameters_ref_incomplete', 'parametersRef and parametersHash must be provided together.');
+  }
+
   return { ok: errors.length === 0, errors, revision: errors.length === 0 ? revision : null };
 }
 

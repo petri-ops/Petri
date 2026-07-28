@@ -31,11 +31,16 @@ function fixture(context, suffix = '') {
   const binding = bindProjectRepository({ workspaceRoot, projectId: 'p_1' });
   const adapter = binding.adapter;
   const sourceScriptContent = 'palette <- "red"\nprint("render")\n';
+  const sourceParametersContent = `{\n  "deg_table": {\n    "inputRef": "inputs/deg/deg.csv",\n    "sha256": "${'e'.repeat(64)}"\n  },\n  "palette": "red"\n}\n`;
+  const gitPrefix = suffix.startsWith('git-prefix-') ? 'projects/p_1/' : '';
   const base = adapter.commitVirtualFiles({
     ref: 'refs/heads/biof3/main',
     expectedOld: '0'.repeat(40),
     message: 'RS5 source',
-    files: [{ path: 'analysis/scripts/source/plot.R', content: sourceScriptContent }],
+    files: [
+      { path: `${gitPrefix}analysis/scripts/source/plot.R`, content: sourceScriptContent },
+      { path: `${gitPrefix}analysis/scripts/source/parameters.json`, content: sourceParametersContent },
+    ],
   });
   const sourceOutput = join(workspaceRoot, 'results/jobs/tj_source/output/volcano.png');
   mkdirSync(join(sourceOutput, '..'), { recursive: true });
@@ -56,7 +61,7 @@ function fixture(context, suffix = '') {
       language: 'r', origin: 'execution_snapshot',
     },
     parametersRef: 'analysis/scripts/source/parameters.json',
-    parametersHash: 'd'.repeat(64), toolJobId: 'tj_source',
+    parametersHash: sha256(sourceParametersContent), toolJobId: 'tj_source',
     outputPath: 'results/jobs/tj_source/output/volcano.png', outputHash: sourceOutputHash,
     validationStatus: 'valid', reproducibilityStatus: 'available', changeSetId: 'cs_source',
   });

@@ -37,11 +37,13 @@ describe('G0-RS-P1 Result Studio surface', () => {
     expect(children.at(-1)?.textContent).toContain('结果编辑 Composer');
   });
 
-  it('exposes real Compare and History canvas modes while Code remains outside P4R-4', () => {
+  it('exposes real Code, Compare and History canvas modes when their capabilities exist', () => {
     const { rerender } = render(<ResultStudioCanvas mode="compare"><div>变更审查</div></ResultStudioCanvas>);
     expect(screen.getByRole('region', { name: '结果主画布' }).getAttribute('data-mode')).toBe('compare');
     rerender(<ResultStudioCanvas mode="history"><div>版本历史</div></ResultStudioCanvas>);
     expect(screen.getByRole('region', { name: '结果主画布' }).getAttribute('data-mode')).toBe('history');
+    rerender(<ResultStudioCanvas mode="code" canProjectSource><div>精确代码</div></ResultStudioCanvas>);
+    expect(screen.getByRole('region', { name: '结果主画布' }).getAttribute('data-mode')).toBe('code');
   });
 
   it('keeps the context bar compact and exposes its two core actions', () => {
@@ -65,7 +67,7 @@ describe('G0-RS-P1 Result Studio surface', () => {
     expect(screen.getByText('处理组出现明确上调基因集合。')).toBeTruthy();
   });
 
-  it('makes Result, Change Review and History reachable without exposing Code', () => {
+  it('makes Result, Code, Change Review and History reachable when source exists', () => {
     const onModeChange = vi.fn();
     render(
       <ResultStudioContextBar
@@ -78,14 +80,16 @@ describe('G0-RS-P1 Result Studio surface', () => {
         onAskAgent={() => undefined}
         activeMode="result"
         canReviewVersions
+        canProjectSource
         onModeChange={onModeChange}
       />,
     );
     fireEvent.click(screen.getByRole('button', { name: '审查修改' }));
     fireEvent.click(screen.getByRole('button', { name: '版本历史' }));
+    fireEvent.click(screen.getByRole('button', { name: '代码' }));
     expect(onModeChange).toHaveBeenNthCalledWith(1, 'compare');
     expect(onModeChange).toHaveBeenNthCalledWith(2, 'history');
-    expect(screen.queryByRole('button', { name: '代码' })).toBeNull();
+    expect(onModeChange).toHaveBeenNthCalledWith(3, 'code');
   });
 
   it('keeps technical identifiers inside progressive disclosure', () => {

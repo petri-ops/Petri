@@ -10,7 +10,7 @@
 
 LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口。RS9 曾新增第 17 类 `result_studio_product`，但后续复核发现其五条任务由独立测试拼装、Provider 未执行真实工具闭环、视觉验收依赖人工布尔值、大表由 seed 直接构造；该证据现降级为 unit/synthetic/renderer historical evidence。`result-studio-editing` 在 RS-P7 前暂停 qualified support claim，不能影响或冒充 LF12 原始核心资格。
 
-`G0-CHF0 Critical Cross-cutting Hardening`（[`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md)）已完成 CHF0-R1～R5 审计修复并重新真实收口：科学输出、PCA sample-ID、长任务/进程终态、HTTP 来源/文件边界与 Acceptance 可追溯性均绑定实现检查点 `41a365f`；专项 5/5、22 tests，29 个 source/producer hashes 与可达提交逐一匹配，证据保持 `qualificationEligible:false`。Result Studio P4R-0～P4R-4 已收口；当前唯一 active canonical 工作包仍为 `G0-RS`，阶段推进至 P4R-5 Per-result Code & Reproduce。
+`G0-CHF0 Critical Cross-cutting Hardening`（[`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md)）已完成 CHF0-R1～R5 审计修复并重新真实收口：科学输出、PCA sample-ID、长任务/进程终态、HTTP 来源/文件边界与 Acceptance 可追溯性均绑定实现检查点 `41a365f`；专项 5/5、22 tests，29 个 source/producer hashes 与可达提交逐一匹配，证据保持 `qualificationEligible:false`。Result Studio P4R-0～P4R-4 已收口；P4R-5 的 Code/source 实现及三类真实 Artifact source projection 已完成定向验证，但 GO/KEGG corpus 因 required `kegg_results`/`kegg_dotplot` 缺失而未形成 completed Job，当前唯一 active canonical 工作包仍为 `G0-RS`，阶段继续停留在 P4R-5，不能推进 P4R-6。
 
 P4R-3 的实现检查点为 `3d3eb29`，性能门校准修复为 `59b33c4`。中央结果焦点以自然语言 Composer 为默认入口，高级参数面板默认关闭；Artifact/Revision/Selection/contextToken 在点击时原子绑定，create 只接受同一 Agent turn 的受信原始 intent，selection 重放、分类/确认篡改、script patch 与模型自带 DAG 均 fail-closed。task/legacy 的取消、返回式 Provider 错误与异常共用 terminal 进度收口，SQLite 重开只显示五个公开阶段。P2/P3/P4/P4R 五份 evidence 均通过 source-commit 反查；产品证据 10/10，资格仍为 `qualificationEligible:false`。缺权威持久 DAG 的科学/数据/流程编辑保持明确阻断，不把安全降级冒充可用能力。
 

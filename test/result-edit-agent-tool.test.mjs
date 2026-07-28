@@ -4,6 +4,7 @@ import { createRequire } from 'node:module';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { createHash } from 'node:crypto';
 
 const require = createRequire(import.meta.url);
 const { createResultEditPlanTool, createResultChangeSetTools } = require('../core/r-server/agent-tools/result-edit-tools');
@@ -87,14 +88,25 @@ test('RS5 Agent ChangeSet tool scopes the source and emits durable progress', as
   const script = join(root, 'results/jobs/tj_plot/run-script.R');
   mkdirSync(join(script, '..'), { recursive: true });
   writeFileSync(script, 'print(1)\n');
+  const scriptHash = createHash('sha256').update('print(1)\n').digest('hex');
+  const paramsText = '{\n  "palette": "red"\n}\n';
+  const paramsHash = createHash('sha256').update(paramsText).digest('hex');
+  writeFileSync(script, 'tampered snapshot\n');
   const project = { id: 'p_1', user_id: 'u_1', workspace_path: root };
   const job = makeJob();
-  job.result.executionProvenance.script = { snapshotPath: script, sha256: 'a'.repeat(64) };
-  const revision = { revisionId: 'rev_1', projectId: 'p_1', artifactId: 'volcano_plot', toolJobId: 'tj_plot' };
+  job.result.executionProvenance.script = { snapshotPath: script, sha256: scriptHash };
+  const sourceCommit = 'a'.repeat(40);
+  const revision = {
+    revisionId: 'rev_1', projectId: 'p_1', artifactId: 'volcano_plot', toolJobId: 'tj_plot',
+    sourceCommit,
+    sourceScriptRef: { relativePath: 'analysis/scripts/plot.R', sha256: scriptHash, artifactId: 'volcano_plot', rendererId: 'volcano-plot:volcano_plot', language: 'r', origin: 'project_materialized' },
+    parametersRef: 'analysis/scripts/parameters.json', parametersHash: paramsHash,
+    outputHash: 'c'.repeat(64), changeSetId: 'cs_1',
+  };
   const repository = {
     saveRepositoryBinding: () => {},
     getRevision: () => revision,
-    getChangeSet: () => ({ changeSetId: 'cs_1', projectId: 'p_1' }),
+    getChangeSet: () => ({ changeSetId: 'cs_1', projectId: 'p_1', candidateCommit: sourceCommit }),
     listRevisionsByChangeSet: () => [],
   };
   const emitted = [];
@@ -106,7 +118,11 @@ test('RS5 Agent ChangeSet tool scopes the source and emits durable progress', as
     bindProjectRepository: () => ({
       status: 'ready', mode: 'managed', workspaceRoot: root, managedPaths: ['analysis/scripts'], reason: null,
       inspection: { runtime: { versionRaw: 'git version test' } },
-      adapter: { gitDir: join(root, '.biof3/git'), workTree: root },
+      adapter: {
+        gitDir: join(root, '.biof3/git'), workTree: root,
+        revParse: (ref) => ref === sourceCommit ? sourceCommit : null,
+        showFile: ({ filePath }) => filePath.endsWith('plot.R') ? 'print(1)\n' : paramsText,
+      },
     }),
     createResultChangeSet: async (input, dependencies) => {
       received = input;
@@ -122,6 +138,7 @@ test('RS5 Agent ChangeSet tool scopes the source and emits durable progress', as
   assert.equal(received.projectId, 'p_1');
   assert.equal(received.sourceRevision, revision);
   assert.equal(received.sourceJob, job);
+  assert.equal(received.sourceScriptContent, 'print(1)\n', 'Agent edits must start from the Revision Git source, not a mutable Job snapshot');
   assert.equal(received.createdBy, 'agent');
   assert.deepEqual(emitted, [{ stage: 'materialize', status: 'completed' }]);
 });

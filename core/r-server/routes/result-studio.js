@@ -51,6 +51,10 @@ const {
   createResultStudioRepository,
 } = require('../../shared-backend/result-studio-repository');
 const {
+  ResultRevisionSourceError,
+  projectRevisionSource,
+} = require('../../shared-backend/result-revision-source');
+const {
   assessSelectionCompatibility,
   validateSelectionContext,
   summarizeSelection,
@@ -811,6 +815,43 @@ module.exports = function registerResultStudioRoutes(app) {
       revisions: revisionPage.slice(0, revisionLimit),
       nextRevisionOffset: hasMoreRevisions ? revisionOffset + revisionLimit : null,
     });
+  });
+
+  /**
+   * Project the exact source for one persisted Revision. This is deliberately
+   * separate from the Job snapshot route: candidate/history scripts live in
+   * virtual Git commits and the current worktree is not an authoritative
+   * source. The route is read-only and requires the caller to name the
+   * project, so a known Revision id cannot be used to cross project boundaries.
+   */
+  app.get('/api/result-studio/revisions/:revisionId/source', (req, res) => {
+    const projectId = String(req.query.projectId || '').trim();
+    if (!projectId) return res.status(400).json({ error: 'project_required' });
+    const context = projectContext(req, projectId, { write: false, git: true });
+    if (context.error) return res.status(context.error.status).json({ error: context.error.code });
+    try {
+      const projection = projectRevisionSource({
+        projectId,
+        revisionId: String(req.params.revisionId || '').trim(),
+        expectSha256: String(req.query.expectSha256 || '').trim() || null,
+      }, {
+        repository: context.repository,
+        adapter: context.binding.adapter,
+        gitPathPrefix: context.gitPathPrefix,
+        workspaceRoot: context.project.workspace_path,
+        getToolJob: db.getToolJob,
+      });
+      if (String(req.query.download || '') === '1') {
+        const entryPoint = String(projection.entryPoint || 'revision-source.R').replace(/[^A-Za-z0-9._-]/g, '_');
+        res.type('text/plain').set('Content-Disposition', `attachment; filename="${entryPoint}"`).send(projection.content);
+        return;
+      }
+      return res.json(projection);
+    } catch (error) {
+      const status = error instanceof ResultRevisionSourceError ? error.status : 500;
+      const code = error instanceof ResultRevisionSourceError ? error.code : 'revision_source_failed';
+      return res.status(status).json({ error: code, message: error instanceof ResultRevisionSourceError ? error.message : 'Revision source projection failed.' });
+    }
   });
 
   app.get('/api/result-studio/changesets/:changeSetId/compare', (req, res) => {

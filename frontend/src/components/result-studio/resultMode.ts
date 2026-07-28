@@ -6,8 +6,7 @@
  * two of the others elsewhere:
  *
  *   result   — the artifact body. The only mode with a surface today.
- *   code     — needs a revision source projection. None of the 23 routes in
- *              routes/result-studio.js provides one; §P4R-5 owns building it.
+ *   code     — the P4R-5 Revision source projection and Code surface.
  *   compare  — has zero writers in frontend/src. Every consumer spells the
  *              check `result || compare`, and its only expression was a
  *              data-mode attribute no stylesheet selects, so it has always
@@ -35,7 +34,7 @@ export const RESULT_MODES: readonly ResultMode[] = ['result', 'code', 'compare',
  * container cannot be made to offer something that has no implementation.
  */
 export interface ResultModeCapabilities {
-  /** A revision source projection route exists (P4R-5). */
+  /** A revision source projection route and Code surface exist (P4R-5). */
   canProjectSource?: boolean;
   /** A version switcher exists to drive history (P4R-4). */
   canSwitchVersions?: boolean;

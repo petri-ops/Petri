@@ -1596,12 +1596,12 @@ Change Review 默认只呈现服务端受信并持久化的一句话意图、影
 - 查看旧版本不产生 Git/SQLite 写入；采用继续使用 Git CAS + SQLite transaction；恢复继续生成新 Revision。
 - 同一 active result 的版本切换和 Agent 上下文同步，陈旧 context token 明确刷新。
 
-##### P4R-5：Per-result Code & Reproduce
+##### P4R-5：Per-result Code & Reproduce（实现中，四类 source-bound 观测未闭合）
 
 - 为每个有正式 `sourceScriptRef` 的 ArtifactRevision 提供精确代码投影和 Result/Code 无损切换。
 - 支持复制、下载、打开、Agent 解释/修改和受控重放；历史版本显示其自己的脚本。
 - 独立脚本与共享 Job 脚本诚实区分；缺代码、越界路径、hash 漂移和跨项目访问全部 fail-closed。
-- 至少对 DESeq2、volcano、heatmap、GO/KEGG 各一个正式 Artifact 验证脚本与结果版本一一对应。
+- 隔离 source-observation producer 已验证 DESeq2、standalone volcano、gene-correlation heatmap 的真实 Revision source；GO/KEGG 当前运行生成了 GO 文件但 Job 因 KEGG required artifact 缺失而为 failed，不能把 failed Job 伪装成正式 Artifact，故该条仍未完成。证据脚本：`scripts/g0-rs-p4r-source-observation.mjs`；重跑入口：`npm run g0:result-studio:p4r:p5:source-observation`。
 
 ##### P4R-6：整体验收与交接
 
@@ -1867,5 +1867,5 @@ G0-RS-P0 Truth Correction
 3. [x] P4R-2 按 §P4R-2 的代码实况收敛范围完成：主体之上无无条件块且判据进入 `resultFirstScreen.ts`，已有结果 header 显示真实 `vN` 或诚实降级，建立一次只显示一态的容器并只接入真实存在的 `result`，Agent 会话常驻，result↔chat 选择/草稿/滚动/布局保持。`code` 随 P4R-5、`history`/版本选择器随 P4R-4，`compare` 在 P4R-4 前保持不可达；四态齐备从未属于收敛后的 P4R-2 出口。按需结果抽屉未单独新建：现有导航已可收起且 artifact rail 已条件化，未把不存在的重构冒充交付。
 4. [x] P4R-3 让自然语言 Agent 成为默认编辑入口，P4 Core 参数面板降为高级精调。实现检查点 `3d3eb29`；性能校准门修复 `59b33c4`；P2/P3/P4/P4R evidence 均 source-bound。安全边界：context-bound create 只接受同一 Agent turn 的受信原始 intent；科学/数据/流程修改在缺少权威持久 DAG 时 fail-closed，不接收模型自带 DAG。
 5. [x] P4R-4 完成可直接查看的版本选择器与 Codex-like Change Review；实现检查点 `f710261`。历史主体/interaction/Selection/contextToken 均显式绑定 viewed Revision，首次 GET 不写 SQLite、不创建 managed Git；采用/撤销/恢复 checkpoint 与 SQLite/Git 原子回滚，项目/family/参数/source commit 漂移 fail-closed。P2/P3/P4/P4R 五份 evidence 均 source-bound；UI-113/UI-114 保持 `in_progress`，实机矩阵留 P4R-6。
-6. [ ] P4R-5 完成每个 Artifact/Revision 的精确代码、复制/下载/Agent 修改和受控复现入口。
+6. [ ] P4R-5 完成每个 Artifact/Revision 的精确代码、复制/下载/Agent 修改和受控复现入口；源码投影、Code surface、fail-closed 和三类真实 Artifact 已实现，GO/KEGG 正式 source-bound 观测仍阻断收口。
 7. [ ] P4R-6 完成真实连续链、性能、明暗/响应式/键盘、异常降级、文档和脱敏证据收口。

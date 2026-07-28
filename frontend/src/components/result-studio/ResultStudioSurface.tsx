@@ -36,11 +36,13 @@ export function ResultStudioCanvas({
   contextBar,
   composer,
   children,
+  canProjectSource = false,
 }: {
   mode: ResultSurfaceMode;
   contextBar?: React.ReactNode;
   composer?: React.ReactNode;
   children: React.ReactNode;
+  canProjectSource?: boolean;
 }): React.ReactElement {
   const [firstVisibleMs, setFirstVisibleMs] = React.useState<number | null>(null);
   React.useLayoutEffect(() => {
@@ -52,9 +54,7 @@ export function ResultStudioCanvas({
     if (duration !== null) setFirstVisibleMs(duration);
   }, []);
 
-  // P4R-4 supplies real Compare and History surfaces. Code remains gated until
-  // P4R-5 provides a source projection for the exact Revision.
-  const activeMode = resolveResultMode(mode, { canCompare: true, canSwitchVersions: true });
+  const activeMode = resolveResultMode(mode, { canProjectSource, canCompare: true, canSwitchVersions: true });
 
   return (
     <section
@@ -82,6 +82,7 @@ export function ResultStudioContextBar({
   activeMode = 'result',
   onModeChange,
   canReviewVersions = false,
+  canProjectSource = false,
 }: {
   title: string;
   trust: ResultTruthProjection;
@@ -90,9 +91,10 @@ export function ResultStudioContextBar({
   selectionLabel: string;
   onBack: () => void;
   onAskAgent: () => void;
-  activeMode?: Extract<ResultMode, 'result' | 'compare' | 'history'>;
-  onModeChange?: (mode: Extract<ResultMode, 'result' | 'compare' | 'history'>) => void;
+  activeMode?: Extract<ResultMode, 'result' | 'code' | 'compare' | 'history'>;
+  onModeChange?: (mode: Extract<ResultMode, 'result' | 'code' | 'compare' | 'history'>) => void;
   canReviewVersions?: boolean;
+  canProjectSource?: boolean;
 }): React.ReactElement {
   return (
     <header className={styles.contextBar}>
@@ -109,10 +111,11 @@ export function ResultStudioContextBar({
           <span>{revisionLabel}</span>
           <span>{selectionLabel}</span>
         </div>
-        {canReviewVersions && onModeChange && (
+        {(canReviewVersions || canProjectSource) && onModeChange && (
           <nav className={styles.modeSwitcher} aria-label="结果视图">
             {([
               ['result', '结果'],
+              ...(canProjectSource ? [['code', '代码'] as const] : []),
               ['compare', '审查修改'],
               ['history', '版本历史'],
             ] as const).map(([mode, label]) => (

@@ -1,7 +1,5 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
 const db = require('../db');
 const pluginLoader = require('../plugin-loader');
 const mcpRegistry = require('../mcp/registry');
@@ -15,7 +13,7 @@ const {
 } = require('../../shared-backend/result-compare-service');
 const { createResultStudioRepository } = require('../../shared-backend/result-studio-repository');
 const { bindProjectRepository } = require('../../shared-backend/git-repository-binding');
-const { isPathContained } = require('../../shared-backend/project-run-layout');
+const { projectRevisionSource } = require('../../shared-backend/result-revision-source');
 
 function createResultEditPlanTool(options = {}) {
   const getToolJob = options.getToolJob || db.getToolJob;
@@ -76,32 +74,34 @@ function createResultChangeSetTools(options = {}) {
   const revertChangeSet = options.revertResultChangeSet || revertResultChangeSet;
   const restoreRevision = options.restoreArtifactRevision || restoreArtifactRevision;
 
-  function context(ctx, { write = false } = {}) {
+  function context(ctx, { write = false, git = write } = {}) {
     const projectId = String(ctx.projectId || '').trim();
     if (!projectId) return { error: 'project_context_required' };
     const project = dbModule.getProject(projectId);
     if (!authorizeProject(project, ctx.userId, dbModule)) return { error: 'source_project_mismatch' };
     const repository = makeRepository(dbModule.db || dbModule.getDatabase());
+    if (!git) return { projectId, project, repository, binding: null };
     const binding = bindRepository({
       workspaceRoot: project.workspace_path,
       projectId,
       preferManaged: false,
       allowExistingRepository: true,
+      createManagedIfMissing: write,
     });
     if (!binding?.adapter || (write && binding.status !== 'ready')) {
       return { error: binding?.reason || binding?.status || 'repository_binding_failed', binding };
     }
-    repository.saveRepositoryBinding({
-      projectId,
-      mode: binding.mode,
-      workspaceRoot: binding.workspaceRoot,
-      gitDir: binding.adapter.gitDir,
-      workTree: binding.adapter.workTree,
-      managedPaths: binding.managedPaths,
-      status: binding.status,
-      reason: binding.reason,
-      gitVersion: binding.inspection?.runtime?.versionRaw || null,
-    });
+    if (write) repository.saveRepositoryBinding({
+        projectId,
+        mode: binding.mode,
+        workspaceRoot: binding.workspaceRoot,
+        gitDir: binding.adapter.gitDir,
+        workTree: binding.adapter.workTree,
+        managedPaths: binding.managedPaths,
+        status: binding.status,
+        reason: binding.reason,
+        gitVersion: binding.inspection?.runtime?.versionRaw || null,
+      });
     return { projectId, project, repository, binding };
   }
 
@@ -120,21 +120,17 @@ function createResultChangeSetTools(options = {}) {
     const pluginId = sourceJob.tool_id;
     const plugin = loadPlugin(pluginId);
     if (!plugin) return { ok: false, error: 'source_plugin_not_found', message: `Plugin is unavailable: ${pluginId}` };
-    const snapshot = sourceJob.result?.executionProvenance?.script;
-    if (!snapshot?.snapshotPath || !snapshot.sha256) {
-      return { ok: false, error: 'source_script_missing', message: 'Source execution script snapshot is unavailable.' };
-    }
-    let sourceScriptPath;
     try {
-      sourceScriptPath = fs.realpathSync(snapshot.snapshotPath);
-      const realWorkspace = fs.realpathSync(scoped.project.workspace_path);
-      if (!isPathContained(realWorkspace, sourceScriptPath)) throw new Error('source_script_outside_project');
-    } catch (error) {
-      return { ok: false, error: 'source_script_unavailable', message: error.message };
-    }
-    const sourceScriptContent = fs.readFileSync(sourceScriptPath, 'utf8');
-
-    try {
+      const projected = projectRevisionSource({ projectId: scoped.projectId, revision: sourceRevision }, {
+        repository: scoped.repository,
+        adapter: scoped.binding.adapter,
+        gitPathPrefix: scoped.binding.mode === 'existing'
+          ? scoped.binding.inspection?.existing?.workspaceRelativeToRepository
+          : '',
+        workspaceRoot: scoped.project.workspace_path,
+        getToolJob: dbModule.getToolJob,
+      });
+      if (!projected.parameters?.values) return { ok: false, error: 'source_parameters_missing', message: 'Exact Revision parameters are unavailable.' };
       return await runChangeSet({
         projectId: scoped.projectId,
         conversationId: ctx.conversationId || null,
@@ -142,8 +138,9 @@ function createResultChangeSetTools(options = {}) {
         intent: args.intent,
         sourceRevision,
         sourceJob,
-        sourceScriptContent,
-        sourceScriptSha256: snapshot.sha256,
+        sourceScriptContent: projected.content,
+        sourceScriptSha256: projected.sha256,
+        normalizedSourceParams: projected.parameters.values,
         pluginId,
         language: plugin.language,
         scriptPatch: args.scriptPatch || [],
@@ -156,6 +153,7 @@ function createResultChangeSetTools(options = {}) {
         gitPathPrefix: scoped.binding.mode === 'existing'
           ? scoped.binding.inspection?.existing?.workspaceRelativeToRepository
           : '',
+        getToolJob: dbModule.getToolJob,
         shouldCancel: () => typeof ctx.isCancelled === 'function' && ctx.isCancelled(),
         activePreviewJobs: typeof scoped.repository.listChangeSets === 'function'
           ? scoped.repository.listChangeSets({ projectId: scoped.projectId, status: 'running', limit: 500 }).length
@@ -188,7 +186,7 @@ function createResultChangeSetTools(options = {}) {
   }
 
   async function status(args = {}, ctx = {}) {
-    const scoped = context(ctx);
+    const scoped = context(ctx, { git: true });
     if (scoped.error) return { ok: false, error: scoped.error };
     const changeSet = scoped.repository.getChangeSet(args.changeSetId);
     if (!changeSet || changeSet.projectId !== scoped.projectId) return { ok: false, error: 'change_set_not_found' };
@@ -207,7 +205,7 @@ function createResultChangeSetTools(options = {}) {
   }
 
   async function compare(args = {}, ctx = {}) {
-    const scoped = context(ctx);
+    const scoped = context(ctx, { git: true });
     if (scoped.error) return { ok: false, error: scoped.error };
     const changeSet = scoped.repository.getChangeSet(args.changeSetId);
     if (!changeSet || changeSet.projectId !== scoped.projectId) return { ok: false, error: 'change_set_not_found' };
@@ -276,12 +274,11 @@ function createResultChangeSetTools(options = {}) {
   async function listRevisions(args = {}, ctx = {}) {
     const scoped = context(ctx);
     if (scoped.error) return { ok: false, error: scoped.error };
-    const revisions = scoped.repository.listRevisions({ artifactFamilyId: args.artifactFamilyId, limit: 100 })
-      .filter((revision) => revision.projectId === scoped.projectId);
+    const revisions = scoped.repository.listRevisions({ artifactFamilyId: args.artifactFamilyId, projectId: scoped.projectId, limit: 100 });
     return {
       ok: true,
       revisions,
-      currentRevision: scoped.repository.getCurrentRevision(args.artifactFamilyId),
+      currentRevision: scoped.repository.getCurrentRevision(args.artifactFamilyId, scoped.projectId),
     };
   }
 

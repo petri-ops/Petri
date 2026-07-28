@@ -74,6 +74,7 @@ import {
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
 import { ResultStudioChangeSetPanel } from '@/components/result-studio/ResultStudioChangeSetPanel';
+import { RevisionCodeView } from '@/components/result-studio/RevisionCodeView';
 import { revisionArtifactUrl, type ArtifactRevision } from '@/components/result-studio/resultStudioClient';
 import { shouldShowDeliveryCard, shouldShowWorkflowBar } from '@/components/result-studio/resultFirstScreen';
 import { nextResultBodyState, type ResultBodyState } from '@/components/result-studio/resultBodyState';
@@ -440,7 +441,7 @@ export function ProjectWorkspace(): React.ReactElement {
   const resultPanelRestoreRef = useRef<{ leftOpen: boolean; rightOpen: boolean } | null>(null);
 
   useEffect(() => {
-    const resultProjection = workspaceMode === 'result' || workspaceMode === 'compare' || workspaceMode === 'history';
+    const resultProjection = workspaceMode === 'result' || workspaceMode === 'code' || workspaceMode === 'compare' || workspaceMode === 'history';
     if (resultProjection) {
       if (!resultPanelRestoreRef.current) {
         resultPanelRestoreRef.current = { leftOpen, rightOpen };
@@ -506,8 +507,8 @@ export function ProjectWorkspace(): React.ReactElement {
   // Bidirectional sync: setWorkspaceMode + URL param. Exists here (not in
   // useWorkspaceRouting) because project-workspace owns workspaceMode state.
   const updateWorkspaceMode = useCallback((nextMode: WorkspaceMode, replace = true, jobId?: string | null) => {
-    const currentIsResult = workspaceMode === 'result' || workspaceMode === 'compare' || workspaceMode === 'history';
-    const nextIsResult = nextMode === 'result' || nextMode === 'compare' || nextMode === 'history';
+    const currentIsResult = workspaceMode === 'result' || workspaceMode === 'code' || workspaceMode === 'compare' || workspaceMode === 'history';
+    const nextIsResult = nextMode === 'result' || nextMode === 'code' || nextMode === 'compare' || nextMode === 'history';
     if (nextIsResult && !currentIsResult) {
       // Capture the conversation layout before result-opening handlers enqueue
       // their own panel changes. React batches those setters, so waiting for the
@@ -523,7 +524,7 @@ export function ProjectWorkspace(): React.ReactElement {
     const nextParams = new URLSearchParams(searchParams);
     if (nextMode === 'chat') nextParams.delete('mode');
     else nextParams.set('mode', nextMode);
-    if ((nextMode === 'scheduled' || nextMode === 'result' || nextMode === 'compare' || nextMode === 'history') && jobId) {
+    if ((nextMode === 'scheduled' || nextMode === 'result' || nextMode === 'code' || nextMode === 'compare' || nextMode === 'history') && jobId) {
       nextParams.set('job', jobId);
     }
     else nextParams.delete('job');
@@ -1074,6 +1075,7 @@ export function ProjectWorkspace(): React.ReactElement {
       summaryCardOpen ||
       (rightOpen && rightTab === 'results') ||
       workspaceMode === 'result' ||
+      workspaceMode === 'code' ||
       workspaceMode === 'compare' ||
       workspaceMode === 'history'
     ),
@@ -1325,7 +1327,7 @@ export function ProjectWorkspace(): React.ReactElement {
       }
       if (
         activeJobId === requestedJobId &&
-        (workspaceMode === 'result' || workspaceMode === 'compare' || workspaceMode === 'history' || workspaceMode === 'chat')
+        (workspaceMode === 'result' || workspaceMode === 'code' || workspaceMode === 'compare' || workspaceMode === 'history' || workspaceMode === 'chat')
       ) return;
       if (autoOpenedJobRef.current === requestedJobId) return;
       autoOpenedJobRef.current = requestedJobId;
@@ -1537,6 +1539,14 @@ export function ProjectWorkspace(): React.ReactElement {
       setPendingArtifactName(null);
     },
     onWorkflowChanged: () => setWorkflowRefreshKey((value) => value + 1),
+    openRevisionWorkspaceFile: (relativePath: string) => {
+      dispatchBioF3Event(biof3Events.projectOpenWorkspaceFile, {
+        projectId: projectId || '',
+        relativePath,
+        name: relativePath.split('/').pop() || relativePath,
+        openWithSystemApp: false,
+      });
+    },
     openResultBrowser: (url: string) => {
       setBrowserUrl(url);
       openRightPanel('browser');
@@ -2983,6 +2993,8 @@ function ResultArtifactShell({
   onActiveArtifactChange,
   onAskAgent,
   onWorkflowChanged,
+  onAgentCodeRequest,
+  onOpenRevisionWorkspaceFile,
   pendingArtifactName = null,
   onPendingArtifactConsumed,
   onOpenBrowser,
@@ -2997,6 +3009,8 @@ function ResultArtifactShell({
   onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
   onAskAgent: (prompt: string) => void;
   onWorkflowChanged?: () => void;
+  onAgentCodeRequest?: (request: 'explain' | 'modify' | 'replay') => void;
+  onOpenRevisionWorkspaceFile?: (relativePath: string) => void;
   /**
    * Optional artifact name the host wants pre-selected once the manifest
    * (or fallback artifacts) becomes available. Populated by the chat
@@ -3930,7 +3944,7 @@ function ResultArtifactShell({
     <>
       {mode === 'result' && workflowBar}
       {mode === 'result' && recoveryConfirmation}
-      {interactionManifest?.artifactFamilyId && (
+      {mode !== 'code' && interactionManifest?.artifactFamilyId && (
         <ResultStudioChangeSetPanel
           projectId={project.id}
           artifactFamilyId={interactionManifest.artifactFamilyId}
@@ -3959,6 +3973,15 @@ function ResultArtifactShell({
             });
             onWorkflowChanged?.();
           }}
+        />
+      )}
+      {mode === 'code' && (
+        <RevisionCodeView
+          projectId={project.id}
+          revisionId={viewedRevision?.revisionId || interactionRevision?.revisionId || activeArtifact?.revisionId || null}
+          revisionOrdinal={viewedRevision?.revisionOrdinal || interactionRevision?.revisionOrdinal || activeArtifact?.revisionOrdinal || null}
+          onAgentRequest={onAgentCodeRequest}
+          onOpenWorkspaceFile={onOpenRevisionWorkspaceFile}
         />
       )}
       {mode === 'result' && (
@@ -4237,6 +4260,8 @@ export function ResultView({
   onActiveArtifactChange,
   onAskAgent,
   onWorkflowChanged,
+  onAgentCodeRequest,
+  onOpenRevisionWorkspaceFile,
   pendingArtifactName = null,
   onPendingArtifactConsumed,
   onOpenBrowser,
@@ -4251,6 +4276,8 @@ export function ResultView({
   onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
   onAskAgent: (prompt: string) => void;
   onWorkflowChanged?: () => void;
+  onAgentCodeRequest?: (request: 'explain' | 'modify' | 'replay') => void;
+  onOpenRevisionWorkspaceFile?: (relativePath: string) => void;
   pendingArtifactName?: string | null;
   onPendingArtifactConsumed?: () => void;
   onOpenBrowser?: (url: string) => void;
@@ -4267,6 +4294,8 @@ export function ResultView({
       onActiveArtifactChange={onActiveArtifactChange}
       onAskAgent={onAskAgent}
       onWorkflowChanged={onWorkflowChanged}
+      onAgentCodeRequest={onAgentCodeRequest}
+      onOpenRevisionWorkspaceFile={onOpenRevisionWorkspaceFile}
       pendingArtifactName={pendingArtifactName}
       onPendingArtifactConsumed={onPendingArtifactConsumed}
       onOpenBrowser={onOpenBrowser}

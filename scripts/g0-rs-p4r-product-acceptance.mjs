@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * G0-RS-P4R-1 / P4R-2 / P4R-3 / P4R-4 验收 — Fast Result Path、Focused
- * Result Surface、Agent-first Editing 与 Version/Change Review。
+ * G0-RS-P4R-1 through P4R-5 验收 — Fast Result Path、Focused Result
+ * Surface、Agent-first Editing、Version/Change Review 与 per-Revision Code。
  *
  * 证据类型：真实服务端测量（与 P4R-0 冻结基线对比）+ 前端纯模块行为断言。
  * **不含**任何布局、主题或像素判定：vitest 在 happy-dom 下运行，
@@ -39,6 +39,10 @@ const sourceFiles = {
   routes: 'core/r-server/routes/result-studio.js',
   repository: 'core/shared-backend/result-studio-repository.js',
   changeSetService: 'core/shared-backend/result-changeset-service.js',
+  revisionSource: 'core/shared-backend/result-revision-source.js',
+  resultEditTools: 'core/r-server/agent-tools/result-edit-tools.js',
+  harnessRoutes: 'core/r-server/routes/harness.js',
+  contracts: 'core/shared-backend/result-studio-contracts.js',
   compareService: 'core/shared-backend/result-compare-service.js',
   bodyState: 'frontend/src/components/result-studio/resultBodyState.ts',
   bodyStateSpec: 'frontend/src/components/result-studio/resultBodyState.test.ts',
@@ -65,6 +69,9 @@ const sourceFiles = {
   changeSetPanelStyle: 'frontend/src/components/result-studio/ResultStudioChangeSetPanel.module.css',
   changeSetPanelSpec: 'frontend/src/components/result-studio/ResultStudioChangeSetPanel.test.tsx',
   resultStudioClient: 'frontend/src/components/result-studio/resultStudioClient.ts',
+  revisionCodeView: 'frontend/src/components/result-studio/RevisionCodeView.tsx',
+  revisionCodeViewStyle: 'frontend/src/components/result-studio/RevisionCodeView.module.css',
+  revisionCodeViewSpec: 'frontend/src/components/result-studio/RevisionCodeView.test.tsx',
   versionRole: 'frontend/src/components/result-studio/resultVersionRole.ts',
   versionRoleSpec: 'frontend/src/components/result-studio/resultVersionRole.test.ts',
   copilotAskDeliverySpec: 'frontend/src/components/result-studio/copilotAskDelivery.test.tsx',
@@ -101,6 +108,8 @@ const sourceFiles = {
   resultCompareSpec: 'test/result-compare-service.test.mjs',
   resultRepositorySpec: 'test/result-studio-repository.test.mjs',
   resultChangeSetSpec: 'test/result-changeset-service.test.mjs',
+  revisionSourceSpec: 'test/result-revision-source.test.mjs',
+  p4rInvariantSpec: 'test/p4r-invariants.test.mjs',
   resultEditAgentToolSpec: 'test/result-edit-agent-tool.test.mjs',
   agentToolPolicySpec: 'test/agent-tool-policy.test.mjs',
   agentToolRegistrySpec: 'test/agent-tool-registry.test.mjs',
@@ -112,6 +121,7 @@ const sourceFiles = {
   baselineScript: 'scripts/g0-rs-p4r-baseline.mjs',
   captureScript: 'scripts/g0-rs-p4r-capture.mjs',
   corpusScript: 'scripts/g0-rs-p4r-corpus.mjs',
+  sourceObservation: 'scripts/g0-rs-p4r-source-observation.mjs',
 };
 
 /**
@@ -132,6 +142,7 @@ const FRONTEND_SPECS = [
   'src/components/result-studio/ResultStudioSurface.test.tsx',
   'src/components/result-studio/ResultStudioChangeSetPanel.test.tsx',
   'src/components/result-studio/resultVersionRole.test.ts',
+  'src/components/result-studio/RevisionCodeView.test.tsx',
   'src/components/workspace-panels/CenterPanel.test.tsx',
   'src/components/workspace-panels/RightPanel.test.tsx',
   'src/lib/result-edit-agent-bridge.test.ts',
@@ -152,6 +163,8 @@ const NODE_SPECS = [
   'test/result-compare-service.test.mjs',
   'test/result-studio-repository.test.mjs',
   'test/result-changeset-service.test.mjs',
+  'test/result-revision-source.test.mjs',
+  'test/p4r-invariants.test.mjs',
 ];
 
 const REQUIRED_P4R3_FRONTEND_SPECS = Object.freeze([
@@ -188,6 +201,19 @@ const REQUIRED_P4R4_NODE_SPECS = Object.freeze([
   'test/result-studio-context.test.mjs',
   'test/result-compare-service.test.mjs',
   'test/result-studio-repository.test.mjs',
+  'test/result-changeset-service.test.mjs',
+]);
+
+const REQUIRED_P4R5_FRONTEND_SPECS = Object.freeze([
+  'src/components/result-studio/RevisionCodeView.test.tsx',
+  'src/components/result-studio/ResultStudioSurface.test.tsx',
+  'src/components/result-studio/resultMode.test.ts',
+  'src/hooks/useWorkspaceRouting.test.ts',
+]);
+
+const REQUIRED_P4R5_NODE_SPECS = Object.freeze([
+  'test/result-revision-source.test.mjs',
+  'test/p4r-invariants.test.mjs',
   'test/result-changeset-service.test.mjs',
 ]);
 
@@ -355,14 +381,35 @@ function inspect(verification, observation) {
         && node.specCount === NODE_SPECS.length,
       [sourceFiles.acceptanceScript, sourceFiles.packageScripts],
       'Every P4R-4 implementation and executed spec is source-hashed; no untracked test outcome can underwrite the evidence.'),
+
+    // ── P4R-5 ────────────────────────────────────────────────────────────
+    item('RS-P4R5-1',
+      frontend.exitCode === 0 && frontend.filesPassed === frontend.specCount && frontend.testsPassed > 0
+        && REQUIRED_P4R5_FRONTEND_SPECS.every((spec) => FRONTEND_SPECS.includes(spec)),
+      [sourceFiles.revisionCodeView, sourceFiles.revisionCodeViewSpec, sourceFiles.resultStudioClient],
+      'The exact Revision Code surface, four-mode routing and source request client executed through the real frontend runner.'),
+
+    item('RS-P4R5-2',
+      node.exitCode === 0 && node.testsObserved > 0 && node.testsPassed === node.testsObserved
+        && REQUIRED_P4R5_NODE_SPECS.every((spec) => NODE_SPECS.includes(spec)),
+      [sourceFiles.revisionSource, sourceFiles.routes, sourceFiles.revisionSourceSpec, sourceFiles.p4rInvariantSpec],
+      'Revision source projection, hash/path/project fail-closed cases, read-only GET and the P4R invariant source route executed as Node tests.'),
+
+    item('RS-P4R5-3',
+      REQUIRED_P4R5_FRONTEND_SPECS.every((spec) => FRONTEND_SPECS.includes(spec))
+        && REQUIRED_P4R5_NODE_SPECS.every((spec) => NODE_SPECS.includes(spec))
+        && FRONTEND_SPECS.every((spec) => Object.values(sourceFiles).includes(`frontend/${spec}`))
+        && NODE_SPECS.every((spec) => Object.values(sourceFiles).includes(spec)),
+      [sourceFiles.acceptanceScript, sourceFiles.packageScripts],
+      'Every P4R-5 implementation and executed spec is source-hashed; no stale P4R-4-only producer can underwrite Code/reproduce claims.'),
   ];
 
   return {
     schemaVersion: 1,
-    workPackage: 'G0-RS-P4R-1/P4R-2/P4R-3/P4R-4',
+    workPackage: 'G0-RS-P4R-1/P4R-2/P4R-3/P4R-4/P4R-5',
     captureMode: 'real_chain_server_measurement_plus_frontend_and_agent_binding_contracts',
     qualificationEligible: false,
-    qualificationReason: 'P4R-1 through P4R-4 deliver a faster read path, focused surface, context-bound Agent-first editing and read-only version/change review implementation. No Provider, layout, theme or pixel claim is made, and Result Studio product qualification remains reserved for P7.',
+    qualificationReason: 'P4R-1 through P4R-5 deliver a faster read path, focused surface, context-bound Agent-first editing, read-only version/change review and exact Revision Code projection. No Provider, layout, theme, device or pixel claim is made, and Result Studio product qualification remains reserved for P7.',
     privacy: 'repository_relative_paths_digests_counts_timings_and_bounded_statuses_only',
     sourceHashes: sourceHashes(),
     frozenBaseline: { capturedAtCommit: FROZEN_BASELINE.capturedAtCommit, revisionCount: FROZEN_BASELINE.revisionCount },
@@ -434,7 +481,7 @@ try {
     if (!report.passed) throw new Error(report.checks.filter((c) => !c.passed).map((c) => c.id).join(','));
     mkdirSync(dirname(evidencePath), { recursive: true });
     writeFileSync(evidencePath, `${JSON.stringify(report, null, 2)}\n`);
-    console.log(`[G0-RS-P4R-1/2/3/4] PASS — evidence updated (${report.checks.length}/${report.checks.length})`);
+    console.log(`[G0-RS-P4R-1/2/3/4/5] PASS — evidence updated (${report.checks.length}/${report.checks.length})`);
     for (const row of report.improvementVsBaseline) {
       if (row.deltaPct !== null) console.log(`  ${row.id.padEnd(18)} ${String(row.baselineWarmMs).padStart(8)}ms -> ${String(row.currentWarmMs).padStart(8)}ms  ${row.deltaPct}%`);
     }
@@ -449,9 +496,9 @@ try {
       || JSON.stringify(stored.sourceHashes) !== JSON.stringify(current.sourceHashes)) {
       throw new Error('stored G0-RS-P4R-1/2/3/4 evidence is stale or invalid');
     }
-    console.log(`[G0-RS-P4R-1/2/3/4] PASS — ${current.checks.length}/${current.checks.length}`);
+    console.log(`[G0-RS-P4R-1/2/3/4/5] PASS — ${current.checks.length}/${current.checks.length}`);
   }
 } catch (error) {
-  console.error(`[G0-RS-P4R-1/2/3/4] FAIL — ${error.message}`);
+  console.error(`[G0-RS-P4R-1/2/3/4/5] FAIL — ${error.message}`);
   process.exitCode = 1;
 }

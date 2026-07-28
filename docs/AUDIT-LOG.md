@@ -4,7 +4,7 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-07-28（P4R-4 已完成 source-bound 收口，当前阶段 P4R-5；无 🔴 阻塞或 🟢 待合并项）
+最后更新：2026-07-28（P4R-5 Code/source 实现已落地；GO/KEGG 正式 source-bound 观测仍阻断阶段收口；无 🔴 审计阻塞或 🟢 待合并项）
 
 ## 当前待处理项
 
@@ -12,6 +12,7 @@
 | --- | --- | --- | --- |
 | 🟡待评估 | 2026-07-26 | **G0 `macos-arm64: qualified` 的视觉证据不成立。** `acceptance/g0-qualification/packaged-ui/` 5 张 PNG 只有 4 个唯一 sha256：`chat-summary-light-wide.png` 与 `restart-restored-light-wide.png` 逐字节相同（均为 `bb54acff…`），即「重启后恢复」证据是重启前截图的副本。`scripts/g0-qualification-visual.mjs:59-62` 只校验哈希格式/宽高/字节数，无唯一性断言；配套 `inspection.json` 为 811 字节九个人工布尔值，仓库内无任何写入者。该形态与 `core/shared-backend/result-studio-qualification.js:113-121` 判 RS9 non-qualifying 的理由（`inspection_booleans_are_human_assertions`）完全一致，但该理由未推及 G0 自身 | 仅登记事实。**不得**由 Agent 擅自变更 `core/shared-backend/g0/support-matrix.json` 的 `qualified` 状态或 `evidence-ledger.json` 的 `visual_state_convergence`——资格状态变更属用户决定。修补检查脚本（加 `distinctStates` 唯一性断言）会使当前 G0 门变红，需先获批。**2026-07-27 用户裁决：暂不发布，故本项降级为待评估、不阻塞开发。** 重开条件：任何对外发布、资格声明或 G0 重新资格之前必须先处理——发布时若仍以此证据支撑 `qualified`，即为不诚实声明 |
 | 🔵进行中 | 2026-07-28 | `G0-RS-P4R`：P4R-0～P4R-4 已收口，当前阶段为 P4R-5 Per-result Code & Reproduce | 当前唯一 active canonical 工作包；P4R-5～P4R-6 继续串行 |
+| 🔵进行中 | 2026-07-28 | **P4R-5 source-bound Artifact 观测未闭合。** DESeq2、standalone volcano、gene-correlation heatmap 已通过真实 Revision source；GO/KEGG 运行生成部分 GO 文件，但 Job Truth 为 `failed`（required `kegg_results`/`kegg_dotplot` 未产出），不得把它登记为正式完成 Artifact | 继续保留在 P4R-5；修复/提供可完成的 GO/KEGG 运行环境后重跑 `npm run g0:result-studio:p4r:p5:source-observation`，未通过前不推进 P4R-6 |
 | 🟡待评估 | 2026-07-28 | **context-bound 科学/数据/流程编辑缺少权威持久 DAG 投影。** P4R-3 深审发现原入口接受模型提供 `workflowPlan`，存在伪造影响范围风险；现已删除该模型参数并在缺 DAG 时 fail-closed。纯 presentation rerender 可诚实限定 `current_result_only`，其余类别不再假装可用 | 不阻塞 P4R-3 的 Agent-first 入口与安全收口。不得恢复模型自带 DAG；若要开放科学/data/workflow 编辑，必须从 SQLite/Job/Workflow truth 投影可验证 DAG，并补下游影响与重放反例。最晚在 P5/P6 产品任务矩阵前裁决 |
 | 🟡待评估 | 2026-07-26 | **Result Studio 无同意即写入用户自有 Git 仓库。** `git-repository-binding.js:14` 自述 existing 模式「用户同意接入」，但默认 `allowExistingRepository = true`，且三个生产调用点（`result-edit-tools.js:89`、`routes/result-studio.js:310`、`:408`）全部硬编码 `true`；代码库内不存在任何同意开关。项目工作区只要落在某个 Git 仓库内，BioF3 即向其写入 object 与 `refs/heads/biof3/*` 分支。**当前未暴露**（已核实：真实数据根不在任何仓库内；4 条绑定全为 `managed`，`existing` 为 0，故改默认值无迁移代价） | 已试改为 opt-in 并撤回：该改动会改变产品行为，使 `test/git-adapter.test.mjs` 5 项 existing 模式测试转红（它们依赖旧的宽松默认）。属真实风险但非当前风险，让位于 P4R-1。重启时：默认改 `false` → 自动落 `managed` 模式（即计划已承诺的「只用 BioF3 托管历史」），5 个测试显式传 `true` 作为知情调用方，并为未接入情况补 `existing_repository_not_attached_without_consent` 诊断 |
 | 🟡建议 | 2026-07-17 | `capability-provisioning.js` 的下载实现与 plugin-manager 各自维护 | host 白名单已经修复；共享下载 helper 只在改动该能力时评估，不阻塞 RH0 |
@@ -23,6 +24,7 @@
 
 | 日期 | 结果 | 检查点 |
 | --- | --- | --- |
+| 2026-07-28 | P4R-5 实现推进：Revision source projector/API、Code surface、历史版本 source identity、复制/下载/项目文件打开门控、Agent contextToken 绑定和旧脚本 hash 漂移保护已落地；专项 source/invariant 10/10、前端定向 118/118。隔离真实 corpus 发现 GO/KEGG 的 required `kegg_results`/`kegg_dotplot` 未产出，Job Truth 为 failed，故未伪造四类 source-bound 通过 | 工作区未提交 |
 | 2026-07-28 | P4R-4 Version Selector + Codex-like Change Review 完成：Result/Compare/History 真实互斥且可路由；历史主体/interaction/Selection/contextToken 显式绑定 viewed Revision，首次 GET 不写 SQLite、不创建 managed Git；版本按项目/family truth 分页并标注原始/当前/候选/历史。审查摘要来自服务端受信持久元数据；checkpoint 故障与参数/source commit/parent family/project 漂移 fail-closed。focused frontend 104/104、affected Node 258/258、related frontend 48/48、P4R product 13/13；P2/P3/P4/P4R 五份 evidence 全部 source-bound。UI-113/UI-114 保持 `in_progress`，唯一不变量红项仍属 P4R-5 source projection | `f710261` |
 | 2026-07-28 | P4R-3 Agent-first Editing 完成：中央自然语言 Composer + 高级参数抽屉；点击时 Artifact/Revision/Selection/token 原子绑定；同 turn 受信 intent、防 selection 重放/分类篡改/script patch/伪 DAG；task/legacy terminal 持久化与 SQLite 重开展示。专项 76/76 Node、134/134 frontend；affected 700/700 + related 102/102；P2/P3/P4/P4R 五份 source-bound evidence 通过。workspace-status 跨 npm/direct 性能比较改为 Git-spawn equivalents，6.785→2.040（-69.9%），不再用不可比裸毫秒 | `3d3eb29` `59b33c4` |
 | 2026-07-27 | G0-CHF0 首次完成结论经反例撤销后完成 CHF0-R1～R5 审计修复：volcano 统计量/输出/报告诚实，PCA sample-ID 严格，R/Python raw execution 与真实 `/api/files` 来源/路径边界 fail-closed，PID-gated heartbeat、独立硬预算、确认式 TERM→KILL、cancel/zombie DB 终态一致。专项 5/5、22 tests；29 个 source/producer hashes 与可达实现提交逐一匹配；影响范围 206 pass / 0 fail / 4 skipped | `41a365f` + `acceptance/g0-critical-crosscut-hardening/acceptance.json` |

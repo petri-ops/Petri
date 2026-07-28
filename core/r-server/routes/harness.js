@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const { randomUUID } = require('crypto');
+const { randomUUID, createHash } = require('crypto');
 const { pathToFileURL } = require('url');
 const express = require('express');
 
@@ -850,6 +850,11 @@ module.exports = function registerHarnessRoutes(app) {
       const layout = resolveProjectRunLayout({ projectId: project.id, toolJobId: job.id, db, skipPermissionCheck: true, ensureDirs: false });
       if (!scriptPath || !isRealPathInsideRoot(layout.jobRoot, scriptPath) || !fs.existsSync(scriptPath)) {
         return res.status(404).json({ ok: false, error: 'script_snapshot_not_found' });
+      }
+      const expectedHash = result.executionProvenance?.script?.sha256;
+      const actualHash = createHash('sha256').update(fs.readFileSync(scriptPath)).digest('hex');
+      if (!expectedHash || actualHash !== expectedHash) {
+        return res.status(409).json({ ok: false, error: 'script_snapshot_hash_drift' });
       }
       return res.sendFile(path.resolve(scriptPath));
     } catch (error) {

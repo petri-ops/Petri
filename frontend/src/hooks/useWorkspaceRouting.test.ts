@@ -7,7 +7,7 @@ describe('G0-RS-P1 workspace route projection', () => {
     expect(parseWorkspaceMode('compare')).toBe('compare');
     expect(parseWorkspaceMode('history')).toBe('history');
     expect(parseWorkspaceMode('chat')).toBe('chat');
-    expect(parseWorkspaceMode('code')).toBeNull();
+    expect(parseWorkspaceMode('code')).toBe('code');
     expect(parseWorkspaceMode('unknown')).toBeNull();
     expect(parseWorkspaceMode(null)).toBeNull();
   });

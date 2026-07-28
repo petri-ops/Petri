@@ -108,6 +108,38 @@ export interface ResultStudioWorkspaceStatus {
   };
 }
 
+export interface RevisionSourceProjection {
+  revisionId: string;
+  artifactId: string;
+  revisionOrdinal: number;
+  relativePath: string;
+  entryPoint: string;
+  language: 'r' | 'python' | string;
+  origin: 'canonical_plugin' | 'execution_snapshot' | 'project_materialized' | 'unknown_legacy' | string;
+  rendererId: string;
+  scope: 'artifact_specific_materialization' | 'job_shared_execution_snapshot' | 'canonical_plugin_shared' | 'unknown_legacy' | string;
+  content: string;
+  sha256: string;
+  openableRelativePath: string | null;
+  parameters: { relativePath: string; sha256: string; values: Record<string, unknown> } | null;
+  reproduction: {
+    status: 'unavailable' | 'available' | 'verified' | string;
+    requiresConfirmation: boolean;
+    replayable: boolean;
+    inputDrift: Array<{ artifactId: string | null; role: string | null; sha256: string | null; status: string }>;
+    inputs: Array<{ artifactId: string | null; role: string | null; sha256: string | null; status: string }>;
+    runtime: { name: string | null; version: string | null; readiness: boolean | null };
+    plugin: { id: string | null; version: string | null; language: string | null; packageConstraints: Record<string, unknown> };
+  };
+}
+
+export class ResultStudioRequestError extends Error {
+  constructor(public readonly code: string, public readonly status: number, message: string) {
+    super(message);
+    this.name = 'ResultStudioRequestError';
+  }
+}
+
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   const token = getToken();
   const response = await fetch(`${getPlatformApiPrefix()}/result-studio${path}`, {
@@ -119,7 +151,11 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
     },
   });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.message || data.error || `Result Studio request failed (${response.status})`);
+  if (!response.ok) throw new ResultStudioRequestError(
+    String(data.error || 'result_studio_request_failed'),
+    response.status,
+    data.message || data.error || `Result Studio request failed (${response.status})`,
+  );
   return data as T;
 }
 
@@ -153,6 +189,15 @@ export interface ResultStudioTablePage {
 
 export function readRevisionTablePage(revisionId: string, cursor = 0, limit = 100): Promise<ResultStudioTablePage> {
   return requestJson(`/revisions/${encodeURIComponent(revisionId)}/table-page?cursor=${cursor}&limit=${limit}`);
+}
+
+export function fetchRevisionSource(
+  projectId: string,
+  revisionId: string,
+  options: { expectSha256?: string | null; signal?: AbortSignal } = {},
+): Promise<RevisionSourceProjection> {
+  const query = new URLSearchParams({ projectId, ...(options.expectSha256 ? { expectSha256: options.expectSha256 } : {}) });
+  return requestJson(`/revisions/${encodeURIComponent(revisionId)}/source?${query.toString()}`, { signal: options.signal });
 }
 
 export function adoptResultChangeSet(changeSetId: string): Promise<{ ok: true; changeSet: ResultStudioChangeSet; currentRevisions: ArtifactRevision[] }> {

@@ -8,6 +8,7 @@ const { validateResultEditIntent } = require('./result-edit-intent');
 const { isPathContained } = require('./project-run-layout');
 const { createRuntimeResourceSnapshot } = require('./runtime-resource-snapshot');
 const { evaluatePreviewResourceBudget } = require('./result-studio-lifecycle');
+const { projectRevisionSource } = require('./result-revision-source');
 
 const RESULT_CHANGESET_SERVICE_VERSION = 1;
 const MAX_SCRIPT_BYTES = 2 * 1024 * 1024;
@@ -533,10 +534,26 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
     throw new ResultChangeSetError('source_artifact_hash_mismatch', 'Source Artifact changed or is missing before the edit.');
   }
   const sourceArtifactHash = sourceRevision.outputHash;
-  const sourceScriptContent = input.sourceScriptContent;
-  const sourceScriptHash = sha256(sourceScriptContent || '');
-  if (!input.sourceScriptSha256 || sourceScriptHash !== input.sourceScriptSha256) {
-    throw new ResultChangeSetError('source_script_hash_mismatch', 'Source script snapshot changed or is unavailable.');
+  let sourceProjection;
+  try {
+    sourceProjection = projectRevisionSource({ projectId, revision: sourceRevision }, {
+      repository,
+      adapter,
+      gitPathPrefix: dependencies.gitPathPrefix,
+      workspaceRoot,
+      getToolJob: dependencies.getToolJob || (() => sourceJob),
+    });
+  } catch (error) {
+    if (error && error.code) throw new ResultChangeSetError(error.code, error.message, error.detail);
+    throw error;
+  }
+  const sourceScriptContent = sourceProjection.content;
+  const sourceScriptHash = sourceProjection.sha256;
+  if (input.sourceScriptSha256 && sourceScriptHash !== input.sourceScriptSha256) {
+    throw new ResultChangeSetError('source_script_hash_mismatch', 'Source script does not match the active Revision.');
+  }
+  if (!sourceProjection.parameters?.values) {
+    throw new ResultChangeSetError('source_parameters_missing', 'Exact Revision parameters are unavailable.');
   }
 
   const changeSetId = input.changeSetId || id('cs');
@@ -572,7 +589,10 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
     if (cancelled()) throw new ResultChangeSetError('edit_cancelled', 'Edit was cancelled before materialization.');
 
     emit('materialize', 'running');
-    const normalizedSourceParams = sourceResult.executionProvenance?.params?.normalized || {};
+    const normalizedSourceParams = input.normalizedSourceParams || sourceProjection.parameters.values;
+    if (stableStringify(normalizedSourceParams) !== stableStringify(sourceProjection.parameters.values)) {
+      throw new ResultChangeSetError('source_parameters_mismatch', 'Edit parameters do not match the selected Revision.');
+    }
     const materialized = materializeResultEdit({
       workspaceRoot,
       changeSetId,
