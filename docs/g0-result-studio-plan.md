@@ -2,7 +2,7 @@
 
 最后更新：2026-07-28
 
-状态：`active / implemented_unverified`（RS0～RS8 引擎基础与 P4R-0～P4R-3 保留；G0-CHF0 审计修复已重新真实收口；当前阶段 `P4R-4 Version Selector + Codex-like Change Review`，`G0-RS-P5` 继续阻断）
+状态：`active / implemented_unverified`（RS0～RS8 引擎基础与 P4R-0～P4R-4 保留；G0-CHF0 审计修复已重新真实收口；当前阶段 `P4R-5 Per-result Code & Reproduce`，`G0-RS-P5` 继续阻断）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -1385,7 +1385,7 @@ Result Studio 当前按三层事实表达：
 
 RH0 收口证据（2026-07-26）：`test/impact-map.json` 与 `scripts/test-affected.mjs` 已建立确定性、去重、fail-closed 的影响选择；`npm run test:changed` 定向 Node 41 项与前端 294 项通过，`npm run test:all:workspace` 最终基线为 Node 1581 pass / 0 fail / 11 skipped、前端 294 pass / 0 fail；`npm run docs:reconcile`（39 registered、0 unregistered、0 validation issues）、`npm run docs:check`、`npm run ui:audit:check` 与 `git diff --check` 全部通过。旧 `dev-desktop.sh`、已下线云端 smoke 与旧 DESeq2 MCP 验收脚本已删除；真实 JSON 证据迁移到 `test/fixtures/golden-path/deseq2-run.json`，`tmp` 历史日志/二进制已清理，QA/golden-path 日志保留上限为 20。后续审计确认 RS9 脚本仍被历史证据引用，因此保留文件但从日常 Result Studio syntax 热路径移出，新增显式 `g0:result-studio:historical:syntax`；历史代码仍可单独校验。该收口只改变工程治理，不改变任何执行/科学真相；P4R 启动门已满足，P4R-0～P4R-2 已按当前证据推进。
 
-### G0-RS-P4R：Product Reframe — Agent-first Focused Result Experience（`in_progress · P4R-3`）
+### G0-RS-P4R：Product Reframe — Agent-first Focused Result Experience（`in_progress · P4R-5`）
 
 #### P4R.1 定位与启动门
 
@@ -1485,7 +1485,7 @@ P4R 完成后的默认产品形态固定为：
 
 ##### P4R-0：Truth Baseline、失败测试与预算冻结
 
-进度（2026-07-27）：P4R-0 已收口。一次性隔离捕获环境、canonical corpus、失败测试先行和性能预算均已完成；`acceptance/g0-result-studio/rs-p4r-performance.json` 为 13/13，基线由 `RS-P4R0-13` 冻结，重跑只写 `currentObservation` 与对比，不覆盖基线。P4R 定向基础测试 19/19；不变量套件 5/6，唯一红项为尚未实现的 Revision source projection，明确归 P4R-5，不把它写成 P4R-0 回归。原始观测工具由 `340c09a` 引入并保持 `BIOF3_PERF_PROBE=1` 默认关闭。
+进度（2026-07-28）：P4R-0 已收口。一次性隔离捕获环境、canonical corpus、失败测试先行和性能预算均已完成；`acceptance/g0-result-studio/rs-p4r-performance.json` 为 13/13，基线由 `RS-P4R0-13` 冻结，重跑只写 `currentObservation` 与对比，不覆盖基线。P4R 定向基础测试已通过；不变量套件当前 6/7，唯一红项为尚未实现的 Revision source projection，明确归 P4R-5，不把它写成 P4R-0/P4R-4 回归。原始观测工具由 `340c09a` 引入并保持 `BIOF3_PERF_PROBE=1` 默认关闭。
 
 运行时勘察（2026-07-26，只读检查开发库 `core/r-server/biof3.db`，只取计数与结构，不读结果内容）：
 
@@ -1587,6 +1587,10 @@ P4R-2 的证据边界沿用 P4R-0 已确立的纪律：**没有生产者的指�
 
 ##### P4R-4：Version Switcher 与 Codex-like Change Review
 
+完成（2026-07-28）：实现检查点 `f710261` 交付真实互斥且可路由的 Result / Compare / History 中央模式；Code 继续由 P4R-5 的 Revision source projection 门控。历史查看使用前端可丢弃 `viewedRevision`，主体、interaction、Selection 与 contextToken 均显式绑定所选 Revision，不移动 current、不切 active Job、不调用写 API；首次版本列表 GET 使用 `ensureSchema:false` 且不创建 managed Git，挂载自动 `workspace/recover` 已改为显式用户动作。版本选择器从项目/family-scoped SQLite Revision + ChangeSet truth 标注原始、当前正式、待采用候选和历史，100 条后可分页，跨项目/family 查询 fail-closed。
+
+Change Review 默认只呈现服务端受信并持久化的一句话意图、影响等级/范围、验证状态和最多三个主动作；视觉、参数、表格、文本 Diff 按需展开，Git 详情默认折叠。adopt/revert/restore 的 checkpoint 写入已并入同一 SQLite transaction，失败时 Git ref 与 SQLite 一起回滚；参数 hash、candidate source commit、parent family/project 漂移均阻断。focused frontend 104/104、affected Node 258/258、related frontend 48/48、P4R product 13/13、strict TypeScript、docs/UI 门通过；P2 17/17、P3 20/20、P4 18/18、P4R-performance 13/13、P4R-product 13/13 全部绑定 `f710261` 且 `sourceCommitMatchesSourceHashes:true`。UI-113/UI-114 保持 `in_progress`，`qualificationEligible:false` 与 `implemented_unverified` 不变；实机明暗/响应式/键盘/连续旅程仍归 P4R-6。当前阶段推进至 P4R-5。
+
 - 提供可直接查看任意 Revision 的版本选择器；严格区分查看、比较、采用、撤销和恢复。
 - 默认只显示一句话摘要、验证/科学影响和三个主动作；详细视觉、代码、参数、表格、科学层 Diff 按需展开。
 - 查看旧版本不产生 Git/SQLite 写入；采用继续使用 Git CAS + SQLite transaction；恢复继续生成新 Revision。
@@ -1647,21 +1651,22 @@ P4R-2 的证据边界沿用 P4R-0 已确立的纪律：**没有生产者的指�
 
 #### P4R.7 计划证据与门禁
 
-计划中的专项入口：
+当前真实存在的专项入口：
 
 - `npm run g0:result-studio:p4r:test`：fast-path、read-only revision view、source projection、Context/ChangeSet 不变量。
 - `npm run g0:result-studio:p4r:frontend`：Focused Result Surface、Agent Composer、Version Switcher、Change Review、Code View。
-- `npm run g0:result-studio:p4r:perf`：事件循环、waterfall、冷/热打开和版本切换预算。
-- `npm run g0:result-studio:p4r:live`：真实 admitted Job/Artifact/Revision 连续观察。
-- `npm run g0:result-studio:p4r:ui`：明暗 × 1440/1024/820 与键盘路径。
+- `npm run g0:result-studio:p4r:product`：P4R-1～当前子阶段的 source-bound 产品契约；`product:update` 刷新对应证据。
+- `npm run g0:result-studio:p4r:invariants`：显式失败测试门，刻意不并入聚合门；当前 6/7，P4R-5 source projection 红项继续保留。
 - `npm run g0:result-studio:p4r[:update]`：聚合/刷新当前源码哈希和脱敏证据。
+
+`g0:result-studio:p4r:perf`、`:live`、`:ui` 当前并不存在，不得冒充已交付入口。事件循环/waterfall 现由 `p4r[:update]` 生成的 performance evidence 承担；真实连续旅程与明暗 × 1440/1024/820、键盘矩阵属于 P4R-6 计划交付，届时只有在生产者和 npm 入口真实落地后才能登记。
 
 计划证据位置：
 
 - `acceptance/g0-result-studio/rs-p4r-product-reframe.json`：契约、源码哈希与专项门。
 - `acceptance/g0-result-studio/rs-p4r-performance.json`：请求 waterfall、event-loop 和预算。
-- `acceptance/g0-result-studio/rs-p4r-live-observation.json`：真实 Job → 结果 → Agent 修改 → 候选 → 审查链。
-- `acceptance/g0-result-studio/rs-p4r-ui-observation.json`：视觉、响应式与键盘矩阵。
+- `acceptance/g0-result-studio/rs-p4r-live-observation.json`：P4R-6 计划证据，当前尚无生产者或文件。
+- `acceptance/g0-result-studio/rs-p4r-ui-observation.json`：P4R-6 计划证据，当前尚无生产者或文件。
 
 这些证据只能把 P4R 标记为 `implemented_unverified/product-development evidence`；不得升级 `result-studio-editing` 支持声明。P7 仍是唯一产品资格裁决点。
 
@@ -1805,7 +1810,7 @@ G0-RS-P0 Truth Correction
 
 阶段状态规则：
 
-- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3` 已完成，`G0-RS-P4 Core` 已形成 18/18 离线实现检查点并提交，`G0-RS-RH0` 与 P4R-0～P4R-3 已完成，当前唯一阶段为 P4R-4；P4R 收口前不得启动 P5。
+- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3` 已完成，`G0-RS-P4 Core` 已形成 18/18 离线实现检查点并提交，`G0-RS-RH0` 与 P4R-0～P4R-4 已完成，当前唯一阶段为 P4R-5；P4R 收口前不得启动 P5。
 - 每阶段先补失败测试/fixture，再实现，再形成与证据类型匹配的验收；不得提前开发下一阶段。
 - 单元测试证明契约，fixture 证明确定性集成，真实 Provider 证明模型边界，packaged Electron 证明产品链；四者不能互相替代。
 - 未运行 `npm run docs:reconcile` 与 `npm run docs:check` 不得宣布阶段 completed/verified/qualified。
@@ -1857,10 +1862,10 @@ G0-RS-P0 Truth Correction
 
 `G0-RS-P4R` 计划交付：
 
-1. [x] P4R-0 捕获真实失败基线、请求 waterfall 与事件循环阻塞，并冻结预算。证据 `rs-p4r-performance.json`（13/13）：基线已冻结为脚本内常量并由 `RS-P4R0-13` 钉住，重跑只写 `currentObservation` 与对比、不覆盖基线；四条不变量见 `test/p4r-invariants.test.mjs`（当前 3 绿 1 红，红的第 3 条属 P4R-5）。分尺寸阈值按 `deferredBudgets` 显式推迟——在快路径存在前采样只会把缺陷固化成标准。
+1. [x] P4R-0 捕获真实失败基线、请求 waterfall 与事件循环阻塞，并冻结预算。证据 `rs-p4r-performance.json`（13/13）：基线已冻结为脚本内常量并由 `RS-P4R0-13` 钉住，重跑只写 `currentObservation` 与对比、不覆盖基线；不变量见 `test/p4r-invariants.test.mjs`（当前 6/7，唯一红项属 P4R-5 source projection）。分尺寸阈值按 `deferredBudgets` 显式推迟——在快路径存在前采样只会把缺陷固化成标准。
 2. [x] P4R-1 按实测边界完成结果快路径。实测推翻计划前提——工作区扫描占 0%、hashing <5%，93% 是每次只读请求都 `bindProjectRepository()` 带来的 git 子进程；因此交付为 memo `detectGitRuntime`、`repositoryState()` 三次 fork 惰性化、`inspectRevisionIntegrity` 的每 revision rev-parse 批量成两次常量开销、只读请求不写 binding，以及客户端次级失败不替换已显示主体。对比冻结基线：changesets 42.102→1.203ms（-97.1%）；workspace-status 因 npm/direct 的 Git spawn 校准相差约 12 倍，不再比较不可比的裸毫秒，改用 6.785→2.040 spawn-equivalents（-69.9%）；每 revision 斜率 20ms→0.18ms（200 revision 由 4179ms 降至 66ms）。证据 `rs-p4r-product-reframe.json`（P4R-1～3 合计 10/10）。原 charter 的相邻版本预取与大文件渐进加载没有可证明收益且未实现，已从本子阶段出口移出，作为 P4R-6 真实性能矩阵出现回归时才重开的优化候选；不得描述为已交付。
 3. [x] P4R-2 按 §P4R-2 的代码实况收敛范围完成：主体之上无无条件块且判据进入 `resultFirstScreen.ts`，已有结果 header 显示真实 `vN` 或诚实降级，建立一次只显示一态的容器并只接入真实存在的 `result`，Agent 会话常驻，result↔chat 选择/草稿/滚动/布局保持。`code` 随 P4R-5、`history`/版本选择器随 P4R-4，`compare` 在 P4R-4 前保持不可达；四态齐备从未属于收敛后的 P4R-2 出口。按需结果抽屉未单独新建：现有导航已可收起且 artifact rail 已条件化，未把不存在的重构冒充交付。
 4. [x] P4R-3 让自然语言 Agent 成为默认编辑入口，P4 Core 参数面板降为高级精调。实现检查点 `3d3eb29`；性能校准门修复 `59b33c4`；P2/P3/P4/P4R evidence 均 source-bound。安全边界：context-bound create 只接受同一 Agent turn 的受信原始 intent；科学/数据/流程修改在缺少权威持久 DAG 时 fail-closed，不接收模型自带 DAG。
-5. [ ] P4R-4 完成可直接查看的版本选择器与 Codex-like Change Review，查看旧版不产生任何写入。
+5. [x] P4R-4 完成可直接查看的版本选择器与 Codex-like Change Review；实现检查点 `f710261`。历史主体/interaction/Selection/contextToken 均显式绑定 viewed Revision，首次 GET 不写 SQLite、不创建 managed Git；采用/撤销/恢复 checkpoint 与 SQLite/Git 原子回滚，项目/family/参数/source commit 漂移 fail-closed。P2/P3/P4/P4R 五份 evidence 均 source-bound；UI-113/UI-114 保持 `in_progress`，实机矩阵留 P4R-6。
 6. [ ] P4R-5 完成每个 Artifact/Revision 的精确代码、复制/下载/Agent 修改和受控复现入口。
 7. [ ] P4R-6 完成真实连续链、性能、明暗/响应式/键盘、异常降级、文档和脱敏证据收口。

@@ -37,7 +37,7 @@ LF12 完成记录为 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseli
 
 2026-07-24 后续治理收口：新增文档生命周期治理层（[`document-governance.md`](./document-governance.md)、[`worktree-governance.md`](./worktree-governance.md)、[`DOC-REGISTRY.json`](./DOC-REGISTRY.json)、`scripts/docs-governance.mjs`、`npm run docs:status|check|reconcile`，`docs:check` 已接入根 `npm run check`）；注册表中 `G0-LF12` 已收口为 `completed / canonical:false`，释放 `g0-current-work-package` truthDomain。干净 checkpoint 为 `38d3de2`（已推送，工作区 clean）。
 
-Result Studio 旧实现的 11 个提交已于 2026-07-25 fast-forward 合并并推送至 `main`，检查点为 `03e5826`。SDC-0 已在 `codex/g0-sdc` 的 `7284921` 完成并推送；当前单线实现分支为 `codex/g0-result-studio-product`，从该检查点创建，不使用 Git Worktree。G0-CHF0 已在实现检查点 `41a365f` 完成 CHF0-R1～R5 审计修复并重新真实收口；P4R-3 实现检查点为 `3d3eb29`、性能门校准修复为 `59b33c4`。当前唯一 active canonical 工作包仍为 `G0-RS`，阶段 P4R-4。
+Result Studio 旧实现的 11 个提交已于 2026-07-25 fast-forward 合并并推送至 `main`，检查点为 `03e5826`。SDC-0 已在 `codex/g0-sdc` 的 `7284921` 完成并推送；当前单线实现分支为 `codex/g0-result-studio-product`，从该检查点创建，不使用 Git Worktree。G0-CHF0 已在实现检查点 `41a365f` 完成 CHF0-R1～R5 审计修复并重新真实收口；P4R-3 实现检查点为 `3d3eb29`、性能门校准修复为 `59b33c4`，P4R-4 实现检查点为 `f710261`。当前唯一 active canonical 工作包仍为 `G0-RS`，阶段 P4R-5。
 
 `G0-RS-P0` 已完成资格纠偏：Baseline patch 为 1.1.1，LF12 核心 16/16 evidence 继续 qualified + maintained；`result-studio-editing` 为 experimental/excluded，旧 RS9 product/provider/visual/table-seed 为 non-qualifying historical evidence。Product Trace v1 要求 14 步连续来源证据并拒绝人工布尔值、提示词指定 JSON、测试摘要和常量不变量。证据位于 `acceptance/g0-result-studio/rs-p0-{truth-correction,ui-baseline}.json`。
 
@@ -51,9 +51,11 @@ Result Studio 旧实现的 11 个提交已于 2026-07-25 fast-forward 合并并�
 
 P4 Core 已于提交 `e0a4c7d` 形成可恢复检查点，四份历史审计于 `e38d6b5` 无损归档。2026-07-26 仓库静态审计随后确认：默认必读仍包含大量已完成材料，`AUDIT-LOG`/`CLAUDE.md` 膨胀，65 个脚本和 145 个 npm 命令缺少机器分层，定向测试仅有文字纪律，`tmp` 有 2013 个残留文件且测试依赖本机绝对路径。`G0-RS-RH0 Repository Hygiene Gate` 已完成上述收口并通过最终基线，治理提交为 `95a7fe3`、`041e32e`。
 
-RH0 已完成：Truth Snapshot → Hot Context → Test Impact → Script/Temp Lifecycle → Acceptance 全部收口。`test/impact-map.json` 与 `scripts/test-affected.mjs` 现在提供确定性定向测试，未知映射 fail-closed；RH0 不删除 Acceptance 证据、不修改科学或执行真相、不创建 Worktree。P4R-0～P4R-3 已完成并保留；当前进入 `G0-RS-P4R-4 Version Selector + Codex-like Change Review`。
+RH0 已完成：Truth Snapshot → Hot Context → Test Impact → Script/Temp Lifecycle → Acceptance 全部收口。`test/impact-map.json` 与 `scripts/test-affected.mjs` 现在提供确定性定向测试，未知映射 fail-closed；RH0 不删除 Acceptance 证据、不修改科学或执行真相、不创建 Worktree。P4R-0～P4R-4 已完成并保留；当前进入 `G0-RS-P4R-5 Per-result Code & Reproduce`。
 
 P4R-3 收口事实：中央结果焦点中的 `ResultAgentComposer` 是默认编辑入口，右栏 `ResultEditPanel` 仅作为默认关闭的高级抽屉；草稿与 contextToken 按 project/conversation/Artifact/Revision/Selection 隔离。前端只保存用户原始目标，可见消息不夹带工具编排。后端 task/legacy 共用 token 投影、五阶段 recorder 与 terminal finalizer；context-bound create 只执行同一 Agent turn 中服务端保存的原始 intent，stale selection、分类/确认篡改、任意 script patch 与模型提供 DAG 全部拒绝。科学/数据/流程修改在没有权威持久 DAG 时明确阻断。专项 76/76 Node、134/134 frontend；affected 700/700 Node、102/102 related frontend；P2 17/17、P3 20/20、P4 18/18、P4R-performance 13/13、P4R-product 10/10。所有新证据都有 `sourceCommitMatchesSourceHashes:true`，仍不升级产品资格或 UI `verified`。
+
+P4R-4 收口事实：Result / Compare / History 为真实互斥中央模式，Code 继续由 P4R-5 门控。历史查看是前端可丢弃 state，主体、interaction、Selection 与 contextToken 均绑定显式 Revision；不移动 current、不切换 active Job、不调用写 API，首次 GET 不写 SQLite、不创建 managed Git。版本角色来自项目/family-scoped Revision + ChangeSet truth 并支持分页；审查摘要来自服务端受信持久元数据，Git 详情默认折叠。adopt/revert/restore 的 checkpoint 与 SQLite/Git 同退，参数/source commit/parent family/project 漂移 fail-closed。实现检查点 `f710261`；focused frontend 104/104、affected Node 258/258、related frontend 48/48、P4R product 13/13，P2/P3/P4/P4R 五份 evidence 全部绑定该提交。唯一显式不变量红项仍是 P4R-5 Revision source projection；UI-113/UI-114 保持 `in_progress`，资格不升级。
 
 `SDC-0 Profile Registry 与版本治理` 已于 2026-07-25 收口：`core/shared-backend/artifact-profiles.js` 从单个 DEG 种子升级为正式 Registry，落地 `biof3.counts-matrix.v1`、`biof3.sample-metadata.v1`、`biof3.expression-matrix.v1`、`biof3.deg.v1`、`biof3.gene-list.v1`、`biof3.enrichment-table.v1` 六个 canonical Profile，并区分 data / artifact / display 三类 Profile Kind。新增 profile 身份解析、registry 校验、contract digest、compatible/migration/breaking 变更分级和 fail-closed 兼容判定；`core/shared-backend/agent-workflow.js` 对未注册 Profile 返回 `unregistered_artifact_profile`，使其无法成为 typed DAG 正式边。`biof3.deg.v1` 及其 legacy alias（含 `log2FC → log2FoldChange`）保持向后兼容，未创建第二套执行真相。
 

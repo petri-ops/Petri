@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P4",
-  "sourceCommit": "59b33c406a1ed9d6e57990f6d41d99df166dd236",
+  "sourceCommit": "f710261d9cb0a556bd0aa9e9d22b06c08d118c24",
   "captureMode": "automated_descriptor_projection_plugin_wiring_registry_and_strict_build_offline_verification",
   "qualificationEligible": false,
   "qualificationReason": "P4 closes the offline unified-editing contract; real manual-vs-AI equivalence on a live plugin run and packaged product qualification remain reserved for P5 and P7.",
@@ -9,11 +9,11 @@
   "sourceHashes": {
     "controls": "d241a97ea738d47f558c8e3050d963db128c5609a28471ffc83313ae39269de1",
     "intent": "3974400975fb8b98fd79b5ee6f06ab799ae4877d4e875d5cdf8d479672a86109",
-    "contextTools": "f702f5c1688a1dca27feb9560f84d32e67c51f4844573c95be3c5d6693e04a3f",
+    "contextTools": "f4eb572624ce0c2afd75cce11dad1236cf8f6cfba47c85cd9576dace9867fdc0",
     "contextEditTools": "3695f54aca1a59a45703935c71ce6264ecac6a2063a5206934b9774d69a1124b",
     "toolDefinitions": "4e6ab4cc280a30e2a49da029db4d6d348d3f25d3d2bfe431b164ae490f47178f",
-    "changeSetService": "52b5f140291b072f609b19713d1ef306b2cc4a9d009911e188f0b7dec7b4fe25",
-    "routes": "c2be0db2bd6720172675664385968b34dfe818e13bdbad748e437ed07a55c7ce",
+    "changeSetService": "73668232b36a3f84f87df8544c61005ff7fb510c7073fceaf79bfd6b3ae52e0e",
+    "routes": "0332c98633a68fc0bd19614268221fba303bba02a879d9aea79ed745381a868b",
     "panel": "9a1387cbb775978e1f5b325c079affe3700d298424cd60911eb87caf415af650",
     "panelStyle": "5b59a661514aa97d6a751dc8c9f5d3220c5ecc060f1c33854d23ed38affb89fd",
     "panelTest": "38335ac744fb6450661cdb1a886c06b094b925befe1298751b50a0d09a752674",
@@ -24,23 +24,23 @@
     "simpleChat": "d6a2b6100e2f871ecf36c432abd4bea25769f607932ac731901a572749c2ac3c",
     "rightPanel": "3f9c1a781e3a7b8718dd71d5091863a48a020fc01e19d43fd297d43d326816ff",
     "rightPanelTest": "bbb2ba07c4ac3aa603b26e03656b80b052f5c54f53c86332d50ee5b898e9d08d",
-    "workspace": "1d71e4c609e27dbd14827ea35e2943885d2f927315ba02d7dee1510de0905137",
-    "contextClient": "4ad936f787298db3a75186dbaab2c7cde3e24b1feb5ff4e7d2c031f6b3e594b8",
+    "workspace": "1702bac4c571367b993f3ffe1998fb23b2ff5d1945e216971d48679fdd505c1b",
+    "contextClient": "8a74968cef56b917742fe932c7f0bf33d74465ac3fcea6f78ca1cf1c52df4c79",
     "systemPrompt": "70c94eacee8ee9b8fea73ffafaeff2c76f8b7a84b50abbe64307fd69c5ba67c1",
     "volcanoDescriptor": "66604b604c81e053ede710dec9db3e124a12800563d9c66746767bdd7b36585b",
     "volcanoScript": "f80012c9b61351ee783ee9a5b85c6c6b14fbcabe35e0c44629a9e7681cab81fd",
     "volcanoGolden": "142c7947b4b1127a74692e6a149e91dee844755c25eb0df1aa01f56d308dd3f0",
     "controlsTest": "0a6a7e1c10733aef3bc2db145534a2510a0dac8748887d270c4d4e56c803536e",
     "intentTest": "4fe9825b6933d18e0b1983db9f9d717296b564aac4c0221db5de84545e7b6a0f",
-    "contextTest": "e96aedbd59428d9a7c576710b67355e70fd149d2c99befa58340e2e609cc02de",
+    "contextTest": "a9f8c25f68874edd722ea27ba8b1b22253213d902d44ce56a20d19cac0735417",
     "pluginSdkTest": "f4c09da3aa89aa5cebc2b42fb0c8c2189c5b44a3e8cc844b6f37ada1923b99f4",
     "qualificationTest": "34568ffc1f0b3346abb98a0275e975e1ce02229e6a7c391ff4140412dd619579",
     "registryTest": "73aa421cba9f4f29e93b31834a20ce99b5698442e1b098427c59f53b0b9ad01d",
     "readinessTest": "cf49ed539c038b60a1463146d034487f274020a706fccd8d1db052d2e484f054",
-    "surfaceTest": "94514de68e951f5e46f108614a5e32a889a8d7a170d3852fbdfed921336c5ac4",
-    "centerPanelTest": "cd2a1637ec9cbd881115320a4c6da10376d6734aa78411d83dcd927dd888c7e8",
+    "surfaceTest": "b909ac160caf228b36fc6288fff4dd44d735fe5f6a5432779ceea3a827f4807f",
+    "centerPanelTest": "ada15e45a652806c7aad788b9a52c225d6956bf552e3eb7a37911cc2bd793b3a",
     "acceptanceScript": "98e1ab946fcece351abb8e27931c2086e9e51abd03756e6e849989affd3a2918",
-    "packageScripts": "5e3627524475a0642e2dc82cfc3bfa297227e5f22b7ba3567bac53c42519c211"
+    "packageScripts": "20d43c6d8bb8acf1eb911383f99162a32cb86d2011bfa5d56c5ec191235e3ba7"
   },
   "controlObservation": {
     "controlCount": 18,
@@ -264,14 +264,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-27T17:11:22.467Z",
+    "generatedAt": "2026-07-28T00:32:47.733Z",
     "commands": [
       {
         "label": "backend-p4",
         "command": "node --test test/result-edit-controls.test.mjs test/result-edit-intent.test.mjs test/result-studio-context.test.mjs test/result-studio-plugin-sdk.test.mjs test/result-studio-qualification.test.mjs test/agent-tool-registry.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "59c63a95c1eae5fcd00a72a6308bf154c8c3048afc36d6b3fa4df58f3a16cef5",
+        "stdoutSha256": "e725266d631f8147b648d20bf38955daccf1e5637d22678e01d795c8091774fe",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -279,7 +279,7 @@
         "command": "npm run test:files --prefix frontend -- ResultEditPanel.test.tsx ResultAgentComposer.test.tsx result-edit-agent-bridge.test.ts ResultStudioContextReadiness.test.tsx ResultStudioSurface.test.tsx CenterPanel.test.tsx RightPanel.test.tsx",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "da14100f518373f25b1729df9ebe048ad0fa6877b72bff15f826e3e2fafce3eb",
+        "stdoutSha256": "7e01e9ee6df72ac6ac450d326128b673ea50a871bd563ff8d86a9b1ddab66238",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -287,7 +287,7 @@
         "command": "npm run build:check --prefix frontend",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "189f82b1225d2e57a64ca1fa7bbcfe2380f38c867f93c537894fd39f829559e5",
+        "stdoutSha256": "f7d0b5e24d651803f6672db6272b509e98f630784b556809e2c13b82529f2d64",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -307,7 +307,7 @@
     "futureStagesImplemented": false
   },
   "passed": true,
-  "generatedAt": "2026-07-27T17:11:22.467Z",
+  "generatedAt": "2026-07-28T00:32:47.733Z",
   "privacyClean": true,
   "sourceCommitReachable": true,
   "sourceCommitMatchesSourceHashes": true,

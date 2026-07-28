@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P2",
-  "sourceCommit": "59b33c406a1ed9d6e57990f6d41d99df166dd236",
+  "sourceCommit": "f710261d9cb0a556bd0aa9e9d22b06c08d118c24",
   "captureMode": "automated_contract_renderer_performance_and_live_local_product_plus_bounded_visual_spot_check",
   "qualificationEligible": false,
   "privacy": "repository_relative_paths_digests_counts_dimensions_timings_and_bounded_statuses_only_no_project_job_conversation_selection_url_credential_prompt_or_result_data",
@@ -9,16 +9,16 @@
     "tableQuery": "01c22f09b3c8682a39e7c2e591a72a46318d8a66f5f097fcc6e174e0fd2a8f76",
     "interaction": "f8bdbb733d4cffc1d051e7d074ac8c61d33e528613b512f1666bf4a9967cb54f",
     "contracts": "52e4c29e14dd384add9305c48e4399e92986973eb4d04e8c5069b8df3642a3a0",
-    "repository": "a857412dda082cc575d844f66eb43a6c77421937786431fb7417c52d23470050",
+    "repository": "dc0d2d6fcd0b3308267102c2202e0a45e37c0157d04a5df2f57cb72b6744a81f",
     "pluginSdk": "44e057e3ef5a3cbd736ce3af1fa169706f6c466ddca4c645ac9a9fc06ff0ffaa",
-    "routes": "c2be0db2bd6720172675664385968b34dfe818e13bdbad748e437ed07a55c7ce",
+    "routes": "0332c98633a68fc0bd19614268221fba303bba02a879d9aea79ed745381a868b",
     "selectionTool": "7bd62361d54847cffc6245933c862e34f44f9d486c1a7b683bdc74e99a75a81d",
     "toolDefinitions": "4e6ab4cc280a30e2a49da029db4d6d348d3f25d3d2bfe431b164ae490f47178f",
     "toolRegistry": "f53dc7d881955cd23efecf466452bac448e9b915d590bed1d783722e6166d5a6",
     "viewer": "0b165e23bf9a915e658db9bb3c2240e32a741d2c86f434fb5681dddb6f44dbc2",
     "viewerStyle": "2f320233486b31fe7744d7d44730c4373edb4f3ff54f91faf84ee83a16bd2fdf",
-    "selectionClient": "4ad936f787298db3a75186dbaab2c7cde3e24b1feb5ff4e7d2c031f6b3e594b8",
-    "workspace": "1d71e4c609e27dbd14827ea35e2943885d2f927315ba02d7dee1510de0905137",
+    "selectionClient": "8a74968cef56b917742fe932c7f0bf33d74465ac3fcea6f78ca1cf1c52df4c79",
+    "workspace": "1702bac4c571367b993f3ffe1998fb23b2ff5d1945e216971d48679fdd505c1b",
     "viewerTest": "7087a4647f97980bbb42e6cd4f22fde702175df72385eca5b7669060b1f1e0e5",
     "selectionLogic": "2156ef151d014b654d54f533663d2b7f5f086024161b464ecb45bb5b07fbafe2",
     "selectionLogicTest": "b02e4b21b7fd1452171ad31b6aa5f5c8e5dfede1a2c5fb8d2fb302f9ccb79407",
@@ -30,16 +30,16 @@
     "tableQueryTest": "c4c97d306b5297aef630d228637d2d40b4ea40962765bf875729aeda712568c7",
     "artifactInteractionTest": "fc7b6dc14bfb2e190f118a4da5ef5b64344fe659311841139e43c2b81a70a332",
     "contractsTest": "f74ed20ad293f3fc3a96ac2615bbd59d9bc560fd76b77ee02ebd3d0419ce982d",
-    "repositoryTest": "f99db454a2ddf17564351be5a6ea64efe218aefd6580db139adfae3ed1875fdc",
+    "repositoryTest": "9a8bfe271d33c8f3b5ac92dbc14144e478e4a63a460fd05f778144f497173444",
     "pluginSdkTest": "f4c09da3aa89aa5cebc2b42fb0c8c2189c5b44a3e8cc844b6f37ada1923b99f4",
     "registryTest": "73aa421cba9f4f29e93b31834a20ce99b5698442e1b098427c59f53b0b9ad01d",
-    "centerPanelTest": "cd2a1637ec9cbd881115320a4c6da10376d6734aa78411d83dcd927dd888c7e8",
-    "surfaceTest": "94514de68e951f5e46f108614a5e32a889a8d7a170d3852fbdfed921336c5ac4",
+    "centerPanelTest": "ada15e45a652806c7aad788b9a52c225d6956bf552e3eb7a37911cc2bd793b3a",
+    "surfaceTest": "b909ac160caf228b36fc6288fff4dd44d735fe5f6a5432779ceea3a827f4807f",
     "liveCapture": "4af77d83afd4b0e0c3f2bf973800d4695b81a59097ead690c03bae18017fddf0",
     "acceptanceScript": "ea98ba3b00a69302b14c870180ea39fa3067fb5f4263beac9f9924064b049475",
     "liveObservation": "b0da52317f9e9eb8fbb759fd5d61f9cf00332d07f9fdb04efe9548fbaa068860",
     "uiObservation": "a266e6458c260713d79144f6a7fc8870922bb0060d6a99ed5c6cc3c854dc1a5b",
-    "packageScripts": "5e3627524475a0642e2dc82cfc3bfa297227e5f22b7ba3567bac53c42519c211"
+    "packageScripts": "20d43c6d8bb8acf1eb911383f99162a32cb86d2011bfa5d56c5ec191235e3ba7"
   },
   "productObservation": {
     "captureMode": "automated_contract_renderer_performance_and_live_local_product_plus_bounded_visual_spot_check",
@@ -196,14 +196,14 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-27T17:10:31.936Z",
+    "generatedAt": "2026-07-28T00:31:48.485Z",
     "commands": [
       {
         "label": "backend-p2",
         "command": "node --test test/result-studio-table-query.test.mjs test/result-selection-tools.test.mjs test/artifact-interaction.test.mjs test/result-studio-contracts.test.mjs test/result-studio-repository.test.mjs test/result-studio-plugin-sdk.test.mjs test/agent-tool-registry.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "bab32399c6ccc4b66c3b52d05a9da5207434e7f25667b7a71fef0c43aa7042a8",
+        "stdoutSha256": "a1ca4b1617728a05a8d9453efe850638a7a509d6ff21093fbc992b53a6a91dab",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
@@ -211,14 +211,14 @@
         "command": "npm run test:files --prefix frontend -- ScientificInteractionViewer.test.tsx artifact-selection.test.ts CenterPanel.test.tsx ResultStudioSurface.test.tsx",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "92efc554e7e45996dcc1a09f9f202374c0acbfcde8e8f5d78e73050225c2a419",
+        "stdoutSha256": "33b3d329c0eaeb646d3d3d129b0e9c4a4aba5811c0266f5c98bbbe4a12eddbeb",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "rendererPerformance": {
           "budgetMs": 100,
-          "scrollFeedbackMs": 3.03,
-          "selectionFeedbackMs": 4.791,
-          "sortFeedbackMs": 5.074,
-          "filterFeedbackMs": 1.025
+          "scrollFeedbackMs": 3.329,
+          "selectionFeedbackMs": 4.37,
+          "sortFeedbackMs": 5.822,
+          "filterFeedbackMs": 1.041
         }
       },
       {
@@ -226,7 +226,7 @@
         "command": "npm run build:check --prefix frontend",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "128102a57e05382fcc3425d1be27cc24f08c58f302db76f86ea57398298b6c81",
+        "stdoutSha256": "1608edf3c68cce085c46548e501846562979b4728dc979fccdacf5caa12390a2",
         "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
       },
       {
@@ -246,7 +246,7 @@
     "futureStagesImplemented": false
   },
   "passed": true,
-  "generatedAt": "2026-07-27T17:10:31.936Z",
+  "generatedAt": "2026-07-28T00:31:48.485Z",
   "privacyClean": true,
   "sourceCommitReachable": true,
   "sourceCommitMatchesSourceHashes": true,

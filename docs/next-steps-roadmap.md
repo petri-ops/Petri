@@ -10,9 +10,11 @@
 
 LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口。RS9 曾新增第 17 类 `result_studio_product`，但后续复核发现其五条任务由独立测试拼装、Provider 未执行真实工具闭环、视觉验收依赖人工布尔值、大表由 seed 直接构造；该证据现降级为 unit/synthetic/renderer historical evidence。`result-studio-editing` 在 RS-P7 前暂停 qualified support claim，不能影响或冒充 LF12 原始核心资格。
 
-`G0-CHF0 Critical Cross-cutting Hardening`（[`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md)）已完成 CHF0-R1～R5 审计修复并重新真实收口：科学输出、PCA sample-ID、长任务/进程终态、HTTP 来源/文件边界与 Acceptance 可追溯性均绑定实现检查点 `41a365f`；专项 5/5、22 tests，29 个 source/producer hashes 与可达提交逐一匹配，证据保持 `qualificationEligible:false`。Result Studio P4R-0～P4R-3 已收口；当前唯一 active canonical 工作包仍为 `G0-RS`，阶段推进至 P4R-4 Version Selector + Codex-like Change Review。
+`G0-CHF0 Critical Cross-cutting Hardening`（[`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md)）已完成 CHF0-R1～R5 审计修复并重新真实收口：科学输出、PCA sample-ID、长任务/进程终态、HTTP 来源/文件边界与 Acceptance 可追溯性均绑定实现检查点 `41a365f`；专项 5/5、22 tests，29 个 source/producer hashes 与可达提交逐一匹配，证据保持 `qualificationEligible:false`。Result Studio P4R-0～P4R-4 已收口；当前唯一 active canonical 工作包仍为 `G0-RS`，阶段推进至 P4R-5 Per-result Code & Reproduce。
 
 P4R-3 的实现检查点为 `3d3eb29`，性能门校准修复为 `59b33c4`。中央结果焦点以自然语言 Composer 为默认入口，高级参数面板默认关闭；Artifact/Revision/Selection/contextToken 在点击时原子绑定，create 只接受同一 Agent turn 的受信原始 intent，selection 重放、分类/确认篡改、script patch 与模型自带 DAG 均 fail-closed。task/legacy 的取消、返回式 Provider 错误与异常共用 terminal 进度收口，SQLite 重开只显示五个公开阶段。P2/P3/P4/P4R 五份 evidence 均通过 source-commit 反查；产品证据 10/10，资格仍为 `qualificationEligible:false`。缺权威持久 DAG 的科学/数据/流程编辑保持明确阻断，不把安全降级冒充可用能力。
+
+P4R-4 的实现检查点为 `f710261`。Result / Compare / History 已成为真实互斥路由模式；查看旧 Revision 使用可丢弃 viewed state，Artifact/interaction/Selection/contextToken 均显式绑定所选版本，不移动 current、不切 active Job、不调用写 API，首次版本列表 GET 不写 SQLite、不创建 managed Git。版本选择按项目/family-scoped truth 分页并标注原始/当前/候选/历史；Change Review 的意图、影响范围和验证状态来自服务端受信持久元数据，Git 详情默认折叠。checkpoint 故障、参数 hash、source commit、parent family/project 漂移均 fail-closed。focused frontend 104/104、affected Node 258/258、related frontend 48/48、P4R product 13/13；五份 evidence 均绑定 `f710261`。UI-113/UI-114 仍为 `in_progress`，P4R 仍是 `implemented_unverified / qualificationEligible:false`。
 
 Result Studio 旧实现的 11 个提交已位于 `main`（检查点 `03e5826`）；`SDC-0 Profile Registry 与版本治理` 也已在分支 `codex/g0-sdc` 的 `7284921` 收口并推送，六个 canonical Profile 与 fail-closed typed DAG 边继续保留。按单工作包串行，`SDC-1`～`SDC-7` deferred，当前不创建 Worktree。
 
