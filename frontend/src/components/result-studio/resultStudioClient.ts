@@ -200,6 +200,74 @@ export function fetchRevisionSource(
   return requestJson(`/revisions/${encodeURIComponent(revisionId)}/source?${query.toString()}`, { signal: options.signal });
 }
 
+export interface ControlledReplayPreflight {
+  ok: true;
+  controlledReplayVersion: number;
+  status: 'confirmation_required';
+  confirmationToken: string;
+  expiresAt: number;
+  fingerprint: string;
+  revision: {
+    revisionId: string;
+    artifactId: string;
+    revisionOrdinal: number;
+    sourceSha256: string;
+    parametersHash: string;
+    inputCount: number;
+  };
+  execution: {
+    toolId: string;
+    pluginVersion: string;
+    runtime: RevisionSourceProjection['reproduction']['runtime'];
+    createsToolJob: true;
+    createsCandidateRevision: true;
+    adoptsCandidate: false;
+    mutatesCurrentRevision: false;
+    acceptsWorkflowPlan: false;
+    acceptsShell: false;
+  };
+}
+
+export interface ControlledReplayResult {
+  ok: true;
+  controlledReplayVersion: number;
+  status: 'preview_ready';
+  replayFingerprint: string;
+  changeSetId: string;
+  toolJobId: string;
+  revisionId: string;
+  parentRevisionId: string;
+  adopted: false;
+  idempotent: boolean;
+}
+
+export function preflightRevisionReplay(input: {
+  projectId: string;
+  revisionId: string;
+  conversationId?: string | null;
+  contextToken: string;
+  expectedSourceSha256: string;
+  expectedParametersHash: string;
+}): Promise<ControlledReplayPreflight> {
+  return requestJson(`/revisions/${encodeURIComponent(input.revisionId)}/replay`, {
+    method: 'POST',
+    body: JSON.stringify({ ...input, phase: 'preflight' }),
+  });
+}
+
+export function confirmRevisionReplay(input: {
+  projectId: string;
+  revisionId: string;
+  conversationId?: string | null;
+  contextToken: string;
+  confirmationToken: string;
+}): Promise<ControlledReplayResult> {
+  return requestJson(`/revisions/${encodeURIComponent(input.revisionId)}/replay`, {
+    method: 'POST',
+    body: JSON.stringify({ ...input, phase: 'confirm' }),
+  });
+}
+
 export function adoptResultChangeSet(changeSetId: string): Promise<{ ok: true; changeSet: ResultStudioChangeSet; currentRevisions: ArtifactRevision[] }> {
   return requestJson(`/changesets/${encodeURIComponent(changeSetId)}/adopt`, { method: 'POST', body: '{}' });
 }

@@ -2994,6 +2994,7 @@ function ResultArtifactShell({
   onAskAgent,
   onWorkflowChanged,
   onAgentCodeRequest,
+  replayContext,
   onOpenRevisionWorkspaceFile,
   pendingArtifactName = null,
   onPendingArtifactConsumed,
@@ -3010,6 +3011,7 @@ function ResultArtifactShell({
   onAskAgent: (prompt: string) => void;
   onWorkflowChanged?: () => void;
   onAgentCodeRequest?: (request: 'explain' | 'modify' | 'replay') => void;
+  replayContext?: { conversationId?: string | null; contextToken: string } | null;
   onOpenRevisionWorkspaceFile?: (relativePath: string) => void;
   /**
    * Optional artifact name the host wants pre-selected once the manifest
@@ -3981,6 +3983,11 @@ function ResultArtifactShell({
           revisionId={viewedRevision?.revisionId || interactionRevision?.revisionId || activeArtifact?.revisionId || null}
           revisionOrdinal={viewedRevision?.revisionOrdinal || interactionRevision?.revisionOrdinal || activeArtifact?.revisionOrdinal || null}
           onAgentRequest={onAgentCodeRequest}
+          replayContext={replayContext}
+          onReplayCreated={() => {
+            onWorkflowChanged?.();
+            onModeChange?.('compare', job?.id || null);
+          }}
           onOpenWorkspaceFile={onOpenRevisionWorkspaceFile}
         />
       )}
@@ -4261,6 +4268,7 @@ export function ResultView({
   onAskAgent,
   onWorkflowChanged,
   onAgentCodeRequest,
+  replayContext,
   onOpenRevisionWorkspaceFile,
   pendingArtifactName = null,
   onPendingArtifactConsumed,
@@ -4277,6 +4285,7 @@ export function ResultView({
   onAskAgent: (prompt: string) => void;
   onWorkflowChanged?: () => void;
   onAgentCodeRequest?: (request: 'explain' | 'modify' | 'replay') => void;
+  replayContext?: { conversationId?: string | null; contextToken: string } | null;
   onOpenRevisionWorkspaceFile?: (relativePath: string) => void;
   pendingArtifactName?: string | null;
   onPendingArtifactConsumed?: () => void;
@@ -4295,6 +4304,7 @@ export function ResultView({
       onAskAgent={onAskAgent}
       onWorkflowChanged={onWorkflowChanged}
       onAgentCodeRequest={onAgentCodeRequest}
+      replayContext={replayContext}
       onOpenRevisionWorkspaceFile={onOpenRevisionWorkspaceFile}
       pendingArtifactName={pendingArtifactName}
       onPendingArtifactConsumed={onPendingArtifactConsumed}

@@ -1,8 +1,12 @@
 import React from 'react';
 import { HighlightedCode } from '@/components/ui/CodeHighlight';
 import {
+  confirmRevisionReplay,
   fetchRevisionSource,
+  preflightRevisionReplay,
   ResultStudioRequestError,
+  type ControlledReplayPreflight,
+  type ControlledReplayResult,
   type RevisionSourceProjection,
 } from './resultStudioClient';
 import styles from './RevisionCodeView.module.css';
@@ -20,17 +24,23 @@ export function RevisionCodeView({
   revisionOrdinal,
   onAgentRequest,
   onOpenWorkspaceFile,
+  replayContext,
+  onReplayCreated,
 }: {
   projectId: string;
   revisionId: string | null;
   revisionOrdinal?: number | null;
   onAgentRequest?: (request: 'explain' | 'modify' | 'replay') => void;
   onOpenWorkspaceFile?: (relativePath: string) => void;
+  replayContext?: { conversationId?: string | null; contextToken: string } | null;
+  onReplayCreated?: (result: ControlledReplayResult) => void;
 }): React.ReactElement {
   const [projection, setProjection] = React.useState<RevisionSourceProjection | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<{ code: string; message: string } | null>(null);
   const [actionMessage, setActionMessage] = React.useState('');
+  const [replayPreflight, setReplayPreflight] = React.useState<ControlledReplayPreflight | null>(null);
+  const [replayBusy, setReplayBusy] = React.useState(false);
   const requestEpoch = React.useRef(0);
   const requestKey = `${projectId}:${revisionId || ''}`;
 
@@ -59,6 +69,8 @@ export function RevisionCodeView({
   }, [projectId, revisionId]);
 
   React.useEffect(() => {
+    setReplayPreflight(null);
+    setActionMessage('');
     const controller = new AbortController();
     void load(controller.signal);
     return () => { controller.abort(); requestEpoch.current += 1; };
@@ -87,6 +99,52 @@ export function RevisionCodeView({
     link.click();
     window.setTimeout(() => URL.revokeObjectURL(href), 0);
     setActionMessage('已下载完整代码');
+  };
+
+  const prepareReplay = async () => {
+    if (!projection || !revisionId || !replayContext?.contextToken || !projection.parameters) return;
+    setReplayBusy(true);
+    setActionMessage('正在重新核对源码、参数、输入与运行时…');
+    try {
+      const prepared = await preflightRevisionReplay({
+        projectId,
+        revisionId,
+        conversationId: replayContext.conversationId || null,
+        contextToken: replayContext.contextToken,
+        expectedSourceSha256: projection.sha256,
+        expectedParametersHash: projection.parameters.sha256,
+      });
+      setReplayPreflight(prepared);
+      setActionMessage('预检通过；确认后会创建新的 Job 和候选版本，不会覆盖当前结果。');
+    } catch (reason) {
+      setReplayPreflight(null);
+      setActionMessage(reason instanceof Error ? reason.message : '受控重放预检失败');
+    } finally {
+      setReplayBusy(false);
+    }
+  };
+
+  const confirmReplay = async () => {
+    if (!replayPreflight || !revisionId || !replayContext?.contextToken) return;
+    setReplayBusy(true);
+    setActionMessage('正在通过正式工具执行链创建候选版本…');
+    try {
+      const result = await confirmRevisionReplay({
+        projectId,
+        revisionId,
+        conversationId: replayContext.conversationId || null,
+        contextToken: replayContext.contextToken,
+        confirmationToken: replayPreflight.confirmationToken,
+      });
+      setReplayPreflight(null);
+      setActionMessage('受控重放完成：新候选版本已就绪，当前版本未被覆盖。');
+      onReplayCreated?.(result);
+    } catch (reason) {
+      setReplayPreflight(null);
+      setActionMessage(reason instanceof Error ? reason.message : '受控重放失败；请重新预检');
+    } finally {
+      setReplayBusy(false);
+    }
   };
 
   if (loading) return <section className={styles.surface} aria-busy="true"><p>正在读取当前 Revision 的精确代码…</p></section>;
@@ -122,7 +180,11 @@ export function RevisionCodeView({
             <div className={styles.menu}>
               <button type="button" onClick={() => onAgentRequest?.('explain')}>解释这份代码</button>
               <button type="button" onClick={() => onAgentRequest?.('modify')}>提出代码修改</button>
-              <button type="button" disabled={!projection.reproduction.replayable} onClick={() => onAgentRequest?.('replay')}>请求受控重放</button>
+              <button
+                type="button"
+                disabled={!projection.reproduction.replayable || !replayContext?.contextToken || replayBusy}
+                onClick={() => void prepareReplay()}
+              >受控重放</button>
             </div>
           </details>
         </div>
@@ -133,6 +195,21 @@ export function RevisionCodeView({
           <button type="button" onClick={() => onOpenWorkspaceFile(projection.openableRelativePath!)}>在项目文件中打开</button>
         )}
       </div>
+      {replayPreflight && (
+        <section className={styles.replayConfirm} aria-label="受控重放确认">
+          <strong>确认创建新的复现候选？</strong>
+          <ul>
+            <li>工具：{replayPreflight.execution.toolId} · {replayPreflight.execution.pluginVersion}</li>
+            <li>输入：{replayPreflight.revision.inputCount} 个，已重新校验 hash</li>
+            <li>运行时：{replayPreflight.execution.runtime.name || '未知'} {replayPreflight.execution.runtime.version || ''}</li>
+            <li>副作用：创建新 Job 与候选 Revision；不采用候选、不修改当前或历史版本</li>
+          </ul>
+          <div className={styles.actions}>
+            <button type="button" disabled={replayBusy} onClick={() => setReplayPreflight(null)}>取消</button>
+            <button type="button" disabled={replayBusy} onClick={() => void confirmReplay()}>确认受控重放</button>
+          </div>
+        </section>
+      )}
       <details className={styles.technical}>
         <summary>技术信息</summary>
         <dl>

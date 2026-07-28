@@ -29,7 +29,7 @@
  * Usage:
  *   node scripts/g0-rs-p4r-corpus.mjs                    # default set, root removed
  *   node scripts/g0-rs-p4r-corpus.mjs --keep             # keep the root
- *   node scripts/g0-rs-p4r-corpus.mjs --with-enrichment  # add go-kegg (~110s)
+ *   node scripts/g0-rs-p4r-corpus.mjs --with-enrichment  # add GO-BP via go-kegg
  *   node scripts/g0-rs-p4r-corpus.mjs --json
  */
 
@@ -96,14 +96,21 @@ export const CORPUS_STEPS = Object.freeze([
     id: 'go-kegg',
     toolId: 'go-kegg',
     optional: true,
-    describes: 'GO/KEGG enrichment tables and dotplots',
+    describes: 'GO-BP enrichment table and dotplot through the go-kegg plugin',
     // Uses real human gene symbols: the deseq2 demo genes are synthetic
     // (Gene1..Gene2000) and would enrich to nothing.
     params: ({ repoRoot }) => ({
       deg_table: path.join(repoRoot, CORPUS_INPUTS.enrichmentGenes),
       species: 'human',
       gene_id_type: 'SYMBOL',
-      analysis_type: 'all',
+      // P4R-5 needs one formal enrichment Artifact from the go-kegg plugin,
+      // not a live KEGG network probe.  GO-BP is fully local once the declared
+      // r-enrichment runtime is ready, while `all` also asks the plugin to run
+      // KEGG and used to make this deterministic source observation depend on
+      // a transient KEGG REST fallback whenever the offline snapshot was not
+      // available.  Keep the product execution truth intact: this is a real
+      // GO-BP Job, not a failed all-analysis Job relabelled as completed.
+      analysis_type: 'GO-BP',
     }),
   },
 ]);

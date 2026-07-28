@@ -71,9 +71,9 @@
   ],
   "outputs": [
     { "id": "go_bp_results", "type": "table", "label": "GO-BP 结果表" },
-    { "id": "kegg_results", "type": "table", "label": "KEGG 结果表" },
+    { "id": "kegg_results", "type": "table", "label": "KEGG 结果表", "required": false },
     { "id": "go_bp_dotplot", "type": "plot", "label": "GO-BP 气泡图" },
-    { "id": "kegg_dotplot", "type": "plot", "label": "KEGG 气泡图" },
+    { "id": "kegg_dotplot", "type": "plot", "label": "KEGG 气泡图", "required": false },
     { "id": "report", "type": "report", "label": "解读报告" }
   ],
   "tutorialUrl": "/docs/bulk-rnaseq/enrichment",

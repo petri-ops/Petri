@@ -27,6 +27,7 @@ import { FROZEN_BASELINE } from './g0-rs-p4r-acceptance.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const evidencePath = join(root, 'acceptance/g0-result-studio/rs-p4r-product-reframe.json');
+const sourceObservationPath = join(root, 'acceptance/g0-result-studio/rs-p4r-source-observation.json');
 const read = (file) => readFileSync(join(root, file), 'utf8');
 const sha = (value) => createHash('sha256').update(String(value)).digest('hex');
 const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
@@ -40,6 +41,7 @@ const sourceFiles = {
   repository: 'core/shared-backend/result-studio-repository.js',
   changeSetService: 'core/shared-backend/result-changeset-service.js',
   revisionSource: 'core/shared-backend/result-revision-source.js',
+  replayService: 'core/shared-backend/result-replay-service.js',
   resultEditTools: 'core/r-server/agent-tools/result-edit-tools.js',
   harnessRoutes: 'core/r-server/routes/harness.js',
   contracts: 'core/shared-backend/result-studio-contracts.js',
@@ -109,6 +111,7 @@ const sourceFiles = {
   resultRepositorySpec: 'test/result-studio-repository.test.mjs',
   resultChangeSetSpec: 'test/result-changeset-service.test.mjs',
   revisionSourceSpec: 'test/result-revision-source.test.mjs',
+  replayServiceSpec: 'test/result-replay-service.test.mjs',
   p4rInvariantSpec: 'test/p4r-invariants.test.mjs',
   resultEditAgentToolSpec: 'test/result-edit-agent-tool.test.mjs',
   agentToolPolicySpec: 'test/agent-tool-policy.test.mjs',
@@ -122,6 +125,8 @@ const sourceFiles = {
   captureScript: 'scripts/g0-rs-p4r-capture.mjs',
   corpusScript: 'scripts/g0-rs-p4r-corpus.mjs',
   sourceObservation: 'scripts/g0-rs-p4r-source-observation.mjs',
+  sourceObservationEvidence: 'acceptance/g0-result-studio/rs-p4r-source-observation.json',
+  goKeggDefinition: 'resources/built-in-plugins/go-kegg/tool-definition.json',
 };
 
 /**
@@ -164,6 +169,7 @@ const NODE_SPECS = [
   'test/result-studio-repository.test.mjs',
   'test/result-changeset-service.test.mjs',
   'test/result-revision-source.test.mjs',
+  'test/result-replay-service.test.mjs',
   'test/p4r-invariants.test.mjs',
 ];
 
@@ -213,6 +219,7 @@ const REQUIRED_P4R5_FRONTEND_SPECS = Object.freeze([
 
 const REQUIRED_P4R5_NODE_SPECS = Object.freeze([
   'test/result-revision-source.test.mjs',
+  'test/result-replay-service.test.mjs',
   'test/p4r-invariants.test.mjs',
   'test/result-changeset-service.test.mjs',
 ]);
@@ -283,6 +290,8 @@ function inspect(verification, observation) {
   const node = verification?.node || {};
   const byId = new Map((observation?.requests || []).map((r) => [r.id, r]));
   const baseline = new Map(FROZEN_BASELINE.requests.map((r) => [r.id, r]));
+  let sourceObservation = null;
+  try { sourceObservation = JSON.parse(readFileSync(sourceObservationPath, 'utf8')); } catch { /* missing evidence fails the check */ }
 
   const warmImprovement = (id) => {
     const now = byId.get(id);
@@ -402,6 +411,16 @@ function inspect(verification, observation) {
         && NODE_SPECS.every((spec) => Object.values(sourceFiles).includes(spec)),
       [sourceFiles.acceptanceScript, sourceFiles.packageScripts],
       'Every P4R-5 implementation and executed spec is source-hashed; no stale P4R-4-only producer can underwrite Code/reproduce claims.'),
+
+    item('RS-P4R5-4',
+      sourceObservation?.passed === true
+        && sourceObservation?.allFourVerified === true
+        && sourceObservation?.sourceCommitMatchesSourceHashes === true
+        && Array.isArray(sourceObservation?.observations)
+        && sourceObservation.observations.length === 4
+        && sourceObservation.observations.every((entry) => entry.status === 'verified' && entry.formalJobCompleted === true),
+      [sourceFiles.sourceObservation, sourceFiles.sourceObservationEvidence, sourceFiles.goKeggDefinition],
+      'The isolated real run_tool → tool_job → Artifact Truth chain produced formal DESeq2, standalone volcano, heatmap and GO-BP artifacts, then created and read each exact Revision source projection. The observation is source-bound and non-qualifying.'),
   ];
 
   return {

@@ -10,7 +10,7 @@
 
 import { strict as assert } from 'node:assert';
 import { execFileSync } from 'node:child_process';
-import { existsSync, rmSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { homedir } from 'node:os';
 import path from 'node:path';
 import { test } from 'node:test';
@@ -74,6 +74,27 @@ test('corpus steps are well formed and chain explicitly', () => {
     outputs: { deseq2: { 'deg_table.csv': '/somewhere/deg_table.csv' } },
   });
   assert.equal(params.deg_table, '/somewhere/deg_table.csv');
+
+  // The enrichment observation is deliberately a real GO-BP run.  It must
+  // not silently broaden into `all`, which would make this offline product
+  // gate depend on KEGG availability and could turn a valid GO Artifact into
+  // a failed Job merely because conditional KEGG outputs were absent.
+  const enrichment = CORPUS_STEPS.find((step) => step.id === 'go-kegg');
+  const enrichmentParams = enrichment.params({ repoRoot: REPO_ROOT, outputs: {} });
+  assert.equal(enrichmentParams.analysis_type, 'GO-BP');
+});
+
+test('go-kegg declares conditional KEGG artifacts optional while keeping GO-BP truth required', () => {
+  const definition = JSON.parse(readFileSync(
+    path.join(REPO_ROOT, 'resources/built-in-plugins/go-kegg/tool-definition.json'),
+    'utf8',
+  ));
+  const outputs = new Map(definition.outputs.map((item) => [item.id, item]));
+  assert.notEqual(outputs.get('go_bp_results')?.required, false);
+  assert.notEqual(outputs.get('go_bp_dotplot')?.required, false);
+  assert.equal(outputs.get('kegg_results')?.required, false);
+  assert.equal(outputs.get('kegg_dotplot')?.required, false);
+  assert.notEqual(outputs.get('report')?.required, false);
 });
 
 test(

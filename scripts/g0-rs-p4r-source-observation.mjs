@@ -7,8 +7,10 @@
  * exact source projection for each artifact class.  Only bounded digests and
  * statuses are persisted.
  */
+import { createHash } from 'node:crypto';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { createServer } from 'node:net';
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generateCorpus } from './g0-rs-p4r-corpus.mjs';
@@ -16,6 +18,41 @@ import { createCaptureEnv, startServer, stopServer } from './g0-rs-p4r-capture.m
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const evidencePath = path.join(rootDir, 'acceptance/g0-result-studio/rs-p4r-source-observation.json');
+const sourceFiles = Object.freeze({
+  observation: 'scripts/g0-rs-p4r-source-observation.mjs',
+  corpus: 'scripts/g0-rs-p4r-corpus.mjs',
+  routes: 'core/r-server/routes/result-studio.js',
+  sourceProjection: 'core/shared-backend/result-revision-source.js',
+  replayService: 'core/shared-backend/result-replay-service.js',
+  deseq2Definition: 'resources/built-in-plugins/deseq2/tool-definition.json',
+  deseq2Script: 'resources/built-in-plugins/deseq2/scripts/deseq2.R',
+  volcanoDefinition: 'resources/built-in-plugins/volcano-plot/tool-definition.json',
+  volcanoScript: 'resources/built-in-plugins/volcano-plot/scripts/volcano-plot.R',
+  correlationDefinition: 'resources/built-in-plugins/gene-correlation/tool-definition.json',
+  correlationScript: 'resources/built-in-plugins/gene-correlation/scripts/gene-correlation.R',
+  enrichmentDefinition: 'resources/built-in-plugins/go-kegg/tool-definition.json',
+  enrichmentScript: 'resources/built-in-plugins/go-kegg/scripts/go-kegg.R',
+});
+const hash = (value) => createHash('sha256').update(value).digest('hex');
+
+function sourceBinding() {
+  const sourceCommit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: rootDir, encoding: 'utf8' }).trim();
+  const sourceHashes = Object.fromEntries(Object.entries(sourceFiles).map(([key, file]) => [
+    key,
+    hash(readFileSync(path.join(rootDir, file))),
+  ]));
+  const mismatches = Object.entries(sourceFiles).filter(([key, file]) => {
+    const shown = spawnSync('git', ['show', `${sourceCommit}:${file}`], { cwd: rootDir });
+    return shown.status !== 0 || hash(shown.stdout) !== sourceHashes[key];
+  }).map(([, file]) => file);
+  return {
+    sourceCommit,
+    sourceFiles,
+    sourceHashes,
+    sourceCommitMatchesSourceHashes: mismatches.length === 0,
+    sourceMismatches: mismatches,
+  };
+}
 
 async function freePort() {
   return new Promise((resolve, reject) => {
@@ -65,7 +102,16 @@ async function observe() {
       const interactionJson = await interaction.json().catch(() => ({}));
       const revisionId = interactionJson.revision?.revisionId || interactionJson.revision?.id || null;
       if (!interaction.ok || !revisionId) {
-        observations.push({ kind: target.kind, artifact: target.artifact, status: 'failed', httpStatus: interaction.status, error: interactionJson.error || 'revision_not_created' });
+        observations.push({
+          kind: target.kind,
+          artifact: target.artifact,
+          status: 'failed',
+          httpStatus: interaction.status,
+          error: interactionJson.error || 'revision_not_created',
+          diagnostics: Array.isArray(interactionJson.manifest?.diagnostics)
+            ? interactionJson.manifest.diagnostics.map((item) => ({ code: item?.code || null, message: item?.message || null }))
+            : [],
+        });
         continue;
       }
       const source = await fetch(`${server.baseUrl}/api/result-studio/revisions/${encodeURIComponent(revisionId)}/source?projectId=${encodeURIComponent(corpus.projectId)}`);
@@ -78,28 +124,33 @@ async function observe() {
         sourceSha256: sourceJson.sha256 || null,
         sourceScope: sourceJson.scope || null,
         reproductionStatus: sourceJson.reproduction?.status || null,
+        formalJobCompleted: record.ok === true,
       });
     }
+    const binding = sourceBinding();
     const result = {
       schemaVersion: 1,
       workPackage: 'G0-RS-P4R-5',
       qualificationEligible: false,
-      sourceCommit: 'runtime-observation',
+      ...binding,
       projectBound: true,
+      executionTruthChain: ['run_tool', 'tool_job', 'artifact_truth', 'artifact_revision', 'revision_source'],
       observations,
       allFourVerified: observations.length === 4 && observations.every((item) => item.status === 'verified'),
     };
+    result.passed = result.allFourVerified && result.sourceCommitMatchesSourceHashes;
     mkdirSync(path.dirname(evidencePath), { recursive: true });
     writeFileSync(evidencePath, `${JSON.stringify(result, null, 2)}\n`);
     return result;
   } finally {
     if (server) await stopServer(server.child);
+    if (existsSync(root)) rmSync(root, { recursive: true, force: true });
   }
 }
 
 observe().then((result) => {
   console.log(JSON.stringify(result, null, 2));
-  if (!result.allFourVerified) process.exitCode = 1;
+  if (!result.passed) process.exitCode = 1;
 }).catch((error) => {
   console.error(error.stack || error.message);
   process.exitCode = 1;

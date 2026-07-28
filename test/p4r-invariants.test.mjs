@@ -128,6 +128,7 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
     env.R_SERVER_PORT = String(port);
     const server = await startServer(env);
     const deseq2 = corpus.records.find((r) => r.id === 'deseq2');
+    const volcano = corpus.records.find((r) => r.id === 'volcano-plot');
     ctx = {
       root: corpus.root,
       env,
@@ -136,12 +137,16 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
       jobId: deseq2.toolJobId,
       projectId: corpus.projectId,
       artifact: 'volcano.png',
+      replayJobId: volcano.toolJobId,
+      replayArtifact: 'volcano.png',
     };
     // Register the baseline revision so the read-path tests below have a real
     // revision to address rather than a fabricated id.
     await fetch(`${ctx.baseUrl}/api/result-studio/interaction?jobId=${ctx.jobId}&artifact=${ctx.artifact}`);
-    const revisions = query(env.BIOF3_DB_PATH, 'select revision_id, is_current from artifact_revisions');
-    ctx.revisionId = revisions && revisions.length ? revisions[0].revision_id : null;
+    await fetch(`${ctx.baseUrl}/api/result-studio/interaction?jobId=${ctx.replayJobId}&artifact=${ctx.replayArtifact}`);
+    const revisions = query(env.BIOF3_DB_PATH, 'select revision_id, tool_job_id, is_current from artifact_revisions');
+    ctx.revisionId = revisions?.find((row) => row.tool_job_id === ctx.jobId)?.revision_id || null;
+    ctx.replayRevisionId = revisions?.find((row) => row.tool_job_id === ctx.replayJobId)?.revision_id || null;
   });
 
   after(async () => {
@@ -275,6 +280,88 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
       drifted.status >= 400,
       'a source hash that does not match the revision must block, not return content',
     );
+  });
+
+  test('3b: controlled replay requires context-bound preflight and creates one non-current candidate', async () => {
+    assert.ok(ctx.replayRevisionId, 'a replayable standalone-volcano Revision is required');
+    const Database = require(require.resolve('better-sqlite3', {
+      paths: [path.join(REPO_ROOT, 'core', 'r-server'), REPO_ROOT],
+    }));
+    const writable = new Database(ctx.env.BIOF3_DB_PATH);
+    try {
+      // The disposable corpus is owned by its synthetic execution identity,
+      // while the HTTP server uses the loopback local identity. Rebind only
+      // this isolated fixture so both context authorization and the canonical
+      // run_tool executor exercise the same local user boundary.
+      writable.prepare("update projects set user_id = 'local-user' where id = ?").run(ctx.projectId);
+    } finally {
+      writable.close();
+    }
+    const conversationId = 'p4r-replay-invariant';
+    const contextResponse = await fetch(
+      `${ctx.baseUrl}/api/result-studio/context-envelope?projectId=${ctx.projectId}`
+      + `&conversationId=${conversationId}&jobId=${ctx.replayJobId}`
+      + `&artifact=${ctx.replayArtifact}&revisionId=${ctx.replayRevisionId}`,
+    );
+    const contextPayload = await contextResponse.json();
+    assert.equal(contextResponse.status, 200, JSON.stringify(contextPayload));
+    const contextToken = contextPayload.envelope?.contextToken;
+    assert.match(contextToken || '', /^[a-f0-9]{64}$/);
+
+    const sourceResponse = await fetch(
+      `${ctx.baseUrl}/api/result-studio/revisions/${ctx.replayRevisionId}/source?projectId=${ctx.projectId}`,
+    );
+    assert.equal(sourceResponse.status, 200);
+    const source = await sourceResponse.json();
+    assert.equal(source.reproduction.replayable, true);
+
+    const forbidden = await fetch(`${ctx.baseUrl}/api/result-studio/revisions/${ctx.replayRevisionId}/replay`, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        phase: 'preflight', projectId: ctx.projectId, conversationId, contextToken,
+        workflowPlan: { nodes: [{ command: 'Rscript arbitrary.R' }] },
+      }),
+    });
+    assert.equal(forbidden.status, 400, 'caller-authored execution material must be rejected');
+    assert.equal((await forbidden.json()).error, 'replay_request_field_not_allowed');
+
+    const currentBefore = currentPointers(ctx.env.BIOF3_DB_PATH);
+    const preflight = await fetch(`${ctx.baseUrl}/api/result-studio/revisions/${ctx.replayRevisionId}/replay`, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        phase: 'preflight', projectId: ctx.projectId, conversationId, contextToken,
+        expectedSourceSha256: source.sha256,
+        expectedParametersHash: source.parameters.sha256,
+      }),
+    });
+    const prepared = await preflight.json();
+    assert.equal(preflight.status, 200, JSON.stringify(prepared));
+    assert.equal(prepared.status, 'confirmation_required');
+    assert.equal(prepared.execution.acceptsWorkflowPlan, false);
+    assert.equal(prepared.execution.acceptsShell, false);
+    assert.equal(prepared.execution.adoptsCandidate, false);
+    assert.deepEqual(currentPointers(ctx.env.BIOF3_DB_PATH), currentBefore, 'preflight must be read-only');
+
+    const confirmBody = {
+      phase: 'confirm', projectId: ctx.projectId, conversationId, contextToken,
+      confirmationToken: prepared.confirmationToken,
+    };
+    const confirmed = await fetch(`${ctx.baseUrl}/api/result-studio/revisions/${ctx.replayRevisionId}/replay`, {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(confirmBody),
+    });
+    const candidate = await confirmed.json();
+    assert.equal(confirmed.status, 201, JSON.stringify(candidate));
+    assert.equal(candidate.status, 'preview_ready');
+    assert.equal(candidate.parentRevisionId, ctx.replayRevisionId);
+    assert.equal(candidate.adopted, false);
+    assert.deepEqual(currentPointers(ctx.env.BIOF3_DB_PATH), currentBefore, 'replay candidate must not replace current');
+    const duplicated = await fetch(`${ctx.baseUrl}/api/result-studio/revisions/${ctx.replayRevisionId}/replay`, {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(confirmBody),
+    });
+    assert.equal(duplicated.status, 201);
+    const duplicate = await duplicated.json();
+    assert.equal(duplicate.revisionId, candidate.revisionId);
+    assert.equal(duplicate.idempotent, true);
   });
 
   // ── 4 ─────────────────────────────────────────────────────────────────────

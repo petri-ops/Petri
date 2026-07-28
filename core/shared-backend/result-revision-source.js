@@ -81,7 +81,13 @@ function projectGitPath(relativePath, gitPathPrefix = '') {
 
 function verifyCommit(adapter, sourceCommit) {
   if (!COMMIT.test(String(sourceCommit || ''))) fail('source_commit_invalid', 'Revision source commit is invalid.');
-  if (adapter.revParse(sourceCommit) !== sourceCommit) fail('source_commit_unavailable', 'Revision source commit is unavailable.');
+  // `git rev-parse --verify <40-hex>` accepts a syntactically complete object
+  // id even when the object is absent. Peeling to a commit forces the object
+  // lookup, so an expired/pruned Revision cannot fall through to a generic
+  // missing-file response or, worse, a nearby worktree fallback.
+  if (adapter.revParse(`${sourceCommit}^{commit}`) !== sourceCommit) {
+    fail('source_commit_unavailable', 'Revision source commit is unavailable.');
+  }
 }
 
 function classifyScope(sourceScriptRef) {
@@ -91,7 +97,7 @@ function classifyScope(sourceScriptRef) {
   return 'unknown_legacy';
 }
 
-function inputStatus({ workspaceRoot, inputs }) {
+function inputStatus({ workspaceRoot, inputs, params = {} }) {
   const statuses = [];
   const root = workspaceRoot && fs.existsSync(workspaceRoot) ? fs.realpathSync(workspaceRoot) : null;
   for (const input of Array.isArray(inputs) ? inputs : []) {
@@ -99,7 +105,16 @@ function inputStatus({ workspaceRoot, inputs }) {
     let status = 'unavailable';
     if (root) {
       try {
-        const target = fs.realpathSync(path.join(root, relativePath));
+        // Provenance `relativePath` is a stable logical identity (for example
+        // inputs/counts/counts.csv), not necessarily a second physical copy.
+        // Prefer the source Job's exact file parameter when it is still a
+        // contained project file; otherwise fall back to the logical path.
+        // Neither path is returned to the ordinary source response.
+        const sourceParam = input?.id && typeof params?.[input.id] === 'string'
+          ? params[input.id]
+          : null;
+        const candidate = sourceParam || path.join(root, relativePath);
+        const target = fs.realpathSync(candidate);
         if (!isPathContained(root, target)) status = 'outside_project';
         else status = sha256(fs.readFileSync(target)) === input.sha256 ? 'intact' : 'hash_drift';
       } catch { status = 'missing'; }
@@ -128,7 +143,12 @@ function projectRevisionSource(input = {}, dependencies = {}) {
   }
   const sourcePath = projectGitPath(sourceRef.relativePath, dependencies.gitPathPrefix);
   verifyCommit(adapter, revision.sourceCommit);
-  const content = adapter.showFile({ ref: revision.sourceCommit, filePath: sourcePath });
+  let content;
+  try {
+    content = adapter.showFile({ ref: revision.sourceCommit, filePath: sourcePath });
+  } catch {
+    fail('source_unavailable', 'Revision source content is unavailable or exceeds the safe limit.');
+  }
   if (typeof content !== 'string' || Buffer.byteLength(content) > MAX_SOURCE_BYTES || content.includes('\0')) {
     fail('source_unavailable', 'Revision source content is unavailable or exceeds the safe limit.');
   }
@@ -141,7 +161,12 @@ function projectRevisionSource(input = {}, dependencies = {}) {
   let parameters = null;
   if (parametersPath) {
     if (!SHA256.test(revision.parametersHash || '')) fail('parameters_hash_invalid', 'Revision parameters hash is invalid.');
-    const parametersText = adapter.showFile({ ref: revision.sourceCommit, filePath: projectGitPath(parametersPath, dependencies.gitPathPrefix) });
+    let parametersText;
+    try {
+      parametersText = adapter.showFile({ ref: revision.sourceCommit, filePath: projectGitPath(parametersPath, dependencies.gitPathPrefix) });
+    } catch {
+      fail('parameters_unavailable', 'Revision parameters are unavailable or too large.');
+    }
     if (typeof parametersText !== 'string' || Buffer.byteLength(parametersText) > MAX_PARAMETERS_BYTES) fail('parameters_unavailable', 'Revision parameters are unavailable or too large.');
     if (sha256(parametersText) !== revision.parametersHash) fail('parameters_hash_mismatch', 'Revision parameters do not match their recorded hash.');
     parameters = { text: parametersText, values: parseJsonObject(parametersText, 'parameters_invalid'), sha256: revision.parametersHash, relativePath: parametersPath };
@@ -158,7 +183,7 @@ function projectRevisionSource(input = {}, dependencies = {}) {
   const provenanceArtifact = (Array.isArray(provenance.artifacts) ? provenance.artifacts : []).filter((item) => item?.id === revision.artifactId);
   if (!artifact || provenanceArtifact.length !== 1 || (revision.outputHash && provenanceArtifact[0].sha256 !== revision.outputHash)) fail('source_artifact_provenance_invalid', 'Revision Artifact is not uniquely bound by Job provenance.');
 
-  const inputs = inputStatus({ workspaceRoot: dependencies.workspaceRoot, inputs: provenance.inputs });
+  const inputs = inputStatus({ workspaceRoot: dependencies.workspaceRoot, inputs: provenance.inputs, params: job.params });
   const inputDrift = inputs.filter((item) => item.status !== 'intact');
   let openableRelativePath = null;
   if (sourceRef.origin === 'project_materialized' && dependencies.workspaceRoot) {
@@ -182,7 +207,16 @@ function projectRevisionSource(input = {}, dependencies = {}) {
     content,
     sha256: sourceRef.sha256,
     openableRelativePath,
-    parameters: parameters ? { relativePath: parameters.relativePath, sha256: parameters.sha256, values: sanitizeValue(parameters.values) } : null,
+    parameters: parameters ? {
+      relativePath: parameters.relativePath,
+      sha256: parameters.sha256,
+      values: sanitizeValue(parameters.values),
+      // Only trusted in-process execution services may request the exact
+      // persisted values. The HTTP source projection never sets this flag, so
+      // absolute paths and secret-shaped values remain absent from ordinary
+      // Code/Result responses.
+      ...(dependencies.allowRawParameters === true ? { rawValues: parameters.values } : {}),
+    } : null,
     reproduction: {
       status: inputDrift.length === 0 ? revision.reproducibilityStatus : 'unavailable',
       requiresConfirmation: true,

@@ -15,7 +15,7 @@ test('result studio backend changes select one deduplicated domain bundle', () =
   assert.equal(new Set(plan.tests).size, plan.tests.length);
   assert.ok(plan.tests.includes('test/result-edit-intent.test.mjs'));
   assert.ok(plan.tests.includes('test/result-studio-lifecycle.test.mjs'));
-  assert.ok(!plan.tests.includes('test/p4r-invariants.test.mjs'));
+  assert.ok(plan.tests.includes('test/p4r-invariants.test.mjs'));
   assert.ok(!plan.tests.includes('test/loop-controller.test.mjs'));
 });
 
@@ -40,7 +40,7 @@ test('Result Studio Agent production wiring selects binding and prompt regressio
   }
 });
 
-test('Git backend and interceptor changes never pull the explicit-only red invariant into the default gate', () => {
+test('low-level Git and interceptor changes keep their domain-specific test scopes', () => {
   for (const file of ['core/shared-backend/git-adapter.js', 'core/shared-backend/git-repository-binding.js']) {
     const plan = resolveImpact([file]);
     assert.deepEqual(plan.unknown, []);

@@ -254,6 +254,9 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
                 onAskAgent={ctx.handleAskAgent}
                 onWorkflowChanged={ctx.onWorkflowChanged}
                 onAgentCodeRequest={onRevisionAgentRequest}
+                replayContext={ctx.resultContext?.status === 'ready' && ctx.resultContext.contextToken
+                  ? { conversationId: ctx.activeConvId, contextToken: ctx.resultContext.contextToken }
+                  : null}
                 onOpenRevisionWorkspaceFile={ctx.openRevisionWorkspaceFile}
                 pendingArtifactName={ctx.pendingArtifactName}
                 onPendingArtifactConsumed={ctx.onPendingArtifactConsumed}

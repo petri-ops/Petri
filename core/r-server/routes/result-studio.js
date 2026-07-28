@@ -27,6 +27,7 @@ const path = require('path');
 const crypto = require('crypto');
 const db = require('../db');
 const pluginLoader = require('../plugin-loader');
+const mcpRegistry = require('../mcp/registry');
 
 // core/r-server/db.js 导出的是模块对象；真实 better-sqlite3 句柄在 `.db` 上。
 // 直接对模块对象调用 prepare() 会在运行时抛错。
@@ -55,6 +56,10 @@ const {
   projectRevisionSource,
 } = require('../../shared-backend/result-revision-source');
 const {
+  ResultReplayError,
+  createControlledReplayService,
+} = require('../../shared-backend/result-replay-service');
+const {
   assessSelectionCompatibility,
   validateSelectionContext,
   summarizeSelection,
@@ -68,7 +73,10 @@ const {
   summarizeContextForAgent,
   PUBLIC_EDIT_PHASES,
 } = require('../../shared-backend/result-studio-context');
-const { resolveResultStudioContext } = require('../agent-tools/result-context-tools');
+const {
+  guardContextOperation,
+  resolveResultStudioContext,
+} = require('../agent-tools/result-context-tools');
 const { buildEditControlSchema } = require('../../shared-backend/result-edit-controls');
 const {
   inspectResultStudioWorkspace,
@@ -280,6 +288,34 @@ function resolveArtifactPath({ req, job, project, artifactName }) {
     return { error: { status: 409, code: 'layout_unavailable', message: error && error.message } };
   }
   const outputDir = layout.outputDir || path.join(layout.jobDir, 'output');
+  // Some canonical plugins predate the unified output/ layout and persist
+  // their declared artifacts directly under the Job directory.  The Job's
+  // Artifact Truth already contains the authoritative path; derive from that
+  // record first instead of pretending every valid artifact lives in output/.
+  // The caller still supplies only an id/name (never a path), and the resolved
+  // target must remain inside the canonical Job directory.
+  const declared = Array.isArray(job?.result?.artifacts) ? job.result.artifacts : [];
+  const declaredMatches = declared.filter((artifact) => artifact && (
+    artifact.id === name
+    || artifact.name === name
+    || artifact.filename === name
+    || path.basename(String(artifact.path || '')) === name
+  ));
+  if (declaredMatches.length > 1) {
+    return { error: { status: 409, code: 'artifact_identity_ambiguous' } };
+  }
+  if (declaredMatches.length === 1 && declaredMatches[0].path) {
+    try {
+      const jobRoot = fs.realpathSync(layout.jobRoot || layout.jobDir);
+      const declaredPath = fs.realpathSync(declaredMatches[0].path);
+      if (!isPathContained(jobRoot, declaredPath) || !fs.statSync(declaredPath).isFile()) {
+        return { error: { status: 400, code: 'artifact_outside_job' } };
+      }
+      return { absolutePath: declaredPath, layout };
+    } catch {
+      return { error: { status: 404, code: 'artifact_not_found' } };
+    }
+  }
   const absolute = path.resolve(outputDir, name);
   const resolvedOutput = path.resolve(outputDir);
   if (absolute !== resolvedOutput && !absolute.startsWith(resolvedOutput + path.sep)) {
@@ -298,6 +334,7 @@ module.exports = function registerResultStudioRoutes(app) {
   // result-studio 模块静默不注册（功能变死代码且没有报错）。改为首次请求时创建，
   // schema 有问题就返回 500 并带明确原因。
   let repositoryInstance = null;
+  const replayService = createControlledReplayService();
   function repo() {
     // Production migrations own schema creation. A GET must never execute DDL
     // merely because this module is serving its first request.
@@ -851,6 +888,87 @@ module.exports = function registerResultStudioRoutes(app) {
       const status = error instanceof ResultRevisionSourceError ? error.status : 500;
       const code = error instanceof ResultRevisionSourceError ? error.code : 'revision_source_failed';
       return res.status(status).json({ error: code, message: error instanceof ResultRevisionSourceError ? error.message : 'Revision source projection failed.' });
+    }
+  });
+
+  /**
+   * P4R-5 controlled replay: preflight and confirmation share one endpoint,
+   * but neither accepts a caller-authored tool id, parameter map, script,
+   * command or workflow plan.  Both phases re-bind the current context token;
+   * confirmation reprojects source/params/inputs again immediately before the
+   * canonical registered-tool execution and only creates a candidate Revision.
+   */
+  app.post('/api/result-studio/revisions/:revisionId/replay', async (req, res) => {
+    const body = req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {};
+    const projectId = String(body.projectId || '').trim();
+    const revisionId = String(req.params.revisionId || '').trim();
+    const phase = String(body.phase || 'preflight').trim();
+    if (!projectId || !revisionId) return res.status(400).json({ error: 'project_and_revision_required' });
+    if (!['preflight', 'confirm'].includes(phase)) return res.status(400).json({ error: 'replay_phase_invalid' });
+    const context = projectContext(req, projectId, { write: phase === 'confirm', git: true });
+    if (context.error) return res.status(context.error.status).json({ error: context.error.code });
+
+    const guarded = guardContextOperation({
+      projectId,
+      userId: userId(req),
+      conversationId: String(body.conversationId || '').trim() || null,
+      activeArtifact: { revisionId },
+    }, {
+      contextToken: String(body.contextToken || '').trim() || null,
+    }, {
+      repository: context.repository,
+      getToolJob: db.getToolJob,
+      getPluginManifest: pluginLoader.getPluginManifest,
+    });
+    if (!guarded.ok) {
+      return res.status(409).json({
+        error: guarded.response.error,
+        message: guarded.response.message,
+        diagnostics: guarded.response.diagnostics,
+      });
+    }
+
+    const dependencies = {
+      repository: context.repository,
+      adapter: context.binding.adapter,
+      gitPathPrefix: context.gitPathPrefix,
+      workspaceRoot: context.project.workspace_path,
+      getToolJob: db.getToolJob,
+      getPlugin: pluginLoader.getPlugin,
+      activePreviewJobs: context.repository.listChangeSets({ projectId, status: 'running', limit: 500 }).length,
+      executeJob: async ({ toolId, params, materializedScriptPath, materializedScriptSha256, changeSetId }) => {
+        const result = await mcpRegistry.callTool(toolId, params, {
+          userId: userId(req) || 'local-user',
+          projectId,
+          resultStudioMaterializedScript: {
+            path: materializedScriptPath,
+            sha256: materializedScriptSha256,
+            changeSetId,
+          },
+        });
+        const toolJobId = result && result.toolJobId;
+        return { result, toolJobId, job: toolJobId ? db.getToolJob(toolJobId) : null };
+      },
+    };
+    const input = {
+      ...body,
+      projectId,
+      revisionId,
+      phase,
+      request: body,
+    };
+    try {
+      const result = phase === 'confirm'
+        ? await replayService.confirm(input, dependencies)
+        : replayService.prepare(input, dependencies);
+      return res.status(phase === 'confirm' ? 201 : 200).json(result);
+    } catch (error) {
+      const status = error instanceof ResultReplayError ? error.status : 500;
+      return res.status(status).json({
+        error: error instanceof ResultReplayError ? error.code : 'replay_failed',
+        message: error instanceof ResultReplayError ? error.message : 'Controlled replay failed.',
+        detail: error instanceof ResultReplayError ? error.detail : null,
+      });
     }
   });
 

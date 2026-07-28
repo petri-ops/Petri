@@ -4,7 +4,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { RevisionCodeView } from './RevisionCodeView';
 import type { RevisionSourceProjection } from './resultStudioClient';
 
-const client = vi.hoisted(() => ({ fetchRevisionSource: vi.fn() }));
+const client = vi.hoisted(() => ({
+  fetchRevisionSource: vi.fn(),
+  preflightRevisionReplay: vi.fn(),
+  confirmRevisionReplay: vi.fn(),
+}));
 vi.mock('./resultStudioClient', async () => {
   const actual = await vi.importActual<typeof import('./resultStudioClient')>('./resultStudioClient');
   return { ...actual, ...client };
@@ -75,5 +79,57 @@ describe('P4R-5 RevisionCodeView', () => {
     expect(screen.queryByRole('button', { name: '复制' })).toBeNull();
     expect(screen.queryByRole('button', { name: '下载' })).toBeNull();
     expect(agent).not.toHaveBeenCalled();
+  });
+
+  it('preflights and explicitly confirms a controlled replay without adopting it', async () => {
+    client.fetchRevisionSource.mockResolvedValue(projection('rev_2'));
+    client.preflightRevisionReplay.mockResolvedValue({
+      ok: true,
+      controlledReplayVersion: 1,
+      status: 'confirmation_required',
+      confirmationToken: 'rrc_token',
+      expiresAt: Date.now() + 60_000,
+      fingerprint: 'f'.repeat(64),
+      revision: {
+        revisionId: 'rev_2', artifactId: 'plot', revisionOrdinal: 2,
+        sourceSha256: 'a'.repeat(64), parametersHash: 'b'.repeat(64), inputCount: 1,
+      },
+      execution: {
+        toolId: 'volcano-plot', pluginVersion: '1.0.0',
+        runtime: { name: 'R', version: '4.5.2', readiness: true },
+        createsToolJob: true, createsCandidateRevision: true,
+        adoptsCandidate: false, mutatesCurrentRevision: false,
+        acceptsWorkflowPlan: false, acceptsShell: false,
+      },
+    });
+    const replayResult = {
+      ok: true as const, controlledReplayVersion: 1, status: 'preview_ready' as const,
+      replayFingerprint: 'f'.repeat(64), changeSetId: 'cs_2', toolJobId: 'job_2',
+      revisionId: 'rev_3', parentRevisionId: 'rev_2', adopted: false as const, idempotent: false,
+    };
+    client.confirmRevisionReplay.mockResolvedValue(replayResult);
+    const created = vi.fn();
+    render(
+      <RevisionCodeView
+        projectId="p_1"
+        revisionId="rev_2"
+        replayContext={{ conversationId: 'conv_1', contextToken: 'c'.repeat(64) }}
+        onReplayCreated={created}
+      />,
+    );
+    expect(await screen.findByText('plot.R · v2')).toBeTruthy();
+    fireEvent.click(screen.getByText('交给 Agent'));
+    fireEvent.click(screen.getByRole('button', { name: '受控重放' }));
+    expect(await screen.findByText('确认创建新的复现候选？')).toBeTruthy();
+    expect(client.preflightRevisionReplay).toHaveBeenCalledWith(expect.objectContaining({
+      projectId: 'p_1', revisionId: 'rev_2', contextToken: 'c'.repeat(64),
+      expectedSourceSha256: 'a'.repeat(64), expectedParametersHash: 'b'.repeat(64),
+    }));
+    fireEvent.click(screen.getByRole('button', { name: '确认受控重放' }));
+    await waitFor(() => expect(created).toHaveBeenCalledWith(replayResult));
+    expect(client.confirmRevisionReplay).toHaveBeenCalledWith(expect.objectContaining({
+      confirmationToken: 'rrc_token', revisionId: 'rev_2', contextToken: 'c'.repeat(64),
+    }));
+    expect(screen.getByText(/新候选版本已就绪/)).toBeTruthy();
   });
 });

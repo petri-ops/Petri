@@ -129,3 +129,33 @@ test('project-file opening is offered only when a matching physical workspace fi
   writeFileSync(physical, 'drifted\n');
   assert.equal(projectRevisionSource({ projectId: 'p_1', revisionId: 'rev_1' }, fx).openableRelativePath, null);
 });
+
+test('fails closed on path escape, missing Git source and unavailable source commit', (context) => {
+  const fx = fixture(context);
+  const revision = fx.repository.getRevision('rev_1');
+  assert.throws(
+    () => projectRevisionSource({
+      projectId: 'p_1',
+      revision: { ...revision, sourceScriptRef: { ...revision.sourceScriptRef, relativePath: '../outside.R' } },
+    }, fx),
+    (error) => error.code === 'sourceScriptRef.relativePath_invalid',
+  );
+  assert.throws(
+    () => projectRevisionSource({
+      projectId: 'p_1',
+      revision: { ...revision, sourceScriptRef: { ...revision.sourceScriptRef, relativePath: 'analysis/scripts/missing.R' } },
+    }, fx),
+    (error) => error.code === 'source_unavailable',
+  );
+  const unavailableCommit = '0'.repeat(40);
+  assert.throws(
+    () => projectRevisionSource({ projectId: 'p_1', revision: { ...revision, sourceCommit: unavailableCommit } }, {
+      ...fx,
+      repository: {
+        ...fx.repository,
+        getChangeSet: () => ({ projectId: 'p_1', candidateCommit: unavailableCommit }),
+      },
+    }),
+    (error) => error.code === 'source_commit_unavailable',
+  );
+});
