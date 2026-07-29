@@ -8,7 +8,7 @@ import os from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const req = createRequire(import.meta.url);
-const { reconcileArtifactTruth } = req(resolve(
+const { captureStagedInputSnapshots, reconcileArtifactTruth } = req(resolve(
   __dirname,
   '..',
   'core',
@@ -79,6 +79,60 @@ test('does not expose manifest metadata as a user artifact', () => {
 
   assert.equal(reconciled.artifactTruth.status, 'valid');
   assert.deepEqual(reconciled.artifacts.map((item) => item.name), ['table.csv']);
+});
+
+test('excludes exact server-staged inputs from disk and declared artifact truth', () => {
+  const resultDir = tempResultDir();
+  const inputPath = join(resultDir, 'expr_matrix.csv');
+  fs.writeFileSync(inputPath, 'gene,S1\nA,2\n');
+  fs.writeFileSync(join(resultDir, 'heatmap.png'), 'png');
+  const reconciled = reconcileArtifactTruth({
+    resultDir,
+    result: {
+      artifacts: [
+        { id: 'artifact_1', filename: 'heatmap.png', type: 'plot' },
+        { id: 'artifact_2', filename: 'expr_matrix.csv', type: 'table' },
+      ],
+      manifest: {
+        files: [
+          { name: 'heatmap.png', type: 'plot' },
+          { name: 'expr_matrix.csv', type: 'table' },
+        ],
+      },
+    },
+    expectedArtifacts: [{ id: 'heatmap', filename: 'heatmap.png', type: 'plot' }],
+    excludedArtifactPaths: [inputPath, join(resultDir, '..', 'outside.csv')],
+  });
+
+  assert.equal(reconciled.blocking, false);
+  assert.deepEqual(reconciled.artifacts.map((item) => item.name), ['heatmap.png']);
+  assert.deepEqual(reconciled.result.manifest.files.map((item) => item.name), ['heatmap.png']);
+  assert.deepEqual(reconciled.artifactTruth.excludedInputNames, ['expr_matrix.csv']);
+  assert.equal(reconciled.artifactTruth.excludedInputCount, 1);
+
+  const repeated = reconcileArtifactTruth({
+    resultDir,
+    result: reconciled.result,
+    expectedArtifacts: [{ id: 'heatmap', filename: 'heatmap.png', type: 'plot' }],
+    trustedExcludedArtifactNames: reconciled.artifactTruth.excludedInputNames,
+  });
+  assert.deepEqual(repeated.artifacts.map((item) => item.name), ['heatmap.png']);
+});
+
+test('blocks a declared output that aliases a server-staged input', () => {
+  const resultDir = tempResultDir();
+  const inputPath = join(resultDir, 'result.csv');
+  fs.writeFileSync(inputPath, 'gene,value\nA,2\n');
+  const reconciled = reconcileArtifactTruth({
+    resultDir,
+    result: { outputs: [{ id: 'result', filename: 'result.csv', type: 'table' }] },
+    expectedArtifacts: [{ id: 'result', filename: 'result.csv', type: 'table' }],
+    excludedArtifactPaths: [inputPath],
+  });
+
+  assert.equal(reconciled.blocking, true);
+  assert.deepEqual(reconciled.artifacts, []);
+  assert.equal(reconciled.issues[0].code, 'artifact_input_output_collision');
 });
 
 test('blocks completion when a required declared artifact is missing', () => {
@@ -208,4 +262,105 @@ test('shared tool-job reconciliation persists artifact truth before workflow pro
   assert.equal(reconciled.result.artifactTruth.status, 'valid');
   assert.equal(reconciled.result.artifacts.length, 1);
   assert.equal(writes.length, 1);
+});
+
+test('shared tool-job reconciliation preserves trusted staged-input exclusions', async () => {
+  const jobsDir = tempResultDir();
+  const resultDir = join(jobsDir, 'job_shared_input');
+  fs.mkdirSync(resultDir, { recursive: true });
+  fs.writeFileSync(join(resultDir, 'expr_matrix.csv'), 'gene,S1\nA,2\n');
+  fs.writeFileSync(join(resultDir, 'table.csv'), 'a,b\n1,2\n');
+  const stored = {
+    resultDir,
+    artifactTruth: {
+      status: 'valid',
+      resultDir,
+      exclusionPolicy: 'server_staged_inputs_v1',
+      excludedInputNames: ['expr_matrix.csv'],
+      stagedInputIntegrity: 'verified',
+      stagedInputSnapshotCount: 1,
+    },
+    artifacts: [{ id: 'table', filename: 'table.csv', type: 'table' }],
+  };
+  const reconciled = await reconcileToolJobArtifacts({
+    db: { prepare: () => ({ run: async () => ({ changes: 1 }) }) },
+    jobsDir,
+    job: {
+      id: 'job_shared_input',
+      tool_id: 'unknown-test-tool',
+      status: 'completed',
+      result: stored,
+    },
+  });
+
+  assert.equal(reconciled.status, 'completed');
+  assert.deepEqual(reconciled.result.artifacts.map((item) => item.filename), ['table.csv']);
+  assert.deepEqual(reconciled.result.artifactTruth.excludedInputNames, ['expr_matrix.csv']);
+  assert.equal(reconciled.result.artifactTruth.stagedInputIntegrity, 'verified');
+  assert.equal(reconciled.result.artifactTruth.stagedInputSnapshotCount, 1);
+});
+
+test('blocks a tool that mutates a server-staged input after its execution snapshot', () => {
+  const resultDir = tempResultDir();
+  const inputPath = join(resultDir, 'expr_matrix.csv');
+  fs.writeFileSync(inputPath, 'gene,S1\nA,2\n');
+  fs.writeFileSync(join(resultDir, 'heatmap.png'), 'plot');
+  const snapshots = captureStagedInputSnapshots([inputPath]);
+  const intact = reconcileArtifactTruth({
+    resultDir,
+    result: { artifacts: [{ id: 'heatmap', filename: 'heatmap.png', type: 'plot' }] },
+    expectedArtifacts: [{ id: 'heatmap', filename: 'heatmap.png', type: 'plot' }],
+    excludedArtifactPaths: [inputPath],
+    stagedInputSnapshots: snapshots,
+  });
+  assert.equal(intact.blocking, false);
+  assert.equal(intact.artifactTruth.stagedInputIntegrity, 'verified');
+  assert.equal(intact.artifactTruth.stagedInputSnapshotCount, 1);
+
+  fs.writeFileSync(inputPath, 'gene,S1\nA,999\n');
+  const mutated = reconcileArtifactTruth({
+    resultDir,
+    result: { artifacts: [{ id: 'heatmap', filename: 'heatmap.png', type: 'plot' }] },
+    expectedArtifacts: [{ id: 'heatmap', filename: 'heatmap.png', type: 'plot' }],
+    excludedArtifactPaths: [inputPath],
+    stagedInputSnapshots: snapshots,
+  });
+  assert.equal(mutated.blocking, true);
+  assert.equal(mutated.artifactTruth.status, 'blocked');
+  assert.equal(mutated.artifactTruth.stagedInputIntegrity, 'mutated');
+  assert.equal(mutated.issues.some((issue) => issue.code === 'staged_input_mutated'), true);
+});
+
+test('shared reconciliation blocks exclusion reuse when the persisted result root drifts', async () => {
+  const jobsDir = tempResultDir();
+  const jobRoot = join(jobsDir, 'job_root_drift');
+  const resultDir = join(jobRoot, 'output');
+  fs.mkdirSync(resultDir, { recursive: true });
+  fs.writeFileSync(join(resultDir, 'expr_matrix.csv'), 'real,output\n1,2\n');
+  const reconciled = await reconcileToolJobArtifacts({
+    db: { prepare: () => ({ run: async () => ({ changes: 1 }) }) },
+    jobsDir,
+    job: {
+      id: 'job_root_drift',
+      tool_id: 'unknown-test-tool',
+      status: 'completed',
+      result: {
+        resultDir,
+        artifactTruth: {
+          status: 'valid',
+          resultDir: join(jobRoot, 'missing-original-root'),
+          exclusionPolicy: 'server_staged_inputs_v1',
+          excludedInputNames: ['expr_matrix.csv'],
+        },
+        artifacts: [],
+      },
+    },
+  });
+
+  assert.equal(reconciled.status, 'failed');
+  assert.deepEqual(reconciled.result.artifacts.map((item) => item.filename), ['expr_matrix.csv']);
+  assert.equal(
+    reconciled.result.artifactDiagnostics.some((issue) => issue.code === 'artifact_truth_result_dir_drift'),
+    true,
+  );
 });

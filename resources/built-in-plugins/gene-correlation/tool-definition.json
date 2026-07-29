@@ -35,16 +35,67 @@
           "label": "Spearman（秩相关）"
         }
       ]
+    },
+    {
+      "id": "color_low",
+      "label": "低相关颜色",
+      "type": "text",
+      "default": "#2563eb",
+      "hint": "仅影响呈现"
+    },
+    {
+      "id": "color_mid",
+      "label": "零相关颜色",
+      "type": "text",
+      "default": "#ffffff",
+      "hint": "仅影响呈现"
+    },
+    {
+      "id": "color_high",
+      "label": "高相关颜色",
+      "type": "text",
+      "default": "#dc2626",
+      "hint": "仅影响呈现"
+    },
+    {
+      "id": "cluster_rows",
+      "label": "按行聚类展示",
+      "type": "boolean",
+      "default": true,
+      "hint": "仅改变热图排列，不重算相关矩阵"
+    },
+    {
+      "id": "cluster_cols",
+      "label": "按列聚类展示",
+      "type": "boolean",
+      "default": true,
+      "hint": "仅改变热图排列，不重算相关矩阵"
+    },
+    {
+      "id": "show_correlation_values",
+      "label": "显示相关系数注释",
+      "type": "boolean",
+      "default": false,
+      "hint": "仅影响呈现"
+    },
+    {
+      "id": "base_font_size",
+      "label": "热图字号",
+      "type": "number",
+      "default": 8,
+      "hint": "仅影响呈现"
     }
   ],
   "outputs": [
     {
       "id": "heatmap",
+      "filename": "heatmap.png",
       "type": "plot",
       "label": "相关性热图"
     },
     {
       "id": "corr_matrix",
+      "filename": "corr_matrix.csv",
       "type": "table",
       "label": "相关系数矩阵"
     }
@@ -59,13 +110,30 @@
     "inputBindings": [{ "inputId": "expr_matrix", "required": true, "acceptsArtifactTypes": ["table"], "semanticRole": "expression_matrix" }],
     "parameters": {
       "top_n": { "type": "number", "default": 30, "minimum": 2 },
-      "method": { "type": "select", "default": "pearson", "options": ["pearson", "spearman"] }
+      "method": { "type": "select", "default": "pearson", "options": ["pearson", "spearman"] },
+      "color_low": { "type": "text", "default": "#2563eb" },
+      "color_mid": { "type": "text", "default": "#ffffff" },
+      "color_high": { "type": "text", "default": "#dc2626" },
+      "cluster_rows": { "type": "boolean", "default": true },
+      "cluster_cols": { "type": "boolean", "default": true },
+      "show_correlation_values": { "type": "boolean", "default": false },
+      "base_font_size": { "type": "number", "default": 8, "minimum": 4, "maximum": 24 }
     },
-    "parameterImpacts": { "top_n": "data", "method": "scientific" },
+    "parameterImpacts": {
+      "top_n": "data",
+      "method": "scientific",
+      "color_low": "presentation",
+      "color_mid": "presentation",
+      "color_high": "presentation",
+      "cluster_rows": "presentation",
+      "cluster_cols": "presentation",
+      "show_correlation_values": "presentation",
+      "base_font_size": "presentation"
+    },
     "actions": ["select_gene_pairs", "derive_gene_set", "recompute"],
     "artifacts": [
-      { "id": "heatmap", "type": "plot", "filename": "heatmap.png" },
-      { "id": "corr_matrix", "type": "table", "filename": "corr_matrix.csv" }
+      { "id": "heatmap", "type": "plot", "filename": "heatmap.png", "interaction": "interactive" },
+      { "id": "corr_matrix", "type": "table", "filename": "corr_matrix.csv", "interaction": "interactive" }
     ],
     "interactionMappings": [
       { "artifactId": "corr_matrix", "mode": "matrix", "dataArtifactId": "corr_matrix", "entityType": "gene", "rowIdField": "row_id", "rowEntityType": "gene", "columnEntityType": "gene" },

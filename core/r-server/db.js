@@ -530,6 +530,11 @@ const stmts = {
   listProjectToolJobs: db.prepare(
     'SELECT * FROM tool_jobs WHERE project_id = ? ORDER BY created_at DESC LIMIT 200'
   ),
+  // Workflow Truth must see the complete project history.  The bounded query
+  // above is a UI/listing projection and can silently drop an older parent.
+  listProjectToolJobsForWorkflow: db.prepare(
+    'SELECT * FROM tool_jobs WHERE project_id = ? ORDER BY created_at ASC, id ASC'
+  ),
   insertToolJob: db.prepare(
     'INSERT INTO tool_jobs (id, user_id, tool_id, params_json, status, created_at, name, is_test_run, project_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
   ),
@@ -884,6 +889,11 @@ function getToolJob(id) {
 
 function listProjectToolJobs(projectId) {
   const rows = stmts.listProjectToolJobs.all(projectId);
+  return rows.map(parseToolJobRow);
+}
+
+function listProjectToolJobsForWorkflow(projectId) {
+  const rows = stmts.listProjectToolJobsForWorkflow.all(projectId);
   return rows.map(parseToolJobRow);
 }
 
@@ -1932,6 +1942,7 @@ module.exports = {
   deleteAnalysis,
   getToolJob,
   listProjectToolJobs,
+  listProjectToolJobsForWorkflow,
   createToolJob,
   updateToolJob,
   saveScientificTaskSpec,

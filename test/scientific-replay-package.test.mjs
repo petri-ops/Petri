@@ -209,6 +209,94 @@ test('HRT-6 detects package and deterministic artifact hash drift', () => {
   assert.ok(validation.issues.some((item) => item.code === 'package_file_hash_mismatch'));
 });
 
+test('HRT-6 binds the exact inventory and manifest payload to the package digest', () => {
+  const f = fixture();
+  replayPackage.buildScientificReplayPackage({
+    taskRecord: f.taskRecord,
+    job: f.job,
+    projectRoot: f.projectRoot,
+    packageDir: f.packageDir,
+    contextCheckpoint: f.contextCheckpoint,
+    includeFixtureInputs: true,
+    inputSources: { counts: f.inputPath },
+    privacyMode: 'repository_demo_data_only',
+  });
+  const replayPath = path.join(f.packageDir, 'replay.json');
+  const replay = JSON.parse(fs.readFileSync(replayPath, 'utf8'));
+  replay.replayPolicy.realTaskRequiresConfirmation = false;
+  fs.writeFileSync(replayPath, JSON.stringify(replay, null, 2) + '\n');
+
+  // Simulate an attacker updating the per-file manifest entry but not the
+  // package-level digest. A per-file-only validator would accept this.
+  const manifestPath = path.join(f.packageDir, 'package-manifest.json');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const replayEntry = manifest.files.find((item) => item.relativePath === 'replay.json');
+  replayEntry.sha256 = replayPackage.hashFile(replayPath);
+  replayEntry.sizeBytes = fs.statSync(replayPath).size;
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
+
+  const validation = replayPackage.validateScientificReplayPackage(f.packageDir);
+  assert.equal(validation.ok, false);
+  assert.ok(validation.issues.some((item) => item.code === 'package_digest_mismatch'));
+  const wrapper = spawnSync(process.execPath, [path.join(f.packageDir, 'repro', 'reproduce.mjs')], { encoding: 'utf8' });
+  assert.notEqual(wrapper.status, 0);
+  assert.ok(JSON.parse(wrapper.stdout).failures.some((item) => item.code === 'package_digest_mismatch'));
+});
+
+test('HRT-6 rejects malformed file entries and unlisted package contents', () => {
+  const f = fixture();
+  replayPackage.buildScientificReplayPackage({
+    taskRecord: f.taskRecord,
+    job: f.job,
+    projectRoot: f.projectRoot,
+    packageDir: f.packageDir,
+    contextCheckpoint: f.contextCheckpoint,
+    includeFixtureInputs: true,
+    inputSources: { counts: f.inputPath },
+    privacyMode: 'repository_demo_data_only',
+  });
+  fs.writeFileSync(path.join(f.packageDir, 'unexpected.txt'), 'not in the manifest\n');
+  const manifestPath = path.join(f.packageDir, 'package-manifest.json');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const duplicate = { ...manifest.files[0] };
+  const wrongSize = manifest.files.find((item) => item.relativePath === 'replay.json');
+  wrongSize.sizeBytes += 1;
+  manifest.files.push(duplicate, {
+    relativePath: '../outside.txt',
+    sha256: 'a'.repeat(64),
+    sizeBytes: 0,
+  });
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
+
+  const validation = replayPackage.validateScientificReplayPackage(f.packageDir);
+  assert.equal(validation.ok, false);
+  assert.ok(validation.issues.some((item) => item.code === 'package_manifest_file_duplicate'));
+  assert.ok(validation.issues.some((item) => item.code === 'package_manifest_file_path_invalid'));
+  assert.ok(validation.issues.some((item) => item.code === 'package_file_size_mismatch'));
+  assert.ok(validation.issues.some((item) => item.code === 'package_file_inventory_mismatch'));
+});
+
+test('HRT-6 fails closed when the package manifest is not an object', () => {
+  const f = fixture();
+  replayPackage.buildScientificReplayPackage({
+    taskRecord: f.taskRecord,
+    job: f.job,
+    projectRoot: f.projectRoot,
+    packageDir: f.packageDir,
+    contextCheckpoint: f.contextCheckpoint,
+    includeFixtureInputs: true,
+    inputSources: { counts: f.inputPath },
+    privacyMode: 'repository_demo_data_only',
+  });
+  fs.writeFileSync(path.join(f.packageDir, 'package-manifest.json'), 'null\n');
+  const validation = replayPackage.validateScientificReplayPackage(f.packageDir);
+  assert.equal(validation.ok, false);
+  assert.ok(validation.issues.some((item) => item.code === 'package_manifest_schema_invalid'));
+  const wrapper = spawnSync(process.execPath, [path.join(f.packageDir, 'repro', 'reproduce.mjs')], { encoding: 'utf8' });
+  assert.notEqual(wrapper.status, 0);
+  assert.ok(JSON.parse(wrapper.stdout).failures.some((item) => item.code === 'package_manifest_schema_invalid'));
+});
+
 test('HRT-6 source digest changes when checkpoint or execution evidence changes', () => {
   const left = fixture();
   const right = fixture();

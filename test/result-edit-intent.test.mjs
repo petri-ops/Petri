@@ -32,14 +32,18 @@ function sourceJob(overrides = {}) {
   };
 }
 
-function workflow() {
+function workflow(steps = [
+  { id: 'deg', toolJobId: 'tj_deg', dependsOn: [] },
+  { id: 'plot', toolJobId: 'tj_plot', dependsOn: ['deg'] },
+  { id: 'report', toolJobId: 'tj_report', dependsOn: ['plot'] },
+]) {
   return {
-    agentWorkflowPlanVersion: 1,
-    steps: [
-      { id: 'deg', toolJobId: 'tj_deg', dependsOn: [] },
-      { id: 'plot', toolJobId: 'tj_plot', dependsOn: ['deg'] },
-      { id: 'report', toolJobId: 'tj_report', dependsOn: ['plot'] },
-    ],
+    workflowTruthVersion: 1,
+    authority: 'sqlite_job_artifact_truth',
+    graphId: 'wfg_test_graph',
+    sourceDigest: 'd'.repeat(64),
+    rootToolJobId: 'tj_deg',
+    steps,
   };
 }
 
@@ -65,7 +69,7 @@ test('RS4 explicit presentation metadata limits a palette edit to the source plo
   assert.equal(result.status, 'ready');
   assert.equal(result.intent.editClass, 'presentation_rerender');
   assert.deepEqual(result.intent.affectedNodeIds, ['plot']);
-  assert.equal(result.intent.affectedScope, 'workflow_subgraph');
+  assert.equal(result.intent.affectedScope, 'current_result_only');
   assert.equal(result.intent.requiresScientificConfirmation, false);
   assert.deepEqual(result.execution, { performed: false, toolJobCreated: false, changeSetCreated: false });
 });
@@ -168,7 +172,7 @@ test('RS4 never uses a filename as artifact identity or lineage', () => {
 
 test('RS4 detects ambiguous nodes, missing dependencies, and cycles', () => {
   const ambiguous = computeResultAffectedSubgraph({
-    workflowPlan: { steps: [{ id: 'a', toolJobId: 'tj_plot', dependsOn: [] }, { id: 'b', toolJobId: 'tj_plot', dependsOn: [] }] },
+    workflowPlan: workflow([{ id: 'a', toolJobId: 'tj_plot', dependsOn: [] }, { id: 'b', toolJobId: 'tj_plot', dependsOn: [] }]),
     sourceToolJobId: 'tj_plot',
     editClass: 'scientific_recompute',
   });
@@ -176,14 +180,14 @@ test('RS4 detects ambiguous nodes, missing dependencies, and cycles', () => {
   assert.equal(ambiguous.diagnostics[0].code, 'source_workflow_node_ambiguous');
 
   const missing = computeResultAffectedSubgraph({
-    workflowPlan: { steps: [{ id: 'a', toolJobId: 'tj_plot', dependsOn: ['missing'] }] },
+    workflowPlan: workflow([{ id: 'a', toolJobId: 'tj_plot', dependsOn: ['missing'] }]),
     sourceToolJobId: 'tj_plot',
     editClass: 'scientific_recompute',
   });
   assert.equal(missing.diagnostics[0].code, 'workflow_dependency_missing');
 
   const cyclic = computeResultAffectedSubgraph({
-    workflowPlan: { steps: [{ id: 'a', toolJobId: 'tj_plot', dependsOn: ['b'] }, { id: 'b', toolJobId: 'tj_b', dependsOn: ['a'] }] },
+    workflowPlan: workflow([{ id: 'a', toolJobId: 'tj_plot', dependsOn: ['b'] }, { id: 'b', toolJobId: 'tj_b', dependsOn: ['a'] }]),
     sourceToolJobId: 'tj_plot',
     editClass: 'scientific_recompute',
   });

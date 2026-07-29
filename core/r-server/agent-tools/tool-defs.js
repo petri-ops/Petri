@@ -513,10 +513,6 @@ const TOOL_DEFS = [
             description: '可选的用户意图类别；参数影响规则可以保守升级它，不能被它降级',
           },
           proposedParameterPatch: { type: 'object', description: '拟议参数 Patch；未知参数自动按科学重算处理' },
-          workflowPlan: {
-            type: 'object',
-            description: '包含唯一 steps[].id/toolJobId/dependsOn 的真实 AgentWorkflowPlan；不会从文件名猜 DAG',
-          },
           selectionId: { type: 'string', description: '可选 SelectionContext id' },
           sourceNodeId: { type: 'string', description: '可选来源节点 id；不传时由 toolJobId 唯一匹配' },
           userMessageId: { type: 'string', description: '可选来源用户消息 id' },
@@ -676,6 +672,10 @@ const TOOL_DEFS = [
             type: 'object',
             description: '拟议参数 Patch。只能使用 result_studio_context 的 editControls 声明过的参数名；未声明参数会被拒绝，未知影响按科学重算处理',
           },
+          useCurrentSelectionForLabels: {
+            type: 'boolean',
+            description: '仅火山图：将当前完整、兼容的稳定 gene 选择绑定为额外标签。不能与 label_genes 同时传入，模型不提供基因 ID。',
+          },
           editOrigin: {
             type: 'string',
             enum: ['manual', 'agent'],
@@ -702,6 +702,26 @@ const TOOL_DEFS = [
           scientificConfirmed: { type: 'boolean', description: '科学参数或方法变化已完成确认时为 true' },
         },
         required: ['contextToken', 'intent'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'result_enrichment_from_context',
+      description:
+        'RESULT_ENRICHMENT_FROM_CONTEXT_v1 — 从当前打开的正式 DEG 表版本继续 GO/KEGG。Revision、输入文件、来源 hash、下游工具与持久 DAG 边均由后端绑定；模型不能提交路径、toolId 或 lineage。仅当前 DEG Revision 且插件声明稳定 gene_id/derive_enrichment_input 时执行。',
+      parameters: {
+        type: 'object',
+        properties: {
+          contextToken: { type: 'string', description: 'result_studio_context 返回的 token' },
+          species: { type: 'string', enum: ['human', 'mouse'] },
+          geneIdType: { type: 'string', enum: ['auto', 'SYMBOL', 'ENSEMBL', 'ENTREZID'] },
+          analysisType: { type: 'string', enum: ['all', 'GO', 'GO-BP', 'GO-MF', 'GO-CC', 'KEGG'] },
+          padjCutoff: { type: 'number', minimum: 0, maximum: 1 },
+          lfcCutoff: { type: 'number', minimum: 0 },
+        },
+        required: ['contextToken'],
       },
     },
   },

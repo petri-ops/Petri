@@ -25,6 +25,7 @@ const { createResultEditPlanTool, createResultChangeSetTools } = require('./resu
 const { projectPublicEditPhase, PUBLIC_EDIT_PHASES } = require('../../shared-backend/result-studio-context');
 const { normalizeEditSubmission, explainEditImpact } = require('../../shared-backend/result-edit-controls');
 const { isDeepStrictEqual } = require('node:util');
+const { tool_result_enrichment_from_revision } = require('./result-selection-tools');
 
 // A context-bound intent is executable only in the Agent turn that received
 // the trusted plan. The model sees the JSON intent but cannot register or
@@ -76,6 +77,37 @@ function contextView(envelope) {
   };
 }
 
+function bindCurrentSelectionAsVolcanoLabels(args, resolved, envelope) {
+  if (args?.useCurrentSelectionForLabels !== true) return { ok: true, patch: null };
+  const selection = resolved?.persistedSelection;
+  if (envelope?.artifact?.idField !== 'gene' || !selection
+      || envelope.selection?.compatibility !== 'compatible'
+      || selection.entityIdsTruncated === true
+      || !Array.isArray(selection.entityIds)) {
+    return {
+      ok: false,
+      error: 'selection_label_binding_unavailable',
+      message: '当前选择不是这个正式基因结果的完整兼容选择，不能据此修改火山图标签。',
+    };
+  }
+  const entityIds = [...new Set(selection.entityIds.map((value) => String(value || '').trim()).filter(Boolean))];
+  if (entityIds.length === 0 || entityIds.length > 100 || entityIds.join(',').length > 8000) {
+    return {
+      ok: false,
+      error: 'selection_label_binding_invalid',
+      message: '标签选择必须包含 1–100 个稳定 gene ID，且不能超过安全大小。',
+    };
+  }
+  if (args.proposedParameterPatch?.label_genes != null) {
+    return {
+      ok: false,
+      error: 'selection_label_binding_conflict',
+      message: '使用当前选择标注时不能同时提交 label_genes；标签只能从当前受信选择绑定。',
+    };
+  }
+  return { ok: true, patch: { label_genes: entityIds.join(',') } };
+}
+
 function emitProgress(ctx, stage, status) {
   if (typeof ctx.emitResultEditProgress !== 'function') return;
   ctx.emitResultEditProgress({
@@ -95,6 +127,7 @@ function emitProgress(ctx, stage, status) {
 function createResultContextEditTools(options = {}) {
   const planTool = options.planTool || createResultEditPlanTool(options);
   const changeSetTools = options.changeSetTools || createResultChangeSetTools(options);
+  const deriveEnrichment = options.resultEnrichmentFromRevision || tool_result_enrichment_from_revision;
 
   /**
    * 只读规划：用户只说想要什么，坐标由上下文补齐。
@@ -111,11 +144,19 @@ function createResultContextEditTools(options = {}) {
     // G0-RS-P4：手动控件与 AI 提议共用同一个归一化闸门。任何一方提出的参数
     // 都必须先通过受信 descriptor 的类型/范围/枚举校验，未声明参数一律拒绝。
     // 归一化在 planResultEdit 之前，因此两条来源进入的是同一条编辑链。
+    const selectionLabelBinding = bindCurrentSelectionAsVolcanoLabels(args, guarded.resolved, envelope);
+    if (!selectionLabelBinding.ok) {
+      return { ok: false, status: 'blocked', error: selectionLabelBinding.error, message: selectionLabelBinding.message, context: contextView(envelope) };
+    }
+    const proposedParameterPatch = {
+      ...(args.proposedParameterPatch && typeof args.proposedParameterPatch === 'object' ? args.proposedParameterPatch : {}),
+      ...(selectionLabelBinding.patch || {}),
+    };
     let submission = null;
-    if (args.proposedParameterPatch && typeof args.proposedParameterPatch === 'object') {
+    if (Object.keys(proposedParameterPatch).length > 0) {
       submission = normalizeEditSubmission({
         descriptor: guarded.resolved.descriptor,
-        proposedValues: args.proposedParameterPatch,
+        proposedValues: proposedParameterPatch,
         origin: args.editOrigin === 'manual' ? 'manual' : 'agent',
         currentValues: guarded.resolved.currentParameters || {},
       });
@@ -149,19 +190,27 @@ function createResultContextEditTools(options = {}) {
       requestedOutcome: args.requestedOutcome,
       requestedEditClass: args.requestedEditClass,
       proposedParameterPatch: submission ? submission.patch : args.proposedParameterPatch,
-      // Never accept a DAG from model arguments. The current context resolver
-      // does not yet project a persisted authoritative DAG, so non-presentation
-      // edits correctly remain blocked instead of trusting an invented graph.
+      // Never accept a DAG from model arguments.  The private context payload
+      // is freshly projected from durable truth and scientific planning still
+      // requires its separately persisted graph snapshot.
       workflowPlan: null,
       selectionId: envelope.selection ? envelope.selection.selectionId : undefined,
       userMessageId: args.userMessageId,
-    }, ctx);
+    }, {
+      ...ctx,
+      // The graph is built by resolveResultStudioContext from durable SQLite
+      // Job/Artifact/Selection truth.  It is private tool context, never a
+      // model argument and never copied into user-visible chat content.
+      resultStudioWorkflowPlan: guarded.resolved.workflowPlan,
+      resultStudioWorkflowGraph: guarded.resolved.workflowGraph,
+    });
     emitProgress(ctx, 'plan', planned && planned.ok ? 'completed' : 'blocked');
     if (planned && planned.ok && planned.intent) rememberTrustedIntent(ctx, envelope, planned.intent);
     return {
       ...planned,
       context: contextView(envelope),
       editOrigin: submission ? submission.origin : null,
+      selectionLabelsBound: selectionLabelBinding.patch ? selectionLabelBinding.patch.label_genes.split(',').length : 0,
       // 执行前的影响说明：用户在点"生成候选"之前就能看到会不会重算科学结论。
       impact: submission
         ? explainEditImpact(submission.classification, {
@@ -221,12 +270,36 @@ function createResultContextEditTools(options = {}) {
         message: '结果焦点编辑只执行插件声明的参数 Patch；脚本修改不能通过此入口提交。',
       };
     }
-    const created = await changeSetTools.create(args, ctx);
+    const created = await changeSetTools.create(args, { ...ctx, resultStudioTrustedIntent: true });
     return {
       ...created,
       context: contextView(envelope),
       publicProgress: publicProgress(created && created.progress),
     };
+  }
+
+  /**
+   * Start GO/KEGG from the exact currently viewed DEG Revision.  The public
+   * arguments deliberately contain only scientific options; revision/path/
+   * lineage/tool coordinates are freshly bound below and never model-owned.
+   */
+  async function deriveEnrichmentFromCurrentResult(args = {}, ctx = {}) {
+    const guarded = guardContextOperation(ctx, args, options);
+    if (!guarded.ok) return guarded.response;
+    const envelope = guarded.resolved.envelope;
+    const result = await deriveEnrichment({
+      species: args.species,
+      geneIdType: args.geneIdType,
+      analysisType: args.analysisType,
+      padjCutoff: args.padjCutoff,
+      lfcCutoff: args.lfcCutoff,
+      revisionId: envelope.revision.revisionId,
+    }, ctx, {
+      ...options,
+      repository: guarded.resolved.repository,
+      getProject: () => guarded.resolved.project,
+    });
+    return { ...result, context: contextView(envelope) };
   }
 
   function bindChangeSet(args, resolved) {
@@ -258,6 +331,7 @@ function createResultContextEditTools(options = {}) {
   return {
     plan,
     create,
+    deriveEnrichmentFromCurrentResult,
     status: contextBoundChangeSetCall((args, ctx) => changeSetTools.status(args, ctx), { requireToken: false }),
     compare: contextBoundChangeSetCall((args, ctx) => changeSetTools.compare(args, ctx), { requireToken: false }),
     adopt: contextBoundChangeSetCall((args, ctx) => changeSetTools.adopt(args, ctx), { requireToken: true }),
@@ -272,6 +346,7 @@ module.exports = {
   createResultContextEditTools,
   tool_result_edit_plan_in_context: contextEditTools.plan,
   tool_result_changeset_create_in_context: contextEditTools.create,
+  tool_result_enrichment_from_context: contextEditTools.deriveEnrichmentFromCurrentResult,
   tool_result_changeset_status_in_context: contextEditTools.status,
   tool_result_changeset_compare_in_context: contextEditTools.compare,
   tool_result_changeset_adopt_in_context: contextEditTools.adopt,

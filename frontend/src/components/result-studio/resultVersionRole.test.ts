@@ -7,12 +7,14 @@ const changeSet = { status: 'adopted', intentRef: null } as ResultStudioChangeSe
 
 describe('resultVersionRoles', () => {
   it('keeps original and current as independent persisted roles', () => {
-    const roles = resultVersionRoles(
-      { ...revision, isCurrent: true },
-      { ...changeSet, intentRef: 'baseline:job:plot' },
-    );
-    expect(roles).toEqual(['original', 'current']);
-    expect(resultVersionRoleLabel(roles)).toBe('原始版本 · 当前正式版本');
+    for (const intentRef of ['baseline:job:plot', 'baseline-cohort:job']) {
+      const roles = resultVersionRoles(
+        { ...revision, isCurrent: true },
+        { ...changeSet, intentRef },
+      );
+      expect(roles).toEqual(['original', 'current']);
+      expect(resultVersionRoleLabel(roles)).toBe('原始版本 · 当前正式版本');
+    }
   });
 
   it('labels preview_ready as candidate without calling it current', () => {

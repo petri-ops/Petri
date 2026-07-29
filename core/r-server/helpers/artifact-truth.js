@@ -1,7 +1,9 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const ARTIFACT_TRUTH_VERSION = 1;
+const STAGED_INPUT_EXCLUSION_POLICY = 'server_staged_inputs_v1';
 const INTERNAL_FILES = new Set([
   'params.json',
   'run-script.R',
@@ -13,6 +15,72 @@ const INTERNAL_FILES = new Set([
   'provenance.json',
   'delivery-manifest.json',
 ]);
+const INTERNAL_FILE_NAMES = new Set(Array.from(INTERNAL_FILES, (name) => name.toLowerCase()));
+
+function isSafeFlatFilename(value) {
+  return typeof value === 'string'
+    && value.length > 0
+    && !value.includes('\0')
+    && !value.includes('/')
+    && !value.includes('\\')
+    && value !== '.'
+    && value !== '..'
+    && !path.isAbsolute(value)
+    && !path.win32.isAbsolute(value)
+    && !/^[A-Za-z]:/.test(value)
+    && path.basename(value) === value;
+}
+
+function isInternalArtifactName(value) {
+  return isSafeFlatFilename(value) && INTERNAL_FILE_NAMES.has(value.toLowerCase());
+}
+
+function sha256File(filePath) {
+  return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
+}
+
+function captureStagedInputSnapshots(filePaths = []) {
+  return (filePaths || []).map((filePath) => {
+    const resolvedPath = fs.realpathSync(filePath);
+    const stat = fs.statSync(resolvedPath);
+    if (!stat.isFile()) throw new Error(`staged_input_not_regular_file:${path.basename(resolvedPath)}`);
+    return {
+      path: resolvedPath,
+      name: path.basename(resolvedPath),
+      sizeBytes: stat.size,
+      sha256: sha256File(resolvedPath),
+    };
+  });
+}
+
+function stagedInputMutationIssues(snapshots = []) {
+  return (snapshots || []).flatMap((snapshot) => {
+    let currentPath = null;
+    let currentSize = null;
+    let currentSha256 = null;
+    try {
+      currentPath = fs.realpathSync(snapshot.path);
+      const stat = fs.statSync(currentPath);
+      if (stat.isFile()) {
+        currentSize = stat.size;
+        currentSha256 = sha256File(currentPath);
+      }
+    } catch {}
+    if (currentPath === snapshot.path
+        && currentSize === snapshot.sizeBytes
+        && currentSha256 === snapshot.sha256) return [];
+    return [{
+      code: 'staged_input_mutated',
+      severity: 'error',
+      recoverable: true,
+      required: true,
+      artifactId: null,
+      artifactName: snapshot.name || null,
+      message: `Server-staged input ${snapshot.name || 'unknown'} changed during tool execution.`,
+      suggestedFix: '插件必须把派生产物写入独立输出文件，不能覆盖、删除或修改服务器暂存输入。',
+    }];
+  });
+}
 
 function artifactName(item) {
   if (!item || typeof item !== 'object') return '';
@@ -49,15 +117,40 @@ function artifactTypesCompatible(declaredType, detectedType) {
     ['data', 'table'].includes(declaredType) && ['data', 'table'].includes(detectedType);
 }
 
-function listActualFiles(resultDir) {
+function normalizeExcludedArtifactNames({
+  resultDir,
+  excludedArtifactPaths = [],
+  trustedExcludedArtifactNames = [],
+} = {}) {
+  const names = new Set();
+  const root = resultDir ? path.resolve(resultDir) : null;
+  if (root) {
+    for (const candidate of excludedArtifactPaths || []) {
+      if (typeof candidate !== 'string' || !candidate || candidate.includes('\0')) continue;
+      const resolved = path.resolve(candidate);
+      if (path.dirname(resolved) !== root) continue;
+      const name = path.basename(resolved);
+      if (isSafeFlatFilename(name) && !isInternalArtifactName(name)) names.add(name);
+    }
+  }
+  for (const candidate of trustedExcludedArtifactNames || []) {
+    if (!isSafeFlatFilename(candidate) || isInternalArtifactName(candidate)) continue;
+    names.add(candidate);
+  }
+  return names;
+}
+
+function listActualFiles(resultDir, excludedNames = new Set()) {
   if (!resultDir || !fs.existsSync(resultDir)) return [];
   return fs.readdirSync(resultDir, { withFileTypes: true })
-    .filter((entry) => entry.isFile() && !INTERNAL_FILES.has(entry.name))
+    .filter((entry) =>
+      entry.isFile() && !isInternalArtifactName(entry.name) && !excludedNames.has(entry.name)
+    )
     .map((entry) => entry.name)
     .sort();
 }
 
-function collectDeclaredItems(result) {
+function collectDeclaredItems(result, excludedNames = new Set()) {
   const sources = [
     ['manifest.artifacts', result && result.manifest && result.manifest.artifacts],
     ['manifest.outputs', result && result.manifest && result.manifest.outputs],
@@ -71,7 +164,7 @@ function collectDeclaredItems(result) {
     if (!Array.isArray(items)) continue;
     for (const item of items) {
       const name = artifactName(item);
-      if (!name || INTERNAL_FILES.has(name)) continue;
+      if (!name || isInternalArtifactName(name) || excludedNames.has(name)) continue;
       const current = byName.get(name) || {};
       byName.set(name, { ...current, ...item, name, filename: name, _source: source });
     }
@@ -119,16 +212,56 @@ function reconcileArtifactTruth({
   resultDir,
   expectedArtifacts = [],
   canonicalizePath = null,
+  excludedArtifactPaths = [],
+  trustedExcludedArtifactNames = [],
+  stagedInputSnapshots = [],
+  trustedStagedInputVerification = null,
 } = {}) {
-  const actualFiles = listActualFiles(resultDir);
+  const excludedNames = normalizeExcludedArtifactNames({
+    resultDir,
+    excludedArtifactPaths,
+    trustedExcludedArtifactNames,
+  });
+  const unfilteredActualFiles = listActualFiles(resultDir);
+  const unfilteredDeclared = collectDeclaredItems(result);
+  const actualFiles = listActualFiles(resultDir, excludedNames);
   const actualSet = new Set(actualFiles);
-  const declared = collectDeclaredItems(result);
+  const declared = collectDeclaredItems(result, excludedNames);
   const expected = Array.isArray(expectedArtifacts) ? expectedArtifacts : [];
   const requiredNames = new Set();
-  const issues = [];
+  const inputMutationIssues = stagedInputSnapshots.length > 0
+    ? stagedInputMutationIssues(stagedInputSnapshots)
+    : trustedStagedInputVerification?.integrity === 'mutated'
+      ? [{
+          code: 'staged_input_mutated',
+          severity: 'error',
+          recoverable: true,
+          required: true,
+          artifactId: null,
+          artifactName: null,
+          message: 'A server-staged input changed during tool execution.',
+          suggestedFix: '从受信执行路径重新运行任务，插件不得修改服务器暂存输入。',
+        }]
+      : [];
+  const issues = [...inputMutationIssues];
 
   for (const item of expected) {
     const required = item && item.required !== false;
+    const excludedMatch = expectedMatch(item, unfilteredDeclared, unfilteredActualFiles);
+    const excludedName = artifactName(excludedMatch);
+    if (excludedName && excludedNames.has(excludedName)) {
+      issues.push({
+        code: 'artifact_input_output_collision',
+        severity: 'error',
+        recoverable: true,
+        required,
+        artifactId: artifactId(item) || null,
+        artifactName: excludedName,
+        message: `Declared output ${excludedName} is the server-staged input file for this Job.`,
+        suggestedFix: '让插件将输出写到不同文件名或独立 output 目录后重新执行任务。',
+      });
+      continue;
+    }
     const match = expectedMatch(item, declared, actualFiles);
     if (match) {
       const name = artifactName(match);
@@ -255,6 +388,15 @@ function reconcileArtifactTruth({
     actualCount: actualFiles.length,
     validCount: validArtifacts.length,
     issueCount: uniqueIssues.length,
+    excludedInputCount: excludedNames.size,
+    excludedInputNames: Array.from(excludedNames).sort(),
+    exclusionPolicy: excludedNames.size > 0 ? STAGED_INPUT_EXCLUSION_POLICY : null,
+    stagedInputSnapshotCount: stagedInputSnapshots.length > 0
+      ? stagedInputSnapshots.length
+      : Number(trustedStagedInputVerification?.snapshotCount || 0),
+    stagedInputIntegrity: stagedInputSnapshots.length > 0
+      ? inputMutationIssues.length > 0 ? 'mutated' : 'verified'
+      : trustedStagedInputVerification?.integrity || null,
     checkedAt: new Date().toISOString(),
   };
   const cleanResult = {
@@ -272,8 +414,14 @@ function reconcileArtifactTruth({
 
 module.exports = {
   ARTIFACT_TRUTH_VERSION,
+  STAGED_INPUT_EXCLUSION_POLICY,
   artifactName,
   inferArtifactType,
   artifactTypesCompatible,
+  isInternalArtifactName,
+  isSafeFlatFilename,
+  normalizeExcludedArtifactNames,
+  captureStagedInputSnapshots,
+  stagedInputMutationIssues,
   reconcileArtifactTruth,
 };

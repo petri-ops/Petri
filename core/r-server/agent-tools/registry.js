@@ -37,6 +37,7 @@ const {
   tool_result_changeset_compare_in_context,
   tool_result_changeset_adopt_in_context,
   tool_result_changeset_revert_in_context,
+  tool_result_enrichment_from_context,
 } = require('./result-context-edit-tools');
 const {
   tool_workspace_list,
@@ -105,6 +106,7 @@ const HANDLERS = {
   result_changeset_compare_in_context: tool_result_changeset_compare_in_context,
   result_changeset_adopt_in_context: tool_result_changeset_adopt_in_context,
   result_changeset_revert_in_context: tool_result_changeset_revert_in_context,
+  result_enrichment_from_context: tool_result_enrichment_from_context,
 };
 
 function contract(category, sideEffect, riskTier, resources, estimatedDurationMs) {
@@ -150,6 +152,7 @@ const CONTRACTS = {
   result_studio_context: contract('result-studio', 'none', 'R0', ['tool_jobs', 'artifacts', 'project.database'], 500),
   result_edit_plan_in_context: contract('result-studio', 'none', 'R0', ['tool_jobs', 'artifacts', 'project.database'], 700),
   result_changeset_create_in_context: contract('result-studio', 'execution', 'R2', ['tool_jobs', 'artifacts', 'project.database', 'project.files', 'local.process'], 300000),
+  result_enrichment_from_context: contract('result-studio', 'execution', 'R2', ['tool_jobs', 'artifacts', 'project.database', 'project.files', 'local.process'], 300000),
   result_changeset_status_in_context: contract('result-studio', 'none', 'R0', ['tool_jobs', 'artifacts', 'project.database'], 700),
   result_changeset_compare_in_context: contract('result-studio', 'none', 'R0', ['artifacts', 'project.database', 'project.files'], 1700),
   result_changeset_adopt_in_context: contract('result-studio', 'state-write', 'R2', ['artifacts', 'project.database', 'project.files'], 1200),

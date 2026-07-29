@@ -5,6 +5,7 @@ const { projectPublicEditPhase } = require('../../shared-backend/result-studio-c
 const CONTEXT_BOUND_TOOLS = new Set([
   'result_edit_plan_in_context',
   'result_changeset_create_in_context',
+  'result_enrichment_from_context',
   'result_changeset_status_in_context',
   'result_changeset_compare_in_context',
   'result_changeset_adopt_in_context',

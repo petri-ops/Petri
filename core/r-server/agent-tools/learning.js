@@ -816,7 +816,7 @@ async function tool_run_tool(args, ctx) {
       const executed = await _executeRunTool(toolId, params, userId, null, ctx.projectId, {
         taskId: ref.taskId,
         version: Number(ref.version || 1),
-      });
+      }, { resultStudioInputLineage: ctx && ctx.resultStudioInputLineage || null });
       return { ...executed, scientificTaskRef: { taskId: ref.taskId, version: Number(ref.version || 1) } };
     }
 
@@ -826,7 +826,9 @@ async function tool_run_tool(args, ctx) {
     // path stays available for callers that do not carry this delegation.
     if (HEAVY_TOOLS.has(toolId)) {
       if (shouldAutoExecuteLocalAnalysis(ctx)) {
-        const executed = await runToolExecutor(ctx)(toolId, params, userId, null, ctx && ctx.projectId);
+        const executed = await runToolExecutor(ctx)(toolId, params, userId, null, ctx && ctx.projectId, null, {
+          resultStudioInputLineage: ctx && ctx.resultStudioInputLineage || null,
+        });
         return {
           ...executed,
           automationDecision: {
@@ -840,7 +842,9 @@ async function tool_run_tool(args, ctx) {
       if (args.ackToken) {
         const job = dbMod.getToolJobByAckToken(args.ackToken);
         if (job && job.ack_status === 'approved') {
-          return await _executeRunTool(toolId, params, userId, args.ackToken, ctx && ctx.projectId);
+          return await _executeRunTool(toolId, params, userId, args.ackToken, ctx && ctx.projectId, null, {
+            resultStudioInputLineage: ctx && ctx.resultStudioInputLineage || null,
+          });
         }
         if (job && job.ack_status === 'rejected') {
           return { ok: false, error: 'user_rejected', message: '用户取消了该重操作', toolId };
@@ -873,7 +877,9 @@ async function tool_run_tool(args, ctx) {
     }
 
     // 非重操作：直接跑（原逻辑）
-    return await _executeRunTool(toolId, params, userId, null, ctx && ctx.projectId);
+    return await _executeRunTool(toolId, params, userId, null, ctx && ctx.projectId, null, {
+      resultStudioInputLineage: ctx && ctx.resultStudioInputLineage || null,
+    });
   }
   if (op === 'status') {
     // Phase 6: project workflow plan status from real tool jobs in DB.
@@ -958,7 +964,7 @@ async function tool_run_tool(args, ctx) {
 }
 
 // 实际执行 callTool（重操作确认通过后 + 非重操作都走这里）
-async function _executeRunTool(toolId, params, userId, ackToken, projectId, scientificTaskRef = null) {
+async function _executeRunTool(toolId, params, userId, ackToken, projectId, scientificTaskRef = null, executionOptions = {}) {
   let scientificJob = null;
   try {
     const approvedJob = ackToken ? dbMod.getToolJobByAckToken(ackToken) : null;
@@ -970,6 +976,7 @@ async function _executeRunTool(toolId, params, userId, ackToken, projectId, scie
       userId,
       projectId,
       toolJobId: (scientificJob && scientificJob.id) || (approvedJob && approvedJob.id),
+      resultStudioInputLineage: executionOptions && executionOptions.resultStudioInputLineage || null,
     });
     const text = result.content && result.content[0] && result.content[0].text;
     let parsed = null;

@@ -161,6 +161,24 @@
 .tableCompare td { border-bottom: 1px solid var(--biof3-border); padding: 4px 5px; text-align: left; vertical-align: top; }
 .tableCompare td:first-child { color: var(--biof3-text-tertiary); width: 96px; }
 
+.scientificDifference {
+  border-left: 2px solid var(--biof3-accent, #2563eb);
+  margin-top: 10px;
+  padding-left: 8px;
+}
+
+.scientificDifference h5 {
+  color: var(--biof3-text-secondary);
+  font-size: 11px;
+  margin: 0 0 5px;
+}
+
+.scientificUnavailable {
+  color: var(--biof3-text-tertiary);
+  font-size: 11px;
+  margin: 4px 0;
+}
+
 .tablePageButton {
   background: transparent;
   border: 0;

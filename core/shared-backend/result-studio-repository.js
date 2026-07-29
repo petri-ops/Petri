@@ -30,6 +30,12 @@ const {
   validateWorkspaceCheckpoint,
 } = require('./result-studio-contracts');
 const { ensureResultStudioSchema } = require('./result-studio-schema');
+const {
+  ensureResultWorkflowGraphSchema,
+  verifyWorkflowGraphIntegrity,
+} = require('./result-workflow-graph');
+
+const SHA256_PATTERN = /^[a-f0-9]{64}$/;
 
 class ResultStudioRepositoryError extends Error {
   constructor(code, message, detail = null) {
@@ -175,6 +181,42 @@ function rowToBinding(row) {
   };
 }
 
+function rowToWorkflowGraph(row) {
+  if (!row) return null;
+  return {
+    graphId: row.graph_id,
+    contractVersion: row.contract_version,
+    projectId: row.project_id,
+    rootToolJobId: row.root_tool_job_id,
+    sourceDigest: row.source_digest,
+    nodes: fromJson(row.nodes_json, []),
+    edges: fromJson(row.edges_json, []),
+    validationStatus: row.validation_status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function sameStringSet(left, right) {
+  if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) return false;
+  const leftSet = new Set(left);
+  const rightSet = new Set(right);
+  return leftSet.size === left.length
+    && rightSet.size === right.length
+    && [...leftSet].every((value) => rightSet.has(value));
+}
+
+function isCanonicalIdentifier(value) {
+  return typeof value === 'string' && value !== '' && value.trim() === value;
+}
+
+function isCanonicalUniqueIdentifierArray(values) {
+  return Array.isArray(values)
+    && values.length > 0
+    && values.every(isCanonicalIdentifier)
+    && new Set(values).size === values.length;
+}
+
 /**
  * 创建仓库。
  *
@@ -185,11 +227,110 @@ function createResultStudioRepository(db, options = {}) {
   if (!db || typeof db.prepare !== 'function') {
     throw new ResultStudioRepositoryError('db_required', 'A better-sqlite3 database instance is required.');
   }
-  if (options.ensureSchema !== false) ensureResultStudioSchema(db);
+  if (options.ensureSchema !== false) {
+    ensureResultStudioSchema(db);
+    ensureResultWorkflowGraphSchema(db);
+  }
 
   const transaction = typeof db.transaction === 'function'
     ? (fn) => db.transaction(fn)
     : (fn) => fn;
+
+  function validateWorkflowGraphPayload(graph) {
+    const integrity = verifyWorkflowGraphIntegrity(graph);
+    if (!integrity.ok) {
+      throw new ResultStudioRepositoryError(
+        'workflow_graph_integrity_failed',
+        'Authoritative workflow graph failed content-addressed integrity validation.',
+        { diagnostics: integrity.diagnostics }
+      );
+    }
+    return graph;
+  }
+
+  function readWorkflowGraphRow(row) {
+    const graph = rowToWorkflowGraph(row);
+    if (!graph) return null;
+    return validateWorkflowGraphPayload(graph);
+  }
+
+  function persistWorkflowGraph(graph) {
+    validateWorkflowGraphPayload(graph);
+    const existing = db.prepare('SELECT * FROM result_workflow_graphs WHERE project_id = ? AND source_digest = ?')
+      .get(graph.projectId, graph.sourceDigest);
+    if (existing) {
+      const stored = readWorkflowGraphRow(existing);
+      if (stored.graphId !== graph.graphId
+          || stored.rootToolJobId !== graph.rootToolJobId
+          || toJson(stored.nodes) !== toJson(graph.nodes)
+          || toJson(stored.edges) !== toJson(graph.edges)) {
+        throw new ResultStudioRepositoryError(
+          'workflow_graph_digest_conflict',
+          'The workflow graph digest is already bound to a different authoritative snapshot.',
+          { graphId: graph.graphId, existingGraphId: stored.graphId, sourceDigest: graph.sourceDigest }
+        );
+      }
+      return stored;
+    }
+    const timestamp = nowIso();
+    db.prepare(`INSERT INTO result_workflow_graphs (
+        graph_id, contract_version, project_id, root_tool_job_id, source_digest,
+        nodes_json, edges_json, validation_status, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(
+        graph.graphId, graph.contractVersion || 1, graph.projectId, graph.rootToolJobId, graph.sourceDigest,
+        toJson(graph.nodes), toJson(graph.edges), graph.validationStatus, timestamp, timestamp
+      );
+    return readWorkflowGraphRow(
+      db.prepare('SELECT * FROM result_workflow_graphs WHERE graph_id = ?').get(graph.graphId)
+    );
+  }
+
+  function insertRevision(input) {
+    const familyId = input && input.artifactFamilyId;
+    if (!familyId) {
+      throw new ResultStudioRepositoryError('revision_invalid', 'artifactFamilyId is required.');
+    }
+    const maxRow = db.prepare(
+      'SELECT MAX(revision_ordinal) AS ordinal FROM artifact_revisions WHERE artifact_family_id = ?'
+    ).get(familyId);
+    const nextOrdinal = (maxRow && maxRow.ordinal ? maxRow.ordinal : 0) + 1;
+    const validated = validateArtifactRevision({ ...input, revisionOrdinal: nextOrdinal, isCurrent: false });
+    if (!validated.ok) {
+      throw new ResultStudioRepositoryError('revision_invalid', 'ArtifactRevision failed validation.', validated.errors);
+    }
+    const rev = validated.revision;
+    if (db.prepare('SELECT revision_id FROM artifact_revisions WHERE revision_id = ?').get(rev.revisionId)) {
+      throw new ResultStudioRepositoryError('revision_exists', `Revision already exists: ${rev.revisionId}`);
+    }
+    const changeSet = rowToChangeSet(
+      db.prepare('SELECT * FROM scientific_change_sets WHERE change_set_id = ?').get(rev.changeSetId)
+    );
+    if (!changeSet || changeSet.projectId !== rev.projectId) {
+      throw new ResultStudioRepositoryError(
+        'revision_change_set_mismatch',
+        'ArtifactRevision must belong to an existing ChangeSet in the same project.',
+        { revisionId: rev.revisionId, changeSetId: rev.changeSetId, projectId: rev.projectId }
+      );
+    }
+    db.prepare(`INSERT INTO artifact_revisions (
+        revision_id, contract_version, project_id, artifact_family_id, artifact_id,
+        parent_revision_ids_json, source_commit, source_script_ref_json, input_artifact_refs_json,
+        parameters_ref, parameters_hash, tool_job_id, output_path, output_hash,
+        validation_status, reproducibility_status, change_set_id, revision_ordinal,
+        is_current, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)`)
+      .run(
+        rev.revisionId, rev.contractVersion, rev.projectId, rev.artifactFamilyId, rev.artifactId,
+        toJson(rev.parentRevisionIds), rev.sourceCommit, toJson(rev.sourceScriptRef),
+        toJson(rev.inputArtifactRefs), rev.parametersRef, rev.parametersHash, rev.toolJobId,
+        rev.outputPath, rev.outputHash, rev.validationStatus, rev.reproducibilityStatus,
+        rev.changeSetId, rev.revisionOrdinal, rev.createdAt
+      );
+    return rowToRevision(
+      db.prepare('SELECT * FROM artifact_revisions WHERE revision_id = ?').get(rev.revisionId)
+    );
+  }
 
   const api = {
     // ---------------------------------------------------------------- bindings
@@ -229,6 +370,32 @@ function createResultStudioRepository(db, options = {}) {
     getRepositoryBinding(projectId) {
       return rowToBinding(
         db.prepare('SELECT * FROM git_repository_bindings WHERE project_id = ?').get(projectId)
+      );
+    },
+
+    // -------------------------------------------------------- workflow graph
+
+    /**
+     * Persist a source-bound authoritative DAG snapshot.  The service that
+     * produces `graph` has already validated Job/Artifact/Selection Truth;
+     * this method deliberately does not accept arbitrary caller nodes later.
+     * Same project + source digest is idempotent and never overwrites history.
+     */
+    saveWorkflowGraph(graph) {
+      return persistWorkflowGraph(graph);
+    },
+
+    getWorkflowGraph(graphId) {
+      return readWorkflowGraphRow(
+        db.prepare('SELECT * FROM result_workflow_graphs WHERE graph_id = ?').get(graphId)
+      );
+    },
+
+    findWorkflowGraph({ projectId, sourceDigest } = {}) {
+      if (!projectId || !sourceDigest) return null;
+      return readWorkflowGraphRow(
+        db.prepare('SELECT * FROM result_workflow_graphs WHERE project_id = ? AND source_digest = ?')
+          .get(projectId, sourceDigest)
       );
     },
 
@@ -361,47 +528,413 @@ function createResultStudioRepository(db, options = {}) {
      * `isCurrent` 在此处**不**生效：正式切换当前版本必须走 adoptChangeSet()。
      */
     appendRevision(input) {
-      const familyId = input && input.artifactFamilyId;
-      if (!familyId) {
-        throw new ResultStudioRepositoryError('revision_invalid', 'artifactFamilyId is required.');
+      return api.appendRevisionBatch({ revisions: [input] }).revisions[0];
+    },
+
+    /**
+     * Atomically register a complete candidate cohort.  When supplied,
+     * `workflowGraph` and `transition` are persisted in the exact
+     * same SQLite transaction as every Revision.  A validation, constraint,
+     * transition or injected `beforeCommit` failure therefore leaves none of
+     * the candidate Revisions, graph or preview projection behind.
+     */
+    appendRevisionBatch({ revisions, workflowGraph = null, transition = null, beforeCommit = null } = {}) {
+      if (!Array.isArray(revisions) || revisions.length === 0) {
+        throw new ResultStudioRepositoryError('revision_batch_invalid', 'Revision batch must contain at least one Revision.');
       }
-      const create = transaction(() => {
-        const maxRow = db.prepare(
-          'SELECT MAX(revision_ordinal) AS ordinal FROM artifact_revisions WHERE artifact_family_id = ?'
-        ).get(familyId);
-        const nextOrdinal = (maxRow && maxRow.ordinal ? maxRow.ordinal : 0) + 1;
-        const validated = validateArtifactRevision({ ...input, revisionOrdinal: nextOrdinal, isCurrent: false });
-        if (!validated.ok) {
-          throw new ResultStudioRepositoryError('revision_invalid', 'ArtifactRevision failed validation.', validated.errors);
+      if (revisions.some((revision) => !revision || typeof revision !== 'object' || Array.isArray(revision))) {
+        throw new ResultStudioRepositoryError('revision_batch_invalid', 'Every batch member must be a Revision object.');
+      }
+      if (revisions.some((revision) => revision.reproducibilityStatus === 'verified')) {
+        throw new ResultStudioRepositoryError(
+          'revision_verified_requires_replay_proof',
+          'A Revision can become verified only through an exact replay proof.'
+        );
+      }
+      const projectIds = revisions.map((revision) => revision.projectId);
+      const changeSetIds = revisions.map((revision) => revision.changeSetId);
+      if (!isCanonicalUniqueIdentifierArray([...new Set(projectIds)])
+          || !isCanonicalUniqueIdentifierArray([...new Set(changeSetIds)])
+          || new Set(projectIds).size !== 1
+          || new Set(changeSetIds).size !== 1) {
+        throw new ResultStudioRepositoryError(
+          'revision_batch_mixed_scope',
+          'Every Revision in an atomic batch must belong to one project and one ChangeSet.'
+        );
+      }
+      const [projectId] = projectIds;
+      const [changeSetId] = changeSetIds;
+      const revisionIds = revisions.map((revision) => revision.revisionId);
+      if (!isCanonicalUniqueIdentifierArray(revisionIds)) {
+        throw new ResultStudioRepositoryError('revision_batch_duplicate', 'Revision batch IDs must be present and unique.');
+      }
+      const artifactFamilyIds = revisions.map((revision) => revision.artifactFamilyId);
+      if (!isCanonicalUniqueIdentifierArray(artifactFamilyIds)) {
+        throw new ResultStudioRepositoryError(
+          'revision_batch_duplicate_family',
+          'A candidate cohort may contain exactly one Revision per Artifact family.'
+        );
+      }
+      if (workflowGraph && workflowGraph.projectId !== projectId) {
+        throw new ResultStudioRepositoryError(
+          'revision_batch_graph_scope_mismatch',
+          'Workflow graph and candidate Revision batch must belong to the same project.'
+        );
+      }
+      if (workflowGraph) {
+        validateWorkflowGraphPayload(workflowGraph);
+        const nodesByJobId = new Map(workflowGraph.nodes.map((node) => [node.toolJobId, node]));
+        const revisionsById = new Map(revisions.map((revision) => [revision.revisionId, revision]));
+        for (const revision of revisions) {
+          const node = nodesByJobId.get(revision.toolJobId);
+          if (!node || !node.artifactIds.includes(revision.artifactId)) {
+            throw new ResultStudioRepositoryError(
+              'revision_batch_graph_cohort_mismatch',
+              'Every candidate Revision must be represented by its exact producing Job and Artifact in the supplied workflow graph.',
+              {
+                revisionId: revision.revisionId,
+                toolJobId: revision.toolJobId,
+                artifactId: revision.artifactId,
+                graphId: workflowGraph.graphId,
+              }
+            );
+          }
         }
-        const rev = validated.revision;
-        if (db.prepare('SELECT revision_id FROM artifact_revisions WHERE revision_id = ?').get(rev.revisionId)) {
-          throw new ResultStudioRepositoryError('revision_exists', `Revision already exists: ${rev.revisionId}`);
+        for (const edge of workflowGraph.edges) {
+          const revision = revisionsById.get(edge.sourceRevisionId) || api.getRevision(edge.sourceRevisionId);
+          if (!revision) {
+            throw new ResultStudioRepositoryError(
+              'revision_batch_graph_source_revision_missing',
+              'Every workflow lineage edge must resolve to a candidate or already-persisted source Revision.',
+              {
+                sourceRevisionId: edge.sourceRevisionId,
+                graphId: workflowGraph.graphId,
+              }
+            );
+          }
+          if (revision.projectId !== projectId
+              || edge.fromNodeId !== `job:${revision.toolJobId}`
+              || edge.sourceToolJobId !== revision.toolJobId
+              || edge.sourceArtifactId !== revision.artifactId
+              || edge.sourceOutputHash !== revision.outputHash) {
+            throw new ResultStudioRepositoryError(
+              'revision_batch_graph_edge_mismatch',
+              'A workflow lineage edge must preserve its source Revision project, Job, Artifact and output hash.',
+              {
+                revisionId: revision.revisionId,
+                graphId: workflowGraph.graphId,
+                edge,
+              }
+            );
+          }
         }
-        db.prepare(`INSERT INTO artifact_revisions (
-            revision_id, contract_version, project_id, artifact_family_id, artifact_id,
-            parent_revision_ids_json, source_commit, source_script_ref_json, input_artifact_refs_json,
-            parameters_ref, parameters_hash, tool_job_id, output_path, output_hash,
-            validation_status, reproducibility_status, change_set_id, revision_ordinal,
-            is_current, created_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)`)
-          .run(
-            rev.revisionId, rev.contractVersion, rev.projectId, rev.artifactFamilyId, rev.artifactId,
-            toJson(rev.parentRevisionIds), rev.sourceCommit, toJson(rev.sourceScriptRef),
-            toJson(rev.inputArtifactRefs), rev.parametersRef, rev.parametersHash, rev.toolJobId,
-            rev.outputPath, rev.outputHash, rev.validationStatus, rev.reproducibilityStatus,
-            rev.changeSetId, rev.revisionOrdinal, rev.createdAt
+      }
+      if (transition) {
+        if (typeof transition !== 'object' || Array.isArray(transition)
+            || !isCanonicalIdentifier(transition.changeSetId)
+            || transition.changeSetId !== changeSetId
+            || transition.to !== 'preview_ready') {
+          throw new ResultStudioRepositoryError(
+            'revision_batch_transition_invalid',
+            'Atomic candidate registration can only transition its own ChangeSet to preview_ready.'
           );
-        return rev.revisionId;
+        }
+        const expectedJobRefs = [...new Set(revisions.map((revision) => revision.toolJobId))];
+        if (!isCanonicalUniqueIdentifierArray(expectedJobRefs)) {
+          throw new ResultStudioRepositoryError(
+            'revision_batch_job_scope_invalid',
+            'Every candidate Revision must bind one canonical producing Job before preview registration.'
+          );
+        }
+        if (!isCanonicalUniqueIdentifierArray(transition.candidateArtifactRefs)
+            || !isCanonicalUniqueIdentifierArray(transition.jobRefs)) {
+          throw new ResultStudioRepositoryError(
+            'revision_batch_transition_scope_invalid',
+            'Candidate Revision and Job references must be non-empty, canonical and unique.'
+          );
+        }
+        if (!sameStringSet(transition.candidateArtifactRefs, revisionIds)
+            || !sameStringSet(transition.jobRefs, expectedJobRefs)) {
+          throw new ResultStudioRepositoryError(
+            'revision_batch_transition_cohort_mismatch',
+            'Preview transition references must match the exact supplied Revision cohort and producing Jobs.',
+            {
+              expectedCandidateArtifactRefs: revisionIds,
+              candidateArtifactRefs: transition.candidateArtifactRefs,
+              expectedJobRefs,
+              jobRefs: transition.jobRefs,
+            }
+          );
+        }
+        const transitionGraphRef = transition.validationSummary?.workflowGraph || null;
+        if (!!workflowGraph !== !!transitionGraphRef
+            || (workflowGraph && (transitionGraphRef.graphId !== workflowGraph.graphId
+              || transitionGraphRef.sourceDigest !== workflowGraph.sourceDigest))) {
+          throw new ResultStudioRepositoryError(
+            'revision_batch_graph_transition_mismatch',
+            'Preview transition must reference the exact workflow graph persisted with the candidate cohort.',
+            {
+              graphId: workflowGraph?.graphId || null,
+              sourceDigest: workflowGraph?.sourceDigest || null,
+              transitionGraphRef,
+            }
+          );
+        }
+        if (workflowGraph) {
+          const graphJobIds = new Set(workflowGraph.nodes.map((node) => node.toolJobId));
+          const missingJobRefs = transition.jobRefs.filter((jobId) => !graphJobIds.has(jobId));
+          if (missingJobRefs.length > 0) {
+            throw new ResultStudioRepositoryError(
+              'revision_batch_graph_job_mismatch',
+              'Every producing Job referenced by the preview transition must exist in the supplied workflow graph.',
+              { graphId: workflowGraph.graphId, missingJobRefs }
+            );
+          }
+        }
+      }
+      const apply = transaction(() => {
+        if (transition) {
+          const existingCohort = api.listRevisionsByChangeSet(changeSetId);
+          if (existingCohort.length > 0) {
+            throw new ResultStudioRepositoryError(
+              'revision_batch_existing_cohort',
+              'Preview registration cannot add a partial cohort to a ChangeSet that already has Revisions.',
+              {
+                changeSetId,
+                existingRevisionIds: existingCohort.map((revision) => revision.revisionId),
+                suppliedRevisionIds: revisionIds,
+              }
+            );
+          }
+        }
+        const inserted = revisions.map((revision) => insertRevision(revision));
+        const storedGraph = workflowGraph ? persistWorkflowGraph(workflowGraph) : null;
+        const transitionResult = transition
+          ? api.transitionChangeSet(transition)
+          : null;
+        if (typeof beforeCommit === 'function') {
+          beforeCommit({ revisions: inserted, workflowGraph: storedGraph, transition: transitionResult });
+        }
+        return {
+          revisionIds: inserted.map((revision) => revision.revisionId),
+          graphId: storedGraph && storedGraph.graphId,
+          changeSetId: transitionResult && transitionResult.changeSet.changeSetId,
+        };
       });
-      const revisionId = create();
-      return api.getRevision(revisionId);
+      const result = apply();
+      return {
+        revisions: result.revisionIds.map((revisionId) => api.getRevision(revisionId)),
+        workflowGraph: result.graphId ? api.getWorkflowGraph(result.graphId) : null,
+        changeSet: result.changeSetId ? api.getChangeSet(result.changeSetId) : null,
+      };
     },
 
     getRevision(revisionId) {
       return rowToRevision(
         db.prepare('SELECT * FROM artifact_revisions WHERE revision_id = ?').get(revisionId)
       );
+    },
+
+    /**
+     * Resolve only a Revision that was once a complete, formally adopted
+     * ChangeSet cohort.  Preview, interrupted, validation-failed, abandoned,
+     * never-adopted reverts and incomplete cohorts are intentionally excluded
+     * from historical restore.
+     */
+    resolveRestorableRevision({ revisionId, projectId = null } = {}) {
+      const revision = api.getRevision(revisionId);
+      if (!revision || (projectId && revision.projectId !== projectId)) {
+        throw new ResultStudioRepositoryError('revision_not_found', `Unknown Revision: ${revisionId}`);
+      }
+      const changeSet = api.getChangeSet(revision.changeSetId);
+      if (!changeSet || changeSet.projectId !== revision.projectId) {
+        throw new ResultStudioRepositoryError(
+          'revision_restore_change_set_missing',
+          'Revision does not belong to a durable ChangeSet in the same project.',
+          { revisionId: revision.revisionId, changeSetId: revision.changeSetId }
+        );
+      }
+      if (!['adopted', 'reverted'].includes(changeSet.status)) {
+        throw new ResultStudioRepositoryError(
+          'revision_restore_status_forbidden',
+          `Revision cannot be restored from ChangeSet status ${changeSet.status}.`,
+          { revisionId: revision.revisionId, changeSetId: changeSet.changeSetId, status: changeSet.status }
+        );
+      }
+      if (!changeSet.adoptedAt) {
+        throw new ResultStudioRepositoryError(
+          'revision_restore_never_adopted',
+          'A discarded preview was never a formal result and cannot be restored.',
+          { revisionId: revision.revisionId, changeSetId: changeSet.changeSetId }
+        );
+      }
+      const cohort = api.listRevisionsByChangeSet(changeSet.changeSetId);
+      const cohortIds = cohort.map((entry) => entry.revisionId);
+      const candidateIds = changeSet.candidateArtifactRefs;
+      const complete = cohort.length > 0
+        && sameStringSet(cohortIds, candidateIds)
+        && cohort.every((entry) => entry.projectId === changeSet.projectId
+          && entry.changeSetId === changeSet.changeSetId
+          && entry.validationStatus !== 'blocked'
+          && !!entry.sourceCommit
+          && entry.sourceCommit === changeSet.candidateCommit);
+      if (!complete) {
+        throw new ResultStudioRepositoryError(
+          'revision_restore_change_set_partial',
+          'Revision belongs to an incomplete or incoherent ChangeSet cohort.',
+          {
+            revisionId: revision.revisionId,
+            changeSetId: changeSet.changeSetId,
+            candidateArtifactRefs: candidateIds,
+            persistedRevisionIds: cohortIds,
+          }
+        );
+      }
+      return { revision, changeSet, cohort };
+    },
+
+    /**
+     * Persist an exact independent replay proof and upgrade the complete
+     * adopted source cohort to `verified` in one transaction.  The proof is
+     * durable in ChangeSet validationSummary until a dedicated normalized
+     * replay-proof migration is introduced; callers cannot upgrade a subset
+     * or provide hashes that differ from either persisted Revision.
+     */
+    recordReplayProofAndVerifyCohort({
+      projectId,
+      changeSetId,
+      replayPackageDigest,
+      proofs,
+      beforeCommit = null,
+    } = {}) {
+      if (!projectId || !changeSetId || !SHA256_PATTERN.test(String(replayPackageDigest || ''))
+          || !Array.isArray(proofs) || proofs.length === 0) {
+        throw new ResultStudioRepositoryError(
+          'replay_proof_invalid',
+          'Replay proof requires project, source ChangeSet, package digest and at least one output proof.'
+        );
+      }
+      const apply = transaction(() => {
+        const sourceChangeSet = api.getChangeSet(changeSetId);
+        if (!sourceChangeSet || sourceChangeSet.projectId !== projectId || sourceChangeSet.status !== 'adopted'
+            || !sourceChangeSet.adoptedAt) {
+          throw new ResultStudioRepositoryError(
+            'replay_proof_source_not_adopted',
+            'Only a formally adopted ChangeSet cohort can receive a verified replay proof.',
+            { projectId, changeSetId, status: sourceChangeSet && sourceChangeSet.status }
+          );
+        }
+        const sourceCohort = api.listRevisionsByChangeSet(changeSetId);
+        const sourceIds = sourceCohort.map((revision) => revision.revisionId);
+        const proofSourceIds = proofs.map((proof) => proof && proof.sourceRevisionId);
+        if (!sameStringSet(sourceIds, sourceChangeSet.candidateArtifactRefs)
+            || !sameStringSet(sourceIds, proofSourceIds)) {
+          throw new ResultStudioRepositoryError(
+            'replay_proof_cohort_incomplete',
+            'Replay proof must cover the exact complete adopted Revision cohort.',
+            { sourceRevisionIds: sourceIds, candidateArtifactRefs: sourceChangeSet.candidateArtifactRefs, proofSourceRevisionIds: proofSourceIds }
+          );
+        }
+        const normalizedProofs = [];
+        const replayChangeSetIds = new Set();
+        const replayRevisionIds = new Set();
+        for (const proof of proofs) {
+          const source = sourceCohort.find((revision) => revision.revisionId === proof.sourceRevisionId);
+          const replay = api.getRevision(proof.replayRevisionId);
+          if (!source || !replay || replay.projectId !== projectId || replay.revisionId === source.revisionId
+              || replay.artifactFamilyId !== source.artifactFamilyId || replay.artifactId !== source.artifactId
+              || !replay.parentRevisionIds.includes(source.revisionId)
+              || replay.validationStatus === 'blocked'
+              || replay.toolJobId !== proof.replayToolJobId || replay.toolJobId === source.toolJobId
+              || proof.sourceOutputHash !== source.outputHash
+              || proof.replayOutputHash !== replay.outputHash
+              || proof.sourceOutputHash !== proof.replayOutputHash
+              || !SHA256_PATTERN.test(String(proof.sourceOutputHash || ''))) {
+            throw new ResultStudioRepositoryError(
+              'replay_proof_output_mismatch',
+              'Replay proof does not resolve to an independent byte-identical Revision output.',
+              { sourceRevisionId: proof && proof.sourceRevisionId, replayRevisionId: proof && proof.replayRevisionId }
+            );
+          }
+          replayChangeSetIds.add(replay.changeSetId);
+          if (replayRevisionIds.has(replay.revisionId)) {
+            throw new ResultStudioRepositoryError('replay_proof_duplicate_revision', 'A replay Revision cannot prove more than one source output.');
+          }
+          replayRevisionIds.add(replay.revisionId);
+          normalizedProofs.push({
+            sourceRevisionId: source.revisionId,
+            replayRevisionId: replay.revisionId,
+            sourceToolJobId: source.toolJobId,
+            replayToolJobId: replay.toolJobId,
+            artifactFamilyId: source.artifactFamilyId,
+            artifactId: source.artifactId,
+            sourceOutputHash: source.outputHash,
+            replayOutputHash: replay.outputHash,
+            exactMatch: true,
+          });
+        }
+        if (replayChangeSetIds.size !== 1) {
+          throw new ResultStudioRepositoryError(
+            'replay_proof_mixed_change_set',
+            'One independent replay ChangeSet must reproduce the complete source cohort.'
+          );
+        }
+        const [replayChangeSetId] = replayChangeSetIds;
+        const replayChangeSet = api.getChangeSet(replayChangeSetId);
+        const replayCohortIds = api.listRevisionsByChangeSet(replayChangeSetId).map((revision) => revision.revisionId);
+        if (!replayChangeSet || replayChangeSet.projectId !== projectId
+            || !['preview_ready', 'adopted'].includes(replayChangeSet.status)
+            || !sameStringSet(replayCohortIds, replayChangeSet.candidateArtifactRefs)
+            || !sameStringSet(replayCohortIds, [...replayRevisionIds])) {
+          throw new ResultStudioRepositoryError(
+            'replay_proof_candidate_incomplete',
+            'Replay proof must come from one complete preview/adopted replay cohort.',
+            { replayChangeSetId, replayRevisionIds: [...replayRevisionIds], candidateArtifactRefs: replayChangeSet && replayChangeSet.candidateArtifactRefs }
+          );
+        }
+        normalizedProofs.sort((left, right) => left.sourceRevisionId.localeCompare(right.sourceRevisionId));
+        const replayProof = {
+          replayProofVersion: 1,
+          replayPackageDigest,
+          sourceChangeSetId: changeSetId,
+          replayChangeSetId,
+          exactMatch: true,
+          outputs: normalizedProofs,
+        };
+        const existingProof = sourceChangeSet.validationSummary?.replayProof || null;
+        if (existingProof && toJson(existingProof) !== toJson(replayProof)) {
+          throw new ResultStudioRepositoryError(
+            'replay_proof_conflict',
+            'The adopted ChangeSet is already bound to a different replay proof.'
+          );
+        }
+        for (const revision of sourceCohort) {
+          if (!['available', 'verified'].includes(revision.reproducibilityStatus)) {
+            throw new ResultStudioRepositoryError(
+              'replay_proof_source_unavailable',
+              'Every source Revision must have replay material available before verification.',
+              { revisionId: revision.revisionId, reproducibilityStatus: revision.reproducibilityStatus }
+            );
+          }
+          db.prepare(`UPDATE artifact_revisions SET reproducibility_status = 'verified'
+              WHERE revision_id = ? AND project_id = ? AND change_set_id = ?`)
+            .run(revision.revisionId, projectId, changeSetId);
+        }
+        const validationSummary = { ...(sourceChangeSet.validationSummary || {}), replayProof };
+        db.prepare('UPDATE scientific_change_sets SET validation_summary_json = ?, updated_at = ? WHERE change_set_id = ? AND status = ?')
+          .run(toJson(validationSummary), nowIso(), changeSetId, 'adopted');
+        if (typeof beforeCommit === 'function') {
+          beforeCommit({ sourceChangeSet, sourceCohort, replayChangeSet, replayProof });
+        }
+        return { replayProof, idempotent: !!existingProof };
+      });
+      const result = apply();
+      return {
+        changeSet: api.getChangeSet(changeSetId),
+        revisions: api.listRevisionsByChangeSet(changeSetId),
+        replayProof: result.replayProof,
+        idempotent: result.idempotent,
+      };
     },
 
     findRevisionByJobArtifact({ projectId, toolJobId, artifactId } = {}) {
@@ -469,9 +1002,43 @@ function createResultStudioRepository(db, options = {}) {
         throw new ResultStudioRepositoryError('change_set_not_found', `Unknown ChangeSet: ${changeSetId}`);
       }
       if (current.status === 'adopted') {
+        const revisions = api.listRevisionsByChangeSet(changeSetId);
+        const revisionIds = revisions.map((revision) => revision.revisionId);
+        const candidateArtifactRefs = current.candidateArtifactRefs;
+        if (revisions.length === 0
+            || !Array.isArray(candidateArtifactRefs)
+            || (candidateArtifactRefs.length > 0
+              && !sameStringSet(candidateArtifactRefs, revisionIds))) {
+          throw new ResultStudioRepositoryError(
+            'change_set_adoption_cohort_incoherent',
+            'An adopted ChangeSet no longer has one complete candidate Revision cohort.',
+            {
+              changeSetId,
+              candidateArtifactRefs,
+              persistedRevisionIds: revisionIds,
+            }
+          );
+        }
+        const staleRevisions = revisions.filter((revision) => {
+          const currentRevision = api.getCurrentRevision(revision.artifactFamilyId, revision.projectId);
+          return !revision.isCurrent || !currentRevision || currentRevision.revisionId !== revision.revisionId;
+        });
+        if (staleRevisions.length > 0) {
+          throw new ResultStudioRepositoryError(
+            'change_set_adoption_not_current',
+            'An adopted ChangeSet can be idempotent only while its exact Revision cohort is current.',
+            {
+              changeSetId,
+              staleRevisionIds: staleRevisions.map((revision) => revision.revisionId),
+              currentRevisionIds: revisions.map((revision) => (
+                api.getCurrentRevision(revision.artifactFamilyId, revision.projectId)?.revisionId || null
+              )),
+            }
+          );
+        }
         return {
           changeSet: current,
-          adoptedRevisionIds: api.listRevisionsByChangeSet(changeSetId).filter((r) => r.isCurrent).map((r) => r.revisionId),
+          adoptedRevisionIds: revisionIds,
           idempotent: true,
         };
       }
@@ -530,7 +1097,7 @@ function createResultStudioRepository(db, options = {}) {
      * 撤销一个 ChangeSet。
      *
      * 未采用 → 只标记 reverted，不动 current 指针。
-     * 已采用 → 把每个 family 的 current 回退到该 ChangeSet 之前的最高 ordinal；
+     * 已采用 → 把每个 family 的 current 回退到候选声明的 exact same-family parent；
      *          历史 Revision 一律保留（计划 §3.2：不自动消失）。
      */
     revertChangeSet({ changeSetId, reason = null, beforeCommit = null } = {}) {
@@ -556,15 +1123,35 @@ function createResultStudioRepository(db, options = {}) {
       const apply = transaction(() => {
         if (wasAdopted) {
           for (const rev of revisions) {
-            db.prepare('UPDATE artifact_revisions SET is_current = 0 WHERE revision_id = ?').run(rev.revisionId);
-            const previous = db.prepare(`SELECT * FROM artifact_revisions
-                WHERE artifact_family_id = ? AND project_id = ? AND revision_ordinal < ? AND validation_status <> 'blocked'
-                ORDER BY revision_ordinal DESC LIMIT 1`)
-              .get(rev.artifactFamilyId, rev.projectId, rev.revisionOrdinal);
-            if (previous) {
-              db.prepare('UPDATE artifact_revisions SET is_current = 1 WHERE revision_id = ?').run(previous.revision_id);
-              restored.push(previous.revision_id);
+            if (!rev.isCurrent) {
+              throw new ResultStudioRepositoryError(
+                'revert_revision_not_current',
+                'An adopted ChangeSet can only be reverted while its exact Revision cohort is current.',
+                { changeSetId, revisionId: rev.revisionId, artifactFamilyId: rev.artifactFamilyId }
+              );
             }
+            const sameFamilyParents = rev.parentRevisionIds
+              .map((revisionId) => db.prepare('SELECT * FROM artifact_revisions WHERE revision_id = ?').get(revisionId))
+              .filter((row) => row
+                && row.project_id === rev.projectId
+                && row.artifact_family_id === rev.artifactFamilyId
+                && row.validation_status !== 'blocked');
+            if (sameFamilyParents.length !== 1) {
+              throw new ResultStudioRepositoryError(
+                'revert_parent_unavailable',
+                'Revert requires exactly one valid same-family parent recorded by the candidate Revision.',
+                {
+                  changeSetId,
+                  revisionId: rev.revisionId,
+                  parentRevisionIds: rev.parentRevisionIds,
+                  sameFamilyParentIds: sameFamilyParents.map((row) => row.revision_id),
+                }
+              );
+            }
+            const previous = sameFamilyParents[0];
+            db.prepare('UPDATE artifact_revisions SET is_current = 0 WHERE revision_id = ?').run(rev.revisionId);
+            db.prepare('UPDATE artifact_revisions SET is_current = 1 WHERE revision_id = ?').run(previous.revision_id);
+            restored.push(previous.revision_id);
           }
         }
         db.prepare(`UPDATE scientific_change_sets SET

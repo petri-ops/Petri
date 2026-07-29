@@ -3,7 +3,11 @@ const path = require('path');
 const { createResultArchive } = require('./result-archive');
 const { v4: uuidv4 } = require('uuid');
 const { execFile } = require('child_process');
-const { reconcileArtifactTruth } = require('./artifact-truth');
+const {
+  captureStagedInputSnapshots,
+  isInternalArtifactName,
+  reconcileArtifactTruth,
+} = require('./artifact-truth');
 const { sendThemedHtmlFile, injectReportTheme, normalizeReportTheme } = require('./report-theme');
 const { materializeFinalReport } = require('./final-report');
 const {
@@ -33,8 +37,80 @@ function isManagedResultDir(candidate, jobsDir) {
   return roots.some((root) => resolved === root || resolved.startsWith(root + path.sep));
 }
 
+/**
+ * The tools HTTP contract accepts a flat `filename -> base64` map. Tool
+ * scripts resolve their inputs directly from the job root; directory uploads
+ * are not part of that contract. Resolve every key before writing so a bad
+ * key cannot escape the job sandbox or leave a partial upload behind.
+ */
+function resolveUploadedFilePath(jobDir, key) {
+  if (typeof jobDir !== 'string' || !jobDir || jobDir.includes('\0')) {
+    return { ok: false, error: '上传目录无效。' };
+  }
+  if (typeof key !== 'string' || !key || key.includes('\0')) {
+    return { ok: false, error: '上传文件名无效。' };
+  }
+
+  // Reject both platform separator syntaxes. This is deliberately stricter
+  // than a containment-only check because nested upload paths are unsupported.
+  if (
+    key.includes('/') ||
+    key.includes('\\') ||
+    key === '.' ||
+    key === '..' ||
+    path.isAbsolute(key) ||
+    path.win32.isAbsolute(key) ||
+    /^[A-Za-z]:/.test(key)
+  ) {
+    return { ok: false, error: '上传文件名不能包含路径。' };
+  }
+  if (isInternalArtifactName(key)) {
+    return { ok: false, error: '上传文件名与任务内部控制文件冲突。' };
+  }
+
+  const root = path.resolve(jobDir);
+  const filePath = path.resolve(root, key);
+  if (path.dirname(filePath) !== root) {
+    return { ok: false, error: '上传文件路径超出任务目录。' };
+  }
+  return { ok: true, filePath, key };
+}
+
+function resolveUploadedFiles(jobDir, files) {
+  if (files === undefined || files === null) return { ok: true, entries: [] };
+  if (typeof files !== 'object' || Array.isArray(files) || Buffer.isBuffer(files)) {
+    return { ok: false, error: '上传文件必须是文件名到 Base64 内容的映射。' };
+  }
+  const prototype = Object.getPrototypeOf(files);
+  if (prototype !== Object.prototype && prototype !== null) {
+    return { ok: false, error: '上传文件必须是文件名到 Base64 内容的映射。' };
+  }
+
+  const entries = [];
+  for (const [key, fileData] of Object.entries(files)) {
+    const resolved = resolveUploadedFilePath(jobDir, key);
+    if (!resolved.ok) return resolved;
+    if (typeof fileData !== 'string') {
+      return { ok: false, error: `文件 "${key}" 的上传内容无效。` };
+    }
+    entries.push({ ...resolved, fileData });
+  }
+  return { ok: true, entries };
+}
+
+function writeUploadedFiles(jobDir, files) {
+  const resolved = resolveUploadedFiles(jobDir, files);
+  if (!resolved.ok) return resolved;
+
+  for (const entry of resolved.entries) {
+    fs.writeFileSync(entry.filePath, Buffer.from(entry.fileData, 'base64'));
+  }
+  return resolved;
+}
+
 function validateUploadedFiles(toolId, jobDir, files) {
-  if (!files || typeof files !== 'object') return null;
+  const resolvedFiles = resolveUploadedFiles(jobDir, files);
+  if (!resolvedFiles.ok) return resolvedFiles.error;
   const csvTools = [
     'deseq2',
     'go-kegg',
@@ -46,9 +122,7 @@ function validateUploadedFiles(toolId, jobDir, files) {
     'complexheatmap',
   ];
 
-  for (const [key, fileData] of Object.entries(files)) {
-    if (!fileData || typeof fileData !== 'string') continue;
-    const filePath = path.join(jobDir, key);
+  for (const { key, filePath } of resolvedFiles.entries) {
     if (!fs.existsSync(filePath)) continue;
 
     const fd = fs.openSync(filePath, 'r');
@@ -104,6 +178,40 @@ function hydrateExecutionJob(row) {
     params = {};
   }
   return { ...row, params };
+}
+
+/**
+ * Plugin scripts historically use either `<job>/output` or the isolated Job
+ * root as their result directory. Both locations are server-owned; select one
+ * only from a produced manifest or an exact declared artifact filename.
+ */
+function resolveProducedResultDirectory({ jobDir, outputDir, expectedArtifacts = [] }) {
+  const resultRoots = [path.resolve(outputDir), path.resolve(jobDir)];
+  const manifestNames = ['manifest.json', 'artifact-manifest.json'];
+  for (const root of resultRoots) {
+    for (const name of manifestNames) {
+      const candidate = path.join(root, name);
+      if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+        return { resultDir: root, manifestPath: candidate, reason: 'manifest' };
+      }
+    }
+  }
+  const declaredNames = expectedArtifacts
+    .map((artifact) => artifact && (artifact.filename || artifact.name))
+    .filter((name) => typeof name === 'string' && name === path.basename(name) && !name.includes('\0'));
+  for (const root of resultRoots) {
+    if (declaredNames.some((name) => {
+      const candidate = path.join(root, name);
+      return fs.existsSync(candidate) && fs.statSync(candidate).isFile();
+    })) {
+      return { resultDir: root, manifestPath: path.join(root, 'manifest.json'), reason: 'declared_artifact' };
+    }
+  }
+  return {
+    resultDir: path.resolve(outputDir),
+    manifestPath: path.join(path.resolve(outputDir), 'manifest.json'),
+    reason: 'standard_default',
+  };
 }
 
 
@@ -558,7 +666,7 @@ function createToolsExecutor({
     return null;
   }
 
-  async function executeJob(jobId, toolId, jobDir) {
+  async function executeJob(jobId, toolId, jobDir, stagedInputFiles = []) {
     const started = await db
       .prepare('UPDATE tool_jobs SET status = ? WHERE id = ? AND status = ?')
       .run('running', jobId, 'pending');
@@ -571,6 +679,13 @@ function createToolsExecutor({
     );
     if (!job) {
       await markJobFailed(jobId, 'Tool job disappeared before execution.', 'setup');
+      return;
+    }
+    let stagedInputSnapshots;
+    try {
+      stagedInputSnapshots = captureStagedInputSnapshots(stagedInputFiles);
+    } catch (error) {
+      await markJobFailed(jobId, `Staged input snapshot failed: ${error.message}`, 'setup');
       return;
     }
     const outputDir = path.join(jobDir, 'output');
@@ -799,13 +914,16 @@ function createToolsExecutor({
               )
             : [];
         } catch {}
+        const produced = resolveProducedResultDirectory({ jobDir, outputDir, expectedArtifacts });
+        const resultDir = produced.resultDir;
+        const manifestPath = produced.manifestPath;
         const archiveArtifact = expectedArtifacts.find(
           (item) => item && item.id === 'zip' && item.required !== false
         );
         if (archiveArtifact) {
           try {
             await createResultArchive(
-              outputDir,
+              resultDir,
               archiveArtifact.filename || archiveArtifact.name || 'all_results.zip'
             );
           } catch (archiveError) {
@@ -814,7 +932,6 @@ function createToolsExecutor({
           }
         }
 
-        const manifestPath = path.join(outputDir, 'manifest.json');
         let result = {};
         if (fs.existsSync(manifestPath)) {
           try {
@@ -822,7 +939,7 @@ function createToolsExecutor({
             result = { ...manifest, manifest };
           } catch {}
         } else {
-          const files = fs.existsSync(outputDir) ? fs.readdirSync(outputDir) : [];
+          const files = fs.existsSync(resultDir) ? fs.readdirSync(resultDir) : [];
           result.files = files.map((f) => ({
             name: f,
             type: f.endsWith('.png') ? 'plot' : f.endsWith('.csv') ? 'table' : 'file',
@@ -832,7 +949,7 @@ function createToolsExecutor({
         const executionContext = createExecutionContext({
           jobDir,
           outputDir,
-          resultDir: outputDir,
+          resultDir,
           runtime: cfg.lang || null,
           runtimeCommand,
           runtimeReady,
@@ -840,10 +957,10 @@ function createToolsExecutor({
         result.toolJobId = jobId;
         result.jobDir = jobDir;
         result.outputDir = outputDir;
-        result.resultDir = outputDir;
+        result.resultDir = resultDir;
         result.canonicalJobDir = canonicalizePath(jobDir);
         result.canonicalOutputDir = canonicalizePath(outputDir);
-        result.canonicalResultDir = canonicalizePath(outputDir);
+        result.canonicalResultDir = canonicalizePath(resultDir);
         result.execution = executionContext;
         result.resourceUsage = {
           start: resourceStart,
@@ -859,7 +976,7 @@ function createToolsExecutor({
           result.outputs = result.outputs.map((item) => {
             const name = item && (item.filename || item.name || item.path);
             if (!name) return item;
-            const itemPath = item.path || path.join(outputDir, path.basename(String(name)));
+            const itemPath = item.path || path.join(resultDir, path.basename(String(name)));
             return {
               ...item,
               path: itemPath,
@@ -871,7 +988,7 @@ function createToolsExecutor({
           result.files = result.files.map((item) => {
             const name = item && (item.filename || item.name || item.path);
             if (!name) return item;
-            const itemPath = item.path || path.join(outputDir, path.basename(String(name)));
+            const itemPath = item.path || path.join(resultDir, path.basename(String(name)));
             return {
               ...item,
               path: itemPath,
@@ -881,14 +998,16 @@ function createToolsExecutor({
         }
         const truth = reconcileArtifactTruth({
           result,
-          resultDir: outputDir,
+          resultDir,
           expectedArtifacts,
           canonicalizePath,
+          excludedArtifactPaths: stagedInputFiles,
+          stagedInputSnapshots,
         });
         const recorded = buildProvenance(truth.artifacts);
         result = attachProvenanceToResult(truth.result, recorded.provenance, recorded.provenancePath);
         writeArtifactManifest({
-          outputDir,
+          outputDir: resultDir,
           result,
           provenance: recorded.provenance,
           plugin: recorded.pluginManifest,
@@ -985,15 +1104,15 @@ function createToolsExecutor({
       config.mkdirSandbox(jobDir);
     }
 
-    fs.writeFileSync(path.join(jobDir, 'params.json'), JSON.stringify(params || {}));
-
-    if (files && typeof files === 'object') {
-      for (const [key, fileData] of Object.entries(files)) {
-        if (fileData && typeof fileData === 'string') {
-          fs.writeFileSync(path.join(jobDir, key), Buffer.from(fileData, 'base64'));
-        }
-      }
+    const uploadResult = writeUploadedFiles(jobDir, files);
+    if (!uploadResult.ok) {
+      try {
+        fs.rmSync(jobDir, { recursive: true, force: true });
+      } catch {}
+      return res.status(400).json({ ok: false, error: uploadResult.error });
     }
+
+    fs.writeFileSync(path.join(jobDir, 'params.json'), JSON.stringify(params || {}));
 
     const validationError = validateUploadedFiles(toolId, jobDir, files);
     if (validationError) {
@@ -1059,7 +1178,7 @@ function createToolsExecutor({
         isTest ? 1 : 0,
         projectId || null
       );
-    executeJob(jobId, toolId, jobDir);
+    executeJob(jobId, toolId, jobDir, uploadResult.entries.map((entry) => entry.filePath));
     console.log(
       `[tools] Job ${jobId} submitted (tool=${toolId} rid=${req.requestId} user=${uid} test=${isTest})`
     );
@@ -1143,5 +1262,13 @@ const R_ERROR_TRANSLATIONS = [
 
 module.exports = {
   createToolsExecutor,
-  _test: { isManagedResultDir, validateUploadedFiles, hydrateExecutionJob },
+  _test: {
+    isManagedResultDir,
+    resolveUploadedFilePath,
+    resolveUploadedFiles,
+    writeUploadedFiles,
+    validateUploadedFiles,
+    hydrateExecutionJob,
+    resolveProducedResultDirectory,
+  },
 };

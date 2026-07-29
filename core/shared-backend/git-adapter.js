@@ -41,6 +41,8 @@ const SENSITIVE_VALUE = /(?:sk-[A-Za-z0-9_-]{20,}|github_pat_[A-Za-z0-9_]{20,}|g
 
 const MAX_STATUS_ENTRIES = 5000;
 const MAX_DIAGNOSTIC_LENGTH = 2000;
+const HASH_OBJECT_TIMEOUT_MS = 10000;
+const HASH_OBJECT_MAX_ATTEMPTS = 2;
 
 class GitAdapterError extends Error {
   constructor(code, message, detail = null) {
@@ -327,12 +329,17 @@ function createGitAdapter(options = {}) {
       });
       return { ok: true, stdout: stdout == null ? '' : String(stdout), stderr: '', status: 0 };
     } catch (error) {
+      const systemCode = error && typeof error.code === 'string' ? error.code : null;
       const failure = {
         ok: false,
+        command: args[0] || null,
         stdout: error && error.stdout ? String(error.stdout) : '',
         stderr: redactGitDiagnostic(error && error.stderr ? String(error.stderr) : (error && error.message), scope),
         status: error && typeof error.status === 'number' ? error.status : null,
-        code: error && error.code === 'ENOENT' ? 'git_executable_not_found' : 'git_command_failed',
+        systemCode,
+        signal: error && typeof error.signal === 'string' ? error.signal : null,
+        killed: error && error.killed === true,
+        code: systemCode === 'ENOENT' ? 'git_executable_not_found' : 'git_command_failed',
       };
       if (runOptions.allowFailure) return failure;
       throw new GitAdapterError(failure.code, `git ${args[0] || ''} failed`, failure);
@@ -682,13 +689,27 @@ function createGitAdapter(options = {}) {
           if (typeof content !== 'string' && !Buffer.isBuffer(content)) {
             throw new GitAdapterError('virtual_file_content_invalid', `Virtual file content is invalid: ${safePaths[index]}`);
           }
-          const blob = run(['hash-object', '-w', '--stdin'], {
-            allowFailure: true,
-            env: isolatedEnv,
-            input: content,
-          });
+          let blob = null;
+          let attempts = 0;
+          while (attempts < HASH_OBJECT_MAX_ATTEMPTS) {
+            attempts += 1;
+            blob = run(['hash-object', '-w', '--stdin'], {
+              allowFailure: true,
+              env: isolatedEnv,
+              input: content,
+              timeout: HASH_OBJECT_TIMEOUT_MS,
+            });
+            if (blob.ok && /^[a-f0-9]{40}$/.test(blob.stdout.trim())) break;
+            const transientInvocationFailure = blob.status === null && (
+              ['EAGAIN', 'EINTR', 'ETIMEDOUT'].includes(blob.systemCode)
+            );
+            if (!transientInvocationFailure) break;
+          }
           if (!blob.ok || !/^[a-f0-9]{40}$/.test(blob.stdout.trim())) {
-            throw new GitAdapterError('git_hash_object_failed', 'Cannot write isolated Git blob.', blob);
+            throw new GitAdapterError('git_hash_object_failed', 'Cannot write isolated Git blob.', {
+              ...blob,
+              attempts,
+            });
           }
           const update = run(
             ['update-index', '--add', '--cacheinfo', '100644', blob.stdout.trim(), safePaths[index]],

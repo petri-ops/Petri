@@ -206,3 +206,21 @@ test('RS-P4 every admitted plugin projects a usable schema with declared impacts
     );
   }
 });
+
+test('P5 heatmap display controls remain presentation-only while calculation controls remain scientific/data', () => {
+  const descriptor = descriptorFor('gene-correlation');
+  const display = controls.normalizeEditSubmission({
+    descriptor,
+    proposedValues: { color_low: '#0000ff', cluster_rows: false, show_correlation_values: true },
+    currentValues: { color_low: '#2563eb', cluster_rows: true, show_correlation_values: false },
+  });
+  assert.equal(display.classification.editClass, 'presentation_rerender');
+  assert.equal(display.classification.requiresScientificConfirmation, false);
+  const calculation = controls.normalizeEditSubmission({
+    descriptor,
+    proposedValues: { top_n: 20, method: 'spearman' },
+    currentValues: { top_n: 30, method: 'pearson' },
+  });
+  assert.equal(calculation.classification.editClass, 'workflow_replan');
+  assert.equal(calculation.classification.requiresScientificConfirmation, true);
+});

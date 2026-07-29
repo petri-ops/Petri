@@ -6,6 +6,7 @@ const path = require('node:path');
 const { isPathContained } = require('./project-run-layout');
 const { isSafeRelativePath } = require('./result-studio-contracts');
 const { stableStringify } = require('./scientific-task-spec');
+const { resolveExecutionInputPath } = require('./execution-provenance');
 
 const MAX_SOURCE_BYTES = 2 * 1024 * 1024;
 const MAX_PARAMETERS_BYTES = 1024 * 1024;
@@ -97,27 +98,22 @@ function classifyScope(sourceScriptRef) {
   return 'unknown_legacy';
 }
 
-function inputStatus({ workspaceRoot, inputs, params = {} }) {
+function inputStatus({ workspaceRoot, inputs, params = {}, provenance = null }) {
   const statuses = [];
-  const root = workspaceRoot && fs.existsSync(workspaceRoot) ? fs.realpathSync(workspaceRoot) : null;
   for (const input of Array.isArray(inputs) ? inputs : []) {
-    const relativePath = safeRef(input?.relativePath, 'input.relativePath', true);
     let status = 'unavailable';
-    if (root) {
-      try {
-        // Provenance `relativePath` is a stable logical identity (for example
-        // inputs/counts/counts.csv), not necessarily a second physical copy.
-        // Prefer the source Job's exact file parameter when it is still a
-        // contained project file; otherwise fall back to the logical path.
-        // Neither path is returned to the ordinary source response.
-        const sourceParam = input?.id && typeof params?.[input.id] === 'string'
-          ? params[input.id]
-          : null;
-        const candidate = sourceParam || path.join(root, relativePath);
-        const target = fs.realpathSync(candidate);
-        if (!isPathContained(root, target)) status = 'outside_project';
-        else status = sha256(fs.readFileSync(target)) === input.sha256 ? 'intact' : 'hash_drift';
-      } catch { status = 'missing'; }
+    try {
+      safeRef(input?.relativePath, 'input.relativePath', true);
+      const resolved = resolveExecutionInputPath({
+        workspaceRoot,
+        input,
+        sourceParams: params,
+        provenance,
+      });
+      if (!resolved.path) status = 'missing';
+      else status = sha256(fs.readFileSync(resolved.path)) === input.sha256 ? 'intact' : 'hash_drift';
+    } catch {
+      status = 'missing';
     }
     statuses.push({ artifactId: input?.sourceArtifactRef || input?.id || null, role: input?.role || null, sha256: input?.sha256 || null, status });
   }
@@ -183,7 +179,12 @@ function projectRevisionSource(input = {}, dependencies = {}) {
   const provenanceArtifact = (Array.isArray(provenance.artifacts) ? provenance.artifacts : []).filter((item) => item?.id === revision.artifactId);
   if (!artifact || provenanceArtifact.length !== 1 || (revision.outputHash && provenanceArtifact[0].sha256 !== revision.outputHash)) fail('source_artifact_provenance_invalid', 'Revision Artifact is not uniquely bound by Job provenance.');
 
-  const inputs = inputStatus({ workspaceRoot: dependencies.workspaceRoot, inputs: provenance.inputs, params: job.params });
+  const inputs = inputStatus({
+    workspaceRoot: dependencies.workspaceRoot,
+    inputs: provenance.inputs,
+    params: job.params,
+    provenance,
+  });
   const inputDrift = inputs.filter((item) => item.status !== 'intact');
   let openableRelativePath = null;
   if (sourceRef.origin === 'project_materialized' && dependencies.workspaceRoot) {

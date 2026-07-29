@@ -117,6 +117,26 @@ describe('ResultStudioChangeSetPanel', () => {
     expect(screen.queryByText('撤销本次采用')).toBeNull();
   });
 
+  it('excludes a legacy baseline cohort when choosing the preferred ChangeSet', async () => {
+    const legacyBaseline = {
+      ...changeSet,
+      changeSetId: 'cs_legacy_baseline',
+      status: 'adopted' as const,
+      intentRef: 'baseline-cohort:tj_legacy',
+      validationSummary: { artifactTruthStatus: 'valid', intentSummary: '旧版基线 cohort' },
+    };
+    const adoptedCandidate = { ...changeSet, status: 'adopted' as const };
+    client.listResultChangeSets.mockResolvedValueOnce({
+      changeSets: [legacyBaseline, adoptedCandidate],
+      currentRevision: { ...candidate, isCurrent: true },
+      revisions: [baseline, { ...candidate, isCurrent: true }],
+    });
+    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" />);
+    expect(await screen.findByText('把火山图配色调整为蓝色')).toBeTruthy();
+    expect(screen.queryByText('旧版基线 cohort')).toBeNull();
+    expect(screen.getByText('撤销本次采用')).toBeTruthy();
+  });
+
   it('restores a historical Revision as a new version instead of mutating history', async () => {
     render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" mode="history" />);
     const restoreButtons = await screen.findAllByText('恢复为新版本');
@@ -137,6 +157,73 @@ describe('ResultStudioChangeSetPanel', () => {
     fireEvent.click(await screen.findByText('渐进查看候选表'));
     expect(await screen.findByText('TP53')).toBeTruthy();
     expect(client.readRevisionTablePage).toHaveBeenCalledWith('rev_2', 0, 50);
+  });
+
+  it('shows declared scientific conclusion differences without inferring missing direction', async () => {
+    const scientificTable = {
+      ...comparison,
+      artifacts: [{
+        ...comparison.artifacts[0], artifactId: 'go_bp_results', kind: 'table' as const,
+        table: { status: 'available', before: { columns: ['ID'], rowCount: 2, rowCountIsLowerBound: false, bytes: 10 }, after: { columns: ['ID'], rowCount: 2, rowCountIsLowerBound: false, bytes: 10 }, addedColumns: [], removedColumns: [], sampleChanges: [], truncated: false },
+        scientific: {
+          status: 'available' as const, kind: 'functional_enrichment',
+          terms: { beforeCount: 2, afterCount: 2, membership: { gainedCount: 1, lostCount: 1, retainedCount: 1, gained: ['GO:3'], lost: ['GO:2'] }, topBefore: [{ rank: 1, id: 'GO:1', adjustedPValue: 0.001 }], topAfter: [{ rank: 1, id: 'GO:3', adjustedPValue: 0.0001 }] },
+          direction: { status: 'unavailable' as const, reason: 'enrichment_table_has_no_declared_direction_column' },
+        },
+      }],
+    };
+    client.compareResultChangeSet.mockResolvedValueOnce(scientificTable);
+    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" mode="compare" />);
+    expect(await screen.findByText('科学结论差异')).toBeTruthy();
+    expect(screen.getByText('当前结果表未声明方向，未作推断')).toBeTruthy();
+    expect(screen.getByText('GO:1 → GO:3')).toBeTruthy();
+  });
+
+  it('shows exact enrichment direction changes and before-after details', async () => {
+    const scientificTable = {
+      ...comparison,
+      artifacts: [{
+        ...comparison.artifacts[0], artifactId: 'go_bp_results', kind: 'table' as const,
+        table: { status: 'available', before: { columns: ['ID'], rowCount: 2, rowCountIsLowerBound: false, bytes: 10 }, after: { columns: ['ID'], rowCount: 2, rowCountIsLowerBound: false, bytes: 10 }, addedColumns: [], removedColumns: [], sampleChanges: [], truncated: false },
+        scientific: {
+          status: 'available' as const, kind: 'functional_enrichment',
+          terms: { beforeCount: 2, afterCount: 2, membership: { gainedCount: 1, lostCount: 1, retainedCount: 1, gained: ['GO:3'], lost: ['GO:2'] }, topBefore: [{ rank: 1, id: 'GO:1', adjustedPValue: 0.001 }], topAfter: [{ rank: 1, id: 'GO:3', adjustedPValue: 0.0001 }] },
+          direction: {
+            status: 'available' as const,
+            before: [{ id: 'GO:1', direction: 'up' }, { id: 'GO:2', direction: 'mixed' }],
+            after: [{ id: 'GO:1', direction: 'down' }, { id: 'GO:3', direction: 'up' }],
+            changedCount: 1,
+            changes: [{ id: 'GO:1', before: 'up', after: 'down' }],
+          },
+        },
+      }],
+    };
+    client.compareResultChangeSet.mockResolvedValueOnce(scientificTable);
+    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" mode="compare" />);
+    expect(await screen.findByText('1 条；GO:1 up → down')).toBeTruthy();
+    expect(screen.getByText('GO:1 up、GO:2 mixed → GO:1 down、GO:3 up')).toBeTruthy();
+    expect(screen.queryByText('已由结果表声明')).toBeNull();
+  });
+
+  it('shows exact executed workflow node IDs instead of only a count', async () => {
+    client.listResultChangeSets.mockResolvedValueOnce({
+      changeSets: [{
+        ...changeSet,
+        validationSummary: {
+          ...changeSet.validationSummary,
+          affectedScope: 'workflow_subgraph',
+          affectedNodeCount: 2,
+          executedNodeIds: ['job:tj_deg_candidate', 'job:tj_go_candidate'],
+        },
+      }],
+      currentRevision: baseline,
+      revisions: [baseline, candidate],
+    });
+    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" />);
+    expect(await screen.findByLabelText('实际执行节点')).toBeTruthy();
+    expect(screen.getByText('job:tj_deg_candidate')).toBeTruthy();
+    expect(screen.getByText('job:tj_go_candidate')).toBeTruthy();
+    expect(screen.getByText('影响下游流程 · 2 个节点')).toBeTruthy();
   });
 
   it('views a historical Revision without invoking any write client', async () => {

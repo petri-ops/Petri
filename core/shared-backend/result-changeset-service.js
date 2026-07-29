@@ -8,7 +8,14 @@ const { validateResultEditIntent } = require('./result-edit-intent');
 const { isPathContained } = require('./project-run-layout');
 const { createRuntimeResourceSnapshot } = require('./runtime-resource-snapshot');
 const { evaluatePreviewResourceBudget } = require('./result-studio-lifecycle');
-const { projectRevisionSource } = require('./result-revision-source');
+const { verifyRevisionSourceMaterial } = require('./result-revision-source');
+const {
+  buildAuthoritativeWorkflowGraph,
+  verifyWorkflowGraphIntegrity,
+} = require('./result-workflow-graph');
+const { validateResultStudioCandidate } = require('./result-plugin-validator');
+const { propagateDegThresholds } = require('./result-scientific-rerun');
+const { resolveExecutionInputPath } = require('./execution-provenance');
 
 const RESULT_CHANGESET_SERVICE_VERSION = 1;
 const MAX_SCRIPT_BYTES = 2 * 1024 * 1024;
@@ -50,6 +57,23 @@ function safeSegment(value, field) {
 
 function stableJson(value) {
   return `${JSON.stringify(JSON.parse(stableStringify(value)), null, 2)}\n`;
+}
+
+function gitFailureDiagnostic(error) {
+  if (!error || error.name !== 'GitAdapterError' || !error.detail || typeof error.detail !== 'object') {
+    return null;
+  }
+  const detail = error.detail;
+  return {
+    operation: typeof error.code === 'string' ? error.code : 'git_command_failed',
+    command: typeof detail.command === 'string' ? detail.command : null,
+    status: Number.isInteger(detail.status) ? detail.status : null,
+    systemCode: typeof detail.systemCode === 'string' ? detail.systemCode : null,
+    signal: typeof detail.signal === 'string' ? detail.signal : null,
+    killed: detail.killed === true,
+    attempts: Number.isInteger(detail.attempts) ? detail.attempts : 1,
+    stderr: typeof detail.stderr === 'string' ? detail.stderr.slice(0, 2000) : '',
+  };
 }
 
 function assertSafeParameterPatch(patch, normalizedSourceParams) {
@@ -109,6 +133,9 @@ function materializeResultEdit(input = {}) {
   const workspaceRoot = path.resolve(input.workspaceRoot || '');
   if (!fs.existsSync(workspaceRoot)) throw new ResultChangeSetError('workspace_missing', 'Project workspace does not exist.');
   const changeSetId = safeSegment(input.changeSetId, 'change_set_id');
+  const materializationKey = input.materializationKey == null
+    ? null
+    : safeSegment(input.materializationKey, 'materialization_key');
   const revisionId = safeSegment(input.revisionId, 'revision_id');
   const artifactFamilyId = safeSegment(input.artifactFamilyId, 'artifact_family_id');
   const artifactId = safeSegment(input.artifactId, 'artifact_id');
@@ -157,10 +184,19 @@ function materializeResultEdit(input = {}) {
   const manifestContent = stableJson(manifest);
 
   const revisionRoot = path.join(workspaceRoot, '.biof3', 'revision');
-  const finalDir = path.join(revisionRoot, changeSetId);
+  // A ChangeSet has one root materialization and, only for an already
+  // verified server-projected affected subgraph, isolated descendant
+  // materializations.  They remain under the same private root so the MCP
+  // override path guard can enforce a single ChangeSet boundary.
+  const finalDir = materializationKey
+    ? path.join(revisionRoot, changeSetId, 'downstream', materializationKey)
+    : path.join(revisionRoot, changeSetId);
   const tempDir = path.join(revisionRoot, `.tmp-${changeSetId}-${crypto.randomUUID()}`);
   if (!isPathContained(revisionRoot, finalDir) || !isPathContained(revisionRoot, tempDir)) {
     throw new ResultChangeSetError('materialization_path_escape', 'Materialization path escaped the private revision root.');
+  }
+  if (materializationKey && !fs.existsSync(path.join(revisionRoot, changeSetId))) {
+    throw new ResultChangeSetError('materialization_root_missing', 'Downstream materialization requires the root ChangeSet materialization.');
   }
   if (fs.existsSync(finalDir)) throw new ResultChangeSetError('materialization_exists', 'ChangeSet materialization already exists.');
   try {
@@ -168,6 +204,7 @@ function materializeResultEdit(input = {}) {
     fs.writeFileSync(path.join(tempDir, `run-script.${extension}`), scriptContent, { flag: 'wx' });
     fs.writeFileSync(path.join(tempDir, 'parameters.json'), parametersContent, { flag: 'wx' });
     fs.writeFileSync(path.join(tempDir, 'materialization.json'), manifestContent, { flag: 'wx' });
+    fs.mkdirSync(path.dirname(finalDir), { recursive: true });
     fs.renameSync(tempDir, finalDir);
   } catch (error) {
     try { fs.rmSync(tempDir, { recursive: true, force: true }); } catch { /* best effort */ }
@@ -236,6 +273,691 @@ function resolveExistingProjectFile(workspaceRoot, relativePath, code) {
     return realFile;
   } catch {
     throw new ResultChangeSetError(code, 'Referenced project file is missing or escapes the workspace.');
+  }
+}
+
+function resultOf(job) {
+  if (!job) return {};
+  if (job.result && typeof job.result === 'object') return job.result;
+  try { return JSON.parse(job.result_json || '{}'); } catch { return {}; }
+}
+
+function cloneJsonObject(value, code) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new ResultChangeSetError(code, 'Persisted execution parameters must be an object.');
+  }
+  try { return JSON.parse(JSON.stringify(value)); } catch {
+    throw new ResultChangeSetError(code, 'Persisted execution parameters are not safely serializable.');
+  }
+}
+
+function resolveCandidateDescriptor({ dependencies, toolId }) {
+  if (typeof dependencies.getResultStudioDescriptor === 'function') {
+    const descriptor = dependencies.getResultStudioDescriptor(toolId);
+    if (descriptor) return descriptor.resultStudio || descriptor;
+  }
+  return null;
+}
+
+function validateCandidateJob({ dependencies, toolId, job, workspaceRoot, expectedScriptSha256, rawParams }) {
+  const validation = validateResultStudioCandidate({
+    descriptor: resolveCandidateDescriptor({ dependencies, toolId }),
+    job,
+    workspaceRoot,
+    expectedScriptSha256,
+    rawParams,
+  });
+  if (!validation.ok) {
+    throw new ResultChangeSetError(
+      'candidate_plugin_validation_failed',
+      `Candidate Job failed the admitted ${toolId} Result Studio validator.`,
+      { toolId, validatorId: validation.validatorId, diagnostics: validation.diagnostics }
+    );
+  }
+  return validation;
+}
+
+function sourceJobParameters(sourceJob) {
+  if (sourceJob?.params && typeof sourceJob.params === 'object' && !Array.isArray(sourceJob.params)) {
+    return cloneJsonObject(sourceJob.params, 'source_parameters_unavailable');
+  }
+  try {
+    return cloneJsonObject(JSON.parse(sourceJob?.params_json || '{}'), 'source_parameters_unavailable');
+  } catch (error) {
+    if (error instanceof ResultChangeSetError) throw error;
+    throw new ResultChangeSetError('source_parameters_unavailable', 'Source Job parameters are unavailable.');
+  }
+}
+
+/**
+ * Rebuild executable parameters from the immutable normalized parameters in
+ * the Revision commit. The mutable Job row contributes only verified physical
+ * file locations; every scientific/display scalar comes from Git.
+ */
+function buildTrustedExecutionParams({ sourceJob, sourceProjection, workspaceRoot, parameterPatch = {} }) {
+  const normalized = cloneJsonObject(
+    sourceProjection?.parameters?.rawValues || sourceProjection?.parameters?.values,
+    'source_parameters_unavailable'
+  );
+  const raw = sourceJobParameters(sourceJob);
+  const runtime = cloneJsonObject(normalized, 'source_parameters_unavailable');
+  const sourceResult = resultOf(sourceJob);
+  const sourceProvenance = sourceResult.executionProvenance || null;
+  const provenanceInputs = Array.isArray(sourceProvenance?.inputs)
+    ? sourceProvenance.inputs
+    : [];
+  const seen = new Set();
+  let realWorkspace;
+  try { realWorkspace = fs.realpathSync(workspaceRoot); } catch {
+    throw new ResultChangeSetError('source_workspace_unavailable', 'Project workspace is unavailable.');
+  }
+  for (const input of provenanceInputs) {
+    const inputId = safeSegment(input?.id, 'source_input_id');
+    if (seen.has(inputId)) {
+      throw new ResultChangeSetError('source_input_identity_ambiguous', 'Source input identity is duplicated.');
+    }
+    seen.add(inputId);
+    const committed = normalized[inputId];
+    if (!committed || typeof committed !== 'object' || Array.isArray(committed)
+        || committed.inputRef !== input.relativePath || committed.sha256 !== input.sha256) {
+      throw new ResultChangeSetError('source_input_binding_mismatch', 'Source input no longer matches the immutable Revision parameters.');
+    }
+    const resolved = resolveExecutionInputPath({
+      workspaceRoot: realWorkspace,
+      input,
+      sourceParams: raw,
+      provenance: sourceProvenance,
+    });
+    const physical = resolved.path;
+    if (!physical) {
+      throw new ResultChangeSetError('source_input_drift', 'A source input is missing.');
+    }
+    if (hashFile(physical) !== input.sha256) {
+      throw new ResultChangeSetError('source_input_drift', 'A source input changed or escaped the project.');
+    }
+    runtime[inputId] = physical;
+  }
+  for (const [key, value] of Object.entries(normalized)) {
+    if (value && typeof value === 'object' && !Array.isArray(value) && value.inputRef && !seen.has(key)) {
+      throw new ResultChangeSetError('source_input_provenance_missing', 'An immutable file input lacks execution provenance.');
+    }
+  }
+  return { normalized, runtime: { ...runtime, ...parameterPatch } };
+}
+
+function exactProvenanceArtifact(result, artifactId) {
+  const matches = (Array.isArray(result?.executionProvenance?.artifacts) ? result.executionProvenance.artifacts : [])
+    .filter((artifact) => artifact && artifact.id === artifactId);
+  return matches.length === 1 ? matches[0] : null;
+}
+
+/**
+ * Normalize the only affected subgraph P5 can replay today.  The caller
+ * cannot submit a plan: the context-bound agent tool rebuilds it from the
+ * durable graph and passes this server-private projection.  This service
+ * nevertheless rechecks every revision/job/hash before executing it.
+ *
+ * The deliberately narrow contract is `DEG table -> go-kegg` via one exact
+ * artifact edge.  Selection/transformed bytes, multi-parent branches and
+ * arbitrary descendants stay unavailable rather than receiving a guessed
+ * rerun.
+ */
+function resolveAuthoritativeDownstreamPlan({ input, dependencies, projectId, workspaceRoot, sourceRevision, sourceOutputHash }) {
+  const subgraph = input.authoritativeSubgraph;
+  if (!subgraph) return [];
+  if (dependencies.authoritativeSubgraphTrusted !== true) {
+    throw new ResultChangeSetError('authoritative_subgraph_untrusted', 'Affected-subgraph execution requires a context-bound server projection.');
+  }
+  if (!subgraph || subgraph.authority !== 'sqlite_job_artifact_truth'
+      || subgraph.graphId !== input.intent?.workflowGraph?.graphId
+      || subgraph.sourceDigest !== input.intent?.workflowGraph?.sourceDigest
+      || subgraph.rootToolJobId !== sourceRevision.toolJobId
+      || subgraph.rootRevisionId !== sourceRevision.revisionId
+      || !Array.isArray(subgraph.children)) {
+    throw new ResultChangeSetError('authoritative_subgraph_invalid', 'Affected-subgraph projection no longer matches the trusted intent.');
+  }
+  if (subgraph.children.length === 0) return [];
+  if (sourceRevision.artifactId !== 'deg_table') {
+    throw new ResultChangeSetError('downstream_root_unsupported', 'Only a verified DEG table can currently drive an affected enrichment rerun.');
+  }
+  if (subgraph.children.length !== 1) {
+    throw new ResultChangeSetError('downstream_subgraph_unsupported', 'Only one direct verified GO/KEGG descendant can currently be replayed.');
+  }
+  const childRef = subgraph.children[0];
+  if (!childRef || childRef.toolId !== 'go-kegg' || childRef.inputId !== 'deg_table'
+      || childRef.edgeKind !== 'artifact' || childRef.sourceToolJobId !== sourceRevision.toolJobId
+      || childRef.sourceRevisionId !== sourceRevision.revisionId
+      || childRef.sourceArtifactId !== sourceRevision.artifactId
+      || childRef.sourceOutputHash !== sourceOutputHash
+      || typeof childRef.childToolJobId !== 'string' || typeof childRef.childRevisionId !== 'string') {
+    throw new ResultChangeSetError('downstream_lineage_unsupported', 'Downstream lineage is not an exact direct DEG artifact hand-off.');
+  }
+  const repository = dependencies.repository;
+  const getToolJob = dependencies.getToolJob;
+  if (!repository || typeof repository.getRevision !== 'function' || typeof getToolJob !== 'function') {
+    throw new ResultChangeSetError('downstream_dependencies_missing', 'Downstream replay cannot resolve durable Job and Revision truth.');
+  }
+  const sourceRevisionForChild = repository.getRevision(childRef.childRevisionId);
+  const sourceJob = getToolJob(childRef.childToolJobId);
+  if (!sourceRevisionForChild || sourceRevisionForChild.projectId !== projectId
+      || sourceRevisionForChild.toolJobId !== childRef.childToolJobId
+      || sourceRevisionForChild.artifactId !== 'go_bp_results'
+      || !sourceJob || sourceJob.status !== 'completed'
+      || String(sourceJob.project_id || sourceJob.projectId || '') !== projectId
+      || (sourceJob.tool_id || sourceJob.toolId) !== 'go-kegg') {
+    throw new ResultChangeSetError('downstream_revision_missing', 'The direct GO-BP descendant lacks a durable source Revision.');
+  }
+  const sourceResult = resultOf(sourceJob);
+  const sourceArtifact = exactArtifact(sourceResult, sourceRevisionForChild.artifactId);
+  const sourceProvenanceArtifact = exactProvenanceArtifact(sourceResult, sourceRevisionForChild.artifactId);
+  if (sourceResult.artifactTruth?.status !== 'valid' || sourceResult.artifactTruth?.blocking === true
+      || !sourceArtifact || !sourceProvenanceArtifact) {
+    throw new ResultChangeSetError('downstream_artifact_truth_invalid', 'The direct GO-BP descendant no longer has valid Artifact Truth.');
+  }
+  const sourceOutputPath = resolveExistingProjectFile(workspaceRoot, sourceRevisionForChild.outputPath, 'downstream_artifact_hash_mismatch');
+  if (!sourceRevisionForChild.outputHash || hashFile(sourceOutputPath) !== sourceRevisionForChild.outputHash
+      || sourceProvenanceArtifact.sha256 !== sourceRevisionForChild.outputHash) {
+    throw new ResultChangeSetError('downstream_artifact_hash_mismatch', 'The direct GO-BP source Artifact changed before rerun.');
+  }
+  let sourceProjection;
+  try {
+    sourceProjection = verifyRevisionSourceMaterial({ projectId, revision: sourceRevisionForChild }, {
+      repository,
+      adapter: dependencies.adapter,
+      gitPathPrefix: dependencies.gitPathPrefix,
+      workspaceRoot,
+      getToolJob,
+    });
+  } catch (error) {
+    if (error && error.code) throw new ResultChangeSetError(error.code, error.message, error.detail);
+    throw error;
+  }
+  const rawParams = cloneJsonObject(sourceJob.params, 'downstream_parameters_unavailable');
+  const normalizedParams = cloneJsonObject(sourceProjection.parameters?.values, 'downstream_parameters_unavailable');
+  const originalInput = normalizedParams.deg_table;
+  if (!originalInput || typeof originalInput !== 'object' || Array.isArray(originalInput)
+      || typeof originalInput.inputRef !== 'string' || !/^[a-f0-9]{64}$/.test(String(originalInput.sha256 || ''))
+      || typeof rawParams.deg_table !== 'string') {
+    throw new ResultChangeSetError('downstream_parameters_unavailable', 'GO/KEGG source parameters do not preserve an exact DEG input binding.');
+  }
+  return [{
+    ...childRef,
+    sourceRevision: sourceRevisionForChild,
+    sourceJob,
+    sourceOutputPath,
+    sourceOutputHash: sourceRevisionForChild.outputHash,
+    sourceScriptContent: sourceProjection.content,
+    sourceScriptSha256: sourceProjection.sha256,
+    normalizedSourceParams: normalizedParams,
+    rawSourceParams: rawParams,
+    language: sourceRevisionForChild.sourceScriptRef.language,
+  }];
+}
+
+function isBaselineIntentRef(value) {
+  const intentRef = String(value || '');
+  return intentRef.startsWith('baseline:') || intentRef.startsWith('baseline-cohort:');
+}
+
+function sameIdentifierSet(left, right) {
+  return Array.isArray(left)
+    && Array.isArray(right)
+    && left.length === right.length
+    && new Set(left).size === left.length
+    && left.every((value) => right.includes(value));
+}
+
+function resolveExactFormalSourceRevision({
+  repository,
+  projectId,
+  selectedRevision,
+  sourceToolJobId,
+  artifactId,
+} = {}) {
+  const sourceChangeSet = selectedRevision?.changeSetId
+    ? repository?.getChangeSet(selectedRevision.changeSetId)
+    : null;
+  const cohort = sourceChangeSet
+    ? repository.listRevisionsByChangeSet(sourceChangeSet.changeSetId)
+    : [];
+  const cohortRevisionIds = cohort.map((revision) => revision.revisionId);
+  const cohortJobIds = [...new Set(cohort.map((revision) => revision.toolJobId))];
+  if (!sourceChangeSet || sourceChangeSet.projectId !== projectId
+      || !['preview_ready', 'adopted', 'reverted'].includes(sourceChangeSet.status)
+      || !sameIdentifierSet(cohortRevisionIds, sourceChangeSet.candidateArtifactRefs)
+      || !sameIdentifierSet(cohortJobIds, sourceChangeSet.jobRefs)
+      || !cohort.some((revision) => revision.revisionId === selectedRevision.revisionId)
+      || selectedRevision.projectId !== projectId
+      || selectedRevision.toolJobId !== sourceToolJobId) {
+    throw new ResultChangeSetError(
+      'candidate_formal_source_cohort_incomplete',
+      'Formal source outputs must resolve from the selected Revision\'s exact ChangeSet cohort.'
+    );
+  }
+  const matches = cohort.filter((revision) => revision.projectId === projectId
+    && revision.toolJobId === sourceToolJobId
+    && revision.artifactId === artifactId);
+  if (matches.length !== 1
+      || (artifactId === selectedRevision.artifactId
+        && matches[0].revisionId !== selectedRevision.revisionId)) {
+    throw new ResultChangeSetError(
+      'candidate_formal_source_revision_missing',
+      'Every produced formal output requires one exact source Revision from the selected ChangeSet cohort.',
+      { toolJobId: sourceToolJobId, artifactId }
+    );
+  }
+  return matches[0];
+}
+
+function resolveCompleteBaselineCohort({
+  repository,
+  changeSetId,
+  projectId,
+  sourceJobId,
+  formalArtifacts,
+  allowedStatuses = ['adopted'],
+}) {
+  if (!changeSetId) return null;
+  const changeSet = repository.getChangeSet(changeSetId);
+  if (!changeSet || changeSet.projectId !== projectId
+      || !allowedStatuses.includes(changeSet.status)
+      || !isBaselineIntentRef(changeSet.intentRef)
+      || (changeSet.status === 'adopted' && !changeSet.adoptedAt)) {
+    return null;
+  }
+  const revisions = repository.listRevisionsByChangeSet(changeSetId);
+  const revisionIds = revisions.map((revision) => revision.revisionId);
+  if (!sameIdentifierSet(revisionIds, changeSet.candidateArtifactRefs)
+      || revisions.length !== formalArtifacts.length) {
+    return null;
+  }
+  const byArtifactId = new Map();
+  for (const revision of revisions) {
+    if (byArtifactId.has(revision.artifactId)) return null;
+    byArtifactId.set(revision.artifactId, revision);
+  }
+  const ordered = [];
+  for (const artifact of formalArtifacts) {
+    const revision = byArtifactId.get(artifact.artifactId);
+    if (!revision || revision.projectId !== projectId
+        || revision.changeSetId !== changeSetId
+        || revision.toolJobId !== sourceJobId
+        || revision.outputHash !== artifact.sha256
+        || revision.validationStatus === 'blocked'
+        || !revision.sourceCommit
+        || revision.sourceCommit !== changeSet.candidateCommit) {
+      return null;
+    }
+    ordered.push(revision);
+  }
+  const graphRef = changeSet.validationSummary?.workflowGraph || null;
+  if (!graphRef?.graphId || !/^[a-f0-9]{64}$/.test(String(graphRef.sourceDigest || ''))) return null;
+  let workflowGraph = null;
+  try { workflowGraph = repository.getWorkflowGraph(graphRef.graphId); } catch { return null; }
+  const graphIntegrity = workflowGraph
+    ? verifyWorkflowGraphIntegrity(workflowGraph)
+    : { ok: false };
+  const sourceNode = workflowGraph?.nodes?.find((node) => node.toolJobId === sourceJobId) || null;
+  if (!workflowGraph || !graphIntegrity.ok || workflowGraph.projectId !== projectId
+      || workflowGraph.sourceDigest !== graphRef.sourceDigest
+      || workflowGraph.validationStatus !== 'valid'
+      || !sourceNode
+      || !formalArtifacts.every((artifact) => sourceNode.artifactIds.includes(artifact.artifactId))) {
+    return null;
+  }
+  return { changeSet, revisions: ordered };
+}
+
+/**
+ * Register all descriptor-declared formal outputs from one completed Job in a
+ * single baseline cohort.  The legacy single-artifact path remains available
+ * for plugins without a trusted Result Studio descriptor, but admitted P5
+ * plugins must never make a partial cohort look like a complete source.
+ */
+function ensureBaselineArtifactCohort(input = {}, dependencies = {}) {
+  const descriptor = resolveCandidateDescriptor({
+    dependencies,
+    toolId: input.pluginId || input.sourceJob?.tool_id || input.sourceJob?.toolId,
+  });
+  if (!descriptor) return ensureBaselineArtifactRevision(input, dependencies);
+  const repository = dependencies.repository;
+  const adapter = dependencies.adapter;
+  if (!repository || !adapter || typeof repository.appendRevisionBatch !== 'function') {
+    throw new ResultChangeSetError('baseline_cohort_dependencies_missing', 'Baseline cohort registration requires the canonical Repository batch API.');
+  }
+  const projectId = String(input.projectId || '').trim();
+  const workspaceRoot = path.resolve(input.workspaceRoot || '');
+  const sourceJob = input.sourceJob;
+  if (!projectId || !sourceJob || String(sourceJob.project_id || sourceJob.projectId || '') !== projectId
+      || sourceJob.status !== 'completed') {
+    throw new ResultChangeSetError('baseline_source_job_invalid', 'Baseline source must be a completed Job in the active project.');
+  }
+  const sourceResult = resultOf(sourceJob);
+  const rawParams = sourceJob.params && typeof sourceJob.params === 'object' && !Array.isArray(sourceJob.params)
+    ? sourceJob.params
+    : (() => {
+      try { return JSON.parse(sourceJob.params_json || '{}'); } catch { return {}; }
+    })();
+  const validation = validateResultStudioCandidate({
+    descriptor,
+    job: sourceJob,
+    workspaceRoot,
+    expectedScriptSha256: input.sourceScriptSha256,
+    rawParams,
+  });
+  if (!validation.ok) {
+    throw new ResultChangeSetError(
+      'baseline_plugin_validation_failed',
+      'The admitted source Job failed its Result Studio validator.',
+      { validatorId: validation.validatorId, diagnostics: validation.diagnostics }
+    );
+  }
+  const formalArtifacts = validation.formalArtifacts;
+  const requested = String(input.artifactId || '').trim();
+  if (!requested || !formalArtifacts.some((artifact) => artifact.artifactId === requested)) {
+    throw new ResultChangeSetError('baseline_artifact_missing', 'Requested Artifact is not a descriptor-declared formal output.');
+  }
+  const cohortDigest = sha256(stableStringify(formalArtifacts.map((artifact) => ({
+    artifactId: artifact.artifactId,
+    sha256: artifact.sha256,
+  })).sort((left, right) => left.artifactId.localeCompare(right.artifactId))));
+  const existingById = new Map(formalArtifacts.map((artifact) => [
+    artifact.artifactId,
+    repository.findRevisionByJobArtifact({ projectId, toolJobId: sourceJob.id, artifactId: artifact.artifactId }),
+  ]));
+  const preferredChangeSetId = deterministicId('cs', 'baseline-cohort-v2', projectId, sourceJob.id, cohortDigest);
+  const reusableChangeSetIds = [
+    preferredChangeSetId,
+    ...new Set([...existingById.values()].filter(Boolean).map((revision) => revision.changeSetId)),
+  ];
+  for (const existingChangeSetId of reusableChangeSetIds) {
+    const reusable = resolveCompleteBaselineCohort({
+      repository,
+      changeSetId: existingChangeSetId,
+      projectId,
+      sourceJobId: sourceJob.id,
+      formalArtifacts,
+    });
+    if (reusable) {
+      return {
+        revision: reusable.revisions.find((revision) => revision.artifactId === requested),
+        cohortRevisions: reusable.revisions,
+        created: false,
+        cohort: true,
+      };
+    }
+  }
+
+  const artifactFamilyIds = new Map(formalArtifacts.map((artifact) => [
+    artifact.artifactId,
+    deterministicId('af', projectId, sourceJob.id, artifact.artifactId),
+  ]));
+  const currentById = new Map(formalArtifacts.map((artifact) => [
+    artifact.artifactId,
+    repository.getCurrentRevision(artifactFamilyIds.get(artifact.artifactId), projectId),
+  ]));
+  const conflictingCurrent = formalArtifacts.find((artifact) => {
+    const current = currentById.get(artifact.artifactId);
+    return current && (current.toolJobId !== sourceJob.id
+      || current.artifactId !== artifact.artifactId
+      || current.outputHash !== artifact.sha256);
+  });
+  if (conflictingCurrent) {
+    const current = currentById.get(conflictingCurrent.artifactId);
+    throw new ResultChangeSetError(
+      'baseline_cohort_current_conflict',
+      'A different current Revision already owns a formal baseline Artifact family.',
+      { artifactId: conflictingCurrent.artifactId, currentRevisionId: current.revisionId }
+    );
+  }
+
+  let changeSetId = null;
+  let changeSet = null;
+  for (let attempt = 0; attempt < 32; attempt += 1) {
+    const candidateId = attempt === 0
+      ? preferredChangeSetId
+      : deterministicId('cs', `baseline-cohort-v2-repair-${attempt}`, projectId, sourceJob.id, cohortDigest);
+    const candidate = repository.getChangeSet(candidateId);
+    if (!candidate) {
+      changeSetId = candidateId;
+      break;
+    }
+    const preview = resolveCompleteBaselineCohort({
+      repository,
+      changeSetId: candidateId,
+      projectId,
+      sourceJobId: sourceJob.id,
+      formalArtifacts,
+      allowedStatuses: ['preview_ready'],
+    });
+    if (preview) {
+      repository.adoptChangeSet({ changeSetId: candidateId, candidateCommit: preview.changeSet.candidateCommit });
+      const adopted = resolveCompleteBaselineCohort({
+        repository,
+        changeSetId: candidateId,
+        projectId,
+        sourceJobId: sourceJob.id,
+        formalArtifacts,
+      });
+      if (!adopted) {
+        throw new ResultChangeSetError('baseline_cohort_incoherent', 'Recovered baseline preview did not adopt as one complete cohort.');
+      }
+      return {
+        revision: adopted.revisions.find((revision) => revision.artifactId === requested),
+        cohortRevisions: adopted.revisions,
+        created: false,
+        cohort: true,
+      };
+    }
+    if (['draft', 'running'].includes(candidate.status)
+        && repository.listRevisionsByChangeSet(candidateId).length === 0) {
+      changeSetId = candidateId;
+      changeSet = candidate;
+      break;
+    }
+  }
+  if (!changeSetId) {
+    throw new ResultChangeSetError(
+      'baseline_cohort_registration_exhausted',
+      'Unable to allocate a coherent baseline cohort after prior incomplete registrations.'
+    );
+  }
+  const workingBranchRef = `refs/heads/biof3/baseline/${changeSetId}`;
+  const baseCommit = resolveBaseCommit(adapter, projectId);
+  let candidateCommit = adapter.revParse(workingBranchRef);
+  const language = String(input.language || '').toLowerCase() === 'python' ? 'python' : 'r';
+  const extension = language === 'python' ? 'py' : 'R';
+  const sourceScriptContent = input.sourceScriptContent;
+  if (typeof sourceScriptContent !== 'string' || sha256(sourceScriptContent) !== input.sourceScriptSha256) {
+    throw new ResultChangeSetError('baseline_script_hash_mismatch', 'Baseline script snapshot is unavailable or changed.');
+  }
+  const inputArtifactRefs = (sourceResult.executionProvenance?.inputs || [])
+    .filter((entry) => entry && (entry.sourceArtifactRef || entry.id))
+    .map((entry) => ({ artifactId: entry.sourceArtifactRef || entry.id, hash: entry.sha256 || null, role: entry.role || null }));
+  const parameters = sourceResult.executionProvenance?.params?.normalized;
+  if (!parameters || typeof parameters !== 'object' || Array.isArray(parameters)) {
+    throw new ResultChangeSetError('baseline_parameters_unavailable', 'Normalized execution parameters are required for a reproducible baseline.');
+  }
+  const parametersContent = stableJson(parameters);
+  const parametersHash = sha256(parametersContent);
+  const cohortRows = formalArtifacts.map((artifact) => {
+    const artifactFamilyId = artifactFamilyIds.get(artifact.artifactId);
+    const revisionId = deterministicId('rev', 'baseline-cohort-v2', changeSetId, artifact.artifactId, artifact.sha256);
+    const managedBase = path.posix.join('analysis/scripts', artifactFamilyId, revisionId);
+    const scriptRelativePath = path.posix.join(managedBase, `${safeSegment(artifact.artifactId, 'artifact_id')}.${extension}`);
+    const parametersRelativePath = path.posix.join(managedBase, 'parameters.json');
+    const manifestRelativePath = path.posix.join(managedBase, 'materialization.json');
+    const manifestContent = stableJson({
+      resultStudioMaterializationVersion: 1,
+      baseline: true,
+      cohortDigest,
+      changeSetId,
+      revisionId,
+      artifactFamilyId,
+      artifactId: artifact.artifactId,
+      pluginId: input.pluginId || sourceJob.tool_id,
+      language,
+      sourceToolJobId: sourceJob.id,
+      scriptRelativePath,
+      scriptSha256: input.sourceScriptSha256,
+      parametersRelativePath,
+      parametersSha256: parametersHash,
+    });
+    return {
+      artifact,
+      revisionId,
+      artifactFamilyId,
+      scriptRelativePath,
+      parametersRelativePath,
+      manifestRelativePath,
+      parametersHash,
+      manifestContent,
+      revision: {
+        revisionId,
+        projectId,
+        artifactFamilyId,
+        artifactId: artifact.artifactId,
+        parentRevisionIds: currentById.get(artifact.artifactId)
+          ? [currentById.get(artifact.artifactId).revisionId]
+          : [],
+        sourceCommit: null,
+        sourceScriptRef: {
+          relativePath: scriptRelativePath,
+          sha256: input.sourceScriptSha256,
+          entryPoint: path.posix.basename(scriptRelativePath),
+          artifactId: artifact.artifactId,
+          rendererId: `${input.pluginId || sourceJob.tool_id}:${artifact.artifactId}`,
+          language,
+          origin: 'project_materialized',
+        },
+        inputArtifactRefs,
+        parametersRef: parametersRelativePath,
+        parametersHash,
+        toolJobId: sourceJob.id,
+        outputPath: projectRelativeOutput(workspaceRoot, artifact),
+        outputHash: artifact.sha256,
+        validationStatus: validation.validationStatus,
+        reproducibilityStatus: 'available',
+        changeSetId,
+      },
+    };
+  });
+
+  try {
+    if (!changeSet) {
+      repository.createChangeSet({
+        changeSetId,
+        projectId,
+        intentRef: `baseline:${sourceJob.id}:cohort`,
+        baseCommit,
+        workingBranchRef,
+        createdBy: 'agent',
+        parentArtifactRefs: [],
+      });
+      repository.transitionChangeSet({ changeSetId, to: 'running' });
+      changeSet = repository.getChangeSet(changeSetId);
+    } else if (changeSet.status === 'draft') {
+      repository.transitionChangeSet({ changeSetId, to: 'running' });
+      changeSet = repository.getChangeSet(changeSetId);
+    }
+    if (changeSet.status !== 'running') {
+      throw new ResultChangeSetError('baseline_cohort_status_invalid', `Cannot complete baseline cohort from status ${changeSet.status}.`);
+    }
+    if (!candidateCommit) {
+      const gitFiles = cohortRows.flatMap((row) => [
+        { path: row.scriptRelativePath, content: sourceScriptContent },
+        { path: row.parametersRelativePath, content: parametersContent },
+        { path: row.manifestRelativePath, content: row.manifestContent },
+      ]);
+      candidateCommit = adapter.commitVirtualFiles({
+        parentCommit: baseCommit,
+        ref: workingBranchRef,
+        expectedOld: '0'.repeat(40),
+        message: `BioF3 baseline cohort ${sourceJob.id}`,
+        files: gitFiles,
+      }).commit;
+    }
+    const revisionInputs = cohortRows.map((row) => ({ ...row.revision, sourceCommit: candidateCommit }));
+    const graphBuilder = dependencies.buildCandidateWorkflowGraph || buildAuthoritativeWorkflowGraph;
+    const resolvedWorkflowJobs = typeof dependencies.resolveWorkflowJobs === 'function'
+      ? dependencies.resolveWorkflowJobs({ projectId, sourceJob })
+      : [sourceJob];
+    const workflowJobsById = new Map((Array.isArray(resolvedWorkflowJobs) ? resolvedWorkflowJobs : [])
+      .filter((job) => job && typeof job === 'object')
+      .map((job) => [String(job.id || '').trim(), job])
+      .filter(([jobId]) => jobId));
+    // The source Job was reloaded from canonical Job truth by the caller.  It
+    // wins over any duplicate returned while resolving its immutable parents.
+    workflowJobsById.set(sourceJob.id, sourceJob);
+    const baselineGraphResult = graphBuilder({
+      projectId,
+      sourceToolJobId: sourceJob.id,
+      jobs: [...workflowJobsById.values()],
+      repository,
+      requiredToolJobIds: [sourceJob.id],
+      stagedRevisions: revisionInputs,
+    });
+    if (!baselineGraphResult || baselineGraphResult.ok !== true || !baselineGraphResult.graph) {
+      throw new ResultChangeSetError(
+        'baseline_workflow_graph_invalid',
+        'Baseline Job could not be projected into one complete authoritative workflow graph.',
+        { diagnostics: baselineGraphResult?.diagnostics || [] }
+      );
+    }
+    const baselineWorkflowGraph = baselineGraphResult.graph;
+    repository.appendRevisionBatch({
+      revisions: revisionInputs,
+      workflowGraph: baselineWorkflowGraph,
+      transition: {
+        changeSetId,
+        to: 'preview_ready',
+        candidateCommit,
+        changedPaths: cohortRows.flatMap((row) => [
+          { relativePath: row.scriptRelativePath, changeType: 'added', beforeHash: null, afterHash: input.sourceScriptSha256 },
+          { relativePath: row.parametersRelativePath, changeType: 'added', beforeHash: null, afterHash: row.parametersHash },
+          { relativePath: row.manifestRelativePath, changeType: 'added', beforeHash: null, afterHash: sha256(row.manifestContent) },
+        ]),
+        jobRefs: [sourceJob.id],
+        candidateArtifactRefs: revisionInputs.map((row) => row.revisionId),
+        validationSummary: {
+          baseline: true,
+          cohort: true,
+          cohortDigest,
+          formalArtifactIds: formalArtifacts.map((artifact) => artifact.artifactId),
+          validatorId: validation.validatorId,
+          artifactTruthStatus: 'valid',
+          workflowGraph: {
+            graphId: baselineWorkflowGraph.graphId,
+            sourceDigest: baselineWorkflowGraph.sourceDigest,
+          },
+        },
+      },
+    });
+    if (repository.getChangeSet(changeSetId)?.status === 'preview_ready') {
+      repository.adoptChangeSet({ changeSetId, candidateCommit });
+    }
+    const complete = resolveCompleteBaselineCohort({
+      repository,
+      changeSetId,
+      projectId,
+      sourceJobId: sourceJob.id,
+      formalArtifacts,
+    });
+    if (!complete) {
+      throw new ResultChangeSetError('baseline_cohort_incoherent', 'Baseline registration did not produce one complete adopted cohort.');
+    }
+    return {
+      revision: complete.revisions.find((revision) => revision.artifactId === requested),
+      cohortRevisions: complete.revisions,
+      created: true,
+      cohort: true,
+    };
+  } catch (error) {
+    const current = repository.getChangeSet(changeSetId);
+    if (current?.status === 'running') {
+      try { repository.transitionChangeSet({ changeSetId, to: 'validation_failed', reason: error.code || 'baseline_cohort_failed' }); } catch { /* recovery scan */ }
+    }
+    throw error;
   }
 }
 
@@ -536,12 +1258,13 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
   const sourceArtifactHash = sourceRevision.outputHash;
   let sourceProjection;
   try {
-    sourceProjection = projectRevisionSource({ projectId, revision: sourceRevision }, {
+    sourceProjection = verifyRevisionSourceMaterial({ projectId, revision: sourceRevision }, {
       repository,
       adapter,
       gitPathPrefix: dependencies.gitPathPrefix,
       workspaceRoot,
       getToolJob: dependencies.getToolJob || (() => sourceJob),
+      allowRawParameters: true,
     });
   } catch (error) {
     if (error && error.code) throw new ResultChangeSetError(error.code, error.message, error.detail);
@@ -555,6 +1278,14 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
   if (!sourceProjection.parameters?.values) {
     throw new ResultChangeSetError('source_parameters_missing', 'Exact Revision parameters are unavailable.');
   }
+  const downstreamPlan = resolveAuthoritativeDownstreamPlan({
+    input,
+    dependencies,
+    projectId,
+    workspaceRoot,
+    sourceRevision,
+    sourceOutputHash: sourceArtifactHash,
+  });
 
   const changeSetId = input.changeSetId || id('cs');
   const revisionId = input.revisionId || id('rev');
@@ -589,10 +1320,18 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
     if (cancelled()) throw new ResultChangeSetError('edit_cancelled', 'Edit was cancelled before materialization.');
 
     emit('materialize', 'running');
-    const normalizedSourceParams = input.normalizedSourceParams || sourceProjection.parameters.values;
-    if (stableStringify(normalizedSourceParams) !== stableStringify(sourceProjection.parameters.values)) {
+    const exactSourceParams = sourceProjection.parameters.rawValues || sourceProjection.parameters.values;
+    if (input.normalizedSourceParams
+        && stableStringify(input.normalizedSourceParams) !== stableStringify(exactSourceParams)) {
       throw new ResultChangeSetError('source_parameters_mismatch', 'Edit parameters do not match the selected Revision.');
     }
+    const trustedExecution = buildTrustedExecutionParams({
+      sourceJob,
+      sourceProjection,
+      workspaceRoot,
+      parameterPatch: input.intent.proposedParameterPatch,
+    });
+    const normalizedSourceParams = trustedExecution.normalized;
     const materialized = materializeResultEdit({
       workspaceRoot,
       changeSetId,
@@ -612,7 +1351,7 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
     saveResultEditCheckpoint({ repository, projectId, conversationId: input.conversationId, changeSetId, stage: 'materialized' });
 
     const gitPathPrefix = String(dependencies.gitPathPrefix || '').replace(/^\/+|\/+$/g, '');
-    const candidate = adapter.commitVirtualFiles({
+    let candidate = adapter.commitVirtualFiles({
       parentCommit: baseCommit,
       ref: workingBranchRef,
       expectedOld: '0'.repeat(40),
@@ -627,7 +1366,7 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
     if (cancelled()) throw new ResultChangeSetError('edit_cancelled', 'Edit was cancelled before execution.');
 
     emit('job', 'running');
-    const executionParams = { ...(sourceJob.params || {}), ...input.intent.proposedParameterPatch };
+    const executionParams = trustedExecution.runtime;
     const execution = await executeJob({
       toolId: input.pluginId,
       params: executionParams,
@@ -651,6 +1390,22 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
       || candidateResult.artifactTruth.blocking === true) {
       throw new ResultChangeSetError('candidate_artifact_truth_invalid', 'Candidate Job did not produce valid Artifact Truth.');
     }
+    const rootValidation = validateCandidateJob({
+      dependencies,
+      toolId: input.pluginId,
+      job: candidateJob,
+      workspaceRoot,
+      expectedScriptSha256: materialized.scriptSha256,
+      rawParams: executionParams,
+    });
+    const expectedCandidateParams = { ...normalizedSourceParams, ...input.intent.proposedParameterPatch };
+    if (stableStringify(candidateResult.executionProvenance?.params?.normalized || {})
+        !== stableStringify(expectedCandidateParams)) {
+      throw new ResultChangeSetError(
+        'candidate_parameters_drift',
+        'Candidate Job parameters differ from the immutable Revision parameters plus the approved patch.'
+      );
+    }
     const artifact = exactArtifact(candidateResult, sourceRevision.artifactId);
     if (!artifact) throw new ResultChangeSetError('candidate_artifact_missing', 'Candidate Artifact id is not uniquely present.');
     const outputPath = projectRelativeOutput(workspaceRoot, artifact);
@@ -660,8 +1415,158 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
     if (!outputHash || !provenanceArtifact || provenanceArtifact.sha256 !== outputHash) {
       throw new ResultChangeSetError('candidate_artifact_hash_mismatch', 'Candidate Artifact hash does not match execution provenance.');
     }
+    const primaryFormalArtifact = rootValidation.formalArtifacts
+      .find((entry) => entry.artifactId === sourceRevision.artifactId);
+    if (!primaryFormalArtifact || primaryFormalArtifact.sha256 !== outputHash) {
+      throw new ResultChangeSetError('candidate_formal_artifact_missing', 'Selected Artifact is not part of the validated formal output cohort.');
+    }
     if (hashFile(sourceOutputPath) !== sourceArtifactHash) {
       throw new ResultChangeSetError('source_artifact_mutated', 'Source Artifact changed during candidate execution.');
+    }
+
+    // P5 affected-subgraph rerun.  Every child is a direct exact-byte
+    // hand-off that was rebuilt from the persisted graph before this service
+    // was entered.  We intentionally materialize/run it only after the root
+    // candidate has produced verifiable Artifact Truth, then add its immutable
+    // source snapshot to one final candidate commit.
+    const downstreamCandidates = [];
+    for (const downstream of downstreamPlan) {
+      if (cancelled()) throw new ResultChangeSetError('edit_cancelled', 'Edit was cancelled before downstream execution.');
+      const downstreamRevisionId = id('rev');
+      const propagatedThresholds = propagateDegThresholds({
+        sourceDescriptor: resolveCandidateDescriptor({ dependencies, toolId: input.pluginId }),
+        downstreamDescriptor: resolveCandidateDescriptor({ dependencies, toolId: downstream.toolId }),
+        sourceParameterPatch: input.intent.proposedParameterPatch,
+        downstreamNormalizedParams: downstream.normalizedSourceParams,
+        downstreamRawParams: downstream.rawSourceParams,
+      });
+      if (!propagatedThresholds.ok) {
+        throw new ResultChangeSetError(propagatedThresholds.code, propagatedThresholds.message, propagatedThresholds.detail || null);
+      }
+      const downstreamNormalizedParams = {
+        ...propagatedThresholds.normalizedParams,
+        deg_table: {
+          inputRef: `inputs/deg_table/${path.basename(artifact.path)}`,
+          sha256: outputHash,
+        },
+      };
+      const downstreamExecutionParams = {
+        ...propagatedThresholds.rawParams,
+        deg_table: artifact.path,
+      };
+      const downstreamMaterialization = materializeResultEdit({
+        workspaceRoot,
+        changeSetId,
+        materializationKey: downstreamRevisionId,
+        revisionId: downstreamRevisionId,
+        artifactFamilyId: downstream.sourceRevision.artifactFamilyId,
+        artifactId: downstream.sourceRevision.artifactId,
+        pluginId: downstream.toolId,
+        language: downstream.language,
+        sourceScriptContent: downstream.sourceScriptContent,
+        expectedSourceScriptSha256: downstream.sourceScriptSha256,
+        normalizedSourceParams: downstreamNormalizedParams,
+        proposedParameterPatch: {},
+        scriptPatch: [],
+        intentId: input.intent.intentId,
+      });
+      const downstreamLineage = {
+        deg_table: {
+          lineageVersion: 1,
+          kind: 'artifact',
+          sourceRevisionId: revisionId,
+          sourceToolJobId: candidateJob.id,
+          sourceArtifactId: sourceRevision.artifactId,
+          sourceOutputHash: outputHash,
+          materializationHash: outputHash,
+        },
+      };
+      emit('downstream_job', 'running', { nodeId: downstream.nodeId, toolId: downstream.toolId });
+      const downstreamExecution = await executeJob({
+        toolId: downstream.toolId,
+        params: downstreamExecutionParams,
+        materializedScriptPath: downstreamMaterialization.executableScriptPath,
+        materializedScriptSha256: downstreamMaterialization.scriptSha256,
+        changeSetId,
+        revisionId: downstreamRevisionId,
+        resultStudioInputLineage: downstreamLineage,
+      });
+      const downstreamJob = downstreamExecution && downstreamExecution.job;
+      if (!downstreamJob || downstreamJob.status !== 'completed'
+          || String(downstreamJob.project_id || downstreamJob.projectId || '') !== projectId) {
+        throw new ResultChangeSetError('downstream_job_failed', 'Verified GO/KEGG descendant did not complete in the active project.', {
+          toolJobId: downstreamJob && downstreamJob.id || downstreamExecution && downstreamExecution.toolJobId || null,
+        });
+      }
+      const downstreamResult = resultOf(downstreamJob);
+      if (downstreamResult.artifactTruth?.status !== 'valid' || downstreamResult.artifactTruth?.blocking === true) {
+        throw new ResultChangeSetError('downstream_artifact_truth_invalid', 'Verified GO/KEGG descendant did not produce valid Artifact Truth.');
+      }
+      const downstreamValidation = validateCandidateJob({
+        dependencies,
+        toolId: downstream.toolId,
+        job: downstreamJob,
+        workspaceRoot,
+        expectedScriptSha256: downstreamMaterialization.scriptSha256,
+        rawParams: downstreamExecutionParams,
+      });
+      const downstreamArtifact = exactArtifact(downstreamResult, downstream.sourceRevision.artifactId);
+      const downstreamProvenanceArtifact = exactProvenanceArtifact(downstreamResult, downstream.sourceRevision.artifactId);
+      if (!downstreamArtifact || !downstreamProvenanceArtifact) {
+        throw new ResultChangeSetError('downstream_candidate_artifact_missing', 'GO/KEGG candidate is missing its required GO-BP Artifact.');
+      }
+      const downstreamOutputPath = projectRelativeOutput(workspaceRoot, downstreamArtifact);
+      const downstreamOutputHash = hashFile(downstreamArtifact.path);
+      if (!downstreamOutputHash || downstreamProvenanceArtifact.sha256 !== downstreamOutputHash) {
+        throw new ResultChangeSetError('downstream_candidate_artifact_hash_mismatch', 'GO/KEGG candidate Artifact does not match execution provenance.');
+      }
+      const downstreamPrimaryFormalArtifact = downstreamValidation.formalArtifacts
+        .find((entry) => entry.artifactId === downstream.sourceRevision.artifactId);
+      if (!downstreamPrimaryFormalArtifact || downstreamPrimaryFormalArtifact.sha256 !== downstreamOutputHash) {
+        throw new ResultChangeSetError('downstream_formal_artifact_missing', 'Downstream selected Artifact is not part of the validated formal output cohort.');
+      }
+      const downstreamProvenance = downstreamResult.executionProvenance || {};
+      if (stableStringify(downstreamProvenance.params?.normalized || {}) !== stableStringify(downstreamNormalizedParams)) {
+        throw new ResultChangeSetError('downstream_parameters_drift', 'GO/KEGG candidate parameters differ from the immutable source parameters plus the candidate DEG input.');
+      }
+      const lineageInput = (downstreamProvenance.inputs || []).filter((entry) => entry && entry.id === 'deg_table');
+      const receivedLineage = lineageInput.length === 1 ? lineageInput[0].lineage : null;
+      if (lineageInput.length !== 1 || lineageInput[0].sha256 !== outputHash
+          || !receivedLineage || receivedLineage.lineageVersion !== 1 || receivedLineage.kind !== 'artifact'
+          || receivedLineage.sourceRevisionId !== revisionId || receivedLineage.sourceToolJobId !== candidateJob.id
+          || receivedLineage.sourceArtifactId !== sourceRevision.artifactId
+          || receivedLineage.sourceOutputHash !== outputHash || receivedLineage.materializationHash !== outputHash) {
+        throw new ResultChangeSetError('downstream_lineage_drift', 'GO/KEGG candidate did not receive the exact candidate DEG Artifact lineage.');
+      }
+      if (hashFile(downstream.sourceOutputPath) !== downstream.sourceOutputHash) {
+        throw new ResultChangeSetError('downstream_source_artifact_mutated', 'Original GO-BP Artifact changed during candidate execution.');
+      }
+      downstreamCandidates.push({
+        ...downstream,
+        revisionId: downstreamRevisionId,
+        job: downstreamJob,
+        result: downstreamResult,
+        materialization: downstreamMaterialization,
+        validation: downstreamValidation,
+        outputPath: downstreamOutputPath,
+        outputHash: downstreamOutputHash,
+      });
+      emit('downstream_job', 'completed', { nodeId: downstream.nodeId, toolJobId: downstreamJob.id });
+    }
+
+    if (downstreamCandidates.length > 0) {
+      candidate = adapter.commitVirtualFiles({
+        parentCommit: candidate.commit,
+        ref: workingBranchRef,
+        expectedOld: candidate.commit,
+        message: `BioF3 ChangeSet ${changeSetId}: verified downstream enrichment materialization`,
+        files: downstreamCandidates.flatMap((entry) => entry.materialization.gitFiles).map((file) => ({
+          ...file,
+          path: gitPathPrefix ? path.posix.join(gitPathPrefix, file.path) : file.path,
+        })),
+      });
+      emit('commit', 'completed', { candidateCommit: candidate.commit, downstream: true });
+      saveResultEditCheckpoint({ repository, projectId, conversationId: input.conversationId, changeSetId, candidateCommit: candidate.commit, stage: 'downstream_candidate_committed' });
     }
 
     emit('revision', 'running');
@@ -672,55 +1577,173 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
         hash: entry.sha256 || null,
         role: entry.role || null,
       }));
-    const revision = repository.appendRevision({
-      revisionId,
-      projectId,
-      artifactFamilyId: sourceRevision.artifactFamilyId,
-      artifactId: sourceRevision.artifactId,
-      parentRevisionIds: [sourceRevision.revisionId],
-      sourceCommit: candidate.commit,
-      sourceScriptRef: {
-        relativePath: materialized.scriptRelativePath,
-        sha256: materialized.scriptSha256,
-        entryPoint: path.posix.basename(materialized.scriptRelativePath),
-        artifactId: sourceRevision.artifactId,
-        rendererId: materialized.rendererId,
-        language: materialized.language,
-        origin: 'project_materialized',
-      },
-      inputArtifactRefs,
-      parametersRef: materialized.parametersRelativePath,
-      parametersHash: materialized.parametersSha256,
-      toolJobId: candidateJob.id,
-      outputPath,
-      outputHash,
-      validationStatus: candidateResult.artifactTruth.status,
-      reproducibilityStatus: 'verified',
-      changeSetId,
+    const sourceRevisionForFormalArtifact = ({ formalArtifact, selectedRevision, sourceFormalJob }) => {
+      const formalSourceRevision = resolveExactFormalSourceRevision({
+        repository,
+        projectId,
+        selectedRevision,
+        sourceToolJobId: sourceFormalJob.id,
+        artifactId: formalArtifact.artifactId,
+      });
+      const sourceProvenanceArtifact = exactProvenanceArtifact(resultOf(sourceFormalJob), formalArtifact.artifactId);
+      if (!formalSourceRevision || formalSourceRevision.projectId !== projectId
+          || formalSourceRevision.toolJobId !== sourceFormalJob.id
+          || formalSourceRevision.artifactId !== formalArtifact.artifactId
+          || !sourceProvenanceArtifact || sourceProvenanceArtifact.sha256 !== formalSourceRevision.outputHash) {
+        throw new ResultChangeSetError(
+          'candidate_formal_source_revision_missing',
+          'Every produced formal output requires an exact source Revision in the same Job cohort.',
+          { toolJobId: sourceFormalJob.id, artifactId: formalArtifact.artifactId }
+        );
+      }
+      return formalSourceRevision;
+    };
+    const rootRevisionInputs = rootValidation.formalArtifacts.map((formalArtifact) => {
+      const formalSourceRevision = sourceRevisionForFormalArtifact({
+        formalArtifact,
+        selectedRevision: sourceRevision,
+        sourceFormalJob: sourceJob,
+      });
+      const formalRevisionId = formalArtifact.artifactId === sourceRevision.artifactId ? revisionId : id('rev');
+      return {
+        revisionId: formalRevisionId,
+        projectId,
+        artifactFamilyId: formalSourceRevision.artifactFamilyId,
+        artifactId: formalArtifact.artifactId,
+        parentRevisionIds: [formalSourceRevision.revisionId],
+        sourceCommit: candidate.commit,
+        sourceScriptRef: {
+          relativePath: materialized.scriptRelativePath,
+          sha256: materialized.scriptSha256,
+          entryPoint: path.posix.basename(materialized.scriptRelativePath),
+          artifactId: formalArtifact.artifactId,
+          rendererId: `${input.pluginId}:${formalArtifact.artifactId}`,
+          language: materialized.language,
+          origin: 'project_materialized',
+        },
+        inputArtifactRefs,
+        parametersRef: materialized.parametersRelativePath,
+        parametersHash: materialized.parametersSha256,
+        toolJobId: candidateJob.id,
+        outputPath: projectRelativeOutput(workspaceRoot, formalArtifact),
+        outputHash: formalArtifact.sha256,
+        validationStatus: rootValidation.status,
+        reproducibilityStatus: rootValidation.reproducibilityStatus,
+        changeSetId,
+      };
     });
-    const ready = repository.transitionChangeSet({
-      changeSetId,
-      to: 'preview_ready',
-      candidateCommit: candidate.commit,
-      changedPaths: materialized.changedPaths,
-      jobRefs: [candidateJob.id],
-      candidateArtifactRefs: [revision.revisionId],
-      validationSummary: {
-        artifactTruthStatus: candidateResult.artifactTruth.status,
-        sourceArtifactPreserved: true,
-        scriptSha256: materialized.scriptSha256,
-        outputSha256: outputHash,
-        // P4R-4 review projection: bounded user-facing intent and impact come
-        // from the validated, server-trusted ResultEditIntent. The UI must not
-        // guess them from an opaque intentRef or a Git message.
-        intentSummary: input.intent.requestedOutcome.slice(0, 500),
-        impactLevel: input.intent.editClass,
-        affectedScope: input.intent.affectedScope || 'unknown',
-        requiresJob: input.intent.requiresJob,
-        affectedNodeCount: Array.isArray(input.intent.affectedNodeIds) ? input.intent.affectedNodeIds.length : 0,
+    const downstreamRevisionIds = new Set();
+    const downstreamRevisionInputs = downstreamCandidates.flatMap((entry) => {
+      const downstreamInputArtifactRefs = (entry.result.executionProvenance?.inputs || [])
+        .filter((item) => item && (item.sourceArtifactRef || item.id))
+        .map((item) => ({
+          artifactId: item.sourceArtifactRef || item.id,
+          hash: item.sha256 || null,
+          role: item.role || null,
+        }));
+      return entry.validation.formalArtifacts.map((formalArtifact) => {
+        const formalSourceRevision = sourceRevisionForFormalArtifact({
+          formalArtifact,
+          selectedRevision: entry.sourceRevision,
+          sourceFormalJob: entry.sourceJob,
+        });
+        const formalRevisionId = formalArtifact.artifactId === entry.sourceRevision.artifactId
+          ? entry.revisionId
+          : id('rev');
+        downstreamRevisionIds.add(formalRevisionId);
+        return {
+          revisionId: formalRevisionId,
+          projectId,
+          artifactFamilyId: formalSourceRevision.artifactFamilyId,
+          artifactId: formalArtifact.artifactId,
+          parentRevisionIds: [formalSourceRevision.revisionId, revisionId],
+          sourceCommit: candidate.commit,
+          sourceScriptRef: {
+            relativePath: entry.materialization.scriptRelativePath,
+            sha256: entry.materialization.scriptSha256,
+            entryPoint: path.posix.basename(entry.materialization.scriptRelativePath),
+            artifactId: formalArtifact.artifactId,
+            rendererId: `${entry.toolId}:${formalArtifact.artifactId}`,
+            language: entry.materialization.language,
+            origin: 'project_materialized',
+          },
+          inputArtifactRefs: downstreamInputArtifactRefs,
+          parametersRef: entry.materialization.parametersRelativePath,
+          parametersHash: entry.materialization.parametersSha256,
+          toolJobId: entry.job.id,
+          outputPath: projectRelativeOutput(workspaceRoot, formalArtifact),
+          outputHash: formalArtifact.sha256,
+          validationStatus: entry.validation.status,
+          reproducibilityStatus: entry.validation.reproducibilityStatus,
+          changeSetId,
+        };
+      });
+    });
+    const revisionInputs = [...rootRevisionInputs, ...downstreamRevisionInputs];
+    const candidateJobs = [candidateJob, ...downstreamCandidates.map((entry) => entry.job)];
+    const requiredToolJobIds = candidateJobs.map((job) => job.id);
+    const graphBuilder = dependencies.buildCandidateWorkflowGraph || buildAuthoritativeWorkflowGraph;
+    const candidateGraphResult = graphBuilder({
+      projectId,
+      sourceToolJobId: candidateJob.id,
+      jobs: candidateJobs,
+      repository,
+      requiredToolJobIds,
+      stagedRevisions: revisionInputs,
+    });
+    if (!candidateGraphResult || candidateGraphResult.ok !== true || !candidateGraphResult.graph) {
+      throw new ResultChangeSetError(
+        'candidate_workflow_graph_invalid',
+        'Candidate Jobs could not be projected into one complete authoritative workflow graph.',
+        { diagnostics: candidateGraphResult?.diagnostics || [] }
+      );
+    }
+    const candidateWorkflowGraph = candidateGraphResult.graph;
+    const batch = repository.appendRevisionBatch({
+      revisions: revisionInputs,
+      workflowGraph: candidateWorkflowGraph,
+      transition: {
+        changeSetId,
+        to: 'preview_ready',
+        candidateCommit: candidate.commit,
+        changedPaths: [...materialized.changedPaths, ...downstreamCandidates.flatMap((entry) => entry.materialization.changedPaths)],
+        jobRefs: [candidateJob.id, ...downstreamCandidates.map((entry) => entry.job.id)],
+        candidateArtifactRefs: revisionInputs.map((entry) => entry.revisionId),
+        validationSummary: {
+          artifactTruthStatus: candidateResult.artifactTruth.status,
+          sourceArtifactPreserved: true,
+          scriptSha256: materialized.scriptSha256,
+          outputSha256: outputHash,
+          workflowGraph: candidateWorkflowGraph
+            ? { graphId: candidateWorkflowGraph.graphId, sourceDigest: candidateWorkflowGraph.sourceDigest }
+            : null,
+          sourceWorkflowGraph: input.authoritativeSubgraph
+            ? { graphId: input.authoritativeSubgraph.graphId, sourceDigest: input.authoritativeSubgraph.sourceDigest }
+            : null,
+          validatorIds: [rootValidation.validatorId, ...downstreamCandidates.map((entry) => entry.validation.validatorId)],
+          formalArtifactCount: revisionInputs.length,
+          executedNodeIds: [input.authoritativeSubgraph?.rootNodeId || `job:${sourceRevision.toolJobId}`,
+            ...downstreamCandidates.map((entry) => entry.nodeId)],
+          downstreamArtifactTruthStatuses: downstreamCandidates.map((entry) => ({
+            artifactId: entry.sourceRevision.artifactId,
+            status: entry.result.artifactTruth.status,
+          })),
+          // P4R-4 review projection: bounded user-facing intent and impact come
+          // from the validated, server-trusted ResultEditIntent. The UI must not
+          // guess them from an opaque intentRef or a Git message.
+          intentSummary: input.intent.requestedOutcome.slice(0, 500),
+          impactLevel: input.intent.editClass,
+          affectedScope: input.intent.affectedScope || 'unknown',
+          requiresJob: input.intent.requiresJob,
+          affectedNodeCount: Array.isArray(input.intent.affectedNodeIds) ? input.intent.affectedNodeIds.length : 0,
+        },
       },
-    }).changeSet;
-    emit('revision', 'completed', { revisionId: revision.revisionId });
+    });
+    const revision = batch.revisions.find((entry) => entry.revisionId === revisionId);
+    const downstreamRevisions = batch.revisions.filter((entry) => downstreamRevisionIds.has(entry.revisionId));
+    const cohortRevisions = batch.revisions;
+    const ready = batch.changeSet;
+    emit('revision', 'completed', { revisionId: revision.revisionId, downstreamRevisionIds: downstreamRevisions.map((entry) => entry.revisionId) });
     emit('preview', 'ready');
     saveResultEditCheckpoint({ repository, projectId, conversationId: input.conversationId, changeSetId, candidateCommit: candidate.commit, stage: 'preview_ready', recovery: 'awaiting_user_decision' });
     return {
@@ -728,6 +1751,8 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
       resultChangeSetServiceVersion: RESULT_CHANGESET_SERVICE_VERSION,
       changeSet: ready,
       revision,
+      downstreamRevisions,
+      cohortRevisions,
       candidateCommit: candidate.commit,
       toolJobId: candidateJob.id,
       materialization: {
@@ -741,6 +1766,7 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
       previewBudget,
     };
   } catch (error) {
+    const gitFailure = gitFailureDiagnostic(error);
     if (changeSetCreated) {
       const current = repository.getChangeSet(changeSetId);
       try {
@@ -752,7 +1778,10 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
               changeSetId,
               to: 'validation_failed',
               reason: error && error.code || 'result_edit_failed',
-              validationSummary: { error: error && error.code || 'result_edit_failed' },
+              validationSummary: {
+                error: error && error.code || 'result_edit_failed',
+                ...(gitFailure ? { gitFailure } : {}),
+              },
             });
           }
         }
@@ -775,7 +1804,12 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
       error.detail = { ...(error.detail || {}), changeSetId, progress };
       throw error;
     }
-    throw new ResultChangeSetError('result_edit_failed', error.message, { changeSetId, progress });
+    throw new ResultChangeSetError('result_edit_failed', error.message, {
+      changeSetId,
+      progress,
+      causeCode: error && error.code || 'result_edit_failed',
+      ...(gitFailure ? { gitFailure } : {}),
+    });
   }
 }
 
@@ -812,8 +1846,10 @@ module.exports = {
   applyExactScriptPatch,
   materializeResultEdit,
   resolveBaseCommit,
+  ensureBaselineArtifactCohort,
   ensureBaselineArtifactRevision,
   createResultChangeSet,
   saveResultEditCheckpoint,
   inspectResultEditRecovery,
+  _test: { resolveExactFormalSourceRevision },
 };

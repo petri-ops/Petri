@@ -150,6 +150,25 @@ test('RS1 blocks honestly when git is unavailable', (context) => {
   assert.equal(existsSync(join(root, BIOF3_DIR, 'git', 'HEAD')), false);
 });
 
+test('RS1 preserves process-level diagnostics for a failed Git invocation', (context) => {
+  const root = makeWorkspace(context);
+  const missingGit = join(root, 'definitely-not-git');
+  const adapter = createGitAdapter({
+    gitDir: join(root, '.biof3/git'),
+    workTree: root,
+    gitBin: missingGit,
+  });
+  const failure = adapter.run(['hash-object', '-w', '--stdin'], {
+    allowFailure: true,
+    input: 'diagnostic',
+  });
+  assert.equal(failure.ok, false);
+  assert.equal(failure.command, 'hash-object');
+  assert.equal(failure.code, 'git_executable_not_found');
+  assert.equal(failure.systemCode, 'ENOENT');
+  assert.equal(failure.status, null);
+});
+
 test('RS1 redacts absolute paths and credential-like values from diagnostics', () => {
   const redacted = redactGitDiagnostic(
     'fatal: cannot open /tmp/ws/secret.txt token sk-abcdefghijklmnopqrstuvwxyz123456',

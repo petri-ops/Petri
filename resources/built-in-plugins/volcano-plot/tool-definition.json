@@ -57,6 +57,14 @@
    "hint": "在图上标注变化最显著的 N 个基因名"
   },
   {
+   "id": "label_genes",
+   "label": "额外标注的基因",
+   "type": "text",
+   "required": false,
+   "default": "",
+   "hint": "以逗号分隔的稳定 gene ID；仅增加标签，不改变统计或分类"
+  },
+  {
    "id": "color_up",
    "label": "上调点颜色",
    "type": "text",
@@ -163,11 +171,19 @@
  "outputs": [
   {
    "id": "volcano",
+   "filename": "volcano.png",
    "type": "plot",
    "label": "火山图"
   },
   {
+   "id": "volcano_svg",
+   "filename": "volcano.svg",
+   "type": "plot",
+   "label": "火山图 SVG"
+  },
+  {
    "id": "classified_table",
+   "filename": "classified_table.csv",
    "type": "table",
    "label": "分类结果表"
   }
@@ -231,6 +247,10 @@
     "type": "number",
     "default": 10,
     "minimum": 0
+   },
+   "label_genes": {
+    "type": "text",
+    "default": ""
    },
    "color_up": {
     "type": "text",
@@ -309,6 +329,7 @@
    "fc_threshold": "scientific",
    "pval_threshold": "scientific",
    "top_n": "data",
+   "label_genes": "presentation",
    "color_up": "presentation",
    "color_down": "presentation",
    "color_ns": "presentation",
@@ -329,14 +350,22 @@
   ],
   "artifacts": [
    {
-    "id": "volcano",
+   "id": "volcano",
+   "type": "plot",
+   "filename": "volcano.png",
+   "interaction": "interactive"
+  },
+   {
+    "id": "volcano_svg",
     "type": "plot",
-    "filename": "volcano.png"
+    "filename": "volcano.svg",
+    "interaction": "noninteractive"
    },
    {
     "id": "classified_table",
     "type": "table",
-    "filename": "classified_table.csv"
+    "filename": "classified_table.csv",
+    "interaction": "interactive"
    }
   ],
   "interactionMappings": [
@@ -347,7 +376,7 @@
     "idField": "gene"
    },
    {
-    "artifactId": "volcano",
+   "artifactId": "volcano",
     "mode": "scatter",
     "dataArtifactId": "classified_table",
     "entityType": "gene",
@@ -355,7 +384,7 @@
     "xField": "log2FoldChange",
     "yField": "significance",
     "yTransform": "neg_log10",
-    "legendField": "sig"
+   "legendField": "sig"
    }
   ],
   "validator": {

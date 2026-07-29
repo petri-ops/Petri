@@ -7,7 +7,10 @@ import test from 'node:test';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { tool_result_selection_run } = require('../core/r-server/agent-tools/result-selection-tools');
+const {
+  tool_result_selection_run,
+  tool_result_enrichment_from_revision,
+} = require('../core/r-server/agent-tools/result-selection-tools');
 
 function sha256(value) {
   return crypto.createHash('sha256').update(value).digest('hex');
@@ -34,18 +37,47 @@ function fixture(context, selectionOverrides = {}) {
     getSelection: (id) => id === selection.selectionId ? selection : null,
     getRevision: (id) => id === revision.revisionId ? revision : null,
     getCurrentRevision: () => revision,
+    saveWorkflowGraph: (graph) => graph,
   };
   return {
     root,
     dependencies: {
       repository,
       getProject: () => ({ id: 'project_1', workspace_path: root }),
-      getToolJob: () => ({ id: 'job_1', tool_id: 'deseq2' }),
+      getToolJob: () => ({
+        id: 'job_1', project_id: 'project_1', tool_id: 'deseq2', status: 'completed',
+        result: {
+          artifactTruth: { status: 'valid', blocking: false },
+          artifacts: [{ id: 'deg_table', path: source, name: 'deg.csv', type: 'table' }],
+        },
+      }),
       getPluginManifest: () => ({ resultStudio: {
         actions: ['select_genes', 'derive_enrichment_input'],
         artifacts: [{ id: 'deg_table', filename: 'deg.csv', type: 'table' }],
         interactionMappings: [{ artifactId: 'deg_table', mode: 'table', entityType: 'gene', idField: 'gene' }],
       } }),
+      verifyRevisionSourceMaterial: () => ({ reproduction: { inputDrift: [] } }),
+      listProjectToolJobsForWorkflow: () => [],
+      buildAuthoritativeWorkflowGraph: ({ projectId, sourceToolJobId, requiredToolJobIds }) => ({
+        ok: true,
+        diagnostics: [],
+        graph: {
+          graphId: 'wfg_test',
+          sourceDigest: 'a'.repeat(64),
+          projectId,
+          rootToolJobId: sourceToolJobId,
+          validationStatus: 'valid',
+          nodes: [],
+          edges: [],
+        },
+        workflowPlan: {
+          authority: 'sqlite_job_artifact_truth',
+          graphId: 'wfg_test',
+          sourceDigest: 'a'.repeat(64),
+          rootToolJobId: sourceToolJobId,
+          steps: requiredToolJobIds.map((toolJobId) => ({ id: `job:${toolJobId}`, toolJobId })),
+        },
+      }),
     },
   };
 }
@@ -115,4 +147,99 @@ test('RS-P2 rejects an unsafe persisted selection id before materializing projec
   }, fx.dependencies);
   assert.equal(result.ok, false);
   assert.equal(result.error, 'selection_id_invalid');
+});
+
+test('P5 derives GO/KEGG from exact current DEG bytes with private artifact lineage', async (context) => {
+  const fx = fixture(context);
+  let call = null;
+  fx.dependencies.runTool = async (args, ctx) => {
+    call = { args, ctx };
+    return { ok: true, toolJobId: 'job_enrichment', artifactTruth: { status: 'valid' } };
+  };
+  const result = await tool_result_enrichment_from_revision({
+    revisionId: 'rev_1', species: 'human', geneIdType: 'auto', analysisType: 'GO-BP', padjCutoff: 0.01, lfcCutoff: 1.5,
+  }, { userId: 'user_1', projectId: 'project_1', accessMode: 'full' }, fx.dependencies);
+  assert.equal(result.ok, true);
+  assert.equal(call.args.toolId, 'go-kegg');
+  assert.match(call.args.params.deg_table, /deg\.csv$/);
+  assert.equal(call.args.params.padj_cutoff, 0.01);
+  assert.equal(call.ctx.resultStudioInputLineage.deg_table.kind, 'artifact');
+  assert.equal(call.ctx.resultStudioInputLineage.deg_table.sourceRevisionId, 'rev_1');
+  assert.equal(call.ctx.resultStudioInputLineage.deg_table.materializationHash, fx.dependencies.repository.getRevision('rev_1').outputHash);
+  assert.equal(result.enrichmentAction.executorTruth, 'run_tool → tool_job → artifact truth');
+});
+
+test('P5 direct enrichment refuses non-current or undeclared DEG source before execution', async (context) => {
+  const fx = fixture(context);
+  fx.dependencies.repository.getCurrentRevision = () => ({ revisionId: 'rev_later' });
+  let called = false;
+  fx.dependencies.runTool = async () => { called = true; return { ok: true }; };
+  const result = await tool_result_enrichment_from_revision({ revisionId: 'rev_1' }, {
+    userId: 'user_1', projectId: 'project_1', accessMode: 'full',
+  }, fx.dependencies);
+  assert.equal(result.ok, false);
+  assert.equal(result.error, 'deg_revision_not_current');
+  assert.equal(called, false);
+});
+
+test('P5 downstream actions refuse immutable source input drift before execution', async (context) => {
+  const fx = fixture(context);
+  fx.dependencies.verifyRevisionSourceMaterial = () => {
+    const error = new Error('One or more reproducibility inputs changed or are unavailable.');
+    error.code = 'source_input_drift';
+    throw error;
+  };
+  let called = false;
+  fx.dependencies.runTool = async () => { called = true; return { ok: true }; };
+
+  const direct = await tool_result_enrichment_from_revision({ revisionId: 'rev_1' }, {
+    userId: 'user_1', projectId: 'project_1', accessMode: 'full',
+  }, fx.dependencies);
+  assert.equal(direct.ok, false);
+  assert.equal(direct.error, 'source_input_drift');
+
+  const selected = await tool_result_selection_run({ selectionId: 'sel_1', action: 'go_kegg' }, {
+    userId: 'user_1', projectId: 'project_1', accessMode: 'full',
+  }, fx.dependencies);
+  assert.equal(selected.ok, false);
+  assert.equal(selected.error, 'source_input_drift');
+  assert.equal(called, false);
+});
+
+test('P5 selection action fails closed after execution when the authoritative DAG cannot be built', async (context) => {
+  const fx = fixture(context);
+  fx.dependencies.runTool = async () => ({ ok: true, toolJobId: 'job_enrichment' });
+  fx.dependencies.buildAuthoritativeWorkflowGraph = () => ({
+    ok: false,
+    diagnostics: [{ code: 'workflow_required_job_disconnected' }],
+  });
+
+  const result = await tool_result_selection_run({ selectionId: 'sel_1', action: 'go_kegg' }, {
+    userId: 'user_1', projectId: 'project_1', accessMode: 'full',
+  }, fx.dependencies);
+
+  assert.equal(result.ok, false);
+  assert.equal(result.error, 'workflow_graph_persistence_failed');
+  assert.equal(result.detail.executionCompleted, true);
+  assert.equal(result.detail.toolJobId, 'job_enrichment');
+  assert.equal(result.detail.diagnostics[0].code, 'workflow_required_job_disconnected');
+});
+
+test('P5 direct enrichment fails closed after execution when DAG persistence fails', async (context) => {
+  const fx = fixture(context);
+  fx.dependencies.runTool = async () => ({ ok: true, toolJobId: 'job_enrichment' });
+  fx.dependencies.repository.saveWorkflowGraph = () => {
+    const error = new Error('disk full');
+    error.code = 'workflow_graph_write_failed';
+    throw error;
+  };
+
+  const result = await tool_result_enrichment_from_revision({ revisionId: 'rev_1' }, {
+    userId: 'user_1', projectId: 'project_1', accessMode: 'full',
+  }, fx.dependencies);
+
+  assert.equal(result.ok, false);
+  assert.equal(result.error, 'workflow_graph_persistence_failed');
+  assert.equal(result.detail.executionCompleted, true);
+  assert.equal(result.detail.diagnostics[0].code, 'workflow_graph_write_failed');
 });

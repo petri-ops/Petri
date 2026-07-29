@@ -14,10 +14,171 @@ const {
 const { createResultStudioRepository } = require('../../shared-backend/result-studio-repository');
 const { bindProjectRepository } = require('../../shared-backend/git-repository-binding');
 const { projectRevisionSource } = require('../../shared-backend/result-revision-source');
+const { buildAuthoritativeWorkflowGraph } = require('../../shared-backend/result-workflow-graph');
+
+function scientificEditClass(editClass) {
+  return ['data_transform', 'scientific_recompute', 'workflow_replan'].includes(editClass);
+}
+
+function persistedWorkflowGraph(repository, graph) {
+  if (!graph || !graph.ok || !graph.graph || !repository || typeof repository.findWorkflowGraph !== 'function') return null;
+  const snapshot = repository.findWorkflowGraph({
+    projectId: graph.graph.projectId,
+    sourceDigest: graph.graph.sourceDigest,
+  });
+  return snapshot
+    && snapshot.graphId === graph.graph.graphId
+    && snapshot.rootToolJobId === graph.graph.rootToolJobId
+    && snapshot.validationStatus === 'valid'
+    ? snapshot
+    : null;
+}
+
+/**
+ * A scientific plan is an explicit Result Studio action, so it may make the
+ * server-projected graph durable.  The caller never supplies graph nodes or
+ * edges: `graph` has just been rebuilt from completed Job + Artifact Truth.
+ * Opening a result remains read-only; raw/caller-provided WorkflowPlans are
+ * still rejected before this point.
+ */
+function persistAuthoritativeWorkflowGraph(repository, graph) {
+  const existing = persistedWorkflowGraph(repository, graph);
+  if (existing) return { ok: true, graph: existing, persisted: false, diagnostics: [] };
+  if (!graph || !graph.ok || !graph.graph || graph.graph.validationStatus !== 'valid') {
+    return {
+      ok: false,
+      diagnostics: [{
+        code: 'workflow_graph_projection_invalid',
+        message: '当前 Job/Artifact Truth 无法投影为有效工作流图。',
+      }],
+    };
+  }
+  if (!repository || typeof repository.saveWorkflowGraph !== 'function') {
+    return {
+      ok: false,
+      diagnostics: [{
+        code: 'workflow_graph_repository_unavailable',
+        message: '权威工作流图存储不可用，不能授权科学、数据或流程编辑。',
+      }],
+    };
+  }
+  try {
+    const saved = repository.saveWorkflowGraph(graph.graph);
+    if (!saved
+        || saved.graphId !== graph.graph.graphId
+        || saved.sourceDigest !== graph.graph.sourceDigest
+        || saved.rootToolJobId !== graph.graph.rootToolJobId
+        || saved.validationStatus !== 'valid') {
+      return {
+        ok: false,
+        diagnostics: [{
+          code: 'workflow_graph_persistence_mismatch',
+          message: '持久化的工作流图未能精确匹配当前 Job/Artifact Truth 投影。',
+        }],
+      };
+    }
+    return { ok: true, graph: saved, persisted: true, diagnostics: [] };
+  } catch (error) {
+    return {
+      ok: false,
+      diagnostics: [{
+        code: error?.code || 'workflow_graph_persistence_failed',
+        message: error?.message || '权威工作流图持久化失败。',
+      }],
+    };
+  }
+}
+
+/**
+ * P5's first executable affected subgraph is intentionally tiny and fully
+ * server-projected: a current DEG Artifact feeds one direct GO/KEGG Job using
+ * exact Artifact bytes.  The model never provides node ids, parameters,
+ * files, or lineage.  Unsupported shapes remain blocked until a later graph
+ * executor can reproduce every edge without inference.
+ */
+function projectDirectEnrichmentSubgraph({ graph, intent, sourceRevision, repository, getToolJob }) {
+  const workflow = graph && graph.graph;
+  if (!workflow || !intent || !sourceRevision || !repository || typeof getToolJob !== 'function') {
+    return { ok: false, error: 'workflow_subgraph_context_missing', message: '权威工作流子图缺少必要的持久事实。' };
+  }
+  if (intent.workflowGraph?.graphId !== workflow.graphId || intent.workflowGraph?.sourceDigest !== workflow.sourceDigest) {
+    return { ok: false, error: 'workflow_graph_stale_or_unpersisted', message: '编辑意图与当前权威工作流图不一致。' };
+  }
+  const rootNodeId = `job:${sourceRevision.toolJobId}`;
+  const root = (workflow.nodes || []).find((node) => node && node.id === rootNodeId);
+  if (!root || root.toolJobId !== sourceRevision.toolJobId) {
+    return { ok: false, error: 'workflow_root_unverified', message: '当前 Revision 不再是权威工作流图的根节点。' };
+  }
+  const affected = Array.isArray(intent.affectedNodeIds) ? intent.affectedNodeIds : [];
+  if (!affected.includes(rootNodeId) || affected.some((nodeId) => !(workflow.nodes || []).some((node) => node.id === nodeId))) {
+    return { ok: false, error: 'workflow_affected_nodes_invalid', message: '受影响节点不再匹配当前权威工作流图。' };
+  }
+  const children = affected.filter((nodeId) => nodeId !== rootNodeId);
+  if (children.length === 0) {
+    return {
+      ok: true,
+      subgraph: {
+        authority: 'sqlite_job_artifact_truth', graphId: workflow.graphId, sourceDigest: workflow.sourceDigest,
+        rootNodeId, rootToolJobId: sourceRevision.toolJobId, rootRevisionId: sourceRevision.revisionId, children: [],
+      },
+    };
+  }
+  if (sourceRevision.artifactId !== 'deg_table' || children.length !== 1) {
+    return { ok: false, error: 'workflow_subgraph_unsupported', message: '当前只支持从正式 DEG 表向一个直接 GO/KEGG 下游节点重跑。' };
+  }
+  const childNode = (workflow.nodes || []).find((node) => node && node.id === children[0]);
+  const childJob = childNode && getToolJob(childNode.toolJobId);
+  const edges = (workflow.edges || []).filter((edge) => edge
+    && edge.fromNodeId === rootNodeId && edge.toNodeId === childNode?.id);
+  if (!childNode || childNode.toolId !== 'go-kegg' || !childJob
+      || String(childJob.project_id || childJob.projectId || '') !== sourceRevision.projectId
+      || childJob.status !== 'completed' || edges.length !== 1) {
+    return { ok: false, error: 'workflow_subgraph_unsupported', message: '下游不是一个可验证的直接 GO/KEGG Job。' };
+  }
+  const edge = edges[0];
+  if (edge.kind !== 'artifact' || edge.inputId !== 'deg_table'
+      || edge.sourceToolJobId !== sourceRevision.toolJobId
+      || edge.sourceRevisionId !== sourceRevision.revisionId
+      || edge.sourceArtifactId !== sourceRevision.artifactId
+      || edge.sourceOutputHash !== sourceRevision.outputHash) {
+    return { ok: false, error: 'workflow_downstream_lineage_drift', message: 'GO/KEGG 下游不再使用当前 DEG Revision 的精确 Artifact 字节。' };
+  }
+  const childRevision = repository.findRevisionByJobArtifact({
+    projectId: sourceRevision.projectId,
+    toolJobId: childJob.id,
+    artifactId: 'go_bp_results',
+  });
+  if (!childRevision) {
+    return { ok: false, error: 'downstream_revision_missing', message: 'GO-BP 下游尚无可复现的正式 Revision，不能猜测性重跑。' };
+  }
+  return {
+    ok: true,
+    subgraph: {
+      authority: 'sqlite_job_artifact_truth', graphId: workflow.graphId, sourceDigest: workflow.sourceDigest,
+      rootNodeId, rootToolJobId: sourceRevision.toolJobId, rootRevisionId: sourceRevision.revisionId,
+      children: [{
+        nodeId: childNode.id,
+        toolId: 'go-kegg',
+        inputId: 'deg_table',
+        edgeKind: 'artifact',
+        sourceToolJobId: sourceRevision.toolJobId,
+        sourceRevisionId: sourceRevision.revisionId,
+        sourceArtifactId: sourceRevision.artifactId,
+        sourceOutputHash: sourceRevision.outputHash,
+        childToolJobId: childJob.id,
+        childRevisionId: childRevision.revisionId,
+      }],
+    },
+  };
+}
 
 function createResultEditPlanTool(options = {}) {
   const getToolJob = options.getToolJob || db.getToolJob;
   const getPluginManifest = options.getPluginManifest || pluginLoader.getPluginManifest;
+  const listProjectToolJobsForWorkflow = options.listProjectToolJobsForWorkflow
+    || db.listProjectToolJobsForWorkflow;
+  const makeRepository = options.createResultStudioRepository || createResultStudioRepository;
+  const buildWorkflowGraph = options.buildAuthoritativeWorkflowGraph || buildAuthoritativeWorkflowGraph;
 
   return async function tool_result_edit_plan(args = {}, ctx = {}) {
     const projectId = String(ctx.projectId || '').trim();
@@ -32,20 +193,58 @@ function createResultEditPlanTool(options = {}) {
     if (jobProjectId !== projectId) {
       return { ok: false, error: 'source_project_mismatch', message: 'Source job does not belong to the active project.' };
     }
+    if (args.workflowPlan != null) {
+      return {
+        ok: false,
+        error: 'workflow_plan_forbidden',
+        message: '科学编辑只能使用服务端从 SQLite/Job/Artifact Truth 投影的工作流图，不能提交 workflowPlan。',
+      };
+    }
 
     const pluginId = toolJob.tool_id || toolJob.toolId;
     const manifest = pluginId ? getPluginManifest(pluginId) : null;
     const parameterImpactRules = manifest && manifest.resultStudio
       ? manifest.resultStudio.parameterImpacts
       : {};
-    return planResultEdit({
+    const repository = options.repository || makeRepository(options.sqlite || db.db || db.getDatabase());
+    // Do not consume ctx.resultStudioWorkflowPlan here.  Context-bound tools
+    // may carry a fresh projection as an optimization for their own response,
+    // but plan authorization must independently rebuild the graph from the
+    // durable source of truth so neither a model nor an arbitrary caller can
+    // recover authority by injecting a previously-shaped graph object.
+    const graph = buildWorkflowGraph({
+      projectId,
+      sourceToolJobId: toolJob.id,
+      jobs: typeof listProjectToolJobsForWorkflow === 'function'
+        ? listProjectToolJobsForWorkflow(projectId)
+        : [toolJob],
+      repository,
+    });
+    const planned = planResultEdit({
       ...args,
       projectId,
       toolJob,
       // Only trusted plugin metadata can downgrade a parameter below the
       // conservative scientific-recompute fallback. Model arguments cannot.
       parameterImpactRules,
+      workflowPlan: graph.ok ? graph.workflowPlan : null,
     });
+    if (!graph.ok) return { ...planned, diagnostics: [...(graph.diagnostics || []), ...(planned.diagnostics || [])] };
+    if (planned.ok && scientificEditClass(planned.intent?.editClass)) {
+      const snapshot = persistAuthoritativeWorkflowGraph(repository, graph);
+      if (!snapshot.ok) {
+        return {
+          ...planned,
+          ok: false,
+          status: 'blocked',
+          diagnostics: [
+            ...(planned.diagnostics || []),
+            ...snapshot.diagnostics,
+          ],
+        };
+      }
+    }
+    return planned;
   };
 }
 
@@ -64,6 +263,10 @@ function authorizeProject(project, userId, dbModule) {
 function createResultChangeSetTools(options = {}) {
   const dbModule = options.db || db;
   const loadPlugin = options.getPlugin || pluginLoader.getPlugin;
+  const getResultStudioDescriptor = options.getResultStudioDescriptor || ((toolId) => {
+    const manifest = pluginLoader.getPluginManifest(toolId);
+    return manifest && manifest.resultStudio ? manifest.resultStudio : null;
+  });
   const callTool = options.callTool || mcpRegistry.callTool;
   const bindRepository = options.bindProjectRepository || bindProjectRepository;
   const makeRepository = options.createResultStudioRepository || createResultStudioRepository;
@@ -120,6 +323,51 @@ function createResultChangeSetTools(options = {}) {
     const pluginId = sourceJob.tool_id;
     const plugin = loadPlugin(pluginId);
     if (!plugin) return { ok: false, error: 'source_plugin_not_found', message: `Plugin is unavailable: ${pluginId}` };
+    let authoritativeSubgraph = null;
+    if (scientificEditClass(args.intent?.editClass)) {
+      // Raw model arguments cannot manufacture a scientific ChangeSet.  The
+      // context-bound path verifies the same-turn intent before setting this
+      // private marker; legacy/raw callers remain limited to non-scientific
+      // presentation work until they adopt the focused Result Studio flow.
+      if (ctx.resultStudioTrustedIntent !== true) {
+        return {
+          ok: false,
+          error: 'context_bound_scientific_intent_required',
+          message: '科学、数据和流程修改必须先通过当前结果的 context-bound 规划与确认。',
+        };
+      }
+      const jobs = typeof dbModule.listProjectToolJobsForWorkflow === 'function'
+        ? dbModule.listProjectToolJobsForWorkflow(scoped.projectId)
+        : [];
+      const graph = buildAuthoritativeWorkflowGraph({
+        projectId: scoped.projectId,
+        sourceToolJobId: sourceRevision.toolJobId,
+        jobs,
+        repository: scoped.repository,
+      });
+      const snapshot = persistedWorkflowGraph(scoped.repository, graph);
+      if (!graph.ok || !snapshot
+          || args.intent?.workflowGraph?.graphId !== graph.graph.graphId
+          || args.intent?.workflowGraph?.sourceDigest !== graph.graph.sourceDigest) {
+        return {
+          ok: false,
+          error: 'workflow_graph_stale_or_unpersisted',
+          message: '权威工作流图不存在、已漂移或未持久化；请重新从当前结果规划科学修改。',
+          diagnostics: graph.ok ? [] : graph.diagnostics || [],
+        };
+      }
+      const projection = projectDirectEnrichmentSubgraph({
+        graph,
+        intent: args.intent,
+        sourceRevision,
+        repository: scoped.repository,
+        getToolJob: dbModule.getToolJob,
+      });
+      if (!projection.ok) {
+        return { ok: false, error: projection.error, message: projection.message };
+      }
+      authoritativeSubgraph = projection.subgraph;
+    }
     try {
       const projected = projectRevisionSource({ projectId: scoped.projectId, revision: sourceRevision }, {
         repository: scoped.repository,
@@ -146,6 +394,7 @@ function createResultChangeSetTools(options = {}) {
         scriptPatch: args.scriptPatch || [],
         previewResourceEstimate: args.previewResourceEstimate || null,
         scientificConfirmed: args.scientificConfirmed === true,
+        authoritativeSubgraph,
         createdBy: 'agent',
       }, {
         repository: scoped.repository,
@@ -154,6 +403,8 @@ function createResultChangeSetTools(options = {}) {
           ? scoped.binding.inspection?.existing?.workspaceRelativeToRepository
           : '',
         getToolJob: dbModule.getToolJob,
+        getResultStudioDescriptor,
+        authoritativeSubgraphTrusted: authoritativeSubgraph !== null,
         shouldCancel: () => typeof ctx.isCancelled === 'function' && ctx.isCancelled(),
         activePreviewJobs: typeof scoped.repository.listChangeSets === 'function'
           ? scoped.repository.listChangeSets({ projectId: scoped.projectId, status: 'running', limit: 500 }).length
@@ -161,7 +412,9 @@ function createResultChangeSetTools(options = {}) {
         onProgress: (event) => {
           if (typeof ctx.emitResultEditProgress === 'function') ctx.emitResultEditProgress(event);
         },
-        executeJob: async ({ toolId, params, materializedScriptPath, materializedScriptSha256, changeSetId }) => {
+        executeJob: async ({
+          toolId, params, materializedScriptPath, materializedScriptSha256, changeSetId, resultStudioInputLineage = null,
+        }) => {
           const result = await callTool(toolId, params, {
             userId: ctx.userId || 'agent',
             projectId: scoped.projectId,
@@ -170,6 +423,7 @@ function createResultChangeSetTools(options = {}) {
               sha256: materializedScriptSha256,
               changeSetId,
             },
+            resultStudioInputLineage,
           });
           const toolJobId = result && result.toolJobId;
           return { result, toolJobId, job: toolJobId ? dbModule.getToolJob(toolJobId) : null };

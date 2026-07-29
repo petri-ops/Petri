@@ -8,7 +8,8 @@
   "packages": {
     "r": {
       "ggplot2": ">=3.4.0",
-      "pheatmap": ">=1.0.12"
+      "pheatmap": ">=1.0.12",
+      "png": ">=0.1-8"
     }
   },
   "runtime": {

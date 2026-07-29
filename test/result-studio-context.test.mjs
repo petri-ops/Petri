@@ -493,6 +493,39 @@ test('RS-P3 context-bound plan fills the internal ids the model never supplied',
   ]);
 });
 
+test('P5 binds volcano labels only from the current compatible selection', async () => {
+  const fx = fixture();
+  let received = null;
+  const tools = createResultContextEditTools({
+    ...fx.dependencies,
+    getPluginManifest: () => ({
+      resultStudio: {
+        descriptorVersion: 1, actions: ['select_genes'],
+        parameters: { label_genes: { type: 'text', default: '' } },
+        parameterImpacts: { label_genes: 'presentation' },
+        interactionMappings: [{ artifactId: 'deg_table', mode: 'table', entityType: 'gene', idField: 'gene' }],
+      },
+    }),
+    planTool: async (args) => {
+      received = args;
+      return { ok: true, status: 'ready', intent: { intentId: 'rei_labels', artifactRef: { artifactId: 'deg_table', revisionId: 'rev_1' } } };
+    },
+    changeSetTools: {},
+  });
+  const result = await tools.plan({ requestedOutcome: '标注我选择的基因', useCurrentSelectionForLabels: true }, {
+    ...ctx, activeArtifact: { revisionId: 'rev_1' },
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.selectionLabelsBound, 3);
+  assert.deepEqual(received.proposedParameterPatch, { label_genes: 'TP53,EGFR,MYC' });
+
+  const conflict = await tools.plan({
+    requestedOutcome: '标注我选择的基因', useCurrentSelectionForLabels: true,
+    proposedParameterPatch: { label_genes: 'MODEL_SUPPLIED' },
+  }, { ...ctx, activeArtifact: { revisionId: 'rev_1' } });
+  assert.equal(conflict.error, 'selection_label_binding_conflict');
+});
+
 test('RS-P3 context-bound create rejects a stale token before any job or changeset exists', async () => {
   const fx = fixture();
   let created = false;

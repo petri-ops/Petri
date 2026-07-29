@@ -8,7 +8,8 @@
   "packages": {
     "r": {
       "ggplot2": ">=3.4.0",
-      "ggrepel": ">=0.9.0"
+      "ggrepel": ">=0.9.0",
+      "png": ">=0.1-8"
     }
   },
   "runtime": {

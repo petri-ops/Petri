@@ -1,6 +1,7 @@
 'use strict';
 
 const crypto = require('node:crypto');
+const { isAuthoritativeWorkflowPlan } = require('./result-workflow-graph');
 
 const RESULT_EDIT_INTENT_VERSION = 1;
 const RESULT_EDIT_CLASSES = Object.freeze([
@@ -212,8 +213,20 @@ function locateResultSource({ toolJob, artifactId, projectId } = {}) {
 
 function validateWorkflow(workflowPlan) {
   const steps = workflowPlan && Array.isArray(workflowPlan.steps) ? workflowPlan.steps : null;
+  // Preserve the useful distinction between "there is no graph" and
+  // "someone supplied an invented graph".  Both are fail-closed for science,
+  // but only the latter is an authority violation.
   if (!steps || steps.length === 0) {
     return { ok: false, diagnostics: [diagnostic('workflow_dag_missing', 'A real workflow DAG is required for affected-subgraph planning.')] };
+  }
+  if (!isAuthoritativeWorkflowPlan(workflowPlan)) {
+    return {
+      ok: false,
+      diagnostics: [diagnostic(
+        'workflow_dag_not_authoritative',
+        'Scientific impact requires a workflow graph projected from persisted SQLite Job, Artifact and Selection Truth.'
+      )],
+    };
   }
   const ids = steps.map((step) => trimmed(step && step.id));
   if (ids.some((id) => !id) || new Set(ids).size !== ids.length) {
@@ -286,7 +299,7 @@ function computeResultAffectedSubgraph({ workflowPlan, sourceToolJobId, sourceNo
   const root = matches[0].id;
   if (editClass === 'presentation_rerender') {
     return {
-      ok: true, sourceNodeId: root, affectedNodeIds: [root], affectedScope: 'workflow_subgraph', diagnostics: [],
+      ok: true, sourceNodeId: root, affectedNodeIds: [root], affectedScope: 'current_result_only', diagnostics: [],
     };
   }
   const affected = [];
@@ -319,6 +332,15 @@ function validateResultEditIntent(intent) {
   if (intent.affectedScope != null
       && !['none', 'current_result_only', 'workflow_subgraph'].includes(intent.affectedScope)) {
     errors.push(diagnostic('affected_scope_invalid', 'affectedScope must describe the truthful impact boundary.'));
+  }
+  const graph = intent.workflowGraph;
+  if (graph != null && (!graph || typeof graph !== 'object' || Array.isArray(graph)
+      || !trimmed(graph.graphId).startsWith('wfg_') || !/^[a-f0-9]{64}$/.test(trimmed(graph.sourceDigest)))) {
+    errors.push(diagnostic('workflow_graph_ref_invalid', 'workflowGraph must reference a source-bound authoritative graph.'));
+  }
+  if (['data_transform', 'scientific_recompute', 'workflow_replan'].includes(intent.editClass)
+      && (!graph || !trimmed(graph.graphId).startsWith('wfg_') || !/^[a-f0-9]{64}$/.test(trimmed(graph.sourceDigest)))) {
+    errors.push(diagnostic('workflow_graph_ref_required', 'Scientific, data and workflow edits require an authoritative persisted workflow graph reference.'));
   }
   if (typeof intent.requiresJob !== 'boolean') errors.push(diagnostic('requires_job_invalid', 'requiresJob must be boolean.'));
   if (typeof intent.requiresScientificConfirmation !== 'boolean') errors.push(diagnostic('scientific_confirmation_invalid', 'requiresScientificConfirmation must be boolean.'));
@@ -369,6 +391,9 @@ function planResultEdit(input = {}) {
     requiresJob: classification.requiresJob,
     requiresScientificConfirmation: classification.requiresScientificConfirmation,
     classificationReason: classification.classificationReason,
+    ...(graph.ok && isAuthoritativeWorkflowPlan(input.workflowPlan)
+      ? { workflowGraph: { graphId: input.workflowPlan.graphId, sourceDigest: input.workflowPlan.sourceDigest } }
+      : {}),
   };
   const intent = { ...intentCore, intentId: `rei_${digest(intentCore).slice(0, 24)}` };
   const validation = validateResultEditIntent(intent);

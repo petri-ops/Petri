@@ -79,9 +79,41 @@ export interface ResultStudioComparison {
       sampleChanges?: Array<{ row: number; before: unknown; after: unknown }>;
       truncated?: boolean;
     } | null;
+    scientific?: {
+      scientificComparisonVersion?: number;
+      status: 'available' | 'unavailable';
+      kind: string;
+      reason?: string;
+      thresholds?: { before: { padjCutoff: number; lfcCutoff: number }; after: { padjCutoff: number; lfcCutoff: number } };
+      significantGenes?: { before: ScientificCount; after: ScientificCount; membership: ScientificMembership };
+      classifications?: { before: ScientificCount; after: ScientificCount; membership: ScientificMembership };
+      terms?: { beforeCount: number; afterCount: number; membership: ScientificMembership; topBefore: ScientificTerm[]; topAfter: ScientificTerm[] };
+      direction?: { status: 'available' | 'unavailable'; reason?: string };
+    } | null;
   }>;
   histories: Array<{ artifactFamilyId: string; revisions: ArtifactRevision[]; currentRevisionId: string | null }>;
   git: { baseCommit: string; candidateCommit: string | null; workingBranchRef: string };
+}
+
+interface ScientificCount {
+  significantCount: number;
+  upCount: number;
+  downCount: number;
+  nonSignificantCount?: number;
+}
+
+interface ScientificMembership {
+  gainedCount: number;
+  lostCount: number;
+  retainedCount: number;
+  gained: string[];
+  lost: string[];
+}
+
+interface ScientificTerm {
+  rank: number;
+  id: string;
+  adjustedPValue: number;
 }
 
 interface ChangeSetListResponse {

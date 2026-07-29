@@ -30,6 +30,7 @@ const {
   PUBLIC_EDIT_PHASES,
 } = require('../../shared-backend/result-studio-context');
 const { buildEditControlSchema } = require('../../shared-backend/result-edit-controls');
+const { buildAuthoritativeWorkflowGraph } = require('../../shared-backend/result-workflow-graph');
 
 const OPERATOR_LABELS = Object.freeze({
   eq: '=', ne: '≠', lt: '<', lte: '≤', gt: '>', gte: '≥', in: '∈', contains: '包含',
@@ -190,6 +191,22 @@ function resolveResultStudioContext(ctx = {}, dependencies = {}) {
     ? descriptor.interactionMappings.find((item) => item && item.artifactId === revision.artifactId) || null
     : null;
   const currentRevision = repository.getCurrentRevision(revision.artifactFamilyId);
+  const listProjectToolJobsForWorkflow = dependencies.listProjectToolJobsForWorkflow
+    || dbModule.listProjectToolJobsForWorkflow;
+  const workflowProjection = typeof listProjectToolJobsForWorkflow === 'function'
+    ? buildAuthoritativeWorkflowGraph({
+      projectId,
+      sourceToolJobId: revision.toolJobId,
+      jobs: listProjectToolJobsForWorkflow(projectId),
+      repository,
+    })
+    : { ok: false, diagnostics: [{ code: 'workflow_truth_unavailable', message: '无法读取项目 Job 真相以投影工作流。' }] };
+  // Context projection itself is read-only.  A graph becomes durable only
+  // when an admitted downstream execution explicitly snapshots it; merely
+  // opening a result must not grant scientific-edit authority or write SQLite.
+  const workflowSnapshot = workflowProjection.ok && typeof repository.findWorkflowGraph === 'function'
+    ? repository.findWorkflowGraph({ projectId, sourceDigest: workflowProjection.graph.sourceDigest })
+    : null;
   // 选择：从 SQLite 权威恢复，再按用户正在查看的 Revision 判定兼容性。
   // 历史查看不能借 current 的 selection，也不能把历史版本自己的 selection
   // 错判为 stale；contextToken 必须绑定 viewed revision，而不是正式 current。
@@ -272,7 +289,20 @@ function resolveResultStudioContext(ctx = {}, dependencies = {}) {
       actions: descriptor && Array.isArray(descriptor.actions) ? descriptor.actions : [],
     },
     selection: selectionInput,
-    workflow: null,
+    workflow: workflowProjection.ok
+      ? {
+        graphId: workflowProjection.graph.graphId,
+        sourceDigest: workflowProjection.graph.sourceDigest,
+        snapshotStatus: workflowSnapshot && workflowSnapshot.graphId === workflowProjection.graph.graphId
+          ? 'persisted'
+          : 'not_persisted',
+        nodeId: `job:${revision.toolJobId}`,
+        stepCount: workflowProjection.workflowPlan.steps.length,
+        downstreamNodeIds: workflowProjection.workflowPlan.steps
+          .filter((step) => Array.isArray(step.dependsOn) && step.dependsOn.includes(`job:${revision.toolJobId}`))
+          .map((step) => step.id),
+      }
+      : null,
   });
 
   // G0-RS-P4：当前生效参数取自该 Job 的执行 provenance 归一化参数，
@@ -295,6 +325,17 @@ function resolveResultStudioContext(ctx = {}, dependencies = {}) {
     job,
     descriptor,
     currentParameters,
+    // Private server-side selection material.  It is intentionally not put in
+    // the ContextEnvelope: model-visible context only receives a bounded
+    // summary.  A narrowly declared presentation action may bind these stable
+    // IDs itself, never by accepting a model-supplied label list.
+    persistedSelection,
+    workflowPlan: workflowProjection.ok ? workflowProjection.workflowPlan : null,
+    workflowGraph: workflowProjection.ok ? workflowProjection.graph : null,
+    workflowSnapshot: workflowSnapshot && workflowSnapshot.graphId === workflowProjection.graph?.graphId
+      ? workflowSnapshot
+      : null,
+    workflowDiagnostics: workflowProjection.ok ? [] : workflowProjection.diagnostics || [],
   };
 }
 
@@ -368,6 +409,7 @@ function createResultStudioContextTool(options = {}) {
       pendingChange: changeSet.ok
         ? { status: changeSet.changeSet.status, hasCandidate: !!changeSet.changeSet.candidateCommit }
         : null,
+      workflowDiagnostics: resolved.workflowDiagnostics || [],
     };
   };
 }

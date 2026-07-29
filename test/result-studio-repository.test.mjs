@@ -84,6 +84,39 @@ test('RS2 schema creates all five tables and is idempotent', (context) => {
   assert.equal(inspectResultStudioSchema(db).complete, true);
 });
 
+test('P5 ordinary Revision append cannot bypass exact replay verification', (context) => {
+  const { repo } = makeRepo(context);
+  newChangeSet(repo, { changeSetId: 'cs_verified_single' });
+  assert.throws(
+    () => repo.appendRevision(revisionInput('cs_verified_single', {
+      revisionId: 'rev_verified_single',
+      reproducibilityStatus: 'verified',
+    })),
+    (error) => error instanceof ResultStudioRepositoryError
+      && error.code === 'revision_verified_requires_replay_proof'
+  );
+  assert.equal(repo.getRevision('rev_verified_single'), null);
+
+  newChangeSet(repo, { changeSetId: 'cs_verified_batch' });
+  const available = revisionInput('cs_verified_batch', {
+    revisionId: 'rev_available_batch',
+    artifactFamilyId: 'table-family',
+    artifactId: 'table',
+  });
+  const verified = revisionInput('cs_verified_batch', {
+    revisionId: 'rev_verified_batch',
+    artifactFamilyId: 'plot-family',
+    reproducibilityStatus: 'verified',
+  });
+  assert.throws(
+    () => repo.appendRevisionBatch({ revisions: [available, verified] }),
+    (error) => error instanceof ResultStudioRepositoryError
+      && error.code === 'revision_verified_requires_replay_proof'
+  );
+  assert.equal(repo.getRevision(available.revisionId), null);
+  assert.equal(repo.getRevision(verified.revisionId), null);
+});
+
 test('RS2 repository refuses to run against a database without the schema', (context) => {
   const root = mkdtempSync(join(tmpdir(), 'biof3-rs2-bare-'));
   context.after(() => rmSync(root, { recursive: true, force: true }));
@@ -242,6 +275,44 @@ test('RS2 adopt is idempotent', (context) => {
   assert.equal(third.changeSet.adoptedAt, first.changeSet.adoptedAt);
   // 仍然只有一个当前版本
   assert.equal(repo.listCurrentRevisions('project_1').length, 1);
+});
+
+test('P5 adopted ChangeSet is not idempotent after another cohort supersedes its family', (context) => {
+  const { repo } = makeRepo(context);
+  newChangeSet(repo, { changeSetId: 'cs_p5_first' });
+  repo.transitionChangeSet({ changeSetId: 'cs_p5_first', to: 'running' });
+  const firstInput = revisionInput('cs_p5_first', { revisionId: 'rev_p5_first' });
+  repo.appendRevisionBatch({
+    revisions: [firstInput],
+    transition: {
+      changeSetId: 'cs_p5_first', to: 'preview_ready', candidateCommit: COMMIT_A,
+      candidateArtifactRefs: [firstInput.revisionId], jobRefs: [firstInput.toolJobId],
+    },
+  });
+  repo.adoptChangeSet({ changeSetId: 'cs_p5_first' });
+
+  newChangeSet(repo, { changeSetId: 'cs_p5_second', baseCommit: COMMIT_A });
+  repo.transitionChangeSet({ changeSetId: 'cs_p5_second', to: 'running' });
+  const secondInput = revisionInput('cs_p5_second', {
+    revisionId: 'rev_p5_second',
+    parentRevisionIds: [firstInput.revisionId],
+    outputPath: 'results/artifacts/volcano-plot/revisions/p5-second/volcano.svg',
+    outputHash: HASH_2,
+  });
+  repo.appendRevisionBatch({
+    revisions: [secondInput],
+    transition: {
+      changeSetId: 'cs_p5_second', to: 'preview_ready', candidateCommit: COMMIT_B,
+      candidateArtifactRefs: [secondInput.revisionId], jobRefs: [secondInput.toolJobId],
+    },
+  });
+  repo.adoptChangeSet({ changeSetId: 'cs_p5_second' });
+
+  assert.throws(
+    () => repo.adoptChangeSet({ changeSetId: 'cs_p5_first' }),
+    (error) => error instanceof ResultStudioRepositoryError && error.code === 'change_set_adoption_not_current'
+  );
+  assert.equal(repo.getCurrentRevision('volcano-plot').revisionId, secondInput.revisionId);
 });
 
 test('RS2 revert is idempotent', (context) => {

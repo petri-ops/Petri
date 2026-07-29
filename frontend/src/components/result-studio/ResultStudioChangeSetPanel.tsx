@@ -16,7 +16,7 @@ import {
   type ResultStudioTablePage,
 } from './resultStudioClient';
 import styles from './ResultStudioChangeSetPanel.module.css';
-import { resultVersionRoleLabel, resultVersionRoles } from './resultVersionRole';
+import { isBaselineIntentRef, resultVersionRoleLabel, resultVersionRoles } from './resultVersionRole';
 
 const STATUS_LABEL: Record<string, string> = {
   draft: '草稿',
@@ -62,6 +62,113 @@ function displayValue(value: unknown): string {
   return JSON.stringify(value);
 }
 
+interface EnrichmentDirectionEntry {
+  id: string;
+  direction: string;
+}
+
+interface EnrichmentDirectionChange {
+  id: string;
+  before: string;
+  after: string;
+}
+
+interface AvailableEnrichmentDirection {
+  changedCount: number;
+  before: EnrichmentDirectionEntry[];
+  after: EnrichmentDirectionEntry[];
+  changes: EnrichmentDirectionChange[];
+}
+
+function record(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
+}
+
+function directionEntries(value: unknown): EnrichmentDirectionEntry[] | null {
+  if (!Array.isArray(value)) return null;
+  const entries: EnrichmentDirectionEntry[] = [];
+  for (const item of value) {
+    const candidate = record(item);
+    if (!candidate || typeof candidate.id !== 'string' || typeof candidate.direction !== 'string') return null;
+    entries.push({ id: candidate.id, direction: candidate.direction });
+  }
+  return entries;
+}
+
+function directionChanges(value: unknown): EnrichmentDirectionChange[] | null {
+  if (!Array.isArray(value)) return null;
+  const changes: EnrichmentDirectionChange[] = [];
+  for (const item of value) {
+    const candidate = record(item);
+    if (!candidate || typeof candidate.id !== 'string'
+        || typeof candidate.before !== 'string' || typeof candidate.after !== 'string') return null;
+    changes.push({ id: candidate.id, before: candidate.before, after: candidate.after });
+  }
+  return changes;
+}
+
+function availableEnrichmentDirection(value: unknown): AvailableEnrichmentDirection | null {
+  const candidate = record(value);
+  if (!candidate || candidate.status !== 'available'
+      || typeof candidate.changedCount !== 'number' || !Number.isInteger(candidate.changedCount)
+      || candidate.changedCount < 0) return null;
+  const before = directionEntries(candidate.before);
+  const after = directionEntries(candidate.after);
+  const changes = directionChanges(candidate.changes);
+  if (!before || !after || !changes || candidate.changedCount !== changes.length) return null;
+  return { changedCount: candidate.changedCount, before, after, changes };
+}
+
+function formatDirectionEntries(entries: EnrichmentDirectionEntry[]): string {
+  return entries.map((entry) => `${entry.id} ${entry.direction}`).join('、') || '无';
+}
+
+function executedNodeIds(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string' && item.length > 0)
+    : [];
+}
+
+function ScientificDifference({ scientific }: { scientific: NonNullable<ResultStudioComparison['artifacts'][number]['scientific']> }): React.ReactElement {
+  if (scientific.status === 'unavailable') {
+    return <p className={styles.scientificUnavailable}>科学差异暂不可用：{scientific.reason || '来源表缺少可验证的语义契约。'}</p>;
+  }
+  if (scientific.kind === 'differential_expression' && scientific.significantGenes) {
+    const { before, after, membership } = scientific.significantGenes;
+    return <table className={styles.tableCompare}><tbody>
+      <tr><td>显著基因</td><td>{before.significantCount} → {after.significantCount}</td></tr>
+      <tr><td>上调 / 下调</td><td>{before.upCount} / {before.downCount} → {after.upCount} / {after.downCount}</td></tr>
+      <tr><td>关键基因变化</td><td>新增 {membership.gainedCount}，移除 {membership.lostCount}；{[...membership.gained, ...membership.lost].join('、') || '无'}</td></tr>
+      {scientific.thresholds && <tr><td>阈值 (padj / |log2FC|)</td><td>{scientific.thresholds.before.padjCutoff} / {scientific.thresholds.before.lfcCutoff} → {scientific.thresholds.after.padjCutoff} / {scientific.thresholds.after.lfcCutoff}</td></tr>}
+    </tbody></table>;
+  }
+  if (scientific.kind === 'volcano_classification' && scientific.classifications) {
+    const { before, after, membership } = scientific.classifications;
+    return <table className={styles.tableCompare}><tbody>
+      <tr><td>显著分类</td><td>{before.significantCount} → {after.significantCount}</td></tr>
+      <tr><td>上调 / 下调</td><td>{before.upCount} / {before.downCount} → {after.upCount} / {after.downCount}</td></tr>
+      <tr><td>标记基因变化</td><td>新增 {membership.gainedCount}，移除 {membership.lostCount}；{[...membership.gained, ...membership.lost].join('、') || '无'}</td></tr>
+    </tbody></table>;
+  }
+  if (scientific.kind === 'functional_enrichment' && scientific.terms) {
+    const direction = availableEnrichmentDirection(scientific.direction);
+    return <table className={styles.tableCompare}><tbody>
+      <tr><td>富集条目</td><td>{scientific.terms.beforeCount} → {scientific.terms.afterCount}</td></tr>
+      <tr><td>通路变化</td><td>新增 {scientific.terms.membership.gainedCount}，移除 {scientific.terms.membership.lostCount}</td></tr>
+      <tr><td>前列通路</td><td>{scientific.terms.topBefore.slice(0, 3).map((item) => item.id).join('、') || '—'} → {scientific.terms.topAfter.slice(0, 3).map((item) => item.id).join('、') || '—'}</td></tr>
+      <tr><td>方向变化</td><td>{direction
+        ? `${direction.changedCount} 条；${direction.changes.map((item) => `${item.id} ${item.before} → ${item.after}`).join('、') || '无'}`
+        : scientific.direction?.status === 'available'
+          ? '方向明细不完整，未作推断'
+          : '当前结果表未声明方向，未作推断'}</td></tr>
+      {direction && <tr><td>前列通路方向</td><td>{formatDirectionEntries(direction.before)} → {formatDirectionEntries(direction.after)}</td></tr>}
+    </tbody></table>;
+  }
+  return <p className={styles.scientificUnavailable}>科学差异没有可展示的受信摘要。</p>;
+}
+
 export function ResultStudioChangeSetPanel({
   projectId,
   artifactFamilyId,
@@ -105,7 +212,7 @@ export function ResultStudioChangeSetPanel({
       setRevisions(data.revisions);
       setCurrentRevision(data.currentRevision);
       setNextRevisionOffset(data.nextRevisionOffset ?? null);
-      const nonBaseline = data.changeSets.filter((item) => !item.intentRef?.startsWith('baseline:'));
+      const nonBaseline = data.changeSets.filter((item) => !isBaselineIntentRef(item.intentRef));
       const preferred = nonBaseline.find((item) => item.status === 'preview_ready')
         || nonBaseline.find((item) => item.status === 'adopted')
         || nonBaseline[0]
@@ -268,13 +375,14 @@ export function ResultStudioChangeSetPanel({
       ? selected.validationSummary.intentSummary
       : selected.intentRef?.startsWith('restore:')
         ? '恢复一个历史版本作为新的正式版本'
-        : selected.intentRef?.startsWith('baseline:')
+        : isBaselineIntentRef(selected.intentRef)
           ? '原始分析结果'
           : '结果修改候选'
     : '';
   const impactLevel = selected && typeof selected.validationSummary?.impactLevel === 'string'
     ? selected.validationSummary.impactLevel
     : null;
+  const executedNodes = executedNodeIds(selected?.validationSummary?.executedNodeIds);
 
   return (
     <section className={styles.root} aria-label="Result Studio 版本与变更" data-mode={mode}>
@@ -348,11 +456,17 @@ export function ResultStudioChangeSetPanel({
             {comparison && <span>+{comparison.summary.additions} −{comparison.summary.deletions}</span>}
             <span>{new Date(selected.updatedAt).toLocaleString()}</span>
           </div>
+          {executedNodes.length > 0 && (
+            <div className={styles.summary} aria-label="实际执行节点">
+              <span>实际执行节点</span>
+              {executedNodes.map((nodeId, index) => <code key={`${nodeId}:${index}`}>{nodeId}</code>)}
+            </div>
+          )}
           {mode === 'compare' && changeSets.length > 1 && (
             <label className={styles.changeSetPicker}>
               <span>审查记录</span>
               <select value={selectedId || ''} onChange={(event) => setSelectedId(event.target.value)}>
-                {changeSets.filter((item) => !item.intentRef?.startsWith('baseline:')).map((item) => (
+                {changeSets.filter((item) => !isBaselineIntentRef(item.intentRef)).map((item) => (
                   <option key={item.changeSetId} value={item.changeSetId}>{STATUS_LABEL[item.status] || item.status} · {new Date(item.updatedAt).toLocaleString()}</option>
                 ))}
               </select>
@@ -368,7 +482,7 @@ export function ResultStudioChangeSetPanel({
                 <button className={styles.primary} type="button" disabled={busy} onClick={() => void runAction('adopt', selected)}>采用此版本</button>
               </>
             )}
-            {selected.status === 'adopted' && !selected.intentRef?.startsWith('baseline:') && (
+            {selected.status === 'adopted' && !isBaselineIntentRef(selected.intentRef) && (
               <button className={styles.danger} type="button" disabled={busy} onClick={() => void runAction('revert', selected)}>撤销本次采用</button>
             )}
           </div>
@@ -417,6 +531,12 @@ export function ResultStudioChangeSetPanel({
                 <tr><td>移除列</td><td>{artifact.table?.removedColumns?.join('、') || '无'}</td></tr>
                 <tr><td>抽样变化</td><td>{artifact.table?.sampleChanges?.length || 0} 行</td></tr>
               </tbody></table>
+              {artifact.scientific && (
+                <div className={styles.scientificDifference}>
+                  <h5>科学结论差异</h5>
+                  <ScientificDifference scientific={artifact.scientific} />
+                </div>
+              )}
               {!tablePages[artifact.afterRevisionId] ? (
                 <button className={styles.tablePageButton} type="button" disabled={busy} onClick={() => void loadTablePage(artifact.afterRevisionId)}>渐进查看候选表</button>
               ) : (

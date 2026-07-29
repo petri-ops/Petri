@@ -21,7 +21,10 @@ const fs = require('fs');
 const { createHash } = require('crypto');
 const Database = require('better-sqlite3');
 const { bindProjectRepository } = require('./git-repository-binding');
-const { ensureBaselineArtifactRevision } = require('./result-changeset-service');
+const {
+  ensureBaselineArtifactCohort,
+  ensureBaselineArtifactRevision,
+} = require('./result-changeset-service');
 const { createResultStudioRepository } = require('./result-studio-repository');
 const {
   inspectResultStudioWorkspace,
@@ -58,6 +61,34 @@ function parseJson(value, label) {
       code: 'background_truth_invalid',
     });
   }
+}
+
+function rowToAuthoritativeJob(row) {
+  if (!row) return null;
+  return {
+    ...row,
+    params: parseJson(row.params_json, 'Source Job parameters') || {},
+    result: parseJson(row.result_json, 'Source Job result') || {},
+  };
+}
+
+function resolveAuthoritativeWorkflowJobs(sqlite, sourceJob) {
+  const projectId = String(sourceJob?.project_id || sourceJob?.projectId || '').trim();
+  const byId = new Map();
+  const queue = [String(sourceJob?.id || '').trim()];
+  while (queue.length > 0) {
+    const toolJobId = queue.shift();
+    if (!toolJobId || byId.has(toolJobId)) continue;
+    const row = sqlite.prepare('SELECT * FROM tool_jobs WHERE id=?').get(toolJobId);
+    if (!row || row.project_id !== projectId) continue;
+    const job = rowToAuthoritativeJob(row);
+    byId.set(toolJobId, job);
+    for (const input of job.result?.executionProvenance?.inputs || []) {
+      const parentJobId = String(input?.lineage?.sourceToolJobId || '').trim();
+      if (parentJobId && !byId.has(parentJobId)) queue.push(parentJobId);
+    }
+  }
+  return [...byId.values()];
 }
 
 function canonicalPath(value) {
@@ -158,7 +189,7 @@ function bind(payload, { write }) {
   return binding;
 }
 
-function ensureBaseline(payload, repository) {
+function ensureBaseline(payload, repository, sqlite) {
   const binding = bind(payload, { write: true });
   repository.saveRepositoryBinding({
     projectId: payload.projectId,
@@ -171,12 +202,22 @@ function ensureBaseline(payload, repository) {
     reason: binding.reason,
     gitVersion: binding.inspection?.runtime?.versionRaw || null,
   });
-  return ensureBaselineArtifactRevision(payload.input, {
+  const trustedDescriptor = payload.input && payload.input.pluginDescriptor
+    ? payload.input.pluginDescriptor
+    : null;
+  const ensureBaseline = trustedDescriptor
+    ? ensureBaselineArtifactCohort
+    : ensureBaselineArtifactRevision;
+  return ensureBaseline(payload.input, {
     repository,
     adapter: binding.adapter,
     gitPathPrefix: binding.mode === 'existing'
       ? binding.inspection?.existing?.workspaceRelativeToRepository
       : '',
+    getResultStudioDescriptor: (toolId) => (
+      trustedDescriptor && toolId === payload.input.pluginId ? trustedDescriptor : null
+    ),
+    resolveWorkflowJobs: ({ sourceJob }) => resolveAuthoritativeWorkflowJobs(sqlite, sourceJob),
   });
 }
 
@@ -198,8 +239,8 @@ function inspectWorkspace(payload, repository) {
   };
 }
 
-function runOperation(operation, payload, repository) {
-  if (operation === 'ensure-baseline') return ensureBaseline(payload, repository);
+function runOperation(operation, payload, repository, sqlite) {
+  if (operation === 'ensure-baseline') return ensureBaseline(payload, repository, sqlite);
   if (operation === 'inspect-workspace') return inspectWorkspace(payload, repository);
   throw Object.assign(new Error('Unsupported Result Studio background operation.'), {
     code: 'background_operation_invalid',
@@ -216,7 +257,7 @@ function handleMessage(message) {
       : {};
     opened = openRepository(payload.databasePath);
     const authoritativePayload = loadAuthoritativePayload(payload, opened.sqlite, operation);
-    const result = runOperation(operation, authoritativePayload, opened.repository);
+    const result = runOperation(operation, authoritativePayload, opened.repository, opened.sqlite);
     opened.sqlite.close();
     opened = null;
     if (process.send) process.send({ requestId, ok: true, result });

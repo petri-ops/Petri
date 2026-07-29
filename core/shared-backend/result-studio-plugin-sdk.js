@@ -6,7 +6,8 @@ const crypto = require('crypto');
 
 const RESULT_STUDIO_PLUGIN_CONTRACT_VERSION = 1;
 const IMPACT_CLASSES = new Set(['view', 'presentation', 'data', 'scientific', 'workflow']);
-const EDITABLE_ARTIFACT_TYPES = new Set(['plot', 'table']);
+const FORMAL_ARTIFACT_TYPES = new Set(['plot', 'table', 'report']);
+const INTERACTION_CONTRACTS = new Set(['interactive', 'noninteractive']);
 const INTERACTION_MODES = new Set(['table', 'scatter', 'matrix']);
 const SHA256 = /^[a-f0-9]{64}$/;
 
@@ -19,7 +20,10 @@ function stableJson(value) {
 }
 
 function digest(value) {
-  return crypto.createHash('sha256').update(typeof value === 'string' ? value : stableJson(value)).digest('hex');
+  const bytes = Buffer.isBuffer(value) || ArrayBuffer.isView(value)
+    ? value
+    : typeof value === 'string' ? value : stableJson(value);
+  return crypto.createHash('sha256').update(bytes).digest('hex');
 }
 
 function readJson(filePath) {
@@ -122,27 +126,62 @@ function validateResultStudioDescriptor({ plugin = {}, toolDefinition = {}, plug
   }
 
   const declaredArtifacts = new Set();
+  for (const output of outputById.values()) {
+    if (!FORMAL_ARTIFACT_TYPES.has(output.type)) continue;
+    if (typeof output.filename !== 'string' || !output.filename
+        || path.basename(output.filename) !== output.filename || output.filename.includes('..')) {
+      fail(
+        'formal_output_filename_invalid',
+        `outputs.${output.id}.filename`,
+        'every formal table, plot, or report requires one exact safe filename'
+      );
+    }
+  }
   for (const [index, artifact] of descriptor.artifacts.entries()) {
     const output = artifact && outputById.get(artifact.id);
     if (!output) {
       fail('artifact_output_unknown', `artifacts[${index}]`, 'id must reference a tool output');
       continue;
     }
-    if (!EDITABLE_ARTIFACT_TYPES.has(output.type)) {
-      fail('artifact_not_editable', `artifacts[${index}]`, 'only plot/table outputs belong in Result Studio v1');
+    if (!FORMAL_ARTIFACT_TYPES.has(output.type)) {
+      fail('artifact_not_formal', `artifacts[${index}]`, 'only table, plot, or report outputs belong in Result Studio v1');
     }
     if (declaredArtifacts.has(artifact.id)) fail('artifact_duplicate', `artifacts[${index}]`, artifact.id);
     declaredArtifacts.add(artifact.id);
     if (artifact.type !== output.type) fail('artifact_type_mismatch', `artifacts[${index}].type`, output.type);
-    if (typeof artifact.filename !== 'string' || !artifact.filename) fail('artifact_filename_missing', `artifacts[${index}].filename`, artifact.id);
+    if (typeof artifact.filename !== 'string' || !artifact.filename
+        || path.basename(artifact.filename) !== artifact.filename || artifact.filename.includes('..')) {
+      fail('artifact_filename_invalid', `artifacts[${index}].filename`, artifact.id);
+    } else if (artifact.filename !== output.filename) {
+      fail(
+        'artifact_filename_mismatch',
+        `artifacts[${index}].filename`,
+        'descriptor filename must exactly match the top-level output contract'
+      );
+    }
+    if ((artifact.required !== false) !== (output.required !== false)) {
+      fail(
+        'artifact_required_mismatch',
+        `artifacts[${index}].required`,
+        'descriptor optionality must exactly match the top-level output contract'
+      );
+    }
+    if (!INTERACTION_CONTRACTS.has(artifact.interaction)) {
+      fail(
+        'artifact_interaction_contract_invalid',
+        `artifacts[${index}].interaction`,
+        'every formal Artifact must explicitly declare interactive or noninteractive'
+      );
+    }
   }
   for (const output of outputById.values()) {
-    if (EDITABLE_ARTIFACT_TYPES.has(output.type) && !declaredArtifacts.has(output.id)) {
-      fail('editable_output_unmapped', `outputs.${output.id}`, 'every formal table/plot output must be mapped');
+    if (FORMAL_ARTIFACT_TYPES.has(output.type) && !declaredArtifacts.has(output.id)) {
+      fail('formal_output_unmapped', `outputs.${output.id}`, 'every formal table, plot, or report output must be mapped');
     }
   }
 
   const mappedInteractions = new Set();
+  const interactionCounts = new Map();
   for (const [index, mapping] of descriptor.interactionMappings.entries()) {
     const field = `interactionMappings[${index}]`;
     if (!mapping || typeof mapping !== 'object' || Array.isArray(mapping)) {
@@ -152,6 +191,7 @@ function validateResultStudioDescriptor({ plugin = {}, toolDefinition = {}, plug
     if (!declaredArtifacts.has(mapping.artifactId)) {
       fail('interaction_artifact_unknown', `${field}.artifactId`, 'must reference a Result Studio artifact');
     }
+    interactionCounts.set(mapping.artifactId, (interactionCounts.get(mapping.artifactId) || 0) + 1);
     if (mappedInteractions.has(mapping.artifactId)) {
       fail('interaction_artifact_duplicate', `${field}.artifactId`, String(mapping.artifactId));
     }
@@ -199,6 +239,35 @@ function validateResultStudioDescriptor({ plugin = {}, toolDefinition = {}, plug
     }
   }
 
+  for (const [index, artifact] of descriptor.artifacts.entries()) {
+    const output = artifact && outputById.get(artifact.id);
+    if (!output) continue;
+    const mappingCount = interactionCounts.get(artifact.id) || 0;
+    if (artifact.interaction === 'interactive' && mappingCount !== 1) {
+      fail(
+        'interactive_artifact_mapping_count_invalid',
+        `artifacts[${index}]`,
+        'an interactive formal Artifact requires exactly one trusted interaction mapping'
+      );
+    }
+    if (artifact.interaction === 'noninteractive' && mappingCount !== 0) {
+      fail(
+        'noninteractive_artifact_mapped',
+        `artifacts[${index}]`,
+        'a noninteractive formal Artifact cannot declare an interaction mapping'
+      );
+    }
+    if (output.type === 'report') {
+      if (artifact.interaction !== 'noninteractive') {
+        fail(
+          'report_interaction_contract_missing',
+          `artifacts[${index}].interaction`,
+          'a formal report must explicitly declare interaction as noninteractive'
+        );
+      }
+    }
+  }
+
   if (!descriptor.validator || typeof descriptor.validator.id !== 'string'
       || !Array.isArray(descriptor.validator.checks) || descriptor.validator.checks.length === 0) {
     fail('validator_invalid', 'validator', 'stable validator id and checks are required');
@@ -227,6 +296,16 @@ function validateResultStudioDescriptor({ plugin = {}, toolDefinition = {}, plug
         if (digest(descriptor.inputBindings) !== fixture.inputBindingDigest
             || digest(descriptor.artifacts) !== fixture.artifactContractDigest) {
           fail('golden_fixture_contract_drift', 'goldenFixture', 'input/artifact contract changed; regenerate fixture or declare migration');
+        }
+        const expectedArtifactIds = descriptor.artifacts.map((artifact) => artifact.id);
+        if (!Array.isArray(fixture.expectedArtifactIds)
+            || fixture.expectedArtifactIds.length !== expectedArtifactIds.length
+            || fixture.expectedArtifactIds.some((id, index) => id !== expectedArtifactIds[index])) {
+          fail(
+            'golden_fixture_artifact_ids_mismatch',
+            'goldenFixture.expectedArtifactIds',
+            'golden formal Artifact ids must exactly match descriptor order'
+          );
         }
       } catch (error) {
         fail('golden_fixture_invalid_json', 'goldenFixture.path', error.message);
@@ -270,5 +349,6 @@ module.exports = {
   validateResultStudioDescriptor,
   lintResultStudioPlugin,
   evaluateRevisionCompatibility,
+  FORMAL_ARTIFACT_TYPES,
   INTERACTION_MODES,
 };

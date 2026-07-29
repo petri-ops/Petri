@@ -65,7 +65,7 @@ test('RS8 restores a durable running ChangeSet to preview only with valid Job an
     revisionId: 'rev_pending', projectId: 'p_rs8', artifactFamilyId: 'family', artifactId: 'table', parentRevisionIds: ['rev_base'],
     sourceCommit: candidate, sourceScriptRef: { relativePath: 'analysis/scripts/candidate.R', sha256: sha256('print(2)\n'), entryPoint: 'candidate.R', artifactId: 'table', rendererId: 'test:table', language: 'r', origin: 'project_materialized' },
     inputArtifactRefs: [], toolJobId: 'tj_pending', outputPath: 'results/jobs/tj_base/output/table.csv', outputHash: fx.outputHash,
-    validationStatus: 'valid', reproducibilityStatus: 'verified', changeSetId: 'cs_pending',
+    validationStatus: 'valid', reproducibilityStatus: 'available', changeSetId: 'cs_pending',
   });
   fx.repository.saveCheckpoint({
     checkpointId: 'cp_pending', projectId: 'p_rs8', conversationId: 'conv_1', baseCommit: fx.base, candidateCommit: candidate,

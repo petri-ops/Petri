@@ -33,6 +33,15 @@ if (!exists("%||%")) {
   `%||%` <- function(a, b) if (is.null(a) || (length(a) == 0 && !is.list(a))) b else a
 }
 
+canonicalize_png <- function(file_path) {
+  if (!file.exists(file_path)) return(invisible(FALSE))
+  if (!requireNamespace("png", quietly = TRUE)) {
+    stop("[deseq2] R package 'png' is required for deterministic Result Studio artifacts")
+  }
+  png::writePNG(png::readPNG(file_path), file_path)
+  invisible(TRUE)
+}
+
 args <- commandArgs(trailingOnly = TRUE)
 job_dir <- args[1]
 output_dir <- file.path(job_dir, "output")
@@ -185,7 +194,7 @@ volcano_pal <- biof3_palette_div(3)  # 蓝-白-红 → 用 Down/NS/Up 三档
 
 p_vol <- ggplot(res_df, aes(log2FoldChange, -log10(padj), color = sig)) +
   geom_point(size = 0.6, alpha = 0.5) +
-  geom_text_repel(data = top, aes(label = gene), size = 3, max.overlaps = 15, color = "black") +
+  geom_text_repel(data = top, aes(label = gene), size = 3, max.overlaps = 15, color = "black", seed = 20260729) +
   scale_color_manual(values = c(Up = volcano_pal[3], Down = volcano_pal[1], NS = "gray70")) +
   geom_vline(xintercept = c(-lfc_cut, lfc_cut), linetype = "dashed", color = "gray40") +
   geom_hline(yintercept = -log10(padj_cut), linetype = "dashed", color = "gray40") +
@@ -331,6 +340,13 @@ disp_df <- data.frame(gene = rownames(counts),
                       dispersion = mcols(dds)$dispersion)
 write.csv(disp_df, file.path(output_dir, "dispersion_data.csv"), row.names = FALSE)
 cat("[deseq2] Intermediate data saved.\n")
+
+# The formal HTML report embeds every generated PNG. R's PNG devices may emit
+# different compressed byte streams for identical pixels, so normalize the
+# complete PNG set before either plots or the report enter Artifact Truth.
+for (png_path in list.files(output_dir, pattern = "\\.png$", full.names = TRUE)) {
+  canonicalize_png(png_path)
+}
 
 # ============================================================
 # Manifest (含 PNG + PDF 双格式)

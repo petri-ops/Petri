@@ -451,7 +451,17 @@ module.exports = function registerResultStudioRoutes(app) {
             toolJobId: loaded.job.id,
             artifactId: artifactRecord.id,
           });
-          if (existing) {
+          const pluginManifest = pluginLoader.getPluginManifest(loaded.job.tool_id);
+          const pluginDescriptor = pluginManifest?.resultStudio || null;
+          const formalArtifactIds = pluginDescriptor && Array.isArray(pluginDescriptor.artifacts)
+            ? pluginDescriptor.artifacts.map((artifact) => artifact && artifact.artifactId || artifact && artifact.id).filter(Boolean)
+            : [];
+          const cohortIncomplete = !!pluginDescriptor && formalArtifactIds.some((artifactId) => !repo().findRevisionByJobArtifact({
+            projectId: loaded.project.id,
+            toolJobId: loaded.job.id,
+            artifactId,
+          }));
+          if (existing && !cohortIncomplete) {
             revision = existing;
           } else {
             const snapshot = result.executionProvenance?.script;
@@ -472,8 +482,9 @@ module.exports = function registerResultStudioRoutes(app) {
               language: result.tool?.language || (/\.py$/i.test(sourceScriptPath) ? 'python' : 'r'),
               sourceScriptContent: fs.readFileSync(sourceScriptPath, 'utf8'),
               sourceScriptSha256: snapshot.sha256,
+              pluginDescriptor,
             };
-            const baselineKey = `${loaded.project.id}\0${loaded.job.id}\0${artifactRecord.id}`;
+            const baselineKey = `${loaded.project.id}\0${loaded.job.id}\0baseline-cohort`;
             const ensured = await baselineWork.run(
               baselineKey,
               'ensure-baseline',
@@ -929,8 +940,16 @@ module.exports = function registerResultStudioRoutes(app) {
       workspaceRoot: context.project.workspace_path,
       getToolJob: db.getToolJob,
       getPlugin: pluginLoader.getPlugin,
+      getResultStudioDescriptor: (toolId) => pluginLoader.getPluginManifest(toolId)?.resultStudio || null,
       activePreviewJobs: context.repository.listChangeSets({ projectId, status: 'running', limit: 500 }).length,
-      executeJob: async ({ toolId, params, materializedScriptPath, materializedScriptSha256, changeSetId }) => {
+      executeJob: async ({
+        toolId,
+        params,
+        materializedScriptPath,
+        materializedScriptSha256,
+        changeSetId,
+        resultStudioInputLineage = null,
+      }) => {
         const result = await mcpRegistry.callTool(toolId, params, {
           userId: userId(req) || 'local-user',
           projectId,
@@ -939,6 +958,7 @@ module.exports = function registerResultStudioRoutes(app) {
             sha256: materializedScriptSha256,
             changeSetId,
           },
+          resultStudioInputLineage,
         });
         const toolJobId = result && result.toolJobId;
         return { result, toolJobId, job: toolJobId ? db.getToolJob(toolJobId) : null };

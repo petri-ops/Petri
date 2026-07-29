@@ -9,6 +9,9 @@ const { isPathContained } = require('../../shared-backend/project-run-layout');
 const { createResultStudioRepository } = require('../../shared-backend/result-studio-repository');
 const { assessSelectionCompatibility } = require('../../shared-backend/result-studio-contracts');
 const { queryResultTable } = require('../../shared-backend/result-studio-table-query');
+const { buildAuthoritativeWorkflowGraph } = require('../../shared-backend/result-workflow-graph');
+const { bindProjectRepository } = require('../../shared-backend/git-repository-binding');
+const { verifyRevisionSourceMaterial } = require('../../shared-backend/result-revision-source');
 
 const MAX_DOWNSTREAM_ENTITY_IDS = 20_000;
 const SAFE_SELECTION_ID = /^sel_[A-Za-z0-9_-]{1,160}$/;
@@ -32,6 +35,243 @@ function atomicWrite(filePath, content) {
 
 function fail(error, message, detail = null) {
   return { ok: false, error, message, detail };
+}
+
+function parseJobResult(job) {
+  if (!job) return {};
+  if (job.result && typeof job.result === 'object') return job.result;
+  try { return JSON.parse(job.result_json || '{}'); } catch { return {}; }
+}
+
+function enumValue(value, allowed, fallback) {
+  const candidate = String(value || fallback).trim();
+  return allowed.includes(candidate) ? candidate : null;
+}
+
+function boundedNumber(value, { fallback, minimum, maximum }) {
+  if (value == null || value === '') return fallback;
+  const number = Number(value);
+  return Number.isFinite(number) && number >= minimum && number <= maximum ? number : null;
+}
+
+function persistVerifiedWorkflowGraph({ projectId, sourceToolJobId, repository, executed, dependencies }) {
+  const listProjectToolJobsForWorkflow = dependencies.listProjectToolJobsForWorkflow
+    || dbMod.listProjectToolJobsForWorkflow;
+  if (!executed || !executed.ok || !executed.toolJobId
+      || typeof listProjectToolJobsForWorkflow !== 'function') {
+    return { ok: false, diagnostics: [{ code: 'workflow_execution_truth_missing' }] };
+  }
+  const buildWorkflowGraph = dependencies.buildAuthoritativeWorkflowGraph
+    || buildAuthoritativeWorkflowGraph;
+  const graph = buildWorkflowGraph({
+    projectId,
+    sourceToolJobId,
+    jobs: listProjectToolJobsForWorkflow(projectId),
+    repository,
+    requiredToolJobIds: [executed.toolJobId],
+  });
+  if (!graph.ok) return { ok: false, diagnostics: graph.diagnostics || [] };
+  if (typeof repository.saveWorkflowGraph !== 'function') {
+    return { ok: false, diagnostics: [{ code: 'workflow_graph_repository_unavailable' }] };
+  }
+  try {
+    const saved = repository.saveWorkflowGraph(graph.graph);
+    if (!saved || saved.graphId !== graph.graph.graphId || saved.sourceDigest !== graph.graph.sourceDigest
+        || saved.validationStatus !== 'valid') {
+      return { ok: false, diagnostics: [{ code: 'workflow_graph_persistence_mismatch' }] };
+    }
+    return { ok: true, graph: saved, diagnostics: [] };
+  } catch (error) {
+    return {
+      ok: false,
+      diagnostics: [{
+        code: error?.code || 'workflow_graph_persistence_failed',
+        message: error?.message || 'Authoritative workflow graph persistence failed.',
+      }],
+    };
+  }
+}
+
+function failClosedWorkflowAction(executed, workflowGraph) {
+  if (workflowGraph.ok) return null;
+  return fail(
+    'workflow_graph_persistence_failed',
+    '下游 Job 已完成，但权威工作流图无法验证并持久化；本次科学动作不能视为成功。',
+    {
+      toolJobId: executed?.toolJobId || null,
+      executionCompleted: executed?.ok === true,
+      diagnostics: workflowGraph.diagnostics || [],
+    }
+  );
+}
+
+function verifyImmutableRevision({ projectId, project, revision, repository, sourceJob, dependencies }) {
+  const verifier = dependencies.verifyRevisionSourceMaterial || verifyRevisionSourceMaterial;
+  let binding = dependencies.repositoryBinding || null;
+  if (!dependencies.adapter && !binding) {
+    const bindRepository = dependencies.bindProjectRepository || bindProjectRepository;
+    binding = bindRepository({
+      workspaceRoot: project.workspace_path,
+      projectId,
+      preferManaged: false,
+      allowExistingRepository: true,
+      createManagedIfMissing: false,
+    });
+  }
+  const adapter = dependencies.adapter || binding?.adapter || null;
+  if (!adapter && dependencies.verifyRevisionSourceMaterial == null) {
+    return fail(
+      binding?.reason || 'revision_source_repository_unavailable',
+      '正式 Revision 的不可变脚本、参数与输入快照不可用，不能启动下游重跑。'
+    );
+  }
+  try {
+    const projection = verifier({ projectId, revision }, {
+      repository,
+      adapter,
+      gitPathPrefix: dependencies.gitPathPrefix != null
+        ? dependencies.gitPathPrefix
+        : binding?.mode === 'existing'
+          ? binding.inspection?.existing?.workspaceRelativeToRepository
+          : '',
+      workspaceRoot: project.workspace_path,
+      getToolJob: dependencies.getToolJob || (() => sourceJob),
+    });
+    if (projection?.reproduction?.inputDrift?.length > 0) {
+      return fail('source_input_drift', '正式 Revision 的一个或多个输入 hash 已变化，不能启动下游重跑。');
+    }
+    return { ok: true, projection };
+  } catch (error) {
+    return fail(
+      error?.code || 'revision_source_verification_failed',
+      error?.message || '正式 Revision 的不可变来源材料验证失败。',
+      error?.detail || null
+    );
+  }
+}
+
+/**
+ * Continue a current DEG Revision into GO/KEGG using its immutable Artifact
+ * bytes.  This intentionally takes a server-resolved revision id: a model
+ * never supplies a file path, a tool id, or a lineage object.  Unlike the
+ * selection route, this direct edge lets a later DEG-threshold candidate
+ * truthfully invalidate and rerun enrichment from the full DEG table.
+ */
+async function tool_result_enrichment_from_revision(args, ctx, dependencies = {}) {
+  const projectId = String(ctx?.projectId || '').trim();
+  const revisionId = String(args?.revisionId || '').trim();
+  if (!ctx?.userId) return fail('unauthorized', '未授权');
+  if (!projectId || !revisionId) return fail('revision_and_project_required', '需要当前项目和一个受信的 DEG Revision');
+
+  const species = enumValue(args?.species, ['human', 'mouse'], 'human');
+  const geneIdType = enumValue(args?.geneIdType, ['auto', 'SYMBOL', 'ENSEMBL', 'ENTREZID'], 'auto');
+  const analysisType = enumValue(args?.analysisType, ['all', 'GO', 'GO-BP', 'GO-MF', 'GO-CC', 'KEGG'], 'all');
+  const padjCutoff = boundedNumber(args?.padjCutoff, { fallback: 0.05, minimum: 0, maximum: 1 });
+  const lfcCutoff = boundedNumber(args?.lfcCutoff, { fallback: 1, minimum: 0, maximum: 100 });
+  if (!species || !geneIdType || !analysisType || padjCutoff == null || lfcCutoff == null) {
+    return fail('enrichment_parameters_invalid', 'GO/KEGG 参数不在插件声明的允许范围内');
+  }
+
+  const sqlite = dependencies.sqlite || dbMod.getDatabase();
+  const repository = dependencies.repository || createResultStudioRepository(sqlite);
+  const revision = repository.getRevision(revisionId);
+  if (!revision || revision.projectId !== projectId || revision.artifactId !== 'deg_table') {
+    return fail('deg_revision_not_found', '当前项目没有可用于富集的正式 DEG 表版本');
+  }
+  const currentRevision = repository.getCurrentRevision(revision.artifactFamilyId, projectId);
+  if (!currentRevision || currentRevision.revisionId !== revision.revisionId) {
+    return fail('deg_revision_not_current', '只允许从当前 DEG Revision 派生新的富集；历史替代方案请先恢复为新 Revision');
+  }
+  const project = dependencies.getProject ? dependencies.getProject(projectId) : dbMod.getProject(projectId);
+  if (!project?.workspace_path) return fail('project_workspace_missing', '项目工作区不可用');
+  let workspaceRoot;
+  let degPath;
+  try {
+    workspaceRoot = fs.realpathSync(project.workspace_path);
+    degPath = fs.realpathSync(path.join(workspaceRoot, revision.outputPath));
+  } catch {
+    return fail('deg_artifact_missing', 'DEG Artifact 已缺失，不能继续富集');
+  }
+  if (!isPathContained(workspaceRoot, degPath) || !fs.statSync(degPath).isFile()) {
+    return fail('deg_artifact_outside_project', 'DEG Artifact 不在项目工作区内');
+  }
+  if (!revision.outputHash || sha256File(degPath) !== revision.outputHash) {
+    return fail('deg_artifact_hash_drift', 'DEG Artifact 已偏离其正式 Revision');
+  }
+
+  const sourceJob = dependencies.getToolJob ? dependencies.getToolJob(revision.toolJobId) : dbMod.getToolJob(revision.toolJobId);
+  const sourceResult = parseJobResult(sourceJob);
+  const sourceArtifactMatches = (Array.isArray(sourceResult.artifacts) ? sourceResult.artifacts : [])
+    .filter((artifact) => artifact && artifact.id === revision.artifactId);
+  if (!sourceJob || sourceJob.status !== 'completed' || String(sourceJob.project_id || sourceJob.projectId || '') !== projectId
+      || sourceResult.artifactTruth?.status !== 'valid' || sourceResult.artifactTruth?.blocking === true
+      || sourceArtifactMatches.length !== 1) {
+    return fail('deg_source_truth_invalid', 'DEG Revision 没有可验证的 Job/Artifact Truth 来源');
+  }
+  const sourcePlugin = dependencies.getPluginManifest
+    ? dependencies.getPluginManifest(sourceJob.tool_id || sourceJob.toolId)
+    : pluginLoader.getPluginManifest(sourceJob.tool_id || sourceJob.toolId);
+  const descriptor = sourcePlugin?.resultStudio;
+  const artifactDescriptor = descriptor?.artifacts?.filter((artifact) => artifact && artifact.id === 'deg_table') || [];
+  const mapping = descriptor?.interactionMappings?.filter((item) => item && item.artifactId === 'deg_table') || [];
+  if (!descriptor || !Array.isArray(descriptor.actions) || !descriptor.actions.includes('derive_enrichment_input')
+      || artifactDescriptor.length !== 1 || mapping.length !== 1 || mapping[0].idField !== 'gene') {
+    return fail('deg_enrichment_action_not_declared', '来源插件没有声明稳定 gene_id 的富集派生契约');
+  }
+  const sourceVerification = verifyImmutableRevision({
+    projectId, project, revision, repository, sourceJob, dependencies,
+  });
+  if (!sourceVerification.ok) return sourceVerification;
+
+  const runTool = dependencies.runTool || require('./learning').tool_run_tool;
+  const executed = await runTool({
+    op: 'run',
+    toolId: 'go-kegg',
+    params: {
+      deg_table: degPath,
+      species,
+      gene_id_type: geneIdType,
+      analysis_type: analysisType,
+      padj_cutoff: padjCutoff,
+      lfc_cutoff: lfcCutoff,
+    },
+  }, {
+    ...ctx,
+    resultStudioInputLineage: {
+      deg_table: {
+        lineageVersion: 1,
+        kind: 'artifact',
+        sourceRevisionId: revision.revisionId,
+        sourceToolJobId: revision.toolJobId,
+        sourceArtifactId: revision.artifactId,
+        sourceOutputHash: revision.outputHash,
+        materializationHash: revision.outputHash,
+      },
+    },
+  });
+  const workflowGraph = persistVerifiedWorkflowGraph({
+    projectId,
+    sourceToolJobId: revision.toolJobId,
+    repository,
+    executed,
+    dependencies,
+  });
+  const workflowFailure = failClosedWorkflowAction(executed, workflowGraph);
+  if (workflowFailure) return workflowFailure;
+  return {
+    ...executed,
+    enrichmentAction: {
+      sourceRevisionId: revision.revisionId,
+      sourceArtifactId: revision.artifactId,
+      geneIdField: 'gene',
+      parameters: { species, geneIdType, analysisType, padjCutoff, lfcCutoff },
+      executorTruth: 'run_tool → tool_job → artifact truth',
+      workflowGraph: workflowGraph.ok
+        ? { graphId: workflowGraph.graph.graphId, sourceDigest: workflowGraph.graph.sourceDigest, validationStatus: workflowGraph.graph.validationStatus }
+        : null,
+      workflowDiagnostics: workflowGraph.ok ? [] : workflowGraph.diagnostics,
+    },
+  };
 }
 
 async function tool_result_selection_run(args, ctx, dependencies = {}) {
@@ -90,6 +330,10 @@ async function tool_result_selection_run(args, ctx, dependencies = {}) {
   if (!idField || !descriptor.actions.includes('derive_enrichment_input')) {
     return fail('selection_action_not_declared', '来源插件没有声明稳定 gene 映射或富集派生动作');
   }
+  const sourceVerification = verifyImmutableRevision({
+    projectId, project, revision, repository, sourceJob, dependencies,
+  });
+  if (!sourceVerification.ok) return sourceVerification;
   let backingName = path.basename(revision.outputPath);
   if (mapping.dataFile) backingName = mapping.dataFile;
   else if (mapping.dataArtifactId) {
@@ -173,6 +417,19 @@ async function tool_result_selection_run(args, ctx, dependencies = {}) {
   atomicWrite(geneFile, `gene\n${selectedIds.map(csvCell).join('\n')}\n`);
 
   const runTool = dependencies.runTool || require('./learning').tool_run_tool;
+  const resultStudioInputLineage = {
+    deg_table: {
+      lineageVersion: 1,
+      kind: 'selection',
+      sourceRevisionId: revision.revisionId,
+      sourceToolJobId: revision.toolJobId,
+      sourceArtifactId: revision.artifactId,
+      sourceOutputHash: revision.outputHash,
+      selectionId: selection.selectionId,
+      selectionHash: selection.entityIdsHash,
+      materializationHash: sha256File(geneFile),
+    },
+  };
   const executed = await runTool({
     op: 'run',
     toolId: 'go-kegg',
@@ -182,7 +439,19 @@ async function tool_result_selection_run(args, ctx, dependencies = {}) {
       gene_id_type: args?.geneIdType || 'auto',
       analysis_type: args?.analysisType || 'all',
     },
-  }, ctx);
+  }, { ...ctx, resultStudioInputLineage });
+
+  // Once the real downstream Job is terminal, snapshot the graph projected
+  // from its persisted provenance.  A failed/partial run never gains a DAG.
+  const workflowGraph = persistVerifiedWorkflowGraph({
+    projectId,
+    sourceToolJobId: revision.toolJobId,
+    repository,
+    executed,
+    dependencies,
+  });
+  const workflowFailure = failClosedWorkflowAction(executed, workflowGraph);
+  if (workflowFailure) return workflowFailure;
   return {
     ...executed,
     selectionAction: {
@@ -197,8 +466,16 @@ async function tool_result_selection_run(args, ctx, dependencies = {}) {
         output: path.posix.join(relativeDir, 'gene-list.csv'),
       },
       executorTruth: 'run_tool → tool_job → artifact truth',
+      workflowGraph: workflowGraph.ok
+        ? { graphId: workflowGraph.graph.graphId, sourceDigest: workflowGraph.graph.sourceDigest, validationStatus: workflowGraph.graph.validationStatus }
+        : null,
+      workflowDiagnostics: workflowGraph.ok ? [] : workflowGraph.diagnostics,
     },
   };
 }
 
-module.exports = { MAX_DOWNSTREAM_ENTITY_IDS, tool_result_selection_run };
+module.exports = {
+  MAX_DOWNSTREAM_ENTITY_IDS,
+  tool_result_selection_run,
+  tool_result_enrichment_from_revision,
+};

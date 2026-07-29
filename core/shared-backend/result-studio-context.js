@@ -126,6 +126,9 @@ function computeContextToken(envelope) {
     selectionFields: envelope.selection && envelope.selection.fields,
     selectionSort: envelope.selection && envelope.selection.sort,
     selectionUpdatedAt: envelope.selection && envelope.selection.updatedAt,
+    workflowGraphId: envelope.workflow && envelope.workflow.graphId,
+    workflowSourceDigest: envelope.workflow && envelope.workflow.sourceDigest,
+    workflowSnapshotStatus: envelope.workflow && envelope.workflow.snapshotStatus,
   }));
 }
 
@@ -281,13 +284,18 @@ function buildResultStudioContextEnvelope(input = {}) {
     workflow: workflowInput
       ? {
         available: true,
+        graphId: nullableTrimmed(workflowInput.graphId),
+        sourceDigest: nullableTrimmed(workflowInput.sourceDigest),
+        snapshotStatus: ['persisted', 'not_persisted'].includes(workflowInput.snapshotStatus)
+          ? workflowInput.snapshotStatus
+          : 'not_persisted',
         nodeId: nullableTrimmed(workflowInput.nodeId),
         stepCount: Number.isInteger(workflowInput.stepCount) ? workflowInput.stepCount : null,
         downstreamNodeIds: Array.isArray(workflowInput.downstreamNodeIds)
           ? workflowInput.downstreamNodeIds.map((item) => trimmed(item)).filter(Boolean)
           : [],
       }
-      : { available: false, nodeId: null, stepCount: null, downstreamNodeIds: [] },
+      : { available: false, graphId: null, sourceDigest: null, snapshotStatus: 'not_persisted', nodeId: null, stepCount: null, downstreamNodeIds: [] },
     validation: {
       artifactTruthStatus: nullableTrimmed(jobInput.artifactTruthStatus),
       revisionValidationStatus: nullableTrimmed(revisionInput.validationStatus),

@@ -73,6 +73,26 @@ test('stored acceptance evidence selects its reader and never blocks on unmapped
   assert.deepEqual(resolveImpact(['acceptance/g0-new-tree/evidence.json']).unknown, ['acceptance/g0-new-tree/evidence.json']);
 });
 
+test('P5 producer and source-bound evidence select the complete scientific-editing contract bundle', () => {
+  const required = [
+    'test/g0-rs-p5-acceptance.test.mjs',
+    'test/result-plugin-validator.test.mjs',
+    'test/result-workflow-graph.test.mjs',
+    'test/result-scientific-rerun.test.mjs',
+    'test/result-scientific-compare.test.mjs',
+    'test/result-revision-replay-package.test.mjs',
+  ];
+  for (const file of [
+    'scripts/g0-rs-p5-acceptance.mjs',
+    'acceptance/g0-result-studio/rs-p5-scientific-editing.json',
+  ]) {
+    const plan = resolveImpact([file]);
+    assert.deepEqual(plan.unknown, []);
+    assert.ok(plan.reasons[file].includes('p5-real-scientific-editing'));
+    for (const testFile of required) assert.ok(plan.tests.includes(testFile), `${file} must select ${testFile}`);
+  }
+});
+
 test('directly edited tests are included and unknown production paths fail closed', () => {
   assert.ok(resolveImpact(['test/loop-contract.test.mjs']).tests.includes('test/loop-contract.test.mjs'));
   assert.deepEqual(resolveImpact(['new-production-area/engine.js']).unknown, ['new-production-area/engine.js']);

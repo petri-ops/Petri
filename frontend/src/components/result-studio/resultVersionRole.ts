@@ -2,6 +2,11 @@ import type { ArtifactRevision, ResultStudioChangeSet } from './resultStudioClie
 
 export type ResultVersionRole = 'original' | 'current' | 'candidate' | 'history';
 
+export function isBaselineIntentRef(intentRef: string | null | undefined): boolean {
+  return intentRef?.startsWith('baseline:') === true
+    || intentRef?.startsWith('baseline-cohort:') === true;
+}
+
 /**
  * Classify a Revision from persisted Revision + ChangeSet truth. Roles may
  * overlap: the original baseline can still be current, and a candidate can be
@@ -12,7 +17,7 @@ export function resultVersionRoles(
   changeSet: ResultStudioChangeSet | null | undefined,
 ): ResultVersionRole[] {
   const roles: ResultVersionRole[] = [];
-  if (changeSet?.intentRef?.startsWith('baseline:')) roles.push('original');
+  if (isBaselineIntentRef(changeSet?.intentRef)) roles.push('original');
   if (revision.isCurrent) roles.push('current');
   if (changeSet?.status === 'preview_ready') roles.push('candidate');
   if (!roles.includes('current') && !roles.includes('candidate')) roles.push('history');

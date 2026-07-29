@@ -9,6 +9,7 @@ import { createHash } from 'node:crypto';
 const require = createRequire(import.meta.url);
 const { createResultEditPlanTool, createResultChangeSetTools } = require('../core/r-server/agent-tools/result-edit-tools');
 const { normalizePluginManifest } = require('../core/r-server/plugin-loader');
+const { computeExecutionProvenanceHash } = require('../core/shared-backend/execution-provenance');
 
 function makeJob(projectId = 'p_1') {
   return {
@@ -26,11 +27,42 @@ function makeJob(projectId = 'p_1') {
   };
 }
 
+function makeRootOnlyCorrelationJob(projectId = 'p_1') {
+  const provenance = {
+    executionProvenanceVersion: 1,
+    toolJobId: 'tj_corr', projectId,
+    script: { snapshotPath: '/snapshot/gene-correlation.R', sha256: 'a'.repeat(64) },
+    // This is a root input, not an upstream Result Studio artifact. It has a
+    // durable input hash but intentionally no model-supplied edge.
+    inputs: [{ id: 'expr_matrix', relativePath: 'inputs/expression.csv', sha256: 'b'.repeat(64) }],
+    artifacts: [{ id: 'corr_matrix', filename: 'corr_matrix.csv', sha256: 'c'.repeat(64) }],
+  };
+  provenance.provenanceHash = computeExecutionProvenanceHash(provenance);
+  return {
+    id: 'tj_corr', project_id: projectId, tool_id: 'gene-correlation', status: 'completed',
+    result: {
+      artifactTruth: { status: 'valid', blocking: false },
+      artifacts: [{ id: 'corr_matrix', name: 'corr_matrix.csv' }],
+      executionProvenance: provenance,
+    },
+  };
+}
+
 const args = {
   toolJobId: 'tj_plot', artifactId: 'volcano_plot', revisionId: 'rev_1',
   requestedOutcome: 'use a blue palette', proposedParameterPatch: { palette: 'blue' },
-  workflowPlan: { steps: [{ id: 'plot', toolJobId: 'tj_plot', dependsOn: [] }] },
 };
+
+function trustedWorkflowPlan(rootToolJobId = 'tj_plot') {
+  return {
+    workflowTruthVersion: 1,
+    authority: 'sqlite_job_artifact_truth',
+    graphId: 'wfg_test_graph',
+    sourceDigest: 'd'.repeat(64),
+    rootToolJobId,
+    steps: [{ id: `job:${rootToolJobId}`, toolJobId: rootToolJobId, dependsOn: [] }],
+  };
+}
 
 test('RS4 Agent tool uses trusted plugin impact metadata and remains read-only', async () => {
   let reads = 0;
@@ -53,6 +85,98 @@ test('RS4 Agent tool does not let model arguments invent parameter impact metada
   const result = await tool({ ...args, parameterImpactRules: { palette: 'presentation' } }, { projectId: 'p_1' });
   assert.equal(result.intent.editClass, 'scientific_recompute');
   assert.equal(result.intent.requiresScientificConfirmation, true);
+});
+
+test('P5 Agent plan tool rejects a model-supplied workflow graph', async () => {
+  const tool = createResultEditPlanTool({ getToolJob: () => makeJob() });
+  const result = await tool({ ...args, workflowPlan: trustedWorkflowPlan() }, { projectId: 'p_1' });
+  assert.equal(result.ok, false);
+  assert.equal(result.error, 'workflow_plan_forbidden');
+});
+
+test('P5 scientific plan persists a server-projected root-only graph before it becomes executable', async () => {
+  const job = makeRootOnlyCorrelationJob();
+  const savedGraphs = [];
+  const repository = {
+    findWorkflowGraph({ projectId, sourceDigest }) {
+      return savedGraphs.find((graph) => graph.projectId === projectId && graph.sourceDigest === sourceDigest) || null;
+    },
+    saveWorkflowGraph(graph) {
+      const saved = { ...graph };
+      savedGraphs.push(saved);
+      return saved;
+    },
+  };
+  const tool = createResultEditPlanTool({
+    getToolJob: () => job,
+    getPluginManifest: () => ({ resultStudio: { parameterImpacts: { method: 'scientific_recompute' } } }),
+    listProjectToolJobsForWorkflow: () => [job],
+    createResultStudioRepository: () => repository,
+  });
+  const request = {
+    toolJobId: job.id,
+    artifactId: 'corr_matrix',
+    revisionId: 'rev_corr_1',
+    requestedOutcome: 'Recompute the correlation matrix with Spearman correlation.',
+    proposedParameterPatch: { method: 'spearman' },
+  };
+  const result = await tool(request, {
+    projectId: 'p_1',
+    // This private-looking graph is deliberately wrong.  The plan must
+    // derive and persist `tj_corr` from the completed Job, not trust ctx.
+    resultStudioWorkflowPlan: trustedWorkflowPlan('tj_invented'),
+  });
+  assert.equal(result.ok, true);
+  // `method` is deliberately conservatively classified as a workflow
+  // replan.  It still belongs to the scientific/data/workflow gate.
+  assert.equal(result.intent.editClass, 'workflow_replan');
+  assert.equal(result.intent.affectedScope, 'workflow_subgraph');
+  assert.equal(result.intent.workflowGraph?.graphId, savedGraphs[0].graphId);
+  assert.deepEqual(savedGraphs[0].nodes.map((node) => node.toolJobId), ['tj_corr']);
+  assert.deepEqual(savedGraphs[0].edges, []);
+
+  const repeated = await tool(request, { projectId: 'p_1' });
+  assert.equal(repeated.ok, true);
+  assert.equal(savedGraphs.length, 1, 'the authoritative source digest is persisted idempotently');
+});
+
+test('P5 scientific planning cannot recover authority from a caller-carried workflow graph', async () => {
+  const job = makeRootOnlyCorrelationJob();
+  const fakePlan = trustedWorkflowPlan(job.id);
+  const fakeGraph = {
+    graphId: fakePlan.graphId,
+    projectId: 'p_1',
+    rootToolJobId: job.id,
+    sourceDigest: fakePlan.sourceDigest,
+    validationStatus: 'valid',
+    nodes: [{ id: `job:${job.id}`, toolJobId: job.id }],
+    edges: [],
+  };
+  let saves = 0;
+  const tool = createResultEditPlanTool({
+    getToolJob: () => job,
+    getPluginManifest: () => ({ resultStudio: { parameterImpacts: { method: 'scientific_recompute' } } }),
+    // No completed Job appears in SQLite's authoritative workflow query.
+    listProjectToolJobsForWorkflow: () => [],
+    createResultStudioRepository: () => ({
+      findWorkflowGraph: () => fakeGraph,
+      saveWorkflowGraph: () => { saves += 1; return fakeGraph; },
+    }),
+  });
+  const result = await tool({
+    toolJobId: job.id,
+    artifactId: 'corr_matrix',
+    revisionId: 'rev_corr_1',
+    requestedOutcome: 'Recompute correlation.',
+    proposedParameterPatch: { method: 'spearman' },
+  }, {
+    projectId: 'p_1',
+    resultStudioWorkflowPlan: fakePlan,
+    resultStudioWorkflowGraph: fakeGraph,
+  });
+  assert.equal(result.ok, false);
+  assert.equal(result.diagnostics.some((entry) => entry.code === 'workflow_source_job_unverified'), true);
+  assert.equal(saves, 0);
 });
 
 test('RS4 Agent tool rejects cross-project access before planning', async () => {
