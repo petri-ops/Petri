@@ -167,7 +167,7 @@ test('selection contract can describe a synthetic 27-gene query but does not qua
   assert.match(selection.filterHash, /^[a-f0-9]{64}$/);
 });
 
-test('intent planner includes the downstream enrichment subgraph without claiming a product trace', () => {
+test('intent planner includes the downstream enrichment subgraph from a trusted persisted graph without claiming a product trace', () => {
   const toolJob = {
     id: 'tj_deg', project_id: 'p_rs9', status: 'completed',
     result: {
@@ -186,12 +186,21 @@ test('intent planner includes the downstream enrichment subgraph without claimin
     requestedOutcome: '将 padj 阈值改为 0.01 并更新下游富集',
     proposedParameterPatch: { padj_cutoff: 0.01 },
     parameterImpactRules: { padj_cutoff: 'scientific_recompute' },
-    workflowPlan: { steps: [
+    // The planner only receives this shape after the server has projected it
+    // from persistent Workflow Truth; callers cannot supply a bare DAG.
+    workflowPlan: {
+      workflowTruthVersion: 1,
+      authority: 'sqlite_job_artifact_truth',
+      graphId: 'wfg_rs9_qualification_test',
+      sourceDigest: 'd'.repeat(64),
+      rootToolJobId: 'tj_counts',
+      steps: [
       { id: 'deg', toolJobId: 'tj_deg', dependsOn: ['counts'] },
       { id: 'counts', toolJobId: 'tj_counts', dependsOn: [] },
       { id: 'volcano', toolJobId: 'tj_volcano', dependsOn: ['deg'] },
       { id: 'enrichment', toolJobId: 'tj_enrich', dependsOn: ['deg'] },
-    ] },
+      ],
+    },
   });
   assert.equal(result.ok, true, JSON.stringify(result.diagnostics));
   assert.equal(result.status, 'confirmation_required');

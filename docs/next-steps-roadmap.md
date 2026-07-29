@@ -1,6 +1,6 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-07-28
+最后更新：2026-07-30
 
 ## 当前结论
 
@@ -10,11 +10,13 @@
 
 LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口。RS9 曾新增第 17 类 `result_studio_product`，但后续复核发现其五条任务由独立测试拼装、Provider 未执行真实工具闭环、视觉验收依赖人工布尔值、大表由 seed 直接构造；该证据现降级为 unit/synthetic/renderer historical evidence。`result-studio-editing` 在 RS-P7 前暂停 qualified support claim，不能影响或冒充 LF12 原始核心资格。
 
-`G0-CHF0 Critical Cross-cutting Hardening`（[`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md)）已完成 CHF0-R1～R5 审计修复并重新真实收口：科学输出、PCA sample-ID、长任务/进程终态、HTTP 来源/文件边界与 Acceptance 可追溯性均绑定实现检查点 `41a365f`；专项 5/5、22 tests，29 个 source/producer hashes 与可达提交逐一匹配，证据保持 `qualificationEligible:false`。Result Studio P4R-0～P4R-6 已真实收口；`G0-RS-P5` 已建立 Goal 并进行中。
+`G0-CHF0 Critical Cross-cutting Hardening`（[`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md)）已完成 CHF0-R1～R5 审计修复并重新真实收口：科学输出、PCA sample-ID、长任务/进程终态、HTTP 来源/文件边界与 Acceptance 可追溯性均绑定实现检查点 `41a365f`；专项 5/5、22 tests，29 个 source/producer hashes 与可达提交逐一匹配，证据保持 `qualificationEligible:false`。Result Studio P4R-0～P4R-6 与 `G0-RS-P5` 已按各自边界真实收口；P6 是下一阶段但尚未启动。
 
-P4R 已于 `cb73132`（实现）、`c449e57`（刷新后的 runtime evidence）与 `252e806`（20/20 product closeout）完成 P4R-6：canonical Git/SQLite 冷路径隔离到持久后台子进程，performance evidence 14/14、event-loop 17.99ms ≤ 250ms；live evidence 从真实 completed Job 经 context-bound Agent candidate、Compare、Code、adopt、受控 replay、discard、conversation 和 backend restart/reopen 连续通过；同一 Electron BrowserWindow 的明暗 × 1440/1024/820、键盘/focus、异常降级/重试和服务重启恢复均通过。UI-112～UI-115 已由 source-bound renderer evidence 记为 `verified`；P4R 整包仍仅是 `implemented_unverified / qualificationEligible:false`，未使用真实 Provider、未作 packaged/GA 声明。当前 `G0-RS-P5` 已启动：先建立来自 SQLite、Job 与 Workflow Truth 的权威持久 DAG；缺该投影时，科学、数据与流程编辑继续 fail-closed，随后才进入五条真实 admitted 科学编辑任务。
+P4R 已于 `cb73132`（实现）、`c449e57`（刷新后的 runtime evidence）与 `252e806`（20/20 product closeout）完成 P4R-6：canonical Git/SQLite 冷路径隔离到持久后台子进程，performance evidence 14/14、event-loop 17.99ms ≤ 250ms；live evidence 从真实 completed Job 经 context-bound Agent candidate、Compare、Code、adopt、受控 replay、discard、conversation 和 backend restart/reopen 连续通过；同一 Electron BrowserWindow 的明暗 × 1440/1024/820、键盘/focus、异常降级/重试和服务重启恢复均通过。UI-112～UI-115 已由 source-bound renderer evidence 记为 `verified`；P4R 整包仍仅是 `implemented_unverified / qualificationEligible:false`，未使用真实 Provider、未作 packaged/GA 声明。
 
-P4R-3 的实现检查点为 `3d3eb29`，性能门校准修复为 `59b33c4`。中央结果焦点以自然语言 Composer 为默认入口，高级参数面板默认关闭；Artifact/Revision/Selection/contextToken 在点击时原子绑定，create 只接受同一 Agent turn 的受信原始 intent，selection 重放、分类/确认篡改、script patch 与模型自带 DAG 均 fail-closed。task/legacy 的取消、返回式 Provider 错误与异常共用 terminal 进度收口，SQLite 重开只显示五个公开阶段。P2/P3/P4/P4R 五份 evidence 均通过 source-commit 反查；产品证据 10/10，资格仍为 `qualificationEligible:false`。缺权威持久 DAG 的科学/数据/流程编辑保持明确阻断，不把安全降级冒充可用能力。
+`G0-RS-P5 Real Scientific Editing` 已在 `e7f271c` 收口，source-bound 证据为 `acceptance/g0-result-studio/rs-p5-scientific-editing.json`（20/20，`sourceCommitMatchesSourceHashes:true`）。空 disposable 账本经迁移与 HTTP project 创建后，五条 admitted 科学任务都走 `run_tool → tool_job → Artifact Truth`，完成持久 SQLite/Job/Workflow Truth DAG、缺图 fail-closed、候选 validator、不可变输入、科学差异、完整 cohort ReplayPackage 及历史 restore。它只证明本地 deterministic context-bound 科学编辑，不证明 Provider、packaged、崩溃/压力恢复或产品资格；P6 必须独立验证这些恢复、压力和多 Revision 场景，P7 才重新裁决 Provider、packaged 与资格。
+
+P4R-3 的实现检查点为 `3d3eb29`，性能门校准修复为 `59b33c4`。中央结果焦点以自然语言 Composer 为默认入口，高级参数面板默认关闭；Artifact/Revision/Selection/contextToken 在点击时原子绑定，create 只接受同一 Agent turn 的受信原始 intent，selection 重放、分类/确认篡改、script patch 与模型自带 DAG 均 fail-closed。task/legacy 的取消、返回式 Provider 错误与异常共用 terminal 进度收口，SQLite 重开只显示五个公开阶段。P2/P3/P4/P4R 五份 evidence 均通过 source-commit 反查；产品证据 10/10，资格仍为 `qualificationEligible:false`。P4R-3 当时缺权威持久 DAG 的科学/数据/流程编辑明确阻断；该边界已由 P5 的持久 Truth 投影在其受验证范围内替代，缺图仍 fail-closed，不把安全降级冒充可用能力。
 
 P4R-4 的实现检查点为 `f710261`。Result / Compare / History 已成为真实互斥路由模式；查看旧 Revision 使用可丢弃 viewed state，Artifact/interaction/Selection/contextToken 均显式绑定所选版本，不移动 current、不切 active Job、不调用写 API，首次版本列表 GET 不写 SQLite、不创建 managed Git。版本选择按项目/family-scoped truth 分页并标注原始/当前/候选/历史；Change Review 的意图、影响范围和验证状态来自服务端受信持久元数据，Git 详情默认折叠。checkpoint 故障、参数 hash、source commit、parent family/project 漂移均 fail-closed。focused frontend 104/104、affected Node 258/258、related frontend 48/48、P4R product 13/13；五份 evidence 均绑定 `f710261`。UI-113/UI-114 仍为 `in_progress`，P4R 仍是 `implemented_unverified / qualificationEligible:false`。
 
@@ -42,7 +44,7 @@ G0-RS-P0 资格与证据纠偏
 
 P4 Core 让手动调整与自然语言修改共用同一条编辑链：控件全部由插件 descriptor 的 `parameters` + `parameterImpacts` 投影，缺 impact 声明的参数不可编辑；`volcano-plot` 补齐配色/字体/尺寸/图例/标签/导出共 12 个 presentation 参数并接进真实 R 脚本（此前全为硬编码）。`normalizeEditSubmission` 是手动与 AI 的唯一归一化闸门，类型/范围/枚举 fail-closed 拒绝、未声明参数记为 rejected、与现状相同的提交不产出 patch，因此不会创建空 ChangeSet；影响分级只能由受信 descriptor 提升，调用方无法把科学或流程参数降级成样式修改，未声明 impact 的参数保守落到科学重算。过程中修复既有缺陷：保护字段表原先覆盖 descriptor，使 deseq2 声明为 `workflow` 的 `design` 被悄悄降级成 `scientific`，现在保护字段只作下限。`currentValues` 取自该 Job 真实执行过的归一化参数，不用默认值冒充。证据为 `acceptance/g0-result-studio/rs-p4-unified-editing.json`（18/18，non-qualifying 离线 descriptor 投影/插件接线/注册表/strict build 证据）；真实候选等价链尚未执行，故 UI-109 保持 `in_progress`。
 
-RH0 已按 Truth Snapshot、Hot Context、Test Impact、Script/Temp Lifecycle、Acceptance 串行收口并通过最终基线。当前只允许准备并推进 `G0-RS-P4R Product Reframe`；P4R 未收口前不得启动 P5～P7。详细范围、非目标和出口见 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) §G0-RS-RH0 与 §P4R。
+RH0 已按 Truth Snapshot、Hot Context、Test Impact、Script/Temp Lifecycle、Acceptance 串行收口并通过最终基线。该阶段的历史顺序要求先完成 `G0-RS-P4R Product Reframe`，P4R 收口前不得启动 P5～P7；P4R 与 P5 现均已完成，当前下一阶段由 P6 的独立 Goal 决定。详细范围、非目标和出口见 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) §G0-RS-RH0 与 §P4R。
 
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 已完成的 Scientific Task Contract 工作包记录见 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md)。
