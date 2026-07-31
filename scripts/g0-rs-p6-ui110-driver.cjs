@@ -158,7 +158,7 @@ async function semanticSnapshot(webContents) {
             if (style.display !== 'none' && style.visibility !== 'hidden') {
               const value = node.nodeValue || '';
               chunks.push(value);
-              if (/(?:\/Users\/|\/home\/|[A-Za-z]:\\\\)/.test(value)) {
+              if (value.includes('/Users/') || value.includes('/home/')) {
                 const location = parent.closest('pre') ? 'preformatted_text'
                   : parent.closest('code') ? 'structured_value'
                     : parent.closest('.sc-msg-assistant, .sc-msg-user') ? 'conversation'
