@@ -225,8 +225,27 @@ export function assertP6Ui110EvidenceWritable(evidence) {
     throw error;
   }
   if (evidence?.passed !== true) {
-    const error = new Error('refusing_to_write_failed_p6_ui110_evidence');
+    const detail = {
+      rendererPassed: evidence?.renderer?.passed === true,
+      publicProjectionAudit: evidence?.renderer?.publicProjectionAudit || null,
+      publicProjectionDiagnostics: evidence?.renderer?.publicProjectionDiagnostics || null,
+      truth: evidence?.truth ? {
+        allCandidateCohortsComplete: evidence.truth.allCandidateCohortsComplete === true,
+        allCandidateRevisionsValid: evidence.truth.allCandidateRevisionsValid === true,
+        allCandidateJobsArtifactValid: evidence.truth.allCandidateJobsArtifactValid === true,
+        allCandidateValidatorProofsPresent: evidence.truth.allCandidateValidatorProofsPresent === true,
+        allCandidatePhysicalBytesExact: evidence.truth.allCandidatePhysicalBytesExact === true,
+        allStageCorrelationsExact: evidence.truth.allStageCorrelationsExact === true,
+        volcanoRenderExact: evidence.truth.volcanoRenderProof?.exact === true,
+        heatmapPresentationExact: evidence.truth.heatmapPresentationProof?.exact === true,
+        heatmapScientificExact: evidence.truth.heatmapScientificProof?.exact === true,
+        thresholdSemanticExact: evidence.truth.thresholdSemanticProof?.exact === true,
+        enrichmentExact: evidence.truth.enrichmentProof?.exact === true,
+      } : null,
+    };
+    const error = new Error(`refusing_to_write_failed_p6_ui110_evidence ${JSON.stringify(detail)}`);
     error.code = 'p6_ui110_evidence_not_passed';
+    error.detail = detail;
     throw error;
   }
   assertSanitizedP6Ui110Evidence(evidence);

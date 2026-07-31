@@ -142,6 +142,7 @@ async function semanticSnapshot(webContents) {
         return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
       };
       const canvas = document.querySelector('[aria-label="结果主画布"]');
+      const absolutePathLocations = new Set();
       const publicText = (root) => {
         if (!root) return '';
         const chunks = [];
@@ -154,7 +155,19 @@ async function semanticSnapshot(webContents) {
           const hiddenAncestor = parent?.closest('[hidden], [aria-hidden="true"]');
           if (parent && !hiddenAncestor && (!closedDetails || insideVisibleSummary)) {
             const style = getComputedStyle(parent);
-            if (style.display !== 'none' && style.visibility !== 'hidden') chunks.push(node.nodeValue || '');
+            if (style.display !== 'none' && style.visibility !== 'hidden') {
+              const value = node.nodeValue || '';
+              chunks.push(value);
+              if (/(?:\/Users\/|\/home\/|[A-Za-z]:\\\\)/.test(value)) {
+                const location = parent.closest('pre') ? 'preformatted_text'
+                  : parent.closest('code') ? 'structured_value'
+                    : parent.closest('.sc-msg-assistant, .sc-msg-user') ? 'conversation'
+                      : parent.closest('[aria-label="Result Studio 版本与变更"]') ? 'change_review'
+                        : parent.closest('[aria-label="高级精细调整"]') ? 'advanced_drawer'
+                          : 'other_visible_text';
+                absolutePathLocations.add(location);
+              }
+            }
           }
           node = walker.nextNode();
         }
@@ -191,6 +204,7 @@ async function semanticSnapshot(webContents) {
         executionNodesVisible: !!document.querySelector('[aria-label="实际执行节点"]'),
         internalLeakFlags: {
           absolutePath: /(?:\\/Users\\/|\\/home\\/|[A-Za-z]:\\\\)/.test(text),
+          absolutePathLocations: [...absolutePathLocations].sort(),
           credential: /(?:sk-[A-Za-z0-9]{12,}|api[_ -]?key\\s*[:=])/i.test(text),
           rawInternalId: /\\b(?:rev|cs|tj|sel|conv|p)_[a-z0-9_-]{6,}\\b/i.test(text),
         },
@@ -1130,6 +1144,14 @@ function projectionAuditByStage(stages) {
     .map(([stage, snapshot]) => [stage, projectionAudit(snapshot)]));
 }
 
+function projectionDiagnosticsByStage(stages) {
+  return Object.fromEntries(Object.entries(stages).map(([stage, snapshot]) => [stage, {
+    absolutePathLocations: Array.isArray(snapshot?.internalLeakFlags?.absolutePathLocations)
+      ? snapshot.internalLeakFlags.absolutePathLocations
+      : [],
+  }]));
+}
+
 async function run() {
   const config = readConfig();
   mkdirSync(config.outputDir, { recursive: true });
@@ -1281,6 +1303,14 @@ async function run() {
       threshold: thresholdCompare,
       final: finalSnapshot,
     });
+    const publicProjectionDiagnostics = projectionDiagnosticsByStage({
+      initial: initialDeg,
+      volcano: volcanoCompare,
+      heatmapPresentation: heatmapPresentationCompare,
+      heatmapScientific: heatmapScientificCompare,
+      threshold: thresholdCompare,
+      final: finalSnapshot,
+    });
     const result = {
       schemaVersion: 1,
       renderer: `Electron ${process.versions.electron} / Chromium ${process.versions.chrome}`,
@@ -1368,6 +1398,7 @@ async function run() {
         domSha256: finalSnapshot.domSha256,
       },
       publicProjectionAudit,
+      publicProjectionDiagnostics,
       noSensitiveProjection: Object.values(publicProjectionAudit)
         .every((stage) => Object.values(stage).every((value) => value === false)),
     };
