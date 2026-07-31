@@ -1,6 +1,6 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-07-30
+最后更新：2026-07-31
 
 ## 当前结论
 
@@ -10,11 +10,11 @@
 
 LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口。RS9 曾新增第 17 类 `result_studio_product`，但后续复核发现其五条任务由独立测试拼装、Provider 未执行真实工具闭环、视觉验收依赖人工布尔值、大表由 seed 直接构造；该证据现降级为 unit/synthetic/renderer historical evidence。`result-studio-editing` 在 RS-P7 前暂停 qualified support claim，不能影响或冒充 LF12 原始核心资格。
 
-`G0-CHF0 Critical Cross-cutting Hardening`（[`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md)）已完成 CHF0-R1～R5 审计修复并重新真实收口：科学输出、PCA sample-ID、长任务/进程终态、HTTP 来源/文件边界与 Acceptance 可追溯性均绑定实现检查点 `41a365f`；专项 5/5、22 tests，29 个 source/producer hashes 与可达提交逐一匹配，证据保持 `qualificationEligible:false`。Result Studio P4R-0～P4R-6 与 `G0-RS-P5` 已按各自边界真实收口；P6 是下一阶段但尚未启动。
+`G0-CHF0 Critical Cross-cutting Hardening`（[`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md)）已完成 CHF0-R1～R5 审计修复并重新真实收口：科学输出、PCA sample-ID、长任务/进程终态、HTTP 来源/文件边界与 Acceptance 可追溯性均绑定实现检查点 `41a365f`；专项 5/5、22 tests，29 个 source/producer hashes 与可达提交逐一匹配，证据保持 `qualificationEligible:false`。Result Studio P4R-0～P4R-6、`G0-RS-P5` 与 P6-0 已按各自边界真实收口；唯一 active 阶段仍为 P6，当前执行 P6-1 的恢复、中断、一致性与压力验证。
 
 P4R 已于 `cb73132`（实现）、`c449e57`（刷新后的 runtime evidence）与 `252e806`（20/20 product closeout）完成 P4R-6：canonical Git/SQLite 冷路径隔离到持久后台子进程，performance evidence 14/14、event-loop 17.99ms ≤ 250ms；live evidence 从真实 completed Job 经 context-bound Agent candidate、Compare、Code、adopt、受控 replay、discard、conversation 和 backend restart/reopen 连续通过；同一 Electron BrowserWindow 的明暗 × 1440/1024/820、键盘/focus、异常降级/重试和服务重启恢复均通过。UI-112～UI-115 已由 source-bound renderer evidence 记为 `verified`；P4R 整包仍仅是 `implemented_unverified / qualificationEligible:false`，未使用真实 Provider、未作 packaged/GA 声明。
 
-`G0-RS-P5 Real Scientific Editing` 已在 `e7f271c` 收口，source-bound 证据为 `acceptance/g0-result-studio/rs-p5-scientific-editing.json`（20/20，`sourceCommitMatchesSourceHashes:true`）。空 disposable 账本经迁移与 HTTP project 创建后，五条 admitted 科学任务都走 `run_tool → tool_job → Artifact Truth`，完成持久 SQLite/Job/Workflow Truth DAG、缺图 fail-closed、候选 validator、不可变输入、科学差异、完整 cohort ReplayPackage 及历史 restore。它只证明本地 deterministic context-bound 科学编辑，不证明 Provider、packaged、崩溃/压力恢复或产品资格；P6 必须独立验证这些恢复、压力和多 Revision 场景，P7 才重新裁决 Provider、packaged 与资格。
+`G0-RS-P5 Real Scientific Editing` 已在 `e7f271c` 收口，source-bound 证据为 `acceptance/g0-result-studio/rs-p5-scientific-editing.json`（20/20，`sourceCommitMatchesSourceHashes:true`）。空 disposable 账本经迁移与 HTTP project 创建后，五条 admitted 科学任务都走 `run_tool → tool_job → Artifact Truth`，完成持久 SQLite/Job/Workflow Truth DAG、缺图 fail-closed、候选 validator、不可变输入、科学差异、完整 cohort ReplayPackage 及历史 restore。它只证明本地 deterministic context-bound 科学编辑，不证明 Provider、packaged、崩溃/压力恢复或产品资格。P6-0 已以 `acceptance/g0-result-studio/rs-p6-ui110-electron-scientific-trace.json` 完成 UI-110 的 source-bound Electron 裁决：证据绑定 `6f5271e`，同一 BrowserWindow 对账 7 个 Job、6 个 ChangeSet、26 个 Revision 与 26 个物理 Artifact，UI-110 在该窄边界升为 `verified`。当前唯一 active 切片为 P6-1，继续验证恢复、压力和多 Revision 场景；P7 才重新裁决 Provider、packaged 与资格。
 
 P4R-3 的实现检查点为 `3d3eb29`，性能门校准修复为 `59b33c4`。中央结果焦点以自然语言 Composer 为默认入口，高级参数面板默认关闭；Artifact/Revision/Selection/contextToken 在点击时原子绑定，create 只接受同一 Agent turn 的受信原始 intent，selection 重放、分类/确认篡改、script patch 与模型自带 DAG 均 fail-closed。task/legacy 的取消、返回式 Provider 错误与异常共用 terminal 进度收口，SQLite 重开只显示五个公开阶段。P2/P3/P4/P4R 五份 evidence 均通过 source-commit 反查；产品证据 10/10，资格仍为 `qualificationEligible:false`。P4R-3 当时缺权威持久 DAG 的科学/数据/流程编辑明确阻断；该边界已由 P5 的持久 Truth 投影在其受验证范围内替代，缺图仍 fail-closed，不把安全降级冒充可用能力。
 

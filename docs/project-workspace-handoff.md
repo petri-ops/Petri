@@ -1,6 +1,6 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-07-30
+最后更新：2026-07-31
 
 ## 1. 恢复顺序
 
@@ -37,7 +37,7 @@ LF12 完成记录为 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseli
 
 2026-07-24 后续治理收口：新增文档生命周期治理层（[`document-governance.md`](./document-governance.md)、[`worktree-governance.md`](./worktree-governance.md)、[`DOC-REGISTRY.json`](./DOC-REGISTRY.json)、`scripts/docs-governance.mjs`、`npm run docs:status|check|reconcile`，`docs:check` 已接入根 `npm run check`）；注册表中 `G0-LF12` 已收口为 `completed / canonical:false`，释放 `g0-current-work-package` truthDomain。干净 checkpoint 为 `38d3de2`（已推送，工作区 clean）。
 
-Result Studio 旧实现的 11 个提交已于 2026-07-25 fast-forward 合并并推送至 `main`，检查点为 `03e5826`。SDC-0 已在 `codex/g0-sdc` 的 `7284921` 完成并推送；当前单线实现分支为 `codex/g0-result-studio-product`，从该检查点创建，不使用 Git Worktree。G0-CHF0 已在实现检查点 `41a365f` 完成 CHF0-R1～R5 审计修复并重新真实收口；P4R-3 实现检查点为 `3d3eb29`、P4R-4 为 `f710261`、P4R-5 为 `f5c50db`，P4R-6 实现为 `cb73132`、runtime evidence 为 `c449e57`、product closeout 为 `252e806`。P5 实现检查点为 `e7f271c`，source-bound 证据为 `acceptance/g0-result-studio/rs-p5-scientific-editing.json`（20/20，`sourceCommitMatchesSourceHashes:true`）：空 disposable 产品账本经迁移和 HTTP project 创建后，真实 admitted 工具链写入 SQLite/Job/Artifact Truth，并投影持久 DAG；缺图保持 fail-closed，五条科学任务含完整 cohort ReplayPackage 与历史 restore。该证据仅覆盖本地 deterministic context-bound 科学编辑，未覆盖 Provider、packaged、崩溃/压力恢复或产品资格。
+Result Studio 旧实现的 11 个提交已于 2026-07-25 fast-forward 合并并推送至 `main`，检查点为 `03e5826`。SDC-0 已在 `codex/g0-sdc` 的 `7284921` 完成并推送；当前单线实现分支为 `codex/g0-result-studio-product`，从该检查点创建，不使用 Git Worktree。G0-CHF0 已在实现检查点 `41a365f` 完成 CHF0-R1～R5 审计修复并重新真实收口；P4R-3 实现检查点为 `3d3eb29`、P4R-4 为 `f710261`、P4R-5 为 `f5c50db`，P4R-6 实现为 `cb73132`、runtime evidence 为 `c449e57`、product closeout 为 `252e806`。P5 实现检查点为 `e7f271c`，source-bound 证据为 `acceptance/g0-result-studio/rs-p5-scientific-editing.json`（20/20，`sourceCommitMatchesSourceHashes:true`）：空 disposable 产品账本经迁移和 HTTP project 创建后，真实 admitted 工具链写入 SQLite/Job/Artifact Truth，并投影持久 DAG；缺图保持 fail-closed，五条科学任务含完整 cohort ReplayPackage 与历史 restore。该证据仅覆盖本地 deterministic context-bound 科学编辑，未覆盖 Provider、packaged、崩溃/压力恢复或产品资格。P6-0 已于 2026-07-31 以 `acceptance/g0-result-studio/rs-p6-ui110-electron-scientific-trace.json` 完成 UI-110 的 source-bound Electron trace：证据绑定 `6f5271e`，同一真实 BrowserWindow 在空 disposable ledger 中完成 Result/Compare/History、Composer、高级抽屉、adopt/revert/restore/reopen，并与 7 个 Job、6 个 ChangeSet、26 个 Revision、26 个物理 Artifact 及 Git/validator 精确对账；默认公开 DOM 的敏感路径泄漏断言全部为 false。UI-110 仅在该开发态 Electron 边界内为 `verified`；Provider、packaged、恢复/压力与资格均未由此证明。
 
 `G0-RS-P0` 已完成资格纠偏：Baseline patch 为 1.1.1，LF12 核心 16/16 evidence 继续 qualified + maintained；`result-studio-editing` 为 experimental/excluded，旧 RS9 product/provider/visual/table-seed 为 non-qualifying historical evidence。Product Trace v1 要求 14 步连续来源证据并拒绝人工布尔值、提示词指定 JSON、测试摘要和常量不变量。证据位于 `acceptance/g0-result-studio/rs-p0-{truth-correction,ui-baseline}.json`。
 
@@ -51,7 +51,7 @@ Result Studio 旧实现的 11 个提交已于 2026-07-25 fast-forward 合并并�
 
 P4 Core 已于提交 `e0a4c7d` 形成可恢复检查点，四份历史审计于 `e38d6b5` 无损归档。2026-07-26 仓库静态审计随后确认：默认必读仍包含大量已完成材料，`AUDIT-LOG`/`CLAUDE.md` 膨胀，65 个脚本和 145 个 npm 命令缺少机器分层，定向测试仅有文字纪律，`tmp` 有 2013 个残留文件且测试依赖本机绝对路径。`G0-RS-RH0 Repository Hygiene Gate` 已完成上述收口并通过最终基线，治理提交为 `95a7fe3`、`041e32e`。
 
-RH0 已完成：Truth Snapshot → Hot Context → Test Impact → Script/Temp Lifecycle → Acceptance 全部收口。`test/impact-map.json` 与 `scripts/test-affected.mjs` 现在提供确定性定向测试，未知映射 fail-closed；RH0 不删除 Acceptance 证据、不修改科学或执行真相、不创建 Worktree。P4R-0～P4R-6 与 P5 已完成并保留；下一阶段是尚未建立 Goal 的 P6。P6 必须独立复验长任务、多 Revision、崩溃/重启、资源压力、复杂 SVG/PNG 与真实恢复路径，不得把 P4R 性能或 P5 本地科学证据外推为这些结论；P7 仍独占 Provider、packaged 和资格重新裁决。
+RH0 已完成：Truth Snapshot → Hot Context → Test Impact → Script/Temp Lifecycle → Acceptance 全部收口。`test/impact-map.json` 与 `scripts/test-affected.mjs` 现在提供确定性定向测试，未知映射 fail-closed；RH0 不删除 Acceptance 证据、不修改科学或执行真相、不创建 Worktree。P4R-0～P4R-6、P5 与 P6-0 已完成并保留；唯一 active 阶段仍为 P6，当前切片是 P6-1。P6-1 独立复验长任务、多 Revision、崩溃/重启、资源压力、复杂 SVG/PNG 与真实恢复路径，不得把 P4R 性能、P5 本地科学证据或 P6-0 UI trace 外推为这些结论；P7 仍独占 Provider、packaged 和资格重新裁决。
 
 P4R-5 收口事实：Revision source projector、Result/Code 路由、复制/下载/项目内打开门控、Agent 点击时 contextToken 绑定、历史版本脚本隔离以及缺失/越界/hash/commit/plugin/input/跨项目 fail-closed 已落地。对 `reproduction.replayable` 的 Revision 提供服务端两阶段 replay：预检重读 Git/SQLite/Job/Artifact Truth，确认后只走注册工具执行链并创建非 current 候选；不接受调用方 toolId、params、script、command、shell 或 workflowPlan，重复确认只返回同一候选，材料不足明确 `unavailable`。四类真实 completed Job（DESeq2、standalone volcano、gene-correlation heatmap、go-kegg GO-BP）exact source observation 为 4/4，source-bound 到 `f5c50db`；其中 volcano/heatmap replayable，DESeq2/GO-BP unavailable，真实 replay E2E 覆盖 standalone volcano。P4R 为 7 条核心不变量 + 1 条显式 skip guard（本机 8/8），P4R-5 Node 15/15；source-bound product runner 为前端 114/114、Node 137/137，umbrella 前端 151/151，P4R product 17/17。`qualificationEligible:false` 与 UI `in_progress` 不变。
 

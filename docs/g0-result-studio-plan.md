@@ -1,8 +1,8 @@
 # G0 Result Studio — 意图驱动、可编辑、Git-backed 的科研结果工作台计划
 
-最后更新：2026-07-30
+最后更新：2026-07-31
 
-状态：`active / implemented_unverified`（RS0～RS8 引擎基础、完整 P4R 与 `G0-RS-P5` 已真实本地收口；P6 尚未启动，产品资格仍待 P7）
+状态：`active / implemented_unverified`（RS0～RS8 引擎基础、完整 P4R、`G0-RS-P5` 与 P6-0 UI-110 source-bound Electron trace 已收口；P6-1 恢复与中断矩阵正在进行，产品资格仍待 P7）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -1720,9 +1720,25 @@ P4R 只有在 P4R-0～P4R-6 串行完成、所有声明证据当前、`docs:reco
 
 ### G0-RS-P6：Durability、Recovery、Performance 与产品可解释性
 
-状态：`not_started`（P5 收口后下一阶段；尚未建立 Goal）。
+状态：`in_progress / P6-1 recovery and interruption matrix`（P6-0 已于 2026-07-31 source-bound 收口；P6 Goal 保持唯一 active）。
 
 目标：让长时间、多轮结果工作在中断、失败和资源压力下仍可理解、可恢复。
+
+#### P6-0：UI-110 的真实 Electron 科学编辑 trace
+
+先完成 P6 的第一条产品证据链，补齐 P5 只验证本地 deterministic context-bound 科学执行、尚未验证用户在 Result Studio 中看见并操作科学差异的缺口。此切片复用 P4R 的 disposable backend/Vite/单 BrowserWindow、截图/DOM hash、source binding、隐私清洗和重启原语，但必须新建独立 producer/evidence；不得刷新或改写已过时的 P4R historical JSON 来冒充 P5 UI 证据。
+
+P6-0 的最小事实链为：空 disposable ledger 经 migration 与 HTTP project 创建，真实 admitted `run_tool → tool_job → Artifact Truth` 形成 P5 五条科学任务的可操作结果；真实 Electron 中建立会话、打开结果、选择稳定 gene、执行 Composer 或高级抽屉的真实 UI 操作，进入 Compare/History，完成 adopt/revert/restore/reopen。每个关键 UI 动作后，父进程必须把 DOM/公开事件与 SQLite ChangeSet/Revision cohort、Job/Artifact Truth、validator、Git 和物理文件 sha256 对账；canonical evidence 只保存脱敏的计数、digest、时间和截图 hash，不能把人工截图或布尔结论当作通过依据。
+
+UI 断言至少覆盖：DEG 显著基因数量与 gained/lost、GO/KEGG term/rank/direction、volcano 的 stable label 与 SVG/PNG 前后产物、heatmap presentation-only 与 scientific recompute 的矩阵边界、阈值造成的 affected subgraph compare，以及历史恢复生成新 Revision 后的重开状态。开发态 Electron 的 source-bound trace 足以单独裁决 UI-110；它仍是 `qualificationEligible:false`，不替代 P7 的真实 Provider、macOS arm64 packaged Electron 或完整资格矩阵。
+
+P6-0 不宣称跨 Job exact replay 已由 UI trace 收口，不重开 P5，也不把 P4R 的 pre-generated deterministic candidate 当作 Composer 提交事实。Computer Use 只用于肉眼抽检；可复跑的 BrowserWindow driver 与 truth cross-check 才是 canonical evidence。
+
+完成（2026-07-31）：`acceptance/g0-result-studio/rs-p6-ui110-electron-scientific-trace.json` 绑定 source commit `6f5271e`，`sourceCommitMatchesSourceHashes:true` 且观测期间 source binding 稳定。空 disposable ledger 的同一真实 Electron BrowserWindow 完成 Result/Compare/History、Composer、高级抽屉、adopt/revert/restore/reopen，共形成 7 个 Job、6 个 ChangeSet、26 个 Revision 和 26 个物理 Artifact；DEG、GO/KEGG、volcano、heatmap、阈值受影响子图与历史恢复的 UI 投影均精确对账，默认公开 DOM 的敏感路径泄漏断言全部为 false。UI-110 因而只在 source-bound 开发态 Electron 科学编辑边界内升为 `verified`；证据仍为 `qualificationEligible:false`，不覆盖 Provider、packaged、恢复/压力或 P7 资格。
+
+#### P6-1：恢复、中断与一致性矩阵
+
+当前切片不重复 UI-110，而是验证 stop、执行失败、应用/后端/系统重启后的 SQLite、Git、Artifact Truth 一致性，以及多 Revision、dirty/ref drift、磁盘/内存和 preview budget 压力下的可恢复行为。任何通过结论必须绑定可复跑证据与冻结预算，不能从 P4R 性能或 P6-0 产品 trace 外推。
 
 故障矩阵：
 
@@ -1825,7 +1841,7 @@ G0-RS-P0 Truth Correction
 
 阶段状态规则：
 
-- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3`、`G0-RS-RH0`、P4R-0～P4R-6 与 `G0-RS-P5` 已完成。P6 是下一阶段但尚未建立 Goal，P7 不得提前启动。
+- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3`、`G0-RS-RH0`、P4R-0～P4R-6、`G0-RS-P5` 与 P6-0 已完成。P6 已建立唯一 Goal，当前仅 P6-1 recovery and interruption matrix 处于进行中；P7 不得提前启动。
 - 每阶段先补失败测试/fixture，再实现，再形成与证据类型匹配的验收；不得提前开发下一阶段。
 - 单元测试证明契约，fixture 证明确定性集成，真实 Provider 证明模型边界，packaged Electron 证明产品链；四者不能互相替代。
 - 未运行 `npm run docs:reconcile` 与 `npm run docs:check` 不得宣布阶段 completed/verified/qualified。
@@ -1842,7 +1858,7 @@ G0-RS-P0 Truth Correction
 5. [x] 捕获当前真实产品基线，不把截图存在等同于操作通过。
 6. [x] 跑专项、G0、文档、UI 和全量测试；根门禁在最终文档收口后复跑。
 
-`G0-RS-P1`～`G0-RS-P3` 已按本节证据收口；`G0-RS-P4 Core` 已形成离线实现检查点但真实候选等价性仍未验证。`G0-RS-RH0` 已完成仓库治理门，P4R 与 P5 均已按各自边界收口；下一步为尚未启动的 P6，不得提前进入 P7。
+`G0-RS-P1`～`G0-RS-P3` 已按本节证据收口；`G0-RS-P4 Core` 已形成离线实现检查点但真实候选等价性仍未验证。`G0-RS-RH0` 已完成仓库治理门，P4R、P5 与 P6-0 均已按各自边界收口；当前继续 P6-1 的恢复、压力与多 Revision 验证，不得提前进入 P7。
 
 `G0-RS-P2` 交付结果：
 
