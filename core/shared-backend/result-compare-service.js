@@ -74,6 +74,10 @@ function publicPatch(rawPatch) {
       (_line, before, after) => `diff ${path.posix.basename(before)} -> ${path.posix.basename(after)}`)
     .replace(/^--- (?:a\/)?(.+)$/gm, (_line, file) => `--- ${path.posix.basename(file)}`)
     .replace(/^\+\+\+ (?:b\/)?(.+)$/gm, (_line, file) => `+++ ${path.posix.basename(file)}`)
+    .replace(/(["'])(?:\/Users\/|\/home\/)[^"'\r\n]*\1/g, '$1[project file]$1')
+    .replace(/(["'])[A-Za-z]:\\[^"'\r\n]*\1/g, '$1[project file]$1')
+    .replace(/(?:\/Users\/|\/home\/)[^\s"'`<>]*/g, '[project file]')
+    .replace(/\b[A-Za-z]:\\[^\s"'`<>]*/g, '[project file]')
     .replace(PUBLIC_INTERNAL_ID_EMBEDDED, '[internal reference]');
 }
 
