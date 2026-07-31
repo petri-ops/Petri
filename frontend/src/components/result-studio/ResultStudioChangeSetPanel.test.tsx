@@ -92,7 +92,7 @@ describe('ResultStudioChangeSetPanel', () => {
       ...comparison,
       textDiff: {
         ...comparison.textDiff,
-        patch: '+input <- "/Users/private/project/input.csv"',
+        patch: '+input <- "/Users/private/project/input.csv"\n+windows <- "C:\\\\private\\\\project\\\\input.csv"',
       },
       jsonDiffs: [{
         relativePath: 'parameters.json',
@@ -109,6 +109,7 @@ describe('ResultStudioChangeSetPanel', () => {
     render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" mode="compare" />);
     expect(await screen.findByText('脚本与文本变化')).toBeTruthy();
     expect(document.body.textContent).not.toContain('/Users/private');
+    expect(document.body.textContent).not.toContain('C:\\private');
     expect(document.body.textContent).toContain('[project file]');
   });
 

@@ -68,17 +68,43 @@ function publicComparisonValue(value, field = '') {
   return value;
 }
 
+function redactWindowsCoordinates(value) {
+  let output = '';
+  let index = 0;
+  while (index < value.length) {
+    const code = value.charCodeAt(index);
+    const startsCoordinate = ((code >= 65 && code <= 90) || (code >= 97 && code <= 122))
+      && value[index + 1] === ':' && value.charCodeAt(index + 2) === 92;
+    if (!startsCoordinate) {
+      output += value[index];
+      index += 1;
+      continue;
+    }
+    const quote = index > 0 && (value[index - 1] === '"' || value[index - 1] === "'")
+      ? value[index - 1]
+      : null;
+    let end = index + 3;
+    while (end < value.length) {
+      const character = value[end];
+      if (character === '\r' || character === '\n'
+          || (quote ? character === quote : /\s|["'`<>]/.test(character))) break;
+      end += 1;
+    }
+    output += '[project file]';
+    index = end;
+  }
+  return output;
+}
+
 function publicPatch(rawPatch) {
-  return String(rawPatch || '')
+  return redactWindowsCoordinates(String(rawPatch || '')
     .replace(/^diff --git a\/(.+) b\/(.+)$/gm,
       (_line, before, after) => `diff ${path.posix.basename(before)} -> ${path.posix.basename(after)}`)
     .replace(/^--- (?:a\/)?(.+)$/gm, (_line, file) => `--- ${path.posix.basename(file)}`)
     .replace(/^\+\+\+ (?:b\/)?(.+)$/gm, (_line, file) => `+++ ${path.posix.basename(file)}`)
     .replace(/(["'])(?:\/Users\/|\/home\/)[^"'\r\n]*\1/g, '$1[project file]$1')
-    .replace(/(["'])[A-Za-z]:\\[^"'\r\n]*\1/g, '$1[project file]$1')
     .replace(/(?:\/Users\/|\/home\/)[^\s"'`<>]*/g, '[project file]')
-    .replace(/\b[A-Za-z]:\\[^\s"'`<>]*/g, '[project file]')
-    .replace(PUBLIC_INTERNAL_ID_EMBEDDED, '[internal reference]');
+    .replace(PUBLIC_INTERNAL_ID_EMBEDDED, '[internal reference]'));
 }
 
 function countPatch(patch) {

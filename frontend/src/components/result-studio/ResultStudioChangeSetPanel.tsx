@@ -56,12 +56,38 @@ function fileName(path: string): string {
   return path.split('/').pop() || path;
 }
 
+function redactWindowsCoordinates(value: string): string {
+  let output = '';
+  let index = 0;
+  while (index < value.length) {
+    const code = value.charCodeAt(index);
+    const startsCoordinate = ((code >= 65 && code <= 90) || (code >= 97 && code <= 122))
+      && value[index + 1] === ':' && value.charCodeAt(index + 2) === 92;
+    if (!startsCoordinate) {
+      output += value[index];
+      index += 1;
+      continue;
+    }
+    const quote = index > 0 && (value[index - 1] === '"' || value[index - 1] === "'")
+      ? value[index - 1]
+      : null;
+    let end = index + 3;
+    while (end < value.length) {
+      const character = value[end];
+      if (character === '\r' || character === '\n'
+          || (quote ? character === quote : /\s|["'`<>]/.test(character))) break;
+      end += 1;
+    }
+    output += '[project file]';
+    index = end;
+  }
+  return output;
+}
+
 function publicDisplayText(value: string): string {
-  return value
+  return redactWindowsCoordinates(value
     .replace(/(["'])(?:\/Users\/|\/home\/)[^"'\r\n]*\1/g, '$1[project file]$1')
-    .replace(/(["'])[A-Za-z]:\\[^"'\r\n]*\1/g, '$1[project file]$1')
-    .replace(/(?:\/Users\/|\/home\/)[^\s"'`<>]*/g, '[project file]')
-    .replace(/\b[A-Za-z]:\\[^\s"'`<>]*/g, '[project file]');
+    .replace(/(?:\/Users\/|\/home\/)[^\s"'`<>]*/g, '[project file]'));
 }
 
 function displayValue(value: unknown): string {

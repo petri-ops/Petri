@@ -36,7 +36,7 @@ function makeFixture(context) {
   const binding = bindProjectRepository({ workspaceRoot, projectId: 'p_rs6' });
   const adapter = binding.adapter;
   const sourceScript = 'palette <- "red"\n';
-  const candidateScript = 'palette <- "blue"\ninput <- "/Users/private/source.csv"\n';
+  const candidateScript = 'palette <- "blue"\ninput <- "/Users/private/source.csv"\nwindows <- "C:\\\\private\\\\source.csv"\n';
   const sourceParams = '{\n  "palette": "red"\n}\n';
   const candidateParams = '{\n  "palette": "blue",\n  "labels": 10\n}\n';
   const sourceScriptPath = 'analysis/scripts/family/rev_source/artifact.R';
@@ -322,7 +322,9 @@ test('RS6 compare, adopt and revert preserve one atomic current Revision', (cont
   assert.equal(comparison.textDiff.additions > 0, true);
   assert.doesNotMatch(comparison.textDiff.patch, /rev_(?:source|candidate)/);
   assert.doesNotMatch(comparison.textDiff.patch, /\/Users\/private/);
+  assert.doesNotMatch(comparison.textDiff.patch, /C:\\/);
   assert.match(comparison.textDiff.patch, /input <- "\[project file\]"/);
+  assert.match(comparison.textDiff.patch, /windows <- "\[project file\]"/);
   assert.match(comparison.textDiff.patch, /diff artifact\.R -> artifact\.R/);
 
   const adopted = adoptResultChangeSet({
