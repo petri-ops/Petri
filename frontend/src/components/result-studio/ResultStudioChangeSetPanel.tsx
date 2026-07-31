@@ -56,10 +56,17 @@ function fileName(path: string): string {
   return path.split('/').pop() || path;
 }
 
+function publicDisplayText(value: string): string {
+  return value
+    .replace(/(["'])(?:\/Users\/|\/home\/)[^"'\r\n]*\1/g, '$1[project file]$1')
+    .replace(/(["'])[A-Za-z]:\\[^"'\r\n]*\1/g, '$1[project file]$1')
+    .replace(/(?:\/Users\/|\/home\/)[^\s"'`<>]*/g, '[project file]')
+    .replace(/\b[A-Za-z]:\\[^\s"'`<>]*/g, '[project file]');
+}
+
 function displayValue(value: unknown): string {
   if (value == null) return '—';
-  if (typeof value === 'string') return value;
-  return JSON.stringify(value);
+  return publicDisplayText(typeof value === 'string' ? value : JSON.stringify(value));
 }
 
 interface EnrichmentDirectionEntry {
@@ -572,7 +579,7 @@ export function ResultStudioChangeSetPanel({
             <section className={styles.section}>
               <h4>脚本与文本变化</h4>
               <div className={styles.diffMeta}>+{comparison.textDiff.additions} −{comparison.textDiff.deletions}{comparison.textDiff.truncated ? ' · 已截断' : ''}</div>
-              <pre className={styles.patch}>{comparison.textDiff.patch}</pre>
+              <pre className={styles.patch}>{publicDisplayText(comparison.textDiff.patch)}</pre>
             </section>
           )}
 

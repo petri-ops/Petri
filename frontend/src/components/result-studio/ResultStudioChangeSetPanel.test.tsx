@@ -87,6 +87,31 @@ describe('ResultStudioChangeSetPanel', () => {
     expect(screen.getByAltText('plot 修改前').getAttribute('src')).toBe('/artifact/rev_1');
   });
 
+  it('keeps absolute project coordinates out of the ordinary compare DOM', async () => {
+    client.compareResultChangeSet.mockResolvedValueOnce({
+      ...comparison,
+      textDiff: {
+        ...comparison.textDiff,
+        patch: '+input <- "/Users/private/project/input.csv"',
+      },
+      jsonDiffs: [{
+        relativePath: 'parameters.json',
+        status: 'available',
+        truncated: false,
+        changes: [{
+          field: 'input',
+          changeType: 'changed',
+          before: '/Users/private/project/old.csv',
+          after: '/Users/private/project/new.csv',
+        }],
+      }],
+    });
+    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" mode="compare" />);
+    expect(await screen.findByText('脚本与文本变化')).toBeTruthy();
+    expect(document.body.textContent).not.toContain('/Users/private');
+    expect(document.body.textContent).toContain('[project file]');
+  });
+
   it('adopts only through the client and activates the returned Revision', async () => {
     const activated = vi.fn();
     render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" onRevisionActivated={activated} />);
