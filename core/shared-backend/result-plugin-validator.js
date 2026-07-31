@@ -330,7 +330,10 @@ function validateFiniteStatistics({ descriptor, formalById, tableCache, diagnost
     for (const row of table.rows) {
       for (const [field, type] of present) {
         const raw = String(row[field] ?? '').trim();
-        if (!raw && String(type).includes('|null')) continue;
+        // R serializes an NA scalar as the literal `NA` in CSV by default.
+        // Treat it as null only when the descriptor explicitly admits null;
+        // required numerics and other non-finite spellings remain fail-closed.
+        if ((!raw || raw === 'NA') && String(type).includes('|null')) continue;
         if (!raw) {
           diagnostics.push(diagnostic('validator_statistic_missing', 'A required declared numeric statistic is missing.', { artifactId: artifact.artifactId, field }));
           continue;

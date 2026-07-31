@@ -65,7 +65,6 @@ import {
   type ResultArtifactRecord,
 } from '@/lib/result-manifest';
 import {
-  isSameSelection,
   summarizeSelectionForAgent,
   type ArtifactInteractionManifest,
   type ArtifactSelection,
@@ -74,6 +73,7 @@ import {
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
 import { ResultStudioChangeSetPanel } from '@/components/result-studio/ResultStudioChangeSetPanel';
+import { isSameActiveArtifactProjection } from '@/components/result-studio/activeArtifactProjection';
 import { RevisionCodeView } from '@/components/result-studio/RevisionCodeView';
 import { revisionArtifactUrl, type ArtifactRevision } from '@/components/result-studio/resultStudioClient';
 import { shouldShowDeliveryCard, shouldShowWorkflowBar } from '@/components/result-studio/resultFirstScreen';
@@ -3579,20 +3579,9 @@ function ResultArtifactShell({
       truthStatus: viewedRevision?.validationStatus ?? result?.deliveryManifest?.status ?? null,
       conclusion: viewedRevision && !viewedRevision.isCurrent ? null : result?.deliveryManifest?.summary?.conclusion ?? null,
     };
-    // 身份比较必须覆盖 revision 与 selection：只比 jobId+name 会让
-    // "同一文件换了版本" 或 "用户改了选择" 无法向上传播。
-    if (
-      !activeArtifact ||
-      activeArtifact.jobId !== artifact.jobId ||
-      activeArtifact.name !== artifact.name ||
-      (activeArtifact.revisionId ?? null) !== (artifact.revisionId ?? null) ||
-      (activeArtifact.revisionOrdinal ?? null) !== (artifact.revisionOrdinal ?? null) ||
-      (activeArtifact.entityType ?? null) !== (artifact.entityType ?? null) ||
-      (activeArtifact.idField ?? null) !== (artifact.idField ?? null) ||
-      (activeArtifact.truthStatus ?? null) !== (artifact.truthStatus ?? null) ||
-      (activeArtifact.conclusion ?? null) !== (artifact.conclusion ?? null) ||
-      !isSameSelection(activeArtifact.selection ?? null, artifact.selection ?? null)
-    ) {
+    // The interaction manifest arrives after the file body. Compare the full
+    // projection so late revision/family/semantic hydration reaches the header.
+    if (!isSameActiveArtifactProjection(activeArtifact, artifact)) {
       onActiveArtifactChange(artifact);
     }
   }, [

@@ -25,7 +25,10 @@ const { createResultEditPlanTool, createResultChangeSetTools } = require('./resu
 const { projectPublicEditPhase, PUBLIC_EDIT_PHASES } = require('../../shared-backend/result-studio-context');
 const { normalizeEditSubmission, explainEditImpact } = require('../../shared-backend/result-edit-controls');
 const { isDeepStrictEqual } = require('node:util');
-const { tool_result_enrichment_from_revision } = require('./result-selection-tools');
+const {
+  tool_result_enrichment_from_revision,
+  tool_result_selection_run,
+} = require('./result-selection-tools');
 
 // A context-bound intent is executable only in the Agent turn that received
 // the trusted plan. The model sees the JSON intent but cannot register or
@@ -128,6 +131,7 @@ function createResultContextEditTools(options = {}) {
   const planTool = options.planTool || createResultEditPlanTool(options);
   const changeSetTools = options.changeSetTools || createResultChangeSetTools(options);
   const deriveEnrichment = options.resultEnrichmentFromRevision || tool_result_enrichment_from_revision;
+  const deriveEnrichmentFromSelection = options.resultSelectionRun || tool_result_selection_run;
 
   /**
    * 只读规划：用户只说想要什么，坐标由上下文补齐。
@@ -206,8 +210,13 @@ function createResultContextEditTools(options = {}) {
     });
     emitProgress(ctx, 'plan', planned && planned.ok ? 'completed' : 'blocked');
     if (planned && planned.ok && planned.intent) rememberTrustedIntent(ctx, envelope, planned.intent);
+    const blockedPlanError = planned?.ok === false && !planned.error
+      ? planned.diagnostics?.find((item) => item && typeof item.code === 'string')?.code
+        || 'edit_plan_blocked'
+      : null;
     return {
       ...planned,
+      ...(blockedPlanError ? { error: blockedPlanError } : {}),
       context: contextView(envelope),
       editOrigin: submission ? submission.origin : null,
       selectionLabelsBound: selectionLabelBinding.patch ? selectionLabelBinding.patch.label_genes.split(',').length : 0,
@@ -270,7 +279,29 @@ function createResultContextEditTools(options = {}) {
         message: '结果焦点编辑只执行插件声明的参数 Patch；脚本修改不能通过此入口提交。',
       };
     }
-    const created = await changeSetTools.create(args, { ...ctx, resultStudioTrustedIntent: true });
+    // For a Result Edit drawer submission, the confirmation was captured by
+    // the renderer before the provider saw the turn.  A model may describe
+    // an intent, but it must not be able to promote an unchecked scientific
+    // edit by supplying `scientificConfirmed: true` in its tool arguments.
+    // The missing-key case deliberately preserves ordinary chat's existing
+    // confirmation contract; only an explicitly projected drawer request is
+    // bound here.
+    const hasBoundScientificConfirmation = typeof ctx.resultStudioScientificConfirmation === 'boolean';
+    if (intent.requiresScientificConfirmation === true
+        && hasBoundScientificConfirmation
+        && ctx.resultStudioScientificConfirmation !== true) {
+      return {
+        ok: false,
+        error: 'scientific_confirmation_required',
+        message: '此科学修改尚未在高级控件中确认；请确认后重新生成候选版本。',
+      };
+    }
+    const created = await changeSetTools.create({
+      ...args,
+      ...(intent.requiresScientificConfirmation === true && hasBoundScientificConfirmation
+        ? { scientificConfirmed: true }
+        : {}),
+    }, { ...ctx, resultStudioTrustedIntent: true });
     return {
       ...created,
       context: contextView(envelope),
@@ -287,18 +318,30 @@ function createResultContextEditTools(options = {}) {
     const guarded = guardContextOperation(ctx, args, options);
     if (!guarded.ok) return guarded.response;
     const envelope = guarded.resolved.envelope;
-    const result = await deriveEnrichment({
-      species: args.species,
-      geneIdType: args.geneIdType,
-      analysisType: args.analysisType,
-      padjCutoff: args.padjCutoff,
-      lfcCutoff: args.lfcCutoff,
-      revisionId: envelope.revision.revisionId,
-    }, ctx, {
+    const dependencies = {
       ...options,
       repository: guarded.resolved.repository,
       getProject: () => guarded.resolved.project,
-    });
+    };
+    const compatibleGeneSelection = envelope.selection?.entityType === 'gene'
+      && envelope.selectionState?.compatibility === 'compatible'
+      && guarded.resolved.persistedSelection?.selectionId === envelope.selection.selectionId;
+    const result = compatibleGeneSelection
+      ? await deriveEnrichmentFromSelection({
+        selectionId: guarded.resolved.persistedSelection.selectionId,
+        action: 'go_kegg',
+        species: args.species,
+        geneIdType: args.geneIdType,
+        analysisType: args.analysisType,
+      }, ctx, dependencies)
+      : await deriveEnrichment({
+        species: args.species,
+        geneIdType: args.geneIdType,
+        analysisType: args.analysisType,
+        padjCutoff: args.padjCutoff,
+        lfcCutoff: args.lfcCutoff,
+        revisionId: envelope.revision.revisionId,
+      }, ctx, dependencies);
     return { ...result, context: contextView(envelope) };
   }
 

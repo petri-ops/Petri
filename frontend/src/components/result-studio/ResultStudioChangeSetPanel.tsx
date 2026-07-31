@@ -458,8 +458,8 @@ export function ResultStudioChangeSetPanel({
           </div>
           {executedNodes.length > 0 && (
             <div className={styles.summary} aria-label="实际执行节点">
-              <span>实际执行节点</span>
-              {executedNodes.map((nodeId, index) => <code key={`${nodeId}:${index}`}>{nodeId}</code>)}
+              <span>实际执行节点 · {executedNodes.length} 个</span>
+              {executedNodes.map((nodeId, index) => <span key={`${nodeId}:${index}`}>节点 {index + 1}</span>)}
             </div>
           )}
           {mode === 'compare' && changeSets.length > 1 && (

@@ -7,7 +7,10 @@ const { isPathContained } = require('./project-run-layout');
 const { stableStringify } = require('./scientific-task-spec');
 const { saveResultEditCheckpoint } = require('./result-changeset-service');
 const { compareScientificTables } = require('./result-scientific-compare');
-const { rebindWorkflowGraphForEquivalentRestore } = require('./result-workflow-graph');
+const {
+  validateRestoreWorkflowScope,
+  rebindWorkflowGraphForEquivalentRestore,
+} = require('./result-workflow-graph');
 
 const RESULT_COMPARE_SERVICE_VERSION = 1;
 const ZERO_OID = '0'.repeat(40);
@@ -15,6 +18,9 @@ const MAX_PATCH_CHARS = 200000;
 const MAX_JSON_FIELDS = 500;
 const MAX_TABLE_BYTES = 4 * 1024 * 1024;
 const MAX_TABLE_SAMPLE_ROWS = 20;
+const PUBLIC_INTERNAL_ID = /^(?:rev|cs|tj|sel|conv|p)_[a-z0-9_-]{6,}$/i;
+const PUBLIC_INTERNAL_ID_EMBEDDED = /\b(?:rev|cs|tj|sel|conv|p)_[a-z0-9_-]{6,}\b/gi;
+const PUBLIC_SENSITIVE_FIELD = /(?:api.?key|access.?token|secret|password|credential|private.?key)/i;
 
 class ResultCompareError extends Error {
   constructor(code, message, detail = null) {
@@ -45,6 +51,30 @@ function projectGitPath(relativePath, gitPathPrefix = '') {
 function boundedText(value, limit = 2000) {
   const text = String(value == null ? '' : value);
   return text.length <= limit ? text : `${text.slice(0, limit)}…`;
+}
+
+function publicComparisonValue(value, field = '') {
+  if (PUBLIC_SENSITIVE_FIELD.test(field)) return '[redacted]';
+  if (typeof value === 'string') {
+    if (path.isAbsolute(value)) return '[project file]';
+    if (PUBLIC_INTERNAL_ID.test(value)) return '[internal reference]';
+    return value.replace(PUBLIC_INTERNAL_ID_EMBEDDED, '[internal reference]');
+  }
+  if (Array.isArray(value)) return value.map((item) => publicComparisonValue(item, field));
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value)
+      .map(([key, child]) => [key, publicComparisonValue(child, key)]));
+  }
+  return value;
+}
+
+function publicPatch(rawPatch) {
+  return String(rawPatch || '')
+    .replace(/^diff --git a\/(.+) b\/(.+)$/gm,
+      (_line, before, after) => `diff ${path.posix.basename(before)} -> ${path.posix.basename(after)}`)
+    .replace(/^--- (?:a\/)?(.+)$/gm, (_line, file) => `--- ${path.posix.basename(file)}`)
+    .replace(/^\+\+\+ (?:b\/)?(.+)$/gm, (_line, file) => `+++ ${path.posix.basename(file)}`)
+    .replace(PUBLIC_INTERNAL_ID_EMBEDDED, '[internal reference]');
 }
 
 function countPatch(patch) {
@@ -100,8 +130,8 @@ function compareJsonValues(beforeText, afterText, relativePath) {
     changes.push({
       field: key,
       changeType: !(key in left.fields) ? 'added' : !(key in right.fields) ? 'removed' : 'changed',
-      before: a === undefined ? null : a,
-      after: b === undefined ? null : b,
+      before: a === undefined ? null : publicComparisonValue(a, key),
+      after: b === undefined ? null : publicComparisonValue(b, key),
     });
     if (changes.length >= MAX_JSON_FIELDS) break;
   }
@@ -217,14 +247,20 @@ function compareResultChangeSet(input = {}, dependencies = {}) {
   if (!changeSet || changeSet.projectId !== input.projectId) throw new ResultCompareError('change_set_not_found', 'ChangeSet was not found in the active project.');
   const revisions = repository.listRevisionsByChangeSet(changeSet.changeSetId);
   const changedPaths = changeSet.changedPaths.map((entry) => entry.relativePath).filter(Boolean);
-  const gitPaths = changedPaths.map((relativePath) => projectGitPath(relativePath, dependencies.gitPathPrefix));
+  // Structured JSON changes are projected below with path/identifier
+  // redaction. Keeping their raw Git patch would duplicate that view and leak
+  // staged absolute input coordinates into the ordinary Compare surface.
+  const gitPaths = changedPaths
+    .filter((relativePath) => !/\.json$/i.test(relativePath))
+    .map((relativePath) => projectGitPath(relativePath, dependencies.gitPathPrefix));
   let rawPatch = '';
   if (changeSet.candidateCommit && changeSet.baseCommit && gitPaths.length > 0) {
     rawPatch = adapter.diff({ paths: gitPaths, fromRef: changeSet.baseCommit, toRef: changeSet.candidateCommit }).patch;
   }
   const patchCounts = countPatch(rawPatch);
-  const patchTruncated = rawPatch.length > MAX_PATCH_CHARS;
-  const patch = patchTruncated ? `${rawPatch.slice(0, MAX_PATCH_CHARS)}\n…[truncated]` : rawPatch;
+  const safePatch = publicPatch(rawPatch);
+  const patchTruncated = safePatch.length > MAX_PATCH_CHARS;
+  const patch = patchTruncated ? `${safePatch.slice(0, MAX_PATCH_CHARS)}\n…[truncated]` : safePatch;
   const jsonDiffs = [];
   for (const relativePath of changedPaths.filter((item) => /\.json$/i.test(item))) {
     const gitPath = projectGitPath(relativePath, dependencies.gitPathPrefix);
@@ -607,20 +643,35 @@ function restoreArtifactRevision(input = {}, dependencies = {}) {
   const target = resolved.revision;
   const sourceCohort = [...resolved.cohort]
     .sort((left, right) => `${left.artifactFamilyId}:${left.artifactId}`.localeCompare(`${right.artifactFamilyId}:${right.artifactId}`));
-  const sourceValidatorIds = [...new Set((resolved.changeSet.validationSummary?.validatorIds || [])
-    .map((value) => String(value || '').trim())
-    .filter(Boolean))];
-  if (sourceValidatorIds.length === 0) {
+  const validationSummary = resolved.changeSet.validationSummary || {};
+  if (!Number.isInteger(validationSummary.formalArtifactCount)
+      || validationSummary.formalArtifactCount !== sourceCohort.length) {
+    throw new ResultCompareError(
+      'restore_formal_artifact_count_mismatch',
+      'Historical restore requires an exact formal Artifact count for the source cohort.',
+      { expected: sourceCohort.length, actual: validationSummary.formalArtifactCount ?? null },
+    );
+  }
+  const sourceToolJobIds = [...new Set(sourceCohort.map((revision) => revision.toolJobId))];
+  const rawValidatorIds = validationSummary.validatorIds;
+  const sourceValidatorIds = Array.isArray(rawValidatorIds)
+    ? rawValidatorIds.map((value) => typeof value === 'string' ? value.trim() : '')
+    : [];
+  if (!Array.isArray(rawValidatorIds) || sourceValidatorIds.length === 0
+      || sourceValidatorIds.length !== sourceToolJobIds.length
+      || sourceValidatorIds.some((value, index) => !value || value !== rawValidatorIds[index])
+      || new Set(sourceValidatorIds).size !== sourceValidatorIds.length
+      || (Object.prototype.hasOwnProperty.call(validationSummary, 'validatorId')
+        && (sourceValidatorIds.length !== 1 || validationSummary.validatorId !== sourceValidatorIds[0]))) {
     throw new ResultCompareError(
       'restore_validator_proof_missing',
-      'Historical restore requires the source cohort validator proof.'
+      'Historical restore requires unique, nonblank validator proof for every source Job.'
     );
   }
   const sourceFamilyIds = sourceCohort.map((revision) => revision.artifactFamilyId);
   if (new Set(sourceFamilyIds).size !== sourceFamilyIds.length) {
     throw new ResultCompareError('restore_cohort_family_duplicate', 'Historical ChangeSet contains more than one Revision for an Artifact family.');
   }
-  const sourceToolJobIds = [...new Set(sourceCohort.map((revision) => revision.toolJobId))];
   const sourceGraphRef = resolved.changeSet.validationSummary?.workflowGraph || null;
   let sourceWorkflowGraph = null;
   const hasSourceGraphRef = Boolean(sourceGraphRef?.graphId || sourceGraphRef?.sourceDigest);
@@ -640,12 +691,15 @@ function restoreArtifactRevision(input = {}, dependencies = {}) {
         'Historical workflow graph is missing, stale, or not valid for this project.'
       );
     }
-    const graphToolJobIds = sourceWorkflowGraph.nodes.map((node) => node.toolJobId);
-    if (!sameStringSet(graphToolJobIds, sourceToolJobIds)) {
+    const graphScope = validateRestoreWorkflowScope({
+      graph: sourceWorkflowGraph,
+      sourceRevisions: sourceCohort,
+    });
+    if (!graphScope.ok) {
       throw new ResultCompareError(
-        'restore_workflow_graph_scope_mismatch',
-        'Historical workflow graph does not cover the exact source Job cohort.',
-        { graphToolJobIds, sourceToolJobIds },
+        graphScope.diagnostic?.code || 'restore_workflow_graph_scope_mismatch',
+        graphScope.diagnostic?.message || 'Historical workflow graph does not cover the source cohort and only its immutable ancestors.',
+        graphScope.diagnostic?.detail || null,
       );
     }
   } else if (sourceToolJobIds.length > 1) {
@@ -653,6 +707,24 @@ function restoreArtifactRevision(input = {}, dependencies = {}) {
       'restore_workflow_graph_missing',
       'A multi-Job historical cohort cannot be restored without its persisted authoritative workflow graph.'
     );
+  }
+  if (typeof dependencies.getResultStudioDescriptor === 'function') {
+    const expectedValidatorIds = sourceToolJobIds.map((toolJobId) => {
+      const graphNode = sourceWorkflowGraph?.nodes.find((node) => node.toolJobId === toolJobId) || null;
+      const job = typeof getToolJob === 'function' ? getToolJob(toolJobId) : null;
+      const toolId = graphNode?.toolId || job?.tool_id || job?.toolId || null;
+      const rawDescriptor = toolId ? dependencies.getResultStudioDescriptor(toolId) : null;
+      const descriptor = rawDescriptor?.resultStudio || rawDescriptor;
+      return typeof descriptor?.validator?.id === 'string' ? descriptor.validator.id.trim() : '';
+    });
+    if (expectedValidatorIds.some((value) => !value)
+        || !sameStringSet(sourceValidatorIds, expectedValidatorIds)) {
+      throw new ResultCompareError(
+        'restore_validator_proof_mismatch',
+        'Historical validator proof does not match the currently trusted plugin descriptors.',
+        { sourceToolJobIds },
+      );
+    }
   }
   const currentByFamily = new Map();
   for (const sourceRevision of sourceCohort) {
@@ -669,7 +741,7 @@ function restoreArtifactRevision(input = {}, dependencies = {}) {
   if (sourceCohort.every((revision) => currentByFamily.get(revision.artifactFamilyId)?.revisionId === revision.revisionId)) {
     return { restored: false, idempotent: true, revision: target, cohortRevisions: sourceCohort };
   }
-  const restoreIntentRef = `restore:cohort:${resolved.changeSet.changeSetId}:selected:${target.revisionId}`;
+  const restoreIntentRef = `restore:cohort:${resolved.changeSet.changeSetId}`;
   const currentChangeSetIds = new Set([...currentByFamily.values()].map((revision) => revision.changeSetId));
   if (currentChangeSetIds.size === 1) {
     const [currentChangeSetId] = currentChangeSetIds;
@@ -809,6 +881,8 @@ function restoreArtifactRevision(input = {}, dependencies = {}) {
         graph: sourceWorkflowGraph,
         sourceRevisions: sourceCohort,
         restoredRevisions: revisionInputs,
+        resolveRevision: (revisionId) => repository.getRevision(revisionId),
+        resolveSelection: (selectionId) => repository.getSelection(selectionId),
       });
       if (!rebound.ok || !rebound.graph) {
         throw new ResultCompareError(

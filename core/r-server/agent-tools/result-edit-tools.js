@@ -15,6 +15,9 @@ const { createResultStudioRepository } = require('../../shared-backend/result-st
 const { bindProjectRepository } = require('../../shared-backend/git-repository-binding');
 const { projectRevisionSource } = require('../../shared-backend/result-revision-source');
 const { buildAuthoritativeWorkflowGraph } = require('../../shared-backend/result-workflow-graph');
+const {
+  DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS = Object.freeze({}),
+} = require('../../shared-backend/result-scientific-rerun');
 
 function scientificEditClass(editClass) {
   return ['data_transform', 'scientific_recompute', 'workflow_replan'].includes(editClass);
@@ -90,9 +93,9 @@ function persistAuthoritativeWorkflowGraph(repository, graph) {
 }
 
 /**
- * P5's first executable affected subgraph is intentionally tiny and fully
- * server-projected: a current DEG Artifact feeds one direct GO/KEGG Job using
- * exact Artifact bytes.  The model never provides node ids, parameters,
+ * P6's executable affected subgraph remains fully server-projected: a current
+ * DEG Artifact may feed one or more explicitly admitted direct child Jobs
+ * using exact Artifact bytes.  The model never provides node ids, parameters,
  * files, or lineage.  Unsupported shapes remain blocked until a later graph
  * executor can reproduce every edge without inference.
  */
@@ -110,7 +113,9 @@ function projectDirectEnrichmentSubgraph({ graph, intent, sourceRevision, reposi
     return { ok: false, error: 'workflow_root_unverified', message: '当前 Revision 不再是权威工作流图的根节点。' };
   }
   const affected = Array.isArray(intent.affectedNodeIds) ? intent.affectedNodeIds : [];
-  if (!affected.includes(rootNodeId) || affected.some((nodeId) => !(workflow.nodes || []).some((node) => node.id === nodeId))) {
+  if (new Set(affected).size !== affected.length
+      || !affected.includes(rootNodeId)
+      || affected.some((nodeId) => !(workflow.nodes || []).some((node) => node.id === nodeId))) {
     return { ok: false, error: 'workflow_affected_nodes_invalid', message: '受影响节点不再匹配当前权威工作流图。' };
   }
   const children = affected.filter((nodeId) => nodeId !== rootNodeId);
@@ -123,51 +128,93 @@ function projectDirectEnrichmentSubgraph({ graph, intent, sourceRevision, reposi
       },
     };
   }
-  if (sourceRevision.artifactId !== 'deg_table' || children.length !== 1) {
-    return { ok: false, error: 'workflow_subgraph_unsupported', message: '当前只支持从正式 DEG 表向一个直接 GO/KEGG 下游节点重跑。' };
+  if (sourceRevision.artifactId !== 'deg_table') {
+    return { ok: false, error: 'workflow_subgraph_unsupported', message: '当前只支持从正式 DEG 表向已准入的直接下游节点重跑。' };
   }
-  const childNode = (workflow.nodes || []).find((node) => node && node.id === children[0]);
-  const childJob = childNode && getToolJob(childNode.toolJobId);
-  const edges = (workflow.edges || []).filter((edge) => edge
-    && edge.fromNodeId === rootNodeId && edge.toNodeId === childNode?.id);
-  if (!childNode || childNode.toolId !== 'go-kegg' || !childJob
-      || String(childJob.project_id || childJob.projectId || '') !== sourceRevision.projectId
-      || childJob.status !== 'completed' || edges.length !== 1) {
-    return { ok: false, error: 'workflow_subgraph_unsupported', message: '下游不是一个可验证的直接 GO/KEGG Job。' };
+  if (children.length > Object.keys(DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS).length) {
+    return { ok: false, error: 'workflow_subgraph_unsupported', message: '受影响子图超出已准入的直接 DEG 下游集合。' };
   }
-  const edge = edges[0];
-  if (edge.kind !== 'artifact' || edge.inputId !== 'deg_table'
-      || edge.sourceToolJobId !== sourceRevision.toolJobId
-      || edge.sourceRevisionId !== sourceRevision.revisionId
-      || edge.sourceArtifactId !== sourceRevision.artifactId
-      || edge.sourceOutputHash !== sourceRevision.outputHash) {
-    return { ok: false, error: 'workflow_downstream_lineage_drift', message: 'GO/KEGG 下游不再使用当前 DEG Revision 的精确 Artifact 字节。' };
+  if (typeof repository.listCurrentRevisions !== 'function') {
+    return { ok: false, error: 'workflow_subgraph_context_missing', message: '当前 Revision 真值不可用，不能投影下游重跑。' };
   }
-  const childRevision = repository.findRevisionByJobArtifact({
-    projectId: sourceRevision.projectId,
-    toolJobId: childJob.id,
-    artifactId: 'go_bp_results',
-  });
-  if (!childRevision) {
-    return { ok: false, error: 'downstream_revision_missing', message: 'GO-BP 下游尚无可复现的正式 Revision，不能猜测性重跑。' };
+  let currentRevisions;
+  try {
+    currentRevisions = repository.listCurrentRevisions(sourceRevision.projectId);
+  } catch {
+    return { ok: false, error: 'downstream_revision_missing', message: '当前下游 Revision 真值读取失败，不能猜测性重跑。' };
+  }
+  if (!Array.isArray(currentRevisions)) {
+    return { ok: false, error: 'downstream_revision_missing', message: '当前下游 Revision 真值无效，不能猜测性重跑。' };
+  }
+
+  const projectedChildren = [];
+  const seenChildJobs = new Set();
+  const seenChildTools = new Set();
+  for (const childNodeId of [...children].sort()) {
+    const childNodes = (workflow.nodes || []).filter((node) => node && node.id === childNodeId);
+    const childNode = childNodes.length === 1 ? childNodes[0] : null;
+    const primaryArtifactId = childNode
+      ? DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS[childNode.toolId]
+      : null;
+    const childJob = childNode && getToolJob(childNode.toolJobId);
+    const childJobToolId = String(childJob?.tool_id || childJob?.toolId || '');
+    const childJobId = String(childJob?.id || '');
+    if (!childNode || !primaryArtifactId || !childJob
+        || childNode.id !== `job:${childNode.toolJobId}`
+        || childJobId !== childNode.toolJobId
+        || childJobToolId !== childNode.toolId
+        || String(childJob.project_id || childJob.projectId || '') !== sourceRevision.projectId
+        || childJob.status !== 'completed'
+        || seenChildJobs.has(childJobId)
+        || seenChildTools.has(childNode.toolId)) {
+      return { ok: false, error: 'workflow_subgraph_unsupported', message: '下游包含重复、缺失或未准入的直接 Job。' };
+    }
+    seenChildJobs.add(childJobId);
+    seenChildTools.add(childNode.toolId);
+
+    const edges = (workflow.edges || []).filter((edge) => edge
+      && edge.fromNodeId === rootNodeId && edge.toNodeId === childNode.id);
+    if (edges.length !== 1) {
+      return { ok: false, error: 'workflow_subgraph_unsupported', message: '下游 Job 必须由唯一的直接 DEG Artifact 边驱动。' };
+    }
+    const edge = edges[0];
+    if (edge.kind !== 'artifact' || edge.inputId !== 'deg_table'
+        || edge.selectionId != null || edge.selectionHash != null
+        || edge.sourceToolJobId !== sourceRevision.toolJobId
+        || edge.sourceRevisionId !== sourceRevision.revisionId
+        || edge.sourceArtifactId !== sourceRevision.artifactId
+        || edge.sourceOutputHash !== sourceRevision.outputHash) {
+      return { ok: false, error: 'workflow_downstream_lineage_drift', message: '直接下游不再使用当前 DEG Revision 的精确 Artifact 字节。' };
+    }
+
+    const matchingCurrentRevisions = currentRevisions.filter((revision) => revision
+      && revision.projectId === sourceRevision.projectId
+      && revision.toolJobId === childJobId
+      && revision.artifactId === primaryArtifactId
+      && revision.isCurrent === true);
+    if (matchingCurrentRevisions.length !== 1 || !matchingCurrentRevisions[0].revisionId) {
+      return { ok: false, error: 'downstream_revision_missing', message: '直接下游没有唯一的当前正式 Revision，不能猜测性重跑。' };
+    }
+    const childRevision = matchingCurrentRevisions[0];
+    projectedChildren.push({
+      nodeId: childNode.id,
+      toolId: childNode.toolId,
+      inputId: 'deg_table',
+      edgeKind: 'artifact',
+      sourceToolJobId: sourceRevision.toolJobId,
+      sourceRevisionId: sourceRevision.revisionId,
+      sourceArtifactId: sourceRevision.artifactId,
+      sourceOutputHash: sourceRevision.outputHash,
+      childToolJobId: childJobId,
+      childRevisionId: childRevision.revisionId,
+    });
   }
   return {
     ok: true,
     subgraph: {
       authority: 'sqlite_job_artifact_truth', graphId: workflow.graphId, sourceDigest: workflow.sourceDigest,
       rootNodeId, rootToolJobId: sourceRevision.toolJobId, rootRevisionId: sourceRevision.revisionId,
-      children: [{
-        nodeId: childNode.id,
-        toolId: 'go-kegg',
-        inputId: 'deg_table',
-        edgeKind: 'artifact',
-        sourceToolJobId: sourceRevision.toolJobId,
-        sourceRevisionId: sourceRevision.revisionId,
-        sourceArtifactId: sourceRevision.artifactId,
-        sourceOutputHash: sourceRevision.outputHash,
-        childToolJobId: childJob.id,
-        childRevisionId: childRevision.revisionId,
-      }],
+      children: projectedChildren,
     },
   };
 }
@@ -555,6 +602,7 @@ function createResultChangeSetTools(options = {}) {
             ? scoped.binding.inspection?.existing?.workspaceRelativeToRepository
             : '',
           getToolJob: dbModule.getToolJob,
+          getResultStudioDescriptor,
         }),
       };
     } catch (error) {
@@ -577,6 +625,7 @@ const tool_artifact_revision_restore = resultChangeSetTools.restore;
 module.exports = {
   createResultEditPlanTool,
   createResultChangeSetTools,
+  projectDirectEnrichmentSubgraph,
   tool_result_edit_plan,
   tool_result_changeset_create,
   tool_result_changeset_status,

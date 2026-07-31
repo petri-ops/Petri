@@ -3,11 +3,22 @@ import test from 'node:test';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { propagateDegThresholds } = require('../core/shared-backend/result-scientific-rerun');
+const {
+  DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS,
+  propagateDegThresholds,
+} = require('../core/shared-backend/result-scientific-rerun');
 
 function parameter(type = 'number', extra = {}) {
   return { type, ...extra };
 }
+
+test('P6 exposes only the admitted direct DEG child primary artifacts as a frozen mapping', () => {
+  assert.deepEqual(DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS, {
+    'go-kegg': 'go_bp_results',
+    'volcano-plot': 'volcano',
+  });
+  assert.equal(Object.isFrozen(DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS), true);
+});
 
 test('P5 propagates changed DEG thresholds into the exact GO/KEGG descriptor names', () => {
   const result = propagateDegThresholds({
@@ -51,6 +62,45 @@ test('P5 maps a declared legacy DEG threshold alias to the downstream canonical 
     sourceName: 'padj_threshold',
     downstreamName: 'padj_cutoff',
     value: 0.025,
+  });
+});
+
+test('P6 maps a DEG LFC cutoff to volcano fc_threshold without changing pval_threshold', () => {
+  const result = propagateDegThresholds({
+    sourceDescriptor: { parameters: { lfc_cutoff: parameter('number', { minimum: 0 }) } },
+    downstreamDescriptor: { parameters: {
+      fc_threshold: parameter('number', { minimum: 0 }),
+      pval_threshold: parameter('number', { minimum: 0 }),
+    } },
+    sourceParameterPatch: { lfc_cutoff: 1.75 },
+    downstreamNormalizedParams: { fc_threshold: 1, pval_threshold: 1.301 },
+    downstreamRawParams: { fc_threshold: 1, pval_threshold: 1.301 },
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.normalizedParams.fc_threshold, 1.75);
+  assert.equal(result.rawParams.fc_threshold, 1.75);
+  assert.equal(result.rawParams.pval_threshold, 1.301);
+  assert.deepEqual(result.propagated, [{
+    semantic: 'absolute_log2_fold_change_cutoff',
+    sourceName: 'lfc_cutoff',
+    downstreamName: 'fc_threshold',
+    value: 1.75,
+  }]);
+});
+
+test('P6 does not treat volcano pval_threshold as an adjusted p-value identity alias', () => {
+  const result = propagateDegThresholds({
+    sourceDescriptor: { parameters: { padj_cutoff: parameter('number', { minimum: 0, maximum: 1 }) } },
+    downstreamDescriptor: { parameters: { pval_threshold: parameter('number', { minimum: 0 }) } },
+    sourceParameterPatch: { padj_cutoff: 0.01 },
+    downstreamNormalizedParams: { pval_threshold: 1.301 },
+    downstreamRawParams: { pval_threshold: 1.301 },
+  });
+  assert.equal(result.ok, false);
+  assert.equal(result.code, 'downstream_parameter_mapping_missing');
+  assert.deepEqual(result.detail, {
+    semantic: 'adjusted_p_value_cutoff',
+    downstreamNames: [],
   });
 });
 

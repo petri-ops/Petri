@@ -39,6 +39,10 @@ const {
   runResultStudioBackground,
 } = require('../../shared-backend/result-studio-background');
 const {
+  inspectBaselineArtifactCohort,
+  inspectPersistedArtifactCohort,
+} = require('../../shared-backend/result-changeset-service');
+const {
   compareResultChangeSet,
   adoptResultChangeSet,
   revertResultChangeSet,
@@ -114,6 +118,75 @@ function hashFile(filePath) {
     fs.closeSync(handle);
   }
   return hash.digest('hex');
+}
+
+function resolveInteractionBaselineRevision({
+  repository,
+  projectId,
+  sourceJob,
+  artifactId,
+  pluginDescriptor,
+} = {}, dependencies = {}) {
+  const existing = repository.findRevisionByJobArtifact({
+    projectId,
+    toolJobId: sourceJob.id,
+    artifactId,
+  });
+  if (!pluginDescriptor) {
+    return {
+      revision: existing,
+      requiresEnsure: !existing,
+      qualification: null,
+    };
+  }
+  const inspectPersisted = dependencies.inspectPersistedArtifactCohort || inspectPersistedArtifactCohort;
+  const persisted = inspectPersisted({
+    projectId,
+    sourceJob,
+    artifactId,
+    pluginId: sourceJob.tool_id,
+    pluginDescriptor,
+  }, { repository });
+  if (persisted.qualified) {
+    return {
+      revision: persisted.revision,
+      requiresEnsure: false,
+      qualification: persisted,
+    };
+  }
+  const inspect = dependencies.inspectBaselineArtifactCohort || inspectBaselineArtifactCohort;
+  const qualification = inspect({
+    projectId,
+    sourceJob,
+    artifactId,
+    pluginId: sourceJob.tool_id,
+    pluginDescriptor,
+  }, { repository });
+  return {
+    revision: qualification.qualified ? qualification.revision : null,
+    requiresEnsure: !qualification.qualified,
+    qualification,
+  };
+}
+
+function baselineFailureDiagnostic(error) {
+  const diagnostic = {
+    code: error && error.code || 'baseline_revision_unavailable',
+    message: error && error.message || 'Baseline revision could not be registered.',
+  };
+  if (!String(diagnostic.code).startsWith('git_') || !error?.detail || typeof error.detail !== 'object') {
+    return diagnostic;
+  }
+  const detail = error.detail;
+  const technical = {};
+  if (/^[a-z][a-z0-9-]*$/.test(String(detail.command || ''))) technical.command = detail.command;
+  if (Number.isInteger(detail.status)) technical.status = detail.status;
+  if (/^[A-Z][A-Z0-9_]*$/.test(String(detail.systemCode || ''))) technical.systemCode = detail.systemCode;
+  if (/^SIG[A-Z0-9]+$/.test(String(detail.signal || ''))) technical.signal = detail.signal;
+  if (detail.killed === true) technical.killed = true;
+  if (Number.isInteger(detail.attempts) && detail.attempts > 0) technical.attempts = detail.attempts;
+  if (Object.keys(technical).length > 0) diagnostic.technical = technical;
+  return diagnostic;
 }
 
 function resolveWorkspaceFileForRevision(workspaceRoot, revision) {
@@ -446,23 +519,17 @@ module.exports = function registerResultStudioRoutes(app) {
         if (!artifactRecord) {
           revisionDiagnostic = { code: 'artifact_identity_unavailable', message: 'Artifact identity is not unique in the completed Job.' };
         } else {
-          const existing = repo().findRevisionByJobArtifact({
-            projectId: loaded.project.id,
-            toolJobId: loaded.job.id,
-            artifactId: artifactRecord.id,
-          });
           const pluginManifest = pluginLoader.getPluginManifest(loaded.job.tool_id);
           const pluginDescriptor = pluginManifest?.resultStudio || null;
-          const formalArtifactIds = pluginDescriptor && Array.isArray(pluginDescriptor.artifacts)
-            ? pluginDescriptor.artifacts.map((artifact) => artifact && artifact.artifactId || artifact && artifact.id).filter(Boolean)
-            : [];
-          const cohortIncomplete = !!pluginDescriptor && formalArtifactIds.some((artifactId) => !repo().findRevisionByJobArtifact({
+          const baseline = resolveInteractionBaselineRevision({
+            repository: repo(),
             projectId: loaded.project.id,
-            toolJobId: loaded.job.id,
-            artifactId,
-          }));
-          if (existing && !cohortIncomplete) {
-            revision = existing;
+            sourceJob: loaded.job,
+            artifactId: artifactRecord.id,
+            pluginDescriptor,
+          });
+          if (!baseline.requiresEnsure) {
+            revision = baseline.revision;
           } else {
             const snapshot = result.executionProvenance?.script;
             if (!snapshot?.snapshotPath || !snapshot.sha256) {
@@ -500,10 +567,7 @@ module.exports = function registerResultStudioRoutes(app) {
         }
       }
     } catch (error) {
-      revisionDiagnostic = {
-        code: error && error.code || 'baseline_revision_unavailable',
-        message: error && error.message || 'Baseline revision could not be registered.',
-      };
+      revisionDiagnostic = baselineFailureDiagnostic(error);
     }
     const revisionId = revision?.revisionId || null;
     const stableArtifactId = artifactRecord?.id || artifactName;
@@ -1199,6 +1263,7 @@ module.exports = function registerResultStudioRoutes(app) {
         adapter: context.binding.adapter,
         gitPathPrefix: context.gitPathPrefix,
         getToolJob: db.getToolJob,
+        getResultStudioDescriptor: (toolId) => pluginLoader.getPluginManifest(toolId)?.resultStudio || null,
       });
       return res.json({ ok: true, ...result });
     } catch (error) {
@@ -1224,3 +1289,5 @@ module.exports = function registerResultStudioRoutes(app) {
     }
   });
 };
+
+module.exports._test = { baselineFailureDiagnostic, resolveInteractionBaselineRevision };

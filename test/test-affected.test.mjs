@@ -93,6 +93,35 @@ test('P5 producer and source-bound evidence select the complete scientific-editi
   }
 });
 
+test('P6 UI-110 producer and evidence select direct trace, transport, and redaction regressions', () => {
+  const required = [
+    'test/g0-rs-p6-ui110-observation.test.mjs',
+    'test/g0-rs-p6-ui110-local-gateway.test.mjs',
+    'test/result-studio-agent-binding.test.mjs',
+    'test/result-studio-context.test.mjs',
+    'test/agent-tool-result.test.mjs',
+    'test/diagnostic-redaction.test.mjs',
+  ];
+  for (const file of [
+    'scripts/g0-rs-p6-ui110-observation.mjs',
+    'scripts/g0-rs-p6-ui110-driver.cjs',
+    'scripts/g0-rs-p6-ui110-local-gateway.mjs',
+    'acceptance/g0-result-studio/rs-p6-ui110-electron-scientific-trace.json',
+    'acceptance/g0-result-studio/rs-p6-ui110-electron/frame.png',
+  ]) {
+    const plan = resolveImpact([file]);
+    assert.deepEqual(plan.unknown, []);
+    assert.ok(plan.reasons[file].includes('p6-ui110-electron-scientific-trace'));
+    for (const testFile of required) assert.ok(plan.tests.includes(testFile), `${file} must select ${testFile}`);
+  }
+
+  const redaction = resolveImpact(['core/shared-backend/redaction.js']);
+  assert.deepEqual(redaction.unknown, []);
+  assert.ok(redaction.reasons['core/shared-backend/redaction.js'].includes('diagnostic-redaction'));
+  assert.ok(redaction.tests.includes('test/diagnostic-redaction.test.mjs'));
+  assert.ok(redaction.tests.includes('test/agent-tool-result.test.mjs'));
+});
+
 test('directly edited tests are included and unknown production paths fail closed', () => {
   assert.ok(resolveImpact(['test/loop-contract.test.mjs']).tests.includes('test/loop-contract.test.mjs'));
   assert.deepEqual(resolveImpact(['new-production-area/engine.js']).unknown, ['new-production-area/engine.js']);

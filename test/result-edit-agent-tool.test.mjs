@@ -7,22 +7,29 @@ import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 
 const require = createRequire(import.meta.url);
-const { createResultEditPlanTool, createResultChangeSetTools } = require('../core/r-server/agent-tools/result-edit-tools');
+const {
+  createResultEditPlanTool,
+  createResultChangeSetTools,
+  projectDirectEnrichmentSubgraph,
+} = require('../core/r-server/agent-tools/result-edit-tools');
 const { normalizePluginManifest } = require('../core/r-server/plugin-loader');
 const { computeExecutionProvenanceHash } = require('../core/shared-backend/execution-provenance');
 
 function makeJob(projectId = 'p_1') {
+  const provenance = {
+    executionProvenanceVersion: 1,
+    toolJobId: 'tj_plot', projectId,
+    script: { snapshotPath: '/snapshot/run.R', sha256: 'a'.repeat(64) },
+    inputs: [{ relativePath: 'inputs/deg.csv', sha256: 'b'.repeat(64), sourceArtifactRef: 'deg_table' }],
+    artifacts: [{ id: 'volcano_plot', filename: 'volcano.png', sha256: 'c'.repeat(64) }],
+  };
+  provenance.provenanceHash = computeExecutionProvenanceHash(provenance);
   return {
     id: 'tj_plot', project_id: projectId, tool_id: 'volcano-plot', status: 'completed',
     result: {
       artifactTruth: { status: 'valid', blocking: false },
       artifacts: [{ id: 'volcano_plot', name: 'volcano.png' }],
-      executionProvenance: {
-        toolJobId: 'tj_plot', projectId,
-        script: { snapshotPath: '/snapshot/run.R', sha256: 'a'.repeat(64) },
-        inputs: [{ relativePath: 'inputs/deg.csv', sha256: 'b'.repeat(64), sourceArtifactRef: 'deg_table' }],
-        artifacts: [{ id: 'volcano_plot', filename: 'volcano.png', sha256: 'c'.repeat(64) }],
-      },
+      executionProvenance: provenance,
     },
   };
 }
@@ -179,6 +186,122 @@ test('P5 scientific planning cannot recover authority from a caller-carried work
   assert.equal(saves, 0);
 });
 
+test('P6 projects exact current GO and volcano children and rejects ambiguous direct lineage', () => {
+  const projectId = 'p_1';
+  const outputHash = '1'.repeat(64);
+  const sourceRevision = {
+    revisionId: 'rev_deg_current', projectId, artifactId: 'deg_table',
+    toolJobId: 'tj_deg', outputHash,
+  };
+  const jobs = new Map([
+    ['tj_go', { id: 'tj_go', project_id: projectId, tool_id: 'go-kegg', status: 'completed' }],
+    ['tj_go_duplicate', { id: 'tj_go_duplicate', project_id: projectId, tool_id: 'go-kegg', status: 'completed' }],
+    ['tj_volcano', { id: 'tj_volcano', project_id: projectId, tool_id: 'volcano-plot', status: 'completed' }],
+    ['tj_unknown', { id: 'tj_unknown', project_id: projectId, tool_id: 'unknown-plot', status: 'completed' }],
+  ]);
+  const edge = (toNodeId) => ({
+    kind: 'artifact', fromNodeId: 'job:tj_deg', toNodeId,
+    sourceToolJobId: 'tj_deg', sourceRevisionId: sourceRevision.revisionId,
+    sourceArtifactId: 'deg_table', sourceOutputHash: outputHash,
+    selectionId: null, selectionHash: null, inputId: 'deg_table',
+  });
+  const graph = {
+    ok: true,
+    graph: {
+      graphId: 'wfg_p6_multi', projectId, rootToolJobId: 'tj_deg', sourceDigest: '2'.repeat(64),
+      nodes: [
+        { id: 'job:tj_deg', toolJobId: 'tj_deg', toolId: 'deseq2' },
+        { id: 'job:tj_go', toolJobId: 'tj_go', toolId: 'go-kegg' },
+        { id: 'job:tj_volcano', toolJobId: 'tj_volcano', toolId: 'volcano-plot' },
+      ],
+      edges: [edge('job:tj_volcano'), edge('job:tj_go')],
+    },
+  };
+  const intent = {
+    workflowGraph: { graphId: graph.graph.graphId, sourceDigest: graph.graph.sourceDigest },
+    affectedNodeIds: ['job:tj_volcano', 'job:tj_deg', 'job:tj_go'],
+  };
+  const currentRevisions = [
+    { revisionId: 'rev_volcano_current', projectId, toolJobId: 'tj_volcano', artifactId: 'volcano', isCurrent: true },
+    { revisionId: 'rev_go_current', projectId, toolJobId: 'tj_go', artifactId: 'go_bp_results', isCurrent: true },
+    { revisionId: 'rev_go_report', projectId, toolJobId: 'tj_go', artifactId: 'report', isCurrent: true },
+  ];
+  const project = ({ workflow = graph, editIntent = intent, revisions = currentRevisions } = {}) => (
+    projectDirectEnrichmentSubgraph({
+      graph: workflow,
+      intent: editIntent,
+      sourceRevision,
+      repository: { listCurrentRevisions: () => revisions },
+      getToolJob: (toolJobId) => jobs.get(toolJobId) || null,
+    })
+  );
+
+  const result = project();
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.subgraph.children.map((child) => ({
+    nodeId: child.nodeId,
+    toolId: child.toolId,
+    childRevisionId: child.childRevisionId,
+  })), [
+    { nodeId: 'job:tj_go', toolId: 'go-kegg', childRevisionId: 'rev_go_current' },
+    { nodeId: 'job:tj_volcano', toolId: 'volcano-plot', childRevisionId: 'rev_volcano_current' },
+  ]);
+
+  assert.equal(project({
+    editIntent: { ...intent, affectedNodeIds: [...intent.affectedNodeIds, 'job:tj_go'] },
+  }).error, 'workflow_affected_nodes_invalid');
+  assert.equal(project({
+    revisions: currentRevisions.filter((revision) => revision.artifactId !== 'volcano'),
+  }).error, 'downstream_revision_missing');
+  assert.equal(project({
+    revisions: currentRevisions.map((revision) => revision.artifactId === 'volcano'
+      ? { ...revision, isCurrent: undefined }
+      : revision),
+  }).error, 'downstream_revision_missing');
+
+  const duplicateToolGraph = structuredClone(graph);
+  duplicateToolGraph.graph.nodes = duplicateToolGraph.graph.nodes
+    .filter((node) => node.id !== 'job:tj_volcano');
+  duplicateToolGraph.graph.edges = duplicateToolGraph.graph.edges
+    .filter((entry) => entry.toNodeId !== 'job:tj_volcano');
+  duplicateToolGraph.graph.nodes.push({
+    id: 'job:tj_go_duplicate', toolJobId: 'tj_go_duplicate', toolId: 'go-kegg',
+  });
+  duplicateToolGraph.graph.edges.push(edge('job:tj_go_duplicate'));
+  assert.equal(project({
+    workflow: duplicateToolGraph,
+    editIntent: {
+      ...intent,
+      affectedNodeIds: ['job:tj_deg', 'job:tj_go', 'job:tj_go_duplicate'],
+    },
+    revisions: [...currentRevisions, {
+      revisionId: 'rev_go_duplicate', projectId, toolJobId: 'tj_go_duplicate',
+      artifactId: 'go_bp_results', isCurrent: true,
+    }],
+  }).error, 'workflow_subgraph_unsupported');
+
+  const unsupportedGraph = structuredClone(graph);
+  unsupportedGraph.graph.nodes.push({ id: 'job:tj_unknown', toolJobId: 'tj_unknown', toolId: 'unknown-plot' });
+  unsupportedGraph.graph.edges.push(edge('job:tj_unknown'));
+  assert.equal(project({
+    workflow: unsupportedGraph,
+    editIntent: {
+      ...intent,
+      affectedNodeIds: [...intent.affectedNodeIds, 'job:tj_unknown'],
+    },
+  }).error, 'workflow_subgraph_unsupported');
+
+  const multiEdgeGraph = structuredClone(graph);
+  multiEdgeGraph.graph.edges.push({ ...edge('job:tj_go'), inputId: 'deg_table_duplicate' });
+  assert.equal(project({ workflow: multiEdgeGraph }).error, 'workflow_subgraph_unsupported');
+
+  const selectionGraph = structuredClone(graph);
+  selectionGraph.graph.edges = selectionGraph.graph.edges.map((entry) => entry.toNodeId === 'job:tj_go'
+    ? { ...entry, kind: 'selection', selectionId: 'sel_1', selectionHash: '3'.repeat(64) }
+    : entry);
+  assert.equal(project({ workflow: selectionGraph }).error, 'workflow_downstream_lineage_drift');
+});
+
 test('RS4 Agent tool rejects cross-project access before planning', async () => {
   const tool = createResultEditPlanTool({
     getToolJob: () => makeJob('p_other'),
@@ -287,6 +410,7 @@ test('RS5 ChangeSet status refuses a cross-project record', async () => {
 
 test('RS6 Agent review tools share project scope and the canonical services', async () => {
   const calls = [];
+  const descriptor = { validator: { id: 'volcano-validator' } };
   const repository = {
     saveRepositoryBinding: () => {},
     getChangeSet: () => ({ changeSetId: 'cs_1', projectId: 'p_1' }),
@@ -307,7 +431,12 @@ test('RS6 Agent review tools share project scope and the canonical services', as
     compareResultChangeSet: (input) => { calls.push(['compare', input]); return { summary: { status: 'preview_ready' } }; },
     adoptResultChangeSet: (input) => { calls.push(['adopt', input]); return { changeSet: { status: 'adopted' } }; },
     revertResultChangeSet: (input) => { calls.push(['revert', input]); return { changeSet: { status: 'reverted' } }; },
-    restoreArtifactRevision: (input) => { calls.push(['restore', input]); return { revision: { revisionId: 'rev_restored' } }; },
+    getResultStudioDescriptor: () => descriptor,
+    restoreArtifactRevision: (input, dependencies) => {
+      assert.equal(dependencies.getResultStudioDescriptor('volcano-plot'), descriptor);
+      calls.push(['restore', input]);
+      return { revision: { revisionId: 'rev_restored' } };
+    },
   });
   const ctx = { projectId: 'p_1', userId: 'u_1', conversationId: 'conv_1' };
   assert.equal((await tools.compare({ changeSetId: 'cs_1' }, ctx)).ok, true);

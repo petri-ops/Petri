@@ -368,6 +368,51 @@ function normalizedRequiredJobIds(values) {
     .sort();
 }
 
+function selectActiveWorkflowJobs({ jobs, repository, projectId, rootJobId, requiredJobIds, stagedRevisions }) {
+  if (!repository || typeof repository.listCurrentRevisions !== 'function') {
+    return { ok: true, jobs };
+  }
+  let currentRevisions;
+  try { currentRevisions = repository.listCurrentRevisions(projectId); } catch {
+    return {
+      ok: false,
+      diagnostic: diagnostic('workflow_current_revisions_unavailable', 'Current ArtifactRevision truth is unavailable.'),
+    };
+  }
+  if (!Array.isArray(currentRevisions)) {
+    return {
+      ok: false,
+      diagnostic: diagnostic('workflow_current_revisions_invalid', 'Current ArtifactRevision truth has an invalid shape.'),
+    };
+  }
+  const jobsById = new Map((Array.isArray(jobs) ? jobs : [])
+    .filter((job) => trimmed(job?.id))
+    .map((job) => [trimmed(job.id), job]));
+  const activeJobIds = new Set([
+    rootJobId,
+    ...requiredJobIds,
+    ...currentRevisions.map((revision) => trimmed(revision?.toolJobId)).filter(Boolean),
+    ...(Array.isArray(stagedRevisions) ? stagedRevisions : [])
+      .map((revision) => trimmed(revision?.toolJobId)).filter(Boolean),
+  ]);
+  const queue = [...activeJobIds];
+  while (queue.length > 0) {
+    const toolJobId = queue.shift();
+    const provenanceInputs = parseJobResult(jobsById.get(toolJobId)).executionProvenance?.inputs;
+    for (const input of Array.isArray(provenanceInputs) ? provenanceInputs : []) {
+      const parentJobId = trimmed(input?.lineage?.sourceToolJobId);
+      if (parentJobId && !activeJobIds.has(parentJobId)) {
+        activeJobIds.add(parentJobId);
+        queue.push(parentJobId);
+      }
+    }
+  }
+  return {
+    ok: true,
+    jobs: (Array.isArray(jobs) ? jobs : []).filter((job) => activeJobIds.has(trimmed(job?.id))),
+  };
+}
+
 function stagedRevisionIndex(stagedRevisions, projectId) {
   const byId = new Map();
   const diagnostics = [];
@@ -487,7 +532,16 @@ function buildAuthoritativeWorkflowGraph({
   const requiredJobIds = normalizedRequiredJobIds(requiredToolJobIds);
   const staged = stagedRevisionIndex(stagedRevisions, normalizedProjectId);
   if (staged.diagnostics.length > 0) return { ok: false, diagnostics: staged.diagnostics };
-  const validJobs = (Array.isArray(jobs) ? jobs : []).filter((job) => validCompletedJob(job, normalizedProjectId));
+  const active = selectActiveWorkflowJobs({
+    jobs: Array.isArray(jobs) ? jobs : [],
+    repository,
+    projectId: normalizedProjectId,
+    rootJobId,
+    requiredJobIds,
+    stagedRevisions,
+  });
+  if (!active.ok) return { ok: false, diagnostics: [active.diagnostic] };
+  const validJobs = active.jobs.filter((job) => validCompletedJob(job, normalizedProjectId));
   const entryJob = validJobs.find((job) => job.id === rootJobId) || null;
   if (!entryJob) {
     return { ok: false, diagnostics: [diagnostic('workflow_source_job_unverified', 'The source Job is not a completed valid Artifact Truth record.')] };
@@ -625,14 +679,12 @@ function buildAuthoritativeWorkflowGraph({
 }
 
 /**
- * A historical restore creates new Revision identities while preserving the
- * exact immutable outputs of an already-authoritative cohort.  Rebind only
- * those Revision ids inside a verified artifact-edge graph; never accept a
- * caller-supplied graph, edge, Job, or output hash.  This keeps a restored
- * multi-Job cohort replayable without pretending that an old graph already
- * names its newly materialized Revisions.
+ * A restore cohort may be a downstream subset of its authoritative graph.
+ * Every graph node outside the cohort must therefore be an ancestor of a
+ * cohort-producing Job; descendants and unrelated siblings would expand the
+ * restore beyond the historical ChangeSet being restored.
  */
-function rebindWorkflowGraphForEquivalentRestore({ graph, sourceRevisions, restoredRevisions } = {}) {
+function validateRestoreWorkflowScope({ graph, sourceRevisions } = {}) {
   if (!graph || graph.validationStatus !== 'valid' || !graph.projectId || !graph.rootToolJobId
       || !Array.isArray(graph.nodes) || !Array.isArray(graph.edges)
       || graph.nodes.length === 0) {
@@ -643,8 +695,78 @@ function rebindWorkflowGraphForEquivalentRestore({ graph, sourceRevisions, resto
     return { ok: false, diagnostic: diagnostic('restore_workflow_graph_digest_drift', 'Persisted workflow graph digest no longer matches its authoritative contents.') };
   }
   const source = Array.isArray(sourceRevisions) ? sourceRevisions : [];
+  if (source.length === 0) {
+    return { ok: false, diagnostic: diagnostic('restore_workflow_cohort_incomplete', 'Historical restore requires a non-empty Revision cohort.') };
+  }
+  const nodesByJobId = new Map(graph.nodes.map((node) => [node.toolJobId, node]));
+  const cohortJobIds = new Set();
+  for (const revision of source) {
+    const node = nodesByJobId.get(trimmed(revision && revision.toolJobId));
+    if (!node || revision.projectId !== graph.projectId
+        || !trimmed(revision && revision.artifactId)
+        || !node.artifactIds.includes(revision.artifactId)) {
+      return {
+        ok: false,
+        diagnostic: diagnostic(
+          'restore_workflow_graph_scope_mismatch',
+          'Historical workflow graph does not cover every cohort-producing Job and formal Artifact.',
+          { toolJobId: revision?.toolJobId || null, artifactId: revision?.artifactId || null },
+        ),
+      };
+    }
+    cohortJobIds.add(revision.toolJobId);
+  }
+
+  const ancestorNodeIds = new Set();
+  const queue = [...cohortJobIds].map((toolJobId) => `job:${toolJobId}`);
+  while (queue.length > 0) {
+    const nodeId = queue.shift();
+    if (ancestorNodeIds.has(nodeId)) continue;
+    ancestorNodeIds.add(nodeId);
+    const node = graph.nodes.find((entry) => entry.id === nodeId);
+    queue.push(...(node?.dependsOn || []));
+  }
+  const nonAncestorJobIds = graph.nodes
+    .filter((node) => !ancestorNodeIds.has(node.id))
+    .map((node) => node.toolJobId);
+  if (nonAncestorJobIds.length > 0) {
+    return {
+      ok: false,
+      diagnostic: diagnostic(
+        'restore_workflow_graph_scope_mismatch',
+        'Historical workflow graph contains Jobs that are not immutable ancestors of the restored cohort.',
+        { nonAncestorJobIds },
+      ),
+    };
+  }
+  return {
+    ok: true,
+    cohortJobIds,
+    externalAncestorJobIds: new Set(
+      graph.nodes.map((node) => node.toolJobId).filter((toolJobId) => !cohortJobIds.has(toolJobId)),
+    ),
+  };
+}
+
+/**
+ * A historical restore creates new Revision identities while preserving the
+ * exact immutable outputs of an already-authoritative cohort. Rebind only
+ * edges whose source Revision belongs to the cohort. External ancestor edges
+ * remain byte-for-byte identical and must still resolve to durable Revision
+ * (and, when applicable, Selection) truth.
+ */
+function rebindWorkflowGraphForEquivalentRestore({
+  graph,
+  sourceRevisions,
+  restoredRevisions,
+  resolveRevision,
+  resolveSelection,
+} = {}) {
+  const scope = validateRestoreWorkflowScope({ graph, sourceRevisions });
+  if (!scope.ok) return scope;
+  const source = Array.isArray(sourceRevisions) ? sourceRevisions : [];
   const restored = Array.isArray(restoredRevisions) ? restoredRevisions : [];
-  if (source.length === 0 || source.length !== restored.length) {
+  if (source.length !== restored.length) {
     return { ok: false, diagnostic: diagnostic('restore_workflow_cohort_incomplete', 'Historical restore requires a complete one-to-one Revision cohort.') };
   }
   const sourceById = new Map();
@@ -685,6 +807,28 @@ function rebindWorkflowGraphForEquivalentRestore({ graph, sourceRevisions, resto
     replacements.set(sourceRevision.revisionId, restoredRevision);
   }
   const edges = graph.edges.map((edge) => {
+    if (!scope.cohortJobIds.has(edge.sourceToolJobId)) {
+      const externalRevision = typeof resolveRevision === 'function'
+        ? resolveRevision(edge.sourceRevisionId)
+        : null;
+      const exactRevision = externalRevision
+        && externalRevision.projectId === graph.projectId
+        && externalRevision.revisionId === edge.sourceRevisionId
+        && externalRevision.toolJobId === edge.sourceToolJobId
+        && externalRevision.artifactId === edge.sourceArtifactId
+        && externalRevision.outputHash === edge.sourceOutputHash;
+      const externalSelection = edge.kind === 'selection' && typeof resolveSelection === 'function'
+        ? resolveSelection(edge.selectionId)
+        : null;
+      const exactSelection = edge.kind !== 'selection'
+        || (externalSelection
+          && externalSelection.projectId === graph.projectId
+          && externalSelection.selectionId === edge.selectionId
+          && externalSelection.revisionId === edge.sourceRevisionId
+          && externalSelection.artifactId === edge.sourceArtifactId
+          && externalSelection.entityIdsHash === edge.selectionHash);
+      return exactRevision && exactSelection ? { ...edge } : null;
+    }
     const sourceRevision = sourceById.get(edge && edge.sourceRevisionId);
     const restoredRevision = sourceRevision && replacements.get(sourceRevision.revisionId);
     if (!edge || edge.kind !== 'artifact' || !sourceRevision || !restoredRevision
@@ -696,7 +840,7 @@ function rebindWorkflowGraphForEquivalentRestore({ graph, sourceRevisions, resto
     return { ...edge, sourceRevisionId: restoredRevision.revisionId };
   });
   if (edges.some((edge) => edge == null)) {
-    return { ok: false, diagnostic: diagnostic('restore_workflow_edge_unverified', 'Historical workflow edges do not exactly resolve to the restored immutable cohort.') };
+    return { ok: false, diagnostic: diagnostic('restore_workflow_edge_unverified', 'Historical workflow edges do not exactly resolve to the restored cohort or its immutable ancestors.') };
   }
   const sourceDigest = workflowGraphDigest({
     projectId: graph.projectId,
@@ -739,6 +883,7 @@ module.exports = {
   workflowGraphDigest,
   verifyWorkflowGraphIntegrity,
   buildAuthoritativeWorkflowGraph,
+  validateRestoreWorkflowScope,
   rebindWorkflowGraphForEquivalentRestore,
   isAuthoritativeWorkflowPlan,
 };

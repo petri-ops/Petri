@@ -10,8 +10,18 @@ const {
   planResultEdit,
   validateResultEditIntent,
 } = require('../core/shared-backend/result-edit-intent');
+const { computeExecutionProvenanceHash } = require('../core/shared-backend/execution-provenance');
 
 function sourceJob(overrides = {}) {
+  const executionProvenance = {
+    executionProvenanceVersion: 1,
+    toolJobId: 'tj_plot',
+    projectId: 'p_1',
+    script: { snapshotPath: '/results/tj_plot/run-script.R', sha256: 'a'.repeat(64) },
+    inputs: [{ id: 'deg', relativePath: 'inputs/deg.csv', sha256: 'b'.repeat(64), sourceArtifactRef: 'deg_table' }],
+    artifacts: [{ id: 'volcano_plot', filename: 'volcano.png', sha256: 'c'.repeat(64) }],
+  };
+  executionProvenance.provenanceHash = computeExecutionProvenanceHash(executionProvenance);
   return {
     id: 'tj_plot',
     project_id: 'p_1',
@@ -20,13 +30,7 @@ function sourceJob(overrides = {}) {
     result: {
       artifactTruth: { status: 'valid', blocking: false },
       artifacts: [{ id: 'volcano_plot', name: 'volcano.png', type: 'plot' }],
-      executionProvenance: {
-        toolJobId: 'tj_plot',
-        projectId: 'p_1',
-        script: { snapshotPath: '/results/tj_plot/run-script.R', sha256: 'a'.repeat(64) },
-        inputs: [{ id: 'deg', relativePath: 'inputs/deg.csv', sha256: 'b'.repeat(64), sourceArtifactRef: 'deg_table' }],
-        artifacts: [{ id: 'volcano_plot', filename: 'volcano.png', sha256: 'c'.repeat(64) }],
-      },
+      executionProvenance,
     },
     ...overrides,
   };
@@ -161,6 +165,9 @@ test('RS4 never uses a filename as artifact identity or lineage', () => {
 
   const noLineageJob = sourceJob();
   noLineageJob.result.executionProvenance.inputs[0].sourceArtifactRef = null;
+  noLineageJob.result.executionProvenance.provenanceHash = computeExecutionProvenanceHash(
+    noLineageJob.result.executionProvenance,
+  );
   const noLineage = plan({
     toolJob: noLineageJob,
     proposedParameterPatch: { palette: 'blue' },
@@ -168,6 +175,41 @@ test('RS4 never uses a filename as artifact identity or lineage', () => {
   });
   assert.equal(noLineage.ok, false);
   assert.equal(noLineage.diagnostics.some((item) => item.code === 'source_lineage_missing'), true);
+});
+
+test('P6 planner accepts exact structured lineage only when its execution provenance digest is intact', () => {
+  const structuredJob = sourceJob();
+  const input = structuredJob.result.executionProvenance.inputs[0];
+  input.sourceArtifactRef = null;
+  input.lineage = {
+    lineageVersion: 1,
+    kind: 'artifact',
+    sourceRevisionId: 'rev_deg',
+    sourceToolJobId: 'tj_deg',
+    sourceArtifactId: 'deg_table',
+    sourceOutputHash: input.sha256,
+    materializationHash: input.sha256,
+  };
+  structuredJob.result.executionProvenance.provenanceHash = computeExecutionProvenanceHash(
+    structuredJob.result.executionProvenance,
+  );
+  const accepted = plan({
+    toolJob: structuredJob,
+    proposedParameterPatch: { palette: 'blue' },
+    parameterImpactRules: { palette: 'presentation' },
+  });
+  assert.equal(accepted.ok, true, JSON.stringify(accepted.diagnostics));
+  assert.equal(accepted.source.inputs[0].hasStructuredLineage, true);
+  assert.equal(accepted.source.inputs[0].lineageKind, 'artifact');
+
+  structuredJob.result.executionProvenance.inputs[0].lineage.sourceRevisionId = 'rev_tampered';
+  const rejected = plan({
+    toolJob: structuredJob,
+    proposedParameterPatch: { palette: 'blue' },
+    parameterImpactRules: { palette: 'presentation' },
+  });
+  assert.equal(rejected.ok, false);
+  assert.equal(rejected.diagnostics.some((item) => item.code === 'source_provenance_integrity_invalid'), true);
 });
 
 test('RS4 detects ambiguous nodes, missing dependencies, and cycles', () => {

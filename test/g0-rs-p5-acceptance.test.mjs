@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -14,8 +14,10 @@ import {
   assertP5EvidenceWritable,
   assertP5NoSeedPrecondition,
   assertSanitizedP5Evidence,
+  createP5LiveScientificRuntime,
   exactWorkflowGraph,
   getP5SourceBinding,
+  runP5LiveWorker,
   svgIncludesColor,
   writeP5Evidence,
 } from '../scripts/g0-rs-p5-acceptance.mjs';
@@ -298,5 +300,54 @@ test('P5 evidence writer only serializes source-bound, passing, sanitized eviden
       write() {},
     }),
     /unsafe evidence key/,
+  );
+});
+
+test('P5 live runtime creates one isolated HTTP project conversation and removes it on close',
+  { concurrency: false, timeout: 60_000 }, async () => {
+    const runtime = await createP5LiveScientificRuntime();
+    const root = runtime.root;
+    try {
+      assert.equal(runtime.kind, 'p5_live_scientific_runtime');
+      assert.equal(runtime.closed, false);
+      assert.match(runtime.baseUrl, /^http:\/\/127\.0\.0\.1:\d+$/);
+      assert.equal(runtime.coordinates.root, root);
+      assert.equal(runtime.coordinates.dbPath, runtime.env.BIOF3_DB_PATH);
+      assert.equal(runtime.coordinates.projectId, runtime.project.id);
+      assert.equal(runtime.coordinates.conversationId, runtime.conversation.id);
+      assert.equal(runtime.conversation.project_id, runtime.project.id);
+      assert.deepEqual(runtime.noSeedPrecondition.seededTables, []);
+
+      const conversationResponse = await fetch(
+        `${runtime.baseUrl}/api/ai/conversations/${encodeURIComponent(runtime.conversation.id)}`,
+      );
+      assert.equal(conversationResponse.status, 200);
+      const conversationPayload = await conversationResponse.json();
+      assert.equal(conversationPayload.conversation?.id, runtime.conversation.id);
+      assert.equal(conversationPayload.conversation?.project_id, runtime.project.id);
+
+      await assert.rejects(
+        runP5LiveWorker(runtime, { projectId: 'p_other', op: 'derive_enrichment' }),
+        /p5_live_worker_cross_project_forbidden/,
+      );
+      await assert.rejects(
+        runtime.runWorker({ conversationId: 'conv_other', op: 'derive_enrichment' }),
+        /p5_live_worker_cross_conversation_forbidden/,
+      );
+    } finally {
+      await runtime.close();
+    }
+    assert.equal(runtime.closed, true);
+    assert.equal(existsSync(root), false);
+  });
+
+test('P5 live runtime validates a requested renderer-compatible port before boot', async () => {
+  await assert.rejects(
+    createP5LiveScientificRuntime({ port: 0 }),
+    /p5_live_runtime_port_invalid/,
+  );
+  await assert.rejects(
+    createP5LiveScientificRuntime({ port: 'not-a-port' }),
+    /p5_live_runtime_port_invalid/,
   );
 });

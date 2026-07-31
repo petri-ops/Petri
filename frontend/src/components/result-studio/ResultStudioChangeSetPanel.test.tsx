@@ -221,8 +221,11 @@ describe('ResultStudioChangeSetPanel', () => {
     });
     render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" />);
     expect(await screen.findByLabelText('实际执行节点')).toBeTruthy();
-    expect(screen.getByText('job:tj_deg_candidate')).toBeTruthy();
-    expect(screen.getByText('job:tj_go_candidate')).toBeTruthy();
+    expect(screen.getByText('实际执行节点 · 2 个')).toBeTruthy();
+    expect(screen.getByText('节点 1')).toBeTruthy();
+    expect(screen.getByText('节点 2')).toBeTruthy();
+    expect(screen.queryByText('job:tj_deg_candidate')).toBeNull();
+    expect(screen.queryByText('job:tj_go_candidate')).toBeNull();
     expect(screen.getByText('影响下游流程 · 2 个节点')).toBeTruthy();
   });
 

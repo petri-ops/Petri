@@ -2,9 +2,14 @@
 
 const SCIENTIFIC_RERUN_VERSION = 1;
 
+const DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS = Object.freeze({
+  'go-kegg': 'go_bp_results',
+  'volcano-plot': 'volcano',
+});
+
 const DEG_THRESHOLD_PARAMETER_ALIASES = Object.freeze({
   adjusted_p_value_cutoff: Object.freeze(['padj_cutoff', 'padj_threshold']),
-  absolute_log2_fold_change_cutoff: Object.freeze(['lfc_cutoff', 'lfc_threshold']),
+  absolute_log2_fold_change_cutoff: Object.freeze(['lfc_cutoff', 'lfc_threshold', 'fc_threshold']),
 });
 
 function own(object, key) {
@@ -87,6 +92,7 @@ function propagateDegThresholds({
 
 module.exports = {
   SCIENTIFIC_RERUN_VERSION,
+  DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS,
   DEG_THRESHOLD_PARAMETER_ALIASES,
   propagateDegThresholds,
 };

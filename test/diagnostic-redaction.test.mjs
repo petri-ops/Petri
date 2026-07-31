@@ -26,8 +26,8 @@ test("diagnostic redaction removes credential-bearing headers and fields", () =>
   const source = [
     "Authorization: Bearer top-secret-token",
     "x-api-key=provider-secret",
-    '{"apiKey":"json-secret","remoteComputeToken":"compute-secret"}',
-    "https://example.test/path?api_key=query-secret&mode=check",
+    '{"apiKey":"json-secret","remoteComputeToken":"compute-secret","contextToken":"context-secret"}',
+    "https://example.test/path?api_key=query-secret&contextToken=query-context-secret&mode=check",
     "provider sk-abcdefghijklmnopqrstuvwxyz123456",
   ].join("\n");
 
@@ -37,7 +37,9 @@ test("diagnostic redaction removes credential-bearing headers and fields", () =>
     "provider-secret",
     "json-secret",
     "compute-secret",
+    "context-secret",
     "query-secret",
+    "query-context-secret",
     "sk-abcdefghijklmnopqrstuvwxyz123456",
   ]) {
     assert.equal(redacted.includes(secret), false);

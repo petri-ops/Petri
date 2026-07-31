@@ -2,6 +2,7 @@
 
 const crypto = require('node:crypto');
 const { isAuthoritativeWorkflowPlan } = require('./result-workflow-graph');
+const { verifyExecutionProvenance } = require('./execution-provenance');
 
 const RESULT_EDIT_INTENT_VERSION = 1;
 const RESULT_EDIT_CLASSES = Object.freeze([
@@ -147,6 +148,20 @@ function exactArtifact(result, artifactId) {
   return matches.length === 1 ? matches[0] : null;
 }
 
+function hasStructuredInputLineage(input) {
+  const lineage = input?.lineage;
+  if (!lineage || typeof lineage !== 'object' || Array.isArray(lineage)
+      || lineage.lineageVersion !== 1 || !['artifact', 'selection'].includes(lineage.kind)) return false;
+  const sha256 = /^[a-f0-9]{64}$/;
+  if (!trimmed(lineage.sourceRevisionId) || !trimmed(lineage.sourceToolJobId)
+      || !trimmed(lineage.sourceArtifactId) || !sha256.test(trimmed(lineage.sourceOutputHash))
+      || !sha256.test(trimmed(lineage.materializationHash))
+      || trimmed(input?.sha256) !== trimmed(lineage.materializationHash)) return false;
+  return lineage.kind === 'artifact'
+    ? trimmed(lineage.materializationHash) === trimmed(lineage.sourceOutputHash)
+    : Boolean(trimmed(lineage.selectionId) && sha256.test(trimmed(lineage.selectionHash)));
+}
+
 function locateResultSource({ toolJob, artifactId, projectId } = {}) {
   const diagnostics = [];
   if (!toolJob) return { ok: false, diagnostics: [diagnostic('source_job_not_found', 'Source tool job was not found.')] };
@@ -168,6 +183,9 @@ function locateResultSource({ toolJob, artifactId, projectId } = {}) {
   const provenance = result.executionProvenance || null;
   if (!provenance || provenance.toolJobId !== toolJob.id) {
     diagnostics.push(diagnostic('source_provenance_missing', 'Execution provenance is missing or does not bind to the source job.'));
+  }
+  if (provenance && !verifyExecutionProvenance(provenance).ok) {
+    diagnostics.push(diagnostic('source_provenance_integrity_invalid', 'Execution provenance no longer matches its server-issued digest.'));
   }
   if (provenance && trimmed(provenance.projectId) && trimmed(provenance.projectId) !== trimmed(projectId)) {
     diagnostics.push(diagnostic('source_provenance_project_mismatch', 'Execution provenance belongs to another project.'));
@@ -206,6 +224,8 @@ function locateResultSource({ toolJob, artifactId, projectId } = {}) {
         relativePath: input.relativePath,
         sha256: input.sha256,
         sourceArtifactRef: input.sourceArtifactRef || null,
+        hasStructuredLineage: hasStructuredInputLineage(input),
+        lineageKind: hasStructuredInputLineage(input) ? input.lineage.kind : null,
       })),
     },
   };
@@ -365,11 +385,12 @@ function planResultEdit(input = {}) {
   if (source.ok && graph.ok && graph.sourceNodeId && input.workflowPlan) {
     const sourceStep = input.workflowPlan.steps.find((step) => step.id === graph.sourceNodeId);
     const hasUpstreamDependency = sourceStep && Array.isArray(sourceStep.dependsOn) && sourceStep.dependsOn.length > 0;
-    const hasExplicitArtifactLineage = source.source.inputs.some((item) => trimmed(item.sourceArtifactRef));
+    const hasExplicitArtifactLineage = source.source.inputs.some((item) =>
+      trimmed(item.sourceArtifactRef) || item.hasStructuredLineage === true);
     if (hasUpstreamDependency && !hasExplicitArtifactLineage) {
       diagnostics.push(diagnostic(
         'source_lineage_missing',
-        'A source node with upstream dependencies requires an explicit sourceArtifactRef; filenames are never used to infer lineage.'
+        'A source node with upstream dependencies requires signed structured lineage or an explicit sourceArtifactRef; filenames are never used to infer lineage.'
       ));
     }
   }

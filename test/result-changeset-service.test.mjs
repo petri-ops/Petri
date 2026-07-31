@@ -21,11 +21,15 @@ const {
   createResultChangeSet,
   ensureBaselineArtifactCohort,
   ensureBaselineArtifactRevision,
+  inspectBaselineArtifactCohort,
+  inspectPersistedArtifactCohort,
   inspectResultEditRecovery,
   materializeResultEdit,
   sha256,
   _test: changeSetTest,
 } = require('../core/shared-backend/result-changeset-service');
+const { projectRevisionSource } = require('../core/shared-backend/result-revision-source');
+const { restoreArtifactRevision } = require('../core/shared-backend/result-compare-service');
 const { resolveResultStudioScriptOverride } = require('../core/r-server/mcp/registry')._test;
 
 function signedExecutionProvenance(payload) {
@@ -155,7 +159,10 @@ function volcanoDescriptor() {
 
 function deseqDescriptor() {
   return {
-    parameters: { padj_cutoff: { type: 'number', minimum: 0, maximum: 1 } },
+    parameters: {
+      padj_cutoff: { type: 'number', minimum: 0, maximum: 1 },
+      lfc_cutoff: { type: 'number', minimum: 0 },
+    },
     artifacts: [{ id: 'deg_table', type: 'table' }, { id: 'deg_summary', type: 'table' }],
     interactionMappings: [{ artifactId: 'deg_table', mode: 'table', entityType: 'gene', idField: 'gene' }],
     validator: {
@@ -167,13 +174,32 @@ function deseqDescriptor() {
 
 function goDescriptor() {
   return {
-    parameters: { padj_cutoff: { type: 'number', minimum: 0, maximum: 1 } },
+    parameters: {
+      padj_cutoff: { type: 'number', minimum: 0, maximum: 1 },
+      lfc_cutoff: { type: 'number', minimum: 0 },
+    },
     inputBindings: [{ inputId: 'deg_table', required: true }],
     artifacts: [{ id: 'go_bp_results', type: 'table' }],
     interactionMappings: [{ artifactId: 'go_bp_results', mode: 'table', entityType: 'pathway', idField: 'ID' }],
     validator: {
       id: 'go_test_validator',
       checks: ['artifact_truth_valid', 'script_sha256', 'input_sha256', 'output_sha256', 'stable_term_id', 'empty_result_is_valid'],
+    },
+  };
+}
+
+function volcanoChildDescriptor() {
+  return {
+    parameters: {
+      fc_threshold: { type: 'number', minimum: 0 },
+      pval_threshold: { type: 'number', minimum: 0 },
+    },
+    inputBindings: [{ inputId: 'deg_table', required: true }],
+    artifacts: [{ id: 'volcano', type: 'plot' }],
+    interactionMappings: [{ artifactId: 'volcano', mode: 'scatter', entityType: 'gene', idField: 'gene' }],
+    validator: {
+      id: 'volcano_child_test_validator',
+      checks: ['artifact_truth_valid', 'script_sha256', 'input_sha256', 'output_sha256'],
     },
   };
 }
@@ -202,6 +228,55 @@ function serviceDependencies(fx, overrides = {}) {
     getResultStudioDescriptor: (toolId) => descriptors[toolId] || null,
     ...overrides,
   };
+}
+
+function attachServerIssuedSourceLineage(fx) {
+  const upstreamJob = {
+    id: 'tj_upstream_deg', project_id: 'p_1', tool_id: 'deseq2', status: 'completed',
+    result: {
+      artifactTruth: { status: 'valid', blocking: false },
+      artifacts: [{ id: 'deg_table', type: 'table', path: fx.sourceInput }],
+      executionProvenance: signedExecutionProvenance({
+        executionProvenanceVersion: 1, toolJobId: 'tj_upstream_deg', projectId: 'p_1',
+        params: { normalized: {} }, inputs: [],
+        script: { sha256: sha256(fx.sourceScriptContent) },
+        artifacts: [{ id: 'deg_table', filename: 'deg.csv', sha256: fx.sourceInputHash }],
+      }),
+    },
+  };
+  fx.repository.createChangeSet({
+    changeSetId: 'cs_upstream_deg', projectId: 'p_1', baseCommit: fx.sourceRevision.sourceCommit,
+    workingBranchRef: 'refs/heads/biof3/upstream-deg', createdBy: 'agent',
+  });
+  fx.repository.transitionChangeSet({ changeSetId: 'cs_upstream_deg', to: 'running' });
+  fx.repository.transitionChangeSet({
+    changeSetId: 'cs_upstream_deg', to: 'preview_ready', candidateCommit: fx.sourceRevision.sourceCommit,
+    candidateArtifactRefs: ['rev_upstream_deg'], jobRefs: [upstreamJob.id],
+  });
+  const upstreamRevision = fx.repository.appendRevision({
+    revisionId: 'rev_upstream_deg', projectId: 'p_1', artifactFamilyId: 'upstream_deg_family',
+    artifactId: 'deg_table', sourceCommit: fx.sourceRevision.sourceCommit,
+    sourceScriptRef: {
+      ...fx.sourceRevision.sourceScriptRef,
+      artifactId: 'deg_table', rendererId: 'deseq2:deg_table',
+    },
+    parametersRef: fx.sourceRevision.parametersRef, parametersHash: fx.sourceRevision.parametersHash,
+    toolJobId: upstreamJob.id, outputPath: 'inputs/deg/deg.csv', outputHash: fx.sourceInputHash,
+    validationStatus: 'valid', reproducibilityStatus: 'available', changeSetId: 'cs_upstream_deg',
+  });
+  fx.repository.adoptChangeSet({ changeSetId: 'cs_upstream_deg', candidateCommit: fx.sourceRevision.sourceCommit });
+  const lineage = {
+    lineageVersion: 1, kind: 'artifact', sourceRevisionId: upstreamRevision.revisionId,
+    sourceToolJobId: upstreamJob.id, sourceArtifactId: upstreamRevision.artifactId,
+    sourceOutputHash: fx.sourceInputHash, materializationHash: fx.sourceInputHash,
+  };
+  const provenance = fx.sourceJob.result.executionProvenance;
+  fx.sourceJob.result.executionProvenance = signedExecutionProvenance({
+    ...provenance,
+    executionProvenanceVersion: 1,
+    inputs: provenance.inputs.map((input) => ({ ...input, lineage })),
+  });
+  return { upstreamJob, upstreamRevision, lineage };
 }
 
 function revisionFromSource(fx, changeSetId, overrides = {}) {
@@ -329,6 +404,8 @@ test('P5 baseline registration records every formal output from one Job as one c
   assert.equal(first.cohortRevisions.every((revision) => revision.isCurrent === true), true);
   assert.equal(fx.repository.listRevisionsByChangeSet(first.cohortRevisions[0].changeSetId).length, 2);
   const baselineChangeSet = fx.repository.getChangeSet(first.cohortRevisions[0].changeSetId);
+  assert.equal(baselineChangeSet.validationSummary.formalArtifactCount, 2);
+  assert.deepEqual(baselineChangeSet.validationSummary.validatorIds, ['cohort-validator']);
   const baselineGraph = fx.repository.getWorkflowGraph(baselineChangeSet.validationSummary.workflowGraph.graphId);
   assert.equal(baselineGraph.rootToolJobId, sourceJob.id);
   assert.deepEqual(baselineGraph.nodes.map((node) => node.toolJobId), [sourceJob.id]);
@@ -347,6 +424,234 @@ test('P5 baseline registration records every formal output from one Job as one c
   assert.equal(second.created, false);
   assert.equal(second.cohortRevisions.length, 2);
   assert.equal(fx.repository.listRevisionsByChangeSet(first.cohortRevisions[0].changeSetId).length, 2);
+  const qualified = inspectBaselineArtifactCohort({
+    projectId: 'p_1', sourceJob, artifactId: 'plot', pluginDescriptor: descriptor,
+  }, { repository: fx.repository });
+  assert.equal(qualified.qualified, true);
+  assert.equal(qualified.revision.revisionId, first.revision.revisionId);
+});
+
+test('P6 qualifies a complete persisted candidate Job cohort without relabeling it as a baseline', () => {
+  const hashes = { plot: 'a'.repeat(64), table: 'b'.repeat(64) };
+  const commit = 'c'.repeat(40);
+  const sourceJob = {
+    id: 'tj_candidate', project_id: 'p_1', tool_id: 'volcano-plot', status: 'completed',
+    result: {
+      artifactTruth: { status: 'valid', blocking: false },
+      artifacts: [{ id: 'plot' }, { id: 'classified' }],
+      executionProvenance: { artifacts: [
+        { id: 'plot', sha256: hashes.plot },
+        { id: 'classified', sha256: hashes.table },
+      ] },
+    },
+  };
+  const revisions = [
+    {
+      revisionId: 'rev_plot', projectId: 'p_1', artifactFamilyId: 'family_plot', artifactId: 'plot',
+      toolJobId: sourceJob.id, outputHash: hashes.plot, validationStatus: 'valid',
+      sourceCommit: commit, changeSetId: 'cs_candidate', isCurrent: true,
+    },
+    {
+      revisionId: 'rev_table', projectId: 'p_1', artifactFamilyId: 'family_table', artifactId: 'classified',
+      toolJobId: sourceJob.id, outputHash: hashes.table, validationStatus: 'valid',
+      sourceCommit: commit, changeSetId: 'cs_candidate', isCurrent: true,
+    },
+  ];
+  const graph = {
+    graphId: 'wfg_candidate', projectId: 'p_1', sourceDigest: 'd'.repeat(64), validationStatus: 'valid',
+    nodes: [{ toolJobId: sourceJob.id, artifactIds: ['plot', 'classified'] }], edges: [],
+  };
+  const changeSet = {
+    changeSetId: 'cs_candidate', projectId: 'p_1', intentRef: 'intent_candidate', status: 'adopted',
+    adoptedAt: '2026-07-30T00:00:00.000Z', candidateCommit: commit,
+    candidateArtifactRefs: revisions.map((revision) => revision.revisionId), jobRefs: [sourceJob.id],
+    validationSummary: {
+      artifactTruthStatus: 'valid', formalArtifactCount: 2, validatorIds: ['candidate-validator'],
+      workflowGraph: { graphId: graph.graphId, sourceDigest: graph.sourceDigest },
+    },
+  };
+  const repository = {
+    findRevisionByJobArtifact: ({ artifactId }) => revisions.find((revision) => revision.artifactId === artifactId) || null,
+    getChangeSet: () => changeSet,
+    listRevisionsByChangeSet: () => revisions,
+    getWorkflowGraph: () => graph,
+  };
+  const input = {
+    projectId: 'p_1', sourceJob, artifactId: 'plot',
+    pluginDescriptor: {
+      artifacts: [{ id: 'plot' }, { id: 'classified' }], validator: { id: 'candidate-validator' },
+    },
+  };
+  const qualified = inspectPersistedArtifactCohort(input, {
+    repository,
+    verifyWorkflowGraphIntegrity: () => ({ ok: true }),
+  });
+  assert.equal(qualified.qualified, true);
+  assert.equal(qualified.revision.revisionId, 'rev_plot');
+  assert.equal(qualified.cohortRevisions.length, 2);
+
+  changeSet.candidateArtifactRefs = ['rev_plot'];
+  assert.equal(inspectPersistedArtifactCohort(input, {
+    repository,
+    verifyWorkflowGraphIntegrity: () => ({ ok: true }),
+  }).reason, 'persisted_cohort_incomplete');
+});
+
+test('P6 baseline registration repairs an adopted legacy cohort without restorable validator proof', (context) => {
+  const fx = fixture(context, 'baseline-proof-repair');
+  const output = join(fx.workspaceRoot, 'results/jobs/tj_proof_repair/output/plot.png');
+  mkdirSync(join(output, '..'), { recursive: true });
+  writeFileSync(output, 'PLOT');
+  const outputHash = sha256(readFileSync(output));
+  const script = 'print("proof repair")\n';
+  const scriptHash = sha256(script);
+  const sourceJob = {
+    id: 'tj_proof_repair', project_id: 'p_1', tool_id: 'volcano-plot', status: 'completed', params: {},
+    result: {
+      artifactTruth: { status: 'valid', blocking: false },
+      artifacts: [{ id: 'plot', type: 'plot', path: output }],
+      executionProvenance: signedExecutionProvenance({
+        executionProvenanceVersion: 1, toolJobId: 'tj_proof_repair', projectId: 'p_1',
+        params: { normalized: {} }, inputs: [], script: { sha256: scriptHash },
+        artifacts: [{ id: 'plot', sha256: outputHash }],
+      }),
+    },
+  };
+  const descriptor = {
+    artifacts: [{ id: 'plot', type: 'plot' }],
+    validator: { id: 'proof-validator', checks: ['artifact_truth_valid', 'script_sha256', 'output_sha256'] },
+  };
+  const input = {
+    projectId: 'p_1', workspaceRoot: fx.workspaceRoot, sourceJob, artifactId: 'plot',
+    pluginId: 'volcano-plot', language: 'r', sourceScriptContent: script, sourceScriptSha256: scriptHash,
+  };
+  const dependencies = {
+    repository: fx.repository,
+    adapter: fx.adapter,
+    getResultStudioDescriptor: () => descriptor,
+  };
+  const original = ensureBaselineArtifactCohort(input, dependencies);
+  const originalChangeSet = fx.repository.getChangeSet(original.revision.changeSetId);
+  fx.db.prepare('UPDATE scientific_change_sets SET validation_summary_json = ? WHERE change_set_id = ?')
+    .run(JSON.stringify({
+      ...originalChangeSet.validationSummary,
+      formalArtifactCount: undefined,
+      validatorIds: undefined,
+    }), originalChangeSet.changeSetId);
+
+  const unqualified = inspectBaselineArtifactCohort({
+    projectId: 'p_1', sourceJob, artifactId: 'plot', pluginDescriptor: descriptor,
+  }, { repository: fx.repository });
+  assert.equal(unqualified.qualified, false);
+  assert.equal(unqualified.reason, 'baseline_cohort_unqualified');
+
+  const repaired = ensureBaselineArtifactCohort(input, dependencies);
+  const repairedChangeSet = fx.repository.getChangeSet(repaired.revision.changeSetId);
+  assert.equal(repaired.created, true);
+  assert.notEqual(repaired.revision.changeSetId, original.revision.changeSetId);
+  assert.deepEqual(repaired.revision.parentRevisionIds, [original.revision.revisionId]);
+  assert.equal(repairedChangeSet.validationSummary.formalArtifactCount, 1);
+  assert.deepEqual(repairedChangeSet.validationSummary.validatorIds, ['proof-validator']);
+  assert.equal(repairedChangeSet.status, 'adopted');
+  const changedValidator = inspectBaselineArtifactCohort({
+    projectId: 'p_1', sourceJob, artifactId: 'plot',
+    pluginDescriptor: { ...descriptor, validator: { ...descriptor.validator, id: 'proof-validator-v2' } },
+  }, { repository: fx.repository });
+  assert.equal(changedValidator.qualified, false);
+  assert.equal(changedValidator.reason, 'baseline_cohort_unqualified');
+});
+
+test('P6 baseline cohort remains source-addressable for a project nested in an existing repository', (context) => {
+  const fx = fixture(context, 'git-prefix-baseline-');
+  const output = join(fx.workspaceRoot, 'results/jobs/tj_nested_baseline/output/plot.png');
+  mkdirSync(join(output, '..'), { recursive: true });
+  writeFileSync(output, 'NESTED-PLOT');
+  const outputHash = sha256(readFileSync(output));
+  const script = 'print("nested baseline")\n';
+  const scriptHash = sha256(script);
+  const sourceJob = {
+    id: 'tj_nested_baseline', project_id: 'p_1', tool_id: 'volcano-plot', status: 'completed', params: {},
+    result: {
+      artifactTruth: { status: 'valid', blocking: false },
+      artifacts: [{ id: 'plot', type: 'plot', path: output }],
+      executionProvenance: signedExecutionProvenance({
+        executionProvenanceVersion: 1, toolJobId: 'tj_nested_baseline', projectId: 'p_1',
+        params: { normalized: {} }, inputs: [], script: { sha256: scriptHash },
+        artifacts: [{ id: 'plot', sha256: outputHash }],
+      }),
+    },
+  };
+  const descriptor = {
+    artifacts: [{ id: 'plot', type: 'plot' }],
+    validator: { id: 'nested-validator', checks: ['artifact_truth_valid', 'script_sha256', 'output_sha256'] },
+  };
+  const prefix = 'projects/p_1';
+  const baseline = ensureBaselineArtifactCohort({
+    projectId: 'p_1', workspaceRoot: fx.workspaceRoot, sourceJob, artifactId: 'plot',
+    pluginId: 'volcano-plot', language: 'r', sourceScriptContent: script, sourceScriptSha256: scriptHash,
+  }, {
+    repository: fx.repository,
+    adapter: fx.adapter,
+    gitPathPrefix: prefix,
+    getResultStudioDescriptor: () => descriptor,
+  });
+  const revision = baseline.revision;
+  const changeSet = fx.repository.getChangeSet(revision.changeSetId);
+  assert.equal(revision.sourceScriptRef.relativePath.startsWith(`${prefix}/`), false,
+    'durable source refs remain project-relative; Git readers add the repository prefix once');
+  assert.equal(revision.parametersRef.startsWith(`${prefix}/`), false);
+  assert.equal(changeSet.changedPaths.every((entry) => !entry.relativePath.startsWith(`${prefix}/`)), true);
+  assert.equal(fx.adapter.showFile({
+    ref: revision.sourceCommit,
+    filePath: `${prefix}/${revision.sourceScriptRef.relativePath}`,
+  }), script);
+  const manifestPath = changeSet.changedPaths.find((entry) => /materialization\.json$/.test(entry.relativePath)).relativePath;
+  const manifest = JSON.parse(fx.adapter.showFile({
+    ref: revision.sourceCommit,
+    filePath: `${prefix}/${manifestPath}`,
+  }));
+  assert.equal(manifest.scriptRelativePath, revision.sourceScriptRef.relativePath);
+  assert.equal(manifest.parametersRelativePath, revision.parametersRef);
+  const projected = projectRevisionSource({ projectId: 'p_1', revision }, {
+    repository: fx.repository,
+    adapter: fx.adapter,
+    gitPathPrefix: prefix,
+    workspaceRoot: fx.workspaceRoot,
+    getToolJob: () => sourceJob,
+  });
+  assert.equal(projected.content, script);
+  assert.deepEqual(projected.parameters.values, {});
+
+  const repaired = ensureBaselineArtifactCohort({
+    projectId: 'p_1', workspaceRoot: fx.workspaceRoot, sourceJob, artifactId: 'plot',
+    pluginId: 'volcano-plot', language: 'r', sourceScriptContent: script, sourceScriptSha256: scriptHash,
+  }, {
+    repository: fx.repository,
+    adapter: fx.adapter,
+    gitPathPrefix: prefix,
+    getResultStudioDescriptor: () => ({
+      ...descriptor,
+      validator: { ...descriptor.validator, id: 'nested-validator-v2' },
+    }),
+  });
+  assert.deepEqual(repaired.revision.parentRevisionIds, [revision.revisionId]);
+  const restored = restoreArtifactRevision({
+    projectId: 'p_1', workspaceRoot: fx.workspaceRoot, revisionId: revision.revisionId, createdBy: 'user',
+  }, {
+    repository: fx.repository,
+    adapter: fx.adapter,
+    gitPathPrefix: prefix,
+    getToolJob: () => sourceJob,
+  });
+  assert.equal(restored.restored, true);
+  assert.deepEqual(restored.revision.parentRevisionIds, [repaired.revision.revisionId]);
+  assert.equal(projectRevisionSource({ projectId: 'p_1', revision: restored.revision }, {
+    repository: fx.repository,
+    adapter: fx.adapter,
+    gitPathPrefix: prefix,
+    workspaceRoot: fx.workspaceRoot,
+    getToolJob: () => sourceJob,
+  }).content, script);
 });
 
 test('P5 baseline registration projects a downstream Job with its authoritative ancestor lineage', (context) => {
@@ -495,6 +800,11 @@ test('P5 baseline registration never stitches formal outputs from split legacy C
     artifacts: [{ id: 'plot', type: 'plot' }, { id: 'classified', type: 'table' }],
     validator: { id: 'cohort-validator', checks: ['artifact_truth_valid', 'script_sha256', 'input_sha256', 'output_sha256'] },
   };
+  const splitQualification = inspectBaselineArtifactCohort({
+    projectId: 'p_1', sourceJob, artifactId: 'plot', pluginDescriptor: descriptor,
+  }, { repository: fx.repository });
+  assert.equal(splitQualification.qualified, false);
+  assert.equal(splitQualification.reason, 'baseline_cohort_split');
   const rebuilt = ensureBaselineArtifactCohort(
     { ...baselineInput, artifactId: 'plot' },
     {
@@ -662,6 +972,77 @@ test('RS5 success creates commit, Job-backed Revision and preview without adopti
   assert.deepEqual(checkpoint.pendingPreview.revisionIds, [result.revision.revisionId]);
 });
 
+test('P6 primary candidate does not infer input lineage from hashes or sourceArtifactRef', async (context) => {
+  const fx = fixture(context, 'primary-no-lineage-inference-');
+  const baseExecutor = successfulExecutor(fx, 'NO_INFERRED_LINEAGE');
+  const result = await createResultChangeSet(request(fx), serviceDependencies(fx, {
+    executeJob: async (execution) => {
+      assert.equal(execution.resultStudioInputLineage, null);
+      return baseExecutor(execution);
+    },
+  }));
+  assert.equal(result.changeSet.status, 'preview_ready');
+});
+
+test('P6 primary candidate inherits exact server-issued input lineage and preserves its DAG parent', async (context) => {
+  const fx = fixture(context, 'primary-inherited-lineage-');
+  const { upstreamJob, lineage } = attachServerIssuedSourceLineage(fx);
+  const baseExecutor = successfulExecutor(fx, 'INHERITED_LINEAGE');
+  const result = await createResultChangeSet(request(fx), serviceDependencies(fx, {
+    getToolJob: (toolJobId) => toolJobId === upstreamJob.id ? upstreamJob : fx.sourceJob,
+    executeJob: async (execution) => {
+      assert.deepEqual(execution.resultStudioInputLineage, { deg_table: lineage });
+      const candidate = await baseExecutor(execution);
+      const provenance = candidate.job.result.executionProvenance;
+      candidate.job.result.executionProvenance = signedExecutionProvenance({
+        ...provenance,
+        inputs: provenance.inputs.map((input) => ({
+          ...input,
+          lineage: execution.resultStudioInputLineage[input.id],
+        })),
+      });
+      return candidate;
+    },
+  }));
+  const graph = fx.repository.getWorkflowGraph(result.changeSet.validationSummary.workflowGraph.graphId);
+  assert.deepEqual(graph.nodes.map((node) => node.toolJobId), [upstreamJob.id, result.toolJobId]);
+  assert.equal(graph.edges.length, 1);
+  assert.equal(graph.edges[0].sourceToolJobId, upstreamJob.id);
+  assert.equal(graph.edges[0].toNodeId, `job:${result.toolJobId}`);
+});
+
+test('P6 primary candidate rejects input lineage drift after execution', async (context) => {
+  const fx = fixture(context, 'primary-lineage-drift-');
+  const { upstreamJob } = attachServerIssuedSourceLineage(fx);
+  const baseExecutor = successfulExecutor(fx, 'DRIFTED_LINEAGE');
+  await assert.rejects(() => createResultChangeSet(request(fx), serviceDependencies(fx, {
+    getToolJob: (toolJobId) => toolJobId === upstreamJob.id ? upstreamJob : fx.sourceJob,
+    executeJob: async (execution) => {
+      const candidate = await baseExecutor(execution);
+      const provenance = candidate.job.result.executionProvenance;
+      candidate.job.result.executionProvenance = signedExecutionProvenance({
+        ...provenance,
+        inputs: provenance.inputs.map((input) => ({
+          ...input,
+          lineage: { ...execution.resultStudioInputLineage[input.id], materializationHash: 'f'.repeat(64) },
+        })),
+      });
+      return candidate;
+    },
+  })), (error) => error.code === 'candidate_input_lineage_drift');
+});
+
+test('P6 primary candidate rejects lineage from tampered source execution provenance', async (context) => {
+  const fx = fixture(context, 'primary-untrusted-lineage-');
+  attachServerIssuedSourceLineage(fx);
+  fx.sourceJob.result.executionProvenance.inputs[0].lineage.sourceRevisionId = 'rev_tampered';
+  let executed = false;
+  await assert.rejects(() => createResultChangeSet(request(fx), serviceDependencies(fx, {
+    executeJob: async () => { executed = true; return null; },
+  })), (error) => error.code === 'source_input_lineage_untrusted');
+  assert.equal(executed, false);
+});
+
 test('P5 executes immutable Revision scalars instead of mutable source Job drift', async (context) => {
   const fx = fixture(context, 'mutable-job-scalar-drift-');
   fx.sourceJob.params.point_size = 999;
@@ -698,7 +1079,7 @@ test('P5 request-body descriptors cannot enable candidate validation', async (co
   assert.deepEqual(fx.repository.listRevisionsByChangeSet(failed[0].changeSetId), []);
 });
 
-test('P5 reruns the verified direct DEG → GO-BP subgraph with candidate-only lineage', async (context) => {
+test('P5/P6 reruns verified direct DEG → GO-BP and volcano subgraphs with candidate-only lineage', async (context) => {
   const fx = fixture(context, 'p5-subgraph-');
   const sourceScript = 'print("deseq")\n';
   const sourceScriptHash = sha256(sourceScript);
@@ -709,7 +1090,7 @@ test('P5 reruns the verified direct DEG → GO-BP subgraph with candidate-only l
   writeFileSync(degSummaryOutput, 'metric,value\nsignificant,1\n');
   const degOutputHash = sha256(readFileSync(degOutput));
   const degSummaryOutputHash = sha256(readFileSync(degSummaryOutput));
-  const degParamsText = '{\n  "padj_cutoff": 0.05\n}\n';
+  const degParamsText = '{\n  "padj_cutoff": 0.05,\n  "lfc_cutoff": 1\n}\n';
   const degBase = fx.adapter.commitVirtualFiles({
     parentCommit: fx.sourceRevision.sourceCommit,
     ref: 'refs/heads/biof3/p5/deg-source', expectedOld: '0'.repeat(40), message: 'P5 DEG source',
@@ -793,15 +1174,57 @@ test('P5 reruns the verified direct DEG → GO-BP subgraph with candidate-only l
   });
   fx.repository.adoptChangeSet({ changeSetId: 'cs_go_source', candidateCommit: goBase });
 
+  const volcanoScript = 'print("volcano")\n';
+  const volcanoScriptHash = sha256(volcanoScript);
+  const volcanoParams = {
+    deg_table: { inputRef: 'inputs/deg_table/deg.csv', sha256: degOutputHash },
+    fc_threshold: 1,
+    pval_threshold: 1.301,
+  };
+  const volcanoParamsText = `${JSON.stringify(volcanoParams, null, 2)}\n`;
+  const volcanoOutput = join(fx.workspaceRoot, 'results/jobs/tj_volcano_source/output/volcano.svg');
+  mkdirSync(join(volcanoOutput, '..'), { recursive: true });
+  writeFileSync(volcanoOutput, '<svg><title>source volcano</title></svg>\n');
+  const volcanoOutputHash = sha256(readFileSync(volcanoOutput));
+  const volcanoBase = fx.adapter.commitVirtualFiles({
+    parentCommit: goBase,
+    ref: 'refs/heads/biof3/p6/volcano-source', expectedOld: '0'.repeat(40), message: 'P6 volcano source',
+    files: [
+      { path: 'analysis/scripts/volcano-source/volcano.R', content: volcanoScript },
+      { path: 'analysis/scripts/volcano-source/parameters.json', content: volcanoParamsText },
+    ],
+  }).commit;
+  fx.repository.createChangeSet({
+    changeSetId: 'cs_volcano_source', projectId: 'p_1', baseCommit: goBase,
+    workingBranchRef: 'refs/heads/biof3/p6/volcano-source', createdBy: 'agent',
+  });
+  fx.repository.transitionChangeSet({ changeSetId: 'cs_volcano_source', to: 'running' });
+  fx.repository.transitionChangeSet({
+    changeSetId: 'cs_volcano_source', to: 'preview_ready', candidateCommit: volcanoBase,
+    candidateArtifactRefs: ['rev_volcano_source'], jobRefs: ['tj_volcano_source'],
+  });
+  const volcanoRevision = fx.repository.appendRevision({
+    revisionId: 'rev_volcano_source', projectId: 'p_1', artifactFamilyId: 'volcano_child_family', artifactId: 'volcano',
+    sourceCommit: volcanoBase,
+    sourceScriptRef: {
+      relativePath: 'analysis/scripts/volcano-source/volcano.R', sha256: volcanoScriptHash,
+      artifactId: 'volcano', rendererId: 'volcano-plot:volcano', language: 'r', origin: 'project_materialized',
+    },
+    parametersRef: 'analysis/scripts/volcano-source/parameters.json', parametersHash: sha256(volcanoParamsText),
+    toolJobId: 'tj_volcano_source', outputPath: 'results/jobs/tj_volcano_source/output/volcano.svg', outputHash: volcanoOutputHash,
+    validationStatus: 'valid', reproducibilityStatus: 'available', changeSetId: 'cs_volcano_source',
+  });
+  fx.repository.adoptChangeSet({ changeSetId: 'cs_volcano_source', candidateCommit: volcanoBase });
+
   const degJob = {
-    id: 'tj_deg_source', project_id: 'p_1', tool_id: 'deseq2', status: 'completed', params: { padj_cutoff: 0.05 },
+    id: 'tj_deg_source', project_id: 'p_1', tool_id: 'deseq2', status: 'completed', params: { padj_cutoff: 0.05, lfc_cutoff: 1 },
     result: {
       artifactTruth: { status: 'valid', blocking: false }, artifacts: [
         { id: 'deg_table', path: degOutput }, { id: 'deg_summary', path: degSummaryOutput },
       ],
       executionProvenance: signedExecutionProvenance({
         executionProvenanceVersion: 1,
-        toolJobId: 'tj_deg_source', projectId: 'p_1', params: { normalized: { padj_cutoff: 0.05 } }, inputs: [],
+        toolJobId: 'tj_deg_source', projectId: 'p_1', params: { normalized: { padj_cutoff: 0.05, lfc_cutoff: 1 } }, inputs: [],
         script: { snapshotPath: '/snapshot/deg.R', sha256: sourceScriptHash },
         artifacts: [{ id: 'deg_table', sha256: degOutputHash }, { id: 'deg_summary', sha256: degSummaryOutputHash }],
       }),
@@ -821,7 +1244,21 @@ test('P5 reruns the verified direct DEG → GO-BP subgraph with candidate-only l
       }),
     },
   };
-  const jobs = new Map([[degJob.id, degJob], [goJob.id, goJob]]);
+  const volcanoJob = {
+    id: 'tj_volcano_source', project_id: 'p_1', tool_id: 'volcano-plot', status: 'completed',
+    params: { deg_table: degOutput, fc_threshold: 1, pval_threshold: 1.301 },
+    result: {
+      artifactTruth: { status: 'valid', blocking: false }, artifacts: [{ id: 'volcano', path: volcanoOutput }],
+      executionProvenance: signedExecutionProvenance({
+        executionProvenanceVersion: 1,
+        toolJobId: 'tj_volcano_source', projectId: 'p_1', params: { normalized: volcanoParams },
+        inputs: [{ id: 'deg_table', relativePath: 'inputs/deg_table/deg.csv', sha256: degOutputHash }],
+        script: { snapshotPath: '/snapshot/volcano.R', sha256: volcanoScriptHash },
+        artifacts: [{ id: 'volcano', sha256: volcanoOutputHash }],
+      }),
+    },
+  };
+  const jobs = new Map([[degJob.id, degJob], [goJob.id, goJob], [volcanoJob.id, volcanoJob]]);
   const scientificIntent = {
     contractVersion: '1', intentId: 'rei_p5_direct', artifactRef: { artifactId: 'deg_table', revisionId: degRevision.revisionId },
     requestedOutcome: 'use a stricter adjusted p-value cutoff', editClass: 'scientific_recompute',
@@ -835,7 +1272,7 @@ test('P5 reruns the verified direct DEG → GO-BP subgraph with candidate-only l
   const result = await createResultChangeSet({
     projectId: 'p_1', conversationId: 'conv_p5', workspaceRoot: fx.workspaceRoot, intent: scientificIntent,
     sourceRevision: degRevision, sourceJob: degJob, sourceScriptContent: sourceScript, sourceScriptSha256: sourceScriptHash,
-    normalizedSourceParams: { padj_cutoff: 0.05 }, pluginId: 'deseq2', language: 'r', scriptPatch: [],
+    normalizedSourceParams: { padj_cutoff: 0.05, lfc_cutoff: 1 }, pluginId: 'deseq2', language: 'r', scriptPatch: [],
     scientificConfirmed: true, createdBy: 'agent',
     authoritativeSubgraph: {
       authority: 'sqlite_job_artifact_truth', graphId: 'wfg_p5_direct', sourceDigest: 'd'.repeat(64),
@@ -867,7 +1304,7 @@ test('P5 reruns the verified direct DEG → GO-BP subgraph with candidate-only l
             executionProvenance: signedExecutionProvenance({
               executionProvenanceVersion: 1, toolJobId: 'tj_deg_candidate', projectId: 'p_1',
               script: { sha256: materializedScriptSha256 },
-              params: { normalized: { padj_cutoff: 0.01 } },
+              params: { normalized: { padj_cutoff: 0.01, lfc_cutoff: 1 } },
               inputs: [], artifacts: [{ id: 'deg_table', sha256: hash }, { id: 'deg_summary', sha256: summaryHash }],
             }),
           },
@@ -910,6 +1347,135 @@ test('P5 reruns the verified direct DEG → GO-BP subgraph with candidate-only l
   assert.equal(fx.repository.getCurrentRevision('deg_family').revisionId, degRevision.revisionId);
   assert.equal(fx.repository.getCurrentRevision('go_family').revisionId, goRevision.revisionId);
   assert.equal(fx.adapter.showFile({ ref: result.candidateCommit, filePath: result.downstreamRevisions[0].sourceScriptRef.relativePath }), goScript);
+
+  const multiIntent = {
+    ...scientificIntent,
+    intentId: 'rei_p6_direct_multi',
+    requestedOutcome: 'use a stricter absolute log2 fold-change cutoff everywhere downstream',
+    proposedParameterPatch: { lfc_cutoff: 1.5 },
+    affectedNodeIds: ['job:tj_deg_source', 'job:tj_go_source', 'job:tj_volcano_source'],
+    classificationReason: 'lfc_cutoff:scientific_recompute',
+    workflowGraph: { graphId: 'wfg_p6_direct_multi', sourceDigest: 'e'.repeat(64) },
+  };
+  const candidateDegMulti = join(fx.workspaceRoot, 'results/jobs/tj_deg_candidate_multi/output/deg_candidate.csv');
+  const candidateDegSummaryMulti = join(fx.workspaceRoot, 'results/jobs/tj_deg_candidate_multi/output/deg_summary.csv');
+  const candidateGoMulti = join(fx.workspaceRoot, 'results/jobs/tj_go_candidate_multi/output/go_bp_results.csv');
+  const candidateVolcanoMulti = join(fx.workspaceRoot, 'results/jobs/tj_volcano_candidate_multi/output/volcano.svg');
+  const multiResult = await createResultChangeSet({
+    projectId: 'p_1', conversationId: 'conv_p6', workspaceRoot: fx.workspaceRoot, intent: multiIntent,
+    sourceRevision: degRevision, sourceJob: degJob, sourceScriptContent: sourceScript, sourceScriptSha256: sourceScriptHash,
+    normalizedSourceParams: { padj_cutoff: 0.05, lfc_cutoff: 1 }, pluginId: 'deseq2', language: 'r', scriptPatch: [],
+    scientificConfirmed: true, createdBy: 'agent',
+    authoritativeSubgraph: {
+      authority: 'sqlite_job_artifact_truth', graphId: 'wfg_p6_direct_multi', sourceDigest: 'e'.repeat(64),
+      rootNodeId: 'job:tj_deg_source', rootToolJobId: 'tj_deg_source', rootRevisionId: degRevision.revisionId,
+      children: [{
+        nodeId: 'job:tj_volcano_source', toolId: 'volcano-plot', inputId: 'deg_table', edgeKind: 'artifact',
+        sourceToolJobId: 'tj_deg_source', sourceRevisionId: degRevision.revisionId, sourceArtifactId: 'deg_table', sourceOutputHash: degOutputHash,
+        childToolJobId: 'tj_volcano_source', childRevisionId: volcanoRevision.revisionId,
+      }, {
+        nodeId: 'job:tj_go_source', toolId: 'go-kegg', inputId: 'deg_table', edgeKind: 'artifact',
+        sourceToolJobId: 'tj_deg_source', sourceRevisionId: degRevision.revisionId, sourceArtifactId: 'deg_table', sourceOutputHash: degOutputHash,
+        childToolJobId: 'tj_go_source', childRevisionId: goRevision.revisionId,
+      }],
+    },
+  }, {
+    repository: fx.repository, adapter: fx.adapter, authoritativeSubgraphTrusted: true, getToolJob: (id) => jobs.get(id) || null,
+    getResultStudioDescriptor: (toolId) => toolId === 'deseq2'
+      ? deseqDescriptor()
+      : toolId === 'go-kegg' ? goDescriptor()
+        : toolId === 'volcano-plot' ? volcanoChildDescriptor() : null,
+    executeJob: async ({ toolId, params, resultStudioInputLineage, materializedScriptSha256 }) => {
+      if (toolId === 'deseq2') {
+        assert.deepEqual(params, { padj_cutoff: 0.05, lfc_cutoff: 1.5 });
+        mkdirSync(join(candidateDegMulti, '..'), { recursive: true });
+        writeFileSync(candidateDegMulti, 'gene,log2FoldChange,padj\nA,2,0.01\n');
+        writeFileSync(candidateDegSummaryMulti, 'metric,value\nsignificant,1\n');
+        const hash = sha256(readFileSync(candidateDegMulti));
+        const summaryHash = sha256(readFileSync(candidateDegSummaryMulti));
+        return { job: {
+          id: 'tj_deg_candidate_multi', project_id: 'p_1', tool_id: 'deseq2', status: 'completed', result: {
+            artifactTruth: { status: 'valid', blocking: false }, artifacts: [
+              { id: 'deg_table', path: candidateDegMulti }, { id: 'deg_summary', path: candidateDegSummaryMulti },
+            ],
+            executionProvenance: signedExecutionProvenance({
+              executionProvenanceVersion: 1, toolJobId: 'tj_deg_candidate_multi', projectId: 'p_1',
+              script: { sha256: materializedScriptSha256 },
+              params: { normalized: { padj_cutoff: 0.05, lfc_cutoff: 1.5 } },
+              inputs: [], artifacts: [{ id: 'deg_table', sha256: hash }, { id: 'deg_summary', sha256: summaryHash }],
+            }),
+          },
+        } };
+      }
+      const candidateDegHash = sha256(readFileSync(candidateDegMulti));
+      assert.equal(params.deg_table, candidateDegMulti, 'each child receives only the exact candidate DEG path');
+      assert.equal(resultStudioInputLineage.deg_table.sourceOutputHash, candidateDegHash);
+      if (toolId === 'go-kegg') {
+        assert.equal(params.lfc_cutoff, 1.5);
+        assert.equal(params.padj_cutoff, 0.05);
+        mkdirSync(join(candidateGoMulti, '..'), { recursive: true });
+        writeFileSync(candidateGoMulti, 'ID,Description,p.adjust\nGO:1,cell cycle,0.01\n');
+        const hash = sha256(readFileSync(candidateGoMulti));
+        return { job: {
+          id: 'tj_go_candidate_multi', project_id: 'p_1', tool_id: 'go-kegg', status: 'completed', result: {
+            artifactTruth: { status: 'valid', blocking: false }, artifacts: [{ id: 'go_bp_results', path: candidateGoMulti }],
+            executionProvenance: signedExecutionProvenance({
+              executionProvenanceVersion: 1, toolJobId: 'tj_go_candidate_multi', projectId: 'p_1',
+              script: { sha256: materializedScriptSha256 },
+              params: { normalized: { ...goParams, lfc_cutoff: 1.5, deg_table: { inputRef: 'inputs/deg_table/deg_candidate.csv', sha256: candidateDegHash } } },
+              inputs: [{ id: 'deg_table', sha256: candidateDegHash, lineage: resultStudioInputLineage.deg_table }],
+              artifacts: [{ id: 'go_bp_results', sha256: hash }],
+            }),
+          },
+        } };
+      }
+      assert.equal(toolId, 'volcano-plot');
+      assert.equal(params.fc_threshold, 1.5, 'the DEG LFC cutoff maps to volcano fc_threshold');
+      assert.equal(params.pval_threshold, 1.301, 'volcano significance scale remains unchanged');
+      mkdirSync(join(candidateVolcanoMulti, '..'), { recursive: true });
+      writeFileSync(candidateVolcanoMulti, '<svg><title>candidate volcano</title></svg>\n');
+      const hash = sha256(readFileSync(candidateVolcanoMulti));
+      return { job: {
+        id: 'tj_volcano_candidate_multi', project_id: 'p_1', tool_id: 'volcano-plot', status: 'completed', result: {
+          artifactTruth: { status: 'valid', blocking: false }, artifacts: [{ id: 'volcano', path: candidateVolcanoMulti }],
+          executionProvenance: signedExecutionProvenance({
+            executionProvenanceVersion: 1, toolJobId: 'tj_volcano_candidate_multi', projectId: 'p_1',
+            script: { sha256: materializedScriptSha256 },
+            params: { normalized: { ...volcanoParams, fc_threshold: 1.5, deg_table: { inputRef: 'inputs/deg_table/deg_candidate.csv', sha256: candidateDegHash } } },
+            inputs: [{ id: 'deg_table', sha256: candidateDegHash, lineage: resultStudioInputLineage.deg_table }],
+            artifacts: [{ id: 'volcano', sha256: hash }],
+          }),
+        },
+      } };
+    },
+  });
+  assert.equal(multiResult.changeSet.status, 'preview_ready');
+  assert.deepEqual(multiResult.changeSet.jobRefs, [
+    'tj_deg_candidate_multi', 'tj_go_candidate_multi', 'tj_volcano_candidate_multi',
+  ]);
+  assert.equal(multiResult.downstreamRevisions.length, 2);
+  assert.equal(multiResult.cohortRevisions.length, 4, 'root and both direct child formal outputs are one atomic cohort');
+  const downstreamByArtifact = new Map(multiResult.downstreamRevisions.map((revision) => [revision.artifactId, revision]));
+  assert.deepEqual(downstreamByArtifact.get('go_bp_results').parentRevisionIds, [goRevision.revisionId, multiResult.revision.revisionId]);
+  assert.deepEqual(downstreamByArtifact.get('volcano').parentRevisionIds, [volcanoRevision.revisionId, multiResult.revision.revisionId]);
+  assert.equal(multiResult.cohortRevisions.every((revision) => revision.sourceCommit === multiResult.candidateCommit), true);
+  const multiGraphRow = fx.db.prepare('SELECT * FROM result_workflow_graphs WHERE root_tool_job_id = ?')
+    .get('tj_deg_candidate_multi');
+  const multiGraphNodes = JSON.parse(multiGraphRow.nodes_json);
+  const multiGraphEdges = JSON.parse(multiGraphRow.edges_json);
+  assert.deepEqual(multiGraphNodes.map((node) => node.toolJobId).sort(), [
+    'tj_deg_candidate_multi', 'tj_go_candidate_multi', 'tj_volcano_candidate_multi',
+  ]);
+  assert.deepEqual(multiGraphEdges.map((edge) => edge.toNodeId).sort(), [
+    'job:tj_go_candidate_multi', 'job:tj_volcano_candidate_multi',
+  ]);
+  assert.equal(fx.repository.getCurrentRevision('deg_family').revisionId, degRevision.revisionId);
+  assert.equal(fx.repository.getCurrentRevision('go_family').revisionId, goRevision.revisionId);
+  assert.equal(fx.repository.getCurrentRevision('volcano_child_family').revisionId, volcanoRevision.revisionId);
+  for (const revision of multiResult.downstreamRevisions) {
+    const expectedScript = revision.artifactId === 'volcano' ? volcanoScript : goScript;
+    assert.equal(fx.adapter.showFile({ ref: multiResult.candidateCommit, filePath: revision.sourceScriptRef.relativePath }), expectedScript);
+  }
 });
 
 test('P5 atomically registers the complete Revision cohort, graph and preview projection', (context) => {

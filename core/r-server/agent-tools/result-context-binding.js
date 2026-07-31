@@ -35,12 +35,22 @@ function projectResultStudioToolContext(context = {}) {
   const contextToken = candidate && validContextToken(candidate.contextToken)
     ? trimmed(candidate.contextToken)
     : null;
-  return {
+  const projected = {
     activeArtifact: jobId && name
       ? { jobId, name, revisionId: revisionId || null }
       : null,
     resultStudioContextToken: contextToken,
   };
+  // The advanced drawer's acknowledgement is a user interaction captured
+  // before the provider is called.  Keep it in private tool context rather
+  // than trusting a later model-supplied `scientificConfirmed` argument.
+  // Omit the key entirely for ordinary chat turns so their established
+  // confirmation flow remains compatible.
+  const editRequest = context && context.resultEditRequest;
+  if (jobId && name && contextToken && editRequest && typeof editRequest === 'object') {
+    projected.resultStudioScientificConfirmation = editRequest.scientificConfirmed === true;
+  }
+  return projected;
 }
 
 /**

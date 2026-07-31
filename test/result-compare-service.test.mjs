@@ -116,6 +116,7 @@ function makeFixture(context) {
       validationSummary: {
         artifactTruthStatus: 'valid',
         formalArtifactCount: 2,
+        validatorId: 'fixture-validator',
         validatorIds: ['fixture-validator'],
         workflowGraph: {
           graphId: sourceWorkflowGraph.graphId,
@@ -168,11 +169,11 @@ function makeFixture(context) {
   });
   const jobs = new Map([
     ['tj_source', {
-      id: 'tj_source', project_id: 'p_rs6', status: 'completed',
+      id: 'tj_source', project_id: 'p_rs6', tool_id: 'fixture-tool', status: 'completed',
       result: { artifactTruth: { status: 'valid', blocking: false } },
     }],
     ['tj_candidate', {
-      id: 'tj_candidate', project_id: 'p_rs6', status: 'completed',
+      id: 'tj_candidate', project_id: 'p_rs6', tool_id: 'fixture-tool', status: 'completed',
       result: { artifactTruth: { status: 'valid', blocking: false } },
     }],
   ]);
@@ -183,6 +184,76 @@ function makeFixture(context) {
   };
 }
 
+function installSourceAncestorGraph(fx) {
+  const sourceRevision = fx.repository.getRevision('rev_source');
+  fx.repository.createChangeSet({
+    changeSetId: 'cs_parent', projectId: 'p_rs6', baseCommit: fx.base.commit,
+    workingBranchRef: 'refs/heads/biof3/parent', createdBy: 'agent',
+  });
+  fx.repository.transitionChangeSet({ changeSetId: 'cs_parent', to: 'running' });
+  fx.repository.appendRevision({
+    revisionId: 'rev_parent', projectId: 'p_rs6', artifactFamilyId: 'family_parent', artifactId: 'input_table',
+    parentRevisionIds: [], sourceCommit: fx.base.commit,
+    sourceScriptRef: {
+      ...sourceRevision.sourceScriptRef,
+      artifactId: 'input_table',
+      rendererId: 'plugin:input_table',
+    },
+    inputArtifactRefs: [], parametersRef: sourceRevision.parametersRef, parametersHash: sourceRevision.parametersHash,
+    toolJobId: 'tj_parent', outputPath: sourceRevision.outputPath, outputHash: sourceRevision.outputHash,
+    validationStatus: 'valid', reproducibilityStatus: 'available', changeSetId: 'cs_parent',
+  });
+  fx.repository.transitionChangeSet({
+    changeSetId: 'cs_parent', to: 'preview_ready', candidateCommit: fx.base.commit,
+    jobRefs: ['tj_parent'], candidateArtifactRefs: ['rev_parent'],
+    validationSummary: { artifactTruthStatus: 'valid' },
+  });
+  fx.repository.adoptChangeSet({ changeSetId: 'cs_parent', candidateCommit: fx.base.commit });
+
+  const nodes = [
+    {
+      id: 'job:tj_parent', toolJobId: 'tj_parent', toolId: 'parent-tool',
+      artifactIds: ['input_table'], provenanceHash: sha256('tj_parent_provenance'), dependsOn: [],
+    },
+    {
+      ...fx.sourceWorkflowGraph.nodes[0],
+      dependsOn: ['job:tj_parent'],
+    },
+  ];
+  const edges = [{
+    kind: 'artifact',
+    fromNodeId: 'job:tj_parent',
+    toNodeId: 'job:tj_source',
+    sourceToolJobId: 'tj_parent',
+    sourceRevisionId: 'rev_parent',
+    sourceArtifactId: 'input_table',
+    sourceOutputHash: sourceRevision.outputHash,
+    selectionId: null,
+    selectionHash: null,
+    inputId: 'input_table',
+  }];
+  const sourceDigest = workflowGraphDigest({
+    projectId: 'p_rs6', rootToolJobId: 'tj_parent', nodes, edges,
+  });
+  const graph = fx.repository.saveWorkflowGraph({
+    graphId: `wfg_${sourceDigest.slice(0, 24)}`,
+    contractVersion: 1,
+    projectId: 'p_rs6',
+    rootToolJobId: 'tj_parent',
+    sourceDigest,
+    nodes,
+    edges,
+    validationStatus: 'valid',
+  });
+  const sourceChangeSet = fx.repository.getChangeSet('cs_source');
+  fx.db.prepare('UPDATE scientific_change_sets SET validation_summary_json = ? WHERE change_set_id = ?')
+    .run(JSON.stringify({
+      ...sourceChangeSet.validationSummary,
+      workflowGraph: { graphId: graph.graphId, sourceDigest: graph.sourceDigest },
+    }), 'cs_source');
+  return graph;
+}
+
 test('RS6 JSON comparison is field-level, deterministic and bounded', () => {
   const result = compareJsonValues('{"palette":"red","nested":{"x":1}}', '{"palette":"blue","nested":{"x":1},"labels":10}', 'parameters.json');
   assert.equal(result.status, 'available');
@@ -190,6 +261,18 @@ test('RS6 JSON comparison is field-level, deterministic and bounded', () => {
     ['labels', 'added'],
     ['palette', 'changed'],
   ]);
+
+  const publicProjection = compareJsonValues(
+    '{"input":"/Users/private/source.csv","job":"tj_private123","api_key":"old"}',
+    '{"input":"/Users/private/candidate.csv","job":"tj_private456","api_key":"new"}',
+    'parameters.json',
+  );
+  assert.deepEqual(publicProjection.changes.map((entry) => [entry.field, entry.before, entry.after]), [
+    ['api_key', '[redacted]', '[redacted]'],
+    ['input', '[project file]', '[project file]'],
+    ['job', '[internal reference]', '[internal reference]'],
+  ]);
+  assert.doesNotMatch(JSON.stringify(publicProjection), /\/Users\/|tj_private|"old"|"new"/);
 });
 
 test('RS6 JSON and table comparisons report bounded truncation honestly', (context) => {
@@ -237,6 +320,8 @@ test('RS6 compare, adopt and revert preserve one atomic current Revision', (cont
   assert.equal(comparison.artifacts[0].kind, 'table');
   assert.deepEqual(comparison.artifacts[0].table.addedColumns, ['label']);
   assert.equal(comparison.textDiff.additions > 0, true);
+  assert.doesNotMatch(comparison.textDiff.patch, /rev_(?:source|candidate)/);
+  assert.match(comparison.textDiff.patch, /diff artifact\.R -> artifact\.R/);
 
   const adopted = adoptResultChangeSet({
     projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, changeSetId: 'cs_candidate',
@@ -425,15 +510,36 @@ test('RS6 restores history as a new commit and Revision without rewriting the ta
   assert.equal(restoredGraph.rootToolJobId, 'tj_source');
   assert.deepEqual(restoredGraph.nodes.map((node) => node.toolJobId), ['tj_source']);
   assert.notEqual(restored.revision.sourceCommit, fx.repository.getRevision('rev_source').sourceCommit);
+  const changeSetCount = fx.db.prepare('SELECT COUNT(*) AS count FROM scientific_change_sets').get().count;
   const repeated = restoreArtifactRevision({
-    projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, revisionId: 'rev_source', createdBy: 'user',
+    projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, revisionId: 'rev_source_summary', createdBy: 'user',
   }, { repository: fx.repository, adapter: fx.adapter, getToolJob: fx.getToolJob });
   assert.equal(repeated.idempotent, true);
-  assert.equal(repeated.revision.revisionId, restored.revision.revisionId);
+  assert.equal(
+    repeated.revision.revisionId,
+    restored.cohortRevisions.find((revision) => revision.artifactFamilyId === 'family_summary').revisionId,
+  );
   assert.deepEqual(
     repeated.cohortRevisions.map((revision) => revision.revisionId).sort(),
     restored.cohortRevisions.map((revision) => revision.revisionId).sort(),
   );
+  assert.equal(fx.db.prepare('SELECT COUNT(*) AS count FROM scientific_change_sets').get().count, changeSetCount);
+});
+
+test('P6 restores a downstream baseline cohort without rewriting its immutable ancestor graph', (context) => {
+  const fx = makeFixture(context);
+  const sourceGraph = installSourceAncestorGraph(fx);
+  adoptResultChangeSet({ projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, changeSetId: 'cs_candidate' }, {
+    repository: fx.repository, adapter: fx.adapter, getToolJob: fx.getToolJob,
+  });
+  const restored = restoreArtifactRevision({
+    projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, revisionId: 'rev_source', createdBy: 'user',
+  }, { repository: fx.repository, adapter: fx.adapter, getToolJob: fx.getToolJob });
+  assert.equal(restored.restored, true);
+  const restoredGraph = fx.repository.getWorkflowGraph(restored.changeSet.validationSummary.workflowGraph.graphId);
+  assert.deepEqual(restoredGraph.nodes.map((node) => node.toolJobId), ['tj_parent', 'tj_source']);
+  assert.deepEqual(restoredGraph.edges, sourceGraph.edges);
+  assert.equal(restoredGraph.edges[0].sourceRevisionId, 'rev_parent');
 });
 
 test('P5 historical restore fails closed without source validator proof', (context) => {
@@ -448,6 +554,66 @@ test('P5 historical restore fails closed without source validator proof', (conte
       projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, revisionId: 'rev_source', createdBy: 'user',
     }, { repository: fx.repository, adapter: fx.adapter, getToolJob: fx.getToolJob }),
     (error) => error instanceof ResultCompareError && error.code === 'restore_validator_proof_missing',
+  );
+});
+
+test('P6 historical restore rejects tampered formal counts and malformed validator cohorts', (context) => {
+  const cases = [
+    {
+      name: 'wrong formal count',
+      summary: { artifactTruthStatus: 'valid', formalArtifactCount: 1, validatorIds: ['fixture-validator'] },
+      code: 'restore_formal_artifact_count_mismatch',
+    },
+    {
+      name: 'duplicate validator ids',
+      summary: { artifactTruthStatus: 'valid', formalArtifactCount: 2, validatorIds: ['fixture-validator', 'fixture-validator'] },
+      code: 'restore_validator_proof_missing',
+    },
+    {
+      name: 'blank validator id',
+      summary: { artifactTruthStatus: 'valid', formalArtifactCount: 2, validatorIds: [' '] },
+      code: 'restore_validator_proof_missing',
+    },
+  ];
+  for (const entry of cases) {
+    const fx = makeFixture(context);
+    adoptResultChangeSet({ projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, changeSetId: 'cs_candidate' }, {
+      repository: fx.repository, adapter: fx.adapter, getToolJob: fx.getToolJob,
+    });
+    fx.db.prepare('UPDATE scientific_change_sets SET validation_summary_json = ? WHERE change_set_id = ?')
+      .run(JSON.stringify(entry.summary), 'cs_source');
+    assert.throws(
+      () => restoreArtifactRevision({
+        projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, revisionId: 'rev_source', createdBy: 'user',
+      }, { repository: fx.repository, adapter: fx.adapter, getToolJob: fx.getToolJob }),
+      (error) => error instanceof ResultCompareError && error.code === entry.code,
+      entry.name,
+    );
+  }
+});
+
+test('P6 historical restore cross-checks validator ids when trusted descriptors are available', (context) => {
+  const fx = makeFixture(context);
+  adoptResultChangeSet({ projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, changeSetId: 'cs_candidate' }, {
+    repository: fx.repository, adapter: fx.adapter, getToolJob: fx.getToolJob,
+  });
+  const sourceChangeSet = fx.repository.getChangeSet('cs_source');
+  fx.db.prepare('UPDATE scientific_change_sets SET validation_summary_json = ? WHERE change_set_id = ?')
+    .run(JSON.stringify({
+      ...sourceChangeSet.validationSummary,
+      validatorId: 'forged-validator',
+      validatorIds: ['forged-validator'],
+    }), 'cs_source');
+  assert.throws(
+    () => restoreArtifactRevision({
+      projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, revisionId: 'rev_source', createdBy: 'user',
+    }, {
+      repository: fx.repository,
+      adapter: fx.adapter,
+      getToolJob: fx.getToolJob,
+      getResultStudioDescriptor: () => ({ validator: { id: 'fixture-validator' } }),
+    }),
+    (error) => error instanceof ResultCompareError && error.code === 'restore_validator_proof_mismatch',
   );
 });
 

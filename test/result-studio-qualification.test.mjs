@@ -21,6 +21,7 @@ const {
   describeSelectionForAgent,
 } = require('../core/shared-backend/artifact-interaction');
 const { planResultEdit } = require('../core/shared-backend/result-edit-intent');
+const { computeExecutionProvenanceHash } = require('../core/shared-backend/execution-provenance');
 
 const evidenceKindForStep = {
   conversation: ['conversation_event'],
@@ -168,17 +169,21 @@ test('selection contract can describe a synthetic 27-gene query but does not qua
 });
 
 test('intent planner includes the downstream enrichment subgraph from a trusted persisted graph without claiming a product trace', () => {
+  const executionProvenance = {
+    executionProvenanceVersion: 1,
+    toolJobId: 'tj_deg',
+    projectId: 'p_rs9',
+    script: { snapshotPath: 'results/jobs/tj_deg/run.R', sha256: 'a'.repeat(64) },
+    inputs: [{ id: 'counts', relativePath: 'inputs/counts.csv', sha256: 'b'.repeat(64), sourceArtifactRef: 'rev_counts' }],
+    artifacts: [{ id: 'deg_table', filename: 'deg.csv', sha256: 'c'.repeat(64) }],
+  };
+  executionProvenance.provenanceHash = computeExecutionProvenanceHash(executionProvenance);
   const toolJob = {
     id: 'tj_deg', project_id: 'p_rs9', status: 'completed',
     result: {
       artifactTruth: { status: 'valid', blocking: false },
       artifacts: [{ id: 'deg_table', type: 'table' }],
-      executionProvenance: {
-        toolJobId: 'tj_deg',
-        script: { snapshotPath: 'results/jobs/tj_deg/run.R', sha256: 'a'.repeat(64) },
-        inputs: [{ id: 'counts', relativePath: 'inputs/counts.csv', sha256: 'b'.repeat(64), sourceArtifactRef: 'rev_counts' }],
-        artifacts: [{ id: 'deg_table', filename: 'deg.csv', sha256: 'c'.repeat(64) }],
-      },
+      executionProvenance,
     },
   };
   const result = planResultEdit({

@@ -344,6 +344,34 @@ test('model serialization recursively redacts credential variants and preserves 
   assert.deepEqual(replaced.data, { value: 'localized' });
 });
 
+test('model serialization redacts Result Studio context tokens in every supported key form', () => {
+  const tokenValues = {
+    camel: 'context-token-camel-must-not-leak',
+    title: 'context-token-title-must-not-leak',
+    snake: 'context-token-snake-must-not-leak',
+    kebab: 'context-token-kebab-must-not-leak',
+    text: 'context-token-text-must-not-leak',
+  };
+  const serialized = serializeToolResultForModel(modelEnvelope('result_studio_context', {
+    ok: true,
+    contextToken: tokenValues.camel,
+    ContextToken: tokenValues.title,
+    context_token: tokenValues.snake,
+    'context-token': tokenValues.kebab,
+    diagnostic: `contextToken=${tokenValues.text}`,
+  }), 10_000);
+
+  for (const value of Object.values(tokenValues)) {
+    assert.equal(serialized.includes(value), false);
+  }
+  const projected = JSON.parse(serialized);
+  assert.equal(projected.data.contextToken, '[REDACTED]');
+  assert.equal(projected.data.ContextToken, '[REDACTED]');
+  assert.equal(projected.data.context_token, '[REDACTED]');
+  assert.equal(projected.data['context-token'], '[REDACTED]');
+  assert.equal(projected.data.diagnostic.includes('[REDACTED]'), true);
+});
+
 test('trace store keeps only redacted summaries within capacity and TTL', () => {
   let now = 1_000;
   const store = createToolTraceStore({ maxEntries: 2, ttlMs: 50, now: () => now });

@@ -124,6 +124,32 @@ test('P5 derives a deterministic downstream DAG only from durable artifact linea
   assert.equal(first.graph.graphId, second.graph.graphId);
 });
 
+test('P6 affected graph excludes historical descendants while retaining current Jobs and ancestors', () => {
+  const { jobs: baseJobs, repository: baseRepository } = truth({ input: artifactLineage() });
+  const currentChild = job({
+    id: 'tj_go_current',
+    toolId: 'go-kegg',
+    artifactId: 'go_bp_results',
+    artifactHash: 'd'.repeat(64),
+    inputs: [artifactLineage()],
+  });
+  const graph = buildAuthoritativeWorkflowGraph({
+    projectId: 'p_1',
+    sourceToolJobId: 'tj_deg',
+    jobs: [...baseJobs, currentChild],
+    repository: {
+      ...baseRepository,
+      listCurrentRevisions: () => [
+        { revisionId: 'rev_deg', projectId: 'p_1', toolJobId: 'tj_deg' },
+        { revisionId: 'rev_go_current', projectId: 'p_1', toolJobId: 'tj_go_current' },
+      ],
+    },
+  });
+  assert.equal(graph.ok, true, JSON.stringify(graph.diagnostics));
+  assert.deepEqual(graph.graph.nodes.map((node) => node.toolJobId), ['tj_deg', 'tj_go_current']);
+  assert.equal(graph.graph.nodes.some((node) => node.toolJobId === 'tj_go'), false);
+});
+
 test('P5 resolves the authoritative upstream root when graph discovery enters through a downstream Job', () => {
   const { jobs, repository } = truth({ input: artifactLineage() });
   const result = buildAuthoritativeWorkflowGraph({
@@ -340,4 +366,49 @@ test('P5 rebinds only an exact historical cohort into a new authoritative restor
   });
   assert.equal(mismatched.ok, false);
   assert.equal(mismatched.diagnostic.code, 'restore_workflow_equivalence_failed');
+});
+
+test('P6 restores a downstream cohort while preserving exact immutable ancestor edges', () => {
+  const { jobs, repository } = truth({ input: artifactLineage() });
+  const source = buildAuthoritativeWorkflowGraph({
+    projectId: 'p_1', sourceToolJobId: 'tj_go', jobs, repository,
+  });
+  assert.equal(source.ok, true);
+  const sourceRevision = {
+    revisionId: 'rev_go', projectId: 'p_1', artifactFamilyId: 'family_go',
+    artifactId: 'go_bp_results', toolJobId: 'tj_go', outputHash: HASH.go,
+  };
+  const restoredRevision = { ...sourceRevision, revisionId: 'rev_go_restored' };
+  const rebound = rebindWorkflowGraphForEquivalentRestore({
+    graph: source.graph,
+    sourceRevisions: [sourceRevision],
+    restoredRevisions: [restoredRevision],
+    resolveRevision: repository.getRevision,
+  });
+  assert.equal(rebound.ok, true);
+  assert.deepEqual(rebound.graph.edges, source.graph.edges);
+  assert.equal(rebound.graph.edges[0].sourceRevisionId, 'rev_deg');
+
+  const driftedAncestor = rebindWorkflowGraphForEquivalentRestore({
+    graph: source.graph,
+    sourceRevisions: [sourceRevision],
+    restoredRevisions: [restoredRevision],
+    resolveRevision: (revisionId) => ({ ...repository.getRevision(revisionId), outputHash: HASH.go }),
+  });
+  assert.equal(driftedAncestor.ok, false);
+  assert.equal(driftedAncestor.diagnostic.code, 'restore_workflow_edge_unverified');
+
+  const descendantExpansion = rebindWorkflowGraphForEquivalentRestore({
+    graph: source.graph,
+    sourceRevisions: [{
+      revisionId: 'rev_deg', projectId: 'p_1', artifactFamilyId: 'family_deg',
+      artifactId: 'deg_table', toolJobId: 'tj_deg', outputHash: HASH.deg,
+    }],
+    restoredRevisions: [{
+      revisionId: 'rev_deg_restored', projectId: 'p_1', artifactFamilyId: 'family_deg',
+      artifactId: 'deg_table', toolJobId: 'tj_deg', outputHash: HASH.deg,
+    }],
+  });
+  assert.equal(descendantExpansion.ok, false);
+  assert.equal(descendantExpansion.diagnostic.code, 'restore_workflow_graph_scope_mismatch');
 });

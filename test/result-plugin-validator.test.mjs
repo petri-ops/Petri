@@ -246,6 +246,51 @@ test('P5 finite-statistics validation rejects non-finite and out-of-range probab
   }
 });
 
+test('P6 finite-statistics validation admits R NA only for descriptor-nullable numerics', (context) => {
+  const fx = workspace(context);
+  const scriptHash = 'd'.repeat(64);
+  const tablePath = join(fx.outputDir, 'enrichment.csv');
+  const artifacts = [{ id: 'enrichment', type: 'table', path: tablePath }];
+  const baseSpec = {
+    checks: ['artifact_truth_valid', 'script_sha256', 'input_sha256', 'output_sha256', 'stable_term_id', 'finite_statistics'],
+    artifacts: [{ id: 'enrichment', type: 'table' }],
+    mappings: [{ artifactId: 'enrichment', mode: 'table', entityType: 'pathway', idField: 'term_id' }],
+  };
+  const nullable = 'term_id,p_adjust,up_gene_count\nGO:1,0.01,NA\n';
+  writeFileSync(tablePath, nullable);
+  const accepted = validateResultStudioCandidate({
+    workspaceRoot: fx.root,
+    expectedScriptSha256: scriptHash,
+    descriptor: descriptor({
+      ...baseSpec,
+      fields: { term_id: 'string', p_adjust: 'number', up_gene_count: 'number|null' },
+    }),
+    job: candidate({
+      fx,
+      scriptHash,
+      artifacts: artifacts.map((artifact) => ({ ...artifact, content: nullable })),
+    }),
+  });
+  assert.equal(accepted.ok, true);
+
+  const required = validateResultStudioCandidate({
+    workspaceRoot: fx.root,
+    expectedScriptSha256: scriptHash,
+    descriptor: descriptor({
+      ...baseSpec,
+      fields: { term_id: 'string', p_adjust: 'number', up_gene_count: 'number' },
+    }),
+    job: candidate({
+      fx,
+      scriptHash,
+      artifacts: artifacts.map((artifact) => ({ ...artifact, content: nullable })),
+    }),
+  });
+  assert.equal(required.ok, false);
+  assert.equal(required.diagnostics.some((item) => item.code === 'validator_statistic_not_finite'
+    && item.detail?.field === 'up_gene_count'), true);
+});
+
 test('P5 admitted DESeq2 and GO/KEGG descriptors execute finite-statistics checks', () => {
   for (const pluginId of ['deseq2', 'go-kegg']) {
     const definition = require(`../resources/built-in-plugins/${pluginId}/tool-definition.json`);

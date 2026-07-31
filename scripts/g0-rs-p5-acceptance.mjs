@@ -1001,6 +1001,54 @@ async function runWorkerMain() {
     return;
   }
 
+  if (spec.op === 'artifact_tool_run') {
+    const { tool_run_tool: runTool } = require(
+      path.join(ROOT, 'core/r-server/agent-tools/learning.js')
+    );
+    const { createResultStudioRepository } = require(
+      path.join(ROOT, 'core/shared-backend/result-studio-repository.js')
+    );
+    const repository = createResultStudioRepository(db.db || db.getDatabase());
+    const sourceRevision = repository.getRevision(spec.sourceRevisionId);
+    const inputId = String(spec.inputId || '').trim();
+    const inputPath = inputId && typeof spec.params?.[inputId] === 'string'
+      ? spec.params[inputId]
+      : null;
+    if (spec.toolId !== 'volcano-plot' || inputId !== 'deg_table') {
+      throw new Error('worker_artifact_tool_not_admitted');
+    }
+    if (!sourceRevision
+        || sourceRevision.projectId !== spec.projectId
+        || sourceRevision.artifactId !== inputId
+        || !inputPath
+        || sha256(readFileSync(inputPath)) !== sourceRevision.outputHash) {
+      throw new Error('worker_artifact_lineage_unverified');
+    }
+    const result = await runTool({
+      op: 'run',
+      toolId: spec.toolId,
+      params: spec.params,
+    }, {
+      projectId: spec.projectId,
+      userId: ownerId,
+      accessMode: 'full',
+      allowExecution: true,
+      resultStudioInputLineage: {
+        [inputId]: {
+          lineageVersion: 1,
+          kind: 'artifact',
+          sourceRevisionId: sourceRevision.revisionId,
+          sourceToolJobId: sourceRevision.toolJobId,
+          sourceArtifactId: sourceRevision.artifactId,
+          sourceOutputHash: sourceRevision.outputHash,
+          materializationHash: sourceRevision.outputHash,
+        },
+      },
+    });
+    process.stdout.write(`${WORKER_MARKER}${JSON.stringify(workerSummary(result))}\n`);
+    return;
+  }
+
   const { createResultContextEditTools, resolveResultStudioContext } = require(
     path.join(ROOT, 'core/r-server/agent-tools/result-context-edit-tools.js')
   );
@@ -1121,6 +1169,278 @@ async function openInteraction(baseUrl, { projectId, job, artifactId, revisionId
   assert(interaction.data?.revision?.revisionId, `formal_revision_missing:${artifactId}`, interaction.data?.manifest?.diagnostics);
   assert(interaction.data.revision.validationStatus === 'valid', `formal_revision_invalid:${artifactId}`);
   return { ...interaction.data, artifact };
+}
+
+function assertLiveP5Runtime(runtime) {
+  assert(runtime?.kind === 'p5_live_scientific_runtime', 'p5_live_runtime_invalid');
+  assert(runtime.closed !== true, 'p5_live_runtime_closed');
+  assert(typeof runtime.baseUrl === 'string' && runtime.baseUrl.startsWith('http://127.0.0.1:'),
+    'p5_live_runtime_url_invalid');
+  assert(runtime.env?.BIOF3_DB_PATH && runtime.project?.id && runtime.conversation?.id,
+    'p5_live_runtime_coordinates_missing');
+  return runtime;
+}
+
+function p5ArtifactCoordinate(job, interaction, artifactId) {
+  const revision = interaction?.revision || {};
+  assert(job?.id && interaction?.artifact && revision.revisionId,
+    `p5_live_baseline_coordinate_missing:${artifactId}`);
+  return Object.freeze({
+    jobId: job.id,
+    artifactId,
+    artifact: interaction.artifact,
+    revisionId: revision.revisionId,
+    artifactFamilyId: revision.artifactFamilyId || null,
+  });
+}
+
+/**
+ * Start an isolated P5 product runtime without manufacturing Result Studio
+ * rows.  The returned coordinates are intentionally live-only: callers may
+ * hand them to a disposable Electron driver, but they must never be copied
+ * into canonical evidence (which is sanitized and source-bound separately).
+ *
+ * Call `await runtime.close()` in a finally block.  The normal P5 acceptance
+ * does this automatically; P6 keeps the process alive long enough to perform
+ * actual BrowserWindow interactions against the same truth ledger.
+ */
+export async function createP5LiveScientificRuntime({
+  verbose = false,
+  port = null,
+  beforeStart = null,
+} = {}) {
+  const requestedPort = port == null ? await freePort() : Number(port);
+  assert(Number.isInteger(requestedPort) && requestedPort > 0 && requestedPort <= 65535,
+    'p5_live_runtime_port_invalid');
+  const { root, env } = createCaptureEnv({ port: requestedPort });
+  env.R_POOL_ENABLED = 'false';
+  let server = null;
+  let closed = false;
+  let closePromise = null;
+  const close = async ({ removeRoot = true } = {}) => {
+    if (closePromise) return closePromise;
+    closed = true;
+    closePromise = (async () => {
+      await stopServer(server?.child);
+      if (removeRoot && existsSync(root)) rmSync(root, { recursive: true, force: true });
+    })();
+    return closePromise;
+  };
+
+  try {
+    await applyMigrations(env.BIOF3_DB_PATH, { quiet: true });
+    const tables = inspectTables(env.BIOF3_DB_PATH);
+    assert(tables.missing.length === 0, `migration_tables_missing:${tables.missing.join(',')}`);
+    if (typeof beforeStart === 'function') {
+      await beforeStart(Object.freeze({ root, env, port: requestedPort }));
+    }
+    server = await startServer(env, verbose
+      ? { onLog: (channel, line) => console.error(`[p5-server:${channel}] ${line}`) }
+      : {});
+    const { baseUrl } = server;
+
+    // The check happens after every schema/bootstrap side effect but before
+    // either HTTP write.  A live UI trace therefore starts from exactly the
+    // same unseeded product ledger contract as the canonical P5 capture.
+    const noSeedPrecondition = assertP5NoSeedPrecondition(env.BIOF3_DB_PATH, { root });
+    const createdProject = await postJson(baseUrl, '/api/data/projects', {
+      name: 'P5 disposable scientific editing',
+      description: 'G0-RS-P5 live no-seed scientific runtime',
+      modality: 'bulk',
+    });
+    const project = createdProject.data?.project;
+    assert(project?.id && project?.workspace_path, 'http_project_creation_failed');
+    assert(path.resolve(project.workspace_path).startsWith(path.resolve(root) + path.sep),
+      'project_workspace_not_isolated');
+
+    // P5's original deterministic worker did not need a conversation.  P6's
+    // product trace does: the real renderer must bind Result/Selection/Agent
+    // context to an actual project conversation rather than an invented ID.
+    const createdConversation = await postJson(baseUrl, '/api/ai/conversations', {
+      title: 'P5 live scientific editing',
+      projectId: project.id,
+      lastPage: 'project-workspace',
+    });
+    const conversation = createdConversation.data?.conversation;
+    assert(createdConversation.status === 200
+      && conversation?.id
+      && conversation.project_id === project.id,
+    'http_project_conversation_creation_failed', createdConversation.data);
+
+    const coordinates = Object.freeze({
+      root,
+      baseUrl,
+      dbPath: env.BIOF3_DB_PATH,
+      projectId: project.id,
+      projectWorkspace: project.workspace_path,
+      conversationId: conversation.id,
+    });
+    const runtime = {
+      kind: 'p5_live_scientific_runtime',
+      root,
+      env,
+      baseUrl,
+      project,
+      conversation,
+      coordinates,
+      tables,
+      noSeedPrecondition,
+      get closed() { return closed; },
+      close,
+    };
+    runtime.runWorker = (spec) => runP5LiveWorker(runtime, spec);
+    return runtime;
+  } catch (error) {
+    await close();
+    throw error;
+  }
+}
+
+/**
+ * Run one of the existing P5 registered worker operations against a live
+ * runtime.  Project and conversation coordinates are always injected from
+ * the runtime, so a caller cannot accidentally aim a P6 helper at another
+ * product ledger.
+ */
+export async function runP5LiveWorker(runtime, spec = {}) {
+  const live = assertLiveP5Runtime(runtime);
+  const requestedProjectId = spec.projectId == null ? live.project.id : spec.projectId;
+  const requestedConversationId = spec.conversationId == null ? live.conversation.id : spec.conversationId;
+  assert(requestedProjectId === live.project.id, 'p5_live_worker_cross_project_forbidden');
+  assert(requestedConversationId === live.conversation.id, 'p5_live_worker_cross_conversation_forbidden');
+  return runWorker(live.env, {
+    ...spec,
+    projectId: live.project.id,
+    conversationId: live.conversation.id,
+  });
+}
+
+/**
+ * Produce only real, adopted baseline outputs for P6.  It intentionally does
+ * not create a selection, candidate ChangeSet, adoption, revert or restore:
+ * those are the user-visible UI-110 operations the Electron trace must drive
+ * itself.  Repeated calls return the original baseline coordinates rather
+ * than submitting a second set of Jobs.
+ */
+export async function prepareP5LiveScientificBaselines(runtime) {
+  const live = assertLiveP5Runtime(runtime);
+  if (live.baselines) return live.baselines;
+
+  const { baseUrl } = live;
+  const projectId = live.project.id;
+  const scientificInput = buildScientificInput();
+  const baselineLfc = 0.25;
+
+  const deseqBaseline = await runHttpTool(baseUrl, {
+    toolId: 'deseq2',
+    projectId,
+    params: {
+      design: 'condition',
+      contrast_ref: 'Control',
+      contrast_treat: 'Treatment',
+      padj_cutoff: 0.05,
+      lfc_cutoff: baselineLfc,
+    },
+    files: {
+      'counts.csv': Buffer.from(scientificInput.counts).toString('base64'),
+      'coldata.csv': Buffer.from(scientificInput.coldata).toString('base64'),
+    },
+  });
+  deseqBaseline.id = deseqBaseline.id || deseqBaseline.toolJobId;
+  const degInteraction = await openInteraction(baseUrl, {
+    projectId,
+    job: deseqBaseline,
+    artifactId: 'deg_table',
+  });
+  const changedLfc = chooseChangedLfcThreshold(
+    artifactPath(deseqBaseline, 'deg_table'),
+    baselineLfc,
+  );
+
+  const directEnrichment = await runP5LiveWorker(live, {
+    op: 'derive_enrichment',
+    jobId: deseqBaseline.id,
+    artifact: degInteraction.artifact,
+    revisionId: degInteraction.revision.revisionId,
+    padjCutoff: 0.05,
+    lfcCutoff: baselineLfc,
+  });
+  assert(directEnrichment.ok
+    && directEnrichment.toolJobId
+    && directEnrichment.workflowGraph?.validationStatus === 'valid',
+  'direct_enrichment_workflow_failed', directEnrichment);
+  const enrichmentBaseline = await waitForJob(baseUrl, directEnrichment.toolJobId);
+  enrichmentBaseline.id = enrichmentBaseline.id || directEnrichment.toolJobId;
+  const enrichmentInteraction = await openInteraction(baseUrl, {
+    projectId,
+    job: enrichmentBaseline,
+    artifactId: 'go_bp_results',
+  });
+
+  const volcanoRun = await runP5LiveWorker(live, {
+    op: 'artifact_tool_run',
+    toolId: 'volcano-plot',
+    sourceRevisionId: degInteraction.revision.revisionId,
+    inputId: 'deg_table',
+    params: {
+      deg_table: artifactPath(deseqBaseline, 'deg_table'),
+      fc_threshold: baselineLfc,
+      pval_threshold: 1.3,
+      top_n: 8,
+    },
+  });
+  assert(volcanoRun.ok && volcanoRun.toolJobId,
+    'volcano_baseline_lineage_run_failed', volcanoRun);
+  const volcanoBaseline = await waitForJob(baseUrl, volcanoRun.toolJobId);
+  volcanoBaseline.id = volcanoBaseline.id || volcanoBaseline.toolJobId;
+  const volcanoInteraction = await openInteraction(baseUrl, {
+    projectId,
+    job: volcanoBaseline,
+    artifactId: 'volcano',
+  });
+
+  const heatmapBaseline = await runHttpTool(baseUrl, {
+    toolId: 'gene-correlation',
+    projectId,
+    params: {
+      expr_matrix: 'expr_matrix.csv',
+      top_n: 30,
+      method: 'pearson',
+    },
+    files: {
+      'expr_matrix.csv': Buffer.from(scientificInput.counts).toString('base64'),
+    },
+  });
+  heatmapBaseline.id = heatmapBaseline.id || heatmapBaseline.toolJobId;
+  assert(stagedInputIsNotAnArtifact(heatmapBaseline, 'expr_matrix', 'expr_matrix.csv'),
+    'heatmap_baseline_input_exposed_as_artifact', heatmapBaseline.result?.artifactTruth);
+  const heatmapInteraction = await openInteraction(baseUrl, {
+    projectId,
+    job: heatmapBaseline,
+    artifactId: 'heatmap',
+  });
+
+  const availableGenes = new Set(readCsv(artifactPath(deseqBaseline, 'deg_table'))
+    .map((row) => String(row.gene || '').trim()));
+  const stableGeneIds = scientificInput.symbols.filter((gene) => availableGenes.has(gene)).slice(0, 24);
+  assert(stableGeneIds.length >= 12, 'stable_gene_ids_unavailable_after_deseq2');
+
+  const baselines = Object.freeze({
+    baselineLfc,
+    changedLfc,
+    stableGeneIds: Object.freeze(stableGeneIds),
+    deg: p5ArtifactCoordinate(deseqBaseline, degInteraction, 'deg_table'),
+    enrichment: p5ArtifactCoordinate(enrichmentBaseline, enrichmentInteraction, 'go_bp_results'),
+    volcano: p5ArtifactCoordinate(volcanoBaseline, volcanoInteraction, 'volcano'),
+    heatmap: p5ArtifactCoordinate(heatmapBaseline, heatmapInteraction, 'heatmap'),
+    directEnrichment: Object.freeze({
+      jobId: enrichmentBaseline.id,
+      workflowGraphId: directEnrichment.workflowGraph.graphId,
+      workflowSourceDigest: directEnrichment.workflowGraph.sourceDigest,
+    }),
+  });
+  live.baselines = baselines;
+  return baselines;
 }
 
 async function exactReplayRevision(baseUrl, {

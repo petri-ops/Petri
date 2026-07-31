@@ -175,6 +175,29 @@ test('RS-P3 context token changes when the revision or selection evidence change
   assert.notEqual(base.contextToken, newSelection.contextToken);
 });
 
+test('P6 context token tracks workflow content but not plan-time snapshot persistence', () => {
+  const workflow = {
+    graphId: 'wfg_context_graph',
+    sourceDigest: 'f'.repeat(64),
+    snapshotStatus: 'not_persisted',
+    nodeId: 'job:job_1',
+    stepCount: 2,
+    downstreamNodeIds: ['job:job_2'],
+  };
+  const beforePlan = buildResultStudioContextEnvelope(envelopeInput({ workflow })).envelope;
+  const afterPlan = buildResultStudioContextEnvelope(envelopeInput({
+    workflow: { ...workflow, snapshotStatus: 'persisted' },
+  })).envelope;
+  const changedGraph = buildResultStudioContextEnvelope(envelopeInput({
+    workflow: { ...workflow, graphId: 'wfg_context_graph_v2', sourceDigest: 'e'.repeat(64) },
+  })).envelope;
+
+  assert.equal(beforePlan.contextToken, afterPlan.contextToken,
+    'persisting an unchanged server-projected graph must not invalidate its own click-time token');
+  assert.notEqual(beforePlan.contextToken, changedGraph.contextToken,
+    'a different authoritative workflow graph must still invalidate the token');
+});
+
 test('P4R-3 context token covers column/filter/sort updates within one selection id', () => {
   const selection = {
     selectionId: 'sel_columns', entityType: 'column', entityIdCount: 0, truncated: false,
@@ -493,6 +516,104 @@ test('RS-P3 context-bound plan fills the internal ids the model never supplied',
   ]);
 });
 
+test('P6 context-bound plan exposes a stable diagnostic code when workflow truth blocks planning', async () => {
+  const fx = fixture();
+  const tools = createResultContextEditTools({
+    ...fx.dependencies,
+    planTool: async () => ({
+      ok: false,
+      status: 'blocked',
+      diagnostics: [{
+        code: 'workflow_lineage_missing',
+        message: 'Internal workflow coordinates stay outside the public error code.',
+        detail: { toolJobId: 'private_job_id' },
+      }],
+    }),
+    changeSetTools: {},
+  });
+
+  const result = await tools.plan(
+    { requestedOutcome: '调整阈值' },
+    { ...ctx, activeArtifact: { revisionId: 'rev_1' } },
+  );
+
+  assert.equal(result.ok, false);
+  assert.equal(result.status, 'blocked');
+  assert.equal(result.error, 'workflow_lineage_missing');
+});
+
+test('P6 context-bound enrichment privately binds a compatible gene SelectionContext', async () => {
+  const fx = fixture();
+  let selectionCall = null;
+  let revisionCalls = 0;
+  const tools = createResultContextEditTools({
+    ...fx.dependencies,
+    resultSelectionRun: async (args) => {
+      selectionCall = args;
+      return { ok: true, selectionAction: { entityIdCount: 3, entityIdsHash: 'c'.repeat(64) } };
+    },
+    resultEnrichmentFromRevision: async () => {
+      revisionCalls += 1;
+      return { ok: true };
+    },
+    changeSetTools: {},
+  });
+  const activeArtifact = { revisionId: 'rev_1' };
+  const resolved = resolveResultStudioContext({ ...ctx, activeArtifact }, fx.dependencies);
+
+  const result = await tools.deriveEnrichmentFromCurrentResult({
+    contextToken: resolved.envelope.contextToken,
+    species: 'human',
+    geneIdType: 'SYMBOL',
+    analysisType: 'all',
+  }, { ...ctx, activeArtifact });
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(selectionCall, {
+    selectionId: 'sel_1',
+    action: 'go_kegg',
+    species: 'human',
+    geneIdType: 'SYMBOL',
+    analysisType: 'all',
+  });
+  assert.equal(revisionCalls, 0);
+  assert.equal(result.context.selectionEntityCount, 3);
+});
+
+test('P6 context-bound enrichment uses the full Revision when no compatible gene selection exists', async () => {
+  const fx = fixture({ selection: null });
+  let revisionCall = null;
+  let selectionCalls = 0;
+  const tools = createResultContextEditTools({
+    ...fx.dependencies,
+    resultSelectionRun: async () => {
+      selectionCalls += 1;
+      return { ok: true };
+    },
+    resultEnrichmentFromRevision: async (args) => {
+      revisionCall = args;
+      return { ok: true, enrichmentAction: { sourceArtifactId: 'deg_table' } };
+    },
+    changeSetTools: {},
+  });
+  const activeArtifact = { revisionId: 'rev_1' };
+  const resolved = resolveResultStudioContext({ ...ctx, activeArtifact }, fx.dependencies);
+
+  const result = await tools.deriveEnrichmentFromCurrentResult({
+    contextToken: resolved.envelope.contextToken,
+    species: 'human',
+    geneIdType: 'SYMBOL',
+    analysisType: 'all',
+    padjCutoff: 0.05,
+    lfcCutoff: 0.25,
+  }, { ...ctx, activeArtifact });
+
+  assert.equal(result.ok, true);
+  assert.equal(selectionCalls, 0);
+  assert.equal(revisionCall.revisionId, 'rev_1');
+  assert.equal(revisionCall.padjCutoff, 0.05);
+});
+
 test('P5 binds volcano labels only from the current compatible selection', async () => {
   const fx = fixture();
   let received = null;
@@ -615,6 +736,58 @@ test('RS-P3 context-bound create delegates to the existing changeset service and
     'assess_impact', 'execute_or_recompute', 'validate', 'candidate_comparable',
   ]);
   assert.equal(JSON.stringify(result.publicProgress).includes('commit'), false);
+});
+
+test('P6 drawer-bound scientific confirmation cannot be promoted by the model tool arguments', async () => {
+  const fx = fixture();
+  let delegated = null;
+  const canonical = {
+    intentId: 'rei_drawer_confirmation',
+    artifactRef: { artifactId: 'deg_table', revisionId: 'rev_1' },
+    selectionRef: 'sel_1',
+    requestedOutcome: '调整阈值',
+    proposedParameterPatch: { padj_cutoff: 0.01 },
+    editClass: 'scientific_recompute',
+    affectedNodeIds: [],
+    requiresJob: true,
+    requiresScientificConfirmation: true,
+  };
+  const tools = createResultContextEditTools({
+    ...fx.dependencies,
+    planTool: async () => ({ ok: true, status: 'confirmation_required', intent: canonical }),
+    changeSetTools: { create: async (args) => { delegated = args; return { ok: true, progress: [] }; } },
+  });
+
+  const uncheckedContext = {
+    ...ctx,
+    activeArtifact: { revisionId: 'rev_1' },
+    resultStudioScientificConfirmation: false,
+  };
+  const uncheckedPlan = await tools.plan({ requestedOutcome: '调整阈值' }, uncheckedContext);
+  const uncheckedEnvelope = resolveResultStudioContext(uncheckedContext, fx.dependencies).envelope;
+  const blocked = await tools.create({
+    contextToken: uncheckedEnvelope.contextToken,
+    intent: uncheckedPlan.intent,
+    scientificConfirmed: true,
+  }, uncheckedContext);
+  assert.equal(blocked.ok, false);
+  assert.equal(blocked.error, 'scientific_confirmation_required');
+  assert.equal(delegated, null);
+
+  const acknowledgedContext = {
+    ...ctx,
+    activeArtifact: { revisionId: 'rev_1' },
+    resultStudioScientificConfirmation: true,
+  };
+  const acknowledgedPlan = await tools.plan({ requestedOutcome: '调整阈值' }, acknowledgedContext);
+  const acknowledgedEnvelope = resolveResultStudioContext(acknowledgedContext, fx.dependencies).envelope;
+  const created = await tools.create({
+    contextToken: acknowledgedEnvelope.contextToken,
+    intent: acknowledgedPlan.intent,
+    scientificConfirmed: false,
+  }, acknowledgedContext);
+  assert.equal(created.ok, true);
+  assert.equal(delegated.scientificConfirmed, true);
 });
 
 test('P4R-3 create rejects a model-mutated planned intent and any script patch', async () => {

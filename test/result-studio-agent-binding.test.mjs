@@ -30,6 +30,24 @@ test('P4R-3 projects only the current Artifact hint and opaque token into tool c
   });
 });
 
+test('P6 binds an advanced-drawer scientific acknowledgement outside model tool arguments', () => {
+  const projected = projectResultStudioToolContext({
+    activeArtifact: {
+      jobId: 'job-1', name: 'deg_table.csv', revisionId: 'rev-1', contextToken: TOKEN,
+    },
+    resultEditRequest: { origin: 'manual', scientificConfirmed: false },
+  });
+  assert.equal(projected.resultStudioScientificConfirmation, false);
+
+  const acknowledged = projectResultStudioToolContext({
+    activeArtifact: {
+      jobId: 'job-1', name: 'deg_table.csv', revisionId: 'rev-1', contextToken: TOKEN,
+    },
+    resultEditRequest: { origin: 'manual', scientificConfirmed: true },
+  });
+  assert.equal(acknowledged.resultStudioScientificConfirmation, true);
+});
+
 test('P4R-3 auto-binds a missing token only for context-bound Result Studio tools', () => {
   assert.deepEqual(
     bindResultStudioContextToken('result_edit_plan_in_context', { requestedOutcome: '换配色' }, {

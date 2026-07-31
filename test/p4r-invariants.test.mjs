@@ -145,8 +145,13 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
     await fetch(`${ctx.baseUrl}/api/result-studio/interaction?jobId=${ctx.jobId}&artifact=${ctx.artifact}`);
     await fetch(`${ctx.baseUrl}/api/result-studio/interaction?jobId=${ctx.replayJobId}&artifact=${ctx.replayArtifact}`);
     const revisions = query(env.BIOF3_DB_PATH, 'select revision_id, tool_job_id, is_current from artifact_revisions');
-    ctx.revisionId = revisions?.find((row) => row.tool_job_id === ctx.jobId)?.revision_id || null;
     ctx.replayRevisionId = revisions?.find((row) => row.tool_job_id === ctx.replayJobId)?.revision_id || null;
+    // The historical DESeq2 corpus predates complete formal-output cohort
+    // qualification. Keep this invariant addressed to a real qualified
+    // Revision instead of weakening baseline registration back to one file.
+    ctx.revisionId = revisions?.find((row) => row.tool_job_id === ctx.jobId)?.revision_id
+      || ctx.replayRevisionId
+      || null;
   });
 
   after(async () => {

@@ -128,7 +128,6 @@ function computeContextToken(envelope) {
     selectionUpdatedAt: envelope.selection && envelope.selection.updatedAt,
     workflowGraphId: envelope.workflow && envelope.workflow.graphId,
     workflowSourceDigest: envelope.workflow && envelope.workflow.sourceDigest,
-    workflowSnapshotStatus: envelope.workflow && envelope.workflow.snapshotStatus,
   }));
 }
 
