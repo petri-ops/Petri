@@ -143,6 +143,14 @@ async function semanticSnapshot(webContents) {
       };
       const canvas = document.querySelector('[aria-label="结果主画布"]');
       const absolutePathLocations = new Set();
+      const containsWindowsPath = (value) => {
+        for (let index = 0; index + 2 < value.length; index += 1) {
+          const code = value.charCodeAt(index);
+          if (((code >= 65 && code <= 90) || (code >= 97 && code <= 122))
+              && value[index + 1] === ':' && value.charCodeAt(index + 2) === 92) return true;
+        }
+        return false;
+      };
       const publicText = (root) => {
         if (!root) return '';
         const chunks = [];
@@ -158,7 +166,7 @@ async function semanticSnapshot(webContents) {
             if (style.display !== 'none' && style.visibility !== 'hidden') {
               const value = node.nodeValue || '';
               chunks.push(value);
-              if (value.includes('/Users/') || value.includes('/home/')) {
+              if (value.includes('/Users/') || value.includes('/home/') || containsWindowsPath(value)) {
                 const location = parent.closest('pre') ? 'preformatted_text'
                   : parent.closest('code') ? 'structured_value'
                     : parent.closest('.sc-msg-assistant, .sc-msg-user') ? 'conversation'
