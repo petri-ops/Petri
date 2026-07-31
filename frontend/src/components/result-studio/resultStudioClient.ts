@@ -92,7 +92,43 @@ export interface ResultStudioComparison {
     } | null;
   }>;
   histories: Array<{ artifactFamilyId: string; revisions: ArtifactRevision[]; currentRevisionId: string | null }>;
+  resourceSummary: ResultStudioTaskResourceSummary;
   git: { baseCommit: string; candidateCommit: string | null; workingBranchRef: string };
+}
+
+interface ResourceMeasurement<T = number> {
+  status: 'measured' | 'partial' | 'unavailable';
+  value: T | null;
+  unit: string | null;
+  reason: string | null;
+}
+
+export interface ResultStudioTaskResourceSummary {
+  resultStudioResourceSummaryVersion: number;
+  scope: 'change_set_candidate_jobs';
+  jobs: {
+    total: number;
+    completed: number;
+    failed: number;
+    cancelled: number;
+    peakConcurrent: ResourceMeasurement;
+  };
+  cpu: { peakPercent: ResourceMeasurement };
+  memory: {
+    processPeakRssBytes: ResourceMeasurement;
+    minimumSystemAvailableBytes: ResourceMeasurement;
+  };
+  disk: {
+    outputPeakBytes: ResourceMeasurement;
+    minimumSystemAvailableBytes: ResourceMeasurement;
+  };
+  sampling: { status: 'measured'; sampleCount: number }
+    | { status: 'unavailable'; sampleCount: null; reason: string };
+  provider: {
+    tokens: ResourceMeasurement<{ input: number; output: number }>;
+    cache: ResourceMeasurement<{ read: number }>;
+    cost: ResourceMeasurement;
+  };
 }
 
 interface ScientificCount {
@@ -123,12 +159,30 @@ interface ChangeSetListResponse {
   nextRevisionOffset?: number | null;
 }
 
+interface ResultStudioLifecycleItem {
+  status: ChangeSetStatus;
+  recovery: string;
+  checkpointStage?: string | null;
+  preservedRevisionCount?: number;
+}
+
 export interface ResultStudioWorkspaceStatus {
   lifecycle: {
     status: 'ready' | 'recovery_available' | 'blocked';
-    interrupted: Array<{ changeSetId: string; status: ChangeSetStatus; recovery: string; revisionIds: string[] }>;
-    checkpoint: { checkpointId: string; changeSetId?: string | null; pendingPreview?: { stage?: string; recovery?: string } | null } | null;
-    revisionIntegrity: { revisionCount: number; intact: boolean; issues: Array<{ revisionId: string; kind: string }> };
+    interrupted: ResultStudioLifecycleItem[];
+    activeOperations?: ResultStudioLifecycleItem[];
+    pendingDecisions?: ResultStudioLifecycleItem[];
+    pendingIssues?: Array<{ kind: string }>;
+    checkpoint: {
+      changeSetStatus?: ChangeSetStatus | null;
+      pendingPreview?: { stage?: string; recovery?: string; revisionCount?: number } | null;
+      updatedAt?: string;
+    } | null;
+    revisionIntegrity: {
+      revisionCount: number;
+      intact: boolean;
+      issues: Array<{ kind: string; blocking?: boolean; recoverable?: boolean }>;
+    };
   };
   storage: {
     revisionCount: number;

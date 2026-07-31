@@ -26,7 +26,7 @@ class ResultStudioBackgroundError extends Error {
 }
 
 const errorOf = (code, message) => new ResultStudioBackgroundError(code, message);
-const isWriteOperation = (operation) => operation === 'ensure-baseline';
+const isWriteOperation = (operation) => operation === 'ensure-baseline' || operation === 'recover-workspace';
 
 function settleClient(task, method, value) {
   if (task.clientSettled) return;

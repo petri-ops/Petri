@@ -314,7 +314,7 @@ test('RS6 compare, adopt and revert preserve one atomic current Revision', (cont
   const fx = makeFixture(context);
   const comparison = compareResultChangeSet({
     projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, changeSetId: 'cs_candidate',
-  }, { repository: fx.repository, adapter: fx.adapter });
+  }, { repository: fx.repository, adapter: fx.adapter, getToolJob: fx.getToolJob });
   assert.equal(comparison.summary.status, 'preview_ready');
   assert.equal(comparison.summary.changedFileCount, 2);
   assert.equal(comparison.artifacts[0].kind, 'table');
@@ -326,6 +326,10 @@ test('RS6 compare, adopt and revert preserve one atomic current Revision', (cont
   assert.match(comparison.textDiff.patch, /input <- "\[project file\]"/);
   assert.match(comparison.textDiff.patch, /windows <- "\[project file\]"/);
   assert.match(comparison.textDiff.patch, /diff artifact\.R -> artifact\.R/);
+  assert.equal(comparison.resourceSummary.jobs.total, 1);
+  assert.equal(comparison.resourceSummary.jobs.completed, 1);
+  assert.equal(comparison.resourceSummary.cpu.peakPercent.status, 'unavailable');
+  assert.equal(comparison.resourceSummary.provider.tokens.value, null);
 
   const adopted = adoptResultChangeSet({
     projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, changeSetId: 'cs_candidate',

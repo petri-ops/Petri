@@ -95,6 +95,29 @@ function displayValue(value: unknown): string {
   return publicDisplayText(typeof value === 'string' ? value : JSON.stringify(value));
 }
 
+function formatBytes(value: number): string {
+  if (value < 1024) return `${value} B`;
+  if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
+  if (value < 1024 * 1024 * 1024) return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(value / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+}
+
+function measuredNumber(
+  measurement: { status: 'measured' | 'partial' | 'unavailable'; value: number | null },
+  formatter: (value: number) => string,
+): string {
+  if (measurement.value == null || measurement.status === 'unavailable') return '不可用';
+  const formatted = formatter(measurement.value);
+  return measurement.status === 'partial' ? `至少 ${formatted}` : formatted;
+}
+
+function measuredCost(
+  measurement: { status: 'measured' | 'partial' | 'unavailable'; value: number | null; unit: string | null },
+): string {
+  if (measurement.status !== 'measured' || measurement.value == null || !measurement.unit) return '不可用';
+  return `${measurement.unit} ${measurement.value}`;
+}
+
 interface EnrichmentDirectionEntry {
   id: string;
   direction: string;
@@ -416,6 +439,30 @@ export function ResultStudioChangeSetPanel({
     ? selected.validationSummary.impactLevel
     : null;
   const executedNodes = executedNodeIds(selected?.validationSummary?.executedNodeIds);
+  const interruptedRecoveries = workspaceStatus?.lifecycle.interrupted || [];
+  const interruptedRecovery = interruptedRecoveries[0] || null;
+  const activeOperations = workspaceStatus?.lifecycle.activeOperations || [];
+  const activeOperation = activeOperations[0] || null;
+  const pendingDecisionCount = workspaceStatus?.lifecycle.pendingDecisions?.length || 0;
+  const checkpointStageLabel = (stage?: string | null) => ({
+    change_set: '创建修改',
+    materialized: '准备执行',
+    candidate_committed: '保存候选脚本',
+    downstream_candidate_committed: '保存下游候选',
+    revision: '登记候选结果',
+    preview_ready: '等待确认',
+  }[stage || ''] || '执行候选任务');
+  const pendingIssueKinds = new Set((workspaceStatus?.lifecycle.pendingIssues || []).map((item) => item.kind));
+  const blockedExplanation = [...pendingIssueKinds].some((kind) => kind.includes('checkpoint') || kind.includes('runtime'))
+    ? '恢复记录不完整、损坏或仍属于另一个运行实例，已停止自动处理。'
+    : [...pendingIssueKinds].some((kind) => kind.includes('job') || kind.includes('cohort') || kind.includes('source'))
+      ? '候选结果的任务、脚本、参数或完整输出无法相互证明，已停止采用与自动恢复。'
+      : '结果文件或版本引用与持久记录不一致，已停止自动处理。';
+  const interruptedStageSummary = [...new Set(interruptedRecoveries.map((item) => checkpointStageLabel(item.checkpointStage)))];
+  const preservedRevisionCount = interruptedRecoveries.reduce(
+    (total, item) => total + (item.preservedRevisionCount || 0),
+    0,
+  );
 
   return (
     <section className={styles.root} aria-label="Result Studio 版本与变更" data-mode={mode}>
@@ -429,11 +476,44 @@ export function ResultStudioChangeSetPanel({
 
       {workspaceStatus && (
         <div className={styles.lifecycle} data-state={workspaceStatus.lifecycle.status}>
-          <span>{workspaceStatus.lifecycle.status === 'blocked' ? '版本存储需要处理' : workspaceStatus.lifecycle.interrupted.length > 0 ? '检测到未完成的修改现场' : '版本存储正常'}</span>
+          <span>{workspaceStatus.lifecycle.status === 'blocked'
+            ? '版本存储需要处理'
+            : interruptedRecovery
+              ? interruptedRecoveries.length === 1
+                ? '检测到中断的修改现场'
+                : `检测到 ${interruptedRecoveries.length} 个中断的修改现场`
+              : activeOperation
+                ? activeOperations.length === 1 ? '结果修改正在运行' : `${activeOperations.length} 个结果修改正在运行`
+              : pendingDecisionCount > 0
+                ? `${pendingDecisionCount} 个候选版本待确认`
+                : '版本存储正常'}</span>
           <span>{workspaceStatus.storage.revisionCount} 个版本 · {Math.ceil(workspaceStatus.storage.logicalArtifactBytes / 1024)} KB</span>
           {workspaceStatus.storage.deduplicableBytes > 0 && <span>可去重 {Math.ceil(workspaceStatus.storage.deduplicableBytes / 1024)} KB</span>}
-          {workspaceStatus.lifecycle.interrupted.length > 0 && (
-            <button type="button" disabled={busy} onClick={() => void recoverWorkspace()}>恢复修改现场</button>
+          {workspaceStatus.lifecycle.status === 'blocked' && (
+            <>
+              <span>{blockedExplanation}</span>
+              <span>下一步：保留当前正式版本，检查对应分析任务与项目文件后重新发起修改。</span>
+            </>
+          )}
+          {workspaceStatus.lifecycle.status === 'recovery_available' && interruptedRecovery && (
+            <>
+              <span>{interruptedRecoveries.length === 1
+                ? `停止于${checkpointStageLabel(interruptedRecovery.checkpointStage)} · 已保留 ${interruptedRecovery.preservedRevisionCount || 0} 个候选结果`
+                : `停止点：${interruptedStageSummary.join('、')} · 共保留 ${preservedRevisionCount} 个候选结果`}</span>
+              <span>系统将核对完整性：完整候选恢复为待确认预览；不完整现场收口为失败且不覆盖当前版本。</span>
+              <span>下一步：恢复后检查候选，或重新发起修改。</span>
+            </>
+          )}
+          {workspaceStatus.lifecycle.status !== 'blocked' && activeOperation && (
+            <span>当前停留在{checkpointStageLabel(activeOperation.checkpointStage)}；任务结束前不会执行重启恢复。</span>
+          )}
+          {!interruptedRecovery && pendingDecisionCount > 0 && (
+            <span>候选结果已保留；下一步：比较差异后采用或放弃。</span>
+          )}
+          {workspaceStatus.lifecycle.status === 'recovery_available' && interruptedRecovery && (
+            <button type="button" disabled={busy} onClick={() => void recoverWorkspace()}>
+              {interruptedRecoveries.length === 1 ? '恢复修改现场' : '恢复全部修改现场'}
+            </button>
           )}
         </div>
       )}
@@ -537,6 +617,19 @@ export function ResultStudioChangeSetPanel({
 
       {mode === 'compare' && comparison && (
         <div className={styles.details}>
+          <section className={styles.section} aria-label="本次任务资源摘要">
+            <h4>本次任务资源</h4>
+            <table className={styles.tableCompare}><tbody>
+              <tr><td>分析任务</td><td>{comparison.resourceSummary.jobs.total} 个 · 完成 {comparison.resourceSummary.jobs.completed} · 失败 {comparison.resourceSummary.jobs.failed} · 停止 {comparison.resourceSummary.jobs.cancelled}</td></tr>
+              <tr><td>CPU 峰值</td><td>{measuredNumber(comparison.resourceSummary.cpu.peakPercent, (value) => `${value.toFixed(1)}%`)}</td></tr>
+              <tr><td>内存峰值</td><td>{measuredNumber(comparison.resourceSummary.memory.processPeakRssBytes, formatBytes)}</td></tr>
+              <tr><td>输出峰值</td><td>{measuredNumber(comparison.resourceSummary.disk.outputPeakBytes, formatBytes)}</td></tr>
+              <tr><td>并发 Job 峰值</td><td>{measuredNumber(comparison.resourceSummary.jobs.peakConcurrent, (value) => `${value}`)}</td></tr>
+              <tr><td>Token / cache / cost</td><td>{comparison.resourceSummary.provider.tokens.status === 'measured'
+                ? `Token ${comparison.resourceSummary.provider.tokens.value?.input ?? 0} + ${comparison.resourceSummary.provider.tokens.value?.output ?? 0} · cache ${comparison.resourceSummary.provider.cache.status === 'measured' ? comparison.resourceSummary.provider.cache.value?.read ?? 0 : '不可用'} · cost ${measuredCost(comparison.resourceSummary.provider.cost)}`
+                : '未绑定真实 Provider 计量'}</td></tr>
+            </tbody></table>
+          </section>
           {visual.map((artifact) => (
             <section className={styles.section} key={artifact.afterRevisionId}>
               <h4>{artifact.artifactId} · 前后对比</h4>

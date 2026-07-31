@@ -4,6 +4,7 @@ const crypto = require('crypto');
 
 const ARTIFACT_TRUTH_VERSION = 1;
 const STAGED_INPUT_EXCLUSION_POLICY = 'server_staged_inputs_v1';
+const SHA256_BUFFER_BYTES = 1024 * 1024;
 const INTERNAL_FILES = new Set([
   'params.json',
   'run-script.R',
@@ -35,8 +36,31 @@ function isInternalArtifactName(value) {
   return isSafeFlatFilename(value) && INTERNAL_FILE_NAMES.has(value.toLowerCase());
 }
 
-function sha256File(filePath) {
-  return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
+function artifactContentTypeHint(filePath) {
+  const extension = path.extname(String(filePath || '')).toLowerCase();
+  return extension || 'application/octet-stream';
+}
+
+function sha256File(filePath, io = fs) {
+  const fd = io.openSync(filePath, 'r');
+  try {
+    return sha256FileDescriptor(fd, io);
+  } finally {
+    io.closeSync(fd);
+  }
+}
+
+function sha256FileDescriptor(fd, io = fs) {
+  const hash = crypto.createHash('sha256');
+  const buffer = Buffer.allocUnsafe(SHA256_BUFFER_BYTES);
+  let position = 0;
+  while (true) {
+    const bytesRead = io.readSync(fd, buffer, 0, buffer.length, position);
+    if (bytesRead === 0) break;
+    hash.update(buffer.subarray(0, bytesRead));
+    position += bytesRead;
+  }
+  return hash.digest('hex');
 }
 
 function captureStagedInputSnapshots(filePaths = []) {
@@ -363,6 +387,7 @@ function reconcileArtifactTruth({
       title: item.title || label,
       path: filePath,
       size: stat.size,
+      sha256: sha256File(filePath),
       required,
       preview: item.preview !== false,
       download: item.download !== false,
@@ -414,8 +439,10 @@ function reconcileArtifactTruth({
 
 module.exports = {
   ARTIFACT_TRUTH_VERSION,
+  SHA256_BUFFER_BYTES,
   STAGED_INPUT_EXCLUSION_POLICY,
   artifactName,
+  artifactContentTypeHint,
   inferArtifactType,
   artifactTypesCompatible,
   isInternalArtifactName,
@@ -423,5 +450,7 @@ module.exports = {
   normalizeExcludedArtifactNames,
   captureStagedInputSnapshots,
   stagedInputMutationIssues,
+  sha256FileDescriptor,
+  sha256File,
   reconcileArtifactTruth,
 };

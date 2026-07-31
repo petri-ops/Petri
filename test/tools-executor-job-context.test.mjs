@@ -1,5 +1,17 @@
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import {
+  closeSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  renameSync,
+  rmSync,
+  statSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -27,6 +39,66 @@ test('tool executor keeps malformed legacy params bounded instead of losing the 
   assert.equal(job.id, 'job-legacy');
   assert.deepEqual(job.params, {});
   assert.equal(_test.hydrateExecutionJob(null), null);
+});
+
+test('P6 final output accounting preserves incomplete scans as a measured lower bound', () => {
+  const resourceUsage = {
+    peak: { outputBytes: 100 },
+    sampling: {
+      outputSampleCount: 2,
+      directoryTruncated: false,
+      directoryReadErrors: 0,
+      directoryStatErrors: 0,
+      outputMeasurementStatus: 'measured',
+    },
+  };
+  _test.mergeFinalOutputMeasurement(resourceUsage, {
+    bytes: 150,
+    truncated: true,
+    readErrors: 1,
+    statErrors: 2,
+    complete: false,
+  });
+  assert.equal(resourceUsage.peak.outputBytes, 150);
+  assert.equal(resourceUsage.sampling.outputSampleCount, 3);
+  assert.equal(resourceUsage.sampling.directoryTruncated, true);
+  assert.equal(resourceUsage.sampling.directoryReadErrors, 1);
+  assert.equal(resourceUsage.sampling.directoryStatErrors, 2);
+  assert.equal(resourceUsage.sampling.outputMeasurementStatus, 'partial');
+
+  _test.mergeFinalOutputMeasurement(resourceUsage, {
+    bytes: 125,
+    truncated: false,
+    readErrors: 0,
+    statErrors: 0,
+    complete: true,
+  });
+  assert.equal(resourceUsage.peak.outputBytes, 150);
+  assert.equal(resourceUsage.sampling.outputMeasurementStatus, 'partial');
+});
+
+test('P6 cancelled tool results retain measured resources without claiming unavailable peaks', () => {
+  const resourceUsage = {
+    peak: { cpuPercent: null, rssBytes: 4096, outputBytes: 128 },
+    sampling: { status: 'measured', sampleCount: 2, processSampleCount: 0 },
+    peakStatus: 'partial_process_peak_unavailable',
+  };
+  const result = _test.buildCancelledToolResult({
+    existingResult: { retained: true },
+    jobId: 'job_cancelled',
+    resourceUsage,
+  });
+  assert.deepEqual(result.cancellation, {
+    phase: 'execute',
+    reason: 'user_stop',
+    terminalStatus: 'cancelled',
+    processExitConfirmed: true,
+  });
+  assert.equal(result.retained, true);
+  assert.equal(result.toolJobId, 'job_cancelled');
+  assert.equal(result.resourceUsage, resourceUsage);
+  assert.equal(result.resourceUsage.peak.cpuPercent, null);
+  assert.equal(result.resourceUsage.peakStatus, 'partial_process_peak_unavailable');
 });
 
 test('HTTP tool execution resolves only server-owned manifest or declared artifact result roots', (context) => {
@@ -63,4 +135,229 @@ test('HTTP tool execution resolves only server-owned manifest or declared artifa
     manifestPath: join(outputDir, 'manifest.json'),
     reason: 'standard_default',
   });
+});
+
+test('private tool artifact reads bind declared flat files to the current Job root', (context) => {
+  const root = mkdtempSync(join(tmpdir(), 'biof3-tools-private-read-'));
+  const projectJobRoot = join(root, 'project-a', 'results', 'jobs', 'job-current');
+  const projectOutputDir = join(projectJobRoot, 'output');
+  const otherJobRoot = join(root, 'project-b', 'results', 'jobs', 'job-other');
+  const legacyJobsDir = join(root, 'legacy', 'tool-jobs');
+  const legacyOutputDir = join(legacyJobsDir, 'job-current', 'output');
+  mkdirSync(projectOutputDir, { recursive: true });
+  mkdirSync(otherJobRoot, { recursive: true });
+  mkdirSync(legacyOutputDir, { recursive: true });
+  context.after(() => rmSync(root, { recursive: true, force: true }));
+
+  writeFileSync(join(projectJobRoot, 'volcano.svg'), '<svg/>');
+  writeFileSync(join(projectJobRoot, 'undeclared.txt'), 'private');
+  writeFileSync(join(projectOutputDir, 'report.html'), '<html/>');
+  writeFileSync(join(otherJobRoot, 'volcano.svg'), '<svg/>');
+  const outside = join(root, 'outside.svg');
+  writeFileSync(outside, '<svg/>');
+  symlinkSync(outside, join(projectJobRoot, 'escaped.svg'));
+
+  const layout = {
+    workspaceRoot: join(root, 'project-a'),
+    jobRoot: projectJobRoot,
+    outputDir: projectOutputDir,
+  };
+  const projectJob = {
+    id: 'job-current',
+    project_id: 'project-a',
+    result_json: JSON.stringify({
+      resultDir: projectJobRoot,
+      artifacts: [{ filename: 'volcano.svg' }, { filename: 'escaped.svg' }],
+      outputs: [{ path: join(projectJobRoot, 'path-only.svg') }],
+      manifest: { files: [{ name: 'manifest-declared.svg' }] },
+    }),
+  };
+  const authorizedProjectArtifact = _test.resolveAuthorizedToolResultFile({
+    job: projectJob, filename: 'volcano.svg', layout, jobsDir: legacyJobsDir,
+  });
+  const authorizedProjectArtifactStat = statSync(join(projectJobRoot, 'volcano.svg'));
+  assert.equal(authorizedProjectArtifact.ok, true);
+  assert.equal(authorizedProjectArtifact.filePath, realpathSync(join(projectJobRoot, 'volcano.svg')));
+  assert.equal(authorizedProjectArtifact.resultDir, projectJobRoot);
+  assert.deepEqual(authorizedProjectArtifact.fileIdentity, {
+    dev: authorizedProjectArtifactStat.dev,
+    ino: authorizedProjectArtifactStat.ino,
+    size: authorizedProjectArtifactStat.size,
+    mtimeMs: authorizedProjectArtifactStat.mtimeMs,
+    ctimeMs: authorizedProjectArtifactStat.ctimeMs,
+  });
+  assert.equal(_test.resolveAuthorizedToolResultFile({
+    job: projectJob, filename: '../outside.svg', layout, jobsDir: legacyJobsDir,
+  }).error, 'bad_path');
+  assert.equal(_test.resolveAuthorizedToolResultFile({
+    job: projectJob, filename: 'undeclared.txt', layout, jobsDir: legacyJobsDir,
+  }).error, 'file_not_found');
+  assert.equal(_test.resolveAuthorizedToolResultFile({
+    job: projectJob, filename: 'escaped.svg', layout, jobsDir: legacyJobsDir,
+  }).error, 'file_not_found', 'declared symlinks cannot escape the exact Job root');
+
+  const otherProjectJob = {
+    ...projectJob,
+    result_json: JSON.stringify({
+      resultDir: otherJobRoot,
+      artifacts: [{ filename: 'volcano.svg' }],
+    }),
+  };
+  assert.equal(_test.resolveAuthorizedToolResultFile({
+    job: otherProjectJob, filename: 'volcano.svg', layout, jobsDir: legacyJobsDir,
+  }).error, 'file_not_found', 'a stored path for another project or Job is not authorized');
+
+  const linkedWorkspace = join(root, 'project-linked');
+  const linkedJobRoot = join(linkedWorkspace, 'results', 'jobs', 'job-current');
+  mkdirSync(join(linkedWorkspace, 'results', 'jobs'), { recursive: true });
+  symlinkSync(otherJobRoot, linkedJobRoot, 'dir');
+  const linkedLayout = {
+    workspaceRoot: linkedWorkspace,
+    jobRoot: linkedJobRoot,
+    outputDir: join(linkedJobRoot, 'output'),
+  };
+  assert.equal(_test.resolveAuthorizedToolResultFile({
+    job: {
+      ...projectJob,
+      result_json: JSON.stringify({
+        resultDir: linkedJobRoot,
+        artifacts: [{ filename: 'volcano.svg' }],
+      }),
+    },
+    filename: 'volcano.svg',
+    layout: linkedLayout,
+    jobsDir: legacyJobsDir,
+  }).error, 'file_not_found', 'a Job-root symlink cannot escape its project workspace');
+
+  const outputJob = {
+    ...projectJob,
+    result_json: JSON.stringify({
+      resultDir: projectOutputDir,
+      manifest: { outputs: [{ file: 'report.html' }] },
+    }),
+  };
+  assert.equal(_test.resolveAuthorizedToolResultFile({
+    job: outputJob, filename: 'report.html', layout, jobsDir: legacyJobsDir,
+  }).ok, true, 'the exact project output root remains supported');
+
+  writeFileSync(join(legacyOutputDir, 'legacy.csv'), 'gene\nTP53\n');
+  const legacyJob = {
+    id: 'job-current',
+    project_id: null,
+    result_json: JSON.stringify({
+      resultDir: legacyOutputDir,
+      files: [{ name: 'legacy.csv' }],
+    }),
+  };
+  assert.equal(_test.resolveAuthorizedToolResultFile({
+    job: legacyJob, filename: 'legacy.csv', jobsDir: legacyJobsDir,
+  }).ok, true, 'the current Job exact managed legacy root remains supported');
+  assert.equal(_test.resolveAuthorizedToolResultFile({
+    job: { ...legacyJob, result_json: JSON.stringify({
+      resultDir: join(legacyJobsDir, 'job-other', 'output'),
+      files: [{ name: 'legacy.csv' }],
+    }) },
+    filename: 'legacy.csv',
+    jobsDir: legacyJobsDir,
+  }).error, 'file_not_found', 'a different legacy Job root is rejected');
+});
+
+test('private tool artifact reads stream the verified descriptor and reject a path swap', (context) => {
+  const root = mkdtempSync(join(tmpdir(), 'biof3-tools-private-fd-'));
+  const jobsDir = join(root, 'tool-jobs');
+  const outputDir = join(jobsDir, 'job-current', 'output');
+  const artifactPath = join(outputDir, 'approved.csv');
+  const outsidePath = join(root, 'other-job-private.csv');
+  const originalPath = join(outputDir, 'approved-original.csv');
+  mkdirSync(outputDir, { recursive: true });
+  writeFileSync(artifactPath, 'gene,padj\nTP53,0.01\n');
+  writeFileSync(outsidePath, 'secret,token\nother,do-not-serve\n');
+  context.after(() => rmSync(root, { recursive: true, force: true }));
+
+  const job = {
+    id: 'job-current',
+    project_id: null,
+    result_json: JSON.stringify({
+      resultDir: outputDir,
+      files: [{ name: 'approved.csv' }],
+    }),
+  };
+  const resolved = _test.resolveAuthorizedToolResultFile({
+    job,
+    filename: 'approved.csv',
+    jobsDir,
+  });
+  assert.equal(resolved.ok, true);
+
+  const opened = _test.openVerifiedAuthorizedToolResultFile(resolved);
+  assert.equal(opened.ok, true);
+
+  // This is the interval that used to exist between realpath and sendFile.
+  // The already-open fd remains the approved file even after its path changes.
+  renameSync(artifactPath, originalPath);
+  symlinkSync(outsidePath, artifactPath);
+  assert.equal(readFileSync(opened.fd, 'utf8'), 'gene,padj\nTP53,0.01\n');
+  closeSync(opened.fd);
+
+  assert.equal(
+    _test.openVerifiedAuthorizedToolResultFile(resolved).error,
+    'file_not_found',
+    'a symlink inserted after authorization cannot be opened for delivery',
+  );
+
+  rmSync(artifactPath);
+  writeFileSync(artifactPath, 'gene,padj\nOTHER,0.01\n');
+  assert.equal(
+    _test.openVerifiedAuthorizedToolResultFile(resolved).error,
+    'file_not_found',
+    'a regular file from another Job cannot replace the authorized inode',
+  );
+});
+
+test('private tool artifact reads enforce current bytes when a Job has Artifact Truth', (context) => {
+  const root = mkdtempSync(join(tmpdir(), 'biof3-tools-private-truth-'));
+  const jobsDir = join(root, 'tool-jobs');
+  const outputDir = join(jobsDir, 'job-current', 'output');
+  const artifactPath = join(outputDir, 'verified.csv');
+  const original = 'gene,padj\nTP53,0.01\n';
+  mkdirSync(outputDir, { recursive: true });
+  writeFileSync(artifactPath, original);
+  context.after(() => rmSync(root, { recursive: true, force: true }));
+  const expectedSha256 = createHash('sha256').update(original).digest('hex');
+  const job = {
+    id: 'job-current',
+    project_id: null,
+    result_json: JSON.stringify({
+      resultDir: outputDir,
+      artifactTruth: { status: 'valid', blocking: false },
+      artifacts: [{ id: 'table', filename: 'verified.csv', sha256: expectedSha256 }],
+    }),
+  };
+
+  const resolved = _test.resolveAuthorizedToolResultFile({ job, filename: 'verified.csv', jobsDir });
+  assert.equal(resolved.ok, true);
+  assert.equal(resolved.expectedSha256, expectedSha256);
+  const opened = _test.openVerifiedAuthorizedToolResultFile(resolved);
+  assert.equal(opened.ok, true);
+  assert.equal(opened.actualSha256, expectedSha256);
+  assert.equal(readFileSync(opened.fd, 'utf8'), original);
+  closeSync(opened.fd);
+
+  writeFileSync(artifactPath, 'gene,padj\nOTHER,0.99\n');
+  const drifted = _test.resolveAuthorizedToolResultFile({ job, filename: 'verified.csv', jobsDir });
+  assert.equal(drifted.ok, true);
+  assert.equal(_test.openVerifiedAuthorizedToolResultFile(drifted).error, 'artifact_truth_drift');
+
+  const unhashed = {
+    ...job,
+    result_json: JSON.stringify({
+      resultDir: outputDir,
+      artifactTruth: { status: 'valid', blocking: false },
+      artifacts: [{ id: 'table', filename: 'verified.csv' }],
+    }),
+  };
+  assert.equal(
+    _test.resolveAuthorizedToolResultFile({ job: unhashed, filename: 'verified.csv', jobsDir }).error,
+    'artifact_truth_unavailable',
+  );
 });

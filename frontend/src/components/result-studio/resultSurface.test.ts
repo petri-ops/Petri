@@ -7,6 +7,8 @@ import {
   describeTruthStatus,
   resolveResultArtifactUrl,
   resolveResultViewerAdapter,
+  requestedArtifactRequestKey,
+  shouldApplyRequestedArtifact,
   shortRevisionLabel,
 } from './resultSurface';
 
@@ -57,6 +59,27 @@ describe('G0-RS-P1 result surface projection', () => {
     expect(chooseResultArtifactName({ currentName: 'report.html', preferredName: 'deg.csv', availableNames })).toBe('report.html');
     expect(chooseResultArtifactName({ currentName: 'missing.txt', preferredName: 'deg.csv', availableNames })).toBe('deg.csv');
     expect(chooseResultArtifactName({ currentName: 'report.html', pendingName: 'deg.csv', preferredName: 'report.html', availableNames })).toBe('deg.csv');
+  });
+
+  it('consumes one URL artifact request once instead of reasserting it after a Job refresh', () => {
+    const request = requestedArtifactRequestKey({
+      projectId: 'project-1',
+      jobId: 'job-1',
+      artifactName: 'classified_table.csv',
+    });
+    expect(shouldApplyRequestedArtifact(null, request)).toBe(true);
+    expect(shouldApplyRequestedArtifact(request, request)).toBe(false);
+    const nextArtifact = requestedArtifactRequestKey({
+      projectId: 'project-1',
+      jobId: 'job-1',
+      artifactName: 'volcano.svg',
+    });
+    expect(shouldApplyRequestedArtifact(request, nextArtifact)).toBe(true);
+    expect(requestedArtifactRequestKey({
+      projectId: 'project-1',
+      jobId: 'job-1',
+      artifactName: null,
+    })).toBeNull();
   });
 
   it('opens a previewable artifact when entering a mixed-availability section', () => {

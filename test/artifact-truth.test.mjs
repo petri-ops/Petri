@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
+import { createHash } from 'node:crypto';
+import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve, join } from 'node:path';
 import fs from 'node:fs';
@@ -8,7 +10,14 @@ import os from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const req = createRequire(import.meta.url);
-const { captureStagedInputSnapshots, reconcileArtifactTruth } = req(resolve(
+const {
+  SHA256_BUFFER_BYTES,
+  artifactContentTypeHint,
+  captureStagedInputSnapshots,
+  reconcileArtifactTruth,
+  sha256FileDescriptor,
+  sha256File,
+} = req(resolve(
   __dirname,
   '..',
   'core',
@@ -16,6 +25,46 @@ const { captureStagedInputSnapshots, reconcileArtifactTruth } = req(resolve(
   'helpers',
   'artifact-truth.js',
 ));
+
+test('artifact response type hints never expose an absolute path as the MIME value', () => {
+  assert.equal(artifactContentTypeHint('/private/project/volcano.svg'), '.svg');
+  assert.equal(artifactContentTypeHint('VOLCANO.PNG'), '.png');
+  assert.equal(artifactContentTypeHint('/private/project/result'), 'application/octet-stream');
+  assert.equal(artifactContentTypeHint(null), 'application/octet-stream');
+});
+
+test('artifact response type hints produce valid HTTP MIME headers', async (context) => {
+  const express = req('express');
+  const app = express();
+  const bodies = {
+    svg: '<svg xmlns="http://www.w3.org/2000/svg"/>',
+    png: Buffer.from([0x89, 0x50, 0x4e, 0x47]),
+    raw: Buffer.from('raw artifact'),
+  };
+  app.get('/:kind', (request, response) => {
+    const kind = String(request.params.kind || 'raw');
+    const extension = kind === 'raw' ? '' : `.${kind}`;
+    response.type(artifactContentTypeHint(`/private/project/result${extension}`)).send(bodies[kind]);
+  });
+  const server = app.listen(0, '127.0.0.1');
+  context.after(() => server.close());
+  await once(server, 'listening');
+  const { port } = server.address();
+
+  const svg = await fetch(`http://127.0.0.1:${port}/svg`);
+  assert.equal(svg.status, 200);
+  assert.match(svg.headers.get('content-type') || '', /^image\/svg\+xml\b/);
+  assert.equal(await svg.text(), bodies.svg);
+  assert.equal((svg.headers.get('content-type') || '').includes('/private/'), false);
+
+  const png = await fetch(`http://127.0.0.1:${port}/png`);
+  assert.equal(png.status, 200);
+  assert.match(png.headers.get('content-type') || '', /^image\/png\b/);
+
+  const raw = await fetch(`http://127.0.0.1:${port}/raw`);
+  assert.equal(raw.status, 200);
+  assert.match(raw.headers.get('content-type') || '', /^application\/octet-stream\b/);
+});
 const { _test: metadataTest, reconcileToolJobArtifacts } = req(resolve(
   __dirname,
   '..',
@@ -79,6 +128,63 @@ test('does not expose manifest metadata as a user artifact', () => {
 
   assert.equal(reconciled.artifactTruth.status, 'valid');
   assert.deepEqual(reconciled.artifacts.map((item) => item.name), ['table.csv']);
+  assert.match(reconciled.artifacts[0].sha256, /^[a-f0-9]{64}$/);
+});
+
+test('normalized Artifact Truth replaces plugin-supplied hashes with physical file bytes', () => {
+  const resultDir = tempResultDir();
+  fs.writeFileSync(join(resultDir, 'table.csv'), 'a,b\n1,2\n');
+  const reconciled = reconcileArtifactTruth({
+    resultDir,
+    result: {
+      artifacts: [{ id: 'table', filename: 'table.csv', type: 'table', sha256: '0'.repeat(64) }],
+    },
+  });
+
+  const expected = createHash('sha256').update('a,b\n1,2\n').digest('hex');
+  assert.equal(reconciled.artifactTruth.status, 'valid');
+  assert.equal(reconciled.result.artifacts[0].sha256, expected);
+  assert.equal(reconciled.result.outputs[0].sha256, expected);
+  assert.equal(reconciled.result.files[0].sha256, expected);
+});
+
+test('Artifact Truth hashes physical bytes with a fixed bounded buffer', () => {
+  const payload = Buffer.from('bounded-physical-artifact');
+  const reads = [];
+  let closed = false;
+  const digest = sha256File('/virtual/large-output.bin', {
+    openSync: () => 17,
+    readSync(fd, buffer, offset, length, position) {
+      assert.equal(fd, 17);
+      assert.equal(length, SHA256_BUFFER_BYTES);
+      reads.push({ length, position });
+      if (position >= payload.length) return 0;
+      const bytes = Math.min(5, payload.length - position);
+      payload.copy(buffer, offset, position, position + bytes);
+      return bytes;
+    },
+    closeSync: (fd) => { assert.equal(fd, 17); closed = true; },
+  });
+  assert.equal(digest, createHash('sha256').update(payload).digest('hex'));
+  assert.equal(reads.length > 1, true);
+  assert.equal(Math.max(...reads.map((entry) => entry.length)), SHA256_BUFFER_BYTES);
+  assert.equal(closed, true);
+});
+
+test('Artifact Truth can hash an already-authorized descriptor without closing or advancing it', () => {
+  const resultDir = tempResultDir();
+  const artifact = join(resultDir, 'authorized.csv');
+  const bytes = 'gene,padj\nTP53,0.01\n';
+  fs.writeFileSync(artifact, bytes);
+  const fd = fs.openSync(artifact, 'r');
+  try {
+    assert.equal(sha256FileDescriptor(fd), createHash('sha256').update(bytes).digest('hex'));
+    const first = Buffer.alloc(4);
+    assert.equal(fs.readSync(fd, first, 0, first.length, null), 4);
+    assert.equal(first.toString('utf8'), 'gene');
+  } finally {
+    fs.closeSync(fd);
+  }
 });
 
 test('excludes exact server-staged inputs from disk and declared artifact truth', () => {

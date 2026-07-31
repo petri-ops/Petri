@@ -322,6 +322,18 @@
     "maximum": 8
    }
   },
+  "previewResourceModel": {
+   "baseMemoryBytes": 268435456,
+   "inputMemoryMultiplier": 4,
+   "outputDiskMultiplier": 2,
+   "raster": {
+    "widthParameter": "plot_width",
+    "heightParameter": "plot_height",
+    "dpiParameter": "export_dpi",
+    "bytesPerPixel": 4,
+    "workingSetMultiplier": 3
+   }
+  },
   "parameterImpacts": {
    "lfc_col": "data",
    "gene_col": "data",

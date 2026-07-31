@@ -7,6 +7,7 @@ const { isPathContained } = require('./project-run-layout');
 const { stableStringify } = require('./scientific-task-spec');
 const { saveResultEditCheckpoint } = require('./result-changeset-service');
 const { compareScientificTables } = require('./result-scientific-compare');
+const { buildResultStudioTaskResourceSummary } = require('./result-studio-resource-summary');
 const {
   validateRestoreWorkflowScope,
   rebindWorkflowGraphForEquivalentRestore,
@@ -352,6 +353,9 @@ function compareResultChangeSet(input = {}, dependencies = {}) {
     revisions: repository.listRevisions({ artifactFamilyId: revision.artifactFamilyId, projectId: input.projectId, limit: 100 }),
     currentRevisionId: repository.getCurrentRevision(revision.artifactFamilyId, input.projectId)?.revisionId || null,
   }));
+  const jobs = [...new Set(changeSet.jobRefs || [])]
+    .map((jobId) => typeof dependencies.getToolJob === 'function' ? dependencies.getToolJob(jobId) : null)
+    .filter((job) => job && String(job.project_id || job.projectId || '') === input.projectId);
   return {
     resultCompareServiceVersion: RESULT_COMPARE_SERVICE_VERSION,
     changeSet,
@@ -370,6 +374,7 @@ function compareResultChangeSet(input = {}, dependencies = {}) {
     jsonDiffs,
     artifacts,
     histories,
+    resourceSummary: buildResultStudioTaskResourceSummary({ jobs }),
     git: {
       baseCommit: changeSet.baseCommit,
       candidateCommit: changeSet.candidateCommit,

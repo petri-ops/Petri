@@ -4,11 +4,14 @@ const { createResultArchive } = require('./result-archive');
 const { v4: uuidv4 } = require('uuid');
 const { execFile } = require('child_process');
 const {
+  artifactContentTypeHint,
   captureStagedInputSnapshots,
   isInternalArtifactName,
+  isSafeFlatFilename,
   reconcileArtifactTruth,
+  sha256FileDescriptor,
 } = require('./artifact-truth');
-const { sendThemedHtmlFile, injectReportTheme, normalizeReportTheme } = require('./report-theme');
+const { injectReportTheme, isHtmlFile, normalizeReportTheme } = require('./report-theme');
 const { materializeFinalReport } = require('./final-report');
 const {
   createExecutionContext: createCanonicalExecutionContext,
@@ -21,6 +24,11 @@ const { ensureBundlesForPlugin } = require('../../shared-backend/capability-bund
 const { createExecutionProvenance, attachProvenanceToResult } = require('../../shared-backend/execution-provenance');
 const { collectExecutionInputs, writeArtifactManifest } = require('../../shared-backend/artifact-manifest');
 const { createRuntimeResourceSnapshot } = require('../../shared-backend/runtime-resource-snapshot');
+const {
+  createToolResourceSampler,
+  directoryBytes,
+  diskSnapshot,
+} = require('../../shared-backend/tool-resource-sampler');
 const {
   markUnownedStaleJobs,
   recoverStaleActiveJobs,
@@ -35,6 +43,272 @@ function isManagedResultDir(candidate, jobsDir) {
   const resolved = path.resolve(String(candidate));
   const roots = [path.resolve(jobsDir), path.resolve(path.dirname(jobsDir), 'mcp-tool-jobs')];
   return roots.some((root) => resolved === root || resolved.startsWith(root + path.sep));
+}
+
+function parseStoredToolResult(job) {
+  if (!job || !job.result_json) return null;
+  try {
+    const result = typeof job.result_json === 'string'
+      ? JSON.parse(job.result_json)
+      : job.result_json;
+    return result && typeof result === 'object' && !Array.isArray(result) ? result : null;
+  } catch {
+    return null;
+  }
+}
+
+function mergeFinalOutputMeasurement(resourceUsage, finalOutput) {
+  if (!resourceUsage?.peak || !resourceUsage?.sampling || !finalOutput) return resourceUsage;
+  const bytes = Number(finalOutput.bytes);
+  if (Number.isFinite(bytes) && bytes >= 0) {
+    const previous = Number(resourceUsage.peak.outputBytes);
+    resourceUsage.peak.outputBytes = Number.isFinite(previous) && previous >= 0
+      ? Math.max(previous, bytes)
+      : bytes;
+  }
+  resourceUsage.sampling.outputSampleCount = Number(
+    resourceUsage.sampling.outputSampleCount || 0,
+  ) + 1;
+  resourceUsage.sampling.directoryTruncated ||= finalOutput.truncated === true;
+  resourceUsage.sampling.directoryReadErrors = Number(
+    resourceUsage.sampling.directoryReadErrors || 0,
+  ) + Number(finalOutput.readErrors || 0);
+  resourceUsage.sampling.directoryStatErrors = Number(
+    resourceUsage.sampling.directoryStatErrors || 0,
+  ) + Number(finalOutput.statErrors || 0);
+  const complete = finalOutput.complete !== false
+    && finalOutput.truncated !== true
+    && Number(finalOutput.readErrors || 0) === 0
+    && Number(finalOutput.statErrors || 0) === 0;
+  resourceUsage.sampling.outputMeasurementStatus = complete
+    && resourceUsage.sampling.outputMeasurementStatus !== 'partial'
+    ? 'measured'
+    : 'partial';
+  return resourceUsage;
+}
+
+function buildCancelledToolResult({
+  existingResult = null,
+  jobId,
+  resourceUsage,
+  executionProvenance = null,
+  provenanceRef = null,
+} = {}) {
+  const result = existingResult && typeof existingResult === 'object' && !Array.isArray(existingResult)
+    ? { ...existingResult }
+    : {};
+  result.toolJobId = jobId;
+  result.cancellation = {
+    phase: 'execute',
+    reason: 'user_stop',
+    terminalStatus: 'cancelled',
+    processExitConfirmed: true,
+  };
+  result.resourceUsage = resourceUsage;
+  if (executionProvenance) result.executionProvenance = executionProvenance;
+  if (provenanceRef) result.provenanceRef = provenanceRef;
+  return result;
+}
+
+function declaredResultFilenames(result) {
+  const names = new Set();
+  const manifest = result && result.manifest;
+  const sources = [
+    result && result.artifacts,
+    result && result.outputs,
+    result && result.files,
+    Array.isArray(manifest) ? manifest : null,
+    manifest && manifest.artifacts,
+    manifest && manifest.outputs,
+    manifest && manifest.files,
+  ];
+  for (const items of sources) {
+    if (!Array.isArray(items)) continue;
+    for (const item of items) {
+      const candidate = typeof item === 'string'
+        ? item
+        : item && typeof item === 'object'
+          ? item.filename || item.name || item.file
+          : null;
+      if (!isSafeFlatFilename(candidate) || isInternalArtifactName(candidate)) continue;
+      names.add(candidate);
+    }
+  }
+  return names;
+}
+
+function resolveStoredArtifactTruthBinding(result, filename) {
+  const truth = result && result.artifactTruth;
+  if (!truth) return { ok: true, expectedSha256: null, legacy: true };
+  if (truth.blocking === true || !['valid', 'degraded'].includes(truth.status)) {
+    return { ok: false, error: 'artifact_truth_unavailable' };
+  }
+  const artifacts = Array.isArray(result.artifacts) ? result.artifacts : [];
+  const matches = artifacts.filter((artifact) => {
+    if (!artifact || typeof artifact !== 'object') return false;
+    const name = artifact.filename || artifact.name || artifact.path;
+    return isSafeFlatFilename(path.basename(String(name || '')))
+      && path.basename(String(name || '')) === filename;
+  });
+  if (matches.length !== 1) {
+    return {
+      ok: false,
+      error: matches.length > 1 ? 'artifact_identity_ambiguous' : 'artifact_truth_unavailable',
+    };
+  }
+  const expectedSha256 = String(matches[0].sha256 || '').trim().toLowerCase();
+  if (!/^[a-f0-9]{64}$/.test(expectedSha256)) {
+    return { ok: false, error: 'artifact_truth_unavailable' };
+  }
+  return { ok: true, expectedSha256, legacy: false };
+}
+
+function exactLegacyResultRoots(jobId, jobsDir) {
+  if (!isSafeFlatFilename(String(jobId || '')) || !jobsDir) return [];
+  const toolRoot = path.resolve(jobsDir, String(jobId));
+  const mcpRoot = path.resolve(path.dirname(jobsDir), 'mcp-tool-jobs', String(jobId));
+  return [toolRoot, path.join(toolRoot, 'output'), mcpRoot, path.join(mcpRoot, 'output')];
+}
+
+function isRealPathInside(root, target) {
+  const relative = path.relative(root, target);
+  return relative !== '' && !relative.startsWith(`..${path.sep}`) && relative !== '..'
+    && !path.isAbsolute(relative);
+}
+
+function expectedPhysicalResultRoot({ job, layout, jobsDir, resultDir }) {
+  if (job.project_id) {
+    if (!layout?.workspaceRoot || !layout.jobRoot || !layout.outputDir) return null;
+    const realWorkspace = fs.realpathSync(layout.workspaceRoot);
+    const realJobRoot = fs.realpathSync(layout.jobRoot);
+    if (!isRealPathInside(realWorkspace, realJobRoot)) return null;
+    if (resultDir === path.resolve(layout.jobRoot)) return realJobRoot;
+    const realOutputDir = fs.realpathSync(layout.outputDir);
+    return path.dirname(realOutputDir) === realJobRoot ? realOutputDir : null;
+  }
+
+  const legacyRoots = exactLegacyResultRoots(job.id, jobsDir);
+  const index = legacyRoots.indexOf(resultDir);
+  if (index === -1) return null;
+  const legacyBase = index < 2
+    ? path.resolve(jobsDir)
+    : path.resolve(path.dirname(jobsDir), 'mcp-tool-jobs');
+  const realBase = fs.realpathSync(legacyBase);
+  return path.join(realBase, String(job.id), ...(index % 2 === 1 ? ['output'] : []));
+}
+
+function resultFileIdentity(stat) {
+  return {
+    dev: stat.dev,
+    ino: stat.ino,
+    size: stat.size,
+    mtimeMs: stat.mtimeMs,
+    ctimeMs: stat.ctimeMs,
+  };
+}
+
+function hasSameResultFileIdentity(stat, identity) {
+  return Boolean(
+    identity
+      && stat.dev === identity.dev
+      && stat.ino === identity.ino
+      && stat.size === identity.size
+      && stat.mtimeMs === identity.mtimeMs
+      && stat.ctimeMs === identity.ctimeMs,
+  );
+}
+
+/**
+ * Resolve a private artifact only from the current Job's persisted declaration.
+ * The stored result root must be one of this Job's exact server-derived roots;
+ * realpath containment prevents a declared symlink from escaping that root.
+ */
+function resolveAuthorizedToolResultFile({ job, filename, layout = null, jobsDir }) {
+  if (!isSafeFlatFilename(filename) || isInternalArtifactName(filename)) {
+    return { ok: false, error: 'bad_path' };
+  }
+  const result = parseStoredToolResult(job);
+  if (!result || !declaredResultFilenames(result).has(filename)) {
+    return { ok: false, error: 'file_not_found' };
+  }
+  const truthBinding = resolveStoredArtifactTruthBinding(result, filename);
+  if (!truthBinding.ok) return truthBinding;
+
+  const storedResultDir = typeof result.resultDir === 'string'
+    ? result.resultDir
+    : typeof result.outputDir === 'string'
+      ? result.outputDir
+      : null;
+  if (!storedResultDir || path.resolve(storedResultDir) !== storedResultDir) {
+    return { ok: false, error: 'file_not_found' };
+  }
+
+  const allowedRoots = job.project_id
+    ? [layout && layout.jobRoot, layout && layout.outputDir]
+      .filter(Boolean)
+      .map((root) => path.resolve(root))
+    : exactLegacyResultRoots(job.id, jobsDir);
+  const resultDir = path.resolve(storedResultDir);
+  if (!allowedRoots.includes(resultDir)) {
+    return { ok: false, error: 'file_not_found' };
+  }
+
+  try {
+    const realRoot = fs.realpathSync(resultDir);
+    const expectedRealRoot = expectedPhysicalResultRoot({ job, layout, jobsDir, resultDir });
+    if (realRoot !== expectedRealRoot || !fs.statSync(realRoot).isDirectory()) {
+      return { ok: false, error: 'file_not_found' };
+    }
+    const candidate = path.join(resultDir, filename);
+    if (path.dirname(candidate) !== resultDir) return { ok: false, error: 'bad_path' };
+    const realFile = fs.realpathSync(candidate);
+    const fileStat = fs.statSync(realFile);
+    if (path.dirname(realFile) !== realRoot || !fileStat.isFile()) {
+      return { ok: false, error: 'file_not_found' };
+    }
+    return {
+      ok: true,
+      filePath: realFile,
+      resultDir,
+      fileIdentity: resultFileIdentity(fileStat),
+      expectedSha256: truthBinding.expectedSha256,
+    };
+  } catch {
+    return { ok: false, error: 'file_not_found' };
+  }
+}
+
+/**
+ * Open exactly the file that passed the authorization realpath checks. Sending
+ * the path through Express after that check would re-resolve it and allow a
+ * rename/symlink race. The caller owns the returned descriptor on success.
+ */
+function openVerifiedAuthorizedToolResultFile(resolved) {
+  if (!resolved || !resolved.ok || !resolved.filePath || !resolved.fileIdentity) {
+    return { ok: false, error: 'file_not_found' };
+  }
+
+  let fd = null;
+  try {
+    const noFollow = Number.isInteger(fs.constants.O_NOFOLLOW) ? fs.constants.O_NOFOLLOW : 0;
+    fd = fs.openSync(resolved.filePath, fs.constants.O_RDONLY | noFollow);
+    const openedStat = fs.fstatSync(fd);
+    if (!openedStat.isFile() || !hasSameResultFileIdentity(openedStat, resolved.fileIdentity)) {
+      fs.closeSync(fd);
+      return { ok: false, error: 'file_not_found' };
+    }
+    const actualSha256 = resolved.expectedSha256 ? sha256FileDescriptor(fd) : null;
+    if (resolved.expectedSha256 && actualSha256 !== resolved.expectedSha256) {
+      fs.closeSync(fd);
+      return { ok: false, error: 'artifact_truth_drift' };
+    }
+    return { ok: true, fd, stat: openedStat, actualSha256 };
+  } catch {
+    if (fd !== null) {
+      try { fs.closeSync(fd); } catch {}
+    }
+    return { ok: false, error: 'file_not_found' };
+  }
 }
 
 /**
@@ -323,60 +597,73 @@ function createToolsExecutor({
   }
 
   async function handlePrivateFileRead(req, res) {
-    const job =
-      req.toolJob ||
-      (await db.prepare('SELECT * FROM tool_jobs WHERE id=?').get(req.params.jobId));
-
-    if (!job) {
+    const job = req.toolJob;
+    if (!job || String(job.id) !== String(req.params.jobId)) {
       return res.status(404).json({ error: 'job_not_found' });
     }
 
-    let filePath = null;
-
-    // Phase 2/4: 尝试从项目目录读取（safeJoinUnder 强制 containment，防路径遍历）
+    let layout = null;
     if (job.project_id) {
       try {
-        const layout = resolveProjectRunLayout({
+        layout = resolveProjectRunLayout({
           projectId: job.project_id,
           toolJobId: job.id,
           db: dbMod,
           skipPermissionCheck: true,
           ensureDirs: false,
         });
-        filePath = safeJoinUnder(layout.outputDir, req.params.filename);
       } catch (error) {
         console.warn('[tools] Project layout resolution failed for file read:', error.message);
+        return res.status(404).json({ error: 'file_not_found' });
       }
     }
 
-    // 回退：尝试全局目录
-    if (!filePath || !fs.existsSync(filePath)) {
-      filePath = safeJoinUnder(jobsDir, req.params.jobId, 'output', req.params.filename);
+    const resolved = resolveAuthorizedToolResultFile({
+      job,
+      filename: req.params.filename,
+      layout,
+      jobsDir,
+    });
+    if (!resolved.ok) {
+      const status = resolved.error === 'bad_path'
+        ? 400
+        : resolved.error.startsWith('artifact_')
+          ? 409
+          : 404;
+      return res.status(status).json({ error: resolved.error });
+    }
+    const opened = openVerifiedAuthorizedToolResultFile(resolved);
+    if (!opened.ok) {
+      return res.status(opened.error === 'artifact_truth_drift' ? 409 : 404).json({ error: opened.error });
     }
 
-    // 回退：尝试历史 result_json 路径
-    if (!filePath || !fs.existsSync(filePath)) {
+    const theme = normalizeReportTheme(req?.query?.theme);
+    if (theme && isHtmlFile(resolved.filePath)) {
       try {
-        const result =
-          job && job.result_json
-            ? typeof job.result_json === 'string'
-              ? JSON.parse(job.result_json)
-              : job.result_json
-            : null;
-        const resultDir = result && (result.resultDir || result.outputDir);
-        if (isManagedResultDir(resultDir, jobsDir)) {
-          const managedPath = safeJoinUnder(resultDir, req.params.filename);
-          if (managedPath) filePath = managedPath;
-        }
-      } catch (error) {
-        console.warn('[tools] Legacy result path lookup failed:', error.message);
+        const html = fs.readFileSync(opened.fd, 'utf8');
+        return res.type('html').set('Cache-Control', 'private, no-store').send(injectReportTheme(html, theme));
+      } catch {
+        return res.status(404).json({ error: 'file_not_found' });
+      } finally {
+        try { fs.closeSync(opened.fd); } catch {}
       }
     }
 
-    if (!filePath) return res.status(400).json({ error: 'bad_path' });
-    if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'file_not_found' });
-    if (sendThemedHtmlFile(req, res, filePath)) return;
-    return res.sendFile(filePath);
+    // `fd` makes createReadStream consume this already-verified descriptor;
+    // it does not reopen or resolve the path supplied during authorization.
+    const stream = fs.createReadStream(null, { fd: opened.fd, autoClose: true, start: 0 });
+    stream.once('error', (error) => {
+      if (!res.headersSent) {
+        res.status(404).json({ error: 'file_not_found' });
+      } else {
+        res.destroy(error);
+      }
+    });
+    res
+      .type(artifactContentTypeHint(resolved.filePath))
+      .set('Cache-Control', 'private, no-store')
+      .set('Content-Length', String(opened.stat.size));
+    return stream.pipe(res);
   }
 
   function regenerateReportForImage(jobId, toolId, filename, outputDirOverride) {
@@ -817,6 +1104,7 @@ function createToolsExecutor({
 
     const startedAt = new Date().toISOString();
     const resourceStart = createRuntimeResourceSnapshot({
+      disk: diskSnapshot(outputDir),
       runtime: { r: cfg.lang === 'r' && runtimeReady?.ready, python: cfg.lang === 'python' && runtimeReady?.ready },
       activeJobs: activeToolJobs.size + 1,
       observedAt: startedAt,
@@ -851,6 +1139,7 @@ function createToolsExecutor({
     };
     const hardTimeoutMs = TOOL_LIFECYCLE.hardTimeoutMs;
     let hardTimeoutTimer = null;
+    let resourceSampler = null;
     const child = execFile(
       runCmd[0],
       runCmd.slice(1),
@@ -859,7 +1148,30 @@ function createToolsExecutor({
         if (hardTimeoutTimer) clearTimeout(hardTimeoutTimer);
         const active = activeToolJobs.get(jobId);
         if (active && active.heartbeatTimer) clearInterval(active.heartbeatTimer);
+        let sampledResources;
+        try {
+          sampledResources = resourceSampler
+            ? await resourceSampler.stop()
+            : {
+              peak: {},
+              sampling: { status: 'unavailable', sampleCount: null, reason: 'process_sampler_unavailable' },
+              peakStatus: 'unavailable',
+            };
+        } catch {
+          sampledResources = {
+            peak: {},
+            sampling: { status: 'unavailable', sampleCount: null, reason: 'process_sampler_failed' },
+            peakStatus: 'unavailable',
+          };
+        }
         activeToolJobs.delete(jobId);
+        const resourceEnd = createRuntimeResourceSnapshot({
+          disk: diskSnapshot(outputDir),
+          runtime: { r: cfg.lang === 'r' && runtimeReady?.ready, python: cfg.lang === 'python' && runtimeReady?.ready },
+          activeJobs: activeToolJobs.size,
+          observedAt: new Date().toISOString(),
+        });
+        const resourceUsage = { start: resourceStart, end: resourceEnd, ...sampledResources };
         try {
           const log = `=== STDOUT ===\n${stdout || ''}\n\n=== STDERR ===\n${stderr || ''}\n\n=== EXIT ===\n${err ? 'ERROR: ' + err.message : 'OK'}\nTimestamp: ${new Date().toISOString()}\n`;
           fs.writeFileSync(path.join(outputDir, 'run.log'), log);
@@ -868,14 +1180,50 @@ function createToolsExecutor({
         let currentJob = null;
         try {
           currentJob = await db
-            .prepare('SELECT status, is_test_run FROM tool_jobs WHERE id=?')
+            .prepare('SELECT status, is_test_run, result_json FROM tool_jobs WHERE id=?')
             .get(jobId);
         } catch {}
         if (active && active.cancelRequested) {
+          try {
+            const finalOutput = await directoryBytes(outputDir);
+            mergeFinalOutputMeasurement(resourceUsage, finalOutput);
+          } catch {
+            // Periodic samples remain truthful when the final directory scan is unavailable.
+          }
+          let recorded = null;
+          try { recorded = buildProvenance(); } catch {}
+          const cancelledResult = buildCancelledToolResult({
+            existingResult: parseStoredToolResult(currentJob),
+            jobId,
+            resourceUsage,
+            executionProvenance: recorded?.provenance || null,
+            provenanceRef: recorded ? {
+              provenanceHash: recorded.provenance.provenanceHash,
+              path: recorded.provenancePath,
+              toolJobId: jobId,
+            } : null,
+          });
+          try {
+            await db.prepare('UPDATE tool_jobs SET result_json=? WHERE id=?')
+              .run(JSON.stringify(cancelledResult), jobId);
+          } catch (error) {
+            console.warn('[tools] cancelled Job resource summary persistence failed:', error.message);
+          }
           console.log('[tools] Job ' + jobId + ' cancellation requested; cancel route owns terminal status');
           return;
         }
         if (currentJob && currentJob.status === 'cancelled') {
+          const cancelledResult = buildCancelledToolResult({
+            existingResult: parseStoredToolResult(currentJob),
+            jobId,
+            resourceUsage,
+          });
+          try {
+            await db.prepare('UPDATE tool_jobs SET result_json=? WHERE id=?')
+              .run(JSON.stringify(cancelledResult), jobId);
+          } catch (error) {
+            console.warn('[tools] cancelled Job resource summary persistence failed:', error.message);
+          }
           console.log('[tools] Job ' + jobId + ' cancelled; skip terminal status overwrite');
           return;
         }
@@ -890,7 +1238,7 @@ function createToolsExecutor({
                 reason: active?.timedOut ? 'hard_timeout' : err.killed ? 'terminated' : 'nonzero_exit',
                 exitCode: err.code ?? null,
               },
-              resourceUsage: { start: resourceStart, end: createRuntimeResourceSnapshot({ observedAt: new Date().toISOString() }), peakStatus: 'unavailable_without_process_sampler' },
+              resourceUsage,
               executionProvenance: failed.provenance,
               provenanceRef: { provenanceHash: failed.provenance.provenanceHash, path: failed.provenancePath, toolJobId: jobId },
             }), jobId);
@@ -962,15 +1310,13 @@ function createToolsExecutor({
         result.canonicalOutputDir = canonicalizePath(outputDir);
         result.canonicalResultDir = canonicalizePath(resultDir);
         result.execution = executionContext;
-        result.resourceUsage = {
-          start: resourceStart,
-          end: createRuntimeResourceSnapshot({
-            runtime: { r: cfg.lang === 'r' && runtimeReady?.ready, python: cfg.lang === 'python' && runtimeReady?.ready },
-            activeJobs: activeToolJobs.size,
-            observedAt: new Date().toISOString(),
-          }),
-          peakStatus: 'unavailable_without_process_sampler',
-        };
+        try {
+          const finalOutput = await directoryBytes(resultDir);
+          mergeFinalOutputMeasurement(resourceUsage, finalOutput);
+        } catch {
+          // Process/system samples remain valid when final output accounting is unavailable.
+        }
+        result.resourceUsage = resourceUsage;
         result.artifactSchemaVersion = result.artifactSchemaVersion || 1;
         if (Array.isArray(result.outputs)) {
           result.outputs = result.outputs.map((item) => {
@@ -1045,6 +1391,12 @@ function createToolsExecutor({
       lastHeartbeatAt: Date.now(),
       toolId,
     });
+    resourceSampler = createToolResourceSampler({
+      pid: child.pid,
+      jobDir: outputDir,
+      activeJobs: () => activeToolJobs.size,
+    });
+    resourceSampler.start();
     await db.prepare('UPDATE tool_jobs SET process_pid=?, heartbeat_at=? WHERE id=?').run(child.pid || null, Date.now(), jobId);
     const active = activeToolJobs.get(jobId);
     active.heartbeatTimer = setInterval(() => {
@@ -1270,5 +1622,10 @@ module.exports = {
     validateUploadedFiles,
     hydrateExecutionJob,
     resolveProducedResultDirectory,
+    resolveAuthorizedToolResultFile,
+    resolveStoredArtifactTruthBinding,
+    openVerifiedAuthorizedToolResultFile,
+    mergeFinalOutputMeasurement,
+    buildCancelledToolResult,
   },
 };

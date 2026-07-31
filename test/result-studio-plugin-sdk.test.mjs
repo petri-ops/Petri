@@ -31,6 +31,21 @@ test('RS7 four scientific plugin descriptors pass the fail-closed SDK lint', () 
   }
 });
 
+test('P6 validates the trusted preview resource model and its numeric parameter bindings', () => {
+  const { pluginDir, plugin, toolDefinition } = readPlugin('volcano-plot');
+  const valid = sdk.lintResultStudioPlugin({ plugin, toolDefinition, pluginDir });
+  assert.equal(valid.valid, true, JSON.stringify(valid.errors));
+  assert.equal(valid.descriptor.previewResourceModel.raster.dpiParameter, 'export_dpi');
+
+  const forged = structuredClone(toolDefinition);
+  forged.resultStudio.previewResourceModel.raster.dpiParameter = 'not_a_declared_parameter';
+  forged.resultStudio.previewResourceModel.raster.workingSetMultiplier = 1_000_000;
+  const rejected = sdk.lintResultStudioPlugin({ plugin, toolDefinition: forged, pluginDir });
+  assert.equal(rejected.valid, false);
+  assert.ok(rejected.errors.some((issue) => issue.code === 'preview_resource_raster_parameter_invalid'));
+  assert.ok(rejected.errors.some((issue) => issue.code === 'preview_resource_raster_multiplier_invalid'));
+});
+
 test('P5 DESeq2 exposes its reusable VST matrix with a stable non-formal Artifact id', () => {
   const { toolDefinition } = readPlugin('deseq2');
   assert.deepEqual(

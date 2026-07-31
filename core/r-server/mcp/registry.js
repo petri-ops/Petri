@@ -105,6 +105,9 @@ try {
 // 让外部 agent 即使没装任何插件也能看到/调用 built-in 工具（volcano-plot 等）。
 // 已装版本优先（loadBuiltInPlugins 内部去重）。
 function resolveBuiltInPluginsDir() {
+  if (process.env.BIOF3_BUILT_IN_PLUGINS_DIR) {
+    return path.resolve(process.env.BIOF3_BUILT_IN_PLUGINS_DIR);
+  }
   // 去 submodule 后：core 直接内嵌在 desktop 仓根 core/ 下，built-in-plugins 在 desktop 仓根 resources/
   // r-server/mcp/ → r-server → core → desktop 仓根 → resources/built-in-plugins/
   const splitPath = path.resolve(
@@ -942,6 +945,7 @@ module.exports = {
     canonicalizePath: _canonicalizePath,
     createMcpExecutionContext: _createMcpExecutionContext,
     normalizeArtifacts: _normalizeArtifacts,
+    resolveBuiltInPluginsDir,
     resolveStagedInputPath: _resolveStagedInputPath,
     resolveMcpJobLayout: _resolveMcpJobLayout,
     resolveResultStudioScriptOverride,

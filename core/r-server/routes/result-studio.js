@@ -28,6 +28,10 @@ const crypto = require('crypto');
 const db = require('../db');
 const pluginLoader = require('../plugin-loader');
 const mcpRegistry = require('../mcp/registry');
+const {
+  artifactContentTypeHint,
+  sha256FileDescriptor,
+} = require('../helpers/artifact-truth');
 
 // core/r-server/db.js 导出的是模块对象；真实 better-sqlite3 句柄在 `.db` 上。
 // 直接对模块对象调用 prepare() 会在运行时抛错。
@@ -76,6 +80,7 @@ const {
   ResultStudioTableQueryError,
 } = require('../../shared-backend/result-studio-table-query');
 const { createRuntimeResourceSnapshot } = require('../../shared-backend/runtime-resource-snapshot');
+const { getResultStudioRuntimeLease } = require('../../shared-backend/result-studio-runtime-lease');
 const {
   summarizeContextForAgent,
   PUBLIC_EDIT_PHASES,
@@ -86,7 +91,6 @@ const {
 } = require('../agent-tools/result-context-tools');
 const { buildEditControlSchema } = require('../../shared-backend/result-edit-controls');
 const {
-  recoverResultStudioWorkspace,
   planArtifactDeduplication,
   executeArtifactDeduplication,
   planResultStudioGc,
@@ -103,6 +107,41 @@ const MAX_READ_BYTES = 8 * 1024 * 1024;
 
 const TABLE_EXTENSIONS = /\.(csv|tsv)$/i;
 const PLOT_EXTENSIONS = /\.(png|jpe?g|gif|svg|webp)$/i;
+const PRIVATE_ERROR_COORDINATE = /(?:file:\/\/|[a-z]:[\\/]|\\\\|(?:^|[\s"'(:=])\/(?!api\/)[^\s"'<>]+)/i;
+
+function publicResultStudioErrorMessage(error, fallback) {
+  const message = String(error?.message || '').trim();
+  if (!message || PRIVATE_ERROR_COORDINATE.test(message) || /[\r\n\0]/.test(message)) return fallback;
+  return message.slice(0, 500);
+}
+
+function buildContextBoundPreviewBudget({ disk = null, activePreviewJobs = 0 } = {}, dependencies = {}) {
+  const snapshotFactory = dependencies.createRuntimeResourceSnapshot || createRuntimeResourceSnapshot;
+  const budgetEvaluator = dependencies.evaluatePreviewResourceBudget || evaluatePreviewResourceBudget;
+  const active = Math.max(0, Math.floor(Number(activePreviewJobs) || 0));
+  const snapshot = snapshotFactory({
+    disk,
+    activeJobs: active,
+    estimatedMemoryBytes: null,
+  });
+  return {
+    snapshot,
+    budget: {
+      ...budgetEvaluator({
+        resourceSnapshot: snapshot,
+        estimatedMemoryBytes: null,
+        estimatedDiskBytes: null,
+        activePreviewJobs: active,
+      }),
+      resourceEstimate: {
+        estimateVersion: 1,
+        available: false,
+        source: 'context_bound_edit_required',
+        reason: 'trusted_edit_context_unavailable',
+      },
+    },
+  };
+}
 
 function hashFile(filePath) {
   const hash = crypto.createHash('sha256');
@@ -197,6 +236,28 @@ function resolveWorkspaceFileForRevision(workspaceRoot, revision) {
     throw Object.assign(new Error('Revision output hash no longer matches Artifact Truth.'), { code: 'revision_output_hash_drift' });
   }
   return target;
+}
+
+function openVerifiedRevisionArtifact(workspaceRoot, revision) {
+  let fd = null;
+  try {
+    const workspace = fs.realpathSync(workspaceRoot);
+    const artifactPath = fs.realpathSync(path.join(workspace, revision.outputPath));
+    if (!isPathContained(workspace, artifactPath)) throw new Error('artifact_path_escape');
+    const noFollow = Number.isInteger(fs.constants.O_NOFOLLOW) ? fs.constants.O_NOFOLLOW : 0;
+    fd = fs.openSync(artifactPath, fs.constants.O_RDONLY | noFollow);
+    const stat = fs.fstatSync(fd);
+    if (!stat.isFile()) throw new Error('artifact_not_file');
+    if (!revision.outputHash || sha256FileDescriptor(fd) !== revision.outputHash) {
+      throw new Error('artifact_hash_mismatch');
+    }
+    return { fd, stat, artifactPath };
+  } catch (error) {
+    if (fd !== null) {
+      try { fs.closeSync(fd); } catch {}
+    }
+    throw error;
+  }
 }
 
 function userId(req) {
@@ -299,17 +360,88 @@ function loadJobAndProject(req, jobId) {
   return { job, project };
 }
 
+function artifactTruthError(reason, message, code = 'artifact_truth_unavailable') {
+  return { error: { status: 409, code, reason, message } };
+}
+
+function artifactTruthAvailability(result) {
+  const truth = result?.artifactTruth;
+  if (!truth || truth.blocking === true || !['valid', 'degraded'].includes(truth.status)) {
+    return artifactTruthError(
+      'job_artifact_truth_unavailable',
+      'The completed Job does not have usable Artifact Truth.',
+    );
+  }
+  return null;
+}
+
+function verifyArtifactRecordBytes(artifactRecord, absolutePath) {
+  const expectedSha256 = String(artifactRecord?.sha256 || '').trim().toLowerCase();
+  if (!/^[a-f0-9]{64}$/.test(expectedSha256)) {
+    return artifactTruthError(
+      'artifact_sha256_unavailable',
+      'The selected Artifact has no trusted SHA-256 in Job Artifact Truth.',
+    );
+  }
+  let actualSha256;
+  try {
+    actualSha256 = hashFile(absolutePath);
+  } catch {
+    return artifactTruthError(
+      'artifact_file_unavailable',
+      'The selected Artifact file is unavailable.',
+    );
+  }
+  if (actualSha256 !== expectedSha256) {
+    return artifactTruthError(
+      'artifact_hash_drift',
+      'The selected Artifact bytes no longer match Job Artifact Truth.',
+      'artifact_truth_drift',
+    );
+  }
+  return { artifactRecord, expectedSha256, actualSha256 };
+}
+
 function findArtifactRecord(result, absolutePath, artifactName) {
-  const artifacts = Array.isArray(result && result.artifacts) ? result.artifacts : [];
-  let realTarget = null;
-  try { realTarget = fs.realpathSync(absolutePath); } catch { /* resolved earlier */ }
+  const unavailable = artifactTruthAvailability(result);
+  if (unavailable) return unavailable;
+  const artifacts = Array.isArray(result.artifacts) ? result.artifacts : [];
+  let realTarget;
+  try {
+    realTarget = fs.realpathSync(absolutePath);
+    if (!fs.statSync(realTarget).isFile()) throw new Error('artifact_not_file');
+  } catch {
+    return artifactTruthError(
+      'artifact_file_unavailable',
+      'The selected Artifact file is unavailable.',
+    );
+  }
   const matches = artifacts.filter((artifact) => {
     if (!artifact || !artifact.id) return false;
     if (artifact.id === artifactName || artifact.name === artifactName || artifact.filename === artifactName) return true;
-    if (!realTarget || !artifact.path) return false;
+    if (!artifact.path) return false;
     try { return fs.realpathSync(artifact.path) === realTarget; } catch { return false; }
   });
-  return matches.length === 1 ? matches[0] : null;
+  if (matches.length === 0) {
+    return artifactTruthError(
+      'artifact_record_missing',
+      'The selected file is not present in Job Artifact Truth.',
+    );
+  }
+  if (matches.length > 1) {
+    return artifactTruthError(
+      'artifact_identity_ambiguous',
+      'The selected file does not resolve to one unique Artifact Truth record.',
+    );
+  }
+  return verifyArtifactRecordBytes(matches[0], realTarget);
+}
+
+function sendArtifactResolutionError(res, error) {
+  const body = { error: error.code };
+  if (error.reason) body.reason = error.reason;
+  if (error.message) body.message = error.message;
+  return res.status(error.status).json(body);
 }
 
 function resolveInteractionDescriptor(toolId, artifactRecord, artifactName) {
@@ -340,7 +472,7 @@ function backingArtifactName(interaction) {
  * 只允许 output/ 下的文件名，不接受路径分隔符或 `..`，
  * 再用 layout 派生的绝对路径做包含性复核。
  */
-function resolveArtifactPath({ req, job, project, artifactName }) {
+function resolveArtifactPath({ req, job, project, artifactName }, dependencies = {}) {
   if (typeof artifactName !== 'string' || artifactName.trim() === '') {
     return { error: { status: 400, code: 'artifact_required' } };
   }
@@ -348,9 +480,12 @@ function resolveArtifactPath({ req, job, project, artifactName }) {
   if (name.includes('\0') || name.includes('/') || name.includes('\\') || name.includes('..')) {
     return { error: { status: 400, code: 'artifact_name_invalid' } };
   }
+  const unavailable = artifactTruthAvailability(job?.result);
+  if (unavailable) return unavailable;
+  const resolveLayout = dependencies.resolveProjectRunLayout || resolveProjectRunLayout;
   let layout;
   try {
-    layout = resolveProjectRunLayout({
+    layout = resolveLayout({
       projectId: project.id,
       toolJobId: job.id,
       db,
@@ -375,9 +510,15 @@ function resolveArtifactPath({ req, job, project, artifactName }) {
     || artifact.filename === name
     || path.basename(String(artifact.path || '')) === name
   ));
-  if (declaredMatches.length > 1) {
-    return { error: { status: 409, code: 'artifact_identity_ambiguous' } };
-  }
+  if (declaredMatches.length === 0) return artifactTruthError(
+    'artifact_record_missing',
+    'The selected file is not present in Job Artifact Truth.',
+  );
+  if (declaredMatches.length > 1) return artifactTruthError(
+    'artifact_identity_ambiguous',
+    'The selected file does not resolve to one unique Artifact Truth record.',
+  );
+  let absolutePath;
   if (declaredMatches.length === 1 && declaredMatches[0].path) {
     try {
       const jobRoot = fs.realpathSync(layout.jobRoot || layout.jobDir);
@@ -385,18 +526,34 @@ function resolveArtifactPath({ req, job, project, artifactName }) {
       if (!isPathContained(jobRoot, declaredPath) || !fs.statSync(declaredPath).isFile()) {
         return { error: { status: 400, code: 'artifact_outside_job' } };
       }
-      return { absolutePath: declaredPath, layout };
+      absolutePath = declaredPath;
     } catch {
-      return { error: { status: 404, code: 'artifact_not_found' } };
+      return artifactTruthError(
+        'artifact_file_unavailable',
+        'The selected Artifact file is unavailable.',
+      );
     }
   }
-  const absolute = path.resolve(outputDir, name);
-  const resolvedOutput = path.resolve(outputDir);
-  if (absolute !== resolvedOutput && !absolute.startsWith(resolvedOutput + path.sep)) {
-    return { error: { status: 400, code: 'artifact_outside_output' } };
+  if (!absolutePath) {
+    const absolute = path.resolve(outputDir, name);
+    const resolvedOutput = path.resolve(outputDir);
+    if (absolute !== resolvedOutput && !absolute.startsWith(resolvedOutput + path.sep)) {
+      return { error: { status: 400, code: 'artifact_outside_output' } };
+    }
+    if (!fs.existsSync(absolute)) return artifactTruthError(
+      'artifact_file_unavailable',
+      'The selected Artifact file is unavailable.',
+    );
+    absolutePath = absolute;
   }
-  if (!fs.existsSync(absolute)) return { error: { status: 404, code: 'artifact_not_found' } };
-  return { absolutePath: absolute, layout };
+  const binding = findArtifactRecord(job.result, absolutePath, name);
+  if (binding.error) return binding;
+  return {
+    absolutePath,
+    layout,
+    artifactRecord: binding.artifactRecord,
+    expectedSha256: binding.expectedSha256,
+  };
 }
 
 module.exports = function registerResultStudioRoutes(app) {
@@ -494,12 +651,12 @@ module.exports = function registerResultStudioRoutes(app) {
 
     const resolved = resolveArtifactPath({ req, job: loaded.job, project: loaded.project, artifactName });
     if (resolved.error) {
-      return res.status(resolved.error.status).json({ error: resolved.error.code, message: resolved.error.message });
+      return sendArtifactResolutionError(res, resolved.error);
     }
     if (!TABLE_EXTENSIONS.test(artifactName) && !PLOT_EXTENSIONS.test(artifactName)) {
       return res.status(415).json({ error: 'artifact_kind_not_interactive' });
     }
-    const artifactRecord = findArtifactRecord(loaded.job.result || {}, resolved.absolutePath, artifactName);
+    const artifactRecord = resolved.artifactRecord;
     const interaction = resolveInteractionDescriptor(loaded.job.tool_id, artifactRecord, artifactName);
 
     let revision = null;
@@ -508,7 +665,7 @@ module.exports = function registerResultStudioRoutes(app) {
     try {
       if (explicitRevisionId) {
         const candidate = repo().getRevision(explicitRevisionId);
-        if (candidate && artifactRecord && candidate.projectId === loaded.project.id
+        if (candidate && candidate.projectId === loaded.project.id
           && candidate.toolJobId === loaded.job.id && candidate.artifactId === artifactRecord.id) {
           revision = candidate;
         } else {
@@ -516,65 +673,69 @@ module.exports = function registerResultStudioRoutes(app) {
         }
       } else {
         const result = loaded.job.result || {};
-        if (!artifactRecord) {
-          revisionDiagnostic = { code: 'artifact_identity_unavailable', message: 'Artifact identity is not unique in the completed Job.' };
+        const pluginManifest = pluginLoader.getPluginManifest(loaded.job.tool_id);
+        const pluginDescriptor = pluginManifest?.resultStudio || null;
+        const baseline = resolveInteractionBaselineRevision({
+          repository: repo(),
+          projectId: loaded.project.id,
+          sourceJob: loaded.job,
+          artifactId: artifactRecord.id,
+          pluginDescriptor,
+        });
+        if (!baseline.requiresEnsure) {
+          revision = baseline.revision;
         } else {
-          const pluginManifest = pluginLoader.getPluginManifest(loaded.job.tool_id);
-          const pluginDescriptor = pluginManifest?.resultStudio || null;
-          const baseline = resolveInteractionBaselineRevision({
-            repository: repo(),
+          const snapshot = result.executionProvenance?.script;
+          if (!snapshot?.snapshotPath || !snapshot.sha256) {
+            throw Object.assign(new Error('Execution script snapshot is unavailable.'), { code: 'source_script_missing' });
+          }
+          if (!fs.existsSync(snapshot.snapshotPath) || !fs.statSync(snapshot.snapshotPath).isFile()) {
+            throw Object.assign(new Error('Execution script snapshot is unavailable.'), { code: 'source_script_missing' });
+          }
+          const realWorkspace = fs.realpathSync(loaded.project.workspace_path);
+          const sourceScriptPath = fs.realpathSync(snapshot.snapshotPath);
+          if (!isPathContained(realWorkspace, sourceScriptPath)) {
+            throw Object.assign(new Error('Execution script snapshot escaped the project.'), { code: 'source_script_outside_project' });
+          }
+          const baselineInput = {
             projectId: loaded.project.id,
+            workspaceRoot: loaded.project.workspace_path,
             sourceJob: loaded.job,
             artifactId: artifactRecord.id,
+            pluginId: loaded.job.tool_id,
+            language: result.tool?.language || (/\.py$/i.test(sourceScriptPath) ? 'python' : 'r'),
+            sourceScriptContent: fs.readFileSync(sourceScriptPath, 'utf8'),
+            sourceScriptSha256: snapshot.sha256,
             pluginDescriptor,
-          });
-          if (!baseline.requiresEnsure) {
-            revision = baseline.revision;
-          } else {
-            const snapshot = result.executionProvenance?.script;
-            if (!snapshot?.snapshotPath || !snapshot.sha256) {
-              throw Object.assign(new Error('Execution script snapshot is unavailable.'), { code: 'source_script_missing' });
-            }
-            const realWorkspace = fs.realpathSync(loaded.project.workspace_path);
-            const sourceScriptPath = fs.realpathSync(snapshot.snapshotPath);
-            if (!isPathContained(realWorkspace, sourceScriptPath)) {
-              throw Object.assign(new Error('Execution script snapshot escaped the project.'), { code: 'source_script_outside_project' });
-            }
-            const baselineInput = {
+          };
+          const baselineKey = `${loaded.project.id}\0${loaded.job.id}\0baseline-cohort`;
+          const ensured = await baselineWork.run(
+            baselineKey,
+            'ensure-baseline',
+            {
+              databasePath,
               projectId: loaded.project.id,
               workspaceRoot: loaded.project.workspace_path,
-              sourceJob: loaded.job,
-              artifactId: artifactRecord.id,
-              pluginId: loaded.job.tool_id,
-              language: result.tool?.language || (/\.py$/i.test(sourceScriptPath) ? 'python' : 'r'),
-              sourceScriptContent: fs.readFileSync(sourceScriptPath, 'utf8'),
-              sourceScriptSha256: snapshot.sha256,
-              pluginDescriptor,
-            };
-            const baselineKey = `${loaded.project.id}\0${loaded.job.id}\0baseline-cohort`;
-            const ensured = await baselineWork.run(
-              baselineKey,
-              'ensure-baseline',
-              {
-                databasePath,
-                projectId: loaded.project.id,
-                workspaceRoot: loaded.project.workspace_path,
-                input: baselineInput,
-              },
-            );
-            revision = ensured.revision;
-          }
+              input: baselineInput,
+            },
+          );
+          revision = ensured.revision;
         }
       }
     } catch (error) {
       revisionDiagnostic = baselineFailureDiagnostic(error);
     }
     const revisionId = revision?.revisionId || null;
-    const stableArtifactId = artifactRecord?.id || artifactName;
+    const stableArtifactId = artifactRecord.id;
+    let activeReadArtifact = resolved;
 
     try {
       if (TABLE_EXTENSIONS.test(artifactName)) {
+        const beforeRead = verifyArtifactRecordBytes(artifactRecord, resolved.absolutePath);
+        if (beforeRead.error) return sendArtifactResolutionError(res, beforeRead.error);
         const sample = readTableSample(resolved.absolutePath, artifactName);
+        const afterRead = verifyArtifactRecordBytes(artifactRecord, resolved.absolutePath);
+        if (afterRead.error) return sendArtifactResolutionError(res, afterRead.error);
         const mapping = interaction.mapping;
         let backingTable = null;
         if (mapping?.mode === 'matrix') {
@@ -582,13 +743,16 @@ module.exports = function registerResultStudioRoutes(app) {
           const backing = backingName === artifactName
             ? resolved
             : resolveArtifactPath({ req, job: loaded.job, project: loaded.project, artifactName: backingName });
-          if (!backing.error) {
-            backingTable = queryResultTable({
-              filePath: backing.absolutePath,
-              idField: mapping.rowIdField || null,
-              limit: 100,
-            });
-          }
+          if (backing.error) return sendArtifactResolutionError(res, backing.error);
+          activeReadArtifact = backing;
+          backingTable = queryResultTable({
+            filePath: backing.absolutePath,
+            expectedSha256: backing.expectedSha256,
+            idField: mapping.rowIdField || null,
+            limit: 100,
+          });
+          const backingAfterRead = verifyArtifactRecordBytes(backing.artifactRecord, backing.absolutePath);
+          if (backingAfterRead.error) return sendArtifactResolutionError(res, backingAfterRead.error);
         }
         const manifest = buildTableInteractionManifest({
           artifactId: stableArtifactId,
@@ -630,6 +794,8 @@ module.exports = function registerResultStudioRoutes(app) {
       }
 
       if (PLOT_EXTENSIONS.test(artifactName)) {
+        const currentPlot = verifyArtifactRecordBytes(artifactRecord, resolved.absolutePath);
+        if (currentPlot.error) return sendArtifactResolutionError(res, currentPlot.error);
         const mapping = interaction.mapping;
         const manifest = buildPlotInteractionManifest({
           artifactId: stableArtifactId,
@@ -653,20 +819,16 @@ module.exports = function registerResultStudioRoutes(app) {
           const backing = resolveArtifactPath({
             req, job: loaded.job, project: loaded.project, artifactName: backingName,
           });
-          if (!backing.error) {
-            backingTable = queryResultTable({
-              filePath: backing.absolutePath,
-              idField: mapping.idField || mapping.rowIdField || null,
-              limit: 250,
-            });
-          } else {
-            manifest.capabilities = [];
-            manifest.selectionDurable = false;
-            manifest.diagnostics = [...manifest.diagnostics, {
-              code: 'interaction_backing_data_unavailable',
-              message: 'Declared interaction backing data is unavailable; artifact is read-only.',
-            }];
-          }
+          if (backing.error) return sendArtifactResolutionError(res, backing.error);
+          activeReadArtifact = backing;
+          backingTable = queryResultTable({
+            filePath: backing.absolutePath,
+            expectedSha256: backing.expectedSha256,
+            idField: mapping.idField || mapping.rowIdField || null,
+            limit: 250,
+          });
+          const backingAfterRead = verifyArtifactRecordBytes(backing.artifactRecord, backing.absolutePath);
+          if (backingAfterRead.error) return sendArtifactResolutionError(res, backingAfterRead.error);
         }
         if (mapping?.mode === 'matrix' && !backingTable) {
           manifest.capabilities = [];
@@ -675,6 +837,11 @@ module.exports = function registerResultStudioRoutes(app) {
         return res.json({ manifest, revision, backingTable, sampledRows: backingTable?.rows?.length || 0, truncated: !!backingTable?.nextOffset });
       }
     } catch (error) {
+      const currentTruth = verifyArtifactRecordBytes(
+        activeReadArtifact.artifactRecord,
+        activeReadArtifact.absolutePath,
+      );
+      if (currentTruth.error) return sendArtifactResolutionError(res, currentTruth.error);
       return res.status(500).json({ error: 'interaction_manifest_failed', message: error && error.message });
     }
   });
@@ -688,8 +855,8 @@ module.exports = function registerResultStudioRoutes(app) {
     const loaded = loadJobAndProject(req, jobId);
     if (loaded.error) return res.status(loaded.error.status).json({ error: loaded.error.code });
     const resolved = resolveArtifactPath({ req, job: loaded.job, project: loaded.project, artifactName });
-    if (resolved.error) return res.status(resolved.error.status).json({ error: resolved.error.code });
-    const artifactRecord = findArtifactRecord(loaded.job.result || {}, resolved.absolutePath, artifactName);
+    if (resolved.error) return sendArtifactResolutionError(res, resolved.error);
+    const artifactRecord = resolved.artifactRecord;
     const interaction = resolveInteractionDescriptor(loaded.job.tool_id, artifactRecord, artifactName);
     const mapping = interaction.mapping;
     if (!mapping) return res.status(409).json({ error: 'plugin_interaction_mapping_missing' });
@@ -697,17 +864,23 @@ module.exports = function registerResultStudioRoutes(app) {
     const queryPath = queryName === artifactName
       ? resolved
       : resolveArtifactPath({ req, job: loaded.job, project: loaded.project, artifactName: queryName });
-    if (queryPath.error) return res.status(queryPath.error.status).json({ error: queryPath.error.code });
+    if (queryPath.error) return sendArtifactResolutionError(res, queryPath.error);
     try {
-      return res.json(queryResultTable({
+      const result = queryResultTable({
         filePath: queryPath.absolutePath,
+        expectedSha256: queryPath.expectedSha256,
         idField: mapping.idField || mapping.rowIdField || null,
         filterExpression: body.filterExpression,
         sort: body.sort,
         offset: Number(body.offset),
         limit: Number(body.limit),
-      }));
+      });
+      const afterRead = verifyArtifactRecordBytes(queryPath.artifactRecord, queryPath.absolutePath);
+      if (afterRead.error) return sendArtifactResolutionError(res, afterRead.error);
+      return res.json(result);
     } catch (error) {
+      const currentTruth = verifyArtifactRecordBytes(queryPath.artifactRecord, queryPath.absolutePath);
+      if (currentTruth.error) return sendArtifactResolutionError(res, currentTruth.error);
       const status = error instanceof ResultStudioTableQueryError ? 400 : 500;
       return res.status(status).json({ error: error.code || 'table_query_failed', message: error.message, detail: error.detail || null });
     }
@@ -1062,6 +1235,7 @@ module.exports = function registerResultStudioRoutes(app) {
         repository: context.repository,
         adapter: context.binding.adapter,
         gitPathPrefix: context.gitPathPrefix,
+        getToolJob: db.getToolJob,
       }));
     } catch (error) {
       return res.status(409).json({ error: error.code || 'compare_failed', message: error.message, detail: error.detail || null });
@@ -1088,31 +1262,41 @@ module.exports = function registerResultStudioRoutes(app) {
           projectId,
           workspaceRoot: context.project.workspace_path,
           conversationId,
+          runtimeLease: getResultStudioRuntimeLease(),
         },
       );
       return res.json(result);
     } catch (error) {
-      return res.status(409).json({ error: error.code || 'workspace_inspection_failed', message: error.message });
+      return res.status(409).json({
+        error: error.code || 'workspace_inspection_failed',
+        message: publicResultStudioErrorMessage(error, 'Result Studio workspace inspection failed.'),
+      });
     }
   });
 
-  app.post('/api/result-studio/workspace/recover', (req, res) => {
+  app.post('/api/result-studio/workspace/recover', async (req, res) => {
     const projectId = String(req.body?.projectId || '').trim();
-    const context = projectContext(req, projectId, { write: true });
+    const context = projectContext(req, projectId, { git: false });
     if (context.error) return res.status(context.error.status).json({ error: context.error.code });
     try {
-      const result = recoverResultStudioWorkspace({
-        workspaceRoot: context.project.workspace_path,
-        projectId,
-        conversationId: String(req.body?.conversationId || '').trim() || null,
-      }, {
-        repository: context.repository,
-        adapter: context.binding.adapter,
-        getToolJob: db.getToolJob,
-      });
+      const conversationId = String(req.body?.conversationId || '').trim() || null;
+      const result = await workspaceInspectionWork.run(
+        `recover\0${projectId}\0${conversationId || ''}`,
+        'recover-workspace',
+        {
+          databasePath,
+          projectId,
+          workspaceRoot: context.project.workspace_path,
+          conversationId,
+          runtimeLease: getResultStudioRuntimeLease(),
+        },
+      );
       return res.status(result.after.status === 'blocked' ? 409 : 200).json({ ok: result.after.status !== 'blocked', ...result });
     } catch (error) {
-      return res.status(409).json({ error: error.code || 'workspace_recovery_failed', message: error.message });
+      return res.status(409).json({
+        error: error.code || 'workspace_recovery_failed',
+        message: publicResultStudioErrorMessage(error, 'Result Studio workspace recovery failed.'),
+      });
     }
   });
 
@@ -1183,10 +1367,7 @@ module.exports = function registerResultStudioRoutes(app) {
       }
     } catch { /* snapshot reports unknown disk */ }
     const activePreviewJobs = context.repository.listChangeSets({ projectId, status: 'running', limit: 500 }).length;
-    const estimatedMemoryBytes = Math.max(0, Number(req.query.estimatedMemoryBytes || 0));
-    const estimatedDiskBytes = Math.max(0, Number(req.query.estimatedDiskBytes || 0));
-    const snapshot = createRuntimeResourceSnapshot({ disk, activeJobs: activePreviewJobs, estimatedMemoryBytes });
-    return res.json({ snapshot, budget: evaluatePreviewResourceBudget({ resourceSnapshot: snapshot, estimatedMemoryBytes, estimatedDiskBytes, activePreviewJobs }) });
+    return res.json(buildContextBoundPreviewBudget({ disk, activePreviewJobs }));
   });
 
   app.get('/api/result-studio/revisions/:revisionId/table-page', (req, res) => {
@@ -1277,17 +1458,30 @@ module.exports = function registerResultStudioRoutes(app) {
     const context = projectContext(req, revision.projectId, { git: false });
     if (context.error) return res.status(context.error.status).json({ error: context.error.code });
     try {
-      const workspace = fs.realpathSync(context.project.workspace_path);
-      const artifact = fs.realpathSync(path.join(workspace, revision.outputPath));
-      if (!isPathContained(workspace, artifact)) throw new Error('artifact_path_escape');
-      if (!revision.outputHash || hashFile(artifact) !== revision.outputHash) {
-        throw new Error('artifact_hash_mismatch');
-      }
-      return res.sendFile(artifact);
+      const opened = openVerifiedRevisionArtifact(context.project.workspace_path, revision);
+      const stream = fs.createReadStream(null, { fd: opened.fd, autoClose: true, start: 0 });
+      stream.once('error', (error) => {
+        if (!res.headersSent) res.status(404).json({ error: 'revision_artifact_unavailable' });
+        else res.destroy(error);
+      });
+      res
+        .type(artifactContentTypeHint(opened.artifactPath))
+        .set('Cache-Control', 'private, no-store')
+        .set('Content-Length', String(opened.stat.size));
+      return stream.pipe(res);
     } catch (error) {
       return res.status(404).json({ error: 'revision_artifact_unavailable', message: error.message });
     }
   });
 };
 
-module.exports._test = { baselineFailureDiagnostic, resolveInteractionBaselineRevision };
+module.exports._test = {
+  baselineFailureDiagnostic,
+  buildContextBoundPreviewBudget,
+  findArtifactRecord,
+  openVerifiedRevisionArtifact,
+  publicResultStudioErrorMessage,
+  resolveArtifactPath,
+  resolveInteractionBaselineRevision,
+  verifyArtifactRecordBytes,
+};

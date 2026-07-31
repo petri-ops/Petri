@@ -1,12 +1,16 @@
 import assert from 'node:assert/strict';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { queryResultTable } = require('../core/shared-backend/result-studio-table-query');
+const {
+  clearResultTableCache,
+  queryResultTable,
+} = require('../core/shared-backend/result-studio-table-query');
 
 function tableFile(context, rows = 100) {
   const root = join(tmpdir(), `biof3-rs-p2-${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}`);
@@ -69,4 +73,41 @@ test('RS-P2 rejects unknown fields instead of silently returning a misleading se
     filePath,
     filterExpression: { logic: 'and', clauses: [{ field: 'missing', op: 'eq', value: 'x' }] },
   }), (error) => error.code === 'filter_field_unknown');
+});
+
+test('P6 parsed-table cache invalidates when immutable Artifact bytes change', (context) => {
+  clearResultTableCache();
+  const filePath = tableFile(context, 20);
+  const before = queryResultTable({
+    filePath,
+    idField: 'gene',
+    filterExpression: { logic: 'and', clauses: [{ field: 'gene', op: 'contains', value: 'G000001' }] },
+  });
+  assert.equal(before.matchedCount, 1);
+  const original = readFileSync(filePath, 'utf8');
+  writeFileSync(filePath, original.replace('G000001', 'X000001'));
+  const after = queryResultTable({
+    filePath,
+    idField: 'gene',
+    filterExpression: { logic: 'and', clauses: [{ field: 'gene', op: 'contains', value: 'G000001' }] },
+  });
+  assert.equal(after.matchedCount, 0);
+  assert.notEqual(after.filterHash, before.filterHash);
+});
+
+test('P6 table query binds the bytes it parsed to the expected Artifact Truth hash', (context) => {
+  clearResultTableCache();
+  const filePath = tableFile(context, 20);
+  const expectedSha256 = createHash('sha256').update(readFileSync(filePath)).digest('hex');
+  assert.equal(queryResultTable({ filePath, expectedSha256 }).totalRows, 20);
+
+  writeFileSync(filePath, readFileSync(filePath, 'utf8').replace('G000001', 'X000001'));
+  assert.throws(
+    () => queryResultTable({ filePath, expectedSha256 }),
+    (error) => error.code === 'artifact_truth_drift',
+  );
+  assert.throws(
+    () => queryResultTable({ filePath, expectedSha256: 'not-a-sha' }),
+    (error) => error.code === 'artifact_truth_unavailable',
+  );
 });

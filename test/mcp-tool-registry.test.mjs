@@ -11,7 +11,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const R_SERVER = resolve(__dirname, '..', 'core', 'r-server');
 
 const pluginLoader = await import(R_SERVER + '/plugin-loader.js');
-const { listTools, callTool } = await import(resolve(__dirname, '..', 'core', 'r-server', 'mcp', 'registry.js'));
+const registryModule = await import(resolve(__dirname, '..', 'core', 'r-server', 'mcp', 'registry.js'));
+const { listTools, callTool } = registryModule;
+const registryTest = registryModule.default?._test || registryModule._test;
 
 // helper：注册一个 mock 插件到 globalThis._biof3Plugins
 function mockPlugin(id, def) {
@@ -37,6 +39,18 @@ test('_inputsToInputSchema 把 inputs[] 转 JSON Schema', () => {
   assert.equal(schema.properties.fc_threshold.type, 'number');
   assert.equal(schema.properties.deg_table.type, 'string');
   assert.equal(schema.properties.fc_threshold.default, 1);
+});
+
+test('MCP registry honors the same explicit built-in source root as the HTTP server', () => {
+  const previous = process.env.BIOF3_BUILT_IN_PLUGINS_DIR;
+  const configured = resolve(__dirname, 'fixtures', 'isolated-built-ins');
+  try {
+    process.env.BIOF3_BUILT_IN_PLUGINS_DIR = configured;
+    assert.equal(registryTest.resolveBuiltInPluginsDir(), configured);
+  } finally {
+    if (previous === undefined) delete process.env.BIOF3_BUILT_IN_PLUGINS_DIR;
+    else process.env.BIOF3_BUILT_IN_PLUGINS_DIR = previous;
+  }
 });
 
 test('单细胞步骤已移除：callTool 视为未知工具', async () => {

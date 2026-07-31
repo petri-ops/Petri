@@ -129,15 +129,25 @@ function VirtualScientificTable({
 
   React.useEffect(() => {
     let cancelled = false;
-    const timer = window.setTimeout(() => {
-      setLoading(true);
-      setError('');
-      queryResultStudioTable({ language, jobId, artifact: artifactName, filterExpression, sort, offset, limit: PAGE_SIZE })
-        .then((data) => { if (!cancelled) setQuery(data); })
-        .catch((reason: Error) => { if (!cancelled) setError(reason.message || '表格查询失败'); })
-        .finally(() => { if (!cancelled) setLoading(false); });
-    }, 120);
-    return () => { cancelled = true; window.clearTimeout(timer); };
+    const controller = new AbortController();
+    setLoading(true);
+    setError('');
+    queryResultStudioTable({
+      language,
+      jobId,
+      artifact: artifactName,
+      filterExpression,
+      sort,
+      offset,
+      limit: PAGE_SIZE,
+      signal: controller.signal,
+    })
+      .then((data) => { if (!cancelled) setQuery(data); })
+      .catch((reason: Error) => {
+        if (!cancelled && reason.name !== 'AbortError') setError(reason.message || '表格查询失败');
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; controller.abort(); };
   }, [artifactName, filterExpression, jobId, language, offset, sort]);
 
   React.useEffect(() => {

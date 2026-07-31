@@ -8,6 +8,7 @@ const { validateResultEditIntent } = require('./result-edit-intent');
 const { isPathContained } = require('./project-run-layout');
 const { createRuntimeResourceSnapshot } = require('./runtime-resource-snapshot');
 const { evaluatePreviewResourceBudget } = require('./result-studio-lifecycle');
+const { getResultStudioRuntimeLease } = require('./result-studio-runtime-lease');
 const { verifyRevisionSourceMaterial } = require('./result-revision-source');
 const {
   buildAuthoritativeWorkflowGraph,
@@ -23,6 +24,12 @@ const { resolveExecutionInputPath, verifyExecutionProvenance } = require('./exec
 const RESULT_CHANGESET_SERVICE_VERSION = 1;
 const MAX_SCRIPT_BYTES = 2 * 1024 * 1024;
 const MAX_PARAMETERS_BYTES = 1024 * 1024;
+const ZERO_OID = '0'.repeat(40);
+const DEFAULT_PREVIEW_BASE_MEMORY_BYTES = 256 * 1024 * 1024;
+const DEFAULT_PREVIEW_INPUT_MEMORY_MULTIPLIER = 4;
+const DEFAULT_PREVIEW_OUTPUT_DISK_MULTIPLIER = 2;
+const PREVIEW_METADATA_RESERVE_BYTES = 8 * 1024 * 1024;
+const MAX_RESOURCE_MODEL_MULTIPLIER = 64;
 const SENSITIVE_PARAMETER = /(?:^|_)(?:api_?key|access_?token|secret|password|credential)(?:$|_)/i;
 
 class ResultChangeSetError extends Error {
@@ -56,6 +63,199 @@ function safeSegment(value, field) {
     throw new ResultChangeSetError(`${field}_invalid`, `${field} must be a safe identifier.`);
   }
   return normalized;
+}
+
+function resourceNumber(value, { minimum = 0, maximum = Number.MAX_SAFE_INTEGER } = {}) {
+  if (value == null || value === '') return null;
+  const number = Number(value);
+  return Number.isFinite(number) && number >= minimum && number <= maximum ? number : null;
+}
+
+function boundedResourceProduct(...values) {
+  let product = 1;
+  for (const value of values) {
+    product *= value;
+    if (!Number.isFinite(product) || product > Number.MAX_SAFE_INTEGER) return Number.MAX_SAFE_INTEGER;
+  }
+  return Math.ceil(product);
+}
+
+function trustedFileSize(workspaceRoot, candidate, code) {
+  try {
+    const root = fs.realpathSync(workspaceRoot);
+    const target = fs.realpathSync(candidate);
+    const stat = fs.statSync(target);
+    if (!isPathContained(root, target) || !stat.isFile()) throw new Error('outside');
+    return stat.size;
+  } catch {
+    throw new ResultChangeSetError(code, 'A trusted resource-estimation file is missing or escapes the project.');
+  }
+}
+
+function trustedPreviewResourceModel(descriptor) {
+  const raw = descriptor?.previewResourceModel;
+  if (raw == null) {
+    return {
+      baseMemoryBytes: DEFAULT_PREVIEW_BASE_MEMORY_BYTES,
+      inputMemoryMultiplier: DEFAULT_PREVIEW_INPUT_MEMORY_MULTIPLIER,
+      outputDiskMultiplier: DEFAULT_PREVIEW_OUTPUT_DISK_MULTIPLIER,
+      raster: null,
+    };
+  }
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    throw new ResultChangeSetError('preview_resource_model_invalid', 'The trusted plugin preview resource model is invalid.');
+  }
+  const baseMemoryBytes = resourceNumber(raw.baseMemoryBytes, { minimum: 1 });
+  const inputMemoryMultiplier = resourceNumber(raw.inputMemoryMultiplier, {
+    minimum: 0,
+    maximum: MAX_RESOURCE_MODEL_MULTIPLIER,
+  });
+  const outputDiskMultiplier = resourceNumber(raw.outputDiskMultiplier, {
+    minimum: 1,
+    maximum: MAX_RESOURCE_MODEL_MULTIPLIER,
+  });
+  if (baseMemoryBytes == null || inputMemoryMultiplier == null || outputDiskMultiplier == null) {
+    throw new ResultChangeSetError('preview_resource_model_invalid', 'The trusted plugin preview resource model has invalid numeric bounds.');
+  }
+  let raster = null;
+  if (raw.raster != null) {
+    const candidate = raw.raster;
+    const parameterIds = ['widthParameter', 'heightParameter', 'dpiParameter'];
+    const bytesPerPixel = resourceNumber(candidate?.bytesPerPixel, { minimum: 1, maximum: 32 });
+    const workingSetMultiplier = resourceNumber(candidate?.workingSetMultiplier, {
+      minimum: 1,
+      maximum: MAX_RESOURCE_MODEL_MULTIPLIER,
+    });
+    if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate)
+        || parameterIds.some((key) => !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(String(candidate[key] || ''))
+          || !descriptor?.parameters?.[candidate[key]])
+        || bytesPerPixel == null || workingSetMultiplier == null) {
+      throw new ResultChangeSetError('preview_resource_model_invalid', 'The trusted plugin raster resource model is invalid.');
+    }
+    raster = {
+      widthParameter: candidate.widthParameter,
+      heightParameter: candidate.heightParameter,
+      dpiParameter: candidate.dpiParameter,
+      bytesPerPixel,
+      workingSetMultiplier,
+    };
+  }
+  return { baseMemoryBytes, inputMemoryMultiplier, outputDiskMultiplier, raster };
+}
+
+function deriveTrustedPreviewResourceEstimate({
+  descriptor,
+  sourceJob,
+  sourceResult,
+  workspaceRoot,
+  trustedExecution,
+  sourceOutputPath,
+  sourceRevision,
+  proposedParameterPatch = {},
+  downstreamPlan = [],
+} = {}) {
+  const model = trustedPreviewResourceModel(descriptor);
+  const provenanceInputs = Array.isArray(sourceResult?.executionProvenance?.inputs)
+    ? sourceResult.executionProvenance.inputs
+    : [];
+  let inputBytes = 0;
+  for (const input of provenanceInputs) {
+    const inputId = safeSegment(input?.id, 'source_input_id');
+    const physical = trustedExecution?.runtime?.[inputId];
+    if (typeof physical !== 'string' || !path.isAbsolute(physical)) {
+      throw new ResultChangeSetError('preview_resource_estimate_unavailable', 'A verified source input is unavailable for resource estimation.');
+    }
+    inputBytes += trustedFileSize(workspaceRoot, physical, 'preview_resource_estimate_unavailable');
+  }
+
+  const descriptorArtifactIds = Array.isArray(descriptor?.artifacts)
+    ? descriptor.artifacts.map((artifact) => String(artifact?.id || '').trim()).filter(Boolean)
+    : [];
+  const selectedOutputBytes = trustedFileSize(workspaceRoot, sourceOutputPath, 'preview_resource_estimate_unavailable');
+  let sourceOutputBytes = selectedOutputBytes;
+  let sourceOutputMeasurement = 'selected_revision_artifact';
+  if (descriptorArtifactIds.length > 0) {
+    const descriptorArtifacts = descriptorArtifactIds.map((artifactId) => exactArtifact(sourceResult, artifactId));
+    // Historical Revisions may predate complete formal-output cohort registration.
+    // Their selected Revision has already passed the exact physical hash check
+    // above, so it is a trusted conservative floor. Only use all descriptor
+    // outputs when every one has a concrete current physical path; a partial
+    // list must never manufacture an estimate from missing artifacts.
+    if (descriptorArtifacts.every((artifact) => artifact?.path)) {
+      sourceOutputBytes = descriptorArtifacts.reduce((total, artifact) => total + trustedFileSize(
+        workspaceRoot,
+        artifact.path,
+        'preview_resource_estimate_unavailable',
+      ), 0);
+      sourceOutputMeasurement = 'complete_descriptor_artifacts';
+    }
+  }
+  const downstreamOutputBytes = (Array.isArray(downstreamPlan) ? downstreamPlan : [])
+    .reduce((total, entry) => total + trustedFileSize(
+      workspaceRoot,
+      entry.sourceOutputPath,
+      'preview_resource_estimate_unavailable',
+    ), 0);
+
+  const usage = sourceResult?.resourceUsage;
+  const historicalRssBytes = Number(usage?.sampling?.processSampleCount) > 0
+    ? resourceNumber(usage?.peak?.rssBytes, { minimum: 1 })
+    : null;
+  const inputWorkingSet = boundedResourceProduct(inputBytes, model.inputMemoryMultiplier);
+  let memoryBytes = Math.max(
+    model.baseMemoryBytes + inputWorkingSet,
+    historicalRssBytes == null ? 0 : boundedResourceProduct(historicalRssBytes, 1.25),
+  );
+  let rasterBytes = 0;
+  let rasterParameterSource = null;
+  if (model.raster) {
+    const parameters = { ...(trustedExecution?.normalized || {}), ...(proposedParameterPatch || {}) };
+    const defaultParameter = (parameterId) => resourceNumber(
+      descriptor?.parameters?.[parameterId]?.default,
+      { minimum: 1 },
+    );
+    const exactWidth = resourceNumber(parameters[model.raster.widthParameter], { minimum: 1 });
+    const exactHeight = resourceNumber(parameters[model.raster.heightParameter], { minimum: 1 });
+    const exactDpi = resourceNumber(parameters[model.raster.dpiParameter], { minimum: 1 });
+    const width = exactWidth ?? defaultParameter(model.raster.widthParameter);
+    const height = exactHeight ?? defaultParameter(model.raster.heightParameter);
+    const dpi = exactDpi ?? defaultParameter(model.raster.dpiParameter);
+    if (width != null && height != null && dpi != null) {
+      rasterParameterSource = exactWidth != null && exactHeight != null && exactDpi != null
+        ? 'trusted_execution_parameters'
+        : 'trusted_descriptor_defaults_for_legacy_revision';
+      rasterBytes = boundedResourceProduct(width, dpi, height, dpi, model.raster.bytesPerPixel);
+      memoryBytes = Math.max(memoryBytes, boundedResourceProduct(rasterBytes, model.raster.workingSetMultiplier));
+    } else {
+      // A pre-descriptor historical revision has no user-provided dimensions to
+      // trust. The base/input/output model remains a deterministic server-side
+      // guard while the response records that no raster term was available.
+      rasterParameterSource = 'not_available_in_legacy_revision';
+    }
+  }
+  const diskBytes = Math.max(
+    PREVIEW_METADATA_RESERVE_BYTES,
+    boundedResourceProduct(sourceOutputBytes + downstreamOutputBytes, model.outputDiskMultiplier)
+      + rasterBytes + PREVIEW_METADATA_RESERVE_BYTES,
+  );
+  if (!Number.isSafeInteger(memoryBytes) || memoryBytes <= 0
+      || !Number.isSafeInteger(diskBytes) || diskBytes <= 0) {
+    throw new ResultChangeSetError('preview_resource_estimate_unavailable', 'A finite trusted preview resource estimate could not be derived.');
+  }
+  return {
+    estimateVersion: 1,
+    source: 'server_job_descriptor_input_truth',
+    memoryBytes,
+    diskBytes,
+    inputBytes,
+    sourceOutputBytes,
+    sourceOutputMeasurement,
+    selectedRevisionId: sourceRevision?.revisionId || null,
+    downstreamOutputBytes,
+    historicalRssBytes,
+    rasterBytes,
+    rasterParameterSource,
+  };
 }
 
 function stableJson(value) {
@@ -944,6 +1144,86 @@ function inspectPersistedArtifactCohort(input = {}, dependencies = {}) {
   };
 }
 
+function adoptBaselineChangeSet({ repository, adapter, changeSetId, candidateCommit }) {
+  const changeSet = repository.getChangeSet(changeSetId);
+  if (!changeSet) {
+    throw new ResultChangeSetError('baseline_change_set_missing', 'Baseline ChangeSet is unavailable for adoption.');
+  }
+  if (changeSet.status === 'adopted') {
+    return repository.adoptChangeSet({ changeSetId, candidateCommit });
+  }
+  const revisions = repository.listRevisionsByChangeSet(changeSetId);
+  const expectedCommits = new Map(revisions.map((revision) => [
+    revision.revisionId,
+    repository.getCurrentRevision(revision.artifactFamilyId, revision.projectId)?.sourceCommit || null,
+  ]));
+  let refUpdates = [];
+  try {
+    const adopted = repository.adoptChangeSet({
+      changeSetId,
+      candidateCommit,
+      beforeCommit: ({ revisions: candidateRevisions }) => {
+        const updated = [];
+        try {
+          for (const revision of candidateRevisions) {
+            if (!revision.sourceCommit || revision.sourceCommit !== candidateCommit) {
+              throw new ResultChangeSetError(
+                'baseline_candidate_commit_mismatch',
+                'Baseline Revision source commit does not match its candidate commit.',
+              );
+            }
+            const ref = `refs/heads/biof3/current/${revision.artifactFamilyId}`;
+            const existing = adapter.revParse(ref);
+            const expected = expectedCommits.get(revision.revisionId) || null;
+            if ((existing && existing !== expected) || (!expected && existing)) {
+              throw new ResultChangeSetError(
+                'baseline_current_git_ref_stale',
+                'Baseline current Git ref does not match the persisted Revision.',
+                { artifactFamilyId: revision.artifactFamilyId },
+              );
+            }
+            const previous = existing || ZERO_OID;
+            adapter.updateRefCas({ ref, newCommit: candidateCommit, expectedOld: previous });
+            updated.push({ ref, previous, next: candidateCommit });
+          }
+          refUpdates = updated;
+        } catch (error) {
+          for (const entry of updated.reverse()) {
+            try {
+              if (entry.previous === ZERO_OID) {
+                adapter.deleteRefCas({ ref: entry.ref, expectedOld: entry.next });
+              } else {
+                adapter.updateRefCas({ ref: entry.ref, newCommit: entry.previous, expectedOld: entry.next });
+              }
+            } catch { /* lifecycle reconciliation will surface a ref-only residue */ }
+          }
+          throw error;
+        }
+        saveResultEditCheckpoint({
+          repository,
+          projectId: changeSet.projectId,
+          conversationId: changeSet.conversationId,
+          changeSetId,
+          candidateCommit,
+          stage: 'adopted',
+        });
+      },
+    });
+    return adopted;
+  } catch (error) {
+    for (const entry of refUpdates.reverse()) {
+      try {
+        if (entry.previous === ZERO_OID) {
+          adapter.deleteRefCas({ ref: entry.ref, expectedOld: entry.next });
+        } else {
+          adapter.updateRefCas({ ref: entry.ref, newCommit: entry.previous, expectedOld: entry.next });
+        }
+      } catch { /* lifecycle reconciliation will surface a ref-only residue */ }
+    }
+    throw error;
+  }
+}
+
 /**
  * Register all descriptor-declared formal outputs from one completed Job in a
  * single baseline cohort.  The legacy single-artifact path remains available
@@ -1069,7 +1349,12 @@ function ensureBaselineArtifactCohort(input = {}, dependencies = {}) {
       allowedStatuses: ['preview_ready'],
     });
     if (preview) {
-      repository.adoptChangeSet({ changeSetId: candidateId, candidateCommit: preview.changeSet.candidateCommit });
+      adoptBaselineChangeSet({
+        repository,
+        adapter,
+        changeSetId: candidateId,
+        candidateCommit: preview.changeSet.candidateCommit,
+      });
       const adopted = resolveCompleteBaselineCohort({
         repository,
         changeSetId: candidateId,
@@ -1188,7 +1473,7 @@ function ensureBaselineArtifactCohort(input = {}, dependencies = {}) {
 
   try {
     if (!changeSet) {
-      repository.createChangeSet({
+      const started = startResultEditChangeSet({ repository, stage: 'change_set', changeSet: {
         changeSetId,
         projectId,
         intentRef: `baseline:${sourceJob.id}:cohort`,
@@ -1196,12 +1481,12 @@ function ensureBaselineArtifactCohort(input = {}, dependencies = {}) {
         workingBranchRef,
         createdBy: 'agent',
         parentArtifactRefs: [],
-      });
-      repository.transitionChangeSet({ changeSetId, to: 'running' });
-      changeSet = repository.getChangeSet(changeSetId);
+      } });
+      changeSet = started.changeSet;
     } else if (changeSet.status === 'draft') {
-      repository.transitionChangeSet({ changeSetId, to: 'running' });
-      changeSet = repository.getChangeSet(changeSetId);
+      changeSet = transitionResultEditWithCheckpoint({
+        repository, projectId, conversationId: null, changeSetId, to: 'running', stage: 'change_set',
+      }).changeSet;
     }
     if (changeSet.status !== 'running') {
       throw new ResultChangeSetError('baseline_cohort_status_invalid', `Cannot complete baseline cohort from status ${changeSet.status}.`);
@@ -1268,6 +1553,11 @@ function ensureBaselineArtifactCohort(input = {}, dependencies = {}) {
           cohortDigest,
           formalArtifactIds: formalArtifacts.map((artifact) => artifact.artifactId),
           formalArtifactCount: formalArtifacts.length,
+          formalArtifactCohort: revisionInputs.map((revision) => ({
+            toolJobId: revision.toolJobId,
+            artifactId: revision.artifactId,
+            outputHash: revision.outputHash,
+          })),
           validatorId: validation.validatorId,
           validatorIds: [validation.validatorId],
           artifactTruthStatus: 'valid',
@@ -1277,9 +1567,20 @@ function ensureBaselineArtifactCohort(input = {}, dependencies = {}) {
           },
         },
       },
+      beforeCommit: () => {
+        saveResultEditCheckpoint({
+          repository,
+          projectId,
+          conversationId: null,
+          changeSetId,
+          candidateCommit,
+          stage: 'preview_ready',
+          recovery: 'awaiting_user_decision',
+        });
+      },
     });
     if (repository.getChangeSet(changeSetId)?.status === 'preview_ready') {
-      repository.adoptChangeSet({ changeSetId, candidateCommit });
+      adoptBaselineChangeSet({ repository, adapter, changeSetId, candidateCommit });
     }
     const complete = resolveCompleteBaselineCohort({
       repository,
@@ -1301,7 +1602,21 @@ function ensureBaselineArtifactCohort(input = {}, dependencies = {}) {
   } catch (error) {
     const current = repository.getChangeSet(changeSetId);
     if (current?.status === 'running') {
-      try { repository.transitionChangeSet({ changeSetId, to: 'validation_failed', reason: error.code || 'baseline_cohort_failed' }); } catch { /* recovery scan */ }
+      try {
+        transitionResultEditWithCheckpoint({
+          repository,
+          projectId,
+          conversationId: null,
+          changeSetId,
+          to: 'validation_failed',
+          stage: 'failed',
+          recovery: error.code || 'baseline_cohort_failed',
+          transition: {
+            reason: error.code || 'baseline_cohort_failed',
+            validationSummary: { error: error.code || 'baseline_cohort_failed' },
+          },
+        });
+      } catch { /* recovery scan */ }
     }
     throw error;
   }
@@ -1323,28 +1638,97 @@ function resolveBaseCommit(adapter, projectId) {
   }).commit;
 }
 
-function saveResultEditCheckpoint({ repository, projectId, conversationId, changeSetId, candidateCommit = null, stage, recovery = null }) {
-  if (!repository || typeof repository.saveCheckpoint !== 'function') return null;
-  const changeSet = repository.getChangeSet(changeSetId);
-  if (!changeSet) return null;
-  const revisionIds = repository.listRevisionsByChangeSet(changeSetId).map((revision) => revision.revisionId);
+function buildResultEditCheckpoint({ repository, projectId, conversationId, changeSet, candidateCommit = null, changeSetStatus = null, stage, recovery = null }) {
+  const revisionIds = repository.listRevisionsByChangeSet(changeSet.changeSetId).map((revision) => revision.revisionId);
   const currentRevisionIds = repository.listCurrentRevisions(projectId).map((revision) => revision.revisionId);
-  return repository.saveCheckpoint({
-    checkpointId: deterministicId('rscp', projectId, conversationId || '', changeSetId),
+  return {
+    checkpointId: deterministicId('rscp', projectId, conversationId || '', changeSet.changeSetId),
     projectId,
     conversationId: conversationId || null,
     baseCommit: changeSet.baseCommit,
     candidateCommit: candidateCommit || changeSet.candidateCommit || null,
-    changeSetId,
-    changeSetStatus: changeSet.status,
+    changeSetId: changeSet.changeSetId,
+    changeSetStatus: changeSetStatus || changeSet.status,
     currentRevisionIds,
     pendingPreview: {
       stage,
       revisionIds,
       recovery,
+      runtimeLease: getResultStudioRuntimeLease(),
     },
     jobRefs: changeSet.jobRefs,
+  };
+}
+
+function startResultEditChangeSet({ repository, changeSet, stage, maxConcurrentPreviews = null }) {
+  if (!repository || typeof repository.startChangeSetWithCheckpoint !== 'function') {
+    throw new ResultChangeSetError('checkpoint_start_unavailable', 'Atomic ChangeSet start is unavailable.');
+  }
+  const checkpoint = buildResultEditCheckpoint({
+    repository,
+    projectId: changeSet.projectId,
+    conversationId: changeSet.conversationId,
+    changeSet: { ...changeSet, status: 'draft', candidateCommit: null, jobRefs: [] },
+    changeSetStatus: 'running',
+    stage,
   });
+  return repository.startChangeSetWithCheckpoint({
+    changeSet,
+    checkpoint,
+    previewSlot: Number.isInteger(maxConcurrentPreviews) && maxConcurrentPreviews > 0
+      ? { projectId: changeSet.projectId, maxConcurrentPreviews }
+      : null,
+  });
+}
+
+function transitionResultEditWithCheckpoint({
+  repository,
+  projectId,
+  conversationId,
+  changeSetId,
+  to,
+  candidateCommit = null,
+  stage,
+  recovery = null,
+  transition = {},
+}) {
+  const changeSet = repository.getChangeSet(changeSetId);
+  if (!changeSet) return null;
+  const targetCandidateCommit = candidateCommit || changeSet.candidateCommit || null;
+  const checkpoint = buildResultEditCheckpoint({
+    repository,
+    projectId,
+    conversationId,
+    changeSet,
+    candidateCommit: targetCandidateCommit,
+    changeSetStatus: to,
+    stage,
+    recovery,
+  });
+  return repository.transitionChangeSetWithCheckpoint({
+    transition: {
+      ...transition,
+      changeSetId,
+      to,
+      candidateCommit: targetCandidateCommit || undefined,
+    },
+    checkpoint,
+  });
+}
+
+function saveResultEditCheckpoint({ repository, projectId, conversationId, changeSetId, candidateCommit = null, stage, recovery = null }) {
+  if (!repository || typeof repository.saveCheckpoint !== 'function') return null;
+  const changeSet = repository.getChangeSet(changeSetId);
+  if (!changeSet) return null;
+  return repository.saveCheckpoint(buildResultEditCheckpoint({
+    repository,
+    projectId,
+    conversationId,
+    changeSet,
+    candidateCommit,
+    stage,
+    recovery,
+  }));
 }
 
 /**
@@ -1438,7 +1822,7 @@ function ensureBaselineArtifactRevision(input = {}, dependencies = {}) {
   let candidateCommit = adapter.revParse(workingBranchRef);
   try {
     if (!changeSet) {
-      repository.createChangeSet({
+      const started = startResultEditChangeSet({ repository, stage: 'change_set', changeSet: {
         changeSetId,
         projectId,
         intentRef: `baseline:${sourceJob.id}:${artifactId}`,
@@ -1446,9 +1830,12 @@ function ensureBaselineArtifactRevision(input = {}, dependencies = {}) {
         workingBranchRef,
         createdBy: 'agent',
         parentArtifactRefs: [],
-      });
-      repository.transitionChangeSet({ changeSetId, to: 'running' });
-      changeSet = repository.getChangeSet(changeSetId);
+      } });
+      changeSet = started.changeSet;
+    } else if (changeSet.status === 'draft') {
+      changeSet = transitionResultEditWithCheckpoint({
+        repository, projectId, conversationId: null, changeSetId, to: 'running', stage: 'change_set',
+      }).changeSet;
     }
     if (!candidateCommit) {
       const gitPathPrefix = String(dependencies.gitPathPrefix || '').replace(/^\/+|\/+$/g, '');
@@ -1468,71 +1855,117 @@ function ensureBaselineArtifactRevision(input = {}, dependencies = {}) {
         files,
       }).commit;
     }
-    let revision = repository.getRevision(revisionId);
-    if (!revision) {
-      const inputArtifactRefs = (result.executionProvenance?.inputs || [])
-        .filter((entry) => entry && (entry.sourceArtifactRef || entry.id))
-        .map((entry) => ({
-          artifactId: entry.sourceArtifactRef || entry.id,
-          hash: entry.sha256 || null,
-          role: entry.role || null,
-        }));
-      revision = repository.appendRevision({
-        revisionId,
-        projectId,
-        artifactFamilyId,
+    const inputArtifactRefs = (result.executionProvenance?.inputs || [])
+      .filter((entry) => entry && (entry.sourceArtifactRef || entry.id))
+      .map((entry) => ({
+        artifactId: entry.sourceArtifactRef || entry.id,
+        hash: entry.sha256 || null,
+        role: entry.role || null,
+      }));
+    const revisionInput = {
+      revisionId,
+      projectId,
+      artifactFamilyId,
+      artifactId,
+      parentRevisionIds: [],
+      sourceCommit: candidateCommit,
+      sourceScriptRef: {
+        relativePath: scriptRelativePath,
+        sha256: sourceScriptSha256,
+        entryPoint: path.posix.basename(scriptRelativePath),
         artifactId,
-        parentRevisionIds: [],
-        sourceCommit: candidateCommit,
-        sourceScriptRef: {
-          relativePath: scriptRelativePath,
-          sha256: sourceScriptSha256,
-          entryPoint: path.posix.basename(scriptRelativePath),
-          artifactId,
-          rendererId,
-          language,
-          origin: 'project_materialized',
-        },
-        inputArtifactRefs,
-        parametersRef: parametersRelativePath,
-        parametersHash,
-        toolJobId: sourceJob.id,
-        outputPath,
-        outputHash,
-        validationStatus: result.artifactTruth.status,
-        reproducibilityStatus: 'available',
-        changeSetId,
-      });
-    }
+        rendererId,
+        language,
+        origin: 'project_materialized',
+      },
+      inputArtifactRefs,
+      parametersRef: parametersRelativePath,
+      parametersHash,
+      toolJobId: sourceJob.id,
+      outputPath,
+      outputHash,
+      validationStatus: result.artifactTruth.status,
+      reproducibilityStatus: 'available',
+      changeSetId,
+    };
+    const changedPaths = [
+      { relativePath: scriptRelativePath, changeType: 'added', beforeHash: null, afterHash: sourceScriptSha256 },
+      { relativePath: parametersRelativePath, changeType: 'added', beforeHash: null, afterHash: parametersHash },
+      { relativePath: manifestRelativePath, changeType: 'added', beforeHash: null, afterHash: sha256(manifestContent) },
+    ];
+    const validationSummary = {
+      artifactTruthStatus: 'valid',
+      baseline: true,
+      outputSha256: outputHash,
+      formalArtifactCount: 1,
+      formalArtifactCohort: [{ toolJobId: sourceJob.id, artifactId, outputHash }],
+    };
+    let revision = repository.getRevision(revisionId);
     changeSet = repository.getChangeSet(changeSetId);
-    if (changeSet.status === 'running') {
-      changeSet = repository.transitionChangeSet({
+    if (!revision) {
+      const batch = repository.appendRevisionBatch({
+        revisions: [revisionInput],
+        transition: {
+          changeSetId,
+          to: 'preview_ready',
+          candidateCommit,
+          changedPaths,
+          jobRefs: [sourceJob.id],
+          candidateArtifactRefs: [revisionId],
+          validationSummary,
+        },
+        beforeCommit: () => {
+          saveResultEditCheckpoint({
+            repository,
+            projectId,
+            conversationId: null,
+            changeSetId,
+            candidateCommit,
+            stage: 'preview_ready',
+            recovery: 'awaiting_user_decision',
+          });
+        },
+      });
+      revision = batch.revisions[0];
+      changeSet = batch.changeSet;
+    } else if (changeSet.status === 'running') {
+      changeSet = transitionResultEditWithCheckpoint({
+        repository,
+        projectId,
+        conversationId: null,
         changeSetId,
         to: 'preview_ready',
         candidateCommit,
-        changedPaths: [
-          { relativePath: scriptRelativePath, changeType: 'added', beforeHash: null, afterHash: sourceScriptSha256 },
-          { relativePath: parametersRelativePath, changeType: 'added', beforeHash: null, afterHash: parametersHash },
-          { relativePath: manifestRelativePath, changeType: 'added', beforeHash: null, afterHash: sha256(manifestContent) },
-        ],
-        jobRefs: [sourceJob.id],
-        candidateArtifactRefs: [revisionId],
-        validationSummary: { artifactTruthStatus: 'valid', baseline: true, outputSha256: outputHash },
+        stage: 'preview_ready',
+        recovery: 'awaiting_user_decision',
+        transition: {
+          changedPaths,
+          jobRefs: [sourceJob.id],
+          candidateArtifactRefs: [revisionId],
+          validationSummary,
+        },
       }).changeSet;
     }
     if (changeSet.status === 'preview_ready') {
-      repository.adoptChangeSet({ changeSetId, candidateCommit });
+      adoptBaselineChangeSet({ repository, adapter, changeSetId, candidateCommit });
     }
     return { revision: repository.getRevision(revisionId), created: true };
   } catch (error) {
     const current = repository.getChangeSet(changeSetId);
     if (current && current.status === 'running') {
       try {
-        repository.transitionChangeSet({
+        transitionResultEditWithCheckpoint({
+          repository,
+          projectId,
+          conversationId: null,
           changeSetId,
           to: 'validation_failed',
-          reason: error.code || 'baseline_registration_failed',
-          validationSummary: { error: error.code || 'baseline_registration_failed' },
+          stage: 'failed',
+          recovery: error.code || 'baseline_registration_failed',
+          transition: {
+            reason: error.code || 'baseline_registration_failed',
+            validationSummary: { error: error.code || 'baseline_registration_failed' },
+          },
         });
       } catch { /* leave the durable running record for recovery */ }
     }
@@ -1560,24 +1993,6 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
   }
   const projectId = String(input.projectId || '').trim();
   const workspaceRoot = path.resolve(input.workspaceRoot || '');
-  let disk = null;
-  try {
-    if (typeof fs.statfsSync === 'function') {
-      const stat = fs.statfsSync(workspaceRoot);
-      disk = { availableBytes: Number(stat.bavail) * Number(stat.bsize), totalBytes: Number(stat.blocks) * Number(stat.bsize) };
-    }
-  } catch { /* unknown disk state remains explicit in the snapshot */ }
-  const estimatedMemoryBytes = Math.max(0, Number(input.previewResourceEstimate?.memoryBytes || 0));
-  const estimatedDiskBytes = Math.max(0, Number(input.previewResourceEstimate?.diskBytes || 0));
-  const activePreviewJobs = Math.max(0, Number(dependencies.activePreviewJobs || 0));
-  const resourceSnapshot = createRuntimeResourceSnapshot({ disk, activeJobs: activePreviewJobs, estimatedMemoryBytes });
-  const previewBudget = evaluatePreviewResourceBudget({ resourceSnapshot, estimatedMemoryBytes, estimatedDiskBytes, activePreviewJobs });
-  if (previewBudget.decision === 'blocked') {
-    throw new ResultChangeSetError('preview_resource_budget_blocked', 'Preview Job cannot start within the current resource budget.', previewBudget);
-  }
-  if (previewBudget.decision === 'queued') {
-    throw new ResultChangeSetError('preview_resource_queued', 'Preview Job is queued because the background preview budget is saturated.', previewBudget);
-  }
   const sourceRevision = input.sourceRevision;
   const sourceJob = input.sourceJob;
   if (!sourceRevision || sourceRevision.projectId !== projectId
@@ -1633,6 +2048,65 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
     sourceRevision,
     sourceOutputHash: sourceArtifactHash,
   });
+  const exactSourceParams = sourceProjection.parameters.rawValues || sourceProjection.parameters.values;
+  if (input.normalizedSourceParams
+      && stableStringify(input.normalizedSourceParams) !== stableStringify(exactSourceParams)) {
+    throw new ResultChangeSetError('source_parameters_mismatch', 'Edit parameters do not match the selected Revision.');
+  }
+  const trustedExecution = buildTrustedExecutionParams({
+    sourceJob,
+    sourceProjection,
+    workspaceRoot,
+    parameterPatch: input.intent.proposedParameterPatch,
+  });
+  const normalizedSourceParams = trustedExecution.normalized;
+  const descriptor = resolveCandidateDescriptor({ dependencies, toolId: input.pluginId });
+  const resourceEstimate = deriveTrustedPreviewResourceEstimate({
+    descriptor,
+    sourceJob,
+    sourceResult,
+    workspaceRoot,
+    trustedExecution,
+    sourceOutputPath,
+    sourceRevision,
+    proposedParameterPatch: input.intent.proposedParameterPatch,
+    downstreamPlan,
+  });
+  let disk = null;
+  try {
+    const statfs = dependencies.statfsSync || fs.statfsSync;
+    if (typeof statfs === 'function') {
+      const stat = statfs(workspaceRoot);
+      disk = {
+        availableBytes: Number(stat.bavail) * Number(stat.bsize),
+        totalBytes: Number(stat.blocks) * Number(stat.bsize),
+      };
+    }
+  } catch { /* unknown disk state remains explicit and blocks execution */ }
+  const maxBackgroundPreviews = Number.isInteger(dependencies.maxBackgroundPreviews)
+    && dependencies.maxBackgroundPreviews > 0
+    ? dependencies.maxBackgroundPreviews
+    : 2;
+  const snapshotFactory = dependencies.createRuntimeResourceSnapshot || createRuntimeResourceSnapshot;
+  const resourceSnapshot = snapshotFactory({
+    disk,
+    activeJobs: 0,
+    estimatedMemoryBytes: resourceEstimate.memoryBytes,
+  });
+  const previewBudget = {
+    ...evaluatePreviewResourceBudget({
+      resourceSnapshot,
+      estimatedMemoryBytes: resourceEstimate.memoryBytes,
+      estimatedDiskBytes: resourceEstimate.diskBytes,
+      activePreviewJobs: 0,
+      maxBackgroundPreviews,
+      maxPreviewMemoryBytes: dependencies.maxPreviewMemoryBytes,
+    }),
+    resourceEstimate,
+  };
+  if (previewBudget.decision === 'blocked') {
+    throw new ResultChangeSetError('preview_resource_budget_blocked', 'Preview Job cannot start within the current resource budget.', previewBudget);
+  }
 
   const changeSetId = input.changeSetId || id('cs');
   const revisionId = input.revisionId || id('rev');
@@ -1651,34 +2125,37 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
 
   try {
     emit('change_set', 'running');
-    repository.createChangeSet({
-      changeSetId,
-      projectId,
-      conversationId: input.conversationId || null,
-      intentRef: input.intent.intentId,
-      baseCommit,
-      workingBranchRef,
-      createdBy: input.createdBy === 'user' ? 'user' : 'agent',
-      parentArtifactRefs: [sourceRevision.revisionId],
-    });
+    let started;
+    try {
+      started = startResultEditChangeSet({ repository, stage: 'change_set', maxConcurrentPreviews: maxBackgroundPreviews, changeSet: {
+        changeSetId,
+        projectId,
+        conversationId: input.conversationId || null,
+        intentRef: input.intent.intentId,
+        baseCommit,
+        workingBranchRef,
+        createdBy: input.createdBy === 'user' ? 'user' : 'agent',
+        parentArtifactRefs: [sourceRevision.revisionId],
+      } });
+    } catch (error) {
+      if (error?.code !== 'preview_concurrency_saturated') throw error;
+      throw new ResultChangeSetError(
+        'preview_resource_queued',
+        'Preview Job is queued because the background preview budget is saturated.',
+        {
+          ...previewBudget,
+          decision: 'queued',
+          reasons: [...new Set([...previewBudget.reasons, 'preview_concurrency_saturated'])],
+          activePreviewJobs: error.detail?.activePreviewJobs ?? maxBackgroundPreviews,
+          maxBackgroundPreviews: error.detail?.maxBackgroundPreviews ?? maxBackgroundPreviews,
+        },
+      );
+    }
+    previewBudget.activePreviewJobs = started.previewSlot?.activePreviewJobsBefore ?? 0;
     changeSetCreated = true;
-    repository.transitionChangeSet({ changeSetId, to: 'running' });
-    saveResultEditCheckpoint({ repository, projectId, conversationId: input.conversationId, changeSetId, stage: 'change_set' });
     if (cancelled()) throw new ResultChangeSetError('edit_cancelled', 'Edit was cancelled before materialization.');
 
     emit('materialize', 'running');
-    const exactSourceParams = sourceProjection.parameters.rawValues || sourceProjection.parameters.values;
-    if (input.normalizedSourceParams
-        && stableStringify(input.normalizedSourceParams) !== stableStringify(exactSourceParams)) {
-      throw new ResultChangeSetError('source_parameters_mismatch', 'Edit parameters do not match the selected Revision.');
-    }
-    const trustedExecution = buildTrustedExecutionParams({
-      sourceJob,
-      sourceProjection,
-      workspaceRoot,
-      parameterPatch: input.intent.proposedParameterPatch,
-    });
-    const normalizedSourceParams = trustedExecution.normalized;
     const materialized = materializeResultEdit({
       workspaceRoot,
       changeSetId,
@@ -2081,6 +2558,11 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
             : null,
           validatorIds: [rootValidation.validatorId, ...downstreamCandidates.map((entry) => entry.validation.validatorId)],
           formalArtifactCount: revisionInputs.length,
+          formalArtifactCohort: revisionInputs.map((entry) => ({
+            toolJobId: entry.toolJobId,
+            artifactId: entry.artifactId,
+            outputHash: entry.outputHash,
+          })),
           executedNodeIds: [input.authoritativeSubgraph?.rootNodeId || `job:${sourceRevision.toolJobId}`,
             ...downstreamCandidates.map((entry) => entry.nodeId)],
           downstreamArtifactTruthStatuses: downstreamCandidates.map((entry) => ({
@@ -2097,6 +2579,17 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
           affectedNodeCount: Array.isArray(input.intent.affectedNodeIds) ? input.intent.affectedNodeIds.length : 0,
         },
       },
+      beforeCommit: () => {
+        saveResultEditCheckpoint({
+          repository,
+          projectId,
+          conversationId: input.conversationId,
+          changeSetId,
+          candidateCommit: candidate.commit,
+          stage: 'preview_ready',
+          recovery: 'awaiting_user_decision',
+        });
+      },
     });
     const revision = batch.revisions.find((entry) => entry.revisionId === revisionId);
     const downstreamRevisions = batch.revisions.filter((entry) => downstreamRevisionIds.has(entry.revisionId));
@@ -2104,7 +2597,6 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
     const ready = batch.changeSet;
     emit('revision', 'completed', { revisionId: revision.revisionId, downstreamRevisionIds: downstreamRevisions.map((entry) => entry.revisionId) });
     emit('preview', 'ready');
-    saveResultEditCheckpoint({ repository, projectId, conversationId: input.conversationId, changeSetId, candidateCommit: candidate.commit, stage: 'preview_ready', recovery: 'awaiting_user_decision' });
     return {
       ok: true,
       resultChangeSetServiceVersion: RESULT_CHANGESET_SERVICE_VERSION,
@@ -2130,31 +2622,27 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
       const current = repository.getChangeSet(changeSetId);
       try {
         if (current && current.status === 'running') {
-          if (error && error.code === 'edit_cancelled') {
-            repository.transitionChangeSet({ changeSetId, to: 'abandoned', reason: error.code });
-          } else {
-            repository.transitionChangeSet({
-              changeSetId,
-              to: 'validation_failed',
+          const cancelledEdit = error && error.code === 'edit_cancelled';
+          transitionResultEditWithCheckpoint({
+            repository,
+            projectId,
+            conversationId: input.conversationId,
+            changeSetId,
+            to: cancelledEdit ? 'abandoned' : 'validation_failed',
+            stage: cancelledEdit ? 'cancelled' : 'failed',
+            recovery: error && error.code || 'result_edit_failed',
+            transition: {
               reason: error && error.code || 'result_edit_failed',
-              validationSummary: {
-                error: error && error.code || 'result_edit_failed',
-                ...(gitFailure ? { gitFailure } : {}),
-              },
-            });
-          }
+              ...(!cancelledEdit ? {
+                validationSummary: {
+                  error: error && error.code || 'result_edit_failed',
+                  ...(gitFailure ? { gitFailure } : {}),
+                },
+              } : {}),
+            },
+          });
         }
       } catch { /* preserve the original failure; recovery scanner sees remaining state */ }
-      try {
-        saveResultEditCheckpoint({
-          repository,
-          projectId,
-          conversationId: input.conversationId,
-          changeSetId,
-          stage: error && error.code === 'edit_cancelled' ? 'cancelled' : 'failed',
-          recovery: error && error.code || 'result_edit_failed',
-        });
-      } catch { /* original failure remains authoritative */ }
     }
     emit(error && error.code === 'edit_cancelled' ? 'cancelled' : 'failed', 'terminal', {
       reason: error && error.code || 'result_edit_failed',

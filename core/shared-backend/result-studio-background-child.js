@@ -29,13 +29,17 @@ const { createResultStudioRepository } = require('./result-studio-repository');
 const {
   inspectResultStudioWorkspace,
   inspectResultStudioStorage,
+  recoverResultStudioWorkspace,
 } = require('./result-studio-lifecycle');
 
 function serializableError(error) {
   return {
     code: String(error && error.code || 'result_studio_background_failed'),
-    message: String(error && error.message || 'Result Studio background work failed.'),
-    detail: error && error.detail != null ? error.detail : null,
+    // Child errors may originate in fs/Git/SQLite and therefore contain an
+    // absolute workspace or database path. The code is the public diagnostic;
+    // raw messages and detail never cross the process/UI boundary.
+    message: 'Result Studio background work could not be completed.',
+    detail: null,
   };
 }
 
@@ -221,8 +225,11 @@ function ensureBaseline(payload, repository, sqlite) {
   });
 }
 
-function inspectWorkspace(payload, repository) {
+function inspectWorkspace(payload, repository, sqlite) {
   const binding = bind(payload, { write: false });
+  const gitPathPrefix = binding.mode === 'existing'
+    ? binding.inspection?.existing?.workspaceRelativeToRepository || ''
+    : '';
   return {
     lifecycle: inspectResultStudioWorkspace({
       repository,
@@ -230,6 +237,11 @@ function inspectWorkspace(payload, repository) {
       workspaceRoot: payload.workspaceRoot,
       projectId: payload.projectId,
       conversationId: payload.conversationId || null,
+      runtimeLease: payload.runtimeLease || null,
+      gitPathPrefix,
+      getToolJob: (toolJobId) => rowToAuthoritativeJob(
+        sqlite.prepare('SELECT * FROM tool_jobs WHERE id=?').get(toolJobId)
+      ),
     }),
     storage: inspectResultStudioStorage({
       repository,
@@ -239,9 +251,30 @@ function inspectWorkspace(payload, repository) {
   };
 }
 
+function recoverWorkspace(payload, repository, sqlite) {
+  const binding = bind(payload, { write: true });
+  const gitPathPrefix = binding.mode === 'existing'
+    ? binding.inspection?.existing?.workspaceRelativeToRepository || ''
+    : '';
+  return recoverResultStudioWorkspace({
+    workspaceRoot: payload.workspaceRoot,
+    projectId: payload.projectId,
+    conversationId: payload.conversationId || null,
+    runtimeLease: payload.runtimeLease || null,
+    gitPathPrefix,
+  }, {
+    repository,
+    adapter: binding.adapter,
+    getToolJob: (toolJobId) => rowToAuthoritativeJob(
+      sqlite.prepare('SELECT * FROM tool_jobs WHERE id=?').get(toolJobId)
+    ),
+  });
+}
+
 function runOperation(operation, payload, repository, sqlite) {
   if (operation === 'ensure-baseline') return ensureBaseline(payload, repository, sqlite);
-  if (operation === 'inspect-workspace') return inspectWorkspace(payload, repository);
+  if (operation === 'inspect-workspace') return inspectWorkspace(payload, repository, sqlite);
+  if (operation === 'recover-workspace') return recoverWorkspace(payload, repository, sqlite);
   throw Object.assign(new Error('Unsupported Result Studio background operation.'), {
     code: 'background_operation_invalid',
   });

@@ -121,6 +121,49 @@ function validateResultStudioDescriptor({ plugin = {}, toolDefinition = {}, plug
     if (!parameterIds.has(id)) fail('parameter_impact_unknown', `parameterImpacts.${id}`, 'impact cannot describe an undeclared parameter');
     if (!IMPACT_CLASSES.has(impact)) fail('parameter_impact_invalid', `parameterImpacts.${id}`, String(impact));
   }
+  if (descriptor.previewResourceModel != null) {
+    const model = descriptor.previewResourceModel;
+    const bounded = (value, minimum, maximum) => (
+      Number.isFinite(Number(value)) && Number(value) >= minimum && Number(value) <= maximum
+    );
+    const allowedModelKeys = new Set(['baseMemoryBytes', 'inputMemoryMultiplier', 'outputDiskMultiplier', 'raster']);
+    if (!model || typeof model !== 'object' || Array.isArray(model)
+        || Object.keys(model).some((key) => !allowedModelKeys.has(key))) {
+      fail('preview_resource_model_invalid', 'previewResourceModel', 'must be a bounded declarative resource model');
+    } else {
+      if (!Number.isSafeInteger(model.baseMemoryBytes) || model.baseMemoryBytes < 1) {
+        fail('preview_resource_base_memory_invalid', 'previewResourceModel.baseMemoryBytes', 'must be a positive safe integer');
+      }
+      if (!bounded(model.inputMemoryMultiplier, 0, 64)) {
+        fail('preview_resource_input_multiplier_invalid', 'previewResourceModel.inputMemoryMultiplier', 'must be between 0 and 64');
+      }
+      if (!bounded(model.outputDiskMultiplier, 1, 64)) {
+        fail('preview_resource_output_multiplier_invalid', 'previewResourceModel.outputDiskMultiplier', 'must be between 1 and 64');
+      }
+      if (model.raster != null) {
+        const raster = model.raster;
+        const parameterFields = ['widthParameter', 'heightParameter', 'dpiParameter'];
+        const allowedRasterKeys = new Set([...parameterFields, 'bytesPerPixel', 'workingSetMultiplier']);
+        if (!raster || typeof raster !== 'object' || Array.isArray(raster)
+            || Object.keys(raster).some((key) => !allowedRasterKeys.has(key))) {
+          fail('preview_resource_raster_invalid', 'previewResourceModel.raster', 'must be a bounded raster working-set model');
+        } else {
+          for (const field of parameterFields) {
+            const parameterId = raster[field];
+            if (typeof parameterId !== 'string' || descriptor.parameters?.[parameterId]?.type !== 'number') {
+              fail('preview_resource_raster_parameter_invalid', `previewResourceModel.raster.${field}`, 'must reference a declared numeric parameter');
+            }
+          }
+          if (!Number.isInteger(raster.bytesPerPixel) || !bounded(raster.bytesPerPixel, 1, 32)) {
+            fail('preview_resource_raster_pixel_invalid', 'previewResourceModel.raster.bytesPerPixel', 'must be an integer between 1 and 32');
+          }
+          if (!bounded(raster.workingSetMultiplier, 1, 64)) {
+            fail('preview_resource_raster_multiplier_invalid', 'previewResourceModel.raster.workingSetMultiplier', 'must be between 1 and 64');
+          }
+        }
+      }
+    }
+  }
   if (descriptor.actions.length === 0 || descriptor.actions.some((action) => typeof action !== 'string' || !action)) {
     fail('actions_invalid', 'actions', 'at least one stable selection, derivation, or recompute action is required');
   }

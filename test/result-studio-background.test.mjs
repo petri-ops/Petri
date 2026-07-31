@@ -19,9 +19,20 @@ const {
 const {
   ensureResultStudioSchema,
 } = require('../core/shared-backend/result-studio-schema');
+const {
+  createResultStudioRepository,
+} = require('../core/shared-backend/result-studio-repository');
 
 const roots = [];
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
+const PREVIOUS_RUNTIME_LEASE = Object.freeze({
+  instanceId: '1'.repeat(32),
+  startedAt: '2026-01-01T00:00:00.000Z',
+});
+const CURRENT_RUNTIME_LEASE = Object.freeze({
+  instanceId: '2'.repeat(32),
+  startedAt: new Date(Date.now() + 60_000).toISOString(),
+});
 
 async function waitForReplacementGeneration(ctx, timeoutMs = 70_000) {
   const deadline = Date.now() + timeoutMs;
@@ -67,6 +78,7 @@ function fixture() {
     );
   `);
   ensureResultStudioSchema(sqlite);
+  const repository = createResultStudioRepository(sqlite, { ensureSchema: false });
 
   const artifactPath = path.join(workspaceRoot, 'results', 'plot.png');
   const artifactContent = Buffer.from('canonical-result-artifact');
@@ -122,6 +134,7 @@ function fixture() {
     databasePath,
     workspaceRoot,
     projectId,
+    repository,
     input,
   };
 }
@@ -252,5 +265,72 @@ test('explicit close rejects active work and permits a replacement child', async
     }),
     (error) => error && error.code === 'background_operation_invalid',
   );
+  ctx.sqlite.close();
+});
+
+test('P6 recovery runs in the canonical background child and closes incomplete restart state', async () => {
+  const ctx = fixture();
+  ctx.repository.createChangeSet({
+    changeSetId: 'cs_background_interrupted',
+    projectId: ctx.projectId,
+    baseCommit: '0'.repeat(40),
+    workingBranchRef: 'refs/heads/biof3/changeset/cs_background_interrupted',
+    createdBy: 'agent',
+  });
+  ctx.repository.transitionChangeSet({ changeSetId: 'cs_background_interrupted', to: 'running' });
+  ctx.repository.saveCheckpoint({
+    checkpointId: 'cp_background_interrupted',
+    projectId: ctx.projectId,
+    baseCommit: '0'.repeat(40),
+    changeSetId: 'cs_background_interrupted',
+    changeSetStatus: 'running',
+    currentRevisionIds: [],
+    pendingPreview: {
+      stage: 'materialized',
+      revisionIds: [],
+      runtimeLease: PREVIOUS_RUNTIME_LEASE,
+    },
+  });
+
+  const result = await runResultStudioBackground('recover-workspace', {
+    databasePath: ctx.databasePath,
+    workspaceRoot: ctx.workspaceRoot,
+    projectId: ctx.projectId,
+    conversationId: null,
+    runtimeLease: CURRENT_RUNTIME_LEASE,
+  });
+  assert.equal(result.recovered, true);
+  assert.equal(result.after.status, 'ready');
+  assert.equal(ctx.repository.getChangeSet('cs_background_interrupted').status, 'validation_failed');
+  assert.equal(ctx.repository.getCheckpoint('cp_background_interrupted').changeSetStatus, 'validation_failed');
+  assert.equal(result.after.consistency.status, 'consistent');
+  ctx.sqlite.close();
+});
+
+test('P6 background recovery leaves a current-runtime operation untouched', async () => {
+  const ctx = fixture();
+  ctx.repository.createChangeSet({
+    changeSetId: 'cs_background_active',
+    projectId: ctx.projectId,
+    baseCommit: '0'.repeat(40),
+    workingBranchRef: 'refs/heads/biof3/changeset/cs_background_active',
+    createdBy: 'agent',
+  });
+  ctx.repository.transitionChangeSet({ changeSetId: 'cs_background_active', to: 'running' });
+  ctx.repository.saveCheckpoint({
+    checkpointId: 'cp_background_active', projectId: ctx.projectId, baseCommit: '0'.repeat(40),
+    changeSetId: 'cs_background_active', changeSetStatus: 'running', currentRevisionIds: [],
+    pendingPreview: { stage: 'materialized', revisionIds: [], runtimeLease: CURRENT_RUNTIME_LEASE },
+  });
+  const result = await runResultStudioBackground('recover-workspace', {
+    databasePath: ctx.databasePath,
+    workspaceRoot: ctx.workspaceRoot,
+    projectId: ctx.projectId,
+    runtimeLease: CURRENT_RUNTIME_LEASE,
+  });
+  assert.equal(result.recovered, false);
+  assert.equal(result.after.status, 'ready');
+  assert.equal(result.after.activeOperations.length, 1);
+  assert.equal(ctx.repository.getChangeSet('cs_background_active').status, 'running');
   ctx.sqlite.close();
 });

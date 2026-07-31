@@ -425,6 +425,42 @@ test('RS2 finds interrupted change sets after a simulated crash', (context) => {
   assert.equal(byId.get('cs_draft_only'), 'resumable_draft');
 });
 
+test('P6 preview slot count and running ChangeSet creation are one SQLite transaction', (context) => {
+  const { repo } = makeRepo(context);
+  const start = (changeSetId) => repo.startChangeSetWithCheckpoint({
+    changeSet: {
+      changeSetId,
+      projectId: 'project_1',
+      conversationId: 'conv_1',
+      baseCommit: COMMIT_A,
+      workingBranchRef: `refs/heads/biof3/changeset/${changeSetId}`,
+      createdBy: 'agent',
+    },
+    checkpoint: {
+      checkpointId: `cp_${changeSetId}`,
+      projectId: 'project_1',
+      conversationId: 'conv_1',
+      baseCommit: COMMIT_A,
+      changeSetId,
+      changeSetStatus: 'running',
+      currentRevisionIds: [],
+      pendingPreview: { stage: 'change_set', revisionIds: [] },
+    },
+    previewSlot: { projectId: 'project_1', maxConcurrentPreviews: 2 },
+  });
+
+  assert.equal(start('cs_slot_first').previewSlot.activePreviewJobsBefore, 0);
+  assert.equal(start('cs_slot_second').previewSlot.activePreviewJobsBefore, 1);
+  assert.throws(
+    () => start('cs_slot_rejected'),
+    (error) => error instanceof ResultStudioRepositoryError
+      && error.code === 'preview_concurrency_saturated'
+      && error.detail?.activePreviewJobs === 2,
+  );
+  assert.equal(repo.getChangeSet('cs_slot_rejected'), null);
+  assert.equal(repo.getCheckpoint('cp_cs_slot_rejected'), null);
+});
+
 test('RS2 recovers state across a real database reopen', (context) => {
   const root = mkdtempSync(join(tmpdir(), 'biof3-rs2-reopen-'));
   context.after(() => rmSync(root, { recursive: true, force: true }));

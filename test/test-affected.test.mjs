@@ -122,6 +122,97 @@ test('P6 UI-110 producer and evidence select direct trace, transport, and redact
   assert.ok(redaction.tests.includes('test/agent-tool-result.test.mjs'));
 });
 
+test('P6 runtime durability and resource paths select their direct regressions', () => {
+  const cases = new Map([
+    ['core/shared-backend/result-studio-runtime-lease.js', [
+      'test/result-studio-lifecycle.test.mjs',
+      'test/result-studio-background.test.mjs',
+    ]],
+    ['core/shared-backend/result-studio-resource-summary.js', [
+      'test/result-studio-resource-summary.test.mjs',
+    ]],
+    ['core/shared-backend/tool-resource-sampler.js', [
+      'test/tool-resource-sampler.test.mjs',
+      'test/tools-executor-job-context.test.mjs',
+    ]],
+  ]);
+  for (const [file, required] of cases) {
+    const plan = resolveImpact([file]);
+    assert.deepEqual(plan.unknown, []);
+    assert.ok(plan.reasons[file].includes('p6-runtime-durability-resources'));
+    for (const testFile of required) assert.ok(plan.tests.includes(testFile), `${file} must select ${testFile}`);
+  }
+});
+
+test('P6 real restart and Electron prototypes select their own bounded regressions', () => {
+  const cases = new Map([
+    ['scripts/g0-rs-p6-real-restart-prototype.mjs', [
+      'p6-real-restart-prototype', 'test/g0-rs-p6-real-restart-prototype.test.mjs',
+    ]],
+    ['scripts/g0-rs-p6-electron-pressure-prototype.mjs', [
+      'p6-electron-pressure-prototype', 'test/g0-rs-p6-electron-pressure-prototype.test.mjs',
+    ]],
+    ['scripts/g0-rs-p6-electron-pressure-driver.cjs', [
+      'p6-electron-pressure-prototype', 'test/g0-rs-p6-electron-pressure-prototype.test.mjs',
+    ]],
+    ['acceptance/g0-result-studio/rs-p6-electron-pressure-multirevision.json', [
+      'p6-electron-pressure-prototype', 'test/g0-rs-p6-electron-pressure-prototype.test.mjs',
+    ]],
+    ['scripts/g0-rs-p6-recovery-electron-prototype.mjs', [
+      'p6-recovery-electron-prototype', 'test/g0-rs-p6-recovery-electron-prototype.test.mjs',
+    ]],
+    ['scripts/g0-rs-p6-recovery-electron-driver.cjs', [
+      'p6-recovery-electron-prototype', 'test/g0-rs-p6-recovery-electron-prototype.test.mjs',
+    ]],
+  ]);
+  for (const [file, [reason, testFile]] of cases) {
+    const plan = resolveImpact([file]);
+    assert.deepEqual(plan.unknown, []);
+    assert.ok(plan.reasons[file].includes(reason));
+    assert.ok(plan.tests.includes(testFile), `${file} must select ${testFile}`);
+  }
+});
+
+test('future canonical P6 product producer and evidence fail closed into the complete component bundle', () => {
+  const required = [
+    'test/g0-rs-p6-real-restart-prototype.test.mjs',
+    'test/g0-rs-p6-electron-pressure-prototype.test.mjs',
+    'test/g0-rs-p6-recovery-electron-prototype.test.mjs',
+    'test/g0-rs-p6-recovery-acceptance.test.mjs',
+    'test/result-studio-resource-summary.test.mjs',
+    'test/tool-resource-sampler.test.mjs',
+  ];
+  for (const file of [
+    'scripts/g0-rs-p6-product-acceptance.mjs',
+    'acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json',
+  ]) {
+    const plan = resolveImpact([file]);
+    assert.deepEqual(plan.unknown, []);
+    assert.ok(plan.reasons[file].includes('p6-product-durability-recovery-performance'));
+    for (const testFile of required) assert.ok(plan.tests.includes(testFile), `${file} must select ${testFile}`);
+  }
+});
+
+test('every representative P6 bound runtime ancestor selects the canonical source verifier', () => {
+  for (const file of [
+    'core/shared-backend/result-changeset-service.js',
+    'core/shared-backend/result-studio-table-query.js',
+    'core/shared-backend/llm-providers/index.js',
+    'core/shared-backend/ai-usage-helper.js',
+    'src/migration-runner.js',
+    'src/migrations/001_result_studio.sql',
+    'frontend/src/components/result-studio/ScientificInteractionViewer.module.css',
+    'frontend/package-lock.json',
+    'package-lock.json',
+  ]) {
+    const plan = resolveImpact([file]);
+    assert.deepEqual(plan.unknown, []);
+    assert.ok(plan.reasons[file].includes('p6-canonical-source-binding'));
+    assert.ok(plan.tests.includes('test/g0-rs-p6-product-acceptance.test.mjs'),
+      `${file} must select the canonical P6 verifier`);
+  }
+});
+
 test('directly edited tests are included and unknown production paths fail closed', () => {
   assert.ok(resolveImpact(['test/loop-contract.test.mjs']).tests.includes('test/loop-contract.test.mjs'));
   assert.deepEqual(resolveImpact(['new-production-area/engine.js']).unknown, ['new-production-area/engine.js']);

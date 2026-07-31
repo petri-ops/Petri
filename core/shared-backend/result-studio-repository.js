@@ -519,6 +519,104 @@ function createResultStudioRepository(db, options = {}) {
       return { changeSet: updated, changed: true, idempotent: false };
     },
 
+    /** Persist a normal state transition and its durable checkpoint together. */
+    transitionChangeSetWithCheckpoint({ transition, checkpoint, beforeCommit = null } = {}) {
+      if (!transition?.changeSetId || !transition?.to || !checkpoint?.checkpointId
+          || checkpoint.changeSetId !== transition.changeSetId) {
+        throw new ResultStudioRepositoryError(
+          'checkpoint_transition_invalid',
+          'A ChangeSet transition and its exact checkpoint are required.'
+        );
+      }
+      const apply = transaction(() => {
+        const transitioned = api.transitionChangeSet(transition);
+        if (checkpoint.projectId !== transitioned.changeSet.projectId
+            || checkpoint.changeSetStatus !== transitioned.changeSet.status
+            || (checkpoint.candidateCommit || null) !== (transitioned.changeSet.candidateCommit || null)) {
+          throw new ResultStudioRepositoryError(
+            'checkpoint_transition_mismatch',
+            'Checkpoint must describe the exact resulting ChangeSet state.'
+          );
+        }
+        const savedCheckpoint = api.saveCheckpoint(checkpoint);
+        if (typeof beforeCommit === 'function') {
+          beforeCommit({ changeSet: transitioned.changeSet, checkpoint: savedCheckpoint });
+        }
+        return {
+          changeSetId: transitioned.changeSet.changeSetId,
+          checkpointId: savedCheckpoint.checkpointId,
+          changed: transitioned.changed,
+        };
+      });
+      const result = apply();
+      return {
+        changeSet: api.getChangeSet(result.changeSetId),
+        checkpoint: api.getCheckpoint(result.checkpointId),
+        changed: result.changed,
+      };
+    },
+
+    /**
+     * Remove the only pre-checkpoint crash window for a new edit: draft row,
+     * running transition and ownership lease become visible in one commit.
+     */
+    startChangeSetWithCheckpoint({ changeSet, checkpoint, previewSlot = null, beforeCommit = null } = {}) {
+      if (!changeSet?.changeSetId || !checkpoint?.checkpointId
+          || checkpoint.changeSetId !== changeSet.changeSetId
+          || checkpoint.projectId !== changeSet.projectId
+          || checkpoint.changeSetStatus !== 'running') {
+        throw new ResultStudioRepositoryError(
+          'change_set_start_invalid',
+          'Starting a ChangeSet requires its exact running checkpoint.'
+        );
+      }
+      if (previewSlot && (previewSlot.projectId !== changeSet.projectId
+          || !Number.isInteger(previewSlot.maxConcurrentPreviews)
+          || previewSlot.maxConcurrentPreviews < 1)) {
+        throw new ResultStudioRepositoryError(
+          'preview_slot_invalid',
+          'A preview slot must be bound to the exact project and a positive concurrency limit.'
+        );
+      }
+      const apply = transaction(() => {
+        let slot = null;
+        if (previewSlot) {
+          const activePreviewJobs = db.prepare(`SELECT COUNT(*) AS count
+              FROM scientific_change_sets WHERE project_id = ? AND status = 'running'`)
+            .get(changeSet.projectId).count;
+          if (activePreviewJobs >= previewSlot.maxConcurrentPreviews) {
+            throw new ResultStudioRepositoryError(
+              'preview_concurrency_saturated',
+              'The project has no free background preview slot.',
+              { activePreviewJobs, maxBackgroundPreviews: previewSlot.maxConcurrentPreviews }
+            );
+          }
+          slot = {
+            activePreviewJobsBefore: activePreviewJobs,
+            activePreviewJobsAfter: activePreviewJobs + 1,
+            maxBackgroundPreviews: previewSlot.maxConcurrentPreviews,
+          };
+        }
+        api.createChangeSet(changeSet);
+        const started = api.transitionChangeSetWithCheckpoint({
+          transition: { changeSetId: changeSet.changeSetId, to: 'running' },
+          checkpoint,
+        });
+        if (typeof beforeCommit === 'function') {
+          beforeCommit({ changeSet: started.changeSet, checkpoint: started.checkpoint });
+        }
+        return { changeSetId: started.changeSet.changeSetId, checkpointId: started.checkpoint.checkpointId, slot };
+      });
+      // BEGIN IMMEDIATE serializes the count-and-claim decision across the
+      // independent Result Studio worker processes sharing this SQLite file.
+      const result = previewSlot && typeof apply.immediate === 'function' ? apply.immediate() : apply();
+      return {
+        changeSet: api.getChangeSet(result.changeSetId),
+        checkpoint: api.getCheckpoint(result.checkpointId),
+        previewSlot: result.slot,
+      };
+    },
+
     // ---------------------------------------------------------------- revision
 
     /**
@@ -972,6 +1070,18 @@ function createResultStudioRepository(db, options = {}) {
         .map(rowToRevision);
     },
 
+    countProjectRevisions(projectId) {
+      return Number(db.prepare('SELECT COUNT(*) AS count FROM artifact_revisions WHERE project_id = ?')
+        .get(projectId)?.count || 0);
+    },
+
+    listAllProjectRevisions(projectId) {
+      return db.prepare(`SELECT * FROM artifact_revisions WHERE project_id = ?
+          ORDER BY created_at ASC`)
+        .all(projectId)
+        .map(rowToRevision);
+    },
+
     getCurrentRevision(artifactFamilyId, projectId = null) {
       return rowToRevision(
         projectId
@@ -1298,6 +1408,83 @@ function createResultStudioRepository(db, options = {}) {
           );
       }
       return api.getCheckpoint(cp.checkpointId);
+    },
+
+    /**
+     * Close or reconcile one restart-owned ChangeSet without exposing a
+     * terminal ChangeSet alongside its stale checkpoint.  The expected hash
+     * and status are compare-and-swap guards against a live process advancing
+     * the same operation after the recovery scan.
+     */
+    applyRecoveryTransition({
+      transition,
+      checkpoint,
+      expectedCheckpointHash,
+      expectedChangeSetStatus,
+      beforeCommit = null,
+    } = {}) {
+      if (!transition || !transition.changeSetId || !transition.to
+          || !checkpoint || !checkpoint.checkpointId
+          || checkpoint.changeSetId !== transition.changeSetId
+          || !expectedCheckpointHash || !expectedChangeSetStatus) {
+        throw new ResultStudioRepositoryError(
+          'recovery_transition_invalid',
+          'Atomic recovery requires one ChangeSet transition and its exact checkpoint.'
+        );
+      }
+      const apply = transaction(() => {
+        const storedChangeSet = api.getChangeSet(transition.changeSetId);
+        const storedCheckpoint = api.getCheckpoint(checkpoint.checkpointId);
+        const integrity = storedCheckpoint
+          ? api.verifyCheckpointIntegrity(storedCheckpoint.checkpointId)
+          : { matches: false };
+        if (!storedChangeSet || storedChangeSet.status !== expectedChangeSetStatus) {
+          throw new ResultStudioRepositoryError(
+            'recovery_change_set_conflict',
+            'ChangeSet advanced after the recovery scan.',
+            {
+              changeSetId: transition.changeSetId,
+              expectedStatus: expectedChangeSetStatus,
+              actualStatus: storedChangeSet?.status || null,
+            }
+          );
+        }
+        if (!storedCheckpoint
+            || storedCheckpoint.projectId !== storedChangeSet.projectId
+            || storedCheckpoint.changeSetId !== storedChangeSet.changeSetId
+            || storedCheckpoint.checkpointHash !== expectedCheckpointHash
+            || !integrity.matches) {
+          throw new ResultStudioRepositoryError(
+            'recovery_checkpoint_conflict',
+            'Checkpoint advanced or failed integrity validation after the recovery scan.',
+            { checkpointId: checkpoint.checkpointId, changeSetId: transition.changeSetId }
+          );
+        }
+        const transitioned = api.transitionChangeSet(transition);
+        if (checkpoint.projectId !== transitioned.changeSet.projectId
+            || checkpoint.changeSetStatus !== transitioned.changeSet.status
+            || (checkpoint.candidateCommit || null) !== (transitioned.changeSet.candidateCommit || null)) {
+          throw new ResultStudioRepositoryError(
+            'recovery_checkpoint_transition_mismatch',
+            'Recovered checkpoint must describe the exact resulting ChangeSet state.'
+          );
+        }
+        const savedCheckpoint = api.saveCheckpoint(checkpoint);
+        if (typeof beforeCommit === 'function') {
+          beforeCommit({ changeSet: transitioned.changeSet, checkpoint: savedCheckpoint });
+        }
+        return {
+          changeSetId: transitioned.changeSet.changeSetId,
+          checkpointId: savedCheckpoint.checkpointId,
+          changed: transitioned.changed,
+        };
+      });
+      const result = apply();
+      return {
+        changeSet: api.getChangeSet(result.changeSetId),
+        checkpoint: api.getCheckpoint(result.checkpointId),
+        changed: result.changed,
+      };
     },
 
     getCheckpoint(checkpointId) {

@@ -103,6 +103,22 @@ export function chooseResultArtifactName(input: {
   return input.availableNames[0] || '';
 }
 
+export function requestedArtifactRequestKey(input: {
+  projectId?: string | null;
+  jobId?: string | null;
+  artifactName?: string | null;
+}): string | null {
+  if (!input.projectId || !input.jobId || !input.artifactName) return null;
+  return JSON.stringify([input.projectId, input.jobId, input.artifactName]);
+}
+
+export function shouldApplyRequestedArtifact(
+  lastAppliedKey: string | null,
+  nextKey: string | null,
+): boolean {
+  return nextKey !== null && nextKey !== lastAppliedKey;
+}
+
 export function chooseResultSectionLandingName(
   artifacts: Array<{ name: string; preview?: boolean }>,
 ): string {

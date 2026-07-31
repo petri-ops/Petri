@@ -335,6 +335,14 @@ test('RS5 registers a real Job Artifact as an idempotent current baseline', (con
   assert.equal(first.revision.toolJobId, 'tj_baseline');
   assert.equal(first.revision.sourceScriptRef.origin, 'project_materialized');
   assert.equal(fx.repository.getChangeSet(first.revision.changeSetId).status, 'adopted');
+  assert.equal(
+    fx.adapter.revParse(`refs/heads/biof3/current/${first.revision.artifactFamilyId}`),
+    first.revision.sourceCommit,
+  );
+  const baselineCheckpoint = fx.repository.getLatestCheckpoint({ projectId: 'p_1', conversationId: null });
+  assert.equal(baselineCheckpoint.changeSetId, first.revision.changeSetId);
+  assert.equal(baselineCheckpoint.changeSetStatus, 'adopted');
+  assert.equal(baselineCheckpoint.pendingPreview.stage, 'adopted');
   assert.equal(existsSync(join(fx.workspaceRoot, first.revision.sourceScriptRef.relativePath)), false,
     'virtual baseline commit must not write the project work tree');
   const committedScript = fx.adapter.showFile({
@@ -402,8 +410,18 @@ test('P5 baseline registration records every formal output from one Job as one c
   assert.deepEqual(first.cohortRevisions.map((revision) => revision.artifactId), ['plot', 'classified']);
   assert.equal(new Set(first.cohortRevisions.map((revision) => revision.changeSetId)).size, 1);
   assert.equal(first.cohortRevisions.every((revision) => revision.isCurrent === true), true);
+  for (const revision of first.cohortRevisions) {
+    assert.equal(
+      fx.adapter.revParse(`refs/heads/biof3/current/${revision.artifactFamilyId}`),
+      revision.sourceCommit,
+    );
+  }
   assert.equal(fx.repository.listRevisionsByChangeSet(first.cohortRevisions[0].changeSetId).length, 2);
   const baselineChangeSet = fx.repository.getChangeSet(first.cohortRevisions[0].changeSetId);
+  const baselineCheckpoint = fx.repository.getLatestCheckpoint({ projectId: 'p_1', conversationId: null });
+  assert.equal(baselineCheckpoint.changeSetId, baselineChangeSet.changeSetId);
+  assert.equal(baselineCheckpoint.changeSetStatus, 'adopted');
+  assert.equal(baselineCheckpoint.pendingPreview.stage, 'adopted');
   assert.equal(baselineChangeSet.validationSummary.formalArtifactCount, 2);
   assert.deepEqual(baselineChangeSet.validationSummary.validatorIds, ['cohort-validator']);
   const baselineGraph = fx.repository.getWorkflowGraph(baselineChangeSet.validationSummary.workflowGraph.graphId);
@@ -970,6 +988,103 @@ test('RS5 success creates commit, Job-backed Revision and preview without adopti
   assert.equal(checkpoint.changeSetStatus, 'preview_ready');
   assert.equal(checkpoint.pendingPreview.stage, 'preview_ready');
   assert.deepEqual(checkpoint.pendingPreview.revisionIds, [result.revision.revisionId]);
+});
+
+test('P6 caller-supplied resource estimates cannot influence the trusted preview guard', async (context) => {
+  const fx = fixture(context, 'resource-estimate-forgery-');
+  const result = await createResultChangeSet(request(fx, {
+    previewResourceEstimate: { memoryBytes: 2 ** 50, diskBytes: 2 ** 50 },
+  }), serviceDependencies(fx, {
+    executeJob: successfulExecutor(fx, 'CALLER_ESTIMATE_IGNORED'),
+  }));
+  assert.equal(result.ok, true);
+  assert.equal(result.previewBudget.resourceEstimate.source, 'server_job_descriptor_input_truth');
+  assert.ok(result.previewBudget.estimatedMemoryBytes < 2 ** 50);
+  assert.ok(result.previewBudget.estimatedDiskBytes < 2 ** 50);
+});
+
+test('P6 unknown critical resource facts fail closed before any ChangeSet or Job write', async (context) => {
+  const fx = fixture(context, 'resource-facts-unknown-');
+  const before = fx.repository.listChangeSets({ projectId: 'p_1', limit: 500 }).map((entry) => entry.changeSetId);
+  let executed = false;
+  await assert.rejects(() => createResultChangeSet(request(fx), serviceDependencies(fx, {
+    createRuntimeResourceSnapshot: () => ({
+      state: 'unavailable',
+      memory: { availableBytes: null },
+      disk: { availableBytes: null },
+    }),
+    executeJob: async () => { executed = true; return null; },
+  })), (error) => error.code === 'preview_resource_budget_blocked'
+    && error.detail?.reasons?.includes('memory_measurement_unavailable')
+    && error.detail?.reasons?.includes('disk_measurement_unavailable'));
+  assert.equal(executed, false);
+  assert.deepEqual(
+    fx.repository.listChangeSets({ projectId: 'p_1', limit: 500 }).map((entry) => entry.changeSetId),
+    before,
+  );
+});
+
+test('P6 saturated atomic preview slots reject without a partial ChangeSet or checkpoint', async (context) => {
+  const fx = fixture(context, 'resource-slot-saturated-');
+  for (const changeSetId of ['cs_holder_one', 'cs_holder_two']) {
+    fx.repository.createChangeSet({
+      changeSetId,
+      projectId: 'p_1',
+      baseCommit: fx.sourceRevision.sourceCommit,
+      workingBranchRef: `refs/heads/biof3/changeset/${changeSetId}`,
+      createdBy: 'agent',
+    });
+    fx.repository.transitionChangeSet({ changeSetId, to: 'running' });
+  }
+  const changeSetCount = fx.repository.listChangeSets({ projectId: 'p_1', limit: 500 }).length;
+  const checkpointCount = fx.db.prepare('SELECT COUNT(*) AS count FROM workspace_revision_checkpoints').get().count;
+  let executed = false;
+  await assert.rejects(() => createResultChangeSet(request(fx, {
+    changeSetId: 'cs_atomic_slot_rejected',
+  }), serviceDependencies(fx, {
+    executeJob: async () => { executed = true; return null; },
+  })), (error) => error.code === 'preview_resource_queued'
+    && error.detail?.reasons?.includes('preview_concurrency_saturated')
+    && error.detail?.activePreviewJobs === 2);
+  assert.equal(executed, false);
+  assert.equal(fx.repository.getChangeSet('cs_atomic_slot_rejected'), null);
+  assert.equal(fx.repository.listChangeSets({ projectId: 'p_1', limit: 500 }).length, changeSetCount);
+  assert.equal(fx.db.prepare('SELECT COUNT(*) AS count FROM workspace_revision_checkpoints').get().count, checkpointCount);
+});
+
+test('P6 preview checkpoint failure rolls back the complete candidate cohort and preview transition', async (context) => {
+  const fx = fixture(context, 'preview-checkpoint-rollback-');
+  const revisionCountBefore = fx.repository.listProjectRevisions('p_1').length;
+  const repository = {
+    ...fx.repository,
+    saveCheckpoint(input) {
+      if (input?.pendingPreview?.stage === 'preview_ready') {
+        throw new Error('injected_preview_checkpoint_failure');
+      }
+      return fx.repository.saveCheckpoint(input);
+    },
+  };
+
+  await assert.rejects(
+    createResultChangeSet(request(fx), serviceDependencies(fx, {
+      repository,
+      executeJob: successfulExecutor(fx),
+    })),
+    /injected_preview_checkpoint_failure/,
+  );
+
+  const attempted = fx.repository.listChangeSets({ projectId: 'p_1', status: 'validation_failed', limit: 10 })
+    .find((changeSet) => changeSet.intentRef === fx.intent.intentId);
+  assert.ok(attempted, 'checkpoint failure closes the attempt without exposing a partial preview');
+  assert.equal(fx.repository.listRevisionsByChangeSet(attempted.changeSetId).length, 0);
+  assert.equal(fx.repository.listProjectRevisions('p_1').length, revisionCountBefore);
+  assert.equal(fx.db.prepare('SELECT COUNT(*) AS count FROM result_workflow_graphs WHERE project_id=?')
+    .get('p_1').count, 0);
+  const checkpoint = fx.repository.getLatestCheckpoint({ projectId: 'p_1', conversationId: 'conv_1' });
+  assert.equal(checkpoint.changeSetId, attempted.changeSetId);
+  assert.equal(checkpoint.changeSetStatus, 'validation_failed');
+  assert.equal(checkpoint.pendingPreview.stage, 'failed');
+  assert.equal(checkpoint.pendingPreview.recovery, 'result_edit_failed');
 });
 
 test('P6 primary candidate does not infer input lineage from hashes or sourceArtifactRef', async (context) => {

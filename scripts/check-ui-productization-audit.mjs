@@ -14,12 +14,19 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // commit itself predates the issue-id enforcement and is not rewritten.
   '17bb486f3eda58cc14aa2ee5d4386b16f20fc18e',
 ])
-// The implementation commit was followed by 2f0e78d, which added the UI-113
-// ledger entry and governance evidence. Keep the immutable commit history
-// intact and exempt this one already-accounted-for transition from both
-// per-commit checks.
-const LEGACY_UI_COMMIT_EXEMPTIONS = new Set([
+// These immutable implementation commits have an explicit later canonical
+// ledger reconciliation. Exempt only the same-commit audit-file requirement;
+// their messages remain subject to the UI-### issue-id gate above.
+const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // P4R-2 was recorded as UI-113 by the immediately following governance
+  // commit 2f0e78d. Its separate message exemption remains declared above.
   '17bb486f3eda58cc14aa2ee5d4386b16f20fc18e',
+  // UI-110 renderer redaction hardening is included in the final source-bound
+  // Electron trace and the verified ledger reconciliation in 2e3bc1b.
+  'f6271911512910e23dad6a383f3c7a961601c122',
+  // UI-110's final cross-platform redaction source commit is referenced
+  // verbatim by both the stored Electron evidence and the 2e3bc1b ledger row.
+  '6f5271e817fb9d6b3ae51aef29bd5bee5a9f36ec',
 ])
 const UI_ID_PATTERN = /\bUI-\d{3}\b/g
 
@@ -80,11 +87,9 @@ if (baselineIsAvailable()) {
     const subject = message.split('\n', 1)[0] ?? ''
     const shortCommit = commit.slice(0, 7)
 
-    if (LEGACY_UI_COMMIT_EXEMPTIONS.has(commit)) continue
-
     if (isChoreCommit(subject)) continue
 
-    if (!files.includes(AUDIT_PATH)) {
+    if (!files.includes(AUDIT_PATH) && !LEGACY_AUDIT_SYNC_EXEMPTIONS.has(commit)) {
       failures.push(`${shortCommit}: UI 改动没有同步 ${AUDIT_PATH}`)
     }
     if (uiIds(message).length === 0 && !LEGACY_MESSAGE_EXEMPTIONS.has(commit)) {

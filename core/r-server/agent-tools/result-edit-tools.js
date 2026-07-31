@@ -439,7 +439,6 @@ function createResultChangeSetTools(options = {}) {
         pluginId,
         language: plugin.language,
         scriptPatch: args.scriptPatch || [],
-        previewResourceEstimate: args.previewResourceEstimate || null,
         scientificConfirmed: args.scientificConfirmed === true,
         authoritativeSubgraph,
         createdBy: 'agent',
@@ -453,9 +452,6 @@ function createResultChangeSetTools(options = {}) {
         getResultStudioDescriptor,
         authoritativeSubgraphTrusted: authoritativeSubgraph !== null,
         shouldCancel: () => typeof ctx.isCancelled === 'function' && ctx.isCancelled(),
-        activePreviewJobs: typeof scoped.repository.listChangeSets === 'function'
-          ? scoped.repository.listChangeSets({ projectId: scoped.projectId, status: 'running', limit: 500 }).length
-          : 0,
         onProgress: (event) => {
           if (typeof ctx.emitResultEditProgress === 'function') ctx.emitResultEditProgress(event);
         },

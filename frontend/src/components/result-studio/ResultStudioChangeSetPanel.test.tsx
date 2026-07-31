@@ -50,6 +50,29 @@ const comparison: ResultStudioComparison = {
   jsonDiffs: [{ relativePath: 'parameters.json', status: 'available', truncated: false, changes: [{ field: 'palette', changeType: 'changed', before: 'red', after: 'blue' }] }],
   artifacts: [{ artifactId: 'plot', artifactFamilyId: 'family', kind: 'visual', beforeRevisionId: 'rev_1', afterRevisionId: 'rev_2', beforeHash: baseline.outputHash || null, afterHash: candidate.outputHash || null, validationStatus: 'valid', table: null }],
   histories: [{ artifactFamilyId: 'family', revisions: [baseline, candidate], currentRevisionId: 'rev_1' }],
+  resourceSummary: {
+    resultStudioResourceSummaryVersion: 1,
+    scope: 'change_set_candidate_jobs',
+    jobs: {
+      total: 1, completed: 1, failed: 0, cancelled: 0,
+      peakConcurrent: { status: 'measured', value: 2, unit: 'jobs', reason: null },
+    },
+    cpu: { peakPercent: { status: 'measured', value: 42.5, unit: 'percent', reason: null } },
+    memory: {
+      processPeakRssBytes: { status: 'measured', value: 64 * 1024 * 1024, unit: 'bytes', reason: null },
+      minimumSystemAvailableBytes: { status: 'measured', value: 2 * 1024 * 1024 * 1024, unit: 'bytes', reason: null },
+    },
+    disk: {
+      outputPeakBytes: { status: 'measured', value: 2 * 1024 * 1024, unit: 'bytes', reason: null },
+      minimumSystemAvailableBytes: { status: 'measured', value: 20 * 1024 * 1024 * 1024, unit: 'bytes', reason: null },
+    },
+    sampling: { status: 'measured', sampleCount: 5 },
+    provider: {
+      tokens: { status: 'unavailable', value: null, unit: 'tokens', reason: 'provider_usage_not_bound_to_change_set' },
+      cache: { status: 'unavailable', value: null, unit: 'tokens', reason: 'provider_usage_not_bound_to_change_set' },
+      cost: { status: 'unavailable', value: null, unit: null, reason: 'provider_usage_not_bound_to_change_set' },
+    },
+  },
   git: { baseCommit: 'a'.repeat(40), candidateCommit: 'c'.repeat(40), workingBranchRef: changeSet.workingBranchRef },
 };
 
@@ -83,6 +106,10 @@ describe('ResultStudioChangeSetPanel', () => {
     expect(await screen.findByText('plot · 前后对比')).toBeTruthy();
     expect(screen.getByText('参数与结构变化')).toBeTruthy();
     expect(screen.getByText('脚本与文本变化')).toBeTruthy();
+    expect(screen.getByLabelText('本次任务资源摘要')).toBeTruthy();
+    expect(screen.getByText('42.5%')).toBeTruthy();
+    expect(screen.getByText('64.0 MB')).toBeTruthy();
+    expect(screen.getByText('未绑定真实 Provider 计量')).toBeTruthy();
     expect(screen.getByText('高级 Git 信息')).toBeTruthy();
     expect(screen.getByAltText('plot 修改前').getAttribute('src')).toBe('/artifact/rev_1');
   });
@@ -111,6 +138,22 @@ describe('ResultStudioChangeSetPanel', () => {
     expect(document.body.textContent).not.toContain('/Users/private');
     expect(document.body.textContent).not.toContain('C:\\private');
     expect(document.body.textContent).toContain('[project file]');
+  });
+
+  it('shows measured Provider cost only with its bound currency', async () => {
+    client.compareResultChangeSet.mockResolvedValueOnce({
+      ...comparison,
+      resourceSummary: {
+        ...comparison.resourceSummary,
+        provider: {
+          tokens: { status: 'measured', value: { input: 120, output: 30 }, unit: 'tokens', reason: null },
+          cache: { status: 'measured', value: { read: 20 }, unit: 'tokens', reason: null },
+          cost: { status: 'measured', value: 0.25, unit: 'USD', reason: null },
+        },
+      },
+    });
+    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" mode="compare" />);
+    expect(await screen.findByText(/cost USD 0\.25/)).toBeTruthy();
   });
 
   it('adopts only through the client and activates the returned Revision', async () => {
@@ -274,14 +317,89 @@ describe('ResultStudioChangeSetPanel', () => {
 
   it('requires an explicit action before recovering interrupted state', async () => {
     client.getResultStudioWorkspaceStatus.mockResolvedValue({
-      lifecycle: { status: 'recovery_available', interrupted: [{ changeSetId: 'cs_2', status: 'running', recovery: 'resume', revisionIds: [] }], checkpoint: null, revisionIntegrity: { revisionCount: 2, intact: true, issues: [] } },
+      lifecycle: { status: 'recovery_available', interrupted: [{ status: 'running', recovery: 'resume', checkpointStage: 'materialized', preservedRevisionCount: 0 }], pendingDecisions: [], checkpoint: null, revisionIntegrity: { revisionCount: 2, intact: true, issues: [] } },
       storage: { revisionCount: 2, logicalArtifactBytes: 2048, uniqueArtifactBytes: 2048, deduplicableBytes: 0, duplicateGroupCount: 0, privateStorage: { bytes: 0, files: 0, truncated: false } },
     });
     render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" mode="history" />);
-    expect(await screen.findByText('检测到未完成的修改现场')).toBeTruthy();
+    expect(await screen.findByText('检测到中断的修改现场')).toBeTruthy();
+    expect(screen.getByText('停止于准备执行 · 已保留 0 个候选结果')).toBeTruthy();
+    expect(screen.getByText('系统将核对完整性：完整候选恢复为待确认预览；不完整现场收口为失败且不覆盖当前版本。')).toBeTruthy();
+    expect(screen.getByText('下一步：恢复后检查候选，或重新发起修改。')).toBeTruthy();
     expect(client.recoverResultStudioWorkspace).not.toHaveBeenCalled();
     fireEvent.click(screen.getByText('恢复修改现场'));
     await waitFor(() => expect(client.recoverResultStudioWorkspace).toHaveBeenCalledWith('p_1'));
+  });
+
+  it('projects a durable preview as a pending decision without a recovery action', async () => {
+    client.getResultStudioWorkspaceStatus.mockResolvedValue({
+      lifecycle: {
+        status: 'ready',
+        interrupted: [],
+        pendingDecisions: [{ status: 'preview_ready', recovery: 'awaiting_user_decision', checkpointStage: 'preview_ready', preservedRevisionCount: 1 }],
+        checkpoint: null,
+        revisionIntegrity: { revisionCount: 2, intact: true, issues: [] },
+      },
+      storage: { revisionCount: 2, logicalArtifactBytes: 2048, uniqueArtifactBytes: 2048, deduplicableBytes: 0, duplicateGroupCount: 0, privateStorage: { bytes: 0, files: 0, truncated: false } },
+    });
+    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" mode="history" />);
+    expect(await screen.findByText('1 个候选版本待确认')).toBeTruthy();
+    expect(screen.getByText('候选结果已保留；下一步：比较差异后采用或放弃。')).toBeTruthy();
+    expect(screen.queryByText('恢复修改现场')).toBeNull();
+    expect(client.recoverResultStudioWorkspace).not.toHaveBeenCalled();
+  });
+
+  it('keeps a current-runtime edit active without offering restart recovery', async () => {
+    client.getResultStudioWorkspaceStatus.mockResolvedValue({
+      lifecycle: {
+        status: 'ready',
+        interrupted: [],
+        activeOperations: [{ status: 'running', recovery: 'recovery_required_after_restart', checkpointStage: 'candidate_committed', preservedRevisionCount: 0 }],
+        checkpoint: null,
+        revisionIntegrity: { revisionCount: 2, intact: true, issues: [] },
+      },
+      storage: { revisionCount: 2, logicalArtifactBytes: 2048, uniqueArtifactBytes: 2048, deduplicableBytes: 0, duplicateGroupCount: 0, privateStorage: { bytes: 0, files: 0, truncated: false } },
+    });
+    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" mode="history" />);
+    expect(await screen.findByText('结果修改正在运行')).toBeTruthy();
+    expect(screen.getByText('当前停留在保存候选脚本；任务结束前不会执行重启恢复。')).toBeTruthy();
+    expect(screen.queryByText('恢复修改现场')).toBeNull();
+  });
+
+  it('summarizes every interrupted site before one project-wide recovery action', async () => {
+    client.getResultStudioWorkspaceStatus.mockResolvedValue({
+      lifecycle: {
+        status: 'recovery_available',
+        interrupted: [
+          { status: 'running', recovery: 'recovery_required_after_restart', checkpointStage: 'materialized', preservedRevisionCount: 0 },
+          { status: 'preview_ready', recovery: 'awaiting_user_decision', checkpointStage: 'revision', preservedRevisionCount: 2 },
+        ],
+        checkpoint: null,
+        revisionIntegrity: { revisionCount: 4, intact: true, issues: [] },
+      },
+      storage: { revisionCount: 4, logicalArtifactBytes: 4096, uniqueArtifactBytes: 4096, deduplicableBytes: 0, duplicateGroupCount: 0, privateStorage: { bytes: 0, files: 0, truncated: false } },
+    });
+    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" mode="history" />);
+    expect(await screen.findByText('检测到 2 个中断的修改现场')).toBeTruthy();
+    expect(screen.getByText('停止点：准备执行、登记候选结果 · 共保留 2 个候选结果')).toBeTruthy();
+    fireEvent.click(screen.getByText('恢复全部修改现场'));
+    await waitFor(() => expect(client.recoverResultStudioWorkspace).toHaveBeenCalledWith('p_1'));
+  });
+
+  it('explains blocked cohort truth without exposing internal identifiers or paths', async () => {
+    client.getResultStudioWorkspaceStatus.mockResolvedValue({
+      lifecycle: {
+        status: 'blocked',
+        interrupted: [],
+        pendingIssues: [{ kind: 'recovery_job_artifact_truth_drift' }, { kind: 'formal_artifact_cohort_incomplete' }],
+        checkpoint: null,
+        revisionIntegrity: { revisionCount: 2, intact: true, issues: [] },
+      },
+      storage: { revisionCount: 2, logicalArtifactBytes: 2048, uniqueArtifactBytes: 2048, deduplicableBytes: 0, duplicateGroupCount: 0, privateStorage: { bytes: 0, files: 0, truncated: false } },
+    });
+    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" mode="history" />);
+    expect(await screen.findByText('候选结果的任务、脚本、参数或完整输出无法相互证明，已停止采用与自动恢复。')).toBeTruthy();
+    expect(document.body.textContent).not.toContain('recovery_job_artifact_truth_drift');
+    expect(document.body.textContent).not.toContain('/Users/');
   });
 
   it('keeps compare failure actionable without entering an automatic retry loop', async () => {

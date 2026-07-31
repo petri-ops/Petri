@@ -99,9 +99,11 @@ import {
   chooseResultArtifactName,
   chooseResultSectionLandingName,
   completeResultSurfaceMeasure,
+  requestedArtifactRequestKey,
   RESULT_SURFACE_PERFORMANCE_MARKS,
   resolveResultArtifactUrl,
   resolveResultViewerAdapter,
+  shouldApplyRequestedArtifact,
   type ResultSurfaceMode,
 } from '@/components/result-studio/resultSurface';
 import type { BackendStatus } from '@/lib/electron';
@@ -290,6 +292,7 @@ export function ProjectWorkspace(): React.ReactElement {
   // inside ResultArtifactShell via the imperative handle.
   const pendingArtifactNameRef = useRef<string | null>(null);
   const pendingArtifactJobIdRef = useRef<string | null>(null);
+  const appliedRequestedArtifactKeyRef = useRef<string | null>(null);
   const [pendingArtifactName, setPendingArtifactName] = useState<string | null>(null);
 
   // Conversation state — current project's conversations + active conversation.
@@ -1320,7 +1323,14 @@ export function ProjectWorkspace(): React.ReactElement {
     if (loading || !projectId) return;
 
     if (requestedJobId) {
-      if (requestedArtifactName && pendingArtifactNameRef.current !== requestedArtifactName) {
+      const requestKey = requestedArtifactRequestKey({
+        projectId,
+        jobId: requestedJobId,
+        artifactName: requestedArtifactName,
+      });
+      if (!requestKey) appliedRequestedArtifactKeyRef.current = null;
+      if (shouldApplyRequestedArtifact(appliedRequestedArtifactKeyRef.current, requestKey)) {
+        appliedRequestedArtifactKeyRef.current = requestKey;
         pendingArtifactNameRef.current = requestedArtifactName;
         pendingArtifactJobIdRef.current = requestedJobId;
         setPendingArtifactName(requestedArtifactName);
@@ -1336,6 +1346,8 @@ export function ProjectWorkspace(): React.ReactElement {
       });
       return;
     }
+
+    appliedRequestedArtifactKeyRef.current = null;
 
     if (activeJobId || jobs.length === 0) return;
     const firstJob = jobs[0];

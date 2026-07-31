@@ -68,10 +68,13 @@ export async function fetchArtifactInteraction(input: {
 export async function queryResultStudioTable(input: {
   language: 'r' | 'python'; jobId: string; artifact: string;
   filterExpression?: SelectionFilterExpression | null;
-  sort?: SelectionSortSpec[]; offset?: number; limit?: number;
+  sort?: SelectionSortSpec[]; offset?: number; limit?: number; signal?: AbortSignal;
 }): Promise<ResultTableQuery> {
   return parseResponse(await fetch(`${getApiPrefix(input.language)}/result-studio/table/query`, {
-    method: 'POST', headers: headers(true), body: JSON.stringify(input),
+    method: 'POST',
+    headers: headers(true),
+    body: JSON.stringify({ ...input, signal: undefined }),
+    signal: input.signal,
   }));
 }
 

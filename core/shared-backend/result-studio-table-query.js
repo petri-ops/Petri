@@ -7,7 +7,10 @@ const MAX_QUERY_BYTES = 64 * 1024 * 1024;
 const MAX_QUERY_ROWS = 250_000;
 const MAX_QUERY_PAGE_ROWS = 250;
 const MAX_FILTER_CLAUSES = 8;
+const MAX_CACHED_QUERY_BYTES = 16 * 1024 * 1024;
+const MAX_CACHED_TABLES = 2;
 const FILTER_OPERATORS = new Set(['eq', 'ne', 'lt', 'lte', 'gt', 'gte', 'in', 'contains']);
+const TABLE_CACHE = new Map();
 
 class ResultStudioTableQueryError extends Error {
   constructor(code, message, detail = null) {
@@ -25,7 +28,12 @@ function stableValue(value) {
 }
 
 function sha256(value) {
-  return crypto.createHash('sha256').update(typeof value === 'string' ? value : JSON.stringify(stableValue(value))).digest('hex');
+  const payload = Buffer.isBuffer(value)
+    ? value
+    : typeof value === 'string'
+      ? value
+      : JSON.stringify(stableValue(value));
+  return crypto.createHash('sha256').update(payload).digest('hex');
 }
 
 function detectDelimiter(header, filePath) {
@@ -120,17 +128,21 @@ function compareValues(left, right) {
 
 function matchesClause(row, clause) {
   const raw = row[clause.field];
-  const cmp = compareValues(raw, clause.value);
   switch (clause.op) {
-    case 'eq': return cmp === 0;
-    case 'ne': return cmp !== 0;
-    case 'lt': return cmp < 0;
-    case 'lte': return cmp <= 0;
-    case 'gt': return cmp > 0;
-    case 'gte': return cmp >= 0;
     case 'contains': return String(raw ?? '').toLowerCase().includes(String(clause.value ?? '').toLowerCase());
     case 'in': return Array.isArray(clause.value) && clause.value.some((value) => compareValues(raw, value) === 0);
-    default: return false;
+    default: {
+      const cmp = compareValues(raw, clause.value);
+      switch (clause.op) {
+        case 'eq': return cmp === 0;
+        case 'ne': return cmp !== 0;
+        case 'lt': return cmp < 0;
+        case 'lte': return cmp <= 0;
+        case 'gt': return cmp > 0;
+        case 'gte': return cmp >= 0;
+        default: return false;
+      }
+    }
   }
 }
 
@@ -141,18 +153,63 @@ function matchesFilter(row, filter) {
     : filter.clauses.every((clause) => matchesClause(row, clause));
 }
 
-function readDelimitedTable(filePath) {
-  const stat = fs.statSync(filePath);
-  if (stat.size > MAX_QUERY_BYTES) {
-    throw new ResultStudioTableQueryError('table_query_file_too_large', 'Table exceeds the bounded query budget.', { bytes: stat.size, maxBytes: MAX_QUERY_BYTES });
+function tableIdentity(filePath) {
+  const realPath = fs.realpathSync(filePath);
+  const stat = fs.statSync(realPath, { bigint: true });
+  const size = Number(stat.size);
+  return {
+    realPath,
+    size,
+    key: JSON.stringify([
+      realPath,
+      String(stat.dev),
+      String(stat.ino),
+      String(stat.size),
+      String(stat.mtimeNs),
+      String(stat.ctimeNs),
+    ]),
+  };
+}
+
+function cacheTable(identity, table) {
+  if (identity.size > MAX_CACHED_QUERY_BYTES) return;
+  for (const [key, entry] of TABLE_CACHE) {
+    if (entry.realPath === identity.realPath) TABLE_CACHE.delete(key);
   }
-  const raw = fs.readFileSync(filePath, 'utf8');
+  TABLE_CACHE.set(identity.key, { realPath: identity.realPath, table });
+  while (TABLE_CACHE.size > MAX_CACHED_TABLES) {
+    TABLE_CACHE.delete(TABLE_CACHE.keys().next().value);
+  }
+}
+
+function clearResultTableCache() {
+  TABLE_CACHE.clear();
+}
+
+function readDelimitedTable(filePath) {
+  const identity = tableIdentity(filePath);
+  if (identity.size > MAX_QUERY_BYTES) {
+    throw new ResultStudioTableQueryError('table_query_file_too_large', 'Table exceeds the bounded query budget.', { bytes: identity.size, maxBytes: MAX_QUERY_BYTES });
+  }
+  const cached = TABLE_CACHE.get(identity.key);
+  if (cached) {
+    TABLE_CACHE.delete(identity.key);
+    TABLE_CACHE.set(identity.key, cached);
+    return cached.table;
+  }
+  const rawBytes = fs.readFileSync(identity.realPath);
+  const raw = rawBytes.toString('utf8');
+  const rawSha256 = sha256(rawBytes);
   const lines = raw.split(/\r?\n/).filter((line) => line.length > 0);
-  if (lines.length === 0) return { columns: [], rows: [], rawSha256: sha256(raw) };
+  if (lines.length === 0) {
+    const table = { columns: [], rows: [], rawSha256 };
+    cacheTable(identity, table);
+    return table;
+  }
   if (lines.length - 1 > MAX_QUERY_ROWS) {
     throw new ResultStudioTableQueryError('table_query_row_limit', 'Table exceeds the bounded row query budget.', { rows: lines.length - 1, maxRows: MAX_QUERY_ROWS });
   }
-  const delimiter = detectDelimiter(lines[0], filePath);
+  const delimiter = detectDelimiter(lines[0], identity.realPath);
   const columns = normalizeColumnNames(splitDelimitedLine(lines[0], delimiter));
   const rows = lines.slice(1).map((line, sourceIndex) => {
     const cells = splitDelimitedLine(line, delimiter);
@@ -160,12 +217,38 @@ function readDelimitedTable(filePath) {
     columns.forEach((column, index) => { row[column] = cells[index] ?? ''; });
     return row;
   });
-  return { columns, rows, rawSha256: sha256(raw) };
+  const table = { columns, rows, rawSha256 };
+  cacheTable(identity, table);
+  return table;
 }
 
-function queryResultTable({ filePath, filterExpression = null, sort = [], offset = 0, limit = 100, idField = null, includeEntityIds = false } = {}) {
+function queryResultTable({
+  filePath,
+  expectedSha256 = null,
+  filterExpression = null,
+  sort = [],
+  offset = 0,
+  limit = 100,
+  idField = null,
+  includeEntityIds = false,
+} = {}) {
   if (!filePath) throw new ResultStudioTableQueryError('table_path_required', 'filePath is required.');
   const table = readDelimitedTable(filePath);
+  if (expectedSha256 !== null) {
+    const expected = String(expectedSha256 || '').trim().toLowerCase();
+    if (!/^[a-f0-9]{64}$/.test(expected)) {
+      throw new ResultStudioTableQueryError(
+        'artifact_truth_unavailable',
+        'The table has no trusted SHA-256 in Artifact Truth.',
+      );
+    }
+    if (table.rawSha256 !== expected) {
+      throw new ResultStudioTableQueryError(
+        'artifact_truth_drift',
+        'The table bytes no longer match Artifact Truth.',
+      );
+    }
+  }
   const filter = normalizeFilter(filterExpression, table.columns);
   const normalizedSort = normalizeSort(sort, table.columns);
   const boundedOffset = Number.isInteger(offset) && offset >= 0 ? offset : 0;
@@ -215,10 +298,13 @@ function queryResultTable({ filePath, filterExpression = null, sort = [], offset
 }
 
 module.exports = {
+  MAX_CACHED_QUERY_BYTES,
+  MAX_CACHED_TABLES,
   MAX_QUERY_BYTES,
   MAX_QUERY_ROWS,
   MAX_QUERY_PAGE_ROWS,
   ResultStudioTableQueryError,
+  clearResultTableCache,
   normalizeColumnNames,
   parseScientificNumber,
   queryResultTable,
