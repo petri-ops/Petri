@@ -167,7 +167,10 @@ async function semanticSnapshot(webContents) {
               const value = node.nodeValue || '';
               chunks.push(value);
               if (value.includes('/Users/') || value.includes('/home/') || containsWindowsPath(value)) {
-                const location = parent.closest('pre') ? 'preformatted_text'
+                const location = parent.closest('pre')
+                  ? parent.closest('[aria-label="Result Studio 版本与变更"]') ? 'change_review_patch'
+                    : parent.closest('[aria-label="结果主画布"]') ? 'result_canvas_pre'
+                      : 'other_preformatted_text'
                   : parent.closest('code') ? 'structured_value'
                     : parent.closest('.sc-msg-assistant, .sc-msg-user') ? 'conversation'
                       : parent.closest('[aria-label="Result Studio 版本与变更"]') ? 'change_review'
