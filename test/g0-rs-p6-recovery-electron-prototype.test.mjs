@@ -11,8 +11,11 @@ import {
   assertP6RecoveryElectronEvidenceWritable,
   assertSanitizedP6RecoveryElectronEvidence,
   buildP6RecoveryElectronVerdict,
+  classifyP6ActiveElectronAttempt,
   getP6RecoveryElectronSourceBinding,
   observeP6RecoveryElectron,
+  runP6ActiveElectronLaunchWithRetry,
+  terminateP6ActiveElectronProcessGroup,
 } from '../scripts/g0-rs-p6-recovery-electron-prototype.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -78,6 +81,8 @@ function passingObservation(overrides = {}) {
         publicProjectionClean: true,
         renderProcessGoneCount: 0,
         backendStatus: readyBackendStatus(),
+        launchAttemptCount: 1,
+        preObservationLaunchFailures: [],
         passed: true,
       },
       recover: {
@@ -236,6 +241,222 @@ test('verdict fails closed when an explanation, recovery request or relaunch tru
     maxDurationMs: null,
   };
   assert.equal(buildP6RecoveryElectronVerdict(missingBackendHealth).passed, false);
+
+  const missingLaunchAudit = passingObservation();
+  delete missingLaunchAudit.renderer.activeCrash.launchAttemptCount;
+  assert.equal(buildP6RecoveryElectronVerdict(missingLaunchAudit).passed, false);
+
+  const forgedRetryAudit = passingObservation();
+  forgedRetryAudit.renderer.activeCrash.launchAttemptCount = 2;
+  forgedRetryAudit.renderer.activeCrash.preObservationLaunchFailures = [{
+    attempt: 1,
+    kind: 'persisted_semantic_failure',
+    exitCode: 1,
+    exitSignal: null,
+    stderrDigest: 'a'.repeat(64),
+    stderrBytes: 10,
+  }];
+  assert.equal(buildP6RecoveryElectronVerdict(forgedRetryAudit).passed, false);
+});
+
+test('active Electron classifier retries only a missing-result child exit or spawn error', () => {
+  assert.deepEqual(classifyP6ActiveElectronAttempt({
+    resultExists: false,
+    terminalKind: 'exit',
+  }), {
+    kind: 'child_exit_before_observation',
+    retryEligible: true,
+  });
+  assert.deepEqual(classifyP6ActiveElectronAttempt({
+    resultExists: false,
+    terminalKind: 'spawn_error',
+  }), {
+    kind: 'spawn_error_before_observation',
+    retryEligible: true,
+  });
+  for (const classified of [
+    classifyP6ActiveElectronAttempt({
+      resultExists: true,
+      result: { passed: false, failedStage: 'load_project' },
+      terminalKind: 'exit',
+    }),
+    classifyP6ActiveElectronAttempt({
+      resultExists: true,
+      result: { passed: false },
+      terminalKind: 'exit',
+    }),
+    classifyP6ActiveElectronAttempt({
+      resultExists: true,
+      resultParseError: 'invalid_json',
+      terminalKind: 'exit',
+    }),
+    classifyP6ActiveElectronAttempt({ resultExists: false, timedOut: true }),
+    classifyP6ActiveElectronAttempt({ resultExists: false }),
+  ]) {
+    assert.equal(classified.retryEligible, false);
+  }
+});
+
+function retryableLaunchError(attempt, kind = 'child_exit_before_observation') {
+  const error = new Error(`p6_recovery_active_electron_${kind}`);
+  error.code = error.message;
+  error.retryEligible = true;
+  error.detail = { exitCode: 1, exitSignal: null };
+  error.preObservationLaunchFailure = {
+    attempt,
+    kind,
+    exitCode: 1,
+    exitSignal: null,
+    stderrDigest: String(attempt).repeat(64),
+    stderrBytes: 32,
+  };
+  return error;
+}
+
+test('active Electron launch retries once in a fresh scope and records bounded failure audit', async () => {
+  const created = [];
+  const launched = [];
+  const result = await runP6ActiveElectronLaunchWithRetry({
+    createAttempt: async (attempt) => {
+      const scope = path.join(ROOT, '.p6-recovery-test', `attempt-${attempt}`);
+      created.push(scope);
+      return {
+        configPath: path.join(scope, 'driver-config.json'),
+        resultPath: path.join(scope, 'driver-result.json'),
+      };
+    },
+    launchAttempt: async ({ attempt, configPath }) => {
+      launched.push({ attempt, configPath });
+      if (attempt === 1) throw retryableLaunchError(attempt);
+      return { pid: 42, exitSignal: 'SIGKILL', result: { phase: 'active-crash', passed: true } };
+    },
+  });
+  assert.equal(created.length, 2);
+  assert.notEqual(path.dirname(launched[0].configPath), path.dirname(launched[1].configPath));
+  assert.equal(result.result.launchAttemptCount, 2);
+  assert.deepEqual(result.result.preObservationLaunchFailures, [{
+    attempt: 1,
+    kind: 'child_exit_before_observation',
+    exitCode: 1,
+    exitSignal: null,
+    stderrDigest: '1'.repeat(64),
+    stderrBytes: 32,
+  }]);
+});
+
+test('active Electron launch never retries a persisted or timeout failure and caps early exits at two', async () => {
+  for (const code of [
+    'p6_recovery_active_electron_persisted_driver_failure',
+    'p6_recovery_active_electron_persisted_semantic_failure',
+    'p6_recovery_active_electron_live_child_timeout',
+  ]) {
+    let calls = 0;
+    await assert.rejects(runP6ActiveElectronLaunchWithRetry({
+      createAttempt: async (attempt) => ({
+        configPath: path.join(ROOT, '.p6-recovery-test', code, `attempt-${attempt}`, 'config.json'),
+        resultPath: path.join(ROOT, '.p6-recovery-test', code, `attempt-${attempt}`, 'result.json'),
+      }),
+      launchAttempt: async () => {
+        calls += 1;
+        const error = new Error(code);
+        error.code = code;
+        error.retryEligible = false;
+        error.detail = { phaseResult: { passed: false } };
+        throw error;
+      },
+    }), (error) => error.code === code && error.detail.launchAttemptCount === 1);
+    assert.equal(calls, 1);
+  }
+
+  let forgedRetryCalls = 0;
+  await assert.rejects(runP6ActiveElectronLaunchWithRetry({
+    createAttempt: async (attempt) => ({
+      configPath: path.join(ROOT, '.p6-recovery-test', 'forged', `attempt-${attempt}`, 'config.json'),
+      resultPath: path.join(ROOT, '.p6-recovery-test', 'forged', `attempt-${attempt}`, 'result.json'),
+    }),
+    launchAttempt: async ({ attempt }) => {
+      forgedRetryCalls += 1;
+      throw retryableLaunchError(attempt, 'persisted_semantic_failure');
+    },
+  }));
+  assert.equal(forgedRetryCalls, 1);
+
+  let earlyExitCalls = 0;
+  await assert.rejects(runP6ActiveElectronLaunchWithRetry({
+    createAttempt: async (attempt) => ({
+      configPath: path.join(ROOT, '.p6-recovery-test', 'bounded', `attempt-${attempt}`, 'config.json'),
+      resultPath: path.join(ROOT, '.p6-recovery-test', 'bounded', `attempt-${attempt}`, 'result.json'),
+    }),
+    launchAttempt: async ({ attempt }) => {
+      earlyExitCalls += 1;
+      throw retryableLaunchError(attempt);
+    },
+  }), (error) => error.detail.launchAttemptCount === 2
+    && error.detail.preObservationLaunchFailures.length === 2);
+  assert.equal(earlyExitCalls, 2);
+});
+
+test('active Electron POSIX cleanup targets the detached process group and confirms TERM to KILL', async () => {
+  let alive = true;
+  const signals = [];
+  const signalProcess = (target, signal) => {
+    signals.push([target, signal]);
+    if (signal === 0) {
+      if (alive) return true;
+      const error = new Error('gone');
+      error.code = 'ESRCH';
+      throw error;
+    }
+    if (signal === 'SIGKILL') alive = false;
+    return true;
+  };
+  const result = await terminateP6ActiveElectronProcessGroup({
+    pid: 4242,
+    exitCode: null,
+    signalCode: null,
+  }, {
+    platform: 'darwin',
+    signalProcess,
+    sleepFn: async () => {},
+    termGraceMs: 1,
+    killConfirmMs: 2,
+  });
+  assert.equal(result.terminated, true);
+  assert.equal(result.signal, 'SIGKILL');
+  assert.equal(result.escalated, true);
+  assert.ok(signals.some(([target, signal]) => target === -4242 && signal === 'SIGTERM'));
+  assert.ok(signals.some(([target, signal]) => target === -4242 && signal === 'SIGKILL'));
+  assert.ok(signals.every(([target]) => target === -4242));
+});
+
+test('active Electron Windows cleanup uses taskkill tree then force and fails closed after root exit', async () => {
+  const child = { pid: 5252, exitCode: null, signalCode: null };
+  const commands = [];
+  const result = await terminateP6ActiveElectronProcessGroup(child, {
+    platform: 'win32',
+    taskkill: async (args) => {
+      commands.push(args);
+      if (args.includes('/f')) child.exitCode = 1;
+      return { ok: true, code: 0, errorCode: null };
+    },
+    sleepFn: async () => {},
+    termGraceMs: 1,
+    killConfirmMs: 2,
+  });
+  assert.equal(result.terminated, true);
+  assert.equal(result.signal, 'SIGKILL');
+  assert.deepEqual(commands, [
+    ['/pid', '5252', '/t'],
+    ['/pid', '5252', '/t', '/f'],
+  ]);
+
+  const unaddressable = await terminateP6ActiveElectronProcessGroup({
+    pid: 6262,
+    exitCode: 0,
+    signalCode: null,
+  }, { platform: 'win32' });
+  assert.equal(unaddressable.terminated, false);
+  assert.equal(unaddressable.reason, 'active_electron_root_exited_before_tree_termination');
 });
 
 test('future evidence guard requires a current source binding and recomputed passing checks', () => {
@@ -270,6 +491,8 @@ test('driver creates a hardened BrowserWindow and clicks only the public recover
   assert.match(source, /contextIsolation:\s*true/);
   assert.match(source, /nodeIntegration:\s*false/);
   assert.match(source, /sandbox:\s*true/);
+  assert.match(source, /BIOF3_P6_RECOVERY_ELECTRON_ATTEMPT/);
+  assert.match(source, /electron-user-data-attempt-/);
   assert.match(source, /setWindowOpenHandler\(\(\) => \(\{ action: 'deny' \}\)\)/);
   assert.match(source, /ipcMain\.handle\('backend:status', async \(\) => \{/);
   assert.match(source, /new URL\('\/api\/health', config\.backendBaseUrl\)/);

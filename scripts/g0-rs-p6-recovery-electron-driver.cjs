@@ -15,6 +15,7 @@ const path = require('node:path');
 const { probeUrl } = require('../src/backend-health.js');
 
 const CONFIG_ENV = 'BIOF3_P6_RECOVERY_ELECTRON_CONFIG';
+const ATTEMPT_ENV = 'BIOF3_P6_RECOVERY_ELECTRON_ATTEMPT';
 const PRELOAD_PATH = path.resolve(__dirname, '..', 'src', 'preload.js');
 const WAIT_MS = 120_000;
 const POLL_MS = 100;
@@ -24,7 +25,14 @@ const configPath = process.env[CONFIG_ENV];
 if (!configPath || !path.isAbsolute(configPath)) {
   throw new Error(`${CONFIG_ENV} must be an absolute disposable path`);
 }
-const userDataPath = path.join(path.dirname(configPath), 'electron-user-data');
+const launchAttempt = String(process.env[ATTEMPT_ENV] || '');
+if (!/^[12]$/.test(launchAttempt)) {
+  throw new Error(`${ATTEMPT_ENV} must identify one bounded launch attempt`);
+}
+const userDataPath = path.join(
+  path.dirname(configPath),
+  `electron-user-data-attempt-${launchAttempt}`,
+);
 mkdirSync(userDataPath, { recursive: true, mode: 0o700 });
 app.setPath('userData', userDataPath);
 

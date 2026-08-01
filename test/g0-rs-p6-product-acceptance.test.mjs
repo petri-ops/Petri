@@ -168,6 +168,7 @@ function electronRecovery() {
       activeCrash: {
         browserWindowSecurity: secureWindow(), publicProjectionClean: true,
         renderProcessGoneCount: 0, recoveryRequestCount: 0, passed: true,
+        launchAttemptCount: 1, preObservationLaunchFailures: [],
         backendStatus: readyBackendStatus(),
         before: {
           lifecycleState: 'ready', activeOperationExplained: true, activeStageExplained: true,

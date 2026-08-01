@@ -10,7 +10,7 @@
  */
 
 import { createHash } from 'node:crypto';
-import { spawn, spawnSync } from 'node:child_process';
+import { execFile, spawn, spawnSync } from 'node:child_process';
 import {
   existsSync,
   mkdirSync,
@@ -38,6 +38,11 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DRIVER_PATH = path.join(ROOT, 'scripts/g0-rs-p6-recovery-electron-driver.cjs');
 const VITE_PATH = path.join(ROOT, 'frontend/node_modules/vite/bin/vite.js');
 const ELECTRON_PATH = require('electron');
+const RECOVERY_ELECTRON_ATTEMPT_ENV = 'BIOF3_P6_RECOVERY_ELECTRON_ATTEMPT';
+const MAX_ACTIVE_ELECTRON_LAUNCH_ATTEMPTS = 2;
+const DRIVER_RESULT_PARSE_STABILITY_MS = 250;
+const ACTIVE_ELECTRON_TERM_GRACE_MS = 2_000;
+const ACTIVE_ELECTRON_KILL_CONFIRM_MS = 2_000;
 const SHA256 = /^[a-f0-9]{64}$/;
 const COMMIT = /^[a-f0-9]{40}$/;
 const TERMINAL_JOBS = new Set(['completed', 'failed', 'cancelled', 'recovery_required']);
@@ -191,6 +196,26 @@ function withinBudget(value, limit) {
   return Number.isFinite(value) && value >= 0 && value <= limit;
 }
 
+function validActiveElectronLaunchAudit(activeCrash) {
+  const attemptCount = activeCrash?.launchAttemptCount;
+  const failures = activeCrash?.preObservationLaunchFailures;
+  return Number.isInteger(attemptCount)
+    && attemptCount >= 1
+    && attemptCount <= MAX_ACTIVE_ELECTRON_LAUNCH_ATTEMPTS
+    && Array.isArray(failures)
+    && failures.length === attemptCount - 1
+    && failures.every((failure, index) => (
+      failure?.attempt === index + 1
+      && ['spawn_error_before_observation', 'child_exit_before_observation'].includes(failure.kind)
+      && (failure.exitCode === null || Number.isInteger(failure.exitCode))
+      && (failure.exitSignal === null || /^[A-Za-z0-9_.-]{1,96}$/.test(failure.exitSignal))
+      && SHA256.test(failure.stderrDigest || '')
+      && Number.isInteger(failure.stderrBytes)
+      && failure.stderrBytes >= 0
+      && failure.stderrBytes <= 12_000
+    ));
+}
+
 export function buildP6RecoveryElectronVerdict(observation = {}) {
   const activeCrash = observation.renderer?.activeCrash || {};
   const recover = observation.renderer?.recover || {};
@@ -274,6 +299,7 @@ export function buildP6RecoveryElectronVerdict(observation = {}) {
       && activeCrash.before?.recoveryControlAbsent === true
       && activeCrash.recoveryRequestCount === 0
       && activeCrash.passed === true
+      && validActiveElectronLaunchAudit(activeCrash)
       && observation.processBoundaries?.electronActuallySigkilled === true
       && observation.processBoundaries?.electronRelaunchedAfterCrash === true),
     check('P6RE-15', withinBudget(
@@ -350,13 +376,149 @@ async function waitForUrl(url, child, timeoutMs = 45_000) {
 }
 
 async function stopChild(child) {
-  if (!child || child.exitCode !== null) return;
-  child.kill('SIGTERM');
+  if (!child || child.exitCode !== null || child.signalCode !== null) return;
+  try { child.kill('SIGTERM'); } catch { return; }
   await Promise.race([
     new Promise((resolve) => child.once('exit', resolve)),
     sleep(3_000),
   ]);
-  if (child.exitCode === null) child.kill('SIGKILL');
+  if (child.exitCode === null && child.signalCode === null) {
+    try { child.kill('SIGKILL'); } catch {}
+  }
+}
+
+function childHasExited(child) {
+  return !child
+    || child.exitCode !== null && child.exitCode !== undefined
+    || child.signalCode !== null && child.signalCode !== undefined;
+}
+
+async function waitForTermination(checkAlive, timeoutMs, sleepFn = sleep) {
+  const deadline = Date.now() + Math.max(1, timeoutMs);
+  while (Date.now() < deadline) {
+    if (!checkAlive()) return true;
+    await sleepFn(Math.min(25, Math.max(1, deadline - Date.now())));
+  }
+  return !checkAlive();
+}
+
+function runWindowsTaskkill(args, timeoutMs) {
+  return new Promise((resolve) => {
+    execFile('taskkill.exe', args, {
+      windowsHide: true,
+      timeout: Math.max(1, timeoutMs),
+    }, (error) => resolve({
+      ok: !error,
+      code: Number.isInteger(error?.code) ? error.code : null,
+      errorCode: safeDiagnosticToken(error?.code),
+    }));
+  });
+}
+
+export async function terminateP6ActiveElectronProcessGroup(child, {
+  force = false,
+  platform = process.platform,
+  signalProcess = process.kill,
+  taskkill = runWindowsTaskkill,
+  sleepFn = sleep,
+  termGraceMs = ACTIVE_ELECTRON_TERM_GRACE_MS,
+  killConfirmMs = ACTIVE_ELECTRON_KILL_CONFIRM_MS,
+} = {}) {
+  const pid = child?.pid;
+  if (!Number.isInteger(pid) || pid <= 0) {
+    return { terminated: false, reason: 'active_electron_pid_missing', escalated: false };
+  }
+
+  if (platform === 'win32') {
+    // taskkill /T is the Windows tree primitive. If the root already exited,
+    // its former descendants can no longer be addressed safely by parent PID;
+    // fail closed instead of retrying while an unowned renderer may survive.
+    if (childHasExited(child)) {
+      return {
+        terminated: false,
+        reason: 'active_electron_root_exited_before_tree_termination',
+        escalated: force,
+      };
+    }
+    const gracefulArgs = ['/pid', String(pid), '/t'];
+    const forcedArgs = [...gracefulArgs, '/f'];
+    if (!force) {
+      const graceful = await taskkill(gracefulArgs, termGraceMs);
+      const gracefulGone = await waitForTermination(
+        () => !childHasExited(child), termGraceMs, sleepFn,
+      );
+      if (graceful.ok && gracefulGone) {
+        return { terminated: true, signal: 'SIGTERM', escalated: false, treeCommand: 'taskkill_t' };
+      }
+    }
+    const forced = await taskkill(forcedArgs, killConfirmMs);
+    const forcedGone = await waitForTermination(
+      () => !childHasExited(child), killConfirmMs, sleepFn,
+    );
+    return forced.ok && forcedGone
+      ? { terminated: true, signal: 'SIGKILL', escalated: !force, treeCommand: 'taskkill_t_f' }
+      : {
+          terminated: false,
+          reason: 'active_electron_windows_tree_termination_unconfirmed',
+          escalated: !force,
+          taskkillErrorCode: forced.errorCode || null,
+        };
+  }
+
+  const groupTarget = -pid;
+  const groupAlive = () => {
+    try {
+      signalProcess(groupTarget, 0);
+      return true;
+    } catch (error) {
+      if (error?.code === 'ESRCH') return false;
+      return true;
+    }
+  };
+  const signalGroup = (signal) => {
+    try {
+      signalProcess(groupTarget, signal);
+      return { sent: true, absent: false };
+    } catch (error) {
+      if (error?.code === 'ESRCH') return { sent: false, absent: true };
+      return { sent: false, absent: false, errorCode: safeDiagnosticToken(error?.code) };
+    }
+  };
+
+  if (!groupAlive()) {
+    return { terminated: true, signal: child?.signalCode || null, alreadyExited: true, escalated: false };
+  }
+  if (!force) {
+    const term = signalGroup('SIGTERM');
+    if (!term.sent && !term.absent) {
+      return {
+        terminated: false,
+        reason: 'active_electron_group_sigterm_failed',
+        errorCode: term.errorCode || null,
+        escalated: false,
+      };
+    }
+    if (term.absent || await waitForTermination(groupAlive, termGraceMs, sleepFn)) {
+      return { terminated: true, signal: 'SIGTERM', escalated: false };
+    }
+  }
+  const kill = signalGroup('SIGKILL');
+  if (!kill.sent && !kill.absent) {
+    return {
+      terminated: false,
+      reason: 'active_electron_group_sigkill_failed',
+      errorCode: kill.errorCode || null,
+      escalated: !force,
+    };
+  }
+  const killed = kill.absent || await waitForTermination(groupAlive, killConfirmMs, sleepFn);
+  return killed
+    ? { terminated: true, signal: 'SIGKILL', escalated: !force }
+    : {
+        terminated: false,
+        reason: 'active_electron_group_sigkill_unconfirmed',
+        escalated: !force,
+      };
 }
 
 async function requestJson(baseUrl, route, options = {}) {
@@ -467,8 +629,216 @@ function sameFileIdentity(left, right) {
   return left.dev === right.dev && left.ino === right.ino;
 }
 
+function readDriverResult(resultPath) {
+  if (!existsSync(resultPath)) return { exists: false, value: null, parseError: null };
+  try {
+    return {
+      exists: true,
+      value: JSON.parse(readFileSync(resultPath, 'utf8')),
+      parseError: null,
+    };
+  } catch (error) {
+    return {
+      exists: true,
+      value: null,
+      parseError: String(error?.message || 'invalid_json').slice(0, 160),
+    };
+  }
+}
+
+function safeDiagnosticToken(value) {
+  const normalized = String(value || '').trim();
+  return /^[A-Za-z0-9_.-]{1,96}$/.test(normalized) ? normalized : null;
+}
+
+function projectDriverPhaseResult(result) {
+  if (!result || typeof result !== 'object') return null;
+  const projectLifecycle = (value) => (value && typeof value === 'object' ? {
+    lifecycleState: safeDiagnosticToken(value.lifecycleState),
+    activeOperationExplained: value.activeOperationExplained === true,
+    activeStageExplained: value.activeStageExplained === true,
+    detectedInterruptedSite: value.detectedInterruptedSite === true,
+    stoppingStageExplained: value.stoppingStageExplained === true,
+    recoveryControlPresent: value.recoveryControlPresent === true,
+    recoveryControlEnabled: value.recoveryControlEnabled === true,
+    recoveryControlAbsent: value.recoveryControlAbsent === true,
+  } : null);
+  const backendStatus = result.backendStatus && typeof result.backendStatus === 'object'
+    ? {
+        checkCount: Number.isInteger(result.backendStatus.checkCount)
+          ? result.backendStatus.checkCount : 0,
+        everyCheckReady: result.backendStatus.everyCheckReady === true,
+        maxDurationMs: Number.isFinite(result.backendStatus.maxDurationMs)
+          ? result.backendStatus.maxDurationMs : null,
+      }
+    : null;
+  return {
+    phase: safeDiagnosticToken(result.phase),
+    failedStage: safeDiagnosticToken(result.failedStage),
+    errorCode: safeDiagnosticToken(result.errorCode),
+    passed: result.passed === true,
+    before: projectLifecycle(result.before || result.lifecycle),
+    after: projectLifecycle(result.after),
+    recoveryRequestCount: Number.isInteger(result.recoveryRequestCount)
+      ? result.recoveryRequestCount : 0,
+    renderProcessGoneCount: Number.isInteger(result.renderProcessGoneCount)
+      ? result.renderProcessGoneCount : 0,
+    publicProjectionClean: result.publicProjectionClean === true,
+    backendStatus,
+  };
+}
+
+function redactDiagnosticText(value) {
+  return String(value || '')
+    .replace(/https?:\/\/[^\s"']+/gi, '<url>')
+    .replace(/(?:\/Users\/|\/home\/|\/private\/|\/tmp\/|\/var\/folders\/)[^\s"']+/g, '<path>')
+    .replace(/\b(?:p|job|tj|rev|cs|conv|sel|wfg)_[A-Za-z0-9._-]+\b/g, '<internal-id>')
+    .replace(/\b(?:authorization|cookie|token|password|secret|api[_-]?key)\s*[:=]\s*[^\s,;]+/gi,
+      (match) => `${match.split(/[:=]/, 1)[0]}=<redacted>`)
+    .slice(-4_000);
+}
+
+function utf8Tail(value, maxBytes) {
+  const source = Buffer.from(String(value || ''), 'utf8');
+  return source.length <= maxBytes ? source : source.subarray(source.length - maxBytes);
+}
+
+function appendBoundedDiagnosticText(current, chunk) {
+  return utf8Tail(`${current}${chunk}`, 12_000).toString('utf8').replace(/^\uFFFD/, '');
+}
+
+function childDiagnostic(stderr, terminal = {}) {
+  const bounded = utf8Tail(stderr, 12_000);
+  return {
+    exitCode: Number.isInteger(terminal.code) ? terminal.code : null,
+    exitSignal: safeDiagnosticToken(terminal.signal),
+    spawnErrorCode: safeDiagnosticToken(terminal.error?.code),
+    stderrDigest: sha256(bounded),
+    stderrBytes: bounded.length,
+    stderrTail: redactDiagnosticText(bounded.toString('utf8')),
+  };
+}
+
+export function classifyP6ActiveElectronAttempt({
+  resultExists = false,
+  result = null,
+  resultParseError = null,
+  terminalKind = null,
+  timedOut = false,
+} = {}) {
+  if (resultExists) {
+    if (resultParseError) {
+      return { kind: 'persisted_result_invalid', retryEligible: false };
+    }
+    if (result?.passed === true) {
+      return { kind: terminalKind ? 'observed_process_exited' : 'observation_ready', retryEligible: false };
+    }
+    if (result?.failedStage) {
+      return { kind: 'persisted_driver_failure', retryEligible: false };
+    }
+    return { kind: 'persisted_semantic_failure', retryEligible: false };
+  }
+  if (timedOut) return { kind: 'live_child_timeout', retryEligible: false };
+  if (terminalKind === 'spawn_error') {
+    return { kind: 'spawn_error_before_observation', retryEligible: true };
+  }
+  if (terminalKind === 'exit') {
+    return { kind: 'child_exit_before_observation', retryEligible: true };
+  }
+  return { kind: 'live_child_waiting', retryEligible: false };
+}
+
+function activeElectronError(code, detail, { retryEligible = false, failure = null } = {}) {
+  const error = new Error(code);
+  error.code = code;
+  error.detail = detail;
+  error.retryEligible = retryEligible;
+  error.preObservationLaunchFailure = failure;
+  return error;
+}
+
+async function requireActiveElectronProcessGroupTermination(child, {
+  force = false,
+  phaseResult = null,
+} = {}) {
+  const termination = await terminateP6ActiveElectronProcessGroup(child, { force });
+  if (!termination.terminated) {
+    throw activeElectronError('p6_recovery_active_electron_tree_termination_unconfirmed', {
+      termination,
+      phaseResult,
+    });
+  }
+  return termination;
+}
+
+function projectPreObservationLaunchFailure(attempt, classification, diagnostic) {
+  return {
+    attempt,
+    kind: classification.kind,
+    exitCode: diagnostic.exitCode,
+    exitSignal: diagnostic.exitSignal,
+    stderrDigest: diagnostic.stderrDigest,
+    stderrBytes: diagnostic.stderrBytes,
+  };
+}
+
+function isRetryablePreObservationFailure(failure, attempt) {
+  return failure?.attempt === attempt
+    && ['spawn_error_before_observation', 'child_exit_before_observation'].includes(failure.kind)
+    && (failure.exitCode === null || Number.isInteger(failure.exitCode))
+    && (failure.exitSignal === null || /^[A-Za-z0-9_.-]{1,96}$/.test(failure.exitSignal))
+    && SHA256.test(failure.stderrDigest || '')
+    && Number.isInteger(failure.stderrBytes)
+    && failure.stderrBytes >= 0
+    && failure.stderrBytes <= 12_000;
+}
+
+export async function runP6ActiveElectronLaunchWithRetry({ createAttempt, launchAttempt }) {
+  invariant(typeof createAttempt === 'function' && typeof launchAttempt === 'function',
+    'p6_recovery_active_electron_retry_dependencies_invalid');
+  const failures = [];
+  const configScopes = new Set();
+  for (let attempt = 1; attempt <= MAX_ACTIVE_ELECTRON_LAUNCH_ATTEMPTS; attempt += 1) {
+    const coordinates = await createAttempt(attempt);
+    invariant(path.isAbsolute(coordinates?.configPath || '')
+      && path.isAbsolute(coordinates?.resultPath || ''),
+    'p6_recovery_active_electron_attempt_coordinates_invalid');
+    const configScope = path.dirname(path.resolve(coordinates.configPath));
+    invariant(!configScopes.has(configScope),
+      'p6_recovery_active_electron_attempt_scope_reused');
+    configScopes.add(configScope);
+    try {
+      const launched = await launchAttempt({ ...coordinates, attempt });
+      return {
+        ...launched,
+        result: {
+          ...launched.result,
+          launchAttemptCount: attempt,
+          preObservationLaunchFailures: failures,
+        },
+      };
+    } catch (error) {
+      const projectedFailure = error?.preObservationLaunchFailure || null;
+      if (error?.retryEligible === true
+          && isRetryablePreObservationFailure(projectedFailure, attempt)
+          && attempt < MAX_ACTIVE_ELECTRON_LAUNCH_ATTEMPTS) {
+        failures.push(projectedFailure);
+        continue;
+      }
+      const finalFailures = projectedFailure ? [...failures, projectedFailure] : failures;
+      error.detail = {
+        ...(error?.detail && typeof error.detail === 'object' ? error.detail : {}),
+        launchAttemptCount: attempt,
+        preObservationLaunchFailures: finalFailures,
+      };
+      throw error;
+    }
+  }
+  throw new Error('p6_recovery_active_electron_retry_exhausted');
+}
+
 async function runElectron(configPath, resultPath, backendPort) {
-  const stderr = [];
+  let stderr = '';
   const child = spawn(ELECTRON_PATH, [DRIVER_PATH], {
     cwd: ROOT,
     env: {
@@ -476,30 +846,38 @@ async function runElectron(configPath, resultPath, backendPort) {
       BIOF3_DESKTOP: '1',
       R_SERVER_PORT: String(backendPort),
       BIOF3_P6_RECOVERY_ELECTRON_CONFIG: configPath,
+      [RECOVERY_ELECTRON_ATTEMPT_ENV]: '1',
     },
     stdio: ['ignore', 'ignore', 'pipe'],
   });
   const pid = child.pid;
   child.stderr.setEncoding('utf8');
   child.stderr.on('data', (chunk) => {
-    stderr.push(chunk);
-    while (stderr.join('').length > 12_000) stderr.shift();
+    stderr = appendBoundedDiagnosticText(stderr, chunk);
   });
   const exit = await new Promise((resolve) => {
     child.once('exit', (code, signal) => resolve({ code, signal }));
-    child.once('error', () => resolve({ code: null, signal: 'spawn_error' }));
+    child.once('error', (error) => resolve({ code: null, signal: null, error }));
   });
-  const persisted = existsSync(resultPath) ? JSON.parse(readFileSync(resultPath, 'utf8')) : null;
-  if (exit.code !== 0 || !persisted?.passed) {
-    const error = new Error(`p6_recovery_electron_driver_failed:${persisted?.failedStage || 'unknown'}`);
-    error.detail = stderr.join('').slice(-4_000);
-    throw error;
+  const snapshot = readDriverResult(resultPath);
+  if (exit.code !== 0 || !snapshot.value?.passed) {
+    const classification = classifyP6ActiveElectronAttempt({
+      resultExists: snapshot.exists,
+      result: snapshot.value,
+      resultParseError: snapshot.parseError,
+      terminalKind: exit.error ? 'spawn_error' : 'exit',
+    });
+    throw activeElectronError(`p6_recovery_electron_driver_${classification.kind}`, {
+      ...childDiagnostic(stderr, exit),
+      phaseResult: projectDriverPhaseResult(snapshot.value),
+      resultParseError: snapshot.parseError,
+    });
   }
-  return { pid, result: persisted };
+  return { pid, result: snapshot.value };
 }
 
-async function crashActiveElectron(configPath, resultPath, backendPort) {
-  const stderr = [];
+async function launchActiveElectronAttempt(configPath, resultPath, backendPort, attempt) {
+  let stderr = '';
   const child = spawn(ELECTRON_PATH, [DRIVER_PATH], {
     cwd: ROOT,
     detached: process.platform !== 'win32',
@@ -508,44 +886,128 @@ async function crashActiveElectron(configPath, resultPath, backendPort) {
       BIOF3_DESKTOP: '1',
       R_SERVER_PORT: String(backendPort),
       BIOF3_P6_RECOVERY_ELECTRON_CONFIG: configPath,
+      [RECOVERY_ELECTRON_ATTEMPT_ENV]: String(attempt),
     },
     stdio: ['ignore', 'ignore', 'pipe'],
   });
   const pid = child.pid;
   child.stderr.setEncoding('utf8');
   child.stderr.on('data', (chunk) => {
-    stderr.push(chunk);
-    while (stderr.join('').length > 12_000) stderr.shift();
+    stderr = appendBoundedDiagnosticText(stderr, chunk);
   });
-  const exitPromise = new Promise((resolve) => {
-    child.once('exit', (code, signal) => resolve({ code, signal }));
-    child.once('error', () => resolve({ code: null, signal: 'spawn_error' }));
+  const terminalPromise = new Promise((resolve) => {
+    child.once('exit', (code, signal) => resolve({ kind: 'exit', code, signal, error: null }));
+    child.once('error', (error) => resolve({
+      kind: 'spawn_error', code: null, signal: null, error,
+    }));
   });
   // The driver owns the 120s renderer timeout. Leave room for it to persist a
   // bounded diagnostic before the parent terminates the isolated process.
   const deadline = Date.now() + 135_000;
-  let persisted = null;
+  let parseErrorFirstSeenAt = null;
   while (Date.now() < deadline) {
-    if (existsSync(resultPath)) {
-      try {
-        persisted = JSON.parse(readFileSync(resultPath, 'utf8'));
-        if (persisted?.passed) break;
-      } catch {}
+    const snapshot = readDriverResult(resultPath);
+    if (snapshot.exists) {
+      if (snapshot.parseError
+          && child.exitCode === null
+          && child.signalCode === null
+          && (parseErrorFirstSeenAt === null
+            || Date.now() - parseErrorFirstSeenAt < DRIVER_RESULT_PARSE_STABILITY_MS)) {
+        if (parseErrorFirstSeenAt === null) parseErrorFirstSeenAt = Date.now();
+        await sleep(20);
+        continue;
+      }
+      parseErrorFirstSeenAt = null;
+      const classification = classifyP6ActiveElectronAttempt({
+        resultExists: true,
+        result: snapshot.value,
+        resultParseError: snapshot.parseError,
+      });
+      if (classification.kind !== 'observation_ready') {
+        const phaseResult = projectDriverPhaseResult(snapshot.value);
+        const termination = await requireActiveElectronProcessGroupTermination(child, { phaseResult });
+        throw activeElectronError(`p6_recovery_active_electron_${classification.kind}`, {
+          ...childDiagnostic(stderr),
+          phaseResult,
+          resultParseError: snapshot.parseError,
+          termination,
+        });
+      }
+      if (child.exitCode !== null || child.signalCode !== null) {
+        const terminal = await terminalPromise;
+        const phaseResult = projectDriverPhaseResult(snapshot.value);
+        const termination = await requireActiveElectronProcessGroupTermination(child, { phaseResult });
+        const exited = classifyP6ActiveElectronAttempt({
+          resultExists: true,
+          result: snapshot.value,
+          terminalKind: terminal.kind,
+        });
+        throw activeElectronError(`p6_recovery_active_electron_${exited.kind}`, {
+          ...childDiagnostic(stderr, terminal),
+          phaseResult,
+          resultParseError: null,
+          termination,
+        });
+      }
+      const termination = await requireActiveElectronProcessGroupTermination(child, {
+        force: true,
+        phaseResult: projectDriverPhaseResult(snapshot.value),
+      });
+      const exit = await terminalPromise;
+      invariant(termination.signal === 'SIGKILL'
+        && (process.platform === 'win32' || exit.signal === 'SIGKILL'),
+      'p6_recovery_active_electron_not_sigkilled', { exit, termination });
+      return { pid, exitSignal: termination.signal, result: snapshot.value };
     }
-    if (child.exitCode !== null || child.signalCode !== null) break;
-    await sleep(100);
+    const terminal = await Promise.race([
+      terminalPromise,
+      sleep(100).then(() => null),
+    ]);
+    if (terminal) {
+      const finalSnapshot = readDriverResult(resultPath);
+      let termination = null;
+      if (terminal.kind === 'exit') {
+        termination = await requireActiveElectronProcessGroupTermination(child, {
+          phaseResult: projectDriverPhaseResult(finalSnapshot.value),
+        });
+      }
+      const classification = classifyP6ActiveElectronAttempt({
+        resultExists: finalSnapshot.exists,
+        result: finalSnapshot.value,
+        resultParseError: finalSnapshot.parseError,
+        terminalKind: terminal.kind,
+      });
+      const diagnostic = childDiagnostic(stderr, terminal);
+      const failure = classification.retryEligible
+        ? projectPreObservationLaunchFailure(attempt, classification, diagnostic)
+        : null;
+      throw activeElectronError(`p6_recovery_active_electron_${classification.kind}`, {
+        ...diagnostic,
+        phaseResult: projectDriverPhaseResult(finalSnapshot.value),
+        resultParseError: finalSnapshot.parseError,
+        termination,
+      }, { retryEligible: classification.retryEligible, failure });
+    }
   }
-  if (!persisted?.passed || child.exitCode !== null || child.signalCode !== null) {
-    await stopChild(child);
-    const error = new Error(`p6_recovery_active_electron_not_ready:${persisted?.failedStage || 'unknown'}`);
-    error.detail = stderr.join('').slice(-4_000);
-    throw error;
-  }
-  if (process.platform !== 'win32') process.kill(-pid, 'SIGKILL');
-  else child.kill('SIGKILL');
-  const exit = await exitPromise;
-  invariant(exit.signal === 'SIGKILL', 'p6_recovery_active_electron_not_sigkilled', exit);
-  return { pid, exitSignal: exit.signal, result: persisted };
+  const termination = await requireActiveElectronProcessGroupTermination(child);
+  const classification = classifyP6ActiveElectronAttempt({ timedOut: true });
+  throw activeElectronError(`p6_recovery_active_electron_${classification.kind}`, {
+    ...childDiagnostic(stderr, {
+      code: child.exitCode,
+      signal: child.signalCode,
+    }),
+    phaseResult: null,
+    termination,
+  });
+}
+
+async function crashActiveElectron(createAttempt, backendPort) {
+  return runP6ActiveElectronLaunchWithRetry({
+    createAttempt,
+    launchAttempt: ({ configPath, resultPath, attempt }) => (
+      launchActiveElectronAttempt(configPath, resultPath, backendPort, attempt)
+    ),
+  });
 }
 
 function terminateWorkerBestEffort(worker) {
@@ -632,7 +1094,6 @@ export async function observeP6RecoveryElectron({ keep = false, show = false, ve
 
     const traceDir = path.join(root, 'p6-recovery-electron');
     const configPath = path.join(traceDir, 'driver-config.json');
-    const activeCrashResultPath = path.join(traceDir, 'driver-active-crash-result.json');
     const recoverResultPath = path.join(traceDir, 'driver-recover-result.json');
     const reopenResultPath = path.join(traceDir, 'driver-reopen-result.json');
     mkdirSync(traceDir, { recursive: true, mode: 0o700 });
@@ -646,14 +1107,23 @@ export async function observeP6RecoveryElectron({ keep = false, show = false, ve
       outputDir: traceDir,
       show,
     };
-    writeFileSync(configPath, `${JSON.stringify({
-      ...baseConfig,
-      phase: 'active-crash',
-      resultPath: activeCrashResultPath,
-    })}\n`, { mode: 0o600 });
     const crashedElectron = await crashActiveElectron(
-      configPath,
-      activeCrashResultPath,
+      async (attempt) => {
+        const attemptDir = path.join(traceDir, `active-launch-attempt-${attempt}`);
+        const attemptConfigPath = path.join(attemptDir, 'driver-config.json');
+        const attemptResultPath = path.join(attemptDir, 'driver-result.json');
+        mkdirSync(attemptDir, { recursive: true, mode: 0o700 });
+        writeFileSync(attemptConfigPath, `${JSON.stringify({
+          ...baseConfig,
+          phase: 'active-crash',
+          outputDir: attemptDir,
+          resultPath: attemptResultPath,
+        })}\n`, { mode: 0o600 });
+        return {
+          configPath: attemptConfigPath,
+          resultPath: attemptResultPath,
+        };
+      },
       backendPort,
     );
 
