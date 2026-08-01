@@ -123,6 +123,7 @@ export interface ResultStudioTaskResourceSummary {
     minimumSystemAvailableBytes: ResourceMeasurement;
   };
   sampling: { status: 'measured'; sampleCount: number }
+    | { status: 'partial'; sampleCount: number; reason: string }
     | { status: 'unavailable'; sampleCount: null; reason: string };
   provider: {
     tokens: ResourceMeasurement<{ input: number; output: number }>;

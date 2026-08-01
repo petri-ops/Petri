@@ -15,6 +15,7 @@ const { verifyRevisionSourceMaterial } = require('../../shared-backend/result-re
 
 const MAX_DOWNSTREAM_ENTITY_IDS = 20_000;
 const SAFE_SELECTION_ID = /^sel_[A-Za-z0-9_-]{1,160}$/;
+const SHA256_PATTERN = /^[a-f0-9]{64}$/;
 
 function sha256File(filePath) {
   const hash = crypto.createHash('sha256');
@@ -26,11 +27,124 @@ function csvCell(value) {
   return `"${String(value).replace(/"/g, '""')}"`;
 }
 
-function atomicWrite(filePath, content) {
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  const temporary = `${filePath}.tmp-${process.pid}`;
-  fs.writeFileSync(temporary, content);
-  fs.renameSync(temporary, filePath);
+function materializationPathError(code, message) {
+  throw Object.assign(new Error(message), { code });
+}
+
+function ensureSelectionMaterializationDirectory(workspaceRoot, selectionId) {
+  if (!SAFE_SELECTION_ID.test(selectionId)) {
+    materializationPathError('selection_id_invalid', 'SelectionContext id is not path-safe.');
+  }
+  let anchor;
+  try {
+    anchor = fs.realpathSync(path.resolve(workspaceRoot));
+  } catch {
+    materializationPathError('selection_workspace_unavailable', 'Selection workspace is unavailable.');
+  }
+  if (!fs.statSync(anchor).isDirectory()) {
+    materializationPathError('selection_workspace_unavailable', 'Selection workspace is not a directory.');
+  }
+
+  let current = anchor;
+  for (const component of ['analysis', 'selections', selectionId]) {
+    const candidate = path.join(current, component);
+    if (!isPathContained(anchor, candidate) || path.dirname(candidate) !== current) {
+      materializationPathError('selection_materialization_path_escape', 'Selection materialization escaped its workspace.');
+    }
+    let stat;
+    try {
+      stat = fs.lstatSync(candidate);
+    } catch (error) {
+      if (error?.code !== 'ENOENT') {
+        materializationPathError('selection_materialization_path_unavailable', 'Selection materialization directory is unavailable.');
+      }
+      try {
+        fs.mkdirSync(candidate, { mode: 0o700 });
+      } catch (mkdirError) {
+        if (mkdirError?.code !== 'EEXIST') {
+          materializationPathError('selection_materialization_path_unavailable', 'Selection materialization directory could not be created.');
+        }
+      }
+      stat = fs.lstatSync(candidate);
+    }
+    if (stat.isSymbolicLink() || !stat.isDirectory()) {
+      materializationPathError('selection_materialization_path_unsafe', 'Selection materialization directories must be real directories.');
+    }
+    const canonical = fs.realpathSync(candidate);
+    if (!isPathContained(anchor, canonical) || path.dirname(canonical) !== current) {
+      materializationPathError('selection_materialization_path_escape', 'Selection materialization directory escaped its workspace.');
+    }
+    current = canonical;
+  }
+  const stat = fs.statSync(current);
+  return { anchor, directory: current, dev: stat.dev, ino: stat.ino };
+}
+
+function atomicWriteSelectionFile(workspaceRoot, selectionId, fileName, content) {
+  if (!fileName || path.basename(fileName) !== fileName || fileName.includes('\0')) {
+    materializationPathError('selection_materialization_file_invalid', 'Selection materialization filename is invalid.');
+  }
+  const directory = ensureSelectionMaterializationDirectory(workspaceRoot, selectionId);
+  const target = path.join(directory.directory, fileName);
+  let existing = null;
+  try { existing = fs.lstatSync(target); } catch (error) {
+    if (error?.code !== 'ENOENT') {
+      materializationPathError('selection_materialization_file_unavailable', 'Selection materialization file is unavailable.');
+    }
+  }
+  if (existing && (existing.isSymbolicLink() || !existing.isFile())) {
+    materializationPathError('selection_materialization_path_unsafe', 'Selection materialization target must be a regular file.');
+  }
+
+  const temporary = path.join(
+    directory.directory,
+    `.selection-write-${process.pid}-${crypto.randomBytes(16).toString('hex')}`,
+  );
+  const noFollow = Number.isInteger(fs.constants.O_NOFOLLOW) ? fs.constants.O_NOFOLLOW : 0;
+  let fd = null;
+  let temporaryCreated = false;
+  try {
+    fd = fs.openSync(
+      temporary,
+      fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_EXCL | noFollow,
+      0o600,
+    );
+    temporaryCreated = true;
+    fs.writeFileSync(fd, content);
+    fs.fsyncSync(fd);
+    fs.closeSync(fd);
+    fd = null;
+
+    const current = ensureSelectionMaterializationDirectory(workspaceRoot, selectionId);
+    if (current.directory !== directory.directory
+        || current.dev !== directory.dev
+        || current.ino !== directory.ino) {
+      materializationPathError('selection_materialization_path_changed', 'Selection materialization directory changed during the write.');
+    }
+    let currentTarget = null;
+    try { currentTarget = fs.lstatSync(target); } catch (error) {
+      if (error?.code !== 'ENOENT') throw error;
+    }
+    if (currentTarget && (currentTarget.isSymbolicLink() || !currentTarget.isFile())) {
+      materializationPathError('selection_materialization_path_unsafe', 'Selection materialization target changed to an unsafe entry.');
+    }
+    fs.renameSync(temporary, target);
+    temporaryCreated = false;
+    const written = fs.lstatSync(target);
+    const canonical = fs.realpathSync(target);
+    if (written.isSymbolicLink() || !written.isFile()
+        || !isPathContained(directory.directory, canonical)) {
+      materializationPathError('selection_materialization_path_unsafe', 'Selection materialization file failed containment verification.');
+    }
+    return canonical;
+  } finally {
+    if (fd !== null) {
+      try { fs.closeSync(fd); } catch {}
+    }
+    if (temporaryCreated) {
+      try { fs.unlinkSync(temporary); } catch {}
+    }
+  }
 }
 
 function fail(error, message, detail = null) {
@@ -41,6 +155,39 @@ function parseJobResult(job) {
   if (!job) return {};
   if (job.result && typeof job.result === 'object') return job.result;
   try { return JSON.parse(job.result_json || '{}'); } catch { return {}; }
+}
+
+function artifactFileName(artifact) {
+  const value = artifact?.filename || artifact?.name || artifact?.path || '';
+  return value ? path.basename(String(value)) : '';
+}
+
+function resolveBackingArtifactTruth({ sourceJob, descriptor, mapping, backingName, sourcePath }) {
+  const result = parseJobResult(sourceJob);
+  if (result.artifactTruth?.status !== 'valid' || result.artifactTruth?.blocking === true) {
+    return fail('selection_backing_data_untrusted', 'backing data 未进入同一 valid Artifact Truth');
+  }
+  const declared = Array.isArray(descriptor?.artifacts) ? descriptor.artifacts : [];
+  const descriptors = mapping?.dataArtifactId
+    ? declared.filter((artifact) => artifact?.id === mapping.dataArtifactId)
+    : declared.filter((artifact) => artifactFileName(artifact) === backingName);
+  if (descriptors.length !== 1 || !descriptors[0]?.id) {
+    return fail('selection_backing_data_untrusted', 'backing data 没有唯一的插件 Artifact 声明');
+  }
+  const artifacts = Array.isArray(result.artifacts) ? result.artifacts : [];
+  const matches = artifacts.filter((artifact) => artifact?.id === descriptors[0].id);
+  if (matches.length !== 1 || artifactFileName(matches[0]) !== backingName) {
+    return fail('selection_backing_data_untrusted', 'backing data 没有唯一的 Job Artifact Truth 记录');
+  }
+  let artifactPath;
+  try { artifactPath = fs.realpathSync(matches[0].path); } catch {
+    return fail('selection_backing_data_untrusted', 'backing data 的 Artifact Truth 路径不可用');
+  }
+  const expectedSha256 = String(matches[0].sha256 || '').trim().toLowerCase();
+  if (artifactPath !== sourcePath || !SHA256_PATTERN.test(expectedSha256)) {
+    return fail('selection_backing_data_untrusted', 'backing data 未精确绑定到 Job Artifact Truth');
+  }
+  return { ok: true, expectedSha256 };
 }
 
 function enumValue(value, allowed, fallback) {
@@ -327,7 +474,7 @@ async function tool_result_selection_run(args, ctx, dependencies = {}) {
     item.id === revision.artifactId || item.filename === path.basename(revision.outputPath));
   const mapping = descriptor?.interactionMappings?.find((item) => item.artifactId === artifactDescriptor?.id);
   const idField = mapping?.idField || mapping?.rowIdField;
-  if (!idField || !descriptor.actions.includes('derive_enrichment_input')) {
+  if (!idField || !Array.isArray(descriptor?.actions) || !descriptor.actions.includes('derive_enrichment_input')) {
     return fail('selection_action_not_declared', '来源插件没有声明稳定 gene 映射或富集派生动作');
   }
   const sourceVerification = verifyImmutableRevision({
@@ -348,19 +495,24 @@ async function tool_result_selection_run(args, ctx, dependencies = {}) {
   if (!isPathContained(path.dirname(revisionPath), sourcePath) || !fs.statSync(sourcePath).isFile()) {
     return fail('selection_backing_data_outside_job', '选择 backing data 不在同一 Job 输出中');
   }
+  let expectedBackingSha256 = revision.outputHash;
   if (sourcePath !== revisionPath) {
-    const artifacts = sourceJob?.result?.artifacts || sourceJob?.result?.files || [];
-    const declaredBacking = artifacts.some((artifact) =>
-      artifact?.name === backingName || artifact?.filename === backingName || path.basename(artifact?.path || '') === backingName);
-    if (!declaredBacking || sourceJob?.result?.artifactTruth?.status !== 'valid') {
-      return fail('selection_backing_data_untrusted', 'backing data 未进入同一 valid Artifact Truth');
-    }
+    const backingTruth = resolveBackingArtifactTruth({
+      sourceJob,
+      descriptor,
+      mapping,
+      backingName,
+      sourcePath,
+    });
+    if (!backingTruth.ok) return backingTruth;
+    expectedBackingSha256 = backingTruth.expectedSha256;
   }
 
   let resolved;
   try {
     resolved = queryResultTable({
       filePath: sourcePath,
+      expectedSha256: expectedBackingSha256,
       idField,
       filterExpression: selection.filterExpression,
       sort: selection.sort,
@@ -369,6 +521,9 @@ async function tool_result_selection_run(args, ctx, dependencies = {}) {
     });
   } catch (error) {
     return fail(error.code || 'selection_resolution_failed', error.message);
+  }
+  if (sha256File(sourcePath) !== expectedBackingSha256) {
+    return fail('selection_backing_data_hash_drift', '选择 backing data 已偏离 Artifact Truth');
   }
   const sourceIds = resolved.resolvedEntityIds || [];
   let selectedIds;
@@ -398,23 +553,39 @@ async function tool_result_selection_run(args, ctx, dependencies = {}) {
   }
 
   const relativeDir = path.posix.join('analysis', 'selections', selectionId);
-  const absoluteDir = path.join(workspaceRoot, ...relativeDir.split('/'));
-  const idsFile = path.join(absoluteDir, 'selection-ids.json');
-  const scriptFile = path.join(absoluteDir, 'materialize-selection.R');
-  const geneFile = path.join(absoluteDir, 'gene-list.csv');
-  atomicWrite(idsFile, `${JSON.stringify({ selectionId, entityType: 'gene', entityIds: selectedIds }, null, 2)}\n`);
-  atomicWrite(scriptFile, [
-    '#!/usr/bin/env Rscript',
-    '# Reproduce the exact SelectionContext-derived GO/KEGG input.',
-    'suppressMessages(library(jsonlite))',
-    '`%||%` <- function(a, b) if (is.null(a)) b else a',
-    'args <- commandArgs(trailingOnly = TRUE)',
-    'root <- if (length(args)) args[[1]] else getwd()',
-    'payload <- fromJSON(file.path(root, "selection-ids.json"), simplifyVector = TRUE)',
-    'write.csv(data.frame(gene = payload$entityIds), file.path(root, "gene-list.csv"), row.names = FALSE)',
-    '',
-  ].join('\n'));
-  atomicWrite(geneFile, `gene\n${selectedIds.map(csvCell).join('\n')}\n`);
+  let idsFile;
+  let scriptFile;
+  let geneFile;
+  try {
+    idsFile = atomicWriteSelectionFile(
+      workspaceRoot,
+      selectionId,
+      'selection-ids.json',
+      `${JSON.stringify({ selectionId, entityType: 'gene', entityIds: selectedIds }, null, 2)}\n`,
+    );
+    scriptFile = atomicWriteSelectionFile(workspaceRoot, selectionId, 'materialize-selection.R', [
+      '#!/usr/bin/env Rscript',
+      '# Reproduce the exact SelectionContext-derived GO/KEGG input.',
+      'suppressMessages(library(jsonlite))',
+      '`%||%` <- function(a, b) if (is.null(a)) b else a',
+      'args <- commandArgs(trailingOnly = TRUE)',
+      'root <- if (length(args)) args[[1]] else getwd()',
+      'payload <- fromJSON(file.path(root, "selection-ids.json"), simplifyVector = TRUE)',
+      'write.csv(data.frame(gene = payload$entityIds), file.path(root, "gene-list.csv"), row.names = FALSE)',
+      '',
+    ].join('\n'));
+    geneFile = atomicWriteSelectionFile(
+      workspaceRoot,
+      selectionId,
+      'gene-list.csv',
+      `gene\n${selectedIds.map(csvCell).join('\n')}\n`,
+    );
+  } catch (error) {
+    return fail(
+      error?.code || 'selection_materialization_failed',
+      '选择物化路径不安全，未启动下游分析。',
+    );
+  }
 
   const runTool = dependencies.runTool || require('./learning').tool_run_tool;
   const resultStudioInputLineage = {

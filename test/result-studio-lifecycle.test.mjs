@@ -1,6 +1,22 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { linkSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, utimesSync, writeFileSync } from 'node:fs';
+import {
+  closeSync,
+  constants,
+  existsSync,
+  fstatSync,
+  linkSync,
+  mkdirSync,
+  mkdtempSync,
+  openSync,
+  readFileSync,
+  readSync,
+  rmSync,
+  statSync,
+  symlinkSync,
+  utimesSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createRequire } from 'node:module';
@@ -9,6 +25,7 @@ const require = createRequire(import.meta.url);
 const Database = require('better-sqlite3');
 const { bindProjectRepository } = require('../core/shared-backend/git-repository-binding');
 const { ensureResultStudioSchema } = require('../core/shared-backend/result-studio-schema');
+const { ensureResultRefTransactionSchema } = require('../core/shared-backend/result-ref-transaction-schema');
 const { createResultStudioRepository } = require('../core/shared-backend/result-studio-repository');
 const { sha256 } = require('../core/shared-backend/result-changeset-service');
 const {
@@ -26,6 +43,9 @@ const {
 const PREVIOUS_RUNTIME_LEASE = Object.freeze({
   instanceId: '1'.repeat(32),
   startedAt: '2026-01-01T00:00:00.000Z',
+  // A prior runtime is stale because its owner is observably gone, not because
+  // this test happened to finish within an arbitrary wall-clock window.
+  ownerPid: 2_147_483_647,
 });
 const CURRENT_RUNTIME_LEASE = Object.freeze({
   instanceId: '2'.repeat(32),
@@ -56,6 +76,7 @@ function fixture(context) {
   const db = new Database(join(workspaceRoot, 'rs8.db'));
   context.after(() => { try { db.close(); } catch { /* closed */ } });
   ensureResultStudioSchema(db);
+  ensureResultRefTransactionSchema(db);
   const repository = createResultStudioRepository(db, { ensureSchema: false });
   const adapter = bindProjectRepository({ workspaceRoot, projectId: 'p_rs8' }).adapter;
   const base = adapter.commitVirtualFiles({
@@ -690,6 +711,85 @@ test('RS8 storage summary is content-addressed and GC never targets Artifact his
   assert.ok(fx.repository.getRevision('rev_orphan'));
 });
 
+test('P6 deduplication revalidates result-objects and never writes through a private symlink', (context) => {
+  const fx = fixture(context);
+  const duplicatePath = join(fx.workspaceRoot, 'results/jobs/tj_private_link/output/table.csv');
+  mkdirSync(join(duplicatePath, '..'), { recursive: true });
+  writeFileSync(duplicatePath, readFileSync(fx.output));
+  fx.repository.createChangeSet({
+    changeSetId: 'cs_private_link',
+    projectId: 'p_rs8',
+    baseCommit: fx.base,
+    workingBranchRef: 'refs/heads/biof3/changeset/cs_private_link',
+    createdBy: 'agent',
+  });
+  fx.repository.appendRevision({
+    revisionId: 'rev_private_link', projectId: 'p_rs8', artifactFamilyId: 'private_link', artifactId: 'table', sourceCommit: fx.base,
+    sourceScriptRef: { relativePath: 'analysis/scripts/base.R', sha256: sha256('print(1)\n'), entryPoint: 'base.R', artifactId: 'table', rendererId: 'test:table', language: 'r', origin: 'project_materialized' },
+    inputArtifactRefs: [], toolJobId: 'tj_private_link', outputPath: 'results/jobs/tj_private_link/output/table.csv', outputHash: fx.outputHash,
+    validationStatus: 'valid', reproducibilityStatus: 'available', changeSetId: 'cs_private_link',
+  });
+  const plan = planArtifactDeduplication(
+    { workspaceRoot: fx.workspaceRoot, projectId: 'p_rs8' },
+    { repository: fx.repository },
+  );
+  const outside = mkdtempSync(join(tmpdir(), 'biof3-result-objects-outside-'));
+  context.after(() => rmSync(outside, { recursive: true, force: true }));
+  symlinkSync(outside, join(fx.workspaceRoot, '.biof3', 'result-objects'), 'dir');
+
+  assert.throws(
+    () => executeArtifactDeduplication(
+      { workspaceRoot: fx.workspaceRoot, projectId: 'p_rs8', planToken: plan.planToken },
+      { repository: fx.repository },
+    ),
+    (error) => error?.code === 'private_path_symlink',
+  );
+  assert.equal(existsSync(join(outside, 'sha256')), false);
+  assert.deepEqual(readFileSync(duplicatePath), readFileSync(fx.output));
+});
+
+test('P6 GC revalidates revision staging before ref mutation or external deletion', (context) => {
+  const fx = fixture(context);
+  fx.repository.createChangeSet({
+    changeSetId: 'cs_private_gc',
+    projectId: 'p_rs8',
+    baseCommit: fx.base,
+    workingBranchRef: 'refs/heads/biof3/changeset/cs_private_gc',
+    createdBy: 'agent',
+  });
+  fx.repository.transitionChangeSet({ changeSetId: 'cs_private_gc', to: 'abandoned' });
+  const revisionRoot = join(fx.workspaceRoot, '.biof3', 'revision');
+  const staging = join(revisionRoot, 'cs_private_gc');
+  mkdirSync(staging, { recursive: true });
+  writeFileSync(join(staging, 'candidate.R'), 'print(1)\n');
+  const old = new Date(Date.now() - 48 * 60 * 60 * 1000);
+  utimesSync(staging, old, old);
+  const plan = planResultStudioGc(
+    { workspaceRoot: fx.workspaceRoot, projectId: 'p_rs8' },
+    { repository: fx.repository, adapter: fx.adapter },
+  );
+  assert.ok(plan.entries.some((entry) => entry.relativePath === '.biof3/revision/cs_private_gc'));
+
+  rmSync(revisionRoot, { recursive: true });
+  const outside = mkdtempSync(join(tmpdir(), 'biof3-revision-outside-'));
+  context.after(() => rmSync(outside, { recursive: true, force: true }));
+  const outsideStaging = join(outside, 'cs_private_gc');
+  mkdirSync(outsideStaging);
+  const marker = join(outsideStaging, 'keep.txt');
+  writeFileSync(marker, 'must survive');
+  symlinkSync(outside, revisionRoot, 'dir');
+
+  assert.throws(
+    () => executeResultStudioGc(
+      { workspaceRoot: fx.workspaceRoot, projectId: 'p_rs8', planToken: plan.planToken },
+      { repository: fx.repository, adapter: fx.adapter },
+    ),
+    (error) => error?.code === 'private_path_symlink',
+  );
+  assert.equal(readFileSync(marker, 'utf8'), 'must survive');
+  assert.equal(fx.adapter.revParse('refs/heads/biof3/result-sources/' + fx.base), null);
+});
+
 test('P6 GC atomically protects every persisted Revision source before deleting a closed candidate ref', (context) => {
   const fx = fixture(context);
   const sourceText = 'message("historical source remains replayable")\n';
@@ -949,6 +1049,58 @@ test('RS8 progressive table pages stay bounded and use a continuation cursor', (
   assert.deepEqual(second.rows, [['C', '3'], ['D', '4']]);
   assert.equal(second.nextCursor, null);
   assert.doesNotMatch(first.caveat, /multiline cells are not supported/i);
+});
+
+test('P6 Revision table pages bind every parsed byte to one Artifact Truth descriptor', (context) => {
+  const root = mkdtempSync(join(tmpdir(), 'biof3-p6-table-truth-'));
+  context.after(() => rmSync(root, { recursive: true, force: true }));
+  const filePath = join(root, 'truth.csv');
+  const original = 'id,value\nA,1\nB,2\n';
+  const changed = 'id,value\nA,9\nB,8\n';
+  const expectedSha256 = sha256(original);
+  writeFileSync(filePath, original);
+
+  assert.deepEqual(
+    readTablePage({ filePath, expectedSha256, limit: 10 }).rows,
+    [['A', '1'], ['B', '2']],
+  );
+  assert.throws(
+    () => readTablePage({ filePath, expectedSha256: 'not-a-sha', limit: 10 }),
+    (error) => error?.code === 'artifact_truth_unavailable',
+  );
+
+  let openCount = 0;
+  let closeCount = 0;
+  let initialHashComplete = false;
+  let mutated = false;
+  const io = {
+    constants,
+    openSync(...args) {
+      openCount += 1;
+      return openSync(...args);
+    },
+    fstatSync,
+    closeSync(handle) {
+      closeCount += 1;
+      return closeSync(handle);
+    },
+    readSync(...args) {
+      const bytesRead = readSync(...args);
+      if (!initialHashComplete && bytesRead === 0) {
+        initialHashComplete = true;
+        writeFileSync(filePath, changed);
+        mutated = true;
+      }
+      return bytesRead;
+    },
+  };
+  assert.throws(
+    () => readTablePage({ filePath, expectedSha256, limit: 10, io }),
+    (error) => error?.code === 'artifact_truth_drift',
+  );
+  assert.equal(mutated, true);
+  assert.equal(openCount, 1);
+  assert.equal(closeCount, 1);
 });
 
 test('P6 progressive table pages round-trip RFC4180 records at exact byte boundaries', (context) => {

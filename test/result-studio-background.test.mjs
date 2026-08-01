@@ -20,6 +20,9 @@ const {
   ensureResultStudioSchema,
 } = require('../core/shared-backend/result-studio-schema');
 const {
+  ensureResultRefTransactionSchema,
+} = require('../core/shared-backend/result-ref-transaction-schema');
+const {
   createResultStudioRepository,
 } = require('../core/shared-backend/result-studio-repository');
 
@@ -31,7 +34,9 @@ const PREVIOUS_RUNTIME_LEASE = Object.freeze({
 });
 const CURRENT_RUNTIME_LEASE = Object.freeze({
   instanceId: '2'.repeat(32),
-  startedAt: new Date(Date.now() + 60_000).toISOString(),
+  // Keep restart ordering independent of how long the preceding child-process
+  // stress tests take under a loaded CI runner.
+  startedAt: '2026-01-02T00:00:00.000Z',
 });
 
 async function waitForReplacementGeneration(ctx, timeoutMs = 70_000) {
@@ -78,6 +83,10 @@ function fixture() {
     );
   `);
   ensureResultStudioSchema(sqlite);
+  // Background children intentionally open the already-migrated product DB
+  // without mutating its schema. Keep this fixture at the same migration
+  // boundary now that lifecycle inspection reads the durable ref journal.
+  ensureResultRefTransactionSchema(sqlite);
   const repository = createResultStudioRepository(sqlite, { ensureSchema: false });
 
   const artifactPath = path.join(workspaceRoot, 'results', 'plot.png');
@@ -290,6 +299,8 @@ test('P6 recovery runs in the canonical background child and closes incomplete r
       revisionIds: [],
       runtimeLease: PREVIOUS_RUNTIME_LEASE,
     },
+    createdAt: '2026-01-01T00:01:00.000Z',
+    updatedAt: '2026-01-01T00:01:00.000Z',
   });
 
   const result = await runResultStudioBackground('recover-workspace', {

@@ -11,6 +11,7 @@ import {
   P6_PRODUCT_ACCEPTANCE_EVIDENCE_CLASS,
   P6_PRODUCT_ACCEPTANCE_SOURCE_FILES,
   P6_PRODUCT_ACCEPTANCE_TEST_FILES,
+  P6_PRODUCT_ACCEPTANCE_TEST_HOOKS,
   assertCurrentP6ProductAcceptanceSourceBinding,
   assertP6ProductAcceptanceEvidenceWritable,
   assertSanitizedP6ProductAcceptanceEvidence,
@@ -19,6 +20,7 @@ import {
   projectP6ComponentObservation,
   verifyStoredP6ProductAcceptanceSourceBinding,
   verifyStoredP6ProductAcceptanceEvidence,
+  writeP6ProductAcceptanceEvidence,
 } from '../scripts/g0-rs-p6-product-acceptance.mjs';
 import {
   P6_ELECTRON_PRESSURE_BUDGETS,
@@ -514,7 +516,14 @@ test('P6 source binding is a unique union of all component producers and focused
     'frontend/package-lock.json',
     'src/migration-runner.js',
     'src/migrations/001_result_studio.sql',
+    'src/migrations/003_result_ref_transactions.sql',
+    'core/r-server/helpers/process-lifecycle.js',
+    'core/r-server/helpers/verified-file-snapshot.js',
+    'core/shared-backend/git-adapter.js',
+    'core/shared-backend/result-ref-transaction-schema.js',
+    'core/shared-backend/result-ref-transaction.js',
     'core/shared-backend/result-studio-contracts.js',
+    'core/shared-backend/result-studio-private-path.js',
     'core/shared-backend/result-studio-schema.js',
     'core/shared-backend/scientific-task-spec.js',
     'core/shared-backend/llm-providers/index.js',
@@ -592,6 +601,35 @@ test('P6 canonical writer independently validates frozen evidence envelope and b
     assert.throws(() => assertP6ProductAcceptanceEvidenceWritable({ ...evidence, ...override }),
       /p6_evidence_classification_invalid/);
   }
+});
+
+test('P6 canonical writer rejects static fixtures that did not come from the live capture', () => {
+  const writes = [];
+  assert.throws(
+    () => writeP6ProductAcceptanceEvidence(writableEvidence(), {
+      makeDirectory() {},
+      write(_target, value) { writes.push(value); },
+    }),
+    (error) => error?.code === 'p6_evidence_not_live_capture',
+  );
+  assert.deepEqual(writes, []);
+});
+
+test('P6 live-capture guard binds object identity and the complete canonical payload digest', () => {
+  const guard = P6_PRODUCT_ACCEPTANCE_TEST_HOOKS.createLiveCaptureGuard();
+  const evidence = writableEvidence();
+  assert.equal(guard.remember(evidence), evidence);
+  assert.equal(guard.assertUnchanged(evidence), true);
+  assert.throws(
+    () => guard.assertUnchanged({ ...evidence }),
+    (error) => error?.code === 'p6_evidence_not_live_capture',
+  );
+
+  evidence.observations.stop.cancelHttpStatus = 500;
+  assert.throws(
+    () => guard.assertUnchanged(evidence),
+    (error) => error?.code === 'p6_evidence_live_capture_mutated',
+  );
 });
 
 test('P6 package gate owns syntax, focused tests, stored verification and evidence refresh', () => {

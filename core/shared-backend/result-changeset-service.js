@@ -20,6 +20,17 @@ const {
   propagateDegThresholds,
 } = require('./result-scientific-rerun');
 const { resolveExecutionInputPath, verifyExecutionProvenance } = require('./execution-provenance');
+const { executeDurableRefTransaction } = require('./result-ref-transaction');
+const {
+  ResultStudioPrivatePathError,
+  resolveWorkspaceAnchor,
+  ensurePrivateDirectory,
+  inspectPrivateDirectory,
+  inspectPrivateEntry,
+  createPrivateFileExclusiveSync,
+  renamePrivateDirectorySync,
+  removePrivatePathSync,
+} = require('./result-studio-private-path');
 
 const RESULT_CHANGESET_SERVICE_VERSION = 1;
 const MAX_SCRIPT_BYTES = 2 * 1024 * 1024;
@@ -39,6 +50,11 @@ class ResultChangeSetError extends Error {
     this.code = code;
     this.detail = detail;
   }
+}
+
+function resultChangeSetPrivatePathError(error) {
+  if (!(error instanceof ResultStudioPrivatePathError)) return error;
+  return new ResultChangeSetError(error.code, error.message, error.detail);
 }
 
 function sha256(value) {
@@ -333,8 +349,16 @@ function applyExactScriptPatch(source, scriptPatch = []) {
 }
 
 function materializeResultEdit(input = {}) {
-  const workspaceRoot = path.resolve(input.workspaceRoot || '');
-  if (!fs.existsSync(workspaceRoot)) throw new ResultChangeSetError('workspace_missing', 'Project workspace does not exist.');
+  let workspaceRoot;
+  try {
+    workspaceRoot = resolveWorkspaceAnchor(input.workspaceRoot);
+  } catch (error) {
+    const wrapped = resultChangeSetPrivatePathError(error);
+    if (wrapped instanceof ResultChangeSetError && wrapped.code === 'private_workspace_missing') {
+      throw new ResultChangeSetError('workspace_missing', 'Project workspace does not exist.', wrapped.detail);
+    }
+    throw wrapped;
+  }
   const changeSetId = safeSegment(input.changeSetId, 'change_set_id');
   const materializationKey = input.materializationKey == null
     ? null
@@ -386,32 +410,59 @@ function materializeResultEdit(input = {}) {
   };
   const manifestContent = stableJson(manifest);
 
-  const revisionRoot = path.join(workspaceRoot, '.biof3', 'revision');
+  const revisionComponents = ['.biof3', 'revision'];
   // A ChangeSet has one root materialization and, only for an already
   // verified server-projected affected subgraph, isolated descendant
   // materializations.  They remain under the same private root so the MCP
   // override path guard can enforce a single ChangeSet boundary.
-  const finalDir = materializationKey
-    ? path.join(revisionRoot, changeSetId, 'downstream', materializationKey)
-    : path.join(revisionRoot, changeSetId);
-  const tempDir = path.join(revisionRoot, `.tmp-${changeSetId}-${crypto.randomUUID()}`);
-  if (!isPathContained(revisionRoot, finalDir) || !isPathContained(revisionRoot, tempDir)) {
-    throw new ResultChangeSetError('materialization_path_escape', 'Materialization path escaped the private revision root.');
-  }
-  if (materializationKey && !fs.existsSync(path.join(revisionRoot, changeSetId))) {
-    throw new ResultChangeSetError('materialization_root_missing', 'Downstream materialization requires the root ChangeSet materialization.');
-  }
-  if (fs.existsSync(finalDir)) throw new ResultChangeSetError('materialization_exists', 'ChangeSet materialization already exists.');
+  const finalComponents = materializationKey
+    ? [...revisionComponents, changeSetId, 'downstream', materializationKey]
+    : [...revisionComponents, changeSetId];
+  const tempComponents = [...revisionComponents, `.tmp-${changeSetId}-${crypto.randomUUID()}`];
+  let tempCreated = false;
+  let finalDir;
   try {
-    fs.mkdirSync(tempDir, { recursive: true });
-    fs.writeFileSync(path.join(tempDir, `run-script.${extension}`), scriptContent, { flag: 'wx' });
-    fs.writeFileSync(path.join(tempDir, 'parameters.json'), parametersContent, { flag: 'wx' });
-    fs.writeFileSync(path.join(tempDir, 'materialization.json'), manifestContent, { flag: 'wx' });
-    fs.mkdirSync(path.dirname(finalDir), { recursive: true });
-    fs.renameSync(tempDir, finalDir);
+    ensurePrivateDirectory(workspaceRoot, revisionComponents);
+    if (materializationKey) {
+      const rootMaterialization = inspectPrivateDirectory(
+        workspaceRoot,
+        [...revisionComponents, changeSetId],
+        { allowMissing: true },
+      );
+      if (!rootMaterialization) {
+        throw new ResultChangeSetError(
+          'materialization_root_missing',
+          'Downstream materialization requires the root ChangeSet materialization.',
+        );
+      }
+      ensurePrivateDirectory(workspaceRoot, [...revisionComponents, changeSetId, 'downstream']);
+    }
+    if (inspectPrivateEntry(workspaceRoot, finalComponents, { allowMissing: true }) !== null) {
+      throw new ResultChangeSetError('materialization_exists', 'ChangeSet materialization already exists.');
+    }
+    ensurePrivateDirectory(workspaceRoot, tempComponents);
+    tempCreated = true;
+    createPrivateFileExclusiveSync(
+      workspaceRoot,
+      [...tempComponents, `run-script.${extension}`],
+      scriptContent,
+    );
+    createPrivateFileExclusiveSync(workspaceRoot, [...tempComponents, 'parameters.json'], parametersContent);
+    createPrivateFileExclusiveSync(workspaceRoot, [...tempComponents, 'materialization.json'], manifestContent);
+    finalDir = renamePrivateDirectorySync(workspaceRoot, tempComponents, finalComponents);
+    tempCreated = false;
   } catch (error) {
-    try { fs.rmSync(tempDir, { recursive: true, force: true }); } catch { /* best effort */ }
+    if (tempCreated) {
+      try {
+        removePrivatePathSync(workspaceRoot, tempComponents, {
+          recursive: true,
+          force: true,
+          kind: 'directory',
+        });
+      } catch { /* preserve unsafe or incomplete staging for lifecycle inspection */ }
+    }
     if (error instanceof ResultChangeSetError) throw error;
+    if (error instanceof ResultStudioPrivatePathError) throw resultChangeSetPrivatePathError(error);
     throw new ResultChangeSetError('materialization_failed', error.message);
   }
 
@@ -1144,7 +1195,13 @@ function inspectPersistedArtifactCohort(input = {}, dependencies = {}) {
   };
 }
 
-function adoptBaselineChangeSet({ repository, adapter, changeSetId, candidateCommit }) {
+function adoptBaselineChangeSet({
+  repository,
+  adapter,
+  changeSetId,
+  candidateCommit,
+  afterRefsApplied = null,
+}) {
   const changeSet = repository.getChangeSet(changeSetId);
   if (!changeSet) {
     throw new ResultChangeSetError('baseline_change_set_missing', 'Baseline ChangeSet is unavailable for adoption.');
@@ -1157,70 +1214,56 @@ function adoptBaselineChangeSet({ repository, adapter, changeSetId, candidateCom
     revision.revisionId,
     repository.getCurrentRevision(revision.artifactFamilyId, revision.projectId)?.sourceCommit || null,
   ]));
-  let refUpdates = [];
-  try {
-    const adopted = repository.adoptChangeSet({
-      changeSetId,
-      candidateCommit,
-      beforeCommit: ({ revisions: candidateRevisions }) => {
-        const updated = [];
-        try {
-          for (const revision of candidateRevisions) {
-            if (!revision.sourceCommit || revision.sourceCommit !== candidateCommit) {
-              throw new ResultChangeSetError(
-                'baseline_candidate_commit_mismatch',
-                'Baseline Revision source commit does not match its candidate commit.',
-              );
-            }
-            const ref = `refs/heads/biof3/current/${revision.artifactFamilyId}`;
-            const existing = adapter.revParse(ref);
-            const expected = expectedCommits.get(revision.revisionId) || null;
-            if ((existing && existing !== expected) || (!expected && existing)) {
-              throw new ResultChangeSetError(
-                'baseline_current_git_ref_stale',
-                'Baseline current Git ref does not match the persisted Revision.',
-                { artifactFamilyId: revision.artifactFamilyId },
-              );
-            }
-            const previous = existing || ZERO_OID;
-            adapter.updateRefCas({ ref, newCommit: candidateCommit, expectedOld: previous });
-            updated.push({ ref, previous, next: candidateCommit });
-          }
-          refUpdates = updated;
-        } catch (error) {
-          for (const entry of updated.reverse()) {
-            try {
-              if (entry.previous === ZERO_OID) {
-                adapter.deleteRefCas({ ref: entry.ref, expectedOld: entry.next });
-              } else {
-                adapter.updateRefCas({ ref: entry.ref, newCommit: entry.previous, expectedOld: entry.next });
-              }
-            } catch { /* lifecycle reconciliation will surface a ref-only residue */ }
-          }
-          throw error;
-        }
-        saveResultEditCheckpoint({
-          repository,
-          projectId: changeSet.projectId,
-          conversationId: changeSet.conversationId,
-          changeSetId,
-          candidateCommit,
-          stage: 'adopted',
-        });
-      },
-    });
-    return adopted;
-  } catch (error) {
-    for (const entry of refUpdates.reverse()) {
-      try {
-        if (entry.previous === ZERO_OID) {
-          adapter.deleteRefCas({ ref: entry.ref, expectedOld: entry.next });
-        } else {
-          adapter.updateRefCas({ ref: entry.ref, newCommit: entry.previous, expectedOld: entry.next });
-        }
-      } catch { /* lifecycle reconciliation will surface a ref-only residue */ }
+  const refUpdates = revisions.map((revision) => {
+    if (!revision.sourceCommit || revision.sourceCommit !== candidateCommit) {
+      throw new ResultChangeSetError(
+        'baseline_candidate_commit_mismatch',
+        'Baseline Revision source commit does not match its candidate commit.',
+      );
     }
-    throw error;
+    const ref = `refs/heads/biof3/current/${revision.artifactFamilyId}`;
+    const existing = adapter.revParse(ref);
+    const expected = expectedCommits.get(revision.revisionId) || null;
+    if ((existing && existing !== expected) || (!expected && existing)) {
+      throw new ResultChangeSetError(
+        'baseline_current_git_ref_stale',
+        'Baseline current Git ref does not match the persisted Revision.',
+        { artifactFamilyId: revision.artifactFamilyId },
+      );
+    }
+    return { ref, expectedOld: existing || ZERO_OID, newOid: candidateCommit };
+  });
+  const affectedFamilies = new Set(revisions.map((revision) => revision.artifactFamilyId));
+  const targetCurrentRevisionIds = [
+    ...repository.listCurrentRevisions(changeSet.projectId)
+      .filter((revision) => !affectedFamilies.has(revision.artifactFamilyId))
+      .map((revision) => revision.revisionId),
+    ...revisions.map((revision) => revision.revisionId),
+  ].sort();
+  executeDurableRefTransaction({
+    operationId: id('rft'),
+    projectId: changeSet.projectId,
+    changeSetId,
+    operationKind: 'baseline_adopt',
+    sourceStatus: changeSet.status,
+    targetStatus: 'adopted',
+    refUpdates,
+    targetRevisionIds: revisions.map((revision) => revision.revisionId),
+    checkpoint: buildResultEditCheckpoint({
+      repository,
+      projectId: changeSet.projectId,
+      conversationId: changeSet.conversationId,
+      changeSet,
+      candidateCommit,
+      changeSetStatus: 'adopted',
+      currentRevisionIds: targetCurrentRevisionIds,
+      stage: 'adopted',
+    }),
+  }, { repository, adapter, afterRefsApplied });
+  return {
+    changeSet: repository.getChangeSet(changeSetId),
+    adoptedRevisionIds: revisions.map((revision) => revision.revisionId),
+    idempotent: false,
   }
 }
 
@@ -1354,6 +1397,7 @@ function ensureBaselineArtifactCohort(input = {}, dependencies = {}) {
         adapter,
         changeSetId: candidateId,
         candidateCommit: preview.changeSet.candidateCommit,
+        afterRefsApplied: dependencies.afterRefsApplied,
       });
       const adopted = resolveCompleteBaselineCohort({
         repository,
@@ -1580,7 +1624,13 @@ function ensureBaselineArtifactCohort(input = {}, dependencies = {}) {
       },
     });
     if (repository.getChangeSet(changeSetId)?.status === 'preview_ready') {
-      adoptBaselineChangeSet({ repository, adapter, changeSetId, candidateCommit });
+      adoptBaselineChangeSet({
+        repository,
+        adapter,
+        changeSetId,
+        candidateCommit,
+        afterRefsApplied: dependencies.afterRefsApplied,
+      });
     }
     const complete = resolveCompleteBaselineCohort({
       repository,
@@ -1638,9 +1688,21 @@ function resolveBaseCommit(adapter, projectId) {
   }).commit;
 }
 
-function buildResultEditCheckpoint({ repository, projectId, conversationId, changeSet, candidateCommit = null, changeSetStatus = null, stage, recovery = null }) {
+function buildResultEditCheckpoint({
+  repository,
+  projectId,
+  conversationId,
+  changeSet,
+  candidateCommit = null,
+  changeSetStatus = null,
+  currentRevisionIds: currentRevisionIdsOverride = null,
+  stage,
+  recovery = null,
+}) {
   const revisionIds = repository.listRevisionsByChangeSet(changeSet.changeSetId).map((revision) => revision.revisionId);
-  const currentRevisionIds = repository.listCurrentRevisions(projectId).map((revision) => revision.revisionId);
+  const currentRevisionIds = Array.isArray(currentRevisionIdsOverride)
+    ? [...currentRevisionIdsOverride]
+    : repository.listCurrentRevisions(projectId).map((revision) => revision.revisionId);
   return {
     checkpointId: deterministicId('rscp', projectId, conversationId || '', changeSet.changeSetId),
     projectId,
@@ -1947,7 +2009,13 @@ function ensureBaselineArtifactRevision(input = {}, dependencies = {}) {
       }).changeSet;
     }
     if (changeSet.status === 'preview_ready') {
-      adoptBaselineChangeSet({ repository, adapter, changeSetId, candidateCommit });
+      adoptBaselineChangeSet({
+        repository,
+        adapter,
+        changeSetId,
+        candidateCommit,
+        afterRefsApplied: dependencies.afterRefsApplied,
+      });
     }
     return { revision: repository.getRevision(revisionId), created: true };
   } catch (error) {
@@ -2666,10 +2734,20 @@ function inspectResultEditRecovery({ repository, adapter, workspaceRoot, project
   }
   return repository.findInterruptedChangeSets(projectId).map((entry) => {
     const changeSet = entry.changeSet;
-    const privateRoot = path.join(path.resolve(workspaceRoot), '.biof3', 'revision', changeSet.changeSetId);
-    const manifestPath = path.join(privateRoot, 'materialization.json');
     const candidateCommit = adapter.revParse(changeSet.workingBranchRef);
-    const materializationPresent = fs.existsSync(manifestPath);
+    let materializationPresent = false;
+    try {
+      const components = ['.biof3', 'revision', changeSet.changeSetId];
+      if (inspectPrivateDirectory(workspaceRoot, components, { allowMissing: true })) {
+        materializationPresent = inspectPrivateEntry(
+          workspaceRoot,
+          [...components, 'materialization.json'],
+          { allowMissing: true, kind: 'file' },
+        ) !== null;
+      }
+    } catch (error) {
+      throw resultChangeSetPrivatePathError(error);
+    }
     let recovery = entry.recovery;
     if (changeSet.status === 'running') {
       recovery = materializationPresent && candidateCommit
@@ -2697,6 +2775,7 @@ module.exports = {
   inspectPersistedArtifactCohort,
   ensureBaselineArtifactCohort,
   ensureBaselineArtifactRevision,
+  buildResultEditCheckpoint,
   createResultChangeSet,
   saveResultEditCheckpoint,
   inspectResultEditRecovery,

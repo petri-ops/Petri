@@ -548,6 +548,24 @@ function createGitAdapter(options = {}) {
       return output.ok ? output.stdout.trim() || null : null;
     },
 
+    /** Distinguish an absent ref from an unreadable repository. */
+    readRefExact(ref) {
+      if (typeof ref !== 'string' || ref.trim() === '' || ref.startsWith('-')) {
+        throw new GitAdapterError('ref_invalid', 'Invalid git ref.');
+      }
+      const output = run(['rev-parse', '--verify', '--quiet', ref], {
+        allowFailure: true,
+        readOnly: true,
+      });
+      if (output.ok) {
+        const oid = output.stdout.trim();
+        if (/^[a-f0-9]{40}$/.test(oid)) return oid;
+        throw new GitAdapterError('git_ref_read_failed', 'Git returned an invalid ref object id.', output);
+      }
+      if (output.status === 1) return null;
+      throw new GitAdapterError('git_ref_read_failed', 'Git ref state could not be read exactly.', output);
+    },
+
     /**
      * 批量解析多个 ref/commit：一次子进程替代 N 次 revParse。
      *
@@ -601,6 +619,49 @@ function createGitAdapter(options = {}) {
         if (match) refs.set(match[1], match[2]);
       }
       return refs;
+    },
+
+    /** Atomically apply one exact BioF3 ref compare-and-swap cohort. */
+    updateRefsCas({ updates } = {}) {
+      if (!Array.isArray(updates) || updates.length === 0) {
+        throw new GitAdapterError('ref_transaction_invalid', 'At least one ref update is required.');
+      }
+      const normalized = updates.map((entry) => ({
+        ref: String(entry?.ref || ''),
+        expectedOld: String(entry?.expectedOld || ''),
+        newOid: String(entry?.newOid || ''),
+      }));
+      if (new Set(normalized.map((entry) => entry.ref)).size !== normalized.length
+          || normalized.some((entry) =>
+            !/^refs\/heads\/biof3\/[A-Za-z0-9][A-Za-z0-9._\-/]*$/.test(entry.ref)
+            || !/^[a-f0-9]{40}$/.test(entry.expectedOld)
+            || !/^[a-f0-9]{40}$/.test(entry.newOid)
+            || entry.expectedOld === entry.newOid)) {
+        throw new GitAdapterError(
+          'ref_transaction_invalid',
+          'Every ref transaction entry must be one unique exact BioF3 compare-and-swap.'
+        );
+      }
+      const zero = '0'.repeat(40);
+      const commands = ['start'];
+      for (const entry of normalized) {
+        if (entry.newOid === zero) commands.push(`delete ${entry.ref} ${entry.expectedOld}`);
+        else if (entry.expectedOld === zero) commands.push(`create ${entry.ref} ${entry.newOid}`);
+        else commands.push(`update ${entry.ref} ${entry.newOid} ${entry.expectedOld}`);
+      }
+      commands.push('prepare', 'commit');
+      const result = run(['update-ref', '--stdin'], {
+        allowFailure: true,
+        input: `${commands.join('\n')}\n`,
+      });
+      if (!result.ok) {
+        throw new GitAdapterError(
+          'git_ref_transaction_conflict',
+          'Git refs changed concurrently or could not be committed atomically.',
+          result,
+        );
+      }
+      return { updated: normalized.length, updates: normalized };
     },
 
     /**

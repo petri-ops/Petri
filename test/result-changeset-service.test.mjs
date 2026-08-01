@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createRequire } from 'node:module';
@@ -9,6 +9,7 @@ const require = createRequire(import.meta.url);
 const Database = require('better-sqlite3');
 const { bindProjectRepository } = require('../core/shared-backend/git-repository-binding');
 const { ensureResultStudioSchema } = require('../core/shared-backend/result-studio-schema');
+const { ensureResultRefTransactionSchema } = require('../core/shared-backend/result-ref-transaction-schema');
 const {
   ensureResultWorkflowGraphSchema,
   workflowGraphDigest,
@@ -43,6 +44,7 @@ function fixture(context, suffix = '') {
   context.after(() => { try { db.close(); } catch { /* already closed */ } });
   ensureResultStudioSchema(db);
   ensureResultWorkflowGraphSchema(db);
+  ensureResultRefTransactionSchema(db);
   const repository = createResultStudioRepository(db, { ensureSchema: false });
   const binding = bindProjectRepository({ workspaceRoot, projectId: 'p_1' });
   const adapter = binding.adapter;
@@ -947,6 +949,65 @@ test('RS5 materialization is private, immutable, and refuses input rebinding', (
     normalizedSourceParams: fx.sourceJob.result.executionProvenance.params.normalized,
     proposedParameterPatch: { deg_table: 'other.csv' },
   }), (error) => error.code === 'artifact_input_read_only');
+});
+
+test('P6 private materialization anchors a symlinked workspace but rejects private directory links and files', (context) => {
+  const container = mkdtempSync(join(tmpdir(), 'biof3-private-materialize-'));
+  context.after(() => rmSync(container, { recursive: true, force: true }));
+  const realWorkspace = join(container, 'workspace-real');
+  const workspaceLink = join(container, 'workspace-link');
+  mkdirSync(realWorkspace);
+  symlinkSync(realWorkspace, workspaceLink, 'dir');
+  const safe = materializeResultEdit({
+    workspaceRoot: workspaceLink,
+    changeSetId: 'cs_symlinked_workspace',
+    revisionId: 'rev_symlinked_workspace',
+    artifactFamilyId: 'family',
+    artifactId: 'table',
+    pluginId: 'fixture',
+    sourceScriptContent: 'print(1)\n',
+    normalizedSourceParams: {},
+  });
+  assert.equal(
+    realpathSync(safe.privateRoot),
+    join(realpathSync(realWorkspace), '.biof3', 'revision', 'cs_symlinked_workspace'),
+  );
+
+  const attackedWorkspace = join(container, 'workspace-attacked');
+  const outside = join(container, 'outside');
+  mkdirSync(attackedWorkspace);
+  mkdirSync(outside);
+  symlinkSync(outside, join(attackedWorkspace, '.biof3'), 'dir');
+  assert.throws(
+    () => materializeResultEdit({
+      workspaceRoot: attackedWorkspace,
+      changeSetId: 'cs_escape',
+      revisionId: 'rev_escape',
+      artifactFamilyId: 'family',
+      artifactId: 'table',
+      pluginId: 'fixture',
+      sourceScriptContent: 'print(2)\n',
+      normalizedSourceParams: {},
+    }),
+    (error) => error instanceof ResultChangeSetError && error.code === 'private_path_symlink',
+  );
+  assert.equal(existsSync(join(outside, 'revision')), false);
+
+  unlinkSync(join(attackedWorkspace, '.biof3'));
+  writeFileSync(join(attackedWorkspace, '.biof3'), 'not a directory');
+  assert.throws(
+    () => materializeResultEdit({
+      workspaceRoot: attackedWorkspace,
+      changeSetId: 'cs_file',
+      revisionId: 'rev_file',
+      artifactFamilyId: 'family',
+      artifactId: 'table',
+      pluginId: 'fixture',
+      sourceScriptContent: 'print(3)\n',
+      normalizedSourceParams: {},
+    }),
+    (error) => error instanceof ResultChangeSetError && error.code === 'private_path_not_directory',
+  );
 });
 
 test('RS5 success creates commit, Job-backed Revision and preview without adopting it', async (context) => {

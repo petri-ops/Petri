@@ -20,6 +20,7 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const Database = require('better-sqlite3');
 const { ensureResultStudioSchema, inspectResultStudioSchema } = require('../core/shared-backend/result-studio-schema');
+const { ensureResultRefTransactionSchema } = require('../core/shared-backend/result-ref-transaction-schema');
 const {
   createResultStudioRepository,
   ResultStudioRepositoryError,
@@ -36,6 +37,7 @@ function makeRepo(context) {
   const db = new Database(join(root, 'test.db'));
   context.after(() => { try { db.close(); } catch { /* already closed */ } });
   ensureResultStudioSchema(db);
+  ensureResultRefTransactionSchema(db);
   return { db, repo: createResultStudioRepository(db, { ensureSchema: false }), root };
 }
 

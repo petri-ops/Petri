@@ -34,8 +34,18 @@ const {
   ensureResultWorkflowGraphSchema,
   verifyWorkflowGraphIntegrity,
 } = require('./result-workflow-graph');
+const {
+  computeResultRefTransactionHash,
+  ensureResultRefTransactionSchema,
+} = require('./result-ref-transaction-schema');
+const {
+  getResultStudioRuntimeLease,
+  isResultStudioRuntimeLease,
+} = require('./result-studio-runtime-lease');
 
 const SHA256_PATTERN = /^[a-f0-9]{64}$/;
+const GIT_OID_PATTERN = /^[a-f0-9]{40}$/;
+const BIOF3_REF_PATTERN = /^refs\/heads\/biof3\/[A-Za-z0-9][A-Za-z0-9._\-/]*$/;
 
 class ResultStudioRepositoryError extends Error {
   constructor(code, message, detail = null) {
@@ -197,6 +207,30 @@ function rowToWorkflowGraph(row) {
   };
 }
 
+function rowToRefTransaction(row) {
+  if (!row) return null;
+  return {
+    contractVersion: row.contract_version,
+    operationId: row.operation_id,
+    projectId: row.project_id,
+    changeSetId: row.change_set_id,
+    operationKind: row.operation_kind,
+    state: row.state,
+    sourceStatus: row.source_status,
+    targetStatus: row.target_status,
+    refUpdates: fromJson(row.ref_updates_json, []),
+    targetRevisionIds: fromJson(row.target_revision_ids_json, []),
+    checkpoint: fromJson(row.checkpoint_json, null),
+    ownerLease: fromJson(row.owner_lease_json, null),
+    intentHash: row.intent_hash,
+    statusReason: row.status_reason || null,
+    failureReason: row.failure_reason || null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    completedAt: row.completed_at || null,
+  };
+}
+
 function sameStringSet(left, right) {
   if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) return false;
   const leftSet = new Set(left);
@@ -217,6 +251,53 @@ function isCanonicalUniqueIdentifierArray(values) {
     && new Set(values).size === values.length;
 }
 
+function assertRefTransactionIntegrity(intent) {
+  if (!intent || !SHA256_PATTERN.test(String(intent.intentHash || ''))
+      || computeResultRefTransactionHash(intent) !== intent.intentHash) {
+    throw new ResultStudioRepositoryError(
+      'ref_transaction_integrity_failed',
+      'The durable ref transition journal failed its immutable intent hash.',
+      { operationId: intent?.operationId || null },
+    );
+  }
+  return intent;
+}
+
+function assertRefTransactionRevisionBindings(intent, getRevision) {
+  const currentRefUpdates = intent.refUpdates.filter(
+    (entry) => entry.ref.startsWith('refs/heads/biof3/current/'),
+  );
+  if (currentRefUpdates.length !== intent.targetRevisionIds.length) {
+    throw new ResultStudioRepositoryError(
+      'ref_transaction_revision_cohort_mismatch',
+      'Every current ref update requires one exact target Revision.'
+    );
+  }
+  const targetRevisions = intent.targetRevisionIds.map((revisionId) => getRevision(revisionId));
+  if (targetRevisions.some((revision) => !revision || revision.projectId !== intent.projectId)
+      || new Set(targetRevisions.map((revision) => revision.artifactFamilyId)).size !== targetRevisions.length) {
+    throw new ResultStudioRepositoryError(
+      'ref_transaction_target_revision_invalid',
+      'Target Revisions must form one unique same-project Artifact family cohort.'
+    );
+  }
+  for (let index = 0; index < targetRevisions.length; index += 1) {
+    const revision = targetRevisions[index];
+    const update = currentRefUpdates[index];
+    const ref = `refs/heads/biof3/current/${revision.artifactFamilyId}`;
+    // Array position is part of the immutable intent hash, so it also freezes
+    // each target Revision's exact family/ref/commit binding across a restart.
+    if (!update || update.ref !== ref || update.newOid !== revision.sourceCommit) {
+      throw new ResultStudioRepositoryError(
+        'ref_transaction_target_revision_mismatch',
+        'Target Revision commits must match the exact current ref cohort.',
+        { revisionId: revision.revisionId, artifactFamilyId: revision.artifactFamilyId },
+      );
+    }
+  }
+  return targetRevisions;
+}
+
 /**
  * 创建仓库。
  *
@@ -230,10 +311,14 @@ function createResultStudioRepository(db, options = {}) {
   if (options.ensureSchema !== false) {
     ensureResultStudioSchema(db);
     ensureResultWorkflowGraphSchema(db);
+    ensureResultRefTransactionSchema(db);
   }
 
   const transaction = typeof db.transaction === 'function'
     ? (fn) => db.transaction(fn)
+    : (fn) => fn;
+  const immediateTransaction = typeof db.transaction === 'function'
+    ? (fn) => (...args) => db.transaction(fn).immediate(...args)
     : (fn) => fn;
 
   function validateWorkflowGraphPayload(graph) {
@@ -485,7 +570,7 @@ function createResultStudioRepository(db, options = {}) {
       }
       const timestamp = nowIso();
       const run = transaction(() => {
-        db.prepare(`UPDATE scientific_change_sets SET
+        const updated = db.prepare(`UPDATE scientific_change_sets SET
             status = ?, status_reason = ?, updated_at = ?,
             candidate_commit = COALESCE(?, candidate_commit),
             validation_summary_json = COALESCE(?, validation_summary_json),
@@ -506,16 +591,14 @@ function createResultStudioRepository(db, options = {}) {
             to, timestamp,
             changeSetId, current.status
           );
+        if (updated.changes !== 1) {
+          throw new ResultStudioRepositoryError('change_set_conflict', 'ChangeSet changed concurrently.', {
+            expected: current.status,
+          });
+        }
       });
       run();
       const updated = api.getChangeSet(changeSetId);
-      if (updated.status !== to) {
-        // 条件更新未命中 → 期间已被并发改写。不猜测，交给调用方重试。
-        throw new ResultStudioRepositoryError('change_set_conflict', 'ChangeSet changed concurrently.', {
-          expected: current.status,
-          actual: updated.status,
-        });
-      }
       return { changeSet: updated, changed: true, idempotent: false };
     },
 
@@ -1098,6 +1181,246 @@ function createResultStudioRepository(db, options = {}) {
         .map(rowToRevision);
     },
 
+    // ----------------------------------------------- durable Git/SQLite refs
+
+    prepareRefTransaction(input = {}) {
+      const operationId = String(input.operationId || '').trim();
+      const projectId = String(input.projectId || '').trim();
+      const changeSetId = String(input.changeSetId || '').trim();
+      const operationKind = String(input.operationKind || '').trim();
+      const sourceStatus = String(input.sourceStatus || '').trim();
+      const targetStatus = String(input.targetStatus || '').trim();
+      const refUpdates = Array.isArray(input.refUpdates) ? input.refUpdates.map((entry) => ({
+        ref: String(entry?.ref || '').trim(),
+        expectedOld: String(entry?.expectedOld || '').trim(),
+        newOid: String(entry?.newOid || '').trim(),
+      })) : [];
+      const targetRevisionIds = Array.isArray(input.targetRevisionIds)
+        ? input.targetRevisionIds.map((value) => String(value || '').trim())
+        : [];
+      const suppliedOwnerLease = input.ownerLease || getResultStudioRuntimeLease();
+      const ownerLease = isResultStudioRuntimeLease(suppliedOwnerLease)
+        && Number.isInteger(suppliedOwnerLease.ownerPid)
+        ? {
+          instanceId: String(suppliedOwnerLease.instanceId),
+          startedAt: String(suppliedOwnerLease.startedAt),
+          ownerPid: suppliedOwnerLease.ownerPid,
+        }
+        : null;
+      const checkpointValidation = validateWorkspaceCheckpoint(input.checkpoint);
+      if (!isCanonicalIdentifier(operationId) || !isCanonicalIdentifier(projectId)
+          || !isCanonicalIdentifier(changeSetId) || !isCanonicalIdentifier(operationKind)
+          || !sourceStatus || !targetStatus || !canTransitionChangeSet(sourceStatus, targetStatus).allowed
+          || refUpdates.length === 0
+          || new Set(refUpdates.map((entry) => entry.ref)).size !== refUpdates.length
+          || refUpdates.some((entry) => !BIOF3_REF_PATTERN.test(entry.ref)
+            || !GIT_OID_PATTERN.test(entry.expectedOld)
+            || !GIT_OID_PATTERN.test(entry.newOid)
+            || entry.expectedOld === entry.newOid)
+          || targetRevisionIds.some((value) => !isCanonicalIdentifier(value))
+          || new Set(targetRevisionIds).size !== targetRevisionIds.length
+          || !ownerLease
+          || !checkpointValidation.ok) {
+        throw new ResultStudioRepositoryError(
+          'ref_transaction_invalid',
+          'A durable ref transition requires one exact CAS cohort and a valid target checkpoint.'
+        );
+      }
+      const checkpoint = checkpointValidation.checkpoint;
+      if (checkpoint.projectId !== projectId || checkpoint.changeSetId !== changeSetId
+          || checkpoint.changeSetStatus !== targetStatus) {
+        throw new ResultStudioRepositoryError(
+          'ref_transaction_checkpoint_mismatch',
+          'The durable ref transition checkpoint does not describe its exact target state.'
+        );
+      }
+      assertRefTransactionRevisionBindings({
+        projectId,
+        refUpdates,
+        targetRevisionIds,
+      }, (revisionId) => api.getRevision(revisionId));
+      const timestamp = nowIso();
+      const statusReason = input.statusReason == null ? null : String(input.statusReason);
+      const immutableIntent = {
+        contractVersion: 1,
+        operationId,
+        projectId,
+        changeSetId,
+        operationKind,
+        sourceStatus,
+        targetStatus,
+        refUpdates,
+        targetRevisionIds,
+        checkpoint,
+        ownerLease,
+        statusReason,
+        createdAt: timestamp,
+      };
+      const intentHash = computeResultRefTransactionHash(immutableIntent);
+      const apply = immediateTransaction(() => {
+        const current = api.getChangeSet(changeSetId);
+        if (!current || current.projectId !== projectId || current.status !== sourceStatus) {
+          throw new ResultStudioRepositoryError(
+            'ref_transaction_source_conflict',
+            'The ChangeSet no longer matches the prepared ref transition source state.',
+            { expected: sourceStatus, actual: current?.status || null },
+          );
+        }
+        const active = db.prepare(`SELECT * FROM result_ref_transactions
+            WHERE project_id = ? AND state IN ('prepared', 'refs_applied')`)
+          .all(projectId)
+          .map(rowToRefTransaction)
+          .map(assertRefTransactionIntegrity)[0] || null;
+        if (active) {
+          throw new ResultStudioRepositoryError(
+            'ref_transaction_project_active',
+            'The project already has an unfinished durable ref transition.',
+            { operationId: active.operationId },
+          );
+        }
+        db.prepare(`INSERT INTO result_ref_transactions (
+            operation_id, contract_version, project_id, change_set_id, operation_kind, state,
+            source_status, target_status, ref_updates_json, target_revision_ids_json,
+            checkpoint_json, owner_lease_json, intent_hash, status_reason, failure_reason,
+            created_at, updated_at, completed_at
+          ) VALUES (?, 1, ?, ?, ?, 'prepared', ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, NULL)`)
+          .run(
+            operationId, projectId, changeSetId, operationKind, sourceStatus, targetStatus,
+            toJson(refUpdates), toJson(targetRevisionIds), toJson(checkpoint),
+            toJson(ownerLease), intentHash, statusReason, timestamp, timestamp,
+          );
+      });
+      apply();
+      return api.getRefTransaction(operationId);
+    },
+
+    getRefTransaction(operationId) {
+      return rowToRefTransaction(
+        db.prepare('SELECT * FROM result_ref_transactions WHERE operation_id = ?').get(operationId)
+      );
+    },
+
+    listActiveRefTransactions(projectId) {
+      return db.prepare(`SELECT * FROM result_ref_transactions
+          WHERE project_id = ? AND state IN ('prepared', 'refs_applied')
+          ORDER BY created_at ASC, operation_id ASC`)
+        .all(projectId)
+        .map(rowToRefTransaction);
+    },
+
+    markRefTransactionRefsApplied(operationId) {
+      const timestamp = nowIso();
+      const result = db.prepare(`UPDATE result_ref_transactions
+          SET state = 'refs_applied', updated_at = ?
+          WHERE operation_id = ? AND state = 'prepared'`)
+        .run(timestamp, operationId);
+      const current = api.getRefTransaction(operationId);
+      if (result.changes !== 1 && current?.state !== 'refs_applied') {
+        throw new ResultStudioRepositoryError(
+          'ref_transaction_state_conflict',
+          'The durable ref transition is not waiting for Git ref acknowledgement.'
+        );
+      }
+      return current;
+    },
+
+    abortRefTransaction(operationId, reason = null) {
+      const timestamp = nowIso();
+      const result = db.prepare(`UPDATE result_ref_transactions
+          SET state = 'aborted', failure_reason = ?,
+              updated_at = ?, completed_at = ?
+          WHERE operation_id = ? AND state IN ('prepared', 'refs_applied')`)
+        .run(reason == null ? null : String(reason), timestamp, timestamp, operationId);
+      const current = api.getRefTransaction(operationId);
+      if (result.changes !== 1 && current?.state !== 'aborted') {
+        throw new ResultStudioRepositoryError(
+          'ref_transaction_state_conflict',
+          'The durable ref transition cannot be aborted from its current state.'
+        );
+      }
+      return current;
+    },
+
+    finalizeRefTransaction(operationId) {
+      const apply = immediateTransaction(() => {
+        const intent = api.getRefTransaction(operationId);
+        if (!intent) {
+          throw new ResultStudioRepositoryError('ref_transaction_not_found', 'Unknown durable ref transition.');
+        }
+        if (intent.state === 'completed') return intent;
+        assertRefTransactionIntegrity(intent);
+        if (intent.state !== 'refs_applied') {
+          throw new ResultStudioRepositoryError(
+            'ref_transaction_state_conflict',
+            'The durable ref transition has not acknowledged its Git ref cohort.'
+          );
+        }
+        const checkpointValidation = validateWorkspaceCheckpoint(intent.checkpoint);
+        if (!checkpointValidation.ok) {
+          throw new ResultStudioRepositoryError(
+            'ref_transaction_checkpoint_invalid',
+            'The durable ref transition target checkpoint failed validation.'
+          );
+        }
+        const targetRevisions = assertRefTransactionRevisionBindings(
+          intent,
+          (revisionId) => api.getRevision(revisionId),
+        );
+        const timestamp = nowIso();
+        const statusUpdate = db.prepare(`UPDATE scientific_change_sets SET
+            status = ?, status_reason = ?, updated_at = ?,
+            adopted_at = CASE WHEN ? = 'adopted' THEN ? ELSE adopted_at END,
+            reverted_at = CASE WHEN ? = 'reverted' THEN ? ELSE reverted_at END
+          WHERE change_set_id = ? AND project_id = ? AND status = ?`)
+          .run(
+            intent.targetStatus, intent.statusReason, timestamp,
+            intent.targetStatus, timestamp, intent.targetStatus, timestamp,
+            intent.changeSetId, intent.projectId, intent.sourceStatus,
+          );
+        if (statusUpdate.changes !== 1) {
+          throw new ResultStudioRepositoryError(
+            'ref_transaction_source_conflict',
+            'The ChangeSet advanced before the durable ref transition finalized.',
+            { expected: intent.sourceStatus },
+          );
+        }
+        for (const revision of targetRevisions) {
+          db.prepare(`UPDATE artifact_revisions SET is_current = 0
+              WHERE project_id = ? AND artifact_family_id = ? AND is_current = 1`)
+            .run(intent.projectId, revision.artifactFamilyId);
+          const target = db.prepare('UPDATE artifact_revisions SET is_current = 1 WHERE revision_id = ? AND project_id = ?')
+            .run(revision.revisionId, intent.projectId);
+          if (target.changes !== 1) {
+            throw new ResultStudioRepositoryError(
+              'ref_transaction_target_revision_conflict',
+              'The target Revision could not become current atomically.'
+            );
+          }
+        }
+        const actualCurrentRevisionIds = api.listCurrentRevisions(intent.projectId)
+          .map((revision) => revision.revisionId);
+        if (!sameStringSet(actualCurrentRevisionIds, checkpointValidation.checkpoint.currentRevisionIds)) {
+          throw new ResultStudioRepositoryError(
+            'ref_transaction_checkpoint_current_mismatch',
+            'The target checkpoint does not match the finalized current Revision set.'
+          );
+        }
+        api.saveCheckpoint(checkpointValidation.checkpoint);
+        const completed = db.prepare(`UPDATE result_ref_transactions
+            SET state = 'completed', updated_at = ?, completed_at = ?
+            WHERE operation_id = ? AND state IN ('prepared', 'refs_applied')`)
+          .run(timestamp, timestamp, operationId);
+        if (completed.changes !== 1) {
+          throw new ResultStudioRepositoryError(
+            'ref_transaction_state_conflict',
+            'The durable ref transition changed while finalizing.'
+          );
+        }
+        return api.getRefTransaction(operationId);
+      });
+      return apply();
+    },
+
     // ------------------------------------------------------- adopt / revert
 
     /**
@@ -1175,6 +1498,18 @@ function createResultStudioRepository(db, options = {}) {
       }
       const timestamp = nowIso();
       const apply = transaction(() => {
+        const statusUpdate = db.prepare(`UPDATE scientific_change_sets SET
+            status = 'adopted', adopted_at = ?, updated_at = ?,
+            candidate_commit = COALESCE(?, candidate_commit)
+          WHERE change_set_id = ? AND status = ?`)
+          .run(timestamp, timestamp, candidateCommit === undefined ? null : candidateCommit, changeSetId, current.status);
+        if (statusUpdate.changes !== 1) {
+          throw new ResultStudioRepositoryError(
+            'change_set_conflict',
+            'ChangeSet changed concurrently during adopt.',
+            { expected: current.status },
+          );
+        }
         for (const rev of revisions) {
           // 先清空同 family 的旧 current，再置新 current；
           // partial unique index 保证任何中间态都不会出现两个 current。
@@ -1182,11 +1517,6 @@ function createResultStudioRepository(db, options = {}) {
             .run(rev.artifactFamilyId, rev.projectId);
           db.prepare('UPDATE artifact_revisions SET is_current = 1 WHERE revision_id = ?').run(rev.revisionId);
         }
-        db.prepare(`UPDATE scientific_change_sets SET
-            status = 'adopted', adopted_at = ?, updated_at = ?,
-            candidate_commit = COALESCE(?, candidate_commit)
-          WHERE change_set_id = ? AND status = ?`)
-          .run(timestamp, timestamp, candidateCommit === undefined ? null : candidateCommit, changeSetId, current.status);
         if (typeof beforeCommit === 'function') {
           beforeCommit({ changeSet: current, revisions });
         }
@@ -1231,6 +1561,17 @@ function createResultStudioRepository(db, options = {}) {
       const timestamp = nowIso();
       const restored = [];
       const apply = transaction(() => {
+        const statusUpdate = db.prepare(`UPDATE scientific_change_sets SET
+            status = 'reverted', status_reason = ?, reverted_at = ?, updated_at = ?
+          WHERE change_set_id = ? AND status = ?`)
+          .run(reason, timestamp, timestamp, changeSetId, current.status);
+        if (statusUpdate.changes !== 1) {
+          throw new ResultStudioRepositoryError(
+            'change_set_conflict',
+            'ChangeSet changed concurrently during revert.',
+            { expected: current.status },
+          );
+        }
         if (wasAdopted) {
           for (const rev of revisions) {
             if (!rev.isCurrent) {
@@ -1264,10 +1605,6 @@ function createResultStudioRepository(db, options = {}) {
             restored.push(previous.revision_id);
           }
         }
-        db.prepare(`UPDATE scientific_change_sets SET
-            status = 'reverted', status_reason = ?, reverted_at = ?, updated_at = ?
-          WHERE change_set_id = ? AND status = ?`)
-          .run(reason, timestamp, timestamp, changeSetId, current.status);
         if (typeof beforeCommit === 'function') {
           beforeCommit({
             changeSet: current,

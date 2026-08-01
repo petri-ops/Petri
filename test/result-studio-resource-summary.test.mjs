@@ -25,11 +25,18 @@ test('P6 task summary aggregates measured Job peaks and keeps unbound Provider u
           minimumAvailableMemoryBytes: 650,
           minimumAvailableDiskBytes: 4_000,
         },
-        sampling: { sampleCount: 4 },
+        sampling: { sampleCount: 4, outputMeasurementStatus: 'measured' },
       }),
       job('failed', {
-        peak: { cpuPercent: 50, rssBytes: 2_048, outputBytes: 4_096, activeJobs: 3 },
-        sampling: { sampleCount: 2 },
+        peak: {
+          cpuPercent: 50,
+          rssBytes: 2_048,
+          outputBytes: 4_096,
+          activeJobs: 3,
+          minimumAvailableMemoryBytes: 675,
+          minimumAvailableDiskBytes: 4_200,
+        },
+        sampling: { sampleCount: 2, outputMeasurementStatus: 'measured' },
       }),
     ],
   });
@@ -100,6 +107,37 @@ test('P6 task summary does not turn absent measurements into zeroes', () => {
   assert.equal(summary.disk.outputPeakBytes.value, null);
   assert.equal(summary.jobs.peakConcurrent.value, null);
   assert.equal(summary.sampling.status, 'unavailable');
+});
+
+test('P6 task summary marks mixed Job resource coverage as partial instead of measured', () => {
+  const summary = buildResultStudioTaskResourceSummary({
+    jobs: [
+      job('completed', {
+        start: { memory: { availableBytes: 900 }, disk: { availableBytes: 5_000 } },
+        end: { memory: { availableBytes: 700 }, disk: { availableBytes: 4_500 } },
+        peak: {
+          cpuPercent: 50,
+          rssBytes: 2_048,
+          outputBytes: 4_096,
+          activeJobs: 2,
+          minimumAvailableMemoryBytes: 650,
+          minimumAvailableDiskBytes: 4_000,
+        },
+        sampling: { status: 'measured', sampleCount: 3, outputMeasurementStatus: 'measured' },
+      }),
+      job('failed', {}),
+    ],
+  });
+
+  assert.equal(summary.cpu.peakPercent.status, 'partial');
+  assert.equal(summary.memory.processPeakRssBytes.status, 'partial');
+  assert.equal(summary.memory.minimumSystemAvailableBytes.status, 'partial');
+  assert.equal(summary.disk.outputPeakBytes.status, 'partial');
+  assert.equal(summary.disk.minimumSystemAvailableBytes.status, 'partial');
+  assert.equal(summary.jobs.peakConcurrent.status, 'partial');
+  assert.deepEqual(summary.sampling, {
+    status: 'partial', sampleCount: 3, reason: 'job_sampling_coverage_incomplete',
+  });
 });
 
 test('P6 task summary keeps explicit null and partial output facts honest', () => {

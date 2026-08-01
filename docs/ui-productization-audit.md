@@ -1,6 +1,6 @@
 # BioF3 Desktop UI 产品化审计台账
 
-最后更新：2026-07-31
+最后更新：2026-08-01
 
 状态：**Stage 1 验收完成（31/31 verified）；UI-031～UI-035、UI-054～UI-064 已完成真实 Provider、长任务、取消恢复及明暗主题实机验收；UI-036～UI-048 的既有验收状态见下表**
 
@@ -273,3 +273,4 @@ npm run check
 - **2026-07-27 P4R-2 模式容器骨架（UI-113 → `in_progress`）**：计划要求 Result/Code/Compare/History 四态互斥，但只有 `result` 有实现，且计划自身已把另外两态分配出去：Code 的源投影属 P4R-5（23 条 result-studio 路由无一提供），History 的版本选择器属 P4R-4；`compare` 在 `frontend/src` 内零写入方，每个消费点都写成 `result || compare`，其唯一表现是一个无样式表选择的 `data-mode` 属性，因此一直与 `result` 渲染完全相同。故本轮**不做四态**，只建立诚实的容器：`resultMode.ts` 以真实能力（而非开关）决定哪些态可被提供，`resolveResultMode` 把无实现的请求回落到 `result`——手输 `?mode=compare` 因此落在结果页而不是暗示存在比较视图；`isSingleActiveMode` 把「一次只渲染一态」写成可断言的不变量。10 项测试覆盖。P4R-4 与 P4R-5 各自提供能力即可点亮自己那一态，无需改动此处逻辑。UI-113 保持 `in_progress`：紧凑 header 的按需结果抽屉与实机响应式矩阵仍未完成。
 - **2026-07-27 P4R-2 让 `resultBodyState` 真正被生产调用（UI-113 → `in_progress`）**：收口前的并行核查发现 `resultBodyState.ts` **零生产导入方**——`project-workspace.tsx` 只在两处注释里提到它（`:2950`、`:3206`），从未 import 或调用。行为本身是对的（`b5d073a` 用内联守卫收窄了三处无条件清空），但那是一份**平行实现**：模块与其 10 项测试全绿，而产品跑的是别的代码，改动内联逻辑不会让任何测试变红。这与本阶段清除的空转门同类，只是由本工作包自己造成。现改为在两处判断点真正调用 `nextResultBodyState`，由 reducer 给出结论而非在组件里复述规则；不变量 ④ 同步加断言：`nextResultBodyState` 必须存在非测试、非自身的调用方，否则「模块有测试」这一事实不足以证明产品行为。UI-113 保持 `in_progress`。
 - **2026-08-01 P6-1 实现检查点（UI-103/UI-105/UI-111 → `in_progress`）**：持久 runtime lease/checkpoint、原子恢复、Artifact Truth 绑定读取、exact GC protection、资源峰值摘要、10 万行 byte-cursor 与开发态 Electron 恢复/压力 driver 已接入同一产品路径。真实压力观测捕获并修复了流式 Artifact 把绝对路径误作 MIME、导致 Chromium ORB 阻断 SVG 的缺陷；修后 exact SVG 请求为 completed/200、尺寸 672×480，网络错误为 0。该检查点仍不声明 literal OS reboot、真实 Provider、packaged Electron、多尺寸 P7 操作或 201 次真实 Job 执行；canonical source-bound P6 证据在实现提交后单独生成。
+- **2026-08-01 P6-1 资源摘要契约补齐（UI-105 → `in_progress`）**：前端客户端现在接受服务端真实返回的 `sampling.status=partial`，同时保留已取得的 `sampleCount` 与不可完整采样的 `reason`；不再把“取得部分测量”误压成 measured 或 unavailable。该改动只补齐资源真相的类型边界，不改变界面布局，也不提供 packaged/P7 资格证据，因此 UI-105 继续保持 `in_progress`。

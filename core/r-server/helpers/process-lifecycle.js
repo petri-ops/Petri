@@ -125,6 +125,34 @@ function refreshVerifiedHeartbeat({ active, jobId, db, now = Date.now(), isAlive
   return true;
 }
 
+async function persistOwnedTerminationObservation({
+  active,
+  jobId,
+  db,
+  diagnostic,
+  termination,
+  now = Date.now,
+}) {
+  if (termination?.terminated === true && active?.cancelRequested !== true) {
+    return db
+      .prepare(
+        "UPDATE tool_jobs SET status='failed', error=?, completed_at=?, process_pid=NULL, heartbeat_at=NULL "
+        + "WHERE id=? AND status IN ('running','pending')"
+      )
+      .run(diagnostic, now(), jobId);
+  }
+
+  // A signal being accepted does not prove that the process exited. Preserve
+  // the active status and process identity so a later owner scan or cancel
+  // request can retry termination. Confirmed user cancellation is likewise
+  // left for the child-exit/cancel path to converge to `cancelled`.
+  return db
+    .prepare(
+      "UPDATE tool_jobs SET error=?, completed_at=NULL WHERE id=? AND status IN ('running','pending')"
+    )
+    .run(diagnostic, jobId);
+}
+
 async function enforceHardTimeout({
   active,
   jobId,
@@ -137,16 +165,20 @@ async function enforceHardTimeout({
   if (active.heartbeatTimer) clearInterval(active.heartbeatTimer);
   const termination = await terminate(active.process);
   active.terminationResult = termination;
+  const diagnostic = termination.terminated
+    ? `任务超过最大运行预算 ${hardTimeoutMs}ms；已确认子进程终止（${termination.signal || 'exit'}）`
+    : `任务超过最大运行预算 ${hardTimeoutMs}ms；子进程终止未确认（${termination.reason || 'unknown'}）`;
   if (!termination.terminated) {
     active.lastHeartbeatAt = 0;
-    await db
-      .prepare("UPDATE tool_jobs SET status='failed', error=?, completed_at=? WHERE id=? AND status IN ('running','pending')")
-      .run(
-        `任务超过最大运行预算 ${hardTimeoutMs}ms；子进程终止未确认（${termination.reason || 'unknown'}）`,
-        now(),
-        jobId
-      );
   }
+  await persistOwnedTerminationObservation({
+    active,
+    jobId,
+    db,
+    diagnostic,
+    termination,
+    now,
+  });
   return termination;
 }
 
@@ -182,20 +214,31 @@ async function recoverStaleActiveJobs({
     const diagnostic = termination.terminated
       ? `任务失活；已确认子进程终止（${termination.signal || 'exit'}）`
       : `任务失活；子进程终止未确认（${termination.reason || 'unknown'}）`;
-    await db
-      .prepare("UPDATE tool_jobs SET status='failed', error=?, completed_at=? WHERE id=? AND status IN ('running','pending')")
-      .run(diagnostic, now(), jobId);
+    if (!termination.terminated) active.lastHeartbeatAt = 0;
+    await persistOwnedTerminationObservation({
+      active,
+      jobId,
+      db,
+      diagnostic,
+      termination,
+      now,
+    });
     recovered.push({ jobId, termination, diagnostic });
   }
   return recovered;
 }
 
-async function markUnownedStaleJobs({ db, cutoff, now = Date.now }) {
+async function markUnownedStaleJobs({ db, cutoff, now = Date.now, ownedJobIds = [] }) {
+  const owned = [...new Set(Array.from(ownedJobIds, (jobId) => String(jobId)))];
+  const excludeOwned = owned.length > 0
+    ? ` AND id NOT IN (${owned.map(() => '?').join(',')})`
+    : '';
   return db
     .prepare(
       "UPDATE tool_jobs SET status = 'failed', error = '任务心跳失活且无本次进程句柄；进程归属无法证明，未发送信号', completed_at = ? WHERE status IN ('running', 'pending') AND COALESCE(heartbeat_at, created_at) < ?"
+      + excludeOwned
     )
-    .run(now(), cutoff);
+    .run(now(), cutoff, ...owned);
 }
 
 module.exports = {

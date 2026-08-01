@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { closeSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import test from 'node:test';
 
@@ -10,8 +11,11 @@ const root = mkdtempSync(path.join(tmpdir(), 'biof3-result-route-baseline-'));
 process.env.BIOF3_DB_PATH = path.join(root, 'route.db');
 const require = createRequire(import.meta.url);
 const route = require('../core/r-server/routes/result-studio');
+const { readVerifiedFileSnapshot } = require('../core/r-server/helpers/verified-file-snapshot');
+const { queryResultTable } = require('../core/shared-backend/result-studio-table-query');
 const {
   baselineFailureDiagnostic,
+  bindAuthoritativeQuerySelection,
   buildContextBoundPreviewBudget,
   findArtifactRecord,
   openVerifiedRevisionArtifact,
@@ -24,6 +28,17 @@ const routeDb = require('../core/r-server/db').db;
 test.after(() => {
   try { routeDb.close(); } catch { /* already closed */ }
   rmSync(root, { recursive: true, force: true });
+});
+
+test('P6 Revision table-page route passes the persisted output hash to the bounded reader', () => {
+  const source = readFileSync(path.join(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '../core/r-server/routes/result-studio.js',
+  ), 'utf8');
+  assert.match(
+    source,
+    /readTablePage\(\{\s*filePath,\s*expectedSha256:\s*revision\.outputHash,/,
+  );
 });
 
 test('P6 interaction route re-enters baseline ensure when an existing formal Revision lacks cohort qualification', () => {
@@ -189,6 +204,84 @@ test('P6 preview budget diagnostic fails closed without a trusted edit context',
   });
 });
 
+test('P6 query Selection persists only server-recomputed Artifact Truth evidence', () => {
+  const file = path.join(root, 'selection-truth.csv');
+  const rows = Array.from({ length: 20 }, (_, index) => `G${index},${index / 100}`);
+  const bytes = `gene,padj\n${rows.join('\n')}\n`;
+  writeFileSync(file, bytes);
+  const sha256 = createHash('sha256').update(bytes).digest('hex');
+  const filterExpression = { logic: 'and', clauses: [{ field: 'padj', op: 'lt', value: 1 }] };
+  const authoritative = queryResultTable({
+    filePath: file,
+    expectedSha256: sha256,
+    idField: 'gene',
+    filterExpression,
+    sort: [],
+    offset: 0,
+    limit: 1,
+  });
+  const artifactRecord = {
+    id: 'deg_table', filename: 'selection-truth.csv', path: file, sha256,
+  };
+  const selection = {
+    selectionId: 'sel_truth',
+    projectId: 'p_truth',
+    artifactId: 'deg_table',
+    revisionId: 'rev_truth',
+    entityType: 'gene',
+    entityIds: authoritative.selectionEvidence.sampleEntityIds,
+    entityIdCount: authoritative.selectionEvidence.entityIdCount,
+    entityIdsTruncated: true,
+    entityIdsHash: authoritative.selectionEvidence.entityIdsHash,
+    filterHash: authoritative.filterHash,
+    filterExpression,
+    sort: [],
+    displayState: { origin: 'query', durable: true },
+  };
+  const dependencies = {
+    getToolJob: () => ({
+      id: 'job_truth', project_id: 'p_truth', tool_id: 'deseq2',
+      result: { artifactTruth: { status: 'valid', blocking: false }, artifacts: [artifactRecord] },
+    }),
+    getPluginManifest: () => ({ resultStudio: {
+      artifacts: [{ id: 'deg_table', filename: 'selection-truth.csv', type: 'table' }],
+      interactionMappings: [{ artifactId: 'deg_table', mode: 'table', entityType: 'gene', idField: 'gene' }],
+    } }),
+    resolveArtifactPath: () => ({
+      absolutePath: file,
+      artifactRecord,
+      expectedSha256: sha256,
+    }),
+  };
+  const input = {
+    req: {},
+    project: { id: 'p_truth' },
+    selection,
+    repository: { getRevision: () => ({
+      revisionId: 'rev_truth', projectId: 'p_truth', artifactId: 'deg_table',
+      toolJobId: 'job_truth', outputHash: sha256,
+    }) },
+  };
+
+  const bound = bindAuthoritativeQuerySelection(input, dependencies);
+  assert.equal(bound.error, undefined);
+  assert.equal(bound.authoritative, true);
+  assert.equal(bound.selection.entityIdCount, 20);
+  assert.equal(bound.selection.entityIdsHash, authoritative.selectionEvidence.entityIdsHash);
+  assert.equal(bound.selection.displayState.evidenceAuthority, 'server_artifact_truth');
+
+  const forged = bindAuthoritativeQuerySelection({
+    ...input,
+    selection: {
+      ...selection,
+      entityIds: [],
+      entityIdCount: 500_000,
+      entityIdsHash: 'f'.repeat(64),
+    },
+  }, dependencies);
+  assert.equal(forged.error.code, 'selection_query_evidence_mismatch');
+});
+
 test('P6 interaction binds one current physical file to exact Job Artifact Truth bytes', () => {
   const file = path.join(root, 'verified-table.csv');
   const bytes = 'gene,score\nTP53,4.2\n';
@@ -292,7 +385,7 @@ test('P6 artifact path resolution never falls back to an undeclared physical out
   assert.equal(resolved.error.reason, 'artifact_record_missing');
 });
 
-test('P6 Revision downloads stream only the descriptor whose bytes match Revision Truth', () => {
+test('P6 Revision downloads stream only the descriptor whose bytes match Revision Truth', async () => {
   const workspace = path.join(root, 'revision-workspace');
   const relativePath = 'results/revision-table.csv';
   const file = path.join(workspace, relativePath);
@@ -304,12 +397,12 @@ test('P6 Revision downloads stream only the descriptor whose bytes match Revisio
     outputHash: createHash('sha256').update(bytes).digest('hex'),
   };
 
-  const opened = openVerifiedRevisionArtifact(workspace, revision);
-  assert.equal(readFileSync(opened.fd, 'utf8'), bytes);
-  closeSync(opened.fd);
+  const opened = await openVerifiedRevisionArtifact(workspace, revision);
+  writeFileSync(file, 'gene,score\nSAME_INODE_MUTATION,100\n');
+  assert.equal(await readVerifiedFileSnapshot(opened, { encoding: 'utf8' }), bytes);
 
   writeFileSync(file, 'gene,score\nBRAF,0\n');
-  assert.throws(
+  await assert.rejects(
     () => openVerifiedRevisionArtifact(workspace, revision),
     /artifact_hash_mismatch/,
   );

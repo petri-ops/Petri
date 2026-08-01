@@ -28,10 +28,12 @@ const crypto = require('crypto');
 const db = require('../db');
 const pluginLoader = require('../plugin-loader');
 const mcpRegistry = require('../mcp/registry');
+const { artifactContentTypeHint } = require('../helpers/artifact-truth');
 const {
-  artifactContentTypeHint,
-  sha256FileDescriptor,
-} = require('../helpers/artifact-truth');
+  createVerifiedFileSnapshot,
+  createVerifiedSnapshotReadStream,
+  pipeVerifiedSnapshotToResponse,
+} = require('../helpers/verified-file-snapshot');
 
 // core/r-server/db.js 导出的是模块对象；真实 better-sqlite3 句柄在 `.db` 上。
 // 直接对模块对象调用 prepare() 会在运行时抛错。
@@ -232,13 +234,10 @@ function resolveWorkspaceFileForRevision(workspaceRoot, revision) {
   const workspace = fs.realpathSync(workspaceRoot);
   const target = fs.realpathSync(path.join(workspace, revision.outputPath));
   if (!isPathContained(workspace, target)) throw Object.assign(new Error('Revision output escaped the project.'), { code: 'revision_output_escape' });
-  if (!revision.outputHash || hashFile(target) !== revision.outputHash) {
-    throw Object.assign(new Error('Revision output hash no longer matches Artifact Truth.'), { code: 'revision_output_hash_drift' });
-  }
   return target;
 }
 
-function openVerifiedRevisionArtifact(workspaceRoot, revision) {
+async function openVerifiedRevisionArtifact(workspaceRoot, revision) {
   let fd = null;
   try {
     const workspace = fs.realpathSync(workspaceRoot);
@@ -248,14 +247,30 @@ function openVerifiedRevisionArtifact(workspaceRoot, revision) {
     fd = fs.openSync(artifactPath, fs.constants.O_RDONLY | noFollow);
     const stat = fs.fstatSync(fd);
     if (!stat.isFile()) throw new Error('artifact_not_file');
-    if (!revision.outputHash || sha256FileDescriptor(fd) !== revision.outputHash) {
-      throw new Error('artifact_hash_mismatch');
-    }
-    return { fd, stat, artifactPath };
+    if (!revision.outputHash) throw new Error('artifact_hash_mismatch');
+    const sourceFd = fd;
+    fd = null;
+    const snapshot = await createVerifiedFileSnapshot(sourceFd, {
+      expectedIdentity: {
+        dev: stat.dev,
+        ino: stat.ino,
+        size: stat.size,
+        mtimeMs: stat.mtimeMs,
+        ctimeMs: stat.ctimeMs,
+      },
+      expectedSha256: revision.outputHash,
+    });
+    return {
+      fd: snapshot.fd,
+      stat: snapshot.stat,
+      verification: snapshot.verification,
+      artifactPath,
+    };
   } catch (error) {
     if (fd !== null) {
       try { fs.closeSync(fd); } catch {}
     }
+    if (error?.code === 'verified_snapshot_hash_mismatch') throw new Error('artifact_hash_mismatch');
     throw error;
   }
 }
@@ -444,8 +459,9 @@ function sendArtifactResolutionError(res, error) {
   return res.status(error.status).json(body);
 }
 
-function resolveInteractionDescriptor(toolId, artifactRecord, artifactName) {
-  const plugin = pluginLoader.getPluginManifest(toolId);
+function resolveInteractionDescriptor(toolId, artifactRecord, artifactName, dependencies = {}) {
+  const getPluginManifest = dependencies.getPluginManifest || pluginLoader.getPluginManifest;
+  const plugin = getPluginManifest(toolId);
   const descriptor = plugin?.resultStudio || null;
   if (!descriptor) return { descriptor: null, artifactDescriptor: null, mapping: null };
   const artifactDescriptor = descriptor.artifacts.find((artifact) =>
@@ -464,6 +480,132 @@ function backingArtifactName(interaction) {
     return descriptor?.artifacts.find((artifact) => artifact.id === mapping.dataArtifactId)?.filename || null;
   }
   return artifactDescriptor?.filename || null;
+}
+
+function parseToolJobResult(job) {
+  if (job?.result && typeof job.result === 'object') return job.result;
+  try { return JSON.parse(job?.result_json || '{}'); } catch { return {}; }
+}
+
+/**
+ * Recompute a query-backed Selection from immutable Revision + Job Artifact
+ * Truth. Browser-supplied count/hash/sample values are comparison inputs only;
+ * none of them can become persisted Agent context without this exact read.
+ */
+function bindAuthoritativeQuerySelection({ req, project, selection, repository }, dependencies = {}) {
+  if (!selection?.entityIdsTruncated || !selection.filterExpression) {
+    return { selection, authoritative: false };
+  }
+  const reject = (code, message, status = 409) => ({ error: { status, code, message } });
+  if (!selection.revisionId) {
+    return reject('selection_revision_required', 'A query-backed selection requires one persisted Revision.');
+  }
+  const revision = repository.getRevision(selection.revisionId);
+  if (!revision
+      || revision.projectId !== project.id
+      || revision.artifactId !== selection.artifactId
+      || !revision.toolJobId) {
+    return reject('selection_revision_mismatch', 'Selection coordinates do not match persisted Revision truth.');
+  }
+
+  const getToolJob = dependencies.getToolJob || db.getToolJob;
+  const storedJob = getToolJob(revision.toolJobId);
+  if (!storedJob || storedJob.project_id !== project.id || storedJob.id !== revision.toolJobId) {
+    return reject('selection_job_mismatch', 'Selection Revision has no matching source Job truth.');
+  }
+  const job = { ...storedJob, result: parseToolJobResult(storedJob) };
+  const resolveArtifact = dependencies.resolveArtifactPath || resolveArtifactPath;
+  const selected = resolveArtifact({
+    req,
+    job,
+    project,
+    artifactName: revision.artifactId,
+  });
+  if (selected.error) return selected;
+  if (selected.expectedSha256 !== revision.outputHash) {
+    return reject('selection_revision_artifact_drift', 'Revision bytes do not match source Job Artifact Truth.');
+  }
+
+  const interaction = resolveInteractionDescriptor(
+    job.tool_id,
+    selected.artifactRecord,
+    revision.artifactId,
+    { getPluginManifest: dependencies.getPluginManifest },
+  );
+  const mapping = interaction.mapping;
+  const idField = mapping?.idField || mapping?.rowIdField || null;
+  if (!idField || !mapping?.entityType) {
+    return reject('selection_mapping_unavailable', 'Source plugin has no stable entity mapping for this selection.');
+  }
+  if (selection.entityType !== mapping.entityType) {
+    return reject('selection_entity_type_mismatch', 'Selection entity type does not match source plugin truth.');
+  }
+
+  const queryName = backingArtifactName(interaction) || revision.artifactId;
+  const backing = queryName === revision.artifactId
+    ? selected
+    : resolveArtifact({ req, job, project, artifactName: queryName });
+  if (backing.error) return backing;
+
+  let query;
+  try {
+    query = (dependencies.queryResultTable || queryResultTable)({
+      filePath: backing.absolutePath,
+      expectedSha256: backing.expectedSha256,
+      idField,
+      filterExpression: selection.filterExpression,
+      sort: selection.sort,
+      offset: 0,
+      limit: 1,
+    });
+  } catch (error) {
+    return reject(error?.code || 'selection_query_recompute_failed', 'Selection query could not be recomputed from Artifact Truth.');
+  }
+  const afterRead = (dependencies.verifyArtifactRecordBytes || verifyArtifactRecordBytes)(
+    backing.artifactRecord,
+    backing.absolutePath,
+  );
+  if (afterRead.error) return afterRead;
+
+  const evidence = query?.selectionEvidence;
+  const authoritativeSample = Array.isArray(evidence?.sampleEntityIds)
+    ? [...new Set(evidence.sampleEntityIds.map((value) => String(value).trim()).filter(Boolean))]
+    : [];
+  const suppliedSample = [...new Set((selection.entityIds || []).map((value) => String(value).trim()).filter(Boolean))];
+  const sameSample = JSON.stringify([...suppliedSample].sort())
+    === JSON.stringify([...authoritativeSample].sort());
+  if (!evidence
+      || evidence.idField !== idField
+      || !Number.isInteger(evidence.entityIdCount)
+      || evidence.entityIdCount < 1
+      || !/^[a-f0-9]{64}$/.test(String(evidence.entityIdsHash || ''))
+      || selection.entityIdCount !== evidence.entityIdCount
+      || selection.entityIdsHash !== evidence.entityIdsHash
+      || selection.filterHash !== query.filterHash
+      || !sameSample) {
+    return reject(
+      'selection_query_evidence_mismatch',
+      'Browser selection evidence does not match the authoritative Artifact query.',
+    );
+  }
+
+  return {
+    authoritative: true,
+    selection: {
+      ...selection,
+      entityIds: authoritativeSample,
+      entityIdCount: evidence.entityIdCount,
+      entityIdsTruncated: evidence.entityIdCount > authoritativeSample.length,
+      entityIdsHash: evidence.entityIdsHash,
+      filterHash: query.filterHash,
+      filterExpression: query.filterExpression,
+      sort: query.sort,
+      displayState: {
+        ...(selection.displayState || {}),
+        evidenceAuthority: 'server_artifact_truth',
+      },
+    },
+  };
 }
 
 /**
@@ -898,7 +1040,7 @@ module.exports = function registerResultStudioRoutes(app) {
     if (!project) return res.status(404).json({ error: 'project_not_found' });
     if (!canAccessProject(req, project)) return res.status(403).json({ error: 'forbidden' });
 
-    const validated = validateSelectionContext({
+    let validated = validateSelectionContext({
       selectionId: body.selectionId,
       projectId,
       conversationId: body.conversationId,
@@ -919,7 +1061,21 @@ module.exports = function registerResultStudioRoutes(app) {
     }
 
     try {
-      const saved = repo().saveSelection(validated.selection);
+      const repository = repo();
+      const bound = bindAuthoritativeQuerySelection({
+        req,
+        project,
+        selection: validated.selection,
+        repository,
+      });
+      if (bound.error) return sendArtifactResolutionError(res, bound.error);
+      if (bound.authoritative) {
+        validated = validateSelectionContext(bound.selection);
+        if (!validated.ok) {
+          return res.status(409).json({ error: 'selection_authoritative_invalid' });
+        }
+      }
+      const saved = repository.saveSelection(validated.selection);
       return res.json({ selection: saved, summary: summarizeSelection(saved) });
     } catch (error) {
       return res.status(500).json({ error: 'selection_persist_failed', message: error && error.message });
@@ -1380,6 +1536,7 @@ module.exports = function registerResultStudioRoutes(app) {
       const filePath = resolveWorkspaceFileForRevision(context.project.workspace_path, revision);
       return res.json(readTablePage({
         filePath,
+        expectedSha256: revision.outputHash,
         cursor: Number(req.query.cursor || 0),
         limit: Number(req.query.limit || 100),
       }));
@@ -1452,14 +1609,14 @@ module.exports = function registerResultStudioRoutes(app) {
     }
   });
 
-  app.get('/api/result-studio/revisions/:revisionId/artifact', (req, res) => {
+  app.get('/api/result-studio/revisions/:revisionId/artifact', async (req, res) => {
     const revision = repo().getRevision(String(req.params.revisionId || '').trim());
     if (!revision) return res.status(404).json({ error: 'revision_not_found' });
     const context = projectContext(req, revision.projectId, { git: false });
     if (context.error) return res.status(context.error.status).json({ error: context.error.code });
     try {
-      const opened = openVerifiedRevisionArtifact(context.project.workspace_path, revision);
-      const stream = fs.createReadStream(null, { fd: opened.fd, autoClose: true, start: 0 });
+      const opened = await openVerifiedRevisionArtifact(context.project.workspace_path, revision);
+      const stream = createVerifiedSnapshotReadStream(opened);
       stream.once('error', (error) => {
         if (!res.headersSent) res.status(404).json({ error: 'revision_artifact_unavailable' });
         else res.destroy(error);
@@ -1468,7 +1625,7 @@ module.exports = function registerResultStudioRoutes(app) {
         .type(artifactContentTypeHint(opened.artifactPath))
         .set('Cache-Control', 'private, no-store')
         .set('Content-Length', String(opened.stat.size));
-      return stream.pipe(res);
+      return pipeVerifiedSnapshotToResponse(stream, req, res);
     } catch (error) {
       return res.status(404).json({ error: 'revision_artifact_unavailable', message: error.message });
     }
@@ -1477,6 +1634,7 @@ module.exports = function registerResultStudioRoutes(app) {
 
 module.exports._test = {
   baselineFailureDiagnostic,
+  bindAuthoritativeQuerySelection,
   buildContextBoundPreviewBudget,
   findArtifactRecord,
   openVerifiedRevisionArtifact,

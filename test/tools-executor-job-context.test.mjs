@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
+import { EventEmitter, once } from 'node:events';
 import {
   closeSync,
+  fstatSync,
   mkdirSync,
   mkdtempSync,
+  openSync,
   readFileSync,
   realpathSync,
   renameSync,
@@ -11,13 +14,23 @@ import {
   statSync,
   symlinkSync,
   writeFileSync,
+  writeSync,
 } from 'node:fs';
+import { createServer, get as httpGet } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
+const nodeFs = require('node:fs');
+const {
+  SNAPSHOT_BUFFER_BYTES,
+  createVerifiedFileSnapshot,
+  createVerifiedSnapshotReadStream,
+  pipeVerifiedSnapshotToResponse,
+  readVerifiedFileSnapshot,
+} = require('../core/r-server/helpers/verified-file-snapshot');
 const { _test } = require('../core/r-server/helpers/tools-executor');
 
 test('tool executor hydrates persisted params and project context before provenance', () => {
@@ -99,6 +112,26 @@ test('P6 cancelled tool results retain measured resources without claiming unava
   assert.equal(result.resourceUsage, resourceUsage);
   assert.equal(result.resourceUsage.peak.cpuPercent, null);
   assert.equal(result.resourceUsage.peakStatus, 'partial_process_peak_unavailable');
+});
+
+test('P6 failed tool results retain measured resources when provenance is unavailable', () => {
+  const resourceUsage = {
+    peak: { cpuPercent: 75, rssBytes: 8192, outputBytes: 256 },
+    sampling: { status: 'measured', sampleCount: 3 },
+  };
+  const result = _test.buildFailedToolResult({
+    existingResult: { retained: true },
+    jobId: 'job_failed',
+    reason: 'nonzero_exit',
+    exitCode: 2,
+    resourceUsage,
+  });
+  assert.equal(result.retained, true);
+  assert.equal(result.toolJobId, 'job_failed');
+  assert.deepEqual(result.failure, { phase: 'execute', reason: 'nonzero_exit', exitCode: 2 });
+  assert.equal(result.resourceUsage, resourceUsage);
+  assert.equal(result.executionProvenance, undefined);
+  assert.equal(result.provenanceRef, undefined);
 });
 
 test('HTTP tool execution resolves only server-owned manifest or declared artifact result roots', (context) => {
@@ -262,7 +295,7 @@ test('private tool artifact reads bind declared flat files to the current Job ro
   }).error, 'file_not_found', 'a different legacy Job root is rejected');
 });
 
-test('private tool artifact reads stream the verified descriptor and reject a path swap', (context) => {
+test('private tool artifact reads stream the verified descriptor and reject a path swap', async (context) => {
   const root = mkdtempSync(join(tmpdir(), 'biof3-tools-private-fd-'));
   const jobsDir = join(root, 'tool-jobs');
   const outputDir = join(jobsDir, 'job-current', 'output');
@@ -289,18 +322,20 @@ test('private tool artifact reads stream the verified descriptor and reject a pa
   });
   assert.equal(resolved.ok, true);
 
-  const opened = _test.openVerifiedAuthorizedToolResultFile(resolved);
+  const opened = await _test.openVerifiedAuthorizedToolResultFile(resolved);
   assert.equal(opened.ok, true);
 
   // This is the interval that used to exist between realpath and sendFile.
   // The already-open fd remains the approved file even after its path changes.
   renameSync(artifactPath, originalPath);
   symlinkSync(outsidePath, artifactPath);
-  assert.equal(readFileSync(opened.fd, 'utf8'), 'gene,padj\nTP53,0.01\n');
-  closeSync(opened.fd);
+  assert.equal(
+    await readVerifiedFileSnapshot(opened, { encoding: 'utf8' }),
+    'gene,padj\nTP53,0.01\n',
+  );
 
   assert.equal(
-    _test.openVerifiedAuthorizedToolResultFile(resolved).error,
+    (await _test.openVerifiedAuthorizedToolResultFile(resolved)).error,
     'file_not_found',
     'a symlink inserted after authorization cannot be opened for delivery',
   );
@@ -308,13 +343,13 @@ test('private tool artifact reads stream the verified descriptor and reject a pa
   rmSync(artifactPath);
   writeFileSync(artifactPath, 'gene,padj\nOTHER,0.01\n');
   assert.equal(
-    _test.openVerifiedAuthorizedToolResultFile(resolved).error,
+    (await _test.openVerifiedAuthorizedToolResultFile(resolved)).error,
     'file_not_found',
     'a regular file from another Job cannot replace the authorized inode',
   );
 });
 
-test('private tool artifact reads enforce current bytes when a Job has Artifact Truth', (context) => {
+test('private tool artifact reads enforce current bytes when a Job has Artifact Truth', async (context) => {
   const root = mkdtempSync(join(tmpdir(), 'biof3-tools-private-truth-'));
   const jobsDir = join(root, 'tool-jobs');
   const outputDir = join(jobsDir, 'job-current', 'output');
@@ -337,16 +372,16 @@ test('private tool artifact reads enforce current bytes when a Job has Artifact 
   const resolved = _test.resolveAuthorizedToolResultFile({ job, filename: 'verified.csv', jobsDir });
   assert.equal(resolved.ok, true);
   assert.equal(resolved.expectedSha256, expectedSha256);
-  const opened = _test.openVerifiedAuthorizedToolResultFile(resolved);
+  const opened = await _test.openVerifiedAuthorizedToolResultFile(resolved);
   assert.equal(opened.ok, true);
   assert.equal(opened.actualSha256, expectedSha256);
-  assert.equal(readFileSync(opened.fd, 'utf8'), original);
-  closeSync(opened.fd);
+  writeFileSync(artifactPath, 'gene,padj\nMUTATED_AFTER_HASH,1\n');
+  assert.equal(await readVerifiedFileSnapshot(opened, { encoding: 'utf8' }), original);
 
   writeFileSync(artifactPath, 'gene,padj\nOTHER,0.99\n');
   const drifted = _test.resolveAuthorizedToolResultFile({ job, filename: 'verified.csv', jobsDir });
   assert.equal(drifted.ok, true);
-  assert.equal(_test.openVerifiedAuthorizedToolResultFile(drifted).error, 'artifact_truth_drift');
+  assert.equal((await _test.openVerifiedAuthorizedToolResultFile(drifted)).error, 'artifact_truth_drift');
 
   const unhashed = {
     ...job,
@@ -360,4 +395,208 @@ test('private tool artifact reads enforce current bytes when a Job has Artifact 
     _test.resolveAuthorizedToolResultFile({ job: unhashed, filename: 'verified.csv', jobsDir }).error,
     'artifact_truth_unavailable',
   );
+});
+
+test('verified snapshot delivery rejects a retained writable fd before sending a corrupt block', async (context) => {
+  const root = mkdtempSync(join(tmpdir(), 'biof3-tools-snapshot-namespace-'));
+  const sourcePath = join(root, 'source.csv');
+  const original = Buffer.alloc(SNAPSHOT_BUFFER_BYTES * 2 + 37);
+  original.fill(0x41, 0, SNAPSHOT_BUFFER_BYTES);
+  original.fill(0x42, SNAPSHOT_BUFFER_BYTES, SNAPSHOT_BUFFER_BYTES * 2);
+  original.fill(0x43, SNAPSHOT_BUFFER_BYTES * 2);
+  writeFileSync(sourcePath, original);
+  context.after(() => rmSync(root, { recursive: true, force: true }));
+
+  const sourceStat = statSync(sourcePath);
+  const expectedSha256 = createHash('sha256').update(original).digest('hex');
+  const originalUnlink = nodeFs.promises.unlink;
+  let interceptedSnapshotUnlink = 0;
+  const retainedWriterFds = [];
+  nodeFs.promises.unlink = async (target) => {
+    if (String(target).startsWith(`${realpathSync(root)}/biof3-artifact-stream-`)
+        && String(target).endsWith('/artifact')) {
+      interceptedSnapshotUnlink += 1;
+      // Model a same-UID process that opens the pathname before unlink and
+      // deliberately retains its writable descriptor after the name is gone.
+      retainedWriterFds.push(openSync(target, 'r+'));
+    }
+    return originalUnlink(target);
+  };
+
+  const createSnapshot = () => createVerifiedFileSnapshot(openSync(sourcePath, 'r'), {
+    expectedIdentity: {
+      dev: sourceStat.dev,
+      ino: sourceStat.ino,
+      size: sourceStat.size,
+      mtimeMs: sourceStat.mtimeMs,
+      ctimeMs: sourceStat.ctimeMs,
+    },
+    expectedSha256,
+    tempRoot: root,
+  });
+
+  let streamSnapshot = null;
+  let wholeReadSnapshot = null;
+  try {
+    streamSnapshot = await createSnapshot();
+    assert.equal(streamSnapshot.sha256, expectedSha256);
+    assert.equal(streamSnapshot.verification.blockHashes.length, 3);
+    assert.equal(retainedWriterFds.length, 1);
+
+    const delivered = [];
+    const stream = createVerifiedSnapshotReadStream(streamSnapshot);
+    const streamError = await new Promise((resolve, reject) => {
+      stream.on('data', (chunk) => {
+        delivered.push(Buffer.from(chunk));
+        if (delivered.length !== 1) return;
+        writeSync(
+          retainedWriterFds[0],
+          Buffer.alloc(64, 0x58),
+          0,
+          64,
+          SNAPSHOT_BUFFER_BYTES,
+        );
+      });
+      stream.once('error', resolve);
+      stream.once('end', () => reject(new Error('corrupt retained-fd stream unexpectedly completed')));
+    });
+    assert.equal(streamError.code, 'verified_snapshot_delivery_hash_mismatch');
+    assert.equal(delivered.length, 1, 'the corrupt future block must never be pushed');
+    assert.deepEqual(delivered[0], original.subarray(0, SNAPSHOT_BUFFER_BYTES));
+
+    wholeReadSnapshot = await createSnapshot();
+    assert.equal(retainedWriterFds.length, 2);
+    writeSync(retainedWriterFds[1], Buffer.alloc(64, 0x59), 0, 64, 0);
+    await assert.rejects(
+      () => readVerifiedFileSnapshot(wholeReadSnapshot),
+      (error) => error?.code === 'verified_snapshot_delivery_hash_mismatch',
+    );
+    assert.equal(interceptedSnapshotUnlink, 2);
+  } finally {
+    nodeFs.promises.unlink = originalUnlink;
+    for (const fd of retainedWriterFds) {
+      try { closeSync(fd); } catch {}
+    }
+    if (streamSnapshot?.fd != null) closeSync(streamSnapshot.fd);
+    if (wholeReadSnapshot?.fd != null) closeSync(wholeReadSnapshot.fd);
+  }
+});
+
+test('aborted HTTP snapshot delivery destroys its source stream and closes the anonymous fd', { timeout: 5000 }, async () => {
+  const root = mkdtempSync(join(tmpdir(), 'biof3-tools-snapshot-abort-'));
+  const sourcePath = join(root, 'large-artifact.bin');
+  const original = Buffer.alloc(SNAPSHOT_BUFFER_BYTES * 16, 0x5a);
+  writeFileSync(sourcePath, original);
+  const sourceStat = statSync(sourcePath);
+  let snapshot = await createVerifiedFileSnapshot(openSync(sourcePath, 'r'), {
+    expectedIdentity: {
+      dev: sourceStat.dev,
+      ino: sourceStat.ino,
+      size: sourceStat.size,
+      mtimeMs: sourceStat.mtimeMs,
+      ctimeMs: sourceStat.ctimeMs,
+    },
+    expectedSha256: createHash('sha256').update(original).digest('hex'),
+    tempRoot: root,
+  });
+  const snapshotFd = snapshot.fd;
+  let responseFinished = false;
+  let serverStream = null;
+  let resolveStreamClosed;
+  const streamClosed = new Promise((resolve) => { resolveStreamClosed = resolve; });
+  const server = createServer((req, res) => {
+    serverStream = createVerifiedSnapshotReadStream(snapshot);
+    serverStream.once('close', resolveStreamClosed);
+    serverStream.once('error', () => {});
+    res.once('finish', () => { responseFinished = true; });
+    res.writeHead(200, {
+      'Content-Type': 'application/octet-stream',
+      'Content-Length': String(original.length),
+    });
+    pipeVerifiedSnapshotToResponse(serverStream, req, res);
+  });
+
+  try {
+    server.listen(0, '127.0.0.1');
+    await once(server, 'listening');
+    const address = server.address();
+    const response = await new Promise((resolve, reject) => {
+      const request = httpGet({ host: '127.0.0.1', port: address.port, path: '/' }, resolve);
+      request.once('error', reject);
+    });
+    await new Promise((resolve, reject) => {
+      response.once('data', () => {
+        response.removeListener('error', reject);
+        response.on('error', () => {});
+        response.destroy();
+        resolve();
+      });
+      response.once('error', reject);
+    });
+    await streamClosed;
+
+    assert.equal(responseFinished, false, 'client abort must not be mistaken for normal finish');
+    assert.equal(serverStream.destroyed, true);
+    assert.equal(snapshot.fd, null);
+    assert.throws(
+      () => fstatSync(snapshotFd),
+      (error) => error?.code === 'EBADF',
+      'the anonymous snapshot descriptor must be closed on abort',
+    );
+    snapshot = null;
+  } finally {
+    if (snapshot?.fd != null) closeSync(snapshot.fd);
+    server.closeAllConnections?.();
+    if (server.listening) {
+      await new Promise((resolve) => server.close(resolve));
+    }
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('normal HTTP finish removes abort bindings without destroying the source again', () => {
+  const req = new EventEmitter();
+  const res = new EventEmitter();
+  res.writableFinished = false;
+  res.on('error', () => {});
+  const stream = new EventEmitter();
+  stream.destroyed = false;
+  let destroyCalls = 0;
+  stream.destroy = () => {
+    destroyCalls += 1;
+    stream.destroyed = true;
+  };
+  stream.pipe = (destination) => destination;
+
+  assert.equal(pipeVerifiedSnapshotToResponse(stream, req, res), res);
+  res.writableFinished = true;
+  res.emit('finish');
+  res.emit('close');
+  res.emit('aborted');
+  res.emit('error', new Error('late response error'));
+  req.emit('aborted');
+
+  assert.equal(destroyCalls, 0);
+  assert.equal(stream.listenerCount('close'), 0);
+
+  const alreadyAbortedReq = new EventEmitter();
+  alreadyAbortedReq.aborted = true;
+  const alreadyClosedRes = new EventEmitter();
+  alreadyClosedRes.destroyed = true;
+  alreadyClosedRes.writableFinished = false;
+  const lateStream = new EventEmitter();
+  lateStream.destroyed = false;
+  let latePipeCalls = 0;
+  let lateDestroyCalls = 0;
+  lateStream.pipe = () => { latePipeCalls += 1; };
+  lateStream.destroy = () => {
+    lateDestroyCalls += 1;
+    lateStream.destroyed = true;
+  };
+  assert.equal(
+    pipeVerifiedSnapshotToResponse(lateStream, alreadyAbortedReq, alreadyClosedRes),
+    alreadyClosedRes,
+  );
+  assert.equal(latePipeCalls, 0, 'a response aborted during snapshot creation must never be piped');
+  assert.equal(lateDestroyCalls, 1);
 });

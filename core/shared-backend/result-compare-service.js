@@ -5,9 +5,11 @@ const fs = require('fs');
 const path = require('path');
 const { isPathContained } = require('./project-run-layout');
 const { stableStringify } = require('./scientific-task-spec');
-const { saveResultEditCheckpoint } = require('./result-changeset-service');
+const { buildResultEditCheckpoint } = require('./result-changeset-service');
 const { compareScientificTables } = require('./result-scientific-compare');
 const { buildResultStudioTaskResourceSummary } = require('./result-studio-resource-summary');
+const { executeDurableRefTransaction } = require('./result-ref-transaction');
+const { removePrivatePathSync } = require('./result-studio-private-path');
 const {
   validateRestoreWorkflowScope,
   rebindWorkflowGraphForEquivalentRestore,
@@ -413,34 +415,53 @@ function verifyRevisionForAdoption({ revision, parent, workspaceRoot, adapter, g
   }
 }
 
-function updateCurrentRefs({ repository, adapter, revisions, targetCommits }) {
-  const updated = [];
-  try {
-    for (const revision of revisions) {
-      const ref = `refs/heads/biof3/current/${revision.artifactFamilyId}`;
-      const existing = adapter.revParse(ref);
-      const expectedCommit = targetCommits.expected(revision);
-      if (existing && expectedCommit && existing !== expectedCommit) {
-        throw new ResultCompareError('current_git_ref_stale', 'Current Git ref does not match the persisted Revision.', { ref });
-      }
-      const previous = existing || ZERO_OID;
-      const next = targetCommits.next(revision);
-      adapter.updateRefCas({ ref, newCommit: next, expectedOld: previous });
-      updated.push({ ref, previous, next });
+function planCurrentRefUpdates({ adapter, revisions, expectedCommit, nextCommit }) {
+  return revisions.map((revision) => {
+    const ref = `refs/heads/biof3/current/${revision.artifactFamilyId}`;
+    const existing = adapter.revParse(ref);
+    const expected = expectedCommit(revision);
+    if (existing && expected && existing !== expected) {
+      throw new ResultCompareError(
+        'current_git_ref_stale',
+        'Current Git ref does not match the persisted Revision.',
+        { ref },
+      );
     }
-    return updated;
-  } catch (error) {
-    for (const entry of updated.reverse()) {
-      try {
-        if (entry.previous === ZERO_OID) {
-          adapter.deleteRefCas?.({ ref: entry.ref, expectedOld: entry.next });
-        } else {
-          adapter.updateRefCas({ ref: entry.ref, newCommit: entry.previous, expectedOld: entry.next });
-        }
-      } catch { /* recovery audit will surface ref drift */ }
+    const newOid = nextCommit(revision);
+    if (!newOid) {
+      throw new ResultCompareError('current_git_ref_target_missing', 'Target Revision has no source commit.');
     }
-    throw error;
-  }
+    return { ref, expectedOld: existing || ZERO_OID, newOid };
+  });
+}
+
+function currentRevisionIdsAfter({ repository, projectId, targetRevisions }) {
+  const affectedFamilies = new Set(targetRevisions.map((revision) => revision.artifactFamilyId));
+  return [
+    ...repository.listCurrentRevisions(projectId)
+      .filter((revision) => !affectedFamilies.has(revision.artifactFamilyId))
+      .map((revision) => revision.revisionId),
+    ...targetRevisions.map((revision) => revision.revisionId),
+  ].sort();
+}
+
+function durableTransitionCheckpoint({
+  repository,
+  changeSet,
+  targetStatus,
+  targetCurrentRevisionIds,
+}) {
+  return buildResultEditCheckpoint({
+    repository,
+    projectId: changeSet.projectId,
+    conversationId: changeSet.conversationId,
+    changeSet,
+    candidateCommit: changeSet.candidateCommit,
+    changeSetStatus: targetStatus,
+    currentRevisionIds: targetCurrentRevisionIds,
+    stage: targetStatus,
+    recovery: null,
+  });
 }
 
 function sameStringSet(left, right) {
@@ -528,45 +549,44 @@ function adoptResultChangeSet(input = {}, dependencies = {}) {
     });
     parents.set(revision.revisionId, parent);
   }
-  let refUpdates = [];
-  try {
-    const adopted = repository.adoptChangeSet({
-      changeSetId: changeSet.changeSetId,
-      candidateCommit: changeSet.candidateCommit,
-      beforeCommit: ({ revisions: candidateRevisions }) => {
-        refUpdates = updateCurrentRefs({
-          repository,
-          adapter,
-          revisions: candidateRevisions,
-          targetCommits: {
-            expected: (revision) => parents.get(revision.revisionId)?.sourceCommit || null,
-            next: () => changeSet.candidateCommit,
-          },
-        });
-        // Checkpoint is part of the same SQLite transaction as status/current.
-        // If it fails, better-sqlite3 rolls back and the outer catch restores
-        // the Git refs changed above.
-        saveResultEditCheckpoint({
-          repository,
-          projectId: changeSet.projectId,
-          conversationId: changeSet.conversationId,
-          changeSetId: changeSet.changeSetId,
-          candidateCommit: changeSet.candidateCommit,
-          stage: 'adopted',
-        });
-      },
-    });
-    const currentRevisions = revisions.map((revision) => repository.getRevision(revision.revisionId));
-    return { ...adopted, currentRevisions };
-  } catch (error) {
-    for (const entry of refUpdates.reverse()) {
-      try {
-        if (entry.previous === ZERO_OID) adapter.deleteRefCas?.({ ref: entry.ref, expectedOld: entry.next });
-        else adapter.updateRefCas({ ref: entry.ref, newCommit: entry.previous, expectedOld: entry.next });
-      } catch { /* fail closed; reconciliation can repair a ref-only residue */ }
-    }
-    throw error;
-  }
+  const refUpdates = planCurrentRefUpdates({
+    adapter,
+    revisions,
+    expectedCommit: (revision) => parents.get(revision.revisionId)?.sourceCommit || null,
+    nextCommit: () => changeSet.candidateCommit,
+  });
+  const targetCurrentRevisionIds = currentRevisionIdsAfter({
+    repository,
+    projectId: input.projectId,
+    targetRevisions: revisions,
+  });
+  executeDurableRefTransaction({
+    operationId: randomId('rft'),
+    projectId: changeSet.projectId,
+    changeSetId: changeSet.changeSetId,
+    operationKind: 'adopt',
+    sourceStatus: 'preview_ready',
+    targetStatus: 'adopted',
+    refUpdates,
+    targetRevisionIds: revisions.map((revision) => revision.revisionId),
+    checkpoint: durableTransitionCheckpoint({
+      repository,
+      changeSet,
+      targetStatus: 'adopted',
+      targetCurrentRevisionIds,
+    }),
+  }, {
+    repository,
+    adapter,
+    afterRefsApplied: dependencies.afterRefsApplied,
+  });
+  const currentRevisions = revisions.map((revision) => repository.getRevision(revision.revisionId));
+  return {
+    changeSet: repository.getChangeSet(changeSet.changeSetId),
+    adoptedRevisionIds: revisions.map((revision) => revision.revisionId),
+    idempotent: false,
+    currentRevisions,
+  };
 }
 
 function revertResultChangeSet(input = {}, dependencies = {}) {
@@ -580,80 +600,114 @@ function revertResultChangeSet(input = {}, dependencies = {}) {
   }
   if (changeSet.status === 'reverted') return repository.revertChangeSet({ changeSetId: changeSet.changeSetId, reason: input.reason || null });
   const revisions = repository.listRevisionsByChangeSet(changeSet.changeSetId);
+  let restoredRevisions = [];
   if (changeSet.status === 'adopted') {
     for (const revision of revisions) {
       const current = repository.getCurrentRevision(revision.artifactFamilyId, input.projectId);
       if (!current || current.revisionId !== revision.revisionId) {
         throw new ResultCompareError('revert_not_current', 'A newer Revision is current; restore history instead of reverting this ChangeSet.');
       }
-    }
-  }
-  let refUpdates = [];
-  try {
-    const reverted = repository.revertChangeSet({
-      changeSetId: changeSet.changeSetId,
-      reason: input.reason || 'user_reverted',
-      beforeCommit: ({ revisions: revertedRevisions, restoredRevisions }) => {
-        if (changeSet.status !== 'adopted') {
-          const existing = adapter.revParse(changeSet.workingBranchRef);
-          if (existing && changeSet.candidateCommit && existing !== changeSet.candidateCommit) {
-            throw new ResultCompareError('candidate_git_ref_mismatch', 'Candidate Git ref changed before discard.');
-          }
-          if (existing) {
-            adapter.deleteRefCas({ ref: changeSet.workingBranchRef, expectedOld: existing });
-            refUpdates.push({ ref: changeSet.workingBranchRef, previous: existing, next: ZERO_OID, deleted: true });
-          }
-          saveResultEditCheckpoint({
-            repository,
-            projectId: changeSet.projectId,
-            conversationId: changeSet.conversationId,
-            changeSetId: changeSet.changeSetId,
-            candidateCommit: changeSet.candidateCommit,
-            stage: 'reverted',
-          });
-          return;
-        }
-        const restoredByFamily = new Map(restoredRevisions.map((revision) => [revision.artifactFamilyId, revision]));
-        refUpdates = updateCurrentRefs({
-          repository,
-          adapter,
-          revisions: revertedRevisions,
-          targetCommits: {
-            expected: () => changeSet.candidateCommit,
-            next: (revision) => {
-              const restored = restoredByFamily.get(revision.artifactFamilyId);
-              if (!restored?.sourceCommit) throw new ResultCompareError('restore_commit_missing', 'Previous Revision has no source commit.');
-              return restored.sourceCommit;
-            },
-          },
-        });
-        saveResultEditCheckpoint({
-          repository,
-          projectId: changeSet.projectId,
-          conversationId: changeSet.conversationId,
-          changeSetId: changeSet.changeSetId,
-          candidateCommit: changeSet.candidateCommit,
-          stage: 'reverted',
-        });
-      },
-    });
-    if (changeSet.status !== 'adopted' && input.workspaceRoot) {
-      const revisionRoot = path.join(path.resolve(input.workspaceRoot), '.biof3', 'revision');
-      const staging = path.join(revisionRoot, changeSet.changeSetId);
-      if (isPathContained(revisionRoot, staging)) {
-        try { fs.rmSync(staging, { recursive: true, force: true }); } catch { /* RS8 GC can remove a residue */ }
+      const sameFamilyParents = revision.parentRevisionIds
+        .map((revisionId) => repository.getRevision(revisionId))
+        .filter((parent) => parent
+          && parent.projectId === revision.projectId
+          && parent.artifactFamilyId === revision.artifactFamilyId
+          && parent.validationStatus !== 'blocked');
+      if (sameFamilyParents.length !== 1 || !sameFamilyParents[0].sourceCommit) {
+        throw new ResultCompareError(
+          'revert_parent_unavailable',
+          'Revert requires exactly one valid same-family parent with a source commit.',
+          { revisionId: revision.revisionId },
+        );
       }
+      restoredRevisions.push(sameFamilyParents[0]);
     }
-    return reverted;
-  } catch (error) {
-    for (const entry of refUpdates.reverse()) {
-      try {
-        if (entry.deleted) adapter.updateRefCas({ ref: entry.ref, newCommit: entry.previous, expectedOld: ZERO_OID });
-        else adapter.updateRefCas({ ref: entry.ref, newCommit: entry.previous, expectedOld: entry.next });
-      } catch { /* audited later */ }
-    }
-    throw error;
   }
+  const targetCurrentRevisionIds = changeSet.status === 'adopted'
+    ? currentRevisionIdsAfter({
+      repository,
+      projectId: input.projectId,
+      targetRevisions: restoredRevisions,
+    })
+    : repository.listCurrentRevisions(input.projectId).map((revision) => revision.revisionId).sort();
+  const checkpoint = durableTransitionCheckpoint({
+    repository,
+    changeSet,
+    targetStatus: 'reverted',
+    targetCurrentRevisionIds,
+  });
+  if (changeSet.status === 'adopted') {
+    const restoredByFamily = new Map(
+      restoredRevisions.map((revision) => [revision.artifactFamilyId, revision]),
+    );
+    executeDurableRefTransaction({
+      operationId: randomId('rft'),
+      projectId: changeSet.projectId,
+      changeSetId: changeSet.changeSetId,
+      operationKind: 'revert_adopted',
+      sourceStatus: 'adopted',
+      targetStatus: 'reverted',
+      refUpdates: planCurrentRefUpdates({
+        adapter,
+        revisions,
+        expectedCommit: () => changeSet.candidateCommit,
+        nextCommit: (revision) => restoredByFamily.get(revision.artifactFamilyId)?.sourceCommit || null,
+      }),
+      targetRevisionIds: restoredRevisions.map((revision) => revision.revisionId),
+      checkpoint,
+      statusReason: input.reason || 'user_reverted',
+    }, {
+      repository,
+      adapter,
+      afterRefsApplied: dependencies.afterRefsApplied,
+    });
+  } else {
+    const existing = adapter.revParse(changeSet.workingBranchRef);
+    if (existing && changeSet.candidateCommit && existing !== changeSet.candidateCommit) {
+      throw new ResultCompareError('candidate_git_ref_mismatch', 'Candidate Git ref changed before discard.');
+    }
+    if (existing) {
+      executeDurableRefTransaction({
+        operationId: randomId('rft'),
+        projectId: changeSet.projectId,
+        changeSetId: changeSet.changeSetId,
+        operationKind: 'discard_preview',
+        sourceStatus: changeSet.status,
+        targetStatus: 'reverted',
+        refUpdates: [{ ref: changeSet.workingBranchRef, expectedOld: existing, newOid: ZERO_OID }],
+        targetRevisionIds: [],
+        checkpoint,
+        statusReason: input.reason || 'user_reverted',
+      }, {
+        repository,
+        adapter,
+        afterRefsApplied: dependencies.afterRefsApplied,
+      });
+    } else {
+      repository.transitionChangeSetWithCheckpoint({
+        transition: {
+          changeSetId: changeSet.changeSetId,
+          to: 'reverted',
+          reason: input.reason || 'user_reverted',
+        },
+        checkpoint,
+      });
+    }
+  }
+  if (changeSet.status !== 'adopted' && input.workspaceRoot) {
+    try {
+      removePrivatePathSync(
+        input.workspaceRoot,
+        ['.biof3', 'revision', changeSet.changeSetId],
+        { recursive: true, force: true, kind: 'directory' },
+      );
+    } catch { /* unsafe or changed staging is preserved for RS8 lifecycle inspection */ }
+  }
+  return {
+    changeSet: repository.getChangeSet(changeSet.changeSetId),
+    restoredRevisionIds: restoredRevisions.map((revision) => revision.revisionId),
+    idempotent: false,
+  };
 }
 
 function restoreArtifactRevision(input = {}, dependencies = {}) {

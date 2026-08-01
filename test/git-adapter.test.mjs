@@ -342,6 +342,46 @@ test('RS5 virtual ref update fails closed on a concurrent ref change', { skip: !
   assert.equal(adapter.revParse(ref), first.commit);
 });
 
+test('P6 atomic ref cohorts never expose a partially updated family set', { skip: !gitReady }, (context) => {
+  const root = makeWorkspace(context);
+  const adapter = bindProjectRepository({ workspaceRoot: root, projectId: 'project_p6_ref_cohort' }).adapter;
+  const first = adapter.commitVirtualFiles({
+    ref: 'refs/heads/biof3/main',
+    expectedOld: '0'.repeat(40),
+    message: 'P6 ref cohort base',
+    files: [{ path: 'analysis/scripts/ref-cohort/base.R', content: 'version <- 1\n' }],
+  });
+  const second = adapter.commitVirtualFiles({
+    parentCommit: first.commit,
+    ref: 'refs/heads/biof3/changeset/ref-cohort',
+    expectedOld: '0'.repeat(40),
+    message: 'P6 ref cohort candidate',
+    files: [{ path: 'analysis/scripts/ref-cohort/candidate.R', content: 'version <- 2\n' }],
+  });
+  const familyA = 'refs/heads/biof3/current/family-a';
+  const familyB = 'refs/heads/biof3/current/family-b';
+  adapter.updateRefsCas({ updates: [
+    { ref: familyA, expectedOld: '0'.repeat(40), newOid: first.commit },
+    { ref: familyB, expectedOld: '0'.repeat(40), newOid: first.commit },
+  ] });
+  adapter.updateRefsCas({ updates: [
+    { ref: familyA, expectedOld: first.commit, newOid: second.commit },
+    { ref: familyB, expectedOld: first.commit, newOid: second.commit },
+  ] });
+  assert.equal(adapter.revParse(familyA), second.commit);
+  assert.equal(adapter.revParse(familyB), second.commit);
+
+  assert.throws(
+    () => adapter.updateRefsCas({ updates: [
+      { ref: familyA, expectedOld: second.commit, newOid: first.commit },
+      { ref: familyB, expectedOld: first.commit, newOid: second.commit },
+    ] }),
+    (error) => error instanceof GitAdapterError && error.code === 'git_ref_transaction_conflict',
+  );
+  assert.equal(adapter.revParse(familyA), second.commit);
+  assert.equal(adapter.revParse(familyB), second.commit);
+});
+
 // ---------------------------------------------------------------------------
 // 4. 既有用户仓库：clean 接入、dirty 阻断、WIP 不受影响
 // ---------------------------------------------------------------------------

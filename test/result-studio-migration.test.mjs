@@ -41,11 +41,16 @@ const {
   RESULT_WORKFLOW_GRAPH_MIGRATION_VERSION,
   buildWorkflowGraphMigrationSql,
 } = require('../core/shared-backend/result-workflow-graph');
+const {
+  RESULT_REF_TRANSACTION_MIGRATION_VERSION,
+  buildResultRefTransactionMigrationSql,
+} = require('../core/shared-backend/result-ref-transaction-schema');
 
 const REAL_MIGRATIONS_DIR = join(REPO_ROOT, 'src', 'migrations');
 const MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '001_result_studio.sql');
 const WORKFLOW_GRAPH_MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '002_result_workflow_graph.sql');
-const LATEST_MIGRATION_VERSION = RESULT_WORKFLOW_GRAPH_MIGRATION_VERSION;
+const REF_TRANSACTION_MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '003_result_ref_transactions.sql');
+const LATEST_MIGRATION_VERSION = RESULT_REF_TRANSACTION_MIGRATION_VERSION;
 
 function tempDir(context, prefix) {
   const root = mkdtempSync(join(tmpdir(), prefix));
@@ -107,6 +112,19 @@ test('P5 workflow graph migration is generated from its schema module and is add
   assert.equal(/\bresult_workflow_graphs\b/i.test(sql), true);
 });
 
+test('P6 ref transaction migration is generated from its schema module and is additive', () => {
+  assert.equal(readFileSync(REF_TRANSACTION_MIGRATION_FILE, 'utf8'), buildResultRefTransactionMigrationSql());
+  const sql = readFileSync(REF_TRANSACTION_MIGRATION_FILE, 'utf8')
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('--'))
+    .join('\n');
+  assert.equal(/^\s*BEGIN\b/im.test(sql), false);
+  assert.equal(/^\s*COMMIT\b/im.test(sql), false);
+  assert.equal(/\bDROP\s+TABLE\b/i.test(sql), false);
+  assert.equal(/\bALTER\s+TABLE\b/i.test(sql), false);
+  assert.equal(/\bresult_ref_transactions\b/i.test(sql), true);
+});
+
 // ---------------------------------------------------------------------------
 // 2-4. 真实 runner 行为
 // ---------------------------------------------------------------------------
@@ -124,12 +142,17 @@ test('RS2 runner installs the schema into an empty database', async (context) =>
     assert.equal(names.includes(table), true, `missing table ${table}`);
   }
   assert.equal(names.includes('result_workflow_graphs'), true);
+  assert.equal(names.includes('result_ref_transactions'), true);
 
   const db = new Database(dbPath, { readonly: true });
   context.after(() => { try { db.close(); } catch { /* noop */ } });
   assert.equal(inspectResultStudioSchema(db).complete, true);
   const applied = db.prepare('SELECT version FROM schema_migrations ORDER BY version').all().map((r) => r.version);
-  assert.deepEqual(applied, [RESULT_STUDIO_MIGRATION_VERSION, RESULT_WORKFLOW_GRAPH_MIGRATION_VERSION]);
+  assert.deepEqual(applied, [
+    RESULT_STUDIO_MIGRATION_VERSION,
+    RESULT_WORKFLOW_GRAPH_MIGRATION_VERSION,
+    RESULT_REF_TRANSACTION_MIGRATION_VERSION,
+  ]);
 });
 
 test('RS2 runner upgrades an existing database without touching its tables', async (context) => {
@@ -151,6 +174,7 @@ test('RS2 runner upgrades an existing database without touching its tables', asy
   assert.equal(db.prepare('SELECT status FROM tool_jobs WHERE id = ?').get('job_1').status, 'completed');
   // RS 表已就位
   assert.equal(inspectResultStudioSchema(db).complete, true);
+  assert.equal(tableNames(dbPath).includes('result_ref_transactions'), true);
 });
 
 test('RS2 runner is idempotent across repeated startups', async (context) => {
@@ -168,7 +192,7 @@ test('RS2 runner is idempotent across repeated startups', async (context) => {
   context.after(() => { try { db.close(); } catch { /* noop */ } });
   // 版本只记录一次，不重复插入
   const rows = db.prepare('SELECT version FROM schema_migrations').all();
-  assert.equal(rows.length, 2);
+  assert.equal(rows.length, 3);
 });
 
 // ---------------------------------------------------------------------------

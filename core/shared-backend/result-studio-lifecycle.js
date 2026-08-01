@@ -10,6 +10,16 @@ const {
   isResultStudioRuntimeLease,
   isResultStudioRuntimeLeaseOwnerAlive,
 } = require('./result-studio-runtime-lease');
+const { recoverActiveRefTransactions } = require('./result-ref-transaction');
+const {
+  ResultStudioPrivatePathError,
+  resolveWorkspaceAnchor,
+  ensurePrivateDirectory,
+  inspectPrivateDirectory,
+  inspectPrivateEntry,
+  renamePrivateEntrySync,
+  removePrivatePathSync,
+} = require('./result-studio-private-path');
 
 const RESULT_STUDIO_LIFECYCLE_VERSION = 1;
 const ZERO_OID = '0'.repeat(40);
@@ -33,8 +43,32 @@ class ResultStudioLifecycleError extends Error {
   }
 }
 
+function guardPrivatePath(operation) {
+  try {
+    return operation();
+  } catch (error) {
+    if (error instanceof ResultStudioPrivatePathError) {
+      throw new ResultStudioLifecycleError(error.code, error.message, error.detail);
+    }
+    throw error;
+  }
+}
+
 function sha256(value) {
   return crypto.createHash('sha256').update(value).digest('hex');
+}
+
+function hashFileDescriptor(handle, io = fs) {
+  const hash = crypto.createHash('sha256');
+  const buffer = Buffer.alloc(1024 * 1024);
+  let position = 0;
+  while (true) {
+    const read = io.readSync(handle, buffer, 0, buffer.length, position);
+    if (read <= 0) break;
+    hash.update(buffer.subarray(0, read));
+    position += read;
+  }
+  return hash.digest('hex');
 }
 
 function expectedGcChangeSetRef(changeSetId) {
@@ -45,19 +79,12 @@ function expectedGcChangeSetRef(changeSetId) {
 }
 
 function hashFile(filePath) {
-  const hash = crypto.createHash('sha256');
   const handle = fs.openSync(filePath, 'r');
   try {
-    const buffer = Buffer.alloc(1024 * 1024);
-    let read;
-    do {
-      read = fs.readSync(handle, buffer, 0, buffer.length, null);
-      if (read > 0) hash.update(buffer.subarray(0, read));
-    } while (read > 0);
+    return hashFileDescriptor(handle);
   } finally {
     fs.closeSync(handle);
   }
-  return hash.digest('hex');
 }
 
 function resolveWorkspaceFile(workspaceRoot, relativePath, { mustExist = true } = {}) {
@@ -322,6 +349,9 @@ function inspectResultStudioWorkspace({
     })
     : { status: checkpoint ? 'checkpoint_corrupt' : 'unavailable', drift: [], recoverable: false };
   const revisionIntegrity = inspectRevisionIntegrity({ repository, adapter, workspaceRoot, projectId });
+  const activeRefTransactions = typeof repository.listActiveRefTransactions === 'function'
+    ? repository.listActiveRefTransactions(projectId)
+    : [];
   const checkpointByChangeSet = new Map();
   for (const item of repository.listProjectCheckpoints(projectId)) {
     if (item.changeSetId && !checkpointByChangeSet.has(item.changeSetId)) {
@@ -451,7 +481,14 @@ function inspectResultStudioWorkspace({
     activeOperations: projectPending(activeOperations),
     pendingDecisions: projectPending(pendingDecisions),
     pendingIssues: uniquePendingIssues,
-    status: blocked ? 'blocked' : interrupted.length > 0 || revisionIntegrity.issues.some((issue) => issue.recoverable) ? 'recovery_available' : 'ready',
+    refTransitions: { activeCount: activeRefTransactions.length },
+    status: blocked
+      ? 'blocked'
+      : interrupted.length > 0
+        || revisionIntegrity.issues.some((issue) => issue.recoverable)
+        || activeRefTransactions.length > 0
+        ? 'recovery_available'
+        : 'ready',
   };
   Object.defineProperty(report, INTERNAL_RECOVERY_ITEMS, { value: pending });
   return report;
@@ -500,9 +537,23 @@ function recoverResultStudioWorkspace(input = {}, dependencies = {}) {
     : getResultStudioRuntimeLease();
   const recoveryInput = { ...input, runtimeLease };
   const before = inspectResultStudioWorkspace({ ...recoveryInput, repository, adapter, getToolJob });
-  if (before.status === 'blocked') return { recovered: false, repaired: [], before, after: before };
-  const repaired = [];
-  const interruptedItems = (before[INTERNAL_RECOVERY_ITEMS] || []).filter((item) => (
+  const refRecovery = typeof repository.listActiveRefTransactions === 'function'
+    ? recoverActiveRefTransactions({ projectId: input.projectId, runtimeLease }, { repository, adapter })
+    : { repaired: [], blocked: [] };
+  const repaired = [...refRecovery.repaired];
+  const working = refRecovery.repaired.length > 0 || refRecovery.blocked.length > 0
+    ? inspectResultStudioWorkspace({ ...recoveryInput, repository, adapter, getToolJob })
+    : before;
+  if (refRecovery.blocked.length > 0 || working.status === 'blocked') {
+    return {
+      recovered: repaired.length > 0,
+      repaired,
+      refTransitionIssues: refRecovery.blocked.map((issue) => ({ kind: issue.kind })),
+      before,
+      after: working,
+    };
+  }
+  const interruptedItems = (working[INTERNAL_RECOVERY_ITEMS] || []).filter((item) => (
     item.status !== 'preview_ready' && item.staleRuntime
   ) || item.previewNeedsCheckpointReconciliation);
 
@@ -613,7 +664,13 @@ function recoverResultStudioWorkspace(input = {}, dependencies = {}) {
     }
   }
   const after = inspectResultStudioWorkspace({ ...recoveryInput, repository, adapter, getToolJob });
-  return { recovered: repaired.length > 0, repaired, before, after };
+  return {
+    recovered: repaired.length > 0,
+    repaired,
+    refTransitionIssues: [],
+    before,
+    after,
+  };
 }
 
 function walkSize(root, maxFiles = MAX_STORAGE_FILES) {
@@ -652,7 +709,14 @@ function inspectResultStudioStorage({ repository, workspaceRoot, projectId } = {
   }
   const duplicateGroups = [...groups.values()].filter((group) => group.paths.length > 1);
   const uniqueArtifactBytes = [...groups.values()].reduce((sum, group) => sum + group.bytes, 0);
-  const privateStorage = walkSize(path.join(path.resolve(workspaceRoot), '.biof3', 'revision'));
+  const privateRoot = guardPrivatePath(() => inspectPrivateDirectory(
+    workspaceRoot,
+    ['.biof3', 'revision'],
+    { allowMissing: true },
+  ));
+  const privateStorage = privateRoot
+    ? walkSize(privateRoot)
+    : { bytes: 0, files: 0, truncated: false };
   return {
     storageSummaryVersion: 1,
     revisionCount: revisions.length,
@@ -702,14 +766,32 @@ function isSameDarwinApfsVolume(sourcePath, targetPath) {
     && targetFs.type === DARWIN_APFS_FS_TYPE;
 }
 
+function removeFailedCloneTarget(targetPath) {
+  let stat;
+  try {
+    stat = fs.lstatSync(targetPath);
+  } catch (error) {
+    if (error?.code === 'ENOENT') return;
+    throw error;
+  }
+  if (stat.isSymbolicLink() || !stat.isFile()) {
+    throw new ResultStudioLifecycleError(
+      'dedup_temporary_path_unsafe',
+      'Deduplication temporary output is not a regular non-symlink file.',
+    );
+  }
+  fs.rmSync(targetPath, { force: false });
+}
+
 function copyFileCopyOnWrite(sourcePath, targetPath) {
   const cloneFlag = fs.constants.COPYFILE_FICLONE_FORCE;
+  const exclusiveFlag = fs.constants.COPYFILE_EXCL || 0;
   if (typeof cloneFlag === 'number') {
     try {
-      fs.copyFileSync(sourcePath, targetPath, cloneFlag);
+      fs.copyFileSync(sourcePath, targetPath, cloneFlag | exclusiveFlag);
       return 'copyfile_ficlone_force';
     } catch (error) {
-      if (fs.existsSync(targetPath)) fs.rmSync(targetPath, { force: true });
+      removeFailedCloneTarget(targetPath);
       if (error?.code !== 'ENOSYS') {
         throw new ResultStudioLifecycleError(
           'dedup_copy_on_write_unavailable',
@@ -724,10 +806,10 @@ function copyFileCopyOnWrite(sourcePath, targetPath) {
   const apfsCloneFlag = fs.constants.COPYFILE_FICLONE;
   if (typeof apfsCloneFlag === 'number' && isSameDarwinApfsVolume(sourcePath, targetPath)) {
     try {
-      fs.copyFileSync(sourcePath, targetPath, apfsCloneFlag);
+      fs.copyFileSync(sourcePath, targetPath, apfsCloneFlag | exclusiveFlag);
       return 'copyfile_ficlone_apfs';
     } catch (error) {
-      if (fs.existsSync(targetPath)) fs.rmSync(targetPath, { force: true });
+      removeFailedCloneTarget(targetPath);
       throw new ResultStudioLifecycleError(
         'dedup_copy_on_write_unavailable',
         'Safe copy-on-write deduplication is unavailable on this APFS volume.',
@@ -751,36 +833,64 @@ function sameFileIdentity(leftPath, rightPath) {
 function executeArtifactDeduplication(input = {}, dependencies = {}) {
   const plan = planArtifactDeduplication(input, dependencies);
   if (!input.planToken || input.planToken !== plan.planToken) throw new ResultStudioLifecycleError('dedup_plan_stale', 'Deduplication plan token is missing or stale.');
-  const workspaceRoot = fs.realpathSync(input.workspaceRoot);
-  const objectRoot = path.join(workspaceRoot, '.biof3', 'result-objects', 'sha256');
+  const workspaceRoot = guardPrivatePath(() => resolveWorkspaceAnchor(input.workspaceRoot));
+  const objectRootComponents = ['.biof3', 'result-objects', 'sha256'];
+  guardPrivatePath(() => ensurePrivateDirectory(workspaceRoot, objectRootComponents));
   const cloned = [];
   const clonePrimitives = new Set();
   for (const group of plan.groups) {
     const files = group.entries.map((entry) => resolveWorkspaceFile(workspaceRoot, entry.outputPath));
     if (files.some((file) => hashFile(file) !== group.digest)) throw new ResultStudioLifecycleError('dedup_artifact_drift', 'Artifact changed after deduplication planning.');
-    const objectDir = path.join(objectRoot, group.digest.slice(0, 2));
-    const objectPath = path.join(objectDir, group.digest);
-    if (!isPathContained(objectRoot, objectPath)) throw new ResultStudioLifecycleError('dedup_object_escape', 'Content object escaped its store.');
-    fs.mkdirSync(objectDir, { recursive: true });
-    if (!fs.existsSync(objectPath) || files.some((file) => sameFileIdentity(file, objectPath))) {
-      const temporaryObject = path.join(objectDir, `.biof3-object-${crypto.randomUUID()}`);
+    const objectDirComponents = [...objectRootComponents, group.digest.slice(0, 2)];
+    const objectComponents = [...objectDirComponents, group.digest];
+    const objectDir = guardPrivatePath(() => ensurePrivateDirectory(workspaceRoot, objectDirComponents));
+    let objectEntry = guardPrivatePath(() => inspectPrivateEntry(
+      workspaceRoot,
+      objectComponents,
+      { allowMissing: true, kind: 'file' },
+    ));
+    if (!objectEntry || files.some((file) => sameFileIdentity(file, objectEntry.path))) {
+      const temporaryName = `.biof3-object-${crypto.randomUUID()}`;
+      const temporaryComponents = [...objectDirComponents, temporaryName];
+      const temporaryObject = path.join(objectDir, temporaryName);
       try {
         clonePrimitives.add(copyFileCopyOnWrite(files[0], temporaryObject));
-        if (hashFile(temporaryObject) !== group.digest) throw new ResultStudioLifecycleError('dedup_object_hash_mismatch', 'Content object hash mismatch.');
-        fs.renameSync(temporaryObject, objectPath);
+        const verifiedTemporary = guardPrivatePath(() => inspectPrivateEntry(
+          workspaceRoot,
+          temporaryComponents,
+          { kind: 'file' },
+        ));
+        if (hashFile(verifiedTemporary.path) !== group.digest) throw new ResultStudioLifecycleError('dedup_object_hash_mismatch', 'Content object hash mismatch.');
+        if (objectEntry) {
+          guardPrivatePath(() => removePrivatePathSync(workspaceRoot, objectComponents, { kind: 'file' }));
+        }
+        guardPrivatePath(() => renamePrivateEntrySync(
+          workspaceRoot,
+          temporaryComponents,
+          objectComponents,
+          { kind: 'file' },
+        ));
+        objectEntry = guardPrivatePath(() => inspectPrivateEntry(workspaceRoot, objectComponents, { kind: 'file' }));
       } finally {
-        if (fs.existsSync(temporaryObject)) fs.rmSync(temporaryObject, { force: true });
+        try {
+          guardPrivatePath(() => removePrivatePathSync(
+            workspaceRoot,
+            temporaryComponents,
+            { force: true, kind: 'file' },
+          ));
+        } catch { /* keep an unsafe or changed temporary entry for explicit inspection */ }
       }
     }
-    if (hashFile(objectPath) !== group.digest) throw new ResultStudioLifecycleError('dedup_object_hash_mismatch', 'Content object hash mismatch.');
+    objectEntry = guardPrivatePath(() => inspectPrivateEntry(workspaceRoot, objectComponents, { kind: 'file' }));
+    if (hashFile(objectEntry.path) !== group.digest) throw new ResultStudioLifecycleError('dedup_object_hash_mismatch', 'Content object hash mismatch.');
     const staged = [];
     try {
       for (let index = 0; index < files.length; index += 1) {
         const file = files[index];
         const temporary = path.join(path.dirname(file), `.biof3-dedupe-${crypto.randomUUID()}`);
-        clonePrimitives.add(copyFileCopyOnWrite(objectPath, temporary));
+        clonePrimitives.add(copyFileCopyOnWrite(objectEntry.path, temporary));
         if (hashFile(temporary) !== group.digest) throw new ResultStudioLifecycleError('dedup_postcondition_failed', 'Deduplicated Artifact failed its hash postcondition.');
-        if (sameFileIdentity(objectPath, temporary)) throw new ResultStudioLifecycleError('dedup_inode_alias', 'Copy-on-write clone unexpectedly reused the content object inode.');
+        if (sameFileIdentity(objectEntry.path, temporary)) throw new ResultStudioLifecycleError('dedup_inode_alias', 'Copy-on-write clone unexpectedly reused the content object inode.');
         if (staged.some((entry) => sameFileIdentity(entry.temporary, temporary))) throw new ResultStudioLifecycleError('dedup_inode_alias', 'Copy-on-write clones unexpectedly share an inode.');
         staged.push({
           file,
@@ -814,21 +924,37 @@ function executeArtifactDeduplication(input = {}, dependencies = {}) {
 }
 
 function listGcEntries({ repository, adapter, workspaceRoot, projectId, minAgeMs = DEFAULT_GC_MIN_AGE_MS, now = Date.now() }) {
-  const privateRoot = path.join(path.resolve(workspaceRoot), '.biof3', 'revision');
+  const workspaceAnchor = guardPrivatePath(() => resolveWorkspaceAnchor(workspaceRoot));
+  const privateComponents = ['.biof3', 'revision'];
+  const privateRoot = guardPrivatePath(() => inspectPrivateDirectory(
+    workspaceAnchor,
+    privateComponents,
+    { allowMissing: true },
+  ));
   const changes = repository.listChangeSets({ projectId, limit: 500 });
   const byId = new Map(changes.map((changeSet) => [changeSet.changeSetId, changeSet]));
   const entries = [];
-  if (fs.existsSync(privateRoot)) {
+  if (privateRoot) {
     for (const dirent of fs.readdirSync(privateRoot, { withFileTypes: true })) {
+      if (dirent.isSymbolicLink()) {
+        throw new ResultStudioLifecycleError(
+          'private_path_symlink',
+          'Result Studio private staging entries must not be symbolic links.',
+        );
+      }
       if (!dirent.isDirectory()) continue;
-      const full = path.join(privateRoot, dirent.name);
-      if (!isPathContained(privateRoot, full)) continue;
-      const ageMs = Math.max(0, now - fs.statSync(full).mtimeMs);
+      const inspected = guardPrivatePath(() => inspectPrivateEntry(
+        workspaceAnchor,
+        [...privateComponents, dirent.name],
+        { kind: 'directory' },
+      ));
+      const full = inspected.path;
+      const ageMs = Math.max(0, now - inspected.stat.mtimeMs);
       const changeSet = byId.get(dirent.name);
       const temp = dirent.name.startsWith('.tmp-');
       const closed = changeSet && ['validation_failed', 'reverted', 'abandoned'].includes(changeSet.status);
       if (ageMs >= minAgeMs && (temp || closed)) {
-        entries.push({ kind: 'private_staging', relativePath: path.relative(workspaceRoot, full).split(path.sep).join('/'), changeSetId: changeSet?.changeSetId || null, ageMs });
+        entries.push({ kind: 'private_staging', relativePath: path.relative(workspaceAnchor, full).split(path.sep).join('/'), changeSetId: changeSet?.changeSetId || null, ageMs });
       }
     }
   }
@@ -1091,19 +1217,46 @@ function executeGcRefTransaction(plan, adapter) {
   }
 }
 
+function gcPrivateEntryComponents(entry) {
+  const relativePath = String(entry?.relativePath || '');
+  const components = relativePath.split('/');
+  if (components.length !== 3
+      || components[0] !== '.biof3'
+      || components[1] !== 'revision'
+      || !components[2]
+      || components.join('/') !== relativePath) {
+    throw new ResultStudioLifecycleError('gc_path_escape', 'GC target escaped private staging.');
+  }
+  return components;
+}
+
 function executeResultStudioGc(input = {}, dependencies = {}) {
   const plan = planResultStudioGc(input, dependencies);
   if (!input.planToken || input.planToken !== plan.planToken) throw new ResultStudioLifecycleError('gc_plan_stale', 'GC plan token is missing or stale.');
-  const privateRoot = path.join(path.resolve(input.workspaceRoot), '.biof3', 'revision');
+  const workspaceRoot = guardPrivatePath(() => resolveWorkspaceAnchor(input.workspaceRoot));
+  const privateEntries = plan.entries
+    .filter((entry) => entry.kind !== 'candidate_ref')
+    .map((entry) => ({
+      entry,
+      components: gcPrivateEntryComponents(entry),
+    }));
+  // Validate every deletion target again after planning and before the Git ref
+  // transaction. This prevents a stale plan from mutating refs before a
+  // replaced private root or staging directory is detected.
+  for (const { components } of privateEntries) {
+    guardPrivatePath(() => inspectPrivateEntry(workspaceRoot, components, { kind: 'directory' }));
+  }
   const removed = [];
   executeGcRefTransaction(plan, dependencies.adapter);
   for (const entry of plan.entries) {
     if (entry.kind === 'candidate_ref') {
       removed.push(entry);
     } else {
-      const absolute = path.resolve(input.workspaceRoot, entry.relativePath);
-      if (!isPathContained(privateRoot, absolute)) throw new ResultStudioLifecycleError('gc_path_escape', 'GC target escaped private staging.');
-      fs.rmSync(absolute, { recursive: true, force: false });
+      const components = gcPrivateEntryComponents(entry);
+      guardPrivatePath(() => removePrivatePathSync(workspaceRoot, components, {
+        recursive: true,
+        kind: 'directory',
+      }));
       removed.push(entry);
     }
   }
@@ -1302,7 +1455,14 @@ function scanDelimitedRecord(buffer, delimiter = null) {
   return { complete: false, contentEnd: buffer.length, consumedBytes: buffer.length, quoted };
 }
 
-function readDelimitedRecord(handle, { startOffset, fileSize, maxBytes, delimiter = null, errorPrefix }) {
+function readDelimitedRecord(handle, {
+  startOffset,
+  fileSize,
+  maxBytes,
+  delimiter = null,
+  errorPrefix,
+  io = fs,
+}) {
   if (startOffset >= fileSize) return null;
   let raw = Buffer.alloc(0);
   while (raw.length < maxBytes + 2 && startOffset + raw.length < fileSize) {
@@ -1312,7 +1472,7 @@ function readDelimitedRecord(handle, { startOffset, fileSize, maxBytes, delimite
       fileSize - startOffset - raw.length,
     );
     const chunk = Buffer.alloc(remaining);
-    const bytesRead = fs.readSync(handle, chunk, 0, remaining, startOffset + raw.length);
+    const bytesRead = io.readSync(handle, chunk, 0, remaining, startOffset + raw.length);
     if (bytesRead <= 0) break;
     raw = Buffer.concat([raw, chunk.subarray(0, bytesRead)]);
     const scanned = scanDelimitedRecord(raw, delimiter);
@@ -1356,93 +1516,165 @@ function decodeDelimitedRecord(buffer, errorPrefix) {
   }
 }
 
-function readTablePage({ filePath, cursor = 0, limit = 100 } = {}) {
+function descriptorIdentity(stat) {
+  return {
+    dev: stat.dev,
+    ino: stat.ino,
+    size: stat.size,
+    mtimeNs: stat.mtimeNs,
+    ctimeNs: stat.ctimeNs,
+  };
+}
+
+function sameDescriptorIdentity(left, right) {
+  return left.dev === right.dev
+    && left.ino === right.ino
+    && left.size === right.size
+    && left.mtimeNs === right.mtimeNs
+    && left.ctimeNs === right.ctimeNs;
+}
+
+function artifactTruthDrift() {
+  return new ResultStudioLifecycleError(
+    'artifact_truth_drift',
+    'The table bytes changed or no longer match Revision Artifact Truth.',
+  );
+}
+
+function readTablePage({
+  filePath,
+  expectedSha256 = null,
+  cursor = 0,
+  limit = 100,
+  io = fs,
+} = {}) {
   const boundedLimit = Number.isInteger(limit) && limit > 0 && limit <= MAX_TABLE_PAGE_ROWS ? limit : 100;
   if (!Number.isInteger(cursor) || cursor < 0) {
     throw new ResultStudioLifecycleError('table_cursor_invalid', 'The table cursor must be a non-negative byte offset.');
   }
+  const expected = expectedSha256 === null
+    ? null
+    : String(expectedSha256 || '').trim().toLowerCase();
+  if (expected !== null && !/^[a-f0-9]{64}$/.test(expected)) {
+    throw new ResultStudioLifecycleError(
+      'artifact_truth_unavailable',
+      'The table has no trusted SHA-256 in Revision Artifact Truth.',
+    );
+  }
   const boundedCursor = cursor;
-  const stat = fs.statSync(filePath);
-  if (boundedCursor > stat.size) {
-    throw new ResultStudioLifecycleError('table_cursor_invalid', 'The table cursor is beyond the end of the file.');
-  }
-  const handle = fs.openSync(filePath, 'r');
-  let headerRecord;
+  const noFollow = Number.isInteger(io.constants?.O_NOFOLLOW) ? io.constants.O_NOFOLLOW : 0;
+  const handle = io.openSync(filePath, io.constants.O_RDONLY | noFollow);
   try {
-    headerRecord = readDelimitedRecord(handle, {
-      startOffset: 0,
-      fileSize: stat.size,
-      maxBytes: MAX_TABLE_HEADER_BYTES,
-      errorPrefix: 'table_header',
-    });
-  } finally { fs.closeSync(handle); }
-  if (!headerRecord) {
-    throw new ResultStudioLifecycleError('table_header_missing', 'The table does not contain a header record.');
-  }
-  const header = decodeDelimitedRecord(headerRecord.buffer, 'table_header');
-  const delimiter = detectDelimiter(header, filePath);
-  const columns = splitDelimitedLine(header, delimiter, 'table_header');
-  const bodyStart = headerRecord.nextOffset;
-  if (boundedCursor !== 0 && boundedCursor < bodyStart) {
-    throw new ResultStudioLifecycleError('table_cursor_invalid', 'The table cursor points inside the header record.');
-  }
-  if (boundedCursor !== 0 && boundedCursor < stat.size) {
-    const cursorHandle = fs.openSync(filePath, 'r');
-    const previousByte = Buffer.alloc(1);
-    try { fs.readSync(cursorHandle, previousByte, 0, 1, boundedCursor - 1); }
-    finally { fs.closeSync(cursorHandle); }
-    if (previousByte[0] !== 0x0a) {
-      throw new ResultStudioLifecycleError('table_cursor_invalid', 'The table cursor is not positioned at a complete record boundary.');
+    const initialStat = io.fstatSync(handle, { bigint: true });
+    if (!initialStat.isFile()) {
+      throw new ResultStudioLifecycleError('table_file_invalid', 'The table Artifact is not a regular file.');
     }
-  }
-  const rows = [];
-  let recordCursor = boundedCursor === 0 ? bodyStart : boundedCursor;
-  let nextCursor = null;
-  const bodyHandle = fs.openSync(filePath, 'r');
-  try {
-    while (rows.length < boundedLimit && recordCursor < stat.size) {
-      const recordStart = recordCursor;
-      const record = readDelimitedRecord(bodyHandle, {
-        startOffset: recordStart,
-        fileSize: stat.size,
-        maxBytes: MAX_TABLE_RECORD_BYTES,
-        delimiter,
-        errorPrefix: 'table_record',
+    const fileSize = Number(initialStat.size);
+    if (!Number.isSafeInteger(fileSize) || fileSize < 0) {
+      throw new ResultStudioLifecycleError('table_file_too_large', 'The table size exceeds the supported byte range.');
+    }
+    if (boundedCursor > fileSize) {
+      throw new ResultStudioLifecycleError('table_cursor_invalid', 'The table cursor is beyond the end of the file.');
+    }
+    const initialIdentity = descriptorIdentity(initialStat);
+    const initialSha256 = hashFileDescriptor(handle, io);
+    if (expected !== null && initialSha256 !== expected) throw artifactTruthDrift();
+
+    let page = null;
+    let readFailure = null;
+    try {
+      const headerRecord = readDelimitedRecord(handle, {
+        startOffset: 0,
+        fileSize,
+        maxBytes: MAX_TABLE_HEADER_BYTES,
+        errorPrefix: 'table_header',
+        io,
       });
-      if (!record) break;
-      const parsed = splitDelimitedLine(
-        decodeDelimitedRecord(record.buffer, 'table_record'),
-        delimiter,
-        'table_record',
-      );
-      const candidateRows = [...rows, parsed];
-      const candidateBytes = Buffer.byteLength(JSON.stringify({ columns, rows: candidateRows }));
-      if (candidateBytes > MAX_TABLE_PAGE_BYTES) {
-        if (rows.length === 0) {
-          throw new ResultStudioLifecycleError('table_page_too_large', 'A single table record exceeds the bounded response budget.');
-        }
-        nextCursor = recordStart;
-        break;
+      if (!headerRecord) {
+        throw new ResultStudioLifecycleError('table_header_missing', 'The table does not contain a header record.');
       }
-      rows.push(parsed);
-      recordCursor = record.nextOffset;
-      nextCursor = recordCursor < stat.size ? recordCursor : null;
+      const header = decodeDelimitedRecord(headerRecord.buffer, 'table_header');
+      const delimiter = detectDelimiter(header, filePath);
+      const columns = splitDelimitedLine(header, delimiter, 'table_header');
+      const bodyStart = headerRecord.nextOffset;
+      if (boundedCursor !== 0 && boundedCursor < bodyStart) {
+        throw new ResultStudioLifecycleError('table_cursor_invalid', 'The table cursor points inside the header record.');
+      }
+      if (boundedCursor !== 0 && boundedCursor < fileSize) {
+        const previousByte = Buffer.alloc(1);
+        io.readSync(handle, previousByte, 0, 1, boundedCursor - 1);
+        if (previousByte[0] !== 0x0a) {
+          throw new ResultStudioLifecycleError('table_cursor_invalid', 'The table cursor is not positioned at a complete record boundary.');
+        }
+      }
+      const rows = [];
+      let recordCursor = boundedCursor === 0 ? bodyStart : boundedCursor;
+      let nextCursor = null;
+      while (rows.length < boundedLimit && recordCursor < fileSize) {
+        const recordStart = recordCursor;
+        const record = readDelimitedRecord(handle, {
+          startOffset: recordStart,
+          fileSize,
+          maxBytes: MAX_TABLE_RECORD_BYTES,
+          delimiter,
+          errorPrefix: 'table_record',
+          io,
+        });
+        if (!record) break;
+        const parsed = splitDelimitedLine(
+          decodeDelimitedRecord(record.buffer, 'table_record'),
+          delimiter,
+          'table_record',
+        );
+        const candidateRows = [...rows, parsed];
+        const candidateBytes = Buffer.byteLength(JSON.stringify({ columns, rows: candidateRows }));
+        if (candidateBytes > MAX_TABLE_PAGE_BYTES) {
+          if (rows.length === 0) {
+            throw new ResultStudioLifecycleError('table_page_too_large', 'A single table record exceeds the bounded response budget.');
+          }
+          nextCursor = recordStart;
+          break;
+        }
+        rows.push(parsed);
+        recordCursor = record.nextOffset;
+        nextCursor = recordCursor < fileSize ? recordCursor : null;
+      }
+      page = {
+        tablePageVersion: 1,
+        columns,
+        rows,
+        cursor: boundedCursor,
+        nextCursor,
+        limit: boundedLimit,
+        totalRows: null,
+        totalRowsIsUnknown: true,
+        virtualized: nextCursor !== null,
+        caveat: 'RFC4180 records are parsed within bounded header, record, and response byte budgets; total row count remains unknown until the final page.',
+      };
+    } catch (error) {
+      readFailure = error;
     }
+
+    let integrityFailure = null;
+    try {
+      const finalStat = io.fstatSync(handle, { bigint: true });
+      const finalSha256 = hashFileDescriptor(handle, io);
+      if (!sameDescriptorIdentity(initialIdentity, descriptorIdentity(finalStat))
+          || finalSha256 !== initialSha256
+          || (expected !== null && finalSha256 !== expected)) {
+        integrityFailure = artifactTruthDrift();
+      }
+    } catch (error) {
+      integrityFailure = error instanceof ResultStudioLifecycleError
+        ? error
+        : artifactTruthDrift();
+    }
+    if (integrityFailure) throw integrityFailure;
+    if (readFailure) throw readFailure;
+    return page;
   } finally {
-    fs.closeSync(bodyHandle);
+    io.closeSync(handle);
   }
-  return {
-    tablePageVersion: 1,
-    columns,
-    rows,
-    cursor: boundedCursor,
-    nextCursor,
-    limit: boundedLimit,
-    totalRows: null,
-    totalRowsIsUnknown: true,
-    virtualized: nextCursor !== null,
-    caveat: 'RFC4180 records are parsed within bounded header, record, and response byte budgets; total row count remains unknown until the final page.',
-  };
 }
 
 module.exports = {

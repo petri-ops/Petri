@@ -95,6 +95,7 @@ const P6_PRESSURE_BOUNDARY = Object.freeze({
 });
 
 export const P6_PRODUCT_ACCEPTANCE_TEST_FILES = Object.freeze([
+  'test/g0-chf0-lifecycle.test.mjs',
   'test/g0-rs-p6-product-acceptance.test.mjs',
   'test/g0-rs-p6-real-restart-prototype.test.mjs',
   'test/g0-rs-p6-electron-pressure-prototype.test.mjs',
@@ -109,6 +110,12 @@ export const P6_PRODUCT_ACCEPTANCE_TEST_FILES = Object.freeze([
   'test/tool-resource-sampler.test.mjs',
   'test/tools-executor-job-context.test.mjs',
   'test/artifact-truth.test.mjs',
+  'test/git-adapter.test.mjs',
+  'test/result-compare-service.test.mjs',
+  'test/result-ref-transaction.test.mjs',
+  'test/result-selection-tools.test.mjs',
+  'test/result-studio-migration.test.mjs',
+  'test/result-studio-repository.test.mjs',
   'test/result-studio-route-baseline.test.mjs',
   'test/test-affected.test.mjs',
 ]);
@@ -127,11 +134,19 @@ const EXTRA_SOURCE_FILES = Object.freeze([
   'src/migration-runner.js',
   'src/migrations/001_result_studio.sql',
   'src/migrations/002_result_workflow_graph.sql',
+  'src/migrations/003_result_ref_transactions.sql',
+  'core/r-server/agent-tools/result-selection-tools.js',
+  'core/r-server/helpers/process-lifecycle.js',
+  'core/r-server/helpers/verified-file-snapshot.js',
   'core/r-server/routes/tools-platform.js',
   'core/shared-backend/artifact-interaction.js',
   'core/shared-backend/project-run-layout.js',
+  'core/shared-backend/git-adapter.js',
   'core/shared-backend/result-edit-controls.js',
+  'core/shared-backend/result-ref-transaction-schema.js',
+  'core/shared-backend/result-ref-transaction.js',
   'core/shared-backend/result-studio-contracts.js',
+  'core/shared-backend/result-studio-private-path.js',
   'core/shared-backend/result-studio-resource-summary.js',
   'core/shared-backend/result-studio-schema.js',
   'core/shared-backend/runtime-resource-probe.js',
@@ -184,6 +199,37 @@ function stable(value) {
 function stableHash(value) {
   return sha256(JSON.stringify(stable(value)));
 }
+
+function canonicalEvidencePayload(evidence) {
+  const { dryRunPassed: _dryRunPassed, ...canonicalEvidence } = evidence || {};
+  return canonicalEvidence;
+}
+
+function createP6LiveCaptureGuard() {
+  const capturedPayloadDigests = new WeakMap();
+  return Object.freeze({
+    remember(evidence) {
+      invariant(evidence && typeof evidence === 'object', 'p6_evidence_not_live_capture');
+      capturedPayloadDigests.set(evidence, stableHash(canonicalEvidencePayload(evidence)));
+      return evidence;
+    },
+    assertUnchanged(evidence) {
+      const capturedDigest = evidence && typeof evidence === 'object'
+        ? capturedPayloadDigests.get(evidence)
+        : null;
+      invariant(SHA256.test(capturedDigest || ''), 'p6_evidence_not_live_capture');
+      invariant(capturedDigest === stableHash(canonicalEvidencePayload(evidence)),
+        'p6_evidence_live_capture_mutated');
+      return true;
+    },
+  });
+}
+
+const p6LiveCaptureGuard = createP6LiveCaptureGuard();
+
+export const P6_PRODUCT_ACCEPTANCE_TEST_HOOKS = Object.freeze({
+  createLiveCaptureGuard: createP6LiveCaptureGuard,
+});
 
 function git(args, options = {}) {
   return spawnSync('git', args, {
@@ -500,7 +546,8 @@ export function assertP6ProductAcceptanceEvidenceWritable(evidence) {
 }
 
 export function writeP6ProductAcceptanceEvidence(evidence, io = {}) {
-  const { dryRunPassed: _dryRunPassed, ...canonicalEvidence } = evidence;
+  p6LiveCaptureGuard.assertUnchanged(evidence);
+  const canonicalEvidence = canonicalEvidencePayload(evidence);
   assertP6ProductAcceptanceEvidenceWritable(canonicalEvidence);
   assertCurrentP6ProductAcceptanceSourceBinding(canonicalEvidence);
   const serialized = `${JSON.stringify(canonicalEvidence, null, 2)}\n`;
@@ -575,10 +622,10 @@ export async function captureP6ProductAcceptance({ keep = false, show = false, v
       && sourceAtStart.sourceBindingDigest === sourceAtEnd.sourceBindingDigest,
   };
   assertSanitizedP6ProductAcceptanceEvidence(evidence);
-  return {
+  return p6LiveCaptureGuard.remember({
     ...evidence,
     dryRunPassed: evaluated.passed,
-  };
+  });
 }
 
 async function main() {

@@ -37,11 +37,29 @@ function measurement(value, unit, unavailableReason) {
     : { status: 'measured', value, unit, reason: null };
 }
 
-function boundedMeasurement(value, unit, incomplete, unavailableReason) {
+function partialMeasurement(value, unit, incomplete, unavailableReason, partialReason) {
   if (value == null) return measurement(null, unit, unavailableReason);
   return incomplete
-    ? { status: 'partial', value, unit, reason: 'job_output_scan_incomplete_lower_bound' }
+    ? { status: 'partial', value, unit, reason: partialReason }
     : measurement(value, unit, unavailableReason);
+}
+
+function jobMetricCoverage(values) {
+  const normalized = values.map(finiteNonNegative);
+  return {
+    values: normalized.filter((value) => value != null),
+    incomplete: normalized.some((value) => value == null),
+  };
+}
+
+function aggregateJobMetric(values, { mode = 'maximum', unit, unavailableReason, partialReason }) {
+  const coverage = jobMetricCoverage(values);
+  const value = coverage.values.length === 0
+    ? null
+    : mode === 'minimum'
+      ? Math.min(...coverage.values)
+      : Math.max(...coverage.values);
+  return partialMeasurement(value, unit, coverage.incomplete, unavailableReason, partialReason);
 }
 
 function providerProjection(providerUsage) {
@@ -110,31 +128,36 @@ function buildResultStudioTaskResourceSummary({ jobs = [], providerUsage = null 
   const results = authoritativeJobs.map(parseResult);
   const usages = results.map((result) => result.resourceUsage || {});
   const peaks = usages.map((usage) => usage.peak || {});
-  const snapshots = usages.flatMap((usage) => [usage.start, usage.end].filter(Boolean));
   const statuses = authoritativeJobs.map((job) => String(job.status || '').toLowerCase());
   const sampleCount = usages.reduce((total, usage) => (
     total + (Number.isInteger(usage?.sampling?.sampleCount) ? usage.sampling.sampleCount : 0)
   ), 0);
-
-  const cpuPeakPercent = maximum(peaks.map((peak) => peak.cpuPercent));
-  const processPeakRssBytes = maximum(peaks.map((peak) => peak.rssBytes));
-  const outputPeakBytes = maximum(peaks.map((peak) => peak.outputBytes));
+  const samplingCoverage = usages.map((usage) => {
+    const sampling = usage?.sampling || {};
+    return Number.isInteger(sampling.sampleCount)
+      && sampling.sampleCount > 0
+      && (sampling.status == null || sampling.status === 'measured');
+  });
+  const anySampling = samplingCoverage.some(Boolean);
+  const samplingIncomplete = samplingCoverage.some((measured) => !measured);
   const outputScanIncomplete = usages.some((usage) => {
     const sampling = usage?.sampling || {};
-    return sampling.outputMeasurementStatus === 'partial'
+    return finiteNonNegative(usage?.peak?.outputBytes) == null
+      || sampling.outputMeasurementStatus !== 'measured'
       || sampling.directoryTruncated === true
       || Number(sampling.directoryReadErrors || 0) > 0
       || Number(sampling.directoryStatErrors || 0) > 0;
   });
-  const concurrentJobPeak = maximum(peaks.map((peak) => peak.activeJobs));
-  const minimumAvailableMemoryBytes = minimum([
-    ...snapshots.map((snapshot) => snapshot?.memory?.availableBytes),
-    ...peaks.map((peak) => peak.minimumAvailableMemoryBytes),
-  ]);
-  const minimumAvailableDiskBytes = minimum([
-    ...snapshots.map((snapshot) => snapshot?.disk?.availableBytes),
-    ...peaks.map((peak) => peak.minimumAvailableDiskBytes),
-  ]);
+  const jobMinimumMemory = usages.map((usage) => minimum([
+    usage?.start?.memory?.availableBytes,
+    usage?.end?.memory?.availableBytes,
+    usage?.peak?.minimumAvailableMemoryBytes,
+  ]));
+  const jobMinimumDisk = usages.map((usage) => minimum([
+    usage?.start?.disk?.availableBytes,
+    usage?.end?.disk?.availableBytes,
+    usage?.peak?.minimumAvailableDiskBytes,
+  ]));
 
   return {
     resultStudioResourceSummaryVersion: RESULT_STUDIO_RESOURCE_SUMMARY_VERSION,
@@ -144,34 +167,51 @@ function buildResultStudioTaskResourceSummary({ jobs = [], providerUsage = null 
       completed: statuses.filter((status) => ['completed', 'done'].includes(status)).length,
       failed: statuses.filter((status) => status === 'failed').length,
       cancelled: statuses.filter((status) => status === 'cancelled').length,
-      peakConcurrent: measurement(concurrentJobPeak, 'jobs', 'job_concurrency_peak_not_sampled'),
+      peakConcurrent: aggregateJobMetric(peaks.map((peak) => peak.activeJobs), {
+        unit: 'jobs',
+        unavailableReason: 'job_concurrency_peak_not_sampled',
+        partialReason: 'job_resource_coverage_incomplete_lower_bound',
+      }),
     },
     cpu: {
-      peakPercent: measurement(cpuPeakPercent, 'percent', 'process_cpu_peak_not_sampled'),
+      peakPercent: aggregateJobMetric(peaks.map((peak) => peak.cpuPercent), {
+        unit: 'percent',
+        unavailableReason: 'process_cpu_peak_not_sampled',
+        partialReason: 'job_resource_coverage_incomplete_lower_bound',
+      }),
     },
     memory: {
-      processPeakRssBytes: measurement(processPeakRssBytes, 'bytes', 'process_memory_peak_not_sampled'),
-      minimumSystemAvailableBytes: measurement(
-        minimumAvailableMemoryBytes,
-        'bytes',
-        'system_memory_snapshot_unavailable',
-      ),
+      processPeakRssBytes: aggregateJobMetric(peaks.map((peak) => peak.rssBytes), {
+        unit: 'bytes',
+        unavailableReason: 'process_memory_peak_not_sampled',
+        partialReason: 'job_resource_coverage_incomplete_lower_bound',
+      }),
+      minimumSystemAvailableBytes: aggregateJobMetric(jobMinimumMemory, {
+        mode: 'minimum',
+        unit: 'bytes',
+        unavailableReason: 'system_memory_snapshot_unavailable',
+        partialReason: 'job_resource_coverage_incomplete_bound',
+      }),
     },
     disk: {
-      outputPeakBytes: boundedMeasurement(
-        outputPeakBytes,
+      outputPeakBytes: partialMeasurement(
+        maximum(peaks.map((peak) => peak.outputBytes)),
         'bytes',
         outputScanIncomplete,
         'job_output_peak_not_sampled',
+        'job_output_scan_incomplete_lower_bound',
       ),
-      minimumSystemAvailableBytes: measurement(
-        minimumAvailableDiskBytes,
-        'bytes',
-        'system_disk_snapshot_unavailable',
-      ),
+      minimumSystemAvailableBytes: aggregateJobMetric(jobMinimumDisk, {
+        mode: 'minimum',
+        unit: 'bytes',
+        unavailableReason: 'system_disk_snapshot_unavailable',
+        partialReason: 'job_resource_coverage_incomplete_bound',
+      }),
     },
-    sampling: sampleCount > 0
-      ? { status: 'measured', sampleCount }
+    sampling: anySampling
+      ? samplingIncomplete
+        ? { status: 'partial', sampleCount, reason: 'job_sampling_coverage_incomplete' }
+        : { status: 'measured', sampleCount }
       : { status: 'unavailable', sampleCount: null, reason: 'process_sampler_unavailable' },
     provider: providerProjection(providerUsage),
   };

@@ -9,8 +9,13 @@ const {
   isInternalArtifactName,
   isSafeFlatFilename,
   reconcileArtifactTruth,
-  sha256FileDescriptor,
 } = require('./artifact-truth');
+const {
+  createVerifiedFileSnapshot,
+  createVerifiedSnapshotReadStream,
+  pipeVerifiedSnapshotToResponse,
+  readVerifiedFileSnapshot,
+} = require('./verified-file-snapshot');
 const { injectReportTheme, isHtmlFile, normalizeReportTheme } = require('./report-theme');
 const { materializeFinalReport } = require('./final-report');
 const {
@@ -30,9 +35,9 @@ const {
   diskSnapshot,
 } = require('../../shared-backend/tool-resource-sampler');
 const {
+  isChildProcessAlive,
   markUnownedStaleJobs,
   recoverStaleActiveJobs,
-  refreshVerifiedHeartbeat,
   resolveLifecycleDurations,
   scheduleHardTimeout,
   terminateChildProcess,
@@ -108,6 +113,290 @@ function buildCancelledToolResult({
   if (executionProvenance) result.executionProvenance = executionProvenance;
   if (provenanceRef) result.provenanceRef = provenanceRef;
   return result;
+}
+
+function buildFailedToolResult({
+  existingResult = null,
+  jobId,
+  reason,
+  exitCode = null,
+  resourceUsage,
+  executionProvenance = null,
+  provenanceRef = null,
+} = {}) {
+  const result = existingResult && typeof existingResult === 'object' && !Array.isArray(existingResult)
+    ? { ...existingResult }
+    : {};
+  result.toolJobId = jobId;
+  result.failure = { phase: 'execute', reason, exitCode };
+  result.resourceUsage = resourceUsage;
+  if (executionProvenance) result.executionProvenance = executionProvenance;
+  if (provenanceRef) result.provenanceRef = provenanceRef;
+  return result;
+}
+
+function claimActiveToolJob(activeToolJobs, { jobId, toolId, now = Date.now } = {}) {
+  if (activeToolJobs.has(jobId)) return null;
+  const observedAt = now();
+  const owner = {
+    process: null,
+    phase: 'preparing',
+    cancelRequested: false,
+    startedAt: observedAt,
+    lastHeartbeatAt: observedAt,
+    toolId,
+  };
+  activeToolJobs.set(jobId, owner);
+  return owner;
+}
+
+function releaseActiveToolJob(activeToolJobs, jobId, owner) {
+  if (activeToolJobs.get(jobId) !== owner) return false;
+  activeToolJobs.delete(jobId);
+  return true;
+}
+
+function terminateOwnedToolJobProcess(
+  owner,
+  { terminate = terminateChildProcess } = {},
+) {
+  if (!owner?.process) {
+    return Promise.resolve({ terminated: false, reason: 'process_handle_missing' });
+  }
+  if (owner.terminationPromise) return owner.terminationPromise;
+
+  const ownedProcess = owner.process;
+  const attempt = Promise.resolve()
+    .then(() => terminate(ownedProcess))
+    .then((termination) => (
+      termination && typeof termination === 'object'
+        ? termination
+        : { terminated: false, reason: 'termination_result_invalid' }
+    ))
+    .catch((error) => ({
+      terminated: false,
+      reason: 'termination_attempt_failed',
+      error: error?.message || String(error),
+    }));
+  owner.terminationPromise = attempt;
+  void attempt.then((termination) => {
+    owner.lastTerminationResult = termination;
+    if (owner.terminationPromise === attempt) owner.terminationPromise = null;
+  });
+  return attempt;
+}
+
+function requestActiveToolJobCancellation(
+  activeToolJobs,
+  jobId,
+  { terminate = terminateChildProcess } = {},
+) {
+  const active = activeToolJobs.get(jobId);
+  if (!active) return { active: false, killed: false, processStarted: false };
+  active.cancelRequested = true;
+  if (!active.process) {
+    return {
+      active: true,
+      killed: false,
+      processStarted: false,
+      cancellationAccepted: true,
+    };
+  }
+  const result = { active: true, killed: false, processStarted: true };
+  result.termination = terminateOwnedToolJobProcess(active, { terminate })
+    .then((termination) => {
+      result.killed = termination.terminated;
+      if (termination.signal) result.signal = termination.signal;
+      else if (termination.terminated && termination.escalated) result.signal = 'SIGKILL';
+      return termination;
+    });
+  return result;
+}
+
+async function canLaunchOwnedToolJob({ activeToolJobs, db, jobId, owner }) {
+  if (activeToolJobs.get(jobId) !== owner || owner.cancelRequested) return false;
+  const stored = await db.prepare('SELECT status FROM tool_jobs WHERE id=?').get(jobId);
+  return activeToolJobs.get(jobId) === owner
+    && owner.cancelRequested !== true
+    && stored?.status === 'running';
+}
+
+function persistVerifiedToolJobHeartbeat({
+  active,
+  jobId,
+  db,
+  now = Date.now,
+  isAlive = isChildProcessAlive,
+} = {}) {
+  if (!active || !isAlive(active.process)) {
+    if (active) active.livenessLostAt ||= now();
+    return false;
+  }
+  const observedAt = now();
+  const commitHeartbeat = (persisted) => {
+    if (!persisted || persisted.changes < 1) return false;
+    if (!isAlive(active.process)) {
+      active.livenessLostAt ||= observedAt;
+      return false;
+    }
+    active.livenessLostAt = null;
+    active.lastHeartbeatAt = observedAt;
+    return true;
+  };
+  const persisted = db
+    .prepare('UPDATE tool_jobs SET heartbeat_at=? WHERE id=? AND status=?')
+    .run(observedAt, jobId, 'running');
+  return persisted && typeof persisted.then === 'function'
+    ? persisted.then(commitHeartbeat)
+    : commitHeartbeat(persisted);
+}
+
+function armActiveToolJobLifecycle({
+  active,
+  jobId,
+  db,
+  heartbeatIntervalMs,
+  hardTimeoutMs,
+  setIntervalFn = setInterval,
+  scheduleHardTimeoutFn = scheduleHardTimeout,
+  refreshHeartbeat = persistVerifiedToolJobHeartbeat,
+} = {}) {
+  if (!active?.process) throw new Error('active_tool_job_process_missing');
+  if (active.hardTimeoutTimer || active.heartbeatTimer) {
+    throw new Error('active_tool_job_lifecycle_already_armed');
+  }
+
+  // Arm the independent kill budget first. Any later sampler/SQLite setup
+  // failure still has a bounded retry path if the immediate TERM/KILL result
+  // cannot be confirmed.
+  active.hardTimeoutTimer = scheduleHardTimeoutFn({
+    active,
+    jobId,
+    db,
+    hardTimeoutMs,
+  });
+  active.heartbeatTimer = setIntervalFn(() => {
+    try {
+      const refreshed = refreshHeartbeat({ active, jobId, db });
+      if (refreshed && typeof refreshed.then === 'function') {
+        void refreshed.catch((error) => {
+          console.warn('[tools] heartbeat update failed:', error.message);
+        });
+      }
+    } catch (error) {
+      console.warn('[tools] heartbeat update failed:', error.message);
+    }
+  }, heartbeatIntervalMs);
+  active.heartbeatTimer.unref?.();
+  return {
+    hardTimeoutTimer: active.hardTimeoutTimer,
+    heartbeatTimer: active.heartbeatTimer,
+  };
+}
+
+function clearActiveToolJobLifecycleTimers(active) {
+  if (!active) return;
+  if (active.hardTimeoutTimer) clearTimeout(active.hardTimeoutTimer);
+  if (active.heartbeatTimer) clearInterval(active.heartbeatTimer);
+  active.hardTimeoutTimer = null;
+  active.heartbeatTimer = null;
+}
+
+async function transitionToolJobToFailed({
+  db,
+  jobId,
+  error,
+  completedAt = Date.now(),
+} = {}) {
+  return db
+    .prepare('UPDATE tool_jobs SET status=?, error=?, completed_at=? WHERE id=? AND status IN (?,?)')
+    .run('failed', error, completedAt, jobId, 'pending', 'running');
+}
+
+async function transitionToolJobToCompleted({
+  db,
+  jobId,
+  result,
+  completedAt = Date.now(),
+} = {}) {
+  return db
+    .prepare('UPDATE tool_jobs SET status=?, result_json=?, completed_at=? WHERE id=? AND status=?')
+    .run('completed', JSON.stringify(result), completedAt, jobId, 'running');
+}
+
+async function settleConfirmedToolCancellation({
+  db,
+  jobId,
+  result,
+  completedAt = Date.now(),
+} = {}) {
+  return db
+    .prepare(
+      'UPDATE tool_jobs SET status=?, error=?, result_json=?, completed_at=?, process_pid=?, heartbeat_at=? '
+      + 'WHERE id=? AND status IN (?,?,?)',
+    )
+    .run(
+      'cancelled',
+      null,
+      JSON.stringify(result),
+      completedAt,
+      null,
+      null,
+      jobId,
+      'pending',
+      'running',
+      'cancelled',
+    );
+}
+
+async function handleActiveToolJobSetupFailure({
+  activeToolJobs,
+  jobId,
+  error,
+  markFailed,
+  terminate = terminateChildProcess,
+} = {}) {
+  const owner = activeToolJobs.get(jobId);
+  const message = error?.message || String(error || 'unknown executor setup failure');
+  if (!owner) {
+    await markFailed(jobId, `Executor setup failed: ${message}`, 'setup');
+    return { active: false, processStarted: false };
+  }
+  owner.setupFailure = { phase: 'setup', reason: 'executor_setup_failure', message };
+  if (!owner.process) {
+    try {
+      await markFailed(jobId, `Executor setup failed: ${message}`, 'setup');
+    } finally {
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
+    }
+    return { active: true, processStarted: false };
+  }
+
+  if (owner.heartbeatTimer) clearInterval(owner.heartbeatTimer);
+  owner.heartbeatTimer = null;
+  const termination = await terminateOwnedToolJobProcess(owner, { terminate });
+  owner.setupTerminationResult = termination;
+  if (!termination.terminated) {
+    // Make the existing periodic owner scan retry this handle on its next pass.
+    // The independently armed hard timeout is deliberately retained as a
+    // second bounded termination path.
+    owner.lastHeartbeatAt = 0;
+    return { active: true, processStarted: true, termination };
+  }
+
+  clearActiveToolJobLifecycleTimers(owner);
+  if (!owner.cancelRequested) {
+    try {
+      await markFailed(
+        jobId,
+        `Executor setup failed: ${message}; child termination confirmed (${termination.signal || 'exit'})`,
+        'setup',
+      );
+    } finally {
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
+    }
+  }
+  return { active: true, processStarted: true, termination };
 }
 
 function declaredResultFilenames(result) {
@@ -283,7 +572,7 @@ function resolveAuthorizedToolResultFile({ job, filename, layout = null, jobsDir
  * the path through Express after that check would re-resolve it and allow a
  * rename/symlink race. The caller owns the returned descriptor on success.
  */
-function openVerifiedAuthorizedToolResultFile(resolved) {
+async function openVerifiedAuthorizedToolResultFile(resolved) {
   if (!resolved || !resolved.ok || !resolved.filePath || !resolved.fileIdentity) {
     return { ok: false, error: 'file_not_found' };
   }
@@ -297,15 +586,25 @@ function openVerifiedAuthorizedToolResultFile(resolved) {
       fs.closeSync(fd);
       return { ok: false, error: 'file_not_found' };
     }
-    const actualSha256 = resolved.expectedSha256 ? sha256FileDescriptor(fd) : null;
-    if (resolved.expectedSha256 && actualSha256 !== resolved.expectedSha256) {
-      fs.closeSync(fd);
-      return { ok: false, error: 'artifact_truth_drift' };
-    }
-    return { ok: true, fd, stat: openedStat, actualSha256 };
-  } catch {
+    const sourceFd = fd;
+    fd = null;
+    const snapshot = await createVerifiedFileSnapshot(sourceFd, {
+      expectedIdentity: resolved.fileIdentity,
+      expectedSha256: resolved.expectedSha256,
+    });
+    return {
+      ok: true,
+      fd: snapshot.fd,
+      stat: snapshot.stat,
+      verification: snapshot.verification,
+      actualSha256: resolved.expectedSha256 ? snapshot.sha256 : null,
+    };
+  } catch (error) {
     if (fd !== null) {
       try { fs.closeSync(fd); } catch {}
+    }
+    if (error?.code === 'verified_snapshot_hash_mismatch') {
+      return { ok: false, error: 'artifact_truth_drift' };
     }
     return { ok: false, error: 'file_not_found' };
   }
@@ -546,16 +845,7 @@ function createToolsExecutor({
   }
 
   function killLocalToolJob(jobId) {
-    const active = activeToolJobs.get(jobId);
-    if (!active || !active.process) return { active: false, killed: false };
-    active.cancelRequested = true;
-    const result = { active: true, killed: false };
-    result.termination = terminateChildProcess(active.process).then((termination) => {
-      result.killed = termination.terminated;
-      result.signal = termination.signal || (termination.escalated ? 'SIGKILL' : 'SIGTERM');
-      return termination;
-    });
-    return result;
+    return requestActiveToolJobCancellation(activeToolJobs, jobId);
   }
 
   async function cleanupLocalToolJobDir(jobId) {
@@ -632,7 +922,7 @@ function createToolsExecutor({
           : 404;
       return res.status(status).json({ error: resolved.error });
     }
-    const opened = openVerifiedAuthorizedToolResultFile(resolved);
+    const opened = await openVerifiedAuthorizedToolResultFile(resolved);
     if (!opened.ok) {
       return res.status(opened.error === 'artifact_truth_drift' ? 409 : 404).json({ error: opened.error });
     }
@@ -640,18 +930,17 @@ function createToolsExecutor({
     const theme = normalizeReportTheme(req?.query?.theme);
     if (theme && isHtmlFile(resolved.filePath)) {
       try {
-        const html = fs.readFileSync(opened.fd, 'utf8');
+        const html = await readVerifiedFileSnapshot(opened, { encoding: 'utf8' });
         return res.type('html').set('Cache-Control', 'private, no-store').send(injectReportTheme(html, theme));
       } catch {
         return res.status(404).json({ error: 'file_not_found' });
-      } finally {
-        try { fs.closeSync(opened.fd); } catch {}
       }
     }
 
-    // `fd` makes createReadStream consume this already-verified descriptor;
-    // it does not reopen or resolve the path supplied during authorization.
-    const stream = fs.createReadStream(null, { fd: opened.fd, autoClose: true, start: 0 });
+    // Each fixed block is hashed before the exact Buffer read from the
+    // unlinked descriptor is pushed. A retained writer can therefore abort a
+    // response, but cannot make the route send bytes outside Snapshot Truth.
+    const stream = createVerifiedSnapshotReadStream(opened);
     stream.once('error', (error) => {
       if (!res.headersSent) {
         res.status(404).json({ error: 'file_not_found' });
@@ -663,7 +952,7 @@ function createToolsExecutor({
       .type(artifactContentTypeHint(resolved.filePath))
       .set('Cache-Control', 'private, no-store')
       .set('Content-Length', String(opened.stat.size));
-    return stream.pipe(res);
+    return pipeVerifiedSnapshotToResponse(stream, req, res);
   }
 
   function regenerateReportForImage(jobId, toolId, filename, outputDirOverride) {
@@ -830,7 +1119,11 @@ function createToolsExecutor({
     try {
       const cutoff = Date.now() - ZOMBIE_TIMEOUT_MS;
       await recoverStaleActiveJobs({ activeJobs: activeToolJobs, cutoff, db });
-      const result = await markUnownedStaleJobs({ db, cutoff });
+      const result = await markUnownedStaleJobs({
+        db,
+        cutoff,
+        ownedJobIds: activeToolJobs.keys(),
+      });
       if (result.changes > 0) {
         console.log(`[tools] Recovered ${result.changes} unowned zombie job(s)`);
         try {
@@ -861,13 +1154,6 @@ function createToolsExecutor({
   }
 
   async function markJobFailed(jobId, errorMsg, stage) {
-    try {
-      const current = await db.prepare('SELECT status FROM tool_jobs WHERE id=?').get(jobId);
-      if (current && current.status === 'cancelled') {
-        console.log('[tools] Job ' + jobId + ' cancelled; skip failure overwrite');
-        return;
-      }
-    } catch {}
     const raw = String(errorMsg || '');
     let errStr;
     if (raw.length <= 3000) {
@@ -880,13 +1166,17 @@ function createToolsExecutor({
         ' chars] ...\n\n' +
         raw.slice(-1200);
     }
-    await db
-      .prepare('UPDATE tool_jobs SET status=?, error=?, completed_at=? WHERE id=?')
-      .run('failed', errStr, Date.now(), jobId);
+    const failed = await transitionToolJobToFailed({ db, jobId, error: errStr });
+    if (!failed || failed.changes < 1) {
+      console.log('[tools] Job ' + jobId + ' reached another terminal state; skip failure overwrite');
+      return;
+    }
     const translated = translateRError(errStr);
     if (translated) {
       const combined = '💡 ' + translated + '\n\n--- 原始错误信息 ---\n' + errStr;
-      await db.prepare('UPDATE tool_jobs SET error=? WHERE id=?').run(combined, jobId);
+      await db
+        .prepare('UPDATE tool_jobs SET error=? WHERE id=? AND status=?')
+        .run(combined, jobId, 'failed');
     }
     try {
       const job = await db
@@ -954,10 +1244,16 @@ function createToolsExecutor({
   }
 
   async function executeJob(jobId, toolId, jobDir, stagedInputFiles = []) {
+    const owner = claimActiveToolJob(activeToolJobs, { jobId, toolId });
+    if (!owner) {
+      console.warn('[tools] Job ' + jobId + ' already has an active execution owner');
+      return;
+    }
     const started = await db
       .prepare('UPDATE tool_jobs SET status = ? WHERE id = ? AND status = ?')
       .run('running', jobId, 'pending');
     if (!started || started.changes < 1) {
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
       console.log('[tools] Job ' + jobId + ' not started because it is no longer pending');
       return;
     }
@@ -966,6 +1262,7 @@ function createToolsExecutor({
     );
     if (!job) {
       await markJobFailed(jobId, 'Tool job disappeared before execution.', 'setup');
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
       return;
     }
     let stagedInputSnapshots;
@@ -973,6 +1270,7 @@ function createToolsExecutor({
       stagedInputSnapshots = captureStagedInputSnapshots(stagedInputFiles);
     } catch (error) {
       await markJobFailed(jobId, `Staged input snapshot failed: ${error.message}`, 'setup');
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
       return;
     }
     const outputDir = path.join(jobDir, 'output');
@@ -981,6 +1279,7 @@ function createToolsExecutor({
     const cfg = getToolConfig(toolId);
     if (!cfg) {
       await markJobFailed(jobId, 'Unknown tool: ' + toolId, 'config');
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
       return;
     }
 
@@ -988,6 +1287,7 @@ function createToolsExecutor({
     const scriptSrc = cfg._isPlugin ? cfg.script : path.join(scriptsDir, cfg.script);
     if (!fs.existsSync(scriptSrc)) {
       await markJobFailed(jobId, 'Script not found: ' + cfg.script, 'config');
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
       return;
     }
 
@@ -1027,6 +1327,7 @@ function createToolsExecutor({
       }
     } catch (e) {
       await markJobFailed(jobId, 'Copy failed: ' + e.message, 'setup');
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
       return;
     }
 
@@ -1054,6 +1355,7 @@ function createToolsExecutor({
         : null;
       if (!runtimeReady.ready) {
         await markJobFailed(jobId, runtimeReady.reason, 'runtime');
+        releaseActiveToolJob(activeToolJobs, jobId, owner);
         return;
       }
       if (cfg.lang === 'r') {
@@ -1102,11 +1404,17 @@ function createToolsExecutor({
       }
     }
 
+    if (!await canLaunchOwnedToolJob({ activeToolJobs, db, jobId, owner })) {
+      releaseActiveToolJob(activeToolJobs, jobId, owner);
+      console.log('[tools] Job ' + jobId + ' launch suppressed by durable cancellation state');
+      return;
+    }
+
     const startedAt = new Date().toISOString();
     const resourceStart = createRuntimeResourceSnapshot({
       disk: diskSnapshot(outputDir),
       runtime: { r: cfg.lang === 'r' && runtimeReady?.ready, python: cfg.lang === 'python' && runtimeReady?.ready },
-      activeJobs: activeToolJobs.size + 1,
+      activeJobs: activeToolJobs.size,
       observedAt: startedAt,
     });
     const buildProvenance = (artifacts = []) => {
@@ -1138,16 +1446,15 @@ function createToolsExecutor({
       return { provenance, provenancePath, pluginManifest };
     };
     const hardTimeoutMs = TOOL_LIFECYCLE.hardTimeoutMs;
-    let hardTimeoutTimer = null;
     let resourceSampler = null;
     const child = execFile(
       runCmd[0],
       runCmd.slice(1),
       { timeout: 0, maxBuffer: 10 * 1024 * 1024, env: runEnv },
       async (err, stdout, stderr) => {
-        if (hardTimeoutTimer) clearTimeout(hardTimeoutTimer);
-        const active = activeToolJobs.get(jobId);
-        if (active && active.heartbeatTimer) clearInterval(active.heartbeatTimer);
+        try {
+        const active = owner;
+        clearActiveToolJobLifecycleTimers(active);
         let sampledResources;
         try {
           sampledResources = resourceSampler
@@ -1164,11 +1471,13 @@ function createToolsExecutor({
             peakStatus: 'unavailable',
           };
         }
-        activeToolJobs.delete(jobId);
         const resourceEnd = createRuntimeResourceSnapshot({
           disk: diskSnapshot(outputDir),
           runtime: { r: cfg.lang === 'r' && runtimeReady?.ready, python: cfg.lang === 'python' && runtimeReady?.ready },
-          activeJobs: activeToolJobs.size,
+          activeJobs: Math.max(
+            0,
+            activeToolJobs.size - (activeToolJobs.get(jobId) === owner ? 1 : 0),
+          ),
           observedAt: new Date().toISOString(),
         });
         const resourceUsage = { start: resourceStart, end: resourceEnd, ...sampledResources };
@@ -1183,69 +1492,85 @@ function createToolsExecutor({
             .prepare('SELECT status, is_test_run, result_json FROM tool_jobs WHERE id=?')
             .get(jobId);
         } catch {}
-        if (active && active.cancelRequested) {
+        const finalizeCancellation = async (recorded = null) => {
           try {
             const finalOutput = await directoryBytes(outputDir);
             mergeFinalOutputMeasurement(resourceUsage, finalOutput);
           } catch {
             // Periodic samples remain truthful when the final directory scan is unavailable.
           }
-          let recorded = null;
-          try { recorded = buildProvenance(); } catch {}
+          let cancellationProvenance = recorded;
+          if (!cancellationProvenance) {
+            try { cancellationProvenance = buildProvenance(); } catch {}
+          }
           const cancelledResult = buildCancelledToolResult({
             existingResult: parseStoredToolResult(currentJob),
             jobId,
             resourceUsage,
-            executionProvenance: recorded?.provenance || null,
-            provenanceRef: recorded ? {
-              provenanceHash: recorded.provenance.provenanceHash,
-              path: recorded.provenancePath,
+            executionProvenance: cancellationProvenance?.provenance || null,
+            provenanceRef: cancellationProvenance ? {
+              provenanceHash: cancellationProvenance.provenance.provenanceHash,
+              path: cancellationProvenance.provenancePath,
               toolJobId: jobId,
             } : null,
           });
           try {
-            await db.prepare('UPDATE tool_jobs SET result_json=? WHERE id=?')
-              .run(JSON.stringify(cancelledResult), jobId);
+            await settleConfirmedToolCancellation({ db, jobId, result: cancelledResult });
           } catch (error) {
-            console.warn('[tools] cancelled Job resource summary persistence failed:', error.message);
+            console.warn('[tools] cancelled Job terminal persistence failed:', error.message);
           }
-          console.log('[tools] Job ' + jobId + ' cancellation requested; cancel route owns terminal status');
+          console.log('[tools] Job ' + jobId + ' cancellation confirmed by process exit');
+        };
+        if (active && active.cancelRequested) {
+          await finalizeCancellation();
           return;
         }
         if (currentJob && currentJob.status === 'cancelled') {
-          const cancelledResult = buildCancelledToolResult({
-            existingResult: parseStoredToolResult(currentJob),
-            jobId,
-            resourceUsage,
-          });
-          try {
-            await db.prepare('UPDATE tool_jobs SET result_json=? WHERE id=?')
-              .run(JSON.stringify(cancelledResult), jobId);
-          } catch (error) {
-            console.warn('[tools] cancelled Job resource summary persistence failed:', error.message);
-          }
-          console.log('[tools] Job ' + jobId + ' cancelled; skip terminal status overwrite');
+          await finalizeCancellation();
           return;
         }
 
-        if (err) {
+        const executionFailure = err || active.setupFailure;
+        if (executionFailure) {
+          let failed = null;
           try {
-            const failed = buildProvenance();
-            await db.prepare('UPDATE tool_jobs SET result_json=? WHERE id=?').run(JSON.stringify({
+            failed = buildProvenance();
+          } catch (error) {
+            console.warn('[tools] failed Job provenance persistence failed:', error.message);
+          }
+          const failedResult = buildFailedToolResult({
+            existingResult: parseStoredToolResult(currentJob),
+            jobId,
+            reason: active.setupFailure
+              ? 'executor_setup_failure'
+              : active?.timedOut
+                ? 'hard_timeout'
+                : err.killed
+                  ? 'terminated'
+                  : 'nonzero_exit',
+            exitCode: err?.code ?? null,
+            resourceUsage,
+            executionProvenance: failed?.provenance || null,
+            provenanceRef: failed ? {
+              provenanceHash: failed.provenance.provenanceHash,
+              path: failed.provenancePath,
               toolJobId: jobId,
-              failure: {
-                phase: 'execute',
-                reason: active?.timedOut ? 'hard_timeout' : err.killed ? 'terminated' : 'nonzero_exit',
-                exitCode: err.code ?? null,
-              },
-              resourceUsage,
-              executionProvenance: failed.provenance,
-              provenanceRef: { provenanceHash: failed.provenance.provenanceHash, path: failed.provenancePath, toolJobId: jobId },
-            }), jobId);
-          } catch {}
+            } : null,
+          });
+          try {
+            await db
+              .prepare('UPDATE tool_jobs SET result_json=? WHERE id=? AND status IN (?,?,?)')
+              .run(JSON.stringify(failedResult), jobId, 'pending', 'running', 'failed');
+          } catch (error) {
+            console.warn('[tools] failed Job resource summary persistence failed:', error.message);
+          }
+          if (active.cancelRequested) {
+            await finalizeCancellation(failed);
+            return;
+          }
           const failureMessage = active?.timedOut
             ? `任务超过最大运行预算 ${hardTimeoutMs}ms；子进程退出已确认`
-            : stderr || err.message || '';
+            : active.setupFailure?.message || stderr || err?.message || '';
           await markJobFailed(jobId, failureMessage, 'execute');
           return;
         }
@@ -1275,6 +1600,10 @@ function createToolsExecutor({
               archiveArtifact.filename || archiveArtifact.name || 'all_results.zip'
             );
           } catch (archiveError) {
+            if (active.cancelRequested) {
+              await finalizeCancellation();
+              return;
+            }
             await markJobFailed(jobId, `Result archive failed: ${archiveError.message}`, 'postprocess');
             return;
           }
@@ -1358,6 +1687,10 @@ function createToolsExecutor({
           provenance: recorded.provenance,
           plugin: recorded.pluginManifest,
         });
+        if (active.cancelRequested) {
+          await finalizeCancellation(recorded);
+          return;
+        }
         if (truth.blocking) {
           const truthError =
             truth.issues
@@ -1366,13 +1699,15 @@ function createToolsExecutor({
               .join('; ') || 'Required result artifacts are missing.';
           await markJobFailed(jobId, truthError, 'artifact_validation');
           await db
-            .prepare('UPDATE tool_jobs SET result_json=? WHERE id=?')
-            .run(JSON.stringify(result), jobId);
+            .prepare('UPDATE tool_jobs SET result_json=? WHERE id=? AND status=?')
+            .run(JSON.stringify(result), jobId, 'failed');
           return;
         }
-        await db
-          .prepare('UPDATE tool_jobs SET status=?, result_json=?, completed_at=? WHERE id=?')
-          .run('completed', JSON.stringify(result), Date.now(), jobId);
+        const completed = await transitionToolJobToCompleted({ db, jobId, result });
+        if (!completed || completed.changes < 1) {
+          if (active.cancelRequested) await finalizeCancellation(recorded);
+          return;
+        }
         console.log('[tools] Job ' + jobId + ' completed');
 
         try {
@@ -1383,13 +1718,27 @@ function createToolsExecutor({
         } catch (e) {
           console.warn('[tools] cleanup error:', e.message);
         }
+        } catch (callbackError) {
+          console.warn('[tools] Job ' + jobId + ' finalization failed:', callbackError.message);
+          try {
+            await markJobFailed(jobId, `Job finalization failed: ${callbackError.message}`, 'finalize');
+          } catch (persistenceError) {
+            console.warn('[tools] Job finalization failure persistence failed:', persistenceError.message);
+          }
+        } finally {
+          releaseActiveToolJob(activeToolJobs, jobId, owner);
+        }
       }
     );
-    activeToolJobs.set(jobId, {
-      process: child,
-      startedAt: Date.now(),
-      lastHeartbeatAt: Date.now(),
-      toolId,
+    owner.process = child;
+    owner.phase = 'running';
+    owner.lastHeartbeatAt = Date.now();
+    armActiveToolJobLifecycle({
+      active: owner,
+      jobId,
+      db,
+      heartbeatIntervalMs: HEARTBEAT_INTERVAL_MS,
+      hardTimeoutMs,
     });
     resourceSampler = createToolResourceSampler({
       pid: child.pid,
@@ -1397,17 +1746,15 @@ function createToolsExecutor({
       activeJobs: () => activeToolJobs.size,
     });
     resourceSampler.start();
-    await db.prepare('UPDATE tool_jobs SET process_pid=?, heartbeat_at=? WHERE id=?').run(child.pid || null, Date.now(), jobId);
-    const active = activeToolJobs.get(jobId);
-    active.heartbeatTimer = setInterval(() => {
-      try {
-        refreshVerifiedHeartbeat({ active, jobId, db });
-      } catch (error) {
-        console.warn('[tools] heartbeat update failed:', error.message);
-      }
-    }, HEARTBEAT_INTERVAL_MS);
-    active.heartbeatTimer.unref?.();
-    hardTimeoutTimer = scheduleHardTimeout({ active, jobId, db, hardTimeoutMs });
+    const ownership = await db
+      .prepare('UPDATE tool_jobs SET process_pid=?, heartbeat_at=? WHERE id=? AND status=?')
+      .run(child.pid || null, Date.now(), jobId, 'running');
+    if (!ownership || ownership.changes < 1) {
+      throw new Error('tool_job_process_ownership_persistence_rejected');
+    }
+    if (activeToolJobs.get(jobId) !== owner) {
+      throw new Error('active_tool_job_owner_lost_after_spawn');
+    }
   }
 
   function translateRError(rawError) {
@@ -1530,7 +1877,16 @@ function createToolsExecutor({
         isTest ? 1 : 0,
         projectId || null
       );
-    executeJob(jobId, toolId, jobDir, uploadResult.entries.map((entry) => entry.filePath));
+    void executeJob(jobId, toolId, jobDir, uploadResult.entries.map((entry) => entry.filePath))
+      .catch((error) => handleActiveToolJobSetupFailure({
+        activeToolJobs,
+        jobId,
+        error,
+        markFailed: markJobFailed,
+      }))
+      .catch((error) => {
+        console.warn('[tools] Job ' + jobId + ' setup failure handling failed:', error.message);
+      });
     console.log(
       `[tools] Job ${jobId} submitted (tool=${toolId} rid=${req.requestId} user=${uid} test=${isTest})`
     );
@@ -1627,5 +1983,18 @@ module.exports = {
     openVerifiedAuthorizedToolResultFile,
     mergeFinalOutputMeasurement,
     buildCancelledToolResult,
+    buildFailedToolResult,
+    claimActiveToolJob,
+    releaseActiveToolJob,
+    terminateOwnedToolJobProcess,
+    requestActiveToolJobCancellation,
+    canLaunchOwnedToolJob,
+    persistVerifiedToolJobHeartbeat,
+    armActiveToolJobLifecycle,
+    clearActiveToolJobLifecycleTimers,
+    transitionToolJobToFailed,
+    transitionToolJobToCompleted,
+    settleConfirmedToolCancellation,
+    handleActiveToolJobSetupFailure,
   },
 };

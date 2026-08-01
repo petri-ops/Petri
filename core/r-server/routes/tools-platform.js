@@ -64,13 +64,24 @@ function createToolsPlatformRoutes({
         if (!canAccessToolJob(req, job)) return res.status(403).json({ error: 'forbidden' });
         if (!isCancellableJob(job)) return res.json({ ok: true, message: 'already_finished' });
         const local = killLocalToolJob(job.id);
+        if (job.status === 'running' && (!local || local.active !== true)) {
+          await db
+            .prepare('UPDATE tool_jobs SET error=? WHERE id=? AND status=?')
+            .run('cancel_owner_unavailable:process_ownership_unproven', job.id, 'running');
+          return res.status(409).json({
+            ok: false,
+            status: job.status,
+            error: 'execution_owner_unavailable',
+            local,
+          });
+        }
         if (local && local.termination) {
           const termination = await local.termination;
           local.killed = termination.terminated === true;
           local.terminationResult = termination;
           delete local.termination;
         }
-        if (local && local.active && !local.killed) {
+        if (local && local.active && local.processStarted !== false && !local.killed) {
           const reason = local.terminationResult?.reason || 'termination_unconfirmed';
           await db
             .prepare('UPDATE tool_jobs SET error=? WHERE id=? AND status IN (?,?)')
@@ -82,9 +93,31 @@ function createToolsPlatformRoutes({
             local,
           });
         }
-        await db
-          .prepare('UPDATE tool_jobs SET status=?, error=?, completed_at=? WHERE id=?')
-          .run('cancelled', null, Date.now(), job.id);
+        const cancelled = await db
+          .prepare(
+            'UPDATE tool_jobs SET status=?, error=?, completed_at=?, process_pid=?, heartbeat_at=? '
+            + 'WHERE id=? AND status IN (?,?,?)',
+          )
+          .run(
+            'cancelled',
+            null,
+            Date.now(),
+            null,
+            null,
+            job.id,
+            'pending',
+            'running',
+            'cancelled',
+          );
+        if (!cancelled || cancelled.changes < 1) {
+          const current = await db.prepare('SELECT status FROM tool_jobs WHERE id = ?').get(job.id);
+          return res.status(409).json({
+            ok: false,
+            status: current?.status || 'unknown',
+            error: 'job_no_longer_cancellable',
+            local,
+          });
+        }
         res.json({ ok: true, status: 'cancelled', local });
       } catch (e) {
         res.status(500).json({ error: e.message });

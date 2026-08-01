@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -48,7 +56,7 @@ function fixture(context, selectionOverrides = {}) {
         id: 'job_1', project_id: 'project_1', tool_id: 'deseq2', status: 'completed',
         result: {
           artifactTruth: { status: 'valid', blocking: false },
-          artifacts: [{ id: 'deg_table', path: source, name: 'deg.csv', type: 'table' }],
+          artifacts: [{ id: 'deg_table', path: source, name: 'deg.csv', type: 'table', sha256: sha256(csv) }],
         },
       }),
       getPluginManifest: () => ({ resultStudio: {
@@ -139,6 +147,53 @@ test('RS-P2 explicit selection blocks when its persisted entity hash drifts', as
   assert.equal(called, false);
 });
 
+test('P6 selection action binds a separate backing table to its exact Artifact Truth SHA', async (context) => {
+  const fx = fixture(context);
+  const plot = join(fx.root, 'volcano.svg');
+  const plotBytes = '<svg xmlns="http://www.w3.org/2000/svg"></svg>\n';
+  writeFileSync(plot, plotBytes);
+  const revision = fx.dependencies.repository.getRevision('rev_1');
+  const selection = fx.dependencies.repository.getSelection('sel_1');
+  Object.assign(revision, {
+    artifactId: 'volcano_plot',
+    outputPath: 'volcano.svg',
+    outputHash: sha256(plotBytes),
+  });
+  selection.artifactId = 'volcano_plot';
+  const trustedTable = readFileSync(join(fx.root, 'deg.csv'));
+  fx.dependencies.getToolJob = () => ({
+    id: 'job_1', project_id: 'project_1', tool_id: 'deseq2', status: 'completed',
+    result: {
+      artifactTruth: { status: 'valid', blocking: false },
+      artifacts: [
+        { id: 'volcano_plot', path: plot, name: 'volcano.svg', type: 'plot', sha256: sha256(plotBytes) },
+        { id: 'deg_table', path: join(fx.root, 'deg.csv'), name: 'deg.csv', type: 'table', sha256: sha256(trustedTable) },
+      ],
+    },
+  });
+  fx.dependencies.getPluginManifest = () => ({ resultStudio: {
+    actions: ['select_genes', 'derive_enrichment_input'],
+    artifacts: [
+      { id: 'volcano_plot', filename: 'volcano.svg', type: 'plot' },
+      { id: 'deg_table', filename: 'deg.csv', type: 'table' },
+    ],
+    interactionMappings: [{
+      artifactId: 'volcano_plot', mode: 'plot', entityType: 'gene', idField: 'gene', dataArtifactId: 'deg_table',
+    }],
+  } });
+  writeFileSync(join(fx.root, 'deg.csv'), `${trustedTable.toString('utf8')}FAKE,9,0.001\n`);
+
+  let called = false;
+  fx.dependencies.runTool = async () => { called = true; return { ok: true }; };
+  const result = await tool_result_selection_run({ selectionId: 'sel_1', action: 'go_kegg' }, {
+    userId: 'user_1', projectId: 'project_1', accessMode: 'full',
+  }, fx.dependencies);
+
+  assert.equal(result.ok, false);
+  assert.equal(result.error, 'artifact_truth_drift');
+  assert.equal(called, false);
+});
+
 test('RS-P2 rejects an unsafe persisted selection id before materializing project files', async (context) => {
   const unsafe = 'sel_../../outside';
   const fx = fixture(context, { selectionId: unsafe });
@@ -147,6 +202,38 @@ test('RS-P2 rejects an unsafe persisted selection id before materializing projec
   }, fx.dependencies);
   assert.equal(result.ok, false);
   assert.equal(result.error, 'selection_id_invalid');
+});
+
+test('P6 selection materialization refuses directory and target symlinks without touching outside files', async (context) => {
+  const outside = mkdtempSync(join(tmpdir(), 'biof3-rs-p6-selection-outside-'));
+  context.after(() => rmSync(outside, { recursive: true, force: true }));
+
+  const directoryFx = fixture(context);
+  symlinkSync(outside, join(directoryFx.root, 'analysis'));
+  let called = false;
+  directoryFx.dependencies.runTool = async () => { called = true; return { ok: true }; };
+  const directoryResult = await tool_result_selection_run({ selectionId: 'sel_1', action: 'go_kegg' }, {
+    userId: 'user_1', projectId: 'project_1', accessMode: 'full',
+  }, directoryFx.dependencies);
+  assert.equal(directoryResult.ok, false);
+  assert.equal(directoryResult.error, 'selection_materialization_path_unsafe');
+  assert.equal(called, false);
+  assert.equal(existsSync(join(outside, 'selections')), false);
+
+  const targetFx = fixture(context);
+  const materializationDir = join(targetFx.root, 'analysis', 'selections', 'sel_1');
+  mkdirSync(materializationDir, { recursive: true });
+  const outsideSentinel = join(outside, 'sentinel.csv');
+  writeFileSync(outsideSentinel, 'OUTSIDE_MUST_NOT_CHANGE\n');
+  symlinkSync(outsideSentinel, join(materializationDir, 'gene-list.csv'));
+  targetFx.dependencies.runTool = async () => { called = true; return { ok: true }; };
+  const targetResult = await tool_result_selection_run({ selectionId: 'sel_1', action: 'go_kegg' }, {
+    userId: 'user_1', projectId: 'project_1', accessMode: 'full',
+  }, targetFx.dependencies);
+  assert.equal(targetResult.ok, false);
+  assert.equal(targetResult.error, 'selection_materialization_path_unsafe');
+  assert.equal(readFileSync(outsideSentinel, 'utf8'), 'OUTSIDE_MUST_NOT_CHANGE\n');
+  assert.equal(called, false);
 });
 
 test('P5 derives GO/KEGG from exact current DEG bytes with private artifact lineage', async (context) => {

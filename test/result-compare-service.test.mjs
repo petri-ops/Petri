@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createRequire } from 'node:module';
@@ -9,6 +9,7 @@ const require = createRequire(import.meta.url);
 const Database = require('better-sqlite3');
 const { bindProjectRepository } = require('../core/shared-backend/git-repository-binding');
 const { ensureResultStudioSchema } = require('../core/shared-backend/result-studio-schema');
+const { ensureResultRefTransactionSchema } = require('../core/shared-backend/result-ref-transaction-schema');
 const { createResultStudioRepository } = require('../core/shared-backend/result-studio-repository');
 const { sha256 } = require('../core/shared-backend/result-changeset-service');
 const {
@@ -32,6 +33,7 @@ function makeFixture(context) {
   context.after(() => { try { db.close(); } catch { /* closed */ } });
   ensureResultStudioSchema(db);
   ensureResultWorkflowGraphSchema(db);
+  ensureResultRefTransactionSchema(db);
   const repository = createResultStudioRepository(db, { ensureSchema: false });
   const binding = bindProjectRepository({ workspaceRoot, projectId: 'p_rs6' });
   const adapter = binding.adapter;
@@ -481,6 +483,25 @@ test('RS6 discarding an unadopted preview removes only its temporary ref', (cont
   assert.equal(fx.adapter.revParse('refs/heads/biof3/changeset/cs_candidate'), null);
   assert.equal(fx.repository.getCurrentRevision('family').revisionId, 'rev_source');
   assert.equal(fx.adapter.revParse('refs/heads/biof3/main'), fx.base.commit);
+});
+
+test('P6 preview discard never follows a symlinked private revision root during cleanup', (context) => {
+  const fx = makeFixture(context);
+  const revisionRoot = join(fx.workspaceRoot, '.biof3', 'revision');
+  rmSync(revisionRoot, { recursive: true, force: true });
+  const outside = mkdtempSync(join(tmpdir(), 'biof3-compare-cleanup-outside-'));
+  context.after(() => rmSync(outside, { recursive: true, force: true }));
+  const outsideStaging = join(outside, 'cs_candidate');
+  mkdirSync(outsideStaging);
+  const marker = join(outsideStaging, 'keep.txt');
+  writeFileSync(marker, 'must survive');
+  symlinkSync(outside, revisionRoot, 'dir');
+
+  const result = revertResultChangeSet({
+    projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, changeSetId: 'cs_candidate',
+  }, { repository: fx.repository, adapter: fx.adapter });
+  assert.equal(result.changeSet.status, 'reverted');
+  assert.equal(readFileSync(marker, 'utf8'), 'must survive');
 });
 
 test('RS6 restores history as a new commit and Revision without rewriting the target', (context) => {
