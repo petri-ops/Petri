@@ -865,7 +865,9 @@ export async function captureP6LiveProductScenarios({ keep = false, verbose = fa
         decision: memoryBlockedResult.detail?.decision || null,
         reasons: memoryBlockedResult.detail?.reasons || [],
         scientificParametersChanged: memoryBlockedResult.detail?.scientificParametersChanged,
-        resourceEstimate: memoryBlockedResult.detail?.resourceEstimate || null,
+        resourceEstimate: projectP6ResourceEstimateForEvidence(
+          memoryBlockedResult.detail?.resourceEstimate,
+        ),
         measurement: 'host_statfs_and_runtime_snapshot',
         noJobOrChangeSetOrRevisionOrCheckpointWrite: stableHash(memoryBlockedCountsBefore) === stableHash(memoryBlockedCountsAfter),
         countsBefore: memoryBlockedCountsBefore,
@@ -876,7 +878,9 @@ export async function captureP6LiveProductScenarios({ keep = false, verbose = fa
         decision: diskBlockedResult.detail?.decision || null,
         reasons: diskBlockedResult.detail?.reasons || [],
         scientificParametersChanged: diskBlockedResult.detail?.scientificParametersChanged,
-        resourceEstimate: diskBlockedResult.detail?.resourceEstimate || null,
+        resourceEstimate: projectP6ResourceEstimateForEvidence(
+          diskBlockedResult.detail?.resourceEstimate,
+        ),
         measurement: 'controlled_statfs_dependency_fault',
         noJobOrChangeSetOrRevisionOrCheckpointWrite: stableHash(diskBlockedCountsBefore) === stableHash(diskBlockedCountsAfter),
         countsBefore: diskBlockedCountsBefore,
@@ -1018,6 +1022,26 @@ export function evaluateP6NoSeedPrecondition(observation) {
     && counts && typeof counts === 'object'
     && stableHash(counts) === stableHash(expectedCounts)
     && String(observation.digest || '') === stableHash(expectedCounts);
+}
+
+export function projectP6ResourceEstimateForEvidence(estimate) {
+  if (!estimate || typeof estimate !== 'object') return null;
+  return {
+    estimateVersion: estimate.estimateVersion,
+    source: estimate.source,
+    memoryBytes: estimate.memoryBytes,
+    diskBytes: estimate.diskBytes,
+    inputBytes: estimate.inputBytes,
+    sourceOutputBytes: estimate.sourceOutputBytes,
+    sourceOutputMeasurement: estimate.sourceOutputMeasurement,
+    selectedRevisionDigest: estimate.selectedRevisionId
+      ? digestId(estimate.selectedRevisionId)
+      : null,
+    downstreamOutputBytes: estimate.downstreamOutputBytes,
+    historicalRssBytes: estimate.historicalRssBytes,
+    rasterBytes: estimate.rasterBytes,
+    rasterParameterSource: estimate.rasterParameterSource,
+  };
 }
 
 function trustedBlockedPreviewObservation(observation, requiredReason, measurement) {

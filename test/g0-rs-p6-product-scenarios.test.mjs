@@ -16,6 +16,7 @@ import {
   evaluateP6ProviderTransportObservation,
   evaluateP6ResourceBudgetObservation,
   evaluateP6StaleAdoptionObservation,
+  projectP6ResourceEstimateForEvidence,
   sanitizeP6ProductScenarioObservation,
 } from '../scripts/g0-rs-p6-product-scenarios.mjs';
 
@@ -207,6 +208,17 @@ test('P6 product evaluators reject weakened budget, stale adoption and GC truth'
     ...gcFixture(),
     nonterminalPreviewPreserved: false,
   }), false);
+});
+
+test('P6 resource estimate evidence replaces the selected Revision ID with a digest', () => {
+  const projected = projectP6ResourceEstimateForEvidence({
+    ...resourceFixture().memoryBlocked.resourceEstimate,
+    selectedRevisionId: 'rev_private123',
+    inputBytes: 128,
+  });
+  assert.equal('selectedRevisionId' in projected, false);
+  assert.match(projected.selectedRevisionDigest, /^[a-f0-9]{64}$/);
+  assert.equal(projected.inputBytes, 128);
 });
 
 test('P6 aggregate remains explicitly non-Provider, non-packaged, non-qualifying and P7-excluded', () => {
