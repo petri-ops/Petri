@@ -873,7 +873,11 @@ function createResultStudioRepository(db, options = {}) {
           }
         }
       }
-      const apply = transaction(() => {
+      // Reserve the WAL writer before reading the existing cohort and family
+      // ordinals. With a deferred transaction, two candidate workers can both
+      // take a read snapshot and the loser then fails with SQLITE_BUSY_SNAPSHOT
+      // when it attempts its first Revision write.
+      const apply = immediateTransaction(() => {
         if (transition) {
           const existingCohort = api.listRevisionsByChangeSet(changeSetId);
           if (existingCohort.length > 0) {
