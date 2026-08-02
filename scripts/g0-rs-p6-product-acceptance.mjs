@@ -543,10 +543,23 @@ export function assertP6ProductAcceptanceEvidenceWritable(evidence) {
     && evidence?.sourceBindingStableDuringCapture === true,
   'p6_evidence_source_binding_not_current');
   const recomputed = evaluateP6ProductAcceptanceObservations(evidence?.observations);
+  const checksExact = exactJson(evidence?.checks, recomputed.checks);
+  const componentCountsExact = exactJson(
+    evidence?.componentCheckCounts,
+    recomputed.componentCheckCounts,
+  );
   invariant(recomputed.passed && evidence?.passed === true
-    && exactJson(evidence?.checks, recomputed.checks)
-    && exactJson(evidence?.componentCheckCounts, recomputed.componentCheckCounts),
-  'p6_evidence_checks_not_recomputed');
+    && checksExact && componentCountsExact,
+  'p6_evidence_checks_not_recomputed', {
+    recomputedPassed: recomputed.passed,
+    storedPassed: evidence?.passed === true,
+    checksExact,
+    componentCountsExact,
+    storedChecks: evidence?.checks,
+    recomputedChecks: recomputed.checks,
+    storedComponentCheckCounts: evidence?.componentCheckCounts,
+    recomputedComponentCheckCounts: recomputed.componentCheckCounts,
+  });
   assertSanitizedP6ProductAcceptanceEvidence(evidence);
   return true;
 }
