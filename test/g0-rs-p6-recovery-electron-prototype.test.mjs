@@ -67,6 +67,7 @@ function passingObservation(overrides = {}) {
       candidateChildPresentBeforeKill: true,
       candidateJobExactBeforeKill: true,
       candidateInputExactBeforeKill: true,
+      candidateRuntimePausedBeforeCheckpoint: true,
       candidateRuntimeProcessObservedBeforeKill: true,
       candidateRuntimeDirectChildBeforeKill: true,
       candidateRuntimeCommandTrustedBeforeKill: true,

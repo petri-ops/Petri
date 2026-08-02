@@ -241,6 +241,7 @@ export function buildP6RecoveryElectronVerdict(observation = {}) {
       && observation.interruption?.candidateChildPresentBeforeKill === true
       && observation.interruption?.candidateJobExactBeforeKill === true
       && observation.interruption?.candidateInputExactBeforeKill === true
+      && observation.interruption?.candidateRuntimePausedBeforeCheckpoint === true
       && observation.interruption?.candidateRuntimeProcessObservedBeforeKill === true
       && observation.interruption?.candidateRuntimeDirectChildBeforeKill === true
       && observation.interruption?.candidateRuntimeCommandTrustedBeforeKill === true
@@ -1319,6 +1320,8 @@ export async function observeP6RecoveryElectron({ keep = false, show = false, ve
           && durable.hold.groupMemberCount >= 2,
         candidateJobExactBeforeKill: durable.hold.candidateJobExact === true,
         candidateInputExactBeforeKill: durable.hold.candidateInputExact === true,
+        candidateRuntimePausedBeforeCheckpoint:
+          durable.hold.candidateRuntimePausedBeforeCheckpoint === true,
         candidateRuntimeProcessObservedBeforeKill:
           durable.hold.candidateRuntimeProcessObserved === true,
         candidateRuntimeDirectChildBeforeKill: durable.hold.candidateRuntimeDirectChild === true,

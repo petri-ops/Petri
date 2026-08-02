@@ -38,6 +38,7 @@ const TERMINAL_JOB_STATUSES = new Set(['completed', 'failed', 'cancelled', 'reco
 const SHA256 = /^[a-f0-9]{64}$/;
 const GIT_OID = /^[a-f0-9]{40}$/;
 const WORKER_CHECKPOINT_TIMEOUT_MS = 120_000;
+const WORKER_HOLD_CONFIRMATION_GRACE_MS = 1_000;
 const JOB_TIMEOUT_MS = 180_000;
 
 const Database = require(require.resolve('better-sqlite3', {
@@ -441,6 +442,7 @@ function runManagedGit(binding, args) {
 export function spawnEditWorker(runtime, baseline) {
   invariant(process.platform !== 'win32',
     'p6_restart_checkpoint_hold_unsupported_platform:win32');
+  const trustedRRuntimeIdentity = configuredRRuntimeIdentity(new RExecutor().binPath);
   const spec = {
     op: 'context_edit',
     projectId: runtime.project.id,
@@ -484,6 +486,7 @@ export function spawnEditWorker(runtime, baseline) {
     child,
     detached,
     baselineJobId: baseline.job.id,
+    trustedRRuntimeIdentity,
     checkpointHoldConfirmed: false,
     output: () => ({ stdout, stderr }),
   };
@@ -506,6 +509,7 @@ export function parseP5WorkerCheckpointHold(stdout) {
       && typeof parsed.candidateJobId === 'string'
       && parsed.candidateJobExact === true
       && parsed.candidateInputExact === true
+      && parsed.candidateRuntimePausedBeforeCheckpoint === true
       ? parsed
       : null;
   } catch {
@@ -521,6 +525,8 @@ export function inspectP6StoppedWorkerProcessGroupOutput(output, {
   expectedRunScriptPaths = [],
   expectedJobDirPaths = [],
   runtimeExecutablePathsByPid = {},
+  trustedRuntimeExecutablePaths = trustedRuntimePaths,
+  trustedRuntimeExecCommandPaths = [],
 } = {}) {
   const expectedJobDir = path.join(
     path.resolve(workspaceRoot || ''), 'results', 'jobs', candidateJobId || '',
@@ -529,6 +535,12 @@ export function inspectP6StoppedWorkerProcessGroupOutput(output, {
     expectedJobDir, 'run-script.R',
   );
   const trustedRuntimePathSet = new Set(trustedRuntimePaths.map(String));
+  const trustedRuntimeExecutablePathSet = new Set(
+    trustedRuntimeExecutablePaths.map(String),
+  );
+  const trustedRuntimeExecCommandPathSet = new Set(
+    trustedRuntimeExecCommandPaths.map(String),
+  );
   const expectedRunScriptPathSet = new Set([
     expectedRunScript,
     ...expectedRunScriptPaths.map(String),
@@ -555,14 +567,22 @@ export function inspectP6StoppedWorkerProcessGroupOutput(output, {
     // run-script.R, must never impersonate the candidate runtime.
     const argv = member.command.trim().split(/\s+/);
     const kernelExecutablePath = String(runtimeExecutablePathsByPid[member.pid] || '');
+    const rscriptShapeExact = argv.length === 3
+      && trustedRuntimePathSet.has(argv[0])
+      && expectedRunScriptPathSet.has(argv[1])
+      && expectedJobDirPathSet.has(argv[2]);
+    const execRShapeExact = argv.length === 6
+      && trustedRuntimeExecCommandPathSet.has(argv[0])
+      && argv[1] === '--no-echo'
+      && argv[2] === '--no-restore'
+      && [...expectedRunScriptPathSet].some((runScript) => argv[3] === `--file=${runScript}`)
+      && argv[4] === '--args'
+      && expectedJobDirPathSet.has(argv[5]);
     return member.ppid === workerPid
       && member.pid !== workerPid
       && /^T/.test(member.state)
-      && argv.length === 3
-      && trustedRuntimePathSet.has(argv[0])
-      && trustedRuntimePathSet.has(kernelExecutablePath)
-      && expectedRunScriptPathSet.has(argv[1])
-      && expectedJobDirPathSet.has(argv[2]);
+      && trustedRuntimeExecutablePathSet.has(kernelExecutablePath)
+      && (rscriptShapeExact || execRShapeExact);
   }) || null;
   return {
     groupMembers,
@@ -570,6 +590,9 @@ export function inspectP6StoppedWorkerProcessGroupOutput(output, {
       member.pid === workerPid && /^T/.test(member.state)
     )),
     childProcessPresent: groupMembers.some((member) => member.pid !== workerPid),
+    directZombieChildPresent: groupMembers.some((member) => (
+      member.ppid === workerPid && member.pid !== workerPid && /^Z/.test(member.state)
+    )),
     processGroupAllStopped: groupMembers.length >= 2
       && groupMembers.every((member) => /^T/.test(member.state)),
     candidateRuntimeProcessObserved: Boolean(runtimeChild),
@@ -623,6 +646,36 @@ function exactExistingPathAliases(filePath, code) {
   return [...new Set([resolved, canonical])];
 }
 
+function configuredRRuntimeIdentity(configuredRscript) {
+  const rscriptCommandPaths = exactExistingPathAliases(
+    configuredRscript,
+    'p6_restart_configured_r_runtime_unavailable',
+  );
+  const homeProbe = spawnSync(configuredRscript, [
+    '--vanilla', '-e', 'cat(R.home())',
+  ], { cwd: ROOT, encoding: 'utf8', timeout: 5_000 });
+  invariant(homeProbe.status === 0 && path.isAbsolute(String(homeProbe.stdout || '').trim()),
+    'p6_restart_configured_r_home_probe_failed');
+  const runtimeHome = path.resolve(String(homeProbe.stdout).trim());
+  const canonicalRuntimeHome = realpathSync(runtimeHome);
+  const canonicalRscript = realpathSync(path.resolve(configuredRscript));
+  invariant(canonicalRscript.startsWith(`${canonicalRuntimeHome}${path.sep}`),
+    'p6_restart_configured_rscript_outside_home');
+  const execR = path.join(runtimeHome, 'bin', 'exec', 'R');
+  const execCommandPaths = exactExistingPathAliases(
+    execR,
+    'p6_restart_configured_r_exec_runtime_unavailable',
+  );
+  const canonicalExecR = realpathSync(execR);
+  invariant(canonicalExecR.startsWith(`${canonicalRuntimeHome}${path.sep}`),
+    'p6_restart_configured_r_exec_runtime_outside_home');
+  return Object.freeze({
+    rscriptCommandPaths,
+    execCommandPaths,
+    executablePaths: [...new Set([...rscriptCommandPaths, ...execCommandPaths])],
+  });
+}
+
 function inspectStoppedWorkerProcessGroup(worker, runtime, candidateJobId) {
   if (process.platform === 'win32') {
     throw new Error('p6_restart_checkpoint_hold_unsupported_platform:win32');
@@ -647,16 +700,18 @@ function inspectStoppedWorkerProcessGroup(worker, runtime, candidateJobId) {
     runtime.project.workspace_path, 'results', 'jobs', candidateJobId,
   );
   const expectedRunScript = path.join(expectedJobDir, 'run-script.R');
-  const trustedRuntimePaths = exactExistingPathAliases(
-    new RExecutor().binPath,
-    'p6_restart_configured_r_runtime_unavailable',
-  );
+  const runtimeIdentity = worker.trustedRRuntimeIdentity;
+  invariant(runtimeIdentity?.rscriptCommandPaths?.length > 0
+    && runtimeIdentity?.execCommandPaths?.length > 0,
+  'p6_restart_trusted_r_runtime_identity_missing');
   const inspectionOutput = groupInspection.status === 0 ? groupInspection.stdout : '';
   const parserOptions = {
     workerPid: worker.child.pid,
     candidateJobId,
     workspaceRoot: runtime.project.workspace_path,
-    trustedRuntimePaths,
+    trustedRuntimePaths: runtimeIdentity.rscriptCommandPaths,
+    trustedRuntimeExecCommandPaths: runtimeIdentity.execCommandPaths,
+    trustedRuntimeExecutablePaths: runtimeIdentity.executablePaths,
     expectedRunScriptPaths: exactExistingPathAliases(
       expectedRunScript,
       'p6_restart_candidate_run_script_unavailable',
@@ -680,6 +735,7 @@ function inspectStoppedWorkerProcessGroup(worker, runtime, candidateJobId) {
   const workerProcessStopped = /^T/.test(processState) && parsed.workerProcessStopped;
   const {
     childProcessPresent,
+    directZombieChildPresent,
     processGroupAllStopped,
     candidateRuntimeProcessObserved,
     candidateRuntimeDirectChild,
@@ -697,6 +753,7 @@ function inspectStoppedWorkerProcessGroup(worker, runtime, candidateJobId) {
     groupAddressable,
     workerProcessStopped,
     childProcessPresent,
+    directZombieChildPresent,
     processGroupAllStopped,
     groupMemberCount: parsed.groupMembers.length,
     processState: processState || null,
@@ -775,6 +832,7 @@ export async function waitForDurableCandidateCheckpoint(runtime, worker, timeout
   let lastCheckpoint = null;
   let lastHandshakeSeen = false;
   let lastProcessGroup = null;
+  let holdConfirmationStartedAt = null;
   while (Date.now() < deadline) {
     const checkpoint = readDurableCandidateCheckpoint(
       runtime.env.BIOF3_DB_PATH,
@@ -828,6 +886,7 @@ export async function waitForDurableCandidateCheckpoint(runtime, worker, timeout
         groupAddressable: processGroup.groupAddressable,
         workerProcessStopped: processGroup.workerProcessStopped,
         childProcessPresent: processGroup.childProcessPresent,
+        directZombieChildPresent: processGroup.directZombieChildPresent,
         processGroupAllStopped: processGroup.processGroupAllStopped,
         candidateRuntimeProcessObserved: processGroup.candidateRuntimeProcessObserved,
         candidateRuntimeDirectChild: processGroup.candidateRuntimeDirectChild,
@@ -836,6 +895,15 @@ export async function waitForDurableCandidateCheckpoint(runtime, worker, timeout
           processGroup.candidateRuntimeExecutableIdentityExact,
       };
       if (!processGroup.confirmed) {
+        if (processGroup.workerProcessStopped) {
+          holdConfirmationStartedAt ||= Date.now();
+          if (processGroup.directZombieChildPresent
+              || Date.now() - holdConfirmationStartedAt > WORKER_HOLD_CONFIRMATION_GRACE_MS) {
+            throw Object.assign(new Error('p6_restart_candidate_runtime_not_live_at_hold'), {
+              detail: { processGroup: lastProcessGroup },
+            });
+          }
+        }
         if (worker.child.exitCode !== null || worker.child.signalCode !== null) {
           throw Object.assign(new Error('p6_restart_worker_exited_before_checkpoint_hold_confirmation'), {
             detail: {
@@ -848,6 +916,7 @@ export async function waitForDurableCandidateCheckpoint(runtime, worker, timeout
         await sleep(5);
         continue;
       }
+      holdConfirmationStartedAt = null;
       const heldCheckpoint = readDurableCandidateCheckpoint(
         runtime.env.BIOF3_DB_PATH,
         runtime.project.id,
@@ -890,6 +959,8 @@ export async function waitForDurableCandidateCheckpoint(runtime, worker, timeout
             candidateRuntimePid: processGroup.candidateRuntimePid,
             candidateJobExact: handshake.candidateJobExact === true,
             candidateInputExact: handshake.candidateInputExact === true,
+            candidateRuntimePausedBeforeCheckpoint:
+              handshake.candidateRuntimePausedBeforeCheckpoint === true,
           },
         };
       }
@@ -959,10 +1030,16 @@ export async function killWorkerWithSigkill(worker) {
       },
     });
   }
-  const outcome = await Promise.race([
-    exit,
-    sleep(10_000).then(() => { throw new Error('p6_restart_sigkill_exit_timeout'); }),
-  ]);
+  let exitTimeout = null;
+  const timeout = new Promise((_, reject) => {
+    exitTimeout = setTimeout(() => reject(new Error('p6_restart_sigkill_exit_timeout')), 10_000);
+  });
+  let outcome;
+  try {
+    outcome = await Promise.race([exit, timeout]);
+  } finally {
+    clearTimeout(exitTimeout);
+  }
   invariant(outcome.signal === 'SIGKILL', 'p6_restart_worker_not_sigkilled', outcome);
   invariant(!worker.output().stdout.includes(WORKER_MARKER),
     'p6_restart_worker_completed_before_sigkill');
@@ -1150,6 +1227,7 @@ export function evaluateP6RealRestartPrototype(observation) {
       && observation.candidateChildPresentBeforeKill === true
       && observation.candidateJobExactBeforeKill === true
       && observation.candidateInputExactBeforeKill === true
+      && observation.candidateRuntimePausedBeforeCheckpoint === true
       && observation.candidateRuntimeProcessObservedBeforeKill === true
       && observation.candidateRuntimeDirectChildBeforeKill === true
       && observation.candidateRuntimeCommandTrustedBeforeKill === true
@@ -1930,6 +2008,8 @@ export async function captureP6RealRestartPrototype({ keep = false, verbose = fa
         && durable.hold.groupMemberCount >= 2,
       candidateJobExactBeforeKill: durable.hold.candidateJobExact === true,
       candidateInputExactBeforeKill: durable.hold.candidateInputExact === true,
+      candidateRuntimePausedBeforeCheckpoint:
+        durable.hold.candidateRuntimePausedBeforeCheckpoint === true,
       candidateRuntimeProcessObservedBeforeKill:
         durable.hold.candidateRuntimeProcessObserved === true,
       candidateRuntimeDirectChildBeforeKill: durable.hold.candidateRuntimeDirectChild === true,

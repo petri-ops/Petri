@@ -947,6 +947,120 @@ function workerSummary(result) {
   };
 }
 
+export function inspectP5AcceptanceRuntimeProcessOutput(output, {
+  workerPid,
+  trustedRuntimePaths = [],
+  trustedRuntimeExecCommandPaths = [],
+  expectedRunScriptPaths = [],
+  expectedJobDirPaths = [],
+} = {}) {
+  const trustedRuntimePathSet = new Set(trustedRuntimePaths.map(String));
+  const trustedRuntimeExecCommandPathSet = new Set(
+    trustedRuntimeExecCommandPaths.map(String),
+  );
+  const expectedRunScriptPathSet = new Set(expectedRunScriptPaths.map(String));
+  const expectedJobDirPathSet = new Set(expectedJobDirPaths.map(String));
+  const matches = String(output || '').split('\n').flatMap((line) => {
+    const match = line.trim().match(/^(\d+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(.+)$/);
+    if (!match) return [];
+    const argv = match[5].trim().split(/\s+/);
+    const process = {
+      pid: Number(match[1]),
+      ppid: Number(match[2]),
+      pgid: Number(match[3]),
+      state: match[4],
+      argv,
+    };
+    const rscriptShapeExact = argv.length === 3
+      && trustedRuntimePathSet.has(argv[0])
+      && expectedRunScriptPathSet.has(argv[1])
+      && expectedJobDirPathSet.has(argv[2]);
+    const execRShapeExact = argv.length === 6
+      && trustedRuntimeExecCommandPathSet.has(argv[0])
+      && argv[1] === '--no-echo'
+      && argv[2] === '--no-restore'
+      && [...expectedRunScriptPathSet].some((runScript) => argv[3] === `--file=${runScript}`)
+      && argv[4] === '--args'
+      && expectedJobDirPathSet.has(argv[5]);
+    return process.ppid === workerPid
+      && process.pgid === workerPid
+      && process.pid !== workerPid
+      && !/^Z/.test(process.state)
+      && (rscriptShapeExact || execRShapeExact)
+      ? [process]
+      : [];
+  });
+  return matches.length === 1 ? matches[0] : null;
+}
+
+function existingPathAliases(filePath) {
+  if (typeof filePath !== 'string' || filePath.length === 0) return [];
+  const resolved = path.resolve(filePath);
+  if (/\s/.test(resolved) || !existsSync(resolved)) return [];
+  try {
+    const canonical = realpathSync(resolved);
+    return /\s/.test(canonical) ? [] : [...new Set([resolved, canonical])];
+  } catch {
+    return [];
+  }
+}
+
+function configuredP5RRuntimeIdentity(configuredRscript) {
+  const rscriptCommandPaths = existingPathAliases(configuredRscript);
+  if (rscriptCommandPaths.length === 0) return null;
+  try {
+    const homeProbe = spawnSync(configuredRscript, [
+      '--vanilla', '-e', 'cat(R.home())',
+    ], { cwd: ROOT, encoding: 'utf8', timeout: 5_000 });
+    if (homeProbe.status !== 0 || !path.isAbsolute(String(homeProbe.stdout || '').trim())) {
+      return null;
+    }
+    const runtimeHome = path.resolve(String(homeProbe.stdout).trim());
+    const canonicalRuntimeHome = realpathSync(runtimeHome);
+    const canonicalRscript = realpathSync(path.resolve(configuredRscript));
+    if (!canonicalRscript.startsWith(`${canonicalRuntimeHome}${path.sep}`)) return null;
+    const execR = path.join(runtimeHome, 'bin', 'exec', 'R');
+    if (!existsSync(execR)) return null;
+    const canonicalExecR = realpathSync(execR);
+    if (!canonicalExecR.startsWith(`${canonicalRuntimeHome}${path.sep}`)) return null;
+    const execCommandPaths = existingPathAliases(execR);
+    return Object.freeze({
+      rscriptCommandPaths,
+      execCommandPaths,
+      executablePaths: [...new Set([...rscriptCommandPaths, ...execCommandPaths])],
+    });
+  } catch {
+    return null;
+  }
+}
+
+function readP5AcceptanceProcessExecutablePath(pid) {
+  try {
+    if (process.platform === 'darwin') {
+      const inspected = spawnSync('/usr/sbin/lsof', [
+        '-a', '-p', String(pid), '-d', 'txt', '-Fn',
+      ], { cwd: ROOT, encoding: 'utf8' });
+      if (inspected.status !== 0) return null;
+      const lines = String(inspected.stdout || '').split('\n')
+        .map((line) => line.trim()).filter(Boolean);
+      const start = lines.indexOf(`p${pid}`);
+      if (start < 0) return null;
+      for (let index = start + 1; index < lines.length; index += 1) {
+        if (/^p\d+$/.test(lines[index])) break;
+        if (lines[index] === 'ftxt' && lines[index + 1]?.startsWith('n')) {
+          const executablePath = lines[index + 1].slice(1);
+          return path.isAbsolute(executablePath) ? realpathSync(executablePath) : null;
+        }
+      }
+      return null;
+    }
+    if (process.platform === 'linux') return realpathSync(`/proc/${pid}/exe`);
+  } catch {
+    return null;
+  }
+  return null;
+}
+
 /**
  * P6 recovery acceptance needs to observe the real UI while a real edit is
  * still interrupted at its durable candidate checkpoint.  A polling timer is
@@ -975,6 +1089,24 @@ function installP6AcceptanceCheckpointHold(spec, dbModule) {
   }
   let closed = false;
   let lastDiagnostic = null;
+  let pausedRuntimePid = null;
+  let pausedCandidateJobId = null;
+  let groupHoldCommitted = false;
+  const { RExecutor } = require(
+    path.join(ROOT, 'core/shared-backend/executors/r-executor.js')
+  );
+  const configuredRscript = new RExecutor().binPath;
+  const runtimeIdentity = configuredP5RRuntimeIdentity(configuredRscript);
+  if (!runtimeIdentity?.rscriptCommandPaths?.length
+      || !runtimeIdentity?.execCommandPaths?.length) {
+    throw new Error('p5_worker_checkpoint_hold_r_runtime_unavailable');
+  }
+  const resumePausedRuntime = () => {
+    if (!Number.isInteger(pausedRuntimePid) || groupHoldCommitted) return;
+    try { process.kill(pausedRuntimePid, 'SIGCONT'); } catch {}
+    pausedRuntimePid = null;
+    pausedCandidateJobId = null;
+  };
   const timer = setInterval(() => {
     if (closed) return;
     let checkpoint;
@@ -1006,8 +1138,7 @@ function installP6AcceptanceCheckpointHold(spec, dbModule) {
     } catch {
       return;
     }
-    if (!checkpoint || candidateJobs?.length !== 1
-        || pendingPreview?.stage !== hold.checkpointStage) {
+    if (candidateJobs?.length !== 1) {
       if (checkpoint && Array.isArray(candidateJobs) && candidateJobs.length > 0) {
         const diagnostic = stableHash({
           candidateJobCount: candidateJobs.length,
@@ -1079,6 +1210,7 @@ function installP6AcceptanceCheckpointHold(spec, dbModule) {
       && nonFileParamsExact
       && inputExact;
     if (!candidateJobExact) {
+      resumePausedRuntime();
       const detail = {
         toolExact: candidateJob.tool_id === hold.expectedToolId,
         statusExact: candidateJob.status === 'running',
@@ -1097,6 +1229,48 @@ function installP6AcceptanceCheckpointHold(spec, dbModule) {
       return;
     }
 
+    const candidateJobDir = path.resolve(
+      project?.workspace_path || '', 'results', 'jobs', candidateJob.id,
+    );
+    const candidateRunScript = path.join(candidateJobDir, 'run-script.R');
+    const expectedJobDirPaths = existingPathAliases(candidateJobDir);
+    const expectedRunScriptPaths = existingPathAliases(candidateRunScript);
+    if (expectedJobDirPaths.length === 0 || expectedRunScriptPaths.length === 0) return;
+    const processInspection = spawnSync('ps', [
+      '-axo', 'pid=,ppid=,pgid=,stat=,command=',
+    ], { cwd: ROOT, encoding: 'utf8' });
+    const runtimeProcess = processInspection.status === 0
+      ? inspectP5AcceptanceRuntimeProcessOutput(processInspection.stdout, {
+        workerPid: process.pid,
+        trustedRuntimePaths: runtimeIdentity.rscriptCommandPaths,
+        trustedRuntimeExecCommandPaths: runtimeIdentity.execCommandPaths,
+        expectedRunScriptPaths,
+        expectedJobDirPaths,
+      })
+      : null;
+    const kernelExecutablePath = runtimeProcess
+      ? readP5AcceptanceProcessExecutablePath(runtimeProcess.pid)
+      : null;
+    if (!runtimeProcess || !runtimeIdentity.executablePaths.includes(kernelExecutablePath)) return;
+    if (pausedRuntimePid == null) {
+      try {
+        process.kill(runtimeProcess.pid, 'SIGSTOP');
+        pausedRuntimePid = runtimeProcess.pid;
+        pausedCandidateJobId = candidateJob.id;
+      } catch {
+        return;
+      }
+      return;
+    }
+    if (pausedRuntimePid !== runtimeProcess.pid
+        || pausedCandidateJobId !== candidateJob.id
+        || !/^T/.test(runtimeProcess.state)) return;
+
+    // Pause the exact scientific runtime as soon as the running candidate Job
+    // is fully identified. The worker remains live so candidate Git/checkpoint
+    // persistence can finish without racing a fast R child into a zombie.
+    if (!checkpoint || pendingPreview?.stage !== hold.checkpointStage) return;
+
     closed = true;
     clearInterval(timer);
     writeSync(1, `${P5_WORKER_CHECKPOINT_HOLD_MARKER}${JSON.stringify({
@@ -1108,8 +1282,16 @@ function installP6AcceptanceCheckpointHold(spec, dbModule) {
       candidateJobId: candidateJob.id,
       candidateJobExact: true,
       candidateInputExact: true,
+      candidateRuntimePausedBeforeCheckpoint: true,
     })}\n`);
-    process.kill(-process.pid, 'SIGSTOP');
+    groupHoldCommitted = true;
+    try {
+      process.kill(-process.pid, 'SIGSTOP');
+    } catch (error) {
+      groupHoldCommitted = false;
+      resumePausedRuntime();
+      throw error;
+    }
     // No successful P6 run resumes this worker: the parent sends SIGKILL to
     // the stopped process group.  Reaching this line means the protocol was
     // externally violated and must fail closed rather than finish the edit.
@@ -1119,6 +1301,7 @@ function installP6AcceptanceCheckpointHold(spec, dbModule) {
   return () => {
     closed = true;
     clearInterval(timer);
+    resumePausedRuntime();
   };
 }
 

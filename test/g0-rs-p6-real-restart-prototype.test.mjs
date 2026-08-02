@@ -20,6 +20,7 @@ import {
   parseP6DarwinLsofExecutablePathOutput,
   parseP5WorkerCheckpointHold,
 } from '../scripts/g0-rs-p6-real-restart-prototype.mjs';
+import { inspectP5AcceptanceRuntimeProcessOutput } from '../scripts/g0-rs-p5-acceptance.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -37,6 +38,10 @@ test('P6 worker checkpoint hold is an explicit synchronous process-group handsha
   assert.match(workerSource, /candidateJobExact = candidateJob\.tool_id === hold\.expectedToolId/);
   assert.match(workerSource, /writeSync\(1, `\$\{P5_WORKER_CHECKPOINT_HOLD_MARKER\}/);
   assert.match(workerSource, /process\.kill\(-process\.pid, 'SIGSTOP'\)/);
+  const runtimeStop = workerSource.indexOf("process.kill(runtimeProcess.pid, 'SIGSTOP')");
+  const holdMarker = workerSource.indexOf('writeSync(1, `${P5_WORKER_CHECKPOINT_HOLD_MARKER}');
+  const groupStop = workerSource.indexOf("process.kill(-process.pid, 'SIGSTOP')");
+  assert.ok(runtimeStop >= 0 && holdMarker > runtimeStop && groupStop > holdMarker);
   const restartSource = readFileSync(
     path.join(ROOT, 'scripts/g0-rs-p6-real-restart-prototype.mjs'),
     'utf8',
@@ -44,6 +49,8 @@ test('P6 worker checkpoint hold is an explicit synchronous process-group handsha
   assert.match(restartSource, /p6_restart_candidate_checkpoint_timeout/);
   assert.match(restartSource, /lastHandshakeSeen/);
   assert.match(restartSource, /lastProcessGroup/);
+  assert.match(restartSource, /p6_restart_candidate_runtime_not_live_at_hold/);
+  assert.match(restartSource, /directZombieChildPresent/);
 
   const marker = '__P5_WORKER_CHECKPOINT_HOLD__';
   const payload = {
@@ -55,10 +62,43 @@ test('P6 worker checkpoint hold is an explicit synchronous process-group handsha
     candidateJobId: 'job-test',
     candidateJobExact: true,
     candidateInputExact: true,
+    candidateRuntimePausedBeforeCheckpoint: true,
   };
   assert.deepEqual(parseP5WorkerCheckpointHold(`prefix\n${marker}${JSON.stringify(payload)}\n`), payload);
   assert.equal(parseP5WorkerCheckpointHold(`${marker}{"version":2}\n`), null);
   assert.equal(parseP5WorkerCheckpointHold(`${marker}${JSON.stringify(payload)}`), null);
+});
+
+test('P6 acceptance hook pauses only the exact direct candidate R runtime', () => {
+  const workspaceRoot = '/tmp/p6-worker-project';
+  const expected = inspectP5AcceptanceRuntimeProcessOutput([
+    '4101 4100 4100 S /opt/R/bin/Rscript /tmp/p6-worker-project/results/jobs/tj_candidate/run-script.R /tmp/p6-worker-project/results/jobs/tj_candidate',
+  ].join('\n'), {
+    workerPid: 4100,
+    trustedRuntimePaths: ['/opt/R/bin/Rscript'],
+    expectedRunScriptPaths: [`${workspaceRoot}/results/jobs/tj_candidate/run-script.R`],
+    expectedJobDirPaths: [`${workspaceRoot}/results/jobs/tj_candidate`],
+  });
+  assert.equal(expected?.pid, 4101);
+  const execR = inspectP5AcceptanceRuntimeProcessOutput([
+    `4101 4100 4100 S /opt/R/bin/exec/R --no-echo --no-restore --file=${workspaceRoot}/results/jobs/tj_candidate/run-script.R --args ${workspaceRoot}/results/jobs/tj_candidate`,
+  ].join('\n'), {
+    workerPid: 4100,
+    trustedRuntimePaths: ['/opt/R/bin/Rscript'],
+    trustedRuntimeExecCommandPaths: ['/opt/R/bin/exec/R'],
+    expectedRunScriptPaths: [`${workspaceRoot}/results/jobs/tj_candidate/run-script.R`],
+    expectedJobDirPaths: [`${workspaceRoot}/results/jobs/tj_candidate`],
+  });
+  assert.equal(execR?.pid, 4101);
+  assert.equal(inspectP5AcceptanceRuntimeProcessOutput(
+    '4101 9999 4100 S /opt/R/bin/Rscript /tmp/unrelated.R /tmp/unrelated',
+    {
+      workerPid: 4100,
+      trustedRuntimePaths: ['/opt/R/bin/Rscript'],
+      expectedRunScriptPaths: [`${workspaceRoot}/results/jobs/tj_candidate/run-script.R`],
+      expectedJobDirPaths: [`${workspaceRoot}/results/jobs/tj_candidate`],
+    },
+  ), null);
 });
 
 test('P6 worker hold accepts only the exact stopped R runtime child', () => {
@@ -79,6 +119,33 @@ test('P6 worker hold accepts only the exact stopped R runtime child', () => {
   assert.equal(expected.candidateRuntimeDirectChild, true);
   assert.equal(expected.candidateRuntimeCommandTrusted, true);
   assert.equal(expected.candidateRuntimeExecutableIdentityExact, true);
+
+  const frameworkExecRuntime = inspectP6StoppedWorkerProcessGroupOutput([
+    '4100 4000 4100 T node scripts/g0-rs-p5-acceptance.mjs --worker payload',
+    `4101 4100 4100 T /opt/R/bin/Rscript ${workspaceRoot}/results/jobs/tj_candidate/run-script.R ${workspaceRoot}/results/jobs/tj_candidate`,
+  ].join('\n'), {
+    workerPid: 4100,
+    candidateJobId: 'tj_candidate',
+    workspaceRoot,
+    trustedRuntimePaths: ['/opt/R/bin/Rscript'],
+    trustedRuntimeExecutablePaths: ['/opt/R/bin/Rscript', '/opt/R/bin/exec/R'],
+    runtimeExecutablePathsByPid: { 4101: '/opt/R/bin/exec/R' },
+  });
+  assert.equal(frameworkExecRuntime.candidateRuntimeExecutableIdentityExact, true);
+
+  const frameworkExecCommand = inspectP6StoppedWorkerProcessGroupOutput([
+    '4100 4000 4100 T node scripts/g0-rs-p5-acceptance.mjs --worker payload',
+    `4101 4100 4100 T /opt/R/bin/exec/R --no-echo --no-restore --file=${workspaceRoot}/results/jobs/tj_candidate/run-script.R --args ${workspaceRoot}/results/jobs/tj_candidate`,
+  ].join('\n'), {
+    workerPid: 4100,
+    candidateJobId: 'tj_candidate',
+    workspaceRoot,
+    trustedRuntimePaths: ['/opt/R/bin/Rscript'],
+    trustedRuntimeExecCommandPaths: ['/opt/R/bin/exec/R'],
+    trustedRuntimeExecutablePaths: ['/opt/R/bin/Rscript', '/opt/R/bin/exec/R'],
+    runtimeExecutablePathsByPid: { 4101: '/opt/R/bin/exec/R' },
+  });
+  assert.equal(frameworkExecCommand.candidateRuntimeCommandTrusted, true);
 
   const wrongHelper = inspectP6StoppedWorkerProcessGroupOutput([
     '4100 4000 4100 T node scripts/g0-rs-p5-acceptance.mjs --worker payload',
@@ -118,6 +185,19 @@ test('P6 worker hold accepts only the exact stopped R runtime child', () => {
   });
   assert.equal(spoofedArgv0.candidateRuntimeCommandTrusted, false);
   assert.equal(spoofedArgv0.candidateRuntimeExecutableIdentityExact, false);
+
+  const exitedRuntime = inspectP6StoppedWorkerProcessGroupOutput([
+    '4100 4000 4100 T node scripts/g0-rs-p5-acceptance.mjs --worker payload',
+    `4101 4100 4100 Z /opt/R/bin/Rscript ${workspaceRoot}/results/jobs/tj_candidate/run-script.R ${workspaceRoot}/results/jobs/tj_candidate`,
+  ].join('\n'), {
+    workerPid: 4100,
+    candidateJobId: 'tj_candidate',
+    workspaceRoot,
+    trustedRuntimePaths: ['/opt/R/bin/Rscript'],
+    runtimeExecutablePathsByPid: { 4101: '/opt/R/bin/Rscript' },
+  });
+  assert.equal(exitedRuntime.directZombieChildPresent, true);
+  assert.equal(exitedRuntime.candidateRuntimeProcessObserved, false);
 
   const misplacedRunScript = inspectP6StoppedWorkerProcessGroupOutput([
     '4100 4000 4100 T node scripts/g0-rs-p5-acceptance.mjs --worker payload',
@@ -216,6 +296,7 @@ test('P6 restart verdict requires every process and durable-store invariant', ()
     candidateChildPresentBeforeKill: true,
     candidateJobExactBeforeKill: true,
     candidateInputExactBeforeKill: true,
+    candidateRuntimePausedBeforeCheckpoint: true,
     candidateRuntimeProcessObservedBeforeKill: true,
     candidateRuntimeDirectChildBeforeKill: true,
     candidateRuntimeCommandTrustedBeforeKill: true,
