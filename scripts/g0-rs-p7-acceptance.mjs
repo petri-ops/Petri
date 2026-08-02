@@ -195,7 +195,7 @@ async function proveImportedInputAndFailureRecovery(baseUrl, projectId, workspac
   const failedSubmission = await requestJson(baseUrl, '/api/tools/run', {
     method: 'POST',
     body: {
-      toolId: 'gene-correlation', projectId, params: { top_n: 30, method: 'pearson' },
+      toolId: 'gene-correlation', projectId, params: { expr_matrix: 'expr_matrix.csv', top_n: 30, method: 'pearson' },
       files: { 'expr_matrix.csv': Buffer.from('gene,bad\nA,not-a-number\n').toString('base64') },
     },
   });
@@ -205,7 +205,7 @@ async function proveImportedInputAndFailureRecovery(baseUrl, projectId, workspac
   const recoverySubmission = await requestJson(baseUrl, '/api/tools/run', {
     method: 'POST',
     body: {
-      toolId: 'gene-correlation', projectId, params: { top_n: 30, method: 'pearson' },
+      toolId: 'gene-correlation', projectId, params: { expr_matrix: 'expr_matrix.csv', top_n: 30, method: 'pearson' },
       files: { 'expr_matrix.csv': uploaded.bytes.toString('base64') },
     },
   });
