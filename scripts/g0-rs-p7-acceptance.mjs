@@ -181,8 +181,9 @@ async function waitForTerminalJob(baseUrl, jobId, timeoutMs = 180_000) {
 async function proveImportedInputAndFailureRecovery(baseUrl, projectId, workspaceRoot, baselines) {
   const baselineJob = await requestJson(baseUrl, `/api/tools/status/${encodeURIComponent(baselines.heatmap.jobId)}`);
   const input = (baselineJob.data?.result?.executionProvenance?.inputs || [])[0];
-  const inputPath = path.resolve(workspaceRoot, String(input?.relativePath || ''));
-  invariant(input?.sha256 && inputPath.startsWith(`${path.resolve(workspaceRoot)}${path.sep}`)
+  const jobRoot = path.resolve(workspaceRoot, 'results/jobs', baselines.heatmap.jobId);
+  const inputPath = path.resolve(jobRoot, String(input?.relativePath || ''));
+  invariant(input?.sha256 && inputPath.startsWith(`${jobRoot}${path.sep}`)
     && existsSync(inputPath), 'p7_baseline_input_snapshot_missing');
   const sourceBytes = readFileSync(inputPath);
   invariant(sha256(sourceBytes) === input.sha256, 'p7_baseline_input_snapshot_hash_drift');
