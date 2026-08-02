@@ -1872,6 +1872,19 @@ export async function captureP6RealRestartPrototype({ keep = false, verbose = fa
   let coldServer = null;
   let root = null;
   let removed = false;
+  let interruptionSignal = null;
+  const terminateOwnedWorkerOnSignal = (signal) => {
+    if (interruptionSignal) return;
+    interruptionSignal = signal;
+    process.exitCode = signal === 'SIGINT' ? 130 : 143;
+    if (!worker?.child || worker.child.exitCode !== null || worker.child.signalCode !== null) return;
+    try {
+      if (worker.detached) process.kill(-worker.child.pid, 'SIGKILL');
+      else worker.child.kill('SIGKILL');
+    } catch { /* the ordinary finally path confirms or retries cleanup */ }
+  };
+  const onSigint = () => terminateOwnedWorkerOnSignal('SIGINT');
+  const onSigterm = () => terminateOwnedWorkerOnSignal('SIGTERM');
   try {
     runtime = await createP5LiveScientificRuntime({
       verbose,
@@ -1904,10 +1917,17 @@ export async function captureP6RealRestartPrototype({ keep = false, verbose = fa
     );
 
     worker = spawnEditWorker(runtime, baseline);
+    process.once('SIGINT', onSigint);
+    process.once('SIGTERM', onSigterm);
     const durable = await waitForDurableCandidateCheckpoint(runtime, worker);
     const killed = await killWorkerWithSigkill(worker);
     const markerSeen = worker.output().stdout.includes(WORKER_MARKER);
     worker = null;
+    process.removeListener('SIGINT', onSigint);
+    process.removeListener('SIGTERM', onSigterm);
+    invariant(interruptionSignal == null, 'p6_restart_interrupted_by_signal', {
+      signal: interruptionSignal,
+    });
 
     // Let the intentionally shortened stale-owner window elapse, then close
     // the original server. No process from the first runtime remains alive.
@@ -2052,6 +2072,8 @@ export async function captureP6RealRestartPrototype({ keep = false, verbose = fa
     };
     return { ...observation, ...evaluateP6RealRestartPrototype(observation), kept: keep };
   } finally {
+    process.removeListener('SIGINT', onSigint);
+    process.removeListener('SIGTERM', onSigterm);
     if (worker) {
       try { await killWorkerWithSigkill(worker); } catch { /* best effort */ }
     }

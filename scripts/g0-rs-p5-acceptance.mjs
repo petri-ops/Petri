@@ -1273,17 +1273,22 @@ function installP6AcceptanceCheckpointHold(spec, dbModule) {
 
     closed = true;
     clearInterval(timer);
-    writeSync(1, `${P5_WORKER_CHECKPOINT_HOLD_MARKER}${JSON.stringify({
-      version: 1,
-      mode: hold.mode,
-      checkpointStage: pendingPreview.stage,
-      changeSetId: checkpoint.change_set_id,
-      checkpointId: checkpoint.checkpoint_id,
-      candidateJobId: candidateJob.id,
-      candidateJobExact: true,
-      candidateInputExact: true,
-      candidateRuntimePausedBeforeCheckpoint: true,
-    })}\n`);
+    try {
+      writeSync(1, `${P5_WORKER_CHECKPOINT_HOLD_MARKER}${JSON.stringify({
+        version: 1,
+        mode: hold.mode,
+        checkpointStage: pendingPreview.stage,
+        changeSetId: checkpoint.change_set_id,
+        checkpointId: checkpoint.checkpoint_id,
+        candidateJobId: candidateJob.id,
+        candidateJobExact: true,
+        candidateInputExact: true,
+        candidateRuntimePausedBeforeCheckpoint: true,
+      })}\n`);
+    } catch (error) {
+      resumePausedRuntime();
+      throw error;
+    }
     groupHoldCommitted = true;
     try {
       process.kill(-process.pid, 'SIGSTOP');
