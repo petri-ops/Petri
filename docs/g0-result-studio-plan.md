@@ -2,7 +2,7 @@
 
 最后更新：2026-08-02
 
-状态：`active / implemented_unverified`（RS0～RS8 引擎基础、完整 P4R、`G0-RS-P5` 与 `G0-RS-P6` 已按各自非资格边界收口；下一阶段为 P7，产品资格仍未恢复）
+状态：`active / implemented_unverified`（RS0～RS8 引擎基础、完整 P4R、`G0-RS-P5` 与 `G0-RS-P6` 已按各自非资格边界收口；P7 Honest Product Requalification 正在进行，产品资格尚未恢复）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -1758,6 +1758,8 @@ P6-0 不宣称跨 Job exact replay 已由 UI trace 收口，不重开 P5，也�
 
 ### G0-RS-P7：Honest Product Requalification
 
+状态：`in_progress / real product qualification matrix`（2026-08-02 建立唯一 P7 Goal；不得复用历史 RS9 合成证据或 P6 开发态证据冒充资格）。
+
 目标：只用真实连续产品旅程重新决定 Result Studio 是否可以成为 supported/qualified 能力。
 
 每条任务必须保存一条脱敏、连续、机器可核对的 trace：
@@ -1843,7 +1845,7 @@ G0-RS-P0 Truth Correction
 
 阶段状态规则：
 
-- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3`、`G0-RS-RH0`、P4R-0～P4R-6、`G0-RS-P5` 与 `G0-RS-P6` 已完成。P7 是下一阶段但尚未启动，不得把 P6 的本地证据外推为 P7 资格。
+- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3`、`G0-RS-RH0`、P4R-0～P4R-6、`G0-RS-P5` 与 `G0-RS-P6` 已完成。P7 是当前唯一进行中阶段，不得把 P6 的本地证据外推为 P7 资格。
 - 每阶段先补失败测试/fixture，再实现，再形成与证据类型匹配的验收；不得提前开发下一阶段。
 - 单元测试证明契约，fixture 证明确定性集成，真实 Provider 证明模型边界，packaged Electron 证明产品链；四者不能互相替代。
 - 未运行 `npm run docs:reconcile` 与 `npm run docs:check` 不得宣布阶段 completed/verified/qualified。
