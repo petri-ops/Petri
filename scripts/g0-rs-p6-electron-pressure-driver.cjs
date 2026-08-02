@@ -1075,7 +1075,7 @@ async function run() {
 
     const result = {
       schemaVersion: 1,
-      renderer: `Electron ${process.versions.electron} / Chromium ${process.versions.chrome}`,
+      renderer: `Electron ${process.versions.electron}; Chromium ${process.versions.chrome}`,
       table: {
         totalRows: table.totalRows,
         visibleRows: table.visibleRows,

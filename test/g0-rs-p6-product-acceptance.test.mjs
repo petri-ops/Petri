@@ -494,6 +494,13 @@ test('P6 component projection drops self-attested verdicts but preserves measure
     renderer: { passed: true, measuredMs: 12 },
   });
   assert.deepEqual(projected, { renderer: { passed: true, measuredMs: 12 } });
+
+  const pressureDriver = readFileSync(
+    path.join(ROOT, 'scripts/g0-rs-p6-electron-pressure-driver.cjs'),
+    'utf8',
+  );
+  assert.match(pressureDriver, /renderer: `Electron \$\{process\.versions\.electron\}; Chromium/);
+  assert.doesNotMatch(pressureDriver, /renderer: `Electron .* \/ Chromium/);
 });
 
 test('P6 sanitizer allows the bounded public adapter path and rejects runtime coordinates and credentials', () => {
