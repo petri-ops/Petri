@@ -1814,7 +1814,7 @@ export async function prepareP5LiveScientificBaselines(runtime) {
   return baselines;
 }
 
-async function exactReplayRevision(baseUrl, {
+export async function exactReplayRevision(baseUrl, {
   projectId,
   dbPath,
   workspaceRoot,

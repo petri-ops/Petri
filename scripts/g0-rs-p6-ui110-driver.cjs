@@ -11,7 +11,6 @@
  * text, or model/tool payloads.
  */
 
-const { app, BrowserWindow } = require('electron');
 const { createHash } = require('node:crypto');
 const { mkdirSync, readFileSync, writeFileSync } = require('node:fs');
 const path = require('node:path');
@@ -1163,10 +1162,11 @@ function projectionDiagnosticsByStage(stages) {
   }]));
 }
 
-async function run() {
-  const config = readConfig();
+async function run({ providedWindow = null, providedConfig = null, manageWindow = true } = {}) {
+  const config = providedConfig || readConfig();
   mkdirSync(config.outputDir, { recursive: true });
   let stage = 'starting';
+  const timeline = [];
   const diagnostics = [];
   const pushDiagnostic = (entry) => {
     diagnostics.push(entry);
@@ -1174,23 +1174,27 @@ async function run() {
   };
   const checkpoint = (nextStage) => {
     stage = nextStage;
+    timeline.push({ stage: nextStage, observedAt: new Date().toISOString() });
     writeFileSync(config.resultPath, `${JSON.stringify({ schemaVersion: 1, passed: false, stage })}\n`);
   };
   checkpoint('starting');
 
-  const window = new BrowserWindow({
-    width: 1440,
-    height: 900,
-    show: config.show === true,
-    title: 'BioF3 P6 UI-110 isolated trace',
-    backgroundColor: '#ffffff',
-    webPreferences: {
-      contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: true,
-      preload: PRELOAD_PATH,
-    },
-  });
+  const window = providedWindow || (() => {
+    const { BrowserWindow } = require('electron');
+    return new BrowserWindow({
+      width: 1440,
+      height: 900,
+      show: config.show === true,
+      title: 'BioF3 P6 UI-110 isolated trace',
+      backgroundColor: '#ffffff',
+      webPreferences: {
+        contextIsolation: true,
+        nodeIntegration: false,
+        sandbox: true,
+        preload: PRELOAD_PATH,
+      },
+    });
+  })();
   window.webContents.on('console-message', (_event, level, message, line, sourceId) => {
     pushDiagnostic({ type: 'console', level, message: String(message || '').slice(0, 1200), line, sourceId: String(sourceId || '').slice(-300) });
   });
@@ -1412,6 +1416,7 @@ async function run() {
       publicProjectionDiagnostics,
       noSensitiveProjection: Object.values(publicProjectionAudit)
         .every((stage) => Object.values(stage).every((value) => value === false)),
+      timeline,
     };
     result.passed = result.initialDeg.bodyVisible
       && result.initialDeg.composerReady
@@ -1455,7 +1460,8 @@ async function run() {
       && result.final.composerReady
       && result.noSensitiveProjection;
     writeFileSync(config.resultPath, `${JSON.stringify(result, null, 2)}\n`);
-    window.destroy();
+    if (manageWindow) window.destroy();
+    return result;
   } catch (error) {
     // This file lives only in the disposable capture directory and is never
     // copied into canonical evidence. It makes renderer-only failures
@@ -1508,10 +1514,20 @@ async function run() {
   }
 }
 
-app.whenReady()
-  .then(run)
-  .then(() => app.quit())
-  .catch((error) => {
-    console.error(error && error.stack ? error.stack : error);
-    app.exit(1);
-  });
+module.exports = {
+  readConfig,
+  runProductTrace(window, config) {
+    return run({ providedWindow: window, providedConfig: config, manageWindow: false });
+  },
+};
+
+if (require.main === module) {
+  const { app } = require('electron');
+  app.whenReady()
+    .then(() => run())
+    .then(() => app.quit())
+    .catch((error) => {
+      console.error(error && error.stack ? error.stack : error);
+      app.exit(1);
+    });
+}

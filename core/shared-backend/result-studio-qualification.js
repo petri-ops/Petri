@@ -2,8 +2,8 @@
 
 const crypto = require('node:crypto');
 
-const RESULT_STUDIO_QUALIFICATION_VERSION = 2;
-const RESULT_STUDIO_PRODUCT_TRACE_VERSION = 1;
+const RESULT_STUDIO_QUALIFICATION_VERSION = 3;
+const RESULT_STUDIO_PRODUCT_TRACE_VERSION = 2;
 
 const REQUIRED_TASKS = Object.freeze([
   'deg_selection_to_enrichment',
@@ -21,8 +21,11 @@ const REQUIRED_ENVIRONMENTS = Object.freeze([
   'light_theme',
   'dark_theme',
   'viewport_820',
+  'viewport_1024',
   'viewport_wide',
   'two_real_providers',
+  'imported_user_data',
+  'provider_and_execution_failure',
 ]);
 
 const REQUIRED_TRACE_STEPS = Object.freeze([
@@ -169,6 +172,59 @@ function validateProductTrace(trace = {}) {
   if (trace.platform !== 'macos-arm64') issues.push('trace_platform_not_qualified');
   if (typeof trace.providerClass !== 'string' || trace.providerClass.length === 0) issues.push('trace_provider_class_missing');
   if (trace.userSuppliedInternalIds !== false) issues.push('trace_user_supplied_internal_ids_not_disproved');
+  if (trace.sourceCommitMatchesSourceHashes !== true) issues.push('trace_source_binding_not_proved');
+  if (trace.sourceBindingStableDuringCapture !== true) issues.push('trace_source_binding_not_stable');
+  const runtime = trace.runtimeBinding && typeof trace.runtimeBinding === 'object'
+    ? trace.runtimeBinding : {};
+  if (runtime.architecture !== 'arm64') issues.push('trace_runtime_architecture_invalid');
+  if (runtime.packaged !== true) issues.push('trace_runtime_not_packaged');
+  if (!isSha256(runtime.executableSha256)) issues.push('trace_runtime_executable_digest_invalid');
+  if (!isSha256(runtime.buildSubjectSha256)) issues.push('trace_runtime_build_subject_digest_invalid');
+  if (runtime.buildSourceCommit !== trace.sourceCommit) issues.push('trace_runtime_source_commit_mismatch');
+  if (runtime.codeSignatureVerified !== true) issues.push('trace_runtime_signature_unverified');
+  const provider = trace.providerInvocation && typeof trace.providerInvocation === 'object'
+    ? trace.providerInvocation : {};
+  if (provider.transport !== 'real_network') issues.push('trace_provider_transport_not_real');
+  if (provider.toolCallObserved !== true) issues.push('trace_provider_tool_call_not_observed');
+  if (provider.toolResultObserved !== true) issues.push('trace_provider_tool_result_not_observed');
+  if (provider.expectedJsonEmbeddedInPrompt !== false) issues.push('trace_provider_prompt_oracle_not_disproved');
+  if (!isSha256(provider.requestDigest)) issues.push('trace_provider_request_digest_invalid');
+  if (!isSha256(provider.responseDigest)) issues.push('trace_provider_response_digest_invalid');
+  if (typeof provider.toolName !== 'string' || !provider.toolName.startsWith('result_')) {
+    issues.push('trace_provider_result_tool_missing');
+  }
+  const performance = trace.performance && typeof trace.performance === 'object'
+    ? trace.performance : {};
+  if (!Number.isFinite(performance.firstCanvasMs) || performance.firstCanvasMs < 0
+      || performance.firstCanvasMs > 1000) issues.push('trace_packaged_first_canvas_budget_failed');
+  const imported = trace.importProof && typeof trace.importProof === 'object' ? trace.importProof : {};
+  if (imported.userUploadObserved !== true || !isSha256(imported.uploadSha256)
+      || imported.executionInputSha256 !== imported.uploadSha256) {
+    issues.push('trace_imported_user_data_not_proved');
+  }
+  const recovery = trace.failureRecoveryProof && typeof trace.failureRecoveryProof === 'object'
+    ? trace.failureRecoveryProof : {};
+  if (recovery.failedTerminalObserved !== true || recovery.falseSuccessAbsent !== true
+      || recovery.recoveryCompleted !== true || recovery.recoveryArtifactTruthValid !== true
+      || !isSha256(recovery.failedJobDigest) || !isSha256(recovery.recoveredJobDigest)) {
+    issues.push('trace_failure_recovery_not_proved');
+  }
+  const responsive = Array.isArray(trace.responsiveMatrix) ? trace.responsiveMatrix : [];
+  const responsiveCells = new Set(responsive.filter((item) => item?.canvasVisible === true
+    && item?.operationCompleted === true && item?.horizontalOverflow === false
+    && Number.isFinite(item?.firstCanvasMs) && item.firstCanvasMs <= 1000)
+    .map((item) => `${item.theme}:${item.width}`));
+  for (const theme of ['light', 'dark']) {
+    for (const width of [1440, 1024, 820]) {
+      if (!responsiveCells.has(`${theme}:${width}`)) issues.push(`trace_responsive_cell_missing:${theme}:${width}`);
+    }
+  }
+  const replay = trace.replayVerification && typeof trace.replayVerification === 'object'
+    ? trace.replayVerification : {};
+  if (replay.exactMatch !== true || replay.graphExact !== true
+      || !isSha256(replay.outputCohortHash) || !isSha256(replay.packageDigest)) {
+    issues.push('trace_exact_replay_not_proved');
+  }
   if (!Number.isFinite(Date.parse(trace.startedAt || ''))) issues.push('trace_started_at_invalid');
   if (!Number.isFinite(Date.parse(trace.completedAt || ''))) issues.push('trace_completed_at_invalid');
   if (Date.parse(trace.completedAt || '') < Date.parse(trace.startedAt || '')) issues.push('trace_time_order_invalid');
@@ -193,6 +249,7 @@ function validateProductTrace(trace = {}) {
   if (!uniqueIds(steps)) issues.push('trace_step_ids_duplicate');
   const observedStepIds = steps.map((step) => step && step.id);
   if (JSON.stringify(observedStepIds) !== JSON.stringify(REQUIRED_TRACE_STEPS)) issues.push('trace_steps_not_complete_and_ordered');
+  let previousObservedAt = Date.parse(trace.startedAt || '');
   for (const step of steps) {
     if (!step || !REQUIRED_TRACE_STEPS.includes(step.id)) continue;
     if (step.status !== 'observed') issues.push(`trace_step_not_observed:${step.id}`);
@@ -208,7 +265,16 @@ function validateProductTrace(trace = {}) {
     for (const requiredKind of STEP_EVIDENCE_KINDS[step.id] || []) {
       if (!kinds.has(requiredKind)) issues.push(`trace_step_evidence_kind_missing:${step.id}:${requiredKind}`);
     }
+    const observedTimes = refs.map((ref) => Date.parse(evidenceById.get(ref)?.observedAt || ''))
+      .filter(Number.isFinite);
+    const observedAt = observedTimes.length > 0 ? Math.min(...observedTimes) : NaN;
+    if (!Number.isFinite(observedAt) || observedAt < previousObservedAt) {
+      issues.push(`trace_step_time_order_invalid:${step.id}`);
+    } else {
+      previousObservedAt = observedAt;
+    }
   }
+  if (previousObservedAt > Date.parse(trace.completedAt || '')) issues.push('trace_evidence_after_completion');
 
   const invariants = Array.isArray(trace.invariants) ? trace.invariants : [];
   if (!uniqueIds(invariants)) issues.push('trace_invariant_ids_duplicate');

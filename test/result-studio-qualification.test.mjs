@@ -67,6 +67,48 @@ function productTrace(taskId, index, environmentTags = REQUIRED_ENVIRONMENTS) {
     platform: 'macos-arm64',
     providerClass: index % 2 === 0 ? 'deepseek' : 'openai-compatible',
     userSuppliedInternalIds: false,
+    sourceCommitMatchesSourceHashes: true,
+    sourceBindingStableDuringCapture: true,
+    runtimeBinding: {
+      architecture: 'arm64',
+      packaged: true,
+      executableSha256: 'd'.repeat(64),
+      buildSubjectSha256: 'e'.repeat(64),
+      buildSourceCommit: 'a'.repeat(40),
+      codeSignatureVerified: true,
+    },
+    providerInvocation: {
+      transport: 'real_network',
+      toolCallObserved: true,
+      toolResultObserved: true,
+      expectedJsonEmbeddedInPrompt: false,
+      requestDigest: 'f'.repeat(64),
+      responseDigest: '1'.repeat(64),
+      toolName: 'result_studio_context',
+    },
+    importProof: {
+      userUploadObserved: true,
+      uploadSha256: '2'.repeat(64),
+      executionInputSha256: '2'.repeat(64),
+    },
+    failureRecoveryProof: {
+      failedTerminalObserved: true,
+      falseSuccessAbsent: true,
+      recoveryCompleted: true,
+      recoveryArtifactTruthValid: true,
+      failedJobDigest: '3'.repeat(64),
+      recoveredJobDigest: '4'.repeat(64),
+    },
+    responsiveMatrix: ['light', 'dark'].flatMap((theme) => [1440, 1024, 820].map((width) => ({
+      theme, width, canvasVisible: true, operationCompleted: true, horizontalOverflow: false, firstCanvasMs: 850,
+    }))),
+    replayVerification: {
+      exactMatch: true,
+      graphExact: true,
+      outputCohortHash: '5'.repeat(64),
+      packageDigest: '6'.repeat(64),
+    },
+    performance: { firstCanvasMs: 850 },
     startedAt: '2026-07-25T08:00:00.000Z',
     completedAt: '2026-07-25T09:00:00.000Z',
     environmentTags,
@@ -116,7 +158,43 @@ test('RS-P0 refuses manual booleans, unsafe refs and user-supplied internal IDs'
   assert.ok(verdict.issues.includes(`trace_evidence_ref_unsafe:${trace.evidence[0].id}`));
 });
 
-test('RS-P0 qualification v2 only passes five valid continuous traces and two Provider classes', () => {
+test('P7 refuses development runtime, prompt-oracle Provider evidence and slow packaged canvas', () => {
+  const trace = productTrace(REQUIRED_TASKS[0], 0);
+  trace.runtimeBinding.packaged = false;
+  trace.providerInvocation.expectedJsonEmbeddedInPrompt = true;
+  trace.performance.firstCanvasMs = 1001;
+  const verdict = validateProductTrace(trace);
+  assert.equal(verdict.valid, false);
+  assert.ok(verdict.issues.includes('trace_runtime_not_packaged'));
+  assert.ok(verdict.issues.includes('trace_provider_prompt_oracle_not_disproved'));
+  assert.ok(verdict.issues.includes('trace_packaged_first_canvas_budget_failed'));
+});
+
+test('P7 refuses source drift and out-of-order evidence timestamps', () => {
+  const trace = productTrace(REQUIRED_TASKS[0], 0);
+  trace.sourceBindingStableDuringCapture = false;
+  trace.evidence.at(-1).observedAt = '2026-07-25T07:59:59.000Z';
+  const verdict = validateProductTrace(trace);
+  assert.equal(verdict.valid, false);
+  assert.ok(verdict.issues.includes('trace_source_binding_not_stable'));
+  assert.ok(verdict.issues.some((issue) => issue.startsWith('trace_step_time_order_invalid:')));
+});
+
+test('P7 refuses claimed import, recovery, responsive and replay tags without their product proofs', () => {
+  const trace = productTrace(REQUIRED_TASKS[0], 0);
+  trace.importProof.executionInputSha256 = '9'.repeat(64);
+  trace.failureRecoveryProof.failedTerminalObserved = false;
+  trace.responsiveMatrix.pop();
+  trace.replayVerification.exactMatch = false;
+  const verdict = validateProductTrace(trace);
+  assert.equal(verdict.valid, false);
+  assert.ok(verdict.issues.includes('trace_imported_user_data_not_proved'));
+  assert.ok(verdict.issues.includes('trace_failure_recovery_not_proved'));
+  assert.ok(verdict.issues.includes('trace_responsive_cell_missing:dark:820'));
+  assert.ok(verdict.issues.includes('trace_exact_replay_not_proved'));
+});
+
+test('P7 qualification v3 only passes five valid continuous traces and two Provider classes', () => {
   const productTraces = REQUIRED_TASKS.map((taskId, index) => productTrace(taskId, index));
   const valid = evaluateResultStudioQualification({
     schemaVersion: RESULT_STUDIO_QUALIFICATION_VERSION,
