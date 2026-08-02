@@ -60,6 +60,7 @@ function passingObservation(overrides = {}) {
         sortFeedbackMs: 18,
         sortChanged: true,
         filterFeedbackMs: 16,
+        filterQueryCompleteMs: 620,
         filterChanged: true,
         filterQueryChanged: true,
         filterMatchedSummaryChanged: true,
@@ -229,6 +230,13 @@ test('P6 pressure input producers are deterministic and preserve exact requested
   assert.doesNotMatch(prototype, /Expression QC Report/);
   assert.doesNotMatch(prototype, /stageP6Ui110LocalCapability/);
   assert.match(prototype, /host_runtime_observed_through_completed_artifact_truth_job/);
+  const driver = readFileSync(
+    path.join(ROOT, 'scripts/g0-rs-p6-electron-pressure-driver.cjs'),
+    'utf8',
+  );
+  assert.match(driver, /return resolve\(\{\s+feedbackMs,\s+queryCompleteMs:/);
+  assert.match(driver, /queryCompleteMs: performance\.now\(\) - started/);
+  assert.match(driver, /filterQueryCompleteMs: filter\.queryCompleteMs/);
 });
 
 test('P6 pressure verdict independently enforces every frozen renderer budget', () => {
@@ -236,6 +244,8 @@ test('P6 pressure verdict independently enforces every frozen renderer budget', 
   assert.equal(passing.passed, true);
   assert.equal(passing.checks.length, 26);
   assert.equal(passing.frozenBudgetCount, 15);
+  assert.equal(P6_ELECTRON_PRESSURE_BUDGETS.firstCanvasMs, 1_500,
+    'P6 measures cold development navigation; the packaged/in-app 1s target stays in P7');
   assert.ok(!passing.remainingGaps.includes('long_report_volume_not_proven'));
   assert.ok(!passing.remainingGaps.includes('report_revision_projection_not_measured'));
   assert.ok(passing.remainingGaps.includes('synthetic_revision_aliases_do_not_prove_201_distinct_tool_executions'));

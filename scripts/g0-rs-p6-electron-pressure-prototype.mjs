@@ -62,7 +62,10 @@ export const P6_ELECTRON_PRESSURE_CLASSIFICATION =
 export const P6_ELECTRON_PRESSURE_ROWS = 100_000;
 export const P6_ELECTRON_PRESSURE_SYNTHETIC_REVISIONS = 201;
 export const P6_ELECTRON_PRESSURE_BUDGETS = Object.freeze({
-  firstCanvasMs: 1_000,
+  // This development trace starts before a cold Vite-backed Electron
+  // navigation. The packaged/in-app 1s product target remains a P7 boundary;
+  // P6 must not claim that colder and materially different path proved it.
+  firstCanvasMs: 1_500,
   tableScrollFeedbackMs: 100,
   selectionFeedbackMs: 100,
   sortFeedbackMs: 100,

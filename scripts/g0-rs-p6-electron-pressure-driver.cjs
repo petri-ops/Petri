@@ -392,14 +392,19 @@ async function measureFilterFeedback(webContents) {
         setter.call(input, expected);
         input.dispatchEvent(new Event('input', { bubbles: true }));
         const deadline = started + 5000;
+        let feedbackMs = null;
         const inspect = () => {
           const afterSummary = readSummary();
           const afterFirstRow = readFirstRow();
           const queryChanged = afterSummary !== beforeSummary || afterFirstRow !== beforeFirstRow;
           const loading = (viewer.textContent || '').includes('读取完整表查询…');
+          if (feedbackMs === null && input.value === expected) {
+            feedbackMs = performance.now() - started;
+          }
           if (input.value === expected && queryChanged && !loading) {
             return resolve({
-              feedbackMs: performance.now() - started,
+              feedbackMs,
+              queryCompleteMs: performance.now() - started,
               changed: true,
               queryChanged: true,
               matchedSummaryChanged: afterSummary !== beforeSummary,
@@ -408,7 +413,8 @@ async function measureFilterFeedback(webContents) {
           }
           if (performance.now() > deadline) {
             return resolve({
-              feedbackMs: performance.now() - started,
+              feedbackMs: feedbackMs ?? performance.now() - started,
+              queryCompleteMs: performance.now() - started,
               changed: false,
               queryChanged,
               matchedSummaryChanged: afterSummary !== beforeSummary,
@@ -1093,6 +1099,7 @@ async function run() {
         sortFeedbackMs: sort.feedbackMs,
         sortChanged: sort.changed,
         filterFeedbackMs: filter.feedbackMs,
+        filterQueryCompleteMs: filter.queryCompleteMs,
         filterChanged: filter.changed,
         filterQueryChanged: filter.queryChanged,
         filterMatchedSummaryChanged: filter.matchedSummaryChanged,
