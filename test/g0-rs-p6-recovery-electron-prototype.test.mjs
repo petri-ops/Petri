@@ -12,6 +12,7 @@ import {
   assertSanitizedP6RecoveryElectronEvidence,
   buildP6RecoveryElectronVerdict,
   classifyP6ActiveElectronAttempt,
+  createP6RecoveryResourceGate,
   getP6RecoveryElectronSourceBinding,
   observeP6RecoveryElectron,
   runP6ActiveElectronLaunchWithRetry,
@@ -46,6 +47,8 @@ function passingObservation(overrides = {}) {
       providerEvidence: 'not_exercised',
       packagedAppEvidence: 'not_exercised',
       qualificationEligible: false,
+      checkpointInterruptionPlatform: 'darwin',
+      checkpointInterruptionSignal: 'posix_sigstop_process_group',
     },
     truth: {
       noSeedProductLedger: true,
@@ -57,8 +60,22 @@ function passingObservation(overrides = {}) {
       checkpointStage: 'candidate_committed',
       checkpointIntegrityExact: true,
       candidateRefExact: true,
+      candidateJobRunningBeforeKill: true,
+      workerCheckpointHoldConfirmed: true,
+      workerCheckpointHoldMode: 'sigstop_process_group',
+      processGroupAliveBeforeKill: true,
+      candidateChildPresentBeforeKill: true,
+      candidateJobExactBeforeKill: true,
+      candidateInputExactBeforeKill: true,
+      candidateRuntimeProcessObservedBeforeKill: true,
+      candidateRuntimeDirectChildBeforeKill: true,
+      candidateRuntimeCommandTrustedBeforeKill: true,
+      candidateRuntimeExecutableIdentityExactBeforeKill: true,
+      processGroupAllStoppedBeforeKill: true,
       workerExitSignal: 'SIGKILL',
       workerCompletionMarkerSeen: false,
+      processGroupGoneAfterKill: true,
+      candidateRuntimeProcessGoneAfterKill: true,
     },
     firstColdStatus: {
       status: 'recovery_available',
@@ -225,6 +242,26 @@ test('verdict fails closed when an explanation, recovery request or relaunch tru
   const noActualCrash = passingObservation();
   noActualCrash.processBoundaries.electronActuallySigkilled = false;
   assert.equal(buildP6RecoveryElectronVerdict(noActualCrash).passed, false);
+
+  const noCheckpointHold = passingObservation();
+  noCheckpointHold.interruption.workerCheckpointHoldConfirmed = false;
+  assert.equal(buildP6RecoveryElectronVerdict(noCheckpointHold).passed, false);
+
+  const noCandidateChild = passingObservation();
+  noCandidateChild.interruption.candidateChildPresentBeforeKill = false;
+  assert.equal(buildP6RecoveryElectronVerdict(noCandidateChild).passed, false);
+
+  const untrustedCandidateRuntime = passingObservation();
+  untrustedCandidateRuntime.interruption.candidateRuntimeCommandTrustedBeforeKill = false;
+  assert.equal(buildP6RecoveryElectronVerdict(untrustedCandidateRuntime).passed, false);
+
+  const spoofedCandidateRuntime = passingObservation();
+  spoofedCandidateRuntime.interruption.candidateRuntimeExecutableIdentityExactBeforeKill = false;
+  assert.equal(buildP6RecoveryElectronVerdict(spoofedCandidateRuntime).passed, false);
+
+  const survivingProcessGroup = passingObservation();
+  survivingProcessGroup.interruption.processGroupGoneAfterKill = false;
+  assert.equal(buildP6RecoveryElectronVerdict(survivingProcessGroup).passed, false);
 
   const recoveryTooSlow = passingObservation();
   recoveryTooSlow.performance.restartRestoreMs = P6_RECOVERY_ELECTRON_BUDGETS.restartRestoreMs + 1;
@@ -517,6 +554,45 @@ test('prototype crashes the active Electron before killing the edit worker', () 
   const electronCrash = source.indexOf('await crashActiveElectron(');
   const workerCrash = source.indexOf('await killWorkerWithSigkill(worker)', electronCrash);
   assert.ok(durable >= 0 && electronCrash > durable && workerCrash > electronCrash);
+  assert.match(source, /workerCheckpointHoldConfirmed: durable\.hold\.confirmed === true/);
+  assert.match(source, /processGroupAliveBeforeKill: durable\.hold\.groupAddressable === true/);
+  assert.match(source, /candidateChildPresentBeforeKill: durable\.hold\.childProcessPresent === true/);
+  assert.match(source, /let cleanupPromise = null/);
+  assert.match(source, /const resourceGate = createP6RecoveryResourceGate/);
+  assert.match(source, /if \(resourceGate\.pendingPromise\) \{/);
+  assert.match(source, /await resourceGate\.pendingPromise/);
+  assert.equal((source.match(/resourceGate\.acquire\(\n\s+\(\) => startServer/g) || []).length, 2);
+  assert.match(source, /const onSigint = \(\) => onSignal\('SIGINT'\)/);
+  assert.match(source, /const onSigterm = \(\) => onSignal\('SIGTERM'\)/);
+  assert.match(source, /if \(cleanupPromise\) return cleanupPromise/);
+  assert.match(source, /await terminateWorkerForCleanup\(worker\)/);
+  assert.match(source, /termination\.terminated === true/);
+});
+
+test('resource gate blocks later cold-server creation and exposes in-flight resources to cleanup', async () => {
+  let interruptionSignal = 'SIGINT';
+  let factoryCalls = 0;
+  const gate = createP6RecoveryResourceGate(() => interruptionSignal);
+  await assert.rejects(
+    gate.acquire(() => {
+      factoryCalls += 1;
+      return Promise.resolve({ child: true });
+    }, () => {}),
+    /p6_recovery_interrupted/,
+  );
+  assert.equal(factoryCalls, 0);
+  assert.equal(gate.pendingPromise, null);
+
+  interruptionSignal = null;
+  let resolveCreation;
+  const creation = new Promise((resolve) => { resolveCreation = resolve; });
+  let assigned = null;
+  const acquired = gate.acquire(() => creation, (resource) => { assigned = resource; });
+  assert.equal(gate.pendingPromise instanceof Promise, true);
+  resolveCreation({ id: 'cold-server' });
+  await acquired;
+  assert.deepEqual(assigned, { id: 'cold-server' });
+  assert.equal(gate.pendingPromise, null);
 });
 
 test('real no-seed worker and active Electron SIGKILL recovery trace is opt-in', {

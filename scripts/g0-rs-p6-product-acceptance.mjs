@@ -74,6 +74,8 @@ export const P6_PRODUCT_ACCEPTANCE_BOUNDARIES = Object.freeze({
     'development_electron_and_owned_backend_processes_restart_on_same_disk_no_literal_system_reboot',
   provider: 'controlled_loopback_503_429_only_real_provider_excluded_to_p7',
   packaged: 'development_electron_only_packaged_app_excluded_to_p7',
+  checkpointInterruption:
+    'macos_development_posix_sigstop_process_group_windows_not_exercised',
 });
 
 export const P6_PRODUCT_ACCEPTANCE_EVIDENCE_CLASS =
@@ -85,6 +87,8 @@ const P6_RECOVERY_ELECTRON_BOUNDARY = Object.freeze({
   qualificationEligible: false,
   systemRestartClaim: false,
   processBoundary: 'owned_electron_and_backend_processes_restarted_against_same_durable_local_stores',
+  checkpointInterruptionPlatform: 'darwin',
+  checkpointInterruptionSignal: 'posix_sigstop_process_group',
 });
 
 const P6_PRESSURE_BOUNDARY = Object.freeze({
@@ -531,7 +535,9 @@ export function assertP6ProductAcceptanceEvidenceWritable(evidence) {
     && evidence?.p7Eligible === false
     && evidence?.systemRestartBoundary === P6_PRODUCT_ACCEPTANCE_BOUNDARIES.systemRestart
     && evidence?.providerBoundary === P6_PRODUCT_ACCEPTANCE_BOUNDARIES.provider
-    && evidence?.packagedBoundary === P6_PRODUCT_ACCEPTANCE_BOUNDARIES.packaged,
+    && evidence?.packagedBoundary === P6_PRODUCT_ACCEPTANCE_BOUNDARIES.packaged
+    && evidence?.checkpointInterruptionBoundary
+      === P6_PRODUCT_ACCEPTANCE_BOUNDARIES.checkpointInterruption,
   'p6_evidence_classification_invalid');
   invariant(evidence?.sourceCommitMatchesSourceHashes === true
     && evidence?.sourceBindingStableDuringCapture === true,
@@ -604,6 +610,7 @@ export async function captureP6ProductAcceptance({ keep = false, show = false, v
     systemRestartBoundary: P6_PRODUCT_ACCEPTANCE_BOUNDARIES.systemRestart,
     providerBoundary: P6_PRODUCT_ACCEPTANCE_BOUNDARIES.provider,
     packagedBoundary: P6_PRODUCT_ACCEPTANCE_BOUNDARIES.packaged,
+    checkpointInterruptionBoundary: P6_PRODUCT_ACCEPTANCE_BOUNDARIES.checkpointInterruption,
     sourceCommit: sourceAtStart.sourceCommit,
     sourceFiles: sourceAtStart.sourceFiles,
     sourceHashes: sourceAtStart.sourceHashes,

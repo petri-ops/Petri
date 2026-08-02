@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -16,12 +16,138 @@ import {
   evaluateP6RealFailurePrototype,
   evaluateP6RealRestartPrototype,
   evaluateP6RealStopPrototype,
+  inspectP6StoppedWorkerProcessGroupOutput,
+  parseP6DarwinLsofExecutablePathOutput,
+  parseP5WorkerCheckpointHold,
 } from '../scripts/g0-rs-p6-real-restart-prototype.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 test('P6 restart prototype uses the existing real P5 worker entrypoint', () => {
   assert.equal(existsSync(path.join(ROOT, 'scripts/g0-rs-p5-acceptance.mjs')), true);
+});
+
+test('P6 worker checkpoint hold is an explicit synchronous process-group handshake', () => {
+  const workerSource = readFileSync(path.join(ROOT, 'scripts/g0-rs-p5-acceptance.mjs'), 'utf8');
+  const holdInstalled = workerSource.indexOf('installP6AcceptanceCheckpointHold(spec, db)');
+  const createAwaited = workerSource.indexOf('created = await tools.create(', holdInstalled);
+  assert.ok(holdInstalled >= 0 && createAwaited > holdInstalled);
+  assert.match(workerSource, /candidateJobs = sqlite\.prepare\(`/);
+  assert.match(workerSource, /status='running'/);
+  assert.match(workerSource, /candidateJobExact = candidateJob\.tool_id === hold\.expectedToolId/);
+  assert.match(workerSource, /writeSync\(1, `\$\{P5_WORKER_CHECKPOINT_HOLD_MARKER\}/);
+  assert.match(workerSource, /process\.kill\(-process\.pid, 'SIGSTOP'\)/);
+
+  const marker = '__P5_WORKER_CHECKPOINT_HOLD__';
+  const payload = {
+    version: 1,
+    mode: 'sigstop_process_group',
+    checkpointStage: 'candidate_committed',
+    changeSetId: 'changeset-test',
+    checkpointId: 'checkpoint-test',
+    candidateJobId: 'job-test',
+    candidateJobExact: true,
+    candidateInputExact: true,
+  };
+  assert.deepEqual(parseP5WorkerCheckpointHold(`prefix\n${marker}${JSON.stringify(payload)}\n`), payload);
+  assert.equal(parseP5WorkerCheckpointHold(`${marker}{"version":2}\n`), null);
+  assert.equal(parseP5WorkerCheckpointHold(`${marker}${JSON.stringify(payload)}`), null);
+});
+
+test('P6 worker hold accepts only the exact stopped R runtime child', () => {
+  const workspaceRoot = '/tmp/p6-worker-project';
+  const expected = inspectP6StoppedWorkerProcessGroupOutput([
+    '4100 4000 4100 T node scripts/g0-rs-p5-acceptance.mjs --worker payload',
+    `4101 4100 4100 T /opt/R/bin/Rscript ${workspaceRoot}/results/jobs/tj_candidate/run-script.R ${workspaceRoot}/results/jobs/tj_candidate`,
+  ].join('\n'), {
+    workerPid: 4100,
+    candidateJobId: 'tj_candidate',
+    workspaceRoot,
+    trustedRuntimePaths: ['/opt/R/bin/Rscript'],
+    runtimeExecutablePathsByPid: { 4101: '/opt/R/bin/Rscript' },
+  });
+  assert.equal(expected.workerProcessStopped, true);
+  assert.equal(expected.processGroupAllStopped, true);
+  assert.equal(expected.candidateRuntimeProcessObserved, true);
+  assert.equal(expected.candidateRuntimeDirectChild, true);
+  assert.equal(expected.candidateRuntimeCommandTrusted, true);
+  assert.equal(expected.candidateRuntimeExecutableIdentityExact, true);
+
+  const wrongHelper = inspectP6StoppedWorkerProcessGroupOutput([
+    '4100 4000 4100 T node scripts/g0-rs-p5-acceptance.mjs --worker payload',
+    '4101 4100 4100 T /bin/sh helper.sh',
+  ].join('\n'), {
+    workerPid: 4100,
+    candidateJobId: 'tj_candidate',
+    workspaceRoot,
+    trustedRuntimePaths: ['/opt/R/bin/Rscript'],
+    runtimeExecutablePathsByPid: { 4101: '/bin/sh' },
+  });
+  assert.equal(wrongHelper.childProcessPresent, true);
+  assert.equal(wrongHelper.candidateRuntimeProcessObserved, false);
+
+  const impersonatedRuntime = inspectP6StoppedWorkerProcessGroupOutput([
+    '4100 4000 4100 T node scripts/g0-rs-p5-acceptance.mjs --worker payload',
+    `4101 4100 4100 T /tmp/Rscript /tmp/unrelated.R --note ${workspaceRoot}/results/jobs/tj_candidate/run-script.R`,
+  ].join('\n'), {
+    workerPid: 4100,
+    candidateJobId: 'tj_candidate',
+    workspaceRoot,
+    trustedRuntimePaths: ['/opt/R/bin/Rscript'],
+    runtimeExecutablePathsByPid: { 4101: '/usr/bin/yes' },
+  });
+  assert.equal(impersonatedRuntime.candidateRuntimeCommandTrusted, false);
+  assert.equal(impersonatedRuntime.candidateRuntimeExecutableIdentityExact, false);
+
+  const spoofedArgv0 = inspectP6StoppedWorkerProcessGroupOutput([
+    '4100 4000 4100 T node scripts/g0-rs-p5-acceptance.mjs --worker payload',
+    `4101 4100 4100 T /opt/R/bin/Rscript ${workspaceRoot}/results/jobs/tj_candidate/run-script.R ${workspaceRoot}/results/jobs/tj_candidate`,
+  ].join('\n'), {
+    workerPid: 4100,
+    candidateJobId: 'tj_candidate',
+    workspaceRoot,
+    trustedRuntimePaths: ['/opt/R/bin/Rscript'],
+    runtimeExecutablePathsByPid: { 4101: '/usr/bin/yes' },
+  });
+  assert.equal(spoofedArgv0.candidateRuntimeCommandTrusted, false);
+  assert.equal(spoofedArgv0.candidateRuntimeExecutableIdentityExact, false);
+
+  const misplacedRunScript = inspectP6StoppedWorkerProcessGroupOutput([
+    '4100 4000 4100 T node scripts/g0-rs-p5-acceptance.mjs --worker payload',
+    `4101 4100 4100 T /opt/R/bin/Rscript /tmp/unrelated.R ${workspaceRoot}/results/jobs/tj_candidate/run-script.R`,
+  ].join('\n'), {
+    workerPid: 4100,
+    candidateJobId: 'tj_candidate',
+    workspaceRoot,
+    trustedRuntimePaths: ['/opt/R/bin/Rscript'],
+    runtimeExecutablePathsByPid: { 4101: '/opt/R/bin/Rscript' },
+  });
+  assert.equal(misplacedRunScript.candidateRuntimeCommandTrusted, false);
+
+  const wrongParent = inspectP6StoppedWorkerProcessGroupOutput([
+    '4100 4000 4100 T node scripts/g0-rs-p5-acceptance.mjs --worker payload',
+    `4101 9999 4100 T /opt/R/bin/Rscript ${workspaceRoot}/results/jobs/tj_candidate/run-script.R ${workspaceRoot}/results/jobs/tj_candidate`,
+  ].join('\n'), {
+    workerPid: 4100,
+    candidateJobId: 'tj_candidate',
+    workspaceRoot,
+    trustedRuntimePaths: ['/opt/R/bin/Rscript'],
+    runtimeExecutablePathsByPid: { 4101: '/opt/R/bin/Rscript' },
+  });
+  assert.equal(wrongParent.candidateRuntimeDirectChild, false);
+});
+
+test('P6 Darwin executable probe accepts only the first kernel text mapping for the exact pid', () => {
+  const output = [
+    'p4101',
+    'ftxt',
+    'n/opt/R/bin/Rscript',
+    'ftxt',
+    'n/usr/lib/dyld',
+  ].join('\n');
+  assert.equal(parseP6DarwinLsofExecutablePathOutput(output, 4101), '/opt/R/bin/Rscript');
+  assert.equal(parseP6DarwinLsofExecutablePathOutput(output, 9999), null);
+  assert.equal(parseP6DarwinLsofExecutablePathOutput('p4101\nftxt\nnrelative/Rscript\n', 4101), null);
 });
 
 test('P6 restart prototype builds bounded deterministic scientific input bytes', () => {
@@ -77,8 +203,21 @@ test('P6 restart verdict requires every process and durable-store invariant', ()
     checkpointStageBeforeKill: 'candidate_committed',
     candidateRefMatchedBeforeKill: true,
     candidateJobRunningBeforeKill: true,
+    workerCheckpointHoldConfirmed: true,
+    workerCheckpointHoldMode: 'sigstop_process_group',
+    processGroupAliveBeforeKill: true,
+    candidateChildPresentBeforeKill: true,
+    candidateJobExactBeforeKill: true,
+    candidateInputExactBeforeKill: true,
+    candidateRuntimeProcessObservedBeforeKill: true,
+    candidateRuntimeDirectChildBeforeKill: true,
+    candidateRuntimeCommandTrustedBeforeKill: true,
+    candidateRuntimeExecutableIdentityExactBeforeKill: true,
+    processGroupAllStoppedBeforeKill: true,
     workerExitSignal: 'SIGKILL',
     workerCompletionMarkerSeen: false,
+    processGroupGoneAfterKill: true,
+    candidateRuntimeProcessGoneAfterKill: true,
     sqliteFileIdentityStable: true,
     sqliteJournalModeBefore: 'wal',
     sqliteJournalModeAfter: 'wal',
@@ -113,6 +252,7 @@ test('P6 restart verdict requires every process and durable-store invariant', ()
   for (const key of Object.keys(complete)) {
     if (key === 'firstColdStatus' || key === 'secondColdStatus'
         || key === 'checkpointStageBeforeKill' || key === 'workerExitSignal'
+        || key === 'workerCheckpointHoldMode'
         || key === 'sqliteJournalModeBefore' || key === 'sqliteJournalModeAfter'
         || key === 'recoveryRepairKinds' || key === 'noSeedSeededTableCount'
         || key === 'baselineRevisionCount' || key === 'recoveryHttpStatus'

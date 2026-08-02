@@ -224,6 +224,8 @@ export function buildP6RecoveryElectronVerdict(observation = {}) {
     check('P6RE-01', observation.classification === P6_RECOVERY_ELECTRON_CLASSIFICATION
       && observation.boundary?.providerEvidence === 'not_exercised'
       && observation.boundary?.packagedAppEvidence === 'not_exercised'
+      && observation.boundary?.checkpointInterruptionPlatform === 'darwin'
+      && observation.boundary?.checkpointInterruptionSignal === 'posix_sigstop_process_group'
       && observation.boundary?.qualificationEligible === false),
     check('P6RE-02', observation.truth?.noSeedProductLedger === true
       && observation.truth?.baselineJobCompleted === true
@@ -232,8 +234,22 @@ export function buildP6RecoveryElectronVerdict(observation = {}) {
     check('P6RE-03', observation.interruption?.checkpointStage === 'candidate_committed'
       && observation.interruption?.checkpointIntegrityExact === true
       && observation.interruption?.candidateRefExact === true
+      && observation.interruption?.candidateJobRunningBeforeKill === true
+      && observation.interruption?.workerCheckpointHoldConfirmed === true
+      && observation.interruption?.workerCheckpointHoldMode === 'sigstop_process_group'
+      && observation.interruption?.processGroupAliveBeforeKill === true
+      && observation.interruption?.candidateChildPresentBeforeKill === true
+      && observation.interruption?.candidateJobExactBeforeKill === true
+      && observation.interruption?.candidateInputExactBeforeKill === true
+      && observation.interruption?.candidateRuntimeProcessObservedBeforeKill === true
+      && observation.interruption?.candidateRuntimeDirectChildBeforeKill === true
+      && observation.interruption?.candidateRuntimeCommandTrustedBeforeKill === true
+      && observation.interruption?.candidateRuntimeExecutableIdentityExactBeforeKill === true
+      && observation.interruption?.processGroupAllStoppedBeforeKill === true
       && observation.interruption?.workerExitSignal === 'SIGKILL'
-      && observation.interruption?.workerCompletionMarkerSeen === false),
+      && observation.interruption?.workerCompletionMarkerSeen === false
+      && observation.interruption?.processGroupGoneAfterKill === true
+      && observation.interruption?.candidateRuntimeProcessGoneAfterKill === true),
     check('P6RE-04', observation.firstColdStatus?.status === 'recovery_available'
       && observation.firstColdStatus?.interruptedCount === 1
       && observation.firstColdStatus?.activeOperationCount === 0
@@ -1010,12 +1026,44 @@ async function crashActiveElectron(createAttempt, backendPort) {
   });
 }
 
-function terminateWorkerBestEffort(worker) {
-  if (!worker?.child || worker.child.exitCode !== null || worker.child.signalCode !== null) return;
-  try {
-    if (worker.detached) process.kill(-worker.child.pid, 'SIGKILL');
-    else worker.child.kill('SIGKILL');
-  } catch {}
+async function terminateWorkerForCleanup(worker) {
+  if (!worker?.child) return { terminated: true, alreadyExited: true };
+  const termination = await terminateP6ActiveElectronProcessGroup(worker.child, { force: true });
+  invariant(termination.terminated === true,
+    'p6_recovery_worker_cleanup_unconfirmed', termination);
+  return termination;
+}
+
+export function createP6RecoveryResourceGate(getInterruptionSignal) {
+  invariant(typeof getInterruptionSignal === 'function',
+    'p6_recovery_resource_gate_signal_reader_missing');
+  let pendingPromise = null;
+  const assertNotInterrupted = () => {
+    const signal = getInterruptionSignal();
+    invariant(!signal, 'p6_recovery_interrupted', { signal });
+  };
+  return Object.freeze({
+    get pendingPromise() { return pendingPromise; },
+    assertNotInterrupted,
+    async acquire(factory, assign) {
+      invariant(typeof factory === 'function' && typeof assign === 'function',
+        'p6_recovery_resource_gate_factory_invalid');
+      // Guard and factory invocation share one synchronous turn. A signal
+      // cannot land between them; once the factory yields, cleanup can see its
+      // promise and wait until the owned resource is addressable.
+      assertNotInterrupted();
+      const tracked = Promise.resolve(factory()).then((resource) => {
+        assign(resource);
+        return resource;
+      });
+      pendingPromise = tracked;
+      try {
+        return await tracked;
+      } finally {
+        if (pendingPromise === tracked) pendingPromise = null;
+      }
+    },
+  });
 }
 
 export async function observeP6RecoveryElectron({ keep = false, show = false, verbose = false } = {}) {
@@ -1028,36 +1076,64 @@ export async function observeP6RecoveryElectron({ keep = false, show = false, ve
   let vite = null;
   let root = null;
   let originalRuntimeClosed = false;
-  let cleaning = false;
+  let cleanupPromise = null;
+  let interruptionSignal = null;
+  const resourceGate = createP6RecoveryResourceGate(() => interruptionSignal);
 
-  const cleanup = async () => {
-    if (cleaning) return;
-    cleaning = true;
-    terminateWorkerBestEffort(worker);
-    await stopChild(vite);
-    await stopServer(coldServer?.child);
-    if (runtime && !originalRuntimeClosed) await runtime.close({ removeRoot: false });
-    if (!keep && root && existsSync(root)) rmSync(root, { recursive: true, force: true });
+  const cleanup = () => {
+    if (cleanupPromise) return cleanupPromise;
+    cleanupPromise = (async () => {
+      // A signal may arrive while a runtime or cold server is still being
+      // created.  Wait for that owned resource to become addressable before
+      // taking the cleanup snapshot; otherwise an early empty cleanup could
+      // be cached while the main path later creates an orphan.
+      if (resourceGate.pendingPromise) {
+        try { await resourceGate.pendingPromise; } catch { /* creation already failed */ }
+      }
+      await terminateWorkerForCleanup(worker);
+      await stopChild(vite);
+      await stopServer(coldServer?.child);
+      if (runtime && !originalRuntimeClosed) await runtime.close({ removeRoot: false });
+      if (!keep && root && existsSync(root)) rmSync(root, { recursive: true, force: true });
+    })();
+    return cleanupPromise;
   };
-  const onSignal = () => { void cleanup(); };
-  process.once('SIGINT', onSignal);
-  process.once('SIGTERM', onSignal);
+  const onSignal = (signal) => {
+    if (interruptionSignal) return;
+    interruptionSignal = signal;
+    process.exitCode = signal === 'SIGINT' ? 130 : 143;
+    cleanup().catch((error) => {
+      process.exitCode = 1;
+      console.error(`[p6-recovery-cleanup] ${safeDiagnosticToken(error?.code || error?.message)}`);
+    });
+  };
+  const onSigint = () => onSignal('SIGINT');
+  const onSigterm = () => onSignal('SIGTERM');
+  process.once('SIGINT', onSigint);
+  process.once('SIGTERM', onSigterm);
 
   try {
-    runtime = await createP5LiveScientificRuntime({
-      port: backendPort,
-      verbose,
-      beforeStart({ env }) {
-        const rendererOrigin = `http://127.0.0.1:${uiPort}`;
-        env.BIOF3_RENDERER_DEV_URL = rendererOrigin;
-        env.BIOF3_TRUSTED_DESKTOP_ORIGINS = rendererOrigin;
-        env.BIOF3_TOOL_ZOMBIE_TIMEOUT_MS = '250';
-        env.BIOF3_TOOL_HEARTBEAT_INTERVAL_MS = '100';
+    await resourceGate.acquire(
+      () => createP5LiveScientificRuntime({
+        port: backendPort,
+        verbose,
+        beforeStart({ env }) {
+          const rendererOrigin = `http://127.0.0.1:${uiPort}`;
+          env.BIOF3_RENDERER_DEV_URL = rendererOrigin;
+          env.BIOF3_TRUSTED_DESKTOP_ORIGINS = rendererOrigin;
+          env.BIOF3_TOOL_ZOMBIE_TIMEOUT_MS = '250';
+          env.BIOF3_TOOL_HEARTBEAT_INTERVAL_MS = '100';
+        },
+      }),
+      (createdRuntime) => {
+        runtime = createdRuntime;
+        root = createdRuntime.root;
       },
-    });
-    root = runtime.root;
+    );
+    resourceGate.assertNotInterrupted();
     const dbIdentityBefore = fileIdentity(runtime.env.BIOF3_DB_PATH);
     const baseline = await createRealVolcanoBaseline(runtime, 50_000);
+    resourceGate.assertNotInterrupted();
     const db = openLedger(runtime.env.BIOF3_DB_PATH);
     let baselineRevisionIds;
     try {
@@ -1079,6 +1155,7 @@ export async function observeP6RecoveryElectron({ keep = false, show = false, ve
 
     worker = spawnEditWorker(runtime, baseline);
     const durable = await waitForDurableCandidateCheckpoint(runtime, worker);
+    resourceGate.assertNotInterrupted();
 
     vite = spawn(process.execPath, [
       VITE_PATH,
@@ -1091,6 +1168,7 @@ export async function observeP6RecoveryElectron({ keep = false, show = false, ve
       stdio: ['ignore', 'ignore', 'ignore'],
     });
     await waitForUrl(`http://127.0.0.1:${uiPort}`, vite);
+    resourceGate.assertNotInterrupted();
 
     const traceDir = path.join(root, 'p6-recovery-electron');
     const configPath = path.join(traceDir, 'driver-config.json');
@@ -1126,6 +1204,7 @@ export async function observeP6RecoveryElectron({ keep = false, show = false, ve
       },
       backendPort,
     );
+    resourceGate.assertNotInterrupted();
 
     // The renderer observation above must happen while the edit worker still
     // owns a live candidate operation. Only after Electron is actually gone do
@@ -1140,10 +1219,15 @@ export async function observeP6RecoveryElectron({ keep = false, show = false, ve
     invariant(existsSync(root), 'p6_recovery_electron_root_removed_before_cold_boot');
 
     const restartRestoreStartedAt = performance.now();
-    coldServer = await startServer(runtime.env, verbose
-      ? { onLog: (channel, line) => console.error(`[p6-recovery-cold-1:${channel}] ${line}`) }
-      : {});
+    await resourceGate.acquire(
+      () => startServer(runtime.env, verbose
+        ? { onLog: (channel, line) => console.error(`[p6-recovery-cold-1:${channel}] ${line}`) }
+        : {}),
+      (createdServer) => { coldServer = createdServer; },
+    );
+    resourceGate.assertNotInterrupted();
     const firstColdStatus = await readWorkspaceStatus(coldServer.baseUrl, runtime.project.id);
+    resourceGate.assertNotInterrupted();
 
     writeFileSync(configPath, `${JSON.stringify({
       ...baseConfig,
@@ -1151,6 +1235,7 @@ export async function observeP6RecoveryElectron({ keep = false, show = false, ve
       resultPath: recoverResultPath,
     })}\n`, { mode: 0o600 });
     const recoverElectron = await runElectron(configPath, recoverResultPath, backendPort);
+    resourceGate.assertNotInterrupted();
     const restartRestoreMs = performance.now() - restartRestoreStartedAt;
 
     const recoveredState = readRecoveredTruth(
@@ -1168,10 +1253,15 @@ export async function observeP6RecoveryElectron({ keep = false, show = false, ve
 
     await stopServer(coldServer.child);
     coldServer = null;
-    coldServer = await startServer(runtime.env, verbose
-      ? { onLog: (channel, line) => console.error(`[p6-recovery-cold-2:${channel}] ${line}`) }
-      : {});
+    await resourceGate.acquire(
+      () => startServer(runtime.env, verbose
+        ? { onLog: (channel, line) => console.error(`[p6-recovery-cold-2:${channel}] ${line}`) }
+        : {}),
+      (createdServer) => { coldServer = createdServer; },
+    );
+    resourceGate.assertNotInterrupted();
     const secondColdStatus = await readWorkspaceStatus(coldServer.baseUrl, runtime.project.id);
+    resourceGate.assertNotInterrupted();
 
     writeFileSync(configPath, `${JSON.stringify({
       ...baseConfig,
@@ -1179,6 +1269,7 @@ export async function observeP6RecoveryElectron({ keep = false, show = false, ve
       resultPath: reopenResultPath,
     })}\n`, { mode: 0o600 });
     const reopenElectron = await runElectron(configPath, reopenResultPath, backendPort);
+    resourceGate.assertNotInterrupted();
     const finalStatus = await readWorkspaceStatus(coldServer.baseUrl, runtime.project.id);
     const dbIdentityAfter = fileIdentity(runtime.env.BIOF3_DB_PATH);
     const sourceAtEnd = getP6RecoveryElectronSourceBinding();
@@ -1196,6 +1287,8 @@ export async function observeP6RecoveryElectron({ keep = false, show = false, ve
         qualificationEligible: false,
         systemRestartClaim: false,
         processBoundary: 'owned_electron_and_backend_processes_restarted_against_same_durable_local_stores',
+        checkpointInterruptionPlatform: process.platform,
+        checkpointInterruptionSignal: 'posix_sigstop_process_group',
       },
       sourceCommit: sourceAtStart.sourceCommit,
       sourceFiles: sourceAtStart.sourceFiles,
@@ -1217,8 +1310,27 @@ export async function observeP6RecoveryElectron({ keep = false, show = false, ve
         checkpointIntegrityExact: durable.integrity.matches === true,
         candidateRefExact: durable.git.commit === durable.checkpoint.candidate_commit,
         candidateJobRunningBeforeKill: durable.checkpoint.candidateJob.status === 'running',
+        workerCheckpointHoldConfirmed: durable.hold.confirmed === true
+          && durable.hold.workerProcessStopped === true
+          && durable.hold.processGroupAllStopped === true,
+        workerCheckpointHoldMode: durable.hold.mode,
+        processGroupAliveBeforeKill: durable.hold.groupAddressable === true,
+        candidateChildPresentBeforeKill: durable.hold.childProcessPresent === true
+          && durable.hold.groupMemberCount >= 2,
+        candidateJobExactBeforeKill: durable.hold.candidateJobExact === true,
+        candidateInputExactBeforeKill: durable.hold.candidateInputExact === true,
+        candidateRuntimeProcessObservedBeforeKill:
+          durable.hold.candidateRuntimeProcessObserved === true,
+        candidateRuntimeDirectChildBeforeKill: durable.hold.candidateRuntimeDirectChild === true,
+        candidateRuntimeCommandTrustedBeforeKill:
+          durable.hold.candidateRuntimeCommandTrusted === true,
+        candidateRuntimeExecutableIdentityExactBeforeKill:
+          durable.hold.candidateRuntimeExecutableIdentityExact === true,
+        processGroupAllStoppedBeforeKill: durable.hold.processGroupAllStopped === true,
         workerExitSignal: killed.signal,
         workerCompletionMarkerSeen: markerSeen,
+        processGroupGoneAfterKill: killed.processGroupGone === true,
+        candidateRuntimeProcessGoneAfterKill: killed.candidateRuntimeProcessGone === true,
       },
       firstColdStatus,
       renderer: {
@@ -1262,8 +1374,8 @@ export async function observeP6RecoveryElectron({ keep = false, show = false, ve
     assertSanitizedP6RecoveryElectronEvidence(result);
     return result;
   } finally {
-    process.removeListener('SIGINT', onSignal);
-    process.removeListener('SIGTERM', onSignal);
+    process.removeListener('SIGINT', onSigint);
+    process.removeListener('SIGTERM', onSigterm);
     await cleanup();
   }
 }

@@ -19,6 +19,7 @@ import {
   rmSync,
   statSync,
   writeFileSync,
+  writeSync,
 } from 'node:fs';
 import { createRequire } from 'node:module';
 import { createServer } from 'node:net';
@@ -38,6 +39,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SELF = fileURLToPath(import.meta.url);
 const EVIDENCE_PATH = path.join(ROOT, 'acceptance/g0-result-studio/rs-p5-scientific-editing.json');
 const WORKER_MARKER = '__P5_WORKER_RESULT__';
+export const P5_WORKER_CHECKPOINT_HOLD_MARKER = '__P5_WORKER_CHECKPOINT_HOLD__';
 const SHA256 = /^[a-f0-9]{64}$/;
 const TERMINAL_JOB_STATUSES = new Set(['completed', 'failed', 'cancelled', 'recovery_required']);
 const VALID_REPLAY_PACKAGE_STATUSES = new Set(['complete', 'partial_history']);
@@ -945,6 +947,181 @@ function workerSummary(result) {
   };
 }
 
+/**
+ * P6 recovery acceptance needs to observe the real UI while a real edit is
+ * still interrupted at its durable candidate checkpoint.  A polling timer is
+ * intentional here: `tools.create()` yields only after the registered plugin
+ * has created its running tool_job and spawned its child process.  The timer
+ * then verifies the persisted ChangeSet/checkpoint/Job tuple, writes a
+ * synchronous handshake to fd 1, and stops the entire detached worker process
+ * group (worker + scientific runtime).  The P6 parent is the only caller that
+ * opts into this protocol and it must finish the interruption with SIGKILL.
+ */
+function installP6AcceptanceCheckpointHold(spec, dbModule) {
+  const hold = spec?.acceptanceCheckpointHold;
+  if (hold == null) return () => {};
+  if (hold?.version !== 1 || hold?.mode !== 'sigstop_process_group'
+      || hold?.checkpointStage !== 'candidate_committed'
+      || hold?.expectedToolId !== 'volcano-plot'
+      || !Number.isFinite(hold?.notBeforeEpochMs)) {
+    throw new Error('p5_worker_checkpoint_hold_protocol_invalid');
+  }
+  if (process.platform === 'win32') {
+    throw new Error('p5_worker_checkpoint_hold_unsupported_platform:win32');
+  }
+  const sqlite = typeof dbModule.getDatabase === 'function' ? dbModule.getDatabase() : dbModule.db;
+  if (!sqlite || typeof sqlite.prepare !== 'function') {
+    throw new Error('p5_worker_checkpoint_hold_database_unavailable');
+  }
+  let closed = false;
+  let lastDiagnostic = null;
+  const timer = setInterval(() => {
+    if (closed) return;
+    let checkpoint;
+    let candidateJobs;
+    try {
+      checkpoint = sqlite.prepare(`
+        SELECT cs.change_set_id, cp.checkpoint_id, cp.pending_preview_json
+        FROM scientific_change_sets cs
+        JOIN workspace_revision_checkpoints cp ON cp.change_set_id=cs.change_set_id
+        WHERE cs.project_id=? AND cs.conversation_id=? AND cs.status='running'
+        ORDER BY cp.updated_at DESC LIMIT 1
+      `).get(spec.projectId, spec.conversationId);
+      candidateJobs = sqlite.prepare(`
+        SELECT id, tool_id, params_json, status, created_at, is_test_run
+        FROM tool_jobs
+        WHERE project_id=? AND id<>? AND status='running' AND created_at>=?
+        ORDER BY created_at DESC, id DESC
+      `).all(spec.projectId, spec.jobId, hold.notBeforeEpochMs);
+    } catch (error) {
+      closed = true;
+      clearInterval(timer);
+      throw error;
+    }
+    let pendingPreview = null;
+    try {
+      pendingPreview = checkpoint?.pending_preview_json
+        ? JSON.parse(checkpoint.pending_preview_json)
+        : null;
+    } catch {
+      return;
+    }
+    if (!checkpoint || candidateJobs?.length !== 1
+        || pendingPreview?.stage !== hold.checkpointStage) {
+      if (checkpoint && Array.isArray(candidateJobs) && candidateJobs.length > 0) {
+        const diagnostic = stableHash({
+          candidateJobCount: candidateJobs.length,
+          checkpointStage: pendingPreview?.stage || null,
+        });
+        if (diagnostic !== lastDiagnostic) {
+          lastDiagnostic = diagnostic;
+          writeSync(2, `[p5-worker-checkpoint-hold] waiting:${JSON.stringify({
+            candidateJobCount: candidateJobs.length,
+            checkpointStageExact: pendingPreview?.stage === hold.checkpointStage,
+          })}\n`);
+        }
+      }
+      return;
+    }
+    const candidateJob = candidateJobs[0];
+    let candidateParams = null;
+    let baselineParams = null;
+    let baselineInputSha256 = null;
+    try {
+      candidateParams = JSON.parse(candidateJob.params_json || '{}');
+      const baselineJob = sqlite.prepare(`
+        SELECT params_json, result_json FROM tool_jobs WHERE id=? AND project_id=?
+      `).get(spec.jobId, spec.projectId);
+      baselineParams = JSON.parse(baselineJob?.params_json || '{}');
+      const baselineResult = JSON.parse(baselineJob?.result_json || '{}');
+      const baselineInput = (baselineResult.executionProvenance?.inputs || [])
+        .filter((entry) => entry?.id === 'deg_table');
+      if (baselineInput.length !== 1 || !SHA256.test(baselineInput[0].sha256 || '')) return;
+      baselineInputSha256 = baselineInput[0].sha256;
+    } catch {
+      return;
+    }
+    const expectedParams = { ...baselineParams, ...(spec.parameterPatch || {}) };
+    const candidateParamKeys = Object.keys(candidateParams).sort();
+    const expectedParamKeys = Object.keys(expectedParams).sort();
+    const nonFileParamsExact = candidateParamKeys.length === expectedParamKeys.length
+      && candidateParamKeys.every((key, index) => key === expectedParamKeys[index])
+      && expectedParamKeys.filter((key) => key !== 'deg_table')
+        .every((key) => stableHash(candidateParams[key]) === stableHash(expectedParams[key]));
+    const project = dbModule.getProject(spec.projectId);
+    let expectedInputRoot = '';
+    let expectedInput = '';
+    let candidateInput = '';
+    try {
+      expectedInputRoot = realpathSync(path.resolve(
+        project?.workspace_path || '', 'results', 'jobs', spec.jobId,
+      ));
+      expectedInput = typeof baselineParams.deg_table === 'string'
+        ? realpathSync(path.resolve(expectedInputRoot, baselineParams.deg_table))
+        : '';
+      candidateInput = typeof candidateParams.deg_table === 'string'
+        ? realpathSync(candidateParams.deg_table)
+        : '';
+    } catch {
+      expectedInputRoot = '';
+      expectedInput = '';
+      candidateInput = '';
+    }
+    const inputExact = typeof baselineParams.deg_table === 'string'
+      && candidateInput === expectedInput
+      && candidateInput.startsWith(`${expectedInputRoot}${path.sep}`)
+      && existsSync(candidateInput)
+      && sha256(readFileSync(candidateInput)) === baselineInputSha256;
+    const candidateJobExact = candidateJob.tool_id === hold.expectedToolId
+      && candidateJob.status === 'running'
+      && candidateJob.is_test_run === 0
+      && Number(candidateJob.created_at) >= hold.notBeforeEpochMs
+      && nonFileParamsExact
+      && inputExact;
+    if (!candidateJobExact) {
+      const detail = {
+        toolExact: candidateJob.tool_id === hold.expectedToolId,
+        statusExact: candidateJob.status === 'running',
+        nonTest: candidateJob.is_test_run === 0,
+        createdAfterHold: Number(candidateJob.created_at) >= hold.notBeforeEpochMs,
+        nonFileParamsExact,
+        inputExact,
+        candidateParamCount: candidateParamKeys.length,
+        expectedParamCount: expectedParamKeys.length,
+      };
+      const diagnostic = stableHash(detail);
+      if (diagnostic !== lastDiagnostic) {
+        lastDiagnostic = diagnostic;
+        writeSync(2, `[p5-worker-checkpoint-hold] candidate_not_exact:${JSON.stringify(detail)}\n`);
+      }
+      return;
+    }
+
+    closed = true;
+    clearInterval(timer);
+    writeSync(1, `${P5_WORKER_CHECKPOINT_HOLD_MARKER}${JSON.stringify({
+      version: 1,
+      mode: hold.mode,
+      checkpointStage: pendingPreview.stage,
+      changeSetId: checkpoint.change_set_id,
+      checkpointId: checkpoint.checkpoint_id,
+      candidateJobId: candidateJob.id,
+      candidateJobExact: true,
+      candidateInputExact: true,
+    })}\n`);
+    process.kill(-process.pid, 'SIGSTOP');
+    // No successful P6 run resumes this worker: the parent sends SIGKILL to
+    // the stopped process group.  Reaching this line means the protocol was
+    // externally violated and must fail closed rather than finish the edit.
+    throw new Error('p5_worker_checkpoint_hold_resumed_without_sigkill');
+  }, 2);
+  timer.unref?.();
+  return () => {
+    closed = true;
+    clearInterval(timer);
+  };
+}
+
 function runWorker(env, spec) {
   return new Promise((resolve, reject) => {
     const payload = Buffer.from(JSON.stringify(spec)).toString('base64url');
@@ -1140,11 +1317,17 @@ async function runWorkerMain() {
     })}\n`);
     return;
   }
-  const created = await tools.create({
-    contextToken: planned.context.contextToken,
-    intent: planned.intent,
-    scientificConfirmed: planned.intent.requiresScientificConfirmation === true,
-  }, ctx);
+  const releaseCheckpointHold = installP6AcceptanceCheckpointHold(spec, db);
+  let created;
+  try {
+    created = await tools.create({
+      contextToken: planned.context.contextToken,
+      intent: planned.intent,
+      scientificConfirmed: planned.intent.requiresScientificConfirmation === true,
+    }, ctx);
+  } finally {
+    releaseCheckpointHold();
+  }
   if (!created?.ok || created.changeSet?.status !== 'preview_ready') {
     process.stdout.write(`${WORKER_MARKER}${JSON.stringify(workerSummary(created))}\n`);
     return;

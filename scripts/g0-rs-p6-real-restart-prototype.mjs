@@ -15,6 +15,7 @@ import {
   cpSync,
   existsSync,
   readFileSync,
+  realpathSync,
   rmSync,
   statSync,
   writeFileSync,
@@ -24,7 +25,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { startServer, stopServer } from './g0-rs-p4r-capture.mjs';
-import { createP5LiveScientificRuntime } from './g0-rs-p5-acceptance.mjs';
+import {
+  P5_WORKER_CHECKPOINT_HOLD_MARKER,
+  createP5LiveScientificRuntime,
+} from './g0-rs-p5-acceptance.mjs';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -41,6 +45,9 @@ const Database = require(require.resolve('better-sqlite3', {
 }));
 const { createResultStudioRepository } = require(
   path.join(ROOT, 'core/shared-backend/result-studio-repository.js')
+);
+const { RExecutor } = require(
+  path.join(ROOT, 'core/shared-backend/executors/r-executor.js')
 );
 
 function invariant(condition, code, detail = null) {
@@ -432,6 +439,8 @@ function runManagedGit(binding, args) {
 }
 
 export function spawnEditWorker(runtime, baseline) {
+  invariant(process.platform !== 'win32',
+    'p6_restart_checkpoint_hold_unsupported_platform:win32');
   const spec = {
     op: 'context_edit',
     projectId: runtime.project.id,
@@ -444,6 +453,17 @@ export function spawnEditWorker(runtime, baseline) {
       color_up: '#d55e00',
       color_down: '#0072b2',
       point_size: 3.2,
+    },
+    // Acceptance-only protocol implemented by the existing P5 worker.  It
+    // stops its detached process group only after the real durable checkpoint
+    // and a real candidate tool_job are both running, so the Electron trace
+    // cannot race a naturally completed edit.
+    acceptanceCheckpointHold: {
+      version: 1,
+      mode: 'sigstop_process_group',
+      checkpointStage: 'candidate_committed',
+      expectedToolId: 'volcano-plot',
+      notBeforeEpochMs: Date.now(),
     },
   };
   const payload = Buffer.from(JSON.stringify(spec)).toString('base64url');
@@ -464,7 +484,227 @@ export function spawnEditWorker(runtime, baseline) {
     child,
     detached,
     baselineJobId: baseline.job.id,
+    checkpointHoldConfirmed: false,
     output: () => ({ stdout, stderr }),
+  };
+}
+
+export function parseP5WorkerCheckpointHold(stdout) {
+  const source = String(stdout || '');
+  const marker = source.lastIndexOf(P5_WORKER_CHECKPOINT_HOLD_MARKER);
+  if (marker < 0) return null;
+  const tail = source.slice(marker + P5_WORKER_CHECKPOINT_HOLD_MARKER.length);
+  const newline = tail.indexOf('\n');
+  if (newline < 0) return null;
+  try {
+    const parsed = JSON.parse(tail.slice(0, newline));
+    return parsed && parsed.version === 1
+      && parsed.mode === 'sigstop_process_group'
+      && parsed.checkpointStage === 'candidate_committed'
+      && typeof parsed.changeSetId === 'string'
+      && typeof parsed.checkpointId === 'string'
+      && typeof parsed.candidateJobId === 'string'
+      && parsed.candidateJobExact === true
+      && parsed.candidateInputExact === true
+      ? parsed
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+export function inspectP6StoppedWorkerProcessGroupOutput(output, {
+  workerPid,
+  candidateJobId,
+  workspaceRoot,
+  trustedRuntimePaths = [],
+  expectedRunScriptPaths = [],
+  expectedJobDirPaths = [],
+  runtimeExecutablePathsByPid = {},
+} = {}) {
+  const expectedJobDir = path.join(
+    path.resolve(workspaceRoot || ''), 'results', 'jobs', candidateJobId || '',
+  );
+  const expectedRunScript = path.join(
+    expectedJobDir, 'run-script.R',
+  );
+  const trustedRuntimePathSet = new Set(trustedRuntimePaths.map(String));
+  const expectedRunScriptPathSet = new Set([
+    expectedRunScript,
+    ...expectedRunScriptPaths.map(String),
+  ]);
+  const expectedJobDirPathSet = new Set([
+    expectedJobDir,
+    ...expectedJobDirPaths.map(String),
+  ]);
+  const groupMembers = String(output || '').split('\n').flatMap((line) => {
+    const match = line.trim().match(/^(\d+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(.+)$/);
+    if (!match || Number(match[3]) !== workerPid) return [];
+    return [{
+      pid: Number(match[1]),
+      ppid: Number(match[2]),
+      pgid: Number(match[3]),
+      state: match[4],
+      command: match[5],
+    }];
+  });
+  const runtimeChild = groupMembers.find((member) => {
+    // This acceptance runtime deliberately uses disposable paths without
+    // whitespace.  Parse the exact execFile argv shape instead of accepting a
+    // command substring: a helper named Rscript, or a later --note containing
+    // run-script.R, must never impersonate the candidate runtime.
+    const argv = member.command.trim().split(/\s+/);
+    const kernelExecutablePath = String(runtimeExecutablePathsByPid[member.pid] || '');
+    return member.ppid === workerPid
+      && member.pid !== workerPid
+      && /^T/.test(member.state)
+      && argv.length === 3
+      && trustedRuntimePathSet.has(argv[0])
+      && trustedRuntimePathSet.has(kernelExecutablePath)
+      && expectedRunScriptPathSet.has(argv[1])
+      && expectedJobDirPathSet.has(argv[2]);
+  }) || null;
+  return {
+    groupMembers,
+    workerProcessStopped: groupMembers.some((member) => (
+      member.pid === workerPid && /^T/.test(member.state)
+    )),
+    childProcessPresent: groupMembers.some((member) => member.pid !== workerPid),
+    processGroupAllStopped: groupMembers.length >= 2
+      && groupMembers.every((member) => /^T/.test(member.state)),
+    candidateRuntimeProcessObserved: Boolean(runtimeChild),
+    candidateRuntimeDirectChild: Boolean(runtimeChild && runtimeChild.ppid === workerPid),
+    candidateRuntimeCommandTrusted: Boolean(runtimeChild),
+    candidateRuntimeExecutableIdentityExact: Boolean(runtimeChild),
+    candidateRuntimePid: runtimeChild?.pid || null,
+  };
+}
+
+export function parseP6DarwinLsofExecutablePathOutput(output, expectedPid) {
+  const lines = String(output || '').split('\n').map((line) => line.trim()).filter(Boolean);
+  const processMarker = `p${expectedPid}`;
+  const start = lines.indexOf(processMarker);
+  if (start < 0) return null;
+  for (let index = start + 1; index < lines.length; index += 1) {
+    if (/^p\d+$/.test(lines[index])) break;
+    if (lines[index] === 'ftxt' && lines[index + 1]?.startsWith('n')) {
+      const filePath = lines[index + 1].slice(1);
+      return path.isAbsolute(filePath) ? filePath : null;
+    }
+  }
+  return null;
+}
+
+function readP6ProcessExecutablePath(pid) {
+  try {
+    if (process.platform === 'darwin') {
+      const inspected = spawnSync('/usr/sbin/lsof', [
+        '-a', '-p', String(pid), '-d', 'txt', '-Fn',
+      ], { cwd: ROOT, encoding: 'utf8' });
+      if (inspected.status !== 0) return null;
+      const executablePath = parseP6DarwinLsofExecutablePathOutput(inspected.stdout, pid);
+      return executablePath ? realpathSync(executablePath) : null;
+    }
+    if (process.platform === 'linux') {
+      return realpathSync(`/proc/${pid}/exe`);
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+function exactExistingPathAliases(filePath, code) {
+  invariant(typeof filePath === 'string' && filePath.length > 0, code);
+  const resolved = path.resolve(filePath);
+  invariant(!/\s/.test(resolved) && existsSync(resolved), code);
+  const canonical = realpathSync(resolved);
+  invariant(!/\s/.test(canonical), code);
+  return [...new Set([resolved, canonical])];
+}
+
+function inspectStoppedWorkerProcessGroup(worker, runtime, candidateJobId) {
+  if (process.platform === 'win32') {
+    throw new Error('p6_restart_checkpoint_hold_unsupported_platform:win32');
+  }
+  let groupAddressable = false;
+  try {
+    process.kill(-worker.child.pid, 0);
+    groupAddressable = true;
+  } catch (error) {
+    if (error?.code !== 'ESRCH') throw error;
+  }
+  const inspected = spawnSync('ps', ['-o', 'stat=', '-p', String(worker.child.pid)], {
+    cwd: ROOT,
+    encoding: 'utf8',
+  });
+  const processState = inspected.status === 0 ? String(inspected.stdout || '').trim() : '';
+  const groupInspection = spawnSync('ps', ['-axo', 'pid=,ppid=,pgid=,stat=,command='], {
+    cwd: ROOT,
+    encoding: 'utf8',
+  });
+  const expectedJobDir = path.join(
+    runtime.project.workspace_path, 'results', 'jobs', candidateJobId,
+  );
+  const expectedRunScript = path.join(expectedJobDir, 'run-script.R');
+  const trustedRuntimePaths = exactExistingPathAliases(
+    new RExecutor().binPath,
+    'p6_restart_configured_r_runtime_unavailable',
+  );
+  const inspectionOutput = groupInspection.status === 0 ? groupInspection.stdout : '';
+  const parserOptions = {
+    workerPid: worker.child.pid,
+    candidateJobId,
+    workspaceRoot: runtime.project.workspace_path,
+    trustedRuntimePaths,
+    expectedRunScriptPaths: exactExistingPathAliases(
+      expectedRunScript,
+      'p6_restart_candidate_run_script_unavailable',
+    ),
+    expectedJobDirPaths: exactExistingPathAliases(
+      expectedJobDir,
+      'p6_restart_candidate_job_dir_unavailable',
+    ),
+  };
+  const membership = inspectP6StoppedWorkerProcessGroupOutput(inspectionOutput, parserOptions);
+  const runtimeExecutablePathsByPid = Object.fromEntries(
+    membership.groupMembers
+      .filter((member) => member.ppid === worker.child.pid && /^T/.test(member.state))
+      .map((member) => [member.pid, readP6ProcessExecutablePath(member.pid)])
+      .filter(([, executablePath]) => typeof executablePath === 'string'),
+  );
+  const parsed = inspectP6StoppedWorkerProcessGroupOutput(inspectionOutput, {
+    ...parserOptions,
+    runtimeExecutablePathsByPid,
+  });
+  const workerProcessStopped = /^T/.test(processState) && parsed.workerProcessStopped;
+  const {
+    childProcessPresent,
+    processGroupAllStopped,
+    candidateRuntimeProcessObserved,
+    candidateRuntimeDirectChild,
+    candidateRuntimeCommandTrusted,
+    candidateRuntimeExecutableIdentityExact,
+    candidateRuntimePid,
+  } = parsed;
+  return {
+    confirmed: groupAddressable && workerProcessStopped
+      && childProcessPresent && processGroupAllStopped
+      && candidateRuntimeProcessObserved
+      && candidateRuntimeDirectChild
+      && candidateRuntimeCommandTrusted
+      && candidateRuntimeExecutableIdentityExact,
+    groupAddressable,
+    workerProcessStopped,
+    childProcessPresent,
+    processGroupAllStopped,
+    groupMemberCount: parsed.groupMembers.length,
+    processState: processState || null,
+    candidateRuntimeProcessObserved,
+    candidateRuntimeDirectChild,
+    candidateRuntimeCommandTrusted,
+    candidateRuntimeExecutableIdentityExact,
+    candidateRuntimePid,
   };
 }
 
@@ -540,6 +780,64 @@ export async function waitForDurableCandidateCheckpoint(runtime, worker, timeout
       worker.baselineJobId,
     );
     if (checkpoint) {
+      const handshake = parseP5WorkerCheckpointHold(worker.output().stdout);
+      if (!handshake) {
+        if (worker.child.exitCode !== null || worker.child.signalCode !== null) {
+          const output = worker.output();
+          throw Object.assign(new Error('p6_restart_worker_exited_before_checkpoint_hold'), {
+            detail: {
+              code: worker.child.exitCode,
+              signal: worker.child.signalCode,
+              stdout: output.stdout.slice(-1600),
+              stderr: output.stderr.slice(-1200),
+            },
+          });
+        }
+        await sleep(5);
+        continue;
+      }
+      invariant(handshake.changeSetId === checkpoint.change_set_id
+        && handshake.checkpointId === checkpoint.checkpoint_id
+        && handshake.candidateJobId === checkpoint.candidateJob.id
+        && handshake.candidateJobExact === true
+        && handshake.candidateInputExact === true,
+      'p6_restart_checkpoint_hold_mismatch', {
+        checkpoint: {
+          changeSetId: checkpoint.change_set_id,
+          checkpointId: checkpoint.checkpoint_id,
+          candidateJobId: checkpoint.candidateJob.id,
+        },
+        handshake,
+      });
+      const processGroup = inspectStoppedWorkerProcessGroup(
+        worker,
+        runtime,
+        checkpoint.candidateJob.id,
+      );
+      if (!processGroup.confirmed) {
+        if (worker.child.exitCode !== null || worker.child.signalCode !== null) {
+          throw Object.assign(new Error('p6_restart_worker_exited_before_checkpoint_hold_confirmation'), {
+            detail: {
+              code: worker.child.exitCode,
+              signal: worker.child.signalCode,
+              processGroup,
+            },
+          });
+        }
+        await sleep(5);
+        continue;
+      }
+      const heldCheckpoint = readDurableCandidateCheckpoint(
+        runtime.env.BIOF3_DB_PATH,
+        runtime.project.id,
+        runtime.conversation.id,
+        worker.baselineJobId,
+      );
+      invariant(heldCheckpoint
+        && heldCheckpoint.change_set_id === checkpoint.change_set_id
+        && heldCheckpoint.checkpoint_id === checkpoint.checkpoint_id
+        && heldCheckpoint.candidateJob.id === checkpoint.candidateJob.id,
+      'p6_restart_checkpoint_changed_after_hold');
       const integrity = verifyCheckpoint(runtime.env.BIOF3_DB_PATH, checkpoint.checkpoint_id);
       const git = candidateRefCommit(
         runtime.env.BIOF3_DB_PATH,
@@ -549,7 +847,30 @@ export async function waitForDurableCandidateCheckpoint(runtime, worker, timeout
       if (integrity.matches === true && git.commit === checkpoint.candidate_commit) {
         invariant(checkpoint.pendingPreview?.runtimeLease?.instanceId,
           'p6_restart_checkpoint_runtime_lease_missing');
-        return { checkpoint, integrity, git };
+        worker.checkpointHoldConfirmed = true;
+        worker.candidateRuntimePid = processGroup.candidateRuntimePid;
+        return {
+          checkpoint: heldCheckpoint,
+          integrity,
+          git,
+          hold: {
+            confirmed: true,
+            mode: handshake.mode,
+            groupAddressable: processGroup.groupAddressable,
+            workerProcessStopped: processGroup.workerProcessStopped,
+            childProcessPresent: processGroup.childProcessPresent,
+            processGroupAllStopped: processGroup.processGroupAllStopped,
+            groupMemberCount: processGroup.groupMemberCount,
+            candidateRuntimeProcessObserved: processGroup.candidateRuntimeProcessObserved,
+            candidateRuntimeDirectChild: processGroup.candidateRuntimeDirectChild,
+            candidateRuntimeCommandTrusted: processGroup.candidateRuntimeCommandTrusted,
+            candidateRuntimeExecutableIdentityExact:
+              processGroup.candidateRuntimeExecutableIdentityExact,
+            candidateRuntimePid: processGroup.candidateRuntimePid,
+            candidateJobExact: handshake.candidateJobExact === true,
+            candidateInputExact: handshake.candidateInputExact === true,
+          },
+        };
       }
     }
     if (worker.child.exitCode !== null || worker.child.signalCode !== null) {
@@ -575,13 +896,30 @@ export async function waitForDurableCandidateCheckpoint(runtime, worker, timeout
 }
 
 export async function killWorkerWithSigkill(worker) {
+  invariant(worker.child.exitCode === null && worker.child.signalCode === null,
+    'p6_restart_worker_exited_before_sigkill', {
+      code: worker.child.exitCode,
+      signal: worker.child.signalCode,
+      completionMarkerSeen: worker.output().stdout.includes(WORKER_MARKER),
+    });
   const exit = new Promise((resolve) => {
     worker.child.once('exit', (code, signal) => resolve({ code, signal }));
   });
-  if (worker.detached) {
-    process.kill(-worker.child.pid, 'SIGKILL');
-  } else {
-    worker.child.kill('SIGKILL');
+  try {
+    if (worker.detached) {
+      process.kill(-worker.child.pid, 'SIGKILL');
+    } else {
+      worker.child.kill('SIGKILL');
+    }
+  } catch (error) {
+    throw Object.assign(new Error('p6_restart_worker_sigkill_failed'), {
+      code: 'p6_restart_worker_sigkill_failed',
+      cause: error,
+      detail: {
+        errorCode: error?.code || null,
+        completionMarkerSeen: worker.output().stdout.includes(WORKER_MARKER),
+      },
+    });
   }
   const outcome = await Promise.race([
     exit,
@@ -590,7 +928,37 @@ export async function killWorkerWithSigkill(worker) {
   invariant(outcome.signal === 'SIGKILL', 'p6_restart_worker_not_sigkilled', outcome);
   invariant(!worker.output().stdout.includes(WORKER_MARKER),
     'p6_restart_worker_completed_before_sigkill');
-  return outcome;
+  const goneBefore = async (deadline, target) => {
+    while (Date.now() < deadline) {
+      try {
+        process.kill(target, 0);
+      } catch (error) {
+        if (error?.code === 'ESRCH') return true;
+        throw error;
+      }
+      await sleep(10);
+    }
+    try {
+      process.kill(target, 0);
+      return false;
+    } catch (error) {
+      if (error?.code === 'ESRCH') return true;
+      throw error;
+    }
+  };
+  const deadline = Date.now() + 2_000;
+  const processGroupGone = worker.detached
+    ? await goneBefore(deadline, -worker.child.pid)
+    : true;
+  const candidateRuntimeProcessGone = Number.isInteger(worker.candidateRuntimePid)
+    ? await goneBefore(deadline, worker.candidateRuntimePid)
+    : false;
+  invariant(processGroupGone && candidateRuntimeProcessGone,
+    'p6_restart_worker_process_group_survived_sigkill', {
+      processGroupGone,
+      candidateRuntimeProcessGone,
+    });
+  return { ...outcome, processGroupGone, candidateRuntimeProcessGone };
 }
 
 function processExited(pid) {
@@ -737,9 +1105,22 @@ export function evaluateP6RealRestartPrototype(observation) {
     checkpointDurableBeforeKill: observation.checkpointIntegrityBeforeKill === true
       && observation.checkpointStageBeforeKill === 'candidate_committed'
       && observation.candidateRefMatchedBeforeKill === true
-      && observation.candidateJobRunningBeforeKill === true,
+      && observation.candidateJobRunningBeforeKill === true
+      && observation.workerCheckpointHoldConfirmed === true
+      && observation.workerCheckpointHoldMode === 'sigstop_process_group'
+      && observation.processGroupAliveBeforeKill === true
+      && observation.candidateChildPresentBeforeKill === true
+      && observation.candidateJobExactBeforeKill === true
+      && observation.candidateInputExactBeforeKill === true
+      && observation.candidateRuntimeProcessObservedBeforeKill === true
+      && observation.candidateRuntimeDirectChildBeforeKill === true
+      && observation.candidateRuntimeCommandTrustedBeforeKill === true
+      && observation.candidateRuntimeExecutableIdentityExactBeforeKill === true
+      && observation.processGroupAllStoppedBeforeKill === true,
     actualSigkill: observation.workerExitSignal === 'SIGKILL'
-      && observation.workerCompletionMarkerSeen === false,
+      && observation.workerCompletionMarkerSeen === false
+      && observation.processGroupGoneAfterKill === true
+      && observation.candidateRuntimeProcessGoneAfterKill === true,
     sameDurableStores: observation.sqliteFileIdentityStable
       && observation.sqliteJournalModeBefore === 'wal'
       && observation.sqliteJournalModeAfter === 'wal'
@@ -1501,8 +1882,28 @@ export async function captureP6RealRestartPrototype({ keep = false, verbose = fa
       checkpointStageBeforeKill: durable.checkpoint.pendingPreview.stage,
       candidateRefMatchedBeforeKill: durable.git.commit === durable.checkpoint.candidate_commit,
       candidateJobRunningBeforeKill: durable.checkpoint.candidateJob.status === 'running',
+      workerCheckpointHoldConfirmed: durable.hold.confirmed === true
+        && durable.hold.groupAddressable === true
+        && durable.hold.workerProcessStopped === true
+        && durable.hold.processGroupAllStopped === true,
+      workerCheckpointHoldMode: durable.hold.mode,
+      processGroupAliveBeforeKill: durable.hold.groupAddressable === true,
+      candidateChildPresentBeforeKill: durable.hold.childProcessPresent === true
+        && durable.hold.groupMemberCount >= 2,
+      candidateJobExactBeforeKill: durable.hold.candidateJobExact === true,
+      candidateInputExactBeforeKill: durable.hold.candidateInputExact === true,
+      candidateRuntimeProcessObservedBeforeKill:
+        durable.hold.candidateRuntimeProcessObserved === true,
+      candidateRuntimeDirectChildBeforeKill: durable.hold.candidateRuntimeDirectChild === true,
+      candidateRuntimeCommandTrustedBeforeKill:
+        durable.hold.candidateRuntimeCommandTrusted === true,
+      candidateRuntimeExecutableIdentityExactBeforeKill:
+        durable.hold.candidateRuntimeExecutableIdentityExact === true,
+      processGroupAllStoppedBeforeKill: durable.hold.processGroupAllStopped === true,
       workerExitSignal: killed.signal,
       workerCompletionMarkerSeen: markerSeen,
+      processGroupGoneAfterKill: killed.processGroupGone === true,
+      candidateRuntimeProcessGoneAfterKill: killed.candidateRuntimeProcessGone === true,
       sqliteFileIdentityStable: sameFileIdentity(dbIdentityBefore, dbIdentityAfter),
       sqliteJournalModeBefore: baselineBefore.journalMode,
       sqliteJournalModeAfter: baselineAfterRecovery.journalMode,
