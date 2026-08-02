@@ -7,6 +7,14 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function safeEvaluationDiagnostic(exceptionDetails) {
+  const raw = String(exceptionDetails?.text || exceptionDetails?.exception?.description || 'renderer_exception');
+  return raw.slice(0, 240)
+    .replace(/https?:\/\/[^\s)]+/gi, '[url]')
+    .replace(/(?:\/Users\/|\/home\/)[^\s)]+/g, '[path]')
+    .replace(/\b(?:rev|cs|tj|sel|conv|p)_[A-Za-z0-9_-]{6,}\b/g, '[id]');
+}
+
 class CdpClient {
   constructor(url) {
     this.url = url;
@@ -111,7 +119,11 @@ function createPackagedWindowAdapter(client) {
         returnByValue: true,
         userGesture: true,
       });
-      if (result.exceptionDetails) throw new Error('packaged_cdp_evaluation_failed');
+      if (result.exceptionDetails) {
+        const error = new Error('packaged_cdp_evaluation_failed');
+        error.diagnostic = safeEvaluationDiagnostic(result.exceptionDetails);
+        throw error;
+      }
       return result.result?.value;
     },
     async capturePage() {

@@ -1499,7 +1499,9 @@ async function run({ providedWindow = null, providedConfig = null, manageWindow 
     writeFileSync(path.join(config.outputDir, 'driver-debug.json'), `${JSON.stringify({
       stage,
       errorName: error?.name || null,
-      errorMessage: error && error.message ? error.message : String(error),
+      errorMessage: error && error.message
+        ? `${error.message}${error.diagnostic ? `:${error.diagnostic}` : ''}`
+        : String(error),
       pageState,
       volcanoLedger,
       diagnostics,
