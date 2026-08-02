@@ -13,6 +13,11 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // immediately following governance commit 2f0e78d. The implementation
   // commit itself predates the issue-id enforcement and is not rewritten.
   '17bb486f3eda58cc14aa2ee5d4386b16f20fc18e',
+  // P6 durability changed one Result Studio client response field and updated
+  // UI-103/UI-105/UI-111 in the same immutable implementation commit. Its
+  // subject named P6 rather than the UI issue IDs; the canonical P6 closeout
+  // preserves that mapping without rewriting shared history.
+  '5a033eb07f2ffdcdc6b285902dbf6a11ab4c96ce',
 ])
 // These immutable implementation commits have an explicit later canonical
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;

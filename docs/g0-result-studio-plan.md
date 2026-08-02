@@ -1,8 +1,8 @@
 # G0 Result Studio — 意图驱动、可编辑、Git-backed 的科研结果工作台计划
 
-最后更新：2026-07-31
+最后更新：2026-08-02
 
-状态：`active / implemented_unverified`（RS0～RS8 引擎基础、完整 P4R、`G0-RS-P5` 与 P6-0 UI-110 source-bound Electron trace 已收口；P6-1 恢复与中断矩阵正在进行，产品资格仍待 P7）
+状态：`active / implemented_unverified`（RS0～RS8 引擎基础、完整 P4R、`G0-RS-P5` 与 `G0-RS-P6` 已按各自非资格边界收口；下一阶段为 P7，产品资格仍未恢复）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -1720,7 +1720,7 @@ P4R 只有在 P4R-0～P4R-6 串行完成、所有声明证据当前、`docs:reco
 
 ### G0-RS-P6：Durability、Recovery、Performance 与产品可解释性
 
-状态：`in_progress / P6-1 recovery and interruption matrix`（P6-0 已于 2026-07-31 source-bound 收口；P6 Goal 保持唯一 active）。
+状态：`completed / real_local_non_qualifying`（2026-08-02；P6-0 与 P6-1 均已 source-bound 收口）。
 
 目标：让长时间、多轮结果工作在中断、失败和资源压力下仍可理解、可恢复。
 
@@ -1753,6 +1753,8 @@ P6-0 不宣称跨 Job exact replay 已由 UI trace 收口，不重开 P5，也�
 - 真实 10 万行表、复杂 SVG/PNG、长报告和多 Revision 项目满足冻结的交互预算。
 - CPU/内存/磁盘/Job 峰值与 Token/cache/cost 以同一任务摘要投影，不把估算冒充精确计量。
 - GC 永不删除 current、历史 Revision、可达脚本、采用证据或未终态 ChangeSet。
+
+完成（2026-08-02）：canonical evidence `acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json` 绑定 source commit `ad1e2ce`，10/10、`sourceCommitMatchesSourceHashes:true`、观测期间 source binding 稳定。真实本地路径覆盖用户停止、R 执行失败、validator 阻断、SIGSTOP/SIGKILL 精确 R 进程组、Electron/owned backend 冷重启、Git/ref/Artifact drift、磁盘/preview budget、资源摘要、exact GC protection 与并发候选登记；并发 SQLite snapshot 冲突由 Repository 的 `BEGIN IMMEDIATE` 串行化修复。开发态 Electron 恢复矩阵 15/15，重开恢复低于 5 秒；压力链实际读取 10 万行表、复杂 SVG/PNG、含 6 张嵌图的长报告并翻阅 100+ 版本。201 条 synthetic Revision 是三个 family 上的 alias 压力，不冒充 201 次真实 Job；开发态冷 Vite + Electron 首画布预算冻结为 1500ms，packaged/in-app 1000ms 产品目标仍由 P7 验证。证据明确为 `qualificationEligible:false`、`p7Eligible:false`，不覆盖真实 Provider、packaged Electron 或 literal OS reboot。
 
 ### G0-RS-P7：Honest Product Requalification
 
@@ -1841,7 +1843,7 @@ G0-RS-P0 Truth Correction
 
 阶段状态规则：
 
-- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3`、`G0-RS-RH0`、P4R-0～P4R-6、`G0-RS-P5` 与 P6-0 已完成。P6 已建立唯一 Goal，当前仅 P6-1 recovery and interruption matrix 处于进行中；P7 不得提前启动。
+- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3`、`G0-RS-RH0`、P4R-0～P4R-6、`G0-RS-P5` 与 `G0-RS-P6` 已完成。P7 是下一阶段但尚未启动，不得把 P6 的本地证据外推为 P7 资格。
 - 每阶段先补失败测试/fixture，再实现，再形成与证据类型匹配的验收；不得提前开发下一阶段。
 - 单元测试证明契约，fixture 证明确定性集成，真实 Provider 证明模型边界，packaged Electron 证明产品链；四者不能互相替代。
 - 未运行 `npm run docs:reconcile` 与 `npm run docs:check` 不得宣布阶段 completed/verified/qualified。
@@ -1858,7 +1860,7 @@ G0-RS-P0 Truth Correction
 5. [x] 捕获当前真实产品基线，不把截图存在等同于操作通过。
 6. [x] 跑专项、G0、文档、UI 和全量测试；根门禁在最终文档收口后复跑。
 
-`G0-RS-P1`～`G0-RS-P3` 已按本节证据收口；`G0-RS-P4 Core` 已形成离线实现检查点但真实候选等价性仍未验证。`G0-RS-RH0` 已完成仓库治理门，P4R、P5 与 P6-0 均已按各自边界收口；当前继续 P6-1 的恢复、压力与多 Revision 验证，不得提前进入 P7。
+`G0-RS-P1`～`G0-RS-P3` 已按本节证据收口；`G0-RS-P4 Core` 的后续真实产品链已由 P4R/P5/P6 分层补证。`G0-RS-RH0`、P4R、P5 与 P6 均已按各自边界收口；P7 是下一阶段且尚未启动，只有它能重新裁决真实 Provider、packaged Electron 与产品资格。
 
 `G0-RS-P2` 交付结果：
 
