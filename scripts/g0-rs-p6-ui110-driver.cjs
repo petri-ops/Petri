@@ -71,6 +71,13 @@ function pause(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function requestBackendJson(url) {
+  const response = await fetch(url);
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || `backend_request_failed:${response.status}`);
+  return data;
+}
+
 function readConfig() {
   const configPath = process.env[CONFIG_ENV];
   if (!configPath || !path.isAbsolute(configPath)) {
@@ -285,14 +292,7 @@ async function readFamilyLedger(webContents, config, target) {
     + `?projectId=${encodeURIComponent(config.projectId)}`
     + `&artifactFamilyId=${encodeURIComponent(target.artifactFamilyId)}`
     + '&revisionOffset=0&revisionLimit=200';
-  const ledger = await webContents.executeJavaScript(`
-    fetch(${JSON.stringify(url)})
-      .then(async (response) => {
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data.error || 'result_studio_ledger_unavailable');
-        return data;
-      })
-  `, true);
+  const ledger = await requestBackendJson(url);
   if (!Array.isArray(ledger?.changeSets) || !Array.isArray(ledger?.revisions)) {
     throw new Error('Result Studio family ledger is incomplete');
   }
@@ -370,14 +370,7 @@ async function readInteractionCoordinate(webContents, config, target, revisionId
     ...(revisionId ? { revisionId } : {}),
   });
   const url = `${config.backendBaseUrl}/api/result-studio/interaction?${query.toString()}`;
-  const data = await webContents.executeJavaScript(`
-    fetch(${JSON.stringify(url)})
-      .then(async (response) => {
-        const body = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(body.error || 'result_interaction_unavailable');
-        return body;
-      })
-  `, true);
+  const data = await requestBackendJson(url);
   if (!data?.revision?.revisionId || !data?.revision?.artifactFamilyId) {
     throw new Error('interaction did not resolve one formal Revision');
   }
@@ -673,14 +666,7 @@ async function selectRows(webContents, config, target, count = 3) {
   contextUrl.searchParams.set('conversationId', config.conversationId);
   contextUrl.searchParams.set('jobId', target.jobId);
   contextUrl.searchParams.set('artifact', target.artifact);
-  const context = await webContents.executeJavaScript(`
-    fetch(${JSON.stringify(contextUrl.toString())})
-      .then(async (response) => {
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'selection_context_unavailable');
-        return data;
-      })
-  `, true);
+  const context = await requestBackendJson(contextUrl.toString());
   const selection = context?.envelope?.selection;
   const boundRevisionId = context?.envelope?.revision?.revisionId;
   const boundArtifactId = context?.envelope?.artifact?.artifactId;
@@ -819,14 +805,7 @@ async function reviewCandidate(window, config, captured, expected = {}) {
   if (expected.presentation && !snapshot.impactPresentationVisible) throw new Error('presentation impact label is not visible');
   const comparisonUrl = `${config.backendBaseUrl}/api/result-studio/changesets/`
     + encodeURIComponent(captured.changeSet.changeSetId) + '/compare';
-  const comparison = await wc.executeJavaScript(`
-    fetch(${JSON.stringify(comparisonUrl)})
-      .then(async (response) => {
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data.error || 'result_comparison_unavailable');
-        return data;
-      })
-  `, true);
+  const comparison = await requestBackendJson(comparisonUrl);
   if (comparison?.changeSet?.changeSetId !== captured.changeSet.changeSetId) {
     throw new Error('review response was not bound to the exact stage ChangeSet');
   }
@@ -950,14 +929,7 @@ async function adoptThenRestore(window, config, target, tracker, candidate, { on
     revisionId: current.revisionId,
   });
   const contextUrl = `${config.backendBaseUrl}/api/result-studio/context-envelope?${contextQuery.toString()}`;
-  const reopenedContext = await wc.executeJavaScript(`
-    fetch(${JSON.stringify(contextUrl)})
-      .then(async (response) => {
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data.error || 'restored_context_unavailable');
-        return data;
-      })
-  `, true);
+  const reopenedContext = await requestBackendJson(contextUrl);
   const exactContext = reopenedContext?.envelope?.revision?.revisionId === current.revisionId
     && reopenedContext.envelope.revision.currentRevisionId === current.revisionId
     && reopenedContext.envelope.revision.isCurrent === true
@@ -1064,11 +1036,8 @@ async function useAdvancedDrawer(window, { field, value, outcome, scientific }) 
 }
 
 async function readProjectJobs(webContents, config) {
-  const jobs = await webContents.executeJavaScript(`
-    fetch(${JSON.stringify(`${config.backendBaseUrl}/api/data/projects/${encodeURIComponent(config.projectId)}/jobs`)})
-      .then((response) => response.ok ? response.json() : Promise.reject(new Error('jobs_unavailable')))
-      .then((data) => Array.isArray(data.jobs) ? data.jobs : [])
-  `, true);
+  const data = await requestBackendJson(`${config.backendBaseUrl}/api/data/projects/${encodeURIComponent(config.projectId)}/jobs`);
+  const jobs = Array.isArray(data.jobs) ? data.jobs : [];
   return Array.isArray(jobs) ? jobs : [];
 }
 
