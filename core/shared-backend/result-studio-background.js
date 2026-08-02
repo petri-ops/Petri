@@ -199,12 +199,20 @@ function handleTimeout(task) {
   task.finalTimer.unref?.();
 }
 
-function startGeneration() {
-  if (currentGeneration && currentGeneration.child.connected) return currentGeneration;
-  const child = fork(childPath, [], {
+function backgroundChildForkOptions(env = process.env, electronVersion = process.versions.electron) {
+  return {
     stdio: ['ignore', 'ignore', 'ignore', 'ipc'],
     detached: process.platform !== 'win32',
-  });
+    // In a packaged Electron process child_process.fork() reuses the Electron
+    // executable. Without this flag it launches another app instance instead
+    // of executing the CommonJS worker as Node.
+    env: electronVersion ? { ...env, ELECTRON_RUN_AS_NODE: '1' } : { ...env },
+  };
+}
+
+function startGeneration() {
+  if (currentGeneration && currentGeneration.child.connected) return currentGeneration;
+  const child = fork(childPath, [], backgroundChildForkOptions());
   const generation = {
     id: ++generationSequence,
     child,
@@ -361,6 +369,7 @@ function closeResultStudioBackground() {
 }
 
 module.exports = {
+  backgroundChildForkOptions,
   DEFAULT_TIMEOUT_MS,
   IDLE_SHUTDOWN_MS,
   MAX_PENDING,

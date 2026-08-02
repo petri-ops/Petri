@@ -12,6 +12,7 @@ const Database = require(require.resolve('better-sqlite3', {
   paths: [path.resolve('core/r-server'), path.resolve('.')],
 }));
 const {
+  backgroundChildForkOptions,
   closeResultStudioBackground,
   createDeduplicatedBackgroundRunner,
   runResultStudioBackground,
@@ -37,6 +38,14 @@ const CURRENT_RUNTIME_LEASE = Object.freeze({
   // Keep restart ordering independent of how long the preceding child-process
   // stress tests take under a loaded CI runner.
   startedAt: '2026-01-02T00:00:00.000Z',
+});
+
+test('packaged Electron background child is forced into Node mode', () => {
+  const options = backgroundChildForkOptions({ P7_SENTINEL: 'preserved' }, '30.5.1');
+  assert.equal(options.env.ELECTRON_RUN_AS_NODE, '1');
+  assert.equal(options.env.P7_SENTINEL, 'preserved');
+  assert.deepEqual(options.stdio, ['ignore', 'ignore', 'ignore', 'ipc']);
+  assert.equal(backgroundChildForkOptions({ P7_SENTINEL: 'node' }, null).env.ELECTRON_RUN_AS_NODE, undefined);
 });
 
 async function waitForReplacementGeneration(ctx, timeoutMs = 70_000) {
