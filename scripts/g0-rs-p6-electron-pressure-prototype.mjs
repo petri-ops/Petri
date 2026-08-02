@@ -508,17 +508,20 @@ function immutableRevisionDigest(repository, projectId) {
   })));
 }
 
-function probeRevisionImmutability(db, revisionId) {
-  db.exec('SAVEPOINT p6_pressure_immutable_probe');
+function probeRevisionImmutability(repository, revisionId) {
+  const existing = repository.getRevision(revisionId);
+  if (!existing) return false;
   let rejected = false;
   try {
-    db.prepare('UPDATE artifact_revisions SET output_hash=? WHERE revision_id=?')
-      .run('0'.repeat(64), revisionId);
+    // ArtifactRevision is append-only at the Repository boundary. Lifecycle
+    // operations may update current/reproducibility projections, so a raw SQL
+    // UPDATE is not a valid immutability probe. Re-appending the same identity
+    // with altered scientific bytes must fail atomically on the durable key.
+    repository.appendRevisionBatch({
+      revisions: [{ ...existing, outputHash: '0'.repeat(64), isCurrent: false }],
+    });
   } catch {
     rejected = true;
-  } finally {
-    db.exec('ROLLBACK TO p6_pressure_immutable_probe');
-    db.exec('RELEASE p6_pressure_immutable_probe');
   }
   return rejected;
 }
@@ -667,7 +670,7 @@ function stagePressureHistory(runtime, real) {
     });
 
     const immutableBefore = immutableRevisionDigest(repository, runtime.project.id);
-    const mutationRejected = probeRevisionImmutability(db, syntheticRevisionIds[0]);
+    const mutationRejected = probeRevisionImmutability(repository, syntheticRevisionIds[0]);
     const immutableAfter = immutableRevisionDigest(repository, runtime.project.id);
     const projectRevisions = repository.listProjectRevisions(runtime.project.id);
     const syntheticRows = db.prepare(`SELECT COUNT(*) AS count,

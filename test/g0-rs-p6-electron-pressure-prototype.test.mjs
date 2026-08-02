@@ -230,6 +230,8 @@ test('P6 pressure input producers are deterministic and preserve exact requested
   assert.doesNotMatch(prototype, /Expression QC Report/);
   assert.doesNotMatch(prototype, /stageP6Ui110LocalCapability/);
   assert.match(prototype, /host_runtime_observed_through_completed_artifact_truth_job/);
+  assert.match(prototype, /repository\.appendRevisionBatch\(\{\s+revisions:/);
+  assert.doesNotMatch(prototype, /UPDATE artifact_revisions SET output_hash/);
   const driver = readFileSync(
     path.join(ROOT, 'scripts/g0-rs-p6-electron-pressure-driver.cjs'),
     'utf8',
