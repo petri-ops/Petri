@@ -699,6 +699,8 @@ async function runJourney(target, index, { existingGit = false, dirtyGit = false
     const baseUrl = `http://127.0.0.1:${first.state.backendPort}`;
     const uiUrl = new URL(first.cdp.target.url);
     const uiBaseUrl = `${uiUrl.protocol}//${uiUrl.host}`;
+    const noSeedPrecondition = inspectP5NoSeedPrecondition(capture.env.BIOF3_DB_PATH, { root });
+    invariant(noSeedPrecondition.seededTables.length === 0, 'p7_product_ledger_not_empty', noSeedPrecondition);
     const projectPayload = await requestJson(baseUrl, '/api/data/projects', {
       method: 'POST',
       body: { name: `P7 packaged journey ${index + 1}`, description: 'P7 disposable packaged product trace', modality: 'bulk' },
@@ -712,8 +714,6 @@ async function runJourney(target, index, { existingGit = false, dirtyGit = false
     const conversation = conversationPayload.conversation || conversationPayload.data?.conversation;
     invariant(conversation?.id, 'p7_conversation_creation_failed');
     const gitFixture = existingGit ? initializeExistingGit(project.workspace_path, dirtyGit) : null;
-    const noSeedPrecondition = inspectP5NoSeedPrecondition(capture.env.BIOF3_DB_PATH, { root });
-    invariant(noSeedPrecondition.seededTables.length === 0, 'p7_product_ledger_not_empty');
     const runtime = {
       kind: 'p5_live_scientific_runtime',
       root,
