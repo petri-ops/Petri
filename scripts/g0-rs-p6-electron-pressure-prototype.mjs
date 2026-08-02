@@ -1088,7 +1088,7 @@ export function buildP6ElectronPressureVerdict(observation) {
         : ['report_revision_projection_not_measured']),
       'provider_not_exercised_p7_exclusion',
       'packaged_app_not_exercised_p7_exclusion',
-      'synthetic_revision_aliases_do_not_prove_201_distinct_job_executions',
+      'synthetic_revision_aliases_do_not_prove_201_distinct_tool_executions',
     ],
   };
 }

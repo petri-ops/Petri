@@ -238,7 +238,7 @@ test('P6 pressure verdict independently enforces every frozen renderer budget', 
   assert.equal(passing.frozenBudgetCount, 15);
   assert.ok(!passing.remainingGaps.includes('long_report_volume_not_proven'));
   assert.ok(!passing.remainingGaps.includes('report_revision_projection_not_measured'));
-  assert.ok(passing.remainingGaps.includes('synthetic_revision_aliases_do_not_prove_201_distinct_job_executions'));
+  assert.ok(passing.remainingGaps.includes('synthetic_revision_aliases_do_not_prove_201_distinct_tool_executions'));
 
   const budgetCases = [
     ['P6EP-10', P6_ELECTRON_PRESSURE_BUDGETS.firstCanvasMs,
