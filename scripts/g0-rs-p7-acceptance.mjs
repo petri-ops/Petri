@@ -180,7 +180,7 @@ async function waitForTerminalJob(baseUrl, jobId, timeoutMs = 180_000) {
 
 async function proveImportedInputAndFailureRecovery(baseUrl, projectId, workspaceRoot, baselines) {
   const baselineJob = await requestJson(baseUrl, `/api/tools/status/${encodeURIComponent(baselines.heatmap.jobId)}`);
-  const input = (baselineJob.data?.result?.executionProvenance?.inputs || [])[0];
+  const input = (baselineJob.result?.executionProvenance?.inputs || [])[0];
   const jobRoot = path.resolve(workspaceRoot, 'results/jobs', baselines.heatmap.jobId);
   const candidates = [
     path.resolve(jobRoot, String(input?.relativePath || '')),
