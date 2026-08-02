@@ -56,13 +56,20 @@ function projectResultStudioToolContext(context = {}) {
 /**
  * Bind the click-time token before JSON-schema validation.
  *
- * An explicitly supplied token always wins — even when stale or malformed —
- * so the existing guard can reject it instead of silently retargeting a write.
+ * An explicitly supplied real token always wins — even when stale — so the
+ * existing guard can reject it instead of silently retargeting a write. The
+ * transport redacts sensitive fields before the model sees tool output;
+ * `[REDACTED]` is therefore not a presented token and is replaced by the
+ * click-time bound token. This preserves capability binding without exposing
+ * the opaque token to the model.
  */
 function bindResultStudioContextToken(name, args = {}, ctx = {}) {
   const safeArgs = args && typeof args === 'object' && !Array.isArray(args) ? args : {};
   if (!CONTEXT_BOUND_TOOLS.has(name)) return safeArgs;
-  if (Object.prototype.hasOwnProperty.call(safeArgs, 'contextToken')) return safeArgs;
+  const presentedToken = trimmed(safeArgs.contextToken);
+  if (validContextToken(presentedToken)) return safeArgs;
+  if (Object.prototype.hasOwnProperty.call(safeArgs, 'contextToken')
+      && presentedToken !== '[REDACTED]') return safeArgs;
   if (!validContextToken(ctx.resultStudioContextToken)) return safeArgs;
   return { ...safeArgs, contextToken: trimmed(ctx.resultStudioContextToken) };
 }

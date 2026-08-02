@@ -98,6 +98,15 @@ test('P4R-3 never replaces an explicit stale token with the current one', () => 
   );
 });
 
+test('P4R-3 replaces transport redaction with the click-time bound token', () => {
+  assert.deepEqual(
+    bindResultStudioContextToken('result_changeset_create_in_context', {
+      contextToken: '[REDACTED]', intent: {},
+    }, { resultStudioContextToken: TOKEN }),
+    { contextToken: TOKEN, intent: {} },
+  );
+});
+
 test('P4R-3 does not invent a token when the Composer context is absent or malformed', () => {
   assert.deepEqual(
     bindResultStudioContextToken('result_edit_plan_in_context', { requestedOutcome: '换配色' }, {}),
