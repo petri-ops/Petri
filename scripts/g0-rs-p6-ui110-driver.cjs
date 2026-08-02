@@ -724,11 +724,14 @@ async function waitForAgentSettlement(webContents, beforeMessages, {
     `, true);
     sawRunning = sawRunning || last.running === true;
     sawProgress = sawProgress || last.progress === true;
-    const completionVisible = !expectedCompletion || last.assistantText.includes(expectedCompletion);
+    const completionVisible = !expectedCompletion
+      || (typeof expectedCompletion === 'function'
+        ? expectedCompletion(last.assistantText)
+        : last.assistantText.includes(expectedCompletion));
     const freshCompletion = last.assistantCount > beforeMessages
       || (sawRunning && completionVisible);
     if (freshCompletion && !last.running && (!requiresResultProgress || sawProgress)) {
-      if (expectedCompletion && !last.assistantText.includes(expectedCompletion)) {
+      if (expectedCompletion && !completionVisible) {
         throw new Error('agent terminal response did not confirm the expected successful outcome');
       }
       return { sawRunning, sawProgress, assistantMessageCount: last.assistantCount };
@@ -746,7 +749,7 @@ async function submitComposer(window, prompt, { requiresResultProgress = false }
   return waitForAgentSettlement(wc, beforeMessages, {
     requiresResultProgress,
     expectedCompletion: requiresResultProgress
-      ? '候选版本已经生成'
+      ? (text) => /候选版本(?:已(?:成功)?创建|已(?:成功)?生成)[^\n]*(?:验证通过|可比较|preview_ready)/.test(text)
       : '富集任务已经提交',
   });
 }
