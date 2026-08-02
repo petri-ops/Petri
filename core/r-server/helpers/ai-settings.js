@@ -151,6 +151,32 @@ function getChatModelPreset(id) {
   return presets.find((p) => p.id === id) || presets.find((p) => p.id === settings.active_chat_model_id) || presets[0];
 }
 
+function resolveChatModelCredential({ preset, profiles, getCredential }) {
+  const selected = preset && typeof preset === 'object' ? preset : {};
+  const profile = (Array.isArray(profiles) ? profiles : [])
+    .find((item) => item && item.id === selected.id);
+  const ref = String(profile?.credentialRef || '');
+  const refId = ref.includes(':') ? ref.slice(ref.indexOf(':') + 1) : ref;
+  const candidates = [refId, selected.id, selected.provider]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean)
+    .map((value) => normalizeProvider(value));
+  for (const credentialId of [...new Set(candidates)]) {
+    const secret = getCredential(credentialId);
+    if (secret) return secret;
+  }
+  return '';
+}
+
+function getChatModelCredential(preset) {
+  const settings = getAiSettings();
+  return resolveChatModelCredential({
+    preset,
+    profiles: settings.model_profiles,
+    getCredential: getApiKey,
+  });
+}
+
 /**
  * 获取指定 provider 的 API key。
  * 桌面版：从用户设置文件读。
@@ -279,11 +305,13 @@ module.exports = {
   getApiKey,
   getChatProviderName,
   getChatModelPreset,
+  getChatModelCredential,
   getEmbedProviderName,
   saveAiSettings,
   testApiKey,
   listAvailableModels,
   normalizeAiSettings,
+  resolveChatModelCredential,
   _extractCredentialUpdates,
   credentialStore,
   SETTINGS_FILE,

@@ -139,7 +139,7 @@ function _pushUniqueResultCard(cards, card) {
 module.exports = function registerAiAgentRoute(app) {
   app.post('/api/ai/agent', express.json({ limit: '256kb' }), async (req, res) => {
     const requestStartedAt = Date.now();
-    const { getApiKey, getChatProviderName, getChatModelPreset } = require('../helpers/ai-settings');
+    const { getChatProviderName, getChatModelPreset, getChatModelCredential } = require('../helpers/ai-settings');
     const { messages, context, conversationId: explicitConvId, modelPresetId, modelName: requestedModelName } = req.body || {};
     const selectedPreset = getChatModelPreset(modelPresetId);
     const providerName = (selectedPreset && selectedPreset.provider) || getChatProviderName();
@@ -150,7 +150,7 @@ module.exports = function registerAiAgentRoute(app) {
       ? requestedModelName.trim().slice(0, 200)
       : selectedPreset && selectedPreset.model;
     const baseUrl = selectedPreset && selectedPreset.baseUrl;
-    const apiKey = (selectedPreset && selectedPreset.apiKey) || getApiKey(providerName);
+    const apiKey = getChatModelCredential(selectedPreset);
     if (!Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ status: 'error', error: '缺少消息' });
     }
