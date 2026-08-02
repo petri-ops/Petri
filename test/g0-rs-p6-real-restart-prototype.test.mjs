@@ -37,6 +37,13 @@ test('P6 worker checkpoint hold is an explicit synchronous process-group handsha
   assert.match(workerSource, /candidateJobExact = candidateJob\.tool_id === hold\.expectedToolId/);
   assert.match(workerSource, /writeSync\(1, `\$\{P5_WORKER_CHECKPOINT_HOLD_MARKER\}/);
   assert.match(workerSource, /process\.kill\(-process\.pid, 'SIGSTOP'\)/);
+  const restartSource = readFileSync(
+    path.join(ROOT, 'scripts/g0-rs-p6-real-restart-prototype.mjs'),
+    'utf8',
+  );
+  assert.match(restartSource, /p6_restart_candidate_checkpoint_timeout/);
+  assert.match(restartSource, /lastHandshakeSeen/);
+  assert.match(restartSource, /lastProcessGroup/);
 
   const marker = '__P5_WORKER_CHECKPOINT_HOLD__';
   const payload = {

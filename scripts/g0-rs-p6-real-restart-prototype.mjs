@@ -772,6 +772,9 @@ function readWorkerDebugState(dbPath, projectId, conversationId, baselineJobId) 
 
 export async function waitForDurableCandidateCheckpoint(runtime, worker, timeoutMs = WORKER_CHECKPOINT_TIMEOUT_MS) {
   const deadline = Date.now() + timeoutMs;
+  let lastCheckpoint = null;
+  let lastHandshakeSeen = false;
+  let lastProcessGroup = null;
   while (Date.now() < deadline) {
     const checkpoint = readDurableCandidateCheckpoint(
       runtime.env.BIOF3_DB_PATH,
@@ -780,7 +783,14 @@ export async function waitForDurableCandidateCheckpoint(runtime, worker, timeout
       worker.baselineJobId,
     );
     if (checkpoint) {
+      lastCheckpoint = {
+        status: checkpoint.status,
+        checkpointStatus: checkpoint.change_set_status,
+        checkpointStage: checkpoint.pendingPreview?.stage || null,
+        candidateJobStatus: checkpoint.candidateJob?.status || null,
+      };
       const handshake = parseP5WorkerCheckpointHold(worker.output().stdout);
+      lastHandshakeSeen = Boolean(handshake);
       if (!handshake) {
         if (worker.child.exitCode !== null || worker.child.signalCode !== null) {
           const output = worker.output();
@@ -814,6 +824,17 @@ export async function waitForDurableCandidateCheckpoint(runtime, worker, timeout
         runtime,
         checkpoint.candidateJob.id,
       );
+      lastProcessGroup = {
+        groupAddressable: processGroup.groupAddressable,
+        workerProcessStopped: processGroup.workerProcessStopped,
+        childProcessPresent: processGroup.childProcessPresent,
+        processGroupAllStopped: processGroup.processGroupAllStopped,
+        candidateRuntimeProcessObserved: processGroup.candidateRuntimeProcessObserved,
+        candidateRuntimeDirectChild: processGroup.candidateRuntimeDirectChild,
+        candidateRuntimeCommandTrusted: processGroup.candidateRuntimeCommandTrusted,
+        candidateRuntimeExecutableIdentityExact:
+          processGroup.candidateRuntimeExecutableIdentityExact,
+      };
       if (!processGroup.confirmed) {
         if (worker.child.exitCode !== null || worker.child.signalCode !== null) {
           throw Object.assign(new Error('p6_restart_worker_exited_before_checkpoint_hold_confirmation'), {
@@ -892,7 +913,24 @@ export async function waitForDurableCandidateCheckpoint(runtime, worker, timeout
     }
     await sleep(5);
   }
-  throw new Error('p6_restart_candidate_checkpoint_timeout');
+  const output = worker.output();
+  throw Object.assign(new Error('p6_restart_candidate_checkpoint_timeout'), {
+    detail: {
+      code: worker.child.exitCode,
+      signal: worker.child.signalCode,
+      stdout: output.stdout.slice(-1600),
+      stderr: output.stderr.slice(-1200),
+      state: readWorkerDebugState(
+        runtime.env.BIOF3_DB_PATH,
+        runtime.project.id,
+        runtime.conversation.id,
+        worker.baselineJobId,
+      ),
+      lastCheckpoint,
+      lastHandshakeSeen,
+      lastProcessGroup,
+    },
+  });
 }
 
 export async function killWorkerWithSigkill(worker) {
