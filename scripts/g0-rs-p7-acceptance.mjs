@@ -691,6 +691,10 @@ async function runJourney(target, index, { existingGit = false, dirtyGit = false
   const capture = createCaptureEnv({ root, port: 0 });
   capture.env.BIOF3_DB_PATH = path.join(capture.env.BIOF3_LOCAL_DATA_DIR, 'biof3.db');
   capture.env.BIOF3_RENDERER_PORT = String(rendererPort);
+  // The packaged renderer is served from the disposable Vite origin.  Allow
+  // that exact origin through the backend's local request boundary so the
+  // CDP driver can exercise the same cross-origin API calls as the product UI.
+  capture.env.BIOF3_TRUSTED_DESKTOP_ORIGINS = `http://127.0.0.1:${rendererPort}`;
   capture.env.BIOF3_BUILT_IN_PLUGINS_DIR = path.join(RESOURCES, 'built-in-plugins');
   mkdirSync(captureDir, { recursive: true });
   mkdirSync(electronDataDir, { recursive: true });
