@@ -19,7 +19,13 @@
 const path = require('path');
 const fs = require('fs');
 const { createHash } = require('crypto');
-const Database = require('better-sqlite3');
+// shared-backend is copied next to r-server in packaged resources, while the
+// native addon intentionally lives under r-server/node_modules. Resolve from
+// both canonical roots so the same worker runs in source Node and packaged
+// ELECTRON_RUN_AS_NODE processes.
+const Database = require(require.resolve('better-sqlite3', {
+  paths: [path.join(__dirname, '../r-server'), __dirname],
+}));
 const { bindProjectRepository } = require('./git-repository-binding');
 const {
   ensureBaselineArtifactCohort,
