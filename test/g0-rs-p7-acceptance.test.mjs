@@ -8,6 +8,9 @@ test('P7 producer is packaged-only, source-bound, and never imports historical R
   assert.match(source, /sourceCommitMatchesSourceHashes/);
   assert.match(source, /connectToPackagedPage/);
   assert.match(source, /providerPreflight/);
+  assert.match(source, /NSRunningApplication\(processIdentifier:/);
+  assert.match(source, /activateAllWindows/);
+  assert.match(source, /kCGWindowLayer/);
   for (const completionSource of [
     'core/r-server/agent-runner.js',
     'core/r-server/agent-tools/agent-loop-control.js',

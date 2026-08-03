@@ -122,11 +122,18 @@ function capturePackagedWindowNative(ownerPid) {
   invariant(process.platform === 'darwin', 'p7_native_capture_requires_macos');
   invariant(Number.isInteger(ownerPid) && ownerPid > 0, 'p7_native_capture_pid_invalid');
   const swift = [
+    'import AppKit',
     'import CoreGraphics',
     `let ownerPid = ${ownerPid}`,
+    'if let app = NSRunningApplication(processIdentifier: pid_t(ownerPid)) {',
+    '  app.unhide()',
+    '  _ = app.activate(options: [.activateAllWindows, .activateIgnoringOtherApps])',
+    '  Thread.sleep(forTimeInterval: 0.35)',
+    '}',
     'let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID)! as! [[String:Any]]',
     'for window in windows {',
     '  if (window[kCGWindowOwnerPID as String] as? Int) == ownerPid,',
+    '     (window[kCGWindowLayer as String] as? Int) == 0,',
     '     let number = window[kCGWindowNumber as String] as? Int { print(number); break }',
     '}',
   ].join('\n');
