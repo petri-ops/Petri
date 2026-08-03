@@ -39,8 +39,13 @@ test('P7 UI trace accepts truthful enrichment submission or completion wording',
   assert.match(source, /expectedCompletion:[\s\S]*enrichmentTerminal/);
 });
 
-test('P7 bound drawer completion guard keys off the private projected confirmation context', () => {
-  const source = readFileSync(new URL('../core/r-server/routes/ai-agent.js', import.meta.url), 'utf8');
-  assert.match(source, /required:\s*typeof toolCtx\.resultStudioScientificConfirmation === 'boolean'/);
-  assert.match(source, /result_edit_completion_retry/);
+test('P7 bound drawer completion guard covers both legacy HTTP and durable task Agent paths', () => {
+  for (const path of ['routes/ai-agent.js', 'agent-runner.js']) {
+    const source = readFileSync(new URL(`../core/r-server/${path}`, import.meta.url), 'utf8');
+    assert.match(source, /createResultEditCompletionGuard/);
+    assert.match(source, /required:\s*typeof toolCtx\.resultStudioScientificConfirmation === 'boolean'/);
+    assert.match(source, /resultEditCompletionGuard\.recordToolResult\(name, result\)/);
+    assert.match(source, /result_edit_completion_retry/);
+    assert.match(source, /resultEditCompletionGuard\.required/);
+  }
 });
