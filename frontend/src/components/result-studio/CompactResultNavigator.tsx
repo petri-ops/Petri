@@ -6,6 +6,7 @@ import {
   type ResultArtifactPickerGroup,
 } from '@/lib/result-artifact-display';
 import type { ResultArtifactNavSection } from '@/lib/result-manifest';
+import type { ResultSurfaceMode, ResultTruthProjection } from './resultSurface';
 import styles from './CompactResultNavigator.module.css';
 
 export interface CompactResultNavigatorProps {
@@ -17,6 +18,14 @@ export interface CompactResultNavigatorProps {
   selectedArtifactUrl?: string;
   relatedSections: ResultArtifactNavSection[];
   secondaryActions?: React.ReactNode;
+  truth?: ResultTruthProjection;
+  availabilityStatus?: 'checking' | 'available' | 'unavailable';
+  activeMode?: ResultSurfaceMode;
+  canReviewVersions?: boolean;
+  canProjectSource?: boolean;
+  onBack?: () => void;
+  onAskAgent?: () => void;
+  onModeChange?: (mode: ResultSurfaceMode) => void;
   onSelectArtifact: (artifactName: string, sectionId: string) => void;
 }
 
@@ -29,6 +38,14 @@ export function CompactResultNavigator({
   selectedArtifactUrl,
   relatedSections,
   secondaryActions,
+  truth,
+  availabilityStatus = 'checking',
+  activeMode = 'result',
+  canReviewVersions = false,
+  canProjectSource = false,
+  onBack,
+  onAskAgent,
+  onModeChange,
   onSelectArtifact,
 }: CompactResultNavigatorProps): React.ReactElement {
   const moreRef = useRef<HTMLDetailsElement | null>(null);
@@ -43,6 +60,16 @@ export function CompactResultNavigator({
   );
   const selectedValue = selectedOption?.option.primary.name || selectedArtifactName;
   const hasMoreActions = Boolean(secondaryActions) || relatedCount > 0;
+  const modes: Array<{ id: ResultSurfaceMode; label: string }> = [
+    { id: 'result', label: '结果' },
+    ...(canProjectSource ? [{ id: 'code' as const, label: '代码' }] : []),
+    ...(canReviewVersions
+      ? [
+          { id: 'compare' as const, label: '审查' },
+          { id: 'history' as const, label: '历史' },
+        ]
+      : []),
+  ];
 
   const selectArtifact = (artifactName: string): void => {
     for (const group of groups) {
@@ -60,12 +87,22 @@ export function CompactResultNavigator({
 
   return (
     <div className={styles.navigator} data-testid="compact-result-navigator">
+      {onBack && (
+        <button
+          type="button"
+          className={styles.iconAction}
+          onClick={onBack}
+          aria-label="返回对话"
+          title="返回对话"
+        >
+          <Icon name="arrow-left" size={15} />
+        </button>
+      )}
       <div className={styles.currentResult}>
         <span className={styles.currentIcon} aria-hidden="true">
           <Icon name={selectedIcon} size={15} />
         </span>
         <div className={styles.currentCopy}>
-          <span className={styles.currentLabel}>当前结果</span>
           {resultCount > 1 ? (
             <select
               className={styles.resultSelect}
@@ -80,7 +117,7 @@ export function CompactResultNavigator({
                 <optgroup key={group.id} label={group.label}>
                   {group.options.map((option) => (
                     <option key={option.key} value={option.primary.name}>
-                      {option.label} · {artifactFormatLabel(option.primary)}
+                      {option.label}
                     </option>
                   ))}
                 </optgroup>
@@ -89,11 +126,29 @@ export function CompactResultNavigator({
           ) : (
             <strong className={styles.currentName}>{selectedArtifactLabel}</strong>
           )}
-          <span className={styles.currentMeta}>
-            {selectedKindLabel}{resultCount > 0 ? ` · ${resultCount} 个结果` : ''}
-          </span>
         </div>
+        {truth && (
+          <span className={styles.truthBadge} data-tone={truth.tone}>{truth.label}</span>
+        )}
+        {availabilityStatus === 'unavailable' && (
+          <span className={styles.availabilityBadge}>文件不可用</span>
+        )}
       </div>
+
+      {onModeChange && modes.length > 1 && (
+        <nav className={styles.modeSwitcher} aria-label="结果视图">
+          {modes.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              aria-current={activeMode === item.id ? 'page' : undefined}
+              onClick={() => onModeChange(item.id)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
+      )}
 
       <div className={styles.actions}>
         {selectedArtifactUrl && (
@@ -108,6 +163,17 @@ export function CompactResultNavigator({
             <Icon name="eye" size={15} />
           </a>
         )}
+        {onAskAgent && (
+          <button
+            type="button"
+            className={styles.iconAction}
+            onClick={onAskAgent}
+            aria-label="询问 Agent"
+            title="询问 Agent"
+          >
+            <Icon name="sparkles" size={15} />
+          </button>
+        )}
         {hasMoreActions && (
           <details className={styles.more} ref={moreRef}>
             <summary aria-label="更多结果操作" title="更多结果操作">
@@ -116,7 +182,9 @@ export function CompactResultNavigator({
             <div className={styles.moreMenu}>
               <div className={styles.moreHeader}>
                 <strong>{selectedArtifactLabel}</strong>
-                <span>{selectedKindLabel}</span>
+                <span>
+                  {selectedKindLabel}{resultCount > 0 ? ` · ${resultCount} 个结果` : ''}
+                </span>
               </div>
               {secondaryActions && (
                 <div className={styles.secondaryActions}>{secondaryActions}</div>

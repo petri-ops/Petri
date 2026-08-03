@@ -19,7 +19,26 @@ vi.mock('@/components/workspace-panels/WorkspaceSummaryCard', () => ({ Workspace
 vi.mock('@/pages/project-workspace', () => ({
   WorkspaceSearchPanel: () => <div>search</div>,
   ScheduledWorkspacePanel: () => <div>task</div>,
-  ResultView: ({ mode }: { mode: string }) => <div data-testid="central-result-view" data-mode={mode}>result body</div>,
+  ResultView: ({
+    mode,
+    onBack,
+    onModeChange,
+  }: {
+    mode: string;
+    onBack?: () => void;
+    onModeChange?: (mode: string) => void;
+  }) => (
+    <div data-testid="central-result-view" data-mode={mode}>
+      result body
+      {mode === 'result' && (
+        <>
+          <button type="button" onClick={onBack}>返回对话</button>
+          <button type="button" onClick={() => onModeChange?.('compare')}>审查</button>
+          <button type="button" onClick={() => onModeChange?.('history')}>历史</button>
+        </>
+      )}
+    </div>
+  ),
 }));
 
 afterEach(cleanup);
@@ -66,7 +85,7 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     expect(screen.getByTestId('persistent-chat')).toBeTruthy();
     expect(screen.getByTestId('persistent-chat').closest('[data-projection="conversation"]')?.getAttribute('aria-hidden')).toBe('true');
     expect(screen.getAllByTestId('central-result-view')).toHaveLength(1);
-    expect(screen.getByText('发现稳定差异表达信号。')).toBeTruthy();
+    expect(screen.queryByText('发现稳定差异表达信号。')).toBeNull();
     const composer = screen.getByRole('region', { name: '用 Agent 修改当前结果' });
     expect(composer.closest('[aria-label="结果主画布"]')).toBeTruthy();
   });
@@ -78,7 +97,7 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     expect(ctx.updateWorkspaceMode).toHaveBeenCalledWith('chat');
   });
 
-  it.each(['compare', 'history'] as const)('renders %s as a distinct central mode without the edit Composer', (mode) => {
+  it.each(['code', 'compare', 'history'] as const)('renders %s as a distinct central mode without the edit Composer', (mode) => {
     const ctx = context(mode);
     render(<CenterPanel ctx={ctx} />);
     expect(screen.getByTestId('central-result-view').getAttribute('data-mode')).toBe(mode);
@@ -89,8 +108,8 @@ describe('G0-RS-P1 CenterPanel projection', () => {
   it('routes the visible review and history actions through the workspace state owner', () => {
     const ctx = context('result');
     render(<CenterPanel ctx={ctx} />);
-    fireEvent.click(screen.getByRole('button', { name: '审查修改' }));
-    fireEvent.click(screen.getByRole('button', { name: '版本历史' }));
+    fireEvent.click(screen.getByRole('button', { name: '审查' }));
+    fireEvent.click(screen.getByRole('button', { name: '历史' }));
     expect(ctx.updateWorkspaceMode).toHaveBeenCalledWith('compare', true, 'job-1');
     expect(ctx.updateWorkspaceMode).toHaveBeenCalledWith('history', true, 'job-1');
   });

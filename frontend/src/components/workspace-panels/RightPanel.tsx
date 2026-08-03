@@ -155,7 +155,7 @@ export function RightPanel({
                           : null
                     }
                     onAskAgent={ctx.handleAskAgent}
-                    context={ctx.resultContext ?? null}
+                    context={workspaceMode === 'result' ? null : ctx.resultContext ?? null}
                   />
                 )}
                 {tab === 'results' && ctx.activeArtifact && ctx.onResultEditSubmit && (

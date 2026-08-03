@@ -32,7 +32,10 @@ const relatedSections: ResultArtifactNavSection[] = [
 ];
 
 describe('CompactResultNavigator', () => {
-  it('shows one compact result selector without the two legacy navigation surfaces', () => {
+  it('combines result identity, trust and workspace actions in one toolbar', () => {
+    const onBack = vi.fn();
+    const onAskAgent = vi.fn();
+    const onModeChange = vi.fn();
     render(
       <CompactResultNavigator
         groups={buildResultArtifactPickerGroups(primarySections)}
@@ -41,13 +44,27 @@ describe('CompactResultNavigator', () => {
         selectedKindLabel="图表"
         selectedIcon="svg"
         relatedSections={relatedSections}
+        truth={{ tone: 'valid', label: '可信结果' }}
+        availabilityStatus="unavailable"
+        canProjectSource
+        canReviewVersions
+        onBack={onBack}
+        onAskAgent={onAskAgent}
+        onModeChange={onModeChange}
         onSelectArtifact={() => undefined}
       />,
     );
 
-    expect(screen.getByText('当前结果')).toBeTruthy();
-    expect(screen.getByText('图表 · 2 个结果')).toBeTruthy();
+    expect(screen.queryByText('当前结果')).toBeNull();
+    expect(screen.getByText('可信结果')).toBeTruthy();
+    expect(screen.getByText('文件不可用')).toBeTruthy();
     expect((screen.getByLabelText('切换当前结果') as HTMLSelectElement).value).toBe('volcano.png');
+    fireEvent.click(screen.getByRole('button', { name: '返回对话' }));
+    fireEvent.click(screen.getByRole('button', { name: '询问 Agent' }));
+    fireEvent.click(screen.getByRole('button', { name: '代码' }));
+    expect(onBack).toHaveBeenCalledTimes(1);
+    expect(onAskAgent).toHaveBeenCalledTimes(1);
+    expect(onModeChange).toHaveBeenCalledWith('code');
     expect(screen.queryByText('Honeycomb')).toBeNull();
     expect(screen.queryByText('二级导航')).toBeNull();
   });

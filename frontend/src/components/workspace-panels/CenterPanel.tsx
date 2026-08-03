@@ -230,7 +230,7 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
                 progress={activeResultProgress}
               />
             ) : null}
-            contextBar={(
+            contextBar={workspaceMode === 'result' ? null : (
               <ResultStudioContextBar
                 title={contextTitle}
                 trust={describeTruthStatus(truthStatus, ctx.activeJob?.status)}
@@ -265,6 +265,8 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
                 pendingArtifactName={ctx.pendingArtifactName}
                 onPendingArtifactConsumed={ctx.onPendingArtifactConsumed}
                 onOpenBrowser={ctx.openResultBrowser}
+                onBack={() => ctx.updateWorkspaceMode('chat')}
+                onAskCurrentResult={askAboutCurrentResult}
                 mode={workspaceMode}
                 onModeChange={(mode, jobId) => ctx.updateWorkspaceMode(mode, true, jobId || ctx.activeJob?.id || null)}
               />

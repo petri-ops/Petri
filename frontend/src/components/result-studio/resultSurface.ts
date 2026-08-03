@@ -80,6 +80,23 @@ export function resolveResultViewerAdapter(input: {
   return 'binary';
 }
 
+/**
+ * Tables require interaction metadata for their full viewer, while images may
+ * opt into a trusted scatter/matrix projection declared by the plugin.
+ */
+export function shouldRequestArtifactInteraction(adapter: ResultViewerAdapter): boolean {
+  return adapter === 'table' || adapter === 'image';
+}
+
+/**
+ * Image interaction is progressive enhancement: a failed discovery must leave
+ * the static plot quiet and usable. A table failure is a material viewer
+ * degradation, so it remains visible and retryable.
+ */
+export function shouldSurfaceInteractionFailure(adapter: ResultViewerAdapter): boolean {
+  return adapter === 'table';
+}
+
 export function resolveResultArtifactUrl(
   declaredUrl: string | null | undefined,
   fallbackUrl: string,

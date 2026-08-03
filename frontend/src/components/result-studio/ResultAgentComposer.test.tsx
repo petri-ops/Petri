@@ -9,7 +9,7 @@ const TOKEN_A = 'a'.repeat(64);
 const TOKEN_B = 'b'.repeat(64);
 
 describe('G0-RS-P4R-3 result-focus Agent Composer', () => {
-  it('只让用户描述目标，并把当前 token 原样绑定到提交但不渲染 token', () => {
+  it('默认只呈现单行目标输入，并把当前 token 原样绑定到提交但不渲染 token', () => {
     const onSubmit = vi.fn();
     const onDraftChange = vi.fn();
     render(
@@ -22,7 +22,9 @@ describe('G0-RS-P4R-3 result-focus Agent Composer', () => {
     );
 
     expect(document.body.textContent).not.toContain(TOKEN_A);
-    expect(screen.getByText(/当前选择会一并绑定/)).toBeTruthy();
+    expect(screen.queryByText(/上下文已绑定|当前选择会一并绑定/)).toBeNull();
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(screen.getByLabelText('描述你希望当前结果发生什么变化').getAttribute('rows')).toBe('1');
     fireEvent.click(screen.getByRole('button', { name: '交给 Agent' }));
 
     expect(onSubmit).toHaveBeenCalledWith({
@@ -45,6 +47,7 @@ describe('G0-RS-P4R-3 result-focus Agent Composer', () => {
         onSubmit={() => undefined}
       />,
     );
+    expect(screen.getByRole('status').textContent).toContain('正在绑定');
     expect((screen.getByRole('button', { name: '交给 Agent' }) as HTMLButtonElement).disabled).toBe(true);
 
     rerender(
@@ -66,7 +69,31 @@ describe('G0-RS-P4R-3 result-focus Agent Composer', () => {
         onSubmit={() => undefined}
       />,
     );
+    expect(screen.getByRole('status').textContent).toContain('上下文不完整');
     expect((screen.getByRole('button', { name: '交给 Agent' }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('选择过期或不可用时保留可见安全边界，但不重复就绪说明', () => {
+    const { rerender } = render(
+      <ResultAgentComposer
+        context={{ status: 'ready', contextToken: TOKEN_A, selectionCompatibility: 'stale' }}
+        draft="调整配色"
+        onDraftChange={() => undefined}
+        onSubmit={() => undefined}
+      />,
+    );
+    expect(screen.getByRole('status').textContent).toContain('选择已过期');
+    expect(screen.getByRole('status').textContent).toContain('不会交给 Agent');
+
+    rerender(
+      <ResultAgentComposer
+        context={{ status: 'ready', contextToken: TOKEN_A, selectionCompatibility: 'invalid' }}
+        draft="调整配色"
+        onDraftChange={() => undefined}
+        onSubmit={() => undefined}
+      />,
+    );
+    expect(screen.getByRole('status').textContent).toContain('选择不可用');
   });
 
   it('上下文刷新后只提交最新 token，旧 token 不会被复用', () => {

@@ -2,7 +2,7 @@
 
 最后更新：2026-08-03
 
-状态：`UX1E completed / P7 deferred / implemented_unverified`（UX1E 只合并结果导航的 UI 投影；不改变 Artifact Truth、插件执行或 P7 资格）
+状态：`UX1F completed / P7 deferred / implemented_unverified`（UX1F 只扁平化结果画布的信息层级；不改变 Artifact Truth、插件执行或 P7 资格）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -35,6 +35,10 @@ Result Studio 进入 `result/code/compare/history` 时，Electron 顶层标题�
 ### UX1E：Single-result Focus Navigation（`completed · non-qualifying`）
 
 原常驻的顶部 Artifact 卡片网格与右侧 Honeycomb 结果栏合并为一个紧凑结果选择器，主画布因此恢复完整宽度与更多纵向空间。选择器继续按 manifest 的报告、图表、表格、文本分组，但数量按科学结果而非原始文件计数；同 stem 的 PNG/SVG/PDF 在全局归组后只占一个结果项，PNG 优先预览，SVG/PDF 留作导出格式。数据、中间产物与未知文件保留在“更多结果操作”的相关文件区。`selectedName` 仍是唯一 Artifact 选择真相，选择动作继续清除临时历史查看并沿用现有性能标记，不新增并行导航状态。聚焦前端 36/36、TypeScript 与开发态 Electron 真实旧 GO/KEGG Job 观察通过：22 个科学结果可在单一选择器切换，标题与主体同步，PDF 只作为导出变体，相关文件仅保留 4 个 RDS。旧 Job 的物理预览文件已不可用，因此本次实机证据只覆盖布局和交互，不外推 packaged/P7。
+
+### UX1F：Result Canvas Flattening（`completed · non-qualifying`）
+
+把 ContextBar 与 Artifact 选择合并为单一结果工具栏，删除同一结果在窗口标题、上下文标题和独立选择条中的重复表达；最终 HTML 报告、格式导出、重放与相关文件统一进入按需操作区。静态图不把“没有交互 manifest”展示成错误，主结果预览移除装饰卡片边界并占据可用画布；底部 Agent Composer 收窄为一行默认态，只在需要时展示上下文阻断或执行状态。该切片只修改 Result Studio 的前端投影与交互层级，保持 `selectedName`、Artifact/Revision/Selection Truth、执行链和 P7 资格边界不变。聚焦前端 51/51、TypeScript 与治理门通过；开发态 Electron 真实旧 GO/KEGG Job 验证单工具栏、22 个结果的原生选择器、气泡图↔条形图标题/主体同步、更多操作完整可达与 Composer 聚焦扩展。旧 Job 物理预览文件不可用，因此本次不外推 packaged/P7。
 
 BioF3 当前已经具备可信运行、Artifact 导航、静态预览、交付摘要、脚本入口和 ReplayPackage，但结果仍主要是“可查看的交付终点”，尚未成为用户可以持续探索、选择、编辑、比较和继续分析的科研工作对象。
 

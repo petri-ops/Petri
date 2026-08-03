@@ -9,6 +9,8 @@ import {
   resolveResultViewerAdapter,
   requestedArtifactRequestKey,
   shouldApplyRequestedArtifact,
+  shouldRequestArtifactInteraction,
+  shouldSurfaceInteractionFailure,
   shortRevisionLabel,
 } from './resultSurface';
 
@@ -22,6 +24,21 @@ describe('G0-RS-P1 result surface projection', () => {
     expect(resolveResultViewerAdapter({ kind: 'data', fileName: 'matrix.rds' })).toBe('binary');
     expect(resolveResultViewerAdapter({ kind: 'file', fileName: 'archive.zip', preview: false })).toBe('binary');
   });
+
+  it.each([
+    ['image', true, false],
+    ['table', true, true],
+    ['report', false, false],
+    ['json', false, false],
+    ['text', false, false],
+    ['binary', false, false],
+  ] as const)(
+    'treats %s interaction as capability discovery without static-plot error noise',
+    (adapter, shouldRequest, shouldSurfaceFailure) => {
+      expect(shouldRequestArtifactInteraction(adapter)).toBe(shouldRequest);
+      expect(shouldSurfaceInteractionFailure(adapter)).toBe(shouldSurfaceFailure);
+    },
+  );
 
   it('projects trust, revision and selection without inventing missing facts', () => {
     expect(describeTruthStatus('valid', 'done')).toEqual({ tone: 'valid', label: '可信结果' });

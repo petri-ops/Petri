@@ -5,7 +5,9 @@ import { RightPanel, type RightPanelContext } from './RightPanel';
 
 vi.mock('@/components/copilot/SimpleChat', () => ({ SimpleChat: () => <div>chat</div> }));
 vi.mock('@/components/result-studio/ResultStudioSurface', () => ({
-  ResultStudioInspector: () => <div>inspector</div>,
+  ResultStudioInspector: ({ context }: { context?: unknown }) => (
+    <div data-testid="result-inspector" data-has-context={context ? 'true' : 'false'}>inspector</div>
+  ),
 }));
 vi.mock('@/pages/project-workspace', () => ({
   EmptyResult: () => <div>empty</div>,
@@ -57,10 +59,14 @@ describe('P4R-3 RightPanel editing hierarchy', () => {
       setBrowserCanGoForward: vi.fn(),
     } as unknown as RightPanelContext;
 
-    render(<RightPanel ctx={ctx} visible workspaceMode="result" />);
+    const view = render(<RightPanel ctx={ctx} visible workspaceMode="result" />);
     const drawer = document.querySelector('details[aria-label="高级精细调整"]');
     expect(drawer).toBeTruthy();
     expect(drawer?.hasAttribute('open')).toBe(false);
     expect(screen.queryByText(/告诉 Agent 你想怎么改/)).toBeNull();
+    expect(screen.getByTestId('result-inspector').getAttribute('data-has-context')).toBe('false');
+
+    view.rerender(<RightPanel ctx={ctx} visible workspaceMode="code" />);
+    expect(screen.getByTestId('result-inspector').getAttribute('data-has-context')).toBe('true');
   });
 });

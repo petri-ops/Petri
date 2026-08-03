@@ -83,7 +83,7 @@ import { isSameActiveArtifactProjection } from '@/components/result-studio/activ
 import { isResultWorkspaceMode, resultFocusTransition } from '@/components/result-studio/resultFocusLayout';
 import { RevisionCodeView } from '@/components/result-studio/RevisionCodeView';
 import { revisionArtifactUrl, type ArtifactRevision } from '@/components/result-studio/resultStudioClient';
-import { shouldShowDeliveryCard, shouldShowWorkflowBar } from '@/components/result-studio/resultFirstScreen';
+import { shouldShowWorkflowBar } from '@/components/result-studio/resultFirstScreen';
 import { nextResultBodyState, type ResultBodyState } from '@/components/result-studio/resultBodyState';
 import { getResultScrollPosition, setResultScrollPosition } from '@/components/result-studio/resultScrollMemory';
 import { ScientificInteractionViewer } from '@/components/result-studio/ScientificInteractionViewer';
@@ -106,11 +106,14 @@ import {
   beginResultSurfaceMeasure,
   chooseResultArtifactName,
   completeResultSurfaceMeasure,
+  describeTruthStatus,
   requestedArtifactRequestKey,
   RESULT_SURFACE_PERFORMANCE_MARKS,
   resolveResultArtifactUrl,
   resolveResultViewerAdapter,
   shouldApplyRequestedArtifact,
+  shouldRequestArtifactInteraction,
+  shouldSurfaceInteractionFailure,
   type ResultSurfaceMode,
 } from '@/components/result-studio/resultSurface';
 import type { BackendStatus } from '@/lib/electron';
@@ -3020,6 +3023,8 @@ function ResultArtifactShell({
   pendingArtifactName = null,
   onPendingArtifactConsumed,
   onOpenBrowser,
+  onBack,
+  onAskCurrentResult,
   mode = 'result',
   onModeChange,
 }: {
@@ -3044,6 +3049,8 @@ function ResultArtifactShell({
   onPendingArtifactConsumed?: () => void;
   /** Opens a generated delivery report in the right-side Electron webview. */
   onOpenBrowser?: (url: string) => void;
+  onBack?: () => void;
+  onAskCurrentResult?: () => void;
   mode?: ResultSurfaceMode;
   onModeChange?: (mode: ResultSurfaceMode, jobId?: string | null) => void;
 }): React.ReactElement {
@@ -3111,7 +3118,6 @@ function ResultArtifactShell({
   const [recoveryError, setRecoveryError] = useState('');
   const [reportGenerating, setReportGenerating] = useState(false);
   const [finalReportUrl, setFinalReportUrl] = useState('');
-  const [finalReportGeneratedAt, setFinalReportGeneratedAt] = useState('');
   const [reportGenerationError, setReportGenerationError] = useState('');
   const [replayPackageBusy, setReplayPackageBusy] = useState(false);
   const [replayPackageMessage, setReplayPackageMessage] = useState('');
@@ -3425,7 +3431,6 @@ function ResultArtifactShell({
     setPendingRecovery(null);
     setRecoveryError('');
     setFinalReportUrl('');
-    setFinalReportGeneratedAt('');
     setReportGenerationError('');
   }, [job?.id]);
 
@@ -3500,7 +3505,7 @@ function ResultArtifactShell({
       setSelectionError('');
     }
     if (!job || effectiveJobStatus !== 'done' || !selectedArtifactName) return;
-    if (selectedArtifactKind !== 'table' && selectedArtifactKind !== 'plot') return;
+    if (!shouldRequestArtifactInteraction(viewerAdapter)) return;
     let cancelled = false;
     (async () => {
       try {
@@ -3531,7 +3536,7 @@ function ResultArtifactShell({
           }
         }
       } catch {
-        if (!cancelled) {
+        if (!cancelled && shouldSurfaceInteractionFailure(viewerAdapter)) {
           // 次级交互失败不能清空主体结果；明确告诉用户当前降级及恢复动作。
           setInteractionError('交互能力暂不可用；请查看下方产物状态。');
         }
@@ -3541,7 +3546,7 @@ function ResultArtifactShell({
       cancelled = true;
       if (selectionMutationEpochRef.current === epoch) selectionMutationEpochRef.current += 1;
     };
-  }, [conversationId, effectiveJobStatus, interactionRetryVersion, job?.id, lang, project.id, selectedArtifactKind, selectedArtifactName, viewedRevision]);
+  }, [conversationId, effectiveJobStatus, interactionRetryVersion, job?.id, lang, project.id, selectedArtifactName, viewedRevision, viewerAdapter]);
 
   const handleSelectionChange = useCallback((next: ArtifactSelection | null) => {
     const epoch = selectionMutationEpochRef.current;
@@ -3831,7 +3836,6 @@ function ResultArtifactShell({
     return <EmptyAnalysisResult />;
   }
 
-  const showCompactNavigator = artifactPickerGroups.length > 0 && artifacts.length > 0;
   const selectedDisplayGroup = findResultArtifactPickerOption(
     artifactPickerGroups,
     selectedArtifactName,
@@ -3904,7 +3908,6 @@ function ResultArtifactShell({
       const data = await response.json();
       if (!response.ok || !data.ok || !data.fileName) throw new Error(data.message || data.error || '报告生成失败');
       setFinalReportUrl(buildUrl(data.fileName));
-      setFinalReportGeneratedAt(data.generatedAt || new Date().toISOString());
     } catch (error) {
       setReportGenerationError(error instanceof Error ? error.message : '报告生成失败');
     } finally {
@@ -3987,10 +3990,107 @@ function ResultArtifactShell({
     <div className={styles.resultWorkflowError}>{recoveryError}</div>
   ) : null;
 
+  const toolbarSecondaryActions = result ? (
+    <>
+      {selectedArtifactName && (
+        <span className={styles.resultReportTechnicalName}>{selectedArtifactName}</span>
+      )}
+      {selectedDisplayGroup && selectedDisplayGroup.variants.length > 1 && (
+        <div className={styles.resultReportExportLinks}>
+          {selectedDisplayGroup.variants
+            .filter((artifact) => artifact.name !== selectedDisplayGroup.primary.name && /\.(svg|pdf)$/i.test(artifact.name))
+            .map((artifact) => (
+              <a
+                key={artifact.name}
+                href={resolveResultArtifactUrl(artifact.url, buildUrl(artifact.name))}
+                target="_blank"
+                rel="noreferrer"
+              >
+                导出 {artifactFormatLabel(artifact)}
+              </a>
+            ))}
+        </div>
+      )}
+      {reportArtifact && (
+        <button
+          type="button"
+          disabled={reportGenerating}
+          onClick={() => void generateFinalReport()}
+        >
+          {reportGenerating ? '生成报告中…' : finalReportUrl ? '重新生成 HTML 报告' : '生成 HTML 报告'}
+        </button>
+      )}
+      {finalReportUrl && onOpenBrowser && (
+        <button type="button" onClick={() => onOpenBrowser(finalReportUrl)}>查看 HTML 报告</button>
+      )}
+      {finalReportUrl && (
+        <a href={finalReportUrl} download="final-report.html">导出 HTML 报告</a>
+      )}
+      {result.deliveryManifest && (
+        <>
+          <a href={buildUrl('delivery-manifest.json')} target="_blank" rel="noreferrer">查看交付清单</a>
+          <button type="button" disabled={replayPackageBusy} onClick={() => void exportReplayPackage()}>
+            {replayPackageBusy ? '导出中…' : '导出复现包'}
+          </button>
+        </>
+      )}
+      {scientificScriptUrl && (
+        <a href={scientificScriptUrl} target="_blank" rel="noreferrer">查看脚本</a>
+      )}
+      {result.deliveryManifest && (
+        <button
+          type="button"
+          onClick={() => onAskAgent(`请为任务 ${job.id} 的产物 ${selectedArtifactName} 发起重放验证；先展示输入、资源和副作用确认摘要，不要直接执行。`)}
+        >
+          重放验证
+        </button>
+      )}
+      {reportGenerationError && <span className={styles.resultReportActionError}>{reportGenerationError}</span>}
+      {replayPackageMessage && <span className={styles.resultReportActionStatus}>{replayPackageMessage}</span>}
+    </>
+  ) : undefined;
+  const toolbarTruthStatus = typeof activeArtifact?.truthStatus === 'string'
+    ? activeArtifact.truthStatus
+    : typeof workflow?.artifactTruth?.status === 'string'
+      ? workflow.artifactTruth.status
+      : null;
+
+  const resultToolbar = (
+    <CompactResultNavigator
+      groups={artifactPickerGroups}
+      selectedArtifactName={selectedArtifactName || activeArtifact?.name || ''}
+      selectedArtifactLabel={selectedArtifactLabel || activeArtifact?.label || activeArtifact?.name || job.name || job.tool_id}
+      selectedKindLabel={selectedArtifact ? artifactKindLabel(selectedArtifactKind) : '结果'}
+      selectedIcon={artifactKindIcon(selectedArtifactKind)}
+      selectedArtifactUrl={
+        selectedArtifactUrl && effectivePreviewAvailability.status !== 'unavailable'
+          ? selectedArtifactUrl
+          : undefined
+      }
+      relatedSections={compactRelatedSections}
+      secondaryActions={toolbarSecondaryActions}
+      truth={describeTruthStatus(toolbarTruthStatus, effectiveJobStatus)}
+      availabilityStatus={selectedArtifact ? effectivePreviewAvailability.status : 'checking'}
+      activeMode={mode}
+      canReviewVersions={Boolean(interactionManifest?.artifactFamilyId || activeArtifact?.artifactFamilyId)}
+      canProjectSource={Boolean(activeArtifact?.revisionId)}
+      onBack={onBack}
+      onAskAgent={onAskCurrentResult}
+      onModeChange={onModeChange ? (nextMode) => onModeChange(nextMode, job.id) : undefined}
+      onSelectArtifact={(artifactName, sectionId) => {
+        beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.artifactStart);
+        setViewedRevision(null);
+        setSelectedSectionId(sectionId);
+        setSelectedName(artifactName);
+      }}
+    />
+  );
+
   const stateBlock = (title: string, body: React.ReactNode, status: 'running' | 'pending' | 'failed' | 'done') => {
     const containerClass = styles.resultView;
     return (
       <div className={containerClass}>
+        {mode === 'result' && resultToolbar}
         {workflowBar}
         {recoveryConfirmation}
         <div className={styles.resultHeader}>
@@ -4094,92 +4194,6 @@ function ResultArtifactShell({
           <div className={styles.resultSidebarPreviewBody}>{renderPreview()}</div>
         </section>
       ) : (
-      <>
-      {result.deliveryManifest && (
-        <section className={styles.resultScientificDelivery} data-status={result.deliveryManifest.status}>
-          <div className={styles.resultScientificDeliveryHeader}>
-            <strong>
-              {result.deliveryManifest.status === 'valid'
-                ? '交付已通过'
-                : result.deliveryManifest.status === 'degraded'
-                  ? '交付需要复核'
-                  : '交付已阻断'}
-            </strong>
-            <span>{result.deliveryManifest.status}</span>
-          </div>
-          <div className={styles.resultScientificDeliveryGrid}>
-            <div>
-              <small>结论摘要</small>
-              <p>{result.deliveryManifest.summary?.conclusion || '暂无结论摘要'}</p>
-            </div>
-            <div>
-              <small>我做了什么</small>
-              <p>{result.deliveryManifest.summary?.whatWasDone || '暂无执行摘要'}</p>
-            </div>
-            <div>
-              <small>需要注意什么</small>
-              <p>{result.deliveryManifest.summary?.cautions?.join('；') || '暂无额外注意事项'}</p>
-            </div>
-          </div>
-          <div className={styles.resultScientificDeliveryMeta}>
-            <span>
-              复现：{result.deliveryManifest.artifacts?.filter((item) => item.reproducibility?.status === 'verified').length || 0} 已验证 ·{' '}
-              {result.deliveryManifest.artifacts?.filter((item) => item.reproducibility?.status === 'available').length || 0} 可用
-            </span>
-            <div className={styles.resultScientificDeliveryActions}>
-              <a href={buildUrl('delivery-manifest.json')} target="_blank" rel="noreferrer">查看交付清单</a>
-              <button type="button" disabled={replayPackageBusy} onClick={() => void exportReplayPackage()}>
-                {replayPackageBusy ? '导出中…' : '导出复现包'}
-              </button>
-            </div>
-          </div>
-          {replayPackageMessage && <div className={styles.resultReplayPackageMessage}>{replayPackageMessage}</div>}
-        </section>
-      )}
-      {/*
-        主体首屏化：这张卡此前无条件渲染在主体正上方，而没有 reportArtifact 时它
-        完全不可操作——「生成」按钮 disabled，「查看」「导出」根本不渲染，
-        文案只是「分析结果确认后按需生成」。于是用户为了看结果，先要滚过一段
-        告诉他「你现在还不能用这个功能」的说明。
-        有可生成的产物或已生成的报告时才渲染；两者皆无时不占首屏。
-      */}
-      {shouldShowDeliveryCard({ reportArtifact, finalReportUrl }) && (
-      <section className={styles.resultDeliveryCard}>
-        <div className={styles.resultDeliveryCopy}>
-          <strong>最终 HTML 报告</strong>
-          <span>
-            {finalReportUrl
-              ? `已基于当前结果生成${finalReportGeneratedAt ? ` · ${new Date(finalReportGeneratedAt).toLocaleString()}` : ''}`
-              : '分析结果确认后按需生成，不占用核心结果预览。'}
-          </span>
-          {reportGenerationError && <em>{reportGenerationError}</em>}
-        </div>
-        <div className={styles.resultDeliveryActions}>
-          <button
-            type="button"
-            disabled={reportGenerating || !reportArtifact}
-            onClick={() => void generateFinalReport()}
-            title={finalReportUrl ? '重新生成最终 HTML 报告' : '生成最终 HTML 报告'}
-          >
-            {reportGenerating ? '生成中…' : '生成'}
-          </button>
-          {finalReportUrl && onOpenBrowser && (
-            <button
-              type="button"
-              onClick={() => onOpenBrowser(finalReportUrl)}
-              title="在右侧内置浏览器查看"
-            >
-              查看
-            </button>
-          )}
-          {finalReportUrl && (
-            <a href={finalReportUrl} download="final-report.html" title="导出最终 HTML 报告">
-              导出
-            </a>
-          )}
-        </div>
-      </section>
-      )}
       <section className={styles.resultReportSection}>
         {selectionError && <div className={styles.resultWorkflowError}>{selectionError}</div>}
         {manifestError && (
@@ -4196,74 +4210,10 @@ function ResultArtifactShell({
             <button type="button" onClick={() => setInteractionRetryVersion((value) => value + 1)}>重试交互能力</button>
           </div>
         )}
-        {showCompactNavigator && selectedArtifact ? (
-          <div className={styles.resultCompactShell}>
-            <CompactResultNavigator
-              groups={artifactPickerGroups}
-              selectedArtifactName={selectedArtifactName}
-              selectedArtifactLabel={selectedArtifactLabel}
-              selectedKindLabel={artifactKindLabel(selectedArtifactKind)}
-              selectedIcon={artifactKindIcon(selectedArtifactKind)}
-              selectedArtifactUrl={
-                selectedArtifactUrl && effectivePreviewAvailability.status !== 'unavailable'
-                  ? selectedArtifactUrl
-                  : undefined
-              }
-              relatedSections={compactRelatedSections}
-              onSelectArtifact={(artifactName, sectionId) => {
-                beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.artifactStart);
-                setViewedRevision(null);
-                setSelectedSectionId(sectionId);
-                setSelectedName(artifactName);
-              }}
-              secondaryActions={
-                (selectedDisplayGroup && selectedDisplayGroup.variants.length > 1) || result.deliveryManifest ? (
-                  <>
-                    <span className={styles.resultReportTechnicalName}>{selectedArtifactName}</span>
-                    {selectedDisplayGroup && selectedDisplayGroup.variants.length > 1 && (
-                      <div className={styles.resultReportExportLinks}>
-                        {selectedDisplayGroup.variants
-                          .filter((artifact) => artifact.name !== selectedDisplayGroup.primary.name && /\.(svg|pdf)$/i.test(artifact.name))
-                          .map((artifact) => (
-                            <a
-                              key={artifact.name}
-                              href={resolveResultArtifactUrl(artifact.url, buildUrl(artifact.name))}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              导出 {artifactFormatLabel(artifact)}
-                            </a>
-                          ))}
-                      </div>
-                    )}
-                    {result.deliveryManifest && (
-                      <div className={styles.resultReportReproductionActions}>
-                        {scientificScriptUrl && (
-                          <a href={scientificScriptUrl} target="_blank" rel="noreferrer">查看脚本</a>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => onAskAgent(`请为任务 ${job.id} 的产物 ${selectedArtifactName} 发起重放验证；先展示输入、资源和副作用确认摘要，不要直接执行。`)}
-                        >
-                          重放验证
-                        </button>
-                      </div>
-                    )}
-                  </>
-                ) : undefined
-              }
-            />
-            <div className={styles.resultSidebarPreviewBody}>
-              {renderPreview()}
-            </div>
-          </div>
-        ) : (
-          <div className={styles.resultSidebarPreviewBody}>
-            {renderPreview()}
-          </div>
-        )}
+        <div className={styles.resultSidebarPreviewBody}>
+          {renderPreview()}
+        </div>
       </section>
-      </>
       )
       )}
     </>
@@ -4276,6 +4226,7 @@ function ResultArtifactShell({
       onScroll={(e) => setResultScrollPosition(job?.id, e.currentTarget.scrollTop)}
       data-artifact-switch-ms={artifactSwitchMs === null ? undefined : artifactSwitchMs.toFixed(2)}
     >
+      {mode === 'result' && resultToolbar}
       {shellBody}
       {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
     </div>
@@ -4297,6 +4248,8 @@ export function ResultView({
   pendingArtifactName = null,
   onPendingArtifactConsumed,
   onOpenBrowser,
+  onBack,
+  onAskCurrentResult,
   mode = 'result',
   onModeChange,
 }: {
@@ -4314,6 +4267,8 @@ export function ResultView({
   pendingArtifactName?: string | null;
   onPendingArtifactConsumed?: () => void;
   onOpenBrowser?: (url: string) => void;
+  onBack?: () => void;
+  onAskCurrentResult?: () => void;
   mode?: ResultSurfaceMode;
   onModeChange?: (mode: ResultSurfaceMode, jobId?: string | null) => void;
 }): React.ReactElement {
@@ -4333,6 +4288,8 @@ export function ResultView({
       pendingArtifactName={pendingArtifactName}
       onPendingArtifactConsumed={onPendingArtifactConsumed}
       onOpenBrowser={onOpenBrowser}
+      onBack={onBack}
+      onAskCurrentResult={onAskCurrentResult}
       mode={mode}
       onModeChange={onModeChange}
     />
