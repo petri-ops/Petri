@@ -1040,10 +1040,27 @@ async function useAdvancedDrawer(window, { field, value, outcome, scientific }) 
   }
   const beforeMessages = await wc.executeJavaScript(`document.querySelectorAll('.sc-msg-assistant').length`, true);
   await clickButtonByText(wc, '生成候选版本', 'advanced');
-  return waitForAgentSettlement(wc, beforeMessages, {
-    requiresResultProgress: true,
-    expectedCompletion: '候选版本已经生成',
-  });
+  try {
+    return await waitForAgentSettlement(wc, beforeMessages, {
+      requiresResultProgress: true,
+      expectedCompletion: verifiedCandidateTerminal,
+    });
+  } catch (error) {
+    if (!scientific || error?.message !== 'agent terminal response did not confirm the expected successful outcome') {
+      throw error;
+    }
+    const assistantText = await wc.executeJavaScript(`
+      [...document.querySelectorAll('.sc-msg-assistant')].at(-1)?.textContent?.trim() || ''
+    `, true);
+    if (!/(?:确认|同意).*(?:执行|重算|修改)|(?:执行|重算|修改).*(?:确认|同意)/.test(assistantText)) {
+      throw error;
+    }
+    // A real Provider may conservatively ask once more even though the user
+    // already checked the scientific-impact acknowledgement. Complete that
+    // visible confirmation turn instead of weakening the backend confirmation
+    // gate or treating the provider's question as a successful candidate.
+    return submitComposer(window, '确认执行这次科学重算。', { requiresResultProgress: true });
+  }
 }
 
 async function readProjectJobs(webContents, config) {

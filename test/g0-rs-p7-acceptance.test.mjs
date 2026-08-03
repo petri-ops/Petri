@@ -23,3 +23,11 @@ test('P7 producer requires two real Provider classes and all five task ids', () 
   ]) assert.match(source, new RegExp(task));
   assert.match(source, /selected\.has\('deepseek'\).*selected\.has\('openai-compatible'\)/s);
 });
+
+test('P7 scientific UI trace completes an explicit Provider confirmation turn without weakening verification', () => {
+  const source = readFileSync(new URL('../scripts/g0-rs-p6-ui110-driver.cjs', import.meta.url), 'utf8');
+  assert.match(source, /确认执行这次科学重算/);
+  assert.match(source, /expectedCompletion:\s*verifiedCandidateTerminal/);
+  assert.match(source, /scientific-impact acknowledgement/);
+  assert.match(source, /agent terminal response did not confirm the expected successful outcome/);
+});
