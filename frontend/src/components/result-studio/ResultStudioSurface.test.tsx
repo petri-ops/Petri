@@ -112,4 +112,38 @@ describe('G0-RS-P1 Result Studio surface', () => {
     expect(details?.textContent).toContain('family-1');
     expect(details?.textContent).toContain('job-1');
   });
+
+  it('shows file availability separately from scientific validation', () => {
+    const onAsk = vi.fn();
+    render(
+      <>
+        <ResultStudioContextBar
+          title="差异表达火山图"
+          trust={{ tone: 'valid', label: '可信结果' }}
+          availabilityStatus="unavailable"
+          conclusion="科学校验记录仍保留，但当前产物文件不可读取。"
+          revisionLabel="当前 v2"
+          selectionLabel="未选择对象"
+          onBack={() => undefined}
+          onAskAgent={() => undefined}
+        />
+        <ResultStudioInspector
+          artifact={{
+            jobId: 'job-1', toolId: 'volcano-plot', name: 'volcano.png', type: 'image',
+            label: '差异表达火山图', revisionId: 'rev-2', artifactFamilyId: 'family-1',
+            availabilityStatus: 'unavailable', availabilityReason: 'artifact_truth_unavailable',
+          }}
+          jobStatus="done"
+          truthStatus="valid"
+          onAskAgent={onAsk}
+        />
+      </>,
+    );
+
+    expect(screen.getAllByText('可信结果')).toHaveLength(2);
+    expect(screen.getAllByText('文件不可用')).toHaveLength(2);
+    expect(screen.queryByText('打开原文件')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /检查并恢复文件/ }));
+    expect(onAsk).toHaveBeenCalledWith(expect.stringContaining('不要覆盖原始数据'));
+  });
 });

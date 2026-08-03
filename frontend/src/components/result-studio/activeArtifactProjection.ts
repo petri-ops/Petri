@@ -24,6 +24,8 @@ export interface ActiveArtifactProjection {
   selectionId?: string | null;
   truthStatus?: 'valid' | 'degraded' | 'blocked' | null;
   conclusion?: string | null;
+  availabilityStatus?: 'checking' | 'available' | 'unavailable';
+  availabilityReason?: string | null;
 }
 
 function sameCapabilities(
@@ -84,5 +86,7 @@ export function isSameActiveArtifactProjection(
     && (left.selectionId ?? null) === (right.selectionId ?? null)
     && (left.truthStatus ?? null) === (right.truthStatus ?? null)
     && (left.conclusion ?? null) === (right.conclusion ?? null)
+    && (left.availabilityStatus ?? 'checking') === (right.availabilityStatus ?? 'checking')
+    && (left.availabilityReason ?? null) === (right.availabilityReason ?? null)
     && sameSelectionProjection(left.selection, right.selection);
 }

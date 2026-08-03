@@ -1,6 +1,6 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-08-02
+最后更新：2026-08-03
 
 ## 1. 恢复顺序
 
@@ -43,7 +43,9 @@ P6-1 已于 2026-08-02 在 `ad1e2ce` 收口，canonical evidence `acceptance/g0-
 
 P7 延期检查点：`e14a8e6` 已完成 existing Git 持久显式 opt-in 后端安全修复；`6dc3880`/`1bb295c` 已使资格器在没有可解引用 task-local fact bundle、独立 replay、唯一截图和重算不变量时 fail-closed；Agent 结果动作 completion 修复保留。没有生成 canonical P7 PASS evidence。selection→enrichment 当前是 direct Job + auto-adopted baseline，不满足 candidate/compare/lifecycle，必须作为未来产品缺口修复，不能由 harness 伪造。
 
-当前工作区应为 clean，分支为 `codex/g0-result-studio-product`。当前没有 active 实现工作包；下一候选为 `G0-SDC1 Data Profiler`，需用户明确建立新 Goal 后才启动。
+当前分支为 `codex/g0-result-studio-product`。`G0-RS-UX1A Focus Entry & Honest Preview` 已完成开发态 Electron 短闭环：结果态可逆自动聚焦，Artifact 加载失败时区分科学 validation 与文件可用性，并提供重试/Agent 恢复。当前没有 active 实现工作包；下一项由用户即时反馈选择短 UX 目标，`G0-SDC1 Data Profiler` 保持后续候选。导航/格式族/插件 renderer 与 P7 资格均未启动。
+
+验证边界：前端 32/32、受影响 Node 368/368、P4R 不变量 7/7、TypeScript/UI/docs 通过。`npm run test:changed` 仍会因 P6 历史 evidence 绑定 `ad1e2ce` 而在 `p6_current_source_tree_not_exact` 处 fail-closed；不得在未重跑 P6 实机矩阵时把旧证据改绑 UX1A 源码。
 
 `G0-RS-P0` 已完成资格纠偏：Baseline patch 为 1.1.1，LF12 核心 16/16 evidence 继续 qualified + maintained；`result-studio-editing` 为 experimental/excluded，旧 RS9 product/provider/visual/table-seed 为 non-qualifying historical evidence。Product Trace v1 要求 14 步连续来源证据并拒绝人工布尔值、提示词指定 JSON、测试摘要和常量不变量。证据位于 `acceptance/g0-result-studio/rs-p0-{truth-correction,ui-baseline}.json`。
 

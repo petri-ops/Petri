@@ -2,7 +2,7 @@
 
 最后更新：2026-08-03
 
-状态：`development checkpoint / P7 deferred / implemented_unverified`（RS0～RS8 引擎基础、完整 P4R、`G0-RS-P5` 与 `G0-RS-P6` 已按各自非资格边界收口；2026-08-03 用户裁决将发布级 P7 重新资格后移，产品资格未恢复）
+状态：`UX1A completed / P7 deferred / implemented_unverified`（RS0～RS8 引擎基础、完整 P4R、`G0-RS-P5`、`G0-RS-P6` 与 UX1A 已按各自非资格边界收口；产品资格未恢复）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -1777,6 +1777,30 @@ P7 重开条件：
 
 重开前 `result-studio-editing` 保持 `experimental/limited / implemented_unverified`，不进入 Support Matrix 的 qualified 范围。
 
+### G0-RS-UX1A：Focus Entry & Honest Preview
+
+状态：`completed / development Electron verified`（2026-08-03）。这是 P7 延期后的短周期体验切片，不是新的大阶段，也不恢复产品资格。
+
+UX1 的方向原则：
+
+- Result Studio 保持跨分析任务复用的通用壳；插件 descriptor 声明产物语义，通用 viewer 按能力渲染，不为每个插件复制页面。
+- 同一科学图形的 PNG、SVG、PDF 是格式变体而非三个独立结果；后续切片以 PNG 为默认预览，SVG/PDF 作为导出格式，不把 PDF 放进日常交互主画布。
+- 打开结果时先给主产物空间，左右辅助面板可随时手动唤回；离开结果态后恢复用户此前布局。
+- 科学 validation 与物理文件可用性是两条独立真相；文件缺失或不可读时不得继续显示绿色成功预览或浏览器破图。
+- 深度交互优化按短 Goal 逐项交付，用户反馈可改变后续顺序，但不能扩大当前切片的完成口径。
+
+UX1A 只交付：
+
+1. 首次进入 Result / Code / Compare / History 会话时自动收起左右栏；会话内手动展开保持有效，返回对话恢复进入前布局。
+2. 图片或文本产物加载失败时以明确不可用状态替代破图，区分 validation 与文件可用性，并提供重试和 Agent 恢复入口。
+3. 定向测试、TypeScript、UI/文档门禁与开发态 Electron 实机验证通过。
+
+本切片明确不做：Artifact 导航重构、产物 family/格式族重构、所有插件 renderer 补齐、P7 Provider/packaged/资格矩阵。
+
+收口证据：前端定向 32/32、受影响 Node（排除下述历史 freshness 门）368/368、P4R 不变量 7/7、TypeScript strict、UI 台账和文档门禁通过。开发态 Electron 在真实旧 GO/KEGG Job 上观察到：首次结果态左右栏均收起，返回对话恢复两栏；Artifact HTTP 409 时 Header 同时显示“可信结果 / 文件不可用”，主画布无破图并提供重试与 Agent 检查，Inspector 隐藏失效的原文件入口。该实机证据不覆盖 packaged、Provider 或 P7。
+
+`npm run test:changed` 唯一非通过项是历史 P6 evidence 的 `p6_current_source_tree_not_exact`：UX1A 修改了 P6 当时绑定的八个前端文件，而 P6 evidence 必须继续诚实绑定 `ad1e2ce`，不能在未重跑 P6 矩阵时改绑新源码。该 freshness 例外已登记审计台；它不表示 UX1A 行为回归，也不升级或重开 P6/P7。
+
 目标：只用真实连续产品旅程重新决定 Result Studio 是否可以成为 supported/qualified 能力。
 
 每条任务必须保存一条脱敏、连续、机器可核对的 trace：
@@ -1862,7 +1886,7 @@ G0-RS-P0 Truth Correction
 
 阶段状态规则：
 
-- 当前没有 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3`、`G0-RS-RH0`、P4R-0～P4R-6、`G0-RS-P5` 与 `G0-RS-P6` 已完成，P7 deferred。不得把 P6 的本地证据外推为 P7 资格。
+- 当前没有 `G0-RS-*` 切片处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3`、`G0-RS-RH0`、P4R-0～P4R-6、`G0-RS-P5`、`G0-RS-P6` 与 UX1A 已完成，P7 deferred。UX1A 不恢复产品资格，也不得把 P6 的旧源码证据外推到当前实现或 P7 资格。
 - 每阶段先补失败测试/fixture，再实现，再形成与证据类型匹配的验收；不得提前开发下一阶段。
 - 单元测试证明契约，fixture 证明确定性集成，真实 Provider 证明模型边界，packaged Electron 证明产品链；四者不能互相替代。
 - 未运行 `npm run docs:reconcile` 与 `npm run docs:check` 不得宣布阶段 completed/verified/qualified。

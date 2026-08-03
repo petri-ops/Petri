@@ -50,6 +50,8 @@ function projection(overrides: Partial<ActiveArtifactProjection> = {}): ActiveAr
     selectionId: 'sel_1',
     truthStatus: 'valid',
     conclusion: 'A conclusion',
+    availabilityStatus: 'available',
+    availabilityReason: null,
     ...overrides,
   };
 }
@@ -72,6 +74,8 @@ describe('active artifact projection equality', () => {
     ['stable id field', { idField: 'ID' }],
     ['truth', { truthStatus: 'degraded' as const }],
     ['conclusion', { conclusion: 'A different conclusion' }],
+    ['availability', { availabilityStatus: 'unavailable' as const }],
+    ['availability reason', { availabilityReason: 'file missing' }],
     ['selection id', { selectionId: 'sel_2' }],
   ])('detects a changed %s projection', (_label, changed) => {
     expect(isSameActiveArtifactProjection(projection(), projection(changed))).toBe(false);

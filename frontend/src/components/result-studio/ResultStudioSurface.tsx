@@ -29,6 +29,8 @@ export interface ResultInspectorArtifact {
   selectionDurable?: boolean;
   selection?: ArtifactSelection | null;
   selectionId?: string | null;
+  availabilityStatus?: 'checking' | 'available' | 'unavailable';
+  availabilityReason?: string | null;
 }
 
 export function ResultStudioCanvas({
@@ -74,6 +76,7 @@ export function ResultStudioCanvas({
 export function ResultStudioContextBar({
   title,
   trust,
+  availabilityStatus = 'checking',
   conclusion,
   revisionLabel,
   selectionLabel,
@@ -86,6 +89,7 @@ export function ResultStudioContextBar({
 }: {
   title: string;
   trust: ResultTruthProjection;
+  availabilityStatus?: 'checking' | 'available' | 'unavailable';
   conclusion: string;
   revisionLabel: string;
   selectionLabel: string;
@@ -105,6 +109,9 @@ export function ResultStudioContextBar({
         <div className={styles.titleRow}>
           <h2>{title}</h2>
           <span className={styles.truthBadge} data-tone={trust.tone}>{trust.label}</span>
+          {availabilityStatus === 'unavailable' && (
+            <span className={styles.availabilityBadge}>文件不可用</span>
+          )}
         </div>
         <p>{conclusion}</p>
         <div className={styles.contextMeta}>
@@ -221,12 +228,19 @@ export function ResultStudioInspector({
         <span>当前结果</span>
         <strong>{title}</strong>
         <span className={styles.truthBadge} data-tone={trust.tone}>{trust.label}</span>
+        {artifact.availabilityStatus === 'unavailable' && (
+          <span className={styles.availabilityBadge}>文件不可用</span>
+        )}
       </div>
       <dl className={styles.inspectorFacts}>
         <div><dt>版本</dt><dd>{shortRevisionLabel(artifact.revisionId, artifact.revisionOrdinal)}</dd></div>
         <div><dt>类型</dt><dd>{artifact.type || '文件'}</dd></div>
         <div><dt>选择</dt><dd>{selectionLabel}</dd></div>
         <div><dt>来源</dt><dd>{artifact.toolId || '未知工具'}</dd></div>
+        <div>
+          <dt>文件</dt>
+          <dd>{artifact.availabilityStatus === 'unavailable' ? '当前不可用' : artifact.availabilityStatus === 'available' ? '可读取' : '检查中'}</dd>
+        </div>
       </dl>
       <ResultStudioContextReadiness context={context} />
       <div className={styles.inspectorActions}>
@@ -237,7 +251,16 @@ export function ResultStudioInspector({
           <Icon name="sparkles" size={13} />
           解释当前结果
         </button>
-        {artifact.url && (
+        {artifact.availabilityStatus === 'unavailable' && (
+          <button
+            type="button"
+            onClick={() => onAskAgent(`请检查并恢复当前结果文件“${title}”。先说明缺失原因和可恢复边界，不要覆盖原始数据。`)}
+          >
+            <Icon name="refresh" size={13} />
+            检查并恢复文件
+          </button>
+        )}
+        {artifact.url && artifact.availabilityStatus !== 'unavailable' && (
           <a href={artifact.url} target="_blank" rel="noreferrer">打开原文件</a>
         )}
       </div>

@@ -140,6 +140,19 @@
 .truthBadge[data-tone='running'] { color: var(--biof3-status-loading); }
 .truthBadge[data-tone='blocked'] { color: var(--biof3-danger); }
 
+.availabilityBadge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-height: 19px;
+  padding: 0 7px;
+  border: 1px solid color-mix(in srgb, var(--biof3-danger) 42%, var(--biof3-border));
+  border-radius: 999px;
+  color: var(--biof3-danger);
+  font-size: 10px;
+  font-weight: 650;
+}
+
 .askButton {
   display: inline-flex;
   min-height: 30px;

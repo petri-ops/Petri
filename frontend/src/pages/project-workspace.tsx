@@ -74,6 +74,7 @@ import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
 import { ResultStudioChangeSetPanel } from '@/components/result-studio/ResultStudioChangeSetPanel';
 import { isSameActiveArtifactProjection } from '@/components/result-studio/activeArtifactProjection';
+import { isResultWorkspaceMode, resultFocusTransition } from '@/components/result-studio/resultFocusLayout';
 import { RevisionCodeView } from '@/components/result-studio/RevisionCodeView';
 import { revisionArtifactUrl, type ArtifactRevision } from '@/components/result-studio/resultStudioClient';
 import { shouldShowDeliveryCard, shouldShowWorkflowBar } from '@/components/result-studio/resultFirstScreen';
@@ -182,6 +183,8 @@ interface ActiveArtifact {
   selectionId?: string | null;
   truthStatus?: 'valid' | 'degraded' | 'blocked' | null;
   conclusion?: string | null;
+  availabilityStatus?: 'checking' | 'available' | 'unavailable';
+  availabilityReason?: string | null;
 }
 
 interface ActiveWorkspaceFile {
@@ -432,7 +435,6 @@ export function ProjectWorkspace(): React.ReactElement {
     rightOpen,
     setRightOpen,
     compactLayout,
-    viewportWidth,
     bottomTerminalOpen,
     setBottomTerminalOpen,
     summaryOpen,
@@ -442,25 +444,28 @@ export function ProjectWorkspace(): React.ReactElement {
     sessionFrameWidth,
   } = useWorkspaceLayout();
   const resultPanelRestoreRef = useRef<{ leftOpen: boolean; rightOpen: boolean } | null>(null);
+  const resultFocusActiveRef = useRef(false);
 
   useEffect(() => {
-    const resultProjection = workspaceMode === 'result' || workspaceMode === 'code' || workspaceMode === 'compare' || workspaceMode === 'history';
-    if (resultProjection) {
+    const transition = resultFocusTransition(resultFocusActiveRef.current, workspaceMode);
+    if (transition === 'enter') {
       if (!resultPanelRestoreRef.current) {
         resultPanelRestoreRef.current = { leftOpen, rightOpen };
       }
-      if (viewportWidth < 1200) setLeftOpen(false);
-      else if (resultPanelRestoreRef.current.leftOpen) setLeftOpen(true);
-      if (viewportWidth <= 960) setRightOpen(false);
-      else if (resultPanelRestoreRef.current.rightOpen) setRightOpen(true);
+      resultFocusActiveRef.current = true;
+      setLeftOpen(false);
+      setRightOpen(false);
       return;
     }
+    if (transition !== 'exit') return;
     const restore = resultPanelRestoreRef.current;
-    if (!restore) return;
-    setLeftOpen(restore.leftOpen);
-    setRightOpen(restore.rightOpen);
+    if (restore) {
+      setLeftOpen(restore.leftOpen);
+      setRightOpen(restore.rightOpen);
+    }
     resultPanelRestoreRef.current = null;
-  }, [setLeftOpen, setRightOpen, viewportWidth, workspaceMode]);
+    resultFocusActiveRef.current = false;
+  }, [leftOpen, rightOpen, setLeftOpen, setRightOpen, workspaceMode]);
 
   const {
     rightTab,
@@ -510,8 +515,8 @@ export function ProjectWorkspace(): React.ReactElement {
   // Bidirectional sync: setWorkspaceMode + URL param. Exists here (not in
   // useWorkspaceRouting) because project-workspace owns workspaceMode state.
   const updateWorkspaceMode = useCallback((nextMode: WorkspaceMode, replace = true, jobId?: string | null) => {
-    const currentIsResult = workspaceMode === 'result' || workspaceMode === 'code' || workspaceMode === 'compare' || workspaceMode === 'history';
-    const nextIsResult = nextMode === 'result' || nextMode === 'code' || nextMode === 'compare' || nextMode === 'history';
+    const currentIsResult = isResultWorkspaceMode(workspaceMode);
+    const nextIsResult = isResultWorkspaceMode(nextMode);
     if (nextIsResult && !currentIsResult) {
       // Capture the conversation layout before result-opening handlers enqueue
       // their own panel changes. React batches those setters, so waiting for the
@@ -3063,8 +3068,12 @@ function ResultArtifactShell({
   const [previewText, setPreviewText] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<string[][] | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
-  const [previewError, setPreviewError] = useState('');
   const [previewRetryVersion, setPreviewRetryVersion] = useState(0);
+  const [previewAvailability, setPreviewAvailability] = useState<{
+    key: string;
+    status: 'checking' | 'available' | 'unavailable';
+    reason: string | null;
+  }>({ key: '', status: 'checking', reason: null });
   // RS3：交互清单由后端基于完整文件判定（稳定 ID 列、可选维度），前端只消费。
   const [interactionRevision, setInteractionRevision] = useState<ArtifactRevision | null>(null);
   // P4R-4: a historical Revision can share its Job with a later restored
@@ -3150,7 +3159,6 @@ function ResultArtifactShell({
       setPreviewText(null);
       setPreviewData(null);
       setPreviewLoading(false);
-      setPreviewError('');
       setInteractionError('');
       return;
     }
@@ -3354,6 +3362,27 @@ function ResultArtifactShell({
         preview: selectedArtifact.preview,
       })
     : 'binary';
+  const usesInteractiveViewer = Boolean(
+    interactionManifest?.interactionMode && interactionManifest.interactionMode !== 'read_only',
+  );
+  const requiresPreviewAvailabilityCheck = activeIsPreviewText
+    || (viewerAdapter === 'image' && !usesInteractiveViewer);
+  const previewAvailabilityKey = `${viewedRevision?.revisionId || 'current'}::${job?.id || ''}::${selectedArtifactName}::${selectedArtifactUrl}`;
+  const effectivePreviewAvailability = previewAvailability.key === previewAvailabilityKey
+    ? previewAvailability
+    : {
+        key: previewAvailabilityKey,
+        status: (requiresPreviewAvailabilityCheck ? 'checking' : 'available') as 'checking' | 'available',
+        reason: null,
+      };
+
+  useEffect(() => {
+    setPreviewAvailability({
+      key: previewAvailabilityKey,
+      status: requiresPreviewAvailabilityCheck ? 'checking' : 'available',
+      reason: null,
+    });
+  }, [previewAvailabilityKey, previewRetryVersion, requiresPreviewAvailabilityCheck]);
 
   useEffect(() => {
     if (!selectedArtifactName) return;
@@ -3488,7 +3517,7 @@ function ResultArtifactShell({
       } catch {
         if (!cancelled) {
           // 次级交互失败不能清空主体结果；明确告诉用户当前降级及恢复动作。
-          setInteractionError('交互能力暂不可用；当前结果仍可查看。');
+          setInteractionError('交互能力暂不可用；请查看下方产物状态。');
         }
       }
     })();
@@ -3590,6 +3619,8 @@ function ResultArtifactShell({
       selectionId: artifactSelection?.selectionId || null,
       truthStatus: viewedRevision?.validationStatus ?? result?.deliveryManifest?.status ?? null,
       conclusion: viewedRevision && !viewedRevision.isCurrent ? null : result?.deliveryManifest?.summary?.conclusion ?? null,
+      availabilityStatus: effectivePreviewAvailability.status,
+      availabilityReason: effectivePreviewAvailability.reason,
     };
     // The interaction manifest arrives after the file body. Compare the full
     // projection so late revision/family/semantic hydration reaches the header.
@@ -3599,6 +3630,8 @@ function ResultArtifactShell({
   }, [
     activeArtifact,
     artifactSelection,
+    effectivePreviewAvailability.reason,
+    effectivePreviewAvailability.status,
     effectiveJobStatus,
     interactionManifest,
     job,
@@ -3617,13 +3650,12 @@ function ResultArtifactShell({
       setPreviewText(null);
       setPreviewData(null);
       setPreviewLoading(false);
-      setPreviewError('');
       return () => {
         cancelled = true;
       };
     }
     setPreviewLoading(true);
-    setPreviewError('');
+    setPreviewAvailability({ key: previewAvailabilityKey, status: 'checking', reason: null });
     fetch(selectedArtifactUrl)
       .then((resp) => {
         if (!resp.ok) throw new Error('preview failed');
@@ -3631,6 +3663,7 @@ function ResultArtifactShell({
       })
       .then((text) => {
         if (cancelled) return;
+        setPreviewAvailability({ key: previewAvailabilityKey, status: 'available', reason: null });
         if (/\.(csv|tsv)$/i.test(selectedArtifactName)) {
           setPreviewData(buildPreviewTable(text, selectedArtifactName));
           setPreviewText(null);
@@ -3651,7 +3684,8 @@ function ResultArtifactShell({
         if (!cancelled) {
           setPreviewText(null);
           setPreviewData(null);
-          setPreviewError('当前文件预览暂不可用；文件本身仍保留。');
+          const reason = '结果记录仍在，但当前产物文件不可读取。';
+          setPreviewAvailability({ key: previewAvailabilityKey, status: 'unavailable', reason });
         }
       })
       .finally(() => {
@@ -3660,13 +3694,36 @@ function ResultArtifactShell({
     return () => {
       cancelled = true;
     };
-  }, [activeIsPreviewText, previewRetryVersion, selectedArtifact, selectedArtifactName, selectedArtifactUrl]);
+  }, [activeIsPreviewText, previewAvailabilityKey, previewRetryVersion, selectedArtifact, selectedArtifactName, selectedArtifactUrl]);
+
+  const retryCurrentPreview = () => {
+    setPreviewAvailability({ key: previewAvailabilityKey, status: 'checking', reason: null });
+    setPreviewRetryVersion((value) => value + 1);
+  };
+
+  const unavailablePreview = effectivePreviewAvailability.status === 'unavailable' ? (
+    <div className={styles.resultPreviewUnavailable} role="alert">
+      <Icon name="flag" size={20} />
+      <strong>当前产物文件不可用</strong>
+      <span>{effectivePreviewAvailability.reason || '结果记录仍在，但无法读取对应文件。'}</span>
+      <div>
+        <button type="button" onClick={retryCurrentPreview}>重试预览</button>
+        <button
+          type="button"
+          onClick={() => onAskAgent(`请检查并恢复当前结果文件“${selectedArtifactLabel || selectedArtifactName}”。先说明缺失原因和可恢复边界，不要覆盖原始数据。`)}
+        >
+          让 Agent 检查
+        </button>
+      </div>
+    </div>
+  ) : null;
 
   const renderPreview = () => {
     if (!selectedArtifact) {
       return <div className={styles.resultPreviewPlaceholder}>未发现可预览的结果文件</div>;
     }
-    if (interactionManifest?.interactionMode && interactionManifest.interactionMode !== 'read_only') {
+    if (unavailablePreview) return unavailablePreview;
+    if (usesInteractiveViewer && interactionManifest) {
       return (
         <ScientificInteractionViewer
           language={lang}
@@ -3697,9 +3754,17 @@ function ResultArtifactShell({
           onClick={() => setLightboxSrc(selectedArtifactUrl)}
         >
           <img
+            key={`${previewAvailabilityKey}:${previewRetryVersion}`}
             src={selectedArtifactUrl}
             alt={selectedArtifactLabel || selectedArtifact.name}
             className={styles.resultPreviewImage}
+            onLoad={() => {
+              setPreviewAvailability({ key: previewAvailabilityKey, status: 'available', reason: null });
+            }}
+            onError={() => {
+              const reason = '结果记录仍在，但当前产物文件不可读取。';
+              setPreviewAvailability({ key: previewAvailabilityKey, status: 'unavailable', reason });
+            }}
           />
         </button>
       );
@@ -4115,14 +4180,6 @@ function ResultArtifactShell({
             <button type="button" onClick={() => setInteractionRetryVersion((value) => value + 1)}>重试交互能力</button>
           </div>
         )}
-        {previewError && (
-          <div className={styles.resultWorkflowError} role="alert">
-            <span>{previewError}</span>
-            <button type="button" disabled={previewLoading} onClick={() => setPreviewRetryVersion((value) => value + 1)}>
-              {previewLoading ? '重试中…' : '重试当前预览'}
-            </button>
-          </div>
-        )}
         {showReportRail ? (
           <div
             className={styles.resultReportShell}
@@ -4248,7 +4305,7 @@ function ResultArtifactShell({
                       <span>{artifactKindLabel(selectedArtifactKind)}</span>
                       <span>{selectedArtifactName}</span>
                     </div>
-                    {selectedArtifactUrl && (
+                    {selectedArtifactUrl && effectivePreviewAvailability.status !== 'unavailable' && (
                       <a className={styles.resultReportActiveLink} href={selectedArtifactUrl} target="_blank" rel="noreferrer">
                         打开原文件
                       </a>

@@ -140,7 +140,9 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
       ? ctx.activeWorkflow.artifactTruth.status
       : null;
   const contextTitle = ctx.activeArtifact?.label || ctx.activeArtifact?.name || ctx.activeJob?.name || ctx.activeJob?.tool_id || '分析结果';
-  const contextConclusion = ctx.activeArtifact?.conclusion || (
+  const contextConclusion = ctx.activeArtifact?.availabilityStatus === 'unavailable'
+    ? '科学校验记录仍保留，但当前产物文件不可读取；请重试预览或让 Agent 检查恢复。'
+    : ctx.activeArtifact?.conclusion || (
     truthStatus === 'valid'
       ? '结果已经过产物校验，可继续查看、比较或交给 Agent 解释。'
       : truthStatus === 'blocked'
@@ -232,6 +234,7 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
               <ResultStudioContextBar
                 title={contextTitle}
                 trust={describeTruthStatus(truthStatus, ctx.activeJob?.status)}
+                availabilityStatus={ctx.activeArtifact?.availabilityStatus}
                 conclusion={contextConclusion}
                 revisionLabel={shortRevisionLabel(ctx.activeArtifact?.revisionId, ctx.activeArtifact?.revisionOrdinal)}
                 selectionLabel={describeSelection(ctx.activeArtifact?.selection)}
