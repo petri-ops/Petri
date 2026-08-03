@@ -56,6 +56,19 @@ function trustedIntentFor(ctx, intentId) {
     : null;
 }
 
+// Providers sometimes merge the plan tool's sibling projections (`source`,
+// `diagnostics`, `impact`, ...) into the intent object on the next structured
+// call. Authenticate every field of the sealed server-side intent and ignore
+// only non-canonical additions. The downstream service receives the sealed
+// copy, so an added field can never acquire execution semantics.
+function matchesTrustedIntent(presented, sealed) {
+  if (!presented || typeof presented !== 'object' || Array.isArray(presented)
+      || !sealed || typeof sealed !== 'object' || Array.isArray(sealed)) return false;
+  return Object.entries(sealed).every(([key, value]) =>
+    Object.prototype.hasOwnProperty.call(presented, key)
+      && isDeepStrictEqual(presented[key], value));
+}
+
 /** 公开进度：只暴露阶段结论，不暴露隐藏推理链或 Git 细节。 */
 function publicProgress(events) {
   if (!Array.isArray(events)) return [];
@@ -264,7 +277,7 @@ function createResultContextEditTools(options = {}) {
       };
     }
     const trusted = trustedIntentFor(ctx, intent.intentId);
-    if (!trusted || trusted.contextToken !== envelope.contextToken || !isDeepStrictEqual(trusted.intent, intent)) {
+    if (!trusted || trusted.contextToken !== envelope.contextToken || !matchesTrustedIntent(intent, trusted.intent)) {
       return {
         ok: false,
         error: 'context_intent_untrusted',
@@ -298,6 +311,7 @@ function createResultContextEditTools(options = {}) {
     }
     const created = await changeSetTools.create({
       ...args,
+      intent: trusted.intent,
       ...(intent.requiresScientificConfirmation === true && hasBoundScientificConfirmation
         ? { scientificConfirmed: true }
         : {}),

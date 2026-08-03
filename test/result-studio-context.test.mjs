@@ -738,6 +738,60 @@ test('RS-P3 context-bound create delegates to the existing changeset service and
   assert.equal(JSON.stringify(result.publicProgress).includes('commit'), false);
 });
 
+test('RS-P7 create tolerates provider-copied read-only plan source without weakening the sealed intent', async () => {
+  const fx = fixture();
+  let delegated = null;
+  const canonical = {
+    intentId: 'rei_source_projection',
+    artifactRef: { artifactId: 'deg_table', revisionId: 'rev_1' },
+    selectionRef: 'sel_1',
+    requestedOutcome: '调整展示',
+    proposedParameterPatch: { palette: 'blue' },
+    editClass: 'presentation_rerender',
+    affectedNodeIds: [],
+    requiresJob: true,
+    requiresScientificConfirmation: false,
+  };
+  const tools = createResultContextEditTools({
+    ...fx.dependencies,
+    planTool: async () => ({ ok: true, status: 'ready', intent: canonical, source: { toolJobId: 'job_1' } }),
+    changeSetTools: { create: async (args) => { delegated = args; return { ok: true, progress: [] }; } },
+  });
+  const runCtx = { ...ctx, activeArtifact: { revisionId: 'rev_1' } };
+  const planned = await tools.plan({ requestedOutcome: '调整展示' }, runCtx);
+  const envelope = resolveResultStudioContext(runCtx, fx.dependencies).envelope;
+  const result = await tools.create({
+    contextToken: envelope.contextToken,
+    intent: {
+      ...planned.intent,
+      source: { toolJobId: 'job_1', script: { snapshotPath: '/read-only' } },
+      sourceNodeId: 'job:job_1',
+      parameterImpacts: [{ parameter: 'palette', impact: 'presentation_rerender' }],
+      diagnostics: [],
+      execution: { performed: false },
+      context: { contextToken: '[REDACTED]' },
+      editOrigin: 'agent',
+      impact: { rerunsScience: false },
+    },
+  }, runCtx);
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(delegated.intent, canonical);
+  assert.equal(Object.hasOwn(delegated.intent, 'source'), false);
+
+  delegated = null;
+  const mutated = await tools.create({
+    contextToken: envelope.contextToken,
+    intent: {
+      ...planned.intent,
+      source: { toolJobId: 'job_1' },
+      proposedParameterPatch: { palette: 'red' },
+    },
+  }, runCtx);
+  assert.equal(mutated.error, 'context_intent_untrusted');
+  assert.equal(delegated, null);
+});
+
 test('P6 drawer-bound scientific confirmation cannot be promoted by the model tool arguments', async () => {
   const fx = fixture();
   let delegated = null;
