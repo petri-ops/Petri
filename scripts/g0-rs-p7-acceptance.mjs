@@ -323,9 +323,11 @@ async function selectProviderTargets() {
   const attempts = [];
   for (const target of targets) {
     if (selected.has(target.profile.provider)) continue;
-    const probe = await probeProviderToolCall(target, attempts.length);
-    attempts.push(probe.evidence);
-    if (probe.internal.passed) selected.set(target.profile.provider, target);
+    for (let retry = 0; retry < 3 && !selected.has(target.profile.provider); retry += 1) {
+      const probe = await probeProviderToolCall(target, attempts.length);
+      attempts.push(probe.evidence);
+      if (probe.internal.passed) selected.set(target.profile.provider, target);
+    }
   }
   invariant(selected.has('deepseek') && selected.has('openai-compatible'), 'p7_two_provider_tool_call_preflight_failed', attempts);
   return { selected: [...selected.values()], attempts };
