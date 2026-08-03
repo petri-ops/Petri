@@ -71,6 +71,14 @@ function pause(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function verifiedCandidateTerminal(text) {
+  const value = String(text || '');
+  const candidateMention = /候选版本|ChangeSet/.test(value);
+  const created = /(?:已(?:成功)?创建|创建成功|已(?:成功)?生成|已生成)/.test(value);
+  const verified = /验证通过|artifactTruthStatus\s*[:：]\s*valid|preview_ready|候选可比较/.test(value);
+  return candidateMention && created && verified;
+}
+
 async function requestBackendJson(url) {
   const response = await fetch(url);
   const data = await response.json().catch(() => ({}));
@@ -749,7 +757,7 @@ async function submitComposer(window, prompt, { requiresResultProgress = false }
   return waitForAgentSettlement(wc, beforeMessages, {
     requiresResultProgress,
     expectedCompletion: requiresResultProgress
-      ? (text) => /候选版本(?:已(?:成功)?创建|已(?:成功)?生成)[^\n]*(?:验证通过|可比较|preview_ready)/.test(text)
+      ? verifiedCandidateTerminal
       : '富集任务已经提交',
   });
 }
