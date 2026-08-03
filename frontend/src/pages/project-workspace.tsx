@@ -56,9 +56,7 @@ import {
   normalizeResultManifest,
   classifyArtifact,
   buildResultArtifactNavigation,
-  countArtifactsByKind,
   findArtifactByName,
-  inferSectionDisplayKind,
   pickPreferredArtifact,
   artifactKindLabel,
   type ResultArtifactKind,
@@ -66,7 +64,9 @@ import {
 } from '@/lib/result-manifest';
 import {
   artifactFormatLabel,
-  groupResultArtifacts,
+  buildResultArtifactPickerGroups,
+  filterResultArtifactRelatedSections,
+  findResultArtifactPickerOption,
   isRelatedArtifactKind,
 } from '@/lib/result-artifact-display';
 import { buildResultTitleBarTitle } from '@/lib/result-title-bar';
@@ -87,6 +87,7 @@ import { shouldShowDeliveryCard, shouldShowWorkflowBar } from '@/components/resu
 import { nextResultBodyState, type ResultBodyState } from '@/components/result-studio/resultBodyState';
 import { getResultScrollPosition, setResultScrollPosition } from '@/components/result-studio/resultScrollMemory';
 import { ScientificInteractionViewer } from '@/components/result-studio/ScientificInteractionViewer';
+import { CompactResultNavigator } from '@/components/result-studio/CompactResultNavigator';
 import {
   deleteResultStudioSelection,
   fetchArtifactInteraction,
@@ -104,7 +105,6 @@ import {
 import {
   beginResultSurfaceMeasure,
   chooseResultArtifactName,
-  chooseResultSectionLandingName,
   completeResultSurfaceMeasure,
   requestedArtifactRequestKey,
   RESULT_SURFACE_PERFORMANCE_MARKS,
@@ -2983,14 +2983,6 @@ function artifactPreviewLabel(artifact: ResultArtifactRecord): string {
   return '文件';
 }
 
-function compactArtifactKindSummary(artifacts: ResultArtifactRecord[]): string {
-  const counts = countArtifactsByKind(artifacts);
-  return (Object.keys(counts) as ResultArtifactKind[])
-    .filter((kind) => counts[kind] > 0)
-    .map((kind) => `${artifactKindLabel(kind)} ${counts[kind]}`)
-    .join(' · ');
-}
-
 function workflowStageLabel(stage: string): string {
   return {
     inspect: '检查输入',
@@ -3110,7 +3102,6 @@ function ResultArtifactShell({
   const committedSelectionRef = useRef<ArtifactSelection | null>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
-  const [navCollapsed, setNavCollapsed] = useState(false);
   const [pendingRecovery, setPendingRecovery] = useState<{
     actionId: string;
     label: string;
@@ -3330,7 +3321,23 @@ function ResultArtifactShell({
     () => navSections.filter((section) => isRelatedArtifactKind(section.kind)),
     [navSections]
   );
-  const artifactSummary = useMemo(() => compactArtifactKindSummary(artifacts), [artifacts]);
+  const resultPickerSections = useMemo(
+    () => (primaryNavSections.length > 0 ? primaryNavSections : navSections),
+    [navSections, primaryNavSections],
+  );
+  const artifactPickerGroups = useMemo(
+    () => buildResultArtifactPickerGroups(resultPickerSections, {
+      includeRelated: primaryNavSections.length === 0,
+      allArtifacts: artifacts,
+    }),
+    [artifacts, primaryNavSections.length, resultPickerSections],
+  );
+  const compactRelatedSections = useMemo(
+    () => primaryNavSections.length > 0
+      ? filterResultArtifactRelatedSections(relatedNavSections, artifactPickerGroups)
+      : [],
+    [artifactPickerGroups, primaryNavSections.length, relatedNavSections],
+  );
   const reportArtifact = useMemo(
     () =>
       artifacts.find((artifact) => classifyArtifact(artifact) === 'report') ||
@@ -3426,17 +3433,6 @@ function ResultArtifactShell({
     if (!materializedReportArtifact) return;
     setFinalReportUrl(materializedReportArtifact.url || buildUrl(materializedReportArtifact.name));
   }, [buildUrl, materializedReportArtifact]);
-
-  const activeSection = useMemo(() => {
-    if (!navSections.length) return null;
-    return (
-      (selectedName
-        ? navSections.find((section) => section.artifactNames.includes(selectedName))
-        : null) ||
-      navSections.find((section) => section.id === selectedSectionId) ||
-      navSections[0]
-    );
-  }, [navSections, selectedName, selectedSectionId]);
 
   useEffect(() => {
     if (!selectedArtifactName || navSections.length === 0) return;
@@ -3835,19 +3831,11 @@ function ResultArtifactShell({
     return <EmptyAnalysisResult />;
   }
 
-  const sectionTabs = primaryNavSections.length > 0 ? primaryNavSections : navSections;
-  const showReportRail = sectionTabs.length > 0 && artifacts.length > 0;
-  const activeSectionArtifacts = activeSection?.artifacts || [];
-  const activeArtifactGroups = useMemo(
-    () => groupResultArtifacts(activeSectionArtifacts),
-    [activeSectionArtifacts]
-  );
-  const selectedDisplayGroup = useMemo(
-    () => activeArtifactGroups.find((group) => group.variants.some((artifact) => artifact.name === selectedArtifactName)) || null,
-    [activeArtifactGroups, selectedArtifactName]
-  );
-  const showArtifactRail = activeArtifactGroups.length > 1;
-  const resultNavWidth = navCollapsed ? 0 : 224;
+  const showCompactNavigator = artifactPickerGroups.length > 0 && artifacts.length > 0;
+  const selectedDisplayGroup = findResultArtifactPickerOption(
+    artifactPickerGroups,
+    selectedArtifactName,
+  )?.option || null;
   const recoveryAction = workflow?.nextActions?.[0] || null;
   const actionRunsDirectly = isDirectRecoveryAction(recoveryAction?.id);
 
@@ -4208,199 +4196,66 @@ function ResultArtifactShell({
             <button type="button" onClick={() => setInteractionRetryVersion((value) => value + 1)}>重试交互能力</button>
           </div>
         )}
-        {showReportRail ? (
-          <div
-            className={styles.resultReportShell}
-            style={{ ['--result-nav-width' as string]: `${resultNavWidth}px` }}
-          >
-            <button
-              type="button"
-              className={styles.resultReportNavToggle}
-              onClick={() => setNavCollapsed((value) => !value)}
-              title={navCollapsed ? '展开结果导航' : '收起结果导航'}
-              aria-label={navCollapsed ? '展开结果导航' : '收起结果导航'}
-              aria-pressed={!navCollapsed}
-            >
-              <Icon name={navCollapsed ? 'arrow-left' : 'arrow-right'} size={13} />
-            </button>
-
-            <div className={styles.resultReportMain}>
-              {activeSection && showArtifactRail && (
-                <div className={styles.resultReportArtifactNav}>
-                  <div className={styles.resultReportArtifactNavHeader}>
-                    <div className={styles.resultReportArtifactNavEyebrow}>二级导航</div>
-                    <div className={styles.resultReportArtifactNavTitle}>{activeSection.label}</div>
-                    <div className={styles.resultReportArtifactNavMeta}>
-                      <span>{activeArtifactGroups.length} 项</span>
-                      {activeSection.description && <span>{activeSection.description}</span>}
-                    </div>
-                  </div>
-                  <div className={styles.resultReportArtifactTabs}>
-                    {activeArtifactGroups.map((group) => {
-                      const artifact = group.primary;
-                      const kind = classifyArtifact(artifact);
-                      const active = artifact.name === selectedArtifactName;
-                      return (
+        {showCompactNavigator && selectedArtifact ? (
+          <div className={styles.resultCompactShell}>
+            <CompactResultNavigator
+              groups={artifactPickerGroups}
+              selectedArtifactName={selectedArtifactName}
+              selectedArtifactLabel={selectedArtifactLabel}
+              selectedKindLabel={artifactKindLabel(selectedArtifactKind)}
+              selectedIcon={artifactKindIcon(selectedArtifactKind)}
+              selectedArtifactUrl={
+                selectedArtifactUrl && effectivePreviewAvailability.status !== 'unavailable'
+                  ? selectedArtifactUrl
+                  : undefined
+              }
+              relatedSections={compactRelatedSections}
+              onSelectArtifact={(artifactName, sectionId) => {
+                beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.artifactStart);
+                setViewedRevision(null);
+                setSelectedSectionId(sectionId);
+                setSelectedName(artifactName);
+              }}
+              secondaryActions={
+                (selectedDisplayGroup && selectedDisplayGroup.variants.length > 1) || result.deliveryManifest ? (
+                  <>
+                    <span className={styles.resultReportTechnicalName}>{selectedArtifactName}</span>
+                    {selectedDisplayGroup && selectedDisplayGroup.variants.length > 1 && (
+                      <div className={styles.resultReportExportLinks}>
+                        {selectedDisplayGroup.variants
+                          .filter((artifact) => artifact.name !== selectedDisplayGroup.primary.name && /\.(svg|pdf)$/i.test(artifact.name))
+                          .map((artifact) => (
+                            <a
+                              key={artifact.name}
+                              href={resolveResultArtifactUrl(artifact.url, buildUrl(artifact.name))}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              导出 {artifactFormatLabel(artifact)}
+                            </a>
+                          ))}
+                      </div>
+                    )}
+                    {result.deliveryManifest && (
+                      <div className={styles.resultReportReproductionActions}>
+                        {scientificScriptUrl && (
+                          <a href={scientificScriptUrl} target="_blank" rel="noreferrer">查看脚本</a>
+                        )}
                         <button
-                          key={group.key}
                           type="button"
-                          className={`${styles.resultReportArtifactTab} ${active ? styles.resultReportArtifactTabActive : ''}`}
-                          onClick={() => {
-                            beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.artifactStart);
-                            setViewedRevision(null);
-                            setSelectedName(artifact.name);
-                            if (activeSection) setSelectedSectionId(activeSection.id);
-                          }}
-                          title={artifact.description || artifact.label || artifact.name}
+                          onClick={() => onAskAgent(`请为任务 ${job.id} 的产物 ${selectedArtifactName} 发起重放验证；先展示输入、资源和副作用确认摘要，不要直接执行。`)}
                         >
-                          <span className={styles.resultReportArtifactTabIcon}>
-                            <Icon name={artifactKindIcon(kind)} size={13} />
-                          </span>
-                          <span className={styles.resultReportArtifactTabText}>
-                            <span className={styles.resultReportArtifactTabName}>
-                              {group.label}
-                            </span>
-                            <span className={styles.resultReportArtifactTabMeta}>
-                              {artifactFormatLabel(artifact)}{group.variants.length > 1 ? ` · ${group.variants.length} 种格式` : ''}
-                            </span>
-                          </span>
+                          重放验证
                         </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              <div className={styles.resultSidebarPreviewBody}>
-                {renderPreview()}
-              </div>
+                      </div>
+                    )}
+                  </>
+                ) : undefined
+              }
+            />
+            <div className={styles.resultSidebarPreviewBody}>
+              {renderPreview()}
             </div>
-
-            {!navCollapsed && (
-              <aside className={styles.resultReportNav}>
-                <div className={styles.resultReportNavHeader}>
-                  <div className={styles.resultReportEyebrow}>Honeycomb</div>
-                  <div className={styles.resultReportTitle}>结果导航</div>
-                  <div className={styles.resultReportNavMeta}>
-                    <span>{sectionTabs.length} 组 · {artifacts.length} 项</span>
-                    {artifactSummary && <span>{artifactSummary}</span>}
-                  </div>
-                </div>
-
-                {sectionTabs.length > 0 && (
-                  <div className={styles.resultReportNavSections}>
-                    {sectionTabs.map((section) => {
-                      const active = section.id === activeSection?.id;
-                      const sectionKind = section.kind === 'mixed'
-                        ? inferSectionDisplayKind(section.artifacts, section.label)
-                        : section.kind;
-                      return (
-                        <section
-                          key={section.id}
-                          className={`${styles.resultReportNavSection} ${active ? styles.resultReportNavSectionActive : ''}`}
-                        >
-                          <button
-                            type="button"
-                            className={styles.resultReportSectionButton}
-                            onClick={() => {
-                              beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.artifactStart);
-                              setViewedRevision(null);
-                              setSelectedSectionId(section.id);
-                              const landingName = chooseResultSectionLandingName(section.artifacts);
-                              if (landingName) setSelectedName(landingName);
-                            }}
-                          >
-                            <span className={styles.resultReportSectionTitle}>
-                              {sectionKind && <Icon name={artifactKindIcon(sectionKind)} size={13} />}
-                              <span>{section.label}</span>
-                            </span>
-                            <span className={styles.resultReportSectionCount}>{groupResultArtifacts(section.artifacts).length}</span>
-                          </button>
-
-                          {section.description && (
-                            <div className={styles.resultReportSectionDesc}>{section.description}</div>
-                          )}
-                        </section>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {relatedNavSections.length > 0 && (
-                  <details className={styles.resultReportRelatedFiles}>
-                    <summary>相关文件 ({relatedNavSections.reduce((count, section) => count + section.artifacts.length, 0)})</summary>
-                    {relatedNavSections.flatMap((section) => section.artifacts).map((artifact) => (
-                      <button
-                        key={artifact.name}
-                        type="button"
-                        className={styles.resultReportRelatedFile}
-                        onClick={() => {
-                          setViewedRevision(null);
-                          setSelectedSectionId(relatedNavSections.find((section) => section.artifactNames.includes(artifact.name))?.id || '');
-                          setSelectedName(artifact.name);
-                        }}
-                      >
-                        <span>{artifact.label || artifact.title || artifact.name}</span>
-                        <span>{artifactFormatLabel(artifact)}</span>
-                      </button>
-                    ))}
-                  </details>
-                )}
-
-                {selectedArtifact && (
-                  <div className={styles.resultReportActiveCard}>
-                    <div className={styles.resultReportActiveLabel}>当前预览</div>
-                    <div className={styles.resultReportActiveName}>{selectedArtifactLabel}</div>
-                    <div className={styles.resultReportActiveMeta}>
-                      <span>{artifactKindLabel(selectedArtifactKind)}</span>
-                    </div>
-                    {selectedArtifactUrl && effectivePreviewAvailability.status !== 'unavailable' && (
-                      <a className={styles.resultReportActiveLink} href={selectedArtifactUrl} target="_blank" rel="noreferrer">
-                        打开结果
-                      </a>
-                    )}
-                    {(selectedDisplayGroup && selectedDisplayGroup.variants.length > 1 || result.deliveryManifest) && (
-                      <details className={styles.resultReportMoreActions}>
-                        <summary>更多操作</summary>
-                        <div className={styles.resultReportMoreActionsBody}>
-                          <div className={styles.resultReportTechnicalName}>{selectedArtifactName}</div>
-                          {selectedDisplayGroup && selectedDisplayGroup.variants.length > 1 && (
-                            <div className={styles.resultReportExportLinks}>
-                              <span>导出格式</span>
-                              {selectedDisplayGroup.variants
-                                .filter((artifact) => artifact.name !== selectedDisplayGroup.primary.name && /\.(svg|pdf)$/i.test(artifact.name))
-                                .map((artifact) => (
-                                  <a
-                                    key={artifact.name}
-                                    href={resolveResultArtifactUrl(artifact.url, buildUrl(artifact.name))}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                  >
-                                    {artifactFormatLabel(artifact)}
-                                  </a>
-                                ))}
-                            </div>
-                          )}
-                          {result.deliveryManifest && (
-                            <div className={styles.resultReportReproductionActions}>
-                              {scientificScriptUrl && (
-                                <a href={scientificScriptUrl} target="_blank" rel="noreferrer">查看脚本</a>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() => onAskAgent(`请为任务 ${job.id} 的产物 ${selectedArtifactName} 发起重放验证；先展示输入、资源和副作用确认摘要，不要直接执行。`)}
-                              >
-                                重放验证
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </details>
-                    )}
-                  </div>
-                )}
-              </aside>
-            )}
           </div>
         ) : (
           <div className={styles.resultSidebarPreviewBody}>

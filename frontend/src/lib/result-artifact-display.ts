@@ -1,4 +1,9 @@
-import { classifyArtifact, type ResultArtifactRecord, type ResultArtifactKind } from './result-manifest';
+import {
+  classifyArtifact,
+  type ResultArtifactNavSection,
+  type ResultArtifactRecord,
+  type ResultArtifactKind,
+} from './result-manifest';
 
 export type ResultArtifactFormat = 'png' | 'svg' | 'pdf' | 'other';
 
@@ -7,6 +12,12 @@ export interface ResultArtifactDisplayGroup {
   label: string;
   primary: ResultArtifactRecord;
   variants: ResultArtifactRecord[];
+}
+
+export interface ResultArtifactPickerGroup {
+  id: string;
+  label: string;
+  options: ResultArtifactDisplayGroup[];
 }
 
 function formatOf(artifact: ResultArtifactRecord): ResultArtifactFormat {
@@ -60,6 +71,66 @@ export function groupResultArtifacts(artifacts: ResultArtifactRecord[]): ResultA
       variants: [...members].sort((a, b) => a.name.localeCompare(b.name)),
     };
   });
+}
+
+export function buildResultArtifactPickerGroups(
+  sections: ResultArtifactNavSection[],
+  options: { includeRelated?: boolean; allArtifacts?: ResultArtifactRecord[] } = {},
+): ResultArtifactPickerGroup[] {
+  const uniqueArtifacts = [...new Map(
+    (options.allArtifacts || sections.flatMap((section) => section.artifacts))
+      .map((artifact) => [artifact.name, artifact]),
+  ).values()];
+  const displayGroups = groupResultArtifacts(uniqueArtifacts);
+  const seenGroupKeys = new Set<string>();
+  return sections.flatMap((section) => {
+    const sectionNames = new Set(section.artifactNames);
+    const pickerOptions = displayGroups.filter((group) => {
+      if (seenGroupKeys.has(group.key)) return false;
+      if (!group.variants.some((artifact) => sectionNames.has(artifact.name))) return false;
+      if (!options.includeRelated && isRelatedArtifactKind(classifyArtifact(group.primary))) return false;
+      seenGroupKeys.add(group.key);
+      return true;
+    });
+    return pickerOptions.length > 0
+      ? [{ id: section.id, label: section.label, options: pickerOptions }]
+      : [];
+  });
+}
+
+export function filterResultArtifactRelatedSections(
+  sections: ResultArtifactNavSection[],
+  pickerGroups: ResultArtifactPickerGroup[],
+): ResultArtifactNavSection[] {
+  const primaryVariantNames = new Set(
+    pickerGroups.flatMap((group) =>
+      group.options.flatMap((option) => option.variants.map((artifact) => artifact.name)),
+    ),
+  );
+  return sections.flatMap((section) => {
+    const artifacts = section.artifacts.filter(
+      (artifact) => !primaryVariantNames.has(artifact.name),
+    );
+    if (artifacts.length === 0) return [];
+    return [{
+      ...section,
+      artifactNames: artifacts.map((artifact) => artifact.name),
+      artifacts,
+    }];
+  });
+}
+
+export function findResultArtifactPickerOption(
+  groups: ResultArtifactPickerGroup[],
+  artifactName: string,
+): { sectionId: string; option: ResultArtifactDisplayGroup } | null {
+  for (const group of groups) {
+    const option = group.options.find((item) =>
+      item.variants.some((artifact) => artifact.name === artifactName),
+    );
+    if (option) return { sectionId: group.id, option };
+  }
+  return null;
 }
 
 export function isRelatedArtifactKind(kind: ResultArtifactKind | 'mixed'): boolean {

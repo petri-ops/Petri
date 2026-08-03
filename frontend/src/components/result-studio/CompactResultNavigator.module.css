@@ -1,0 +1,249 @@
+.navigator {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 42px;
+  padding: 5px 8px;
+  border-bottom: 1px solid color-mix(in srgb, var(--biof3-border) 64%, transparent);
+  background: var(--biof3-bg-surface);
+}
+
+.currentResult {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.currentIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  color: var(--biof3-accent);
+}
+
+.currentCopy {
+  display: grid;
+  grid-template-columns: minmax(0, auto) auto;
+  align-items: center;
+  column-gap: 8px;
+  min-width: 0;
+}
+
+.currentLabel {
+  grid-column: 1 / -1;
+  font-size: 9px;
+  line-height: 1;
+  color: var(--biof3-text-tertiary);
+}
+
+.resultSelect {
+  width: min(420px, 52vw);
+  min-width: 150px;
+  height: 24px;
+  padding: 0 24px 0 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--biof3-text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.currentName {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--biof3-text);
+  font-size: 12px;
+  line-height: 24px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.currentMeta {
+  color: var(--biof3-text-tertiary);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+.iconAction,
+.more > summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  cursor: pointer;
+  text-decoration: none;
+  list-style: none;
+}
+
+.iconAction:hover,
+.more > summary:hover,
+.more[open] > summary {
+  background: var(--biof3-hover);
+  color: var(--biof3-text);
+}
+
+.more {
+  position: relative;
+}
+
+.more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.moreMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 20;
+  width: min(320px, calc(100vw - 32px));
+  max-height: min(440px, calc(100vh - 120px));
+  overflow: auto;
+  padding: 10px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 6px;
+  background: var(--biof3-bg-surface);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+}
+
+.moreHeader {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--biof3-border-subtle);
+}
+
+.moreHeader strong {
+  overflow-wrap: anywhere;
+  color: var(--biof3-text);
+  font-size: 12px;
+}
+
+.moreHeader span,
+.menuLabel {
+  color: var(--biof3-text-tertiary);
+  font-size: 10px;
+}
+
+.relatedFiles {
+  display: grid;
+  gap: 2px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--biof3-border-subtle);
+}
+
+.secondaryActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 8px;
+}
+
+.secondaryActions a,
+.secondaryActions button {
+  min-height: 26px;
+  padding: 3px 7px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  font: inherit;
+  font-size: 10px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.secondaryActions a:hover,
+.secondaryActions button:hover {
+  border-color: var(--biof3-accent-border);
+  color: var(--biof3-accent);
+}
+
+.menuLabel {
+  padding: 0 6px 4px;
+  font-weight: 650;
+}
+
+.relatedFiles button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 28px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.relatedFiles button:hover {
+  background: var(--biof3-hover);
+  color: var(--biof3-text);
+}
+
+.relatedFiles button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.relatedFiles button small {
+  flex: 0 0 auto;
+  color: var(--biof3-text-tertiary);
+  font-size: 9px;
+}
+
+@container (max-width: 520px) {
+  .navigator {
+    gap: 6px;
+    padding-inline: 6px;
+  }
+
+  .currentIcon {
+    display: none;
+  }
+
+  .currentCopy {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .currentMeta {
+    display: none;
+  }
+
+  .resultSelect {
+    width: 100%;
+  }
+}
