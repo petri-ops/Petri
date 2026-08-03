@@ -1,8 +1,8 @@
 # G0 Scientific Data Contract & Adaptation Baseline
 
-最后更新：2026-07-25
+最后更新：2026-08-03
 
-状态：`planned / SDC-0 completed / SDC-1 deferred`（2026-07-25 因 Result Studio 产品复核让出唯一 active 工作包；已完成代码与证据保留）
+状态：`planned / SDC-0 completed / SDC-1 next candidate`（P7 发布级重新资格已于 2026-08-03 后移；SDC-1 作为更适合初级 G0 的下一候选，但尚未建立 Goal 或开始实现）
 
 计划编号：`G0-SDC`
 
@@ -18,7 +18,7 @@
 2. ✅ `G0-START` 审计通过（10/10，2026-07-24）。
 3. ✅ `G0-LF0` 已建立 Constitution、Baseline Registry、版本身份和 Support Matrix（2026-07-24）。
 
-启动边界：本计划已于 2026-07-25 完成 `SDC-0` Profile Registry 与版本治理。产品复核确认 Result Studio 尚未具备真实结果选择、编辑和资格闭环，因此 `SDC-1`～`SDC-7` 暂不启动；当前唯一 active 工作包回到 `G0-RS`，待 `G0-RS-P7` 收口后再评估恢复 `SDC-1`。单工作包串行不变，已完成的 SDC-0 不回滚、不冒充完整数据适配能力。
+启动边界：本计划已于 2026-07-25 完成 `SDC-0` Profile Registry 与版本治理。2026-08-03 用户裁决将发布级 `G0-RS-P7` 后移，项目重新聚焦初级 G0 的真实数据入口；因此解除“必须先完成 P7”这一排期依赖，把 `SDC-1 Data Profiler` 设为下一候选。它仍未启动：只有明确建立新 Goal、核对唯一 active 工作包并冻结 SDC-1 范围后才允许写生产代码。单工作包串行不变，已完成的 SDC-0 不回滚、不冒充完整数据适配能力。
 
 ## 1. 决策结论
 
@@ -268,7 +268,7 @@ cannot_reliably_answer
 
 ### SDC-1：Data Profiler
 
-状态：`pending`
+状态：`next_candidate / not_started`
 
 目标：
 

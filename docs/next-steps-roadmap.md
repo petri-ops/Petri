@@ -1,28 +1,30 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-08-02
+最后更新：2026-08-03
 
 ## 当前结论
 
 `v0.0.1-rc.7` 是当前 OSS 线上版本，已完成代码、自动化、双架构构建、安装候选启动验收和公开更新链核验。Stage 1 UI 产品化、Stage 2 模型层、Stage 3 Harness 与标准流程、Stage 4 首个稳定产品版本及 Harness Phase 7 均已关闭。
 
-当前不默认扩展分析功能。`G0-START`、LF0～LF12 的核心资格保持 maintained；RS0～RS8 的 Result Studio 引擎基础保留，但 2026-07-25 产品复核撤销了 RS9 的完整产品资格结论。Result Studio 当前为 `active / implemented_unverified`，rc.7 仍是工程候选版，不得描述为 GA。
+当前不默认扩展分析功能。`G0-START`、LF0～LF12 的核心资格保持 maintained；RS0～RS8 与 P4R/P5/P6 的 Result Studio 引擎和开发态证据保留，但 2026-07-25 产品复核撤销的完整产品资格没有恢复。2026-08-03 用户裁决把发布级 P7 重新资格后移；Result Studio 保持 `implemented_unverified / experimental`，rc.7 仍是工程候选版，不得描述为 GA。
+
+当前没有 active 实现工作包。下一候选是 `G0-SDC1 Data Profiler`：先让用户导入的真实不规则文件形成只读 Snapshot 与确定性结构观察，科学含义不确定时阻断并提出最少问题。它更符合初级 G0 的核心成功路径；尚未建立 Goal，不得提前实现 SDC-2～SDC-7，也不把 SDC-1 冒充完整数据适配。
 
 LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口。RS9 曾新增第 17 类 `result_studio_product`，但后续复核发现其五条任务由独立测试拼装、Provider 未执行真实工具闭环、视觉验收依赖人工布尔值、大表由 seed 直接构造；该证据现降级为 unit/synthetic/renderer historical evidence。`result-studio-editing` 在 RS-P7 前暂停 qualified support claim，不能影响或冒充 LF12 原始核心资格。
 
-`G0-CHF0 Critical Cross-cutting Hardening`（[`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md)）已完成 CHF0-R1～R5 审计修复并重新真实收口：科学输出、PCA sample-ID、长任务/进程终态、HTTP 来源/文件边界与 Acceptance 可追溯性均绑定实现检查点 `41a365f`；专项 5/5、22 tests，29 个 source/producer hashes 与可达提交逐一匹配，证据保持 `qualificationEligible:false`。Result Studio P4R-0～P4R-6、`G0-RS-P5` 与 `G0-RS-P6` 已按各自边界真实收口；P7 Honest Product Requalification 是当前唯一进行中阶段。
+`G0-CHF0 Critical Cross-cutting Hardening`（[`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md)）已完成 CHF0-R1～R5 审计修复并重新真实收口：科学输出、PCA sample-ID、长任务/进程终态、HTTP 来源/文件边界与 Acceptance 可追溯性均绑定实现检查点 `41a365f`；专项 5/5、22 tests，29 个 source/producer hashes 与可达提交逐一匹配，证据保持 `qualificationEligible:false`。Result Studio P4R-0～P4R-6、`G0-RS-P5` 与 `G0-RS-P6` 已按各自边界真实收口；P7 Honest Product Requalification 已 deferred。
 
 P4R 已于 `cb73132`（实现）、`c449e57`（刷新后的 runtime evidence）与 `252e806`（20/20 product closeout）完成 P4R-6：canonical Git/SQLite 冷路径隔离到持久后台子进程，performance evidence 14/14、event-loop 17.99ms ≤ 250ms；live evidence 从真实 completed Job 经 context-bound Agent candidate、Compare、Code、adopt、受控 replay、discard、conversation 和 backend restart/reopen 连续通过；同一 Electron BrowserWindow 的明暗 × 1440/1024/820、键盘/focus、异常降级/重试和服务重启恢复均通过。UI-112～UI-115 已由 source-bound renderer evidence 记为 `verified`；P4R 整包仍仅是 `implemented_unverified / qualificationEligible:false`，未使用真实 Provider、未作 packaged/GA 声明。
 
 `G0-RS-P5 Real Scientific Editing` 已在 `e7f271c` 收口，source-bound 证据为 `acceptance/g0-result-studio/rs-p5-scientific-editing.json`（20/20，`sourceCommitMatchesSourceHashes:true`）。空 disposable 账本经迁移与 HTTP project 创建后，五条 admitted 科学任务都走 `run_tool → tool_job → Artifact Truth`，完成持久 SQLite/Job/Workflow Truth DAG、缺图 fail-closed、候选 validator、不可变输入、科学差异、完整 cohort ReplayPackage 及历史 restore。它只证明本地 deterministic context-bound 科学编辑，不证明 Provider、packaged、崩溃/压力恢复或产品资格。P6-0 已以 `acceptance/g0-result-studio/rs-p6-ui110-electron-scientific-trace.json` 完成 UI-110 的 source-bound Electron 裁决：证据绑定 `6f5271e`，同一 BrowserWindow 对账 7 个 Job、6 个 ChangeSet、26 个 Revision 与 26 个物理 Artifact，UI-110 在该窄边界升为 `verified`。
 
-`G0-RS-P6` 已在 `ad1e2ce` 收口，canonical evidence 为 `acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json`（10/10，source-bound，`qualificationEligible:false`）。真实本地矩阵覆盖停止、R/validator 失败、SIGSTOP/SIGKILL、Electron/后端重启、drift、GC、并发候选和资源压力；开发态 Electron 恢复 15/15 且低于 5 秒，真实读取 10 万行表、复杂 SVG/PNG、长报告与 100+ 版本。201 条 synthetic Revision 只是 alias 压力；开发态冷启动首画布预算为 1500ms。真实 Provider、packaged Electron、literal OS reboot 与 packaged/in-app 1000ms 目标仍未证明，现由 P7 以全新连续产品 trace 重新裁决。
+`G0-RS-P6` 已在 `ad1e2ce` 收口，canonical evidence 为 `acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json`（10/10，source-bound，`qualificationEligible:false`）。真实本地矩阵覆盖停止、R/validator 失败、SIGSTOP/SIGKILL、Electron/后端重启、drift、GC、并发候选和资源压力；开发态 Electron 恢复 15/15 且低于 5 秒，真实读取 10 万行表、复杂 SVG/PNG、长报告与 100+ 版本。201 条 synthetic Revision 只是 alias 压力；开发态冷启动首画布预算为 1500ms。真实 Provider、packaged Electron、literal OS reboot 与 packaged/in-app 1000ms 目标仍未证明，随 P7 一并 deferred。
 
 P4R-3 的实现检查点为 `3d3eb29`，性能门校准修复为 `59b33c4`。中央结果焦点以自然语言 Composer 为默认入口，高级参数面板默认关闭；Artifact/Revision/Selection/contextToken 在点击时原子绑定，create 只接受同一 Agent turn 的受信原始 intent，selection 重放、分类/确认篡改、script patch 与模型自带 DAG 均 fail-closed。task/legacy 的取消、返回式 Provider 错误与异常共用 terminal 进度收口，SQLite 重开只显示五个公开阶段。P2/P3/P4/P4R 五份 evidence 均通过 source-commit 反查；产品证据 10/10，资格仍为 `qualificationEligible:false`。P4R-3 当时缺权威持久 DAG 的科学/数据/流程编辑明确阻断；该边界已由 P5 的持久 Truth 投影在其受验证范围内替代，缺图仍 fail-closed，不把安全降级冒充可用能力。
 
 P4R-4 的实现检查点为 `f710261`。Result / Compare / History 已成为真实互斥路由模式；查看旧 Revision 使用可丢弃 viewed state，Artifact/interaction/Selection/contextToken 均显式绑定所选版本，不移动 current、不切 active Job、不调用写 API，首次版本列表 GET 不写 SQLite、不创建 managed Git。版本选择按项目/family-scoped truth 分页并标注原始/当前/候选/历史；Change Review 的意图、影响范围和验证状态来自服务端受信持久元数据，Git 详情默认折叠。checkpoint 故障、参数 hash、source commit、parent family/project 漂移均 fail-closed。focused frontend 104/104、affected Node 258/258、related frontend 48/48、P4R product 13/13；五份 evidence 均绑定 `f710261`。UI-113/UI-114 仍为 `in_progress`，P4R 仍是 `implemented_unverified / qualificationEligible:false`。
 
-Result Studio 旧实现的 11 个提交已位于 `main`（检查点 `03e5826`）；`SDC-0 Profile Registry 与版本治理` 也已在分支 `codex/g0-sdc` 的 `7284921` 收口并推送，六个 canonical Profile 与 fail-closed typed DAG 边继续保留。按单工作包串行，`SDC-1`～`SDC-7` deferred，当前不创建 Worktree。
+Result Studio 旧实现的 11 个提交已位于 `main`（检查点 `03e5826`）；`SDC-0 Profile Registry 与版本治理` 也已在分支 `codex/g0-sdc` 的 `7284921` 收口并推送，六个 canonical Profile 与 fail-closed typed DAG 边继续保留。按单工作包串行，SDC-1 是下一候选但尚未启动，SDC-2～SDC-7 deferred，当前不创建 Worktree。
 
 当前固定顺序：
 
@@ -38,15 +40,16 @@ G0-RS-P0 资格与证据纠偏
   → RS-P4R-3～P4R-6 Agent-first 聚焦结果体验
   → RS-P5 真实科学编辑与差异
   → RS-P6 恢复、性能和产品解释
-  → RS-P7 诚实重新资格
-  → 重新评估 SDC-1
+  → RS-P7 诚实重新资格（deferred）
 ```
+
+当前重新排序：`SDC-1 Data Profiler`（下一候选）→ 后续按真实使用反馈决定继续 SDC 或重开 RS-P7。
 
 `G0-RS-P0`～`G0-RS-P3` 已依次收口；P4 Core 已形成 18/18 离线实现检查点并保持 `implemented_unverified`。P3 建立 `ResultStudioContextEnvelope v1` 与 `contextToken`：artifact/family、job、revision（含 current 与 ordinal）、脚本相对路径与 sha256、参数摘要、插件可编辑参数与声明动作、selection、validation、reproducibility 全部由后端从 SQLite/`tool_jobs`/插件 descriptor 重新投影，前端 activeArtifact 只作线索。模型可见 schema 新增 7 个工具（注册表共 32 个），6 个 `*_in_context` 工具的参数中不含 toolJobId/artifactId/revisionId/artifactFamilyId/selectionId；写操作强制校验 token，陈旧上下文返回 `context_token_stale`，intent 指向别的 Revision 返回 `context_intent_mismatch`，"归因只能到 Job"与跨项目 revision 一律 fail-closed。公开进度固定为「理解意图 → 判断影响 → 执行/重算 → 验证 → 候选可比较」五阶段，不展示隐藏推理链。证据为 `acceptance/g0-result-studio/rs-p3-agent-context.json`（20/20，non-qualifying）。
 
 P4 Core 让手动调整与自然语言修改共用同一条编辑链：控件全部由插件 descriptor 的 `parameters` + `parameterImpacts` 投影，缺 impact 声明的参数不可编辑；`volcano-plot` 补齐配色/字体/尺寸/图例/标签/导出共 12 个 presentation 参数并接进真实 R 脚本（此前全为硬编码）。`normalizeEditSubmission` 是手动与 AI 的唯一归一化闸门，类型/范围/枚举 fail-closed 拒绝、未声明参数记为 rejected、与现状相同的提交不产出 patch，因此不会创建空 ChangeSet；影响分级只能由受信 descriptor 提升，调用方无法把科学或流程参数降级成样式修改，未声明 impact 的参数保守落到科学重算。过程中修复既有缺陷：保护字段表原先覆盖 descriptor，使 deseq2 声明为 `workflow` 的 `design` 被悄悄降级成 `scientific`，现在保护字段只作下限。`currentValues` 取自该 Job 真实执行过的归一化参数，不用默认值冒充。证据为 `acceptance/g0-result-studio/rs-p4-unified-editing.json`（18/18，non-qualifying 离线 descriptor 投影/插件接线/注册表/strict build 证据）；真实候选等价链尚未执行，故 UI-109 保持 `in_progress`。
 
-RH0 已按 Truth Snapshot、Hot Context、Test Impact、Script/Temp Lifecycle、Acceptance 串行收口并通过最终基线。该阶段的历史顺序要求先完成 `G0-RS-P4R Product Reframe`，P4R 收口前不得启动 P5～P7；P4R 与 P5 现均已完成，当前下一阶段由 P6 的独立 Goal 决定。详细范围、非目标和出口见 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) §G0-RS-RH0 与 §P4R。
+RH0 已按 Truth Snapshot、Hot Context、Test Impact、Script/Temp Lifecycle、Acceptance 串行收口并通过最终基线。该阶段曾要求先完成 `G0-RS-P4R Product Reframe` 再进入 P5～P7；P4R～P6 的实现检查点现予保留，P7 已于 2026-08-03 延期。当前没有 active 实现工作包，下一候选是需要另立 Goal 的 `G0-SDC1 Data Profiler`。详细范围、非目标和出口见 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) §G0-RS-RH0 与 §P4R。
 
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 已完成的 Scientific Task Contract 工作包记录见 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md)。
@@ -110,7 +113,7 @@ Phase 7 未建立第二套 analysis executor、job、artifact 或 workflow truth
 2. x64 分析 Runtime。
 3. 新产品阶段；若重开 P7-F，必须先有至少 3 个合格真实任务的可复现证据。
 
-Harness Loop Engineering v1 与 Result Studio 引擎基础继续复用。G0 Living Foundation 的 LF12 核心保持 maintained；Result Studio 产品资格暂停并从 RS-P0 重新收口。Scientific Data Contract 的 SDC-0 已收口，SDC-1～SDC-7 延后到 RS-P7 之后重新评估。科学长任务继续走正式 Job/Artifact 链，不能借通用后台进程工具绕过。
+Harness Loop Engineering v1 与 Result Studio 引擎基础继续复用。G0 Living Foundation 的 LF12 核心保持 maintained；Result Studio 产品资格暂停，P7 deferred。Scientific Data Contract 的 SDC-0 已收口，SDC-1 Data Profiler 为下一候选，SDC-2～SDC-7 继续 deferred。科学长任务继续走正式 Job/Artifact 链，不能借通用后台进程工具绕过。
 
 完全访问模式已经由用户明确定位为通用命令执行授权，不再维护固定命令白名单；只读模式仍禁止命令。不得借通用命令行建立第二套科学结果真相：正式分析交付仍必须进入确认、审计与 `run_tool → tool_job → artifact truth`。
 

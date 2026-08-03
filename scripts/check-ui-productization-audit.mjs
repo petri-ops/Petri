@@ -18,6 +18,10 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // subject named P6 rather than the UI issue IDs; the canonical P6 closeout
   // preserves that mapping without rewriting shared history.
   '5a033eb07f2ffdcdc6b285902dbf6a11ab4c96ce',
+  // P7 completion classification changed the UI-to-Agent request contract for
+  // UI-108/UI-109. P7 was later deferred and the immutable implementation
+  // checkpoint is reconciled explicitly in the 2026-08-03 audit record.
+  '2298c968f7afa289a1c257e2fc8ba8d608bad1ed',
 ])
 // These immutable implementation commits have an explicit later canonical
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
@@ -32,6 +36,9 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // UI-110's final cross-platform redaction source commit is referenced
   // verbatim by both the stored Electron evidence and the 2e3bc1b ledger row.
   '6f5271e817fb9d6b3ae51aef29bd5bee5a9f36ec',
+  // UI-108/UI-109 bound-result completion classification is reconciled by the
+  // 2026-08-03 P7 deferral entry; shared history is intentionally not rewritten.
+  '2298c968f7afa289a1c257e2fc8ba8d608bad1ed',
 ])
 const UI_ID_PATTERN = /\bUI-\d{3}\b/g
 

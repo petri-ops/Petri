@@ -1,8 +1,8 @@
 # G0 Result Studio — 意图驱动、可编辑、Git-backed 的科研结果工作台计划
 
-最后更新：2026-08-02
+最后更新：2026-08-03
 
-状态：`active / implemented_unverified`（RS0～RS8 引擎基础、完整 P4R、`G0-RS-P5` 与 `G0-RS-P6` 已按各自非资格边界收口；P7 Honest Product Requalification 正在进行，产品资格尚未恢复）
+状态：`development checkpoint / P7 deferred / implemented_unverified`（RS0～RS8 引擎基础、完整 P4R、`G0-RS-P5` 与 `G0-RS-P6` 已按各自非资格边界收口；2026-08-03 用户裁决将发布级 P7 重新资格后移，产品资格未恢复）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -1153,7 +1153,7 @@ Result Studio 当前按三层事实表达：
 | Product surface | `incomplete` | 右侧紧凑版本面板与部分预览 | 不得宣称中央结果工作台、真实选择、手动编辑器已经可用 |
 | Qualification | `under_review` | 单元、fixture、合成集成和 renderer 截图证据可继续用于回归 | 不得把这些证据称为真实连续科学任务或完整 Provider tool-calling 资格 |
 
-本次重开不删除 RS0～RS8 的代码或历史证据。`G0-SDC0` 作为已完成的数据契约种子保留，`SDC-1`～`SDC-7` 延后；SDC-1 只有在 `G0-RS-P7` 收口后才重新排期。
+本次重开不删除 RS0～RS8 的代码或历史证据。`G0-SDC0` 作为已完成的数据契约种子保留。2026-08-03 排期调整后，SDC-1 成为下一候选，SDC-2～SDC-7 继续 deferred。
 
 ### 22.2 复核确认的产品缺口
 
@@ -1758,7 +1758,24 @@ P6-0 不宣称跨 Job exact replay 已由 UI trace 收口，不重开 P5，也�
 
 ### G0-RS-P7：Honest Product Requalification
 
-状态：`in_progress / real product qualification matrix`（2026-08-02 建立唯一 P7 Goal；不得复用历史 RS9 合成证据或 P6 开发态证据冒充资格）。
+状态：`deferred / not qualified`（2026-08-03 用户裁决：项目仍处于初级 G0，先收住开发检查点，不继续消耗当前主线完成发布级资格矩阵；不得把 deferred 写成 completed）。
+
+本轮保留的可恢复检查点：
+
+- Agent 结果动作 completion guard 已区分候选编辑与直接结果动作，并对明确 GO/KEGG 请求执行受信工具恢复；这些是产品正确性修复，不是 Provider 资格证据。
+- existing Git 已改为持久化显式 opt-in；未同意时保持 managed history，并给出 `existing_repository_not_attached_without_consent`。后端安全契约已完成，前端同意 UI 与产品 trace 未实现。
+- P7 资格契约升级为可解引用 fact bundle：缺少五个独立 primary operation、task-bound replay、真实截图或重算不变量时 fail-closed；当前没有生成 canonical P7 evidence，因此不会误报通过。
+
+延期不是因为验收脚本暂时未调通，而是发现了真实产品契约缺口：`result_enrichment_from_context` 当前执行真实 GO/KEGG Job 后登记并自动采用 parentless baseline，而 P7 要求每条任务具有 candidate → compare → adopt/revert → replay。既有 family/parent/adopt 不变量禁止在验收层伪造该链。未来重开时必须在单一 ChangeSet/Revision Truth 中实现 derived-result candidate cohort，不能新增第二套 enrichment 工具或放宽完整 cohort 安全门。
+
+P7 重开条件：
+
+1. 初级 G0 的真实数据导入、Profiler、科学设计 Gate 与核心分析成功路径已稳定。
+2. selection→enrichment、manual→Agent heatmap、affected-subgraph lifecycle 与 historical alternative 已成为真实产品契约，而不是 harness 拼装。
+3. 有明确发布/支持范围决策，并预留双真实 Provider、packaged macOS arm64、六格 UI 和 literal OS reboot 的连续验收窗口。
+4. existing Git 显式同意 UI 已落地，旧 G0 重复视觉证据已重新裁决。
+
+重开前 `result-studio-editing` 保持 `experimental/limited / implemented_unverified`，不进入 Support Matrix 的 qualified 范围。
 
 目标：只用真实连续产品旅程重新决定 Result Studio 是否可以成为 supported/qualified 能力。
 
@@ -1845,7 +1862,7 @@ G0-RS-P0 Truth Correction
 
 阶段状态规则：
 
-- 同一时间只有一个 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3`、`G0-RS-RH0`、P4R-0～P4R-6、`G0-RS-P5` 与 `G0-RS-P6` 已完成。P7 是当前唯一进行中阶段，不得把 P6 的本地证据外推为 P7 资格。
+- 当前没有 `G0-RS-*` 阶段处于 `in_progress`；`G0-RS-P0`～`G0-RS-P3`、`G0-RS-RH0`、P4R-0～P4R-6、`G0-RS-P5` 与 `G0-RS-P6` 已完成，P7 deferred。不得把 P6 的本地证据外推为 P7 资格。
 - 每阶段先补失败测试/fixture，再实现，再形成与证据类型匹配的验收；不得提前开发下一阶段。
 - 单元测试证明契约，fixture 证明确定性集成，真实 Provider 证明模型边界，packaged Electron 证明产品链；四者不能互相替代。
 - 未运行 `npm run docs:reconcile` 与 `npm run docs:check` 不得宣布阶段 completed/verified/qualified。
@@ -1862,7 +1879,7 @@ G0-RS-P0 Truth Correction
 5. [x] 捕获当前真实产品基线，不把截图存在等同于操作通过。
 6. [x] 跑专项、G0、文档、UI 和全量测试；根门禁在最终文档收口后复跑。
 
-`G0-RS-P1`～`G0-RS-P3` 已按本节证据收口；`G0-RS-P4 Core` 的后续真实产品链已由 P4R/P5/P6 分层补证。`G0-RS-RH0`、P4R、P5 与 P6 均已按各自边界收口；P7 是下一阶段且尚未启动，只有它能重新裁决真实 Provider、packaged Electron 与产品资格。
+`G0-RS-P1`～`G0-RS-P3` 已按本节证据收口；`G0-RS-P4 Core` 的后续真实产品链已由 P4R/P5/P6 分层补证。`G0-RS-RH0`、P4R、P5 与 P6 均已按各自边界收口；P7 已 deferred，未来只有重开的 P7 能重新裁决真实 Provider、packaged Electron 与产品资格。
 
 `G0-RS-P2` 交付结果：
 

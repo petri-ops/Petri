@@ -765,7 +765,7 @@ G0 Baseline v1 = qualified + maintained
 - 真实 Provider、macOS arm64 packaged、5 分钟 soak 与五态视觉矩阵分别形成脱敏证据；canonical DESeq2 的参数、Artifact、Provenance、独立脚本和报告通过真实执行。
 - 永久 `g0:qualification` 门验证当前 maintained bundle、封存 subject、Evidence Ledger、零容忍、支持边界和六个独立子门。
 - LF11 Promotion Gate 接入 LF12 requalification；触发器缺少新的 qualified 决策或证据摘要时 fail-closed。
-- `result-studio-editing` 重新资格只由 `G0-RS-P7` 的连续真实 trace、双 Provider tool calling、packaged Electron、五条真实科学任务和恢复矩阵决定；此前 RS9 汇总不能替代该门。
+- `result-studio-editing` 重新资格只由未来重开的 `G0-RS-P7` 连续真实 trace、双 Provider tool calling、packaged Electron、五条真实科学任务和恢复矩阵决定；P7 当前 deferred，此前 RS9 汇总不能替代该门。
 - 完整报告见 [`../acceptance/g0-qualification/qualification-report.md`](../acceptance/g0-qualification/qualification-report.md)。
 
 ## 22. 永久 Conformance Matrix
@@ -904,7 +904,7 @@ G1 可以在 `G0 Baseline v1` qualified 后启动；G0 同时转入 maintained�
 下一主线按依赖启动：
 
 1. 保持 G0 永久门禁优先；任何触发器变化先完成 Promotion + requalification。
-2. `G0 Result Studio` 因产品资格证据不足重新成为 active 工作包，按 RS-P0～P7 串行收口；`G0-SDC0` 已完成并保留，SDC-1～SDC-7 延后到 RS-P7 后重新评估。
+2. `G0 Result Studio` 已完成 RS-P0～P6 的开发态收口，P7 于 2026-08-03 deferred，产品资格继续暂停；`G0-SDC0` 已完成并保留，SDC-1 Data Profiler 成为下一候选但尚未启动。
 
 任何后续工作仍须通过六代兼容门与永久 `npm run g0:qualification`；不得把本次限定资格扩张到未验收平台、插件或科学任务。
 
