@@ -330,6 +330,7 @@ async function selectProviderTargets() {
   for (const target of targets) {
     if (selected.has(target.profile.provider)) continue;
     for (let retry = 0; retry < 3 && !selected.has(target.profile.provider); retry += 1) {
+      if (retry > 0) await delay(2_000);
       const probe = await probeProviderToolCall(target, attempts.length);
       attempts.push(probe.evidence);
       if (probe.internal.passed) selected.set(target.profile.provider, target);
