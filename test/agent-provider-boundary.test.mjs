@@ -15,9 +15,44 @@ const {
   buildFinalizationFallbackMessage,
   finalizationFallbackReason,
   createAgentProgressRecorder,
+  createResultEditCompletionGuard,
   createAgentToolCallController,
   runAgentToolCallBatch,
 } = require('../core/r-server/agent-tools');
+
+test('bound result edits cannot finish successfully before a real preview-ready candidate exists', () => {
+  const guard = createResultEditCompletionGuard({ required: true });
+  const first = guard.assessTerminal();
+  assert.equal(first.action, 'retry');
+  assert.match(first.prompt, /尚未成功创建 preview_ready 候选/);
+
+  const second = guard.assessTerminal();
+  assert.equal(second.action, 'fail');
+  assert.match(second.message, /阻止展示伪成功结论/);
+});
+
+test('bound result edit completion guard accepts only the sealed create tool success terminal', () => {
+  const guard = createResultEditCompletionGuard({ required: true });
+  guard.recordToolResult('result_changeset_create_in_context', {
+    ok: false,
+    changeSet: { status: 'preview_ready' },
+  });
+  assert.equal(guard.assessTerminal().action, 'retry');
+
+  guard.recordToolResult('result_changeset_create_in_context', {
+    ok: true,
+    changeSet: { status: 'preview_ready' },
+  });
+  assert.equal(guard.assessTerminal().action, 'accept');
+  assert.deepEqual(guard.snapshot(), {
+    required: true,
+    candidateCreated: true,
+    recoveryAttempted: true,
+  });
+
+  const ordinary = createResultEditCompletionGuard();
+  assert.equal(ordinary.assessTerminal().action, 'accept');
+});
 
 function toolCall(id, argumentsValue = '{}', name = 'workspace_read') {
   return { id, type: 'function', function: { name, arguments: argumentsValue } };

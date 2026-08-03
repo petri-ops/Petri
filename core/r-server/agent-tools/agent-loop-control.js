@@ -22,6 +22,37 @@ function normalizeRedactedContextTokenJson(value) {
   );
 }
 
+function createResultEditCompletionGuard({ required = false } = {}) {
+  let candidateCreated = false;
+  let recoveryAttempted = false;
+  return {
+    required: required === true,
+    recordToolResult(name, result) {
+      if (name === 'result_changeset_create_in_context'
+          && result?.ok === true
+          && result?.changeSet?.status === 'preview_ready') candidateCreated = true;
+    },
+    assessTerminal() {
+      if (!required || candidateCreated) return { action: 'accept' };
+      if (!recoveryAttempted) {
+        recoveryAttempted = true;
+        return {
+          action: 'retry',
+          prompt:
+            '本轮是由结果编辑器提交的绑定式候选创建请求，界面中的科学影响确认已经由后端保存。你尚未成功创建 preview_ready 候选，不能声称修改、重算或验证已完成。请立即使用当前受信上下文调用必要的 Result Studio 工具完成候选创建；不要只复述上一轮结果，也不要再次向用户索要确认。',
+        };
+      }
+      return {
+        action: 'fail',
+        message: '结果修改未完成：模型没有创建并验证真实候选版本，系统已阻止展示伪成功结论。请重试本次编辑。',
+      };
+    },
+    snapshot() {
+      return { required: required === true, candidateCreated, recoveryAttempted };
+    },
+  };
+}
+
 function shouldFinalizeAgentIteration(iteration, controller) {
   return Boolean(controller && (
     (typeof controller.capHit === 'function' && controller.capHit()) ||
@@ -407,6 +438,7 @@ module.exports = {
   buildFinalizationFallbackMessage,
   finalizationFallbackReason,
   createAgentProgressRecorder,
+  createResultEditCompletionGuard,
   createAgentToolCallController,
   runAgentToolCallBatch,
 };

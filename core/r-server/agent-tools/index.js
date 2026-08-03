@@ -32,6 +32,7 @@ const {
   buildFinalizationFallbackMessage,
   finalizationFallbackReason,
   createAgentProgressRecorder,
+  createResultEditCompletionGuard,
   createAgentToolCallController,
   runAgentToolCallBatch,
 } = require('./agent-loop-control');
@@ -71,6 +72,7 @@ module.exports = {
   buildFinalizationFallbackMessage,
   finalizationFallbackReason,
   createAgentProgressRecorder,
+  createResultEditCompletionGuard,
   createAgentToolCallController,
   runAgentToolCallBatch,
 };

@@ -61,6 +61,7 @@ const {
   buildFinalizationFallbackMessage,
   finalizationFallbackReason,
   createAgentProgressRecorder,
+  createResultEditCompletionGuard,
   createAgentToolCallController,
   runAgentToolCallBatch,
 } = require('../agent-tools');
@@ -540,6 +541,10 @@ module.exports = function registerAiAgentRoute(app) {
 
     const traceId = createTraceId();
     const toolCallController = createAgentToolCallController({ maxToolCalls: MAX_AGENT_TOOL_CALLS });
+    const resultEditCompletionGuard = createResultEditCompletionGuard({
+      required: Boolean(context?.activeArtifact && context?.resultEditRequest
+        && typeof context.resultEditRequest === 'object'),
+    });
     const modelResultState = createModelResultState({
       projectId: toolCtx.projectId,
       traceId,
@@ -601,7 +606,9 @@ module.exports = function registerAiAgentRoute(app) {
             protocolRecoveryAttempt ? undefined : (event) => {
               if (event.type === 'content_delta' && event.content && !aborted) {
                 streamedText += event.content;
-                sseSend({ choices: [{ delta: { content: event.content } }] });
+                if (!resultEditCompletionGuard.required) {
+                  sseSend({ choices: [{ delta: { content: event.content } }] });
+                }
               }
             },
             {
@@ -654,7 +661,9 @@ module.exports = function registerAiAgentRoute(app) {
               (event) => {
                 if (event.type === 'content_delta' && event.content && !aborted) {
                   streamedText += event.content;
-                  sseSend({ choices: [{ delta: { content: event.content } }] });
+                  if (!resultEditCompletionGuard.required) {
+                    sseSend({ choices: [{ delta: { content: event.content } }] });
+                  }
                 }
               },
               { baseUrl, profileId: selectedPreset && selectedPreset.id, modelOverride: modelName }
@@ -684,6 +693,26 @@ module.exports = function registerAiAgentRoute(app) {
 
         if (toolCalls.length === 0) {
           let assessment = assessFinalizationResult(upJson, streamedText);
+          const editCompletion = resultEditCompletionGuard.assessTerminal();
+          if (editCompletion.action === 'retry') {
+            fullMessages.push({ role: 'assistant', content: assessment.content || msg.content || '' });
+            fullMessages.push({ role: 'system', content: editCompletion.prompt });
+            sseSend({
+              event: 'agent_status',
+              phase: 'result_edit_completion_retry',
+              attempt: 1,
+              maxAttempts: 1,
+              reason: 'candidate_not_created',
+              message: '模型尚未创建真实候选，正在自动纠正执行…',
+            });
+            continue;
+          }
+          if (editCompletion.action === 'fail') {
+            assistantAcc = editCompletion.message;
+            sseSend({ choices: [{ delta: { content: assistantAcc } }] });
+            sseSend({ event: 'done' });
+            break;
+          }
           finalizationAttempts = 1;
           finalizationFailureReason = assessment.usable ? null : assessment.reason;
           if (!assessment.usable && assessment.retryable && !aborted) {
@@ -722,6 +751,9 @@ module.exports = function registerAiAgentRoute(app) {
             }
           }
           assistantAcc = assessment.content;
+          if (assessment.usable && resultEditCompletionGuard.required && assessment.content) {
+            sseSend({ choices: [{ delta: { content: assessment.content } }] });
+          }
           if (assessment.usable) sseSend({ event: 'done' });
           break;
         }
@@ -745,6 +777,7 @@ module.exports = function registerAiAgentRoute(app) {
             sseSend(buildToolCallEvent({ name, args, traceId, callId, iteration: iter + 1 }));
             let envelope = await executeToolCall(name, args, toolCtx, { traceId, callId });
             let result = localizeToolResult(envelope.data);
+            resultEditCompletionGuard.recordToolResult(name, result);
             envelope = replaceToolResultData(envelope, result);
 
             // ACT_ACK_v1_SERVER: send the event first, then wait for the frontend ack.
