@@ -35,17 +35,42 @@ test('P6 binds an advanced-drawer scientific acknowledgement outside model tool 
     activeArtifact: {
       jobId: 'job-1', name: 'deg_table.csv', revisionId: 'rev-1', contextToken: TOKEN,
     },
-    resultEditRequest: { origin: 'manual', scientificConfirmed: false },
+    resultEditRequest: {
+      origin: 'manual', completionExpectation: 'candidate', scientificConfirmed: false,
+    },
   });
   assert.equal(projected.resultStudioScientificConfirmation, false);
+  assert.equal(projected.resultStudioCompletionExpectation, 'candidate');
 
   const acknowledged = projectResultStudioToolContext({
     activeArtifact: {
       jobId: 'job-1', name: 'deg_table.csv', revisionId: 'rev-1', contextToken: TOKEN,
     },
-    resultEditRequest: { origin: 'manual', scientificConfirmed: true },
+    resultEditRequest: {
+      origin: 'manual', completionExpectation: 'candidate', scientificConfirmed: true,
+    },
   });
   assert.equal(acknowledged.resultStudioScientificConfirmation, true);
+});
+
+test('P7 projects an explicit completion contract for Composer actions and read-only helpers', () => {
+  const base = {
+    activeArtifact: {
+      jobId: 'job-1', name: 'deg_table.csv', revisionId: 'rev-1', contextToken: TOKEN,
+    },
+  };
+  assert.equal(projectResultStudioToolContext({
+    ...base,
+    resultEditRequest: {
+      origin: 'agent', completionExpectation: 'result_action', scientificConfirmed: false,
+    },
+  }).resultStudioCompletionExpectation, 'result_action');
+  assert.equal(projectResultStudioToolContext({
+    ...base,
+    resultEditRequest: {
+      origin: 'agent', completionExpectation: 'none', scientificConfirmed: false,
+    },
+  }).resultStudioCompletionExpectation, 'none');
 });
 
 test('P4R-3 auto-binds a missing token only for context-bound Result Studio tools', () => {

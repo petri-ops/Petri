@@ -78,6 +78,7 @@ export function ResultAgentComposer({
     if (!canSubmit || !isResultStudioContextToken(token)) return;
     const accepted = onSubmit({
       origin: 'agent',
+      completionExpectation: 'result_action',
       requestedOutcome,
       parameterPatch: {},
       scientificConfirmed: false,

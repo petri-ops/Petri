@@ -39,21 +39,32 @@ function recoverSealedResultEditArgs(name, value) {
   };
 }
 
-function createResultEditCompletionGuard({ required = false } = {}) {
+function createResultEditCompletionGuard({ expectation, required = false } = {}) {
+  const completionExpectation = ['candidate', 'result_action', 'none'].includes(expectation)
+    ? expectation
+    : (required === true ? 'candidate' : 'none');
   let candidateCreated = false;
+  let enrichmentJobStarted = false;
   let recoveryAttempted = false;
+  const satisfied = () => candidateCreated
+    || (completionExpectation === 'result_action' && enrichmentJobStarted);
   return {
-    required: required === true,
+    required: completionExpectation !== 'none',
     requiresToolExecution() {
-      return required === true && recoveryAttempted && !candidateCreated;
+      return completionExpectation !== 'none' && recoveryAttempted && !satisfied();
     },
     recordToolResult(name, result) {
       if (name === 'result_changeset_create_in_context'
           && result?.ok === true
           && result?.changeSet?.status === 'preview_ready') candidateCreated = true;
+      if (name === 'result_enrichment_from_context'
+          && result?.ok === true
+          && result?.toolId === 'go-kegg'
+          && typeof result?.result?.toolJobId === 'string'
+          && result.result.toolJobId.trim()) enrichmentJobStarted = true;
     },
     assessTerminal() {
-      if (!required || candidateCreated) return { action: 'accept' };
+      if (completionExpectation === 'none' || satisfied()) return { action: 'accept' };
       if (!recoveryAttempted) {
         recoveryAttempted = true;
         return {
@@ -68,7 +79,13 @@ function createResultEditCompletionGuard({ required = false } = {}) {
       };
     },
     snapshot() {
-      return { required: required === true, candidateCreated, recoveryAttempted };
+      return {
+        required: completionExpectation !== 'none',
+        expectation: completionExpectation,
+        candidateCreated,
+        enrichmentJobStarted,
+        recoveryAttempted,
+      };
     },
   };
 }

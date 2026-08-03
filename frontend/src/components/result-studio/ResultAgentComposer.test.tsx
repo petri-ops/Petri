@@ -27,6 +27,7 @@ describe('G0-RS-P4R-3 result-focus Agent Composer', () => {
 
     expect(onSubmit).toHaveBeenCalledWith({
       origin: 'agent',
+      completionExpectation: 'result_action',
       requestedOutcome: '换成色盲友好配色',
       parameterPatch: {},
       scientificConfirmed: false,

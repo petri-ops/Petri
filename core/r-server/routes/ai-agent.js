@@ -542,7 +542,7 @@ module.exports = function registerAiAgentRoute(app) {
     const traceId = createTraceId();
     const toolCallController = createAgentToolCallController({ maxToolCalls: MAX_AGENT_TOOL_CALLS });
     const resultEditCompletionGuard = createResultEditCompletionGuard({
-      required: typeof toolCtx.resultStudioScientificConfirmation === 'boolean',
+      expectation: toolCtx.resultStudioCompletionExpectation,
     });
     const modelResultState = createModelResultState({
       projectId: toolCtx.projectId,

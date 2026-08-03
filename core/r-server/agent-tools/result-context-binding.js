@@ -48,6 +48,12 @@ function projectResultStudioToolContext(context = {}) {
   // confirmation flow remains compatible.
   const editRequest = context && context.resultEditRequest;
   if (jobId && name && contextToken && editRequest && typeof editRequest === 'object') {
+    const requestedExpectation = trimmed(editRequest.completionExpectation);
+    projected.resultStudioCompletionExpectation = [
+      'candidate', 'result_action', 'none',
+    ].includes(requestedExpectation)
+      ? requestedExpectation
+      : (editRequest.origin === 'manual' ? 'candidate' : 'result_action');
     projected.resultStudioScientificConfirmation = editRequest.scientificConfirmed === true;
   }
   return projected;

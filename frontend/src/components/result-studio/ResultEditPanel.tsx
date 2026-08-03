@@ -21,9 +21,11 @@ import styles from './ResultEditPanel.module.css';
  */
 
 export type EditSubmissionOrigin = 'manual' | 'agent';
+export type ResultEditCompletionExpectation = 'candidate' | 'result_action' | 'none';
 
 export interface ResultEditSubmission {
   origin: EditSubmissionOrigin;
+  completionExpectation: ResultEditCompletionExpectation;
   requestedOutcome: string;
   parameterPatch: Record<string, unknown>;
   scientificConfirmed: boolean;
@@ -235,6 +237,7 @@ export function ResultEditPanel({
           disabled={!canSubmit}
           onClick={() => onSubmit({
             origin: 'manual',
+            completionExpectation: 'candidate',
             requestedOutcome: outcome.trim() || `调整 ${changedNames.join('、')}`,
             parameterPatch: patch,
             scientificConfirmed: needsConfirm && confirmed,

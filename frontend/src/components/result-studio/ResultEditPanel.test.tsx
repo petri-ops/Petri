@@ -129,6 +129,7 @@ describe('G0-RS-P4 Schema 驱动统一编辑面板', () => {
 
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
       origin: 'manual',
+      completionExpectation: 'candidate',
       parameterPatch: { point_size: 3 },
     }));
     expect(screen.queryByText(/或者直接描述/)).toBeNull();

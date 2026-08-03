@@ -49,12 +49,50 @@ test('bound result edit completion guard accepts only the sealed create tool suc
   assert.equal(guard.assessTerminal().action, 'accept');
   assert.deepEqual(guard.snapshot(), {
     required: true,
+    expectation: 'candidate',
     candidateCreated: true,
+    enrichmentJobStarted: false,
     recoveryAttempted: true,
   });
 
   const ordinary = createResultEditCompletionGuard();
   assert.equal(ordinary.assessTerminal().action, 'accept');
+});
+
+test('result actions may complete through a trusted enrichment Job but candidate-only edits may not', () => {
+  const action = createResultEditCompletionGuard({ expectation: 'result_action' });
+  action.recordToolResult('result_enrichment_from_context', {
+    ok: false,
+    toolId: 'go-kegg',
+    result: { toolJobId: 'job-rejected' },
+  });
+  assert.equal(action.assessTerminal().action, 'retry');
+
+  action.recordToolResult('result_enrichment_from_context', {
+    ok: true,
+    toolId: 'go-kegg',
+    result: { toolJobId: 'job-enrichment' },
+  });
+  assert.equal(action.assessTerminal().action, 'accept');
+  assert.deepEqual(action.snapshot(), {
+    required: true,
+    expectation: 'result_action',
+    candidateCreated: false,
+    enrichmentJobStarted: true,
+    recoveryAttempted: true,
+  });
+
+  const candidate = createResultEditCompletionGuard({ expectation: 'candidate' });
+  candidate.recordToolResult('result_enrichment_from_context', {
+    ok: true,
+    toolId: 'go-kegg',
+    result: { toolJobId: 'job-enrichment' },
+  });
+  assert.equal(candidate.assessTerminal().action, 'retry');
+
+  const none = createResultEditCompletionGuard({ expectation: 'none' });
+  assert.equal(none.required, false);
+  assert.equal(none.assessTerminal().action, 'accept');
 });
 
 function toolCall(id, argumentsValue = '{}', name = 'workspace_read') {

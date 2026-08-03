@@ -129,6 +129,7 @@ export interface CopilotContext {
    */
   resultEditRequest?: {
     origin: 'manual' | 'agent';
+    completionExpectation: 'candidate' | 'result_action' | 'none';
     parameterPatch: Record<string, unknown>;
     scientificConfirmed: boolean;
   } | null;

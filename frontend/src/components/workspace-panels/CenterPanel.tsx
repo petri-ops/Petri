@@ -162,6 +162,7 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
         : '请先展示当前 Revision 的输入、参数、运行时和副作用确认摘要；未经明确确认不要执行受控重放。';
     ctx.onResultEditSubmit({
       origin: 'agent',
+      completionExpectation: 'none',
       requestedOutcome,
       parameterPatch: {},
       scientificConfirmed: false,

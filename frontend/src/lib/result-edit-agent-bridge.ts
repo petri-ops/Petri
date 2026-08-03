@@ -3,6 +3,7 @@ import type { CopilotAskDetail } from '@/lib/events';
 
 export interface ResultEditBridgeSubmission {
   origin: 'manual' | 'agent';
+  completionExpectation: 'candidate' | 'result_action' | 'none';
   requestedOutcome: string;
   parameterPatch: Record<string, unknown>;
   scientificConfirmed: boolean;
@@ -47,6 +48,7 @@ export function buildResultEditCopilotAsk({
       activeArtifact,
       editRequest: {
         origin: submission.origin,
+        completionExpectation: submission.completionExpectation,
         parameterPatch: { ...submission.parameterPatch },
         scientificConfirmed: submission.scientificConfirmed,
       },

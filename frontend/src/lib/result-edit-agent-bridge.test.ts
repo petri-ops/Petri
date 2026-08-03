@@ -22,6 +22,7 @@ describe('P4R-3 Result Composer → Copilot bridge', () => {
     const detail = buildResultEditCopilotAsk({
       submission: {
         origin: 'agent',
+        completionExpectation: 'result_action',
         requestedOutcome: '换成更清晰的配色',
         parameterPatch: {},
         scientificConfirmed: false,
@@ -35,7 +36,9 @@ describe('P4R-3 Result Composer → Copilot bridge', () => {
     expect(detail?.resultContext).toEqual({
       contextToken: TOKEN,
       activeArtifact,
-      editRequest: { origin: 'agent', parameterPatch: {}, scientificConfirmed: false },
+      editRequest: {
+        origin: 'agent', completionExpectation: 'result_action', parameterPatch: {}, scientificConfirmed: false,
+      },
     });
     expect(detail?.prompt).toBe('换成更清晰的配色');
     expect(detail?.prompt).not.toContain('result_edit_plan_in_context');
@@ -47,6 +50,7 @@ describe('P4R-3 Result Composer → Copilot bridge', () => {
   it('token 缺失、非法或与当前上下文不一致时拒绝派发', () => {
     const submission = {
       origin: 'agent' as const,
+      completionExpectation: 'result_action' as const,
       requestedOutcome: '换配色',
       parameterPatch: {},
       scientificConfirmed: false,
@@ -65,6 +69,7 @@ describe('P4R-3 Result Composer → Copilot bridge', () => {
     const detail = buildResultEditCopilotAsk({
       submission: {
         origin: 'agent', requestedOutcome: '换配色', parameterPatch: {},
+        completionExpectation: 'result_action',
         scientificConfirmed: false, contextToken: TOKEN,
       },
       activeArtifact,
@@ -73,7 +78,9 @@ describe('P4R-3 Result Composer → Copilot bridge', () => {
     const override = copilotContextOverrideForAsk(detail!);
     expect(override).toEqual({
       activeArtifact: { ...activeArtifact, contextToken: TOKEN },
-      resultEditRequest: { origin: 'agent', parameterPatch: {}, scientificConfirmed: false },
+      resultEditRequest: {
+        origin: 'agent', completionExpectation: 'result_action', parameterPatch: {}, scientificConfirmed: false,
+      },
     });
   });
 
@@ -81,6 +88,7 @@ describe('P4R-3 Result Composer → Copilot bridge', () => {
     const detail = buildResultEditCopilotAsk({
       submission: {
         origin: 'manual', requestedOutcome: '应用高级参数调整',
+        completionExpectation: 'candidate',
         parameterPatch: { point_size: 3 }, scientificConfirmed: false, contextToken: TOKEN,
       },
       activeArtifact,
