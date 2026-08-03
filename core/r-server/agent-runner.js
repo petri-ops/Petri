@@ -967,12 +967,14 @@ async function runAgentLoop({
       }
       if (!finalizing && (!upJson || upJson.error || !upJson.choices)) {
         const assessment = assessFinalizationResult(upJson, streamedText);
-        if (assessment.retryable && !aborted()) {
+        const maxProviderAttempts = 3;
+        for (let attempt = 2; attempt <= maxProviderAttempts
+          && assessment.retryable && !aborted(); attempt += 1) {
           _emit({
             event: 'agent_status',
             phase: 'provider_retry',
-            attempt: 2,
-            maxAttempts: 2,
+            attempt,
+            maxAttempts: maxProviderAttempts,
             reason: assessment.reason,
             message: '上游响应暂时异常，正在自动重试当前阶段…',
           });
@@ -994,6 +996,7 @@ async function runAgentLoop({
             },
             { baseUrl, profileId, modelOverride: modelName }
           );
+          if (upJson && !upJson.error && upJson.choices) break;
         }
       }
       if (!upJson || upJson.error || !upJson.choices) {
