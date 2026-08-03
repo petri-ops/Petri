@@ -29,12 +29,13 @@
 .readOnlyNotice { display: grid; place-content: center; gap: 4px; min-height: 220px; color: var(--biof3-text-tertiary); text-align: center; }
 .readOnlyNotice strong { color: var(--biof3-text); font-size: 12px; }
 .readOnlyNotice span { max-width: 360px; font-size: 10px; }
-.scatter { width: 100%; min-height: 300px; flex: 1; touch-action: none; }
+.scatter { display: block; width: 100%; height: 100%; min-height: 300px; flex: 1; touch-action: none; }
 .scatter line { stroke: var(--biof3-border-strong); stroke-width: 1; }
 .scatter circle { fill: var(--biof3-accent); fill-opacity: .58; cursor: pointer; }
 .scatter circle[data-active='true'] { fill: var(--biof3-danger); fill-opacity: 1; stroke: var(--biof3-bg-surface); stroke-width: 1.5; }
 .scatter rect { fill: color-mix(in srgb, var(--biof3-accent) 12%, transparent); stroke: var(--biof3-accent); stroke-dasharray: 4 3; }
 .scatter text { fill: var(--biof3-text-tertiary); font-size: 10px; text-anchor: middle; }
+.scatter .axisLabel { font-size: 11px; }
 .legend { display: flex; flex-wrap: wrap; gap: 5px; padding: 7px 9px 0; }
 .legend button { padding: 0 8px; font-size: 10px; }
 .caveat { padding: 4px 9px 8px; color: var(--biof3-text-tertiary); font-size: 9px; }

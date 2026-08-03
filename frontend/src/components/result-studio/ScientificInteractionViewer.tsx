@@ -22,6 +22,25 @@ import styles from './ScientificInteractionViewer.module.css';
 const ROW_HEIGHT = 32;
 const PAGE_SIZE = 200;
 const VIEW_ROWS = 18;
+const SCATTER_WIDTH = 600;
+const SCATTER_HEIGHT = 350;
+const SCATTER_PLOT = Object.freeze({ left: 58, right: 576, top: 28, bottom: 310 });
+
+function scatterPointerPosition(svg: SVGSVGElement, clientX: number, clientY: number): { x: number; y: number } {
+  const matrix = svg.getScreenCTM?.();
+  if (matrix && typeof matrix.inverse === 'function' && typeof svg.createSVGPoint === 'function') {
+    const point = svg.createSVGPoint();
+    point.x = clientX;
+    point.y = clientY;
+    const local = point.matrixTransform(matrix.inverse());
+    return { x: local.x, y: local.y };
+  }
+  const box = svg.getBoundingClientRect();
+  return {
+    x: (clientX - box.left) * SCATTER_WIDTH / box.width,
+    y: (clientY - box.top) * SCATTER_HEIGHT / box.height,
+  };
+}
 
 function numeric(value: unknown): number | null {
   const text = String(value ?? '').trim();
@@ -295,8 +314,10 @@ function ScientificScatter({ manifest, query, selection, onSelectionChange }: {
   }).filter((point): point is { row: Record<string, string>; x: number; y: number } => point.x !== null && point.y !== null), [mapping, query.rows]);
   const xs = points.map((point) => point.x); const ys = points.map((point) => point.y);
   const minX = Math.min(...xs); const maxX = Math.max(...xs); const minY = Math.min(...ys); const maxY = Math.max(...ys);
-  const px = (value: number) => 42 + ((value - minX) / (maxX - minX || 1)) * 526;
-  const py = (value: number) => 318 - ((value - minY) / (maxY - minY || 1)) * 284;
+  const px = (value: number) => SCATTER_PLOT.left
+    + ((value - minX) / (maxX - minX || 1)) * (SCATTER_PLOT.right - SCATTER_PLOT.left);
+  const py = (value: number) => SCATTER_PLOT.bottom
+    - ((value - minY) / (maxY - minY || 1)) * (SCATTER_PLOT.bottom - SCATTER_PLOT.top);
   const [drag, setDrag] = React.useState<{ x0: number; y0: number; x1: number; y1: number } | null>(null);
   const legends = mapping.legendField ? [...new Set(query.rows.map((row) => row[mapping.legendField!]).filter(Boolean))] : [];
   return (
@@ -307,11 +328,19 @@ function ScientificScatter({ manifest, query, selection, onSelectionChange }: {
       ))}</div>}
       <svg
         className={styles.scatter}
-        viewBox="0 0 600 350"
+        viewBox={`0 0 ${SCATTER_WIDTH} ${SCATTER_HEIGHT}`}
+        preserveAspectRatio="xMidYMid meet"
         role="group"
         aria-label="可选择科学散点图"
-        onPointerDown={(event) => { const box = event.currentTarget.getBoundingClientRect(); const x = (event.clientX - box.left) * 600 / box.width; const y = (event.clientY - box.top) * 350 / box.height; setDrag({ x0: x, y0: y, x1: x, y1: y }); }}
-        onPointerMove={(event) => { if (!drag) return; const box = event.currentTarget.getBoundingClientRect(); setDrag({ ...drag, x1: (event.clientX - box.left) * 600 / box.width, y1: (event.clientY - box.top) * 350 / box.height }); }}
+        onPointerDown={(event) => {
+          const point = scatterPointerPosition(event.currentTarget, event.clientX, event.clientY);
+          setDrag({ x0: point.x, y0: point.y, x1: point.x, y1: point.y });
+        }}
+        onPointerMove={(event) => {
+          if (!drag) return;
+          const point = scatterPointerPosition(event.currentTarget, event.clientX, event.clientY);
+          setDrag({ ...drag, x1: point.x, y1: point.y });
+        }}
         onPointerUp={() => {
           if (!drag) return;
           const left = Math.min(drag.x0, drag.x1); const right = Math.max(drag.x0, drag.x1);
@@ -321,8 +350,8 @@ function ScientificScatter({ manifest, query, selection, onSelectionChange }: {
           setDrag(null);
         }}
       >
-        <line x1="42" y1="318" x2="568" y2="318" />
-        <line x1="42" y1="34" x2="42" y2="318" />
+        <line x1={SCATTER_PLOT.left} y1={SCATTER_PLOT.bottom} x2={SCATTER_PLOT.right} y2={SCATTER_PLOT.bottom} />
+        <line x1={SCATTER_PLOT.left} y1={SCATTER_PLOT.top} x2={SCATTER_PLOT.left} y2={SCATTER_PLOT.bottom} />
         {points.map((point) => {
           const id = readEntityId(manifest, point.row) || '';
           const active = !!id && selection?.entityIds.includes(id);
@@ -351,7 +380,15 @@ function ScientificScatter({ manifest, query, selection, onSelectionChange }: {
           );
         })}
         {drag && <rect x={Math.min(drag.x0, drag.x1)} y={Math.min(drag.y0, drag.y1)} width={Math.abs(drag.x1 - drag.x0)} height={Math.abs(drag.y1 - drag.y0)} />}
-        <text x="300" y="344">{mapping.xField}</text><text x="8" y="22">{mapping.yTransform === 'neg_log10' ? `-log10(${mapping.yField})` : mapping.yField}</text>
+        <text className={styles.axisLabel} x={SCATTER_WIDTH / 2} y="342">{mapping.xField}</text>
+        <text
+          className={styles.axisLabel}
+          x="16"
+          y={(SCATTER_PLOT.top + SCATTER_PLOT.bottom) / 2}
+          transform={`rotate(-90 16 ${(SCATTER_PLOT.top + SCATTER_PLOT.bottom) / 2})`}
+        >
+          {mapping.yTransform === 'neg_log10' ? `-log10(${mapping.yField})` : mapping.yField}
+        </text>
       </svg>
       <small className={styles.caveat}>显示 {points.length} 个有界 backing-data 点；点选、框选和图例均回写稳定 {manifest.entityType} ID。</small>
     </div>

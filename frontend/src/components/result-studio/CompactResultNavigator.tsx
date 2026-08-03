@@ -23,8 +23,11 @@ export interface CompactResultNavigatorProps {
   activeMode?: ResultSurfaceMode;
   canReviewVersions?: boolean;
   canProjectSource?: boolean;
+  canUseInteraction?: boolean;
+  interactionActive?: boolean;
   onBack?: () => void;
   onAskAgent?: () => void;
+  onInteractionToggle?: () => void;
   onModeChange?: (mode: ResultSurfaceMode) => void;
   onSelectArtifact: (artifactName: string, sectionId: string) => void;
 }
@@ -43,8 +46,11 @@ export function CompactResultNavigator({
   activeMode = 'result',
   canReviewVersions = false,
   canProjectSource = false,
+  canUseInteraction = false,
+  interactionActive = false,
   onBack,
   onAskAgent,
+  onInteractionToggle,
   onModeChange,
   onSelectArtifact,
 }: CompactResultNavigatorProps): React.ReactElement {
@@ -151,6 +157,18 @@ export function CompactResultNavigator({
       )}
 
       <div className={styles.actions}>
+        {canUseInteraction && onInteractionToggle && (
+          <button
+            type="button"
+            className={styles.iconAction}
+            onClick={onInteractionToggle}
+            aria-label={interactionActive ? '查看原始图像' : '进入交互选择'}
+            title={interactionActive ? '查看原始图像' : '进入交互选择'}
+            aria-pressed={interactionActive}
+          >
+            <Icon name={interactionActive ? 'image' : 'bar-chart'} size={15} />
+          </button>
+        )}
         {selectedArtifactUrl && (
           <a
             className={styles.iconAction}

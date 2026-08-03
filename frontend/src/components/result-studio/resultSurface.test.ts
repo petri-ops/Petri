@@ -10,6 +10,7 @@ import {
   requestedArtifactRequestKey,
   shouldApplyRequestedArtifact,
   shouldRequestArtifactInteraction,
+  shouldShowResultInteraction,
   shouldSurfaceInteractionFailure,
   shortRevisionLabel,
 } from './resultSurface';
@@ -18,6 +19,7 @@ describe('G0-RS-P1 result surface projection', () => {
   it('routes every supported artifact into an explicit viewer adapter', () => {
     expect(resolveResultViewerAdapter({ kind: 'report', fileName: 'report.html' })).toBe('report');
     expect(resolveResultViewerAdapter({ kind: 'plot', fileName: 'volcano.svg' })).toBe('image');
+    expect(resolveResultViewerAdapter({ kind: 'plot', fileName: 'volcano.pdf' })).toBe('binary');
     expect(resolveResultViewerAdapter({ kind: 'table', fileName: 'deg.csv' })).toBe('table');
     expect(resolveResultViewerAdapter({ kind: 'text', fileName: 'summary.json' })).toBe('json');
     expect(resolveResultViewerAdapter({ kind: 'text', fileName: 'notes.md' })).toBe('text');
@@ -39,6 +41,39 @@ describe('G0-RS-P1 result surface projection', () => {
       expect(shouldSurfaceInteractionFailure(adapter)).toBe(shouldSurfaceFailure);
     },
   );
+
+  it('keeps generated plots primary until interaction is explicitly requested', () => {
+    expect(shouldShowResultInteraction({
+      adapter: 'image',
+      interactionAvailable: true,
+      interactionRequested: false,
+    })).toBe(false);
+    expect(shouldShowResultInteraction({
+      adapter: 'image',
+      interactionAvailable: true,
+      interactionRequested: true,
+    })).toBe(true);
+    expect(shouldShowResultInteraction({
+      adapter: 'table',
+      interactionAvailable: true,
+      interactionRequested: false,
+    })).toBe(true);
+    expect(shouldShowResultInteraction({
+      adapter: 'image',
+      interactionAvailable: false,
+      interactionRequested: true,
+    })).toBe(false);
+    expect(shouldShowResultInteraction({
+      adapter: 'report',
+      interactionAvailable: true,
+      interactionRequested: true,
+    })).toBe(false);
+    expect(shouldShowResultInteraction({
+      adapter: 'binary',
+      interactionAvailable: true,
+      interactionRequested: true,
+    })).toBe(false);
+  });
 
   it('projects trust, revision and selection without inventing missing facts', () => {
     expect(describeTruthStatus('valid', 'done')).toEqual({ tone: 'valid', label: '可信结果' });

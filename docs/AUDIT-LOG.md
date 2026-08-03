@@ -23,7 +23,7 @@
 
 | 日期 | 结果 | 检查点 |
 | --- | --- | --- |
-| 2026-08-03 | `G0-RS-UX1F` 短闭环完成：ContextBar 与 Artifact 选择合成单一结果工具栏，报告/导出/重放/相关文件收入更多操作，主预览无卡片边框，静态图交互发现失败安静降级，Agent Composer 默认一行。聚焦前端 51/51、TypeScript 与开发态 Electron 真实旧 GO/KEGG Job 通过；旧 Job 物理文件不可用，未外推 packaged/P7 | UI-122 / UX1F |
+| 2026-08-03 | `G0-RS-UX1F / UI-122` 真实图形补验并修复：插件正式 PNG 恢复为默认主结果且完整适配可见画布，通用 scatter/matrix 改为显式可逆交互，状态严格绑定 Revision/Job/Artifact；结果态不再常驻版本面板。聚焦前端 44/44、Result Studio 前端聚合 199/199、TypeScript 与同一开发态 Electron 真实新 volcano Job `job_41578fbc4c6f4577` 通过，PNG 标题/阈值/图例/双轴和 25 点交互均可达；未外推 packaged/P7 | UI-122 / UX1F |
 | 2026-08-03 | `G0-RS-UX1E` 短闭环完成：顶部 Artifact 卡片网格与右侧 Honeycomb 栏合并为一个紧凑结果选择器；PNG/SVG/PDF 按科学结果全局归组，技术格式和相关文件按需展开，`selectedName` 仍是唯一选择真相。聚焦前端 36/36、TypeScript 与开发态 Electron 真实旧 GO/KEGG Job 交互通过；旧 Job 物理预览文件不可用，未外推 packaged/P7 | UI-121 / UX1E |
 | 2026-08-03 | `G0-RS-UX1A` 短闭环完成：结果会话首次进入收起左右栏、会话内不反复覆盖用户布局、返回对话恢复；Artifact 409/加载失败以独立“文件不可用”状态替代破图，Header/Inspector/主画布一致并提供重试与 Agent 恢复。开发态 Electron 真实旧 Job 观察通过；前端 32/32、受影响 Node 368/368、P4R 7/7，P6 历史 source freshness 例外单独登记 | UI-116 / UX1A |
 | 2026-08-03 | `G0-RS-UX1B` 短闭环完成：展示层把同一科学图的 PNG/SVG/PDF 归并为一个结果项，PNG 默认预览，SVG/PDF 为导出格式，技术/中间文件移入相关文件折叠区；纯函数 9/9、TypeScript、docs/UI 门禁通过。开发态 Electron 真实旧 GO/KEGG Job 确认 PNG 默认预览与相关文件折叠，因该 Job 无同图 SVG/PDF，变体实机观察边界已明确 | UI-117 / UX1B |

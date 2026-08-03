@@ -113,6 +113,7 @@ import {
   resolveResultViewerAdapter,
   shouldApplyRequestedArtifact,
   shouldRequestArtifactInteraction,
+  shouldShowResultInteraction,
   shouldSurfaceInteractionFailure,
   type ResultSurfaceMode,
 } from '@/components/result-studio/resultSurface';
@@ -3100,6 +3101,7 @@ function ResultArtifactShell({
   const [interactionRetryVersion, setInteractionRetryVersion] = useState(0);
   const [artifactSelection, setArtifactSelection] = useState<ArtifactSelection | null>(null);
   const [selectionError, setSelectionError] = useState('');
+  const [interactionPreviewKey, setInteractionPreviewKey] = useState<string | null>(null);
   // SelectionContext 是 SQLite 真相的乐观投影。连续点击必须按发生顺序写入，
   // 且保存/删除失败时回到最后一次真正提交的选择，不能把未落库状态交给 Agent。
   const selectionMutationEpochRef = useRef(0);
@@ -3358,18 +3360,25 @@ function ResultArtifactShell({
   const preferredArtifactName =
     activeArtifact && activeArtifact.jobId === job?.id ? activeArtifact.name : '';
   const selectedArtifact = useMemo(() => {
+    const asPrimaryArtifact = (artifact: ResultArtifactRecord | null): ResultArtifactRecord | null => {
+      if (!artifact) return null;
+      const grouped = findResultArtifactPickerOption(artifactPickerGroups, artifact.name);
+      return grouped
+        ? findArtifactByName(artifacts, grouped.option.primary.name) || artifact
+        : artifact;
+    };
     const current = findArtifactByName(artifacts, selectedName);
-    if (current) return current;
+    if (current) return asPrimaryArtifact(current);
     // The pending artifact (from chat click / cross-project navigation)
     // wins over the active-artifact hint when both are present.
     const pending = pendingArtifactName ? findArtifactByName(artifacts, pendingArtifactName) : null;
-    if (pending) return pending;
-    return (
+    if (pending) return asPrimaryArtifact(pending);
+    return asPrimaryArtifact(
       pickPreferredArtifact(coreArtifacts, preferredArtifactName) ||
       coreArtifacts[0] ||
       null
     );
-  }, [artifacts, coreArtifacts, pendingArtifactName, preferredArtifactName, selectedName]);
+  }, [artifactPickerGroups, artifacts, coreArtifacts, pendingArtifactName, preferredArtifactName, selectedName]);
   const viewedArtifactName = viewedRevision
     ? viewedRevision.outputPath.split('/').pop() || viewedRevision.artifactId
     : '';
@@ -3395,11 +3404,24 @@ function ResultArtifactShell({
         preview: selectedArtifact.preview,
       })
     : 'binary';
+  const interactionBindingKey = `${viewedRevision?.revisionId || 'current'}::${viewedRevision?.toolJobId || job?.id || ''}::${selectedArtifactName}`;
+  const interactionIsBound = manifestArtifactRef.current === interactionBindingKey;
+  const boundInteractionManifest = interactionIsBound ? interactionManifest : null;
+  const boundInteractionRevision = interactionIsBound ? interactionRevision : null;
+  const boundInteractionBackingTable = interactionIsBound ? interactionBackingTable : null;
+  const boundArtifactSelection = interactionIsBound ? artifactSelection : null;
   const usesInteractiveViewer = Boolean(
-    interactionManifest?.interactionMode && interactionManifest.interactionMode !== 'read_only',
+    boundInteractionManifest?.interactionMode && boundInteractionManifest.interactionMode !== 'read_only',
   );
+  const interactionPreviewActive = interactionPreviewKey === interactionBindingKey;
+  const imageInteractionAvailable = viewerAdapter === 'image' && usesInteractiveViewer;
+  const showInteractiveViewer = shouldShowResultInteraction({
+    adapter: viewerAdapter,
+    interactionAvailable: usesInteractiveViewer,
+    interactionRequested: interactionPreviewActive,
+  });
   const requiresPreviewAvailabilityCheck = activeIsPreviewText
-    || (viewerAdapter === 'image' && !usesInteractiveViewer);
+    || viewerAdapter === 'image';
   const previewAvailabilityKey = `${viewedRevision?.revisionId || 'current'}::${job?.id || ''}::${selectedArtifactName}::${selectedArtifactUrl}`;
   const effectivePreviewAvailability = previewAvailability.key === previewAvailabilityKey
     ? previewAvailability
@@ -3492,9 +3514,8 @@ function ResultArtifactShell({
     // 于是一次刷新失败就会永久丢掉交互视图——次级失败降级了主体能力。
     // 清空本身的理由（旧选择属于旧 artifact）依然成立，只是收窄到它真正适用的条件。
     // 见 components/result-studio/resultBodyState.ts。
-    const manifestKey = `${viewedRevision?.revisionId || 'current'}::${viewedRevision?.toolJobId || job?.id || ''}::${selectedArtifactName || ''}`;
-    if (manifestArtifactRef.current !== manifestKey) {
-      manifestArtifactRef.current = manifestKey;
+    if (manifestArtifactRef.current !== interactionBindingKey) {
+      manifestArtifactRef.current = interactionBindingKey;
       setInteractionManifest(null);
       setInteractionRevision(null);
       setInteractionBackingTable(null);
@@ -3546,7 +3567,7 @@ function ResultArtifactShell({
       cancelled = true;
       if (selectionMutationEpochRef.current === epoch) selectionMutationEpochRef.current += 1;
     };
-  }, [conversationId, effectiveJobStatus, interactionRetryVersion, job?.id, lang, project.id, selectedArtifactName, viewedRevision, viewerAdapter]);
+  }, [conversationId, effectiveJobStatus, interactionBindingKey, interactionRetryVersion, job?.id, lang, project.id, selectedArtifactName, viewedRevision, viewerAdapter]);
 
   const handleSelectionChange = useCallback((next: ArtifactSelection | null) => {
     const epoch = selectionMutationEpochRef.current;
@@ -3629,15 +3650,15 @@ function ResultArtifactShell({
       // RS3 semantic 维度：来自后端基于完整文件产出的交互清单。
       // 清单还没到（或该类型不支持交互）时保持 null，不猜测。
       semanticKind: selectedArtifactKind,
-      revisionId: viewedRevision?.revisionId ?? interactionManifest?.revisionId ?? null,
-      revisionOrdinal: viewedRevision?.revisionOrdinal ?? interactionRevision?.revisionOrdinal ?? null,
-      artifactFamilyId: viewedRevision?.artifactFamilyId ?? interactionManifest?.artifactFamilyId ?? null,
-      entityType: interactionManifest?.entityType ?? null,
-      idField: interactionManifest?.idField ?? null,
-      selectionDurable: interactionManifest?.selectionDurable ?? false,
-      interactionCapabilities: interactionManifest?.capabilities ?? [],
-      selection: artifactSelection,
-      selectionId: artifactSelection?.selectionId || null,
+      revisionId: viewedRevision?.revisionId ?? boundInteractionManifest?.revisionId ?? null,
+      revisionOrdinal: viewedRevision?.revisionOrdinal ?? boundInteractionRevision?.revisionOrdinal ?? null,
+      artifactFamilyId: viewedRevision?.artifactFamilyId ?? boundInteractionManifest?.artifactFamilyId ?? null,
+      entityType: boundInteractionManifest?.entityType ?? null,
+      idField: boundInteractionManifest?.idField ?? null,
+      selectionDurable: boundInteractionManifest?.selectionDurable ?? false,
+      interactionCapabilities: boundInteractionManifest?.capabilities ?? [],
+      selection: boundArtifactSelection,
+      selectionId: boundArtifactSelection?.selectionId || null,
       truthStatus: viewedRevision?.validationStatus ?? result?.deliveryManifest?.status ?? null,
       conclusion: viewedRevision && !viewedRevision.isCurrent ? null : result?.deliveryManifest?.summary?.conclusion ?? null,
       availabilityStatus: effectivePreviewAvailability.status,
@@ -3650,11 +3671,12 @@ function ResultArtifactShell({
     }
   }, [
     activeArtifact,
-    artifactSelection,
+    boundArtifactSelection,
+    boundInteractionManifest,
+    boundInteractionRevision,
     effectivePreviewAvailability.reason,
     effectivePreviewAvailability.status,
     effectiveJobStatus,
-    interactionManifest,
     job,
     onActiveArtifactChange,
     result?.deliveryManifest?.status,
@@ -3743,20 +3765,20 @@ function ResultArtifactShell({
     if (!selectedArtifact) {
       return <div className={styles.resultPreviewPlaceholder}>未发现可预览的结果文件</div>;
     }
-    if (unavailablePreview) return unavailablePreview;
-    if (usesInteractiveViewer && interactionManifest) {
+    if (showInteractiveViewer && boundInteractionManifest) {
       return (
         <ScientificInteractionViewer
           language={lang}
           jobId={viewedRevision?.toolJobId || job!.id}
           artifactName={selectedArtifactName}
-          manifest={interactionManifest}
-          backingTable={interactionBackingTable}
-          selection={artifactSelection}
+          manifest={boundInteractionManifest}
+          backingTable={boundInteractionBackingTable}
+          selection={boundArtifactSelection}
           onSelectionChange={(next) => void handleSelectionChange(next)}
         />
       );
     }
+    if (unavailablePreview) return unavailablePreview;
     if (viewerAdapter === 'report' && selectedArtifactUrl) {
       return (
         <iframe
@@ -4054,6 +4076,23 @@ function ResultArtifactShell({
     : typeof workflow?.artifactTruth?.status === 'string'
       ? workflow.artifactTruth.status
       : null;
+  const matchingActiveArtifact = activeArtifact
+    && activeArtifact.jobId === (viewedRevision?.toolJobId || job.id)
+    && activeArtifact.name === selectedArtifactName
+    ? activeArtifact
+    : null;
+  const versionFamilyId = viewedRevision?.artifactFamilyId
+    || boundInteractionManifest?.artifactFamilyId
+    || matchingActiveArtifact?.artifactFamilyId
+    || null;
+  const versionRevisionId = viewedRevision?.revisionId
+    || boundInteractionManifest?.revisionId
+    || matchingActiveArtifact?.revisionId
+    || null;
+  const versionRevisionOrdinal = viewedRevision?.revisionOrdinal
+    || boundInteractionRevision?.revisionOrdinal
+    || matchingActiveArtifact?.revisionOrdinal
+    || null;
 
   const resultToolbar = (
     <CompactResultNavigator
@@ -4072,10 +4111,15 @@ function ResultArtifactShell({
       truth={describeTruthStatus(toolbarTruthStatus, effectiveJobStatus)}
       availabilityStatus={selectedArtifact ? effectivePreviewAvailability.status : 'checking'}
       activeMode={mode}
-      canReviewVersions={Boolean(interactionManifest?.artifactFamilyId || activeArtifact?.artifactFamilyId)}
-      canProjectSource={Boolean(activeArtifact?.revisionId)}
+      canReviewVersions={Boolean(versionFamilyId)}
+      canProjectSource={Boolean(versionRevisionId)}
+      canUseInteraction={imageInteractionAvailable}
+      interactionActive={interactionPreviewActive}
       onBack={onBack}
       onAskAgent={onAskCurrentResult}
+      onInteractionToggle={() => setInteractionPreviewKey((current) => (
+        current === interactionBindingKey ? null : interactionBindingKey
+      ))}
       onModeChange={onModeChange ? (nextMode) => onModeChange(nextMode, job.id) : undefined}
       onSelectArtifact={(artifactName, sectionId) => {
         beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.artifactStart);
@@ -4143,11 +4187,11 @@ function ResultArtifactShell({
     <>
       {mode === 'result' && workflowBar}
       {mode === 'result' && recoveryConfirmation}
-      {mode !== 'code' && interactionManifest?.artifactFamilyId && (
+      {(mode === 'compare' || mode === 'history') && versionFamilyId && (
         <ResultStudioChangeSetPanel
           projectId={project.id}
-          artifactFamilyId={interactionManifest.artifactFamilyId}
-          activeRevisionId={interactionManifest.revisionId}
+          artifactFamilyId={versionFamilyId}
+          activeRevisionId={versionRevisionId}
           mode={mode}
           onModeChange={(nextMode) => onModeChange?.(nextMode, job.id)}
           onRevisionViewed={(revision) => {
@@ -4177,8 +4221,8 @@ function ResultArtifactShell({
       {mode === 'code' && (
         <RevisionCodeView
           projectId={project.id}
-          revisionId={viewedRevision?.revisionId || interactionRevision?.revisionId || activeArtifact?.revisionId || null}
-          revisionOrdinal={viewedRevision?.revisionOrdinal || interactionRevision?.revisionOrdinal || activeArtifact?.revisionOrdinal || null}
+          revisionId={versionRevisionId}
+          revisionOrdinal={versionRevisionOrdinal}
           onAgentRequest={onAgentCodeRequest}
           replayContext={replayContext}
           onReplayCreated={() => {

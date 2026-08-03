@@ -89,6 +89,42 @@ describe('CompactResultNavigator', () => {
     expect(onSelectArtifact).toHaveBeenCalledWith('heatmap.png', 'plots');
   });
 
+  it('offers an explicit reversible interaction toggle for generated plots', () => {
+    const onInteractionToggle = vi.fn();
+    const { rerender } = render(
+      <CompactResultNavigator
+        groups={buildResultArtifactPickerGroups(primarySections)}
+        selectedArtifactName="volcano.png"
+        selectedArtifactLabel="火山图"
+        selectedKindLabel="图表"
+        selectedIcon="image"
+        relatedSections={relatedSections}
+        canUseInteraction
+        onInteractionToggle={onInteractionToggle}
+        onSelectArtifact={() => undefined}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '进入交互选择' }));
+    expect(onInteractionToggle).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <CompactResultNavigator
+        groups={buildResultArtifactPickerGroups(primarySections)}
+        selectedArtifactName="volcano.png"
+        selectedArtifactLabel="火山图"
+        selectedKindLabel="图表"
+        selectedIcon="image"
+        relatedSections={relatedSections}
+        canUseInteraction
+        interactionActive
+        onInteractionToggle={onInteractionToggle}
+        onSelectArtifact={() => undefined}
+      />,
+    );
+    expect(screen.getByRole('button', { name: '查看原始图像' }).getAttribute('aria-pressed')).toBe('true');
+  });
+
   it('keeps related files in secondary actions and closes the menu after selection', () => {
     const onSelectArtifact = vi.fn();
     render(

@@ -73,6 +73,7 @@ export function resolveResultViewerAdapter(input: {
   const name = input.fileName.toLowerCase();
   if (input.preview === false) return 'binary';
   if (input.kind === 'report' || /\.html?$/.test(name)) return 'report';
+  if (/\.pdf$/.test(name)) return 'binary';
   if (input.kind === 'plot' || /\.(png|jpe?g|gif|svg|webp)$/.test(name)) return 'image';
   if (input.kind === 'table' || /\.(csv|tsv|xlsx?)$/.test(name)) return 'table';
   if (/\.json$/.test(name)) return 'json';
@@ -95,6 +96,22 @@ export function shouldRequestArtifactInteraction(adapter: ResultViewerAdapter): 
  */
 export function shouldSurfaceInteractionFailure(adapter: ResultViewerAdapter): boolean {
   return adapter === 'table';
+}
+
+/**
+ * A generated plot is the scientific result of record. Its generic interaction
+ * projection is progressive enhancement and must only replace the image after
+ * an explicit user action. Tables, by contrast, use their interactive viewer as
+ * the primary readable surface.
+ */
+export function shouldShowResultInteraction(input: {
+  adapter: ResultViewerAdapter;
+  interactionAvailable: boolean;
+  interactionRequested: boolean;
+}): boolean {
+  if (!input.interactionAvailable) return false;
+  if (input.adapter === 'table') return true;
+  return input.adapter === 'image' && input.interactionRequested;
 }
 
 export function resolveResultArtifactUrl(

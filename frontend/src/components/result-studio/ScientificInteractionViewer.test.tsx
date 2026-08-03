@@ -183,6 +183,7 @@ describe('ScientificInteractionViewer', () => {
     const { container } = render(<ScientificInteractionViewer language="r" jobId="job_1" artifactName="volcano.png" manifest={manifest('scatter')} backingTable={query} selection={null} onSelectionChange={onSelectionChange} />);
     fireEvent.click(container.querySelector('circle') as SVGCircleElement);
     expect(onSelectionChange.mock.calls[0][0].entityIds).toEqual(['TP53']);
+    expect(screen.getByText('-log10(pvalue)').getAttribute('transform')).toBe('rotate(-90 16 169)');
   });
 
   it('lets keyboard users focus and select a scatter point', () => {
