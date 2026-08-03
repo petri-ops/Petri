@@ -161,6 +161,45 @@ test('single-key Provider arguments envelopes are decoded before normal executio
   assert.deepEqual(batch.executed[0].args, inner);
 });
 
+test('single-key Provider envelopes repair only a bare redacted context token placeholder', async () => {
+  const wrapped = '{"contextToken": [REDACTED], "intent": {"intentId": "rei_1"}}';
+  const batch = await runBoundaryBatch([
+    toolCall('wrapped-redacted-token', JSON.stringify({ arguments: wrapped }), 'result_changeset_create_in_context'),
+  ]);
+  assert.equal(batch.executed.length, 1);
+  assert.deepEqual(batch.executed[0].args, {
+    contextToken: '[REDACTED]',
+    intent: { intentId: 'rei_1' },
+  });
+
+  const malformed = await runBoundaryBatch([
+    toolCall('wrapped-other-bare-token', JSON.stringify({ arguments: '{"path": [REDACTED]}' })),
+  ]);
+  assert.equal(malformed.executed.length, 1);
+  assert.deepEqual(malformed.executed[0].args, { arguments: '{"path": [REDACTED]}' });
+});
+
+test('direct Provider arguments repair only a bare redacted context token placeholder', async () => {
+  const batch = await runBoundaryBatch([
+    toolCall(
+      'direct-redacted-token',
+      '{"contextToken": [REDACTED], "intent": {"intentId": "rei_1"}}',
+      'result_changeset_create_in_context'
+    ),
+  ]);
+  assert.equal(batch.executed.length, 1);
+  assert.deepEqual(batch.executed[0].args, {
+    contextToken: '[REDACTED]',
+    intent: { intentId: 'rei_1' },
+  });
+
+  const malformed = await runBoundaryBatch([
+    toolCall('direct-other-bare-token', '{"path": [REDACTED]}'),
+  ]);
+  assert.equal(malformed.executed.length, 0);
+  assert.equal(malformed.rejected[0].error, 'invalid_arguments');
+});
+
 test('Provider arguments compatibility never unwraps envelopes with extra keys', async () => {
   const batch = await runBoundaryBatch([
     toolCall('ambiguous-wrapper', JSON.stringify({ arguments: '{"path":"a.txt"}', extra: true })),

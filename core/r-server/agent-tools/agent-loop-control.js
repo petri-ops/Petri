@@ -15,6 +15,13 @@ const MAX_FINALIZATION_ATTEMPTS = 2;
 const FINALIZATION_RETRY_PROMPT =
   '上一次最终整理没有返回可展示的正文。不要调用工具，不要输出思考过程；只输出面向用户的完整最终答复，说明已完成的工作、结果、需要注意的事项和下一步。';
 
+function normalizeRedactedContextTokenJson(value) {
+  return String(value || '').replace(
+    /("contextToken"\s*:\s*)\[REDACTED\](?=\s*[,}])/g,
+    '$1"[REDACTED]"'
+  );
+}
+
 function shouldFinalizeAgentIteration(iteration, controller) {
   return Boolean(controller && (
     (typeof controller.capHit === 'function' && controller.capHit()) ||
@@ -211,7 +218,8 @@ function createAgentToolCallController(options = {}) {
 
     let args;
     try {
-      args = JSON.parse(typeof fn.arguments === 'string' && fn.arguments.trim() ? fn.arguments : '{}');
+      const rawArguments = typeof fn.arguments === 'string' && fn.arguments.trim() ? fn.arguments : '{}';
+      args = JSON.parse(normalizeRedactedContextTokenJson(rawArguments));
     } catch {
       return {
         ok: false,
@@ -239,7 +247,13 @@ function createAgentToolCallController(options = {}) {
     // and fail at the existing boundary.
     if (Object.keys(args).length === 1 && typeof args.arguments === 'string') {
       try {
-        const decoded = JSON.parse(args.arguments);
+        // A few Providers serialize the diagnostic redaction marker as a
+        // bare token inside the stringified envelope. Repair only the exact
+        // contextToken placeholder; result-context binding will replace the
+        // resulting string with the click-time trusted token before schema
+        // validation. Other malformed JSON remains rejected downstream.
+        const normalizedArguments = normalizeRedactedContextTokenJson(args.arguments);
+        const decoded = JSON.parse(normalizedArguments);
         if (decoded && typeof decoded === 'object' && !Array.isArray(decoded)) args = decoded;
       } catch {}
     }
