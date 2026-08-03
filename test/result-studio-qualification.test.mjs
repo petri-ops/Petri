@@ -40,7 +40,7 @@ const evidenceKindForStep = {
   replay_verification: ['replay_record'],
 };
 
-function productTrace(taskId, index, environmentTags = REQUIRED_ENVIRONMENTS) {
+function productTrace(taskId, index) {
   const evidence = [];
   const steps = REQUIRED_TRACE_STEPS.map((id, stepIndex) => {
     const evidenceRefs = evidenceKindForStep[id].map((kind, kindIndex) => {
@@ -63,6 +63,8 @@ function productTrace(taskId, index, environmentTags = REQUIRED_ENVIRONMENTS) {
     sourceCommit: 'a'.repeat(40),
     projectRefHash: 'b'.repeat(64),
     conversationRefHash: 'c'.repeat(64),
+    primaryOperationDigest: String(index + 1).padStart(64, '7').slice(-64),
+    factPackageRef: `facts/trace-${index}.json#`,
     appMode: 'packaged_desktop_app',
     platform: 'macos-arm64',
     providerClass: index % 2 === 0 ? 'deepseek' : 'openai-compatible',
@@ -86,22 +88,6 @@ function productTrace(taskId, index, environmentTags = REQUIRED_ENVIRONMENTS) {
       responseDigest: '1'.repeat(64),
       toolName: 'result_studio_context',
     },
-    importProof: {
-      userUploadObserved: true,
-      uploadSha256: '2'.repeat(64),
-      executionInputSha256: '2'.repeat(64),
-    },
-    failureRecoveryProof: {
-      failedTerminalObserved: true,
-      falseSuccessAbsent: true,
-      recoveryCompleted: true,
-      recoveryArtifactTruthValid: true,
-      failedJobDigest: '3'.repeat(64),
-      recoveredJobDigest: '4'.repeat(64),
-    },
-    responsiveMatrix: ['light', 'dark'].flatMap((theme) => [1440, 1024, 820].map((width) => ({
-      theme, width, canvasVisible: true, operationCompleted: true, horizontalOverflow: false, firstCanvasMs: 850,
-    }))),
     replayVerification: {
       exactMatch: true,
       graphExact: true,
@@ -111,14 +97,8 @@ function productTrace(taskId, index, environmentTags = REQUIRED_ENVIRONMENTS) {
     performance: { firstCanvasMs: 850 },
     startedAt: '2026-07-25T08:00:00.000Z',
     completedAt: '2026-07-25T09:00:00.000Z',
-    environmentTags,
     evidence,
     steps,
-    invariants: REQUIRED_INVARIANTS.map((id) => ({
-      id,
-      status: 'observed_pass',
-      evidenceRefs: [evidence[0].id],
-    })),
   };
 }
 
@@ -131,18 +111,24 @@ test('RS-P0 rejects the stored RS9 summary because it has no continuous product 
   assert.deepEqual(verdict.missingTasks, REQUIRED_TASKS);
 });
 
-test('RS-P0 continuous trace contract requires ordered observed events and source-backed invariants', () => {
+test('RS-P0 continuous trace contract requires ordered observed events and source-backed references', () => {
   const valid = productTrace(REQUIRED_TASKS[0], 0);
   assert.equal(validateProductTrace(valid).valid, true, JSON.stringify(validateProductTrace(valid)));
 
   const incomplete = structuredClone(valid);
   incomplete.steps.splice(4, 1);
-  incomplete.invariants[0] = { ...incomplete.invariants[0], status: 'asserted_constant', evidenceRefs: [] };
   const verdict = validateProductTrace(incomplete);
   assert.equal(verdict.valid, false);
   assert.ok(verdict.issues.includes('trace_steps_not_complete_and_ordered'));
-  assert.ok(verdict.issues.includes(`trace_invariant_not_observed_pass:${REQUIRED_INVARIANTS[0]}`));
-  assert.ok(verdict.issues.includes(`trace_invariant_evidence_missing:${REQUIRED_INVARIANTS[0]}`));
+});
+
+test('P7 refuses producer-authored invariant and environment conclusions', () => {
+  const trace = productTrace(REQUIRED_TASKS[0], 0);
+  trace.invariants = REQUIRED_INVARIANTS.map((id) => ({ id, status: 'observed_pass' }));
+  trace.environmentTags = REQUIRED_ENVIRONMENTS;
+  const verdict = validateProductTrace(trace);
+  assert.equal(verdict.valid, false);
+  assert.ok(verdict.issues.includes('trace_producer_qualification_assertions_forbidden'));
 });
 
 test('RS-P0 refuses manual booleans, unsafe refs and user-supplied internal IDs', () => {
@@ -180,28 +166,28 @@ test('P7 refuses source drift and out-of-order evidence timestamps', () => {
   assert.ok(verdict.issues.some((issue) => issue.startsWith('trace_step_time_order_invalid:')));
 });
 
-test('P7 refuses claimed import, recovery, responsive and replay tags without their product proofs', () => {
+test('P7 task traces still refuse a claimed replay without its task-local proof', () => {
   const trace = productTrace(REQUIRED_TASKS[0], 0);
-  trace.importProof.executionInputSha256 = '9'.repeat(64);
-  trace.failureRecoveryProof.failedTerminalObserved = false;
-  trace.responsiveMatrix.pop();
   trace.replayVerification.exactMatch = false;
   const verdict = validateProductTrace(trace);
   assert.equal(verdict.valid, false);
-  assert.ok(verdict.issues.includes('trace_imported_user_data_not_proved'));
-  assert.ok(verdict.issues.includes('trace_failure_recovery_not_proved'));
-  assert.ok(verdict.issues.includes('trace_responsive_cell_missing:dark:820'));
   assert.ok(verdict.issues.includes('trace_exact_replay_not_proved'));
 });
 
-test('P7 qualification v3 only passes five valid continuous traces and two Provider classes', () => {
+test('P7 qualification v4 refuses five structurally valid traces without an independently verified evidence bundle', () => {
   const productTraces = REQUIRED_TASKS.map((taskId, index) => productTrace(taskId, index));
   const valid = evaluateResultStudioQualification({
     schemaVersion: RESULT_STUDIO_QUALIFICATION_VERSION,
     productTraces,
     privacyClean: true,
   });
-  assert.equal(valid.passed, true, JSON.stringify(valid));
+  assert.equal(valid.passed, false, JSON.stringify(valid));
+  assert.equal(valid.checks.schema, true);
+  assert.equal(valid.checks.allTracesValid, true);
+  assert.equal(valid.checks.taskMatrix, true);
+  assert.equal(valid.checks.twoRealProviders, false);
+  assert.equal(valid.checks.independentEvidence, false);
+  assert.ok(valid.evidenceIssues.includes('qualification_evidence_bundle_required'));
 
   const incomplete = evaluateResultStudioQualification({
     schemaVersion: RESULT_STUDIO_QUALIFICATION_VERSION,

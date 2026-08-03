@@ -1,9 +1,10 @@
 'use strict';
 
 const crypto = require('node:crypto');
+const { verifyQualificationEvidence } = require('./result-studio-evidence-bundle');
 
-const RESULT_STUDIO_QUALIFICATION_VERSION = 3;
-const RESULT_STUDIO_PRODUCT_TRACE_VERSION = 2;
+const RESULT_STUDIO_QUALIFICATION_VERSION = 4;
+const RESULT_STUDIO_PRODUCT_TRACE_VERSION = 3;
 
 const REQUIRED_TASKS = Object.freeze([
   'deg_selection_to_enrichment',
@@ -18,6 +19,7 @@ const REQUIRED_ENVIRONMENTS = Object.freeze([
   'existing_clean_git',
   'existing_dirty_git',
   'restart_and_interruption',
+  'literal_os_reboot',
   'light_theme',
   'dark_theme',
   'viewport_820',
@@ -168,6 +170,10 @@ function validateProductTrace(trace = {}) {
   if (!isCommit(trace.sourceCommit)) issues.push('trace_source_commit_invalid');
   if (!isSha256(trace.projectRefHash)) issues.push('trace_project_ref_hash_invalid');
   if (!isSha256(trace.conversationRefHash)) issues.push('trace_conversation_ref_hash_invalid');
+  if (!isSha256(trace.primaryOperationDigest)) issues.push('trace_primary_operation_digest_invalid');
+  if (!isSafeEvidenceRef(trace.factPackageRef) || !String(trace.factPackageRef || '').includes('#')) {
+    issues.push('trace_fact_package_ref_invalid');
+  }
   if (trace.appMode !== 'packaged_desktop_app') issues.push('trace_not_packaged_app');
   if (trace.platform !== 'macos-arm64') issues.push('trace_platform_not_qualified');
   if (typeof trace.providerClass !== 'string' || trace.providerClass.length === 0) issues.push('trace_provider_class_missing');
@@ -197,28 +203,6 @@ function validateProductTrace(trace = {}) {
     ? trace.performance : {};
   if (!Number.isFinite(performance.firstCanvasMs) || performance.firstCanvasMs < 0
       || performance.firstCanvasMs > 1000) issues.push('trace_packaged_first_canvas_budget_failed');
-  const imported = trace.importProof && typeof trace.importProof === 'object' ? trace.importProof : {};
-  if (imported.userUploadObserved !== true || !isSha256(imported.uploadSha256)
-      || imported.executionInputSha256 !== imported.uploadSha256) {
-    issues.push('trace_imported_user_data_not_proved');
-  }
-  const recovery = trace.failureRecoveryProof && typeof trace.failureRecoveryProof === 'object'
-    ? trace.failureRecoveryProof : {};
-  if (recovery.failedTerminalObserved !== true || recovery.falseSuccessAbsent !== true
-      || recovery.recoveryCompleted !== true || recovery.recoveryArtifactTruthValid !== true
-      || !isSha256(recovery.failedJobDigest) || !isSha256(recovery.recoveredJobDigest)) {
-    issues.push('trace_failure_recovery_not_proved');
-  }
-  const responsive = Array.isArray(trace.responsiveMatrix) ? trace.responsiveMatrix : [];
-  const responsiveCells = new Set(responsive.filter((item) => item?.canvasVisible === true
-    && item?.operationCompleted === true && item?.horizontalOverflow === false
-    && Number.isFinite(item?.firstCanvasMs) && item.firstCanvasMs <= 1000)
-    .map((item) => `${item.theme}:${item.width}`));
-  for (const theme of ['light', 'dark']) {
-    for (const width of [1440, 1024, 820]) {
-      if (!responsiveCells.has(`${theme}:${width}`)) issues.push(`trace_responsive_cell_missing:${theme}:${width}`);
-    }
-  }
   const replay = trace.replayVerification && typeof trace.replayVerification === 'object'
     ? trace.replayVerification : {};
   if (replay.exactMatch !== true || replay.graphExact !== true
@@ -276,23 +260,11 @@ function validateProductTrace(trace = {}) {
   }
   if (previousObservedAt > Date.parse(trace.completedAt || '')) issues.push('trace_evidence_after_completion');
 
-  const invariants = Array.isArray(trace.invariants) ? trace.invariants : [];
-  if (!uniqueIds(invariants)) issues.push('trace_invariant_ids_duplicate');
-  const invariantById = new Map(invariants.map((item) => [item && item.id, item]));
-  for (const id of REQUIRED_INVARIANTS) {
-    const invariant = invariantById.get(id);
-    if (!invariant) {
-      issues.push(`trace_invariant_missing:${id}`);
-      continue;
-    }
-    if (invariant.status !== 'observed_pass') issues.push(`trace_invariant_not_observed_pass:${id}`);
-    const refs = Array.isArray(invariant.evidenceRefs) ? invariant.evidenceRefs : [];
-    if (refs.length === 0) issues.push(`trace_invariant_evidence_missing:${id}`);
-    for (const ref of refs) if (!evidenceById.has(ref)) issues.push(`trace_invariant_evidence_unknown:${id}:${ref}`);
+  if (trace.invariants !== undefined || trace.environmentTags !== undefined || trace.importProof !== undefined
+      || trace.failureRecoveryProof !== undefined || trace.responsiveMatrix !== undefined) {
+    issues.push('trace_producer_qualification_assertions_forbidden');
   }
 
-  const environmentTags = new Set(Array.isArray(trace.environmentTags) ? trace.environmentTags : []);
-  if (environmentTags.size === 0) issues.push('trace_environment_tags_missing');
   return Object.freeze({
     valid: issues.length === 0,
     issues: Object.freeze([...new Set(issues)]),
@@ -300,14 +272,34 @@ function validateProductTrace(trace = {}) {
   });
 }
 
-function evaluateResultStudioQualification(report = {}) {
+function evaluateResultStudioQualification(report = {}, { evidenceRoot = null, manifest = null } = {}) {
   const traces = Array.isArray(report.productTraces) ? report.productTraces : [];
   const validated = traces.map((trace) => ({ trace, verdict: validateProductTrace(trace) }));
   const validTraces = validated.filter(({ verdict }) => verdict.valid).map(({ trace }) => trace);
   const taskIds = new Set(validTraces.map((trace) => trace.taskId));
-  const providerClasses = new Set(validTraces.map((trace) => trace.providerClass));
-  const environments = new Set(validTraces.flatMap((trace) => trace.environmentTags || []));
   const missingTasks = REQUIRED_TASKS.filter((id) => !taskIds.has(id));
+  let independentEvidence = Object.freeze({
+    valid: false,
+    issues: Object.freeze(['qualification_evidence_bundle_required']),
+    packageCount: 0,
+    primaryOperationCount: 0,
+    screenshotCount: 0,
+  });
+  if (typeof evidenceRoot === 'string' && evidenceRoot.length > 0 && manifest && typeof manifest === 'object') {
+    try {
+      independentEvidence = verifyQualificationEvidence(evidenceRoot, report, manifest);
+    } catch (error) {
+      independentEvidence = Object.freeze({
+        valid: false,
+        issues: Object.freeze([`qualification_evidence_verifier_failed:${error.message}`]),
+        packageCount: 0,
+        primaryOperationCount: 0,
+        screenshotCount: 0,
+      });
+    }
+  }
+  const providerClasses = new Set(independentEvidence.providerClasses || []);
+  const environments = new Set(independentEvidence.environmentTags || []);
   const missingEnvironments = REQUIRED_ENVIRONMENTS.filter((id) => !environments.has(id));
   const checks = {
     schema: report.schemaVersion === RESULT_STUDIO_QUALIFICATION_VERSION,
@@ -316,7 +308,11 @@ function evaluateResultStudioQualification(report = {}) {
     environmentMatrix: missingEnvironments.length === 0,
     twoRealProviders: providerClasses.size >= 2,
     packagedOnly: validTraces.length > 0 && validTraces.every((trace) => trace.appMode === 'packaged_desktop_app'),
-    privacy: report.privacyClean === true,
+    privacy: independentEvidence.privacyClean === true,
+    independentEvidence: independentEvidence.valid
+      && independentEvidence.packageCount === REQUIRED_TASKS.length
+      && independentEvidence.primaryOperationCount === REQUIRED_TASKS.length
+      && independentEvidence.screenshotCount === 6,
   };
   const passed = Object.values(checks).every(Boolean);
   return Object.freeze({
@@ -326,7 +322,14 @@ function evaluateResultStudioQualification(report = {}) {
     missingEnvironments: Object.freeze(missingEnvironments),
     invalidTraces: Object.freeze(validated.filter(({ verdict }) => !verdict.valid).map(({ trace, verdict }) => ({ traceId: trace.traceId || null, issues: verdict.issues }))),
     providerClassCount: providerClasses.size,
-    qualificationDigest: sha256(JSON.stringify({ checks, missingTasks, missingEnvironments, traceDigests: validated.map(({ verdict }) => verdict.traceDigest) })),
+    evidenceIssues: independentEvidence.issues,
+    qualificationDigest: sha256(JSON.stringify({
+      checks,
+      missingTasks,
+      missingEnvironments,
+      traceDigests: validated.map(({ verdict }) => verdict.traceDigest),
+      evidenceIssues: independentEvidence.issues,
+    })),
   });
 }
 
