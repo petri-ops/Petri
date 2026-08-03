@@ -43,7 +43,7 @@ P6-1 已于 2026-08-02 在 `ad1e2ce` 收口，canonical evidence `acceptance/g0-
 
 P7 延期检查点：`e14a8e6` 已完成 existing Git 持久显式 opt-in 后端安全修复；`6dc3880`/`1bb295c` 已使资格器在没有可解引用 task-local fact bundle、独立 replay、唯一截图和重算不变量时 fail-closed；Agent 结果动作 completion 修复保留。没有生成 canonical P7 PASS evidence。selection→enrichment 当前是 direct Job + auto-adopted baseline，不满足 candidate/compare/lifecycle，必须作为未来产品缺口修复，不能由 harness 伪造。
 
-当前分支为 `codex/g0-result-studio-product`。`G0-RS-UX1A Focus Entry & Honest Preview` 与 `G0-RS-UX1B Artifact Navigation & Format Clarity` 已完成开发态短闭环：结果导航按科学图分组格式变体，PNG 默认预览，SVG/PDF 为导出选项，数据/技术文件进入相关文件折叠区；不改变 Artifact Truth、插件执行或 P7 资格。当前没有 active 实现工作包。
+当前分支为 `codex/g0-result-studio-product`。`G0-RS-UX1A Focus Entry & Honest Preview`、`G0-RS-UX1B Artifact Navigation & Format Clarity` 与 `G0-RS-UX1C Result-First Preview` 均已完成：主结果卡只保留结果名、结果类型、可用性/校验状态和必要动作，原始路径、导出、脚本、重放等进入“更多操作”；不改变 Artifact Truth、插件执行或 P7 资格。当前没有 active 实现工作包。
 
 验证边界：前端 32/32、受影响 Node 368/368、P4R 不变量 7/7、TypeScript/UI/docs 通过。`npm run test:changed` 仍会因 P6 历史 evidence 绑定 `ad1e2ce` 而在 `p6_current_source_tree_not_exact` 处 fail-closed；不得在未重跑 P6 实机矩阵时把旧证据改绑 UX1A 源码。
 

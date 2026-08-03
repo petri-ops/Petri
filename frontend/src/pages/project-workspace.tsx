@@ -4346,42 +4346,49 @@ function ResultArtifactShell({
                     <div className={styles.resultReportActiveName}>{selectedArtifactLabel}</div>
                     <div className={styles.resultReportActiveMeta}>
                       <span>{artifactKindLabel(selectedArtifactKind)}</span>
-                      <span>{selectedArtifactName}</span>
                     </div>
                     {selectedArtifactUrl && effectivePreviewAvailability.status !== 'unavailable' && (
                       <a className={styles.resultReportActiveLink} href={selectedArtifactUrl} target="_blank" rel="noreferrer">
-                        打开原文件
+                        打开结果
                       </a>
                     )}
-                    {selectedDisplayGroup && selectedDisplayGroup.variants.length > 1 && (
-                      <div className={styles.resultReportExportLinks}>
-                        <span>导出格式</span>
-                        {selectedDisplayGroup.variants
-                          .filter((artifact) => artifact.name !== selectedDisplayGroup.primary.name && /\.(svg|pdf)$/i.test(artifact.name))
-                          .map((artifact) => (
-                            <a
-                              key={artifact.name}
-                              href={resolveResultArtifactUrl(artifact.url, buildUrl(artifact.name))}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              {artifactFormatLabel(artifact)}
-                            </a>
-                          ))}
-                      </div>
-                    )}
-                    {result.deliveryManifest && (
-                      <div className={styles.resultReportReproductionActions}>
-                        {scientificScriptUrl && (
-                          <a href={scientificScriptUrl} target="_blank" rel="noreferrer">查看脚本</a>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => onAskAgent(`请为任务 ${job.id} 的产物 ${selectedArtifactName} 发起重放验证；先展示输入、资源和副作用确认摘要，不要直接执行。`)}
-                        >
-                          重放验证
-                        </button>
-                      </div>
+                    {(selectedDisplayGroup && selectedDisplayGroup.variants.length > 1 || result.deliveryManifest) && (
+                      <details className={styles.resultReportMoreActions}>
+                        <summary>更多操作</summary>
+                        <div className={styles.resultReportMoreActionsBody}>
+                          <div className={styles.resultReportTechnicalName}>{selectedArtifactName}</div>
+                          {selectedDisplayGroup && selectedDisplayGroup.variants.length > 1 && (
+                            <div className={styles.resultReportExportLinks}>
+                              <span>导出格式</span>
+                              {selectedDisplayGroup.variants
+                                .filter((artifact) => artifact.name !== selectedDisplayGroup.primary.name && /\.(svg|pdf)$/i.test(artifact.name))
+                                .map((artifact) => (
+                                  <a
+                                    key={artifact.name}
+                                    href={resolveResultArtifactUrl(artifact.url, buildUrl(artifact.name))}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  >
+                                    {artifactFormatLabel(artifact)}
+                                  </a>
+                                ))}
+                            </div>
+                          )}
+                          {result.deliveryManifest && (
+                            <div className={styles.resultReportReproductionActions}>
+                              {scientificScriptUrl && (
+                                <a href={scientificScriptUrl} target="_blank" rel="noreferrer">查看脚本</a>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => onAskAgent(`请为任务 ${job.id} 的产物 ${selectedArtifactName} 发起重放验证；先展示输入、资源和副作用确认摘要，不要直接执行。`)}
+                              >
+                                重放验证
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </details>
                     )}
                   </div>
                 )}

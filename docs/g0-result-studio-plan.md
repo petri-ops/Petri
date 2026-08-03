@@ -2,7 +2,7 @@
 
 最后更新：2026-08-03
 
-状态：`UX1B completed / P7 deferred / implemented_unverified`（UX1B 只处理结果导航与格式表达；不改变 Artifact Truth、插件执行或 P7 资格）
+状态：`UX1C completed / P7 deferred / implemented_unverified`（UX1C 只处理结果优先的信息层级；不改变 Artifact Truth、插件执行或 P7 资格）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -23,6 +23,10 @@
 ### UX1B：Artifact Navigation & Format Clarity（`completed · non-qualifying`）
 
 这是 UX1A 之后的短闭环：同一科学图的 PNG/SVG/PDF 展示为一个结果项，PNG 作为默认预览，SVG/PDF 作为导出格式；数据、日志和未知文件降级到“相关文件”折叠区。该投影只存在于 Result Studio UI，不修改 Artifact Truth、manifest 原始记录、插件 descriptor、执行链、版本控制或 P7 资格边界。聚焦单测 9/9、TypeScript、治理门禁通过；开发态 Electron 真实旧 GO/KEGG Job 观察确认 PNG 默认预览与 14 个相关文件折叠显示，但该 Job 未产生同图 SVG/PDF，变体合并由纯函数测试覆盖。该短闭环不提升产品资格。
+
+### UX1C：Result-First Preview（`completed · non-qualifying`）
+
+主结果卡只保留科学结果名称、类型、可用性/校验状态和必要的“打开结果”动作；原始路径、格式导出、脚本查看、重放验证等技术动作统一进入“更多操作”折叠区。该调整只改变信息层级，不删除能力，不改变 Artifact Truth、插件执行、版本控制或 P7 资格。前端聚焦测试 16/16、TypeScript、docs/UI 门禁通过；开发态 Electron 真实旧 GO/KEGG Job 观察确认首屏只显示结果名/类型与必要恢复动作，技术信息未占据主结果卡。
 
 BioF3 当前已经具备可信运行、Artifact 导航、静态预览、交付摘要、脚本入口和 ReplayPackage，但结果仍主要是“可查看的交付终点”，尚未成为用户可以持续探索、选择、编辑、比较和继续分析的科研工作对象。
 

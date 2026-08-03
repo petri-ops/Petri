@@ -4252,6 +4252,30 @@ body.biof3-resizing-columns * {
   text-decoration: none;
 }
 
+.resultReportMoreActions {
+  margin-top: 10px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 8px;
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.resultReportMoreActions summary {
+  cursor: pointer;
+  user-select: none;
+}
+
+.resultReportMoreActionsBody {
+  padding-top: 6px;
+}
+
+.resultReportTechnicalName {
+  overflow-wrap: anywhere;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+}
+
 .resultReportNavSection {
   display: grid;
   gap: 1px;
