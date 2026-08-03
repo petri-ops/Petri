@@ -38,3 +38,9 @@ test('P7 UI trace accepts truthful enrichment submission or completion wording',
   assert.match(source, /任务已经提交\|已成功执行\|分析已完成/);
   assert.match(source, /expectedCompletion:[\s\S]*enrichmentTerminal/);
 });
+
+test('P7 bound drawer completion guard keys off the private projected confirmation context', () => {
+  const source = readFileSync(new URL('../core/r-server/routes/ai-agent.js', import.meta.url), 'utf8');
+  assert.match(source, /required:\s*typeof toolCtx\.resultStudioScientificConfirmation === 'boolean'/);
+  assert.match(source, /result_edit_completion_retry/);
+});
