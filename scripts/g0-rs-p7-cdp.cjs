@@ -7,6 +7,20 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function withTimeout(promise, timeoutMs, code) {
+  let timer;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error(code)), timeoutMs);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function safeEvaluationDiagnostic(exceptionDetails) {
   const raw = String(exceptionDetails?.text || exceptionDetails?.exception?.description || 'renderer_exception');
   return raw.slice(0, 240)
@@ -109,7 +123,10 @@ async function connectToPackagedPage(debugPort, { timeoutMs = 60_000 } = {}) {
   throw new Error('packaged_cdp_page_timeout');
 }
 
-function createPackagedWindowAdapter(client) {
+function createPackagedWindowAdapter(client, {
+  captureTimeoutMs = 10_000,
+  captureFallback = null,
+} = {}) {
   const webContents = {
     on() {},
     async executeJavaScript(expression) {
@@ -127,12 +144,19 @@ function createPackagedWindowAdapter(client) {
       return result.result?.value;
     },
     async capturePage() {
-      const result = await client.send('Page.captureScreenshot', {
-        format: 'png',
-        fromSurface: true,
-        captureBeyondViewport: false,
-      });
-      const png = Buffer.from(result.data || '', 'base64');
+      let png;
+      try {
+        const result = await withTimeout(client.send('Page.captureScreenshot', {
+          format: 'png',
+          fromSurface: true,
+          captureBeyondViewport: false,
+        }), captureTimeoutMs, 'packaged_cdp_capture_timeout');
+        png = Buffer.from(result.data || '', 'base64');
+      } catch (error) {
+        if (typeof captureFallback !== 'function') throw error;
+        png = Buffer.from(await captureFallback(error));
+      }
+      if (png.length === 0) throw new Error('packaged_capture_empty');
       return { toPNG: () => png };
     },
   };

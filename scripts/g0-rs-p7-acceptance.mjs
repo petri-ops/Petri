@@ -111,6 +111,32 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function capturePackagedWindowNative(ownerPid) {
+  invariant(process.platform === 'darwin', 'p7_native_capture_requires_macos');
+  invariant(Number.isInteger(ownerPid) && ownerPid > 0, 'p7_native_capture_pid_invalid');
+  const swift = [
+    'import CoreGraphics',
+    `let ownerPid = ${ownerPid}`,
+    'let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID)! as! [[String:Any]]',
+    'for window in windows {',
+    '  if (window[kCGWindowOwnerPID as String] as? Int) == ownerPid,',
+    '     let number = window[kCGWindowNumber as String] as? Int { print(number); break }',
+    '}',
+  ].join('; ');
+  const windowId = execFileSync('swift', ['-e', swift], { encoding: 'utf8', timeout: 30_000 }).trim();
+  invariant(/^\d+$/.test(windowId), 'p7_native_capture_window_missing');
+  const capturePath = path.join(tmpdir(), `biof3-p7-native-${process.pid}-${Date.now()}.png`);
+  try {
+    execFileSync('/usr/sbin/screencapture', ['-x', `-l${windowId}`, capturePath], { timeout: 30_000 });
+    const png = readFileSync(capturePath);
+    invariant(png.length > 8 && png.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex')),
+      'p7_native_capture_invalid_png');
+    return png;
+  } finally {
+    rmSync(capturePath, { force: true });
+  }
+}
+
 async function freePort() {
   const { createServer } = await import('node:net');
   return await new Promise((resolve, reject) => {
@@ -773,7 +799,13 @@ async function runJourney(target, index, { existingGit = false, dirtyGit = false
       },
     };
     stage = 'packaged_ui_trace';
-    const window = createPackagedWindowAdapter(first.cdp.client);
+    const window = createPackagedWindowAdapter(first.cdp.client, {
+      // Chromium 130 on macOS can leave Page.captureScreenshot pending after
+      // a WebGL/SVG-heavy compare surface. Keep the evidence capture bounded
+      // and fall back to the real on-screen packaged BrowserWindow pixels.
+      captureTimeoutMs: 8_000,
+      captureFallback: () => capturePackagedWindowNative(first.child.pid),
+    });
     const ui = await runProductTrace(window, config);
     const startedCheckpoint = ui?.timeline?.find((item) => item.stage === 'starting');
     const canvasCheckpoint = ui?.timeline?.find((item) => item.stage === 'deg_ready');
