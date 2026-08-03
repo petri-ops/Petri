@@ -1,8 +1,8 @@
 # G0 Result Studio — 意图驱动、可编辑、Git-backed 的科研结果工作台计划
 
-最后更新：2026-08-03
+最后更新：2026-08-04
 
-状态：`UX1F completed / P7 deferred / implemented_unverified`（UX1F 只扁平化结果画布的信息层级；不改变 Artifact Truth、插件执行或 P7 资格）
+状态：`TL1 active / P7 deferred / implemented_unverified`（TL1 只收口自绘窗口控件；不改变 Artifact Truth、插件执行或 P7 资格）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -39,6 +39,12 @@ Result Studio 进入 `result/code/compare/history` 时，Electron 顶层标题�
 ### UX1F：Result Canvas Flattening（`completed · non-qualifying`）
 
 把 ContextBar 与 Artifact 选择合并为单一结果工具栏，删除同一结果在窗口标题、上下文标题和独立选择条中的重复表达；最终 HTML 报告、格式导出、重放与相关文件统一进入按需操作区。静态图不把“没有交互 manifest”展示成错误，主结果预览移除装饰卡片边界并占据可用画布；底部 Agent Composer 收窄为一行默认态，只在需要时展示上下文阻断或执行状态。图形结果以插件生成的正式 PNG 为默认展示，通用 scatter/matrix 只作为显式可逆的交互增强；交互状态按 Revision/Job/Artifact 绑定，结果模式不常驻版本面板，PDF-only 不进入图片查看器。该切片只修改 Result Studio 的前端投影与交互层级，保持 Artifact/Revision/Selection Truth、执行链和 P7 资格边界不变。原 UX1F 聚焦前端 51/51；真实图形补验修复后聚焦前端 44/44、Result Studio 前端聚合 199/199、TypeScript 与治理门通过。开发态 Electron 同一真实新 volcano Job `job_41578fbc4c6f4577` 验证 PNG 标题、阈值线、图例与双轴完整显示，25 点交互视图显式往返，结果态无版本大面板；不外推 packaged/P7。
+
+### TL1：Frameless Window Controls（`active · non-qualifying`）
+
+这是用户反馈驱动的短 Goal，复用 `G0-RS` 而不创建第二个工作包。现有 WIP 已把 Electron 窗口改为 `frame:false`，并在统一 TitleBar 中接入关闭、最小化、最大化/还原及状态事件；收口前必须修复折叠左轨约 12px 的几何溢出、最大化初始查询与事件订阅的竞态/拒绝处理，以及窗口按钮缺少 `focus-visible` 的可访问性回归。新增聚焦测试覆盖 desktop/web 投影、按钮 IPC、状态事件与清理、双击交互元素不误触；主进程/preload 保持单一窗口 IPC 真相。
+
+出口只认开发态 Electron 同一 BrowserWindow 的真实行为：关闭、最小化、最大化/还原、图标与 aria 状态同步、空白拖拽区双击、交互元素双击隔离、拖动、Cmd/Ctrl+0/-/+、明暗主题及 720/840/1050px 布局均无重叠或不可达；配套 `node --check`、前端 strict check、聚焦/related 测试、`docs:check` 与 `ui:audit:check` 必须通过。完整 P6 evidence 重绑、P7、Provider、packaged Windows/Linux、构建、OS reboot 和新分析功能均不属于 TL1；旧 P6 evidence 对当前 `src/preload.js` 的 source-exact 失败继续如实保留。
 
 BioF3 当前已经具备可信运行、Artifact 导航、静态预览、交付摘要、脚本入口和 ReplayPackage，但结果仍主要是“可查看的交付终点”，尚未成为用户可以持续探索、选择、编辑、比较和继续分析的科研工作对象。
 
