@@ -14,6 +14,7 @@ const route = require('../core/r-server/routes/result-studio');
 const { readVerifiedFileSnapshot } = require('../core/r-server/helpers/verified-file-snapshot');
 const { queryResultTable } = require('../core/shared-backend/result-studio-table-query');
 const {
+  attachExistingRepositoryWithExplicitConsent,
   baselineFailureDiagnostic,
   bindAuthoritativeQuerySelection,
   buildContextBoundPreviewBudget,
@@ -23,6 +24,76 @@ const {
   resolveArtifactPath,
   resolveInteractionBaselineRevision,
 } = route._test;
+
+test('P7 existing Git attachment requires explicit affirmative consent before binding or persistence', () => {
+  let bindCalls = 0;
+  let consentWrites = 0;
+  let bindingWrites = 0;
+  const repository = {
+    saveExistingRepositoryConsent: () => { consentWrites += 1; },
+    saveRepositoryBinding: () => { bindingWrites += 1; },
+  };
+  const binder = () => { bindCalls += 1; return null; };
+
+  const denied = attachExistingRepositoryWithExplicitConsent({
+    projectId: 'p_1', workspaceRoot: '/tmp/project', allowExistingRepository: false,
+  }, { repository, bindProjectRepository: binder });
+  assert.deepEqual(denied, {
+    ok: false, status: 400, code: 'explicit_existing_repository_consent_required',
+  });
+  assert.equal(bindCalls, 0);
+  assert.equal(consentWrites, 0);
+  assert.equal(bindingWrites, 0);
+});
+
+test('P7 explicit Git attachment persists consent and binding only after inspecting existing mode', () => {
+  let bindOptions = null;
+  const repository = {
+    saveExistingRepositoryConsent: (decision) => ({
+      ...decision,
+      createdAt: '2026-08-03T00:00:00.000Z',
+      updatedAt: '2026-08-03T00:00:00.000Z',
+    }),
+    saveRepositoryBinding: (binding) => ({ ...binding, createdAt: 'now', updatedAt: 'now' }),
+  };
+  const result = attachExistingRepositoryWithExplicitConsent({
+    projectId: 'p_1', workspaceRoot: '/tmp/project', allowExistingRepository: true,
+  }, {
+    repository,
+    bindProjectRepository: (options) => {
+      bindOptions = options;
+      return {
+        status: 'ready', mode: 'existing', reason: null,
+        workspaceRoot: '/tmp/project', managedPaths: ['analysis/scripts'],
+        adapter: { gitDir: '/tmp/project/.git', workTree: '/tmp/project' },
+        inspection: { runtime: { versionRaw: 'git version 2.50.1' } },
+      };
+    },
+  });
+  assert.equal(bindOptions.allowExistingRepository, true);
+  assert.equal(bindOptions.createManagedIfMissing, false);
+  assert.deepEqual(result, {
+    ok: true,
+    status: 200,
+    code: null,
+    bindingStatus: 'ready',
+    mode: 'existing',
+    consent: { allowExistingRepository: true, decisionSource: 'explicit_api' },
+  });
+});
+
+test('P7 production Git callers derive existing-repository access instead of hard-coding it', () => {
+  for (const relative of [
+    '../core/r-server/routes/result-studio.js',
+    '../core/shared-backend/result-studio-background-child.js',
+    '../core/r-server/agent-tools/result-edit-tools.js',
+    '../core/r-server/agent-tools/result-selection-tools.js',
+  ]) {
+    const source = readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), relative), 'utf8');
+    assert.doesNotMatch(source, /allowExistingRepository\s*:\s*true/);
+    assert.match(source, /hasExistingRepositoryConsent/);
+  }
+});
 const routeDb = require('../core/r-server/db').db;
 
 test.after(() => {

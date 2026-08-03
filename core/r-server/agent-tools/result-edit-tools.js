@@ -331,11 +331,12 @@ function createResultChangeSetTools(options = {}) {
     if (!authorizeProject(project, ctx.userId, dbModule)) return { error: 'source_project_mismatch' };
     const repository = makeRepository(dbModule.db || dbModule.getDatabase());
     if (!git) return { projectId, project, repository, binding: null };
+    const allowExistingRepository = repository.hasExistingRepositoryConsent?.(projectId) === true;
     const binding = bindRepository({
       workspaceRoot: project.workspace_path,
       projectId,
       preferManaged: false,
-      allowExistingRepository: true,
+      allowExistingRepository,
       createManagedIfMissing: write,
     });
     if (!binding?.adapter || (write && binding.status !== 'ready')) {

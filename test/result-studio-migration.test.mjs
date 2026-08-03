@@ -45,12 +45,17 @@ const {
   RESULT_REF_TRANSACTION_MIGRATION_VERSION,
   buildResultRefTransactionMigrationSql,
 } = require('../core/shared-backend/result-ref-transaction-schema');
+const {
+  GIT_REPOSITORY_CONSENT_MIGRATION_VERSION,
+  buildGitRepositoryConsentMigrationSql,
+} = require('../core/shared-backend/git-repository-consent-schema');
 
 const REAL_MIGRATIONS_DIR = join(REPO_ROOT, 'src', 'migrations');
 const MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '001_result_studio.sql');
 const WORKFLOW_GRAPH_MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '002_result_workflow_graph.sql');
 const REF_TRANSACTION_MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '003_result_ref_transactions.sql');
-const LATEST_MIGRATION_VERSION = RESULT_REF_TRANSACTION_MIGRATION_VERSION;
+const REPOSITORY_CONSENT_MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '004_git_repository_consent.sql');
+const LATEST_MIGRATION_VERSION = GIT_REPOSITORY_CONSENT_MIGRATION_VERSION;
 
 function tempDir(context, prefix) {
   const root = mkdtempSync(join(tmpdir(), prefix));
@@ -125,6 +130,22 @@ test('P6 ref transaction migration is generated from its schema module and is ad
   assert.equal(/\bresult_ref_transactions\b/i.test(sql), true);
 });
 
+test('P7 Git repository consent migration is generated and additive', () => {
+  assert.equal(
+    readFileSync(REPOSITORY_CONSENT_MIGRATION_FILE, 'utf8'),
+    buildGitRepositoryConsentMigrationSql(),
+  );
+  const sql = readFileSync(REPOSITORY_CONSENT_MIGRATION_FILE, 'utf8')
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('--'))
+    .join('\n');
+  assert.equal(/^\s*BEGIN\b/im.test(sql), false);
+  assert.equal(/^\s*COMMIT\b/im.test(sql), false);
+  assert.equal(/\bDROP\s+TABLE\b/i.test(sql), false);
+  assert.equal(/\bALTER\s+TABLE\b/i.test(sql), false);
+  assert.equal(/\bgit_repository_consents\b/i.test(sql), true);
+});
+
 // ---------------------------------------------------------------------------
 // 2-4. 真实 runner 行为
 // ---------------------------------------------------------------------------
@@ -143,6 +164,7 @@ test('RS2 runner installs the schema into an empty database', async (context) =>
   }
   assert.equal(names.includes('result_workflow_graphs'), true);
   assert.equal(names.includes('result_ref_transactions'), true);
+  assert.equal(names.includes('git_repository_consents'), true);
 
   const db = new Database(dbPath, { readonly: true });
   context.after(() => { try { db.close(); } catch { /* noop */ } });
@@ -152,6 +174,7 @@ test('RS2 runner installs the schema into an empty database', async (context) =>
     RESULT_STUDIO_MIGRATION_VERSION,
     RESULT_WORKFLOW_GRAPH_MIGRATION_VERSION,
     RESULT_REF_TRANSACTION_MIGRATION_VERSION,
+    GIT_REPOSITORY_CONSENT_MIGRATION_VERSION,
   ]);
 });
 
@@ -192,7 +215,7 @@ test('RS2 runner is idempotent across repeated startups', async (context) => {
   context.after(() => { try { db.close(); } catch { /* noop */ } });
   // 版本只记录一次，不重复插入
   const rows = db.prepare('SELECT version FROM schema_migrations').all();
-  assert.equal(rows.length, 3);
+  assert.equal(rows.length, 4);
 });
 
 // ---------------------------------------------------------------------------

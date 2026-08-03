@@ -393,7 +393,11 @@ test('RS1 binds a clean existing repository without touching it', { skip: !gitRe
   const found = findEnclosingGitRepository(root);
   assert.equal(found.root, root);
 
-  const binding = bindProjectRepository({ workspaceRoot: root, projectId: 'project_existing' });
+  const binding = bindProjectRepository({
+    workspaceRoot: root,
+    projectId: 'project_existing',
+    allowExistingRepository: true,
+  });
   assert.equal(binding.status, 'ready');
   assert.equal(binding.mode, 'existing');
   assert.equal(binding.dirty.dirty, false);
@@ -409,7 +413,11 @@ test('RS1 blocks when managed paths collide with uncommitted user work', { skip:
   // 用户自己正在改我们要管的脚本 → 必须阻断，不覆盖、不 stash
   writeManagedScript(root, 'analysis/scripts/plot_volcano.R', 'user work in progress\n');
 
-  const binding = bindProjectRepository({ workspaceRoot: root, projectId: 'project_existing' });
+  const binding = bindProjectRepository({
+    workspaceRoot: root,
+    projectId: 'project_existing',
+    allowExistingRepository: true,
+  });
   assert.equal(binding.status, 'blocked_dirty_conflict');
   assert.equal(binding.reason, 'managed_paths_have_uncommitted_changes');
   assert.equal(binding.dirty.conflictingManagedPaths.includes('analysis/scripts/plot_volcano.R'), true);
@@ -424,7 +432,11 @@ test('RS1 proceeds when user WIP lies outside managed paths and leaves it untouc
   writeFileSync(join(root, 'README.md'), '# user project\nlocal edit\n');
   writeFileSync(join(root, 'notes.txt'), 'private notes\n');
 
-  const binding = bindProjectRepository({ workspaceRoot: root, projectId: 'project_existing' });
+  const binding = bindProjectRepository({
+    workspaceRoot: root,
+    projectId: 'project_existing',
+    allowExistingRepository: true,
+  });
   assert.equal(binding.status, 'ready');
   assert.equal(binding.mode, 'existing');
   assert.equal(binding.dirty.dirty, true);
@@ -449,13 +461,21 @@ test('RS1 blocks a repository that is mid-operation or index-locked', { skip: !g
   const root = makeWorkspace(context);
   initUserRepository(root);
   writeFileSync(join(root, '.git', 'index.lock'), '');
-  const locked = bindProjectRepository({ workspaceRoot: root, projectId: 'project_existing' });
+  const locked = bindProjectRepository({
+    workspaceRoot: root,
+    projectId: 'project_existing',
+    allowExistingRepository: true,
+  });
   assert.equal(locked.status, 'blocked_repository_state');
   assert.equal(locked.reason, 'index_lock_present');
   rmSync(join(root, '.git', 'index.lock'));
 
   writeFileSync(join(root, '.git', 'MERGE_HEAD'), '0'.repeat(40));
-  const merging = bindProjectRepository({ workspaceRoot: root, projectId: 'project_existing' });
+  const merging = bindProjectRepository({
+    workspaceRoot: root,
+    projectId: 'project_existing',
+    allowExistingRepository: true,
+  });
   assert.equal(merging.status, 'blocked_repository_state');
   assert.equal(merging.reason, 'repository_mid_operation');
 });
@@ -464,7 +484,11 @@ test('RS1 blocks existing repositories that contain submodules', { skip: !gitRea
   const root = makeWorkspace(context);
   initUserRepository(root);
   writeFileSync(join(root, '.gitmodules'), '[submodule "x"]\n\tpath = x\n\turl = ./x\n');
-  const binding = bindProjectRepository({ workspaceRoot: root, projectId: 'project_existing' });
+  const binding = bindProjectRepository({
+    workspaceRoot: root,
+    projectId: 'project_existing',
+    allowExistingRepository: true,
+  });
   assert.equal(binding.status, 'blocked_repository_state');
   assert.equal(binding.reason, 'submodules_present');
 });
@@ -497,6 +521,24 @@ test('RS1 honours an explicit managed-only preference inside an existing reposit
   assert.equal(binding.status, 'ready');
   assert.equal(binding.mode, 'managed');
   assert.equal(existsSync(join(root, BIOF3_DIR, 'git', 'HEAD')), true);
+});
+
+test('RS1 defaults an existing repository to managed history without consent and reports why', { skip: !gitReady }, (context) => {
+  const root = makeWorkspace(context);
+  initUserRepository(root);
+  const headBefore = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
+
+  const binding = bindProjectRepository({ workspaceRoot: root, projectId: 'project_no_consent' });
+
+  assert.equal(binding.status, 'ready');
+  assert.equal(binding.mode, 'managed');
+  assert.deepEqual(binding.diagnostics, ['existing_repository_not_attached_without_consent']);
+  assert.equal(existsSync(join(root, BIOF3_DIR, 'git', 'HEAD')), true);
+  assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), headBefore);
+  assert.equal(execFileSync('git', ['for-each-ref', '--format=%(refname)', 'refs/heads/biof3'], {
+    cwd: root,
+    encoding: 'utf8',
+  }).trim(), '');
 });
 
 test('RS1 refuses to create a managed repository when creation is disabled', { skip: !gitReady }, (context) => {

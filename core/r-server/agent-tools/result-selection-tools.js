@@ -257,11 +257,12 @@ function verifyImmutableRevision({ projectId, project, revision, repository, sou
   let binding = dependencies.repositoryBinding || null;
   if (!dependencies.adapter && !binding) {
     const bindRepository = dependencies.bindProjectRepository || bindProjectRepository;
+    const allowExistingRepository = repository.hasExistingRepositoryConsent?.(projectId) === true;
     binding = bindRepository({
       workspaceRoot: project.workspace_path,
       projectId,
       preferManaged: false,
-      allowExistingRepository: true,
+      allowExistingRepository,
       createManagedIfMissing: false,
     });
   }

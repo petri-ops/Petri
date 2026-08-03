@@ -39,7 +39,10 @@ const {
 // 直接对模块对象调用 prepare() 会在运行时抛错。
 const sqlite = db.db;
 const { resolveProjectRunLayout, isPathContained } = require('../../shared-backend/project-run-layout');
-const { bindProjectRepository } = require('../../shared-backend/git-repository-binding');
+const {
+  bindProjectRepository,
+  inspectWorkspaceGit,
+} = require('../../shared-backend/git-repository-binding');
 const {
   createDeduplicatedBackgroundRunner,
   runResultStudioBackground,
@@ -87,6 +90,74 @@ const {
   summarizeContextForAgent,
   PUBLIC_EDIT_PHASES,
 } = require('../../shared-backend/result-studio-context');
+
+function attachExistingRepositoryWithExplicitConsent(input, dependencies = {}) {
+  const projectId = String(input?.projectId || '').trim();
+  const workspaceRoot = String(input?.workspaceRoot || '').trim();
+  const allowExistingRepository = input?.allowExistingRepository === true;
+  if (!projectId || !workspaceRoot) {
+    return { ok: false, status: 400, code: 'project_context_required' };
+  }
+  if (!allowExistingRepository) {
+    return { ok: false, status: 400, code: 'explicit_existing_repository_consent_required' };
+  }
+  const repository = dependencies.repository;
+  const binder = dependencies.bindProjectRepository || bindProjectRepository;
+  if (!repository?.saveExistingRepositoryConsent || !repository?.saveRepositoryBinding) {
+    return { ok: false, status: 500, code: 'repository_consent_store_unavailable' };
+  }
+  const binding = binder({
+    workspaceRoot,
+    projectId,
+    preferManaged: false,
+    allowExistingRepository,
+    createManagedIfMissing: false,
+  });
+  if (binding?.mode !== 'existing') {
+    return {
+      ok: false,
+      status: 409,
+      code: binding?.inspection?.managed?.exists
+        ? 'managed_repository_already_initialized'
+        : 'existing_repository_not_found',
+    };
+  }
+  if (!binding.adapter) {
+    return {
+      ok: false,
+      status: 409,
+      code: binding.reason || binding.status || 'repository_binding_failed',
+      bindingStatus: binding.status || null,
+    };
+  }
+  const consent = repository.saveExistingRepositoryConsent({
+    projectId,
+    allowExistingRepository,
+    decisionSource: 'explicit_api',
+  });
+  const savedBinding = repository.saveRepositoryBinding({
+    projectId,
+    mode: binding.mode,
+    workspaceRoot: binding.workspaceRoot,
+    gitDir: binding.adapter.gitDir,
+    workTree: binding.adapter.workTree,
+    managedPaths: binding.managedPaths,
+    status: binding.status,
+    reason: binding.reason,
+    gitVersion: binding.inspection?.runtime?.versionRaw || null,
+  });
+  return {
+    ok: binding.status === 'ready',
+    status: binding.status === 'ready' ? 200 : 409,
+    code: binding.status === 'ready' ? null : binding.reason || binding.status,
+    bindingStatus: binding.status,
+    mode: savedBinding.mode,
+    consent: {
+      allowExistingRepository: consent.allowExistingRepository,
+      decisionSource: consent.decisionSource,
+    },
+  };
+}
 const {
   guardContextOperation,
   resolveResultStudioContext,
@@ -727,11 +798,13 @@ module.exports = function registerResultStudioRoutes(app) {
     if (!project) return { error: { status: 404, code: 'project_not_found' } };
     if (!canAccessProject(req, project)) return { error: { status: 403, code: 'forbidden' } };
     if (!git) return { project, binding: null, repository: repo(), gitPathPrefix: '' };
+    const repository = repo();
+    const allowExistingRepository = repository.hasExistingRepositoryConsent(projectId);
     const binding = bindProjectRepository({
       workspaceRoot: project.workspace_path,
       projectId,
       preferManaged: false,
-      allowExistingRepository: true,
+      allowExistingRepository,
       // Read-only history/compare/status requests may inspect an existing
       // repository but must not initialize .biof3/git as a side effect.
       createManagedIfMissing: write,
@@ -751,7 +824,7 @@ module.exports = function registerResultStudioRoutes(app) {
     // （`getRepositoryBinding` 仅被测试消费），因此它是审计记录：
     // 在真正用到 git 的时候记录才有意义。
     if (write) {
-      repo().saveRepositoryBinding({
+      repository.saveRepositoryBinding({
         projectId,
         mode: binding.mode,
         workspaceRoot: binding.workspaceRoot,
@@ -766,12 +839,58 @@ module.exports = function registerResultStudioRoutes(app) {
     return {
       project,
       binding,
-      repository: repo(),
+      repository,
       gitPathPrefix: binding.mode === 'existing'
         ? binding.inspection?.existing?.workspaceRelativeToRepository
         : '',
     };
   }
+
+  app.get('/api/result-studio/repository-binding', (req, res) => {
+    const projectId = String(req.query.projectId || '').trim();
+    const project = db.getProject(projectId);
+    if (!project) return res.status(404).json({ error: 'project_not_found' });
+    if (!canAccessProject(req, project)) return res.status(403).json({ error: 'forbidden' });
+    try {
+      const inspection = inspectWorkspaceGit({ workspaceRoot: project.workspace_path });
+      const repository = repo();
+      const consent = repository.getExistingRepositoryConsent(projectId);
+      const binding = repository.getRepositoryBinding(projectId);
+      return res.json({
+        ok: true,
+        projectId,
+        existingRepositoryDetected: !!inspection.existing,
+        managedRepositoryExists: inspection.managed.exists,
+        decisionRequired: !!inspection.existing && !inspection.managed.exists && !consent,
+        existingRepositoryConsent: consent
+          ? { allowExistingRepository: consent.allowExistingRepository, decisionSource: consent.decisionSource }
+          : null,
+        binding: binding ? { mode: binding.mode, status: binding.status, reason: binding.reason } : null,
+      });
+    } catch (error) {
+      return res.status(409).json({ error: error.code || 'repository_inspection_failed' });
+    }
+  });
+
+  app.post('/api/result-studio/repository-binding/consent', (req, res) => {
+    const projectId = String(req.body?.projectId || '').trim();
+    const project = db.getProject(projectId);
+    if (!project) return res.status(404).json({ error: 'project_not_found' });
+    if (!canAccessProject(req, project)) return res.status(403).json({ error: 'forbidden' });
+    const result = attachExistingRepositoryWithExplicitConsent({
+      projectId,
+      workspaceRoot: project.workspace_path,
+      allowExistingRepository: req.body?.allowExistingRepository,
+    }, {
+      repository: repo(),
+      bindProjectRepository,
+    });
+    if (!result.ok) return res.status(result.status).json({
+      error: result.code,
+      bindingStatus: result.bindingStatus || null,
+    });
+    return res.json(result);
+  });
 
   function changeSetContext(req, changeSetId, options = {}) {
     const changeSet = repo().getChangeSet(changeSetId);
@@ -1633,6 +1752,7 @@ module.exports = function registerResultStudioRoutes(app) {
 };
 
 module.exports._test = {
+  attachExistingRepositoryWithExplicitConsent,
   baselineFailureDiagnostic,
   bindAuthoritativeQuerySelection,
   buildContextBoundPreviewBudget,
