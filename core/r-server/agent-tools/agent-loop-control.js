@@ -44,6 +44,9 @@ function createResultEditCompletionGuard({ required = false } = {}) {
   let recoveryAttempted = false;
   return {
     required: required === true,
+    requiresToolExecution() {
+      return required === true && recoveryAttempted && !candidateCreated;
+    },
     recordToolResult(name, result) {
       if (name === 'result_changeset_create_in_context'
           && result?.ok === true

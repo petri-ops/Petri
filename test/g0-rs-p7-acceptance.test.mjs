@@ -47,5 +47,6 @@ test('P7 bound drawer completion guard covers both legacy HTTP and durable task 
     assert.match(source, /resultEditCompletionGuard\.recordToolResult\(name, result\)/);
     assert.match(source, /result_edit_completion_retry/);
     assert.match(source, /resultEditCompletionGuard\.required/);
+    assert.match(source, /resultEditCompletionGuard\.requiresToolExecution\(\)/);
   }
 });

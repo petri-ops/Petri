@@ -918,7 +918,9 @@ async function runAgentLoop({
         temperature: 0.4,
         max_tokens: 1500,
         tools: finalizing ? undefined : tools,
-        tool_choice: finalizing ? undefined : 'auto',
+        tool_choice: finalizing
+          ? undefined
+          : (resultEditCompletionGuard.requiresToolExecution() ? 'required' : 'auto'),
       };
 
       let streamedText = '';

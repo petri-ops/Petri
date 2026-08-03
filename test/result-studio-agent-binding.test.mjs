@@ -198,6 +198,7 @@ test('P4R-3 wires the same context/progress helpers into task and legacy product
     assert.match(text, /createResultEditCompletionGuard/);
     assert.match(text, /resultEditCompletionGuard\.recordToolResult\(name, result\)/);
     assert.match(text, /result_edit_completion_retry/);
+    assert.match(text, /resultEditCompletionGuard\.requiresToolExecution\(\)/);
   }
   assert.match(source('core/r-server/agent-tools/result-context-binding.js'), /已完成的阶段结论已保留/);
 });

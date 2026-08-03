@@ -22,9 +22,11 @@ const {
 
 test('bound result edits cannot finish successfully before a real preview-ready candidate exists', () => {
   const guard = createResultEditCompletionGuard({ required: true });
+  assert.equal(guard.requiresToolExecution(), false);
   const first = guard.assessTerminal();
   assert.equal(first.action, 'retry');
   assert.match(first.prompt, /尚未成功创建 preview_ready 候选/);
+  assert.equal(guard.requiresToolExecution(), true);
 
   const second = guard.assessTerminal();
   assert.equal(second.action, 'fail');
@@ -43,6 +45,7 @@ test('bound result edit completion guard accepts only the sealed create tool suc
     ok: true,
     changeSet: { status: 'preview_ready' },
   });
+  assert.equal(guard.requiresToolExecution(), false);
   assert.equal(guard.assessTerminal().action, 'accept');
   assert.deepEqual(guard.snapshot(), {
     required: true,
