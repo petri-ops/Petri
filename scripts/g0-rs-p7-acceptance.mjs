@@ -296,7 +296,13 @@ async function probeProviderToolCall(target, index) {
   const startedAt = new Date().toISOString();
   let response;
   try {
-    response = await gateway.chat({ role: 'agent', body: requestShape });
+    // A misbehaving configured endpoint must not stall the whole packaged
+    // qualification run. Keep this probe bounded so the next compatible
+    // profile can be tried and the failure remains explicit in evidence.
+    response = await Promise.race([
+      gateway.chat({ role: 'agent', body: requestShape }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('provider_probe_timeout')), 30_000)),
+    ]);
   } catch {
     response = { error: 'provider_exception' };
   }
