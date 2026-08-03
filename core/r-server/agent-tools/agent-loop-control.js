@@ -67,15 +67,28 @@ function createResultEditCompletionGuard({ expectation, required = false } = {})
       if (completionExpectation === 'none' || satisfied()) return { action: 'accept' };
       if (!recoveryAttempted) {
         recoveryAttempted = true;
+        if (completionExpectation === 'result_action') {
+          return {
+            action: 'retry',
+            reason: 'result_action_not_executed',
+            message: '模型尚未执行真实结果动作，正在自动纠正执行…',
+            prompt:
+              '本轮是由结果区自然语言 Composer 提交的受信结果动作，不等同于一律创建参数候选。你尚未成功执行任何与用户原始目标一致的结果动作，不能声称分析、修改或验证已完成。必须立即选择并调用正确的 Result Studio 执行工具：如果用户要求基于当前 DEG 或当前基因选择做 GO/KEGG 富集，直接调用 result_enrichment_from_context；如果用户要求修改当前结果的参数或呈现，才使用 result_edit_plan_in_context 后调用 result_changeset_create_in_context。不要把富集请求改写成候选创建，不要轮询无关或旧的 ChangeSet，也不要只复述上一轮结果。',
+          };
+        }
         return {
           action: 'retry',
+          reason: 'candidate_not_created',
+          message: '模型尚未创建真实候选，正在自动纠正执行…',
           prompt:
             '本轮是由结果编辑器提交的绑定式候选创建请求，界面中的科学影响确认已经由后端保存。你尚未成功创建 preview_ready 候选，不能声称修改、重算或验证已完成。请立即使用当前受信上下文调用必要的 Result Studio 工具完成候选创建；不要只复述上一轮结果，也不要再次向用户索要确认。',
         };
       }
       return {
         action: 'fail',
-        message: '结果修改未完成：模型没有创建并验证真实候选版本，系统已阻止展示伪成功结论。请重试本次编辑。',
+        message: completionExpectation === 'result_action'
+          ? '结果动作未完成：模型没有执行与用户目标一致的受信结果工具，系统已阻止展示伪成功结论。请重试本次操作。'
+          : '结果修改未完成：模型没有创建并验证真实候选版本，系统已阻止展示伪成功结论。请重试本次编辑。',
       };
     },
     snapshot() {

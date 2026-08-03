@@ -1041,8 +1041,8 @@ async function runAgentLoop({
             phase: 'result_edit_completion_retry',
             attempt: 1,
             maxAttempts: 1,
-            reason: 'candidate_not_created',
-            message: '模型尚未创建真实候选，正在自动纠正执行…',
+            reason: editCompletion.reason,
+            message: editCompletion.message,
           });
           continue;
         }

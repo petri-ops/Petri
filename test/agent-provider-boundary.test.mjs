@@ -66,7 +66,11 @@ test('result actions may complete through a trusted enrichment Job but candidate
     toolId: 'go-kegg',
     result: { toolJobId: 'job-rejected' },
   });
-  assert.equal(action.assessTerminal().action, 'retry');
+  const retry = action.assessTerminal();
+  assert.equal(retry.action, 'retry');
+  assert.equal(retry.reason, 'result_action_not_executed');
+  assert.match(retry.prompt, /result_enrichment_from_context/);
+  assert.doesNotMatch(retry.prompt, /请立即使用当前受信上下文调用必要的 Result Studio 工具完成候选创建/);
 
   action.recordToolResult('result_enrichment_from_context', {
     ok: true,

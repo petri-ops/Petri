@@ -8,6 +8,12 @@ test('P7 producer is packaged-only, source-bound, and never imports historical R
   assert.match(source, /sourceCommitMatchesSourceHashes/);
   assert.match(source, /connectToPackagedPage/);
   assert.match(source, /providerPreflight/);
+  for (const completionSource of [
+    'core/r-server/agent-runner.js',
+    'core/r-server/agent-tools/agent-loop-control.js',
+    'core/r-server/agent-tools/result-context-binding.js',
+    'frontend/src/lib/result-edit-agent-bridge.ts',
+  ]) assert.match(source, new RegExp(completionSource.replaceAll('/', '\\/').replaceAll('.', '\\.')));
   assert.doesNotMatch(source, /rs9-(?:product|provider|visual)-acceptance\.json/);
   assert.doesNotMatch(source, /manual_boolean|asserted_constant|prompt_expected_json/);
 });
