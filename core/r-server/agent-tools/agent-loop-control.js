@@ -39,10 +39,23 @@ function recoverSealedResultEditArgs(name, value) {
   };
 }
 
-function createResultEditCompletionGuard({ expectation, required = false } = {}) {
+function isExplicitEnrichmentAction(value) {
+  const text = typeof value === 'string' ? value.trim() : '';
+  if (!text || !/(?:\bGO\b|\bKEGG\b|富集)/i.test(text)) return false;
+  const presentationOnly = /(?:配色|颜色|字号|字体|布局|标注|标签|图例|展示|显示|排序)/i.test(text)
+    && !/(?:重算|重新计算|重跑|运行|执行|进行|开展|分析)/i.test(text);
+  if (presentationOnly) return false;
+  return /(?:做|进行|运行|执行|开展|继续|分析|重算|重新计算|重跑)[^。！？]*(?:\bGO\b|\bKEGG\b|富集)|(?:\bGO\b|\bKEGG\b)[^。！？]*富集|富集(?:分析|计算)/i.test(text);
+}
+
+function createResultEditCompletionGuard({ expectation, required = false, requestedOutcome = '' } = {}) {
   const completionExpectation = ['candidate', 'result_action', 'none'].includes(expectation)
     ? expectation
     : (required === true ? 'candidate' : 'none');
+  const completionTarget = completionExpectation === 'result_action'
+    && isExplicitEnrichmentAction(requestedOutcome)
+    ? 'enrichment'
+    : completionExpectation;
   let candidateCreated = false;
   let enrichmentJobStarted = false;
   let recoveryAttempted = false;
@@ -52,6 +65,11 @@ function createResultEditCompletionGuard({ expectation, required = false } = {})
     required: completionExpectation !== 'none',
     requiresToolExecution() {
       return completionExpectation !== 'none' && recoveryAttempted && !satisfied();
+    },
+    requiredToolChoice() {
+      return completionTarget === 'enrichment'
+        ? { type: 'function', function: { name: 'result_enrichment_from_context' } }
+        : 'required';
     },
     recordToolResult(name, result) {
       if (name === 'result_changeset_create_in_context'
@@ -95,6 +113,7 @@ function createResultEditCompletionGuard({ expectation, required = false } = {})
       return {
         required: completionExpectation !== 'none',
         expectation: completionExpectation,
+        target: completionTarget,
         candidateCreated,
         enrichmentJobStarted,
         recoveryAttempted,

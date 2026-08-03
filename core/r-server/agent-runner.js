@@ -858,8 +858,10 @@ async function runAgentLoop({
 
   const traceId = createTraceId();
   const toolCallController = createAgentToolCallController({ maxToolCalls: MAX_AGENT_TOOL_CALLS });
+  const latestUserMessage = [...messages].reverse().find((message) => message?.role === 'user');
   const resultEditCompletionGuard = createResultEditCompletionGuard({
     expectation: toolCtx.resultStudioCompletionExpectation,
+    requestedOutcome: typeof latestUserMessage?.content === 'string' ? latestUserMessage.content : '',
   });
   const modelResultState = createModelResultState({
     projectId: toolCtx.projectId,
@@ -920,7 +922,9 @@ async function runAgentLoop({
         tools: finalizing ? undefined : tools,
         tool_choice: finalizing
           ? undefined
-          : (resultEditCompletionGuard.requiresToolExecution() ? 'required' : 'auto'),
+          : (resultEditCompletionGuard.requiresToolExecution()
+            ? resultEditCompletionGuard.requiredToolChoice()
+            : 'auto'),
       };
 
       let streamedText = '';

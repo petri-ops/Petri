@@ -50,6 +50,7 @@ test('bound result edit completion guard accepts only the sealed create tool suc
   assert.deepEqual(guard.snapshot(), {
     required: true,
     expectation: 'candidate',
+    target: 'candidate',
     candidateCreated: true,
     enrichmentJobStarted: false,
     recoveryAttempted: true,
@@ -81,6 +82,7 @@ test('result actions may complete through a trusted enrichment Job but candidate
   assert.deepEqual(action.snapshot(), {
     required: true,
     expectation: 'result_action',
+    target: 'result_action',
     candidateCreated: false,
     enrichmentJobStarted: true,
     recoveryAttempted: true,
@@ -97,6 +99,33 @@ test('result actions may complete through a trusted enrichment Job but candidate
   const none = createResultEditCompletionGuard({ expectation: 'none' });
   assert.equal(none.required, false);
   assert.equal(none.assessTerminal().action, 'accept');
+});
+
+test('explicit enrichment recovery forces only the sealed context enrichment tool', () => {
+  const enrichment = createResultEditCompletionGuard({
+    expectation: 'result_action',
+    requestedOutcome: '用当前差异基因做 GO 和 KEGG 富集。',
+  });
+  assert.equal(enrichment.requiresToolExecution(), false);
+  assert.equal(enrichment.assessTerminal().reason, 'result_action_not_executed');
+  assert.equal(enrichment.requiresToolExecution(), true);
+  assert.deepEqual(enrichment.requiredToolChoice(), {
+    type: 'function',
+    function: { name: 'result_enrichment_from_context' },
+  });
+  assert.equal(enrichment.snapshot().target, 'enrichment');
+
+  for (const presentation of [
+    '把 GO 富集图配色改成蓝色',
+    '调整 KEGG 结果的图例和标签',
+  ]) {
+    const edit = createResultEditCompletionGuard({
+      expectation: 'result_action', requestedOutcome: presentation,
+    });
+    edit.assessTerminal();
+    assert.equal(edit.requiredToolChoice(), 'required');
+    assert.equal(edit.snapshot().target, 'result_action');
+  }
 });
 
 function toolCall(id, argumentsValue = '{}', name = 'workspace_read') {
