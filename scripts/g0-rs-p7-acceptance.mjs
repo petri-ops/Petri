@@ -122,7 +122,7 @@ function capturePackagedWindowNative(ownerPid) {
     '  if (window[kCGWindowOwnerPID as String] as? Int) == ownerPid,',
     '     let number = window[kCGWindowNumber as String] as? Int { print(number); break }',
     '}',
-  ].join('; ');
+  ].join('\n');
   const windowId = execFileSync('swift', ['-e', swift], { encoding: 'utf8', timeout: 30_000 }).trim();
   invariant(/^\d+$/.test(windowId), 'p7_native_capture_window_missing');
   const capturePath = path.join(tmpdir(), `biof3-p7-native-${process.pid}-${Date.now()}.png`);
