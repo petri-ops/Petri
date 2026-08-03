@@ -792,6 +792,21 @@ function startContentSync() {
 
 // ── 主窗口 ─────────────────────────────────────────────────────
 let mainWindow = null;
+const TITLE_BAR_HEIGHT_PX = 38;
+const MACOS_TRAFFIC_LIGHT_HEIGHT_PX = 14;
+const MACOS_TRAFFIC_LIGHT_X_PX = 20;
+
+function getTrafficLightPosition(zoomFactor = 1) {
+  return {
+    x: MACOS_TRAFFIC_LIGHT_X_PX,
+    y: Math.max(
+      0,
+      Math.round(
+        (TITLE_BAR_HEIGHT_PX * zoomFactor - MACOS_TRAFFIC_LIGHT_HEIGHT_PX) / 2,
+      ),
+    ),
+  };
+}
 
 // BioF3 owns local backend ports and must run as a single application
 // instance. A repeated launch focuses the existing window instead of starting
@@ -866,11 +881,11 @@ async function createWindow() {
     minWidth: 720,
     minHeight: 520,
     title: "BioF3",
-    // On macOS, hiddenInset keeps the native traffic lights and lets the OS
-    // place them on its title-bar track. Other platforms keep the frameless
-    // shell used by the custom toolbar.
+    // hiddenInset keeps native macOS controls; their track follows renderer zoom below.
     frame: process.platform === "darwin",
     titleBarStyle: "hiddenInset",
+    trafficLightPosition:
+      process.platform === "darwin" ? getTrafficLightPosition() : undefined,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -934,6 +949,15 @@ async function createWindow() {
     }
     console.log("[desktop] soft refresh requested");
     mainWindow.webContents.send("app:soft-refresh");
+  });
+
+  mainWindow.webContents.on("zoom-changed", () => {
+    setTimeout(() => {
+      if (!mainWindow || mainWindow.isDestroyed()) return;
+      if (process.platform !== "darwin") return;
+      const zoomFactor = mainWindow.webContents.getZoomFactor();
+      mainWindow.setWindowButtonPosition(getTrafficLightPosition(zoomFactor));
+    }, 0);
   });
 
   // DevTools 仅在显式需要时打开，避免日常启动打断工作台。

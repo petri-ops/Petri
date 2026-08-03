@@ -43,7 +43,7 @@ P6-1 已于 2026-08-02 在 `ad1e2ce` 收口，canonical evidence `acceptance/g0-
 
 P7 延期检查点：`e14a8e6` 已完成 existing Git 持久显式 opt-in 后端安全修复；`6dc3880`/`1bb295c` 已使资格器在没有可解引用 task-local fact bundle、独立 replay、唯一截图和重算不变量时 fail-closed；Agent 结果动作 completion 修复保留。没有生成 canonical P7 PASS evidence。selection→enrichment 当前是 direct Job + auto-adopted baseline，不满足 candidate/compare/lifecycle，必须作为未来产品缺口修复，不能由 harness 伪造。
 
-当前分支为 `codex/g0-result-studio-product`。`G0-RS-UX1A Focus Entry & Honest Preview`、`G0-RS-UX1B Artifact Navigation & Format Clarity` 与 `G0-RS-UX1C Result-First Preview` 均已完成：主结果卡只保留结果名、结果类型、可用性/校验状态和必要动作，原始路径、导出、脚本、重放等进入“更多操作”；不改变 Artifact Truth、插件执行或 P7 资格。当前没有 active 实现工作包。
+当前分支为 `codex/g0-result-studio-product`。`G0-RS-UX1A`～`UX1D` 均已完成：结果/代码/审查/历史模式的顶层标题跟随当前结果，侧栏收起时移除多余竖向分隔并保留整宽底线；标题栏与正文同步缩放，macOS 原生按钮按真实 renderer zoom factor 动态居中，在默认、连续缩小两档和放大一档下内容起点连续。聊天模式仍显示项目名；不改变 Artifact Truth、插件执行、侧栏状态或 P7 资格。当前没有 active 实现工作包。
 
 验证边界：前端 32/32、受影响 Node 368/368、P4R 不变量 7/7、TypeScript/UI/docs 通过。`npm run test:changed` 仍会因 P6 历史 evidence 绑定 `ad1e2ce` 而在 `p6_current_source_tree_not_exact` 处 fail-closed；不得在未重跑 P6 实机矩阵时把旧证据改绑 UX1A 源码。
 
@@ -259,8 +259,8 @@ Stage 1 已完成。Stage 2 的模型管理 UI 复用现有设置分类；结果
 
 当前已完成：
 
-- macOS 顶栏改为单一几何基准：`hiddenInset` 保留系统原生交通灯，不再设置 `trafficLightPosition`，不再用局部 `translateY` 互相补偿。
-- 标题栏高度统一为全局 `--biof3-titlebar-height: 38px`；TitleBar、工作区可用高度和 Desktop Dock 共用该变量。
+- macOS 顶栏采用单一物理几何基准：`hiddenInset` 保留系统原生交通灯，`trafficLightPosition` 绑定 38px 轨道中心；TitleBar 不再用局部 `translateY` 互相补偿。
+- 标题栏视觉高度统一为全局 `--biof3-titlebar-height: 38px`；TitleBar、工作区和 Desktop Dock 共用该变量并随 renderer 同步缩放，主进程按 zoom factor 动态调整 macOS 原生按钮的纵向中心。
 - 关闭最后一个 BioF3 窗口会退出整个应用；开发启动器会清理 Vite/Electron 子进程树，主进程同时停止 R/Python/Plumber 和集成终端。
 - 加入单实例保护；重复打开只聚焦已有窗口，不启动第二套本地后端。
 - R Server/Python Server/Plumber 保留 `3001/3004/8787` 为首选端口；如被其他程序占用，自动选择系统空闲端口，并通过 preload 安全桥传给前端，不杀占用者。

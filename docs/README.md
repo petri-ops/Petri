@@ -15,7 +15,7 @@
 2. [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) — 当前永久 G0 可信基础层主线；LF12 原始核心资格保持 maintained，Result Studio 产品支持声明暂停，P7 deferred。
 3. [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) — 已完成的 G0 Baseline v1 资格认证、证据边界与永久维护契约。
 4. [`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md) — SDC-0 已完成；SDC-1 Data Profiler 是下一候选但尚未建立 Goal，SDC-2～SDC-7 deferred。
-5. [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) — UX1A～UX1C 结果体验短闭环已完成；P4R-0～P6 已按非资格边界收口，发布级 P7 deferred。
+5. [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) — UX1A～UX1D 结果体验短闭环已完成；P4R-0～P6 已按非资格边界收口，发布级 P7 deferred。
 6. [`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md) — 已重新真实收口的横切修复工作包；保留科学、进程、HTTP 与逐契约 Acceptance 证据。
 7. [`g0-rs0-result-studio-audit.md`](./g0-rs0-result-studio-audit.md) — G0-RS0 现状审计与架构 ADR；Result Studio 的复用/新增边界、契约缺陷与 Git 风险矩阵的唯一裁决记录。
 

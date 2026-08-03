@@ -8,7 +8,7 @@
 
 当前不默认扩展分析功能。`G0-START`、LF0～LF12 的核心资格保持 maintained；RS0～RS8 与 P4R/P5/P6 的 Result Studio 引擎和开发态证据保留，但 2026-07-25 产品复核撤销的完整产品资格没有恢复。2026-08-03 用户裁决把发布级 P7 重新资格后移；Result Studio 保持 `implemented_unverified / experimental`，rc.7 仍是工程候选版，不得描述为 GA。
 
-`G0-RS-UX1A Focus Entry & Honest Preview`、`G0-RS-UX1B Artifact Navigation & Format Clarity` 与 `G0-RS-UX1C Result-First Preview` 均已完成短闭环：主结果卡只保留结果、状态与必要操作，导出/脚本/重放/技术元数据进入“更多操作”。当前没有 active 实现工作包，`G0-SDC1 Data Profiler` 保持后续候选；不改 Artifact Truth、插件执行或 P7。
+`G0-RS-UX1A`～`UX1D` 均已完成短闭环：结果模式顶层标题跟随当前结果，侧栏收起时移除多余竖向分隔并保留整宽底线；窗口 chrome 与正文同步缩放，macOS 原生按钮按 zoom factor 动态居中，聊天模式仍显示项目名。当前没有 active 实现工作包，`G0-SDC1 Data Profiler` 保持后续候选；不改 Artifact Truth、插件执行或 P7。
 
 LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口。RS9 曾新增第 17 类 `result_studio_product`，但后续复核发现其五条任务由独立测试拼装、Provider 未执行真实工具闭环、视觉验收依赖人工布尔值、大表由 seed 直接构造；该证据现降级为 unit/synthetic/renderer historical evidence。`result-studio-editing` 在 RS-P7 前暂停 qualified support claim，不能影响或冒充 LF12 原始核心资格。
 

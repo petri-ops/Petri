@@ -69,6 +69,7 @@ import {
   groupResultArtifacts,
   isRelatedArtifactKind,
 } from '@/lib/result-artifact-display';
+import { buildResultTitleBarTitle } from '@/lib/result-title-bar';
 import {
   summarizeSelectionForAgent,
   type ArtifactInteractionManifest,
@@ -921,9 +922,14 @@ export function ProjectWorkspace(): React.ReactElement {
     }
   }, [chooseWorkspaceDirectory, projectId]);
 
+  const titleBarTitle = useMemo(
+    () => buildResultTitleBarTitle(workspaceMode, project?.name, activeArtifact?.label || activeArtifact?.name),
+    [activeArtifact?.label, activeArtifact?.name, project?.name, workspaceMode],
+  );
+
   useEffect(() => {
     updateTitleBar({
-      title: project?.name || '梳理开发进展',
+      title: titleBarTitle,
       leftPanelWidth: leftWidth,
       rightPanelWidth: effectiveRightWidth,
       tabs: titleBarTabs,
@@ -994,6 +1000,7 @@ export function ProjectWorkspace(): React.ReactElement {
     openRightPanel,
     openRightTabs,
     project?.name,
+    titleBarTitle,
     project?.workspacePath,
     rightTab,
     effectiveRightWidth,

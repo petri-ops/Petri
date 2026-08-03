@@ -26,15 +26,11 @@ export function TitleBar(): React.ReactElement {
     toolMenuOpen,
     toolMenuItems,
     onSelectToolItem,
-    canGoBack,
-    canGoForward,
-    onGoBack,
-    onGoForward,
   } = panels.titleBar;
 
   const displayTitle = title || getFallbackTitle(location.pathname);
   const resizeRail = 1;
-  const collapsedLeftRail = 146;
+  const collapsedLeftRail = 122;
   const collapsedRightRail = 56;
   const leftSpan = panels.leftOpen ? leftPanelWidth + resizeRail : collapsedLeftRail;
   const rightSpan = panels.rightOpen ? rightPanelWidth + resizeRail : collapsedRightRail;
@@ -45,7 +41,7 @@ export function TitleBar(): React.ReactElement {
 
   return (
     <header className={styles.titleBar} style={titleBarStyle}>
-      <div className={styles.leftZone}>
+      <div className={`${styles.leftZone} ${!panels.leftOpen ? styles.leftZoneCollapsed : ''}`}>
         <div className={styles.trafficZone} aria-hidden="true" />
 
         <div className={styles.leftTools}>
@@ -58,30 +54,10 @@ export function TitleBar(): React.ReactElement {
           >
             <Icon name="panel-left" size={15} />
           </button>
-          <button
-            type="button"
-            className={`${styles.iconBtn} ${!canGoBack ? styles.iconBtnDisabled : ''}`}
-            onClick={canGoBack ? onGoBack || undefined : undefined}
-            title="后退"
-            aria-label="后退"
-            aria-disabled={!canGoBack}
-          >
-            <Icon name="arrow-left" size={15} />
-          </button>
-          <button
-            type="button"
-            className={`${styles.iconBtn} ${!canGoForward ? styles.iconBtnDisabled : ''}`}
-            onClick={canGoForward ? onGoForward || undefined : undefined}
-            title="前进"
-            aria-label="前进"
-            aria-disabled={!canGoForward}
-          >
-            <Icon name="arrow-right" size={15} />
-          </button>
         </div>
       </div>
 
-      <div className={styles.centerTitle}>
+      <div className={`${styles.centerTitle} ${!panels.rightOpen ? styles.centerTitleNoDivider : ''}`}>
         <div className={styles.centerTitleMain}>
           <Icon name="folder" size={15} />
           <span className={styles.centerTitleText}>{displayTitle}</span>
