@@ -698,7 +698,12 @@ const TOOL_DEFS = [
         type: 'object',
         properties: {
           contextToken: { type: 'string', description: 'result_studio_context 返回的 token' },
-          intent: { type: 'object', description: 'result_edit_plan_in_context 返回的完整 intent' },
+          intent: {
+            type: 'object',
+            description: 'result_edit_plan_in_context 返回的 intent 引用；只需原样携带 intentId，执行字段由服务器 sealed plan 解析',
+            properties: { intentId: { type: 'string' } },
+            required: ['intentId'],
+          },
           scientificConfirmed: { type: 'boolean', description: '科学参数或方法变化已完成确认时为 true' },
         },
         required: ['contextToken', 'intent'],

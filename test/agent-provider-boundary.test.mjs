@@ -235,6 +235,30 @@ test('direct Provider arguments repair only a bare redacted context token placeh
   assert.equal(malformed.rejected[0].error, 'invalid_arguments');
 });
 
+test('malformed Result Studio create envelopes recover only the sealed intent capability', async () => {
+  const malformedInner = '{"contextToken": [REDACTED], "scientificConfirmed": false, "intent": {'
+    + '"intentId": "rei_sealed_1", "source": {"inputs": [], "sourceNodeId": "job:1"}}';
+  const batch = await runBoundaryBatch([
+    toolCall(
+      'malformed-sealed-intent',
+      JSON.stringify({ arguments: malformedInner }),
+      'result_changeset_create_in_context'
+    ),
+  ]);
+  assert.equal(batch.executed.length, 1);
+  assert.deepEqual(batch.executed[0].args, {
+    contextToken: '[REDACTED]',
+    intent: { intentId: 'rei_sealed_1' },
+    scientificConfirmed: false,
+  });
+
+  const foreignTool = await runBoundaryBatch([
+    toolCall('foreign-malformed', malformedInner, 'workspace_read'),
+  ]);
+  assert.equal(foreignTool.executed.length, 0);
+  assert.equal(foreignTool.rejected[0].error, 'invalid_arguments');
+});
+
 test('Provider arguments compatibility never unwraps envelopes with extra keys', async () => {
   const batch = await runBoundaryBatch([
     toolCall('ambiguous-wrapper', JSON.stringify({ arguments: '{"path":"a.txt"}', extra: true })),

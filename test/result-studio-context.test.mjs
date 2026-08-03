@@ -788,8 +788,9 @@ test('RS-P7 create tolerates provider-copied read-only plan source without weake
       proposedParameterPatch: { palette: 'red' },
     },
   }, runCtx);
-  assert.equal(mutated.error, 'context_intent_untrusted');
-  assert.equal(delegated, null);
+  assert.equal(mutated.ok, true);
+  assert.deepEqual(delegated.intent, canonical);
+  assert.deepEqual(delegated.intent.proposedParameterPatch, { palette: 'blue' });
 });
 
 test('P6 drawer-bound scientific confirmation cannot be promoted by the model tool arguments', async () => {
@@ -844,7 +845,7 @@ test('P6 drawer-bound scientific confirmation cannot be promoted by the model to
   assert.equal(delegated.scientificConfirmed, true);
 });
 
-test('P4R-3 create rejects a model-mutated planned intent and any script patch', async () => {
+test('P4R-3 create resolves sealed intent fields and rejects any script patch', async () => {
   const fx = fixture();
   let created = false;
   const canonical = {
@@ -863,7 +864,11 @@ test('P4R-3 create rejects a model-mutated planned intent and any script patch',
     planTool: async () => ({ ok: true, status: 'confirmation_required', intent: canonical }),
     changeSetTools: { create: async () => { created = true; return { ok: true }; } },
   });
-  const runCtx = { ...ctx, activeArtifact: { revisionId: 'rev_1' } };
+  const runCtx = {
+    ...ctx,
+    activeArtifact: { revisionId: 'rev_1' },
+    resultStudioScientificConfirmation: false,
+  };
   const planned = await tools.plan({ requestedOutcome: '调整阈值' }, runCtx);
   const envelope = resolveResultStudioContext(runCtx, fx.dependencies).envelope;
 
@@ -872,7 +877,7 @@ test('P4R-3 create rejects a model-mutated planned intent and any script patch',
     intent: { ...planned.intent, editClass: 'presentation_rerender', requiresScientificConfirmation: false },
     scientificConfirmed: false,
   }, runCtx);
-  assert.equal(downgraded.error, 'context_intent_untrusted');
+  assert.equal(downgraded.error, 'scientific_confirmation_required');
   assert.equal(created, false);
 
   const scriptPatched = await tools.create({

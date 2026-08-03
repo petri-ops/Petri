@@ -24,7 +24,6 @@ const {
 const { createResultEditPlanTool, createResultChangeSetTools } = require('./result-edit-tools');
 const { projectPublicEditPhase, PUBLIC_EDIT_PHASES } = require('../../shared-backend/result-studio-context');
 const { normalizeEditSubmission, explainEditImpact } = require('../../shared-backend/result-edit-controls');
-const { isDeepStrictEqual } = require('node:util');
 const {
   tool_result_enrichment_from_revision,
   tool_result_selection_run,
@@ -61,14 +60,6 @@ function trustedIntentFor(ctx, intentId) {
 // call. Authenticate every field of the sealed server-side intent and ignore
 // only non-canonical additions. The downstream service receives the sealed
 // copy, so an added field can never acquire execution semantics.
-function matchesTrustedIntent(presented, sealed) {
-  if (!presented || typeof presented !== 'object' || Array.isArray(presented)
-      || !sealed || typeof sealed !== 'object' || Array.isArray(sealed)) return false;
-  return Object.entries(sealed).every(([key, value]) =>
-    Object.prototype.hasOwnProperty.call(presented, key)
-      && isDeepStrictEqual(presented[key], value));
-}
-
 /** 公开进度：只暴露阶段结论，不暴露隐藏推理链或 Git 细节。 */
 function publicProgress(events) {
   if (!Array.isArray(events)) return [];
@@ -250,10 +241,53 @@ function createResultContextEditTools(options = {}) {
     const guarded = guardContextOperation(ctx, args, options);
     if (!guarded.ok) return guarded.response;
     const envelope = guarded.resolved.envelope;
-    const intent = args.intent;
-    if (!intent || typeof intent !== 'object') {
-      return { ok: false, error: 'intent_required', message: '需要 result_edit_plan_in_context 返回的完整 intent。' };
+    const presentedIntent = args.intent;
+    if (!presentedIntent || typeof presentedIntent !== 'object') {
+      return { ok: false, error: 'intent_required', message: '需要 result_edit_plan_in_context 返回的 intentId。' };
     }
+    // Preserve precise stale-target diagnostics when a Provider echoed those
+    // optional fields. They are diagnostic only; execution still resolves the
+    // sealed plan by intentId below.
+    const presentedRef = presentedIntent.artifactRef || {};
+    if ((presentedRef.artifactId || presentedRef.revisionId)
+        && (presentedRef.artifactId !== envelope.artifact.artifactId
+          || presentedRef.revisionId !== envelope.revision.revisionId)) {
+      return {
+        ok: false,
+        error: 'context_intent_mismatch',
+        message: '该修改计划不属于当前打开的结果版本；请重新规划。',
+        remediation: 'result_edit_plan_in_context',
+      };
+    }
+    const activeSelectionRef = envelope.selection ? envelope.selection.selectionId : null;
+    if (Object.prototype.hasOwnProperty.call(presentedIntent, 'selectionRef')) {
+      const presentedSelectionRef = typeof presentedIntent.selectionRef === 'string' && presentedIntent.selectionRef.trim()
+        ? presentedIntent.selectionRef.trim()
+        : null;
+      if (presentedSelectionRef !== activeSelectionRef) {
+        return {
+          ok: false,
+          error: 'context_intent_selection_mismatch',
+          message: '当前选择与修改计划不一致；请基于当前结果重新规划。',
+          remediation: 'result_edit_plan_in_context',
+        };
+      }
+    }
+    if (!presentedIntent.intentId) {
+      return { ok: false, error: 'intent_required', message: '需要 result_edit_plan_in_context 返回的 intentId。' };
+    }
+    const trusted = trustedIntentFor(ctx, presentedIntent.intentId);
+    if (!trusted || trusted.contextToken !== envelope.contextToken) {
+      return {
+        ok: false,
+        error: 'context_intent_untrusted',
+        message: '修改计划不是本轮由受信上下文生成的原始计划，或计划内容已变化；请重新规划。',
+        remediation: 'result_edit_plan_in_context',
+      };
+    }
+    // intentId is an opaque capability reference. Never execute the model's
+    // echoed fields: resolve the exact server-sealed plan for this context.
+    const intent = trusted.intent;
     // intent 必须仍然指向当前上下文，否则模型可能拿旧 plan 改新结果。
     const ref = intent.artifactRef || {};
     if (ref.artifactId !== envelope.artifact.artifactId || ref.revisionId !== envelope.revision.revisionId) {
@@ -264,7 +298,6 @@ function createResultContextEditTools(options = {}) {
         remediation: 'result_edit_plan_in_context',
       };
     }
-    const activeSelectionRef = envelope.selection ? envelope.selection.selectionId : null;
     const plannedSelectionRef = typeof intent.selectionRef === 'string' && intent.selectionRef.trim()
       ? intent.selectionRef.trim()
       : null;
@@ -273,15 +306,6 @@ function createResultContextEditTools(options = {}) {
         ok: false,
         error: 'context_intent_selection_mismatch',
         message: '当前选择与修改计划不一致；请基于当前结果重新规划。',
-        remediation: 'result_edit_plan_in_context',
-      };
-    }
-    const trusted = trustedIntentFor(ctx, intent.intentId);
-    if (!trusted || trusted.contextToken !== envelope.contextToken || !matchesTrustedIntent(intent, trusted.intent)) {
-      return {
-        ok: false,
-        error: 'context_intent_untrusted',
-        message: '修改计划不是本轮由受信上下文生成的原始计划，或计划内容已变化；请重新规划。',
         remediation: 'result_edit_plan_in_context',
       };
     }

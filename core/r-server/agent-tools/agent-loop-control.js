@@ -22,6 +22,23 @@ function normalizeRedactedContextTokenJson(value) {
   );
 }
 
+function recoverSealedResultEditArgs(name, value) {
+  if (name !== 'result_changeset_create_in_context') return null;
+  const source = String(value || '');
+  const intentIds = [...source.matchAll(/"intentId"\s*:\s*"(rei_[A-Za-z0-9_-]{1,128})"/g)]
+    .map((match) => match[1]);
+  if (new Set(intentIds).size !== 1) return null;
+  const tokenMatch = source.match(
+    /"contextToken"\s*:\s*(?:"([a-f0-9]{64}|\[REDACTED\])"|(\[REDACTED\]))/
+  );
+  const confirmedMatch = source.match(/"scientificConfirmed"\s*:\s*(true|false)/);
+  return {
+    ...(tokenMatch ? { contextToken: tokenMatch[1] || tokenMatch[2] } : {}),
+    intent: { intentId: intentIds[0] },
+    ...(confirmedMatch ? { scientificConfirmed: confirmedMatch[1] === 'true' } : {}),
+  };
+}
+
 function createResultEditCompletionGuard({ required = false } = {}) {
   let candidateCreated = false;
   let recoveryAttempted = false;
@@ -252,14 +269,17 @@ function createAgentToolCallController(options = {}) {
       const rawArguments = typeof fn.arguments === 'string' && fn.arguments.trim() ? fn.arguments : '{}';
       args = JSON.parse(normalizeRedactedContextTokenJson(rawArguments));
     } catch {
-      return {
-        ok: false,
-        name,
-        callId: providerCallId,
-        args: {},
-        error: 'invalid_arguments',
-        message: 'Provider 返回的工具参数不是合法 JSON；该调用未执行',
-      };
+      args = recoverSealedResultEditArgs(name, fn.arguments);
+      if (!args) {
+        return {
+          ok: false,
+          name,
+          callId: providerCallId,
+          args: {},
+          error: 'invalid_arguments',
+          message: 'Provider 返回的工具参数不是合法 JSON；该调用未执行',
+        };
+      }
     }
     if (!args || typeof args !== 'object' || Array.isArray(args)) {
       return {
@@ -286,7 +306,10 @@ function createAgentToolCallController(options = {}) {
         const normalizedArguments = normalizeRedactedContextTokenJson(args.arguments);
         const decoded = JSON.parse(normalizedArguments);
         if (decoded && typeof decoded === 'object' && !Array.isArray(decoded)) args = decoded;
-      } catch {}
+      } catch {
+        const recovered = recoverSealedResultEditArgs(name, args.arguments);
+        if (recovered) args = recovered;
+      }
     }
     const semanticKey = `${name}:${stableJson(args)}`;
     consecutiveSemanticCallCount = semanticKey === lastSemanticCallKey
