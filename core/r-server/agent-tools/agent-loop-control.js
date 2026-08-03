@@ -232,6 +232,17 @@ function createAgentToolCallController(options = {}) {
         message: 'Provider 返回的工具参数必须是 JSON 对象；该调用未执行',
       };
     }
+    // Some OpenAI-compatible Providers occasionally wrap the declared JSON
+    // object in a single `arguments` string. Accept only that exact transport
+    // envelope, then run the normal schema/policy/context checks on the
+    // decoded object. Extra wrapper keys, arrays and scalars remain untouched
+    // and fail at the existing boundary.
+    if (Object.keys(args).length === 1 && typeof args.arguments === 'string') {
+      try {
+        const decoded = JSON.parse(args.arguments);
+        if (decoded && typeof decoded === 'object' && !Array.isArray(decoded)) args = decoded;
+      } catch {}
+    }
     const semanticKey = `${name}:${stableJson(args)}`;
     consecutiveSemanticCallCount = semanticKey === lastSemanticCallKey
       ? consecutiveSemanticCallCount + 1

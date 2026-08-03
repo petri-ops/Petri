@@ -152,6 +152,37 @@ test('malformed, array, and null arguments are rejected without executing handle
   ]);
 });
 
+test('single-key Provider arguments envelopes are decoded before normal execution', async () => {
+  const inner = { contextToken: 'a'.repeat(64), intent: { intentId: 'rei_1' } };
+  const batch = await runBoundaryBatch([
+    toolCall('wrapped-json', JSON.stringify({ arguments: JSON.stringify(inner) }), 'result_changeset_create_in_context'),
+  ]);
+  assert.equal(batch.executed.length, 1);
+  assert.deepEqual(batch.executed[0].args, inner);
+});
+
+test('Provider arguments compatibility never unwraps envelopes with extra keys', async () => {
+  const batch = await runBoundaryBatch([
+    toolCall('ambiguous-wrapper', JSON.stringify({ arguments: '{"path":"a.txt"}', extra: true })),
+  ]);
+  assert.equal(batch.executed.length, 1);
+  assert.deepEqual(batch.executed[0].args, { arguments: '{"path":"a.txt"}', extra: true });
+});
+
+test('repeated-call protection compares decoded and native argument forms identically', async () => {
+  const controller = createAgentToolCallController();
+  const inner = { path: 'a.txt' };
+  const first = await runBoundaryBatch([toolCall('native-1', JSON.stringify(inner))], { controller });
+  const second = await runBoundaryBatch([
+    toolCall('wrapped-2', JSON.stringify({ arguments: JSON.stringify(inner) })),
+  ], { controller });
+  const third = await runBoundaryBatch([toolCall('native-3', JSON.stringify(inner))], { controller });
+  assert.equal(first.executed.length, 1);
+  assert.equal(second.executed.length, 1);
+  assert.equal(third.executed.length, 0);
+  assert.equal(third.rejected[0].error, 'repeated_tool_call');
+});
+
 test('duplicate Provider tool call ids are rejected without duplicating protocol history ids', async () => {
   const controller = createAgentToolCallController();
   const first = await runBoundaryBatch([toolCall('same-id', '{"path":"a.txt"}')], { controller });
