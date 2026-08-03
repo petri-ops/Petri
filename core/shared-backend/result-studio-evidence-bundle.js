@@ -261,7 +261,8 @@ function validateFactPackage(value) {
   const intent = roles.get('sqlite.intent')?.payload || {};
   const changeSet = roles.get('sqlite.changeset')?.payload || {};
   const gitChangeSet = roles.get('git.changeset')?.payload || {};
-  const job = roles.get('sqlite.job')?.payload || {};
+  const jobCohort = roles.get('sqlite.job')?.payload || {};
+  const jobs = Array.isArray(jobCohort.jobs) ? jobCohort.jobs : [];
   const artifact = roles.get('artifact.formal_output_cohort')?.payload || {};
   const validator = roles.get('validator.cohort')?.payload || {};
   const revisions = roles.get('sqlite.candidate_revision_cohort')?.payload || {};
@@ -292,14 +293,18 @@ function validateFactPackage(value) {
     'fact_changeset_intent_join_invalid');
   addIssue(issues, gitChangeSet.changeSetRef === changeSet.changeSetRef && COMMIT.test(String(gitChangeSet.commit || '')),
     'fact_changeset_git_join_invalid');
-  addIssue(issues, job.changeSetRef === changeSet.changeSetRef && SHA256.test(String(job.jobRef || ''))
-    && job.status === 'completed' && job.falseSuccessAbsent === true,
+  addIssue(issues, jobs.length > 0 && jobs.every((job) => job.changeSetRef === changeSet.changeSetRef
+    && SHA256.test(String(job.jobRef || '')) && job.status === 'completed' && job.falseSuccessAbsent === true),
     'fact_job_changeset_join_invalid');
-  addIssue(issues, sameStringSet(changeSet.jobRefs, [job.jobRef]), 'fact_changeset_job_set_mismatch');
-  addIssue(issues, artifact.jobRef === job.jobRef && artifact.changeSetRef === changeSet.changeSetRef,
+  const jobRefs = jobs.map((job) => job.jobRef);
+  const formalArtifactRefs = jobs.flatMap((job) => job.formalArtifactRefs || []);
+  const outputRevisionRefs = jobs.flatMap((job) => job.outputRevisionRefs || []);
+  addIssue(issues, sameStringSet(changeSet.jobRefs, jobRefs), 'fact_changeset_job_set_mismatch');
+  addIssue(issues, sameStringSet(jobCohort.jobRefs, jobRefs), 'fact_job_cohort_set_mismatch');
+  addIssue(issues, artifact.changeSetRef === changeSet.changeSetRef && sameStringSet(artifact.jobRefs, jobRefs),
     'fact_artifact_job_join_invalid');
-  addIssue(issues, sameStringSet(job.formalArtifactRefs, artifact.artifactRefs), 'fact_formal_artifact_set_mismatch');
-  addIssue(issues, sameStringSet(job.outputRevisionRefs, revisions.revisionRefs), 'fact_job_revision_set_mismatch');
+  addIssue(issues, sameStringSet(formalArtifactRefs, artifact.artifactRefs), 'fact_formal_artifact_set_mismatch');
+  addIssue(issues, sameStringSet(outputRevisionRefs, revisions.revisionRefs), 'fact_job_revision_set_mismatch');
   addIssue(issues, sameStringSet(changeSet.candidateRevisionRefs, revisions.revisionRefs),
     'fact_changeset_revision_set_mismatch');
   addIssue(issues, revisions.changeSetRef === changeSet.changeSetRef
@@ -350,7 +355,8 @@ function validateFactPackage(value) {
 
 function deriveFactPackageInvariants(factPackage, roles) {
   const repository = roles.get('environment.repository')?.payload || {};
-  const job = roles.get('sqlite.job')?.payload || {};
+  const jobCohort = roles.get('sqlite.job')?.payload || {};
+  const jobs = Array.isArray(jobCohort.jobs) ? jobCohort.jobs : [];
   const artifact = roles.get('artifact.formal_output_cohort')?.payload || {};
   const lifecycle = roles.get('sqlite.lifecycle')?.payload || {};
   const restart = roles.get('restart.reopen')?.payload || {};
@@ -362,7 +368,8 @@ function deriveFactPackageInvariants(factPackage, roles) {
       && restart.historyDigestBefore === restart.historyDigestAfter,
     unrelated_git_wip_preserved: SHA256.test(String(repository.snapshotBefore || ''))
       && repository.snapshotBefore === repository.snapshotAfter,
-    no_false_success: job.status === 'completed' && job.falseSuccessAbsent === true,
+    no_false_success: jobs.length > 0
+      && jobs.every((job) => job.status === 'completed' && job.falseSuccessAbsent === true),
     no_partial_adopt: lifecycle.completeCohort === true,
     no_silent_loss: SHA256.test(String(restart.artifactSetDigestBefore || ''))
       && restart.artifactSetDigestBefore === restart.artifactSetDigestAfter,

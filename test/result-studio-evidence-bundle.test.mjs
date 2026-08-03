@@ -56,11 +56,14 @@ function validFactPackage(taskId = 'volcano_ai_presentation_edit', seed = 'one')
   });
   add('changeset-git', 'git_record', 'git.changeset', { changeSetRef, commit: 'a'.repeat(40) });
   add('job', 'database_record', 'sqlite.job', {
-    jobRef, changeSetRef, formalArtifactRefs: artifactRefs, outputRevisionRefs: revisionRefs,
-    status: 'completed', falseSuccessAbsent: true,
+    jobRefs: [jobRef],
+    jobs: [{
+      jobRef, changeSetRef, formalArtifactRefs: artifactRefs, outputRevisionRefs: revisionRefs,
+      status: 'completed', falseSuccessAbsent: true,
+    }],
   });
   add('artifact', 'artifact_truth', 'artifact.formal_output_cohort', {
-    jobRef, changeSetRef, artifactRefs, revisionRefs,
+    jobRefs: [jobRef], changeSetRef, artifactRefs, revisionRefs,
     declaredHashes: hashTruth, provenanceHashes: hashTruth, physicalHashes: hashTruth,
     scriptHashes: { [artifactRefs[0]]: ref(`script-${seed}`) },
   });
