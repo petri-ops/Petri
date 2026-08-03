@@ -4204,6 +4204,54 @@ body.biof3-resizing-columns * {
   gap: 0;
 }
 
+.resultReportRelatedFiles {
+  margin: 12px 14px 0;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 10px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.resultReportRelatedFiles summary {
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+}
+
+.resultReportRelatedFile {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 11px;
+  text-align: left;
+}
+
+.resultReportRelatedFile:hover {
+  color: var(--text-primary);
+}
+
+.resultReportExportLinks {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.resultReportExportLinks a {
+  color: var(--accent-primary);
+  text-decoration: none;
+}
+
 .resultReportNavSection {
   display: grid;
   gap: 1px;

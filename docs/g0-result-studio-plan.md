@@ -2,7 +2,7 @@
 
 最后更新：2026-08-03
 
-状态：`UX1A completed / P7 deferred / implemented_unverified`（RS0～RS8 引擎基础、完整 P4R、`G0-RS-P5`、`G0-RS-P6` 与 UX1A 已按各自非资格边界收口；产品资格未恢复）
+状态：`UX1B completed / P7 deferred / implemented_unverified`（UX1B 只处理结果导航与格式表达；不改变 Artifact Truth、插件执行或 P7 资格）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -19,6 +19,10 @@
 范围边界：Result Studio 不属于 LF12 原始资格范围。RS0～RS8 已形成 Git/SQLite/Artifact/ChangeSet/Revision 引擎基础，但 2026-07-25 产品复核确认选择 UI、图形实体映射、Agent 上下文、手动编辑器、主画布和真实端到端资格证据不足。`result-studio-editing` 的产品支持声明在 `G0-RS-P7` 重新资格前保持暂停，不从既有合成证据外推。
 
 ## 1. 决策结论
+
+### UX1B：Artifact Navigation & Format Clarity（`completed · non-qualifying`）
+
+这是 UX1A 之后的短闭环：同一科学图的 PNG/SVG/PDF 展示为一个结果项，PNG 作为默认预览，SVG/PDF 作为导出格式；数据、日志和未知文件降级到“相关文件”折叠区。该投影只存在于 Result Studio UI，不修改 Artifact Truth、manifest 原始记录、插件 descriptor、执行链、版本控制或 P7 资格边界。聚焦单测 9/9、TypeScript、治理门禁通过；开发态 Electron 真实旧 GO/KEGG Job 观察确认 PNG 默认预览与 14 个相关文件折叠显示，但该 Job 未产生同图 SVG/PDF，变体合并由纯函数测试覆盖。该短闭环不提升产品资格。
 
 BioF3 当前已经具备可信运行、Artifact 导航、静态预览、交付摘要、脚本入口和 ReplayPackage，但结果仍主要是“可查看的交付终点”，尚未成为用户可以持续探索、选择、编辑、比较和继续分析的科研工作对象。
 

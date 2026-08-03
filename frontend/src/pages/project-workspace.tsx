@@ -65,6 +65,11 @@ import {
   type ResultArtifactRecord,
 } from '@/lib/result-manifest';
 import {
+  artifactFormatLabel,
+  groupResultArtifacts,
+  isRelatedArtifactKind,
+} from '@/lib/result-artifact-display';
+import {
   summarizeSelectionForAgent,
   type ArtifactInteractionManifest,
   type ArtifactSelection,
@@ -3310,6 +3315,14 @@ function ResultArtifactShell({
     () => buildResultArtifactNavigation(manifest, artifacts),
     [artifacts, manifest]
   );
+  const primaryNavSections = useMemo(
+    () => navSections.filter((section) => !isRelatedArtifactKind(section.kind)),
+    [navSections]
+  );
+  const relatedNavSections = useMemo(
+    () => navSections.filter((section) => isRelatedArtifactKind(section.kind)),
+    [navSections]
+  );
   const artifactSummary = useMemo(() => compactArtifactKindSummary(artifacts), [artifacts]);
   const reportArtifact = useMemo(
     () =>
@@ -3815,10 +3828,18 @@ function ResultArtifactShell({
     return <EmptyAnalysisResult />;
   }
 
-  const sectionTabs = navSections.length > 0 ? navSections : [];
+  const sectionTabs = primaryNavSections.length > 0 ? primaryNavSections : navSections;
   const showReportRail = sectionTabs.length > 0 && artifacts.length > 0;
   const activeSectionArtifacts = activeSection?.artifacts || [];
-  const showArtifactRail = activeSectionArtifacts.length > 1;
+  const activeArtifactGroups = useMemo(
+    () => groupResultArtifacts(activeSectionArtifacts),
+    [activeSectionArtifacts]
+  );
+  const selectedDisplayGroup = useMemo(
+    () => activeArtifactGroups.find((group) => group.variants.some((artifact) => artifact.name === selectedArtifactName)) || null,
+    [activeArtifactGroups, selectedArtifactName]
+  );
+  const showArtifactRail = activeArtifactGroups.length > 1;
   const resultNavWidth = navCollapsed ? 0 : 224;
   const recoveryAction = workflow?.nextActions?.[0] || null;
   const actionRunsDirectly = isDirectRecoveryAction(recoveryAction?.id);
@@ -4203,17 +4224,18 @@ function ResultArtifactShell({
                     <div className={styles.resultReportArtifactNavEyebrow}>二级导航</div>
                     <div className={styles.resultReportArtifactNavTitle}>{activeSection.label}</div>
                     <div className={styles.resultReportArtifactNavMeta}>
-                      <span>{activeSectionArtifacts.length} 项</span>
+                      <span>{activeArtifactGroups.length} 项</span>
                       {activeSection.description && <span>{activeSection.description}</span>}
                     </div>
                   </div>
                   <div className={styles.resultReportArtifactTabs}>
-                    {activeSectionArtifacts.map((artifact) => {
+                    {activeArtifactGroups.map((group) => {
+                      const artifact = group.primary;
                       const kind = classifyArtifact(artifact);
                       const active = artifact.name === selectedArtifactName;
                       return (
                         <button
-                          key={artifact.name}
+                          key={group.key}
                           type="button"
                           className={`${styles.resultReportArtifactTab} ${active ? styles.resultReportArtifactTabActive : ''}`}
                           onClick={() => {
@@ -4229,10 +4251,10 @@ function ResultArtifactShell({
                           </span>
                           <span className={styles.resultReportArtifactTabText}>
                             <span className={styles.resultReportArtifactTabName}>
-                              {artifact.label || artifact.title || artifact.name}
+                              {group.label}
                             </span>
                             <span className={styles.resultReportArtifactTabMeta}>
-                              {artifactPreviewLabel(artifact)}
+                              {artifactFormatLabel(artifact)}{group.variants.length > 1 ? ` · ${group.variants.length} 种格式` : ''}
                             </span>
                           </span>
                         </button>
@@ -4285,7 +4307,7 @@ function ResultArtifactShell({
                               {sectionKind && <Icon name={artifactKindIcon(sectionKind)} size={13} />}
                               <span>{section.label}</span>
                             </span>
-                            <span className={styles.resultReportSectionCount}>{section.artifacts.length}</span>
+                            <span className={styles.resultReportSectionCount}>{groupResultArtifacts(section.artifacts).length}</span>
                           </button>
 
                           {section.description && (
@@ -4295,6 +4317,27 @@ function ResultArtifactShell({
                       );
                     })}
                   </div>
+                )}
+
+                {relatedNavSections.length > 0 && (
+                  <details className={styles.resultReportRelatedFiles}>
+                    <summary>相关文件 ({relatedNavSections.reduce((count, section) => count + section.artifacts.length, 0)})</summary>
+                    {relatedNavSections.flatMap((section) => section.artifacts).map((artifact) => (
+                      <button
+                        key={artifact.name}
+                        type="button"
+                        className={styles.resultReportRelatedFile}
+                        onClick={() => {
+                          setViewedRevision(null);
+                          setSelectedSectionId(relatedNavSections.find((section) => section.artifactNames.includes(artifact.name))?.id || '');
+                          setSelectedName(artifact.name);
+                        }}
+                      >
+                        <span>{artifact.label || artifact.title || artifact.name}</span>
+                        <span>{artifactFormatLabel(artifact)}</span>
+                      </button>
+                    ))}
+                  </details>
                 )}
 
                 {selectedArtifact && (
@@ -4309,6 +4352,23 @@ function ResultArtifactShell({
                       <a className={styles.resultReportActiveLink} href={selectedArtifactUrl} target="_blank" rel="noreferrer">
                         打开原文件
                       </a>
+                    )}
+                    {selectedDisplayGroup && selectedDisplayGroup.variants.length > 1 && (
+                      <div className={styles.resultReportExportLinks}>
+                        <span>导出格式</span>
+                        {selectedDisplayGroup.variants
+                          .filter((artifact) => artifact.name !== selectedDisplayGroup.primary.name && /\.(svg|pdf)$/i.test(artifact.name))
+                          .map((artifact) => (
+                            <a
+                              key={artifact.name}
+                              href={resolveResultArtifactUrl(artifact.url, buildUrl(artifact.name))}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {artifactFormatLabel(artifact)}
+                            </a>
+                          ))}
+                      </div>
                     )}
                     {result.deliveryManifest && (
                       <div className={styles.resultReportReproductionActions}>
