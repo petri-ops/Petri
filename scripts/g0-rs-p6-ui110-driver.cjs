@@ -79,6 +79,12 @@ function verifiedCandidateTerminal(text) {
   return candidateMention && created && verified;
 }
 
+function enrichmentTerminal(text) {
+  const value = String(text || '');
+  return /富集/.test(value)
+    && /(?:任务已经提交|已成功执行|分析已完成|已完成并生成|生成了正式产物)/.test(value);
+}
+
 async function requestBackendJson(url) {
   const response = await fetch(url);
   const data = await response.json().catch(() => ({}));
@@ -758,7 +764,7 @@ async function submitComposer(window, prompt, { requiresResultProgress = false }
     requiresResultProgress,
     expectedCompletion: requiresResultProgress
       ? verifiedCandidateTerminal
-      : '富集任务已经提交',
+      : enrichmentTerminal,
   });
 }
 

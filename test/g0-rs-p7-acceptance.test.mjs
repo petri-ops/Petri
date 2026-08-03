@@ -31,3 +31,10 @@ test('P7 scientific UI trace completes an explicit Provider confirmation turn wi
   assert.match(source, /scientific-impact acknowledgement/);
   assert.match(source, /agent terminal response did not confirm the expected successful outcome/);
 });
+
+test('P7 UI trace accepts truthful enrichment submission or completion wording', () => {
+  const source = readFileSync(new URL('../scripts/g0-rs-p6-ui110-driver.cjs', import.meta.url), 'utf8');
+  assert.match(source, /function enrichmentTerminal\(text\)/);
+  assert.match(source, /任务已经提交\|已成功执行\|分析已完成/);
+  assert.match(source, /expectedCompletion:[\s\S]*enrichmentTerminal/);
+});
