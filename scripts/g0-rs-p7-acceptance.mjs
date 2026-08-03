@@ -127,7 +127,9 @@ async function requestJson(baseUrl, route, { method = 'GET', body, timeoutMs = 1
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(`${baseUrl}${route}`, {
+    let response;
+    try {
+      response = await fetch(`${baseUrl}${route}`, {
       method,
       headers: {
         Authorization: 'Bearer desktop-local',
@@ -135,7 +137,10 @@ async function requestJson(baseUrl, route, { method = 'GET', body, timeoutMs = 1
       },
       body: body == null ? undefined : JSON.stringify(body),
       signal: controller.signal,
-    });
+      });
+    } catch (error) {
+      throw new Error(`p7_local_request_failed:${route}:${error?.cause?.code || error?.name || 'fetch_failed'}`);
+    }
     const text = await response.text();
     let data = {};
     try { data = text ? JSON.parse(text) : {}; } catch {}
@@ -711,9 +716,11 @@ async function runJourney(target, index, { existingGit = false, dirtyGit = false
   writeSandboxSettings(capture.env.BIOF3_LOCAL_DATA_DIR, target.profile.id);
   let first = null;
   let second = null;
+  let stage = 'start_packaged_app';
   try {
     const sourceAtStart = sourceBinding();
     first = await startPackagedApp({ env: capture.env, electronDataDir, debugPort });
+    stage = 'create_project';
     const baseUrl = `http://127.0.0.1:${first.state.backendPort}`;
     const uiUrl = new URL(first.cdp.target.url);
     const uiBaseUrl = `${uiUrl.protocol}//${uiUrl.host}`;
@@ -731,6 +738,7 @@ async function runJourney(target, index, { existingGit = false, dirtyGit = false
     });
     const conversation = conversationPayload.conversation || conversationPayload.data?.conversation;
     invariant(conversation?.id, 'p7_conversation_creation_failed');
+    stage = 'scientific_baselines';
     const gitFixture = existingGit ? initializeExistingGit(project.workspace_path, dirtyGit) : null;
     const runtime = {
       kind: 'p5_live_scientific_runtime',
@@ -743,6 +751,7 @@ async function runJourney(target, index, { existingGit = false, dirtyGit = false
     };
     runtime.runWorker = (spec) => runP5LiveWorker(runtime, spec);
     const baselines = await prepareP5LiveScientificBaselines(runtime);
+    stage = 'failure_recovery';
     const failureRecovery = await proveImportedInputAndFailureRecovery(baseUrl, project.id, project.workspace_path, baselines);
     if (dirtyGit) {
       invariant(sha256(readFileSync(path.join(project.workspace_path, 'user-dirty-note.txt'))) === gitFixture.dirtyDigest,
@@ -763,6 +772,7 @@ async function runJourney(target, index, { existingGit = false, dirtyGit = false
         heatmap: { jobId: baselines.heatmap.jobId, artifact: baselines.heatmap.artifact, artifactFamilyId: baselines.heatmap.artifactFamilyId },
       },
     };
+    stage = 'packaged_ui_trace';
     const window = createPackagedWindowAdapter(first.cdp.client);
     const ui = await runProductTrace(window, config);
     const startedCheckpoint = ui?.timeline?.find((item) => item.stage === 'starting');
@@ -781,6 +791,7 @@ async function runJourney(target, index, { existingGit = false, dirtyGit = false
     await delay(250);
     const restartDebugPort = await freePort();
     second = await startPackagedApp({ env: capture.env, electronDataDir, debugPort: restartDebugPort });
+    stage = 'restart_responsive_matrix';
     const restartBaseUrl = `http://127.0.0.1:${second.state.backendPort}`;
     const restartUi = new URL(second.cdp.target.url);
     const restartConfig = { ...config, uiBaseUrl: `${restartUi.protocol}//${restartUi.host}`, backendBaseUrl: restartBaseUrl };
@@ -788,6 +799,7 @@ async function runJourney(target, index, { existingGit = false, dirtyGit = false
     const responsive = await responsiveObservation(second.cdp.client, restartWindow, restartConfig, config.targets.volcano, captureDir);
     invariant(responsive.every((item) => item.canvasVisible && item.operationCompleted
       && !item.horizontalOverflow && item.firstCanvasMs <= 1000), 'p7_responsive_matrix_failed', responsive);
+    stage = 'exact_replay';
     const replay = await exactReplayRevision(restartBaseUrl, {
       projectId: project.id,
       dbPath: capture.env.BIOF3_DB_PATH,
@@ -859,6 +871,10 @@ async function runJourney(target, index, { existingGit = false, dirtyGit = false
       screenshotSourceDir: captureDir,
     };
     return { result, cleanup: () => rmSync(root, { recursive: true, force: true }) };
+  } catch (error) {
+    const wrapped = new Error(`p7_journey_${index + 1}_${stage}:${error?.message || 'unknown_error'}`);
+    wrapped.cause = error;
+    throw wrapped;
   } finally {
     if (first) await stopPackagedApp(first);
     if (second) await stopPackagedApp(second);
