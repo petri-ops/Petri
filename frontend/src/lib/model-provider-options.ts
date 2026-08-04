@@ -1,5 +1,5 @@
 export const USER_MODEL_PROVIDER_OPTIONS = [
-  { value: 'openai-compatible', label: 'OpenAI 兼容' },
+  { value: 'openai-compatible', label: 'OpenAI' },
   { value: 'anthropic', label: 'Anthropic' },
 ] as const;
 

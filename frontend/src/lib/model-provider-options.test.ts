@@ -18,7 +18,7 @@ import {
 describe('user-facing model provider options', () => {
   it('exposes protocol adapters without mixing in suppliers', () => {
     expect(USER_MODEL_PROVIDER_OPTIONS).toEqual([
-      { value: 'openai-compatible', label: 'OpenAI 兼容' },
+      { value: 'openai-compatible', label: 'OpenAI' },
       { value: 'anthropic', label: 'Anthropic' },
     ]);
   });
