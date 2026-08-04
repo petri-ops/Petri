@@ -48,11 +48,12 @@ describe('model endpoint transfer', () => {
     expect(parsed.warnings.join(' ')).toContain('跳过');
   });
 
-  it('preserves a native Anthropic provider and its default endpoint', () => {
+  it('preserves a native Anthropic provider and its user-supplied endpoint', () => {
     const output = exportEndpointProfilesJson([{
       id: 'anthropic-main',
       label: 'Anthropic',
       provider: 'anthropic',
+      baseUrl: 'https://api.anthropic.com/v1',
       model: 'claude-test',
       defaultModel: 'claude-test',
     }] as never);

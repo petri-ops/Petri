@@ -1,13 +1,11 @@
 export const USER_MODEL_PROVIDER_OPTIONS = [
-  { value: 'deepseek', label: 'DeepSeek' },
   { value: 'openai-compatible', label: 'OpenAI 兼容' },
-  { value: 'anthropic', label: 'Anthropic 原生' },
+  { value: 'anthropic', label: 'Anthropic' },
 ] as const;
 
 export type UserModelProvider = (typeof USER_MODEL_PROVIDER_OPTIONS)[number]['value'];
 
-export const DEEPSEEK_DEFAULT_BASE_URL = 'https://api.deepseek.com';
-export const ANTHROPIC_DEFAULT_BASE_URL = 'https://api.anthropic.com/v1';
+export const LEGACY_DEEPSEEK_BASE_URL = 'https://api.deepseek.com';
 
 const USER_MODEL_PROVIDERS = new Set<string>(
   USER_MODEL_PROVIDER_OPTIONS.map((option) => option.value)
@@ -31,8 +29,7 @@ export function endpointBaseUrl(profile: {
   baseUrl?: string;
 }): string {
   if (profile.baseUrl) return profile.baseUrl;
-  if (profile.provider === 'deepseek') return DEEPSEEK_DEFAULT_BASE_URL;
-  if (profile.provider === 'anthropic') return ANTHROPIC_DEFAULT_BASE_URL;
+  if (profile.provider === 'deepseek') return LEGACY_DEEPSEEK_BASE_URL;
   return '';
 }
 
@@ -42,7 +39,6 @@ export function modelSupplierName(profile: {
   baseUrl?: string;
 }): string {
   if (profile.provider === 'deepseek') return 'DeepSeek';
-  if (profile.provider === 'anthropic') return profile.label?.trim() || 'Anthropic';
   if (profile.label?.trim()) return profile.label.trim();
   try {
     return profile.baseUrl ? new URL(profile.baseUrl).hostname : '自定义 API';
@@ -55,14 +51,13 @@ export function modelChoiceId(profileId: string, model: string): string {
   return `${profileId}::${encodeURIComponent(model)}`;
 }
 
-/** Infer the transport adapter from the endpoint instead of exposing it in UI. */
+/** Infer the protocol adapter only when an imported profile omits it. */
 export function inferUserModelProvider(profile: {
   label?: string;
   baseUrl?: string;
 }): UserModelProvider {
   try {
     const hostname = profile.baseUrl ? new URL(profile.baseUrl).hostname.toLowerCase() : '';
-    if (hostname === 'api.deepseek.com' || hostname.endsWith('.deepseek.com')) return 'deepseek';
     if (hostname === 'api.anthropic.com' || hostname.endsWith('.anthropic.com')) return 'anthropic';
   } catch {
     // Validation reports malformed URLs separately; keep the generic adapter here.
@@ -87,8 +82,25 @@ export function modelProviderCredentialRef(
   provider: UserModelProvider,
   profileId: string
 ): string {
-  if (provider === 'deepseek') return 'provider:deepseek';
   return `credential:${credentialScope(profileId)}-${provider}`;
+}
+
+export function normalizeLegacyUserModelProfile<
+  T extends {
+    provider: string;
+    label?: string;
+    baseUrl?: string;
+    protocol?: string;
+  }
+>(profile: T): T {
+  if (profile.provider !== 'deepseek') return profile;
+  return {
+    ...profile,
+    provider: 'openai-compatible',
+    protocol: 'openai-compatible',
+    baseUrl: profile.baseUrl || LEGACY_DEEPSEEK_BASE_URL,
+    label: 'DeepSeek',
+  } as T;
 }
 
 export interface UserModelProfileLike {

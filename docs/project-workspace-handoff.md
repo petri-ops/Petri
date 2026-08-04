@@ -231,7 +231,7 @@ Stage 3 已完成 GO/KEGG、GSEA、WGCNA 与 capability bundle 自动 provision 
   - 项目提示词的实时资源快照只包含当前项目；删除项目会同步清理该项目的向量、事实、摘要、会话和消息，删除单个会话会同步清理其向量记忆。
   - 隔离门禁：`test/project-memory-isolation.test.mjs` 覆盖 A/B/全局三作用域对撞，`test/project-memory-migration.test.mjs` 覆盖旧向量安全回填。
 - 已注册 DeepSeek、OpenAI、OpenAI-compatible、Ollama、LM Studio、vLLM、Anthropic、DashScope embedding/vision；Anthropic 使用原生 Messages/stream/tool 协议适配。
-- 2026-08-04 设置页已把 Anthropic 原生适配器开放为独立协议列：新渠道默认 `https://api.anthropic.com/v1`，经原生模型列表发现后进入既有聊天模型选择；协议切换隔离凭据并淘汰迟到的旧模型发现响应。开发态 Electron 已验证布局和无 Key 失败关闭，真实 Anthropic Key 连通尚未复验，因此 UI-124 保持 `in_progress`。
+- 2026-08-04 设置页已把协议与供应商分离：用户协议只有 OpenAI 兼容和 Anthropic，DeepSeek/BioF3 等是可编辑供应商名；新渠道由用户显式填写 Base URL。旧 DeepSeek profile 读取时无损归一为 OpenAI-compatible，保留模型、Key 引用与原地址；协议切换隔离凭据并淘汰迟到的旧模型发现响应。开发态 Electron 已核对六列布局、两个协议选项、新渠道空 URL 和旧 DeepSeek 配置保留；真实 Anthropic Key 连通尚未复验，因此 UI-124 保持 `in_progress`。
 - 多模型角色绑定覆盖 chat、agent、planner、vision、embedding、summary、report、explanation；能力不匹配在调用前阻断。
 - fallback 默认关闭，仅在用户显式开启并逐角色配置候选时对可重试错误切换；401、缺 Key、取消和已经输出部分流内容时不切换，切换原因写入事件/日志。
 - API Key 已从普通设置与读取 IPC 分离：macOS Keychain，其他平台独立 0600 凭据文件；旧字段自动迁移。一个兼容 Provider 可通过不同 credential reference 使用多套 Key。

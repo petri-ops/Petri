@@ -4,7 +4,7 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-04（MODEL-ANTHROPIC-NATIVE / UI-124 已完成开发态布局与无 Key 失败关闭核对；真实 Anthropic Key 待验，P6 stored evidence 继续保持非 exact）
+最后更新：2026-08-04（MODEL-ANTHROPIC-NATIVE / UI-124 已收敛为“协议与供应商分离”；真实 Anthropic Key 待验，P6 stored evidence 继续保持非 exact）
 
 ## 当前待处理项
 
@@ -24,7 +24,7 @@
 
 | 日期 | 结果 | 检查点 |
 | --- | --- | --- |
-| 2026-08-04 | `MODEL-ANTHROPIC-NATIVE / UI-124` 实现检查点：设置页新增 Anthropic 原生协议、官方 `/v1` 默认地址和原生模型发现；Endpoint 拆为“协议、供应商、Base URL、Key、默认模型、连通性”六列单行。两轮 Luna 只读审计发现并修复跨协议复用旧 Key、迟到模型发现覆盖新协议及导入路径未失效旧运行态的问题，补充 provider-specific credential ref、请求 generation、URL 校验、10 秒超时和流式 2 MiB 响应上限。前端 related 42/42（含聚焦 27/27）、Provider/Gateway 40/40、strict TypeScript、docs/UI 门禁、开发态 Electron 六列布局和无 Key fail-closed 通过；`npm run test:changed` 为 129/130，唯一失败是已登记的 `p6_current_source_tree_not_exact`（本次新增 `anthropic.js` 源码漂移），未重写旧 P6 evidence。真实 Anthropic Key 连通与聊天尚未执行，UI-124 保持 `in_progress` | UI-124 / MODEL-ANTHROPIC-NATIVE |
+| 2026-08-04 | `MODEL-ANTHROPIC-NATIVE / UI-124` 实现检查点：Endpoint 保持“协议、供应商、Base URL、Key、默认模型、连通性”六列单行，用户协议只保留 OpenAI 兼容与 Anthropic，DeepSeek/BioF3 等作为可编辑供应商名。新渠道不代填 Base URL；旧 DeepSeek profile 无损归一为 OpenAI-compatible，保留模型、`provider:deepseek` 凭据引用并显式回填原地址。前续已补充 provider-specific credential ref、请求 generation、URL 校验、10 秒超时和流式 2 MiB 响应上限；开发态 Electron 已核对六列布局、两个协议选项、新渠道空 URL 与旧 DeepSeek 配置保留。真实 Anthropic Key 连通与聊天尚未执行，UI-124 保持 `in_progress`；P6 stored evidence 仍非 exact | UI-124 / MODEL-ANTHROPIC-NATIVE |
 | 2026-08-04 | `G0-RS-UX1G-2 / UI-123` 收口：标题栏只展示当前 Conversation 的 Job，双结果可主动打开和精确切换；跨会话深链按持久归属切 Conversation，legacy/null 与不存在结果明确降级。实机发现并修复 Job 切换时旧 Artifact 短暂串入新 Inspector 的竞态，现由原子清空、结果响应与深链查询的迟到提交失效保护共同锁定。前端 46/46、受影响 Node 125 pass / 1 live skip、TypeScript 与开发态 browser/Electron 双 Job 核对通过；ScreenCaptureKit `-3811/-3812` 限制后续 Electron 像素采集，不外推 packaged/P6/P7 | UI-123 / UX1G-2 |
 | 2026-08-04 | `G0-RS-UX1G-1` 收口：ToolJob 增加 nullable Conversation 身份，贯通 Agent/审批/ScientificTask/Workflow/插件/Result Studio 与 Jobs 历史；旧数据只做同项目/用户/工具的唯一精确回填，未知保持 null，跨会话 Job 引用和 ACK、错误绑定及无账本执行均 fail-closed。聚焦 Node 78 pass / 1 live skip，前端审批契约 6/6、strict TypeScript 与治理门通过；不实现 UX1G-2/UI-123，不升级 P7 资格 | UX1G-1 |
 | 2026-08-04 | `G0-RS-TL1 / UI-120` 开发态 macOS 收口：`frame:false` 自绘关闭/最小化/最大化，134px 折叠轨、live/query 竞态、异常/cleanup、sender/boolean 与 `focus-visible` 均修复；TitleBar 11/11、Electron/preload 6/6。真实窗口完成最大化/还原、最小化、双击隔离、缩放、明暗、约1050/840/720px、Cmd+M/W、自绘关闭及 owned 服务退出重启。ScreenCaptureKit `-3811` 使窄宽截图/拖拽绝对位移不可用；不外推 packaged/P6/P7 | UI-120 / TL1 |

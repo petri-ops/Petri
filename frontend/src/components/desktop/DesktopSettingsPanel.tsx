@@ -26,6 +26,7 @@ import {
   modelProviderCredentialRef,
   modelProviderProtocol,
   modelProviderRequiresCredential,
+  normalizeLegacyUserModelProfile,
   USER_MODEL_PROVIDER_OPTIONS,
   type UserModelProvider,
   validateUserModelProfile,
@@ -140,12 +141,9 @@ const MODEL_ROLES: Array<{ id: ModelRole; label: string; capability: ModelCapabi
 
 function providerDefaults(provider: string, id: string): Partial<ChatModelPreset> {
   const defaults: Record<string, Partial<ChatModelPreset>> = {
-    deepseek: { label: 'DeepSeek', model: 'deepseek-chat', capabilities: ['chat', 'streaming', 'tools'], credentialRef: 'provider:deepseek' },
-    'openai-compatible': { label: '自定义 API', model: '', capabilities: ['chat', 'streaming', 'tools'], credentialRef: modelProviderCredentialRef('openai-compatible', id) },
+    'openai-compatible': { model: '', capabilities: ['chat', 'streaming', 'tools'], credentialRef: modelProviderCredentialRef('openai-compatible', id) },
     anthropic: {
-      label: 'Anthropic',
       model: '',
-      baseUrl: 'https://api.anthropic.com/v1',
       capabilities: ['chat', 'streaming', 'tools'],
       credentialRef: modelProviderCredentialRef('anthropic', id),
     },
@@ -754,9 +752,8 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     const profiles = Array.isArray(s.model_profiles)
       ? (s.model_profiles as ChatModelPreset[])
           .filter((profile) => profile?.id && profile?.model)
-          .map((profile) => profile.provider === 'deepseek'
-            ? { ...profile, label: 'DeepSeek', defaultModel: profile.defaultModel || profile.model }
-            : { ...profile, defaultModel: profile.defaultModel || profile.model })
+          .map(normalizeLegacyUserModelProfile)
+          .map((profile) => ({ ...profile, defaultModel: profile.defaultModel || profile.model }))
       : [];
     const statuses = (s.credential_status as Record<string, boolean>) || {};
     setModelProfiles(profiles);
@@ -931,36 +928,13 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   }
 
   function updateProfileBaseUrl(profile: ChatModelPreset, baseUrl: string | undefined) {
-    const inferred = inferUserModelProvider({ label: profile.label, baseUrl });
-    const shouldSwitchProvider =
-      profile.provider === 'openai-compatible' && inferred !== 'openai-compatible';
-    const nextProvider = shouldSwitchProvider ? inferred : profile.provider as UserModelProvider;
-    const nextCredentialRef = shouldSwitchProvider
-      ? modelProviderCredentialRef(nextProvider, profile.id)
-      : profile.credentialRef;
     setModelProfiles((profiles) => profiles.map((candidate) => candidate.id === profile.id
       ? {
           ...candidate,
           baseUrl,
-          ...(shouldSwitchProvider
-            ? {
-                provider: nextProvider,
-                protocol: modelProviderProtocol(nextProvider),
-                credentialRef: nextCredentialRef,
-                label: nextProvider === 'deepseek' ? 'DeepSeek' : 'Anthropic',
-                model: nextProvider === 'deepseek' ? 'deepseek-chat' : '',
-                defaultModel: '',
-              }
-            : {}),
         }
       : candidate));
     clearProfileRuntimeState(profile.id);
-    if (shouldSwitchProvider && nextCredentialRef) {
-      if (profile.provider !== 'deepseek') clearCredentialUi(credentialId(profile));
-      if (nextProvider !== 'deepseek') {
-        clearCredentialUi(nextCredentialRef.slice(nextCredentialRef.indexOf(':') + 1));
-      }
-    }
   }
 
   function updateProfileProvider(currentProfile: ChatModelPreset, provider: UserModelProvider) {
@@ -980,9 +954,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     }));
     clearProfileRuntimeState(currentProfile.id);
     if (currentProfile.provider !== 'deepseek') clearCredentialUi(credentialId(currentProfile));
-    if (provider !== 'deepseek') {
-      clearCredentialUi(nextCredentialRef.slice(nextCredentialRef.indexOf(':') + 1));
-    }
+    clearCredentialUi(nextCredentialRef.slice(nextCredentialRef.indexOf(':') + 1));
   }
 
   function addProfile() {
@@ -1084,7 +1056,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
           const profile: ChatModelPreset = {
             ...(existing || providerDefaults(provider, id)),
             id,
-            label: provider === 'deepseek' ? 'DeepSeek' : item.supplier,
+            label: item.supplier,
             provider,
             protocol: modelProviderProtocol(provider),
             baseUrl: item.baseUrl,
@@ -1263,11 +1235,10 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                     </select>
                     <input
                       className="biof3-input"
-                      value={profile.provider === 'deepseek' ? 'DeepSeek' : profile.label}
+                      value={profile.label}
                       onChange={(event) => updateProfile(profile.id, { label: event.target.value })}
                       placeholder="供应商"
                       aria-label="供应商"
-                      readOnly={profile.provider === 'deepseek'}
                     />
                     <input
                       className="biof3-input"
@@ -1354,7 +1325,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                 </div>
               );
               })}
-              {userModelProfiles.length === 0 && <p className="biof3-field__hint">尚未配置模型。添加一个自定义 API，或选择 DeepSeek。</p>}
+              {userModelProfiles.length === 0 && <p className="biof3-field__hint">尚未配置模型。请添加 API 渠道并填写连接信息。</p>}
             </div>
             <div className="biof3-model-fallback" aria-label="Agent 模型自动容错">
               <label className="biof3-model-fallback__toggle">

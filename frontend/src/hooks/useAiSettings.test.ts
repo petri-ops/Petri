@@ -72,6 +72,31 @@ describe('useAiSettings', () => {
     expect(result.current.activeId).toBe('chat-a');
   });
 
+  it('normalizes a legacy DeepSeek chat preset when ModelProfiles are absent', async () => {
+    installBridge({
+      initial: {
+        chat_model_presets: [{
+          id: 'legacy-deepseek',
+          label: 'DeepSeek Chat',
+          provider: 'deepseek',
+          model: 'deepseek-chat',
+          credentialRef: 'provider:deepseek',
+        }],
+        active_chat_model_id: 'legacy-deepseek',
+      },
+    });
+    const { result } = renderHook(() => useAiSettings());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.activePreset).toMatchObject({
+      id: 'legacy-deepseek',
+      label: 'DeepSeek',
+      provider: 'openai-compatible',
+      model: 'deepseek-chat',
+      baseUrl: 'https://api.deepseek.com',
+      credentialRef: 'provider:deepseek',
+    });
+  });
+
   it('loads and expands a native Anthropic ModelProfile for chat selection', async () => {
     const listModels = vi.fn().mockResolvedValue({
       ok: true,
@@ -122,6 +147,7 @@ describe('useAiSettings', () => {
             label: 'DeepSeek Chat',
             provider: 'deepseek',
             model: 'deepseek-v4-flash',
+            credentialRef: 'provider:deepseek',
             capabilities: ['chat', 'streaming', 'tools'],
           },
         ],
@@ -142,6 +168,9 @@ describe('useAiSettings', () => {
     ]);
     expect(result.current.presets.every((preset) => preset.label === 'DeepSeek')).toBe(true);
     expect(result.current.presets.every((preset) => preset.endpointProfileId === 'deepseek-chat')).toBe(true);
+    expect(result.current.presets.every((preset) => preset.provider === 'openai-compatible')).toBe(true);
+    expect(result.current.presets.every((preset) => preset.baseUrl === 'https://api.deepseek.com')).toBe(true);
+    expect(result.current.presets.every((preset) => preset.credentialRef === 'provider:deepseek')).toBe(true);
     expect(result.current.activePreset.model).toBe('deepseek-v4-flash');
 
     const pro = result.current.presets.find((preset) => preset.model === 'deepseek-v4-pro');
