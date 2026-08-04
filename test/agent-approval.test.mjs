@@ -17,7 +17,11 @@ const { tool_run_tool } = req(R_SERVER + '/agent-tools/plan-ui-tools.js');
 const learning = req(R_SERVER + '/agent-tools/learning.js');
 const { dispatchTool, inferExecutionPolicy } = req(R_SERVER + '/agent-tools/index.js');
 
-const CTX = { userId: 'local-user' };
+const CTX = {
+  userId: 'local-user',
+  projectId: 'agent-approval-project',
+  conversationId: 'agent-approval-conversation',
+};
 const DESEQ2_PARAMS = {
   counts: resolve(__dirname, '..', 'resources', 'built-in-plugins', 'deseq2', 'demo-data', 'demo-counts.csv'),
   coldata: resolve(__dirname, '..', 'resources', 'built-in-plugins', 'deseq2', 'demo-data', 'demo-coldata.csv'),
@@ -75,6 +79,8 @@ test('deseq2 首次 run 返回 needApproval + ackToken', async () => {
   const job = db.getToolJob(r.toolJobId);
   assert.equal(job.ack_status, 'pending');
   assert.equal(job.ack_token, r.ackToken);
+  assert.equal(job.project_id, CTX.projectId);
+  assert.equal(job.conversation_id, CTX.conversationId);
   assert.ok(job.ack_expires_at > Date.now(), 'ack_expires_at 应在未来');
 
   // 清理
@@ -109,6 +115,85 @@ test('ack(reject) 后重调 ackToken 返回 user_rejected', async () => {
 
   const sqlite = db.getDatabase();
   sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(r.toolJobId);
+});
+
+test('approval continuation 只接受同 user/project/conversation/tool/params 且未过期的 capability', async () => {
+  const params = { ...DESEQ2_PARAMS };
+  const job = db.createToolJob({
+    toolId: 'deseq2',
+    userId: 'approval-owner',
+    projectId: 'approval-project',
+    conversationId: 'approval-conversation',
+    params,
+    status: 'pending',
+  });
+  const token = 'ack_scope_' + Date.now();
+  db.setToolJobApproval(job.id, token, Date.now() + 60_000);
+  db.ackToolJob(token, true, {
+    userId: 'approval-owner',
+    projectId: 'approval-project',
+    conversationId: 'approval-conversation',
+  });
+
+  const registry = req(R_SERVER + '/mcp/registry.js');
+  const originalCallTool = registry.callTool;
+  let calls = 0;
+  registry.callTool = async () => {
+    calls += 1;
+    return { isError: false, content: [{ type: 'text', text: '{}' }], toolJobId: job.id };
+  };
+  const run = (ctx, overrides = {}) => learning.tool_run_tool({
+    op: 'run',
+    toolId: 'deseq2',
+    params: { ...params, ...(overrides.params || {}) },
+    ackToken: token,
+    ...(overrides.toolId ? { toolId: overrides.toolId } : {}),
+  }, ctx);
+  try {
+    for (const ctx of [
+      { userId: 'approval-other', projectId: 'approval-project', conversationId: 'approval-conversation' },
+      { userId: 'approval-owner', projectId: 'approval-other', conversationId: 'approval-conversation' },
+      { userId: 'approval-owner', projectId: 'approval-project', conversationId: 'approval-other' },
+    ]) {
+      const result = await run(ctx);
+      assert.equal(result.error, 'approval_invalid');
+    }
+    assert.equal((await run({
+      userId: 'approval-owner', projectId: 'approval-project', conversationId: 'approval-conversation',
+    }, {
+      toolId: 'wgcna',
+      // Reach the capability identity check instead of wgcna's own required
+      // input validation; the values remain intentionally different from the
+      // persisted DESeq2 params.
+      params: { expression: params.counts, traits: params.coldata },
+    })).error, 'approval_invalid');
+    assert.equal((await run({
+      userId: 'approval-owner', projectId: 'approval-project', conversationId: 'approval-conversation',
+    }, {
+      toolId: 'volcano-plot',
+      params: { deg_table: params.counts },
+    })).error, 'approval_invalid');
+    assert.equal((await run({
+      userId: 'approval-owner', projectId: 'approval-project', conversationId: 'approval-conversation',
+    }, { params: { pval_threshold: 0.01 } })).error, 'approval_invalid');
+    assert.equal(calls, 0, '所有不匹配续跑都不得触发 executor');
+
+    const valid = await run({
+      userId: 'approval-owner', projectId: 'approval-project', conversationId: 'approval-conversation',
+    });
+    assert.equal(valid.ok, true);
+    assert.equal(calls, 1, '完全匹配的 capability 才能进入 executor');
+
+    db.getDatabase().prepare('UPDATE tool_jobs SET ack_expires_at=? WHERE id=?').run(Date.now() - 1, job.id);
+    const expired = await run({
+      userId: 'approval-owner', projectId: 'approval-project', conversationId: 'approval-conversation',
+    });
+    assert.equal(expired.error, 'approval_invalid');
+    assert.equal(calls, 1, '过期 capability 不得再次执行');
+  } finally {
+    registry.callTool = originalCallTool;
+    db.getDatabase().prepare('DELETE FROM tool_jobs WHERE id=?').run(job.id);
+  }
 });
 
 test('volcano-plot（非重操作）不拦截，直接跑', async () => {
@@ -191,6 +276,8 @@ test('Agent 只能把真实 tool_job 中已验证的 artifact 绑定到下游', 
     userId: CTX.userId,
     status: 'completed',
     params: {},
+    projectId: CTX.projectId,
+    conversationId: CTX.conversationId,
   });
   db.updateToolJob(job.id, {
     status: 'completed',
@@ -219,6 +306,76 @@ test('Agent 只能把真实 tool_job 中已验证的 artifact 绑定到下游', 
   assert.equal(bound.ok, true);
   assert.equal(bound.plan.steps.find((step) => step.id === 'deg-standardization').inputs.deg_results, '/results/deg.csv');
   assert.equal(bound.plan.lineage[0].fromToolJobId, job.id);
+
+  const foreignJob = db.createToolJob({
+    toolId: 'deseq2',
+    userId: CTX.userId,
+    status: 'completed',
+    params: {},
+    projectId: CTX.projectId,
+    conversationId: 'other-conversation',
+  });
+  const rejected = await learning.tool_run_tool(
+    {
+      op: 'bind_artifact',
+      workflowPlan: planned.plan,
+      fromToolJobId: foreignJob.id,
+      fromStepId: 'differential',
+      toStepId: 'deg-standardization',
+      inputId: 'deg_results',
+      artifactId: 'deg_table',
+    },
+    CTX,
+  );
+  assert.equal(rejected.error, 'tool_job_not_found');
   const sqlite = db.getDatabase();
   sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(job.id);
+  sqlite.prepare('DELETE FROM tool_jobs WHERE id=?').run(foreignJob.id);
+});
+
+test('workflow run/status/next ignore persisted jobs outside the active conversation', async () => {
+  const planned = await learning.tool_run_tool(
+    { op: 'plan', templateId: 'bulk-rna-core' },
+    CTX,
+  );
+  const foreignJob = db.createToolJob({
+    toolId: 'deseq2',
+    userId: CTX.userId,
+    status: 'completed',
+    params: {},
+    projectId: CTX.projectId,
+    conversationId: 'other-conversation',
+  });
+  db.updateToolJob(foreignJob.id, {
+    status: 'completed',
+    resultJson: { artifactTruth: { status: 'valid' }, artifacts: [] },
+    completedAt: Date.now(),
+  });
+  const poisonedPlan = {
+    ...planned.plan,
+    steps: planned.plan.steps.map((step, index) => index === 0
+      ? { ...step, toolJobId: foreignJob.id }
+      : step),
+  };
+
+  const status = await learning.tool_run_tool({ op: 'status', workflowPlan: poisonedPlan }, CTX);
+  assert.equal(status.ok, true);
+  assert.equal(status.jobs.length, 0);
+
+  const next = await learning.tool_run_tool({ op: 'next', workflowPlan: poisonedPlan }, CTX);
+  assert.equal(next.ok, true);
+  assert.ok(next.nextSteps.every((step) => step.toolJobId !== foreignJob.id));
+
+  let executions = 0;
+  const run = await learning.tool_run_tool({
+    op: 'run',
+    workflowPlan: poisonedPlan,
+    stepId: 'deg-standardization',
+  }, {
+    ...CTX,
+    executeRunTool: async () => { executions += 1; return { ok: true }; },
+  });
+  assert.equal(run.error, 'workflow_step_not_ready');
+  assert.equal(executions, 0);
+  db.getDatabase().prepare('DELETE FROM tool_jobs WHERE id=?').run(foreignJob.id);
 });

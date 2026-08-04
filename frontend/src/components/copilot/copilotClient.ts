@@ -669,15 +669,20 @@ export async function ackAct(
 // TOOL_JOB_APPROVAL_v1（阶段2 Task3）：重操作 run_tool 确认/取消。
 // approve=true 落 ack_status=approved，agent 下轮重调 run_tool(ackToken) 续跑；
 // approve=false 落 rejected，agent 收到 user_rejected 取消。
-export async function ackRunTool(token: string, approve: boolean): Promise<void> {
-  if (!token) return;
+export async function ackRunTool(
+  token: string,
+  approve: boolean,
+  scope: { projectId: string | null; conversationId: string | null },
+): Promise<boolean> {
+  if (!token) return false;
   try {
-    await fetch(getApiPrefix() + '/ai/run-tool-ack/' + encodeURIComponent(token), {
+    const response = await fetch(getApiPrefix() + '/ai/run-tool-ack/' + encodeURIComponent(token), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-      body: JSON.stringify({ approve }),
+      body: JSON.stringify({ approve, projectId: scope.projectId, conversationId: scope.conversationId }),
     });
+    return response.ok;
   } catch {
-    // best-effort
+    return false;
   }
 }

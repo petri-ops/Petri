@@ -259,7 +259,7 @@ function createToolsMetadataRoutes({db, getUserId, jobsDir = ''}) {
       const uid = getUserId(req);
       if (!uid) return res.status(401).json({error: 'login_required'});
       try {
-        const jobs = await db.prepare('SELECT id, tool_id, status, created_at, completed_at, error, name FROM tool_jobs WHERE user_id = ? AND is_test_run = 0 ORDER BY created_at DESC LIMIT 50').all(uid);
+        const jobs = await db.prepare('SELECT id, tool_id, status, created_at, completed_at, error, name, project_id, conversation_id FROM tool_jobs WHERE user_id = ? AND is_test_run = 0 ORDER BY created_at DESC LIMIT 50').all(uid);
         res.json({ok: true, jobs});
       } catch (e) {
         res.status(500).json({error: e.message});

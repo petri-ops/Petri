@@ -158,6 +158,12 @@ function attachExistingRepositoryWithExplicitConsent(input, dependencies = {}) {
     },
   };
 }
+
+function persistedToolJobConversation(job) {
+  if (!job) return null;
+  const value = job.conversation_id ?? job.conversationId ?? null;
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
 const {
   guardContextOperation,
   resolveResultStudioContext,
@@ -1425,10 +1431,24 @@ module.exports = function registerResultStudioRoutes(app) {
     const context = projectContext(req, projectId, { write: phase === 'confirm', git: true });
     if (context.error) return res.status(context.error.status).json({ error: context.error.code });
 
+    // Scoped sources keep their persisted conversation. A legacy unscoped
+    // source may create a new replay Job in the current conversation only when
+    // that conversation is authenticated by the context token below.
+    const sourceRevision = context.repository.getRevision(revisionId);
+    const sourceJob = sourceRevision ? db.getToolJob(sourceRevision.toolJobId) : null;
+    const persistedConversationId = persistedToolJobConversation(sourceJob);
+    const requestedConversationId = String(body.conversationId || '').trim() || null;
+    if (persistedConversationId !== null
+        && requestedConversationId !== null
+        && requestedConversationId !== persistedConversationId) {
+      return res.status(409).json({ error: 'replay_conversation_mismatch' });
+    }
+    const conversationId = persistedConversationId || requestedConversationId;
+
     const guarded = guardContextOperation({
       projectId,
       userId: userId(req),
-      conversationId: String(body.conversationId || '').trim() || null,
+      conversationId,
       activeArtifact: { revisionId },
     }, {
       contextToken: String(body.contextToken || '').trim() || null,
@@ -1465,6 +1485,7 @@ module.exports = function registerResultStudioRoutes(app) {
         const result = await mcpRegistry.callTool(toolId, params, {
           userId: userId(req) || 'local-user',
           projectId,
+          conversationId,
           resultStudioMaterializedScript: {
             path: materializedScriptPath,
             sha256: materializedScriptSha256,
@@ -1481,7 +1502,8 @@ module.exports = function registerResultStudioRoutes(app) {
       projectId,
       revisionId,
       phase,
-      request: body,
+      conversationId,
+      request: { ...body, conversationId },
     };
     try {
       const result = phase === 'confirm'
@@ -1708,12 +1730,20 @@ module.exports = function registerResultStudioRoutes(app) {
     if (!revision) return res.status(404).json({ error: 'revision_not_found' });
     const context = projectContext(req, revision.projectId, { write: true });
     if (context.error) return res.status(context.error.status).json({ error: context.error.code, bindingStatus: context.error.bindingStatus });
+    const sourceJob = db.getToolJob(revision.toolJobId);
+    const conversationId = persistedToolJobConversation(sourceJob);
+    const requestedConversationId = String(req.body?.conversationId || '').trim() || null;
+    if (conversationId !== null
+        && requestedConversationId !== null
+        && requestedConversationId !== conversationId) {
+      return res.status(409).json({ error: 'restore_conversation_mismatch' });
+    }
     try {
       const result = restoreArtifactRevision({
         projectId: context.project.id,
         workspaceRoot: context.project.workspace_path,
         revisionId: revision.revisionId,
-        conversationId: req.body?.conversationId || null,
+        conversationId,
         createdBy: 'user',
       }, {
         repository: context.repository,

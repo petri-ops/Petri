@@ -1,12 +1,34 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  ackRunTool,
   parseResultEditProgressEvent,
   parseToolCallEvent,
   parseToolResultEvent,
   restoreResultEditProgressEvents,
 } from './copilotClient';
 
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+
 describe('copilot SSE tool event projection', () => {
+  it('sends the active project and conversation as immutable approval expectations', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(ackRunTool('ack_1', true, {
+      projectId: 'project-1',
+      conversationId: 'conversation-1',
+    })).resolves.toBe(true);
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({
+      approve: true,
+      projectId: 'project-1',
+      conversationId: 'conversation-1',
+    });
+  });
+
   it('preserves structured call correlation fields', () => {
     expect(parseToolCallEvent({
       event: 'tool_call',

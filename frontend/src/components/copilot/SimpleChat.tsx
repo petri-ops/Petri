@@ -611,19 +611,27 @@ export function SimpleChat({
       }
     });
     const { ackToken, toolId } = pendingApproval;
-    await ackRunTool(ackToken, true);
+    const acknowledged = await ackRunTool(ackToken, true, {
+      projectId: projectId || null,
+      conversationId: conversationId || null,
+    });
+    if (!acknowledged) return;
     if (conversationId) clearConversationPendingApproval(conversationId);
     send(
       `用户已确认开始（ackToken=${ackToken}）。请重调 run_tool(op=run, toolId="${toolId ?? ''}", params=${JSON.stringify(mergedParams)}, ackToken="${ackToken}") 续跑该重操作。`
     );
-  }, [conversationId, paramDraft, pendingApproval, send, streaming]);
+  }, [conversationId, paramDraft, pendingApproval, projectId, send, streaming]);
 
   const rejectPending = useCallback(async () => {
     if (!pendingApproval || streaming) return;
-    await ackRunTool(pendingApproval.ackToken, false);
+    const acknowledged = await ackRunTool(pendingApproval.ackToken, false, {
+      projectId: projectId || null,
+      conversationId: conversationId || null,
+    });
+    if (!acknowledged) return;
     if (conversationId) clearConversationPendingApproval(conversationId);
     send('用户取消了该重操作，不要重试。请简短说明已取消，并给出如需继续时应调整哪些参数。');
-  }, [conversationId, pendingApproval, send, streaming]);
+  }, [conversationId, pendingApproval, projectId, send, streaming]);
 
   useEffect(() => {
     if (!pendingApproval || streaming || accessMode !== 'full') return;

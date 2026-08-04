@@ -749,6 +749,8 @@ test('P5 HTTP replay preserves generated downstream Artifact lineage through the
   const replayRouteEnd = routeSource.indexOf("app.get('/api/result-studio/changesets/:changeSetId/compare'", replayRouteStart);
   assert.ok(replayRouteStart >= 0 && replayRouteEnd > replayRouteStart, 'controlled replay route is unavailable');
   const replayRoute = routeSource.slice(replayRouteStart, replayRouteEnd);
+  assert.match(replayRoute, /const persistedConversationId = persistedToolJobConversation\(sourceJob\)/);
+  assert.match(replayRoute, /const conversationId = persistedConversationId \|\| requestedConversationId/);
   assert.match(replayRoute, /executeJob:\s*async\s*\(\{[\s\S]*?resultStudioInputLineage\s*=\s*null[\s\S]*?\}\)\s*=>/);
-  assert.match(replayRoute, /mcpRegistry\.callTool\([\s\S]*?resultStudioInputLineage[\s\S]*?\);/);
+  assert.match(replayRoute, /mcpRegistry\.callTool\([\s\S]*?conversationId,[\s\S]*?resultStudioInputLineage[\s\S]*?\);/);
 });

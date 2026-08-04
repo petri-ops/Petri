@@ -339,7 +339,8 @@ async function _runPluginScript(
   userId = 'agent',
   projectId = null,
   existingToolJobId = null,
-  resultStudioInputLineage = null
+  resultStudioInputLineage = null,
+  conversationId = null
 ) {
   // Stage 3 B2 part2: auto-provision required capability bundle(s) before
   // assembling R_LIBS_USER, so a freshly-downloaded bundle is visible to the
@@ -368,8 +369,24 @@ async function _runPluginScript(
     let toolJobId = existingToolJobId || null;
     if (db) {
       try {
+        if (existingToolJobId) {
+          const existing = typeof db.getToolJob === 'function' ? db.getToolJob(existingToolJobId) : null;
+          const existingProjectId = existing && (existing.project_id || existing.projectId || null);
+          const existingConversationId = existing && (existing.conversation_id || existing.conversationId || null);
+          const existingUserId = existing && (existing.user_id || existing.userId || null);
+          if (!existing
+              || existingUserId !== userId
+              || (existing.tool_id || existing.toolId) !== plugin.id
+              || existingProjectId !== (projectId || null)
+              || existingConversationId !== (conversationId || null)) {
+            throw new Error('tool_job_identity_mismatch');
+          }
+        }
         const job = existingToolJobId
           ? db.prepareToolJobForRun(existingToolJobId, {
+              toolName: plugin.id,
+              projectId,
+              conversationId,
               params: args,
               name: `${plugin.id} via agent`,
             })
@@ -380,10 +397,18 @@ async function _runPluginScript(
               status: 'running',
               name: `${plugin.id} via agent`,
               projectId,
+              conversationId,
             });
+        if (!job || !job.id) throw new Error('tool_job_create_failed');
         toolJobId = job && job.id;
       } catch (e) {
         console.warn('[mcp-registry] prepare/create toolJob failed:', e.message);
+        const failureLabel = existingToolJobId ? '身份校验失败' : '持久化校验失败';
+        return resolve({
+          content: [{ type: 'text', text: `执行失败: tool_job ${failureLabel}: ${e.message}` }],
+          isError: true,
+          ...(existingToolJobId ? { toolJobId: existingToolJobId } : {}),
+        });
       }
     }
 
@@ -925,7 +950,10 @@ async function callTool(name, args, opts = {}) {
       userId,
       projectId,
       toolJobId,
-      opts && opts.resultStudioInputLineage ? opts.resultStudioInputLineage : null
+      opts && opts.resultStudioInputLineage ? opts.resultStudioInputLineage : null,
+      opts && typeof opts.conversationId === 'string' && opts.conversationId.trim()
+        ? opts.conversationId.trim()
+        : null
     );
   }
 

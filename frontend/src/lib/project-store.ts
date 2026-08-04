@@ -105,8 +105,11 @@ export async function setProjectStatus(
 // Project-scoped Tool Jobs
 // ============================================================
 
-export async function listProjectJobs(projectId: string): Promise<ToolJob[]> {
-  const data = await api(`/projects/${projectId}/jobs`);
+export async function listProjectJobs(projectId: string, conversationId?: string): Promise<ToolJob[]> {
+  const query = conversationId === undefined
+    ? ''
+    : `?${new URLSearchParams({ conversationId }).toString()}`;
+  const data = await api(`/projects/${projectId}/jobs${query}`);
   return (data.jobs || []).map(mapToolJob);
 }
 
@@ -191,6 +194,9 @@ function mapProjectG0Baseline(value: Record<string, unknown>): ProjectG0Baseline
 }
 
 function mapToolJob(j: Record<string, unknown>): ToolJob {
+  const conversationId = Object.prototype.hasOwnProperty.call(j, 'conversationId')
+    ? j.conversationId
+    : j.conversation_id;
   return {
     id: String(j.id),
     tool_id: String(j.tool_id || ''),
@@ -200,6 +206,7 @@ function mapToolJob(j: Record<string, unknown>): ToolJob {
     error: j.error ? String(j.error) : undefined,
     name: j.name ? String(j.name) : undefined,
     project_id: j.project_id ? String(j.project_id) : null,
+    conversationId: conversationId == null ? null : String(conversationId),
   };
 }
 

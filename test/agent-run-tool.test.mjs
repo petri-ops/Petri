@@ -232,6 +232,75 @@ test('MCP file-input staging contains plugin ids and rejects reserved control fi
   );
 });
 
+test('MCP existing tool_job rejects user/project/conversation/tool identity drift before execution', async () => {
+  const builtInDir = resolve(__dirname, '..', 'resources', 'built-in-plugins', 'volcano-plot');
+  globalThis._biof3Plugins = new Map();
+  globalThis._biof3Plugins.set('volcano-plot', {
+    id: 'volcano-plot',
+    version: '1.0.0',
+    language: 'r',
+    pluginDir: builtInDir,
+    scriptPath: path.join(builtInDir, 'scripts'),
+  });
+  const job = db.createToolJob({
+    toolId: 'volcano-plot',
+    userId: 'mcp-owner',
+    projectId: 'mcp-project',
+    conversationId: 'mcp-conversation-a',
+    params: { deg_table: '/tmp/does-not-run.csv' },
+    status: 'failed',
+  });
+  try {
+    for (const opts of [
+      { userId: 'mcp-other', projectId: 'mcp-project', conversationId: 'mcp-conversation-a' },
+      { userId: 'mcp-owner', projectId: 'mcp-other', conversationId: 'mcp-conversation-a' },
+      { userId: 'mcp-owner', projectId: 'mcp-project', conversationId: 'mcp-conversation-b' },
+      { userId: 'mcp-owner', projectId: 'mcp-project', conversationId: 'mcp-conversation-a', toolJobId: job.id },
+    ]) {
+      const result = await callTool(
+        opts.toolJobId ? 'go-kegg' : 'volcano-plot',
+        { deg_table: '/tmp/does-not-run.csv' },
+        { ...opts, toolJobId: job.id },
+      );
+      assert.equal(result.isError, true);
+      assert.match(result.content[0].text, /tool_job 身份校验失败/);
+    }
+    assert.equal(db.getToolJob(job.id).status, 'failed');
+  } finally {
+    db.getDatabase().prepare('DELETE FROM tool_jobs WHERE id=?').run(job.id);
+    globalThis._biof3Plugins = new Map();
+  }
+});
+
+test('MCP plugin execution fails closed when a new tool_job cannot be persisted', async () => {
+  const builtInDir = resolve(__dirname, '..', 'resources', 'built-in-plugins', 'volcano-plot');
+  globalThis._biof3Plugins = new Map();
+  globalThis._biof3Plugins.set('volcano-plot', {
+    id: 'volcano-plot',
+    version: '1.0.0',
+    language: 'r',
+    pluginDir: builtInDir,
+    scriptPath: path.join(builtInDir, 'scripts'),
+  });
+  const originalCreateToolJob = db.createToolJob;
+  db.createToolJob = () => { throw new Error('injected_persistence_failure'); };
+  try {
+    const result = await callTool('volcano-plot', {
+      deg_table: '/tmp/does-not-run.csv',
+    }, {
+      userId: 'mcp-owner',
+      projectId: 'mcp-project',
+      conversationId: 'mcp-conversation',
+    });
+    assert.equal(result.isError, true);
+    assert.equal(result.toolJobId, undefined);
+    assert.match(result.content[0].text, /tool_job 持久化校验失败/);
+  } finally {
+    db.createToolJob = originalCreateToolJob;
+    globalThis._biof3Plugins = new Map();
+  }
+});
+
 // === callTool 端到端：跑完返回 toolJobId（live，需 R）===
 
 const RUN_LIVE = process.env.RUN_AGENT_LIVE === '1';

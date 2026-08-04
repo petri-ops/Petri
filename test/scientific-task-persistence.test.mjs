@@ -38,7 +38,7 @@ test('HRT-3 persists confirmed task and binds only a same-project real tool_job'
   assert.equal(saved.confirmation.taskSpecHash, confirmed.taskSpecHash);
   assert.throws(() => db.saveScientificTaskSpec({ spec: { ...confirmed.spec, originalRequest: '被覆盖' }, specHash: 'f'.repeat(64), version: 1 }), /scientific_task_version_immutable/);
 
-  const job = db.createToolJob({ toolId: 'deseq2', userId: 'local-user', params: {}, status: 'pending', projectId: project.id });
+  const job = db.createToolJob({ toolId: 'deseq2', userId: 'local-user', params: {}, status: 'pending', projectId: project.id, conversationId: 'conv_1' });
   const bound = db.bindScientificTaskToolJob({ taskId: confirmed.spec.taskId, toolJobId: job.id });
   assert.equal(bound.tool_job_id, job.id);
   assert.equal(db.getScientificTaskSpec(confirmed.spec.taskId).tool_job_id, job.id);

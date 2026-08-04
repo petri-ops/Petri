@@ -114,3 +114,45 @@ test('project baseline endpoint reports a future identity as blocked without hid
   assert.equal(response.body.baseline.compatibilityReason, 'future_baseline_unsupported');
   assert.equal(response.body.baseline.executionAllowed, false);
 });
+
+test('project jobs enforce ownership, project all conversations, and filter exactly by conversation', async () => {
+  const ownerId = 'g0-jobs-owner';
+  const created = await request('/api/data/projects', {
+    method: 'POST',
+    userId: ownerId,
+    body: {
+      name: 'G0 jobs API project',
+      modality: 'bulk',
+      workspacePath: join(tempRoot, 'jobs-api-project'),
+    },
+  });
+  assert.equal(created.body.status, 'ok');
+  const projectId = created.body.project.id;
+
+  const jobA1 = db.createToolJob({ toolId: 'fixture', userId: ownerId, projectId, conversationId: 'conversation-a' });
+  const jobA2 = db.createToolJob({ toolId: 'fixture', userId: ownerId, projectId, conversationId: 'conversation-a' });
+  const jobB = db.createToolJob({ toolId: 'fixture', userId: ownerId, projectId, conversationId: 'conversation-b' });
+  const jobUnscoped = db.createToolJob({ toolId: 'fixture', userId: ownerId, projectId });
+
+  const all = await request(`/api/data/projects/${projectId}/jobs`, { userId: ownerId });
+  assert.equal(all.status, 200);
+  assert.equal(all.body.status, 'ok');
+  assert.deepEqual(new Set(all.body.jobs.map((job) => job.id)), new Set([
+    jobA1.id,
+    jobA2.id,
+    jobB.id,
+    jobUnscoped.id,
+  ]));
+  assert.equal(all.body.jobs.find((job) => job.id === jobA1.id).conversationId, 'conversation-a');
+  assert.equal(all.body.jobs.find((job) => job.id === jobUnscoped.id).conversationId, null);
+
+  const filtered = await request(`/api/data/projects/${projectId}/jobs?conversationId=conversation-a`, { userId: ownerId });
+  assert.equal(filtered.body.status, 'ok');
+  assert.deepEqual(new Set(filtered.body.jobs.map((job) => job.id)), new Set([jobA1.id, jobA2.id]));
+  assert.ok(filtered.body.jobs.every((job) => job.conversationId === 'conversation-a'));
+
+  const denied = await request(`/api/data/projects/${projectId}/jobs`, { userId: 'g0-jobs-other' });
+  assert.equal(denied.body.status, 'error');
+  assert.equal(denied.body.error, '无权访问此资源');
+  assert.equal(denied.body.jobs, undefined);
+});

@@ -462,6 +462,7 @@ function createResultChangeSetTools(options = {}) {
           const result = await callTool(toolId, params, {
             userId: ctx.userId || 'agent',
             projectId: scoped.projectId,
+            conversationId: ctx.conversationId || null,
             resultStudioMaterializedScript: {
               path: materializedScriptPath,
               sha256: materializedScriptSha256,

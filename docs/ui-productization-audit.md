@@ -205,6 +205,7 @@ npm run check
 - UI-047 不破坏 Markdown 阅读密度：复用 UI-039 的 fenced code 语言栏与弱化边框规则；`CodeHighlight` 只作为渲染基元被 Markdown 与工具结果复用，不引入新的主题变量或修改现有 markdown 渲染管线。
 - UI-048 不破坏现有文件预览栈：Office 预览仅作为新分支加入文件路由表，文本/CSV/PDF/图片预览契约保持不变；预览失败时 fallback 到“用默认应用打开”入口，不引入第二套文件真相系统。
 - UI-037 不创建第二套后台任务系统：仍使用既有 Agent task、`task_events` SSE 回放和 `copilot_messages` 持久化；本次只修复 renderer 按会话隔离、订阅存续和完成对账。
+- UI-061 的 2026-08-04 UX1G-1 非视觉加固：确认/取消请求携带当前 project/conversation 作为只读期望值，后端与持久 ToolJob 精确比较后才改变 ACK 状态；失败时前端不清除确认卡、不发送续跑指令。该改动不改变卡片布局、完全访问自动执行边界或 UI-061 的既有实机状态。
 
 
 ## 12. 2026-07-22 UI-046 / UI-047 / UI-048 实机收口

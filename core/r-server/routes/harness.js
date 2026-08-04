@@ -582,6 +582,7 @@ module.exports = function registerHarnessRoutes(app) {
       registry.callTool(job.tool_id, nextParams, {
         userId: userId(req),
         projectId: job.project_id || null,
+        conversationId: job.conversation_id || job.conversationId || null,
         toolJobId: job.id,
       }).catch((error) => {
         console.warn('[harness] workflow retry failed:', error.message);
@@ -868,6 +869,8 @@ module.exports = function registerHarnessRoutes(app) {
       if (!task) return res.status(404).json({ ok: false, error: 'scientific_task_not_found' });
       const project = db.getProject(task.project_id);
       if (!canAccessProject(req, project)) return res.status(403).json({ ok: false, error: 'forbidden' });
+      const job = db.getToolJob(req.body?.toolJobId);
+      if (!job || !canAccessJob(req, job)) return res.status(job ? 403 : 404).json({ ok: false, error: job ? 'forbidden' : 'tool_job_not_found' });
       const bound = db.bindScientificTaskToolJob({ taskId: req.params.taskId, version: Number(req.body?.version || 1), toolJobId: req.body?.toolJobId });
       res.json({ ok: true, task: bound });
     } catch (error) {

@@ -71,10 +71,22 @@ module.exports = function mountAiLegacy(app) {
   // 前端确认卡用户点"开始/取消"后 POST 这里，后端落 ack_status=approved/rejected。
   // agent 下次重调 run_tool(ackToken) 时读到 approved 才续跑。
   app.post('/api/ai/run-tool-ack/:token', express.json({limit:'8kb'}), (req, res) => {
-    const userId = req.user && req.user.id;
+    const userId = req.user && (req.user.id || req.user.userId);
     if (!userId) return res.status(401).json({status: 'error', error: '未授权'});
-    const approve = req.body && req.body.approve !== false;
-    const job = dbMod.ackToolJob(req.params.token, approve);
+    const body = req.body && typeof req.body === 'object' ? req.body : {};
+    if (!Object.prototype.hasOwnProperty.call(body, 'projectId')
+        || !Object.prototype.hasOwnProperty.call(body, 'conversationId')) {
+      return res.status(400).json({status: 'error', error: 'approval_scope_required'});
+    }
+    const approve = body.approve !== false;
+    const projectId = typeof body.projectId === 'string' && body.projectId.trim()
+      ? body.projectId.trim()
+      : null;
+    const conversationId = typeof body.conversationId === 'string' && body.conversationId.trim()
+      ? body.conversationId.trim()
+      : null;
+    // Request scope is an expectation only; persisted Job identity is immutable.
+    const job = dbMod.ackToolJob(req.params.token, approve, { userId, projectId, conversationId });
     if (!job) return res.status(404).json({status: 'error', error: 'token_not_found'});
     res.json({status: 'ok', ackStatus: job.ack_status, toolJobId: job.id});
   });
