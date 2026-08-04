@@ -4,13 +4,14 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-03（P4R-0～P4R-6、P5 与 P6 已完成 source-bound 收口；P7 经用户裁决 deferred；无 🔴 审计阻塞或 🟢 待合并项）
+最后更新：2026-08-04（G0-RS-TL1 / UI-120 已在开发态 macOS 边界 verified；P6 stored evidence 因 src/preload.js 改动继续保持非 exact）
 
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
 | --- | --- | --- | --- |
 | 🟡证据边界 | 2026-08-03 | **P6 stored evidence 不再匹配当前 Result Studio 前端源码。** UX1A 修改了 P6 绑定的八个前端文件，`npm run test:changed` 的 `p6_current_source_tree_not_exact` 按设计 fail-closed | P6 evidence 继续诚实绑定 `ad1e2ce`；只有重跑完整 P6 矩阵才能刷新。P7 deferred 期间不阻塞 UX 小切片，但不得宣称当前源码仍由旧 P6 evidence 覆盖 |
+| 🟡证据边界 | 2026-08-03 | **P6 stored evidence 不再匹配当前 `src/preload.js`。** `G0-RS-TL1` (UI-120) 把窗口切为 `frame:false` 自绘控制并新增 `window.biof3Desktop.window.onMaximizeChanged`；`src/preload.js` 与 `src/main.js` 同属 `P6_RECOVERY_ELECTRON_SOURCE_FILES`，旧 P6 freshness 按设计报告 `p6_current_source_tree_not_exact` | TL1 自身已由 17 项专项测试与开发态 Electron 控件/退出重启链验证，但未运行完整 P6 矩阵；P6 evidence 继续诚实绑定 `ad1e2ce`。未来只有显式 `npm run g0:result-studio:p6:update` 并纳入新窗口控件的 restart/pressure/recovery 才能重绑，不能宣称旧 P6 evidence 覆盖当前源码 |
 | 🟡延期 | 2026-08-03 | **G0-RS-P7 Honest Product Requalification。** 用户裁决发布级资格工作后移；Result Studio 保持 `implemented_unverified / experimental`，没有 canonical P7 PASS evidence | 重开前必须先解决 selection→enrichment 无 candidate/compare/lifecycle、existing Git consent UI、五条独立 task trace、双 Provider、packaged 六格与 literal OS reboot；历史 RS9、P4R/P6 开发态证据不得冒充资格 |
 | 🟡待评估 | 2026-07-26 | **G0 `macos-arm64: qualified` 的视觉证据不成立。** `acceptance/g0-qualification/packaged-ui/` 5 张 PNG 只有 4 个唯一 sha256：`chat-summary-light-wide.png` 与 `restart-restored-light-wide.png` 逐字节相同（均为 `bb54acff…`），即「重启后恢复」证据是重启前截图的副本。`scripts/g0-qualification-visual.mjs:59-62` 只校验哈希格式/宽高/字节数，无唯一性断言；配套 `inspection.json` 为 811 字节九个人工布尔值，仓库内无任何写入者。该形态与 `core/shared-backend/result-studio-qualification.js:113-121` 判 RS9 non-qualifying 的理由（`inspection_booleans_are_human_assertions`）完全一致，但该理由未推及 G0 自身 | 仅登记事实。**不得**由 Agent 擅自变更 `core/shared-backend/g0/support-matrix.json` 的 `qualified` 状态或 `evidence-ledger.json` 的 `visual_state_convergence`——资格状态变更属用户决定。修补检查脚本（加 `distinctStates` 唯一性断言）会使当前 G0 门变红，需先获批。**2026-07-27 用户裁决：暂不发布，故本项降级为待评估、不阻塞开发。** 重开条件：任何对外发布、资格声明或 G0 重新资格之前必须先处理——发布时若仍以此证据支撑 `qualified`，即为不诚实声明 |
 | 🟡产品待续 | 2026-08-03 | **Result Studio existing Git 显式同意 UI。** 后端无同意写入风险已在 `e14a8e6` 修复：默认 managed、独立持久 consent truth、生产调用零硬编码 `true` | 前端尚未提供 detected/decisionRequired/dirty risk 与 affirmative opt-in 产品操作；因此 existing clean/dirty 不进入 P7 支持范围，未来不得用直接 API 调用冒充用户同意 |
@@ -23,6 +24,7 @@
 
 | 日期 | 结果 | 检查点 |
 | --- | --- | --- |
+| 2026-08-04 | `G0-RS-TL1 / UI-120` 开发态 macOS 收口：`frame:false` 自绘关闭/最小化/最大化，134px 折叠轨、live/query 竞态、异常/cleanup、sender/boolean 与 `focus-visible` 均修复；TitleBar 11/11、Electron/preload 6/6。真实窗口完成最大化/还原、最小化、双击隔离、缩放、明暗、约1050/840/720px、Cmd+M/W、自绘关闭及 owned 服务退出重启。ScreenCaptureKit `-3811` 使窄宽截图/拖拽绝对位移不可用；不外推 packaged/P6/P7 | UI-120 / TL1 |
 | 2026-08-03 | `G0-RS-UX1F / UI-122` 真实图形补验并修复：插件正式 PNG 恢复为默认主结果且完整适配可见画布，通用 scatter/matrix 改为显式可逆交互，状态严格绑定 Revision/Job/Artifact；结果态不再常驻版本面板。聚焦前端 44/44、Result Studio 前端聚合 199/199、TypeScript 与同一开发态 Electron 真实新 volcano Job `job_41578fbc4c6f4577` 通过，PNG 标题/阈值/图例/双轴和 25 点交互均可达；未外推 packaged/P7 | UI-122 / UX1F |
 | 2026-08-03 | `G0-RS-UX1E` 短闭环完成：顶部 Artifact 卡片网格与右侧 Honeycomb 栏合并为一个紧凑结果选择器；PNG/SVG/PDF 按科学结果全局归组，技术格式和相关文件按需展开，`selectedName` 仍是唯一选择真相。聚焦前端 36/36、TypeScript 与开发态 Electron 真实旧 GO/KEGG Job 交互通过；旧 Job 物理预览文件不可用，未外推 packaged/P7 | UI-121 / UX1E |
 | 2026-08-03 | `G0-RS-UX1A` 短闭环完成：结果会话首次进入收起左右栏、会话内不反复覆盖用户布局、返回对话恢复；Artifact 409/加载失败以独立“文件不可用”状态替代破图，Header/Inspector/主画布一致并提供重试与 Agent 恢复。开发态 Electron 真实旧 Job 观察通过；前端 32/32、受影响 Node 368/368、P4R 7/7，P6 历史 source freshness 例外单独登记 | UI-116 / UX1A |

@@ -792,21 +792,6 @@ function startContentSync() {
 
 // ── 主窗口 ─────────────────────────────────────────────────────
 let mainWindow = null;
-const TITLE_BAR_HEIGHT_PX = 38;
-const MACOS_TRAFFIC_LIGHT_HEIGHT_PX = 14;
-const MACOS_TRAFFIC_LIGHT_X_PX = 20;
-
-function getTrafficLightPosition(zoomFactor = 1) {
-  return {
-    x: MACOS_TRAFFIC_LIGHT_X_PX,
-    y: Math.max(
-      0,
-      Math.round(
-        (TITLE_BAR_HEIGHT_PX * zoomFactor - MACOS_TRAFFIC_LIGHT_HEIGHT_PX) / 2,
-      ),
-    ),
-  };
-}
 
 // BioF3 owns local backend ports and must run as a single application
 // instance. A repeated launch focuses the existing window instead of starting
@@ -881,11 +866,12 @@ async function createWindow() {
     minWidth: 720,
     minHeight: 520,
     title: "BioF3",
-    // hiddenInset keeps native macOS controls; their track follows renderer zoom below.
-    frame: process.platform === "darwin",
-    titleBarStyle: "hiddenInset",
-    trafficLightPosition:
-      process.platform === "darwin" ? getTrafficLightPosition() : undefined,
+    // Self-drawn traffic-light buttons in TitleBar.tsx — see src/main.js comments
+    // around setupWindowIpc() for the IPC contract (window:minimize/maximize/close).
+    // Using a frameless window on every platform lets the renderer own the controls and
+    // can match the Cursor-style grey capsule + dark glyph look on macOS too.
+    frame: false,
+    backgroundColor: "#1f2330",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -935,29 +921,42 @@ async function createWindow() {
   // renderer 内存状态，并造成“前端刷新后后端像断开”的体感。
   // Cmd/Ctrl+R 改为应用内软刷新；Cmd/Ctrl+Shift+R 保留为开发者硬刷新。
   mainWindow.webContents.on("before-input-event", (event, input) => {
+    const key = typeof input.key === "string" ? input.key.toLowerCase() : "";
+    const isMacWindowShortcut =
+      process.platform === "darwin" &&
+      input.meta &&
+      !input.control &&
+      !input.alt &&
+      !input.shift;
+
+    if (isMacWindowShortcut && key === "w") {
+      event.preventDefault();
+      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.close();
+      return;
+    }
+    if (isMacWindowShortcut && key === "m") {
+      event.preventDefault();
+      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.minimize();
+      return;
+    }
+
     const isReloadKey =
-      input.key &&
-      input.key.toLowerCase() === "r" &&
+      key === "r" &&
       (input.meta || input.control) &&
       !input.alt;
     if (!isReloadKey) return;
     event.preventDefault();
     if (input.shift) {
       console.log("[desktop] hard reload requested");
-      mainWindow.webContents.reloadIgnoringCache();
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.reloadIgnoringCache();
+      }
       return;
     }
     console.log("[desktop] soft refresh requested");
-    mainWindow.webContents.send("app:soft-refresh");
-  });
-
-  mainWindow.webContents.on("zoom-changed", () => {
-    setTimeout(() => {
-      if (!mainWindow || mainWindow.isDestroyed()) return;
-      if (process.platform !== "darwin") return;
-      const zoomFactor = mainWindow.webContents.getZoomFactor();
-      mainWindow.setWindowButtonPosition(getTrafficLightPosition(zoomFactor));
-    }, 0);
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("app:soft-refresh");
+    }
   });
 
   // DevTools 仅在显式需要时打开，避免日常启动打断工作台。
@@ -989,29 +988,56 @@ async function createWindow() {
     console.log("[renderer] page loaded");
   });
 
+  const windowForEvents = mainWindow;
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
+
+  // Forward maximize/unmaximize state to the renderer so the self-drawn
+  // window control buttons can swap their glyph (single square ↔ double square).
+  const publishMaximizedState = (isMaximized) => {
+    if (
+      (typeof windowForEvents.isDestroyed === "function" &&
+        windowForEvents.isDestroyed()) ||
+      (typeof windowForEvents.webContents?.isDestroyed === "function" &&
+        windowForEvents.webContents.isDestroyed())
+    ) {
+      return;
+    }
+    windowForEvents.webContents.send(
+      "window:maximize-changed",
+      isMaximized,
+    );
+  };
+  windowForEvents.on("maximize", () => publishMaximizedState(true));
+  windowForEvents.on("unmaximize", () => publishMaximizedState(false));
 }
 
 // ── IPC：窗口控制（配合 frame:false 自定义标题栏）──────────────
 function setupWindowIpc() {
-  ipcMain.on("window:minimize", () => {
-    if (mainWindow) mainWindow.minimize();
+  const resolveWindowForSender = (event) => {
+    if (!mainWindow || mainWindow.isDestroyed()) return null;
+    return event?.sender === mainWindow.webContents ? mainWindow : null;
+  };
+
+  ipcMain.on("window:minimize", (event) => {
+    resolveWindowForSender(event)?.minimize();
   });
-  ipcMain.on("window:maximize", () => {
-    if (!mainWindow) return;
-    if (mainWindow.isMaximized()) {
-      mainWindow.unmaximize();
+  ipcMain.on("window:maximize", (event) => {
+    const targetWindow = resolveWindowForSender(event);
+    if (!targetWindow) return;
+    if (targetWindow.isMaximized()) {
+      targetWindow.unmaximize();
     } else {
-      mainWindow.maximize();
+      targetWindow.maximize();
     }
   });
-  ipcMain.on("window:close", () => {
-    if (mainWindow) mainWindow.close();
+  ipcMain.on("window:close", (event) => {
+    resolveWindowForSender(event)?.close();
   });
-  ipcMain.handle("window:isMaximized", () => {
-    return mainWindow ? mainWindow.isMaximized() : false;
+  ipcMain.handle("window:isMaximized", (event) => {
+    const targetWindow = resolveWindowForSender(event);
+    return targetWindow ? targetWindow.isMaximized() === true : false;
   });
 }
 

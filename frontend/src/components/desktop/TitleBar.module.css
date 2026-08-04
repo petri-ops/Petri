@@ -11,6 +11,13 @@
   --titlebar-pill-bg: color-mix(in srgb, var(--biof3-bg-surface) 72%, transparent 28%);
   --titlebar-pill-border: color-mix(in srgb, var(--biof3-border-strong) 62%, transparent 38%);
   --titlebar-hover: color-mix(in srgb, var(--biof3-hover) 92%, transparent 8%);
+  --win-btn-size: 22px;
+  --win-btn-bg: color-mix(in srgb, var(--biof3-text) 12%, transparent 88%);
+  --win-btn-bg-hover: color-mix(in srgb, var(--biof3-text) 22%, transparent 78%);
+  --win-btn-fg: color-mix(in srgb, var(--biof3-text) 78%, transparent 22%);
+  --win-btn-bg-close: color-mix(in srgb, var(--biof3-text) 12%, transparent 88%);
+  --win-btn-bg-close-hover: #e0464e;
+  --win-btn-fg-close-hover: #ffffff;
   position: fixed;
   top: 0;
   left: 0;
@@ -58,10 +65,67 @@
 }
 
 .trafficZone {
-  /* Match the quiet gap Codex leaves after the native traffic lights. */
-  width: 88px;
+  /* Three self-drawn window control buttons (close / minimize / maximize).
+     Each is its own grey capsule — no shared background well — to match the
+     Cursor-style reference design. Visible only when running under Electron
+     (see TitleBar.tsx). On the web build we render a small placeholder so the
+     leftZone width stays stable. */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 102px;
   height: 100%;
+  flex: 0 0 102px;
+  padding-left: 12px;
+  padding-right: 8px;
+}
+
+.trafficPlaceholder {
+  width: var(--win-btn-size);
+  height: var(--win-btn-size);
   flex-shrink: 0;
+}
+
+.winBtn {
+  -webkit-app-region: no-drag;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--win-btn-size);
+  height: var(--win-btn-size);
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--win-btn-bg);
+  color: var(--win-btn-fg);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.12s ease, color 0.12s ease, transform 0.12s ease;
+  outline: none;
+}
+
+.winBtn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--biof3-accent) 78%, white 22%);
+  outline-offset: 1px;
+}
+
+.winBtn:hover {
+  background: var(--win-btn-bg-hover);
+}
+
+.winBtn:active {
+  transform: scale(0.92);
+}
+
+.winBtn svg {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.winBtnClose:hover {
+  background: var(--win-btn-bg-close-hover);
+  color: var(--win-btn-fg-close-hover);
 }
 
 .iconBtn,
@@ -77,7 +141,10 @@
   display: flex;
   align-items: center;
   gap: 2px;
-  padding-left: 1px;
+  box-sizing: border-box;
+  width: 32px;
+  flex: 0 0 32px;
+  padding-left: 4px; /* keep the panel-left toggle visually distinct from the window controls at small zoom */
   min-width: 0;
 }
 
@@ -235,6 +302,13 @@
   transition: background 0.14s ease, color 0.14s ease, opacity 0.14s ease;
   padding: 0;
   flex-shrink: 0;
+}
+
+.iconBtn:focus-visible,
+.tabPillMain:focus-visible,
+.tabClose:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--biof3-accent) 78%, white 22%);
+  outline-offset: 1px;
 }
 
 .iconBtn:hover,

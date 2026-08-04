@@ -55,6 +55,7 @@ declare global {
         maximize: () => void;
         close: () => void;
         isMaximized: () => Promise<boolean>;
+        onMaximizeChanged: (callback: (isMaximized: boolean) => void) => () => void;
       };
       aiSettings: {
         get: () => Promise<Record<string, unknown>>;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { useWorkspacePanelsContext } from './WorkspacePanelsContext';
@@ -11,9 +11,84 @@ function getFallbackTitle(pathname: string): string {
   return 'BioF3';
 }
 
+function useDesktopWindowControls(): {
+  isMaximized: boolean;
+  minimize: () => void;
+  toggleMaximize: () => void;
+  close: () => void;
+  onTitleBarDoubleClick: (event: React.MouseEvent<HTMLElement>) => void;
+} {
+  const bridge = typeof window !== 'undefined' ? window.biof3Desktop : undefined;
+  const desktopWindow = bridge?.isDesktop === true ? bridge.window : undefined;
+  const [isMaximized, setIsMaximized] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!desktopWindow) return undefined;
+
+    let active = true;
+    let receivedLiveState = false;
+    let unsubscribe: (() => void) | undefined;
+
+    try {
+      // Subscribe before hydrating from the query. A maximize event can arrive
+      // between these operations, and the live event is the newer truth.
+      unsubscribe = desktopWindow.onMaximizeChanged?.((value) => {
+        receivedLiveState = true;
+        if (active) setIsMaximized(value === true);
+      });
+    } catch {
+      // A partially available preload bridge should leave the safe default in
+      // place instead of preventing the title bar from rendering.
+      unsubscribe = undefined;
+    }
+
+    if (desktopWindow.isMaximized) {
+      // Promise.resolve().then(...) also catches a bridge that throws before it
+      // can return its Promise (for example, an older preload implementation).
+      void Promise.resolve()
+        .then(() => desktopWindow.isMaximized?.())
+        .then((value) => {
+          // A live maximize/unmaximize event is newer than the initial query.
+          // Never let a late query response overwrite that state.
+          if (active && !receivedLiveState) setIsMaximized(value === true);
+        })
+        .catch(() => {
+          // Older or partially available desktop bridges keep the safe default.
+        });
+    }
+
+    return () => {
+      active = false;
+      try {
+        unsubscribe?.();
+      } catch {
+        // Cleanup must remain safe even if an older bridge has a fragile
+        // unsubscribe implementation.
+      }
+    };
+  }, [desktopWindow?.isMaximized, desktopWindow?.onMaximizeChanged]);
+
+  return {
+    isMaximized,
+    minimize: () => desktopWindow?.minimize?.(),
+    toggleMaximize: () => desktopWindow?.maximize?.(),
+    close: () => desktopWindow?.close?.(),
+    onTitleBarDoubleClick: (event) => {
+      // Only the drag region (header surface) should trigger maximize; clicking
+      // a no-drag child (tool buttons, traffic lights, tabs) must not.
+      const target = event.target as Element | null;
+      if (target?.closest?.('button, a, input, select, textarea, [role="button"]')) {
+        return;
+      }
+      desktopWindow?.maximize?.();
+    },
+  };
+}
+
 export function TitleBar(): React.ReactElement {
   const location = useLocation();
   const panels = useWorkspacePanelsContext();
+  const win = useDesktopWindowControls();
   const {
     title,
     leftPanelWidth,
@@ -30,7 +105,10 @@ export function TitleBar(): React.ReactElement {
 
   const displayTitle = title || getFallbackTitle(location.pathname);
   const resizeRail = 1;
-  const collapsedLeftRail = 122;
+  // 102px window-control rail + 32px panel-toggle rail. Keep this in sync
+  // with the fixed rails in TitleBar.module.css so collapsed chrome cannot
+  // overflow into the result title at narrow widths or renderer zoom levels.
+  const collapsedLeftRail = 134;
   const collapsedRightRail = 56;
   const leftSpan = panels.leftOpen ? leftPanelWidth + resizeRail : collapsedLeftRail;
   const rightSpan = panels.rightOpen ? rightPanelWidth + resizeRail : collapsedRightRail;
@@ -39,10 +117,54 @@ export function TitleBar(): React.ReactElement {
     ['--titlebar-right-span' as string]: `${rightSpan}px`,
   } as React.CSSProperties;
 
+  const isDesktop = typeof window !== 'undefined' && window.biof3Desktop?.isDesktop === true;
+
   return (
-    <header className={styles.titleBar} style={titleBarStyle}>
+    <header
+      className={styles.titleBar}
+      style={titleBarStyle}
+      onDoubleClick={win.onTitleBarDoubleClick}
+    >
       <div className={`${styles.leftZone} ${!panels.leftOpen ? styles.leftZoneCollapsed : ''}`}>
-        <div className={styles.trafficZone} aria-hidden="true" />
+        <div className={styles.trafficZone}>
+          {isDesktop ? (
+            <>
+              <button
+                type="button"
+                className={`${styles.winBtn} ${styles.winBtnClose}`}
+                onClick={win.close}
+                aria-label="关闭窗口"
+                title="关闭"
+              >
+                <Icon name="x" size={11} strokeWidth={2.4} />
+              </button>
+              <button
+                type="button"
+                className={styles.winBtn}
+                onClick={win.minimize}
+                aria-label="最小化窗口"
+                title="最小化"
+              >
+                <Icon name="minus" size={11} strokeWidth={2.4} />
+              </button>
+              <button
+                type="button"
+                className={styles.winBtn}
+                onClick={win.toggleMaximize}
+                aria-label={win.isMaximized ? '还原窗口' : '最大化窗口'}
+                title={win.isMaximized ? '还原' : '最大化'}
+              >
+                <Icon
+                  name={win.isMaximized ? 'square-stack' : 'square'}
+                  size={win.isMaximized ? 10 : 11}
+                  strokeWidth={2.2}
+                />
+              </button>
+            </>
+          ) : (
+            <div className={styles.trafficPlaceholder} aria-hidden="true" />
+          )}
+        </div>
 
         <div className={styles.leftTools}>
           <button

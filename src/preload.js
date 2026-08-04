@@ -44,7 +44,21 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     minimize: () => ipcRenderer.send('window:minimize'),
     maximize: () => ipcRenderer.send('window:maximize'),
     close: () => ipcRenderer.send('window:close'),
-    isMaximized: () => ipcRenderer.invoke('window:isMaximized'),
+    isMaximized: () => {
+      try {
+        return Promise.resolve(ipcRenderer.invoke('window:isMaximized')).then(
+          (value) => value === true,
+        );
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    },
+    onMaximizeChanged: (callback) => {
+      if (typeof callback !== 'function') return () => {};
+      const listener = (_event, isMaximized) => callback(isMaximized === true);
+      ipcRenderer.on('window:maximize-changed', listener);
+      return () => ipcRenderer.removeListener('window:maximize-changed', listener);
+    },
   },
 
   // AI 设置

@@ -75,6 +75,7 @@ export type IconName =
   | 'message-circle'
   | 'send'
   | 'square'
+  | 'square-stack'
   | 'minus'
   | 'more-horizontal';
 
@@ -501,6 +502,13 @@ const paths: Record<IconName, React.ReactNode> = {
   // Square — stop (Lucide square)
   square: (
     <rect x="3" y="3" width="18" height="18" rx="2" />
+  ),
+  // Square-stack — restore from maximize (Lucide square-stack icon)
+  'square-stack': (
+    <>
+      <rect x="7" y="7" width="13" height="13" rx="1.5" />
+      <path d="M4 17V5a1 1 0 0 1 1-1h12" />
+    </>
   ),
   minus: <line x1="5" y1="12" x2="19" y2="12" />,
   'more-horizontal': (
