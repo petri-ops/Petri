@@ -7,10 +7,19 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { nextResultBodyState } from './resultBodyState';
+import { canCommitResultFetch, nextResultBodyState } from './resultBodyState';
 import type { ResultBodyState } from './resultBodyState';
 
 const SHOWN: ResultBodyState = { kind: 'artifact', jobId: 'job_1', artifactName: 'volcano.png' };
+
+describe('canCommitResultFetch', () => {
+  it('rejects a late response after the active Job changes or the request is cancelled', () => {
+    expect(canCommitResultFetch('job-a', 'job-a', false)).toBe(true);
+    expect(canCommitResultFetch('job-a', 'job-b', false)).toBe(false);
+    expect(canCommitResultFetch('job-a', 'job-a', true)).toBe(false);
+    expect(canCommitResultFetch('job-a', null, false)).toBe(false);
+  });
+});
 
 describe('nextResultBodyState', () => {
   it('keeps the body when the interaction manifest fails (project-workspace.tsx:3602-3612)', () => {

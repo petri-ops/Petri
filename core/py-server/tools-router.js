@@ -479,6 +479,8 @@ function registerToolsRoutes(app) {
       toolId: job.tool_id,
       status: job.status,
       error: job.error,
+      projectId: job.project_id || null,
+      conversationId: job.conversation_id || null,
       createdAt: job.created_at,
       completedAt: job.completed_at,
       result: job.result_json ? JSON.parse(job.result_json) : null,

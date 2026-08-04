@@ -2,7 +2,8 @@ import React from 'react';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { WorkspacePanelsProvider } from './WorkspacePanelsContext';
+import type { TitleBarResultItem } from '@/hooks/useWorkspacePanels';
+import { WorkspacePanelsProvider, useWorkspacePanelsContext } from './WorkspacePanelsContext';
 import { TitleBar } from './TitleBar';
 
 type DesktopWindow = NonNullable<Window['biof3Desktop']>['window'];
@@ -27,6 +28,43 @@ function renderTitleBar() {
   return render(
     <MemoryRouter>
       <WorkspacePanelsProvider>
+        <TitleBar />
+      </WorkspacePanelsProvider>
+    </MemoryRouter>,
+  );
+}
+
+function ResultStateHarness({
+  resultItems,
+  activeResultId,
+  onSelectResult,
+}: {
+  resultItems: TitleBarResultItem[];
+  activeResultId: string | null;
+  onSelectResult: ((id: string) => void) | null;
+}) {
+  const { updateTitleBar } = useWorkspacePanelsContext();
+
+  React.useEffect(() => {
+    updateTitleBar({ resultItems, activeResultId, onSelectResult });
+  }, [activeResultId, onSelectResult, resultItems, updateTitleBar]);
+
+  return null;
+}
+
+function renderTitleBarWithResults(
+  resultItems: TitleBarResultItem[],
+  activeResultId: string | null,
+  onSelectResult: (id: string) => void,
+) {
+  return render(
+    <MemoryRouter>
+      <WorkspacePanelsProvider>
+        <ResultStateHarness
+          resultItems={resultItems}
+          activeResultId={activeResultId}
+          onSelectResult={onSelectResult}
+        />
         <TitleBar />
       </WorkspacePanelsProvider>
     </MemoryRouter>,
@@ -249,5 +287,69 @@ describe('TitleBar web fallback', () => {
     expect(screen.queryByRole('button', { name: '关闭窗口' })).toBeNull();
     expect(bridge.window.onMaximizeChanged).not.toHaveBeenCalled();
     expect(bridge.window.isMaximized).not.toHaveBeenCalled();
+  });
+});
+
+describe('TitleBar result selector', () => {
+  const resultItems: TitleBarResultItem[] = [
+    { id: 'result-a', label: '差异表达', status: 'done' },
+    { id: 'result-b', label: '火山图', status: 'running' },
+  ];
+
+  it('does not render a selector for an empty list', () => {
+    renderTitleBarWithResults([], null, vi.fn());
+
+    expect(screen.queryByRole('button', { name: /^结果 \d+$/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: '展开结果列表' })).toBeNull();
+  });
+
+  it('selects the only result from the primary button without opening a menu', async () => {
+    const onSelectResult = vi.fn();
+    renderTitleBarWithResults([resultItems[0]], 'missing', onSelectResult);
+
+    expect(screen.queryByRole('button', { name: '展开结果列表' })).toBeNull();
+    await waitFor(() => expect(screen.getByRole('button', { name: '结果 1' })).toBeTruthy());
+
+    fireEvent.click(screen.getByRole('button', { name: '结果 1' }));
+    expect(onSelectResult).toHaveBeenCalledWith('result-a');
+  });
+
+  it('shows only passed results, marks the active one, and supports keyboard and overlay dismissal', async () => {
+    const onSelectResult = vi.fn();
+    renderTitleBarWithResults(resultItems, 'result-b', onSelectResult);
+
+    await waitFor(() => expect(screen.getByRole('button', { name: '结果 2' })).toBeTruthy());
+    const menuTrigger = screen.getByRole('button', { name: '展开结果列表' });
+    fireEvent.keyDown(menuTrigger, { key: 'ArrowDown' });
+
+    const menu = await screen.findByRole('menu', { name: '结果列表' });
+    const menuItems = screen.getAllByRole('menuitem');
+    expect(menuItems).toHaveLength(2);
+    expect(menuItems[0].textContent).toContain('差异表达');
+    expect(menuItems[1].textContent).toContain('火山图');
+    expect(menuItems[1].getAttribute('aria-current')).toBe('true');
+    expect(document.activeElement).toBe(menuItems[1]);
+
+    fireEvent.keyDown(menuItems[1], { key: 'ArrowUp' });
+    expect(document.activeElement).toBe(menuItems[0]);
+    fireEvent.keyDown(menuItems[0], { key: 'Enter' });
+    expect(onSelectResult).toHaveBeenCalledWith('result-a');
+    expect(screen.queryByRole('menu', { name: '结果列表' })).toBeNull();
+
+    fireEvent.click(menuTrigger);
+    await screen.findByRole('menu', { name: '结果列表' });
+    fireEvent.keyDown(screen.getByRole('menu', { name: '结果列表' }), { key: 'Escape' });
+    expect(screen.queryByRole('menu', { name: '结果列表' })).toBeNull();
+
+    fireEvent.click(menuTrigger);
+    await screen.findByRole('menu', { name: '结果列表' });
+    fireEvent.click(screen.getByRole('button', { name: '关闭结果菜单' }));
+    expect(screen.queryByRole('menu', { name: '结果列表' })).toBeNull();
+    expect(document.activeElement).toBe(menuTrigger);
+
+    fireEvent.click(menuTrigger);
+    await screen.findByRole('menu', { name: '结果列表' });
+    fireEvent(window, new Event('resize'));
+    expect(screen.queryByRole('menu', { name: '结果列表' })).toBeNull();
   });
 });

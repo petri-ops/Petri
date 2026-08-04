@@ -4,7 +4,7 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-04（G0-RS-TL1 / UI-120 已在开发态 macOS 边界 verified；P6 stored evidence 因 src/preload.js 改动继续保持非 exact）
+最后更新：2026-08-04（G0-RS-UX1G-2 / UI-123 已在开发态 macOS/renderer 边界 verified；P6 stored evidence 继续保持非 exact）
 
 ## 当前待处理项
 
@@ -24,6 +24,7 @@
 
 | 日期 | 结果 | 检查点 |
 | --- | --- | --- |
+| 2026-08-04 | `G0-RS-UX1G-2 / UI-123` 收口：标题栏只展示当前 Conversation 的 Job，双结果可主动打开和精确切换；跨会话深链按持久归属切 Conversation，legacy/null 与不存在结果明确降级。实机发现并修复 Job 切换时旧 Artifact 短暂串入新 Inspector 的竞态，现由原子清空、结果响应与深链查询的迟到提交失效保护共同锁定。前端 46/46、受影响 Node 125 pass / 1 live skip、TypeScript 与开发态 browser/Electron 双 Job 核对通过；ScreenCaptureKit `-3811/-3812` 限制后续 Electron 像素采集，不外推 packaged/P6/P7 | UI-123 / UX1G-2 |
 | 2026-08-04 | `G0-RS-UX1G-1` 收口：ToolJob 增加 nullable Conversation 身份，贯通 Agent/审批/ScientificTask/Workflow/插件/Result Studio 与 Jobs 历史；旧数据只做同项目/用户/工具的唯一精确回填，未知保持 null，跨会话 Job 引用和 ACK、错误绑定及无账本执行均 fail-closed。聚焦 Node 78 pass / 1 live skip，前端审批契约 6/6、strict TypeScript 与治理门通过；不实现 UX1G-2/UI-123，不升级 P7 资格 | UX1G-1 |
 | 2026-08-04 | `G0-RS-TL1 / UI-120` 开发态 macOS 收口：`frame:false` 自绘关闭/最小化/最大化，134px 折叠轨、live/query 竞态、异常/cleanup、sender/boolean 与 `focus-visible` 均修复；TitleBar 11/11、Electron/preload 6/6。真实窗口完成最大化/还原、最小化、双击隔离、缩放、明暗、约1050/840/720px、Cmd+M/W、自绘关闭及 owned 服务退出重启。ScreenCaptureKit `-3811` 使窄宽截图/拖拽绝对位移不可用；不外推 packaged/P6/P7 | UI-120 / TL1 |
 | 2026-08-03 | `G0-RS-UX1F / UI-122` 真实图形补验并修复：插件正式 PNG 恢复为默认主结果且完整适配可见画布，通用 scatter/matrix 改为显式可逆交互，状态严格绑定 Revision/Job/Artifact；结果态不再常驻版本面板。聚焦前端 44/44、Result Studio 前端聚合 199/199、TypeScript 与同一开发态 Electron 真实新 volcano Job `job_41578fbc4c6f4577` 通过，PNG 标题/阈值/图例/双轴和 25 点交互均可达；未外推 packaged/P7 | UI-122 / UX1F |

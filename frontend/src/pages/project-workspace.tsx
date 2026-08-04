@@ -34,6 +34,11 @@ import {
   useConversations,
   useOtherConversations,
 } from '@/hooks/useConversations';
+import {
+  artifactAfterJobSelection,
+  canCommitJobOpen,
+  useConversationJobs,
+} from '@/hooks/useConversationJobs';
 import { useResizableColumns } from '@/hooks/useResizableColumns';
 import { useWorkspaceLayout } from '@/hooks/useWorkspaceLayout';
 import { useRightPanelTabs } from '@/hooks/useRightPanelTabs';
@@ -84,7 +89,11 @@ import { isResultWorkspaceMode, resultFocusTransition } from '@/components/resul
 import { RevisionCodeView } from '@/components/result-studio/RevisionCodeView';
 import { revisionArtifactUrl, type ArtifactRevision } from '@/components/result-studio/resultStudioClient';
 import { shouldShowWorkflowBar } from '@/components/result-studio/resultFirstScreen';
-import { nextResultBodyState, type ResultBodyState } from '@/components/result-studio/resultBodyState';
+import {
+  canCommitResultFetch,
+  nextResultBodyState,
+  type ResultBodyState,
+} from '@/components/result-studio/resultBodyState';
 import { getResultScrollPosition, setResultScrollPosition } from '@/components/result-studio/resultScrollMemory';
 import { ScientificInteractionViewer } from '@/components/result-studio/ScientificInteractionViewer';
 import { CompactResultNavigator } from '@/components/result-studio/CompactResultNavigator';
@@ -273,6 +282,7 @@ export function ProjectWorkspace(): React.ReactElement {
 
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const autoOpenedJobRef = useRef<string | null>(null);
+  const openResultRequestSequenceRef = useRef(0);
   const [activeArtifact, setActiveArtifact] = useState<ActiveArtifact | null>(null);
   const [activeWorkspaceFile, setActiveWorkspaceFile] = useState<ActiveWorkspaceFile | null>(null);
   // G0-RS-P3: Agent 上下文就绪状态。真相来自后端 context-envelope 投影，
@@ -317,8 +327,29 @@ export function ProjectWorkspace(): React.ReactElement {
     create: createConversationInProject,
   } = useConversations(projectId);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
+  const {
+    jobs: conversationJobs,
+    error: conversationJobsError,
+    refresh: refreshConversationJobs,
+  } = useConversationJobs(projectId, activeConvId);
   const activeConversationRun = useConversationRun(activeConvId);
   const resultEditBusy = resultEditSubmitting || activeConversationRun?.status === 'running';
+
+  useEffect(() => {
+    if (!conversationJobsError) return;
+    setWorkspaceNotice('当前会话的结果列表暂时无法刷新，已保留上一次可用结果。');
+  }, [conversationJobsError]);
+
+  useEffect(() => {
+    if (!workspaceNotice) return undefined;
+    const timer = window.setTimeout(() => setWorkspaceNotice(''), 4_500);
+    return () => window.clearTimeout(timer);
+  }, [workspaceNotice]);
+
+  const bindActiveJob = useCallback((jobId: string | null) => {
+    setActiveArtifact((current) => artifactAfterJobSelection(current, activeJobId, jobId));
+    setActiveJobId(jobId);
+  }, [activeJobId]);
 
   const activeSelectionBindingKey = useMemo(() => {
     const selection = activeArtifact?.selection;
@@ -540,12 +571,20 @@ export function ProjectWorkspace(): React.ReactElement {
     }
     setWorkspaceMode(nextMode);
     const nextParams = new URLSearchParams(searchParams);
+    const nextCarriesJob = (nextMode === 'scheduled' || nextMode === 'result' || nextMode === 'code' || nextMode === 'compare' || nextMode === 'history') && Boolean(jobId);
+    if (!nextCarriesJob || nextParams.get('job') !== jobId) {
+      openResultRequestSequenceRef.current += 1;
+    }
     if (nextMode === 'chat') nextParams.delete('mode');
     else nextParams.set('mode', nextMode);
     if ((nextMode === 'scheduled' || nextMode === 'result' || nextMode === 'code' || nextMode === 'compare' || nextMode === 'history') && jobId) {
+      if (nextParams.get('job') !== jobId) nextParams.delete('artifact');
       nextParams.set('job', jobId);
     }
-    else nextParams.delete('job');
+    else {
+      nextParams.delete('job');
+      nextParams.delete('artifact');
+    }
     setSearchParams(nextParams, { replace });
   }, [leftOpen, rightOpen, searchParams, setSearchParams, workspaceMode]);
 
@@ -598,6 +637,34 @@ export function ProjectWorkspace(): React.ReactElement {
         }),
     [openRightTabs]
   );
+
+  const titleBarResultItems = useMemo(() => conversationJobs.map((job) => {
+    const status = job.status === 'done'
+      ? '完成'
+      : job.status === 'failed'
+        ? '失败'
+        : job.status === 'running'
+          ? '运行中'
+          : '排队中';
+    return {
+      id: job.id,
+      label: job.name || job.tool_id || '分析结果',
+      status: `${status} · ${new Date(job.created_at).toLocaleTimeString('zh-CN', {
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      })}`,
+    };
+  }), [conversationJobs]);
+
+  const handleSelectTitleBarResult = useCallback((jobId: string) => {
+    if (!conversationJobs.some((job) => job.id === jobId)) return;
+    bindActiveJob(jobId);
+    setRightOpen(true);
+    openRightPanel('results');
+    updateWorkspaceMode('result', true, jobId);
+  }, [bindActiveJob, conversationJobs, openRightPanel, setRightOpen, updateWorkspaceMode]);
 
   const switchToProject = useCallback((id: string) => {
     if (id !== projectId) navigate(`/project/${id}`);
@@ -682,6 +749,8 @@ export function ProjectWorkspace(): React.ReactElement {
   // Switch conversation
   const handleSwitchConversation = useCallback((convId: string) => {
     updateWorkspaceMode('chat');
+    setActiveJobId(null);
+    setActiveArtifact(null);
     setActiveConvId(convId);
   }, [updateWorkspaceMode]);
 
@@ -690,12 +759,13 @@ export function ProjectWorkspace(): React.ReactElement {
     updateWorkspaceMode('search');
   }, [updateWorkspaceMode]);
   const handleShowScheduled = useCallback(() => {
-    const nextJobId = activeJobId || jobs[0]?.id || null;
+    const currentJob = conversationJobs.find((job) => job.id === activeJobId);
+    const nextJobId = currentJob?.id || conversationJobs[0]?.id || null;
     if (nextJobId) {
-      setActiveJobId(nextJobId);
+      bindActiveJob(nextJobId);
     }
     updateWorkspaceMode('scheduled', true, nextJobId);
-  }, [activeJobId, jobs, updateWorkspaceMode]);
+  }, [activeJobId, bindActiveJob, conversationJobs, updateWorkspaceMode]);
   // Entering settings hides both side rails: settings is a global surface
   // that doesn't need project context (left: project/chat list) or job
   // artifacts (right: files/results/browser), so collapsing them gives the
@@ -717,12 +787,13 @@ export function ProjectWorkspace(): React.ReactElement {
 
   const handleOpenRightResults = useCallback(() => {
     openRightPanel('results');
-    const nextJobId = activeJobId || jobs[0]?.id || null;
+    const currentJob = conversationJobs.find((job) => job.id === activeJobId);
+    const nextJobId = currentJob?.id || conversationJobs[0]?.id || null;
     if (nextJobId) {
-      setActiveJobId(nextJobId);
+      bindActiveJob(nextJobId);
       updateWorkspaceMode('result', true, nextJobId);
     }
-  }, [activeJobId, jobs, openRightPanel, updateWorkspaceMode]);
+  }, [activeJobId, bindActiveJob, conversationJobs, openRightPanel, updateWorkspaceMode]);
 
   const handleOpenRightBrowser = useCallback(() => {
     openRightPanel('browser');
@@ -965,6 +1036,9 @@ export function ProjectWorkspace(): React.ReactElement {
         openRightPanel(tabId as RightPanelMode);
         setRightToolMenuOpen(false);
       },
+      resultItems: titleBarResultItems,
+      activeResultId: conversationJobs.some((job) => job.id === activeJobId) ? activeJobId : null,
+      onSelectResult: handleSelectTitleBarResult,
       canGoBack: rightTab === 'browser' && browserCanGoBack,
       canGoForward: rightTab === 'browser' && browserCanGoForward,
       onGoBack:
@@ -989,6 +1063,9 @@ export function ProjectWorkspace(): React.ReactElement {
         toolMenuOpen: false,
         toolMenuItems: [],
         onSelectToolItem: null,
+        resultItems: [],
+        activeResultId: null,
+        onSelectResult: null,
         canGoBack: false,
         canGoForward: false,
         onGoBack: null,
@@ -1009,11 +1086,13 @@ export function ProjectWorkspace(): React.ReactElement {
     rightTab,
     effectiveRightWidth,
     handleOpenRightResults,
+    handleSelectTitleBarResult,
     rightToolMenuOpen,
     setRightOpen,
     setRightToolMenuOpen,
     setRightTab,
     titleBarTabs,
+    titleBarResultItems,
     updateTitleBar,
   ]);
 
@@ -1026,6 +1105,7 @@ export function ProjectWorkspace(): React.ReactElement {
   useEffect(() => {
     const handler = () => {
       fetchData();
+      void refreshConversationJobs();
       refreshConversations();
       listProjects()
         .then(setAllProjects)
@@ -1033,7 +1113,7 @@ export function ProjectWorkspace(): React.ReactElement {
     };
     const unsub = subscribeBioF3Event(biof3Events.softRefresh, handler);
     return unsub;
-  }, [fetchData, refreshConversations]);
+  }, [fetchData, refreshConversationJobs, refreshConversations]);
 
   useEffect(() => {
     if (workspaceMode === 'search') {
@@ -1041,10 +1121,13 @@ export function ProjectWorkspace(): React.ReactElement {
     }
   }, [ensureSearchConversationIndex, workspaceMode]);
 
-  const activeJob = useMemo(
-    () => jobs.find((j) => j.id === activeJobId) || null,
-    [jobs, activeJobId]
-  );
+  const activeJob = useMemo(() => {
+    if (!activeConvId || !activeJobId) return null;
+    const candidate = conversationJobs.find((job) => job.id === activeJobId)
+      || jobs.find((job) => job.id === activeJobId)
+      || null;
+    return candidate?.conversationId === activeConvId ? candidate : null;
+  }, [activeConvId, activeJobId, conversationJobs, jobs]);
 
   useEffect(() => {
     if (!activeJob || activeJob.status !== 'done') {
@@ -1069,21 +1152,21 @@ export function ProjectWorkspace(): React.ReactElement {
     let failed = 0;
     let done = 0;
     let pending = 0;
-    jobs.forEach((job) => {
+    conversationJobs.forEach((job) => {
       if (job.status === 'running') running += 1;
       else if (job.status === 'failed') failed += 1;
       else if (job.status === 'done') done += 1;
       else pending += 1;
     });
     return { running, failed, done, pending };
-  }, [jobs]);
+  }, [conversationJobs]);
 
   const liveJobsPreview = useMemo(
     () =>
-      jobs
+      conversationJobs
         .filter((job) => job.status === 'running' || job.status === 'pending')
         .slice(0, 3),
-    [jobs]
+    [conversationJobs]
   );
 
   const showPinnedSummary = workspaceMode === 'chat' || workspaceMode === 'scheduled';
@@ -1266,13 +1349,11 @@ export function ProjectWorkspace(): React.ReactElement {
 
   useEffect(() => {
     if (loading) return;
-    if (activeJobId || jobs.length === 0) return;
-    const firstJob = jobs[0];
+    if (activeJobId || conversationJobs.length === 0) return;
+    const firstJob = conversationJobs[0];
     if (!firstJob) return;
-    setActiveJobId(firstJob.id);
-    setRightOpen(true);
-    openRightPanel('results');
-  }, [activeJobId, jobs, loading, openRightPanel, setRightOpen]);
+    bindActiveJob(firstJob.id);
+  }, [activeJobId, bindActiveJob, conversationJobs, loading]);
 
   const normalizeToolStatus = useCallback((status: unknown): ToolJob['status'] => {
     if (status === 'completed' || status === 'done') return 'done';
@@ -1286,6 +1367,7 @@ export function ProjectWorkspace(): React.ReactElement {
     targetProjectId?: string | null,
     options?: { preserveWorkspaceMode?: boolean },
   ) => {
+    const openRequestId = ++openResultRequestSequenceRef.current;
     const currentProjectId = projectId || null;
     const resolvedTargetProjectId = targetProjectId ?? currentProjectId;
     if (resolvedTargetProjectId && currentProjectId && resolvedTargetProjectId !== currentProjectId) {
@@ -1294,7 +1376,9 @@ export function ProjectWorkspace(): React.ReactElement {
       return;
     }
 
-    let nextJob = jobs.find((j) => j.id === jobId) || null;
+    let nextJob = conversationJobs.find((job) => job.id === jobId)
+      || jobs.find((job) => job.id === jobId)
+      || null;
     let nextProjectId = resolvedTargetProjectId;
     if (!nextJob) {
       try {
@@ -1303,6 +1387,7 @@ export function ProjectWorkspace(): React.ReactElement {
           headers: token ? { Authorization: 'Bearer ' + token } : {},
         });
         const data = await resp.json();
+        if (!canCommitJobOpen(openRequestId, openResultRequestSequenceRef.current)) return;
         if (data && data.ok) {
           nextJob = {
             id: String(data.id || jobId),
@@ -1313,6 +1398,7 @@ export function ProjectWorkspace(): React.ReactElement {
             error: data.error ? String(data.error) : undefined,
             name: data.toolId ? `${data.toolId} via agent` : undefined,
             project_id: data.projectId ? String(data.projectId) : (resolvedTargetProjectId || null),
+            conversationId: data.conversationId == null ? null : String(data.conversationId),
           };
           nextProjectId = nextJob.project_id || nextProjectId;
           if (nextProjectId && currentProjectId && nextProjectId !== currentProjectId) {
@@ -1325,16 +1411,32 @@ export function ProjectWorkspace(): React.ReactElement {
       } catch {
         /* keep the current panel state if the status lookup fails */
       }
+      if (!canCommitJobOpen(openRequestId, openResultRequestSequenceRef.current)) return;
+    }
+    if (!nextJob) {
+      bindActiveJob(null);
+      setWorkspaceNotice('找不到这个结果，或当前项目无权访问它。');
+      if (!options?.preserveWorkspaceMode) updateWorkspaceMode('chat', true, null);
+      return;
+    }
+    if (!nextJob.conversationId) {
+      bindActiveJob(null);
+      setWorkspaceNotice('这个旧结果没有可信的会话归属，不能混入当前会话。');
+      if (!options?.preserveWorkspaceMode) updateWorkspaceMode('chat', true, null);
+      return;
     }
     if (nextJob) {
-      setActiveJobId(nextJob.id);
+      if (nextJob.conversationId !== activeConvId) {
+        setActiveConvId(nextJob.conversationId);
+      }
+      bindActiveJob(nextJob.id);
       setRightOpen(true);
       openRightPanel('results');
       if (!options?.preserveWorkspaceMode) {
         updateWorkspaceMode('result', true, nextJob.id);
       }
     }
-  }, [jobs, navigate, normalizeToolStatus, openRightPanel, projectId, setRightOpen, updateWorkspaceMode]);
+  }, [activeConvId, bindActiveJob, conversationJobs, jobs, navigate, normalizeToolStatus, openRightPanel, projectId, setRightOpen, updateWorkspaceMode]);
 
   useEffect(() => {
     autoOpenedJobRef.current = null;
@@ -1370,11 +1472,6 @@ export function ProjectWorkspace(): React.ReactElement {
 
     appliedRequestedArtifactKeyRef.current = null;
 
-    if (activeJobId || jobs.length === 0) return;
-    const firstJob = jobs[0];
-    if (!firstJob || autoOpenedJobRef.current === firstJob.id) return;
-    autoOpenedJobRef.current = firstJob.id;
-    void handleOpenResult(firstJob.id, projectId);
   }, [activeJobId, handleOpenResult, jobs, loading, projectId, requestedArtifactName, requestedJobId, workspaceMode]);
 
   useEffect(() => {
@@ -1484,14 +1581,15 @@ export function ProjectWorkspace(): React.ReactElement {
   }, [activeConvId, copilotActiveArtifact, effectiveResultContextState?.contextToken, effectiveResultContextState?.status]);
 
   const openScheduledResults = useCallback(() => {
-    const nextJobId = activeJobId || jobs[0]?.id || null;
+    const currentJob = conversationJobs.find((job) => job.id === activeJobId);
+    const nextJobId = currentJob?.id || conversationJobs[0]?.id || null;
     if (nextJobId) {
-      setActiveJobId(nextJobId);
+      bindActiveJob(nextJobId);
       updateWorkspaceMode('result', true, nextJobId);
     }
     setRightOpen(true);
     openRightPanel('results');
-  }, [activeJobId, jobs, openRightPanel, setRightOpen, updateWorkspaceMode]);
+  }, [activeJobId, bindActiveJob, conversationJobs, openRightPanel, setRightOpen, updateWorkspaceMode]);
 
   if (loading) {
     return (
@@ -1542,7 +1640,7 @@ export function ProjectWorkspace(): React.ReactElement {
     resultAgentDraft,
     activeJobId,
     pendingArtifactName: pendingArtifactJobIdRef.current === activeJob?.id ? pendingArtifactName : null,
-    recentJobs: jobs,
+    recentJobs: conversationJobs,
     liveJobsPreview,
     jobStats,
     backendStatus,
@@ -1670,6 +1768,11 @@ export function ProjectWorkspace(): React.ReactElement {
 
   return (
     <div className={styles.workspaceRoot}>
+      {workspaceNotice && (
+        <div className={styles.workspaceNotice} role="status" aria-live="polite">
+          {workspaceNotice}
+        </div>
+      )}
       <div className={styles.workspaceBody}>
         {compactLayout && (leftOpen || rightOpen) && (
           <button
@@ -3061,6 +3164,8 @@ function ResultArtifactShell({
   // effects below cannot tell "re-observing the same job" from "a different
   // job", and cleared unconditionally for both.
   const bodyJobRef = useRef<string | null>(null);
+  const activeBodyJobRef = useRef<string | null>(job?.id ?? null);
+  activeBodyJobRef.current = job?.id ?? null;
   // Which artifact the interaction manifest belongs to, so the manifest effect
   // can tell an artifact change from an unrelated dependency change.
   const manifestArtifactRef = useRef<string | null>(null);
@@ -3175,6 +3280,8 @@ function ResultArtifactShell({
     }
 
     if (effectiveJobStatus === 'done') {
+      const requestedJobId = job.id;
+      let cancelled = false;
       setLoading(true);
       // The decision is the reducer's, not a condition restated here. An
       // earlier version reimplemented the same rule inline and left
@@ -3194,12 +3301,13 @@ function ResultArtifactShell({
       (async () => {
         try {
           const token = getToken();
-          const resp = await fetch(getApiPrefix(lang) + '/tools/status/' + job.id, {
+          const resp = await fetch(getApiPrefix(lang) + '/tools/status/' + requestedJobId, {
             headers: token ? { Authorization: 'Bearer ' + token } : {},
           });
           const data = await resp.json();
+          if (!canCommitResultFetch(requestedJobId, activeBodyJobRef.current, cancelled)) return;
           if (data.ok && data.result) {
-            bodyJobRef.current = job.id;
+            bodyJobRef.current = requestedJobId;
             setResult(data.result);
             setJobMeta({
               params: data.params || {},
@@ -3210,9 +3318,14 @@ function ResultArtifactShell({
         } catch {
           // keep shell quiet
         } finally {
-          setLoading(false);
+          if (canCommitResultFetch(requestedJobId, activeBodyJobRef.current, cancelled)) {
+            setLoading(false);
+          }
         }
       })();
+      return () => {
+        cancelled = true;
+      };
     } else if (nextResultBodyState(
       bodyJobRef.current
         ? { kind: 'artifact', jobId: bodyJobRef.current, artifactName: selectedName || '' }
@@ -3242,6 +3355,7 @@ function ResultArtifactShell({
       setPreviewData(null);
       setPreviewLoading(false);
     }
+    return undefined;
   }, [effectiveJobStatus, job?.id, lang]);
 
   // P4R-2: restore `.resultView` scroll position once the body is mounted.

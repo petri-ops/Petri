@@ -149,6 +149,7 @@
 }
 
 .centerTitle {
+  container-type: inline-size;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -182,6 +183,160 @@
   font-size: 12px;
   font-weight: 630;
   line-height: 16px;
+}
+
+.resultPicker,
+.resultPrimary,
+.resultMenuTrigger,
+.resultMenu,
+.resultMenuOverlay {
+  -webkit-app-region: no-drag;
+}
+
+.resultPicker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: min(180px, 28vw);
+  border: 1px solid var(--titlebar-pill-border);
+  border-radius: 7px;
+  background: var(--titlebar-pill-bg);
+  color: var(--titlebar-ink-muted);
+}
+
+.resultPrimary,
+.resultMenuTrigger {
+  height: 24px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.resultPrimary {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0 7px;
+  font-size: 11px;
+  font-weight: 620;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.resultPrimary span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.resultMenuTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 23px;
+  padding: 0;
+  border-left: 1px solid var(--titlebar-pill-border);
+  flex: 0 0 23px;
+}
+
+.resultPrimary:hover,
+.resultMenuTrigger:hover,
+.resultPicker:focus-within {
+  background: var(--titlebar-hover);
+  color: var(--titlebar-ink);
+}
+
+.resultPrimary:focus-visible,
+.resultMenuTrigger:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--biof3-accent) 78%, white 22%);
+  outline-offset: 1px;
+}
+
+.resultMenuOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  border: 0;
+  background: transparent;
+}
+
+.resultMenu {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 50%;
+  z-index: 10001;
+  display: grid;
+  width: min(260px, calc(100vw - 20px));
+  max-width: calc(100vw - 20px);
+  padding: 5px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 9px;
+  background: var(--biof3-bg-elevated);
+  box-shadow: 0 14px 32px color-mix(in srgb, var(--biof3-text) 18%, transparent);
+  transform: translateX(-50%);
+}
+
+.resultMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  min-height: 32px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.resultMenuItem:hover,
+.resultMenuItem:focus-visible,
+.resultMenuItemActive {
+  background: var(--titlebar-hover);
+  color: var(--titlebar-ink);
+}
+
+.resultMenuItem:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--biof3-accent) 78%, white 22%);
+  outline-offset: -1px;
+}
+
+.resultMenuItemLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1 1 auto;
+}
+
+.resultMenuItemStatus {
+  flex: 0 0 auto;
+  max-width: 112px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--titlebar-ink-muted);
+  font-size: 10px;
+}
+
+.resultMenuItemActive .resultMenuItemStatus {
+  color: inherit;
+}
+
+/* When both side rails consume the window, the center track can collapse to
+   only a few pixels. Keep controls inside their real hit area instead of
+   painting the result picker over the right-side title-bar controls. */
+@container (max-width: 96px) {
+  .resultPicker {
+    display: none;
+  }
 }
 
 .rightZone {

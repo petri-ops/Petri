@@ -60,6 +60,15 @@ export type ResultBodyEvent =
   /** A result fetch failed. */
   | { type: 'result_fetch_failed'; jobId: string; reason: string };
 
+/** A result response may commit only while it still belongs to the mounted Job. */
+export function canCommitResultFetch(
+  requestedJobId: string,
+  activeJobId: string | null,
+  cancelled: boolean,
+): boolean {
+  return !cancelled && requestedJobId === activeJobId;
+}
+
 function bodyJobId(shown: ResultBodyState): string | null {
   return shown.kind === 'empty' ? null : shown.jobId;
 }

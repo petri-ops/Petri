@@ -328,7 +328,7 @@ test('HTTP approval acknowledgement requires and verifies project/conversation s
   assert.equal(approved.body.ackStatus, 'approved');
 });
 
-test('all-job history projections retain project and conversation identity', () => {
+test('all-job history and status projections retain project and conversation identity', () => {
   const historyUser = 'history-conversation-user';
   const projectId = 'history-conversation-project';
   db.createToolJob({
@@ -344,4 +344,9 @@ test('all-job history projections retain project and conversation identity', () 
 
   const routeSource = readFileSync(resolve(new URL('../core/r-server/routes/tools-metadata.js', import.meta.url).pathname), 'utf8');
   assert.match(routeSource, /SELECT id, tool_id,[^']*project_id, conversation_id FROM tool_jobs/);
+  assert.match(routeSource, /conversationId:\s*job\.conversation_id\s*\|\|\s*null/);
+
+  const pyRouteSource = readFileSync(resolve(new URL('../core/py-server/tools-router.js', import.meta.url).pathname), 'utf8');
+  assert.match(pyRouteSource, /projectId:\s*job\.project_id\s*\|\|\s*null/);
+  assert.match(pyRouteSource, /conversationId:\s*job\.conversation_id\s*\|\|\s*null/);
 });
