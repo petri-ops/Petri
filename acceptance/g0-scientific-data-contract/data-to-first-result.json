@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-SDC1-A / UI-125",
+  "classification": "development_deterministic_local_adapter_no_provider_claim",
+  "qualificationEligible": false,
+  "productScope": "development Electron renderer with deterministic local adapter; not packaged or real-provider qualification",
+  "noSeedPrecondition": {
+    "tables": [
+      "projects",
+      "datasets",
+      "analyses",
+      "project_g0_baselines",
+      "tool_jobs",
+      "git_repository_bindings",
+      "scientific_change_sets",
+      "artifact_revisions",
+      "result_selection_contexts",
+      "workspace_revision_checkpoints",
+      "result_workflow_graphs",
+      "scientific_task_specs"
+    ],
+    "tableCounts": {
+      "projects": 0,
+      "datasets": 0,
+      "analyses": 0,
+      "project_g0_baselines": 0,
+      "tool_jobs": 0,
+      "git_repository_bindings": 0,
+      "scientific_change_sets": 0,
+      "artifact_revisions": 0,
+      "result_selection_contexts": 0,
+      "workspace_revision_checkpoints": 0,
+      "result_workflow_graphs": 0,
+      "scientific_task_specs": 0
+    },
+    "seededTables": [],
+    "digest": "dd575ac9ca406c00c2ac2330ee6cab12b7f642b4c042a55fe38ac87f09ec3cb9"
+  },
+  "renderer": {
+    "schemaVersion": 1,
+    "renderer": "Electron 30.5.1 / Chromium 124.0.6367.243",
+    "importedFileCount": 2,
+    "dataReady": true,
+    "scientificConfirmationRequested": true,
+    "execution": {
+      "tool": "deseq2",
+      "completedJobCount": 1,
+      "artifactTruthStatus": "valid",
+      "artifactTruthBlocking": false
+    },
+    "automaticResultOpen": {
+      "exactJob": true,
+      "mode": "result",
+      "canvasPresent": true,
+      "bodyVisible": true,
+      "imageVisible": true,
+      "assistantConfirmed": true
+    },
+    "screenshots": {
+      "dataReady": {
+        "file": "data-ready.png",
+        "sha256": "f7948e4e4cd2eb05336565d7dc24d6aa86d115f5f28df7ad435930f62c1d6619",
+        "bytes": 172495
+      },
+      "resultOpen": {
+        "file": "result-open.png",
+        "sha256": "e4c9d3b5fca743cdf8ec0af5088e382f50756f3a6a17b1f500f3a8906dfe64bb",
+        "bytes": 165923
+      }
+    },
+    "passed": true
+  },
+  "gateway": {
+    "phases": [
+      "scientific_confirmation",
+      "scientific_confirmation",
+      "catalog",
+      "contract",
+      "execute",
+      "final",
+      "catalog"
+    ],
+    "requestCount": 7,
+    "noRawMessagesPersisted": true
+  },
+  "sourceCommit": "bd157778f2a04389ebd1d6a565cee66f1902c043",
+  "sourceHashes": {
+    "core/shared-backend/data-profiler.js": "434c0b6aca7d89939175ac233301e5d0d6561bfd8b27aedb707336265cdfc7c6",
+    "core/r-server/routes/files.js": "6d0a882167ca635013d8224015e0b650795aa671d69e13772d4eebd65d12b0f9",
+    "frontend/src/lib/data-profile.ts": "bd7cfc5d2bbf309d9e9e6c058cc6a2f4bdadbb9a64b588169c1f78ff940d8e35",
+    "frontend/src/components/workspace-panels/DataIntakeControl.tsx": "c483150ad389fe8723d6f4e4d99df9986fff770d9ecbea5d9394a579cb366cad",
+    "frontend/src/components/workspace-panels/RightPanel.tsx": "3deddc316f67df7c8f7273be8281f073568f1fc09f15c977f6825d12a7380a11",
+    "frontend/src/pages/project-workspace.tsx": "eb457e786546a7e08f3f635382d8f7bfbe429ac6b7c6cae0f0f2402665f1c4c0",
+    "frontend/src/pages/project-workspace.module.css": "7d7a63a1cd039816a033ff315242ce00c3886c84e8e0af0f3fef38f5ba346e4e",
+    "scripts/g0-sdc1-local-gateway.mjs": "d8d6f72692cc72a0f0e6499086cedcad84c73b8b7f7b2e62d2682b7cfcde5822",
+    "scripts/g0-sdc1-electron-driver.cjs": "995b816e834e0355e9c9985e4545e6fec6707c1c183daf49e6fea56d623b2b03",
+    "scripts/g0-sdc1-acceptance.mjs": "86400d9438eb2b04cfdae44ce542764ee4aedd742f3dbbfcbb72fe920ff7995c"
+  },
+  "sourceDigest": "9795f7e8a2be1473074168479c84c6b7daa6b381eab1db33407b00999a53070f",
+  "sourceCommitMatchesSourceHashes": true,
+  "sourceMismatches": [],
+  "passed": true
+}

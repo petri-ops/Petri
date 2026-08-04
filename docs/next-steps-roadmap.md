@@ -8,7 +8,7 @@
 
 当前不默认扩展分析功能。`G0-START`、LF0～LF12 的核心资格保持 maintained；RS0～RS8 与 P4R/P5/P6 的 Result Studio 引擎和开发态证据保留，但 2026-07-25 产品复核撤销的完整产品资格没有恢复。2026-08-03 用户裁决把发布级 P7 重新资格后移；Result Studio 保持 `implemented_unverified / experimental`，rc.7 仍是工程候选版，不得描述为 GA。
 
-`G0-RS-UX1A`～`UX1F`、短 Goal `G0-RS-TL1 / UI-120`、`G0-RS-UX1G-1 Conversation-bound ToolJob Identity` 与 `G0-RS-UX1G-2 / UI-123 Conversation Result Switcher` 均已完成。当前唯一 active 增量是 `G0-SDC / SDC1-A Data-to-first-result`：项目内导入文本表格、有界只读画像、候选角色/准备状态与现有 Agent 执行链交接。P7 继续 deferred，不扩大 Result Viewer，不提前实现 SDC-2～SDC-7。
+`G0-RS-UX1A`～`UX1F`、短 Goal `G0-RS-TL1 / UI-120`、`G0-RS-UX1G-1 Conversation-bound ToolJob Identity`、`G0-RS-UX1G-2 / UI-123 Conversation Result Switcher` 与 `G0-SDC / SDC1-A Data-to-first-result` 均已完成。当前没有自动续开的 active 增量；P7、SDC-1 其余范围与 SDC-2～SDC-7 继续 deferred，下一项由用户按短 Goal 重新选择。
 
 LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口。RS9 曾新增第 17 类 `result_studio_product`，但后续复核发现其五条任务由独立测试拼装、Provider 未执行真实工具闭环、视觉验收依赖人工布尔值、大表由 seed 直接构造；该证据现降级为 unit/synthetic/renderer historical evidence。`result-studio-editing` 在 RS-P7 前暂停 qualified support claim，不能影响或冒充 LF12 原始核心资格。
 
@@ -24,7 +24,7 @@ P4R-3 的实现检查点为 `3d3eb29`，性能门校准修复为 `59b33c4`。中
 
 P4R-4 的实现检查点为 `f710261`。Result / Compare / History 已成为真实互斥路由模式；查看旧 Revision 使用可丢弃 viewed state，Artifact/interaction/Selection/contextToken 均显式绑定所选版本，不移动 current、不切 active Job、不调用写 API，首次版本列表 GET 不写 SQLite、不创建 managed Git。版本选择按项目/family-scoped truth 分页并标注原始/当前/候选/历史；Change Review 的意图、影响范围和验证状态来自服务端受信持久元数据，Git 详情默认折叠。checkpoint 故障、参数 hash、source commit、parent family/project 漂移均 fail-closed。focused frontend 104/104、affected Node 258/258、related frontend 48/48、P4R product 13/13；五份 evidence 均绑定 `f710261`。UI-113/UI-114 仍为 `in_progress`，P4R 仍是 `implemented_unverified / qualificationEligible:false`。
 
-Result Studio 旧实现的 11 个提交已位于 `main`（检查点 `03e5826`）；`SDC-0 Profile Registry 与版本治理` 也已在分支 `codex/g0-sdc` 的 `7284921` 收口并推送，六个 canonical Profile 与 fail-closed typed DAG 边继续保留。按单工作包串行，当前只启动 SDC1-A 短切片，SDC-2～SDC-7 deferred，当前不创建 Worktree。
+Result Studio 旧实现的 11 个提交已位于 `main`（检查点 `03e5826`）；`SDC-0 Profile Registry 与版本治理` 也已在分支 `codex/g0-sdc` 的 `7284921` 收口并推送，六个 canonical Profile 与 fail-closed typed DAG 边继续保留。SDC1-A 已在 `bd15777` 完成并由 `acceptance/g0-scientific-data-contract/data-to-first-result.json` 绑定开发态 Electron 短闭环；当前没有 active 工作包，不创建 Worktree，SDC-1 其余范围与 SDC-2～SDC-7 deferred。
 
 当前固定顺序：
 

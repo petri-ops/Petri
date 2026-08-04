@@ -1,8 +1,8 @@
 # G0 Scientific Data Contract & Adaptation Baseline
 
-最后更新：2026-08-03
+最后更新：2026-08-04
 
-状态：`active / SDC-0 completed / SDC1-A in progress`（P7 发布级重新资格继续 deferred；当前唯一 active 增量是从项目文件到首个结果的 SDC-1 竖切片）
+状态：`paused / SDC-0 completed / SDC1-A completed / SDC-2～SDC-7 deferred`（P7 发布级重新资格继续 deferred；当前没有自动续开的 active 增量）
 
 计划编号：`G0-SDC`
 
@@ -18,7 +18,7 @@
 2. ✅ `G0-START` 审计通过（10/10，2026-07-24）。
 3. ✅ `G0-LF0` 已建立 Constitution、Baseline Registry、版本身份和 Support Matrix（2026-07-24）。
 
-启动边界：本计划已于 2026-07-25 完成 `SDC-0` Profile Registry 与版本治理。2026-08-04 已建立短 Goal，并冻结 `SDC1-A Data-to-first-result slice`。它只交付项目内文本表格导入、有界只读 Profiler、候选文件角色与可行动准备状态，然后把明确路径交给现有 Agent。科学分析仍必须通过 `run_tool → tool_job → artifact truth`，并由现有结果事件自动打开 Result Studio。单工作包串行不变，已完成的 SDC-0 不回滚，P7 不重开。
+启动边界：本计划已于 2026-07-25 完成 `SDC-0` Profile Registry 与版本治理。`SDC1-A Data-to-first-result slice` 已于 2026-08-04 以实现检查点 `bd15777` 和 source-bound 开发态 Electron 证据收口：项目内文本表格导入、有界只读 Profiler、候选文件角色与可行动准备状态把明确路径交给现有 Agent，科学分析仍通过 `run_tool → tool_job → artifact truth`，并由现有结果事件自动打开 Result Studio。单工作包串行不变；SDC-1 其余范围、SDC-2～SDC-7 与 P7 不自动启动。
 
 ## 1. 决策结论
 
@@ -268,7 +268,7 @@ cannot_reliably_answer
 
 ### SDC-1：Data Profiler
 
-状态：`active / SDC1-A in_progress`
+状态：`partial / SDC1-A completed / remaining SDC-1 deferred`
 
 目标：
 
@@ -307,6 +307,8 @@ cannot_reliably_answer
 - 前端覆盖导入、ready/blocked 投影、重复分析隔离与 Agent 交接。
 - 开发态 Electron 从空项目导入受控 fixture，由真实 Agent 执行链产生 Job/Artifact 并打开 Result Studio；该证据明确 `qualificationEligible:false`。
 - `npm run test:changed`、定向前端测试、strict TypeScript、`docs:reconcile`、`docs:check`、`ui:audit:check` 与 `git diff --check` 通过。
+
+收口结果（2026-08-04）：实现检查点 `bd15777`。`npm run g0:sdc1:update` 完成 Node 33/33、前端 14/14、strict TypeScript 与真实开发态 Electron 矩阵；空 disposable 账本中导入 2 个真实文件，经科学确认产生 1 个 completed DESeq2 Job，Artifact Truth 为 `valid` 且非阻断，并自动打开同一 Job 的非空 PNG 结果。canonical evidence 为 `acceptance/g0-scientific-data-contract/data-to-first-result.json`，`sourceCommitMatchesSourceHashes:true`、`qualificationEligible:false`；它不证明真实 Provider、packaged Electron、通用 SDC-1、SDC-2～SDC-7 或 P7 产品资格。
 
 ### SDC-2：Semantic Binder 与最少必要确认
 

@@ -73,7 +73,7 @@ P4R-4 收口事实：Result / Compare / History 为真实互斥中央模式；Co
 
 SDC-0 证据与门禁：`acceptance/g0-scientific-data-contract/profile-registry.json`（10/10，锚定 `03e5826`）、`test/g0-sdc0-profile-registry.test.mjs`（7/7）、`scripts/g0-sdc0-profile-registry-acceptance.mjs`，命令 `npm run g0:sdc0`（含 `g0:sdc0:test`）已挂入 `postcheck`。实测 `npm test` 1339 pass / 0 fail / 11 skipped，`npm run check` 全绿（末尾 `[G0-SDC0] PASS — 10/10`）。SDC-0 只完成离线契约层，真实不规则数据端到端产品验收属于 SDC-7，不得由本阶段冒充。
 
-2026-08-04 已建立短 Goal 并启动 `G0-SDC / SDC1-A Data-to-first-result`。当前唯一 active 范围是：把 `.csv/.tsv/.txt` 导入当前项目 `data/`，产生绑定文件 SHA-256 的有界只读 Observation，仅将 counts/metadata 显示为候选，并交给现有 Agent。首个科学结果仍只能由 `run_tool → tool_job → artifact truth → projectOpenResult` 产生和打开。不新建执行器、不写 legacy Dataset 假真相、不自动猜测对照组；`SDC-2`～`SDC-7` 与 P7 继续 deferred。
+`G0-SDC / SDC1-A Data-to-first-result` 已于 2026-08-04 收口，实现检查点 `bd15777`。`.csv/.tsv/.txt` 导入当前项目 `data/`，产生绑定完整 SHA-256 的有界只读 Observation，仅将 counts/metadata 显示为候选并交给现有 Agent；首个科学结果仍只由 `run_tool → tool_job → artifact truth → projectOpenResult` 产生和打开。`npm run g0:sdc1:update` 已在空 disposable 账本中验证真实导入、科学确认、1 个 completed DESeq2 Job、有效 Artifact Truth 与同 Job 非空 PNG 自动打开；证据见 `acceptance/g0-scientific-data-contract/data-to-first-result.json`，source-bound 且 `qualificationEligible:false`。当前没有 active 工作包；SDC-1 其余范围、`SDC-2`～`SDC-7` 与 P7 继续 deferred。
 
 已收口阶段：
 
