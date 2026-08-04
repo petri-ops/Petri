@@ -23,6 +23,11 @@ import {
   inferUserModelProvider,
   isChatSelectableProfile,
   isUserConfigurableModelProvider,
+  modelProviderCredentialRef,
+  modelProviderProtocol,
+  modelProviderRequiresCredential,
+  USER_MODEL_PROVIDER_OPTIONS,
+  type UserModelProvider,
   validateUserModelProfile,
 } from '@/lib/model-provider-options';
 import {
@@ -136,9 +141,16 @@ const MODEL_ROLES: Array<{ id: ModelRole; label: string; capability: ModelCapabi
 function providerDefaults(provider: string, id: string): Partial<ChatModelPreset> {
   const defaults: Record<string, Partial<ChatModelPreset>> = {
     deepseek: { label: 'DeepSeek', model: 'deepseek-chat', capabilities: ['chat', 'streaming', 'tools'], credentialRef: 'provider:deepseek' },
-    'openai-compatible': { label: '自定义 API', model: '', capabilities: ['chat', 'streaming', 'tools'], credentialRef: `credential:${id}` },
+    'openai-compatible': { label: '自定义 API', model: '', capabilities: ['chat', 'streaming', 'tools'], credentialRef: modelProviderCredentialRef('openai-compatible', id) },
+    anthropic: {
+      label: 'Anthropic',
+      model: '',
+      baseUrl: 'https://api.anthropic.com/v1',
+      capabilities: ['chat', 'streaming', 'tools'],
+      credentialRef: modelProviderCredentialRef('anthropic', id),
+    },
   };
-  return { protocol: 'openai-compatible', baseUrl: undefined, ...defaults[provider] };
+  return { protocol: modelProviderProtocol(provider), baseUrl: undefined, ...defaults[provider] };
 }
 
 function credentialId(profile: ChatModelPreset): string {
@@ -720,6 +732,8 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   const [credentialBackend, setCredentialBackend] = useState('local');
   const [endpointTransferMessage, setEndpointTransferMessage] = useState<string | null>(null);
   const endpointImportRef = useRef<HTMLInputElement>(null);
+  const modelDiscoveryGeneration = useRef<Record<string, number>>({});
+  const modelProfilesRef = useRef<ChatModelPreset[]>([]);
   const { refresh: refreshAiSettings } = useAiSettings();
   const { preference: themePreference } = useTheme();
   // M2-3：错误遥测开关（默认关闭）
@@ -728,6 +742,10 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   useEffect(() => {
     loadSettings();
   }, []);
+
+  useEffect(() => {
+    modelProfilesRef.current = modelProfiles;
+  }, [modelProfiles]);
 
   async function loadSettings() {
     if (!window.biof3Desktop) return;
@@ -752,8 +770,8 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     profiles
       .filter((profile) =>
         isUserConfigurableModelProvider(profile.provider) &&
-        ((profile.provider === 'deepseek' && statuses[credentialId(profile)]) ||
-          (profile.provider === 'openai-compatible' && Boolean(profile.baseUrl)))
+        ((modelProviderRequiresCredential(profile.provider) && statuses[credentialId(profile)]) ||
+          (!modelProviderRequiresCredential(profile.provider) && Boolean(profile.baseUrl)))
       )
       .forEach((profile) => void discoverModels(profile, '', true));
   }
@@ -823,50 +841,148 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
 
   async function discoverModels(profile: ChatModelPreset, apiKey = '', silent = false) {
     if (!window.biof3Desktop) return;
+    const generation = (modelDiscoveryGeneration.current[profile.id] || 0) + 1;
+    modelDiscoveryGeneration.current[profile.id] = generation;
     setLoadingModels((current) => ({ ...current, [profile.id]: true }));
-    const result = await window.biof3Desktop.aiSettings.listModels(
-      profile as unknown as Record<string, unknown>,
-      apiKey
-    );
-    if (result.ok && result.models.length > 0) {
-      setAvailableModels((current) => ({ ...current, [profile.id]: result.models }));
-      setModelProfiles((profiles) => profiles.map((candidate) =>
-        candidate.id === profile.id
-              ? {
-              ...candidate,
-              model: result.models.includes(candidate.model) ? candidate.model : result.models[0],
-              defaultModel: result.models.includes(candidate.defaultModel || candidate.model)
-                ? (candidate.defaultModel || candidate.model)
-                : result.models[0],
-            }
-          : candidate
-      ));
+    try {
+      const result = await window.biof3Desktop.aiSettings.listModels(
+        profile as unknown as Record<string, unknown>,
+        apiKey
+      );
+      if (modelDiscoveryGeneration.current[profile.id] !== generation) return;
+      if (result.ok && result.models.length > 0) {
+        setAvailableModels((current) => ({ ...current, [profile.id]: result.models }));
+        setModelProfiles((profiles) => profiles.map((candidate) =>
+          candidate.id === profile.id
+                ? {
+                ...candidate,
+                model: result.models.includes(candidate.model) ? candidate.model : result.models[0],
+                defaultModel: result.models.includes(candidate.defaultModel || candidate.model)
+                  ? (candidate.defaultModel || candidate.model)
+                  : result.models[0],
+              }
+            : candidate
+        ));
+      }
+      if (!silent || result.ok) {
+        setTestResult((prev) => ({
+          ...prev,
+          [profile.id]: { ok: result.ok, message: result.message },
+        }));
+      }
+    } catch (error) {
+      if (modelDiscoveryGeneration.current[profile.id] !== generation) return;
+      if (!silent) {
+        setTestResult((current) => ({
+          ...current,
+          [profile.id]: {
+            ok: false,
+            message: error instanceof Error ? error.message : '模型列表请求失败',
+          },
+        }));
+      }
+    } finally {
+      if (modelDiscoveryGeneration.current[profile.id] === generation) {
+        setLoadingModels((current) => ({ ...current, [profile.id]: false }));
+      }
     }
-    if (!silent || result.ok) {
-      setTestResult((prev) => ({
-        ...prev,
-        [profile.id]: { ok: result.ok, message: result.message },
-      }));
-    }
-    setLoadingModels((current) => ({ ...current, [profile.id]: false }));
+  }
+
+  function invalidateModelDiscovery(id: string) {
+    modelDiscoveryGeneration.current[id] = (modelDiscoveryGeneration.current[id] || 0) + 1;
+    setLoadingModels((current) => ({ ...current, [id]: false }));
+  }
+
+  function clearProfileRuntimeState(id: string) {
+    invalidateModelDiscovery(id);
+    setAvailableModels((current) => ({ ...current, [id]: [] }));
+    setTestResult((current) => {
+      const next = { ...current };
+      delete next[id];
+      return next;
+    });
+    setProfileErrors((current) => {
+      const next = { ...current };
+      delete next[id];
+      return next;
+    });
+  }
+
+  function clearCredentialUi(id: string) {
+    setCredentialInputs((current) => {
+      const next = { ...current };
+      delete next[id];
+      return next;
+    });
+    setCredentialStatus((current) => ({ ...current, [id]: false }));
+    setVisibleCredentialIds((current) => {
+      const next = { ...current };
+      delete next[id];
+      return next;
+    });
   }
 
   function updateProfile(id: string, patch: Partial<ChatModelPreset>) {
     setModelProfiles((profiles) => profiles.map((profile) => {
       if (profile.id !== id) return profile;
       const next = { ...profile, ...patch, id };
-      if (Object.prototype.hasOwnProperty.call(patch, 'baseUrl')) {
-        const provider = inferUserModelProvider({ label: next.label, baseUrl: next.baseUrl });
-        next.provider = provider;
-        next.protocol = 'openai-compatible';
-        next.credentialRef = provider === 'deepseek'
-          ? 'provider:deepseek'
-          : `credential:${id}`;
-        if (provider === 'deepseek') next.label = 'DeepSeek';
-        else if (profile.provider === 'deepseek') next.label = '自定义 API';
-      }
       return next;
     }));
+  }
+
+  function updateProfileBaseUrl(profile: ChatModelPreset, baseUrl: string | undefined) {
+    const inferred = inferUserModelProvider({ label: profile.label, baseUrl });
+    const shouldSwitchProvider =
+      profile.provider === 'openai-compatible' && inferred !== 'openai-compatible';
+    const nextProvider = shouldSwitchProvider ? inferred : profile.provider as UserModelProvider;
+    const nextCredentialRef = shouldSwitchProvider
+      ? modelProviderCredentialRef(nextProvider, profile.id)
+      : profile.credentialRef;
+    setModelProfiles((profiles) => profiles.map((candidate) => candidate.id === profile.id
+      ? {
+          ...candidate,
+          baseUrl,
+          ...(shouldSwitchProvider
+            ? {
+                provider: nextProvider,
+                protocol: modelProviderProtocol(nextProvider),
+                credentialRef: nextCredentialRef,
+                label: nextProvider === 'deepseek' ? 'DeepSeek' : 'Anthropic',
+                model: nextProvider === 'deepseek' ? 'deepseek-chat' : '',
+                defaultModel: '',
+              }
+            : {}),
+        }
+      : candidate));
+    clearProfileRuntimeState(profile.id);
+    if (shouldSwitchProvider && nextCredentialRef) {
+      if (profile.provider !== 'deepseek') clearCredentialUi(credentialId(profile));
+      if (nextProvider !== 'deepseek') {
+        clearCredentialUi(nextCredentialRef.slice(nextCredentialRef.indexOf(':') + 1));
+      }
+    }
+  }
+
+  function updateProfileProvider(currentProfile: ChatModelPreset, provider: UserModelProvider) {
+    const nextCredentialRef = modelProviderCredentialRef(provider, currentProfile.id);
+    setModelProfiles((profiles) => profiles.map((profile) => {
+      if (profile.id !== currentProfile.id) return profile;
+      return {
+        ...profile,
+        ...providerDefaults(provider, currentProfile.id),
+        id: currentProfile.id,
+        provider,
+        protocol: modelProviderProtocol(provider),
+        defaultModel: '',
+        roles: profile.roles || [],
+        parameters: profile.parameters || {},
+      };
+    }));
+    clearProfileRuntimeState(currentProfile.id);
+    if (currentProfile.provider !== 'deepseek') clearCredentialUi(credentialId(currentProfile));
+    if (provider !== 'deepseek') {
+      clearCredentialUi(nextCredentialRef.slice(nextCredentialRef.indexOf(':') + 1));
+    }
   }
 
   function addProfile() {
@@ -952,36 +1068,47 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
       const parsed = parseEndpointProfiles(await file.text(), format);
       const imported = parsed.profiles;
       const importedCredentials: Record<string, string> = {};
-      setModelProfiles((current) => {
-        const next = [...current];
-        imported.forEach((item) => {
+      const changedProviderCredentialIds = new Set<string>();
+      const importedProfileIds = new Set<string>();
+      const next = [...modelProfilesRef.current];
+      imported.forEach((item) => {
           const existingIndex = next.findIndex((profile) =>
             (item.id && profile.id === item.id) ||
             (profile.baseUrl && profile.baseUrl.replace(/\/$/, '') === item.baseUrl)
           );
           const existing = existingIndex >= 0 ? next[existingIndex] : undefined;
           const id = existing?.id || item.id || `model-${Date.now()}-${next.length}`;
-          const provider = inferUserModelProvider({ label: item.supplier, baseUrl: item.baseUrl });
+          const provider = isUserConfigurableModelProvider(item.provider || '')
+            ? item.provider as UserModelProvider
+            : inferUserModelProvider({ label: item.supplier, baseUrl: item.baseUrl });
           const profile: ChatModelPreset = {
             ...(existing || providerDefaults(provider, id)),
             id,
             label: provider === 'deepseek' ? 'DeepSeek' : item.supplier,
             provider,
-            protocol: 'openai-compatible',
+            protocol: modelProviderProtocol(provider),
             baseUrl: item.baseUrl,
             model: existing?.model || item.defaultModel,
             defaultModel: item.defaultModel,
-            credentialRef: existing?.credentialRef || (provider === 'deepseek' ? 'provider:deepseek' : `credential:${id}`),
+            credentialRef: existing?.provider === provider && existing.credentialRef
+              ? existing.credentialRef
+              : modelProviderCredentialRef(provider, id),
             capabilities: existing?.capabilities || ['chat', 'streaming', 'tools'],
             roles: existing?.roles || [],
             parameters: existing?.parameters || {},
           };
+          importedProfileIds.add(id);
+          if (existing && existing.provider !== provider) {
+            changedProviderCredentialIds.add(credentialId(existing));
+            changedProviderCredentialIds.add(credentialId(profile));
+          }
           if (item.apiKey) importedCredentials[credentialId(profile)] = item.apiKey;
           if (existingIndex >= 0) next[existingIndex] = profile;
           else next.push(profile);
-        });
-        return next;
       });
+      setModelProfiles(next);
+      importedProfileIds.forEach((id) => clearProfileRuntimeState(id));
+      changedProviderCredentialIds.forEach((id) => clearCredentialUi(id));
       if (Object.keys(importedCredentials).length > 0) {
         setCredentialInputs((current) => ({ ...current, ...importedCredentials }));
       }
@@ -1074,7 +1201,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
             <div className="biof3-settings-section__heading">
               <h3>API Endpoint</h3>
               <p>
-                每个供应商只需配置供应商、Base URL、Key 和默认模型；接口协议与模型能力由后端自动适配。Key
+                为每个渠道选择接口协议，再配置供应商、Base URL、Key 和默认模型；模型能力由后端统一适配。Key
                 {credentialBackend === 'keychain' ? ' 保存在 macOS Keychain。' : ' 保存在独立本地凭据存储。'}
               </p>
               <p className="biof3-field__hint">Key 默认隐藏，可点击眼睛显示或复制；导出前会确认是否把 Key 写入文件，请仅保存到安全位置。</p>
@@ -1082,6 +1209,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
             <div className="biof3-model-list">
               {userModelProfiles.length > 0 && (
                 <div className="biof3-endpoint-list-header" aria-hidden="true">
+                  <span>协议</span>
                   <span>供应商</span>
                   <span>Base URL</span>
                   <span>Key</span>
@@ -1120,10 +1248,23 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                 return (
                 <div key={profile.id} className="biof3-model-preset biof3-endpoint-card">
                   <div className="biof3-endpoint-card__grid" role="group" aria-label={`${profile.label || '自定义'} 模型渠道`}>
+                    <select
+                      className="biof3-select"
+                      value={profile.provider}
+                      onChange={(event) => updateProfileProvider(
+                        profile,
+                        event.target.value as UserModelProvider
+                      )}
+                      aria-label={`${profile.label || '自定义渠道'} 接口协议`}
+                    >
+                      {USER_MODEL_PROVIDER_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
                     <input
                       className="biof3-input"
                       value={profile.provider === 'deepseek' ? 'DeepSeek' : profile.label}
-                      onChange={(e) => updateProfile(profile.id, { label: e.target.value })}
+                      onChange={(event) => updateProfile(profile.id, { label: event.target.value })}
                       placeholder="供应商"
                       aria-label="供应商"
                       readOnly={profile.provider === 'deepseek'}
@@ -1132,13 +1273,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       className="biof3-input"
                       value={endpointBaseUrl(profile)}
                       onChange={(e) => {
-                        updateProfile(profile.id, { baseUrl: e.target.value || undefined });
-                        setAvailableModels((current) => ({ ...current, [profile.id]: [] }));
-                        setTestResult((current) => {
-                          const next = { ...current };
-                          delete next[profile.id];
-                          return next;
-                        });
+                        updateProfileBaseUrl(profile, e.target.value || undefined);
                       }}
                       placeholder="Base URL"
                       aria-label="Base URL"
@@ -1151,12 +1286,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                         value={credentialInputs[id] || ''}
                         onChange={(e) => {
                           setCredentialInputs((current) => ({ ...current, [id]: e.target.value }));
-                          setAvailableModels((current) => ({ ...current, [profile.id]: [] }));
-                          setTestResult((current) => {
-                            const next = { ...current };
-                            delete next[profile.id];
-                            return next;
-                          });
+                          clearProfileRuntimeState(profile.id);
                         }}
                         placeholder={configured ? 'Key 已配置' : 'API Key'}
                         aria-label={configured ? 'API Key 已配置，输入新 Key 可覆盖' : 'API Key'}
@@ -1200,7 +1330,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       disabled={
                         discovering ||
                         !endpointBaseUrl(profile).trim() ||
-                        (profile.provider === 'deepseek' && !configured && !credentialInputs[id])
+                        (modelProviderRequiresCredential(profile.provider) && !configured && !credentialInputs[id])
                       }
                       title={connectionTitle}
                     >

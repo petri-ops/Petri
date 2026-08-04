@@ -1,4 +1,5 @@
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
+import { endpointBaseUrl } from './model-provider-options';
 
 export interface EndpointTransferProfile {
   id?: string;
@@ -66,7 +67,7 @@ export function endpointProfilesForTransfer(
   return profiles.map((profile) => ({
     id: profile.id,
     supplier: profile.label || profile.provider,
-    baseUrl: profile.baseUrl || (profile.provider === 'deepseek' ? 'https://api.deepseek.com' : ''),
+    baseUrl: endpointBaseUrl(profile),
     defaultModel: profile.defaultModel || profile.model,
     provider: profile.provider,
     hasApiKey: undefined,

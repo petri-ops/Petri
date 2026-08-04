@@ -72,6 +72,42 @@ describe('useAiSettings', () => {
     expect(result.current.activeId).toBe('chat-a');
   });
 
+  it('loads and expands a native Anthropic ModelProfile for chat selection', async () => {
+    const listModels = vi.fn().mockResolvedValue({
+      ok: true,
+      models: ['claude-sonnet-test', 'claude-opus-test'],
+      message: '已获取 2 个模型',
+    });
+    installBridge({
+      initial: {
+        model_profiles: [{
+          id: 'anthropic-main',
+          label: 'Anthropic',
+          provider: 'anthropic',
+          protocol: 'anthropic-messages',
+          model: 'claude-sonnet-test',
+          baseUrl: 'https://api.anthropic.com/v1',
+          capabilities: ['chat', 'streaming', 'tools'],
+        }],
+        model_role_bindings: { chat: 'anthropic-main' },
+      },
+      listModels,
+    });
+
+    const { result } = renderHook(() => useAiSettings());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(listModels).toHaveBeenCalledWith(
+      expect.objectContaining({ provider: 'anthropic', protocol: 'anthropic-messages' }),
+      ''
+    );
+    expect(result.current.presets.map((preset) => preset.model)).toEqual([
+      'claude-sonnet-test',
+      'claude-opus-test',
+    ]);
+    expect(result.current.presets.every((preset) => preset.provider === 'anthropic')).toBe(true);
+    expect(result.current.activePreset.model).toBe('claude-sonnet-test');
+  });
+
   it('expands one supplier endpoint into all discovered chat models and persists a switch', async () => {
     const listModels = vi.fn().mockResolvedValue({
       ok: true,

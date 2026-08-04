@@ -21,6 +21,51 @@ function closeServer(server) {
   return new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
 }
 
+test('Anthropic provider discovers native models with the expected path and headers', async () => {
+  let received;
+  const { server, baseUrl } = await startServer((req, res) => {
+    received = { path: req.url, headers: req.headers };
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({
+      data: [
+        { id: 'claude-sonnet-test', type: 'model' },
+        { id: 'claude-opus-test', type: 'model' },
+      ],
+    }));
+  });
+  try {
+    const result = await new AnthropicProvider().listModels('secret', { baseUrl });
+    assert.equal(received.path, '/v1/models');
+    assert.equal(received.headers['x-api-key'], 'secret');
+    assert.equal(received.headers['anthropic-version'], '2023-06-01');
+    assert.deepEqual(result, {
+      ok: true,
+      models: ['claude-sonnet-test', 'claude-opus-test'],
+      message: '已获取 2 个模型',
+    });
+  } finally {
+    await closeServer(server);
+  }
+});
+
+test('Anthropic model discovery stops reading an oversized chunked response', async () => {
+  const { server, baseUrl } = await startServer((_req, res) => {
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.write('{"data":[{"id":"');
+    res.end('x'.repeat(2 * 1024 * 1024 + 1));
+  });
+  try {
+    const result = await new AnthropicProvider().listModels('secret', { baseUrl });
+    assert.deepEqual(result, {
+      ok: false,
+      models: [],
+      message: '模型列表响应过大',
+    });
+  } finally {
+    await closeServer(server);
+  }
+});
+
 test('Anthropic provider converts Gateway chat request and response', async () => {
   let received;
   const { server, baseUrl } = await startServer((req, res) => {

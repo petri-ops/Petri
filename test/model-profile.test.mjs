@@ -40,6 +40,19 @@ test('ModelProfile v1 normalizes an OpenAI-compatible custom model', () => {
   );
 });
 
+test('ModelProfile v1 infers the native Anthropic Messages protocol', () => {
+  const profile = normalizeModelProfile({
+    id: 'anthropic-main',
+    label: 'Anthropic',
+    provider: 'anthropic',
+    model: 'claude-test',
+    baseUrl: 'https://api.anthropic.com/v1/',
+  });
+  assert.equal(profile.protocol, 'anthropic-messages');
+  assert.equal(profile.baseUrl, 'https://api.anthropic.com/v1');
+  assert.deepEqual(profile.capabilities, ['chat', 'streaming', 'tools']);
+});
+
 test('legacy chat presets migrate without persisting their inline apiKey', () => {
   const config = normalizeModelConfig({
     chat_model_presets: [

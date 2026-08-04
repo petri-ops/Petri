@@ -47,4 +47,19 @@ describe('model endpoint transfer', () => {
     expect(parsed.profiles[0].apiKey).toBe('secret');
     expect(parsed.warnings.join(' ')).toContain('跳过');
   });
+
+  it('preserves a native Anthropic provider and its default endpoint', () => {
+    const output = exportEndpointProfilesJson([{
+      id: 'anthropic-main',
+      label: 'Anthropic',
+      provider: 'anthropic',
+      model: 'claude-test',
+      defaultModel: 'claude-test',
+    }] as never);
+    expect(parseEndpointProfiles(output, 'json').profiles[0]).toMatchObject({
+      provider: 'anthropic',
+      baseUrl: 'https://api.anthropic.com/v1',
+      defaultModel: 'claude-test',
+    });
+  });
 });
