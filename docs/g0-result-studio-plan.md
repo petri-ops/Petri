@@ -2,7 +2,7 @@
 
 最后更新：2026-08-04
 
-状态：`TL1 completed / P7 deferred / implemented_unverified`（TL1 只收口自绘窗口控件；不改变 Artifact Truth、插件执行或 P7 资格）
+状态：`UX1G-1 active / P7 deferred / implemented_unverified`（当前只补 ToolJob 的 Conversation 归属真相与 API 投影；顶部多结果入口留给后续独立小 Goal）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -45,6 +45,12 @@ Result Studio 进入 `result/code/compare/history` 时，Electron 顶层标题�
 这是用户反馈驱动的短 Goal，复用 `G0-RS` 而未创建第二个工作包。Electron 窗口已改为 `frame:false`，统一 TitleBar 提供关闭、最小化、最大化/还原及状态事件；窗口 IPC 只接受主窗口 sender。折叠左轨固定为 `102px` 控制区 + `32px` 左栏按钮区，消除原 122px 轨道下约 12px 的溢出；最大化状态先订阅 live event 再查询初值，迟到查询、同步 throw、Promise rejection 与 listener cleanup 均安全。窗口按钮和既有 TitleBar 交互补齐 `focus-visible`，Web/非 desktop bridge 保持无 IPC 降级。
 
 自动证据为 TitleBar `11/11` 与 Electron/preload 契约 `6/6`，覆盖 desktop/web、IPC click、subscribe-before-query、live/query race、throw/rejection/cleanup、双击隔离、134px 轨道、sender 隔离、Cmd+W/M/R 和严格 boolean 投影；`node --check`、前端 strict check 与 diff 门通过。Darwin 25.5.0 arm64 开发态同一 BrowserWindow 完成最大化/还原、最小化恢复、空白标题栏双击、全部交互元素双击隔离、Cmd+0/-/+、明暗主题和约 1050→840→720px 实际 resize；窄宽下窗口/左栏/标题/右栏控件仍由 AX 可达。Cmd+W 与自绘关闭按钮分别证明 launcher/Electron/Vite/R/Py 全链退出并从当前工作树重启，最终 dev 实例保留。ScreenCaptureKit 在首张 1050×768 截图后报 `-3811`，因此 840/720 的像素级截图与拖拽绝对 frame 位移不可用；该边界不影响功能/可达性证据，但不得外推为 packaged 视觉资格。完整 P6 evidence 重绑、P7、Provider、packaged Windows/Linux、构建、OS reboot 和新分析功能均不属于 TL1；旧 P6 evidence 对当前 `src/preload.js` 的 source-exact 失败继续如实保留。
+
+### UX1G-1：Conversation-bound ToolJob Identity（`active · non-qualifying`）
+
+这是“同一会话可包含多个独立分析”的第一个小 Goal，只建立可持久、可查询、不可伪造的归属真相。当前 `tool_jobs` 只有 `project_id`，而 Conversation 只存在于 Agent 上下文或部分 `scientific_task_specs`；因此项目级 Jobs 列表无法可靠区分同项目不同会话。UX1G-1 为 `tool_jobs` 增加 nullable `conversation_id`，由服务端 Agent 上下文贯通直接执行、重操作审批续跑、ScientificTask 绑定、插件创建以及 Result Studio 派生执行；模型参数和前端请求都不能覆盖该值。旧 Job 只允许从唯一 `scientific_task_specs.tool_job_id` 精确回填，无法证明归属的记录继续保持 `null`，不得按时间或消息文本猜测。
+
+项目 Jobs API 必须投影 `conversationId` 并支持精确会话过滤，同时保留 nullable 项供后续“项目其他结果”分组。验收覆盖两个 Conversation 各自多个 Job、审批前后归属不漂移、跨会话 ack 拒绝、直接 MCP/unscoped Job 保持 null、旧 ScientificTask 精确回填、API ownership/filter 与现有 project-scoped 列表无回归。该 Goal 不实现顶部结果按钮或跨 Job 菜单，不修改 Result Viewer、Artifact/Revision/Selection/contextToken、科学算法、P6/P7 或资格状态；UI-123 只在后续 UX1G-2 启动时登记。
 
 BioF3 当前已经具备可信运行、Artifact 导航、静态预览、交付摘要、脚本入口和 ReplayPackage，但结果仍主要是“可查看的交付终点”，尚未成为用户可以持续探索、选择、编辑、比较和继续分析的科研工作对象。
 

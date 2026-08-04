@@ -8,7 +8,7 @@
 
 当前不默认扩展分析功能。`G0-START`、LF0～LF12 的核心资格保持 maintained；RS0～RS8 与 P4R/P5/P6 的 Result Studio 引擎和开发态证据保留，但 2026-07-25 产品复核撤销的完整产品资格没有恢复。2026-08-03 用户裁决把发布级 P7 重新资格后移；Result Studio 保持 `implemented_unverified / experimental`，rc.7 仍是工程候选版，不得描述为 GA。
 
-`G0-RS-UX1A`～`UX1F` 与短 Goal `G0-RS-TL1 / UI-120` 均已完成：结果上下文和 Artifact 选择已收成一条工具栏，插件正式 PNG 是图形结果默认主视图；窗口 chrome 采用 `frame:false` 自绘控制，关闭/最小化/最大化、缩放、双击隔离和退出重启链已在开发态 macOS 验证。当前没有 active 实现工作包；这些增量不改 Artifact Truth、插件执行或 P7，`G0-SDC1 Data Profiler` 保持后续候选。
+`G0-RS-UX1A`～`UX1F` 与短 Goal `G0-RS-TL1 / UI-120` 均已完成。当前唯一 active 小 Goal 是 `G0-RS-UX1G-1 Conversation-bound ToolJob Identity`：只补 `tool_jobs.conversation_id`、Agent/审批/插件执行归属链和项目 Jobs API 投影，为同一会话多个分析建立不串台的持久身份。顶部常驻结果入口与跨 Job 菜单留给 UX1G-2，尚未启动；P7 与 `G0-SDC1 Data Profiler` 继续 deferred/候选。
 
 LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口。RS9 曾新增第 17 类 `result_studio_product`，但后续复核发现其五条任务由独立测试拼装、Provider 未执行真实工具闭环、视觉验收依赖人工布尔值、大表由 seed 直接构造；该证据现降级为 unit/synthetic/renderer historical evidence。`result-studio-editing` 在 RS-P7 前暂停 qualified support claim，不能影响或冒充 LF12 原始核心资格。
 
@@ -43,13 +43,13 @@ G0-RS-P0 资格与证据纠偏
   → RS-P7 诚实重新资格（deferred）
 ```
 
-当前重新排序：UX1A～UX1F 与 `G0-RS-TL1 / UI-120` 已完成 → 按真实使用反馈选择后续 UX 小目标或 `SDC-1 Data Profiler`；RS-P7 继续 deferred。
+当前重新排序：UX1A～UX1F 与 `G0-RS-TL1 / UI-120` 已完成 → `UX1G-1` ToolJob 会话归属 → 收口后再单独启动 `UX1G-2` 顶部多结果入口；RS-P7 继续 deferred。
 
 `G0-RS-P0`～`G0-RS-P3` 已依次收口；P4 Core 已形成 18/18 离线实现检查点并保持 `implemented_unverified`。P3 建立 `ResultStudioContextEnvelope v1` 与 `contextToken`：artifact/family、job、revision（含 current 与 ordinal）、脚本相对路径与 sha256、参数摘要、插件可编辑参数与声明动作、selection、validation、reproducibility 全部由后端从 SQLite/`tool_jobs`/插件 descriptor 重新投影，前端 activeArtifact 只作线索。模型可见 schema 新增 7 个工具（注册表共 32 个），6 个 `*_in_context` 工具的参数中不含 toolJobId/artifactId/revisionId/artifactFamilyId/selectionId；写操作强制校验 token，陈旧上下文返回 `context_token_stale`，intent 指向别的 Revision 返回 `context_intent_mismatch`，"归因只能到 Job"与跨项目 revision 一律 fail-closed。公开进度固定为「理解意图 → 判断影响 → 执行/重算 → 验证 → 候选可比较」五阶段，不展示隐藏推理链。证据为 `acceptance/g0-result-studio/rs-p3-agent-context.json`（20/20，non-qualifying）。
 
 P4 Core 让手动调整与自然语言修改共用同一条编辑链：控件全部由插件 descriptor 的 `parameters` + `parameterImpacts` 投影，缺 impact 声明的参数不可编辑；`volcano-plot` 补齐配色/字体/尺寸/图例/标签/导出共 12 个 presentation 参数并接进真实 R 脚本（此前全为硬编码）。`normalizeEditSubmission` 是手动与 AI 的唯一归一化闸门，类型/范围/枚举 fail-closed 拒绝、未声明参数记为 rejected、与现状相同的提交不产出 patch，因此不会创建空 ChangeSet；影响分级只能由受信 descriptor 提升，调用方无法把科学或流程参数降级成样式修改，未声明 impact 的参数保守落到科学重算。过程中修复既有缺陷：保护字段表原先覆盖 descriptor，使 deseq2 声明为 `workflow` 的 `design` 被悄悄降级成 `scientific`，现在保护字段只作下限。`currentValues` 取自该 Job 真实执行过的归一化参数，不用默认值冒充。证据为 `acceptance/g0-result-studio/rs-p4-unified-editing.json`（18/18，non-qualifying 离线 descriptor 投影/插件接线/注册表/strict build 证据）；真实候选等价链尚未执行，故 UI-109 保持 `in_progress`。
 
-RH0 已按 Truth Snapshot、Hot Context、Test Impact、Script/Temp Lifecycle、Acceptance 串行收口并通过最终基线。P4R～P6、UX1A～UX1F 与 TL1 的实现检查点保留，P7 已于 2026-08-03 延期。当前没有 active 实现工作包；详细范围、非目标和出口见 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md)。
+RH0 已按 Truth Snapshot、Hot Context、Test Impact、Script/Temp Lifecycle、Acceptance 串行收口并通过最终基线。P4R～P6、UX1A～UX1F 与 TL1 的实现检查点保留，P7 已于 2026-08-03 延期。当前唯一 active 增量为 `G0-RS-UX1G-1`；详细范围、非目标和出口见 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md)。
 
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 已完成的 Scientific Task Contract 工作包记录见 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md)。
