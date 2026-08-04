@@ -27,6 +27,37 @@ test('frontend source changes produce related frontend inputs and required gates
   assert.ok(plan.commands.includes('ui-audit'));
 });
 
+test('frontend Vitest inputs stay out of the Node impact bundle', () => {
+  const plan = resolveImpact([
+    'frontend/src/components/copilot/copilotClient.ts',
+    'frontend/src/components/desktop/TitleBar.tsx',
+  ]);
+  assert.deepEqual(plan.unknown, []);
+  assert.ok(plan.tests.every((file) => !file.startsWith('frontend/')));
+  assert.ok(plan.tests.includes('test/tool-job-conversation.test.mjs'));
+  assert.ok(plan.tests.includes('test/g0-api-route.test.mjs'));
+  assert.deepEqual(plan.frontendRelated, [
+    'src/components/copilot/copilotClient.ts',
+    'src/components/desktop/TitleBar.tsx',
+  ]);
+});
+
+test('SDC1 scripts have one maintained classification and select the focused data contract bundle', () => {
+  for (const file of [
+    'scripts/g0-sdc1-local-gateway.mjs',
+    'scripts/g0-sdc1-electron-driver.cjs',
+    'scripts/g0-sdc1-acceptance.mjs',
+  ]) {
+    const plan = resolveImpact([file]);
+    assert.deepEqual(plan.unknown, []);
+    assert.ok(plan.reasons[file].includes('script-g0-maintained'));
+    assert.ok(plan.reasons[file].includes('sdc1-data-to-first-result'));
+    assert.ok(plan.tests.includes('test/g0-sdc1-local-gateway.test.mjs'));
+    assert.ok(plan.tests.includes('test/data-profiler.test.mjs'));
+    assert.ok(plan.tests.includes('test/workspace-data-import.test.mjs'));
+  }
+});
+
 test('Result Studio Agent production wiring selects binding and prompt regressions', () => {
   for (const file of [
     'core/r-server/agent-runner.js',

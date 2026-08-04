@@ -16,6 +16,7 @@ import { BottomTerminal } from '@/components/workspace-panels/BottomTerminal';
 import { CenterPanel, type CenterPanelContext } from '@/components/workspace-panels/CenterPanel';
 import { LeftPanel, type LeftPanelContext } from '@/components/workspace-panels/LeftPanel';
 import { RightPanel, type RightPanelContext } from '@/components/workspace-panels/RightPanel';
+import { DataIntakeControl } from '@/components/workspace-panels/DataIntakeControl';
 import { WorkspaceFileIcon } from '@/components/workspace-panels/WorkspaceFileIcon';
 import { getProject, listProjectJobs, listDatasetsByProject, listProjects, updateProject, createProject, setProjectStatus } from '@/lib/project-store';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
@@ -1548,8 +1549,14 @@ export function ProjectWorkspace(): React.ReactElement {
 
   /** Dispatch a copilot-ask event so the embedded SimpleChat picks it up */
   const handleAskAgent = useCallback((prompt: string) => {
+    if (activeConvId && isConversationRunning(activeConvId)) {
+      setWorkspaceNotice('当前 Agent 仍在处理上一个请求；完成或停止后再开始新分析。');
+      return false;
+    }
+    setWorkspaceNotice('');
     dispatchBioF3Event(biof3Events.copilotAsk, { prompt });
-  }, []);
+    return true;
+  }, [activeConvId]);
 
   // P4R-3: 焦点 Composer 与高级控件在这里汇合。可见 prompt 只包含用户目标/
   // 手动 patch；opaque token + Artifact/Revision/Selection 快照走事件 context，
@@ -2036,6 +2043,7 @@ export function RightFileTree({
   activeFile,
   onOpenFile,
   onCloseFile,
+  onAskAgent,
 }: {
   project: Project;
   active: boolean;
@@ -2043,6 +2051,7 @@ export function RightFileTree({
   activeFile: ActiveWorkspaceFile | null;
   onOpenFile: (file: ActiveWorkspaceFile) => void;
   onCloseFile: (path: string) => void;
+  onAskAgent: (prompt: string) => boolean | void;
 }): React.ReactElement {
   const [tree, setTree] = useState<FileEntry[]>([]);
   const [expandedDirs, setExpandedDirs] = useState<Set<string>>(new Set());
@@ -2248,6 +2257,7 @@ export function RightFileTree({
           })}
           {!activeFile && <span className={styles.workspaceBreadcrumbEmpty}>选择文件预览</span>}
         </div>
+        <DataIntakeControl projectId={project.id} onAskAgent={onAskAgent} />
         <button
           className={styles.workspaceTreeToggle}
           onClick={() => setTreeOpen((value) => !value)}

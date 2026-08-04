@@ -2,7 +2,7 @@
 
 最后更新：2026-08-03
 
-状态：`planned / SDC-0 completed / SDC-1 next candidate`（P7 发布级重新资格已于 2026-08-03 后移；SDC-1 作为更适合初级 G0 的下一候选，但尚未建立 Goal 或开始实现）
+状态：`active / SDC-0 completed / SDC1-A in progress`（P7 发布级重新资格继续 deferred；当前唯一 active 增量是从项目文件到首个结果的 SDC-1 竖切片）
 
 计划编号：`G0-SDC`
 
@@ -18,7 +18,7 @@
 2. ✅ `G0-START` 审计通过（10/10，2026-07-24）。
 3. ✅ `G0-LF0` 已建立 Constitution、Baseline Registry、版本身份和 Support Matrix（2026-07-24）。
 
-启动边界：本计划已于 2026-07-25 完成 `SDC-0` Profile Registry 与版本治理。2026-08-03 用户裁决将发布级 `G0-RS-P7` 后移，项目重新聚焦初级 G0 的真实数据入口；因此解除“必须先完成 P7”这一排期依赖，把 `SDC-1 Data Profiler` 设为下一候选。它仍未启动：只有明确建立新 Goal、核对唯一 active 工作包并冻结 SDC-1 范围后才允许写生产代码。单工作包串行不变，已完成的 SDC-0 不回滚、不冒充完整数据适配能力。
+启动边界：本计划已于 2026-07-25 完成 `SDC-0` Profile Registry 与版本治理。2026-08-04 已建立短 Goal，并冻结 `SDC1-A Data-to-first-result slice`。它只交付项目内文本表格导入、有界只读 Profiler、候选文件角色与可行动准备状态，然后把明确路径交给现有 Agent。科学分析仍必须通过 `run_tool → tool_job → artifact truth`，并由现有结果事件自动打开 Result Studio。单工作包串行不变，已完成的 SDC-0 不回滚，P7 不重开。
 
 ## 1. 决策结论
 
@@ -268,7 +268,7 @@ cannot_reliably_answer
 
 ### SDC-1：Data Profiler
 
-状态：`next_candidate / not_started`
+状态：`active / SDC1-A in_progress`
 
 目标：
 
@@ -288,6 +288,25 @@ cannot_reliably_answer
 - 不规则 CSV/TSV/文本矩阵产生稳定 Observation。
 - 文件变化后缓存不复用。
 - 错误编码、空文件、超宽表和截断行有结构化诊断。
+
+#### SDC1-A：Data-to-first-result 短闭环
+
+当前 Goal 只验收以下产品切片：
+
+1. 用户从项目工作区一次导入一个或多个 `.csv / .tsv / .txt`，文件落在当前项目的 `data/` 目录，不覆盖同名原文件，不写 legacy OSS Dataset 真相。
+2. 导入后对文件生成与完整 SHA-256 绑定的有界 Observation；候选的 counts / sample metadata 只能显示为候选，不能冒充科学语义结论。
+3. 空文件、非 UTF-8/二进制文件、不稳定分隔符、超宽表或截断样本返回结构化诊断；文件改变后旧哈希结果不得复用。
+4. 只有当导入批次中存在可行动的表达矩阵与样本信息候选时，界面才提供“开始分析”；该动作只把项目相对路径与有界摘要交给当前会话 Agent。
+5. Agent 必须继续走现有 preflight / 确认 / `run_tool` 链；用户完成首个真实 Job 后，现有 `projectOpenResult` 链打开 Result Studio。不增加直连 `/api/tools/run`、前端执行器、伪 Artifact 或第二套结果状态。
+
+本短 Goal 明确不包含：通用 SemanticBinding 持久化、对照组/配对/批次自动猜测、Adapter Job 编译、任意文件格式、全插件 I/O conformance、SDC-7 真实不规则数据资格或 P7 发布级验收。
+
+收口门：
+
+- Profiler 纯函数与 HTTP 路由聚焦测试通过，包含 Hash 失效、空/异常/超宽/截断输入。
+- 前端覆盖导入、ready/blocked 投影、重复分析隔离与 Agent 交接。
+- 开发态 Electron 从空项目导入受控 fixture，由真实 Agent 执行链产生 Job/Artifact 并打开 Result Studio；该证据明确 `qualificationEligible:false`。
+- `npm run test:changed`、定向前端测试、strict TypeScript、`docs:reconcile`、`docs:check`、`ui:audit:check` 与 `git diff --check` 通过。
 
 ### SDC-2：Semantic Binder 与最少必要确认
 

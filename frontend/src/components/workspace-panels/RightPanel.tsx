@@ -70,7 +70,7 @@ export interface RightPanelContext {
   setBottomTerminalOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
   setRightOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
   setActiveConvId: (id: string | null) => void;
-  handleAskAgent: (prompt: string) => void;
+  handleAskAgent: (prompt: string) => boolean | void;
   handleOpenWorkspaceFile: (file: ActiveWorkspaceFile) => void;
   handleCloseWorkspaceFile: (path: string) => void;
   handleOpenResult: (jobId: string, projectId?: string | null) => void | Promise<void>;
@@ -180,6 +180,7 @@ export function RightPanel({
                     activeFile={ctx.activeWorkspaceFile}
                     onOpenFile={ctx.handleOpenWorkspaceFile}
                     onCloseFile={ctx.handleCloseWorkspaceFile}
+                    onAskAgent={ctx.handleAskAgent}
                   />
                 )}
                 {tab === 'terminal' && (

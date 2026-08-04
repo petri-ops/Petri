@@ -5206,6 +5206,223 @@ body.biof3-resizing-columns * {
   color: var(--biof3-text);
 }
 
+.dataIntakeControl {
+  position: static;
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.dataIntakeInput {
+  display: none;
+}
+
+.dataIntakePopover {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 7px);
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  width: min(380px, calc(100% - 16px));
+  max-height: min(520px, calc(100vh - 120px));
+  overflow: auto;
+  border: 1px solid var(--biof3-border-strong);
+  border-radius: 7px;
+  background: var(--biof3-surface);
+  color: var(--biof3-text);
+  box-shadow: 0 12px 32px rgb(15 23 42 / 16%);
+}
+
+.dataIntakeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 38px;
+  padding: 7px 10px 7px 12px;
+  border-bottom: 1px solid var(--biof3-border);
+  font-size: 13px;
+}
+
+.dataIntakeHeader button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  cursor: pointer;
+}
+
+.dataIntakeHeader button:hover {
+  background: var(--biof3-hover);
+  color: var(--biof3-text);
+}
+
+.dataIntakeState,
+.dataIntakeChoose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 96px;
+  margin: 12px;
+  border: 1px dashed var(--biof3-border-strong);
+  border-radius: 6px;
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text-secondary);
+  font: inherit;
+  font-size: 12px;
+}
+
+.dataIntakeChoose {
+  cursor: pointer;
+}
+
+.dataIntakeChoose:hover {
+  border-color: var(--biof3-accent);
+  color: var(--biof3-text);
+}
+
+.dataIntakeSpinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--biof3-border-strong);
+  border-top-color: var(--biof3-accent);
+  border-radius: 50%;
+  animation: dataIntakeSpin 800ms linear infinite;
+}
+
+@keyframes dataIntakeSpin {
+  to { transform: rotate(360deg); }
+}
+
+.dataIntakeFiles {
+  display: flex;
+  flex-direction: column;
+  padding: 5px 8px;
+}
+
+.dataIntakeFileRow {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 48px;
+  padding: 6px 4px;
+  border-bottom: 1px solid color-mix(in srgb, var(--biof3-border) 72%, transparent);
+  color: var(--biof3-text-secondary);
+}
+
+.dataIntakeFileRow:last-child {
+  border-bottom: 0;
+}
+
+.dataIntakeFileRow[data-blocked='true'] {
+  color: var(--biof3-danger);
+}
+
+.dataIntakeFileRow > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dataIntakeFileRow strong,
+.dataIntakeFileRow small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dataIntakeFileRow strong {
+  color: var(--biof3-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.dataIntakeFileRow small {
+  color: inherit;
+  font-size: 10px;
+}
+
+.dataIntakeFileRow em {
+  color: var(--biof3-text-tertiary);
+  font-size: 10px;
+  font-style: normal;
+}
+
+.dataIntakeReadiness {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 7px 12px;
+  border-top: 1px solid var(--biof3-border);
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-warning, #a16207);
+  font-size: 11px;
+}
+
+.dataIntakeReadiness[data-status='ready'] {
+  color: var(--biof3-success, #15803d);
+}
+
+.dataIntakeActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  padding: 9px 10px;
+  border-top: 1px solid var(--biof3-border);
+}
+
+.dataIntakePrimary,
+.dataIntakeSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 4px 10px;
+  border: 1px solid var(--biof3-border-strong);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.dataIntakePrimary {
+  border-color: var(--biof3-accent);
+  background: var(--biof3-accent);
+  color: var(--biof3-on-accent, #fff);
+}
+
+.dataIntakePrimary:disabled {
+  border-color: var(--biof3-border);
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text-tertiary);
+  cursor: not-allowed;
+}
+
+.dataIntakeSecondary:hover {
+  background: var(--biof3-hover);
+  color: var(--biof3-text);
+}
+
+.dataIntakeError {
+  padding: 7px 12px;
+  border-top: 1px solid color-mix(in srgb, var(--biof3-danger) 24%, transparent);
+  background: color-mix(in srgb, var(--biof3-danger) 7%, transparent);
+  color: var(--biof3-danger);
+  font-size: 11px;
+}
+
 .workspaceFileTreePaneWrap {
   display: flex;
   flex-shrink: 0;
