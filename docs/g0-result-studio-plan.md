@@ -2,7 +2,7 @@
 
 最后更新：2026-08-04
 
-状态：`UX1G-1 completed / UX1G-2 candidate / P7 deferred / implemented_unverified`（ToolJob 的 Conversation 归属真相已收口；顶部多结果入口尚未启动）
+状态：`UX1G-2 active / P7 deferred / implemented_unverified`（当前会话的多分析结果入口进入短闭环；不扩大到 Result Viewer 或资格重验）
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -53,6 +53,12 @@ Result Studio 进入 `result/code/compare/history` 时，Electron 顶层标题�
 项目 Jobs API 必须投影 `conversationId` 并支持精确会话过滤，同时保留 nullable 项供后续“项目其他结果”分组。验收覆盖两个 Conversation 各自多个 Job、审批前后归属不漂移、跨会话 ack 拒绝、直接 MCP/unscoped Job 保持 null、旧 ScientificTask 精确回填、API ownership/filter 与现有 project-scoped 列表无回归。该 Goal 不实现顶部结果按钮或跨 Job 菜单，不修改 Result Viewer、Artifact/Revision/Selection/contextToken、科学算法、P6/P7 或资格状态；UI-123 只在后续 UX1G-2 启动时登记。
 
 收口结果：`tool_jobs.conversation_id` 已作为 nullable 持久身份进入创建、审批续跑、ScientificTask、Workflow、插件执行/重试、Result Edit 与受控 replay；同项目/同会话、用户、工具、参数和 token 过期边界均 fail-closed。旧记录只在唯一 ScientificTask 关系同时满足同项目、同用户、同工具时回填，未知、歧义或不一致记录保持 `null`；legacy null Revision 可在 contextToken 证明的当前会话中创建新的 replay Job，但不会改写旧 Job，restore 继续保持 unscoped。项目 Jobs 与全局历史均投影 project/conversation，插件 Job 落库失败时不再降级为无账本执行。聚焦 Node 79 项为 78 pass / 1 live skip，前端审批契约 6/6、strict TypeScript、syntax、impact-map、docs/UI/diff 门禁通过。该证据是 unit/integration 与契约收口，不是新的 Electron/Provider/P7 产品资格；UX1G-2 仍未启动。
+
+### UX1G-2：Conversation Result Switcher（`active · non-qualifying`）
+
+这是 UX1G-1 之后的独立短 Goal，只解决同一 Conversation 内已有多个分析时如何主动打开和切换结果。顶部工作台提供一个紧凑结果入口：默认投影当前会话中具备可打开结果的 Job，按持久 `conversationId` 精确过滤，并复用既有 `?mode=result&job=<jobId>`、`activeJob` 与 Artifact 选择链。项目其他会话结果和 `conversation_id IS NULL` 的 legacy 结果不得混入主列表；如需发现它们，只能以明确分组或独立入口呈现，不能伪装成当前会话结果。
+
+验收要求：同一会话至少两个结果可稳定切换；选择 Job 后 URL、结果主体、标题和后续 Artifact 选择全部绑定新 Job；返回聊天再打开仍保持当前会话边界；深链 Job 若不属于当前会话必须拒绝或显式降级，不能串台。空态、加载态、失败态、键盘操作和窄宽布局必须可用。范围外事项包括 Result Viewer 核心、Artifact/Revision/Selection/contextToken 真相、科学算法、跨会话聚合管理、P6/P7 重验与资格升级。
 
 BioF3 当前已经具备可信运行、Artifact 导航、静态预览、交付摘要、脚本入口和 ReplayPackage，但结果仍主要是“可查看的交付终点”，尚未成为用户可以持续探索、选择、编辑、比较和继续分析的科研工作对象。
 
