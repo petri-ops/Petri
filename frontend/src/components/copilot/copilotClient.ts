@@ -303,6 +303,28 @@ export interface StreamChatOptions {
   onTaskStarted?: (taskId: string) => void;
 }
 
+export async function retryToolSummary(input: {
+  toolJobId: string;
+  projectId: string;
+  conversationId: string;
+  modelPresetId?: string;
+}): Promise<string> {
+  await ensureOnlineOrThrow();
+  const resp = await fetch(getApiPrefix() + '/ai/tool-summary/retry', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    body: JSON.stringify(input),
+  });
+  let body: { content?: string; error?: string; message?: string } = {};
+  try {
+    body = await resp.json();
+  } catch {}
+  if (!resp.ok || !body.content) {
+    throw new Error(body.error || body.message || `HTTP ${resp.status}`);
+  }
+  return body.content;
+}
+
 /**
  * Stream a chat completion. Talks to /api/ai/agent (multi-turn tool calling),
  * falls back gracefully — server emits OpenAI-style choices.delta.content

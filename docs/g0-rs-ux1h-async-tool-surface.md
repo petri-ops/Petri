@@ -119,7 +119,7 @@ A-4. 复现"AI 总结超时"：
        - 验收：Result Studio 自动打开了结果 PNG
 A-5. 点"重试总结"按钮：
        - 工具**不重跑** DESeq2
-       - 仍然走 LLM，失败仍 fail-soft（红字但不掩盖工具成功）
+       - 仍然走无工具权限的 summary 模型调用，失败仍 fail-soft，且不掩盖工具成功
 A-6. 控制台 0 error
 A-7. 验收证据：
        acceptance/g0-rs-ux1h/async-tool-surface.json
@@ -132,8 +132,8 @@ A-7. 验收证据：
 ```text
 S-1. run_tool → tool_job → artifact truth 唯一执行真相不变
 S-2. SimpleChat 错误渲染分支的改写，仅针对"已知 toolJob 成功 + AI 总结失败"组合
-S-3. 不引入第二个 stream 通道、不引入第二个 SSE 解析路径
-S-4. 不修改 toolJobId、traceId、callId 的传播路径
+S-3. 总结重试使用独立 JSON 请求，不引入第二个 SSE 解析路径，服务端不注册工具定义
+S-4. 只补齐 toolJobId 的活动持久化，不改变 traceId、callId 的关联语义
 S-5. 不修改 plugin descriptor、不修改 r-server 入口
 ```
 
@@ -161,7 +161,17 @@ frontend/src/components/copilot/SimpleChat.tsx
   - 新增"重试总结"按钮（仅触发 LLM，触发 run_tool 则阻断）
 
 frontend/src/components/copilot/copilotClient.ts
-  - 新增可选 retrySummary(toolJobId) 工具方法（仅 LLM，不重跑工具）
+  - 新增 retryToolSummary(toolJobId) 方法（调用无工具权限的服务端 summary-only 契约）
+
+frontend/src/components/copilot/toolActivity.ts
+core/r-server/agent-tools/tool-events.js
+  - 持久化已完成 run_tool 的 toolJobId，作为总结重试的精确锚点
+
+core/r-server/routes/ai-chat.js
+  - 新增带 ToolJob/Artifact Truth 归属核验的 JSON summary-only 重试接口
+
+core/r-server/agent-runner.js
+  - 工具已完成且总结失败时收敛 durable loop 终态，不再遗留 running
 
 frontend/src/components/copilot/__tests__/ 或 SimpleChat.test.tsx
   - 覆盖"工具成功 + LLM 超时"渲染分支
@@ -173,7 +183,6 @@ frontend/src/components/copilot/__tests__/ 或 SimpleChat.test.tsx
 ```text
 core/shared-backend/llm-providers/*.js
 core/shared-backend/agent-workflow.js
-core/r-server/routes/*
 src/mcp-server.js
 src/main.js
 core/shared-backend/result-studio-*.js
@@ -190,7 +199,8 @@ core/shared-backend/result-studio-*.js
 | 2026-08-06 | 计划创建 | 用户在 airway 完整流程中识别问题，本计划上线 |
 | 2026-08-06 | active | 写完本计划 + 同步 handoff/registry/AUDIT-LOG |
 | 2026-08-06 | active checkpoint | SimpleChat 已接入真实 ToolJob 成功 + 总结超时展示分支；单元测试 6/6、strict TypeScript 通过。一次开发态 Electron 阶段收口验收使用真实 airway counts/metadata 跑出 DESeq2 completed + Artifact Truth valid + 同 Job PNG，并确认目标文案可见、"请求超时"不可见。证据见 `acceptance/g0-rs-ux1h/`；本地 `ux1h-timeout-adapter` 不代表外部模型 |
-| — | pending | 完成重试总结不重跑工具与完整 async surface；未完成前不将本计划或 UI-126 标为 `verified` |
+| 2026-08-06 | active implementation | 已补齐成功 `run_tool` 的 `toolJobId` 活动持久化、服务端 summary-only 重试接口与按钮；接口按 user/project/conversation 核验 completed ToolJob + valid Artifact Truth，调用时不注册工具并持久化总结。工具完成但总结失败时 durable loop 收敛为 completed，避免重开后仍显示“执行中”；工具活动汇总改为“运行 N 次”以消除状态歧义。本轮按用户要求未运行测试或 Electron 验收，因此这些新增行为仍待阶段门验证。 |
+| — | pending | 完成主对话与长工具执行的完整 async surface；验证本次 summary-only 重试确实不重跑工具。未完成前不将本计划或 UI-126 标为 `verified` |
 | — | pending | 收口前按风险驱动运行 G-1 ~ G-5 与剩余行为门；开发中不重复运行长耗时 Electron 链，只有产品行为或验收脚本发生实质变化才重跑 |
 | — | pending | 收口（同步 handoff、registry、UI audit、evidence） |
 

@@ -185,6 +185,8 @@ function createToolActivityRecorder() {
     const existing = index >= 0 ? items[index] : null;
     const next = {
       key: existing ? existing.key : (result.callId || `${result.traceId || 'legacy'}:${name}:${items.length + 1}`),
+      toolJobId: event.toolJobId || (existing && existing.toolJobId),
+      toolId: event.toolId || (existing && existing.toolId),
       callId: result.callId || (existing && existing.callId),
       traceId: result.traceId || (existing && existing.traceId),
       iteration: Number.isFinite(event.iteration)

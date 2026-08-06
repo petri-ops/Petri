@@ -8,7 +8,7 @@
 
 当前不默认扩展分析功能。`G0-START`、LF0～LF12 的核心资格保持 maintained；RS0～RS8 与 P4R/P5/P6 的 Result Studio 引擎和开发态证据保留，但 2026-07-25 产品复核撤销的完整产品资格没有恢复。2026-08-03 用户裁决把发布级 P7 重新资格后移；Result Studio 保持 `implemented_unverified / experimental`，rc.7 仍是工程候选版，不得描述为 GA。
 
-`G0-RS-UX1A`～`UX1F`、短 Goal `G0-RS-TL1 / UI-120`、`G0-RS-UX1G-1 Conversation-bound ToolJob Identity`、`G0-RS-UX1G-2 / UI-123 Conversation Result Switcher` 与 `G0-SDC / SDC1-A Data-to-first-result` 均已完成。2026-08-06 当前唯一 active 增量为 `G0-RS-UX1H / UI-126`：SimpleChat 的“工具成功 + AI 总结暂时不可用”展示组合已用真实 airway 数据在开发态 Electron 中验证并写入 `acceptance/g0-rs-ux1h/`，但重试总结不重跑工具与完整 async surface 尚未完成，故工作包保持 active、UI-126 保持 `in_progress`。`G0-SDC-1 / G0-SDC-2` 已分别以 `acceptance/g0-scientific-data-contract/sdc1-complete.json` 与 `sdc2-semantic-binder.json` 收口；SDC-1 其余范围、SDC-3～SDC-7 与 P7 继续 deferred。
+`G0-RS-UX1A`～`UX1F`、短 Goal `G0-RS-TL1 / UI-120`、`G0-RS-UX1G-1 Conversation-bound ToolJob Identity`、`G0-RS-UX1G-2 / UI-123 Conversation Result Switcher` 与 `G0-SDC / SDC1-A Data-to-first-result` 均已完成。2026-08-06 当前唯一 active 增量为 `G0-RS-UX1H / UI-126`：SimpleChat 的“工具成功 + AI 总结暂时不可用”展示组合已用真实 airway 数据在开发态 Electron 中验证并写入 `acceptance/g0-rs-ux1h/`；summary-only 重试与 durable loop 状态收敛已实现但按用户要求尚未测试，完整 async surface 仍未完成，故工作包保持 active、UI-126 保持 `in_progress`。`G0-SDC-1 / G0-SDC-2` 已分别以 `acceptance/g0-scientific-data-contract/sdc1-complete.json` 与 `sdc2-semantic-binder.json` 收口；SDC-1 其余范围、SDC-3～SDC-7 与 P7 继续 deferred。
 
 LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口。RS9 曾新增第 17 类 `result_studio_product`，但后续复核发现其五条任务由独立测试拼装、Provider 未执行真实工具闭环、视觉验收依赖人工布尔值、大表由 seed 直接构造；该证据现降级为 unit/synthetic/renderer historical evidence。`result-studio-editing` 在 RS-P7 前暂停 qualified support claim，不能影响或冒充 LF12 原始核心资格。
 
@@ -43,7 +43,7 @@ G0-RS-P0 资格与证据纠偏
   → RS-P7 诚实重新资格（deferred）
 ```
 
-当前重新排序：UX1A～UX1F、`G0-RS-TL1 / UI-120`、`UX1G-1` ToolJob 会话归属与 `UX1G-2 / UI-123` 当前会话多结果入口均已完成；当前只推进 `G0-RS-UX1H / UI-126` 的剩余重试/async surface，RS-P7 继续 deferred。
+当前重新排序：UX1A～UX1F、`G0-RS-TL1 / UI-120`、`UX1G-1` ToolJob 会话归属与 `UX1G-2 / UI-123` 当前会话多结果入口均已完成；当前只推进 `G0-RS-UX1H / UI-126` 的剩余完整 async surface，并在阶段门统一验证已实现的 summary-only 重试，RS-P7 继续 deferred。
 
 `G0-RS-P0`～`G0-RS-P3` 已依次收口；P4 Core 已形成 18/18 离线实现检查点并保持 `implemented_unverified`。P3 建立 `ResultStudioContextEnvelope v1` 与 `contextToken`：artifact/family、job、revision（含 current 与 ordinal）、脚本相对路径与 sha256、参数摘要、插件可编辑参数与声明动作、selection、validation、reproducibility 全部由后端从 SQLite/`tool_jobs`/插件 descriptor 重新投影，前端 activeArtifact 只作线索。模型可见 schema 新增 7 个工具（注册表共 32 个），6 个 `*_in_context` 工具的参数中不含 toolJobId/artifactId/revisionId/artifactFamilyId/selectionId；写操作强制校验 token，陈旧上下文返回 `context_token_stale`，intent 指向别的 Revision 返回 `context_intent_mismatch`，"归因只能到 Job"与跨项目 revision 一律 fail-closed。公开进度固定为「理解意图 → 判断影响 → 执行/重算 → 验证 → 候选可比较」五阶段，不展示隐藏推理链。证据为 `acceptance/g0-result-studio/rs-p3-agent-context.json`（20/20，non-qualifying）。
 

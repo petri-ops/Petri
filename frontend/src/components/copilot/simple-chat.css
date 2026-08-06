@@ -298,6 +298,16 @@
   opacity: 1;
 }
 
+.sc-msg-actions-summary {
+  opacity: 1;
+  flex-wrap: wrap;
+}
+
+.sc-msg-action-error {
+  color: var(--biof3-danger);
+  font-size: 12px;
+}
+
 .sc-msg-action {
   display: inline-flex;
   align-items: center;

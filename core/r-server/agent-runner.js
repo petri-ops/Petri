@@ -1499,6 +1499,14 @@ async function runAgentLoop({
           decisionReasonCode = REASON_CODES.TOOL_SUCCEEDED;
           publicConclusion = `工具执行中（${activeJobs.length} 个运行中）。继续监控。`;
           loopActiveJobs = activeJobs;
+        } else if (
+          activities.some((activity) => activity.name === 'run_tool' && activity.status === 'success') &&
+          finalizationFailureReason
+        ) {
+          decision = 'complete';
+          decisionReasonCode = REASON_CODES.GOAL_ACHIEVED;
+          publicConclusion = '工具与产物已完成验证；AI 总结暂时不可用。';
+          loopActiveJobs = [];
         } else if (modelFinalized || activities.length === 0) {
           decision = 'complete';
           decisionReasonCode = REASON_CODES.GOAL_ACHIEVED;

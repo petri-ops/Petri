@@ -7,12 +7,14 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   ackRunTool,
+  retryToolSummary,
   restoreResultEditProgressEvents,
   type ChatMessage,
   type ResultEditProgressEvent,
 } from './copilotClient';
 import {
   getConversationMessages,
+  type ConversationMessage,
 } from './copilotConversationsClient';
 import { useCopilotContext } from '@/lib/copilotContextProvider';
 import { useConversations } from '@/hooks/useConversations';
@@ -98,10 +100,43 @@ interface SimpleMessage {
   toolActivities?: ToolActivityItem[];
   processingDurationMs?: number;
   statusMessage?: string;
+  summaryUnavailable?: boolean;
+  retryToolJobId?: string;
   progressUpdates?: Array<{ iteration: number; content: string }>;
   resultEditProgress?: ResultEditProgressEvent[];
   /** HLE-C4R: live durable-loop projection for the running assistant turn. */
   loop?: ConversationLoopState | null;
+}
+
+function restoreSimpleMessage(message: ConversationMessage): SimpleMessage {
+  const meta = message.meta || {};
+  const toolActivities = restoreToolActivities(meta.toolActivities);
+  const finalization = meta.finalization && typeof meta.finalization === 'object'
+    ? meta.finalization as Record<string, unknown>
+    : null;
+  const incident = meta.incident && typeof meta.incident === 'object';
+  const presentation = resolveToolSummaryPresentation({
+    assistantContent: message.content,
+    assistantError: message.role === 'assistant' && Boolean(incident),
+    summaryFailureReason: typeof finalization?.failureReason === 'string'
+      ? finalization.failureReason
+      : undefined,
+    toolActivities,
+  });
+  return {
+    role: message.role === 'system' ? 'assistant' : message.role,
+    content: presentation.content,
+    error: presentation.error,
+    summaryUnavailable: presentation.summaryUnavailable,
+    retryToolJobId: presentation.retryToolJobId,
+    ts: message.ts,
+    toolActivities,
+    progressUpdates: restoreProgressUpdates(meta.progressUpdates),
+    resultEditProgress: restoreResultEditProgressEvents(meta.resultEditProgress),
+    processingDurationMs: typeof meta.processingDurationMs === 'number'
+      ? meta.processingDurationMs
+      : undefined,
+  };
 }
 
 interface AgentProgressUpdate {
@@ -162,6 +197,8 @@ export function SimpleChat({
   const [copiedMessageKey, setCopiedMessageKey] = useState<string | null>(null);
   const [input, setInput] = useState('');
   const [starting, setStarting] = useState(false);
+  const [summaryRetryState, setSummaryRetryState] = useState<Record<string, 'running' | 'done'>>({});
+  const [summaryRetryErrors, setSummaryRetryErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [paramDraft, setParamDraft] = useState<Record<string, string>>({});
   const [approvalRepair, setApprovalRepair] = useState<ApprovalRepairState>({ status: 'idle' });
@@ -372,17 +409,7 @@ export function SimpleChat({
     (async () => {
       const msgs = await getConversationMessages(conversationId, 200);
       if (cancelled) return;
-      const ui: SimpleMessage[] = msgs.map((m) => ({
-        role: m.role === 'system' ? 'assistant' : (m.role as 'user' | 'assistant'),
-        content: m.content,
-        ts: m.ts,
-        toolActivities: restoreToolActivities(m.meta?.toolActivities),
-        progressUpdates: restoreProgressUpdates(m.meta?.progressUpdates),
-        resultEditProgress: restoreResultEditProgressEvents(m.meta?.resultEditProgress),
-        processingDurationMs: typeof m.meta?.processingDurationMs === 'number'
-          ? m.meta.processingDurationMs
-          : undefined,
-      }));
+      const ui: SimpleMessage[] = msgs.map(restoreSimpleMessage);
       setMessages(ui);
       setLoading(false);
     })();
@@ -403,17 +430,7 @@ export function SimpleChat({
       const persisted = await getConversationMessages(conversationId, 200);
       if (cancelled) return;
       reconciledRunRef.current = reconciliationId;
-      setMessages(persisted.map((m) => ({
-        role: m.role === 'system' ? 'assistant' : (m.role as 'user' | 'assistant'),
-        content: m.content,
-        ts: m.ts,
-        toolActivities: restoreToolActivities(m.meta?.toolActivities),
-        progressUpdates: restoreProgressUpdates(m.meta?.progressUpdates),
-        resultEditProgress: restoreResultEditProgressEvents(m.meta?.resultEditProgress),
-        processingDurationMs: typeof m.meta?.processingDurationMs === 'number'
-          ? m.meta.processingDurationMs
-          : undefined,
-      })));
+      setMessages(persisted.map(restoreSimpleMessage));
       // Cancellation is persisted by the backend just like successful
       // completion. Once SQLite has supplied that durable message, discard
       // the local snapshot so progress and tool blocks are not duplicated.
@@ -477,6 +494,8 @@ export function SimpleChat({
         toolActivities: activeRun.toolActivities,
         processingDurationMs: activeRun.processingDurationMs,
         statusMessage: summaryPresentation.statusMessage,
+        summaryUnavailable: summaryPresentation.summaryUnavailable,
+        retryToolJobId: summaryPresentation.retryToolJobId,
         progressUpdates: activeRun.progressUpdates,
         resultEditProgress: activeRun.resultEditProgress,
         loop: durableLoop.loop || activeRun.loop,
@@ -607,6 +626,41 @@ export function SimpleChat({
   const stop = useCallback(() => {
     if (conversationId) stopConversationRun(conversationId);
   }, [conversationId]);
+
+  const retrySummary = useCallback(async (toolJobId: string) => {
+    if (!conversationId || summaryRetryState[toolJobId] === 'running') return;
+    setSummaryRetryState((current) => ({ ...current, [toolJobId]: 'running' }));
+    setSummaryRetryErrors((current) => {
+      const next = { ...current };
+      delete next[toolJobId];
+      return next;
+    });
+    try {
+      const content = await retryToolSummary({
+        toolJobId,
+        projectId,
+        conversationId,
+        modelPresetId: activeModel?.endpointProfileId || activeModelId,
+      });
+      setMessages((current) => [
+        ...current,
+        { role: 'assistant', content, ts: new Date().toISOString() },
+      ]);
+      clearConversationRun(conversationId);
+      setSummaryRetryState((current) => ({ ...current, [toolJobId]: 'done' }));
+      await refreshConversations();
+    } catch (error) {
+      setSummaryRetryState((current) => {
+        const next = { ...current };
+        delete next[toolJobId];
+        return next;
+      });
+      setSummaryRetryErrors((current) => ({
+        ...current,
+        [toolJobId]: error instanceof Error ? error.message : 'AI 总结仍不可用，请稍后重试',
+      }));
+    }
+  }, [activeModel, activeModelId, conversationId, projectId, refreshConversations, summaryRetryState]);
 
   const approvePending = useCallback(async () => {
     if (!pendingApproval || streaming) return;
@@ -758,6 +812,30 @@ export function SimpleChat({
                         <HighlightedCode code={code} language={language} />
                       )) : undefined}
                     />
+                    {m.role === 'assistant' && m.summaryUnavailable && m.retryToolJobId && (
+                      <div className="sc-msg-actions sc-msg-actions-summary">
+                        <button
+                          type="button"
+                          className="sc-msg-action"
+                          onClick={() => void retrySummary(m.retryToolJobId!)}
+                          disabled={Boolean(summaryRetryState[m.retryToolJobId])}
+                          title="仅重新生成 AI 总结，不会再次运行分析工具"
+                        >
+                          <Icon
+                            name={summaryRetryState[m.retryToolJobId] === 'done' ? 'check' : 'refresh'}
+                            size={14}
+                          />
+                          {summaryRetryState[m.retryToolJobId] === 'running'
+                            ? '正在重试总结'
+                            : summaryRetryState[m.retryToolJobId] === 'done'
+                              ? '总结已生成'
+                              : '重试 AI 总结'}
+                        </button>
+                        {summaryRetryErrors[m.retryToolJobId] && (
+                          <span className="sc-msg-action-error">{summaryRetryErrors[m.retryToolJobId]}</span>
+                        )}
+                      </div>
+                    )}
                     {m.role === 'assistant' && m.content && !m.pending && (
                       <div className="sc-msg-actions">
                         <button
@@ -1134,7 +1212,7 @@ function ToolActivityList({
   }, {});
   const actionSummary = Object.entries(actionCounts)
     .slice(0, 3)
-    .map(([action, count]) => `${action} ${count}`)
+    .map(([action, count]) => `${action} ${count} 次`)
     .join(' · ');
   const summary = running > 0
     ? `正在处理 ${running}/${activities.length} 项${actionSummary ? ` · ${actionSummary}` : ''}`

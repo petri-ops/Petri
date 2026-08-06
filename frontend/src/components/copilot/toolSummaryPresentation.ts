@@ -6,6 +6,7 @@ interface ToolSummaryPresentationInput {
   assistantContent: string;
   assistantError: boolean;
   statusMessage?: string;
+  summaryFailureReason?: string;
   toolActivities?: ToolActivityItem[];
 }
 
@@ -14,6 +15,7 @@ export interface ToolSummaryPresentation {
   error: boolean;
   statusMessage?: string;
   summaryUnavailable: boolean;
+  retryToolJobId?: string;
 }
 
 function isTimeoutMessage(value: string | undefined): boolean {
@@ -25,12 +27,17 @@ function isTimeoutMessage(value: string | undefined): boolean {
 export function resolveToolSummaryPresentation(
   input: ToolSummaryPresentationInput
 ): ToolSummaryPresentation {
-  const toolSucceeded = input.toolActivities?.some(
+  const completedTool = [...(input.toolActivities || [])].reverse().find(
     (activity) => activity.name === 'run_tool' && activity.status === 'success'
-  ) === true;
+  );
+  const toolSucceeded = Boolean(completedTool);
   const summaryUnavailable = input.assistantError
     && toolSucceeded
-    && (isTimeoutMessage(input.assistantContent) || isTimeoutMessage(input.statusMessage));
+    && (
+      isTimeoutMessage(input.assistantContent)
+      || isTimeoutMessage(input.statusMessage)
+      || isTimeoutMessage(input.summaryFailureReason)
+    );
 
   if (!summaryUnavailable) {
     return {
@@ -46,5 +53,6 @@ export function resolveToolSummaryPresentation(
     error: false,
     statusMessage: TOOL_SUMMARY_UNAVAILABLE_MESSAGE,
     summaryUnavailable: true,
+    retryToolJobId: completedTool?.toolJobId,
   };
 }
