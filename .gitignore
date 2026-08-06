@@ -56,3 +56,6 @@ core/**/*.pyc
 core/r-server/tool-demo-data/
 core/r-server/tool-demo-results/
 core/**/.DS_Store
+
+# WorkBuddy agent 工作区记忆（本地工具产物，非项目源码）
+.workbuddy/

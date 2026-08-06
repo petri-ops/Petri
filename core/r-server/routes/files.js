@@ -158,7 +158,7 @@ async function removeUploadedFiles(files) {
 module.exports = function registerFileRoutes(app) {
   // ── 桌面版本地文件服务 ──────────────────────────────────────
   // /api/files/<key> → 从本地 results 目录读取文件并返回
-  app.get('/api/workspaces/:projectId/tree', (req, res) => {
+  app.get('/api/workspaces/:projectId/tree', requireTrustedDesktopOrigin, (req, res) => {
       try {
         const root = getProjectWorkspace(req.params.projectId);
         if (!root) return res.status(404).json({ ok: false, error: '项目工作目录不存在' });
@@ -308,7 +308,8 @@ module.exports = function registerFileRoutes(app) {
       }
     });
 
-  app.post('/api/upload', upload.single('file'), async (req, res) => {
+  // origin 校验必须先于 multer 解析 body，拒绝不可信来源的上传
+  app.post('/api/upload', requireTrustedDesktopOrigin, upload.single('file'), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ status: 'error', error: '未收到文件' });
     }

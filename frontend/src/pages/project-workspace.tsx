@@ -937,6 +937,8 @@ export function ProjectWorkspace(): React.ReactElement {
     try {
       const p = await getProject(projectId);
       if (!p) {
+        // 项目被删除/无权访问：清空 project，走全屏错误（致命，非瞬时）
+        setProject(null);
         setError('项目不存在或无权访问');
         setLoading(false);
         return;
@@ -948,7 +950,10 @@ export function ProjectWorkspace(): React.ReactElement {
       ]);
       setJobs(jobList);
       setDatasets(dsList);
+      // 成功路径必须清除此前轮询留下的瞬时错误，否则错误屏永驻（P0-2）
+      setError('');
     } catch (e: any) {
+      // 轮询瞬时失败：保留已加载数据，错误以非阻塞横幅呈现，下一轮成功即自愈
       setError(e.message || '加载失败');
     } finally {
       setLoading(false);
@@ -1606,10 +1611,20 @@ export function ProjectWorkspace(): React.ReactElement {
     );
   }
 
-  if (error || !project) {
+  // 只有"尚未加载到项目"时错误才全屏；已加载项目的轮询瞬时错误走顶部横幅，不卸载整页
+  if (error && !project) {
     return (
       <div className={styles.errorWrap}>
-        <p>{error || '项目不存在'}</p>
+        <p>{error}</p>
+        <Link to="/" className={styles.backLink}>← 返回工作台</Link>
+      </div>
+    );
+  }
+
+  if (!project) {
+    return (
+      <div className={styles.errorWrap}>
+        <p>项目不存在</p>
         <Link to="/" className={styles.backLink}>← 返回工作台</Link>
       </div>
     );
@@ -1778,6 +1793,11 @@ export function ProjectWorkspace(): React.ReactElement {
       {workspaceNotice && (
         <div className={styles.workspaceNotice} role="status" aria-live="polite">
           {workspaceNotice}
+        </div>
+      )}
+      {error && (
+        <div className={styles.workspaceNotice} role="alert" aria-live="assertive">
+          数据刷新暂时失败：{error}（将在下一轮自动重试）
         </div>
       )}
       <div className={styles.workspaceBody}>
@@ -3170,6 +3190,10 @@ function ResultArtifactShell({
 }): React.ReactElement {
   const { resolvedTheme } = useTheme();
   const [result, setResult] = useState<JobResult | null>(null);
+  // P0-3：结果请求的网络/服务错误必须与"确实没有结果文件"区分开，
+  // 否则网络抖动会被谎报为"分析已完成，但未生成可视化结果文件"。
+  const [resultError, setResultError] = useState('');
+  const [resultRetryVersion, setResultRetryVersion] = useState(0);
   // Which job the currently displayed body belongs to. Without this the
   // effects below cannot tell "re-observing the same job" from "a different
   // job", and cleared unconditionally for both.
@@ -3276,6 +3300,7 @@ function ResultArtifactShell({
     if (!job) {
       bodyJobRef.current = null;
       setResult(null);
+      setResultError('');
       setJobMeta(null);
       setManifestRaw(null);
       setManifestLoading(false);
@@ -3293,6 +3318,7 @@ function ResultArtifactShell({
       const requestedJobId = job.id;
       let cancelled = false;
       setLoading(true);
+      setResultError('');
       // The decision is the reducer's, not a condition restated here. An
       // earlier version reimplemented the same rule inline and left
       // resultBodyState.ts with no production importer — so its tests were
@@ -3314,19 +3340,35 @@ function ResultArtifactShell({
           const resp = await fetch(getApiPrefix(lang) + '/tools/status/' + requestedJobId, {
             headers: token ? { Authorization: 'Bearer ' + token } : {},
           });
+          if (!resp.ok) {
+            // HTTP 层失败（5xx/403 等）：不是"没有结果"，是服务出错
+            if (canCommitResultFetch(requestedJobId, activeBodyJobRef.current, cancelled)) {
+              setResultError(`结果服务返回 HTTP ${resp.status}`);
+            }
+            return;
+          }
           const data = await resp.json();
           if (!canCommitResultFetch(requestedJobId, activeBodyJobRef.current, cancelled)) return;
           if (data.ok && data.result) {
             bodyJobRef.current = requestedJobId;
             setResult(data.result);
+            setResultError('');
             setJobMeta({
               params: data.params || {},
               ackStatus: data.ackStatus || null,
               projectId: data.projectId || null,
             });
+          } else if (!data.ok) {
+            // 服务显式报错：如实展示，不归入"未生成结果"
+            setResultError(data.error || '结果服务返回失败');
           }
-        } catch {
-          // keep shell quiet
+          // data.ok 但无 result：确实没有结果文件，保持 resultError 为空，
+          // 由 !result 分支展示"未生成可视化结果文件"
+        } catch (e: any) {
+          // 网络层失败（服务不可达/超时）：必须让用户知道是连接问题而非"没有结果"
+          if (canCommitResultFetch(requestedJobId, activeBodyJobRef.current, cancelled)) {
+            setResultError(e?.message || '网络错误，无法获取结果');
+          }
         } finally {
           if (canCommitResultFetch(requestedJobId, activeBodyJobRef.current, cancelled)) {
             setLoading(false);
@@ -3354,6 +3396,7 @@ function ResultArtifactShell({
     } else {
       bodyJobRef.current = null;
       setResult(null);
+      setResultError('');
       setJobMeta(null);
       setLoading(false);
       setManifestRaw(null);
@@ -3366,7 +3409,7 @@ function ResultArtifactShell({
       setPreviewLoading(false);
     }
     return undefined;
-  }, [effectiveJobStatus, job?.id, lang]);
+  }, [effectiveJobStatus, job?.id, lang, resultRetryVersion]);
 
   // P4R-2: restore `.resultView` scroll position once the body is mounted.
   // Runs only when there is a result to render (success-state return); the
@@ -4300,6 +4343,17 @@ function ResultArtifactShell({
   }
 
   if (!result) {
+    if (resultError) {
+      // 网络/服务错误：如实告知并提供重试，绝不谎报为"未生成结果"
+      return stateBlock(
+        job.name || job.tool_id,
+        <div className={styles.resultPlaceholder}>
+          <p>结果加载失败：{resultError}</p>
+          <button type="button" onClick={() => setResultRetryVersion((value) => value + 1)}>重试</button>
+        </div>,
+        'done'
+      );
+    }
     return stateBlock(
       job.name || job.tool_id,
       <p className={styles.resultPlaceholder}>分析已完成，但未生成可视化结果文件。</p>,
