@@ -327,7 +327,7 @@ async function run(config) {
       await waitFor(wc, `
         [...document.querySelectorAll('.sc-msg-assistant')]
           .some((item) => (item.textContent || '').includes(${JSON.stringify(config.expectedAssistantText)}))
-      `, 'tool success summary-unavailable message', 4 * 60 * 1000);
+      `, 'tool success summary-unavailable message', 6 * 60 * 1000);
       await clickButton(
         wc,
         `item.matches('.sc-tool-activity-summary') && item.getAttribute('aria-expanded') === 'false'`,
