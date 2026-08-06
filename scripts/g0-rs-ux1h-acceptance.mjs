@@ -329,6 +329,8 @@ export async function observeUx1h({ writeEvidence = false, keep = false, show = 
       metadataSourcePath: METADATA_SOURCE_PATH,
       countsUploadName,
       metadataUploadName,
+      allowNonActionableData: true,
+      initialAnalysisMessage: 'Data Profiler 已导入 airway counts 与 metadata。请先确认 design 与 control/treated 对比，再执行 DESeq2。',
       expectedConfirmationText: '请确认：design 使用 condition',
       confirmationMessage: '确认：design=condition，对照组=control，实验组=treated。请执行 DESeq2。',
       expectedAssistantText: TARGET_MESSAGE,

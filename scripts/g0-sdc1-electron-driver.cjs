@@ -247,23 +247,35 @@ async function run(config) {
     await waitFor(wc, `Boolean(document.querySelector('input[type="file"][multiple]'))`, 'file input');
     checkpoint('import_open');
     await uploadFixtureFiles(wc, config);
+    const acceptImportedOnly = config.allowNonActionableData === true;
     const readiness = await waitFor(wc, `
       (() => {
         const panel = document.querySelector('[aria-label="数据准备"]');
         if (!panel) return null;
         const text = panel.textContent || '';
         const start = [...panel.querySelectorAll('button')].find((item) => (item.textContent || '').includes('开始分析'));
-        return text.includes('可开始分析') && start && !start.disabled
-          ? { fileCount: panel.querySelectorAll('strong[title^="data/"]').length, ready: true }
+        const fileCount = panel.querySelectorAll('strong[title^="data/"]').length;
+        const ready = text.includes('可开始分析') && start && !start.disabled;
+        return (ready || (${JSON.stringify(acceptImportedOnly)} && fileCount === 2))
+          ? { fileCount, ready, imported: fileCount === 2 }
           : null;
       })()
-    `, 'actionable data readiness');
-    checkpoint('data_ready');
+    `, acceptImportedOnly ? 'two imported data files' : 'actionable data readiness');
+    checkpoint(readiness.ready ? 'data_ready' : 'data_imported');
     const readyPng = (await window.webContents.capturePage()).toPNG();
     const readyScreenshot = path.join(config.outputDir, 'data-ready.png');
     writeFileSync(readyScreenshot, readyPng);
 
-    await clickButton(wc, `(item.textContent || '').includes('开始分析')`, 'start analysis');
+    if (config.initialAnalysisMessage) {
+      await clickButton(
+        wc,
+        `item.getAttribute('aria-label') === '关闭' && Boolean(item.closest('[aria-label="数据准备"]'))`,
+        'close data preparation'
+      );
+      await submitChat(wc, config.initialAnalysisMessage);
+    } else {
+      await clickButton(wc, `(item.textContent || '').includes('开始分析')`, 'start analysis');
+    }
     const confirmationText = config.expectedConfirmationText || '请确认：design 使用 condition';
     await waitFor(wc, `
       [...document.querySelectorAll('.sc-msg-assistant')]
@@ -360,6 +372,8 @@ async function run(config) {
       renderer: `Electron ${process.versions.electron} / Chromium ${process.versions.chrome}`,
       importedFileCount: readiness.fileCount,
       dataReady: readiness.ready === true,
+      dataImported: readiness.imported === true,
+      analysisInitiatedBy: config.initialAnalysisMessage ? 'explicit_chat' : 'data_intake_control',
       scientificConfirmationRequested: true,
       execution: {
         tool: 'deseq2',
@@ -389,7 +403,7 @@ async function run(config) {
       },
     };
     evidence.passed = evidence.importedFileCount === 2
-      && evidence.dataReady
+      && (evidence.dataReady || (config.allowNonActionableData === true && evidence.dataImported))
       && evidence.scientificConfirmationRequested
       && evidence.execution.completedJobCount === 1
       && evidence.execution.artifactTruthStatus === 'valid'
