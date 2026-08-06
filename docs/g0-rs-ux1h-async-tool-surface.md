@@ -200,6 +200,8 @@ core/shared-backend/result-studio-*.js
 | 2026-08-06 | active | 写完本计划 + 同步 handoff/registry/AUDIT-LOG |
 | 2026-08-06 | active checkpoint | SimpleChat 已接入真实 ToolJob 成功 + 总结超时展示分支；单元测试 6/6、strict TypeScript 通过。一次开发态 Electron 阶段收口验收使用真实 airway counts/metadata 跑出 DESeq2 completed + Artifact Truth valid + 同 Job PNG，并确认目标文案可见、"请求超时"不可见。证据见 `acceptance/g0-rs-ux1h/`；本地 `ux1h-timeout-adapter` 不代表外部模型 |
 | 2026-08-06 | active implementation | 已补齐成功 `run_tool` 的 `toolJobId` 活动持久化、服务端 summary-only 重试接口与按钮；接口按 user/project/conversation 核验 completed ToolJob + valid Artifact Truth，调用时不注册工具并持久化总结。工具完成但总结失败时 durable loop 收敛为 completed，避免重开后仍显示“执行中”；工具活动汇总改为“运行 N 次”以消除状态歧义。SimpleChat 运行期间新增最多 5 条待发送队列，任务完成并完成 SQLite 对账后自动发送。本轮按用户要求未运行测试或 Electron 验收，因此这些新增行为仍待阶段门验证。 |
+| 2026-08-06 | active checkpoint | 上述新增实现（`7e02f07` summary-only 重试面、`de83c58` 运行中排队）已经 `npm run g0:result-studio:ux1h` 全门验证通过：syntax、Node/前端 24/24、strict TypeScript、真实 Electron 验收链 EXIT=0（`passed:true`）。注：本次运行需 `env -u ELECTRON_RUN_AS_NODE ELECTRON_DISABLE_SANDBOX=1` 与系统 Node 23（better-sqlite3 ABI 131）。`retry-summary-does-not-rerun-tool.json` 证据仍缺，"重试不重跑工具"行为门未闭合 |
+| — | pending（下一阶段：终态分离设计） | **UX1H 最后一个大阶段：task"工具完成、总结分离"终态设计**。主线评估已否决"工具完成后强行切断总结流"（现有 cancel 会把会话写成 `cancelled`，破坏 Job/Artifact Truth 与会话持久化）。本阶段为 durable loop 设计一个合法终态（工具 completed + 总结 detached/可独立重试），约束：① 不动 cancel 语义；② 不动 `run_tool → tool_job → artifact truth` 唯一执行真相；③ 不引入第二执行器/第二 Job 表；④ 总结保持"可重试、失败 fail-soft 不掩盖工具成功"。先产出设计（含状态机迁移与持久化影响分析），实现后再做一次阶段级验收（补齐 `retry-summary-does-not-rerun-tool.json`） |
 | — | pending | 完成主对话与长工具执行的完整 async surface；验证本次 summary-only 重试确实不重跑工具。未完成前不将本计划或 UI-126 标为 `verified` |
 | — | pending | 收口前按风险驱动运行 G-1 ~ G-5 与剩余行为门；开发中不重复运行长耗时 Electron 链，只有产品行为或验收脚本发生实质变化才重跑 |
 | — | pending | 收口（同步 handoff、registry、UI audit、evidence） |
@@ -247,3 +249,4 @@ core/shared-backend/result-studio-*.js
 - [ ] 是否在本计划收口后启动"完整"子 agent 工作包（用户拍板）。
 - [ ] `retrySummary` 按钮的可见性：始终可见 / 仅在 LLM 失败时可见（实现时定）。
 - [ ] 主对话"已发起后台任务"卡片的复制按钮：是否允许复制 `toolJobId`（用户拍板）。
+- [ ] **终态分离设计待决**（下一阶段设计稿回答）：新终态的命名与持久化形态（独立终态 vs completed + summary 子状态）；历史 running/已完成数据的迁移策略；总结 detached 后会话恢复时的事实来源（以 tool_job 为准还是会话消息为准）；失败总结的 retry 上限与退避。
