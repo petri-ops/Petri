@@ -137,6 +137,7 @@
     "g0:result-studio:p6:frontend": "npm run test:files --prefix frontend -- ResultStudioChangeSetPanel.test.tsx",
     "g0:result-studio:p6": "npm run g0:result-studio:p6:syntax && npm run g0:result-studio:p6:test && npm run g0:result-studio:p6:frontend && node scripts/g0-rs-p6-product-acceptance.mjs",
     "g0:result-studio:p6:update": "npm run g0:result-studio:p6:syntax && npm run g0:result-studio:p6:test && npm run g0:result-studio:p6:frontend && node scripts/g0-rs-p6-product-acceptance.mjs --write-evidence",
+    "g0:model-anthropic-native:check": "node --check scripts/check-model-anthropic-native.mjs && node scripts/check-model-anthropic-native.mjs",
     "g0:result-studio:p7:syntax": "node --check scripts/g0-rs-p7-acceptance.mjs && node --check scripts/g0-rs-p7-cdp.cjs && node --check scripts/g0-rs-p6-ui110-driver.cjs && node --check core/shared-backend/result-studio-qualification.js && node --check core/shared-backend/result-studio-evidence-bundle.js && node --check core/r-server/helpers/ai-settings.js && node --check core/r-server/routes/ai-agent.js",
     "g0:result-studio:p7:test": "node --test --test-concurrency=1 test/g0-rs-p7-acceptance.test.mjs test/g0-rs-p7-cdp.test.mjs test/ai-settings-credential.test.mjs test/result-studio-qualification.test.mjs test/result-studio-evidence-bundle.test.mjs test/result-studio-agent-binding.test.mjs test/system-prompt-result-context.test.mjs",
     "g0:result-studio:p7:build": "npm run build:mac-arm64",
