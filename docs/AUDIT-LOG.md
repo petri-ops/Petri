@@ -4,7 +4,7 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-04（G0-SDC / SDC1-A 已完成 source-bound 开发态 Electron 短闭环；P6 stored evidence 继续保持非 exact；UI-124 实机收口脚本已就绪但本机未配置 BIOTEST_ANTHROPIC_KEY）
+最后更新：2026-08-06（G0-SDC-1 / G0-SDC-2 已收口；UI-124 已按 key-unavailable 例外 verified；P6 stored evidence 继续保持非 exact）
 
 ## 当前待处理项
 
@@ -18,12 +18,13 @@
 | 🟡建议 | 2026-07-17 | `capability-provisioning.js` 的下载实现与 plugin-manager 各自维护 | host 白名单已经修复；共享下载 helper 只在改动该能力时评估，不阻塞 RH0 |
 | 🟡待评估 | 2026-07-17 | 本地分支 `codex/fix-collapsed-right-titlebar` 尚未采用，且与当前 UI 已有语义重叠 | 不直接 merge；进入相关 UI 工作时先比较当前实现，再决定删除或重做 |
 
-当前没有 🔴 阻塞项，也没有 🟢 待合并项。`UI-124 / MODEL-ANTHROPIC-NATIVE` 已按 `docs/ui-productization-audit.md`「key-unavailable 例外」纪律收口；待 `BIOTEST_ANTHROPIC_KEY` 可用时新开 audit 跑 live 模式补充实机 evidence（不触发回退）。
+当前没有 🔴 阻塞项，也没有 🟢 待合并项。`UI-124 / MODEL-ANTHROPIC-NATIVE` 已按 `docs/ui-productization-audit.md`「key-unavailable 例外」纪律收口；`G0-SDC-1 / G0-SDC-2` 已于 2026-08-06 以 fixture + 门禁脚本收口，canonical evidence 为 `acceptance/g0-scientific-data-contract/sdc1-complete.json` 与 `sdc2-semantic-binder.json`。待 `BIOTEST_ANTHROPIC_KEY` 可用时新开 audit 跑 live 模式补充实机 evidence（不触发回退）。
 
 ## 最近处理记录
 
 | 日期 | 结果 | 检查点 |
 | --- | --- | --- |
+| 2026-08-06 | `G0-SDC-1 / G0-SDC-2` 收口：`SDC-1 Data Profiler` 完整覆盖编码/分隔符/表头/方向/类型/缺失/重复/ID/文件角色/structure report；`SDC-2 Semantic Binder` 完整覆盖 auto/confirm/unknown 三轨与 blocked/ready/ambiguous 三态。验证以 `test/sdc1-complete.test.mjs` 11 项 Node fixture + `frontend/src/lib/data-profile.test.ts` 10 项 Vitest + `scripts/check-sdc-complete.mjs` 门禁脚本为 canonical evidence，输出 `acceptance/g0-scientific-data-contract/sdc1-complete.json` 与 `sdc2-semantic-binder.json`。实现复用 `core/shared-backend/data-profiler.js` 与 `frontend/src/lib/data-profile.ts`，未新增运行态依赖；`docs:check` / `ui:audit:check` / `docs:reconcile` 三门禁通过 | G0-SDC-1 / G0-SDC-2 |
 | 2026-08-04 | `MODEL-ANTHROPIC-NATIVE / UI-124` 收口完毕（key-unavailable 例外）：`scripts/check-model-anthropic-native.mjs`（`g0:model-anthropic-native:check`）dryrun 模式跑通并产出 `acceptance/MODEL-ANTHROPIC-NATIVE/anthropic-real-key-evidence.json`；`AnthropicProvider` 6 项 mock 测试与 `test/anthropic-provider.test.mjs` 7 项测试稳定通过；`docs:check` / `ui:audit:check` / `docs:reconcile` 三门禁通过。本机未配 `BIOTEST_ANTHROPIC_KEY`，按 `docs/ui-productization-audit.md` 新增「key-unavailable 例外」纪律晋升 UI-124 至 `verified`：① 凭据命名 `modelProviderCredentialRef('anthropic', id)` 在 DesktopSettingsPanel 实机核对；② AnthropicProvider 全部 mock 测试稳定通过；③ 收口脚本 dryrun 模式产出 evidence，文件内 `mode: dryrun` 显式记录"Key 未注入"。Key 可用后必须重跑 live 模式产出真实 evidence，状态不再回退 | UI-124 / MODEL-ANTHROPIC-NATIVE |
 | 2026-08-04 | `G0-SDC / SDC1-A / UI-125` 收口：项目内 CSV/TSV/TXT 非覆盖导入、有界结构画像、候选角色与 fail-closed 准备状态已进入文件面板；只把相对路径、Hash 和有界摘要交给现有 Agent，不新增执行真相。空 disposable 账本的同一开发态 Electron 完成 2 文件导入、科学确认、1 个 completed DESeq2 Job、有效 Artifact Truth 与同 Job 非空 PNG 自动打开。Node 33/33、前端 14/14、strict TypeScript 通过；证据绑定 `bd15777` 且 `qualificationEligible:false`，不外推真实 Provider、packaged、SDC-2～SDC-7/P7 | `bd15777` + `data-to-first-result.json` |
 | 2026-08-04 | `MODEL-ANTHROPIC-NATIVE / UI-124` 实现检查点：Endpoint 保持“协议、供应商、Base URL、Key、默认模型、连通性”六列单行，用户协议只保留 OpenAI 与 Anthropic，DeepSeek/BioF3 等作为可编辑供应商名。新渠道不代填 Base URL；旧 DeepSeek profile 无损归一为 OpenAI-compatible，保留模型、`provider:deepseek` 凭据引用并显式回填原地址。前续已补充 provider-specific credential ref、请求 generation、URL 校验、10 秒超时和流式 2 MiB 响应上限；开发态 Electron 已核对六列布局、两个协议选项、新渠道空 URL 与旧 DeepSeek 配置保留。真实 Anthropic Key 连通与聊天尚未执行，UI-124 保持 `in_progress`；P6 stored evidence 仍非 exact | UI-124 / MODEL-ANTHROPIC-NATIVE |
