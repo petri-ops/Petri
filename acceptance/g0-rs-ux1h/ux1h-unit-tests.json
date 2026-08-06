@@ -1,0 +1,80 @@
+{
+  "evidenceId": "g0-rs-ux1h-unit-tests",
+  "planId": "G0-RS-UX1H",
+  "title": "UX1H: Tool Success + AI Summary Timeout 单元测试证据",
+  "timestamp": "2026-08-06T12:47:00Z",
+  "sourceCommit": "pending",
+  "qualificationEligible": false,
+  "scope": {
+    "description": "SimpleChat 渲染分支的"工具成功 + AI 总结超时"逻辑单元测试",
+    "boundaries": [
+      "只覆盖 SimpleChat.tsx 的错误渲染改写逻辑",
+      "不覆盖真实 Provider、真实 toolJob、开发态 Electron 流程",
+      "不覆盖 LLM provider timeout 配置",
+      "不覆盖 conversationRunStore、copilotClient 后端交互"
+    ]
+  },
+  "tests": {
+    "framework": "vitest",
+    "testFile": "frontend/src/components/copilot/SimpleChat.test.tsx",
+    "totalTests": 6,
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "details": [
+      {
+        "name": "should detect tool success in toolActivities",
+        "result": "passed",
+        "description": "检测 toolActivities 数组中是否存在 status === 'success'"
+      },
+      {
+        "name": "should detect timeout in statusMessage",
+        "result": "passed",
+        "description": "检测 statusMessage 中是否包含'超时'或'timeout'关键词"
+      },
+      {
+        "name": "should rewrite error flag when tool succeeded + summary timeout",
+        "result": "passed",
+        "description": "当工具成功且 AI 总结超时时，shouldRewriteError 应为 true"
+      },
+      {
+        "name": "should not rewrite error when tool failed",
+        "result": "passed",
+        "description": "当工具失败时，不应改写错误标志"
+      },
+      {
+        "name": "should not rewrite error when no timeout",
+        "result": "passed",
+        "description": "当没有超时时，不应改写错误标志"
+      },
+      {
+        "name": "should produce friendly status message when rewriting",
+        "result": "passed",
+        "description": "改写后的 statusMessage 应为友好提示，不包含'失败''错误'等负面词，包含'✓'"
+      }
+    ]
+  },
+  "staticChecks": {
+    "typescript": "passed",
+    "docsCheck": "passed",
+    "uiAuditCheck": "passed"
+  },
+  "implementation": {
+    "changedFiles": [
+      "frontend/src/components/copilot/SimpleChat.tsx",
+      "frontend/src/components/copilot/SimpleChat.test.tsx"
+    ],
+    "logic": "在 displayMessages 计算逻辑中，当检测到 toolActivities 包含成功项且 assistantError + statusMessage 包含超时关键词时，将 error 标志改写为 false，statusMessage 改写为友好提示"
+  },
+  "nextSteps": [
+    "用户需在开发态 Electron 中真实复现 airway 数据流程，验证 UI 确实显示友好提示而非'请求超时'红字",
+    "确认 Result Studio 自动打开结果 PNG",
+    "确认工具活动卡片显示'已完成'状态"
+  ],
+  "limitations": [
+    "当前只有逻辑单测，未执行真实端到端流程验证",
+    "未实现'重试总结'按钮（计划中标为可选）",
+    "未动 LLM provider timeout 配置",
+    "未实现异步工具发起卡片（计划中标为范围外）"
+  ]
+}

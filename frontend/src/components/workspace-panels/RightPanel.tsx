@@ -5,6 +5,7 @@ import type { BackendStatus } from '@/lib/electron';
 import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import { ResultStudioInspector } from '@/components/result-studio/ResultStudioSurface';
+import { GitRepositoryConsent } from '@/components/result-studio/GitRepositoryConsent';
 import {
   ResultEditAdvancedDrawer,
   type ResultEditSubmission,
@@ -142,6 +143,9 @@ export function RightPanel({
                     onOpenFiles={ctx.handleOpenRightFiles}
                     onOpenChat={ctx.handleOpenRightChat}
                   />
+                )}
+                {tab === 'results' && ctx.projectId && (
+                  <GitRepositoryConsent projectId={ctx.projectId} />
                 )}
                 {tab === 'results' && (
                   <ResultStudioInspector

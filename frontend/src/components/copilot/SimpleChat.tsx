@@ -460,15 +460,23 @@ export function SimpleChat({
       lastAssistant.content === activeRun.assistantContent &&
       Boolean(lastAssistant.ts && Date.parse(lastAssistant.ts) >= activeRun.startedAt);
     if (!assistantAlreadyPersisted) {
+      // UX1H: Detect "tool succeeded + AI summary timeout" and rewrite status message
+      const toolSucceeded = activeRun.toolActivities?.some((activity) => activity.status === 'success');
+      const summaryTimeout = activeRun.assistantError &&
+        (activeRun.statusMessage?.includes('超时') || activeRun.statusMessage?.includes('timeout'));
+      const shouldRewriteError = toolSucceeded && summaryTimeout;
+
       next.push({
         role: 'assistant',
         content: activeRun.assistantContent,
         pending: activeRun.assistantPending,
-        error: activeRun.assistantError,
+        error: shouldRewriteError ? false : activeRun.assistantError,
         ts: activeRun.assistantTs,
         toolActivities: activeRun.toolActivities,
         processingDurationMs: activeRun.processingDurationMs,
-        statusMessage: activeRun.statusMessage,
+        statusMessage: shouldRewriteError
+          ? '✓ 工具已完成，AI 总结暂时不可用（可稍后重试或查看结果）'
+          : activeRun.statusMessage,
         progressUpdates: activeRun.progressUpdates,
         resultEditProgress: activeRun.resultEditProgress,
         loop: durableLoop.loop || activeRun.loop,

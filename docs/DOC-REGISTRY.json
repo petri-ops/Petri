@@ -379,6 +379,16 @@
       "status": "reference",
       "canonical": false,
       "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "G0-RS-UX1H",
+      "path": "docs/g0-rs-ux1h-async-tool-surface.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "g0-current-work-package",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
     }
   ]
 }

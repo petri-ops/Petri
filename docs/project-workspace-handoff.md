@@ -27,7 +27,15 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 
 ## 3. 当前立即任务
 
-### 3.0 当前主线：G0 Living Foundation maintained
+### 3.0 当前主线：G0-RS-UX1H Async Tool Surface
+
+2026-08-06 用户在真实 airway 数据（`tmp/airway-test/airway_counts_symbol.csv` + `airway_metadata.csv`，4 control vs 4 treated，34890 gene symbol × 8 sample）上完成首次端到端流程跑通：`run_tool → tool_job(tj_mshbgvms_hluh) → artifact truth → projectOpenResult` 全部成功，但 UI 末尾显示"请求超时"，来源是 `core/shared-backend/llm-providers/deepseek.js:238/443` 在 LLM 写自然语言总结阶段 180s 触发 Node http timeout。
+
+这是一个 user-visible 痛点：主 agent 同步流被工具完成后的 AI 总结占用，工具已成功却仍被渲染为"失败"。`G0-RS-UX1H` 计划已创建并激活，范围限定在 SimpleChat 渲染分支 + 一个可选 `retrySummary(toolJobId)` 路径，**不开 P7-F**，不引入 subagent 池，不创建 Git Worktree。Canonical 计划见 [`g0-rs-ux1h-async-tool-surface.md`](./g0-rs-ux1h-async-tool-surface.md)；已登记 `DOC-REGISTRY.json` 的 `G0-RS-UX1H` 条目并占用 `g0-current-work-package` truthDomain。上一份 active 的 `G0-SDC / SDC1-A Data-to-first-result`（实现检查点 `bd15777`）保持 `completed`，SDC-1 其余范围、SDC-2～SDC-7 与 P7 继续 deferred。
+
+UI-108 / UI-109 / UI-113 / UI-114 仍维持 `in_progress`；本计划不冒充其 `verified`。`qualificationEligible:false` 不升级。
+
+### 3.0 历史主线：G0 Living Foundation maintained
 
 2026-07-25 `G0-START`、LF0～LF12 核心资格已关闭并进入 maintained。Result Studio RS0～RS8 的引擎基础存在，但后续产品复核确认 RS9 的第 17 类证据不能证明连续真实产品任务；`result-studio-editing` 支持声明暂停，当前状态为 `P7 deferred / implemented_unverified / experimental`。
 

@@ -4,6 +4,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { RightPanel, type RightPanelContext } from './RightPanel';
 
 vi.mock('@/components/copilot/SimpleChat', () => ({ SimpleChat: () => <div>chat</div> }));
+vi.mock('@/components/result-studio/GitRepositoryConsent', () => ({
+  GitRepositoryConsent: ({ projectId }: { projectId?: string }) =>
+    projectId ? <div data-testid="git-consent">consent:{projectId}</div> : null,
+}));
 vi.mock('@/components/result-studio/ResultStudioSurface', () => ({
   ResultStudioInspector: ({ context }: { context?: unknown }) => (
     <div data-testid="result-inspector" data-has-context={context ? 'true' : 'false'}>inspector</div>
