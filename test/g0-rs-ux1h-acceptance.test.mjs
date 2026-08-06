@@ -83,6 +83,7 @@ test('acceptance verdict requires real tool truth, soft presentation, and final 
     { phase: 'contract', behavior: 'response' },
     { phase: 'execute', behavior: 'response' },
     { phase: 'final', behavior: 'timeout' },
+    { phase: 'final', behavior: 'timeout' },
   ];
   const dataset = {
     countsSha256: 'b'.repeat(64),
