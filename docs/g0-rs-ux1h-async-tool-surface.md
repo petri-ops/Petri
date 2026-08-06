@@ -199,7 +199,7 @@ core/shared-backend/result-studio-*.js
 | 2026-08-06 | 计划创建 | 用户在 airway 完整流程中识别问题，本计划上线 |
 | 2026-08-06 | active | 写完本计划 + 同步 handoff/registry/AUDIT-LOG |
 | 2026-08-06 | active checkpoint | SimpleChat 已接入真实 ToolJob 成功 + 总结超时展示分支；单元测试 6/6、strict TypeScript 通过。一次开发态 Electron 阶段收口验收使用真实 airway counts/metadata 跑出 DESeq2 completed + Artifact Truth valid + 同 Job PNG，并确认目标文案可见、"请求超时"不可见。证据见 `acceptance/g0-rs-ux1h/`；本地 `ux1h-timeout-adapter` 不代表外部模型 |
-| 2026-08-06 | active implementation | 已补齐成功 `run_tool` 的 `toolJobId` 活动持久化、服务端 summary-only 重试接口与按钮；接口按 user/project/conversation 核验 completed ToolJob + valid Artifact Truth，调用时不注册工具并持久化总结。工具完成但总结失败时 durable loop 收敛为 completed，避免重开后仍显示“执行中”；工具活动汇总改为“运行 N 次”以消除状态歧义。本轮按用户要求未运行测试或 Electron 验收，因此这些新增行为仍待阶段门验证。 |
+| 2026-08-06 | active implementation | 已补齐成功 `run_tool` 的 `toolJobId` 活动持久化、服务端 summary-only 重试接口与按钮；接口按 user/project/conversation 核验 completed ToolJob + valid Artifact Truth，调用时不注册工具并持久化总结。工具完成但总结失败时 durable loop 收敛为 completed，避免重开后仍显示“执行中”；工具活动汇总改为“运行 N 次”以消除状态歧义。SimpleChat 运行期间新增最多 5 条待发送队列，任务完成并完成 SQLite 对账后自动发送。本轮按用户要求未运行测试或 Electron 验收，因此这些新增行为仍待阶段门验证。 |
 | — | pending | 完成主对话与长工具执行的完整 async surface；验证本次 summary-only 重试确实不重跑工具。未完成前不将本计划或 UI-126 标为 `verified` |
 | — | pending | 收口前按风险驱动运行 G-1 ~ G-5 与剩余行为门；开发中不重复运行长耗时 Electron 链，只有产品行为或验收脚本发生实质变化才重跑 |
 | — | pending | 收口（同步 handoff、registry、UI audit、evidence） |

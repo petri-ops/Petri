@@ -1329,6 +1329,18 @@
   color: #ffffff;
 }
 
+.sc-send-cta-queue {
+  background: var(--biof3-accent);
+  color: #ffffff;
+}
+
+.sc-queued-count {
+  align-self: center;
+  color: var(--biof3-text-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
 .sc-stop-btn {
   background: var(--biof3-danger);
   color: #ffffff;

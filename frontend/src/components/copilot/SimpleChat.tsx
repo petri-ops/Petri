@@ -197,6 +197,7 @@ export function SimpleChat({
   const [copiedMessageKey, setCopiedMessageKey] = useState<string | null>(null);
   const [input, setInput] = useState('');
   const [starting, setStarting] = useState(false);
+  const [queuedPrompts, setQueuedPrompts] = useState<string[]>([]);
   const [summaryRetryState, setSummaryRetryState] = useState<Record<string, 'running' | 'done'>>({});
   const [summaryRetryErrors, setSummaryRetryErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -531,6 +532,7 @@ export function SimpleChat({
 
   useEffect(() => {
     setInput(conversationDrafts.get(conversationDraftKey(projectId, conversationId)) || '');
+    setQueuedPrompts([]);
   }, [conversationId, projectId]);
 
   const onInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -709,14 +711,44 @@ export function SimpleChat({
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      send(input);
+      const trimmed = input.trim();
+      if (!trimmed) return;
+      if (streaming) {
+        setQueuedPrompts((current) => [...current, trimmed].slice(-5));
+        setInput('');
+        conversationDrafts.delete(conversationDraftKey(projectId, conversationId));
+        if (taRef.current) taRef.current.style.height = 'auto';
+      } else {
+        void send(trimmed);
+      }
     }
   };
+
+  const queueCurrentPrompt = useCallback(() => {
+    const trimmed = input.trim();
+    if (!trimmed || !streaming) return;
+    setQueuedPrompts((current) => [...current, trimmed].slice(-5));
+    setInput('');
+    conversationDrafts.delete(conversationDraftKey(projectId, conversationId));
+    if (taRef.current) taRef.current.style.height = 'auto';
+  }, [conversationId, input, projectId, streaming]);
+
+  // Drain one queued prompt only after the completed run has been reconciled
+  // from SQLite, so the next turn receives the durable conversation history.
+  useEffect(() => {
+    if (streaming || queuedPrompts.length === 0 || !conversationId) return;
+    if (activeRun?.completedAt
+      && reconciledRunRef.current !== `${conversationId}:${activeRun.completedAt}`) return;
+    const [next, ...rest] = queuedPrompts;
+    setQueuedPrompts(rest);
+    void send(next);
+  }, [activeRun, conversationId, messages, queuedPrompts, send, streaming]);
 
   // Create new conversation
   const newConversation = useCallback(async () => {
     onConversationChange(null);
     setMessages([]);
+    setQueuedPrompts([]);
   }, [onConversationChange]);
 
   // Expose via ref-like pattern through props is not needed here;
@@ -1017,9 +1049,20 @@ export function SimpleChat({
                   )}
                 </div>
                 {streaming ? (
-                  <button className="sc-send-cta sc-send-cta-stop" onClick={stop} title="停止生成">
-                    <Icon name="square" size={14} />
-                  </button>
+                  <>
+                    <button
+                      className="sc-send-cta sc-send-cta-queue"
+                      onClick={queueCurrentPrompt}
+                      disabled={!input.trim()}
+                      title="当前任务完成后发送"
+                      aria-label="当前任务完成后发送"
+                    >
+                      <Icon name="arrow-up" size={12} />
+                    </button>
+                    <button className="sc-send-cta sc-send-cta-stop" onClick={stop} title="停止生成">
+                      <Icon name="square" size={14} />
+                    </button>
+                  </>
                 ) : (
                   <button
                     className="sc-send-cta sc-send-cta-send"
@@ -1029,6 +1072,11 @@ export function SimpleChat({
                   >
                     <Icon name="arrow-up" size={12} />
                   </button>
+                )}
+                {queuedPrompts.length > 0 && (
+                  <span className="sc-queued-count" aria-label={`已排队 ${queuedPrompts.length} 条消息`}>
+                    已排队 {queuedPrompts.length}
+                  </span>
                 )}
               </div>
             </div>
