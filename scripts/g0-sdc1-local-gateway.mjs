@@ -176,6 +176,7 @@ export async function startSdc1LocalGateway({
   port = 0,
   analysis,
   finalBehavior = 'success',
+  modelId = 'sdc1-scripted',
 } = {}) {
   const trace = [];
   const inputPaths = { countsPath: countsPath || '', metadataPath: metadataPath || '' };
@@ -183,7 +184,7 @@ export async function startSdc1LocalGateway({
   const server = createServer(async (req, res) => {
     const pathname = new URL(req.url || '/', `http://${host}`).pathname;
     if (req.method === 'GET' && pathname === '/v1/models') {
-      json(res, 200, { object: 'list', data: [{ id: 'sdc1-scripted', object: 'model' }] });
+      json(res, 200, { object: 'list', data: [{ id: modelId, object: 'model' }] });
       return;
     }
     if (req.method !== 'POST' || pathname !== '/v1/chat/completions') {
@@ -211,6 +212,10 @@ export async function startSdc1LocalGateway({
         req.once('close', () => {
           if (!res.writableEnded) res.end();
         });
+        return;
+      }
+      if (next.phase === 'final' && finalBehavior === 'http-timeout') {
+        json(res, 504, { error: { message: '请求超时' } });
         return;
       }
       json(res, 200, next.response);

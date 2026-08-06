@@ -250,7 +250,12 @@ function softFailureEvidence(evidence) {
   };
 }
 
-export async function observeUx1h({ writeEvidence = false, keep = false, show = false } = {}) {
+export async function observeUx1h({
+  writeEvidence = false,
+  keep = false,
+  show = false,
+  finalBehavior = 'timeout',
+} = {}) {
   const dataset = observeAirwayDataset();
   const backendPort = await freePort();
   const uiPort = await freePort(new Set([backendPort]));
@@ -280,7 +285,8 @@ export async function observeUx1h({ writeEvidence = false, keep = false, show = 
   try {
     gateway = await startSdc1LocalGateway({
       analysis: { design: 'condition', reference: 'control', treatment: 'treated' },
-      finalBehavior: 'timeout',
+      finalBehavior,
+      modelId: 'ux1h-timeout-adapter',
     });
     runtime = await createP5LiveScientificRuntime({
       port: backendPort,
@@ -381,6 +387,7 @@ export async function observeUx1h({ writeEvidence = false, keep = false, show = 
     evidence.passed = evidence.passed && softEvidence.passed;
     assertSanitizedP5Evidence(evidence);
     assertSanitizedP5Evidence(softEvidence);
+    console.log(JSON.stringify({ evidence, softEvidence }, null, 2));
 
     if (writeEvidence) {
       if (!evidence.passed || !softEvidence.passed) {
@@ -407,7 +414,6 @@ export async function observeUx1h({ writeEvidence = false, keep = false, show = 
       writeFileSync(SOFT_EVIDENCE_PATH, `${JSON.stringify(softEvidence, null, 2)}\n`);
     }
 
-    console.log(JSON.stringify({ evidence, softEvidence }, null, 2));
     return { evidence, softEvidence };
   } finally {
     process.removeListener('SIGINT', onSignal);
@@ -422,6 +428,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     writeEvidence: args.has('--write'),
     keep: args.has('--keep'),
     show: args.has('--show'),
+    finalBehavior: args.has('--fast-timeout') ? 'http-timeout' : 'timeout',
   }).then(({ evidence }) => {
     if (!evidence.passed) process.exitCode = 1;
   }).catch((error) => {
