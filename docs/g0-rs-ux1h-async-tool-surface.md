@@ -189,11 +189,12 @@ core/shared-backend/result-studio-*.js
 |---|---|---|
 | 2026-08-06 | 计划创建 | 用户在 airway 完整流程中识别问题，本计划上线 |
 | 2026-08-06 | active | 写完本计划 + 同步 handoff/registry/AUDIT-LOG |
-| — | pending | 实施 SimpleChat 渲染分支调整（待用户最终拍板实施） |
-| — | pending | 跑 G-1 ~ G-7 门禁 + 行为验收 A-1 ~ A-7 |
+| 2026-08-06 | active checkpoint | SimpleChat 已接入真实 ToolJob 成功 + 总结超时展示分支；单元测试 6/6、strict TypeScript 通过。一次开发态 Electron 阶段收口验收使用真实 airway counts/metadata 跑出 DESeq2 completed + Artifact Truth valid + 同 Job PNG，并确认目标文案可见、"请求超时"不可见。证据见 `acceptance/g0-rs-ux1h/`；本地 `ux1h-timeout-adapter` 不代表外部模型 |
+| — | pending | 完成重试总结不重跑工具与完整 async surface；未完成前不将本计划或 UI-126 标为 `verified` |
+| — | pending | 收口前按风险驱动运行 G-1 ~ G-5 与剩余行为门；开发中不重复运行长耗时 Electron 链，只有产品行为或验收脚本发生实质变化才重跑 |
 | — | pending | 收口（同步 handoff、registry、UI audit、evidence） |
 
-> 当前本计划仅是 canonical 计划文档。**不写入任何代码。** 实施前会进入计划模式（plan mode）让用户最终确认改动范围。
+> 当前已进入实现检查点；本次目标展示组合有真实 Electron 证据，但 §4.2 的重试/完整异步行为尚未满足，计划继续保持 `active`。
 
 ---
 

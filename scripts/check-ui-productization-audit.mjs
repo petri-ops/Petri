@@ -22,6 +22,9 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // UI-108/UI-109. P7 was later deferred and the immutable implementation
   // checkpoint is reconciled explicitly in the 2026-08-03 audit record.
   '2298c968f7afa289a1c257e2fc8ba8d608bad1ed',
+  // UX1H implementation landed before the target row was reconciled from
+  // unit-only evidence to the current in_progress + Electron evidence state.
+  '7995ee945b0221e2507e1cce11414849a942ac5d',
 ])
 // These immutable implementation commits have an explicit later canonical
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
@@ -39,6 +42,9 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // UI-108/UI-109 bound-result completion classification is reconciled by the
   // 2026-08-03 P7 deferral entry; shared history is intentionally not rewritten.
   '2298c968f7afa289a1c257e2fc8ba8d608bad1ed',
+  // The initial UX1H implementation is reconciled by the current UI-126 row
+  // and acceptance evidence; do not rewrite the already-local implementation commit.
+  '7995ee945b0221e2507e1cce11414849a942ac5d',
 ])
 const UI_ID_PATTERN = /\bUI-\d{3}\b/g
 

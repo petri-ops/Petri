@@ -29,11 +29,13 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 
 ### 3.0 当前主线：G0-RS-UX1H Async Tool Surface
 
-2026-08-06 用户在真实 airway 数据（`tmp/airway-test/airway_counts_symbol.csv` + `airway_metadata.csv`，4 control vs 4 treated，34890 gene symbol × 8 sample）上完成首次端到端流程跑通：`run_tool → tool_job(tj_mshbgvms_hluh) → artifact truth → projectOpenResult` 全部成功，但 UI 末尾显示"请求超时"，来源是 `core/shared-backend/llm-providers/deepseek.js:238/443` 在 LLM 写自然语言总结阶段 180s 触发 Node http timeout。
+2026-08-06 用户在真实 airway 数据（`tmp/airway-test/airway_counts_symbol.csv` + `airway_metadata.csv`，4 control vs 4 treated，34889 gene rows × 8 sample）上完成开发态 Electron 端到端流程：`run_tool → tool_job → artifact truth → projectOpenResult` 全部成功，1 个 completed DESeq2 Job、Artifact Truth `valid`、同 Job PNG 自动打开。LLM 总结阶段真实 socket timeout 与自动重试结束后，返回对话显示"✓ 工具已完成，AI 总结暂时不可用"，assistant 行不再显示"请求超时"；截图与脱敏证据见 `acceptance/g0-rs-ux1h/`。
 
-这是一个 user-visible 痛点：主 agent 同步流被工具完成后的 AI 总结占用，工具已成功却仍被渲染为"失败"。`G0-RS-UX1H` 计划已创建并激活，范围限定在 SimpleChat 渲染分支 + 一个可选 `retrySummary(toolJobId)` 路径，**不开 P7-F**，不引入 subagent 池，不创建 Git Worktree。Canonical 计划见 [`g0-rs-ux1h-async-tool-surface.md`](./g0-rs-ux1h-async-tool-surface.md)；已登记 `DOC-REGISTRY.json` 的 `G0-RS-UX1H` 条目并占用 `g0-current-work-package` truthDomain。上一份 active 的 `G0-SDC / SDC1-A Data-to-first-result`（实现检查点 `bd15777`）保持 `completed`，SDC-1 其余范围、SDC-2～SDC-7 与 P7 继续 deferred。
+这是一个 user-visible 痛点：主 agent 同步流被工具完成后的 AI 总结占用，工具已成功却仍被渲染为"失败"。`G0-RS-UX1H` 计划已创建并激活，SimpleChat 展示分支已完成本次目标组合验证；计划中的 `retrySummary(toolJobId)` 不重跑工具与完整 async surface 仍未实现，故 UI-126 和工作包均保持 `in_progress/active`，不宣称完整收口。范围仍限定在该计划，**不开 P7-F**，不引入 subagent 池，不创建 Git Worktree。Canonical 计划见 [`g0-rs-ux1h-async-tool-surface.md`](./g0-rs-ux1h-async-tool-surface.md)；已登记 `DOC-REGISTRY.json` 的 `G0-RS-UX1H` 条目并占用 `g0-current-work-package` truthDomain。上一份 `G0-SDC / SDC1-A Data-to-first-result` 保持 `completed`，SDC-1 其余范围、SDC-2～SDC-7 与 P7 继续 deferred。
 
 UI-108 / UI-109 / UI-113 / UI-114 仍维持 `in_progress`；本计划不冒充其 `verified`。`qualificationEligible:false` 不升级。
+
+验证节奏按用户裁决采用风险驱动：开发中只跑语法与受影响单测；真实数据 Electron 长链仅在阶段收口运行一次，除非产品行为或验收脚本发生实质变化，不重复消耗长链窗口。
 
 ### 3.0 历史主线：G0 Living Foundation maintained
 
@@ -51,7 +53,7 @@ P6-1 已于 2026-08-02 在 `ad1e2ce` 收口，canonical evidence `acceptance/g0-
 
 P7 延期检查点：`e14a8e6` 已完成 existing Git 持久显式 opt-in 后端安全修复；`6dc3880`/`1bb295c` 已使资格器在没有可解引用 task-local fact bundle、独立 replay、唯一截图和重算不变量时 fail-closed；Agent 结果动作 completion 修复保留。没有生成 canonical P7 PASS evidence。selection→enrichment 当前是 direct Job + auto-adopted baseline，不满足 candidate/compare/lifecycle，必须作为未来产品缺口修复，不能由 harness 伪造。
 
-当前分支为 `codex/g0-result-studio-product`。`G0-RS-UX1A`～`UX1G-2` 与短 Goal `G0-RS-TL1 / UI-120` 均已完成，当前没有 active 增量。UX1G-1 已把 `conversation_id` 从受信 Agent 上下文贯通到 ToolJob、审批、ScientificTask/Workflow、插件执行/重试、Result Studio 派生执行及 Jobs 历史 API；UX1G-2 在此基础上补齐当前会话的顶部多分析结果入口与精确 Job 切换，Job 变化会原子清除旧 Artifact，迟到的结果响应和深链查询均不可覆盖新导航，其他会话和 legacy null Job 不混入。聚焦前端 46/46、受影响 Node 125 pass / 1 live skip、strict TypeScript 与开发态 browser/Electron 真实双 Job 核对通过；不改 Result Viewer、科学算法或 P7 资格。
+当前分支为 `codex/g0-result-studio-product`。`G0-RS-UX1A`～`UX1G-2` 与短 Goal `G0-RS-TL1 / UI-120` 均已完成；当前唯一 active 增量为 `G0-RS-UX1H / UI-126`，其目标组合已实机通过但计划尚未收口。UX1G-1 已把 `conversation_id` 从受信 Agent 上下文贯通到 ToolJob、审批、ScientificTask/Workflow、插件执行/重试、Result Studio 派生执行及 Jobs 历史 API；UX1G-2 在此基础上补齐当前会话的顶部多分析结果入口与精确 Job 切换，Job 变化会原子清除旧 Artifact，迟到的结果响应和深链查询均不可覆盖新导航，其他会话和 legacy null Job 不混入。聚焦前端 46/46、受影响 Node 125 pass / 1 live skip、strict TypeScript 与开发态 browser/Electron 真实双 Job 核对通过；不改 Result Viewer、科学算法或 P7 资格。
 
 验证边界：UX1F 原聚焦前端 51/51；真实图形补验修复后聚焦前端 44/44、Result Studio 前端聚合 199/199、TypeScript、UI/docs 门禁与开发态 Electron 通过。同一真实新 volcano Job `job_41578fbc4c6f4577` 覆盖正式 PNG 完整首屏、25 点交互往返和结果态无版本大面板。TL1 新增 TitleBar 11/11 与 Electron/preload 6/6；Darwin arm64 开发态真实窗口覆盖最大化/还原、最小化、双击隔离、缩放、明暗、约 1050/840/720px、Cmd+M/W、自绘关闭及 owned 服务退出/重启。ScreenCaptureKit `-3811` 使 840/720 像素截图与拖拽绝对 frame 位移不可用，AX 功能/可达性与 134px 几何测试仍通过。UI-120 仅在该开发态边界为 `verified`。`npm run test:changed` 仍会因 P6 历史 evidence 绑定 `ad1e2ce` 而在 `p6_current_source_tree_not_exact` 处 fail-closed；TL1 未运行 `g0:result-studio:p6:update`，不得把旧证据改绑当前源码。
 
