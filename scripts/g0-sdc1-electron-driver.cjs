@@ -93,8 +93,16 @@ async function dismissOnboarding(webContents) {
 
 async function uploadFixtureFiles(webContents, config) {
   const files = [
-    { name: 'counts.csv', type: 'text/csv', base64: readFileSync(config.countsSourcePath).toString('base64') },
-    { name: 'metadata.csv', type: 'text/csv', base64: readFileSync(config.metadataSourcePath).toString('base64') },
+    {
+      name: config.countsUploadName || 'counts.csv',
+      type: 'text/csv',
+      base64: readFileSync(config.countsSourcePath).toString('base64'),
+    },
+    {
+      name: config.metadataUploadName || 'metadata.csv',
+      type: 'text/csv',
+      base64: readFileSync(config.metadataSourcePath).toString('base64'),
+    },
   ];
   const uploaded = await webContents.executeJavaScript(`
     (() => {
@@ -256,13 +264,17 @@ async function run(config) {
     writeFileSync(readyScreenshot, readyPng);
 
     await clickButton(wc, `(item.textContent || '').includes('开始分析')`, 'start analysis');
+    const confirmationText = config.expectedConfirmationText || '请确认：design 使用 condition';
     await waitFor(wc, `
       [...document.querySelectorAll('.sc-msg-assistant')]
-        .some((item) => (item.textContent || '').includes('请确认：design 使用 condition'))
+        .some((item) => (item.textContent || '').includes(${JSON.stringify(confirmationText)}))
     `, 'scientific confirmation request', 90_000);
     checkpoint('confirmation_requested');
 
-    await submitChat(wc, '确认：design=condition，对照组=WT，实验组=KO。请执行 DESeq2。');
+    await submitChat(
+      wc,
+      config.confirmationMessage || '确认：design=condition，对照组=WT，实验组=KO。请执行 DESeq2。'
+    );
     await waitFor(wc, `
       (() => {
         const query = new URLSearchParams(location.search);
@@ -294,6 +306,44 @@ async function run(config) {
         };
       })()
     `, true);
+    const resultPng = (await window.webContents.capturePage()).toPNG();
+    writeFileSync(path.join(config.outputDir, 'result-open.png'), resultPng);
+    let summaryPresentation = null;
+    let chatPng = null;
+    if (config.expectedAssistantText) {
+      await clickButton(wc, `item.getAttribute('aria-label') === '返回对话'`, 'return to chat');
+      await waitFor(wc, `
+        [...document.querySelectorAll('.sc-msg-assistant')]
+          .some((item) => (item.textContent || '').includes(${JSON.stringify(config.expectedAssistantText)}))
+      `, 'tool success summary-unavailable message', 2 * 60 * 1000);
+      await clickButton(
+        wc,
+        `item.matches('.sc-tool-activity-summary') && item.getAttribute('aria-expanded') === 'false'`,
+        'expand completed tool activity'
+      );
+      await waitFor(wc, `Boolean(document.querySelector('.sc-tool-activity-success'))`, 'completed tool activity');
+      summaryPresentation = await wc.executeJavaScript(`
+        (() => {
+          const expected = ${JSON.stringify(config.expectedAssistantText)};
+          const forbidden = ${JSON.stringify(config.forbiddenAssistantText || '')};
+          const messages = [...document.querySelectorAll('.sc-msg-assistant')];
+          const target = messages.find((item) => (item.textContent || '').includes(expected));
+          const visibleForbidden = forbidden
+            ? messages.some((item) => (item.textContent || '').includes(forbidden))
+            : false;
+          const successfulTool = [...document.querySelectorAll('.sc-tool-activity-success')].length > 0;
+          return {
+            expectedVisible: Boolean(target),
+            forbiddenVisible: visibleForbidden,
+            successfulTool,
+            text: (target?.textContent || '').trim().slice(0, 500),
+            mode: new URLSearchParams(location.search).get('mode'),
+          };
+        })()
+      `, true);
+      chatPng = (await window.webContents.capturePage()).toPNG();
+      writeFileSync(path.join(config.outputDir, 'summary-unavailable.png'), chatPng);
+    }
     const jobsPayload = await backendJson(`${config.backendBaseUrl}/api/data/projects/${encodeURIComponent(config.projectId)}/jobs`);
     const jobs = Array.isArray(jobsPayload.jobs) ? jobsPayload.jobs : [];
     const completed = jobs.filter((job) => job.tool_id === 'deseq2' && job.status === 'completed');
@@ -304,8 +354,6 @@ async function run(config) {
     const result = statusJob.result || statusJob.result_json || job.result || {};
     const parsedResult = typeof result === 'string' ? JSON.parse(result) : result;
     const artifactTruth = parsedResult.artifactTruth || statusPayload.artifactTruth;
-    const resultPng = (await window.webContents.capturePage()).toPNG();
-    writeFileSync(path.join(config.outputDir, 'result-open.png'), resultPng);
 
     const evidence = {
       schemaVersion: 1,
@@ -327,9 +375,17 @@ async function run(config) {
         imageVisible: uiTruth.imageVisible,
         assistantConfirmed: uiTruth.assistantConfirmed,
       },
+      ...(summaryPresentation ? { summaryPresentation } : {}),
       screenshots: {
         dataReady: { file: 'data-ready.png', sha256: sha256(readyPng), bytes: readyPng.length },
         resultOpen: { file: 'result-open.png', sha256: sha256(resultPng), bytes: resultPng.length },
+        ...(chatPng ? {
+          summaryUnavailable: {
+            file: 'summary-unavailable.png',
+            sha256: sha256(chatPng),
+            bytes: chatPng.length,
+          },
+        } : {}),
       },
     };
     evidence.passed = evidence.importedFileCount === 2
@@ -341,7 +397,13 @@ async function run(config) {
       && evidence.automaticResultOpen.exactJob
       && evidence.automaticResultOpen.mode === 'result'
       && evidence.automaticResultOpen.canvasPresent
-      && evidence.automaticResultOpen.bodyVisible;
+      && evidence.automaticResultOpen.bodyVisible
+      && (!config.expectedAssistantText || (
+        evidence.summaryPresentation?.expectedVisible === true
+        && evidence.summaryPresentation?.forbiddenVisible === false
+        && evidence.summaryPresentation?.successfulTool === true
+        && evidence.summaryPresentation?.mode === 'chat'
+      ));
     writeFileSync(config.resultPath, `${JSON.stringify(evidence, null, 2)}\n`);
     window.destroy();
     return evidence;

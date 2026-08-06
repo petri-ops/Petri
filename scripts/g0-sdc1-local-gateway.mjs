@@ -103,7 +103,12 @@ function toolCall(args, index) {
   }, 'tool_calls');
 }
 
-export function buildSdc1GatewayResponse(body, { countsPath, metadataPath, requestIndex }) {
+export function buildSdc1GatewayResponse(body, {
+  countsPath,
+  metadataPath,
+  requestIndex,
+  analysis = {},
+}) {
   const messages = Array.isArray(body?.messages) ? body.messages : [];
   const userText = lastUserText(messages);
   const runResults = parsedToolResults(messages, 'run_tool');
@@ -113,13 +118,16 @@ export function buildSdc1GatewayResponse(body, { countsPath, metadataPath, reque
   const runSucceeded = latestRunResult?.status === 'success'
     && latestRunResult?.terminationReason !== 'error'
     && runData?.ok !== false;
+  const design = String(analysis.design || 'condition');
+  const reference = String(analysis.reference || 'WT');
+  const treatment = String(analysis.treatment || 'KO');
 
   if (/Data Profiler/.test(userText) && !/design\s*=\s*condition/i.test(userText)) {
     return {
       phase: 'scientific_confirmation',
       response: response({
         role: 'assistant',
-        content: '文件结构与样本 ID 已匹配。请确认：design 使用 condition，对照组 WT，实验组 KO；确认后我再执行 DESeq2。',
+        content: `文件结构与样本 ID 已匹配。请确认：design 使用 ${design}，对照组 ${reference}，实验组 ${treatment}；确认后我再执行 DESeq2。`,
       }),
     };
   }
@@ -139,9 +147,9 @@ export function buildSdc1GatewayResponse(body, { countsPath, metadataPath, reque
         params: {
           counts: countsPath,
           coldata: metadataPath,
-          design: 'condition',
-          contrast_ref: 'WT',
-          contrast_treat: 'KO',
+          design,
+          contrast_ref: reference,
+          contrast_treat: treatment,
           padj_cutoff: 0.05,
           lfc_cutoff: 1,
         },
@@ -161,7 +169,14 @@ export function buildSdc1GatewayResponse(body, { countsPath, metadataPath, reque
   };
 }
 
-export async function startSdc1LocalGateway({ countsPath, metadataPath, host = '127.0.0.1', port = 0 }) {
+export async function startSdc1LocalGateway({
+  countsPath,
+  metadataPath,
+  host = '127.0.0.1',
+  port = 0,
+  analysis,
+  finalBehavior = 'success',
+} = {}) {
   const trace = [];
   const inputPaths = { countsPath: countsPath || '', metadataPath: metadataPath || '' };
   let requestIndex = 0;
@@ -179,8 +194,25 @@ export async function startSdc1LocalGateway({ countsPath, metadataPath, host = '
       const body = await readBody(req);
       requestIndex += 1;
       if (!inputPaths.countsPath || !inputPaths.metadataPath) throw new Error('sdc1_gateway_input_paths_unavailable');
-      const next = buildSdc1GatewayResponse(body, { ...inputPaths, requestIndex });
-      trace.push({ requestIndex, phase: next.phase, errorCode: next.errorCode || null });
+      const next = buildSdc1GatewayResponse(body, { ...inputPaths, requestIndex, analysis });
+      trace.push({
+        requestIndex,
+        phase: next.phase,
+        errorCode: next.errorCode || null,
+        behavior: next.phase === 'final' ? finalBehavior : 'response',
+      });
+      if (next.phase === 'final' && finalBehavior === 'timeout') {
+        res.writeHead(200, {
+          'Content-Type': 'text/event-stream; charset=utf-8',
+          'Cache-Control': 'no-store',
+          Connection: 'close',
+        });
+        res.flushHeaders?.();
+        req.once('close', () => {
+          if (!res.writableEnded) res.end();
+        });
+        return;
+      }
       json(res, 200, next.response);
     } catch (error) {
       json(res, 400, { error: { message: error instanceof Error ? error.message : 'invalid_request' } });
