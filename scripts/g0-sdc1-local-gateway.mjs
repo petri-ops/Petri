@@ -80,18 +80,18 @@ function calledRunToolOperation(messages, operation, toolId = null) {
     }));
 }
 
-function response(message, finishReason = 'stop') {
+function response(message, finishReason = 'stop', modelId = 'sdc1-scripted') {
   return {
     id: 'sdc1-local-gateway',
     object: 'chat.completion',
     created: 0,
-    model: 'sdc1-scripted',
+    model: modelId,
     choices: [{ index: 0, finish_reason: finishReason, message }],
     usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
   };
 }
 
-function toolCall(args, index) {
+function toolCall(args, index, modelId) {
   return response({
     role: 'assistant',
     content: '',
@@ -100,7 +100,7 @@ function toolCall(args, index) {
       type: 'function',
       function: { name: 'run_tool', arguments: JSON.stringify(args) },
     }],
-  }, 'tool_calls');
+  }, 'tool_calls', modelId);
 }
 
 export function buildSdc1GatewayResponse(body, {
@@ -108,6 +108,7 @@ export function buildSdc1GatewayResponse(body, {
   metadataPath,
   requestIndex,
   analysis = {},
+  modelId = 'sdc1-scripted',
 }) {
   const messages = Array.isArray(body?.messages) ? body.messages : [];
   const userText = lastUserText(messages);
@@ -128,15 +129,15 @@ export function buildSdc1GatewayResponse(body, {
       response: response({
         role: 'assistant',
         content: `文件结构与样本 ID 已匹配。请确认：design 使用 ${design}，对照组 ${reference}，实验组 ${treatment}；确认后我再执行 DESeq2。`,
-      }),
+      }, 'stop', modelId),
     };
   }
 
   if (!calledRunToolOperation(messages, 'list')) {
-    return { phase: 'catalog', response: toolCall({ op: 'list' }, requestIndex) };
+    return { phase: 'catalog', response: toolCall({ op: 'list' }, requestIndex, modelId) };
   }
   if (!calledRunToolOperation(messages, 'list', 'deseq2')) {
-    return { phase: 'contract', response: toolCall({ op: 'list', toolId: 'deseq2' }, requestIndex) };
+    return { phase: 'contract', response: toolCall({ op: 'list', toolId: 'deseq2' }, requestIndex, modelId) };
   }
   if (!calledRunToolOperation(messages, 'run', 'deseq2')) {
     return {
@@ -153,19 +154,19 @@ export function buildSdc1GatewayResponse(body, {
           padj_cutoff: 0.05,
           lfc_cutoff: 1,
         },
-      }, requestIndex),
+      }, requestIndex, modelId),
     };
   }
   if (completedToolJobId && runSucceeded) {
     return {
       phase: 'final',
-      response: response({ role: 'assistant', content: 'DESeq2 已完成，正式结果已打开。' }),
+      response: response({ role: 'assistant', content: 'DESeq2 已完成，正式结果已打开。' }, 'stop', modelId),
     };
   }
   return {
     phase: 'blocked',
     errorCode: String(runData?.error || latestRunResult?.terminationReason || 'run_tool_failed').slice(0, 80),
-    response: response({ role: 'assistant', content: '分析未通过工具或产物校验，已停止。' }),
+    response: response({ role: 'assistant', content: '分析未通过工具或产物校验，已停止。' }, 'stop', modelId),
   };
 }
 
@@ -195,7 +196,12 @@ export async function startSdc1LocalGateway({
       const body = await readBody(req);
       requestIndex += 1;
       if (!inputPaths.countsPath || !inputPaths.metadataPath) throw new Error('sdc1_gateway_input_paths_unavailable');
-      const next = buildSdc1GatewayResponse(body, { ...inputPaths, requestIndex, analysis });
+      const next = buildSdc1GatewayResponse(body, {
+        ...inputPaths,
+        requestIndex,
+        analysis,
+        modelId,
+      });
       trace.push({
         requestIndex,
         phase: next.phase,

@@ -350,6 +350,8 @@ async function run(config) {
             successfulTool,
             text: (target?.textContent || '').trim().slice(0, 500),
             mode: new URLSearchParams(location.search).get('mode'),
+            resultCanvasVisible: Boolean(document.querySelector('[aria-label="结果主画布"]')),
+            composerVisible: Boolean(document.querySelector(${JSON.stringify(CHAT_INPUT_SELECTOR)})),
           };
         })()
       `, true);
@@ -416,7 +418,9 @@ async function run(config) {
         evidence.summaryPresentation?.expectedVisible === true
         && evidence.summaryPresentation?.forbiddenVisible === false
         && evidence.summaryPresentation?.successfulTool === true
-        && evidence.summaryPresentation?.mode === 'chat'
+        && evidence.summaryPresentation?.mode !== 'result'
+        && evidence.summaryPresentation?.resultCanvasVisible === false
+        && evidence.summaryPresentation?.composerVisible === true
       ));
     writeFileSync(config.resultPath, `${JSON.stringify(evidence, null, 2)}\n`);
     window.destroy();
