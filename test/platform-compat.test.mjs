@@ -8,11 +8,14 @@ const compat = req(resolve(process.cwd(), 'src/platform-compat.js'));
 const runtimePaths = req(resolve(process.cwd(), 'core/shared-backend/runtime-paths.js'));
 
 test('platform compat chooses runtime binary names per OS', () => {
-  assert.deepEqual(compat.getRuntimeBinCandidates('r', 'win32'), ['Rscript.exe']);
+  assert.deepEqual(compat.getRuntimeBinCandidates('r', 'win32'), ['Rscript.exe', 'R.exe']);
   assert.deepEqual(compat.getRuntimeBinCandidates('python', 'win32'), [
     'python.exe',
     'python3.exe',
     'python3.11.exe',
+    'python3.12.exe',
+    'python3.13.exe',
+    'py.exe',
   ]);
   assert.equal(compat.getRuntimeBinName('r', 'darwin'), 'Rscript');
   assert.equal(compat.getRuntimeBinName('python', 'linux'), 'python3');
@@ -35,6 +38,9 @@ test('python runtime path helpers cover Windows and Unix layouts', () => {
     'python.exe',
     'python3.exe',
     'python3.11.exe',
+    'python3.12.exe',
+    'python3.13.exe',
+    'py.exe',
   ]);
   assert.deepEqual(runtimePaths.getPythonExecutableCandidates('linux'), ['python3', 'python']);
 });

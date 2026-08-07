@@ -1951,6 +1951,17 @@ function getDatabase() {
   return db;
 }
 
+/** Close the underlying SQLite connection (releases the file handle).
+ *  Needed so callers/tests can remove the DB file on platforms (Windows)
+ *  that forbid deleting an open file. Safe to call when already closed. */
+function closeDatabase() {
+  try {
+    db.close();
+  } catch (_) {
+    // already closed or never opened
+  }
+}
+
 /** Promise facade over better-sqlite3 for async route handlers. */
 function createAsyncDatabaseFacade(realDb) {
   return {
@@ -2079,5 +2090,6 @@ module.exports = {
   getLatestLoopSnapshot,
   db,
   getDatabase,
+  closeDatabase,
   getAsyncDatabase,
 };

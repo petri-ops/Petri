@@ -2,7 +2,7 @@
 // 运行：cd desktop-app && node --test test/mcp-tool-registry.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve, join } from 'node:path';
 
 const path = { join };
@@ -10,8 +10,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // desktop-app/test → 仓库根/r-server
 const R_SERVER = resolve(__dirname, '..', 'core', 'r-server');
 
-const pluginLoader = await import(R_SERVER + '/plugin-loader.js');
-const registryModule = await import(resolve(__dirname, '..', 'core', 'r-server', 'mcp', 'registry.js'));
+const pluginLoader = await import(pathToFileURL(R_SERVER + '/plugin-loader.js').href);
+const registryModule = await import(pathToFileURL(resolve(__dirname, '..', 'core', 'r-server', 'mcp', 'registry.js')).href);
 const { listTools, callTool } = registryModule;
 const registryTest = registryModule.default?._test || registryModule._test;
 
@@ -176,7 +176,7 @@ test('callTool 跑通 deseq2 全流程出图（live）', { skip: !RUN_LIVE }, as
   }
   // 显式从三源加载器注册；builtin-canonical 不得被历史安装副本覆盖。
   globalThis._biof3Plugins = new Map();
-  const pluginLoaderFresh = await import(R_SERVER + '/plugin-loader.js');
+  const pluginLoaderFresh = await import(pathToFileURL(R_SERVER + '/plugin-loader.js').href);
   pluginLoaderFresh.loadPluginsFromSources({
     builtInDir: path.resolve(__dirname, '..', 'resources', 'built-in-plugins'),
     installedDir: path.resolve(__dirname, 'fixtures', 'empty-plugins'),

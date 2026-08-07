@@ -12,7 +12,7 @@ const require = createRequire(import.meta.url);
 const db = require('../core/r-server/db');
 const { confirmScientificTask } = require('../core/shared-backend/scientific-task-confirmation');
 const { sourceMessageDigest, validateContextCheckpoint } = require('../core/shared-backend/scientific-task-spec');
-after(() => rmSync(tempRoot, { recursive: true, force: true }));
+after(() => { try { db.closeDatabase(); } catch (_) {} rmSync(tempRoot, { recursive: true, force: true }); });
 
 test('HRT-3 persists confirmed task and binds only a same-project real tool_job', () => {
   const project = db.createProject({ name: 'HRT-3', modality: 'bulk', workspacePath: join(tempRoot, 'project') });

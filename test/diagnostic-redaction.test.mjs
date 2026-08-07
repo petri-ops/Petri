@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import path from "node:path";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
@@ -9,17 +10,14 @@ const {
 } = require("../src/diagnostic-redaction.js");
 
 test("diagnostic redaction resolves the packaged core resource path", () => {
+  const resourcesPath = "/Applications/BioF3.app/Contents/Resources";
   assert.equal(
-    resolveDiagnosticRedactionModule({
-      isPackaged: true,
-      resourcesPath: "/Applications/BioF3.app/Contents/Resources",
-    }),
-    "/Applications/BioF3.app/Contents/Resources/core/shared-backend/redaction.js",
+    resolveDiagnosticRedactionModule({ isPackaged: true, resourcesPath }),
+    path.join(resourcesPath, "core", "shared-backend", "redaction.js"),
   );
-  assert.match(
-    resolveDiagnosticRedactionModule({ isPackaged: false }),
-    /desktop\/core\/shared-backend\/redaction\.js$/,
-  );
+  // Normalize separators so the trailing-suffix assertion is platform-independent.
+  const devPath = resolveDiagnosticRedactionModule({ isPackaged: false });
+  assert.match(devPath.split(path.sep).join("/"), /desktop\/core\/shared-backend\/redaction\.js$/);
 });
 
 test("diagnostic redaction removes credential-bearing headers and fields", () => {

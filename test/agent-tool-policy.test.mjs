@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
+import fssync from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
@@ -19,6 +20,32 @@ const { getToolEntry } = require('../core/r-server/agent-tools/registry.js');
 const { createWorkspaceTools } = require('../core/r-server/agent-tools/workspace-tools.js');
 const { dispatchTool } = require('../core/r-server/agent-tools/index.js');
 const db = require('../core/r-server/db.js');
+
+// Windows (without Developer Mode) and some CI images cannot create symlinks,
+// which breaks the escape-prevention fixture. Probe once and skip the symlink
+// portion on unsupported platforms — the same guard used by the RS5 suite.
+function symlinksSupported() {
+  try {
+    const probe = fssync.mkdtempSync(path.join(os.tmpdir(), 'biof3-symlink-probe-'));
+    try {
+      fssync.symlinkSync(path.join(probe, 'target'), path.join(probe, 'link'));
+      return true;
+    } catch {
+      return false;
+    } finally {
+      fssync.rmSync(probe, { recursive: true, force: true });
+    }
+  } catch {
+    return false;
+  }
+}
+
+// The shell-command and symlink-escape tests below assume a POSIX shell and
+// filesystem. On Windows the spawned shell reports paths like `/tmp/...` that do
+// not correspond to Node's os.tmpdir() (C:\Users\...\Temp), and symlink-escape
+// resolution differs. CI (macOS) exercises these; skip on win32.
+const isWindows = process.platform === 'win32';
+const maybeSkipShell = isWindows ? test.skip : test;
 
 const contract = (sideEffect = 'none', riskTier = 'R0', category = 'retrieval') => ({
   sideEffect,
@@ -197,7 +224,9 @@ before(async () => {
   await fs.mkdir(path.join(workspaceRoot, 'derived'), { recursive: true });
   await fs.writeFile(path.join(workspaceRoot, 'derived', 'metadata-normalized.csv'), 'sample,condition\ns1,Control\n');
   await fs.writeFile(path.join(outsideRoot, 'secret.txt'), 'outside\n');
-  await fs.symlink(outsideRoot, path.join(workspaceRoot, 'escape'));
+  if (symlinksSupported()) {
+    await fs.symlink(outsideRoot, path.join(workspaceRoot, 'escape'));
+  }
 
   const fakeDb = {
     getProject(projectId) {
@@ -254,9 +283,11 @@ test('workspace preflight hard-denies missing scope, ownership, sensitive paths,
   assert.equal(sensitive.error, 'sensitive_path');
   assert.equal(sensitive.reason, 'policy_denied');
 
-  const escaped = await interceptWorkspace('workspace_read', { path: 'escape/secret.txt' }, workspaceCtx);
-  assert.equal(escaped.error, 'symlink_escape');
-  assert.equal(escaped.reason, 'policy_denied');
+  if (!isWindows) {
+    const escaped = await interceptWorkspace('workspace_read', { path: 'escape/secret.txt' }, workspaceCtx);
+    assert.equal(escaped.error, 'symlink_escape');
+    assert.equal(escaped.reason, 'policy_denied');
+  }
 });
 
 test('read-only policy allows validated dry-runs but still denies real workspace edits', async () => {
@@ -438,7 +469,7 @@ test('existing scientific inputs are immutable while derived CSV remains editabl
   assert.equal(await fs.readFile(derivedPath, 'utf8'), 'sample,condition\ns1,Treatment\n');
 });
 
-test('full access permits general commands while read mode denies execution', async () => {
+maybeSkipShell('full access permits general commands while read mode denies execution', async () => {
   const pwd = await interceptWorkspace('workspace_exec', { command: 'pwd' }, workspaceCtx);
   assert.equal(pwd.ok, true);
   assert.equal(pwd.stdout.trim(), await fs.realpath(workspaceRoot));

@@ -34,9 +34,10 @@ const HASH_2 = '2'.repeat(64);
 
 function makeRepo(context) {
   const root = mkdtempSync(join(tmpdir(), 'biof3-rs2-'));
-  context.after(() => rmSync(root, { recursive: true, force: true }));
   const db = new Database(join(root, 'test.db'));
-  context.after(() => { try { db.close(); } catch { /* already closed */ } });
+  // Close the DB before removing its directory: on Windows an open file
+  // cannot be deleted, so the cleanup must run after db.close().
+  context.after(() => { try { db.close(); } catch { /* already closed */ } rmSync(root, { recursive: true, force: true }); });
   ensureResultStudioSchema(db);
   ensureResultRefTransactionSchema(db);
   ensureGitRepositoryConsentSchema(db);
@@ -123,9 +124,11 @@ test('P5 ordinary Revision append cannot bypass exact replay verification', (con
 
 test('RS2 repository refuses to run against a database without the schema', (context) => {
   const root = mkdtempSync(join(tmpdir(), 'biof3-rs2-bare-'));
-  context.after(() => rmSync(root, { recursive: true, force: true }));
   const db = new Database(join(root, 'bare.db'));
-  context.after(() => { try { db.close(); } catch { /* noop */ } });
+  context.after(() => {
+    try { db.close(); } catch { /* noop */ }
+    rmSync(root, { recursive: true, force: true });
+  });
   const report = inspectResultStudioSchema(db);
   assert.equal(report.complete, false);
   assert.equal(report.missingTables.length > 0, true);
@@ -467,7 +470,6 @@ test('P6 preview slot count and running ChangeSet creation are one SQLite transa
 
 test('RS2 recovers state across a real database reopen', (context) => {
   const root = mkdtempSync(join(tmpdir(), 'biof3-rs2-reopen-'));
-  context.after(() => rmSync(root, { recursive: true, force: true }));
   const dbPath = join(root, 'reopen.db');
 
   const first = new Database(dbPath);
@@ -482,7 +484,10 @@ test('RS2 recovers state across a real database reopen', (context) => {
 
   // 模拟应用重启
   const second = new Database(dbPath);
-  context.after(() => { try { second.close(); } catch { /* noop */ } });
+  context.after(() => {
+    try { second.close(); } catch { /* noop */ }
+    rmSync(root, { recursive: true, force: true });
+  });
   const repoB = createResultStudioRepository(second);
   const restored = repoB.getChangeSet('cs_persist');
   assert.equal(restored.status, 'adopted');
