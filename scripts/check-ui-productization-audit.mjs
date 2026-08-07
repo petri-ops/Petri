@@ -25,6 +25,10 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // UX1H implementation landed before the target row was reconciled from
   // unit-only evidence to the current in_progress + Electron evidence state.
   '7995ee945b0221e2507e1cce11414849a942ac5d',
+  // devah 的 origin/main 不可变提交：自定义窗口控件 + 插件 status 治理。
+  // 代码提交 e6421e0 与台账登记 f624d76 拆分，提交信息未带 UI-###；
+  // 台账已在 f624d76 以 UI-106 登记（合并后改号 UI-129）。不重写共享历史。
+  'e6421e07fdf4337944bd7f186926aeeb082049c2',
 ])
 // These immutable implementation commits have an explicit later canonical
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
@@ -45,6 +49,9 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // The initial UX1H implementation is reconciled by the current UI-126 row
   // and acceptance evidence; do not rewrite the already-local implementation commit.
   '7995ee945b0221e2507e1cce11414849a942ac5d',
+  // devah 的 origin/main 不可变提交 e6421e0：窗口控件代码提交，台账由
+  // 后续 f624d76 单独登记（UI-106→合并后 UI-129）。豁免同提交台账要求。
+  'e6421e07fdf4337944bd7f186926aeeb082049c2',
 ])
 const UI_ID_PATTERN = /\bUI-\d{3}\b/g
 
