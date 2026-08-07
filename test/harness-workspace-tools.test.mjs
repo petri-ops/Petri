@@ -2,6 +2,7 @@ import { after, before, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import fs from 'node:fs/promises';
+import fssync from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
@@ -9,6 +10,32 @@ const require = createRequire(import.meta.url);
 const { createWorkspaceTools } = require('../core/r-server/agent-tools/workspace-tools.js');
 const { getToolDefs } = require('../core/r-server/agent-tools/tool-defs.js');
 const { dispatchTool } = require('../core/r-server/agent-tools/index.js');
+
+// Windows (without Developer Mode) and some CI images cannot create symlinks,
+// which breaks the escape-prevention fixture. Probe once and skip the symlink
+// portion on unsupported platforms — the same guard used by the RS5 suite.
+function symlinksSupported() {
+  try {
+    const probe = fssync.mkdtempSync(path.join(os.tmpdir(), 'biof3-symlink-probe-'));
+    try {
+      fssync.symlinkSync(path.join(probe, 'target'), path.join(probe, 'link'));
+      return true;
+    } catch {
+      return false;
+    } finally {
+      fssync.rmSync(probe, { recursive: true, force: true });
+    }
+  } catch {
+    return false;
+  }
+}
+
+// The shell-command and symlink-escape tests below assume a POSIX shell and
+// filesystem. On Windows the spawned shell (cmd.exe / Git Bash) reports paths
+// like `/tmp/...` that do not correspond to Node's os.tmpdir() (C:\Users\...\Temp),
+// and symlink-escape resolution differs. CI (macOS) exercises these; skip on win32.
+const isWindows = process.platform === 'win32';
+const maybeSkipShell = isWindows ? test.skip : test;
 
 let sandboxRoot;
 let workspaceRoot;
@@ -26,7 +53,9 @@ before(async () => {
   await fs.writeFile(path.join(workspaceRoot, 'data', 'genes.csv'), 'gene,score\nTP53,4.2\nEGFR,3.1\n');
   await fs.writeFile(path.join(workspaceRoot, 'notes.md'), '# Project\nTP53 is important.\n');
   await fs.writeFile(path.join(outsideRoot, 'secret.txt'), 'outside');
-  await fs.symlink(outsideRoot, path.join(workspaceRoot, 'escape'));
+  if (symlinksSupported()) {
+    await fs.symlink(outsideRoot, path.join(workspaceRoot, 'escape'));
+  }
 
   const fakeDb = {
     getProject(projectId) {
@@ -151,11 +180,13 @@ test('dry-run preserves workspace authorization and edit preconditions', async (
   );
   assert.equal(sensitive.error, 'sensitive_path');
 
-  const escaped = await tools.writeFile(
-    { path: 'escape/preview.txt', content: 'preview\n', dryRun: true },
-    ctx
-  );
-  assert.equal(escaped.error, 'symlink_escape');
+  if (!isWindows) {
+    const escaped = await tools.writeFile(
+      { path: 'escape/preview.txt', content: 'preview\n', dryRun: true },
+      ctx
+    );
+    assert.equal(escaped.error, 'symlink_escape');
+  }
 
   const overwrite = await tools.writeFile(
     { path: 'notes.md', content: 'preview\n', dryRun: true },
@@ -379,9 +410,11 @@ test('blocks path traversal, absolute paths, sensitive files, and symlink escape
   assert.equal(sensitive.ok, false);
   assert.equal(sensitive.error, 'sensitive_path');
 
-  const escaped = await tools.readFile({ path: 'escape/secret.txt' }, ctx);
-  assert.equal(escaped.ok, false);
-  assert.equal(escaped.error, 'symlink_escape');
+  if (!isWindows) {
+    const escaped = await tools.readFile({ path: 'escape/secret.txt' }, ctx);
+    assert.equal(escaped.ok, false);
+    assert.equal(escaped.error, 'symlink_escape');
+  }
 });
 
 test('enforces project ownership', async () => {
@@ -390,7 +423,7 @@ test('enforces project ownership', async () => {
   assert.equal(denied.error, 'permission_denied');
 });
 
-test('full access executes general shell commands from the project root', async () => {
+maybeSkipShell('full access executes general shell commands from the project root', async () => {
   const result = await tools.executeCommand({ command: 'pwd', timeoutMs: 3000 }, ctx);
   assert.equal(result.ok, true);
   assert.equal(result.stdout.trim(), await fs.realpath(workspaceRoot));
@@ -417,7 +450,7 @@ test('full access executes general shell commands from the project root', async 
   assert.equal(await fs.readFile(path.join(workspaceRoot, 'marker.txt'), 'utf8'), 'changed\n');
 });
 
-test('command handler requires full access even when called without the central interceptor', async () => {
+maybeSkipShell('command handler requires full access even when called without the central interceptor', async () => {
   const result = await tools.executeCommand(
     { command: "printf 'blocked\\n' > read-mode-marker.txt" },
     { ...ctx, accessMode: 'read' }

@@ -1,0 +1,15 @@
+# 跨平台一致性（autocrlf 防御）
+#
+# 本仓库在 macOS 上以 LF 开发并入库。Windows 上 core.autocrlf=true 会把工作副本
+# 的 LF 转成 CRLF，从而破坏一切基于「文件内容 SHA / 逐字节比对」的校验，导致整条
+# g0 / acceptance 校验链在 Windows 上系统性失败，例如：
+#   - src/migrations/001_result_studio.sql 与 buildMigrationSql() 的「单一事实来源」比对
+#   - 插件脚本 golden fixture 的 sourceScriptSha256（RS7 漂移检查）
+#   - acceptance 证据 JSON 的 productionEvidenceSha256 / runnerSha256 比对
+#   - 各 g0/harness acceptance 脚本对自身文件的 runnerSha256 自检
+#
+# 统一用 `* text=auto eol=lf` 锁定所有文本文件的检出换行为 LF，
+# 既让 Windows 本地 `npm run check` 与 macOS/CI 行为一致，也防止该回归反复出现。
+# 注意：git 在 autocrlf 下会把 CRLF 工作文件视为「clean」，故首次需在 .gitattributes
+# 生效后显式将工作树重新规范为 LF（见提交说明 / 一次性 renormalize）。
+* text=auto eol=lf

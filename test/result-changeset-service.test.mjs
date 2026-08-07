@@ -21,11 +21,30 @@ const {
 } = require('../core/shared-backend/result-changeset-service');
 const { resolveResultStudioScriptOverride } = require('../core/r-server/mcp/registry')._test;
 
+// 符号链接在 Windows 非提权环境下默认禁止创建（EPERM），而 CI/macOS 支持。
+// 本文件用符号链接验证「脚本不得通过软链逃逸 ChangeSet 根目录」；
+// 不支持时跳过该子断言，避免 Windows 本地误报失败（macOS/CI 仍完整覆盖）。
+function symlinksSupported() {
+  const probe = mkdtempSync(join(tmpdir(), 'biof3-symlink-probe-'));
+  try {
+    symlinkSync(join(probe, 'target'), join(probe, 'link'));
+    return true;
+  } catch {
+    return false;
+  } finally {
+    try { rmSync(probe, { recursive: true, force: true }); } catch { /* noop */ }
+  }
+}
+const SYMLINKS_SUPPORTED = symlinksSupported();
+
 function fixture(context, suffix = '') {
   const workspaceRoot = mkdtempSync(join(tmpdir(), `biof3-rs5-${suffix}`));
-  context.after(() => rmSync(workspaceRoot, { recursive: true, force: true }));
   const db = new Database(join(workspaceRoot, '.rs5-test.db'));
-  context.after(() => { try { db.close(); } catch { /* already closed */ } });
+  // 先关库再删目录：Windows 上打开的 SQLite 文件无法删除（EPERM）。
+  context.after(() => {
+    try { db.close(); } catch { /* already closed */ }
+    rmSync(workspaceRoot, { recursive: true, force: true });
+  });
   ensureResultStudioSchema(db);
   const repository = createResultStudioRepository(db, { ensureSchema: false });
   const binding = bindProjectRepository({ workspaceRoot, projectId: 'p_1' });
@@ -353,10 +372,12 @@ test('RS5 execution bridge accepts only a hashed script inside the ChangeSet roo
   }), /materialized_script_hash_mismatch/);
   const outside = join(fx.workspaceRoot, 'outside.R');
   writeFileSync(outside, 'print(2)\n');
-  const link = join(root, 'escape.R');
-  symlinkSync(outside, link);
-  assert.throws(() => resolveResultStudioScriptOverride({
-    override: { changeSetId: 'cs_bridge', path: link, sha256: sha256(readFileSync(outside)) },
-    plugin: { language: 'r' }, projectId: 'p_1', dbModule,
-  }), /materialized_script_outside_changeset/);
+  if (SYMLINKS_SUPPORTED) {
+    const link = join(root, 'escape.R');
+    symlinkSync(outside, link);
+    assert.throws(() => resolveResultStudioScriptOverride({
+      override: { changeSetId: 'cs_bridge', path: link, sha256: sha256(readFileSync(outside)) },
+      plugin: { language: 'r' }, projectId: 'p_1', dbModule,
+    }), /materialized_script_outside_changeset/);
+  }
 });

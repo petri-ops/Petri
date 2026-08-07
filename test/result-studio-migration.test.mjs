@@ -41,11 +41,26 @@ const {
 const REAL_MIGRATIONS_DIR = join(REPO_ROOT, 'src', 'migrations');
 const MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '001_result_studio.sql');
 
+// 收集本文件所有临时目录，统一在「文件级」after 钩子里清理。
+// 文件级钩子在所有 test 级 after 钩子（含各用例的 db.close）之后运行，
+// 从而避免在 Windows 上删除仍被打开的 SQLite 文件（EPERM）。
+const tempDirs = [];
+
 function tempDir(context, prefix) {
   const root = mkdtempSync(join(tmpdir(), prefix));
-  context.after(() => rmSync(root, { recursive: true, force: true }));
+  tempDirs.push(root);
   return root;
 }
+
+test.after(() => {
+  for (const root of tempDirs) {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      // 清理失败不应影响测试结果（Windows 偶发的句柄残留）
+    }
+  }
+});
 
 function tableNames(dbPath) {
   const db = new Database(dbPath, { readonly: true });

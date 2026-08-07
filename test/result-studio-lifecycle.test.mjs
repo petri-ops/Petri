@@ -25,9 +25,12 @@ const {
 
 function fixture(context) {
   const workspaceRoot = mkdtempSync(join(tmpdir(), 'biof3-rs8-'));
-  context.after(() => rmSync(workspaceRoot, { recursive: true, force: true }));
   const db = new Database(join(workspaceRoot, 'rs8.db'));
-  context.after(() => { try { db.close(); } catch { /* closed */ } });
+  // 先关库再删目录：Windows 上打开的 SQLite 文件无法删除（EPERM）。
+  context.after(() => {
+    try { db.close(); } catch { /* closed */ }
+    rmSync(workspaceRoot, { recursive: true, force: true });
+  });
   ensureResultStudioSchema(db);
   const repository = createResultStudioRepository(db, { ensureSchema: false });
   const adapter = bindProjectRepository({ workspaceRoot, projectId: 'p_rs8' }).adapter;

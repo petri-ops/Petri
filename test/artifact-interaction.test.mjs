@@ -43,14 +43,30 @@ const DEG_ROWS = [
   { gene_id: 'ENSG00000012048', symbol: 'BRCA1', log2FoldChange: 1.1, pvalue: 4e-4, padj: 9e-3 },
 ];
 
+// 收集本文件所有临时目录，统一在「文件级」after 钩子里清理。
+// 文件级钩子在所有用例级 after 钩子（含各用例的 db.close / reopened.close）之后运行，
+// 从而避免 Windows 上删除仍被打开的 SQLite 文件（EPERM）。
+const tempDirs = [];
+
 function makeRepo(context) {
   const root = mkdtempSync(join(tmpdir(), 'biof3-rs3-'));
-  context.after(() => rmSync(root, { recursive: true, force: true }));
+  tempDirs.push(root);
   const db = new Database(join(root, 'rs3.db'));
+  // 关闭 makeRepo 自己持有的 DB（用例级 after 钩子）。
   context.after(() => { try { db.close(); } catch { /* already closed */ } });
   ensureResultStudioSchema(db);
   return { db, repo: createResultStudioRepository(db, { ensureSchema: false }), root, dbPath: join(root, 'rs3.db') };
 }
+
+test.after(() => {
+  for (const root of tempDirs) {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      // 偶发句柄残留，不阻断测试结论
+    }
+  }
+});
 
 // ---------------------------------------------------------------------------
 // 1. 稳定实体 ID，不依赖行号
