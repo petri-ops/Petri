@@ -8,12 +8,14 @@
  * 在下次 `npm run dev` 时自动启动——无需手动安装 R，也无需等
  * OSS 上的官方 windows-x64 制品（Week 3/4）。
  *
- * 原理：静默安装官方 R 4.6.1 到运行时目录 -> BiocManager 安装科学包。
+ * 原理：静默安装官方 R 4.5.2（与 macOS 已发布基线一致，详见
+ *   docs/runtime-version-baseline.md）到运行时目录 -> BiocManager 安装科学包。
  *
  * 用法（在 Windows 开发机，需网络；R 安装可能弹 UAC，点允许）：
  *   node scripts/provision-win-r-runtime.mjs
  * 环境变量：
- *   BIOF3_R_VERSION       R 版本（默认 4.6.1，须为 CRAN bin/windows/base 当前在线的版本）
+ *   BIOF3_R_VERSION       R 版本（默认 4.5.2×x；≥4.6.1 从 base 根目录拉取，历史版本从
+ *                         bin/windows/base/old/<ver>/ 拉取）
  *   BIOF3_LOCAL_DATA_DIR  覆盖数据根目录（默认 Documents/BioF3-Local）
  */
 
@@ -27,7 +29,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
 const PACKAGES = path.join(REPO_ROOT, 'resources', 'built-in-plugins', 'r-runtime-packages.txt');
 
-const R_VERSION = process.env.BIOF3_R_VERSION || '4.6.1';
+const R_VERSION = process.env.BIOF3_R_VERSION || '4.5.2';
 const DATA_ROOT = process.env.BIOF3_LOCAL_DATA_DIR
   ? path.resolve(process.env.BIOF3_LOCAL_DATA_DIR)
   : path.join(os.homedir(), 'Documents', 'BioF3-Local');
@@ -79,7 +81,14 @@ async function main() {
   fs.mkdirSync(TARGET, { recursive: true });
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-r-'));
   const installer = path.join(tmp, `R-${R_VERSION}-win.exe`);
-  const installerUrl = `https://cran.r-project.org/bin/windows/base/R-${R_VERSION}-win.exe`;
+  // CRAN bin/windows/base 只保留当前最新版在根目录；历史版本(如 4.5.2)在
+  // bin/windows/base/old/<version>/ 子目录。这里沿用与 macOS 一致的版本基线
+  // R 4.5.2（见 docs/runtime-version-baseline.md），因此必须从 old 目录拉取。
+  const BASE = 'https://cran.r-project.org/bin/windows/base';
+  const isCurrent = R_VERSION === '4.6.1'; // 当前 base 根目录在线的版本
+  const installerUrl = isCurrent
+    ? `${BASE}/R-${R_VERSION}-win.exe`
+    : `${BASE}/old/${R_VERSION}/R-${R_VERSION}-win.exe`;
 
   try {
     await download(installerUrl, installer);

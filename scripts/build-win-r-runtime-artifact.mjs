@@ -2,12 +2,17 @@
 /**
  * build-win-r-runtime-artifact.mjs
  * ---------------------------------------------------------------
- * 在「装有 R 4.5 的 Windows 构建机」上，组装 BioF3 的 windows-x64
+ * 在「装有 R 4.5.2 的 Windows 构建机」上，组装 BioF3 的 windows-x64
  * R 运行时制品（对应 manifest.json 的 biof3-r-runtime）。
  *
  * 产物：一个 zip，内部根目录为 `R/`，解压到
  *   userData/runtimes/R 后，resolveRuntime('r') 即可命中
  *   userData/runtimes/R/bin/Rscript.exe。
+ *
+ * ⚠️ 版本基线：必须用 R 4.5.2（与 macOS 已发布基线一致，见
+ *   docs/runtime-version-baseline.md）。此脚本从源 R prefix 复制，
+ *   默认继承 build 机安装的 R 版本——请确保 build 机装的是 4.5.2
+ *   （Windows 开发者机可用 provision-win-r-runtime.mjs 安装）。
  *
  * 用法（在 Windows 构建机）：
  *   node scripts/build-win-r-runtime-artifact.mjs
