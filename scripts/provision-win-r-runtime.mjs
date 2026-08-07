@@ -8,12 +8,12 @@
  * 在下次 `npm run dev` 时自动启动——无需手动安装 R，也无需等
  * OSS 上的官方 windows-x64 制品（Week 3/4）。
  *
- * 原理：静默安装官方 R 4.5 到运行时目录 -> BiocManager 安装科学包。
+ * 原理：静默安装官方 R 4.6.1 到运行时目录 -> BiocManager 安装科学包。
  *
  * 用法（在 Windows 开发机，需网络；R 安装可能弹 UAC，点允许）：
  *   node scripts/provision-win-r-runtime.mjs
  * 环境变量：
- *   BIOF3_R_VERSION       R 版本（默认 4.5.0）
+ *   BIOF3_R_VERSION       R 版本（默认 4.6.1，须为 CRAN bin/windows/base 当前在线的版本）
  *   BIOF3_LOCAL_DATA_DIR  覆盖数据根目录（默认 Documents/BioF3-Local）
  */
 
@@ -27,7 +27,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
 const PACKAGES = path.join(REPO_ROOT, 'resources', 'built-in-plugins', 'r-runtime-packages.txt');
 
-const R_VERSION = process.env.BIOF3_R_VERSION || '4.5.0';
+const R_VERSION = process.env.BIOF3_R_VERSION || '4.6.1';
 const DATA_ROOT = process.env.BIOF3_LOCAL_DATA_DIR
   ? path.resolve(process.env.BIOF3_LOCAL_DATA_DIR)
   : path.join(os.homedir(), 'Documents', 'BioF3-Local');
