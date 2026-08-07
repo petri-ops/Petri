@@ -81,11 +81,14 @@ async function main() {
     fs.mkdirSync(extractTmp, { recursive: true });
     sh('powershell.exe', ['-NoProfile', '-Command', `Expand-Archive -Path '${embedZip}' -DestinationPath '${extractTmp}' -Force`]);
 
-    // 嵌入版解压出一个子目录，把内容移到 TARGET 根
-    const inner = fs.readdirSync(extractTmp)[0];
-    const innerDir = path.join(extractTmp, inner);
-    for (const f of fs.readdirSync(innerDir)) {
-      fs.renameSync(path.join(innerDir, f), path.join(TARGET, f));
+    // Python 嵌入版 zip 是平铺结构（无顶层子目录）。若解压后 extractTmp
+    // 下恰好只有一个目录条目，则视为顶层包目录；否则直接用 extractTmp。
+    const entries = fs.readdirSync(extractTmp);
+    const onlyDir = entries.length === 1 && fs.statSync(path.join(extractTmp, entries[0])).isDirectory()
+      ? path.join(extractTmp, entries[0])
+      : extractTmp;
+    for (const f of fs.readdirSync(onlyDir)) {
+      fs.renameSync(path.join(onlyDir, f), path.join(TARGET, f));
     }
 
     // 让嵌入版支持 pip：取消 ._pth 中 `import site` 的注释并包含 Lib/site-packages
