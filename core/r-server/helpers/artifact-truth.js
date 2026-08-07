@@ -236,7 +236,9 @@ function reconcileArtifactTruth({
     };
     delete normalized._source;
     if (typeof canonicalizePath === 'function') {
-      normalized.canonicalPath = item.canonicalPath || canonicalizePath(filePath);
+      const rawCanonical = item.canonicalPath || canonicalizePath(filePath);
+      normalized.canonicalPath =
+        typeof rawCanonical === 'string' ? rawCanonical.split(path.sep).join('/') : rawCanonical;
     }
     validArtifacts.push(normalized);
   }
