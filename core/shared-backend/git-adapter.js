@@ -69,8 +69,13 @@ function redactGitDiagnostic(value, scope = {}) {
   ];
   for (const [absolute, token] of replacements) {
     if (!absolute) continue;
-    const resolved = path.resolve(absolute);
-    while (text.includes(resolved)) text = text.replace(resolved, token);
+    // Match both the raw value and the platform-resolved form so redaction
+    // works regardless of how the path string appears in the diagnostic
+    // (e.g. a Unix-style '/tmp/ws' passed as workTree on Windows).
+    const candidates = new Set([absolute, path.resolve(absolute)]);
+    for (const candidate of candidates) {
+      while (text.includes(candidate)) text = text.replace(candidate, token);
+    }
   }
   text = text.replace(SENSITIVE_VALUE, '<redacted>');
   text = text.replace(/\s+$/, '');
