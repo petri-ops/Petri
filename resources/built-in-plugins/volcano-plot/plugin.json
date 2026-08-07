@@ -1,5 +1,6 @@
 {
   "id": "volcano-plot",
+  "status": "canonical",
   "pluginManifestVersion": 1,
   "title": "火山图绘制",
   "version": "1.0.0",

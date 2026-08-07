@@ -1,5 +1,6 @@
 {
   "id": "gsea",
+  "status": "incubating",
   "pluginManifestVersion": 1,
   "title": "GSEA 基因集富集分析",
   "version": "1.0.0",

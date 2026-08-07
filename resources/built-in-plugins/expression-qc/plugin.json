@@ -1,5 +1,6 @@
 {
   "id": "expression-qc",
+  "status": "incubating",
   "title": "表达矩阵质量控制",
   "subtitle": "counts 矩阵数据质量门，不执行差异表达",
   "category": "bulk RNA-seq",
