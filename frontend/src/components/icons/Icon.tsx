@@ -77,6 +77,7 @@ export type IconName =
   | 'square'
   | 'square-stack'
   | 'minus'
+  | 'restore'
   | 'more-horizontal';
 
 interface IconProps {
@@ -511,6 +512,13 @@ const paths: Record<IconName, React.ReactNode> = {
     </>
   ),
   minus: <line x1="5" y1="12" x2="19" y2="12" />,
+  // Restore — window behind window (Lucide "copy"-style two rectangles)
+  restore: (
+    <>
+      <rect x="3" y="8" width="13" height="13" rx="2" />
+      <path d="M8 3h13a2 2 0 0 1 2 2v13" />
+    </>
+  ),
   'more-horizontal': (
     <>
       <circle cx="6" cy="12" r="1.75" />

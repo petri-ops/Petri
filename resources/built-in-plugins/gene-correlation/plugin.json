@@ -1,5 +1,6 @@
 {
   "id": "gene-correlation",
+  "status": "incubating",
   "pluginManifestVersion": 1,
   "title": "基因相关性热图",
   "version": "1.0.0",

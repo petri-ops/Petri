@@ -2,7 +2,79 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { useWorkspacePanelsContext } from './WorkspacePanelsContext';
+import { getBridge } from '@/lib/desktopBridge';
 import styles from './TitleBar.module.css';
+
+/**
+ * True when running inside the BioF3 desktop app on macOS, where the OS
+ * draws native traffic-light controls (left side) and we must NOT render
+ * custom window controls. On Windows/Linux the window is frameless, so we
+ * draw our own buttons.
+ */
+const isMac =
+  typeof window !== 'undefined' && window.biof3Desktop?.platform === 'darwin';
+
+/**
+ * Custom frameless window controls (minimize / maximize-restore / close).
+ * Rendered ONLY on non-macOS. Calls the existing `window` IPC bridge that
+ * the preload already exposes (`minimize`, `maximize` [toggles], `close`,
+ * `isMaximized`).
+ */
+export function WindowControls(): React.ReactElement {
+  const bridge = getBridge('window');
+  const [isMaximized, setIsMaximized] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!bridge) return;
+    let cancelled = false;
+    bridge
+      .isMaximized()
+      .then((maximized) => {
+        if (!cancelled) setIsMaximized(maximized);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [bridge]);
+
+  if (!bridge) return <></>;
+
+  return (
+    <div className={styles.windowControls}>
+      <button
+        type="button"
+        className={styles.winBtn}
+        onClick={() => bridge.minimize()}
+        title="最小化"
+        aria-label="最小化"
+      >
+        <Icon name="minus" size={14} />
+      </button>
+      <button
+        type="button"
+        className={styles.winBtn}
+        onClick={() => {
+          bridge.maximize();
+          setIsMaximized((prev) => !prev);
+        }}
+        title={isMaximized ? '还原' : '最大化'}
+        aria-label={isMaximized ? '还原' : '最大化'}
+      >
+        <Icon name={isMaximized ? 'restore' : 'square'} size={14} />
+      </button>
+      <button
+        type="button"
+        className={`${styles.winBtn} ${styles.winBtnClose}`}
+        onClick={() => bridge.close()}
+        title="关闭"
+        aria-label="关闭"
+      >
+        <Icon name="x" size={14} />
+      </button>
+    </div>
+  );
+}
 
 function getFallbackTitle(pathname: string): string {
   if (pathname.startsWith('/project/')) return '梳理开发进展';
@@ -181,11 +253,12 @@ export function TitleBar(): React.ReactElement {
 
   const displayTitle = title || getFallbackTitle(location.pathname);
   const resizeRail = 1;
-  // 102px window-control rail + 32px panel-toggle rail. Keep this in sync
-  // with the fixed rails in TitleBar.module.css so collapsed chrome cannot
-  // overflow into the result title at narrow widths or renderer zoom levels.
-  const collapsedLeftRail = 134;
-  const collapsedRightRail = 56;
+  const collapsedLeftRail = isMac ? 180 : 146;
+  // Collapsed right rail must fit the windowTools (bottom-terminal + right-panel
+  // toggles) AND, on Windows/Linux, the custom WindowControls (minimize /
+  // maximize / close). 56px only covered windowTools, so once WindowControls
+  // render the centered summary button slid under the minimize button.
+  const collapsedRightRail = isMac ? 80 : 196;
   const leftSpan = panels.leftOpen ? leftPanelWidth + resizeRail : collapsedLeftRail;
   const rightSpan = panels.rightOpen ? rightPanelWidth + resizeRail : collapsedRightRail;
   const titleBarStyle = {
@@ -193,54 +266,14 @@ export function TitleBar(): React.ReactElement {
     ['--titlebar-right-span' as string]: `${rightSpan}px`,
   } as React.CSSProperties;
 
-  const isDesktop = typeof window !== 'undefined' && window.biof3Desktop?.isDesktop === true;
-
   return (
     <header
       className={styles.titleBar}
       style={titleBarStyle}
-      onDoubleClick={win.onTitleBarDoubleClick}
+      onDoubleClick={!isMac ? win.onTitleBarDoubleClick : undefined}
     >
-      <div className={`${styles.leftZone} ${!panels.leftOpen ? styles.leftZoneCollapsed : ''}`}>
-        <div className={styles.trafficZone}>
-          {isDesktop ? (
-            <>
-              <button
-                type="button"
-                className={`${styles.winBtn} ${styles.winBtnClose}`}
-                onClick={win.close}
-                aria-label="关闭窗口"
-                title="关闭"
-              >
-                <Icon name="x" size={11} strokeWidth={2.4} />
-              </button>
-              <button
-                type="button"
-                className={styles.winBtn}
-                onClick={win.minimize}
-                aria-label="最小化窗口"
-                title="最小化"
-              >
-                <Icon name="minus" size={11} strokeWidth={2.4} />
-              </button>
-              <button
-                type="button"
-                className={styles.winBtn}
-                onClick={win.toggleMaximize}
-                aria-label={win.isMaximized ? '还原窗口' : '最大化窗口'}
-                title={win.isMaximized ? '还原' : '最大化'}
-              >
-                <Icon
-                  name={win.isMaximized ? 'square-stack' : 'square'}
-                  size={win.isMaximized ? 10 : 11}
-                  strokeWidth={2.2}
-                />
-              </button>
-            </>
-          ) : (
-            <div className={styles.trafficPlaceholder} aria-hidden="true" />
-          )}
-        </div>
+      <div className={styles.leftZone}>
+        {isMac && <div className={styles.trafficZone} aria-hidden="true" />}
 
         <div className={styles.leftTools}>
           <button
@@ -441,6 +474,8 @@ export function TitleBar(): React.ReactElement {
             <Icon name="panel-right" size={15} />
           </button>
         </div>
+
+        {!isMac && <WindowControls />}
       </div>
     </header>
   );

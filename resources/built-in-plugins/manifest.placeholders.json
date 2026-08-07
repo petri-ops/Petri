@@ -231,6 +231,18 @@
       "field": "artifacts.macos-arm64.sizeBytes",
       "current": null,
       "needsFillFrom": "Week 4 release pipeline"
+    },
+    {
+      "pluginId": "biof3-py-runtime",
+      "field": "artifacts.windows-x64",
+      "current": null,
+      "needsFillFrom": "Week 3/4 release pipeline (windows-x64 runtime artifact — produced by scripts/build-win-runtime-artifact.mjs, uploaded to OSS, then fill url/sizeBytes/sha256 here and in manifest.json)"
+    },
+    {
+      "pluginId": "biof3-r-runtime",
+      "field": "artifacts.windows-x64",
+      "current": null,
+      "needsFillFrom": "Week 3/4 release pipeline (windows-x64 R runtime artifact — produced by the R bundling step, uploaded to OSS, then fill url/sizeBytes/sha256 here and in manifest.json)"
     }
   ]
 }

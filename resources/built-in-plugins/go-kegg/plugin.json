@@ -1,5 +1,6 @@
 {
   "id": "go-kegg",
+  "status": "incubating",
   "pluginManifestVersion": 1,
   "title": "GO/KEGG 富集分析",
   "version": "1.0.0",

@@ -2,8 +2,12 @@ const fs = require('fs');
 const path = require('path');
 
 function getPythonExecutableCandidates(platform = process.platform) {
+  // Must stay in sync with platform-compat.getRuntimeBinCandidates for win32.
+  // Covers the Store shim, python3.x aliases, and the `py.exe` launcher so a
+  // user-installed Runtime dir (userData/runtimes/Python) is recognised across
+  // Python 3.11–3.13 installs.
   return platform === 'win32'
-    ? ['python.exe', 'python3.exe', 'python3.11.exe']
+    ? ['python.exe', 'python3.exe', 'python3.11.exe', 'python3.12.exe', 'python3.13.exe', 'py.exe']
     : ['python3', 'python'];
 }
 

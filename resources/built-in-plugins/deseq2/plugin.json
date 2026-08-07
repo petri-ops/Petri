@@ -1,5 +1,6 @@
 {
   "id": "deseq2",
+  "status": "canonical",
   "pluginManifestVersion": 1,
   "title": "DESeq2 差异分析",
   "version": "1.0.0",

@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "updated": "2026-07-14",
   "checksumAlgorithm": "sha256",
-  "notes": "Per-platform artifact schema (Week 2 发行可信化). Only macos-arm64 declared; windows-x64/macos-x64/linux-x64 have NO artifacts (release-contract.json platforms[*].supported = false until Week 3/4). See manifest.placeholders.json for placeholder fields pending Week 4 CI fill-in. Built-in plugins use built-in:// pseudo-URLs and ship under resources/built-in-plugins/{id}/.",
+  "notes": "Per-platform artifact schema (Week 2 发行可信化). Only macos-arm64 has real artifacts; windows-x64/macos-x64/linux-x64 have NO artifacts yet (release-contract.json platforms[*].supported = false until Week 3/4). windows-x64 runtime artifacts for biof3-r-runtime/biof3-py-runtime are planned and tracked as placeholders in manifest.placeholders.json (url/sizeBytes/sha256 = null) pending Week 3/4 CI fill-in. See manifest.placeholders.json for placeholder fields pending Week 4 CI fill-in. Built-in plugins use built-in:// pseudo-URLs and ship under resources/built-in-plugins/{id}/.",
   "plugins": {
     "biof3-r-runtime": {
       "id": "biof3-r-runtime",
@@ -47,6 +47,7 @@
     },
     "volcano-plot": {
       "id": "volcano-plot",
+      "status": "canonical",
       "title": "火山图绘制",
       "version": "1.0.0",
       "kind": "plugin",
@@ -75,6 +76,7 @@
     },
     "gene-correlation": {
       "id": "gene-correlation",
+      "status": "incubating",
       "title": "基因相关性热图",
       "version": "1.0.0",
       "kind": "plugin",
@@ -103,6 +105,7 @@
     },
     "pca-explorer": {
       "id": "pca-explorer",
+      "status": "incubating",
       "title": "PCA 可视化",
       "version": "1.0.0",
       "kind": "plugin",
@@ -132,6 +135,7 @@
     },
     "sample-metadata-validator": {
       "id": "sample-metadata-validator",
+      "status": "incubating",
       "title": "样本元数据校验",
       "version": "1.0.0",
       "kind": "plugin",
@@ -160,6 +164,7 @@
     },
     "expression-qc": {
       "id": "expression-qc",
+      "status": "incubating",
       "title": "表达矩阵质量控制",
       "version": "1.0.0",
       "kind": "plugin",
@@ -188,6 +193,7 @@
     },
     "deg-standardizer": {
       "id": "deg-standardizer",
+      "status": "incubating",
       "title": "DEG 标准化",
       "version": "1.0.0",
       "kind": "plugin",
@@ -216,6 +222,7 @@
     },
     "go-kegg": {
       "id": "go-kegg",
+      "status": "incubating",
       "title": "GO/KEGG 富集分析",
       "version": "1.0.0",
       "kind": "plugin",
@@ -251,6 +258,7 @@
     },
     "gsea": {
       "id": "gsea",
+      "status": "incubating",
       "title": "GSEA 基因集富集分析",
       "version": "1.0.0",
       "kind": "plugin",
@@ -287,6 +295,7 @@
     },
     "wgcna": {
       "id": "wgcna",
+      "status": "incubating",
       "title": "WGCNA 加权基因共表达网络分析",
       "version": "1.0.0",
       "kind": "plugin",
@@ -765,6 +774,7 @@
     },
     "deseq2": {
     "id": "deseq2",
+    "status": "canonical",
     "title": "DESeq2 差异分析",
     "version": "1.0.0",
     "kind": "plugin",
