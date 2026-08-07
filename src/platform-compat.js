@@ -6,10 +6,16 @@ function getNodeLocator(platform = process.platform) {
 
 function getRuntimeBinCandidates(lang, platform = process.platform) {
   if (lang === 'r') {
-    return platform === 'win32' ? ['Rscript.exe'] : ['Rscript', 'Rscript.exe'];
+    // Windows R installs Rscript.exe AND R.exe under bin/; check both so a
+    // user runtime dir is recognised even if only R.exe is present.
+    return platform === 'win32' ? ['Rscript.exe', 'R.exe'] : ['Rscript', 'Rscript.exe'];
   }
+  // Windows: cover the Microsoft Store python.exe shim, the python3.x aliases,
+  // and the `py.exe` launcher (supports `-c` for prefix detection). Newer
+  // 3.12/3.13 installs are included so DEV-mode system detection keeps working
+  // as users upgrade.
   return platform === 'win32'
-    ? ['python.exe', 'python3.exe', 'python3.11.exe']
+    ? ['python.exe', 'python3.exe', 'python3.11.exe', 'python3.12.exe', 'python3.13.exe', 'py.exe']
     : ['python3', 'python'];
 }
 
