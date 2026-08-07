@@ -1,5 +1,6 @@
 {
   "id": "pca-explorer",
+  "status": "incubating",
   "pluginManifestVersion": 1,
   "title": "PCA 可视化",
   "version": "1.0.0",

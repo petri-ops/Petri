@@ -23,7 +23,10 @@ function spawnChild(command, args, options = {}) {
   const { shutdownOnExit = 'error', ...spawnOptions } = options;
   const child = spawn(command, args, {
     stdio: 'inherit',
-    shell: false,
+    // npm.cmd / npx.cmd are batch files; on Windows they can only be launched
+    // via a shell (cmd.exe /c). shell:true is required there and also safe on
+    // POSIX (runs via sh -c).
+    shell: true,
     detached: !isWin,
     ...spawnOptions,
   });

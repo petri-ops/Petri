@@ -1,6 +1,6 @@
 # BioF3 Desktop UI 产品化审计台账
 
-最后更新：2026-07-25
+最后更新：2026-08-07
 
 状态：**Stage 1 验收完成（31/31 verified）；UI-031～UI-035、UI-054～UI-064 已完成真实 Provider、长任务、取消恢复及明暗主题实机验收；UI-036～UI-048 的既有验收状态见下表**
 
@@ -174,6 +174,7 @@ npm run check
 | UI-103 | verified | P1 | W-03, W-04 | P-03, C-04, C-06 | Result Studio / ChangeSet 修改进度 | 隔离编辑会经历 materialize、Git candidate、Job、validator 和 Revision 多阶段；若前端只显示普通工具调用，用户无法判断修改停在哪一步，切到下一工具时阶段反馈也可能消失 | `result_edit_progress` SSE 与有界 run store 保留 change_set/materialize/commit/job/revision/preview/failed/cancelled。RS9 将失败、取消、历史 reopen 的 ChangeSet 回归与真实服务中断/重启 renderer 合并验收：重启后仍显示“修改现场已恢复”、同一候选和操作入口，阶段证据不因下一个工具或进程退出消失，故晋升 verified | G0-RS5 / G0-RS6 / G0-RS9 |
 | UI-104 | verified | P1 | W-04 | P-02, P-03, C-04, C-06 | Result Studio / 结果版本比较与操作 | 候选 Revision 已生成但用户只能看到普通结果，无法理解变化、原子采用、撤销或把历史恢复成新版本；直接展示完整 Git 细节又会淹没科学结果 | 结果侧栏新增紧凑版本区：默认仅显示当前版本、候选/采用状态、来源、文件数和比较/采用/撤销；展开后按 SVG/图像、表格语义、JSON 字段、文本 Git diff 和 Revision history 分层，Git commit/ref 折叠到高级信息。采用通过 Git CAS + SQLite transaction 切换全部 current，baseline 不显示撤销，历史恢复永远生成新 commit/ChangeSet/Revision。隔离真实链完成 v1→采用 v2→撤销 v1→恢复 v3，重复恢复幂等；真实 renderer 覆盖明亮、夜间与 820×900，窄窗 `innerWidth=clientWidth=scrollWidth=820`，无页面级横向溢出 | G0-RS6 / RESULT-REVISION-REVIEW |
 | UI-105 | verified | P1 | W-04 | P-02, P-05, C-04, C-05, C-06 | Result Studio / 耐久恢复与大表性能 | 退出或中断后修改现场只存在于运行内存；大表比较只有固定前缀摘要，无法继续读取；用户也看不到版本存储是否健康、重复内容和资源压力 | lifecycle/storage、checkpoint 恢复、content-addressed 去重、plan-token GC、preview 资源预算与 byte-cursor 分页已进入同一生产投影。RS9 真实五万行 DEG 表只渲染当前可见 24 行，展示 4 个版本、4421 KB 逻辑占用和 2210 KB 可去重空间；服务中断重启后同一候选恢复。明暗、1440×900、820×900 五态截图通过，820px `innerWidth=clientWidth=scrollWidth=820`，故晋升 verified | G0-RS8 / G0-RS9 / RESULT-LIFECYCLE |
+| UI-106 | verified | P1 | W-01 | C-02 | TitleBar 全局 | 右侧栏收起后,摘要按钮(centerTitle 的 toggleSummary)与最小化按钮(WindowControls)重叠,Windows 自定义窗口控件下内容向左溢出压住摘要按钮 | `e6421e0` 将 TitleBar 3 列 Grid 收起态 rightSpan 从硬编码 56px 改为平台感知 `isMac ? 80 : 196`(Windows 预留 22px 余量以覆盖 windowTools + WindowControls 实际宽度);顺带把 collapsedLeftRail 改为 `isMac ? 180 : 146` 修正 macOS 收起左侧栏时红绿灯区与工具溢出。前端 tsc 0 错误;用户 Windows 实机确认重叠消失("厉害呀 我看到效果了") | UI-2 |
 - UI-032 属于 `P-07 模型网关与 AI Provider` 的 Harness 能力子系统（Stage 3 M1），现已与 UI-031/UI-033/UI-034 一起完成实机验收。
 - 不允许破坏：设置页窄窗布局、计算与数据分类既有 `ComputeExecution`/`DataManagement` 组件、`run_tool → tool_job → artifact truth` 执行链。
 - 验收同时覆盖无 bundle 的空状态与真实 bundle 条目状态；面板保持只读，不提供绕过 Harness 编排层的 provision/remove 操作。

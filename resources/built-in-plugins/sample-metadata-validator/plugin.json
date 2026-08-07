@@ -1,5 +1,6 @@
 {
   "id": "sample-metadata-validator",
+  "status": "incubating",
   "title": "样本元数据校验",
   "subtitle": "counts 矩阵与 metadata 实验设计对齐验证",
   "category": "bulk RNA-seq",

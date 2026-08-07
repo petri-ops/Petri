@@ -1,5 +1,6 @@
 {
   "id": "deg-standardizer",
+  "status": "incubating",
   "title": "DEG 标准化",
   "subtitle": "差异分析结果转换为标准 DEG Artifact",
   "category": "bulk RNA-seq",

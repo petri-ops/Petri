@@ -1,5 +1,6 @@
 {
   "id": "wgcna",
+  "status": "incubating",
   "pluginManifestVersion": 1,
   "title": "WGCNA 加权基因共表达网络分析",
   "version": "1.0.0",
