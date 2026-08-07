@@ -36,6 +36,21 @@ const TOOL_SUMMARY_PRIVATE_KEYS = new Set([
   'jobDir', 'outputDir', 'resultDir', 'workDir', 'stdout', 'stderr', 'script',
 ]);
 
+// UX1H: per-toolJobId rate limit for summary-only retry (abuse guard).
+// Sliding 10-minute window, max 5 attempts. In-memory per r-server process.
+const SUMMARY_RETRY_LIMIT = 5;
+const SUMMARY_RETRY_WINDOW_MS = 10 * 60 * 1000;
+const summaryRetryBuckets = new Map();
+
+function checkSummaryRetryAllowed(toolJobId) {
+  const now = Date.now();
+  const attempts = (summaryRetryBuckets.get(toolJobId) || []).filter((t) => now - t < SUMMARY_RETRY_WINDOW_MS);
+  summaryRetryBuckets.set(toolJobId, attempts);
+  if (attempts.length >= SUMMARY_RETRY_LIMIT) return false;
+  attempts.push(now);
+  return true;
+}
+
 function toolSummaryEvidence(value, depth = 0) {
   if (depth > 5 || value == null) return value == null ? value : '[omitted]';
   if (typeof value === 'string') return value.slice(0, 2000);
@@ -82,6 +97,9 @@ module.exports = function registerAiChatRoute(app) {
     const artifactTruth = job.result && job.result.artifactTruth;
     if (!artifactTruth || artifactTruth.status !== 'valid') {
       return res.status(409).json({ status: 'error', error: '产物尚未通过 Artifact Truth 验证' });
+    }
+    if (!checkSummaryRetryAllowed(String(toolJobId))) {
+      return res.status(429).json({ status: 'error', error: '总结重试过于频繁，请稍后再试' });
     }
 
     let boundedResult = '{}';

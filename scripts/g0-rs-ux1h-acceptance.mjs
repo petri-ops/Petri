@@ -31,6 +31,7 @@ const EVIDENCE_DIR = path.join(ROOT, 'acceptance/g0-rs-ux1h');
 const SCREENSHOT_DIR = path.join(EVIDENCE_DIR, 'screenshots');
 const FULL_EVIDENCE_PATH = path.join(EVIDENCE_DIR, 'async-tool-surface.json');
 const SOFT_EVIDENCE_PATH = path.join(EVIDENCE_DIR, 'summary-failure-renders-soft.json');
+const RETRY_EVIDENCE_PATH = path.join(EVIDENCE_DIR, 'retry-summary-does-not-rerun-tool.json');
 const COUNTS_SOURCE_PATH = path.join(ROOT, 'tmp/airway-test/airway_counts_symbol.csv');
 const METADATA_SOURCE_PATH = path.join(ROOT, 'tmp/airway-test/airway_metadata.csv');
 const TARGET_MESSAGE = '✓ 工具已完成，AI 总结暂时不可用';
@@ -250,6 +251,51 @@ function softFailureEvidence(evidence) {
   };
 }
 
+function retryDoesNotRerunToolEvidence(evidence, renderer) {
+  const retry = renderer.retryAssertion;
+  const before = retry?.before || {};
+  const after = retry?.after || {};
+  const initialRemaining = retry?.initialRemaining ?? null;
+  const finalRemaining = retry?.finalRemaining ?? null;
+  const dispatchConsistent = retry?.runningObserved === true
+    || (typeof finalRemaining === 'number' && typeof initialRemaining === 'number' && finalRemaining < initialRemaining);
+  return {
+    schemaVersion: 1,
+    evidenceId: 'g0-rs-ux1h-retry-summary-does-not-rerun-tool',
+    workPackage: evidence.workPackage,
+    classification: evidence.classification,
+    qualificationEligible: false,
+    sourceCommit: evidence.sourceCommit,
+    sourceDigest: evidence.sourceDigest,
+    dataset: evidence.dataset,
+    assertions: {
+      retryButtonClicked: retry?.retryClicked === true,
+      retryDispatchObserved: retry?.runningObserved === true,
+      retryButtonRemainingBefore: initialRemaining,
+      retryButtonRemainingAfter: finalRemaining,
+      retryButtonDecrementedOrRunning: dispatchConsistent,
+      completedDeseq2JobCountBeforeRetry: before.completedDeseq2JobCount,
+      completedDeseq2JobCountAfterRetry: after.completedDeseq2JobCount,
+      toolDidNotRerun: before.completedDeseq2JobCount === 1 && after.completedDeseq2JobCount === 1,
+      artifactTruthStatusBefore: before.artifactTruthStatus,
+      artifactTruthStatusAfter: after.artifactTruthStatus,
+      artifactTruthStatusUnchanged: before.artifactTruthStatus === after.artifactTruthStatus,
+      artifactTruthBlockingBefore: before.artifactTruthBlocking,
+      artifactTruthBlockingAfter: after.artifactTruthBlocking,
+      artifactTruthBlockingUnchanged: before.artifactTruthBlocking === after.artifactTruthBlocking,
+      finalErrorShown: retry?.finalErrorShown === true,
+    },
+    passed: retry?.retryClicked === true
+      && dispatchConsistent
+      && before.completedDeseq2JobCount === 1
+      && after.completedDeseq2JobCount === 1
+      && before.artifactTruthStatus === 'valid'
+      && after.artifactTruthStatus === 'valid'
+      && before.artifactTruthBlocking === false
+      && after.artifactTruthBlocking === false,
+  };
+}
+
 export async function observeUx1h({
   writeEvidence = false,
   keep = false,
@@ -341,6 +387,7 @@ export async function observeUx1h({
       confirmationMessage: '确认：design=condition，对照组=control，实验组=treated。请执行 DESeq2。',
       expectedAssistantText: TARGET_MESSAGE,
       forbiddenAssistantText: FORBIDDEN_MESSAGE,
+      enableRetryAssertion: true,
       show,
     }, null, 2)}\n`, { mode: 0o600 });
 
@@ -384,13 +431,15 @@ export async function observeUx1h({
       noSeedPrecondition: runtime.noSeedPrecondition,
     });
     const softEvidence = softFailureEvidence(evidence);
-    evidence.passed = evidence.passed && softEvidence.passed;
+    const retryEvidence = retryDoesNotRerunToolEvidence(evidence, renderer);
+    evidence.passed = evidence.passed && softEvidence.passed && retryEvidence.passed;
     assertSanitizedP5Evidence(evidence);
     assertSanitizedP5Evidence(softEvidence);
-    console.log(JSON.stringify({ evidence, softEvidence }, null, 2));
+    assertSanitizedP5Evidence(retryEvidence);
+    console.log(JSON.stringify({ evidence, softEvidence, retryEvidence }, null, 2));
 
     if (writeEvidence) {
-      if (!evidence.passed || !softEvidence.passed) {
+      if (!evidence.passed || !softEvidence.passed || !retryEvidence.passed) {
         throw new Error('refusing_to_write_failed_ux1h_evidence');
       }
       if (!binding.sourceCommitMatchesSourceHashes) {
@@ -412,6 +461,7 @@ export async function observeUx1h({
       mkdirSync(EVIDENCE_DIR, { recursive: true });
       writeFileSync(FULL_EVIDENCE_PATH, `${JSON.stringify(evidence, null, 2)}\n`);
       writeFileSync(SOFT_EVIDENCE_PATH, `${JSON.stringify(softEvidence, null, 2)}\n`);
+      writeFileSync(RETRY_EVIDENCE_PATH, `${JSON.stringify(retryEvidence, null, 2)}\n`);
     }
 
     return { evidence, softEvidence };

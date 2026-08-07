@@ -202,7 +202,8 @@ core/shared-backend/result-studio-*.js
 | 2026-08-06 | active implementation | 已补齐成功 `run_tool` 的 `toolJobId` 活动持久化、服务端 summary-only 重试接口与按钮；接口按 user/project/conversation 核验 completed ToolJob + valid Artifact Truth，调用时不注册工具并持久化总结。工具完成但总结失败时 durable loop 收敛为 completed，避免重开后仍显示“执行中”；工具活动汇总改为“运行 N 次”以消除状态歧义。SimpleChat 运行期间新增最多 5 条待发送队列，任务完成并完成 SQLite 对账后自动发送。本轮按用户要求未运行测试或 Electron 验收，因此这些新增行为仍待阶段门验证。 |
 | 2026-08-06 | active checkpoint | 上述新增实现（`7e02f07` summary-only 重试面、`de83c58` 运行中排队）已经 `npm run g0:result-studio:ux1h` 全门验证通过：syntax、Node/前端 24/24、strict TypeScript、真实 Electron 验收链 EXIT=0（`passed:true`）。注：本次运行需 `env -u ELECTRON_RUN_AS_NODE ELECTRON_DISABLE_SANDBOX=1` 与系统 Node 23（better-sqlite3 ABI 131）。`retry-summary-does-not-rerun-tool.json` 证据仍缺，"重试不重跑工具"行为门未闭合 |
 | — | pending（下一阶段：终态分离设计） | **UX1H 最后一个大阶段：task"工具完成、总结分离"终态设计**。主线评估已否决"工具完成后强行切断总结流"（现有 cancel 会把会话写成 `cancelled`，破坏 Job/Artifact Truth 与会话持久化）。本阶段为 durable loop 设计一个合法终态（工具 completed + 总结 detached/可独立重试），约束：① 不动 cancel 语义；② 不动 `run_tool → tool_job → artifact truth` 唯一执行真相；③ 不引入第二执行器/第二 Job 表；④ 总结保持"可重试、失败 fail-soft 不掩盖工具成功"。先产出设计（含状态机迁移与持久化影响分析），实现后再做一次阶段级验收（补齐 `retry-summary-does-not-rerun-tool.json`） |
-| — | pending | 完成主对话与长工具执行的完整 async surface；验证本次 summary-only 重试确实不重跑工具。未完成前不将本计划或 UI-126 标为 `verified` |
+| 2026-08-06 | active checkpoint | **终态分离设计已定稿**（用户拍板三项决策）。状态机：run_tool 发起→卡片立即返回"已发起后台任务(tj_xxx)"(running，无 spinner)→tool_job 完成事件→`completed` + 工具 activity `success`(toolJobId 锚定，事实来源=artifact truth)；总结 stream 成功=正常 assistant 消息；总结超时/失败=assistant 行"工具已成功，AI 总结暂时不可用" + 独立重试按钮。持久化：(1) 终态复用 `completed` + 工具 activity `success`，总结为独立 assistant 消息带 `summaryRetry:{toolJobId, mode:'summary_only', toolExecution:'not_invoked'}` 元数据——**无新表、无新状态枚举**，满足约束②③；(2) 历史 running/已完成数据**无需迁移**，旧会话缺 tag 视为无总结/legacy，重试按钮只在存在 completed ToolJob + valid artifact truth 时出现；(3) 会话恢复事实来源=**tool_job 为权威**（完成判定）+ **对话消息为展示层**（总结内容），重开由"是否存在成功 summaryRetry 消息"反推；(4) 失败总结重试=前端 **3 次上限 + 2/4/8s 指数退避 + 冷却**，后端 **per-toolJobId 5 次/10min 限流**；(5) 重试按钮**仅"总结缺失/失败时"可见**，暂不加复制 toolJobId 按钮。实现=护栏+可见性（均增量），随后真实 Electron 验收补 `retry-summary-does-not-rerun-tool.json`。 |
+| 2026-08-06 | active implementation | 验收 harness 已落地：driver 新增“点击重试 AI 总结按钮 → 回查 backend 确认 deseq2 completed Job 数(1) 与 Artifact Truth(valid/非 blocking) 点击前后不变 → 写 retryAssertion”阶段；验收脚本新增 retryDoesNotRerunToolEvidence 并 --write 产出第三份证据 acceptance/g0-rs-ux1h/retry-summary-does-not-rerun-tool.json（§4.2 A-7 闭合项）。静态门全绿：syntax、Node 6/6、前端 24/24、strict TypeScript；真实 Electron 因命令沙箱无 GUI 无法运行，须开发态 macOS 实机 env -u ELECTRON_RUN_AS_NODE ELECTRON_DISABLE_SANDBOX=1（系统 Node 23）跑 npm run g0:result-studio:ux1h:update 产出 | 2026-08-06 | pending | 完成主对话与长工具执行的完整 async surface；验证本次 summary-only 重试确实不重跑工具。未完成前不将本计划或 UI-126 标为 `verified` |
 | — | pending | 收口前按风险驱动运行 G-1 ~ G-5 与剩余行为门；开发中不重复运行长耗时 Electron 链，只有产品行为或验收脚本发生实质变化才重跑 |
 | — | pending | 收口（同步 handoff、registry、UI audit、evidence） |
 
@@ -246,7 +247,7 @@ core/shared-backend/result-studio-*.js
 
 ## 10. 暂未决定的项
 
-- [ ] 是否在本计划收口后启动"完整"子 agent 工作包（用户拍板）。
-- [ ] `retrySummary` 按钮的可见性：始终可见 / 仅在 LLM 失败时可见（实现时定）。
-- [ ] 主对话"已发起后台任务"卡片的复制按钮：是否允许复制 `toolJobId`（用户拍板）。
-- [ ] **终态分离设计待决**（下一阶段设计稿回答）：新终态的命名与持久化形态（独立终态 vs completed + summary 子状态）；历史 running/已完成数据的迁移策略；总结 detached 后会话恢复时的事实来源（以 tool_job 为准还是会话消息为准）；失败总结的 retry 上限与退避。
+- [ ] 是否在本计划收口后启动"完整"子 agent 工作包（收口后再拍板，本计划不涵盖）。
+- [x] `retrySummary` 按钮的可见性：**已拍板（2026-08-06）= 仅"总结缺失/失败时"可见**，不在每次常驻（避免噪音）。依据：存在 completed ToolJob + valid artifact truth 且尚无成功的 summaryRetry 消息，或上次重试失败。
+- [x] 主对话"已发起后台任务"卡片的复制按钮：**已拍板（2026-08-06）= 暂不加**复制 `toolJobId` 按钮，保持范围克制，后续单独评估。
+- [x] **终态分离设计已定稿**（见 §7 终态分离设计 checkpoint）。四项子问题结论：① 终态命名与持久化形态 = 复用 `completed` + 工具 activity `success`(toolJobId 锚定)，总结为独立 assistant 消息带 `summaryRetry` 元数据，**无新表、无新状态枚举**；② 历史 running/已完成数据**无需迁移**，旧会话缺 tag 视为无总结/legacy；③ 总结 detached 后会话恢复事实来源 = **tool_job 为权威**（完成判定）+ **对话消息为展示层**（总结内容）；④ 失败总结 retry 上限与退避 = **前端 3 次 + 2/4/8s 指数退避 + 冷却，后端 per-toolJobId 5 次/10min 限流**。

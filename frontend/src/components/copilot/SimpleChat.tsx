@@ -198,8 +198,13 @@ export function SimpleChat({
   const [input, setInput] = useState('');
   const [starting, setStarting] = useState(false);
   const [queuedPrompts, setQueuedPrompts] = useState<string[]>([]);
+  const MAX_SUMMARY_RETRIES = 3;
+  const RETRY_BACKOFF_MS = [2000, 4000, 8000];
   const [summaryRetryState, setSummaryRetryState] = useState<Record<string, 'running' | 'done'>>({});
   const [summaryRetryErrors, setSummaryRetryErrors] = useState<Record<string, string>>({});
+  const [summaryRetryAttempts, setSummaryRetryAttempts] = useState<Record<string, number>>({});
+  const [summaryRetryCooldownUntil, setSummaryRetryCooldownUntil] = useState<Record<string, number>>({});
+  const [retryTick, setRetryTick] = useState(0);
   const [loading, setLoading] = useState(false);
   const [paramDraft, setParamDraft] = useState<Record<string, string>>({});
   const [approvalRepair, setApprovalRepair] = useState<ApprovalRepairState>({ status: 'idle' });
@@ -630,7 +635,11 @@ export function SimpleChat({
   }, [conversationId]);
 
   const retrySummary = useCallback(async (toolJobId: string) => {
-    if (!conversationId || summaryRetryState[toolJobId] === 'running') return;
+    const attempts = summaryRetryAttempts[toolJobId] ?? 0;
+    if (!conversationId) return;
+    if (summaryRetryState[toolJobId] === 'running') return;
+    if (attempts >= MAX_SUMMARY_RETRIES) return;
+    if (Date.now() < (summaryRetryCooldownUntil[toolJobId] ?? 0)) return;
     setSummaryRetryState((current) => ({ ...current, [toolJobId]: 'running' }));
     setSummaryRetryErrors((current) => {
       const next = { ...current };
@@ -650,8 +659,20 @@ export function SimpleChat({
       ]);
       clearConversationRun(conversationId);
       setSummaryRetryState((current) => ({ ...current, [toolJobId]: 'done' }));
+      setSummaryRetryAttempts((current) => {
+        const next = { ...current };
+        delete next[toolJobId];
+        return next;
+      });
+      setSummaryRetryCooldownUntil((current) => {
+        const next = { ...current };
+        delete next[toolJobId];
+        return next;
+      });
       await refreshConversations();
     } catch (error) {
+      const nextAttempts = attempts + 1;
+      setSummaryRetryAttempts((current) => ({ ...current, [toolJobId]: nextAttempts }));
       setSummaryRetryState((current) => {
         const next = { ...current };
         delete next[toolJobId];
@@ -661,8 +682,23 @@ export function SimpleChat({
         ...current,
         [toolJobId]: error instanceof Error ? error.message : 'AI 总结仍不可用，请稍后重试',
       }));
+      if (nextAttempts < MAX_SUMMARY_RETRIES) {
+        const backoff = RETRY_BACKOFF_MS[nextAttempts - 1] ?? 8000;
+        setSummaryRetryCooldownUntil((current) => ({ ...current, [toolJobId]: Date.now() + backoff }));
+      }
     }
-  }, [activeModel, activeModelId, conversationId, projectId, refreshConversations, summaryRetryState]);
+  }, [activeModel, activeModelId, conversationId, projectId, refreshConversations, summaryRetryState, summaryRetryAttempts, summaryRetryCooldownUntil]);
+
+  // UX1H: tick while any summary-retry cooldown is active so the "冷却中 Ns"
+  // label and re-enable update without a full external re-render.
+  useEffect(() => {
+    const now = Date.now();
+    const active = Object.values(summaryRetryCooldownUntil).filter((until) => until > now);
+    if (active.length === 0) return;
+    const minUntil = Math.min(...active);
+    const timer = window.setTimeout(() => setRetryTick((t) => t + 1), Math.max(250, minUntil - Date.now()));
+    return () => window.clearTimeout(timer);
+  }, [summaryRetryCooldownUntil, retryTick]);
 
   const approvePending = useCallback(async () => {
     if (!pendingApproval || streaming) return;
@@ -844,30 +880,42 @@ export function SimpleChat({
                         <HighlightedCode code={code} language={language} />
                       )) : undefined}
                     />
-                    {m.role === 'assistant' && m.summaryUnavailable && m.retryToolJobId && (
-                      <div className="sc-msg-actions sc-msg-actions-summary">
-                        <button
-                          type="button"
-                          className="sc-msg-action"
-                          onClick={() => void retrySummary(m.retryToolJobId!)}
-                          disabled={Boolean(summaryRetryState[m.retryToolJobId])}
-                          title="仅重新生成 AI 总结，不会再次运行分析工具"
-                        >
-                          <Icon
-                            name={summaryRetryState[m.retryToolJobId] === 'done' ? 'check' : 'refresh'}
-                            size={14}
-                          />
-                          {summaryRetryState[m.retryToolJobId] === 'running'
-                            ? '正在重试总结'
-                            : summaryRetryState[m.retryToolJobId] === 'done'
-                              ? '总结已生成'
-                              : '重试 AI 总结'}
-                        </button>
-                        {summaryRetryErrors[m.retryToolJobId] && (
-                          <span className="sc-msg-action-error">{summaryRetryErrors[m.retryToolJobId]}</span>
-                        )}
-                      </div>
-                    )}
+                    {m.role === 'assistant' && m.summaryUnavailable && m.retryToolJobId && summaryRetryState[m.retryToolJobId] !== 'done' && (() => {
+                      const tj = m.retryToolJobId!;
+                      const attempts = summaryRetryAttempts[tj] ?? 0;
+                      const cooling = Date.now() < (summaryRetryCooldownUntil[tj] ?? 0);
+                      const exhausted = attempts >= MAX_SUMMARY_RETRIES;
+                      const running = summaryRetryState[tj] === 'running';
+                      if (exhausted) {
+                        return (
+                          <div className="sc-msg-actions sc-msg-actions-summary">
+                            <span className="sc-msg-action-error">已达重试上限，请稍后再试</span>
+                          </div>
+                        );
+                      }
+                      const remaining = cooling ? Math.max(0, Math.ceil((summaryRetryCooldownUntil[tj]! - Date.now()) / 1000)) : 0;
+                      return (
+                        <div className="sc-msg-actions sc-msg-actions-summary">
+                          <button
+                            type="button"
+                            className="sc-msg-action"
+                            onClick={() => void retrySummary(tj)}
+                            disabled={running || cooling}
+                            title="仅重新生成 AI 总结，不会再次运行分析工具"
+                          >
+                            <Icon name="refresh" size={14} />
+                            {running
+                              ? '正在重试总结'
+                              : cooling
+                                ? `冷却中 ${remaining}s`
+                                : `重试 AI 总结（剩 ${MAX_SUMMARY_RETRIES - attempts} 次）`}
+                          </button>
+                          {summaryRetryErrors[tj] && (
+                            <span className="sc-msg-action-error">{summaryRetryErrors[tj]}</span>
+                          )}
+                        </div>
+                      );
+                    })()}
                     {m.role === 'assistant' && m.content && !m.pending && (
                       <div className="sc-msg-actions">
                         <button

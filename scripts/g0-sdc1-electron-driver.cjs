@@ -358,6 +358,7 @@ async function run(config) {
       chatPng = (await window.webContents.capturePage()).toPNG();
       writeFileSync(path.join(config.outputDir, 'summary-unavailable.png'), chatPng);
     }
+
     const jobsPayload = await backendJson(`${config.backendBaseUrl}/api/data/projects/${encodeURIComponent(config.projectId)}/jobs`);
     const jobs = Array.isArray(jobsPayload.jobs) ? jobsPayload.jobs : [];
     const completed = jobs.filter((job) => job.tool_id === 'deseq2' && job.status === 'completed');
@@ -368,6 +369,98 @@ async function run(config) {
     const result = statusJob.result || statusJob.result_json || job.result || {};
     const parsedResult = typeof result === 'string' ? JSON.parse(result) : result;
     const artifactTruth = parsedResult.artifactTruth || statusPayload.artifactTruth;
+
+    let retryAssertion = null;
+    if (config.enableRetryAssertion === true && summaryPresentation) {
+      const parseRemainingExpr = `
+        (() => {
+          const btn = [...document.querySelectorAll('button.sc-msg-action')]
+            .find((item) => (item.textContent || '').includes('重试 AI 总结'));
+          if (!btn) return null;
+          const txt = btn.textContent || '';
+          const idx = txt.indexOf('剩');
+          if (idx === -1) return null;
+          let digits = '';
+          for (const ch of txt.slice(idx)) {
+            if (ch >= '0' && ch <= '9') digits += ch;
+            else if (digits) break;
+          }
+          return digits ? Number(digits) : null;
+        })()
+      `;
+      const initialRemaining = await wc.executeJavaScript(parseRemainingExpr, true);
+      let retryClicked = false;
+      try {
+        await clickButton(wc, `
+          item.matches('button.sc-msg-action')
+          && (item.textContent || '').includes('重试 AI 总结')
+          && !item.disabled
+        `, 'retry AI summary');
+        retryClicked = true;
+      } catch (clickError) {
+        retryClicked = false;
+      }
+      let runningObserved = false;
+      try {
+        await waitFor(wc, `
+          [...document.querySelectorAll('button.sc-msg-action')]
+            .some((item) => (item.textContent || '').includes('正在重试总结'))
+        `, 'retry running state', 30_000);
+        runningObserved = true;
+      } catch {}
+      const jobsAfter = await backendJson(`${config.backendBaseUrl}/api/data/projects/${encodeURIComponent(config.projectId)}/jobs`);
+      const completedAfter = (Array.isArray(jobsAfter.jobs) ? jobsAfter.jobs : [])
+        .filter((item) => item.tool_id === 'deseq2' && item.status === 'completed');
+      const statusAfter = await backendJson(`${config.backendBaseUrl}/api/tools/status/${encodeURIComponent(job.id)}`);
+      const statusJobAfter = statusAfter.job || statusAfter.data?.job || statusAfter.data || statusAfter;
+      const resultAfter = statusJobAfter.result || statusJobAfter.result_json || job.result || {};
+      const parsedAfter = typeof resultAfter === 'string' ? JSON.parse(resultAfter) : resultAfter;
+      const artifactAfter = parsedAfter.artifactTruth || statusAfter.artifactTruth;
+      let finalRemaining = initialRemaining;
+      let finalErrorShown = false;
+      try {
+        const settle = await waitFor(wc, `
+          (() => {
+            const btn = [...document.querySelectorAll('button.sc-msg-action')]
+              .find((item) => (item.textContent || '').includes('重试 AI 总结'));
+            const txt = btn ? (btn.textContent || '') : '';
+            const idx = txt.indexOf('剩');
+            let remaining = null;
+            if (idx !== -1) {
+              let digits = '';
+              for (const ch of txt.slice(idx)) {
+                if (ch >= '0' && ch <= '9') digits += ch;
+                else if (digits) break;
+              }
+              remaining = digits ? Number(digits) : null;
+            }
+            const errorSpan = [...document.querySelectorAll('.sc-msg-action-error')]
+              .some((item) => (item.textContent || '').includes('AI 总结') || (item.textContent || '').includes('重试'));
+            return (remaining !== null || errorSpan) ? { remaining, errorSpan } : null;
+          })()
+        `, 'retry settle', 150_000);
+        finalRemaining = settle.remaining;
+        finalErrorShown = settle.errorSpan;
+      } catch {}
+      retryAssertion = {
+        enabled: true,
+        retryClicked,
+        initialRemaining,
+        runningObserved,
+        finalRemaining,
+        finalErrorShown,
+        before: {
+          completedDeseq2JobCount: completed.length,
+          artifactTruthStatus: artifactTruth?.status || null,
+          artifactTruthBlocking: artifactTruth?.blocking === true,
+        },
+        after: {
+          completedDeseq2JobCount: completedAfter.length,
+          artifactTruthStatus: artifactAfter?.status || null,
+          artifactTruthBlocking: artifactAfter?.blocking === true,
+        },
+      };
+    }
 
     const evidence = {
       schemaVersion: 1,
@@ -392,6 +485,7 @@ async function run(config) {
         assistantConfirmed: uiTruth.assistantConfirmed,
       },
       ...(summaryPresentation ? { summaryPresentation } : {}),
+      ...(retryAssertion ? { retryAssertion } : {}),
       screenshots: {
         dataReady: { file: 'data-ready.png', sha256: sha256(readyPng), bytes: readyPng.length },
         resultOpen: { file: 'result-open.png', sha256: sha256(resultPng), bytes: resultPng.length },
@@ -421,6 +515,16 @@ async function run(config) {
         && evidence.summaryPresentation?.mode !== 'result'
         && evidence.summaryPresentation?.resultCanvasVisible === false
         && evidence.summaryPresentation?.composerVisible === true
+      ))
+      && (!retryAssertion || (
+        retryAssertion.retryClicked === true
+        && retryAssertion.runningObserved === true
+        && retryAssertion.before.completedDeseq2JobCount === 1
+        && retryAssertion.after.completedDeseq2JobCount === 1
+        && retryAssertion.before.artifactTruthStatus === 'valid'
+        && retryAssertion.after.artifactTruthStatus === 'valid'
+        && retryAssertion.before.artifactTruthBlocking === false
+        && retryAssertion.after.artifactTruthBlocking === false
       ));
     writeFileSync(config.resultPath, `${JSON.stringify(evidence, null, 2)}\n`);
     window.destroy();
