@@ -967,6 +967,19 @@ function setupWindowIpc() {
   ipcMain.handle("window:isMaximized", () => {
     return mainWindow ? mainWindow.isMaximized() : false;
   });
+
+  // 重启应用 —— 装完 R/Python 运行时后必须整体重启才生效：
+  // BIOF3_R_HOME 等 env 在启动阶段（resolveRuntime）就固化了，
+  // 单独重启 r-server 子进程仍会读到旧的空值。
+  ipcMain.handle("app:relaunch", async () => {
+    try {
+      app.relaunch();
+      app.exit(0);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
 }
 
 // ── IPC：AI 设置 ───────────────────────────────────────────────
@@ -1223,7 +1236,19 @@ function setupRuntimeIpc() {
         },
       });
     } catch (e) {
-      return { isReady: false, downReason: "状态查询失败: " + e.message };
+      // 契约：必须回全字段。缺 rRuntime/pyRuntime 会让渲染进程把
+      // undefined 误读成"运行时确认缺失"，从而错弹首次配置引导页。
+      // 查询失败属于"状态未知"，用 null 显式表达，前端只在 === false
+      // 时才判定缺失。
+      return {
+        rRuntime: null,
+        pyRuntime: null,
+        rServerUp: false,
+        pyServerUp: false,
+        plumberUp: false,
+        isReady: false,
+        downReason: "状态查询失败: " + e.message,
+      };
     }
   });
 }
@@ -1668,12 +1693,15 @@ function setupTerminalIpc() {
         {
           id: "plumber",
           label: "R plumber",
+          // 展示串（不执行）——但必须与 startPlumber 实际 spawn 的路径一致，
+          // 否则排查时会误以为 Windows 上找的是无后缀的 Rscript。
           command: process.env.BIOF3_R_HOME
-            ? `${path.join(process.env.BIOF3_R_HOME, "bin", "Rscript")} ${resolveCore(
-                "r-server",
-                "replot.R",
-              )} --port 8787`
-            : "Rscript replot.R --port 8787",
+            ? `${path.join(
+                process.env.BIOF3_R_HOME,
+                "bin",
+                getRuntimeBinName("r", process.platform),
+              )} ${resolveCore("r-server", "replot.R")} --port 8787`
+            : `${getRuntimeBinName("r", process.platform)} replot.R --port 8787`,
           status: plumberProc && !plumberProc.killed ? "running" : "stopped",
           pid: plumberProc?.pid || null,
           logPath: path.join(logDir, "plumber.log"),

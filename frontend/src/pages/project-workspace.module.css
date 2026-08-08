@@ -504,6 +504,65 @@
   background: var(--biof3-bg-surface);
 }
 
+/* 运行时缺失引导横幅 —— 应用打开检测到 R/Python 缺失时主动引导安装 */
+.runtimeMissingBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex: none;
+  padding: 10px 16px;
+  background: linear-gradient(
+    90deg,
+    rgba(245, 158, 11, 0.18),
+    rgba(245, 158, 11, 0.06)
+  );
+  border-bottom: 1px solid rgba(245, 158, 11, 0.35);
+  color: var(--biof3-text);
+  font-size: 13px;
+  animation: runtimeBannerIn 0.25s ease-out;
+}
+
+@keyframes runtimeBannerIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.runtimeMissingBannerText {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.runtimeMissingBannerBtn {
+  flex: none;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  background: rgba(245, 158, 11, 0.18);
+  color: var(--biof3-text);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.runtimeMissingBannerBtn:hover {
+  background: rgba(245, 158, 11, 0.32);
+  transform: translateY(-1px);
+}
+
+.runtimeMissingBannerBtn:active {
+  transform: translateY(0);
+}
+
 .panelBackdrop {
   display: none;
 }

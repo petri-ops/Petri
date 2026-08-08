@@ -47,6 +47,7 @@ function resolveSharedBackendDir() {
 
 const SHARED_BACKEND_DIR = resolveSharedBackendDir();
 const {
+  getRuntimeBinName,
   getPythonRuntimeExecutable,
   getPythonSitePackagesDir,
 } = require(path.join(SHARED_BACKEND_DIR, 'runtime-paths'));
@@ -1022,7 +1023,11 @@ function getRuntimeStatus() {
   const pyDir = path.join(RUNTIMES_DIR, 'Python');
   return {
     r: {
-      installed: fs.existsSync(path.join(rDir, 'bin', 'Rscript')),
+      // win32 上文件名是 `Rscript.exe`；existsSync 不像 shell 那样按 PATHEXT
+      // 自动补后缀，硬编码 'Rscript' 会让已装好的 Windows R 树永远判为未安装
+      // （用户实测：装完重启仍提示"R 运行时未安装"）。走平台感知 helper，
+      // 与 r-executor 的 binPath / platform-compat 同源。
+      installed: fs.existsSync(path.join(rDir, 'bin', getRuntimeBinName('r'))),
       path: fs.existsSync(rDir) ? rDir : null,
     },
     python: {
