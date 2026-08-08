@@ -113,7 +113,9 @@ function attachExecutionMetadata(result = {}, context) {
       const name = path.basename(String(filename));
       return {
         ...item,
-        path: item.path || (localRoot ? path.join(localRoot, name) : null),
+        // Serialize with forward slashes so the value is stable across
+        // platforms (Windows path.join emits backslashes / drive prefixes).
+        path: item.path || (localRoot ? normalizeSlashPath(path.join(localRoot, name)) : null),
         canonicalPath:
           item.canonicalPath ||
           (canonicalRoot ? normalizeSlashPath(path.posix.join(canonicalRoot, name)) : null),
