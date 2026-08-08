@@ -324,6 +324,16 @@
       "archivePolicy": "retain_stable_path"
     },
     {
+      "id": "RUNTIME-VERSION-BASELINE",
+      "path": "docs/runtime-version-baseline.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "runtime-version-contract",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
       "id": "UI-035-064-ACCEPTANCE",
       "path": "docs/ui-035-064-real-acceptance.md",
       "kind": "audit",

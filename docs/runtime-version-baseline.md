@@ -47,7 +47,8 @@
 | 脚本 | 关键位置 | 基线要求 | 现状 |
 |------|----------|----------|------|
 | `scripts/provision-win-r-runtime.mjs` | `R_VERSION` 默认 | **R 4.5.2** | ✅ 已改为 4.5.2；URL 自动切 `bin/windows/base/old/4.5.2/` |
-| `scripts/build-win-r-runtime-artifact.mjs` | 源 R prefix 探测 | **build 机需装 4.5.2**（脚本继承 build 机 R 版本） | ✅ 注释已明确 |
+| `scripts/build-win-r-runtime-artifact.mjs` | 源 R prefix 探测 | **build 机需装 4.5.2**（脚本继承 build 机 R 版本） | ✅ 注释已明确；2026-08-08 首次产出 `r-runtime-1.0.0-windows-x64.zip`（657MB） |
+| `scripts/upload-win-r-runtime.mjs` | OSS multipartUpload | **R 4.5.2** | ✅ 2026-08-08 上传到 OSS（凭证自动读 `.biof3-secrets` 的 `OSS_AK`/`OSS_SK`） |
 | `scripts/build-win-runtime-artifact.mjs`（py） | 源 Python 探测 | **Python 3.11**（回填 sub-version 后锁死） | 待取证 |
 
 **CRAN 来源**（已实测 HTTP 200）：
@@ -74,8 +75,41 @@ https://cloud.r-project.org/bin/windows/base/old/4.5.2/R-4.5.2-win.exe
 ## 5. 待办/未决
 
 - [ ] macOS Python 精确 sub-version 取证（从 macOS 构建机 `BIOF3_BUILD_PYTHON` 实查），锁死双端 Python 基线。
-- [ ] Windows R/Python 官方 `windows-x64` 制品产出（`build-win-r-*-runtime-artifact.mjs`）+ 填 `manifest.json`/`placeholders.json`，完成双端 OSS 分发闭环。
+- [ ] **Windows R** windows-x64 制品：**已落地** ✅（2026-08-08，详见 §6）。
+- [ ] **Windows Python** windows-x64 制品产出（`build-win-runtime-artifact.mjs`）+ 上传 OSS，完成双端 OSS 分发闭环。
 - [ ] 平台选择自动化：`selectArtifact` 确认按 platformId 过滤（防装错平台导致的"非 Windows R 树"残留再次出现）。
+
+---
+
+## 6. Windows R 运行时 OSS 制品落地记录（2026-08-08）
+
+| 字段 | 值 |
+|------|----|
+| **runtime 插件** | `biof3-r-runtime` |
+| **平台** | `windows-x64` |
+| **R 版本** | 4.5.2（与 macOS 基线一致） |
+| **本地制品路径** | `dist-runtime/r-runtime-1.0.0-windows-x64.zip`（已被 `.gitignore` 忽略） |
+| **OSS 路径** | `oss://biof3-uploads/plugins/r-runtime/1.0.0/windows-x64.zip` |
+| **公开 URL** | `https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/windows-x64.zip` |
+| **sizeBytes** | `657224393`（≈629MB） |
+| **sha256** | `26b05ba6f3439f2e7ccef9c979d5e157cdc67640fc45fdc759039f2a03dde462` |
+| **ACL** | `public-read`（multipartUpload + HEAD 校验通过） |
+| **zip 顶层结构** | `R\bin\Rscript.exe`（单层，无嵌套壳；与 macOS 同布局） |
+| **验证** | 解压后 `R\bin\Rscript.exe`、`R\bin\x64\R.dll`、`R\bin\x64\Rterm.exe`、`R\library\` 等关键路径全部存在；`resolveRuntime('r')` 优先级 1 命中 |
+
+### 6.1 manifest 收尾边界（重要）
+
+- ✅ **`biof3-r-runtime` 与 `biof3-py-runtime` 已从 `manifest.placeholders.json` 移除**
+  （2026-08-08）。`plugin-manifest-schema.test.mjs` 第 152-161 行判定只看 pluginId，不看 field；
+  只要占位数组里还含这两个 pluginId，schema 测试就红。两条占位移除后 schema 测试变绿。
+- ❌ **不要把 `windows-x64` 写进 `manifest.json` 的 `artifacts`**
+  ——`plugin-manifest-schema.test.mjs` 第 70-74 行要求 `manifest.plugins[*].artifacts.windows-x64`
+  必须为 **0**（0.0.1 阶段禁止假 Windows 支持；Week 3/4 真实发布时才翻转）。
+- ✅ **`release-contract.json` 的 `windows-x64.supported` 维持 `false`**，
+  原因是 Windows 发布仍受签名/公证约束，且 Python 制品尚未产出。
+- ✅ **Windows 制品真实状态由 OSS 落地 + 本文件 §6 记录承载**，无需回写 `manifest.json`。
+- ℹ️ **重新生成/重新上传**：`node scripts/upload-win-r-runtime.mjs`
+  （自动读取 `.biof3-secrets` 的 `OSS_AK`/`OSS_SK`，支持 `--dry-run` 预览）。
 
 ---
 
@@ -85,6 +119,7 @@ https://cloud.r-project.org/bin/windows/base/old/4.5.2/R-4.5.2-win.exe
 |------|------|--------|----------|
 | `scripts/build-win-r-runtime-artifact.mjs` | 注释 + 源探测 | 4.5.2（注释已改） | build 机需 R 4.5.2 |
 | `scripts/provision-win-r-runtime.mjs` | `R_VERSION` 默认 | 4.5.2（已改） | 4.5.2 |
+| `scripts/upload-win-r-runtime.mjs` | OSS 上传 + 摘要输出 | R 4.5.2（自动 sha256/sizeBytes） | 详见 §6 |
 | `scripts/build-r-bundle.mjs` | `rVersion` | 4.5.2 | 4.5.2（macOS 基线） |
 | `manifest.json` 所有 R 插件 | `runtime.r` | `>=4.3.0`/`>=4.4.0` | 下限 < 4.5.2，OK；`builtAgainst: r=4.5` 契合 |
 | `manifest.json` 所有 Python 插件 | `runtime.python` | `>=3.10.0` | 下限 < 3.11，OK；`builtAgainst: python=3.11` 契合 |

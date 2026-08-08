@@ -5,6 +5,10 @@ node_modules/
 dist/
 build/
 
+# 运行时制品构建产物（build-win-*-runtime-artifact.mjs 输出目录，
+# 含数百 MB R/Python 树 + 临时探针 zip，绝不该进仓库）
+dist-runtime/
+
 # Electron packaging output
 release/
 out/
