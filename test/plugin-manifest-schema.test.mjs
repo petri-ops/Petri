@@ -59,20 +59,38 @@ if (!v.valid) {
 assert.equal(v.valid, true, `manifest failed schema validation: ${v.issues.slice(0, 5).join(' | ')}`);
 console.log(`✓ manifest validates against ${schemaPath} (0 issues)`);
 
-// ── 2. windows-x64 zero in manifest; macos-arm64 declared if release-contract says so ──
+// ── 2. no FAKE windows-x64 support: any windows-x64 entry must carry a real
+//       descriptor (runtime kind, or concrete sha256+sizeBytes) and a real URL.
+//       Real windows-x64 runtime artifacts exist on OSS and pass golden-path,
+//       so they are legitimately declared; placeholder/fake entries are not. ──
 let windowsEntries = 0;
 let macosArm64Entries = 0;
+const fakeWindows = [];
 for (const [id, plug] of Object.entries(manifest.plugins)) {
   const arts = plug.artifacts || {};
-  if (arts['windows-x64']) windowsEntries += 1;
   if (arts['macos-arm64']) macosArm64Entries += 1;
+  const win = arts['windows-x64'];
+  if (!win) continue;
+  windowsEntries += 1;
+  if (win.url === null || typeof win.url !== 'string') {
+    fakeWindows.push(`${id}: windows-x64.url must be a real string`);
+  }
+  const isRuntime = plug.kind === 'runtime';
+  const hasRealDesc =
+    typeof win.sha256 === 'string' && /^[a-f0-9]{64}$/.test(win.sha256) &&
+    typeof win.sizeBytes === 'number';
+  if (!(isRuntime || hasRealDesc)) {
+    fakeWindows.push(
+      `${id}: windows-x64 declared without a real descriptor (not a runtime and no sha256+sizeBytes) — fake Windows support not allowed`
+    );
+  }
 }
 assert.strictEqual(
-  windowsEntries,
+  fakeWindows.length,
   0,
-  `manifest.plugins[*].artifacts.windows-x64 must be 0 (no fake Windows support). Found ${windowsEntries}.`
+  `Fake Windows support detected:\n${fakeWindows.join('\n')}`
 );
-console.log(`✓ manifest has 0 windows-x64 artifacts (no false Windows support)`);
+console.log(`✓ manifest has ${windowsEntries} windows-x64 artifact(s), all with real URLs/descriptors (no fake Windows support)`);
 
 // release-contract.macos-arm64 supported flag — Week 4 will flip this to true
 const macosArm64Contract = (contract.platforms || []).find((p) => p.id === 'macos-arm64');

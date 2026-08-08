@@ -13,6 +13,7 @@ const INITIAL_STATUS: BackendStatus = {
   plumberUp: false,
   isReady: false,
   downReason: '',
+  loaded: false,
 };
 
 const Ctx = createContext<BackendStatus>(INITIAL_STATUS);
@@ -36,6 +37,7 @@ async function readBackendStatus(): Promise<BackendStatus | null> {
     plumberUp: false,
     isReady: rServerUp,
     downReason: rServerUp ? null : '本地分析服务尚未就绪',
+    loaded: true,
   };
 }
 
@@ -49,11 +51,15 @@ export function BackendStatusProvider({
   children: React.ReactNode;
 }): React.ReactElement {
   const [status, setStatus] = useState<BackendStatus>(INITIAL_STATUS);
+  const [loaded, setLoaded] = useState(false);
 
   const tick = useCallback(async () => {
     try {
       const s = await readBackendStatus();
-      if (s) setStatus(s);
+      if (s) {
+        setStatus(s);
+        setLoaded(true);
+      }
     } catch {
       // IPC 失败时保持上次状态，不闪烁
     }
@@ -64,7 +70,10 @@ export function BackendStatusProvider({
     const safeTick = async () => {
       try {
         const s = await readBackendStatus();
-        if (alive && s) setStatus(s);
+        if (alive && s) {
+          setStatus(s);
+          setLoaded(true);
+        }
       } catch {
         // 忽略
       }
@@ -77,5 +86,5 @@ export function BackendStatusProvider({
     };
   }, []);
 
-  return <Ctx.Provider value={status}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ ...status, loaded }}>{children}</Ctx.Provider>;
 }

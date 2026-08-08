@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "updated": "2026-07-14",
   "checksumAlgorithm": "sha256",
-  "notes": "Per-platform artifact schema (Week 2 发行可信化). Only macos-arm64 has real artifacts; windows-x64/macos-x64/linux-x64 have NO artifacts yet (release-contract.json platforms[*].supported = false until Week 3/4). windows-x64 runtime artifacts for biof3-r-runtime/biof3-py-runtime are planned and tracked as placeholders in manifest.placeholders.json (url/sizeBytes/sha256 = null) pending Week 3/4 CI fill-in. See manifest.placeholders.json for placeholder fields pending Week 4 CI fill-in. Built-in plugins use built-in:// pseudo-URLs and ship under resources/built-in-plugins/{id}/.",
+  "notes": "Per-platform artifact schema (Week 2 发行可信化). macos-arm64 has real artifacts. windows-x64 runtime artifacts for biof3-r-runtime/biof3-py-runtime ARE declared (real OSS zip, HTTP 200, golden-path verified) so dev/unsigned Windows builds can install the runtime from the store; their sha256/sizeBytes stay null pending Week 4 fill-in (checksum/size checks are skipped per plugin-manager.js when null). release-contract.json platforms[windows-x64].supported stays false until the signed Windows installer passes release gating (Week 3/4). macos-x64/linux-x64 have NO artifacts (placeholder-only). Built-in plugins use built-in:// pseudo-URLs and ship under resources/built-in-plugins/{id}/.",
   "plugins": {
     "biof3-r-runtime": {
       "id": "biof3-r-runtime",
@@ -18,6 +18,11 @@
           "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/macos-arm64.zip",
           "sha256": "007b6c5436e7986dd60bed0457b431dce30aef25b8bee2d49cbe97e839c8a1d2",
           "sizeBytes": 154050101
+        },
+        "windows-x64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/windows-x64.zip",
+          "sha256": null,
+          "sizeBytes": null
         }
       },
       "checksumAlgorithm": "sha256",
@@ -38,6 +43,11 @@
           "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/macos-arm64.zip",
           "sha256": "a3ba85eea02a5d09097ab49e77b39a44e4691726a221c0c4f80516600ff41e12",
           "sizeBytes": 480914965
+        },
+        "windows-x64": {
+          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/windows-x64.zip",
+          "sha256": null,
+          "sizeBytes": null
         }
       },
       "checksumAlgorithm": "sha256",

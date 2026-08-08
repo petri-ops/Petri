@@ -85,3 +85,223 @@
   0%, 100% { opacity: 0.35; }
   50% { opacity: 1; }
 }
+
+/* ============================================================
+   首次配置引导页（运行时缺失时的唯一出路）
+   死锁修复：r-server 需要 R 运行时，R 运行时只能从商店装，
+   而商店此前只在工作台内部 → 本页提供独立入口。
+   ============================================================ */
+
+.setupHome {
+  min-height: calc(100vh - var(--biof3-titlebar-height));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 40px 32px;
+  text-align: center;
+  background:
+    radial-gradient(1200px 480px at 50% -10%, var(--biof3-accent-bg), transparent 70%),
+    var(--biof3-bg-surface);
+  color: var(--biof3-text-secondary);
+  animation: setupEnter 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes setupEnter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+.setupIcon {
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: var(--biof3-accent-bg);
+  color: var(--biof3-accent);
+  border: 1px solid var(--biof3-border);
+}
+
+.setupHome h1 {
+  margin: 2px 0 0;
+  color: var(--biof3-text);
+  font-size: 21px;
+  letter-spacing: -0.01em;
+}
+
+.setupLead {
+  margin: 0;
+  max-width: 460px;
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+/* ---- 运行时清单卡片 ---- */
+.setupChecklist {
+  width: 100%;
+  max-width: 460px;
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.setupCheckItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 12px;
+  background: var(--biof3-bg-canvas);
+  color: var(--biof3-text-secondary);
+  transition: border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.setupCheckItem:hover {
+  transform: translateY(-1px);
+  border-color: var(--biof3-accent);
+}
+
+.setupCheckOk {
+  border-color: var(--biof3-accent);
+  color: var(--biof3-accent);
+}
+
+.setupCheckName {
+  color: var(--biof3-text);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.setupCheckMeta {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.setupCheckState {
+  margin-left: auto;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- 操作区 ---- */
+.setupActions {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.setupPrimary,
+.setupSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 9px;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.setupPrimary {
+  border: 1px solid var(--biof3-accent);
+  background: var(--biof3-accent);
+  color: #fff;
+}
+
+.setupPrimary:hover {
+  transform: translateY(-1px) scale(1.015);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+}
+
+.setupSecondary {
+  border: 1px solid var(--biof3-border);
+  background: var(--biof3-bg-surface);
+  color: var(--biof3-text);
+}
+
+.setupSecondary:hover {
+  transform: translateY(-1px);
+  border-color: var(--biof3-accent);
+}
+
+.setupPrimary:disabled,
+.setupSecondary:disabled {
+  cursor: default;
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none;
+}
+
+.setupReason {
+  margin: 4px 0 0;
+  font-size: 11.5px;
+  opacity: 0.75;
+}
+
+/* ---- 内嵌商店外壳（商店面板是 width/height:100% 的 flex 容器） ---- */
+.setupStoreShell {
+  height: calc(100vh - var(--biof3-titlebar-height));
+  display: flex;
+  flex-direction: column;
+  background: var(--biof3-bg-surface);
+  overflow: hidden;
+}
+
+.setupStoreFrame {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.setupStoreFooter {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 11px 16px;
+  border-top: 1px solid var(--biof3-border);
+  background: var(--biof3-accent-bg);
+  color: var(--biof3-text);
+  font-size: 12.5px;
+  animation: setupEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.setupStoreFooter > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--biof3-accent);
+}
+
+.setupStoreFooter button {
+  height: 30px;
+  padding: 0 14px;
+  border: 1px solid var(--biof3-accent);
+  border-radius: 8px;
+  background: var(--biof3-accent);
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.setupStoreFooter button:hover {
+  transform: translateY(-1px) scale(1.02);
+}
+
+.setupStoreFooter button:disabled {
+  cursor: default;
+  opacity: 0.55;
+  transform: none;
+}
