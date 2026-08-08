@@ -25,6 +25,10 @@ function classifyReference(reference) {
   if (!value) return null;
 
   const normalized = normalizeWhitespace(value);
+  // Reject genuinely unsafe characters. Backslashes are rejected here on
+  // purpose: the chat resolver must never surface raw absolute local paths
+  // (e.g. `C:\Users\...\file.csv`), which are contained only via the
+  // route-level absolute_path gate on POSIX. See classifyReference contract.
   if (/[<>"|\\\x00-\x1F\x7F]/.test(normalized)) {
     return null;
   }
@@ -154,8 +158,15 @@ function hasUsableArtifactTruth(result) {
 
 function isRealPathInsideRoot(rootPath, targetPath) {
   if (!rootPath || !targetPath) return false;
-  const root = path.resolve(rootPath);
-  const target = path.resolve(targetPath);
+  let root = path.resolve(rootPath);
+  let target = path.resolve(targetPath);
+  // Windows filesystems are case-insensitive but path.resolve / realpathSync
+  // can return drive-letter or directory casing that differs from the path the
+  // caller created (e.g. os.tmpdir vs the on-disk entry) — compare insensitively.
+  if (process.platform === 'win32') {
+    root = root.toLowerCase();
+    target = target.toLowerCase();
+  }
   if (target === root) return false;
   const rootWithSep = root.endsWith(path.sep) ? root : root + path.sep;
   return target.startsWith(rootWithSep);

@@ -2,12 +2,17 @@
 /**
  * build-win-r-runtime-artifact.mjs
  * ---------------------------------------------------------------
- * 在「装有 R 4.5 的 Windows 构建机」上，组装 BioF3 的 windows-x64
+ * 在「装有 R 4.5.2 的 Windows 构建机」上，组装 BioF3 的 windows-x64
  * R 运行时制品（对应 manifest.json 的 biof3-r-runtime）。
  *
  * 产物：一个 zip，内部根目录为 `R/`，解压到
  *   userData/runtimes/R 后，resolveRuntime('r') 即可命中
  *   userData/runtimes/R/bin/Rscript.exe。
+ *
+ * ⚠️ 版本基线：必须用 R 4.5.2（与 macOS 已发布基线一致，见
+ *   docs/runtime-version-baseline.md）。此脚本从源 R prefix 复制，
+ *   默认继承 build 机安装的 R 版本——请确保 build 机装的是 4.5.2
+ *   （Windows 开发者机可用 provision-win-r-runtime.mjs 安装）。
  *
  * 用法（在 Windows 构建机）：
  *   node scripts/build-win-r-runtime-artifact.mjs
@@ -91,7 +96,7 @@ function installPackages(stageR, packages) {
   const tmpR = path.join(os.tmpdir(), `biof3-r-install-${Date.now()}.R`);
   fs.writeFileSync(tmpR, installR);
   try {
-    const r = spawnSync(rscript, [tmpR], { stdio: 'inherit', windowsHide: true, timeout: 1000 * 60 * 60 });
+    const r = spawnSync(rscript, [tmpR], { stdio: 'inherit', windowsHide: true, timeout: 1000 * 60 * 60 * 3 });
     if (r.status !== 0) console.warn(`[build-r-runtime] 部分 R 包安装失败（exit ${r.status}），继续打包。`);
   } finally {
     fs.rmSync(tmpR, { force: true });
@@ -114,11 +119,15 @@ function prune(stageR) {
   walk(stageR);
 }
 
-function zip(stageRoot, zipPath) {
+function zip(stageR, zipPath) {
   fs.mkdirSync(path.dirname(zipPath), { recursive: true });
   if (fs.existsSync(zipPath)) fs.rmSync(zipPath, { force: true });
   console.log(`[build-r-runtime] compressing -> ${zipPath}`);
-  const ps = `Compress-Archive -Path '${stageRoot}' -DestinationPath '${zipPath}' -Force`;
+  // 压缩 stageR（即 .../R）的内容，使 zip 顶层直接是 R/（不是 staging 外壳）。
+  // 若压 stageRoot，会得到 <pid>-staging/R/... 两层外壳，解压后落到
+  // runtimes/R/R/bin/Rscript.exe，resolveRuntime 不命中（plugin-manager 的
+  // flatten 只剥一层）。实测 Compress-Archive -Path '<R>' 顶层 = R/bin/Rscript.exe ✅
+  const ps = `Compress-Archive -Path '${stageR}' -DestinationPath '${zipPath}' -Force`;
   const r = spawnSync('powershell.exe', ['-NoProfile', '-Command', ps], { stdio: 'inherit', windowsHide: true });
   if (r.status !== 0) fail('Compress-Archive 失败');
 }
@@ -132,25 +141,46 @@ function main() {
   if (os.platform() !== 'win32') fail('此脚本必须在 Windows 构建机上运行。');
   if (!fs.existsSync(PACKAGES)) fail(`缺少包清单: ${PACKAGES}`);
 
-  const { prefix } = resolveSourceRPrefix();
-  const stageRoot = path.join(OUT_DIR, 'biof3-r-runtime-staging');
-  const stageR = path.join(stageRoot, 'R');
-  if (fs.existsSync(stageRoot)) fs.rmSync(stageRoot, { recursive: true, force: true });
-
-  stagePrefix(prefix, stageR);
-  installPackages(stageR, parsePackages(PACKAGES));
-  prune(stageR);
+  const repackOnly = process.argv.includes('--repack-only');
+  let stageR;
+  if (repackOnly) {
+    // 复用最近一个已有 stage（不重新下载/安装包，只重打 zip 修正结构）
+    const dirs = fs.existsSync(OUT_DIR)
+      ? fs.readdirSync(OUT_DIR).filter((d) => d.startsWith('biof3-r-runtime-staging-'))
+      : [];
+    if (dirs.length === 0) fail('--repack-only 但找不到已有 stage 目录，请直接完整构建。');
+    const newest = dirs
+      .map((d) => ({ d, t: fs.statSync(path.join(OUT_DIR, d)).mtimeMs }))
+      .sort((a, b) => b.t - a.t)[0].d;
+    stageR = path.join(OUT_DIR, newest, 'R');
+    if (!fs.existsSync(path.join(stageR, 'bin', 'Rscript.exe'))) {
+      fail(`--repack-only 的 stage 缺少 R/bin/Rscript.exe: ${stageR}`);
+    }
+    console.log(`[build-r-runtime] --repack-only 复用 stage: ${stageR}`);
+  } else {
+    const { prefix } = resolveSourceRPrefix();
+    // 用 PID 后缀的唯一 stage 目录，避免多次运行共享目录时触发批量删除门禁
+    // （Node fs.rmSync 对 >50 文件目录会被 WorkBuddy 安全删除 shim 拦截）。
+    const stageRoot = path.join(OUT_DIR, `biof3-r-runtime-staging-${process.pid}`);
+    stageR = path.join(stageRoot, 'R');
+    stagePrefix(prefix, stageR);
+    installPackages(stageR, parsePackages(PACKAGES));
+    prune(stageR);
+  }
 
   const zipPath = path.join(OUT_DIR, 'r-runtime-1.0.0-windows-x64.zip');
-  zip(stageRoot, zipPath);
+  zip(stageR, zipPath);
 
   const { sha256, sizeBytes } = digest(zipPath);
   console.log('\n==================== BUILD COMPLETE ====================');
   console.log(`artifact : ${zipPath}`);
   console.log(`sizeBytes: ${sizeBytes}`);
   console.log(`sha256   : ${sha256}`);
-  console.log('\n将下面这段填进 manifest.json 的 biof3-r-runtime.artifacts.windows-x64，');
-  console.log('并把 manifest.placeholders.json 对应条目的 current 由 null 改为真实值：\n');
+  console.log('\n⚠️ 收尾边界（2026-08-08 确认）：');
+  console.log('  - 此制品只「上传 OSS + 打印真实摘要」，由 scripts/upload-win-r-runtime.mjs 完成。');
+  console.log('  - 不要把它写进 manifest.json 的 artifacts.windows-x64 ——');
+  console.log('    plugin-manifest-schema.test.mjs 第 70-74 行要求 windows-x64 必须为 0（0.0.1 禁止假 Windows 支持）。');
+  console.log('  - zip 落地 OSS 后，才允许把 biof3-r-runtime 从 manifest.placeholders.json 移除。\n');
   console.log(JSON.stringify({
     "windows-x64": {
       "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/windows-x64.zip",

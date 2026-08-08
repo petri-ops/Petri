@@ -39,7 +39,7 @@ function stableNow() {
 }
 
 function safeRelative(root, target) {
-  const rel = path.relative(root, target);
+  const rel = relativePosix(root, target);
   return rel || path.basename(target);
 }
 

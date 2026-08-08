@@ -65,8 +65,12 @@ function getSessionShellSpec(env = process.env, platform = process.platform) {
 }
 
 function getBuiltInPluginsDir({ isPackaged, projectRoot, resourcesPath }) {
-  if (isPackaged) return path.join(resourcesPath, 'built-in-plugins');
-  return path.join(projectRoot, 'resources', 'built-in-plugins');
+  const dir = isPackaged
+    ? path.join(resourcesPath, 'built-in-plugins')
+    : path.join(projectRoot, 'resources', 'built-in-plugins');
+  // Serialize with forward slashes so the value is stable across platforms
+  // (Windows path.join emits backslashes). Idempotent on POSIX.
+  return dir.split(path.sep).join('/');
 }
 
 module.exports = {
