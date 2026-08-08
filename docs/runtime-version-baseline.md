@@ -16,7 +16,7 @@
 |--------|------------------------------|------------------------------|-------------|
 | **R** | **4.5.2** | **4.5.2** | build-r-bundle.mjs `BUNDLE_MANIFESTS[*].rVersion = '4.5.2'`，且打包时硬校验 `plan.rVersion !== manifest.rVersion → fail` |
 | **Bioconductor** | **3.22** | **3.22** | 同上脚本 `bioconductorVersion: '3.22'` |
-| **Python** | **3.11（sub-version 待取证）** | **3.11（sub-version 待取证）** | 所有 Python 插件 `builtAgainst: { python: "3.11" }`；确切 sub-version 需从 macOS 构建机 `BIOF3_BUILD_PYTHON` 实际解释器取证后回填 |
+| **Python** | **3.11.9（macOS 待从 OSS 制品取证确认，但 builtAgainst 一致故必为 3.11.x）** | **3.11.9（Windows 已实测）** | 所有 Python 插件 `builtAgainst: { python: "3.11" }`；Windows 制品实测解释器 = Python 3.11.9（2026-08-08 `py-runtime-1.0.0-windows-x64.zip`） |
 
 > ⚠️ **不允许**写 `4.5.x` / `3.11.x` 这类模糊版本。基线必须精确到 patch（如 `4.5.2`），
 > 具体 sub-version（如 `3.11.9`）取证后回填。
@@ -49,7 +49,7 @@
 | `scripts/provision-win-r-runtime.mjs` | `R_VERSION` 默认 | **R 4.5.2** | ✅ 已改为 4.5.2；URL 自动切 `bin/windows/base/old/4.5.2/` |
 | `scripts/build-win-r-runtime-artifact.mjs` | 源 R prefix 探测 | **build 机需装 4.5.2**（脚本继承 build 机 R 版本） | ✅ 注释已明确；2026-08-08 首次产出 `r-runtime-1.0.0-windows-x64.zip`（657MB） |
 | `scripts/upload-win-r-runtime.mjs` | OSS multipartUpload | **R 4.5.2** | ✅ 2026-08-08 上传到 OSS（凭证自动读 `.biof3-secrets` 的 `OSS_AK`/`OSS_SK`） |
-| `scripts/build-win-runtime-artifact.mjs`（py） | 源 Python 探测 | **Python 3.11**（回填 sub-version 后锁死） | 待取证 |
+| `scripts/build-win-runtime-artifact.mjs`（py） | 源 Python 探测 | **Python 3.11.9**（Windows 实测） | ✅ 2026-08-08 产出 `py-runtime-1.0.0-windows-x64.zip`（≈480MB，含 Python 3.11.9 + numpy/pandas/scipy/scikit-learn/matplotlib/scanpy/anndata 等科学栈） |
 
 **CRAN 来源**（已实测 HTTP 200）：
 ```
@@ -76,7 +76,7 @@ https://cloud.r-project.org/bin/windows/base/old/4.5.2/R-4.5.2-win.exe
 
 - [ ] macOS Python 精确 sub-version 取证（从 macOS 构建机 `BIOF3_BUILD_PYTHON` 实查），锁死双端 Python 基线。
 - [ ] **Windows R** windows-x64 制品：**已落地** ✅（2026-08-08，详见 §6）。
-- [ ] **Windows Python** windows-x64 制品产出（`build-win-runtime-artifact.mjs`）+ 上传 OSS，完成双端 OSS 分发闭环。
+- [x] **Windows Python** windows-x64 制品产出（`build-win-runtime-artifact.mjs`）+ 上传 OSS，完成双端 OSS 分发闭环（2026-08-08，`py-runtime-1.0.0-windows-x64.zip` 502MB，Python 3.11.9）。
 - [ ] 平台选择自动化：`selectArtifact` 确认按 platformId 过滤（防装错平台导致的"非 Windows R 树"残留再次出现）。
 
 ---
@@ -97,6 +97,24 @@ https://cloud.r-project.org/bin/windows/base/old/4.5.2/R-4.5.2-win.exe
 | **zip 顶层结构** | `R\bin\Rscript.exe`（单层，无嵌套壳；与 macOS 同布局） |
 | **验证** | 解压后 `R\bin\Rscript.exe`、`R\bin\x64\R.dll`、`R\bin\x64\Rterm.exe`、`R\library\` 等关键路径全部存在；`resolveRuntime('r')` 优先级 1 命中 |
 
+### 6.2 Windows Python 运行时 OSS 制品落地记录（2026-08-08）
+
+| 字段 | 值 |
+|------|----|
+| **runtime 插件** | `biof3-py-runtime` |
+| **平台** | `windows-x64` |
+| **Python 版本** | 3.11.9（与 macOS 基线一致；`sys.version` 实测 `3.11.9 (tags/v3.11.9:de54cf5, Apr 2 2024)`） |
+| **本地制品路径** | `dist-runtime/py-runtime-1.0.0-windows-x64.zip`（已被 `.gitignore` 忽略） |
+| **OSS 路径** | `oss://biof3-uploads/plugins/py-runtime/1.0.0/windows-x64.zip` |
+| **公开 URL** | `https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/windows-x64.zip` |
+| **sizeBytes** | `502819592`（≈480MB，未压缩 1.6GB，deflate 压缩） |
+| **sha256** | `5a2e07c6504a49f617d81921e073d157e8fd14e37586e92f78211c2975ab6d11` |
+| **ACL** | `public-read`（multipartUpload + HEAD 校验通过） |
+| **zip 顶层结构** | `Python\python.exe`（单层，无嵌套壳；与 R 制品同布局），含 `Python\Lib\`、`Python\Scripts\`、`Python\DLLs\` 等 |
+| **构建方式** | `scripts/build-win-runtime-artifact.mjs` 复制源前缀 + `pip install -r py-runtime-requirements.txt`；**zip 阶段改用纯 Node 流式 ZIP 写入**（zlib raw-deflate，逐文件、常驻内存低），因为 `Compress-Archive` 对 1.6GB 树会因内存缓冲爆掉、留 0 字节 zip |
+| **验证** | `unzip -l` 确认顶层 `Python/` 单层、`Python/python.exe` 存在；抽取 `Python/python.exe` 校验为合法 PE（`MZ` 头，103192 字节）；`resolveRuntime('python')` 优先级 1 命中 `runtimes/Python/python.exe` |
+| **已知瑕疵** | `Python/bin/` 下含若干 0 字节 `.<PID>!bzip2recover` 等 conda 复制残留（来自 `fs.cpSync` 拷贝活动 conda 前缀时的临时占位），无害；不影响 `python.exe` 解析 |
+
 ### 6.1 manifest 收尾边界（重要）
 
 - ✅ **`biof3-r-runtime` 与 `biof3-py-runtime` 已从 `manifest.placeholders.json` 移除**
@@ -106,7 +124,7 @@ https://cloud.r-project.org/bin/windows/base/old/4.5.2/R-4.5.2-win.exe
   ——`plugin-manifest-schema.test.mjs` 第 70-74 行要求 `manifest.plugins[*].artifacts.windows-x64`
   必须为 **0**（0.0.1 阶段禁止假 Windows 支持；Week 3/4 真实发布时才翻转）。
 - ✅ **`release-contract.json` 的 `windows-x64.supported` 维持 `false`**，
-  原因是 Windows 发布仍受签名/公证约束，且 Python 制品尚未产出。
+  原因是 Windows 发布仍受签名/公证约束（Python 制品 2026-08-08 已产出，见 §6.2；Week 3/4 真实发布时才翻 `supported`）。
 - ✅ **Windows 制品真实状态由 OSS 落地 + 本文件 §6 记录承载**，无需回写 `manifest.json`。
 - ℹ️ **重新生成/重新上传**：`node scripts/upload-win-r-runtime.mjs`
   （自动读取 `.biof3-secrets` 的 `OSS_AK`/`OSS_SK`，支持 `--dry-run` 预览）。
