@@ -31,7 +31,7 @@
     {
       "id": "windows-x64",
       "supported": false,
-      "reason": "no real Runtime artifact yet, awaiting Week 3 milestone"
+      "reason": "Real Runtime artifact exists on OSS (R 4.5.2 + Python 3.11.9, HTTP 200) and passes end-to-end Windows golden-path validation (DESeq2 job completed with real DEG results + 8 plots, provenance recorded). supported stays false because the Windows desktop build is not yet code-signed/notarized; flip to true only when the signed Windows installer passes release gating (Week 3/4)."
     }
   ],
   "gaCriteria": [
