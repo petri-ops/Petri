@@ -13,6 +13,7 @@
 
 | 状态 | 日期 | 发现 | 来源 | 详情 |
 |------|------|------|------|------|
+| 🔴阻塞 | 2026-08-08 | **macOS R/Python 运行时 OSS 制品 404**：`manifest.json` 记录了 sha256/sizeBytes，但 `plugins/{r,py}-runtime/1.0.0/macos-arm64.zip` 在 OSS 上均 HTTP 404 → macOS 新装用户 `installRuntime` 会在下载步失败 | Windows 侧 agent（本文件 §8） | [§8 问题 N](#问题-nmacos-运行时-oss-制品-404) |
 | ✅已处理 | 2026-07-17 | Stage 3 M1: R_LIBS_USER 组装逻辑抽到 `shared-backend/r-libs-resolver.js`，两处调用共用 | 本文件 §3 | [§3 问题 A](#问题-a代码重复r-libs-user-组装逻辑) |
 | ✅已处理 | 2026-07-17 | Stage 3 M1: 两处 `catch {}` 静默吞掉所有错误，调试困难 | 本文件 §3 | [§3 问题 B](#问题-b静默-catch-吞掉所有错误) |
 | 🟡建议 | 2026-07-17 | Stage 3 M1: `capability-provisioning.js` 的 defaultDownload 未复用 plugin-manager 且无 host 白名单 | 本文件 §3 | [§3 问题 C](#问题-cdefaultdownload-未复用-plugin-manager) |
@@ -347,6 +348,40 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
 
 ---
 
+## §8 双端 Runtime 制品一致性审计（2026-08-08，Windows 侧 agent）
+
+### 问题 N：macOS 运行时 OSS 制品 404
+
+- **发现时机**：Windows R/Python 运行时制品端到端闭环（PR #1）完成后，为核对「双端 Runtime 版本基线契约」（[`docs/runtime-version-baseline.md`](./runtime-version-baseline.md)）中 macOS Python 精确 sub-version，去 OSS 拉 macOS 制品取证时发现。
+- **位置**：`resources/built-in-plugins/manifest.json` 中 `biof3-r-runtime` / `biof3-py-runtime` 的 `artifacts["macos-arm64"]`。
+- **现象**：manifest 已填入 sha256 与 sizeBytes（非 null、非占位），但对应 OSS 对象不存在：
+
+  | 制品 | OSS 路径 | manifest sha256 | HTTP |
+  |------|---------|-----------------|------|
+  | R (macos-arm64) | `plugins/r-runtime/1.0.0/macos-arm64.zip` | `007b6c5…` | **404** |
+  | Python (macos-arm64) | `plugins/py-runtime/1.0.0/macos-arm64.zip` | `a3ba85e…` | **404** |
+  | R (windows-x64) | `plugins/r-runtime/1.0.0/windows-x64.zip` | `26b05ba6…` | 200 ✅ |
+  | Python (windows-x64) | `plugins/py-runtime/1.0.0/windows-x64.zip` | `5a2e07c6…` | 200 ✅ |
+
+  验证方式：`curl -sI "<url>"`（4 条 URL 均直连 OSS 公网端点，无凭据）。
+- **溯源**：两条 macOS sha256/sizeBytes 在提交 `9bc0f60` 被填入，来自一次 `npm run build:mac` 会话产出的本地 zip；**制品本身从未上传到 OSS**。属于「本地构建了 → 记了摘要 → 没发布」的半步收口。
+- **影响（🔴 阻塞级）**：
+  - macOS 全新用户走官方 runtime 安装路径（`src/plugin-manager.js#installRuntime` → `selectArtifact` → 下载 → SHA-256 校验 → 解压）时，**在下载步就 404 失败**，R/Python 两个后端（r-server:3001 / py-server:3004）都起不来。
+  - 现有 macOS 开发机/已发布安装包因本地 `runtimes/` 已存在而不暴露该问题 —— 与 §6 问题 J（Runtime 首装契约不完整）同一类「已有缓存掩盖首装缺口」的失效模式。
+  - 与 Windows 侧刻意保持的 `release-contract.windows-x64.supported=false` 不同，macOS 是**已声明支持**的平台，manifest 记录与真实分发源不一致属契约违背。
+- **性质**：与问题 D/H/M 同类的 **「记录说有、实际没有」**。差别在于此前几例是代码/文档漂移，本例是**分发制品与 manifest 摘要漂移** —— 更危险，因为 SHA-256 已填，任何「按摘要非空即视为已发布」的判定都会误判为就绪。
+- **不属于 PR #1 引入**：PR #1 只新增 Windows 侧脚本与 windows-x64 制品，未触碰 macOS artifacts 条目。为预存在问题，已在 PR #1 描述「已知问题」中登记。
+- **建议处理（需 macOS 机器执行，Windows 侧无法完成）**：
+  1. 在 macOS 构建机重新产出 R 4.5.2 + Python 3.11.x 的 `macos-arm64.zip`，或找回 `9bc0f60` 当次产物；
+  2. 逐个核对本地 zip 的 sha256/sizeBytes 与 manifest 记录是否一致 —— 若不一致，说明产物已丢失，需重建并回写 manifest；
+  3. 上传到 OSS（可复用本次新增的 `scripts/upload-win-{r,python}-runtime.mjs` 模式：读 `.biof3-secrets` 的 `OSS_AK/OSS_SK`，multipart + public-read + HEAD 校验，仅需改 key 前缀与本地 zip 路径）；
+  4. 上传后用 `curl -sI` 复验 200，并在 [`docs/runtime-version-baseline.md`](./runtime-version-baseline.md) §6 补记 macOS 制品行（当前 §6.2 只有 Windows Python 记录）；
+  5. 顺带取证 macOS Python 精确 sub-version，补全基线契约 §1 中「macOS 待取证」的空缺（Windows 侧已实测为 3.11.9）。
+- **建议加固（防复发）**：增加一条「manifest artifacts 可达性」检查 —— 对每个 `artifacts[*].url` 发 HEAD 请求，断言 200 且 `Content-Length === sizeBytes`。可作为发布前门禁（非 CI 常跑，避免联网依赖）。当前 `plugin-manifest-schema.test.mjs` 只校验结构与占位纪律，不校验 URL 可达性，正是本问题溜过门禁的原因。
+- **状态**：🔴 待处理（需 macOS 机器）。Windows 侧已完成发现、取证与广播，交由 macOS 侧 agent 接手。
+
+---
+
 ## 审计发现追加规范
 
 非主 agent 完成新审计后，按以下格式追加到"当前待处理项"表格：
@@ -406,3 +441,4 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
 | 2026-07-24 | HLE-C5 源数据不可变边界（P-03）：真实主轨因插件大小写约束原地改写 metadata，立即取消并从既有 Job 输入副本恢复原 SHA-256。workspace write/replace 对已有科学数据扩展名强制 `source_data_immutable`，派生 CSV 仍可在 derived/results 编辑；Agent prompt 禁止 exec 绕过。 | 主 agent |
 | 2026-07-25 | G0-RS6 收口：有界多类型比较、Git CAS + SQLite fail-closed 原子采用、baseline/跨项目/大文件边界、撤销和恢复为新 Revision 已进入服务/API/Agent/前端；隔离真实链完成 v1→v2→v1→v3，明亮、夜间与 820×900 无横向溢出。UI-104 verified，下一阶段 RS7；UI-102/UI-103 未借本轮证据提前关闭。 | 主 agent |
 | 2026-07-25 | G0-RS9 收口：Result Studio 5/5 科学任务、9/9 环境、7/7 证据、双 Provider、五态 renderer 和 G0 第 17 类 mandatory evidence 通过；基线兼容升级 1.1.0，UI-102/UI-103/UI-105 verified，工作包状态 completed。 | 主 agent |
+| 2026-08-08 | Windows R 4.5.2 + Python 3.11.9 运行时制品端到端闭环并合并 PR #1（`b45e947`）：构建 → OSS 上传 → 解压验证 → 4 个 Windows 源路径 bug 修复 → schema/docs 门禁变绿。Windows `npm test` 1323 pass / 5 fail（均 Windows-only 测试假设或环境问题，无新回归）。顺带审计发现 macOS 运行时 OSS 制品 404，追加为 §8 问题 N（🔴 阻塞，需 macOS 侧处理）。 | Windows 侧 agent |
