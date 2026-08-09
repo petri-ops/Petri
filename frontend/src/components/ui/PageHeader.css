@@ -7,7 +7,7 @@
 
 .biof3-page-header {
   padding: 18px 24px 14px;
-  border-bottom: 1px solid var(--ifm-color-emphasis-200, #e2e8f0);
+  border-bottom: 1px solid var(--biof3-border);
   margin-bottom: 18px;
   background: var(--ifm-background-color, transparent);
 }
@@ -38,7 +38,7 @@
 }
 
 .biof3-page-header__crumb {
-  color: var(--ifm-color-emphasis-600, #475569);
+  color: var(--biof3-text-tertiary);
   text-decoration: none;
   transition: color 0.15s ease;
 }
@@ -49,21 +49,21 @@ a.biof3-page-header__crumb:hover {
 }
 
 .biof3-page-header__crumb--current {
-  color: var(--ifm-color-emphasis-800, #1e293b);
+  color: var(--biof3-text-secondary);
   font-weight: 600;
 }
 
 [data-theme='dark'] .biof3-page-header__crumb {
-  color: var(--ifm-color-emphasis-500, #94a3b8);
+  color: var(--biof3-text-muted);
 }
 
 [data-theme='dark'] .biof3-page-header__crumb--current {
-  color: var(--ifm-color-emphasis-200, #cbd5e1);
+  color: var(--biof3-text-secondary);
 }
 
 .biof3-page-header__sep {
   margin: 0 8px;
-  color: var(--ifm-color-emphasis-300, #cbd5e1);
+  color: var(--biof3-border-strong);
   user-select: none;
 }
 
@@ -101,18 +101,18 @@ a.biof3-page-header__crumb:hover {
   font-size: 1.4rem;
   font-weight: 700;
   line-height: 1.25;
-  color: var(--ifm-heading-color, var(--ifm-color-emphasis-900, #0f172a));
+  color: var(--biof3-text);
 }
 
 .biof3-page-header__subtitle {
   margin: 4px 0 0;
   font-size: 0.88rem;
-  color: var(--ifm-color-emphasis-600, #475569);
+  color: var(--biof3-text-tertiary);
   line-height: 1.5;
 }
 
 [data-theme='dark'] .biof3-page-header__subtitle {
-  color: var(--ifm-color-emphasis-500, #94a3b8);
+  color: var(--biof3-text-muted);
 }
 
 /* 移动端：缩小标题、减少 padding */

@@ -208,7 +208,7 @@
   gap: 14px;
   padding: 10px 12px;
   border-bottom: 1px solid var(--biof3-border);
-  background: var(--ifm-background-color);
+  background: var(--biof3-bg-surface);
   flex-shrink: 0;
   min-width: 0;
 }
@@ -665,7 +665,7 @@
   min-height: 40px;
   padding: 2px 4px;
   margin-bottom: 8px;
-  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  border-bottom: 1px solid var(--biof3-border);
 }
 
 .leftSidebarEyebrow {
@@ -685,7 +685,7 @@
   font-size: 12px;
   line-height: 20px;
   font-weight: 650;
-  color: var(--ifm-color-emphasis-900);
+  color: var(--biof3-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -756,7 +756,7 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--ifm-color-emphasis-700);
+  color: var(--biof3-text-secondary);
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -770,7 +770,7 @@
   display: grid;
   gap: 2px;
   padding: 0 0 10px;
-  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  border-bottom: 1px solid var(--biof3-border);
   flex-shrink: 0;
 }
 
@@ -779,7 +779,7 @@
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.4px;
-  color: var(--ifm-color-emphasis-500);
+  color: var(--biof3-text-muted);
   text-transform: uppercase;
 }
 
@@ -793,7 +793,7 @@
   border-radius: 6px;
   padding: 0 10px;
   background: transparent;
-  color: var(--ifm-color-emphasis-700);
+  color: var(--biof3-text-secondary);
   font-size: 13px;
   font-weight: 500;
   text-align: left;
@@ -802,7 +802,7 @@
 
 .leftQuickAction:hover {
   background: var(--biof3-hover);
-  color: var(--ifm-color-emphasis-900);
+  color: var(--biof3-text);
 }
 
 .leftQuickActionActive {
@@ -823,7 +823,7 @@
   justify-content: space-between;
   padding: 10px 8px 8px;
   flex-shrink: 0;
-  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  border-bottom: 1px solid var(--biof3-border);
 }
 
 .leftPanelTitle {
@@ -831,7 +831,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--ifm-color-emphasis-500);
+  color: var(--biof3-text-muted);
 }
 
 .projectTreeScroll {
@@ -859,7 +859,7 @@
   padding: 6px 8px;
   cursor: pointer;
   transition: background 0.12s ease;
-  color: var(--ifm-color-emphasis-700);
+  color: var(--biof3-text-secondary);
   user-select: none;
 }
 
@@ -897,7 +897,7 @@
   height: 20px;
   border: none;
   background: transparent;
-  color: var(--ifm-color-emphasis-600);
+  color: var(--biof3-text-tertiary);
   border-radius: 4px;
   cursor: pointer;
   opacity: 0;
@@ -922,7 +922,7 @@
 .convEmpty {
   padding: 4px 8px 4px 34px;
   font-size: 12px;
-  color: var(--ifm-color-emphasis-500);
+  color: var(--biof3-text-muted);
 }
 
 .convItem {
@@ -932,7 +932,7 @@
   padding: 5px 8px 5px 26px;
   cursor: pointer;
   font-size: 12px;
-  color: var(--ifm-color-emphasis-700);
+  color: var(--biof3-text-secondary);
   transition: background 0.12s ease;
   user-select: none;
 }
