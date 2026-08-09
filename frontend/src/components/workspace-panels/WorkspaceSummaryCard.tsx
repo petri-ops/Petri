@@ -291,15 +291,17 @@ export function WorkspaceSummaryCard({
                 <Icon name="cpu" size={15} /> 计算后端
               </span>
               <span className={styles.workspacePinnedSummaryRuntimes} aria-label="后端运行状态">
+                {/* rRuntime/pyRuntime 可为 null（backend:status 查询失败 = 未知）；
+                    状态芯片只做展示，未知按"未就绪"处理，用 === true 归一化。 */}
                 <RuntimeStatusChip
                   label="R"
-                  runtimeReady={backendStatus.rRuntime}
+                  runtimeReady={backendStatus.rRuntime === true}
                   serverUp={backendStatus.rServerUp}
                   downReason={backendStatus.downReason}
                 />
                 <RuntimeStatusChip
                   label="Py"
-                  runtimeReady={backendStatus.pyRuntime}
+                  runtimeReady={backendStatus.pyRuntime === true}
                   serverUp={backendStatus.pyServerUp}
                 />
               </span>

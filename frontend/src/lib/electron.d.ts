@@ -4,13 +4,19 @@
 
 // M1-1：后端就绪感知层返回结构
 export interface BackendStatus {
-  rRuntime: boolean;
-  pyRuntime: boolean;
+  /** `true` 已安装 / `false` 确认缺失 / `null` 状态未知（backend:status 查询
+   *  失败时的兜底）。消费端判断"缺失"必须用 `=== false`，用 `!rRuntime` 会把
+   *  "未知"误判成"缺失"，导致偶发 IPC 异常时错弹首次配置引导页。 */
+  rRuntime: boolean | null;
+  pyRuntime: boolean | null;
   rServerUp: boolean;
   pyServerUp: boolean;
   plumberUp: boolean;
   isReady: boolean;
   downReason: string | null;
+  /** true once the first backend status read has resolved — lets the UI
+   *  avoid flashing runtime-missing banners before detection has run. */
+  loaded: boolean;
 }
 
 // M2-3：可选错误遥测 payload（最小化，隐私优先）
@@ -55,6 +61,10 @@ declare global {
         maximize: () => void;
         close: () => void;
         isMaximized: () => Promise<boolean>;
+      };
+      /** 应用级控制 —— 装完运行时后需整体重启（BIOF3_R_HOME 在 main 启动时固化）。 */
+      app: {
+        relaunch: () => Promise<{ ok: boolean; error?: string }>;
       };
       aiSettings: {
         get: () => Promise<Record<string, unknown>>;

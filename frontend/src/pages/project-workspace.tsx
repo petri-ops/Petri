@@ -1247,8 +1247,42 @@ export function ProjectWorkspace(): React.ReactElement {
     setBrowserCanGoForward,
   };
 
+  // backendStatus.rRuntime 可为 null（状态查询失败 = 未知）。用 `=== false`
+  // 严格判定"确认缺失"，避免偶发 IPC 异常时误弹缺失横幅。
+  const rRuntimeMissing = backendStatus.rRuntime === false;
+  const pyRuntimeMissing = backendStatus.pyRuntime === false;
+
+  const showRuntimeBanner =
+    backendStatus.loaded &&
+    workspaceMode !== 'plugins' &&
+    (rRuntimeMissing || pyRuntimeMissing);
+
+  let runtimeBannerMessage: string;
+  if (rRuntimeMissing && pyRuntimeMissing) {
+    runtimeBannerMessage = 'R 与 Python 运行时均未安装，分析功能暂不可用。';
+  } else if (rRuntimeMissing) {
+    runtimeBannerMessage = 'R 运行时未安装，依赖 R 的分析无法运行。';
+  } else {
+    runtimeBannerMessage = 'Python 运行时未安装，依赖 Python 的分析无法运行。';
+  }
+
   return (
     <div className={styles.workspaceRoot}>
+      {showRuntimeBanner && (
+        <div className={styles.runtimeMissingBanner} role="alert">
+          <span className={styles.runtimeMissingBannerText}>
+            <Icon name="cpu" size={15} />
+            <span>{runtimeBannerMessage}</span>
+          </span>
+          <button
+            type="button"
+            className={styles.runtimeMissingBannerBtn}
+            onClick={handleShowPlugins}
+          >
+            去插件商店安装
+          </button>
+        </div>
+      )}
       <div className={styles.workspaceBody}>
         {compactLayout && (leftOpen || rightOpen) && (
           <button
