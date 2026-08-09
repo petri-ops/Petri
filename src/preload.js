@@ -47,6 +47,12 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     isMaximized: () => ipcRenderer.invoke('window:isMaximized'),
   },
 
+  // 应用级控制 — 装完运行时后需整体重启（BIOF3_R_HOME 在 main 启动时固化，
+  // 只重启 r-server 不够，必须重新解析 runtime 路径）
+  app: {
+    relaunch: () => ipcRenderer.invoke('app:relaunch'),
+  },
+
   // AI 设置
   aiSettings: {
     get: () => ipcRenderer.invoke('ai-settings:get'),

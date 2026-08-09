@@ -41,8 +41,12 @@ for (const rel of CORE_SERVERS) {
     continue;
   }
   // Prefer reproducible `npm ci` when a lockfile exists, else `npm install`.
+  // Skip lifecycle scripts: better-sqlite3's native build is unnecessary here
+  // because build/afterPack.js copies the Electron-rebuilt .node binary into
+  // each server's node_modules; installing it natively would fail without build
+  // tools and is overwritten at pack time anyway.
   const useCi = existsSync(join(dir, 'package-lock.json'));
-  const args = useCi ? ['ci'] : ['install'];
+  const args = useCi ? ['ci', '--ignore-scripts'] : ['install', '--ignore-scripts'];
   console.log(`[install-core-deps] ${rel}: npm ${args.join(' ')} …`);
   const res = spawnSync(npmCmd, args, { cwd: dir, stdio: 'inherit' });
   if (res.status !== 0) {

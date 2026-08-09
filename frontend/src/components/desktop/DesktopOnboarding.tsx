@@ -40,8 +40,12 @@ export function DesktopOnboarding(): React.ReactElement | null {
   const backend = useBackendStatus();
 
   // 运行时是否就绪：任一已装即视为"有运行时"
-  const hasAnyRuntime = backend.rRuntime || backend.pyRuntime;
-  const hasAllRuntime = backend.rRuntime && backend.pyRuntime;
+  // backend.rRuntime 可为 null（状态查询失败 = 未知）；引导页只做展示，
+  // 未知一律按"未就绪"处理，用 === true 归一化成严格布尔。
+  const rOk = backend.rRuntime === true;
+  const pyOk = backend.pyRuntime === true;
+  const hasAnyRuntime = rOk || pyOk;
+  const hasAllRuntime = rOk && pyOk;
 
   const finish = useCallback(() => {
     try {
@@ -89,8 +93,8 @@ export function DesktopOnboarding(): React.ReactElement | null {
           {step === 0 && <StepWelcome />}
           {step === 1 && (
             <StepRuntime
-              rOk={backend.rRuntime}
-              pyOk={backend.pyRuntime}
+              rOk={rOk}
+              pyOk={pyOk}
               hasAnyRuntime={hasAnyRuntime}
               hasAllRuntime={hasAllRuntime}
             />

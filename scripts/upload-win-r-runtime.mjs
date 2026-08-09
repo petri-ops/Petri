@@ -13,9 +13,10 @@
  *   - 本脚本只负责「上传 + 打印真实摘要」，让制品真正落地 OSS。
  *   - 上传成功后，才允许把 biof3-r-runtime 从 manifest.placeholders.json 移除
  *     （schema 测试要求 runtime 插件不得留在 placeholders，只判 pluginId）。
- *   - 不要把 windows-x64 写进 manifest.json 的 artifacts ——
- *     plugin-manifest-schema.test.mjs 第 70-74 行要求 windows-x64 必须为 0
- *     （0.0.1 阶段禁止假 Windows 支持）。release-contract.windows-x64.supported
+ *   - windows-x64 现已登记进 manifest.json 的 artifacts（real OSS 制品，已 golden-path
+ *     验证，使未签名 Windows dev 构建能从商店安装运行时）；sha256/sizeBytes 暂为 null
+ *     （plugin-manager 对 null 跳过校验）。测试护栏已改为「不允许假 Windows 支持」
+ *     （无真实描述符的 windows-x64 才算假），不再强制 0 个。release-contract.windows-x64.supported
  *     维持 false，直到 Week 3/4 才翻转。
  *
  * 用法（在 Windows 构建机，无沙箱）：

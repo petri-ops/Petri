@@ -377,11 +377,28 @@ writeLines(toJSON(manifest, auto_unbox = TRUE, pretty = TRUE),
 # ============================================================
 template_path <- file.path(job_dir, "report-template.html")
 if (!file.exists(template_path)) {
-  template_path <- "/opt/biof3-r-server/tool-scripts/deseq2-report-template.html"
+  # 平台安全兜底：从宿主注入的内置插件资源目录解析（main.js 启动 r-server 时设置
+  # BIOF3_BUILT_IN_PLUGINS_DIR=resources/built-in-plugins），不再硬编码 POSIX 路径
+  # （/opt/... 在 Windows 与 macOS app bundle 上均不存在）。
+  built_in_dir <- Sys.getenv("BIOF3_BUILT_IN_PLUGINS_DIR", "")
+  if (nzchar(built_in_dir)) {
+    candidate <- file.path(built_in_dir, "deseq2", "deseq2-report-template.html")
+    if (file.exists(candidate)) template_path <- candidate
+  }
 }
 if (file.exists(template_path)) {
   report_html <- readLines(template_path, warn = FALSE)
   report_html <- paste(report_html, collapse = "\n")
+  # 填充摘要占位符（模板中的 {{...}} token）
+  report_html <- gsub("{{TOTAL_GENES}}", as.character(nrow(counts)), report_html, fixed = TRUE)
+  report_html <- gsub("{{SIG_GENES}}", as.character(nrow(sig)), report_html, fixed = TRUE)
+  report_html <- gsub("{{UP}}", as.character(n_up), report_html, fixed = TRUE)
+  report_html <- gsub("{{DOWN}}", as.character(n_down), report_html, fixed = TRUE)
+  report_html <- gsub("{{DESIGN}}", design_col, report_html, fixed = TRUE)
+  report_html <- gsub("{{REF}}", ref, report_html, fixed = TRUE)
+  report_html <- gsub("{{TREAT}}", treat, report_html, fixed = TRUE)
+  report_html <- gsub("{{PADJ}}", formatC(padj_cut, format = "g"), report_html, fixed = TRUE)
+  report_html <- gsub("{{LFC}}", formatC(lfc_cut, format = "g"), report_html, fixed = TRUE)
   img_files <- c("library_size.png", "dispersion.png", "pca.png",
                  "sample_distance.png", "volcano.png", "ma_plot.png", "heatmap_top50.png")
   for (img in img_files) {
