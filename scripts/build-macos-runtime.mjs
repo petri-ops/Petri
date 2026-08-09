@@ -65,6 +65,9 @@ const RT = {
   r:  { manifestKey: 'biof3-r-runtime', topName: 'R', ossSegment: 'r-runtime', lang: 'r' },
   py: { manifestKey: 'biof3-py-runtime', topName: 'Python', ossSegment: 'py-runtime', lang: 'python' },
 };
+// 版本契约：macOS / Windows 运行时必须严格对齐，任意一方打运行时都不得偏离。
+// 改这里即视为升级运行时版本（需同步 Windows 侧与 manifest.builtAgainst）。
+const VERSION_CONTRACT = { r: '4.5.2', python: '3.11.9' };
 const rt = RT[runtime];
 if (!rt) fail('--runtime 必须是 r 或 py');
 
@@ -114,21 +117,22 @@ function resolveSource() {
 
 // ── 版本校验 ───────────────────────────────────────────────
 function checkVersion(source) {
+  const contract = VERSION_CONTRACT[rt.lang];
   if (rt.lang === 'r') {
     try {
       const out = spawnSync(path.join(source, 'bin', 'Rscript'), ['-e', 'cat(as.character(getRversion()))'], { encoding: 'utf-8', timeout: 15000 });
       const v = out.stdout.trim();
-      console.log(`[build-macos-runtime] R 版本: ${v}`);
-      if (!/^4\.[4-9]/.test(v)) console.warn('  ⚠️ 建议 R >= 4.4（manifest 声明 >=4.4.0）');
-    } catch (e) { console.warn('  ⚠️ 无法读取 R 版本:', e.message); }
+      console.log(`[build-macos-runtime] R 版本: ${v}（契约要求 ${contract}）`);
+      if (v !== contract) fail(`R 版本 ${v} 与版本契约 ${contract} 不一致——macOS/Windows 运行时必须严格对齐，请用 ${contract} 重打`);
+    } catch (e) { fail('无法读取 R 版本（需含 bin/Rscript）: ' + e.message); }
   } else {
     try {
       const out = spawnSync(path.join(source, 'bin', 'python3'), ['--version'], { encoding: 'utf-8', timeout: 15000 });
       const m = (out.stdout + out.stderr).match(/Python (\d+\.\d+\.\d+)/);
       const v = m ? m[1] : '?';
-      console.log(`[build-macos-runtime] Python 版本: ${v}`);
-      if (!/^3\.11\./.test(v)) console.warn('  ⚠️ 运行时 builtAgainst=3.11，当前不是 3.11，可能导致下游工具不兼容');
-    } catch (e) { console.warn('  ⚠️ 无法读取 Python 版本:', e.message); }
+      console.log(`[build-macos-runtime] Python 版本: ${v}（契约要求 ${contract}）`);
+      if (v !== contract) fail(`Python 版本 ${v} 与版本契约 ${contract} 不一致——macOS/Windows 运行时必须严格对齐，请用 ${contract} 重打`);
+    } catch (e) { fail('无法读取 Python 版本（需含 bin/python3）: ' + e.message); }
   }
 }
 

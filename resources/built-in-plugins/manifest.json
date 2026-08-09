@@ -12,7 +12,7 @@
       "kind": "runtime",
       "type": "runtime",
       "language": "r",
-      "description": "R 4.5 + ggplot2/dplyr/data.table/BiocGenerics 等 70+ 包，BioF3 所有 R 工具的运行基础。约 280MB。",
+      "description": "R 4.5.2 + Bioconductor 3.22 + ggplot2/dplyr/data.table/BiocGenerics 等 70+ 包，BioF3 所有 R 工具的运行基础。约 557MB（macOS arm64）。",
       "artifacts": {
         "macos-arm64": {
           "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/macos-arm64.zip",
@@ -28,6 +28,10 @@
       "checksumAlgorithm": "sha256",
       "runtime": {
         "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5.2",
+        "bioconductor": "3.22"
       }
     },
     "biof3-py-runtime": {
@@ -37,12 +41,12 @@
       "kind": "runtime",
       "type": "runtime",
       "language": "python",
-      "description": "Python 3.11 + pandas/numpy/scipy/sklearn/matplotlib/scanpy 等 200+ 包，BioF3 所有 Python 工具的运行基础。约 750MB。",
+      "description": "Python 3.11.9 + pandas/numpy/scipy/sklearn/matplotlib/scanpy 等 200+ 包，BioF3 所有 Python 工具的运行基础。约 147MB（macOS arm64）。",
       "artifacts": {
         "macos-arm64": {
           "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/macos-arm64.zip",
-          "sha256": "6144c678867cd0b1e916a05d76a83e4a4a336b172276713aea58e28a756927a3",
-          "sizeBytes": 154339336
+          "sha256": "f88502026027aec32eaa03ea5d2faefe77dbd59d0524f99d365208385b2abec8",
+          "sizeBytes": 154126592
         },
         "windows-x64": {
           "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/windows-x64.zip",
@@ -53,6 +57,9 @@
       "checksumAlgorithm": "sha256",
       "runtime": {
         "python": ">=3.10.0"
+      },
+      "builtAgainst": {
+        "python": "3.11.9"
       }
     },
     "volcano-plot": {
@@ -81,7 +88,7 @@
         "r": ">=4.3.0"
       },
       "builtAgainst": {
-        "r": "4.5"
+        "r": "4.5.2"
       }
     },
     "gene-correlation": {
@@ -110,7 +117,7 @@
         "r": ">=4.3.0"
       },
       "builtAgainst": {
-        "r": "4.5"
+        "r": "4.5.2"
       }
     },
     "pca-explorer": {
@@ -140,7 +147,7 @@
         "python": ">=3.10.0"
       },
       "builtAgainst": {
-        "python": "3.11"
+        "python": "3.11.9"
       }
     },
     "sample-metadata-validator": {
@@ -169,7 +176,7 @@
         "r": ">=4.4.0"
       },
       "builtAgainst": {
-        "r": "4.5"
+        "r": "4.5.2"
       }
     },
     "expression-qc": {
@@ -198,7 +205,7 @@
         "r": ">=4.4.0"
       },
       "builtAgainst": {
-        "r": "4.5"
+        "r": "4.5.2"
       }
     },
     "deg-standardizer": {
@@ -227,7 +234,7 @@
         "r": ">=4.4.0"
       },
       "builtAgainst": {
-        "r": "4.5"
+        "r": "4.5.2"
       }
     },
     "go-kegg": {
@@ -263,7 +270,7 @@
         "r": ">=4.4.0"
       },
       "builtAgainst": {
-        "r": "4.5"
+        "r": "4.5.2"
       }
     },
     "gsea": {
@@ -300,7 +307,7 @@
         "r": ">=4.4.0"
       },
       "builtAgainst": {
-        "r": "4.5"
+        "r": "4.5.2"
       }
     },
     "wgcna": {
@@ -334,7 +341,7 @@
         "r": ">=4.4.0"
       },
       "builtAgainst": {
-        "r": "4.5"
+        "r": "4.5.2"
       }
     },
     "figcode-volcano-animated": {
@@ -360,7 +367,7 @@
         ]
       },
       "builtAgainst": {
-        "r": "4.5"
+        "r": "4.5.2"
       }
     },
     "figcode-trajectory-branch": {
@@ -386,7 +393,7 @@
         ]
       },
       "builtAgainst": {
-        "r": "4.5"
+        "r": "4.5.2"
       }
     },
     "figcode-sc-doublet": {
@@ -412,7 +419,7 @@
         ]
       },
       "builtAgainst": {
-        "r": "4.5"
+        "r": "4.5.2"
       }
     },
     "figcode-cytotrace": {
@@ -438,7 +445,7 @@
         ]
       },
       "builtAgainst": {
-        "r": "4.5"
+        "r": "4.5.2"
       }
     },
     "figcode-qq-plot": {
@@ -464,7 +471,7 @@
         ]
       },
       "builtAgainst": {
-        "r": "4.5"
+        "r": "4.5.2"
       }
     },
     "figcode-manhattan": {
@@ -490,7 +497,7 @@
         ]
       },
       "builtAgainst": {
-        "r": "4.5"
+        "r": "4.5.2"
       }
     },
     "figcode-power-curve": {
@@ -516,7 +523,7 @@
         ]
       },
       "builtAgainst": {
-        "r": "4.5"
+        "r": "4.5.2"
       }
     },
     "figcode-meta-forest": {
@@ -542,7 +549,7 @@
         ]
       },
       "builtAgainst": {
-        "r": "4.5"
+        "r": "4.5.2"
       }
     },
     "figcode-mut-signature": {
@@ -566,7 +573,7 @@
         "r": []
       },
       "builtAgainst": {
-        "r": "4.5"
+        "r": "4.5.2"
       },
       "dependencies": [
         "figcode-data-bsgenome-hg19"
@@ -593,7 +600,7 @@
         "r": []
       },
       "builtAgainst": {
-        "r": "4.5"
+        "r": "4.5.2"
       },
       "dependencies": [
         "figcode-data-bsgenome-hg19"
@@ -622,7 +629,7 @@
         ]
       },
       "builtAgainst": {
-        "python": "3.11"
+        "python": "3.11.9"
       }
     },
     "figcode-spatial-deconv-c2l": {
@@ -648,7 +655,7 @@
         ]
       },
       "builtAgainst": {
-        "python": "3.11"
+        "python": "3.11.9"
       }
     },
     "figcode-feature-spatial": {
@@ -674,7 +681,7 @@
         ]
       },
       "builtAgainst": {
-        "python": "3.11"
+        "python": "3.11.9"
       }
     },
     "figcode-spatial-svg-moran": {
@@ -700,7 +707,7 @@
         ]
       },
       "builtAgainst": {
-        "python": "3.11"
+        "python": "3.11.9"
       }
     },
     "figcode-squidpy-neighbors": {
@@ -726,7 +733,7 @@
         ]
       },
       "builtAgainst": {
-        "python": "3.11"
+        "python": "3.11.9"
       }
     },
     "figcode-spatial-lr-liana": {
@@ -753,7 +760,7 @@
         ]
       },
       "builtAgainst": {
-        "python": "3.11"
+        "python": "3.11.9"
       }
     },
     "figcode-scvelo-stream": {
@@ -779,7 +786,7 @@
         ]
       },
       "builtAgainst": {
-        "python": "3.11"
+        "python": "3.11.9"
       }
     },
     "deseq2": {
@@ -811,7 +818,7 @@
         "r": ">=4.4.0"
       },
       "builtAgainst": {
-        "r": "4.5"
+        "r": "4.5.2"
       }
     },
     "figcode-shap-summary": {
@@ -838,7 +845,7 @@
         ]
       },
       "builtAgainst": {
-        "python": "3.11"
+        "python": "3.11.9"
       }
     },
     "figcode-data-bsgenome-hg19": {
