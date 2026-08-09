@@ -162,3 +162,21 @@ ol {
 [data-theme='dark'] code {
   background-color: var(--ifm-color-emphasis-200);
 }
+
+/* ────────────────────────────────────────────────────────────
+ * 动效减弱（prefers-reduced-motion）— 全局兜底
+ * 统一关闭动画/过渡/滚动平滑，覆盖 run-modal / fade / pulse /
+ * onboarding 等未单独处理的动效，满足 WCAG 2.3.3（动画敏感用户）。
+ * 各组件已有的局部 reduced-motion 规则仍保留，与此处叠加无害。
+ * ──────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}
