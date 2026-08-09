@@ -1157,6 +1157,7 @@ function LoopStatusPanel({
         type="button"
         className="sc-loop-summary"
         aria-expanded={expanded}
+        aria-controls="sc-loop-iterations"
         aria-label={expanded ? '收起循环详情' : '展开循环详情'}
         onClick={() => setExpanded((current) => !current)}
       >
