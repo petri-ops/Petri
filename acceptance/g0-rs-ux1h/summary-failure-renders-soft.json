@@ -4,9 +4,8 @@
   "workPackage": "G0-RS-UX1H / UI-126",
   "classification": "development_deterministic_local_adapter_no_provider_claim_with_real_socket_timeout",
   "qualificationEligible": false,
-  "captureSourceCommit": "954c56e745df8c6532941288369be4307f327c53",
-  "currentVerificationCommit": "9c2b4383f7c5b2ce9fa56a505040daa44a02ab34",
-  "productSourceUnchangedSinceCapture": true,
+  "sourceCommit": "c8454e0a326268163a490c95825914828fe69615",
+  "sourceDigest": "ed1dc70f9b394e2798b9d0014d7aea5e916118f6805a8329adde7a89c5a13176",
   "dataset": {
     "countsSha256": "ed85549d09d5d2b5a406529ca4635ecf3420240200c451aefb695996243dd015",
     "metadataSha256": "09b211c25fdfb2b0865841926a2c9e67c474c67570fdee5dc3ee2c2c1d714120",
@@ -27,18 +26,12 @@
     "targetMessageVisible": true,
     "forbiddenMessage": "请求超时",
     "forbiddenMessageVisible": false,
-    "completedRunToolVisible": true,
-    "chatComposerVisibleAfterReturn": true
+    "completedRunToolVisible": true
   },
-  "gateway": {
-    "modelId": "ux1h-timeout-adapter",
-    "finalSocketTimeoutObserved": true,
-    "requestCount": 9
-  },
-  "screenshots": {
+  "screenshot": {
     "file": "screenshots/summary-unavailable.png",
-    "sha256": "25840f105b3a02ca2e625948e2b77224deb0e7e6c9921019c6b650058dbae151",
-    "bytes": 335699
+    "sha256": "61590d1e1d343594e7a9a355d3c516ecc03ea09d8cd2cbc0303044b500af5d16",
+    "bytes": 346516
   },
   "passed": true
 }

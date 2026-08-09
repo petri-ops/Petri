@@ -4,14 +4,7 @@
   "workPackage": "G0-RS-UX1H / UI-126",
   "classification": "development_deterministic_local_adapter_no_provider_claim_with_real_socket_timeout",
   "qualificationEligible": false,
-  "productScope": "开发态 Electron；真实本地 DESeq2；本地确定性 LLM socket timeout；不代表外部 Provider、打包态或发布资格",
-  "capture": {
-    "captureSourceCommit": "954c56e745df8c6532941288369be4307f327c53",
-    "captureMode": "live_development_electron_stage_closeout",
-    "currentVerificationCommit": "9c2b4383f7c5b2ce9fa56a505040daa44a02ab34",
-    "postCaptureChanges": "仅验收驱动器的对话视图断言与本地适配器响应 model label；未改 renderer、ToolJob、DESeq2 或 Artifact Truth 执行路径",
-    "productSourceUnchangedSinceCapture": true
-  },
+  "productScope": "development Electron with real local DESeq2 and deterministic local LLM timeout; not packaged or real-provider qualification",
   "noSeedPrecondition": {
     "tables": [
       "projects",
@@ -61,7 +54,7 @@
     "importedFileCount": 2,
     "dataReady": false,
     "dataImported": true,
-    "analysisInitiatedBy": "explicit_chat_after_fail_closed_data_profiler",
+    "analysisInitiatedBy": "explicit_chat",
     "scientificConfirmationRequested": true,
     "execution": {
       "tool": "deseq2",
@@ -81,33 +74,49 @@
       "expectedVisible": true,
       "forbiddenVisible": false,
       "successfulTool": true,
-      "modeAfterReturn": null,
-      "resultCanvasVisibleAfterReturn": false,
-      "composerVisibleAfterReturn": true,
-      "text": "执行中· 4 轮· deseq2 已生成真实 Job/Artifact，继续验证下游目标。✓ 工具已完成，AI 总结暂时不可用复制"
+      "text": "执行中· 4 轮· deseq2 已生成真实 Job/Artifact，继续验证下游目标。✓ 工具已完成，AI 总结暂时不可用重试 AI 总结（剩 3 次）复制",
+      "mode": null,
+      "resultCanvasVisible": false,
+      "composerVisible": true
+    },
+    "retryAssertion": {
+      "enabled": true,
+      "retryClicked": true,
+      "initialRemaining": 3,
+      "runningObserved": true,
+      "finalRemaining": null,
+      "finalErrorShown": true,
+      "before": {
+        "completedDeseq2JobCount": 1,
+        "artifactTruthStatus": "valid",
+        "artifactTruthBlocking": false
+      },
+      "after": {
+        "completedDeseq2JobCount": 1,
+        "artifactTruthStatus": "valid",
+        "artifactTruthBlocking": false
+      }
     },
     "screenshots": {
       "dataReady": {
-        "file": "screenshots/airway-data-ready.png",
-        "sha256": "2af36bdf199b99935b0e5786ea8dcc19131caa7a218c9dc0bb787f9e2f0ebcdb",
-        "bytes": 193911
+        "file": "data-ready.png",
+        "sha256": "2e94bf188caa89483d4ba2f191bc80da5459d1c560936c09e9ab5415667c67d1",
+        "bytes": 207290
       },
       "resultOpen": {
-        "file": "screenshots/deseq2-result-open.png",
-        "sha256": "912ba8cf47b0e163fd25e85cc9d21cc34c434676541656565b58425c099be3b1",
-        "bytes": 323614
+        "file": "result-open.png",
+        "sha256": "6cf593f4103d37d388c73b47ab07010b8e5fde0d996507f2c97ca94cc338fddd",
+        "bytes": 322725
       },
       "summaryUnavailable": {
-        "file": "screenshots/summary-unavailable.png",
-        "sha256": "25840f105b3a02ca2e625948e2b77224deb0e7e6c9921019c6b650058dbae151",
-        "bytes": 335699
+        "file": "summary-unavailable.png",
+        "sha256": "61590d1e1d343594e7a9a355d3c516ecc03ea09d8cd2cbc0303044b500af5d16",
+        "bytes": 346516
       }
     },
     "passed": true
   },
   "gateway": {
-    "modelId": "ux1h-timeout-adapter",
-    "adapterNature": "local deterministic scripted adapter; no network and no external model claim",
     "phases": [
       "scientific_confirmation",
       "scientific_confirmation",
@@ -117,30 +126,31 @@
       "final",
       "final",
       "final",
+      "catalog",
       "catalog"
     ],
-    "requestCount": 9,
+    "requestCount": 10,
     "finalSocketTimeoutObserved": true,
     "noRawMessagesPersisted": true
   },
-  "sourceCommit": "954c56e745df8c6532941288369be4307f327c53",
+  "sourceCommit": "c8454e0a326268163a490c95825914828fe69615",
   "sourceHashes": {
-    "frontend/src/components/copilot/SimpleChat.tsx": "231c0896e65cf0d84574a87dff1f0d71c37da9f18dce1fd7e55ffa3971a188fe",
+    "frontend/src/components/copilot/SimpleChat.tsx": "df92751799dbc365a51d45e73643e16984808f74ba8a1dd580ae2a25bcb254ee",
     "frontend/src/components/copilot/SimpleChat.test.tsx": "f4299ae8e3a383c65f92510bcfc46878589ddb4c8abe6d4e0c25b21b5d1b3097",
-    "frontend/src/components/copilot/toolSummaryPresentation.ts": "ffd1384b0989e9a14dce1ee5e5c1dd836fba2604c597512fa10e5762dedeceac",
+    "frontend/src/components/copilot/toolSummaryPresentation.ts": "9ce187ddda1ad6407198a88bbf0bdc454cd1a5076d22b15d019757897c96b821",
     "frontend/src/components/copilot/conversationRunStore.ts": "8183703db05831e71264f749bc5c0a4c47c1a766350879d69d47b3d616fcf68a",
-    "scripts/g0-rs-ux1h-acceptance.mjs": "5208f9faec5aeec737f9b86fbce8d266213a4f895d7a14cd4325c036aa74d44e",
-    "scripts/g0-sdc1-local-gateway.mjs": "aeeb9a051a3bf81baf4c658567e03b4d1b96c363776fe9e68bce5e8f362fce78",
-    "scripts/g0-sdc1-electron-driver.cjs": "c0f3d61293447c19e778559c85429f4105f2bd5ee8d1149b34ab5cfce35bbfa0",
+    "scripts/g0-rs-ux1h-acceptance.mjs": "9cc2229e05b7f0bf962d819fac2dc50dfbabdac6f189ea601ed643b29e903dbf",
+    "scripts/g0-sdc1-local-gateway.mjs": "4df372620db8f1317fca2e010d97dc60b00bddf4f29aeb602280a58b3e54e9ae",
+    "scripts/g0-sdc1-electron-driver.cjs": "73e8fba01c28b6878eb1d691e9658c1d4761440ca8efcbddf937df1cb18041fc",
     "core/shared-backend/llm-providers/deepseek.js": "023011ed31905e59a2a867d8f4ebb8a3317284ca598eb8cdd9bd8a50cdea1504",
     "core/r-server/routes/ai-agent.js": "2d6c18b8d11467744e3315250de1958033981ae23c5dc827ef1a2b755cdb698f",
-    "resources/built-in-plugins/deseq2/plugin.json": "d848417d5539bb377024978668f9b41a1b3750b11e87a17b816398305199e9c5",
+    "resources/built-in-plugins/deseq2/plugin.json": "85d0d84ec76f975a571e05ae7a666b3c23dc7f5acd46c73e130af1e07ddd6daf",
     "resources/built-in-plugins/deseq2/scripts/deseq2.R": "013856191f06d1ab1326d7747a4cbd6b0979efcb31d084da707e5fec10cfa297",
     "test/g0-rs-ux1h-acceptance.test.mjs": "8906f8b0676d5fffe509159c3ddf042aad6ecc74e69c697deba9bbbfcf45cf78",
-    "test/impact-map.json": "1ff71a45e1f81cef9deca287c6f20159f18b79eb49f38aa8b978aca0cc375faa",
-    "package.json": "bba818ade93d9e3c43dd9f923cb34a264e11ff1f24cc2686d5ac62d51cdde2c0"
+    "test/impact-map.json": "318c20fada877bcccb1642be08ba8dce88b2ebce200c0106c353a26a29880917",
+    "package.json": "e30fa0bbfdc526e7dff40f1a08325285add424dc68ab7e56c6f6664910942a98"
   },
-  "sourceDigest": "62c6ccd6a588cfbdd58a50c563ada69fa822c30476375d5c63bb4fbc5eebd1c0",
+  "sourceDigest": "ed1dc70f9b394e2798b9d0014d7aea5e916118f6805a8329adde7a89c5a13176",
   "sourceCommitMatchesSourceHashes": true,
   "sourceMismatches": [],
   "passed": true
