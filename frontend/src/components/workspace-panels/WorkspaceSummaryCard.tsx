@@ -7,6 +7,7 @@ import styles from '@/pages/project-workspace.module.css';
 import { useRuntimeResourceSnapshot } from '@/hooks/useRuntimeResourceSnapshot';
 import type { ConversationLoopState } from '@/components/copilot/conversationRunStore';
 import { deriveLoopDisplay, loopDecisionLabel, type LoopSessionSummary } from '@/lib/loop-client';
+import { formatDate } from '@/lib/format';
 
 export interface WorkspaceSummaryCardProps {
   open: boolean;
@@ -382,16 +383,3 @@ function workflowStatusLabel(status: string): string {
   }[status] || status;
 }
 
-// Local copy of formatDate — duplicated from project-workspace.tsx to avoid a
-// circular import. The helper is tiny and stable; a future shared utils
-// module can hold it once.
-function formatDate(ts: string | number): string {
-  const d = typeof ts === 'number' ? new Date(ts) : new Date(ts);
-  if (isNaN(d.getTime())) return String(ts);
-  return d.toLocaleString('zh-CN', {
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
