@@ -87,6 +87,50 @@
   flex-shrink: 0;
 }
 
+/* macOS self-drawn traffic lights (Cursor-style grey circular capsule).
+   Separate from .winBtn on purpose: .winBtn is overridden below by the
+   non-macOS square WindowControls, so the Mac dots need their own class. */
+.macTrafficBtn {
+  -webkit-app-region: no-drag;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--win-btn-size);
+  height: var(--win-btn-size);
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--win-btn-bg);
+  color: var(--win-btn-fg);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.12s ease, color 0.12s ease, transform 0.12s ease;
+  outline: none;
+}
+
+.macTrafficBtn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--biof3-accent) 78%, white 22%);
+  outline-offset: 1px;
+}
+
+.macTrafficBtn:hover {
+  background: var(--win-btn-bg-hover);
+}
+
+.macTrafficBtn:active {
+  transform: scale(0.92);
+}
+
+.macTrafficBtn svg {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.macTrafficBtnClose:hover {
+  background: var(--win-btn-bg-close-hover);
+  color: var(--win-btn-fg-close-hover);
+}
+
 .winBtn {
   -webkit-app-region: no-drag;
   display: inline-flex;
@@ -134,7 +178,9 @@
 .toolMenuAnchor,
 .toolMenu,
 .toolMenuOverlay,
-.winBtn {
+.winBtn,
+.macTrafficBtn,
+.macTrafficBtnClose {
   -webkit-app-region: no-drag;
 }
 
