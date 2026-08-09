@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import path from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
@@ -47,6 +48,12 @@ test('result files inherit stable host and canonical paths', () => {
     context
   );
   assert.equal(result.execution, context);
-  assert.equal(result.files[0].path, '/srv/jobs/job-2/output/markers.csv');
+  // .path is built from context.resultDir (which createExecutionContext resolves
+  // via path.resolve — adding the cwd drive letter on Windows) joined with the
+  // filename. Mirror that exactly so the assertion is platform-stable.
+  assert.equal(
+    result.files[0].path,
+    path.join(path.resolve('/srv/jobs/job-2/output'), 'markers.csv').split(path.sep).join('/'),
+  );
   assert.equal(result.files[0].canonicalPath, '/work/biof3/jobs/job-2/output/markers.csv');
 });

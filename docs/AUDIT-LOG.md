@@ -10,6 +10,7 @@
 
 | 状态 | 日期 | 事项 | 处置边界 |
 | --- | --- | --- | --- |
+| 🔴阻塞 | 2026-08-08 | **macOS R/Python 运行时 OSS 制品 404**：`manifest.json` 记录了 sha256/sizeBytes，但 `plugins/{r,py}-runtime/1.0.0/macos-arm64.zip` 在 OSS 上均 HTTP 404 → macOS 新装用户 `installRuntime` 会在下载步失败 | 需 macOS 机器接手：本机已 provision 的本地 R/Python 不受影响，**不阻塞当前 UX1H 开发态实机验收**；修复需重新上传 macos-arm64.zip 到 OSS 并校验 manifest（Windows 侧已于 2026-08-08 完成 Windows 制品闭环并广播此 macOS 缺口，详见 origin/main §8 问题 N） |
 | 🔵 进行中 | 2026-08-06 | **`G0-RS-UX1H Async Tool Surface` 仍为当前唯一 active 工作包**：真实 airway 数据（4 control vs 4 treated，34889 gene rows × 8 sample）在开发态 Electron 中完成 DESeq2，1 个 completed Job、Artifact Truth `valid`、同 Job PNG 自动打开；模拟总结阶段 socket timeout 后，返回对话显示"✓ 工具已完成，AI 总结暂时不可用"，未显示红色"请求超时"。summary-only 重试（`7e02f07`）与运行中排队（`de83c58`）已经 `npm run g0:result-studio:ux1h` 全门验证通过（syntax + Node/前端 24/24 + strict TS + 真实 Electron 链 EXIT=0）。**下一阶段：task"工具完成、总结分离"终态设计**（已立项为 UX1H 最后阶段，约束见 canonical 计划 §7/§10；cancel 语义与执行真相不动）。`retry-summary-does-not-rerun-tool.json` 证据仍缺 | 本地 `ux1h-timeout-adapter` 是无网络确定性适配器，不代表外部模型。保持不动 P7-F、provider timeout、Git Worktree 与 `qualificationEligible:true`；完整 async surface 仍待终态分离阶段，UI-126 保持 `in_progress` |
 | 🟡证据边界 | 2026-08-03 | **P6 stored evidence 不再匹配当前 Result Studio 前端源码。** UX1A 修改了 P6 绑定的八个前端文件，`npm run test:changed` 的 `p6_current_source_tree_not_exact` 按设计 fail-closed | P6 evidence 继续诚实绑定 `ad1e2ce`；只有重跑完整 P6 矩阵才能刷新。P7 deferred 期间不阻塞 UX 小切片，但不得宣称当前源码仍由旧 P6 evidence 覆盖 |
 | 🟡证据边界 | 2026-08-03 | **P6 stored evidence 不再匹配当前 `src/preload.js`。** `G0-RS-TL1` (UI-120) 把窗口切为 `frame:false` 自绘控制并新增 `window.biof3Desktop.window.onMaximizeChanged`；`src/preload.js` 与 `src/main.js` 同属 `P6_RECOVERY_ELECTRON_SOURCE_FILES`，旧 P6 freshness 按设计报告 `p6_current_source_tree_not_exact` | TL1 自身已由 17 项专项测试与开发态 Electron 控件/退出重启链验证，但未运行完整 P6 矩阵；P6 evidence 继续诚实绑定 `ad1e2ce`。未来只有显式 `npm run g0:result-studio:p6:update` 并纳入新窗口控件的 restart/pressure/recovery 才能重绑，不能宣称旧 P6 evidence 覆盖当前源码 |
@@ -19,7 +20,7 @@
 | 🟡建议 | 2026-07-17 | `capability-provisioning.js` 的下载实现与 plugin-manager 各自维护 | host 白名单已经修复；共享下载 helper 只在改动该能力时评估，不阻塞 RH0 |
 | 🟡待评估 | 2026-07-17 | 本地分支 `codex/fix-collapsed-right-titlebar` 尚未采用，且与当前 UI 已有语义重叠 | 不直接 merge；进入相关 UI 工作时先比较当前实现，再决定删除或重做 |
 
-当前没有 🔴 阻塞项，也没有 🟢 待合并项。`UI-124 / MODEL-ANTHROPIC-NATIVE` 已按 `docs/ui-productization-audit.md`「key-unavailable 例外」纪律收口；`G0-SDC-1 / G0-SDC-2` 已于 2026-08-06 以 fixture + 门禁脚本收口，canonical evidence 为 `acceptance/g0-scientific-data-contract/sdc1-complete.json` 与 `sdc2-semantic-binder.json`。待 `BIOTEST_ANTHROPIC_KEY` 可用时新开 audit 跑 live 模式补充实机 evidence（不触发回退）。
+当前有 1 个 🔴 阻塞项（macOS 运行时 OSS 404，仅影响**新装用户**下载运行时，不阻塞本机已 provision 运行时的开发态验收）；没有 🟢 待合并项。`UI-124 / MODEL-ANTHROPIC-NATIVE` 已按 `docs/ui-productization-audit.md`「key-unavailable 例外」纪律收口；`G0-SDC-1 / G0-SDC-2` 已于 2026-08-06 以 fixture + 门禁脚本收口，canonical evidence 为 `acceptance/g0-scientific-data-contract/sdc1-complete.json` 与 `sdc2-semantic-binder.json`。待 `BIOTEST_ANTHROPIC_KEY` 可用时新开 audit 跑 live 模式补充实机 evidence（不触发回退）。
 
 ## 最近处理记录
 
@@ -67,6 +68,7 @@
 | 2026-07-26 | RH0 定向测试、脚本/tmp 生命周期和最终全量基线收口；下一阶段转为 P4R | RH0 closeout commit |
 | 2026-07-26 | RS9 历史脚本仍被封存证据引用；移出日常 syntax，保留显式历史 syntax 入口 | repository governance follow-up |
 | 2026-07-26 | P4 治理后源哈希刷新，专项门恢复 `18/18`；未改变 `qualificationEligible:false` | P4 current evidence |
+| 2026-08-09 | 合并 `origin/main`（`1b58887..4790819`，10 提交）：Windows R/Python 运行时制品端到端闭环（PR #1/#2）、engines≥24 收紧、`.gitignore`/`release-contract.json`/`DOC-REGISTRY.json`/`platform-compat.js`/`artifact-truth.js` 等随主线变更自动合并无冲突。**接收 🔴 广播（macOS R/Python 运行时 OSS 制品 404）并已登记为当前唯一 🔴 阻塞项**：本机已 provision 的本地 R/Python 不受影响，不阻塞 UX1H 开发态实机验收；修复属 OSS 制品重传，留待 macOS 侧单独处理。合并基点干净（线性推进于 `1b58887`），非 main 重写 | G0-RS-UX1H / AUDIT-LOG-SYNC |
 
 ## 广播规则
 

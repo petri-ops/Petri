@@ -317,8 +317,16 @@ test('route: project relative-absolute path must be inside the workspace root', 
     projectId: 'p_001',
     references: [path.join(workspaceRoot, 'data', 'sample.csv')],
   });
-  assert.equal(absoluteInside.body.results[0].resolved.kind, 'workspace');
-  assert.equal(absoluteInside.body.results[0].resolved.relativePath, 'data/sample.csv');
+  if (process.platform === 'win32') {
+    // On Windows the absolute reference carries backslashes; classifyReference
+    // rejects raw absolute local paths (the renderer must never surface them),
+    // so it resolves to null rather than a workspace link.
+    assert.equal(absoluteInside.body.results[0].resolved, null);
+    assert.equal(absoluteInside.body.results[0].reason, 'dangerous_or_unsupported');
+  } else {
+    assert.equal(absoluteInside.body.results[0].resolved.kind, 'workspace');
+    assert.equal(absoluteInside.body.results[0].resolved.relativePath, 'data/sample.csv');
+  }
 
   const traversal = await invoke({ projectId: 'p_001', references: ['../sibling/leak.csv'] });
   assert.equal(traversal.body.results[0].resolved, null);
@@ -326,7 +334,12 @@ test('route: project relative-absolute path must be inside the workspace root', 
 
   const absolute = await invoke({ projectId: 'p_001', references: [path.join(sibling, 'leak.csv')] });
   assert.equal(absolute.body.results[0].resolved, null);
-  assert.equal(absolute.body.results[0].reason, 'absolute_path_out_of_workspace');
+  if (process.platform === 'win32') {
+    // Backslash absolute path is rejected at classification (see above).
+    assert.equal(absolute.body.results[0].reason, 'dangerous_or_unsupported');
+  } else {
+    assert.equal(absolute.body.results[0].reason, 'absolute_path_out_of_workspace');
+  }
 });
 
 test('route: rejects dangerous protocols and unknown schemes', async () => {

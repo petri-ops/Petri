@@ -89,7 +89,8 @@ function resolveRLibsForPlugin(pluginCfg) {
   return {
     ...process.env,
     R_HOME: process.env.BIOF3_R_HOME || process.env.R_HOME,
-    R_LIBS_USER: rLibsParts.join(':'),
+    // R uses ';' as the library path separator on Windows and ':' on POSIX.
+    R_LIBS_USER: rLibsParts.join(path.delimiter),
   };
 }
 

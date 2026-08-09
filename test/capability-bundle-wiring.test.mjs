@@ -116,7 +116,7 @@ test('wiring: published bundle downloads once and is then mounted via R_LIBS_USE
     // The payoff of awaiting ensure BEFORE resolve: the just-installed bundle
     // dir is now on R_LIBS_USER.
     assert.ok(env, 'resolveRLibsForPlugin must return an env once a bundle is ready');
-    const parts = env.R_LIBS_USER.split(':');
+    const parts = env.R_LIBS_USER.split(path.delimiter);
     assert.ok(parts.includes(installDir), `R_LIBS_USER must include ${installDir}, got ${env.R_LIBS_USER}`);
   } finally {
     bundles.getBundleDescriptor = original;

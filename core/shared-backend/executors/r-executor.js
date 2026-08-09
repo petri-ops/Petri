@@ -10,7 +10,7 @@ const path = require('path');
 const fs = require('fs');
 const { execFileSync, spawn } = require('child_process');
 const logger = require('../logger');
-const { findExecutableOnPath } = require('../runtime-paths');
+const { findExecutableOnPath, getRuntimeBinName } = require('../runtime-paths');
 
 // 从 config-helper 读取配置（断点1：斩断对 r-server/config 的反向 require）
 // 调用方启动时通过 require('shared-backend').configure({getConfig}) 注入；
@@ -28,7 +28,11 @@ class RExecutor {
   /** Rscript 可执行文件路径（内嵌 R）。 */
   get binPath() {
     const cfg = getRConfig();
-    const embedded = path.join(cfg.rHome || path.join(__dirname, '../../r-server/R'), 'bin', 'Rscript');
+    const rHome = cfg.rHome || path.join(__dirname, '../../r-server/R');
+    // Use the platform-correct binary name (Rscript.exe on Windows) so the
+    // embedded path is resolved by existsSync instead of falling through to a
+    // PATH search that misses an isolated (non-PATH) runtime tree.
+    const embedded = path.join(rHome, 'bin', getRuntimeBinName('r', process.platform));
     if (fs.existsSync(embedded)) return embedded;
     return findExecutableOnPath(process.platform === 'win32' ? ['Rscript.exe', 'Rscript'] : ['Rscript']);
   }
@@ -59,7 +63,8 @@ class RExecutor {
   /** 创建进程池 worker（常驻 R 进程）。 */
   buildPoolWorker() {
     const cfg = getRConfig();
-    const rBin = path.join(cfg.rHome || '', 'bin', 'R');
+    const rBinName = getRuntimeBinName('r', process.platform);
+    const rBin = path.join(cfg.rHome || '', 'bin', rBinName);
     return spawn(rBin, ['--no-save', '--no-restore', '--interactive'], {
       env: { ...process.env, R_HOME: cfg.rHome },
     });
