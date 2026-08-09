@@ -1461,7 +1461,7 @@ function ApprovalCard({
       <div className="sc-approval-actions">
         <button
           type="button"
-          className="sc-approval-btn sc-approval-approve"
+          className="biof3-btn sc-approval-btn sc-approval-approve"
           onClick={onApprove}
           disabled={busy}
         >
@@ -1470,7 +1470,7 @@ function ApprovalCard({
         </button>
         <button
           type="button"
-          className="sc-approval-btn sc-approval-cancel"
+          className="biof3-btn sc-approval-btn sc-approval-cancel"
           onClick={onReject}
           disabled={busy}
         >
