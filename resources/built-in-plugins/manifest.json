@@ -1,7 +1,7 @@
 {
   "$schema": "./manifest.schema.json",
   "version": "2.0.0",
-  "updated": "2026-07-14",
+  "updated": "2026-08-09",
   "checksumAlgorithm": "sha256",
   "notes": "Per-platform artifact schema (Week 2 发行可信化). macos-arm64 has real artifacts. windows-x64 runtime artifacts for biof3-r-runtime/biof3-py-runtime ARE declared (real OSS zip, HTTP 200, golden-path verified) so dev/unsigned Windows builds can install the runtime from the store; their sha256/sizeBytes stay null pending Week 4 fill-in (checksum/size checks are skipped per plugin-manager.js when null). release-contract.json platforms[windows-x64].supported stays false until the signed Windows installer passes release gating (Week 3/4). macos-x64/linux-x64 have NO artifacts (placeholder-only). Built-in plugins use built-in:// pseudo-URLs and ship under resources/built-in-plugins/{id}/.",
   "plugins": {
@@ -16,8 +16,8 @@
       "artifacts": {
         "macos-arm64": {
           "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/macos-arm64.zip",
-          "sha256": "007b6c5436e7986dd60bed0457b431dce30aef25b8bee2d49cbe97e839c8a1d2",
-          "sizeBytes": 154050101
+          "sha256": "60e1c9bc1eae529585ff8184b2f507331539a8302beb34249b2597fe7231e68c",
+          "sizeBytes": 556916997
         },
         "windows-x64": {
           "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/windows-x64.zip",
@@ -41,8 +41,8 @@
       "artifacts": {
         "macos-arm64": {
           "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/macos-arm64.zip",
-          "sha256": "a3ba85eea02a5d09097ab49e77b39a44e4691726a221c0c4f80516600ff41e12",
-          "sizeBytes": 480914965
+          "sha256": "6144c678867cd0b1e916a05d76a83e4a4a336b172276713aea58e28a756927a3",
+          "sizeBytes": 154339336
         },
         "windows-x64": {
           "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/windows-x64.zip",
@@ -783,38 +783,38 @@
       }
     },
     "deseq2": {
-    "id": "deseq2",
-    "status": "canonical",
-    "title": "DESeq2 差异分析",
-    "version": "1.0.0",
-    "kind": "plugin",
-    "language": "r",
-    "description": "Bulk RNA-seq 差异表达基因检测（DESeq2 + lfcShrink(apeglm)），Week 3 first-success-path 的核心工具。",
-    "artifacts": {
-      "macos-arm64": {
-        "url": "built-in://deseq2",
-        "sha256": null,
-        "sizeBytes": 0
+      "id": "deseq2",
+      "status": "canonical",
+      "title": "DESeq2 差异分析",
+      "version": "1.0.0",
+      "kind": "plugin",
+      "language": "r",
+      "description": "Bulk RNA-seq 差异表达基因检测（DESeq2 + lfcShrink(apeglm)），Week 3 first-success-path 的核心工具。",
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://deseq2",
+          "sha256": null,
+          "sizeBytes": 0
+        }
+      },
+      "checksumAlgorithm": "sha256",
+      "packages": {
+        "r": {
+          "DESeq2": ">=1.40.0",
+          "ggplot2": ">=3.4.0",
+          "ggrepel": ">=0.9.0",
+          "pheatmap": ">=1.0.12",
+          "apeglm": ">=1.20.0"
+        }
+      },
+      "runtime": {
+        "r": ">=4.4.0"
+      },
+      "builtAgainst": {
+        "r": "4.5"
       }
     },
-    "checksumAlgorithm": "sha256",
-    "packages": {
-      "r": {
-        "DESeq2": ">=1.40.0",
-        "ggplot2": ">=3.4.0",
-        "ggrepel": ">=0.9.0",
-        "pheatmap": ">=1.0.12",
-        "apeglm": ">=1.20.0"
-      }
-    },
-    "runtime": {
-      "r": ">=4.4.0"
-    },
-    "builtAgainst": {
-      "r": "4.5"
-    }
-  },
-  "figcode-shap-summary": {
+    "figcode-shap-summary": {
       "id": "figcode-shap-summary",
       "title": "FigCode · SHAP 特征重要性",
       "version": "1.0.0",
