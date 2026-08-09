@@ -1060,8 +1060,6 @@
 }
 
 .sc-approval-btn {
-  display: inline-flex;
-  align-items: center;
   gap: 5px;
   min-height: 30px;
   padding: 5px 11px;
@@ -1069,7 +1067,6 @@
   border: 1px solid transparent;
   font-size: 12px;
   font-weight: 600;
-  cursor: pointer;
 }
 
 .sc-approval-btn:disabled {
@@ -1264,34 +1261,6 @@
   color: var(--biof3-text-tertiary);
 }
 
-.sc-send-btn,
-.sc-stop-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 16px;
-  font-size: 13px;
-  font-weight: 500;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.sc-send-btn {
-  background: var(--biof3-accent);
-  color: var(--biof3-on-accent);
-}
-
-.sc-send-btn:hover:not(:disabled) {
-  background: var(--biof3-accent-hover);
-}
-
-.sc-send-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
 .sc-send-cta {
   display: inline-flex;
   align-items: center;
@@ -1321,7 +1290,7 @@
 
 .sc-send-cta-send:disabled {
   background: var(--biof3-text-muted);
-  color: #ffffff;
+  color: var(--biof3-on-solid);
 }
 
 .sc-send-cta-stop {
@@ -1339,15 +1308,6 @@
   color: var(--biof3-text-muted);
   font-size: 11px;
   white-space: nowrap;
-}
-
-.sc-stop-btn {
-  background: var(--biof3-danger);
-  color: var(--biof3-on-accent);
-}
-
-.sc-stop-btn:hover {
-  background: var(--biof3-status-error-fg);
 }
 
 /* HLE-C4R: durable loop status panel. Shows the backend loop phase, attempt
