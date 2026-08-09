@@ -84,6 +84,7 @@ import './simple-chat.css';
 import { Icon } from '@/components/icons/Icon';
 import { HighlightedCode } from '@/components/ui/CodeHighlight';
 import { tools as staticTools } from '@/pages/_data';
+import { INITIAL_NAV_STATE, stepHistoryNavigation } from './chatHistoryNav';
 
 const conversationDrafts = new Map<string, string>();
 
@@ -215,6 +216,8 @@ export function SimpleChat({
   const [accessMode, setAccessMode] = useState<'full' | 'read'>('full');
   const taRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // 输入框 ↑/↓ 历史回溯的导航态（null = 未进入导航，输入框即实时草稿）。
+  const historyNavRef = useRef<typeof INITIAL_NAV_STATE>(INITIAL_NAV_STATE);
   const activeRun = useConversationRun(conversationId);
   const durableLoop = useDurableConversationLoop(projectId, conversationId, activeRun?.loop);
   const streaming = starting || activeRun?.status === 'running';
@@ -538,11 +541,13 @@ export function SimpleChat({
   useEffect(() => {
     setInput(conversationDrafts.get(conversationDraftKey(projectId, conversationId)) || '');
     setQueuedPrompts([]);
+    historyNavRef.current = INITIAL_NAV_STATE;
   }, [conversationId, projectId]);
 
   const onInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
     conversationDrafts.set(conversationDraftKey(projectId, conversationId), e.target.value);
+    historyNavRef.current = INITIAL_NAV_STATE;
     resizeTextarea(e.target);
   };
 
@@ -586,6 +591,7 @@ export function SimpleChat({
       if (!started) return;
       conversationDrafts.delete(conversationDraftKey(projectId, conversationId));
       setInput('');
+      historyNavRef.current = INITIAL_NAV_STATE;
       if (taRef.current) taRef.current.style.height = 'auto';
     } finally {
       setStarting(false);
@@ -745,6 +751,27 @@ export function SimpleChat({
   }, [accessMode, approvalRepair.status, approvePending, pendingApproval, streaming]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      const direction = e.key === 'ArrowUp' ? 'up' : 'down';
+      // 历史源：本会话已发送的用户消息，最新在前（反序）。
+      const history = messages
+        .filter((m) => m.role === 'user')
+        .map((m) => m.content ?? '')
+        .filter((c) => c.trim() !== '')
+        .reverse();
+      const { state, value } = stepHistoryNavigation(
+        history,
+        historyNavRef.current,
+        direction,
+        input,
+      );
+      historyNavRef.current = state;
+      const changed = value !== input;
+      if (changed) setInput(value);
+      // 仅在真正切换了历史时才拦截默认行为，避免空历史/最旧处打断多行光标移动。
+      if (changed) e.preventDefault();
+      return;
+    }
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       const trimmed = input.trim();
@@ -752,6 +779,7 @@ export function SimpleChat({
       if (streaming) {
         setQueuedPrompts((current) => [...current, trimmed].slice(-5));
         setInput('');
+        historyNavRef.current = INITIAL_NAV_STATE;
         conversationDrafts.delete(conversationDraftKey(projectId, conversationId));
         if (taRef.current) taRef.current.style.height = 'auto';
       } else {
@@ -765,6 +793,7 @@ export function SimpleChat({
     if (!trimmed || !streaming) return;
     setQueuedPrompts((current) => [...current, trimmed].slice(-5));
     setInput('');
+    historyNavRef.current = INITIAL_NAV_STATE;
     conversationDrafts.delete(conversationDraftKey(projectId, conversationId));
     if (taRef.current) taRef.current.style.height = 'auto';
   }, [conversationId, input, projectId, streaming]);
@@ -967,7 +996,7 @@ export function SimpleChat({
                 className="sc-input"
                 rows={1}
                 value={input}
-                placeholder="输入消息… (Enter 发送, Shift+Enter 换行)"
+                placeholder="输入消息… (Enter 发送, Shift+Enter 换行, ↑/↓ 回溯历史)"
                 onChange={onInputChange}
                 onKeyDown={onKeyDown}
               />
