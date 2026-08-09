@@ -15,10 +15,10 @@
 | 父主线 | `codex/g0-result-studio-product`（继 `UX1G-2` 之后） |
 | 启用形式 | 短 Goal / 单工作包串行 |
 | truthDomain | `g0-current-work-package` |
-| 状态（启动时） | `active` |
+| 状态（收口） | `completed`（2026-08-09） |
 | 替代关系 | 不替代任何已收口计划；不复用任何已 deferred 的 P7-F 范围 |
 | 启用日期 | 2026-08-06 |
-| 收口日期 | 待定 |
+| 收口日期 | 2026-08-09 |
 
 ---
 
@@ -205,9 +205,9 @@ core/shared-backend/result-studio-*.js
 | 2026-08-06 | active checkpoint | **终态分离设计已定稿**（用户拍板三项决策）。状态机：run_tool 发起→卡片立即返回"已发起后台任务(tj_xxx)"(running，无 spinner)→tool_job 完成事件→`completed` + 工具 activity `success`(toolJobId 锚定，事实来源=artifact truth)；总结 stream 成功=正常 assistant 消息；总结超时/失败=assistant 行"工具已成功，AI 总结暂时不可用" + 独立重试按钮。持久化：(1) 终态复用 `completed` + 工具 activity `success`，总结为独立 assistant 消息带 `summaryRetry:{toolJobId, mode:'summary_only', toolExecution:'not_invoked'}` 元数据——**无新表、无新状态枚举**，满足约束②③；(2) 历史 running/已完成数据**无需迁移**，旧会话缺 tag 视为无总结/legacy，重试按钮只在存在 completed ToolJob + valid artifact truth 时出现；(3) 会话恢复事实来源=**tool_job 为权威**（完成判定）+ **对话消息为展示层**（总结内容），重开由"是否存在成功 summaryRetry 消息"反推；(4) 失败总结重试=前端 **3 次上限 + 2/4/8s 指数退避 + 冷却**，后端 **per-toolJobId 5 次/10min 限流**；(5) 重试按钮**仅"总结缺失/失败时"可见**，暂不加复制 toolJobId 按钮。实现=护栏+可见性（均增量），随后真实 Electron 验收补 `retry-summary-does-not-rerun-tool.json`。 |
 | 2026-08-06 | active implementation | 验收 harness 已落地：driver 新增“点击重试 AI 总结按钮 → 回查 backend 确认 deseq2 completed Job 数(1) 与 Artifact Truth(valid/非 blocking) 点击前后不变 → 写 retryAssertion”阶段；验收脚本新增 retryDoesNotRerunToolEvidence 并 --write 产出第三份证据 acceptance/g0-rs-ux1h/retry-summary-does-not-rerun-tool.json（§4.2 A-7 闭合项）。静态门全绿：syntax、Node 6/6、前端 24/24、strict TypeScript；已于 2026-08-09 在开发态 macOS 实机（`env -u ELECTRON_RUN_AS_NODE ELECTRON_DISABLE_SANDBOX=1`，系统 Node 23, better-sqlite3 ABI 131）真实 Electron 跑通验收链（EXIT=0），产出第三份证据 `retry-summary-does-not-rerun-tool.json`（`passed:true`，classification=development_deterministic_local_adapter_no_provider_claim，qualificationEligible=false）。§4.2 A-7 闭合项现已闭合 | 2026-08-06 | pending | 完成主对话与长工具执行的完整 async surface；验证本次 summary-only 重试确实不重跑工具。未完成前不将本计划或 UI-126 标为 `verified` |
 | — | pending | 收口前按风险驱动运行 G-1 ~ G-5 与剩余行为门；开发中不重复运行长耗时 Electron 链，只有产品行为或验收脚本发生实质变化才重跑 |
-| — | pending | 收口（同步 handoff、registry、UI audit、evidence） |
+| 2026-08-09 | completed | UX1H 收口：终态分离设计（§7 五项决策）全部代码落地并提交（7e5b14e），三份验收证据 async-tool-surface.json / summary-failure-renders-soft.json / retry-summary-does-not-rerun-tool.json 均 passed:true 且 qualificationEligible:false（诚实不冒充资格）；阶段门 syntax / Node 6/6 / 前端 24/24 / strict TypeScript 全绿。计划 active→completed，UI-126 维持 in_progress（不升 verified）。 |
 
-> 当前已进入实现检查点；本次目标展示组合与 §4.2 A-7（重试不重跑工具）均有真实 Electron 证据（`retry-summary-does-not-rerun-tool.json` `passed:true`）。但完整 async surface（终态分离设计实现化）仍未完成，故计划保持 `active`/`in_progress`，UI-126 不升 `verified`。
+> UX1H 已于 2026-08-09 收口：目标展示组合与 §4.2 A-7（重试不重跑工具）均有真实 Electron 证据（`retry-summary-does-not-rerun-tool.json` `passed:true`）；终态分离设计五项决策（终态复用 completed + 工具 activity success、summaryRetry 元数据无新表/枚举、历史无需迁移、会话恢复来源=tool_job 权威、前端 3 次 + 2/4/8s 退避 + 冷却与后端 per-toolJobId 5 次/10min 限流、重试按钮仅总结缺失/失败时可见）全部在代码与三份 passed 证据中闭合。计划 status 改为 `completed`；按 §9.10，UI-126 维持 `in_progress`（不升 verified），`qualificationEligible` 维持 `false`。
 
 ---
 
@@ -251,3 +251,5 @@ core/shared-backend/result-studio-*.js
 - [x] `retrySummary` 按钮的可见性：**已拍板（2026-08-06）= 仅"总结缺失/失败时"可见**，不在每次常驻（避免噪音）。依据：存在 completed ToolJob + valid artifact truth 且尚无成功的 summaryRetry 消息，或上次重试失败。
 - [x] 主对话"已发起后台任务"卡片的复制按钮：**已拍板（2026-08-06）= 暂不加**复制 `toolJobId` 按钮，保持范围克制，后续单独评估。
 - [x] **终态分离设计已定稿**（见 §7 终态分离设计 checkpoint）。四项子问题结论：① 终态命名与持久化形态 = 复用 `completed` + 工具 activity `success`(toolJobId 锚定)，总结为独立 assistant 消息带 `summaryRetry` 元数据，**无新表、无新状态枚举**；② 历史 running/已完成数据**无需迁移**，旧会话缺 tag 视为无总结/legacy；③ 总结 detached 后会话恢复事实来源 = **tool_job 为权威**（完成判定）+ **对话消息为展示层**（总结内容）；④ 失败总结 retry 上限与退避 = **前端 3 次 + 2/4/8s 指数退避 + 冷却，后端 per-toolJobId 5 次/10min 限流**。
+
+**收口记录（2026-08-09）**：§4.1 G-1~G-5、§4.2 A-1~A-7、§4.3 S-1~S-5 全部满足；三份 evidence 均 passed:true；docs:check 与 ui:audit:check 绿；handoff §3.0、DOC-REGISTRY（G0-RS-UX1H active→completed）、AUDIT-LOG 已同步收口。按 §9.10，UI-126 仍 in_progress、qualificationEligible 仍 false，未升 verified。
