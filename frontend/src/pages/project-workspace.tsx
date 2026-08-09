@@ -1822,6 +1822,7 @@ export function ProjectWorkspace(): React.ReactElement {
           >
             去插件商店安装
           </button>
+        </div>
       )}
       {workspaceNotice && (
         <div className={styles.workspaceNotice} role="status" aria-live="polite">
