@@ -1,6 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 
+function getRuntimeBinName(lang, platform = process.platform) {
+  // Mirrors platform-compat.getRuntimeBinName — keep the two in sync.
+  // On Windows the embedded R/Python ship as `Rscript.exe` / `python.exe`;
+  // the suffix is required because existsSync() does not auto-resolve
+  // extensionless names the way the shell's PATHEXT does.
+  if (lang === 'r') return platform === 'win32' ? 'Rscript.exe' : 'Rscript';
+  return platform === 'win32' ? 'python.exe' : 'python3';
+}
+
 function getPythonExecutableCandidates(platform = process.platform) {
   // Must stay in sync with platform-compat.getRuntimeBinCandidates for win32.
   // Covers the Store shim, python3.x aliases, and the `py.exe` launcher so a
@@ -61,6 +70,7 @@ function getPythonSitePackagesDir(runtimeHome) {
 }
 
 module.exports = {
+  getRuntimeBinName,
   getPythonExecutableCandidates,
   getPythonRuntimeExecutable,
   getPythonSitePackagesDir,
