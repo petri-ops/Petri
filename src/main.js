@@ -868,8 +868,9 @@ async function createWindow() {
     title: "BioF3",
     // Self-drawn traffic-light buttons in TitleBar.tsx — see src/main.js comments
     // around setupWindowIpc() for the IPC contract (window:minimize/maximize/close).
-    // Using a frameless window on every platform lets the renderer own the controls and
-    // can match the Cursor-style grey capsule + dark glyph look on macOS too.
+    // Frameless on every platform so the renderer owns the window controls; on macOS
+    // TitleBar draws the Cursor-style grey circular capsule (not the native OS lights),
+    // on Windows/Linux it draws the square WindowControls.
     frame: false,
     backgroundColor: "#1f2330",
     webPreferences: {

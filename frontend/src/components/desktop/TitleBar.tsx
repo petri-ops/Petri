@@ -14,6 +14,9 @@ import styles from './TitleBar.module.css';
 const isMac =
   typeof window !== 'undefined' && window.biof3Desktop?.platform === 'darwin';
 
+const isDesktop =
+  typeof window !== 'undefined' && window.biof3Desktop?.isDesktop === true;
+
 /**
  * Custom frameless window controls (minimize / maximize-restore / close).
  * Rendered ONLY on non-macOS. Calls the existing `window` IPC bridge that
@@ -273,7 +276,47 @@ export function TitleBar(): React.ReactElement {
       onDoubleClick={!isMac ? win.onTitleBarDoubleClick : undefined}
     >
       <div className={styles.leftZone}>
-        {isMac && <div className={styles.trafficZone} aria-hidden="true" />}
+        {isMac && (
+          <div className={styles.trafficZone}>
+            {isDesktop ? (
+              <>
+                <button
+                  type="button"
+                  className={`${styles.macTrafficBtn} ${styles.macTrafficBtnClose}`}
+                  onClick={win.close}
+                  aria-label="关闭窗口"
+                  title="关闭"
+                >
+                  <Icon name="x" size={11} strokeWidth={2.4} />
+                </button>
+                <button
+                  type="button"
+                  className={styles.macTrafficBtn}
+                  onClick={win.minimize}
+                  aria-label="最小化窗口"
+                  title="最小化"
+                >
+                  <Icon name="minus" size={11} strokeWidth={2.4} />
+                </button>
+                <button
+                  type="button"
+                  className={styles.macTrafficBtn}
+                  onClick={win.toggleMaximize}
+                  aria-label={win.isMaximized ? '还原窗口' : '最大化窗口'}
+                  title={win.isMaximized ? '还原' : '最大化'}
+                >
+                  <Icon
+                    name={win.isMaximized ? 'square-stack' : 'square'}
+                    size={win.isMaximized ? 10 : 11}
+                    strokeWidth={2.2}
+                  />
+                </button>
+              </>
+            ) : (
+              <div className={styles.trafficPlaceholder} aria-hidden="true" />
+            )}
+          </div>
+        )}
 
         <div className={styles.leftTools}>
           <button
