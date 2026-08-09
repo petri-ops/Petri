@@ -84,6 +84,7 @@ Stage 1 出口要求 P0/P1 清零；P2 可以延期，但必须写明原因与�
 | UI-031 | verified | P1 | P-07 | C-03, C-04 | 设置 / AI 模型 | 旧设置页只支持 DeepSeek/DashScope 固定入口，无法管理多模型、任务角色能力绑定、显式 fallback 和自定义 Endpoint | 2026-07-17 打包态 `dist/mac-arm64/BioF3.app`(arm64/rc.5) 实机验收通过：模型 CRUD、8 类角色绑定与能力过滤、显式 fallback、Keychain 凭据（无明文回显）、保存重开、聊天选择器同步、窄窗均由用户实测确认；真实 Provider 由 `acceptance/stage2/live-provider-check.mjs` 真机验证（DeepSeek + xunfei-astron + api.xcdw.us opus-4-8，chat/streaming/tool calling 全绿，PASS） | MODEL-5 |
 
 | UI-131 | in_progress | P3 | W-01 | C-01 | 全局样式 / 设计系统卫生 | 删除已退役页面的死 CSS：single-cell.css 仍被 global.css @import 但对应页面已删除（grep 确认其 sc-* 类无任何组件引用）；docs.css、figcode.module.css、index.module.css 零引用。降低包体与维护认知负担 | 代码完成；@import 已移除、4 文件已删；待实机验证全局样式无回归 | UI-卫生 |
+| UI-132 | in_progress | P2 | W-01 | C-01 | 全局样式 / 设计系统卫生 | 令牌消费一致性：simple-chat.css 与 project-workspace.module.css 中硬编码的 hex/rgba 改为引用 --biof3-* 语义令牌；新增 --biof3-on-solid 令牌修复暗色下 send-cta 白字糊字问题 | 代码完成；新增 --biof3-on-solid（亮 #fff / 暗 #0b1220）；simple-chat.css 6 处实心按钮白字 + loop 状态色、project-workspace.module.css 状态/品牌色光晕及两处失效 fallback（--biof3-warning/--biof3-success）已收敛；code-highlight.css 本就令牌驱动未动；纯黑投影与实心按钮白字留待 P5 按钮基元统一 | UI-卫生 |
 状态只使用：`open / in_progress / verified / deferred`。
 
 ### verified 证据门槛

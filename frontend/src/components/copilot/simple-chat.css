@@ -1080,7 +1080,7 @@
 .sc-approval-approve {
   background: var(--biof3-accent);
   border-color: var(--biof3-accent);
-  color: #ffffff;
+  color: var(--biof3-on-accent);
 }
 
 .sc-approval-cancel {
@@ -1280,7 +1280,7 @@
 
 .sc-send-btn {
   background: var(--biof3-accent);
-  color: #ffffff;
+  color: var(--biof3-on-accent);
 }
 
 .sc-send-btn:hover:not(:disabled) {
@@ -1316,7 +1316,7 @@
 
 .sc-send-cta-send {
   background: var(--biof3-text);
-  color: #ffffff;
+  color: var(--biof3-on-solid);
 }
 
 .sc-send-cta-send:disabled {
@@ -1326,12 +1326,12 @@
 
 .sc-send-cta-stop {
   background: var(--biof3-text);
-  color: #ffffff;
+  color: var(--biof3-on-solid);
 }
 
 .sc-send-cta-queue {
   background: var(--biof3-accent);
-  color: #ffffff;
+  color: var(--biof3-on-accent);
 }
 
 .sc-queued-count {
@@ -1343,7 +1343,7 @@
 
 .sc-stop-btn {
   background: var(--biof3-danger);
-  color: #ffffff;
+  color: var(--biof3-on-accent);
 }
 
 .sc-stop-btn:hover {
@@ -1413,10 +1413,10 @@
 }
 
 /* Tones — running (blue), success (green), warning (blocked/failed), neutral */
-.sc-loop-tone-running .sc-loop-status-dot { background: #2f6feb; }
-.sc-loop-tone-success .sc-loop-status-dot { background: #1f9d55; }
-.sc-loop-tone-warning .sc-loop-status-dot { background: #d9822b; }
-.sc-loop-tone-warning .sc-loop-status-label { color: #b5641a; }
+.sc-loop-tone-running .sc-loop-status-dot { background: var(--biof3-status-info); }
+.sc-loop-tone-success .sc-loop-status-dot { background: var(--biof3-status-online); }
+.sc-loop-tone-warning .sc-loop-status-dot { background: var(--biof3-status-warning); }
+.sc-loop-tone-warning .sc-loop-status-label { color: var(--biof3-status-warning-fg); }
 .sc-loop-tone-neutral .sc-loop-status-dot { background: var(--biof3-text-tertiary); }
 
 .sc-loop-iterations {
@@ -1450,9 +1450,9 @@
   overflow-wrap: anywhere;
 }
 
-.sc-loop-iteration-blocked .sc-loop-iteration-decision { color: #b5641a; }
-.sc-loop-iteration-failed .sc-loop-iteration-decision { color: #c23b3b; }
+.sc-loop-iteration-blocked .sc-loop-iteration-decision { color: var(--biof3-status-warning-fg); }
+.sc-loop-iteration-failed .sc-loop-iteration-decision { color: var(--biof3-status-error-fg); }
 
-[data-theme='dark'] .sc-loop-tone-warning .sc-loop-status-label { color: #e0a35e; }
-[data-theme='dark'] .sc-loop-iteration-blocked .sc-loop-iteration-decision { color: #e0a35e; }
-[data-theme='dark'] .sc-loop-iteration-failed .sc-loop-iteration-decision { color: #e88; }
+[data-theme='dark'] .sc-loop-tone-warning .sc-loop-status-label { color: var(--biof3-status-warning-fg); }
+[data-theme='dark'] .sc-loop-iteration-blocked .sc-loop-iteration-decision { color: var(--biof3-status-warning-fg); }
+[data-theme='dark'] .sc-loop-iteration-failed .sc-loop-iteration-decision { color: var(--biof3-status-error-fg); }
