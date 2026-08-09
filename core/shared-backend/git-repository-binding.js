@@ -209,7 +209,7 @@ function bindProjectRepository(options = {}) {
     workspaceRoot,
     projectId,
     preferManaged = false,
-    allowExistingRepository = true,
+    allowExistingRepository = false,
     createManagedIfMissing = true,
     managedRelativePaths = MANAGED_RELATIVE_PATHS,
     gitBin,
@@ -247,12 +247,19 @@ function bindProjectRepository(options = {}) {
 
   // 模式选择：已有托管仓库 → 继续托管；用户偏好托管 → 托管；
   // 否则若存在既有仓库且允许接入 → existing；其余 → 新建托管。
+  const existingRepositoryNotAttached = !!inspection.existing
+    && !allowExistingRepository
+    && !preferManaged
+    && !inspection.managed.exists;
   const canUseExisting = allowExistingRepository
     && !!inspection.existing
     && !preferManaged
     && !inspection.managed.exists;
 
   const mode = canUseExisting ? 'existing' : 'managed';
+  if (existingRepositoryNotAttached) {
+    base.diagnostics.push('existing_repository_not_attached_without_consent');
+  }
   const managedPaths = resolveManagedPaths({ mode, inspection, managedRelativePaths });
 
   let adapter;

@@ -1,0 +1,464 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS-P4R-1/P4R-2/P4R-3/P4R-4/P4R-5/P4R-6",
+  "captureMode": "real_chain_server_measurement_plus_frontend_agent_binding_live_journey_and_electron_renderer",
+  "qualificationEligible": false,
+  "qualificationReason": "P4R-1 through P4R-6 deliver a responsive read path, focused surface, context-bound Agent-first editing, version/change review, exact Revision Code projection and development Electron journey evidence. No real Provider or packaged-desktop qualification claim is made; product qualification remains reserved for P7.",
+  "privacy": "repository_relative_paths_digests_counts_timings_and_bounded_statuses_only",
+  "sourceHashes": {
+    "gitAdapter": "db7a9030ee5a736ae03fbcefc7f548b7c98bd454198010169c92c86974dee255",
+    "lifecycle": "40828528bed440d6e63da911cec720f291ca3728074092c51540a86fc1bf0d06",
+    "routes": "916cba5c6437fc2ed58f0a9b9c4a743eda492f4fb990c65cdf9f4e62525f65e3",
+    "repository": "dc0d2d6fcd0b3308267102c2202e0a45e37c0157d04a5df2f57cb72b6744a81f",
+    "changeSetService": "e45a182a10a74bef668cc265e64a1427662d4a48d568fb69ec274a27dbf6589d",
+    "revisionSource": "28004e2c885f5762028afcaead8c3c2c10fcd7ef1010be4dac03fa226c76482d",
+    "replayService": "f372bf8a348c868652a93b410374aa32c5079435defb709deeb74e317631b0a7",
+    "backgroundService": "0c8d74472ca99bf505967a1c3d0c4179e1d07dc0a81c6c3e301b251e93db0e16",
+    "backgroundChild": "06209a3cd696af000f39d234eda29472583bf79b7fc45fb98e21d93c39bdf62d",
+    "resultEditTools": "824fdee932c03fb10cb662990edb35f3666ffb6e0da176bd2b7fc91fe9355904",
+    "harnessRoutes": "99ca8c83103ffebb8890fc1503cf100462f97ebe843bf1e07d3983567e969612",
+    "contracts": "7f3062bfb94d87e2017daceb2cedd073f5155d900de7fce4f118135232032531",
+    "compareService": "15e6e949bc1510bd5f86ef4ac6215b104c3db0771db9a0adf8c865c4d5502d93",
+    "bodyState": "5a72f81934df8c621419dbdc9745c4cdd622eecc2fe44a5d9de1c21dc1f2156e",
+    "bodyStateSpec": "a8926eae3aa0ac4d3570ed0de70eb217099f65cac5788397cf6a9ad84db590b6",
+    "firstScreen": "0ec5a9dcb536caae6929ecf589c59911bfcbc6900f88371866554b33ce246c3f",
+    "firstScreenSpec": "6c9d28d17257c27368289b18d4b4e1c503a3c60d9b6d52e523350875a7fa40c5",
+    "mode": "311d0a5d2cd7e3be6643ea9308904ae1109fe6cd17d5d881ec8a62ec4f8cb9b5",
+    "modeSpec": "6d471b8fb8f870ffd96a80ec0b38c1261d2d9e3384b5443fc25e6c68a9a1c1bb",
+    "surface": "2eeda29f387d040ce9c544a568eb7ae2e83794ec10f5fbc328e58dbb248612f3",
+    "resultSurfaceSpec": "152a6ac542e2eeaf410f6343581757ca5bbd6b4f9cf54988bafe9f48e0603048",
+    "centerPanel": "dd002e0ecc39e7a56dd335dcaeaeb0f1282729559d95eb9eef451091a5b5199c",
+    "rightPanel": "3f9c1a781e3a7b8718dd71d5091863a48a020fc01e19d43fd297d43d326816ff",
+    "rightPanelSpec": "bbb2ba07c4ac3aa603b26e03656b80b052f5c54f53c86332d50ee5b898e9d08d",
+    "projectWorkspace": "a74cb05e0223af51e5957d27d89ec142e2f3724ca0edf446d131d0ae7cdcf3f6",
+    "projectWorkspaceStyle": "e8650ac918218c8e02864da9b1421bbef7262ec9da4d5a09d77cef23b52d5d06",
+    "resultAgentComposer": "5c0508cb07254b660ba9b5c63553011617dde37f7db26053329f8d97e8c5e9e1",
+    "resultAgentComposerStyle": "96bfc4dff032898ff544364d85c7c86984701bc16ccf254864a504a3c11a8bb2",
+    "resultAgentComposerSpec": "cb703937db63adcafac6dc7f602816017cda04971dfa4fb27112d3167768a0ba",
+    "resultEditPanel": "9a1387cbb775978e1f5b325c079affe3700d298424cd60911eb87caf415af650",
+    "resultEditPanelStyle": "5b95b407f4517132af63aea5c20be403cd16cff9db13b6d799040b366c5b308a",
+    "resultEditPanelSpec": "38335ac744fb6450661cdb1a886c06b094b925befe1298751b50a0d09a752674",
+    "resultStudioSurface": "fe026c47d099e4cc84e95b7133810620ee67bbdafcfd815ba322fb47ed03a545",
+    "resultStudioSurfaceStyle": "51de03642417669b94637447c27e6f18e3e38d328dcec5867779bac138c95254",
+    "resultStudioSurfaceSpec": "97bf84d82dead98f90dc153da6a3514d15d9240493e67cc39063bb6451796503",
+    "changeSetPanel": "2e58d70c6f301baf21e418754aa103f8d2138241809e9b13b6b843359416716b",
+    "changeSetPanelStyle": "48e87b854af64d41ea12bcef504896d4d94a51bb02f51433e22bf5303b14376c",
+    "changeSetPanelSpec": "40282a57ccda17431f6926137033ca9028396545323aa07324c6f00e9925783c",
+    "resultStudioClient": "0654d1409bf95dc03739d5cd72acc21e7643ded409eabf488d66b94ba5a7fe08",
+    "revisionCodeView": "6534f49cf39a42c0e7ef303e91e20346e4f51990151ae1aa357070f0f305e855",
+    "revisionCodeViewStyle": "d51a9a7addb03ad51bada5c6eb8789d8d4df50d89dbd4ada5fca0c4a1d6ab9a9",
+    "revisionCodeViewSpec": "f22cbab29339a053a8f705a23ec712cada02c750884b1029a92f3552e5ffdca2",
+    "scientificInteractionViewer": "2150ff1a3a3a497b1f7ea911fd42d00d5521d29d2b746f707cf8917b069ee816",
+    "scientificInteractionViewerStyle": "660894b5ebb58440da200a7ff061787647ab7f054f0615478b3eaa193a716330",
+    "scientificInteractionViewerSpec": "fe066e5457f5a4ca67163aef75b9552c3ead6d3ed57866168467649d2d63da51",
+    "versionRole": "e2c3a70adf15c1aa016823ba17c49bc608bbbf26fb0b2186ebee27a3bffef11e",
+    "versionRoleSpec": "ad77ac2c2b376d40ecfccb1fdf03bf141e118d351ce7bbc41ec3838f21265d74",
+    "copilotAskDeliverySpec": "8158edb210aac33837d1871f39fa98834527d26e5db0be8c54e5200f332b1e3e",
+    "centerPanelSpec": "ada15e45a652806c7aad788b9a52c225d6956bf552e3eb7a37911cc2bd793b3a",
+    "copilotContext": "093cafd92346b33ed755938949b393c749d4bd8ee300d1cb4cafb5601aed3271",
+    "events": "2f98d2035d577157d992ce02513db50215fe91ef1f459840fa4f706cc2f54bff",
+    "resultEditAgentBridge": "cd5e05ad41b40622cb1ee63f7e7fefe40b055147b9fcb581a0595f9f215ea996",
+    "resultEditAgentBridgeSpec": "4993bc009a7937f6e8045ac9f2ce08fc5df5e90bd49ebf2a213db44abdffd248",
+    "simpleChat": "d6a2b6100e2f871ecf36c432abd4bea25769f607932ac731901a572749c2ac3c",
+    "simpleChatStyle": "71602839b587bd688ba655a0ebbf2f95f980aab1f3b952700f6cc9691c12fa9e",
+    "copilotClient": "d2e604017f7f91a1ed8b5f3e70aef91781602a86f5782db1eecac266b10119e7",
+    "copilotClientSpec": "3ea7d34d05da5ae8a3b6bf05aac9da4e638b8d5f229eed41e5ad2a2d61dfa291",
+    "conversationRunStore": "8183703db05831e71264f749bc5c0a4c47c1a766350879d69d47b3d616fcf68a",
+    "conversationRunStoreSpec": "d48e4103f1052a2b0c4348f44e4b7314ec95ef3b069074219cfd51e8b15642d8",
+    "simpleChatProgressSpec": "6f5db861ac90b06ba37b40902f6a0f04010ae132bedd06927862e6f007f77164",
+    "contextClient": "8a74968cef56b917742fe932c7f0bf33d74465ac3fcea6f78ca1cf1c52df4c79",
+    "contextClientSpec": "85f325b818ed742613ca00e3b21c1a61842423b6592025e7f7bb710cc1dd4348",
+    "workspaceRouting": "2b05c1d2f94c18cbbce965c629f2897b4144e407a8fb10980702e39d3f7307f3",
+    "workspaceRoutingSpec": "ae52ed61186b84ef6aba0afa4b613c03efb568438fd67717a89812c20d6511c6",
+    "contextContract": "8a29038a33a759b4b144549c79e16b16c8d7878df96c52a55081e67a9213b1a3",
+    "resultEditIntent": "3974400975fb8b98fd79b5ee6f06ab799ae4877d4e875d5cdf8d479672a86109",
+    "resultEditControls": "d241a97ea738d47f558c8e3050d963db128c5609a28471ffc83313ae39269de1",
+    "resultContextTools": "f4eb572624ce0c2afd75cce11dad1236cf8f6cfba47c85cd9576dace9867fdc0",
+    "resultContextEditTools": "3695f54aca1a59a45703935c71ce6264ecac6a2063a5206934b9774d69a1124b",
+    "agentRunner": "c80fd7dbb970c497971d3712a7c962b9cceb4280b1a5394f80ca4fd2b9823f65",
+    "agentRoute": "441c6a632659f8283081155f27761a7dc5e981baca69806c3a2fd0dcc7b2f516",
+    "agentInterceptor": "2791c9c0ac2d2cd49b666e98dd652e0cf4b9fe04b092e9c2c9d7b2e0f42aed63",
+    "resultContextBinding": "205dd70c0cf09b5bca89d837913894bcde33faa622c8c3ea89d1f0d4e2858429",
+    "toolDefinitions": "4e6ab4cc280a30e2a49da029db4d6d348d3f25d3d2bfe431b164ae490f47178f",
+    "systemPrompt": "70c94eacee8ee9b8fea73ffafaeff2c76f8b7a84b50abbe64307fd69c5ba67c1",
+    "agentBindingSpec": "e736410615f96f0158f4974a386c608a228fff18bc81e5b390c1c6f1dc8d82af",
+    "systemPromptSpec": "185834ceb684b683df93288008bb0b244e3743fe2c0d8627d0103c320a9924a1",
+    "resultStudioContextSpec": "a9f8c25f68874edd722ea27ba8b1b22253213d902d44ce56a20d19cac0735417",
+    "resultCompareSpec": "78a27eccec7ed2e529124f96651d5f17b3c7e36fe79cf090781d777d6e9eca9b",
+    "resultRepositorySpec": "9a8bfe271d33c8f3b5ac92dbc14144e478e4a63a460fd05f778144f497173444",
+    "resultChangeSetSpec": "82e21692f280d252efa63e48bab8a393938e3bf70b465d27b3d6d620ccca6c54",
+    "revisionSourceSpec": "8a3c04ff5f26148a7e5d551d5671da7c9688106af36cdd553ea671749744d80e",
+    "replayServiceSpec": "52c89779b8b3b1695454b1cdeb2f2ae7ff06e4e498dc0491a9329cc1165ea526",
+    "p4rInvariantSpec": "8b335f39f2be6716247aa11302f274d11a09522b7cd976d3040e550bf132cd03",
+    "p4rBackgroundSpec": "b8b3e743d81574bf012d1f4f5969f49eef38dec1fc5488459a460a6b07e6c1ca",
+    "p4rLiveSpec": "f7fedd3985feeb2f37d056b77adf56fe797e269d2a5bee74f29e213c25456370",
+    "p4rUiSpec": "07e8802e09117f5593bbb0b585430ea92fa5918dcba1eedfba2a7027072a2e83",
+    "resultEditAgentToolSpec": "5faf3d5eee6c4f4f519978e8084fefc26f5977a0e710b8a46894c702a9ca991f",
+    "agentToolPolicySpec": "d275291158cf33369e1d3accc165ce60f5edbc60e8bdbe99a8c6aac0907e6906",
+    "agentToolRegistrySpec": "73aa421cba9f4f29e93b31834a20ce99b5698442e1b098427c59f53b0b9ad01d",
+    "impactMap": "073cda5d914a50e7c3214b70f96dbd1294e0680c15364c0042d201ea0e6ce0c2",
+    "impactMapSpec": "bde81eeb7150ea549d8e22c33b554e6dbb2098b569e16e23a08608b64ec70b84",
+    "packageScripts": "1e7f71e9fe0bed784930198260bbd0b081e8a11234af1e9ae7e27a56ef350669",
+    "acceptanceScript": "d500c0c5a3364ed2b2625637710082c822ffe89d2c64e1c807c7ee430d1c3484",
+    "performanceAcceptanceScript": "64676b5d427f3180d660778bbfe3e39100f814e720073d37705749266f0f75f4",
+    "baselineScript": "cc6a431db7e271fcfd2af8ef2eeb2aad6299a22ae6661b31119f3cf4b5cc0fef",
+    "captureScript": "99f9eb3fe4efa643e5a87925098dfdd815664b703907b90333e9e240edd317ac",
+    "corpusScript": "359e202832c117f12c6e041706e0028caaaf4c063df3d97511be982ab703bf11",
+    "sourceObservation": "97aa4943855fd349b035c4ab08c5d265a3ca2e25e7ac34b837325ac8832423fa",
+    "sourceObservationEvidence": "c32491290dd067ab07ac901c2ebb671d4e9900a183caed5bbe61cc4a3465b270",
+    "liveObservation": "7fe88df4e806719834e7ff4a37cc4402450db560fd32429f338f31bafedd69be",
+    "uiObservation": "4fbc32af629d5680322fa3f652d4b12fc3e97ff7a9183536f15ff7871d9a673b",
+    "uiDriver": "1b6bfbc4c9bea690c7749f46019c1bfaee6295c5a6595aae09dad96f118ee431",
+    "performanceObservationEvidence": "8f37945c071885b97ce913444f334d294ad730abee9e9c8dc610bd937befcfb0",
+    "liveObservationEvidence": "3b6849ac76f2537e4c277256e0dfa6d9f30b7ba4df7d283791eb23f83ec0aa46",
+    "uiObservationEvidence": "aad9fcc2d5dbdb9b474d86568d4ac803d0f079bf2bfaec8b97f3d2ca075804cd",
+    "goKeggDefinition": "e8d54b3aab301f2f36da7eae74258b512a0c3cdfc66668e3af7f1b398a0ff790"
+  },
+  "frozenBaseline": {
+    "capturedAtCommit": "e1f841c8ada919250c01f5cde76586ef2375bdc6",
+    "revisionCount": 1
+  },
+  "observation": {
+    "revisionCount": 1,
+    "calibration": {
+      "gitSpawnMedianMs": 12.1,
+      "pathEntries": 44,
+      "invokedUnderNpm": false
+    },
+    "requests": [
+      {
+        "id": "job-status",
+        "role": "render-blocking",
+        "status": 200,
+        "coldMs": 6.946,
+        "warmMs": 2.577,
+        "warmSpreadMs": 2.159,
+        "oneTimeCostMs": 4.369
+      },
+      {
+        "id": "artifact-bytes",
+        "role": "render-blocking",
+        "status": 200,
+        "coldMs": 6.927,
+        "warmMs": 2.217,
+        "warmSpreadMs": 2.1,
+        "oneTimeCostMs": 4.71
+      },
+      {
+        "id": "interaction",
+        "role": "secondary",
+        "status": 200,
+        "coldMs": 731.906,
+        "warmMs": 12.915,
+        "warmSpreadMs": 1.143,
+        "oneTimeCostMs": 718.991
+      },
+      {
+        "id": "context-envelope",
+        "role": "secondary",
+        "status": 409,
+        "coldMs": 3.552,
+        "warmMs": 1.96,
+        "warmSpreadMs": 1.505,
+        "oneTimeCostMs": 1.592
+      },
+      {
+        "id": "changesets",
+        "role": "secondary",
+        "status": 200,
+        "coldMs": 2.913,
+        "warmMs": 1.429,
+        "warmSpreadMs": 0.25,
+        "oneTimeCostMs": 1.484
+      },
+      {
+        "id": "workspace-status",
+        "role": "secondary",
+        "status": 200,
+        "coldMs": 34.752,
+        "warmMs": 30.954,
+        "warmSpreadMs": 3.966,
+        "oneTimeCostMs": 3.798
+      }
+    ],
+    "eventLoop": {
+      "samples": 89,
+      "maxMs": 22.905
+    }
+  },
+  "improvementVsBaseline": [
+    {
+      "id": "job-status",
+      "baselineWarmMs": 2.229,
+      "currentWarmMs": 2.577,
+      "deltaPct": 15.6,
+      "baselineWarmSpawnEquivalents": null,
+      "currentWarmSpawnEquivalents": null,
+      "calibratedDeltaPct": null
+    },
+    {
+      "id": "artifact-bytes",
+      "baselineWarmMs": 2.174,
+      "currentWarmMs": 2.217,
+      "deltaPct": 2,
+      "baselineWarmSpawnEquivalents": null,
+      "currentWarmSpawnEquivalents": null,
+      "calibratedDeltaPct": null
+    },
+    {
+      "id": "interaction",
+      "baselineWarmMs": 9.9,
+      "currentWarmMs": 12.915,
+      "deltaPct": 30.5,
+      "baselineWarmSpawnEquivalents": null,
+      "currentWarmSpawnEquivalents": null,
+      "calibratedDeltaPct": null
+    },
+    {
+      "id": "changesets",
+      "baselineWarmMs": 42.102,
+      "currentWarmMs": 1.429,
+      "deltaPct": -96.6,
+      "baselineWarmSpawnEquivalents": null,
+      "currentWarmSpawnEquivalents": null,
+      "calibratedDeltaPct": null
+    },
+    {
+      "id": "workspace-status",
+      "baselineWarmMs": 64.862,
+      "currentWarmMs": 30.954,
+      "deltaPct": -52.3,
+      "baselineWarmSpawnEquivalents": 6.785,
+      "currentWarmSpawnEquivalents": 2.558,
+      "calibratedDeltaPct": -62.3
+    }
+  ],
+  "unmeasured": {
+    "firstContentVisibleMs": "not_captured_no_browser_automation_in_repo",
+    "layoutAt1440_1024_820": "not_captured_no_browser_automation_in_repo",
+    "themeRenderingLightDark": "not_captured_no_browser_automation_in_repo",
+    "firstScreenPixelJudgement": "not_captured_no_browser_automation_in_repo",
+    "keyboardTraversalOnDevice": "not_captured_no_browser_automation_in_repo"
+  },
+  "checks": [
+    {
+      "id": "RS-P4R1-1",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/git-adapter.js",
+        "core/r-server/routes/result-studio.js"
+      ],
+      "detail": "changesets steady-state cost fell by at least half against the frozen P4R-0 baseline, measured on the real chain rather than asserted."
+    },
+    {
+      "id": "RS-P4R1-2",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/git-adapter.js",
+        "core/shared-backend/result-studio-lifecycle.js"
+      ],
+      "detail": "workspace-status steady-state process-spawn equivalents fell by at least 30% against the frozen capture. Raw milliseconds remain recorded but are not compared across the npm/direct spawn-cost calibration mismatch."
+    },
+    {
+      "id": "RS-P4R1-3",
+      "passed": true,
+      "evidence": [
+        "core/r-server/routes/result-studio.js"
+      ],
+      "detail": "Every measured route returned 200, so the numbers describe the real path and not argument validation."
+    },
+    {
+      "id": "RS-P4R1-4",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-baseline.mjs"
+      ],
+      "detail": "Cold and warm are recorded separately, so one-time creation cost cannot be reported as steady-state viewing cost."
+    },
+    {
+      "id": "RS-P4R2-1",
+      "passed": true,
+      "evidence": [
+        "frontend/src/components/result-studio/resultBodyState.test.ts",
+        "frontend/src/components/result-studio/resultFirstScreen.test.ts",
+        "frontend/src/components/result-studio/resultMode.test.ts"
+      ],
+      "detail": "The frontend behaviour specs really ran and really passed — file count and test count parsed from the run, not inferred from an exit code."
+    },
+    {
+      "id": "RS-P4R2-2",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-product-acceptance.mjs"
+      ],
+      "detail": "The specs run through test:files. Bare `npm test` is `vitest run --changed`, which selects nothing under a file filter and exits 0 for a zero-test run."
+    },
+    {
+      "id": "RS-P4R2-3",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-product-acceptance.mjs"
+      ],
+      "detail": "Every metric with no producer is recorded as unmeasured with one stated reason, matching P4R-0 vocabulary. Nothing is estimated and nothing defaults to zero."
+    },
+    {
+      "id": "RS-P4R3-1",
+      "passed": true,
+      "evidence": [
+        "frontend/src/components/result-studio/ResultAgentComposer.test.tsx",
+        "frontend/src/components/result-studio/ResultEditPanel.test.tsx",
+        "frontend/src/lib/result-edit-agent-bridge.test.ts"
+      ],
+      "detail": "The central Composer, atomic context bridge, advanced drawer and persistent progress frontend contracts executed with non-zero tests."
+    },
+    {
+      "id": "RS-P4R3-2",
+      "passed": true,
+      "evidence": [
+        "test/result-studio-agent-binding.test.mjs",
+        "test/system-prompt-result-context.test.mjs",
+        "core/r-server/agent-tools/result-context-binding.js"
+      ],
+      "detail": "Context projection, pre-schema token binding, stale-token rejection and five-stage recording executed as Node tests; task/legacy imports are additionally protected by a static wiring guard."
+    },
+    {
+      "id": "RS-P4R3-3",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-product-acceptance.mjs",
+        "package.json"
+      ],
+      "detail": "Every executed frontend and Node spec is source-hashed, including the exact required P4R-3 UI, bridge, persistence, prompt, context and interceptor set."
+    },
+    {
+      "id": "RS-P4R4-1",
+      "passed": true,
+      "evidence": [
+        "frontend/src/components/result-studio/ResultStudioChangeSetPanel.test.tsx",
+        "frontend/src/components/result-studio/resultVersionRole.test.ts",
+        "frontend/src/hooks/useWorkspaceRouting.test.ts"
+      ],
+      "detail": "Version roles, read-only view actions, explicit Revision interaction binding and reachable Result/Compare/History surfaces executed as frontend tests."
+    },
+    {
+      "id": "RS-P4R4-2",
+      "passed": true,
+      "evidence": [
+        "test/result-compare-service.test.mjs",
+        "test/result-studio-repository.test.mjs",
+        "test/result-studio-context.test.mjs"
+      ],
+      "detail": "Family pagination, trusted review metadata, viewed-Revision selection binding, parameter drift and cross-store checkpoint rollback executed as Node tests."
+    },
+    {
+      "id": "RS-P4R4-3",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-product-acceptance.mjs",
+        "package.json"
+      ],
+      "detail": "Every P4R-4 implementation and executed spec is source-hashed; no untracked test outcome can underwrite the evidence."
+    },
+    {
+      "id": "RS-P4R5-1",
+      "passed": true,
+      "evidence": [
+        "frontend/src/components/result-studio/RevisionCodeView.tsx",
+        "frontend/src/components/result-studio/RevisionCodeView.test.tsx",
+        "frontend/src/components/result-studio/resultStudioClient.ts"
+      ],
+      "detail": "The exact Revision Code surface, four-mode routing and source request client executed through the real frontend runner."
+    },
+    {
+      "id": "RS-P4R5-2",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-revision-source.js",
+        "core/r-server/routes/result-studio.js",
+        "test/result-revision-source.test.mjs",
+        "test/p4r-invariants.test.mjs"
+      ],
+      "detail": "Revision source projection, hash/path/project fail-closed cases, read-only GET and the P4R invariant source route executed as Node tests."
+    },
+    {
+      "id": "RS-P4R5-3",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-product-acceptance.mjs",
+        "package.json"
+      ],
+      "detail": "Every P4R-5 implementation and executed spec is source-hashed; no stale P4R-4-only producer can underwrite Code/reproduce claims."
+    },
+    {
+      "id": "RS-P4R5-4",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-source-observation.mjs",
+        "acceptance/g0-result-studio/rs-p4r-source-observation.json",
+        "resources/built-in-plugins/go-kegg/tool-definition.json"
+      ],
+      "detail": "The isolated real run_tool → tool_job → Artifact Truth chain produced formal DESeq2, standalone volcano, heatmap and GO-BP artifacts, then created and read each exact Revision source projection. The observation is source-bound and non-qualifying."
+    },
+    {
+      "id": "RS-P4R6-1",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-acceptance.mjs",
+        "acceptance/g0-result-studio/rs-p4r-performance.json",
+        "core/shared-backend/result-studio-background.js",
+        "core/shared-backend/result-studio-background-child.js",
+        "test/result-studio-background.test.mjs"
+      ],
+      "detail": "The source-bound real-chain performance observation keeps the Express event loop within the frozen 250ms budget while cold canonical Git/SQLite work completes asynchronously."
+    },
+    {
+      "id": "RS-P4R6-2",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-live-observation.mjs",
+        "acceptance/g0-result-studio/rs-p4r-live-observation.json",
+        "test/p4r-live-observation.test.mjs"
+      ],
+      "detail": "One disposable source-bound chain opens a real completed Job, creates a deterministic context-bound Agent presentation candidate, compares, adopts, replays, discards, round-trips conversation truth and recovers after a real backend restart. It remains explicitly non-Provider and non-qualifying."
+    },
+    {
+      "id": "RS-P4R6-3",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-ui-observation.mjs",
+        "scripts/g0-rs-p4r-ui-driver.cjs",
+        "acceptance/g0-result-studio/rs-p4r-ui-observation.json",
+        "test/p4r-ui-observation.test.mjs",
+        "frontend/src/pages/project-workspace.tsx",
+        "frontend/src/components/result-studio/ScientificInteractionViewer.tsx"
+      ],
+      "detail": "One real Electron BrowserWindow covers light/dark × 1440/1024/820, keyboard/focus, bounded actions, candidate lifecycle, fail-closed secondary errors and stop/restart recovery without promoting this development renderer run to packaged or Provider qualification."
+    }
+  ],
+  "verification": {
+    "generatedAt": "2026-07-28T11:42:58.841Z",
+    "frontend": {
+      "command": "npm run test:files --prefix frontend -- 19 specs",
+      "exitCode": 0,
+      "filesPassed": 19,
+      "testsPassed": 116,
+      "specCount": 19,
+      "stdoutSha256": "26f6906f7be8007d2af8a6fb068be32ded756624570aea7f0a8415c63f0ebc67"
+    },
+    "node": {
+      "command": "node --test --test-concurrency=1 12 specs",
+      "exitCode": 0,
+      "specCount": 12,
+      "testsObserved": 137,
+      "testsPassed": 137,
+      "stdoutSha256": "82ad4a4c23f7e0d9bc354b317e7dc54ea3df643ebc8b4e9cb4f5dde66f88aa71"
+    }
+  },
+  "passed": true,
+  "sourceCommit": "734e9e253dfda4c833f28c6536a5a5741ae32e0c",
+  "sourceCommitReachable": true,
+  "sourceCommitMatchesSourceHashes": true,
+  "sourceCommitMismatches": [],
+  "generatedAt": "2026-07-28T11:42:58.841Z",
+  "privacyClean": true
+}

@@ -32,6 +32,15 @@ if (!exists("%||%")) {
   `%||%` <- function(a, b) if (is.null(a) || (length(a) == 0 && !is.list(a))) b else a
 }
 
+canonicalize_png <- function(file_path) {
+  if (!file.exists(file_path)) return(invisible(FALSE))
+  if (!requireNamespace("png", quietly = TRUE)) {
+    stop("[go-kegg] R package 'png' is required for deterministic Result Studio artifacts")
+  }
+  png::writePNG(png::readPNG(file_path), file_path)
+  invisible(TRUE)
+}
+
 find_biof3_kegg_snapshot <- function(organism) {
   candidates <- file.path(.libPaths(), ".biof3-data", paste0("kegg-", organism, ".rds"))
   matches <- candidates[file.exists(candidates)]
@@ -191,13 +200,29 @@ if (gene_id_type != "ENTREZID") {
 
 up_entrez <- NULL
 down_entrez <- NULL
+up_readable <- NULL
+down_readable <- NULL
+if (!is.null(up_genes)) {
+  up_entrez <- character(0)
+  up_readable <- character(0)
+}
+if (!is.null(down_genes)) {
+  down_entrez <- character(0)
+  down_readable <- character(0)
+}
 if (!is.null(up_genes) && length(up_genes) > 0) {
   up_map <- bitr(up_genes, fromType = gene_id_type, toType = "ENTREZID", OrgDb = orgdb)
   up_entrez <- unique(up_map$ENTREZID)
+  up_readable <- if (gene_id_type == "SYMBOL") unique(up_genes) else {
+    unique(bitr(up_genes, fromType = gene_id_type, toType = "SYMBOL", OrgDb = orgdb)$SYMBOL)
+  }
 }
 if (!is.null(down_genes) && length(down_genes) > 0) {
   down_map <- bitr(down_genes, fromType = gene_id_type, toType = "ENTREZID", OrgDb = orgdb)
   down_entrez <- unique(down_map$ENTREZID)
+  down_readable <- if (gene_id_type == "SYMBOL") unique(down_genes) else {
+    unique(bitr(down_genes, fromType = gene_id_type, toType = "SYMBOL", OrgDb = orgdb)$SYMBOL)
+  }
 }
 
 write.csv(data.frame(gene = gene_list), file.path(output_dir, "gene_list.csv"), row.names = FALSE)
@@ -217,12 +242,42 @@ run_go <- function(ont) {
   })
 }
 
+# Direction belongs to the signed DEG genes overlapping each term, not to the
+# enrichment p-value itself. Preserve the rank statistics and add an auditable
+# overlap summary for Result Studio Compare.
+annotate_enrichment_direction <- function(table, up_ids, down_ids) {
+  result <- as.data.frame(table)
+  if (!("geneID" %in% colnames(result))) {
+    stop("Enrichment result is missing the declared geneID overlap column")
+  }
+  if (is.null(up_ids) || is.null(down_ids)) {
+    result$up_gene_count <- NA_integer_
+    result$down_gene_count <- NA_integer_
+    result$direction <- "unavailable_without_signed_deg"
+    return(result)
+  }
+  overlaps <- strsplit(as.character(result$geneID), "/", fixed = TRUE)
+  result$up_gene_count <- vapply(overlaps, function(ids) sum(ids %in% up_ids), integer(1))
+  result$down_gene_count <- vapply(overlaps, function(ids) sum(ids %in% down_ids), integer(1))
+  result$direction <- ifelse(
+    result$up_gene_count > result$down_gene_count,
+    "up",
+    ifelse(
+      result$down_gene_count > result$up_gene_count,
+      "down",
+      ifelse(result$up_gene_count + result$down_gene_count > 0, "mixed", "unresolved")
+    )
+  )
+  result
+}
+
 ego_bp <- NULL; ego_mf <- NULL; ego_cc <- NULL
 if (analysis_type %in% c("all", "GO-BP", "GO")) {
   cat("[go-kegg] enrichGO BP...\n")
   ego_bp <- run_go("BP")
   if (!is.null(ego_bp) && nrow(as.data.frame(ego_bp)) > 0) {
-    write.csv(as.data.frame(ego_bp), file.path(output_dir, "go_bp_results.csv"), row.names = FALSE)
+    write.csv(annotate_enrichment_direction(ego_bp, up_readable, down_readable),
+              file.path(output_dir, "go_bp_results.csv"), row.names = FALSE)
     cat(sprintf("  GO-BP: %d terms\n", nrow(as.data.frame(ego_bp))))
   }
 }
@@ -230,7 +285,8 @@ if (analysis_type %in% c("all", "GO-MF", "GO")) {
   cat("[go-kegg] enrichGO MF...\n")
   ego_mf <- run_go("MF")
   if (!is.null(ego_mf) && nrow(as.data.frame(ego_mf)) > 0) {
-    write.csv(as.data.frame(ego_mf), file.path(output_dir, "go_mf_results.csv"), row.names = FALSE)
+    write.csv(annotate_enrichment_direction(ego_mf, up_readable, down_readable),
+              file.path(output_dir, "go_mf_results.csv"), row.names = FALSE)
     cat(sprintf("  GO-MF: %d terms\n", nrow(as.data.frame(ego_mf))))
   }
 }
@@ -238,7 +294,8 @@ if (analysis_type %in% c("all", "GO-CC", "GO")) {
   cat("[go-kegg] enrichGO CC...\n")
   ego_cc <- run_go("CC")
   if (!is.null(ego_cc) && nrow(as.data.frame(ego_cc)) > 0) {
-    write.csv(as.data.frame(ego_cc), file.path(output_dir, "go_cc_results.csv"), row.names = FALSE)
+    write.csv(annotate_enrichment_direction(ego_cc, up_readable, down_readable),
+              file.path(output_dir, "go_cc_results.csv"), row.names = FALSE)
     cat(sprintf("  GO-CC: %d terms\n", nrow(as.data.frame(ego_cc))))
   }
 }
@@ -249,7 +306,8 @@ if (analysis_type %in% c("all", "KEGG")) {
   tryCatch({
     kegg_res <- run_kegg_ora(entrez_ids, kegg_org, enrich_pval, enrich_qval)
     if (!is.null(kegg_res) && nrow(as.data.frame(kegg_res)) > 0) {
-      write.csv(as.data.frame(kegg_res), file.path(output_dir, "kegg_results.csv"), row.names = FALSE)
+      write.csv(annotate_enrichment_direction(kegg_res, up_entrez, down_entrez),
+                file.path(output_dir, "kegg_results.csv"), row.names = FALSE)
       cat(sprintf("  KEGG: %d pathways\n", nrow(as.data.frame(kegg_res))))
     }
   }, error = function(e) cat(sprintf("  KEGG failed: %s\n", e$message)))
@@ -259,6 +317,9 @@ if (analysis_type %in% c("all", "KEGG")) {
 # Plots — SCI 风格双格式
 # ============================================================
 cat("[go-kegg] Generating plots...\n")
+# enrichplot network layouts consume R's RNG. Bind the seed before any plot so
+# formal reports that embed cnetplot/emapplot remain byte-identical on replay.
+set.seed(20260729)
 
 # ---- 1-2: GO-BP dotplot + barplot (ggplot 系) ----
 if (!is.null(ego_bp) && nrow(as.data.frame(ego_bp)) > 0) {
@@ -360,6 +421,12 @@ if (!is.null(up_entrez) && !is.null(down_entrez) &&
   }, error = function(e) cat(sprintf("  compareCluster skipped: %s\n", e$message)))
 }
 
+# The formal HTML report embeds every generated PNG. Canonical encoding removes
+# compression metadata/stream drift from the complete report dependency set.
+for (png_path in list.files(output_dir, pattern = "\\.png$", full.names = TRUE)) {
+  canonicalize_png(png_path)
+}
+
 # ============================================================
 # Summary
 # ============================================================
@@ -385,19 +452,19 @@ writeLines(summary_text, file.path(output_dir, "summary.txt"))
 # ============================================================
 cat("[go-kegg] Saving intermediate data...\n")
 if (!is.null(ego_bp) && nrow(as.data.frame(ego_bp)) > 0) {
-  write.csv(as.data.frame(ego_bp), file.path(output_dir, "go_bp_data.csv"), row.names = FALSE)
+  write.csv(annotate_enrichment_direction(ego_bp, up_readable, down_readable), file.path(output_dir, "go_bp_data.csv"), row.names = FALSE)
   saveRDS(ego_bp, file.path(output_dir, "ego_bp.rds"))
 }
 if (!is.null(ego_mf) && nrow(as.data.frame(ego_mf)) > 0) {
-  write.csv(as.data.frame(ego_mf), file.path(output_dir, "go_mf_data.csv"), row.names = FALSE)
+  write.csv(annotate_enrichment_direction(ego_mf, up_readable, down_readable), file.path(output_dir, "go_mf_data.csv"), row.names = FALSE)
   saveRDS(ego_mf, file.path(output_dir, "ego_mf.rds"))
 }
 if (!is.null(ego_cc) && nrow(as.data.frame(ego_cc)) > 0) {
-  write.csv(as.data.frame(ego_cc), file.path(output_dir, "go_cc_data.csv"), row.names = FALSE)
+  write.csv(annotate_enrichment_direction(ego_cc, up_readable, down_readable), file.path(output_dir, "go_cc_data.csv"), row.names = FALSE)
   saveRDS(ego_cc, file.path(output_dir, "ego_cc.rds"))
 }
 if (!is.null(kegg_res) && nrow(as.data.frame(kegg_res)) > 0) {
-  write.csv(as.data.frame(kegg_res), file.path(output_dir, "kegg_data.csv"), row.names = FALSE)
+  write.csv(annotate_enrichment_direction(kegg_res, up_entrez, down_entrez), file.path(output_dir, "kegg_data.csv"), row.names = FALSE)
   saveRDS(kegg_res, file.path(output_dir, "kegg_res.rds"))
 }
 

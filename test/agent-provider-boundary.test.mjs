@@ -15,9 +15,118 @@ const {
   buildFinalizationFallbackMessage,
   finalizationFallbackReason,
   createAgentProgressRecorder,
+  createResultEditCompletionGuard,
   createAgentToolCallController,
   runAgentToolCallBatch,
 } = require('../core/r-server/agent-tools');
+
+test('bound result edits cannot finish successfully before a real preview-ready candidate exists', () => {
+  const guard = createResultEditCompletionGuard({ required: true });
+  assert.equal(guard.requiresToolExecution(), false);
+  const first = guard.assessTerminal();
+  assert.equal(first.action, 'retry');
+  assert.match(first.prompt, /尚未成功创建 preview_ready 候选/);
+  assert.equal(guard.requiresToolExecution(), true);
+
+  const second = guard.assessTerminal();
+  assert.equal(second.action, 'fail');
+  assert.match(second.message, /阻止展示伪成功结论/);
+});
+
+test('bound result edit completion guard accepts only the sealed create tool success terminal', () => {
+  const guard = createResultEditCompletionGuard({ required: true });
+  guard.recordToolResult('result_changeset_create_in_context', {
+    ok: false,
+    changeSet: { status: 'preview_ready' },
+  });
+  assert.equal(guard.assessTerminal().action, 'retry');
+
+  guard.recordToolResult('result_changeset_create_in_context', {
+    ok: true,
+    changeSet: { status: 'preview_ready' },
+  });
+  assert.equal(guard.requiresToolExecution(), false);
+  assert.equal(guard.assessTerminal().action, 'accept');
+  assert.deepEqual(guard.snapshot(), {
+    required: true,
+    expectation: 'candidate',
+    target: 'candidate',
+    candidateCreated: true,
+    enrichmentJobStarted: false,
+    recoveryAttempted: true,
+  });
+
+  const ordinary = createResultEditCompletionGuard();
+  assert.equal(ordinary.assessTerminal().action, 'accept');
+});
+
+test('result actions may complete through a trusted enrichment Job but candidate-only edits may not', () => {
+  const action = createResultEditCompletionGuard({ expectation: 'result_action' });
+  action.recordToolResult('result_enrichment_from_context', {
+    ok: false,
+    toolId: 'go-kegg',
+    result: { toolJobId: 'job-rejected' },
+  });
+  const retry = action.assessTerminal();
+  assert.equal(retry.action, 'retry');
+  assert.equal(retry.reason, 'result_action_not_executed');
+  assert.match(retry.prompt, /result_enrichment_from_context/);
+  assert.doesNotMatch(retry.prompt, /请立即使用当前受信上下文调用必要的 Result Studio 工具完成候选创建/);
+
+  action.recordToolResult('result_enrichment_from_context', {
+    ok: true,
+    toolId: 'go-kegg',
+    result: { toolJobId: 'job-enrichment' },
+  });
+  assert.equal(action.assessTerminal().action, 'accept');
+  assert.deepEqual(action.snapshot(), {
+    required: true,
+    expectation: 'result_action',
+    target: 'result_action',
+    candidateCreated: false,
+    enrichmentJobStarted: true,
+    recoveryAttempted: true,
+  });
+
+  const candidate = createResultEditCompletionGuard({ expectation: 'candidate' });
+  candidate.recordToolResult('result_enrichment_from_context', {
+    ok: true,
+    toolId: 'go-kegg',
+    result: { toolJobId: 'job-enrichment' },
+  });
+  assert.equal(candidate.assessTerminal().action, 'retry');
+
+  const none = createResultEditCompletionGuard({ expectation: 'none' });
+  assert.equal(none.required, false);
+  assert.equal(none.assessTerminal().action, 'accept');
+});
+
+test('explicit enrichment recovery forces only the sealed context enrichment tool', () => {
+  const enrichment = createResultEditCompletionGuard({
+    expectation: 'result_action',
+    requestedOutcome: '用当前差异基因做 GO 和 KEGG 富集。',
+  });
+  assert.equal(enrichment.requiresToolExecution(), false);
+  assert.equal(enrichment.assessTerminal().reason, 'result_action_not_executed');
+  assert.equal(enrichment.requiresToolExecution(), true);
+  assert.deepEqual(enrichment.requiredToolChoice(), {
+    type: 'function',
+    function: { name: 'result_enrichment_from_context' },
+  });
+  assert.equal(enrichment.snapshot().target, 'enrichment');
+
+  for (const presentation of [
+    '把 GO 富集图配色改成蓝色',
+    '调整 KEGG 结果的图例和标签',
+  ]) {
+    const edit = createResultEditCompletionGuard({
+      expectation: 'result_action', requestedOutcome: presentation,
+    });
+    edit.assessTerminal();
+    assert.equal(edit.requiredToolChoice(), 'required');
+    assert.equal(edit.snapshot().target, 'result_action');
+  }
+});
 
 function toolCall(id, argumentsValue = '{}', name = 'workspace_read') {
   return { id, type: 'function', function: { name, arguments: argumentsValue } };
@@ -150,6 +259,100 @@ test('malformed, array, and null arguments are rejected without executing handle
     'invalid_arguments',
     'invalid_arguments',
   ]);
+});
+
+test('single-key Provider arguments envelopes are decoded before normal execution', async () => {
+  const inner = { contextToken: 'a'.repeat(64), intent: { intentId: 'rei_1' } };
+  const batch = await runBoundaryBatch([
+    toolCall('wrapped-json', JSON.stringify({ arguments: JSON.stringify(inner) }), 'result_changeset_create_in_context'),
+  ]);
+  assert.equal(batch.executed.length, 1);
+  assert.deepEqual(batch.executed[0].args, inner);
+});
+
+test('single-key Provider envelopes repair only a bare redacted context token placeholder', async () => {
+  const wrapped = '{"contextToken": [REDACTED], "intent": {"intentId": "rei_1"}}';
+  const batch = await runBoundaryBatch([
+    toolCall('wrapped-redacted-token', JSON.stringify({ arguments: wrapped }), 'result_changeset_create_in_context'),
+  ]);
+  assert.equal(batch.executed.length, 1);
+  assert.deepEqual(batch.executed[0].args, {
+    contextToken: '[REDACTED]',
+    intent: { intentId: 'rei_1' },
+  });
+
+  const malformed = await runBoundaryBatch([
+    toolCall('wrapped-other-bare-token', JSON.stringify({ arguments: '{"path": [REDACTED]}' })),
+  ]);
+  assert.equal(malformed.executed.length, 1);
+  assert.deepEqual(malformed.executed[0].args, { arguments: '{"path": [REDACTED]}' });
+});
+
+test('direct Provider arguments repair only a bare redacted context token placeholder', async () => {
+  const batch = await runBoundaryBatch([
+    toolCall(
+      'direct-redacted-token',
+      '{"contextToken": [REDACTED], "intent": {"intentId": "rei_1"}}',
+      'result_changeset_create_in_context'
+    ),
+  ]);
+  assert.equal(batch.executed.length, 1);
+  assert.deepEqual(batch.executed[0].args, {
+    contextToken: '[REDACTED]',
+    intent: { intentId: 'rei_1' },
+  });
+
+  const malformed = await runBoundaryBatch([
+    toolCall('direct-other-bare-token', '{"path": [REDACTED]}'),
+  ]);
+  assert.equal(malformed.executed.length, 0);
+  assert.equal(malformed.rejected[0].error, 'invalid_arguments');
+});
+
+test('malformed Result Studio create envelopes recover only the sealed intent capability', async () => {
+  const malformedInner = '{"contextToken": [REDACTED], "scientificConfirmed": false, "intent": {'
+    + '"intentId": "rei_sealed_1", "source": {"inputs": [], "sourceNodeId": "job:1"}}';
+  const batch = await runBoundaryBatch([
+    toolCall(
+      'malformed-sealed-intent',
+      JSON.stringify({ arguments: malformedInner }),
+      'result_changeset_create_in_context'
+    ),
+  ]);
+  assert.equal(batch.executed.length, 1);
+  assert.deepEqual(batch.executed[0].args, {
+    contextToken: '[REDACTED]',
+    intent: { intentId: 'rei_sealed_1' },
+    scientificConfirmed: false,
+  });
+
+  const foreignTool = await runBoundaryBatch([
+    toolCall('foreign-malformed', malformedInner, 'workspace_read'),
+  ]);
+  assert.equal(foreignTool.executed.length, 0);
+  assert.equal(foreignTool.rejected[0].error, 'invalid_arguments');
+});
+
+test('Provider arguments compatibility never unwraps envelopes with extra keys', async () => {
+  const batch = await runBoundaryBatch([
+    toolCall('ambiguous-wrapper', JSON.stringify({ arguments: '{"path":"a.txt"}', extra: true })),
+  ]);
+  assert.equal(batch.executed.length, 1);
+  assert.deepEqual(batch.executed[0].args, { arguments: '{"path":"a.txt"}', extra: true });
+});
+
+test('repeated-call protection compares decoded and native argument forms identically', async () => {
+  const controller = createAgentToolCallController();
+  const inner = { path: 'a.txt' };
+  const first = await runBoundaryBatch([toolCall('native-1', JSON.stringify(inner))], { controller });
+  const second = await runBoundaryBatch([
+    toolCall('wrapped-2', JSON.stringify({ arguments: JSON.stringify(inner) })),
+  ], { controller });
+  const third = await runBoundaryBatch([toolCall('native-3', JSON.stringify(inner))], { controller });
+  assert.equal(first.executed.length, 1);
+  assert.equal(second.executed.length, 1);
+  assert.equal(third.executed.length, 0);
+  assert.equal(third.rejected[0].error, 'repeated_tool_call');
 });
 
 test('duplicate Provider tool call ids are rejected without duplicating protocol history ids', async () => {

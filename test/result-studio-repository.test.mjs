@@ -20,6 +20,8 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const Database = require('better-sqlite3');
 const { ensureResultStudioSchema, inspectResultStudioSchema } = require('../core/shared-backend/result-studio-schema');
+const { ensureResultRefTransactionSchema } = require('../core/shared-backend/result-ref-transaction-schema');
+const { ensureGitRepositoryConsentSchema } = require('../core/shared-backend/git-repository-consent-schema');
 const {
   createResultStudioRepository,
   ResultStudioRepositoryError,
@@ -37,6 +39,8 @@ function makeRepo(context) {
   // cannot be deleted, so the cleanup must run after db.close().
   context.after(() => { try { db.close(); } catch { /* already closed */ } rmSync(root, { recursive: true, force: true }); });
   ensureResultStudioSchema(db);
+  ensureResultRefTransactionSchema(db);
+  ensureGitRepositoryConsentSchema(db);
   return { db, repo: createResultStudioRepository(db, { ensureSchema: false }), root };
 }
 
@@ -83,6 +87,39 @@ test('RS2 schema creates all five tables and is idempotent', (context) => {
   ensureResultStudioSchema(db);
   ensureResultStudioSchema(db);
   assert.equal(inspectResultStudioSchema(db).complete, true);
+});
+
+test('P5 ordinary Revision append cannot bypass exact replay verification', (context) => {
+  const { repo } = makeRepo(context);
+  newChangeSet(repo, { changeSetId: 'cs_verified_single' });
+  assert.throws(
+    () => repo.appendRevision(revisionInput('cs_verified_single', {
+      revisionId: 'rev_verified_single',
+      reproducibilityStatus: 'verified',
+    })),
+    (error) => error instanceof ResultStudioRepositoryError
+      && error.code === 'revision_verified_requires_replay_proof'
+  );
+  assert.equal(repo.getRevision('rev_verified_single'), null);
+
+  newChangeSet(repo, { changeSetId: 'cs_verified_batch' });
+  const available = revisionInput('cs_verified_batch', {
+    revisionId: 'rev_available_batch',
+    artifactFamilyId: 'table-family',
+    artifactId: 'table',
+  });
+  const verified = revisionInput('cs_verified_batch', {
+    revisionId: 'rev_verified_batch',
+    artifactFamilyId: 'plot-family',
+    reproducibilityStatus: 'verified',
+  });
+  assert.throws(
+    () => repo.appendRevisionBatch({ revisions: [available, verified] }),
+    (error) => error instanceof ResultStudioRepositoryError
+      && error.code === 'revision_verified_requires_replay_proof'
+  );
+  assert.equal(repo.getRevision(available.revisionId), null);
+  assert.equal(repo.getRevision(verified.revisionId), null);
 });
 
 test('RS2 repository refuses to run against a database without the schema', (context) => {
@@ -247,6 +284,44 @@ test('RS2 adopt is idempotent', (context) => {
   assert.equal(repo.listCurrentRevisions('project_1').length, 1);
 });
 
+test('P5 adopted ChangeSet is not idempotent after another cohort supersedes its family', (context) => {
+  const { repo } = makeRepo(context);
+  newChangeSet(repo, { changeSetId: 'cs_p5_first' });
+  repo.transitionChangeSet({ changeSetId: 'cs_p5_first', to: 'running' });
+  const firstInput = revisionInput('cs_p5_first', { revisionId: 'rev_p5_first' });
+  repo.appendRevisionBatch({
+    revisions: [firstInput],
+    transition: {
+      changeSetId: 'cs_p5_first', to: 'preview_ready', candidateCommit: COMMIT_A,
+      candidateArtifactRefs: [firstInput.revisionId], jobRefs: [firstInput.toolJobId],
+    },
+  });
+  repo.adoptChangeSet({ changeSetId: 'cs_p5_first' });
+
+  newChangeSet(repo, { changeSetId: 'cs_p5_second', baseCommit: COMMIT_A });
+  repo.transitionChangeSet({ changeSetId: 'cs_p5_second', to: 'running' });
+  const secondInput = revisionInput('cs_p5_second', {
+    revisionId: 'rev_p5_second',
+    parentRevisionIds: [firstInput.revisionId],
+    outputPath: 'results/artifacts/volcano-plot/revisions/p5-second/volcano.svg',
+    outputHash: HASH_2,
+  });
+  repo.appendRevisionBatch({
+    revisions: [secondInput],
+    transition: {
+      changeSetId: 'cs_p5_second', to: 'preview_ready', candidateCommit: COMMIT_B,
+      candidateArtifactRefs: [secondInput.revisionId], jobRefs: [secondInput.toolJobId],
+    },
+  });
+  repo.adoptChangeSet({ changeSetId: 'cs_p5_second' });
+
+  assert.throws(
+    () => repo.adoptChangeSet({ changeSetId: 'cs_p5_first' }),
+    (error) => error instanceof ResultStudioRepositoryError && error.code === 'change_set_adoption_not_current'
+  );
+  assert.equal(repo.getCurrentRevision('volcano-plot').revisionId, secondInput.revisionId);
+});
+
 test('RS2 revert is idempotent', (context) => {
   const { repo } = makeRepo(context);
   newChangeSet(repo, { changeSetId: 'cs_ridem' });
@@ -300,6 +375,41 @@ test('RS2 assigns increasing revision ordinals per family', (context) => {
   assert.equal(second.revisionOrdinal, 2);
 });
 
+test('P4R-4 family-scoped queries paginate every Revision without unrelated ChangeSet starvation', (context) => {
+  const { repo } = makeRepo(context);
+  newChangeSet(repo, { changeSetId: 'cs_target' });
+  for (let index = 1; index <= 150; index += 1) {
+    repo.appendRevision(revisionInput('cs_target', {
+      revisionId: `rev_target_${index}`,
+      artifactFamilyId: 'target-family',
+      outputPath: `results/target/v${index}/plot.png`,
+      toolJobId: `job_target_${String(index).padStart(6, '0')}`,
+    }));
+  }
+  for (let index = 1; index <= 105; index += 1) {
+    const changeSetId = `cs_other_${index}`;
+    newChangeSet(repo, { changeSetId, workingBranchRef: `refs/heads/biof3/changeset/${changeSetId}` });
+    repo.appendRevision(revisionInput(changeSetId, {
+      revisionId: `rev_other_${index}`,
+      artifactFamilyId: `other-family-${index}`,
+      outputPath: `results/other/${index}/plot.png`,
+      toolJobId: `job_other_${String(index).padStart(6, '0')}`,
+    }));
+  }
+  assert.deepEqual(
+    repo.listChangeSetsByArtifactFamily({ projectId: 'project_1', artifactFamilyId: 'target-family' })
+      .map((entry) => entry.changeSetId),
+    ['cs_target'],
+  );
+  const first = repo.listRevisions({ artifactFamilyId: 'target-family', projectId: 'project_1', order: 'desc', limit: 100 });
+  const second = repo.listRevisions({ artifactFamilyId: 'target-family', projectId: 'project_1', order: 'desc', limit: 100, offset: 100 });
+  assert.equal(first.length, 100);
+  assert.equal(second.length, 50);
+  assert.equal(first[0].revisionOrdinal, 150);
+  assert.equal(second.at(-1).revisionOrdinal, 1);
+  assert.equal(repo.listRevisions({ artifactFamilyId: 'target-family', projectId: 'project_other' }).length, 0);
+});
+
 // ---------------------------------------------------------------------------
 // 6. 中断恢复
 // ---------------------------------------------------------------------------
@@ -320,6 +430,42 @@ test('RS2 finds interrupted change sets after a simulated crash', (context) => {
   assert.equal(byId.get('cs_running'), 'recovery_required_after_restart');
   assert.equal(byId.get('cs_pending'), 'awaiting_user_decision');
   assert.equal(byId.get('cs_draft_only'), 'resumable_draft');
+});
+
+test('P6 preview slot count and running ChangeSet creation are one SQLite transaction', (context) => {
+  const { repo } = makeRepo(context);
+  const start = (changeSetId) => repo.startChangeSetWithCheckpoint({
+    changeSet: {
+      changeSetId,
+      projectId: 'project_1',
+      conversationId: 'conv_1',
+      baseCommit: COMMIT_A,
+      workingBranchRef: `refs/heads/biof3/changeset/${changeSetId}`,
+      createdBy: 'agent',
+    },
+    checkpoint: {
+      checkpointId: `cp_${changeSetId}`,
+      projectId: 'project_1',
+      conversationId: 'conv_1',
+      baseCommit: COMMIT_A,
+      changeSetId,
+      changeSetStatus: 'running',
+      currentRevisionIds: [],
+      pendingPreview: { stage: 'change_set', revisionIds: [] },
+    },
+    previewSlot: { projectId: 'project_1', maxConcurrentPreviews: 2 },
+  });
+
+  assert.equal(start('cs_slot_first').previewSlot.activePreviewJobsBefore, 0);
+  assert.equal(start('cs_slot_second').previewSlot.activePreviewJobsBefore, 1);
+  assert.throws(
+    () => start('cs_slot_rejected'),
+    (error) => error instanceof ResultStudioRepositoryError
+      && error.code === 'preview_concurrency_saturated'
+      && error.detail?.activePreviewJobs === 2,
+  );
+  assert.equal(repo.getChangeSet('cs_slot_rejected'), null);
+  assert.equal(repo.getCheckpoint('cp_cs_slot_rejected'), null);
 });
 
 test('RS2 recovers state across a real database reopen', (context) => {
@@ -386,6 +532,41 @@ test('RS2 persists and restores a selection context', (context) => {
 
   repo.deleteSelection('sel_1');
   assert.equal(repo.getSelection('sel_1'), null);
+});
+
+test('RS-P2 restores only the latest selection in the same project conversation and artifact', (context) => {
+  const { repo } = makeRepo(context);
+  const base = {
+    projectId: 'project_1', conversationId: 'conv_1', artifactId: 'deg_table',
+    revisionId: 'rev_1', entityType: 'gene', filterExpression: { logic: 'and', clauses: [] },
+  };
+  repo.saveSelection({ ...base, selectionId: 'sel_old', entityIds: ['TP53'] });
+  repo.saveSelection({ ...base, selectionId: 'sel_new', entityIds: ['EGFR'] });
+  repo.saveSelection({ ...base, selectionId: 'sel_other_conv', conversationId: 'conv_2', entityIds: ['MYC'] });
+  repo.saveSelection({ ...base, selectionId: 'sel_other_artifact', artifactId: 'other', entityIds: ['KRAS'] });
+  assert.equal(repo.findLatestSelection({
+    projectId: 'project_1', conversationId: 'conv_1', artifactId: 'deg_table',
+  }).selectionId, 'sel_new');
+  assert.equal(repo.findLatestSelection({
+    projectId: 'project_1', conversationId: 'conv_2', artifactId: 'deg_table',
+  }).selectionId, 'sel_other_conv');
+});
+
+test('RS-P2 falls back only to an unscoped artifact selection when a conversation is created later', (context) => {
+  const { repo } = makeRepo(context);
+  const base = {
+    projectId: 'project_1', artifactId: 'deg_table', revisionId: 'rev_1',
+    entityType: 'gene', filterExpression: { logic: 'and', clauses: [] },
+  };
+  repo.saveSelection({ ...base, selectionId: 'sel_unscoped', entityIds: ['TP53'] });
+  repo.saveSelection({ ...base, selectionId: 'sel_other_conv', conversationId: 'conv_other', entityIds: ['MYC'] });
+
+  assert.equal(repo.findLatestSelection({
+    projectId: 'project_1', conversationId: 'conv_created_later', artifactId: 'deg_table',
+  }).selectionId, 'sel_unscoped');
+  assert.equal(repo.findLatestSelection({
+    projectId: 'project_1', conversationId: 'conv_other', artifactId: 'deg_table',
+  }).selectionId, 'sel_other_conv');
 });
 
 test('RS2 checkpoint hash detects tampering and survives reopen', (context) => {
@@ -468,6 +649,41 @@ test('RS2 persists a git repository binding per project', (context) => {
   const updated = repo.getRepositoryBinding('project_1');
   assert.equal(updated.mode, 'existing');
   assert.equal(updated.status, 'blocked_dirty_conflict');
+});
+
+test('P7 persists explicit existing-repository consent separately from runtime binding', (context) => {
+  const { repo } = makeRepo(context);
+  assert.equal(repo.hasExistingRepositoryConsent('project_1'), false);
+  repo.saveRepositoryBinding({
+    projectId: 'project_1',
+    mode: 'existing',
+    workspaceRoot: '/tmp/ws',
+    gitDir: '/tmp/ws/.git',
+    workTree: '/tmp/ws',
+    managedPaths: ['analysis/scripts'],
+    status: 'ready',
+  });
+  assert.equal(
+    repo.hasExistingRepositoryConsent('project_1'),
+    false,
+    'a runtime binding row alone must never become consent',
+  );
+  assert.throws(
+    () => repo.saveExistingRepositoryConsent({
+      projectId: 'project_1', allowExistingRepository: false, decisionSource: 'explicit_api',
+    }),
+    (error) => error instanceof ResultStudioRepositoryError
+      && error.code === 'existing_repository_consent_invalid',
+  );
+  const consent = repo.saveExistingRepositoryConsent({
+    projectId: 'project_1', allowExistingRepository: true, decisionSource: 'explicit_api',
+  });
+  assert.deepEqual(
+    { allowExistingRepository: consent.allowExistingRepository, decisionSource: consent.decisionSource },
+    { allowExistingRepository: true, decisionSource: 'explicit_api' },
+  );
+  assert.equal(repo.hasExistingRepositoryConsent('project_1'), true);
+  assert.equal(repo.getRepositoryBinding('project_1').mode, 'existing');
 });
 
 // ---------------------------------------------------------------------------

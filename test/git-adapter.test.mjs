@@ -150,6 +150,25 @@ test('RS1 blocks honestly when git is unavailable', (context) => {
   assert.equal(existsSync(join(root, BIOF3_DIR, 'git', 'HEAD')), false);
 });
 
+test('RS1 preserves process-level diagnostics for a failed Git invocation', (context) => {
+  const root = makeWorkspace(context);
+  const missingGit = join(root, 'definitely-not-git');
+  const adapter = createGitAdapter({
+    gitDir: join(root, '.biof3/git'),
+    workTree: root,
+    gitBin: missingGit,
+  });
+  const failure = adapter.run(['hash-object', '-w', '--stdin'], {
+    allowFailure: true,
+    input: 'diagnostic',
+  });
+  assert.equal(failure.ok, false);
+  assert.equal(failure.command, 'hash-object');
+  assert.equal(failure.code, 'git_executable_not_found');
+  assert.equal(failure.systemCode, 'ENOENT');
+  assert.equal(failure.status, null);
+});
+
 test('RS1 redacts absolute paths and credential-like values from diagnostics', () => {
   const redacted = redactGitDiagnostic(
     'fatal: cannot open /tmp/ws/secret.txt token sk-abcdefghijklmnopqrstuvwxyz123456',
@@ -323,6 +342,46 @@ test('RS5 virtual ref update fails closed on a concurrent ref change', { skip: !
   assert.equal(adapter.revParse(ref), first.commit);
 });
 
+test('P6 atomic ref cohorts never expose a partially updated family set', { skip: !gitReady }, (context) => {
+  const root = makeWorkspace(context);
+  const adapter = bindProjectRepository({ workspaceRoot: root, projectId: 'project_p6_ref_cohort' }).adapter;
+  const first = adapter.commitVirtualFiles({
+    ref: 'refs/heads/biof3/main',
+    expectedOld: '0'.repeat(40),
+    message: 'P6 ref cohort base',
+    files: [{ path: 'analysis/scripts/ref-cohort/base.R', content: 'version <- 1\n' }],
+  });
+  const second = adapter.commitVirtualFiles({
+    parentCommit: first.commit,
+    ref: 'refs/heads/biof3/changeset/ref-cohort',
+    expectedOld: '0'.repeat(40),
+    message: 'P6 ref cohort candidate',
+    files: [{ path: 'analysis/scripts/ref-cohort/candidate.R', content: 'version <- 2\n' }],
+  });
+  const familyA = 'refs/heads/biof3/current/family-a';
+  const familyB = 'refs/heads/biof3/current/family-b';
+  adapter.updateRefsCas({ updates: [
+    { ref: familyA, expectedOld: '0'.repeat(40), newOid: first.commit },
+    { ref: familyB, expectedOld: '0'.repeat(40), newOid: first.commit },
+  ] });
+  adapter.updateRefsCas({ updates: [
+    { ref: familyA, expectedOld: first.commit, newOid: second.commit },
+    { ref: familyB, expectedOld: first.commit, newOid: second.commit },
+  ] });
+  assert.equal(adapter.revParse(familyA), second.commit);
+  assert.equal(adapter.revParse(familyB), second.commit);
+
+  assert.throws(
+    () => adapter.updateRefsCas({ updates: [
+      { ref: familyA, expectedOld: second.commit, newOid: first.commit },
+      { ref: familyB, expectedOld: first.commit, newOid: second.commit },
+    ] }),
+    (error) => error instanceof GitAdapterError && error.code === 'git_ref_transaction_conflict',
+  );
+  assert.equal(adapter.revParse(familyA), second.commit);
+  assert.equal(adapter.revParse(familyB), second.commit);
+});
+
 // ---------------------------------------------------------------------------
 // 4. 既有用户仓库：clean 接入、dirty 阻断、WIP 不受影响
 // ---------------------------------------------------------------------------
@@ -334,7 +393,11 @@ test('RS1 binds a clean existing repository without touching it', { skip: !gitRe
   const found = findEnclosingGitRepository(root);
   assert.equal(found.root, root);
 
-  const binding = bindProjectRepository({ workspaceRoot: root, projectId: 'project_existing' });
+  const binding = bindProjectRepository({
+    workspaceRoot: root,
+    projectId: 'project_existing',
+    allowExistingRepository: true,
+  });
   assert.equal(binding.status, 'ready');
   assert.equal(binding.mode, 'existing');
   assert.equal(binding.dirty.dirty, false);
@@ -350,7 +413,11 @@ test('RS1 blocks when managed paths collide with uncommitted user work', { skip:
   // 用户自己正在改我们要管的脚本 → 必须阻断，不覆盖、不 stash
   writeManagedScript(root, 'analysis/scripts/plot_volcano.R', 'user work in progress\n');
 
-  const binding = bindProjectRepository({ workspaceRoot: root, projectId: 'project_existing' });
+  const binding = bindProjectRepository({
+    workspaceRoot: root,
+    projectId: 'project_existing',
+    allowExistingRepository: true,
+  });
   assert.equal(binding.status, 'blocked_dirty_conflict');
   assert.equal(binding.reason, 'managed_paths_have_uncommitted_changes');
   assert.equal(binding.dirty.conflictingManagedPaths.includes('analysis/scripts/plot_volcano.R'), true);
@@ -365,7 +432,11 @@ test('RS1 proceeds when user WIP lies outside managed paths and leaves it untouc
   writeFileSync(join(root, 'README.md'), '# user project\nlocal edit\n');
   writeFileSync(join(root, 'notes.txt'), 'private notes\n');
 
-  const binding = bindProjectRepository({ workspaceRoot: root, projectId: 'project_existing' });
+  const binding = bindProjectRepository({
+    workspaceRoot: root,
+    projectId: 'project_existing',
+    allowExistingRepository: true,
+  });
   assert.equal(binding.status, 'ready');
   assert.equal(binding.mode, 'existing');
   assert.equal(binding.dirty.dirty, true);
@@ -390,13 +461,21 @@ test('RS1 blocks a repository that is mid-operation or index-locked', { skip: !g
   const root = makeWorkspace(context);
   initUserRepository(root);
   writeFileSync(join(root, '.git', 'index.lock'), '');
-  const locked = bindProjectRepository({ workspaceRoot: root, projectId: 'project_existing' });
+  const locked = bindProjectRepository({
+    workspaceRoot: root,
+    projectId: 'project_existing',
+    allowExistingRepository: true,
+  });
   assert.equal(locked.status, 'blocked_repository_state');
   assert.equal(locked.reason, 'index_lock_present');
   rmSync(join(root, '.git', 'index.lock'));
 
   writeFileSync(join(root, '.git', 'MERGE_HEAD'), '0'.repeat(40));
-  const merging = bindProjectRepository({ workspaceRoot: root, projectId: 'project_existing' });
+  const merging = bindProjectRepository({
+    workspaceRoot: root,
+    projectId: 'project_existing',
+    allowExistingRepository: true,
+  });
   assert.equal(merging.status, 'blocked_repository_state');
   assert.equal(merging.reason, 'repository_mid_operation');
 });
@@ -405,7 +484,11 @@ test('RS1 blocks existing repositories that contain submodules', { skip: !gitRea
   const root = makeWorkspace(context);
   initUserRepository(root);
   writeFileSync(join(root, '.gitmodules'), '[submodule "x"]\n\tpath = x\n\turl = ./x\n');
-  const binding = bindProjectRepository({ workspaceRoot: root, projectId: 'project_existing' });
+  const binding = bindProjectRepository({
+    workspaceRoot: root,
+    projectId: 'project_existing',
+    allowExistingRepository: true,
+  });
   assert.equal(binding.status, 'blocked_repository_state');
   assert.equal(binding.reason, 'submodules_present');
 });
@@ -438,6 +521,24 @@ test('RS1 honours an explicit managed-only preference inside an existing reposit
   assert.equal(binding.status, 'ready');
   assert.equal(binding.mode, 'managed');
   assert.equal(existsSync(join(root, BIOF3_DIR, 'git', 'HEAD')), true);
+});
+
+test('RS1 defaults an existing repository to managed history without consent and reports why', { skip: !gitReady }, (context) => {
+  const root = makeWorkspace(context);
+  initUserRepository(root);
+  const headBefore = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
+
+  const binding = bindProjectRepository({ workspaceRoot: root, projectId: 'project_no_consent' });
+
+  assert.equal(binding.status, 'ready');
+  assert.equal(binding.mode, 'managed');
+  assert.deepEqual(binding.diagnostics, ['existing_repository_not_attached_without_consent']);
+  assert.equal(existsSync(join(root, BIOF3_DIR, 'git', 'HEAD')), true);
+  assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), headBefore);
+  assert.equal(execFileSync('git', ['for-each-ref', '--format=%(refname)', 'refs/heads/biof3'], {
+    cwd: root,
+    encoding: 'utf8',
+  }).trim(), '');
 });
 
 test('RS1 refuses to create a managed repository when creation is disabled', { skip: !gitReady }, (context) => {

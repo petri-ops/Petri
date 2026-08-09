@@ -6,7 +6,7 @@ const { hashFile } = require('./execution-provenance');
 
 const ARTIFACT_MANIFEST_VERSION = 1;
 
-function collectExecutionInputs({ inputDefinitions = [], params = {}, jobDir = null } = {}) {
+function collectExecutionInputs({ inputDefinitions = [], params = {}, jobDir = null, inputLineage = null } = {}) {
   const snapshots = [];
   for (const definition of inputDefinitions || []) {
     if (!definition || definition.type !== 'file' || !definition.id) continue;
@@ -24,6 +24,9 @@ function collectExecutionInputs({ inputDefinitions = [], params = {}, jobDir = n
     });
     if (!filePath) continue;
     const stat = fs.statSync(filePath);
+    const lineage = inputLineage && typeof inputLineage === 'object' && !Array.isArray(inputLineage)
+      ? inputLineage[id] || null
+      : null;
     snapshots.push({
       id,
       role: definition.role || id,
@@ -31,6 +34,10 @@ function collectExecutionInputs({ inputDefinitions = [], params = {}, jobDir = n
       sha256: hashFile(filePath),
       sizeBytes: stat.size,
       sourceArtifactRef: definition.sourceArtifactRef || null,
+      // This field is supplied only by a server-side Result Studio action;
+      // model-visible run_tool parameters cannot set it.  It is validated again
+      // when projecting the persistent authoritative workflow DAG.
+      lineage: lineage && typeof lineage === 'object' && !Array.isArray(lineage) ? { ...lineage } : null,
     });
   }
   return snapshots;

@@ -10,8 +10,18 @@ const {
   planResultEdit,
   validateResultEditIntent,
 } = require('../core/shared-backend/result-edit-intent');
+const { computeExecutionProvenanceHash } = require('../core/shared-backend/execution-provenance');
 
 function sourceJob(overrides = {}) {
+  const executionProvenance = {
+    executionProvenanceVersion: 1,
+    toolJobId: 'tj_plot',
+    projectId: 'p_1',
+    script: { snapshotPath: '/results/tj_plot/run-script.R', sha256: 'a'.repeat(64) },
+    inputs: [{ id: 'deg', relativePath: 'inputs/deg.csv', sha256: 'b'.repeat(64), sourceArtifactRef: 'deg_table' }],
+    artifacts: [{ id: 'volcano_plot', filename: 'volcano.png', sha256: 'c'.repeat(64) }],
+  };
+  executionProvenance.provenanceHash = computeExecutionProvenanceHash(executionProvenance);
   return {
     id: 'tj_plot',
     project_id: 'p_1',
@@ -20,26 +30,24 @@ function sourceJob(overrides = {}) {
     result: {
       artifactTruth: { status: 'valid', blocking: false },
       artifacts: [{ id: 'volcano_plot', name: 'volcano.png', type: 'plot' }],
-      executionProvenance: {
-        toolJobId: 'tj_plot',
-        projectId: 'p_1',
-        script: { snapshotPath: '/results/tj_plot/run-script.R', sha256: 'a'.repeat(64) },
-        inputs: [{ id: 'deg', relativePath: 'inputs/deg.csv', sha256: 'b'.repeat(64), sourceArtifactRef: 'deg_table' }],
-        artifacts: [{ id: 'volcano_plot', filename: 'volcano.png', sha256: 'c'.repeat(64) }],
-      },
+      executionProvenance,
     },
     ...overrides,
   };
 }
 
-function workflow() {
+function workflow(steps = [
+  { id: 'deg', toolJobId: 'tj_deg', dependsOn: [] },
+  { id: 'plot', toolJobId: 'tj_plot', dependsOn: ['deg'] },
+  { id: 'report', toolJobId: 'tj_report', dependsOn: ['plot'] },
+]) {
   return {
-    agentWorkflowPlanVersion: 1,
-    steps: [
-      { id: 'deg', toolJobId: 'tj_deg', dependsOn: [] },
-      { id: 'plot', toolJobId: 'tj_plot', dependsOn: ['deg'] },
-      { id: 'report', toolJobId: 'tj_report', dependsOn: ['plot'] },
-    ],
+    workflowTruthVersion: 1,
+    authority: 'sqlite_job_artifact_truth',
+    graphId: 'wfg_test_graph',
+    sourceDigest: 'd'.repeat(64),
+    rootToolJobId: 'tj_deg',
+    steps,
   };
 }
 
@@ -65,8 +73,29 @@ test('RS4 explicit presentation metadata limits a palette edit to the source plo
   assert.equal(result.status, 'ready');
   assert.equal(result.intent.editClass, 'presentation_rerender');
   assert.deepEqual(result.intent.affectedNodeIds, ['plot']);
+  assert.equal(result.intent.affectedScope, 'current_result_only');
   assert.equal(result.intent.requiresScientificConfirmation, false);
   assert.deepEqual(result.execution, { performed: false, toolJobCreated: false, changeSetCreated: false });
+});
+
+test('P4R-3 presentation rerender scopes honestly to the current result when no DAG exists', () => {
+  const result = plan({
+    workflowPlan: null,
+    proposedParameterPatch: { palette: 'viridis' },
+    parameterImpactRules: { palette: 'presentation' },
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.intent.editClass, 'presentation_rerender');
+  assert.equal(result.intent.affectedScope, 'current_result_only');
+  assert.deepEqual(result.intent.affectedNodeIds, []);
+
+  const scientific = plan({
+    workflowPlan: null,
+    proposedParameterPatch: { padj_cutoff: 0.01 },
+    parameterImpactRules: { padj_cutoff: 'scientific' },
+  });
+  assert.equal(scientific.ok, false);
+  assert.equal(scientific.diagnostics.some((item) => item.code === 'workflow_dag_missing'), true);
 });
 
 test('RS4 declared scientific threshold recomputes source and downstream nodes', () => {
@@ -136,6 +165,9 @@ test('RS4 never uses a filename as artifact identity or lineage', () => {
 
   const noLineageJob = sourceJob();
   noLineageJob.result.executionProvenance.inputs[0].sourceArtifactRef = null;
+  noLineageJob.result.executionProvenance.provenanceHash = computeExecutionProvenanceHash(
+    noLineageJob.result.executionProvenance,
+  );
   const noLineage = plan({
     toolJob: noLineageJob,
     proposedParameterPatch: { palette: 'blue' },
@@ -145,9 +177,44 @@ test('RS4 never uses a filename as artifact identity or lineage', () => {
   assert.equal(noLineage.diagnostics.some((item) => item.code === 'source_lineage_missing'), true);
 });
 
+test('P6 planner accepts exact structured lineage only when its execution provenance digest is intact', () => {
+  const structuredJob = sourceJob();
+  const input = structuredJob.result.executionProvenance.inputs[0];
+  input.sourceArtifactRef = null;
+  input.lineage = {
+    lineageVersion: 1,
+    kind: 'artifact',
+    sourceRevisionId: 'rev_deg',
+    sourceToolJobId: 'tj_deg',
+    sourceArtifactId: 'deg_table',
+    sourceOutputHash: input.sha256,
+    materializationHash: input.sha256,
+  };
+  structuredJob.result.executionProvenance.provenanceHash = computeExecutionProvenanceHash(
+    structuredJob.result.executionProvenance,
+  );
+  const accepted = plan({
+    toolJob: structuredJob,
+    proposedParameterPatch: { palette: 'blue' },
+    parameterImpactRules: { palette: 'presentation' },
+  });
+  assert.equal(accepted.ok, true, JSON.stringify(accepted.diagnostics));
+  assert.equal(accepted.source.inputs[0].hasStructuredLineage, true);
+  assert.equal(accepted.source.inputs[0].lineageKind, 'artifact');
+
+  structuredJob.result.executionProvenance.inputs[0].lineage.sourceRevisionId = 'rev_tampered';
+  const rejected = plan({
+    toolJob: structuredJob,
+    proposedParameterPatch: { palette: 'blue' },
+    parameterImpactRules: { palette: 'presentation' },
+  });
+  assert.equal(rejected.ok, false);
+  assert.equal(rejected.diagnostics.some((item) => item.code === 'source_provenance_integrity_invalid'), true);
+});
+
 test('RS4 detects ambiguous nodes, missing dependencies, and cycles', () => {
   const ambiguous = computeResultAffectedSubgraph({
-    workflowPlan: { steps: [{ id: 'a', toolJobId: 'tj_plot', dependsOn: [] }, { id: 'b', toolJobId: 'tj_plot', dependsOn: [] }] },
+    workflowPlan: workflow([{ id: 'a', toolJobId: 'tj_plot', dependsOn: [] }, { id: 'b', toolJobId: 'tj_plot', dependsOn: [] }]),
     sourceToolJobId: 'tj_plot',
     editClass: 'scientific_recompute',
   });
@@ -155,14 +222,14 @@ test('RS4 detects ambiguous nodes, missing dependencies, and cycles', () => {
   assert.equal(ambiguous.diagnostics[0].code, 'source_workflow_node_ambiguous');
 
   const missing = computeResultAffectedSubgraph({
-    workflowPlan: { steps: [{ id: 'a', toolJobId: 'tj_plot', dependsOn: ['missing'] }] },
+    workflowPlan: workflow([{ id: 'a', toolJobId: 'tj_plot', dependsOn: ['missing'] }]),
     sourceToolJobId: 'tj_plot',
     editClass: 'scientific_recompute',
   });
   assert.equal(missing.diagnostics[0].code, 'workflow_dependency_missing');
 
   const cyclic = computeResultAffectedSubgraph({
-    workflowPlan: { steps: [{ id: 'a', toolJobId: 'tj_plot', dependsOn: ['b'] }, { id: 'b', toolJobId: 'tj_b', dependsOn: ['a'] }] },
+    workflowPlan: workflow([{ id: 'a', toolJobId: 'tj_plot', dependsOn: ['b'] }, { id: 'b', toolJobId: 'tj_b', dependsOn: ['a'] }]),
     sourceToolJobId: 'tj_plot',
     editClass: 'scientific_recompute',
   });

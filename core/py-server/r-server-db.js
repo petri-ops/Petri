@@ -82,8 +82,8 @@ function updateToolJobStatus(jobId, {status, error, resultJson, completedAt}) {
 
 function listToolJobsByUser(userId, {limit = 50, includeTestRuns = false} = {}) {
   const sql = includeTestRuns
-    ? 'SELECT id, tool_id, status, created_at, completed_at, error, name FROM tool_jobs WHERE user_id = ? ORDER BY created_at DESC LIMIT ?'
-    : 'SELECT id, tool_id, status, created_at, completed_at, error, name FROM tool_jobs WHERE user_id = ? AND is_test_run = 0 ORDER BY created_at DESC LIMIT ?';
+    ? 'SELECT id, tool_id, status, created_at, completed_at, error, name, project_id, conversation_id FROM tool_jobs WHERE user_id = ? ORDER BY created_at DESC LIMIT ?'
+    : 'SELECT id, tool_id, status, created_at, completed_at, error, name, project_id, conversation_id FROM tool_jobs WHERE user_id = ? AND is_test_run = 0 ORDER BY created_at DESC LIMIT ?';
   return db().prepare(sql).all(userId, limit);
 }
 

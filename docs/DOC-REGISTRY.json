@@ -33,19 +33,19 @@
     },
     {
       "id": "AGENT-HANDOFF-PROMPT",
-      "path": "docs/agent-handoff-prompt.md",
+      "path": "docs/archive/checkpoints/agent-handoff-prompt.md",
       "kind": "reference",
-      "status": "reference",
+      "status": "archived",
       "canonical": false,
-      "archivePolicy": "manual_review"
+      "archivePolicy": "archive_after_completion"
     },
     {
       "id": "BRANCH-HANDOFF",
-      "path": "docs/branch-handoff.md",
+      "path": "docs/archive/checkpoints/branch-handoff.md",
       "kind": "handoff",
-      "status": "reference",
+      "status": "archived",
       "canonical": false,
-      "archivePolicy": "manual_review"
+      "archivePolicy": "archive_after_completion"
     },
     {
       "id": "UI-WORKBENCH-DIRECTION",
@@ -115,8 +115,19 @@
       "id": "G0-RS",
       "path": "docs/g0-result-studio-plan.md",
       "kind": "work-package",
+      "status": "planned",
+      "canonical": false,
+      "truthDomain": "g0-result-studio",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "G0-CHF0",
+      "path": "docs/g0-critical-crosscut-hardening-plan.md",
+      "kind": "work-package",
       "status": "completed",
       "canonical": false,
+      "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path"
     },
     {
@@ -211,9 +222,9 @@
     },
     {
       "id": "MODEL-PROVIDER-AUDIT",
-      "path": "docs/model-provider-audit.md",
+      "path": "docs/archive/checkpoints/model-provider-audit.md",
       "kind": "audit",
-      "status": "completed",
+      "status": "archived",
       "canonical": false,
       "archivePolicy": "archive_after_completion"
     },
@@ -283,17 +294,17 @@
     },
     {
       "id": "STAGE2-ACCEPTANCE-AUDIT",
-      "path": "docs/stage2-acceptance-audit.md",
+      "path": "docs/archive/checkpoints/stage2-acceptance-audit.md",
       "kind": "audit",
-      "status": "completed",
+      "status": "archived",
       "canonical": false,
       "archivePolicy": "archive_after_completion"
     },
     {
       "id": "STAGE3-M1-AUDIT",
-      "path": "docs/stage3-m1-audit.md",
+      "path": "docs/archive/checkpoints/stage3-m1-audit.md",
       "kind": "audit",
-      "status": "completed",
+      "status": "archived",
       "canonical": false,
       "archivePolicy": "archive_after_completion"
     },
@@ -335,9 +346,9 @@
     },
     {
       "id": "UI-035-064-ACCEPTANCE",
-      "path": "docs/ui-035-064-real-acceptance.md",
+      "path": "docs/archive/checkpoints/ui-035-064-real-acceptance.md",
       "kind": "audit",
-      "status": "completed",
+      "status": "archived",
       "canonical": false,
       "archivePolicy": "archive_after_completion"
     },
@@ -370,6 +381,24 @@
       "truthDomain": "git-worktree-lifecycle",
       "entrypoint": "docs/README.md",
       "archivePolicy": "never_archive"
+    },
+    {
+      "id": "AUDIT-PROJECT-WIDE-2026-07",
+      "path": "docs/project-wide-audit-2026-07.md",
+      "kind": "audit",
+      "status": "reference",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "G0-RS-UX1H",
+      "path": "docs/g0-rs-ux1h-async-tool-surface.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "g0-current-work-package",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
     }
   ]
 }

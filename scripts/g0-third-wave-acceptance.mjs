@@ -47,7 +47,7 @@ function commands() {
   const specs = [
     ['third-wave-test', 'node', ['--test', 'test/g0-third-wave.test.mjs', 'test/g0-second-wave.test.mjs', 'test/runtime-resource-snapshot.test.mjs', 'test/loop-checkpoint.test.cjs', 'test/model-gateway.test.mjs', 'test/ai-settings-cache.test.mjs']],
     ['root-test', 'npm', ['test']],
-    ['frontend-test', 'npm', ['test', '--prefix', 'frontend']],
+    ['frontend-test', 'npm', ['run', 'test:files', '--prefix', 'frontend']],
     ['frontend-build', 'npm', ['run', 'build', '--prefix', 'frontend']],
     ['root-check', 'npm', ['run', 'check']],
     ['hle-production', 'npm', ['run', 'harness:loop:production']],

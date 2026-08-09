@@ -70,7 +70,7 @@ function runCommands() {
   const specs = [
     ['second-wave-test', 'node', ['--test', 'test/g0-second-wave.test.mjs', 'test/g0-first-wave.test.mjs', 'test/delivery-manifest.test.mjs', 'test/scientific-replay-package.test.mjs']],
     ['root-test', 'npm', ['test']],
-    ['frontend-test', 'npm', ['test', '--prefix', 'frontend']],
+    ['frontend-test', 'npm', ['run', 'test:files', '--prefix', 'frontend']],
     ['frontend-build', 'npm', ['run', 'build', '--prefix', 'frontend']],
     ['root-check', 'npm', ['run', 'check']],
     ['scientific-replay', 'npm', ['run', 'harness:scientific-task:replay:test']],

@@ -80,8 +80,8 @@ function closeServer(server) {
 
 test('agent registry pairs every model-visible definition with one handler and contract', () => {
   const registry = getToolRegistry();
-  assert.equal(registry.length, 24);
-  assert.equal(new Set(registry.map((entry) => entry.definition.function.name)).size, 24);
+  assert.equal(registry.length, 33);
+  assert.equal(new Set(registry.map((entry) => entry.definition.function.name)).size, 33);
 
   for (const entry of registry) {
     assert.equal(typeof entry.handler, 'function');
@@ -140,7 +140,7 @@ test('schema-first loading does not capture partial act helper exports', () => {
       const { getToolDefs } = require('./core/r-server/agent-tools/tool-defs.js');
       const planTools = require('./core/r-server/agent-tools/plan-ui-tools.js');
       const actTools = require('./core/r-server/agent-tools/act-tools.js');
-      if (getToolDefs().length !== 24) throw new Error('unexpected tool count');
+      if (getToolDefs().length !== 33) throw new Error('unexpected tool count');
       if (!actTools.testFilterExpr('5', '>3')) throw new Error('filter helper unavailable');
       const context = {};
       const result = await planTools.actOpenFigcodePlot({ figcardId: 'volcano' }, context);
@@ -228,7 +228,7 @@ test('OpenAI-compatible outbound JSON contains Provider schema only', async () =
       { baseUrl }
     );
     assert.equal(result.choices[0].message.content, 'ok');
-    assert.equal(receivedBody.tools.length, 24);
+    assert.equal(receivedBody.tools.length, 33);
     const keys = collectKeys(receivedBody.tools);
     for (const key of INTERNAL_CONTRACT_KEYS) assert.equal(keys.has(key), false, `${key} leaked`);
   } finally {

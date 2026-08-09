@@ -1,6 +1,8 @@
 'use strict';
 
 const crypto = require('node:crypto');
+const { isAuthoritativeWorkflowPlan } = require('./result-workflow-graph');
+const { verifyExecutionProvenance } = require('./execution-provenance');
 
 const RESULT_EDIT_INTENT_VERSION = 1;
 const RESULT_EDIT_CLASSES = Object.freeze([
@@ -71,16 +73,37 @@ function classifyParameterPatch({ proposedParameterPatch = {}, parameterImpactRu
 
   for (const field of fields) {
     const normalizedField = field.trim().toLowerCase().replace(/[.\s-]+/g, '_');
+    // 保护字段是**下限**，不是覆盖：它保证 `design`、`method` 这类字段永远不会
+    // 被当成样式改动，但当受信 descriptor 声明了更高影响时（例如 DESeq2 把
+    // `design` 声明为 workflow），必须采用更高的那个。此前的 if/else 链让保护
+    // 字段抢先命中并把已声明的 workflow_replan 降级成 scientific_recompute，
+    // 等于让"重新规划下游"被静默说成"只重算本节点"。
+    let floorImpact = null;
+    let floorSource = null;
+    if (WORKFLOW_FIELDS.has(normalizedField)) {
+      floorImpact = 'workflow_replan';
+      floorSource = 'protected_workflow_field';
+    } else if (SCIENTIFIC_FIELDS.has(normalizedField)) {
+      floorImpact = 'scientific_recompute';
+      floorSource = 'protected_scientific_field';
+    }
+    const declaredImpact = rules[field] || null;
     let impact;
     let source;
-    if (WORKFLOW_FIELDS.has(normalizedField)) {
-      impact = 'workflow_replan';
-      source = 'protected_workflow_field';
-    } else if (SCIENTIFIC_FIELDS.has(normalizedField)) {
-      impact = 'scientific_recompute';
-      source = 'protected_scientific_field';
-    } else if (rules[field]) {
-      impact = rules[field];
+    if (declaredImpact && floorImpact) {
+      // 取两者中更保守（rank 更高）的一个，绝不向下取。
+      if (CLASS_RANK.get(declaredImpact) >= CLASS_RANK.get(floorImpact)) {
+        impact = declaredImpact;
+        source = 'declared_parameter_impact';
+      } else {
+        impact = floorImpact;
+        source = floorSource;
+      }
+    } else if (floorImpact) {
+      impact = floorImpact;
+      source = floorSource;
+    } else if (declaredImpact) {
+      impact = declaredImpact;
       source = 'declared_parameter_impact';
     } else {
       impact = 'scientific_recompute';
@@ -125,6 +148,20 @@ function exactArtifact(result, artifactId) {
   return matches.length === 1 ? matches[0] : null;
 }
 
+function hasStructuredInputLineage(input) {
+  const lineage = input?.lineage;
+  if (!lineage || typeof lineage !== 'object' || Array.isArray(lineage)
+      || lineage.lineageVersion !== 1 || !['artifact', 'selection'].includes(lineage.kind)) return false;
+  const sha256 = /^[a-f0-9]{64}$/;
+  if (!trimmed(lineage.sourceRevisionId) || !trimmed(lineage.sourceToolJobId)
+      || !trimmed(lineage.sourceArtifactId) || !sha256.test(trimmed(lineage.sourceOutputHash))
+      || !sha256.test(trimmed(lineage.materializationHash))
+      || trimmed(input?.sha256) !== trimmed(lineage.materializationHash)) return false;
+  return lineage.kind === 'artifact'
+    ? trimmed(lineage.materializationHash) === trimmed(lineage.sourceOutputHash)
+    : Boolean(trimmed(lineage.selectionId) && sha256.test(trimmed(lineage.selectionHash)));
+}
+
 function locateResultSource({ toolJob, artifactId, projectId } = {}) {
   const diagnostics = [];
   if (!toolJob) return { ok: false, diagnostics: [diagnostic('source_job_not_found', 'Source tool job was not found.')] };
@@ -146,6 +183,9 @@ function locateResultSource({ toolJob, artifactId, projectId } = {}) {
   const provenance = result.executionProvenance || null;
   if (!provenance || provenance.toolJobId !== toolJob.id) {
     diagnostics.push(diagnostic('source_provenance_missing', 'Execution provenance is missing or does not bind to the source job.'));
+  }
+  if (provenance && !verifyExecutionProvenance(provenance).ok) {
+    diagnostics.push(diagnostic('source_provenance_integrity_invalid', 'Execution provenance no longer matches its server-issued digest.'));
   }
   if (provenance && trimmed(provenance.projectId) && trimmed(provenance.projectId) !== trimmed(projectId)) {
     diagnostics.push(diagnostic('source_provenance_project_mismatch', 'Execution provenance belongs to another project.'));
@@ -184,6 +224,8 @@ function locateResultSource({ toolJob, artifactId, projectId } = {}) {
         relativePath: input.relativePath,
         sha256: input.sha256,
         sourceArtifactRef: input.sourceArtifactRef || null,
+        hasStructuredLineage: hasStructuredInputLineage(input),
+        lineageKind: hasStructuredInputLineage(input) ? input.lineage.kind : null,
       })),
     },
   };
@@ -191,8 +233,20 @@ function locateResultSource({ toolJob, artifactId, projectId } = {}) {
 
 function validateWorkflow(workflowPlan) {
   const steps = workflowPlan && Array.isArray(workflowPlan.steps) ? workflowPlan.steps : null;
+  // Preserve the useful distinction between "there is no graph" and
+  // "someone supplied an invented graph".  Both are fail-closed for science,
+  // but only the latter is an authority violation.
   if (!steps || steps.length === 0) {
     return { ok: false, diagnostics: [diagnostic('workflow_dag_missing', 'A real workflow DAG is required for affected-subgraph planning.')] };
+  }
+  if (!isAuthoritativeWorkflowPlan(workflowPlan)) {
+    return {
+      ok: false,
+      diagnostics: [diagnostic(
+        'workflow_dag_not_authoritative',
+        'Scientific impact requires a workflow graph projected from persisted SQLite Job, Artifact and Selection Truth.'
+      )],
+    };
   }
   const ids = steps.map((step) => trimmed(step && step.id));
   if (ids.some((id) => !id) || new Set(ids).size !== ids.length) {
@@ -227,9 +281,29 @@ function validateWorkflow(workflowPlan) {
 }
 
 function computeResultAffectedSubgraph({ workflowPlan, sourceToolJobId, sourceNodeId, editClass } = {}) {
-  if (editClass === 'view_only') return { ok: true, sourceNodeId: null, affectedNodeIds: [], diagnostics: [] };
+  if (editClass === 'view_only') {
+    return { ok: true, sourceNodeId: null, affectedNodeIds: [], affectedScope: 'none', diagnostics: [] };
+  }
+  const workflowSteps = workflowPlan && Array.isArray(workflowPlan.steps) ? workflowPlan.steps : null;
+  // A presentation-only rerender has a truthful bounded scope even when this
+  // historical Job was not created from a persisted workflow DAG: it affects
+  // the current result only. Scientific/data/workflow changes still require a
+  // real DAG so downstream impact can never be guessed away.
+  if (editClass === 'presentation_rerender' && (!workflowSteps || workflowSteps.length === 0)) {
+    return {
+      ok: true,
+      sourceNodeId: null,
+      affectedNodeIds: [],
+      affectedScope: 'current_result_only',
+      diagnostics: [],
+    };
+  }
   const validated = validateWorkflow(workflowPlan);
-  if (!validated.ok) return { ok: false, sourceNodeId: null, affectedNodeIds: [], diagnostics: validated.diagnostics };
+  if (!validated.ok) {
+    return {
+      ok: false, sourceNodeId: null, affectedNodeIds: [], affectedScope: 'unknown', diagnostics: validated.diagnostics,
+    };
+  }
   let matches = [];
   if (trimmed(sourceNodeId)) matches = validated.steps.filter((step) => step.id === sourceNodeId);
   else matches = validated.steps.filter((step) => (step.toolJobId || step.tool_job_id) === sourceToolJobId);
@@ -238,12 +312,15 @@ function computeResultAffectedSubgraph({ workflowPlan, sourceToolJobId, sourceNo
       ok: false,
       sourceNodeId: null,
       affectedNodeIds: [],
+      affectedScope: 'unknown',
       diagnostics: [diagnostic('source_workflow_node_ambiguous', 'The source job must map to exactly one workflow node.')],
     };
   }
   const root = matches[0].id;
   if (editClass === 'presentation_rerender') {
-    return { ok: true, sourceNodeId: root, affectedNodeIds: [root], diagnostics: [] };
+    return {
+      ok: true, sourceNodeId: root, affectedNodeIds: [root], affectedScope: 'current_result_only', diagnostics: [],
+    };
   }
   const affected = [];
   const queue = [root];
@@ -255,7 +332,9 @@ function computeResultAffectedSubgraph({ workflowPlan, sourceToolJobId, sourceNo
     affected.push(id);
     queue.push(...validated.downstream.get(id));
   }
-  return { ok: true, sourceNodeId: root, affectedNodeIds: affected, diagnostics: [] };
+  return {
+    ok: true, sourceNodeId: root, affectedNodeIds: affected, affectedScope: 'workflow_subgraph', diagnostics: [],
+  };
 }
 
 function validateResultEditIntent(intent) {
@@ -268,6 +347,21 @@ function validateResultEditIntent(intent) {
   if (!intent.artifactRef || !trimmed(intent.artifactRef.artifactId) || !trimmed(intent.artifactRef.revisionId)) errors.push(diagnostic('artifact_ref_incomplete', 'artifactId and revisionId are required.'));
   if (!RESULT_EDIT_CLASSES.includes(intent.editClass)) errors.push(diagnostic('edit_class_invalid', 'Unknown edit class.'));
   if (!Array.isArray(intent.affectedNodeIds)) errors.push(diagnostic('affected_nodes_invalid', 'affectedNodeIds must be an array.'));
+  // Additive P4R-3 field: historical persisted/test intents without it remain
+  // valid, while newly planned intents always carry an explicit honest scope.
+  if (intent.affectedScope != null
+      && !['none', 'current_result_only', 'workflow_subgraph'].includes(intent.affectedScope)) {
+    errors.push(diagnostic('affected_scope_invalid', 'affectedScope must describe the truthful impact boundary.'));
+  }
+  const graph = intent.workflowGraph;
+  if (graph != null && (!graph || typeof graph !== 'object' || Array.isArray(graph)
+      || !trimmed(graph.graphId).startsWith('wfg_') || !/^[a-f0-9]{64}$/.test(trimmed(graph.sourceDigest)))) {
+    errors.push(diagnostic('workflow_graph_ref_invalid', 'workflowGraph must reference a source-bound authoritative graph.'));
+  }
+  if (['data_transform', 'scientific_recompute', 'workflow_replan'].includes(intent.editClass)
+      && (!graph || !trimmed(graph.graphId).startsWith('wfg_') || !/^[a-f0-9]{64}$/.test(trimmed(graph.sourceDigest)))) {
+    errors.push(diagnostic('workflow_graph_ref_required', 'Scientific, data and workflow edits require an authoritative persisted workflow graph reference.'));
+  }
   if (typeof intent.requiresJob !== 'boolean') errors.push(diagnostic('requires_job_invalid', 'requiresJob must be boolean.'));
   if (typeof intent.requiresScientificConfirmation !== 'boolean') errors.push(diagnostic('scientific_confirmation_invalid', 'requiresScientificConfirmation must be boolean.'));
   if (!trimmed(intent.requestedOutcome)) errors.push(diagnostic('requested_outcome_required', 'requestedOutcome is required.'));
@@ -291,11 +385,12 @@ function planResultEdit(input = {}) {
   if (source.ok && graph.ok && graph.sourceNodeId && input.workflowPlan) {
     const sourceStep = input.workflowPlan.steps.find((step) => step.id === graph.sourceNodeId);
     const hasUpstreamDependency = sourceStep && Array.isArray(sourceStep.dependsOn) && sourceStep.dependsOn.length > 0;
-    const hasExplicitArtifactLineage = source.source.inputs.some((item) => trimmed(item.sourceArtifactRef));
+    const hasExplicitArtifactLineage = source.source.inputs.some((item) =>
+      trimmed(item.sourceArtifactRef) || item.hasStructuredLineage === true);
     if (hasUpstreamDependency && !hasExplicitArtifactLineage) {
       diagnostics.push(diagnostic(
         'source_lineage_missing',
-        'A source node with upstream dependencies requires an explicit sourceArtifactRef; filenames are never used to infer lineage.'
+        'A source node with upstream dependencies requires signed structured lineage or an explicit sourceArtifactRef; filenames are never used to infer lineage.'
       ));
     }
   }
@@ -313,9 +408,13 @@ function planResultEdit(input = {}) {
       ? input.proposedParameterPatch
       : {},
     affectedNodeIds: blocked ? [] : graph.affectedNodeIds,
+    affectedScope: blocked ? 'unknown' : graph.affectedScope,
     requiresJob: classification.requiresJob,
     requiresScientificConfirmation: classification.requiresScientificConfirmation,
     classificationReason: classification.classificationReason,
+    ...(graph.ok && isAuthoritativeWorkflowPlan(input.workflowPlan)
+      ? { workflowGraph: { graphId: input.workflowPlan.graphId, sourceDigest: input.workflowPlan.sourceDigest } }
+      : {}),
   };
   const intent = { ...intentCore, intentId: `rei_${digest(intentCore).slice(0, 24)}` };
   const validation = validateResultEditIntent(intent);

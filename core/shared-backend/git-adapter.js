@@ -41,6 +41,8 @@ const SENSITIVE_VALUE = /(?:sk-[A-Za-z0-9_-]{20,}|github_pat_[A-Za-z0-9_]{20,}|g
 
 const MAX_STATUS_ENTRIES = 5000;
 const MAX_DIAGNOSTIC_LENGTH = 2000;
+const HASH_OBJECT_TIMEOUT_MS = 10000;
+const HASH_OBJECT_MAX_ATTEMPTS = 2;
 
 class GitAdapterError extends Error {
   constructor(code, message, detail = null) {
@@ -115,14 +117,44 @@ function baseEnv() {
 }
 
 /**
- * 检测系统 git 可用性。不缓存，调用方自行决定是否复用结果。
+ * 进程内 git 运行时探测缓存。键为 gitBin。
  *
- * @param {{ gitBin?: string }} [options]
+ * 同一进程内 git 的可用性与版本不会变化，而 `git --version` 在本机实测
+ * 约 9～11ms（不同调用环境下可达 ~117ms）。此前该函数不缓存，
+ * `bindProjectRepository()` 每次调用都会 fork 一次，而 Result Studio 的
+ * 每个只读请求都会 bind 一次（`routes/result-studio.js:302-338`），
+ * 因此该 fork 出现在结果查看的热路径上。
+ *
+ * 只缓存 available/version 这类进程生命周期常量；仓库运行态不在此列。
+ */
+const gitRuntimeCache = new Map();
+
+/** 清空运行时探测缓存。仅供测试与显式重新探测使用。 */
+function resetGitRuntimeCache() {
+  gitRuntimeCache.clear();
+}
+
+/**
+ * 检测系统 git 可用性。按 gitBin 在进程内缓存；用 `refresh: true` 强制重探。
+ *
+ * @param {{ gitBin?: string, refresh?: boolean }} [options]
  * @returns {{ available: boolean, gitBin: string, version: object|null, versionRaw: string|null,
  *            meetsMinimum: boolean, reason: string|null, minimum: object }}
  */
 function detectGitRuntime(options = {}) {
   const gitBin = options.gitBin || 'git';
+  if (!options.refresh && gitRuntimeCache.has(gitBin)) {
+    return gitRuntimeCache.get(gitBin);
+  }
+  const result = detectGitRuntimeUncached(gitBin);
+  // 只缓存成功探测。失败可能是暂时的（git 尚未安装、PATH 未就绪），
+  // 缓存它会把一次暂时故障变成本进程内的永久故障；而失败路径本就提前阻断，
+  // 不在热路径上。冻结以防调用方改到共享对象。
+  if (result.available) gitRuntimeCache.set(gitBin, Object.freeze(result));
+  return result;
+}
+
+function detectGitRuntimeUncached(gitBin) {
   const result = {
     gitAdapterVersion: GIT_ADAPTER_VERSION,
     available: false,
@@ -302,12 +334,17 @@ function createGitAdapter(options = {}) {
       });
       return { ok: true, stdout: stdout == null ? '' : String(stdout), stderr: '', status: 0 };
     } catch (error) {
+      const systemCode = error && typeof error.code === 'string' ? error.code : null;
       const failure = {
         ok: false,
+        command: args[0] || null,
         stdout: error && error.stdout ? String(error.stdout) : '',
         stderr: redactGitDiagnostic(error && error.stderr ? String(error.stderr) : (error && error.message), scope),
         status: error && typeof error.status === 'number' ? error.status : null,
-        code: error && error.code === 'ENOENT' ? 'git_executable_not_found' : 'git_command_failed',
+        systemCode,
+        signal: error && typeof error.signal === 'string' ? error.signal : null,
+        killed: error && error.killed === true,
+        code: systemCode === 'ENOENT' ? 'git_executable_not_found' : 'git_command_failed',
       };
       if (runOptions.allowFailure) return failure;
       throw new GitAdapterError(failure.code, `git ${args[0] || ''} failed`, failure);
@@ -360,19 +397,55 @@ function createGitAdapter(options = {}) {
       const rebaseInProgress = fs.existsSync(path.join(resolvedGitDir, 'rebase-merge'))
         || fs.existsSync(path.join(resolvedGitDir, 'rebase-apply'));
       const hasSubmodules = fs.existsSync(path.join(resolvedWorkTree, '.gitmodules'));
-      const headRef = run(['symbolic-ref', '--quiet', '--short', 'HEAD'], { allowFailure: true, readOnly: true });
-      const headCommit = run(['rev-parse', '--verify', '--quiet', 'HEAD'], { allowFailure: true, readOnly: true });
-      const worktrees = run(['worktree', 'list', '--porcelain'], { allowFailure: true, readOnly: true });
-      const linkedWorktreeCount = worktrees.ok
-        ? Math.max(0, worktrees.stdout.split('\n').filter((line) => line.startsWith('worktree ')).length - 1)
-        : 0;
+      // 下面三个字段各需一次 git 子进程，而上面的锁/中途操作/submodule 判断
+      // 全是 fs.existsSync。`bindProjectRepository()` 在 managed 模式下只读
+      // fs 那几项（git-repository-binding.js:301-317），
+      // linkedWorktreeCount 仅在 `mode === 'existing'` 分支使用，
+      // 因此只读请求过去白付三次 fork。
+      //
+      // 改为惰性求值：对象形状与字段语义不变，读到才 fork，读一次缓存一次。
+      // 写路径（result-changeset-service.js:242 读 headCommit）照常付出代价。
+      let headProbe = null;
+      const probeHead = () => {
+        if (!headProbe) {
+          headProbe = {
+            ref: run(['symbolic-ref', '--quiet', '--short', 'HEAD'], { allowFailure: true, readOnly: true }),
+            commit: run(['rev-parse', '--verify', '--quiet', 'HEAD'], { allowFailure: true, readOnly: true }),
+          };
+        }
+        return headProbe;
+      };
+      let worktreeCount = null;
+      const probeWorktrees = () => {
+        if (worktreeCount === null) {
+          const worktrees = run(['worktree', 'list', '--porcelain'], { allowFailure: true, readOnly: true });
+          worktreeCount = worktrees.ok
+            ? Math.max(0, worktrees.stdout.split('\n').filter((line) => line.startsWith('worktree ')).length - 1)
+            : 0;
+        }
+        return worktreeCount;
+      };
       return {
         gitAdapterVersion: GIT_ADAPTER_VERSION,
         initialized: fs.existsSync(path.join(resolvedGitDir, 'HEAD')),
-        headRef: headRef.ok ? headRef.stdout.trim() || null : null,
-        headCommit: headCommit.ok ? headCommit.stdout.trim() || null : null,
-        detached: headRef.ok ? false : !!(headCommit.ok && headCommit.stdout.trim()),
-        unborn: !(headCommit.ok && headCommit.stdout.trim()),
+        // getter：读到才 fork。属性访问语义与原来完全一致，
+        // 既有读取方（result-changeset-service.js:242、test/git-adapter.test.mjs:208/:344）无需改动。
+        get headRef() {
+          const { ref } = probeHead();
+          return ref.ok ? ref.stdout.trim() || null : null;
+        },
+        get headCommit() {
+          const { commit } = probeHead();
+          return commit.ok ? commit.stdout.trim() || null : null;
+        },
+        get detached() {
+          const { ref, commit } = probeHead();
+          return ref.ok ? false : !!(commit.ok && commit.stdout.trim());
+        },
+        get unborn() {
+          const { commit } = probeHead();
+          return !(commit.ok && commit.stdout.trim());
+        },
         hasIndexLock,
         mergeInProgress,
         cherryPickInProgress,
@@ -380,7 +453,7 @@ function createGitAdapter(options = {}) {
         rebaseInProgress,
         midOperation: mergeInProgress || cherryPickInProgress || revertInProgress || rebaseInProgress,
         hasSubmodules,
-        linkedWorktreeCount,
+        get linkedWorktreeCount() { return probeWorktrees(); },
       };
     },
 
@@ -480,6 +553,122 @@ function createGitAdapter(options = {}) {
       return output.ok ? output.stdout.trim() || null : null;
     },
 
+    /** Distinguish an absent ref from an unreadable repository. */
+    readRefExact(ref) {
+      if (typeof ref !== 'string' || ref.trim() === '' || ref.startsWith('-')) {
+        throw new GitAdapterError('ref_invalid', 'Invalid git ref.');
+      }
+      const output = run(['rev-parse', '--verify', '--quiet', ref], {
+        allowFailure: true,
+        readOnly: true,
+      });
+      if (output.ok) {
+        const oid = output.stdout.trim();
+        if (/^[a-f0-9]{40}$/.test(oid)) return oid;
+        throw new GitAdapterError('git_ref_read_failed', 'Git returned an invalid ref object id.', output);
+      }
+      if (output.status === 1) return null;
+      throw new GitAdapterError('git_ref_read_failed', 'Git ref state could not be read exactly.', output);
+    },
+
+    /**
+     * 批量解析多个 ref/commit：一次子进程替代 N 次 revParse。
+     *
+     * `inspectRevisionIntegrity` 过去按 revision 逐个 revParse，实测约
+     * 20ms/revision（每 revision 两次 fork × ~10ms），于是 workspace/status
+     * 的开销随项目历史线性增长，约 10 个 revision 就会撞破 250ms 事件循环预算。
+     *
+     * 用 `cat-file --batch-check` 一次读完 stdin 上的全部对象。返回 Map，
+     * 语义与 revParse 对齐：解析不到的键映射为 null。
+     */
+    resolveManyRefs(refs) {
+      const wanted = [...new Set((refs || []).filter(
+        (ref) => typeof ref === 'string' && ref.trim() !== '' && !ref.startsWith('-'),
+      ))];
+      const resolved = new Map(wanted.map((ref) => [ref, null]));
+      if (wanted.length === 0) return resolved;
+      const output = run(['cat-file', '--batch-check=%(objectname) %(rest)'], {
+        allowFailure: true,
+        readOnly: true,
+        // %(rest) 回显该行 ref 之后的内容，用它把结果对回请求的键，
+        // 避免依赖行序或对 peel 后的名字做猜测。
+        input: `${wanted.map((ref) => `${ref} ${ref}`).join('\n')}\n`,
+      });
+      if (!output.ok) return resolved;
+      for (const line of output.stdout.split('\n')) {
+        if (!line.trim()) continue;
+        // 命中: "<sha> <原始键>"；未命中: "<原始键> missing"
+        const hit = /^([a-f0-9]{40,64})\s+(.+)$/.exec(line);
+        if (hit && resolved.has(hit[2])) resolved.set(hit[2], hit[1]);
+      }
+      return resolved;
+    },
+
+    /**
+     * 一次列出某前缀下的全部 ref。
+     *
+     * 替代「对每个 current revision 各 revParse 一次」的写法。
+     */
+    listRefs(prefix) {
+      if (typeof prefix !== 'string' || prefix.trim() === '' || prefix.startsWith('-')) {
+        throw new GitAdapterError('ref_invalid', 'Invalid git ref prefix.');
+      }
+      const output = run(['for-each-ref', '--format=%(refname) %(objectname)', prefix], {
+        allowFailure: true,
+        readOnly: true,
+      });
+      const refs = new Map();
+      if (!output.ok) return refs;
+      for (const line of output.stdout.split('\n')) {
+        const match = /^(\S+)\s+([a-f0-9]{40,64})$/.exec(line.trim());
+        if (match) refs.set(match[1], match[2]);
+      }
+      return refs;
+    },
+
+    /** Atomically apply one exact BioF3 ref compare-and-swap cohort. */
+    updateRefsCas({ updates } = {}) {
+      if (!Array.isArray(updates) || updates.length === 0) {
+        throw new GitAdapterError('ref_transaction_invalid', 'At least one ref update is required.');
+      }
+      const normalized = updates.map((entry) => ({
+        ref: String(entry?.ref || ''),
+        expectedOld: String(entry?.expectedOld || ''),
+        newOid: String(entry?.newOid || ''),
+      }));
+      if (new Set(normalized.map((entry) => entry.ref)).size !== normalized.length
+          || normalized.some((entry) =>
+            !/^refs\/heads\/biof3\/[A-Za-z0-9][A-Za-z0-9._\-/]*$/.test(entry.ref)
+            || !/^[a-f0-9]{40}$/.test(entry.expectedOld)
+            || !/^[a-f0-9]{40}$/.test(entry.newOid)
+            || entry.expectedOld === entry.newOid)) {
+        throw new GitAdapterError(
+          'ref_transaction_invalid',
+          'Every ref transaction entry must be one unique exact BioF3 compare-and-swap.'
+        );
+      }
+      const zero = '0'.repeat(40);
+      const commands = ['start'];
+      for (const entry of normalized) {
+        if (entry.newOid === zero) commands.push(`delete ${entry.ref} ${entry.expectedOld}`);
+        else if (entry.expectedOld === zero) commands.push(`create ${entry.ref} ${entry.newOid}`);
+        else commands.push(`update ${entry.ref} ${entry.newOid} ${entry.expectedOld}`);
+      }
+      commands.push('prepare', 'commit');
+      const result = run(['update-ref', '--stdin'], {
+        allowFailure: true,
+        input: `${commands.join('\n')}\n`,
+      });
+      if (!result.ok) {
+        throw new GitAdapterError(
+          'git_ref_transaction_conflict',
+          'Git refs changed concurrently or could not be committed atomically.',
+          result,
+        );
+      }
+      return { updated: normalized.length, updates: normalized };
+    },
+
     /**
      * 以 compare-and-swap 更新一个 BioF3 refs/heads 引用。
      * 调用方必须给出预期旧值；不存在的 ref 使用 40 个 0。
@@ -566,13 +755,27 @@ function createGitAdapter(options = {}) {
           if (typeof content !== 'string' && !Buffer.isBuffer(content)) {
             throw new GitAdapterError('virtual_file_content_invalid', `Virtual file content is invalid: ${safePaths[index]}`);
           }
-          const blob = run(['hash-object', '-w', '--stdin'], {
-            allowFailure: true,
-            env: isolatedEnv,
-            input: content,
-          });
+          let blob = null;
+          let attempts = 0;
+          while (attempts < HASH_OBJECT_MAX_ATTEMPTS) {
+            attempts += 1;
+            blob = run(['hash-object', '-w', '--stdin'], {
+              allowFailure: true,
+              env: isolatedEnv,
+              input: content,
+              timeout: HASH_OBJECT_TIMEOUT_MS,
+            });
+            if (blob.ok && /^[a-f0-9]{40}$/.test(blob.stdout.trim())) break;
+            const transientInvocationFailure = blob.status === null && (
+              ['EAGAIN', 'EINTR', 'ETIMEDOUT'].includes(blob.systemCode)
+            );
+            if (!transientInvocationFailure) break;
+          }
           if (!blob.ok || !/^[a-f0-9]{40}$/.test(blob.stdout.trim())) {
-            throw new GitAdapterError('git_hash_object_failed', 'Cannot write isolated Git blob.', blob);
+            throw new GitAdapterError('git_hash_object_failed', 'Cannot write isolated Git blob.', {
+              ...blob,
+              attempts,
+            });
           }
           const update = run(
             ['update-index', '--add', '--cacheinfo', '100644', blob.stdout.trim(), safePaths[index]],
@@ -626,6 +829,7 @@ module.exports = {
   FORBIDDEN_PATHSPECS,
   GitAdapterError,
   detectGitRuntime,
+  resetGitRuntimeCache,
   assertSafePathspecs,
   redactGitDiagnostic,
   parseGitVersion,

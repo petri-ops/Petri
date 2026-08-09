@@ -12,10 +12,8 @@
 const express = require('express');
 const cors = require('cors');
 const crypto = require('crypto');
-const { execFile } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
 let multer = null;
 try {
   multer = require('multer');
@@ -26,8 +24,8 @@ try {
 const config = require('./config');
 const logger = require('./logger');
 const { createPool } = require('./py-pool');
-const { getExecutor } = require('../shared-backend/executors');
-const { getPythonRuntimeExecutable } = require('../shared-backend/runtime-paths');
+const { corsOrigin } = require('../shared-backend/local-request-boundary');
+const { registerPythonRawExecution } = require('./routes/raw-execution');
 
 // 桌面版：注册执行器 + 存储适配器（必须在路由之前）
 try {
@@ -84,7 +82,7 @@ function getStorage() {
 // ============================================================
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: corsOrigin }));
 // W2-A: 路径相关 body limit
 // - /api/tools/* — 200mb（base64 上传大 h5ad 文件）
 // - 其他 — 1mb（fast-path /api/run 等只接受小 JSON）
@@ -158,29 +156,6 @@ function createUploadMiddleware() {
 }
 const upload = createUploadMiddleware();
 
-// Rate limiting
-const rateLimits = new Map();
-function checkRateLimit(ip) {
-  const now = Date.now();
-  const record = rateLimits.get(ip) || { count: 0, resetAt: now + 60000 };
-  if (now > record.resetAt) {
-    record.count = 0;
-    record.resetAt = now + 60000;
-  }
-  record.count++;
-  rateLimits.set(ip, record);
-  return record.count <= config.rateLimitPerMinute;
-}
-setInterval(
-  () => {
-    const now = Date.now();
-    for (const [ip, r] of rateLimits) {
-      if (now > r.resetAt + 60000) rateLimits.delete(ip);
-    }
-  },
-  5 * 60 * 1000
-);
-
 // ============================================================
 // Routes
 // ============================================================
@@ -221,105 +196,7 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
   });
 });
 
-// Execute Python code (fast path)
-app.post('/api/run', async (req, res) => {
-  const ip = req.ip || req.socket.remoteAddress;
-  if (!checkRateLimit(ip)) {
-    return res.status(429).json({
-      status: 'error',
-      error: `请求过于频繁（限制：${config.rateLimitPerMinute} 次/分钟）`,
-    });
-  }
-
-  const { code } = req.body;
-  if (!code || typeof code !== 'string')
-    return res.status(400).json({ status: 'error', error: '缺少 code 参数' });
-  if (code.length > 20000)
-    return res.status(400).json({ status: 'error', error: '代码过长（最大 20000 字符）' });
-
-  // Security: block dangerous operations
-  const forbidden = [
-    { pattern: /\bos\.system\s*\(/, name: 'os.system' },
-    { pattern: /\bsubprocess\b/, name: 'subprocess' },
-    { pattern: /\b__import__\s*\(/, name: '__import__' },
-    { pattern: /\beval\s*\(/, name: 'eval' },
-    { pattern: /\bexec\s*\(/, name: 'exec' },
-    { pattern: /\bshutil\.rmtree\s*\(/, name: 'shutil.rmtree' },
-    { pattern: /\bos\.remove\s*\(/, name: 'os.remove' },
-  ];
-  for (const { pattern, name } of forbidden) {
-    if (pattern.test(code)) {
-      return res.status(400).json({ status: 'error', error: `禁止使用 ${name}()` });
-    }
-  }
-
-  const sessionId = uuidv4();
-  const workDir = path.join(config.tempDir, sessionId);
-  fs.mkdirSync(workDir, { recursive: true });
-
-  try {
-    let result;
-    if (pyPool) {
-      result = await pyPool.execute(code, workDir);
-    } else {
-      // Cold fallback — 本地执行内嵌 python
-      const pyScript = `
-import os, sys, matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-os.chdir(${JSON.stringify(workDir)})
-try:
-${code
-  .split('\n')
-  .map((l) => '    ' + l)
-  .join('\n')}
-except Exception as e:
-    print(f"Error: {e}")
-finally:
-    if plt.get_fignums(): plt.savefig("plot_001.png", dpi=150, bbox_inches="tight"); plt.close("all")
-`;
-      fs.writeFileSync(path.join(workDir, 'run.py'), pyScript);
-      result = await new Promise((resolve, reject) => {
-        const pyBin =
-          getPythonRuntimeExecutable(config.pyHome || process.env.BIOF3_PY_HOME || '') ||
-          getExecutor('python').binPath;
-        execFile(
-          pyBin,
-          ['-u', path.join(workDir, 'run.py')],
-          {
-            timeout: config.runTimeoutMs,
-            maxBuffer: 1024 * 1024 * 5,
-            env: { ...process.env, PYTHONUNBUFFERED: '1' },
-          },
-          (error, stdout, stderr) => {
-            if (error)
-              reject(
-                new Error(
-                  error.killed
-                    ? `执行超时（${config.runTimeoutMs / 1000}秒）`
-                    : stderr || error.message
-                )
-              );
-            else resolve({ stdout: stdout || '', stderr: stderr || '' });
-          }
-        );
-      });
-    }
-
-    const images = await collectImages(workDir, sessionId);
-    cleanup(workDir);
-    res.json({
-      status: 'success',
-      stdout: result.stdout || '',
-      stderr: result.stderr || '',
-      images,
-    });
-  } catch (err) {
-    const images = await collectImages(workDir, sessionId);
-    cleanup(workDir);
-    res.json({ status: 'error', error: err.message, stdout: '', images });
-  }
-});
+registerPythonRawExecution(app);
 
 // ============================================================
 // W2-A (2026-05-28): User-scoped tools API for /tools page
@@ -327,40 +204,6 @@ finally:
 // ============================================================
 const { registerToolsRoutes } = require('./tools-router');
 registerToolsRoutes(app);
-
-// ============================================================
-// Helpers
-// ============================================================
-
-async function collectImages(workDir, sessionId) {
-  const images = [];
-  const storage = getStorage();
-  try {
-    const files = fs.readdirSync(workDir).filter((f) => f.match(/\.(png|svg)$/));
-    files.sort();
-    for (const f of files) {
-      const localPath = path.join(workDir, f);
-      const key = `results/py-${sessionId}/${f}`;
-      if (storage) {
-        try {
-          const url = await storage.upload(localPath, key);
-          images.push(url);
-          continue;
-        } catch {}
-      }
-      // fallback: base64
-      const data = fs.readFileSync(localPath);
-      images.push(`data:image/png;base64,${data.toString('base64')}`);
-    }
-  } catch {}
-  return images;
-}
-
-function cleanup(workDir) {
-  try {
-    fs.rmSync(workDir, { recursive: true, force: true });
-  } catch {}
-}
 
 // ============================================================
 // Start

@@ -45,6 +45,7 @@ export interface ToolJob {
   error?: string;
   name?: string;
   project_id?: string | null;
+  conversationId?: string | null;
 }
 
 export interface Dataset {

@@ -1,0 +1,917 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS-P6 / P6-0 UI-110",
+  "qualificationEligible": false,
+  "classification": "development_real_renderer_deterministic_local_adapter_non_provider_non_packaged",
+  "captureMode": "single_parent_disposable_p5_runtime_vite_electron_agent_tool_protocol",
+  "adapter": {
+    "classification": "deterministic_local_adapter_no_real_provider_claim",
+    "networkAccess": "none_for_model_adapter",
+    "realProviderClaim": false,
+    "packagedElectronClaim": false,
+    "trace": {
+      "requestCount": 27,
+      "toolCallCounts": {
+        "result_changeset_create_in_context": 4,
+        "result_edit_plan_in_context": 4,
+        "result_enrichment_from_context": 1,
+        "result_studio_context": 13
+      },
+      "requestKindCounts": {
+        "deg_scientific": 4,
+        "enrichment": 3,
+        "heatmap_presentation": 9,
+        "heatmap_scientific": 6,
+        "volcano_presentation": 5
+      },
+      "requestPhaseCounts": {
+        "context": 13,
+        "create": 4,
+        "enrichment": 1,
+        "final": 5,
+        "plan": 4
+      },
+      "errorCodeCounts": {},
+      "noRawMessagesPersisted": true
+    }
+  },
+  "executionCapability": {
+    "ready": true,
+    "capabilityId": "r-enrichment",
+    "version": "1.0.0",
+    "sha256": "a857831d0d548cc6f9d856684ccec32c0241af018521c5d0641349ade0be1820",
+    "packageCount": 129,
+    "manifestSha256": "9f2d1b310900d36ba8fac9b52e708676af184f9aa663b7b0a0ad4ceb3c7cce83",
+    "source": "verified_preprovisioned_local_dependency",
+    "networkAccessDuringTrace": "none"
+  },
+  "noSeedRuntime": {
+    "productLedgerStartedEmpty": true,
+    "localCapabilityWasPreprovisioned": true,
+    "baselineArtifactFamilies": 4,
+    "stableSelectionFixtureCount": 24
+  },
+  "sourceCommit": "6f5271e817fb9d6b3ae51aef29bd5bee5a9f36ec",
+  "sourceFiles": {
+    "acceptance": "scripts/g0-rs-p5-acceptance.mjs",
+    "acceptanceTest": "test/g0-rs-p5-acceptance.test.mjs",
+    "capture": "scripts/g0-rs-p4r-capture.mjs",
+    "packageScripts": "package.json",
+    "frontendPackage": "frontend/package.json",
+    "impactMap": "test/impact-map.json",
+    "server": "core/r-server/server.js",
+    "routeRegistry": "core/r-server/routes/index.js",
+    "dataApi": "core/r-server/api-data.js",
+    "routes": "core/r-server/routes/result-studio.js",
+    "toolsRoute": "core/r-server/routes/tools.js",
+    "toolsPlatformRoute": "core/r-server/routes/tools-platform.js",
+    "agentLearning": "core/r-server/agent-tools/learning.js",
+    "agentRegistry": "core/r-server/agent-tools/registry.js",
+    "contextBinding": "core/r-server/agent-tools/result-context-binding.js",
+    "contextTools": "core/r-server/agent-tools/result-context-tools.js",
+    "contextEditTools": "core/r-server/agent-tools/result-context-edit-tools.js",
+    "editTools": "core/r-server/agent-tools/result-edit-tools.js",
+    "selectionTools": "core/r-server/agent-tools/result-selection-tools.js",
+    "toolDefinitions": "core/r-server/agent-tools/tool-defs.js",
+    "database": "core/r-server/db.js",
+    "artifactTruth": "core/r-server/helpers/artifact-truth.js",
+    "toolExecutor": "core/r-server/helpers/tools-executor.js",
+    "mcpRegistry": "core/r-server/mcp/registry.js",
+    "toolsMetadata": "core/r-server/routes/tools-metadata.js",
+    "pluginLoader": "core/r-server/plugin-loader.js",
+    "toolRegistry": "core/r-server/tool-registry.js",
+    "artifactManifest": "core/shared-backend/artifact-manifest.js",
+    "executionProvenance": "core/shared-backend/execution-provenance.js",
+    "gitAdapter": "core/shared-backend/git-adapter.js",
+    "gitRepositoryBinding": "core/shared-backend/git-repository-binding.js",
+    "changeSetService": "core/shared-backend/result-changeset-service.js",
+    "compareService": "core/shared-backend/result-compare-service.js",
+    "editIntent": "core/shared-backend/result-edit-intent.js",
+    "replayService": "core/shared-backend/result-replay-service.js",
+    "replayPackage": "core/shared-backend/scientific-replay-package.js",
+    "revisionSource": "core/shared-backend/result-revision-source.js",
+    "backgroundChild": "core/shared-backend/result-studio-background-child.js",
+    "resultStudioContext": "core/shared-backend/result-studio-context.js",
+    "pluginSdk": "core/shared-backend/result-studio-plugin-sdk.js",
+    "repository": "core/shared-backend/result-studio-repository.js",
+    "workflowGraph": "core/shared-backend/result-workflow-graph.js",
+    "scientificRerun": "core/shared-backend/result-scientific-rerun.js",
+    "scientificCompare": "core/shared-backend/result-scientific-compare.js",
+    "pluginValidator": "core/shared-backend/result-plugin-validator.js",
+    "workflowMigration": "src/migrations/002_result_workflow_graph.sql",
+    "changeSetPanel": "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx",
+    "changeSetPanelStyles": "frontend/src/components/result-studio/ResultStudioChangeSetPanel.module.css",
+    "changeSetPanelTest": "frontend/src/components/result-studio/ResultStudioChangeSetPanel.test.tsx",
+    "resultVersionRole": "frontend/src/components/result-studio/resultVersionRole.ts",
+    "resultVersionRoleTest": "frontend/src/components/result-studio/resultVersionRole.test.ts",
+    "resultStudioSurfaceTest": "frontend/src/components/result-studio/ResultStudioSurface.test.tsx",
+    "resultStudioClient": "frontend/src/components/result-studio/resultStudioClient.ts",
+    "deseq2Manifest": "resources/built-in-plugins/deseq2/plugin.json",
+    "deseq2Descriptor": "resources/built-in-plugins/deseq2/tool-definition.json",
+    "deseq2Script": "resources/built-in-plugins/deseq2/scripts/deseq2.R",
+    "deseq2GoldenRevision": "resources/built-in-plugins/deseq2/golden-revisions/result-studio-v1.json",
+    "volcanoManifest": "resources/built-in-plugins/volcano-plot/plugin.json",
+    "volcanoDescriptor": "resources/built-in-plugins/volcano-plot/tool-definition.json",
+    "volcanoScript": "resources/built-in-plugins/volcano-plot/scripts/volcano-plot.R",
+    "volcanoGoldenRevision": "resources/built-in-plugins/volcano-plot/golden-revisions/result-studio-v1.json",
+    "heatmapManifest": "resources/built-in-plugins/gene-correlation/plugin.json",
+    "heatmapDescriptor": "resources/built-in-plugins/gene-correlation/tool-definition.json",
+    "heatmapScript": "resources/built-in-plugins/gene-correlation/scripts/gene-correlation.R",
+    "heatmapGoldenRevision": "resources/built-in-plugins/gene-correlation/golden-revisions/result-studio-v1.json",
+    "enrichmentManifest": "resources/built-in-plugins/go-kegg/plugin.json",
+    "enrichmentDescriptor": "resources/built-in-plugins/go-kegg/tool-definition.json",
+    "enrichmentScript": "resources/built-in-plugins/go-kegg/scripts/go-kegg.R",
+    "enrichmentGoldenRevision": "resources/built-in-plugins/go-kegg/golden-revisions/result-studio-v1.json",
+    "enrichmentGeneFixture": "resources/built-in-plugins/go-kegg/demo-data/genes.csv",
+    "agentRunToolTest": "test/agent-run-tool.test.mjs",
+    "agentToolRegistryTest": "test/agent-tool-registry.test.mjs",
+    "artifactTruthTest": "test/artifact-truth.test.mjs",
+    "executionProvenanceTest": "test/execution-provenance.test.mjs",
+    "gitAdapterTest": "test/git-adapter.test.mjs",
+    "changeSetServiceTest": "test/result-changeset-service.test.mjs",
+    "compareServiceTest": "test/result-compare-service.test.mjs",
+    "editAgentToolTest": "test/result-edit-agent-tool.test.mjs",
+    "editControlsTest": "test/result-edit-controls.test.mjs",
+    "editIntentTest": "test/result-edit-intent.test.mjs",
+    "pluginValidatorTest": "test/result-plugin-validator.test.mjs",
+    "replayServiceTest": "test/result-replay-service.test.mjs",
+    "revisionReplayPackageTest": "test/result-revision-replay-package.test.mjs",
+    "revisionSourceTest": "test/result-revision-source.test.mjs",
+    "scientificCompareTest": "test/result-scientific-compare.test.mjs",
+    "scientificRerunTest": "test/result-scientific-rerun.test.mjs",
+    "selectionToolsTest": "test/result-selection-tools.test.mjs",
+    "contextTest": "test/result-studio-context.test.mjs",
+    "lifecycleTest": "test/result-studio-lifecycle.test.mjs",
+    "migrationTest": "test/result-studio-migration.test.mjs",
+    "pluginSdkTest": "test/result-studio-plugin-sdk.test.mjs",
+    "repositoryTest": "test/result-studio-repository.test.mjs",
+    "workflowGraphTest": "test/result-workflow-graph.test.mjs",
+    "scientificReplayPackageTest": "test/scientific-replay-package.test.mjs",
+    "testAffectedTest": "test/test-affected.test.mjs",
+    "toolsExecutorJobContextTest": "test/tools-executor-job-context.test.mjs",
+    "toolsInputValidationTest": "test/tools-input-validation.test.mjs",
+    "p6Observation": "scripts/g0-rs-p6-ui110-observation.mjs",
+    "p6Driver": "scripts/g0-rs-p6-ui110-driver.cjs",
+    "p6Gateway": "scripts/g0-rs-p6-ui110-local-gateway.mjs",
+    "p6ObservationTest": "test/g0-rs-p6-ui110-observation.test.mjs",
+    "p6GatewayTest": "test/g0-rs-p6-ui110-local-gateway.test.mjs",
+    "baselineRouteTest": "test/result-studio-route-baseline.test.mjs",
+    "electronPreload": "src/preload.js",
+    "aiSettings": "core/r-server/helpers/ai-settings.js",
+    "modelProfile": "core/shared-backend/llm-providers/model-profile.js",
+    "providerTransport": "core/shared-backend/llm-providers/deepseek.js",
+    "modelGateway": "core/r-server/helpers/model-gateway.js",
+    "agentRoute": "core/r-server/routes/ai-agent.js",
+    "agentRunner": "core/r-server/agent-runner.js",
+    "redaction": "core/shared-backend/redaction.js",
+    "diagnosticRedactionTest": "test/diagnostic-redaction.test.mjs",
+    "capabilityProvisioning": "core/shared-backend/capability-provisioning.js",
+    "capabilityBundles": "core/shared-backend/capability-bundles.js",
+    "rLibraryResolver": "core/shared-backend/r-libs-resolver.js",
+    "projectWorkspace": "frontend/src/pages/project-workspace.tsx",
+    "centerPanel": "frontend/src/components/workspace-panels/CenterPanel.tsx",
+    "rightPanel": "frontend/src/components/workspace-panels/RightPanel.tsx",
+    "agentComposer": "frontend/src/components/result-studio/ResultAgentComposer.tsx",
+    "agentComposerTest": "frontend/src/components/result-studio/ResultAgentComposer.test.tsx",
+    "advancedEditPanel": "frontend/src/components/result-studio/ResultEditPanel.tsx",
+    "advancedEditPanelTest": "frontend/src/components/result-studio/ResultEditPanel.test.tsx",
+    "resultSurface": "frontend/src/components/result-studio/ResultStudioSurface.tsx",
+    "activeArtifactProjection": "frontend/src/components/result-studio/activeArtifactProjection.ts",
+    "activeArtifactProjectionTest": "frontend/src/components/result-studio/activeArtifactProjection.test.ts",
+    "scientificViewer": "frontend/src/components/result-studio/ScientificInteractionViewer.tsx",
+    "scientificViewerTest": "frontend/src/components/result-studio/ScientificInteractionViewer.test.tsx",
+    "agentEditBridge": "frontend/src/lib/result-edit-agent-bridge.ts",
+    "copilotClient": "frontend/src/components/copilot/copilotClient.ts",
+    "copilotClientTest": "frontend/src/components/copilot/copilotClient.test.ts",
+    "conversationRunStore": "frontend/src/components/copilot/conversationRunStore.ts",
+    "conversationRunStoreTest": "frontend/src/components/copilot/conversationRunStore.test.ts",
+    "simpleChat": "frontend/src/components/copilot/SimpleChat.tsx"
+  },
+  "sourceHashes": {
+    "acceptance": "4c81a5e9029aa0c3023740a4c220aef82f515bc200f5eb82c48575ee0d498975",
+    "acceptanceTest": "bcf7923da3a7e6cd4e18d093322cdb4bb77cc69c6502167caf039b00c2189e5a",
+    "capture": "99f9eb3fe4efa643e5a87925098dfdd815664b703907b90333e9e240edd317ac",
+    "packageScripts": "14da02ebfcef21688010e93abd8050a9ff6bdbff42316d0ebcafd4194a04749a",
+    "frontendPackage": "42b1f6f7b675522c28023ea879b8be1eb456feb36afa69a8a06f3767ffefddfb",
+    "impactMap": "1ea8e86e336bb9ecedceb8f82cddb242ae1bd638dc34d4a8da1344adc9b0c2ee",
+    "server": "8219d23323ebc88fdb26c74c5ea3ebd679390b7fbbee24218ddcd056bc0db6a3",
+    "routeRegistry": "0b93c0e6c6c78b4a5796b27e51602e031b00b3cdc54301fffe7544f63e0c9fe9",
+    "dataApi": "ea96fd5eafb42f1854d01eccd002925fac74de6bc53d6710557f6452a0e7e441",
+    "routes": "32f938d598420638ef1f5d48ee417e30cc47e80b2343f7a53ac7563fdd181575",
+    "toolsRoute": "b0130c9734750edd22a9e6f12110ac2d515c127f3c213de05b9685baf6f49067",
+    "toolsPlatformRoute": "23751798fd47a9970007c18c6afb2842b10c2d336c84ae76c188d96da5fde60b",
+    "agentLearning": "4b52fec17305e6143c1f7239c376715f75de148081ca036742cd9819f4a6968a",
+    "agentRegistry": "62eb53fd52b75aceb41231f14198d04fc908d5284ba7685d8f92002491945777",
+    "contextBinding": "3e4da25017c6a8b5030963aaf9be570db7b51e10bc193fa4a1eaac669eb18003",
+    "contextTools": "63541d5c64f0243011c2ba6756eff39c6158a3f850a9b31b83659e4236a6c2e2",
+    "contextEditTools": "6ee8e8e2bc57a6a51c7a365776157e43a04096ad387d69764fa9fc37efa7b41c",
+    "editTools": "a449f80c32b5f5b87bba6a30ea41cb0a227a1f719facb884a345f5a844d53227",
+    "selectionTools": "8a7b4cc9c066746c56259f8f97dc4e12bd51a62639112319fc9cab650a70fd17",
+    "toolDefinitions": "e9c3d0314c7f3d6d7b14bbd968a1efa16e35f2ef7a4bd096357c2fa78e8e4d20",
+    "database": "4f73ddf4dea95b1c7dac9c65e16e9981ef67afffb21a3f5f29d1b5132ae2f550",
+    "artifactTruth": "eaf292a77588af6205449488df9099cdc924ff274da319b7835ef4bc8f75a99e",
+    "toolExecutor": "0cf6e5daf795be77f8470ec785e4f6e24545e0a033e811028ae6b5e397d41793",
+    "mcpRegistry": "3a8417a57d8273537bfd92fbaa60fe3213ce2377dbcfb9e876825b34684eb9e9",
+    "toolsMetadata": "507e8e75df7bb5b3c77ab040f8b24d61857a31e7c072e75e8f0c610014babe7f",
+    "pluginLoader": "c02a9b85e70230cde44f5f1103880ddc8589116827eb1d73570bd715fdd4b98a",
+    "toolRegistry": "d0c986cd02314a651ccdc29e24db3a0a2241f108aedbced6623fb5cf33852869",
+    "artifactManifest": "0ecdc1223054d1f3eb09a5f3d5c585c346d147c4d09e9c12560c301c738293ee",
+    "executionProvenance": "939c5dec34414416e5b2802a5d466036d983d826334075dc41244d040a3dfd66",
+    "gitAdapter": "2a6e31b3e98aabb861961610bb7699a9ff032552e4d6bd1218f8c1a3e3f37b44",
+    "gitRepositoryBinding": "9a5a785578c425e1f3980ef17b9c06afab37ec056f5e1e6705df1f71af863470",
+    "changeSetService": "9a7edaf2353d82bc37665f014f641e2ebca1665774a1aac033d158a1c379af95",
+    "compareService": "9fb63da0ed690166de5fa33b24778784bb3a8ffb07929b6fc396c2a5f685c564",
+    "editIntent": "2fef62411b57362ed74c53fa47f3c464d746bae39f84341c95aef382641dac0c",
+    "replayService": "470a8dcc1f0d574aa7ba470de7d498a93dbec6024ffdde86dbb65af13e22f5d3",
+    "replayPackage": "315c1f6ea87414767c1d9eea6ed38b89f0947b35fd87555a9c98eaf62dadc96b",
+    "revisionSource": "98f79c7c3afe7e880dee02fa682c4e8e693affdaf3e3741bceb07d9c38c9ff99",
+    "backgroundChild": "9f29fb173e9d3d415b4d01294c51f1340c6564e14a4eb8ca6d35562504e19bde",
+    "resultStudioContext": "e35bfa343786c66e83f80d770956c48166d93c72e8aa53096aeb54beab2a3cca",
+    "pluginSdk": "1047182666ba31fe10d552dc471fda6632704f7288593b439f0c3ef80b95cc19",
+    "repository": "9cbc98494322e1aeb2de6d8d87a3564840b8fba72192aab7b608c50b8184c525",
+    "workflowGraph": "2a4500eb0e6129e20359c99aaaf91836c2317c258abdbf03bafc94e58421e40f",
+    "scientificRerun": "c76dd4da49c6bde02a2718fe255b12c1838c52485ec20b2781a29af3288e6f82",
+    "scientificCompare": "8579d3c804c8ffb8c9930a65b88cb4160b061cafe61ebb3d1bbe2a0971c1422b",
+    "pluginValidator": "4d0a9d2f8b9c83dd3d9002f969bf156f5f051a12aaa8d5ce7f390b33fcec85f7",
+    "workflowMigration": "0033abb0ffca505c7cf6169ae838f4d986835d074baff4732159958b15602fb3",
+    "changeSetPanel": "424586f5a778be02168aeecf6e06d7a84b233102b75e057445e3b336b516c493",
+    "changeSetPanelStyles": "6390244a64631130e97c641f81042e1f4b92a3ce5e14524224bcff640e3d593f",
+    "changeSetPanelTest": "f9a24a5ab60fda0d8a25b0e6abdd239c84853fc5306c994c7987a83dcecabb27",
+    "resultVersionRole": "7266eb1f7b68edbe4a3ab66599c4561a10bfa22615b81633a54656fdd314ec41",
+    "resultVersionRoleTest": "253bac02cf49e119d3ea8b6355b355cc82a4757ca6304551997acdd1fcc2636c",
+    "resultStudioSurfaceTest": "97bf84d82dead98f90dc153da6a3514d15d9240493e67cc39063bb6451796503",
+    "resultStudioClient": "6ce44ee8173c7a830f4888e51e047543d959538de0b714e730af8d03023025a9",
+    "deseq2Manifest": "d848417d5539bb377024978668f9b41a1b3750b11e87a17b816398305199e9c5",
+    "deseq2Descriptor": "3795547abb88e7307255b4a062840a34052390550596631311b83a861a8cc4f5",
+    "deseq2Script": "013856191f06d1ab1326d7747a4cbd6b0979efcb31d084da707e5fec10cfa297",
+    "deseq2GoldenRevision": "b27bce1e3ea77592bf3da817da52d96cce290fd1b7d870088bca6a35b9c09f2b",
+    "volcanoManifest": "754c48de4f6a2e7904ab5bfbf428deb5d3e2bc89a2131fdfdeb2e38c6644a65e",
+    "volcanoDescriptor": "f17fa994f47fd936647c2d3ba72444ac17493ee1514ee564bd45e587d7b24cf5",
+    "volcanoScript": "ed50739c762e9fc8d4ae4d1532aa0e52a9af6e98cbcc1514fe29d4f8d5ba2c29",
+    "volcanoGoldenRevision": "05cf879f6a5f1978ac2cab6f526f16fdbb1c6f5184df348a28637e30b01334c6",
+    "heatmapManifest": "3d6b1b1588e05c2f8300d290a340e978c9bdc38f69bcc89dace3b6dfe158f76b",
+    "heatmapDescriptor": "8101fd1cba19b1cb376544bcb39727a98551d972262fc33a9e2772ae94d06218",
+    "heatmapScript": "6d4806556b99ca903cdc47bb038e97448eed711344015ae856a1986cd6de762c",
+    "heatmapGoldenRevision": "6f627ed22aabd43deb1d1c623c7ecad0b81a003a458099aad1aba9ece7e2c8bf",
+    "enrichmentManifest": "16cb225381983dbbe994c7f4e6c0becb18fe93eec2daadb71e82ae28bcd7a155",
+    "enrichmentDescriptor": "667632831ee88fba75d9869d399ca534e451c57f708a10fb3c4f72353c158f6f",
+    "enrichmentScript": "517e86b6fed5af13aa8da8eca95cab70cfc73c3469aa8129a2f28fe58a4464ed",
+    "enrichmentGoldenRevision": "23c40ffcb6a0524b74df37791baff3e53cdd08033ac73de8fcb82342e0066fb6",
+    "enrichmentGeneFixture": "00d5be08c34fc458284acd59e5215c8c1f383727b1b460ba1d120b759bfd9a1f",
+    "agentRunToolTest": "2087a73cf12ca11312a5900011b77902a7eaa2ca2761a7b6108978b5f73d5871",
+    "agentToolRegistryTest": "8a741ba798b4ac15bb0ded02dc2c53d5f0de35f44dbfb959839d47429368f736",
+    "artifactTruthTest": "912045978ea5c56a91183e4c6fcd2019afbb3a68c9081fc85ddb8f35ff750599",
+    "executionProvenanceTest": "914a53721e6edf4e391c5439e21b4ffde6683145e74543029923b7e98b1f3fd3",
+    "gitAdapterTest": "e970b5d1009c8be1619f51adc9537480d9e18b4d6c21178d75b3e941f8037401",
+    "changeSetServiceTest": "5d939d7ead9072cbef7cbeb5b2caffd3fce318182c08c2045e81bfee5b870ed0",
+    "compareServiceTest": "9190f054800fa5331b2703a5364f5afb3d208676c2978fd9b81c151ecb51351b",
+    "editAgentToolTest": "416a084465138d053f72689c78238b58c9edd604c3cb087adb58218c5f688794",
+    "editControlsTest": "4e45a58d2e440be52c03664ffe761bd969e8b4e23b14c2fa36cf3a5e86fe1976",
+    "editIntentTest": "cf01cfb9298ab3f386b224bc18a9fdfb48e0045dd76467fab2de5188e882aadb",
+    "pluginValidatorTest": "c395f7d11ff0c781e2f98469ee1603633d2a0eaefc97bd28449ef23437f0b329",
+    "replayServiceTest": "46d4901ab1e4eb6b8fd8269f7f35f84fe36c4b538b7a1342d7337f52e4977eee",
+    "revisionReplayPackageTest": "f759ef40b35f063a85540f51e8f9c1dbfe1993b8bbd5794115b0f12b16c84b07",
+    "revisionSourceTest": "8a3c04ff5f26148a7e5d551d5671da7c9688106af36cdd553ea671749744d80e",
+    "scientificCompareTest": "8c4a7fcef956d89fbee8d4411a307190324a1d2b4ae693b9685997c7475ace51",
+    "scientificRerunTest": "c026eb5ad690b2aaaee9c0a8caae9c98349dfa0ef2b1d0480935c0652e912188",
+    "selectionToolsTest": "0d053d2a55a8755d50b1b19dc7af686ce3764db49934851f6329c0e921543799",
+    "contextTest": "5292bdf52a1af367a2eba58940af20205acc869b57cf1a88492b558c13156454",
+    "lifecycleTest": "7c40b98f3034616b1a1e8644f60d0f37e95100bdc3e9adf6c98b18fc4c43090a",
+    "migrationTest": "fa87953a2d94b68757298f90cb6b541af8b6c92e8cb0564c8a57ca33fcb1fa27",
+    "pluginSdkTest": "ee8833ae7d7828096badacb977fbb43888be03f32fa57e3a79a3c52dbc26e1af",
+    "repositoryTest": "af8598a18c54b3e20057541b0177563b992fec9e6cdea95373ac6309554ed200",
+    "workflowGraphTest": "67d6734a223a2045f27bbba8087ad64a8a32e911f9d8f9163dfd570c8f9166de",
+    "scientificReplayPackageTest": "3456769e544192b9afe01fadbe0f931d63860079a67c66c03eeaa932924523a1",
+    "testAffectedTest": "9f626246d4df7489ba96a329673ae4c0902f97b83446a1929e09fd6e8a373a78",
+    "toolsExecutorJobContextTest": "6c8232bf63151cbda39af40901a967afb0093c8118c0be09505f4d175adb66aa",
+    "toolsInputValidationTest": "302f401237653697d06b1e76518869bad694cb2ec28814f9a55a30c7ff666052",
+    "p6Observation": "62a402081362afed4ee1a539f6017e1885f9076af02a604b5e3558de3aaa7ae6",
+    "p6Driver": "4fe0f14774cdbe50ab34ab947f22874a07d8e0fbfb27d07f27174d10be20097d",
+    "p6Gateway": "129383885397d0e183063d255341438ca91df37feec7a8dca8aa84d8e80ab1a0",
+    "p6ObservationTest": "804564e192186d4ae08539f6960c7e1044039c3aa6c9051ed20c3be520c0ead5",
+    "p6GatewayTest": "89d4962e4f71f5d8b7fab135c62a3ae25399298afde269bc587207628c7d683a",
+    "baselineRouteTest": "5ed8a61ca4ca37bfb3407766b70fb2fc7a45e7efdbef5a1135719a4c2898f1dc",
+    "electronPreload": "a972589af6185945120433e392eae8d723c9facffde40ef0402bdd23089b9a61",
+    "aiSettings": "0bedae46ae6247d84bd2a8788326e1905c23d5dda6a50f9679f0dbefdb668f84",
+    "modelProfile": "b7433458960e5cf9936c326d00296fa958defb86031670ed7c1e5be68d23a185",
+    "providerTransport": "023011ed31905e59a2a867d8f4ebb8a3317284ca598eb8cdd9bd8a50cdea1504",
+    "modelGateway": "56f8ffb59058c274c2ce2abd320c7768e2e182bb7a8cd0fa8ed70bc20333cc31",
+    "agentRoute": "441c6a632659f8283081155f27761a7dc5e981baca69806c3a2fd0dcc7b2f516",
+    "agentRunner": "c80fd7dbb970c497971d3712a7c962b9cceb4280b1a5394f80ca4fd2b9823f65",
+    "redaction": "76dbfb58df6943e6434065ebe7038af2e380dc5786110e008566d8ba0d770d30",
+    "diagnosticRedactionTest": "0d0e6abc547535c544ae9e38faca6519def5e8615e146f954c85bdb8134e3ddd",
+    "capabilityProvisioning": "c4251a03a92243e9bc6b4a54fb3a90011ad959f134440037ffa3fc9ab54e1f96",
+    "capabilityBundles": "f9f0f066b572281b39a640585f437b3ec236c46011c8469815491bc6b152b108",
+    "rLibraryResolver": "543ddd9a911f1f0380c45e001982a6bfd815cc06ca0c7ee158665be2e9c03056",
+    "projectWorkspace": "6d4130cb78ea482d0e1943f4544e9a45a5cc1c8fb3cdb0f8ab8b7a813e3171bb",
+    "centerPanel": "dd002e0ecc39e7a56dd335dcaeaeb0f1282729559d95eb9eef451091a5b5199c",
+    "rightPanel": "3f9c1a781e3a7b8718dd71d5091863a48a020fc01e19d43fd297d43d326816ff",
+    "agentComposer": "5c0508cb07254b660ba9b5c63553011617dde37f7db26053329f8d97e8c5e9e1",
+    "agentComposerTest": "cb703937db63adcafac6dc7f602816017cda04971dfa4fb27112d3167768a0ba",
+    "advancedEditPanel": "9a1387cbb775978e1f5b325c079affe3700d298424cd60911eb87caf415af650",
+    "advancedEditPanelTest": "38335ac744fb6450661cdb1a886c06b094b925befe1298751b50a0d09a752674",
+    "resultSurface": "fe026c47d099e4cc84e95b7133810620ee67bbdafcfd815ba322fb47ed03a545",
+    "activeArtifactProjection": "5eec0dc2372e3085fbe99b3d4cd56522e28e02e98153683c46d1ec2d80511a34",
+    "activeArtifactProjectionTest": "7a816c0f777a007a0c4e1dff13cd97733e9afe3da8518b431cf8e438193fd8ac",
+    "scientificViewer": "2150ff1a3a3a497b1f7ea911fd42d00d5521d29d2b746f707cf8917b069ee816",
+    "scientificViewerTest": "fe066e5457f5a4ca67163aef75b9552c3ead6d3ed57866168467649d2d63da51",
+    "agentEditBridge": "cd5e05ad41b40622cb1ee63f7e7fefe40b055147b9fcb581a0595f9f215ea996",
+    "copilotClient": "d2e604017f7f91a1ed8b5f3e70aef91781602a86f5782db1eecac266b10119e7",
+    "copilotClientTest": "3ea7d34d05da5ae8a3b6bf05aac9da4e638b8d5f229eed41e5ad2a2d61dfa291",
+    "conversationRunStore": "8183703db05831e71264f749bc5c0a4c47c1a766350879d69d47b3d616fcf68a",
+    "conversationRunStoreTest": "d48e4103f1052a2b0c4348f44e4b7314ec95ef3b069074219cfd51e8b15642d8",
+    "simpleChat": "d6a2b6100e2f871ecf36c432abd4bea25769f607932ac731901a572749c2ac3c"
+  },
+  "bindingDigest": "ee68e0a5d92c742d05b014362c2926e2f6b1a73ade9bc2c5b06839a06c9e67c1",
+  "sourceCommitMatchesSourceHashes": true,
+  "sourceMismatches": [],
+  "sourceBindingStableDuringObservation": true,
+  "sourceBindingObservation": {
+    "startDigest": "ee68e0a5d92c742d05b014362c2926e2f6b1a73ade9bc2c5b06839a06c9e67c1",
+    "endDigest": "ee68e0a5d92c742d05b014362c2926e2f6b1a73ade9bc2c5b06839a06c9e67c1"
+  },
+  "renderer": {
+    "schemaVersion": 1,
+    "renderer": "Electron 30.5.1 / Chromium 124.0.6367.243",
+    "initialDeg": {
+      "bodyVisible": true,
+      "composerReady": true,
+      "tablePresent": true,
+      "domSha256": "583fc98fb4af5ce351048ff084ab2bdcf7829b3723bdb393114d98c36fd0ea70",
+      "screenshot": "deg-baseline.png",
+      "screenshotSha256": "1757cd9f2904f0f9160070a39f7ed6b957c5c719a010794a87e5f23e17ceb635",
+      "screenshotBytes": 443777
+    },
+    "enrichment": {
+      "selectedGenes": 3,
+      "selectionBinding": {
+        "count": 3,
+        "entityIdsHash": "9f36c20544abdd23e061003e642bc167f5f81518b8234a300d463405d482294b",
+        "entitySetDigest": "9f36c20544abdd23e061003e642bc167f5f81518b8234a300d463405d482294b",
+        "objectDigest": "847c925686b0491f36e4131414cb7098fdae47c9464e30885e613d175e00fff4",
+        "selectionDigest": "b7b9631ecc83d3cf43c2a27f29394749bc03ff66893cf60d68a8b6b6cfe1d75a",
+        "revisionDigest": "1c4683e08fe0fa07b39b912d35788ee1bb3ec224bddda8201717604b3dc9852f",
+        "artifactDigest": "a66f9d56b14d6466868ea22210f67bff713d54f9a6029bbd26139b0abaf9f59f",
+        "exact": true
+      },
+      "agentSettled": true,
+      "goTableVisible": true,
+      "keggTableVisible": true,
+      "keggFormalArtifactPresent": true,
+      "goDomSha256": "524281065cfdeb8a76af2c459cd0c3a1ceaa5c6c981bcb7d4617a69fca478e23",
+      "keggDomSha256": "8602940039ce8baf7c3f034c568f3157e6d956f38a77855d3d96dd7066ebb3ad",
+      "jobBinding": {
+        "objectDigest": "9831bc5d7cbb304ef9f421f42da931e4e60237f14fe9cd5115a03495e6ad8da5",
+        "jobDigest": "fc8c0bf9f4e2bdb172b9e9e87fdfe6e1ac06dda0af5964c558287925174698ea",
+        "artifactSetDigest": "50260887419d4c9d3ce52f893794b6cf498c3aee1caf1e8841db9bcdb941cc00",
+        "artifactCount": 36,
+        "status": "completed"
+      },
+      "cohortBinding": {
+        "objectDigest": "7dd2ee53385ed8ece7d959d12f40156b783e8ffdf31d59f5344d23c46a9101d9",
+        "changeSetDigest": "4ff115e095bb7108f54336188b633047c2cc6afcae50e4a8964256a438fe70f8",
+        "revisionSetDigest": "552a34e69e5f0f5e1970311fa1a913087055cb8d704490b9814357c17db29c28",
+        "jobSetDigest": "f549575b695d4db849762f296f42ba0862f6baaf8fe949ec4fe52d446d03a8bb",
+        "revisionCount": 5,
+        "jobCount": 1,
+        "status": "adopted"
+      }
+    },
+    "volcano": {
+      "selectedGenes": 1,
+      "selectionBinding": {
+        "count": 1,
+        "entityIdsHash": "a7c8abf2d6c21a503fac970860b090d5598ac873afd3a1024c78d0ef8191960f",
+        "entitySetDigest": "a7c8abf2d6c21a503fac970860b090d5598ac873afd3a1024c78d0ef8191960f",
+        "objectDigest": "d3d684632051c40a3ab7588c08fc7e026589130c1b8ef3f50d02ca690ddfe7e2",
+        "selectionDigest": "84f75bbdad76fd905933d7a03ced79b860aa5f038a19cabf78888aedddd17e01",
+        "revisionDigest": "23debf243cdad89287f6c5070242d950a59a5a0be3acbd3e4efc8e000d3d4ec8",
+        "artifactDigest": "e056e6c382958b9d9ac06765943e8b58042473ccdb95e13032b21a7125a38c81",
+        "exact": true
+      },
+      "resultProgressSeen": true,
+      "visualCompareVisible": true,
+      "presentationImpactVisible": true,
+      "adopted": true,
+      "restoredAsNewRevision": true,
+      "resultingRevisionOrdinal": 3,
+      "lifecycleBinding": {
+        "candidate": {
+          "objectDigest": "8060e50a326e8a62bbd304b58cade2981ebfe9360e9a0c7cc946c905883873d9",
+          "changeSetDigest": "8160bd110f05819c3a6b78cdd4620d869e9b72f68fa54b0785fd3e8d9697d112",
+          "revisionSetDigest": "7f9d20fb465b726799c926052d44d9b69c8c922b1c436d78fa1902197a7e8c93",
+          "jobSetDigest": "2a3868d4a320f43a66f391a8415b31c415ba8fc6f4aca9b3e3e796eb139cfdae",
+          "revisionCount": 3,
+          "jobCount": 1,
+          "status": "preview_ready"
+        },
+        "adoptedState": {
+          "objectDigest": "8060e50a326e8a62bbd304b58cade2981ebfe9360e9a0c7cc946c905883873d9",
+          "changeSetDigest": "8160bd110f05819c3a6b78cdd4620d869e9b72f68fa54b0785fd3e8d9697d112",
+          "revisionSetDigest": "7f9d20fb465b726799c926052d44d9b69c8c922b1c436d78fa1902197a7e8c93",
+          "jobSetDigest": "2a3868d4a320f43a66f391a8415b31c415ba8fc6f4aca9b3e3e796eb139cfdae",
+          "revisionCount": 3,
+          "jobCount": 1,
+          "status": "adopted"
+        },
+        "sourceRevisionDigest": "23debf243cdad89287f6c5070242d950a59a5a0be3acbd3e4efc8e000d3d4ec8",
+        "restored": {
+          "objectDigest": "a4c4d99f37d371997f07e945c16ec99e8c4c91fdf3822426cef67b068f365ece",
+          "changeSetDigest": "0cba5274b8edd52eeb26dfad92950f1c13541c2ae7f4d25d53f7cf54260986cc",
+          "revisionSetDigest": "39eeac13583d9e2de698f3cb20ef2239e33ebe5db3c4ea181d08d613d18dcfcc",
+          "jobSetDigest": "9377d2a3a35c030e74f8953680c11f12ee0151adbff40e10a66de9dd7c3aea31",
+          "revisionCount": 3,
+          "jobCount": 1,
+          "status": "adopted"
+        },
+        "reopened": {
+          "currentRevisionDigest": "0f4b293730fc3e3fbd502797ec5624e04852064512a34d5f350870ad38d9d50b",
+          "currentJobDigest": "5b44c9bf752f8ed223a67cf034fa0507bf32c4eeee9eb5f6f956c3c3724520f2",
+          "exactContext": true,
+          "composerReady": true,
+          "contextBindingDigest": "eea97d6103268989eb8d343171f27c36c61fa799d82b61631acf84c04b697636"
+        }
+      },
+      "scientificSummary": {
+        "artifactCount": 1,
+        "artifacts": [
+          {
+            "artifactId": "classified_table",
+            "kind": "volcano_classification",
+            "beforeSha256": "01589505de2d5906dcc3536258ad13b50fcc318f176ecc4b126fca31e47420c3",
+            "afterSha256": "01589505de2d5906dcc3536258ad13b50fcc318f176ecc4b126fca31e47420c3",
+            "classifications": {
+              "before": {
+                "significantCount": 60,
+                "upCount": 30,
+                "downCount": 30,
+                "nonSignificantCount": 8
+              },
+              "after": {
+                "significantCount": 60,
+                "upCount": 30,
+                "downCount": 30,
+                "nonSignificantCount": 8
+              },
+              "membership": {
+                "gainedCount": 0,
+                "lostCount": 0,
+                "retainedCount": 60
+              }
+            }
+          }
+        ],
+        "summaryDigest": "104c03b8ce553449e028a43a9c017ffb073477dedf15ffb7d31474cb1f02f8fb"
+      },
+      "visibleScientificSummary": {
+        "sectionCount": 1,
+        "sections": [
+          {
+            "classification": [
+              60,
+              60
+            ],
+            "classificationMembership": [
+              0,
+              0
+            ]
+          }
+        ],
+        "displayDigest": "f70e45c0093297d8b9fb25858649e855d3af2146aee8c51558c405a13d6be719"
+      },
+      "screenshot": "volcano-compare.png",
+      "screenshotSha256": "ba4b5de649b8c89796f82dd8ebccd75f211e6e995a4f6a21c244507c245053a7",
+      "screenshotBytes": 392761
+    },
+    "heatmap": {
+      "presentation": {
+        "resultProgressSeen": true,
+        "visualCompareVisible": true,
+        "presentationImpactVisible": true,
+        "adopted": true,
+        "reverted": true,
+        "lifecycleBinding": {
+          "candidate": {
+            "objectDigest": "5a3f6312a269f484ffc6322f79eae645885883c62ba8fee7a1191161e938526c",
+            "changeSetDigest": "60fb0987dceab3b0530b19fa55c0154cb6a63f694cfa65097482fc85e94af8f0",
+            "revisionSetDigest": "f3a670cecb35a085cc6a54a0d38a2ab695edd9f1da5885c13d87fe505d0783c3",
+            "jobSetDigest": "3961f20526dfb942bc15b54eaea6fd4645c6edaf634cbe9e94b40bfe893ae0e1",
+            "revisionCount": 2,
+            "jobCount": 1,
+            "status": "preview_ready"
+          },
+          "adoptedState": {
+            "objectDigest": "5a3f6312a269f484ffc6322f79eae645885883c62ba8fee7a1191161e938526c",
+            "changeSetDigest": "60fb0987dceab3b0530b19fa55c0154cb6a63f694cfa65097482fc85e94af8f0",
+            "revisionSetDigest": "f3a670cecb35a085cc6a54a0d38a2ab695edd9f1da5885c13d87fe505d0783c3",
+            "jobSetDigest": "3961f20526dfb942bc15b54eaea6fd4645c6edaf634cbe9e94b40bfe893ae0e1",
+            "revisionCount": 2,
+            "jobCount": 1,
+            "status": "adopted"
+          },
+          "revertedState": {
+            "objectDigest": "5a3f6312a269f484ffc6322f79eae645885883c62ba8fee7a1191161e938526c",
+            "changeSetDigest": "60fb0987dceab3b0530b19fa55c0154cb6a63f694cfa65097482fc85e94af8f0",
+            "revisionSetDigest": "f3a670cecb35a085cc6a54a0d38a2ab695edd9f1da5885c13d87fe505d0783c3",
+            "jobSetDigest": "3961f20526dfb942bc15b54eaea6fd4645c6edaf634cbe9e94b40bfe893ae0e1",
+            "revisionCount": 2,
+            "jobCount": 1,
+            "status": "reverted"
+          }
+        }
+      },
+      "scientific": {
+        "resultProgressSeen": true,
+        "scientificImpactVisible": true,
+        "visualCompareVisible": true,
+        "discarded": true,
+        "lifecycleBinding": {
+          "candidate": {
+            "objectDigest": "9c1a94f760287ce8dc11b2c1ac0765ba2a6db001f622c4f477b525918afe0529",
+            "changeSetDigest": "e0ff274833351f82898d69b19dfde2fded9132c9e8ac8408d0cfed54bd227ab9",
+            "revisionSetDigest": "c0fd7295679e822673a9870aee86c1439630471043bdcaf80f57e581b4c046f0",
+            "jobSetDigest": "2bf28feff09a3a2fc87e7e60954dc9d6f834968bae7e175157706ce6428fc13c",
+            "revisionCount": 2,
+            "jobCount": 1,
+            "status": "preview_ready"
+          },
+          "revertedState": {
+            "objectDigest": "9c1a94f760287ce8dc11b2c1ac0765ba2a6db001f622c4f477b525918afe0529",
+            "changeSetDigest": "e0ff274833351f82898d69b19dfde2fded9132c9e8ac8408d0cfed54bd227ab9",
+            "revisionSetDigest": "c0fd7295679e822673a9870aee86c1439630471043bdcaf80f57e581b4c046f0",
+            "jobSetDigest": "2bf28feff09a3a2fc87e7e60954dc9d6f834968bae7e175157706ce6428fc13c",
+            "revisionCount": 2,
+            "jobCount": 1,
+            "status": "reverted"
+          }
+        },
+        "scientificSummary": {
+          "artifactCount": 0,
+          "artifacts": [],
+          "summaryDigest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "visibleScientificSummary": {
+          "sectionCount": 0,
+          "sections": [],
+          "displayDigest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "screenshot": "heatmap-scientific-compare.png",
+        "screenshotSha256": "7142ac43d5c6892310534495d9f9fe69650bca4a214bbaf7342a8601f34c5999",
+        "screenshotBytes": 417091
+      }
+    },
+    "threshold": {
+      "resultProgressSeen": true,
+      "degDifferenceVisible": true,
+      "enrichmentRankAndDirectionVisible": true,
+      "executionNodesVisible": true,
+      "scientificImpactVisible": true,
+      "candidateBinding": {
+        "objectDigest": "3662bcd8559f5b87610b6eb702361411a6aa3bfe594d6a9e2179e7c2f116b671",
+        "changeSetDigest": "c6ecf5e883179b3386a3a59b50371541246ba65e15145801e52e3f984e47e380",
+        "revisionSetDigest": "8334293293b6fccbc12fa206ce5e2c2f77d0df41d44648fb5149faabed217d6d",
+        "jobSetDigest": "e56f30f5bb55e6a58b6f69ca838778934bab68c002cf40d7fba4055b4307bebd",
+        "revisionCount": 11,
+        "jobCount": 3,
+        "status": "preview_ready"
+      },
+      "scientificSummary": {
+        "artifactCount": 3,
+        "artifacts": [
+          {
+            "artifactId": "classified_table",
+            "kind": "volcano_classification",
+            "beforeSha256": "01589505de2d5906dcc3536258ad13b50fcc318f176ecc4b126fca31e47420c3",
+            "afterSha256": "26e678c088ee6fba29dae624214d8282b2056c085d318fd38f4b1ece304f1991",
+            "classifications": {
+              "before": {
+                "significantCount": 60,
+                "upCount": 30,
+                "downCount": 30,
+                "nonSignificantCount": 8
+              },
+              "after": {
+                "significantCount": 23,
+                "upCount": 9,
+                "downCount": 14,
+                "nonSignificantCount": 45
+              },
+              "membership": {
+                "gainedCount": 0,
+                "lostCount": 37,
+                "retainedCount": 23,
+                "membershipDigest": "af5bf119fb6e4752df3035c5e71e46117f216016c5088cbb565aa28d8fd580ce"
+              }
+            }
+          },
+          {
+            "artifactId": "deg_table",
+            "kind": "differential_expression",
+            "beforeSha256": "43bf3a947c3e2946f98b420888af2398448016611bd498104739d09736beb3dd",
+            "afterSha256": "43bf3a947c3e2946f98b420888af2398448016611bd498104739d09736beb3dd",
+            "significantGenes": {
+              "before": {
+                "significantCount": 60,
+                "upCount": 30,
+                "downCount": 30
+              },
+              "after": {
+                "significantCount": 23,
+                "upCount": 9,
+                "downCount": 14
+              },
+              "membership": {
+                "gainedCount": 0,
+                "lostCount": 37,
+                "retainedCount": 23,
+                "membershipDigest": "af5bf119fb6e4752df3035c5e71e46117f216016c5088cbb565aa28d8fd580ce"
+              }
+            }
+          },
+          {
+            "artifactId": "go_bp_results",
+            "kind": "functional_enrichment",
+            "beforeSha256": "f47fd58c09164464073680b6946d201335b51819319b93e349df8cd9bfa30de5",
+            "afterSha256": "f8492ae73fb73b921517eb762d4d9ba68ad8c513049ec6e82fb3abf3af7ef1d0",
+            "terms": {
+              "beforeCount": 1759,
+              "afterCount": 1011,
+              "membership": {
+                "gainedCount": 162,
+                "lostCount": 910,
+                "retainedCount": 849,
+                "membershipDigest": "b2ac2acc5408a75cedc0f50fde7ed8f055ea109d3f1f9496a979361e30525684"
+              },
+              "topBeforeDigest": "160bf35fd4da9c714a51ea0e858f9bf1ea147a1ba708e9babcaf49b4905d13bb",
+              "topAfterDigest": "984b3b262e6acf7b4054a4f2096ae64f8e3e85a1450a6da91f4fa66c597d79ec"
+            },
+            "direction": {
+              "status": "available",
+              "changedCount": 20,
+              "detailDigest": "d339a6a95a60cf70d6187b54177ed4817ff80a5fae9e7bfeb2572cb21251e33b"
+            }
+          }
+        ],
+        "summaryDigest": "56ee7e90a3d98a677c21c17e11bd6547f6389bbb5cc66eecdec1e38c0e79c766"
+      },
+      "visibleScientificSummary": {
+        "sectionCount": 3,
+        "sections": [
+          {
+            "significantGenes": [
+              60,
+              23
+            ],
+            "geneMembership": [
+              0,
+              37,
+              2,
+              1,
+              2,
+              3,
+              9,
+              2,
+              1,
+              2,
+              4,
+              2,
+              2,
+              10,
+              8,
+              2,
+              1,
+              2
+            ]
+          },
+          {
+            "terms": [
+              1759,
+              1011
+            ],
+            "termMembership": [
+              162,
+              910
+            ],
+            "directionChanges": [
+              20,
+              1101,
+              1541,
+              1649,
+              1657,
+              1658,
+              1666,
+              1701,
+              1763,
+              1764,
+              1822,
+              1823,
+              1837,
+              1889,
+              2053,
+              2244,
+              2260,
+              2327,
+              2360,
+              2520,
+              2761
+            ]
+          },
+          {
+            "classification": [
+              60,
+              23
+            ],
+            "classificationMembership": [
+              0,
+              37,
+              2,
+              1,
+              2,
+              3,
+              9,
+              2,
+              1,
+              2,
+              4,
+              2,
+              2,
+              10,
+              8,
+              2,
+              1,
+              2
+            ]
+          }
+        ],
+        "displayDigest": "b11ea495eaa0dab178da421013e20b2efe505832aaaa28a67f98b645943752f0"
+      },
+      "screenshot": "deg-threshold-compare.png",
+      "screenshotSha256": "646b70e03111d63c26bb1dee8f10ff8c34278725f1741e0d266fd82a6be85cb3",
+      "screenshotBytes": 362531
+    },
+    "final": {
+      "canvasPresent": true,
+      "bodyVisible": true,
+      "composerReady": true,
+      "domSha256": "524281065cfdeb8a76af2c459cd0c3a1ceaa5c6c981bcb7d4617a69fca478e23"
+    },
+    "publicProjectionAudit": {
+      "initial": {
+        "absoluteCoordinate": false,
+        "accessMaterialPattern": false,
+        "internalIdentifier": false
+      },
+      "volcano": {
+        "absoluteCoordinate": false,
+        "accessMaterialPattern": false,
+        "internalIdentifier": false
+      },
+      "heatmapPresentation": {
+        "absoluteCoordinate": false,
+        "accessMaterialPattern": false,
+        "internalIdentifier": false
+      },
+      "heatmapScientific": {
+        "absoluteCoordinate": false,
+        "accessMaterialPattern": false,
+        "internalIdentifier": false
+      },
+      "threshold": {
+        "absoluteCoordinate": false,
+        "accessMaterialPattern": false,
+        "internalIdentifier": false
+      },
+      "final": {
+        "absoluteCoordinate": false,
+        "accessMaterialPattern": false,
+        "internalIdentifier": false
+      }
+    },
+    "publicProjectionDiagnostics": {
+      "initial": {
+        "absolutePathLocations": []
+      },
+      "volcano": {
+        "absolutePathLocations": []
+      },
+      "heatmapPresentation": {
+        "absolutePathLocations": []
+      },
+      "heatmapScientific": {
+        "absolutePathLocations": []
+      },
+      "threshold": {
+        "absolutePathLocations": []
+      },
+      "final": {
+        "absolutePathLocations": []
+      }
+    },
+    "noSensitiveProjection": true,
+    "passed": true
+  },
+  "truth": {
+    "newJobCount": 7,
+    "newEnrichmentJobCount": 2,
+    "newChangeSetCount": 6,
+    "newRevisionCount": 26,
+    "allCandidateCohortsComplete": true,
+    "allCandidateRevisionsValid": true,
+    "allCandidateJobsArtifactValid": true,
+    "allCandidateValidatorProofsPresent": true,
+    "allCandidatePhysicalBytesExact": true,
+    "physicalArtifactCount": 26,
+    "physicalProofDigest": "865605cd3d31c6915b2044d5253655fdaddcfcef6ff892ce9974b7879b4bf16e",
+    "gitBindingReady": true,
+    "candidateCommitsVerified": true,
+    "impactCounts": {
+      "presentation_rerender": 2,
+      "scientific_recompute": 1,
+      "unknown": 1,
+      "version_restore": 1,
+      "workflow_replan": 1
+    },
+    "statusCounts": {
+      "adopted": 3,
+      "preview_ready": 1,
+      "reverted": 2
+    },
+    "presentationCandidateCount": 2,
+    "scientificCandidateCount": 2,
+    "workflowSubgraphCandidateCount": 1,
+    "restoreChangeSetCount": 1,
+    "stageCorrelations": {
+      "volcanoPresentation": true,
+      "volcanoRestore": true,
+      "heatmapPresentation": true,
+      "heatmapScientific": true,
+      "thresholdSubgraph": true,
+      "enrichment": true
+    },
+    "allStageCorrelationsExact": true,
+    "volcanoRenderProof": {
+      "exact": true,
+      "selectedLabelCount": 1,
+      "renderedLabelCount": 8,
+      "labelSetDigest": "a7c8abf2d6c21a503fac970860b090d5598ac873afd3a1024c78d0ef8191960f",
+      "renderContractDigest": "80116329d857792513859a2de5bb44be34341792e77d868fdf2bd697564081e8",
+      "width": 2100,
+      "height": 1500,
+      "dpi": 300
+    },
+    "heatmapPresentationProof": {
+      "exact": true,
+      "kind": "presentation",
+      "method": "pearson",
+      "rowCount": 30,
+      "columnCount": 30,
+      "rowSetDigest": "398aa0db4d20e137659488598e796f0f59c99470e875bea70b42c8635aef4cb9",
+      "columnSetDigest": "398aa0db4d20e137659488598e796f0f59c99470e875bea70b42c8635aef4cb9",
+      "matrixValueDigest": "a27b63eddf45e499bb15ac3845a369303aa82111324627b61e4ec81e8bbf40ab",
+      "matrixChanged": false,
+      "renderContractDigest": "4feb7fb59c09ad803e1288946d7b4937937c84889f4081c94aac57ec9d21ef60",
+      "displayedCorrelationValueCount": 900
+    },
+    "heatmapScientificProof": {
+      "exact": true,
+      "kind": "scientific",
+      "method": "spearman",
+      "rowCount": 30,
+      "columnCount": 30,
+      "rowSetDigest": "398aa0db4d20e137659488598e796f0f59c99470e875bea70b42c8635aef4cb9",
+      "columnSetDigest": "398aa0db4d20e137659488598e796f0f59c99470e875bea70b42c8635aef4cb9",
+      "matrixValueDigest": "1623f9cd524d22844908573566a5c7197cb2d5114d8989f2b30acc74afc675cd",
+      "matrixChanged": true,
+      "renderContractDigest": "26abbbad0112563523903ac4eedb232205c8b8361d7f844d3fc104322b922f61",
+      "displayedCorrelationValueCount": 0
+    },
+    "thresholdSemanticProof": {
+      "exact": true,
+      "toolCount": 3,
+      "toolSetDigest": "bc7f44b8df6b298156cc1ec92f25e6c08a8dd395e797f751563cafae69743803",
+      "lfcCutoff": 1.97644594766,
+      "scientificArtifactCount": 3,
+      "scientificSummaryDigest": "56ee7e90a3d98a677c21c17e11bd6547f6389bbb5cc66eecdec1e38c0e79c766",
+      "visibleScientificSectionCount": 3,
+      "visibleScientificDigest": "b11ea495eaa0dab178da421013e20b2efe505832aaaa28a67f98b645943752f0"
+    },
+    "enrichmentProof": {
+      "exact": true,
+      "formalArtifactCount": 5,
+      "formalArtifactSetDigest": "93860c0caf55ebd97e22d2704138022466bef49130f04a197c1e90c72229d9d0",
+      "goFormal": true,
+      "keggFormal": true,
+      "goVisible": true,
+      "keggVisible": true,
+      "selection": {
+        "exact": true,
+        "entityCount": 3,
+        "entitySetDigest": "9f36c20544abdd23e061003e642bc167f5f81518b8234a300d463405d482294b",
+        "materializationDigest": "f583b594f48d22a5473694463a7ea6ddbc9b25c6c09d35f0b6991409045439b5",
+        "lineageKind": "selection"
+      }
+    },
+    "proofDigest": "39c84856589084387ef8eea90d17e07ea958942282f1983d9fedde897399887c"
+  },
+  "passed": true
+}

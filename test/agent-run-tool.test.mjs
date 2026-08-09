@@ -18,6 +18,8 @@ process.env.BIOF3_DB_PATH = path.join(TEST_DB_DIR, 'biof3.db');
 
 // db.js 是 CJS，用 createRequire 拿到 module.exports 的具名函数（await import 只能拿 default）
 const db = req(R_SERVER + '/db.js');
+const { buildAuthoritativeWorkflowGraph } = req(resolve(__dirname, '..', 'core', 'shared-backend', 'result-workflow-graph.js'));
+const { computeExecutionProvenanceHash } = req(resolve(__dirname, '..', 'core', 'shared-backend', 'execution-provenance.js'));
 // 单测绕过 server.js 启动；显式复用真实启动路径的 Plan 表初始化，避免依赖开发机旧 SQLite。
 req(R_SERVER + '/ai-bridge.js');
 const registry = req(R_SERVER + '/mcp/registry.js');
@@ -77,6 +79,95 @@ test('updateToolJobParams 持久化 workflow recovery 审计', async () => {
   assert.equal(updated.params.__harnessRecovery[0].actionId, 'retry_run');
 });
 
+test('P5 Workflow Truth query is not truncated by the 200-row UI listing limit', () => {
+  const projectId = `p_workflow_truth_${Date.now()}`;
+  const outputHash = 'a'.repeat(64);
+  let rootJob = null;
+  let childJob = null;
+  for (let index = 0; index < 205; index += 1) {
+    const job = db.createToolJob({
+      toolId: index === 0 ? 'deseq2' : index === 204 ? 'go-kegg' : 'unrelated-job',
+      projectId,
+      params: { index },
+      status: 'completed',
+    });
+    db.db.prepare('UPDATE tool_jobs SET created_at = ? WHERE id = ?').run(index, job.id);
+    if (index === 0) rootJob = job;
+    if (index === 204) childJob = job;
+  }
+  const rootProvenance = {
+    executionProvenanceVersion: 1,
+    projectId,
+    toolJobId: rootJob.id,
+    inputs: [],
+    artifacts: [{ id: 'deg_table', sha256: outputHash }],
+  };
+  rootProvenance.provenanceHash = computeExecutionProvenanceHash(rootProvenance);
+  db.updateToolJob(rootJob.id, {
+    status: 'completed',
+    resultJson: {
+      artifactTruth: { status: 'valid', blocking: false },
+      executionProvenance: rootProvenance,
+    },
+  });
+  const childProvenance = {
+    executionProvenanceVersion: 1,
+    projectId,
+    toolJobId: childJob.id,
+    inputs: [{
+      id: 'deg_table',
+      sha256: outputHash,
+      lineage: {
+        lineageVersion: 1,
+        kind: 'artifact',
+        sourceRevisionId: 'rev_workflow_root',
+        sourceToolJobId: rootJob.id,
+        sourceArtifactId: 'deg_table',
+        sourceOutputHash: outputHash,
+        materializationHash: outputHash,
+      },
+    }],
+    artifacts: [{ id: 'go_bp_results', sha256: 'd'.repeat(64) }],
+  };
+  childProvenance.provenanceHash = computeExecutionProvenanceHash(childProvenance);
+  db.updateToolJob(childJob.id, {
+    status: 'completed',
+    resultJson: {
+      artifactTruth: { status: 'valid', blocking: false },
+      executionProvenance: childProvenance,
+    },
+  });
+
+  const uiRows = db.listProjectToolJobs(projectId);
+  const workflowRows = db.listProjectToolJobsForWorkflow(projectId);
+  assert.equal(uiRows.length, 200);
+  assert.equal(workflowRows.length, 205);
+  assert.equal(uiRows.some((row) => row.params.index === 0), false);
+  assert.equal(workflowRows[0].params.index, 0);
+  assert.deepEqual(workflowRows.map((row) => row.params.index), Array.from({ length: 205 }, (_, index) => index));
+
+  const graph = buildAuthoritativeWorkflowGraph({
+    projectId,
+    sourceToolJobId: rootJob.id,
+    jobs: workflowRows,
+    requiredToolJobIds: [childJob.id],
+    repository: {
+      getRevision: (revisionId) => revisionId === 'rev_workflow_root'
+        ? {
+          revisionId,
+          projectId,
+          toolJobId: rootJob.id,
+          artifactId: 'deg_table',
+          outputHash,
+        }
+        : null,
+      getSelection: () => null,
+    },
+  });
+  assert.equal(graph.ok, true);
+  assert.deepEqual(graph.workflowPlan.steps.map((step) => step.toolJobId), [rootJob.id, childJob.id]);
+});
+
 // === Harness execution context（非 live，默认跑）===
 
 test('MCP run_tool execution context 映射本地 jobDir 到 canonical workDir', async () => {
@@ -122,6 +213,92 @@ test('MCP artifact summary 带 canonicalPath，供后续 Agent/平台抽象稳�
   assert.equal(artifacts[0].canonicalPath, '/work/biof3/mcp-tool-jobs/mcp_2/output/volcano.png');
   assert.equal(artifacts[1].type, 'table');
   assert.equal(artifacts[1].canonicalPath, '/work/biof3/mcp-tool-jobs/mcp_2/output/table.csv');
+});
+
+test('MCP file-input staging contains plugin ids and rejects reserved control filenames', () => {
+  const jobDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-mcp-input-stage-'));
+  const safe = _test.resolveStagedInputPath(jobDir, 'expr_matrix', '/uploads/source.csv');
+  assert.deepEqual(safe, {
+    ok: true,
+    name: 'expr_matrix.csv',
+    stagedPath: path.join(jobDir, 'expr_matrix.csv'),
+  });
+  for (const inputId of ['../outside', 'nested/input', 'nested\\input', '.', '..']) {
+    assert.equal(_test.resolveStagedInputPath(jobDir, inputId, '/uploads/source.csv').ok, false, inputId);
+  }
+  assert.deepEqual(
+    _test.resolveStagedInputPath(jobDir, 'manifest', '/uploads/source.json'),
+    { ok: false, error: 'plugin_input_name_reserved' },
+  );
+});
+
+test('MCP existing tool_job rejects user/project/conversation/tool identity drift before execution', async () => {
+  const builtInDir = resolve(__dirname, '..', 'resources', 'built-in-plugins', 'volcano-plot');
+  globalThis._biof3Plugins = new Map();
+  globalThis._biof3Plugins.set('volcano-plot', {
+    id: 'volcano-plot',
+    version: '1.0.0',
+    language: 'r',
+    pluginDir: builtInDir,
+    scriptPath: path.join(builtInDir, 'scripts'),
+  });
+  const job = db.createToolJob({
+    toolId: 'volcano-plot',
+    userId: 'mcp-owner',
+    projectId: 'mcp-project',
+    conversationId: 'mcp-conversation-a',
+    params: { deg_table: '/tmp/does-not-run.csv' },
+    status: 'failed',
+  });
+  try {
+    for (const opts of [
+      { userId: 'mcp-other', projectId: 'mcp-project', conversationId: 'mcp-conversation-a' },
+      { userId: 'mcp-owner', projectId: 'mcp-other', conversationId: 'mcp-conversation-a' },
+      { userId: 'mcp-owner', projectId: 'mcp-project', conversationId: 'mcp-conversation-b' },
+      { userId: 'mcp-owner', projectId: 'mcp-project', conversationId: 'mcp-conversation-a', toolJobId: job.id },
+    ]) {
+      const result = await callTool(
+        opts.toolJobId ? 'go-kegg' : 'volcano-plot',
+        { deg_table: '/tmp/does-not-run.csv' },
+        { ...opts, toolJobId: job.id },
+      );
+      assert.equal(result.isError, true);
+      assert.match(result.content[0].text, /tool_job 身份校验失败/);
+    }
+    assert.equal(db.getToolJob(job.id).status, 'failed');
+  } finally {
+    db.getDatabase().prepare('DELETE FROM tool_jobs WHERE id=?').run(job.id);
+    globalThis._biof3Plugins = new Map();
+  }
+});
+
+test('MCP plugin execution fails closed when a new tool_job cannot be persisted', async () => {
+  const builtInDir = resolve(__dirname, '..', 'resources', 'built-in-plugins', 'volcano-plot');
+  globalThis._biof3Plugins = new Map();
+  globalThis._biof3Plugins.set('volcano-plot', {
+    id: 'volcano-plot',
+    version: '1.0.0',
+    language: 'r',
+    pluginDir: builtInDir,
+    scriptPath: path.join(builtInDir, 'scripts'),
+  });
+  const originalCreateToolJob = db.createToolJob;
+  db.createToolJob = () => { throw new Error('injected_persistence_failure'); };
+  try {
+    const result = await callTool('volcano-plot', {
+      deg_table: '/tmp/does-not-run.csv',
+    }, {
+      userId: 'mcp-owner',
+      projectId: 'mcp-project',
+      conversationId: 'mcp-conversation',
+    });
+    assert.equal(result.isError, true);
+    assert.equal(result.toolJobId, undefined);
+    assert.match(result.content[0].text, /tool_job 持久化校验失败/);
+  } finally {
+    db.createToolJob = originalCreateToolJob;
+    globalThis._biof3Plugins = new Map();
+  }
 });
 
 // === callTool 端到端：跑完返回 toolJobId（live，需 R）===

@@ -457,6 +457,26 @@ function setupDesktopEnv(backendPorts) {
   process.env.R_SERVER_PORT = String(backendPorts.r);
   process.env.PY_SERVER_PORT = String(backendPorts.python);
   process.env.PLUMBER_PORT = String(backendPorts.plumber);
+  if (backendPorts.renderer) {
+    process.env.BIOF3_RENDERER_PORT = String(backendPorts.renderer);
+    process.env.BIOF3_RENDERER_ORIGIN = `http://localhost:${backendPorts.renderer}`;
+  }
+  const trustedRendererOrigins = new Set(
+    String(process.env.BIOF3_TRUSTED_DESKTOP_ORIGINS || '')
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean),
+  );
+  if (isDevMode) {
+    try {
+      trustedRendererOrigins.add(new URL(rendererDevUrl).origin);
+    } catch {}
+  }
+  if (backendPorts.renderer) {
+    trustedRendererOrigins.add(`http://localhost:${backendPorts.renderer}`);
+    trustedRendererOrigins.add(`http://127.0.0.1:${backendPorts.renderer}`);
+  }
+  process.env.BIOF3_TRUSTED_DESKTOP_ORIGINS = [...trustedRendererOrigins].join(',');
   // Child servers run in separate Node processes and cannot see Electron's
   // in-memory plugin registry. Give them the exact packaged/dev built-in root
   // so HTTP execution resolves the same plugin metadata as MCP (including
@@ -497,10 +517,12 @@ async function selectBackendPorts() {
   const r = await reserveAvailablePort(3001);
   const python = await reserveAvailablePort(3004);
   const plumber = await reserveAvailablePort(8787);
+  const renderer = isDevMode ? null : await reserveAvailablePort(3002);
   if (r !== 3001) console.warn(`[desktop] port 3001 occupied; using ${r} for r-server`);
   if (python !== 3004) console.warn(`[desktop] port 3004 occupied; using ${python} for py-server`);
   if (plumber !== 8787) console.warn(`[desktop] port 8787 occupied; using ${plumber} for plumber`);
-  return { r, python, plumber };
+  if (renderer && renderer !== 3002) console.warn(`[desktop] port 3002 occupied; using ${renderer} for renderer`);
+  return { r, python, plumber, renderer };
 }
 
 // ── 启动 r-server（子进程 spawn，避免原生模块 V8 版本冲突）─────
@@ -805,11 +827,11 @@ async function createWindow() {
     try {
       const { startStaticServer } = require("./static-server");
       const spaServer = await startStaticServer(spaBuildDir, {
-        port: 3002,
+        port: Number(process.env.BIOF3_RENDERER_PORT || 3002),
         baseUrl: "/",
         label: "spa-server",
         spaFallback: true,
-        fallbackToRandomPort: true,
+        fallbackToRandomPort: false,
       });
       const address = spaServer?.address();
       if (typeof address === "object" && address) {
@@ -844,11 +866,12 @@ async function createWindow() {
     minWidth: 720,
     minHeight: 520,
     title: "BioF3",
-    // On macOS, hiddenInset keeps the native traffic lights and lets the OS
-    // place them on its title-bar track. Other platforms keep the frameless
-    // shell used by the custom toolbar.
-    frame: process.platform === "darwin",
-    titleBarStyle: "hiddenInset",
+    // Self-drawn traffic-light buttons in TitleBar.tsx — see src/main.js comments
+    // around setupWindowIpc() for the IPC contract (window:minimize/maximize/close).
+    // Using a frameless window on every platform lets the renderer own the controls and
+    // can match the Cursor-style grey capsule + dark glyph look on macOS too.
+    frame: false,
+    backgroundColor: "#1f2330",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -898,20 +921,42 @@ async function createWindow() {
   // renderer 内存状态，并造成“前端刷新后后端像断开”的体感。
   // Cmd/Ctrl+R 改为应用内软刷新；Cmd/Ctrl+Shift+R 保留为开发者硬刷新。
   mainWindow.webContents.on("before-input-event", (event, input) => {
+    const key = typeof input.key === "string" ? input.key.toLowerCase() : "";
+    const isMacWindowShortcut =
+      process.platform === "darwin" &&
+      input.meta &&
+      !input.control &&
+      !input.alt &&
+      !input.shift;
+
+    if (isMacWindowShortcut && key === "w") {
+      event.preventDefault();
+      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.close();
+      return;
+    }
+    if (isMacWindowShortcut && key === "m") {
+      event.preventDefault();
+      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.minimize();
+      return;
+    }
+
     const isReloadKey =
-      input.key &&
-      input.key.toLowerCase() === "r" &&
+      key === "r" &&
       (input.meta || input.control) &&
       !input.alt;
     if (!isReloadKey) return;
     event.preventDefault();
     if (input.shift) {
       console.log("[desktop] hard reload requested");
-      mainWindow.webContents.reloadIgnoringCache();
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.reloadIgnoringCache();
+      }
       return;
     }
     console.log("[desktop] soft refresh requested");
-    mainWindow.webContents.send("app:soft-refresh");
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("app:soft-refresh");
+    }
   });
 
   // DevTools 仅在显式需要时打开，避免日常启动打断工作台。
@@ -943,29 +988,56 @@ async function createWindow() {
     console.log("[renderer] page loaded");
   });
 
+  const windowForEvents = mainWindow;
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
+
+  // Forward maximize/unmaximize state to the renderer so the self-drawn
+  // window control buttons can swap their glyph (single square ↔ double square).
+  const publishMaximizedState = (isMaximized) => {
+    if (
+      (typeof windowForEvents.isDestroyed === "function" &&
+        windowForEvents.isDestroyed()) ||
+      (typeof windowForEvents.webContents?.isDestroyed === "function" &&
+        windowForEvents.webContents.isDestroyed())
+    ) {
+      return;
+    }
+    windowForEvents.webContents.send(
+      "window:maximize-changed",
+      isMaximized,
+    );
+  };
+  windowForEvents.on("maximize", () => publishMaximizedState(true));
+  windowForEvents.on("unmaximize", () => publishMaximizedState(false));
 }
 
 // ── IPC：窗口控制（配合 frame:false 自定义标题栏）──────────────
 function setupWindowIpc() {
-  ipcMain.on("window:minimize", () => {
-    if (mainWindow) mainWindow.minimize();
+  const resolveWindowForSender = (event) => {
+    if (!mainWindow || mainWindow.isDestroyed()) return null;
+    return event?.sender === mainWindow.webContents ? mainWindow : null;
+  };
+
+  ipcMain.on("window:minimize", (event) => {
+    resolveWindowForSender(event)?.minimize();
   });
-  ipcMain.on("window:maximize", () => {
-    if (!mainWindow) return;
-    if (mainWindow.isMaximized()) {
-      mainWindow.unmaximize();
+  ipcMain.on("window:maximize", (event) => {
+    const targetWindow = resolveWindowForSender(event);
+    if (!targetWindow) return;
+    if (targetWindow.isMaximized()) {
+      targetWindow.unmaximize();
     } else {
-      mainWindow.maximize();
+      targetWindow.maximize();
     }
   });
-  ipcMain.on("window:close", () => {
-    if (mainWindow) mainWindow.close();
+  ipcMain.on("window:close", (event) => {
+    resolveWindowForSender(event)?.close();
   });
-  ipcMain.handle("window:isMaximized", () => {
-    return mainWindow ? mainWindow.isMaximized() : false;
+  ipcMain.handle("window:isMaximized", (event) => {
+    const targetWindow = resolveWindowForSender(event);
+    return targetWindow ? targetWindow.isMaximized() === true : false;
   });
 
   // 重启应用 —— 装完 R/Python 运行时后必须整体重启才生效：

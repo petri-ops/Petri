@@ -8,6 +8,13 @@
  * 这是 *人可跑* 的 burn-in 脚本（不是 Playwright，也不是单元测试）。
  * 假定 r-server 已在 localhost:3001 启动（py-server :3004 不在本路径）。
  *
+ * ⚠️ 本脚本对 **运行中的真实服务器** 演练，因此会在该服务器配置的数据根下创建
+ *    真实项目、真实 tool_job 与真实结果文件。对桌面/开发服务器而言那就是
+ *    `~/Documents/BioF3-Local`。脚本 **不会自动清理**：每次运行都留下一个
+ *    `golden-path-<时间戳>` 项目。运行前后的足迹会打印在日志里，需自行回收。
+ *    要完全隔离地演练，请改用 `scripts/g0-rs-p4r-corpus.mjs`，它在一次性
+ *    临时根中执行同一条 run_tool → tool_job → artifact truth 链。
+ *
  * 真实端点（与 plan 描述的 /api/tools/deseq2/... 有出入，落地以 r-server 为准）：
  *   GET  /api/health
  *   POST /api/data/projects                       → 创建项目
@@ -31,7 +38,7 @@
  * 日志：写到 tmp/golden-path/<timestamp>.log（stdout 同步输出）
  */
 
-import { mkdirSync, writeFileSync, appendFileSync, existsSync, readFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, appendFileSync, existsSync, readFileSync, readdirSync, statSync, unlinkSync } from 'node:fs';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Buffer } from 'node:buffer';
@@ -71,6 +78,14 @@ const TOOL_ID = contract?.goldenPath?.tool || 'deseq2';
 const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
 const LOG_DIR = join(REPO_ROOT, 'tmp', 'golden-path');
 mkdirSync(LOG_DIR, { recursive: true });
+const MAX_LOGS = 20;
+const oldLogs = readdirSync(LOG_DIR)
+  .filter((entry) => entry.endsWith('.log'))
+  .map((entry) => ({ entry, mtime: statSync(join(LOG_DIR, entry)).mtimeMs }))
+  .sort((a, b) => b.mtime - a.mtime);
+for (const { entry } of oldLogs.slice(MAX_LOGS - 1)) {
+  unlinkSync(join(LOG_DIR, entry));
+}
 const LOG_PATH = join(LOG_DIR, `${timestamp}.log`);
 
 function log(level, msg) {
@@ -139,6 +154,7 @@ const RUN_STARTED_AT = new Date().toISOString();
 // ── 步骤 2：创建项目 ────────────────────────────────────────
 const projectName = `golden-path-${Date.now()}`;
 let projectId = null;
+let projectWorkspacePath = null;
 {
   log('INFO', `STEP 2: POST /api/data/projects name=${projectName}`);
   const r = await http('POST', '/api/data/projects', {
@@ -149,7 +165,15 @@ let projectId = null;
     bail(`create project failed: status=${r.status} body=${JSON.stringify(r.body)?.slice(0, 400)}`);
   }
   projectId = r.body.project.id;
+  projectWorkspacePath = r.body.project.workspace_path || null;
   log('INFO', `✓ project created: id=${projectId}`);
+  // This is a burn-in against a LIVE server, so the project is real and lands
+  // wherever that server is configured to write — for a desktop/dev server that
+  // is ~/Documents/BioF3-Local. Say so at creation time, because six of these
+  // accumulated unnoticed before anyone looked.
+  if (projectWorkspacePath) {
+    log('INFO', `  ↳ real workspace created on disk: ${projectWorkspacePath}`);
+  }
 }
 
 // ── 步骤 3：拉 demo 数据 ────────────────────────────────────
@@ -425,4 +449,12 @@ writeFileSync(jsonPath, JSON.stringify(runRecord, null, 2) + '\n', 'utf8');
 log('INFO', `✓ run.json written: ${jsonPath} (exit: ${runRecord.exit})`);
 
 log('INFO', `🎉 golden path COMPLETED. log: ${LOG_PATH}`);
+
+// A burn-in run leaves a real project, real tool_job rows and real result files
+// on the server it exercised. Nothing here deletes them — that is the user's
+// data and their call — but an accumulating footprint must at least be visible.
+log('INFO', '── persisted by this run (not cleaned up automatically) ──');
+log('INFO', `  project id:   ${projectId}`);
+if (projectWorkspacePath) log('INFO', `  workspace:    ${projectWorkspacePath}`);
+log('INFO', '  to reclaim:   remove the workspace directory above and delete the project in the app');
 process.exit(0);

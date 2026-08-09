@@ -37,9 +37,25 @@ const {
   buildMigrationSql,
   inspectResultStudioSchema,
 } = require('../core/shared-backend/result-studio-schema');
+const {
+  RESULT_WORKFLOW_GRAPH_MIGRATION_VERSION,
+  buildWorkflowGraphMigrationSql,
+} = require('../core/shared-backend/result-workflow-graph');
+const {
+  RESULT_REF_TRANSACTION_MIGRATION_VERSION,
+  buildResultRefTransactionMigrationSql,
+} = require('../core/shared-backend/result-ref-transaction-schema');
+const {
+  GIT_REPOSITORY_CONSENT_MIGRATION_VERSION,
+  buildGitRepositoryConsentMigrationSql,
+} = require('../core/shared-backend/git-repository-consent-schema');
 
 const REAL_MIGRATIONS_DIR = join(REPO_ROOT, 'src', 'migrations');
 const MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '001_result_studio.sql');
+const WORKFLOW_GRAPH_MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '002_result_workflow_graph.sql');
+const REF_TRANSACTION_MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '003_result_ref_transactions.sql');
+const REPOSITORY_CONSENT_MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '004_git_repository_consent.sql');
+const LATEST_MIGRATION_VERSION = GIT_REPOSITORY_CONSENT_MIGRATION_VERSION;
 
 // 收集本文件所有临时目录，统一在「文件级」after 钩子里清理。
 // 文件级钩子在所有 test 级 after 钩子（含各用例的 db.close）之后运行，
@@ -103,6 +119,48 @@ test('RS2 migration file avoids constructs the runner forbids', () => {
   assert.equal(/\bALTER\s+TABLE\b/i.test(sql), false);
 });
 
+test('P5 workflow graph migration is generated from its schema module and is additive', () => {
+  assert.equal(readFileSync(WORKFLOW_GRAPH_MIGRATION_FILE, 'utf8'), buildWorkflowGraphMigrationSql());
+  const sql = readFileSync(WORKFLOW_GRAPH_MIGRATION_FILE, 'utf8')
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('--'))
+    .join('\n');
+  assert.equal(/^\s*BEGIN\b/im.test(sql), false);
+  assert.equal(/^\s*COMMIT\b/im.test(sql), false);
+  assert.equal(/\bDROP\s+TABLE\b/i.test(sql), false);
+  assert.equal(/\bALTER\s+TABLE\b/i.test(sql), false);
+  assert.equal(/\bresult_workflow_graphs\b/i.test(sql), true);
+});
+
+test('P6 ref transaction migration is generated from its schema module and is additive', () => {
+  assert.equal(readFileSync(REF_TRANSACTION_MIGRATION_FILE, 'utf8'), buildResultRefTransactionMigrationSql());
+  const sql = readFileSync(REF_TRANSACTION_MIGRATION_FILE, 'utf8')
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('--'))
+    .join('\n');
+  assert.equal(/^\s*BEGIN\b/im.test(sql), false);
+  assert.equal(/^\s*COMMIT\b/im.test(sql), false);
+  assert.equal(/\bDROP\s+TABLE\b/i.test(sql), false);
+  assert.equal(/\bALTER\s+TABLE\b/i.test(sql), false);
+  assert.equal(/\bresult_ref_transactions\b/i.test(sql), true);
+});
+
+test('P7 Git repository consent migration is generated and additive', () => {
+  assert.equal(
+    readFileSync(REPOSITORY_CONSENT_MIGRATION_FILE, 'utf8'),
+    buildGitRepositoryConsentMigrationSql(),
+  );
+  const sql = readFileSync(REPOSITORY_CONSENT_MIGRATION_FILE, 'utf8')
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('--'))
+    .join('\n');
+  assert.equal(/^\s*BEGIN\b/im.test(sql), false);
+  assert.equal(/^\s*COMMIT\b/im.test(sql), false);
+  assert.equal(/\bDROP\s+TABLE\b/i.test(sql), false);
+  assert.equal(/\bALTER\s+TABLE\b/i.test(sql), false);
+  assert.equal(/\bgit_repository_consents\b/i.test(sql), true);
+});
+
 // ---------------------------------------------------------------------------
 // 2-4. 真实 runner 行为
 // ---------------------------------------------------------------------------
@@ -113,18 +171,26 @@ test('RS2 runner installs the schema into an empty database', async (context) =>
 
   assert.equal(getAppliedVersion(dbPath), 0);
   const version = await runMigrations(dbPath, REAL_MIGRATIONS_DIR);
-  assert.equal(version, RESULT_STUDIO_MIGRATION_VERSION);
+  assert.equal(version, LATEST_MIGRATION_VERSION);
 
   const names = tableNames(dbPath);
   for (const table of RESULT_STUDIO_TABLES) {
     assert.equal(names.includes(table), true, `missing table ${table}`);
   }
+  assert.equal(names.includes('result_workflow_graphs'), true);
+  assert.equal(names.includes('result_ref_transactions'), true);
+  assert.equal(names.includes('git_repository_consents'), true);
 
   const db = new Database(dbPath, { readonly: true });
   context.after(() => { try { db.close(); } catch { /* noop */ } });
   assert.equal(inspectResultStudioSchema(db).complete, true);
   const applied = db.prepare('SELECT version FROM schema_migrations ORDER BY version').all().map((r) => r.version);
-  assert.deepEqual(applied, [RESULT_STUDIO_MIGRATION_VERSION]);
+  assert.deepEqual(applied, [
+    RESULT_STUDIO_MIGRATION_VERSION,
+    RESULT_WORKFLOW_GRAPH_MIGRATION_VERSION,
+    RESULT_REF_TRANSACTION_MIGRATION_VERSION,
+    GIT_REPOSITORY_CONSENT_MIGRATION_VERSION,
+  ]);
 });
 
 test('RS2 runner upgrades an existing database without touching its tables', async (context) => {
@@ -138,7 +204,7 @@ test('RS2 runner upgrades an existing database without touching its tables', asy
   seed.close();
 
   const version = await runMigrations(dbPath, REAL_MIGRATIONS_DIR);
-  assert.equal(version, RESULT_STUDIO_MIGRATION_VERSION);
+  assert.equal(version, LATEST_MIGRATION_VERSION);
 
   const db = new Database(dbPath, { readonly: true });
   context.after(() => { try { db.close(); } catch { /* noop */ } });
@@ -146,6 +212,7 @@ test('RS2 runner upgrades an existing database without touching its tables', asy
   assert.equal(db.prepare('SELECT status FROM tool_jobs WHERE id = ?').get('job_1').status, 'completed');
   // RS 表已就位
   assert.equal(inspectResultStudioSchema(db).complete, true);
+  assert.equal(tableNames(dbPath).includes('result_ref_transactions'), true);
 });
 
 test('RS2 runner is idempotent across repeated startups', async (context) => {
@@ -155,15 +222,15 @@ test('RS2 runner is idempotent across repeated startups', async (context) => {
   const first = await runMigrations(dbPath, REAL_MIGRATIONS_DIR);
   const second = await runMigrations(dbPath, REAL_MIGRATIONS_DIR);
   const third = await runMigrations(dbPath, REAL_MIGRATIONS_DIR);
-  assert.equal(first, RESULT_STUDIO_MIGRATION_VERSION);
-  assert.equal(second, RESULT_STUDIO_MIGRATION_VERSION);
-  assert.equal(third, RESULT_STUDIO_MIGRATION_VERSION);
+  assert.equal(first, LATEST_MIGRATION_VERSION);
+  assert.equal(second, LATEST_MIGRATION_VERSION);
+  assert.equal(third, LATEST_MIGRATION_VERSION);
 
   const db = new Database(dbPath, { readonly: true });
   context.after(() => { try { db.close(); } catch { /* noop */ } });
   // 版本只记录一次，不重复插入
   const rows = db.prepare('SELECT version FROM schema_migrations').all();
-  assert.equal(rows.length, 1);
+  assert.equal(rows.length, 4);
 });
 
 // ---------------------------------------------------------------------------

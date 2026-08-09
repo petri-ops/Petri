@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contractVersion": 2,
+  "contractVersion": 3,
   "decisionPolicyVersion": 1,
   "qualificationId": "g0-baseline-v1-qualification",
   "subjectBaselineId": "g0-fifth-wave-establishing-0.6",
@@ -107,11 +107,6 @@
       "id": "visual_state_convergence",
       "enforcement": "mandatory",
       "evidenceMode": "real_execution"
-    },
-    {
-      "id": "result_studio_product",
-      "enforcement": "mandatory",
-      "evidenceMode": "real_execution"
     }
   ],
   "zeroToleranceInvariants": [
@@ -133,10 +128,10 @@
     "real-provider-science-neutral",
     "runtime-resource-adaptive",
     "capability-supply-chain-governed",
-    "permission-boundary-enforced",
-    "result-studio-editing"
+    "permission-boundary-enforced"
   ],
   "excludedClaims": [
+    "result-studio-editing",
     "windows-support",
     "linux-support",
     "macos-x64-support",
@@ -155,7 +150,7 @@
       "reintroduced_incident"
     ]
   },
-  "sourceCommit": "c74c434732725a8497bd073ba0899b873b462d55",
-  "generatedAt": "2026-07-25T08:05:36.800Z",
-  "manifestObjectHash": "cea63fb6da6a1daf77e61a2243d78b0e6eb323708803bda8b244e841da66ecba"
+  "sourceCommit": "728492102a12b4138fc386dd4cd6982086c98136",
+  "generatedAt": "2026-07-25T10:29:31.664Z",
+  "manifestObjectHash": "db4be89acafacca1431c8959086a23403458092f96b7ce78d9d06bae3086611c"
 }

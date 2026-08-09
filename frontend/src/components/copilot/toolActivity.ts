@@ -8,6 +8,8 @@ export type ToolActivityStatus = 'running' | 'awaiting_confirmation' | 'success'
 
 export interface ToolActivityItem {
   key: string;
+  toolJobId?: string;
+  toolId?: string;
   callId?: string;
   traceId?: string;
   iteration?: number;
@@ -51,6 +53,8 @@ export function restoreToolActivities(value: unknown): ToolActivityItem[] {
       : undefined;
     return [{
       key: typeof raw.key === 'string' ? raw.key : `restored:${index}:${name}`,
+      toolJobId: typeof raw.toolJobId === 'string' ? raw.toolJobId : undefined,
+      toolId: typeof raw.toolId === 'string' ? raw.toolId : undefined,
       callId: typeof raw.callId === 'string' ? raw.callId : undefined,
       traceId: typeof raw.traceId === 'string' ? raw.traceId : undefined,
       iteration: typeof raw.iteration === 'number' && Number.isFinite(raw.iteration)
@@ -192,6 +196,8 @@ export function mergeToolResultActivity(
   const fallbackAction = summarizeToolCall(name);
   const item: ToolActivityItem = {
     key: index >= 0 ? current[index].key : key,
+    toolJobId: event.toolJobId || (index >= 0 ? current[index].toolJobId : undefined),
+    toolId: event.toolId || (index >= 0 ? current[index].toolId : undefined),
     callId: result?.callId || (index >= 0 ? current[index].callId : undefined),
     traceId: result?.traceId || (index >= 0 ? current[index].traceId : undefined),
     iteration: event.iteration || (index >= 0 ? current[index].iteration : undefined),

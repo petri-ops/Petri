@@ -435,7 +435,8 @@ try {
     is_public INTEGER DEFAULT 0,
     result_json TEXT,
     completed_at BIGINT,
-    error TEXT
+    error TEXT,
+    conversation_id TEXT
   )`);
   db.exec('CREATE INDEX IF NOT EXISTS idx_tool_jobs_user ON tool_jobs(user_id)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_tool_jobs_status ON tool_jobs(status)');
@@ -446,7 +447,40 @@ try {
   try { db.exec('ALTER TABLE tool_jobs ADD COLUMN ack_expires_at BIGINT'); } catch {}
   // 7.3: project_id column for project-scoped tool jobs
   try { db.exec('ALTER TABLE tool_jobs ADD COLUMN project_id TEXT'); } catch {}
+  try { db.exec('ALTER TABLE tool_jobs ADD COLUMN process_pid INTEGER'); } catch {}
+  try { db.exec('ALTER TABLE tool_jobs ADD COLUMN heartbeat_at BIGINT'); } catch {}
   try { db.exec('CREATE INDEX IF NOT EXISTS idx_tool_jobs_project ON tool_jobs(project_id)'); } catch {}
+} catch {}
+
+// UX1G-1: bind persisted tool jobs to the conversation that authorized them.
+// Legacy jobs are backfilled only when exactly one scientific task in the same
+// project points at the job. Ambiguous, cross-project, and otherwise unknown
+// history remains explicitly unscoped (NULL).
+try { db.exec('ALTER TABLE tool_jobs ADD COLUMN conversation_id TEXT'); } catch {}
+try {
+  db.exec(`
+    UPDATE tool_jobs
+    SET conversation_id = (
+      SELECT MIN(spec.conversation_id)
+      FROM scientific_task_specs AS spec
+      WHERE spec.tool_job_id = tool_jobs.id
+        AND spec.project_id = tool_jobs.project_id
+        AND json_extract(spec.confirmation_json, '$.userId') = tool_jobs.user_id
+        AND json_extract(spec.confirmation_json, '$.selectedToolId') = tool_jobs.tool_id
+    )
+    WHERE conversation_id IS NULL
+      AND (
+        SELECT COUNT(*)
+        FROM scientific_task_specs AS spec
+        WHERE spec.tool_job_id = tool_jobs.id
+          AND spec.project_id = tool_jobs.project_id
+          AND json_extract(spec.confirmation_json, '$.userId') = tool_jobs.user_id
+          AND json_extract(spec.confirmation_json, '$.selectedToolId') = tool_jobs.tool_id
+      ) = 1
+  `);
+} catch {}
+try {
+  db.exec('CREATE INDEX IF NOT EXISTS idx_tool_jobs_project_conversation ON tool_jobs(project_id, conversation_id, created_at DESC)');
 } catch {}
 
 // ============================================================
@@ -528,8 +562,16 @@ const stmts = {
   listProjectToolJobs: db.prepare(
     'SELECT * FROM tool_jobs WHERE project_id = ? ORDER BY created_at DESC LIMIT 200'
   ),
+  listProjectToolJobsByConversation: db.prepare(
+    'SELECT * FROM tool_jobs WHERE project_id = ? AND conversation_id = ? ORDER BY created_at DESC LIMIT 200'
+  ),
+  // Workflow Truth must see the complete project history.  The bounded query
+  // above is a UI/listing projection and can silently drop an older parent.
+  listProjectToolJobsForWorkflow: db.prepare(
+    'SELECT * FROM tool_jobs WHERE project_id = ? ORDER BY created_at ASC, id ASC'
+  ),
   insertToolJob: db.prepare(
-    'INSERT INTO tool_jobs (id, user_id, tool_id, params_json, status, created_at, name, is_test_run, project_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    'INSERT INTO tool_jobs (id, user_id, tool_id, params_json, status, created_at, name, is_test_run, project_id, conversation_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
   ),
   updateToolJob: db.prepare(
     'UPDATE tool_jobs SET status = COALESCE(?, status), result_json = COALESCE(?, result_json), completed_at = COALESCE(?, completed_at), error = COALESCE(?, error) WHERE id = ?'
@@ -880,13 +922,23 @@ function getToolJob(id) {
   return row ? parseToolJobRow(row) : null;
 }
 
-function listProjectToolJobs(projectId) {
-  const rows = stmts.listProjectToolJobs.all(projectId);
+function listProjectToolJobs(projectId, conversationId = undefined) {
+  const rows = conversationId == null
+    ? stmts.listProjectToolJobs.all(projectId)
+    : stmts.listProjectToolJobsByConversation.all(projectId, conversationId);
   return rows.map(parseToolJobRow);
 }
 
-function createToolJob({ toolId, userId = 'agent', params, status = 'running', name = '', isTestRun = 0, projectId = null }) {
+function listProjectToolJobsForWorkflow(projectId) {
+  const rows = stmts.listProjectToolJobsForWorkflow.all(projectId);
+  return rows.map(parseToolJobRow);
+}
+
+function createToolJob({ toolId, userId = 'agent', params, status = 'running', name = '', isTestRun = 0, projectId = null, conversationId = null }) {
   const id = uid('tj');
+  const normalizedConversationId = typeof conversationId === 'string' && conversationId.trim()
+    ? conversationId.trim()
+    : null;
   stmts.insertToolJob.run(
     id,
     userId,
@@ -896,7 +948,8 @@ function createToolJob({ toolId, userId = 'agent', params, status = 'running', n
     Date.now(),
     name,
     isTestRun,
-    projectId
+    projectId,
+    normalizedConversationId
   );
   return getToolJob(id);
 }
@@ -968,7 +1021,18 @@ function bindScientificTaskToolJob({ taskId, version = 1, toolJobId }) {
   if (!task) throw new Error('scientific_task_not_found');
   if (!job) throw new Error('tool_job_not_found');
   if (task.project_id !== job.project_id) throw new Error('scientific_task_job_project_mismatch');
+  if (task.conversation_id !== job.conversation_id) throw new Error('scientific_task_job_conversation_mismatch');
   if (task.status !== 'confirmed') throw new Error('scientific_task_not_confirmed');
+  if (!task.confirmation) throw new Error('scientific_task_confirmation_missing');
+  if (task.confirmation.userId !== job.user_id) throw new Error('scientific_task_job_user_mismatch');
+  const { validateScientificTaskExecution } = require('../shared-backend/scientific-task-confirmation');
+  const executionGate = validateScientificTaskExecution({
+    persistedTask: task,
+    projectId: job.project_id,
+    toolId: job.tool_id,
+    params: job.params || {},
+  });
+  if (!executionGate.ok) throw new Error(executionGate.error);
   db.prepare('UPDATE scientific_task_specs SET tool_job_id=?, updated_at=? WHERE task_id=? AND version=?')
     .run(toolJobId, new Date().toISOString(), taskId, version);
   return getScientificTaskSpec(taskId, version);
@@ -1542,9 +1606,20 @@ function setToolJobApproval(id, ackToken, expiresAt) {
   return getToolJob(id);
 }
 
-function ackToolJob(ackToken, approve) {
-  const row = db.prepare('SELECT id FROM tool_jobs WHERE ack_token=?').get(ackToken);
+function toolJobMatchesScope(row, scope = {}) {
+  if (scope.userId !== undefined && row.user_id !== scope.userId) return false;
+  if (scope.projectId !== undefined && row.project_id !== scope.projectId) return false;
+  if (Object.prototype.hasOwnProperty.call(scope, 'conversationId')) {
+    const conversationId = scope.conversationId == null ? null : scope.conversationId;
+    if (row.conversation_id !== conversationId) return false;
+  }
+  return true;
+}
+
+function ackToolJob(ackToken, approve, scope = {}) {
+  const row = db.prepare('SELECT * FROM tool_jobs WHERE ack_token=?').get(ackToken);
   if (!row) return null;
+  if (!toolJobMatchesScope(row, scope)) return null;
   if (approve) {
     db.prepare('UPDATE tool_jobs SET ack_status=? WHERE id=?').run('approved', row.id);
   } else {
@@ -1559,9 +1634,9 @@ function ackToolJob(ackToken, approve) {
   return getToolJob(row.id);
 }
 
-function getToolJobByAckToken(ackToken) {
+function getToolJobByAckToken(ackToken, scope = {}) {
   const row = db.prepare('SELECT * FROM tool_jobs WHERE ack_token=?').get(ackToken);
-  return row ? parseToolJobRow(row) : null;
+  return row && toolJobMatchesScope(row, scope) ? parseToolJobRow(row) : null;
 }
 
 function listStalledAnalyses() {
@@ -1941,6 +2016,7 @@ module.exports = {
   deleteAnalysis,
   getToolJob,
   listProjectToolJobs,
+  listProjectToolJobsForWorkflow,
   createToolJob,
   updateToolJob,
   saveScientificTaskSpec,

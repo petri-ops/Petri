@@ -9,6 +9,8 @@ const { AnthropicStreamAggregator, extractSseFrames } = require('./stream-aggreg
 
 const DEFAULT_BASE_URL = 'https://api.anthropic.com/v1';
 const DEFAULT_VERSION = '2023-06-01';
+const MODEL_LIST_TIMEOUT_MS = 10000;
+const MAX_MODEL_LIST_BYTES = 2 * 1024 * 1024;
 
 function endpointUrl(baseUrl, pathname) {
   const url = new URL(baseUrl || DEFAULT_BASE_URL);
@@ -23,6 +25,36 @@ function requestHeaders(apiKey, options = {}) {
     'x-api-key': apiKey,
     'anthropic-version': options.anthropicVersion || DEFAULT_VERSION,
   };
+}
+
+async function readBoundedResponseText(response) {
+  const contentLength = Number(response.headers.get('content-length') || 0);
+  if (contentLength > MAX_MODEL_LIST_BYTES) {
+    if (response.body && typeof response.body.cancel === 'function') {
+      try { await response.body.cancel(); } catch {}
+    }
+    throw new Error('模型列表响应过大');
+  }
+  if (!response.body || typeof response.body.getReader !== 'function') {
+    const text = await response.text();
+    if (Buffer.byteLength(text) > MAX_MODEL_LIST_BYTES) throw new Error('模型列表响应过大');
+    return text;
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let total = 0;
+  let text = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > MAX_MODEL_LIST_BYTES) {
+      try { await reader.cancel(); } catch {}
+      throw new Error('模型列表响应过大');
+    }
+    text += decoder.decode(value, { stream: true });
+  }
+  return text + decoder.decode();
 }
 
 function usageRecord(telemetry, model, startedAt, usage, errorCode) {
@@ -55,6 +87,54 @@ class AnthropicProvider {
 
   get supportsStreaming() {
     return true;
+  }
+
+  async listModels(apiKey, options = {}) {
+    if (!apiKey) return { ok: false, models: [], message: 'Anthropic API key 未配置' };
+    const controller = new AbortController();
+    const onAbort = () => controller.abort(options.signal && options.signal.reason);
+    if (options.signal && options.signal.aborted) onAbort();
+    else if (options.signal) options.signal.addEventListener('abort', onAbort, { once: true });
+    const timeout = setTimeout(() => controller.abort(), MODEL_LIST_TIMEOUT_MS);
+    try {
+      const response = await fetch(endpointUrl(options.baseUrl, '/models'), {
+        headers: requestHeaders(apiKey, options),
+        signal: controller.signal,
+      });
+      const raw = await readBoundedResponseText(response);
+      let parsed = null;
+      try {
+        parsed = raw ? JSON.parse(raw) : null;
+      } catch {
+        return { ok: false, models: [], message: 'Anthropic 模型列表返回了无效 JSON' };
+      }
+      if (!response.ok || parsed?.type === 'error') {
+        return {
+          ok: false,
+          models: [],
+          message: parsed?.error?.message || `HTTP ${response.status}`,
+        };
+      }
+      const models = Array.isArray(parsed?.data)
+        ? [...new Set(parsed.data.map((item) => String(item?.id || '').trim()).filter(Boolean))]
+        : [];
+      return {
+        ok: models.length > 0,
+        models,
+        message: models.length > 0 ? `已获取 ${models.length} 个模型` : '接口未返回可用模型',
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        models: [],
+        message: error && error.name === 'AbortError'
+          ? (options.signal && options.signal.aborted ? 'Anthropic 模型列表请求已取消' : 'Anthropic 模型列表请求超时')
+          : error && error.message ? error.message : 'Anthropic 模型列表请求失败',
+      };
+    } finally {
+      clearTimeout(timeout);
+      if (options.signal) options.signal.removeEventListener('abort', onAbort);
+    }
   }
 
   async chat(apiKey, body, telemetry, options = {}) {

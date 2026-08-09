@@ -126,9 +126,15 @@ const {
   buildFinalizationFallbackMessage,
   finalizationFallbackReason,
   createAgentProgressRecorder,
+  createResultEditCompletionGuard,
   createAgentToolCallController,
   runAgentToolCallBatch,
 } = require('./agent-tools');
+const {
+  createResultEditProgressRecorder,
+  finalizeResultEditProgress,
+  projectResultStudioToolContext,
+} = require('./agent-tools/result-context-binding');
 const { inferExecutionPolicy } = require('./helpers/agent-execution-policy');
 const {
   _gatherAnalysisContextForMethods,
@@ -825,9 +831,11 @@ async function runAgentLoop({
   }
 
   const aborted = () => (typeof shouldAbort === 'function' ? shouldAbort() : false);
+  const resultEditProgress = createResultEditProgressRecorder();
   const toolCtx = {
     userId,
     projectId: context && context.projectId,
+    ...projectResultStudioToolContext(context),
     accessMode: context && context.accessMode === 'read' ? 'read' : 'full',
     allowExecution: executionPolicy.allowExecution,
     executionPolicyReason: executionPolicy.reason,
@@ -838,7 +846,10 @@ async function runAgentLoop({
     gatherAnalysisContextForMethods: _gatherAnalysisContextForMethods, // GENERATE_METHODS_v1
     renderMethodsParagraph: _renderMethodsParagraph,
     isCancelled: aborted,
-    emitResultEditProgress: (progress) => _emit({ event: 'result_edit_progress', ...progress }),
+    emitResultEditProgress: (progress) => _emit({
+      event: 'result_edit_progress',
+      ...resultEditProgress.record(progress),
+    }),
   };
   // Refresh docs index in background if stale
 
@@ -847,11 +858,18 @@ async function runAgentLoop({
 
   const traceId = createTraceId();
   const toolCallController = createAgentToolCallController({ maxToolCalls: MAX_AGENT_TOOL_CALLS });
+  const latestUserMessage = [...messages].reverse().find((message) => message?.role === 'user');
+  const resultEditCompletionGuard = createResultEditCompletionGuard({
+    expectation: toolCtx.resultStudioCompletionExpectation,
+    requestedOutcome: typeof latestUserMessage?.content === 'string' ? latestUserMessage.content : '',
+  });
   const modelResultState = createModelResultState({
     projectId: toolCtx.projectId,
     traceId,
   });
   let assistantAcc = '';
+  let assistantMessagePersisted = false;
+  let providerFailureReason = null;
   const assistantProgress = createAgentProgressRecorder();
   let finalizationAttempts = 0;
   let finalizationFailureReason = null;
@@ -902,7 +920,11 @@ async function runAgentLoop({
         temperature: 0.4,
         max_tokens: 1500,
         tools: finalizing ? undefined : tools,
-        tool_choice: finalizing ? undefined : 'auto',
+        tool_choice: finalizing
+          ? undefined
+          : (resultEditCompletionGuard.requiresToolExecution()
+            ? resultEditCompletionGuard.requiredToolChoice()
+            : 'auto'),
       };
 
       let streamedText = '';
@@ -924,7 +946,9 @@ async function runAgentLoop({
           protocolRecoveryAttempt ? undefined : (event) => {
             if (event.type === 'content_delta' && event.content && !aborted()) {
               streamedText += event.content;
-              _emit({ choices: [{ delta: { content: event.content } }] });
+              if (!resultEditCompletionGuard.required) {
+                _emit({ choices: [{ delta: { content: event.content } }] });
+              }
             }
           },
           {
@@ -955,12 +979,14 @@ async function runAgentLoop({
       }
       if (!finalizing && (!upJson || upJson.error || !upJson.choices)) {
         const assessment = assessFinalizationResult(upJson, streamedText);
-        if (assessment.retryable && !aborted()) {
+        const maxProviderAttempts = 3;
+        for (let attempt = 2; attempt <= maxProviderAttempts
+          && assessment.retryable && !aborted(); attempt += 1) {
           _emit({
             event: 'agent_status',
             phase: 'provider_retry',
-            attempt: 2,
-            maxAttempts: 2,
+            attempt,
+            maxAttempts: maxProviderAttempts,
             reason: assessment.reason,
             message: '上游响应暂时异常，正在自动重试当前阶段…',
           });
@@ -977,20 +1003,22 @@ async function runAgentLoop({
             (event) => {
               if (event.type === 'content_delta' && event.content && !aborted()) {
                 streamedText += event.content;
-                _emit({ choices: [{ delta: { content: event.content } }] });
+                if (!resultEditCompletionGuard.required) {
+                  _emit({ choices: [{ delta: { content: event.content } }] });
+                }
               }
             },
             { baseUrl, profileId, modelOverride: modelName }
           );
+          if (upJson && !upJson.error && upJson.choices) break;
         }
       }
       if (!upJson || upJson.error || !upJson.choices) {
         if (finalizing && finalizationAttempts > 0) break;
-        _emit({
-          error:
-            (upJson && (upJson.message || upJson.error || (upJson.choices ? 'no choice' : 'bad response'))) ||
-            'upstream error',
-        });
+        providerFailureReason = String(
+          (upJson && (upJson.message || upJson.error || (upJson.choices ? 'no choice' : 'bad response')))
+          || 'upstream error'
+        );
         break;
       }
 
@@ -1008,6 +1036,27 @@ async function runAgentLoop({
 
       if (toolCalls.length === 0) {
         let assessment = assessFinalizationResult(upJson, streamedText);
+        const editCompletion = resultEditCompletionGuard.assessTerminal();
+        if (editCompletion.action === 'retry') {
+          fullMessages.push({ role: 'assistant', content: assessment.content || msg.content || '' });
+          fullMessages.push({ role: 'system', content: editCompletion.prompt });
+          _emit({
+            event: 'agent_status',
+            phase: 'result_edit_completion_retry',
+            attempt: 1,
+            maxAttempts: 1,
+            reason: editCompletion.reason,
+            message: editCompletion.message,
+          });
+          continue;
+        }
+        if (editCompletion.action === 'fail') {
+          assistantAcc = editCompletion.message;
+          _emit({ choices: [{ delta: { content: assistantAcc } }] });
+          _emit({ event: 'done' });
+          modelFinalized = true;
+          break;
+        }
         finalizationAttempts = 1;
         finalizationFailureReason = assessment.usable ? null : assessment.reason;
         if (!assessment.usable && assessment.retryable && !aborted()) {
@@ -1046,6 +1095,9 @@ async function runAgentLoop({
           }
         }
         assistantAcc = assessment.content;
+        if (assessment.usable && resultEditCompletionGuard.required && assessment.content) {
+          _emit({ choices: [{ delta: { content: assessment.content } }] });
+        }
         modelFinalized = assessment.usable;
         break;
       }
@@ -1073,6 +1125,7 @@ async function runAgentLoop({
           _emit(buildToolCallEvent({ name, args, traceId, callId, iteration: iter + 1 }));
           let envelope = await executeToolCall(name, args, toolCtx, { traceId, callId });
           let result = localizeToolResult(envelope.data);
+          resultEditCompletionGuard.recordToolResult(name, result);
           envelope = replaceToolResultData(envelope, result);
 
           // ACT_ACK_v1_SERVER: send the event first, then wait for the frontend ack.
@@ -1446,6 +1499,14 @@ async function runAgentLoop({
           decisionReasonCode = REASON_CODES.TOOL_SUCCEEDED;
           publicConclusion = `工具执行中（${activeJobs.length} 个运行中）。继续监控。`;
           loopActiveJobs = activeJobs;
+        } else if (
+          activities.some((activity) => activity.name === 'run_tool' && activity.status === 'success') &&
+          finalizationFailureReason
+        ) {
+          decision = 'complete';
+          decisionReasonCode = REASON_CODES.GOAL_ACHIEVED;
+          publicConclusion = '工具与产物已完成验证；AI 总结暂时不可用。';
+          loopActiveJobs = [];
         } else if (modelFinalized || activities.length === 0) {
           decision = 'complete';
           decisionReasonCode = REASON_CODES.GOAL_ACHIEVED;
@@ -1508,8 +1569,21 @@ async function runAgentLoop({
       _emit({ event: 'done' });
     }
 
-    if (cancellationObserved || loopAbortedByController) {
-      assistantAcc = '任务已由用户停止。已完成的阶段结论、工具记录和结果已保留，未开始的步骤不会继续执行。';
+    if (providerFailureReason) {
+      fatalAgentError = new Error(providerFailureReason);
+      const final = finalizeResultEditProgress(resultEditProgress, {
+        outcome: 'failed', reason: 'agent_run_failed',
+      });
+      if (final.terminal) _emit({ event: 'result_edit_progress', ...final.terminal });
+      assistantAcc = final.assistantMessage;
+      _emit({ choices: [{ delta: { content: assistantAcc } }] });
+      _emit({ error: providerFailureReason });
+    } else if (cancellationObserved || loopAbortedByController) {
+      const final = finalizeResultEditProgress(resultEditProgress, {
+        outcome: 'cancelled', reason: 'user_cancelled',
+      });
+      if (final.terminal) _emit({ event: 'result_edit_progress', ...final.terminal });
+      assistantAcc = final.assistantMessage;
       _emit({ event: 'agent_cancelled', reason: 'user_cancelled' });
     } else if (assistantAcc.trim().length === 0) {
       const fallbackMsg = buildFinalizationFallbackMessage({
@@ -1542,6 +1616,9 @@ async function runAgentLoop({
                 ...(assistantProgress.snapshot().length
                   ? { progressUpdates: assistantProgress.snapshot() }
                   : {}),
+                ...(resultEditProgress.snapshot().length
+                  ? { resultEditProgress: resultEditProgress.snapshot() }
+                  : {}),
                 ...(finalizationAttempts ? {
                   finalization: {
                     attempts: finalizationAttempts,
@@ -1550,9 +1627,11 @@ async function runAgentLoop({
                     ...(finalizationRouting ? { routing: finalizationRouting } : {}),
                   },
                 } : {}),
-                ...(finalizationFailureReason || toolCallController.anomaly ? {
+                ...(providerFailureReason || finalizationFailureReason || toolCallController.anomaly ? {
                   incident: {
-                    code: toolCallController.anomaly?.code || finalizationFailureReason || 'agent_failure',
+                    code: providerFailureReason
+                      ? 'agent_provider_failed'
+                      : toolCallController.anomaly?.code || finalizationFailureReason || 'agent_failure',
                     autoRecoveryAttempts: finalizationAttempts,
                     ...(toolCallController.anomaly?.tool ? { tool: toolCallController.anomaly.tool } : {}),
                   },
@@ -1569,6 +1648,7 @@ async function runAgentLoop({
                 } : {}),
               };
               appendMessageToConversation(_activeConv.id, 'assistant', assistantAcc.trim(), assistantMeta);
+              assistantMessagePersisted = true;
               try {
                 _maybeAutoTitleConversation(_activeConv.id, userId);
               } catch {}
@@ -1655,6 +1735,24 @@ async function runAgentLoop({
   } catch (e) {
     fatalAgentError = e;
     cancellationObserved = cancellationObserved || aborted();
+    if (!assistantMessagePersisted && _activeConv && resultEditProgress.snapshot().length > 0) {
+      const final = finalizeResultEditProgress(resultEditProgress, {
+        outcome: cancellationObserved ? 'cancelled' : 'failed',
+        reason: cancellationObserved ? 'user_cancelled' : 'agent_run_failed',
+      });
+      if (final.terminal) _emit({ event: 'result_edit_progress', ...final.terminal });
+      assistantAcc = final.assistantMessage;
+      try {
+        appendMessageToConversation(_activeConv.id, 'assistant', assistantAcc, {
+          page: context && context.page,
+          projectId: context && context.projectId,
+          processingDurationMs: Math.max(0, Date.now() - turnStartedAt),
+          resultEditProgress: resultEditProgress.snapshot(),
+          incident: { code: cancellationObserved ? 'user_cancelled' : 'agent_run_failed', autoRecoveryAttempts: 0 },
+        });
+        assistantMessagePersisted = true;
+      } catch {}
+    }
     _emit({ error: e.message });
     if (loopRunId && !cancellationObserved) {
       _loopPersistPhase('failed', 'Harness Loop 收口失败，执行记录与已有产物已保留。');

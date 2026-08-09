@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { createRequire } from 'node:module';
 
@@ -6,8 +7,13 @@ const require = createRequire(import.meta.url);
 const {
   REQUIRED_TASKS,
   REQUIRED_ENVIRONMENTS,
-  REQUIRED_EVIDENCE,
+  REQUIRED_TRACE_STEPS,
+  REQUIRED_INVARIANTS,
+  RESULT_STUDIO_QUALIFICATION_VERSION,
+  RESULT_STUDIO_PRODUCT_TRACE_VERSION,
+  validateProductTrace,
   evaluateResultStudioQualification,
+  classifyHistoricalEvidence,
 } = require('../core/shared-backend/result-studio-qualification');
 const {
   buildTableInteractionManifest,
@@ -15,61 +21,194 @@ const {
   describeSelectionForAgent,
 } = require('../core/shared-backend/artifact-interaction');
 const { planResultEdit } = require('../core/shared-backend/result-edit-intent');
+const { computeExecutionProvenanceHash } = require('../core/shared-backend/execution-provenance');
 
-function passingReport() {
+const evidenceKindForStep = {
+  conversation: ['conversation_event'],
+  open_artifact: ['ui_event'],
+  selection_or_manual_edit: ['ui_event'],
+  agent_context_envelope: ['context_snapshot'],
+  provider_tool_call: ['provider_tool_call'],
+  result_edit_intent: ['database_record'],
+  changeset: ['database_record', 'git_record'],
+  real_job: ['database_record'],
+  artifact_truth_and_validator: ['artifact_truth', 'validator_record'],
+  candidate_revision: ['database_record', 'git_record'],
+  compare: ['ui_event'],
+  adopt_or_revert: ['database_record', 'git_record'],
+  restart_or_reopen: ['restart_event'],
+  replay_verification: ['replay_record'],
+};
+
+function productTrace(taskId, index) {
+  const evidence = [];
+  const steps = REQUIRED_TRACE_STEPS.map((id, stepIndex) => {
+    const evidenceRefs = evidenceKindForStep[id].map((kind, kindIndex) => {
+      const evidenceId = `ev_${index}_${stepIndex}_${kindIndex}`;
+      evidence.push({
+        id: evidenceId,
+        kind,
+        sourceRef: `${kind}:trace-${index}/event-${stepIndex}-${kindIndex}`,
+        digest: String(index + stepIndex + kindIndex + 1).padStart(64, 'a').slice(-64),
+        observedAt: `2026-07-25T08:${String(stepIndex).padStart(2, '0')}:00.000Z`,
+      });
+      return evidenceId;
+    });
+    return { id, status: 'observed', eventId: `event_${index}_${stepIndex}`, evidenceRefs };
+  });
   return {
-    schemaVersion: 1,
-    tasks: REQUIRED_TASKS.map((id) => ({ id, status: 'passed' })),
-    environments: REQUIRED_ENVIRONMENTS.map((id) => ({ id, status: 'passed' })),
-    evidence: REQUIRED_EVIDENCE.map((id) => ({ id, status: 'passed' })),
-    providers: [
-      { providerClass: 'deepseek', status: 'passed' },
-      { providerClass: 'openai-compatible', status: 'passed' },
-    ],
-    commands: [{ id: 'product', passed: true }],
-    invariants: {
-      executionTruth: 'run_tool -> tool_job -> artifact_truth',
-      sourceDataPreserved: true,
-      artifactHistoryPreserved: true,
-      unrelatedGitWipPreserved: true,
-      falseSuccessCount: 0,
-      partialAdoptCount: 0,
-      silentLossCount: 0,
-      formalArtifactCount: 12,
-      formalArtifactsWithIndependentScripts: 12,
+    schemaVersion: RESULT_STUDIO_PRODUCT_TRACE_VERSION,
+    traceId: `trace-product-${index}`,
+    taskId,
+    sourceCommit: 'a'.repeat(40),
+    projectRefHash: 'b'.repeat(64),
+    conversationRefHash: 'c'.repeat(64),
+    primaryOperationDigest: String(index + 1).padStart(64, '7').slice(-64),
+    factPackageRef: `facts/trace-${index}.json#`,
+    appMode: 'packaged_desktop_app',
+    platform: 'macos-arm64',
+    providerClass: index % 2 === 0 ? 'deepseek' : 'openai-compatible',
+    userSuppliedInternalIds: false,
+    sourceCommitMatchesSourceHashes: true,
+    sourceBindingStableDuringCapture: true,
+    runtimeBinding: {
+      architecture: 'arm64',
+      packaged: true,
+      executableSha256: 'd'.repeat(64),
+      buildSubjectSha256: 'e'.repeat(64),
+      buildSourceCommit: 'a'.repeat(40),
+      codeSignatureVerified: true,
     },
-    privacyClean: true,
+    providerInvocation: {
+      transport: 'real_network',
+      toolCallObserved: true,
+      toolResultObserved: true,
+      expectedJsonEmbeddedInPrompt: false,
+      requestDigest: 'f'.repeat(64),
+      responseDigest: '1'.repeat(64),
+      toolName: 'result_studio_context',
+    },
+    replayVerification: {
+      exactMatch: true,
+      graphExact: true,
+      outputCohortHash: '5'.repeat(64),
+      packageDigest: '6'.repeat(64),
+    },
+    performance: { firstCanvasMs: 850 },
+    startedAt: '2026-07-25T08:00:00.000Z',
+    completedAt: '2026-07-25T09:00:00.000Z',
+    evidence,
+    steps,
   };
 }
 
-test('RS9 qualification requires the complete task, environment and evidence matrices', () => {
-  const valid = evaluateResultStudioQualification(passingReport());
-  assert.equal(valid.passed, true, JSON.stringify(valid));
-
-  const incomplete = passingReport();
-  incomplete.tasks.pop();
-  incomplete.environments.pop();
-  incomplete.evidence.pop();
-  const verdict = evaluateResultStudioQualification(incomplete);
+test('RS-P0 rejects the stored RS9 summary because it has no continuous product traces', () => {
+  const historical = JSON.parse(readFileSync(new URL('../acceptance/g0-result-studio/rs9-product-acceptance.json', import.meta.url)));
+  const verdict = evaluateResultStudioQualification(historical);
   assert.equal(verdict.passed, false);
-  assert.equal(verdict.missingTasks.length, 1);
-  assert.equal(verdict.missingEnvironments.length, 1);
-  assert.equal(verdict.missingEvidence.length, 1);
+  assert.equal(verdict.checks.schema, false);
+  assert.equal(verdict.checks.allTracesValid, false);
+  assert.deepEqual(verdict.missingTasks, REQUIRED_TASKS);
 });
 
-test('RS9 qualification refuses one Provider, false success or incomplete independent scripts', () => {
-  const report = passingReport();
-  report.providers = report.providers.slice(0, 1);
-  report.invariants.falseSuccessCount = 1;
-  report.invariants.formalArtifactsWithIndependentScripts = 11;
-  const verdict = evaluateResultStudioQualification(report);
-  assert.equal(verdict.passed, false);
-  assert.equal(verdict.checks.twoRealProviders, false);
-  assert.equal(verdict.checks.honestRecovery, false);
-  assert.equal(verdict.checks.independentScripts, false);
+test('RS-P0 continuous trace contract requires ordered observed events and source-backed references', () => {
+  const valid = productTrace(REQUIRED_TASKS[0], 0);
+  assert.equal(validateProductTrace(valid).valid, true, JSON.stringify(validateProductTrace(valid)));
+
+  const incomplete = structuredClone(valid);
+  incomplete.steps.splice(4, 1);
+  const verdict = validateProductTrace(incomplete);
+  assert.equal(verdict.valid, false);
+  assert.ok(verdict.issues.includes('trace_steps_not_complete_and_ordered'));
 });
 
-test('RS9 carries an exact 27-gene DEG selection into bounded Agent context', () => {
+test('P7 refuses producer-authored invariant and environment conclusions', () => {
+  const trace = productTrace(REQUIRED_TASKS[0], 0);
+  trace.invariants = REQUIRED_INVARIANTS.map((id) => ({ id, status: 'observed_pass' }));
+  trace.environmentTags = REQUIRED_ENVIRONMENTS;
+  const verdict = validateProductTrace(trace);
+  assert.equal(verdict.valid, false);
+  assert.ok(verdict.issues.includes('trace_producer_qualification_assertions_forbidden'));
+});
+
+test('RS-P0 refuses manual booleans, unsafe refs and user-supplied internal IDs', () => {
+  const trace = productTrace(REQUIRED_TASKS[0], 0);
+  trace.userSuppliedInternalIds = true;
+  trace.evidence[0].kind = 'manual_boolean';
+  trace.evidence[0].sourceRef = '/Users/example/private.json';
+  const verdict = validateProductTrace(trace);
+  assert.equal(verdict.valid, false);
+  assert.ok(verdict.issues.includes('trace_user_supplied_internal_ids_not_disproved'));
+  assert.ok(verdict.issues.includes(`trace_evidence_kind_not_qualifying:${trace.evidence[0].id}`));
+  assert.ok(verdict.issues.includes(`trace_evidence_kind_forbidden:${trace.evidence[0].id}`));
+  assert.ok(verdict.issues.includes(`trace_evidence_ref_unsafe:${trace.evidence[0].id}`));
+});
+
+test('P7 refuses development runtime, prompt-oracle Provider evidence and slow packaged canvas', () => {
+  const trace = productTrace(REQUIRED_TASKS[0], 0);
+  trace.runtimeBinding.packaged = false;
+  trace.providerInvocation.expectedJsonEmbeddedInPrompt = true;
+  trace.performance.firstCanvasMs = 1001;
+  const verdict = validateProductTrace(trace);
+  assert.equal(verdict.valid, false);
+  assert.ok(verdict.issues.includes('trace_runtime_not_packaged'));
+  assert.ok(verdict.issues.includes('trace_provider_prompt_oracle_not_disproved'));
+  assert.ok(verdict.issues.includes('trace_packaged_first_canvas_budget_failed'));
+});
+
+test('P7 refuses source drift and out-of-order evidence timestamps', () => {
+  const trace = productTrace(REQUIRED_TASKS[0], 0);
+  trace.sourceBindingStableDuringCapture = false;
+  trace.evidence.at(-1).observedAt = '2026-07-25T07:59:59.000Z';
+  const verdict = validateProductTrace(trace);
+  assert.equal(verdict.valid, false);
+  assert.ok(verdict.issues.includes('trace_source_binding_not_stable'));
+  assert.ok(verdict.issues.some((issue) => issue.startsWith('trace_step_time_order_invalid:')));
+});
+
+test('P7 task traces still refuse a claimed replay without its task-local proof', () => {
+  const trace = productTrace(REQUIRED_TASKS[0], 0);
+  trace.replayVerification.exactMatch = false;
+  const verdict = validateProductTrace(trace);
+  assert.equal(verdict.valid, false);
+  assert.ok(verdict.issues.includes('trace_exact_replay_not_proved'));
+});
+
+test('P7 qualification v4 refuses five structurally valid traces without an independently verified evidence bundle', () => {
+  const productTraces = REQUIRED_TASKS.map((taskId, index) => productTrace(taskId, index));
+  const valid = evaluateResultStudioQualification({
+    schemaVersion: RESULT_STUDIO_QUALIFICATION_VERSION,
+    productTraces,
+    privacyClean: true,
+  });
+  assert.equal(valid.passed, false, JSON.stringify(valid));
+  assert.equal(valid.checks.schema, true);
+  assert.equal(valid.checks.allTracesValid, true);
+  assert.equal(valid.checks.taskMatrix, true);
+  assert.equal(valid.checks.twoRealProviders, false);
+  assert.equal(valid.checks.independentEvidence, false);
+  assert.ok(valid.evidenceIssues.includes('qualification_evidence_bundle_required'));
+
+  const incomplete = evaluateResultStudioQualification({
+    schemaVersion: RESULT_STUDIO_QUALIFICATION_VERSION,
+    productTraces: productTraces.slice(0, 4).map((trace) => ({ ...trace, providerClass: 'deepseek' })),
+    privacyClean: true,
+  });
+  assert.equal(incomplete.passed, false);
+  assert.equal(incomplete.missingTasks.length, 1);
+  assert.equal(incomplete.checks.twoRealProviders, false);
+});
+
+test('RS-P0 classifies every RS9 input as historical and non-qualifying', () => {
+  for (const id of ['rs9-product-acceptance', 'rs9-provider-acceptance', 'rs9-visual-acceptance', 'rs9-visual-table-seed']) {
+    const classification = classifyHistoricalEvidence(id);
+    assert.equal(classification.qualificationEligible, false);
+    assert.notEqual(classification.classification, 'unknown_unclassified');
+    assert.ok(classification.reasons.length > 0);
+  }
+});
+
+test('selection contract can describe a synthetic 27-gene query but does not qualify the product UI', () => {
   const rows = Array.from({ length: 27 }, (_, index) => ({
     gene_id: `ENSG${String(index + 1).padStart(11, '0')}`,
     padj: 0.001 + index / 100000,
@@ -93,18 +232,22 @@ test('RS9 carries an exact 27-gene DEG selection into bounded Agent context', ()
   assert.match(selection.filterHash, /^[a-f0-9]{64}$/);
 });
 
-test('RS9 scientific threshold edits deterministically include the downstream enrichment subgraph', () => {
+test('intent planner includes the downstream enrichment subgraph from a trusted persisted graph without claiming a product trace', () => {
+  const executionProvenance = {
+    executionProvenanceVersion: 1,
+    toolJobId: 'tj_deg',
+    projectId: 'p_rs9',
+    script: { snapshotPath: 'results/jobs/tj_deg/run.R', sha256: 'a'.repeat(64) },
+    inputs: [{ id: 'counts', relativePath: 'inputs/counts.csv', sha256: 'b'.repeat(64), sourceArtifactRef: 'rev_counts' }],
+    artifacts: [{ id: 'deg_table', filename: 'deg.csv', sha256: 'c'.repeat(64) }],
+  };
+  executionProvenance.provenanceHash = computeExecutionProvenanceHash(executionProvenance);
   const toolJob = {
     id: 'tj_deg', project_id: 'p_rs9', status: 'completed',
     result: {
       artifactTruth: { status: 'valid', blocking: false },
       artifacts: [{ id: 'deg_table', type: 'table' }],
-      executionProvenance: {
-        toolJobId: 'tj_deg',
-        script: { snapshotPath: 'results/jobs/tj_deg/run.R', sha256: 'a'.repeat(64) },
-        inputs: [{ id: 'counts', relativePath: 'inputs/counts.csv', sha256: 'b'.repeat(64), sourceArtifactRef: 'rev_counts' }],
-        artifacts: [{ id: 'deg_table', filename: 'deg.csv', sha256: 'c'.repeat(64) }],
-      },
+      executionProvenance,
     },
   };
   const result = planResultEdit({
@@ -112,12 +255,21 @@ test('RS9 scientific threshold edits deterministically include the downstream en
     requestedOutcome: '将 padj 阈值改为 0.01 并更新下游富集',
     proposedParameterPatch: { padj_cutoff: 0.01 },
     parameterImpactRules: { padj_cutoff: 'scientific_recompute' },
-    workflowPlan: { steps: [
+    // The planner only receives this shape after the server has projected it
+    // from persistent Workflow Truth; callers cannot supply a bare DAG.
+    workflowPlan: {
+      workflowTruthVersion: 1,
+      authority: 'sqlite_job_artifact_truth',
+      graphId: 'wfg_rs9_qualification_test',
+      sourceDigest: 'd'.repeat(64),
+      rootToolJobId: 'tj_counts',
+      steps: [
       { id: 'deg', toolJobId: 'tj_deg', dependsOn: ['counts'] },
       { id: 'counts', toolJobId: 'tj_counts', dependsOn: [] },
       { id: 'volcano', toolJobId: 'tj_volcano', dependsOn: ['deg'] },
       { id: 'enrichment', toolJobId: 'tj_enrich', dependsOn: ['deg'] },
-    ] },
+      ],
+    },
   });
   assert.equal(result.ok, true, JSON.stringify(result.diagnostics));
   assert.equal(result.status, 'confirmation_required');

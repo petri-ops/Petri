@@ -21,6 +21,7 @@ const {
   VALIDATION_STATUSES,
   REPRODUCIBILITY_STATUSES,
   MAX_PERSISTED_ENTITY_IDS,
+  assessSelectionCompatibility,
   assessCheckpointConsistency,
   canTransitionChangeSet,
   computeCheckpointHash,
@@ -356,6 +357,54 @@ test('RS2 selection summary stays bounded and never leaks the full id list', () 
   assert.equal(summary.sampleEntityIds.length, 12);
   assert.equal(summary.hasFilter, true);
   assert.equal(JSON.stringify(summary).length < 2000, true);
+});
+
+test('RS-P2 accepts authoritative query evidence without persisting the complete ID set', () => {
+  const result = validateSelectionContext({
+    selectionId: 'sel_query',
+    projectId: 'project_1',
+    conversationId: 'conv_1',
+    artifactId: 'deg_table',
+    revisionId: 'rev_1',
+    entityType: 'gene',
+    entityIds: ['TP53', 'EGFR'],
+    entityIdCount: 100_000,
+    entityIdsHash: 'a'.repeat(64),
+    filterHash: 'b'.repeat(64),
+    filterExpression: { logic: 'and', clauses: [{ field: 'padj', op: 'lt', value: 0.05 }] },
+  });
+  assert.equal(result.ok, true, JSON.stringify(result.errors));
+  assert.equal(result.selection.entityIdCount, 100_000);
+  assert.equal(result.selection.entityIds.length, 2);
+  assert.equal(result.selection.entityIdsTruncated, true);
+  assert.equal(result.selection.filterHash, 'b'.repeat(64));
+});
+
+test('RS-P2 refuses a query-backed selection without authoritative hashes', () => {
+  const result = validateSelectionContext({
+    selectionId: 'sel_query_bad', projectId: 'project_1', artifactId: 'deg_table',
+    entityType: 'gene', entityIds: ['TP53'], entityIdCount: 50,
+    filterExpression: { logic: 'and', clauses: [] },
+  });
+  assert.equal(result.ok, false);
+  assert.equal(result.errors.some((error) => error.code === 'query_selection_requires_evidence'), true);
+});
+
+test('RS-P2 classifies selection compatibility without silently remapping stale rows', () => {
+  const { selection } = validateSelectionContext({
+    selectionId: 'sel_compat', projectId: 'project_1', artifactId: 'deg_table',
+    revisionId: 'rev_1', entityType: 'gene', entityIds: ['TP53', 'EGFR'],
+    displayState: { durable: true },
+  });
+  assert.deepEqual(assessSelectionCompatibility({
+    selection, projectId: 'project_1', artifactId: 'deg_table', revisionId: 'rev_1',
+  }), { status: 'compatible', reason: 'same_revision' });
+  assert.deepEqual(assessSelectionCompatibility({
+    selection, projectId: 'project_1', artifactId: 'deg_table', revisionId: 'rev_2',
+  }), { status: 'stale', reason: 'revision_changed' });
+  assert.deepEqual(assessSelectionCompatibility({
+    selection, projectId: 'project_1', artifactId: 'other', revisionId: 'rev_1',
+  }), { status: 'invalid', reason: 'artifact_mismatch' });
 });
 
 // ---------------------------------------------------------------------------

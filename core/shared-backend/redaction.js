@@ -2,8 +2,8 @@
 
 const SENSITIVE_VALUE = '[REDACTED]';
 const SENSITIVE_KEY = /(?:^|[_-])(?:authorization|x-api-key|api[_-]?key|access[_-]?token|refresh[_-]?token|token|password|passwd|secret|secret[_-]?access[_-]?key|private[_-]?key)$/i;
-const CAMEL_CASE_SENSITIVE_KEY = /^(?:remoteComputeToken)$/i;
-const CREDENTIAL_NAME = String.raw`(?:remoteComputeToken|(?:[A-Za-z][A-Za-z0-9]*[_-])*(?:api[_-]?key|access[_-]?token|refresh[_-]?token|token|password|passwd|secret(?:[_-]?access[_-]?key)?|private[_-]?key))`;
+const CAMEL_CASE_SENSITIVE_KEY = /^(?:remoteComputeToken|contextToken)$/i;
+const CREDENTIAL_NAME = String.raw`(?:remoteComputeToken|contextToken|(?:[A-Za-z][A-Za-z0-9]*[_-])*(?:api[_-]?key|access[_-]?token|refresh[_-]?token|token|password|passwd|secret(?:[_-]?access[_-]?key)?|private[_-]?key))`;
 
 function isSensitiveKey(key) {
   return SENSITIVE_KEY.test(key) || CAMEL_CASE_SENSITIVE_KEY.test(key);

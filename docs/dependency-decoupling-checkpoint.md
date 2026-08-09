@@ -117,7 +117,7 @@
 
 ## 下阶段建议
 
-> 可直接粘贴给下一个 Agent 的接手提示词见 [`agent-handoff-prompt.md`](./agent-handoff-prompt.md)。
+> 当时使用的 Agent 接手提示词已失效并归档于 [`agent-handoff-prompt.md`](./archive/checkpoints/agent-handoff-prompt.md)；当前 Agent 必须从 `AGENTS.md` 和文档入口恢复状态。
 
 架构去耦与 C 档执行引擎清理已经完成。后续回到 v1 Stage 1 UI 产品化主线；
 以下只剩非阻塞文档/模块归档事项：

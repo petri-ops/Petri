@@ -11,8 +11,11 @@
  */
 
 const express = require('express');
+const dbMod = require('../db');
 
 const { logChatAudit } = require('../helpers/memory-privacy');
+const { appendMessageToConversation } = require('../helpers/conversations');
+const { callModelTask } = require('../helpers/model-tasks');
 const { buildSystemPrompt } = require('../helpers/system-prompt');
 const { buildSiteSnapshotAsync, renderSiteSnapshotForPrompt } = require('../helpers/site-snapshot');
 const { buildFactsBlockAsync, backgroundExtractFacts } = require('../helpers/user-facts');
@@ -29,7 +32,129 @@ const {
   MAX_CONTENT_LEN,
 } = require('../helpers/memory-vectors');
 
+const TOOL_SUMMARY_PRIVATE_KEYS = new Set([
+  'jobDir', 'outputDir', 'resultDir', 'workDir', 'stdout', 'stderr', 'script',
+]);
+
+// UX1H: per-toolJobId rate limit for summary-only retry (abuse guard).
+// Sliding 10-minute window, max 5 attempts. In-memory per r-server process.
+const SUMMARY_RETRY_LIMIT = 5;
+const SUMMARY_RETRY_WINDOW_MS = 10 * 60 * 1000;
+const summaryRetryBuckets = new Map();
+
+function checkSummaryRetryAllowed(toolJobId) {
+  const now = Date.now();
+  const attempts = (summaryRetryBuckets.get(toolJobId) || []).filter((t) => now - t < SUMMARY_RETRY_WINDOW_MS);
+  summaryRetryBuckets.set(toolJobId, attempts);
+  if (attempts.length >= SUMMARY_RETRY_LIMIT) return false;
+  attempts.push(now);
+  return true;
+}
+
+function toolSummaryEvidence(value, depth = 0) {
+  if (depth > 5 || value == null) return value == null ? value : '[omitted]';
+  if (typeof value === 'string') return value.slice(0, 2000);
+  if (typeof value !== 'object') return value;
+  if (Array.isArray(value)) {
+    return value.slice(0, 50).map((item) => toolSummaryEvidence(item, depth + 1));
+  }
+  return Object.fromEntries(Object.entries(value)
+    .filter(([key]) => !TOOL_SUMMARY_PRIVATE_KEYS.has(key))
+    .slice(0, 80)
+    .map(([key, item]) => [key, toolSummaryEvidence(item, depth + 1)]));
+}
+
 module.exports = function registerAiChatRoute(app) {
+  app.post('/api/ai/tool-summary/retry', express.json({ limit: '64kb' }), async (req, res) => {
+    const userId = req.user && req.user.id ? String(req.user.id) : '';
+    const {
+      toolJobId,
+      projectId,
+      conversationId,
+      modelPresetId,
+    } = req.body || {};
+    if (!userId || !toolJobId || !projectId || !conversationId) {
+      return res.status(400).json({ status: 'error', error: '缺少总结重试上下文' });
+    }
+
+    const job = dbMod.getToolJob(String(toolJobId));
+    const scoped = job
+      && String(job.user_id || '') === userId
+      && String(job.project_id || '') === String(projectId)
+      && String(job.conversation_id || '') === String(conversationId);
+    if (!scoped) {
+      return res.status(404).json({ status: 'error', error: '未找到当前会话的工具结果' });
+    }
+    const conversation = dbMod.getDatabase().prepare(
+      'SELECT id FROM copilot_conversations WHERE id=? AND user_id=? AND project_id=?'
+    ).get(String(conversationId), userId, String(projectId));
+    if (!conversation) {
+      return res.status(404).json({ status: 'error', error: '未找到当前项目会话' });
+    }
+    if (job.status !== 'completed') {
+      return res.status(409).json({ status: 'error', error: '工具尚未完成，不能生成总结' });
+    }
+    const artifactTruth = job.result && job.result.artifactTruth;
+    if (!artifactTruth || artifactTruth.status !== 'valid') {
+      return res.status(409).json({ status: 'error', error: '产物尚未通过 Artifact Truth 验证' });
+    }
+    if (!checkSummaryRetryAllowed(String(toolJobId))) {
+      return res.status(429).json({ status: 'error', error: '总结重试过于频繁，请稍后再试' });
+    }
+
+    let boundedResult = '{}';
+    try {
+      boundedResult = JSON.stringify(toolSummaryEvidence(job.result || {})).slice(0, 18_000);
+    } catch {}
+
+    try {
+      // This task endpoint intentionally has no tool definitions. Retrying a
+      // summary can read one verified ToolJob, but can never execute it again.
+      const summary = await callModelTask({
+        role: 'chat',
+        profileId: typeof modelPresetId === 'string' ? modelPresetId : undefined,
+        messages: [
+          {
+            role: 'system',
+            content: '你只总结已完成的生物信息学工具结果。不得调用工具、不得建议结果仍在运行、不得虚构未提供的统计量。用简洁中文说明关键结果、产物和下一步解读重点。',
+          },
+          {
+            role: 'user',
+            content: `工具：${job.tool_id}\nToolJob：${job.id}\nArtifact Truth：valid\n\n已验证结果：\n${boundedResult}`,
+          },
+        ],
+        temperature: 0.2,
+        maxTokens: 900,
+        telemetry: {
+          userId,
+          projectId: String(projectId),
+          conversationId: String(conversationId),
+          toolJobId: job.id,
+          kind: 'tool_summary_retry',
+        },
+      });
+      const content = String(summary.text || '').trim();
+      if (summary.error || !content) {
+        return res.status(502).json({ status: 'error', error: 'AI 总结仍不可用，请稍后重试' });
+      }
+      appendMessageToConversation(String(conversationId), 'assistant', content, {
+        page: 'desktop-project',
+        projectId: String(projectId),
+        summaryRetry: {
+          toolJobId: job.id,
+          mode: 'summary_only',
+          toolExecution: 'not_invoked',
+        },
+      });
+      return res.json({ status: 'ok', content, toolJobId: job.id });
+    } catch (error) {
+      return res.status(502).json({
+        status: 'error',
+        error: 'AI 总结仍不可用，请稍后重试',
+      });
+    }
+  });
+
   app.post('/api/ai/chat', express.json({ limit: '256kb' }), async (req, res) => {
     // MEMORY_PRIVACY_v1: log audit (metadata only, no content)
     try {

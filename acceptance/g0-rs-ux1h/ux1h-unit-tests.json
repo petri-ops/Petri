@@ -1,0 +1,46 @@
+{
+  "evidenceId": "g0-rs-ux1h-unit-tests",
+  "planId": "G0-RS-UX1H",
+  "title": "UX1H - 工具成功与 AI 总结不可用提示单元测试",
+  "timestamp": "2026-08-06T16:30:00+08:00",
+  "sourceCommit": "9c2b4383f7c5b2ce9fa56a505040daa44a02ab34",
+  "qualificationEligible": false,
+  "scope": {
+    "description": "SimpleChat 展示层真实消息快照的工具成功与总结超时改写逻辑",
+    "boundaries": [
+      "覆盖 assistantContent/statusMessage 与成功 run_tool 的组合",
+      "覆盖失败工具与无关工具活动的 fail-closed 行为",
+      "不覆盖真实 Provider、开发态 Electron 或重试总结路径",
+      "不修改 LLM provider timeout 配置"
+    ]
+  },
+  "tests": {
+    "framework": "vitest",
+    "testFile": "frontend/src/components/copilot/SimpleChat.test.tsx",
+    "totalTests": 6,
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "testCommand": "npm run test:files --prefix frontend -- src/components/copilot/SimpleChat.test.tsx src/components/copilot/conversationRunStore.test.ts"
+  },
+  "staticChecks": {
+    "typescript": "passed",
+    "ux1hNodeGate": "passed",
+    "docsCheck": "passed",
+    "uiAuditCheck": "passed",
+    "docsReconcile": "passed"
+  },
+  "implementation": {
+    "changedFiles": [
+      "frontend/src/components/copilot/SimpleChat.tsx",
+      "frontend/src/components/copilot/SimpleChat.test.tsx",
+      "frontend/src/components/copilot/toolSummaryPresentation.ts"
+    ],
+    "logic": "仅在 assistant 总结超时且同一展示快照包含成功 run_tool 时，将错误态改为目标提示；工具失败、无关活动或非超时保持原错误语义"
+  },
+  "limitations": [
+    "重试总结按钮与完整异步工具面仍未实现",
+    "本证据不代表真实外部 Provider、打包态或 P7 资格",
+    "长链 Electron 证据单独记录在 async-tool-surface.json 与 summary-failure-renders-soft.json"
+  ]
+}

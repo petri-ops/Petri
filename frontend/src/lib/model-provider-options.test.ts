@@ -6,25 +6,29 @@ import {
   inferUserModelProvider,
   isChatSelectableProfile,
   isUserConfigurableModelProvider,
+  modelProviderProtocol,
+  modelProviderCredentialRef,
+  modelProviderRequiresCredential,
+  normalizeLegacyUserModelProfile,
   modelChoiceId,
   modelSupplierName,
   validateUserModelProfile,
 } from './model-provider-options';
 
 describe('user-facing model provider options', () => {
-  it('only exposes DeepSeek and a custom OpenAI-compatible API', () => {
+  it('exposes protocol adapters without mixing in suppliers', () => {
     expect(USER_MODEL_PROVIDER_OPTIONS).toEqual([
-      { value: 'deepseek', label: 'DeepSeek' },
-      { value: 'openai-compatible', label: '自定义 API' },
+      { value: 'openai-compatible', label: 'OpenAI' },
+      { value: 'anthropic', label: 'Anthropic' },
     ]);
   });
 
   it('keeps system vision and embedding services out of user choices', () => {
-    expect(isUserConfigurableModelProvider('deepseek')).toBe(true);
+    expect(isUserConfigurableModelProvider('deepseek')).toBe(false);
     expect(isUserConfigurableModelProvider('openai-compatible')).toBe(true);
     expect(isUserConfigurableModelProvider('dashscope')).toBe(false);
     expect(isUserConfigurableModelProvider('dashscope-vision')).toBe(false);
-    expect(isUserConfigurableModelProvider('anthropic')).toBe(false);
+    expect(isUserConfigurableModelProvider('anthropic')).toBe(true);
     expect(USER_MODEL_ROLE_IDS).not.toContain('vision');
     expect(USER_MODEL_ROLE_IDS).not.toContain('embedding');
   });
@@ -38,6 +42,7 @@ describe('user-facing model provider options', () => {
       })
     ).toBe('https://example.com/v1');
     expect(endpointBaseUrl({ provider: 'openai-compatible' })).toBe('');
+    expect(endpointBaseUrl({ provider: 'anthropic' })).toBe('');
   });
 
   it('derives stable supplier labels and unique endpoint/model choice ids', () => {
@@ -55,8 +60,39 @@ describe('user-facing model provider options', () => {
   });
 
   it('infers the transport adapter from the endpoint host', () => {
-    expect(inferUserModelProvider({ baseUrl: 'https://api.deepseek.com' })).toBe('deepseek');
+    expect(inferUserModelProvider({ baseUrl: 'https://api.deepseek.com' })).toBe('openai-compatible');
+    expect(inferUserModelProvider({ baseUrl: 'https://api.anthropic.com/v1' })).toBe('anthropic');
     expect(inferUserModelProvider({ baseUrl: 'https://ai.example.com/v1' })).toBe('openai-compatible');
+  });
+
+  it('maps native Anthropic endpoints to Messages protocol and required credentials', () => {
+    expect(modelProviderProtocol('anthropic')).toBe('anthropic-messages');
+    expect(modelProviderProtocol('openai-compatible')).toBe('openai-compatible');
+    expect(modelProviderRequiresCredential('anthropic')).toBe(true);
+    expect(modelProviderRequiresCredential('openai-compatible')).toBe(false);
+    expect(modelProviderCredentialRef('anthropic', 'Model A')).toBe(
+      'credential:model-a-anthropic'
+    );
+    expect(modelProviderCredentialRef('openai-compatible', 'Model A')).toBe(
+      'credential:model-a-openai-compatible'
+    );
+  });
+
+  it('migrates a legacy DeepSeek supplier into the OpenAI-compatible adapter', () => {
+    expect(normalizeLegacyUserModelProfile({
+      id: 'deepseek-chat',
+      provider: 'deepseek',
+      label: 'DeepSeek',
+      model: 'deepseek-v4-pro',
+      credentialRef: 'provider:deepseek',
+    })).toMatchObject({
+      id: 'deepseek-chat',
+      provider: 'openai-compatible',
+      protocol: 'openai-compatible',
+      label: 'DeepSeek',
+      baseUrl: 'https://api.deepseek.com',
+      credentialRef: 'provider:deepseek',
+    });
   });
 
   it('uses one explicit contract for chat-selectable endpoints', () => {
@@ -78,12 +114,12 @@ describe('user-facing model provider options', () => {
     ).toBe(false);
     expect(
       isChatSelectableProfile({
-        id: 'legacy',
+        id: 'native',
         provider: 'anthropic',
         model: 'claude',
         capabilities: ['chat'],
       })
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it('rejects incomplete custom endpoints instead of silently dropping them', () => {
@@ -107,5 +143,12 @@ describe('user-facing model provider options', () => {
         baseUrl: 'https://example.com/v1',
       })
     ).toBeNull();
+    expect(
+      validateUserModelProfile({
+        provider: 'anthropic',
+        model: 'claude-test',
+        baseUrl: 'not-a-url',
+      })
+    ).toContain('格式不正确');
   });
 });

@@ -137,7 +137,7 @@
     </header>
 
     <h2>一、分析概览</h2>
-    <p>本报告对差异分析结果表进行可视化汇总。火山图横轴为 <code>log2FC</code>，纵轴为 <code>-log10(p value)</code>，用于同时观察变化幅度和统计显著性。</p>
+    <p>本报告对差异分析结果表进行可视化汇总。火山图横轴为 <code>log2FC</code>，纵轴为 <code>-log10({{significance_column}})</code>，用于同时观察变化幅度和统计显著性。</p>
 
     <div class="stat-grid">
       <div class="stat-card"><div class="value">{{up_count}}</div><div class="label">上调基因</div></div>
@@ -147,7 +147,7 @@
 
     <div class="callout callout-info">
       <strong>阈值说明</strong>
-      当前使用 <code>|log2FC| &gt; {{fc_threshold}}</code> 与 <code>-log10(p value) &gt; {{pval_threshold}}</code> 判定显著性，并在图中标注 top {{top_n}} 个变化较明显的基因。
+      当前使用 <code>|log2FC| &gt; {{fc_threshold}}</code> 与 <code>-log10({{significance_column}}) &gt; {{pval_threshold}}</code> 判定显著性，并在图中标注 top {{top_n}} 个变化较明显的基因。
     </div>
 
     <h2>二、核心图表</h2>

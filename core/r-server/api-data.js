@@ -254,7 +254,15 @@ router.delete('/projects/:id', async (req, res) => {
 
 router.get('/projects/:id/jobs', (req, res) => {
   if (!checkOwnership(req, res, req.params.id)) return;
-  const jobs = db.listProjectToolJobs(req.params.id);
+  const conversationId = typeof req.query.conversationId === 'string'
+    ? req.query.conversationId
+    : undefined;
+  const jobs = db.listProjectToolJobs(req.params.id, conversationId).map((job) => ({
+    ...job,
+    // Keep the persisted snake_case field for older consumers while exposing
+    // the conversation-bound API contract in the same projection.
+    conversationId: job.conversation_id ?? null,
+  }));
   res.json({ status: 'ok', jobs });
 });
 

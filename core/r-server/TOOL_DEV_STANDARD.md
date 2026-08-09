@@ -357,7 +357,7 @@ bash scripts/_dev/verify-template-defense.sh
 10. 跑一次分析，确认输出完整（7+ 图 + 中间数据 + manifest.json）
 11. **★ 浏览器实际打开 `output/report.html` 肉眼过 §6.2 视觉检查清单**（视觉层）
 12. 在 `FIGCODE_MAP` 中注册图片→FigCode 卡片映射 + 在 `generateFigcodeWithData` 中添加代码模板
-13. 在 `test/smoke-tools.mjs` 与 `scripts/promote-demo.js` 的 fixtures 中加入该工具的 fixture（params + expectedOutputs）
+13. 在当前工具契约测试与 `scripts/harness-plugin-acceptance.mjs` 的验收 fixture 中加入该工具的 fixture（params + expectedOutputs）；历史 cloud smoke 脚本已退役，不再作为新增工具入口。
 14. **★ 服务器上跑 `bash /opt/biof3-r-server/scripts/promote-demo.sh <toolId>` 一键上线公开 demo**（幂等：admin token 跑 demo + 标 `is_public=1` + 验证可访问）。这取代了原来的"管理员后台手动点 设为 Demo"步骤
 
 ## 十一、关键约束

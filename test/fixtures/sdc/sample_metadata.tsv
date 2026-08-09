@@ -1,0 +1,5 @@
+sample_id	condition	batch	age
+sample_A	treatment	1	23
+sample_B	control	1	25
+sample_C	treatment	2	27
+sample_D	control	2	22

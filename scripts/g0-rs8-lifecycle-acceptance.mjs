@@ -51,7 +51,7 @@ function inspect(verification = null) {
 function runCommands() {
   const commands = [
     ['lifecycle-tests', 'node', ['--test', 'test/result-studio-lifecycle.test.mjs', 'test/result-changeset-service.test.mjs', 'test/result-studio-repository.test.mjs']],
-    ['frontend-result-studio', 'npm', ['test', '--prefix', 'frontend', '--', '--run', 'src/components/result-studio/ResultStudioChangeSetPanel.test.tsx']],
+    ['frontend-result-studio', 'npm', ['run', 'test:files', '--prefix', 'frontend', '--', 'src/components/result-studio/ResultStudioChangeSetPanel.test.tsx']],
     ['syntax', 'node', ['--check', 'core/shared-backend/result-studio-lifecycle.js']],
   ];
   return commands.map(([label, bin, args]) => {

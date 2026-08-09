@@ -22,7 +22,11 @@
  *   1   at least one assertion failed (with reason on stderr)
  */
 import { strict as assert } from 'node:assert';
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 let failed = 0;
 function check(cond, msg) {
@@ -92,8 +96,8 @@ if (failed > 0) {
 console.log('\nall run-json assertions passed.');
 
 // Real-run fixture (Week 3 first-success path evidence)
-const FIXTURE = '/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/tmp/real-run/deseq2-job_6b3808816e0041b4.run.json';
-if (existsSync(FIXTURE)) {
+const FIXTURE = resolve(REPO_ROOT, 'test/fixtures/golden-path/deseq2-run.json');
+{
   console.log('\n• real run fixture (Week 3A)');
   const real = JSON.parse(readFileSync(FIXTURE, 'utf8'));
   let rf = 0;
@@ -111,8 +115,6 @@ if (existsSync(FIXTURE)) {
     process.exit(1);
   }
   console.log('  all real-fixture assertions passed.');
-} else {
-  console.log(`\n  (real fixture not present at ${FIXTURE}, skipping real-fixture checks)`);
 }
 
 // Rescue-path schema (Week 3B): golden-path.mjs writes a

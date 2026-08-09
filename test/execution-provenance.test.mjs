@@ -1,12 +1,16 @@
 import assert from 'node:assert/strict';
 import test, { after } from 'node:test';
-import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, readFileSync, realpathSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { createExecutionProvenance, attachProvenanceToResult } = require('../core/shared-backend/execution-provenance');
+const {
+  createExecutionProvenance,
+  attachProvenanceToResult,
+  resolveExecutionInputPath,
+} = require('../core/shared-backend/execution-provenance');
 const { collectExecutionInputs, writeArtifactManifest } = require('../core/shared-backend/artifact-manifest');
 const root = mkdtempSync(join(tmpdir(), 'biof3-hrt4-'));
 after(() => rmSync(root, { recursive: true, force: true }));
@@ -71,6 +75,53 @@ test('direct plugin runs hash declared file inputs without retaining absolute pa
   assert.equal(provenance.params.normalized.counts.inputRef, 'inputs/counts/counts.csv');
   assert.doesNotMatch(JSON.stringify(provenance.params), new RegExp(jobDir.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.deepEqual(provenance.plugin.packageConstraints, { jsonlite: '>=1.8' });
+});
+
+test('direct uploaded files remain normalized input bindings when public params omit their paths', () => {
+  const jobDir = join(root, 'uploaded-run');
+  const inputPath = join(jobDir, 'counts.csv');
+  const scriptPath = join(jobDir, 'run-script.R');
+  require('node:fs').mkdirSync(jobDir, { recursive: true });
+  writeFileSync(inputPath, 'gene,S1\nA,2\n');
+  writeFileSync(scriptPath, 'print(1)\n');
+  const inputs = collectExecutionInputs({
+    inputDefinitions: [{ id: 'counts', role: 'counts', type: 'file' }],
+    params: { alpha: 0.05 },
+    jobDir,
+  });
+  const provenance = createExecutionProvenance({
+    toolJobId: 'tj_uploaded',
+    plugin: { id: 'tool', version: '1', language: 'r' },
+    params: { alpha: 0.05 },
+    inputs,
+    runScriptPath: scriptPath,
+  });
+  assert.deepEqual(provenance.params.normalized.counts, {
+    inputRef: 'inputs/counts/counts.csv',
+    sha256: provenance.inputs[0].sha256,
+  });
+  const resolved = resolveExecutionInputPath({
+    workspaceRoot: root,
+    input: provenance.inputs[0],
+    sourceParams: { alpha: 0.05 },
+    provenance,
+  });
+  assert.equal(resolved.path, realpathSync(inputPath));
+  assert.equal(resolved.source, 'job_compatibility_input');
+
+  for (const relativePath of ['../counts.csv', '..\\counts.csv', 'inputs/../counts.csv']) {
+    const unsafe = resolveExecutionInputPath({
+      workspaceRoot: root,
+      input: { ...provenance.inputs[0], relativePath },
+      sourceParams: { alpha: 0.05 },
+      provenance,
+    });
+    assert.deepEqual(unsafe, {
+      path: null,
+      source: null,
+      reason: 'input_identity_invalid',
+    });
+  }
 });
 
 test('artifact manifest records script, params, input and output hashes', () => {

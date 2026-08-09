@@ -20,7 +20,7 @@
  * 日志：写到 tmp/qa-smoke/<timestamp>.log
  */
 
-import { mkdirSync, writeFileSync, appendFileSync, existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { mkdirSync, writeFileSync, appendFileSync, existsSync, readFileSync, readdirSync, statSync, unlinkSync } from 'node:fs';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -46,6 +46,14 @@ const JSON_OUTPUT = argv.includes('--json');
 const ts = new Date().toISOString().replace(/[:.]/g, '-');
 const LOG_DIR = join(REPO_ROOT, 'tmp', 'qa-smoke');
 mkdirSync(LOG_DIR, { recursive: true });
+const MAX_LOGS = 20;
+const oldLogs = readdirSync(LOG_DIR)
+  .filter((entry) => entry.endsWith('.log'))
+  .map((entry) => ({ entry, mtime: statSync(join(LOG_DIR, entry)).mtimeMs }))
+  .sort((a, b) => b.mtime - a.mtime);
+for (const { entry } of oldLogs.slice(MAX_LOGS - 1)) {
+  unlinkSync(join(LOG_DIR, entry));
+}
 const LOG_PATH = join(LOG_DIR, `${ts}.log`);
 let logFd = null;
 

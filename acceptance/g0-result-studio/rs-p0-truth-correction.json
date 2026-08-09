@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS-P0",
+  "sourceCommit": "728492102a12b4138fc386dd4cd6982086c98136",
+  "baseline": {
+    "schemaVersion": 1,
+    "baselineId": "g0-baseline-v1",
+    "baselineVersion": "1.1.1",
+    "lifecycleStatus": "maintained",
+    "qualificationStatus": "qualified",
+    "constitutionId": "biof3-g0-constitution-v1",
+    "manifestDigest": "5c8a0246bd263a304f520e853dd9a4576a3be0fbb668523e67b028add1d70df5",
+    "bundleDigest": "8799d7678debeab413628832872fdfceee73c0a9fe6ae46b414260797819df86"
+  },
+  "status": "implemented_unverified",
+  "supportClaim": {
+    "id": "result-studio-editing",
+    "status": "experimental",
+    "qualificationEligible": false,
+    "reason": "continuous_product_trace_and_packaged_product_requalification_required",
+    "nextQualificationStage": "G0-RS-P7"
+  },
+  "evidencePolicy": {
+    "historicalEvidence": [
+      {
+        "id": "rs9-product-acceptance",
+        "sourceRef": "acceptance/g0-result-studio/rs9-product-acceptance.json",
+        "sourceSha256": "55d1b8316d3a3397706fb1dad6f9aa25801bb998c19b2c60094122ca92cbc838",
+        "classification": "synthetic_integration_summary",
+        "qualificationEligible": false,
+        "reasons": [
+          "tasks_composed_from_independent_test_results",
+          "invariants_contain_asserted_constants",
+          "no_continuous_product_trace"
+        ]
+      },
+      {
+        "id": "rs9-provider-acceptance",
+        "sourceRef": "acceptance/g0-result-studio/rs9-provider-acceptance.json",
+        "sourceSha256": "90c7400d46fb57c6163ac7db0ddca735d6acffe9e470f65fd5b702c45eb3dd19",
+        "classification": "provider_prompt_probe",
+        "qualificationEligible": false,
+        "reasons": [
+          "expected_json_embedded_in_prompt",
+          "no_result_studio_tool_call",
+          "no_job_artifact_revision_chain"
+        ]
+      },
+      {
+        "id": "rs9-visual-acceptance",
+        "sourceRef": "acceptance/g0-result-studio/rs9-visual-acceptance.json",
+        "sourceSha256": "33c91aab16b116c7a427e5fe0960cf6986effa1a0bdd741b36b802a78ce4d82c",
+        "classification": "renderer_fixture_review",
+        "qualificationEligible": false,
+        "reasons": [
+          "inspection_booleans_are_human_assertions",
+          "screenshots_do_not_prove_task_completion",
+          "no_continuous_product_trace"
+        ]
+      },
+      {
+        "id": "rs9-visual-table-seed",
+        "sourceRef": "scripts/g0-rs9-visual-table-seed.cjs",
+        "sourceSha256": "2ee9736ec8af4351e7a9dfea154083bf427f827fc4085bd671ffc8a47672a577",
+        "classification": "renderer_database_seed",
+        "qualificationEligible": false,
+        "reasons": [
+          "tool_jobs_artifacts_revisions_and_changesets_created_directly",
+          "does_not_execute_admitted_plugin_through_product_flow"
+        ]
+      }
+    ],
+    "qualifyingEvidenceKind": "continuous_product_trace_v1",
+    "forbiddenSubstitutions": [
+      "manual_boolean",
+      "asserted_constant",
+      "test_pass_summary",
+      "prompt_expected_json"
+    ]
+  },
+  "productBaseline": {
+    "engineFoundation": "implemented",
+    "productSurface": "incomplete",
+    "qualification": "suspended",
+    "rendererObservationRef": "acceptance/g0-result-studio/rs-p0-ui-baseline.json",
+    "observations": [
+      {
+        "id": "selection_ui_unwired",
+        "status": "observed",
+        "evidenceRef": "frontend/src/pages/project-workspace.tsx",
+        "detail": "artifactSelection is only cleared; selection builders are not consumed by the workspace UI"
+      },
+      {
+        "id": "plot_entity_mapping_unavailable",
+        "status": "observed",
+        "evidenceRef": "core/r-server/routes/result-studio.js",
+        "detail": "generic plot interaction advertises no stable entity mapping"
+      },
+      {
+        "id": "agent_result_context_incomplete",
+        "status": "observed",
+        "evidenceRef": "core/r-server/helpers/system-prompt.js",
+        "detail": "system prompt does not bind artifact/revision/family/selection/source-script coordinates",
+        "missingBindings": [
+          "artifactId",
+          "revisionId",
+          "artifactFamilyId",
+          "selectionId",
+          "sourceScriptRef"
+        ]
+      },
+      {
+        "id": "manual_and_ai_editor_missing",
+        "status": "observed",
+        "evidenceRef": "frontend/src/components/result-studio",
+        "detail": "component surface contains review/client files but no manual parameter editor, AI composer or central canvas",
+        "componentFileNames": [
+          "ResultStudioChangeSetPanel.module.css",
+          "ResultStudioChangeSetPanel.test.tsx",
+          "ResultStudioChangeSetPanel.tsx",
+          "resultStudioClient.ts"
+        ]
+      }
+    ]
+  },
+  "traceContract": {
+    "schemaVersion": 1,
+    "qualificationVersion": 2,
+    "requiredSteps": [
+      "conversation",
+      "open_artifact",
+      "selection_or_manual_edit",
+      "agent_context_envelope",
+      "provider_tool_call",
+      "result_edit_intent",
+      "changeset",
+      "real_job",
+      "artifact_truth_and_validator",
+      "candidate_revision",
+      "compare",
+      "adopt_or_revert",
+      "restart_or_reopen",
+      "replay_verification"
+    ],
+    "requiredInvariants": [
+      "source_data_preserved",
+      "artifact_history_preserved",
+      "unrelated_git_wip_preserved",
+      "no_false_success",
+      "no_partial_adopt",
+      "no_silent_loss",
+      "independent_replayable_scripts"
+    ],
+    "qualifyingEvidenceKinds": [
+      "conversation_event",
+      "ui_event",
+      "context_snapshot",
+      "provider_tool_call",
+      "database_record",
+      "git_record",
+      "artifact_truth",
+      "validator_record",
+      "restart_event",
+      "replay_record",
+      "packaged_runtime",
+      "screenshot"
+    ]
+  },
+  "inputHashes": {
+    "rs9-product-acceptance": "55d1b8316d3a3397706fb1dad6f9aa25801bb998c19b2c60094122ca92cbc838",
+    "rs9-provider-acceptance": "90c7400d46fb57c6163ac7db0ddca735d6acffe9e470f65fd5b702c45eb3dd19",
+    "rs9-visual-acceptance": "33c91aab16b116c7a427e5fe0960cf6986effa1a0bdd741b36b802a78ce4d82c",
+    "rs9-visual-table-seed": "2ee9736ec8af4351e7a9dfea154083bf427f827fc4085bd671ffc8a47672a577",
+    "projectWorkspace": "8b286763f35383a969e0669a67b489984e5922f75a923940a7a6dadc4507dcdd",
+    "artifactSelection": "24a192013b1479f460b08dc7b3ac01d1992c04018178a569b17bca391b0a73b1",
+    "resultStudioRoute": "4b8af60efd4a62b981c41cb9b6afd27cf3674dbc56ebf87831bf4044818b4b26",
+    "systemPrompt": "eb29680d3885b6440f72762b9fa5661aea08ba2c147796bd6faf0c19e0783c1b",
+    "supportMatrix": "e29698d492982bd8c39be075a618b7775a7793c17a55fe99287fe3deb4d6423f",
+    "qualificationManifest": "bf01de100a0ef35cc4c5131f8750805dd6e2a9ecd40d95e66c04b701e06520d5",
+    "productQualification": "5fc66e1cb820d07aff5823804d151f92bfc76c895fb273792f2fb238b2dc0406",
+    "uiBaseline": "f154f53612db49a5f5d7933dc098a18feaf4499f20165c3432d223fe017443b5"
+  },
+  "checks": {
+    "baselinePatchVersioned": true,
+    "baselineBundleValid": true,
+    "capabilityExperimental": true,
+    "claimExcluded": true,
+    "productEvidenceNotMandatory": true,
+    "historicalEvidenceClassified": true,
+    "oldRs9Rejected": true,
+    "productGapsObserved": true,
+    "continuousTraceContractFrozen": true,
+    "interactiveBaselineRecorded": true
+  },
+  "privacy": "repository_relative_refs_hashes_contract_ids_and_deterministic_source_observations_only",
+  "runnerSha256": "28e55186f990b960588537b78e8fa483d554a404a9377795b29ba4269a5f11c0",
+  "generatedAt": "2026-07-25T10:36:36.791Z",
+  "privacyClean": true,
+  "passed": true
+}

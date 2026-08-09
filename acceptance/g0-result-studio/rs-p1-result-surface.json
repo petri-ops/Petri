@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS-P1",
+  "sourceCommit": "cb2c7c223dd8dc5a2bbeba1b5de5418b9da9cbd1",
+  "captureMode": "interactive_dev_renderer_product_evidence",
+  "qualificationEligible": false,
+  "qualificationReason": "P1 renderer evidence closes the bounded Result Surface stage but does not replace the packaged continuous product traces required by G0-RS-P7",
+  "privacy": "repository_relative_refs_hashes_counts_dimensions_timings_and_bounded_statuses_only_no_project_job_conversation_url_path_credential_prompt_or_result_data",
+  "sourceHashes": {
+    "resultStudioSurface": "42ed65b77e40aaba264ff51b2bb4da46022725fbfc5209637de598497e000e74",
+    "resultStudioSurfaceStyles": "f27741eab1fcd54a5481aadcfaf2acf885d5b70a3d88d601f5e3cbddadb21930",
+    "resultSurfaceProjection": "6eb2f87f51135d5776aa4bf74cee83f72cc0bf325609a016877ba18c64057611",
+    "centerPanel": "8d37fb93bd110533c0ae2045bf846df2d37dcead3428543006c39fdfe31ef5ef",
+    "rightPanel": "25260690cf414fd8454e71a04d581a289a0da1ff60c61f6ae1bfdda2e944da65",
+    "workspaceRouting": "c186b06ebfcbd1a2c960bce2ac3eef1e56d751bd9edb3b66a02d07a3d6fba87d",
+    "projectWorkspace": "f64df5671ff7e6c95da9add939ef4df11e3178ca772add1d12260415dfb99a07",
+    "projectWorkspaceStyles": "d76aef3a1f96508a1877632c9c77d84a821a5e4a118258da447413928f597a62",
+    "p0ForwardEvolutionGate": "11385251b74734ed2b0ceaab1217be7d80ff39e390fd3cb3b58c5359edb76707"
+  },
+  "surface": {
+    "singleWorkspaceStateMachine": true,
+    "modes": [
+      "conversation",
+      "task",
+      "result",
+      "compare"
+    ],
+    "centralCanvas": true,
+    "compactInspector": true,
+    "contextBarFields": [
+      "title",
+      "truth",
+      "conclusion",
+      "revision",
+      "selection",
+      "primaryActions"
+    ],
+    "viewerAdapters": [
+      "report",
+      "image",
+      "table",
+      "json",
+      "text",
+      "binary"
+    ],
+    "controlledFallbackForRelativeOrUnsafeArtifactUrl": true,
+    "manifestOnlyPreviewableArtifactSupported": true,
+    "singleActiveArtifactTruth": true
+  },
+  "interactiveChecks": {
+    "openFromTopResultEntry": true,
+    "reportRemainsSelectedAcrossBackgroundRefresh": true,
+    "reportRefreshObservationSeconds": 15,
+    "conversationComponentStayedMounted": true,
+    "draftRetainedAcrossRoundTrip": true,
+    "temporaryDraftRemovedAfterCheck": true,
+    "conversationLayoutRestoredAfterRoundTrip": true,
+    "coreActionsAccessibleByRoleAndName": true,
+    "technicalIdentifiersProgressivelyDisclosed": true
+  },
+  "layoutMatrix": [
+    {
+      "viewportWidth": 1440,
+      "viewportHeight": 900,
+      "canvasWidth": 858,
+      "inspectorVisible": true,
+      "pageHorizontalOverflow": false
+    },
+    {
+      "viewportWidth": 1024,
+      "viewportHeight": 900,
+      "canvasWidth": 683,
+      "inspectorVisible": true,
+      "pageHorizontalOverflow": false
+    },
+    {
+      "viewportWidth": 820,
+      "viewportHeight": 900,
+      "canvasWidth": 820,
+      "inspectorVisible": false,
+      "pageHorizontalOverflow": false
+    }
+  ],
+  "themeMatrix": {
+    "light": "passed",
+    "dark": "passed",
+    "preferenceRestored": "system"
+  },
+  "performance": {
+    "firstCanvasVisibleMs": 3.2,
+    "firstCanvasBudgetMs": 1000,
+    "artifactSwitchMs": 0.7,
+    "artifactSwitchBudgetMs": 500,
+    "tableScrollResponseBudgetMs": 100,
+    "tableScrollResponseObservedMs": null,
+    "tableScrollResponseStatus": "budget_frozen_for_real_large_table_validation_in_G0-RS-P2",
+    "selectionFeedbackBudgetMs": 100,
+    "selectionFeedbackObservedMs": null,
+    "selectionFeedbackStatus": "budget_frozen_for_feature_delivery_in_G0-RS-P2",
+    "parameterPreviewBudgetMs": 500,
+    "parameterPreviewObservedMs": null,
+    "parameterPreviewStatus": "budget_frozen_for_feature_delivery_in_G0-RS-P4",
+    "compareOpenBudgetMs": 1000,
+    "compareOpenObservedMs": null,
+    "compareOpenStatus": "budget_frozen_for_product_validation_in_G0-RS-P5",
+    "restartRestoreBudgetMs": 5000,
+    "restartRestoreObservedMs": null,
+    "restartRestoreStatus": "budget_frozen_for_product_validation_in_G0-RS-P6",
+    "returnConversationMs": 2.6,
+    "returnConversationBudgetMs": 250,
+    "toggleHeapGrowthBudgetBytes": 67108864,
+    "toggleHeapGrowthObservedBytes": null,
+    "toggleHeapGrowthStatus": "not_observable_in_selected_dev_browser_runtime",
+    "toggleHeapGrowthNextGate": "G0-RS-P6"
+  },
+  "console": {
+    "applicationErrors": 0,
+    "knownWarnings": 2,
+    "warningClass": "react_router_v7_future_flags"
+  },
+  "verification": {
+    "focusedTestFiles": 4,
+    "focusedTests": 12,
+    "focusedFailures": 0,
+    "frontendTestFiles": 36,
+    "frontendTests": 266,
+    "frontendFailures": 0,
+    "typescriptStrict": "passed",
+    "diffCheck": "passed"
+  },
+  "invariants": {
+    "executionTruth": "run_tool -> tool_job -> artifact_truth",
+    "secondWorkspaceState": false,
+    "secondCurrentArtifactState": false,
+    "resultStudioQualificationClaimed": false,
+    "futureStagesImplemented": false
+  },
+  "generatedAt": "2026-07-25T11:58:00Z",
+  "privacyClean": true,
+  "passed": true
+}

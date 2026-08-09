@@ -298,6 +298,16 @@
   opacity: 1;
 }
 
+.sc-msg-actions-summary {
+  opacity: 1;
+  flex-wrap: wrap;
+}
+
+.sc-msg-action-error {
+  color: var(--biof3-danger);
+  font-size: 12px;
+}
+
 .sc-msg-action {
   display: inline-flex;
   align-items: center;
@@ -387,6 +397,33 @@
 
 .sc-agent-progress-current {
   color: var(--biof3-text-tertiary);
+}
+
+.sc-result-edit-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 0 0 9px;
+}
+
+.sc-result-edit-progress span {
+  padding: 3px 7px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 999px;
+  color: var(--biof3-text-secondary);
+  font-size: 10px;
+}
+
+.sc-result-edit-progress span[data-status='completed'],
+.sc-result-edit-progress span[data-status='ready'] {
+  border-color: color-mix(in srgb, var(--biof3-status-online) 42%, var(--biof3-border));
+}
+
+.sc-result-edit-progress strong {
+  width: 100%;
+  color: var(--biof3-status-error);
+  font-size: 11px;
+  font-weight: 500;
 }
 
 .cp-md {
@@ -1290,6 +1327,18 @@
 .sc-send-cta-stop {
   background: var(--biof3-text);
   color: #ffffff;
+}
+
+.sc-send-cta-queue {
+  background: var(--biof3-accent);
+  color: #ffffff;
+}
+
+.sc-queued-count {
+  align-self: center;
+  color: var(--biof3-text-muted);
+  font-size: 11px;
+  white-space: nowrap;
 }
 
 .sc-stop-btn {

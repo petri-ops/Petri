@@ -1,13 +1,17 @@
 {
   "schemaVersion": 1,
   "baselineId": "g0-baseline-v1",
-  "qualificationBoundary": "Only the explicit macOS arm64, local runtime, admitted scientific tracks and Result Studio editing matrix qualified by G0-LF12 plus G0-RS9 are maintained; all other scope remains available, experimental or unavailable.",
+  "qualificationBoundary": "Only the explicit macOS arm64, local runtime and G0-LF12 admitted scientific tracks are qualified and maintained. Result Studio engine foundations exist, but product editing remains experimental until G0-RS-P7 continuous product traces pass; all other scope remains available, experimental or unavailable.",
   "productCapabilities": [
     {
       "id": "result-studio-editing",
-      "status": "qualified",
-      "scope": "admitted_tables_and_plots_with_git_backed_revision_review",
+      "status": "experimental",
+      "scope": "git_sqlite_artifact_revision_engine_foundation_only_product_incomplete",
+      "reason": "continuous_product_trace_and_packaged_product_requalification_required",
       "evidenceRefs": [
+        "acceptance/g0-result-studio/rs-p0-truth-correction.json"
+      ],
+      "historicalEvidenceRefs": [
         "acceptance/g0-result-studio/rs9-product-acceptance.json",
         "acceptance/g0-result-studio/rs9-provider-acceptance.json",
         "acceptance/g0-result-studio/rs9-visual-acceptance.json"

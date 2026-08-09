@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "baselineId": "g0-baseline-v1",
-  "baselineVersion": "1.1.0",
+  "baselineVersion": "1.1.1",
   "lifecycleStatus": "maintained",
   "qualificationStatus": "qualified",
   "constitutionId": "biof3-g0-constitution-v1",
@@ -35,7 +35,7 @@
     "observableExperience": 1,
     "resilienceLab": 1,
     "evolutionPipeline": 1,
-    "baselineQualification": 2
+    "baselineQualification": 3
   },
   "database": {
     "engine": "sqlite",
@@ -84,6 +84,9 @@
     "acceptance/g0-qualification/qualification-gate.json",
     "acceptance/g0-qualification/qualification-report.md",
     "acceptance/g0-qualification/visual-state-convergence.json",
+    "acceptance/g0-result-studio/rs-p0-truth-correction.json"
+  ],
+  "historicalEvidenceRefs": [
     "acceptance/g0-result-studio/rs9-product-acceptance.json",
     "acceptance/g0-result-studio/rs9-provider-acceptance.json",
     "acceptance/g0-result-studio/rs9-visual-acceptance.json"
@@ -91,9 +94,9 @@
   "qualification": {
     "qualificationId": "g0-baseline-v1-qualification",
     "decisionState": "qualified",
-    "decisionHash": "8b30fd964724c8bdbfb0e33809e961c041b2addde1cfb7aa3e17dac43181c8c7",
-    "ledgerHash": "d8a67ddf82d49ddf53ec980f9e6153579985c120a8ef3968e655674f71f04eb3",
-    "sourceCommit": "c74c434732725a8497bd073ba0899b873b462d55",
+    "decisionHash": "3166ff20b9d45da94d7c8329a04c4237673a707c58f964dca9480a1409f87aca",
+    "ledgerHash": "23b9bf65b58281ba9a0c9ddbadb2dbf4c58bdbd8b9804774ae4842cd64de90a0",
+    "sourceCommit": "728492102a12b4138fc386dd4cd6982086c98136",
     "qualifiedFrom": {
       "baselineId": "g0-fifth-wave-establishing-0.6",
       "baselineVersion": "0.6.0",

@@ -1,0 +1,215 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 0 0;
+  border-top: 1px solid var(--biof3-border);
+  font-size: 11px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--biof3-text-secondary);
+  font-weight: 600;
+}
+
+.disabled {
+  color: var(--biof3-status-loading);
+  font-weight: 400;
+}
+
+.empty {
+  margin: 0;
+  color: var(--biof3-text-tertiary);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 6px;
+}
+
+.group legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
+  padding: 0 4px;
+  color: var(--biof3-text-secondary);
+  font-weight: 600;
+}
+
+.groupHint {
+  color: var(--biof3-text-tertiary);
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.group[data-group='scientific'] legend,
+.group[data-group='workflow'] legend {
+  color: var(--biof3-status-loading);
+}
+
+.field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 116px;
+  gap: 8px;
+  align-items: center;
+}
+
+.field[data-changed='true'] .fieldName {
+  color: var(--biof3-accent);
+  font-weight: 600;
+}
+
+.fieldName {
+  overflow-wrap: anywhere;
+  color: var(--biof3-text-secondary);
+}
+
+.field input,
+.field select {
+  min-height: 26px;
+  width: 100%;
+  padding: 0 6px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 4px;
+  background: var(--biof3-bg-elevated);
+  color: var(--biof3-text-primary);
+  font-size: 11px;
+}
+
+.field input[type='checkbox'] {
+  width: 14px;
+  min-height: 14px;
+  justify-self: start;
+}
+
+.field input[type='color'] {
+  padding: 2px;
+  cursor: pointer;
+}
+
+.outcome {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--biof3-text-secondary);
+}
+
+.outcome input {
+  min-height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 4px;
+  background: var(--biof3-bg-elevated);
+  color: var(--biof3-text-primary);
+  font-size: 11px;
+}
+
+.impact {
+  margin: 0;
+  padding: 7px 8px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--biof3-accent) 8%, transparent);
+  color: var(--biof3-text-secondary);
+  line-height: 1.5;
+}
+
+.impact[data-science='true'] {
+  background: color-mix(in srgb, var(--biof3-status-loading) 12%, transparent);
+  color: var(--biof3-status-loading);
+}
+
+.confirm {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  color: var(--biof3-status-loading);
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.actions button {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 5px;
+  background: var(--biof3-bg-elevated);
+  color: var(--biof3-accent);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.actions button:disabled {
+  color: var(--biof3-text-tertiary);
+  cursor: not-allowed;
+}
+
+.reset {
+  color: var(--biof3-text-secondary) !important;
+}
+
+.advancedDrawer {
+  margin-top: 10px;
+  border-top: 1px solid var(--biof3-border);
+}
+
+.advancedDrawer > summary {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--biof3-text-secondary);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  list-style: none;
+}
+
+.advancedDrawer > summary::-webkit-details-marker {
+  display: none;
+}
+
+.advancedDrawer > summary::after {
+  content: '›';
+  color: var(--biof3-text-tertiary);
+  font-size: 15px;
+  transform: rotate(90deg);
+}
+
+.advancedDrawer[open] > summary::after {
+  transform: rotate(-90deg);
+}
+
+.advancedDrawer > summary small {
+  margin-left: auto;
+  color: var(--biof3-text-tertiary);
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.root button:focus-visible,
+.root input:focus-visible,
+.root select:focus-visible,
+.root textarea:focus-visible,
+.root summary:focus-visible {
+  outline: 2px solid var(--biof3-accent);
+  outline-offset: 2px;
+}

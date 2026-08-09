@@ -1,0 +1,486 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS-P4R-0/P4R-6",
+  "sourceCommit": "35a0760cf98c5865574507e03521795231307442",
+  "captureMode": "real_chain_corpus_plus_server_request_waterfall_and_event_loop_histogram_in_disposable_root",
+  "qualificationEligible": false,
+  "qualificationReason": "P4R-6 closes the frozen server event-loop budget using the canonical Git/SQLite services in an isolated background process. Client layout and journey evidence is separate, and Provider/packaged Result Studio qualification remains reserved for P7.",
+  "privacy": "repository_relative_paths_digests_counts_timings_and_bounded_statuses_only_no_project_job_conversation_selection_url_credential_prompt_or_result_data",
+  "sourceHashes": {
+    "probe": "61711144b7daadc08d903512676fdf7b1d506ae8b565d98191e59be181e64006",
+    "probeRoutes": "3805eeabcc510874b7af03a9a219450db3d53d438d181a34323e489e5759877e",
+    "bootstrap": "618ce06f1b90a7fb4e6de9ca6f983c9c1805b4d59dd13846f98ecb008728b69c",
+    "routes": "916cba5c6437fc2ed58f0a9b9c4a743eda492f4fb990c65cdf9f4e62525f65e3",
+    "background": "0c8d74472ca99bf505967a1c3d0c4179e1d07dc0a81c6c3e301b251e93db0e16",
+    "backgroundChild": "06209a3cd696af000f39d234eda29472583bf79b7fc45fb98e21d93c39bdf62d",
+    "capture": "99f9eb3fe4efa643e5a87925098dfdd815664b703907b90333e9e240edd317ac",
+    "corpus": "359e202832c117f12c6e041706e0028caaaf4c063df3d97511be982ab703bf11",
+    "baseline": "cc6a431db7e271fcfd2af8ef2eeb2aad6299a22ae6661b31119f3cf4b5cc0fef",
+    "probeTest": "72e55812ae8fd3c5d5b02c17a64bf18581e3e0c0759b0e37315641f025960abe",
+    "captureTest": "8c4cec8a66f34e42e87c64eda758dbc1be78740b2d1c272c538d0766ec8956cd",
+    "corpusTest": "2cbd764b9b39c02a17db27381e10b78c69c02f3fa8eb8bcb77e985c15001649a",
+    "baselineTest": "613b1f5b07f215963ca45b9ea351f581ec6f3518956f8127d48f156a9a5c7cf4",
+    "invariantTest": "8b335f39f2be6716247aa11302f274d11a09522b7cd976d3040e550bf132cd03",
+    "backgroundTest": "b8b3e743d81574bf012d1f4f5969f49eef38dec1fc5488459a460a6b07e6c1ca",
+    "impactMap": "073cda5d914a50e7c3214b70f96dbd1294e0680c15364c0042d201ea0e6ce0c2",
+    "packageScripts": "1e7f71e9fe0bed784930198260bbd0b081e8a11234af1e9ae7e27a56ef350669",
+    "acceptanceScript": "64676b5d427f3180d660778bbfe3e39100f814e720073d37705749266f0f75f4"
+  },
+  "budgets": {
+    "eventLoopMaxMs": {
+      "value": 250,
+      "source": "G0-RS-P4R-0 plan: no synchronous Result Studio block may exceed 250ms",
+      "signal": "perf-probe eventLoop.maxMs (monitorEventLoopDelay, 10ms resolution)",
+      "rejectedSignal": "server.js startEventLoopMonitor tick sampler (1Hz, 2000ms threshold)",
+      "machineVerifiable": true
+    },
+    "visibleFeedbackMs": {
+      "value": 100,
+      "source": "G0-RS-P4R-0 plan: visible feedback within 100ms of a result click",
+      "signal": "client-side; no producer exists in this repository",
+      "machineVerifiable": false,
+      "status": "frozen_target_not_yet_measurable"
+    }
+  },
+  "deferredBudgets": {
+    "firstContentBySizeMs": "deferred_to_G0-RS-P4R-1: sampling the pre-fast-path implementation would freeze the defect as the standard",
+    "versionSwitchMs": "unmeasured_not_captured_no_browser_automation_in_repo",
+    "codeOpenMs": "unmeasured_not_captured_no_browser_automation_in_repo"
+  },
+  "frozenBaseline": {
+    "capturedAtCommit": "e1f841c8ada919250c01f5cde76586ef2375bdc6",
+    "revisionCount": 1,
+    "calibration": {
+      "gitSpawnMedianMs": 9.559,
+      "pathEntries": 31,
+      "invokedUnderNpm": false
+    },
+    "requests": [
+      {
+        "id": "job-status",
+        "role": "render-blocking",
+        "status": 200,
+        "coldMs": 5.492,
+        "warmMs": 2.229,
+        "oneTimeCostMs": 3.263
+      },
+      {
+        "id": "artifact-bytes",
+        "role": "render-blocking",
+        "status": 200,
+        "coldMs": 5.043,
+        "warmMs": 2.174,
+        "oneTimeCostMs": 2.869
+      },
+      {
+        "id": "interaction",
+        "role": "secondary",
+        "status": 200,
+        "coldMs": 389.139,
+        "warmMs": 9.9,
+        "oneTimeCostMs": 379.239
+      },
+      {
+        "id": "context-envelope",
+        "role": "secondary",
+        "status": 409,
+        "coldMs": 4.235,
+        "warmMs": 1.719,
+        "oneTimeCostMs": 2.516
+      },
+      {
+        "id": "changesets",
+        "role": "secondary",
+        "status": 200,
+        "coldMs": 45.73,
+        "warmMs": 42.102,
+        "oneTimeCostMs": 3.628
+      },
+      {
+        "id": "workspace-status",
+        "role": "secondary",
+        "status": 200,
+        "coldMs": 64.925,
+        "warmMs": 64.862,
+        "oneTimeCostMs": 0.063
+      }
+    ],
+    "eventLoop": {
+      "resolutionMs": 10,
+      "samples": 16,
+      "minMs": 9.839,
+      "meanMs": 58.073,
+      "maxMs": 394.265,
+      "percentilesOmitted": "sample count too low for p95/p99 to be meaningful"
+    }
+  },
+  "baselineObservation": {
+    "captureMode": "real_run_tool_chain_in_disposable_root_with_env_gated_probe",
+    "calibration": {
+      "gitSpawnMedianMs": 109.14,
+      "pathEntries": 52,
+      "invokedUnderNpm": true
+    },
+    "revisionCount": 1,
+    "scalingNote": "workspace-status is linear in revisionCount. This capture is the cheapest case; the route grows and crosses the frozen 250ms budget well before the 5000-revision cap. P4R-1 must re-capture with revisionCount swept before choosing any cache key.",
+    "corpus": [
+      {
+        "toolId": "deseq2",
+        "durationMs": 12058,
+        "artifactCount": 23
+      },
+      {
+        "toolId": "volcano-plot",
+        "durationMs": 1062,
+        "artifactCount": 5
+      },
+      {
+        "toolId": "gene-correlation",
+        "durationMs": 386,
+        "artifactCount": 4
+      }
+    ],
+    "requests": [
+      {
+        "id": "job-status",
+        "role": "render-blocking",
+        "status": 200,
+        "totalMs": 5.207,
+        "coldMs": 5.207,
+        "warmMs": 1.94,
+        "warmSamplesMs": [
+          1.887,
+          1.94,
+          3.169
+        ],
+        "warmSpreadMs": 1.282,
+        "oneTimeCostMs": 3.267,
+        "bytes": 74633
+      },
+      {
+        "id": "artifact-bytes",
+        "role": "render-blocking",
+        "status": 200,
+        "totalMs": 5.443,
+        "coldMs": 5.443,
+        "warmMs": 1.616,
+        "warmSamplesMs": [
+          1.605,
+          1.616,
+          2.024
+        ],
+        "warmSpreadMs": 0.419,
+        "oneTimeCostMs": 3.827,
+        "bytes": 143049
+      },
+      {
+        "id": "interaction",
+        "role": "secondary",
+        "status": 200,
+        "totalMs": 2964.21,
+        "coldMs": 2964.21,
+        "warmMs": 10.995,
+        "warmSamplesMs": [
+          9.669,
+          10.995,
+          12.005
+        ],
+        "warmSpreadMs": 2.336,
+        "oneTimeCostMs": 2953.215,
+        "bytes": 46212
+      },
+      {
+        "id": "context-envelope",
+        "role": "secondary",
+        "status": 409,
+        "totalMs": 3.253,
+        "coldMs": 3.253,
+        "warmMs": 1.643,
+        "warmSamplesMs": [
+          1.483,
+          1.643,
+          1.829
+        ],
+        "warmSpreadMs": 0.346,
+        "oneTimeCostMs": 1.61,
+        "bytes": 188
+      },
+      {
+        "id": "changesets",
+        "role": "secondary",
+        "status": 200,
+        "totalMs": 2.059,
+        "coldMs": 2.059,
+        "warmMs": 0.896,
+        "warmSamplesMs": [
+          0.866,
+          0.896,
+          1.115
+        ],
+        "warmSpreadMs": 0.249,
+        "oneTimeCostMs": 1.163,
+        "bytes": 1669
+      },
+      {
+        "id": "workspace-status",
+        "role": "secondary",
+        "status": 200,
+        "totalMs": 213.591,
+        "coldMs": 213.591,
+        "warmMs": 216.683,
+        "warmSamplesMs": [
+          214.447,
+          216.683,
+          217.85
+        ],
+        "warmSpreadMs": 3.403,
+        "oneTimeCostMs": -3.092,
+        "bytes": 837
+      }
+    ],
+    "renderBlockingTotalMs": 10.65,
+    "slowestRequest": "interaction",
+    "eventLoop": {
+      "resolutionMs": 10,
+      "samples": 407,
+      "minMs": 9.028,
+      "meanMs": 10.929,
+      "maxMs": 17.99,
+      "percentilesOmitted": "sample count too low for p95/p99 to be meaningful"
+    },
+    "unmeasured": [
+      {
+        "metric": "firstContentVisibleMs",
+        "reason": "not_captured_no_browser_automation_in_repo"
+      },
+      {
+        "metric": "artifactSwitchMs",
+        "reason": "not_captured_no_browser_automation_in_repo"
+      },
+      {
+        "metric": "versionSwitchMs",
+        "reason": "not_captured_no_browser_automation_in_repo"
+      },
+      {
+        "metric": "codeOpenMs",
+        "reason": "not_captured_no_browser_automation_in_repo"
+      },
+      {
+        "metric": "context-envelope",
+        "reason": "route returned 409; excluded from the baseline"
+      }
+    ]
+  },
+  "improvementVsBaseline": [
+    {
+      "id": "job-status",
+      "baselineWarmMs": 2.229,
+      "currentWarmMs": 1.94,
+      "deltaPct": -13
+    },
+    {
+      "id": "artifact-bytes",
+      "baselineWarmMs": 2.174,
+      "currentWarmMs": 1.616,
+      "deltaPct": -25.7
+    },
+    {
+      "id": "interaction",
+      "baselineWarmMs": 9.9,
+      "currentWarmMs": 10.995,
+      "deltaPct": 11.1
+    },
+    {
+      "id": "changesets",
+      "baselineWarmMs": 42.102,
+      "currentWarmMs": 0.896,
+      "deltaPct": -97.9
+    },
+    {
+      "id": "workspace-status",
+      "baselineWarmMs": 64.862,
+      "currentWarmMs": 216.683,
+      "deltaPct": 234.1
+    }
+  ],
+  "budgetStatus": {
+    "eventLoopMaxMs": "met",
+    "observedMaxMs": 17.99,
+    "attributedTo": "interaction",
+    "steadyStateWorstMs": 216.683,
+    "steadyStateWorstRoute": "workspace-status",
+    "oneTimeDominated": [
+      "job-status",
+      "artifact-bytes",
+      "interaction",
+      "changesets"
+    ],
+    "note": "Current implementation is within the frozen block budget.",
+    "absoluteTimingsAreLoadSensitive": true,
+    "observedColdRangeMsAcrossRuns": [
+      383.491,
+      4072.669
+    ],
+    "loadSensitivityCause": "Absolute request completion varies with R/Git process scheduling and host load. P4R-6 therefore freezes the 250ms budget on attributed event-loop blocking, while preserving cold/warm request completion separately; no request duration is re-labelled as event-loop delay.",
+    "violationRobustAtRangeFloor": false,
+    "structuralFinding": "Cold Interaction baseline materialization remains a one-time asynchronous secondary completion; workspace/status remains a recurring asynchronous inspection. The main thread stays responsive while both reuse the canonical Git/SQLite services.",
+    "violationAttribution": "No current Result Studio synchronous task violated the frozen 250ms event-loop budget in this source-bound observation."
+  },
+  "checks": [
+    {
+      "id": "RS-P4R0-1",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-corpus.mjs"
+      ],
+      "detail": "Baseline corpus was produced by real run_tool -> tool_job -> artifact truth runs, not a database seed."
+    },
+    {
+      "id": "RS-P4R0-2",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-baseline.mjs",
+        "test/p4r-baseline.test.mjs"
+      ],
+      "detail": "Every route the baseline must measure returned 200, so the timings are the real path and not argument validation."
+    },
+    {
+      "id": "RS-P4R0-3",
+      "passed": true,
+      "evidence": [
+        "core/r-server/helpers/perf-probe.js"
+      ],
+      "detail": "Event-loop delay came from a real histogram sample, not the empty-histogram sentinel."
+    },
+    {
+      "id": "RS-P4R0-4",
+      "passed": true,
+      "evidence": [
+        "core/r-server/helpers/perf-probe.js"
+      ],
+      "detail": "The authoritative >250ms signal is declared as the 10ms-resolution histogram; the 1Hz tick sampler is explicitly rejected as unable to resolve it."
+    },
+    {
+      "id": "RS-P4R0-5",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-baseline.mjs"
+      ],
+      "detail": "Metrics with no producer are recorded as unmeasured with a stated reason, never estimated or defaulted to zero."
+    },
+    {
+      "id": "RS-P4R0-6",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-capture.mjs",
+        "test/p4r-capture.test.mjs"
+      ],
+      "detail": "Every writable path is redirected and guarded from one declared list, so a capture cannot reach the developer database or the real user data root."
+    },
+    {
+      "id": "RS-P4R0-7",
+      "passed": true,
+      "evidence": [
+        "core/r-server/helpers/perf-probe.js",
+        "core/r-server/routes/perf-probe.js"
+      ],
+      "detail": "The probe is env-gated: with the flag unset every export is a no-op and the /api/__perf surface is not mounted."
+    },
+    {
+      "id": "RS-P4R0-8",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-corpus.mjs"
+      ],
+      "detail": "The corpus creates and owns a real project, without which every Result Studio route rejects and the baseline would time validation."
+    },
+    {
+      "id": "RS-P4R0-11",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-baseline.mjs"
+      ],
+      "detail": "Every measured route records both a first-call and a second-call timing, so one-time creation cost cannot be reported as steady-state viewing cost."
+    },
+    {
+      "id": "RS-P4R0-12",
+      "passed": true,
+      "evidence": [
+        "test/p4r-invariants.test.mjs"
+      ],
+      "detail": "The P4R invariants run against code reality with no failures. All current tests are accounted for; if the R runtime is unavailable, only the suite's explicit and visible skip guard may permit the bounded skip."
+    },
+    {
+      "id": "RS-P4R0-13",
+      "passed": true,
+      "evidence": [
+        "scripts/g0-rs-p4r-acceptance.mjs"
+      ],
+      "detail": "The P4R-0 baseline is a frozen constant, not a re-measured value. Its numbers are pinned so a later run cannot quietly replace the record it exists to preserve."
+    },
+    {
+      "id": "RS-P4R0-9",
+      "passed": true,
+      "evidence": [
+        "acceptance/g0-result-studio/rs-p4r-performance.json"
+      ],
+      "detail": "All declared P4R-0 command gates passed."
+    },
+    {
+      "id": "RS-P4R0-10",
+      "passed": true,
+      "evidence": [
+        "acceptance/g0-result-studio/rs-p4r-performance.json",
+        "package.json"
+      ],
+      "detail": "No recorded gate invokes bare `npm test`, which under a file filter resolves to `vitest run --changed`, selects nothing and reports success for a zero-test run."
+    },
+    {
+      "id": "RS-P4R6-1",
+      "passed": true,
+      "evidence": [
+        "core/r-server/routes/result-studio.js",
+        "core/shared-backend/result-studio-background.js",
+        "core/shared-backend/result-studio-background-child.js",
+        "test/result-studio-background.test.mjs"
+      ],
+      "detail": "P4R-6 closes the frozen event-loop budget on the real cold/warm chain: canonical baseline materialization and workspace inspection may complete asynchronously, but neither may block the Express event loop above 250ms."
+    }
+  ],
+  "verification": {
+    "generatedAt": "2026-07-28T11:38:17.389Z",
+    "commands": [
+      {
+        "label": "probe-and-harness",
+        "command": "node --test test/perf-probe.test.mjs test/p4r-capture.test.mjs test/p4r-corpus.test.mjs test/p4r-baseline.test.mjs test/result-studio-background.test.mjs",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "275962f3e29f08103b4dd28f830f7a57ea379718b7ea7a6d85030dce411b0ba9",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "impact-map",
+        "command": "node --test test/test-affected.test.mjs",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "a15fcae3671ac6393f2885b8a492866bc21570f3495eca0e49db35a9556063de",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "syntax",
+        "command": "node --check scripts/g0-rs-p4r-acceptance.mjs",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "executionTruth": "run_tool -> tool_job -> artifact_truth",
+  "passed": true,
+  "generatedAt": "2026-07-28T11:38:17.389Z",
+  "privacyClean": true,
+  "sourceCommitReachable": true,
+  "sourceCommitMatchesSourceHashes": true,
+  "sourceCommitMismatches": []
+}

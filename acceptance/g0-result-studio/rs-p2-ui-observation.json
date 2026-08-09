@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS-P2",
+  "evidenceClass": "automated_local_renderer_visual_spot_check_non_qualifying",
+  "capturedAt": "2026-07-25T15:00:51Z",
+  "qualificationEligible": false,
+  "privacy": "dimensions_counts_statuses_and_screenshot_digests_only_no_ids_urls_paths_credentials_prompts_or_result_values",
+  "target": "real_admitted_deseq2_deg_table_with_restored_selection",
+  "matrix": [
+    {
+      "theme": "light",
+      "width": 1440,
+      "height": 900,
+      "canvasWidth": 858,
+      "checkedCount": 3,
+      "inspectorVisible": true,
+      "pageHorizontalOverflow": false,
+      "screenshotSha256": "6f97881c66f21a01ea32ff5c718ada9cd580ff335dc2320f3d2f8eb63a77e760"
+    },
+    {
+      "theme": "light",
+      "width": 1024,
+      "height": 900,
+      "canvasWidth": 683,
+      "checkedCount": 3,
+      "inspectorVisible": true,
+      "pageHorizontalOverflow": false,
+      "screenshotSha256": "253d79967050c8655d4ee7abcb7249bc845754811f7395fd617e4a0ab5696e20"
+    },
+    {
+      "theme": "light",
+      "width": 820,
+      "height": 900,
+      "canvasWidth": 820,
+      "checkedCount": 3,
+      "inspectorVisible": false,
+      "pageHorizontalOverflow": false,
+      "screenshotSha256": "79404f582b069c509fa90aaef7738f9935426624cb89711a9148ccc89026b16e"
+    },
+    {
+      "theme": "dark",
+      "width": 1440,
+      "height": 900,
+      "canvasWidth": 858,
+      "checkedCount": 3,
+      "inspectorVisible": true,
+      "pageHorizontalOverflow": false,
+      "screenshotSha256": "36364477c59b95f6d46484c61641d3504b7a796d751590ccbaa3f168583144f2"
+    },
+    {
+      "theme": "dark",
+      "width": 1024,
+      "height": 900,
+      "canvasWidth": 683,
+      "checkedCount": 3,
+      "inspectorVisible": true,
+      "pageHorizontalOverflow": false,
+      "screenshotSha256": "27c81d8cc7e9751d6a8488390fe702731de8da1a456c9f775bbd1d90b4932802"
+    },
+    {
+      "theme": "dark",
+      "width": 820,
+      "height": 900,
+      "canvasWidth": 820,
+      "checkedCount": 3,
+      "inspectorVisible": false,
+      "pageHorizontalOverflow": false,
+      "screenshotSha256": "4bc8088dae565f91c8cb8934e7059e8db1f1275c17d95285aa25768f71384534"
+    }
+  ],
+  "themePreferenceRestored": "system",
+  "passed": true
+}
