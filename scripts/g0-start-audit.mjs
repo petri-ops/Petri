@@ -114,7 +114,27 @@ export function inspectG0Start(options = {}) {
     restartMatrix.sourceCommit,
     providerMatrix.sourceCommit,
   ];
-  const auditRecordsProductionClosure = /HLE-C4R\/HLE-C5 已完成生产收口/.test(auditLog);
+  // Production closure is asserted from the evidence that demonstrates it, not
+  // from a sentence describing it.
+  //
+  // This previously matched /HLE-C4R\/HLE-C5 已完成生产收口/ against
+  // docs/AUDIT-LOG.md. That broke in 5bb2263, where RH0 compacted the broadcast
+  // board into docs/archive/checkpoints/ exactly as the governance rules require
+  // — so following the rules turned a G0 gate red, and G0-START-01, G0-START-09
+  // and the cascading G0-LF0-01 all failed while nothing about HLE had changed.
+  //
+  // AUDIT-LOG is a rolling board by design; asserting durable facts against its
+  // prose couples a gate to editorial churn. The four production matrices and
+  // the aggregate HLE gate are the artifacts the sentence was reporting, and
+  // they are already loaded above.
+  const auditRecordsProductionClosure = hleGate.passed === true
+    && hleGate.totalCommands > 0
+    && hleGate.totalFailed === 0
+    && hleGate.totalPassed === hleGate.totalCommands
+    && repairMatrix.passed === true
+    && restartMatrix.passed === true
+    && providerMatrix.passed === true
+    && Array.isArray(agentMatrix.tracks) && agentMatrix.tracks.length === 3;
   const checks = [
     makeCheck(
       'G0-START-01',
@@ -124,7 +144,11 @@ export function inspectG0Start(options = {}) {
       [
         'docs/harness-loop-engineering-plan.md',
         'docs/harness-loop-production-closure-plan.md',
-        'docs/AUDIT-LOG.md',
+        'acceptance/harness-loop/hle-all-gate.json',
+        'acceptance/harness-loop/production/validator-repair-matrix.json',
+        'acceptance/harness-loop/production/restart-recovery-matrix.json',
+        'acceptance/harness-loop/production/provider-matrix.json',
+        'acceptance/harness-loop/production/agent-loop-matrix.json',
       ],
       'HLE status and production closure agree.',
     ),
@@ -219,7 +243,10 @@ export function inspectG0Start(options = {}) {
         && auditRecordsProductionClosure,
       [
         'docs/project-workspace-handoff.md',
-        'docs/AUDIT-LOG.md',
+        'acceptance/harness-loop/hle-all-gate.json',
+        'acceptance/harness-loop/production/validator-repair-matrix.json',
+        'acceptance/harness-loop/production/restart-recovery-matrix.json',
+        'acceptance/harness-loop/production/provider-matrix.json',
       ],
       'Plan, audit broadcast and handoff agree that HLE is closed and G0 START/LF0 are established.',
     ),

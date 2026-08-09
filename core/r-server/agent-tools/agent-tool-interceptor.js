@@ -3,6 +3,7 @@
 const { decideAgentToolCall } = require('./agent-tool-policy');
 const { getToolEntry } = require('./registry');
 const { preflightWorkspaceTool } = require('./workspace-tools');
+const { bindResultStudioContextToken } = require('./result-context-binding');
 
 function matchesType(value, expected) {
   if (expected === 'object') return !!value && typeof value === 'object' && !Array.isArray(value);
@@ -74,7 +75,10 @@ function createAgentToolInterceptor(options = {}) {
       };
     }
 
-    const args = argsObj == null ? {} : argsObj;
+    // P4R-3: a result-focus Composer binds its opaque token in request
+    // context. Inject before required-field validation; explicit model tokens
+    // are never replaced, so stale writes still fail closed in the handler.
+    const args = bindResultStudioContextToken(name, argsObj == null ? {} : argsObj, ctx);
     const argumentErrors = validateToolArguments(args, entry.definition.function.parameters);
     if (argumentErrors.length) {
       return {

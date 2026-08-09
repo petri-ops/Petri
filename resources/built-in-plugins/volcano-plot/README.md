@@ -19,9 +19,8 @@ deg-standardizer → volcano-plot
 | deg_results | file | ✓ | — | 差异分析结果表 (CSV/TSV) |
 | gene_col | text | — | `gene` | 基因 ID 列名 |
 | lfc_col | text | — | `log2FoldChange` | log2FC 列名 |
-| pval_col | text | — | `pvalue` | p value 列名 |
-| padj_col | text | — | `padj` | adjusted p value 列名 |
-| padj_threshold | number | — | `0.05` | 显著性阈值 |
+| pval_col | text | — | `padj` | 用于判定和纵轴的显著性列；显式改为 `pvalue` 属科学变化 |
+| pval_threshold | number | — | `1.3` | `-log10(所选显著性列)` 阈值 |
 | lfc_threshold | number | — | `1` | |log2FC| 阈值 |
 
 ## 输出

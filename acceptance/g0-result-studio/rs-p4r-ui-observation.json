@@ -1,0 +1,701 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS-P4R-6",
+  "qualificationEligible": false,
+  "classification": "development_real_renderer_non_provider_non_packaged",
+  "privacy": "fixture_labels_counts_timings_bounded_dom_digests_and_screenshot_hashes_only",
+  "captureMode": "single_parent_disposable_real_corpus_backend_vite_electron_chromium",
+  "sourceCommit": "35a0760cf98c5865574507e03521795231307442",
+  "sourceFiles": {
+    "observation": "scripts/g0-rs-p4r-ui-observation.mjs",
+    "driver": "scripts/g0-rs-p4r-ui-driver.cjs",
+    "observationTest": "test/p4r-ui-observation.test.mjs",
+    "liveProducer": "scripts/g0-rs-p4r-live-observation.mjs",
+    "corpus": "scripts/g0-rs-p4r-corpus.mjs",
+    "capture": "scripts/g0-rs-p4r-capture.mjs",
+    "packageScripts": "package.json",
+    "impactMap": "test/impact-map.json",
+    "background": "core/shared-backend/result-studio-background.js",
+    "backgroundChild": "core/shared-backend/result-studio-background-child.js",
+    "workspace": "frontend/src/pages/project-workspace.tsx",
+    "workspaceStyles": "frontend/src/pages/project-workspace.module.css",
+    "resultSurface": "frontend/src/components/result-studio/ResultStudioSurface.tsx",
+    "resultSurfaceStyles": "frontend/src/components/result-studio/ResultStudioSurface.module.css",
+    "resultComposerStyles": "frontend/src/components/result-studio/ResultAgentComposer.module.css",
+    "resultComposer": "frontend/src/components/result-studio/ResultAgentComposer.tsx",
+    "resultEditPanelStyles": "frontend/src/components/result-studio/ResultEditPanel.module.css",
+    "resultEditPanel": "frontend/src/components/result-studio/ResultEditPanel.tsx",
+    "changeReview": "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx",
+    "changeReviewStyles": "frontend/src/components/result-studio/ResultStudioChangeSetPanel.module.css",
+    "changeReviewTest": "frontend/src/components/result-studio/ResultStudioChangeSetPanel.test.tsx",
+    "codeView": "frontend/src/components/result-studio/RevisionCodeView.tsx",
+    "codeViewStyles": "frontend/src/components/result-studio/RevisionCodeView.module.css",
+    "resultStudioClient": "frontend/src/components/result-studio/resultStudioClient.ts",
+    "interactionClient": "frontend/src/lib/result-studio-interaction-client.ts",
+    "scientificViewer": "frontend/src/components/result-studio/ScientificInteractionViewer.tsx",
+    "scientificViewerStyles": "frontend/src/components/result-studio/ScientificInteractionViewer.module.css",
+    "scientificViewerTest": "frontend/src/components/result-studio/ScientificInteractionViewer.test.tsx",
+    "theme": "frontend/src/themes/ThemeProvider.tsx"
+  },
+  "sourceHashes": {
+    "observation": "4fbc32af629d5680322fa3f652d4b12fc3e97ff7a9183536f15ff7871d9a673b",
+    "driver": "1b6bfbc4c9bea690c7749f46019c1bfaee6295c5a6595aae09dad96f118ee431",
+    "observationTest": "07e8802e09117f5593bbb0b585430ea92fa5918dcba1eedfba2a7027072a2e83",
+    "liveProducer": "7fe88df4e806719834e7ff4a37cc4402450db560fd32429f338f31bafedd69be",
+    "corpus": "359e202832c117f12c6e041706e0028caaaf4c063df3d97511be982ab703bf11",
+    "capture": "99f9eb3fe4efa643e5a87925098dfdd815664b703907b90333e9e240edd317ac",
+    "packageScripts": "1e7f71e9fe0bed784930198260bbd0b081e8a11234af1e9ae7e27a56ef350669",
+    "impactMap": "073cda5d914a50e7c3214b70f96dbd1294e0680c15364c0042d201ea0e6ce0c2",
+    "background": "0c8d74472ca99bf505967a1c3d0c4179e1d07dc0a81c6c3e301b251e93db0e16",
+    "backgroundChild": "06209a3cd696af000f39d234eda29472583bf79b7fc45fb98e21d93c39bdf62d",
+    "workspace": "a74cb05e0223af51e5957d27d89ec142e2f3724ca0edf446d131d0ae7cdcf3f6",
+    "workspaceStyles": "e8650ac918218c8e02864da9b1421bbef7262ec9da4d5a09d77cef23b52d5d06",
+    "resultSurface": "fe026c47d099e4cc84e95b7133810620ee67bbdafcfd815ba322fb47ed03a545",
+    "resultSurfaceStyles": "51de03642417669b94637447c27e6f18e3e38d328dcec5867779bac138c95254",
+    "resultComposerStyles": "96bfc4dff032898ff544364d85c7c86984701bc16ccf254864a504a3c11a8bb2",
+    "resultComposer": "5c0508cb07254b660ba9b5c63553011617dde37f7db26053329f8d97e8c5e9e1",
+    "resultEditPanelStyles": "5b95b407f4517132af63aea5c20be403cd16cff9db13b6d799040b366c5b308a",
+    "resultEditPanel": "9a1387cbb775978e1f5b325c079affe3700d298424cd60911eb87caf415af650",
+    "changeReview": "2e58d70c6f301baf21e418754aa103f8d2138241809e9b13b6b843359416716b",
+    "changeReviewStyles": "48e87b854af64d41ea12bcef504896d4d94a51bb02f51433e22bf5303b14376c",
+    "changeReviewTest": "40282a57ccda17431f6926137033ca9028396545323aa07324c6f00e9925783c",
+    "codeView": "6534f49cf39a42c0e7ef303e91e20346e4f51990151ae1aa357070f0f305e855",
+    "codeViewStyles": "d51a9a7addb03ad51bada5c6eb8789d8d4df50d89dbd4ada5fca0c4a1d6ab9a9",
+    "resultStudioClient": "0654d1409bf95dc03739d5cd72acc21e7643ded409eabf488d66b94ba5a7fe08",
+    "interactionClient": "8a74968cef56b917742fe932c7f0bf33d74465ac3fcea6f78ca1cf1c52df4c79",
+    "scientificViewer": "2150ff1a3a3a497b1f7ea911fd42d00d5521d29d2b746f707cf8917b069ee816",
+    "scientificViewerStyles": "660894b5ebb58440da200a7ff061787647ab7f054f0615478b3eaa193a716330",
+    "scientificViewerTest": "fe066e5457f5a4ca67163aef75b9552c3ead6d3ed57866168467649d2d63da51",
+    "theme": "0815c6f466e38e4767d4fd094dc32438e5cbb4587fe0b87601bf3b1d1ebe9ded"
+  },
+  "sourceCommitMatchesSourceHashes": true,
+  "sourceMismatches": [],
+  "renderer": {
+    "schemaVersion": 1,
+    "renderer": "Electron 30.5.1 / Chromium 124.0.6367.243",
+    "initialResult": {
+      "theme": "dark",
+      "viewport": {
+        "innerWidth": 1440,
+        "innerHeight": 859,
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "canvas": {
+        "width": 858,
+        "height": 821,
+        "mode": "result",
+        "firstVisibleMs": null
+      },
+      "bodyVisible": true,
+      "degradationVisible": false,
+      "composerState": "ready",
+      "versionKind": "ordinal",
+      "truthKind": "valid",
+      "visiblePrimaryActionCount": 3,
+      "activeElement": {
+        "tag": "body",
+        "ariaLabel": null,
+        "textDigest": "246299a76806479c8673e74c4d83aa67c0ad365a162a624822a20190cad1b1e8"
+      },
+      "internalLeakFlags": {
+        "absolutePath": false,
+        "credential": false,
+        "rawInternalId": false
+      },
+      "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf"
+    },
+    "openResult": {
+      "feedbackMs": 7.528,
+      "firstContentVisibleMs": 3.6,
+      "domSha256": "0f843d5b73608adea99fd5c7789e37213b92213def2eae6ece09a55e26a87e98",
+      "draftPreserved": true,
+      "draftDigest": "4cf115d02c95fb9bbab5a4da44039112dda3bb61d316249ee9d5fe0a27f18e4f",
+      "theme": "dark",
+      "viewport": {
+        "innerWidth": 1440,
+        "innerHeight": 859,
+        "clientWidth": 1440,
+        "scrollWidth": 1440
+      },
+      "canvas": {
+        "width": 858,
+        "height": 821,
+        "mode": "result",
+        "firstVisibleMs": 3.6
+      },
+      "bodyVisible": true,
+      "degradationVisible": false,
+      "composerState": "ready",
+      "versionKind": "ordinal",
+      "truthKind": "valid",
+      "visiblePrimaryActionCount": 3,
+      "activeElement": {
+        "tag": "body",
+        "ariaLabel": null,
+        "textDigest": "246299a76806479c8673e74c4d83aa67c0ad365a162a624822a20190cad1b1e8"
+      },
+      "internalLeakFlags": {
+        "absolutePath": false,
+        "credential": false,
+        "rawInternalId": false
+      },
+      "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf"
+    },
+    "matrix": [
+      {
+        "label": "light-1440",
+        "theme": "light",
+        "requestedSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "screenshot": "light-1440.png",
+        "screenshotSha256": "f842b57311e0097777984591041af0fede6810fe35e1c3c841304ed802c3b29c",
+        "screenshotBytes": 481794,
+        "domSha256": "13e3d7f46a827f761e666d3b9a25ba32493b141e20186796de418696ef57b98a",
+        "viewport": {
+          "innerWidth": 1440,
+          "innerHeight": 872,
+          "clientWidth": 1440,
+          "scrollWidth": 1440
+        },
+        "canvas": {
+          "width": 858,
+          "height": 834,
+          "mode": "result",
+          "firstVisibleMs": 3.6
+        },
+        "bodyVisible": true,
+        "degradationVisible": false,
+        "composerState": "ready",
+        "versionKind": "ordinal",
+        "truthKind": "valid",
+        "visiblePrimaryActionCount": 3,
+        "activeElement": {
+          "tag": "body",
+          "ariaLabel": null,
+          "textDigest": "246299a76806479c8673e74c4d83aa67c0ad365a162a624822a20190cad1b1e8"
+        },
+        "internalLeakFlags": {
+          "absolutePath": false,
+          "credential": false,
+          "rawInternalId": false
+        },
+        "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf",
+        "pageHorizontalOverflow": false
+      },
+      {
+        "label": "light-1024",
+        "theme": "light",
+        "requestedSize": {
+          "width": 1024,
+          "height": 900
+        },
+        "screenshot": "light-1024.png",
+        "screenshotSha256": "d92c1e0666ecb69d15d48c721c41df518791e2add5904cd430c5798485eb314b",
+        "screenshotBytes": 412752,
+        "domSha256": "0968f2f15a3a3297b3305e1f25d88b3c96a67dc430662847efb64e746b2a90f8",
+        "viewport": {
+          "innerWidth": 1024,
+          "innerHeight": 872,
+          "clientWidth": 1024,
+          "scrollWidth": 1024
+        },
+        "canvas": {
+          "width": 683,
+          "height": 834,
+          "mode": "result",
+          "firstVisibleMs": 3.6
+        },
+        "bodyVisible": true,
+        "degradationVisible": false,
+        "composerState": "ready",
+        "versionKind": "ordinal",
+        "truthKind": "valid",
+        "visiblePrimaryActionCount": 3,
+        "activeElement": {
+          "tag": "body",
+          "ariaLabel": null,
+          "textDigest": "fffbe14de210ae0879c9dba18f591d562eb1be27bd94e705012e63c7fbd2b084"
+        },
+        "internalLeakFlags": {
+          "absolutePath": false,
+          "credential": false,
+          "rawInternalId": false
+        },
+        "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf",
+        "pageHorizontalOverflow": false
+      },
+      {
+        "label": "light-820",
+        "theme": "light",
+        "requestedSize": {
+          "width": 820,
+          "height": 900
+        },
+        "screenshot": "light-820.png",
+        "screenshotSha256": "2700e1e22ee66dee2c3f079d01904aec555374897372786fd8455bf32de4a522",
+        "screenshotBytes": 353633,
+        "domSha256": "7205206a48615fbb29c5dc35d8712dfa3b8e2831ad9b47245fc58e81f5c54fe4",
+        "viewport": {
+          "innerWidth": 820,
+          "innerHeight": 872,
+          "clientWidth": 820,
+          "scrollWidth": 820
+        },
+        "canvas": {
+          "width": 820,
+          "height": 834,
+          "mode": "result",
+          "firstVisibleMs": 3.6
+        },
+        "bodyVisible": true,
+        "degradationVisible": false,
+        "composerState": "ready",
+        "versionKind": "ordinal",
+        "truthKind": "valid",
+        "visiblePrimaryActionCount": 3,
+        "activeElement": {
+          "tag": "body",
+          "ariaLabel": null,
+          "textDigest": "d6654c22ee696611e818d0e8c0192835cab87e794cdcac3e24ab0f4608abfa8a"
+        },
+        "internalLeakFlags": {
+          "absolutePath": false,
+          "credential": false,
+          "rawInternalId": false
+        },
+        "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf",
+        "pageHorizontalOverflow": false
+      },
+      {
+        "label": "dark-1440",
+        "theme": "dark",
+        "requestedSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "screenshot": "dark-1440.png",
+        "screenshotSha256": "947d7cb2bbb0e599b89f01386ea2773daa943dba4e238b9c46700f1fa7b09e06",
+        "screenshotBytes": 484525,
+        "domSha256": "55b7eb16f0369ac8ae86441d430d98d2468ea8cafad8348a297be0ba6de8ef8e",
+        "viewport": {
+          "innerWidth": 1440,
+          "innerHeight": 872,
+          "clientWidth": 1440,
+          "scrollWidth": 1440
+        },
+        "canvas": {
+          "width": 858,
+          "height": 834,
+          "mode": "result",
+          "firstVisibleMs": 3.6
+        },
+        "bodyVisible": true,
+        "degradationVisible": false,
+        "composerState": "ready",
+        "versionKind": "ordinal",
+        "truthKind": "valid",
+        "visiblePrimaryActionCount": 3,
+        "activeElement": {
+          "tag": "body",
+          "ariaLabel": null,
+          "textDigest": "246299a76806479c8673e74c4d83aa67c0ad365a162a624822a20190cad1b1e8"
+        },
+        "internalLeakFlags": {
+          "absolutePath": false,
+          "credential": false,
+          "rawInternalId": false
+        },
+        "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf",
+        "pageHorizontalOverflow": false
+      },
+      {
+        "label": "dark-1024",
+        "theme": "dark",
+        "requestedSize": {
+          "width": 1024,
+          "height": 900
+        },
+        "screenshot": "dark-1024.png",
+        "screenshotSha256": "bc2938d196d2b989a76ebb34aa03bb864e655c42ee0e7ef5fcb66e8e3fc773bd",
+        "screenshotBytes": 409046,
+        "domSha256": "ee238555db32b8eeaa17162e54a11fe6ec3f402b21be0a4d4c5ae25db1759346",
+        "viewport": {
+          "innerWidth": 1024,
+          "innerHeight": 872,
+          "clientWidth": 1024,
+          "scrollWidth": 1024
+        },
+        "canvas": {
+          "width": 683,
+          "height": 834,
+          "mode": "result",
+          "firstVisibleMs": 3.6
+        },
+        "bodyVisible": true,
+        "degradationVisible": false,
+        "composerState": "ready",
+        "versionKind": "ordinal",
+        "truthKind": "valid",
+        "visiblePrimaryActionCount": 3,
+        "activeElement": {
+          "tag": "body",
+          "ariaLabel": null,
+          "textDigest": "fffbe14de210ae0879c9dba18f591d562eb1be27bd94e705012e63c7fbd2b084"
+        },
+        "internalLeakFlags": {
+          "absolutePath": false,
+          "credential": false,
+          "rawInternalId": false
+        },
+        "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf",
+        "pageHorizontalOverflow": false
+      },
+      {
+        "label": "dark-820",
+        "theme": "dark",
+        "requestedSize": {
+          "width": 820,
+          "height": 900
+        },
+        "screenshot": "dark-820.png",
+        "screenshotSha256": "a11dfedf8ac5e27a7611809b7d4d46d6a46a917a51fbd479c968bb2526a71006",
+        "screenshotBytes": 352242,
+        "domSha256": "80f4ef903ab743138fb242368f100d4bcde17d3441b78a57e4c4a93e3ee46f9d",
+        "viewport": {
+          "innerWidth": 820,
+          "innerHeight": 872,
+          "clientWidth": 820,
+          "scrollWidth": 820
+        },
+        "canvas": {
+          "width": 820,
+          "height": 834,
+          "mode": "result",
+          "firstVisibleMs": 3.6
+        },
+        "bodyVisible": true,
+        "degradationVisible": false,
+        "composerState": "ready",
+        "versionKind": "ordinal",
+        "truthKind": "valid",
+        "visiblePrimaryActionCount": 3,
+        "activeElement": {
+          "tag": "body",
+          "ariaLabel": null,
+          "textDigest": "d6654c22ee696611e818d0e8c0192835cab87e794cdcac3e24ab0f4608abfa8a"
+        },
+        "internalLeakFlags": {
+          "absolutePath": false,
+          "credential": false,
+          "rawInternalId": false
+        },
+        "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf",
+        "pageHorizontalOverflow": false
+      }
+    ],
+    "modeTrace": [
+      {
+        "mode": "code",
+        "feedbackMs": 13.168,
+        "domSha256": "bd360ab13681af6a877373d693e947f7b5442d81711ef36e7610dd94cac9a3b6",
+        "theme": "dark",
+        "viewport": {
+          "innerWidth": 820,
+          "innerHeight": 872,
+          "clientWidth": 820,
+          "scrollWidth": 820
+        },
+        "canvas": {
+          "width": 820,
+          "height": 834,
+          "mode": "code",
+          "firstVisibleMs": 3.6
+        },
+        "bodyVisible": false,
+        "degradationVisible": false,
+        "composerState": "absent",
+        "versionKind": "ordinal",
+        "truthKind": "valid",
+        "visiblePrimaryActionCount": 0,
+        "activeElement": {
+          "tag": "body",
+          "ariaLabel": null,
+          "textDigest": "d6654c22ee696611e818d0e8c0192835cab87e794cdcac3e24ab0f4608abfa8a"
+        },
+        "internalLeakFlags": {
+          "absolutePath": false,
+          "credential": false,
+          "rawInternalId": false
+        },
+        "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf"
+      },
+      {
+        "mode": "compare",
+        "feedbackMs": 5.149,
+        "domSha256": "f379cf225986cacce9470c0444e4b8ada7b15250478bbf93d360be989493ba9c",
+        "theme": "dark",
+        "viewport": {
+          "innerWidth": 820,
+          "innerHeight": 872,
+          "clientWidth": 820,
+          "scrollWidth": 820
+        },
+        "canvas": {
+          "width": 820,
+          "height": 834,
+          "mode": "compare",
+          "firstVisibleMs": 3.6
+        },
+        "bodyVisible": false,
+        "degradationVisible": false,
+        "composerState": "absent",
+        "versionKind": "ordinal",
+        "truthKind": "valid",
+        "visiblePrimaryActionCount": 0,
+        "activeElement": {
+          "tag": "body",
+          "ariaLabel": null,
+          "textDigest": "d6654c22ee696611e818d0e8c0192835cab87e794cdcac3e24ab0f4608abfa8a"
+        },
+        "internalLeakFlags": {
+          "absolutePath": false,
+          "credential": false,
+          "rawInternalId": false
+        },
+        "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf"
+      },
+      {
+        "mode": "history",
+        "feedbackMs": 2.914,
+        "domSha256": "c8473a6d82d7898a60f3d336d4f2be7ef2fee7cf402a6c2cb146de4c18ff4393",
+        "theme": "dark",
+        "viewport": {
+          "innerWidth": 820,
+          "innerHeight": 872,
+          "clientWidth": 820,
+          "scrollWidth": 820
+        },
+        "canvas": {
+          "width": 820,
+          "height": 834,
+          "mode": "history",
+          "firstVisibleMs": 3.6
+        },
+        "bodyVisible": false,
+        "degradationVisible": false,
+        "composerState": "absent",
+        "versionKind": "ordinal",
+        "truthKind": "valid",
+        "visiblePrimaryActionCount": 0,
+        "activeElement": {
+          "tag": "body",
+          "ariaLabel": null,
+          "textDigest": "d6654c22ee696611e818d0e8c0192835cab87e794cdcac3e24ab0f4608abfa8a"
+        },
+        "internalLeakFlags": {
+          "absolutePath": false,
+          "credential": false,
+          "rawInternalId": false
+        },
+        "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf"
+      },
+      {
+        "mode": "result",
+        "feedbackMs": 18.154,
+        "domSha256": "cd8fe46ed7ef44b18a11e1c01ce231d629850d69697d1adcf827e42ad0a9de0e",
+        "theme": "dark",
+        "viewport": {
+          "innerWidth": 820,
+          "innerHeight": 872,
+          "clientWidth": 820,
+          "scrollWidth": 820
+        },
+        "canvas": {
+          "width": 820,
+          "height": 834,
+          "mode": "result",
+          "firstVisibleMs": 3.6
+        },
+        "bodyVisible": true,
+        "degradationVisible": false,
+        "composerState": "ready",
+        "versionKind": "ordinal",
+        "truthKind": "valid",
+        "visiblePrimaryActionCount": 1,
+        "activeElement": {
+          "tag": "body",
+          "ariaLabel": null,
+          "textDigest": "d6654c22ee696611e818d0e8c0192835cab87e794cdcac3e24ab0f4608abfa8a"
+        },
+        "internalLeakFlags": {
+          "absolutePath": false,
+          "credential": false,
+          "rawInternalId": false
+        },
+        "titleDigest": "761ad96c7b03ca05fdaf47d2c0db0b8843cb19c123e3b45e68446d6e48935fcf"
+      }
+    ],
+    "keyboard": {
+      "steps": [
+        {
+          "tag": "button",
+          "ariaLabel": null,
+          "textDigest": "e6f04ffbaa424001e9716a18813eab4adf46f4e54528f5613915ee7d4d6453ca"
+        },
+        {
+          "tag": "button",
+          "ariaLabel": null,
+          "textDigest": "20a7f192800652ea7f87451110f3fd8af66270dbb7349e94161eca1144da13c2"
+        },
+        {
+          "tag": "button",
+          "ariaLabel": null,
+          "textDigest": "bb58d709f19dedbfee7df2daac0722e4cac43ba4c8c19186e232f020b0de7042"
+        },
+        {
+          "tag": "button",
+          "ariaLabel": "询问 Agent",
+          "textDigest": "6c676241b8e284e56373c89d4a92fbae30f7d7c52e612496bd7e6f3b1b701f9c"
+        }
+      ],
+      "modeEnterActivated": true,
+      "focusVisible": true,
+      "scatterAvailable": true,
+      "scatterActivated": true,
+      "allFocusable": true
+    },
+    "lifecycle": {
+      "compareVisible": true,
+      "compareDigest": "638f5accc246f22af8751b2aa21a9d86ec51a1027c2c8a597e99bf6a809ad11d",
+      "adoptedVersionKind": "ordinal",
+      "adopted": true,
+      "undone": true,
+      "restoredOrdinal": 3,
+      "replayConfirmed": true,
+      "replayCandidateDiscarded": true
+    },
+    "serviceRestart": {
+      "sameWebContents": true,
+      "backendWasUnreachable": true,
+      "resultRecovered": true,
+      "composerRecovered": true,
+      "versionRecovered": true,
+      "beforeDigest": "638b803320d6a4e304518ebe33ece41bcae25c310ed0554a70b50a99980331ed",
+      "afterDigest": "112489339bbeda8313928ac221adb1b4215c2ce26d6e695340e2836da622eea7"
+    },
+    "failures": [
+      {
+        "kind": "interaction",
+        "bodyPreserved": true,
+        "pageHorizontalOverflow": false,
+        "domSha256": "04a98030b6ce3c7c78a3be6452b8cfa9fb4b0d4e6a2b56c59d2213a7f0cea62f",
+        "screenshot": "failure-interaction.png",
+        "screenshotSha256": "47cea98dcd969debf57bdfe427a57d160748a27cf7615b6ee99ca38424ba2f7d",
+        "screenshotBytes": 265578,
+        "degradationVisible": true,
+        "internalLeakFlags": {
+          "absolutePath": false,
+          "credential": false,
+          "rawInternalId": false
+        },
+        "actionable": true,
+        "recovered": true
+      },
+      {
+        "kind": "versions",
+        "bodyPreserved": true,
+        "pageHorizontalOverflow": false,
+        "domSha256": "30cdcfb8d37b1db63ba9f54cc871d5a6e9986bed3e9d088acc403f90b0337b53",
+        "screenshot": "failure-versions.png",
+        "screenshotSha256": "51e36e794392701f10ce9ba70f784433911f4d89583c6c4cfc04acc3ae6ba452",
+        "screenshotBytes": 282120,
+        "degradationVisible": true,
+        "internalLeakFlags": {
+          "absolutePath": false,
+          "credential": false,
+          "rawInternalId": false
+        },
+        "actionable": true,
+        "recovered": true
+      },
+      {
+        "kind": "storage",
+        "bodyPreserved": true,
+        "pageHorizontalOverflow": false,
+        "domSha256": "f9c4fe0e33179a5d7f3bc3288cd48065f20dc7881b11d34c40b8dd1aed268f96",
+        "screenshot": "failure-storage.png",
+        "screenshotSha256": "4e96df2f8b8cbb9b294025c72461852b060be5920513daa5260df2c0a317578e",
+        "screenshotBytes": 289574,
+        "degradationVisible": true,
+        "internalLeakFlags": {
+          "absolutePath": false,
+          "credential": false,
+          "rawInternalId": false
+        },
+        "actionable": true,
+        "recovered": true
+      },
+      {
+        "kind": "code",
+        "bodyPreserved": true,
+        "pageHorizontalOverflow": false,
+        "domSha256": "f44428d772cdb8ff400e4c720b764d6b66bb73578664f3b70ebf85ab6d4c4f8b",
+        "screenshot": "failure-code.png",
+        "screenshotSha256": "4e96df2f8b8cbb9b294025c72461852b060be5920513daa5260df2c0a317578e",
+        "screenshotBytes": 289574,
+        "degradationVisible": true,
+        "internalLeakFlags": {
+          "absolutePath": false,
+          "credential": false,
+          "rawInternalId": false
+        },
+        "actionable": true,
+        "recovered": true
+      },
+      {
+        "kind": "context",
+        "bodyPreserved": true,
+        "pageHorizontalOverflow": false,
+        "domSha256": "4cafe9d0078fc680c836aad7cf474892b3fce30f3a55f58f008215b2e0f9e850",
+        "screenshot": "failure-context.png",
+        "screenshotSha256": "6f015e55d20764993fb724881a513b1291cb0d0440b8a054db3a893c04aa5a7a",
+        "screenshotBytes": 277784,
+        "degradationVisible": true,
+        "internalLeakFlags": {
+          "absolutePath": false,
+          "credential": false,
+          "rawInternalId": false
+        },
+        "actionable": true,
+        "failClosed": true,
+        "recovered": true,
+        "recoveryStatusClass": "reachable_bounded_response",
+        "recoveredComposerState": "ready"
+      }
+    ],
+    "allMatrixStatesCaptured": true,
+    "allScreenshotsDistinct": true,
+    "noHorizontalOverflow": true,
+    "bodyVisibleEverywhere": true,
+    "composerReadyEverywhere": true,
+    "noSensitiveProjection": true,
+    "primaryActionBudgetMet": true,
+    "secondaryFailureRecoveryPassed": true,
+    "continuousLifecyclePassed": true,
+    "serviceRestartPassed": true,
+    "visibleFeedbackBudget": {
+      "targetMs": 100,
+      "observedModeSwitchMaxMs": 18.154,
+      "modeSwitchPassed": true,
+      "openResultFeedbackMs": 7.528,
+      "openResultFeedbackPassed": true,
+      "firstContentVisibleMs": 3.6,
+      "firstContentPassed": true
+    },
+    "passed": true
+  },
+  "passed": true
+}

@@ -186,7 +186,8 @@ test('RS3 plot manifest allows point selection only with an entity mapping', () 
   const unmapped = buildPlotInteractionManifest({ artifactId: 'heatmap_plot' });
   assert.equal(unmapped.selectionDurable, false);
   assert.equal(unmapped.capabilities.includes('point_select'), false);
-  assert.equal(unmapped.capabilities.includes('region_select'), true);
+  assert.equal(unmapped.capabilities.includes('region_select'), false);
+  assert.deepEqual(unmapped.capabilities, []);
   assert.equal(unmapped.diagnostics.some((d) => d.code === 'plot_without_entity_mapping'), true);
 });
 

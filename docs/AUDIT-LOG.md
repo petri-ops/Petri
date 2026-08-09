@@ -1,444 +1,81 @@
 # 审计广播台 (AUDIT-LOG)
 
-> **本文件是非主线 agent（审计/辅助 agent）向主 agent 广播发现的唯一入口。**
-> 主 agent 每次会话开始时，**必须先读本文件**，处理其中 🔴 阻塞项和 🟢 待合并项，再开始主线工作。
-> 非主 agent 每次完成审计后，必须把发现追加到本文件并提交，不要只写在单独报告里。
->
-> 维护方：非主 agent（只读审计 + 阻断性回归修复通道）
-> 最后更新：2026-07-24（G0 第五波 LF11 Evolution Pipeline 收口）
-
----
-
-## 当前待处理项（主 agent 请优先看这里）
-
-| 状态 | 日期 | 发现 | 来源 | 详情 |
-|------|------|------|------|------|
-| 🔴阻塞 | 2026-08-08 | **macOS R/Python 运行时 OSS 制品 404**：`manifest.json` 记录了 sha256/sizeBytes，但 `plugins/{r,py}-runtime/1.0.0/macos-arm64.zip` 在 OSS 上均 HTTP 404 → macOS 新装用户 `installRuntime` 会在下载步失败 | Windows 侧 agent（本文件 §8） | [§8 问题 N](#问题-nmacos-运行时-oss-制品-404) |
-| ✅已处理 | 2026-07-17 | Stage 3 M1: R_LIBS_USER 组装逻辑抽到 `shared-backend/r-libs-resolver.js`，两处调用共用 | 本文件 §3 | [§3 问题 A](#问题-a代码重复r-libs-user-组装逻辑) |
-| ✅已处理 | 2026-07-17 | Stage 3 M1: 两处 `catch {}` 静默吞掉所有错误，调试困难 | 本文件 §3 | [§3 问题 B](#问题-b静默-catch-吞掉所有错误) |
-| 🟡建议 | 2026-07-17 | Stage 3 M1: `capability-provisioning.js` 的 defaultDownload 未复用 plugin-manager 且无 host 白名单 | 本文件 §3 | [§3 问题 C](#问题-cdefaultdownload-未复用-plugin-manager) |
-| ✅已处理 | 2026-07-18 | Stage 3 M1: `capability-provisioning` 加 host 白名单（https-only + 精确/后缀匹配 + env 覆盖），下载前 gate；顺带纠正设计文档失实描述（plugin-manager 从无 host 白名单） | 本文件 §4 | [§4 问题 D](#问题-ddefaultdownload-缺少-host-白名单) |
-| ✅已处理 | 2026-07-17 | `fix/qa-smoke-stale-css-paths` 已合并，themes 门禁恢复 7/7 | 分支备忘录 | [§2.1](#21-fixqa-smoke-stale-css-paths-) |
-| 🟡待评估 | 2026-07-17 | `codex/fix-collapsed-right-titlebar` 分支待评估，三文件两边改过 | 分支备忘录 | [§2.2](#22-codexfix-collapsed-right-titlebar-) |
-| ✅已处理 | 2026-07-24 | G0-START 10/10 与 G0-LF0 10/10 建立：机器可读 Constitution、Baseline Manifest/Registry、Support Matrix 和治理词汇落地；项目持久记录创建/打开 baseline、manifest/bundle 摘要，legacy 显式采用，未来主版本或同版本摘要冲突保持可读但阻断正式写入；API/前端投影及永久根门禁均有脱敏证据。G0 仍为 establishing/not_yet_qualified。 | G0-LF0 / P-01～P-07 | `core/shared-backend/g0/`, `g0-baseline.js`, `project_g0_baselines`, `acceptance/g0-living-foundation/` |
-| ✅已处理 | 2026-07-24 | G0 第一波完成：LF1 五层 Truth Projection 已接入 Workflow/Delivery，Presentation 不得提升上游真相；LF2 为 13 类对象和 10 类故障建立恢复契约、项目导出校验与 append-only 审计；LF7/LF8 第一波供应链和权限基础契约落地。基线兼容升级为 0.2.0，仍为 establishing/not_yet_qualified。 | G0-LF1 / G0-LF2 / LF7-LF8 foundation | `g0-truth-projection.js`, `g0-durable-state.js`, `acceptance/g0-living-foundation/g0-first-wave-acceptance.json` |
-| ✅已处理 | 2026-07-24 | G0 第二波完成：LF3 固定方法适用性、假设、统计语义、科学设计变化和非显著/低功效/矛盾/阻断状态；LF4 建立七类 Corpus、三类 Artifact 比较和四类 Drift Report，并接入现有 Truth/Delivery/Replay。基线兼容升级为 0.3.0，仍为 establishing/not_yet_qualified。 | G0-LF3 / G0-LF4 | `g0-scientific-accuracy.js`, `g0-reproducibility-lab.js`, `acceptance/g0-living-foundation/g0-second-wave-acceptance.json` |
-| ✅已处理 | 2026-07-24 | G0 第三波完成：LF5 固定资源与安全调度；LF6 固定事实完整压缩、缓存、用量和 fallback；LF9 固定五视图统一投影与可行动异常。基线升级 0.4.0，仍为 establishing/not_yet_qualified。 | G0-LF5 / G0-LF6 / G0-LF9 | `g0-adaptive-runtime.js`, `g0-model-memory-cost.js`, `g0-observable-experience.js` |
-| ✅已处理 | 2026-07-24 | G0 第四波完成：LF7 固定能力描述符、独立脚本、平台资格与升级 Replay/Drift；LF8 固定多维权限决策和不可覆盖边界；LF10 固定八域 Fault Matrix 与无假成功恢复断言。基线升级 0.5.0，仍为 establishing/not_yet_qualified。 | G0-LF7 / G0-LF8 / G0-LF10 | `g0-capability-supply-chain.js`, `g0-security-permission.js`, `g0-resilience-lab.js` |
-| ✅已处理 | 2026-07-24 | G0 第五波完成：LF11 Evolution Pipeline 固定四级变更分级（policy/compatible-contract/migration/breaking）及各自所需证据、八项 Promotion Gate 强制证据，以及动态策略学习「只产候选、隐私边界/可解释/版本化/可回放/可回滚、科学阈值与结论规则不得隐式在线漂移」约束。基线升级 0.6.0，仍为 establishing/not_yet_qualified；六波证据全部按新 bundleDigest 刷新，第五波门禁进入根检查。下一波 LF12 Baseline Qualification。 | G0-LF11 | `g0-evolution-pipeline.js`, `g0/evolution-pipeline.json`, `acceptance/g0-living-foundation/g0-fifth-wave-acceptance.json` |
-| ✅已处理 | 2026-07-24 | G0-LF12 Q0～Q7 完成：封存 0.6 qualification subject；16/16 强制证据 satisfied，10/10 零容忍观测为 0；双 Provider、macOS arm64 packaged canonical DESeq2、5 分钟 soak、明暗/820px/重启五态视觉分别通过。Baseline 晋升 `g0-baseline-v1 / 1.0.0 / qualified + maintained`，限定 Support Matrix 范围；永久资格门与 LF11 requalification fail-closed 接线完成。 | G0-LF12 | `acceptance/g0-qualification/qualification-report.md`, `qualification-gate.json`, `g0-qualification-gate.mjs` |
-| ✅已处理 | 2026-07-25 | G0-RS4 完成：ResultEditIntent v1、确定性参数影响、真实 Job/Artifact/provenance 来源定位、DAG affected subgraph 与科学确认门接入只读 `result_edit_plan`；未知参数保守重算，跨项目/缺脚本输入/缺 Revision/DAG 均阻断，不创建 Job/ChangeSet。 | G0-RS4 | `result-edit-intent.js`, `result-edit-tools.js`, `test/result-edit-*.test.mjs` |
-| ✅已处理 | 2026-07-25 | G0-RS5 完成：普通 valid Job Artifact 建立确定性 baseline v1；临时 Git index + 私有 staging 形成无 Worktree 隔离，独立脚本/参数/candidate commit 经正式 Job/Artifact Truth 产生 preview Revision；失败、取消、并发冲突与恢复扫描均不切 current，修改进度接入 SSE 与有界前端 run store。 | G0-RS5 / UI-103 | `result-changeset-service.js`, `git-adapter.js`, `result-edit-tools.js`, `routes/result-studio.js` |
-| ✅已处理 | 2026-07-25 | G0-RS6 完成：有界文本/JSON/表格/图像比较、history、Git current ref CAS + SQLite 原子采用、baseline 保护、候选/已采用撤销和恢复为新 Revision 已接入服务/API/Agent/紧凑结果侧栏；真实隔离链 v1→v2→v1→v3 与明暗/820px 通过。UI-104 verified；UI-102/UI-103 按未覆盖场景继续 in_progress。 | G0-RS6 / UI-104 | `result-compare-service.js`, `routes/result-studio.js`, `ResultStudioChangeSetPanel.tsx`, `rs6-visual-matrix.md` |
-| ✅已处理 | 2026-07-25 | G0-RS7 完成：Result Studio Plugin SDK v1 fail-closed lint 接入生产 normalize 与插件 contract lint；DESeq2 table、volcano、heatmap、GO/KEGG 共 12 个正式图表完成 descriptor、Artifact binding、per-Artifact Revision 脚本路径与 golden Revision 适配。兼容升级保持可读，contract drift 缺迁移时明确 read-only legacy；四插件真实 valid 生产 fixture 保持通过。 | G0-RS7 | `result-studio-plugin-sdk.js`, `resources/built-in-plugins/*/golden-revisions/result-studio-v1.json`, `rs7-plugin-acceptance.json` |
-| ✅已处理 | 2026-07-25 | G0-RS8 完成：ChangeSet 全阶段 WorkspaceCheckpoint、Git/SQLite/Artifact 漂移自愈或阻断、content-addressed Artifact 去重、plan-token 安全 GC、1 MiB byte-cursor 大表渐进加载和 preview 资源/并发预算进入生产/API/UI；GC 永不删除 Artifact 或 Revision 历史。UI-105 功能完成、待 RS9 真实矩阵。 | G0-RS8 / UI-105 | `result-studio-lifecycle.js`, `routes/result-studio.js`, `ResultStudioChangeSetPanel.tsx`, `rs8-lifecycle-acceptance.json` |
-| ✅已处理 | 2026-07-25 | G0-RS9 完成：5/5 科学任务、9/9 环境、7/7 证据类、双真实 Provider 与五态真实 renderer 通过；五万行表仅渲染可见 24 行，820px 无页面横溢出，服务中断/重启保持候选 Revision。`result-studio-editing` 从 excluded claim 晋升为 qualified support claim，新增第 17 类 mandatory evidence，G0 Baseline v1 兼容升级至 1.1.0 并重资格。UI-102/UI-103/UI-105 verified。 | G0-RS9 / UI-102 / UI-103 / UI-105 | `result-studio-qualification.js`, `rs9-product-acceptance.json`, `rs9-provider-acceptance.json`, `rs9-visual-acceptance.json` |
-| ✅已处理 | 2026-07-17 | 5 个 codex/* 已合并残留分支已删除（连带 prune 6 个失效 worktree 注册） | 分支备忘录 | [§2.3](#23-已合并残留分支可安全删除-) |
-| ✅已处理 | 2026-07-17 | `sanitizer.js` 死模块 + 其测试已删除（全仓零生产引用） | 本文件 §4 | [§4 问题 E](#问题-esanitizerjs-死模块) |
-| ✅已处理 | 2026-07-17 | `core/test/` 门禁盲区已收口：3 个单测迁入 `test/*.test.mjs`，死模块测试删除，4 个联网 smoke 保留在 core/test/ | 本文件 §4 | [§4 问题 F](#问题-fcoretest-目录不在门禁范围) |
-| ✅已处理 | 2026-07-17 | `project-run-layout.js` isAdmin 硬编码 → 实现为 `db.getUserById().role === 'admin'`（与 api-data/feedback 一致） | 本文件 §4 | [§4 问题 G](#问题-gproject-run-layoutjs-isadmin-硬编码) |
-| ✅已处理 | 2026-07-18 | Stage 3 B2: `provisionCapability` 写好但未接入任何真实运行路径（无执行器/readiness gate 调用它，`r-libs-resolver` 只查已装不触发下载）——文档说有、实际没有 → B2 part2 已接进 tools-executor/registry 运行路径 | 本文件 §5 | [§5 问题 H](#问题-hprovisioncapability-未接入任何真实运行路径) |
-| ✅已处理 | 2026-07-19 | Stage 4: 开发 migration 使用系统 Node 却加载 electron-builder 留下的 Electron ABI `better-sqlite3`，导致首次启动和全量测试不干净 | 本文件 §6 | [§6 问题 I](#问题-istage-4-migration-原生模块-abi-边界错误) |
-| ✅已处理 | 2026-07-19 | Stage 4: Runtime 首装被线上旧 manifest 覆盖，且内置清单缺校验描述符、安装包缺 R 路径修复脚本 | 本文件 §6 | [§6 问题 J](#问题-jruntime-首装契约不完整) |
-| ✅已处理 | 2026-07-19 | Stage 4: 诊断导出范围过宽且原始日志未脱敏，可能携带用户数据 | 本文件 §6 | [§6 问题 K](#问题-k诊断导出隐私边界过宽) |
-| ✅已处理 | 2026-07-19 | Stage 4: DESeq2 可产生科学文件却缺必需 ZIP/报告模板，golden-path 曾用补救逻辑掩盖失败 | 本文件 §6 | [§6 问题 L](#问题-ldeseq2-首次成功产物契约不完整) |
-| ✅已处理 | 2026-07-21 | rc.7: `diagnostic-redaction.js` 在打包态仍从 app.asar 相邻目录解析 `core/`，主进程启动即报模块缺失 | rc.7 安装候选实机 | 已改为 `Resources/core/shared-backend/redaction.js`，补开发/打包双路径回归并完成安装启动验证 |
-| ✅已处理 | 2026-07-24 | HLE-C4R/HLE-C5 已完成生产收口：历史/终态/恢复/active-background/token-cost 均由 SQLite 投影；真实 SPT-1 正常 7 节点、可修复、科学阻断三轨，双 Provider、应用重启及明暗/820px/停止恢复视觉矩阵均已形成脱敏证据。 | 生产收口计划 | [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) HLE-C4~C5 |
-| ✅已处理 | 2026-07-24 | ReplayPackage 取最新 checkpoint 时会把共表的 Loop iteration checkpoint 当成 ContextCheckpoint，导致真实交付回放报 `replay_package_context_checkpoint_invalid`。现按 ContextCheckpoint 契约从新到旧选择兼容记录；显式指定不兼容记录时诚实返回 422，并补回归。 | HRT-6 / HLE-C5 | `scientific-replay-package.js`, `routes/harness.js`, `scientific-replay-package.test.mjs` |
-| ✅已处理 | 2026-07-24 | 全量插件 schema 在 ToolResult 投影中截断，模型看不到后部插件 ID 后会猜测名称；现 `run_tool(op=list)` 返回完整紧凑目录，`op=list, toolId=...)` 返回单工具精确契约，unknown 也返回真实 ID 列表。真实正常轨据此稳定完成 go-kegg 与 gsea。 | P-03 / P-04 / HLE-C5 | `agent-tools/learning.js`, `agent-tools/tool-defs.js`, `agent-approval.test.mjs` |
-| ✅已处理 | 2026-07-24 | 双 Provider 工作区复验发现 full access 下模型可把 `sudo` 直接交给 shell，产生系统密码提示；同类 `rm`、`git push`、远程脚本管道也不应成为无提示副作用。现保留通用 shell 能力，但在 handler/preflight 共用 verdict 中稳定拒绝这四类不可协商风险，返回明确 `command_blocked`，不再回退到旧 allowlist。 | P-02 / P-03 / HLE-C5 | `workspace-tools.js`, `tool-defs.js`, `harness-workspace-tools.test.mjs` |
-| ✅已处理 | 2026-07-24 | 生产可修复轨的 failed parent 与 completed replacement 已存在，但未知故障没有可选 RepairStrategy 时 checkpoint 不记录替换链；同时 `EVIDENCE_KINDS` 数组被误当枚举对象，`undefined` kind 触发的异常又被保护性 catch 吞掉，导致 LoopEvidence 恒为 0。现对已验证的同工具 replacement 生成 `observed_same_tool_replacement` lineage，统一构造合法 observation evidence；生产证据采集同时按明确 TaskEvent 绑定 Loop，不再被同会话后续普通聊天污染。真实重跑已写入 parent/replacement checkpoint 与 2 条 LoopEvidence。 | P-03 / HLE-C5 | `agent-runner.js`, `harness-loop-production-acceptance.mjs`, `loop-agent-integration.test.mjs` |
-| ✅已处理 | 2026-07-24 | 真实 Desktop 启动发现 Loop API 被 legacy `/api/loop/:loopRunId` 路由吞掉、desktop-local 只注入 `req.user` 导致 401、无 assistant 消息的历史会话不展示已恢复 Loop。现将 bounded AI Loop API 前置注册、统一归一化 `req.user.id`，并为无 assistant 历史提供独立 LoopStatusPanel；新增生产注册顺序与桌面身份回归。 | HLE-C4R / UI-101 | `routes/index.js`, `routes/ai-loop.js`, `SimpleChat.tsx`, `loop-api-route.test.mjs` |
-| ✅已处理 | 2026-07-24 | Provider 人工验收工具不识别产品已支持的通用 OpenAI-compatible Profile，双 Provider 验收只能依赖固定 DeepSeek/Anthropic 环境变量；控制台还会打印自定义 endpoint/model。现增加 `openai-compatible` 目标（key/base URL/model 三字段齐备才启用），日志只显示目标/协议，报告保持脱敏。 | P-07 / HLE-C5 | `scripts/harness-provider-eval.mjs`, `test/harness-provider-eval.test.mjs` |
-| ✅已处理 | 2026-07-24 | 真实 Bulk RNA 主轨生成最终答案后，Loop 收口从 `loop-contract` 错误解构 `deriveObservedStateDigest`，异常又被已有 assistant 正文掩盖：task=completed、Loop=running、iterations=0。现改从 Loop Controller 导入并启动即校验依赖；真实 state digest 纳入 Job/进度事实；模型终答只有在 Loop 收口成功后才发 done；任何 post-processing fatal error 优先标 task/Loop failed，不能由文本长度升级成功。 | P-03 / HLE-C5 | `agent-runner.js`, `loop-agent-integration.test.mjs` |
-| ✅已处理 | 2026-07-24 | Loop 原注释要求“首次 run_tool 才惰性创建、每个 Agent turn 持久化”，生产却在所有 execution-capable 消息首轮即创建且只在整轮结束落一次 iteration：普通问答会误建 Loop，长任务崩溃前无 durable 阶段。现改为首次 `run_tool`（含 plan/blocked preflight）才建 Loop，每个工具批次立即落公开结论、Job 状态、hash chain 与 checkpoint；终答再落终态 iteration。失败 Job 被同工具后续 completed Job 修复时保留 parent/replacement lineage，不因旧失败产物阻断新验证结果。 | P-03 / HLE-C4R~C5 | `agent-runner.js` |
-| ✅已处理 | 2026-07-24 | 真实 SPT-1 主轨中 sample metadata validator 对大小写不兼容，Agent 用 `workspace_replace` 原地修改项目 `metadata.csv` 以迎合插件，违反源数据不可变与 repair lineage。任务已主动取消，Loop/阶段/Job 保留；原始 metadata 按既有 Job 输入副本恢复并校验回原 SHA-256。工具策略现拒绝覆盖/替换已有科学数据文件，要求写 `derived/`/`results/`；系统提示同步禁止通过 exec 绕过。 | P-03 / HLE-C5 | `agent-tool-policy.js`, `agent-runner.js`, `agent-tool-policy.test.mjs` |
-| ✅已处理 | 2026-07-23 | HLE-C3R 耐久恢复收口：`_loopInit` 改为先 `getActiveLoopRunForConversation` 复用同会话未终结 LoopRun（planned/running）并重建内存 iteration 链，不再每轮新建；server-restart 标为 failed(recovery_required) 的 run 被排除、只经恢复 API 暴露不静默复用。新增 `db.getActiveLoopRunForConversation` 与 `db.listLoopActions`（修复此前空转的 `/api/loop/actions`）。checkpoint-on-success 接线：每轮 `buildIterationCheckpoint→saveContextCheckpoint`，聊天摘要不再是 loop 状态唯一副本，ContextEnvelope 可从持久化 checkpoint 重建（模型切换仅换决策提供者，不改重建状态）。修复 `ai-loop.js` 三处真实 bug：recovery/abort 读错字段（`run.loopStatusJson/loopStatusHash` → `run.record/run.hash`，此前 statusJson 恒为 `{}`、recovery_required 永不暴露）、无项目归属隔离（新增 `userMayAccessProject`+`loadRunAuthorized`，跨用户 403、public/admin 放行）、expanded 投影暴露 recoveryRequired/recoveryReason。新增 11 durable-resume + 15 route 集成测试（挂真实 router+DB+mock auth）；641 loop 测试、`npm test` 1049 pass/0 fail、`npm run check` 全绿。 | 本提交 | `core/r-server/db.js`, `core/r-server/agent-runner.js`, `core/r-server/routes/ai-loop.js`, `test/loop-durable-resume.test.mjs`, `test/loop-api-route.test.mjs` |
-| ✅已处理 | 2026-07-24 | LoopRun 契约漂移已修复：`automationMode` 固定为 guided/confirm/trusted，新增独立 `executionIntent=task_draft/task_execute`；生产新建统一走 `buildLoopRun`，旧 task_* 行只读归一化，恢复仍按项目+会话复用同一 run。 | 本文件 §7 | 见 §7 |
-| ✅已处理 | 2026-07-23 | HLE-C1 完成
-| ✅已处理 | 2026-07-23 | HLE-C2 完成
-| ✅已处理 | 2026-07-23 | HLE-C5R：真实 Bulk RNA 聊天路径发现 Plugin Contract 未统一——DESeq2 coldata 绑定丢失、log2FoldChange/log2FC 列名漂移、volcano-plot 硬编码 log2FC、Workflow DAG 缺少 deg-standardizer、failed Job 假成功防护基于文件存在而非 artifactTruth、metadata→coldata 映射未进入 Job 参数。合成测试通过但产品路径失败。修复：biof3.deg.v1 profile、volcano-plot lfc_col 参数、DESeq2 preflight、bulk-rna-core 4-step DAG、Repair Boundary、scientific-task-planner coldataBinding、agent-runner false-success 检测。1032/1032 测试全量通过，插件契约 lint 0 错误。真实产品验收待 Step 7。 |
-| ✅已处理 | 2026-07-23 | DESeq2 存在 built-in、新旧 installed 快照和 `tool-scripts` 三条脚本来源，真实加载被 6 月 installed 副本覆盖。现以 `resources/built-in-plugins/deseq2` 为 builtin-canonical 唯一源码：移除 installed 台账/本机副本和 legacy R 脚本，普通 installed 不得覆盖，显式 development 仍可调试覆盖，并补充来源选择回归。 |
-| ✅已处理 | 2026-07-23 | HLE-C5 离线基础：server.js 启动恢复（HLE-C5）接入 listRunningLoopRuns；running LoopRun → failed(recovery_required) 平滑过渡；Loop Controller 修复 require('./loop-failure-diagnoser') 引用 loop-repair-strategy；22/22 恢复矩阵测试通过；46/46 SPT-1 三轨离线验收测试通过；440/440 Loop 离线测试全量通过。注意：离线测试通过不等于真实产品路径通过，HLE-C5 真实产品验收待 HLE-C5R 完成。 | 本提交 | `core/r-server/server.js`, `core/r-server/db.js`, `core/shared-backend/loop-controller.js`, `test/loop-recovery-integration.test.mjs`, `test/loop-spt1-acceptance.test.mjs` |
-
-| ✅已处理 | 2026-07-23 | HLE-C3（REST API 部分）完成，耐久恢复由 HLE-C3R 收口（见上方 ✅ 条目）：Loop REST API 上线（runs/iterations/actions/evidence/recovery/abort），compact 投影不暴露无界字段 | 本提交 | `core/r-server/routes/ai-loop.js` |
-| ✅已处理 | 2026-07-24 | HLE-C4R 功能与视觉接线完成：有界 `session-summary`、历史回放、active/background、恢复、Token/缓存/成本及 completed/blocked/cancelled 终态全部来自持久化真相；blocked/failed/cancelled 非绿，不展示隐藏思维链。真实 renderer 明暗、820px、停止/恢复矩阵通过，UI-101 已 verified。 | UI-101 | `loop-client.ts`, `useDurableConversationLoop.ts`, `SimpleChat.tsx`, `CenterPanel.tsx`, `WorkspaceSummaryCard.tsx`, `acceptance/harness-loop/production/ui-matrix.md` |
-：Validator Registry 接入生产 orchestration，运行真实 job truth 读取；Diagnoser 分类故障并选 Repair Strategy；blocked/failed 验证结果阻止完成；假成功（failed job + partial files）稳定阻断；38/38 集成测试通过 | 本提交 | `core/r-server/agent-runner.js` + `test/loop-validator-diagnoser.test.mjs` |
-：Loop Controller 接入 agent-runner.js，惰性初始化 LoopRun、按轮持久化 Iteration、发出 loop_phase/loop_iteration SSE 事件、记录用户取消和 Controller 终止；非执行轮不创建 LoopRun；19/19 集成测试通过 | 本提交 | `core/r-server/agent-runner.js` + `test/loop-agent-integration.test.mjs` |
- HLE 生产代码与实机审计 | 按 [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md) HLE-C0～HLE-C5 收口；failed Job 即使存在部分文件也不得宣称任务完成 |
-
-**状态图例**：🔴 阻塞验收必须处理 | 🟡 建议处理不阻塞 | 🟢 待合并零风险 | ⚪ 可清理 | ✅ 已处理
-
----
-
-## §1 Stage 2 验收审计（已完成，归档）
-
-> 详细报告见 `docs/stage2-acceptance-audit.md`
-> **状态：✅ 已被主 agent 完成验收，本审计归档**
-
-主 agent 已于 2026-07-17 完成 Stage 2 全部验收：
-- 真实 Provider 矩阵通过（DeepSeek + xunfei-astron + api.xcdw.us claude-opus-4-8）
-- 打包态 UI-031 verified（提交 `f7a9b4e`）
-- conversation/tool_job/artifact 契约不变
-
-原审计报告中的 3 条建议级问题（注释陈旧/成本估算硬编码/兼容期 apiKeyOverride）未在 Stage 2 验收中处理，仍为 🟡 建议级，不阻塞后续工作，主 agent 可在 Stage 3 间隙清理。
-
----
-
-## §2 并行分支待合并（2026-07-17）
-
-> 详细备忘录见 `docs/branch-handoff.md`
-
-### §2.1 fix/qa-smoke-stale-css-paths ✅
-
-- **提交**：`ce1f054`
-- **改动**：`scripts/qa-smoke.mjs`（2 行删除）
-- **状态**：✅ 2026-07-17 已 `git merge` 进 main（ort merge commit），qa-smoke 从 6/7 恢复到 7/7。分支已删除。
-- **风险**：零冲突，与 MODEL 文件零重叠（已确认）
-
-### §2.2 codex/fix-collapsed-right-titlebar 🟡
-
-- **提交**：`23705a3`
-- **改动**：3 文件（TitleBar.module.css、TitleBar.tsx、project-workspace.tsx）
-- **风险**：无文本冲突，但三文件两边都改过，有语义冲突风险
-- **合并方式**：建议先 `git diff main...codex/fix-collapsed-right-titlebar` review
-- **合并时机**：人工 review 后
-
-### §2.3 已合并残留分支可安全删除 ✅
-
-- **状态**：✅ 2026-07-17 已处理（主 agent）。`git branch --merged main` 逐个核实 5 个分支确已合并；发现它们各被 `/private/tmp/` 下的 worktree 占用（且 `/tmp` 已清空，worktree 目录 MISSING、标记 prunable），先 `git worktree prune` 清理陈旧注册，再 `git branch -d`（安全删除，只删已合并）删除。
-- 待评估的 `codex/fix-collapsed-right-titlebar`（§2.2，无 `-minimal` 后缀）不在 `--merged` 列表，已正确排除、保留。
-
-```bash
-# 已执行：
-git worktree prune
-git branch -d codex/fix-collapsed-right-titlebar-minimal \
-              codex/fix-external-webview-height \
-              codex/restore-user-avatar \
-              codex/restore-user-chat-bubble \
-              codex/theme-linked-panels
-```
-
----
-
-## §3 Stage 3 M1 Capability Provisioning 审计（2026-07-17）
-
-> 审计对象：工作区未提交的 Stage 3 M1 代码
-> 审计方式：只读，未改动任何代码
-> 审计结论：**代码质量良好，13 个测试全通过，无阻塞级问题。3 条建议级改进。**
-
-### 审计范围
-
-| 文件 | 改动类型 | 说明 |
-|------|---------|------|
-| `core/shared-backend/capability-provisioning.js` | 新增 | 核心模块：能力预备 CRUD + SHA-256 校验 + 幂等 |
-| `test/capability-provisioning.test.mjs` | 新增 | 13 个测试，全通过 |
-| `core/shared-backend/index.js` | +1 行 | 注册新模块导出 |
-| `core/r-server/helpers/tools-executor.js` | +27/-4 | R_LIBS_USER 注入 provisioned bundle |
-| `core/r-server/mcp/registry.js` | +29/-3 | 同上（插件脚本路径） |
-| `src/main.js` | +16 | IPC: `harness-capabilities:list`（只读） |
-| `src/preload.js` | +5 | 暴露 `harnessCapabilities.list` |
-| `frontend/src/lib/electron.d.ts` | +17 | 类型定义 |
-| `frontend/src/components/desktop/DesktopSettingsPanel.tsx` | +59 | 设置面板 HarnessEnvironment 只读视图 |
-| `scripts/harness-file-index.mjs` | +7/-2 | 索引更新 |
-
-### 优点（设计正确的部分）
-
-1. **capability-provisioning.js 不依赖 electron**，可独立测试，符合 D5 "不引入新依赖"
-2. **流式 SHA-256 + 幂等性 + 自愈检查**（install_dir_missing）设计完善
-3. **可注入的 download/hash/install 函数**，测试用 mock 完全覆盖，无真实网络调用
-4. **IPC 只暴露 list（只读）**，provision/remove 由 Harness 编排层内部完成，符合 D8 透明进度
-5. **tools-executor.js 和 mcp/registry.js 两处 R_LIBS_USER 注入逻辑一致**，provisioned bundle 优先级最高
-6. **HarnessEnvironment 组件遵循 Stage 1 UI 规范**（field__label / field__hint / biof3-badge）
-
-### 问题 A：代码重复（R_LIBS_USER 组装逻辑）
-
-- **位置**：`core/r-server/helpers/tools-executor.js:590-615` 和 `core/r-server/mcp/registry.js:475-500`
-- **现象**：两处的 R_LIBS_USER 三段式组装逻辑几乎完全相同（约 25 行重复代码）：
-  1. provisioned capability bundle lib（requiresBundle）
-  2. 插件内置 packages/r
-  3. R runtime library
-- **建议**：抽取为共享 helper，如 `core/shared-backend/r-libs-resolver.js`，导出 `resolveRLibsForPlugin(pluginCfg)` 函数
-- **优先级**：中（不阻塞 M1，但 M2 增加更多 bundle 类型时会重复更多）
-- **对验收影响**：无
-- **状态**：✅ 2026-07-17 已处理。新建 `core/shared-backend/r-libs-resolver.js`，导出 `resolveRLibsForPlugin(pluginCfg)` 与 `resolveProvisionedBundleLibs(pluginCfg)`。`tools-executor.js`（HTTP 执行器）与 `mcp/registry.js`（MCP 注册表）两处三段式逻辑替换为单行调用，约 25 行重复消除。触发时机正是 WGCNA 引入第二个 bundle 类型（`r-wgcna`）——审计预判的"M2 增加更多 bundle 类型时会重复更多"已兑现。全量测试 312 pass（唯一 fail 为环境 sqlite ABI，与改动无关），`npm run check` 绿。
-- **状态**：✅ 2026-07-17 已处理。新建 `core/shared-backend/r-libs-resolver.js`，导出 `resolveRLibsForPlugin(pluginCfg)`（返回完整 runEnv 或 null）+ `resolveProvisionedBundleLibs`。`tools-executor.js`、`mcp/registry.js` 两处三段式组装均改为调用该 helper，重复代码消除。四件套全绿（harness:check 7/7、node --test 312 pass 仅环境 sqlite ABI fail、frontend tsc 0、npm run check 绿）。
-
-### 问题 B：静默 catch {} 吞掉所有错误
-
-- **位置**：`tools-executor.js:598` 和 `mcp/registry.js:484`
-- **现象**：两处 `try { require('capability-provisioning')... } catch {}` 会吞掉所有错误（require 失败、ledger 损坏等）
-- **设计意图**：provisioning 未就绪时不阻塞基础执行（正确）
-- **建议**：至少 `console.warn` 一次，记录原因，否则调试困难。例如：
-  ```js
-  } catch (e) { console.warn('[harness] capability provisioning unavailable:', e.message); }
-  ```
-- **优先级**：中
-- **对验收影响**：无
-- **状态**：✅ 2026-07-17 随问题 A 一并处理。抽取到 `r-libs-resolver.js` 后，provisioning 不可用时 `console.warn('[harness] capability provisioning unavailable:', ...)`（每进程只 warn 一次，避免刷屏），单个 bundle readiness 检查失败也 warn 而非静默。两处调用点不再有裸 `catch {}`。
-- **状态**：✅ 2026-07-17 随问题 A 一并处理。抽取进 `r-libs-resolver.js` 时，require 失败改为每进程 warn 一次（`_warnedProvisioningUnavailable` 门闩，避免每次 tool run 刷屏）；`checkCapabilityReady` 单 bundle 失败也改为 `console.warn` 带 bundleId，不再静默。
-
-### 问题 C：defaultDownload 未复用 plugin-manager
-
-- **位置**：`core/shared-backend/capability-provisioning.js` 的 `defaultDownload` 函数
-- **现象**：代码注释写"mirrors src/plugin-manager.js#streamingSha256"，是复制而不是复用
-- **背景**：设计文档 D5 提到"复用现有管道 plugin-manager.js 的 downloadFile"
-- **判定**：可接受的偏离 -- capability-provisioning 有意不依赖 electron（plugin-manager 依赖 electron 的 app.getPath），无法直接复用。但可考虑抽取共享的下载函数到 shared-backend
-- **建议**：M2 阶段评估是否抽取共享下载函数
-- **优先级**：低
-- **对验收影响**:无
-
-### 问题 D：defaultDownload 缺少 host 白名单
-
-- **位置**：`core/shared-backend/capability-provisioning.js` 的 `defaultDownload` 函数
-- **现象**：直接 `https.get(options.url)`，无 host 白名单校验
-- **设计文档要求**：第 5.5 节明确提到"host 走白名单"
-- **当前风险评估**：低 -- M1 阶段 URL 来源是内置 `CAPABILITIES` 常量，非用户直接输入
-- **建议**：在 M2 扩展分发源前补上 host 白名单，复用 plugin-manager 的 host 白名单逻辑
-- **优先级**：中（当前低风险，但应在 M2 前修复）
-- **对验收影响**：不阻塞 M1
-- **✅ 处理（2026-07-18，主 agent）**：在 `capability-provisioning.js` 实现 host 白名单，作为独立 gate 加在 `provisionCapability` 的 readiness 检查之后、任何下载之前：
-  - `checkUrlAllowed(url, options)`：强制 `https:`（对齐 `macos-oss-updater.js` 的 https-only），host 走白名单；返回结构化 `{ok:false, reason}`（`invalid_url` / `insecure_protocol` / `host_not_allowed`），不抛异常。
-  - 默认白名单 `DEFAULT_ALLOWED_HOSTS` = 真实分发源 `biof3-uploads.oss-cn-hangzhou.aliyuncs.com` + 后缀 `.aliyuncs.com`（对齐 D7 OSS CDN）。`.` 开头条目为后缀匹配且防 `aliyuncs.com.evil.net` 型 lookalike，其余精确匹配。
-  - 可覆盖：`options.allowedHosts`（测试/编排）与 `BIOF3_CAPABILITY_ALLOWED_HOSTS` 环境变量（D4 分发源可换、只改配置不改逻辑）。
-  - gate 位置刻意在 readiness 之后：已就位的 capability 短路返回、不重新校验，收紧白名单不会 strand 已装 bundle。
-  - 新增 5 个测试（off-allowlist 拒绝且不下载 / http 拒绝 / allowedHosts 覆盖 / checkUrlAllowed 匹配规则 / env 覆盖），本文件测试 13→18，全通过。
-  - **顺带纠正设计文档失实描述**：设计文档 §3.3/§5.5 与本审计原文均称"复用 plugin-manager 的 host 白名单逻辑"——经核实 `src/plugin-manager.js#downloadFile`（及 `content-sync.js#downloadFile`）**从来没有 host 白名单**，都是裸 `https.get(url)`；全仓唯一做 host 校验的是 `macos-oss-updater.js#resolveArtifactUrl`（https + 同源）。因此本次是**新实现**而非复用，并已修正 `stage3-standard-workflows-design.md` §3.3/§5.2 的错误表述，避免后续 agent 继续被"现成白名单"误导。
-- **详细报告**：`docs/stage3-m1-audit.md`
-
----
-
-## §4 代码质量审计（2026-07-17）
-
-### 问题 E：sanitizer.js 死模块
-
-- **位置**：`core/r-server/sanitizer.js`（51 行）
-- **现象**：导出 `sanitizeParam`/`assertSafePath`/`sanitizeRString`，但全项目（core/ + src/ + frontend/）无任何生产代码引用
-- **测试**：`core/test/sanitizer.test.mjs` 存在，但该文件在 `core/test/` 下，不在 `npm test` 门禁范围（`node --test test/*.test.mjs`）
-- **dependency-decoupling-checkpoint.md 记录**："早期 flagged 但保留的模块，等 P-07 模型网关落地时统一收编"。P-07 已落地，但 sanitizer 仍无人引用
-- **建议**：主 agent 评估是否删除 `sanitizer.js` 和 `core/test/sanitizer.test.mjs`。如果安全函数仍有价值，应迁移到 `core/shared-backend/` 或合并到现有 util
-- **优先级**：低（死代码不影响运行，但增加维护噪音）
-- **对验收影响**：无
-- **✅ 处理（2026-07-17，主 agent）**：确认全仓（core/+src/+frontend/，排除 dist/node_modules）无任何生产引用，确为死模块。删除 `core/r-server/sanitizer.js` + `core/test/sanitizer.test.mjs`。安全函数当前无消费方，未迁移；未来需要 R 参数/路径消毒时再从 git 历史取回并接入实际调用点。
-
-### 问题 F：core/test/ 目录不在门禁范围
-
-- **现象**：`package.json` 的 test 脚本是 `node --test test/*.test.mjs`，只覆盖 `test/` 目录
-- **`core/test/` 目录下有 9 个测试文件**不被门禁覆盖：
-  - `sanitizer.test.mjs`（测死模块）
-  - `agent-tools.smoke.mjs`、`agent-workflow.mjs`、`copilot-scenarios.mjs`
-  - `execution-context.mjs`、`final-report.mjs`、`report-theme.mjs`
-  - `smoke-phase-c3.mjs`、`smoke-tools.mjs`
-- **风险**：这些测试可能测的模块已变更但测试未同步，产生"假绿色"或"假红色"
-- **建议**：主 agent 评估：
-  1. 将仍有价值的 `core/test/` 测试迁移到 `test/` 目录纳入门禁
-  2. 删除测死模块的测试（如 sanitizer.test.mjs）
-  3. 或在 package.json 中扩展 test glob 为 `node --test test/*.test.mjs core/test/*.mjs`
-- **优先级**：中（门禁覆盖范围直接影响 CI 可信度）
-- **对验收影响**：不阻塞 Stage 3，但影响长期代码质量
-- **✅ 处理（2026-07-17，主 agent）**：未采用方案 3（`core/test/*.mjs` glob 会拖入 4 个打 `biof3.com` 已下线云平台的 live smoke，CI 必挂）。改为按测试性质分流：
-  - 3 个纯单测迁进门禁：`agent-workflow.mjs` / `execution-context.mjs` / `final-report.mjs` → `test/*.test.mjs`（`git mv` 保留历史，修正相对 require 路径）。同步更新引用它们的 `package.json`（harness:phase6 / harness:agent-evaluate）与 `.github/workflows/ci.yml`。
-  - `report-theme.mjs`：`test/report-theme.test.mjs` 已是其超集（含 isHtmlFile + XSS 用例），删除 `core/test/` 陈旧副本。
-  - `sanitizer.test.mjs`：随死模块删除（见问题 E）。
-  - 4 个 live-network smoke（`agent-tools.smoke` / `copilot-scenarios` / `smoke-phase-c3` / `smoke-tools`）**有意保留在 `core/test/`**：它们打已下线的 `biof3.com` 云平台、需凭证、CI 里会挂，不应进门禁。已在本记录标注其性质，避免后续误纳入。
-  - **顺带抓到的真 bug**：迁移后 `npm test` 覆盖到 `agent-workflow.test.mjs`，暴露 `listAgentWorkflowTemplates` 断言仍期望 2 个模板 —— 但 WGCNA 提交 `e30bc90` 已新增第 3 个 `coexpression-network` 模板。该测试在 CI 门禁内、却不在本地 `npm test` glob 内，正是本问题所述"假绿"：`e30bc90` 一旦 push 就会让 CI 变红。已把断言更新为 3 模板（含 coexpression-network）。本地 `npm test` 从 324→367（+43 迁移用例），唯一 fail 仍是环境性 sqlite ABI。
-
-### 问题 G：project-run-layout.js isAdmin 硬编码
-
-- **位置**：`core/r-server/helpers/project-run-layout.js:86`
-- **现象**：`const isAdmin = false; // TODO: 从 user 对象获取角色`
-- **风险**：管理员判断被硬编码为 false，如果有依赖 isAdmin 的权限分支，可能永远不执行
-- **建议**：主 agent 确认该 TODO 是否需要实现，或标记为"桌面版不需要管理员角色"并移除 TODO
-- **优先级**：低（桌面单用户场景可能不需要 admin 判断）
-- **对验收影响**：无
-- **✅ 处理（2026-07-17，主 agent）**：核实"桌面版不需要 admin"的建议前提**不成立** —— 仓库确有角色模型：`users` 表有 `role` 列（默认 `'user'`），`db.getUserById()` 返回它，且 `api-data.js` / `feedback.js` 均已用 `role === 'admin'` 派生管理员权限。因此按既有模式**实现** TODO 而非删除：`resolveProjectRunLayout` 在非 owner 时经 `db.getUserById(userId)` 查 `role === 'admin'` 放行。防御性处理：db 未提供 `getUserById`（如单测 mock）或用户不存在/抛错时安全回退为非管理员，owner-only 行为不变。注意实际路径是 `core/shared-backend/project-run-layout.js`（审计记的 `core/r-server/helpers/` 已过时）。新增 3 个测试用例（admin 放行 / 非 admin 拒绝 / 无 getUserById 回退），`test/project-run-layout.test.mjs` 30→33 pass。
-
----
-
-## §5 Stage 3 B2 接线缺口审计（2026-07-18）
-
-### 问题 H：provisionCapability 未接入任何真实运行路径
-
-- **位置**：`core/shared-backend/capability-provisioning.js#provisionCapability`（下载函数本身）；缺口在 `core/shared-backend/r-libs-resolver.js#resolveProvisionedBundleLibs`（运行路径侧）
-- **现象**：`provisionCapability`（下载 + 校验 + 落盘 + ledger）实现完整、测试齐全，但**全仓没有任何执行器 / readiness gate 真正调用它**。全仓搜索 `provisionCapability` 的调用者，除模块自身、文档、测试外，无生产调用点。运行路径侧 `r-libs-resolver.js` 的 `resolveProvisionedBundleLibs` 只调 `checkCapabilityReady`（检查 bundle 是否**已装**），从不在缺失时触发 `provisionCapability`（**下载**）。
-- **事实核对（已核实）**：
-  - `checkCapabilityReady` 有生产调用者（`r-libs-resolver.js`）——只读检查已装。
-  - `provisionCapability` 无生产调用者——即"缺 bundle 就自动触发下载"这一步从未接线。
-  - 结果：即便 `BUNDLE_REGISTRY` 里某 bundle 已 `ready`（有 sha256），运行路径也不会去下载它，只会因 `checkCapabilityReady` 返回 `not_provisioned` 而静默跳过该 bundle 的 lib 注入。
-- **性质**：与之前 host 白名单那个 gap（问题 D）同类——**"文档说有、实际没有"**。设计文档 §5.2 把"缺 bundle 就自动 provision"描述成"已有机制"，实际 M1 只做了下载函数本身，没做"缺 bundle 就自动触发下载"的接线。
-- **B2 进度对账**：
-  - ✅ B2 part1（`capability-bundles.js` bundle 注册表，commit `4c6557e`）已补齐 **"bundleId → descriptor"** 这一环（单一事实源：bundleId → `{url, sha256, sizeBytes, platforms}`），并提供了 `ensureBundlesForPlugin()` 编排层作为"未来运行路径将调用的接缝"——但该编排层同样尚未被任何运行路径调用（见 `capability-bundles.js` 文件头注释自述）。
-  - ⏳ 剩下的运行路径接线（在 `r-libs-resolver.js` / readiness gate 缺 bundle 时调 `ensureBundlesForPlugin` → `provisionCapability`）留 **B2 part2**。
-- **状态标记**：✅已处理（原为 🟡建议。不阻塞当前验收——bundle 尚未构建发布，`sha256===null` 时本就不该下载；B2 part2 已把接线批次补齐，闭合本 gap）。
-- **对验收影响**：无（当前所有 bundle 均 unpublished，运行路径本就应跳过；接线缺口只有在 bundle 真正发布后才显现为"该下载却没下载"）。
-- **✅ 处理（2026-07-18，主 agent）**：B2 part2 已把运行路径接线补齐，闭合本 gap：
-  - `core/r-server/helpers/tools-executor.js#executeJob`（R 分支，`resolveRLibsForPlugin` 之前）与 `core/r-server/mcp/registry.js#_runPluginScript`（已改为 async，在 `return new Promise` 之前 await）两处，均在 R 库解析前调用 `ensureBundlesForPlugin(cfg/plugin)`；`getToolConfig` 已透传 `requiresBundle`/`requiresBundleVersion`。
-  - best-effort 语义：双守卫（仅 R 插件 + 有 `requiresBundle`）+ try/catch only-warn；unpublished（`sha256===null`）/ unknown / 下载失败均不中断 job，行为与接线前一致（当前所有 bundle 均 unpublished 故不下载）。
-  - 新增 `test/capability-bundle-wiring.test.mjs`（4 个 wiring 契约测试，零网络）；全量 `npm test` 423 tests，仅 1 个环境性 sqlite ABI fail，零功能回归。
-  - **gap 已闭合**：`provisionCapability` 现在有真实运行路径调用者（经 `ensureBundlesForPlugin` 编排层触达），"缺 bundle 就自动 provision"不再是空转；bundle 一旦发布（有 sha256）即会在运行路径按需下载。
-  - 相关提交：B2 part1 注册表 `4c6557e`；B1 构建脚本 + 本 gap 记录（批次一）；B2 part2 接线（批次二）均已 push。
-
----
-
-## §6 Stage 4 发布收口审计（2026-07-19）
-
-### 问题 I：Stage 4 migration 原生模块 ABI 边界错误
-
-- **位置**：`src/main.js` 启动 migration 子进程；`src/migration-runner.js` 的 `better-sqlite3` 加载边界。
-- **现象**：electron-builder 会把根 `better-sqlite3` 重建为 Electron ABI。构建后再运行 `npm test` 或 `npm run dev` 时，migration 使用系统 Node，却从根 `node_modules` 加载 Electron ABI，出现 `NODE_MODULE_VERSION 123` / `131` 错误。
-- **影响**：此前虽被记录成“环境性允许失败”，但实际会让开发首次启动 migration 失败，也使 Stage 4 的“全量测试通过”无法成立；属于发布收口阻断。
-- **✅ 处理（2026-07-19，主 agent）**：
-  - 开发 migration 通过内部环境变量明确加载 `core/r-server` 的系统 Node ABI 依赖；
-  - 打包态保持 Electron Helper + electron-builder 重建的根 ABI，`afterPack` 继续复制到两个 Core；
-  - migration 单测改用相同 Core 依赖边界，消除 build/test 执行顺序耦合；
-  - `npm test` 达到 428 total / 417 pass / 11 skip / 0 fail，原唯一 ABI fail 消失；
-  - 全新临时数据目录的开发态和 arm64 打包态均验证 migration version 0、SQLite 25 张表、R/Python/SPA 健康；
-  - 详细 Stage 4 矩阵见 `docs/stage4-stable-release-checklist.md`。
-
-### 问题 J：Runtime 首装契约不完整
-
-- **位置**：`resources/built-in-plugins/manifest.json`、`src/plugin-manager.js`、`src/plugin-schema.js`、`electron-builder.yml`。
-- **现象**：线上 `plugins/manifest.json` 仍是旧 `{url, checksum, size, platform}` 结构，浅合并后覆盖新版 `artifacts`，导致全新首装无法选择 artifact；内置 R/Python 条目的 SHA-256/大小为空，且安装包只带旧 `.sh`、未带实际调用的 `fix-r-paths.mjs`。
-- **影响**：已有开发机因缓存 Runtime 不暴露问题，但全新用户会在下载、校验或 R dylib 修复阶段失败。
-- **✅ 处理（2026-07-19，主 agent）**：
-  - 旧远程条目先归一化为现代 artifact 契约，再与可信内置 fallback 合并；
-  - 回填线上 R/Python ZIP 的真实大小与 SHA-256，并增加严格 archive 大小校验；
-  - 同时打包 `.mjs` 与 `.sh` 路径修复资源；
-  - 隔离目录通过真实 OSS 下载 R/Python，R 修复扫描 74 个 `.so` 后 framework 引用为 0，R 4.5.2 与 Python 3.11.15 均可执行。
-
-### 问题 K：诊断导出隐私边界过宽
-
-- **位置**：`src/main.js` 诊断导出 IPC。
-- **现象**：旧实现归档整个用户数据目录并附带未经脱敏的原始后端日志，与“诊断包”名称不符。
-- **影响**：可能将 SQLite、设置、对话、结果或日志中的认证信息带入用户分享的 ZIP，属于安全发布阻断。
-- **✅ 处理（2026-07-19，主 agent）**：
-  - 导出仅保留脱敏后的 R/Python 日志、最小系统信息、插件安装摘要和隐私说明；
-  - 明确排除数据库、设置、对话、结果与凭据；
-  - 覆盖 header、结构化字段、query 参数和 Provider key 模式的脱敏测试；
-  - 适配 archiver v8 的 `ZipArchive` 构造接口。
-
-### 问题 L：DESeq2 首次成功产物契约不完整
-
-- **位置**：`core/r-server/helpers/tools-executor.js`、DESeq2 tool definition、`scripts/golden-path.mjs`。
-- **现象**：R 脚本完成并产生 22 个科学文件后，因声明的 `all_results.zip` 不存在而失败；报告模板只查插件目录，golden-path 还保留测试侧补报告逻辑。
-- **影响**：科学计算成功不等于产品首次成功，`run_tool → tool_job → artifact truth` 会被缺失的交付产物阻断，且测试补救会掩盖真实产品缺口。
-- **✅ 处理（2026-07-19，主 agent）**：
-  - 执行器在 artifact truth 前按声明输出生成 `all_results.zip`；
-  - 报告模板允许回退到内置 tool-scripts；
-  - golden-path 读取当前报告 URL 契约，旧补救只保留为兼容分支；
-  - 隔离首用任务 `job_828eacaf0e9741ea` 为 `completed`，run.json `passed`，ZIP 与约 1.6 MB 自包含报告均存在。
-
----
-
-## §7 HLE-C3R 耐久恢复收口审计（2026-07-23）
-
-### 问题 M：LoopRun.automationMode 分类漂移（契约与生产不一致）
-
-- **位置**：`core/shared-backend/loop-contract.js#validateLoopRun`（枚举 `guided|confirm|trusted`） vs `core/r-server/agent-runner.js#_loopInit`（写入 `task_execute|task_draft`）。
-- **现象**：契约校验器要求 `automationMode ∈ {guided, confirm, trusted}`，但生产 `_loopInit` 经 `db.persistLoopRun`（**不过 `buildLoopRun` 校验**）直接落库 `task_execute`/`task_draft`。两套词表并存：契约描述的是"自动化信任级别"，生产存的是"本轮执行意图"。
-- **性质**：与问题 D/H 同类的**"文档/契约说一套、生产存另一套"**。`persistLoopRun` 是裸仓储写入、不校验 `automationMode`，因此漂移长期未被测试捕获（HLE-C3R 新测试经 `buildLoopRun` 才暴露）。
-- **当前影响**：低。`automationMode` 目前只作展示/查询投影字段，不参与决策或恢复分支；`getActiveLoopRunForConversation` 已**刻意不按 automationMode 过滤**（draft→execute 属同一 LoopRun 生命周期，见 closure plan §4.1）。
-- **不阻塞 C3R**：耐久恢复不依赖该字段取值。
-- **状态**：✅ 已处理（2026-07-24）。采用第二条路线：
-  - `LOOP_AUTOMATION_MODES=guided|confirm|trusted` 与 `LOOP_EXECUTION_INTENTS=task_draft|task_execute` 分离并进入 hash 语义字段。
-  - `_loopInit` 新写统一走 `buildLoopRun`；完全访问映射 trusted，只读映射 guided，执行意图独立保存。
-  - DB 读取兼容历史 `task_execute`/`task_draft`，分别投影为 trusted/guided 且恢复出 executionIntent，不批量改写旧 hash。
-  - 项目/会话列表查询和投影缺字段一并修复；Contract、Repository 与真实 Router 回归覆盖新写和旧读。
-- **对验收影响**：契约漂移关闭，不改变 `run_tool → tool_job → artifact truth`。
-
----
-
-## §8 双端 Runtime 制品一致性审计（2026-08-08，Windows 侧 agent）
-
-### 问题 N：macOS 运行时 OSS 制品 404
-
-- **发现时机**：Windows R/Python 运行时制品端到端闭环（PR #1）完成后，为核对「双端 Runtime 版本基线契约」（[`docs/runtime-version-baseline.md`](./runtime-version-baseline.md)）中 macOS Python 精确 sub-version，去 OSS 拉 macOS 制品取证时发现。
-- **位置**：`resources/built-in-plugins/manifest.json` 中 `biof3-r-runtime` / `biof3-py-runtime` 的 `artifacts["macos-arm64"]`。
-- **现象**：manifest 已填入 sha256 与 sizeBytes（非 null、非占位），但对应 OSS 对象不存在：
-
-  | 制品 | OSS 路径 | manifest sha256 | HTTP |
-  |------|---------|-----------------|------|
-  | R (macos-arm64) | `plugins/r-runtime/1.0.0/macos-arm64.zip` | `007b6c5…` | **404** |
-  | Python (macos-arm64) | `plugins/py-runtime/1.0.0/macos-arm64.zip` | `a3ba85e…` | **404** |
-  | R (windows-x64) | `plugins/r-runtime/1.0.0/windows-x64.zip` | `26b05ba6…` | 200 ✅ |
-  | Python (windows-x64) | `plugins/py-runtime/1.0.0/windows-x64.zip` | `5a2e07c6…` | 200 ✅ |
-
-  验证方式：`curl -sI "<url>"`（4 条 URL 均直连 OSS 公网端点，无凭据）。
-- **溯源**：两条 macOS sha256/sizeBytes 在提交 `9bc0f60` 被填入，来自一次 `npm run build:mac` 会话产出的本地 zip；**制品本身从未上传到 OSS**。属于「本地构建了 → 记了摘要 → 没发布」的半步收口。
-- **影响（🔴 阻塞级）**：
-  - macOS 全新用户走官方 runtime 安装路径（`src/plugin-manager.js#installRuntime` → `selectArtifact` → 下载 → SHA-256 校验 → 解压）时，**在下载步就 404 失败**，R/Python 两个后端（r-server:3001 / py-server:3004）都起不来。
-  - 现有 macOS 开发机/已发布安装包因本地 `runtimes/` 已存在而不暴露该问题 —— 与 §6 问题 J（Runtime 首装契约不完整）同一类「已有缓存掩盖首装缺口」的失效模式。
-  - 与 Windows 侧刻意保持的 `release-contract.windows-x64.supported=false` 不同，macOS 是**已声明支持**的平台，manifest 记录与真实分发源不一致属契约违背。
-- **性质**：与问题 D/H/M 同类的 **「记录说有、实际没有」**。差别在于此前几例是代码/文档漂移，本例是**分发制品与 manifest 摘要漂移** —— 更危险，因为 SHA-256 已填，任何「按摘要非空即视为已发布」的判定都会误判为就绪。
-- **不属于 PR #1 引入**：PR #1 只新增 Windows 侧脚本与 windows-x64 制品，未触碰 macOS artifacts 条目。为预存在问题，已在 PR #1 描述「已知问题」中登记。
-- **建议处理（需 macOS 机器执行，Windows 侧无法完成）**：
-  1. 在 macOS 构建机重新产出 R 4.5.2 + Python 3.11.x 的 `macos-arm64.zip`，或找回 `9bc0f60` 当次产物；
-  2. 逐个核对本地 zip 的 sha256/sizeBytes 与 manifest 记录是否一致 —— 若不一致，说明产物已丢失，需重建并回写 manifest；
-  3. 上传到 OSS（可复用本次新增的 `scripts/upload-win-{r,python}-runtime.mjs` 模式：读 `.biof3-secrets` 的 `OSS_AK/OSS_SK`，multipart + public-read + HEAD 校验，仅需改 key 前缀与本地 zip 路径）；
-  4. 上传后用 `curl -sI` 复验 200，并在 [`docs/runtime-version-baseline.md`](./runtime-version-baseline.md) §6 补记 macOS 制品行（当前 §6.2 只有 Windows Python 记录）；
-  5. 顺带取证 macOS Python 精确 sub-version，补全基线契约 §1 中「macOS 待取证」的空缺（Windows 侧已实测为 3.11.9）。
-- **建议加固（防复发）**：增加一条「manifest artifacts 可达性」检查 —— 对每个 `artifacts[*].url` 发 HEAD 请求，断言 200 且 `Content-Length === sizeBytes`。可作为发布前门禁（非 CI 常跑，避免联网依赖）。当前 `plugin-manifest-schema.test.mjs` 只校验结构与占位纪律，不校验 URL 可达性，正是本问题溜过门禁的原因。
-- **状态**：🔴 待处理（需 macOS 机器）。Windows 侧已完成发现、取证与广播，交由 macOS 侧 agent 接手。
-
----
-
-## 审计发现追加规范
-
-非主 agent 完成新审计后，按以下格式追加到"当前待处理项"表格：
-
-```
-| 状态 | 日期 | 简述 | 来源 | 详情锚点 |
-```
-
-- **状态**：🔴/🟡/🟢/⚪/✅
-- **来源**：审计报告文件名或"本文件 §N"
-- **详情锚点**：指向本文件下方的详细小节
-
-每条新增发现同时在下方新建小节记录详情。已处理的条目状态改为 ✅ 并保留，不删除（供追溯）。
-
----
-
-## 处理记录
-
-| 日期 | 处理内容 | 处理方 |
-|------|---------|--------|
-| 2026-07-17 | 建立审计广播台，汇总 Stage 2 验收审计 + 分支备忘录的发现 | 非主 agent |
-| 2026-07-17 | Stage 2 验收审计归档（主 agent 已完成验收） | 非主 agent |
-| 2026-07-17 | 追加 Stage 3 M1 capability-provisioning 审计（3 条建议级） | 非主 agent |
-| 2026-07-17 | 追加 Stage 3 M1 深度审计报告（不变量/约束/安全），新增问题 D（host 白名单） | 非主 agent |
-| 2026-07-17 | 追加代码质量审计：死模块/门禁覆盖盲区/硬编码 TODO（问题 E/F/G） | 非主 agent |
-| 2026-07-17 | 合并 `fix/qa-smoke-stale-css-paths`（§2.1），qa-smoke 6/7 → 7/7，删除已合并分支 | 主 agent |
-| 2026-07-17 | 打包 WGCNA 为 built-in 插件（Stage 3 M4）+ 修锚定正则输入 bug + 新增 coexpression-network 工作流 | 主 agent |
-| 2026-07-17 | 抽取共享 R_LIBS_USER resolver（问题 A/B），静默 catch → warn | 主 agent |
-| 2026-07-17 | 删除 sanitizer 死模块（问题 E）；core/test 门禁分流：3 单测迁入门禁、删陈旧副本、保留 4 个 live smoke（问题 F）；顺带修 agent-workflow 模板数断言（WGCNA 引入的 CI 潜伏失败） | 主 agent |
-| 2026-07-17 | 处理问题 G：实现 project-run-layout 的 isAdmin（`db.getUserById().role === 'admin'`，防御性回退非管理员），补 3 个权限单测（admin 放行 / 非 admin 拒绝 / 无 getUserById 回退） | 主 agent |
-| 2026-07-17 | 清理 §2.3 5 个已合并 codex 残留分支（worktree prune + branch -d），保留 §2.2 待评估分支 | 主 agent |
-| 2026-07-18 | 处理问题 D：为 capability-provisioning 实现 host 白名单（`checkUrlAllowed`：https-only + 默认 OSS CDN 白名单 + `options.allowedHosts`/env 覆盖），gate 加在 readiness 之后不 strand 已装 bundle，补 5 个测试（13→18）；顺带纠正设计文档 §3.3/§5.5「复用 plugin-manager host 白名单」的失实描述（该白名单从不存在，本次为新实现） | 主 agent |
-| 2026-07-18 | Stage 3 M3：实现多 Provider harness 评测脚本 `scripts/harness-provider-eval.mjs`（6 环节探针，前 4 必需；Markdown+JSON 双报告到 gitignored `eval-reports/`；凭据只读环境变量、不落盘/不打印/不进 CI）+ 31 个 mock 单测纳入门禁（`test/harness-provider-eval.test.mjs`，零网络）+ package.json `harness:provider-eval` 接线。真机跑分待用户 key/endpoint。全量测试 367→406（+39），唯一 fail 仍为环境 sqlite ABI。 | 主 agent |
-| 2026-07-18 | Stage 3 M3 首次真机跑分（用户执行 `source .biof3-secrets && npm run harness:provider-eval`）：DeepSeek + Anthropic 双目标各 6/6 全绿，exit 0，达成"≥2 Provider 通过必需项 + 可比较报告 + 失败分类"出口判据；结论记入 stage3 §9（不含 key） | 主 agent |
-| 2026-07-18 | Stage 3 M5 三方插件接入指南落地：新建 `docs/third-party-plugin-guide.md`（基于真实 go-kegg/deseq2/volcano-plot 插件），stage3 §15 占位改为指向该指南 | 主 agent |
-| 2026-07-18 | Stage 3 B1/B2：新增 R bundle 构建脚本 build-r-bundle.mjs + capability-bundles 注册表 + 运行路径接线（ensureBundlesForPlugin 接进 tools-executor/registry），闭合问题 H；4 wiring 测试，全量 423 零回归 | 主 agent |
-| 2026-07-19 | Stage 4 第一批：修复 migration 系统 Node / Electron ABI 边界（问题 I），全量根测试首次 0 fail；开发态与 arm64 打包态空目录启动通过 | 主 agent |
-| 2026-07-19 | Stage 4 rc.6：处理 Runtime 首装契约、诊断导出隐私和 DESeq2 首次成功产物缺口（问题 J/K/L）；完成真实 OSS Runtime、bundle、rc.4 数据副本与双架构验证 | 主 agent |
-| 2026-07-19 | 发布 `v0.0.1-rc.6`：main/tag/OSS 一致；公开更新选择、下载、大小/SHA-512、DMG 挂载及包内版本/架构验证通过，Stage 4 arm64 RC 出口关闭 | 主 agent |
-| 2026-07-21 | 发布 `v0.0.1-rc.7`：修复打包态诊断模块路径，完成 arm64/x64 构建、UI-033/UI-034 收口、OSS 四对象上传及公开 `latest-mac.yml`/SHA-256 反向核验 | 主 agent |
-| 2026-07-23 | HLE-2 完成：实现统一 Loop Controller（observe→decide→validate→record→evaluate exit）；核心：deriveObservedStateDigest/digests、computeGoalGapIds（含 prior iterations 累积语义）、detectNoProgress/detectRepeatedAction（含 self-guard）/detectOscillation；decideNextAction 优先级分支（振荡→重复→验证→完成→无进展→等待→运行→推进→完成）；validateAction 前置校验；buildControllerIteration 全链路记录；evaluateExit 退出判定；toStructuredDecision Provider 安全决策；reconcileJobResult 状态回填。核心：core/shared-backend/loop-controller.js（纯函数，560 行）+ 51 单元测试（test/loop-controller.test.mjs）+ 10 集成测试（test/loop-controller-integration.test.mjs，全链路 observe→decide→persist）。新 npm 脚本：harness:loop:controller:test、harness:loop:controller；check 已接线。HLE-3~HLE-6 保持 planned；MCP 工具注册延后到 HLE-2/3 | 主 agent |
-| 2026-07-23 | HLE-3 完成：实现 Validator Registry 与科学完成判定；核心：loop-validator-registry.js（register/dispatch/validateArtifact/validateDelivery/aggregateStatus，四态结果 valid/degraded/blocked/unavailable）+ loop-validators.js（7 个内置验证器：input-snapshot/metadata-consistency/counts-matrix/de-results/heatmap-data/enrichment-statistics/delivery-integrity）+ loop-controller.js（HLE-2 收口：decideNextAction + buildControllerIteration 集成 validatorResults，2 个新 REASON_CODE：ARTIFACT_VALIDATION_FAILED/WARNING）+ loop-contract.js（2 个新 reason code）。新 npm 脚本：harness:loop:validator:test、harness:loop:validator；check 接线。验收通过：142 测试全量通过，`npm run check` 通过。HLE-4~HLE-6 保持 planned | 主 agent |
-| 2026-07-23 | HLE-4 完成：实现故障诊断、修复策略与受影响子图重规划；核心：loop-failure-diagnoser.js（10 类故障分类，36 条规则，含 HLE-3 validator 结果集成，confidence 评分）+ loop-repair-strategy.js（12 个 strategy，safety level，cost multiplier，parent lineage，computeAffectedSubgraph 保留 verified artifacts）+ loop-controller.js（decideNextAction 新增 failedJob 参数，诊断后 decision='retry' 自动修复，或 decision='block' 要求人工介入）。loop-repair-strategy.js 内置 computeAffectedSubgraph 仅遍历 downstream，不误走 dependsOn。验收通过：88 测试全量通过（HLE-2 61 + HLE-3 81 + HLE-4 88），`npm run check` 通过，HLE-5~HLE-6 保持 planned | 主 agent |
-| 2026-07-23 | HLE-5/HLE-6 完成（离线基础设施）：实现耐久检查点、预算策略和会话阶段视图；scripts/harness-loop.mjs 升级为统一全量聚合门禁，输出 acceptance/harness-loop/hle-all-gate.json。验收通过：330 测试全量通过（HLE-2 61 + HLE-3 81 + HLE-4 88 + HLE-5 38 = 330），npm run harness:loop 通过。注意：离线门禁通过不等于生产验收完成——HLE-C0 审计确认 ai-agent 未接入 Loop Controller、前端未消费 Loop 状态、双 Provider/重启/视觉证据待补。生产接线由 HLE-C1~C5 实施 | 主 agent |
-
-| 2026-07-23 | HLE-C0 完成：事实审计、状态纠偏与生产基线；HLE-0~HLE-5 后端原语和离线测试确认存在（7 个 loop-*.js + 10 个离线测试，330 测试全量通过）；发现生产接线尚未完成：agent-loop-control.js 未调用 Loop Controller/Validator/Repair，`harness.js` 路由未接线 Validator/Repair 到真实 Job/Artifact，前端完全未消费 Loop 状态，HLE-6 只验证离线门禁无 Provider/重启/视觉证据；文档状态纠偏：HLE-0~HLE-2 离线基础设施状态修正为 completed，HLE-3~HLE-5 保持 in_progress（HLE-C1~C5 待实施），HLE-6 保持 pending；新增 test/loop-false-success-regression.test.mjs（10 个测试，验证 failed Job + partial files 假成功回归被正确阻断），新增 test/loop-iterate-route.test.mjs（38 个测试，验证 /api/loop/iterate 路由边界：鉴权/FMS/sequence/idempotency/hash 不变/跨项目隔离）；两个测试 48/48 通过，`npm run check` 通过；HLE-C1~C5 生产接线待实施，HLE 主计划总状态保持 in_progress | 主 agent |
-| 2026-07-23 | HLE-C3R 完成：耐久恢复收口。生产纠偏——`agent-runner._loopInit` 先 `getActiveLoopRunForConversation` 复用同会话未终结 LoopRun（planned/running）并从 `listLoopIterations` 重建内存序列/parent 链，不再每轮新建；restart 标为 failed(recovery_required) 的 run 被排除、仅经恢复 API 暴露。新增 `db.getActiveLoopRunForConversation` + `db.listLoopActions`（修复空转的 `/api/loop/actions`）。checkpoint-on-success 接线：每轮 `buildIterationCheckpoint→saveContextCheckpoint`，摘要不再是 loop 状态唯一副本，ContextEnvelope 可从持久化 checkpoint 重建（模型切换只换决策提供者）。修 `ai-loop.js` 三真 bug：recovery/abort 读错字段（`loopStatusJson/loopStatusHash`→`record/hash`，此前 statusJson 恒 `{}`、recovery_required 永不暴露）、缺项目归属隔离（`userMayAccessProject`+`loadRunAuthorized`：跨用户 403，public/admin 放行）、expanded 投影补 recoveryRequired/recoveryReason。新增 `test/loop-durable-resume.test.mjs`（11）+ `test/loop-api-route.test.mjs`（15，挂真实 router+DB+mock auth）；641 loop 测试、`npm test` 1049 pass/0 fail/11 skip、`npm run check` 全绿。途中发现 automationMode 契约漂移记入 §7 问题 M（🟡 不阻塞）。 | 主 agent |
-| 2026-07-23 | HLE-C4R 聊天消费端接线（UI-101）：修复 loop 事件被丢弃（startConversationRun 未传 onLoopPhase/onLoopIteration）；新增 loop-client.ts（/api/loop/* 类型化 REST + SSE 事件类型 + deriveLoopDisplay/loopStatusLabel 展示辅助）；ConversationRunSnapshot.loop 投影 + 幂等合并（iterationId 去重、sequence 排序）；SimpleChat LoopStatusPanel（紧凑状态+轮次+最近结论，可展开逐轮 decision/publicConclusion，blocked/failed/cancelled 非绿，只展示 publicConclusion）；loop 投影 stop 后保留。frontend 223/223（conversationRunStore +4 loop 用例）、build:check 绿、根 check 全绿、ui:audit 通过。摘要卡/历史回放/视觉矩阵/HLE-C5 Step 7 待续 | 主 agent |
-| 2026-07-24 | HLE-C4R 摘要卡实时投影续作（UI-101）：`CenterPanel` 从共享 conversation run store 读取当前会话 loop，`WorkspaceSummaryCard` 紧凑显示后端状态、轮次、最近公开结论与最近决策；普通聊天无 LoopRun 时不显示，blocked/failed/cancelled 继续沿用非绿语义。同步纠正生产收口计划、UI audit 与 handoff；历史 API 回放、active/background/recovery/token-cost 数据和实机视觉矩阵仍保持待验。 | 主 agent |
-| 2026-07-24 | Loop 契约与 HLE-C4R 功能收口（UI-101）：automationMode/executionIntent 分轴并兼容旧行；真实落盘 completed/blocked/cancelled；修复项目/会话单条件查询及列表漏字段；新增 session-summary + useDurableConversationLoop，历史阶段、恢复、active/background、会话 Token/缓存/成本自动回放到聊天和摘要。新增 8 项后端/前端回归；根测试 1067（1056 pass/0 fail/11 skip），前端 226 pass。视觉矩阵与 HLE-C5 Step 7 继续待验。 | 主 agent |
-| 2026-07-24 | HLE-C4R 真实桌面接线纠偏（UI-101）：真实应用启动验证发现 `/api/loop/session-summary` 被 legacy catch-all 吞掉、desktop-local 身份只在 `req.user` 导致 Loop API 401，以及历史会话无 assistant 消息时 Loop 面板不可见。调整生产路由注册顺序、归一化桌面身份并补 standalone 历史 Loop 面板；新增真实 registry 顺序与桌面身份回归。 | 主 agent |
-| 2026-07-24 | HLE-C5 Provider 验收入口扩展（P-07）：`harness:provider-eval` 新增通用 OpenAI-compatible Profile 目标，凭据、Base URL 和模型仍只从环境变量读取，不落盘、不输出；32 项离线测试通过。 | 主 agent |
-| 2026-07-25 | G0-RS4 收口：只读 `result_edit_plan` 接入受信插件描述符、来源定位、保守参数分类、受影响 DAG 和科学确认门；聚合门禁 126/126，下一阶段 RS5。 | 主 agent |
-| 2026-07-25 | G0-RS5 收口：补齐真实 Job→baseline Revision 生产入口；隔离 ChangeSet、独立脚本、正式 Job-backed candidate Revision、失败/取消/冲突/恢复边界与 SSE 进度消费进入聚合门，下一阶段 RS6。 | 主 agent |
-| 2026-07-24 | HLE-C5 真实主轨假成功纠偏（P-03）：真实产品发现 Agent Loop post-processing 从错误模块解构状态摘要函数，导致正文已输出后 task 假完成而 Loop 永久 running/0 iteration。依赖改为 fail-fast；done 延后至 Loop ledger 成功；fatal error 优先失败；完成决策明确要求模型终答且 Job/Validator 无阻断。 | 主 agent |
-| 2026-07-24 | HLE-C4R/C5 durable stage 纠偏（P-03）：Loop 改为首次 run_tool 惰性创建，工具批次完成即持久化阶段 iteration/checkpoint，普通问答不误建；终答单独落终态。修复后同工具“失败父 Job → 后续成功 replacement Job”保留 lineage 且只按未修复失败决定终态。 | 主 agent |
-| 2026-07-24 | HLE-C5 源数据不可变边界（P-03）：真实主轨因插件大小写约束原地改写 metadata，立即取消并从既有 Job 输入副本恢复原 SHA-256。workspace write/replace 对已有科学数据扩展名强制 `source_data_immutable`，派生 CSV 仍可在 derived/results 编辑；Agent prompt 禁止 exec 绕过。 | 主 agent |
-| 2026-07-25 | G0-RS6 收口：有界多类型比较、Git CAS + SQLite fail-closed 原子采用、baseline/跨项目/大文件边界、撤销和恢复为新 Revision 已进入服务/API/Agent/前端；隔离真实链完成 v1→v2→v1→v3，明亮、夜间与 820×900 无横向溢出。UI-104 verified，下一阶段 RS7；UI-102/UI-103 未借本轮证据提前关闭。 | 主 agent |
-| 2026-07-25 | G0-RS9 收口：Result Studio 5/5 科学任务、9/9 环境、7/7 证据、双 Provider、五态 renderer 和 G0 第 17 类 mandatory evidence 通过；基线兼容升级 1.1.0，UI-102/UI-103/UI-105 verified，工作包状态 completed。 | 主 agent |
-| 2026-08-08 | Windows R 4.5.2 + Python 3.11.9 运行时制品端到端闭环并合并 PR #1（`b45e947`）：构建 → OSS 上传 → 解压验证 → 4 个 Windows 源路径 bug 修复 → schema/docs 门禁变绿。Windows `npm test` 1323 pass / 5 fail（均 Windows-only 测试假设或环境问题，无新回归）。顺带审计发现 macOS 运行时 OSS 制品 404，追加为 §8 问题 N（🔴 阻塞，需 macOS 侧处理）。 | Windows 侧 agent |
+> 本文件只保存需要主 Agent 看见的活跃广播与最近处理记录。
+> 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
+> 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
+
+最后更新：2026-08-06（G0-SDC-1 / G0-SDC-2 已收口；UI-124 已按 key-unavailable 例外 verified；P6 stored evidence 继续保持非 exact）
+
+## 当前待处理项
+
+| 状态 | 日期 | 事项 | 处置边界 |
+| --- | --- | --- | --- |
+| 🔴阻塞 | 2026-08-08 | **macOS R/Python 运行时 OSS 制品 404**：`manifest.json` 记录了 sha256/sizeBytes，但 `plugins/{r,py}-runtime/1.0.0/macos-arm64.zip` 在 OSS 上均 HTTP 404 → macOS 新装用户 `installRuntime` 会在下载步失败 | 需 macOS 机器接手：本机已 provision 的本地 R/Python 不受影响，**不阻塞当前 UX1H 开发态实机验收**；修复需重新上传 macos-arm64.zip 到 OSS 并校验 manifest（Windows 侧已于 2026-08-08 完成 Windows 制品闭环并广播此 macOS 缺口，详见 origin/main §8 问题 N） |
+| 🔵 进行中 | 2026-08-06 | **`G0-RS-UX1H Async Tool Surface` 仍为当前唯一 active 工作包**：真实 airway 数据（4 control vs 4 treated，34889 gene rows × 8 sample）在开发态 Electron 中完成 DESeq2，1 个 completed Job、Artifact Truth `valid`、同 Job PNG 自动打开；模拟总结阶段 socket timeout 后，返回对话显示"✓ 工具已完成，AI 总结暂时不可用"，未显示红色"请求超时"。summary-only 重试（`7e02f07`）与运行中排队（`de83c58`）已经 `npm run g0:result-studio:ux1h` 全门验证通过（syntax + Node/前端 24/24 + strict TS + 真实 Electron 链 EXIT=0）。**下一阶段：task"工具完成、总结分离"终态设计**（已立项为 UX1H 最后阶段，约束见 canonical 计划 §7/§10；cancel 语义与执行真相不动）。`retry-summary-does-not-rerun-tool.json` 证据仍缺 | 本地 `ux1h-timeout-adapter` 是无网络确定性适配器，不代表外部模型。保持不动 P7-F、provider timeout、Git Worktree 与 `qualificationEligible:true`；完整 async surface 仍待终态分离阶段，UI-126 保持 `in_progress` |
+| 🟡证据边界 | 2026-08-03 | **P6 stored evidence 不再匹配当前 Result Studio 前端源码。** UX1A 修改了 P6 绑定的八个前端文件，`npm run test:changed` 的 `p6_current_source_tree_not_exact` 按设计 fail-closed | P6 evidence 继续诚实绑定 `ad1e2ce`；只有重跑完整 P6 矩阵才能刷新。P7 deferred 期间不阻塞 UX 小切片，但不得宣称当前源码仍由旧 P6 evidence 覆盖 |
+| 🟡证据边界 | 2026-08-03 | **P6 stored evidence 不再匹配当前 `src/preload.js`。** `G0-RS-TL1` (UI-120) 把窗口切为 `frame:false` 自绘控制并新增 `window.biof3Desktop.window.onMaximizeChanged`；`src/preload.js` 与 `src/main.js` 同属 `P6_RECOVERY_ELECTRON_SOURCE_FILES`，旧 P6 freshness 按设计报告 `p6_current_source_tree_not_exact` | TL1 自身已由 17 项专项测试与开发态 Electron 控件/退出重启链验证，但未运行完整 P6 矩阵；P6 evidence 继续诚实绑定 `ad1e2ce`。未来只有显式 `npm run g0:result-studio:p6:update` 并纳入新窗口控件的 restart/pressure/recovery 才能重绑，不能宣称旧 P6 evidence 覆盖当前源码 |
+| 🟡延期 | 2026-08-03 | **G0-RS-P7 Honest Product Requalification。** 用户裁决发布级资格工作后移；Result Studio 保持 `implemented_unverified / experimental`，没有 canonical P7 PASS evidence | 重开前必须先解决 selection→enrichment 无 candidate/compare/lifecycle、existing Git consent UI、五条独立 task trace、双 Provider、packaged 六格与 literal OS reboot；历史 RS9、P4R/P6 开发态证据不得冒充资格 |
+| 🟡待评估 | 2026-07-26 | **G0 `macos-arm64: qualified` 的视觉证据不成立。** `acceptance/g0-qualification/packaged-ui/` 5 张 PNG 只有 4 个唯一 sha256：`chat-summary-light-wide.png` 与 `restart-restored-light-wide.png` 逐字节相同（均为 `bb54acff…`），即「重启后恢复」证据是重启前截图的副本。`scripts/g0-qualification-visual.mjs:59-62` 只校验哈希格式/宽高/字节数，无唯一性断言；配套 `inspection.json` 为 811 字节九个人工布尔值，仓库内无任何写入者。该形态与 `core/shared-backend/result-studio-qualification.js:113-121` 判 RS9 non-qualifying 的理由（`inspection_booleans_are_human_assertions`）完全一致，但该理由未推及 G0 自身 | 仅登记事实。**不得**由 Agent 擅自变更 `core/shared-backend/g0/support-matrix.json` 的 `qualified` 状态或 `evidence-ledger.json` 的 `visual_state_convergence`——资格状态变更属用户决定。修补检查脚本（加 `distinctStates` 唯一性断言）会使当前 G0 门变红，需先获批。**2026-07-27 用户裁决：暂不发布，故本项降级为待评估、不阻塞开发。** 重开条件：任何对外发布、资格声明或 G0 重新资格之前必须先处理——发布时若仍以此证据支撑 `qualified`，即为不诚实声明 |
+| 🟡待评估 | 2026-08-06 | **代码复审（Senior Developer）确认旧审计余项仍存在并新发现 4 项**：① ~~`plugin-manager.js` 缺 sha256 直接安装~~（**当日已修复**：fail-closed + `test/plugin-checksum-fail-closed.test.mjs` 4/4）；② ~~`files.js` 两个端点未挂 `requireTrustedDesktopOrigin`~~（**当日已修复**）；③ `main.js` webPreferences 未显式声明 sandbox/webSecurity（低，未动）；④ `process-lifecycle.js:231-242` 无句柄失活 job 只改 DB 不杀进程（低，未动）。同轮修复前端 P0-2/P0-3（见 UI-128）；并修复 `test/impact-map.json` 两处存量断点（g0-sdc1 脚本双重分类致 `test:changed` 在 HEAD 全红、`acceptance/MODEL-ANTHROPIC-NATIVE/**` 未映射）。完整清单见 `eval-reports/code-review-2026-08-06.md` | ③④ 与安全专项（webview 加固、默认权限收紧）留后续工作包，按单工作包串行纪律不插队 UX1H |
+| 🟡建议 | 2026-07-17 | `capability-provisioning.js` 的下载实现与 plugin-manager 各自维护 | host 白名单已经修复；共享下载 helper 只在改动该能力时评估，不阻塞 RH0 |
+| 🟡待评估 | 2026-07-17 | 本地分支 `codex/fix-collapsed-right-titlebar` 尚未采用，且与当前 UI 已有语义重叠 | 不直接 merge；进入相关 UI 工作时先比较当前实现，再决定删除或重做 |
+
+当前有 1 个 🔴 阻塞项（macOS 运行时 OSS 404，仅影响**新装用户**下载运行时，不阻塞本机已 provision 运行时的开发态验收）；没有 🟢 待合并项。`UI-124 / MODEL-ANTHROPIC-NATIVE` 已按 `docs/ui-productization-audit.md`「key-unavailable 例外」纪律收口；`G0-SDC-1 / G0-SDC-2` 已于 2026-08-06 以 fixture + 门禁脚本收口，canonical evidence 为 `acceptance/g0-scientific-data-contract/sdc1-complete.json` 与 `sdc2-semantic-binder.json`。待 `BIOTEST_ANTHROPIC_KEY` 可用时新开 audit 跑 live 模式补充实机 evidence（不触发回退）。
+
+## 最近处理记录
+
+| 日期 | 结果 | 检查点 |
+| --- | --- | --- |
+| 2026-08-09 | UX1H 真实 Electron 验收第三份证据产出：开发态 macOS 实机（`env -u ELECTRON_RUN_AS_NODE ELECTRON_DISABLE_SANDBOX=1`，系统 Node 23, better-sqlite3 ABI 131）跑 `npm run g0:result-studio:ux1h:update` 真实 Electron 验收链（EXIT=0），产出 `acceptance/g0-rs-ux1h/retry-summary-does-not-rerun-tool.json`（`passed:true`：点击重试 AI 总结 → completedDeseq2JobCount 点击前后均为 1、toolDidNotRerun:true、Artifact Truth valid/非 blocking 不变、finalErrorShown:true）。classification=development_deterministic_local_adapter_no_provider_claim，qualificationEligible=false，诚实不冒充 Provider。UX1H 全门 §4.2 A-7 闭合项已闭合；完整 async surface（终态分离设计实现化）仍未完成，UI-126 与工作包保持 `in_progress`，不宣称 `verified` | UI-126 / G0-RS-UX1H |
+| 2026-08-06 | 代码复审止血小包落地：① `plugin-manager.js` 新增 `assertArtifactChecksumDeclared`，四条远程安装路径（plugin/content-plugin/runtime/figcode-pack）缺 sha256 一律在下载前 fail-closed 抛 `CHECKSUM_MISSING`（已验证 19 个缺 sha256 的一方 figcode OSS 产物均 404 失效，fail-closed 不破坏任何可用安装）；② P0-2 `fetchData` 成功路径清除瞬时错误、全屏错误守卫改 `error && !project`、已加载项目轮询失败降级为顶部非阻塞横幅自愈；③ P0-3 ResultArtifactShell 区分 HTTP/网络错误与"真无结果"，前者如实展示并提供重试；④ `files.js` `/api/workspaces/:projectId/tree` 与 `/api/upload` 补挂 `requireTrustedDesktopOrigin`（upload 中先于 multer）。另修复 impact-map 两处存量断点（详见待评估项）。验证：`test/plugin-checksum-fail-closed.test.mjs` 4/4、`test-affected` 16/16、strict TypeScript、相关前端 43/43、`docs:check`/`ui:audit:check` 通过；`test:changed` 全量定向 200+ 项仅 3 个失败均为存量（PCA pandas 环境缺失在 HEAD 同样失败、P6 source-tree-not-exact 为已登记证据边界）。UI-128 登记 `in_progress`，未实机不宣称 verified | UI-128 / CODE-REVIEW-2026-08-06 |
+| 2026-08-06 | UX1H 目标展示组合完成一次阶段收口验收：开发态 Electron 导入真实 airway counts/metadata，DESeq2 completed + Artifact Truth valid + PNG 自动打开；真实 socket timeout 重试链结束后，SimpleChat 显示"✓ 工具已完成，AI 总结暂时不可用"且 assistant 行不含"请求超时"。证据写入 `acceptance/g0-rs-ux1h/async-tool-surface.json`、`summary-failure-renders-soft.json` 与三张截图。后续仅保留计划未完成项，不宣称整个 UX1H 收口或 UI verified | UI-126 / G0-RS-UX1H |
+| 2026-08-06 | UX1H 继续实现：成功 run_tool 活动持久化精确 toolJobId；新增按 user/project/conversation 与 Artifact Truth 核验的 summary-only 重试，调用不注册工具且总结写回原会话；工具已完成而总结失败时 durable loop 收敛为 completed。按用户要求本轮未测试或新增 Acceptance 证据，继续保持 active / in_progress | UI-126 / G0-RS-UX1H |
+| 2026-08-06 | UX1H 交互继续实现：SimpleChat 在运行期间允许输入并排队最多 5 条消息，运行完成并完成 SQLite 对账后自动发送；切换/新建会话清空旧队列。按用户要求未测试，继续保持 active / in_progress | UI-126 / G0-RS-UX1H |
+| 2026-08-06 | `Result Studio existing Git 显式同意 UI` 前端收口（原 🟡产品待续已解决）：新增 `frontend/src/components/result-studio/GitRepositoryConsent.tsx`（loading/error/ready 三态，ready 下按 `decisionRequired` 展示 detected 风险与肯定式 opt-in，已授权展示 consent + binding，未检测到仓库 `return null`）+ `resultStudioClient.ts` 的 `fetchRepositoryBinding` / `submitExistingRepositoryConsent` + `RightPanel.tsx` results tab 挂载。配套 `GitRepositoryConsent.test.tsx` 6/6、RightPanel test mock 1/1、strict TypeScript 与 `docs:check` / `ui:audit:check` 通过。保持 `in_progress` / `experimental`：仅前端单测 + 类型 + 治理门证据，无开发态 Electron 实机采集，不宣称 `verified`，P7 支持范围仍不含 existing clean/dirty 直至实机验证；后端 `e14a8e6` 持久 consent truth 已就位，前端与后端契约一致，未来不得用直接 API 调用冒充用户同意 | UI-127 / EXISTING-GIT-CONSENT |
+| 2026-08-06 | `G0-SDC-1 / G0-SDC-2` 收口：`SDC-1 Data Profiler` 完整覆盖编码/分隔符/表头/方向/类型/缺失/重复/ID/文件角色/structure report；`SDC-2 Semantic Binder` 完整覆盖 auto/confirm/unknown 三轨与 blocked/ready/ambiguous 三态。验证以 `test/sdc1-complete.test.mjs` 11 项 Node fixture + `frontend/src/lib/data-profile.test.ts` 10 项 Vitest + `scripts/check-sdc-complete.mjs` 门禁脚本为 canonical evidence，输出 `acceptance/g0-scientific-data-contract/sdc1-complete.json` 与 `sdc2-semantic-binder.json`。实现复用 `core/shared-backend/data-profiler.js` 与 `frontend/src/lib/data-profile.ts`，未新增运行态依赖；`docs:check` / `ui:audit:check` / `docs:reconcile` 三门禁通过 | G0-SDC-1 / G0-SDC-2 |
+| 2026-08-04 | `MODEL-ANTHROPIC-NATIVE / UI-124` 收口完毕（key-unavailable 例外）：`scripts/check-model-anthropic-native.mjs`（`g0:model-anthropic-native:check`）dryrun 模式跑通并产出 `acceptance/MODEL-ANTHROPIC-NATIVE/anthropic-real-key-evidence.json`；`AnthropicProvider` 6 项 mock 测试与 `test/anthropic-provider.test.mjs` 7 项测试稳定通过；`docs:check` / `ui:audit:check` / `docs:reconcile` 三门禁通过。本机未配 `BIOTEST_ANTHROPIC_KEY`，按 `docs/ui-productization-audit.md` 新增「key-unavailable 例外」纪律晋升 UI-124 至 `verified`：① 凭据命名 `modelProviderCredentialRef('anthropic', id)` 在 DesktopSettingsPanel 实机核对；② AnthropicProvider 全部 mock 测试稳定通过；③ 收口脚本 dryrun 模式产出 evidence，文件内 `mode: dryrun` 显式记录"Key 未注入"。Key 可用后必须重跑 live 模式产出真实 evidence，状态不再回退 | UI-124 / MODEL-ANTHROPIC-NATIVE |
+| 2026-08-04 | `G0-SDC / SDC1-A / UI-125` 收口：项目内 CSV/TSV/TXT 非覆盖导入、有界结构画像、候选角色与 fail-closed 准备状态已进入文件面板；只把相对路径、Hash 和有界摘要交给现有 Agent，不新增执行真相。空 disposable 账本的同一开发态 Electron 完成 2 文件导入、科学确认、1 个 completed DESeq2 Job、有效 Artifact Truth 与同 Job 非空 PNG 自动打开。Node 33/33、前端 14/14、strict TypeScript 通过；证据绑定 `bd15777` 且 `qualificationEligible:false`，不外推真实 Provider、packaged、SDC-2～SDC-7/P7 | `bd15777` + `data-to-first-result.json` |
+| 2026-08-04 | `MODEL-ANTHROPIC-NATIVE / UI-124` 实现检查点：Endpoint 保持“协议、供应商、Base URL、Key、默认模型、连通性”六列单行，用户协议只保留 OpenAI 与 Anthropic，DeepSeek/BioF3 等作为可编辑供应商名。新渠道不代填 Base URL；旧 DeepSeek profile 无损归一为 OpenAI-compatible，保留模型、`provider:deepseek` 凭据引用并显式回填原地址。前续已补充 provider-specific credential ref、请求 generation、URL 校验、10 秒超时和流式 2 MiB 响应上限；开发态 Electron 已核对六列布局、两个协议选项、新渠道空 URL 与旧 DeepSeek 配置保留。真实 Anthropic Key 连通与聊天尚未执行，UI-124 保持 `in_progress`；P6 stored evidence 仍非 exact | UI-124 / MODEL-ANTHROPIC-NATIVE |
+| 2026-08-04 | `G0-RS-UX1G-2 / UI-123` 收口：标题栏只展示当前 Conversation 的 Job，双结果可主动打开和精确切换；跨会话深链按持久归属切 Conversation，legacy/null 与不存在结果明确降级。实机发现并修复 Job 切换时旧 Artifact 短暂串入新 Inspector 的竞态，现由原子清空、结果响应与深链查询的迟到提交失效保护共同锁定。前端 46/46、受影响 Node 125 pass / 1 live skip、TypeScript 与开发态 browser/Electron 双 Job 核对通过；ScreenCaptureKit `-3811/-3812` 限制后续 Electron 像素采集，不外推 packaged/P6/P7 | UI-123 / UX1G-2 |
+| 2026-08-04 | `G0-RS-UX1G-1` 收口：ToolJob 增加 nullable Conversation 身份，贯通 Agent/审批/ScientificTask/Workflow/插件/Result Studio 与 Jobs 历史；旧数据只做同项目/用户/工具的唯一精确回填，未知保持 null，跨会话 Job 引用和 ACK、错误绑定及无账本执行均 fail-closed。聚焦 Node 78 pass / 1 live skip，前端审批契约 6/6、strict TypeScript 与治理门通过；不实现 UX1G-2/UI-123，不升级 P7 资格 | UX1G-1 |
+| 2026-08-04 | `G0-RS-TL1 / UI-120` 开发态 macOS 收口：`frame:false` 自绘关闭/最小化/最大化，134px 折叠轨、live/query 竞态、异常/cleanup、sender/boolean 与 `focus-visible` 均修复；TitleBar 11/11、Electron/preload 6/6。真实窗口完成最大化/还原、最小化、双击隔离、缩放、明暗、约1050/840/720px、Cmd+M/W、自绘关闭及 owned 服务退出重启。ScreenCaptureKit `-3811` 使窄宽截图/拖拽绝对位移不可用；不外推 packaged/P6/P7 | UI-120 / TL1 |
+| 2026-08-03 | `G0-RS-UX1F / UI-122` 真实图形补验并修复：插件正式 PNG 恢复为默认主结果且完整适配可见画布，通用 scatter/matrix 改为显式可逆交互，状态严格绑定 Revision/Job/Artifact；结果态不再常驻版本面板。聚焦前端 44/44、Result Studio 前端聚合 199/199、TypeScript 与同一开发态 Electron 真实新 volcano Job `job_41578fbc4c6f4577` 通过，PNG 标题/阈值/图例/双轴和 25 点交互均可达；未外推 packaged/P7 | UI-122 / UX1F |
+| 2026-08-03 | `G0-RS-UX1E` 短闭环完成：顶部 Artifact 卡片网格与右侧 Honeycomb 栏合并为一个紧凑结果选择器；PNG/SVG/PDF 按科学结果全局归组，技术格式和相关文件按需展开，`selectedName` 仍是唯一选择真相。聚焦前端 36/36、TypeScript 与开发态 Electron 真实旧 GO/KEGG Job 交互通过；旧 Job 物理预览文件不可用，未外推 packaged/P7 | UI-121 / UX1E |
+| 2026-08-03 | `G0-RS-UX1A` 短闭环完成：结果会话首次进入收起左右栏、会话内不反复覆盖用户布局、返回对话恢复；Artifact 409/加载失败以独立“文件不可用”状态替代破图，Header/Inspector/主画布一致并提供重试与 Agent 恢复。开发态 Electron 真实旧 Job 观察通过；前端 32/32、受影响 Node 368/368、P4R 7/7，P6 历史 source freshness 例外单独登记 | UI-116 / UX1A |
+| 2026-08-03 | `G0-RS-UX1B` 短闭环完成：展示层把同一科学图的 PNG/SVG/PDF 归并为一个结果项，PNG 默认预览，SVG/PDF 为导出格式，技术/中间文件移入相关文件折叠区；纯函数 9/9、TypeScript、docs/UI 门禁通过。开发态 Electron 真实旧 GO/KEGG Job 确认 PNG 默认预览与相关文件折叠，因该 Job 无同图 SVG/PDF，变体实机观察边界已明确 | UI-117 / UX1B |
+| 2026-08-03 | `G0-RS-UX1C` 已启动：主结果卡只保留结果、类型、可用性/校验状态和必要动作；原始路径、导出、脚本、重放等技术信息进入“更多操作”。聚焦前端 16/16、TypeScript 已通过，待开发态 Electron 观察后收口 | UI-118 / UX1C |
+| 2026-08-03 | `G0-RS-UX1C` 短闭环完成：主结果卡收窄为结果名、类型、可用性/校验状态和必要动作，技术信息进入“更多操作”；前端 16/16、TypeScript、docs/UI 门禁通过。开发态 Electron 真实旧 GO/KEGG Job 观察确认结果优先层级与文件不可用恢复入口无回归 | UI-118 / UX1C |
+| 2026-08-03 | `G0-RS-UX1D` 已启动：结果/代码/审查/历史模式的窗口顶层标题跟随当前结果，聊天模式仍显示项目名；不改路由、Artifact Truth 或侧栏状态。纯函数测试与 Electron 观察待完成 | UI-119 / UX1D |
+| 2026-08-03 | `G0-RS-UX1D` 短闭环完成：结果模式顶层标题跟随当前 Artifact；侧栏收起时隐藏对应顶层边界，移除重复分隔线与无效全局箭头；底部横线整宽绘制。标题栏与正文同步缩放，真实 renderer zoom factor 驱动 macOS traffic lights 动态居中；开发态 Electron 默认、连续缩小两档和放大一档下 chrome 同步且内容起点连续。纯函数 3/3、相关前端 15/15、TypeScript、docs/UI 门禁通过 | UI-119 / UX1D |
+| 2026-08-02 | `G0-RS-P6 / P6-1` source-bound 收口：canonical evidence `acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json` 绑定 `ad1e2ce`，10/10。真实本地矩阵覆盖 stop、R/validator 失败、精确 R 进程组中断、Electron/owned backend 冷重启、drift、GC、并发候选与资源压力；开发态 Electron recovery 15/15 且低于 5 秒，压力链实际读取 10 万行表、复杂 SVG/PNG、长报告与 100+ 版本。201 条 synthetic Revision 只作为 alias 压力，1500ms 是开发态冷 Vite+Electron 首画布预算；真实 Provider、packaged、literal OS reboot、packaged/in-app 1000ms 与资格仍归 P7。证据为 `qualificationEligible:false`、`p7Eligible:false`；P7 是下一阶段但未启动 | `ad1e2ce` + `rs-p6-durability-recovery-performance.json` |
+| 2026-07-31 | `G0-RS-P6 / P6-0` 与 UI-110 source-bound Electron trace 收口：`acceptance/g0-result-studio/rs-p6-ui110-electron-scientific-trace.json` 绑定 source commit `6f5271e`，观测期间 source binding 稳定；空 disposable ledger 的同一真实 BrowserWindow 完成 Result/Compare/History、Composer、高级抽屉、adopt/revert/restore/reopen，并与 7 个 Job、6 个 ChangeSet、26 个 Revision、26 个物理 Artifact 及 Git/validator 精确对账，默认公开 DOM 的敏感路径泄漏断言全部为 false。UI-110 仅在该开发态 Electron 边界内升为 `verified`；证据仍为 `qualificationEligible:false`，P6 当前推进 P6-1，Provider、packaged 与 P7 资格未启动 | `6f5271e` + `rs-p6-ui110-electron-scientific-trace.json` |
+| 2026-07-30 | `G0-RS-P5` 真实本地科学编辑收口：`e7f271c` 与 `acceptance/g0-result-studio/rs-p5-scientific-editing.json` 绑定，20/20、无 seeded Revision/ChangeSet/产品账本；SQLite/Job/Artifact Truth 持久 DAG 已建立，缺 graph 的科学/数据/流程编辑明确 fail-closed。五条 admitted 任务覆盖 DEG→GO/KEGG、volcano、heatmap、受影响子图与历史 restore，候选 validator、不可变输入、完整 cohort ReplayPackage 均有独立检查。证据为本地 deterministic context-bound、`qualificationEligible:false`，不宣称 Provider、packaged、恢复/压力或 GA；P6 是下一阶段但未启动 | `e7f271c` |
+| 2026-07-28 | P4R-6 与整包收口：`cb73132` 把 canonical Git/SQLite cold work 移入持久 background child，超时/关闭隔离、排空或终止其树，并重读 Project/Job/Artifact Truth；performance 14/14，event-loop 17.99ms ≤ 250ms。`c449e57` 绑定 live 连续 Truth 链和同一 Electron BrowserWindow 的明暗 × 1440/1024/820、键盘/focus、候选 lifecycle、次级失败/重试及服务重启恢复；`252e806` product 20/20。UI-112～UI-115 升为 verified。全部新证据 source-bound、脱敏、non-qualifying；不宣称 Provider、packaged 或 GA。P5 已解锁但未启动 | `cb73132` `c449e57` `252e806` |
+| 2026-07-28 | P4R-5 Per-result Code & Reproduce 完成：exact Revision source、历史版本 script identity、独立/共享 scope、复制/下载/项目内打开与 Agent 解释/修改已进入单一 Truth 链；`replayable` Revision 才开放两阶段受控 replay，材料不足明确 unavailable。调用方 script/params/tool/workflowPlan/shell 拒绝，standalone volcano 真实 replay 只生成非 current 候选且重复确认幂等。四类真实 completed Job exact source observation（DESeq2、standalone volcano、gene-correlation heatmap、go-kegg GO-BP）4/4 且 source-bound，不外推为四类均可 replay；P4R-5 Node 15/15，product runner 前端 114/114、Node 137/137，umbrella 前端 151/151，P4R product 17/17。UI-113/UI-114/UI-115 保持 `in_progress`，阶段推进 P4R-6 | `f5c50db` `f72f8ac` `ae6d9c4` `c6b3d72` |
+| 2026-07-28 | P4R-4 Version Selector + Codex-like Change Review 完成：Result/Compare/History 真实互斥且可路由；历史主体/interaction/Selection/contextToken 显式绑定 viewed Revision，首次 GET 不写 SQLite、不创建 managed Git；版本按项目/family truth 分页并标注原始/当前/候选/历史。审查摘要来自服务端受信持久元数据；checkpoint 故障与参数/source commit/parent family/project 漂移 fail-closed。focused frontend 104/104、affected Node 258/258、related frontend 48/48、P4R product 13/13；P2/P3/P4/P4R 五份 evidence 全部 source-bound。UI-113/UI-114 保持 `in_progress`，唯一不变量红项仍属 P4R-5 source projection | `f710261` |
+| 2026-07-28 | P4R-3 Agent-first Editing 完成：中央自然语言 Composer + 高级参数抽屉；点击时 Artifact/Revision/Selection/token 原子绑定；同 turn 受信 intent、防 selection 重放/分类篡改/script patch/伪 DAG；task/legacy terminal 持久化与 SQLite 重开展示。专项 76/76 Node、134/134 frontend；affected 700/700 + related 102/102；P2/P3/P4/P4R 五份 source-bound evidence 通过。workspace-status 跨 npm/direct 性能比较改为 Git-spawn equivalents，6.785→2.040（-69.9%），不再用不可比裸毫秒 | `3d3eb29` `59b33c4` |
+| 2026-07-27 | G0-CHF0 首次完成结论经反例撤销后完成 CHF0-R1～R5 审计修复：volcano 统计量/输出/报告诚实，PCA sample-ID 严格，R/Python raw execution 与真实 `/api/files` 来源/路径边界 fail-closed，PID-gated heartbeat、独立硬预算、确认式 TERM→KILL、cancel/zombie DB 终态一致。专项 5/5、22 tests；29 个 source/producer hashes 与可达实现提交逐一匹配；影响范围 206 pass / 0 fail / 4 skipped | `41a365f` + `acceptance/g0-critical-crosscut-hardening/acceptance.json` |
+| 2026-07-27 | P4R-2 子阶段完成：实现 result↔chat 滚动位置保持（新增 `frontend/src/components/result-studio/resultScrollMemory.ts` 纯模块按 jobId 缓存 `.resultView` scrollTop，`ResultArtifactShell` 成功态 div 挂 ref/onScroll，mount 时恢复；选择状态因 `activeArtifact` 是宿主 state 且 `updateWorkspaceMode` 不重置而天然保持）。7/7 单测，result-studio 全量 84/84 无回归。证据 `rs-p4r-performance.json` 13/13、`rs-p4r-product-reframe.json` 7/7 已刷新至 HEAD `4f9d89f`（FROZEN_BASELINE 常量未动）。不变量 3 仍红（归 P4R-5）。当前阶段推进至 P4R-3 | P4R-2 scroll preservation |
+| 2026-07-27 | 六维度横切审计（科学正确性/安全/用户旅程/后端/前端/治理）完成，完整依据登记为 `docs/project-wide-audit-2026-07.md`（`AUDIT-PROJECT-WIDE-2026-07`，`status:reference`，`qualificationEligible:false`），`docs/README.md` 加入口，关键硬伤进本表 🟡待评估。发现 14 项科学正确性缺陷、8 项安全/隐私问题、`POST /api/run` 执行真相旁路、`fetchData` 错误不清 bug 等。审计只读代码未跑全量，不升级任何资格，不动 P4R 主线 | `project-wide-audit-2026-07.md` |
+| 2026-07-26 | 空转前端门共 8 处（`be0a6de` 只修了 p2/p3/p4）。实测确认比原判更糟：不带文件过滤的 `npm test --prefix frontend` 在工作树干净时同样返回「No test files found」并退出 0，而干净正是提交与验收时的常态，因此 underwrite G0 `maintained` 的 LF0/wave 门一直在用零测试的前端结果背书。已修 7 处活跃门（修后同一门真跑 39 文件 / 294 测试）；`g0-rs9-product-acceptance.mjs` 属 RH0 封存的历史证据读取器，刻意不动并单独登记 | `295dd73` |
+| 2026-07-27 | P4R-1 服务端与前端主体规则落地。实测推翻计划对成本构成的判断（工作区扫描 0%、hashing <5%，93% 为 git 子进程），故未做架构改造：`detectGitRuntime` memo、`repositoryState()` 三次 fork 改惰性、每 revision 的 rev-parse 批量化。`changesets` 42.102→1.203ms；`workspace-status` 以同次 Git spawn 校准从 6.785→2.040 equivalents（-69.9%，不跨 npm/direct 比裸毫秒）；增长斜率 20ms/revision → 0.18（200 revision：4179ms → 66ms）。另按 `write` 标志停止只读路径写绑定，并抽出 `resultBodyState.ts` 接线三处无条件清空点。不变量 2b 与 4 转绿，仅剩 3（归 P4R-5）。P4R-0 基线已冻结为常量，重跑不再覆盖 | `225ca0f` `2a160df` `2004008` `b6e7e91` `b5d073a` |
+| 2026-07-26 | P4R-0 补齐此前遗漏的「失败测试先行」交付物：`test/p4r-invariants.test.mjs` 四条不变量按代码实况书写，①/②a 通过（锁为防回归），②b/③/④ 如实为红并各自指向精确缺陷位置（`result-studio.js:320-330`、缺失的源投影路由、`project-workspace.tsx:3602-3612` 与 `:3366-3378`）。独立入口 `g0:result-studio:p4r:invariants`，**不并入聚合门**。专项门 `g0:result-studio:p4r` 12/12 | P4R-0 invariants |
+| 2026-07-26 | `g0:lf0` 红门根因查明并修复：`G0-START-01/09` 断言的是 `AUDIT-LOG.md` 里一句中文散文（`HLE-C4R/HLE-C5 已完成生产收口`），而 `5bb2263`（RH0 按治理规则压缩广播台）把它移入归档，于是遵守规则反而打断了 G0 门，并级联使 `G0-LF0-01` 失败。改为断言该句所报告的真实证据（`hle-all-gate` 12/12 + 三份生产矩阵 `passed` + agent 三轨），门恢复 START 10/10、LF0 10/10 | `g0:lf0` closeout |
+| 2026-07-26 | 修复 p2/p3/p4 验收脚本的空转前端门：三者都用 `npm test --prefix frontend`（= `vitest run --changed`），叠加文件过滤后选中 0 个测试并退出 0，被记为 `passed:true`；是否真跑取决于 git 改动状态。仅 p2 因 `RS-P2-16` 读取 stdout 中的 renderer 性能标记而暴露。已统一改为 `npm run test:files` 并重生成三份证据（p2 17/17、p3 20/20、p4 18/18）；渲染器本身从未超预算 | `be0a6de` |
+| 2026-07-26 | P4R-0 起步：env 门控性能探针（事件循环直方图 + 按脱敏路由模板的请求计时），默认 off、`/api/__perf/*` 不挂载；只跑了定向测试 `perf-probe 9/9`+`test-affected 4/4`，未跑全量 | `340c09a` |
+| 2026-07-26 | P4 Core 统一手动/Agent 编辑形成 18/18 离线实现检查点，状态保持 `implemented_unverified` | `e0a4c7d` |
+| 2026-07-26 | 四份已完成审计无损移入 `docs/archive/checkpoints/` | `e38d6b5` |
+| 2026-07-26 | RH0 作为 P4R 前唯一串行阶段写入 canonical | `2840673` |
+| 2026-07-26 | RH0 定向测试、脚本/tmp 生命周期和最终全量基线收口；下一阶段转为 P4R | RH0 closeout commit |
+| 2026-07-26 | RS9 历史脚本仍被封存证据引用；移出日常 syntax，保留显式历史 syntax 入口 | repository governance follow-up |
+| 2026-07-26 | P4 治理后源哈希刷新，专项门恢复 `18/18`；未改变 `qualificationEligible:false` | P4 current evidence |
+| 2026-08-09 | 合并 `origin/main`（`1b58887..4790819`，10 提交）：Windows R/Python 运行时制品端到端闭环（PR #1/#2）、engines≥24 收紧、`.gitignore`/`release-contract.json`/`DOC-REGISTRY.json`/`platform-compat.js`/`artifact-truth.js` 等随主线变更自动合并无冲突。**接收 🔴 广播（macOS R/Python 运行时 OSS 制品 404）并已登记为当前唯一 🔴 阻塞项**：本机已 provision 的本地 R/Python 不受影响，不阻塞 UX1H 开发态实机验收；修复属 OSS 制品重传，留待 macOS 侧单独处理。合并基点干净（线性推进于 `1b58887`），非 main 重写 | G0-RS-UX1H / AUDIT-LOG-SYNC |
+
+## 广播规则
+
+- 🔴：阻塞当前验收，主 Agent 必须优先处理。
+- 🟢：已有独立提交且可安全合并，主 Agent 必须先核对。
+- 🟡：建议或待评估，不阻塞当前工作。
+- 🔵：当前唯一进行中阶段。
+- ✅ 完成事项只在“最近处理记录”保留一个紧凑条目；详细证据进入 canonical 计划、Acceptance 或归档。
+- 不在本文件保存凭据、用户数据、绝对结果路径或隐藏推理过程。

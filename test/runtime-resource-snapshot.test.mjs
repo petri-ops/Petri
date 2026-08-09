@@ -21,9 +21,18 @@ test('runtime resource snapshot has TTL and separates resource state from scient
 });
 
 test('resource state becomes warning or unavailable without changing task truth', () => {
-  assert.equal(snapshot.classifyResourceState({ availableMemoryBytes: 10 * 1024 ** 3, estimatedMemoryBytes: 8 * 1024 ** 3 }), 'warning');
-  assert.equal(snapshot.classifyResourceState({ availableMemoryBytes: 10 * 1024 ** 3, estimatedMemoryBytes: 11 * 1024 ** 3 }), 'unavailable');
+  assert.equal(snapshot.classifyResourceState({ availableMemoryBytes: 10 * 1024 ** 3, diskAvailableBytes: 20 * 1024 ** 3, estimatedMemoryBytes: 8 * 1024 ** 3 }), 'warning');
+  assert.equal(snapshot.classifyResourceState({ availableMemoryBytes: 10 * 1024 ** 3, diskAvailableBytes: 20 * 1024 ** 3, estimatedMemoryBytes: 11 * 1024 ** 3 }), 'unavailable');
   assert.equal(snapshot.classifyResourceState({ diskAvailableBytes: 100 * 1024 ** 2 }), 'unavailable');
-  assert.equal(snapshot.classifyResourceState({ availableMemoryBytes: 256 * 1024 ** 2 }), 'unavailable');
-  assert.equal(snapshot.classifyResourceState({ availableMemoryBytes: 1024 ** 3 }), 'warning');
+  assert.equal(snapshot.classifyResourceState({ availableMemoryBytes: 256 * 1024 ** 2, diskAvailableBytes: 20 * 1024 ** 3 }), 'unavailable');
+  assert.equal(snapshot.classifyResourceState({ availableMemoryBytes: 1024 ** 3, diskAvailableBytes: 20 * 1024 ** 3 }), 'warning');
+  assert.equal(snapshot.classifyResourceState({ availableMemoryBytes: 10 * 1024 ** 3, diskAvailableBytes: null }), 'unavailable');
+  const unknown = snapshot.createRuntimeResourceSnapshot({
+    disk: { availableBytes: null, totalBytes: null },
+    totalMemoryBytes: null,
+    availableMemoryBytes: null,
+  });
+  assert.equal(unknown.state, 'unavailable');
+  assert.equal(unknown.memory.availableBytes, null);
+  assert.equal(unknown.disk.availableBytes, null);
 });

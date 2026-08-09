@@ -9,6 +9,9 @@ const path = require('path');
 const multer = require('multer');
 
 const config = require('../config');
+const { safeJoinUnder } = require('../../shared-backend/path-safe');
+const { profileData } = require('../../shared-backend/data-profiler');
+const { requireTrustedDesktopOrigin } = require('../helpers/local-request-boundary');
 const TEMP_DIR = config.tempDir || '/tmp/biof3-tmp';
 
 // 本地存储适配器
@@ -73,13 +76,21 @@ function getProjectWorkspace(projectId) {
 }
 
 function resolveInside(root, relativePath) {
-  const safeRelative = String(relativePath || '').replace(/^[/\\]+/, '');
-  const target = path.resolve(root, safeRelative);
-  const normalizedRoot = path.resolve(root);
-  if (target !== normalizedRoot && !target.startsWith(normalizedRoot + path.sep)) {
-    return null;
+  const target = safeJoinUnder(root, String(relativePath || ''));
+  if (!target) return null;
+  try {
+    const realRoot = fs.realpathSync(root);
+    const realTarget = fs.realpathSync(target);
+    if (realTarget !== realRoot && !realTarget.startsWith(realRoot + path.sep)) return null;
+  } catch (error) {
+    if (error.code !== 'ENOENT') return null;
   }
   return target;
+}
+
+function isSafeStorageKey(key) {
+  if (typeof key !== 'string' || !key || key.includes('\0') || key.includes('%') || path.isAbsolute(key) || /^[/\\]/.test(key)) return false;
+  return !key.split(/[\\/]+/).some((segment) => segment === '..' || segment === '.');
 }
 
 const upload = multer({
@@ -96,10 +107,58 @@ const upload = multer({
   },
 });
 
+const projectDataImport = multer({
+  dest: path.join(TEMP_DIR, 'imports'),
+  limits: { fileSize: 500 * 1024 * 1024, files: 12 },
+  fileFilter: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(['.csv', '.tsv', '.txt'].includes(ext)
+      ? null
+      : new Error(`不支持的文件格式: ${ext || '无扩展名'}，支持: .csv, .tsv, .txt`),
+      ['.csv', '.tsv', '.txt'].includes(ext));
+  },
+}).array('files', 12);
+
+function safeImportedFilename(originalName) {
+  const basename = path.basename(String(originalName || '').normalize('NFKC'));
+  const ext = path.extname(basename).toLowerCase();
+  const stem = path.basename(basename, path.extname(basename))
+    .replace(/[^\p{L}\p{N}._-]+/gu, '_')
+    .replace(/^\.+/, '')
+    .slice(0, 120);
+  return `${stem || 'data'}${ext}`;
+}
+
+async function copyImportWithoutOverwrite(sourcePath, destinationDir, originalName) {
+  const safeName = safeImportedFilename(originalName);
+  const ext = path.extname(safeName);
+  const stem = path.basename(safeName, ext);
+  for (let attempt = 0; attempt < 1000; attempt += 1) {
+    const suffix = attempt === 0 ? '' : `-${attempt + 1}`;
+    const candidate = path.join(destinationDir, `${stem}${suffix}${ext}`);
+    try {
+      await fs.promises.copyFile(sourcePath, candidate, fs.constants.COPYFILE_EXCL);
+      return candidate;
+    } catch (error) {
+      if (error && error.code === 'EEXIST') continue;
+      throw error;
+    }
+  }
+  throw new Error(`无法为导入文件分配唯一名称: ${safeName}`);
+}
+
+async function removeUploadedFiles(files) {
+  await Promise.all((files || []).map(async (file) => {
+    try {
+      await fs.promises.rm(file.path, { force: true });
+    } catch {}
+  }));
+}
+
 module.exports = function registerFileRoutes(app) {
   // ── 桌面版本地文件服务 ──────────────────────────────────────
   // /api/files/<key> → 从本地 results 目录读取文件并返回
-  app.get('/api/workspaces/:projectId/tree', (req, res) => {
+  app.get('/api/workspaces/:projectId/tree', requireTrustedDesktopOrigin, (req, res) => {
       try {
         const root = getProjectWorkspace(req.params.projectId);
         if (!root) return res.status(404).json({ ok: false, error: '项目工作目录不存在' });
@@ -132,7 +191,7 @@ module.exports = function registerFileRoutes(app) {
       }
     });
 
-    app.get('/api/workspaces/:projectId/file', (req, res) => {
+    app.get('/api/workspaces/:projectId/file', requireTrustedDesktopOrigin, (req, res) => {
       try {
         const root = getProjectWorkspace(req.params.projectId);
         if (!root) return res.status(404).json({ status: 'error', error: '项目工作目录不存在' });
@@ -141,16 +200,101 @@ module.exports = function registerFileRoutes(app) {
           return res.status(404).json({ status: 'error', error: '文件不存在' });
         }
         res.setHeader('Content-Type', contentTypeFor(target));
-        res.setHeader('Access-Control-Allow-Origin', '*');
         res.send(fs.readFileSync(target));
       } catch (e) {
         res.status(500).json({ status: 'error', error: e.message });
       }
     });
 
-    app.get('/api/files/:key(*)', (req, res) => {
-      const key = req.params.key;
+    app.post('/api/workspaces/:projectId/profile', requireTrustedDesktopOrigin, async (req, res) => {
+      const root = getProjectWorkspace(req.params.projectId);
+      if (!root) return res.status(404).json({ ok: false, error: '项目工作目录不存在' });
+      const paths = Array.isArray(req.body?.paths) ? req.body.paths : [];
+      if (paths.length === 0 || paths.length > 12) {
+        return res.status(400).json({ ok: false, error: '请提供 1 到 12 个项目相对路径' });
+      }
       try {
+        const profiles = [];
+        for (const relativePath of paths) {
+          const normalizedPath = String(relativePath || '').replace(/\\/g, '/');
+          const target = resolveInside(root, normalizedPath);
+          if (!target || !fs.existsSync(target) || !fs.statSync(target).isFile()) {
+            return res.status(404).json({ ok: false, error: '文件不存在', relativePath: normalizedPath });
+          }
+          profiles.push(await profileData({
+            projectId: req.params.projectId,
+            relativePath: normalizedPath,
+            absolutePath: target,
+          }));
+        }
+        return res.json({ ok: true, profiles });
+      } catch (error) {
+        return res.status(500).json({ ok: false, error: error.message || '数据画像失败' });
+      }
+    });
+
+    app.post('/api/workspaces/:projectId/import', requireTrustedDesktopOrigin, (req, res) => {
+      projectDataImport(req, res, async (uploadError) => {
+        const files = Array.isArray(req.files) ? req.files : [];
+        if (uploadError) {
+          await removeUploadedFiles(files);
+          return res.status(400).json({ ok: false, error: uploadError.message || '导入失败' });
+        }
+        if (files.length === 0) {
+          return res.status(400).json({ ok: false, error: '请选择至少一个 CSV、TSV 或 TXT 文件' });
+        }
+
+        const root = getProjectWorkspace(req.params.projectId);
+        if (!root) {
+          await removeUploadedFiles(files);
+          return res.status(404).json({ ok: false, error: '项目工作目录不存在' });
+        }
+
+        const dataDir = path.join(root, 'data');
+        const copied = [];
+        try {
+          await fs.promises.mkdir(dataDir, { recursive: true });
+          const dataDirStat = await fs.promises.lstat(dataDir);
+          if (dataDirStat.isSymbolicLink() || !resolveInside(root, 'data')) {
+            throw new Error('项目 data 目录不能是工作区外部链接');
+          }
+          const imported = [];
+          for (const file of files) {
+            const destination = await copyImportWithoutOverwrite(file.path, dataDir, file.originalname);
+            copied.push(destination);
+            const relativePath = path.relative(root, destination).split(path.sep).join('/');
+            const profile = await profileData({
+              projectId: req.params.projectId,
+              relativePath,
+              absolutePath: destination,
+            });
+            imported.push({
+              name: path.basename(destination),
+              relativePath,
+              size: file.size,
+              profile,
+            });
+          }
+          await removeUploadedFiles(files);
+          return res.status(201).json({ ok: true, imported });
+        } catch (error) {
+          await removeUploadedFiles(files);
+          await Promise.all(copied.map(async (target) => {
+            try {
+              await fs.promises.rm(target, { force: true });
+            } catch {}
+          }));
+          return res.status(500).json({ ok: false, error: error.message || '导入失败' });
+        }
+      });
+    });
+
+    app.get(/^\/api\/files\/(.+)$/, requireTrustedDesktopOrigin, (req, res) => {
+      const key = Array.isArray(req.params[0]) ? req.params[0].join('/') : req.params[0];
+      try {
+        if (!isSafeStorageKey(key)) {
+          return res.status(400).json({ status: 'error', error: 'invalid_storage_key' });
+        }
         const storage = getStorage();
         if (!storage || !storage.exists(key)) {
           return res.status(404).json({ status: 'error', error: '文件不存在' });
@@ -158,14 +302,14 @@ module.exports = function registerFileRoutes(app) {
         const buf = storage.read(key);
         // 根据扩展名设置 Content-Type
         res.setHeader('Content-Type', contentTypeFor(key));
-        res.setHeader('Access-Control-Allow-Origin', '*');
         res.send(buf);
       } catch (e) {
         res.status(500).json({ status: 'error', error: e.message });
       }
     });
 
-  app.post('/api/upload', upload.single('file'), async (req, res) => {
+  // origin 校验必须先于 multer 解析 body，拒绝不可信来源的上传
+  app.post('/api/upload', requireTrustedDesktopOrigin, upload.single('file'), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ status: 'error', error: '未收到文件' });
     }
@@ -195,3 +339,7 @@ module.exports = function registerFileRoutes(app) {
     });
   });
 };
+
+module.exports.isSafeStorageKey = isSafeStorageKey;
+module.exports.safeImportedFilename = safeImportedFilename;
+module.exports.copyImportWithoutOverwrite = copyImportWithoutOverwrite;

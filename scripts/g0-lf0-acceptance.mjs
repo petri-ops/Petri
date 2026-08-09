@@ -200,7 +200,7 @@ function runVerificationCommands() {
     },
     {
       label: 'frontend-test',
-      command: ['npm', ['test', '--prefix', 'frontend']],
+      command: ['npm', ['run', 'test:files', '--prefix', 'frontend']],
     },
     {
       label: 'frontend-build',

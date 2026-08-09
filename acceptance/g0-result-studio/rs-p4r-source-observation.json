@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS-P4R-5",
+  "qualificationEligible": false,
+  "sourceCommit": "f5c50db85f137b85caddd45b99b7dbe7ced94303",
+  "sourceFiles": {
+    "observation": "scripts/g0-rs-p4r-source-observation.mjs",
+    "corpus": "scripts/g0-rs-p4r-corpus.mjs",
+    "routes": "core/r-server/routes/result-studio.js",
+    "sourceProjection": "core/shared-backend/result-revision-source.js",
+    "replayService": "core/shared-backend/result-replay-service.js",
+    "deseq2Definition": "resources/built-in-plugins/deseq2/tool-definition.json",
+    "deseq2Script": "resources/built-in-plugins/deseq2/scripts/deseq2.R",
+    "volcanoDefinition": "resources/built-in-plugins/volcano-plot/tool-definition.json",
+    "volcanoScript": "resources/built-in-plugins/volcano-plot/scripts/volcano-plot.R",
+    "correlationDefinition": "resources/built-in-plugins/gene-correlation/tool-definition.json",
+    "correlationScript": "resources/built-in-plugins/gene-correlation/scripts/gene-correlation.R",
+    "enrichmentDefinition": "resources/built-in-plugins/go-kegg/tool-definition.json",
+    "enrichmentScript": "resources/built-in-plugins/go-kegg/scripts/go-kegg.R"
+  },
+  "sourceHashes": {
+    "observation": "97aa4943855fd349b035c4ab08c5d265a3ca2e25e7ac34b837325ac8832423fa",
+    "corpus": "359e202832c117f12c6e041706e0028caaaf4c063df3d97511be982ab703bf11",
+    "routes": "1f3c93c8ddf9f4fbfb098fdd5c3a276b249f6e72d7beac2ecafc607b6e9acbd3",
+    "sourceProjection": "28004e2c885f5762028afcaead8c3c2c10fcd7ef1010be4dac03fa226c76482d",
+    "replayService": "f372bf8a348c868652a93b410374aa32c5079435defb709deeb74e317631b0a7",
+    "deseq2Definition": "085143916e4ace65656888430c7931639506eed6c31c52a2584d21fd2733f0ee",
+    "deseq2Script": "7c8b1cacdd3c7cb70cc45e841bb6620e7acdeba36a0d138752e69d988035fd4a",
+    "volcanoDefinition": "66604b604c81e053ede710dec9db3e124a12800563d9c66746767bdd7b36585b",
+    "volcanoScript": "f80012c9b61351ee783ee9a5b85c6c6b14fbcabe35e0c44629a9e7681cab81fd",
+    "correlationDefinition": "e14278ea8aadafc021690265d3685f3326c21492f39e94c519b198eedbec7afa",
+    "correlationScript": "17a39ae1ab7cc96b89ccc22075bc2c8b667dbb840ccad136bd22c42ccd2467a5",
+    "enrichmentDefinition": "e8d54b3aab301f2f36da7eae74258b512a0c3cdfc66668e3af7f1b398a0ff790",
+    "enrichmentScript": "a6b5103ca1d281daa2a0dae59591dde0bf05552191057eb517f74f81ba5d90db"
+  },
+  "sourceCommitMatchesSourceHashes": true,
+  "sourceMismatches": [],
+  "projectBound": true,
+  "executionTruthChain": [
+    "run_tool",
+    "tool_job",
+    "artifact_truth",
+    "artifact_revision",
+    "revision_source"
+  ],
+  "observations": [
+    {
+      "kind": "deseq2_deg_table",
+      "artifact": "deg_table.csv",
+      "status": "verified",
+      "sourceStatus": 200,
+      "sourceSha256": "7c8b1cacdd3c7cb70cc45e841bb6620e7acdeba36a0d138752e69d988035fd4a",
+      "sourceScope": "artifact_specific_materialization",
+      "reproductionStatus": "unavailable",
+      "formalJobCompleted": true
+    },
+    {
+      "kind": "standalone_volcano",
+      "artifact": "volcano.png",
+      "status": "verified",
+      "sourceStatus": 200,
+      "sourceSha256": "f80012c9b61351ee783ee9a5b85c6c6b14fbcabe35e0c44629a9e7681cab81fd",
+      "sourceScope": "artifact_specific_materialization",
+      "reproductionStatus": "available",
+      "formalJobCompleted": true
+    },
+    {
+      "kind": "gene_correlation_heatmap",
+      "artifact": "heatmap.png",
+      "status": "verified",
+      "sourceStatus": 200,
+      "sourceSha256": "17a39ae1ab7cc96b89ccc22075bc2c8b667dbb840ccad136bd22c42ccd2467a5",
+      "sourceScope": "artifact_specific_materialization",
+      "reproductionStatus": "available",
+      "formalJobCompleted": true
+    },
+    {
+      "kind": "go_kegg_enrichment",
+      "artifact": "go_bp_results.csv",
+      "status": "verified",
+      "sourceStatus": 200,
+      "sourceSha256": "a6b5103ca1d281daa2a0dae59591dde0bf05552191057eb517f74f81ba5d90db",
+      "sourceScope": "artifact_specific_materialization",
+      "reproductionStatus": "unavailable",
+      "formalJobCompleted": true
+    }
+  ],
+  "allFourVerified": true,
+  "passed": true
+}

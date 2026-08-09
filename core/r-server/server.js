@@ -177,10 +177,13 @@ setupAiBridge({ tempDir: TEMP_DIR });
 (function startEventLoopMonitor() {
   const TICK_MS = 1000;
   const BLOCK_THRESHOLD_MS = 2000; // report blocks longer than this
+  const perfProbe = require('./helpers/perf-probe');
+  perfProbe.enableProbe();
   let last = Date.now();
   const t = setInterval(() => {
     const now = Date.now();
     const lag = now - last - TICK_MS;
+    if (lag > 0) perfProbe.observeBlock(lag);
     if (lag > BLOCK_THRESHOLD_MS) {
       console.warn(
         `[event-loop] ⚠ blocked ~${lag}ms (recovered at ${new Date(now).toISOString()})`

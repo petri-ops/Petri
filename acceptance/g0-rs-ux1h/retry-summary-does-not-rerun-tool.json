@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "g0-rs-ux1h-retry-summary-does-not-rerun-tool",
+  "workPackage": "G0-RS-UX1H / UI-126",
+  "classification": "development_deterministic_local_adapter_no_provider_claim_with_real_socket_timeout",
+  "qualificationEligible": false,
+  "sourceCommit": "c8454e0a326268163a490c95825914828fe69615",
+  "sourceDigest": "ed1dc70f9b394e2798b9d0014d7aea5e916118f6805a8329adde7a89c5a13176",
+  "dataset": {
+    "countsSha256": "ed85549d09d5d2b5a406529ca4635ecf3420240200c451aefb695996243dd015",
+    "metadataSha256": "09b211c25fdfb2b0865841926a2c9e67c474c67570fdee5dc3ee2c2c1d714120",
+    "featureRows": 34889,
+    "sampleColumns": 8,
+    "metadataRows": 8,
+    "groups": {
+      "control": 4,
+      "treated": 4
+    }
+  },
+  "assertions": {
+    "retryButtonClicked": true,
+    "retryDispatchObserved": true,
+    "retryButtonRemainingBefore": 3,
+    "retryButtonRemainingAfter": null,
+    "retryButtonDecrementedOrRunning": true,
+    "completedDeseq2JobCountBeforeRetry": 1,
+    "completedDeseq2JobCountAfterRetry": 1,
+    "toolDidNotRerun": true,
+    "artifactTruthStatusBefore": "valid",
+    "artifactTruthStatusAfter": "valid",
+    "artifactTruthStatusUnchanged": true,
+    "artifactTruthBlockingBefore": false,
+    "artifactTruthBlockingAfter": false,
+    "artifactTruthBlockingUnchanged": true,
+    "finalErrorShown": true
+  },
+  "passed": true
+}

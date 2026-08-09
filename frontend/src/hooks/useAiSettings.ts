@@ -31,6 +31,7 @@ import {
   isChatSelectableProfile,
   modelChoiceId,
   modelSupplierName,
+  normalizeLegacyUserModelProfile,
 } from '@/lib/model-provider-options';
 
 // ChatModelPreset type — extracted here so SimpleChat and
@@ -86,12 +87,16 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
     .get()
     .then(async (raw) => {
       const profilePresets = Array.isArray(raw?.model_profiles)
-        ? (raw.model_profiles as ChatModelPreset[]).filter(isChatSelectableProfile)
+        ? (raw.model_profiles as ChatModelPreset[])
+            .map(normalizeLegacyUserModelProfile)
+            .filter(isChatSelectableProfile)
         : [];
       const presetsRaw = profilePresets.length > 0
         ? profilePresets
         : Array.isArray(raw?.chat_model_presets)
-        ? (raw.chat_model_presets as ChatModelPreset[]).filter((p) => p?.id && p?.model)
+        ? (raw.chat_model_presets as ChatModelPreset[])
+            .filter((p) => p?.id && p?.model)
+            .map(normalizeLegacyUserModelProfile)
         : [];
       let presets = presetsRaw.length > 0 ? presetsRaw : DEFAULT_CHAT_MODEL_PRESETS;
       const activeEndpointId = String(

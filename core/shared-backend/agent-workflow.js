@@ -1,4 +1,5 @@
 const AGENT_WORKFLOW_TEMPLATE_VERSION = 1;
+const { isRegisteredProfile } = require('./artifact-profiles');
 
 // Reuse harness workflow state projection for per-job details.
 let _harness;
@@ -246,6 +247,10 @@ function bindVerifiedArtifact(plan, { fromStepId, toStepId, inputId, artifact, a
   const binding = (toStep.inputBindings || []).find((item) => item.inputId === inputId);
   if (!binding || binding.fromStepId !== fromStepId)
     throw new Error('workflow_dependency_mismatch');
+  const effectiveProfile = binding.artifactProfile || artifact?.artifactProfile || null;
+  if (effectiveProfile && !isRegisteredProfile(effectiveProfile)) {
+    throw new Error(`unregistered_artifact_profile:${effectiveProfile}`);
+  }
   if (binding.artifactType && artifact?.type && binding.artifactType !== artifact.type) {
     throw new Error('artifact_type_mismatch');
   }
@@ -470,12 +475,16 @@ function validateWorkflowPlanBindings(plan) {
         errors.push(`Step '${step.id}': inputBinding fromStepId '${binding.fromStepId}' references unknown step`);
       }
       if (binding.artifactProfile) {
-        // Verify the upstream step is declared as a producer of this profile.
-        // This is a warning (advisory) rather than error since runtime
-        // artifact-truth supersedes static declaration.
-        warnings.push(
-          `Step '${step.id}' input '${binding.inputId}': artifactProfile '${binding.artifactProfile}' declared; runtime artifact-truth validation will confirm compatibility`
-        );
+        if (!isRegisteredProfile(binding.artifactProfile)) {
+          errors.push(
+            `Step '${step.id}' input '${binding.inputId}': unregistered_artifact_profile '${binding.artifactProfile}'`
+          );
+        } else {
+          // Runtime artifact truth remains authoritative for the concrete file.
+          warnings.push(
+            `Step '${step.id}' input '${binding.inputId}': artifactProfile '${binding.artifactProfile}' registered; runtime artifact-truth validation will confirm compatibility`
+          );
+        }
       }
     }
   }

@@ -64,12 +64,48 @@
   margin-top: 4px;
 }
 
+.lifecycle button {
+  border: 0;
+  background: transparent;
+  color: var(--biof3-accent);
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  padding: 0;
+}
+
 .lifecycle[data-state='blocked'] { color: var(--biof3-danger); }
 
 .actions {
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 7px;
+}
+
+.intentSummary {
+  color: var(--biof3-text);
+  font-size: 12px;
+  line-height: 1.45;
+  margin: 8px 0 0;
+}
+
+.changeSetPicker {
+  align-items: center;
+  color: var(--biof3-text-tertiary);
+  display: flex;
+  font-size: 10px;
+  gap: 7px;
+  margin-top: 7px;
+}
+
+.changeSetPicker select {
+  background: var(--biof3-bg-surface);
+  border: 1px solid var(--biof3-border);
+  border-radius: 5px;
+  color: var(--biof3-text-secondary);
+  font: inherit;
+  min-width: 0;
+  padding: 3px 6px;
 }
 
 .actions button,
@@ -95,6 +131,7 @@
 .actions .danger { color: var(--biof3-danger); }
 
 .error { color: var(--biof3-danger); font-size: 11px; margin-top: 6px; }
+.error button { border: 0; background: transparent; color: var(--biof3-accent); cursor: pointer; font: inherit; margin-left: 7px; padding: 0; }
 .loading { color: var(--biof3-text-tertiary); font-size: 11px; padding: 2px 0; }
 
 .details {
@@ -123,6 +160,24 @@
 }
 .tableCompare td { border-bottom: 1px solid var(--biof3-border); padding: 4px 5px; text-align: left; vertical-align: top; }
 .tableCompare td:first-child { color: var(--biof3-text-tertiary); width: 96px; }
+
+.scientificDifference {
+  border-left: 2px solid var(--biof3-accent, #2563eb);
+  margin-top: 10px;
+  padding-left: 8px;
+}
+
+.scientificDifference h5 {
+  color: var(--biof3-text-secondary);
+  font-size: 11px;
+  margin: 0 0 5px;
+}
+
+.scientificUnavailable {
+  color: var(--biof3-text-tertiary);
+  font-size: 11px;
+  margin: 4px 0;
+}
 
 .tablePageButton {
   background: transparent;
@@ -174,6 +229,29 @@
 .historyIdentity { min-width: 0; }
 .historyIdentity strong { display: block; font-size: 11px; font-weight: 550; }
 .historyIdentity small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.historyActions { display: flex; flex: 0 0 auto; gap: 5px; }
+.loadMore {
+  justify-self: center;
+  border: 0;
+  background: transparent;
+  color: var(--biof3-accent);
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  padding: 5px 8px;
+}
+
+.lifecycle[data-state='unavailable'] {
+  border-color: color-mix(in srgb, var(--biof3-status-loading) 45%, var(--biof3-border));
+  color: var(--biof3-text-secondary);
+}
+
+.root button:focus-visible,
+.root select:focus-visible,
+.root summary:focus-visible {
+  outline: 2px solid var(--biof3-accent);
+  outline-offset: 2px;
+}
 
 @container (max-width: 520px) {
   .visualGrid { grid-template-columns: 1fr; }

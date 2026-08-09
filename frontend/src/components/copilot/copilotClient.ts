@@ -166,6 +166,9 @@ export interface ResultEditProgressEvent {
   changeSetId: string;
   stage: string;
   status: string;
+  /** P4R-3 public projection; never exposes materialize/Git internals in result focus UI. */
+  publicPhase?: string;
+  publicPhaseLabel?: string;
   reason?: string;
   toolJobId?: string;
   revisionId?: string;
@@ -178,10 +181,25 @@ export function parseResultEditProgressEvent(obj: Record<string, unknown>): Resu
     changeSetId: String(obj.changeSetId || ''),
     stage: String(obj.stage || ''),
     status: String(obj.status || ''),
+    publicPhase: obj.publicPhase ? String(obj.publicPhase) : undefined,
+    publicPhaseLabel: obj.publicPhaseLabel ? String(obj.publicPhaseLabel) : undefined,
     reason: obj.reason ? String(obj.reason) : undefined,
     toolJobId: obj.toolJobId ? String(obj.toolJobId) : undefined,
     revisionId: obj.revisionId ? String(obj.revisionId) : undefined,
   };
+}
+
+export function restoreResultEditProgressEvents(value: unknown): ResultEditProgressEvent[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .slice(-30)
+    .flatMap((item) => item && typeof item === 'object'
+      ? [parseResultEditProgressEvent(item as Record<string, unknown>)]
+      : [])
+    // intent/plan and an early terminal failure legitimately precede any
+    // ChangeSet, so an empty changeSetId is not evidence of a malformed event.
+    .filter((item) => item.stage && item.status)
+    .sort((a, b) => a.sequence - b.sequence);
 }
 
 export function parseToolCallEvent(obj: Record<string, unknown>): ToolCallEvent {
@@ -283,6 +301,28 @@ export interface StreamChatOptions {
   onLoopIteration?: (info: { loopRunId: string; iterationId: string; sequence: number; decision: string; decisionReasonCode: string; publicConclusion: string; status: string; proposedActionKey: string | null; actionKeyHash: string | null }) => void;
   /** Background task created for this run. Used by the UI to request a real cancellation. */
   onTaskStarted?: (taskId: string) => void;
+}
+
+export async function retryToolSummary(input: {
+  toolJobId: string;
+  projectId: string;
+  conversationId: string;
+  modelPresetId?: string;
+}): Promise<string> {
+  await ensureOnlineOrThrow();
+  const resp = await fetch(getApiPrefix() + '/ai/tool-summary/retry', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    body: JSON.stringify(input),
+  });
+  let body: { content?: string; error?: string; message?: string } = {};
+  try {
+    body = await resp.json();
+  } catch {}
+  if (!resp.ok || !body.content) {
+    throw new Error(body.error || body.message || `HTTP ${resp.status}`);
+  }
+  return body.content;
 }
 
 /**
@@ -651,15 +691,20 @@ export async function ackAct(
 // TOOL_JOB_APPROVAL_v1（阶段2 Task3）：重操作 run_tool 确认/取消。
 // approve=true 落 ack_status=approved，agent 下轮重调 run_tool(ackToken) 续跑；
 // approve=false 落 rejected，agent 收到 user_rejected 取消。
-export async function ackRunTool(token: string, approve: boolean): Promise<void> {
-  if (!token) return;
+export async function ackRunTool(
+  token: string,
+  approve: boolean,
+  scope: { projectId: string | null; conversationId: string | null },
+): Promise<boolean> {
+  if (!token) return false;
   try {
-    await fetch(getApiPrefix() + '/ai/run-tool-ack/' + encodeURIComponent(token), {
+    const response = await fetch(getApiPrefix() + '/ai/run-tool-ack/' + encodeURIComponent(token), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-      body: JSON.stringify({ approve }),
+      body: JSON.stringify({ approve, projectId: scope.projectId, conversationId: scope.conversationId }),
     });
+    return response.ok;
   } catch {
-    // best-effort
+    return false;
   }
 }

@@ -18,7 +18,8 @@
       "KEGGREST": ">=1.50.0",
       "ggplot2": ">=4.0.0",
       "jsonlite": ">=1.8.0",
-      "base64enc": ">=0.1-3"
+      "base64enc": ">=0.1-3",
+      "png": ">=0.1-8"
     }
   },
   "runtime": {

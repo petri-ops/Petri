@@ -1,6 +1,6 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-07-25
+最后更新：2026-08-04
 
 ## 1. 恢复顺序
 
@@ -27,9 +27,19 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 
 ## 3. 当前立即任务
 
-### 3.0 当前主线：G0 Living Foundation maintained
+### 3.0 当前主线：G0-RS-UX1H Async Tool Surface
 
-2026-07-25 `G0-START`、LF0～LF12 与 Result Studio RS0～RS9 已关闭。`G0 Baseline v1 / 1.1.0` 已通过 17 类强制证据、10 条零容忍、双真实 Provider、macOS arm64 packaged、5 分钟 soak、基础五态视觉和 Result Studio 五态视觉矩阵，保持 `qualified + maintained`。
+2026-08-06 用户在真实 airway 数据（`tmp/airway-test/airway_counts_symbol.csv` + `airway_metadata.csv`，4 control vs 4 treated，34889 gene rows × 8 sample）上完成开发态 Electron 端到端流程：`run_tool → tool_job → artifact truth → projectOpenResult` 全部成功，1 个 completed DESeq2 Job、Artifact Truth `valid`、同 Job PNG 自动打开。LLM 总结阶段真实 socket timeout 与自动重试结束后，返回对话显示"✓ 工具已完成，AI 总结暂时不可用"，assistant 行不再显示"请求超时"；截图与脱敏证据见 `acceptance/g0-rs-ux1h/`。
+
+这是一个 user-visible 痛点：主 agent 同步流被工具完成后的 AI 总结占用，工具已成功却仍被渲染为"失败"。`G0-RS-UX1H` 计划已创建并激活，SimpleChat 展示分支已完成目标组合实机验证；随后已实现基于精确 `toolJobId` 的 summary-only 重试、历史恢复、运行中最多 5 条自动排队发送，以及“工具完成、总结失败”时 durable loop 的 completed 收敛。重试接口只读取当前 user/project/conversation 下 completed + Artifact Truth valid 的 ToolJob，不注册工具，并把新总结持久化到原会话。2026-08-06 晚，上述新增实现（`7e02f07`/`de83c58`）已经 `npm run g0:result-studio:ux1h` 全门验证通过（syntax + Node/前端 24/24 + strict TypeScript + 真实 Electron 验收链 EXIT=0）；注意该门禁需 `env -u ELECTRON_RUN_AS_NODE ELECTRON_DISABLE_SANDBOX=1` 与系统 Node 23。**下一步是 UX1H 最后一个大阶段：task"工具完成、总结分离"终态设计**（主线已否决强行切断总结流——cancel 会把会话写成 `cancelled` 并破坏 Job/Artifact Truth）；第三份证据 `retry-summary-does-not-rerun-tool.json` 已于 2026-08-09 在开发态 macOS 实机（`env -u ELECTRON_RUN_AS_NODE ELECTRON_DISABLE_SANDBOX=1`，系统 Node 23, better-sqlite3 ABI 131）真实 Electron 跑通产出（`passed:true`，§4.2 A-7 闭合）；但完整 async surface（终态分离设计实现化）仍未完成，故 UI-126 和工作包仍保持 `in_progress/active`，不宣称完整收口。范围仍限定在该计划，**不开 P7-F**，不引入 subagent 池，不创建 Git Worktree。Canonical 计划见 [`g0-rs-ux1h-async-tool-surface.md`](./g0-rs-ux1h-async-tool-surface.md)；已登记 `DOC-REGISTRY.json` 的 `G0-RS-UX1H` 条目并占用 `g0-current-work-package` truthDomain。上一份 `G0-SDC / SDC1-A Data-to-first-result` 保持 `completed`，SDC-1 其余范围、SDC-2～SDC-7 与 P7 继续 deferred。
+
+UI-108 / UI-109 / UI-113 / UI-114 仍维持 `in_progress`；本计划不冒充其 `verified`。`qualificationEligible:false` 不升级。
+
+验证节奏按用户裁决采用风险驱动：开发中只跑语法与受影响单测；真实数据 Electron 长链仅在阶段收口运行一次，除非产品行为或验收脚本发生实质变化，不重复消耗长链窗口。
+
+### 3.0 历史主线：G0 Living Foundation maintained
+
+2026-07-25 `G0-START`、LF0～LF12 核心资格已关闭并进入 maintained。Result Studio RS0～RS8 的引擎基础存在，但后续产品复核确认 RS9 的第 17 类证据不能证明连续真实产品任务；`result-studio-editing` 支持声明暂停，当前状态为 `P7 deferred / implemented_unverified / experimental`。
 
 G0 资格只覆盖 Support Matrix 明示范围，不覆盖 Windows/Linux/macOS x64、任意插件或任意科学任务。永久 `g0:qualification` 与 LF11 requalification 继续优先；任何触发器缺少新证据时 fail-closed。
 
@@ -37,7 +47,43 @@ LF12 完成记录为 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseli
 
 2026-07-24 后续治理收口：新增文档生命周期治理层（[`document-governance.md`](./document-governance.md)、[`worktree-governance.md`](./worktree-governance.md)、[`DOC-REGISTRY.json`](./DOC-REGISTRY.json)、`scripts/docs-governance.mjs`、`npm run docs:status|check|reconcile`，`docs:check` 已接入根 `npm run check`）；注册表中 `G0-LF12` 已收口为 `completed / canonical:false`，释放 `g0-current-work-package` truthDomain。干净 checkpoint 为 `38d3de2`（已推送，工作区 clean）。
 
-Result Studio 工作包已收口，仍由主工作区分支 `codex/g0-result-studio` 承载最终提交；本轮未创建 Git Worktree。当前没有第二个 active 工作包，`G0-SDC` 仅为下一候选且尚未启动。
+Result Studio 旧实现的 11 个提交已于 2026-07-25 fast-forward 合并并推送至 `main`，检查点为 `03e5826`。SDC-0 已在 `codex/g0-sdc` 的 `7284921` 完成并推送；当前单线实现分支为 `codex/g0-result-studio-product`，从该检查点创建，不使用 Git Worktree。G0-CHF0 已在实现检查点 `41a365f` 完成 CHF0-R1～R5 审计修复并重新真实收口；P4R-3 实现检查点为 `3d3eb29`、P4R-4 为 `f710261`、P4R-5 为 `f5c50db`，P4R-6 实现为 `cb73132`、runtime evidence 为 `c449e57`、product closeout 为 `252e806`。P5 实现检查点为 `e7f271c`，source-bound 证据为 `acceptance/g0-result-studio/rs-p5-scientific-editing.json`（20/20，`sourceCommitMatchesSourceHashes:true`）。P6-0 已于 2026-07-31 以 `acceptance/g0-result-studio/rs-p6-ui110-electron-scientific-trace.json` 完成 UI-110 的 source-bound Electron trace，证据绑定 `6f5271e`，UI-110 仅在该开发态 Electron 边界内为 `verified`。
+
+P6-1 已于 2026-08-02 在 `ad1e2ce` 收口，canonical evidence `acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json` 为 10/10、source-bound、`qualificationEligible:false`。真实本地矩阵覆盖停止、R/validator 失败、精确进程组中断、Electron/owned backend 重启、drift、GC、并发候选与资源压力；开发态 Electron 恢复 15/15 且低于 5 秒，实际读取 10 万行表、复杂 SVG/PNG、长报告与 100+ 版本。201 条 synthetic Revision 只是 alias 压力，开发态冷启动首画布预算为 1500ms。2026-08-03 用户裁决将 P7 发布级重新资格后移；Result Studio 保持 `implemented_unverified / experimental`，真实 Provider、packaged Electron、literal OS reboot、明暗/尺寸资格矩阵均未证明。
+
+P7 延期检查点：`e14a8e6` 已完成 existing Git 持久显式 opt-in 后端安全修复；`6dc3880`/`1bb295c` 已使资格器在没有可解引用 task-local fact bundle、独立 replay、唯一截图和重算不变量时 fail-closed；Agent 结果动作 completion 修复保留。没有生成 canonical P7 PASS evidence。selection→enrichment 当前是 direct Job + auto-adopted baseline，不满足 candidate/compare/lifecycle，必须作为未来产品缺口修复，不能由 harness 伪造。
+
+当前分支为 `codex/g0-result-studio-product`。`G0-RS-UX1A`～`UX1G-2` 与短 Goal `G0-RS-TL1 / UI-120` 均已完成；当前唯一 active 增量为 `G0-RS-UX1H / UI-126`，其目标组合已实机通过但计划尚未收口。UX1G-1 已把 `conversation_id` 从受信 Agent 上下文贯通到 ToolJob、审批、ScientificTask/Workflow、插件执行/重试、Result Studio 派生执行及 Jobs 历史 API；UX1G-2 在此基础上补齐当前会话的顶部多分析结果入口与精确 Job 切换，Job 变化会原子清除旧 Artifact，迟到的结果响应和深链查询均不可覆盖新导航，其他会话和 legacy null Job 不混入。聚焦前端 46/46、受影响 Node 125 pass / 1 live skip、strict TypeScript 与开发态 browser/Electron 真实双 Job 核对通过；不改 Result Viewer、科学算法或 P7 资格。
+
+验证边界：UX1F 原聚焦前端 51/51；真实图形补验修复后聚焦前端 44/44、Result Studio 前端聚合 199/199、TypeScript、UI/docs 门禁与开发态 Electron 通过。同一真实新 volcano Job `job_41578fbc4c6f4577` 覆盖正式 PNG 完整首屏、25 点交互往返和结果态无版本大面板。TL1 新增 TitleBar 11/11 与 Electron/preload 6/6；Darwin arm64 开发态真实窗口覆盖最大化/还原、最小化、双击隔离、缩放、明暗、约 1050/840/720px、Cmd+M/W、自绘关闭及 owned 服务退出/重启。ScreenCaptureKit `-3811` 使 840/720 像素截图与拖拽绝对 frame 位移不可用，AX 功能/可达性与 134px 几何测试仍通过。UI-120 仅在该开发态边界为 `verified`。`npm run test:changed` 仍会因 P6 历史 evidence 绑定 `ad1e2ce` 而在 `p6_current_source_tree_not_exact` 处 fail-closed；TL1 未运行 `g0:result-studio:p6:update`，不得把旧证据改绑当前源码。
+
+`G0-RS-P0` 已完成资格纠偏：Baseline patch 为 1.1.1，LF12 核心 16/16 evidence 继续 qualified + maintained；`result-studio-editing` 为 experimental/excluded，旧 RS9 product/provider/visual/table-seed 为 non-qualifying historical evidence。Product Trace v1 要求 14 步连续来源证据并拒绝人工布尔值、提示词指定 JSON、测试摘要和常量不变量。证据位于 `acceptance/g0-result-studio/rs-p0-{truth-correction,ui-baseline}.json`。
+
+`G0-RS-P1 Result Surface` 已于 2026-07-25 收口：中央 `ResultStudioCanvas`、紧凑 Inspector/ContextBar、六类 viewer adapter、受控 Artifact URL、无损 Agent 会话投影与 1440/1024/820px 响应式布局已进入同一 `ProjectWorkspace` 状态机。真实开发态 renderer 证据位于 `acceptance/g0-result-studio/rs-p1-result-surface.json`；该证据不升级产品资格。
+
+`G0-RS-P2 Scientific Interaction + SelectionContext` 已于 2026-07-25 收口：完整表权威排序/过滤、18 行视口虚拟化、行列与 query 全选、scatter point/region/legend、matrix gene/sample 选择及缺 mapping 只读均进入同一 Result Studio viewer；持久 selectionId、显式 ID hash 或 query/filter+hash 贯通 Canvas、Inspector、Agent composer 和 SQLite，只有 compatible 选择进入 Agent 上下文。真实 admitted 链为 valid DESeq2 25 Artifact → 3 gene SelectionContext → 独立 R 脚本/参数/gene-list → valid GO/KEGG 36 Artifact，且选择创建早于当前 r-server 进程并成功恢复。10 万行 scroll/select/sort/filter renderer 反馈均低于 100ms；明暗 × 1440/1024/820 六格恢复 3 个勾选且无页面溢出。证据位于 `acceptance/g0-result-studio/rs-p2-{live-observation,ui-observation,scientific-interaction}.json`，为 non-qualifying P2 evidence。日常开发改用 `npm run g0:result-studio:p2:update|p2` 自动验收，Electron/真实 Provider 留给所属阶段出口。
+
+`G0-RS-P3 Agent Context 与 Edit Orchestration` 已于 2026-07-25 完成实现（`implemented_unverified`）：`core/shared-backend/result-studio-context.js` 建立 `ResultStudioContextEnvelope v1` 与 `contextToken`，覆盖 artifact/family、job、revision（含 current 与 ordinal）、脚本相对路径与 sha256、参数摘要、插件可编辑参数与声明动作、selection、validation、reproducibility、workflow 及五阶段公开词表。`core/r-server/agent-tools/result-context-tools.js` 只把前端 `activeArtifact` 当线索，坐标全部从 SQLite/`tool_jobs`/插件 descriptor 重新解析；`result-context-edit-tools.js` 提供 context-bound plan/create/status/compare/adopt/revert 并复用既有 `result-changeset-service` 与 `result-compare-service`，未建立第二套执行真相。模型可见 schema 新增 7 个工具（注册表共 32 个），其中 6 个 `*_in_context` 工具参数不含 toolJobId/artifactId/revisionId/artifactFamilyId/selectionId；系统提示描述当前结果但不写入任何内部 ID，并禁止向用户索要 ID。写操作强制校验 token，陈旧返回 `context_token_stale`，intent 指向别的 Revision 返回 `context_intent_mismatch`；"归因只能到 Job"、跨项目 revision、未打开结果一律 fail-closed。`GET /api/result-studio/context-envelope` 与前端 `fetchResultStudioContext` 共用同一投影，Inspector 的 `ResultStudioContextReadiness` 如实显示 loading/blocked/ready。证据 `acceptance/g0-result-studio/rs-p3-agent-context.json`（20/20，`qualificationEligible: false`，离线契约/注册表/提示词/strict build）；门禁 `npm run g0:result-studio:p3[:update]` 已接入 `g0:result-studio:acceptance` 与根 `check`。P3 验收要求的双真实 Provider tool calling、真实候选 Revision 与重开重建复验尚未执行，UI-108 保持 `in_progress`。
+
+`G0-RS-P4 Core Manual + AI Unified Editing` 已于 2026-07-26 形成稳定实现检查点（`implemented_unverified`）：`core/shared-backend/result-edit-controls.js` 从插件 descriptor 的 `parameters` + `parameterImpacts` 投影控件，不为任何插件手写孤立结果页；缺 impact 声明的参数不提供控件，只有 presentation 组允许标注"不改变科学结论"。`volcano-plot` 的 descriptor 与 `scripts/volcano-plot.R` 补齐配色（`color_up`/`color_down`/`color_ns`）、字体（`base_font_size`/`label_size`）、尺寸（`point_size`/`plot_width`/`plot_height`）、图例（`legend_position`）、标签（`plot_title`）与导出（`export_dpi`）共 12 个 presentation 参数——此前这些全是 R 脚本硬编码；阈值与分类逻辑仍只由 `fc_threshold`/`pval_threshold` 决定。`normalizeEditSubmission` 是手动控件与 AI 提议的唯一归一化闸门，随后共用 `ResultEditIntent → ScientificChangeSet`，validation/preview/compare/adopt/revert 只有一条路径；类型/范围/枚举 fail-closed 拒绝，未声明参数记为 rejected，与当前生效值相同的提交不产出 patch。影响分级只能由受信 descriptor 提升，保护字段只作影响下限。`currentValues` 取自 Job 的真实 `executionProvenance.params.normalized`；`ResultEditPanel` 只发出编辑请求，不写文件也不覆盖 current Revision。证据 `acceptance/g0-result-studio/rs-p4-unified-editing.json`（18/18，`qualificationEligible: false`，离线 descriptor 投影/插件接线/注册表/strict build）；真实手动/AI 候选等价链尚未执行，UI-109 保持 `in_progress`。
+
+P4 Core 已于提交 `e0a4c7d` 形成可恢复检查点，四份历史审计于 `e38d6b5` 无损归档。2026-07-26 仓库静态审计随后确认：默认必读仍包含大量已完成材料，`AUDIT-LOG`/`CLAUDE.md` 膨胀，65 个脚本和 145 个 npm 命令缺少机器分层，定向测试仅有文字纪律，`tmp` 有 2013 个残留文件且测试依赖本机绝对路径。`G0-RS-RH0 Repository Hygiene Gate` 已完成上述收口并通过最终基线，治理提交为 `95a7fe3`、`041e32e`。
+
+RH0 已完成：Truth Snapshot → Hot Context → Test Impact → Script/Temp Lifecycle → Acceptance 全部收口。`test/impact-map.json` 与 `scripts/test-affected.mjs` 现在提供确定性定向测试，未知映射 fail-closed；RH0 不删除 Acceptance 证据、不修改科学或执行真相、不创建 Worktree。P4R-0～P4R-6、P5 与 P6 的实现检查点继续保留；P7 已于 2026-08-03 延期，真实 Provider、packaged Electron、literal OS reboot 和资格重新裁决均未完成，也不再占用当前 active 工作包。
+
+P4R-5 收口事实：Revision source projector、Result/Code 路由、复制/下载/项目内打开门控、Agent 点击时 contextToken 绑定、历史版本脚本隔离以及缺失/越界/hash/commit/plugin/input/跨项目 fail-closed 已落地。对 `reproduction.replayable` 的 Revision 提供服务端两阶段 replay：预检重读 Git/SQLite/Job/Artifact Truth，确认后只走注册工具执行链并创建非 current 候选；不接受调用方 toolId、params、script、command、shell 或 workflowPlan，重复确认只返回同一候选，材料不足明确 `unavailable`。四类真实 completed Job（DESeq2、standalone volcano、gene-correlation heatmap、go-kegg GO-BP）exact source observation 为 4/4，source-bound 到 `f5c50db`；其中 volcano/heatmap replayable，DESeq2/GO-BP unavailable，真实 replay E2E 覆盖 standalone volcano。P4R 为 7 条核心不变量 + 1 条显式 skip guard（本机 8/8），P4R-5 Node 15/15；source-bound product runner 为前端 114/114、Node 137/137，umbrella 前端 151/151，P4R product 17/17。`qualificationEligible:false` 与 UI `in_progress` 不变。
+
+P4R-6 收口事实：持久 background child 重读 Project/Job/Artifact Truth、SQLite file 和 canonical Git/SQLite 服务，超时/关闭时隔离、排空或终止其进程树。性能 evidence 14/14（event-loop 19.661ms ≤ 250ms）；live chain 与同一 Electron BrowserWindow 的 UI 矩阵均 source-bound、脱敏且通过。其边界不变：deterministic context-bound Agent invocation，不是 Provider；开发态 Electron，不是 packaged；`qualificationEligible:false`。
+
+P4R-3 收口事实：中央结果焦点中的 `ResultAgentComposer` 是默认编辑入口，右栏 `ResultEditPanel` 仅作为默认关闭的高级抽屉；草稿与 contextToken 按 project/conversation/Artifact/Revision/Selection 隔离。前端只保存用户原始目标，可见消息不夹带工具编排。后端 task/legacy 共用 token 投影、五阶段 recorder 与 terminal finalizer；context-bound create 只执行同一 Agent turn 中服务端保存的原始 intent，stale selection、分类/确认篡改、任意 script patch 与模型提供 DAG 全部拒绝。科学/数据/流程修改在没有权威持久 DAG 时明确阻断。专项 76/76 Node、134/134 frontend；affected 700/700 Node、102/102 related frontend；P2 17/17、P3 20/20、P4 18/18、P4R-performance 13/13、P4R-product 10/10。所有新证据都有 `sourceCommitMatchesSourceHashes:true`，仍不升级产品资格或 UI `verified`。
+
+P4R-4 收口事实：Result / Compare / History 为真实互斥中央模式；Code 已由后续 P4R-5 接入。历史查看是前端可丢弃 state，主体、interaction、Selection 与 contextToken 均绑定显式 Revision；不移动 current、不切换 active Job、不调用写 API，首次 GET 不写 SQLite、不创建 managed Git。版本角色来自项目/family-scoped Revision + ChangeSet truth 并支持分页；审查摘要来自服务端受信持久元数据，Git 详情默认折叠。adopt/revert/restore 的 checkpoint 与 SQLite/Git 同退，参数/source commit/parent family/project 漂移 fail-closed。实现检查点 `f710261`；focused frontend 104/104、affected Node 258/258、related frontend 48/48、P4R product 13/13，P2/P3/P4/P4R 五份 evidence 全部绑定该提交。UI-113/UI-114 保持 `in_progress`，资格不升级。
+
+`SDC-0 Profile Registry 与版本治理` 已于 2026-07-25 收口：`core/shared-backend/artifact-profiles.js` 从单个 DEG 种子升级为正式 Registry，落地 `biof3.counts-matrix.v1`、`biof3.sample-metadata.v1`、`biof3.expression-matrix.v1`、`biof3.deg.v1`、`biof3.gene-list.v1`、`biof3.enrichment-table.v1` 六个 canonical Profile，并区分 data / artifact / display 三类 Profile Kind。新增 profile 身份解析、registry 校验、contract digest、compatible/migration/breaking 变更分级和 fail-closed 兼容判定；`core/shared-backend/agent-workflow.js` 对未注册 Profile 返回 `unregistered_artifact_profile`，使其无法成为 typed DAG 正式边。`biof3.deg.v1` 及其 legacy alias（含 `log2FC → log2FoldChange`）保持向后兼容，未创建第二套执行真相。
+
+SDC-0 证据与门禁：`acceptance/g0-scientific-data-contract/profile-registry.json`（10/10，锚定 `03e5826`）、`test/g0-sdc0-profile-registry.test.mjs`（7/7）、`scripts/g0-sdc0-profile-registry-acceptance.mjs`，命令 `npm run g0:sdc0`（含 `g0:sdc0:test`）已挂入 `postcheck`。实测 `npm test` 1339 pass / 0 fail / 11 skipped，`npm run check` 全绿（末尾 `[G0-SDC0] PASS — 10/10`）。SDC-0 只完成离线契约层，真实不规则数据端到端产品验收属于 SDC-7，不得由本阶段冒充。
+
+`G0-SDC / SDC1-A Data-to-first-result` 已于 2026-08-04 收口，实现检查点 `bd15777`。`.csv/.tsv/.txt` 导入当前项目 `data/`，产生绑定完整 SHA-256 的有界只读 Observation，仅将 counts/metadata 显示为候选并交给现有 Agent；首个科学结果仍只由 `run_tool → tool_job → artifact truth → projectOpenResult` 产生和打开。`npm run g0:sdc1:update` 已在空 disposable 账本中验证真实导入、科学确认、1 个 completed DESeq2 Job、有效 Artifact Truth 与同 Job 非空 PNG 自动打开；证据见 `acceptance/g0-scientific-data-contract/data-to-first-result.json`，source-bound 且 `qualificationEligible:false`。当前没有 active 工作包；SDC-1 其余范围、`SDC-2`～`SDC-7` 与 P7 继续 deferred。
 
 已收口阶段：
 
@@ -56,7 +102,7 @@ RS2 实测修正的两个真实缺陷：其一，`canTransitionChangeSet()` 返�
 
 migration 现状更正：RS0 审计称 `src/migrations/` 只有 `.gitkeep`，实际该目录**根本不存在**，`runMigrations()` 因 `readdirSync` 抛错走 catch 分支静默返回，从未真正执行过。RS2 已建立该目录与首个 migration，并用 `test/result-studio-migration.test.mjs` 覆盖空库首装、重复执行幂等、已有库升级不动现有表、坏 SQL 事务回滚且不记版本、缺目录静默 no-op、`BIOF3_BETTER_SQLITE3_ROOT` ABI 路径，以及 `.sql` 与 schema 模块逐字节一致。
 
-- `G0-RS3` Artifact Interaction 与 Selection Context —— 新增 `core/shared-backend/artifact-interaction.js`（稳定实体 ID 判定、表格/图形交互清单、选择解析与有界 Agent 摘要）、`core/r-server/routes/result-studio.js`（6 个端点）、`frontend/src/lib/artifact-selection.ts`（前端选择语义镜像层）。`ActiveArtifact` 已从文件级升级为 revision / semantic / selection-aware。聚合门禁 `npm run g0:result-studio` 实测 104/104（git 24 + contract/repository 45 + migration 9 + interaction 26），前端 246/246，已接入根 `npm run check`。台账登记为 `UI-102`（`in_progress`，待实机）。
+- `G0-RS3` Artifact Interaction 与 Selection Context —— 新增 `core/shared-backend/artifact-interaction.js`（稳定实体 ID 判定、表格/图形交互清单、选择解析与有界 Agent 摘要）、`core/r-server/routes/result-studio.js` 与 `frontend/src/lib/artifact-selection.ts`；`ActiveArtifact` 从文件级升级为 revision / semantic / selection-aware。该阶段建立的契约基础已由 `G0-RS-P2` 完成真实表/图交互、耐久恢复、下游链和视觉/性能复验，UI-102/UI-107 现按 P2 窄范围 `verified`，不外推 P3～P7。
 
 RS3 已固化的边界：交互清单只能由**后端基于完整文件**产出，浏览器侧 40 行预览样本（`buildPreviewTable`）无权判定稳定 ID 列，前端只消费不自建第二套判定；`idStrategy='positional'` 时 `selectionDurable` 必须为 false，绝不把行号伪装成实体身份，且交互能力里不含 `row_select`；声明的 ID 列若在抽样中实测不唯一则拒绝采用并回退 positional，不产出错误的实体映射；超过阈值的选择以 `filterExpression` + hash 为权威表达，`entityIds` 只作抽样证据，计数如实反映真实规模；给 Agent 的摘要恒定有界且不可持久时必须带 caveat。
 
@@ -72,7 +118,9 @@ RS3 实测修正的三个真实缺陷：其一，我在路由里使用了 `app.l
 
 `G0-RS8` 已收口：每个 ChangeSet 阶段持久化 WorkspaceCheckpoint；重启后只在 candidate ref、Revision、completed Job 与 valid Artifact Truth 全部一致时自动恢复 preview。Git/SQLite/Artifact 漂移分类为自愈或阻断；存储摘要、content-addressed hardlink 去重和 plan-token GC 均不删除正式 Artifact/Revision 历史。大表通过 1 MiB 有界 byte cursor 渐进加载，preview Job 受真实资源快照和并发预算约束且不修改科学参数。UI-105 功能完成但待 RS9 真实重启/大表/视觉矩阵，保持 `in_progress`。下一阶段：`G0-RS9` 真实产品验收与基线晋升。
 
-`G0-RS9` 已收口：资格判定器要求 5/5 科学任务、9/9 环境、7/7 证据类型和 2/2 真实 Provider 类同时通过。隔离真实 renderer 覆盖明暗、宽屏、820px、五万行 DEG 表与服务中断/重启；五万行仅渲染 24 个可见行，820px 无页面横向溢出，重启后候选 ChangeSet/Revision/存储摘要仍恢复。`result-studio-editing` 已从 excluded claim 晋升为 qualified support claim，新增第 17 类 mandatory evidence；G0 兼容升级到 v1.1.0。UI-102/UI-103/UI-105 均有 RS9 真实矩阵并标记 `verified`。证据位于 `acceptance/g0-result-studio/rs9-{product,provider,visual}-acceptance.json` 与 `rs9-ui/`。
+`G0-RS9` 历史实现保留，但资格结论已撤销：复核确认 5 条任务由独立单测/fixture/截图拼装，Provider 探针没有执行真实 Result Studio tool calling，大表由 seed 直接构造数据库记录，视觉脚本主要消费人工 inspection 布尔值。证据继续位于 `acceptance/g0-result-studio/rs9-{product,provider,visual}-acceptance.json` 与 `rs9-ui/`，但只按 unit/synthetic/renderer historical evidence 使用。UI-102/UI-103/UI-105 回退 `in_progress`；UI-104 仅保留窄范围版本操作验证。
+
+Result Studio 新顺序为 `RS-P0 Truth Correction → P1 Result Surface → P2 Scientific Interaction → P3 Agent Context → P4 Core Unified Editing → RH0 Repository Hygiene Gate → P4R Product Reframe → P5 Real Scientific Editing → P6 Durability & UX → P7 Requalification`。完整范围和阶段验收见 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) §22～§26。
 
 ### 3.1 已完成基线：真实科学任务驱动的 Harness 升级
 
@@ -193,6 +241,7 @@ Stage 3 已完成 GO/KEGG、GSEA、WGCNA 与 capability bundle 自动 provision 
   - 项目提示词的实时资源快照只包含当前项目；删除项目会同步清理该项目的向量、事实、摘要、会话和消息，删除单个会话会同步清理其向量记忆。
   - 隔离门禁：`test/project-memory-isolation.test.mjs` 覆盖 A/B/全局三作用域对撞，`test/project-memory-migration.test.mjs` 覆盖旧向量安全回填。
 - 已注册 DeepSeek、OpenAI、OpenAI-compatible、Ollama、LM Studio、vLLM、Anthropic、DashScope embedding/vision；Anthropic 使用原生 Messages/stream/tool 协议适配。
+- 2026-08-04 设置页已把协议与供应商分离：用户协议只有 OpenAI 和 Anthropic，DeepSeek/BioF3 等是可编辑供应商名；新渠道由用户显式填写 Base URL。旧 DeepSeek profile 读取时无损归一为 OpenAI-compatible，保留模型、Key 引用与原地址；协议切换隔离凭据并淘汰迟到的旧模型发现响应。开发态 Electron 已核对六列布局、两个协议选项、新渠道空 URL 和旧 DeepSeek 配置保留；真实 Anthropic Key 连通尚未复验，因此 UI-124 保持 `in_progress`。
 - 多模型角色绑定覆盖 chat、agent、planner、vision、embedding、summary、report、explanation；能力不匹配在调用前阻断。
 - fallback 默认关闭，仅在用户显式开启并逐角色配置候选时对可重试错误切换；401、缺 Key、取消和已经输出部分流内容时不切换，切换原因写入事件/日志。
 - API Key 已从普通设置与读取 IPC 分离：macOS Keychain，其他平台独立 0600 凭据文件；旧字段自动迁移。一个兼容 Provider 可通过不同 credential reference 使用多套 Key。
@@ -221,8 +270,8 @@ Stage 1 已完成。Stage 2 的模型管理 UI 复用现有设置分类；结果
 
 当前已完成：
 
-- macOS 顶栏改为单一几何基准：`hiddenInset` 保留系统原生交通灯，不再设置 `trafficLightPosition`，不再用局部 `translateY` 互相补偿。
-- 标题栏高度统一为全局 `--biof3-titlebar-height: 38px`；TitleBar、工作区可用高度和 Desktop Dock 共用该变量。
+- macOS 顶栏采用单一物理几何基准：`hiddenInset` 保留系统原生交通灯，`trafficLightPosition` 绑定 38px 轨道中心；TitleBar 不再用局部 `translateY` 互相补偿。
+- 标题栏视觉高度统一为全局 `--biof3-titlebar-height: 38px`；TitleBar、工作区和 Desktop Dock 共用该变量并随 renderer 同步缩放，主进程按 zoom factor 动态调整 macOS 原生按钮的纵向中心。
 - 关闭最后一个 BioF3 窗口会退出整个应用；开发启动器会清理 Vite/Electron 子进程树，主进程同时停止 R/Python/Plumber 和集成终端。
 - 加入单实例保护；重复打开只聚焦已有窗口，不启动第二套本地后端。
 - R Server/Python Server/Plumber 保留 `3001/3004/8787` 为首选端口；如被其他程序占用，自动选择系统空闲端口，并通过 preload 安全桥传给前端，不杀占用者。

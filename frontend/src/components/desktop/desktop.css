@@ -544,7 +544,7 @@
 
 .biof3-endpoint-card {
   display: block;
-  min-width: 880px;
+  min-width: 1040px;
   padding: 0;
   background: transparent;
 }
@@ -553,7 +553,8 @@
 .biof3-endpoint-card__grid {
   display: grid;
   grid-template-columns:
-    minmax(112px, 0.8fr)
+    minmax(132px, 0.9fr)
+    minmax(112px, 0.75fr)
     minmax(240px, 2fr)
     minmax(176px, 1.25fr)
     minmax(180px, 1.25fr)
@@ -564,7 +565,7 @@
 }
 
 .biof3-endpoint-list-header {
-  min-width: 880px;
+  min-width: 1040px;
   padding: 0 0 6px;
   color: var(--biof3-text-tertiary);
   font-size: 0.66rem;

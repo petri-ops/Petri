@@ -1,10 +1,20 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const { reconcileArtifactTruth } = require('../helpers/artifact-truth');
+const {
+  STAGED_INPUT_EXCLUSION_POLICY,
+  reconcileArtifactTruth,
+} = require('../helpers/artifact-truth');
 const { publicRecoveryParams } = require('../helpers/harness-workflow-recovery');
 
 function selectArtifactResultDir({ job, result, jobsDir = '' } = {}) {
+  const persistedResultDir = result?.artifactTruth?.resultDir;
+  if (persistedResultDir) {
+    try {
+      const persisted = path.resolve(persistedResultDir);
+      if (fs.existsSync(persisted) && fs.statSync(persisted).isDirectory()) return persisted;
+    } catch {}
+  }
   const bases = [
     result && result.resultDir,
     result && result.outputDir,
@@ -17,7 +27,9 @@ function selectArtifactResultDir({ job, result, jobsDir = '' } = {}) {
     try {
       if (!fs.existsSync(candidate) || !fs.statSync(candidate).isDirectory()) return null;
       const files = fs.readdirSync(candidate, { withFileTypes: true }).filter((entry) => entry.isFile());
-      const score = (files.some((entry) => entry.name === 'manifest.json') ? 1000 : 0) + files.length;
+      const score = (files.some((entry) =>
+        entry.name === 'manifest.json' || entry.name === 'artifact-manifest.json'
+      ) ? 1000 : 0) + files.length;
       return { candidate, score, fileCount: files.length };
     } catch {
       return null;
@@ -58,11 +70,58 @@ async function reconcileToolJobArtifacts({ job, db, jobsDir = '' }) {
   const hydrated = diskManifest
     ? { ...diskManifest, ...stored, manifest: diskManifest }
     : stored;
-  const truth = reconcileArtifactTruth({
+  const hasPersistedInputExclusions =
+    stored.artifactTruth?.exclusionPolicy === STAGED_INPUT_EXCLUSION_POLICY
+      && Array.isArray(stored.artifactTruth.excludedInputNames);
+  const exclusionRootMatches = hasPersistedInputExclusions
+    && typeof stored.artifactTruth.resultDir === 'string'
+    && path.resolve(stored.artifactTruth.resultDir) === path.resolve(resultDir);
+  const trustedExcludedArtifactNames = exclusionRootMatches
+      ? stored.artifactTruth.excludedInputNames
+      : [];
+  const integrityRootMatches = typeof stored.artifactTruth?.resultDir === 'string'
+    && path.resolve(stored.artifactTruth.resultDir) === path.resolve(resultDir)
+    && ['verified', 'mutated'].includes(stored.artifactTruth.stagedInputIntegrity)
+    && Number.isInteger(stored.artifactTruth.stagedInputSnapshotCount)
+    && stored.artifactTruth.stagedInputSnapshotCount >= 0;
+  let truth = reconcileArtifactTruth({
     result: hydrated,
     resultDir,
     expectedArtifacts: expectedArtifactsFor(job.tool_id),
+    trustedExcludedArtifactNames,
+    trustedStagedInputVerification: integrityRootMatches
+      ? {
+          integrity: stored.artifactTruth.stagedInputIntegrity,
+          snapshotCount: stored.artifactTruth.stagedInputSnapshotCount,
+        }
+      : null,
   });
+  if (hasPersistedInputExclusions && !exclusionRootMatches) {
+    const driftIssue = {
+      code: 'artifact_truth_result_dir_drift',
+      severity: 'error',
+      recoverable: true,
+      required: true,
+      artifactId: null,
+      artifactName: null,
+      message: 'Artifact Truth result directory changed; staged-input exclusions cannot be reused across roots.',
+      suggestedFix: '恢复原结果目录，或从受信执行路径重新运行该任务。',
+    };
+    const issues = [...truth.issues, driftIssue];
+    const artifactTruth = {
+      ...truth.artifactTruth,
+      status: 'blocked',
+      blocking: true,
+      issueCount: issues.length,
+    };
+    truth = {
+      ...truth,
+      blocking: true,
+      issues,
+      artifactTruth,
+      result: { ...truth.result, artifactTruth, artifactDiagnostics: issues },
+    };
+  }
   const nextStatus = truth.blocking && job.status === 'completed' ? 'failed' : job.status;
   const nextError = truth.blocking
     ? truth.issues.filter((issue) => issue.severity === 'error').map((issue) => issue.message).join('; ')
@@ -70,12 +129,22 @@ async function reconcileToolJobArtifacts({ job, db, jobsDir = '' }) {
   const previousSignature = JSON.stringify({
     status: stored.artifactTruth && stored.artifactTruth.status,
     validCount: stored.artifactTruth && stored.artifactTruth.validCount,
+    resultDir: stored.artifactTruth && stored.artifactTruth.resultDir,
+    exclusionPolicy: stored.artifactTruth && stored.artifactTruth.exclusionPolicy,
+    excludedInputNames: stored.artifactTruth && stored.artifactTruth.excludedInputNames,
+    stagedInputIntegrity: stored.artifactTruth && stored.artifactTruth.stagedInputIntegrity,
+    stagedInputSnapshotCount: stored.artifactTruth && stored.artifactTruth.stagedInputSnapshotCount,
     issues: stored.artifactDiagnostics || [],
     artifacts: (stored.artifacts || stored.files || []).map((item) => item && (item.name || item.filename)),
   });
   const nextSignature = JSON.stringify({
     status: truth.artifactTruth.status,
     validCount: truth.artifactTruth.validCount,
+    resultDir: truth.artifactTruth.resultDir,
+    exclusionPolicy: truth.artifactTruth.exclusionPolicy,
+    excludedInputNames: truth.artifactTruth.excludedInputNames,
+    stagedInputIntegrity: truth.artifactTruth.stagedInputIntegrity,
+    stagedInputSnapshotCount: truth.artifactTruth.stagedInputSnapshotCount,
     issues: truth.issues,
     artifacts: truth.artifacts.map((item) => item.name),
   });
@@ -116,7 +185,8 @@ function createToolsMetadataRoutes({db, getUserId, jobsDir = ''}) {
           status: reconciled.status,
           error: reconciled.error,
           name: job.name,
-          projectId: job.project_id,
+          projectId: job.project_id || null,
+          conversationId: job.conversation_id || null,
           params: publicRecoveryParams(parseJsonMaybe(job.params_json, {})),
           recoveryHistory: parseJsonMaybe(job.params_json, {}).__harnessRecovery || [],
           ackStatus: job.ack_status || null,
@@ -190,7 +260,7 @@ function createToolsMetadataRoutes({db, getUserId, jobsDir = ''}) {
       const uid = getUserId(req);
       if (!uid) return res.status(401).json({error: 'login_required'});
       try {
-        const jobs = await db.prepare('SELECT id, tool_id, status, created_at, completed_at, error, name FROM tool_jobs WHERE user_id = ? AND is_test_run = 0 ORDER BY created_at DESC LIMIT 50').all(uid);
+        const jobs = await db.prepare('SELECT id, tool_id, status, created_at, completed_at, error, name, project_id, conversation_id FROM tool_jobs WHERE user_id = ? AND is_test_run = 0 ORDER BY created_at DESC LIMIT 50').all(uid);
         res.json({ok: true, jobs});
       } catch (e) {
         res.status(500).json({error: e.message});

@@ -98,6 +98,40 @@ export interface CopilotContext {
     type: string;
     label?: string;
     url?: string;
+    revisionId?: string | null;
+    artifactFamilyId?: string | null;
+    entityType?: string | null;
+    idField?: string | null;
+    selectionId?: string | null;
+    selectionCompatibility?: 'compatible' | 'stale' | 'invalid' | null;
+    /** P4R-3 opaque binding; sent in request context, never rendered in chat text. */
+    contextToken?: string | null;
+    selection?: {
+      artifactId: string;
+      revisionId: string | null;
+      entityType: string;
+      origin: string;
+      entityIdCount: number;
+      truncated: boolean;
+      durable: boolean;
+      sampleEntityIds: string[];
+      entityIdsHash: string | null;
+      fields: string[];
+      hasFilter: boolean;
+      filterDescription: string | null;
+      sort: Array<{ field: string; direction: 'asc' | 'desc' }>;
+    } | null;
+  } | null;
+  /**
+   * P4R-3 structured result-edit request. The visible user message remains the
+   * user's own outcome; orchestration instructions are rendered by the backend
+   * system prompt instead of being persisted as a fake user utterance.
+   */
+  resultEditRequest?: {
+    origin: 'manual' | 'agent';
+    completionExpectation: 'candidate' | 'result_action' | 'none';
+    parameterPatch: Record<string, unknown>;
+    scientificConfirmed: boolean;
   } | null;
 }
 

@@ -1042,6 +1042,27 @@
   position: relative;
 }
 
+.workspaceProjectionLayer {
+  display: none;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.workspaceProjectionLayerActive {
+  display: flex;
+}
+
+.resultSurfaceEmpty {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  color: var(--biof3-text-tertiary);
+  font-size: 12px;
+}
+
 /* Left rail — always visible on the left edge of center column */
 .leftRail {
   position: absolute;
@@ -3660,7 +3681,7 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   margin: 0;
   overflow: hidden;
   background: transparent;
-  container-type: inline-size;
+  /* container-type moved to .resultView — see below. */
 }
 
 .resultWorkflowBar {
@@ -3776,6 +3797,32 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   color: var(--biof3-status-error-fg);
 }
 
+.resultWorkflowError > span {
+  min-width: 0;
+  flex: 1;
+}
+
+.resultWorkflowError > button {
+  flex: 0 0 auto;
+  padding: 3px 8px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.resultView button:focus-visible,
+.resultView a:focus-visible,
+.resultView summary:focus-visible,
+.resultView input:focus-visible,
+.resultView select:focus-visible,
+.resultView textarea:focus-visible {
+  outline: 2px solid var(--biof3-accent);
+  outline-offset: 2px;
+}
+
 .resultSidebarReportCard {
   display: flex;
   flex-direction: column;
@@ -3796,8 +3843,8 @@ body.biof3-resizing-columns .rightPanelTabContent iframe {
   height: auto;
   max-height: none;
   overflow: hidden;
-  border-radius: 10px;
-  border: 1px solid color-mix(in srgb, var(--biof3-border) 64%, transparent);
+  border: 0;
+  border-radius: 0;
   background: var(--biof3-bg-surface);
   position: relative;
 }
@@ -3824,9 +3871,15 @@ body.biof3-resizing-columns * {
 }
 
 .resultPreviewImageButton {
-  display: block;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
   width: 100%;
-  padding: 0;
+  height: 100%;
+  min-height: 0;
+  padding: 12px;
+  overflow: hidden;
   border: 0;
   background: transparent;
   cursor: zoom-in;
@@ -4101,15 +4154,27 @@ body.biof3-resizing-columns * {
 
 /* Result view */
 .resultView {
+  /*
+    Establishes the inline-size container that UI-049's fix depends on.
+    That fix collapses .resultScientificDeliveryGrid below 520px via
+    @container, replacing a whole-window @media query that mis-judged a
+    ~340px column. It was verified on .resultSidebarRoot — and then
+    5f3cd5e (G0-RS-P1) moved the result surface to the centre and removed
+    the sidebar mount, leaving the query with no container ancestor on the
+    branch users actually see. The two are sibling returns in
+    ResultArtifactShell, not nested, so nothing inherited it.
+  */
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   height: 100%;
   width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 18px 20px;
+  max-width: none;
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
   min-width: 0;
+  overflow: auto;
 }
 
 .scheduledResultCol .resultView {
@@ -4120,339 +4185,45 @@ body.biof3-resizing-columns * {
   max-width: none;
 }
 
-.resultReportShell {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--result-nav-width, 224px);
-  gap: 10px;
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
-  align-items: stretch;
-  position: relative;
-}
-
-.resultReportNav {
-  position: sticky;
-  top: 16px;
-  align-self: center;
-  height: auto;
-  max-height: min(100%, calc(100vh - 116px));
-  overflow: auto;
-  display: grid;
-  gap: 4px;
-  padding: 10px 2px 10px 8px;
-  border-left: 1px solid rgba(148, 163, 184, 0.18);
-  background: transparent;
-  box-shadow: none;
-}
-
-.resultReportNavToggle {
-  position: absolute;
-  top: 8px;
-  right: 6px;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 8px;
-  background: var(--biof3-surface-translucent);
-  color: var(--biof3-text-secondary);
-  cursor: pointer;
-  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03);
-}
-
-.resultReportNavToggle:hover {
-  background: var(--biof3-bg-surface);
-  color: var(--biof3-text);
-}
-
-.resultReportNavHeader {
-  display: grid;
-  gap: 1px;
-  padding: 0 12px 4px 0;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
-}
-
-.resultReportEyebrow {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--biof3-text-tertiary);
-}
-
-.resultReportTitle {
-  font-size: 11.5px;
-  line-height: 1.15;
-  font-weight: 700;
-  color: var(--biof3-text);
-}
-
-.resultReportNavMeta {
-  display: grid;
-  gap: 0;
-  font-size: 9px;
-  line-height: 1.2;
-  color: var(--biof3-text-tertiary);
-}
-
-.resultReportNavSections {
-  display: grid;
-  gap: 0;
-}
-
-.resultReportNavSection {
-  display: grid;
-  gap: 1px;
-  padding: 1px 10px 1px 0;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
-  border-radius: 0;
-  background: transparent;
-}
-
-.resultReportNavSectionActive {
-  border-left: 2px solid rgba(13, 148, 136, 0.72);
-  padding-left: 6px;
-  background: var(--biof3-accent-surface);
-}
-
-.resultReportSectionButton {
+.resultReportExportLinks {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 4px;
-  width: 100%;
-  padding: 2px 0 2px;
-  border: 0;
-  background: transparent;
-  color: var(--biof3-text);
-  text-align: left;
-  cursor: pointer;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 0;
+  color: var(--text-tertiary);
+  font-size: 11px;
 }
 
-.resultReportSectionButton:hover {
-  color: var(--biof3-accent);
-}
-
-.resultReportSectionTitle {
-  min-width: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 10.5px;
-  font-weight: 700;
-  color: inherit;
-}
-
-.resultReportSectionTitle span:last-child {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.resultReportSectionCount {
-  flex-shrink: 0;
-  min-width: 15px;
-  height: 15px;
-  border-radius: 999px;
-  background: var(--biof3-bg-subtle);
-  color: var(--biof3-text-secondary);
-  font-size: 8.5px;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.resultReportSectionDesc {
-  padding: 0 0 3px 18px;
-  font-size: 8.5px;
-  line-height: 1.2;
-  color: var(--biof3-text-tertiary);
-}
-
-.resultReportActiveCard {
-  display: grid;
-  gap: 1px;
-  padding: 4px 0 0;
-  border-top: 1px solid rgba(148, 163, 184, 0.12);
-  border-radius: 0;
-  background: transparent;
-}
-
-.resultReportActiveLabel {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  color: var(--biof3-text-tertiary);
-}
-
-.resultReportActiveName {
-  min-width: 0;
-  font-size: 10.5px;
-  font-weight: 600;
-  line-height: 1.2;
-  color: var(--biof3-text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.resultReportActiveMeta {
-  display: grid;
-  gap: 0;
-  font-size: 8.5px;
-  line-height: 1.2;
-  color: var(--biof3-text-tertiary);
-}
-
-.resultReportActiveMeta span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.resultReportActiveLink {
-  width: fit-content;
-  margin-top: 1px;
-  font-size: 9.5px;
-  font-weight: 600;
-  color: var(--biof3-accent);
+.resultReportExportLinks a {
+  color: var(--accent-primary);
   text-decoration: none;
 }
 
-.resultReportActiveLink:hover {
-  text-decoration: underline;
-}
-
-.resultReportMain {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
-}
-
-.resultReportArtifactNav {
-  display: grid;
-  gap: 5px;
-  padding: 7px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 12px;
-  background: var(--biof3-surface-translucent);
-}
-
-.resultReportArtifactNavHeader {
-  display: grid;
-  gap: 1px;
-  padding: 0 1px 3px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
-}
-
-.resultReportArtifactNavEyebrow {
+.resultReportTechnicalName {
+  flex-basis: 100%;
+  overflow-wrap: anywhere;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--biof3-text-tertiary);
+  margin: 0;
+  padding: 2px 0 6px;
 }
 
-.resultReportArtifactNavTitle {
-  font-size: 11.5px;
-  line-height: 1.3;
-  font-weight: 700;
-  color: var(--biof3-text);
+.resultReportActionStatus,
+.resultReportActionError {
+  flex-basis: 100%;
+  font-size: 10px;
+  line-height: 1.45;
 }
 
-.resultReportArtifactNavMeta {
-  display: grid;
-  gap: 1px;
-  font-size: 9.5px;
-  line-height: 1.35;
-  color: var(--biof3-text-tertiary);
-}
-
-.resultReportArtifactTabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-.resultReportArtifactTab {
-  display: grid;
-  grid-template-columns: 18px minmax(0, 1fr);
-  align-items: center;
-  gap: 4px;
-  flex: 1 1 160px;
-  min-width: 0;
-  padding: 5px 6px;
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  border-radius: 8px;
-  background: var(--biof3-surface-translucent);
-  text-align: left;
-  cursor: pointer;
-}
-
-.resultReportArtifactTab:hover {
-  border-color: var(--biof3-accent-border);
-  background: var(--biof3-bg-surface);
-}
-
-.resultReportArtifactTabActive {
-  border-color: var(--biof3-accent-border);
-  background: var(--biof3-accent-bg);
-  box-shadow: inset 2px 0 0 var(--biof3-accent);
-}
-
-.resultReportArtifactTabIcon {
-  width: 18px;
-  height: 18px;
-  border-radius: 6px;
-  color: var(--biof3-text-tertiary);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.resultReportArtifactTabActive .resultReportArtifactTabIcon {
-  color: var(--biof3-accent);
-}
-
-.resultReportArtifactTabText {
-  min-width: 0;
-  display: grid;
-  gap: 0;
-}
-
-.resultReportArtifactTabName {
-  font-size: 10.5px;
-  line-height: 1.2;
-  font-weight: 700;
-  color: var(--biof3-text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.resultReportArtifactTabMeta {
-  font-size: 9px;
-  line-height: 1.3;
-  color: var(--biof3-text-tertiary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+.resultReportActionStatus { color: var(--biof3-text-tertiary); }
+.resultReportActionError { color: var(--biof3-danger); }
 
 .resultReportSection {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0;
   flex: 1;
   min-height: 0;
   padding: 0;
@@ -4698,17 +4469,105 @@ body.biof3-resizing-columns * {
 }
 
 .resultPreviewImage {
+  position: absolute;
+  top: 12px;
+  left: 12px;
   display: block;
-  width: 100%;
-  height: auto;
+  width: calc(100% - 24px);
+  height: calc(100% - 24px);
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
   cursor: zoom-in;
 }
 
 .resultPreviewPlaceholder {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
   margin: 0;
   padding: 18px 16px;
   color: var(--biof3-text-secondary);
   font-size: 13px;
+}
+
+.resultPreviewPlaceholder strong {
+  color: var(--biof3-text);
+  font-size: 12px;
+}
+
+.resultPreviewPlaceholder span {
+  color: var(--biof3-text-tertiary);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.resultPreviewPlaceholder a {
+  color: var(--biof3-accent);
+  font-size: 11px;
+  text-decoration: none;
+}
+
+.resultPreviewUnavailable {
+  display: grid;
+  min-height: 100%;
+  align-content: center;
+  justify-items: center;
+  gap: 9px;
+  padding: 24px;
+  border: 0;
+  border-radius: 0;
+  background: var(--biof3-bg-surface);
+  color: var(--biof3-text-secondary);
+  text-align: center;
+}
+
+.resultPreviewUnavailable > svg {
+  color: var(--biof3-danger);
+}
+
+.resultPreviewUnavailable strong {
+  color: var(--biof3-text);
+  font-size: 13px;
+}
+
+.resultPreviewUnavailable span {
+  max-width: 440px;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.resultPreviewUnavailable > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+}
+
+.resultPreviewUnavailable button {
+  min-height: 29px;
+  padding: 0 10px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 6px;
+  background: var(--biof3-bg);
+  color: var(--biof3-text-secondary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+}
+
+.resultPreviewUnavailable button:hover {
+  border-color: var(--biof3-border-strong);
+  color: var(--biof3-text);
+}
+
+.resultReportPreview {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 520px;
+  border: 0;
+  background: var(--biof3-bg-surface);
 }
 
 .resultStatus {
@@ -5404,6 +5263,223 @@ body.biof3-resizing-columns * {
 .workspaceTreeToggle:hover {
   background: var(--biof3-hover);
   color: var(--biof3-text);
+}
+
+.dataIntakeControl {
+  position: static;
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.dataIntakeInput {
+  display: none;
+}
+
+.dataIntakePopover {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 7px);
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  width: min(380px, calc(100% - 16px));
+  max-height: min(520px, calc(100vh - 120px));
+  overflow: auto;
+  border: 1px solid var(--biof3-border-strong);
+  border-radius: 7px;
+  background: var(--biof3-surface);
+  color: var(--biof3-text);
+  box-shadow: 0 12px 32px rgb(15 23 42 / 16%);
+}
+
+.dataIntakeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 38px;
+  padding: 7px 10px 7px 12px;
+  border-bottom: 1px solid var(--biof3-border);
+  font-size: 13px;
+}
+
+.dataIntakeHeader button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  cursor: pointer;
+}
+
+.dataIntakeHeader button:hover {
+  background: var(--biof3-hover);
+  color: var(--biof3-text);
+}
+
+.dataIntakeState,
+.dataIntakeChoose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 96px;
+  margin: 12px;
+  border: 1px dashed var(--biof3-border-strong);
+  border-radius: 6px;
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text-secondary);
+  font: inherit;
+  font-size: 12px;
+}
+
+.dataIntakeChoose {
+  cursor: pointer;
+}
+
+.dataIntakeChoose:hover {
+  border-color: var(--biof3-accent);
+  color: var(--biof3-text);
+}
+
+.dataIntakeSpinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--biof3-border-strong);
+  border-top-color: var(--biof3-accent);
+  border-radius: 50%;
+  animation: dataIntakeSpin 800ms linear infinite;
+}
+
+@keyframes dataIntakeSpin {
+  to { transform: rotate(360deg); }
+}
+
+.dataIntakeFiles {
+  display: flex;
+  flex-direction: column;
+  padding: 5px 8px;
+}
+
+.dataIntakeFileRow {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 48px;
+  padding: 6px 4px;
+  border-bottom: 1px solid color-mix(in srgb, var(--biof3-border) 72%, transparent);
+  color: var(--biof3-text-secondary);
+}
+
+.dataIntakeFileRow:last-child {
+  border-bottom: 0;
+}
+
+.dataIntakeFileRow[data-blocked='true'] {
+  color: var(--biof3-danger);
+}
+
+.dataIntakeFileRow > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dataIntakeFileRow strong,
+.dataIntakeFileRow small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dataIntakeFileRow strong {
+  color: var(--biof3-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.dataIntakeFileRow small {
+  color: inherit;
+  font-size: 10px;
+}
+
+.dataIntakeFileRow em {
+  color: var(--biof3-text-tertiary);
+  font-size: 10px;
+  font-style: normal;
+}
+
+.dataIntakeReadiness {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 7px 12px;
+  border-top: 1px solid var(--biof3-border);
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-warning, #a16207);
+  font-size: 11px;
+}
+
+.dataIntakeReadiness[data-status='ready'] {
+  color: var(--biof3-success, #15803d);
+}
+
+.dataIntakeActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  padding: 9px 10px;
+  border-top: 1px solid var(--biof3-border);
+}
+
+.dataIntakePrimary,
+.dataIntakeSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 4px 10px;
+  border: 1px solid var(--biof3-border-strong);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.dataIntakePrimary {
+  border-color: var(--biof3-accent);
+  background: var(--biof3-accent);
+  color: var(--biof3-on-accent, #fff);
+}
+
+.dataIntakePrimary:disabled {
+  border-color: var(--biof3-border);
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text-tertiary);
+  cursor: not-allowed;
+}
+
+.dataIntakeSecondary:hover {
+  background: var(--biof3-hover);
+  color: var(--biof3-text);
+}
+
+.dataIntakeError {
+  padding: 7px 12px;
+  border-top: 1px solid color-mix(in srgb, var(--biof3-danger) 24%, transparent);
+  background: color-mix(in srgb, var(--biof3-danger) 7%, transparent);
+  color: var(--biof3-danger);
+  font-size: 11px;
 }
 
 .workspaceFileTreePaneWrap {
@@ -6109,4 +6185,22 @@ body.biof3-resizing-columns * {
   padding: 4px 8px;
   border-radius: 4px;
   margin-bottom: 8px;
+}
+.workspaceNotice {
+  position: fixed;
+  top: calc(var(--biof3-titlebar-height) + 8px);
+  left: 50%;
+  z-index: 9000;
+  max-width: min(460px, calc(100vw - 24px));
+  padding: 7px 10px;
+  border: 1px solid var(--biof3-border-strong);
+  border-radius: 6px;
+  background: var(--biof3-bg-elevated);
+  color: var(--biof3-text);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--biof3-text) 14%, transparent);
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+  transform: translateX(-50%);
+  pointer-events: none;
 }

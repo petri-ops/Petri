@@ -15,6 +15,113 @@ const MAX_FINALIZATION_ATTEMPTS = 2;
 const FINALIZATION_RETRY_PROMPT =
   '上一次最终整理没有返回可展示的正文。不要调用工具，不要输出思考过程；只输出面向用户的完整最终答复，说明已完成的工作、结果、需要注意的事项和下一步。';
 
+function normalizeRedactedContextTokenJson(value) {
+  return String(value || '').replace(
+    /("contextToken"\s*:\s*)\[REDACTED\](?=\s*[,}])/g,
+    '$1"[REDACTED]"'
+  );
+}
+
+function recoverSealedResultEditArgs(name, value) {
+  if (name !== 'result_changeset_create_in_context') return null;
+  const source = String(value || '');
+  const intentIds = [...source.matchAll(/"intentId"\s*:\s*"(rei_[A-Za-z0-9_-]{1,128})"/g)]
+    .map((match) => match[1]);
+  if (new Set(intentIds).size !== 1) return null;
+  const tokenMatch = source.match(
+    /"contextToken"\s*:\s*(?:"([a-f0-9]{64}|\[REDACTED\])"|(\[REDACTED\]))/
+  );
+  const confirmedMatch = source.match(/"scientificConfirmed"\s*:\s*(true|false)/);
+  return {
+    ...(tokenMatch ? { contextToken: tokenMatch[1] || tokenMatch[2] } : {}),
+    intent: { intentId: intentIds[0] },
+    ...(confirmedMatch ? { scientificConfirmed: confirmedMatch[1] === 'true' } : {}),
+  };
+}
+
+function isExplicitEnrichmentAction(value) {
+  const text = typeof value === 'string' ? value.trim() : '';
+  if (!text || !/(?:\bGO\b|\bKEGG\b|富集)/i.test(text)) return false;
+  const presentationOnly = /(?:配色|颜色|字号|字体|布局|标注|标签|图例|展示|显示|排序)/i.test(text)
+    && !/(?:重算|重新计算|重跑|运行|执行|进行|开展|分析)/i.test(text);
+  if (presentationOnly) return false;
+  return /(?:做|进行|运行|执行|开展|继续|分析|重算|重新计算|重跑)[^。！？]*(?:\bGO\b|\bKEGG\b|富集)|(?:\bGO\b|\bKEGG\b)[^。！？]*富集|富集(?:分析|计算)/i.test(text);
+}
+
+function createResultEditCompletionGuard({ expectation, required = false, requestedOutcome = '' } = {}) {
+  const completionExpectation = ['candidate', 'result_action', 'none'].includes(expectation)
+    ? expectation
+    : (required === true ? 'candidate' : 'none');
+  const completionTarget = completionExpectation === 'result_action'
+    && isExplicitEnrichmentAction(requestedOutcome)
+    ? 'enrichment'
+    : completionExpectation;
+  let candidateCreated = false;
+  let enrichmentJobStarted = false;
+  let recoveryAttempted = false;
+  const satisfied = () => candidateCreated
+    || (completionExpectation === 'result_action' && enrichmentJobStarted);
+  return {
+    required: completionExpectation !== 'none',
+    requiresToolExecution() {
+      return completionExpectation !== 'none' && recoveryAttempted && !satisfied();
+    },
+    requiredToolChoice() {
+      return completionTarget === 'enrichment'
+        ? { type: 'function', function: { name: 'result_enrichment_from_context' } }
+        : 'required';
+    },
+    recordToolResult(name, result) {
+      if (name === 'result_changeset_create_in_context'
+          && result?.ok === true
+          && result?.changeSet?.status === 'preview_ready') candidateCreated = true;
+      if (name === 'result_enrichment_from_context'
+          && result?.ok === true
+          && result?.toolId === 'go-kegg'
+          && typeof result?.result?.toolJobId === 'string'
+          && result.result.toolJobId.trim()) enrichmentJobStarted = true;
+    },
+    assessTerminal() {
+      if (completionExpectation === 'none' || satisfied()) return { action: 'accept' };
+      if (!recoveryAttempted) {
+        recoveryAttempted = true;
+        if (completionExpectation === 'result_action') {
+          return {
+            action: 'retry',
+            reason: 'result_action_not_executed',
+            message: '模型尚未执行真实结果动作，正在自动纠正执行…',
+            prompt:
+              '本轮是由结果区自然语言 Composer 提交的受信结果动作，不等同于一律创建参数候选。你尚未成功执行任何与用户原始目标一致的结果动作，不能声称分析、修改或验证已完成。必须立即选择并调用正确的 Result Studio 执行工具：如果用户要求基于当前 DEG 或当前基因选择做 GO/KEGG 富集，直接调用 result_enrichment_from_context；如果用户要求修改当前结果的参数或呈现，才使用 result_edit_plan_in_context 后调用 result_changeset_create_in_context。不要把富集请求改写成候选创建，不要轮询无关或旧的 ChangeSet，也不要只复述上一轮结果。',
+          };
+        }
+        return {
+          action: 'retry',
+          reason: 'candidate_not_created',
+          message: '模型尚未创建真实候选，正在自动纠正执行…',
+          prompt:
+            '本轮是由结果编辑器提交的绑定式候选创建请求，界面中的科学影响确认已经由后端保存。你尚未成功创建 preview_ready 候选，不能声称修改、重算或验证已完成。请立即使用当前受信上下文调用必要的 Result Studio 工具完成候选创建；不要只复述上一轮结果，也不要再次向用户索要确认。',
+        };
+      }
+      return {
+        action: 'fail',
+        message: completionExpectation === 'result_action'
+          ? '结果动作未完成：模型没有执行与用户目标一致的受信结果工具，系统已阻止展示伪成功结论。请重试本次操作。'
+          : '结果修改未完成：模型没有创建并验证真实候选版本，系统已阻止展示伪成功结论。请重试本次编辑。',
+      };
+    },
+    snapshot() {
+      return {
+        required: completionExpectation !== 'none',
+        expectation: completionExpectation,
+        target: completionTarget,
+        candidateCreated,
+        enrichmentJobStarted,
+        recoveryAttempted,
+      };
+    },
+  };
+}
+
 function shouldFinalizeAgentIteration(iteration, controller) {
   return Boolean(controller && (
     (typeof controller.capHit === 'function' && controller.capHit()) ||
@@ -211,16 +318,20 @@ function createAgentToolCallController(options = {}) {
 
     let args;
     try {
-      args = JSON.parse(typeof fn.arguments === 'string' && fn.arguments.trim() ? fn.arguments : '{}');
+      const rawArguments = typeof fn.arguments === 'string' && fn.arguments.trim() ? fn.arguments : '{}';
+      args = JSON.parse(normalizeRedactedContextTokenJson(rawArguments));
     } catch {
-      return {
-        ok: false,
-        name,
-        callId: providerCallId,
-        args: {},
-        error: 'invalid_arguments',
-        message: 'Provider 返回的工具参数不是合法 JSON；该调用未执行',
-      };
+      args = recoverSealedResultEditArgs(name, fn.arguments);
+      if (!args) {
+        return {
+          ok: false,
+          name,
+          callId: providerCallId,
+          args: {},
+          error: 'invalid_arguments',
+          message: 'Provider 返回的工具参数不是合法 JSON；该调用未执行',
+        };
+      }
     }
     if (!args || typeof args !== 'object' || Array.isArray(args)) {
       return {
@@ -231,6 +342,26 @@ function createAgentToolCallController(options = {}) {
         error: 'invalid_arguments',
         message: 'Provider 返回的工具参数必须是 JSON 对象；该调用未执行',
       };
+    }
+    // Some OpenAI-compatible Providers occasionally wrap the declared JSON
+    // object in a single `arguments` string. Accept only that exact transport
+    // envelope, then run the normal schema/policy/context checks on the
+    // decoded object. Extra wrapper keys, arrays and scalars remain untouched
+    // and fail at the existing boundary.
+    if (Object.keys(args).length === 1 && typeof args.arguments === 'string') {
+      try {
+        // A few Providers serialize the diagnostic redaction marker as a
+        // bare token inside the stringified envelope. Repair only the exact
+        // contextToken placeholder; result-context binding will replace the
+        // resulting string with the click-time trusted token before schema
+        // validation. Other malformed JSON remains rejected downstream.
+        const normalizedArguments = normalizeRedactedContextTokenJson(args.arguments);
+        const decoded = JSON.parse(normalizedArguments);
+        if (decoded && typeof decoded === 'object' && !Array.isArray(decoded)) args = decoded;
+      } catch {
+        const recovered = recoverSealedResultEditArgs(name, args.arguments);
+        if (recovered) args = recovered;
+      }
     }
     const semanticKey = `${name}:${stableJson(args)}`;
     consecutiveSemanticCallCount = semanticKey === lastSemanticCallKey
@@ -382,6 +513,7 @@ module.exports = {
   buildFinalizationFallbackMessage,
   finalizationFallbackReason,
   createAgentProgressRecorder,
+  createResultEditCompletionGuard,
   createAgentToolCallController,
   runAgentToolCallBatch,
 };

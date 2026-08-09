@@ -61,6 +61,7 @@ declare global {
         maximize: () => void;
         close: () => void;
         isMaximized: () => Promise<boolean>;
+        onMaximizeChanged: (callback: (isMaximized: boolean) => void) => () => void;
       };
       /** 应用级控制 —— 装完运行时后需整体重启（BIOF3_R_HOME 在 main 启动时固化）。 */
       app: {

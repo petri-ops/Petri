@@ -74,4 +74,6 @@ frontend/src/
 
 - 框架：Vitest + @testing-library/react
 - 测试文件：`*.test.ts` 或 `*.test.tsx`
-- 运行：`npm run test`（frontend 目录下）
+- 默认**定向运行**改动相关的测试：`npm test --prefix frontend -- <文件名...>`
+- 全量 `npm run test`（frontend 目录下）默认不跑，留给发布前或 CI
+- strict build 门禁：`npm run build:check --prefix frontend`，涉及类型或组件改动时必跑

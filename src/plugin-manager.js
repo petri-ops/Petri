@@ -395,6 +395,21 @@ function streamingSha256(filePath, onProgress) {
   });
 }
 
+// 供应链防线（2026-08-06 收口 "Week 4 placeholder"）：
+// 远程 artifact 必须声明 sha256，缺声明即拒绝安装（fail-closed），且在下载前 fail-fast，
+// 避免先下载几百 MB 再拒绝。内置插件（built-in:// 本地复制）不经过此检查。
+function assertArtifactChecksumDeclared(kind, pluginId, platform, artifact) {
+  if (artifact && artifact.sha256) return;
+  const e = new Error(
+    `${kind} ${pluginId}.artifacts.${platform}.sha256 缺失 — ` +
+      '拒绝安装未声明校验和的远程 artifact（fail-closed，请先在 manifest 中补齐 sha256）'
+  );
+  e.code = 'CHECKSUM_MISSING';
+  e.pluginId = pluginId;
+  e.platform = platform;
+  throw e;
+}
+
 // Week 2：递归计算目录总大小（best-effort unpacked size 校验用）
 function dirSize(dir) {
   let total = 0;
@@ -492,12 +507,14 @@ async function installPlugin(pluginIdOrSpec, onProgress) {
     // 远程插件：按 platform 取 artifact（Week 2 起替换 plugin.url 直读）
     const { artifact } = selectArtifact(plugin, pluginSpec.platform);
     assertAllowedUrl(artifact.url);
+    assertArtifactChecksumDeclared('plugin', pluginId, pluginSpec.platform, artifact);
 
     const zipPath = path.join(PLUGINS_DIR, `${pluginId}-${plugin.version}.zip`);
     console.log(`[plugin] downloading ${pluginId} from ${artifact.url} (platform=${pluginSpec.platform})`);
     await downloadFile(artifact.url, zipPath, onProgress);
 
     // streaming SHA-256 校验 — 500MB Runtime 不进内存
+    // （sha256 缺失已在下载前由 assertArtifactChecksumDeclared 拒绝）
     if (artifact.sha256) {
       const actualHash = await streamingSha256(zipPath);
       const expected = String(artifact.sha256).replace(/^sha256:/i, '').trim().toLowerCase();
@@ -512,11 +529,6 @@ async function installPlugin(pluginIdOrSpec, onProgress) {
         e.actual = actualHash;
         throw e;
       }
-    } else {
-      console.warn(
-        `[plugin] ${pluginId}.artifacts.${pluginSpec.platform}.sha256 is null — ` +
-          'skipping checksum verification (Week 4 placeholder)'
-      );
     }
 
     if (fs.existsSync(pluginDir)) {
@@ -684,6 +696,7 @@ async function installContentPlugin(pluginId, plugin, platform, onProgress) {
     // Week 2：按 platform 选 artifact
     const { artifact } = selectArtifact(plugin, platform);
     assertAllowedUrl(artifact.url);
+    assertArtifactChecksumDeclared('content-plugin', pluginId, platform, artifact);
     const zipPath = path.join(PLUGINS_DIR, `${pluginId}-${plugin.version}.zip`);
     console.log(`[plugin] downloading content-plugin ${pluginId} from ${artifact.url} (platform=${platform})`);
     await downloadFile(artifact.url, zipPath, onProgress);
@@ -696,8 +709,6 @@ async function installContentPlugin(pluginId, plugin, platform, onProgress) {
         e.code = 'CHECKSUM_MISMATCH';
         throw e;
       }
-    } else {
-      console.warn(`[plugin] content-plugin ${pluginId}.artifacts.${platform}.sha256 is null — skipping checksum (Week 4 placeholder)`);
     }
     if (fs.existsSync(pluginDir)) fs.rmSync(pluginDir, { recursive: true, force: true });
     await extractZipFile(zipPath, pluginDir);
@@ -780,6 +791,7 @@ async function installRuntime(pluginId, plugin, platform, onProgress) {
   // Week 2：按 platform 取 artifact（不再直读 plugin.url / plugin.checksum / plugin.size）
   const { artifact } = selectArtifact(plugin, platform);
   assertAllowedUrl(artifact.url);
+  assertArtifactChecksumDeclared('runtime', pluginId, platform, artifact);
 
   // 下载 zip
   const zipPath = path.join(PLUGINS_DIR, `${pluginId}-${plugin.version}.zip`);
@@ -803,6 +815,7 @@ async function installRuntime(pluginId, plugin, platform, onProgress) {
   }
 
   // streaming SHA-256 校验
+  // （sha256 缺失已在下载前由 assertArtifactChecksumDeclared 拒绝）
   if (artifact.sha256) {
     const actualHash = await streamingSha256(zipPath);
     const expected = String(artifact.sha256).replace(/^sha256:/i, '').trim().toLowerCase();
@@ -816,11 +829,6 @@ async function installRuntime(pluginId, plugin, platform, onProgress) {
       e.actual = actualHash;
       throw e;
     }
-  } else {
-    console.warn(
-      `[plugin] runtime ${pluginId}.artifacts.${platform}.sha256 is null — ` +
-        'skipping checksum (Week 4 placeholder)'
-    );
   }
 
   // 清旧 Runtime
@@ -918,11 +926,13 @@ async function installFigcodePack(pluginId, plugin, platform, onProgress) {
   // Week 2：按 platform 选 artifact
   const { artifact } = selectArtifact(plugin, platform);
   assertAllowedUrl(artifact.url);
+  assertArtifactChecksumDeclared('figcode-pack', pluginId, platform, artifact);
   const zipPath = path.join(PLUGINS_DIR, `${pluginId}-${plugin.version}.zip`);
   console.log(`[plugin] downloading figcode-pack ${pluginId} from ${artifact.url} (platform=${platform})`);
   await downloadFile(artifact.url, zipPath, onProgress);
 
   // streaming SHA-256
+  // （sha256 缺失已在下载前由 assertArtifactChecksumDeclared 拒绝）
   if (artifact.sha256) {
     const actualHash = await streamingSha256(zipPath);
     const expected = String(artifact.sha256).replace(/^sha256:/i, '').trim().toLowerCase();
@@ -932,8 +942,6 @@ async function installFigcodePack(pluginId, plugin, platform, onProgress) {
       e.code = 'CHECKSUM_MISMATCH';
       throw e;
     }
-  } else {
-    console.warn(`[plugin] figcode-pack ${pluginId}.artifacts.${platform}.sha256 is null — skipping checksum (Week 4 placeholder)`);
   }
 
   if (fs.existsSync(pluginDir)) {
@@ -1444,5 +1452,6 @@ module.exports = {
   assertAllowedUrl,
   validateManifest,
   streamingSha256,
+  assertArtifactChecksumDeclared,
   dirSize,
 };

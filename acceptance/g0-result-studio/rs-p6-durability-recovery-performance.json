@@ -1,0 +1,1924 @@
+{
+  "schemaVersion": 1,
+  "planId": "G0-RS-P6",
+  "evidenceClass": "real_local_product_durability_recovery_pressure_non_qualifying",
+  "capturedAt": "2026-08-02T03:01:18.590Z",
+  "classification": {
+    "stage": "G0-RS-P6",
+    "scope": "local_durability_recovery_performance_and_product_explainability",
+    "realProvider": false,
+    "packagedElectron": false,
+    "literalSystemReboot": false,
+    "qualificationEligible": false,
+    "p7Eligible": false
+  },
+  "qualificationEligible": false,
+  "p7Eligible": false,
+  "systemRestartBoundary": "development_electron_and_owned_backend_processes_restart_on_same_disk_no_literal_system_reboot",
+  "providerBoundary": "controlled_loopback_503_429_only_real_provider_excluded_to_p7",
+  "packagedBoundary": "development_electron_only_packaged_app_excluded_to_p7",
+  "checkpointInterruptionBoundary": "macos_development_posix_sigstop_process_group_windows_not_exercised",
+  "sourceCommit": "ad1e2ceed15d1a395e62a95d7680c192c80761d6",
+  "sourceFiles": {
+    "core/r-server/agent-runner.js": "core/r-server/agent-runner.js",
+    "core/r-server/agent-tools/learning.js": "core/r-server/agent-tools/learning.js",
+    "core/r-server/agent-tools/registry.js": "core/r-server/agent-tools/registry.js",
+    "core/r-server/agent-tools/result-context-binding.js": "core/r-server/agent-tools/result-context-binding.js",
+    "core/r-server/agent-tools/result-context-edit-tools.js": "core/r-server/agent-tools/result-context-edit-tools.js",
+    "core/r-server/agent-tools/result-context-tools.js": "core/r-server/agent-tools/result-context-tools.js",
+    "core/r-server/agent-tools/result-edit-tools.js": "core/r-server/agent-tools/result-edit-tools.js",
+    "core/r-server/agent-tools/result-selection-tools.js": "core/r-server/agent-tools/result-selection-tools.js",
+    "core/r-server/agent-tools/tool-defs.js": "core/r-server/agent-tools/tool-defs.js",
+    "core/r-server/api-data.js": "core/r-server/api-data.js",
+    "core/r-server/db.js": "core/r-server/db.js",
+    "core/r-server/helpers/ai-settings.js": "core/r-server/helpers/ai-settings.js",
+    "core/r-server/helpers/artifact-truth.js": "core/r-server/helpers/artifact-truth.js",
+    "core/r-server/helpers/model-gateway.js": "core/r-server/helpers/model-gateway.js",
+    "core/r-server/helpers/process-lifecycle.js": "core/r-server/helpers/process-lifecycle.js",
+    "core/r-server/helpers/tools-executor.js": "core/r-server/helpers/tools-executor.js",
+    "core/r-server/helpers/verified-file-snapshot.js": "core/r-server/helpers/verified-file-snapshot.js",
+    "core/r-server/logger.js": "core/r-server/logger.js",
+    "core/r-server/mcp/registry.js": "core/r-server/mcp/registry.js",
+    "core/r-server/plugin-loader.js": "core/r-server/plugin-loader.js",
+    "core/r-server/routes/ai-agent.js": "core/r-server/routes/ai-agent.js",
+    "core/r-server/routes/index.js": "core/r-server/routes/index.js",
+    "core/r-server/routes/result-studio.js": "core/r-server/routes/result-studio.js",
+    "core/r-server/routes/tools-metadata.js": "core/r-server/routes/tools-metadata.js",
+    "core/r-server/routes/tools-platform.js": "core/r-server/routes/tools-platform.js",
+    "core/r-server/routes/tools.js": "core/r-server/routes/tools.js",
+    "core/r-server/server.js": "core/r-server/server.js",
+    "core/r-server/tool-registry.js": "core/r-server/tool-registry.js",
+    "core/shared-backend/ai-usage-helper.js": "core/shared-backend/ai-usage-helper.js",
+    "core/shared-backend/artifact-interaction.js": "core/shared-backend/artifact-interaction.js",
+    "core/shared-backend/artifact-manifest.js": "core/shared-backend/artifact-manifest.js",
+    "core/shared-backend/capability-bundles.js": "core/shared-backend/capability-bundles.js",
+    "core/shared-backend/capability-provisioning.js": "core/shared-backend/capability-provisioning.js",
+    "core/shared-backend/execution-provenance.js": "core/shared-backend/execution-provenance.js",
+    "core/shared-backend/git-adapter.js": "core/shared-backend/git-adapter.js",
+    "core/shared-backend/git-repository-binding.js": "core/shared-backend/git-repository-binding.js",
+    "core/shared-backend/llm-providers/anthropic.js": "core/shared-backend/llm-providers/anthropic.js",
+    "core/shared-backend/llm-providers/dashscope-vision.js": "core/shared-backend/llm-providers/dashscope-vision.js",
+    "core/shared-backend/llm-providers/dashscope.js": "core/shared-backend/llm-providers/dashscope.js",
+    "core/shared-backend/llm-providers/deepseek.js": "core/shared-backend/llm-providers/deepseek.js",
+    "core/shared-backend/llm-providers/index.js": "core/shared-backend/llm-providers/index.js",
+    "core/shared-backend/llm-providers/model-gateway.js": "core/shared-backend/llm-providers/model-gateway.js",
+    "core/shared-backend/llm-providers/model-profile.js": "core/shared-backend/llm-providers/model-profile.js",
+    "core/shared-backend/llm-providers/protocol-conversion.js": "core/shared-backend/llm-providers/protocol-conversion.js",
+    "core/shared-backend/llm-providers/protocol-usage.js": "core/shared-backend/llm-providers/protocol-usage.js",
+    "core/shared-backend/llm-providers/provider-reliability.js": "core/shared-backend/llm-providers/provider-reliability.js",
+    "core/shared-backend/llm-providers/stream-aggregate.js": "core/shared-backend/llm-providers/stream-aggregate.js",
+    "core/shared-backend/logger.js": "core/shared-backend/logger.js",
+    "core/shared-backend/project-run-layout.js": "core/shared-backend/project-run-layout.js",
+    "core/shared-backend/r-libs-resolver.js": "core/shared-backend/r-libs-resolver.js",
+    "core/shared-backend/redaction.js": "core/shared-backend/redaction.js",
+    "core/shared-backend/result-changeset-service.js": "core/shared-backend/result-changeset-service.js",
+    "core/shared-backend/result-compare-service.js": "core/shared-backend/result-compare-service.js",
+    "core/shared-backend/result-edit-controls.js": "core/shared-backend/result-edit-controls.js",
+    "core/shared-backend/result-edit-intent.js": "core/shared-backend/result-edit-intent.js",
+    "core/shared-backend/result-plugin-validator.js": "core/shared-backend/result-plugin-validator.js",
+    "core/shared-backend/result-ref-transaction-schema.js": "core/shared-backend/result-ref-transaction-schema.js",
+    "core/shared-backend/result-ref-transaction.js": "core/shared-backend/result-ref-transaction.js",
+    "core/shared-backend/result-replay-service.js": "core/shared-backend/result-replay-service.js",
+    "core/shared-backend/result-revision-source.js": "core/shared-backend/result-revision-source.js",
+    "core/shared-backend/result-scientific-compare.js": "core/shared-backend/result-scientific-compare.js",
+    "core/shared-backend/result-scientific-rerun.js": "core/shared-backend/result-scientific-rerun.js",
+    "core/shared-backend/result-studio-background-child.js": "core/shared-backend/result-studio-background-child.js",
+    "core/shared-backend/result-studio-background.js": "core/shared-backend/result-studio-background.js",
+    "core/shared-backend/result-studio-context.js": "core/shared-backend/result-studio-context.js",
+    "core/shared-backend/result-studio-contracts.js": "core/shared-backend/result-studio-contracts.js",
+    "core/shared-backend/result-studio-lifecycle.js": "core/shared-backend/result-studio-lifecycle.js",
+    "core/shared-backend/result-studio-plugin-sdk.js": "core/shared-backend/result-studio-plugin-sdk.js",
+    "core/shared-backend/result-studio-private-path.js": "core/shared-backend/result-studio-private-path.js",
+    "core/shared-backend/result-studio-repository.js": "core/shared-backend/result-studio-repository.js",
+    "core/shared-backend/result-studio-resource-summary.js": "core/shared-backend/result-studio-resource-summary.js",
+    "core/shared-backend/result-studio-runtime-lease.js": "core/shared-backend/result-studio-runtime-lease.js",
+    "core/shared-backend/result-studio-schema.js": "core/shared-backend/result-studio-schema.js",
+    "core/shared-backend/result-studio-table-query.js": "core/shared-backend/result-studio-table-query.js",
+    "core/shared-backend/result-workflow-graph.js": "core/shared-backend/result-workflow-graph.js",
+    "core/shared-backend/runtime-resource-probe.js": "core/shared-backend/runtime-resource-probe.js",
+    "core/shared-backend/runtime-resource-snapshot.js": "core/shared-backend/runtime-resource-snapshot.js",
+    "core/shared-backend/scientific-replay-package.js": "core/shared-backend/scientific-replay-package.js",
+    "core/shared-backend/scientific-task-spec.js": "core/shared-backend/scientific-task-spec.js",
+    "core/shared-backend/tool-resource-sampler.js": "core/shared-backend/tool-resource-sampler.js",
+    "frontend/package-lock.json": "frontend/package-lock.json",
+    "frontend/package.json": "frontend/package.json",
+    "frontend/src/components/copilot/SimpleChat.tsx": "frontend/src/components/copilot/SimpleChat.tsx",
+    "frontend/src/components/copilot/conversationRunStore.test.ts": "frontend/src/components/copilot/conversationRunStore.test.ts",
+    "frontend/src/components/copilot/conversationRunStore.ts": "frontend/src/components/copilot/conversationRunStore.ts",
+    "frontend/src/components/copilot/copilotClient.test.ts": "frontend/src/components/copilot/copilotClient.test.ts",
+    "frontend/src/components/copilot/copilotClient.ts": "frontend/src/components/copilot/copilotClient.ts",
+    "frontend/src/components/result-studio/ResultAgentComposer.module.css": "frontend/src/components/result-studio/ResultAgentComposer.module.css",
+    "frontend/src/components/result-studio/ResultAgentComposer.test.tsx": "frontend/src/components/result-studio/ResultAgentComposer.test.tsx",
+    "frontend/src/components/result-studio/ResultAgentComposer.tsx": "frontend/src/components/result-studio/ResultAgentComposer.tsx",
+    "frontend/src/components/result-studio/ResultEditPanel.module.css": "frontend/src/components/result-studio/ResultEditPanel.module.css",
+    "frontend/src/components/result-studio/ResultEditPanel.test.tsx": "frontend/src/components/result-studio/ResultEditPanel.test.tsx",
+    "frontend/src/components/result-studio/ResultEditPanel.tsx": "frontend/src/components/result-studio/ResultEditPanel.tsx",
+    "frontend/src/components/result-studio/ResultStudioChangeSetPanel.module.css": "frontend/src/components/result-studio/ResultStudioChangeSetPanel.module.css",
+    "frontend/src/components/result-studio/ResultStudioChangeSetPanel.test.tsx": "frontend/src/components/result-studio/ResultStudioChangeSetPanel.test.tsx",
+    "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx": "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx",
+    "frontend/src/components/result-studio/ResultStudioSurface.module.css": "frontend/src/components/result-studio/ResultStudioSurface.module.css",
+    "frontend/src/components/result-studio/ResultStudioSurface.test.tsx": "frontend/src/components/result-studio/ResultStudioSurface.test.tsx",
+    "frontend/src/components/result-studio/ResultStudioSurface.tsx": "frontend/src/components/result-studio/ResultStudioSurface.tsx",
+    "frontend/src/components/result-studio/RevisionCodeView.module.css": "frontend/src/components/result-studio/RevisionCodeView.module.css",
+    "frontend/src/components/result-studio/RevisionCodeView.tsx": "frontend/src/components/result-studio/RevisionCodeView.tsx",
+    "frontend/src/components/result-studio/ScientificInteractionViewer.module.css": "frontend/src/components/result-studio/ScientificInteractionViewer.module.css",
+    "frontend/src/components/result-studio/ScientificInteractionViewer.test.tsx": "frontend/src/components/result-studio/ScientificInteractionViewer.test.tsx",
+    "frontend/src/components/result-studio/ScientificInteractionViewer.tsx": "frontend/src/components/result-studio/ScientificInteractionViewer.tsx",
+    "frontend/src/components/result-studio/activeArtifactProjection.test.ts": "frontend/src/components/result-studio/activeArtifactProjection.test.ts",
+    "frontend/src/components/result-studio/activeArtifactProjection.ts": "frontend/src/components/result-studio/activeArtifactProjection.ts",
+    "frontend/src/components/result-studio/resultBodyState.ts": "frontend/src/components/result-studio/resultBodyState.ts",
+    "frontend/src/components/result-studio/resultFirstScreen.ts": "frontend/src/components/result-studio/resultFirstScreen.ts",
+    "frontend/src/components/result-studio/resultMode.ts": "frontend/src/components/result-studio/resultMode.ts",
+    "frontend/src/components/result-studio/resultScrollMemory.ts": "frontend/src/components/result-studio/resultScrollMemory.ts",
+    "frontend/src/components/result-studio/resultStudioClient.ts": "frontend/src/components/result-studio/resultStudioClient.ts",
+    "frontend/src/components/result-studio/resultSurface.ts": "frontend/src/components/result-studio/resultSurface.ts",
+    "frontend/src/components/result-studio/resultVersionRole.test.ts": "frontend/src/components/result-studio/resultVersionRole.test.ts",
+    "frontend/src/components/result-studio/resultVersionRole.ts": "frontend/src/components/result-studio/resultVersionRole.ts",
+    "frontend/src/components/workspace-panels/CenterPanel.tsx": "frontend/src/components/workspace-panels/CenterPanel.tsx",
+    "frontend/src/components/workspace-panels/RightPanel.tsx": "frontend/src/components/workspace-panels/RightPanel.tsx",
+    "frontend/src/lib/artifact-selection.ts": "frontend/src/lib/artifact-selection.ts",
+    "frontend/src/lib/result-edit-agent-bridge.ts": "frontend/src/lib/result-edit-agent-bridge.ts",
+    "frontend/src/lib/result-studio-interaction-client.ts": "frontend/src/lib/result-studio-interaction-client.ts",
+    "frontend/src/pages/project-workspace.module.css": "frontend/src/pages/project-workspace.module.css",
+    "frontend/src/pages/project-workspace.tsx": "frontend/src/pages/project-workspace.tsx",
+    "package-lock.json": "package-lock.json",
+    "package.json": "package.json",
+    "resources/built-in-plugins/deseq2/golden-revisions/result-studio-v1.json": "resources/built-in-plugins/deseq2/golden-revisions/result-studio-v1.json",
+    "resources/built-in-plugins/deseq2/plugin.json": "resources/built-in-plugins/deseq2/plugin.json",
+    "resources/built-in-plugins/deseq2/scripts/deseq2.R": "resources/built-in-plugins/deseq2/scripts/deseq2.R",
+    "resources/built-in-plugins/deseq2/tool-definition.json": "resources/built-in-plugins/deseq2/tool-definition.json",
+    "resources/built-in-plugins/gene-correlation/golden-revisions/result-studio-v1.json": "resources/built-in-plugins/gene-correlation/golden-revisions/result-studio-v1.json",
+    "resources/built-in-plugins/gene-correlation/plugin.json": "resources/built-in-plugins/gene-correlation/plugin.json",
+    "resources/built-in-plugins/gene-correlation/scripts/gene-correlation.R": "resources/built-in-plugins/gene-correlation/scripts/gene-correlation.R",
+    "resources/built-in-plugins/gene-correlation/tool-definition.json": "resources/built-in-plugins/gene-correlation/tool-definition.json",
+    "resources/built-in-plugins/go-kegg/demo-data/genes.csv": "resources/built-in-plugins/go-kegg/demo-data/genes.csv",
+    "resources/built-in-plugins/go-kegg/go-kegg-report-template.html": "resources/built-in-plugins/go-kegg/go-kegg-report-template.html",
+    "resources/built-in-plugins/go-kegg/golden-revisions/result-studio-v1.json": "resources/built-in-plugins/go-kegg/golden-revisions/result-studio-v1.json",
+    "resources/built-in-plugins/go-kegg/plugin.json": "resources/built-in-plugins/go-kegg/plugin.json",
+    "resources/built-in-plugins/go-kegg/scripts/go-kegg.R": "resources/built-in-plugins/go-kegg/scripts/go-kegg.R",
+    "resources/built-in-plugins/go-kegg/tool-definition.json": "resources/built-in-plugins/go-kegg/tool-definition.json",
+    "resources/built-in-plugins/volcano-plot/golden-revisions/result-studio-v1.json": "resources/built-in-plugins/volcano-plot/golden-revisions/result-studio-v1.json",
+    "resources/built-in-plugins/volcano-plot/plugin.json": "resources/built-in-plugins/volcano-plot/plugin.json",
+    "resources/built-in-plugins/volcano-plot/scripts/volcano-plot.R": "resources/built-in-plugins/volcano-plot/scripts/volcano-plot.R",
+    "resources/built-in-plugins/volcano-plot/tool-definition.json": "resources/built-in-plugins/volcano-plot/tool-definition.json",
+    "scripts/g0-rs-p4r-capture.mjs": "scripts/g0-rs-p4r-capture.mjs",
+    "scripts/g0-rs-p5-acceptance.mjs": "scripts/g0-rs-p5-acceptance.mjs",
+    "scripts/g0-rs-p6-electron-pressure-driver.cjs": "scripts/g0-rs-p6-electron-pressure-driver.cjs",
+    "scripts/g0-rs-p6-electron-pressure-prototype.mjs": "scripts/g0-rs-p6-electron-pressure-prototype.mjs",
+    "scripts/g0-rs-p6-product-acceptance.mjs": "scripts/g0-rs-p6-product-acceptance.mjs",
+    "scripts/g0-rs-p6-product-scenarios.mjs": "scripts/g0-rs-p6-product-scenarios.mjs",
+    "scripts/g0-rs-p6-real-restart-prototype.mjs": "scripts/g0-rs-p6-real-restart-prototype.mjs",
+    "scripts/g0-rs-p6-recovery-acceptance.mjs": "scripts/g0-rs-p6-recovery-acceptance.mjs",
+    "scripts/g0-rs-p6-recovery-electron-driver.cjs": "scripts/g0-rs-p6-recovery-electron-driver.cjs",
+    "scripts/g0-rs-p6-recovery-electron-prototype.mjs": "scripts/g0-rs-p6-recovery-electron-prototype.mjs",
+    "scripts/g0-rs-p6-ui110-driver.cjs": "scripts/g0-rs-p6-ui110-driver.cjs",
+    "scripts/g0-rs-p6-ui110-local-gateway.mjs": "scripts/g0-rs-p6-ui110-local-gateway.mjs",
+    "scripts/g0-rs-p6-ui110-observation.mjs": "scripts/g0-rs-p6-ui110-observation.mjs",
+    "src/backend-health.js": "src/backend-health.js",
+    "src/migration-runner.js": "src/migration-runner.js",
+    "src/migrations/001_result_studio.sql": "src/migrations/001_result_studio.sql",
+    "src/migrations/002_result_workflow_graph.sql": "src/migrations/002_result_workflow_graph.sql",
+    "src/migrations/003_result_ref_transactions.sql": "src/migrations/003_result_ref_transactions.sql",
+    "src/preload.js": "src/preload.js",
+    "test/agent-run-tool.test.mjs": "test/agent-run-tool.test.mjs",
+    "test/agent-tool-registry.test.mjs": "test/agent-tool-registry.test.mjs",
+    "test/artifact-truth.test.mjs": "test/artifact-truth.test.mjs",
+    "test/diagnostic-redaction.test.mjs": "test/diagnostic-redaction.test.mjs",
+    "test/execution-provenance.test.mjs": "test/execution-provenance.test.mjs",
+    "test/g0-chf0-lifecycle.test.mjs": "test/g0-chf0-lifecycle.test.mjs",
+    "test/g0-rs-p5-acceptance.test.mjs": "test/g0-rs-p5-acceptance.test.mjs",
+    "test/g0-rs-p6-electron-pressure-prototype.test.mjs": "test/g0-rs-p6-electron-pressure-prototype.test.mjs",
+    "test/g0-rs-p6-product-acceptance.test.mjs": "test/g0-rs-p6-product-acceptance.test.mjs",
+    "test/g0-rs-p6-product-scenarios.test.mjs": "test/g0-rs-p6-product-scenarios.test.mjs",
+    "test/g0-rs-p6-real-restart-prototype.test.mjs": "test/g0-rs-p6-real-restart-prototype.test.mjs",
+    "test/g0-rs-p6-recovery-acceptance.test.mjs": "test/g0-rs-p6-recovery-acceptance.test.mjs",
+    "test/g0-rs-p6-recovery-electron-prototype.test.mjs": "test/g0-rs-p6-recovery-electron-prototype.test.mjs",
+    "test/g0-rs-p6-ui110-local-gateway.test.mjs": "test/g0-rs-p6-ui110-local-gateway.test.mjs",
+    "test/g0-rs-p6-ui110-observation.test.mjs": "test/g0-rs-p6-ui110-observation.test.mjs",
+    "test/git-adapter.test.mjs": "test/git-adapter.test.mjs",
+    "test/impact-map.json": "test/impact-map.json",
+    "test/result-changeset-service.test.mjs": "test/result-changeset-service.test.mjs",
+    "test/result-compare-service.test.mjs": "test/result-compare-service.test.mjs",
+    "test/result-edit-agent-tool.test.mjs": "test/result-edit-agent-tool.test.mjs",
+    "test/result-edit-controls.test.mjs": "test/result-edit-controls.test.mjs",
+    "test/result-edit-intent.test.mjs": "test/result-edit-intent.test.mjs",
+    "test/result-plugin-validator.test.mjs": "test/result-plugin-validator.test.mjs",
+    "test/result-ref-transaction.test.mjs": "test/result-ref-transaction.test.mjs",
+    "test/result-replay-service.test.mjs": "test/result-replay-service.test.mjs",
+    "test/result-revision-replay-package.test.mjs": "test/result-revision-replay-package.test.mjs",
+    "test/result-revision-source.test.mjs": "test/result-revision-source.test.mjs",
+    "test/result-scientific-compare.test.mjs": "test/result-scientific-compare.test.mjs",
+    "test/result-scientific-rerun.test.mjs": "test/result-scientific-rerun.test.mjs",
+    "test/result-selection-tools.test.mjs": "test/result-selection-tools.test.mjs",
+    "test/result-studio-background.test.mjs": "test/result-studio-background.test.mjs",
+    "test/result-studio-context.test.mjs": "test/result-studio-context.test.mjs",
+    "test/result-studio-lifecycle.test.mjs": "test/result-studio-lifecycle.test.mjs",
+    "test/result-studio-migration.test.mjs": "test/result-studio-migration.test.mjs",
+    "test/result-studio-plugin-sdk.test.mjs": "test/result-studio-plugin-sdk.test.mjs",
+    "test/result-studio-repository.test.mjs": "test/result-studio-repository.test.mjs",
+    "test/result-studio-resource-summary.test.mjs": "test/result-studio-resource-summary.test.mjs",
+    "test/result-studio-route-baseline.test.mjs": "test/result-studio-route-baseline.test.mjs",
+    "test/result-studio-table-query.test.mjs": "test/result-studio-table-query.test.mjs",
+    "test/result-workflow-graph.test.mjs": "test/result-workflow-graph.test.mjs",
+    "test/scientific-replay-package.test.mjs": "test/scientific-replay-package.test.mjs",
+    "test/test-affected.test.mjs": "test/test-affected.test.mjs",
+    "test/tool-resource-sampler.test.mjs": "test/tool-resource-sampler.test.mjs",
+    "test/tools-executor-job-context.test.mjs": "test/tools-executor-job-context.test.mjs",
+    "test/tools-input-validation.test.mjs": "test/tools-input-validation.test.mjs"
+  },
+  "sourceHashes": {
+    "core/r-server/agent-runner.js": "c80fd7dbb970c497971d3712a7c962b9cceb4280b1a5394f80ca4fd2b9823f65",
+    "core/r-server/agent-tools/learning.js": "4b52fec17305e6143c1f7239c376715f75de148081ca036742cd9819f4a6968a",
+    "core/r-server/agent-tools/registry.js": "62eb53fd52b75aceb41231f14198d04fc908d5284ba7685d8f92002491945777",
+    "core/r-server/agent-tools/result-context-binding.js": "3e4da25017c6a8b5030963aaf9be570db7b51e10bc193fa4a1eaac669eb18003",
+    "core/r-server/agent-tools/result-context-edit-tools.js": "6ee8e8e2bc57a6a51c7a365776157e43a04096ad387d69764fa9fc37efa7b41c",
+    "core/r-server/agent-tools/result-context-tools.js": "63541d5c64f0243011c2ba6756eff39c6158a3f850a9b31b83659e4236a6c2e2",
+    "core/r-server/agent-tools/result-edit-tools.js": "5f469160cee13cf537ad5216be9c2b557ca7102c7879b8cb3254c8949015379e",
+    "core/r-server/agent-tools/result-selection-tools.js": "9f1069b9645cf2fa26c3ae30e9257884b18937130f854c10a4559bfa3362ecfd",
+    "core/r-server/agent-tools/tool-defs.js": "e9c3d0314c7f3d6d7b14bbd968a1efa16e35f2ef7a4bd096357c2fa78e8e4d20",
+    "core/r-server/api-data.js": "ea96fd5eafb42f1854d01eccd002925fac74de6bc53d6710557f6452a0e7e441",
+    "core/r-server/db.js": "4f73ddf4dea95b1c7dac9c65e16e9981ef67afffb21a3f5f29d1b5132ae2f550",
+    "core/r-server/helpers/ai-settings.js": "0bedae46ae6247d84bd2a8788326e1905c23d5dda6a50f9679f0dbefdb668f84",
+    "core/r-server/helpers/artifact-truth.js": "440d5c29591fe1beac8d01e3bcc32512f8929b7dfae301b1605cbdabfa1c9c91",
+    "core/r-server/helpers/model-gateway.js": "56f8ffb59058c274c2ce2abd320c7768e2e182bb7a8cd0fa8ed70bc20333cc31",
+    "core/r-server/helpers/process-lifecycle.js": "aef46047ec6134b32d1e0cbba56534d08dcd6e7e0d9487992b271f2a95c26a29",
+    "core/r-server/helpers/tools-executor.js": "0908432b649da6b23c0d1f128b8531ed0c41f54691829e68ed0cede13ef956f7",
+    "core/r-server/helpers/verified-file-snapshot.js": "440f2ae5b2f8320691c3841e1c9d3a1ac65e73a94fbf3998dc1907edf96009c8",
+    "core/r-server/logger.js": "b5eccdf23e98ebce844a8620e5475db1e121602e542115c06fb50851c9fe6da8",
+    "core/r-server/mcp/registry.js": "0263df2ba9c0abefb393ab42853b1660afc11c70ea78ce6cfd189ded8bb64f2d",
+    "core/r-server/plugin-loader.js": "c02a9b85e70230cde44f5f1103880ddc8589116827eb1d73570bd715fdd4b98a",
+    "core/r-server/routes/ai-agent.js": "441c6a632659f8283081155f27761a7dc5e981baca69806c3a2fd0dcc7b2f516",
+    "core/r-server/routes/index.js": "0b93c0e6c6c78b4a5796b27e51602e031b00b3cdc54301fffe7544f63e0c9fe9",
+    "core/r-server/routes/result-studio.js": "fbcf00d13a7e53633468e861130fe1260a703dab1ba8422534eebaf60dc65e15",
+    "core/r-server/routes/tools-metadata.js": "507e8e75df7bb5b3c77ab040f8b24d61857a31e7c072e75e8f0c610014babe7f",
+    "core/r-server/routes/tools-platform.js": "cdce4456d71b47348f0174d7c06e37b693b3c9f29291907143028c159a7a6792",
+    "core/r-server/routes/tools.js": "b0130c9734750edd22a9e6f12110ac2d515c127f3c213de05b9685baf6f49067",
+    "core/r-server/server.js": "8219d23323ebc88fdb26c74c5ea3ebd679390b7fbbee24218ddcd056bc0db6a3",
+    "core/r-server/tool-registry.js": "d0c986cd02314a651ccdc29e24db3a0a2241f108aedbced6623fb5cf33852869",
+    "core/shared-backend/ai-usage-helper.js": "9822f457e63c979afbff70eb1174f2515849bb30924a7851cebfcb77ee725e07",
+    "core/shared-backend/artifact-interaction.js": "f8bdbb733d4cffc1d051e7d074ac8c61d33e528613b512f1666bf4a9967cb54f",
+    "core/shared-backend/artifact-manifest.js": "0ecdc1223054d1f3eb09a5f3d5c585c346d147c4d09e9c12560c301c738293ee",
+    "core/shared-backend/capability-bundles.js": "f9f0f066b572281b39a640585f437b3ec236c46011c8469815491bc6b152b108",
+    "core/shared-backend/capability-provisioning.js": "c4251a03a92243e9bc6b4a54fb3a90011ad959f134440037ffa3fc9ab54e1f96",
+    "core/shared-backend/execution-provenance.js": "939c5dec34414416e5b2802a5d466036d983d826334075dc41244d040a3dfd66",
+    "core/shared-backend/git-adapter.js": "461d756c4bb63638e31bd0e8f16e2b9738cbceba4526ca5a5d307e71143da2a1",
+    "core/shared-backend/git-repository-binding.js": "9a5a785578c425e1f3980ef17b9c06afab37ec056f5e1e6705df1f71af863470",
+    "core/shared-backend/llm-providers/anthropic.js": "0ad3b5b81942d636a99ec55bc085712973fbd2b667a4e07cf22ce533481953b5",
+    "core/shared-backend/llm-providers/dashscope-vision.js": "b9a14f432380662ab842292923e5ee53f55e620879825464058828c320259376",
+    "core/shared-backend/llm-providers/dashscope.js": "16c06a341690e14446d51bb6fb709ab08d2d5f6ca5ad680d91ce5504b3437cab",
+    "core/shared-backend/llm-providers/deepseek.js": "023011ed31905e59a2a867d8f4ebb8a3317284ca598eb8cdd9bd8a50cdea1504",
+    "core/shared-backend/llm-providers/index.js": "b178d741df97f15d13cd4a2f33e0eee365260a4690760ae6b694af237d1c128f",
+    "core/shared-backend/llm-providers/model-gateway.js": "2a8fef6616f4fa76d65c062ebe88e3d5d8cc611f45c4c1dd731f7705768c3ec0",
+    "core/shared-backend/llm-providers/model-profile.js": "b7433458960e5cf9936c326d00296fa958defb86031670ed7c1e5be68d23a185",
+    "core/shared-backend/llm-providers/protocol-conversion.js": "d7c0a2e1f8a745c3757090acf8ab342719714822899657db01cc320033e6d18f",
+    "core/shared-backend/llm-providers/protocol-usage.js": "5c572c3777b1caa7c17ae8fbbfe077324ffe68f50d8f43dc8051a7f1d8e8540b",
+    "core/shared-backend/llm-providers/provider-reliability.js": "81c188882f9c758bd5c78c341534533ac39e901b406904d53aad9cdca17475bc",
+    "core/shared-backend/llm-providers/stream-aggregate.js": "258b2cb9ee004e2ae5224850f60162b51f85309dbeae68cac8b101c0e10c9722",
+    "core/shared-backend/logger.js": "91153172b1ab21cda0544e49f3a88587ab570154a465a557e1efa52d9565d3eb",
+    "core/shared-backend/project-run-layout.js": "75836e2696be18e4bbdcf653178e3786bfaffb5c4e50a90bd8e4b933b7ae8baa",
+    "core/shared-backend/r-libs-resolver.js": "543ddd9a911f1f0380c45e001982a6bfd815cc06ca0c7ee158665be2e9c03056",
+    "core/shared-backend/redaction.js": "76dbfb58df6943e6434065ebe7038af2e380dc5786110e008566d8ba0d770d30",
+    "core/shared-backend/result-changeset-service.js": "2a2f8c575efdfbc545838ae2d92cbfdfa9e99f8a4574ef01cfb5ae5e9ef44601",
+    "core/shared-backend/result-compare-service.js": "7edb01b44cc1810ae7a5848ab3cefe64d52f989320e8b7f9b074db47a0e9e8f2",
+    "core/shared-backend/result-edit-controls.js": "d241a97ea738d47f558c8e3050d963db128c5609a28471ffc83313ae39269de1",
+    "core/shared-backend/result-edit-intent.js": "2fef62411b57362ed74c53fa47f3c464d746bae39f84341c95aef382641dac0c",
+    "core/shared-backend/result-plugin-validator.js": "4d0a9d2f8b9c83dd3d9002f969bf156f5f051a12aaa8d5ce7f390b33fcec85f7",
+    "core/shared-backend/result-ref-transaction-schema.js": "53db561daa4443c50c5fda11e9861abc515acfd1ddff610c759522def80df065",
+    "core/shared-backend/result-ref-transaction.js": "c67a096901d510ec602d0e7c4379b631adecbdb9ba5dfa9ffd305645575f9b46",
+    "core/shared-backend/result-replay-service.js": "470a8dcc1f0d574aa7ba470de7d498a93dbec6024ffdde86dbb65af13e22f5d3",
+    "core/shared-backend/result-revision-source.js": "98f79c7c3afe7e880dee02fa682c4e8e693affdaf3e3741bceb07d9c38c9ff99",
+    "core/shared-backend/result-scientific-compare.js": "8579d3c804c8ffb8c9930a65b88cb4160b061cafe61ebb3d1bbe2a0971c1422b",
+    "core/shared-backend/result-scientific-rerun.js": "c76dd4da49c6bde02a2718fe255b12c1838c52485ec20b2781a29af3288e6f82",
+    "core/shared-backend/result-studio-background-child.js": "0865d157ba7dbd6222d99145d1e3df0bbb79c5596a24c9aa19a6f0d402e2754b",
+    "core/shared-backend/result-studio-background.js": "9047175f92fb30ec4fac7e4177557022b85157a5e7e65cf0c1d8b62b2375227d",
+    "core/shared-backend/result-studio-context.js": "e35bfa343786c66e83f80d770956c48166d93c72e8aa53096aeb54beab2a3cca",
+    "core/shared-backend/result-studio-contracts.js": "7f3062bfb94d87e2017daceb2cedd073f5155d900de7fce4f118135232032531",
+    "core/shared-backend/result-studio-lifecycle.js": "30da93c2fe5e698761fdb5d57ffd999c9025c4199d54ae5947dd20de36abbec4",
+    "core/shared-backend/result-studio-plugin-sdk.js": "5e068ace66c2622d1c4c83ae7e32d3b187fcaa12b9acfdd593f7d5c8a181d45b",
+    "core/shared-backend/result-studio-private-path.js": "56523482bd30548ec12e8d0ca60f8f6953c22e031b27737a592f223e0b2e61f8",
+    "core/shared-backend/result-studio-repository.js": "67f113f8ca50af5aff8e558455603029a2e20617a4b106b54868721eec9ca1fa",
+    "core/shared-backend/result-studio-resource-summary.js": "d31fd966fcf8e880909777a2de528006645117525d4281f664589cb3233c6423",
+    "core/shared-backend/result-studio-runtime-lease.js": "9abf968b12e9965222e547142db0cd638d2747bfa02fa5597495b75613e79659",
+    "core/shared-backend/result-studio-schema.js": "84daf3777f21dc87d3615524399b45a8b16b930d020d584705e469cb96d3b76f",
+    "core/shared-backend/result-studio-table-query.js": "bcdd5b3377378674f322ef2287434f7a813553a42c01b4fc2eee7e7ad794fe3a",
+    "core/shared-backend/result-workflow-graph.js": "2a4500eb0e6129e20359c99aaaf91836c2317c258abdbf03bafc94e58421e40f",
+    "core/shared-backend/runtime-resource-probe.js": "c0129947e8e1e52d67f9a5ca674ddf0d32f5b9c2be9e27f47c5b4f35e239d773",
+    "core/shared-backend/runtime-resource-snapshot.js": "4a9e6407dc964500e87e7a484f33c038f7e199099beed0ff39df171a2447adbc",
+    "core/shared-backend/scientific-replay-package.js": "315c1f6ea87414767c1d9eea6ed38b89f0947b35fd87555a9c98eaf62dadc96b",
+    "core/shared-backend/scientific-task-spec.js": "ae992cacb8d9c57328eac2ab96dbe0300f3fde04d81b2e77dd5f9ee08181e7e5",
+    "core/shared-backend/tool-resource-sampler.js": "3eee5a4a491595e1c2b037cf2a04eee0b2234be8557ba035309c658b5ccb4c77",
+    "frontend/package-lock.json": "20fb9a1dc4c7cb183f14af0543c3193a4eb48a58300805edddffc7ca1a8e6645",
+    "frontend/package.json": "42b1f6f7b675522c28023ea879b8be1eb456feb36afa69a8a06f3767ffefddfb",
+    "frontend/src/components/copilot/SimpleChat.tsx": "d6a2b6100e2f871ecf36c432abd4bea25769f607932ac731901a572749c2ac3c",
+    "frontend/src/components/copilot/conversationRunStore.test.ts": "d48e4103f1052a2b0c4348f44e4b7314ec95ef3b069074219cfd51e8b15642d8",
+    "frontend/src/components/copilot/conversationRunStore.ts": "8183703db05831e71264f749bc5c0a4c47c1a766350879d69d47b3d616fcf68a",
+    "frontend/src/components/copilot/copilotClient.test.ts": "3ea7d34d05da5ae8a3b6bf05aac9da4e638b8d5f229eed41e5ad2a2d61dfa291",
+    "frontend/src/components/copilot/copilotClient.ts": "d2e604017f7f91a1ed8b5f3e70aef91781602a86f5782db1eecac266b10119e7",
+    "frontend/src/components/result-studio/ResultAgentComposer.module.css": "96bfc4dff032898ff544364d85c7c86984701bc16ccf254864a504a3c11a8bb2",
+    "frontend/src/components/result-studio/ResultAgentComposer.test.tsx": "cb703937db63adcafac6dc7f602816017cda04971dfa4fb27112d3167768a0ba",
+    "frontend/src/components/result-studio/ResultAgentComposer.tsx": "5c0508cb07254b660ba9b5c63553011617dde37f7db26053329f8d97e8c5e9e1",
+    "frontend/src/components/result-studio/ResultEditPanel.module.css": "5b95b407f4517132af63aea5c20be403cd16cff9db13b6d799040b366c5b308a",
+    "frontend/src/components/result-studio/ResultEditPanel.test.tsx": "38335ac744fb6450661cdb1a886c06b094b925befe1298751b50a0d09a752674",
+    "frontend/src/components/result-studio/ResultEditPanel.tsx": "9a1387cbb775978e1f5b325c079affe3700d298424cd60911eb87caf415af650",
+    "frontend/src/components/result-studio/ResultStudioChangeSetPanel.module.css": "6390244a64631130e97c641f81042e1f4b92a3ce5e14524224bcff640e3d593f",
+    "frontend/src/components/result-studio/ResultStudioChangeSetPanel.test.tsx": "bf90c49f1a1115e91245e5603d449d3201a1d391422fe916a4854e9d81ff65d8",
+    "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx": "150bdac99814e8f7867e25324f305eb59e19123d915d2dd57eff60192699064b",
+    "frontend/src/components/result-studio/ResultStudioSurface.module.css": "51de03642417669b94637447c27e6f18e3e38d328dcec5867779bac138c95254",
+    "frontend/src/components/result-studio/ResultStudioSurface.test.tsx": "97bf84d82dead98f90dc153da6a3514d15d9240493e67cc39063bb6451796503",
+    "frontend/src/components/result-studio/ResultStudioSurface.tsx": "fe026c47d099e4cc84e95b7133810620ee67bbdafcfd815ba322fb47ed03a545",
+    "frontend/src/components/result-studio/RevisionCodeView.module.css": "d51a9a7addb03ad51bada5c6eb8789d8d4df50d89dbd4ada5fca0c4a1d6ab9a9",
+    "frontend/src/components/result-studio/RevisionCodeView.tsx": "6534f49cf39a42c0e7ef303e91e20346e4f51990151ae1aa357070f0f305e855",
+    "frontend/src/components/result-studio/ScientificInteractionViewer.module.css": "660894b5ebb58440da200a7ff061787647ab7f054f0615478b3eaa193a716330",
+    "frontend/src/components/result-studio/ScientificInteractionViewer.test.tsx": "fe066e5457f5a4ca67163aef75b9552c3ead6d3ed57866168467649d2d63da51",
+    "frontend/src/components/result-studio/ScientificInteractionViewer.tsx": "f315c4078d92a69a1af1b9edb5f049e7385dfa25662bf0480e93093251e3635b",
+    "frontend/src/components/result-studio/activeArtifactProjection.test.ts": "7a816c0f777a007a0c4e1dff13cd97733e9afe3da8518b431cf8e438193fd8ac",
+    "frontend/src/components/result-studio/activeArtifactProjection.ts": "5eec0dc2372e3085fbe99b3d4cd56522e28e02e98153683c46d1ec2d80511a34",
+    "frontend/src/components/result-studio/resultBodyState.ts": "5a72f81934df8c621419dbdc9745c4cdd622eecc2fe44a5d9de1c21dc1f2156e",
+    "frontend/src/components/result-studio/resultFirstScreen.ts": "0ec5a9dcb536caae6929ecf589c59911bfcbc6900f88371866554b33ce246c3f",
+    "frontend/src/components/result-studio/resultMode.ts": "311d0a5d2cd7e3be6643ea9308904ae1109fe6cd17d5d881ec8a62ec4f8cb9b5",
+    "frontend/src/components/result-studio/resultScrollMemory.ts": "35fd77fa67bd4c34c79b85cd0f9d294e85d63c07bebdb7cf083c3fc2a865c078",
+    "frontend/src/components/result-studio/resultStudioClient.ts": "1173354496a9b20f29c76f2c989f1ae0cea35a2f58533777949705df7c050ebc",
+    "frontend/src/components/result-studio/resultSurface.ts": "6135a0d939cc8def8f5250f31408ab025a43dec0ae2e78ef588e31fb1f840f58",
+    "frontend/src/components/result-studio/resultVersionRole.test.ts": "253bac02cf49e119d3ea8b6355b355cc82a4757ca6304551997acdd1fcc2636c",
+    "frontend/src/components/result-studio/resultVersionRole.ts": "7266eb1f7b68edbe4a3ab66599c4561a10bfa22615b81633a54656fdd314ec41",
+    "frontend/src/components/workspace-panels/CenterPanel.tsx": "dd002e0ecc39e7a56dd335dcaeaeb0f1282729559d95eb9eef451091a5b5199c",
+    "frontend/src/components/workspace-panels/RightPanel.tsx": "3f9c1a781e3a7b8718dd71d5091863a48a020fc01e19d43fd297d43d326816ff",
+    "frontend/src/lib/artifact-selection.ts": "2156ef151d014b654d54f533663d2b7f5f086024161b464ecb45bb5b07fbafe2",
+    "frontend/src/lib/result-edit-agent-bridge.ts": "cd5e05ad41b40622cb1ee63f7e7fefe40b055147b9fcb581a0595f9f215ea996",
+    "frontend/src/lib/result-studio-interaction-client.ts": "41bb303c788a544e292e715e3e34b103ae0f0aaf538ca3b9ec83bcf601940b74",
+    "frontend/src/pages/project-workspace.module.css": "e8650ac918218c8e02864da9b1421bbef7262ec9da4d5a09d77cef23b52d5d06",
+    "frontend/src/pages/project-workspace.tsx": "1fe2ac3eb9aa6589f8cdb2612aca42a9ecd8b8028b0727bf477fde4c6d9a293e",
+    "package-lock.json": "c950b73b1dc5d6ae443a7db25edc048ce5b17a9bb990fd1845dad0e434ed9fb3",
+    "package.json": "0a8adb823ee844d3f9fb05859de3afe72c1c35ef7e74b7ce8d09c3c21931b6ff",
+    "resources/built-in-plugins/deseq2/golden-revisions/result-studio-v1.json": "b27bce1e3ea77592bf3da817da52d96cce290fd1b7d870088bca6a35b9c09f2b",
+    "resources/built-in-plugins/deseq2/plugin.json": "d848417d5539bb377024978668f9b41a1b3750b11e87a17b816398305199e9c5",
+    "resources/built-in-plugins/deseq2/scripts/deseq2.R": "013856191f06d1ab1326d7747a4cbd6b0979efcb31d084da707e5fec10cfa297",
+    "resources/built-in-plugins/deseq2/tool-definition.json": "3795547abb88e7307255b4a062840a34052390550596631311b83a861a8cc4f5",
+    "resources/built-in-plugins/gene-correlation/golden-revisions/result-studio-v1.json": "6f627ed22aabd43deb1d1c623c7ecad0b81a003a458099aad1aba9ece7e2c8bf",
+    "resources/built-in-plugins/gene-correlation/plugin.json": "3d6b1b1588e05c2f8300d290a340e978c9bdc38f69bcc89dace3b6dfe158f76b",
+    "resources/built-in-plugins/gene-correlation/scripts/gene-correlation.R": "6d4806556b99ca903cdc47bb038e97448eed711344015ae856a1986cd6de762c",
+    "resources/built-in-plugins/gene-correlation/tool-definition.json": "8101fd1cba19b1cb376544bcb39727a98551d972262fc33a9e2772ae94d06218",
+    "resources/built-in-plugins/go-kegg/demo-data/genes.csv": "00d5be08c34fc458284acd59e5215c8c1f383727b1b460ba1d120b759bfd9a1f",
+    "resources/built-in-plugins/go-kegg/go-kegg-report-template.html": "b98fd60d345a07df574adf9527b129ccadb9a9dda16c39fa1949c316e9eebdcb",
+    "resources/built-in-plugins/go-kegg/golden-revisions/result-studio-v1.json": "23c40ffcb6a0524b74df37791baff3e53cdd08033ac73de8fcb82342e0066fb6",
+    "resources/built-in-plugins/go-kegg/plugin.json": "16cb225381983dbbe994c7f4e6c0becb18fe93eec2daadb71e82ae28bcd7a155",
+    "resources/built-in-plugins/go-kegg/scripts/go-kegg.R": "517e86b6fed5af13aa8da8eca95cab70cfc73c3469aa8129a2f28fe58a4464ed",
+    "resources/built-in-plugins/go-kegg/tool-definition.json": "667632831ee88fba75d9869d399ca534e451c57f708a10fb3c4f72353c158f6f",
+    "resources/built-in-plugins/volcano-plot/golden-revisions/result-studio-v1.json": "05cf879f6a5f1978ac2cab6f526f16fdbb1c6f5184df348a28637e30b01334c6",
+    "resources/built-in-plugins/volcano-plot/plugin.json": "754c48de4f6a2e7904ab5bfbf428deb5d3e2bc89a2131fdfdeb2e38c6644a65e",
+    "resources/built-in-plugins/volcano-plot/scripts/volcano-plot.R": "ed50739c762e9fc8d4ae4d1532aa0e52a9af6e98cbcc1514fe29d4f8d5ba2c29",
+    "resources/built-in-plugins/volcano-plot/tool-definition.json": "7bed4bca98b614540f39fb8ffe5a6f2ef15eee7554e7b0acf95c03a5f0c9f97b",
+    "scripts/g0-rs-p4r-capture.mjs": "99f9eb3fe4efa643e5a87925098dfdd815664b703907b90333e9e240edd317ac",
+    "scripts/g0-rs-p5-acceptance.mjs": "e347c17f6f972678b02543fa4fa9c6234f85466d75dcbcad3b2b1323dfecbc20",
+    "scripts/g0-rs-p6-electron-pressure-driver.cjs": "521e7c4a87ca0d0e057ebd46823b4c5e1abb171fa0cd8250660aefde785139e9",
+    "scripts/g0-rs-p6-electron-pressure-prototype.mjs": "468c4beeee1871aa4022726282322ccde29f4232da97e66970c59b82748ecad5",
+    "scripts/g0-rs-p6-product-acceptance.mjs": "f349a37083409cf45bc061ee27e6f4b87fc7fe439f9f1e521f6364d57b5b9676",
+    "scripts/g0-rs-p6-product-scenarios.mjs": "7d1c4f9d2eb513e2c4c6cfdff0c0c7429ac4e010695a648c805bdb9e9bbc2a96",
+    "scripts/g0-rs-p6-real-restart-prototype.mjs": "3c14cac0bbfe7efad488a997049720e6141688b4ebf9ad4287f43150d5804061",
+    "scripts/g0-rs-p6-recovery-acceptance.mjs": "2874333f5b5e1bf18502cad3638477af556d9fdf5617d9ee286f37cd0df244e3",
+    "scripts/g0-rs-p6-recovery-electron-driver.cjs": "e3662625dfe886369e0089a2c47ec45d7b03983eae46275704f7e7a4620c23a2",
+    "scripts/g0-rs-p6-recovery-electron-prototype.mjs": "44feb58237149573d3216958ff62cb8824517192ca92e32716e044884d89dcc2",
+    "scripts/g0-rs-p6-ui110-driver.cjs": "4fe0f14774cdbe50ab34ab947f22874a07d8e0fbfb27d07f27174d10be20097d",
+    "scripts/g0-rs-p6-ui110-local-gateway.mjs": "129383885397d0e183063d255341438ca91df37feec7a8dca8aa84d8e80ab1a0",
+    "scripts/g0-rs-p6-ui110-observation.mjs": "62a402081362afed4ee1a539f6017e1885f9076af02a604b5e3558de3aaa7ae6",
+    "src/backend-health.js": "37739f3156d1c5cfae9f4ba32f9fda10dce1fcb4fb956a96ae63fb9701a5b150",
+    "src/migration-runner.js": "4c9826cc08fa1e7eb4c4daed9c700987273dbaa3ea26dbb43010ba563ec76080",
+    "src/migrations/001_result_studio.sql": "f6346ddb80d73d6a92a3cbdaf091c6d6b58cfaab9717fd0b2d8edca78c9723e0",
+    "src/migrations/002_result_workflow_graph.sql": "0033abb0ffca505c7cf6169ae838f4d986835d074baff4732159958b15602fb3",
+    "src/migrations/003_result_ref_transactions.sql": "a3f18fb245eea4809523e395b2fc7418833c52f9d35b3cb3734e81a1d23ad604",
+    "src/preload.js": "a972589af6185945120433e392eae8d723c9facffde40ef0402bdd23089b9a61",
+    "test/agent-run-tool.test.mjs": "2087a73cf12ca11312a5900011b77902a7eaa2ca2761a7b6108978b5f73d5871",
+    "test/agent-tool-registry.test.mjs": "8a741ba798b4ac15bb0ded02dc2c53d5f0de35f44dbfb959839d47429368f736",
+    "test/artifact-truth.test.mjs": "3f99e9ee566bb0a3fa37e5cf3228c685f1a76dac8ea736757380063e20ae0388",
+    "test/diagnostic-redaction.test.mjs": "0d0e6abc547535c544ae9e38faca6519def5e8615e146f954c85bdb8134e3ddd",
+    "test/execution-provenance.test.mjs": "914a53721e6edf4e391c5439e21b4ffde6683145e74543029923b7e98b1f3fd3",
+    "test/g0-chf0-lifecycle.test.mjs": "37855b31fc776d5c220f75d70544dbe80ee4892d28db6d10eba2bd9177e1486a",
+    "test/g0-rs-p5-acceptance.test.mjs": "bcf7923da3a7e6cd4e18d093322cdb4bb77cc69c6502167caf039b00c2189e5a",
+    "test/g0-rs-p6-electron-pressure-prototype.test.mjs": "aac8644887a15568e5b84527a73b0493b41802a6a8f9e18b59f1e9ba71daf2dd",
+    "test/g0-rs-p6-product-acceptance.test.mjs": "5072130a06e2d5a0468ae67e2ec9b60a2bd4a84019b4ce7ed71e517412e94f61",
+    "test/g0-rs-p6-product-scenarios.test.mjs": "f4dbe28beec99cd7bee260528a6c471526356b4ad6eefd0c39e16180788561d2",
+    "test/g0-rs-p6-real-restart-prototype.test.mjs": "623a6989d8b22b4c4acebb8e4c9ea490150ed7714b0f598f185eca2adc5b0824",
+    "test/g0-rs-p6-recovery-acceptance.test.mjs": "1b37a3e5640f05edac4dec8c8fe78fc417aa25bf375e33cbf2296762c6e5fadd",
+    "test/g0-rs-p6-recovery-electron-prototype.test.mjs": "406cf9948513356e0d4ffbe09005c0028c0d30d76ce6aa237778d14faa720eb6",
+    "test/g0-rs-p6-ui110-local-gateway.test.mjs": "89d4962e4f71f5d8b7fab135c62a3ae25399298afde269bc587207628c7d683a",
+    "test/g0-rs-p6-ui110-observation.test.mjs": "804564e192186d4ae08539f6960c7e1044039c3aa6c9051ed20c3be520c0ead5",
+    "test/git-adapter.test.mjs": "cc08c1fafb4a7117487714c450aae154aca33cf18d07d9e04e885ff796d8894d",
+    "test/impact-map.json": "2c3aac62b67070ef0f2925007e17510669e310647f37dc3fde4d7ec1f3465b41",
+    "test/result-changeset-service.test.mjs": "7aa64eba971d36a7d1435fb7437dcf1c4733b60351effddf096410be8272e2ac",
+    "test/result-compare-service.test.mjs": "7133ea5b40770c2157667cba38e1c78a6fceafa8f5e7e8b84dd0504c97ec62bb",
+    "test/result-edit-agent-tool.test.mjs": "416a084465138d053f72689c78238b58c9edd604c3cb087adb58218c5f688794",
+    "test/result-edit-controls.test.mjs": "4e45a58d2e440be52c03664ffe761bd969e8b4e23b14c2fa36cf3a5e86fe1976",
+    "test/result-edit-intent.test.mjs": "cf01cfb9298ab3f386b224bc18a9fdfb48e0045dd76467fab2de5188e882aadb",
+    "test/result-plugin-validator.test.mjs": "c395f7d11ff0c781e2f98469ee1603633d2a0eaefc97bd28449ef23437f0b329",
+    "test/result-ref-transaction.test.mjs": "63a024a733626d09125e7bbf5f7aa6ae3438c4a2b7f9375b2f725fc9e5a3e3aa",
+    "test/result-replay-service.test.mjs": "46d4901ab1e4eb6b8fd8269f7f35f84fe36c4b538b7a1342d7337f52e4977eee",
+    "test/result-revision-replay-package.test.mjs": "f759ef40b35f063a85540f51e8f9c1dbfe1993b8bbd5794115b0f12b16c84b07",
+    "test/result-revision-source.test.mjs": "8a3c04ff5f26148a7e5d551d5671da7c9688106af36cdd553ea671749744d80e",
+    "test/result-scientific-compare.test.mjs": "8c4a7fcef956d89fbee8d4411a307190324a1d2b4ae693b9685997c7475ace51",
+    "test/result-scientific-rerun.test.mjs": "c026eb5ad690b2aaaee9c0a8caae9c98349dfa0ef2b1d0480935c0652e912188",
+    "test/result-selection-tools.test.mjs": "cba40db58f578e3c6ebde4d35d155b5139055934d7e9b4ddbb84b5b55a2be849",
+    "test/result-studio-background.test.mjs": "4f40cfdcdd3bcdbc8d7aa466a8c0b927957795a1e266246ce75760927cf2270e",
+    "test/result-studio-context.test.mjs": "5292bdf52a1af367a2eba58940af20205acc869b57cf1a88492b558c13156454",
+    "test/result-studio-lifecycle.test.mjs": "4f719717024c00b2978075f32adea719aaf145186161906b64cb00c3ac36bd7e",
+    "test/result-studio-migration.test.mjs": "816a135f0ed114c7143b40f19545c5655473945fa4202557298c632c375c363e",
+    "test/result-studio-plugin-sdk.test.mjs": "50b5d406e7971f9236640ae115b1714f9645326a4ffa289cfc689609c0961eaf",
+    "test/result-studio-repository.test.mjs": "4350c7674e7f5ea74facd2195fda89c88d52183ac9d804e886e0f085d9e6f9c8",
+    "test/result-studio-resource-summary.test.mjs": "b9ebeda24c83b1a82055cf6fb06961b7ca41f10f8551fc943ba7cf927c395f38",
+    "test/result-studio-route-baseline.test.mjs": "615dd13dded71db28f3cecad1fb66cccaa4fa9831abbbdf53ea4f3036f80ed1d",
+    "test/result-studio-table-query.test.mjs": "faf60f747fd6e5e90c2ede63b9b00a72bad8c454899580fc7c54468a6d03ac78",
+    "test/result-workflow-graph.test.mjs": "67d6734a223a2045f27bbba8087ad64a8a32e911f9d8f9163dfd570c8f9166de",
+    "test/scientific-replay-package.test.mjs": "3456769e544192b9afe01fadbe0f931d63860079a67c66c03eeaa932924523a1",
+    "test/test-affected.test.mjs": "ad1e97de15ff5613e7422304ef4796178d1434a58d52eaacde6291400053dfa6",
+    "test/tool-resource-sampler.test.mjs": "198adead5f16f0e8715a310542e4c0a8268ccd37424be4d49cfce2970c3a82c3",
+    "test/tools-executor-job-context.test.mjs": "c88e9a26f84e94eb079b4b8a5680402b7b7545f6b5ada575c229e532ce04cbac",
+    "test/tools-input-validation.test.mjs": "302f401237653697d06b1e76518869bad694cb2ec28814f9a55a30c7ff666052"
+  },
+  "sourceBindingDigest": "d9775f30d728f444124d46bef6c7d71fe139883a4b140966e0219f2202de2e8d",
+  "sourceCommitMatchesSourceHashes": true,
+  "sourceBindingStableDuringCapture": true,
+  "observations": {
+    "stop": {
+      "prototype": "real_user_stop_noncanonical",
+      "cancelHttpStatus": 200,
+      "cancelResponseStatus": "cancelled",
+      "cancelTerminationConfirmed": true,
+      "cancelledJobStatus": "cancelled",
+      "cancelledJobCompleted": true,
+      "cancelledProcessExited": true,
+      "cancelledResourceSamplingStatus": "measured",
+      "cancelledResourceSampleCount": 2,
+      "cancelledResourcePeakStatus": "measured",
+      "cancelledResourceProcessExitConfirmed": true,
+      "changeSetCountBefore": 1,
+      "changeSetCountAfter": 1,
+      "revisionCountBefore": 3,
+      "revisionCountAfter": 3,
+      "baselineDigestStable": true,
+      "baselineArtifactsExact": true,
+      "workspaceStatus": {
+        "status": "ready",
+        "checkpointIntegrity": {
+          "status": "unavailable",
+          "matches": false
+        },
+        "consistency": {
+          "status": "unavailable",
+          "recoverable": false,
+          "drift": []
+        },
+        "interruptedCount": 0,
+        "activeOperationCount": 0,
+        "pendingDecisionCount": 0,
+        "pendingIssues": [],
+        "revisionIntegrityStatus": null,
+        "revisionIntegrityIssues": [],
+        "interrupted": []
+      },
+      "qualificationEligible": false,
+      "providerUsed": false,
+      "packagedAppUsed": false
+    },
+    "executionFailure": {
+      "prototype": "real_r_failure_and_validator_block_noncanonical",
+      "failedJobStatus": "failed",
+      "failedJobCompleted": true,
+      "failedProcessExited": true,
+      "changeSetCountBeforeFailure": 1,
+      "changeSetCountAfterFailure": 1,
+      "revisionCountBeforeFailure": 3,
+      "revisionCountAfterFailure": 3,
+      "recoveryJobStatus": "completed",
+      "recoveryJobArtifactTruthStatus": "valid",
+      "recoveryJobArtifactsExact": true,
+      "validatorJobStatus": "completed",
+      "validatorJobArtifactTruthStatus": "valid",
+      "validatorJobArtifactsExact": true,
+      "validatorHttpStatus": 200,
+      "validatorRevisionCreated": false,
+      "validatorDiagnosticCode": "baseline_plugin_validation_failed",
+      "changeSetCountBeforeValidator": 1,
+      "changeSetCountAfterValidator": 1,
+      "revisionCountBeforeValidator": 3,
+      "revisionCountAfterValidator": 3,
+      "baselineDigestStable": true,
+      "baselineArtifactsExact": true,
+      "workspaceStatus": {
+        "status": "ready",
+        "checkpointIntegrity": {
+          "status": "unavailable",
+          "matches": false
+        },
+        "consistency": {
+          "status": "unavailable",
+          "recoverable": false,
+          "drift": []
+        },
+        "interruptedCount": 0,
+        "activeOperationCount": 0,
+        "pendingDecisionCount": 0,
+        "pendingIssues": [],
+        "revisionIntegrityStatus": null,
+        "revisionIntegrityIssues": [],
+        "interrupted": []
+      },
+      "qualificationEligible": false,
+      "providerUsed": false,
+      "packagedAppUsed": false
+    },
+    "drift": {
+      "prototype": "real_product_drift_noncanonical",
+      "dirtyGitDetected": true,
+      "dirtyMarkerHashStable": true,
+      "artifactDriftStatus": {
+        "status": "blocked",
+        "checkpointIntegrity": {
+          "status": "unavailable",
+          "matches": false
+        },
+        "consistency": {
+          "status": "unavailable",
+          "recoverable": false,
+          "drift": []
+        },
+        "interruptedCount": 0,
+        "activeOperationCount": 0,
+        "pendingDecisionCount": 0,
+        "pendingIssues": [],
+        "revisionIntegrityStatus": null,
+        "revisionIntegrityIssues": [
+          "artifact_hash_drift"
+        ],
+        "interrupted": []
+      },
+      "artifactRecoverHttpStatus": 409,
+      "artifactRecoverAfterStatus": "blocked",
+      "afterArtifactRestoreStatus": {
+        "status": "ready",
+        "checkpointIntegrity": {
+          "status": "unavailable",
+          "matches": false
+        },
+        "consistency": {
+          "status": "unavailable",
+          "recoverable": false,
+          "drift": []
+        },
+        "interruptedCount": 0,
+        "activeOperationCount": 0,
+        "pendingDecisionCount": 0,
+        "pendingIssues": [],
+        "revisionIntegrityStatus": null,
+        "revisionIntegrityIssues": [],
+        "interrupted": []
+      },
+      "refDriftStatus": {
+        "status": "blocked",
+        "checkpointIntegrity": {
+          "status": "unavailable",
+          "matches": false
+        },
+        "consistency": {
+          "status": "unavailable",
+          "recoverable": false,
+          "drift": []
+        },
+        "interruptedCount": 0,
+        "activeOperationCount": 0,
+        "pendingDecisionCount": 0,
+        "pendingIssues": [],
+        "revisionIntegrityStatus": null,
+        "revisionIntegrityIssues": [
+          "current_ref_drift"
+        ],
+        "interrupted": []
+      },
+      "refRecoverHttpStatus": 409,
+      "refRecoverAfterStatus": "blocked",
+      "afterRefRestoreStatus": {
+        "status": "ready",
+        "checkpointIntegrity": {
+          "status": "unavailable",
+          "matches": false
+        },
+        "consistency": {
+          "status": "unavailable",
+          "recoverable": false,
+          "drift": []
+        },
+        "interruptedCount": 0,
+        "activeOperationCount": 0,
+        "pendingDecisionCount": 0,
+        "pendingIssues": [],
+        "revisionIntegrityStatus": null,
+        "revisionIntegrityIssues": [],
+        "interrupted": []
+      },
+      "scriptHashRevisionCreated": false,
+      "scriptHashDiagnosticCode": "background_source_script_drift",
+      "scriptMissingRevisionCreated": false,
+      "scriptMissingDiagnosticCode": "source_script_missing",
+      "scriptDriftChangeSetCountStable": true,
+      "scriptDriftRevisionCountStable": true,
+      "selectionCompatibility": "stale",
+      "contextSelectionCompatibility": "stale",
+      "contextSelectionExcluded": true,
+      "oldContextHttpStatus": 409,
+      "oldContextErrorCode": "context_token_stale",
+      "oldContextWriteCountsStable": true,
+      "coldBootStatus": {
+        "status": "ready",
+        "checkpointIntegrity": {
+          "status": "unavailable",
+          "matches": false
+        },
+        "consistency": {
+          "status": "unavailable",
+          "recoverable": false,
+          "drift": []
+        },
+        "interruptedCount": 0,
+        "activeOperationCount": 0,
+        "pendingDecisionCount": 0,
+        "pendingIssues": [],
+        "revisionIntegrityStatus": null,
+        "revisionIntegrityIssues": [],
+        "interrupted": []
+      },
+      "historySourceStillExact": true,
+      "pluginReplayHttpStatus": 409,
+      "pluginReplayErrorCode": "replay_plugin_version_drift",
+      "pluginReplayWriteCountsStable": true,
+      "currentRevisionArtifactsExact": true,
+      "qualificationEligible": false,
+      "providerUsed": false,
+      "packagedAppUsed": false
+    },
+    "restart": {
+      "prototype": "real_process_restart_noncanonical",
+      "noSeedSeededTableCount": 0,
+      "baselineJobCompleted": true,
+      "baselineArtifactTruthValid": true,
+      "baselineRevisionCount": 3,
+      "baselineResourceSamplingMeasured": true,
+      "baselineCpuPeakMeasured": true,
+      "baselineRssPeakMeasured": true,
+      "baselineOutputPeakMeasured": true,
+      "baselineSystemResourcesMeasured": true,
+      "baselineActiveJobPeakMeasured": true,
+      "checkpointIntegrityBeforeKill": true,
+      "checkpointStageBeforeKill": "candidate_committed",
+      "candidateRefMatchedBeforeKill": true,
+      "candidateJobRunningBeforeKill": true,
+      "workerCheckpointHoldConfirmed": true,
+      "workerCheckpointHoldMode": "sigstop_process_group",
+      "processGroupAliveBeforeKill": true,
+      "candidateChildPresentBeforeKill": true,
+      "candidateJobExactBeforeKill": true,
+      "candidateInputExactBeforeKill": true,
+      "candidateRuntimePausedBeforeCheckpoint": true,
+      "candidateRuntimeProcessObservedBeforeKill": true,
+      "candidateRuntimeDirectChildBeforeKill": true,
+      "candidateRuntimeCommandTrustedBeforeKill": true,
+      "candidateRuntimeExecutableIdentityExactBeforeKill": true,
+      "processGroupAllStoppedBeforeKill": true,
+      "workerExitSignal": "SIGKILL",
+      "workerCompletionMarkerSeen": false,
+      "processGroupGoneAfterKill": true,
+      "candidateRuntimeProcessGoneAfterKill": true,
+      "sqliteFileIdentityStable": true,
+      "sqliteJournalModeBefore": "wal",
+      "sqliteJournalModeAfter": "wal",
+      "workspaceStable": true,
+      "gitBindingStable": true,
+      "firstColdStatus": {
+        "status": "recovery_available",
+        "checkpointIntegrity": {
+          "status": "intact",
+          "matches": true
+        },
+        "consistency": {
+          "status": "consistent",
+          "recoverable": true,
+          "drift": []
+        },
+        "interruptedCount": 1,
+        "activeOperationCount": 0,
+        "pendingDecisionCount": 0,
+        "pendingIssues": [],
+        "revisionIntegrityStatus": null,
+        "revisionIntegrityIssues": [],
+        "interrupted": [
+          {
+            "status": "running",
+            "checkpointStage": "candidate_committed",
+            "preservedRevisionCount": 0
+          }
+        ]
+      },
+      "recoveryHttpStatus": 200,
+      "recoveryRepairKinds": [
+        "running_to_validation_failed"
+      ],
+      "recoveredChangeSetStatus": "validation_failed",
+      "recoveredCheckpointStatus": "validation_failed",
+      "recoveredRevisionCount": 0,
+      "baselineDigestStable": true,
+      "baselineArtifactsExactAfterRecovery": true,
+      "secondColdStatus": {
+        "status": "ready",
+        "checkpointIntegrity": {
+          "status": "intact",
+          "matches": true
+        },
+        "consistency": {
+          "status": "consistent",
+          "recoverable": true,
+          "drift": []
+        },
+        "interruptedCount": 0,
+        "activeOperationCount": 0,
+        "pendingDecisionCount": 0,
+        "pendingIssues": [],
+        "revisionIntegrityStatus": null,
+        "revisionIntegrityIssues": [],
+        "interrupted": []
+      },
+      "secondRecoveryRecovered": false,
+      "interruptedJobsTerminal": true,
+      "interruptedJobStatuses": [
+        "failed"
+      ],
+      "qualificationEligible": false,
+      "providerUsed": false,
+      "packagedAppUsed": false
+    },
+    "electronRecovery": {
+      "schemaVersion": 1,
+      "planId": "G0-RS-P6",
+      "slice": "P6-1 bounded development Electron recovery trace",
+      "classification": "development_local_electron_real_sigkill_recovery_non_provider_non_packaged_non_qualifying",
+      "qualificationEligible": false,
+      "p6CloseoutEligible": false,
+      "boundary": {
+        "providerEvidence": "not_exercised",
+        "packagedAppEvidence": "not_exercised",
+        "qualificationEligible": false,
+        "systemRestartClaim": false,
+        "processBoundary": "owned_electron_and_backend_processes_restarted_against_same_durable_local_stores",
+        "checkpointInterruptionPlatform": "darwin",
+        "checkpointInterruptionSignal": "posix_sigstop_process_group"
+      },
+      "sourceBindingStableDuringObservation": true,
+      "truth": {
+        "noSeedProductLedger": true,
+        "baselineJobCompleted": true,
+        "baselineArtifactTruthValid": true,
+        "baselineRevisionCount": 3,
+        "baselineJournalMode": "wal"
+      },
+      "interruption": {
+        "checkpointStage": "candidate_committed",
+        "checkpointIntegrityExact": true,
+        "candidateRefExact": true,
+        "candidateJobRunningBeforeKill": true,
+        "workerCheckpointHoldConfirmed": true,
+        "workerCheckpointHoldMode": "sigstop_process_group",
+        "processGroupAliveBeforeKill": true,
+        "candidateChildPresentBeforeKill": true,
+        "candidateJobExactBeforeKill": true,
+        "candidateInputExactBeforeKill": true,
+        "candidateRuntimePausedBeforeCheckpoint": true,
+        "candidateRuntimeProcessObservedBeforeKill": true,
+        "candidateRuntimeDirectChildBeforeKill": true,
+        "candidateRuntimeCommandTrustedBeforeKill": true,
+        "candidateRuntimeExecutableIdentityExactBeforeKill": true,
+        "processGroupAllStoppedBeforeKill": true,
+        "workerExitSignal": "SIGKILL",
+        "workerCompletionMarkerSeen": false,
+        "processGroupGoneAfterKill": true,
+        "candidateRuntimeProcessGoneAfterKill": true
+      },
+      "firstColdStatus": {
+        "status": "recovery_available",
+        "checkpointIntegrityExact": true,
+        "consistencyStatus": "consistent",
+        "interruptedCount": 1,
+        "activeOperationCount": 0,
+        "pendingDecisionCount": 0,
+        "pendingIssueCount": 0,
+        "revisionIntegrityStatus": null
+      },
+      "renderer": {
+        "activeCrash": {
+          "schemaVersion": 1,
+          "phase": "active-crash",
+          "browserWindowSecurity": {
+            "contextIsolation": true,
+            "nodeIntegrationDisabled": true,
+            "sandbox": true,
+            "popupDenied": true
+          },
+          "before": {
+            "lifecycleState": "ready",
+            "detectedInterruptedSite": false,
+            "stoppingStageExplained": false,
+            "preservedCandidateCountExplained": false,
+            "automaticHandlingExplained": false,
+            "nextActionExplained": false,
+            "readyStateExplained": false,
+            "activeOperationExplained": true,
+            "activeStageExplained": true,
+            "recoveryControlPresent": false,
+            "recoveryControlEnabled": false,
+            "publicProjectionAudit": {
+              "absolutePath": false,
+              "providerMaterial": false,
+              "rawInternalId": false
+            },
+            "semanticDigest": "4ebaca00427394e473c85d2bbbe4323e42b71488736bb993f5aa0aca35621566",
+            "visual": {
+              "label": "active-before-crash",
+              "sha256": "0979815c8a1c002df74d56c913f093e67425e512267cb1641c9fbd76ac02084c",
+              "bytes": 413261,
+              "nonblank": true
+            },
+            "recoveryControlAbsent": true
+          },
+          "after": null,
+          "recoveryRequestCount": 0,
+          "recoveryRequestStatuses": [],
+          "blockedNavigationCount": 0,
+          "renderProcessGoneCount": 0,
+          "publicProjectionClean": true,
+          "backendStatus": {
+            "checkCount": 2,
+            "everyCheckReady": true,
+            "maxDurationMs": 22.807124999999814
+          },
+          "isolatedCompatibility": {
+            "aiSettingsReadCount": 1,
+            "terminalResizeCount": 1,
+            "terminalStopCount": 1
+          },
+          "passed": true,
+          "launchAttemptCount": 1,
+          "preObservationLaunchFailures": []
+        },
+        "recover": {
+          "schemaVersion": 1,
+          "phase": "recover",
+          "browserWindowSecurity": {
+            "contextIsolation": true,
+            "nodeIntegrationDisabled": true,
+            "sandbox": true,
+            "popupDenied": true
+          },
+          "before": {
+            "lifecycleState": "recovery_available",
+            "detectedInterruptedSite": true,
+            "stoppingStageExplained": true,
+            "preservedCandidateCountExplained": true,
+            "automaticHandlingExplained": true,
+            "nextActionExplained": true,
+            "readyStateExplained": false,
+            "activeOperationExplained": false,
+            "activeStageExplained": false,
+            "recoveryControlPresent": true,
+            "recoveryControlEnabled": true,
+            "publicProjectionAudit": {
+              "absolutePath": false,
+              "providerMaterial": false,
+              "rawInternalId": false
+            },
+            "semanticDigest": "3236a365eb107d5f2e4987f1e2c1cd6c5c1e1c0ac09e28ddefaddc650b35f324",
+            "visual": {
+              "label": "before-recovery",
+              "sha256": "758e703bdba8f68517cabda02bd06c5538c1b8ff134ccee23c3be74e96f2474a",
+              "bytes": 436778,
+              "nonblank": true
+            }
+          },
+          "after": {
+            "lifecycleState": "ready",
+            "detectedInterruptedSite": false,
+            "stoppingStageExplained": false,
+            "preservedCandidateCountExplained": false,
+            "automaticHandlingExplained": false,
+            "nextActionExplained": false,
+            "readyStateExplained": true,
+            "activeOperationExplained": false,
+            "activeStageExplained": false,
+            "recoveryControlPresent": false,
+            "recoveryControlEnabled": false,
+            "publicProjectionAudit": {
+              "absolutePath": false,
+              "providerMaterial": false,
+              "rawInternalId": false
+            },
+            "semanticDigest": "a6ed2ece325da737419dc832c482e9e423839ce8e51bbf45d97ac7cb4846bf6c",
+            "visual": {
+              "label": "after-recovery",
+              "sha256": "e4dd2a348f8006e2d4659a987aa7d48a28886a760dbfd56785732b06379854ac",
+              "bytes": 401092,
+              "nonblank": true
+            },
+            "recoveryControlAbsent": true
+          },
+          "recoveryRequestCount": 1,
+          "recoveryRequestStatuses": [
+            200
+          ],
+          "blockedNavigationCount": 0,
+          "renderProcessGoneCount": 0,
+          "publicProjectionClean": true,
+          "backendStatus": {
+            "checkCount": 2,
+            "everyCheckReady": true,
+            "maxDurationMs": 22.367250000000013
+          },
+          "isolatedCompatibility": {
+            "aiSettingsReadCount": 1,
+            "terminalResizeCount": 1,
+            "terminalStopCount": 1
+          },
+          "passed": true
+        },
+        "reopen": {
+          "schemaVersion": 1,
+          "phase": "reopen",
+          "browserWindowSecurity": {
+            "contextIsolation": true,
+            "nodeIntegrationDisabled": true,
+            "sandbox": true,
+            "popupDenied": true
+          },
+          "before": {
+            "lifecycleState": "ready",
+            "detectedInterruptedSite": false,
+            "stoppingStageExplained": false,
+            "preservedCandidateCountExplained": false,
+            "automaticHandlingExplained": false,
+            "nextActionExplained": false,
+            "readyStateExplained": true,
+            "activeOperationExplained": false,
+            "activeStageExplained": false,
+            "recoveryControlPresent": false,
+            "recoveryControlEnabled": false,
+            "publicProjectionAudit": {
+              "absolutePath": false,
+              "providerMaterial": false,
+              "rawInternalId": false
+            },
+            "semanticDigest": "a6ed2ece325da737419dc832c482e9e423839ce8e51bbf45d97ac7cb4846bf6c"
+          },
+          "after": {
+            "lifecycleState": "ready",
+            "detectedInterruptedSite": false,
+            "stoppingStageExplained": false,
+            "preservedCandidateCountExplained": false,
+            "automaticHandlingExplained": false,
+            "nextActionExplained": false,
+            "readyStateExplained": true,
+            "activeOperationExplained": false,
+            "activeStageExplained": false,
+            "recoveryControlPresent": false,
+            "recoveryControlEnabled": false,
+            "publicProjectionAudit": {
+              "absolutePath": false,
+              "providerMaterial": false,
+              "rawInternalId": false
+            },
+            "semanticDigest": "a6ed2ece325da737419dc832c482e9e423839ce8e51bbf45d97ac7cb4846bf6c",
+            "visual": {
+              "label": "reopened-ready",
+              "sha256": "e4dd2a348f8006e2d4659a987aa7d48a28886a760dbfd56785732b06379854ac",
+              "bytes": 401092,
+              "nonblank": true
+            },
+            "recoveryControlAbsent": true
+          },
+          "recoveryRequestCount": 0,
+          "recoveryRequestStatuses": [],
+          "blockedNavigationCount": 0,
+          "renderProcessGoneCount": 0,
+          "publicProjectionClean": true,
+          "backendStatus": {
+            "checkCount": 2,
+            "everyCheckReady": true,
+            "maxDurationMs": 21.474166999999966
+          },
+          "isolatedCompatibility": {
+            "aiSettingsReadCount": 1,
+            "terminalResizeCount": 1,
+            "terminalStopCount": 1
+          },
+          "passed": true
+        }
+      },
+      "recoveredTruth": {
+        "changeSetStatus": "validation_failed",
+        "checkpointStatus": "validation_failed",
+        "candidateRevisionCount": 0,
+        "interruptedJobTerminal": true,
+        "activeChangeSetCount": 0,
+        "baselineDigestStable": true,
+        "baselineArtifactsExact": true,
+        "baselineCurrentCountExact": true
+      },
+      "afterRecoveryStatus": {
+        "status": "ready",
+        "checkpointIntegrityExact": true,
+        "consistencyStatus": "consistent",
+        "interruptedCount": 0,
+        "activeOperationCount": 0,
+        "pendingDecisionCount": 0,
+        "pendingIssueCount": 0,
+        "revisionIntegrityStatus": null
+      },
+      "secondColdStatus": {
+        "status": "ready",
+        "checkpointIntegrityExact": true,
+        "consistencyStatus": "consistent",
+        "interruptedCount": 0,
+        "activeOperationCount": 0,
+        "pendingDecisionCount": 0,
+        "pendingIssueCount": 0,
+        "revisionIntegrityStatus": null
+      },
+      "finalStatus": {
+        "status": "ready",
+        "checkpointIntegrityExact": true,
+        "consistencyStatus": "consistent",
+        "interruptedCount": 0,
+        "activeOperationCount": 0,
+        "pendingDecisionCount": 0,
+        "pendingIssueCount": 0,
+        "revisionIntegrityStatus": null
+      },
+      "performance": {
+        "restartRestoreMs": 1831.4533329999977,
+        "budgets": {
+          "restartRestoreMs": 5000
+        }
+      },
+      "processBoundaries": {
+        "electronActuallySigkilled": true,
+        "electronRelaunchedAfterCrash": true,
+        "electronProcessRelaunched": true,
+        "backendColdBootCount": 2,
+        "sqliteFileIdentityStable": true,
+        "workspaceStillPresent": true
+      },
+      "remainingBoundaries": [
+        "real_provider_not_exercised_p7_exclusion",
+        "packaged_app_not_exercised_p7_exclusion",
+        "development_trace_not_qualification_evidence"
+      ]
+    },
+    "electronPressure": {
+      "schemaVersion": 1,
+      "planId": "G0-RS-P6",
+      "slice": "P6-1 bounded Electron pressure and multi-Revision observation",
+      "classification": "development_electron_real_jobs_mixed_synthetic_revision_pressure_non_provider_non_packaged_non_qualifying",
+      "qualificationEligible": false,
+      "p6CloseoutEligible": false,
+      "providerEvidence": "not_exercised",
+      "packagedAppEvidence": "not_exercised",
+      "dependencyBoundary": {
+        "capabilityProvisioning": "not_exercised",
+        "enrichmentLibraries": "host_runtime_observed_through_completed_artifact_truth_job"
+      },
+      "platform": "darwin-arm64",
+      "sourceBindingStableDuringObservation": true,
+      "input": {
+        "volcanoRows": 100000,
+        "volcanoBytes": 4049954,
+        "volcanoSha256": "518901ddf9b65bf675bc5d4fe9642cbf757899a81508d2c8c43972d92773d0a8",
+        "reportRows": 68,
+        "reportInputBytes": 369,
+        "reportInputSha256": "00d5be08c34fc458284acd59e5215c8c1f383727b1b460ba1d120b759bfd9a1f"
+      },
+      "truth": {
+        "table": {
+          "rows": 100000,
+          "bytes": 5741929,
+          "sha256": "b6d3a46273e887c1c4ef356470f9487c8bbea91bfb139778bb941bba30aba150",
+          "jobArtifactHashProjection": "measured"
+        },
+        "png": {
+          "bytes": 1297051,
+          "sha256": "271d57e86d1d063628ec799870b55dd932db332b3129dae9094fd885d742a270",
+          "width": 2100,
+          "height": 1500,
+          "jobArtifactHashProjection": "measured"
+        },
+        "svg": {
+          "bytes": 42686780,
+          "sha256": "0858684f101302328c474a4fc93b2e1e34f9b110c57379e3c5719f93c68839e6",
+          "vectorElementCount": 100327,
+          "complex": true,
+          "jobArtifactHashProjection": "measured"
+        },
+        "report": {
+          "bytes": 5014451,
+          "sha256": "4cc54f4c4830e8ac0d2eb70c1d5142633c8eb9cc24be912617f9a68ecc170cc8",
+          "headingCount": 22,
+          "present": true,
+          "longVolumeProven": true,
+          "jobArtifactHashProjection": "measured",
+          "sqliteRevisionProjection": "measured"
+        },
+        "artifactTruthValid": true,
+        "exactPhysicalHashes": true,
+        "sqliteFormalOutputRevisionsExact": true,
+        "sqliteSyntheticRevisionCount": 201,
+        "sqliteMatchesPressureSummary": true,
+        "jobResourceUsage": [
+          {
+            "toolClass": "go_bp_report",
+            "peakStatus": "measured",
+            "sampleCount": 11
+          },
+          {
+            "toolClass": "go_bp_report",
+            "peakStatus": "measured",
+            "sampleCount": 101
+          }
+        ]
+      },
+      "pressure": {
+        "syntheticRevisionCount": 201,
+        "syntheticFamilyCount": 3,
+        "syntheticClassification": "same_real_artifact_bytes_revision_alias_without_additional_execution",
+        "previewCohortRevisionCount": 3,
+        "totalProjectRevisionCount": 210,
+        "projectToolJobCount": 2,
+        "familyCounts": [
+          {
+            "artifactClass": "table",
+            "revisionCount": 123
+          },
+          {
+            "artifactClass": "png",
+            "revisionCount": 42
+          },
+          {
+            "artifactClass": "svg",
+            "revisionCount": 42
+          }
+        ],
+        "immutableMutationRejected": true,
+        "immutableDigestStable": true,
+        "immutableLedgerDigest": "73504b8782fe2dedd25774d6b9cfb97a4ecdec106c86a5a5a2291c1e62f9894a",
+        "currentRevisionCount": 6,
+        "realJobBackedCohortCount": 2,
+        "realJobBackedCohortDigest": "50a7252de3c3266be6b22db7f2b62fd15b6bae4604223ac65c52477f97f27f3c"
+      },
+      "renderer": {
+        "schemaVersion": 1,
+        "renderer": "Electron 30.5.1; Chromium 124.0.6367.243",
+        "table": {
+          "totalRows": 100000,
+          "visibleRows": 18,
+          "navigationMs": 1223.036083,
+          "canvasFirstVisibleMs": 1223.036083,
+          "productCanvasFirstVisibleMs": null,
+          "scrollFeedbackMs": 5.200000002980232,
+          "scrollChanged": true,
+          "selectionFeedbackMs": 10.399999998509884,
+          "selectionChanged": true,
+          "sortFeedbackMs": 3.899999998509884,
+          "sortChanged": true,
+          "filterFeedbackMs": 8.899999998509884,
+          "filterQueryCompleteMs": 600.7999999970198,
+          "filterChanged": true,
+          "filterQueryChanged": true,
+          "filterMatchedSummaryChanged": true,
+          "filterFirstVisibleRowChanged": true,
+          "virtualPageLoadMs": 38.600000001490116,
+          "virtualPageChanged": true,
+          "screenshotSha256": "63211cc1410c96757d9ddfed7bd862dced977ce89ceca41791391011f568b1ff",
+          "screenshotBytes": 459640,
+          "width": 2880,
+          "height": 1718
+        },
+        "media": {
+          "png": {
+            "loadMs": 124.48129199999994,
+            "switch": {
+              "feedbackMs": 14.899999998509884,
+              "productMetricMs": 1.6,
+              "wallFeedbackMs": 14.899999998509884,
+              "changed": true
+            },
+            "rendered": true,
+            "renderMode": "source_image",
+            "naturalWidth": 2100,
+            "naturalHeight": 1500,
+            "pointCount": 0,
+            "sourceKind": "tool_file",
+            "sourceTargetMatched": true,
+            "artifactTargetMatched": true,
+            "screenshotSha256": "413586bd27c9ee118a842c4fb63042cce92a61c3ce1fd8361645864d80ad75ea",
+            "screenshotBytes": 918309,
+            "width": 2880,
+            "height": 1718
+          },
+          "svg": {
+            "loadMs": 1050.5182090000003,
+            "switch": {
+              "feedbackMs": 1.6,
+              "productMetricMs": 1.6,
+              "wallFeedbackMs": 1.1000000014901161,
+              "changed": true
+            },
+            "naturalWidth": 672,
+            "naturalHeight": 480,
+            "sourceKind": "tool_file",
+            "sourceTargetMatched": true,
+            "artifactTargetMatched": true,
+            "screenshotSha256": "80360935ae98423e38d1976be33b0febc30bf56ef22f99e7dcf5f0aa1a8ff95f",
+            "screenshotBytes": 702486,
+            "width": 2880,
+            "height": 1718
+          },
+          "report": {
+            "loadMs": 769.3823750000001,
+            "iframeVisible": true,
+            "iframeWidth": 582,
+            "iframeHeight": 520,
+            "iframeSourceKind": "tool_file",
+            "sourceTargetMatched": true,
+            "artifactTargetMatched": true,
+            "embeddedImageCount": 6,
+            "firstEmbeddedImageWidth": 258,
+            "headingCount": 9,
+            "publicProjectionAudit": {
+              "absolutePath": false,
+              "providerMaterial": false,
+              "rawInternalId": false
+            },
+            "textCharacters": 1283,
+            "screenshotSha256": "90d250bcc23e830cf4a72f4b0115d075e96b741ac90692a4cd759248d0bdfac7",
+            "screenshotBytes": 498950,
+            "width": 2880,
+            "height": 1718
+          }
+        },
+        "compare": {
+          "openMs": 671.0304169999999,
+          "progressiveRows": 204,
+          "progressivePages": [
+            {
+              "rows": 54,
+              "loadMs": null
+            },
+            {
+              "rows": 104,
+              "loadMs": 1710.7161660000002
+            },
+            {
+              "rows": 154,
+              "loadMs": 226.8049170000004
+            },
+            {
+              "rows": 204,
+              "loadMs": 306.04729100000077
+            }
+          ],
+          "screenshotSha256": "4e15c08131a09e152ba953b32dd1cb11704492a173dcbbb8889bfbc0e415d392",
+          "screenshotBytes": 643803,
+          "width": 2880,
+          "height": 1718
+        },
+        "history": {
+          "firstPageVersions": 100,
+          "firstPageMs": 26.837333999999828,
+          "afterPaginationVersions": 123,
+          "paginationMs": 114.2583340000001,
+          "screenshotSha256": "4e2d5b0b6a8123f6a45685509ae1e9e4adbed3c02b2e508591d71acdc8f0befe",
+          "screenshotBytes": 453719,
+          "width": 2880,
+          "height": 1718
+        },
+        "memory": {
+          "baselinePostGcBytes": 13063812,
+          "peakRawUsedBytes": 19905072,
+          "peakRawGrowthBytes": 6841260,
+          "peakPostGcUsedBytes": 16334216,
+          "peakPostGcGrowthBytes": 3270404,
+          "peakWorkingSetBytes": 1418838016,
+          "samples": [
+            {
+              "stage": "table_baseline",
+              "rawUsedBytes": 15887724,
+              "postGcUsedBytes": 13063812,
+              "heapTotalBytes": 15990784,
+              "workingSetBytes": 257114112
+            },
+            {
+              "stage": "table_interactions",
+              "rawUsedBytes": 16486088,
+              "postGcUsedBytes": 13004320,
+              "heapTotalBytes": 15728640,
+              "workingSetBytes": 254345216
+            },
+            {
+              "stage": "png",
+              "rawUsedBytes": 14623840,
+              "postGcUsedBytes": 12709120,
+              "heapTotalBytes": 15466496,
+              "workingSetBytes": 279150592
+            },
+            {
+              "stage": "svg",
+              "rawUsedBytes": 12394784,
+              "postGcUsedBytes": 12345788,
+              "heapTotalBytes": 15204352,
+              "workingSetBytes": 843612160
+            },
+            {
+              "stage": "report",
+              "rawUsedBytes": 14095796,
+              "postGcUsedBytes": 12666608,
+              "heapTotalBytes": 15892480,
+              "workingSetBytes": 876347392
+            },
+            {
+              "stage": "compare",
+              "rawUsedBytes": 19505884,
+              "postGcUsedBytes": 16334216,
+              "heapTotalBytes": 19562496,
+              "workingSetBytes": 1418838016
+            },
+            {
+              "stage": "history",
+              "rawUsedBytes": 19905072,
+              "postGcUsedBytes": 14971448,
+              "heapTotalBytes": 18251776,
+              "workingSetBytes": 1400291328
+            }
+          ]
+        },
+        "publicProjectionAudit": {
+          "absolutePath": false,
+          "providerMaterial": false,
+          "rawInternalId": false
+        },
+        "publicProjectionSampleCount": 7,
+        "renderProcessGoneCount": 0,
+        "artifactNetwork": {
+          "completedCount": 11,
+          "errorCount": 0,
+          "events": [
+            {
+              "artifactName": "classified_table.csv",
+              "matchedTargets": [
+                "table"
+              ],
+              "outcome": "completed",
+              "resourceType": "xhr",
+              "statusCode": 200,
+              "fromCache": false,
+              "error": null
+            },
+            {
+              "artifactName": "classified_table.csv",
+              "matchedTargets": [
+                "table"
+              ],
+              "outcome": "completed",
+              "resourceType": "xhr",
+              "statusCode": 200,
+              "fromCache": false,
+              "error": null
+            },
+            {
+              "artifactName": "classified_table.csv",
+              "matchedTargets": [
+                "table"
+              ],
+              "outcome": "completed",
+              "resourceType": "xhr",
+              "statusCode": 200,
+              "fromCache": false,
+              "error": null
+            },
+            {
+              "artifactName": "classified_table.csv",
+              "matchedTargets": [
+                "table"
+              ],
+              "outcome": "completed",
+              "resourceType": "xhr",
+              "statusCode": 200,
+              "fromCache": false,
+              "error": null
+            },
+            {
+              "artifactName": "volcano.png",
+              "matchedTargets": [
+                "png"
+              ],
+              "outcome": "completed",
+              "resourceType": "image",
+              "statusCode": 200,
+              "fromCache": false,
+              "error": null
+            },
+            {
+              "artifactName": "volcano.svg",
+              "matchedTargets": [
+                "svg"
+              ],
+              "outcome": "completed",
+              "resourceType": "image",
+              "statusCode": 200,
+              "fromCache": false,
+              "error": null
+            },
+            {
+              "artifactName": "report.html",
+              "matchedTargets": [
+                "report"
+              ],
+              "outcome": "completed",
+              "resourceType": "subFrame",
+              "statusCode": 200,
+              "fromCache": false,
+              "error": null
+            },
+            {
+              "artifactName": "classified_table.csv",
+              "matchedTargets": [
+                "table"
+              ],
+              "outcome": "completed",
+              "resourceType": "xhr",
+              "statusCode": 200,
+              "fromCache": false,
+              "error": null
+            },
+            {
+              "artifactName": "classified_table.csv",
+              "matchedTargets": [
+                "table"
+              ],
+              "outcome": "completed",
+              "resourceType": "xhr",
+              "statusCode": 200,
+              "fromCache": false,
+              "error": null
+            },
+            {
+              "artifactName": "classified_table.csv",
+              "matchedTargets": [
+                "table"
+              ],
+              "outcome": "completed",
+              "resourceType": "xhr",
+              "statusCode": 200,
+              "fromCache": false,
+              "error": null
+            },
+            {
+              "artifactName": "classified_table.csv",
+              "matchedTargets": [
+                "table"
+              ],
+              "outcome": "completed",
+              "resourceType": "xhr",
+              "statusCode": 200,
+              "fromCache": false,
+              "error": null
+            }
+          ]
+        },
+        "backendStatus": {
+          "checkCount": 6,
+          "everyCheckReady": true,
+          "maxDurationMs": 27.802208999999493
+        },
+        "isolatedCompatibility": {
+          "aiSettingsReadCount": 3,
+          "terminalResizeCount": 3,
+          "terminalStopCount": 3
+        },
+        "passed": true
+      },
+      "revisionLedgerStableDuringElectron": true,
+      "budgets": {
+        "firstCanvasMs": 1500,
+        "tableScrollFeedbackMs": 100,
+        "selectionFeedbackMs": 100,
+        "sortFeedbackMs": 100,
+        "filterFeedbackMs": 100,
+        "artifactSwitchMs": 500,
+        "virtualPageLoadMs": 2000,
+        "pngContentReadyMs": 5000,
+        "svgContentReadyMs": 15000,
+        "reportContentReadyMs": 10000,
+        "compareOpenMs": 1000,
+        "progressivePageLoadMs": 2000,
+        "historyFirstPageMs": 5000,
+        "historyPaginationMs": 2000,
+        "rendererPostGcHeapGrowthBytes": 67108864
+      },
+      "remainingGaps": [
+        "provider_not_exercised_p7_exclusion",
+        "packaged_app_not_exercised_p7_exclusion",
+        "synthetic_revision_aliases_do_not_prove_201_distinct_tool_executions"
+      ]
+    },
+    "productScenarios": {
+      "classification": {
+        "stage": "G0-RS-P6",
+        "scope": "local_product_durability_recovery_performance",
+        "providerObservation": "controlled_loopback_openai_compatible_transport_only",
+        "realProvider": false,
+        "packagedElectron": false,
+        "qualificationEligible": false,
+        "p7Eligible": false
+      },
+      "transport": {
+        "classification": "controlled_loopback_openai_compatible_transport_only",
+        "adapter": "openai-compatible/DeepSeekProvider",
+        "loopbackOnly": true,
+        "realProvider": false,
+        "p7Eligible": false,
+        "cases": [
+          {
+            "status": 503,
+            "retryable": true,
+            "requestPath": "/v1/chat/completions",
+            "requestModels": [
+              "primary-503",
+              "fallback-503"
+            ],
+            "requestStatuses": [
+              503,
+              200
+            ],
+            "requestCount": 2,
+            "routingEvent": {
+              "type": "model_fallback",
+              "fromProfileId": "p6-primary-503",
+              "toProfileId": "p6-fallback-503",
+              "reason": {
+                "code": "http_error",
+                "status": 503
+              }
+            },
+            "modelRouting": {
+              "role": "chat",
+              "profileId": "p6-fallback-503",
+              "fallbackFrom": "p6-primary-503",
+              "fallbackReason": {
+                "code": "http_error",
+                "status": 503
+              }
+            },
+            "recovered": true
+          },
+          {
+            "status": 429,
+            "retryable": true,
+            "requestPath": "/v1/chat/completions",
+            "requestModels": [
+              "primary-429",
+              "fallback-429"
+            ],
+            "requestStatuses": [
+              429,
+              200
+            ],
+            "requestCount": 2,
+            "routingEvent": {
+              "type": "model_fallback",
+              "fromProfileId": "p6-primary-429",
+              "toProfileId": "p6-fallback-429",
+              "reason": {
+                "code": "http_error",
+                "status": 429
+              }
+            },
+            "modelRouting": {
+              "role": "chat",
+              "profileId": "p6-fallback-429",
+              "fallbackFrom": "p6-primary-429",
+              "fallbackReason": {
+                "code": "http_error",
+                "status": 429
+              }
+            },
+            "recovered": true
+          }
+        ]
+      },
+      "product": {
+        "classification": {
+          "stage": "G0-RS-P6",
+          "scope": "local_product_durability_recovery_performance",
+          "providerObservation": "controlled_loopback_openai_compatible_transport_only",
+          "realProvider": false,
+          "packagedElectron": false,
+          "qualificationEligible": false,
+          "p7Eligible": false
+        },
+        "noSeedPrecondition": {
+          "tables": [
+            "projects",
+            "datasets",
+            "analyses",
+            "project_g0_baselines",
+            "tool_jobs",
+            "git_repository_bindings",
+            "scientific_change_sets",
+            "artifact_revisions",
+            "result_selection_contexts",
+            "workspace_revision_checkpoints",
+            "result_workflow_graphs",
+            "scientific_task_specs"
+          ],
+          "tableCounts": {
+            "projects": 0,
+            "datasets": 0,
+            "analyses": 0,
+            "project_g0_baselines": 0,
+            "tool_jobs": 0,
+            "git_repository_bindings": 0,
+            "scientific_change_sets": 0,
+            "artifact_revisions": 0,
+            "result_selection_contexts": 0,
+            "workspace_revision_checkpoints": 0,
+            "result_workflow_graphs": 0,
+            "scientific_task_specs": 0
+          },
+          "seededTables": [],
+          "digest": "dd575ac9ca406c00c2ac2330ee6cab12b7f642b4c042a55fe38ac87f09ec3cb9"
+        },
+        "projectDigest": "69fb4bed51f38e750653b0d380c1153730dadd915522971496eaeb9cbbdbd295",
+        "resourceBudget": {
+          "classification": "real_product_changeset_preflight_no_seed",
+          "sourceBaselineJobDigest": "4c8f7471ad040ff6310a9311a4c3a44533ec81257a192a87e25bcb1c9d454dea",
+          "sourceBaselineRevisionDigest": "4c9788844e78f200d318323f3cbc3ff1d0e6aa14c1bd7d9119baeaf38d721498",
+          "sourceScientificParametersUnchanged": true,
+          "memoryBlocked": {
+            "error": "preview_resource_budget_blocked",
+            "decision": "blocked",
+            "reasons": [
+              "resource_snapshot_unavailable",
+              "memory_budget_exceeded"
+            ],
+            "scientificParametersChanged": false,
+            "resourceEstimate": {
+              "estimateVersion": 1,
+              "source": "server_job_descriptor_input_truth",
+              "memoryBytes": 6912000000,
+              "diskBytes": 2312849184,
+              "inputBytes": 6914,
+              "sourceOutputBytes": 230288,
+              "sourceOutputMeasurement": "complete_descriptor_artifacts",
+              "selectedRevisionDigest": "4c9788844e78f200d318323f3cbc3ff1d0e6aa14c1bd7d9119baeaf38d721498",
+              "downstreamOutputBytes": 0,
+              "historicalRssBytes": null,
+              "rasterBytes": 2304000000,
+              "rasterParameterSource": "trusted_execution_parameters"
+            },
+            "measurement": "host_statfs_and_runtime_snapshot",
+            "noJobOrChangeSetOrRevisionOrCheckpointWrite": true,
+            "countsBefore": {
+              "jobs": 4,
+              "changeSets": 4,
+              "revisions": 13,
+              "checkpoints": 4,
+              "runningChangeSets": 0
+            },
+            "countsAfter": {
+              "jobs": 4,
+              "changeSets": 4,
+              "revisions": 13,
+              "checkpoints": 4,
+              "runningChangeSets": 0
+            }
+          },
+          "diskBlocked": {
+            "error": "preview_resource_budget_blocked",
+            "decision": "blocked",
+            "reasons": [
+              "resource_snapshot_unavailable",
+              "disk_budget_exceeded"
+            ],
+            "scientificParametersChanged": false,
+            "resourceEstimate": {
+              "estimateVersion": 1,
+              "source": "server_job_descriptor_input_truth",
+              "memoryBytes": 268463112,
+              "diskBytes": 21449184,
+              "inputBytes": 6914,
+              "sourceOutputBytes": 230288,
+              "sourceOutputMeasurement": "complete_descriptor_artifacts",
+              "selectedRevisionDigest": "4c9788844e78f200d318323f3cbc3ff1d0e6aa14c1bd7d9119baeaf38d721498",
+              "downstreamOutputBytes": 0,
+              "historicalRssBytes": null,
+              "rasterBytes": 12600000,
+              "rasterParameterSource": "trusted_descriptor_defaults_for_legacy_revision"
+            },
+            "measurement": "controlled_statfs_dependency_fault",
+            "noJobOrChangeSetOrRevisionOrCheckpointWrite": true,
+            "countsBefore": {
+              "jobs": 4,
+              "changeSets": 4,
+              "revisions": 13,
+              "checkpoints": 4,
+              "runningChangeSets": 0
+            },
+            "countsAfter": {
+              "jobs": 4,
+              "changeSets": 4,
+              "revisions": 13,
+              "checkpoints": 4,
+              "runningChangeSets": 0
+            }
+          },
+          "queued": {
+            "error": "preview_resource_queued",
+            "decision": "queued",
+            "reasons": [
+              "preview_concurrency_saturated"
+            ],
+            "scientificParametersChanged": false,
+            "noJobOrChangeSetOrRevisionOrCheckpointWrite": true,
+            "countsBefore": {
+              "jobs": 4,
+              "changeSets": 6,
+              "revisions": 13,
+              "checkpoints": 6,
+              "runningChangeSets": 2
+            },
+            "countsAfter": {
+              "jobs": 4,
+              "changeSets": 6,
+              "revisions": 13,
+              "checkpoints": 6,
+              "runningChangeSets": 2
+            },
+            "activePreviewJobs": 2
+          },
+          "holders": {
+            "createdByProductService": true,
+            "realToolExecution": true,
+            "previewReadyCount": 2,
+            "changeSetDigests": [
+              "75646e657d7a373c1d81ac540b9c6b52d7332577c9d4f20682433870af0adeae",
+              "9eb8bf9ba9c310480c4ec63629524cca2d973d687942d8564955a62c183d29d6"
+            ]
+          }
+        },
+        "staleAdoption": {
+          "classification": "real_no_seed_same_family_candidate_adoption_race",
+          "secondAdopted": true,
+          "staleHttpStatus": 409,
+          "staleError": "adoption_base_stale",
+          "noPartialMutation": true,
+          "firstCandidateRemainsPreviewReady": true,
+          "secondCandidateRemainsAdopted": true,
+          "adoptedCohortCurrent": true,
+          "firstCandidateDigest": "75646e657d7a373c1d81ac540b9c6b52d7332577c9d4f20682433870af0adeae",
+          "secondCandidateDigest": "9eb8bf9ba9c310480c4ec63629524cca2d973d687942d8564955a62c183d29d6",
+          "stateDigestBeforeFailure": "7272386bc8c8ea954663f0e953b1fe5e6322764749a2394925bc080b01f262ca",
+          "stateDigestAfterFailure": "7272386bc8c8ea954663f0e953b1fe5e6322764749a2394925bc080b01f262ca"
+        },
+        "gcColdReadback": {
+          "classification": "real_product_http_gc_then_managed_git_gc_and_same_disk_cold_boot",
+          "httpPlanMode": "dry_run",
+          "httpExecutionMode": "executed",
+          "planVersion": 2,
+          "artifactDeletionCount": 0,
+          "sourceRevisionCount": 19,
+          "sourceCommitCount": 6,
+          "protectedSourceRefCount": 6,
+          "gitGc": {
+            "exitCode": 0,
+            "signal": null,
+            "durationMs": 84,
+            "stderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "before": {
+            "ledgerDigest": "baed5c503bbbc19a24a201748bcf548e61689a3a38bdec4f9a86e4dae0f6b2f9",
+            "revisionDigest": "f26d2cff00b15155e888eabe80f86bcc514dbce282f75989b69268f244eec17b",
+            "changeSetDigest": "b86fd0e310cbbbda5b7f953fac33f93b51d4c84a8ea90cdad10104b2954c8bbe",
+            "checkpointDigest": "60e4bdca8ef265d1c82e93056f842583d754fbcced7663989f956eb950fc6586",
+            "jobDigest": "1c646d0cc55778ff3e08658bc83caec51e1c493c295b46e49ac682895b8bc7bc",
+            "physicalDigest": "15a6eeffbf52a74ca1db4bc3c62382daac31e2262ffb1c2f88b46526a0974bdc",
+            "physicalHashesExact": true,
+            "sourceDigest": "d6aa75949d709bb5991da5be2fbb2071a8bb715f7a0d8d6eddfadc202093a09a",
+            "historyDigest": "e099a03843283651cc1acd01318933bcb71356e737ec120987bf6dbe7af8af0c",
+            "revisionCount": 19,
+            "changeSetCount": 6,
+            "checkpointCount": 6,
+            "jobCount": 6,
+            "currentRevisionCount": 13,
+            "historicalRevisionCount": 3,
+            "previewRevisionCount": 3,
+            "previewChangeSetCount": 1,
+            "checkpointHashesExact": true,
+            "historyCurrentRevisionDigest": "e76364b4812ac150fc9ce5829d7e3d165854a07020912a0c7f44537f4d77d7e5",
+            "historyRevisionCount": 3,
+            "workspaceStatus": null,
+            "workspaceBlockingIssueCount": 0
+          },
+          "after": {
+            "ledgerDigest": "baed5c503bbbc19a24a201748bcf548e61689a3a38bdec4f9a86e4dae0f6b2f9",
+            "revisionDigest": "f26d2cff00b15155e888eabe80f86bcc514dbce282f75989b69268f244eec17b",
+            "changeSetDigest": "b86fd0e310cbbbda5b7f953fac33f93b51d4c84a8ea90cdad10104b2954c8bbe",
+            "checkpointDigest": "60e4bdca8ef265d1c82e93056f842583d754fbcced7663989f956eb950fc6586",
+            "jobDigest": "1c646d0cc55778ff3e08658bc83caec51e1c493c295b46e49ac682895b8bc7bc",
+            "physicalDigest": "15a6eeffbf52a74ca1db4bc3c62382daac31e2262ffb1c2f88b46526a0974bdc",
+            "physicalHashesExact": true,
+            "sourceDigest": "d6aa75949d709bb5991da5be2fbb2071a8bb715f7a0d8d6eddfadc202093a09a",
+            "historyDigest": "e099a03843283651cc1acd01318933bcb71356e737ec120987bf6dbe7af8af0c",
+            "revisionCount": 19,
+            "changeSetCount": 6,
+            "checkpointCount": 6,
+            "jobCount": 6,
+            "currentRevisionCount": 13,
+            "historicalRevisionCount": 3,
+            "previewRevisionCount": 3,
+            "previewChangeSetCount": 1,
+            "checkpointHashesExact": true,
+            "historyCurrentRevisionDigest": "e76364b4812ac150fc9ce5829d7e3d165854a07020912a0c7f44537f4d77d7e5",
+            "historyRevisionCount": 3,
+            "workspaceStatus": null,
+            "workspaceBlockingIssueCount": 0
+          },
+          "ledgerExact": true,
+          "revisionsExact": true,
+          "changeSetsExact": true,
+          "checkpointsExact": true,
+          "jobsExact": true,
+          "physicalHashesExact": true,
+          "scriptsExact": true,
+          "historyExact": true,
+          "adoptedCurrentHistoryPresent": true,
+          "nonterminalPreviewPreserved": true,
+          "checkpointTruthPreserved": true,
+          "coldWorkspaceNotBlocked": true
+        }
+      }
+    }
+  },
+  "checks": [
+    {
+      "id": "P6-01",
+      "passed": true
+    },
+    {
+      "id": "P6-02",
+      "passed": true
+    },
+    {
+      "id": "P6-03",
+      "passed": true
+    },
+    {
+      "id": "P6-04",
+      "passed": true
+    },
+    {
+      "id": "P6-05",
+      "passed": true
+    },
+    {
+      "id": "P6-06",
+      "passed": true
+    },
+    {
+      "id": "P6-07",
+      "passed": true
+    },
+    {
+      "id": "P6-08",
+      "passed": true
+    },
+    {
+      "id": "P6-09",
+      "passed": true
+    },
+    {
+      "id": "P6-10",
+      "passed": true
+    }
+  ],
+  "componentCheckCounts": {
+    "stop": 5,
+    "executionFailure": 7,
+    "drift": 7,
+    "restart": 11,
+    "electronRecovery": 15,
+    "electronPressure": 26,
+    "productScenarios": 6
+  },
+  "durationMs": 281205,
+  "passed": true
+}

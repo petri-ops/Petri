@@ -643,6 +643,56 @@ function runToolExecutor(ctx) {
     : _executeRunTool;
 }
 
+function trustedConversationId(ctx) {
+  return ctx && typeof ctx.conversationId === 'string' && ctx.conversationId.trim()
+    ? ctx.conversationId.trim()
+    : null;
+}
+
+function trustedProjectId(ctx) {
+  return ctx && typeof ctx.projectId === 'string' && ctx.projectId.trim()
+    ? ctx.projectId.trim()
+    : null;
+}
+
+function toolJobMatchesTrustedContext(job, ctx, userId) {
+  if (!job || job.user_id !== userId) return false;
+  const jobProjectId = job.project_id || job.projectId || null;
+  const jobConversationId = job.conversation_id || job.conversationId || null;
+  return jobProjectId === trustedProjectId(ctx)
+    && jobConversationId === trustedConversationId(ctx);
+}
+
+function sanitizeWorkflowPlanJobRefs(plan, ctx, userId) {
+  if (!plan || !Array.isArray(plan.steps)) return plan;
+  return {
+    ...plan,
+    steps: plan.steps.map((step) => {
+      if (!step || !step.toolJobId) return step;
+      const job = dbMod.getToolJob(step.toolJobId);
+      return toolJobMatchesTrustedContext(job, ctx, userId)
+        ? step
+        : { ...step, toolJobId: null };
+    }),
+  };
+}
+
+function sameJsonValue(left, right) {
+  if (left === right) return true;
+  if (left == null || right == null || typeof left !== typeof right) return false;
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return Array.isArray(left)
+      && Array.isArray(right)
+      && left.length === right.length
+      && left.every((value, index) => sameJsonValue(value, right[index]));
+  }
+  if (typeof left !== 'object') return false;
+  const leftKeys = Object.keys(left).sort();
+  const rightKeys = Object.keys(right).sort();
+  return leftKeys.length === rightKeys.length
+    && leftKeys.every((key, index) => key === rightKeys[index] && sameJsonValue(left[key], right[key]));
+}
+
 async function tool_run_tool(args, ctx) {
   const userId = ctx && ctx.userId;
   if (!userId) throw new Error('未授权');
@@ -723,7 +773,7 @@ async function tool_run_tool(args, ctx) {
       };
     }
     const job = dbMod.getToolJob(fromToolJobId);
-    if (!job || (job.user_id !== userId && job.user_id !== 'agent')) {
+    if (!toolJobMatchesTrustedContext(job, ctx, userId)) {
       return { ok: false, error: 'tool_job_not_found' };
     }
     const result = job.result || {};
@@ -736,9 +786,10 @@ async function tool_run_tool(args, ctx) {
     if (!artifact) return { ok: false, error: 'artifact_not_found' };
     try {
       const { bindVerifiedArtifact } = require('../../shared-backend/agent-workflow');
+      const scopedPlan = sanitizeWorkflowPlanJobRefs(plan, ctx, userId);
       const linkedPlan = {
-        ...plan,
-        steps: plan.steps.map((step) =>
+        ...scopedPlan,
+        steps: scopedPlan.steps.map((step) =>
           step.id === args.fromStepId ? { ...step, toolJobId: fromToolJobId } : step
         ),
       };
@@ -761,11 +812,12 @@ async function tool_run_tool(args, ctx) {
     let params = (args && args.params) || {};
     if (args && args.workflowPlan && args.stepId) {
       const { projectWorkflowPlan, runToolJobs } = require('../../shared-backend/agent-workflow');
-      const jobs = runToolJobs(args.workflowPlan, (id) => {
+      const scopedPlan = sanitizeWorkflowPlanJobRefs(args.workflowPlan, ctx, userId);
+      const jobs = runToolJobs(scopedPlan, (id) => {
         const job = dbMod.getToolJob(id);
-        return job && (job.user_id === userId || job.user_id === 'agent') ? job : null;
+        return toolJobMatchesTrustedContext(job, ctx, userId) ? job : null;
       });
-      const projected = projectWorkflowPlan(args.workflowPlan, jobs);
+      const projected = projectWorkflowPlan(scopedPlan, jobs);
       const step = projected.steps.find((item) => item.id === args.stepId);
       if (!step) return { ok: false, error: 'workflow_step_not_found' };
       if (!projected.readyStepIds.includes(step.id) || step.status !== 'ready') {
@@ -775,6 +827,28 @@ async function tool_run_tool(args, ctx) {
       params = { ...step.inputs, ...params };
     }
     if (!toolId) return { error: 'missing_toolId', message: 'op=run 需要 toolId' };
+
+    // An ACK token is a capability for one exact heavy-operation request. It
+    // must be checked before target-tool validation or any execution policy so
+    // a caller cannot retarget it into a different (including non-heavy) tool.
+    let approvalContinuationJob = null;
+    if (args && args.ackToken) {
+      const scopedJob = dbMod.getToolJobByAckToken(args.ackToken, {
+        userId,
+        projectId: trustedProjectId(ctx),
+        conversationId: trustedConversationId(ctx),
+      });
+      const persistedToolId = scopedJob && (scopedJob.tool_id || scopedJob.toolId);
+      const capabilityMatches = scopedJob
+        && HEAVY_TOOLS.has(persistedToolId)
+        && persistedToolId === toolId
+        && (!scopedJob.ack_expires_at || Number(scopedJob.ack_expires_at) > Date.now())
+        && sameJsonValue(scopedJob.params || {}, params);
+      if (!capabilityMatches) {
+        return { ok: false, error: 'approval_invalid', message: '确认 token 无效或已过期', toolId };
+      }
+      approvalContinuationJob = scopedJob;
+    }
 
     // 注册表是唯一工具事实源。先拒绝不存在的工具，避免旧步骤 ID 在确认阶段
     // 提前生成永远无法执行的 tool_job。
@@ -811,11 +885,18 @@ async function tool_run_tool(args, ctx) {
       const ref = args.scientificTaskRef;
       scientificTask = dbMod.getScientificTaskSpec(ref.taskId, Number(ref.version || 1));
       const { validateScientificTaskExecution } = require('../../shared-backend/scientific-task-confirmation');
-      const gate = validateScientificTaskExecution({ persistedTask: scientificTask, projectId: ctx.projectId, toolId, params });
+      const gate = validateScientificTaskExecution({ persistedTask: scientificTask, projectId: trustedProjectId(ctx), toolId, params });
       if (!gate.ok) return gate;
-      const executed = await _executeRunTool(toolId, params, userId, null, ctx.projectId, {
+      const taskConversationId = scientificTask && (scientificTask.conversation_id || scientificTask.conversationId || null);
+      if (taskConversationId !== trustedConversationId(ctx)) {
+        return { ok: false, error: 'scientific_task_conversation_mismatch', message: 'ScientificTask 必须在其确认的会话中执行。' };
+      }
+      const executed = await _executeRunTool(toolId, params, userId, null, trustedProjectId(ctx), {
         taskId: ref.taskId,
         version: Number(ref.version || 1),
+      }, {
+        conversationId: trustedConversationId(ctx),
+        resultStudioInputLineage: ctx && ctx.resultStudioInputLineage || null,
       });
       return { ...executed, scientificTaskRef: { taskId: ref.taskId, version: Number(ref.version || 1) } };
     }
@@ -825,8 +906,11 @@ async function tool_run_tool(args, ctx) {
     // ToolResult/Job/Artifact facts remain fully audited. The legacy approval
     // path stays available for callers that do not carry this delegation.
     if (HEAVY_TOOLS.has(toolId)) {
-      if (shouldAutoExecuteLocalAnalysis(ctx)) {
-        const executed = await runToolExecutor(ctx)(toolId, params, userId, null, ctx && ctx.projectId);
+      if (shouldAutoExecuteLocalAnalysis(ctx) && !args.ackToken) {
+        const executed = await runToolExecutor(ctx)(toolId, params, userId, null, trustedProjectId(ctx), null, {
+          conversationId: trustedConversationId(ctx),
+          resultStudioInputLineage: ctx && ctx.resultStudioInputLineage || null,
+        });
         return {
           ...executed,
           automationDecision: {
@@ -838,9 +922,12 @@ async function tool_run_tool(args, ctx) {
       }
       // 已带 ackToken 且 ackStatus='approved' → 续跑（第二轮调用）
       if (args.ackToken) {
-        const job = dbMod.getToolJobByAckToken(args.ackToken);
+        const job = approvalContinuationJob;
         if (job && job.ack_status === 'approved') {
-          return await _executeRunTool(toolId, params, userId, args.ackToken, ctx && ctx.projectId);
+          return await _executeRunTool(toolId, params, userId, args.ackToken, trustedProjectId(ctx), null, {
+            conversationId: trustedConversationId(ctx),
+            resultStudioInputLineage: ctx && ctx.resultStudioInputLineage || null,
+          });
         }
         if (job && job.ack_status === 'rejected') {
           return { ok: false, error: 'user_rejected', message: '用户取消了该重操作', toolId };
@@ -853,14 +940,16 @@ async function tool_run_tool(args, ctx) {
       const job = dbMod.createToolJob({
         toolId,
         userId,
-        projectId: ctx && ctx.projectId,
+        projectId: trustedProjectId(ctx),
+        conversationId: trustedConversationId(ctx),
         params,
         status: 'pending',
         name: `${toolId} 待确认`,
       });
-      if (job && job.id) {
-        dbMod.setToolJobApproval(job.id, ackToken, expiresAt);
+      if (!job || !job.id) {
+        return { ok: false, error: 'tool_job_create_failed', message: '无法建立可审计的工具任务。', toolId };
       }
+      dbMod.setToolJobApproval(job.id, ackToken, expiresAt);
       return {
         ok: true,
         needApproval: true,
@@ -873,7 +962,10 @@ async function tool_run_tool(args, ctx) {
     }
 
     // 非重操作：直接跑（原逻辑）
-    return await _executeRunTool(toolId, params, userId, null, ctx && ctx.projectId);
+    return await _executeRunTool(toolId, params, userId, null, trustedProjectId(ctx), null, {
+      conversationId: trustedConversationId(ctx),
+      resultStudioInputLineage: ctx && ctx.resultStudioInputLineage || null,
+    });
   }
   if (op === 'status') {
     // Phase 6: project workflow plan status from real tool jobs in DB.
@@ -882,11 +974,12 @@ async function tool_run_tool(args, ctx) {
     if (!plan) return { ok: false, error: 'missing_workflow_plan', message: 'op=status 需要 workflowPlan' };
     try {
       const { projectWorkflowPlan, runToolJobs } = require('../../shared-backend/agent-workflow');
-      const jobs = runToolJobs(plan, (id) => {
+      const scopedPlan = sanitizeWorkflowPlanJobRefs(plan, ctx, userId);
+      const jobs = runToolJobs(scopedPlan, (id) => {
         const job = dbMod.getToolJob(id);
-        return job && (job.user_id === userId || job.user_id === 'agent') ? job : null;
+        return toolJobMatchesTrustedContext(job, ctx, userId) ? job : null;
       });
-      const projected = projectWorkflowPlan(plan, jobs);
+      const projected = projectWorkflowPlan(scopedPlan, jobs);
       return {
         ok: true,
         plan: projected,
@@ -916,11 +1009,12 @@ async function tool_run_tool(args, ctx) {
     if (!plan) return { ok: false, error: 'missing_workflow_plan', message: 'op=next 需要 workflowPlan' };
     try {
       const { projectWorkflowPlan, runToolJobs } = require('../../shared-backend/agent-workflow');
-      const jobs = runToolJobs(plan, (id) => {
+      const scopedPlan = sanitizeWorkflowPlanJobRefs(plan, ctx, userId);
+      const jobs = runToolJobs(scopedPlan, (id) => {
         const job = dbMod.getToolJob(id);
-        return job && (job.user_id === userId || job.user_id === 'agent') ? job : null;
+        return toolJobMatchesTrustedContext(job, ctx, userId) ? job : null;
       });
-      const projected = projectWorkflowPlan(plan, jobs);
+      const projected = projectWorkflowPlan(scopedPlan, jobs);
       const next = projected.readyStepIds
         .filter((stepId) => {
           const step = projected.steps.find((s) => s.id === stepId);
@@ -958,18 +1052,33 @@ async function tool_run_tool(args, ctx) {
 }
 
 // 实际执行 callTool（重操作确认通过后 + 非重操作都走这里）
-async function _executeRunTool(toolId, params, userId, ackToken, projectId, scientificTaskRef = null) {
+async function _executeRunTool(toolId, params, userId, ackToken, projectId, scientificTaskRef = null, executionOptions = {}) {
   let scientificJob = null;
   try {
-    const approvedJob = ackToken ? dbMod.getToolJobByAckToken(ackToken) : null;
+    const conversationId = executionOptions && Object.prototype.hasOwnProperty.call(executionOptions, 'conversationId')
+      ? executionOptions.conversationId || null
+      : null;
+    const approvedJob = ackToken
+      ? dbMod.getToolJobByAckToken(ackToken, { userId, projectId: projectId || null, conversationId })
+      : null;
     if (scientificTaskRef) {
-      scientificJob = dbMod.createToolJob({ toolId, userId, params, status: 'pending', name: `${toolId} scientific task`, projectId });
+      scientificJob = dbMod.createToolJob({
+        toolId,
+        userId,
+        params,
+        status: 'pending',
+        name: `${toolId} scientific task`,
+        projectId,
+        conversationId,
+      });
       dbMod.bindScientificTaskToolJob({ taskId: scientificTaskRef.taskId, version: scientificTaskRef.version, toolJobId: scientificJob.id });
     }
     const result = await _getRegistry().callTool(toolId, params, {
       userId,
       projectId,
+      conversationId,
       toolJobId: (scientificJob && scientificJob.id) || (approvedJob && approvedJob.id),
+      resultStudioInputLineage: executionOptions && executionOptions.resultStudioInputLineage || null,
     });
     const text = result.content && result.content[0] && result.content[0].text;
     let parsed = null;

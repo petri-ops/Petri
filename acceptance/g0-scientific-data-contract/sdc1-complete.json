@@ -1,0 +1,15 @@
+{
+  "workPackage": "G0-SDC-1",
+  "stage": "complete",
+  "startedAt": "2026-08-06T05:55:23.433Z",
+  "finishedAt": "2026-08-06T05:55:24.315Z",
+  "mode": "source-bound",
+  "fixtureDir": "test/fixtures/sdc/",
+  "testFile": "test/sdc1-complete.test.mjs",
+  "ok": true,
+  "tests": 11,
+  "pass": 11,
+  "fail": 0,
+  "durationMs": 140,
+  "output": "1.A counts_matrix.csv: wide counts matrix profile\n  ---\n  duration_ms: 6.823625\n  type: 'test'\n  ...\n# Subtest: SDC-1.B sample_metadata.tsv: long sample metadata profile\nok 2 - SDC-1.B sample_metadata.tsv: long sample metadata profile\n  ---\n  duration_ms: 1.255042\n  type: 'test'\n  ...\n# Subtest: SDC-1.C expression_matrix.tsv: tsv with expression_matrix role\nok 3 - SDC-1.C expression_matrix.tsv: tsv with expression_matrix role\n  ---\n  duration_ms: 1.106917\n  type: 'test'\n  ...\n# Subtest: SDC-1.D counts_matrix.csv: delimiter detected as comma\nok 4 - SDC-1.D counts_matrix.csv: delimiter detected as comma\n  ---\n  duration_ms: 1.791667\n  type: 'test'\n  ...\n# Subtest: SDC-1.E expression_matrix.tsv: delimiter detected as tab\nok 5 - SDC-1.E expression_matrix.tsv: delimiter detected as tab\n  ---\n  duration_ms: 0.89075\n  type: 'test'\n  ...\n# Subtest: SDC-1.F latin1_encoded.csv: blocked due to unsupported encoding\nok 6 - SDC-1.F latin1_encoded.csv: blocked due to unsupported encoding\n  ---\n  duration_ms: 0.902542\n  type: 'test'\n  ...\n# Subtest: SDC-1.G ambiguous_delimiter.csv: multiple file role candidates -> ambiguous role situation\nok 7 - SDC-1.G ambiguous_delimiter.csv: multiple file role candidates -> ambiguous role situation\n  ---\n  duration_ms: 0.613542\n  type: 'test'\n  ...\n# Subtest: SDC-1.H ID column detection in sample_metadata\nok 8 - SDC-1.H ID column detection in sample_metadata\n  ---\n  duration_ms: 0.618792\n  type: 'test'\n  ...\n# Subtest: SDC-1.I missing value detection\nok 9 - SDC-1.I missing value detection\n  ---\n  duration_ms: 1.174375\n  type: 'test'\n  ...\n# Subtest: SDC-1.J duplicate value detection\nok 10 - SDC-1.J duplicate value detection\n  ---\n  duration_ms: 0.729125\n  type: 'test'\n  ...\n# Subtest: SDC-1.K structure report contains required fields\nok 11 - SDC-1.K structure report contains required fields\n  ---\n  duration_ms: 0.554459\n  type: 'test'\n  ...\n1..11\n# tests 11\n# suites 0\n# pass 11\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 60.046208\n"
+}

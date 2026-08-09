@@ -4,12 +4,18 @@ import type { Project, ToolJob } from '@/lib/project-types';
 import type { BackendStatus } from '@/lib/electron';
 import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
+import { ResultStudioInspector } from '@/components/result-studio/ResultStudioSurface';
+import { GitRepositoryConsent } from '@/components/result-studio/GitRepositoryConsent';
+import {
+  ResultEditAdvancedDrawer,
+  type ResultEditSubmission,
+} from '@/components/result-studio/ResultEditPanel';
+import type { ResultStudioEditControls } from '@/lib/result-studio-interaction-client';
 import {
   type RightPanelMode,
   type ActiveArtifact,
   type ActiveWorkspaceFile,
   EmptyResult,
-  ResultSidebarPanel,
   RightFileTree,
   TerminalPanel,
   BrowserPanel,
@@ -42,6 +48,17 @@ export interface RightPanelContext {
   onWorkflowChanged: () => void;
   activeArtifact: ActiveArtifact | null;
   setActiveArtifact: (a: ActiveArtifact | null) => void;
+  /** G0-RS-P3: Agent 上下文就绪状态，由后端 context-envelope 投影而来。 */
+  resultContext?: {
+    status: 'ready' | 'blocked' | 'loading';
+    reason?: string | null;
+    selectionUsable?: boolean;
+    selectionCompatibility?: 'compatible' | 'stale' | 'invalid' | null;
+  } | null;
+  /** G0-RS-P4: Schema 驱动的编辑控件，与 Agent 可见参数同源。 */
+  resultEditControls?: ResultStudioEditControls | null;
+  resultEditSubmitting?: boolean;
+  onResultEditSubmit?: (submission: ResultEditSubmission) => void;
   openWorkspaceFiles: ActiveWorkspaceFile[];
   activeWorkspaceFile: ActiveWorkspaceFile | null;
   setActiveWorkspaceFile: (f: ActiveWorkspaceFile | null) => void;
@@ -54,7 +71,7 @@ export interface RightPanelContext {
   setBottomTerminalOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
   setRightOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
   setActiveConvId: (id: string | null) => void;
-  handleAskAgent: (prompt: string) => void;
+  handleAskAgent: (prompt: string) => boolean | void;
   handleOpenWorkspaceFile: (file: ActiveWorkspaceFile) => void;
   handleCloseWorkspaceFile: (path: string) => void;
   handleOpenResult: (jobId: string, projectId?: string | null) => void | Promise<void>;
@@ -106,6 +123,7 @@ export function RightPanel({
       <aside
         className={styles.rightCol}
         style={{ width: ctx.width }}
+        data-workspace-mode={workspaceMode}
       >
         <div className={styles.resultPanel}>
           <div className={styles.resultPanelBody}>
@@ -126,21 +144,36 @@ export function RightPanel({
                     onOpenChat={ctx.handleOpenRightChat}
                   />
                 )}
+                {tab === 'results' && ctx.projectId && (
+                  <GitRepositoryConsent projectId={ctx.projectId} />
+                )}
                 {tab === 'results' && (
-                  <ResultSidebarPanel
-                    project={ctx.project}
-                    job={ctx.activeJob}
-                    workflow={ctx.activeWorkflow}
-                    onWorkflowChanged={ctx.onWorkflowChanged}
-                    activeArtifact={ctx.activeArtifact}
-                    onActiveArtifactChange={ctx.setActiveArtifact}
+                  <ResultStudioInspector
+                    artifact={ctx.activeArtifact}
+                    jobStatus={ctx.activeWorkflow?.jobStatus || ctx.activeJob?.status}
+                    truthStatus={
+                      typeof ctx.activeArtifact?.truthStatus === 'string'
+                        ? ctx.activeArtifact.truthStatus
+                        : typeof ctx.activeWorkflow?.artifactTruth?.status === 'string'
+                          ? ctx.activeWorkflow.artifactTruth.status
+                          : null
+                    }
                     onAskAgent={ctx.handleAskAgent}
-                    pendingArtifactName={ctx.pendingArtifactName}
-                    onPendingArtifactConsumed={ctx.onPendingArtifactConsumed}
-                    onOpenBrowser={(url) => {
-                      ctx.setBrowserUrl(url);
-                      ctx.openRightPanel('browser');
-                    }}
+                    context={workspaceMode === 'result' ? null : ctx.resultContext ?? null}
+                  />
+                )}
+                {tab === 'results' && ctx.activeArtifact && ctx.onResultEditSubmit && (
+                  <ResultEditAdvancedDrawer
+                    editControls={ctx.resultEditControls ?? null}
+                    disabledReason={
+                      ctx.resultContext?.status === 'blocked'
+                        ? ctx.resultContext.reason || '当前结果缺少可复现的来源坐标，暂时无法修改。'
+                        : ctx.resultContext?.status === 'loading'
+                          ? '正在读取结果坐标…'
+                          : null
+                    }
+                    submitting={ctx.resultEditSubmitting === true}
+                    onSubmit={ctx.onResultEditSubmit}
                   />
                 )}
                 {tab === 'files' && (
@@ -151,6 +184,7 @@ export function RightPanel({
                     activeFile={ctx.activeWorkspaceFile}
                     onOpenFile={ctx.handleOpenWorkspaceFile}
                     onCloseFile={ctx.handleCloseWorkspaceFile}
+                    onAskAgent={ctx.handleAskAgent}
                   />
                 )}
                 {tab === 'terminal' && (

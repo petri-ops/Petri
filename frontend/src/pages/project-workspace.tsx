@@ -16,6 +16,7 @@ import { BottomTerminal } from '@/components/workspace-panels/BottomTerminal';
 import { CenterPanel, type CenterPanelContext } from '@/components/workspace-panels/CenterPanel';
 import { LeftPanel, type LeftPanelContext } from '@/components/workspace-panels/LeftPanel';
 import { RightPanel, type RightPanelContext } from '@/components/workspace-panels/RightPanel';
+import { DataIntakeControl } from '@/components/workspace-panels/DataIntakeControl';
 import { WorkspaceFileIcon } from '@/components/workspace-panels/WorkspaceFileIcon';
 import { getProject, listProjectJobs, listDatasetsByProject, listProjects, updateProject, createProject, setProjectStatus } from '@/lib/project-store';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
@@ -25,18 +26,28 @@ import type { Tool } from '@/pages/_data';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { HighlightedCode, codeLanguageForFile } from '@/components/ui/CodeHighlight';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
+import {
+  isConversationRunning,
+  useConversationRun,
+} from '@/components/copilot/conversationRunStore';
 import { listConversations, createConversation, renameConversation, archiveConversation, type ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import {
   useConversations,
   useOtherConversations,
 } from '@/hooks/useConversations';
+import {
+  artifactAfterJobSelection,
+  canCommitJobOpen,
+  useConversationJobs,
+} from '@/hooks/useConversationJobs';
 import { useResizableColumns } from '@/hooks/useResizableColumns';
 import { useWorkspaceLayout } from '@/hooks/useWorkspaceLayout';
 import { useRightPanelTabs } from '@/hooks/useRightPanelTabs';
 import { usePluginStore } from '@/hooks/usePluginStore';
+import { parseWorkspaceMode, type WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import { isDirectRecoveryAction, useHarnessWorkflowStatus } from '@/hooks/useHarnessWorkflowStatus';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
-import type { HarnessContextSummary } from '@/lib/copilotContext';
+import type { CopilotContext, HarnessContextSummary } from '@/lib/copilotContext';
 import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
 import { getBrowserViewportSize, isBioF3LocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
@@ -51,17 +62,22 @@ import {
   normalizeResultManifest,
   classifyArtifact,
   buildResultArtifactNavigation,
-  countArtifactsByKind,
   findArtifactByName,
-  inferSectionDisplayKind,
   pickPreferredArtifact,
   artifactKindLabel,
   type ResultArtifactKind,
   type ResultArtifactRecord,
-  type NormalizedResultManifest,
 } from '@/lib/result-manifest';
 import {
-  isSameSelection,
+  artifactFormatLabel,
+  buildResultArtifactPickerGroups,
+  filterResultArtifactRelatedSections,
+  findResultArtifactPickerOption,
+  isRelatedArtifactKind,
+} from '@/lib/result-artifact-display';
+import { buildResultTitleBarTitle } from '@/lib/result-title-bar';
+import {
+  summarizeSelectionForAgent,
   type ArtifactInteractionManifest,
   type ArtifactSelection,
   type InteractionCapability,
@@ -69,6 +85,48 @@ import {
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { DesktopSettingsPanel } from '@/components/desktop/DesktopSettingsPanel';
 import { ResultStudioChangeSetPanel } from '@/components/result-studio/ResultStudioChangeSetPanel';
+import { isSameActiveArtifactProjection } from '@/components/result-studio/activeArtifactProjection';
+import { isResultWorkspaceMode, resultFocusTransition } from '@/components/result-studio/resultFocusLayout';
+import { RevisionCodeView } from '@/components/result-studio/RevisionCodeView';
+import { revisionArtifactUrl, type ArtifactRevision } from '@/components/result-studio/resultStudioClient';
+import { shouldShowWorkflowBar } from '@/components/result-studio/resultFirstScreen';
+import {
+  canCommitResultFetch,
+  nextResultBodyState,
+  type ResultBodyState,
+} from '@/components/result-studio/resultBodyState';
+import { getResultScrollPosition, setResultScrollPosition } from '@/components/result-studio/resultScrollMemory';
+import { ScientificInteractionViewer } from '@/components/result-studio/ScientificInteractionViewer';
+import { CompactResultNavigator } from '@/components/result-studio/CompactResultNavigator';
+import {
+  deleteResultStudioSelection,
+  fetchArtifactInteraction,
+  fetchResultStudioContext,
+  restoreResultStudioSelection,
+  saveResultStudioSelection,
+  type ResultStudioEditControls,
+  type ResultTableQuery,
+} from '@/lib/result-studio-interaction-client';
+import type { ResultEditSubmission } from '@/components/result-studio/ResultEditPanel';
+import {
+  buildResultEditCopilotAsk,
+  isResultStudioContextToken,
+} from '@/lib/result-edit-agent-bridge';
+import {
+  beginResultSurfaceMeasure,
+  chooseResultArtifactName,
+  completeResultSurfaceMeasure,
+  describeTruthStatus,
+  requestedArtifactRequestKey,
+  RESULT_SURFACE_PERFORMANCE_MARKS,
+  resolveResultArtifactUrl,
+  resolveResultViewerAdapter,
+  shouldApplyRequestedArtifact,
+  shouldRequestArtifactInteraction,
+  shouldShowResultInteraction,
+  shouldSurfaceInteractionFailure,
+  type ResultSurfaceMode,
+} from '@/components/result-studio/resultSurface';
 import type { BackendStatus } from '@/lib/electron';
 import { getBridge } from '@/lib/desktopBridge';
 import {
@@ -106,6 +164,20 @@ const markdownSanitizeSchema = {
  *   浏览器侧 40 行预览样本没有资格做这个判定。
  * - selection 维度（`selection`）由表格行列/过滤/排序与图形点选产生。
  */
+/**
+ * Narrow the interaction endpoint's `revision` to the fields the header needs.
+ * Returns null rather than casting: revisionOrdinal decides what a user reads
+ * as the version, so a malformed payload must degrade visibly instead of
+ * rendering a wrong number.
+ */
+function toArtifactRevision(input: unknown): ArtifactRevision | null {
+  if (!input || typeof input !== 'object') return null;
+  const candidate = input as Partial<ArtifactRevision>;
+  if (typeof candidate.revisionId !== 'string') return null;
+  if (!Number.isInteger(candidate.revisionOrdinal) || (candidate.revisionOrdinal as number) < 1) return null;
+  return candidate as ArtifactRevision;
+}
+
 interface ActiveArtifact {
   jobId: string;
   toolId: string;
@@ -114,6 +186,13 @@ interface ActiveArtifact {
   label?: string;
   url?: string;
   revisionId?: string | null;
+  /**
+   * 1-based ordinal within the artifact family, for showing a real "v2"
+   * instead of a truncated Revision ID. The interaction endpoint already
+   * returns it on `revision` (routes/result-studio.js:559); the client used
+   * to read only `manifest` and discard it.
+   */
+  revisionOrdinal?: number | null;
   artifactFamilyId?: string | null;
   semanticKind?: ResultArtifactKind;
   entityType?: string | null;
@@ -121,6 +200,11 @@ interface ActiveArtifact {
   selectionDurable?: boolean;
   interactionCapabilities?: InteractionCapability[];
   selection?: ArtifactSelection | null;
+  selectionId?: string | null;
+  truthStatus?: 'valid' | 'degraded' | 'blocked' | null;
+  conclusion?: string | null;
+  availabilityStatus?: 'checking' | 'available' | 'unavailable';
+  availabilityReason?: string | null;
 }
 
 interface ActiveWorkspaceFile {
@@ -143,13 +227,6 @@ export type {
   JobStats,
 };
 
-type WorkspaceMode =
-  | 'chat'
-  | 'search'
-  | 'scheduled'
-  | 'plugins'
-  | 'settings';
-
 export type RightPanelMode = 'home' | 'results' | 'files' | 'terminal' | 'browser' | 'chat';
 
 const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconName }> = [
@@ -159,19 +236,6 @@ const RIGHT_PANEL_ITEMS: Array<{ id: RightPanelMode; label: string; icon: IconNa
   { id: 'browser', label: '浏览器', icon: 'globe' },
   { id: 'chat', label: '聊天', icon: 'sidebar' },
 ];
-
-const WORKSPACE_MODES: WorkspaceMode[] = [
-  'chat',
-  'search',
-  'scheduled',
-  'plugins',
-  'settings',
-];
-
-function parseWorkspaceMode(value: string | null): WorkspaceMode | null {
-  if (!value) return null;
-  return WORKSPACE_MODES.includes(value as WorkspaceMode) ? (value as WorkspaceMode) : null;
-}
 
 function toCopilotHarnessSummary(index: HarnessIndexSummary | null | undefined): HarnessContextSummary | undefined {
   if (!index) return undefined;
@@ -219,8 +283,28 @@ export function ProjectWorkspace(): React.ReactElement {
 
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const autoOpenedJobRef = useRef<string | null>(null);
+  const openResultRequestSequenceRef = useRef(0);
   const [activeArtifact, setActiveArtifact] = useState<ActiveArtifact | null>(null);
   const [activeWorkspaceFile, setActiveWorkspaceFile] = useState<ActiveWorkspaceFile | null>(null);
+  // G0-RS-P3: Agent 上下文就绪状态。真相来自后端 context-envelope 投影，
+  // 前端不自行判断"坐标是否齐备"，也不把缺失坐标伪装成可用。
+  const [resultContextState, setResultContextState] = useState<{
+    status: 'ready' | 'blocked' | 'loading';
+    bindingKey: string;
+    contextToken?: string | null;
+    reason?: string | null;
+    selectionUsable?: boolean;
+    selectionCompatibility?: 'compatible' | 'stale' | 'invalid' | null;
+    publicPhases?: string[];
+  } | null>(null);
+  // G0-RS-P4: Schema 驱动控件与该 Job 真实执行过的参数值。两者都由后端
+  // descriptor 投影，前端不合成控件也不用默认值冒充"当前生效值"。
+  const [resultEditControls, setResultEditControls] = useState<ResultStudioEditControls | null>(null);
+  const [resultEditSubmitting, setResultEditSubmitting] = useState(false);
+  // P4R-3: result Composer drafts live above the conditional result surface,
+  // keyed by exact result/revision/selection so result↔chat does not discard a
+  // draft and a draft can never silently move onto a different context.
+  const [resultAgentDrafts, setResultAgentDrafts] = useState<Record<string, string>>({});
   const [browserCanGoBack, setBrowserCanGoBack] = useState(false);
   const [browserCanGoForward, setBrowserCanGoForward] = useState(false);
   const [openWorkspaceFiles, setOpenWorkspaceFiles] = useState<ActiveWorkspaceFile[]>([]);
@@ -232,6 +316,7 @@ export function ProjectWorkspace(): React.ReactElement {
   // inside ResultArtifactShell via the imperative handle.
   const pendingArtifactNameRef = useRef<string | null>(null);
   const pendingArtifactJobIdRef = useRef<string | null>(null);
+  const appliedRequestedArtifactKeyRef = useRef<string | null>(null);
   const [pendingArtifactName, setPendingArtifactName] = useState<string | null>(null);
 
   // Conversation state — current project's conversations + active conversation.
@@ -243,6 +328,119 @@ export function ProjectWorkspace(): React.ReactElement {
     create: createConversationInProject,
   } = useConversations(projectId);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
+  const {
+    jobs: conversationJobs,
+    error: conversationJobsError,
+    refresh: refreshConversationJobs,
+  } = useConversationJobs(projectId, activeConvId);
+  const activeConversationRun = useConversationRun(activeConvId);
+  const resultEditBusy = resultEditSubmitting || activeConversationRun?.status === 'running';
+
+  useEffect(() => {
+    if (!conversationJobsError) return;
+    setWorkspaceNotice('当前会话的结果列表暂时无法刷新，已保留上一次可用结果。');
+  }, [conversationJobsError]);
+
+  useEffect(() => {
+    if (!workspaceNotice) return undefined;
+    const timer = window.setTimeout(() => setWorkspaceNotice(''), 4_500);
+    return () => window.clearTimeout(timer);
+  }, [workspaceNotice]);
+
+  const bindActiveJob = useCallback((jobId: string | null) => {
+    setActiveArtifact((current) => artifactAfterJobSelection(current, activeJobId, jobId));
+    setActiveJobId(jobId);
+  }, [activeJobId]);
+
+  const activeSelectionBindingKey = useMemo(() => {
+    const selection = activeArtifact?.selection;
+    if (!selection) return '';
+    return JSON.stringify({
+      selectionId: activeArtifact?.selectionId || null,
+      entityIdsHash: selection.entityIdsHash,
+      filterHash: selection.filterHash || null,
+      fields: selection.fields,
+      sort: selection.sort,
+      compatibility: selection.compatibility || null,
+      createdAt: selection.createdAt,
+    });
+  }, [
+    activeArtifact?.selectionId,
+    activeArtifact?.selection?.entityIdsHash,
+    activeArtifact?.selection?.filterHash,
+    activeArtifact?.selection?.fields,
+    activeArtifact?.selection?.sort,
+    activeArtifact?.selection?.compatibility,
+    activeArtifact?.selection?.createdAt,
+  ]);
+  const resultContextBindingKey = useMemo(() => {
+    if (!projectId || !activeArtifact) return '';
+    return [
+      projectId,
+      activeConvId || '',
+      activeArtifact.jobId,
+      activeArtifact.name,
+      activeArtifact.revisionId || '',
+      activeArtifact.artifactFamilyId || '',
+      activeSelectionBindingKey,
+    ].join('\u0000');
+  }, [
+    projectId,
+    activeConvId,
+    activeArtifact?.jobId,
+    activeArtifact?.name,
+    activeArtifact?.revisionId,
+    activeArtifact?.artifactFamilyId,
+    activeSelectionBindingKey,
+  ]);
+  const effectiveResultContextState = !activeArtifact
+    ? null
+    : resultContextState?.bindingKey === resultContextBindingKey
+      ? resultContextState
+      : !activeConvId
+        ? {
+            status: 'blocked' as const,
+            bindingKey: resultContextBindingKey,
+            contextToken: null,
+            reason: '请先创建或选择一个 Agent 会话，再修改当前结果。',
+          }
+        : { status: 'loading' as const, bindingKey: resultContextBindingKey, contextToken: null };
+  const effectiveResultEditControls = resultContextState?.bindingKey === resultContextBindingKey
+    ? resultEditControls
+    : null;
+
+  const resultAgentDraftKey = useMemo(() => {
+    if (!activeArtifact) return '';
+    return [
+      projectId || '',
+      activeConvId || '',
+      activeArtifact.jobId,
+      activeArtifact.name,
+      activeArtifact.revisionId || '',
+      activeArtifact.artifactFamilyId || '',
+      activeArtifact.selectionId || '',
+      activeSelectionBindingKey,
+    ].join('\u0000');
+  }, [
+    projectId,
+    activeConvId,
+    activeArtifact?.jobId,
+    activeArtifact?.name,
+    activeArtifact?.revisionId,
+    activeArtifact?.artifactFamilyId,
+    activeArtifact?.selectionId,
+    activeSelectionBindingKey,
+  ]);
+  const resultAgentDraft = resultAgentDraftKey ? resultAgentDrafts[resultAgentDraftKey] || '' : '';
+  const setResultAgentDraft = useCallback((draft: string) => {
+    if (!resultAgentDraftKey) return;
+    setResultAgentDrafts((current) => {
+      const next = { ...current, [resultAgentDraftKey]: draft };
+      const keys = Object.keys(next);
+      for (const key of keys.slice(0, Math.max(0, keys.length - 24))) delete next[key];
+      return next;
+    });
+  }, [resultAgentDraftKey]);
 
   // Plan 1.6 §4.3 — optimistic prepend for cross-project creations
   // (sidebar adds a conv under another project without switching pages).
@@ -279,7 +477,6 @@ export function ProjectWorkspace(): React.ReactElement {
     rightOpen,
     setRightOpen,
     compactLayout,
-    viewportWidth,
     bottomTerminalOpen,
     setBottomTerminalOpen,
     summaryOpen,
@@ -288,6 +485,29 @@ export function ProjectWorkspace(): React.ReactElement {
     sessionFrameRef,
     sessionFrameWidth,
   } = useWorkspaceLayout();
+  const resultPanelRestoreRef = useRef<{ leftOpen: boolean; rightOpen: boolean } | null>(null);
+  const resultFocusActiveRef = useRef(false);
+
+  useEffect(() => {
+    const transition = resultFocusTransition(resultFocusActiveRef.current, workspaceMode);
+    if (transition === 'enter') {
+      if (!resultPanelRestoreRef.current) {
+        resultPanelRestoreRef.current = { leftOpen, rightOpen };
+      }
+      resultFocusActiveRef.current = true;
+      setLeftOpen(false);
+      setRightOpen(false);
+      return;
+    }
+    if (transition !== 'exit') return;
+    const restore = resultPanelRestoreRef.current;
+    if (restore) {
+      setLeftOpen(restore.leftOpen);
+      setRightOpen(restore.rightOpen);
+    }
+    resultPanelRestoreRef.current = null;
+    resultFocusActiveRef.current = false;
+  }, [leftOpen, rightOpen, setLeftOpen, setRightOpen, workspaceMode]);
 
   const {
     rightTab,
@@ -337,14 +557,37 @@ export function ProjectWorkspace(): React.ReactElement {
   // Bidirectional sync: setWorkspaceMode + URL param. Exists here (not in
   // useWorkspaceRouting) because project-workspace owns workspaceMode state.
   const updateWorkspaceMode = useCallback((nextMode: WorkspaceMode, replace = true, jobId?: string | null) => {
+    const currentIsResult = isResultWorkspaceMode(workspaceMode);
+    const nextIsResult = isResultWorkspaceMode(nextMode);
+    if (nextIsResult && !currentIsResult) {
+      // Capture the conversation layout before result-opening handlers enqueue
+      // their own panel changes. React batches those setters, so waiting for the
+      // result-mode effect would otherwise remember the already-forced layout.
+      if (!resultPanelRestoreRef.current) {
+        resultPanelRestoreRef.current = { leftOpen, rightOpen };
+      }
+      beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.openStart);
+    } else if (nextMode === 'chat' && currentIsResult) {
+      beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.returnStart);
+    }
     setWorkspaceMode(nextMode);
     const nextParams = new URLSearchParams(searchParams);
+    const nextCarriesJob = (nextMode === 'scheduled' || nextMode === 'result' || nextMode === 'code' || nextMode === 'compare' || nextMode === 'history') && Boolean(jobId);
+    if (!nextCarriesJob || nextParams.get('job') !== jobId) {
+      openResultRequestSequenceRef.current += 1;
+    }
     if (nextMode === 'chat') nextParams.delete('mode');
     else nextParams.set('mode', nextMode);
-    if (nextMode === 'scheduled' && jobId) nextParams.set('job', jobId);
-    else nextParams.delete('job');
+    if ((nextMode === 'scheduled' || nextMode === 'result' || nextMode === 'code' || nextMode === 'compare' || nextMode === 'history') && jobId) {
+      if (nextParams.get('job') !== jobId) nextParams.delete('artifact');
+      nextParams.set('job', jobId);
+    }
+    else {
+      nextParams.delete('job');
+      nextParams.delete('artifact');
+    }
     setSearchParams(nextParams, { replace });
-  }, [searchParams, setSearchParams]);
+  }, [leftOpen, rightOpen, searchParams, setSearchParams, workspaceMode]);
 
   // openRightPanel: collapses left in compactLayout, opens right tab.
   const openRightPanel = useCallback((tab: RightPanelMode) => {
@@ -395,6 +638,34 @@ export function ProjectWorkspace(): React.ReactElement {
         }),
     [openRightTabs]
   );
+
+  const titleBarResultItems = useMemo(() => conversationJobs.map((job) => {
+    const status = job.status === 'done'
+      ? '完成'
+      : job.status === 'failed'
+        ? '失败'
+        : job.status === 'running'
+          ? '运行中'
+          : '排队中';
+    return {
+      id: job.id,
+      label: job.name || job.tool_id || '分析结果',
+      status: `${status} · ${new Date(job.created_at).toLocaleTimeString('zh-CN', {
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      })}`,
+    };
+  }), [conversationJobs]);
+
+  const handleSelectTitleBarResult = useCallback((jobId: string) => {
+    if (!conversationJobs.some((job) => job.id === jobId)) return;
+    bindActiveJob(jobId);
+    setRightOpen(true);
+    openRightPanel('results');
+    updateWorkspaceMode('result', true, jobId);
+  }, [bindActiveJob, conversationJobs, openRightPanel, setRightOpen, updateWorkspaceMode]);
 
   const switchToProject = useCallback((id: string) => {
     if (id !== projectId) navigate(`/project/${id}`);
@@ -479,6 +750,8 @@ export function ProjectWorkspace(): React.ReactElement {
   // Switch conversation
   const handleSwitchConversation = useCallback((convId: string) => {
     updateWorkspaceMode('chat');
+    setActiveJobId(null);
+    setActiveArtifact(null);
     setActiveConvId(convId);
   }, [updateWorkspaceMode]);
 
@@ -487,12 +760,13 @@ export function ProjectWorkspace(): React.ReactElement {
     updateWorkspaceMode('search');
   }, [updateWorkspaceMode]);
   const handleShowScheduled = useCallback(() => {
-    const nextJobId = activeJobId || jobs[0]?.id || null;
+    const currentJob = conversationJobs.find((job) => job.id === activeJobId);
+    const nextJobId = currentJob?.id || conversationJobs[0]?.id || null;
     if (nextJobId) {
-      setActiveJobId(nextJobId);
+      bindActiveJob(nextJobId);
     }
     updateWorkspaceMode('scheduled', true, nextJobId);
-  }, [activeJobId, jobs, updateWorkspaceMode]);
+  }, [activeJobId, bindActiveJob, conversationJobs, updateWorkspaceMode]);
   // Entering settings hides both side rails: settings is a global surface
   // that doesn't need project context (left: project/chat list) or job
   // artifacts (right: files/results/browser), so collapsing them gives the
@@ -514,7 +788,13 @@ export function ProjectWorkspace(): React.ReactElement {
 
   const handleOpenRightResults = useCallback(() => {
     openRightPanel('results');
-  }, [openRightPanel]);
+    const currentJob = conversationJobs.find((job) => job.id === activeJobId);
+    const nextJobId = currentJob?.id || conversationJobs[0]?.id || null;
+    if (nextJobId) {
+      bindActiveJob(nextJobId);
+      updateWorkspaceMode('result', true, nextJobId);
+    }
+  }, [activeJobId, bindActiveJob, conversationJobs, openRightPanel, updateWorkspaceMode]);
 
   const handleOpenRightBrowser = useCallback(() => {
     openRightPanel('browser');
@@ -657,6 +937,8 @@ export function ProjectWorkspace(): React.ReactElement {
     try {
       const p = await getProject(projectId);
       if (!p) {
+        // 项目被删除/无权访问：清空 project，走全屏错误（致命，非瞬时）
+        setProject(null);
         setError('项目不存在或无权访问');
         setLoading(false);
         return;
@@ -668,7 +950,10 @@ export function ProjectWorkspace(): React.ReactElement {
       ]);
       setJobs(jobList);
       setDatasets(dsList);
+      // 成功路径必须清除此前轮询留下的瞬时错误，否则错误屏永驻（P0-2）
+      setError('');
     } catch (e: any) {
+      // 轮询瞬时失败：保留已加载数据，错误以非阻塞横幅呈现，下一轮成功即自愈
       setError(e.message || '加载失败');
     } finally {
       setLoading(false);
@@ -718,14 +1003,23 @@ export function ProjectWorkspace(): React.ReactElement {
     }
   }, [chooseWorkspaceDirectory, projectId]);
 
+  const titleBarTitle = useMemo(
+    () => buildResultTitleBarTitle(workspaceMode, project?.name, activeArtifact?.label || activeArtifact?.name),
+    [activeArtifact?.label, activeArtifact?.name, project?.name, workspaceMode],
+  );
+
   useEffect(() => {
     updateTitleBar({
-      title: project?.name || '梳理开发进展',
+      title: titleBarTitle,
       leftPanelWidth: leftWidth,
       rightPanelWidth: effectiveRightWidth,
       tabs: titleBarTabs,
       activeTabId: rightTab === 'home' ? null : rightTab,
       onSelectTab: (tabId) => {
+        if (tabId === 'results') {
+          handleOpenRightResults();
+          return;
+        }
         setRightTab(tabId as RightPanelMode);
         setRightToolMenuOpen(false);
         setRightOpen(true);
@@ -740,9 +1034,17 @@ export function ProjectWorkspace(): React.ReactElement {
         isOpen: openRightTabs.includes(item.id),
       })),
       onSelectToolItem: (tabId) => {
+        if (tabId === 'results') {
+          handleOpenRightResults();
+          setRightToolMenuOpen(false);
+          return;
+        }
         openRightPanel(tabId as RightPanelMode);
         setRightToolMenuOpen(false);
       },
+      resultItems: titleBarResultItems,
+      activeResultId: conversationJobs.some((job) => job.id === activeJobId) ? activeJobId : null,
+      onSelectResult: handleSelectTitleBarResult,
       canGoBack: rightTab === 'browser' && browserCanGoBack,
       canGoForward: rightTab === 'browser' && browserCanGoForward,
       onGoBack:
@@ -767,6 +1069,9 @@ export function ProjectWorkspace(): React.ReactElement {
         toolMenuOpen: false,
         toolMenuItems: [],
         onSelectToolItem: null,
+        resultItems: [],
+        activeResultId: null,
+        onSelectResult: null,
         canGoBack: false,
         canGoForward: false,
         onGoBack: null,
@@ -782,14 +1087,18 @@ export function ProjectWorkspace(): React.ReactElement {
     openRightPanel,
     openRightTabs,
     project?.name,
+    titleBarTitle,
     project?.workspacePath,
     rightTab,
     effectiveRightWidth,
+    handleOpenRightResults,
+    handleSelectTitleBarResult,
     rightToolMenuOpen,
     setRightOpen,
     setRightToolMenuOpen,
     setRightTab,
     titleBarTabs,
+    titleBarResultItems,
     updateTitleBar,
   ]);
 
@@ -802,6 +1111,7 @@ export function ProjectWorkspace(): React.ReactElement {
   useEffect(() => {
     const handler = () => {
       fetchData();
+      void refreshConversationJobs();
       refreshConversations();
       listProjects()
         .then(setAllProjects)
@@ -809,7 +1119,7 @@ export function ProjectWorkspace(): React.ReactElement {
     };
     const unsub = subscribeBioF3Event(biof3Events.softRefresh, handler);
     return unsub;
-  }, [fetchData, refreshConversations]);
+  }, [fetchData, refreshConversationJobs, refreshConversations]);
 
   useEffect(() => {
     if (workspaceMode === 'search') {
@@ -817,10 +1127,13 @@ export function ProjectWorkspace(): React.ReactElement {
     }
   }, [ensureSearchConversationIndex, workspaceMode]);
 
-  const activeJob = useMemo(
-    () => jobs.find((j) => j.id === activeJobId) || null,
-    [jobs, activeJobId]
-  );
+  const activeJob = useMemo(() => {
+    if (!activeConvId || !activeJobId) return null;
+    const candidate = conversationJobs.find((job) => job.id === activeJobId)
+      || jobs.find((job) => job.id === activeJobId)
+      || null;
+    return candidate?.conversationId === activeConvId ? candidate : null;
+  }, [activeConvId, activeJobId, conversationJobs, jobs]);
 
   useEffect(() => {
     if (!activeJob || activeJob.status !== 'done') {
@@ -845,21 +1158,21 @@ export function ProjectWorkspace(): React.ReactElement {
     let failed = 0;
     let done = 0;
     let pending = 0;
-    jobs.forEach((job) => {
+    conversationJobs.forEach((job) => {
       if (job.status === 'running') running += 1;
       else if (job.status === 'failed') failed += 1;
       else if (job.status === 'done') done += 1;
       else pending += 1;
     });
     return { running, failed, done, pending };
-  }, [jobs]);
+  }, [conversationJobs]);
 
   const liveJobsPreview = useMemo(
     () =>
-      jobs
+      conversationJobs
         .filter((job) => job.status === 'running' || job.status === 'pending')
         .slice(0, 3),
-    [jobs]
+    [conversationJobs]
   );
 
   const showPinnedSummary = workspaceMode === 'chat' || workspaceMode === 'scheduled';
@@ -871,9 +1184,44 @@ export function ProjectWorkspace(): React.ReactElement {
   const summaryCardOpen = summaryVisibility !== 'hidden' && summaryOpen;
   const { workflow: activeWorkflow } = useHarnessWorkflowStatus(
     activeJob?.id,
-    !!activeJob && (summaryCardOpen || (rightOpen && rightTab === 'results')),
+    !!activeJob && (
+      summaryCardOpen ||
+      (rightOpen && rightTab === 'results') ||
+      workspaceMode === 'result' ||
+      workspaceMode === 'code' ||
+      workspaceMode === 'compare' ||
+      workspaceMode === 'history'
+    ),
     workflowRefreshKey,
   );
+
+  const copilotActiveArtifact = useMemo<NonNullable<CopilotContext['activeArtifact']> | null>(() => {
+    if (!activeArtifact) return null;
+    const contextToken = effectiveResultContextState?.status === 'ready'
+      && isResultStudioContextToken(effectiveResultContextState.contextToken)
+      ? effectiveResultContextState.contextToken
+      : null;
+    return {
+      jobId: activeArtifact.jobId,
+      toolId: activeArtifact.toolId,
+      name: activeArtifact.name,
+      type: activeArtifact.type,
+      label: activeArtifact.label,
+      url: activeArtifact.url,
+      revisionId: activeArtifact.revisionId,
+      artifactFamilyId: activeArtifact.artifactFamilyId,
+      entityType: activeArtifact.entityType,
+      idField: activeArtifact.idField,
+      selectionId: activeArtifact.selection?.compatibility === 'compatible'
+        ? activeArtifact.selectionId
+        : null,
+      selection: activeArtifact.selection?.compatibility === 'compatible'
+        ? summarizeSelectionForAgent(activeArtifact.selection)
+        : null,
+      selectionCompatibility: activeArtifact.selection?.compatibility || null,
+      contextToken,
+    };
+  }, [activeArtifact, effectiveResultContextState?.contextToken, effectiveResultContextState?.status]);
 
   // 6.3 — Inject project context into SimpleChat (via shared copilot context).
   // Replaces the original useEffect that did an in-place setCopilotContext
@@ -904,24 +1252,114 @@ export function ProjectWorkspace(): React.ReactElement {
           projectHarnessSummary: toCopilotHarnessSummary(copilotHarnessIndex),
           activeJobHarnessSummary: toCopilotHarnessSummary(activeJobHarnessIndex),
           activeJobId: activeJobId ?? undefined,
-          activeArtifact,
+          activeArtifact: copilotActiveArtifact,
         }
       : {}
   );
 
   useEffect(() => {
     setActiveArtifact(null);
+    setResultContextState(null);
+    setResultEditControls(null);
   }, [activeJobId]);
+
+  // G0-RS-P3: 每当打开的结果或其版本变化，就从后端重新投影一次上下文。
+  // 这里只提供 job/文件名/revision 线索，坐标齐备与否由后端裁决；
+  // 409 时如实记录阻断原因，UI 不把它显示成"Agent 可以直接改"。
+  useEffect(() => {
+    if (!projectId || !activeArtifact?.jobId || !activeArtifact.name) {
+      setResultContextState(null);
+      setResultEditControls(null);
+      return;
+    }
+    if (!activeConvId) {
+      setResultContextState({
+        status: 'blocked',
+        bindingKey: resultContextBindingKey,
+        contextToken: null,
+        reason: '请先创建或选择一个 Agent 会话，再修改当前结果。',
+      });
+      setResultEditControls(null);
+      return;
+    }
+    let cancelled = false;
+    setResultContextState({ status: 'loading', bindingKey: resultContextBindingKey, contextToken: null });
+    setResultEditControls(null);
+    fetchResultStudioContext({
+      language: 'r',
+      projectId,
+      conversationId: activeConvId,
+      jobId: activeArtifact.jobId,
+      artifact: activeArtifact.name,
+      revisionId: activeArtifact.revisionId ?? null,
+    })
+      .then((result) => {
+        if (cancelled) return;
+        if (result.status === 'blocked') {
+          setResultContextState({
+            status: 'blocked',
+            bindingKey: resultContextBindingKey,
+            contextToken: null,
+            reason: result.diagnostics[0]?.message || null,
+          });
+          setResultEditControls(null);
+          return;
+        }
+        const contextToken = result.agentView?.contextToken ?? null;
+        if (!isResultStudioContextToken(contextToken)) {
+          setResultContextState({
+            status: 'blocked',
+            bindingKey: resultContextBindingKey,
+            contextToken: null,
+            reason: '本地服务没有返回可验证的结果上下文，请刷新后重试。',
+          });
+          setResultEditControls(null);
+          return;
+        }
+        setResultContextState({
+          status: 'ready',
+          bindingKey: resultContextBindingKey,
+          contextToken,
+          selectionUsable: result.agentView?.selectionState.usableByAgent === true,
+          selectionCompatibility: result.agentView?.selectionState.compatibility ?? null,
+          publicPhases: result.agentView?.publicPhases || [],
+        });
+        // G0-RS-P4: 控件 schema 与 Agent 可见参数出自同一后端投影。
+        setResultEditControls(result.editControls ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setResultContextState({
+            status: 'blocked',
+            bindingKey: resultContextBindingKey,
+            contextToken: null,
+            reason: '无法连接本地服务读取结果上下文。',
+          });
+          setResultEditControls(null);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    projectId,
+    activeConvId,
+    activeArtifact?.jobId,
+    activeArtifact?.name,
+    activeArtifact?.revisionId,
+    activeArtifact?.artifactFamilyId,
+    activeArtifact?.selectionId,
+    activeSelectionBindingKey,
+    resultContextBindingKey,
+  ]);
 
   useEffect(() => {
     if (loading) return;
-    if (activeJobId || jobs.length === 0) return;
-    const firstJob = jobs[0];
+    if (activeJobId || conversationJobs.length === 0) return;
+    const firstJob = conversationJobs[0];
     if (!firstJob) return;
-    setActiveJobId(firstJob.id);
-    setRightOpen(true);
-    openRightPanel('results');
-  }, [activeJobId, jobs, loading, openRightPanel, setRightOpen]);
+    bindActiveJob(firstJob.id);
+  }, [activeJobId, bindActiveJob, conversationJobs, loading]);
 
   const normalizeToolStatus = useCallback((status: unknown): ToolJob['status'] => {
     if (status === 'completed' || status === 'done') return 'done';
@@ -935,15 +1373,18 @@ export function ProjectWorkspace(): React.ReactElement {
     targetProjectId?: string | null,
     options?: { preserveWorkspaceMode?: boolean },
   ) => {
+    const openRequestId = ++openResultRequestSequenceRef.current;
     const currentProjectId = projectId || null;
     const resolvedTargetProjectId = targetProjectId ?? currentProjectId;
     if (resolvedTargetProjectId && currentProjectId && resolvedTargetProjectId !== currentProjectId) {
-      const mode = options?.preserveWorkspaceMode ? 'chat' : 'scheduled';
+      const mode = options?.preserveWorkspaceMode ? 'chat' : 'result';
       navigate(`/project/${resolvedTargetProjectId}?mode=${mode}&job=${encodeURIComponent(jobId)}`);
       return;
     }
 
-    let nextJob = jobs.find((j) => j.id === jobId) || null;
+    let nextJob = conversationJobs.find((job) => job.id === jobId)
+      || jobs.find((job) => job.id === jobId)
+      || null;
     let nextProjectId = resolvedTargetProjectId;
     if (!nextJob) {
       try {
@@ -952,6 +1393,7 @@ export function ProjectWorkspace(): React.ReactElement {
           headers: token ? { Authorization: 'Bearer ' + token } : {},
         });
         const data = await resp.json();
+        if (!canCommitJobOpen(openRequestId, openResultRequestSequenceRef.current)) return;
         if (data && data.ok) {
           nextJob = {
             id: String(data.id || jobId),
@@ -962,10 +1404,11 @@ export function ProjectWorkspace(): React.ReactElement {
             error: data.error ? String(data.error) : undefined,
             name: data.toolId ? `${data.toolId} via agent` : undefined,
             project_id: data.projectId ? String(data.projectId) : (resolvedTargetProjectId || null),
+            conversationId: data.conversationId == null ? null : String(data.conversationId),
           };
           nextProjectId = nextJob.project_id || nextProjectId;
           if (nextProjectId && currentProjectId && nextProjectId !== currentProjectId) {
-            const mode = options?.preserveWorkspaceMode ? 'chat' : 'scheduled';
+            const mode = options?.preserveWorkspaceMode ? 'chat' : 'result';
             navigate(`/project/${nextProjectId}?mode=${mode}&job=${encodeURIComponent(nextJob.id)}`);
             return;
           }
@@ -974,16 +1417,32 @@ export function ProjectWorkspace(): React.ReactElement {
       } catch {
         /* keep the current panel state if the status lookup fails */
       }
+      if (!canCommitJobOpen(openRequestId, openResultRequestSequenceRef.current)) return;
+    }
+    if (!nextJob) {
+      bindActiveJob(null);
+      setWorkspaceNotice('找不到这个结果，或当前项目无权访问它。');
+      if (!options?.preserveWorkspaceMode) updateWorkspaceMode('chat', true, null);
+      return;
+    }
+    if (!nextJob.conversationId) {
+      bindActiveJob(null);
+      setWorkspaceNotice('这个旧结果没有可信的会话归属，不能混入当前会话。');
+      if (!options?.preserveWorkspaceMode) updateWorkspaceMode('chat', true, null);
+      return;
     }
     if (nextJob) {
-      setActiveJobId(nextJob.id);
+      if (nextJob.conversationId !== activeConvId) {
+        setActiveConvId(nextJob.conversationId);
+      }
+      bindActiveJob(nextJob.id);
       setRightOpen(true);
       openRightPanel('results');
       if (!options?.preserveWorkspaceMode) {
-        updateWorkspaceMode('scheduled', true, nextJob.id);
+        updateWorkspaceMode('result', true, nextJob.id);
       }
     }
-  }, [jobs, navigate, normalizeToolStatus, openRightPanel, projectId, setRightOpen, updateWorkspaceMode]);
+  }, [activeConvId, bindActiveJob, conversationJobs, jobs, navigate, normalizeToolStatus, openRightPanel, projectId, setRightOpen, updateWorkspaceMode]);
 
   useEffect(() => {
     autoOpenedJobRef.current = null;
@@ -993,12 +1452,22 @@ export function ProjectWorkspace(): React.ReactElement {
     if (loading || !projectId) return;
 
     if (requestedJobId) {
-      if (requestedArtifactName && pendingArtifactNameRef.current !== requestedArtifactName) {
+      const requestKey = requestedArtifactRequestKey({
+        projectId,
+        jobId: requestedJobId,
+        artifactName: requestedArtifactName,
+      });
+      if (!requestKey) appliedRequestedArtifactKeyRef.current = null;
+      if (shouldApplyRequestedArtifact(appliedRequestedArtifactKeyRef.current, requestKey)) {
+        appliedRequestedArtifactKeyRef.current = requestKey;
         pendingArtifactNameRef.current = requestedArtifactName;
         pendingArtifactJobIdRef.current = requestedJobId;
         setPendingArtifactName(requestedArtifactName);
       }
-      if (activeJobId === requestedJobId && workspaceMode === 'scheduled') return;
+      if (
+        activeJobId === requestedJobId &&
+        (workspaceMode === 'result' || workspaceMode === 'code' || workspaceMode === 'compare' || workspaceMode === 'history' || workspaceMode === 'chat')
+      ) return;
       if (autoOpenedJobRef.current === requestedJobId) return;
       autoOpenedJobRef.current = requestedJobId;
       void handleOpenResult(requestedJobId, projectId, {
@@ -1007,11 +1476,8 @@ export function ProjectWorkspace(): React.ReactElement {
       return;
     }
 
-    if (activeJobId || jobs.length === 0) return;
-    const firstJob = jobs[0];
-    if (!firstJob || autoOpenedJobRef.current === firstJob.id) return;
-    autoOpenedJobRef.current = firstJob.id;
-    void handleOpenResult(firstJob.id, projectId);
+    appliedRequestedArtifactKeyRef.current = null;
+
   }, [activeJobId, handleOpenResult, jobs, loading, projectId, requestedArtifactName, requestedJobId, workspaceMode]);
 
   useEffect(() => {
@@ -1088,17 +1554,54 @@ export function ProjectWorkspace(): React.ReactElement {
 
   /** Dispatch a copilot-ask event so the embedded SimpleChat picks it up */
   const handleAskAgent = useCallback((prompt: string) => {
+    if (activeConvId && isConversationRunning(activeConvId)) {
+      setWorkspaceNotice('当前 Agent 仍在处理上一个请求；完成或停止后再开始新分析。');
+      return false;
+    }
+    setWorkspaceNotice('');
     dispatchBioF3Event(biof3Events.copilotAsk, { prompt });
-  }, []);
+    return true;
+  }, [activeConvId]);
+
+  // P4R-3: 焦点 Composer 与高级控件在这里汇合。可见 prompt 只包含用户目标/
+  // 手动 patch；opaque token + Artifact/Revision/Selection 快照走事件 context，
+  // 不进入消息文字。后端仍会重新投影真相并拒绝陈旧 token。
+  const handleResultEditSubmit = useCallback((submission: ResultEditSubmission) => {
+    if (!activeConvId || isConversationRunning(activeConvId)) {
+      setWorkspaceNotice('当前 Agent 仍在处理上一条请求；完成或停止后可继续修改结果。');
+      return false;
+    }
+    setResultEditSubmitting(true);
+    try {
+      const detail = buildResultEditCopilotAsk({
+        submission,
+        activeArtifact: copilotActiveArtifact,
+        currentContextToken: effectiveResultContextState?.status === 'ready'
+          ? effectiveResultContextState.contextToken
+          : null,
+      });
+      if (!detail) {
+        setWorkspaceNotice('当前结果上下文已经变化，请等待上下文刷新后再提交。');
+        return false;
+      }
+      setWorkspaceNotice('');
+      dispatchBioF3Event(biof3Events.copilotAsk, detail);
+      return true;
+    } finally {
+      setResultEditSubmitting(false);
+    }
+  }, [activeConvId, copilotActiveArtifact, effectiveResultContextState?.contextToken, effectiveResultContextState?.status]);
 
   const openScheduledResults = useCallback(() => {
-    const nextJobId = activeJobId || jobs[0]?.id || null;
+    const currentJob = conversationJobs.find((job) => job.id === activeJobId);
+    const nextJobId = currentJob?.id || conversationJobs[0]?.id || null;
     if (nextJobId) {
-      setActiveJobId(nextJobId);
+      bindActiveJob(nextJobId);
+      updateWorkspaceMode('result', true, nextJobId);
     }
     setRightOpen(true);
     openRightPanel('results');
-  }, [activeJobId, jobs, openRightPanel, setRightOpen]);
+  }, [activeJobId, bindActiveJob, conversationJobs, openRightPanel, setRightOpen, updateWorkspaceMode]);
 
   if (loading) {
     return (
@@ -1108,10 +1611,20 @@ export function ProjectWorkspace(): React.ReactElement {
     );
   }
 
-  if (error || !project) {
+  // 只有"尚未加载到项目"时错误才全屏；已加载项目的轮询瞬时错误走顶部横幅，不卸载整页
+  if (error && !project) {
     return (
       <div className={styles.errorWrap}>
-        <p>{error || '项目不存在'}</p>
+        <p>{error}</p>
+        <Link to="/" className={styles.backLink}>← 返回工作台</Link>
+      </div>
+    );
+  }
+
+  if (!project) {
+    return (
+      <div className={styles.errorWrap}>
+        <p>项目不存在</p>
         <Link to="/" className={styles.backLink}>← 返回工作台</Link>
       </div>
     );
@@ -1144,8 +1657,12 @@ export function ProjectWorkspace(): React.ReactElement {
     activeJob,
     activeWorkflow,
     activeArtifact,
+    resultContext: effectiveResultContextState,
+    resultEditSubmitting: resultEditBusy,
+    resultAgentDraft,
     activeJobId,
-    recentJobs: jobs,
+    pendingArtifactName: pendingArtifactJobIdRef.current === activeJob?.id ? pendingArtifactName : null,
+    recentJobs: conversationJobs,
     liveJobsPreview,
     jobStats,
     backendStatus,
@@ -1159,6 +1676,8 @@ export function ProjectWorkspace(): React.ReactElement {
     setActiveConvId,
     setActiveJobId,
     setActiveArtifact,
+    setResultAgentDraft,
+    onResultEditSubmit: handleResultEditSubmit,
     setBottomTerminalOpen,
     setSummaryOpen,
     setLeftOpen,
@@ -1167,6 +1686,24 @@ export function ProjectWorkspace(): React.ReactElement {
     handleOpenResult,
     handleAskAgent,
     handleOpenWorkspacePath,
+    onPendingArtifactConsumed: () => {
+      pendingArtifactNameRef.current = null;
+      pendingArtifactJobIdRef.current = null;
+      setPendingArtifactName(null);
+    },
+    onWorkflowChanged: () => setWorkflowRefreshKey((value) => value + 1),
+    openRevisionWorkspaceFile: (relativePath: string) => {
+      dispatchBioF3Event(biof3Events.projectOpenWorkspaceFile, {
+        projectId: projectId || '',
+        relativePath,
+        name: relativePath.split('/').pop() || relativePath,
+        openWithSystemApp: false,
+      });
+    },
+    openResultBrowser: (url: string) => {
+      setBrowserUrl(url);
+      openRightPanel('browser');
+    },
     openScheduledResults,
     startColumnResize,
   };
@@ -1219,6 +1756,10 @@ export function ProjectWorkspace(): React.ReactElement {
     onWorkflowChanged: () => setWorkflowRefreshKey((value) => value + 1),
     activeArtifact,
     setActiveArtifact,
+    resultContext: effectiveResultContextState,
+    resultEditControls: effectiveResultEditControls,
+    resultEditSubmitting: resultEditBusy,
+    onResultEditSubmit: handleResultEditSubmit,
     openWorkspaceFiles,
     activeWorkspaceFile,
     setActiveWorkspaceFile,
@@ -1281,6 +1822,15 @@ export function ProjectWorkspace(): React.ReactElement {
           >
             去插件商店安装
           </button>
+      )}
+      {workspaceNotice && (
+        <div className={styles.workspaceNotice} role="status" aria-live="polite">
+          {workspaceNotice}
+        </div>
+      )}
+      {error && (
+        <div className={styles.workspaceNotice} role="alert" aria-live="assertive">
+          数据刷新暂时失败：{error}（将在下一轮自动重试）
         </div>
       )}
       <div className={styles.workspaceBody}>
@@ -1537,57 +2087,7 @@ function formatPreviewText(name: string, text: string): string {
   return text;
 }
 
-function summarizeRecord(record?: Record<string, number>, limit = 4): string {
-  const entries = Object.entries(record || {})
-    .filter(([, count]) => count > 0)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, limit);
-  return entries.length ? entries.map(([key, count]) => `${key}×${count}`).join(' · ') : '暂无';
-}
 
-function HarnessIndexCard({
-  title,
-  index,
-  loading,
-  error,
-}: {
-  title: string;
-  index: HarnessIndexSummary | null;
-  loading: boolean;
-  error?: string;
-}): React.ReactElement | null {
-  if (!loading && !index && !error) return null;
-  const entries = index?.entries || [];
-  return (
-    <div className={styles.harnessIndexCard}>
-      <div className={styles.harnessIndexCardHeader}>
-        <span>{title}</span>
-        {loading && <em>识别中…</em>}
-        {!loading && index && <em>{index.fileCount || 0} 个文件</em>}
-      </div>
-      {error && !loading ? (
-        <p className={styles.harnessIndexMuted}>暂未生成识别摘要：{error}</p>
-      ) : index ? (
-        <>
-          <div className={styles.harnessIndexStats}>
-            <span>类型：{summarizeRecord(index.byKind)}</span>
-            <span>角色：{summarizeRecord(index.byRole)}</span>
-          </div>
-          {entries.length > 0 && (
-            <div className={styles.harnessIndexEntries}>
-              {entries.slice(0, 4).map((entry) => (
-                <div key={entry.relativePath} className={styles.harnessIndexEntry} title={entry.relativePath}>
-                  <span>{entry.relativePath}</span>
-                  <em>{entry.role || entry.kind}</em>
-                </div>
-              ))}
-            </div>
-          )}
-        </>
-      ) : null}
-    </div>
-  );
-}
 
 export function RightFileTree({
   project,
@@ -1596,6 +2096,7 @@ export function RightFileTree({
   activeFile,
   onOpenFile,
   onCloseFile,
+  onAskAgent,
 }: {
   project: Project;
   active: boolean;
@@ -1603,21 +2104,19 @@ export function RightFileTree({
   activeFile: ActiveWorkspaceFile | null;
   onOpenFile: (file: ActiveWorkspaceFile) => void;
   onCloseFile: (path: string) => void;
+  onAskAgent: (prompt: string) => boolean | void;
 }): React.ReactElement {
   const [tree, setTree] = useState<FileEntry[]>([]);
   const [expandedDirs, setExpandedDirs] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [treeOpen, setTreeOpen] = useState(true);
   const [treeWidth, setTreeWidth] = useState(220);
-  const [harnessIndex, setHarnessIndex] = useState<HarnessIndexSummary | null>(null);
-  const [harnessLoading, setHarnessLoading] = useState(false);
-  const [harnessError, setHarnessError] = useState('');
+
   const [refreshVersion, setRefreshVersion] = useState(0);
   const [previewVersion, setPreviewVersion] = useState(0);
   const [openError, setOpenError] = useState('');
   const [opening, setOpening] = useState(false);
   const activeFileSignatureRef = useRef<string | null>(null);
-  const harnessRequestRef = useRef(0);
 
   const fetchDir = useCallback(async (prefix: string) => {
     try {
@@ -1652,23 +2151,6 @@ export function RightFileTree({
     }
   }, [activeFile?.name, activeFile?.path, fetchDir]);
 
-  const refreshHarnessIndex = useCallback(async (showLoading = false) => {
-    const requestId = harnessRequestRef.current + 1;
-    harnessRequestRef.current = requestId;
-    if (showLoading) setHarnessLoading(true);
-    setHarnessError('');
-    try {
-      const data = await fetchHarnessIndex({ scope: 'project', projectId: project.id, maxFiles: 120 });
-      if (harnessRequestRef.current === requestId) setHarnessIndex(data.index || null);
-    } catch (error) {
-      if (harnessRequestRef.current !== requestId) return;
-      setHarnessIndex(null);
-      setHarnessError((error as Error).message || '识别失败');
-    } finally {
-      if (showLoading && harnessRequestRef.current === requestId) setHarnessLoading(false);
-    }
-  }, [project.id]);
-
   useEffect(() => {
     activeFileSignatureRef.current = null;
     setOpenError('');
@@ -1700,26 +2182,13 @@ export function RightFileTree({
     const unsubscribe = subscribeBioF3Event(biof3Events.projectWorkspaceChanged, (detail) => {
       if (detail.projectId === project.id) {
         void refreshFiles(true);
-        void refreshHarnessIndex(false);
       }
     });
     return () => {
       window.clearInterval(timer);
       unsubscribe();
     };
-  }, [active, project.id, refreshFiles, refreshHarnessIndex]);
-
-  useEffect(() => {
-    void refreshHarnessIndex(true);
-  }, [project.id, refreshHarnessIndex]);
-
-  useEffect(() => {
-    if (!active) return;
-    const timer = window.setInterval(() => {
-      if (!document.hidden) void refreshHarnessIndex(false);
-    }, 10000);
-    return () => window.clearInterval(timer);
-  }, [active, refreshHarnessIndex]);
+  }, [active, project.id, refreshFiles]);
 
   const toggleDir = useCallback(async (dirPath: string) => {
     setExpandedDirs((prev) => {
@@ -1841,6 +2310,7 @@ export function RightFileTree({
           })}
           {!activeFile && <span className={styles.workspaceBreadcrumbEmpty}>选择文件预览</span>}
         </div>
+        <DataIntakeControl projectId={project.id} onAskAgent={onAskAgent} />
         <button
           className={styles.workspaceTreeToggle}
           onClick={() => setTreeOpen((value) => !value)}
@@ -2609,340 +3079,8 @@ export function ScheduledWorkspacePanel({
   );
 }
 
-// ============================================================
-// HistoryPanel — right column (Phase7)
-// ============================================================
 
-function HistoryPanel({
-  jobs,
-  activeJobId,
-  onSelectJob,
-}: {
-  jobs: ToolJob[];
-  activeJobId: string | null;
-  onSelectJob: (id: string) => void;
-}): React.ReactElement {
-  return (
-    <div className={styles.panelInner}>
-      <div className={styles.panelSection}>
-        <h3 className={styles.panelHeading}>
-          <Icon name="clock" size={14} /> 分析历史
-        </h3>
-        {jobs.length === 0 ? (
-          <p className={styles.panelEmpty}>还没有分析记录</p>
-        ) : (
-          <ul className={styles.timeline}>
-            {jobs.map((job) => (
-              <li
-                key={job.id}
-                className={`${styles.timelineItem} ${
-                  activeJobId === job.id ? styles.timelineItemActive : ''
-                }`}
-                onClick={() => onSelectJob(job.id)}
-              >
-                <div className={styles.timelineDot} data-status={job.status} />
-                <div className={styles.timelineContent}>
-                  <span className={styles.timelineTitle}>
-                    {job.name || job.tool_id}
-                  </span>
-                  <span className={styles.timelineTime}>
-                    {formatDate(job.created_at)}
-                  </span>
-                  <span className={styles.timelineStatus} data-status={job.status}>
-                    {job.status}
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
-  );
-}
 
-// ============================================================
-// ToolboxPanel — right column (Phase7: tool catalog + 7.3 plugin list)
-// ============================================================
-
-// Plan 1.6 §4.6 — InstalledPlugin / RemotePlugin shapes are now
-// exported from `@/hooks/usePluginStore`. The local
-// `InstalledPluginInfo` / `RemotePluginInfo` aliases were
-// previously used inline; the hook now owns the canonical type
-// and the panel reads through it.
-
-const PLUGIN_TYPE_LABELS: Record<string, string> = {
-  runtime: '运行时',
-  tool: '工具',
-};
-
-function ToolboxPanel({
-  onAskAgent,
-}: {
-  onAskAgent: (prompt: string) => void;
-}): React.ReactElement {
-  const [query, setQuery] = useState('');
-  const [activeCat, setActiveCat] = useState<string>('全部');
-  const [tab, setTab] = useState<'tools' | 'plugins'>('tools');
-
-  // --- Plugin state — Plan 1.6 §4.6 [HIGH] dedup ---
-  // Shares the same SWR catalog as PluginStorePanel. `autoLoad: false`
-  // because the toolbox only wants the catalog when its plugins tab
-  // is opened (no point burning the bridge on every workspace mount).
-  // We dispatch refresh() ourselves when the tab activates.
-  const {
-    installed,
-    remote,
-    install: hookInstall,
-    uninstall: hookUninstall,
-    refresh: refreshPluginCatalog,
-  } = usePluginStore({ autoLoad: false });
-  const [installing, setInstalling] = useState<string | null>(null);
-  const [uninstalling, setUninstalling] = useState<string | null>(null);
-  const [pluginError, setPluginError] = useState<string | null>(null);
-
-  // Group tools by category
-  const categories = useMemo(() => {
-    const cats = new Set<string>();
-    staticTools.forEach((t) => cats.add(t.category));
-    return ['全部', ...Array.from(cats).sort()];
-  }, []);
-
-  const filteredTools = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return staticTools.filter((t) => {
-      if (activeCat !== '全部' && t.category !== activeCat) return false;
-      if (!q) return true;
-      return (
-        t.title.toLowerCase().includes(q) ||
-        t.subtitle.toLowerCase().includes(q) ||
-        t.id.toLowerCase().includes(q)
-      );
-    });
-  }, [query, activeCat]);
-
-  // --- Load plugins when tab is first activated ---
-  useEffect(() => {
-    if (tab !== 'plugins') return;
-    // The shared cache may already have data from the sidebar
-    // PluginStorePanel; refresh() will short-circuit the IPC
-    // roundtrip via the cache hit (or fetch fresh if the user
-    // hasn't visited the store yet).
-    refreshPluginCatalog();
-  }, [tab, refreshPluginCatalog]);
-
-  async function handleInstall(pluginId: string) {
-    setInstalling(pluginId);
-    setPluginError(null);
-    try {
-      const result = await hookInstall(pluginId);
-      if (!result.ok) {
-        setPluginError(result.error || '安装失败');
-      }
-    } catch (e) {
-      setPluginError(e instanceof Error ? e.message : '安装失败');
-    } finally {
-      setInstalling(null);
-    }
-  }
-
-  async function handleUninstall(pluginId: string) {
-    if (!confirm(`确定卸载插件「${pluginId}」？`)) return;
-    setUninstalling(pluginId);
-    setPluginError(null);
-    try {
-      const result = await hookUninstall(pluginId);
-      if (!result.ok) {
-        setPluginError(result.error || '卸载失败');
-      }
-    } catch (e) {
-      setPluginError(e instanceof Error ? e.message : '卸载失败');
-    } finally {
-      setUninstalling(null);
-    }
-  }
-
-  const remotePlugins = remote.plugins || {};
-
-  const installedIds = useMemo(() => new Set(installed.map((p) => p.id)), [installed]);
-
-  const availablePlugins = useMemo(() => {
-    return Object.entries(remotePlugins)
-      .filter(([id]) => !installedIds.has(id))
-      .sort((a, b) => {
-        const ta = a[1].title ?? a[0];
-        const tb = b[1].title ?? b[0];
-        return ta.localeCompare(tb);
-      });
-  }, [remotePlugins, installedIds]);
-
-  return (
-    <div className={styles.panelInner}>
-      <div className={styles.panelSection}>
-        <h3 className={styles.panelHeading}>
-          <Icon name="wrench" size={14} /> 工具箱
-        </h3>
-
-        {/* Tab switcher */}
-        <div className={styles.toolboxTabs}>
-          <button
-            className={`${styles.toolboxTab} ${tab === 'tools' ? styles.toolboxTabActive : ''}`}
-            onClick={() => setTab('tools')}
-          >
-            工具
-          </button>
-          <button
-            className={`${styles.toolboxTab} ${tab === 'plugins' ? styles.toolboxTabActive : ''}`}
-            onClick={() => setTab('plugins')}
-          >
-            插件
-            {installed.length > 0 && (
-              <span className={styles.toolboxTabBadge}>{installed.length}</span>
-            )}
-          </button>
-        </div>
-
-        {tab === 'tools' ? (
-          <>
-            {/* Search box */}
-            <input
-              className={styles.toolSearch}
-              type="text"
-              placeholder="搜索工具…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-
-            {/* Category chips */}
-            <div className={styles.toolCats}>
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  className={`${styles.toolCat} ${
-                    activeCat === cat ? styles.toolCatActive : ''
-                  }`}
-                  onClick={() => setActiveCat(cat)}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-
-            {/* Tool list */}
-            <ul className={styles.toolList}>
-              {filteredTools.map((tool) => (
-                <li
-                  key={tool.id}
-                  className={styles.toolItem}
-                  onClick={() =>
-                    onAskAgent(
-                      `请帮我使用工具「${tool.title}」(${tool.id}) 进行分析。`
-                    )
-                  }
-                  title={tool.description}
-                >
-                  <span
-                    className={styles.toolDot}
-                    style={{ background: tool.color }}
-                  />
-                  <div className={styles.toolMeta}>
-                    <span className={styles.toolName}>{tool.title}</span>
-                    <span className={styles.toolSub}>{tool.subtitle}</span>
-                  </div>
-                  {tool.comingSoon && (
-                    <span className={styles.toolBadge}>即将上线</span>
-                  )}
-                </li>
-              ))}
-              {filteredTools.length === 0 && (
-                <p className={styles.panelEmpty}>没有匹配的工具</p>
-              )}
-            </ul>
-          </>
-        ) : (
-          <>
-            {pluginError && (
-              <p className={styles.pluginError}>{pluginError}</p>
-            )}
-
-            {/* Installed plugins */}
-            <div className={styles.pluginSection}>
-              <h4 className={styles.pluginSectionTitle}>
-                已安装 ({installed.length})
-              </h4>
-              {installed.length === 0 ? (
-                <p className={styles.panelEmpty}>暂无已安装插件</p>
-              ) : (
-                <ul className={styles.toolList}>
-                  {installed.map((p) => {
-                    const info = remotePlugins[p.id];
-                    const label = PLUGIN_TYPE_LABELS[p.type ?? ''] ?? p.type ?? '插件';
-                    return (
-                      <li key={p.id} className={styles.pluginItem}>
-                        <div className={styles.pluginMeta}>
-                          <span className={styles.pluginName}>
-                            {info?.title ?? p.id}
-                          </span>
-                          <span className={styles.pluginSub}>
-                            v{p.version} · {label}
-                            {p.language ? ` · ${p.language}` : ''}
-                          </span>
-                        </div>
-                        <button
-                          className={styles.pluginBtnUninstall}
-                          disabled={uninstalling === p.id}
-                          onClick={() => handleUninstall(p.id)}
-                        >
-                          {uninstalling === p.id ? '…' : '卸载'}
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-
-            {/* Available (remote) plugins */}
-            <div className={styles.pluginSection}>
-              <h4 className={styles.pluginSectionTitle}>
-                可用 ({availablePlugins.length})
-              </h4>
-              {availablePlugins.length === 0 ? (
-                <p className={styles.panelEmpty}>所有插件均已安装</p>
-              ) : (
-                <ul className={styles.toolList}>
-                  {availablePlugins.map(([id, info]) => {
-                    const label = PLUGIN_TYPE_LABELS[info.type ?? ''] ?? info.type ?? '插件';
-                    return (
-                      <li key={id} className={styles.pluginItem}>
-                        <div className={styles.pluginMeta}>
-                          <span className={styles.pluginName}>
-                            {info.title ?? id}
-                          </span>
-                          <span className={styles.pluginSub}>
-                            {info.version ? `v${info.version} · ` : ''}{label}
-                            {info.language ? ` · ${info.language}` : ''}
-                          </span>
-                        </div>
-                        <button
-                          className={styles.pluginBtnInstall}
-                          disabled={installing === id}
-                          onClick={() => handleInstall(id)}
-                        >
-                          {installing === id ? '…' : '安装'}
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
 
 // ============================================================
 // ResultView — center column result display (Phase5: actual results)
@@ -3015,14 +3153,6 @@ function artifactPreviewLabel(artifact: ResultArtifactRecord): string {
   return '文件';
 }
 
-function compactArtifactKindSummary(artifacts: ResultArtifactRecord[]): string {
-  const counts = countArtifactsByKind(artifacts);
-  return (Object.keys(counts) as ResultArtifactKind[])
-    .filter((kind) => counts[kind] > 0)
-    .map((kind) => `${artifactKindLabel(kind)} ${counts[kind]}`)
-    .join(' · ');
-}
-
 function workflowStageLabel(stage: string): string {
   return {
     inspect: '检查输入',
@@ -3047,27 +3177,35 @@ function buildPreviewTable(text: string, fileName: string): string[][] {
 
 function ResultArtifactShell({
   project,
+  conversationId,
   job,
   workflow,
   activeArtifact,
   onActiveArtifactChange,
   onAskAgent,
   onWorkflowChanged,
-  variant,
-  showHarnessIndex = false,
+  onAgentCodeRequest,
+  replayContext,
+  onOpenRevisionWorkspaceFile,
   pendingArtifactName = null,
   onPendingArtifactConsumed,
   onOpenBrowser,
+  onBack,
+  onAskCurrentResult,
+  mode = 'result',
+  onModeChange,
 }: {
   project: Project;
+  conversationId?: string | null;
   job: ToolJob | null;
   workflow: HarnessWorkflowJobState | null;
   activeArtifact: ActiveArtifact | null;
   onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
   onAskAgent: (prompt: string) => void;
   onWorkflowChanged?: () => void;
-  variant: 'center' | 'sidebar';
-  showHarnessIndex?: boolean;
+  onAgentCodeRequest?: (request: 'explain' | 'modify' | 'replay') => void;
+  replayContext?: { conversationId?: string | null; contextToken: string } | null;
+  onOpenRevisionWorkspaceFile?: (relativePath: string) => void;
   /**
    * Optional artifact name the host wants pre-selected once the manifest
    * (or fallback artifacts) becomes available. Populated by the chat
@@ -3078,31 +3216,73 @@ function ResultArtifactShell({
   onPendingArtifactConsumed?: () => void;
   /** Opens a generated delivery report in the right-side Electron webview. */
   onOpenBrowser?: (url: string) => void;
+  onBack?: () => void;
+  onAskCurrentResult?: () => void;
+  mode?: ResultSurfaceMode;
+  onModeChange?: (mode: ResultSurfaceMode, jobId?: string | null) => void;
 }): React.ReactElement {
   const { resolvedTheme } = useTheme();
-  const isSidebar = variant === 'sidebar';
   const [result, setResult] = useState<JobResult | null>(null);
+  // P0-3：结果请求的网络/服务错误必须与"确实没有结果文件"区分开，
+  // 否则网络抖动会被谎报为"分析已完成，但未生成可视化结果文件"。
+  const [resultError, setResultError] = useState('');
+  const [resultRetryVersion, setResultRetryVersion] = useState(0);
+  // Which job the currently displayed body belongs to. Without this the
+  // effects below cannot tell "re-observing the same job" from "a different
+  // job", and cleared unconditionally for both.
+  const bodyJobRef = useRef<string | null>(null);
+  const activeBodyJobRef = useRef<string | null>(job?.id ?? null);
+  activeBodyJobRef.current = job?.id ?? null;
+  // Which artifact the interaction manifest belongs to, so the manifest effect
+  // can tell an artifact change from an unrelated dependency change.
+  const manifestArtifactRef = useRef<string | null>(null);
+  // P4R-2: result↔chat scroll preservation. `.resultView` is the scroll
+  // container; the result projection layer unmounts in chat mode, so the
+  // position is held in the module-level memory keyed by job id and restored
+  // once the body is mounted. See resultScrollMemory.ts.
+  const resultViewRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(false);
   const [jobMeta, setJobMeta] = useState<JobDetailMeta | null>(null);
   const [manifestRaw, setManifestRaw] = useState<unknown>(null);
   const [manifestLoading, setManifestLoading] = useState(false);
   const [manifestError, setManifestError] = useState('');
-  const [unavailableArtifactNames, setUnavailableArtifactNames] = useState<Set<string>>(
-    () => new Set()
-  );
+  const [manifestRetryVersion, setManifestRetryVersion] = useState(0);
   const [selectedName, setSelectedName] = useState('');
   const [selectedSectionId, setSelectedSectionId] = useState('');
   const [previewText, setPreviewText] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<string[][] | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewRetryVersion, setPreviewRetryVersion] = useState(0);
+  const [previewAvailability, setPreviewAvailability] = useState<{
+    key: string;
+    status: 'checking' | 'available' | 'unavailable';
+    reason: string | null;
+  }>({ key: '', status: 'checking', reason: null });
   // RS3：交互清单由后端基于完整文件判定（稳定 ID 列、可选维度），前端只消费。
+  const [interactionRevision, setInteractionRevision] = useState<ArtifactRevision | null>(null);
+  // P4R-4: a historical Revision can share its Job with a later restored
+  // Revision. Keep the clicked identity as disposable view state and pass it
+  // explicitly to the interaction route; do not infer it from job+artifact.
+  const [viewedRevision, setViewedRevision] = useState<ArtifactRevision | null>(null);
+  useEffect(() => {
+    setViewedRevision(null);
+  }, [job?.id]);
   const [interactionManifest, setInteractionManifest] = useState<ArtifactInteractionManifest | null>(null);
+  const [interactionBackingTable, setInteractionBackingTable] = useState<ResultTableQuery | null>(null);
+  const [interactionError, setInteractionError] = useState('');
+  const [interactionRetryVersion, setInteractionRetryVersion] = useState(0);
   const [artifactSelection, setArtifactSelection] = useState<ArtifactSelection | null>(null);
+  const [selectionError, setSelectionError] = useState('');
+  const [interactionPreviewKey, setInteractionPreviewKey] = useState<string | null>(null);
+  // SelectionContext 是 SQLite 真相的乐观投影。连续点击必须按发生顺序写入，
+  // 且保存/删除失败时回到最后一次真正提交的选择，不能把未落库状态交给 Agent。
+  const selectionMutationEpochRef = useRef(0);
+  const selectionMutationVersionRef = useRef(0);
+  const selectionMutationQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const visibleSelectionRef = useRef<ArtifactSelection | null>(null);
+  const committedSelectionRef = useRef<ArtifactSelection | null>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
-  const [harnessIndex, setHarnessIndex] = useState<HarnessIndexSummary | null>(null);
-  const [harnessLoading, setHarnessLoading] = useState(false);
-  const [harnessError, setHarnessError] = useState('');
-  const [navCollapsed, setNavCollapsed] = useState(false);
+
   const [pendingRecovery, setPendingRecovery] = useState<{
     actionId: string;
     label: string;
@@ -3112,14 +3292,14 @@ function ResultArtifactShell({
   const [recoveryError, setRecoveryError] = useState('');
   const [reportGenerating, setReportGenerating] = useState(false);
   const [finalReportUrl, setFinalReportUrl] = useState('');
-  const [finalReportGeneratedAt, setFinalReportGeneratedAt] = useState('');
   const [reportGenerationError, setReportGenerationError] = useState('');
   const [replayPackageBusy, setReplayPackageBusy] = useState(false);
   const [replayPackageMessage, setReplayPackageMessage] = useState('');
+  const [artifactSwitchMs, setArtifactSwitchMs] = useState<number | null>(null);
 
   const tool = useMemo(
     () => (job ? staticTools.find((t) => t.id === job.tool_id) || null : null),
-    [job]
+    [job?.tool_id]
   );
   const lang: 'r' | 'python' = tool?.language === 'python' ? 'python' : 'r';
   const effectiveJobStatus: ToolJob['status'] = workflow?.jobStatus === 'completed'
@@ -3140,18 +3320,20 @@ function ResultArtifactShell({
       const tokenQs = token ? `?token=${encodeURIComponent(token)}` : '';
       return `${base}/tools/file/${job.id}/${encodeURIComponent(name)}${tokenQs}`;
     },
-    [job, lang]
+    [job?.id, lang]
   );
   const scientificScriptUrl = useMemo(() => {
     if (!job || !result?.deliveryManifest) return '';
     const token = getToken();
     const query = token ? `?token=${encodeURIComponent(token)}` : '';
     return `${getApiPrefix(lang)}/harness/scientific-task-by-job/${encodeURIComponent(job.id)}/script${query}`;
-  }, [job, lang, result?.deliveryManifest]);
+  }, [job?.id, lang, result?.deliveryManifest]);
 
   useEffect(() => {
     if (!job) {
+      bodyJobRef.current = null;
       setResult(null);
+      setResultError('');
       setJobMeta(null);
       setManifestRaw(null);
       setManifestLoading(false);
@@ -3161,41 +3343,93 @@ function ResultArtifactShell({
       setPreviewText(null);
       setPreviewData(null);
       setPreviewLoading(false);
-      setHarnessIndex(null);
-      setHarnessLoading(false);
-      setHarnessError('');
+      setInteractionError('');
       return;
     }
 
     if (effectiveJobStatus === 'done') {
+      const requestedJobId = job.id;
+      let cancelled = false;
       setLoading(true);
-      setResult(null);
-      setJobMeta(null);
-      setSelectedName('');
-      setSelectedSectionId('');
+      setResultError('');
+      // The decision is the reducer's, not a condition restated here. An
+      // earlier version reimplemented the same rule inline and left
+      // resultBodyState.ts with no production importer — so its tests were
+      // green while nothing they described was running.
+      const shownBefore: ResultBodyState = bodyJobRef.current
+        ? { kind: 'artifact', jobId: bodyJobRef.current, artifactName: selectedName || '' }
+        : { kind: 'empty' };
+      const shownAfter = nextResultBodyState(shownBefore, { type: 'result_fetch_started', jobId: job.id });
+      if (shownAfter !== shownBefore) {
+        bodyJobRef.current = null;
+        setResult(null);
+        setJobMeta(null);
+        setSelectedName('');
+        setSelectedSectionId('');
+      }
       (async () => {
         try {
           const token = getToken();
-          const resp = await fetch(getApiPrefix(lang) + '/tools/status/' + job.id, {
+          const resp = await fetch(getApiPrefix(lang) + '/tools/status/' + requestedJobId, {
             headers: token ? { Authorization: 'Bearer ' + token } : {},
           });
+          if (!resp.ok) {
+            // HTTP 层失败（5xx/403 等）：不是"没有结果"，是服务出错
+            if (canCommitResultFetch(requestedJobId, activeBodyJobRef.current, cancelled)) {
+              setResultError(`结果服务返回 HTTP ${resp.status}`);
+            }
+            return;
+          }
           const data = await resp.json();
+          if (!canCommitResultFetch(requestedJobId, activeBodyJobRef.current, cancelled)) return;
           if (data.ok && data.result) {
+            bodyJobRef.current = requestedJobId;
             setResult(data.result);
+            setResultError('');
             setJobMeta({
               params: data.params || {},
               ackStatus: data.ackStatus || null,
               projectId: data.projectId || null,
             });
+          } else if (!data.ok) {
+            // 服务显式报错：如实展示，不归入"未生成结果"
+            setResultError(data.error || '结果服务返回失败');
           }
-        } catch {
-          // keep shell quiet
+          // data.ok 但无 result：确实没有结果文件，保持 resultError 为空，
+          // 由 !result 分支展示"未生成可视化结果文件"
+        } catch (e: any) {
+          // 网络层失败（服务不可达/超时）：必须让用户知道是连接问题而非"没有结果"
+          if (canCommitResultFetch(requestedJobId, activeBodyJobRef.current, cancelled)) {
+            setResultError(e?.message || '网络错误，无法获取结果');
+          }
         } finally {
-          setLoading(false);
+          if (canCommitResultFetch(requestedJobId, activeBodyJobRef.current, cancelled)) {
+            setLoading(false);
+          }
         }
       })();
+      return () => {
+        cancelled = true;
+      };
+    } else if (nextResultBodyState(
+      bodyJobRef.current
+        ? { kind: 'artifact', jobId: bodyJobRef.current, artifactName: selectedName || '' }
+        : { kind: 'empty' },
+      { type: 'job_status_observed', jobId: job.id, status: String(effectiveJobStatus), source: 'job-list' },
+    ).kind === 'artifact') {
+      // job_status_observed from the 15s job-list fetch, which is never updated
+      // in place for an already-present job — so its status may be arbitrarily
+      // stale and must not replace a rendered artifact with a spinner. Losing
+      // an observation is not observing a change.
+      //
+      // Guarded on the ref rather than on `result`: this effect's deps are
+      // [effectiveJobStatus, job?.id, lang], so a `result` read here would be a
+      // stale closure value.
+      setLoading(false);
     } else {
+      bodyJobRef.current = null;
       setResult(null);
+      setResultError('');
       setJobMeta(null);
       setLoading(false);
       setManifestRaw(null);
@@ -3207,35 +3441,19 @@ function ResultArtifactShell({
       setPreviewData(null);
       setPreviewLoading(false);
     }
-  }, [effectiveJobStatus, job, lang]);
+    return undefined;
+  }, [effectiveJobStatus, job?.id, lang, resultRetryVersion]);
 
+  // P4R-2: restore `.resultView` scroll position once the body is mounted.
+  // Runs only when there is a result to render (success-state return); the
+  // stateBlock exits have no scrollable content. Re-runs on artifact switch
+  // so a re-mount within the same job also restores.
   useEffect(() => {
-    if (!job || effectiveJobStatus !== 'done' || !showHarnessIndex) {
-      setHarnessIndex(null);
-      setHarnessError('');
-      setHarnessLoading(false);
-      return;
-    }
-    let cancelled = false;
-    setHarnessLoading(true);
-    setHarnessError('');
-    fetchHarnessIndex({ scope: 'artifact', jobId: job.id, maxFiles: 120 })
-      .then((data) => {
-        if (!cancelled) setHarnessIndex(data.index || null);
-      })
-      .catch((error: Error) => {
-        if (!cancelled) {
-          setHarnessIndex(null);
-          setHarnessError(error.message || '识别失败');
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setHarnessLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [effectiveJobStatus, job?.id, showHarnessIndex]);
+    if (!result || !job?.id) return;
+    const el = resultViewRef.current;
+    if (!el) return;
+    el.scrollTop = getResultScrollPosition(job.id);
+  }, [result, job?.id]);
 
   const files = result?.artifacts || result?.files || [];
   const fallbackArtifacts = useMemo<ResultArtifactRecord[]>(
@@ -3287,26 +3505,47 @@ function ResultArtifactShell({
     return () => {
       cancelled = true;
     };
-  }, [buildUrl, effectiveJobStatus, job?.id, result?.manifest]);
+  }, [buildUrl, effectiveJobStatus, job?.id, manifestRetryVersion, result?.manifest]);
 
   const manifest = useMemo(
     () => normalizeResultManifest(manifestRaw, fallbackArtifacts),
     [fallbackArtifacts, manifestRaw]
   );
   const manifestArtifacts = manifest?.artifacts?.length ? manifest.artifacts : fallbackArtifacts;
-  const artifacts = useMemo(
-    () => manifestArtifacts.filter((artifact) => !unavailableArtifactNames.has(artifact.name)),
-    [manifestArtifacts, unavailableArtifactNames]
-  );
+  const artifacts = manifestArtifacts;
   const coreArtifacts = useMemo(
     () => artifacts.filter((artifact) => classifyArtifact(artifact) !== 'report'),
     [artifacts]
   );
   const navSections = useMemo(
-    () => buildResultArtifactNavigation(manifest, coreArtifacts),
-    [coreArtifacts, manifest]
+    () => buildResultArtifactNavigation(manifest, artifacts),
+    [artifacts, manifest]
   );
-  const artifactSummary = useMemo(() => compactArtifactKindSummary(coreArtifacts), [coreArtifacts]);
+  const primaryNavSections = useMemo(
+    () => navSections.filter((section) => !isRelatedArtifactKind(section.kind)),
+    [navSections]
+  );
+  const relatedNavSections = useMemo(
+    () => navSections.filter((section) => isRelatedArtifactKind(section.kind)),
+    [navSections]
+  );
+  const resultPickerSections = useMemo(
+    () => (primaryNavSections.length > 0 ? primaryNavSections : navSections),
+    [navSections, primaryNavSections],
+  );
+  const artifactPickerGroups = useMemo(
+    () => buildResultArtifactPickerGroups(resultPickerSections, {
+      includeRelated: primaryNavSections.length === 0,
+      allArtifacts: artifacts,
+    }),
+    [artifacts, primaryNavSections.length, resultPickerSections],
+  );
+  const compactRelatedSections = useMemo(
+    () => primaryNavSections.length > 0
+      ? filterResultArtifactRelatedSections(relatedNavSections, artifactPickerGroups)
+      : [],
+    [artifactPickerGroups, primaryNavSections.length, relatedNavSections],
+  );
   const reportArtifact = useMemo(
     () =>
       artifacts.find((artifact) => classifyArtifact(artifact) === 'report') ||
@@ -3321,43 +3560,99 @@ function ResultArtifactShell({
   const preferredArtifactName =
     activeArtifact && activeArtifact.jobId === job?.id ? activeArtifact.name : '';
   const selectedArtifact = useMemo(() => {
+    const asPrimaryArtifact = (artifact: ResultArtifactRecord | null): ResultArtifactRecord | null => {
+      if (!artifact) return null;
+      const grouped = findResultArtifactPickerOption(artifactPickerGroups, artifact.name);
+      return grouped
+        ? findArtifactByName(artifacts, grouped.option.primary.name) || artifact
+        : artifact;
+    };
     const current = findArtifactByName(artifacts, selectedName);
-    if (current) return current;
+    if (current) return asPrimaryArtifact(current);
     // The pending artifact (from chat click / cross-project navigation)
     // wins over the active-artifact hint when both are present.
     const pending = pendingArtifactName ? findArtifactByName(artifacts, pendingArtifactName) : null;
-    if (pending) return pending;
-    return (
+    if (pending) return asPrimaryArtifact(pending);
+    return asPrimaryArtifact(
       pickPreferredArtifact(coreArtifacts, preferredArtifactName) ||
       coreArtifacts[0] ||
       null
     );
-  }, [artifacts, coreArtifacts, pendingArtifactName, preferredArtifactName, selectedName]);
-  const selectedArtifactName = selectedArtifact?.name || '';
-  const selectedArtifactUrl = selectedArtifact
-    ? selectedArtifact.url || buildUrl(selectedArtifact.name)
+  }, [artifactPickerGroups, artifacts, coreArtifacts, pendingArtifactName, preferredArtifactName, selectedName]);
+  const viewedArtifactName = viewedRevision
+    ? viewedRevision.outputPath.split('/').pop() || viewedRevision.artifactId
     : '';
+  const selectedArtifactName = viewedArtifactName || selectedArtifact?.name || '';
+  const selectedArtifactUrl = viewedRevision
+    ? revisionArtifactUrl(viewedRevision.revisionId)
+    : selectedArtifact
+      ? resolveResultArtifactUrl(selectedArtifact.url, buildUrl(selectedArtifact.name))
+      : '';
   const selectedArtifactKind = selectedArtifact ? classifyArtifact(selectedArtifact) : 'file';
   const selectedArtifactLabel = selectedArtifact
     ? selectedArtifact.label || selectedArtifact.title || selectedArtifact.name
     : '';
-  const activeFile = useMemo(() => {
-    if (!selectedArtifactName) return null;
-    return files.find((file) => artifactName(file) === selectedArtifactName) || null;
-  }, [files, selectedArtifactName]);
   const activeIsHtml = selectedArtifactKind === 'report' || /\.html?$/i.test(selectedArtifactName);
   const activeIsText =
     !activeIsHtml &&
     (selectedArtifactKind === 'text' || isTextFile(selectedArtifactName) || isMarkdownFile(selectedArtifactName) || /\.json$/i.test(selectedArtifactName) || /\.(csv|tsv)$/i.test(selectedArtifactName));
-  const activeIsImage = selectedArtifactKind === 'plot' || (selectedArtifactName ? isImageFile(selectedArtifactName) : false);
   const activeIsPreviewText = activeIsText && !activeIsHtml;
+  const viewerAdapter = selectedArtifact
+    ? resolveResultViewerAdapter({
+        kind: selectedArtifactKind,
+        fileName: selectedArtifactName,
+        preview: selectedArtifact.preview,
+      })
+    : 'binary';
+  const interactionBindingKey = `${viewedRevision?.revisionId || 'current'}::${viewedRevision?.toolJobId || job?.id || ''}::${selectedArtifactName}`;
+  const interactionIsBound = manifestArtifactRef.current === interactionBindingKey;
+  const boundInteractionManifest = interactionIsBound ? interactionManifest : null;
+  const boundInteractionRevision = interactionIsBound ? interactionRevision : null;
+  const boundInteractionBackingTable = interactionIsBound ? interactionBackingTable : null;
+  const boundArtifactSelection = interactionIsBound ? artifactSelection : null;
+  const usesInteractiveViewer = Boolean(
+    boundInteractionManifest?.interactionMode && boundInteractionManifest.interactionMode !== 'read_only',
+  );
+  const interactionPreviewActive = interactionPreviewKey === interactionBindingKey;
+  const imageInteractionAvailable = viewerAdapter === 'image' && usesInteractiveViewer;
+  const showInteractiveViewer = shouldShowResultInteraction({
+    adapter: viewerAdapter,
+    interactionAvailable: usesInteractiveViewer,
+    interactionRequested: interactionPreviewActive,
+  });
+  const requiresPreviewAvailabilityCheck = activeIsPreviewText
+    || viewerAdapter === 'image';
+  const previewAvailabilityKey = `${viewedRevision?.revisionId || 'current'}::${job?.id || ''}::${selectedArtifactName}::${selectedArtifactUrl}`;
+  const effectivePreviewAvailability = previewAvailability.key === previewAvailabilityKey
+    ? previewAvailability
+    : {
+        key: previewAvailabilityKey,
+        status: (requiresPreviewAvailabilityCheck ? 'checking' : 'available') as 'checking' | 'available',
+        reason: null,
+      };
 
   useEffect(() => {
-    setUnavailableArtifactNames(new Set());
+    setPreviewAvailability({
+      key: previewAvailabilityKey,
+      status: requiresPreviewAvailabilityCheck ? 'checking' : 'available',
+      reason: null,
+    });
+  }, [previewAvailabilityKey, previewRetryVersion, requiresPreviewAvailabilityCheck]);
+
+  useEffect(() => {
+    if (!selectedArtifactName) return;
+    const duration = completeResultSurfaceMeasure({
+      start: RESULT_SURFACE_PERFORMANCE_MARKS.artifactStart,
+      end: RESULT_SURFACE_PERFORMANCE_MARKS.artifactEnd,
+      measure: RESULT_SURFACE_PERFORMANCE_MARKS.artifactMeasure,
+    });
+    if (duration !== null) setArtifactSwitchMs(duration);
+  }, [selectedArtifactName]);
+
+  useEffect(() => {
     setPendingRecovery(null);
     setRecoveryError('');
     setFinalReportUrl('');
-    setFinalReportGeneratedAt('');
     setReportGenerationError('');
   }, [job?.id]);
 
@@ -3367,38 +3662,6 @@ function ResultArtifactShell({
   }, [buildUrl, materializedReportArtifact]);
 
   useEffect(() => {
-    if (!activeIsHtml || !selectedArtifactName || !selectedArtifactUrl) return;
-    let cancelled = false;
-    fetch(selectedArtifactUrl)
-      .then((response) => {
-        if (cancelled || response.ok) return;
-        setUnavailableArtifactNames((current) => {
-          if (current.has(selectedArtifactName)) return current;
-          const next = new Set(current);
-          next.add(selectedArtifactName);
-          return next;
-        });
-      })
-      .catch(() => {
-        // A transient network failure must not permanently hide a valid report.
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [activeIsHtml, selectedArtifactName, selectedArtifactUrl]);
-
-  const activeSection = useMemo(() => {
-    if (!navSections.length) return null;
-    return (
-      (selectedName
-        ? navSections.find((section) => section.artifactNames.includes(selectedName))
-        : null) ||
-      navSections.find((section) => section.id === selectedSectionId) ||
-      navSections[0]
-    );
-  }, [navSections, selectedName, selectedSectionId]);
-
-  useEffect(() => {
     if (!selectedArtifactName || navSections.length === 0) return;
     const nextSection = navSections.find((section) => section.artifactNames.includes(selectedArtifactName));
     if (!nextSection) return;
@@ -3406,18 +3669,16 @@ function ResultArtifactShell({
   }, [navSections, selectedArtifactName]);
 
   useEffect(() => {
-    if (!job || effectiveJobStatus !== 'done' || coreArtifacts.length === 0) return;
-    const preferred = pickPreferredArtifact(coreArtifacts, preferredArtifactName) || coreArtifacts[0];
+    if (!job || effectiveJobStatus !== 'done' || artifacts.length === 0) return;
+    const preferredPool = coreArtifacts.length > 0 ? coreArtifacts : artifacts;
+    const preferred = pickPreferredArtifact(preferredPool, preferredArtifactName) || preferredPool[0];
     const preferredName = preferred ? preferred.name : '';
-    setSelectedName((current) => {
-      // Pending artifact name (from chat click) wins over the user's prior
-      // selection — the chat is the trigger that brought us here.
-      if (pendingArtifactName && artifacts.some((artifact) => artifact.name === pendingArtifactName)) {
-        return pendingArtifactName;
-      }
-      if (current && coreArtifacts.some((artifact) => artifact.name === current)) return current;
-      return preferredName;
-    });
+    setSelectedName((current) => chooseResultArtifactName({
+      currentName: current,
+      pendingName: pendingArtifactName,
+      preferredName,
+      availableNames: artifacts.map((artifact) => artifact.name),
+    }));
     setSelectedSectionId((current) => {
       if (current && navSections.some((section) => section.id === current)) return current;
       const focusName =
@@ -3429,7 +3690,7 @@ function ResultArtifactShell({
         navSections[0];
       return nextSection?.id || '';
     });
-  }, [artifacts, coreArtifacts, effectiveJobStatus, job, navSections, pendingArtifactName, preferredArtifactName]);
+  }, [artifacts, coreArtifacts, effectiveJobStatus, job?.id, navSections, pendingArtifactName, preferredArtifactName]);
 
   // Clear the pending artifact after it's been applied so a subsequent
   // unrelated render doesn't keep forcing it.
@@ -3446,30 +3707,133 @@ function ResultArtifactShell({
   // 解析出的前 40 行样本，用它判定"哪一列是稳定实体 ID"会在 10 万行表上出错。
   // artifact 一变就重取，并清空上一份选择——旧选择属于旧 artifact，不能顺延。
   useEffect(() => {
-    setInteractionManifest(null);
-    setArtifactSelection(null);
+    const epoch = selectionMutationEpochRef.current + 1;
+    selectionMutationEpochRef.current = epoch;
+    // 只在 artifact 真的换了时才清空。这个 effect 的依赖还包含 conversationId
+    // 与 effectiveJobStatus，因此 artifact 没变也会重跑；而下面的 catch 是空的，
+    // 于是一次刷新失败就会永久丢掉交互视图——次级失败降级了主体能力。
+    // 清空本身的理由（旧选择属于旧 artifact）依然成立，只是收窄到它真正适用的条件。
+    // 见 components/result-studio/resultBodyState.ts。
+    if (manifestArtifactRef.current !== interactionBindingKey) {
+      manifestArtifactRef.current = interactionBindingKey;
+      setInteractionManifest(null);
+      setInteractionRevision(null);
+      setInteractionBackingTable(null);
+      setInteractionError('');
+      setArtifactSelection(null);
+      visibleSelectionRef.current = null;
+      committedSelectionRef.current = null;
+      setSelectionError('');
+    }
     if (!job || effectiveJobStatus !== 'done' || !selectedArtifactName) return;
-    if (selectedArtifactKind !== 'table' && selectedArtifactKind !== 'plot') return;
+    if (!shouldRequestArtifactInteraction(viewerAdapter)) return;
     let cancelled = false;
     (async () => {
       try {
-        const token = getToken();
-        const query = `?jobId=${encodeURIComponent(job.id)}&artifact=${encodeURIComponent(selectedArtifactName)}`;
-        const resp = await fetch(`${getApiPrefix(lang)}/result-studio/interaction${query}`, {
-          headers: token ? { Authorization: 'Bearer ' + token } : {},
+        setInteractionError('');
+        const data = await fetchArtifactInteraction({
+          language: lang,
+          jobId: viewedRevision?.toolJobId || job.id,
+          artifact: selectedArtifactName,
+          revisionId: viewedRevision?.revisionId || null,
         });
-        if (!resp.ok) return;
-        const data = await resp.json();
         if (cancelled) return;
-        if (data && data.manifest) setInteractionManifest(data.manifest as ArtifactInteractionManifest);
+        if (data?.manifest) {
+          setInteractionManifest(data.manifest);
+          setInteractionRevision(toArtifactRevision(data.revision));
+          setInteractionBackingTable(data.backingTable || null);
+          const restored = await restoreResultStudioSelection({
+            language: lang,
+            projectId: project.id,
+            conversationId,
+            artifactId: data.manifest.artifactId,
+            revisionId: data.manifest.revisionId,
+            selectionDurable: data.manifest.selectionDurable,
+          });
+          if (!cancelled && selectionMutationEpochRef.current === epoch) {
+            visibleSelectionRef.current = restored;
+            committedSelectionRef.current = restored;
+            setArtifactSelection(restored);
+          }
+        }
       } catch {
-        // 清单拿不到不应连带影响结果展示：保持 null，交互能力按"不支持"处理。
+        if (!cancelled && shouldSurfaceInteractionFailure(viewerAdapter)) {
+          // 次级交互失败不能清空主体结果；明确告诉用户当前降级及恢复动作。
+          setInteractionError('交互能力暂不可用；请查看下方产物状态。');
+        }
       }
     })();
     return () => {
       cancelled = true;
+      if (selectionMutationEpochRef.current === epoch) selectionMutationEpochRef.current += 1;
     };
-  }, [effectiveJobStatus, job, lang, selectedArtifactKind, selectedArtifactName]);
+  }, [conversationId, effectiveJobStatus, interactionBindingKey, interactionRetryVersion, job?.id, lang, project.id, selectedArtifactName, viewedRevision, viewerAdapter]);
+
+  const handleSelectionChange = useCallback((next: ArtifactSelection | null) => {
+    const epoch = selectionMutationEpochRef.current;
+    const version = selectionMutationVersionRef.current + 1;
+    selectionMutationVersionRef.current = version;
+    const previousVisible = visibleSelectionRef.current;
+    setSelectionError('');
+    if (!next) {
+      visibleSelectionRef.current = null;
+      setArtifactSelection(null);
+      if (!previousVisible?.selectionId) return;
+      selectionMutationQueueRef.current = selectionMutationQueueRef.current
+        .catch(() => undefined)
+        .then(async () => {
+          try {
+            await deleteResultStudioSelection({ language: lang, selectionId: previousVisible.selectionId! });
+            if (selectionMutationEpochRef.current !== epoch) return;
+            committedSelectionRef.current = null;
+          } catch (error) {
+            if (selectionMutationEpochRef.current !== epoch
+                || selectionMutationVersionRef.current !== version) return;
+            const rollback = committedSelectionRef.current;
+            visibleSelectionRef.current = rollback;
+            setArtifactSelection(rollback);
+            setSelectionError(error instanceof Error ? error.message : '清除选择失败');
+          }
+        });
+      return;
+    }
+    const randomId = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const selectionId = previousVisible?.selectionId
+      || committedSelectionRef.current?.selectionId
+      || `sel_${randomId}`;
+    const optimistic = { ...next, selectionId, compatibility: 'compatible' as const };
+    visibleSelectionRef.current = optimistic;
+    setArtifactSelection(optimistic);
+    selectionMutationQueueRef.current = selectionMutationQueueRef.current
+      .catch(() => undefined)
+      .then(async () => {
+        try {
+          const saved = await saveResultStudioSelection({
+            language: lang,
+            selection: optimistic,
+            selectionId,
+            projectId: project.id,
+            conversationId,
+          });
+          if (selectionMutationEpochRef.current !== epoch) return;
+          const committed = { ...saved, compatibility: 'compatible' as const };
+          committedSelectionRef.current = committed;
+          if (selectionMutationVersionRef.current === version) {
+            visibleSelectionRef.current = committed;
+            setArtifactSelection(committed);
+          }
+        } catch (error) {
+          if (selectionMutationEpochRef.current !== epoch
+              || selectionMutationVersionRef.current !== version) return;
+          const rollback = committedSelectionRef.current;
+          visibleSelectionRef.current = rollback;
+          setArtifactSelection(rollback);
+          setSelectionError(error instanceof Error ? error.message : '保存选择失败');
+        }
+      });
+  }, [conversationId, lang, project.id]);
 
   useEffect(() => {
     if (!job || effectiveJobStatus !== 'done' || !selectedArtifact) {
@@ -3477,51 +3841,55 @@ function ResultArtifactShell({
       return;
     }
     const artifact: ActiveArtifact = {
-      jobId: job.id,
+      jobId: viewedRevision?.toolJobId || job.id,
       toolId: job.tool_id,
-      name: selectedArtifact.name,
+      name: selectedArtifactName,
       type: selectedArtifact.type || selectedArtifactKind,
       label: selectedArtifact.label || selectedArtifact.title,
       url: selectedArtifactUrl,
       // RS3 semantic 维度：来自后端基于完整文件产出的交互清单。
       // 清单还没到（或该类型不支持交互）时保持 null，不猜测。
       semanticKind: selectedArtifactKind,
-      revisionId: interactionManifest?.revisionId ?? null,
-      artifactFamilyId: interactionManifest?.artifactFamilyId ?? null,
-      entityType: interactionManifest?.entityType ?? null,
-      idField: interactionManifest?.idField ?? null,
-      selectionDurable: interactionManifest?.selectionDurable ?? false,
-      interactionCapabilities: interactionManifest?.capabilities ?? [],
-      selection: artifactSelection,
+      revisionId: viewedRevision?.revisionId ?? boundInteractionManifest?.revisionId ?? null,
+      revisionOrdinal: viewedRevision?.revisionOrdinal ?? boundInteractionRevision?.revisionOrdinal ?? null,
+      artifactFamilyId: viewedRevision?.artifactFamilyId ?? boundInteractionManifest?.artifactFamilyId ?? null,
+      entityType: boundInteractionManifest?.entityType ?? null,
+      idField: boundInteractionManifest?.idField ?? null,
+      selectionDurable: boundInteractionManifest?.selectionDurable ?? false,
+      interactionCapabilities: boundInteractionManifest?.capabilities ?? [],
+      selection: boundArtifactSelection,
+      selectionId: boundArtifactSelection?.selectionId || null,
+      truthStatus: viewedRevision?.validationStatus ?? result?.deliveryManifest?.status ?? null,
+      conclusion: viewedRevision && !viewedRevision.isCurrent ? null : result?.deliveryManifest?.summary?.conclusion ?? null,
+      availabilityStatus: effectivePreviewAvailability.status,
+      availabilityReason: effectivePreviewAvailability.reason,
     };
-    // 身份比较必须覆盖 revision 与 selection：只比 jobId+name 会让
-    // "同一文件换了版本" 或 "用户改了选择" 无法向上传播。
-    if (
-      !activeArtifact ||
-      activeArtifact.jobId !== artifact.jobId ||
-      activeArtifact.name !== artifact.name ||
-      (activeArtifact.revisionId ?? null) !== (artifact.revisionId ?? null) ||
-      (activeArtifact.entityType ?? null) !== (artifact.entityType ?? null) ||
-      (activeArtifact.idField ?? null) !== (artifact.idField ?? null) ||
-      !isSameSelection(activeArtifact.selection ?? null, artifact.selection ?? null)
-    ) {
+    // The interaction manifest arrives after the file body. Compare the full
+    // projection so late revision/family/semantic hydration reaches the header.
+    if (!isSameActiveArtifactProjection(activeArtifact, artifact)) {
       onActiveArtifactChange(artifact);
     }
   }, [
     activeArtifact,
-    artifactSelection,
+    boundArtifactSelection,
+    boundInteractionManifest,
+    boundInteractionRevision,
+    effectivePreviewAvailability.reason,
+    effectivePreviewAvailability.status,
     effectiveJobStatus,
-    interactionManifest,
     job,
     onActiveArtifactChange,
+    result?.deliveryManifest?.status,
+    result?.deliveryManifest?.summary?.conclusion,
     selectedArtifact,
     selectedArtifactKind,
     selectedArtifactUrl,
+    viewedRevision,
   ]);
 
   useEffect(() => {
     let cancelled = false;
-    if (!activeFile || !activeIsPreviewText) {
+    if (!selectedArtifact || !selectedArtifactUrl || !activeIsPreviewText) {
       setPreviewText(null);
       setPreviewData(null);
       setPreviewLoading(false);
@@ -3530,14 +3898,15 @@ function ResultArtifactShell({
       };
     }
     setPreviewLoading(true);
-    const url = selectedArtifactUrl || activeFile.url || '';
-    fetch(url)
+    setPreviewAvailability({ key: previewAvailabilityKey, status: 'checking', reason: null });
+    fetch(selectedArtifactUrl)
       .then((resp) => {
         if (!resp.ok) throw new Error('preview failed');
         return resp.text();
       })
       .then((text) => {
         if (cancelled) return;
+        setPreviewAvailability({ key: previewAvailabilityKey, status: 'available', reason: null });
         if (/\.(csv|tsv)$/i.test(selectedArtifactName)) {
           setPreviewData(buildPreviewTable(text, selectedArtifactName));
           setPreviewText(null);
@@ -3556,8 +3925,10 @@ function ResultArtifactShell({
       })
       .catch(() => {
         if (!cancelled) {
-          setPreviewText('无法读取预览内容');
+          setPreviewText(null);
           setPreviewData(null);
+          const reason = '结果记录仍在，但当前产物文件不可读取。';
+          setPreviewAvailability({ key: previewAvailabilityKey, status: 'unavailable', reason });
         }
       })
       .finally(() => {
@@ -3566,16 +3937,59 @@ function ResultArtifactShell({
     return () => {
       cancelled = true;
     };
-  }, [activeFile, activeIsPreviewText, selectedArtifactName, selectedArtifactUrl]);
+  }, [activeIsPreviewText, previewAvailabilityKey, previewRetryVersion, selectedArtifact, selectedArtifactName, selectedArtifactUrl]);
+
+  const retryCurrentPreview = () => {
+    setPreviewAvailability({ key: previewAvailabilityKey, status: 'checking', reason: null });
+    setPreviewRetryVersion((value) => value + 1);
+  };
+
+  const unavailablePreview = effectivePreviewAvailability.status === 'unavailable' ? (
+    <div className={styles.resultPreviewUnavailable} role="alert">
+      <Icon name="flag" size={20} />
+      <strong>当前产物文件不可用</strong>
+      <span>{effectivePreviewAvailability.reason || '结果记录仍在，但无法读取对应文件。'}</span>
+      <div>
+        <button type="button" onClick={retryCurrentPreview}>重试预览</button>
+        <button
+          type="button"
+          onClick={() => onAskAgent(`请检查并恢复当前结果文件“${selectedArtifactLabel || selectedArtifactName}”。先说明缺失原因和可恢复边界，不要覆盖原始数据。`)}
+        >
+          让 Agent 检查
+        </button>
+      </div>
+    </div>
+  ) : null;
 
   const renderPreview = () => {
     if (!selectedArtifact) {
       return <div className={styles.resultPreviewPlaceholder}>未发现可预览的结果文件</div>;
     }
-    if (selectedArtifactKind === 'report' && selectedArtifactUrl) {
-      return <div className={styles.resultPreviewPlaceholder}>报告属于后置交付物，请从上方报告卡生成最终 HTML。</div>;
+    if (showInteractiveViewer && boundInteractionManifest) {
+      return (
+        <ScientificInteractionViewer
+          language={lang}
+          jobId={viewedRevision?.toolJobId || job!.id}
+          artifactName={selectedArtifactName}
+          manifest={boundInteractionManifest}
+          backingTable={boundInteractionBackingTable}
+          selection={boundArtifactSelection}
+          onSelectionChange={(next) => void handleSelectionChange(next)}
+        />
+      );
     }
-    if (activeIsImage && selectedArtifactUrl) {
+    if (unavailablePreview) return unavailablePreview;
+    if (viewerAdapter === 'report' && selectedArtifactUrl) {
+      return (
+        <iframe
+          className={styles.resultReportPreview}
+          src={selectedArtifactUrl}
+          title={selectedArtifactLabel || selectedArtifact.name}
+          sandbox="allow-same-origin"
+        />
+      );
+    }
+    if (viewerAdapter === 'image' && selectedArtifactUrl) {
       return (
         <button
           type="button"
@@ -3583,9 +3997,17 @@ function ResultArtifactShell({
           onClick={() => setLightboxSrc(selectedArtifactUrl)}
         >
           <img
+            key={`${previewAvailabilityKey}:${previewRetryVersion}`}
             src={selectedArtifactUrl}
             alt={selectedArtifactLabel || selectedArtifact.name}
             className={styles.resultPreviewImage}
+            onLoad={() => {
+              setPreviewAvailability({ key: previewAvailabilityKey, status: 'available', reason: null });
+            }}
+            onError={() => {
+              const reason = '结果记录仍在，但当前产物文件不可读取。';
+              setPreviewAvailability({ key: previewAvailabilityKey, status: 'unavailable', reason });
+            }}
           />
         </button>
       );
@@ -3593,7 +4015,7 @@ function ResultArtifactShell({
     if (previewLoading && !previewText && !previewData) {
       return <div className={styles.resultPreviewPlaceholder}>加载预览中…</div>;
     }
-    if (previewData && previewData.length > 0) {
+    if (viewerAdapter === 'table' && previewData && previewData.length > 0) {
       const [header, ...rows] = previewData;
       return (
         <div className={styles.csvPreviewBody}>
@@ -3618,12 +4040,16 @@ function ResultArtifactShell({
         </div>
       );
     }
-    if (previewText) {
+    if ((viewerAdapter === 'json' || viewerAdapter === 'text') && previewText) {
       return <pre className={styles.textPreview}>{previewText}</pre>;
     }
     return (
       <div className={styles.resultPreviewPlaceholder}>
-        当前文件暂不支持内嵌预览。
+        <strong>当前文件暂不支持内嵌预览</strong>
+        <span>{selectedArtifact.name}</span>
+        {selectedArtifactUrl && (
+          <a href={selectedArtifactUrl} target="_blank" rel="noreferrer">打开或下载原文件</a>
+        )}
       </div>
     );
   };
@@ -3632,11 +4058,10 @@ function ResultArtifactShell({
     return <EmptyAnalysisResult />;
   }
 
-  const sectionTabs = navSections.length > 0 ? navSections : [];
-  const showReportRail = sectionTabs.length > 0 && artifacts.length > 0;
-  const activeSectionArtifacts = activeSection?.artifacts || [];
-  const showArtifactRail = activeSectionArtifacts.length > 1;
-  const resultNavWidth = navCollapsed ? 0 : (isSidebar ? 184 : 224);
+  const selectedDisplayGroup = findResultArtifactPickerOption(
+    artifactPickerGroups,
+    selectedArtifactName,
+  )?.option || null;
   const recoveryAction = workflow?.nextActions?.[0] || null;
   const actionRunsDirectly = isDirectRecoveryAction(recoveryAction?.id);
 
@@ -3705,7 +4130,6 @@ function ResultArtifactShell({
       const data = await response.json();
       if (!response.ok || !data.ok || !data.fileName) throw new Error(data.message || data.error || '报告生成失败');
       setFinalReportUrl(buildUrl(data.fileName));
-      setFinalReportGeneratedAt(data.generatedAt || new Date().toISOString());
     } catch (error) {
       setReportGenerationError(error instanceof Error ? error.message : '报告生成失败');
     } finally {
@@ -3738,7 +4162,11 @@ function ResultArtifactShell({
     }
   };
 
-  const workflowBar = workflow ? (
+  const workflowBar = shouldShowWorkflowBar({
+    hasWorkflow: Boolean(workflow),
+    resumeFrom: workflow?.resumeFrom ?? null,
+    hasRecoveryAction: Boolean(recoveryAction),
+  }) && workflow ? (
     <div className={styles.resultWorkflowBar} data-state={workflow.resumeFrom || 'completed'}>
       <div className={styles.resultWorkflowBarMain}>
         <span className={styles.resultWorkflowDot} data-terminal={workflow.terminal} />
@@ -3747,9 +4175,15 @@ function ResultArtifactShell({
             ? `当前阶段：${workflowStageLabel(workflow.resumeFrom)}`
             : `结果已校验 · ${workflow.artifactCount} 项产物`}
         </span>
-        {workflow.artifactTruth && (
-          <small>truth {String(workflow.artifactTruth.status || 'unknown')}</small>
-        )}
+        {/*
+          Trust state is stated once, by ResultStudioContextBar, in words the
+          user can act on (可信结果 / 需要复核 / 结果已阻断) — see
+          describeTruthStatus in result-studio/resultSurface.ts. This rendered
+          the same fact a second time as the raw enum (「truth valid」), which
+          both duplicated the header and leaked an internal value into a normal
+          view, against plan §P4R.3. The bar keeps what only it knows: the
+          current stage, the artifact count and the recovery action.
+        */}
       </div>
       {recoveryAction && (
         <button
@@ -3778,13 +4212,132 @@ function ResultArtifactShell({
     <div className={styles.resultWorkflowError}>{recoveryError}</div>
   ) : null;
 
+  const toolbarSecondaryActions = result ? (
+    <>
+      {selectedArtifactName && (
+        <span className={styles.resultReportTechnicalName}>{selectedArtifactName}</span>
+      )}
+      {selectedDisplayGroup && selectedDisplayGroup.variants.length > 1 && (
+        <div className={styles.resultReportExportLinks}>
+          {selectedDisplayGroup.variants
+            .filter((artifact) => artifact.name !== selectedDisplayGroup.primary.name && /\.(svg|pdf)$/i.test(artifact.name))
+            .map((artifact) => (
+              <a
+                key={artifact.name}
+                href={resolveResultArtifactUrl(artifact.url, buildUrl(artifact.name))}
+                target="_blank"
+                rel="noreferrer"
+              >
+                导出 {artifactFormatLabel(artifact)}
+              </a>
+            ))}
+        </div>
+      )}
+      {reportArtifact && (
+        <button
+          type="button"
+          disabled={reportGenerating}
+          onClick={() => void generateFinalReport()}
+        >
+          {reportGenerating ? '生成报告中…' : finalReportUrl ? '重新生成 HTML 报告' : '生成 HTML 报告'}
+        </button>
+      )}
+      {finalReportUrl && onOpenBrowser && (
+        <button type="button" onClick={() => onOpenBrowser(finalReportUrl)}>查看 HTML 报告</button>
+      )}
+      {finalReportUrl && (
+        <a href={finalReportUrl} download="final-report.html">导出 HTML 报告</a>
+      )}
+      {result.deliveryManifest && (
+        <>
+          <a href={buildUrl('delivery-manifest.json')} target="_blank" rel="noreferrer">查看交付清单</a>
+          <button type="button" disabled={replayPackageBusy} onClick={() => void exportReplayPackage()}>
+            {replayPackageBusy ? '导出中…' : '导出复现包'}
+          </button>
+        </>
+      )}
+      {scientificScriptUrl && (
+        <a href={scientificScriptUrl} target="_blank" rel="noreferrer">查看脚本</a>
+      )}
+      {result.deliveryManifest && (
+        <button
+          type="button"
+          onClick={() => onAskAgent(`请为任务 ${job.id} 的产物 ${selectedArtifactName} 发起重放验证；先展示输入、资源和副作用确认摘要，不要直接执行。`)}
+        >
+          重放验证
+        </button>
+      )}
+      {reportGenerationError && <span className={styles.resultReportActionError}>{reportGenerationError}</span>}
+      {replayPackageMessage && <span className={styles.resultReportActionStatus}>{replayPackageMessage}</span>}
+    </>
+  ) : undefined;
+  const toolbarTruthStatus = typeof activeArtifact?.truthStatus === 'string'
+    ? activeArtifact.truthStatus
+    : typeof workflow?.artifactTruth?.status === 'string'
+      ? workflow.artifactTruth.status
+      : null;
+  const matchingActiveArtifact = activeArtifact
+    && activeArtifact.jobId === (viewedRevision?.toolJobId || job.id)
+    && activeArtifact.name === selectedArtifactName
+    ? activeArtifact
+    : null;
+  const versionFamilyId = viewedRevision?.artifactFamilyId
+    || boundInteractionManifest?.artifactFamilyId
+    || matchingActiveArtifact?.artifactFamilyId
+    || null;
+  const versionRevisionId = viewedRevision?.revisionId
+    || boundInteractionManifest?.revisionId
+    || matchingActiveArtifact?.revisionId
+    || null;
+  const versionRevisionOrdinal = viewedRevision?.revisionOrdinal
+    || boundInteractionRevision?.revisionOrdinal
+    || matchingActiveArtifact?.revisionOrdinal
+    || null;
+
+  const resultToolbar = (
+    <CompactResultNavigator
+      groups={artifactPickerGroups}
+      selectedArtifactName={selectedArtifactName || activeArtifact?.name || ''}
+      selectedArtifactLabel={selectedArtifactLabel || activeArtifact?.label || activeArtifact?.name || job.name || job.tool_id}
+      selectedKindLabel={selectedArtifact ? artifactKindLabel(selectedArtifactKind) : '结果'}
+      selectedIcon={artifactKindIcon(selectedArtifactKind)}
+      selectedArtifactUrl={
+        selectedArtifactUrl && effectivePreviewAvailability.status !== 'unavailable'
+          ? selectedArtifactUrl
+          : undefined
+      }
+      relatedSections={compactRelatedSections}
+      secondaryActions={toolbarSecondaryActions}
+      truth={describeTruthStatus(toolbarTruthStatus, effectiveJobStatus)}
+      availabilityStatus={selectedArtifact ? effectivePreviewAvailability.status : 'checking'}
+      activeMode={mode}
+      canReviewVersions={Boolean(versionFamilyId)}
+      canProjectSource={Boolean(versionRevisionId)}
+      canUseInteraction={imageInteractionAvailable}
+      interactionActive={interactionPreviewActive}
+      onBack={onBack}
+      onAskAgent={onAskCurrentResult}
+      onInteractionToggle={() => setInteractionPreviewKey((current) => (
+        current === interactionBindingKey ? null : interactionBindingKey
+      ))}
+      onModeChange={onModeChange ? (nextMode) => onModeChange(nextMode, job.id) : undefined}
+      onSelectArtifact={(artifactName, sectionId) => {
+        beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.artifactStart);
+        setViewedRevision(null);
+        setSelectedSectionId(sectionId);
+        setSelectedName(artifactName);
+      }}
+    />
+  );
+
   const stateBlock = (title: string, body: React.ReactNode, status: 'running' | 'pending' | 'failed' | 'done') => {
-    const containerClass = isSidebar ? styles.resultSidebarCard : styles.resultView;
+    const containerClass = styles.resultView;
     return (
       <div className={containerClass}>
+        {mode === 'result' && resultToolbar}
         {workflowBar}
         {recoveryConfirmation}
-        <div className={isSidebar ? styles.resultSidebarTitleRow : styles.resultHeader}>
+        <div className={styles.resultHeader}>
           <strong>{title}</strong>
           <span className={styles.resultStatus} data-status={status}>
             {status === 'running' ? '运行中…' : status === 'pending' ? '排队中' : status === 'failed' ? '失败' : '完成'}
@@ -3823,6 +4376,17 @@ function ResultArtifactShell({
   }
 
   if (!result) {
+    if (resultError) {
+      // 网络/服务错误：如实告知并提供重试，绝不谎报为"未生成结果"
+      return stateBlock(
+        job.name || job.tool_id,
+        <div className={styles.resultPlaceholder}>
+          <p>结果加载失败：{resultError}</p>
+          <button type="button" onClick={() => setResultRetryVersion((value) => value + 1)}>重试</button>
+        </div>,
+        'done'
+      );
+    }
     return stateBlock(
       job.name || job.tool_id,
       <p className={styles.resultPlaceholder}>分析已完成，但未生成可视化结果文件。</p>,
@@ -3832,15 +4396,30 @@ function ResultArtifactShell({
 
   const shellBody = (
     <>
-      {workflowBar}
-      {recoveryConfirmation}
-      {interactionManifest?.artifactFamilyId && (
+      {mode === 'result' && workflowBar}
+      {mode === 'result' && recoveryConfirmation}
+      {(mode === 'compare' || mode === 'history') && versionFamilyId && (
         <ResultStudioChangeSetPanel
           projectId={project.id}
-          artifactFamilyId={interactionManifest.artifactFamilyId}
-          activeRevisionId={interactionManifest.revisionId}
+          artifactFamilyId={versionFamilyId}
+          activeRevisionId={versionRevisionId}
+          mode={mode}
+          onModeChange={(nextMode) => onModeChange?.(nextMode, job.id)}
+          onRevisionViewed={(revision) => {
+            if (!revision.toolJobId) return;
+            setViewedRevision(revision);
+            setArtifactSelection(null);
+            visibleSelectionRef.current = null;
+            committedSelectionRef.current = null;
+            onModeChange?.('result', job.id);
+          }}
           onRevisionActivated={(revision) => {
             if (!revision.toolJobId) return;
+            setViewedRevision(revision);
+            setArtifactSelection(null);
+            visibleSelectionRef.current = null;
+            committedSelectionRef.current = null;
+            onModeChange?.('result', revision.toolJobId);
             dispatchBioF3Event(biof3Events.projectOpenArtifact, {
               projectId: project.id,
               jobId: revision.toolJobId,
@@ -3850,243 +4429,59 @@ function ResultArtifactShell({
           }}
         />
       )}
-      {result.deliveryManifest && (
-        <section className={styles.resultScientificDelivery} data-status={result.deliveryManifest.status}>
-          <div className={styles.resultScientificDeliveryHeader}>
-            <strong>
-              {result.deliveryManifest.status === 'valid'
-                ? '交付已通过'
-                : result.deliveryManifest.status === 'degraded'
-                  ? '交付需要复核'
-                  : '交付已阻断'}
-            </strong>
-            <span>{result.deliveryManifest.status}</span>
-          </div>
-          <div className={styles.resultScientificDeliveryGrid}>
-            <div>
-              <small>结论摘要</small>
-              <p>{result.deliveryManifest.summary?.conclusion || '暂无结论摘要'}</p>
-            </div>
-            <div>
-              <small>我做了什么</small>
-              <p>{result.deliveryManifest.summary?.whatWasDone || '暂无执行摘要'}</p>
-            </div>
-            <div>
-              <small>需要注意什么</small>
-              <p>{result.deliveryManifest.summary?.cautions?.join('；') || '暂无额外注意事项'}</p>
-            </div>
-          </div>
-          <div className={styles.resultScientificDeliveryMeta}>
-            <span>
-              复现：{result.deliveryManifest.artifacts?.filter((item) => item.reproducibility?.status === 'verified').length || 0} 已验证 ·{' '}
-              {result.deliveryManifest.artifacts?.filter((item) => item.reproducibility?.status === 'available').length || 0} 可用
-            </span>
-            <div className={styles.resultScientificDeliveryActions}>
-              <a href={buildUrl('delivery-manifest.json')} target="_blank" rel="noreferrer">查看交付清单</a>
-              <button type="button" disabled={replayPackageBusy} onClick={() => void exportReplayPackage()}>
-                {replayPackageBusy ? '导出中…' : '导出复现包'}
-              </button>
-            </div>
-          </div>
-          {replayPackageMessage && <div className={styles.resultReplayPackageMessage}>{replayPackageMessage}</div>}
-        </section>
+      {mode === 'code' && (
+        <RevisionCodeView
+          projectId={project.id}
+          revisionId={versionRevisionId}
+          revisionOrdinal={versionRevisionOrdinal}
+          onAgentRequest={onAgentCodeRequest}
+          replayContext={replayContext}
+          onReplayCreated={() => {
+            onWorkflowChanged?.();
+            onModeChange?.('compare', job?.id || null);
+          }}
+          onOpenWorkspaceFile={onOpenRevisionWorkspaceFile}
+        />
       )}
-      <section className={styles.resultDeliveryCard}>
-        <div className={styles.resultDeliveryCopy}>
-          <strong>最终 HTML 报告</strong>
-          <span>
-            {finalReportUrl
-              ? `已基于当前结果生成${finalReportGeneratedAt ? ` · ${new Date(finalReportGeneratedAt).toLocaleString()}` : ''}`
-              : '分析结果确认后按需生成，不占用核心结果预览。'}
-          </span>
-          {reportGenerationError && <em>{reportGenerationError}</em>}
-        </div>
-        <div className={styles.resultDeliveryActions}>
-          <button
-            type="button"
-            disabled={reportGenerating || !reportArtifact}
-            onClick={() => void generateFinalReport()}
-            title={finalReportUrl ? '重新生成最终 HTML 报告' : '生成最终 HTML 报告'}
-          >
-            {reportGenerating ? '生成中…' : '生成'}
-          </button>
-          {finalReportUrl && onOpenBrowser && (
-            <button
-              type="button"
-              onClick={() => onOpenBrowser(finalReportUrl)}
-              title="在右侧内置浏览器查看"
-            >
-              查看
+      {mode === 'result' && (
+      viewedRevision && !viewedRevision.isCurrent ? (
+        <section className={styles.resultReportSection} data-viewing="historical-revision">
+          <div className={styles.resultSidebarPreviewBody}>{renderPreview()}</div>
+        </section>
+      ) : (
+      <section className={styles.resultReportSection}>
+        {selectionError && <div className={styles.resultWorkflowError}>{selectionError}</div>}
+        {manifestError && (
+          <div className={styles.resultWorkflowError} role="alert">
+            <span>结果清单暂不可用；已保留可直接读取的结果文件。</span>
+            <button type="button" disabled={manifestLoading} onClick={() => setManifestRetryVersion((value) => value + 1)}>
+              {manifestLoading ? '重试中…' : '重试结果清单'}
             </button>
-          )}
-          {finalReportUrl && (
-            <a href={finalReportUrl} download="final-report.html" title="导出最终 HTML 报告">
-              导出
-            </a>
-          )}
-        </div>
-      </section>
-      <section className={isSidebar ? styles.resultSidebarReportCard : styles.resultReportSection}>
-        {showReportRail ? (
-          <div
-            className={styles.resultReportShell}
-            style={{ ['--result-nav-width' as string]: `${resultNavWidth}px` }}
-          >
-            <button
-              type="button"
-              className={styles.resultReportNavToggle}
-              onClick={() => setNavCollapsed((value) => !value)}
-              title={navCollapsed ? '展开结果导航' : '收起结果导航'}
-              aria-label={navCollapsed ? '展开结果导航' : '收起结果导航'}
-              aria-pressed={!navCollapsed}
-            >
-              <Icon name={navCollapsed ? 'arrow-left' : 'arrow-right'} size={13} />
-            </button>
-
-            <div className={styles.resultReportMain}>
-              {activeSection && showArtifactRail && (
-                <div className={styles.resultReportArtifactNav}>
-                  <div className={styles.resultReportArtifactNavHeader}>
-                    <div className={styles.resultReportArtifactNavEyebrow}>二级导航</div>
-                    <div className={styles.resultReportArtifactNavTitle}>{activeSection.label}</div>
-                    <div className={styles.resultReportArtifactNavMeta}>
-                      <span>{activeSectionArtifacts.length} 项</span>
-                      {activeSection.description && <span>{activeSection.description}</span>}
-                    </div>
-                  </div>
-                  <div className={styles.resultReportArtifactTabs}>
-                    {activeSectionArtifacts.map((artifact) => {
-                      const kind = classifyArtifact(artifact);
-                      const active = artifact.name === selectedArtifactName;
-                      return (
-                        <button
-                          key={artifact.name}
-                          type="button"
-                          className={`${styles.resultReportArtifactTab} ${active ? styles.resultReportArtifactTabActive : ''}`}
-                          onClick={() => {
-                            setSelectedName(artifact.name);
-                            if (activeSection) setSelectedSectionId(activeSection.id);
-                          }}
-                          title={artifact.description || artifact.label || artifact.name}
-                        >
-                          <span className={styles.resultReportArtifactTabIcon}>
-                            <Icon name={artifactKindIcon(kind)} size={13} />
-                          </span>
-                          <span className={styles.resultReportArtifactTabText}>
-                            <span className={styles.resultReportArtifactTabName}>
-                              {artifact.label || artifact.title || artifact.name}
-                            </span>
-                            <span className={styles.resultReportArtifactTabMeta}>
-                              {artifactPreviewLabel(artifact)}
-                            </span>
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              <div className={styles.resultSidebarPreviewBody}>
-                {renderPreview()}
-              </div>
-            </div>
-
-            {!navCollapsed && (
-              <aside className={styles.resultReportNav}>
-                <div className={styles.resultReportNavHeader}>
-                  <div className={styles.resultReportEyebrow}>Honeycomb</div>
-                  <div className={styles.resultReportTitle}>结果导航</div>
-                  <div className={styles.resultReportNavMeta}>
-                    <span>{sectionTabs.length} 组 · {artifacts.length} 项</span>
-                    {artifactSummary && <span>{artifactSummary}</span>}
-                  </div>
-                </div>
-
-                {sectionTabs.length > 0 && (
-                  <div className={styles.resultReportNavSections}>
-                    {sectionTabs.map((section) => {
-                      const active = section.id === activeSection?.id;
-                      const sectionKind = section.kind === 'mixed'
-                        ? inferSectionDisplayKind(section.artifacts, section.label)
-                        : section.kind;
-                      return (
-                        <section
-                          key={section.id}
-                          className={`${styles.resultReportNavSection} ${active ? styles.resultReportNavSectionActive : ''}`}
-                        >
-                          <button
-                            type="button"
-                            className={styles.resultReportSectionButton}
-                            onClick={() => {
-                              setSelectedSectionId(section.id);
-                              const first = section.artifacts[0];
-                              if (first) setSelectedName(first.name);
-                            }}
-                          >
-                            <span className={styles.resultReportSectionTitle}>
-                              {sectionKind && <Icon name={artifactKindIcon(sectionKind)} size={13} />}
-                              <span>{section.label}</span>
-                            </span>
-                            <span className={styles.resultReportSectionCount}>{section.artifacts.length}</span>
-                          </button>
-
-                          {section.description && (
-                            <div className={styles.resultReportSectionDesc}>{section.description}</div>
-                          )}
-                        </section>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {selectedArtifact && (
-                  <div className={styles.resultReportActiveCard}>
-                    <div className={styles.resultReportActiveLabel}>当前预览</div>
-                    <div className={styles.resultReportActiveName}>{selectedArtifactLabel}</div>
-                    <div className={styles.resultReportActiveMeta}>
-                      <span>{artifactKindLabel(selectedArtifactKind)}</span>
-                      <span>{selectedArtifactName}</span>
-                    </div>
-                    {selectedArtifactUrl && (
-                      <a className={styles.resultReportActiveLink} href={selectedArtifactUrl} target="_blank" rel="noreferrer">
-                        打开原文件
-                      </a>
-                    )}
-                    {result.deliveryManifest && (
-                      <div className={styles.resultReportReproductionActions}>
-                        {scientificScriptUrl && (
-                          <a href={scientificScriptUrl} target="_blank" rel="noreferrer">查看脚本</a>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => onAskAgent(`请为任务 ${job.id} 的产物 ${selectedArtifactName} 发起重放验证；先展示输入、资源和副作用确认摘要，不要直接执行。`)}
-                        >
-                          重放验证
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </aside>
-            )}
-          </div>
-        ) : (
-          <div className={styles.resultSidebarPreviewBody}>
-            {renderPreview()}
           </div>
         )}
+        {interactionError && (
+          <div className={styles.resultWorkflowError} role="alert">
+            <span>{interactionError}</span>
+            <button type="button" onClick={() => setInteractionRetryVersion((value) => value + 1)}>重试交互能力</button>
+          </div>
+        )}
+        <div className={styles.resultSidebarPreviewBody}>
+          {renderPreview()}
+        </div>
       </section>
+      )
+      )}
     </>
   );
 
-  return isSidebar ? (
-    <div className={styles.resultSidebarRoot}>
-      {shellBody}
-      {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
-    </div>
-  ) : (
-    <div className={styles.resultView}>
+  return (
+    <div
+      className={styles.resultView}
+      ref={resultViewRef}
+      onScroll={(e) => setResultScrollPosition(job?.id, e.currentTarget.scrollTop)}
+      data-artifact-switch-ms={artifactSwitchMs === null ? undefined : artifactSwitchMs.toFixed(2)}
+    >
+      {mode === 'result' && resultToolbar}
       {shellBody}
       {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
     </div>
@@ -4095,78 +4490,67 @@ function ResultArtifactShell({
 
 export function ResultView({
   project,
+  conversationId,
   job,
   workflow = null,
   activeArtifact,
   onActiveArtifactChange,
   onAskAgent,
+  onWorkflowChanged,
+  onAgentCodeRequest,
+  replayContext,
+  onOpenRevisionWorkspaceFile,
   pendingArtifactName = null,
   onPendingArtifactConsumed,
+  onOpenBrowser,
+  onBack,
+  onAskCurrentResult,
+  mode = 'result',
+  onModeChange,
 }: {
   project: Project;
+  conversationId?: string | null;
   job: ToolJob;
   workflow?: HarnessWorkflowJobState | null;
   activeArtifact: ActiveArtifact | null;
   onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
   onAskAgent: (prompt: string) => void;
-  pendingArtifactName?: string | null;
-  onPendingArtifactConsumed?: () => void;
-}): React.ReactElement {
-  return (
-    <ResultArtifactShell
-      project={project}
-      job={job}
-      workflow={workflow}
-      activeArtifact={activeArtifact}
-      onActiveArtifactChange={onActiveArtifactChange}
-      onAskAgent={onAskAgent}
-      pendingArtifactName={pendingArtifactName}
-      onPendingArtifactConsumed={onPendingArtifactConsumed}
-      variant="center"
-    />
-  );
-}
-
-export function ResultSidebarPanel({
-  project,
-  job,
-  workflow,
-  activeArtifact,
-  onActiveArtifactChange,
-  onAskAgent,
-  onWorkflowChanged,
-  pendingArtifactName = null,
-  onPendingArtifactConsumed,
-  onOpenBrowser,
-}: {
-  project: Project;
-  job: ToolJob | null;
-  workflow: HarnessWorkflowJobState | null;
-  activeArtifact: ActiveArtifact | null;
-  onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
-  onAskAgent: (prompt: string) => void;
-  onWorkflowChanged: () => void;
+  onWorkflowChanged?: () => void;
+  onAgentCodeRequest?: (request: 'explain' | 'modify' | 'replay') => void;
+  replayContext?: { conversationId?: string | null; contextToken: string } | null;
+  onOpenRevisionWorkspaceFile?: (relativePath: string) => void;
   pendingArtifactName?: string | null;
   onPendingArtifactConsumed?: () => void;
   onOpenBrowser?: (url: string) => void;
+  onBack?: () => void;
+  onAskCurrentResult?: () => void;
+  mode?: ResultSurfaceMode;
+  onModeChange?: (mode: ResultSurfaceMode, jobId?: string | null) => void;
 }): React.ReactElement {
   return (
     <ResultArtifactShell
       project={project}
+      conversationId={conversationId}
       job={job}
       workflow={workflow}
       activeArtifact={activeArtifact}
       onActiveArtifactChange={onActiveArtifactChange}
       onAskAgent={onAskAgent}
       onWorkflowChanged={onWorkflowChanged}
+      onAgentCodeRequest={onAgentCodeRequest}
+      replayContext={replayContext}
+      onOpenRevisionWorkspaceFile={onOpenRevisionWorkspaceFile}
       pendingArtifactName={pendingArtifactName}
       onPendingArtifactConsumed={onPendingArtifactConsumed}
       onOpenBrowser={onOpenBrowser}
-      variant="sidebar"
-      showHarnessIndex
+      onBack={onBack}
+      onAskCurrentResult={onAskCurrentResult}
+      mode={mode}
+      onModeChange={onModeChange}
     />
   );
 }
+
 
 // EmbeddedTerminalPanel moved to @/components/workspace-panels/BottomTerminal (PR-3.1)
 

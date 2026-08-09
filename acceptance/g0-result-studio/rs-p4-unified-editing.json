@@ -1,0 +1,315 @@
+{
+  "schemaVersion": 1,
+  "workPackage": "G0-RS-P4",
+  "sourceCommit": "f710261d9cb0a556bd0aa9e9d22b06c08d118c24",
+  "captureMode": "automated_descriptor_projection_plugin_wiring_registry_and_strict_build_offline_verification",
+  "qualificationEligible": false,
+  "qualificationReason": "P4 closes the offline unified-editing contract; real manual-vs-AI equivalence on a live plugin run and packaged product qualification remain reserved for P5 and P7.",
+  "privacy": "repository_relative_paths_digests_counts_and_bounded_statuses_only_no_project_job_conversation_selection_url_credential_prompt_or_result_data",
+  "sourceHashes": {
+    "controls": "d241a97ea738d47f558c8e3050d963db128c5609a28471ffc83313ae39269de1",
+    "intent": "3974400975fb8b98fd79b5ee6f06ab799ae4877d4e875d5cdf8d479672a86109",
+    "contextTools": "f4eb572624ce0c2afd75cce11dad1236cf8f6cfba47c85cd9576dace9867fdc0",
+    "contextEditTools": "3695f54aca1a59a45703935c71ce6264ecac6a2063a5206934b9774d69a1124b",
+    "toolDefinitions": "4e6ab4cc280a30e2a49da029db4d6d348d3f25d3d2bfe431b164ae490f47178f",
+    "changeSetService": "73668232b36a3f84f87df8544c61005ff7fb510c7073fceaf79bfd6b3ae52e0e",
+    "routes": "0332c98633a68fc0bd19614268221fba303bba02a879d9aea79ed745381a868b",
+    "panel": "9a1387cbb775978e1f5b325c079affe3700d298424cd60911eb87caf415af650",
+    "panelStyle": "5b59a661514aa97d6a751dc8c9f5d3220c5ecc060f1c33854d23ed38affb89fd",
+    "panelTest": "38335ac744fb6450661cdb1a886c06b094b925befe1298751b50a0d09a752674",
+    "agentComposer": "5c0508cb07254b660ba9b5c63553011617dde37f7db26053329f8d97e8c5e9e1",
+    "agentComposerTest": "cb703937db63adcafac6dc7f602816017cda04971dfa4fb27112d3167768a0ba",
+    "agentBridge": "cd5e05ad41b40622cb1ee63f7e7fefe40b055147b9fcb581a0595f9f215ea996",
+    "agentBridgeTest": "4993bc009a7937f6e8045ac9f2ce08fc5df5e90bd49ebf2a213db44abdffd248",
+    "simpleChat": "d6a2b6100e2f871ecf36c432abd4bea25769f607932ac731901a572749c2ac3c",
+    "rightPanel": "3f9c1a781e3a7b8718dd71d5091863a48a020fc01e19d43fd297d43d326816ff",
+    "rightPanelTest": "bbb2ba07c4ac3aa603b26e03656b80b052f5c54f53c86332d50ee5b898e9d08d",
+    "workspace": "1702bac4c571367b993f3ffe1998fb23b2ff5d1945e216971d48679fdd505c1b",
+    "contextClient": "8a74968cef56b917742fe932c7f0bf33d74465ac3fcea6f78ca1cf1c52df4c79",
+    "systemPrompt": "70c94eacee8ee9b8fea73ffafaeff2c76f8b7a84b50abbe64307fd69c5ba67c1",
+    "volcanoDescriptor": "66604b604c81e053ede710dec9db3e124a12800563d9c66746767bdd7b36585b",
+    "volcanoScript": "f80012c9b61351ee783ee9a5b85c6c6b14fbcabe35e0c44629a9e7681cab81fd",
+    "volcanoGolden": "142c7947b4b1127a74692e6a149e91dee844755c25eb0df1aa01f56d308dd3f0",
+    "controlsTest": "0a6a7e1c10733aef3bc2db145534a2510a0dac8748887d270c4d4e56c803536e",
+    "intentTest": "4fe9825b6933d18e0b1983db9f9d717296b564aac4c0221db5de84545e7b6a0f",
+    "contextTest": "a9f8c25f68874edd722ea27ba8b1b22253213d902d44ce56a20d19cac0735417",
+    "pluginSdkTest": "f4c09da3aa89aa5cebc2b42fb0c8c2189c5b44a3e8cc844b6f37ada1923b99f4",
+    "qualificationTest": "34568ffc1f0b3346abb98a0275e975e1ce02229e6a7c391ff4140412dd619579",
+    "registryTest": "73aa421cba9f4f29e93b31834a20ce99b5698442e1b098427c59f53b0b9ad01d",
+    "readinessTest": "cf49ed539c038b60a1463146d034487f274020a706fccd8d1db052d2e484f054",
+    "surfaceTest": "b909ac160caf228b36fc6288fff4dd44d735fe5f6a5432779ceea3a827f4807f",
+    "centerPanelTest": "ada15e45a652806c7aad788b9a52c225d6956bf552e3eb7a37911cc2bd793b3a",
+    "acceptanceScript": "98e1ab946fcece351abb8e27931c2086e9e51abd03756e6e849989affd3a2918",
+    "packageScripts": "20d43c6d8bb8acf1eb911383f99162a32cb86d2011bfa5d56c5ec191235e3ba7"
+  },
+  "controlObservation": {
+    "controlCount": 18,
+    "groups": [
+      "presentation",
+      "data",
+      "scientific"
+    ],
+    "firstBatch": [
+      {
+        "category": "color",
+        "names": [
+          "color_up",
+          "color_down",
+          "color_ns"
+        ],
+        "projected": true,
+        "wired": true
+      },
+      {
+        "category": "font",
+        "names": [
+          "base_font_size",
+          "label_size"
+        ],
+        "projected": true,
+        "wired": true
+      },
+      {
+        "category": "size",
+        "names": [
+          "point_size",
+          "plot_width",
+          "plot_height"
+        ],
+        "projected": true,
+        "wired": true
+      },
+      {
+        "category": "legend",
+        "names": [
+          "legend_position"
+        ],
+        "projected": true,
+        "wired": true
+      },
+      {
+        "category": "label",
+        "names": [
+          "plot_title"
+        ],
+        "projected": true,
+        "wired": true
+      },
+      {
+        "category": "export",
+        "names": [
+          "export_dpi"
+        ],
+        "projected": true,
+        "wired": true
+      }
+    ],
+    "presentationNeutral": true,
+    "descriptorParameterCount": 18
+  },
+  "checks": [
+    {
+      "id": "RS-P4-01",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-edit-controls.js"
+      ],
+      "detail": "Controls are projected from the plugin descriptor schema; no per-plugin result page is hand written."
+    },
+    {
+      "id": "RS-P4-02",
+      "passed": true,
+      "evidence": [
+        "resources/built-in-plugins/volcano-plot/tool-definition.json",
+        "resources/built-in-plugins/volcano-plot/scripts/volcano-plot.R"
+      ],
+      "detail": "The first control batch covers color, font, size, legend, label and export format, and each parameter is consumed by the real renderer script."
+    },
+    {
+      "id": "RS-P4-03",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-edit-controls.js",
+        "resources/built-in-plugins/volcano-plot/tool-definition.json"
+      ],
+      "detail": "A pure styling change is classified as presentation rerender and never reruns the scientific computation."
+    },
+    {
+      "id": "RS-P4-04",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-edit-controls.js"
+      ],
+      "detail": "A scientific threshold change requires explicit confirmation and reports its affected downstream nodes."
+    },
+    {
+      "id": "RS-P4-05",
+      "passed": true,
+      "evidence": [
+        "core/r-server/agent-tools/result-context-edit-tools.js"
+      ],
+      "detail": "Manual controls and AI intent pass through one normalization gate before the shared ResultEditIntent planner."
+    },
+    {
+      "id": "RS-P4-06",
+      "passed": true,
+      "evidence": [
+        "core/r-server/agent-tools/tool-defs.js"
+      ],
+      "detail": "The model-visible schema records the edit origin so manual and AI submissions stay auditable on one tool."
+    },
+    {
+      "id": "RS-P4-07",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-edit-controls.js"
+      ],
+      "detail": "Undeclared parameters and out-of-contract values are rejected rather than silently dropped or clamped."
+    },
+    {
+      "id": "RS-P4-08",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-edit-controls.js",
+        "core/r-server/agent-tools/result-context-edit-tools.js"
+      ],
+      "detail": "A submission equal to the current values produces no patch, so no empty ChangeSet or Job is created."
+    },
+    {
+      "id": "RS-P4-09",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-edit-controls.js",
+        "core/shared-backend/result-edit-intent.js"
+      ],
+      "detail": "A caller declaring presentation_rerender cannot downgrade a parameter the descriptor declares scientific, and a declared workflow parameter is not silently degraded to scientific by the protected-field table."
+    },
+    {
+      "id": "RS-P4-10",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-edit-intent.js"
+      ],
+      "detail": "A parameter with no declared impact falls back to scientific recompute and is flagged as a conservative decision, never guessed as styling."
+    },
+    {
+      "id": "RS-P4-11",
+      "passed": true,
+      "evidence": [
+        "core/r-server/agent-tools/result-context-tools.js"
+      ],
+      "detail": "Current values come from the parameters the job really executed, not from descriptor defaults."
+    },
+    {
+      "id": "RS-P4-12",
+      "passed": true,
+      "evidence": [
+        "core/r-server/routes/result-studio.js"
+      ],
+      "detail": "The production API serves one control schema shared by the manual panel and the agent context."
+    },
+    {
+      "id": "RS-P4-13",
+      "passed": true,
+      "evidence": [
+        "frontend/src/components/result-studio/ResultEditPanel.tsx"
+      ],
+      "detail": "The panel only claims scientific neutrality where the descriptor allows it and requires explicit confirmation otherwise."
+    },
+    {
+      "id": "RS-P4-14",
+      "passed": true,
+      "evidence": [
+        "frontend/src/components/result-studio/ResultEditPanel.tsx"
+      ],
+      "detail": "No control writes an Artifact, source data, or the current Revision: the panel only emits an edit request."
+    },
+    {
+      "id": "RS-P4-15",
+      "passed": true,
+      "evidence": [
+        "frontend/src/pages/project-workspace.tsx",
+        "frontend/src/lib/result-edit-agent-bridge.ts",
+        "frontend/src/lib/result-edit-agent-bridge.test.ts",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "core/r-server/helpers/system-prompt.js"
+      ],
+      "detail": "Manual and Agent submissions share the tested atomic context bridge; the production chat consumer preserves the click-time snapshot, then the hidden system orchestration reads the trusted schema before planning the edit."
+    },
+    {
+      "id": "RS-P4-16",
+      "passed": true,
+      "evidence": [
+        "frontend/src/components/workspace-panels/RightPanel.tsx",
+        "frontend/src/components/result-studio/ResultEditPanel.tsx",
+        "frontend/src/components/result-studio/ResultEditPanel.test.tsx"
+      ],
+      "detail": "The schema panel is a default-closed advanced drawer and remains disabled with an honest reason when reproducible coordinates are unavailable."
+    },
+    {
+      "id": "RS-P4-17",
+      "passed": true,
+      "evidence": [
+        "core/shared-backend/result-changeset-service.js"
+      ],
+      "detail": "Candidate creation still flows through the existing ChangeSet service and formal execution truth."
+    },
+    {
+      "id": "RS-P4-18",
+      "passed": true,
+      "evidence": [
+        "acceptance/g0-result-studio/rs-p4-unified-editing.json"
+      ],
+      "detail": "All declared P4 command gates passed."
+    }
+  ],
+  "verification": {
+    "generatedAt": "2026-07-28T00:32:47.733Z",
+    "commands": [
+      {
+        "label": "backend-p4",
+        "command": "node --test test/result-edit-controls.test.mjs test/result-edit-intent.test.mjs test/result-studio-context.test.mjs test/result-studio-plugin-sdk.test.mjs test/result-studio-qualification.test.mjs test/agent-tool-registry.test.mjs",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "e725266d631f8147b648d20bf38955daccf1e5637d22678e01d795c8091774fe",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "frontend-p4",
+        "command": "npm run test:files --prefix frontend -- ResultEditPanel.test.tsx ResultAgentComposer.test.tsx result-edit-agent-bridge.test.ts ResultStudioContextReadiness.test.tsx ResultStudioSurface.test.tsx CenterPanel.test.tsx RightPanel.test.tsx",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "7e01e9ee6df72ac6ac450d326128b673ea50a871bd563ff8d86a9b1ddab66238",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "frontend-build",
+        "command": "npm run build:check --prefix frontend",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "f7d0b5e24d651803f6672db6272b509e98f630784b556809e2c13b82529f2d64",
+        "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
+      },
+      {
+        "label": "syntax",
+        "command": "node --check scripts/g0-rs-p4-acceptance.mjs",
+        "exitCode": 0,
+        "passed": true,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "invariants": {
+    "executionTruth": "run_tool -> tool_job -> artifact_truth",
+    "secondEditingChain": false,
+    "resultStudioQualificationClaimed": false,
+    "futureStagesImplemented": false
+  },
+  "passed": true,
+  "generatedAt": "2026-07-28T00:32:47.733Z",
+  "privacyClean": true,
+  "sourceCommitReachable": true,
+  "sourceCommitMatchesSourceHashes": true,
+  "sourceCommitMismatches": []
+}

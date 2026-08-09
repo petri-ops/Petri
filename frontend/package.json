@@ -10,7 +10,11 @@
     "build:check": "tsc -b && vite build && node -e \"const fs=require('fs'),p=require('path'),d='dist/exports';if(fs.existsSync(d))for(const e of fs.readdirSync(d))if(e!=='figcode')fs.rmSync(p.join(d,e),{recursive:true,force:true})\"",
     "preview": "vite preview",
     "check": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --changed",
+    "test:changed": "vitest run --changed",
+    "test:related": "vitest related --run",
+    "test:files": "vitest run",
+    "test:all": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {

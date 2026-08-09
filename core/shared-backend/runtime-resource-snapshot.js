@@ -5,14 +5,17 @@ const { probeAvailableMemoryBytes } = require('./runtime-resource-probe');
 
 const SNAPSHOT_VERSION = 1;
 
-function positiveNumber(value, fallback = 0) {
-  return Number.isFinite(Number(value)) && Number(value) >= 0 ? Number(value) : fallback;
+function nonNegativeNumber(value, fallback = null) {
+  if (value == null || value === '') return fallback;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric >= 0 ? numeric : fallback;
 }
 
 function classifyResourceState({ availableMemoryBytes, diskAvailableBytes, estimatedMemoryBytes = 0 } = {}) {
-  const memory = positiveNumber(availableMemoryBytes);
-  const disk = positiveNumber(diskAvailableBytes);
-  const estimated = positiveNumber(estimatedMemoryBytes);
+  const memory = nonNegativeNumber(availableMemoryBytes);
+  const disk = nonNegativeNumber(diskAvailableBytes);
+  const estimated = nonNegativeNumber(estimatedMemoryBytes, 0);
+  if (memory == null || disk == null || memory === 0 || disk === 0) return 'unavailable';
   if ((memory > 0 && memory < 512 * 1024 * 1024) || (estimated > 0 && memory > 0 && estimated > memory) || (disk > 0 && disk < 512 * 1024 * 1024)) {
     return 'unavailable';
   }
@@ -23,8 +26,12 @@ function classifyResourceState({ availableMemoryBytes, diskAvailableBytes, estim
 }
 
 function createRuntimeResourceSnapshot({ disk = null, runtime = {}, activeJobs = 0, estimatedMemoryBytes = 0, totalMemoryBytes: totalMemoryOverride, availableMemoryBytes: availableMemoryOverride, observedAt = new Date().toISOString() } = {}) {
-  const totalMemoryBytes = positiveNumber(totalMemoryOverride, os.totalmem());
-  const availableMemoryBytes = positiveNumber(availableMemoryOverride, probeAvailableMemoryBytes());
+  const totalMemoryBytes = nonNegativeNumber(
+    totalMemoryOverride === undefined ? os.totalmem() : totalMemoryOverride,
+  );
+  const availableMemoryBytes = nonNegativeNumber(
+    availableMemoryOverride === undefined ? probeAvailableMemoryBytes() : availableMemoryOverride,
+  );
   const cpuCount = os.cpus().length;
   const snapshot = {
     schemaVersion: SNAPSHOT_VERSION,
@@ -32,18 +39,18 @@ function createRuntimeResourceSnapshot({ disk = null, runtime = {}, activeJobs =
     expiresAt: new Date(new Date(observedAt).getTime() + 30_000).toISOString(),
     platform: `${process.platform}-${process.arch}`,
     cpu: { logicalCores: cpuCount, load1m: Array.isArray(os.loadavg()) ? os.loadavg()[0] : null },
-    memory: { totalBytes: totalMemoryBytes, availableBytes: availableMemoryBytes, estimatedBytes: positiveNumber(estimatedMemoryBytes) },
+    memory: { totalBytes: totalMemoryBytes, availableBytes: availableMemoryBytes, estimatedBytes: nonNegativeNumber(estimatedMemoryBytes) },
     disk: disk && typeof disk === 'object' ? {
-      availableBytes: positiveNumber(disk.availableBytes),
-      totalBytes: positiveNumber(disk.totalBytes),
-      usePercent: positiveNumber(disk.usePercent),
+      availableBytes: nonNegativeNumber(disk.availableBytes),
+      totalBytes: nonNegativeNumber(disk.totalBytes),
+      usePercent: nonNegativeNumber(disk.usePercent),
     } : { availableBytes: null, totalBytes: null, usePercent: null },
     runtime: {
       r: runtime.r === true,
       python: runtime.python === true,
       details: typeof runtime.details === 'string' ? runtime.details.slice(0, 200) : null,
     },
-    activeJobs: Math.max(0, Math.floor(Number(activeJobs) || 0)),
+    activeJobs: Math.max(0, Math.floor(nonNegativeNumber(activeJobs, 0))),
   };
   snapshot.state = classifyResourceState({
     availableMemoryBytes,

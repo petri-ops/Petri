@@ -1,0 +1,49 @@
+{
+  "uiId": "UI-124",
+  "workPackage": "MODEL-ANTHROPIC-NATIVE",
+  "mode": "dryrun",
+  "baseUrl": "https://api.anthropic.com",
+  "anthropicVersion": "2023-06-01",
+  "keyPresent": false,
+  "keyLength": 0,
+  "startedAt": "2026-08-06T04:28:41.128Z",
+  "steps": [
+    {
+      "name": "listModels",
+      "ts": "2026-08-06T04:28:41.128Z",
+      "note": "dryrun: 跳过 fetch，仅打印 provider 默认模型",
+      "expectedProviderClass": "AnthropicProvider",
+      "expectedDefaultModel": "claude-haiku-4-5"
+    },
+    {
+      "name": "chat",
+      "ts": "2026-08-06T04:28:41.128Z",
+      "note": "dryrun: BIOTEST_ANTHROPIC_KEY 未设置，跳过实机",
+      "expectedDurationMs": "<3000 on healthy key"
+    },
+    {
+      "name": "chatStream",
+      "ts": "2026-08-06T04:28:41.128Z",
+      "note": "dryrun: 跳过流式实机",
+      "expectedEventTypes": [
+        "content_block_delta",
+        "message_stop",
+        "message_start"
+      ]
+    },
+    {
+      "name": "usage",
+      "ts": "2026-08-06T04:28:41.128Z",
+      "note": "dryrun: 仅校验 ai-usage-helper 导出形态"
+    }
+  ],
+  "errors": [
+    {
+      "name": "live-skip",
+      "ts": "2026-08-06T04:28:41.128Z",
+      "message": "BIOTEST_ANTHROPIC_KEY 未设置；未做实机。本机配置完成后重跑脚本以升级 evidence。",
+      "code": "NO_KEY"
+    }
+  ],
+  "finishedAt": "2026-08-06T04:28:41.128Z"
+}

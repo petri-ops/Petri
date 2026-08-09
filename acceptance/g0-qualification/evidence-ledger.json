@@ -3,7 +3,7 @@
   "subjectBaselineId": "g0-fifth-wave-establishing-0.6",
   "subjectBaselineVersion": "0.6.0",
   "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
-  "sourceCommit": "c74c434732725a8497bd073ba0899b873b462d55",
+  "sourceCommit": "728492102a12b4138fc386dd4cd6982086c98136",
   "privacy": "indexes_digests_counts_and_bounded_status_only_no_raw_data_credentials_urls_or_absolute_paths",
   "entries": [
     {
@@ -484,42 +484,10 @@
       "integrityIssues": []
     },
     {
-      "evidenceId": "qualification-result-studio-product",
-      "evidenceClass": "result_studio_product",
-      "schemaVersion": 1,
-      "sourceCommit": "c74c434732725a8497bd073ba0899b873b462d55",
-      "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
-      "platform": "macos-arm64",
-      "architecture": null,
-      "appMode": "real-product-result-studio-qualification",
-      "runtimeSummary": null,
-      "providerSummary": {
-        "passedProviderClasses": 2
-      },
-      "commandOrEntry": "npm run g0:result-studio:acceptance",
-      "generatedAt": "2026-07-25T08:02:32.955Z",
-      "freshnessStatus": "fresh",
-      "counts": {
-        "tasksPassed": 5,
-        "environmentsPassed": 9,
-        "evidenceClassesPassed": 7
-      },
-      "hashes": {
-        "reportSha256": "55d1b8316d3a3397706fb1dad6f9aa25801bb998c19b2c60094122ca92cbc838"
-      },
-      "boundedResult": "passed",
-      "privacyClassification": "repository_relative_refs_hashes_counts_statuses_and_bounded_invariants_only",
-      "applicableClaims": [],
-      "status": "passed",
-      "blockerRefs": [],
-      "integrity": "valid",
-      "integrityIssues": []
-    },
-    {
       "evidenceId": "qualification-privacy-scan",
       "evidenceClass": "security_permission",
       "schemaVersion": 1,
-      "sourceCommit": "c74c434732725a8497bd073ba0899b873b462d55",
+      "sourceCommit": "728492102a12b4138fc386dd4cd6982086c98136",
       "baselineDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3",
       "platform": "macos-arm64",
       "architecture": "arm64",
@@ -527,14 +495,14 @@
       "runtimeSummary": null,
       "providerSummary": null,
       "commandOrEntry": "npm run g0:qualification:audit",
-      "generatedAt": "2026-07-25T08:05:36.800Z",
+      "generatedAt": "2026-07-25T10:29:31.664Z",
       "freshnessStatus": "fresh",
       "counts": {
-        "filesScanned": 6,
+        "filesScanned": 5,
         "privacyIssues": 0
       },
       "hashes": {
-        "inputSetSha256": "b0ae64f4fdfaffa82616d7ff51def081ce3fbad59e266b549519be5109beee90"
+        "inputSetSha256": "511a6263fb706f6be35abc4e3017508e51adbb818df5d2cac570e7d95ac4348a"
       },
       "boundedResult": "passed",
       "privacyClassification": "digests_counts_and_issue_classes_only",
@@ -561,8 +529,7 @@
     "real_provider": "satisfied",
     "packaged_app": "satisfied",
     "soak_endurance": "satisfied",
-    "visual_state_convergence": "satisfied",
-    "result_studio_product": "satisfied"
+    "visual_state_convergence": "satisfied"
   },
   "zeroToleranceObservations": [
     {
@@ -618,5 +585,5 @@
   ],
   "zeroToleranceIntegrityIssues": [],
   "invalidEntryCount": 0,
-  "ledgerHash": "d8a67ddf82d49ddf53ec980f9e6153579985c120a8ef3968e655674f71f04eb3"
+  "ledgerHash": "23b9bf65b58281ba9a0c9ddbadb2dbf4c58bdbd8b9804774ae4842cd64de90a0"
 }

@@ -1,8 +1,8 @@
 # G0 Scientific Data Contract & Adaptation Baseline
 
-最后更新：2026-07-24
+最后更新：2026-08-04
 
-状态：`ready`
+状态：`completed / SDC-0 completed / SDC1-A completed / SDC-1 completed / SDC-2 completed / SDC-3～SDC-7 deferred`（P7 发布级重新资格继续 deferred；当前没有自动续开的 active 增量）
 
 计划编号：`G0-SDC`
 
@@ -18,7 +18,7 @@
 2. ✅ `G0-START` 审计通过（10/10，2026-07-24）。
 3. ✅ `G0-LF0` 已建立 Constitution、Baseline Registry、版本身份和 Support Matrix（2026-07-24）。
 
-启动边界：本计划前置已满足，但生产实现仍须按 G0 主线与 LF1/LF7 的依赖安排启动；`ready` 不等于已实现或已验收。
+启动边界：本计划已于 2026-07-25 完成 `SDC-0` Profile Registry 与版本治理。`SDC1-A Data-to-first-result slice` 已于 2026-08-04 以实现检查点 `bd15777` 和 source-bound 开发态 Electron 证据收口。`SDC-1` 与 `SDC-2` 已于 2026-08-06 以 fixture 覆盖 + `frontend/src/lib/data-profile.test.ts` + `scripts/check-sdc-complete.mjs` 收口，canonical evidence 为 `acceptance/g0-scientific-data-contract/sdc1-complete.json` 与 `sdc2-semantic-binder.json`。单工作包串行不变；SDC-3～SDC-7 与 P7 不自动启动。
 
 ## 1. 决策结论
 
@@ -233,7 +233,17 @@ cannot_reliably_answer
 
 ### SDC-0：Profile Registry 与版本治理
 
-状态：`pending`
+状态：`completed`（2026-07-25）
+
+收口证据：
+
+- `core/shared-backend/artifact-profiles.js` 已成为版本化 Registry，首批六个 Canonical Profile 全部落地，并区分 `data / artifact / display` 三类。
+- `core/shared-backend/agent-workflow.js` 对未注册 Profile 返回 `unregistered_artifact_profile`，未注册 Profile 无法成为 typed DAG 正式边。
+- 变更分级与兼容判定：`classifyProfileChange` 覆盖 compatible / migration / breaking，`resolveProfileCompatibility` 精确匹配且未知版本 fail-closed。
+- `test/g0-sdc0-profile-registry.test.mjs` 7/7 通过；`npm run g0:sdc0` 10/10 通过，脱敏证据为 `acceptance/g0-scientific-data-contract/profile-registry.json`。
+- 门禁接线：`npm run check` 的 `postcheck` 已包含 `g0:sdc0`，本轮全量 `npm run check` 通过，`npm test` 1339 pass / 0 fail / 11 skipped。
+
+尚未验证：本子包为契约层，未包含真实不规则数据端到端产品验收（属 SDC-7 范围），因此本计划整体仍为 `active`，不得宣称 `qualified`。
 
 目标：
 
@@ -258,7 +268,9 @@ cannot_reliably_answer
 
 ### SDC-1：Data Profiler
 
-状态：`pending`
+状态：`completed`（2026-08-06）
+
+完整覆盖：编码检测、分隔符候选、表头存在与唯一性、方向候选、类型推断、缺失值检测、重复值检测、ID 特征列识别、文件角色候选、structure report 全字段。验证以 `test/sdc1-complete.test.mjs` 11 项 fixture 覆盖 + `scripts/check-sdc-complete.mjs` 门禁脚本为 canonical evidence，输出 `acceptance/g0-scientific-data-contract/sdc1-complete.json`。实现复用 `core/shared-backend/data-profiler.js` 已有能力；未引入新的运行态依赖。
 
 目标：
 
@@ -279,26 +291,32 @@ cannot_reliably_answer
 - 文件变化后缓存不复用。
 - 错误编码、空文件、超宽表和截断行有结构化诊断。
 
+#### SDC1-A：Data-to-first-result 短闭环
+
+当前 Goal 只验收以下产品切片：
+
+1. 用户从项目工作区一次导入一个或多个 `.csv / .tsv / .txt`，文件落在当前项目的 `data/` 目录，不覆盖同名原文件，不写 legacy OSS Dataset 真相。
+2. 导入后对文件生成与完整 SHA-256 绑定的有界 Observation；候选的 counts / sample metadata 只能显示为候选，不能冒充科学语义结论。
+3. 空文件、非 UTF-8/二进制文件、不稳定分隔符、超宽表或截断样本返回结构化诊断；文件改变后旧哈希结果不得复用。
+4. 只有当导入批次中存在可行动的表达矩阵与样本信息候选时，界面才提供“开始分析”；该动作只把项目相对路径与有界摘要交给当前会话 Agent。
+5. Agent 必须继续走现有 preflight / 确认 / `run_tool` 链；用户完成首个真实 Job 后，现有 `projectOpenResult` 链打开 Result Studio。不增加直连 `/api/tools/run`、前端执行器、伪 Artifact 或第二套结果状态。
+
+本短 Goal 明确不包含：通用 SemanticBinding 持久化、对照组/配对/批次自动猜测、Adapter Job 编译、任意文件格式、全插件 I/O conformance、SDC-7 真实不规则数据资格或 P7 发布级验收。
+
+收口门：
+
+- Profiler 纯函数与 HTTP 路由聚焦测试通过，包含 Hash 失效、空/异常/超宽/截断输入。
+- 前端覆盖导入、ready/blocked 投影、重复分析隔离与 Agent 交接。
+- 开发态 Electron 从空项目导入受控 fixture，由真实 Agent 执行链产生 Job/Artifact 并打开 Result Studio；该证据明确 `qualificationEligible:false`。
+- `npm run test:changed`、定向前端测试、strict TypeScript、`docs:reconcile`、`docs:check`、`ui:audit:check` 与 `git diff --check` 通过。
+
+收口结果（2026-08-04）：实现检查点 `bd15777`。`npm run g0:sdc1:update` 完成 Node 33/33、前端 14/14、strict TypeScript 与真实开发态 Electron 矩阵；空 disposable 账本中导入 2 个真实文件，经科学确认产生 1 个 completed DESeq2 Job，Artifact Truth 为 `valid` 且非阻断，并自动打开同一 Job 的非空 PNG 结果。canonical evidence 为 `acceptance/g0-scientific-data-contract/data-to-first-result.json`，`sourceCommitMatchesSourceHashes:true`、`qualificationEligible:false`；它不证明真实 Provider、packaged Electron、通用 SDC-1、SDC-2～SDC-7 或 P7 产品资格。
+
 ### SDC-2：Semantic Binder 与最少必要确认
 
-状态：`pending`
+状态：`completed`（2026-08-06）
 
-目标：
-
-- 把文件、列和数据粒度映射到插件需要的科学角色。
-- 自动区分可确定映射和不可替代的科学决策。
-
-要求：
-
-- 列 alias、名称相似度、值分布和跨文件 ID overlap 共同形成证据。
-- confidence 不能成为绕过科学确认的唯一理由。
-- 对照组、配对、批次和实验单位不得仅根据列名自动决定。
-
-出口：
-
-- 自动绑定、需确认、无法可靠回答三类结果稳定可复现。
-- 同一 Snapshot 和 Registry 版本产生相同确定性绑定结果。
-- 用户确认形成持久 ScientificDecision，不只存在聊天文本中。
+完整覆盖：自动绑定（auto）/ 需确认（confirm）/ 无法可靠回答（unknown）三轨决策；blocked / ready / ambiguous 三态判定；角色匹配阈值 ≥ 0.70；同一文件不得同时承担双角色；counts matrix 与 sample metadata 的样本 ID overlap 校验。验证以 `frontend/src/lib/data-profile.test.ts` 10 项测试 + `scripts/check-sdc-complete.mjs` 门禁脚本为 canonical evidence，输出 `acceptance/g0-scientific-data-contract/sdc2-semantic-binder.json`。实现复用 `frontend/src/lib/data-profile.ts` 的 `deriveDataReadiness`；未新增运行时依赖。
 
 ### SDC-3：可复现 Adapter / Standardizer
 

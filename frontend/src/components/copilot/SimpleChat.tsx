@@ -7,10 +7,14 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   ackRunTool,
+  retryToolSummary,
+  restoreResultEditProgressEvents,
   type ChatMessage,
+  type ResultEditProgressEvent,
 } from './copilotClient';
 import {
   getConversationMessages,
+  type ConversationMessage,
 } from './copilotConversationsClient';
 import { useCopilotContext } from '@/lib/copilotContextProvider';
 import { useConversations } from '@/hooks/useConversations';
@@ -54,6 +58,7 @@ import {
   type ChatModelPreset,
 } from '@/hooks/useAiSettings';
 import type { CopilotContext } from '@/lib/copilotContext';
+import { copilotContextOverrideForAsk } from '@/lib/result-edit-agent-bridge';
 import { CopilotMarkdown } from './copilotMarkdown';
 import {
   formatToolDuration,
@@ -61,6 +66,7 @@ import {
   restoreToolActivities,
   type ToolActivityItem,
 } from './toolActivity';
+import { resolveToolSummaryPresentation } from './toolSummaryPresentation';
 import {
   clearConversationPendingApproval,
   clearConversationRun,
@@ -94,9 +100,43 @@ interface SimpleMessage {
   toolActivities?: ToolActivityItem[];
   processingDurationMs?: number;
   statusMessage?: string;
+  summaryUnavailable?: boolean;
+  retryToolJobId?: string;
   progressUpdates?: Array<{ iteration: number; content: string }>;
+  resultEditProgress?: ResultEditProgressEvent[];
   /** HLE-C4R: live durable-loop projection for the running assistant turn. */
   loop?: ConversationLoopState | null;
+}
+
+function restoreSimpleMessage(message: ConversationMessage): SimpleMessage {
+  const meta = message.meta || {};
+  const toolActivities = restoreToolActivities(meta.toolActivities);
+  const finalization = meta.finalization && typeof meta.finalization === 'object'
+    ? meta.finalization as Record<string, unknown>
+    : null;
+  const incident = meta.incident && typeof meta.incident === 'object';
+  const presentation = resolveToolSummaryPresentation({
+    assistantContent: message.content,
+    assistantError: message.role === 'assistant' && Boolean(incident),
+    summaryFailureReason: typeof finalization?.failureReason === 'string'
+      ? finalization.failureReason
+      : undefined,
+    toolActivities,
+  });
+  return {
+    role: message.role === 'system' ? 'assistant' : message.role,
+    content: presentation.content,
+    error: presentation.error,
+    summaryUnavailable: presentation.summaryUnavailable,
+    retryToolJobId: presentation.retryToolJobId,
+    ts: message.ts,
+    toolActivities,
+    progressUpdates: restoreProgressUpdates(meta.progressUpdates),
+    resultEditProgress: restoreResultEditProgressEvents(meta.resultEditProgress),
+    processingDurationMs: typeof meta.processingDurationMs === 'number'
+      ? meta.processingDurationMs
+      : undefined,
+  };
 }
 
 interface AgentProgressUpdate {
@@ -139,6 +179,11 @@ interface SimpleChatProps {
   conversationId: string | null;
   onConversationChange: (id: string | null) => void;
   inputHeight?: number;
+  /**
+   * Whether this instance handles the copilotAsk event. Exactly one mounted
+   * instance may, so it defaults to false and the owner opts in explicitly.
+   */
+  ownsCopilotAsk?: boolean;
 }
 
 export function SimpleChat({
@@ -146,11 +191,20 @@ export function SimpleChat({
   conversationId,
   onConversationChange,
   inputHeight: _inputHeight = 120,
+  ownsCopilotAsk = false,
 }: SimpleChatProps): React.ReactElement {
   const [messages, setMessages] = useState<SimpleMessage[]>([]);
   const [copiedMessageKey, setCopiedMessageKey] = useState<string | null>(null);
   const [input, setInput] = useState('');
   const [starting, setStarting] = useState(false);
+  const [queuedPrompts, setQueuedPrompts] = useState<string[]>([]);
+  const MAX_SUMMARY_RETRIES = 3;
+  const RETRY_BACKOFF_MS = [2000, 4000, 8000];
+  const [summaryRetryState, setSummaryRetryState] = useState<Record<string, 'running' | 'done'>>({});
+  const [summaryRetryErrors, setSummaryRetryErrors] = useState<Record<string, string>>({});
+  const [summaryRetryAttempts, setSummaryRetryAttempts] = useState<Record<string, number>>({});
+  const [summaryRetryCooldownUntil, setSummaryRetryCooldownUntil] = useState<Record<string, number>>({});
+  const [retryTick, setRetryTick] = useState(0);
   const [loading, setLoading] = useState(false);
   const [paramDraft, setParamDraft] = useState<Record<string, string>>({});
   const [approvalRepair, setApprovalRepair] = useState<ApprovalRepairState>({ status: 'idle' });
@@ -361,16 +415,7 @@ export function SimpleChat({
     (async () => {
       const msgs = await getConversationMessages(conversationId, 200);
       if (cancelled) return;
-      const ui: SimpleMessage[] = msgs.map((m) => ({
-        role: m.role === 'system' ? 'assistant' : (m.role as 'user' | 'assistant'),
-        content: m.content,
-        ts: m.ts,
-        toolActivities: restoreToolActivities(m.meta?.toolActivities),
-        progressUpdates: restoreProgressUpdates(m.meta?.progressUpdates),
-        processingDurationMs: typeof m.meta?.processingDurationMs === 'number'
-          ? m.meta.processingDurationMs
-          : undefined,
-      }));
+      const ui: SimpleMessage[] = msgs.map(restoreSimpleMessage);
       setMessages(ui);
       setLoading(false);
     })();
@@ -391,16 +436,7 @@ export function SimpleChat({
       const persisted = await getConversationMessages(conversationId, 200);
       if (cancelled) return;
       reconciledRunRef.current = reconciliationId;
-      setMessages(persisted.map((m) => ({
-        role: m.role === 'system' ? 'assistant' : (m.role as 'user' | 'assistant'),
-        content: m.content,
-        ts: m.ts,
-        toolActivities: restoreToolActivities(m.meta?.toolActivities),
-        progressUpdates: restoreProgressUpdates(m.meta?.progressUpdates),
-        processingDurationMs: typeof m.meta?.processingDurationMs === 'number'
-          ? m.meta.processingDurationMs
-          : undefined,
-      })));
+      setMessages(persisted.map(restoreSimpleMessage));
       // Cancellation is persisted by the backend just like successful
       // completion. Once SQLite has supplied that durable message, discard
       // the local snapshot so progress and tool blocks are not duplicated.
@@ -448,16 +484,26 @@ export function SimpleChat({
       lastAssistant.content === activeRun.assistantContent &&
       Boolean(lastAssistant.ts && Date.parse(lastAssistant.ts) >= activeRun.startedAt);
     if (!assistantAlreadyPersisted) {
+      const summaryPresentation = resolveToolSummaryPresentation({
+        assistantContent: activeRun.assistantContent,
+        assistantError: activeRun.assistantError,
+        statusMessage: activeRun.statusMessage,
+        toolActivities: activeRun.toolActivities,
+      });
+
       next.push({
         role: 'assistant',
-        content: activeRun.assistantContent,
+        content: summaryPresentation.content,
         pending: activeRun.assistantPending,
-        error: activeRun.assistantError,
+        error: summaryPresentation.error,
         ts: activeRun.assistantTs,
         toolActivities: activeRun.toolActivities,
         processingDurationMs: activeRun.processingDurationMs,
-        statusMessage: activeRun.statusMessage,
+        statusMessage: summaryPresentation.statusMessage,
+        summaryUnavailable: summaryPresentation.summaryUnavailable,
+        retryToolJobId: summaryPresentation.retryToolJobId,
         progressUpdates: activeRun.progressUpdates,
+        resultEditProgress: activeRun.resultEditProgress,
         loop: durableLoop.loop || activeRun.loop,
       });
     }
@@ -491,6 +537,7 @@ export function SimpleChat({
 
   useEffect(() => {
     setInput(conversationDrafts.get(conversationDraftKey(projectId, conversationId)) || '');
+    setQueuedPrompts([]);
   }, [conversationId, projectId]);
 
   const onInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -499,7 +546,7 @@ export function SimpleChat({
     resizeTextarea(e.target);
   };
 
-  const send = useCallback(async (text: string) => {
+  const send = useCallback(async (text: string, contextOverride?: Partial<CopilotContext>) => {
     const trimmed = text.trim();
     if (!trimmed || streaming) return;
     setStarting(true);
@@ -530,6 +577,7 @@ export function SimpleChat({
         modelName: activeModel?.model,
         context: {
           ...copilotCtxRef.current,
+          ...(contextOverride || {}),
           page: 'desktop-project',
           projectId,
           accessMode,
@@ -565,16 +613,92 @@ export function SimpleChat({
   // Toolbox clicks / "explain current result" / chain recommendations dispatch this
   // event with a ready-to-send prompt; we pick it up here and send it.
   useEffect(() => {
-    const unsub = subscribeBioF3Event(biof3Events.copilotAsk, ({ prompt }) => {
+    // Exactly one instance may own this event. Two can be mounted at once — the
+    // center conversation and a right-panel chat tab, which RightPanel keeps
+    // alive via openRightTabs.map — and both subscribing would send the prompt
+    // twice. When no conversation exists yet, createConversationForRun is
+    // awaited before the running check, so each would also create its own.
+    if (!ownsCopilotAsk) return undefined;
+    const unsub = subscribeBioF3Event(biof3Events.copilotAsk, (detail) => {
+      const { prompt } = detail;
       const p = typeof prompt === 'string' ? prompt.trim() : '';
-      if (p) sendRef.current(p);
+      // Snapshot override was created at click time. Pass it into send before
+      // send can await conversation creation, otherwise the result/token may
+      // drift to whichever Artifact happens to be open afterwards.
+      if (p) void sendRef.current(p, copilotContextOverrideForAsk(detail));
     });
     return unsub;
-  }, []);
+  }, [ownsCopilotAsk]);
 
   const stop = useCallback(() => {
     if (conversationId) stopConversationRun(conversationId);
   }, [conversationId]);
+
+  const retrySummary = useCallback(async (toolJobId: string) => {
+    const attempts = summaryRetryAttempts[toolJobId] ?? 0;
+    if (!conversationId) return;
+    if (summaryRetryState[toolJobId] === 'running') return;
+    if (attempts >= MAX_SUMMARY_RETRIES) return;
+    if (Date.now() < (summaryRetryCooldownUntil[toolJobId] ?? 0)) return;
+    setSummaryRetryState((current) => ({ ...current, [toolJobId]: 'running' }));
+    setSummaryRetryErrors((current) => {
+      const next = { ...current };
+      delete next[toolJobId];
+      return next;
+    });
+    try {
+      const content = await retryToolSummary({
+        toolJobId,
+        projectId,
+        conversationId,
+        modelPresetId: activeModel?.endpointProfileId || activeModelId,
+      });
+      setMessages((current) => [
+        ...current,
+        { role: 'assistant', content, ts: new Date().toISOString() },
+      ]);
+      clearConversationRun(conversationId);
+      setSummaryRetryState((current) => ({ ...current, [toolJobId]: 'done' }));
+      setSummaryRetryAttempts((current) => {
+        const next = { ...current };
+        delete next[toolJobId];
+        return next;
+      });
+      setSummaryRetryCooldownUntil((current) => {
+        const next = { ...current };
+        delete next[toolJobId];
+        return next;
+      });
+      await refreshConversations();
+    } catch (error) {
+      const nextAttempts = attempts + 1;
+      setSummaryRetryAttempts((current) => ({ ...current, [toolJobId]: nextAttempts }));
+      setSummaryRetryState((current) => {
+        const next = { ...current };
+        delete next[toolJobId];
+        return next;
+      });
+      setSummaryRetryErrors((current) => ({
+        ...current,
+        [toolJobId]: error instanceof Error ? error.message : 'AI 总结仍不可用，请稍后重试',
+      }));
+      if (nextAttempts < MAX_SUMMARY_RETRIES) {
+        const backoff = RETRY_BACKOFF_MS[nextAttempts - 1] ?? 8000;
+        setSummaryRetryCooldownUntil((current) => ({ ...current, [toolJobId]: Date.now() + backoff }));
+      }
+    }
+  }, [activeModel, activeModelId, conversationId, projectId, refreshConversations, summaryRetryState, summaryRetryAttempts, summaryRetryCooldownUntil]);
+
+  // UX1H: tick while any summary-retry cooldown is active so the "冷却中 Ns"
+  // label and re-enable update without a full external re-render.
+  useEffect(() => {
+    const now = Date.now();
+    const active = Object.values(summaryRetryCooldownUntil).filter((until) => until > now);
+    if (active.length === 0) return;
+    const minUntil = Math.min(...active);
+    const timer = window.setTimeout(() => setRetryTick((t) => t + 1), Math.max(250, minUntil - Date.now()));
+    return () => window.clearTimeout(timer);
+  }, [summaryRetryCooldownUntil, retryTick]);
 
   const approvePending = useCallback(async () => {
     if (!pendingApproval || streaming) return;
@@ -587,19 +711,27 @@ export function SimpleChat({
       }
     });
     const { ackToken, toolId } = pendingApproval;
-    await ackRunTool(ackToken, true);
+    const acknowledged = await ackRunTool(ackToken, true, {
+      projectId: projectId || null,
+      conversationId: conversationId || null,
+    });
+    if (!acknowledged) return;
     if (conversationId) clearConversationPendingApproval(conversationId);
     send(
       `用户已确认开始（ackToken=${ackToken}）。请重调 run_tool(op=run, toolId="${toolId ?? ''}", params=${JSON.stringify(mergedParams)}, ackToken="${ackToken}") 续跑该重操作。`
     );
-  }, [conversationId, paramDraft, pendingApproval, send, streaming]);
+  }, [conversationId, paramDraft, pendingApproval, projectId, send, streaming]);
 
   const rejectPending = useCallback(async () => {
     if (!pendingApproval || streaming) return;
-    await ackRunTool(pendingApproval.ackToken, false);
+    const acknowledged = await ackRunTool(pendingApproval.ackToken, false, {
+      projectId: projectId || null,
+      conversationId: conversationId || null,
+    });
+    if (!acknowledged) return;
     if (conversationId) clearConversationPendingApproval(conversationId);
     send('用户取消了该重操作，不要重试。请简短说明已取消，并给出如需继续时应调整哪些参数。');
-  }, [conversationId, pendingApproval, send, streaming]);
+  }, [conversationId, pendingApproval, projectId, send, streaming]);
 
   useEffect(() => {
     if (!pendingApproval || streaming || accessMode !== 'full') return;
@@ -615,14 +747,44 @@ export function SimpleChat({
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      send(input);
+      const trimmed = input.trim();
+      if (!trimmed) return;
+      if (streaming) {
+        setQueuedPrompts((current) => [...current, trimmed].slice(-5));
+        setInput('');
+        conversationDrafts.delete(conversationDraftKey(projectId, conversationId));
+        if (taRef.current) taRef.current.style.height = 'auto';
+      } else {
+        void send(trimmed);
+      }
     }
   };
+
+  const queueCurrentPrompt = useCallback(() => {
+    const trimmed = input.trim();
+    if (!trimmed || !streaming) return;
+    setQueuedPrompts((current) => [...current, trimmed].slice(-5));
+    setInput('');
+    conversationDrafts.delete(conversationDraftKey(projectId, conversationId));
+    if (taRef.current) taRef.current.style.height = 'auto';
+  }, [conversationId, input, projectId, streaming]);
+
+  // Drain one queued prompt only after the completed run has been reconciled
+  // from SQLite, so the next turn receives the durable conversation history.
+  useEffect(() => {
+    if (streaming || queuedPrompts.length === 0 || !conversationId) return;
+    if (activeRun?.completedAt
+      && reconciledRunRef.current !== `${conversationId}:${activeRun.completedAt}`) return;
+    const [next, ...rest] = queuedPrompts;
+    setQueuedPrompts(rest);
+    void send(next);
+  }, [activeRun, conversationId, messages, queuedPrompts, send, streaming]);
 
   // Create new conversation
   const newConversation = useCallback(async () => {
     onConversationChange(null);
     setMessages([]);
+    setQueuedPrompts([]);
   }, [onConversationChange]);
 
   // Expose via ref-like pattern through props is not needed here;
@@ -706,6 +868,9 @@ export function SimpleChat({
                         onFileReferenceClick={handleFileReferenceClick}
                       />
                     )}
+                    {m.resultEditProgress && m.resultEditProgress.length > 0 && (
+                      <ResultEditProgressList events={m.resultEditProgress} />
+                    )}
                     <CopilotMarkdown
                       text={m.content || m.statusMessage || (m.pending ? '…' : '')}
                       onFileReferenceClick={handleFileReferenceClick}
@@ -715,6 +880,42 @@ export function SimpleChat({
                         <HighlightedCode code={code} language={language} />
                       )) : undefined}
                     />
+                    {m.role === 'assistant' && m.summaryUnavailable && m.retryToolJobId && summaryRetryState[m.retryToolJobId] !== 'done' && (() => {
+                      const tj = m.retryToolJobId!;
+                      const attempts = summaryRetryAttempts[tj] ?? 0;
+                      const cooling = Date.now() < (summaryRetryCooldownUntil[tj] ?? 0);
+                      const exhausted = attempts >= MAX_SUMMARY_RETRIES;
+                      const running = summaryRetryState[tj] === 'running';
+                      if (exhausted) {
+                        return (
+                          <div className="sc-msg-actions sc-msg-actions-summary">
+                            <span className="sc-msg-action-error">已达重试上限，请稍后再试</span>
+                          </div>
+                        );
+                      }
+                      const remaining = cooling ? Math.max(0, Math.ceil((summaryRetryCooldownUntil[tj]! - Date.now()) / 1000)) : 0;
+                      return (
+                        <div className="sc-msg-actions sc-msg-actions-summary">
+                          <button
+                            type="button"
+                            className="sc-msg-action"
+                            onClick={() => void retrySummary(tj)}
+                            disabled={running || cooling}
+                            title="仅重新生成 AI 总结，不会再次运行分析工具"
+                          >
+                            <Icon name="refresh" size={14} />
+                            {running
+                              ? '正在重试总结'
+                              : cooling
+                                ? `冷却中 ${remaining}s`
+                                : `重试 AI 总结（剩 ${MAX_SUMMARY_RETRIES - attempts} 次）`}
+                          </button>
+                          {summaryRetryErrors[tj] && (
+                            <span className="sc-msg-action-error">{summaryRetryErrors[tj]}</span>
+                          )}
+                        </div>
+                      );
+                    })()}
                     {m.role === 'assistant' && m.content && !m.pending && (
                       <div className="sc-msg-actions">
                         <button
@@ -896,9 +1097,20 @@ export function SimpleChat({
                   )}
                 </div>
                 {streaming ? (
-                  <button className="sc-send-cta sc-send-cta-stop" onClick={stop} title="停止生成">
-                    <Icon name="square" size={14} />
-                  </button>
+                  <>
+                    <button
+                      className="sc-send-cta sc-send-cta-queue"
+                      onClick={queueCurrentPrompt}
+                      disabled={!input.trim()}
+                      title="当前任务完成后发送"
+                      aria-label="当前任务完成后发送"
+                    >
+                      <Icon name="arrow-up" size={12} />
+                    </button>
+                    <button className="sc-send-cta sc-send-cta-stop" onClick={stop} title="停止生成">
+                      <Icon name="square" size={14} />
+                    </button>
+                  </>
                 ) : (
                   <button
                     className="sc-send-cta sc-send-cta-send"
@@ -908,6 +1120,11 @@ export function SimpleChat({
                   >
                     <Icon name="arrow-up" size={12} />
                   </button>
+                )}
+                {queuedPrompts.length > 0 && (
+                  <span className="sc-queued-count" aria-label={`已排队 ${queuedPrompts.length} 条消息`}>
+                    已排队 {queuedPrompts.length}
+                  </span>
                 )}
               </div>
             </div>
@@ -1014,6 +1231,31 @@ function AgentProgressList({
   );
 }
 
+export function ResultEditProgressList({
+  events,
+}: {
+  events: ResultEditProgressEvent[];
+}): React.ReactElement {
+  const phases = new Map<string, { label: string; status: string }>();
+  for (const event of events) {
+    if (!event.publicPhase || !event.publicPhaseLabel) continue;
+    phases.set(event.publicPhase, { label: event.publicPhaseLabel, status: event.status });
+  }
+  const terminal = [...events].reverse().find((event) => event.status === 'terminal');
+  return (
+    <div className="sc-result-edit-progress" aria-label="结果修改五阶段进度">
+      {[...phases.entries()].map(([phase, item]) => (
+        <span key={phase} data-status={item.status}>
+          {item.label}
+        </span>
+      ))}
+      {terminal && (
+        <strong>{terminal.stage === 'cancelled' ? '修改已停止' : '修改未完成'}</strong>
+      )}
+    </div>
+  );
+}
+
 export function compactStageConclusion(content: string, maxLength = 240): string {
   const normalized = String(content || '')
     .trim()
@@ -1066,7 +1308,7 @@ function ToolActivityList({
   }, {});
   const actionSummary = Object.entries(actionCounts)
     .slice(0, 3)
-    .map(([action, count]) => `${action} ${count}`)
+    .map(([action, count]) => `${action} ${count} 次`)
     .join(' · ');
   const summary = running > 0
     ? `正在处理 ${running}/${activities.length} 项${actionSummary ? ` · ${actionSummary}` : ''}`

@@ -71,6 +71,7 @@
   --biof3-border: #e2e8f0;
   --biof3-border-strong: #cbd5e1;
   --biof3-text: #0f172a;
+  --biof3-text-primary: var(--biof3-text);
   --biof3-text-secondary: #475569;
   --biof3-text-tertiary: #64748b;
   --biof3-text-muted: #94a3b8;
@@ -153,6 +154,7 @@
   --biof3-border: #243149;
   --biof3-border-strong: #324466;
   --biof3-text: #e6edf3;
+  --biof3-text-primary: var(--biof3-text);
   --biof3-text-secondary: #b1bac4;
   --biof3-text-tertiary: #8b98ad;
   --biof3-text-muted: #6b7689;

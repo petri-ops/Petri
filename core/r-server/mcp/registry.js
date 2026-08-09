@@ -14,7 +14,12 @@ const fs = require('fs');
 const os = require('os');
 const crypto = require('crypto');
 const { execFile } = require('child_process');
-const { reconcileArtifactTruth } = require('../helpers/artifact-truth');
+const {
+  captureStagedInputSnapshots,
+  isInternalArtifactName,
+  isSafeFlatFilename,
+  reconcileArtifactTruth,
+} = require('../helpers/artifact-truth');
 const { createResultArchive } = require('../helpers/result-archive');
 const { createExecutionContext } = require('../../shared-backend/execution-context');
 const { resolveProjectRunLayout } = require('../../shared-backend/project-run-layout');
@@ -100,6 +105,9 @@ try {
 // 让外部 agent 即使没装任何插件也能看到/调用 built-in 工具（volcano-plot 等）。
 // 已装版本优先（loadBuiltInPlugins 内部去重）。
 function resolveBuiltInPluginsDir() {
+  if (process.env.BIOF3_BUILT_IN_PLUGINS_DIR) {
+    return path.resolve(process.env.BIOF3_BUILT_IN_PLUGINS_DIR);
+  }
   // 去 submodule 后：core 直接内嵌在 desktop 仓根 core/ 下，built-in-plugins 在 desktop 仓根 resources/
   // r-server/mcp/ → r-server → core → desktop 仓根 → resources/built-in-plugins/
   const splitPath = path.resolve(
@@ -297,6 +305,24 @@ function _normalizeArtifacts({ manifestItems, outFiles, resultDir, canonicalizeP
     .filter(Boolean);
 }
 
+function _resolveStagedInputPath(jobDir, inputId, sourcePath) {
+  const id = typeof inputId === 'string' ? inputId.trim() : '';
+  if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(id) || !isSafeFlatFilename(id)) {
+    return { ok: false, error: 'plugin_input_id_unsafe' };
+  }
+  const extension = typeof sourcePath === 'string' ? path.extname(sourcePath) : '';
+  const name = `${id}${extension}`;
+  if (!isSafeFlatFilename(name) || isInternalArtifactName(name)) {
+    return { ok: false, error: 'plugin_input_name_reserved' };
+  }
+  const root = path.resolve(jobDir);
+  const stagedPath = path.resolve(root, name);
+  if (path.dirname(stagedPath) !== root) {
+    return { ok: false, error: 'plugin_input_path_escaped' };
+  }
+  return { ok: true, name, stagedPath };
+}
+
 /**
  * 执行插件 R 脚本（local 模式）。
  * 复刻 r-server/helpers/tools-executor.js:384-407 的执行约定：
@@ -312,7 +338,9 @@ async function _runPluginScript(
   args,
   userId = 'agent',
   projectId = null,
-  existingToolJobId = null
+  existingToolJobId = null,
+  resultStudioInputLineage = null,
+  conversationId = null
 ) {
   // Stage 3 B2 part2: auto-provision required capability bundle(s) before
   // assembling R_LIBS_USER, so a freshly-downloaded bundle is visible to the
@@ -341,8 +369,24 @@ async function _runPluginScript(
     let toolJobId = existingToolJobId || null;
     if (db) {
       try {
+        if (existingToolJobId) {
+          const existing = typeof db.getToolJob === 'function' ? db.getToolJob(existingToolJobId) : null;
+          const existingProjectId = existing && (existing.project_id || existing.projectId || null);
+          const existingConversationId = existing && (existing.conversation_id || existing.conversationId || null);
+          const existingUserId = existing && (existing.user_id || existing.userId || null);
+          if (!existing
+              || existingUserId !== userId
+              || (existing.tool_id || existing.toolId) !== plugin.id
+              || existingProjectId !== (projectId || null)
+              || existingConversationId !== (conversationId || null)) {
+            throw new Error('tool_job_identity_mismatch');
+          }
+        }
         const job = existingToolJobId
           ? db.prepareToolJobForRun(existingToolJobId, {
+              toolName: plugin.id,
+              projectId,
+              conversationId,
               params: args,
               name: `${plugin.id} via agent`,
             })
@@ -353,10 +397,18 @@ async function _runPluginScript(
               status: 'running',
               name: `${plugin.id} via agent`,
               projectId,
+              conversationId,
             });
+        if (!job || !job.id) throw new Error('tool_job_create_failed');
         toolJobId = job && job.id;
       } catch (e) {
         console.warn('[mcp-registry] prepare/create toolJob failed:', e.message);
+        const failureLabel = existingToolJobId ? '身份校验失败' : '持久化校验失败';
+        return resolve({
+          content: [{ type: 'text', text: `执行失败: tool_job ${failureLabel}: ${e.message}` }],
+          isError: true,
+          ...(existingToolJobId ? { toolJobId: existingToolJobId } : {}),
+        });
       }
     }
 
@@ -398,15 +450,55 @@ async function _runPluginScript(
     // 为兼容两者，file input 既保留在 params（路径），又复制到 jobDir/<id>。
     // 复刻 tools-executor.js:572-578 的 files 写入约定（文件名 = input id）。
     const toolDef = pluginLoader.getToolDefinition(plugin.id);
+    const stagedInputFiles = [];
     if (toolDef && Array.isArray(toolDef.inputs)) {
       for (const inp of toolDef.inputs) {
         if (inp.type !== 'file' || !inp.id) continue;
         const srcPath = args && args[inp.id];
         if (typeof srcPath !== 'string' || !fs.existsSync(srcPath)) continue;
-        const ext = path.extname(srcPath);
-        // 文件名 = input id（+ 原扩展名），deseq2 的 list.files("^counts") 才能命中
-        fs.copyFileSync(srcPath, path.join(jobDir, inp.id + ext));
+        // 文件名 = input id（+ 原扩展名），deseq2 的 list.files("^counts") 才能命中。
+        // Descriptor id is still untrusted plugin data, so contain it before writing.
+        const staged = _resolveStagedInputPath(jobDir, inp.id, srcPath);
+        if (!staged.ok) {
+          const errText = `执行失败: 插件文件输入定义无效 (${staged.error})`;
+          if (db && toolJobId) {
+            try {
+              db.updateToolJob(toolJobId, {
+                status: 'failed',
+                error: errText,
+                completedAt: Date.now(),
+              });
+            } catch {}
+          }
+          return resolve({
+            content: [{ type: 'text', text: errText }],
+            isError: true,
+            toolJobId,
+          });
+        }
+        fs.copyFileSync(srcPath, staged.stagedPath);
+        stagedInputFiles.push(staged.stagedPath);
       }
+    }
+    let stagedInputSnapshots;
+    try {
+      stagedInputSnapshots = captureStagedInputSnapshots(stagedInputFiles);
+    } catch (error) {
+      const errText = `执行失败: 暂存输入快照失败 (${error.message})`;
+      if (db && toolJobId) {
+        try {
+          db.updateToolJob(toolJobId, {
+            status: 'failed',
+            error: errText,
+            completedAt: Date.now(),
+          });
+        } catch {}
+      }
+      return resolve({
+        content: [{ type: 'text', text: errText }],
+        isError: true,
+        toolJobId,
+      });
     }
 
     // 2. 复制脚本到 jobDir（run-script.R），避免污染插件原脚本目录
@@ -475,6 +567,7 @@ async function _runPluginScript(
           inputDefinitions: toolDef && Array.isArray(toolDef.inputs) ? toolDef.inputs : [],
           params: args || {},
           jobDir,
+          inputLineage: resultStudioInputLineage,
         }),
         runtime: { name: plugin.language || null, command: executor && executor.binPath, version: runtimeVersion, ready: runtimeReady.ready },
         runScriptPath: runScript,
@@ -721,6 +814,8 @@ async function _runPluginScript(
           resultDir,
           expectedArtifacts: Array.isArray(toolDefinition.outputs) ? toolDefinition.outputs : [],
           canonicalizePath,
+          excludedArtifactPaths: stagedInputFiles,
+          stagedInputSnapshots,
         });
         const successfulProvenance = provenanceFor({
           artifacts: truth.artifacts,
@@ -848,7 +943,18 @@ async function callTool(name, args, opts = {}) {
         isError: true,
       };
     }
-    return _runPluginScript(plugin, scriptPath, args, userId, projectId, toolJobId);
+    return _runPluginScript(
+      plugin,
+      scriptPath,
+      args,
+      userId,
+      projectId,
+      toolJobId,
+      opts && opts.resultStudioInputLineage ? opts.resultStudioInputLineage : null,
+      opts && typeof opts.conversationId === 'string' && opts.conversationId.trim()
+        ? opts.conversationId.trim()
+        : null
+    );
   }
 
   // Scientific analysis is exposed only through installed plugin tools so all
@@ -867,6 +973,8 @@ module.exports = {
     canonicalizePath: _canonicalizePath,
     createMcpExecutionContext: _createMcpExecutionContext,
     normalizeArtifacts: _normalizeArtifacts,
+    resolveBuiltInPluginsDir,
+    resolveStagedInputPath: _resolveStagedInputPath,
     resolveMcpJobLayout: _resolveMcpJobLayout,
     resolveResultStudioScriptOverride,
     GLOBAL_JOBS_DIR,

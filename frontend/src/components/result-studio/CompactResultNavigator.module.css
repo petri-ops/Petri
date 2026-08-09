@@ -1,0 +1,290 @@
+.navigator {
+  position: sticky;
+  top: 0;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--biof3-border);
+  background: var(--biof3-bg-surface);
+}
+
+.currentResult {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.currentIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 28px;
+  flex: 0 0 24px;
+  color: var(--biof3-accent);
+}
+
+.currentCopy {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.resultSelect {
+  width: min(390px, 42vw);
+  min-width: 150px;
+  height: 24px;
+  padding: 0 24px 0 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--biof3-text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.currentName {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--biof3-text);
+  font-size: 13px;
+  line-height: 24px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+.iconAction,
+.more > summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  cursor: pointer;
+  text-decoration: none;
+  list-style: none;
+}
+
+button.iconAction {
+  font: inherit;
+}
+
+.iconAction:hover,
+.more > summary:hover,
+.more[open] > summary {
+  background: var(--biof3-hover);
+  color: var(--biof3-text);
+}
+
+.more {
+  position: relative;
+}
+
+.more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.moreMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 20;
+  width: min(320px, calc(100vw - 32px));
+  max-height: min(440px, calc(100vh - 120px));
+  overflow: auto;
+  padding: 10px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 6px;
+  background: var(--biof3-bg-surface);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+}
+
+.moreHeader {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--biof3-border-subtle);
+}
+
+.moreHeader strong {
+  overflow-wrap: anywhere;
+  color: var(--biof3-text);
+  font-size: 12px;
+}
+
+.moreHeader span,
+.menuLabel {
+  color: var(--biof3-text-tertiary);
+  font-size: 10px;
+}
+
+.truthBadge,
+.availabilityBadge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-height: 19px;
+  padding: 0 6px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 999px;
+  color: var(--biof3-text-secondary);
+  font-size: 9px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.truthBadge[data-tone='valid'] { color: var(--biof3-status-online); }
+.truthBadge[data-tone='degraded'],
+.truthBadge[data-tone='running'] { color: var(--biof3-status-loading); }
+.truthBadge[data-tone='blocked'] { color: var(--biof3-danger); }
+
+.availabilityBadge {
+  border-color: color-mix(in srgb, var(--biof3-danger) 36%, var(--biof3-border));
+  color: var(--biof3-danger);
+}
+
+.modeSwitcher {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 2px;
+}
+
+.modeSwitcher button {
+  min-height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--biof3-text-tertiary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+}
+
+.modeSwitcher button:hover {
+  background: var(--biof3-hover);
+  color: var(--biof3-text);
+}
+
+.modeSwitcher button[aria-current='page'] {
+  background: color-mix(in srgb, var(--biof3-accent) 10%, transparent);
+  color: var(--biof3-accent);
+}
+
+.relatedFiles {
+  display: grid;
+  gap: 2px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--biof3-border-subtle);
+}
+
+.secondaryActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 8px;
+}
+
+.secondaryActions a,
+.secondaryActions button {
+  min-height: 26px;
+  padding: 3px 7px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  font: inherit;
+  font-size: 10px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.secondaryActions a:hover,
+.secondaryActions button:hover {
+  border-color: var(--biof3-accent-border);
+  color: var(--biof3-accent);
+}
+
+.menuLabel {
+  padding: 0 6px 4px;
+  font-weight: 650;
+}
+
+.relatedFiles button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 28px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.relatedFiles button:hover {
+  background: var(--biof3-hover);
+  color: var(--biof3-text);
+}
+
+.relatedFiles button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.relatedFiles button small {
+  flex: 0 0 auto;
+  color: var(--biof3-text-tertiary);
+  font-size: 9px;
+}
+
+@container (max-width: 520px) {
+  .navigator {
+    gap: 6px;
+    padding-inline: 6px;
+  }
+
+  .currentIcon {
+    display: none;
+  }
+
+  .truthBadge,
+  .availabilityBadge,
+  .modeSwitcher {
+    display: none;
+  }
+
+  .resultSelect {
+    width: 100%;
+  }
+}
