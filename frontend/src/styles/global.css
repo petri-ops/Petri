@@ -63,7 +63,7 @@ body {
     'Microsoft YaHei', sans-serif;
   font-size: 16px;
   background: var(--ifm-background-color);
-  color: var(--ifm-color-emphasis-700);
+  color: var(--biof3-text-secondary);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -111,7 +111,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ifm-color-emphasis-500, #94a3b8);
+  color: var(--biof3-text-muted);
   font-size: 0.95rem;
 }
 .biof3-docs-frame {
@@ -130,7 +130,7 @@ body {
 /* inline code：去掉 infima 的硬边框（暗色下难看），保留淡背景 */
 code {
   border: none;
-  background-color: var(--ifm-color-emphasis-100);
+  background-color: var(--biof3-bg-subtle);
 }
 /* pre 代码块：去掉 infima 默认背景，让应用页自己的代码块样式生效；
    docs/blog 的 .biof3-docs-content pre 会重新给深色背景 */
@@ -160,7 +160,7 @@ ol {
 
 /* 暗色模式：inline code 背景用半透明，避免亮灰块刺眼 */
 [data-theme='dark'] code {
-  background-color: var(--ifm-color-emphasis-200);
+  background-color: var(--biof3-border);
 }
 
 /* ────────────────────────────────────────────────────────────
