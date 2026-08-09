@@ -165,6 +165,34 @@ test('minimal schema validation reports required, type, enum, and nested errors'
   ]);
 });
 
+test('integer/number schema tolerates numeric-string input the handlers coerce', () => {
+  const schema = {
+    type: 'object',
+    required: ['op', 'params'],
+    properties: {
+      op: { type: 'string', enum: ['run'] },
+      params: {
+        type: 'object',
+        properties: {
+          count: { type: 'integer' },
+          ratio: { type: 'number' },
+        },
+      },
+    },
+  };
+  // Numeric strings are accepted (handlers coerce via Number/clampInteger),
+  // so agent/LM callers passing "1" instead of 1 no longer trip invalid_arguments.
+  assert.deepEqual(validateToolArguments({ op: 'run', params: { count: '2', ratio: '0.5' } }, schema), []);
+  // Non-integer strings still fail for integer fields (strictness preserved).
+  assert.deepEqual(validateToolArguments({ op: 'run', params: { count: '2.5' } }, schema), [
+    { path: '$.params.count', code: 'invalid_type', expected: 'integer' },
+  ]);
+  // Non-numeric strings still fail for number fields.
+  assert.deepEqual(validateToolArguments({ op: 'run', params: { ratio: 'abc' } }, schema), [
+    { path: '$.params.ratio', code: 'invalid_type', expected: 'number' },
+  ]);
+});
+
 test('injectable interceptor is Provider-independent and never calls denied handlers', async () => {
   let calls = 0;
   const entry = {

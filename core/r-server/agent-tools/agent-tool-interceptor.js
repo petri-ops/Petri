@@ -8,8 +8,24 @@ const { bindResultStudioContextToken } = require('./result-context-binding');
 function matchesType(value, expected) {
   if (expected === 'object') return !!value && typeof value === 'object' && !Array.isArray(value);
   if (expected === 'array') return Array.isArray(value);
-  if (expected === 'integer') return Number.isInteger(value);
-  if (expected === 'number') return typeof value === 'number' && Number.isFinite(value);
+  if (expected === 'integer') {
+    // Accept JSON integer numbers and their numeric-string form (e.g. "1"),
+    // matching handler coercion (clampInteger). Floats/non-integers still fail.
+    if (Number.isInteger(value)) return true;
+    if (typeof value === 'string') {
+      const t = value.trim();
+      return t !== '' && /^-?\d+$/.test(t);
+    }
+    return false;
+  }
+  if (expected === 'number') {
+    if (typeof value === 'number' && Number.isFinite(value)) return true;
+    if (typeof value === 'string') {
+      const t = value.trim();
+      return t !== '' && Number.isFinite(Number(t));
+    }
+    return false;
+  }
   if (expected === 'null') return value === null;
   return typeof value === expected;
 }
