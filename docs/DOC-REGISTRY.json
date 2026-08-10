@@ -409,6 +409,16 @@
       "truthDomain": "team-collaboration-convention",
       "entrypoint": "docs/README.md",
       "archivePolicy": "never_archive"
+    },
+    {
+      "id": "AGENT-CONCURRENCY",
+      "path": "docs/agent-concurrency-design.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "agent-concurrency-design",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
     }
   ]
 }
