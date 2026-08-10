@@ -415,6 +415,34 @@ if (file.exists(template_path)) {
   report_html <- gsub("{{TREAT}}", treat, report_html, fixed = TRUE)
   report_html <- gsub("{{PADJ}}", formatC(padj_cut, format = "g"), report_html, fixed = TRUE)
   report_html <- gsub("{{LFC}}", formatC(lfc_cut, format = "g"), report_html, fixed = TRUE)
+  # 填充差异基因结果表（{{DEG_TABLE}} token）——sig 为已算好的显著差异基因框
+  deg_rows <- ""
+  if (nrow(sig) > 0) {
+    sig_sorted <- sig[order(sig$padj, decreasing = FALSE), ]
+    max_rows <- min(nrow(sig_sorted), 2000)
+    for (i in seq_len(max_rows)) {
+      g <- rownames(sig_sorted)[i]
+      bm <- formatC(sig_sorted$baseMean[i], format = "g", digits = 4)
+      lfc <- formatC(sig_sorted$log2FoldChange[i], format = "f", digits = 3)
+      pj <- formatC(sig_sorted$padj[i], format = "g", digits = 3)
+      if (sig_sorted$log2FoldChange[i] > 0) {
+        reg <- "上调"; reg_cls <- "up"
+      } else {
+        reg <- "下调"; reg_cls <- "down"
+      }
+      deg_rows <- paste0(deg_rows,
+        sprintf('<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td class="%s">%s</td></tr>\n',
+                g, bm, lfc, pj, reg_cls, reg))
+    }
+    if (nrow(sig_sorted) > max_rows) {
+      deg_rows <- paste0(deg_rows,
+        sprintf('<tr><td colspan="5" class="more">… 仅显示前 %d 个（共 %d 个），完整列表见 deg_table.csv</td></tr>\n',
+                max_rows, nrow(sig_sorted)))
+    }
+  } else {
+    deg_rows <- '<tr><td colspan="5" class="more">未检测到显著差异基因</td></tr>\n'
+  }
+  report_html <- gsub("{{DEG_TABLE}}", deg_rows, report_html, fixed = TRUE)
   img_files <- c("library_size.png", "dispersion.png", "pca.png",
                  "sample_distance.png", "volcano.png", "ma_plot.png", "heatmap_top50.png")
   for (img in img_files) {

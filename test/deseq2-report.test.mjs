@@ -55,6 +55,13 @@ test('report template declares all 9 summary tokens', () => {
   }
 });
 
+test('report template declares the DEG results-table token', () => {
+  assert.ok(
+    template.includes('{{DEG_TABLE}}'),
+    'template missing {{DEG_TABLE}} token for the gene-level results table'
+  );
+});
+
 // ── 2. R 脚本：无 POSIX 硬编码 + 平台安全兜底 + token 替换 ──
 test('deseq2.R does NOT hardcode POSIX /opt path', () => {
   assert.ok(
@@ -81,4 +88,11 @@ test('deseq2.R performs summary token substitution', () => {
       `deseq2.R should replace summary token ${t}`
     );
   }
+});
+
+test('deseq2.R injects the DEG results table', () => {
+  assert.ok(
+    script.includes('gsub("{{DEG_TABLE}}"'),
+    'deseq2.R should replace the {{DEG_TABLE}} token with <tr> rows built from sig'
+  );
 });
