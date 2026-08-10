@@ -31,11 +31,11 @@ import {
 } from '@/components/result-studio/resultSurface';
 import {
   WorkspaceSearchPanel,
-  ScheduledWorkspacePanel,
   ResultView,
   type ActiveArtifact,
   type JobStats,
 } from '@/pages/project-workspace';
+import { ScheduledWorkspacePanel } from '@/components/workspace-panels/ScheduledWorkspacePanel';
 import styles from '@/pages/project-workspace.module.css';
 
 export type { ActiveArtifact };
