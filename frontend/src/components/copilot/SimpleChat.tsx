@@ -74,7 +74,10 @@ import {
   isConversationRunning,
   shouldClearReconciledConversationRun,
   startConversationRun,
+  startSubAgentTask,
+  stopSubAgentTask,
   useConversationRun,
+  useSubAgentTasksForConversation,
   type ConversationPendingApproval,
   type ConversationLoopState,
 } from './conversationRunStore';
@@ -219,6 +222,7 @@ export function SimpleChat({
   // 输入框 ↑/↓ 历史回溯的导航态（null = 未进入导航，输入框即实时草稿）。
   const historyNavRef = useRef<typeof INITIAL_NAV_STATE>(INITIAL_NAV_STATE);
   const activeRun = useConversationRun(conversationId);
+  const subAgentTasks = useSubAgentTasksForConversation(conversationId);
   const durableLoop = useDurableConversationLoop(projectId, conversationId, activeRun?.loop);
   const streaming = starting || activeRun?.status === 'running';
   const pendingApproval = activeRun?.pendingApproval || null;
@@ -679,6 +683,36 @@ export function SimpleChat({
   const stop = useCallback(() => {
     if (conversationId) stopConversationRun(conversationId);
   }, [conversationId]);
+
+  // AGENT-CONCURRENCY: run the current prompt as an independent sub-agent task
+  // while the primary conversation loop is busy — the user is never blocked.
+  const runInBackground = useCallback(() => {
+    const trimmed = input.trim();
+    if (!trimmed || !conversationId) return;
+    const parentTaskId = activeRun?.taskId;
+    if (!parentTaskId) return;
+    const tagged: ChatMessage[] = messages
+      .filter((m) => !m.error && !m.pending)
+      .map((m) => ({ role: m.role, content: m.content }));
+    tagged.push({ role: 'user', content: trimmed });
+    startSubAgentTask({
+      conversationId,
+      projectId,
+      userContent: trimmed,
+      messages: tagged,
+      parentTaskId,
+      modelPresetId: activeModel?.endpointProfileId || activeModelId,
+      modelName: activeModel?.model,
+      context: {
+        ...copilotCtxRef.current,
+        page: 'desktop-project',
+        projectId,
+        accessMode,
+      },
+    });
+    setInput('');
+    if (taRef.current) taRef.current.style.height = 'auto';
+  }, [accessMode, activeModel, activeModelId, activeRun, conversationId, input, messages, projectId]);
 
   const retrySummary = useCallback(async (toolJobId: string) => {
     const attempts = summaryRetryAttempts[toolJobId] ?? 0;
@@ -1176,6 +1210,16 @@ export function SimpleChat({
                     >
                       <Icon name="arrow-up" size={12} />
                     </button>
+                    <button
+                      type="button"
+                      className="sc-send-cta sc-send-cta-bg"
+                      onClick={runInBackground}
+                      disabled={!input.trim() || !activeRun?.taskId}
+                      title="后台运行（作为独立子任务并行处理，不打断当前对话）"
+                      aria-label="后台运行"
+                    >
+                      后台运行
+                    </button>
                     <button className="sc-send-cta sc-send-cta-stop" onClick={stop} title="停止生成">
                       <Icon name="square" size={14} />
                     </button>
@@ -1198,6 +1242,30 @@ export function SimpleChat({
               </div>
             </div>
           </div>
+          {subAgentTasks.length > 0 && (
+            <div className="sc-subtasks" role="list" aria-label="后台子任务">
+              {subAgentTasks.map((task) => (
+                <div key={task.taskId} className="sc-subtask" role="listitem">
+                  <span className={`sc-subtask-dot sc-subtask-${task.status}`} aria-hidden />
+                  <span className="sc-subtask-text" title={task.userContent}>
+                    {task.status === 'running'
+                      ? (task.assistantContent || task.statusMessage || '后台处理中…')
+                      : (task.assistantContent || '后台任务已结束')}
+                  </span>
+                  {task.status === 'running' && task.taskId && (
+                    <button
+                      type="button"
+                      className="sc-subtask-stop"
+                      onClick={() => stopSubAgentTask(task.taskId)}
+                      title="停止后台任务"
+                    >
+                      停止
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

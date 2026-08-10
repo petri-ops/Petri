@@ -163,6 +163,42 @@ module.exports = function registerAiAgentRoute(app) {
         return res.status(401).json({ status: 'error', error: '未登录' });
       }
 
+      // ---- AGENT-CONCURRENCY：sub-agent 派生（同会话并行）----
+      const wantKind = req.body && req.body.kind === 'subagent' ? 'subagent' : 'primary';
+      let parentTaskId = null;
+      let parentLoopRunId = null;
+      if (wantKind === 'subagent') {
+        parentTaskId = req.body && req.body.parentTaskId;
+        if (!parentTaskId) {
+          return res.status(400).json({ status: 'error', error: 'subagent 缺少 parentTaskId' });
+        }
+        let parentTask = null;
+        try { parentTask = agentTaskStore.getAgentTask(parentTaskId); } catch {}
+        if (!parentTask) {
+          return res.status(404).json({ status: 'error', error: 'parentTask 不存在' });
+        }
+        if (parentTask.userId && parentTask.userId !== userId) {
+          return res.status(403).json({ status: 'error', error: '无权以该 parentTask 派生子 agent' });
+        }
+        const parentLoop = (() => { try { return dbMod.getLoopRunByTaskId(parentTaskId); } catch { return null; } })();
+        if (!parentLoop || parentLoop.kind !== 'primary') {
+          return res.status(409).json({ status: 'error', error: 'parentTask 不是可用的主 agent 会话' });
+        }
+        if (
+          explicitConvId &&
+          parentTask.params &&
+          parentTask.params.conversationId &&
+          parentTask.params.conversationId !== explicitConvId
+        ) {
+          return res.status(409).json({ status: 'error', error: 'parentTask 与当前会话不一致' });
+        }
+        parentLoopRunId = parentLoop.loopRunId;
+        // 强制落到父会话线程，子 agent 输出与主线同框
+        if (parentTask.params && parentTask.params.conversationId) {
+          explicitConvId = parentTask.params.conversationId;
+        }
+      }
+
       // 创建/复用会话
       let _activeConv = null;
       try {
@@ -198,7 +234,7 @@ module.exports = function registerAiAgentRoute(app) {
       // 创建 agent task（engine='agent'，提交即 running）
       const { v4: uuidv4 } = require('uuid');
       const taskId = uuidv4();
-      const guard = aiTaskConcurrencyAcquire(userId, taskId);
+      const guard = aiTaskConcurrencyAcquire(userId, taskId, { isPrimary: wantKind === 'primary' });
       if (!guard.ok) {
         return res.status(503).json({ error: guard.reason, message: guard.message });
       }
@@ -213,6 +249,8 @@ module.exports = function registerAiAgentRoute(app) {
             providerName,
             providerLabel,
             modelName,
+            kind: wantKind,
+            parentTaskId: parentTaskId || null,
           },
         });
       } catch (e) {
@@ -236,6 +274,8 @@ module.exports = function registerAiAgentRoute(app) {
           profileId: selectedPreset && selectedPreset.id,
           baseUrl,
           taskId,
+          kind: wantKind,
+          parentLoopRunId: parentLoopRunId || null,
           onEvent: () => {
             /* 实时推进程内订阅（阶段 1 订阅端点轮询 task_events，onEvent 暂留空） */
           },
@@ -252,7 +292,13 @@ module.exports = function registerAiAgentRoute(app) {
         });
       });
 
-      return res.json({ taskId, status: 'running', conversationId: _activeConv && _activeConv.id });
+      return res.json({
+        taskId,
+        status: 'running',
+        kind: wantKind,
+        parentTaskId: parentTaskId || null,
+        conversationId: _activeConv && _activeConv.id,
+      });
     }
 
     // ===== 老路径：直连 SSE（fallback，BIOF3_AGENT_TASK_MODE=legacy 或 ?legacy=1）=====
@@ -1064,6 +1110,18 @@ module.exports = function registerAiAgentRoute(app) {
       return res.json({ status: task.agent_status, taskId, alreadyTerminal: true });
     }
     agentTaskStore.requestAgentTaskCancel(taskId);
+
+    // AGENT-CONCURRENCY：取消主 agent 时级联取消其子 agent（按 parent_loop_run_id）
+    try {
+      const loop = dbMod.getLoopRunByTaskId(taskId);
+      if (loop && loop.kind === 'primary') {
+        const children = dbMod.getLoopRunsByParentLoopRunId(loop.loopRunId);
+        for (const child of children) {
+          if (child.taskId) agentTaskStore.requestAgentTaskCancel(child.taskId);
+        }
+      }
+    } catch {}
+
     return res.json({ status: 'cancel_requested', taskId });
   });
 

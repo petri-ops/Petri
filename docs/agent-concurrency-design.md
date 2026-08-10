@@ -228,3 +228,110 @@ plugin 执行路径（DESeq2/GO-KEGG/volcano）
 - [x] **取消级联**：主 loop 取消时**默认级联**取消其名下未完成的 sub-agent，避免孤儿任务。
 - [x] **并发预算**：每用户上限 3→**5**，其中**预留 1 槽给主 loop**（per conversation），其余 4 槽给 sub-agent；超限 sub-agent 优雅拒绝（复用 `503 user_limit` 文案）。
 - [x] **结果呈现**：sub-agent 结果作为**独立卡片 + 可折叠归组**到主对话，不破坏主对话时间线；不按完成时间穿插进主线程。
+
+## 11. 详细实现任务分解（按文件，已核实行号）
+
+### Phase A — 后端 sub-agent 底座
+- **`core/r-server/db.js`**
+  - `:86-99` `CREATE TABLE loop_runs` 之后追加（仿 `agent-task-store.js:44-52`）：
+    ```js
+    try { db.exec('ALTER TABLE loop_runs ADD COLUMN kind TEXT'); } catch {}
+    try { db.exec('ALTER TABLE loop_runs ADD COLUMN parent_loop_run_id TEXT'); } catch {}
+    ```
+  - `loop-contract.js:404` `buildLoopRun` 增 `kind`（默认 `'primary'`）/`parentLoopRunId`（默认 `null`）。
+  - `db.js:1104` `persistLoopRun` INSERT 写入 `kind`/`parent_loop_run_id`；`db.js:1155` `getLoopRun` 投影包含这两列。
+  - 放宽 `validateLoopRun`（如存在）对未知字段的拒绝。
+  - `db.js:1216-1226` `getActiveLoopRunForConversation`：`WHERE` 加 `AND (kind IS NULL OR kind = 'primary')`——**向后兼容历史行（kind NULL 视为 primary）**，仅 resume primary，sub-agent 永不被误当主 loop 续跑。
+- **`core/r-server/routes/ai-agent.js`**
+  - `:160` `USE_AGENT_TASK_MODE` 分支内新增：`if (req.body.kind === 'subagent')` 路径 →
+    1. 校验 `parentTaskId` 存在、属于同一 userId + conversationId（防越权委派）；
+    2. 复用现有 `insertAgentTask` + `setImmediate(() => runAgentLoop(...))`，但 `taskId` 独立、`kind:'subagent'`、`parentTaskId` 透传进 `runAgentLoop` 的 `parentLoopRunId`；
+    3. 主 loop 路径（`kind` 缺省/primary）完全不变。
+  - `runAgentLoop`（`agent-runner.js:313`）签名增 `parentLoopRunId` 形参，透传给 `buildLoopRun`。
+- **`core/r-server/helpers/runtime.js`**
+  - `:20` `AI_MAX_CONCURRENT_PER_USER` 3 → **5**。
+  - `aiTaskConcurrencyAcquire(userId, taskId, { isPrimary })`：sub-agent 路径 `userCount >= 4` 即拒（保留第 5 槽给主 loop），主 loop 永远能拿到槽。
+
+### Phase B — 会话历史并发写入安全
+- **`core/r-server/helpers/conversations.js`**
+  - `:34-43` `copilot_messages` 之后追加：`try { db.exec('ALTER TABLE copilot_messages ADD COLUMN task_id TEXT'); } catch {}`（仿 `:44-66`）。
+  - `appendMessageToConversation`（`:92-101`）写入 `task_id`（从 opts 取，缺省 `NULL`）；读取侧 `COALESCE(task_id, NULL)`。
+  - 每会话 append 互斥：模块内 `const _convAppendMutex = new Map()`；`appendMessageToConversation` 用 per-conversation Promise 链串行化（同 `conversation_id` 排队），执行仍并行。
+
+### Phase C — 前端多 run + 按 taskId 订阅
+- **`frontend/src/components/copilot/conversationRunStore.ts`**
+  - `:88` `runs` 由 `Map<conversationId, snapshot>` 改为 `Map<taskId, snapshot>`；新增 `byConversation(conversationId)` 聚合视图。
+  - `isConversationRunning(conversationId)` 改为「仅 primary 在飞」（`startConversationRun` 标 `isPrimary`）。
+  - `startConversationRun` 接受 `taskId` + `isPrimary`；新增 `subscribeAllForConversation(conversationId)`：用 `loop-client.fetchLoopRuns({conversationId})`（`:195-206`）拿全部 run，对每个活跃 `taskId` 各开 `copilotClient.subscribeAgentTask`（`:447-502`）。
+- **`frontend/src/components/copilot/SimpleChat.tsx`**
+  - `:201` `queuedPrompts` drain 守卫由「任意 run 在飞」改为「仅 primary 在飞」。
+  - 输入框 `disabled` 条件改 `primary 在飞`；sub-agent 进度卡片复用 `ToolActivityItem`（`toolActivity.ts:9-27`），**按 taskId 隔离各 snapshot.toolActivities**（现存 `mergeToolCallActivity` 按 `callId||name+traceId` 去重，taskId 隔离后直接复用，不改 toolActivity 本身）。
+
+### Phase D — 收口与验收
+- **重启孤儿化修复**：app 启动 `agent-task-store.js:54-64` 把 running task 标 failed；sub-agent 恢复需把 `fetchLoopRuns` 的 subagent `taskId` 接入 `findResumableAgentTask`（`copilotClient.ts:349-375`）或等价逻辑，重订阅其 `task_events` 回放（`ai-agent.js:1110-1131`）。
+- **取消级联**：`ai-agent.js:1047-1068` cancel 端点扩展——若取消的是 primary `taskId`，查 `loop_runs WHERE parent_loop_run_id = 该 loopRunId` 得子 `taskId`，逐个 `requestAgentTaskCancel`。
+- 收口：`docs:check` + `ui:audit:check` 绿 → 设计 `planned → active` → AUDIT-LOG 追加 → DOC-REGISTRY 状态更新 → PR 合 main。
+
+## 12. 边界与兼容（关键）
+
+- **历史 LoopRun 行无 `kind`** → `getActiveLoopRunForConversation` 用 `kind IS NULL OR kind='primary'`，旧行仍被当 primary 续跑，零迁移数据。
+- **历史消息无 `task_id`** → `COALESCE` 为 `NULL`，渲染不依赖该列。
+- **`validateLoopRun` 若拒绝未知字段** → 一并放宽（加列后才写入）。
+- **主 loop 预留槽**：sub-agent 路径 `userCount >= 4` 即拒，保留第 5 槽给主 loop，主 loop 永不被饿死。
+- **sub-agent 为一次性**：每次委派新建 LoopRun（`kind='subagent'`，`parentLoopRunId` 指向主），不续跑。
+
+## 13. 测试矩阵
+
+**后端 `node --test`**
+- `getActiveLoopRunForConversation` 仅 resume primary：构造 1 primary + 1 subagent 行，确认只回 primary。
+- sub-agent spawn：`POST /api/ai/agent` `kind='subagent'` 返回独立 `taskId`，`loop_runs` 行 `kind='subagent'` + `parent_loop_run_id` 正确。
+- runtime 预留槽：主 loop(1) + 4 sub-agent 通过；第 5 个 sub-agent 拒（503 user_limit）。
+- 并发写历史：`appendMessageToConversation` 同 `conversation_id` 并发 50 次，断言顺序/计数无交错。
+
+**前端单测**
+- `conversationRunStore` 多 run、`isConversationRunning` 仅 primary、`SimpleChat` 输入态（primary 在飞禁用、sub-agent 在飞可用）。
+
+**真实 Electron 验收（Phase D 门，A-1~A-6）**
+- 启动：`env -u ELECTRON_RUN_AS_NODE ELECTRON_DISABLE_SANDBOX=1 npm run dev`（⚠️ 先 kill 旧 electron 主进程 + 清 `~/Library/Application Support/biof3-local/SingletonLock` + 确认端口 3001/3004 空，规避 dev 孤儿陷阱）。
+- 验证：单会话长任务输入框可用、并行起第 2 sub-agent、独立取消、历史无交错、主 loop 槽不被占满。
+
+## 14. 回滚策略
+
+- 所有 schema 变更用 `try/catch ALTER`，新列默认 `NULL`，旧代码路径不依赖 → 代码 `git revert` 安全，列留空无害。
+- 旧 `loop_runs` 行 `kind NULL` 仍被 resume 为 primary，回滚后行为不变。
+- 前端 `conversationRunStore` 重构若出问题，单文件 `git revert` 即可回到单 run 模型。
+
+---
+
+## 15. 实现进度（2026-08-10）
+
+### 15.1 状态
+- **阶段 A（后端底座）**：✅ 已实现 + `node --test` 全绿（5/5）。
+- **阶段 B（历史写入安全）**：✅ `conversations.js` `task_id` 列 + 写入已实现；并发压测无交错。
+- **阶段 C（前端多 run + 后台运行）**：✅ 已实现 + `vitest` 全绿（34/34，含 4 个新增 sub-agent 用例）。前端保留主 run 单通道不变，新增**平行 sub-agent 子系统**（按 `taskId` 索引），UI 暴露"后台运行"按钮与子任务卡片。
+- **阶段 D（收口）**：✅ 已实现（`docs:check` / `ui:audit:check` 通过；A-1~A-6 真实 Electron 验收待本机手测）。
+
+### 15.2 已落地改动（相对 §8/§11 的实际落点）
+- `core/r-server/db.js`：`loop_runs` 增 `kind` / `parent_loop_run_id` / `task_id` 三列（idempotent ALTER）；`persistLoopRun` 写三列；`getLoopRun` 投影 `kind`/`parentLoopRunId`/`taskId`；新增 `getLoopRunByTaskId(taskId)` 与 `getLoopRunsByParentLoopRunId(parentLoopRunId)`；`getActiveLoopRunForConversation` 仅 resume primary（向后兼容 `kind NULL`）。
+- `core/shared-backend/loop-contract.js`：`buildLoopRun` 默认 `kind:'primary'`、`parentLoopRunId:null`（validateLoopRun 不拒未知字段，安全）。
+- `core/r-server/agent-runner.js`：`runAgentLoop` 增 `kind`/`parentLoopRunId` 形参；`_loopInit` 中 subagent 跳过 `getActiveLoopRunForConversation` 续跑；`buildLoopRun` 透传 `kind`/`parentLoopRunId`；`run.taskId = taskId` 使 `loop_runs.task_id` 落库；两处 `appendMessageToConversation` 传入 `taskId`。
+- `core/r-server/helpers/runtime.js`：`AI_MAX_CONCURRENT_PER_USER` 3→5；`aiTaskConcurrencyAcquire(userId, taskId, { isPrimary })` 用独立 subagent 计数保证主 loop 预留 1 槽（与启动顺序无关）。
+- `core/r-server/helpers/conversations.js`：`copilot_messages` 增 `task_id` 列；`appendMessageToConversation` 写 `task_id`（第 5 参）。
+- `core/r-server/routes/ai-agent.js`：`POST /api/ai/agent` 增 `kind:'subagent'` + `parentTaskId` 分支（越权/归属校验、父 loopRunId 解析、subagent 落到父会话线程）；主 loop `concurrency acquire` 标 `isPrimary:true`；返回体带 `kind`/`parentTaskId`；cancel 端点级联取消 primary 名下 sub-agent。
+- 测试：`test/agent-concurrency.test.mjs`（5 用例，覆盖 §13 后端矩阵 4 项）。
+- `frontend/src/components/copilot/conversationRunStore.ts`：`ConversationRunSnapshot` 增 `parentTaskId?`；新增平行 sub-agent 子系统——`subTaskRuns`(Map<taskId, snapshot>)、`startSubAgentTask` / `stopSubAgentTask` / `getSubAgentTaskSnapshot` / `listSubAgentTasksForConversation` / `subscribeSubAgentTask` / `useSubAgentTask` / `useSubAgentTasksForConversation` / `clearSubAgentTask`。复用 `streamChat` 并透传 `kind:'subagent'` + `parentTaskId`（taskId 在 `onTaskStarted` 中确定后作索引键）。主 run 通道完全不动。
+- `frontend/src/components/copilot/copilotClient.ts`：`StreamChatOptions` 增 `kind?` / `parentTaskId?`；`submitAgentTask` 与 `streamChatLegacy` 的 POST body 透传二者（undefined 时 JSON 自动省略，主路径零行为变化）。
+- `frontend/src/components/copilot/SimpleChat.tsx`：主 run 忙时（`streaming`）输入区出现「后台运行」按钮 → `runInBackground` 以当前输入作为独立 sub-agent 任务提交（父 `taskId` = 当前主 run 的 `taskId`），输入不被主 run 阻塞；底部渲染 `subAgentTasks` 子任务卡片（状态点 + 进度文本 + 停止按钮）。新增样式见 `simple-chat.css`（`.sc-send-cta-bg` / `.sc-subtasks` / `.sc-subtask*`）。
+- 前端测试：`conversationRunStore.test.ts` 新增 4 个用例（独立追踪 / 同会话并发多子任务 / 取消 / 无父 taskId 拒绝 spawn）。
+- 阶段 D 重启孤儿重订阅：`copilotClient.ts` 的 `findResumableAgentTask` 过滤 `kind==='subagent'`（老 key 无 kind 视为 primary），新增 `findResumableSubAgentTasks()`；`streamChatViaTask` 写 localStorage 时记录 `kind` + `parentTaskId`（防 sub-agent 被误当主 run 恢复）。`loop-client.ts` 的 `LoopRunCompact` 补 `kind`/`parentLoopRunId`/`taskId`；`ai-loop.js` 的 `GET /api/loop/runs` compact 映射补同字段；`conversationRunStore.ts` 新增 `resumeSubAgentTasks(conversationId, projectId)`（调 `fetchLoopRuns` 找回仍 running 的 sub-agent run 并重订阅其事件流，避免孤儿化）。**注意**：`findResumableAgentTask`/`resumeSubAgentTasks` 的 mount 调用点尚未接线（与主 run 崩溃恢复同源，当前 UI 层无消费方），需与 mount 恢复一并接入。
+
+### 15.3 设计收敛（实现中修正，已落实）
+1. **并发写入保护：去掉"每会话 append mutex"，改为"同步 SQLite 原子性 + `task_id` 列"。**
+   `better-sqlite3` 为同步串行写入，多 task 并发 `appendMessageToConversation` 不会交错/损坏；原 §4.4 / §7 / §11-Phase B 的"每会话 Promise 互斥链"属过度设计，已收敛为仅加 `task_id` 列并按 taskId 归组（§13 并发压测 300 条无交错验证）。文档表述以本小节为准。
+2. **主 loop 预留槽实现：`userSet.size >= perUserCap` 无法保证"先 primary 后 4 subagent"达标**（primary 先占 1 槽后 subagent 只能再占 3 槽）。改为按 `isPrimary` 分别计数：subagent 上限 = `AI_MAX_CONCURRENT_SUBAGENT_PER_USER`(4) 且总数封顶 5，主 loop 始终能拿到预留槽，与启动顺序无关（§13 两组用例验证）。
+3. **父会话 / 子任务链路落点：未在 `tasks` 表加列，改为在 `loop_runs` 加 `task_id`。**
+   subagent spawn 用 `getLoopRunByTaskId(parentTaskId)` 取父 `loopRunId`；cancel 级联用 `getLoopRunsByParentLoopRunId(parentLoopRunId)` 枚举子 `taskId`；避免在 `tasks` 表再引一列。
+
+### 15.4 下一步
+- 阶段 D 收口已完成：`docs:check` + `ui:audit:check` 通过；重启孤儿 sub-agent 重订阅逻辑落地（见上方 §15.2）；设计文档 `planned → active`、DOC-REGISTRY + AUDIT-LOG 已同步；待统一推 PR。
+- 真实 Electron 行为验收 A-1~A-6（mount 调用点接入 + 同会话并行 / 取消级联 / 重启重订阅手测）待本机 `launchctl asuser` 启动后执行，当前状态 `in_progress`，不宣称 `verified`。

@@ -222,6 +222,11 @@ function registerAiLoopRoutes(app) {
         partialReason: run.partialReason || null,
         createdAt: run.createdAt,
         updatedAt: run.updatedAt,
+        // AGENT-CONCURRENCY: expose identity so the client can resume orphaned
+        // sub-agent runs after a crash/refresh.
+        kind: run.kind || 'primary',
+        parentLoopRunId: run.parentLoopRunId || null,
+        taskId: run.taskId || null,
       }));
       res.json({ ok: true, runs: compact, count: compact.length });
     } catch (err) {

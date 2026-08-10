@@ -414,7 +414,7 @@
       "id": "AGENT-CONCURRENCY",
       "path": "docs/agent-concurrency-design.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "active",
       "canonical": true,
       "truthDomain": "agent-concurrency-design",
       "entrypoint": "docs/README.md",

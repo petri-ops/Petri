@@ -1,8 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { cancelAgentTaskMock, streamChatMock } = vi.hoisted(() => ({
+const { cancelAgentTaskMock, streamChatMock, subscribeAgentTaskMock, fetchLoopRunsMock } = vi.hoisted(() => ({
   cancelAgentTaskMock: vi.fn(),
   streamChatMock: vi.fn(),
+  subscribeAgentTaskMock: vi.fn(),
+  fetchLoopRunsMock: vi.fn(),
 }));
 
 vi.mock('./copilotClient', async (importOriginal) => {
@@ -11,17 +13,31 @@ vi.mock('./copilotClient', async (importOriginal) => {
     ...original,
     cancelAgentTask: cancelAgentTaskMock,
     streamChat: streamChatMock,
+    subscribeAgentTask: subscribeAgentTaskMock,
+  };
+});
+
+vi.mock('@/lib/loop-client', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@/lib/loop-client')>();
+  return {
+    ...original,
+    fetchLoopRuns: fetchLoopRunsMock,
   };
 });
 
 import {
   __resetConversationRunsForTests,
   getConversationRunSnapshot,
+  getSubAgentTaskSnapshot,
+  listSubAgentTasksForConversation,
   resultEditProgressForContext,
   shouldClearReconciledConversationRun,
   startConversationRun,
+  startSubAgentTask,
   stopConversationRun,
+  stopSubAgentTask,
   subscribeConversationRun,
+  resumeSubAgentTasks,
 } from './conversationRunStore';
 import { biof3Events, subscribeBioF3Event } from '@/lib/events';
 import { deriveLoopDisplay } from '@/lib/loop-client';
@@ -448,5 +464,135 @@ describe('conversation run store', () => {
     expect(display.status).toBe('blocked');
     expect(display.tone).toBe('warning');
     expect(display.tone).not.toBe('success');
+  });
+});
+
+// ===========================================================================
+// AGENT-CONCURRENCY: parallel sub-agent task subsystem
+// ===========================================================================
+describe('sub-agent task subsystem', () => {
+  beforeEach(() => {
+    __resetConversationRunsForTests();
+    streamChatMock.mockReset();
+  });
+  afterEach(() => {
+    __resetConversationRunsForTests();
+  });
+
+  function spawn(conversationId: string, parentTaskId: string, taskId: string): void {
+    streamChatMock.mockImplementation(async (opts) => {
+      opts.onTaskStarted?.(taskId);
+      opts.onDelta?.('后台结果-' + taskId);
+      opts.onDone?.();
+    });
+    startSubAgentTask({
+      conversationId,
+      projectId: 'project-1',
+      userContent: '后台跑个分析',
+      messages: [{ role: 'user', content: '后台跑个分析' }],
+      context: { page: 'desktop-project', projectId: 'project-1' },
+      parentTaskId,
+    });
+  }
+
+  it('tracks a sub-agent task independently of the primary run', () => {
+    spawn('conv-sub', 'parent-1', 'sub-1');
+    const list = listSubAgentTasksForConversation('conv-sub');
+    expect(list).toHaveLength(1);
+    expect(list[0]).toMatchObject({
+      taskId: 'sub-1',
+      parentTaskId: 'parent-1',
+      status: 'done',
+      assistantContent: '后台结果-sub-1',
+      conversationId: 'conv-sub',
+    });
+    // primary conversation run must remain untouched / isolated
+    expect(getConversationRunSnapshot('conv-sub')).toBeNull();
+  });
+
+  it('runs multiple sub-agents concurrently in the same conversation', () => {
+    streamChatMock.mockImplementation(async (opts) => {
+      const id = opts.parentTaskId === 'p-a' ? 'sub-a' : 'sub-b';
+      opts.onTaskStarted?.(id);
+      opts.onDelta?.(id === 'sub-a' ? '结果A' : '结果B');
+      opts.onDone?.();
+    });
+    startSubAgentTask({
+      conversationId: 'conv-multi', projectId: 'project-1', userContent: 'a',
+      messages: [{ role: 'user', content: 'a' }],
+      context: { page: 'desktop-project', projectId: 'project-1' }, parentTaskId: 'p-a',
+    });
+    startSubAgentTask({
+      conversationId: 'conv-multi', projectId: 'project-1', userContent: 'b',
+      messages: [{ role: 'user', content: 'b' }],
+      context: { page: 'desktop-project', projectId: 'project-1' }, parentTaskId: 'p-b',
+    });
+
+    const list = listSubAgentTasksForConversation('conv-multi');
+    expect(list.map((t) => t.taskId).sort()).toEqual(['sub-a', 'sub-b']);
+    expect(list.find((t) => t.taskId === 'sub-a')?.assistantContent).toBe('结果A');
+    expect(list.find((t) => t.taskId === 'sub-b')?.assistantContent).toBe('结果B');
+  });
+
+  it('cancels a running sub-agent via stopSubAgentTask', () => {
+    streamChatMock.mockImplementation(async (opts) => {
+      opts.onTaskStarted?.('sub-stop');
+    });
+    startSubAgentTask({
+      conversationId: 'conv-stop', projectId: 'project-1', userContent: 'x',
+      messages: [{ role: 'user', content: 'x' }],
+      context: { page: 'desktop-project', projectId: 'project-1' }, parentTaskId: 'p',
+    });
+    expect(getSubAgentTaskSnapshot('sub-stop')?.status).toBe('running');
+
+    stopSubAgentTask('sub-stop');
+    expect(getSubAgentTaskSnapshot('sub-stop')?.status).toBe('stopped');
+    expect(cancelAgentTaskMock).toHaveBeenCalledWith('sub-stop');
+  });
+
+  it('ignores spawn without a parent task id', () => {
+    startSubAgentTask({
+      conversationId: 'conv-nop', projectId: 'project-1', userContent: 'x',
+      messages: [{ role: 'user', content: 'x' }],
+      context: { page: 'desktop-project', projectId: 'project-1' }, parentTaskId: '',
+    });
+    expect(listSubAgentTasksForConversation('conv-nop')).toHaveLength(0);
+    expect(streamChatMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('resumeSubAgentTasks (AGENT-CONCURRENCY)', () => {
+  beforeEach(() => {
+    __resetConversationRunsForTests();
+    subscribeAgentTaskMock.mockReset();
+    subscribeAgentTaskMock.mockResolvedValue(undefined);
+    fetchLoopRunsMock.mockReset();
+  });
+
+  afterEach(() => {
+    __resetConversationRunsForTests();
+  });
+
+  it('只重订阅仍 running 的 sub-agent run，跳过 primary 与已完成的', async () => {
+    fetchLoopRunsMock.mockResolvedValue([
+      { loopRunId: 'lr-primary', conversationId: 'c1', loopStatus: 'running', kind: 'primary', taskId: 't-primary' },
+      { loopRunId: 'lr-sub1', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-sub1', parentLoopRunId: 'lr-primary' },
+      { loopRunId: 'lr-sub2', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-sub2', parentLoopRunId: 'lr-primary' },
+      { loopRunId: 'lr-sub3', conversationId: 'c1', loopStatus: 'completed', kind: 'subagent', taskId: 't-sub3', parentLoopRunId: 'lr-primary' },
+    ] as any);
+
+    await resumeSubAgentTasks('c1', 'project-1');
+
+    expect(subscribeAgentTaskMock).toHaveBeenCalledTimes(2);
+    expect(subscribeAgentTaskMock).toHaveBeenCalledWith('t-sub1', expect.anything(), 0);
+    expect(subscribeAgentTaskMock).toHaveBeenCalledWith('t-sub2', expect.anything(), 0);
+    const taskIds = listSubAgentTasksForConversation('c1').map((t) => t.taskId).sort();
+    expect(taskIds).toEqual(['t-sub1', 't-sub2']);
+  });
+
+  it('fetchLoopRuns 失败时静默返回，不订阅任何任务', async () => {
+    fetchLoopRunsMock.mockRejectedValue(new Error('network'));
+    await expect(resumeSubAgentTasks('c1', 'project-1')).resolves.toBeUndefined();
+    expect(subscribeAgentTaskMock).not.toHaveBeenCalled();
   });
 });
