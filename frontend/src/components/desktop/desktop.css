@@ -21,7 +21,7 @@
   gap: var(--biof3-dock-gap);
   padding: var(--biof3-dock-padding-top) 6px;
   background: var(--biof3-surface-dim);
-  border-right: 1px solid var(--ifm-color-emphasis-200);
+  border-right: 1px solid var(--biof3-border);
   width: 64px;
   box-sizing: border-box;
   transition:
@@ -72,7 +72,7 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--ifm-color-emphasis-500);
+  color: var(--biof3-text-muted);
   cursor: pointer;
   transition:
     background 0.15s ease,
@@ -83,11 +83,11 @@
   margin-left: 6px;
 }
 .biof3-desktop-dock__toggle:hover {
-  background: var(--ifm-color-emphasis-100);
+  background: var(--biof3-bg-subtle);
   color: var(--biof3-teal);
 }
 [data-theme='dark'] .biof3-desktop-dock__toggle {
-  color: var(--ifm-color-emphasis-600);
+  color: var(--biof3-text-tertiary);
 }
 [data-theme='dark'] .biof3-desktop-dock__toggle:hover {
   background: rgba(148, 163, 184, 0.12);
@@ -117,7 +117,7 @@
   border: none;
   border-radius: 9px;
   background: transparent;
-  color: var(--ifm-color-emphasis-800);
+  color: var(--biof3-text-secondary);
   cursor: pointer;
   transition:
     background 0.15s ease,
@@ -125,7 +125,7 @@
 }
 
 .biof3-desktop-dock__btn:hover {
-  background: var(--ifm-color-emphasis-100);
+  background: var(--biof3-bg-subtle);
   color: var(--biof3-teal);
 }
 
@@ -135,7 +135,7 @@
 }
 
 [data-theme='dark'] .biof3-desktop-dock__btn {
-  color: var(--ifm-color-emphasis-500);
+  color: var(--biof3-text-muted);
 }
 
 [data-theme='dark'] .biof3-desktop-dock__btn:hover {
@@ -1096,15 +1096,15 @@
 
 .biof3-btn--ghost {
   background: transparent;
-  color: var(--ifm-color-emphasis-700, var(--ifm-color-emphasis-800));
-  border: 1px solid var(--ifm-color-emphasis-300, var(--ifm-color-emphasis-300));
+  color: var(--biof3-text-secondary, var(--biof3-text-secondary));
+  border: 1px solid var(--biof3-border-strong, var(--biof3-border-strong));
 }
 .biof3-btn--ghost:hover:not(:disabled) {
-  background: var(--ifm-color-emphasis-100);
+  background: var(--biof3-bg-subtle);
 }
 
 [data-theme='dark'] .biof3-btn--ghost {
-  color: var(--ifm-color-emphasis-600, var(--ifm-color-emphasis-300));
+  color: var(--biof3-text-tertiary, var(--biof3-border-strong));
   border-color: rgba(148, 163, 184, 0.3);
 }
 [data-theme='dark'] .biof3-btn--ghost:hover:not(:disabled) {
@@ -1113,7 +1113,7 @@
 
 .biof3-btn--danger-ghost {
   background: transparent;
-  color: var(--ifm-color-danger);
+  color: var(--biof3-danger);
   border: 1px solid rgba(239, 68, 68, 0.4);
 }
 .biof3-btn--danger-ghost:hover:not(:disabled) {
@@ -1993,12 +1993,12 @@
 .biof3-search-hint {
   margin: 8px 0 0;
   font-size: 0.78rem;
-  color: var(--ifm-color-emphasis-500);
+  color: var(--biof3-text-muted);
   text-align: center;
 }
 
 [data-theme='dark'] .biof3-search-hint {
-  color: var(--ifm-color-emphasis-600);
+  color: var(--biof3-text-tertiary);
 }
 
 /* ============================================================
@@ -2062,8 +2062,8 @@
   max-height: 88vh;
   display: flex;
   flex-direction: column;
-  background: var(--ifm-background-color);
-  color: var(--ifm-color-content);
+  background: var(--biof3-bg-canvas);
+  color: var(--biof3-text);
   border-radius: 14px;
   box-shadow: 0 24px 72px rgba(0, 0, 0, 0.28);
   overflow: hidden;
@@ -2079,21 +2079,21 @@
   align-items: center;
   gap: 0;
   padding: 18px 24px 14px;
-  border-bottom: 1px solid var(--ifm-color-emphasis-200, var(--ifm-color-emphasis-200));
+  border-bottom: 1px solid var(--biof3-border, var(--biof3-border));
 }
 .biof3-onboarding__step {
   display: flex;
   align-items: center;
   gap: 8px;
   flex: 1;
-  color: var(--ifm-color-emphasis-500, var(--ifm-color-emphasis-500));
+  color: var(--biof3-text-muted, var(--biof3-text-muted));
   font-size: 0.85rem;
 }
 .biof3-onboarding__step + .biof3-onboarding__step::before {
   content: '';
   width: 24px;
   height: 1px;
-  background: var(--ifm-color-emphasis-300, #cbd5e1);
+  background: var(--biof3-border-strong, #cbd5e1);
   margin-right: 8px;
 }
 .biof3-onboarding__step.active {
@@ -2110,7 +2110,7 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: var(--ifm-color-emphasis-100);
+  background: var(--biof3-bg-subtle);
   flex-shrink: 0;
 }
 .biof3-onboarding__step.active .biof3-onboarding__step-icon,
@@ -2135,12 +2135,12 @@
 }
 .biof3-onboarding__subtitle {
   margin: 0 0 18px;
-  color: var(--ifm-color-emphasis-600, var(--ifm-color-emphasis-800));
+  color: var(--biof3-text-tertiary, var(--biof3-text-secondary));
   font-size: 0.9rem;
   line-height: 1.5;
 }
 [data-theme='dark'] .biof3-onboarding__subtitle {
-  color: var(--ifm-color-emphasis-500, var(--ifm-color-emphasis-500));
+  color: var(--biof3-text-muted, var(--biof3-text-muted));
 }
 
 /* Step 1: 环境检测 */
@@ -2155,8 +2155,8 @@
   gap: 12px;
   padding: 12px 14px;
   border-radius: 10px;
-  border: 1px solid var(--ifm-color-emphasis-200, var(--ifm-color-emphasis-200));
-  background: var(--ifm-background-color, var(--ifm-background-color));
+  border: 1px solid var(--biof3-border, var(--biof3-border));
+  background: var(--biof3-bg-canvas, var(--biof3-bg-canvas));
 }
 .biof3-onboarding__env-row.ok {
   border-color: rgba(16, 118, 110, 0.3);
@@ -2169,7 +2169,7 @@
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: var(--ifm-color-emphasis-100);
+  background: var(--biof3-bg-subtle);
   color: var(--biof3-teal);
   flex-shrink: 0;
 }
@@ -2185,7 +2185,7 @@
 }
 .biof3-onboarding__env-desc {
   font-size: 0.78rem;
-  color: var(--ifm-color-emphasis-500, var(--ifm-color-emphasis-500));
+  color: var(--biof3-text-muted, var(--biof3-text-muted));
 }
 .biof3-onboarding__env-status {
   display: inline-flex;
@@ -2193,7 +2193,7 @@
   gap: 4px;
   font-size: 0.82rem;
   font-weight: 600;
-  color: var(--ifm-color-emphasis-500, var(--ifm-color-emphasis-500));
+  color: var(--biof3-text-muted, var(--biof3-text-muted));
 }
 .biof3-onboarding__env-row.ok .biof3-onboarding__env-status {
   color: var(--biof3-teal);
@@ -2202,9 +2202,9 @@
   margin: 14px 0 0;
   padding: 10px 12px;
   border-radius: 8px;
-  background: var(--ifm-color-emphasis-100);
+  background: var(--biof3-bg-subtle);
   font-size: 0.8rem;
-  color: var(--ifm-color-emphasis-600, var(--ifm-color-emphasis-800));
+  color: var(--biof3-text-tertiary, var(--biof3-text-secondary));
 }
 
 /* Step 3: 插件提示 */
@@ -2220,7 +2220,7 @@
   gap: 12px;
   padding: 12px 14px;
   border-radius: 10px;
-  border: 1px solid var(--ifm-color-emphasis-200, var(--ifm-color-emphasis-200));
+  border: 1px solid var(--biof3-border, var(--biof3-border));
 }
 .biof3-onboarding__tip > svg:first-child,
 .biof3-onboarding__tip > span:first-child {
@@ -2234,7 +2234,7 @@
 .biof3-onboarding__tip p {
   margin: 2px 0 0;
   font-size: 0.8rem;
-  color: var(--ifm-color-emphasis-500, var(--ifm-color-emphasis-500));
+  color: var(--biof3-text-muted, var(--biof3-text-muted));
 }
 
 /* Step 2: 模式选择卡片 */
@@ -2251,8 +2251,8 @@
   width: 100%;
   padding: 14px;
   border-radius: 10px;
-  border: 1px solid var(--ifm-color-emphasis-200, var(--ifm-color-emphasis-200));
-  background: var(--ifm-background-color, var(--ifm-background-color));
+  border: 1px solid var(--biof3-border, var(--biof3-border));
+  background: var(--biof3-bg-canvas, var(--biof3-bg-canvas));
   cursor: pointer;
   text-align: left;
   transition:
@@ -2277,7 +2277,7 @@
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  background: var(--ifm-color-emphasis-100);
+  background: var(--biof3-bg-subtle);
   color: var(--biof3-teal);
   flex-shrink: 0;
 }
@@ -2293,7 +2293,7 @@
 .biof3-onboarding__choice-body p {
   margin: 0;
   font-size: 0.8rem;
-  color: var(--ifm-color-emphasis-500, var(--ifm-color-emphasis-500));
+  color: var(--biof3-text-muted, var(--biof3-text-muted));
   line-height: 1.45;
 }
 .biof3-onboarding__choice-check {
@@ -2328,7 +2328,7 @@
 .biof3-onboarding__store-callout-body p {
   margin: 0;
   font-size: 0.8rem;
-  color: var(--ifm-color-emphasis-600, var(--ifm-color-emphasis-800));
+  color: var(--biof3-text-tertiary, var(--biof3-text-secondary));
   line-height: 1.45;
 }
 
@@ -2338,7 +2338,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 24px;
-  border-top: 1px solid var(--ifm-color-emphasis-200, var(--ifm-color-emphasis-200));
+  border-top: 1px solid var(--biof3-border, var(--biof3-border));
 }
 .biof3-onboarding__footer-right {
   display: flex;
@@ -2358,8 +2358,8 @@
   left: 0;
   width: 320px;
   z-index: 9998;
-  background: var(--ifm-background-color, var(--ifm-background-color));
-  border-right: 1px solid var(--ifm-color-emphasis-200, var(--ifm-color-emphasis-200));
+  background: var(--biof3-bg-canvas, var(--biof3-bg-canvas));
+  border-right: 1px solid var(--biof3-border, var(--biof3-border));
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08);
   transform: translateX(-110%); /* 默认隐藏：往左滑出被 dock 遮住 */
   transition: transform 0.22s ease;

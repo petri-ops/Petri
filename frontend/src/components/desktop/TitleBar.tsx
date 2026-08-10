@@ -465,6 +465,7 @@ export function TitleBar(): React.ReactElement {
                 aria-label="展开更多工具"
                 aria-haspopup="menu"
                 aria-expanded={toolMenuOpen}
+                aria-controls="titlebar-tool-menu"
               >
                 <Icon name="plus" size={15} />
               </button>
@@ -476,7 +477,7 @@ export function TitleBar(): React.ReactElement {
                     onClick={() => onMoreAction?.()}
                     aria-label="关闭工具菜单"
                   />
-                  <div className={styles.toolMenu} role="menu">
+                  <div id="titlebar-tool-menu" className={styles.toolMenu} role="menu">
                     {toolMenuItems.map((item) => (
                       <button
                         key={item.id}

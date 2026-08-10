@@ -25,11 +25,23 @@ export function DataIntakeControl({
 }): React.ReactElement {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const importControllerRef = React.useRef<AbortController | null>(null);
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const popoverRef = React.useRef<HTMLElement>(null);
   const [open, setOpen] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState('');
   const [imported, setImported] = React.useState<ImportedDataFile[]>([]);
   const readiness = React.useMemo(() => deriveDataReadiness(imported), [imported]);
+
+  const closeIntake = React.useCallback(() => {
+    setOpen(false);
+    triggerRef.current?.focus();
+  }, []);
+
+  // Move focus into the popover when it opens.
+  React.useEffect(() => {
+    if (open) popoverRef.current?.focus();
+  }, [open]);
 
   React.useEffect(() => {
     importControllerRef.current?.abort();
@@ -82,8 +94,8 @@ export function DataIntakeControl({
       setError('当前 Agent 仍在处理上一个请求');
       return;
     }
-    setOpen(false);
-  }, [onAskAgent, readiness]);
+    closeIntake();
+  }, [onAskAgent, readiness, closeIntake]);
 
   return (
     <div className={styles.dataIntakeControl}>
@@ -96,6 +108,7 @@ export function DataIntakeControl({
         onChange={handleFiles}
       />
       <button
+        ref={triggerRef}
         type="button"
         className={styles.workspaceTreeToggle}
         aria-label="导入数据"
@@ -107,10 +120,21 @@ export function DataIntakeControl({
         <Icon name="plus" size={15} />
       </button>
       {open && (
-        <section className={styles.dataIntakePopover} aria-label="数据准备">
+        <section
+          ref={popoverRef}
+          className={styles.dataIntakePopover}
+          aria-label="数据准备"
+          tabIndex={-1}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') {
+              event.preventDefault();
+              closeIntake();
+            }
+          }}
+        >
           <header className={styles.dataIntakeHeader}>
             <strong>数据准备</strong>
-            <button type="button" onClick={() => setOpen(false)} aria-label="关闭">
+            <button type="button" onClick={closeIntake} aria-label="关闭">
               <Icon name="x" size={13} />
             </button>
           </header>
