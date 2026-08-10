@@ -71,6 +71,7 @@
   --biof3-danger-bg: var(--biof3-status-error-bg);
   --biof3-border: #e2e8f0;
   --biof3-border-strong: #cbd5e1;
+  --biof3-border-tertiary: #eef2f7;
   --biof3-text: #0f172a;
   --biof3-text-primary: var(--biof3-text);
   --biof3-text-secondary: #475569;
@@ -155,6 +156,7 @@
   --biof3-danger-bg: var(--biof3-status-error-bg);
   --biof3-border: #243149;
   --biof3-border-strong: #324466;
+  --biof3-border-tertiary: #2a3a54;
   --biof3-text: #e6edf3;
   --biof3-text-primary: var(--biof3-text);
   --biof3-text-secondary: #b1bac4;
