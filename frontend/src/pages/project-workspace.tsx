@@ -44,7 +44,7 @@ import { useResizableColumns } from '@/hooks/useResizableColumns';
 import { useWorkspaceLayout } from '@/hooks/useWorkspaceLayout';
 import { useRightPanelTabs } from '@/hooks/useRightPanelTabs';
 import { usePluginStore } from '@/hooks/usePluginStore';
-import { parseWorkspaceMode, type WorkspaceMode } from '@/hooks/useWorkspaceRouting';
+import { segmentToMode, modeToSegment, type WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import { isDirectRecoveryAction, useHarnessWorkflowStatus } from '@/hooks/useHarnessWorkflowStatus';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import type { CopilotContext, HarnessContextSummary } from '@/lib/copilotContext';
@@ -264,9 +264,9 @@ function toCopilotHarnessSummary(index: HarnessIndexSummary | null | undefined):
 export function ProjectWorkspace(): React.ReactElement {
   const shell = useWorkspacePanelsContext();
   const updateTitleBar = shell.updateTitleBar;
-  const { projectId } = useParams<{ projectId: string }>();
+  const { projectId, '*': modeSplat } = useParams<{ projectId: string; '*'?: string }>();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   const [project, setProject] = useState<Project | null>(null);
   const [jobs, setJobs] = useState<ToolJob[]>([]);
@@ -274,9 +274,10 @@ export function ProjectWorkspace(): React.ReactElement {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [workspaceNotice, setWorkspaceNotice] = useState('');
-  const [workspaceMode, setWorkspaceMode] = useState<WorkspaceMode>(
-    () => parseWorkspaceMode(searchParams.get('mode')) || 'chat'
-  );
+  // T85: mode is derived from the URL sub-path (`/project/:id/<mode>`), not the
+  // `?mode=` query param. This makes views deep-linkable, refresh-stable and
+  // breadcrumb-ready without touching the three-column render tree.
+  const workspaceMode = segmentToMode(modeSplat || undefined);
   const requestedJobId = searchParams.get('job');
   const requestedArtifactName = searchParams.get('artifact');
   const requestedFilePath = searchParams.get('file');
@@ -531,10 +532,20 @@ export function ProjectWorkspace(): React.ReactElement {
     if (!rightOpen) setRightToolMenuOpen(false);
   }, [rightOpen, setRightToolMenuOpen]);
 
+  // T85: legacy `?mode=` deep links (and the 5 direct navigations that still
+  // build `?mode=`) are normalized to the URL sub-path form on arrival. Runs
+  // whenever `?mode=` is present, so in-place navigations are covered too.
   useEffect(() => {
-    const nextMode = parseWorkspaceMode(searchParams.get('mode')) || 'chat';
-    setWorkspaceMode((current) => (current === nextMode ? current : nextMode));
-  }, [searchParams]);
+    const legacyMode = searchParams.get('mode');
+    if (!legacyMode) return;
+    const target = segmentToMode(legacyMode);
+    const seg = modeToSegment(target);
+    const base = seg ? `/project/${projectId}/${seg}` : `/project/${projectId}`;
+    const next = new URLSearchParams(searchParams);
+    next.delete('mode');
+    const query = next.toString();
+    navigate(query ? `${base}?${query}` : base, { replace: true });
+  }, [searchParams, projectId, navigate]);
 
   // Derived summary visibility (semantic + pixel dimensions).
   const summaryVisibility = useMemo<'hidden' | 'compact' | 'expanded'>(() => {
@@ -554,8 +565,9 @@ export function ProjectWorkspace(): React.ReactElement {
     [startBottomTerminalResize]
   );
 
-  // Bidirectional sync: setWorkspaceMode + URL param. Exists here (not in
-  // useWorkspaceRouting) because project-workspace owns workspaceMode state.
+  // T85: navigation now pushes the mode into the URL sub-path
+  // (`/project/:id/<mode>?job=...`) instead of the `?mode=` query param. The
+  // `?job=`/`?artifact=`/`?file=` query params are preserved for deep links.
   const updateWorkspaceMode = useCallback((nextMode: WorkspaceMode, replace = true, jobId?: string | null) => {
     const currentIsResult = isResultWorkspaceMode(workspaceMode);
     const nextIsResult = isResultWorkspaceMode(nextMode);
@@ -570,24 +582,25 @@ export function ProjectWorkspace(): React.ReactElement {
     } else if (nextMode === 'chat' && currentIsResult) {
       beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.returnStart);
     }
-    setWorkspaceMode(nextMode);
+    const seg = modeToSegment(nextMode);
+    const base = seg ? `/project/${projectId}/${seg}` : `/project/${projectId}`;
     const nextParams = new URLSearchParams(searchParams);
     const nextCarriesJob = (nextMode === 'scheduled' || nextMode === 'result' || nextMode === 'code' || nextMode === 'compare' || nextMode === 'history') && Boolean(jobId);
     if (!nextCarriesJob || nextParams.get('job') !== jobId) {
       openResultRequestSequenceRef.current += 1;
     }
-    if (nextMode === 'chat') nextParams.delete('mode');
-    else nextParams.set('mode', nextMode);
-    if ((nextMode === 'scheduled' || nextMode === 'result' || nextMode === 'code' || nextMode === 'compare' || nextMode === 'history') && jobId) {
+    if (nextCarriesJob && jobId) {
       if (nextParams.get('job') !== jobId) nextParams.delete('artifact');
       nextParams.set('job', jobId);
-    }
-    else {
+    } else {
       nextParams.delete('job');
       nextParams.delete('artifact');
     }
-    setSearchParams(nextParams, { replace });
-  }, [leftOpen, rightOpen, searchParams, setSearchParams, workspaceMode]);
+    // mode now lives in the path segment, not the query string.
+    nextParams.delete('mode');
+    const query = nextParams.toString();
+    navigate(query ? `${base}?${query}` : base, { replace });
+  }, [leftOpen, rightOpen, searchParams, navigate, projectId, workspaceMode]);
 
   // openRightPanel: collapses left in compactLayout, opens right tab.
   const openRightPanel = useCallback((tab: RightPanelMode) => {
