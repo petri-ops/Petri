@@ -4,10 +4,14 @@ import { biof3Events, dispatchBioF3Event } from '@/lib/events';
 import {
   cancelAgentTask,
   streamChat,
+  subscribeAgentTask,
+  persistResumableAgentTask,
   type ChatMessage,
   type ToolCallEvent,
   type ToolResultEvent,
   type ResultEditProgressEvent,
+  type ResumableAgentTask,
+  type StreamChatOptions,
 } from './copilotClient';
 import {
   mergeToolCallActivity,
@@ -57,6 +61,8 @@ export interface ConversationRunSnapshot {
   historyLastUserTs?: string;
   assistantContent: string;
   assistantTs: string;
+  /** T83: model used for this assistant turn (per-message, session can switch). */
+  modelName?: string;
   assistantPending: boolean;
   assistantError: boolean;
   statusMessage?: string;
@@ -202,37 +208,26 @@ export function shouldClearReconciledConversationRun(
   return (snapshot.status === 'done' || snapshot.status === 'stopped') && !snapshot.pendingApproval;
 }
 
-export function startConversationRun(options: StartConversationRunOptions): boolean {
-  const { conversationId } = options;
-  if (!conversationId || isConversationRunning(conversationId)) return false;
+interface RunHandlerDeps {
+  conversationId: string;
+  projectId: string;
+  context: CopilotContext;
+  startedAt: number;
+  ctrl: AbortController;
+  assistantAcc: { value: string };
+  modelPresetId?: string;
+  modelName?: string;
+}
 
-  const startedAt = Date.now();
-  const ctrl = new AbortController();
-  controllers.get(conversationId)?.abort();
-  controllers.set(conversationId, ctrl);
-  let assistantAcc = '';
-
-  runs.set(conversationId, {
-    conversationId,
-    projectId: options.projectId,
-    status: 'running',
-    userContent: options.userContent,
-    userTs: new Date(startedAt).toISOString(),
-    historyLastUserTs: options.historyLastUserTs,
-    assistantContent: '',
-    assistantTs: new Date(startedAt + 1).toISOString(),
-    assistantPending: true,
-    assistantError: false,
-    progressUpdates: [],
-    resultEditProgress: [],
-    resultContextToken: typeof options.context.activeArtifact?.contextToken === 'string'
-      ? options.context.activeArtifact.contextToken
-      : undefined,
-    toolActivities: [],
-    pendingApproval: null,
-    startedAt,
-  });
-  emit(conversationId);
+/**
+ * Build the SSE event handlers that drive a ConversationRunSnapshot.
+ * Shared by both startConversationRun (fresh submit) and resumeConversationRun
+ * (reconnect to an in-progress task after refresh) so the two paths render
+ * identically. onTaskStarted persists a ResumableAgentTask record so the next
+ * refresh can rediscover the task.
+ */
+function createRunHandlers(deps: RunHandlerDeps): Omit<StreamChatOptions, 'messages'> {
+  const { conversationId, projectId, context, ctrl, assistantAcc, modelPresetId, modelName } = deps;
 
   const finish = (status: 'done' | 'error', error?: Error) => {
     if (runs.get(conversationId)?.status !== 'running') return;
@@ -251,16 +246,10 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     }));
   };
 
-  void streamChat({
-    messages: options.messages,
-    context: options.context,
-    conversationId,
-    modelPresetId: options.modelPresetId,
-    modelName: options.modelName,
-    signal: ctrl.signal,
+  return {
     onIter: (iteration) => {
       if (iteration <= 1) return;
-      assistantAcc = '';
+      assistantAcc.value = '';
       replaceRun(conversationId, (current) => ({
         ...current,
         assistantContent: '',
@@ -270,6 +259,18 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     },
     onTaskStarted: (taskId) => {
       replaceRun(conversationId, (current) => ({ ...current, taskId }));
+      // Persist enough context to re-subscribe this task after a refresh/crash.
+      persistResumableAgentTask({
+        taskId,
+        ts: Date.now(),
+        conversationId,
+        projectId,
+        userContent: runs.get(conversationId)?.userContent || '',
+        historyLastUserTs: runs.get(conversationId)?.historyLastUserTs,
+        context,
+        modelPresetId,
+        modelName,
+      });
     },
     onAgentStatus: (status) => {
       replaceRun(conversationId, (current) => ({
@@ -279,7 +280,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
       }));
     },
     onAgentProgress: (progress) => {
-      assistantAcc = '';
+      assistantAcc.value = '';
       replaceRun(conversationId, (current) => {
         const duplicate = current.progressUpdates.some(
           (item) => item.iteration === progress.iteration && item.content === progress.content
@@ -321,10 +322,10 @@ export function startConversationRun(options: StartConversationRunOptions): bool
       });
     },
     onDelta: (delta) => {
-      assistantAcc += delta;
+      assistantAcc.value += delta;
       replaceRun(conversationId, (current) => ({
         ...current,
-        assistantContent: assistantAcc,
+        assistantContent: assistantAcc.value,
         assistantPending: false,
         statusMessage: undefined,
       }));
@@ -355,7 +356,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
         ['workspace_write', 'workspace_replace', 'workspace_exec'].includes(event.toolResult.tool || event.name)
       ) {
         dispatchBioF3Event(biof3Events.projectWorkspaceChanged, {
-          projectId: options.projectId,
+          projectId,
           source: 'agent',
         });
       }
@@ -367,7 +368,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
       ) {
         dispatchBioF3Event(biof3Events.projectOpenResult, {
           toolJobId: event.toolJobId,
-          projectId: options.projectId,
+          projectId,
         });
       }
     },
@@ -385,9 +386,139 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     },
     onDone: () => finish('done'),
     onError: (error) => finish('error', error),
+  };
+}
+
+export function startConversationRun(options: StartConversationRunOptions): boolean {
+  const { conversationId } = options;
+  if (!conversationId || isConversationRunning(conversationId)) return false;
+
+  const startedAt = Date.now();
+  const ctrl = new AbortController();
+  controllers.get(conversationId)?.abort();
+  controllers.set(conversationId, ctrl);
+  const assistantAcc = { value: '' };
+
+  runs.set(conversationId, {
+    conversationId,
+    projectId: options.projectId,
+    status: 'running',
+    userContent: options.userContent,
+    userTs: new Date(startedAt).toISOString(),
+    historyLastUserTs: options.historyLastUserTs,
+    assistantContent: '',
+    assistantTs: new Date(startedAt + 1).toISOString(),
+    modelName: options.modelName,
+    assistantPending: true,
+    assistantError: false,
+    progressUpdates: [],
+    resultEditProgress: [],
+    resultContextToken: typeof options.context.activeArtifact?.contextToken === 'string'
+      ? options.context.activeArtifact.contextToken
+      : undefined,
+    toolActivities: [],
+    pendingApproval: null,
+    startedAt,
+  });
+  emit(conversationId);
+
+  const handlers = createRunHandlers({
+    conversationId,
+    projectId: options.projectId,
+    context: options.context,
+    startedAt,
+    ctrl,
+    assistantAcc,
+    modelPresetId: options.modelPresetId,
+    modelName: options.modelName,
+  });
+
+  void streamChat({
+    messages: options.messages,
+    context: options.context,
+    conversationId,
+    modelPresetId: options.modelPresetId,
+    modelName: options.modelName,
+    signal: ctrl.signal,
+    ...handlers,
   }).finally(() => {
     if (controllers.get(conversationId) === ctrl) controllers.delete(conversationId);
   });
+
+  return true;
+}
+
+/**
+ * T82 — reconnect to an in-progress agent task after a refresh/restart.
+ * Given a ResumableAgentTask (discovered from localStorage by
+ * findResumableAgentTask), rebuilds a running ConversationRunSnapshot and
+ * re-subscribes to GET /ai/agent/task/:taskId. The backend replays all stored
+ * task_events (agent-runner._emit persists every event) and keeps streaming
+ * live while the task is still running, so progress display recovers instead
+ * of going dark for the full ~10+ min run.
+ */
+export function resumeConversationRun(record: ResumableAgentTask): boolean {
+  const { conversationId, taskId } = record;
+  if (!conversationId || !taskId) return false;
+  if (isConversationRunning(conversationId)) return false;
+
+  const startedAt = Date.now();
+  const ctrl = new AbortController();
+  controllers.get(conversationId)?.abort();
+  controllers.set(conversationId, ctrl);
+  const assistantAcc = { value: '' };
+
+  runs.set(conversationId, {
+    conversationId,
+    projectId: record.projectId,
+    status: 'running',
+    userContent: record.userContent,
+    userTs: new Date(startedAt).toISOString(),
+    historyLastUserTs: record.historyLastUserTs,
+    assistantContent: '',
+    assistantTs: new Date(startedAt + 1).toISOString(),
+    modelName: record.modelName,
+    assistantPending: true,
+    assistantError: false,
+    progressUpdates: [],
+    resultEditProgress: [],
+    resultContextToken: typeof record.context.activeArtifact?.contextToken === 'string'
+      ? record.context.activeArtifact.contextToken
+      : undefined,
+    toolActivities: [],
+    pendingApproval: null,
+    startedAt,
+    taskId,
+  });
+  emit(conversationId);
+
+  const handlers = createRunHandlers({
+    conversationId,
+    projectId: record.projectId,
+    context: record.context,
+    startedAt,
+    ctrl,
+    assistantAcc,
+    modelPresetId: record.modelPresetId,
+    modelName: record.modelName,
+  });
+
+  void subscribeAgentTask(
+    taskId,
+    {
+      conversationId,
+      context: record.context,
+      modelPresetId: record.modelPresetId,
+      modelName: record.modelName,
+      signal: ctrl.signal,
+      ...handlers,
+    },
+    0
+  )
+    .catch((err: unknown) => handlers.onError?.(err instanceof Error ? err : new Error(String(err))))
+    .finally(() => {
+      if (controllers.get(conversationId) === ctrl) controllers.delete(conversationId);
+    });
 
   return true;
 }

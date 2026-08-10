@@ -4,11 +4,12 @@
 // Pure message list + input, driven by projectId/conversationId.
 // ============================================================
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import {
   ackRunTool,
   retryToolSummary,
   restoreResultEditProgressEvents,
+  findResumableAgentTask,
   type ChatMessage,
   type ResultEditProgressEvent,
 } from './copilotClient';
@@ -17,11 +18,12 @@ import {
   type ConversationMessage,
 } from './copilotConversationsClient';
 import { useCopilotContext } from '@/lib/copilotContextProvider';
+import { formatRelativeTime } from '@/lib/format';
 import { useConversations } from '@/hooks/useConversations';
 import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
 import '@/lib/chat-file-references';
 import type { ExtractContext, FileReferenceClickDetail } from '@/lib/chat-file-references';
-import { __resetFileReferenceCache } from '@/lib/chat-file-references';
+import { __resetFileReferenceCache, extractFileReferenceCandidates } from '@/lib/chat-file-references';
 
 /**
  * Files that cannot be inlined in the right Files panel trigger the system
@@ -74,6 +76,7 @@ import {
   isConversationRunning,
   shouldClearReconciledConversationRun,
   startConversationRun,
+  resumeConversationRun,
   useConversationRun,
   type ConversationPendingApproval,
   type ConversationLoopState,
@@ -107,6 +110,8 @@ interface SimpleMessage {
   resultEditProgress?: ResultEditProgressEvent[];
   /** HLE-C4R: live durable-loop projection for the running assistant turn. */
   loop?: ConversationLoopState | null;
+  /** T83: model used to produce this assistant message (per-message). */
+  modelName?: string;
 }
 
 function restoreSimpleMessage(message: ConversationMessage): SimpleMessage {
@@ -159,6 +164,29 @@ function restoreProgressUpdates(value: unknown): Array<{ iteration: number; cont
   });
 }
 
+/**
+ * T83 — small header shown on every AI message: `模型名 · 回复时间`.
+ * Time is progressively formatted (刚刚 → HH:MM → MM-DD HH:MM) via a 30s
+ * timer so an open conversation ages the labels without a full re-render.
+ */
+function MessageMeta({ modelName, ts }: { modelName?: string; ts?: string }): React.ReactElement | null {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const timer = window.setInterval(() => setTick((n) => n + 1), 30000);
+    return () => window.clearInterval(timer);
+  }, []);
+  if (!ts) return null;
+  const time = formatRelativeTime(ts);
+  if (!time) return null;
+  return (
+    <div className="sc-msg-meta" aria-label="回复信息">
+      {modelName && <span className="sc-msg-meta-model">{modelName}</span>}
+      {modelName && <span className="sc-msg-meta-sep" aria-hidden="true">·</span>}
+      <span className="sc-msg-meta-time">{time}</span>
+    </div>
+  );
+}
+
 type PendingApproval = ConversationPendingApproval;
 
 type ApprovalRepairState =
@@ -207,6 +235,8 @@ export function SimpleChat({
   const [summaryRetryCooldownUntil, setSummaryRetryCooldownUntil] = useState<Record<string, number>>({});
   const [retryTick, setRetryTick] = useState(0);
   const [loading, setLoading] = useState(false);
+  // T83: transient spinner state for the file-reference refresh button.
+  const [refreshing, setRefreshing] = useState(false);
   const [paramDraft, setParamDraft] = useState<Record<string, string>>({});
   const [approvalRepair, setApprovalRepair] = useState<ApprovalRepairState>({ status: 'idle' });
   const autoApproveRef = useRef<string | null>(null);
@@ -216,6 +246,12 @@ export function SimpleChat({
   const [accessMode, setAccessMode] = useState<'full' | 'read'>('full');
   const taRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // T83: keep a ref to the latest messages so `regenerate` can send with the
+  // stripped history synchronously (before React re-renders the state update).
+  const messagesRef = useRef<SimpleMessage[]>(messages);
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
   // 输入框 ↑/↓ 历史回溯的导航态（null = 未进入导航，输入框即实时草稿）。
   const historyNavRef = useRef<typeof INITIAL_NAV_STATE>(INITIAL_NAV_STATE);
   const activeRun = useConversationRun(conversationId);
@@ -453,6 +489,20 @@ export function SimpleChat({
     };
   }, [activeRun, conversationId, refreshConversations]);
 
+  // T82 — recover an in-progress agent task after a refresh / Electron restart.
+  // On conversation mount, if a prior run left a resumable task in localStorage
+  // (findResumableAgentTask), reconnect its SSE and rebuild the live snapshot so
+  // the user does not stare at a blank "running" state for the whole ~10+ min run.
+  // Guarded so it only attempts once per conversationId (also survives StrictMode).
+  const resumableCheckedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!conversationId) return;
+    if (resumableCheckedRef.current === conversationId) return;
+    resumableCheckedRef.current = conversationId;
+    const record = findResumableAgentTask(conversationId);
+    if (record) resumeConversationRun(record);
+  }, [conversationId]);
+
   const displayMessages = (() => {
     if (!activeRun || activeRun.conversationId !== conversationId) {
       if (!durableLoop.loop) return messages;
@@ -500,6 +550,7 @@ export function SimpleChat({
         pending: activeRun.assistantPending,
         error: summaryPresentation.error,
         ts: activeRun.assistantTs,
+        modelName: activeRun.modelName,
         toolActivities: activeRun.toolActivities,
         processingDurationMs: activeRun.processingDurationMs,
         statusMessage: summaryPresentation.statusMessage,
@@ -515,6 +566,17 @@ export function SimpleChat({
   const standaloneDurableLoop = durableLoop.loop && !displayMessages.some((message) => message.loop)
     ? durableLoop.loop
     : null;
+
+  // T83: does the latest AI reply contain any file references? Drives the
+  // fade of the file-reference refresh button when there's nothing to refresh.
+  const lastAssistantContent = useMemo(() => {
+    const m = [...displayMessages].reverse().find((msg) => msg.role === 'assistant');
+    return m?.content || '';
+  }, [displayMessages]);
+  const hasFileReferences = useMemo(
+    () => extractFileReferenceCandidates(lastAssistantContent).length > 0,
+    [lastAssistantContent]
+  );
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -607,7 +669,7 @@ export function SimpleChat({
       if (isConversationRunning(targetConversationId)) return;
 
       // Build upstream messages from current history
-      const tagged: ChatMessage[] = messages
+      const tagged: ChatMessage[] = messagesRef.current
         .filter((m) => !m.error && !m.pending)
         .map((m) => ({ role: m.role, content: m.content }));
       tagged.push({ role: 'user', content: trimmed });
@@ -616,7 +678,7 @@ export function SimpleChat({
         conversationId: targetConversationId,
         projectId,
         userContent: trimmed,
-        historyLastUserTs: [...messages].reverse().find((message) => message.role === 'user')?.ts,
+        historyLastUserTs: [...messagesRef.current].reverse().find((message) => message.role === 'user')?.ts,
         messages: tagged,
         modelPresetId: activeModel?.endpointProfileId || activeModelId,
         modelName: activeModel?.model,
@@ -679,6 +741,34 @@ export function SimpleChat({
   const stop = useCallback(() => {
     if (conversationId) stopConversationRun(conversationId);
   }, [conversationId]);
+
+  // T83: re-send the most recent user message with the current model, replacing
+  // the trailing (user, assistant) pair. Reuses the existing send path.
+  const regenerate = useCallback(() => {
+    if (!conversationId || streaming) return;
+    const lastUser = [...displayMessages].reverse().find((m) => m.role === 'user');
+    if (!lastUser?.content) return;
+    const stripped = (() => {
+      let arr = messagesRef.current.slice();
+      if (arr.length && arr[arr.length - 1].role === 'assistant') arr = arr.slice(0, -1);
+      if (arr.length && arr[arr.length - 1].role === 'user') arr = arr.slice(0, -1);
+      return arr;
+    })();
+    messagesRef.current = stripped;
+    setMessages(stripped);
+    // Drop any stale run snapshot so it doesn't re-inject the old user/assistant.
+    clearConversationRun(conversationId);
+    void sendRef.current(lastUser.content);
+  }, [conversationId, streaming, displayMessages]);
+
+  // T83: file-reference refresh feedback layer (no core-logic change).
+  const handleRefresh = useCallback(() => {
+    if (refreshing) return;
+    __resetFileReferenceCache();
+    setResolveNonce((value) => value + 1);
+    setRefreshing(true);
+    window.setTimeout(() => setRefreshing(false), 700);
+  }, [refreshing]);
 
   const retrySummary = useCallback(async (toolJobId: string) => {
     const attempts = summaryRetryAttempts[toolJobId] ?? 0;
@@ -927,6 +1017,7 @@ export function SimpleChat({
                     )}
                   </div>
                   <div className="sc-msg-body">
+                    {m.role === 'assistant' && <MessageMeta modelName={m.modelName} ts={m.ts} />}
                     {m.role === 'assistant' && m.loop && m.loop.loopRunId && (
                       <LoopStatusPanel loop={m.loop} pending={Boolean(m.pending)} />
                     )}
@@ -997,6 +1088,18 @@ export function SimpleChat({
                           <Icon name={copiedMessageKey === key ? 'check' : 'copy'} size={14} />
                           {copiedMessageKey === key ? '已复制' : '复制'}
                         </button>
+                        <span className="sc-msg-action-divider" aria-hidden="true" />
+                        <button
+                          type="button"
+                          className="sc-msg-action"
+                          onClick={() => void regenerate()}
+                          disabled={streaming}
+                          title="用当前模型重新生成这条回复"
+                          aria-label="重新生成回复"
+                        >
+                          <Icon name="repeat" size={14} />
+                          重新生成
+                        </button>
                       </div>
                     )}
                   </div>
@@ -1043,20 +1146,24 @@ export function SimpleChat({
             </div>
             <div className="sc-composer-bar">
               <div className="sc-composer-left">
-                <button type="button" className="sc-composer-icon-btn" title="添加内容">
+                <button
+                  type="button"
+                  className="sc-composer-icon-btn"
+                  title="添加内容（即将上线）"
+                  aria-label="添加内容"
+                  disabled
+                >
                   <Icon name="plus" size={20} />
                 </button>
                 <button
                   type="button"
-                  className="sc-composer-icon-btn"
+                  className={`sc-composer-icon-btn${refreshing ? ' is-refreshing' : ''}${hasFileReferences ? '' : ' is-faded'}`}
                   title="重新解析当前会话中的文件链接（清除解析缓存并对所有已落地消息重跑解析器；首次生效需重启 Electron 让 r-server 加载最新索引逻辑）"
                   aria-label="刷新文件链接"
-                  onClick={() => {
-                    __resetFileReferenceCache();
-                    setResolveNonce((value) => value + 1);
-                  }}
+                  disabled={refreshing}
+                  onClick={() => void handleRefresh()}
                 >
-                  <Icon name="refresh" size={16} />
+                  <Icon name="refresh" size={16} className={refreshing ? 'sc-icon-spin' : undefined} />
                 </button>
                 <div className="sc-access-picker">
                   <button
