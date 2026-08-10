@@ -17,8 +17,8 @@ vi.mock('@/components/desktop/PluginStorePanel', () => ({ PluginStorePanel: () =
 vi.mock('@/components/desktop/DesktopSettingsPanel', () => ({ DesktopSettingsPanel: () => <div>settings</div> }));
 vi.mock('@/components/workspace-panels/WorkspaceSummaryCard', () => ({ WorkspaceSummaryCard: () => <div>summary</div> }));
 vi.mock('@/components/workspace-panels/ScheduledWorkspacePanel', () => ({ ScheduledWorkspacePanel: () => <div>task</div> }));
+vi.mock('@/components/workspace-panels/WorkspaceSearchPanel', () => ({ WorkspaceSearchPanel: () => <div>search</div> }));
 vi.mock('@/pages/project-workspace', () => ({
-  WorkspaceSearchPanel: () => <div>search</div>,
   ResultView: ({
     mode,
     onBack,
