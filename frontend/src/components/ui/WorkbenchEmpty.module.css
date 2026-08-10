@@ -1,13 +1,13 @@
 .empty {
   text-align: center;
   padding: 60px 20px;
-  color: var(--ifm-color-emphasis-500);
+  color: var(--biof3-text-muted);
 }
 
 .title {
   font-size: var(--ifm-font-size-base);
   font-weight: 700;
-  color: var(--ifm-color-emphasis-800);
+  color: var(--biof3-text-secondary);
   margin-bottom: 6px;
 }
 
@@ -27,7 +27,7 @@
 .hint {
   margin-top: 14px;
   font-size: var(--biof3-font-size-sm);
-  color: var(--ifm-color-emphasis-500);
+  color: var(--biof3-text-muted);
   line-height: 1.5;
 }
 

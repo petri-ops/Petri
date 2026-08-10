@@ -6,9 +6,6 @@
    - 下方桌面版覆盖：body 字体、滚动条、dock 让位 */
 @import 'infima/dist/css/default/default.css';
 @import './custom.css';
-/* 单细胞/空间工作台（sc-* 前缀全局类）— Docusaurus 版全局 CSS 还在，
-   是 plan 1.6/§4.10 的 legacy removal 候选，先保留。 */
-@import './single-cell.css';
 
 :root {
   /* 桌面版基础（覆盖 infima 的 web 站点默认） */
@@ -66,7 +63,7 @@ body {
     'Microsoft YaHei', sans-serif;
   font-size: 16px;
   background: var(--ifm-background-color);
-  color: var(--ifm-color-emphasis-700);
+  color: var(--biof3-text-secondary);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -114,7 +111,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ifm-color-emphasis-500, #94a3b8);
+  color: var(--biof3-text-muted);
   font-size: 0.95rem;
 }
 .biof3-docs-frame {
@@ -133,7 +130,7 @@ body {
 /* inline code：去掉 infima 的硬边框（暗色下难看），保留淡背景 */
 code {
   border: none;
-  background-color: var(--ifm-color-emphasis-100);
+  background-color: var(--biof3-bg-subtle);
 }
 /* pre 代码块：去掉 infima 默认背景，让应用页自己的代码块样式生效；
    docs/blog 的 .biof3-docs-content pre 会重新给深色背景 */
@@ -163,5 +160,23 @@ ol {
 
 /* 暗色模式：inline code 背景用半透明，避免亮灰块刺眼 */
 [data-theme='dark'] code {
-  background-color: var(--ifm-color-emphasis-200);
+  background-color: var(--biof3-border);
+}
+
+/* ────────────────────────────────────────────────────────────
+ * 动效减弱（prefers-reduced-motion）— 全局兜底
+ * 统一关闭动画/过渡/滚动平滑，覆盖 run-modal / fade / pulse /
+ * onboarding 等未单独处理的动效，满足 WCAG 2.3.3（动画敏感用户）。
+ * 各组件已有的局部 reduced-motion 规则仍保留，与此处叠加无害。
+ * ──────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
 }

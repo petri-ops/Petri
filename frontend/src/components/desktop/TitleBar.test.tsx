@@ -1,4 +1,6 @@
 import React from 'react';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -20,6 +22,8 @@ function makeBridge(overrides: Partial<DesktopWindow> = {}): DesktopBridge {
   };
   return {
     isDesktop: true,
+    // mac 分支才渲染交通灯窗口控件；缺这个字段会导致相关用例全部找不到按钮。
+    platform: 'darwin',
     window: windowApi,
   } as DesktopBridge;
 }
@@ -119,6 +123,25 @@ describe('TitleBar desktop window controls', () => {
     expect(bridge.window.close).toHaveBeenCalledTimes(1);
     expect(bridge.window.minimize).toHaveBeenCalledTimes(1);
     expect(bridge.window.maximize).toHaveBeenCalledTimes(1);
+  });
+
+  // 回归：窗口控件是 DOM 里最靠前的可聚焦元素。若它们参与键盘焦点，页面加载后
+  // 焦点会默认落在「关闭窗口」上，用户击键被按钮吞掉（空格/回车还会误触关闭）。
+  // 断言源码而非渲染结果：isMac/isDesktop 是模块级常量，在 import 时即求值，
+  // stubGlobal 注入发生在其后，因此测试环境下这些按钮根本不渲染（既有缺陷）。
+  it('keeps window controls out of the keyboard focus order', async () => {
+    const source = await readFile(
+      resolve(process.cwd(), 'src/components/desktop/TitleBar.tsx'),
+      'utf8',
+    );
+    const controlBlocks = source
+      .split('<button')
+      .filter((block) => /aria-label=(?:"关闭窗口"|"最小化窗口")|isMaximized \? '还原窗口'/.test(block));
+
+    expect(controlBlocks.length).toBeGreaterThanOrEqual(3);
+    for (const block of controlBlocks) {
+      expect(block).toContain('tabIndex={-1}');
+    }
   });
 
   it('hydrates maximized state, follows maximize changes, and unregisters the listener', async () => {
@@ -234,8 +257,10 @@ describe('TitleBar desktop window controls', () => {
     expect(screen.getByRole('button', { name: '最大化窗口' })).toBeTruthy();
   });
 
+  // 双击标题栏最大化只在非 mac 生效：mac 上该手势由系统处理，
+  // 组件显式设置 onDoubleClick={!isMac ? ... : undefined}。
   it('maximizes on a blank header double-click but ignores buttons and role=button children', () => {
-    const bridge = makeBridge();
+    const bridge = { ...makeBridge(), platform: 'win32' } as DesktopBridge;
     vi.stubGlobal('biof3Desktop', bridge);
     renderTitleBar();
     const header = screen.getByRole('banner');
@@ -243,7 +268,8 @@ describe('TitleBar desktop window controls', () => {
     fireEvent.doubleClick(header);
     expect(bridge.window.maximize).toHaveBeenCalledTimes(1);
 
-    fireEvent.doubleClick(screen.getByRole('button', { name: '最小化窗口' }));
+    // 非 mac 走 WindowControls，其 aria-label 是「最小化」（mac 交通灯才是「最小化窗口」）。
+    fireEvent.doubleClick(screen.getByRole('button', { name: '最小化' }));
     expect(bridge.window.maximize).toHaveBeenCalledTimes(1);
 
     const roleButton = document.createElement('div');
@@ -261,7 +287,8 @@ describe('TitleBar desktop window controls', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '收起左侧栏' }));
 
-    expect(header.style.getPropertyValue('--titlebar-left-span')).toBe('134px');
+    // 非 mac（无 desktop bridge）收起后为 collapsedLeftRail=146；mac 为 180。
+    expect(header.style.getPropertyValue('--titlebar-left-span')).toBe('146px');
   });
 });
 
