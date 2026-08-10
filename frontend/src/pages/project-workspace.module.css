@@ -60,11 +60,11 @@
 
 @keyframes breathe {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.15);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--biof3-accent) 15%, transparent);
     opacity: 0.7;
   }
   50% {
-    box-shadow: 0 0 0 6px rgba(13, 148, 136, 0);
+    box-shadow: 0 0 0 6px transparent;
     opacity: 1;
   }
 }
@@ -208,7 +208,7 @@
   gap: 14px;
   padding: 10px 12px;
   border-bottom: 1px solid var(--biof3-border);
-  background: var(--ifm-background-color);
+  background: var(--biof3-bg-surface);
   flex-shrink: 0;
   min-width: 0;
 }
@@ -335,12 +335,12 @@
 
 .workspaceSummaryDot[data-ready='true'] {
   background: var(--biof3-status-online);
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--biof3-status-online) 15%, transparent);
 }
 
 .workspaceSummaryDot[data-ready='false'] {
   background: var(--biof3-status-loading);
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--biof3-status-loading) 12%, transparent);
 }
 
 .workspaceSummaryMiniDot[data-status='online'],
@@ -396,7 +396,7 @@
   background: var(--biof3-bg-elevated);
   border: 1px solid var(--biof3-border);
   border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--biof3-shadow-menu);
   z-index: 999;
   overflow: hidden;
   display: flex;
@@ -514,10 +514,10 @@
   padding: 10px 16px;
   background: linear-gradient(
     90deg,
-    rgba(245, 158, 11, 0.18),
-    rgba(245, 158, 11, 0.06)
+    color-mix(in srgb, var(--biof3-status-loading) 18%, transparent),
+    color-mix(in srgb, var(--biof3-status-loading) 6%, transparent)
   );
-  border-bottom: 1px solid rgba(245, 158, 11, 0.35);
+  border-bottom: 1px solid color-mix(in srgb, var(--biof3-status-loading) 35%, transparent);
   color: var(--biof3-text);
   font-size: 13px;
   animation: runtimeBannerIn 0.25s ease-out;
@@ -545,8 +545,8 @@
   flex: none;
   padding: 6px 14px;
   border-radius: 8px;
-  border: 1px solid rgba(245, 158, 11, 0.5);
-  background: rgba(245, 158, 11, 0.18);
+  border: 1px solid color-mix(in srgb, var(--biof3-status-loading) 50%, transparent);
+  background: color-mix(in srgb, var(--biof3-status-loading) 18%, transparent);
   color: var(--biof3-text);
   font-weight: 600;
   font-size: 13px;
@@ -555,7 +555,7 @@
 }
 
 .runtimeMissingBannerBtn:hover {
-  background: rgba(245, 158, 11, 0.32);
+  background: color-mix(in srgb, var(--biof3-status-loading) 32%, transparent);
   transform: translateY(-1px);
 }
 
@@ -665,7 +665,7 @@
   min-height: 40px;
   padding: 2px 4px;
   margin-bottom: 8px;
-  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  border-bottom: 1px solid var(--biof3-border);
 }
 
 .leftSidebarEyebrow {
@@ -685,7 +685,7 @@
   font-size: 12px;
   line-height: 20px;
   font-weight: 650;
-  color: var(--ifm-color-emphasis-900);
+  color: var(--biof3-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -756,7 +756,7 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--ifm-color-emphasis-700);
+  color: var(--biof3-text-secondary);
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -770,7 +770,7 @@
   display: grid;
   gap: 2px;
   padding: 0 0 10px;
-  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  border-bottom: 1px solid var(--biof3-border);
   flex-shrink: 0;
 }
 
@@ -779,7 +779,7 @@
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.4px;
-  color: var(--ifm-color-emphasis-500);
+  color: var(--biof3-text-muted);
   text-transform: uppercase;
 }
 
@@ -793,7 +793,7 @@
   border-radius: 6px;
   padding: 0 10px;
   background: transparent;
-  color: var(--ifm-color-emphasis-700);
+  color: var(--biof3-text-secondary);
   font-size: 13px;
   font-weight: 500;
   text-align: left;
@@ -802,7 +802,7 @@
 
 .leftQuickAction:hover {
   background: var(--biof3-hover);
-  color: var(--ifm-color-emphasis-900);
+  color: var(--biof3-text);
 }
 
 .leftQuickActionActive {
@@ -823,7 +823,7 @@
   justify-content: space-between;
   padding: 10px 8px 8px;
   flex-shrink: 0;
-  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  border-bottom: 1px solid var(--biof3-border);
 }
 
 .leftPanelTitle {
@@ -831,7 +831,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--ifm-color-emphasis-500);
+  color: var(--biof3-text-muted);
 }
 
 .projectTreeScroll {
@@ -859,7 +859,7 @@
   padding: 6px 8px;
   cursor: pointer;
   transition: background 0.12s ease;
-  color: var(--ifm-color-emphasis-700);
+  color: var(--biof3-text-secondary);
   user-select: none;
 }
 
@@ -897,7 +897,7 @@
   height: 20px;
   border: none;
   background: transparent;
-  color: var(--ifm-color-emphasis-600);
+  color: var(--biof3-text-tertiary);
   border-radius: 4px;
   cursor: pointer;
   opacity: 0;
@@ -922,7 +922,7 @@
 .convEmpty {
   padding: 4px 8px 4px 34px;
   font-size: 12px;
-  color: var(--ifm-color-emphasis-500);
+  color: var(--biof3-text-muted);
 }
 
 .convItem {
@@ -932,7 +932,7 @@
   padding: 5px 8px 5px 26px;
   cursor: pointer;
   font-size: 12px;
-  color: var(--ifm-color-emphasis-700);
+  color: var(--biof3-text-secondary);
   transition: background 0.12s ease;
   user-select: none;
 }
@@ -1027,7 +1027,7 @@
   color: var(--biof3-text);
   font: inherit;
   font-size: 12px;
-  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.1);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--biof3-accent) 10%, transparent);
 }
 
 /* Center column — Agent main interaction area */
@@ -1140,11 +1140,11 @@
 /* Breathing animation — subtle pulse to draw attention */
 @keyframes breathe {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.15);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--biof3-accent) 15%, transparent);
     opacity: 0.7;
   }
   50% {
-    box-shadow: 0 0 0 6px rgba(13, 148, 136, 0);
+    box-shadow: 0 0 0 6px transparent;
     opacity: 1;
   }
 }
@@ -1401,7 +1401,7 @@
   flex-shrink: 0;
   min-height: 52px;
   padding: 10px 13px 9px;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.065);
+  border-bottom: 1px solid color-mix(in srgb, var(--biof3-text) 6%, transparent);
 }
 
 .workspacePinnedSummaryTopBarLeft {
@@ -1486,7 +1486,7 @@
 
 .workspacePinnedSummaryStatus[data-status='running'] > span {
   background: var(--biof3-status-online);
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--biof3-status-online) 12%, transparent);
 }
 
 .workspacePinnedSummaryStatus[data-status='failed'] > span {
@@ -1987,7 +1987,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   gap: 8px;
   min-height: 0;
   padding: 7px 6px 0;
-  border-top: 1px solid rgba(15, 23, 42, 0.065);
+  border-top: 1px solid color-mix(in srgb, var(--biof3-text) 6%, transparent);
   font-size: 10px;
   color: var(--biof3-text-tertiary);
 }
@@ -2089,7 +2089,7 @@ button.workspacePinnedSummaryMetricCard:hover {
 .workspacePinnedSummaryTaskRow:focus-visible,
 .workspacePinnedSummaryActionBtn:focus-visible,
 .workspacePinnedSummaryFooterBtn:focus-visible {
-  outline: 2px solid rgba(13, 148, 136, 0.35);
+  outline: 2px solid color-mix(in srgb, var(--biof3-accent) 35%, transparent);
   outline-offset: 2px;
 }
 
@@ -2992,7 +2992,7 @@ button.workspacePinnedSummaryMetricCard:hover {
 
 .embeddedTerminalStatusDot[data-running='true'] {
   background: var(--biof3-status-online);
-  box-shadow: 0 0 0 2px rgba(63, 185, 80, 0.18);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--biof3-status-online) 18%, transparent);
 }
 
 .embeddedTerminalHeader button {
@@ -3221,12 +3221,12 @@ button.workspacePinnedSummaryMetricCard:hover {
 
 .terminalProcessDot[data-status='running'] {
   background: var(--biof3-status-online);
-  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.16);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--biof3-status-online) 16%, transparent);
 }
 
 .terminalProcessDot[data-status='stopped'] {
   background: var(--biof3-status-warning);
-  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.14);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--biof3-status-warning) 14%, transparent);
 }
 
 .terminalProcessCommand {
@@ -3298,11 +3298,11 @@ button.workspacePinnedSummaryMetricCard:hover {
 .browserUrlBar input:focus {
   outline: none;
   border-color: var(--biof3-accent-border);
-  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--biof3-accent) 12%, transparent);
 }
 
 .browserGoBtn {
-  border: 1px solid rgba(13, 148, 136, 0.3);
+  border: 1px solid color-mix(in srgb, var(--biof3-accent) 30%, transparent);
   border-radius: 8px;
   padding: 0 10px;
   height: 28px;
@@ -4687,7 +4687,7 @@ body.biof3-resizing-columns * {
 
 .plotCardActive {
   border-color: var(--biof3-accent);
-  box-shadow: 0 0 0 1px rgba(13, 148, 136, 0.16);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--biof3-accent) 16%, transparent);
 }
 
 .plotCardHeader {
@@ -4785,7 +4785,7 @@ body.biof3-resizing-columns * {
 
 .fileCardActive {
   border-color: var(--biof3-accent);
-  box-shadow: 0 0 0 1px rgba(13, 148, 136, 0.16);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--biof3-accent) 16%, transparent);
 }
 
 .fileCardIcon {
@@ -5423,12 +5423,12 @@ body.biof3-resizing-columns * {
   padding: 7px 12px;
   border-top: 1px solid var(--biof3-border);
   background: var(--biof3-bg-subtle);
-  color: var(--biof3-warning, #a16207);
+  color: var(--biof3-status-warning-fg);
   font-size: 11px;
 }
 
 .dataIntakeReadiness[data-status='ready'] {
-  color: var(--biof3-success, #15803d);
+  color: var(--biof3-status-success-fg);
 }
 
 .dataIntakeActions {

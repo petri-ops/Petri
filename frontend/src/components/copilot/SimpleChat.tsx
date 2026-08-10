@@ -1186,6 +1186,7 @@ function LoopStatusPanel({
         type="button"
         className="sc-loop-summary"
         aria-expanded={expanded}
+        aria-controls="sc-loop-iterations"
         aria-label={expanded ? '收起循环详情' : '展开循环详情'}
         onClick={() => setExpanded((current) => !current)}
       >
@@ -1489,7 +1490,7 @@ function ApprovalCard({
       <div className="sc-approval-actions">
         <button
           type="button"
-          className="sc-approval-btn sc-approval-approve"
+          className="biof3-btn sc-approval-btn sc-approval-approve"
           onClick={onApprove}
           disabled={busy}
         >
@@ -1498,7 +1499,7 @@ function ApprovalCard({
         </button>
         <button
           type="button"
-          className="sc-approval-btn sc-approval-cancel"
+          className="biof3-btn sc-approval-btn sc-approval-cancel"
           onClick={onReject}
           disabled={busy}
         >

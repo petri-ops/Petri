@@ -262,11 +262,11 @@
   display: block;
   margin-top: 4px;
   font-size: 0.75rem;
-  color: var(--ifm-color-emphasis-600, #64748b);
+  color: var(--biof3-text-tertiary);
 }
 
 .biof3-login-modal__hint--error {
-  color: var(--ifm-color-danger, #dc2626);
+  color: var(--biof3-danger);
 }
 
 /* Welcome view after registration */
@@ -283,12 +283,12 @@
 .biof3-login-modal__welcome h2 {
   font-size: 1.25rem;
   margin: 0 0 0.5rem;
-  color: var(--ifm-heading-color);
+  color: var(--biof3-text);
 }
 
 .biof3-login-modal__welcome-desc {
   font-size: 0.875rem;
-  color: var(--ifm-color-emphasis-600, #64748b);
+  color: var(--biof3-text-tertiary);
   margin-bottom: 1.25rem;
 }
 
@@ -305,7 +305,7 @@
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   border-radius: 8px;
-  border: 1px solid var(--ifm-color-emphasis-200, #e2e8f0);
+  border: 1px solid var(--biof3-border);
   text-decoration: none;
   color: inherit;
   transition:
@@ -337,5 +337,5 @@
 
 .biof3-login-modal__welcome-link small {
   font-size: 0.75rem;
-  color: var(--ifm-color-emphasis-600, #64748b);
+  color: var(--biof3-text-tertiary);
 }
