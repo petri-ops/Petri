@@ -20,6 +20,7 @@
 6. [`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md) — 已重新真实收口的横切修复工作包；保留科学、进程、HTTP 与逐契约 Acceptance 证据。
 7. [`g0-rs0-result-studio-audit.md`](./g0-rs0-result-studio-audit.md) — G0-RS0 现状审计与架构 ADR；Result Studio 的复用/新增边界、契约缺陷与 Git 风险矩阵的唯一裁决记录。
 8. [`g0-rs-ux1h-async-tool-surface.md`](./g0-rs-ux1h-async-tool-surface.md) — 2026-08-06 启动的 active 工作包：消除"主 agent 被工具同步流锁死"与"工具成功 + LLM 总结失败"被渲染为"失败"两种 user-visible 误导；不实现 P7-F，不引入 subagent 池。
+9. [`agent-concurrency-design.md`](./agent-concurrency-design.md) — Agent 并发设计：承接 `g0-rs-ux1h` §10 推迟的 subagent 池决策，设计"主 agent 不被长任务阻塞 + 同会话并行 sub-agent"方案（planned，待评审）。
 
 ## 当前开发必读
 
