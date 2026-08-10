@@ -67,19 +67,27 @@ export function BackendStatusProvider({
 
   useEffect(() => {
     let alive = true;
+    // 启动期高频探测（1s）：后端双服务稳态 ~2.6s 就绪，高频能让 UI 尽快
+    // 感知就绪、避免"后端已起但引导页还在转圈"的体感延迟；就绪后降频到
+    // 5s 仅作健康保活，避免无谓 IPC 占用。
+    let interval = 1000;
     const safeTick = async () => {
       try {
         const s = await readBackendStatus();
-        if (alive && s) {
-          setStatus(s);
-          setLoaded(true);
+        if (!alive || !s) return;
+        setStatus(s);
+        setLoaded(true);
+        if (s.isReady && interval !== 5000) {
+          interval = 5000;
+          clearInterval(id);
+          id = setInterval(safeTick, interval);
         }
       } catch {
         // 忽略
       }
     };
     safeTick();
-    const id = setInterval(safeTick, 5000);
+    const id = setInterval(safeTick, interval);
     return () => {
       alive = false;
       clearInterval(id);
