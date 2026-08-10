@@ -78,6 +78,7 @@ import {
   stopSubAgentTask,
   useConversationRun,
   useSubAgentTasksForConversation,
+  resumeOrphanAgentTasks,
   type ConversationPendingApproval,
   type ConversationLoopState,
 } from './conversationRunStore';
@@ -223,6 +224,13 @@ export function SimpleChat({
   const historyNavRef = useRef<typeof INITIAL_NAV_STATE>(INITIAL_NAV_STATE);
   const activeRun = useConversationRun(conversationId);
   const subAgentTasks = useSubAgentTasksForConversation(conversationId);
+  // AGENT-CONCURRENCY A-5: 会话挂载/切换时恢复崩溃或刷新前仍在跑的后台任务
+  // （sub-agent 走后端 loop_runs，主 agent 走 localStorage resumable task）。
+  // 幂等：已追踪的 sub-agent 会被跳过，已有活跃主 run 时不重复恢复。
+  useEffect(() => {
+    if (!conversationId) return;
+    void resumeOrphanAgentTasks(conversationId, projectId);
+  }, [conversationId, projectId]);
   const durableLoop = useDurableConversationLoop(projectId, conversationId, activeRun?.loop);
   const streaming = starting || activeRun?.status === 'running';
   const pendingApproval = activeRun?.pendingApproval || null;

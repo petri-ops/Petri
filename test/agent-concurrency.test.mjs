@@ -12,6 +12,7 @@ const require = createRequire(import.meta.url);
 const db = require('../core/r-server/db');
 const conv = require('../core/r-server/helpers/conversations');
 const runtime = require('../core/r-server/helpers/runtime');
+const agentTaskStore = require('../core/r-server/agent-task-store');
 const { buildLoopRun } = require('../core/shared-backend/loop-contract');
 const sqlite = db.getDatabase();
 
@@ -160,4 +161,75 @@ test('并发写会话历史无交错（同步 SQLite + task_id 列）', async ()
       .get(conversationId, t).n;
     assert.equal(n, 100, `task ${t} 应有 100 条`);
   }
+});
+
+// AGENT-CONCURRENCY A-4：取消级联（主→子）单测。
+// 在 agent-task-store.cancelAgentTaskCascade 上验证，无需启动 HTTP 服务。
+
+test('取消主 agent 级联取消其子 sub-agent（A-4）', () => {
+  const cid = 'conv-cascade';
+  persistLoop({ loopRunId: 'loop-cap', conversationId: cid, kind: 'primary', taskId: 'task-cap' });
+  persistLoop({
+    loopRunId: 'loop-cap-c1',
+    conversationId: cid,
+    kind: 'subagent',
+    parentLoopRunId: 'loop-cap',
+    taskId: 'task-cap-c1',
+  });
+  persistLoop({
+    loopRunId: 'loop-cap-c2',
+    conversationId: cid,
+    kind: 'subagent',
+    parentLoopRunId: 'loop-cap',
+    taskId: 'task-cap-c2',
+  });
+
+  // 创建对应的 agent task 行（agent_status=running），否则 requestAgentTaskCancel 不会翻转状态。
+  for (const t of ['task-cap', 'task-cap-c1', 'task-cap-c2']) {
+    agentTaskStore.insertAgentTask({ taskId: t, userId: 'user-cascade', params: {} });
+  }
+  assert.equal(agentTaskStore.getAgentTask('task-cap').agentStatus, 'running');
+  assert.equal(agentTaskStore.getAgentTask('task-cap-c1').agentStatus, 'running');
+  assert.equal(agentTaskStore.getAgentTask('task-cap-c2').agentStatus, 'running');
+
+  const { cancelledTaskIds } = agentTaskStore.cancelAgentTaskCascade('task-cap', { dbMod: db });
+  assert.deepEqual(
+    cancelledTaskIds.sort(),
+    ['task-cap', 'task-cap-c1', 'task-cap-c2'].sort(),
+    '主 task + 两个子 task 都应被级联取消',
+  );
+  assert.equal(agentTaskStore.getAgentTask('task-cap').agentStatus, 'cancel_requested');
+  assert.equal(agentTaskStore.getAgentTask('task-cap-c1').agentStatus, 'cancel_requested');
+  assert.equal(agentTaskStore.getAgentTask('task-cap-c2').agentStatus, 'cancel_requested');
+});
+
+test('取消 sub-agent 不级联到父/兄弟（A-4 反向）', () => {
+  const cid = 'conv-cascade-rev';
+  persistLoop({ loopRunId: 'loop-rev', conversationId: cid, kind: 'primary', taskId: 'task-rev' });
+  persistLoop({
+    loopRunId: 'loop-rev-s1',
+    conversationId: cid,
+    kind: 'subagent',
+    parentLoopRunId: 'loop-rev',
+    taskId: 'task-rev-s1',
+  });
+  persistLoop({
+    loopRunId: 'loop-rev-s2',
+    conversationId: cid,
+    kind: 'subagent',
+    parentLoopRunId: 'loop-rev',
+    taskId: 'task-rev-s2',
+  });
+
+  for (const t of ['task-rev', 'task-rev-s1', 'task-rev-s2']) {
+    agentTaskStore.insertAgentTask({ taskId: t, userId: 'user-cascade-rev', params: {} });
+  }
+
+  // 取消一个子 agent：不应影响父 agent 或另一个兄弟子 agent。
+  const { cancelledTaskIds } = agentTaskStore.cancelAgentTaskCascade('task-rev-s1', { dbMod: db });
+  assert.deepEqual(cancelledTaskIds, ['task-rev-s1'], '仅被取消的子 agent 自身应出现在结果中');
+
+  assert.equal(agentTaskStore.getAgentTask('task-rev-s1').agentStatus, 'cancel_requested');
+  assert.equal(agentTaskStore.getAgentTask('task-rev').agentStatus, 'running', '父 agent 不应被级联');
+  assert.equal(agentTaskStore.getAgentTask('task-rev-s2').agentStatus, 'running', '兄弟子 agent 不应被级联');
 });

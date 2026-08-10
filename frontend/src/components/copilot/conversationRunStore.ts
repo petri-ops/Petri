@@ -3,6 +3,7 @@ import type { CopilotContext } from '@/lib/copilotContext';
 import { biof3Events, dispatchBioF3Event } from '@/lib/events';
 import {
   cancelAgentTask,
+  findResumableAgentTask,
   streamChat,
   subscribeAgentTask,
   type ChatMessage,
@@ -87,6 +88,12 @@ interface StartConversationRunOptions {
   context: CopilotContext;
   modelPresetId?: string;
   modelName?: string;
+  /**
+   * AGENT-CONCURRENCY A-5: 恢复模式。提供则跳过重新提交，直接订阅该已存在
+   * 的 task 事件流（崩溃/刷新前仍在跑的主 agent），用于 app 启动/会话重开时
+   * 避免主 run 孤儿化。userContent 退化为占位提示。
+   */
+  resumeTaskId?: string;
 }
 
 const runs = new Map<string, ConversationRunSnapshot>();
@@ -235,6 +242,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     toolActivities: [],
     pendingApproval: null,
     startedAt,
+    taskId: options.resumeTaskId ?? undefined,
   });
   emit(conversationId);
 
@@ -255,13 +263,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     }));
   };
 
-  void streamChat({
-    messages: options.messages,
-    context: options.context,
-    conversationId,
-    modelPresetId: options.modelPresetId,
-    modelName: options.modelName,
-    signal: ctrl.signal,
+  const callbacks = {
     onIter: (iteration) => {
       if (iteration <= 1) return;
       assistantAcc = '';
@@ -389,9 +391,32 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     },
     onDone: () => finish('done'),
     onError: (error) => finish('error', error),
-  }).finally(() => {
-    if (controllers.get(conversationId) === ctrl) controllers.delete(conversationId);
-  });
+  };
+
+  if (options.resumeTaskId) {
+    // AGENT-CONCURRENCY A-5: 恢复模式 — 直接订阅已存在的 task 事件流，不重新提交。
+    void subscribeAgentTask(
+      options.resumeTaskId,
+      { messages: [], conversationId, signal: ctrl.signal, ...callbacks },
+      0
+    )
+      .catch(() => finish('error', new Error('订阅失败')))
+      .finally(() => {
+        if (controllers.get(conversationId) === ctrl) controllers.delete(conversationId);
+      });
+  } else {
+    void streamChat({
+      messages: options.messages,
+      context: options.context,
+      conversationId,
+      modelPresetId: options.modelPresetId,
+      modelName: options.modelName,
+      signal: ctrl.signal,
+      ...callbacks,
+    }).finally(() => {
+      if (controllers.get(conversationId) === ctrl) controllers.delete(conversationId);
+    });
+  }
 
   return true;
 }
@@ -763,6 +788,47 @@ export async function resumeSubAgentTasks(
     const taskId = run.taskId as string;
     if (subTaskRuns.has(taskId)) continue;
     subscribeSubAgentResumed(taskId, conversationId, projectId, run.parentLoopRunId, '（恢复后台任务）');
+  }
+}
+
+/**
+ * AGENT-CONCURRENCY A-5: 重订阅一个崩溃/刷新前仍在跑的主 agent task（来自
+ * localStorage 的 findResumableAgentTask）。不重新提交，直接订阅其后端事件流
+ * 并写入主 run 状态，避免主 run 孤儿化。taskId 已在 run 快照中登记。
+ */
+export function resumeConversationRun(
+  resumeTaskId: string,
+  conversationId: string,
+  projectId?: string
+): boolean {
+  return startConversationRun({
+    conversationId,
+    projectId: projectId || '',
+    userContent: '（恢复后台任务）',
+    messages: [],
+    context: { page: 'desktop-project', projectId: projectId || '' },
+    resumeTaskId,
+  });
+}
+
+/**
+ * AGENT-CONCURRENCY A-5: app 启动 / 会话重开时的孤儿恢复入口。
+ * - sub-agent：后端 loop_runs 是权威来源，覆盖刷新/崩溃场景。
+ * - 主 agent：localStorage 中尚未完成的 primary task（findResumableAgentTask）。
+ * 两者互补：loop_runs 覆盖服务侧仍在跑的，localStorage 覆盖前端已提交但事件流
+ * 尚未结束的。仅当当前会话没有活跃主 run 时才恢复主 agent，避免重复订阅。
+ */
+export async function resumeOrphanAgentTasks(
+  conversationId: string,
+  projectId?: string
+): Promise<void> {
+  if (!conversationId) return;
+  // 1) sub-agent：后端 loop_runs 权威。
+  await resumeSubAgentTasks(conversationId, projectId);
+  // 2) 主 agent：localStorage resumable task（仅当当前会话无活跃主 run）。
+  const primaryTaskId = findResumableAgentTask();
+  if (primaryTaskId && !isConversationRunning(conversationId)) {
+    resumeConversationRun(primaryTaskId, conversationId, projectId);
   }
 }
 

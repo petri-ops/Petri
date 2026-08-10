@@ -1109,18 +1109,9 @@ module.exports = function registerAiAgentRoute(app) {
     if (task.agent_status === 'done' || task.agent_status === 'failed' || task.agent_status === 'cancelled') {
       return res.json({ status: task.agent_status, taskId, alreadyTerminal: true });
     }
-    agentTaskStore.requestAgentTaskCancel(taskId);
-
-    // AGENT-CONCURRENCY：取消主 agent 时级联取消其子 agent（按 parent_loop_run_id）
-    try {
-      const loop = dbMod.getLoopRunByTaskId(taskId);
-      if (loop && loop.kind === 'primary') {
-        const children = dbMod.getLoopRunsByParentLoopRunId(loop.loopRunId);
-        for (const child of children) {
-          if (child.taskId) agentTaskStore.requestAgentTaskCancel(child.taskId);
-        }
-      }
-    } catch {}
+    // AGENT-CONCURRENCY：取消主 agent 时级联取消其子 agent（按 parent_loop_run_id）。
+    // cancelAgentTaskCascade 同时请求取消主 task 本身，并在其为 primary 时级联子 agent。
+    agentTaskStore.cancelAgentTaskCascade(taskId, { dbMod });
 
     return res.json({ status: 'cancel_requested', taskId });
   });

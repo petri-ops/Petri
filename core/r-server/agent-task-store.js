@@ -156,6 +156,42 @@ function requestAgentTaskCancel(taskId) {
   return result.changes > 0;
 }
 
+/**
+ * AGENT-CONCURRENCY: cancel a primary agent loop and cascade the cancel to all
+ * of its child sub-agent loops (enumerated by parent_loop_run_id). Cancelling a
+ * sub-agent never cascades upward to its parent or sideways to siblings.
+ *
+ * The cascade reads LoopRun rows from the shared `db` module (injected as
+ * `dbMod`) but flips agent task status through this store's own connection, so
+ * a primary cancel reaches every still-running child task in a single call.
+ *
+ * @param {string} taskId  the task to cancel (primary or sub-agent)
+ * @param {{ dbMod: object }} deps  shared db module exposing
+ *   getLoopRunByTaskId / getLoopRunsByParentLoopRunId
+ * @returns {{ cancelledTaskIds: string[] }} ids whose agent_status was flipped
+ *   to cancel_requested by this call
+ */
+function cancelAgentTaskCascade(taskId, { dbMod }) {
+  const cancelledTaskIds = [];
+  // Always request cancel on the requested task itself.
+  if (requestAgentTaskCancel(taskId)) cancelledTaskIds.push(taskId);
+
+  // Cascade only when the requested task owns a primary loop.
+  try {
+    const loop = dbMod.getLoopRunByTaskId(taskId);
+    if (loop && loop.kind === 'primary') {
+      const children = dbMod.getLoopRunsByParentLoopRunId(loop.loopRunId);
+      for (const child of children) {
+        if (child.taskId && requestAgentTaskCancel(child.taskId)) {
+          cancelledTaskIds.push(child.taskId);
+        }
+      }
+    }
+  } catch {}
+
+  return { cancelledTaskIds };
+}
+
 function isAgentTaskCancellationRequested(taskId) {
   const task = getAgentTask(taskId);
   return task?.agentStatus === 'cancel_requested' || task?.agentStatus === 'cancelled';
@@ -188,6 +224,7 @@ module.exports = {
   markAgentTaskDone,
   markAgentTaskFailed,
   requestAgentTaskCancel,
+  cancelAgentTaskCascade,
   isAgentTaskCancellationRequested,
   markAgentTaskCancelled,
 };
