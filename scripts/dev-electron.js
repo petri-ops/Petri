@@ -117,7 +117,15 @@ async function main() {
   spawnChild(npmCmd, ['--prefix', 'frontend', 'run', 'dev']);
   await waitForUrl(rendererUrl);
 
-  spawnChild(npxCmd, ['electron', '.', '--dev'], {
+  // Optional extra Electron CLI args for local debugging, e.g.
+  //   BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev
+  // Empty by default so normal dev runs are unchanged.
+  const extraElectronArgs = (process.env.BIOF3_DEV_ELECTRON_ARGS || '')
+    .split(' ')
+    .map((arg) => arg.trim())
+    .filter(Boolean);
+
+  spawnChild(npxCmd, ['electron', '.', '--dev', ...extraElectronArgs], {
     shutdownOnExit: 'always',
     env: {
       ...process.env,
