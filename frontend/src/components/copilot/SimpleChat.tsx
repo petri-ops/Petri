@@ -84,6 +84,7 @@ import './simple-chat.css';
 import { Icon } from '@/components/icons/Icon';
 import { HighlightedCode } from '@/components/ui/CodeHighlight';
 import { tools as staticTools } from '@/pages/_data';
+import { INITIAL_NAV_STATE, stepHistoryNavigation } from './chatHistoryNav';
 
 const conversationDrafts = new Map<string, string>();
 
@@ -215,6 +216,8 @@ export function SimpleChat({
   const [accessMode, setAccessMode] = useState<'full' | 'read'>('full');
   const taRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // 输入框 ↑/↓ 历史回溯的导航态（null = 未进入导航，输入框即实时草稿）。
+  const historyNavRef = useRef<typeof INITIAL_NAV_STATE>(INITIAL_NAV_STATE);
   const activeRun = useConversationRun(conversationId);
   const durableLoop = useDurableConversationLoop(projectId, conversationId, activeRun?.loop);
   const streaming = starting || activeRun?.status === 'running';
@@ -538,13 +541,55 @@ export function SimpleChat({
   useEffect(() => {
     setInput(conversationDrafts.get(conversationDraftKey(projectId, conversationId)) || '');
     setQueuedPrompts([]);
+    historyNavRef.current = INITIAL_NAV_STATE;
   }, [conversationId, projectId]);
 
   const onInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
     conversationDrafts.set(conversationDraftKey(projectId, conversationId), e.target.value);
+    historyNavRef.current = INITIAL_NAV_STATE;
     resizeTextarea(e.target);
   };
+
+  // 自动聚焦输入框：新加载/刷新后无需先点一下才能打字。macOS 上窗口被程序化
+  // 激活后 webview 常拿不到键盘焦点，挂载时主动聚焦一次即可立即可输入。
+  // 仅 copilotAsk 的拥有者（中央会话）执行：两个实例可能同时挂载（中央会话 +
+  // 右侧面板 chat tab），都自动聚焦会互相抢焦点。
+  useEffect(() => {
+    if (!ownsCopilotAsk) return;
+    taRef.current?.focus();
+  }, [ownsCopilotAsk]);
+
+  // 键盘焦点兜底：窗口重新获焦、或用户开始打字时，若焦点并不在任何可输入控件/按钮
+  // 上（例如停留在标题栏窗口控件这类非输入元素），把焦点交还输入框，避免击键被吞。
+  // 菜单打开时跳过，避免抢走菜单焦点。同样只由 copilotAsk 拥有者执行。
+  useEffect(() => {
+    if (!ownsCopilotAsk) return undefined;
+    const focusInputIfIdle = () => {
+      if (accessMenuOpen || modelMenuOpen) return;
+      const ta = taRef.current;
+      if (!ta || document.activeElement === ta) return;
+      // 自身被隐藏（display:none，如切到非会话模式）时不抢焦点。
+      if (ta.offsetParent === null) return;
+      const ae = document.activeElement as HTMLElement | null;
+      // 焦点已在真正的输入控件里（别处的输入框/可编辑区）就不要抢。
+      if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.isContentEditable)) return;
+      ta.focus();
+    };
+    const onWinFocus = () => focusInputIfIdle();
+    const onDocKeyDown = (e: KeyboardEvent) => {
+      // 仅在"可打印字符"击键且焦点无处安放时接管，不干扰快捷键与 Tab 导航。
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key.length !== 1) return;
+      focusInputIfIdle();
+    };
+    window.addEventListener('focus', onWinFocus);
+    document.addEventListener('keydown', onDocKeyDown);
+    return () => {
+      window.removeEventListener('focus', onWinFocus);
+      document.removeEventListener('keydown', onDocKeyDown);
+    };
+  }, [accessMenuOpen, modelMenuOpen, ownsCopilotAsk]);
 
   const send = useCallback(async (text: string, contextOverride?: Partial<CopilotContext>) => {
     const trimmed = text.trim();
@@ -586,6 +631,7 @@ export function SimpleChat({
       if (!started) return;
       conversationDrafts.delete(conversationDraftKey(projectId, conversationId));
       setInput('');
+      historyNavRef.current = INITIAL_NAV_STATE;
       if (taRef.current) taRef.current.style.height = 'auto';
     } finally {
       setStarting(false);
@@ -745,6 +791,27 @@ export function SimpleChat({
   }, [accessMode, approvalRepair.status, approvePending, pendingApproval, streaming]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      const direction = e.key === 'ArrowUp' ? 'up' : 'down';
+      // 历史源：本会话已发送的用户消息，最新在前（反序）。
+      const history = messages
+        .filter((m) => m.role === 'user')
+        .map((m) => m.content ?? '')
+        .filter((c) => c.trim() !== '')
+        .reverse();
+      const { state, value } = stepHistoryNavigation(
+        history,
+        historyNavRef.current,
+        direction,
+        input,
+      );
+      historyNavRef.current = state;
+      const changed = value !== input;
+      if (changed) setInput(value);
+      // 仅在真正切换了历史时才拦截默认行为，避免空历史/最旧处打断多行光标移动。
+      if (changed) e.preventDefault();
+      return;
+    }
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       const trimmed = input.trim();
@@ -752,6 +819,7 @@ export function SimpleChat({
       if (streaming) {
         setQueuedPrompts((current) => [...current, trimmed].slice(-5));
         setInput('');
+        historyNavRef.current = INITIAL_NAV_STATE;
         conversationDrafts.delete(conversationDraftKey(projectId, conversationId));
         if (taRef.current) taRef.current.style.height = 'auto';
       } else {
@@ -765,6 +833,7 @@ export function SimpleChat({
     if (!trimmed || !streaming) return;
     setQueuedPrompts((current) => [...current, trimmed].slice(-5));
     setInput('');
+    historyNavRef.current = INITIAL_NAV_STATE;
     conversationDrafts.delete(conversationDraftKey(projectId, conversationId));
     if (taRef.current) taRef.current.style.height = 'auto';
   }, [conversationId, input, projectId, streaming]);
@@ -967,7 +1036,7 @@ export function SimpleChat({
                 className="sc-input"
                 rows={1}
                 value={input}
-                placeholder="输入消息… (Enter 发送, Shift+Enter 换行)"
+                placeholder="输入消息… (Enter 发送, Shift+Enter 换行, ↑/↓ 回溯历史)"
                 onChange={onInputChange}
                 onKeyDown={onKeyDown}
               />
@@ -1157,6 +1226,7 @@ function LoopStatusPanel({
         type="button"
         className="sc-loop-summary"
         aria-expanded={expanded}
+        aria-controls="sc-loop-iterations"
         aria-label={expanded ? '收起循环详情' : '展开循环详情'}
         onClick={() => setExpanded((current) => !current)}
       >
@@ -1460,7 +1530,7 @@ function ApprovalCard({
       <div className="sc-approval-actions">
         <button
           type="button"
-          className="sc-approval-btn sc-approval-approve"
+          className="biof3-btn sc-approval-btn sc-approval-approve"
           onClick={onApprove}
           disabled={busy}
         >
@@ -1469,7 +1539,7 @@ function ApprovalCard({
         </button>
         <button
           type="button"
-          className="sc-approval-btn sc-approval-cancel"
+          className="biof3-btn sc-approval-btn sc-approval-cancel"
           onClick={onReject}
           disabled={busy}
         >

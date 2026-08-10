@@ -11,11 +11,16 @@ import styles from './TitleBar.module.css';
  * custom window controls. On Windows/Linux the window is frameless, so we
  * draw our own buttons.
  */
-const isMac =
-  typeof window !== 'undefined' && window.biof3Desktop?.platform === 'darwin';
+// 惰性求值（不要提成模块级常量）：模块级常量在 import 时就固化，测试里通过
+// vi.stubGlobal 注入 window.biof3Desktop 发生在 import 之后，会导致这两个判定
+// 永远为 false、窗口控件根本不渲染，整个测试文件集体失败。
+function getIsMac(): boolean {
+  return typeof window !== 'undefined' && window.biof3Desktop?.platform === 'darwin';
+}
 
-const isDesktop =
-  typeof window !== 'undefined' && window.biof3Desktop?.isDesktop === true;
+function getIsDesktop(): boolean {
+  return typeof window !== 'undefined' && window.biof3Desktop?.isDesktop === true;
+}
 
 /**
  * Custom frameless window controls (minimize / maximize-restore / close).
@@ -255,6 +260,8 @@ export function TitleBar(): React.ReactElement {
   };
 
   const displayTitle = title || getFallbackTitle(location.pathname);
+  const isMac = getIsMac();
+  const isDesktop = getIsDesktop();
   const resizeRail = 1;
   const collapsedLeftRail = isMac ? 180 : 146;
   // Collapsed right rail must fit the windowTools (bottom-terminal + right-panel
@@ -280,8 +287,12 @@ export function TitleBar(): React.ReactElement {
           <div className={styles.trafficZone}>
             {isDesktop ? (
               <>
+                {/* tabIndex=-1: 这些窗口控件是 DOM 里最靠前的可聚焦元素，若参与
+                    键盘焦点，页面加载后焦点会默认落在「关闭窗口」上，导致用户敲的
+                    字被按钮吃掉（且空格/回车会误触关闭）。鼠标点击不受影响。 */}
                 <button
                   type="button"
+                  tabIndex={-1}
                   className={`${styles.macTrafficBtn} ${styles.macTrafficBtnClose}`}
                   onClick={win.close}
                   aria-label="关闭窗口"
@@ -291,6 +302,7 @@ export function TitleBar(): React.ReactElement {
                 </button>
                 <button
                   type="button"
+                  tabIndex={-1}
                   className={styles.macTrafficBtn}
                   onClick={win.minimize}
                   aria-label="最小化窗口"
@@ -300,6 +312,7 @@ export function TitleBar(): React.ReactElement {
                 </button>
                 <button
                   type="button"
+                  tabIndex={-1}
                   className={styles.macTrafficBtn}
                   onClick={win.toggleMaximize}
                   aria-label={win.isMaximized ? '还原窗口' : '最大化窗口'}
@@ -465,6 +478,7 @@ export function TitleBar(): React.ReactElement {
                 aria-label="展开更多工具"
                 aria-haspopup="menu"
                 aria-expanded={toolMenuOpen}
+                aria-controls="titlebar-tool-menu"
               >
                 <Icon name="plus" size={15} />
               </button>
@@ -476,7 +490,7 @@ export function TitleBar(): React.ReactElement {
                     onClick={() => onMoreAction?.()}
                     aria-label="关闭工具菜单"
                   />
-                  <div className={styles.toolMenu} role="menu">
+                  <div id="titlebar-tool-menu" className={styles.toolMenu} role="menu">
                     {toolMenuItems.map((item) => (
                       <button
                         key={item.id}

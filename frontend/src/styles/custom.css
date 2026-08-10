@@ -65,6 +65,7 @@
   --biof3-overlay: rgba(15, 23, 42, 0.2);
   --biof3-shadow-menu: 0 10px 24px rgba(15, 23, 42, 0.14);
   --biof3-on-accent: #ffffff;
+  --biof3-on-solid: #ffffff;
   --biof3-warning-bg: var(--biof3-status-warning-bg);
   --biof3-warning-text: var(--biof3-status-warning-fg);
   --biof3-danger-bg: var(--biof3-status-error-bg);
@@ -148,6 +149,7 @@
   --biof3-overlay: rgba(2, 6, 23, 0.6);
   --biof3-shadow-menu: 0 14px 36px rgba(0, 0, 0, 0.34);
   --biof3-on-accent: #ffffff;
+  --biof3-on-solid: #0b1220;
   --biof3-warning-bg: var(--biof3-status-warning-bg);
   --biof3-warning-text: var(--biof3-status-warning-fg);
   --biof3-danger-bg: var(--biof3-status-error-bg);
@@ -230,7 +232,7 @@
 .theme-doc-markdown h2 {
   margin-top: 1.75rem;
   padding-top: 0.2rem;
-  border-top: 1px solid var(--ifm-color-emphasis-200);
+  border-top: 1px solid var(--biof3-border);
   font-size: 1.42rem;
 }
 
@@ -306,7 +308,7 @@
 }
 
 .theme-doc-markdown .theme-code-block {
-  border: 1px solid var(--ifm-color-emphasis-200);
+  border: 1px solid var(--biof3-border);
   border-radius: 4px;
 }
 
@@ -398,7 +400,7 @@
   gap: 0.55rem;
   margin: 1rem 0.5rem 0;
   padding: 0.55rem 0.65rem;
-  border: 1px solid var(--ifm-color-emphasis-200);
+  border: 1px solid var(--biof3-border);
   border-radius: 6px;
   background: transparent;
 }
@@ -412,14 +414,14 @@
 
 .biof3-sidebar-wechat strong {
   display: block;
-  color: var(--ifm-color-emphasis-900);
+  color: var(--biof3-text);
   font-size: 0.78rem;
   line-height: 1.3;
 }
 
 .biof3-sidebar-wechat p {
   margin: 0.22rem 0 0;
-  color: var(--ifm-color-emphasis-600);
+  color: var(--biof3-text-tertiary);
   font-size: 0.72rem;
   line-height: 1.4;
 }
@@ -464,7 +466,7 @@
   flex-wrap: wrap;
   margin: 0.58rem 0;
   padding: 0.62rem 0.72rem;
-  border: 1px solid var(--ifm-color-emphasis-200);
+  border: 1px solid var(--biof3-border);
   border-radius: 6px;
   background: transparent;
 }
@@ -477,7 +479,7 @@
 
 .biof3-download__name {
   overflow-wrap: anywhere;
-  color: var(--ifm-color-emphasis-900);
+  color: var(--biof3-text);
   font-family: var(--ifm-font-family-monospace);
   font-size: 0.76rem;
   font-weight: 650;
@@ -487,7 +489,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.34rem;
-  border: 1px solid var(--ifm-color-emphasis-300);
+  border: 1px solid var(--biof3-border-strong);
   border-radius: 6px;
   background: transparent;
   color: var(--ifm-color-primary);
@@ -518,7 +520,7 @@
 }
 
 .biof3-download__size {
-  color: var(--ifm-color-emphasis-600);
+  color: var(--biof3-text-tertiary);
   font-size: 0.74rem;
 }
 
@@ -534,9 +536,9 @@
   flex-wrap: wrap;
   margin: 1.6rem 0 1rem;
   padding: 1rem;
-  border: 1px solid var(--ifm-color-emphasis-200);
+  border: 1px solid var(--biof3-border);
   border-radius: 8px;
-  background: var(--ifm-background-surface-color);
+  background: var(--biof3-bg-surface);
 }
 
 .biof3-export-panel__text {
@@ -564,7 +566,7 @@
 
 .biof3-export-panel__text p {
   margin: 0;
-  color: var(--ifm-color-emphasis-700);
+  color: var(--biof3-text-secondary);
   font-size: 0.88rem;
   line-height: 1.5;
 }
@@ -581,10 +583,10 @@
   align-items: center;
   justify-content: center;
   min-height: 1.9rem;
-  border: 1px solid var(--ifm-color-emphasis-300);
+  border: 1px solid var(--biof3-border-strong);
   border-radius: 6px;
   background: transparent;
-  color: var(--ifm-color-emphasis-800);
+  color: var(--biof3-text-secondary);
   cursor: pointer;
   font-size: 0.78rem;
   font-weight: 650;
@@ -615,16 +617,16 @@
 
 .biof3-export-panel__button--quiet {
   border-color: transparent;
-  color: var(--ifm-color-emphasis-650);
+  color: var(--biof3-text-secondary);
 }
 
 .biof3-export-panel__button--quiet:hover,
 .biof3-export-panel__button--quiet:focus {
-  border-color: var(--ifm-color-emphasis-300);
+  border-color: var(--biof3-border-strong);
 }
 
 .biof3-export-panel__link {
-  color: var(--ifm-color-emphasis-700);
+  color: var(--biof3-text-secondary);
   font-size: 0.84rem;
   font-weight: 700;
   text-decoration: none;
@@ -639,7 +641,7 @@
 .biof3-comments {
   margin-top: 2.6rem;
   padding-top: 1.5rem;
-  border-top: 1px solid var(--ifm-color-emphasis-200);
+  border-top: 1px solid var(--biof3-border);
 }
 
 .biof3-comments__header {
@@ -650,13 +652,13 @@
   margin: 0 0 0.32rem;
   padding: 0;
   border: 0;
-  color: var(--ifm-color-emphasis-900);
+  color: var(--biof3-text);
   font-size: 1.1rem;
 }
 
 .biof3-comments__header p {
   margin: 0;
-  color: var(--ifm-color-emphasis-700);
+  color: var(--biof3-text-secondary);
   font-size: 0.88rem;
   line-height: 1.6;
 }
@@ -798,7 +800,7 @@
 
   .biof3-download {
     break-inside: avoid;
-    border-color: var(--ifm-color-emphasis-300);
+    border-color: var(--biof3-border-strong);
     background: transparent;
   }
 
@@ -2144,7 +2146,7 @@ html.biof3-desktop [class*='docMainContainer'] > .container > .row > .col {
 
 /* DocSidebar 收紧：与 dock 视觉统一，去 Web 卡片感 */
 html.biof3-desktop .theme-doc-sidebar-container {
-  border-right: 1px solid var(--ifm-color-emphasis-200, #e2e8f0);
+  border-right: 1px solid var(--biof3-border, #e2e8f0);
   width: 280px;
 }
 html.biof3-desktop .theme-doc-sidebar-container .menu__link {
