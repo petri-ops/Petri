@@ -20,6 +20,17 @@ export function parseWorkspaceMode(raw: string | null | undefined): WorkspaceMod
   return (WORKSPACE_MODES as Set<string>).has(raw) ? (raw as WorkspaceMode) : null;
 }
 
+// T85: mode now lives in the URL sub-path (`/project/:id/<mode>`) instead of
+// the `?mode=` query param. `chat` is the default landing mode and carries no
+// segment, so deep links stay clean (`/project/:id` === `/project/:id/chat`).
+export function segmentToMode(seg: string | null | undefined): WorkspaceMode {
+  return parseWorkspaceMode(seg) || 'chat';
+}
+
+export function modeToSegment(mode: WorkspaceMode): string {
+  return mode === 'chat' ? '' : mode;
+}
+
 export interface UseWorkspaceRoutingResult {
   mode: WorkspaceMode;
   setMode: (next: WorkspaceMode, replace?: boolean) => void;

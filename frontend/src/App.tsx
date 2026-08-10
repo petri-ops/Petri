@@ -62,7 +62,9 @@ export default function App(): React.ReactElement {
             <Routes>
               {/* Desktop Agent-based workflow */}
               <Route path="/" element={<HomePage />} />
-              <Route path="/project/:projectId" element={<ProjectWorkspace />} />
+              {/* T85: `*` splat lets `/project/:projectId/<mode>` resolve to the
+                  same workspace; mode is read from the sub-path, not `?mode=`. */}
+              <Route path="/project/:projectId/*" element={<ProjectWorkspace />} />
               {/* Legacy pages (tools, admin, docs, figcode) removed - all workflows now use Agent */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
