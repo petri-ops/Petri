@@ -1,6 +1,6 @@
 # BioF3 Desktop UI 产品化审计台账
 
-最后更新：2026-08-07
+最后更新：2026-08-10
 状态：**Stage 1 验收完成（31/31 verified）；UI-031～UI-035、UI-054～UI-064 已完成真实 Provider、长任务、取消恢复及明暗主题实机验收；UI-036～UI-048 的既有验收状态见下表**
 
 本文件是 [`docs/v1-productization-roadmap.md`](./v1-productization-roadmap.md) Stage 1 的唯一 UI 问题清单。它记录真实可复现问题，不用来收集没有目标层级的泛化审美意见。
@@ -92,6 +92,7 @@ Stage 1 出口要求 P0/P1 清零；P2 可以延期，但必须写明原因与�
 | UI-137 | in_progress | P7 | W-01 | C-01 | 全局样式 / 设计系统卫生 | desktop.css 双令牌收敛：将桌面外壳遗留的 Infima `--ifm-color-emphasis-*`/`--ifm-color-danger`/`--ifm-background-color`/`--ifm-background-surface-color`/`--ifm-color-content` 用法整体收敛为 `--biof3-*` 语义令牌（含 `var(--ifm-x, fallback)` 逗号包裹外层形式）；品牌 `--ifm-color-primary*` 与字体类 `--ifm-*` 按既定口径保留；custom.css 别名定义块（204–211）因不含 `var(--ifm-…)` 自动保留，继续服务 Infima 底层框架 | 代码完成；desktop.css 共替换 ~45 处引用（含 22 处逗号包裹外层，修复首轮正则误拼接 `--` 产生的 `----` 四短横伪令牌）；视觉零变化（1:1 别名等效替换），`.biof3-btn` 基元内部灰度用法随之令牌化，为 SimpleChat 按钮统一化解锁 | UI-卫生 |
 | UI-138 | in_progress | P8 | W-01 | C-01 | 全局样式 / 设计系统卫生 | custom.css 内部双令牌收敛：将全局样式表内部（除别名定义块 202–211 外）遗留的 Infima `--ifm-color-emphasis-*`/`--ifm-background-surface-color` 用法收敛为 `--biof3-*`；顺手修复 custom.css:620 从未定义、导致 color 声明失效的 `--ifm-color-emphasis-650`（`var(--ifm-color-emphasis-650)` → `var(--biof3-text-secondary)`）；品牌 `--ifm-color-primary*`（~60 处）与 `--ifm-font-family-monospace` 字体令牌按既定口径保留 | 代码完成；custom.css 共替换 ~21 处引用（含 1 处逗号包裹外层已修复四短横）；修复 1 处历史无效令牌；视觉零变化 | UI-卫生 |
 | UI-139 | in_progress | P9 | W-01 | C-01 | 全局样式 / 设计系统卫生 | SimpleChat 按钮统一到 .biof3-btn 基元：(1) 删除 simple-chat.css 中零引用的死 CSS `.sc-send-btn`/`.sc-stop-btn` 及其 hover/disabled（约 21 行，全工程无 JSX 引用）；(2) 活矩形按钮 `.sc-approval-btn`（SimpleChat.tsx:1464/1473）统一加 `biof3-btn` 基元类，CSS 去除基元已提供的 display/align-items/cursor 重置，保留紧凑尺寸修饰（min-height 30px / padding 5px11px / font 12px / radius 6px / border 1px transparent），加载顺序确认 desktop.css 先于 simple-chat.css 故 .sc-* 修饰在等特异性下胜出、视觉零变化；(3) 修 `.sc-send-cta-send:disabled` 硬编码 `#ffffff` 为 `var(--biof3-on-solid)`（暗色语义正确）；FAB `.sc-send-cta-*`（28px 圆）与工具按钮 `.sc-composer-icon-btn`/`.sc-access-btn`（异形）因非重复体保留 | 代码完成；死 CSS 已删、approval 按钮接基元、硬编码白色已令牌化；tsc + vite build 通过 | UI-卫生 |
+| UI-140 | in_progress | P1 | W-08 | C-02 | 项目工作台 / 定时分析壳层 | 定时/计划视图 ScheduledWorkspacePanel 的 body 为空 div，点击进入后完全空白（死体验）；改为诚实的「即将推出」空态：标题+说明+返回对话按钮，全部用 --biof3-* 令牌，杜绝空白死体验 | feat/ui-wave0（UI-WAVE0 三连提交）；project-workspace.tsx ScheduledWorkspacePanel + project-workspace.module.css | UI-WAVE0 |
 状态只使用：`open / in_progress / verified / deferred`。
 
 ### verified 证据门槛

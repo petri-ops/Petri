@@ -2371,6 +2371,67 @@ button.workspacePinnedSummaryMetricCard:hover {
   gap: 16px;
 }
 
+.scheduledEmptyState {
+  grid-column: 1 / -1;
+  align-self: center;
+  justify-self: center;
+  max-width: 420px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 32px 28px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 14px;
+  background: var(--biof3-surface-translucent);
+}
+
+.scheduledEmptyIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--biof3-accent-bg);
+  color: var(--biof3-accent);
+}
+
+.scheduledEmptyTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--biof3-text);
+}
+
+.scheduledEmptyDesc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--biof3-text-secondary);
+}
+
+.scheduledEmptyBack {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 16px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 8px;
+  background: var(--biof3-surface);
+  color: var(--biof3-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.scheduledEmptyBack:hover {
+  color: var(--biof3-text);
+  background: var(--biof3-hover);
+}
+
 .scheduledHistoryCol,
 .scheduledResultCol {
   min-height: 0;
