@@ -33,6 +33,12 @@ export interface LoopRunCompact {
   partialReason: string | null;
   createdAt: string;
   updatedAt: string;
+  /** AGENT-CONCURRENCY: primary vs subagent identity of this LoopRun. */
+  kind?: 'primary' | 'subagent' | string | null;
+  /** Parent primary LoopRun when kind === 'subagent'. */
+  parentLoopRunId?: string | null;
+  /** Backend task id that drives this LoopRun (used for event-stream resubscription). */
+  taskId?: string | null;
 }
 
 export interface LoopIterationCompact {

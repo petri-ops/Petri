@@ -325,6 +325,8 @@ async function runAgentLoop({
   taskId,
   onEvent,
   shouldAbort,
+  kind = 'primary',
+  parentLoopRunId = null,
 }) {
   const turnStartedAt = Date.now();
   const isGuest = !userId;
@@ -567,9 +569,11 @@ async function runAgentLoop({
     // getActiveLoopRunForConversation, so recovery is surfaced via the recovery
     // API instead of being silently resumed here.
     let resumed = null;
-    try {
-      resumed = getActiveLoopRunForConversation(pid, cid);
-    } catch { resumed = null; }
+    if (kind !== 'subagent') {
+      try {
+        resumed = getActiveLoopRunForConversation(pid, cid);
+      } catch { resumed = null; }
+    }
 
     if (resumed && resumed.loopRunId) {
       loopRunId = resumed.loopRunId;
@@ -618,10 +622,13 @@ async function runAgentLoop({
       automationMode,
       executionIntent,
       loopStatus: 'running',
+      kind,
+      parentLoopRunId,
       metadata: { taskSpecHash },
     });
     loopRunId = run.loopRunId;
     loopState = 'running';
+    run.taskId = taskId;
     persistLoopRun(run);
     _emit({
       event: 'loop_phase',
@@ -1647,7 +1654,7 @@ async function runAgentLoop({
                   },
                 } : {}),
               };
-              appendMessageToConversation(_activeConv.id, 'assistant', assistantAcc.trim(), assistantMeta);
+              appendMessageToConversation(_activeConv.id, 'assistant', assistantAcc.trim(), assistantMeta, taskId);
               assistantMessagePersisted = true;
               try {
                 _maybeAutoTitleConversation(_activeConv.id, userId);
@@ -1749,7 +1756,7 @@ async function runAgentLoop({
           processingDurationMs: Math.max(0, Date.now() - turnStartedAt),
           resultEditProgress: resultEditProgress.snapshot(),
           incident: { code: cancellationObserved ? 'user_cancelled' : 'agent_run_failed', autoRecoveryAttempts: 0 },
-        });
+        }, taskId);
         assistantMessagePersisted = true;
       } catch {}
     }

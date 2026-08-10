@@ -1,6 +1,8 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   ackRunTool,
+  findResumableAgentTask,
+  findResumableSubAgentTasks,
   parseResultEditProgressEvent,
   parseToolCallEvent,
   parseToolResultEvent,
@@ -127,5 +129,56 @@ describe('copilot SSE tool event projection', () => {
       [1, '判断影响'],
       [2, '执行/重算'],
     ]);
+  });
+});
+
+describe('agent task localStorage 恢复 (AGENT-CONCURRENCY)', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+  afterEach(() => {
+    localStorage.clear();
+  });
+
+  it('findResumableAgentTask 只返回 primary（忽略 sub-agent，老 key 视为 primary）', () => {
+    const now = Date.now();
+    localStorage.setItem('biof3_agent_task_legacy', JSON.stringify({ taskId: 'legacy', ts: now - 3000 }));
+    localStorage.setItem(
+      'biof3_agent_task_sub',
+      JSON.stringify({ taskId: 'sub1', ts: now - 2000, kind: 'subagent', parentTaskId: 'p1' })
+    );
+    localStorage.setItem('biof3_agent_task_primary', JSON.stringify({ taskId: 'p1', ts: now - 1000, kind: 'primary' }));
+    expect(findResumableAgentTask()).toBe('p1');
+  });
+
+  it('findResumableSubAgentTasks 仅返回 sub-agent（含 parentTaskId）', () => {
+    const now = Date.now();
+    localStorage.setItem('biof3_agent_task_legacy', JSON.stringify({ taskId: 'legacy', ts: now - 3000 }));
+    localStorage.setItem(
+      'biof3_agent_task_sub',
+      JSON.stringify({ taskId: 'sub1', ts: now - 2000, kind: 'subagent', parentTaskId: 'p1' })
+    );
+    localStorage.setItem('biof3_agent_task_primary', JSON.stringify({ taskId: 'p1', ts: now - 1000, kind: 'primary' }));
+    const subs = findResumableSubAgentTasks();
+    expect(subs).toHaveLength(1);
+    expect(subs[0]).toEqual({ taskId: 'sub1', parentTaskId: 'p1', ts: now - 2000 });
+  });
+
+  it('超过 1 小时的 primary 返回 null 并删除 key', () => {
+    localStorage.setItem(
+      'biof3_agent_task_old',
+      JSON.stringify({ taskId: 'old', ts: Date.now() - 2 * 60 * 60 * 1000, kind: 'primary' })
+    );
+    expect(findResumableAgentTask()).toBeNull();
+    expect(localStorage.getItem('biof3_agent_task_old')).toBeNull();
+  });
+
+  it('超过 1 小时的 sub-agent 不返回且删除 key', () => {
+    localStorage.setItem(
+      'biof3_agent_task_oldsub',
+      JSON.stringify({ taskId: 'oldsub', ts: Date.now() - 2 * 60 * 60 * 1000, kind: 'subagent', parentTaskId: 'p1' })
+    );
+    expect(findResumableSubAgentTasks()).toHaveLength(0);
+    expect(localStorage.getItem('biof3_agent_task_oldsub')).toBeNull();
   });
 });

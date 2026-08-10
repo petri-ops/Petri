@@ -175,6 +175,11 @@ try {
   db.exec('CREATE INDEX IF NOT EXISTS idx_loop_snapshot_run ON loop_state_snapshots(loop_run_id, sequence_at DESC)');
 } catch {}
 
+// AGENT-CONCURRENCY: sub-agent task pool — LoopRun identity columns (idempotent, safe to re-run)
+try { db.exec('ALTER TABLE loop_runs ADD COLUMN kind TEXT'); } catch {}
+try { db.exec('ALTER TABLE loop_runs ADD COLUMN parent_loop_run_id TEXT'); } catch {}
+try { db.exec('ALTER TABLE loop_runs ADD COLUMN task_id TEXT'); } catch {}
+
 // ============================================================
 // Schema
 // ============================================================
@@ -1105,8 +1110,9 @@ function persistLoopRun(loopRun) {
     INSERT INTO loop_runs(
       loop_run_id, project_id, conversation_id, task_spec_ref, automation_mode,
       loop_status, loop_status_hash, loop_status_json,
-      is_partial, partial_reason, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      is_partial, partial_reason, kind, parent_loop_run_id, task_id,
+      created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(loop_run_id) DO NOTHING
   `).run(
     loopRun.loopRunId,
@@ -1119,6 +1125,9 @@ function persistLoopRun(loopRun) {
     JSON.stringify(loopRun),
     loopRun.isPartial ? 1 : 0,
     loopRun.partialReason || null,
+    loopRun.kind || 'primary',
+    loopRun.parentLoopRunId || null,
+    loopRun.taskId || null,
     loopRun.createdAt || new Date().toISOString(),
     loopRun.updatedAt || loopRun.createdAt || new Date().toISOString(),
   );
@@ -1164,12 +1173,38 @@ function getLoopRun(loopRunId) {
     ),
     loopStatus: row.loop_status,
     hash: row.loop_status_hash,
+    kind: row.kind || 'primary',
+    parentLoopRunId: row.parent_loop_run_id || null,
+    taskId: row.task_id || null,
     isPartial: !!row.is_partial,
     partialReason: row.partial_reason,
     record,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+// AGENT-CONCURRENCY: resolve a LoopRun by its owning task_id (sub-agent spawn
+// needs the parent task's loopRunId; cancel cascade enumerates children).
+function getLoopRunByTaskId(taskId) {
+  if (!taskId) return null;
+  const row = db.prepare('SELECT loop_run_id FROM loop_runs WHERE task_id=? ORDER BY updated_at DESC LIMIT 1').get(taskId);
+  if (!row) return null;
+  return getLoopRun(row.loop_run_id);
+}
+
+// AGENT-CONCURRENCY: enumerate child sub-agent LoopRuns for a parent primary
+// LoopRun (used by the cancel cascade).
+function getLoopRunsByParentLoopRunId(parentLoopRunId) {
+  if (!parentLoopRunId) return [];
+  const rows = db
+    .prepare(
+      `SELECT loop_run_id FROM loop_runs
+       WHERE parent_loop_run_id=? AND (kind = 'subagent')
+       ORDER BY updated_at ASC`
+    )
+    .all(parentLoopRunId);
+  return rows.map((r) => getLoopRun(r.loop_run_id)).filter(Boolean);
 }
 
 function listLoopRunsForConversation(projectId, conversationId, { limit = 50 } = {}) {
@@ -1219,6 +1254,7 @@ function getActiveLoopRunForConversation(projectId, conversationId) {
     SELECT loop_run_id FROM loop_runs
     WHERE project_id=? AND conversation_id=?
       AND loop_status IN ('planned','running')
+      AND (kind IS NULL OR kind = 'primary')
     ORDER BY updated_at DESC LIMIT 1
   `).get(projectId, conversationId);
   if (!row) return null;
@@ -2069,6 +2105,8 @@ module.exports = {
   persistLoopRun,
   updateLoopRunStatus,
   getLoopRun,
+  getLoopRunByTaskId,
+  getLoopRunsByParentLoopRunId,
   listLoopRunsForConversation,
   listRunningLoopRuns,
   getActiveLoopRunForConversation,

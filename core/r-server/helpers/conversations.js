@@ -41,6 +41,7 @@ sqlite.exec(`
   );
   CREATE INDEX IF NOT EXISTS idx_msg_conv_ts ON copilot_messages(conversation_id, ts ASC);
 `);
+try { sqlite.exec('ALTER TABLE copilot_messages ADD COLUMN task_id TEXT'); } catch {}
 try { sqlite.exec('ALTER TABLE memory_vectors ADD COLUMN conversation_id TEXT'); } catch {}
 try { sqlite.exec('ALTER TABLE memory_vectors ADD COLUMN project_id TEXT'); } catch {}
 try { sqlite.exec('ALTER TABLE copilot_conversations ADD COLUMN project_id TEXT'); } catch {}
@@ -89,12 +90,12 @@ function getOrCreateActiveConversation(userId, hint) {
   return sqlite.prepare('SELECT * FROM copilot_conversations WHERE id=?').get(id);
 }
 
-function appendMessageToConversation(conversationId, role, content, meta) {
+function appendMessageToConversation(conversationId, role, content, meta, taskId) {
   if (!conversationId || !content) return null;
   const id = _newMsgId();
   const ts = new Date().toISOString();
-  sqlite.prepare('INSERT INTO copilot_messages(id, conversation_id, role, content, meta_json, ts) VALUES (?,?,?,?,?,?)')
-    .run(id, conversationId, role, String(content).slice(0, 30000), JSON.stringify(meta || {}), ts);
+  sqlite.prepare('INSERT INTO copilot_messages(id, conversation_id, role, content, meta_json, task_id, ts) VALUES (?,?,?,?,?,?,?)')
+    .run(id, conversationId, role, String(content).slice(0, 30000), JSON.stringify(meta || {}), taskId || null, ts);
   sqlite.prepare('UPDATE copilot_conversations SET message_count = message_count + 1, updated_at=?, last_page=COALESCE(?, last_page) WHERE id=?')
     .run(ts, (meta && meta.page) || null, conversationId);
   return id;
