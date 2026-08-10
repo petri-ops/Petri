@@ -33,9 +33,10 @@ import {
   ResultView,
   type ActiveArtifact,
   type JobStats,
-} from '@/pages/project-workspace';
+} from '@/components/workspace-panels/ResultView';
 import { ScheduledWorkspacePanel } from '@/components/workspace-panels/ScheduledWorkspacePanel';
 import { WorkspaceSearchPanel } from '@/components/workspace-panels/WorkspaceSearchPanel';
+import { ResultsLibrary } from '@/components/workspace-panels/ResultsLibrary';
 import styles from '@/pages/project-workspace.module.css';
 
 export type { ActiveArtifact };
@@ -86,7 +87,7 @@ export interface CenterPanelContext {
   // Handlers
   updateWorkspaceMode: (next: WorkspaceMode, replace?: boolean, jobId?: string | null) => void;
   setWorkspaceSearchQuery: (q: string) => void;
-  openRightPanel: (tab: 'home' | 'results' | 'files' | 'terminal' | 'browser' | 'chat') => void;
+  openRightPanel: (tab: 'home' | 'results' | 'files' | 'terminal' | 'browser' | 'chat' | 'analyze') => void;
   switchToProject: (id: string) => void;
   navigate: (to: string) => void;
   setActiveConvId: (id: string | null) => void;
@@ -271,7 +272,11 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
                 onModeChange={(mode, jobId) => ctx.updateWorkspaceMode(mode, true, jobId || ctx.activeJob?.id || null)}
               />
             ) : (
-              <div className={styles.resultSurfaceEmpty}>尚未选择分析结果</div>
+              <ResultsLibrary
+                projectId={ctx.projectId}
+                jobs={ctx.jobs}
+                onOpenJob={(jobId) => ctx.handleOpenResult(jobId, ctx.projectId)}
+              />
             )}
           </ResultStudioCanvas>
         </div>
