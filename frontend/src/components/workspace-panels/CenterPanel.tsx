@@ -30,12 +30,12 @@ import {
   shortRevisionLabel,
 } from '@/components/result-studio/resultSurface';
 import {
-  WorkspaceSearchPanel,
   ResultView,
   type ActiveArtifact,
   type JobStats,
 } from '@/pages/project-workspace';
 import { ScheduledWorkspacePanel } from '@/components/workspace-panels/ScheduledWorkspacePanel';
+import { WorkspaceSearchPanel } from '@/components/workspace-panels/WorkspaceSearchPanel';
 import styles from '@/pages/project-workspace.module.css';
 
 export type { ActiveArtifact };
