@@ -399,6 +399,16 @@
       "truthDomain": "g0-current-work-package",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "COLLABORATION",
+      "path": "docs/COLLABORATION.md",
+      "kind": "governance",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "team-collaboration-convention",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
     }
   ]
 }
