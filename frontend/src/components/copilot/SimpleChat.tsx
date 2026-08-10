@@ -89,10 +89,39 @@ import { HighlightedCode } from '@/components/ui/CodeHighlight';
 import { tools as staticTools } from '@/pages/_data';
 import { INITIAL_NAV_STATE, stepHistoryNavigation } from './chatHistoryNav';
 
-const conversationDrafts = new Map<string, string>();
+const COMPOSER_DRAFT_PREFIX = 'biof3:composer-draft:';
 
 function conversationDraftKey(projectId: string, conversationId: string | null): string {
   return `${projectId}:${conversationId || 'new'}`;
+}
+
+// UI-149: composer draft persists to localStorage so it survives page reload /
+// Electron restart. The previous in-memory Map was re-created on every remount
+// and therefore lost all unsent input on refresh / reopen.
+function loadConversationDraft(projectId: string, conversationId: string | null): string {
+  try {
+    return window.localStorage.getItem(COMPOSER_DRAFT_PREFIX + conversationDraftKey(projectId, conversationId)) || '';
+  } catch {
+    return '';
+  }
+}
+
+function saveConversationDraft(projectId: string, conversationId: string | null, text: string): void {
+  try {
+    const key = COMPOSER_DRAFT_PREFIX + conversationDraftKey(projectId, conversationId);
+    if (text) window.localStorage.setItem(key, text);
+    else window.localStorage.removeItem(key);
+  } catch {
+    // ignore quota / private-mode failures
+  }
+}
+
+function clearConversationDraft(projectId: string, conversationId: string | null): void {
+  try {
+    window.localStorage.removeItem(COMPOSER_DRAFT_PREFIX + conversationDraftKey(projectId, conversationId));
+  } catch {
+    // ignore availability failures
+  }
 }
 
 interface SimpleMessage {
@@ -601,14 +630,14 @@ export function SimpleChat({
   }, [input, resizeTextarea]);
 
   useEffect(() => {
-    setInput(conversationDrafts.get(conversationDraftKey(projectId, conversationId)) || '');
+    setInput(loadConversationDraft(projectId, conversationId) || '');
     setQueuedPrompts([]);
     historyNavRef.current = INITIAL_NAV_STATE;
   }, [conversationId, projectId]);
 
   const onInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
-    conversationDrafts.set(conversationDraftKey(projectId, conversationId), e.target.value);
+    saveConversationDraft(projectId, conversationId, e.target.value);
     historyNavRef.current = INITIAL_NAV_STATE;
     resizeTextarea(e.target);
   };
@@ -691,7 +720,7 @@ export function SimpleChat({
         },
       });
       if (!started) return;
-      conversationDrafts.delete(conversationDraftKey(projectId, conversationId));
+      clearConversationDraft(projectId, conversationId);
       setInput('');
       historyNavRef.current = INITIAL_NAV_STATE;
       if (taRef.current) taRef.current.style.height = 'auto';
@@ -910,7 +939,7 @@ export function SimpleChat({
         setQueuedPrompts((current) => [...current, trimmed].slice(-5));
         setInput('');
         historyNavRef.current = INITIAL_NAV_STATE;
-        conversationDrafts.delete(conversationDraftKey(projectId, conversationId));
+        clearConversationDraft(projectId, conversationId);
         if (taRef.current) taRef.current.style.height = 'auto';
       } else {
         void send(trimmed);
@@ -924,7 +953,7 @@ export function SimpleChat({
     setQueuedPrompts((current) => [...current, trimmed].slice(-5));
     setInput('');
     historyNavRef.current = INITIAL_NAV_STATE;
-    conversationDrafts.delete(conversationDraftKey(projectId, conversationId));
+    clearConversationDraft(projectId, conversationId);
     if (taRef.current) taRef.current.style.height = 'auto';
   }, [conversationId, input, projectId, streaming]);
 

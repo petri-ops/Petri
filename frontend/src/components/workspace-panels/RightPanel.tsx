@@ -20,6 +20,8 @@ import {
   TerminalPanel,
   BrowserPanel,
 } from '@/pages/project-workspace';
+import { tools as staticTools } from '@/pages/_data';
+import { AnalysisLaunchPanel } from '@/components/workspace-panels/AnalysisLaunchPanel';
 import styles from '@/pages/project-workspace.module.css';
 
 type DispatchSetter<T> = React.Dispatch<React.SetStateAction<T>>;
@@ -209,6 +211,15 @@ export function RightPanel({
                       />
                     )}
                   </div>
+                )}
+                {tab === 'analyze' && (
+                  <AnalysisLaunchPanel
+                    tools={staticTools}
+                    onLaunch={(tool) => {
+                      ctx.handleAskAgent(`请运行「${tool.title}」分析（${tool.category}）。`);
+                      ctx.handleOpenRightChat();
+                    }}
+                  />
                 )}
               </div>
             ))}
