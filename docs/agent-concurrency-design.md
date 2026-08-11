@@ -13,7 +13,7 @@
 | 父主线 | `feat/agent-concurrency` 分支 |
 | 启用形式 | 设计先行后已进入实现与实机验收（本文档同时保留设计决策与实现收敛） |
 | truthDomain | `agent-concurrency-design` |
-| 状态 | `active / in_progress`（A-1～A-6 开发态 Electron 验收已通过；待把 evidence 绑定实现提交后收口） |
+| 状态 | `completed`（A-1～A-6 开发态 Electron 验收通过；evidence 精确绑定实现提交 `6adeaa9`） |
 | 关联决策 | 推翻/兑现 `g0-rs-ux1h` §10 的 subagent 池推迟项 |
 
 ---
@@ -309,7 +309,7 @@ plugin 执行路径（DESeq2/GO-KEGG/volcano）
 - **阶段 A（后端底座）**：✅ 已实现 + `node --test` 全绿（5/5）。
 - **阶段 B（历史写入安全）**：✅ `conversations.js` `task_id` 列 + 写入已实现；并发压测无交错。
 - **阶段 C（前端多 run + 后台运行）**：✅ 已实现 + `vitest` 全绿（34/34，含 4 个新增 sub-agent 用例）。前端保留主 run 单通道不变，新增**平行 sub-agent 子系统**（按 `taskId` 索引），UI 暴露"后台运行"按钮与子任务卡片。
-- **阶段 D（收口）**：实现与定向门已完成；2026-08-11 A-1～A-6 开发态 Electron 验收全部通过，当前仅剩 evidence 与实现提交的 source hash 精确绑定。
+- **阶段 D（收口）**：✅ A-1～A-6 开发态 Electron 验收全部通过；evidence 已绑定实现提交与 15 个实现/测试 source hashes。
 
 ### 15.2 已落地改动（相对 §8/§11 的实际落点）
 - `core/r-server/db.js`：`loop_runs` 增 `kind` / `parent_loop_run_id` / `task_id` 三列（idempotent ALTER）；`persistLoopRun` 写三列；`getLoopRun` 投影 `kind`/`parentLoopRunId`/`taskId`；新增 `getLoopRunByTaskId(taskId)` 与 `getLoopRunsByParentLoopRunId(parentLoopRunId)`；`getActiveLoopRunForConversation` 仅 resume primary（向后兼容 `kind NULL`）。
@@ -332,6 +332,6 @@ plugin 执行路径（DESeq2/GO-KEGG/volcano）
 3. **父会话 / 子任务链路落点：未在 `tasks` 表加列，改为在 `loop_runs` 加 `task_id`。**
    subagent spawn 用 `getLoopRunByTaskId(parentTaskId)` 取父 `loopRunId`；cancel 级联用 `getLoopRunsByParentLoopRunId(parentLoopRunId)` 枚举子 `taskId`；避免在 `tasks` 表再引一列。
 
-### 15.4 下一步
+### 15.4 收口边界
 - 验收证据见 `acceptance/agent-concurrency/ui140-electron.json`：DeepSeek `deepseek-v4-flash` 连接测试与真实任务通过；A-1～A-6 全部 `passed`，并额外验证 renderer 重载按 conversation/project 精确恢复。
-- 当前 evidence 为 `passed_unbound / sourceTreeExact:false`。先提交实现检查点，再写入该提交的 source hashes；绑定完成前工作包保持 `active / in_progress`，且 `qualificationEligible:false` 不变。
+- Evidence 精确绑定实现提交 `6adeaa9` 与 15 个 source hashes，`sourceCommitMatchesSourceHashes:true`。该结论只覆盖当前 macOS 开发态 Electron，不外推 packaged、发布资格或其他平台；`qualificationEligible:false` 保持不变。

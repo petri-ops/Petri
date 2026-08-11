@@ -29,14 +29,13 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 
 ### 3.0 当前恢复检查点：UI-141 / UI-142 macOS 开发启动
 
-- 当前分支：`fix/startup-runtime-gate`，HEAD `8de1ff7`，与 `origin/fix/startup-runtime-gate` 同步；单 worktree。
-- 已提交：UI-141 将“后端未就绪”与“R Runtime 缺失”拆分，避免已安装运行时却继续提示重装；启动超时提示 12s→30s，启动期轮询 5s→1s。
-- 未提交 WIP：`.gitignore`、`scripts/dev-electron.js`、`src/main.js`、`frontend/src/components/backend/BackendStatusProvider.tsx`、`frontend/src/components/copilot/conversationRunStore.ts` 与本组 canonical 文档。未跟踪的 `biof3-dev` 已删除；开发/审计统一使用 `npm run dev`。
+- 当前分支：`fix/startup-runtime-gate`；实现检查点 `6adeaa9`；单 worktree。开发/审计统一使用 `npm run dev`，不保留 `biof3-dev` wrapper。
+- 已提交：UI-141 将“后端未就绪”与“R Runtime 缺失”拆分并修复轮询挂起；UI-142 通过 LaunchServices + 隔离 userData 根治 macOS 后台启动无键盘焦点；UI-140 修复恢复身份、早期派生与并发收口缺陷。
 - 根因证据：`launchctl asuser` 启动的 Electron 虽有 renderer focus，OS 层仍是 `AXFocused=false`，系统真实 `keystroke "x"` 不进 textarea；改为 LaunchServices `open -a` 后，同样按键读回 `"x"`。这证明问题来自 macOS GUI 启动上下文，不是 React textarea 抢焦点。
 - 当前现场（2026-08-11 复核）：canonical `npm run dev` 正在运行；3000/3001/3004/9222 全部监听，r-server/py-server health 均为 ok。日志含 `[renderer] page loaded` 和 `[focus] isKeyWindow after load: n/a isFocused: true`；Accessibility focused element 为 composer textarea，系统 UI 通道输入 `x` 后 textarea 读回 `"x"`，测试字符已清空。
 - UI-142 在当前 macOS 开发态边界已实机 verified。UI-141 的 strict TypeScript 已修复且启动服务恢复，仍需对“后端未就绪”和“运行时缺失”两套引导文案做最终 UI 实机核对后再升 verified。
 - `npm run test:changed:list` 当前因存量 `scripts/*.mjs` 分类规则重叠 fail-closed；本轮已用显式定向测试覆盖改动，不能把它表述为 `test:changed` 通过。
-- UI-140 / `AGENT-CONCURRENCY` 的 A-1～A-6 已在开发态 Electron 通过。DeepSeek `deepseek-v4-flash` 经 Clash Verge 规则恢复连通，真实主任务、排队续发、4 个并发 sub-agent 与第 5 个 `503 user_limit` 均有记录；renderer 重载按 conversation/project 恢复且控制台 0 error。`acceptance/agent-concurrency/ui140-electron.json` 当前为 `passed_unbound / sourceTreeExact:false`，只剩绑定实现提交后收口。
+- UI-140 / `AGENT-CONCURRENCY` 已完成。A-1～A-6 在开发态 Electron 通过；DeepSeek `deepseek-v4-flash` 经 Clash Verge 规则恢复连通，真实主任务、排队续发、4 个并发 sub-agent 与第 5 个 `503 user_limit` 均有记录；renderer 重载按 conversation/project 恢复且控制台 0 error。`acceptance/agent-concurrency/ui140-electron.json` 精确绑定 `6adeaa9` 与 15 个 source hashes，UI-140 在该开发态边界为 verified。
 
 ### 3.1 已收口主线：G0-RS-UX1H Async Tool Surface（2026-08-09 收口）
 
