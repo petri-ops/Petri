@@ -88,41 +88,12 @@ import { Icon } from '@/components/icons/Icon';
 import { HighlightedCode } from '@/components/ui/CodeHighlight';
 import { tools as staticTools } from '@/pages/_data';
 import { INITIAL_NAV_STATE, stepHistoryNavigation } from './chatHistoryNav';
-
-const COMPOSER_DRAFT_PREFIX = 'biof3:composer-draft:';
-
-function conversationDraftKey(projectId: string, conversationId: string | null): string {
-  return `${projectId}:${conversationId || 'new'}`;
-}
-
-// UI-149: composer draft persists to localStorage so it survives page reload /
-// Electron restart. The previous in-memory Map was re-created on every remount
-// and therefore lost all unsent input on refresh / reopen.
-function loadConversationDraft(projectId: string, conversationId: string | null): string {
-  try {
-    return window.localStorage.getItem(COMPOSER_DRAFT_PREFIX + conversationDraftKey(projectId, conversationId)) || '';
-  } catch {
-    return '';
-  }
-}
-
-function saveConversationDraft(projectId: string, conversationId: string | null, text: string): void {
-  try {
-    const key = COMPOSER_DRAFT_PREFIX + conversationDraftKey(projectId, conversationId);
-    if (text) window.localStorage.setItem(key, text);
-    else window.localStorage.removeItem(key);
-  } catch {
-    // ignore quota / private-mode failures
-  }
-}
-
-function clearConversationDraft(projectId: string, conversationId: string | null): void {
-  try {
-    window.localStorage.removeItem(COMPOSER_DRAFT_PREFIX + conversationDraftKey(projectId, conversationId));
-  } catch {
-    // ignore availability failures
-  }
-}
+import {
+  clearConversationDraft,
+  loadConversationDraft,
+  migrateConversationDraft,
+  saveConversationDraft,
+} from './conversationDraft';
 
 interface SimpleMessage {
   role: 'user' | 'assistant';
@@ -692,6 +663,7 @@ export function SimpleChat({
       if (!targetConversationId) {
         const created = await createConversationForRun('新对话');
         if (!created) return;
+        migrateConversationDraft(projectId, null, created.id);
         targetConversationId = created.id;
         onConversationChange(created.id);
       }

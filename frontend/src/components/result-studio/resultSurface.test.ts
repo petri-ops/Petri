@@ -27,6 +27,18 @@ describe('G0-RS-P1 result surface projection', () => {
     expect(resolveResultViewerAdapter({ kind: 'file', fileName: 'archive.zip', preview: false })).toBe('binary');
   });
 
+  it('keeps readable scientific text files aligned with the text preview loader', () => {
+    expect(resolveResultViewerAdapter({ kind: 'file', fileName: 'analysis.py' })).toBe('text');
+    expect(resolveResultViewerAdapter({ kind: 'file', fileName: 'workflow.R' })).toBe('text');
+    expect(resolveResultViewerAdapter({ kind: 'file', fileName: 'variants.vcf' })).toBe('text');
+    expect(resolveResultViewerAdapter({ kind: 'file', fileName: 'config.toml' })).toBe('text');
+  });
+
+  it('does not claim Excel workbooks have an inline table viewer', () => {
+    expect(resolveResultViewerAdapter({ kind: 'table', fileName: 'results.xlsx' })).toBe('binary');
+    expect(resolveResultViewerAdapter({ kind: 'file', fileName: 'legacy.xls' })).toBe('binary');
+  });
+
   it.each([
     ['image', true, false],
     ['table', true, true],
