@@ -1063,6 +1063,214 @@
   font-size: 12px;
 }
 
+/* UI-148 / T86 — 结果库（result 模式默认空态的库式浏览面板） */
+.resultsLibrary {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: 16px;
+  gap: 12px;
+  overflow: hidden;
+}
+.resultsLibraryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--biof3-text-primary, #1a1a1a);
+}
+.resultsLibraryHeader strong {
+  font-size: 14px;
+}
+.resultsLibraryCount {
+  margin-left: 8px;
+  font-size: 12px;
+  color: var(--biof3-text-tertiary, #8a8a8a);
+}
+.resultsLibraryEmpty {
+  color: var(--biof3-text-tertiary, #8a8a8a);
+  font-size: 12px;
+  padding: 12px 0;
+}
+.resultsLibraryList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.resultsLibraryItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: 1px solid var(--biof3-border, #e2e2e2);
+  border-radius: 8px;
+  background: var(--biof3-surface, #ffffff);
+  color: var(--biof3-text-primary, #1a1a1a);
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+.resultsLibraryItem:hover {
+  border-color: var(--biof3-accent, var(--biof3-border-strong, #cfcfcf));
+  background: var(--biof3-surface-hover, #f5f7fa);
+}
+.resultsLibraryItemMain {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.resultsLibraryItemTitle {
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.resultsLibraryItemMeta {
+  font-size: 11px;
+  color: var(--biof3-text-tertiary, #8a8a8a);
+}
+.resultsLibraryBadge {
+  flex: none;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+.resultsLibraryBadge[data-status='done'] {
+  color: var(--biof3-success, #2e7d32);
+  background: rgba(46, 125, 50, 0.12);
+}
+.resultsLibraryBadge[data-status='running'] {
+  color: var(--biof3-info, #1565c0);
+  background: rgba(21, 101, 192, 0.12);
+}
+.resultsLibraryBadge[data-status='pending'] {
+  color: var(--biof3-text-secondary, #5a5a5a);
+  background: var(--biof3-surface-strong, #f0f0f0);
+}
+.resultsLibraryBadge[data-status='failed'] {
+  color: var(--biof3-danger, #c62828);
+  background: rgba(198, 40, 40, 0.12);
+}
+
+/* UI-147 / T84 — 分析入口面板（右栏「分析」tab 的内容） */
+.analysisLaunch {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: 16px;
+  gap: 12px;
+  overflow: hidden;
+}
+.analysisLaunchHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.analysisLaunchHeader strong {
+  font-size: 14px;
+  color: var(--biof3-text-primary, #1a1a1a);
+}
+.analysisLaunchHint {
+  font-size: 11px;
+  color: var(--biof3-text-tertiary, #8a8a8a);
+}
+.analysisLaunchList {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.analysisLaunchGroupTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--biof3-text-secondary, #5a5a5a);
+  margin: 0 0 8px;
+}
+.analysisLaunchCards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.analysisLaunchCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--biof3-border, #e2e2e2);
+  border-radius: 8px;
+  background: var(--biof3-surface, #ffffff);
+}
+.analysisLaunchCardMain {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.analysisLaunchCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--biof3-text-primary, #1a1a1a);
+}
+.analysisLaunchDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+.analysisLaunchCardDesc {
+  font-size: 11px;
+  color: var(--biof3-text-tertiary, #8a8a8a);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.analysisLaunchCardMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--biof3-text-secondary, #5a5a5a);
+}
+.analysisLaunchLang {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--biof3-border, #e2e2e2);
+  text-transform: uppercase;
+}
+.analysisLaunchRun {
+  flex: none;
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: var(--biof3-accent, #3b82f6);
+  color: var(--biof3-on-solid, #ffffff);
+  cursor: pointer;
+}
+.analysisLaunchRun:disabled {
+  background: var(--biof3-surface-strong, #f0f0f0);
+  color: var(--biof3-text-tertiary, #8a8a8a);
+  cursor: not-allowed;
+}
+
 /* Left rail — always visible on the left edge of center column */
 .leftRail {
   position: absolute;
@@ -2369,6 +2577,67 @@ button.workspacePinnedSummaryMetricCard:hover {
   display: grid;
   grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
   gap: 16px;
+}
+
+.scheduledEmptyState {
+  grid-column: 1 / -1;
+  align-self: center;
+  justify-self: center;
+  max-width: 420px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 32px 28px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 14px;
+  background: var(--biof3-surface-translucent);
+}
+
+.scheduledEmptyIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--biof3-accent-bg);
+  color: var(--biof3-accent);
+}
+
+.scheduledEmptyTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--biof3-text);
+}
+
+.scheduledEmptyDesc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--biof3-text-secondary);
+}
+
+.scheduledEmptyBack {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 16px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 8px;
+  background: var(--biof3-surface);
+  color: var(--biof3-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.scheduledEmptyBack:hover {
+  color: var(--biof3-text);
+  background: var(--biof3-hover);
 }
 
 .scheduledHistoryCol,
