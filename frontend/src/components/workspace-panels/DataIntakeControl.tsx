@@ -134,7 +134,7 @@ export function DataIntakeControl({
         >
           <header className={styles.dataIntakeHeader}>
             <strong>数据准备</strong>
-            <button type="button" onClick={closeIntake} aria-label="关闭">
+            <button className="biof3-btn biof3-btn--icon" type="button" onClick={closeIntake} aria-label="关闭">
               <Icon name="x" size={13} />
             </button>
           </header>

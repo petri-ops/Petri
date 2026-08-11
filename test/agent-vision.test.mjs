@@ -3,7 +3,7 @@
 // 需：DashScope API key（用户设置或 DASHSCOPE_API_KEY env）+ 已有完成的 volcano-plot tool_job
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 
@@ -13,7 +13,8 @@ const req = createRequire(import.meta.url);
 
 const db = req(R_SERVER + '/db.js');
 const { tool_read_image } = req(R_SERVER + '/agent-tools/vision-tools.js');
-const { callTool } = await import(resolve(__dirname, '..', 'core', 'r-server', 'mcp', 'registry.js'));
+// 动态 import 必须用 file:// URL（Windows 绝对路径 D:/... 不被 ESM loader 接受）
+const { callTool } = await import(pathToFileURL(resolve(__dirname, '..', 'core', 'r-server', 'mcp', 'registry.js')).href);
 
 const RUN_LIVE = process.env.RUN_VISION_LIVE === '1';
 

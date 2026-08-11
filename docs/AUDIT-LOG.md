@@ -21,7 +21,9 @@
 | 🟡建议 | 2026-07-17 | `capability-provisioning.js` 的下载实现与 plugin-manager 各自维护 | host 白名单已经修复；共享下载 helper 只在改动该能力时评估，不阻塞 RH0 |
 | 🟡待评估 | 2026-07-17 | 本地分支 `codex/fix-collapsed-right-titlebar` 尚未采用，且与当前 UI 已有语义重叠 | 不直接 merge；进入相关 UI 工作时先比较当前实现，再决定删除或重做 |
 
-当前没有 🔴 阻塞当前收口项，也没有 🟢 待合并项。`UI-124 / MODEL-ANTHROPIC-NATIVE` 已按 `docs/ui-productization-audit.md`「key-unavailable 例外」纪律收口；`G0-SDC-1 / G0-SDC-2` 已于 2026-08-06 以 fixture + 门禁脚本收口，canonical evidence 为 `acceptance/g0-scientific-data-contract/sdc1-complete.json` 与 `sdc2-semantic-binder.json`。待 `BIOTEST_ANTHROPIC_KEY` 可用时新开 audit 跑 live 模式补充实机 evidence（不触发回退）。
+| 🟡延期 | 2026-08-10 | **Windows 代码签名缺失（任务 #55）**：`electron-builder.yml` 仅 macOS 配置 afterSign，Windows 段无证书/签名配置；当前 Windows 安装包为未签名 NSIS（`dist/BioF3 Setup 0.0.1-rc.7.exe`）。未签名包在 Windows SmartScreen/Defender 下会触发未知发布者警告，属发布门禁缺口，非功能缺陷 | 阻塞于**代码签名证书**：需发布负责人提供 EV/标准代码签名证书并配置 `electron-builder.yml` win 段 afterSign/证书路径。证书到位前不得伪造 `release-contract.json` 的 windows-x64.supported 翻转——当前 `supported` 仍诚实保持 false（reason 已写明"制品存在且通过验证，仅缺签名/公证"）。用户裁决：标记 deferred，待证书到位再闭环 |
+| 🟡延期 | 2026-08-10 | **i18n 资源抽离未做（任务 #91）**：全仓无 react-i18next/i18n 框架，用户可见字符串散落于组件（grep 命中多为 `Intl.`/locale 巧合，非 i18n 体系）。抽离需引入 i18n 框架、建立语言资源文件、改造所有文案调用点，属较大前端架构决策 | 阻塞于**产品/架构决策**：是否国际化、支持哪些语言、采用 react-i18next 还是自研轻量方案。决策前不强行抽离（避免半吊子框架增加维护成本）。用户裁决：标记 deferred，待产品明确国际化范围后再立项 |
+当前无 🔴 阻塞项（macOS R/Python 运行时 OSS 404 已于 2026-08-09 修复收口，两端均 200 + 端到端验证通过）；没有 🟢 待合并项。`UI-124 / MODEL-ANTHROPIC-NATIVE` 已按 `docs/ui-productization-audit.md`「key-unavailable 例外」纪律收口；`G0-SDC-1 / G0-SDC-2` 已于 2026-08-06 以 fixture + 门禁脚本收口，canonical evidence 为 `acceptance/g0-scientific-data-contract/sdc1-complete.json` 与 `sdc2-semantic-binder.json`。待 `BIOTEST_ANTHROPIC_KEY` 可用时新开 audit 跑 live 模式补充实机 evidence（不触发回退）。
 
 ## 最近处理记录
 

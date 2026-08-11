@@ -1,4 +1,5 @@
 import type { ResultArtifactKind } from '@/lib/result-manifest';
+import { isTextFile } from '@/lib/previewFileUtils';
 
 export type ResultSurfaceMode = 'result' | 'code' | 'compare' | 'history';
 export type ResultViewerAdapter = 'report' | 'image' | 'table' | 'json' | 'text' | 'binary';
@@ -75,9 +76,10 @@ export function resolveResultViewerAdapter(input: {
   if (input.kind === 'report' || /\.html?$/.test(name)) return 'report';
   if (/\.pdf$/.test(name)) return 'binary';
   if (input.kind === 'plot' || /\.(png|jpe?g|gif|svg|webp)$/.test(name)) return 'image';
-  if (input.kind === 'table' || /\.(csv|tsv|xlsx?)$/.test(name)) return 'table';
+  if (/\.xlsx?$/.test(name)) return 'binary';
+  if (input.kind === 'table' || /\.(csv|tsv)$/.test(name)) return 'table';
   if (/\.json$/.test(name)) return 'json';
-  if (input.kind === 'text' || /\.(txt|md|log|ya?ml)$/.test(name)) return 'text';
+  if (input.kind === 'text' || isTextFile(name)) return 'text';
   return 'binary';
 }
 

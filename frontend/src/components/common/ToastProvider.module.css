@@ -1,0 +1,62 @@
+.viewport {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+  pointer-events: none;
+  max-width: min(380px, calc(100vw - 40px));
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--biof3-border);
+  border-left: 4px solid var(--biof3-info);
+  background: var(--biof3-bg-elevated);
+  color: var(--biof3-text);
+  box-shadow: var(--biof3-shadow-sm);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.toast[data-variant='success'] {
+  border-left-color: var(--biof3-success);
+}
+.toast[data-variant='info'] {
+  border-left-color: var(--biof3-info);
+}
+.toast[data-variant='warning'] {
+  border-left-color: var(--biof3-warning-text);
+}
+.toast[data-variant='error'] {
+  border-left-color: var(--biof3-danger);
+}
+
+.message {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.dismiss {
+  flex: 0 0 auto;
+  border: none;
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+  border-radius: 4px;
+}
+
+.dismiss:hover {
+  color: var(--biof3-text);
+}

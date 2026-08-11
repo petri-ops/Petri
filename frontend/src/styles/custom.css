@@ -71,6 +71,7 @@
   --biof3-danger-bg: var(--biof3-status-error-bg);
   --biof3-border: #e2e8f0;
   --biof3-border-strong: #cbd5e1;
+  --biof3-border-tertiary: #eef2f7;
   --biof3-text: #0f172a;
   --biof3-text-primary: var(--biof3-text);
   --biof3-text-secondary: #475569;
@@ -113,6 +114,26 @@
  --biof3-user-bubble-bg: rgba(15, 23, 42, 0.065);
  --biof3-accent-orange: #ea580c;
  --biof3-accent-orange-bg: rgba(249, 115, 22, 0.08);
+
+  /* ===== 设计系统补齐令牌（UI-151 / 关闭 #87 theme-token-contract 缺口） =====
+     以下 7 个令牌此前仅被组件以 var(--biof3-*) 引用却无 :root 定义，
+     导致 theme-token-contract 测试失败、且引用处回退为无效值。
+     取值优先复用既有语义令牌（surface 类用 var() 引用，明暗双主题自动适配），
+     颜色类对齐组件原 fallback，保证零视觉回归。 */
+  --biof3-success: #2e7d32;
+  --biof3-info: #1565c0;
+  --biof3-bg-hover: var(--biof3-hover);
+  --biof3-surface-raised: var(--biof3-bg-elevated);
+  --biof3-bg-surface-raised: var(--biof3-bg-elevated);
+  --biof3-surface-strong: var(--biof3-bg-surface);
+  --biof3-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
+  /* ===== UI-155 / 关闭合并后暴露的 theme-token-contract 缺口 =====
+     --biof3-surface-2 与 --biof3-status-idle 此前被 simple-chat.css
+     （origin/main PR #13 的 subagent UI）以 var(--biof3-*) 引用却无定义，
+     导致 theme-token-contract 测试失败、引用处回退为无效值。
+     取值对齐组件原 fallback，保证零视觉回归。 */
+  --biof3-surface-2: rgba(127, 127, 127, 0.12);
+  --biof3-status-idle: #9ca3af;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -155,6 +176,7 @@
   --biof3-danger-bg: var(--biof3-status-error-bg);
   --biof3-border: #243149;
   --biof3-border-strong: #324466;
+  --biof3-border-tertiary: #2a3a54;
   --biof3-text: #e6edf3;
   --biof3-text-primary: var(--biof3-text);
   --biof3-text-secondary: #b1bac4;
@@ -195,8 +217,11 @@
  --biof3-accent-border: rgba(45, 212, 191, 0.4);
  --biof3-accent-surface: rgba(45, 212, 191, 0.12);
  --biof3-user-bubble-bg: rgba(148, 163, 184, 0.12);
- --biof3-accent-orange: #fb923c;
- --biof3-accent-orange-bg: rgba(251, 146, 60, 0.16);
+  --biof3-accent-orange: #fb923c;
+  --biof3-accent-orange-bg: rgba(251, 146, 60, 0.16);
+  /* ===== UI-155 / 合并后暴露的 theme-token-contract 缺口（dark 适配） ===== */
+  --biof3-surface-2: rgba(127, 127, 127, 0.08);
+  --biof3-status-idle: #94a3b8;
 
   /* Infima emphasis overrides — 让 ifm 颜色也跟 biof3 深色对齐 */
   --ifm-background-color: var(--biof3-bg-canvas);

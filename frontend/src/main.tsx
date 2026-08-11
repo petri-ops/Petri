@@ -6,14 +6,17 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import App from './App';
 import { ThemeProvider } from './themes/ThemeProvider';
+import { ToastProvider } from './components/common/ToastProvider';
 import './styles/global.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ThemeProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <ToastProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ToastProvider>
     </ThemeProvider>
   </React.StrictMode>
 );

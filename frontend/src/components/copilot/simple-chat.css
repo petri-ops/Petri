@@ -329,6 +329,39 @@
   color: var(--biof3-text);
 }
 
+.sc-msg-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* T83: divider between 复制 and 重新生成 in the AI message footer. */
+.sc-msg-action-divider {
+  align-self: stretch;
+  width: 1px;
+  margin: 2px 2px;
+  background: var(--biof3-border-tertiary);
+}
+
+/* T83: per-AI-message header meta `模型名 · 回复时间`. */
+.sc-msg-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--biof3-text-muted);
+}
+
+.sc-msg-meta-model {
+  font-weight: 600;
+  color: var(--biof3-text-tertiary);
+}
+
+.sc-msg-meta-sep {
+  color: var(--biof3-border-strong);
+}
+
 .sc-msg-body p {
   margin: 0 0 8px;
 }
@@ -1184,6 +1217,26 @@
 .sc-composer-icon-btn:hover {
   background: var(--biof3-bg-subtle);
   color: var(--biof3-text);
+}
+
+/* T83: dead `+` button and no-reference refresh state. */
+.sc-composer-icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sc-composer-icon-btn.is-faded {
+  opacity: 0.4;
+}
+
+.sc-icon-spin {
+  animation: sc-icon-spin 0.7s linear infinite;
+}
+
+@keyframes sc-icon-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .sc-access-picker {

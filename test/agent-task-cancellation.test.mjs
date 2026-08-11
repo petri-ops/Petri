@@ -12,7 +12,12 @@ const require = createRequire(import.meta.url);
 const store = require('../core/r-server/agent-task-store');
 
 test.after(() => {
-  fs.rmSync(tempDir, { recursive: true, force: true });
+  // Windows: better-sqlite3 仍持有 DB 文件句柄，rmdir 会 EPERM —— best-effort 清理，不阻断套件
+  try {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  } catch (e) {
+    if (process.platform !== 'win32') throw e;
+  }
 });
 
 test('persists an explicit cancellation request and terminal cancelled state', () => {
