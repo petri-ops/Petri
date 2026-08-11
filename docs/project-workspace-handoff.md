@@ -33,7 +33,7 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 - 已提交：UI-141 将“后端未就绪”与“R Runtime 缺失”拆分并修复轮询挂起；UI-142 通过 LaunchServices + 隔离 userData 根治 macOS 后台启动无键盘焦点；UI-140 修复恢复身份、早期派生与并发收口缺陷。
 - 根因证据：`launchctl asuser` 启动的 Electron 虽有 renderer focus，OS 层仍是 `AXFocused=false`，系统真实 `keystroke "x"` 不进 textarea；改为 LaunchServices `open -a` 后，同样按键读回 `"x"`。这证明问题来自 macOS GUI 启动上下文，不是 React textarea 抢焦点。
 - 当前现场（2026-08-11 复核）：canonical `npm run dev` 正在运行；3000/3001/3004/9222 全部监听，r-server/py-server health 均为 ok。日志含 `[renderer] page loaded` 和 `[focus] isKeyWindow after load: n/a isFocused: true`；Accessibility focused element 为 composer textarea，系统 UI 通道输入 `x` 后 textarea 读回 `"x"`，测试字符已清空。
-- UI-142 在当前 macOS 开发态边界已实机 verified。UI-141 的 strict TypeScript 已修复且启动服务恢复，仍需对“后端未就绪”和“运行时缺失”两套引导文案做最终 UI 实机核对后再升 verified。
+- UI-142 在当前 macOS 开发态边界已实机 verified。UI-141 也已用当前源码构建隔离 unsigned arm64 packaged 候选：真实 `rRuntime:false/pyRuntime:false` 首启只显示运行时安装引导，且在双后端未启动时仍能打开纯 IPC 插件商店；证据 `acceptance/startup-runtime/ui141-startup-runtime-gate.json` 与两张截图，状态 verified。
 - `npm run test:changed:list` 当前因存量 `scripts/*.mjs` 分类规则重叠 fail-closed；本轮已用显式定向测试覆盖改动，不能把它表述为 `test:changed` 通过。
 - UI-140 / `AGENT-CONCURRENCY` 已完成。A-1～A-6 在开发态 Electron 通过；DeepSeek `deepseek-v4-flash` 经 Clash Verge 规则恢复连通，真实主任务、排队续发、4 个并发 sub-agent 与第 5 个 `503 user_limit` 均有记录；renderer 重载按 conversation/project 恢复且控制台 0 error。`acceptance/agent-concurrency/ui140-electron.json` 精确绑定 `6adeaa9` 与 15 个 source hashes，UI-140 在该开发态边界为 verified。
 
