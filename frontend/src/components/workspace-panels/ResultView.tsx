@@ -1118,7 +1118,7 @@ function ResultArtifactShell({
             <thead>
               <tr>
                 {header.map((cell, idx) => (
-                  <td key={`${cell || 'col'}-${idx}`}>{cell || `列 ${idx + 1}`}</td>
+                  <th key={`${cell || 'col'}-${idx}`} scope="col">{cell || `列 ${idx + 1}`}</th>
                 ))}
               </tr>
             </thead>
