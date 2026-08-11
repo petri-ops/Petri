@@ -37,6 +37,21 @@ function isProcAlive(proc) {
   return !!proc && !proc.killed;
 }
 
+function mergeRuntimeStatusWithConfiguredHomes(runtimeStatus, env = process.env) {
+  const merged = {
+    ...(runtimeStatus || {}),
+    r: { ...(runtimeStatus?.r || {}) },
+    python: { ...(runtimeStatus?.python || {}) },
+  };
+  // In development, main.js may resolve a valid system runtime even though it
+  // is not present in the plugin installation ledger. The configured runtime
+  // home is authoritative for availability and must not be collapsed into
+  // "not installed" merely because the child server stopped.
+  if (env.BIOF3_R_HOME) merged.r.installed = true;
+  if (env.BIOF3_PY_HOME) merged.python.installed = true;
+  return merged;
+}
+
 /**
  * 聚合后端状态。
  * @param {object} opts
@@ -78,4 +93,4 @@ async function getBackendStatus({ runtimeStatus, procs, probeHealth, probePy, pr
   return { rRuntime, pyRuntime, rServerUp, pyServerUp, plumberUp, isReady, downReason };
 }
 
-module.exports = { getBackendStatus, probeUrl };
+module.exports = { getBackendStatus, mergeRuntimeStatusWithConfiguredHomes, probeUrl };

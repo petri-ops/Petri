@@ -45,6 +45,24 @@ test('python runtime path helpers cover Windows and Unix layouts', () => {
   assert.deepEqual(runtimePaths.getPythonExecutableCandidates('linux'), ['python3', 'python']);
 });
 
+test('python runtime lookup prefers bin launcher over framework root dylib', () => {
+  const fs = req('node:fs');
+  const os = req('node:os');
+  const path = req('node:path');
+  const runtimeHome = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-python-home-'));
+  try {
+    fs.mkdirSync(path.join(runtimeHome, 'bin'));
+    fs.writeFileSync(path.join(runtimeHome, 'python'), 'framework dylib placeholder');
+    fs.writeFileSync(path.join(runtimeHome, 'bin', 'python3'), '#!/bin/sh\n');
+    assert.equal(
+      runtimePaths.getPythonRuntimeExecutable(runtimeHome, 'darwin'),
+      path.join(runtimeHome, 'bin', 'python3'),
+    );
+  } finally {
+    fs.rmSync(runtimeHome, { recursive: true, force: true });
+  }
+});
+
 test('built-in plugin root matches electron-builder extraResources layout', () => {
   assert.equal(
     compat.getBuiltInPluginsDir({

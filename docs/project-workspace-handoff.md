@@ -1,6 +1,6 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-08-04
+最后更新：2026-08-11
 
 ## 1. 恢复顺序
 
@@ -27,7 +27,18 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 
 ## 3. 当前立即任务
 
-### 3.0 已收口主线：G0-RS-UX1H Async Tool Surface（2026-08-09 收口）
+### 3.0 当前恢复检查点：UI-141 / UI-142 macOS 开发启动
+
+- 当前分支：`fix/startup-runtime-gate`，HEAD `8de1ff7`，与 `origin/fix/startup-runtime-gate` 同步；单 worktree。
+- 已提交：UI-141 将“后端未就绪”与“R Runtime 缺失”拆分，避免已安装运行时却继续提示重装；启动超时提示 12s→30s，启动期轮询 5s→1s。
+- 未提交 WIP：`.gitignore`、`scripts/dev-electron.js`、`src/main.js`、`frontend/src/components/backend/BackendStatusProvider.tsx`、`frontend/src/components/copilot/conversationRunStore.ts` 与本组 canonical 文档。未跟踪的 `biof3-dev` 已删除；开发/审计统一使用 `npm run dev`。
+- 根因证据：`launchctl asuser` 启动的 Electron 虽有 renderer focus，OS 层仍是 `AXFocused=false`，系统真实 `keystroke "x"` 不进 textarea；改为 LaunchServices `open -a` 后，同样按键读回 `"x"`。这证明问题来自 macOS GUI 启动上下文，不是 React textarea 抢焦点。
+- 当前现场（2026-08-11 复核）：canonical `npm run dev` 正在运行；3000/3001/3004/9222 全部监听，r-server/py-server health 均为 ok。日志含 `[renderer] page loaded` 和 `[focus] isKeyWindow after load: n/a isFocused: true`；Accessibility focused element 为 composer textarea，系统 UI 通道输入 `x` 后 textarea 读回 `"x"`，测试字符已清空。
+- UI-142 在当前 macOS 开发态边界已实机 verified。UI-141 的 strict TypeScript 已修复且启动服务恢复，仍需对“后端未就绪”和“运行时缺失”两套引导文案做最终 UI 实机核对后再升 verified。
+- `npm run test:changed:list` 当前因存量 `scripts/*.mjs` 分类规则重叠 fail-closed；本轮已用显式定向测试覆盖改动，不能把它表述为 `test:changed` 通过。
+- UI-140 / `AGENT-CONCURRENCY` 的 A-1～A-6 已在开发态 Electron 通过。DeepSeek `deepseek-v4-flash` 经 Clash Verge 规则恢复连通，真实主任务、排队续发、4 个并发 sub-agent 与第 5 个 `503 user_limit` 均有记录；renderer 重载按 conversation/project 恢复且控制台 0 error。`acceptance/agent-concurrency/ui140-electron.json` 当前为 `passed_unbound / sourceTreeExact:false`，只剩绑定实现提交后收口。
+
+### 3.1 已收口主线：G0-RS-UX1H Async Tool Surface（2026-08-09 收口）
 
 2026-08-06 用户在真实 airway 数据（`tmp/airway-test/airway_counts_symbol.csv` + `airway_metadata.csv`，4 control vs 4 treated，34889 gene rows × 8 sample）上完成开发态 Electron 端到端流程：`run_tool → tool_job → artifact truth → projectOpenResult` 全部成功，1 个 completed DESeq2 Job、Artifact Truth `valid`、同 Job PNG 自动打开。LLM 总结阶段真实 socket timeout 与自动重试结束后，返回对话显示"✓ 工具已完成，AI 总结暂时不可用"，assistant 行不再显示"请求超时"；截图与脱敏证据见 `acceptance/g0-rs-ux1h/`。
 
@@ -37,7 +48,7 @@ UI-108 / UI-109 / UI-113 / UI-114 仍维持 `in_progress`；本计划不冒充�
 
 验证节奏按用户裁决采用风险驱动：开发中只跑语法与受影响单测；真实数据 Electron 长链仅在阶段收口运行一次，除非产品行为或验收脚本发生实质变化，不重复消耗长链窗口。
 
-### 3.0 历史主线：G0 Living Foundation maintained
+### 3.2 历史主线：G0 Living Foundation maintained
 
 2026-07-25 `G0-START`、LF0～LF12 核心资格已关闭并进入 maintained。Result Studio RS0～RS8 的引擎基础存在，但后续产品复核确认 RS9 的第 17 类证据不能证明连续真实产品任务；`result-studio-editing` 支持声明暂停，当前状态为 `P7 deferred / implemented_unverified / experimental`。
 

@@ -151,6 +151,37 @@ describe('agent task localStorage 恢复 (AGENT-CONCURRENCY)', () => {
     expect(findResumableAgentTask()).toBe('p1');
   });
 
+  it('findResumableAgentTask 按会话与项目隔离恢复归属', () => {
+    const now = Date.now();
+    localStorage.setItem(
+      'biof3_agent_task_other',
+      JSON.stringify({
+        taskId: 'other',
+        ts: now + 2,
+        kind: 'primary',
+        conversationId: 'c-other',
+        projectId: 'p-other',
+      })
+    );
+    localStorage.setItem(
+      'biof3_agent_task_target',
+      JSON.stringify({
+        taskId: 'target',
+        ts: now + 1,
+        kind: 'primary',
+        conversationId: 'c-target',
+        projectId: 'p-target',
+      })
+    );
+    localStorage.setItem(
+      'biof3_agent_task_legacy',
+      JSON.stringify({ taskId: 'legacy', ts: now + 3 })
+    );
+
+    expect(findResumableAgentTask('c-target', 'p-target')).toBe('target');
+    expect(findResumableAgentTask('c-missing', 'p-missing')).toBeNull();
+  });
+
   it('findResumableSubAgentTasks 仅返回 sub-agent（含 parentTaskId）', () => {
     const now = Date.now();
     localStorage.setItem('biof3_agent_task_legacy', JSON.stringify({ taskId: 'legacy', ts: now - 3000 }));

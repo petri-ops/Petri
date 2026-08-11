@@ -141,7 +141,8 @@ module.exports = function registerAiAgentRoute(app) {
   app.post('/api/ai/agent', express.json({ limit: '256kb' }), async (req, res) => {
     const requestStartedAt = Date.now();
     const { getChatProviderName, getChatModelPreset, getChatModelCredential } = require('../helpers/ai-settings');
-    const { messages, context, conversationId: explicitConvId, modelPresetId, modelName: requestedModelName } = req.body || {};
+    const { messages, context, modelPresetId, modelName: requestedModelName } = req.body || {};
+    let explicitConvId = req.body && req.body.conversationId;
     const selectedPreset = getChatModelPreset(modelPresetId);
     const providerName = (selectedPreset && selectedPreset.provider) || getChatProviderName();
     const providerLabel = providerName === 'deepseek'
@@ -180,8 +181,14 @@ module.exports = function registerAiAgentRoute(app) {
         if (parentTask.userId && parentTask.userId !== userId) {
           return res.status(403).json({ status: 'error', error: '无权以该 parentTask 派生子 agent' });
         }
+        if (parentTask.status !== 'running' || parentTask.agentStatus !== 'running') {
+          return res.status(409).json({ status: 'error', error: 'parentTask 已结束，不能再派生子 agent' });
+        }
+        if ((parentTask.params?.kind || 'primary') !== 'primary') {
+          return res.status(409).json({ status: 'error', error: 'parentTask 不是可用的主 agent 会话' });
+        }
         const parentLoop = (() => { try { return dbMod.getLoopRunByTaskId(parentTaskId); } catch { return null; } })();
-        if (!parentLoop || parentLoop.kind !== 'primary') {
+        if (parentLoop && parentLoop.kind !== 'primary') {
           return res.status(409).json({ status: 'error', error: 'parentTask 不是可用的主 agent 会话' });
         }
         if (
@@ -192,7 +199,7 @@ module.exports = function registerAiAgentRoute(app) {
         ) {
           return res.status(409).json({ status: 'error', error: 'parentTask 与当前会话不一致' });
         }
-        parentLoopRunId = parentLoop.loopRunId;
+        parentLoopRunId = parentLoop?.loopRunId || null;
         // 强制落到父会话线程，子 agent 输出与主线同框
         if (parentTask.params && parentTask.params.conversationId) {
           explicitConvId = parentTask.params.conversationId;

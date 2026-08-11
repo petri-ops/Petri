@@ -1,7 +1,21 @@
 // M1-1 后端就绪感知层测试
 // 运行：cd desktop-app && node --test test/backend-health.test.mjs
 import assert from 'node:assert/strict';
-import { getBackendStatus } from '../src/backend-health.js';
+import {
+  getBackendStatus,
+  mergeRuntimeStatusWithConfiguredHomes,
+} from '../src/backend-health.js';
+
+// === 场景 0：开发态系统 Runtime 覆盖插件台账的“未安装”===
+{
+  const status = mergeRuntimeStatusWithConfiguredHomes(
+    { r: { installed: false }, python: { installed: false } },
+    { BIOF3_R_HOME: '/system/R', BIOF3_PY_HOME: '/system/Python' },
+  );
+  assert.strictEqual(status.r.installed, true, '已解析的系统 R 应视为可用 Runtime');
+  assert.strictEqual(status.python.installed, true, '已解析的系统 Python 应视为可用 Runtime');
+  console.log('✓ 场景0 开发态系统 Runtime 真相合并通过');
+}
 
 // === 场景 1：全就绪 ===
 {

@@ -11,9 +11,9 @@
 | Plan ID | `AGENT-CONCURRENCY` |
 | 全名 | Agent Concurrency（主 agent 不阻塞 + 同会话 sub-agent 并行） |
 | 父主线 | `feat/agent-concurrency` 分支 |
-| 启用形式 | 设计方案先行，评审通过再实现（本文档 = 设计阶段交付物） |
+| 启用形式 | 设计先行后已进入实现与实机验收（本文档同时保留设计决策与实现收敛） |
 | truthDomain | `agent-concurrency-design` |
-| 状态 | `planned`（设计稿，待评审） |
+| 状态 | `active / in_progress`（A-1～A-6 开发态 Electron 验收已通过；待把 evidence 绑定实现提交后收口） |
 | 关联决策 | 推翻/兑现 `g0-rs-ux1h` §10 的 subagent 池推迟项 |
 
 ---
@@ -292,7 +292,7 @@ plugin 执行路径（DESeq2/GO-KEGG/volcano）
 - `conversationRunStore` 多 run、`isConversationRunning` 仅 primary、`SimpleChat` 输入态（primary 在飞禁用、sub-agent 在飞可用）。
 
 **真实 Electron 验收（Phase D 门，A-1~A-6）**
-- 启动：`env -u ELECTRON_RUN_AS_NODE ELECTRON_DISABLE_SANDBOX=1 npm run dev`（⚠️ 先 kill 旧 electron 主进程 + 清 `~/Library/Application Support/biof3-local/SingletonLock` + 确认端口 3001/3004 空，规避 dev 孤儿陷阱）。
+- 启动：`env -u ELECTRON_RUN_AS_NODE ELECTRON_DISABLE_SANDBOX=1 npm run dev`。脚本会精确回收本 workspace 的旧 Electron、等待退出，并把 Electron userData 与后端 SQLite/项目数据一并隔离到 `.biof3-dev-user-data/`；不得手工删除已安装版共享 `SingletonLock`。
 - 验证：单会话长任务输入框可用、并行起第 2 sub-agent、独立取消、历史无交错、主 loop 槽不被占满。
 
 ## 14. 回滚策略
@@ -309,7 +309,7 @@ plugin 执行路径（DESeq2/GO-KEGG/volcano）
 - **阶段 A（后端底座）**：✅ 已实现 + `node --test` 全绿（5/5）。
 - **阶段 B（历史写入安全）**：✅ `conversations.js` `task_id` 列 + 写入已实现；并发压测无交错。
 - **阶段 C（前端多 run + 后台运行）**：✅ 已实现 + `vitest` 全绿（34/34，含 4 个新增 sub-agent 用例）。前端保留主 run 单通道不变，新增**平行 sub-agent 子系统**（按 `taskId` 索引），UI 暴露"后台运行"按钮与子任务卡片。
-- **阶段 D（收口）**：✅ 已实现（`docs:check` / `ui:audit:check` 通过；A-1~A-6 真实 Electron 验收待本机手测）。
+- **阶段 D（收口）**：实现与定向门已完成；2026-08-11 A-1～A-6 开发态 Electron 验收全部通过，当前仅剩 evidence 与实现提交的 source hash 精确绑定。
 
 ### 15.2 已落地改动（相对 §8/§11 的实际落点）
 - `core/r-server/db.js`：`loop_runs` 增 `kind` / `parent_loop_run_id` / `task_id` 三列（idempotent ALTER）；`persistLoopRun` 写三列；`getLoopRun` 投影 `kind`/`parentLoopRunId`/`taskId`；新增 `getLoopRunByTaskId(taskId)` 与 `getLoopRunsByParentLoopRunId(parentLoopRunId)`；`getActiveLoopRunForConversation` 仅 resume primary（向后兼容 `kind NULL`）。
@@ -318,12 +318,12 @@ plugin 执行路径（DESeq2/GO-KEGG/volcano）
 - `core/r-server/helpers/runtime.js`：`AI_MAX_CONCURRENT_PER_USER` 3→5；`aiTaskConcurrencyAcquire(userId, taskId, { isPrimary })` 用独立 subagent 计数保证主 loop 预留 1 槽（与启动顺序无关）。
 - `core/r-server/helpers/conversations.js`：`copilot_messages` 增 `task_id` 列；`appendMessageToConversation` 写 `task_id`（第 5 参）。
 - `core/r-server/routes/ai-agent.js`：`POST /api/ai/agent` 增 `kind:'subagent'` + `parentTaskId` 分支（越权/归属校验、父 loopRunId 解析、subagent 落到父会话线程）；主 loop `concurrency acquire` 标 `isPrimary:true`；返回体带 `kind`/`parentTaskId`；cancel 端点级联取消 primary 名下 sub-agent。
-- 测试：`test/agent-concurrency.test.mjs`（5 用例，覆盖 §13 后端矩阵 4 项）。
+- 测试：`test/agent-concurrency.test.mjs`（8 用例，包含 primary/subagent resume 边界、无 LoopRun 派生/级联、并发槽与取消级联/反向不级联）。
 - `frontend/src/components/copilot/conversationRunStore.ts`：`ConversationRunSnapshot` 增 `parentTaskId?`；新增平行 sub-agent 子系统——`subTaskRuns`(Map<taskId, snapshot>)、`startSubAgentTask` / `stopSubAgentTask` / `getSubAgentTaskSnapshot` / `listSubAgentTasksForConversation` / `subscribeSubAgentTask` / `useSubAgentTask` / `useSubAgentTasksForConversation` / `clearSubAgentTask`。复用 `streamChat` 并透传 `kind:'subagent'` + `parentTaskId`（taskId 在 `onTaskStarted` 中确定后作索引键）。主 run 通道完全不动。
 - `frontend/src/components/copilot/copilotClient.ts`：`StreamChatOptions` 增 `kind?` / `parentTaskId?`；`submitAgentTask` 与 `streamChatLegacy` 的 POST body 透传二者（undefined 时 JSON 自动省略，主路径零行为变化）。
 - `frontend/src/components/copilot/SimpleChat.tsx`：主 run 忙时（`streaming`）输入区出现「后台运行」按钮 → `runInBackground` 以当前输入作为独立 sub-agent 任务提交（父 `taskId` = 当前主 run 的 `taskId`），输入不被主 run 阻塞；底部渲染 `subAgentTasks` 子任务卡片（状态点 + 进度文本 + 停止按钮）。新增样式见 `simple-chat.css`（`.sc-send-cta-bg` / `.sc-subtasks` / `.sc-subtask*`）。
 - 前端测试：`conversationRunStore.test.ts` 新增 4 个用例（独立追踪 / 同会话并发多子任务 / 取消 / 无父 taskId 拒绝 spawn）。
-- 阶段 D 重启孤儿重订阅：`copilotClient.ts` 的 `findResumableAgentTask` 过滤 `kind==='subagent'`（老 key 无 kind 视为 primary），新增 `findResumableSubAgentTasks()`；`streamChatViaTask` 写 localStorage 时记录 `kind` + `parentTaskId`（防 sub-agent 被误当主 run 恢复）。`loop-client.ts` 的 `LoopRunCompact` 补 `kind`/`parentLoopRunId`/`taskId`；`ai-loop.js` 的 `GET /api/loop/runs` compact 映射补同字段；`conversationRunStore.ts` 新增 `resumeSubAgentTasks(conversationId, projectId)`（调 `fetchLoopRuns` 找回仍 running 的 sub-agent run 并重订阅其事件流，避免孤儿化）。**注意**：`findResumableAgentTask`/`resumeSubAgentTasks` 的 mount 调用点尚未接线（与主 run 崩溃恢复同源，当前 UI 层无消费方），需与 mount 恢复一并接入。
+- 阶段 D 重启孤儿重订阅：`copilotClient.ts` 的 `findResumableAgentTask` 过滤 sub-agent，并持久化/严格匹配 `conversationId + projectId`；旧的无归属记录在带上下文恢复时 fail-closed。`conversationRunStore.ts` 的 sub-agent 恢复同样拒绝跨项目、跨会话或缺失归属的响应；`SimpleChat` 已在会话挂载/切换 effect 消费 `resumeOrphanAgentTasks`。
 
 ### 15.3 设计收敛（实现中修正，已落实）
 1. **并发写入保护：去掉"每会话 append mutex"，改为"同步 SQLite 原子性 + `task_id` 列"。**
@@ -333,5 +333,5 @@ plugin 执行路径（DESeq2/GO-KEGG/volcano）
    subagent spawn 用 `getLoopRunByTaskId(parentTaskId)` 取父 `loopRunId`；cancel 级联用 `getLoopRunsByParentLoopRunId(parentLoopRunId)` 枚举子 `taskId`；避免在 `tasks` 表再引一列。
 
 ### 15.4 下一步
-- 阶段 D 收口已完成：`docs:check` + `ui:audit:check` 通过；重启孤儿 sub-agent 重订阅逻辑落地（见上方 §15.2）；设计文档 `planned → active`、DOC-REGISTRY + AUDIT-LOG 已同步；待统一推 PR。
-- 真实 Electron 行为验收 A-1~A-6（mount 调用点接入 + 同会话并行 / 取消级联 / 重启重订阅手测）待本机 `launchctl asuser` 启动后执行，当前状态 `in_progress`，不宣称 `verified`。
+- 验收证据见 `acceptance/agent-concurrency/ui140-electron.json`：DeepSeek `deepseek-v4-flash` 连接测试与真实任务通过；A-1～A-6 全部 `passed`，并额外验证 renderer 重载按 conversation/project 精确恢复。
+- 当前 evidence 为 `passed_unbound / sourceTreeExact:false`。先提交实现检查点，再写入该提交的 source hashes；绑定完成前工作包保持 `active / in_progress`，且 `qualificationEligible:false` 不变。

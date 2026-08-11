@@ -1,6 +1,6 @@
 # BioF3 Desktop 文档入口
 
-最后更新：2026-08-10
+最后更新：2026-08-11
 
 ## 项目治理入口
 
@@ -19,8 +19,8 @@
 5. [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) — UX1A～UX1G-2 结果体验短闭环已完成；P4R-0～P6 已按非资格边界收口，发布级 P7 deferred。
 6. [`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md) — 已重新真实收口的横切修复工作包；保留科学、进程、HTTP 与逐契约 Acceptance 证据。
 7. [`g0-rs0-result-studio-audit.md`](./g0-rs0-result-studio-audit.md) — G0-RS0 现状审计与架构 ADR；Result Studio 的复用/新增边界、契约缺陷与 Git 风险矩阵的唯一裁决记录。
-8. [`g0-rs-ux1h-async-tool-surface.md`](./g0-rs-ux1h-async-tool-surface.md) — 2026-08-06 启动的 active 工作包：消除"主 agent 被工具同步流锁死"与"工具成功 + LLM 总结失败"被渲染为"失败"两种 user-visible 误导；不实现 P7-F，不引入 subagent 池。
-9. [`agent-concurrency-design.md`](./agent-concurrency-design.md) — Agent 并发设计：承接 `g0-rs-ux1h` §10 推迟的 subagent 池决策，设计"主 agent 不被长任务阻塞 + 同会话并行 sub-agent"方案（planned，待评审）。
+8. [`g0-rs-ux1h-async-tool-surface.md`](./g0-rs-ux1h-async-tool-surface.md) — 2026-08-09 已按非资格边界收口的 Async Tool Surface 工作包；UI-126 仍不升 `verified`。
+9. [`agent-concurrency-design.md`](./agent-concurrency-design.md) — 当前 active 工作包：主 agent 不被长任务阻塞 + 同会话并行 sub-agent；A-1～A-6 开发态 Electron evidence 已通过，待绑定实现提交后收口。
 
 ## 当前开发必读
 
@@ -29,7 +29,7 @@
 1. [`AUDIT-LOG.md`](./AUDIT-LOG.md) — 活跃阻塞、待合并和当前进行中阶段。
 2. [`next-steps-roadmap.md`](./next-steps-roadmap.md) — 当前立即任务。
 3. [`project-workspace-handoff.md`](./project-workspace-handoff.md) — 当前可恢复 Git/工程检查点。
-4. [`g0-rs-ux1h-async-tool-surface.md`](./g0-rs-ux1h-async-tool-surface.md) — 当前 active 工作包（🔵 进行中）。仅修改 `SimpleChat.tsx` 渲染分支 + 可选 `retrySummary(toolJobId)`，不开 P7-F。
+4. [`agent-concurrency-design.md`](./agent-concurrency-design.md) — 当前 active 工作包（🔵 进行中）。UI-142 已 verified；UI-140 A-1～A-6 已通过、等待 source-bound 收口；UI-141 仍待运行时缺失分支实机核对。
 
 只有任务实际涉及阶段顺序、UI 或模块边界时，才读取 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)、[`ui-productization-audit.md`](./ui-productization-audit.md) 或 [`development-module-map.md`](./development-module-map.md)。其他 G0 资格、插件、发布和历史材料从上方核心指引、下方专项规范或 `DOC-REGISTRY.json` 按需定位；已完成工作包和 Acceptance 不属于默认启动上下文。
 

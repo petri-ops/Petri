@@ -350,7 +350,10 @@ export async function streamChat(opts: StreamChatOptions): Promise<void> {
  * 返回 taskId（取最新一个）。streamChat 在提交时写入 key，订阅 [DONE] 或
  * onDone 时删除；若 mount 时 key 仍在 = 上次没跑完，需重新订阅。
  */
-export function findResumableAgentTask(): string | null {
+export function findResumableAgentTask(
+  conversationId?: string,
+  projectId?: string
+): string | null {
   if (typeof window === 'undefined') return null;
   let latest: { taskId: string; ts: number } | null = null;
   try {
@@ -360,7 +363,15 @@ export function findResumableAgentTask(): string | null {
       try {
         const obj = JSON.parse(localStorage.getItem(key) || '{}');
         // AGENT-CONCURRENCY: sub-agent 永不被当主 run 恢复（老 key 无 kind 视为 primary）。
-        if (obj?.taskId && typeof obj.ts === 'number' && (obj.kind || 'primary') !== 'subagent') {
+        const matchesConversation = !conversationId || obj.conversationId === conversationId;
+        const matchesProject = !projectId || obj.projectId === projectId;
+        if (
+          obj?.taskId &&
+          typeof obj.ts === 'number' &&
+          (obj.kind || 'primary') !== 'subagent' &&
+          matchesConversation &&
+          matchesProject
+        ) {
           if (!latest || obj.ts > latest.ts) latest = { taskId: obj.taskId, ts: obj.ts };
         }
       } catch {
@@ -434,6 +445,8 @@ async function streamChatViaTask(opts: StreamChatOptions): Promise<void> {
           ts: Date.now(),
           kind: opts.kind || 'primary',
           parentTaskId: opts.parentTaskId || null,
+          conversationId: opts.conversationId || null,
+          projectId: opts.context?.projectId || null,
         })
       );
     } catch {}
