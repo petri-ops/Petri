@@ -29,7 +29,7 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 
 ### 3.0 当前恢复检查点：UI-141 / UI-142 macOS 开发启动
 
-- 当前分支：`fix/startup-runtime-gate`；实现检查点 `6adeaa9`；单 worktree。开发/审计统一使用 `npm run dev`，不保留 `biof3-dev` wrapper。
+- 交付载体：PR #13；实现检查点 `6adeaa9`；单 worktree。开发/审计统一使用 `npm run dev`，不保留 `biof3-dev` wrapper。PR 必须使用 merge commit 合入，不 squash/rebase，以保留 Acceptance evidence 绑定的 source commit 可达性。
 - 已提交：UI-141 将“后端未就绪”与“R Runtime 缺失”拆分并修复轮询挂起；UI-142 通过 LaunchServices + 隔离 userData 根治 macOS 后台启动无键盘焦点；UI-140 修复恢复身份、早期派生与并发收口缺陷。
 - 根因证据：`launchctl asuser` 启动的 Electron 虽有 renderer focus，OS 层仍是 `AXFocused=false`，系统真实 `keystroke "x"` 不进 textarea；改为 LaunchServices `open -a` 后，同样按键读回 `"x"`。这证明问题来自 macOS GUI 启动上下文，不是 React textarea 抢焦点。
 - 当前现场（2026-08-11 复核）：canonical `npm run dev` 正在运行；3000/3001/3004/9222 全部监听，r-server/py-server health 均为 ok。日志含 `[renderer] page loaded` 和 `[focus] isKeyWindow after load: n/a isFocused: true`；Accessibility focused element 为 composer textarea，系统 UI 通道输入 `x` 后 textarea 读回 `"x"`，测试字符已清空。
