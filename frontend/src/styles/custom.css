@@ -127,6 +127,13 @@
   --biof3-bg-surface-raised: var(--biof3-bg-elevated);
   --biof3-surface-strong: var(--biof3-bg-surface);
   --biof3-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
+  /* ===== UI-155 / 关闭合并后暴露的 theme-token-contract 缺口 =====
+     --biof3-surface-2 与 --biof3-status-idle 此前被 simple-chat.css
+     （origin/main PR #13 的 subagent UI）以 var(--biof3-*) 引用却无定义，
+     导致 theme-token-contract 测试失败、引用处回退为无效值。
+     取值对齐组件原 fallback，保证零视觉回归。 */
+  --biof3-surface-2: rgba(127, 127, 127, 0.12);
+  --biof3-status-idle: #9ca3af;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -210,8 +217,11 @@
  --biof3-accent-border: rgba(45, 212, 191, 0.4);
  --biof3-accent-surface: rgba(45, 212, 191, 0.12);
  --biof3-user-bubble-bg: rgba(148, 163, 184, 0.12);
- --biof3-accent-orange: #fb923c;
- --biof3-accent-orange-bg: rgba(251, 146, 60, 0.16);
+  --biof3-accent-orange: #fb923c;
+  --biof3-accent-orange-bg: rgba(251, 146, 60, 0.16);
+  /* ===== UI-155 / 合并后暴露的 theme-token-contract 缺口（dark 适配） ===== */
+  --biof3-surface-2: rgba(127, 127, 127, 0.08);
+  --biof3-status-idle: #94a3b8;
 
   /* Infima emphasis overrides — 让 ifm 颜色也跟 biof3 深色对齐 */
   --ifm-background-color: var(--biof3-bg-canvas);

@@ -1,6 +1,6 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-08-06
+最后更新：2026-08-11
 
 ## 当前结论
 
@@ -8,7 +8,7 @@
 
 当前不默认扩展分析功能。`G0-START`、LF0～LF12 的核心资格保持 maintained；RS0～RS8 与 P4R/P5/P6 的 Result Studio 引擎和开发态证据保留，但 2026-07-25 产品复核撤销的完整产品资格没有恢复。2026-08-03 用户裁决把发布级 P7 重新资格后移；Result Studio 保持 `implemented_unverified / experimental`，rc.7 仍是工程候选版，不得描述为 GA。
 
-`G0-RS-UX1A`～`UX1F`、短 Goal `G0-RS-TL1 / UI-120`、`G0-RS-UX1G-1 Conversation-bound ToolJob Identity`、`G0-RS-UX1G-2 / UI-123 Conversation Result Switcher` 与 `G0-SDC / SDC1-A Data-to-first-result` 均已完成。2026-08-06 当前唯一 active 增量为 `G0-RS-UX1H / UI-126`：SimpleChat 的“工具成功 + AI 总结暂时不可用”展示组合已用真实 airway 数据在开发态 Electron 中验证并写入 `acceptance/g0-rs-ux1h/`；summary-only 重试、历史恢复、运行中自动排队与 durable loop 状态收敛已实现但按用户要求尚未测试，完整 async surface 仍未完成，故工作包保持 active、UI-126 保持 `in_progress`。`G0-SDC-1 / G0-SDC-2` 已分别以 `acceptance/g0-scientific-data-contract/sdc1-complete.json` 与 `sdc2-semantic-binder.json` 收口；SDC-1 其余范围、SDC-3～SDC-7 与 P7 继续 deferred。
+`G0-RS-UX1H / UI-126` 已于 2026-08-09 按非资格边界收口；`G0-SDC-1 / G0-SDC-2` 已分别以 `acceptance/g0-scientific-data-contract/sdc1-complete.json` 与 `sdc2-semantic-binder.json` 收口。`AGENT-CONCURRENCY / UI-140` 已于 2026-08-11 完成：A-1～A-6 开发态 Electron evidence 精确绑定实现提交 `6adeaa9`；DeepSeek `deepseek-v4-flash` 经 Clash Verge 的 `api.deepseek.com → AI专用` 规则恢复连通，连接测试与真实任务均通过。UI-141 已以隔离 unsigned arm64 packaged 候选闭合真实运行时缺失 → 插件商店链，UI-142 键盘焦点链也已 verified；三项改动由 PR #13 统一交付。当前没有新的 active 工作包，不自动启动后续阶段；SDC-3～SDC-7 与 P7 继续 deferred。
 
 LF12 已按 [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) 的 Q0～Q7 收口。RS9 曾新增第 17 类 `result_studio_product`，但后续复核发现其五条任务由独立测试拼装、Provider 未执行真实工具闭环、视觉验收依赖人工布尔值、大表由 seed 直接构造；该证据现降级为 unit/synthetic/renderer historical evidence。`result-studio-editing` 在 RS-P7 前暂停 qualified support claim，不能影响或冒充 LF12 原始核心资格。
 
@@ -24,7 +24,7 @@ P4R-3 的实现检查点为 `3d3eb29`，性能门校准修复为 `59b33c4`。中
 
 P4R-4 的实现检查点为 `f710261`。Result / Compare / History 已成为真实互斥路由模式；查看旧 Revision 使用可丢弃 viewed state，Artifact/interaction/Selection/contextToken 均显式绑定所选版本，不移动 current、不切 active Job、不调用写 API，首次版本列表 GET 不写 SQLite、不创建 managed Git。版本选择按项目/family-scoped truth 分页并标注原始/当前/候选/历史；Change Review 的意图、影响范围和验证状态来自服务端受信持久元数据，Git 详情默认折叠。checkpoint 故障、参数 hash、source commit、parent family/project 漂移均 fail-closed。focused frontend 104/104、affected Node 258/258、related frontend 48/48、P4R product 13/13；五份 evidence 均绑定 `f710261`。UI-113/UI-114 仍为 `in_progress`，P4R 仍是 `implemented_unverified / qualificationEligible:false`。
 
-Result Studio 旧实现的 11 个提交已位于 `main`（检查点 `03e5826`）；`SDC-0 Profile Registry 与版本治理` 也已在分支 `codex/g0-sdc` 的 `7284921` 收口并推送，六个 canonical Profile 与 fail-closed typed DAG 边继续保留。SDC1-A 已在 `bd15777` 完成并由 `acceptance/g0-scientific-data-contract/data-to-first-result.json` 绑定开发态 Electron 短闭环；当前没有 active 工作包，不创建 Worktree，SDC-1 其余范围与 SDC-2～SDC-7 deferred。
+Result Studio 旧实现的 11 个提交已位于 `main`（检查点 `03e5826`）；`SDC-0 Profile Registry 与版本治理` 也已在分支 `codex/g0-sdc` 的 `7284921` 收口并推送，六个 canonical Profile 与 fail-closed typed DAG 边继续保留。SDC1-A 已在 `bd15777` 完成并由 `acceptance/g0-scientific-data-contract/data-to-first-result.json` 绑定开发态 Electron 短闭环；当前不创建 Worktree，SDC-3～SDC-7 deferred。
 
 当前固定顺序：
 
@@ -43,13 +43,13 @@ G0-RS-P0 资格与证据纠偏
   → RS-P7 诚实重新资格（deferred）
 ```
 
-当前重新排序：UX1A～UX1F、`G0-RS-TL1 / UI-120`、`UX1G-1` ToolJob 会话归属与 `UX1G-2 / UI-123` 当前会话多结果入口均已完成；当前只推进 `G0-RS-UX1H / UI-126` 的剩余完整 async surface，并在阶段门统一验证已实现的 summary-only 重试，RS-P7 继续 deferred。
+当前重新排序：UX1A～UX1H、`G0-RS-TL1 / UI-120`、`UX1G-1`、`UX1G-2 / UI-123`、`AGENT-CONCURRENCY / UI-140`、UI-141 与 UI-142 均已按各自证据边界完成；当前无 active 工作包，RS-P7 继续 deferred。
 
 `G0-RS-P0`～`G0-RS-P3` 已依次收口；P4 Core 已形成 18/18 离线实现检查点并保持 `implemented_unverified`。P3 建立 `ResultStudioContextEnvelope v1` 与 `contextToken`：artifact/family、job、revision（含 current 与 ordinal）、脚本相对路径与 sha256、参数摘要、插件可编辑参数与声明动作、selection、validation、reproducibility 全部由后端从 SQLite/`tool_jobs`/插件 descriptor 重新投影，前端 activeArtifact 只作线索。模型可见 schema 新增 7 个工具（注册表共 32 个），6 个 `*_in_context` 工具的参数中不含 toolJobId/artifactId/revisionId/artifactFamilyId/selectionId；写操作强制校验 token，陈旧上下文返回 `context_token_stale`，intent 指向别的 Revision 返回 `context_intent_mismatch`，"归因只能到 Job"与跨项目 revision 一律 fail-closed。公开进度固定为「理解意图 → 判断影响 → 执行/重算 → 验证 → 候选可比较」五阶段，不展示隐藏推理链。证据为 `acceptance/g0-result-studio/rs-p3-agent-context.json`（20/20，non-qualifying）。
 
 P4 Core 让手动调整与自然语言修改共用同一条编辑链：控件全部由插件 descriptor 的 `parameters` + `parameterImpacts` 投影，缺 impact 声明的参数不可编辑；`volcano-plot` 补齐配色/字体/尺寸/图例/标签/导出共 12 个 presentation 参数并接进真实 R 脚本（此前全为硬编码）。`normalizeEditSubmission` 是手动与 AI 的唯一归一化闸门，类型/范围/枚举 fail-closed 拒绝、未声明参数记为 rejected、与现状相同的提交不产出 patch，因此不会创建空 ChangeSet；影响分级只能由受信 descriptor 提升，调用方无法把科学或流程参数降级成样式修改，未声明 impact 的参数保守落到科学重算。过程中修复既有缺陷：保护字段表原先覆盖 descriptor，使 deseq2 声明为 `workflow` 的 `design` 被悄悄降级成 `scientific`，现在保护字段只作下限。`currentValues` 取自该 Job 真实执行过的归一化参数，不用默认值冒充。证据为 `acceptance/g0-result-studio/rs-p4-unified-editing.json`（18/18，non-qualifying 离线 descriptor 投影/插件接线/注册表/strict build 证据）；真实候选等价链尚未执行，故 UI-109 保持 `in_progress`。
 
-RH0 已按 Truth Snapshot、Hot Context、Test Impact、Script/Temp Lifecycle、Acceptance 串行收口并通过最终基线。P4R～P6、UX1A～UX1G-2 与 TL1 的实现检查点保留，P7 已于 2026-08-03 延期。当前没有 active 增量，详细边界见 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md)。
+RH0 已按 Truth Snapshot、Hot Context、Test Impact、Script/Temp Lifecycle、Acceptance 串行收口并通过最终基线。P4R～P6、UX1A～UX1H、TL1 与 AGENT-CONCURRENCY 的实现检查点保留，P7 已于 2026-08-03 延期。当前没有新的 active 工作包；UI-140、UI-141 与 UI-142 已在各自 macOS 证据边界 verified。
 
 详细阶段范围见 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)，Phase 7 完成证据见 [`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)。
 已完成的 Scientific Task Contract 工作包记录见 [`harness-scientific-task-contract-plan.md`](./harness-scientific-task-contract-plan.md)。

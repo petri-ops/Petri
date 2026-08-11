@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+.biof3-dev-user-data/
 
 # Build output
 dist/

@@ -270,6 +270,10 @@ export interface StreamChatOptions {
   modelPresetId?: string;
   /** Model id discovered from the selected provider Endpoint. */
   modelName?: string;
+  /** AGENT-CONCURRENCY: spawn this run as a sub-agent child of an existing primary task. */
+  kind?: 'primary' | 'subagent';
+  /** Parent primary taskId when kind === 'subagent' (server validates ownership). */
+  parentTaskId?: string;
   onDelta: (delta: string) => void;
   onDone?: () => void;
   onError?: (err: Error) => void;
@@ -342,60 +346,34 @@ export async function streamChat(opts: StreamChatOptions): Promise<void> {
 }
 
 /**
- * 可恢复 agent 任务记录：刷新/重启 Electron 后凭 taskId 重连 SSE 所需的
- * 最小上下文。由 conversationRunStore.startConversationRun 在拿到 taskId 时
- * 写入 localStorage；由 subscribeAgentTask 收尾 [DONE] 时删除。
- *
- * 后端 GET /ai/agent/task/:taskId 会从 task_events 回放全部事件并持续轮询
- * in-progress 任务（core/r-server/routes/ai-agent.js 订阅端点 + agent-runner
- * 的 _emit 落库），因此只要这里有 taskId 就能重连并恢复进度展示。
- */
-export interface ResumableAgentTask {
-  taskId: string;
-  ts: number;
-  conversationId: string;
-  projectId: string;
-  userContent: string;
-  historyLastUserTs?: string;
-  context: CopilotContext;
-  modelPresetId?: string;
-  modelName?: string;
-}
-
-/** 写入/刷新可恢复记录（提交时调用，携带重连所需的全量上下文）。 */
-export function persistResumableAgentTask(record: ResumableAgentTask): void {
-  if (!record?.taskId) return;
-  try {
-    localStorage.setItem('biof3_agent_task_' + record.taskId, JSON.stringify(record));
-  } catch {}
-}
-
-/** 显式清除（任务收尾/取消时调用）。 */
-export function clearResumableAgentTask(taskId: string): void {
-  if (!taskId) return;
-  try {
-    localStorage.removeItem('biof3_agent_task_' + taskId);
-  } catch {}
-}
-
-/**
  * 扫描 localStorage 找出尚未完成的 agent task（页面刷新/崩溃恢复用）。
- * - conversationId 给定时只返回该会话的可恢复任务；
- * - 否则返回最新一个（兼容旧的全局面向调用）。
- * 返回记录包含重连 SSE 所需的全量上下文。1 小时以上的残留视为过期并清理。
+ * 返回 taskId（取最新一个）。streamChat 在提交时写入 key，订阅 [DONE] 或
+ * onDone 时删除；若 mount 时 key 仍在 = 上次没跑完，需重新订阅。
  */
-export function findResumableAgentTask(conversationId?: string): ResumableAgentTask | null {
+export function findResumableAgentTask(
+  conversationId?: string,
+  projectId?: string
+): string | null {
   if (typeof window === 'undefined') return null;
-  let latest: ResumableAgentTask | null = null;
+  let latest: { taskId: string; ts: number } | null = null;
   try {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (!key || !key.startsWith('biof3_agent_task_')) continue;
       try {
-        const obj = JSON.parse(localStorage.getItem(key) || '{}') as Partial<ResumableAgentTask>;
-        if (!obj.taskId || typeof obj.ts !== 'number' || !obj.conversationId) continue;
-        if (conversationId && obj.conversationId !== conversationId) continue;
-        if (!latest || obj.ts > latest.ts) latest = obj as ResumableAgentTask;
+        const obj = JSON.parse(localStorage.getItem(key) || '{}');
+        // AGENT-CONCURRENCY: sub-agent 永不被当主 run 恢复（老 key 无 kind 视为 primary）。
+        const matchesConversation = !conversationId || obj.conversationId === conversationId;
+        const matchesProject = !projectId || obj.projectId === projectId;
+        if (
+          obj?.taskId &&
+          typeof obj.ts === 'number' &&
+          (obj.kind || 'primary') !== 'subagent' &&
+          matchesConversation &&
+          matchesProject
+        ) {
+          if (!latest || obj.ts > latest.ts) latest = { taskId: obj.taskId, ts: obj.ts };
+        }
       } catch {
         try {
           localStorage.removeItem(key);
@@ -404,10 +382,51 @@ export function findResumableAgentTask(conversationId?: string): ResumableAgentT
     }
   } catch {}
   if (latest && Date.now() - latest.ts > 60 * 60 * 1000) {
-    clearResumableAgentTask(latest.taskId);
+    try {
+      localStorage.removeItem('biof3_agent_task_' + latest.taskId);
+    } catch {}
     return null;
   }
-  return latest;
+  return latest?.taskId ?? null;
+}
+
+export interface ResumableSubAgentTask {
+  taskId: string;
+  parentTaskId: string | null;
+  ts: number;
+}
+
+/**
+ * AGENT-CONCURRENCY: 扫描 localStorage 找出尚未完成的 sub-agent task
+ * （与主 run 平行的后台子任务），供 app 启动/会话重开时重订阅其事件流，
+ * 避免主进程崩溃/刷新后 sub-agent 孤儿化。仅返回 kind === 'subagent' 的项。
+ */
+export function findResumableSubAgentTasks(): ResumableSubAgentTask[] {
+  if (typeof window === 'undefined') return [];
+  const out: ResumableSubAgentTask[] = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key || !key.startsWith('biof3_agent_task_')) continue;
+      try {
+        const obj = JSON.parse(localStorage.getItem(key) || '{}');
+        if (obj?.taskId && typeof obj.ts === 'number' && obj.kind === 'subagent') {
+          if (Date.now() - obj.ts <= 60 * 60 * 1000) {
+            out.push({ taskId: obj.taskId, parentTaskId: obj.parentTaskId ?? null, ts: obj.ts });
+          } else {
+            try {
+              localStorage.removeItem(key);
+            } catch {}
+          }
+        }
+      } catch {
+        try {
+          localStorage.removeItem(key);
+        } catch {}
+      }
+    }
+  } catch {}
+  return out.sort((a, b) => a.ts - b.ts);
 }
 
 /** task 模式：提交拿 taskId → 订阅事件流 */
@@ -415,10 +434,22 @@ async function streamChatViaTask(opts: StreamChatOptions): Promise<void> {
   const { onDone } = opts;
   try {
     const taskId = await submitAgentTask(opts);
-    // 这里的 onTaskStarted 由 startConversationRun 注入，会在拿到 taskId 时
-    // 把【全量上下文】写入 localStorage 供刷新后重连发现。本函数不再写
-    // localStorage，以免覆盖那条更完整的记录。
     opts.onTaskStarted?.(taskId);
+    // 存 localStorage 供重连发现（CopilotChat mount 时检查）。
+    // AGENT-CONCURRENCY: 记录 kind + parentTaskId，使 sub-agent 不被误当主 run 恢复。
+    try {
+      localStorage.setItem(
+        'biof3_agent_task_' + taskId,
+        JSON.stringify({
+          taskId,
+          ts: Date.now(),
+          kind: opts.kind || 'primary',
+          parentTaskId: opts.parentTaskId || null,
+          conversationId: opts.conversationId || null,
+          projectId: opts.context?.projectId || null,
+        })
+      );
+    } catch {}
     await subscribeAgentTask(taskId, opts, 0);
   } catch (err: unknown) {
     if ((err as Error)?.name === 'AbortError') return;
@@ -453,13 +484,13 @@ export async function cancelAgentTask(taskId: string): Promise<void> {
 
 /** POST /ai/agent 提交，返回 taskId */
 async function submitAgentTask(opts: StreamChatOptions): Promise<string> {
-  const { messages, context, conversationId, modelPresetId, modelName, signal } = opts;
+  const { messages, context, conversationId, modelPresetId, modelName, kind, parentTaskId, signal } = opts;
   // M2-5: 提交前先探测网络，离线时直接抛 OfflineError，避免裸 fetch 报错
   await ensureOnlineOrThrow();
   const resp = await fetch(getApiPrefix() + '/ai/agent', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-    body: JSON.stringify({ messages, context, conversationId, modelPresetId, modelName }),
+    body: JSON.stringify({ messages, context, conversationId, modelPresetId, modelName, kind, parentTaskId }),
     signal,
   });
   if (!resp.ok) {
@@ -478,7 +509,7 @@ async function submitAgentTask(opts: StreamChatOptions): Promise<string> {
 /** GET /ai/agent/task/:taskId 订阅事件流（afterSeq 支持续传） */
 export async function subscribeAgentTask(
   taskId: string,
-  opts: Omit<StreamChatOptions, 'messages'>,
+  opts: StreamChatOptions,
   afterSeq = 0
 ): Promise<void> {
   const { signal, onDone } = opts;
@@ -513,7 +544,9 @@ export async function subscribeAgentTask(
         const data = m[1];
         if (data === '[DONE]') {
           onDone?.();
-          clearResumableAgentTask(taskId);
+          try {
+            localStorage.removeItem('biof3_agent_task_' + taskId);
+          } catch {}
           return;
         }
         try {
@@ -532,7 +565,7 @@ export async function subscribeAgentTask(
 }
 
 /** 处理单个 SSE 事件对象（原 streamChat 的解析逻辑，task/legacy 共用） */
-function _handleSseEvent(obj: any, opts: Omit<StreamChatOptions, 'messages'>): void {
+function _handleSseEvent(obj: any, opts: StreamChatOptions): void {
   const {
     onDelta,
     onDone,
@@ -635,14 +668,14 @@ function _handleSseEvent(obj: any, opts: Omit<StreamChatOptions, 'messages'>): v
 
 /** 老路径：直连 SSE（fallback） */
 async function streamChatLegacy(opts: StreamChatOptions): Promise<void> {
-  const { messages, context, conversationId, modelPresetId, modelName, signal, onDelta, onDone, onError } = opts;
+  const { messages, context, conversationId, modelPresetId, modelName, kind, parentTaskId, signal, onDelta, onDone, onError } = opts;
   try {
     // M2-5: 离线探测，先于 fetch 触发，避免裸 fetch 报错
     await ensureOnlineOrThrow();
     const resp = await fetch(getApiPrefix() + '/ai/agent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-      body: JSON.stringify({ messages, context, conversationId, modelPresetId, modelName }),
+      body: JSON.stringify({ messages, context, conversationId, modelPresetId, modelName, kind, parentTaskId }),
       signal,
     });
 
