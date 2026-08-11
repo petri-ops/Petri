@@ -21,7 +21,10 @@ test('file credential backend separates secrets with owner-only permissions', ()
 
   assert.equal(store.get('openai'), 'secret-value');
   assert.equal(store.isConfigured('openai'), true);
-  assert.equal(fs.statSync(store.filePath).mode & 0o777, 0o600);
+  // Windows 无 Unix 文件模式语义（chmod 0600 不映射为 mode 位），仅 Unix 校验 owner-only 权限
+  if (process.platform !== 'win32') {
+    assert.equal(fs.statSync(store.filePath).mode & 0o777, 0o600);
+  }
   store.remove('openai');
   assert.equal(store.get('openai'), '');
 });

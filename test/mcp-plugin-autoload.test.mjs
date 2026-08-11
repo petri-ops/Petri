@@ -2,7 +2,7 @@
 // 运行：cd desktop-app && node --test test/mcp-plugin-autoload.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve, join } from 'node:path';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -10,8 +10,9 @@ import { tmpdir } from 'node:os';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const R_SERVER = resolve(__dirname, '..', 'core', 'r-server');
 
-const pluginLoader = await import(R_SERVER + '/plugin-loader.js');
-const { listTools } = await import(resolve(__dirname, '..', 'core', 'r-server', 'mcp', 'registry.js'));
+// 动态 import 必须用 file:// URL（Windows 绝对路径 D:/... 不被 ESM loader 接受）
+const pluginLoader = await import(pathToFileURL(R_SERVER + '/plugin-loader.js').href);
+const { listTools } = await import(pathToFileURL(resolve(__dirname, '..', 'core', 'r-server', 'mcp', 'registry.js')).href);
 
 test('loadPluginsFromDisk 从 installed.json 注册插件，listTools 含该插件', async () => {
   // 构造临时 pluginsDir：installed.json + my-tool/plugin.json + tool-definition.json
