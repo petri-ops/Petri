@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "ui140-agent-concurrency-electron-2026-08-11",
+  "workPackage": "AGENT-CONCURRENCY / UI-140",
+  "classification": "development_electron_real_deepseek_with_deterministic_concurrency_regression",
+  "qualificationEligible": false,
+  "sourceCommit": "8de1ff7ba3f41b1df0cd36231c00e63167694188",
+  "sourceTreeExact": false,
+  "platform": "darwin-arm64",
+  "launch": {
+    "entrypoint": "npm run dev",
+    "electronViaLaunchServices": true,
+    "isolatedUserData": ".biof3-dev-user-data",
+    "portsObserved": [3000, 3001, 3004, 9222]
+  },
+  "provider": {
+    "selectedProfileId": "deepseek-chat",
+    "selectedLabel": "DeepSeek",
+    "selectedModel": "deepseek-v4-flash",
+    "baseUrl": "https://api.deepseek.com",
+    "credentialConfigured": true,
+    "connectivityPassed": true,
+    "connectivityRemediation": "Clash Verge rule mode routes api.deepseek.com through AI dedicated proxy group",
+    "settingsTestResponse": {
+      "ok": true,
+      "message": "连接正常"
+    },
+    "providerClaim": true
+  },
+  "acceptance": {
+    "A-1": {
+      "status": "passed",
+      "observed": "A real DeepSeek primary DESeq2 task returned immediately as task 39658a06-c358-45b0-8cf9-ed2280129993 while the composer remained editable. The scientific tool ran and truthfully reported that the four-gene fixture could not fit DESeq2 dispersion."
+    },
+    "A-2": {
+      "status": "passed",
+      "observed": "A queued same-conversation message was persisted after the primary terminal event and automatically started as DeepSeek task c2cc1e67-e798-4535-9200-fb7244e030d2, completing with the correct control-versus-case grouping."
+    },
+    "A-3": {
+      "status": "passed",
+      "observed": "Two independent sub-agent cards were simultaneously visible under one running primary in the Electron renderer; focused store tests also retain independent taskId snapshots."
+    },
+    "A-4": {
+      "status": "passed",
+      "observed": "Stopping one rendered sub-agent changed only that task while its parent and sibling remained running. Deterministic tests additionally cover primary-to-child cascade and reverse non-cascade."
+    },
+    "A-5": {
+      "status": "passed",
+      "observed": "A renderer reload while DeepSeek task fc968ae5-58e1-4bb4-bd30-c1874f645dff was running restored the exact conversation/project task and displayed the recovery marker. CDP captured zero Runtime exceptions, Log errors, or console.error events after reload; the 300-write SQLite concurrency test preserved task_id grouping."
+    },
+    "A-6": {
+      "status": "passed",
+      "observed": "Under real parent 4bf4affd-050c-40e0-8a4d-766d9c4a3a09, four DeepSeek sub-agent POSTs returned HTTP 200 with distinct taskIds and the fifth returned HTTP 503 user_limit. Deterministic tests additionally prove the primary reservation for both acquisition orders."
+    }
+  },
+  "defectsFoundAndFixed": [
+    "Sub-agent creation incorrectly required an existing parent LoopRun even before the first tool call.",
+    "Sub-agent creation reassigned a const conversation id, leaving the Express request hanging after parent validation.",
+    "Primary recovery localStorage lacked conversationId/projectId and could restore into the wrong conversation.",
+    "Sub-agent recovery did not fail closed on mismatched or missing project/conversation identity."
+  ],
+  "verification": {
+    "frontendFocused": "4 files, 47 tests passed",
+    "agentConcurrency": "8 tests passed",
+    "backendAndPlatform": "16 tests passed",
+    "frontendStrictTypeScript": "passed",
+    "syntaxChecks": "passed",
+    "docsReconcile": "0 validation issues",
+    "docsCheck": "passed",
+    "uiAuditCheck": "passed"
+  },
+  "status": "passed_unbound",
+  "passed": true,
+  "remaining": [
+    "Bind this evidence to the committed implementation source hashes before changing UI-140 to verified or the work package to completed."
+  ]
+}

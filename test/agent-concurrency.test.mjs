@@ -203,6 +203,29 @@ test('取消主 agent 级联取消其子 sub-agent（A-4）', () => {
   assert.equal(agentTaskStore.getAgentTask('task-cap-c2').agentStatus, 'cancel_requested');
 });
 
+test('父任务尚无 LoopRun 时仍按 task parent identity 级联取消', () => {
+  agentTaskStore.insertAgentTask({
+    taskId: 'task-preloop-primary',
+    userId: 'user-preloop',
+    params: { kind: 'primary' },
+  });
+  agentTaskStore.insertAgentTask({
+    taskId: 'task-preloop-child',
+    userId: 'user-preloop',
+    params: { kind: 'subagent', parentTaskId: 'task-preloop-primary' },
+  });
+
+  assert.equal(db.getLoopRunByTaskId('task-preloop-primary'), null);
+  const { cancelledTaskIds } = agentTaskStore.cancelAgentTaskCascade('task-preloop-primary', {
+    dbMod: db,
+  });
+  assert.deepEqual(
+    cancelledTaskIds.sort(),
+    ['task-preloop-primary', 'task-preloop-child'].sort(),
+  );
+  assert.equal(agentTaskStore.getAgentTask('task-preloop-child').agentStatus, 'cancel_requested');
+});
+
 test('取消 sub-agent 不级联到父/兄弟（A-4 反向）', () => {
   const cid = 'conv-cascade-rev';
   persistLoop({ loopRunId: 'loop-rev', conversationId: cid, kind: 'primary', taskId: 'task-rev' });

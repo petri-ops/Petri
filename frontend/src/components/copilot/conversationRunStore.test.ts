@@ -578,10 +578,10 @@ describe('resumeSubAgentTasks (AGENT-CONCURRENCY)', () => {
 
   it('只重订阅仍 running 的 sub-agent run，跳过 primary 与已完成的', async () => {
     fetchLoopRunsMock.mockResolvedValue([
-      { loopRunId: 'lr-primary', conversationId: 'c1', loopStatus: 'running', kind: 'primary', taskId: 't-primary' },
-      { loopRunId: 'lr-sub1', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-sub1', parentLoopRunId: 'lr-primary' },
-      { loopRunId: 'lr-sub2', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-sub2', parentLoopRunId: 'lr-primary' },
-      { loopRunId: 'lr-sub3', conversationId: 'c1', loopStatus: 'completed', kind: 'subagent', taskId: 't-sub3', parentLoopRunId: 'lr-primary' },
+      { loopRunId: 'lr-primary', projectId: 'project-1', conversationId: 'c1', loopStatus: 'running', kind: 'primary', taskId: 't-primary' },
+      { loopRunId: 'lr-sub1', projectId: 'project-1', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-sub1', parentLoopRunId: 'lr-primary' },
+      { loopRunId: 'lr-sub2', projectId: 'project-1', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-sub2', parentLoopRunId: 'lr-primary' },
+      { loopRunId: 'lr-sub3', projectId: 'project-1', conversationId: 'c1', loopStatus: 'completed', kind: 'subagent', taskId: 't-sub3', parentLoopRunId: 'lr-primary' },
     ] as any);
 
     await resumeSubAgentTasks('c1', 'project-1');
@@ -597,6 +597,19 @@ describe('resumeSubAgentTasks (AGENT-CONCURRENCY)', () => {
     fetchLoopRunsMock.mockRejectedValue(new Error('network'));
     await expect(resumeSubAgentTasks('c1', 'project-1')).resolves.toBeUndefined();
     expect(subscribeAgentTaskMock).not.toHaveBeenCalled();
+  });
+
+  it('拒绝恢复到其他项目或会话，并跳过缺少归属字段的旧响应', async () => {
+    fetchLoopRunsMock.mockResolvedValue([
+      { loopRunId: 'lr-other-project', projectId: 'project-2', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-project-2' },
+      { loopRunId: 'lr-other-conversation', projectId: 'project-1', conversationId: 'c2', loopStatus: 'running', kind: 'subagent', taskId: 't-c2' },
+      { loopRunId: 'lr-missing-project', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-legacy' },
+    ] as any);
+
+    await resumeSubAgentTasks('c1', 'project-1');
+
+    expect(subscribeAgentTaskMock).not.toHaveBeenCalled();
+    expect(listSubAgentTasksForConversation('c1')).toHaveLength(0);
   });
 });
 
@@ -618,13 +631,14 @@ describe('resumeOrphanAgentTasks (AGENT-CONCURRENCY A-5)', () => {
 
   it('同时恢复 running 的 sub-agent 与 localStorage 中未完成的 primary', async () => {
     fetchLoopRunsMock.mockResolvedValue([
-      { loopRunId: 'lr-primary', conversationId: 'c1', loopStatus: 'running', kind: 'primary', taskId: 't-primary' },
-      { loopRunId: 'lr-sub1', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-sub1', parentLoopRunId: 'lr-primary' },
+      { loopRunId: 'lr-primary', projectId: 'project-1', conversationId: 'c1', loopStatus: 'running', kind: 'primary', taskId: 't-primary' },
+      { loopRunId: 'lr-sub1', projectId: 'project-1', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-sub1', parentLoopRunId: 'lr-primary' },
     ] as any);
     findResumableAgentTaskMock.mockReturnValue('t-primary');
 
     await resumeOrphanAgentTasks('c1', 'project-1');
 
+    expect(findResumableAgentTaskMock).toHaveBeenCalledWith('c1', 'project-1');
     // sub-agent：来自后端 loop_runs
     expect(subscribeAgentTaskMock).toHaveBeenCalledWith('t-sub1', expect.anything(), 0);
     // primary：来自 localStorage resumable task，走 subscribeAgentTask 而非重新提交
@@ -637,7 +651,7 @@ describe('resumeOrphanAgentTasks (AGENT-CONCURRENCY A-5)', () => {
 
   it('无 resumable primary 时只恢复 sub-agent，不创建主 run', async () => {
     fetchLoopRunsMock.mockResolvedValue([
-      { loopRunId: 'lr-sub1', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-sub1', parentLoopRunId: 'lr-primary' },
+      { loopRunId: 'lr-sub1', projectId: 'project-1', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-sub1', parentLoopRunId: 'lr-primary' },
     ] as any);
     findResumableAgentTaskMock.mockReturnValue(null);
 

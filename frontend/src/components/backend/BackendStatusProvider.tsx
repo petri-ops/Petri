@@ -18,6 +18,18 @@ const INITIAL_STATUS: BackendStatus = {
 
 const Ctx = createContext<BackendStatus>(INITIAL_STATUS);
 
+async function probeHealth(url: string): Promise<boolean> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 2000);
+  try {
+    return await fetch(url, { signal: controller.signal }).then((response) => response.ok);
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 async function readBackendStatus(): Promise<BackendStatus | null> {
   const desktopStatus = await window.biof3Desktop?.backend?.status();
   if (desktopStatus) return desktopStatus;
@@ -26,8 +38,8 @@ async function readBackendStatus(): Promise<BackendStatus | null> {
   // regression and accessibility acceptance; packaged builds never use this.
   if (!import.meta.env.DEV) return null;
   const [rServerUp, pyServerUp] = await Promise.all([
-    fetch('http://127.0.0.1:3001/api/health').then((response) => response.ok).catch(() => false),
-    fetch('http://127.0.0.1:3004/api/health').then((response) => response.ok).catch(() => false),
+    probeHealth('http://127.0.0.1:3001/api/health'),
+    probeHealth('http://127.0.0.1:3004/api/health'),
   ]);
   return {
     rRuntime: rServerUp,
@@ -67,30 +79,29 @@ export function BackendStatusProvider({
 
   useEffect(() => {
     let alive = true;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     // 启动期高频探测（1s）：后端双服务稳态 ~2.6s 就绪，高频能让 UI 尽快
     // 感知就绪、避免"后端已起但引导页还在转圈"的体感延迟；就绪后降频到
     // 5s 仅作健康保活，避免无谓 IPC 占用。
-    let interval = 1000;
     const safeTick = async () => {
+      let nextDelay = 1000;
       try {
         const s = await readBackendStatus();
-        if (!alive || !s) return;
-        setStatus(s);
-        setLoaded(true);
-        if (s.isReady && interval !== 5000) {
-          interval = 5000;
-          clearInterval(id);
-          id = setInterval(safeTick, interval);
+        if (alive && s) {
+          setStatus(s);
+          setLoaded(true);
+          nextDelay = s.isReady ? 5000 : 1000;
         }
       } catch {
         // 忽略
+      } finally {
+        if (alive) timeoutId = setTimeout(safeTick, nextDelay);
       }
     };
-    safeTick();
-    const id = setInterval(safeTick, interval);
+    void safeTick();
     return () => {
       alive = false;
-      clearInterval(id);
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, []);
 

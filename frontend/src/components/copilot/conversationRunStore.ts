@@ -10,6 +10,7 @@ import {
   type ToolCallEvent,
   type ToolResultEvent,
   type ResultEditProgressEvent,
+  type StreamChatOptions,
 } from './copilotClient';
 import {
   mergeToolCallActivity,
@@ -263,7 +264,21 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     }));
   };
 
-  const callbacks = {
+  const callbacks: Pick<
+    StreamChatOptions,
+    | 'onIter'
+    | 'onTaskStarted'
+    | 'onAgentStatus'
+    | 'onAgentProgress'
+    | 'onResultEditProgress'
+    | 'onDelta'
+    | 'onToolCall'
+    | 'onToolResult'
+    | 'onLoopPhase'
+    | 'onLoopIteration'
+    | 'onDone'
+    | 'onError'
+  > = {
     onIter: (iteration) => {
       if (iteration <= 1) return;
       assistantAcc = '';
@@ -703,7 +718,7 @@ export function startSubAgentTask(options: StartSubAgentTaskOptions): void {
 function subscribeSubAgentResumed(
   taskId: string,
   conversationId: string,
-  projectId: string | undefined,
+  projectId: string,
   parentTaskId: string | null | undefined,
   userContent = '（恢复后台任务）'
 ): void {
@@ -782,12 +797,22 @@ export async function resumeSubAgentTasks(
     (run) =>
       run.loopStatus === 'running' &&
       (run.kind === 'subagent' || (run.kind == null && !!run.parentLoopRunId)) &&
-      !!run.taskId
+      !!run.taskId &&
+      run.conversationId === conversationId &&
+      typeof run.projectId === 'string' &&
+      run.projectId.length > 0 &&
+      (!projectId || run.projectId === projectId)
   );
   for (const run of subRuns) {
     const taskId = run.taskId as string;
     if (subTaskRuns.has(taskId)) continue;
-    subscribeSubAgentResumed(taskId, conversationId, projectId, run.parentLoopRunId, '（恢复后台任务）');
+    subscribeSubAgentResumed(
+      taskId,
+      conversationId,
+      run.projectId,
+      run.parentLoopRunId,
+      '（恢复后台任务）'
+    );
   }
 }
 
@@ -826,7 +851,7 @@ export async function resumeOrphanAgentTasks(
   // 1) sub-agent：后端 loop_runs 权威。
   await resumeSubAgentTasks(conversationId, projectId);
   // 2) 主 agent：localStorage resumable task（仅当当前会话无活跃主 run）。
-  const primaryTaskId = findResumableAgentTask();
+  const primaryTaskId = findResumableAgentTask(conversationId, projectId);
   if (primaryTaskId && !isConversationRunning(conversationId)) {
     resumeConversationRun(primaryTaskId, conversationId, projectId);
   }
