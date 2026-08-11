@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "ui141-startup-runtime-gate-2026-08-11",
+  "workPackage": "UI-141 startup runtime gate",
+  "classification": "unsigned_packaged_macos_arm64_isolated_runtime_missing_acceptance",
+  "qualificationEligible": false,
+  "sourceCommit": "6adeaa92845a302e80fa4c888992f4e5a40b3894",
+  "sourceTreeExact": true,
+  "sourceCommitMatchesSourceHashes": true,
+  "sourceHashes": {
+    "frontend/src/pages/home.tsx": "661c560881ea43b5209628a77673e556284ec0ba7a8e46fec17fe2de095d2673",
+    "frontend/src/pages/home.test.tsx": "e251c9d4957a4fcc66836b7995d6641e86bb4645ac04cce4e5bbf21e1f163fd2",
+    "frontend/src/components/backend/BackendStatusProvider.tsx": "137c0807057414d09ec75c02ffe3bfe74addea46de319d43e69d23995189e6e1",
+    "src/backend-health.js": "a84871d1662ab1888bc602691a0b14bf7126761951faf2b09c009817a7faaa39",
+    "src/main.js": "05156630b3a35cd2298f44f86037d780e128fb5a84478176b3d9bd9421dac382",
+    "core/shared-backend/runtime-paths.js": "9a4a01fabe7c1f9319090cd60a5221353204a00ec7a89a592f59c1591b9ba833",
+    "test/backend-health.test.mjs": "02a217c4968b404ebf6739520a8eb19bff132f9526420ad41f0db82acee489dd",
+    "test/platform-compat.test.mjs": "67eb2be68a44448b2a41f689187c1f4c7e3d8cd108be3526e9850d5b1d53ec2f"
+  },
+  "build": {
+    "command": "npm run build:mac-arm64",
+    "app": "dist/mac-arm64/BioF3.app",
+    "architecture": "arm64",
+    "signed": false,
+    "result": "passed"
+  },
+  "isolation": {
+    "temporaryUserData": true,
+    "temporaryLocalData": true,
+    "systemRuntimeFallback": false,
+    "existingUserRuntimesModified": false,
+    "temporaryDataRemovedAfterCapture": true
+  },
+  "runtimeTruth": {
+    "rRuntime": false,
+    "pyRuntime": false,
+    "rServerUp": false,
+    "pyServerUp": false,
+    "plumberUp": false,
+    "isReady": false,
+    "downReason": "R 运行时未安装，请从插件商店安装"
+  },
+  "observations": {
+    "runtimeMissingHeading": "先安装分析运行时",
+    "runtimeMissingAriaLabel": "首次配置运行时",
+    "rRuntimeState": "未安装",
+    "pythonRuntimeState": "未安装",
+    "installButtonEnabled": true,
+    "installButtonLabel": "打开插件商店安装",
+    "pluginStoreOpenedWithoutBackend": true,
+    "pluginStoreRuntimeCount": 2,
+    "pluginStoreRInstallEnabled": true,
+    "pluginStorePythonInstallEnabled": true,
+    "misleadingBackendNotReadyCopyShown": false
+  },
+  "screenshots": {
+    "runtimeMissing": {
+      "path": "acceptance/startup-runtime/ui141-runtime-missing.png",
+      "sha256": "df7e723a65259d5d928e1d2e8a3aa5f83d23337325ae6e1b59a42e080651fb3d"
+    },
+    "pluginStore": {
+      "path": "acceptance/startup-runtime/ui141-plugin-store.png",
+      "sha256": "faf4acfd19bac7db61a0e5b749600da2ea8a6bee31ec5f1f16769bd48a2e74fe"
+    }
+  },
+  "focusedVerification": {
+    "home": "2 tests passed",
+    "backendAndPlatform": "8 tests passed",
+    "frontendStrictTypeScript": "passed",
+    "docsCheck": "passed",
+    "uiAuditCheck": "passed"
+  },
+  "status": "passed",
+  "passed": true,
+  "remaining": []
+}

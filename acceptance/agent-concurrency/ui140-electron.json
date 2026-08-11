@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "ui140-agent-concurrency-electron-2026-08-11",
+  "workPackage": "AGENT-CONCURRENCY / UI-140",
+  "classification": "development_electron_real_deepseek_with_deterministic_concurrency_regression",
+  "qualificationEligible": false,
+  "sourceCommit": "6adeaa92845a302e80fa4c888992f4e5a40b3894",
+  "sourceTreeExact": true,
+  "sourceCommitMatchesSourceHashes": true,
+  "sourceHashes": {
+    "core/r-server/db.js": "990aa90dfa9c77fcb576aa8b3964cc46461ce49b7543f46aa4cbdc819c6b8555",
+    "core/r-server/agent-runner.js": "7862c4b40f1bf22ae933670d14b69d901731b72886c8fd59fb4d80f359fe342b",
+    "core/r-server/agent-task-store.js": "b7b4fd5efb12f41f260c4af5c1449f148cb59c12a6e9454673e6cdb5253ade7b",
+    "core/r-server/helpers/runtime.js": "da535177e2c0e111d258345694594f49d43b69d4aa2ae8551071d30f6bfe66f8",
+    "core/r-server/helpers/conversations.js": "0ec65bb48e354d1a27febe233cdacc59d41898d30104ab0583b0c96337e4446f",
+    "core/r-server/routes/ai-agent.js": "3275890e689f87347bb57d9b5283f8e1de29cabf94e070a377e4d4f0d44bfde7",
+    "core/shared-backend/loop-contract.js": "66a838bc100096edc0118292da0a85462abc5659d5bed269b7ec4cf390fdc2fc",
+    "frontend/src/components/copilot/SimpleChat.tsx": "c02c9be3d33e240a577217e65a8968460a8d3b00f9b0f2b744b5bfbc87263ecf",
+    "frontend/src/components/copilot/simple-chat.css": "42638fc1d462b5a15367ed48e55156668cee5a44776b39c42dd7da32f84f7b35",
+    "frontend/src/components/copilot/conversationRunStore.ts": "9a10bb3433202dd67243e9175b9a3c953cca70b76aeaaeca42bbdf05052b7bbe",
+    "frontend/src/components/copilot/copilotClient.ts": "7a4c487cfad3ac507638b8e3e544726d01415655c2617343d269cc4559278f17",
+    "test/agent-concurrency.test.mjs": "c704bc2848bbeb8095407ddb6cfac09c7dc169eeda3051037fd47e809fffb156",
+    "frontend/src/components/copilot/conversationRunStore.test.ts": "438fe82a5f62d29d94d15d418ee5ceac194bbc9d3a195961c14de5ff682db8e1",
+    "frontend/src/components/copilot/copilotClient.test.ts": "d98deec53983f3214f71f42bf89a566b26226362670c9947a545449b205debaf",
+    "frontend/src/components/copilot/SimpleChat.test.tsx": "f4299ae8e3a383c65f92510bcfc46878589ddb4c8abe6d4e0c25b21b5d1b3097"
+  },
+  "platform": "darwin-arm64",
+  "launch": {
+    "entrypoint": "npm run dev",
+    "electronViaLaunchServices": true,
+    "isolatedUserData": ".biof3-dev-user-data",
+    "portsObserved": [3000, 3001, 3004, 9222]
+  },
+  "provider": {
+    "selectedProfileId": "deepseek-chat",
+    "selectedLabel": "DeepSeek",
+    "selectedModel": "deepseek-v4-flash",
+    "baseUrl": "https://api.deepseek.com",
+    "credentialConfigured": true,
+    "connectivityPassed": true,
+    "connectivityRemediation": "Clash Verge rule mode routes api.deepseek.com through AI dedicated proxy group",
+    "settingsTestResponse": {
+      "ok": true,
+      "message": "连接正常"
+    },
+    "providerClaim": true
+  },
+  "acceptance": {
+    "A-1": {
+      "status": "passed",
+      "observed": "A real DeepSeek primary DESeq2 task returned immediately as task 39658a06-c358-45b0-8cf9-ed2280129993 while the composer remained editable. The scientific tool ran and truthfully reported that the four-gene fixture could not fit DESeq2 dispersion."
+    },
+    "A-2": {
+      "status": "passed",
+      "observed": "A queued same-conversation message was persisted after the primary terminal event and automatically started as DeepSeek task c2cc1e67-e798-4535-9200-fb7244e030d2, completing with the correct control-versus-case grouping."
+    },
+    "A-3": {
+      "status": "passed",
+      "observed": "Two independent sub-agent cards were simultaneously visible under one running primary in the Electron renderer; focused store tests also retain independent taskId snapshots."
+    },
+    "A-4": {
+      "status": "passed",
+      "observed": "Stopping one rendered sub-agent changed only that task while its parent and sibling remained running. Deterministic tests additionally cover primary-to-child cascade and reverse non-cascade."
+    },
+    "A-5": {
+      "status": "passed",
+      "observed": "A renderer reload while DeepSeek task fc968ae5-58e1-4bb4-bd30-c1874f645dff was running restored the exact conversation/project task and displayed the recovery marker. CDP captured zero Runtime exceptions, Log errors, or console.error events after reload; the 300-write SQLite concurrency test preserved task_id grouping."
+    },
+    "A-6": {
+      "status": "passed",
+      "observed": "Under real parent 4bf4affd-050c-40e0-8a4d-766d9c4a3a09, four DeepSeek sub-agent POSTs returned HTTP 200 with distinct taskIds and the fifth returned HTTP 503 user_limit. Deterministic tests additionally prove the primary reservation for both acquisition orders."
+    }
+  },
+  "defectsFoundAndFixed": [
+    "Sub-agent creation incorrectly required an existing parent LoopRun even before the first tool call.",
+    "Sub-agent creation reassigned a const conversation id, leaving the Express request hanging after parent validation.",
+    "Primary recovery localStorage lacked conversationId/projectId and could restore into the wrong conversation.",
+    "Sub-agent recovery did not fail closed on mismatched or missing project/conversation identity."
+  ],
+  "verification": {
+    "frontendFocused": "4 files, 47 tests passed",
+    "agentConcurrency": "8 tests passed",
+    "backendAndPlatform": "16 tests passed",
+    "frontendStrictTypeScript": "passed",
+    "syntaxChecks": "passed",
+    "docsReconcile": "0 validation issues",
+    "docsCheck": "passed",
+    "uiAuditCheck": "passed"
+  },
+  "status": "passed",
+  "passed": true,
+  "remaining": []
+}

@@ -989,6 +989,26 @@ async function createWindow() {
     console.log("[renderer] page loaded");
   });
 
+  // macOS 焦点诊断。开发启动器通过 LaunchServices 获取 GUI 会话；这里只
+  // 记录窗口状态，不能延迟抢焦点，否则用户已切到其他应用时会被强制拉回。
+  if (process.platform === "darwin") {
+    const windowForFocusDiagnostics = mainWindow;
+    windowForFocusDiagnostics.webContents.once("did-finish-load", () => {
+      setTimeout(() => {
+        if (!windowForFocusDiagnostics.isDestroyed()) {
+          console.log(
+            "[focus] isKeyWindow after load:",
+            typeof windowForFocusDiagnostics.isKeyWindow === "function"
+              ? windowForFocusDiagnostics.isKeyWindow()
+              : "n/a",
+            "isFocused:",
+            windowForFocusDiagnostics.isFocused(),
+          );
+        }
+      }, 500);
+    });
+  }
+
   const windowForEvents = mainWindow;
   mainWindow.on("closed", () => {
     mainWindow = null;
@@ -1288,7 +1308,8 @@ function setupRuntimeIpc() {
   ipcMain.handle("runtime:status", async () => {
     try {
       const { getRuntimeStatus } = require("./plugin-manager");
-      return getRuntimeStatus();
+      const { mergeRuntimeStatusWithConfiguredHomes } = require("./backend-health");
+      return mergeRuntimeStatusWithConfiguredHomes(getRuntimeStatus());
     } catch (e) {
       return { r: { installed: false }, python: { installed: false } };
     }
@@ -1299,9 +1320,12 @@ function setupRuntimeIpc() {
   ipcMain.handle("backend:status", async () => {
     try {
       const { getRuntimeStatus } = require("./plugin-manager");
-      const { getBackendStatus } = require("./backend-health");
+      const {
+        getBackendStatus,
+        mergeRuntimeStatusWithConfiguredHomes,
+      } = require("./backend-health");
       return await getBackendStatus({
-        runtimeStatus: getRuntimeStatus(),
+        runtimeStatus: mergeRuntimeStatusWithConfiguredHomes(getRuntimeStatus()),
         procs: {
           rServer: rServerProc,
           pyServer: pyServerProc,

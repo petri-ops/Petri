@@ -22,7 +22,10 @@ function getPythonExecutableCandidates(platform = process.platform) {
 
 function getPythonRuntimeExecutable(runtimeHome, platform = process.platform) {
   if (!runtimeHome) return null;
-  const searchDirs = [runtimeHome, path.join(runtimeHome, 'bin'), path.join(runtimeHome, 'Scripts')];
+  // Framework-style Python homes can contain a root-level `python` Mach-O
+  // dylib with executable permission. It is not process-spawnable (ENOEXEC),
+  // so prefer the actual launchers under bin/Scripts before legacy flat trees.
+  const searchDirs = [path.join(runtimeHome, 'bin'), path.join(runtimeHome, 'Scripts'), runtimeHome];
   const candidates = getPythonExecutableCandidates(platform);
   for (const dir of searchDirs) {
     if (!fs.existsSync(dir)) continue;

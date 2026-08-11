@@ -17,7 +17,10 @@
 // AI_CONCURRENCY_GUARD_v1
 // ============================================================
 const AI_MAX_CONCURRENT_PER_WORKER = 8;
-const AI_MAX_CONCURRENT_PER_USER = 3;
+const AI_MAX_CONCURRENT_PER_USER = 5;
+// AGENT-CONCURRENCY: reserve 1 slot per user for the primary (main) loop so a
+// user's own sub-agent tasks can never starve the main conversational agent.
+const AI_MAX_CONCURRENT_SUBAGENT_PER_USER = AI_MAX_CONCURRENT_PER_USER - 1;
 let _aiActiveStreams = 0;
 const _aiUserStreams = new Map();
 
@@ -45,21 +48,30 @@ function aiConcurrencyRelease(userId) {
 // AGENT_TASK_v1 — task 生命周期并发锁（P2-b 阶段 1）
 // 与 aiConcurrencyAcquire 区别：锁绑 task 生命周期（runner finally 释放），
 // 而非 HTTP 请求。用户关浏览器→SSE 订阅 close→锁不释放，loop 继续。
-// _aiTaskStreams: userId → Set<taskId>
+// _aiTaskStreams: userId → Map<taskId, isPrimary>
+// 主 agent(primary) 始终预留 1 槽；sub-agent 并发上限 = 总数-1，保证主 agent
+// 不论启动顺序都能拿到槽位（即「每用户 5 / 预留 1」）。
 // ============================================================
 const _aiTaskStreams = new Map();
 
-function aiTaskConcurrencyAcquire(userId, taskId) {
+function aiTaskConcurrencyAcquire(userId, taskId, { isPrimary = false } = {}) {
   if (!userId || !taskId) return {ok: false, reason: 'invalid', message: '缺少 userId/taskId'};
   if (_aiActiveStreams >= AI_MAX_CONCURRENT_PER_WORKER) {
     return {ok: false, reason: 'server_busy', message: '当前对话人数较多，请稍后重试'};
   }
-  const userSet = _aiTaskStreams.get(userId) || new Set();
-  if (userSet.size >= AI_MAX_CONCURRENT_PER_USER) {
+  const userMap = _aiTaskStreams.get(userId) || new Map();
+  let subagentCount = 0;
+  for (const v of userMap.values()) if (v === false) subagentCount++;
+  // 总数封顶：主 agent 永远能拿到至少 1 个槽位。
+  if (userMap.size >= AI_MAX_CONCURRENT_PER_USER) {
     return {ok: false, reason: 'user_limit', message: '你已有多个对话在进行中，请等待完成后再试'};
   }
-  userSet.add(taskId);
-  _aiTaskStreams.set(userId, userSet);
+  // sub-agent 单独封顶，确保不挤占主 agent 的预留槽。
+  if (!isPrimary && subagentCount >= AI_MAX_CONCURRENT_SUBAGENT_PER_USER) {
+    return {ok: false, reason: 'user_limit', message: '子任务并发已达上限，请等待其完成后再派生'};
+  }
+  userMap.set(taskId, isPrimary);
+  _aiTaskStreams.set(userId, userMap);
   _aiActiveStreams++;
   return {ok: true};
 }
@@ -67,11 +79,11 @@ function aiTaskConcurrencyAcquire(userId, taskId) {
 function aiTaskConcurrencyRelease(userId, taskId) {
   if (!userId || !taskId) return;
   _aiActiveStreams = Math.max(0, _aiActiveStreams - 1);
-  const userSet = _aiTaskStreams.get(userId);
-  if (userSet) {
-    userSet.delete(taskId);
-    if (userSet.size === 0) _aiTaskStreams.delete(userId);
-    else _aiTaskStreams.set(userId, userSet);
+  const userMap = _aiTaskStreams.get(userId);
+  if (userMap) {
+    userMap.delete(taskId);
+    if (userMap.size === 0) _aiTaskStreams.delete(userId);
+    else _aiTaskStreams.set(userId, userMap);
   }
 }
 

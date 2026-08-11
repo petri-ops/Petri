@@ -1,8 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { cancelAgentTaskMock, streamChatMock } = vi.hoisted(() => ({
+const { cancelAgentTaskMock, streamChatMock, subscribeAgentTaskMock, fetchLoopRunsMock, findResumableAgentTaskMock } = vi.hoisted(() => ({
   cancelAgentTaskMock: vi.fn(),
   streamChatMock: vi.fn(),
+  subscribeAgentTaskMock: vi.fn(),
+  fetchLoopRunsMock: vi.fn(),
+  findResumableAgentTaskMock: vi.fn(),
 }));
 
 vi.mock('./copilotClient', async (importOriginal) => {
@@ -10,18 +13,34 @@ vi.mock('./copilotClient', async (importOriginal) => {
   return {
     ...original,
     cancelAgentTask: cancelAgentTaskMock,
+    findResumableAgentTask: findResumableAgentTaskMock,
     streamChat: streamChatMock,
+    subscribeAgentTask: subscribeAgentTaskMock,
+  };
+});
+
+vi.mock('@/lib/loop-client', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@/lib/loop-client')>();
+  return {
+    ...original,
+    fetchLoopRuns: fetchLoopRunsMock,
   };
 });
 
 import {
   __resetConversationRunsForTests,
   getConversationRunSnapshot,
+  getSubAgentTaskSnapshot,
+  listSubAgentTasksForConversation,
   resultEditProgressForContext,
   shouldClearReconciledConversationRun,
   startConversationRun,
+  startSubAgentTask,
   stopConversationRun,
+  stopSubAgentTask,
   subscribeConversationRun,
+  resumeSubAgentTasks,
+  resumeOrphanAgentTasks,
 } from './conversationRunStore';
 import { biof3Events, subscribeBioF3Event } from '@/lib/events';
 import { deriveLoopDisplay } from '@/lib/loop-client';
@@ -448,5 +467,214 @@ describe('conversation run store', () => {
     expect(display.status).toBe('blocked');
     expect(display.tone).toBe('warning');
     expect(display.tone).not.toBe('success');
+  });
+});
+
+// ===========================================================================
+// AGENT-CONCURRENCY: parallel sub-agent task subsystem
+// ===========================================================================
+describe('sub-agent task subsystem', () => {
+  beforeEach(() => {
+    __resetConversationRunsForTests();
+    streamChatMock.mockReset();
+  });
+  afterEach(() => {
+    __resetConversationRunsForTests();
+  });
+
+  function spawn(conversationId: string, parentTaskId: string, taskId: string): void {
+    streamChatMock.mockImplementation(async (opts) => {
+      opts.onTaskStarted?.(taskId);
+      opts.onDelta?.('后台结果-' + taskId);
+      opts.onDone?.();
+    });
+    startSubAgentTask({
+      conversationId,
+      projectId: 'project-1',
+      userContent: '后台跑个分析',
+      messages: [{ role: 'user', content: '后台跑个分析' }],
+      context: { page: 'desktop-project', projectId: 'project-1' },
+      parentTaskId,
+    });
+  }
+
+  it('tracks a sub-agent task independently of the primary run', () => {
+    spawn('conv-sub', 'parent-1', 'sub-1');
+    const list = listSubAgentTasksForConversation('conv-sub');
+    expect(list).toHaveLength(1);
+    expect(list[0]).toMatchObject({
+      taskId: 'sub-1',
+      parentTaskId: 'parent-1',
+      status: 'done',
+      assistantContent: '后台结果-sub-1',
+      conversationId: 'conv-sub',
+    });
+    // primary conversation run must remain untouched / isolated
+    expect(getConversationRunSnapshot('conv-sub')).toBeNull();
+  });
+
+  it('runs multiple sub-agents concurrently in the same conversation', () => {
+    streamChatMock.mockImplementation(async (opts) => {
+      const id = opts.parentTaskId === 'p-a' ? 'sub-a' : 'sub-b';
+      opts.onTaskStarted?.(id);
+      opts.onDelta?.(id === 'sub-a' ? '结果A' : '结果B');
+      opts.onDone?.();
+    });
+    startSubAgentTask({
+      conversationId: 'conv-multi', projectId: 'project-1', userContent: 'a',
+      messages: [{ role: 'user', content: 'a' }],
+      context: { page: 'desktop-project', projectId: 'project-1' }, parentTaskId: 'p-a',
+    });
+    startSubAgentTask({
+      conversationId: 'conv-multi', projectId: 'project-1', userContent: 'b',
+      messages: [{ role: 'user', content: 'b' }],
+      context: { page: 'desktop-project', projectId: 'project-1' }, parentTaskId: 'p-b',
+    });
+
+    const list = listSubAgentTasksForConversation('conv-multi');
+    expect(list.map((t) => t.taskId).sort()).toEqual(['sub-a', 'sub-b']);
+    expect(list.find((t) => t.taskId === 'sub-a')?.assistantContent).toBe('结果A');
+    expect(list.find((t) => t.taskId === 'sub-b')?.assistantContent).toBe('结果B');
+  });
+
+  it('cancels a running sub-agent via stopSubAgentTask', () => {
+    streamChatMock.mockImplementation(async (opts) => {
+      opts.onTaskStarted?.('sub-stop');
+    });
+    startSubAgentTask({
+      conversationId: 'conv-stop', projectId: 'project-1', userContent: 'x',
+      messages: [{ role: 'user', content: 'x' }],
+      context: { page: 'desktop-project', projectId: 'project-1' }, parentTaskId: 'p',
+    });
+    expect(getSubAgentTaskSnapshot('sub-stop')?.status).toBe('running');
+
+    stopSubAgentTask('sub-stop');
+    expect(getSubAgentTaskSnapshot('sub-stop')?.status).toBe('stopped');
+    expect(cancelAgentTaskMock).toHaveBeenCalledWith('sub-stop');
+  });
+
+  it('ignores spawn without a parent task id', () => {
+    startSubAgentTask({
+      conversationId: 'conv-nop', projectId: 'project-1', userContent: 'x',
+      messages: [{ role: 'user', content: 'x' }],
+      context: { page: 'desktop-project', projectId: 'project-1' }, parentTaskId: '',
+    });
+    expect(listSubAgentTasksForConversation('conv-nop')).toHaveLength(0);
+    expect(streamChatMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('resumeSubAgentTasks (AGENT-CONCURRENCY)', () => {
+  beforeEach(() => {
+    __resetConversationRunsForTests();
+    subscribeAgentTaskMock.mockReset();
+    subscribeAgentTaskMock.mockResolvedValue(undefined);
+    fetchLoopRunsMock.mockReset();
+  });
+
+  afterEach(() => {
+    __resetConversationRunsForTests();
+  });
+
+  it('只重订阅仍 running 的 sub-agent run，跳过 primary 与已完成的', async () => {
+    fetchLoopRunsMock.mockResolvedValue([
+      { loopRunId: 'lr-primary', projectId: 'project-1', conversationId: 'c1', loopStatus: 'running', kind: 'primary', taskId: 't-primary' },
+      { loopRunId: 'lr-sub1', projectId: 'project-1', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-sub1', parentLoopRunId: 'lr-primary' },
+      { loopRunId: 'lr-sub2', projectId: 'project-1', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-sub2', parentLoopRunId: 'lr-primary' },
+      { loopRunId: 'lr-sub3', projectId: 'project-1', conversationId: 'c1', loopStatus: 'completed', kind: 'subagent', taskId: 't-sub3', parentLoopRunId: 'lr-primary' },
+    ] as any);
+
+    await resumeSubAgentTasks('c1', 'project-1');
+
+    expect(subscribeAgentTaskMock).toHaveBeenCalledTimes(2);
+    expect(subscribeAgentTaskMock).toHaveBeenCalledWith('t-sub1', expect.anything(), 0);
+    expect(subscribeAgentTaskMock).toHaveBeenCalledWith('t-sub2', expect.anything(), 0);
+    const taskIds = listSubAgentTasksForConversation('c1').map((t) => t.taskId).sort();
+    expect(taskIds).toEqual(['t-sub1', 't-sub2']);
+  });
+
+  it('fetchLoopRuns 失败时静默返回，不订阅任何任务', async () => {
+    fetchLoopRunsMock.mockRejectedValue(new Error('network'));
+    await expect(resumeSubAgentTasks('c1', 'project-1')).resolves.toBeUndefined();
+    expect(subscribeAgentTaskMock).not.toHaveBeenCalled();
+  });
+
+  it('拒绝恢复到其他项目或会话，并跳过缺少归属字段的旧响应', async () => {
+    fetchLoopRunsMock.mockResolvedValue([
+      { loopRunId: 'lr-other-project', projectId: 'project-2', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-project-2' },
+      { loopRunId: 'lr-other-conversation', projectId: 'project-1', conversationId: 'c2', loopStatus: 'running', kind: 'subagent', taskId: 't-c2' },
+      { loopRunId: 'lr-missing-project', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-legacy' },
+    ] as any);
+
+    await resumeSubAgentTasks('c1', 'project-1');
+
+    expect(subscribeAgentTaskMock).not.toHaveBeenCalled();
+    expect(listSubAgentTasksForConversation('c1')).toHaveLength(0);
+  });
+});
+
+describe('resumeOrphanAgentTasks (AGENT-CONCURRENCY A-5)', () => {
+  beforeEach(() => {
+    __resetConversationRunsForTests();
+    subscribeAgentTaskMock.mockReset();
+    subscribeAgentTaskMock.mockResolvedValue(undefined);
+    fetchLoopRunsMock.mockReset();
+    findResumableAgentTaskMock.mockReset();
+    findResumableAgentTaskMock.mockReturnValue(null);
+    streamChatMock.mockReset();
+    streamChatMock.mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    __resetConversationRunsForTests();
+  });
+
+  it('同时恢复 running 的 sub-agent 与 localStorage 中未完成的 primary', async () => {
+    fetchLoopRunsMock.mockResolvedValue([
+      { loopRunId: 'lr-primary', projectId: 'project-1', conversationId: 'c1', loopStatus: 'running', kind: 'primary', taskId: 't-primary' },
+      { loopRunId: 'lr-sub1', projectId: 'project-1', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-sub1', parentLoopRunId: 'lr-primary' },
+    ] as any);
+    findResumableAgentTaskMock.mockReturnValue('t-primary');
+
+    await resumeOrphanAgentTasks('c1', 'project-1');
+
+    expect(findResumableAgentTaskMock).toHaveBeenCalledWith('c1', 'project-1');
+    // sub-agent：来自后端 loop_runs
+    expect(subscribeAgentTaskMock).toHaveBeenCalledWith('t-sub1', expect.anything(), 0);
+    // primary：来自 localStorage resumable task，走 subscribeAgentTask 而非重新提交
+    expect(subscribeAgentTaskMock).toHaveBeenCalledWith('t-primary', expect.anything(), 0);
+    expect(streamChatMock).not.toHaveBeenCalled();
+    // 主 run 快照已登记 taskId 并进入 running（未重复创建 sub-agent 条目）
+    expect(getConversationRunSnapshot('c1')).toMatchObject({ status: 'running', taskId: 't-primary' });
+    expect(listSubAgentTasksForConversation('c1').map((t) => t.taskId)).toEqual(['t-sub1']);
+  });
+
+  it('无 resumable primary 时只恢复 sub-agent，不创建主 run', async () => {
+    fetchLoopRunsMock.mockResolvedValue([
+      { loopRunId: 'lr-sub1', projectId: 'project-1', conversationId: 'c1', loopStatus: 'running', kind: 'subagent', taskId: 't-sub1', parentLoopRunId: 'lr-primary' },
+    ] as any);
+    findResumableAgentTaskMock.mockReturnValue(null);
+
+    await resumeOrphanAgentTasks('c1', 'project-1');
+
+    expect(subscribeAgentTaskMock).toHaveBeenCalledTimes(1);
+    expect(subscribeAgentTaskMock).toHaveBeenCalledWith('t-sub1', expect.anything(), 0);
+    expect(getConversationRunSnapshot('c1')).toBeNull();
+  });
+
+  it('已有活跃主 run 时不重复恢复 primary（避免重复订阅）', async () => {
+    fetchLoopRunsMock.mockResolvedValue([] as any);
+    findResumableAgentTaskMock.mockReturnValue('t-primary');
+    startConversationRun({
+      conversationId: 'c1',
+      projectId: 'project-1',
+      userContent: '进行中',
+      messages: [{ role: 'user', content: '进行中' }],
+      context: { page: 'desktop-project', projectId: 'project-1' },
+    });
+
+    await resumeOrphanAgentTasks('c1', 'project-1');
+
+    expect(subscribeAgentTaskMock).not.toHaveBeenCalled();
   });
 });
