@@ -628,7 +628,7 @@ function TrashManagement(): React.ReactElement {
             <div key={project.id} className="biof3-trash-item">
               <Icon name="folder" size={14} />
               <div><strong>{project.name}</strong><small>项目</small></div>
-              <button type="button" onClick={() => void restoreProject(project.id)} disabled={busyId !== null}>恢复</button>
+              <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={() => void restoreProject(project.id)} disabled={busyId !== null}>恢复</button>
               <button type="button" className="danger" onClick={() => void permanentlyDeleteProject(project.id)} disabled={busyId !== null}>永久删除</button>
             </div>
           ))}
@@ -639,7 +639,7 @@ function TrashManagement(): React.ReactElement {
                 <strong>{conversation.title}</strong>
                 <small>会话{conversation.project_id ? ` · ${projectNameById.get(conversation.project_id) || '现有项目'}` : ''}</small>
               </div>
-              <button type="button" onClick={() => void restoreConversation(conversation.id)} disabled={busyId !== null}>恢复</button>
+              <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={() => void restoreConversation(conversation.id)} disabled={busyId !== null}>恢复</button>
               <button type="button" className="danger" onClick={() => void permanentlyDeleteConversation(conversation.id)} disabled={busyId !== null}>永久删除</button>
             </div>
           ))}

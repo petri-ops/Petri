@@ -3122,7 +3122,7 @@ export function BrowserPanel({
           <Icon name="globe" size={22} />
           <strong>无法打开网页</strong>
           <span>{browserError}</span>
-          <button type="button" onClick={reload}>重新加载</button>
+          <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={reload}>重新加载</button>
         </div>
       )}
     </div>

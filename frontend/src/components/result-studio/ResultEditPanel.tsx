@@ -232,7 +232,7 @@ export function ResultEditPanel({
       )}
 
       <div className={styles.actions}>
-        <button
+        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm"
           type="button"
           disabled={!canSubmit}
           onClick={() => onSubmit({

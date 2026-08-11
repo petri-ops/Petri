@@ -1045,8 +1045,8 @@ function ResultArtifactShell({
       <strong>当前产物文件不可用</strong>
       <span>{effectivePreviewAvailability.reason || '结果记录仍在，但无法读取对应文件。'}</span>
       <div>
-        <button type="button" onClick={retryCurrentPreview}>重试预览</button>
-        <button
+        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={retryCurrentPreview}>重试预览</button>
+        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm"
           type="button"
           onClick={() => onAskAgent(`请检查并恢复当前结果文件“${selectedArtifactLabel || selectedArtifactName}”。先说明缺失原因和可恢复边界，不要覆盖原始数据。`)}
         >
@@ -1281,7 +1281,7 @@ function ResultArtifactShell({
         */}
       </div>
       {recoveryAction && (
-        <button
+        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm"
           type="button"
           disabled={recoveryBusy}
           onClick={() => void requestRecovery()}
@@ -1295,10 +1295,10 @@ function ResultArtifactShell({
     <div className={styles.resultWorkflowConfirmation}>
       <span>确认执行“{pendingRecovery.label}”？该操作会写入任务审计记录。</span>
       <div>
-        <button type="button" disabled={recoveryBusy} onClick={() => void resolveRecovery(false)}>
+        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" disabled={recoveryBusy} onClick={() => void resolveRecovery(false)}>
           取消
         </button>
-        <button type="button" disabled={recoveryBusy} onClick={() => void resolveRecovery(true)}>
+        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" disabled={recoveryBusy} onClick={() => void resolveRecovery(true)}>
           确认执行
         </button>
       </div>
@@ -1329,7 +1329,7 @@ function ResultArtifactShell({
         </div>
       )}
       {reportArtifact && (
-        <button
+        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm"
           type="button"
           disabled={reportGenerating}
           onClick={() => void generateFinalReport()}
@@ -1338,7 +1338,7 @@ function ResultArtifactShell({
         </button>
       )}
       {finalReportUrl && onOpenBrowser && (
-        <button type="button" onClick={() => onOpenBrowser(finalReportUrl)}>查看 HTML 报告</button>
+        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={() => onOpenBrowser(finalReportUrl)}>查看 HTML 报告</button>
       )}
       {finalReportUrl && (
         <a href={finalReportUrl} download="final-report.html">导出 HTML 报告</a>
@@ -1346,7 +1346,7 @@ function ResultArtifactShell({
       {result.deliveryManifest && (
         <>
           <a href={buildUrl('delivery-manifest.json')} target="_blank" rel="noreferrer">查看交付清单</a>
-          <button type="button" disabled={replayPackageBusy} onClick={() => void exportReplayPackage()}>
+          <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" disabled={replayPackageBusy} onClick={() => void exportReplayPackage()}>
             {replayPackageBusy ? '导出中…' : '导出复现包'}
           </button>
         </>
@@ -1355,7 +1355,7 @@ function ResultArtifactShell({
         <a href={scientificScriptUrl} target="_blank" rel="noreferrer">查看脚本</a>
       )}
       {result.deliveryManifest && (
-        <button
+        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm"
           type="button"
           onClick={() => onAskAgent(`请为任务 ${job.id} 的产物 ${selectedArtifactName} 发起重放验证；先展示输入、资源和副作用确认摘要，不要直接执行。`)}
         >
@@ -1477,7 +1477,7 @@ function ResultArtifactShell({
         job.name || job.tool_id,
         <div className={styles.resultPlaceholder}>
           <p>结果加载失败：{resultError}</p>
-          <button type="button" onClick={() => setResultRetryVersion((value) => value + 1)}>重试</button>
+          <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={() => setResultRetryVersion((value) => value + 1)}>重试</button>
         </div>,
         'done'
       );
@@ -1549,7 +1549,7 @@ function ResultArtifactShell({
         {manifestError && (
           <div className={styles.resultWorkflowError} role="alert">
             <span>结果清单暂不可用；已保留可直接读取的结果文件。</span>
-            <button type="button" disabled={manifestLoading} onClick={() => setManifestRetryVersion((value) => value + 1)}>
+            <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" disabled={manifestLoading} onClick={() => setManifestRetryVersion((value) => value + 1)}>
               {manifestLoading ? '重试中…' : '重试结果清单'}
             </button>
           </div>
@@ -1557,7 +1557,7 @@ function ResultArtifactShell({
         {interactionError && (
           <div className={styles.resultWorkflowError} role="alert">
             <span>{interactionError}</span>
-            <button type="button" onClick={() => setInteractionRetryVersion((value) => value + 1)}>重试交互能力</button>
+            <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={() => setInteractionRetryVersion((value) => value + 1)}>重试交互能力</button>
           </div>
         )}
         <div className={styles.resultSidebarPreviewBody}>
