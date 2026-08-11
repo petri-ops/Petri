@@ -53,7 +53,9 @@ test('qa-smoke --json 包含合法 version / startedAt / finishedAt', () => {
   assert.equal(summary.version, 1);
   assert.match(summary.startedAt, /^\d{4}-\d{2}-\d{2}T/);
   assert.match(summary.finishedAt, /^\d{4}-\d{2}-\d{2}T/);
-  assert.match(summary.log, /tmp\/qa-smoke\/.+\.log$/);
+  // 日志路径平台无关校验：Windows 为 AppData\Local\Temp\qa-smoke\...，不再用 POSIX /tmp/ 正则
+  assert.ok(summary.log.endsWith('.log'), `日志路径应以 .log 结尾: ${summary.log}`);
+  assert.ok(summary.log.includes('qa-smoke'), `日志路径应含 qa-smoke: ${summary.log}`);
 });
 
 test('qa-smoke --check themes 仅跑主题检查且 ok=true', () => {
