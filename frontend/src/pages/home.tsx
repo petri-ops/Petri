@@ -92,13 +92,15 @@ export default function Home(): React.ReactElement {
     };
   }, [backendStatus.isReady, loadAttempt]);
 
-  // 后端 12s 还没就绪 → 放出「打开插件商店 / 重启」出路，不再干转圈
+  // 后端久等未起 → 放出「打开插件商店 / 重启」出路，不再干转圈。
+  // 阈值取 30s：dev 冷启动（Vite 全量编译 + Electron 框架准备 + native 模块加载）
+  // 实测可达 10s+，12s 会把"后端正在启动"误判成"运行时缺失"而错弹首次配置页。
   useEffect(() => {
     if (backendStatus.isReady) {
       setWaitedTooLong(false);
       return;
     }
-    const timer = setTimeout(() => setWaitedTooLong(true), 12000);
+    const timer = setTimeout(() => setWaitedTooLong(true), 30000);
     return () => clearTimeout(timer);
   }, [backendStatus.isReady]);
 
@@ -132,12 +134,17 @@ export default function Home(): React.ReactElement {
     }
   }, [relaunching]);
 
-  // ── 首次配置引导：R 运行时缺失（或后端久等未起）时的唯一出路 ──
-  // 注意用 `=== false` 而非 `!rRuntime`：main.js 的 backend:status handler 在
-  // 状态查询异常时返回的对象**不含** rRuntime（undefined = 未知）。把"未知"
-  // 当成"缺失"会让偶发 IPC 异常误弹首次配置页，所以只认显式 false。
+  // ── 启动/配置引导页：两类截然不同的状态，必须分开处理 ──
+  // ① runtimeMissing：R 运行时**确认缺失**（backend:status 显式返回 false）。
+  //    此时才需要去插件商店装运行时 —— 真正的"首次配置"场景。
+  // ② backendNotReady：状态已检测（loaded=true）但后端 30s 仍未就绪（r-server
+  //    没起来）。这是"后端启动慢/启动失败"，**不是**缺运行时 —— 误导用户去装
+  //    运行时毫无意义，应给"重试/重启"出路，文案明确说"本地分析服务未启动"。
+  // 注：runtimeMissing 用 `=== false` 而非 `!rRuntime`，因为 rRuntime 为 null
+  // （检测异常/未知）时不能当成缺失，否则偶发 IPC 异常会错弹配置页。
   const runtimeMissing = backendStatus.loaded && backendStatus.rRuntime === false;
-  const needsSetupGate = runtimeMissing || (!backendStatus.isReady && waitedTooLong);
+  const backendNotReady = backendStatus.loaded && !backendStatus.isReady && waitedTooLong;
+  const needsSetupGate = runtimeMissing || backendNotReady;
 
   if (needsSetupGate && status !== 'ready') {
     if (storeOpen) {
@@ -160,6 +167,68 @@ export default function Home(): React.ReactElement {
       );
     }
 
+    // ── 分支 A：后端未就绪（启动中/启动失败），而非缺运行时 ──
+    if (backendNotReady && !runtimeMissing) {
+      return (
+        <section className={styles.setupHome} aria-label="本地分析服务未启动">
+          <div className={styles.setupIcon}>
+            <Icon name="cpu" size={26} />
+          </div>
+          <h1>本地分析服务未就绪</h1>
+          <p className={styles.setupLead}>
+            本次启动中后端服务（R / Python 分析引擎）未在预期时间内连上。
+            这与「是否安装运行时」无关 —— 运行时已安装，只是本次后端没起来。
+          </p>
+
+          <div className={styles.setupChecklist}>
+            <div className={`${styles.setupCheckItem} ${backendStatus.rRuntime ? styles.setupCheckOk : ''}`}>
+              <Icon name={backendStatus.rRuntime ? 'check' : 'cpu'} size={15} />
+              <span className={styles.setupCheckName}>R 运行时</span>
+              <span className={styles.setupCheckMeta}>已安装</span>
+              <span className={styles.setupCheckState}>
+                {backendStatus.rRuntime ? '已安装' : '状态未知'}
+              </span>
+            </div>
+            <div className={`${styles.setupCheckItem} ${backendStatus.pyRuntime ? styles.setupCheckOk : ''}`}>
+              <Icon name={backendStatus.pyRuntime ? 'check' : 'cpu'} size={15} />
+              <span className={styles.setupCheckName}>Python 运行时</span>
+              <span className={styles.setupCheckMeta}>已安装</span>
+              <span className={styles.setupCheckState}>
+                {backendStatus.pyRuntime ? '已安装' : '状态未知'}
+              </span>
+            </div>
+          </div>
+
+          <div className={styles.setupActions}>
+            <button
+              type="button"
+              className={styles.setupPrimary}
+              onClick={() => {
+                setWaitedTooLong(false);
+                setLoadAttempt((value) => value + 1);
+              }}
+            >
+              <Icon name="refresh" size={15} />
+              重试连接
+            </button>
+            <button
+              type="button"
+              className={styles.setupSecondary}
+              onClick={() => void handleRelaunch()}
+              disabled={relaunching}
+            >
+              {relaunching ? '正在重启…' : '重启应用'}
+            </button>
+          </div>
+
+          {backendStatus.downReason && (
+            <p className={styles.setupReason}>{backendStatus.downReason}</p>
+          )}
+        </section>
+      );
+    }
+
+    // ── 分支 B：R 运行时确认缺失 —— 真正的首次配置场景 ──
     return (
       <section className={styles.setupHome} aria-label="首次配置运行时">
         <div className={styles.setupIcon}>

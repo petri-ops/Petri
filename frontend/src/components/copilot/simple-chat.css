@@ -1469,3 +1469,87 @@
 [data-theme='dark'] .sc-loop-tone-warning .sc-loop-status-label { color: var(--biof3-status-warning-fg); }
 [data-theme='dark'] .sc-loop-iteration-blocked .sc-loop-iteration-decision { color: var(--biof3-status-warning-fg); }
 [data-theme='dark'] .sc-loop-iteration-failed .sc-loop-iteration-decision { color: var(--biof3-status-error-fg); }
+
+/* AGENT-CONCURRENCY: background sub-agent task panel */
+.sc-send-cta-bg {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0 10px;
+  min-width: auto;
+  height: 28px;
+  border-radius: 8px;
+  color: var(--biof3-text-secondary);
+  background: var(--biof3-surface-2, rgba(127, 127, 127, 0.12));
+  border: 1px solid var(--biof3-border, rgba(127, 127, 127, 0.24));
+}
+
+.sc-send-cta-bg:hover:not(:disabled) {
+  color: var(--biof3-text);
+  border-color: var(--biof3-accent, #3b82f6);
+}
+
+.sc-subtasks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px auto 0;
+  width: 100%;
+  max-width: var(--sc-composer-width, 980px);
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.sc-subtask {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--biof3-surface-2, rgba(127, 127, 127, 0.08));
+  border: 1px solid var(--biof3-border, rgba(127, 127, 127, 0.18));
+  font-size: 13px;
+  color: var(--biof3-text);
+}
+
+.sc-subtask-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: var(--biof3-status-idle, #9ca3af);
+}
+
+.sc-subtask-running .sc-subtask-dot {
+  background: var(--biof3-accent, #3b82f6);
+  animation: sc-subtask-pulse 1.2s ease-in-out infinite;
+}
+
+.sc-subtask-done .sc-subtask-dot { background: var(--biof3-status-success-fg, #22c55e); }
+.sc-subtask-error .sc-subtask-dot { background: var(--biof3-status-error-fg, #ef4444); }
+.sc-subtask-stopped .sc-subtask-dot { background: var(--biof3-status-warning-fg, #f59e0b); }
+
+@keyframes sc-subtask-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.sc-subtask-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sc-subtask-stop {
+  flex: 0 0 auto;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--biof3-border, rgba(127, 127, 127, 0.24));
+  background: transparent;
+  color: var(--biof3-text-secondary);
+  cursor: pointer;
+}
+
+.sc-subtask-stop:hover { color: var(--biof3-status-error-fg, #ef4444); border-color: var(--biof3-status-error-fg, #ef4444); }

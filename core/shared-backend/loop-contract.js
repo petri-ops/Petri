@@ -413,6 +413,8 @@ function buildLoopRun(input) {
       input.automationMode,
     ),
     loopStatus: input.loopStatus || 'planned',
+    kind: input.kind || 'primary',
+    parentLoopRunId: input.parentLoopRunId || null,
     createdAt: input.createdAt || nowIso(),
     updatedAt: input.updatedAt || nowIso(),
     metadata: redactSensitiveValue(input.metadata || {}),
