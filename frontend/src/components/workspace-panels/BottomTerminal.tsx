@@ -54,8 +54,8 @@ export function BottomTerminal({
           <small>{running ? `${workspacePath || '运行中'}` : '未连接'}</small>
         </div>
         <div>
-          <button type="button" onClick={clear}>清空</button>
-          <button type="button" onClick={onClose} aria-label="关闭终端">
+          <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={clear}>清空</button>
+          <button className="biof3-btn biof3-btn--icon" type="button" onClick={onClose} aria-label="关闭终端">
             <Icon name="x" size={13} />
           </button>
         </div>

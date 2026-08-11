@@ -245,7 +245,7 @@ export function WorkspaceSummaryCard({
           <section className={styles.workspacePinnedSummarySection}>
             <div className={styles.workspacePinnedSummarySectionHeading}>
               <div className={styles.workspacePinnedSummarySectionTitle}>最近分析</div>
-              <button type="button" onClick={onOpenScheduled}>查看全部</button>
+              <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={onOpenScheduled}>查看全部</button>
             </div>
             <div className={styles.workspacePinnedSummaryHistory}>
               {historyJobs.map((job) => {

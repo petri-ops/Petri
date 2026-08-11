@@ -151,7 +151,7 @@ export default function Home(): React.ReactElement {
               <span>
                 <Icon name="check" size={14} /> R 运行时已就绪，重启应用即可开始分析
               </span>
-              <button type="button" onClick={() => void handleRelaunch()} disabled={relaunching}>
+              <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={() => void handleRelaunch()} disabled={relaunching}>
                 {relaunching ? '正在重启…' : '立即重启应用'}
               </button>
             </div>
@@ -244,7 +244,7 @@ export default function Home(): React.ReactElement {
       <div className={styles.homeState}>
         <Icon name="flag" size={18} />
         <span>项目列表加载失败</span>
-        <button type="button" onClick={() => {
+        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={() => {
           setStatus('loading');
           setLoadAttempt((value) => value + 1);
         }}>
@@ -260,7 +260,7 @@ export default function Home(): React.ReactElement {
       <h1>创建第一个项目</h1>
       <p>选择工作目录后，将以目录名称创建项目。</p>
       <div className={styles.emptyHomeCreate}>
-        <button type="button" onClick={() => void handleCreateProject()} disabled={creating}>
+        <button className="biof3-btn biof3-btn--ghost biof3-btn--sm" type="button" onClick={() => void handleCreateProject()} disabled={creating}>
           {creating ? '创建中…' : '选择工作目录并创建'}
         </button>
       </div>

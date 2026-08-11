@@ -104,7 +104,7 @@ export function ResultAgentComposer({
             }
           }}
         />
-        <button type="button" aria-label="交给 Agent" title="交给 Agent" disabled={!canSubmit} onClick={submit}>
+        <button className="biof3-btn biof3-btn--icon" type="button" aria-label="交给 Agent" title="交给 Agent" disabled={!canSubmit} onClick={submit}>
           <Icon name="arrow-up" size={15} />
         </button>
       </div>
