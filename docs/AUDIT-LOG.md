@@ -4,7 +4,7 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-12（UI-041 已完成 Windows 开发态 Electron 的设置 surface 与 Endpoint 工具栏六格实机闭环；既有验收记录保持不变）
+最后更新：2026-08-12（UI-044 已完成 Windows 开发态 Electron 的 RightPanel 单一折叠入口九格实机闭环；既有验收记录保持不变）
 
 ## 当前待处理项
 
@@ -34,6 +34,7 @@
 
 | 日期 | 结果 | 检查点 |
 | --- | --- | --- |
+| 2026-08-12 | **UI-044 RightPanel 单一折叠入口已实机 verified**：Windows 开发态 Electron 30.5.1 的 1440/1024/820×900 × chat/scheduled/settings 九格中，右栏折叠后无 aside、无旧“显示右侧侧边栏”浮按钮、无带文本绝对定位恢复按钮；恰有一个标题栏“展开右侧栏”，设置与计划内容不被遮挡且页面无溢出。逐格恢复均得到一个右栏与一个收起入口；820px 只额外出现预期的紧凑布局 dismiss backdrop | 证据 `acceptance/ui-044/electron-right-panel-single-entry-windows.json` 绑定 `62f9507` 与四个关键源码哈希，`passed:true`、`qualificationEligible:false`；不外推 packaged/P7 资格 |
 | 2026-08-12 | **UI-041 设置视觉一致性与工具栏密度已实机 verified**：Windows 开发态 Electron 30.5.1 的 1440/1024/820×900 明暗六格中，导航、三类可达数据容器、两条维护行及真实临时回收站项均使用主题 surface；Endpoint 行按 UI-042 透明单层列表契约透出同一 surface。7 条渠道下标题区无操作按钮，添加、导出 JSON/CSV、导入配置位于列表后且六格均无工具栏或页面溢出。用于观察回收站行的隔离空项目已永久删除，剩余数为 0 | 证据 `acceptance/ui-041/electron-settings-surface-and-toolbar-windows.json` 绑定 `62f9507` 与三个关键源码哈希，`passed:true`、`qualificationEligible:false`；设置归一化始终提供默认渠道，故空配置折叠不冒充可达 Electron 状态；不外推 packaged/P7 资格 |
 | 2026-08-12 | **UI-040 设置安全性与可达性已实机 verified**：Windows 开发态 Electron 30.5.1 中，1024×900 实际触发模型渠道删除确认并取消，确认文案覆盖渠道身份、URL、Key、默认模型和不可恢复风险，取消后配置不变；820×900 明暗主题选择即时披露当前偏好且无横向溢出。回收站只在“计算与数据”末尾出现，计算执行、本地数据目录、Harness 环境、回收站由三条 1px 主题边框色分隔线依次区分 | 证据 `acceptance/ui-040/electron-settings-safety-and-reachability-windows.json` 绑定 `62f9507` 与三个关键源码哈希，`passed:true`、`qualificationEligible:false`；未读取或保存 URL/Key，不外推 packaged/P7 资格 |
 | 2026-08-12 | **UI-042 Windows 开发态 Electron 验收收口**：以 7 条真实 Endpoint 核对首行无顶线、后 6 行各一条 computed solid 分隔线；820px 下 1040px 行网格保持在 600px `overflow-x:auto` 容器内。renderer-only 临时裁为单条时无孤线、空态无残线，未写配置且刷新恢复真实数据。证据 `acceptance/ui-042/electron-endpoint-density.json` 精确绑定 CSS 实现提交 `361d0d1` 与源码哈希，`qualificationEligible:false` | UI-042 / SETTING-FIX |

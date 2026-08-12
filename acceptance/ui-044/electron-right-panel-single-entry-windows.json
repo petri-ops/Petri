@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "ui-044-electron-right-panel-single-entry-windows",
+  "workItem": "UI-044",
+  "capturedAt": "2026-08-12",
+  "sourceCommit": "62f9507a398ca053def7d041b353bd4dfa587bf7",
+  "classification": "development_windows_electron_workspace_panel_interaction",
+  "qualificationEligible": false,
+  "environment": {
+    "os": "Windows 11 Home China 10.0.26200 x64",
+    "electron": "30.5.1",
+    "chromium": "124.0.6367.243",
+    "viewports": ["1440x900", "1024x900", "820x900"],
+    "workspaceModes": ["chat", "scheduled", "settings"]
+  },
+  "sourceFiles": {
+    "frontend/src/components/workspace-panels/RightPanel.tsx": "6513af22fa9c473bc8211872ff836b23eb5abbcd43796f1c3c1c4a51863cb939",
+    "frontend/src/components/desktop/TitleBar.tsx": "bb7cdafbed2d763fec83bf51a848f08bf801cc749c6abc3aa44d681931ed8da0",
+    "frontend/src/pages/project-workspace.module.css": "057ae71ae4ed9017bc5a2f43017270e499777359c9173b767f7f5cb60dc3d792",
+    "frontend/src/hooks/useWorkspacePanels.ts": "f6f36b8cba80519df01bc42a81236875d4be0e3ef327925a758826110622f349"
+  },
+  "collapsedMatrix": {
+    "cellCount": 9,
+    "assertions": {
+      "rightPanelAsideIsAbsentInEveryCell": true,
+      "exactlyOneExpandRightSidebarControlExistsInEveryCell": true,
+      "theSingleRecoveryControlIsInsideTheTitleBar": true,
+      "legacyShowRightSidebarFloatingControlIsAbsent": true,
+      "absolutePositionedTextRecoveryButtonsAreAbsent": true,
+      "settingsSurfaceIsNotCoveredByARecoveryControl": true,
+      "scheduledSurfaceIsNotCoveredByARecoveryControl": true,
+      "documentHorizontalOverflowIsAbsent": true
+    }
+  },
+  "restoreInteraction": {
+    "assertions": {
+      "titleBarControlRestoresTheRightPanelAtAllThreeWidths": true,
+      "restoredStateHasExactlyOneCollapseControl": true,
+      "desktopWidthsRestoreWithoutBackdrop": true,
+      "compactWidthRestoresWithExpectedDismissBackdrop": true,
+      "collapsingAgainReturnsToTheSingleEntryState": true
+    }
+  },
+  "privacy": {
+    "conversationTextStored": false,
+    "projectOrConversationIdsStored": false,
+    "localPathsStored": false,
+    "screenshotsCommitted": false
+  },
+  "passed": true
+}
