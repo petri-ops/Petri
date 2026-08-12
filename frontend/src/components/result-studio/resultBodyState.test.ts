@@ -7,7 +7,11 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { canCommitResultFetch, nextResultBodyState } from './resultBodyState';
+import {
+  canCommitResultFetch,
+  nextResultBodyState,
+  revisionAfterJobSelection,
+} from './resultBodyState';
 import type { ResultBodyState } from './resultBodyState';
 
 const SHOWN: ResultBodyState = { kind: 'artifact', jobId: 'job_1', artifactName: 'volcano.png' };
@@ -18,6 +22,19 @@ describe('canCommitResultFetch', () => {
     expect(canCommitResultFetch('job-a', 'job-b', false)).toBe(false);
     expect(canCommitResultFetch('job-a', 'job-a', true)).toBe(false);
     expect(canCommitResultFetch('job-a', null, false)).toBe(false);
+  });
+});
+
+describe('revisionAfterJobSelection', () => {
+  it('keeps an adopted Revision when ResultView switches to its candidate Job', () => {
+    const revision = { revisionId: 'rev_2', toolJobId: 'job_2' };
+    expect(revisionAfterJobSelection(revision, 'job_2')).toBe(revision);
+  });
+
+  it('clears a viewed Revision when the user navigates to an unrelated Job', () => {
+    const revision = { revisionId: 'rev_2', toolJobId: 'job_2' };
+    expect(revisionAfterJobSelection(revision, 'job_3')).toBeNull();
+    expect(revisionAfterJobSelection(revision, null)).toBeNull();
   });
 });
 
