@@ -4,12 +4,13 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-12（UI-036 已完成 Windows 开发态 Electron 的设置六列单行、保存重开与聊天供应商/模型双入口实机闭环；既有验收记录保持不变）
+最后更新：2026-08-12（UI-039 已修复 Markdown 重复四边框，并完成 Windows 开发态 Electron 的真实长回复/文件预览、明暗与 820px 实机闭环；既有验收记录保持不变）
 
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
 | --- | --- | --- | --- |
+| ✅ 已收口 | 2026-08-12 | **UI-039 Markdown 阅读密度已实机 verified**：修复通用 `<pre>`/table 样式覆盖局部契约导致的重复四边框；Windows 开发态 Electron 30.5.1、820×900 明暗主题中，以真实 11 条长回复核对 1 个宽表格、2 个 Python/Shell 块、2 个纯文本结构块及代码/表格/整回复复制，全部符合横向分隔、单一代码框、纯文本上下线和局部滚动契约。真实 TSX/日志文件预览分别使用语法高亮/纯文本路径且页面无溢出 | 实现 `d91c214`，证据 `acceptance/ui-039/electron-markdown-density-windows.json` 绑定源码与关键文件哈希，`passed:true`、`qualificationEligible:false`；不外推 packaged/P7 资格 |
 | ✅ 已收口 | 2026-08-12 | **UI-036 模型设置与聊天双入口已实机 verified**：Windows 开发态 Electron 30.5.1、1440×900 中，正常设置入口自动收起两侧栏；7 条既有渠道均以“协议/供应商/Base URL/Key/默认模型/连通性”六列单行完整显示，保存关闭重开后脱敏指纹不变。聊天 Composer 的供应商与模型按钮分别实际打开和切换，模型菜单只列当前供应商模型，最终恢复原持久选择 | 证据 `acceptance/ui-036/electron-model-settings-and-chat-picker-windows.json` 绑定当前源码 `62f9507` 与关键文件哈希，未读取或导出 Key，`passed:true`、`qualificationEligible:false`。真实 Anthropic Key 仍由 UI-124 key-unavailable 例外管理；不外推 packaged/P7 资格 |
 | ✅ 已收口 | 2026-08-12 | **UI-128 两条真实错误路径已实机 verified**：Windows 开发态 Electron 30.5.1、1024×900 中，项目 datasets 轮询单次 503 仅显示非阻塞“数据刷新暂时失败”横幅，已加载可信结果不卸载，下一次成功刷新后自愈；活动结果请求改写到 r-server 原生 missing-job 端点后精确显示 HTTP 404 与重试，不再谎报“未生成可视化”，解除故障并点击重试后可信结果恢复 | 证据 `acceptance/ui-128/electron-honest-error-recovery-windows.json` 绑定当前源码 `62f9507`、实现提交 `e852252` 与关键文件哈希，`passed:true`、`qualificationEligible:false`；仅关闭 UI-128 开发态验收缺口，不外推 packaged/P7 资格 |
 | ✅ 已收口 | 2026-08-12 | **UI-127 existing Git 显式同意已实机 verified**：Windows 开发态 Electron 30.5.1、820×900 窄窗中，全新 clean/dirty disposable 仓库各实际出现一次 `decision-required` 弹窗并由 UI 点击授权；dirty 态明确显示不自动暂存/提交/覆盖 WIP及管理路径冲突阻断。API 点击后均记录 `explicit_api` 并绑定 `existing/ready`；两仓库 HEAD 不变，clean 仍 clean，dirty 未跟踪 WIP 原样保留，均未创建 `.biof3` | 证据 `acceptance/ui-127/electron-existing-git-consent-windows.json` 绑定源码提交 `a601379`，`passed:true`、`qualificationEligible:false`；仅关闭 UI-127 开发态验收缺口，不外推 packaged/P7 资格 |
