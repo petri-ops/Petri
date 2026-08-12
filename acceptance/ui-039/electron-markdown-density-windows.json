@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "ui-039-electron-markdown-density-windows",
+  "workItem": "UI-039",
+  "capturedAt": "2026-08-12",
+  "sourceCommit": "d91c21466919411d67bd4f8742b4e47f12840b41",
+  "classification": "development_windows_electron_existing_long_conversation_and_real_workspace_files",
+  "qualificationEligible": false,
+  "environment": {
+    "os": "Windows 11 Home China 10.0.26200 x64",
+    "electron": "30.5.1",
+    "chromium": "124.0.6367.243",
+    "viewport": "820x900",
+    "themes": ["dark", "light"]
+  },
+  "sourceFiles": {
+    "frontend/src/components/copilot/simple-chat.css": "4956aedce4df06c49c274e49295eeefc5479182a63148820f702e5e2919c5ee8",
+    "frontend/src/components/copilot/simple-chat-markdown-style.test.ts": "cbe5e585fb33f5206de6f1377ebd3923415c9f129cc9128139ba91e360764d5b",
+    "core/packages/shared-copilot/copilotMarkdown.tsx": "8e26f8d2f5ea9a76221d8dc3bfefa7e74cb43fc59a4fef3c622f5e65df633b6a",
+    "frontend/src/pages/project-workspace.tsx": "8b93b407fc7f891fe2dbbefee8aeb0662920cb422862a28fa44d616e09d3c82c"
+  },
+  "conversationFixture": {
+    "assistantMessageCount": 11,
+    "markdownTableCount": 1,
+    "languageCodeBlockCount": 2,
+    "plainCodeBlockCount": 2,
+    "assertions": {
+      "tableHasNoOuterOrVerticalCellBorders": true,
+      "tableKeepsLowContrastHorizontalSeparators": true,
+      "wideTableScrollsInsideOwnContainer": true,
+      "languageBlocksHaveOneOuterFrameAndNoNestedPreFrame": true,
+      "languageLabelsVisibleForPythonAndShell": true,
+      "plainBlocksHaveNoLanguageHeader": true,
+      "plainBlocksUseOnlyTopAndBottomSeparators": true,
+      "allCodeBlocksHaveCopyControls": true,
+      "tableCopyControlIsOutsideTable": true,
+      "codeCopySucceededInElectron": true,
+      "tableCopySucceededWithFocusedElectronWindow": true,
+      "replyCopySucceededWithFocusedElectronWindow": true,
+      "darkThemePassed": true,
+      "lightThemePassed": true,
+      "documentHorizontalOverflowAbsent": true
+    }
+  },
+  "workspacePreview": {
+    "assertions": {
+      "realTsxFileUsedSyntaxHighlighting": true,
+      "tsxLongLinesScrolledInsidePreview": true,
+      "realLogFileUsedPlainTextPreview": true,
+      "plainTextWasNotSyntaxHighlighted": true,
+      "plainTextDidNotRequireHorizontalScroll": true,
+      "documentHorizontalOverflowAbsent": true
+    }
+  },
+  "privacy": {
+    "conversationTextStored": false,
+    "workspaceFileContentsStored": false,
+    "clipboardContentsStored": false,
+    "projectOrConversationIdsStored": false,
+    "screenshotsCommitted": false
+  },
+  "passed": true
+}
