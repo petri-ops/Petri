@@ -4,7 +4,7 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-12（UI-039 已修复 Markdown 重复四边框，并完成 Windows 开发态 Electron 的真实长回复/文件预览、明暗与 820px 实机闭环；既有验收记录保持不变）
+最后更新：2026-08-12（UI-040 已完成 Windows 开发态 Electron 的删除确认、主题状态与回收站可达性实机闭环；既有验收记录保持不变）
 
 ## 当前待处理项
 
@@ -34,6 +34,7 @@
 
 | 日期 | 结果 | 检查点 |
 | --- | --- | --- |
+| 2026-08-12 | **UI-040 设置安全性与可达性已实机 verified**：Windows 开发态 Electron 30.5.1 中，1024×900 实际触发模型渠道删除确认并取消，确认文案覆盖渠道身份、URL、Key、默认模型和不可恢复风险，取消后配置不变；820×900 明暗主题选择即时披露当前偏好且无横向溢出。回收站只在“计算与数据”末尾出现，计算执行、本地数据目录、Harness 环境、回收站由三条 1px 主题边框色分隔线依次区分 | 证据 `acceptance/ui-040/electron-settings-safety-and-reachability-windows.json` 绑定 `62f9507` 与三个关键源码哈希，`passed:true`、`qualificationEligible:false`；未读取或保存 URL/Key，不外推 packaged/P7 资格 |
 | 2026-08-12 | **UI-042 Windows 开发态 Electron 验收收口**：以 7 条真实 Endpoint 核对首行无顶线、后 6 行各一条 computed solid 分隔线；820px 下 1040px 行网格保持在 600px `overflow-x:auto` 容器内。renderer-only 临时裁为单条时无孤线、空态无残线，未写配置且刷新恢复真实数据。证据 `acceptance/ui-042/electron-endpoint-density.json` 精确绑定 CSS 实现提交 `361d0d1` 与源码哈希，`qualificationEligible:false` | UI-042 / SETTING-FIX |
 | 2026-08-12 | **UI-038 Windows 开发态 Electron 验收收口**：先真实复现 DeepSeek `deepseek-v4-flash` 经 umapis 往返后错误回退默认 `deepseek-v4-pro`，实现改为在展开模型快照中保留 Endpoint `lastSelectedModel` 并同步内存/持久化；同路径重验恢复 flash，整页刷新后仍保持，专项 16/16、strict TypeScript 与生产构建通过。证据 `acceptance/ui-038/electron-provider-model-restore.json` 精确绑定实现提交 `f984560`，`qualificationEligible:false` | UI-038 / MODEL-UX |
 | 2026-08-11 | **UI-141 启动运行时状态误导已收口**：以当前源码构建 unsigned arm64 packaged app，在临时 userData/localData 中真实制造 R/Python 均缺失状态；IPC 返回 `rRuntime:false/pyRuntime:false/isReady:false`，首页只显示“先安装分析运行时”、两个“未安装”状态和可用“打开插件商店安装”。点击后在 r-server/py-server 均未启动时仍通过纯 IPC 打开商店，显示 2 个基础运行时及下载按钮。证据 `acceptance/startup-runtime/ui141-startup-runtime-gate.json` 精确绑定实现提交 `6adeaa9` 的 8 个 source hashes，并含两张 renderer 截图；现有用户运行时未修改，临时数据已删除。前端 2/2、backend/platform 8/8、strict TypeScript、arm64 build 与治理门通过。UI-141 在该 unsigned packaged macOS arm64 边界 verified，`qualificationEligible:false` | UI-141 / STARTUP-RUNTIME-GATE |
