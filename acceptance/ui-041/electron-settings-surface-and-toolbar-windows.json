@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "ui-041-electron-settings-surface-and-toolbar-windows",
+  "workItem": "UI-041",
+  "capturedAt": "2026-08-12",
+  "sourceCommit": "62f9507a398ca053def7d041b353bd4dfa587bf7",
+  "classification": "development_windows_electron_existing_redacted_settings_and_disposable_trash_item",
+  "qualificationEligible": false,
+  "environment": {
+    "os": "Windows 11 Home China 10.0.26200 x64",
+    "electron": "30.5.1",
+    "chromium": "124.0.6367.243",
+    "viewports": ["1440x900", "1024x900", "820x900"],
+    "themes": ["dark", "light"]
+  },
+  "sourceFiles": {
+    "frontend/src/components/desktop/DesktopSettingsPanel.tsx": "f93d32f34bc434494b89396c83b77a16da6ecb1ebd3b1926d74166e0e0c4c79e",
+    "frontend/src/components/desktop/desktop.css": "9f78c7df7b614126488ba09a81440da17f7946ad73ad456cb02167643a85db5f",
+    "frontend/src/lib/model-endpoint-transfer.ts": "480623671363a29798a80827af43a24bf76b02b55c33e1747a60deb6fc2fbb6c"
+  },
+  "surfaceMatrix": {
+    "assertions": {
+      "settingsNavigationMatchesThemeSurfaceInAllSixCells": true,
+      "threeReachableDataContainersMatchThemeSurfaceInAllSixCells": true,
+      "twoMaintenanceRowsMatchThemeSurfaceInAllSixCells": true,
+      "realTrashItemMatchesThemeSurfaceInAllSixCells": true,
+      "endpointRowsRemainTransparentOverTheSameSurfaceByUi042Design": true,
+      "independentCredentialCardIsNotRenderedBecauseKeyLivesInEndpointRows": true,
+      "documentAndSettingsContentHaveNoHorizontalOverflowInAllSixCells": true
+    }
+  },
+  "endpointToolbar": {
+    "observedProfileCount": 7,
+    "assertions": {
+      "headingContainsNoActionButtons": true,
+      "toolbarFollowsTheEndpointList": true,
+      "addChannelRemainsTheLeftPrimaryAction": true,
+      "jsonCsvAndImportActionsRemainGroupedOnTheRight": true,
+      "allFourActionsFitWithoutToolbarOverflowInAllSixCells": true,
+      "narrowEndpointRowsScrollInsideTheirOwnList": true
+    },
+    "emptyStateBoundary": "The normalized production settings contract always supplies at least one default profile. The conditional transfer-action branch is therefore source-and-test covered rather than claimed as a reachable Electron observation."
+  },
+  "disposableProbe": {
+    "createdEmptyProject": true,
+    "archivedForTrashRowObservation": true,
+    "permanentlyDeletedAfterObservation": true,
+    "remainingProbeCount": 0
+  },
+  "privacy": {
+    "providerNamesStored": false,
+    "baseUrlsStored": false,
+    "credentialsReadOrStored": false,
+    "localDataPathsStored": false,
+    "screenshotsCommitted": false
+  },
+  "passed": true
+}
