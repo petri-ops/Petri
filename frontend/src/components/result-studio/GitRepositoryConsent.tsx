@@ -19,7 +19,7 @@ type LoadState =
  * 当 `decisionRequired` 为 true 时展示 detected / dirty 风险与肯定式 opt-in；
  * 一旦用户明确同意，才调用 `submitExistingRepositoryConsent`。绝不在前端伪造同意。
  *
- * 实验态：本组件未在开发态 Electron 实机验收，保持 non-qualifying。
+ * 本组件仅提供用户明示授权边界；开发态 UI 证据不得外推 packaged 或 P7 资格。
  */
 export function GitRepositoryConsent({ projectId }: { projectId: string }): React.ReactElement | null {
   const [state, setState] = React.useState<LoadState>({ kind: 'loading' });
@@ -98,6 +98,12 @@ export function GitRepositoryConsent({ projectId }: { projectId: string }): Reac
           BioF3 想把 Result Studio 的版本历史写入你自己的仓库。这需要你的明确授权——
           默认只使用 BioF3 受管理的私有存储，不会触碰你的仓库。
         </p>
+        {status.existingRepositoryDirty && (
+          <p className={styles.warning}>
+            当前仓库有未提交改动。授权不会自动暂存、提交或覆盖这些改动；
+            如改动与 Result Studio 管理路径冲突，后续写入将被阻止。
+          </p>
+        )}
         {status.managedRepositoryExists && (
           <p className={styles.hint}>注意：当前项目已存在 BioF3 受管理仓库，附加自有仓库前请确认不会覆盖未提交的改动。</p>
         )}
