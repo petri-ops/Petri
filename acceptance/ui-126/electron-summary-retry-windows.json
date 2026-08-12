@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "ui-126-electron-summary-retry-windows",
+  "workItem": "UI-126",
+  "capturedAt": "2026-08-12",
+  "sourceCommit": "e59f55309fe8656763d04ffcffc77d22a7400519",
+  "classification": "development_windows_electron_deterministic_local_adapter_no_provider_claim_with_real_socket_timeout",
+  "qualificationEligible": false,
+  "environment": {
+    "os": "Windows 11 Home China 10.0.26200 x64",
+    "electron": "30.5.1",
+    "chromium": "124.0.6367.243",
+    "viewport": "1440x900"
+  },
+  "fixture": {
+    "source": "Bioconductor airway 1.26.0; mechanically exported Windows-only temporary fixture",
+    "matchesHistoricalTemporaryFixture": false,
+    "countsSha256": "5271e9dd6876f03b5b6de6b22de46b4539268007c97079a84818e73b71af0b26",
+    "metadataSha256": "19db270cffe274879fb3004ebeaaacb50b6ad3851cd206e5502f7ce575271541",
+    "featureRows": 34889,
+    "sampleColumns": 8,
+    "metadataRows": 8,
+    "groups": {
+      "control": 4,
+      "treated": 4
+    }
+  },
+  "assertions": {
+    "isolatedLedgerStartedEmpty": true,
+    "scientificConfirmationRequested": true,
+    "completedDeseq2JobCountBeforeRetry": 1,
+    "completedDeseq2JobCountAfterRetry": 1,
+    "toolDidNotRerun": true,
+    "artifactTruthStatusBefore": "valid",
+    "artifactTruthStatusAfter": "valid",
+    "artifactTruthBlockingBefore": false,
+    "artifactTruthBlockingAfter": false,
+    "exactResultAutomaticallyOpened": true,
+    "resultCanvasVisible": true,
+    "resultImageVisible": true,
+    "realSocketTimeoutObserved": true,
+    "softFailureMessageVisible": true,
+    "rawTimeoutMessageVisible": false,
+    "retryButtonClicked": true,
+    "retryDispatchObserved": true,
+    "retryFailureRemainedSummaryOnly": true,
+    "sourceCommitMatchesSourceHashes": true
+  },
+  "harnessCompatibility": {
+    "windowsElectronExecutableResolved": true,
+    "currentComposerSelectorResolved": true,
+    "currentResultRouteResolved": true,
+    "bundledRRuntimeResolved": true
+  },
+  "screenshotObservation": {
+    "summaryUnavailableSha256": "e1844aadb1d4d3b198880b9936f936d19833ff702af6fca3031595a7ae286a01",
+    "summaryUnavailableBytes": 227001,
+    "committed": false,
+    "reason": "Evidence retains bounded assertions and screenshot digest without persisting conversation pixels."
+  },
+  "passed": true
+}

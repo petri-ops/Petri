@@ -538,14 +538,6 @@
   margin-bottom: 1px;
 }
 
-.cp-code-block-plain .cp-code-pre {
-  margin-right: 34px;
-  padding: 10px 2px;
-  border-top: 1px solid color-mix(in srgb, var(--biof3-border) 40%, transparent 60%);
-  border-bottom: 1px solid color-mix(in srgb, var(--biof3-border) 40%, transparent 60%);
-  background: transparent;
-}
-
 .cp-code-head {
   display: flex;
   align-items: center;
@@ -625,12 +617,25 @@
   background: var(--biof3-bg-surface);
 }
 
-.cp-code-pre {
+.cp-md .cp-code-pre {
   margin: 0;
   padding: 12px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   overflow-x: auto;
   font-size: 12.5px;
   line-height: 1.55;
+}
+
+.cp-md .cp-code-block-plain .cp-code-pre {
+  margin-right: 34px;
+  padding: 10px 2px;
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--biof3-border) 40%, transparent 60%);
+  border-bottom: 1px solid color-mix(in srgb, var(--biof3-border) 40%, transparent 60%);
+  border-radius: 0;
+  background: transparent;
 }
 
 .cp-code-pre code {
@@ -664,6 +669,7 @@
 .cp-table {
   width: 100%;
   min-width: max-content;
+  border: 0;
   border-collapse: collapse;
   background: transparent;
   font-size: 12.5px;
@@ -685,6 +691,7 @@
 .cp-md .cp-table tbody tr:nth-child(odd) > td,
 .cp-md .cp-table tbody tr:nth-child(even) > td {
   padding: 5px 9px;
+  border: 0;
   border-bottom: 0.5px solid color-mix(in srgb, var(--biof3-border) 22%, transparent 78%);
   background: color-mix(in srgb, var(--biof3-bg-subtle) 55%, transparent 45%);
   background-image: none;

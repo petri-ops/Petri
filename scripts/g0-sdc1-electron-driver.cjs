@@ -8,7 +8,7 @@ const path = require('node:path');
 const CONFIG_ENV = 'BIOF3_SDC1_DRIVER_CONFIG';
 const PRELOAD_PATH = path.resolve(__dirname, '..', 'src', 'preload.js');
 const AI_SETTINGS_HELPER_PATH = path.resolve(__dirname, '..', 'core', 'r-server', 'helpers', 'ai-settings.js');
-const CHAT_INPUT_SELECTOR = 'textarea[placeholder="输入消息… (Enter 发送, Shift+Enter 换行)"]';
+const CHAT_INPUT_SELECTOR = 'textarea.sc-input[placeholder^="输入消息…"]';
 const SEND_BUTTON_SELECTOR = 'button.sc-send-cta-send[title="发送消息"]';
 const POLL_MS = 125;
 
@@ -291,7 +291,8 @@ async function run(config) {
       (() => {
         const query = new URLSearchParams(location.search);
         const canvas = document.querySelector('[aria-label="结果主画布"]');
-        if (query.get('mode') !== 'result' || !query.get('job') || !canvas) return null;
+        const routeIsResult = location.pathname.endsWith('/result') || query.get('mode') === 'result';
+        if (!routeIsResult || !query.get('job') || !canvas) return null;
         const image = [...canvas.querySelectorAll('img')]
           .find((item) => item.complete && item.naturalWidth > 0 && item.naturalHeight > 0);
         const body = image || canvas.querySelector('table, iframe, pre, [role="img"], [data-viewer]');
@@ -307,7 +308,7 @@ async function run(config) {
         const image = [...(canvas?.querySelectorAll('img') || [])]
           .find((item) => item.complete && item.naturalWidth > 0 && item.naturalHeight > 0);
         return {
-          mode: query.get('mode'),
+          mode: location.pathname.endsWith('/result') ? 'result' : query.get('mode'),
           jobId: query.get('job'),
           artifact: query.get('artifact'),
           canvasPresent: Boolean(canvas),

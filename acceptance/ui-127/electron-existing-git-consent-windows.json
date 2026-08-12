@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "ui-127-electron-existing-git-consent-windows",
+  "workItem": "UI-127",
+  "capturedAt": "2026-08-12",
+  "sourceCommit": "a601379bc49ddc6ba311c3084bbcbd1920024110",
+  "classification": "development_windows_electron_disposable_clean_and_dirty_git_repositories",
+  "qualificationEligible": false,
+  "environment": {
+    "os": "Windows 11 Home China 10.0.26200 x64",
+    "electron": "30.5.1",
+    "chromium": "124.0.6367.243",
+    "viewport": "820x900"
+  },
+  "fixtures": {
+    "clean": {
+      "headBefore": "051c302a85b912ac93977b133356456be4027ea5",
+      "headAfter": "051c302a85b912ac93977b133356456be4027ea5",
+      "trackedFileSha256": "cae5e03b1b52fb8a86dcdeaa89022bf11e9969ba221c3841e41e1678f5cc734a"
+    },
+    "dirty": {
+      "headBefore": "8a09b5c66644e466b4089e62eee7acbe9b3ce4d6",
+      "headAfter": "8a09b5c66644e466b4089e62eee7acbe9b3ce4d6",
+      "trackedFileSha256": "3bd6addc7a9ebd30828f7b51ccb7a29c99ac6f0aedf989ef843e1a61e21c1ea4",
+      "untrackedWipSha256": "351795ddb8d87f8add7a30cfa084a3e1a25a9145432081cf35f058f8b83e357d"
+    }
+  },
+  "assertions": {
+    "cleanDecisionRequiredBeforeClick": true,
+    "cleanDirtyWarningAbsent": true,
+    "cleanConsentButtonClicked": true,
+    "cleanConsentPersistedFromExplicitApi": true,
+    "cleanBindingExistingReady": true,
+    "cleanHeadUnchanged": true,
+    "cleanWorktreeRemainedClean": true,
+    "dirtyDecisionRequiredBeforeClick": true,
+    "dirtyWarningVisible": true,
+    "dirtyWarningSaysNoAutomaticStageCommitOrOverwrite": true,
+    "dirtyWarningSaysManagedPathConflictsWillBlock": true,
+    "dirtyConsentButtonClicked": true,
+    "dirtyConsentPersistedFromExplicitApi": true,
+    "dirtyBindingExistingReady": true,
+    "dirtyHeadUnchanged": true,
+    "dirtyUntrackedWipPreserved": true,
+    "managedRepositoryNotCreatedInEitherFixture": true,
+    "decisionSurfaceFullyVisibleAtNarrowViewport": true,
+    "horizontalOverflowAbsentAtNarrowViewport": true,
+    "authorizationButtonRemovedAfterConsent": true,
+    "sourceCommitMatchesImplementation": true
+  },
+  "privacy": {
+    "projectIdsStored": false,
+    "workspacePathsStored": false,
+    "screenshotsCommitted": false
+  },
+  "passed": true
+}

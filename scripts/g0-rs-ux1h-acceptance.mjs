@@ -25,7 +25,12 @@ import {
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const VITE_PATH = path.join(ROOT, 'frontend/node_modules/vite/bin/vite.js');
-const ELECTRON_PATH = path.join(ROOT, 'node_modules/.bin/electron');
+export function resolveUx1hElectronPath(root = ROOT, platform = process.platform) {
+  return platform === 'win32'
+    ? path.join(root, 'node_modules/electron/dist/electron.exe')
+    : path.join(root, 'node_modules/.bin/electron');
+}
+const ELECTRON_PATH = resolveUx1hElectronPath();
 const DRIVER_PATH = path.join(ROOT, 'scripts/g0-sdc1-electron-driver.cjs');
 const EVIDENCE_DIR = path.join(ROOT, 'acceptance/g0-rs-ux1h');
 const SCREENSHOT_DIR = path.join(EVIDENCE_DIR, 'screenshots');
@@ -338,6 +343,11 @@ export async function observeUx1h({
       port: backendPort,
       beforeStart: ({ env }) => {
         const origin = `http://127.0.0.1:${uiPort}`;
+        const bundledRHome = process.env.BIOF3_R_HOME
+          || path.join(process.env.USERPROFILE || '', 'Documents', 'BioF3-Local', 'runtimes', 'R');
+        if (existsSync(path.join(bundledRHome, 'bin', process.platform === 'win32' ? 'Rscript.exe' : 'Rscript'))) {
+          env.BIOF3_R_HOME = bundledRHome;
+        }
         env.BIOF3_RENDERER_DEV_URL = origin;
         env.BIOF3_TRUSTED_DESKTOP_ORIGINS = origin;
         env.OPENAI_COMPATIBLE_API_KEY = 'ux1h-local-adapter-only';

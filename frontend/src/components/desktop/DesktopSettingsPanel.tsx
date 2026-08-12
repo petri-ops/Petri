@@ -939,15 +939,19 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
 
   function updateProfileProvider(currentProfile: ChatModelPreset, provider: UserModelProvider) {
     const nextCredentialRef = modelProviderCredentialRef(provider, currentProfile.id);
+    const providerDefaultsForProvider = providerDefaults(provider, currentProfile.id);
     setModelProfiles((profiles) => profiles.map((profile) => {
       if (profile.id !== currentProfile.id) return profile;
       return {
         ...profile,
-        ...providerDefaults(provider, currentProfile.id),
+        ...providerDefaultsForProvider,
         id: currentProfile.id,
         provider,
         protocol: modelProviderProtocol(provider),
-        defaultModel: '',
+        // UI-038: 切换供应商时保留用户已手选的模型/默认模型，不再清空；
+        // 仅当原手选为空时回落到该渠道默认值，满足「带入默认模型」意图。
+        model: profile.model || providerDefaultsForProvider.model || '',
+        defaultModel: profile.defaultModel || profile.model || '',
         roles: profile.roles || [],
         parameters: profile.parameters || {},
       };
