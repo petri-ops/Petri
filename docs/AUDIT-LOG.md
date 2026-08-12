@@ -4,7 +4,7 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-11（UI-140 A-1～A-6 已通过并以 source-bound evidence 收口；UI-141 已完成隔离 unsigned arm64 packaged 运行时缺失 → 插件商店实机链；UI-142 已从唯一入口 `npm run dev` 完成 macOS Accessibility + 真实输入验证；DeepSeek `deepseek-v4-flash` 经 Clash Verge 规则恢复连通；交付载体为 PR #13）
+最后更新：2026-08-12（UI-038 供应商最近模型恢复与 UI-042 Endpoint 列表密度已完成 Windows 开发态 Electron 实机验收并以 source-bound evidence 收口）
 
 ## 当前待处理项
 
@@ -29,6 +29,8 @@
 
 | 日期 | 结果 | 检查点 |
 | --- | --- | --- |
+| 2026-08-12 | **UI-042 Windows 开发态 Electron 验收收口**：以 7 条真实 Endpoint 核对首行无顶线、后 6 行各一条 computed solid 分隔线；820px 下 1040px 行网格保持在 600px `overflow-x:auto` 容器内。renderer-only 临时裁为单条时无孤线、空态无残线，未写配置且刷新恢复真实数据。证据 `acceptance/ui-042/electron-endpoint-density.json` 精确绑定 CSS 实现提交 `361d0d1` 与源码哈希，`qualificationEligible:false` | UI-042 / SETTING-FIX |
+| 2026-08-12 | **UI-038 Windows 开发态 Electron 验收收口**：先真实复现 DeepSeek `deepseek-v4-flash` 经 umapis 往返后错误回退默认 `deepseek-v4-pro`，实现改为在展开模型快照中保留 Endpoint `lastSelectedModel` 并同步内存/持久化；同路径重验恢复 flash，整页刷新后仍保持，专项 16/16、strict TypeScript 与生产构建通过。证据 `acceptance/ui-038/electron-provider-model-restore.json` 精确绑定实现提交 `f984560`，`qualificationEligible:false` | UI-038 / MODEL-UX |
 | 2026-08-11 | **UI-141 启动运行时状态误导已收口**：以当前源码构建 unsigned arm64 packaged app，在临时 userData/localData 中真实制造 R/Python 均缺失状态；IPC 返回 `rRuntime:false/pyRuntime:false/isReady:false`，首页只显示“先安装分析运行时”、两个“未安装”状态和可用“打开插件商店安装”。点击后在 r-server/py-server 均未启动时仍通过纯 IPC 打开商店，显示 2 个基础运行时及下载按钮。证据 `acceptance/startup-runtime/ui141-startup-runtime-gate.json` 精确绑定实现提交 `6adeaa9` 的 8 个 source hashes，并含两张 renderer 截图；现有用户运行时未修改，临时数据已删除。前端 2/2、backend/platform 8/8、strict TypeScript、arm64 build 与治理门通过。UI-141 在该 unsigned packaged macOS arm64 边界 verified，`qualificationEligible:false` | UI-141 / STARTUP-RUNTIME-GATE |
 | 2026-08-11 | **UI-140 A-1～A-6 Electron 验收与恢复归属加固已收口**：修复父任务尚无 LoopRun 时不能派生、`const explicitConvId` 重赋值导致请求永久挂起、主任务 localStorage 恢复缺 conversation/project 归属、sub-agent 恢复跨项目/缺字段不 fail-closed 四项。Clash Verge 增加 `api.deepseek.com → AI专用` 后，DeepSeek 连接测试与真实任务恢复；实机覆盖 composer 可用、排队自动续发、双子任务卡、单独取消、renderer 0 error、重载精确恢复、4 个 sub-agent 受理且第 5 个 `503 user_limit`。证据 `acceptance/agent-concurrency/ui140-electron.json` 精确绑定实现提交 `6adeaa9` 与 15 个 source hashes；前端 47/47、Node 16/16、strict TypeScript 与治理门通过。UI-140 在当前 macOS 开发态边界 verified，`qualificationEligible:false` | UI-140 / AGENT-CONCURRENCY |
 | 2026-08-11 | **UI-142 macOS 开发启动与键盘焦点链完成实机复核**：删除未跟踪的 `biof3-dev`，唯一入口回归 `npm run dev`；`scripts/dev-electron.js` 通过 LaunchServices 启动，并为开发实例使用仓库内隔离 userData，不删除已安装版共享 `SingletonLock`，重启/退出按精确 workspace Electron PID 等待并清理。干净重启后 3000/3001/3004/9222 全部监听，双后端 health 为 ok，main log 有 renderer loaded 与 focus 诊断；Accessibility tree 的 focused element 为 composer textarea，系统 UI 通道输入 `x` 后 CDP 读回 `"x"`，随后已清空测试字符。`src/main.js` 只记录焦点，不再延迟强抢前台。strict TypeScript、Copilot 76/76、agent-concurrency 7/7 与治理门通过；在该 macOS 开发态边界记为 verified，实现已提交并通过 PR #13 交付 | UI-142 / PR #13 |

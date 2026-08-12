@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "uiItem": "UI-109",
+  "observedAt": "2026-08-12T18:03:00+08:00",
+  "environment": {
+    "platform": "win32",
+    "surface": "development Electron",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    }
+  },
+  "scenario": {
+    "source": "current formal volcano Revision",
+    "candidateCreation": "controlled replay through the visible Electron code and confirmation UI",
+    "candidateStatusBeforeAdopt": "preview_ready",
+    "candidateOrdinal": 4,
+    "candidateRevisionId": "rev_554e8cf865104a36aabd60b1b52fa9e7",
+    "candidateToolJobId": "tj_mspx7ljw_tzh0",
+    "changeSetId": "cs_3e4c60682b6849d790d8fb350df508ea",
+    "artifactTruthStatus": "valid",
+    "exactReplayMatch": true
+  },
+  "assertions": {
+    "candidateWasNotCurrentBeforeAdopt": true,
+    "visibleAdoptActionUsed": true,
+    "routeSwitchedToCandidateJobWithoutRestart": true,
+    "inspectorRevisionOrdinalAfterAdopt": 4,
+    "canvasRevisionIdAfterAdopt": "rev_554e8cf865104a36aabd60b1b52fa9e7",
+    "canvasHadOnlyCandidateRevisionResourceAfterAdopt": true,
+    "canvasImageComplete": true,
+    "canvasImageNaturalWidth": 2100,
+    "advancedControlsExpanded": true,
+    "advancedPlotTitle": "UI-108 Provider2 Context Verified",
+    "coldReloadKeptCandidateJobRoute": true,
+    "coldReloadKeptRevisionOrdinal": 4,
+    "coldReloadImageComplete": true,
+    "coldReloadImageNaturalWidth": 2100
+  },
+  "scope": {
+    "manualControls": "The advanced parameter drawer was inspected against the adopted Revision and showed its persisted plot_title.",
+    "agentFirst": "The natural-language result Composer and manual controls continue to use the existing context-bound ResultEditIntent and ScientificChangeSet path.",
+    "providerBoundary": "Three live provider attempts failed upstream before candidate creation. They are not counted as successful Provider evidence. The adopted candidate was produced by the product's deterministic controlled-replay flow.",
+    "notClaimed": [
+      "packaged Electron",
+      "provider availability",
+      "UI-108 verification",
+      "UI-111 recovery or responsive qualification"
+    ]
+  }
+}
