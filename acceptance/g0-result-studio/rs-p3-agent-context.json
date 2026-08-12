@@ -1,33 +1,33 @@
 {
   "schemaVersion": 1,
   "workPackage": "G0-RS-P3",
-  "sourceCommit": "f710261d9cb0a556bd0aa9e9d22b06c08d118c24",
+  "sourceCommit": "379e1ade6370bd7c3536ace06ce91b2f0c66e9a8",
   "captureMode": "automated_contract_registry_prompt_and_strict_build_offline_verification",
   "qualificationEligible": false,
   "privacy": "repository_relative_paths_digests_counts_and_bounded_statuses_only_no_project_job_conversation_selection_url_credential_prompt_or_result_data",
   "sourceHashes": {
-    "contextContract": "8a29038a33a759b4b144549c79e16b16c8d7878df96c52a55081e67a9213b1a3",
-    "contextTools": "f4eb572624ce0c2afd75cce11dad1236cf8f6cfba47c85cd9576dace9867fdc0",
-    "contextEditTools": "3695f54aca1a59a45703935c71ce6264ecac6a2063a5206934b9774d69a1124b",
-    "toolDefinitions": "4e6ab4cc280a30e2a49da029db4d6d348d3f25d3d2bfe431b164ae490f47178f",
-    "toolRegistry": "f53dc7d881955cd23efecf466452bac448e9b915d590bed1d783722e6166d5a6",
+    "contextContract": "e35bfa343786c66e83f80d770956c48166d93c72e8aa53096aeb54beab2a3cca",
+    "contextTools": "63541d5c64f0243011c2ba6756eff39c6158a3f850a9b31b83659e4236a6c2e2",
+    "contextEditTools": "cd6cc0e7f4b7e39e278fb4bfda35cad55b0f8c47d0f8ac1de27e28e1ba5d9e67",
+    "toolDefinitions": "89e3a4ef0b611cd5d6f9af9c385f687b9d511d192023e4e183fc12a198bdc19b",
+    "toolRegistry": "62eb53fd52b75aceb41231f14198d04fc908d5284ba7685d8f92002491945777",
     "systemPrompt": "70c94eacee8ee9b8fea73ffafaeff2c76f8b7a84b50abbe64307fd69c5ba67c1",
-    "routes": "0332c98633a68fc0bd19614268221fba303bba02a879d9aea79ed745381a868b",
-    "editTools": "0485edee96061a3dbbc13855c6539c119250ed29bc7092e14f6c5a14023e8f3d",
-    "contextClient": "8a74968cef56b917742fe932c7f0bf33d74465ac3fcea6f78ca1cf1c52df4c79",
-    "surface": "945a1d00ff3cd232f091d063eb3367a83abf2a18bc31d2c6743fe560ba670b0c",
-    "surfaceStyle": "63ff05201fffae1c70f9a9d412e6e839503f8e15161311ea12f4364437960763",
-    "rightPanel": "3f9c1a781e3a7b8718dd71d5091863a48a020fc01e19d43fd297d43d326816ff",
-    "workspace": "1702bac4c571367b993f3ffe1998fb23b2ff5d1945e216971d48679fdd505c1b",
-    "contextTest": "a9f8c25f68874edd722ea27ba8b1b22253213d902d44ce56a20d19cac0735417",
+    "routes": "58375fe6323cea24d35dcd6789c6aa31aff13bd622cbad97717957e6dae9ecd2",
+    "editTools": "f7772ad122cebf3bf68893b88ef9f54dcf937028a2b040a64eb65ace1630767d",
+    "contextClient": "41bb303c788a544e292e715e3e34b103ae0f0aaf538ca3b9ec83bcf601940b74",
+    "surface": "506e127bd086ee6d487b061acc205ea10f8d2aaf6a45dca34353a15d35c1569c",
+    "surfaceStyle": "f32678fb758dced57a45efea727ca6a655e6a251363864e9f23ffa9f0ef9249f",
+    "rightPanel": "6513af22fa9c473bc8211872ff836b23eb5abbcd43796f1c3c1c4a51863cb939",
+    "workspace": "8b93b407fc7f891fe2dbbefee8aeb0662920cb422862a28fa44d616e09d3c82c",
+    "contextTest": "164b9546879831698a267f9421168a10244ecf51de620b73ffe01971fa9e4d05",
     "promptTest": "185834ceb684b683df93288008bb0b244e3743fe2c0d8627d0103c320a9924a1",
-    "registryTest": "73aa421cba9f4f29e93b31834a20ce99b5698442e1b098427c59f53b0b9ad01d",
-    "intentTest": "4fe9825b6933d18e0b1983db9f9d717296b564aac4c0221db5de84545e7b6a0f",
-    "editAgentToolTest": "7bc0d41a15ec4cfe2ac21297559a819890aecdc4538b2a04f90a4ba4ed183088",
+    "registryTest": "8a741ba798b4ac15bb0ded02dc2c53d5f0de35f44dbfb959839d47429368f736",
+    "intentTest": "cf01cfb9298ab3f386b224bc18a9fdfb48e0045dd76467fab2de5188e882aadb",
+    "editAgentToolTest": "416a084465138d053f72689c78238b58c9edd604c3cb087adb58218c5f688794",
     "readinessTest": "cf49ed539c038b60a1463146d034487f274020a706fccd8d1db052d2e484f054",
-    "surfaceTest": "b909ac160caf228b36fc6288fff4dd44d735fe5f6a5432779ceea3a827f4807f",
-    "acceptanceScript": "5a2777014e8aeca41f5483781c99a8e9c23b214ec7a9583577450a6c43a443ef",
-    "packageScripts": "20d43c6d8bb8acf1eb911383f99162a32cb86d2011bfa5d56c5ec191235e3ba7"
+    "surfaceTest": "ee311fc84ec7e32c7fe4f3a251d1c4c2a1181e4cf678846326dd0f494241363c",
+    "acceptanceScript": "19bd9087930031d78f9bc5ac47146520b07e46c0f29eccd69b6d42b78566a266",
+    "packageScripts": "e30fa0bbfdc526e7dff40f1a08325285add424dc68ab7e56c6f6664910942a98"
   },
   "productObservation": {
     "captureMode": "automated_contract_registry_prompt_and_strict_build_offline_verification",
@@ -41,7 +41,7 @@
     ]
   },
   "modelVisibleTools": {
-    "total": 32,
+    "total": 33,
     "contextBound": 7,
     "internalIdParametersExposed": 0
   },
@@ -214,31 +214,31 @@
     }
   ],
   "verification": {
-    "generatedAt": "2026-07-28T00:32:17.496Z",
+    "generatedAt": "2026-08-12T10:19:59.606Z",
     "commands": [
       {
         "label": "backend-p3",
         "command": "node --test test/result-studio-context.test.mjs test/system-prompt-result-context.test.mjs test/agent-tool-registry.test.mjs test/result-edit-intent.test.mjs test/result-edit-agent-tool.test.mjs",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "adbfbccdf6364e0d45a4b78d6a44cb512260f04c4f72e005984abbbe90937f1e",
+        "stdoutSha256": "e6fbe580fa215634606eabb60493bd041736c38af958dfd43037f57236015822",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
         "label": "frontend-p3",
-        "command": "npm run test:files --prefix frontend -- ResultStudioContextReadiness.test.tsx ResultStudioSurface.test.tsx",
+        "command": "C:\\WINDOWS\\system32\\cmd.exe /d /s /c npm run test:files --prefix frontend -- ResultStudioContextReadiness.test.tsx ResultStudioSurface.test.tsx",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "f5602a48c5721df2588dd681aa489234fb83fe171bf1e1d206a6c67b0687b0b1",
+        "stdoutSha256": "e2b97b2bf87580703d4a04007a8e11852e871d2f234ca7ba9e8789172a717fb2",
         "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       {
         "label": "frontend-build",
-        "command": "npm run build:check --prefix frontend",
+        "command": "C:\\WINDOWS\\system32\\cmd.exe /d /s /c npm run build:check --prefix frontend",
         "exitCode": 0,
         "passed": true,
-        "stdoutSha256": "c717eff527c17b2d84661a27b6b2bb5a255c16960c4a997649e917621839bfef",
-        "stderrSha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
+        "stdoutSha256": "ee27184a60adb74cdd95faed51e0a6fe44b04344ab23459369bb0c9ad66e45e1",
+        "stderrSha256": "aa9b7207d2d2d42fbf4e013331ee76fc39b9b042505b38551893c1f60f35b63a"
       },
       {
         "label": "syntax",
@@ -257,7 +257,7 @@
     "futureStagesImplemented": false
   },
   "passed": true,
-  "generatedAt": "2026-07-28T00:32:17.496Z",
+  "generatedAt": "2026-08-12T10:19:59.606Z",
   "privacyClean": true,
   "sourceCommitReachable": true,
   "sourceCommitMatchesSourceHashes": true,

@@ -139,6 +139,30 @@ function inspectWorkspaceGit(options = {}) {
 }
 
 /**
+ * 只读判断用户既有仓库是否包含未提交改动。
+ *
+ * 仅返回布尔值，避免把用户文件路径带到 API/UI；status 使用
+ * `untracked=all`，确保未跟踪目录不会被折叠后漏判。
+ */
+function inspectExistingRepositoryDirty(options = {}) {
+  const inspection = options.inspection || inspectWorkspaceGit(options);
+  if (!inspection.existing) return false;
+
+  const existing = inspection.existing;
+  if (!existing.resolvedGitDir || !fs.existsSync(existing.resolvedGitDir)) {
+    throw new GitAdapterError('existing_gitdir_unresolved', 'Existing Git directory could not be resolved.');
+  }
+
+  const adapter = createGitAdapter({
+    gitDir: existing.resolvedGitDir,
+    workTree: existing.repositoryRoot,
+    gitBin: options.gitBin,
+  });
+  const status = adapter.repositoryStatus({ untracked: 'all' });
+  return status.dirty || status.hasUntracked;
+}
+
+/**
  * 计算受管理路径（相对仓库根）。
  *
  * managed 模式下工作区就是仓库根；existing 模式下需要加上项目目录
@@ -398,6 +422,7 @@ module.exports = {
   findEnclosingGitRepository,
   resolveGitDirFromFile,
   inspectWorkspaceGit,
+  inspectExistingRepositoryDirty,
   resolveManagedPaths,
   pathsOverlap,
   detectDirtyConflict,
