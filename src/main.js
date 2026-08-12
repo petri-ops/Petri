@@ -24,6 +24,7 @@ const path = require("path");
 const fs = require("fs");
 const nodeNet = require("net");
 const { spawn, spawnSync } = require("child_process");
+const { createOwnedBackendSupervisor } = require("./owned-backend-supervisor");
 const { createMacOssUpdater } = require("./macos-oss-updater");
 const { redactSensitiveText } = require("./diagnostic-redaction");
 const {
@@ -527,47 +528,60 @@ async function selectBackendPorts() {
 
 // ── 启动 r-server（子进程 spawn，避免原生模块 V8 版本冲突）─────
 let rServerProc = null;
-function startRServer() {
+const rServerSupervisor = createOwnedBackendSupervisor({
+  name: "r-server",
+  spawnProcess: () => {
+    const rServerPath = resolveCore("r-server", "server.js");
+    const child = spawn(NODE_BIN, [rServerPath], {
+      env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" },
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+
+    _createLogStream("r-server");
+    child.stdout.on("data", (d) => {
+      const text = d.toString().trim();
+      if (text) {
+        console.log(`[r-server] ${text}`);
+        _writeLog("r-server", `[r-server] ${text}`);
+      }
+    });
+    child.stderr.on("data", (d) => {
+      const text = d.toString().trim();
+      if (text) {
+        console.error(`[r-server] ${text}`);
+        _writeLog("r-server", `[r-server:ERR] ${text}`);
+      }
+    });
+    return child;
+  },
+  onProcessChange: (child) => {
+    rServerProc = child;
+  },
+  log: console.log,
+  warn: console.warn,
+});
+
+function startRServer(reason = "boot") {
   // Runtime 未安装时跳过启动（不崩溃，前端会提示安装）
   if (!process.env.BIOF3_R_HOME || !fs.existsSync(process.env.BIOF3_R_HOME)) {
     console.warn("[desktop] r-server skipped — R runtime not installed");
-    return;
+    return { ok: false, error: "R runtime not installed" };
   }
 
   const rServerPath = resolveCore("r-server", "server.js");
   if (!fs.existsSync(rServerPath)) {
     console.error("[desktop] r-server not found:", rServerPath);
-    return;
+    return { ok: false, error: "r-server script not found" };
   }
 
-  rServerProc = spawn(NODE_BIN, [rServerPath], {
-    env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" },
-    stdio: ["ignore", "pipe", "pipe"],
-  });
+  const result = rServerSupervisor.start(reason);
 
-  _createLogStream("r-server");
-  rServerProc.stdout.on("data", (d) => {
-    const text = d.toString().trim();
-    if (text) {
-      console.log(`[r-server] ${text}`);
-      _writeLog("r-server", `[r-server] ${text}`);
-    }
-  });
-  rServerProc.stderr.on("data", (d) => {
-    const text = d.toString().trim();
-    if (text) {
-      console.error(`[r-server] ${text}`);
-      _writeLog("r-server", `[r-server:ERR] ${text}`);
-    }
-  });
-  rServerProc.on("exit", (code) => {
-    console.log(`[desktop] r-server exited: ${code}`);
-    rServerProc = null;
-  });
-
-  console.log(
-    `[desktop] r-server spawned (pid=${rServerProc.pid}) on :${process.env.R_SERVER_PORT}`,
-  );
+  if (result.ok && !result.alreadyRunning) {
+    console.log(
+      `[desktop] r-server spawned (pid=${result.pid}) on :${process.env.R_SERVER_PORT} — reason=${reason}`,
+    );
+  }
+  return result;
 }
 
 // ── 启动 py-server（子进程 spawn，应用启动即热）───────────────
@@ -2051,7 +2065,8 @@ app.on("activate", () => {
 
 app.on("before-quit", () => {
   _clearPlumberIdleTimer();
-  for (const proc of [rServerProc, pyServerProc, plumberProc]) {
+  rServerSupervisor.shutdown("app-quit");
+  for (const proc of [pyServerProc, plumberProc]) {
     if (proc) {
       try {
         proc.kill();
