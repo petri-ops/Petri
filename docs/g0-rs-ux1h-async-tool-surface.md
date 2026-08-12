@@ -208,6 +208,8 @@ core/shared-backend/result-studio-*.js
 | 2026-08-09 | completed | UX1H 收口：终态分离设计（§7 五项决策）全部代码落地并提交（7e5b14e），三份验收证据 async-tool-surface.json / summary-failure-renders-soft.json / retry-summary-does-not-rerun-tool.json 均 passed:true 且 qualificationEligible:false（诚实不冒充资格）；阶段门 syntax / Node 6/6 / 前端 24/24 / strict TypeScript 全绿。计划 active→completed，UI-126 维持 in_progress（不升 verified）。 |
 
 > UX1H 已于 2026-08-09 收口：目标展示组合与 §4.2 A-7（重试不重跑工具）均有真实 Electron 证据（`retry-summary-does-not-rerun-tool.json` `passed:true`）；终态分离设计五项决策（终态复用 completed + 工具 activity success、summaryRetry 元数据无新表/枚举、历史无需迁移、会话恢复来源=tool_job 权威、前端 3 次 + 2/4/8s 退避 + 冷却与后端 per-toolJobId 5 次/10min 限流、重试按钮仅总结缺失/失败时可见）全部在代码与三份 passed 证据中闭合。计划 status 改为 `completed`；按 §9.10，UI-126 维持 `in_progress`（不升 verified），`qualificationEligible` 维持 `false`。
+>
+> 2026-08-12 补充验收：Windows 开发态 Electron 已用当前源码重新跑通真实 socket-timeout 与 summary-only 重试链，UI-126 因此升为 `verified`。该结论只覆盖开发态 Electron 用户体验；deterministic local adapter 与 `qualificationEligible:false` 边界不变。证据见 `acceptance/ui-126/electron-summary-retry-windows.json`。
 
 ---
 
