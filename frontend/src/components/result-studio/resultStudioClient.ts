@@ -384,6 +384,7 @@ export interface RepositoryBindingStatus {
   ok: boolean;
   projectId: string;
   existingRepositoryDetected: boolean;
+  existingRepositoryDirty: boolean;
   managedRepositoryExists: boolean;
   decisionRequired: boolean;
   existingRepositoryConsent: RepositoryBindingConsent | null;
