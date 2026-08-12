@@ -41,6 +41,7 @@ const sqlite = db.db;
 const { resolveProjectRunLayout, isPathContained } = require('../../shared-backend/project-run-layout');
 const {
   bindProjectRepository,
+  inspectExistingRepositoryDirty,
   inspectWorkspaceGit,
 } = require('../../shared-backend/git-repository-binding');
 const {
@@ -862,10 +863,14 @@ module.exports = function registerResultStudioRoutes(app) {
       const repository = repo();
       const consent = repository.getExistingRepositoryConsent(projectId);
       const binding = repository.getRepositoryBinding(projectId);
+      const existingRepositoryDirty = inspection.existing
+        ? inspectExistingRepositoryDirty({ inspection })
+        : false;
       return res.json({
         ok: true,
         projectId,
         existingRepositoryDetected: !!inspection.existing,
+        existingRepositoryDirty,
         managedRepositoryExists: inspection.managed.exists,
         decisionRequired: !!inspection.existing && !inspection.managed.exists && !consent,
         existingRepositoryConsent: consent

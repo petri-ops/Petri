@@ -69,6 +69,19 @@ export function canCommitResultFetch(
   return !cancelled && requestedJobId === activeJobId;
 }
 
+/**
+ * A Revision activated by adopt/restore may switch ResultView to the
+ * candidate's Job in the same render. Keep that exact Revision identity while
+ * the Job catches up; ordinary navigation to an unrelated Job still clears it.
+ */
+export function revisionAfterJobSelection<T extends { toolJobId?: string | null }>(
+  revision: T | null,
+  nextJobId: string | null,
+): T | null {
+  if (!revision) return null;
+  return revision.toolJobId && revision.toolJobId === nextJobId ? revision : null;
+}
+
 function bodyJobId(shown: ResultBodyState): string | null {
   return shown.kind === 'empty' ? null : shown.jobId;
 }
