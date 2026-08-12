@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "uiItem": "UI-103",
+  "sourceCommit": "62f9507",
+  "observedAt": "2026-08-12T19:12:00+08:00",
+  "environment": {
+    "platform": "win32",
+    "surface": "development Electron",
+    "viewport": {
+      "width": 820,
+      "height": 900
+    },
+    "durableStores": [
+      "desktop SQLite",
+      "project Git",
+      "Artifact files"
+    ]
+  },
+  "recoverableInterruption": {
+    "setup": "A production repository transaction created a running ChangeSet and intact checkpoint owned by a provably absent prior runtime. No candidate Revision or Git current-ref mutation was created.",
+    "changeSetDigest": "c6ed997bfbc3501194e09e2fae91d50cf87b02a2587590fdab335dab73800635",
+    "checkpointDigest": "2ccf3b38f94dd8a0e4782d6b081b115bbe6f15baaa7500910a64ae4da7b22d7e",
+    "workspaceStatusBefore": "recovery_available",
+    "checkpointIntegrityBefore": "intact",
+    "checkpointStage": "materialized",
+    "publicStageLabel": "准备执行",
+    "preservedCandidateRevisionCount": 0,
+    "uiExplainedAutomaticHandling": true,
+    "uiExplainedNextAction": true,
+    "recoveryButtonPresent": true,
+    "recoveryButtonEnabled": true,
+    "recoveryHttpStatus": 200,
+    "workspaceStatusAfter": "ready",
+    "recoveryButtonPresentAfter": false,
+    "changeSetStatusAfter": "validation_failed",
+    "changeSetStatusReasonAfter": "restart_without_complete_preview",
+    "currentRevisionCountBeforeAndAfter": 6,
+    "currentRevisionDigestBefore": "d2e307d4480f7084e63385551bde2adcd78014201f757986848ac0ca4a723",
+    "currentRevisionDigestAfter": "d2e307d4480f7084e63385551bde2adcd78014201f757986848ac0ca4a723",
+    "currentRevisionUnchanged": true,
+    "revisionIntegrityAfter": "intact"
+  },
+  "activeOperationCounterexample": {
+    "setup": "A second production repository transaction created a running checkpoint owned by the exact live Electron-owned backend process. The observation was explicitly closed after the UI assertion.",
+    "changeSetDigest": "8855101b6bfeb6a16152cddd37548f08eff0a50d9ef58b3df84c50175a44231f",
+    "checkpointDigest": "6c4635bf075125853dbf5c03436f21d6e3eddc1b7ac74b7635328467e6f66f51",
+    "backendOwnershipVerified": true,
+    "workspaceStatus": "ready",
+    "activeOperationCount": 1,
+    "checkpointStage": "candidate_committed",
+    "publicStageLabel": "保存候选脚本",
+    "uiExplainedRecoveryWaitsForTaskEnd": true,
+    "recoveryButtonPresent": false,
+    "publicDomContainsInternalId": false,
+    "closedStatus": "validation_failed",
+    "finalWorkspaceStatus": "ready",
+    "finalInterruptedCount": 0,
+    "finalActiveOperationCount": 0,
+    "finalPendingIssueCount": 0
+  },
+  "responsiveAndPrivacy": {
+    "innerWidth": 820,
+    "clientWidth": 820,
+    "scrollWidth": 820,
+    "horizontalOverflow": false,
+    "publicDomContainsInternalId": false
+  },
+  "focusedGate": {
+    "frontendTestFilesPassed": 2,
+    "frontendTestsPassed": 29,
+    "coveredStates": [
+      "recovery_available",
+      "active_operation",
+      "pending_decision",
+      "blocked",
+      "ready"
+    ],
+    "lifecycleNodeSuite": {
+      "status": "environment_blocked",
+      "reason": "root better-sqlite3 was built for Node ABI 123 while the current system Node requires ABI 137; SQLite-backed cases did not enter product assertions",
+      "notReportedAsProductFailure": true
+    }
+  },
+  "scope": {
+    "claimed": "Development Electron displayed the persisted ChangeSet checkpoint stage, preserved-candidate count, recovery handling and next action; it enabled recovery only for a recoverable stale runtime and removed the action after recovery. A live active operation never exposed recovery.",
+    "notClaimed": [
+      "packaged Electron",
+      "literal operating-system reboot",
+      "a real Provider task interrupted during this observation",
+      "P7 or GA qualification"
+    ]
+  },
+  "passed": true
+}

@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "uiItem": "UI-108",
+  "observedAt": "2026-08-12T18:23:00+08:00",
+  "environment": {
+    "platform": "win32",
+    "surface": "development Electron",
+    "persistence": "durable desktop SQLite task, message, usage, ChangeSet and Revision records"
+  },
+  "providerRuns": [
+    {
+      "provider": "deepseek",
+      "providerLabel": "DeepSeek",
+      "model": "deepseek-v4-flash",
+      "taskDigest": "9f4e692ff5a608182230075c90de807b6e2922c771dc064809d2d431ca106aa1",
+      "userMessageDigest": "4e33d2fdebb0579b7bd1d7311a3059c820ced414ce276c275ba70268ca09d0cd",
+      "userMessageContainsInternalId": false,
+      "providerIterationCount": 9,
+      "toolSequence": [
+        "result_studio_context:success",
+        "result_edit_plan_in_context:success",
+        "result_changeset_create_in_context:success",
+        "result_changeset_adopt_in_context:success",
+        "workspace_read:error",
+        "result_changeset_status_in_context:context_token_stale",
+        "result_changeset_compare_in_context:context_token_stale",
+        "result_studio_context:success",
+        "artifact_revision_list:success"
+      ],
+      "changeSetDigest": "6a179bb3de2798d197835b8367634c464abc17847badb811f63fec104e06a826",
+      "changeSetStatus": "adopted",
+      "changeSetCreatedBy": "agent",
+      "artifactTruthStatus": "valid",
+      "toolJobDigest": "5b414455ea761da8038559c3b0b4d9f8cad8c3bab3270075053b3d3374582338",
+      "revisionDigest": "1a714cb0eae6ed1a29af2c2a6da7a62162f069c1e4a270030210d5f5f626c316",
+      "revisionOrdinalAtCreation": 2,
+      "revisionValidationStatus": "valid",
+      "staleTokenWasReReadBeforeFurtherContextUse": true
+    },
+    {
+      "provider": "openai-compatible",
+      "providerLabel": "umapis",
+      "model": "gpt-5.6-sol",
+      "taskDigest": "6e2699b86dfba003441a4930327435e7ac731aa3a545bf34fff70ce7b1991712",
+      "userMessageDigest": "7103576172ebe93141c7406f3bcacb00fdaa1eb263a8e90b87fcb2fd8882de74",
+      "userMessageContainsInternalId": false,
+      "providerIterationCount": 6,
+      "toolSequence": [
+        "result_studio_context:success",
+        "result_edit_plan_in_context:success",
+        "result_changeset_create_in_context:success",
+        "result_changeset_adopt_in_context:success",
+        "result_studio_context:success"
+      ],
+      "changeSetDigest": "3b3f59f9a95ff8ebdb558663674586c42ae9cedf9e036e33a1d35fbbf6d5e900",
+      "changeSetStatus": "adopted",
+      "changeSetCreatedBy": "agent",
+      "artifactTruthStatus": "valid",
+      "toolJobDigest": "89cd8f8f74d1560fd1ca522996980b429887f6462ce5b2bd949089137abf49ba",
+      "revisionDigest": "3aacf6dfb54f32381612bd03b280cca62bbbb9f5e938ac2e280ee98691b7b18f",
+      "revisionOrdinalAtCreation": 2,
+      "revisionValidationStatus": "valid"
+    }
+  ],
+  "restartReprojection": {
+    "currentRevisionOrdinal": 4,
+    "currentRevisionIsCurrent": true,
+    "currentRevisionValidationStatus": "valid",
+    "editableParameterCount": 19,
+    "contextTokenIsSha256": true,
+    "staleSelectionCompatibility": "stale",
+    "staleSelectionUsableByAgent": false,
+    "historicalProviderRevisionOrdinal": 2,
+    "historicalProviderRevisionValidationStatus": "valid",
+    "historicalContextTokenIsSha256": true,
+    "publicDomContainsInternalId": false
+  },
+  "contractGate": {
+    "backendTestsPassed": 75,
+    "frontendTestsPassed": 15,
+    "strictBuildPassed": true,
+    "storedChecksPassed": "20/20",
+    "selectionTokenCovers": [
+      "fields",
+      "filter",
+      "sort",
+      "updatedAt"
+    ],
+    "staleTokenFailsClosed": true,
+    "staleResponseLeaksReplacementToken": false
+  },
+  "scope": {
+    "claimed": "Two real Provider runs automatically resolved Result Studio context and trusted editable schema, created and adopted valid candidate Revisions without user-supplied internal IDs, and durable context reprojection survived reload.",
+    "notClaimed": [
+      "packaged Electron",
+      "Provider availability after the captured successful runs",
+      "UI-111 recovery or responsive qualification",
+      "literal OS reboot"
+    ]
+  }
+}

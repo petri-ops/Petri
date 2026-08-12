@@ -4,8 +4,16 @@ import test from 'node:test';
 import {
   buildUx1hEvidence,
   observeAirwayDataset,
+  resolveUx1hElectronPath,
 } from '../scripts/g0-rs-ux1h-acceptance.mjs';
 import { buildSdc1GatewayResponse } from '../scripts/g0-sdc1-local-gateway.mjs';
+
+test('resolves the UX1H Electron executable for Windows and POSIX', () => {
+  assert.match(resolveUx1hElectronPath('/repo', 'win32').replaceAll('\\', '/'),
+    /\/node_modules\/electron\/dist\/electron\.exe$/);
+  assert.match(resolveUx1hElectronPath('/repo', 'darwin').replaceAll('\\', '/'),
+    /\/node_modules\/\.bin\/electron$/);
+});
 
 function responseBody(messages) {
   return { messages };
