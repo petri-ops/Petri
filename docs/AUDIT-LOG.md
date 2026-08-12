@@ -4,12 +4,13 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-11（UI-140 A-1～A-6 已通过并以 source-bound evidence 收口；UI-141 已完成隔离 unsigned arm64 packaged 运行时缺失 → 插件商店实机链；UI-142 已从唯一入口 `npm run dev` 完成 macOS Accessibility + 真实输入验证；DeepSeek `deepseek-v4-flash` 经 Clash Verge 规则恢复连通；交付载体为 PR #13）
+最后更新：2026-08-12（UI-127 已完成 Windows 开发态 Electron clean/dirty 既有 Git 仓库的明示授权实机闭环；其他资格与延期边界不变）
 
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
 | --- | --- | --- | --- |
+| ✅ 已收口 | 2026-08-12 | **UI-127 existing Git 显式同意已实机 verified**：Windows 开发态 Electron 30.5.1、820×900 窄窗中，全新 clean/dirty disposable 仓库各实际出现一次 `decision-required` 弹窗并由 UI 点击授权；dirty 态明确显示不自动暂存/提交/覆盖 WIP及管理路径冲突阻断。API 点击后均记录 `explicit_api` 并绑定 `existing/ready`；两仓库 HEAD 不变，clean 仍 clean，dirty 未跟踪 WIP 原样保留，均未创建 `.biof3` | 证据 `acceptance/ui-127/electron-existing-git-consent-windows.json` 绑定源码提交 `a601379`，`passed:true`、`qualificationEligible:false`；仅关闭 UI-127 开发态验收缺口，不外推 packaged/P7 资格 |
 | 🟡门禁基础设施 | 2026-08-11 | `npm run test:changed:list` 在当前分支因多个 `scripts/*.mjs` 同时命中多条 classification rule 而 fail-closed（首项 `scripts/provision-win-r-runtime.mjs`），未进入定向测试执行 | 与 UI-141/UI-142 改动无关；本轮用显式定向门覆盖实际改动。后续在不打断唯一 active 工作包的前提下修正 `test/impact-map.json` 规则重叠，期间不得宣称 `test:changed` 通过 |
 | ✅ 已收口 | 2026-08-09 | **macOS R/Python 运行时 OSS 制品 404 已修复**：`plugins/{r,py}-runtime/1.0.0/macos-arm64.zip` 原在 OSS 均 404 → 重新打包并上传真实制品，manifest 改为真实非空 sha256/sizeBytes（fail-closed 校验通过） | macOS 机器本机重打：r 按 185 包功能闭包裁系统 R 4.5.2（扁平 zip，557MB，sha256=60e1c9bc…）；py 用 pyenv 3.11.11 完整 prefix + 科学栈（flat 扁平 zip，147MB，sha256=6144c678…）。两端均 `curl -sI` 验证 HTTP 200 + Content-Length 与 manifest 精确匹配，并**从实际 zip 解压→(r 跑 fix-r-paths)→import/运行**端到端验证通过（scanpy 1.11.5 / R 4.5.2）。新增 `scripts/build-macos-runtime.mjs` 一体化脚本（流式 zip + 符号链接/Unix 权限位保留 + 改 manifest + 上传），与 Windows 链路对齐 |
 | ✅ 已收口 | 2026-08-09 | **`G0-RS-UX1H Async Tool Surface` 已收口**（2026-08-06 激活，2026-08-09 收口）：真实 airway 数据在开发态 Electron 中完成 DESeq2（1 个 completed Job、Artifact Truth `valid`、同 Job PNG 自动打开），模拟总结阶段 socket timeout 后显示"✓ 工具已完成，AI 总结暂时不可用"且不显示红色"请求超时"。summary-only 重试（`7e02f07`）与运行中排队（`de83c58`）已全门验证通过；「工具完成、总结分离」终态设计（约束见 canonical 计划 §7/§10；cancel 语义与执行真相不动）已于 2026-08-09 实现收口，`retry-summary-does-not-rerun-tool.json` 证据已产出（passed:true）。 | 终态分离设计五项决策全部代码落地并提交（7e5b14e）；三份 evidence 均 passed:true、qualificationEligible:false。保持不动 P7-F、provider timeout、Git Worktree；UI-126 维持 `in_progress`（不升 verified），`qualificationEligible` 维持 `false`。 |
