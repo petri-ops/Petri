@@ -44,8 +44,10 @@ export interface ChatModelPreset {
   label: string;
   provider: string;
   model: string;
-  /** Configured supplier default; `model` is the last active choice. */
+  /** Configured supplier default used when no prior selection exists. */
   defaultModel?: string;
+  /** Persisted most-recent model for the backing Endpoint profile. */
+  lastSelectedModel?: string;
   baseUrl?: string;
   credentialRef?: string;
   protocol?: string;
@@ -59,6 +61,18 @@ export interface ChatModelPreset {
 export const DEFAULT_CHAT_MODEL_PRESETS: ChatModelPreset[] = [
   { id: 'deepseek-chat', label: 'DeepSeek Chat', provider: 'deepseek', model: 'deepseek-chat' },
 ];
+
+export function preferredModelPreset(
+  presets: ChatModelPreset[],
+  activeId: string | undefined,
+  lastSelectedModel: string,
+  defaultModel: string
+): ChatModelPreset | undefined {
+  return (activeId ? presets.find((preset) => preset.id === activeId) : undefined)
+    || presets.find((preset) => preset.model === lastSelectedModel)
+    || presets.find((preset) => preset.model === defaultModel)
+    || presets[0];
+}
 
 interface AiSettingsSnapshot {
   presets: ChatModelPreset[];
@@ -120,6 +134,7 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
               label: modelSupplierName(profile),
               model,
               defaultModel: profile.defaultModel || profile.model,
+              lastSelectedModel: profile.model,
             }));
           } catch {
             return [{
@@ -128,6 +143,7 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
               endpointProfileId: profile.id,
               label: modelSupplierName(profile),
               defaultModel: profile.defaultModel || profile.model,
+              lastSelectedModel: profile.model,
             }];
           }
         }));
@@ -243,8 +259,14 @@ export function useAiSettings(): UseAiSettingsResult {
     const target = presetsCache.presets.find((p) => p.id === id);
     if (!target) return presetsCache.activeId;
     const endpointProfileId = target.endpointProfileId || target.id;
-    // Optimistic cache write.
-    applyMutation({ activeId: target.id });
+    // Keep each supplier's most-recent model in the expanded renderer snapshot,
+    // so switching away and back restores the user's explicit choice.
+    const nextPresets = presetsCache.presets.map((preset) =>
+      (preset.endpointProfileId || preset.id) === endpointProfileId
+        ? { ...preset, lastSelectedModel: target.model }
+        : preset
+    );
+    applyMutation({ presets: nextPresets, activeId: target.id });
     // Persist so the next chat request after this click uses the new
     // model on disk. We don't fail the call when save fails — the
     // cache is the immediate source of truth and the next refresh()
