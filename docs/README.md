@@ -19,7 +19,7 @@
 5. [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) — UX1A～UX1G-2 结果体验短闭环已完成；P4R-0～P6 已按非资格边界收口，发布级 P7 deferred。
 6. [`g0-critical-crosscut-hardening-plan.md`](./g0-critical-crosscut-hardening-plan.md) — 已重新真实收口的横切修复工作包；保留科学、进程、HTTP 与逐契约 Acceptance 证据。
 7. [`g0-rs0-result-studio-audit.md`](./g0-rs0-result-studio-audit.md) — G0-RS0 现状审计与架构 ADR；Result Studio 的复用/新增边界、契约缺陷与 Git 风险矩阵的唯一裁决记录。
-8. [`g0-rs-ux1h-async-tool-surface.md`](./g0-rs-ux1h-async-tool-surface.md) — 2026-08-09 已按非资格边界收口的 Async Tool Surface 工作包；UI-126 仍不升 `verified`。
+8. [`g0-rs-ux1h-async-tool-surface.md`](./g0-rs-ux1h-async-tool-surface.md) — 2026-08-09 已按非资格边界收口的 Async Tool Surface 工作包；UI-126 已于 2026-08-12 经 Windows 开发态 Electron 实机复核升为 `verified`，仍不外推 Provider/packaged 资格。
 9. [`agent-concurrency-design.md`](./agent-concurrency-design.md) — 2026-08-11 已完成的 Agent Concurrency 工作包；A-1～A-6 开发态 Electron evidence 精确绑定实现提交 `6adeaa9`。
 
 ## 当前开发必读

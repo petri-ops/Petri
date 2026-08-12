@@ -56,6 +56,7 @@ import {
   type HarnessToolManifest,
 } from '@/lib/harness-client';
 import {
+  preferredModelPreset,
   useAiSettings,
   type ChatModelPreset,
 } from '@/hooks/useAiSettings';
@@ -992,13 +993,25 @@ export function SimpleChat({
   // parent controls conversationId directly.
 
   const accessModeLabel = accessMode === 'full' ? '完全访问' : '只读模式';
-  const modelGroups = modelPresets.reduce<Array<{ key: string; supplier: string; defaultModel: string; presets: ChatModelPreset[] }>>(
+  const modelGroups = modelPresets.reduce<Array<{
+    key: string;
+    supplier: string;
+    defaultModel: string;
+    lastSelectedModel: string;
+    presets: ChatModelPreset[];
+  }>>(
     (groups, preset) => {
       const supplier = preset.label || preset.provider;
       const key = preset.endpointProfileId || preset.provider;
       const existing = groups.find((group) => group.key === key);
       if (existing) existing.presets.push(preset);
-      else groups.push({ key, supplier, defaultModel: preset.defaultModel || preset.model, presets: [preset] });
+      else groups.push({
+        key,
+        supplier,
+        defaultModel: preset.defaultModel || preset.model,
+        lastSelectedModel: preset.lastSelectedModel || preset.model,
+        presets: [preset],
+      });
       return groups;
     },
     []
@@ -1009,13 +1022,12 @@ export function SimpleChat({
   const selectedSupplierGroup = modelGroups.find((group) => group.key === modelSupplierKey)
     || activeSupplierGroup;
   const preferredPresetForSupplier = useCallback((group: typeof modelGroups[number]) => {
-    if (group.key === activeSupplierGroup?.key) {
-      return group.presets.find((preset) => preset.id === activeModelId)
-        || group.presets.find((preset) => preset.model === group.defaultModel)
-        || group.presets[0];
-    }
-    return group.presets.find((preset) => preset.model === group.defaultModel)
-      || group.presets[0];
+    return preferredModelPreset(
+      group.presets,
+      group.key === activeSupplierGroup?.key ? activeModelId : undefined,
+      group.lastSelectedModel,
+      group.defaultModel
+    );
   }, [activeModelId, activeSupplierGroup?.key]);
   const selectModel = useCallback(async (preset: ChatModelPreset) => {
     setModelMenuOpen(null);
