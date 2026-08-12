@@ -4,12 +4,13 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-12（UI-127 已完成 Windows 开发态 Electron clean/dirty 既有 Git 仓库的明示授权实机闭环；UI-038/UI-042 等既有验收记录保持不变）
+最后更新：2026-08-12（UI-128 已完成 Windows 开发态 Electron 的轮询瞬时失败自愈与结果原生 404 诚实呈现/重试恢复实机闭环；既有验收记录保持不变）
 
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
 | --- | --- | --- | --- |
+| ✅ 已收口 | 2026-08-12 | **UI-128 两条真实错误路径已实机 verified**：Windows 开发态 Electron 30.5.1、1024×900 中，项目 datasets 轮询单次 503 仅显示非阻塞“数据刷新暂时失败”横幅，已加载可信结果不卸载，下一次成功刷新后自愈；活动结果请求改写到 r-server 原生 missing-job 端点后精确显示 HTTP 404 与重试，不再谎报“未生成可视化”，解除故障并点击重试后可信结果恢复 | 证据 `acceptance/ui-128/electron-honest-error-recovery-windows.json` 绑定当前源码 `62f9507`、实现提交 `e852252` 与关键文件哈希，`passed:true`、`qualificationEligible:false`；仅关闭 UI-128 开发态验收缺口，不外推 packaged/P7 资格 |
 | ✅ 已收口 | 2026-08-12 | **UI-127 existing Git 显式同意已实机 verified**：Windows 开发态 Electron 30.5.1、820×900 窄窗中，全新 clean/dirty disposable 仓库各实际出现一次 `decision-required` 弹窗并由 UI 点击授权；dirty 态明确显示不自动暂存/提交/覆盖 WIP及管理路径冲突阻断。API 点击后均记录 `explicit_api` 并绑定 `existing/ready`；两仓库 HEAD 不变，clean 仍 clean，dirty 未跟踪 WIP 原样保留，均未创建 `.biof3` | 证据 `acceptance/ui-127/electron-existing-git-consent-windows.json` 绑定源码提交 `a601379`，`passed:true`、`qualificationEligible:false`；仅关闭 UI-127 开发态验收缺口，不外推 packaged/P7 资格 |
 | 🟡门禁基础设施 | 2026-08-11 | `npm run test:changed:list` 在当前分支因多个 `scripts/*.mjs` 同时命中多条 classification rule 而 fail-closed（首项 `scripts/provision-win-r-runtime.mjs`），未进入定向测试执行 | 与 UI-141/UI-142 改动无关；本轮用显式定向门覆盖实际改动。后续在不打断唯一 active 工作包的前提下修正 `test/impact-map.json` 规则重叠，期间不得宣称 `test:changed` 通过 |
 | ✅ 已收口 | 2026-08-12 | **UI-126 Windows 开发态 Electron 实机复核通过**：隔离空账本导入 34889×8 airway 临时导出数据，真实 DESeq2 产生恰好 1 个 completed Job、Artifact Truth `valid`/非 blocking，并自动打开同 Job PNG；真实 socket timeout 后显示软失败文案，实际点击 summary-only 重试，点击前后 completed Job 数仍为 1 且 Artifact Truth 不变 | 覆盖 2026-08-09 “尚未实机复核、不升 verified”的旧状态结论。证据 `acceptance/ui-126/electron-summary-retry-windows.json` 精确绑定 `e59f553`；classification 仍为 deterministic local adapter、`qualificationEligible:false`，不冒充真实 Provider 或 packaged 资格 |
