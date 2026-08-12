@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "ui-052-electron-full-access-commands-windows",
+  "workItem": "UI-052",
+  "capturedAt": "2026-08-12",
+  "sourceCommit": "62f9507a398ca053def7d041b353bd4dfa587bf7",
+  "classification": "development_windows_electron_real_provider_disposable_project_workspace",
+  "qualificationEligible": false,
+  "environment": {
+    "os": "Windows 11 Home China 10.0.26200 x64",
+    "electron": "30.5.1",
+    "chromium": "124.0.6367.243",
+    "viewport": "1024x900",
+    "shell": "cmd.exe /d /s /c"
+  },
+  "sourceFiles": {
+    "core/r-server/agent-tools/workspace-tools.js": "a8e561b6e919f63b8c0daf2eca8b963390edde6113087ad487f7850ec704a563",
+    "core/r-server/agent-tools/agent-tool-policy.js": "32622492f689ec300af0124cb8a091b66371b7a9cca6f8e1e1452b83c4f14449",
+    "core/r-server/agent-tools/tool-defs.js": "89e3a4ef0b611cd5d6f9af9c385f687b9d511d192023e4e183fc12a198bdc19b",
+    "frontend/src/components/copilot/SimpleChat.tsx": "1e144fa68ecd9a5883755507e4919e9706d4f3bb5a5d15bb540918250d15d1c4"
+  },
+  "providerAttempts": {
+    "firstConfiguredChannelReachedToolLayer": false,
+    "firstConfiguredChannelFailure": "provider_channel_temporarily_unavailable",
+    "secondConfiguredChannelReachedToolLayer": true,
+    "providerNamesOrModelsStored": false
+  },
+  "realConversation": {
+    "accessMode": "full",
+    "commands": [
+      {
+        "class": "head_first_five_lines",
+        "tool": "workspace_exec",
+        "status": "success",
+        "exitCode": 0,
+        "outputMatchedFixture": true,
+        "truncated": false
+      },
+      {
+        "class": "cat_complete_text_file",
+        "tool": "workspace_exec",
+        "status": "success",
+        "exitCode": 0,
+        "outputMatchedFixture": true,
+        "truncated": false
+      },
+      {
+        "class": "wc_lines_multiple_files",
+        "tool": "workspace_exec",
+        "status": "success",
+        "exitCode": 0,
+        "observedLineCounts": [7, 3, 10],
+        "truncated": false
+      }
+    ],
+    "assertions": {
+      "exactlyThreePersistedWorkspaceExecActivities": true,
+      "allPersistedActivitiesSucceeded": true,
+      "processingSummaryShowsThreeCompletedRuns": true,
+      "commandNotAllowlistedAbsent": true,
+      "approvalCardAbsent": true,
+      "errorAlertAbsentOnSuccessfulAttempt": true,
+      "permissionMenuDisclosesCommandFileAndToolAccess": true,
+      "inputFilesRemainByteIdentical": true,
+      "workspaceContainsNoUnexpectedFilesAfterExecution": true
+    }
+  },
+  "focusedRegression": {
+    "tests": 29,
+    "passed": 26,
+    "failed": 0,
+    "windowsPlatformSkips": 3,
+    "skipBoundary": "The skipped test bodies assume POSIX path output. Their Windows shell behavior is covered by the real Electron and cmd.exe observation above."
+  },
+  "cleanup": {
+    "temporaryConversationDeleted": true,
+    "temporaryProjectDeleted": true,
+    "temporaryWorkspaceDeleted": true,
+    "remainingProjectRecords": 0,
+    "remainingWorkspace": false
+  },
+  "privacy": {
+    "credentialsReadOrStored": false,
+    "providerNamesOrModelsStored": false,
+    "conversationOrProjectIdsStored": false,
+    "absoluteWorkspacePathStored": false,
+    "screenshotsCommitted": false
+  },
+  "passed": true
+}
