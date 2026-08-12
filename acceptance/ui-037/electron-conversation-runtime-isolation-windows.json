@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "ui-037-electron-conversation-runtime-isolation-windows",
+  "workItem": "UI-037",
+  "capturedAt": "2026-08-12",
+  "sourceCommit": "62f9507a398ca053def7d041b353bd4dfa587bf7",
+  "classification": "development_windows_electron_real_provider_disposable_conversations",
+  "qualificationEligible": false,
+  "environment": {
+    "os": "Windows 11 Home China 10.0.26200 x64",
+    "electron": "30.5.1",
+    "chromium": "124.0.6367.243",
+    "viewport": "1024x900"
+  },
+  "sourceFiles": {
+    "frontend/src/components/copilot/conversationRunStore.ts": "9a10bb3433202dd67243e9175b9a3c953cca70b76aeaaeca42bbdf05052b7bbe",
+    "frontend/src/components/copilot/SimpleChat.tsx": "1e144fa68ecd9a5883755507e4919e9706d4f3bb5a5d15bb540918250d15d1c4",
+    "frontend/src/components/workspace-panels/LeftPanel.tsx": "e4f1d974589f76456a99c58cd6ba34dd054816dbd0135ce7c01ac482eb1d41b2",
+    "frontend/src/components/copilot/copilotConversationsClient.ts": "93b7b100a4711f46b23563843fc872f81679a946eaf4f14a81d7b28f87851034",
+    "core/r-server/helpers/runtime.js": "da535177e2c0e111d258345694594f49d43b69d4aa2ae8551071d30f6bfe66f8"
+  },
+  "parallelConversationObservation": {
+    "conversationCount": 2,
+    "tool": "workspace_exec",
+    "commandClass": "bounded_wait_then_emit_unique_marker",
+    "assertions": {
+      "firstConversationShowedRunningPulseBeforeSecondStarted": true,
+      "bothConversationsShowedRunningPulsesConcurrently": true,
+      "switchingToSecondConversationDidNotShowFirstMarker": true,
+      "leavingChatForSettingsDidNotCancelEitherRun": true,
+      "bothRunsPersistedSuccessfulToolActivity": true,
+      "firstConversationContainsOnlyItsParallelMarker": true,
+      "secondConversationContainsOnlyItsParallelMarker": true,
+      "returningToEachConversationRestoredItsOwnCompletedState": true,
+      "errorAlertsAbsent": true
+    },
+    "persistedMessagesPerConversation": [2, 4],
+    "processingMilliseconds": [28936, 23320]
+  },
+  "sameConversationOverlapObservation": {
+    "assertions": {
+      "directSendControlAbsentWhileRunActive": true,
+      "queueControlAvailableWhileRunActive": true,
+      "backgroundSubtaskControlAvailableWhileRunActive": true,
+      "stopControlAvailableWhileRunActive": true,
+      "runCompletedAndPersistedSuccessfully": true,
+      "errorAlertsAbsent": true
+    }
+  },
+  "concurrencyBoundary": {
+    "ui037ChangedBackendConcurrencyPolicy": false,
+    "currentPolicyAfterUi140": "five_tasks_per_user_with_one_primary_slot_reserved"
+  },
+  "focusedRegression": {
+    "frontend": {
+      "tests": 38,
+      "passed": 38,
+      "failed": 0
+    },
+    "backendConversationAndCancellation": {
+      "tests": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    "backendConcurrency": {
+      "behaviorAssertionsPassed": 8,
+      "behaviorAssertionsFailed": 0,
+      "processExitWasZero": false,
+      "nonBehaviorFailure": "windows_temp_directory_cleanup_eperm_after_sqlite_use"
+    },
+    "mixedAbiBoundary": "The broader tool-job conversation suite cannot use one local runtime because the root native module is ABI 123 while the R server native module is ABI 137. No native dependency was rebuilt during the running Electron acceptance."
+  },
+  "cleanup": {
+    "temporaryConversationsDeleted": true,
+    "temporaryProjectDeleted": true,
+    "temporaryWorkspaceDeleted": true,
+    "remainingConversationRecords": 0,
+    "remainingProjectRecords": 0,
+    "remainingWorkspace": false,
+    "previousActiveModelRestored": true
+  },
+  "privacy": {
+    "credentialsReadOrStored": false,
+    "providerNamesOrModelsStored": false,
+    "conversationOrProjectIdsStored": false,
+    "absoluteWorkspacePathStored": false,
+    "conversationContentStored": false,
+    "screenshotsCommitted": false
+  },
+  "passed": true
+}
