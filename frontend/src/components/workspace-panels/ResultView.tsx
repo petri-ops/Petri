@@ -91,6 +91,7 @@ import { shouldShowWorkflowBar } from '@/components/result-studio/resultFirstScr
 import {
   canCommitResultFetch,
   nextResultBodyState,
+  revisionAfterJobSelection,
   type ResultBodyState,
 } from '@/components/result-studio/resultBodyState';
 import { getResultScrollPosition, setResultScrollPosition } from '@/components/result-studio/resultScrollMemory';
@@ -360,7 +361,7 @@ function ResultArtifactShell({
   // explicitly to the interaction route; do not infer it from job+artifact.
   const [viewedRevision, setViewedRevision] = useState<ArtifactRevision | null>(null);
   useEffect(() => {
-    setViewedRevision(null);
+    setViewedRevision((current) => revisionAfterJobSelection(current, job?.id ?? null));
   }, [job?.id]);
   const [interactionManifest, setInteractionManifest] = useState<ArtifactInteractionManifest | null>(null);
   const [interactionBackingTable, setInteractionBackingTable] = useState<ResultTableQuery | null>(null);

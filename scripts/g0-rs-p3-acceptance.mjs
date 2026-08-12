@@ -87,6 +87,17 @@ function sourceCommitStatus(commit, hashes) {
 }
 
 function runCommands() {
+  const npmCommand = (args) => process.platform === 'win32'
+    ? [process.env.ComSpec || 'cmd.exe', ['/d', '/s', '/c', 'npm', ...args]]
+    : ['npm', args];
+  const [frontendTestBin, frontendTestArgs] = npmCommand([
+    'run', 'test:files', '--prefix', 'frontend', '--',
+    'ResultStudioContextReadiness.test.tsx',
+    'ResultStudioSurface.test.tsx',
+  ]);
+  const [frontendBuildBin, frontendBuildArgs] = npmCommand([
+    'run', 'build:check', '--prefix', 'frontend',
+  ]);
   const commands = [
     ['backend-p3', 'node', ['--test',
       'test/result-studio-context.test.mjs',
@@ -98,11 +109,8 @@ function runCommands() {
     // `npm test` in frontend is `vitest run --changed`, which combines with these
     // filters to select nothing and exit 0 — recording passed:true for a run that
     // executed no tests. `test:files` is plain `vitest run`, matching the gate.
-    ['frontend-p3', 'npm', ['run', 'test:files', '--prefix', 'frontend', '--',
-      'ResultStudioContextReadiness.test.tsx',
-      'ResultStudioSurface.test.tsx',
-    ]],
-    ['frontend-build', 'npm', ['run', 'build:check', '--prefix', 'frontend']],
+    ['frontend-p3', frontendTestBin, frontendTestArgs],
+    ['frontend-build', frontendBuildBin, frontendBuildArgs],
     ['syntax', 'node', ['--check', 'scripts/g0-rs-p3-acceptance.mjs']],
   ];
   return commands.map(([label, bin, args]) => {

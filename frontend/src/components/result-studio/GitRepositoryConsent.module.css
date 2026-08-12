@@ -39,6 +39,15 @@
   color: var(--biof3-text-tertiary, var(--biof3-text-secondary));
 }
 
+.warning {
+  margin: 0;
+  padding-left: 10px;
+  border-left: 3px solid var(--biof3-warning, #a86400);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--biof3-text-secondary);
+}
+
 .action {
   align-self: flex-start;
   margin-top: 2px;
