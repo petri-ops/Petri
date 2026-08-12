@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "ui-036-electron-model-settings-and-chat-picker-windows",
+  "workItem": "UI-036",
+  "capturedAt": "2026-08-12",
+  "sourceCommit": "62f9507a398ca053def7d041b353bd4dfa587bf7",
+  "classification": "development_windows_electron_existing_local_model_configuration_no_credential_export",
+  "qualificationEligible": false,
+  "environment": {
+    "os": "Windows 11 Home China 10.0.26200 x64",
+    "electron": "30.5.1",
+    "chromium": "124.0.6367.243",
+    "viewport": "1440x900"
+  },
+  "sourceFiles": {
+    "frontend/src/components/desktop/DesktopSettingsPanel.tsx": "f93d32f34bc434494b89396c83b77a16da6ecb1ebd3b1926d74166e0e0c4c79e",
+    "frontend/src/components/copilot/SimpleChat.tsx": "1e144fa68ecd9a5883755507e4919e9706d4f3bb5a5d15bb540918250d15d1c4",
+    "frontend/src/components/desktop/desktop.css": "9f78c7df7b614126488ba09a81440da17f7946ad73ad456cb02167643a85db5f",
+    "frontend/src/hooks/useAiSettings.ts": "8e5198c7c317e2862d3e65940b7eaf4005774e9ae6cfaf36116d339994047dd9"
+  },
+  "settings": {
+    "existingChannelCount": 7,
+    "visibleColumns": ["protocol", "supplier", "base_url", "key", "default_model", "connectivity"],
+    "rowHeightCssPixels": 33.33,
+    "assertions": {
+      "normalSettingsEntryCollapsedBothSidebars": true,
+      "allChannelRowsSingleLine": true,
+      "allChannelRowsFullyVisible": true,
+      "documentHorizontalOverflowAbsent": true,
+      "keysRemainedMasked": true,
+      "saveButtonClicked": true,
+      "savedConfirmationVisible": true,
+      "settingsClosedAndReopened": true,
+      "supplierAndDefaultModelFingerprintUnchanged": true
+    }
+  },
+  "chatPicker": {
+    "assertions": {
+      "supplierAndModelAreSeparateButtons": true,
+      "supplierMenuOpened": true,
+      "supplierMenuReportedPerSupplierModelCounts": true,
+      "differentSupplierSelected": true,
+      "modelMenuOpened": true,
+      "modelMenuContainedOnlySelectedSupplierModels": true,
+      "twoModelsWithinOneSupplierWereSelected": true,
+      "supplierAndModelButtonsDidNotOverlap": true,
+      "originalPersistedSupplierAndModelRestored": true,
+      "documentHorizontalOverflowAbsent": true
+    }
+  },
+  "boundaries": {
+    "credentialsReadOrExported": false,
+    "providerConnectionClaimed": false,
+    "anthropicLiveKeyClaimed": false,
+    "anthropicKeyBoundaryOwnedBy": "UI-124 key-unavailable exception",
+    "packagedOrP7Claimed": false
+  },
+  "privacy": {
+    "supplierNamesStored": false,
+    "baseUrlsStored": false,
+    "apiKeysStored": false,
+    "projectOrConversationIdsStored": false,
+    "screenshotsCommitted": false
+  },
+  "passed": true
+}
