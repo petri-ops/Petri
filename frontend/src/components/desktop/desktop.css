@@ -549,6 +549,12 @@
   background: transparent;
 }
 
+/* UI-042: 渠道卡片之间用 1px 分隔线区分（相邻卡片顶部加线，首张与列表末尾不产生双线）。
+   原台账声明「底部 1px 分隔线 + 末条去线」，此处以 top-border 邻接实现等价视觉且更稳健。 */
+.biof3-endpoint-card + .biof3-endpoint-card {
+  border-top: 1px solid var(--biof3-border);
+}
+
 .biof3-endpoint-list-header,
 .biof3-endpoint-card__grid {
   display: grid;

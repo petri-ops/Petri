@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "ui042-electron-endpoint-density-2026-08-12",
+  "workPackage": "SETTING-FIX / UI-042",
+  "classification": "development_electron_windows_renderer_layout_acceptance",
+  "qualificationEligible": false,
+  "sourceCommit": "361d0d1e33ea09f2c9e0c0b6d849b26085e2db16",
+  "sourceTreeExact": true,
+  "sourceCommitMatchesSourceHashes": true,
+  "sourceHashes": {
+    "frontend/src/components/desktop/desktop.css": "5366289b100a55409f43729653c1b82a6969786442cdbb13100c2f81797f37d0"
+  },
+  "platform": "win32-x64",
+  "launch": {
+    "entrypoint": "npm start -- --remote-debugging-port=9222",
+    "developmentMode": true,
+    "rendererUrl": "http://localhost:3000"
+  },
+  "acceptance": {
+    "multiEndpoint": {
+      "status": "passed",
+      "observed": "Seven real Endpoint rows rendered as one list. The first row had no top border and rows 2-7 each had exactly one computed solid top separator; no bottom borders created double lines."
+    },
+    "narrow820": {
+      "status": "passed",
+      "observed": "At innerWidth 820, the 1040px row grid remained inside a 600px overflow-x auto container; all six separators remained present without page-level row compression."
+    },
+    "singleEndpoint": {
+      "status": "passed",
+      "observed": "A temporary renderer-only reduction to one Endpoint produced no orphan top or bottom separator."
+    },
+    "emptyEndpoint": {
+      "status": "passed",
+      "observed": "A temporary renderer-only reduction to zero Endpoint rows left no Endpoint separator. The DOM mutation was not persisted and a reload restored the real settings."
+    }
+  },
+  "verification": {
+    "computedStylesInspected": true,
+    "realEndpointCount": 7,
+    "viewportWidths": [1600, 820],
+    "frontendStrictTypeScriptAndBuild": "passed",
+    "uiAuditCheck": "passed"
+  },
+  "status": "passed",
+  "passed": true,
+  "remaining": []
+}
