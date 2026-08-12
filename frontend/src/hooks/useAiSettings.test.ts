@@ -3,6 +3,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import {
   useAiSettings,
   DEFAULT_CHAT_MODEL_PRESETS,
+  preferredModelPreset,
   __resetAiSettingsCacheForTests,
   type ChatModelPreset,
 } from '@/hooks/useAiSettings';
@@ -31,6 +32,18 @@ beforeEach(() => {
 });
 
 describe('useAiSettings', () => {
+  it('restores a supplier last-selected model before its configured default', () => {
+    const presets: ChatModelPreset[] = [
+      { id: 'flash', label: 'DeepSeek', provider: 'openai-compatible', model: 'deepseek-v4-flash' },
+      { id: 'pro', label: 'DeepSeek', provider: 'openai-compatible', model: 'deepseek-v4-pro' },
+    ];
+
+    expect(preferredModelPreset(presets, undefined, 'deepseek-v4-flash', 'deepseek-v4-pro')?.id)
+      .toBe('flash');
+    expect(preferredModelPreset(presets, 'pro', 'deepseek-v4-flash', 'deepseek-v4-pro')?.id)
+      .toBe('pro');
+  });
+
   it('exposes default presets when no bridge is installed', async () => {
     const { result } = renderHook(() => useAiSettings());
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -171,6 +184,7 @@ describe('useAiSettings', () => {
     expect(result.current.presets.every((preset) => preset.provider === 'openai-compatible')).toBe(true);
     expect(result.current.presets.every((preset) => preset.baseUrl === 'https://api.deepseek.com')).toBe(true);
     expect(result.current.presets.every((preset) => preset.credentialRef === 'provider:deepseek')).toBe(true);
+    expect(result.current.presets.every((preset) => preset.lastSelectedModel === 'deepseek-v4-flash')).toBe(true);
     expect(result.current.activePreset.model).toBe('deepseek-v4-flash');
 
     const pro = result.current.presets.find((preset) => preset.model === 'deepseek-v4-pro');
@@ -178,6 +192,7 @@ describe('useAiSettings', () => {
       await result.current.setActive(pro!.id);
     });
     expect(result.current.activePreset.model).toBe('deepseek-v4-pro');
+    expect(result.current.presets.every((preset) => preset.lastSelectedModel === 'deepseek-v4-pro')).toBe(true);
     expect(save).toHaveBeenCalledWith(expect.objectContaining({
       active_chat_model_id: 'deepseek-chat',
       model_role_bindings: expect.objectContaining({ chat: 'deepseek-chat' }),

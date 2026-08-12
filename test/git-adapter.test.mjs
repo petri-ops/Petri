@@ -34,6 +34,7 @@ const {
   MANAGED_RELATIVE_PATHS,
   bindProjectRepository,
   findEnclosingGitRepository,
+  inspectExistingRepositoryDirty,
   inspectWorkspaceGit,
   resolveBiof3MetadataLayout,
   resolveManagedPaths,
@@ -211,6 +212,17 @@ test('RS1 inspects a non-git workspace without writing anything', (context) => {
   assert.equal(inspection.managed.exists, false);
   assert.equal(inspection.existing, null);
   assert.equal(existsSync(join(root, '.git')), false);
+  assert.equal(existsSync(join(root, BIOF3_DIR)), false);
+});
+
+test('RS1 reports existing repository dirty state without exposing paths or writing', { skip: !gitReady }, (context) => {
+  const root = makeWorkspace(context);
+  initUserRepository(root);
+  const inspection = inspectWorkspaceGit({ workspaceRoot: root });
+
+  assert.equal(inspectExistingRepositoryDirty({ inspection }), false);
+  writeFileSync(join(root, 'user-wip.txt'), 'keep me\n');
+  assert.equal(inspectExistingRepositoryDirty({ inspection }), true);
   assert.equal(existsSync(join(root, BIOF3_DIR)), false);
 });
 

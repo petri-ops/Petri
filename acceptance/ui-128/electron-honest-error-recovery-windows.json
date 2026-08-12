@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "ui-128-electron-honest-error-recovery-windows",
+  "workItem": "UI-128",
+  "capturedAt": "2026-08-12",
+  "sourceCommit": "62f9507a398ca053def7d041b353bd4dfa587bf7",
+  "implementationCommit": "e852252",
+  "classification": "development_windows_electron_cdp_controlled_request_faults_against_existing_completed_result",
+  "qualificationEligible": false,
+  "environment": {
+    "os": "Windows 11 Home China 10.0.26200 x64",
+    "electron": "30.5.1",
+    "chromium": "124.0.6367.243",
+    "viewport": "1024x900"
+  },
+  "sourceFiles": {
+    "frontend/src/pages/project-workspace.tsx": "8b93b407fc7f891fe2dbbefee8aeb0662920cb422862a28fa44d616e09d3c82c",
+    "frontend/src/components/workspace-panels/ResultView.tsx": "ad6bc2a38b6033a6f03aface17df895f77fe980b23c5a1bc65537d0a8315067b"
+  },
+  "transientPollingFailure": {
+    "fault": "one project datasets polling request returned HTTP 503",
+    "assertions": {
+      "failureRequestIntercepted": true,
+      "nonBlockingAlertVisible": true,
+      "alertSaysAutomaticRetry": true,
+      "existingTrustedResultRemainedVisible": true,
+      "fullScreenErrorAbsent": true,
+      "nextSuccessfulRefreshClearedAlert": true,
+      "resultRemainedVisibleAfterRecovery": true,
+      "horizontalOverflowAbsent": true
+    }
+  },
+  "resultHttpFailure": {
+    "fault": "active result GET was rewritten to the native r-server missing-job endpoint",
+    "nativeResponseStatus": 404,
+    "assertions": {
+      "activeResultRequestsRewritten": true,
+      "http404MessageVisible": true,
+      "retryButtonVisible": true,
+      "falseNoVisualizationMessageAbsent": true,
+      "faultRemovedBeforeRetry": true,
+      "retryButtonClicked": true,
+      "trustedResultRecovered": true,
+      "errorMessageClearedAfterRecovery": true,
+      "falseNoVisualizationMessageStillAbsent": true,
+      "horizontalOverflowAbsent": true
+    }
+  },
+  "privacy": {
+    "projectIdsStored": false,
+    "jobIdsStored": false,
+    "workspacePathsStored": false,
+    "screenshotsCommitted": false
+  },
+  "passed": true
+}
