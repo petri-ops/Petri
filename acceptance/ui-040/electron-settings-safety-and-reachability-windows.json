@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "ui-040-electron-settings-safety-and-reachability-windows",
+  "workItem": "UI-040",
+  "capturedAt": "2026-08-12",
+  "sourceCommit": "62f9507a398ca053def7d041b353bd4dfa587bf7",
+  "classification": "development_windows_electron_existing_local_settings_redacted",
+  "qualificationEligible": false,
+  "environment": {
+    "os": "Windows 11 Home China 10.0.26200 x64",
+    "electron": "30.5.1",
+    "chromium": "124.0.6367.243",
+    "viewports": ["1024x900", "820x900"],
+    "themes": ["dark", "light"]
+  },
+  "sourceFiles": {
+    "frontend/src/components/desktop/DesktopSettingsPanel.tsx": "f93d32f34bc434494b89396c83b77a16da6ecb1ebd3b1926d74166e0e0c4c79e",
+    "frontend/src/components/desktop/ThemeControl.tsx": "4ed7f714420a11197ea69f0b835ece2fcf6d3a818d0a2f894147450443717c8b",
+    "frontend/src/components/desktop/desktop.css": "9f78c7df7b614126488ba09a81440da17f7946ad73ad456cb02167643a85db5f"
+  },
+  "modelChannelDeletion": {
+    "assertions": {
+      "deleteControlNamesItsChannel": true,
+      "confirmationMentionsUrl": true,
+      "confirmationMentionsKey": true,
+      "confirmationMentionsDefaultModel": true,
+      "confirmationWarnsDeletionCannotBeRecoveredFromTrash": true,
+      "cancelKeptChannelCountAndConfigurationUnchanged": true,
+      "addActionUsesApiChannelWording": true,
+      "legacyCustomApiWordingAbsent": true
+    }
+  },
+  "themePreference": {
+    "assertions": {
+      "lightSelectionImmediatelyShowsCurrentLight": true,
+      "darkSelectionImmediatelyShowsCurrentDark": true,
+      "selectionPersistsThroughSectionNavigation": true,
+      "narrowViewportHasNoDocumentHorizontalOverflow": true
+    }
+  },
+  "trashReachability": {
+    "assertions": {
+      "trashIsAbsentFromMaintenanceSection": true,
+      "trashIsVisibleAtEndOfComputeAndDataSection": true,
+      "computeDataHarnessTrashOrderIsCorrect": true,
+      "threeSectionDividersAreRendered": true,
+      "eachDividerIsOnePixelHighAndUsesThemeBorderColor": true,
+      "narrowViewportHasNoDocumentOrContentHorizontalOverflow": true
+    }
+  },
+  "privacy": {
+    "providerNamesStored": false,
+    "baseUrlsStored": false,
+    "credentialsReadOrStored": false,
+    "localDataPathsStored": false,
+    "screenshotsCommitted": false
+  },
+  "passed": true
+}
