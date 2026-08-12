@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "uiItem": "UI-111",
+  "sourceCommit": "7b78c88",
+  "observedAt": "2026-08-12T18:47:26+08:00",
+  "environment": {
+    "platform": "win32",
+    "surface": "development Electron",
+    "renderer": "Vite development source",
+    "deviceScaleFactor": 1.25,
+    "durableStores": [
+      "desktop SQLite",
+      "project Git",
+      "Artifact files"
+    ]
+  },
+  "providerLineage": {
+    "classification": "two real durable Provider task chains plus exact controlled replay of the adopted Provider result",
+    "providers": [
+      {
+        "provider": "deepseek",
+        "model": "deepseek-v4-flash",
+        "taskDigest": "9f4e692ff5a608182230075c90de807b6e2922c771dc064809d2d431ca106aa1",
+        "providerIterationCount": 9,
+        "changeSetStatus": "adopted",
+        "changeSetCreatedBy": "agent",
+        "artifactTruthStatus": "valid",
+        "userMessageContainsInternalId": false
+      },
+      {
+        "provider": "openai-compatible",
+        "model": "gpt-5.6-sol",
+        "taskDigest": "6e2699b86dfba003441a4930327435e7ac731aa3a545bf34fff70ce7b1991712",
+        "providerIterationCount": 6,
+        "changeSetStatus": "adopted",
+        "changeSetCreatedBy": "agent",
+        "artifactTruthStatus": "valid",
+        "userMessageContainsInternalId": false
+      }
+    ],
+    "durableCrossCheck": {
+      "conversationMessageCount": 20,
+      "conversationMessageDigest": "5cf138fbdce2aac93c90c8b44693b7510b0bca4004e1de12a10a7ac8ba8057a1",
+      "modelUsageCount": 67,
+      "modelUsageDigest": "a4c9f131aa308ba9e501804433765b42f8d8be18c833a3c6043ec92ba8f0d814",
+      "durableAgentTaskCount": 10,
+      "durableAgentTaskDigest": "3f1d3cce0faf765fef6e0b3db6c7c1f431207fc2f503b5c23b9599178cb8c9ac",
+      "taskEventCount": 1974,
+      "taskEventDigest": "7322d985754ee0298185cd1361dc607b8bffe1cd00d5c2de27ef0e0ec7d5306a",
+      "revisionCount": 18,
+      "revisionDigest": "36bc9bf9d357aade67412dd4ab099f82073a2600fc3fcc0ba6c488163ad595c4",
+      "changeSetCount": 6,
+      "changeSetDigest": "e15499853047c91c272f0f40456aa1ef313becbb379621bee1a65fa090ab8c21",
+      "agentCreatedAdoptedChangeSetCount": 4,
+      "currentReplayOrdinal": 4,
+      "currentReplayExactMatch": true,
+      "currentRevisionValidationStatus": "valid",
+      "currentRevisionReproducibilityStatus": "available"
+    }
+  },
+  "ownedBackendRecovery": {
+    "interruption": "forced termination of the exact Electron-owned r-server child after parent and command-line verification",
+    "processIdentifiersRedacted": true,
+    "sameElectronParent": true,
+    "commandLineMatchedRepositoryRServer": true,
+    "healthStatusAfterRestart": 200,
+    "recoveryMs": 1431,
+    "routeRetained": true,
+    "currentRevisionOrdinalAfterRestart": 4,
+    "agentViewDigestBefore": "7a77e27021a204660097f8bf671c51460492ef13dcb4efff1eb4506039a37136",
+    "agentViewDigestAfter": "7a77e27021a204660097f8bf671c51460492ef13dcb4efff1eb4506039a37136",
+    "editableParameterCountAfterRestart": 19,
+    "canvasImageCompleteAfterRestart": true,
+    "canvasImageNaturalWidth": 2100,
+    "canvasImageNaturalHeight": 1500,
+    "publicDomContainsInternalId": false,
+    "staleSelectionUsableByAgent": false
+  },
+  "responsiveMatrix": {
+    "operationSequence": [
+      "code",
+      "result",
+      "history",
+      "result",
+      "review",
+      "result"
+    ],
+    "operationCount": 36,
+    "cases": [
+      { "theme": "light", "width": 1440, "passed": true },
+      { "theme": "light", "width": 1024, "passed": true },
+      { "theme": "light", "width": 820, "passed": true },
+      { "theme": "dark", "width": 1440, "passed": true },
+      { "theme": "dark", "width": 1024, "passed": true },
+      { "theme": "dark", "width": 820, "passed": true }
+    ],
+    "everyOperationPassed": true,
+    "everyCaseHadNoHorizontalOverflow": true,
+    "everyCaseRenderedComplete2100x1500Artifact": true,
+    "everyCaseKeptStaleSelectionFailClosed": true,
+    "everyCaseKeptInternalIdsOutOfPublicDom": true
+  },
+  "visualEvidence": {
+    "path": "acceptance/ui-111/electron-dark-820.png",
+    "sha256": "c5337c311fde7cb277a9759461b0bee43cdd4cfeecf2f7172f9398bc7addc673",
+    "viewport": { "width": 820, "height": 900 },
+    "physicalWindowCapture": { "width": 2000, "height": 1250 }
+  },
+  "focusedGate": {
+    "syntaxChecksPassed": 2,
+    "backendHealthTestsPassed": 1,
+    "ownedBackendSupervisorTestsPassed": 3,
+    "realElectronRestartPassed": true,
+    "responsiveCasesPassed": "6/6"
+  },
+  "scope": {
+    "claimed": "A real Provider-derived result remained usable through development-Electron interruption and automatic owned-backend restart, and completed the full Result/Code/History/Review workflow in light and dark themes at 1440, 1024 and 820 pixels.",
+    "notClaimed": [
+      "packaged Electron",
+      "literal operating-system reboot",
+      "Windows code signing",
+      "P7 or GA qualification"
+    ]
+  },
+  "passed": true
+}
