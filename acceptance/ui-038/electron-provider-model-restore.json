@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "ui038-electron-provider-model-restore-2026-08-12",
+  "workPackage": "MODEL-UX / UI-038",
+  "classification": "development_electron_windows_real_local_settings_acceptance",
+  "qualificationEligible": false,
+  "sourceCommit": "f984560c1f24b038145f3706660a4b3e36f4696d",
+  "sourceTreeExact": true,
+  "sourceCommitMatchesSourceHashes": true,
+  "sourceHashes": {
+    "frontend/src/components/copilot/SimpleChat.tsx": "29f5662e025ae194adbdb048bb9dc217f01b86dfa73e12d94eacf7ad625fc089",
+    "frontend/src/hooks/useAiSettings.ts": "2f1f5f135f5e96223e9a200aec8cd352d8256f0a4f21b7434c1da5c4101bc557",
+    "frontend/src/hooks/useAiSettings.test.ts": "bc28061f93e8a96c359a2a2cc6381b8613ba1b678c92b8992070583c140ffe1d",
+    "frontend/src/components/desktop/DesktopSettingsPanel.tsx": "0575563c4aa6a9b88be0df384ddf3f7c31858e0c9de33fcb57aeb440b0ebd269"
+  },
+  "platform": "win32-x64",
+  "launch": {
+    "entrypoint": "npm start -- --remote-debugging-port=9222",
+    "developmentMode": true,
+    "rendererUrl": "http://localhost:3000",
+    "backendHealth": {
+      "rServer3001": 200,
+      "pythonServer3004": 200
+    }
+  },
+  "acceptance": {
+    "initialFailureReproduced": {
+      "status": "passed",
+      "observed": "Selected DeepSeek deepseek-v4-flash, switched to umapis, then switched back to DeepSeek; the pre-fix renderer incorrectly selected deepseek-v4-pro."
+    },
+    "supplierRoundTrip": {
+      "status": "passed",
+      "observed": "After the fix, the same DeepSeek -> umapis -> DeepSeek path restored deepseek-v4-flash."
+    },
+    "rendererReloadPersistence": {
+      "status": "passed",
+      "observed": "A full renderer reload retained DeepSeek and deepseek-v4-flash from the persisted Endpoint profile."
+    },
+    "fallbackContract": {
+      "status": "passed",
+      "observed": "Focused regression coverage proves active choice first, then lastSelectedModel, then defaultModel, then the first discovered model."
+    }
+  },
+  "verification": {
+    "frontendFocused": "1 file, 16 tests passed",
+    "frontendStrictTypeScriptAndBuild": "passed",
+    "uiAuditCheck": "passed"
+  },
+  "status": "passed",
+  "passed": true,
+  "remaining": []
+}
