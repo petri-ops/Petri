@@ -4,7 +4,7 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-12（UI-044 已完成 Windows 开发态 Electron 的 RightPanel 单一折叠入口九格实机闭环；既有验收记录保持不变）
+最后更新：2026-08-12（UI-052 已完成 Windows 开发态 Electron 的真实 Provider 完全访问三命令闭环；既有验收记录保持不变）
 
 ## 当前待处理项
 
@@ -34,6 +34,7 @@
 
 | 日期 | 结果 | 检查点 |
 | --- | --- | --- |
+| 2026-08-12 | **UI-052 完全访问真实命令链已实机 verified**：Windows 开发态 Electron 30.5.1 的隔离项目中，真实 Agent 分别以 `workspace_exec` 成功执行 `head -5`、`cat`、多文件 `wc -l`，持久消息恰有 3 条 success 工具活动，UI 显示“已完成 3 项 · 运行 3 次”，输出与固定 fixture 对账为 7/3/10 行；无 allowlist 错误、确认卡、错误横幅或写入副作用。首个已配置 Provider 渠道在工具调用前暂时不可用，切换另一已配置渠道后通过；前置渠道故障未冒充工具结果。临时会话、项目与工作区已永久删除，残留为 0 | 证据 `acceptance/ui-052/electron-full-access-commands-windows.json` 绑定 `62f9507` 与四个关键源码哈希，`passed:true`、`qualificationEligible:false`；专项 26 pass / 0 fail / 3 Windows POSIX 路径假设 skip，由真实 `cmd.exe` Electron 链补足；不外推 packaged/P7 资格 |
 | 2026-08-12 | **UI-044 RightPanel 单一折叠入口已实机 verified**：Windows 开发态 Electron 30.5.1 的 1440/1024/820×900 × chat/scheduled/settings 九格中，右栏折叠后无 aside、无旧“显示右侧侧边栏”浮按钮、无带文本绝对定位恢复按钮；恰有一个标题栏“展开右侧栏”，设置与计划内容不被遮挡且页面无溢出。逐格恢复均得到一个右栏与一个收起入口；820px 只额外出现预期的紧凑布局 dismiss backdrop | 证据 `acceptance/ui-044/electron-right-panel-single-entry-windows.json` 绑定 `62f9507` 与四个关键源码哈希，`passed:true`、`qualificationEligible:false`；不外推 packaged/P7 资格 |
 | 2026-08-12 | **UI-041 设置视觉一致性与工具栏密度已实机 verified**：Windows 开发态 Electron 30.5.1 的 1440/1024/820×900 明暗六格中，导航、三类可达数据容器、两条维护行及真实临时回收站项均使用主题 surface；Endpoint 行按 UI-042 透明单层列表契约透出同一 surface。7 条渠道下标题区无操作按钮，添加、导出 JSON/CSV、导入配置位于列表后且六格均无工具栏或页面溢出。用于观察回收站行的隔离空项目已永久删除，剩余数为 0 | 证据 `acceptance/ui-041/electron-settings-surface-and-toolbar-windows.json` 绑定 `62f9507` 与三个关键源码哈希，`passed:true`、`qualificationEligible:false`；设置归一化始终提供默认渠道，故空配置折叠不冒充可达 Electron 状态；不外推 packaged/P7 资格 |
 | 2026-08-12 | **UI-040 设置安全性与可达性已实机 verified**：Windows 开发态 Electron 30.5.1 中，1024×900 实际触发模型渠道删除确认并取消，确认文案覆盖渠道身份、URL、Key、默认模型和不可恢复风险，取消后配置不变；820×900 明暗主题选择即时披露当前偏好且无横向溢出。回收站只在“计算与数据”末尾出现，计算执行、本地数据目录、Harness 环境、回收站由三条 1px 主题边框色分隔线依次区分 | 证据 `acceptance/ui-040/electron-settings-safety-and-reachability-windows.json` 绑定 `62f9507` 与三个关键源码哈希，`passed:true`、`qualificationEligible:false`；未读取或保存 URL/Key，不外推 packaged/P7 资格 |
