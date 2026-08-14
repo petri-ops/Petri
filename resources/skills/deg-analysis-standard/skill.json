@@ -1,0 +1,116 @@
+{
+  "skillManifestVersion": 1,
+  "id": "deg-analysis-standard",
+  "name": "标准差异表达分析",
+  "version": "1.0.0",
+  "description": "从原始计数矩阵到火山图的完整 DEG 分析流程。包含数据质控、标准化、差异分析和可视化。",
+  "category": "bioinformatics/ngs",
+  "tags": ["deg", "rna-seq", "deseq2", "volcano-plot", "expression"],
+  "source": "built-in",
+  "capabilities": ["r-enrichment", "bioinformatics"],
+  "plugins": {
+    "required": ["expression-qc", "deseq2", "volcano-plot"],
+    "optional": ["go-kegg", "gsea"]
+  },
+  "workflows": {
+    "default": "deg-standard-pipeline",
+    "variants": ["deg-quick", "deg-comprehensive"]
+  },
+  "prompts": {
+    "system": "你是一位资深的生物信息分析师，擅长差异表达分析。你的工作流程包括：\n1. 评估数据质量\n2. 执行标准化\n3. 运行差异分析\n4. 可视化结果\n\n始终基于科学最佳实践，为用户提供准确的分析建议。",
+    "user_templates": [
+      "对 {dataset} 进行标准 DEG 分析",
+      "使用 {method} 方法比较 {group1} vs {group2}",
+      "分析 {sample_count} 个样本，检测 {condition} 条件的影响"
+    ]
+  },
+  "parameters": {
+    "required": ["dataset", "group_column"],
+    "optional": {
+      "method": {
+        "type": "select",
+        "options": ["deseq2", "edger", "limma"],
+        "default": "deseq2",
+        "description": "差异分析方法"
+      },
+      "padj_threshold": {
+        "type": "number",
+        "default": 0.05,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "description": "校正后 P 值阈值"
+      },
+      "logfc_threshold": {
+        "type": "number",
+        "default": 1,
+        "min": 0,
+        "max": 10,
+        "step": 0.5,
+        "description": "Log2 Fold Change 阈值"
+      },
+      "species": {
+        "type": "select",
+        "options": ["human", "mouse", "rat", "zebrafish"],
+        "default": "human",
+        "description": "物种"
+      }
+    }
+  },
+  "recovery_strategies": [
+    {
+      "when": "sample_group_mismatch",
+      "description": "样本分组不匹配",
+      "do": "尝试自动检测分组或请求用户确认",
+      "fallback": "提供分组模板让用户填写",
+      "recoverable": true
+    },
+    {
+      "when": "insufficient_replicates",
+      "description": "生物学重复不足",
+      "do": "警告用户并建议使用 limma-voom 方法",
+      "fallback": "使用 DESeq2 的 nbinomWaldTest",
+      "recoverable": true
+    }
+  ],
+  "outputs": {
+    "primary": [
+      {
+        "id": "volcano_plot",
+        "type": "plot",
+        "label": "火山图",
+        "description": "差异基因可视化"
+      },
+      {
+        "id": "degs_table",
+        "type": "table",
+        "label": "DEGs 结果表",
+        "description": "差异表达基因详情"
+      }
+    ],
+    "secondary": [
+      {
+        "id": "go_enrichment",
+        "type": "table",
+        "label": "GO 富集结果",
+        "requires_plugin": "go-kegg"
+      },
+      {
+        "id": "qc_report",
+        "type": "html",
+        "label": "QC 报告"
+      }
+    ]
+  },
+  "metadata": {
+    "author": "BioF3 Team",
+    "license": "MIT",
+    "source": "built-in",
+    "created": "2026-08-14",
+    "updated": "2026-08-14",
+    "compatibility": {
+      "min_app_version": "0.1.0",
+      "platform": ["macos-arm64", "macos-x64", "windows-x64"]
+    }
+  }
+}
