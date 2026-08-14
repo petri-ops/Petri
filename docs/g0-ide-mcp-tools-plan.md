@@ -135,7 +135,7 @@
 
 ---
 
-## 10. Phase 1 + 1.5 收口记录
+## 10. Phase 1 + 1.5 收口记录 + Phase 2/3 启动门快照（2026-08-14）
 
 ### Phase 1 收口（2026-08-14）
 
@@ -193,3 +193,22 @@
 - [x] git CLI 可用性已验证（git 2.50.1 + ripgrep 15.1.0）
 - [ ] 评估是否仍需 `simple-git` vs 继续 CLI 包装
 - [ ] 决定 `simple-git` 是否进 `package.json`（需单独 PR）
+
+
+---
+
+## 11. 工作包整体状态（2026-08-14 收口）
+
+- **Phase 1（文件 7 + 终端 5）** — `qualified`，2026-08-14 实现+测试一次通过
+- **Phase 1.5（search 1 + diff 1 + resources 2）** — `qualified`，2026-08-14 实现+测试一次通过（首轮 diff 解析器 2 fail，已修；其余直通过）
+- **Phase 2（Monaco 编辑器 + 9 个工具）** — `deferred` 直至 `frontend/src/components/editor/*` 有可工作入口
+- **Phase 3（Git CLI 4 个工具：diff / log / show / blame）** — `deferred` 但启动门已开；2026-08-14 已验证 `git` CLI 路径
+- **整体包状态**：`qualified for Phase 1 + 1.5；Phase 2/3 deferred`，由独立实现检查点 + 测试 evidence 支撑
+- **资格边界**：`implemented_unverified` — 不进 `qualificationEligible`，不外推到 Provider 调用、packaged Electron、其他 OS
+
+## 12. 当前 active 范围（2026-08-14）
+
+下一步唯一允许的工作：在 Phase 3 启动门已满足的前提下补齐 `ide_git_diff` / `ide_git_log` / `ide_git_show` / `ide_git_blame` 4 个 CLI 包装工具
+（依赖 `core/r-server/mcp/ide-tools/diff.js` 的 unified hunk 解析器，无需新增 `simple-git` 依赖）。
+
+Phase 2 编辑器工具待 Monaco 集成；不并行开新工作包。
