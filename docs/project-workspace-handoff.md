@@ -47,19 +47,17 @@ UI-108 / UI-109 / UI-113 / UI-114 仍维持 `in_progress`；本计划不冒充�
 
 验证节奏按用户裁决采用风险驱动：开发中只跑语法与受影响单测；真实数据 Electron 长链仅在阶段收口运行一次，除非产品行为或验收脚本发生实质变化，不重复消耗长链窗口。
 
-### 3.1.5 当前 active 工作包：G0-IDE-MCP-TOOLS Phase 3（2026-08-14 启动）
+### 3.1.5 已收口工作包：G0-IDE-MCP-TOOLS Phase 1 + 1.5 + 3（2026-08-14）
 
-Phase 1 + 1.5 已于 2026-08-14 `qualified`：14 个 `ide_*` 工具 + 2 个 MCP Resources；详见 `docs/g0-ide-mcp-tools-plan.md` §11。
+Phase 1 + 1.5 + 3 均已 `qualified`（`docs/g0-ide-mcp-tools-plan.md` §11 + §Phase 3 收口）：
 
-**Phase 3 范围**（2026-08-14 启动，独立小工作包）：
-- `ide_git_diff` / `ide_git_log` / `ide_git_show` / `ide_git_blame`
-- 全部封装系统 `git` CLI（已验证 git 2.50.1 可用）
-- 复用 Phase 1.5 `core/r-server/mcp/ide-tools/diff.js` 的 unified hunk 解析器
-- **不引入 `simple-git` 依赖**（避免单独 PR + package.json 改动）
+- 总计 18 个 `ide_*` 工具（7 文件 + 5 终端 + 1 search + 1 diff + 4 git）+ 2 个 MCP Resources
+- 78/78 IDE 工具定向测试全 PASS（33 + 23 + 22）
+- 全部封装系统 `git`/`rg`/`diff` CLI；Phase 3 复用 Phase 1.5 `diff.js` 的 `parseUnifiedHunks`
+- 未引入 `simple-git` 依赖（避免单独 PR + package.json 改动）
+- 整包 `implemented_unverified`，不进 `qualificationEligible`
 
-**启动门**：Phase 1+1.5 已 qualified（2026-08-14 落实）；git + rg CLI 已可用验证；启动门不再阻塞。
-
-**资格边界**：与 Phase 1+1.5 相同，`implemented_unverified`，不进 `qualificationEligible`。
+**Phase 2 唯一仍 deferred**：Monaco 编辑器 + 9 个 `editor_*` 工具；待 `frontend/src/components/editor/*` 有可工作入口或 IDE-Transformation 完成后启动。
 
 ### 3.2 历史主线：G0 Living Foundation maintained
 
