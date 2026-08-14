@@ -369,6 +369,20 @@
   color: var(--biof3-text);
 }
 
+/* UI-AGENTWB-004 A4 bridge: wrapper around injected ResultCards.
+   Cards stack vertically with a small gap and keep the same body
+   width as the surrounding assistant markdown flow. */
+.sc-extra-result-nodes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 8px;
+  max-width: 100%;
+}
+.sc-extra-result-nodes > article {
+  max-width: 100%;
+}
+
 .sc-msg-actions {
   display: flex;
   align-items: center;

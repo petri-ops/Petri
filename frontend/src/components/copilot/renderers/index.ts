@@ -11,6 +11,8 @@
 // ============================================================
 
 import { registerRenderer } from '../ResultCardRenderer';
+import { ChartRenderer } from './ChartRenderer';
+import { ImageRenderer } from './ImageRenderer';
 import { TableRenderer } from './TableRenderer';
 import { TextRenderer } from './TextRenderer';
 
@@ -20,6 +22,8 @@ export function registerDefaultRenderers(): void {
   // registration site uniform for future audit (listRegisteredRendererTypes).
   registerRenderer('text', TextRenderer);
   registerRenderer('table', TableRenderer);
+  registerRenderer('chart', ChartRenderer);
+  registerRenderer('image', ImageRenderer);
 }
 
-export { TableRenderer, TextRenderer };
+export { ChartRenderer, ImageRenderer, TableRenderer, TextRenderer };

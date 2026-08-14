@@ -1,0 +1,73 @@
+/* ============================================================
+   ImageRenderer — <figure>/<img> for ResultCard body.
+
+   Pairs with ImageRenderer.tsx which renders payload shapes
+   that already passed the type-guard (data: or http(s) src +
+   non-empty alt). The body host stays inside ResultCard so it
+   inherits padding + variant tint from the card chrome (no
+   double-frame).
+
+   Visual rules:
+   - The image is constrained to the card body width with
+     `max-width: 100%` so it can never horizontally overflow
+     the ResultCard chrome.
+   - Uses --biof3-* design tokens (same family as ResultCard +
+     TableRenderer + ChartRenderer) for caption color, fallback
+     bg/border, and error boundary.
+   - caption is muted and small so the chrome title still
+     dominates the card visual hierarchy.
+   ============================================================ */
+
+.figure {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* The renderer never specifies max-height so aspect ratio
+     remains intact for both landscape and portrait payloads. */
+  max-width: 100%;
+  border-radius: 6px;
+  background: var(--biof3-bg-subtle);
+  border: 1px solid var(--biof3-border);
+}
+
+.caption {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--biof3-text-tertiary);
+  /* Allow long captions to wrap naturally inside the card body. */
+  word-break: break-word;
+}
+
+.fallback {
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px dashed var(--biof3-border);
+  border-radius: 6px;
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text-secondary);
+  font-family: var(--biof3-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 11px;
+  line-height: 1.45;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.fallbackNote {
+  margin: 0 0 6px;
+  font-size: 11px;
+  color: var(--biof3-text-tertiary);
+  font-family: var(--biof3-font-sans, inherit);
+  font-style: normal;
+}

@@ -225,4 +225,224 @@ describe('ResultCardRenderer', () => {
       cleanup();
     }
   });
+
+  it('registers chart and image alongside text/table through registerDefaultRenderers', () => {
+    // after beforeAll() the registry must expose all four slots
+    // and unknown types must still fall back to TextRenderer so
+    // the card never breaks for unsupported payloads.
+    const types = listRegisteredRendererTypes();
+    expect(types).toEqual(
+      expect.arrayContaining(['text', 'table', 'chart', 'image']),
+    );
+    expect(getRegisteredRenderer('chart')).toBeDefined();
+    expect(getRegisteredRenderer('image')).toBeDefined();
+
+    // Unknown type still falls back to TextRenderer — proves the
+    // new registrations did not accidentally override the fallback
+    // (TextRenderer is pre-registered at module load and only
+    // re-affirmed by registerDefaultRenderers).
+    const unknownNode: ResultNode = {
+      id: 'n-unknown',
+      type: 'unknown-type' as ResultNode['type'],
+      title: 'Probe',
+      payload: 'fallback-payload',
+      createdAt: '2026-08-14T10:00:00Z',
+    };
+    render(<ResultCardRenderer node={unknownNode} />);
+    expect(screen.getByTestId('result-renderer-text')).toBeTruthy();
+  });
+
+  it('renders a registered chart node via ChartRenderer with native SVG and a11y region', () => {
+    const node: ResultNode = {
+      id: 'chart-1',
+      type: 'chart',
+      title: 'Expression per gene',
+      subtitle: 'RNA-seq · counts',
+      meta: '4 genes · 2 series',
+      payload: {
+        kind: 'bar',
+        labels: ['TP53', 'BRCA1', 'MYC', 'EGFR'],
+        series: [
+          { name: 'control', values: [10, 20, 30, 40] },
+          { name: 'treated', values: [12, 18, 35, 45] },
+        ],
+      },
+      createdAt: '2026-08-14T10:00:00Z',
+    };
+
+    const { container } = render(<ResultCardRenderer node={node} />);
+
+    // ChartRenderer root marker + a11y role proves the registry
+    // routed to ChartRenderer instead of TextRenderer or
+    // TableRenderer.
+    const chartRoot = screen.getByTestId('result-renderer-chart');
+    expect(chartRoot).toBeTruthy();
+    expect(chartRoot.getAttribute('role')).toBe('img');
+    expect(chartRoot.getAttribute('aria-label')).toBe('Chart: bar');
+    expect(chartRoot.getAttribute('data-chart-kind')).toBe('bar');
+
+    // Native <svg> viewBox is set to a stable 600×320 box so the
+    // bar/line geometry is reproducible across responsive scales.
+    const svg = chartRoot.querySelector('svg');
+    expect(svg).not.toBeNull();
+    expect(svg!.getAttribute('viewBox')).toBe('0 0 600 320');
+
+    // 2 series × 4 labels = 8 bars. Each <rect> sits inside the
+    // plot region, not anywhere in the wrapper.
+    const rects = chartRoot.querySelectorAll('rect');
+    expect(rects.length).toBeGreaterThanOrEqual(8);
+    // Legend swatches (one per series) + the 8 bars; allow ≥ 10 rects.
+    expect(rects.length).toBeGreaterThanOrEqual(10);
+
+    // Per-series names render in the legend <text> so screen
+    // readers can announce them next to the accessible name.
+    const legendText = Array.from(chartRoot.querySelectorAll('text'))
+      .map((t) => t.textContent ?? '')
+      .join(' ');
+    expect(legendText).toContain('control');
+    expect(legendText).toContain('treated');
+
+    // The card chrome still wraps the chart — title + subtitle
+    // + meta are forwarded as in the text/table path.
+    expect(container.querySelector('article h3')!.textContent).toBe(
+      'Expression per gene',
+    );
+    expect(screen.getByText('4 genes · 2 series')).toBeTruthy();
+
+    // TextRenderer and TableRenderer must NOT render for a
+    // registered chart node.
+    expect(screen.queryByTestId('result-renderer-text')).toBeNull();
+    expect(screen.queryByTestId('result-renderer-table')).toBeNull();
+  });
+
+  it('falls back to the JSON dump when a chart node has a malformed payload', () => {
+    // Each shape below fails the ChartRenderer type-guard at a
+    // different layer; all must degrade to the JSON fallback
+    // without throwing the surrounding ResultCard.
+    const malformedPayloads: Array<{ name: string; payload: unknown }> = [
+      { name: 'unknown-kind', payload: { kind: 'pie', labels: ['a'], series: [] } },
+      { name: 'missing-series', payload: { kind: 'bar', labels: ['a', 'b'] } },
+      { name: 'empty-labels', payload: { kind: 'bar', labels: [], series: [{ name: 's', values: [] }] } },
+      { name: 'non-numeric-values', payload: { kind: 'line', xLabels: ['a'], series: [{ name: 's', values: ['x'] }] } },
+      { name: 'not-an-object', payload: 'this is not a chart' },
+    ];
+
+    for (const { name, payload } of malformedPayloads) {
+      const node: ResultNode = {
+        id: `bad-chart-${name}`,
+        type: 'chart',
+        title: `Bad payload (${name})`,
+        payload,
+        createdAt: '2026-08-14T10:00:00Z',
+      };
+      const { container } = render(<ResultCardRenderer node={node} />);
+
+      // Fallback marker replaces the chart marker.
+      const fallback = screen.getByTestId('result-renderer-chart-fallback');
+      expect(fallback).toBeTruthy();
+      expect(fallback.getAttribute('role')).toBe('region');
+
+      // The card chrome is still intact — title + body never disappear.
+      expect(container.querySelector('article h3')!.textContent).toBe(
+        `Bad payload (${name})`,
+      );
+      // No <svg> is rendered for the malformed payload.
+      expect(container.querySelector('svg')).toBeNull();
+
+      cleanup();
+    }
+  });
+
+  it('renders a registered image node via ImageRenderer with figure/img + alt forwarding', () => {
+    const node: ResultNode = {
+      id: 'img-1',
+      type: 'image',
+      title: 'Heatmap preview',
+      subtitle: 'PNG · 320×240',
+      meta: 'PNG · 8 KB',
+      payload: {
+        src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkAAIAAAoAAv/lxKUAAAAASUVORK5CYII=',
+        alt: 'Expression heatmap with 4 conditions',
+        caption: 'Top 100 differentially expressed genes',
+      },
+      createdAt: '2026-08-14T10:00:00Z',
+    };
+
+    const { container } = render(<ResultCardRenderer node={node} />);
+
+    // ImageRenderer root marker proves the registry routed to
+    // ImageRenderer instead of TextRenderer or TableRenderer.
+    const imgRoot = screen.getByTestId('result-renderer-image');
+    expect(imgRoot).toBeTruthy();
+    expect(imgRoot.tagName.toLowerCase()).toBe('figure');
+
+    // <img> renders with src + alt forwarded verbatim. alt is
+    // REQUIRED by the type-guard — a missing/empty alt would
+    // have fallen back to JSON.
+    const img = imgRoot.querySelector('img');
+    expect(img).not.toBeNull();
+    expect(img!.getAttribute('src')).toBe(
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkAAIAAAoAAv/lxKUAAAAASUVORK5CYII=',
+    );
+    expect(img!.getAttribute('alt')).toBe(
+      'Expression heatmap with 4 conditions',
+    );
+    expect(img!.getAttribute('loading')).toBe('lazy');
+
+    // Caption renders as <figcaption> inside the figure.
+    const caption = imgRoot.querySelector('figcaption');
+    expect(caption).not.toBeNull();
+    expect(caption!.textContent).toBe('Top 100 differentially expressed genes');
+
+    // The card chrome still wraps the image — title + meta are
+    // forwarded as in the text/table/chart path.
+    expect(container.querySelector('article h3')!.textContent).toBe('Heatmap preview');
+    expect(screen.getByText('PNG · 8 KB')).toBeTruthy();
+
+    // TextRenderer, TableRenderer and ChartRenderer must NOT
+    // render for a registered image node.
+    expect(screen.queryByTestId('result-renderer-text')).toBeNull();
+    expect(screen.queryByTestId('result-renderer-table')).toBeNull();
+    expect(screen.queryByTestId('result-renderer-chart')).toBeNull();
+  });
+
+  it('falls back to the JSON dump when an image node has a malformed payload', () => {
+    // Each shape below fails the ImageRenderer type-guard at a
+    // different layer; all must degrade to the JSON fallback
+    // without throwing the surrounding ResultCard.
+    const malformedPayloads: Array<{ name: string; payload: unknown }> = [
+      { name: 'missing-src', payload: { alt: 'x' } },
+      { name: 'missing-alt', payload: { src: 'https://example.com/x.png' } },
+      { name: 'empty-alt', payload: { src: 'https://example.com/x.png', alt: '' } },
+      { name: 'unsafe-src', payload: { src: 'javascript:alert(1)', alt: 'x' } },
+      { name: 'wrong-width-type', payload: { src: 'https://example.com/x.png', alt: 'x', width: '320' } },
+      { name: 'not-an-object', payload: 'this is not an image' },
+    ];
+
+    for (const { name, payload } of malformedPayloads) {
+      const node: ResultNode = {
+        id: `bad-img-${name}`,
+        type: 'image',
+        title: `Bad payload (${name})`,
+        payload,
+        createdAt: '2026-08-14T10:00:00Z',
+      };
+      const { container } = render(<ResultCardRenderer node={node} />);
+
+      // Fallback marker replaces the image marker.
+      const fallback = screen.getByTestId('result-renderer-image-fallback');
+      expect(fallback).toBeTruthy();
+      expect(fallback.getAttribute('role')).toBe('region');
+
+      // The card chrome is still intact — title + body never disappear.
+      expect(container.querySelector('article h3')!.textContent).toBe(
+        `Bad payload (${name})`,
+      );
+      // No <figure>/<img> is rendered for the malformed payload.
+      expect(container.querySelector('figure')).toBeNull();
+      expect(container.querySelector('img')).toBeNull();
+
+      cleanup();
+    }
+  });
 });
