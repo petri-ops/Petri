@@ -1,0 +1,121 @@
+/* ============================================================
+   ChartRenderer — native <svg> chart for ResultCard body.
+
+   Pairs with ChartRenderer.tsx which renders payload shapes
+   that already passed the type-guard (bar / line). The body
+   host stays inside ResultCard so it inherits padding + variant
+   tint from the card chrome (no double-frame).
+
+   Visual rules:
+   - Single-color chart strokes + bar fills using --biof3-*
+     design tokens so light/dark themes stay aligned with the
+     rest of the ResultCard family (ResultCard.module.css +
+     TableRenderer.module.css).
+   - Legend swatches share the same fill token (deliberately
+     monochrome) to stay honest about being a placeholder
+     rather than a full charting library.
+   - The SVG uses preserveAspectRatio so the chart scales inside
+     the card body without overflowing horizontally; the
+     surrounding wrapper clips nothing intentionally — text
+     labels above bars can render outside the plot box.
+   ============================================================ */
+
+.wrapper {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--biof3-text);
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* The default SVG background should never fight with the
+     surrounding ResultCard surface. */
+  background: transparent;
+}
+
+.axis {
+  stroke: var(--biof3-border);
+  stroke-width: 1;
+  /* Vector effect keeps the stroke crisp when the SVG is
+     scaled down by the responsive wrapper. */
+  vector-effect: non-scaling-stroke;
+}
+
+.bar {
+  fill: var(--biof3-accent, var(--biof3-text));
+  fill-opacity: 0.78;
+  stroke: var(--biof3-accent, var(--biof3-text));
+  stroke-width: 0.5;
+}
+
+.bar:hover {
+  fill-opacity: 1;
+}
+
+.barLabel {
+  font-size: 10px;
+  fill: var(--biof3-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.line {
+  stroke: var(--biof3-accent, var(--biof3-text));
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  /* Vector effect keeps strokes sharp at smaller scales. */
+  vector-effect: non-scaling-stroke;
+}
+
+.dot {
+  fill: var(--biof3-bg-surface, #fff);
+  stroke: var(--biof3-accent, var(--biof3-text));
+  stroke-width: 1.4;
+  /* Vector effect keeps dot strokes sharp at smaller scales. */
+  vector-effect: non-scaling-stroke;
+}
+
+.tickLabel {
+  font-size: 10px;
+  fill: var(--biof3-text-tertiary);
+  /* Tick labels can be long; truncate visually rather than
+     pushing the SVG wider than the card. */
+  font-variant-numeric: tabular-nums;
+}
+
+.legendSwatch {
+  fill: var(--biof3-accent, var(--biof3-text));
+  fill-opacity: 0.78;
+}
+
+.legendText {
+  font-size: 10px;
+  fill: var(--biof3-text-secondary);
+}
+
+.fallback {
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px dashed var(--biof3-border);
+  border-radius: 6px;
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text-secondary);
+  font-family: var(--biof3-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 11px;
+  line-height: 1.45;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.fallbackNote {
+  margin: 0 0 6px;
+  font-size: 11px;
+  color: var(--biof3-text-tertiary);
+  font-family: var(--biof3-font-sans, inherit);
+  font-style: normal;
+}

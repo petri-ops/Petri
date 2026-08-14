@@ -108,6 +108,12 @@ import {
 import { useErrorFormatter } from './useErrorFormatter';
 import { deriveLoopDisplay, loopDecisionLabel } from '@/lib/loop-client';
 import { useDurableConversationLoop } from '@/hooks/useDurableConversationLoop';
+import {
+  AssistantResultNodes,
+  parseAssistantResultNodes,
+  useExtraRenderersFlag,
+} from './extraRenderers';
+import type { ResultNode } from './types';
 import './simple-chat.css';
 import { Icon, type IconName } from '@/components/icons/Icon';
 import { HighlightedCode } from '@/components/ui/CodeHighlight';
@@ -137,9 +143,17 @@ interface SimpleMessage {
   loop?: ConversationLoopState | null;
   /** T83: model used to produce this assistant message (per-message). */
   modelName?: string;
+  /**
+   * UI-AGENTWB-004: A4 bridge — typed list of ResultNodes parsed from
+   * `meta.resultNodes`. Populated only when the optional payload is a
+   * well-formed array of well-formed nodes; otherwise left undefined so
+   * the assistant message falls through to the existing markdown path
+   * without any visible error.
+   */
+  resultNodes?: ResultNode[];
 }
 
-function restoreSimpleMessage(message: ConversationMessage): SimpleMessage {
+export function restoreSimpleMessage(message: ConversationMessage): SimpleMessage {
   const meta = message.meta || {};
   const toolActivities = restoreToolActivities(meta.toolActivities);
   const finalization = meta.finalization && typeof meta.finalization === 'object'
@@ -167,6 +181,7 @@ function restoreSimpleMessage(message: ConversationMessage): SimpleMessage {
     processingDurationMs: typeof meta.processingDurationMs === 'number'
       ? meta.processingDurationMs
       : undefined,
+    resultNodes: parseAssistantResultNodes(meta.resultNodes) ?? undefined,
   };
 }
 
@@ -396,6 +411,12 @@ export function SimpleChat({
 
   // Error formatter hook for user-friendly error display
   const { formatError, getTechnicalDetails } = useErrorFormatter();
+
+  // UI-AGENTWB-004 A4 bridge: opt-in switch for routing
+  // assistant messages that carry `meta.resultNodes` through the
+  // ResultCard pipeline. Defaults to false so existing users see
+  // no change; flip via `localStorage.biof3.simplechat.extraRenderers='true'`.
+  const extraRenderersFlag = useExtraRenderersFlag();
 
   // Resolve file references only after a message is fully settled —
   // streaming deltas would otherwise hammer the resolver and we never want
@@ -1307,6 +1328,9 @@ export function SimpleChat({
                     )}
                     {m.resultEditProgress && m.resultEditProgress.length > 0 && (
                       <ResultEditProgressList events={m.resultEditProgress} />
+                    )}
+                    {extraRenderersFlag && m.resultNodes && m.resultNodes.length > 0 && (
+                      <AssistantResultNodes nodes={m.resultNodes} />
                     )}
                     <CopilotMarkdown
                       text={m.content || m.statusMessage || (m.pending ? '…' : '')}
