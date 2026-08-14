@@ -471,6 +471,22 @@
       "archivePolicy": "retain_stable_path"
     },
     {
+      "id": "G0-IDE-MCP-TOOLS",
+      "path": "docs/g0-ide-mcp-tools-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "agent-ide-mcp-tools",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "agent",
+        "mcp",
+        "ide",
+        "tools"
+      ]
+    },
+    {
       "id": "IDE-TRANSFORMATION",
       "path": "docs/ide-transformation-plan.md",
       "kind": "roadmap",
@@ -498,12 +514,12 @@
     },
     {
       "id": "SKILLS-ARCHITECTURE",
-      "path": "docs/skills-architecture.md",
+      "path": "docs/architecture/skills-architecture.md",
       "kind": "reference",
       "status": "active",
-      "canonical": false,
+      "canonical": true,
       "truthDomain": "skills-layer-architecture",
-      "entrypoint": null,
+      "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
       "tags": [
         "skills",
