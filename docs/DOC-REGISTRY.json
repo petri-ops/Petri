@@ -559,6 +559,43 @@
         "integration",
         "agent-workflow"
       ]
+    },
+    {
+      "id": "AGENT-WORKBENCH",
+      "path": "docs/agent-workbench-enhancement-plan.md",
+      "kind": "roadmap",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "agent-workbench-enhancement",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "agent",
+        "workbench",
+        "enhancement",
+        "codex-style",
+        "result-card"
+      ],
+      "phases": [
+        {
+          "id": "P1",
+          "name": "快速见效增强",
+          "duration": "2-3 人周",
+          "milestone": "M1"
+        },
+        {
+          "id": "P2",
+          "name": "核心功能",
+          "duration": "8-12 人周",
+          "milestone": "M3-M4"
+        },
+        {
+          "id": "P3",
+          "name": "高级能力",
+          "duration": "12-16 人周",
+          "milestone": "M5-M6"
+        }
+      ]
     }
   ]
 }
