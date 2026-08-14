@@ -65,6 +65,8 @@ try {
 } catch {}
 try { sqlite.exec('ALTER TABLE copilot_conversations ADD COLUMN last_topic_shift_at TEXT'); } catch {}
 try { sqlite.exec('ALTER TABLE copilot_conversations ADD COLUMN last_topic_shift_reason TEXT'); } catch {}
+try { sqlite.exec('ALTER TABLE copilot_conversations ADD COLUMN parent_id TEXT'); } catch {}
+try { sqlite.exec('ALTER TABLE copilot_conversations ADD COLUMN branch_color TEXT'); } catch {}
 
 function _newConvId() { return 'conv_' + uuidv4().slice(0, 12); }
 function _newMsgId() { return 'msg_' + uuidv4().slice(0, 12); }

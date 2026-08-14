@@ -1015,6 +1015,43 @@
   opacity: 0.25;
 }
 
+/* Branch support */
+.convItemBranch {
+  padding-left: 22px;
+}
+
+.convBranchIndicator {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: var(--biof3-text-muted);
+  margin-right: 2px;
+}
+
+.convItemForkBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--biof3-text-muted);
+  cursor: pointer;
+  opacity: 0;
+}
+
+.convItem:hover .convItemForkBtn,
+.convItemForkBtn:focus-visible {
+  opacity: 1;
+}
+
+.convItemForkBtn:hover {
+  background: var(--biof3-hover);
+  color: var(--biof3-accent);
+}
+
 .treeRenameInput {
   flex: 1;
   min-width: 0;

@@ -27,6 +27,10 @@ export interface ConversationSummary {
   last_topic_shift_at?: string | null;
   last_topic_shift_reason?: string | null;
   project_id?: string | null;
+  /** Branch support: ID of the parent conversation this was forked from */
+  parent_id?: string | null;
+  /** Branch support: visual color identifier for the branch line */
+  branch_color?: string | null;
 }
 
 export interface ConversationMessage {
@@ -147,5 +151,30 @@ export async function dismissTopicShift(id: string): Promise<boolean> {
     return resp.ok;
   } catch {
     return false;
+  }
+}
+
+/**
+ * Fork an existing conversation — creates a new conversation with all messages copied.
+ * Returns the new conversation summary including parent_id.
+ */
+export async function forkConversation(
+  id: string,
+  title?: string
+): Promise<ConversationSummary | null> {
+  try {
+    const resp = await fetch(
+      getApiPrefix() + '/ai/conversations/' + encodeURIComponent(id) + '/fork',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+        body: JSON.stringify({ title }),
+      }
+    );
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data.status === 'ok' ? data.conversation : null;
+  } catch {
+    return null;
   }
 }

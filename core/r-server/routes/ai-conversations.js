@@ -56,7 +56,7 @@ module.exports = function mountConversations(app) {
       await ensureProjectColumn();
       const status = (req.query.status === 'archived') ? 'archived' : (req.query.status === 'all' ? null : 'active');
       const projectId = _projectIdFromReq(req);
-      const cols = 'id, title, status, last_page, project_id, message_count, created_at, updated_at, last_topic_shift_at, last_topic_shift_reason';
+      const cols = 'id, title, status, last_page, project_id, message_count, created_at, updated_at, last_topic_shift_at, last_topic_shift_reason, parent_id';
       const where = ['user_id=?'];
       const values = [userId];
       if (status) { where.push('status=?'); values.push(status); }
@@ -132,6 +132,57 @@ module.exports = function mountConversations(app) {
       const r = await adb.prepare('UPDATE copilot_conversations SET last_topic_shift_at=NULL, last_topic_shift_reason=NULL WHERE id=? AND user_id=?').run(req.params.id, userId);
       if (r.changes === 0) return res.status(404).json({status:'error', error:'not_found'});
       res.json({status:'ok'});
+    } catch (e) { res.status(500).json({status:'error', error: e.message}); }
+  });
+
+  // POST /api/ai/conversations/:id/fork — create a new conversation from an existing one
+  app.post('/api/ai/conversations/:id/fork', express.json({limit: '8kb'}), async (req, res) => {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({status:'error', error:'未授权'});
+    try {
+      // Get the source conversation
+      const source = await adb.prepare('SELECT * FROM copilot_conversations WHERE id=? AND user_id=?').get(req.params.id, userId);
+      if (!source) return res.status(404).json({status:'error', error:'not_found'});
+
+      // Create new conversation with branch metadata
+      const forkId = _newConvId();
+      const now = new Date().toISOString();
+      const title = String((req.body && req.body.title) || source.title + ' (分支)').slice(0, 100);
+      const lastPage = source.last_page || null;
+      const projectId = source.project_id || null;
+      const parentId = source.id;
+
+      await adb.prepare('INSERT INTO copilot_conversations(id, user_id, title, status, last_page, project_id, parent_id, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?)')
+        .run(forkId, userId, title, 'active', lastPage, projectId, parentId, now, now);
+
+      // Copy messages from source conversation to forked conversation
+      const messages = await adb.prepare('SELECT role, content, meta_json FROM copilot_messages WHERE conversation_id=? ORDER BY ts ASC').all(req.params.id);
+      if (messages && messages.length > 0) {
+        const stmt = adb.prepare('INSERT INTO copilot_messages(id, conversation_id, role, content, meta_json, ts) VALUES (?,?,?,?,?,?)');
+        for (const msg of messages) {
+          const msgId = 'msg_' + require('uuid').v4().slice(0, 12);
+          stmt.run(msgId, forkId, msg.role, msg.content, msg.meta_json, now);
+        }
+      }
+
+      // Update message count
+      const messageCount = messages ? messages.length : 0;
+      await adb.prepare('UPDATE copilot_conversations SET message_count=? WHERE id=?').run(messageCount, forkId);
+
+      res.json({
+        status: 'ok',
+        conversation: {
+          id: forkId,
+          title,
+          status: 'active',
+          last_page: lastPage,
+          project_id: projectId,
+          message_count: messageCount,
+          created_at: now,
+          updated_at: now,
+          parent_id: parentId,
+        }
+      });
     } catch (e) { res.status(500).json({status:'error', error: e.message}); }
   });
 };

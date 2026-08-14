@@ -30,7 +30,7 @@ import {
   isConversationRunning,
   useConversationRun,
 } from '@/components/copilot/conversationRunStore';
-import { listConversations, createConversation, renameConversation, archiveConversation, type ConversationSummary } from '@/components/copilot/copilotConversationsClient';
+import { listConversations, createConversation, forkConversation, renameConversation, archiveConversation, type ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import {
   useConversations,
   useOtherConversations,
@@ -868,6 +868,14 @@ export function ProjectWorkspace(): React.ReactElement {
     return true;
   }, [activeConvId, refreshConversations, refreshOtherConversations]);
 
+  const forkConversationInTree = useCallback(async (conversationId: string, title?: string) => {
+    const forked = await forkConversation(conversationId, title);
+    if (!forked) return null;
+    await Promise.all([refreshConversations(), refreshOtherConversations()]);
+    setActiveConvId(forked.id);
+    return forked;
+  }, [refreshConversations, refreshOtherConversations]);
+
   // Toggle project expansion in left panel
   const toggleProjectExpand = useCallback((pid: string) => {
     setExpandedProjects((prev) => {
@@ -1678,6 +1686,7 @@ export function ProjectWorkspace(): React.ReactElement {
     renameConversation: renameConversationInTree,
     archiveProject: archiveProjectFromTree,
     archiveConversation: archiveConversationFromTree,
+    forkConversation: forkConversationInTree,
     workspaceMode,
     handleShowSearch,
     handleShowScheduled,
