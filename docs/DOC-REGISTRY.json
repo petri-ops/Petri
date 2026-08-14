@@ -612,6 +612,25 @@
           "milestone": "M5-M6"
         }
       ]
+    },
+    {
+      "id": "AGENT-WORKBENCH-P1-A5",
+      "path": "docs/agent-workbench-p1-a5-verification-2026-08-15.md",
+      "kind": "audit",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "agent-workbench-p1-a5-verification",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "agent",
+        "workbench",
+        "p1",
+        "a5",
+        "verification",
+        "result-card",
+        "extra-renderers"
+      ]
     }
   ]
 }
