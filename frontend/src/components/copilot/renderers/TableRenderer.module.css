@@ -135,3 +135,53 @@
   font-family: var(--biof3-font-sans, inherit);
   font-style: normal;
 }
+
+/* ----- P1.5 export action bar (UI-AGENTWB-006) ----- */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  margin: 0 0 6px;
+}
+
+.downloadButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  padding: 3px 10px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 999px;
+  background: var(--biof3-bg-surface);
+  color: var(--biof3-text-secondary);
+  font-family: var(--biof3-font-sans, inherit);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background-color 80ms ease, border-color 80ms ease,
+    color 80ms ease;
+}
+
+.downloadButton:hover {
+  background: var(--biof3-bg-subtle);
+  border-color: var(--biof3-text-tertiary, var(--biof3-border));
+  color: var(--biof3-text);
+}
+
+.downloadButton:active {
+  background: var(--biof3-bg-hover, color-mix(in srgb, var(--biof3-text) 8%, transparent));
+}
+
+.downloadButton:focus-visible {
+  outline: 2px solid var(--biof3-accent);
+  outline-offset: 1px;
+}
+
+.downloadButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
