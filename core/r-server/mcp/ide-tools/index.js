@@ -1,13 +1,21 @@
 /**
  * core/r-server/mcp/ide-tools/index.js
  *
- * IDE MCP 工具集入口（Phase 1：文件 + 终端）。
- * 暴露：
- * - getIdeToolDefinitions()  → 数组，追加到 MCP listTools()
- * - callIdeTool(name, args)  → dispatch 到 file / terminal handler
- * - wrapWithAudit(tool, handler) → 包装一层审计日志
+ * IDE MCP 工具集入口（Phase 1 + Phase 1.5）。
+ * Tools: 17 个 ide_* 工具
+ *   - Phase 1: file (7) + terminal (5)
+ *   - Phase 1.5: search (1) + diff (1)
+ *   - Phase 2/3: editor / git 等在此扩展
  *
- * 后续 Phase 2 / Phase 3 编辑器 / 搜索 / Git 工具在此扩展。
+ * Resources: 2 个只读数据源（resources/list + resources/read）
+ *   - ide://projects
+ *   - ide://git-status?path=<path>
+ *
+ * 暴露：
+ * - getIdeToolDefinitions() → 工具定义数组（MCP tools/list）
+ * - callIdeTool(name, args)  → dispatch + 审计
+ * - getIdeResourceDefinitions() → 资源定义（MCP resources/list）
+ * - readIdeResource(uri) → 资源读取（MCP resources/read）
  */
 
 'use strict';
@@ -15,13 +23,27 @@
 const audit = require('./audit-log');
 const { fileToolDefinitions, HANDLERS: FILE_HANDLERS } = require('./file');
 const { terminalToolDefinitions, HANDLERS: TERMINAL_HANDLERS } = require('./terminal');
+const { searchToolDefinitions, HANDLERS: SEARCH_HANDLERS } = require('./search');
+const { diffToolDefinitions, HANDLERS: DIFF_HANDLERS } = require('./diff');
+const {
+  getIdeResourceDefinitions: getResDefs,
+  readIdeResource: readRes,
+  listIdeResources: listRes,
+} = require('./resources');
 
-const ALL_HANDLERS = { ...FILE_HANDLERS, ...TERMINAL_HANDLERS };
+const ALL_HANDLERS = {
+  ...FILE_HANDLERS,
+  ...TERMINAL_HANDLERS,
+  ...SEARCH_HANDLERS,
+  ...DIFF_HANDLERS,
+};
 
 function getIdeToolDefinitions() {
   return [
     ...fileToolDefinitions(),
     ...terminalToolDefinitions(),
+    ...searchToolDefinitions(),
+    ...diffToolDefinitions(),
   ];
 }
 
@@ -74,6 +96,10 @@ async function callIdeTool(name, args) {
 module.exports = {
   getIdeToolDefinitions,
   callIdeTool,
+  // MCP Resources（Phase 1.5）
+  getIdeResourceDefinitions: getResDefs,
+  listIdeResources: listRes,
+  readIdeResource: readRes,
   // 供测试直连（不经过审计）
   _rawHandlers: ALL_HANDLERS,
 };

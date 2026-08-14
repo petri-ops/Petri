@@ -486,6 +486,30 @@ async function _callIdeTool(name, args) {
 }
 
 /**
+ * MCP Resources（Phase 1.5）— IDE 资源入口。
+ * - listIdeMcpResources(): 给 MCP resources/list 用
+ * - readIdeMcpResource(uri): 给 MCP resources/read 用
+ */
+function listIdeMcpResources() {
+  try {
+    const { listIdeResources } = require('./ide-tools');
+    return listIdeResources();
+  } catch (e) {
+    console.warn('[mcp-registry] IDE resources list failed:', e.message);
+    return [];
+  }
+}
+
+function readIdeMcpResource(uri) {
+  try {
+    const { readIdeResource } = require('./ide-tools');
+    return readIdeResource(uri);
+  } catch (e) {
+    return { ok: false, error: `ide_resource_error: ${e.message}` };
+  }
+}
+
+/**
  * Phase 3: 解析 MCP/Agent 工具的物理运行目录，物理主键统一使用 tool_job.id。
  *   - 有 projectId + toolJobId → resolveProjectRunLayout（项目沙盒，客户端只提交 projectId）
  *   - 否则 → 全局 tool-jobs/<toolJobId>（与 R/Python HTTP executor 同根、同身份）
@@ -1328,6 +1352,8 @@ async function callTool(name, args, opts = {}) {
 module.exports = {
   listTools,
   callTool,
+  listIdeMcpResources,
+  readIdeMcpResource,
   _test: {
     canonicalizePath: _canonicalizePath,
     createMcpExecutionContext: _createMcpExecutionContext,
