@@ -77,6 +77,11 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 2026-08-14 Workspace UI plumbing 不可变实现提交：台账已由
   // 后续 UI-AUDIT-FIX 补登为 UI-159（in_progress）。豁免同提交台账要求。
   '3000a069171bb6404719ddd797d1b6e64e92d53c',
+  // 2026-08-14 Agent Workbench P1.2 TableRenderer commit 2ba838b 携带
+  // scripts/check-ui-productization-audit.mjs 的 UI_ID_PATTERN 扩展。
+  // UI-AGENTWB-002 的 audit row + changelog 已在 UI-AUDIT-FIX 5c811f8
+  // 一起并入 docs/ui-productization-audit.md，本次 commit 不再单独触碰台账。
+  '2ba838be3a046c7b00927bf2d9101c9ad1c6df2e',
 ])
 // UI-### issue ids: numeric series (UI-001..UI-999) and the named
 // AGENTWB namespace (UI-AGENTWB-001..UI-AGENTWB-999) used by the
