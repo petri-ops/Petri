@@ -2249,9 +2249,10 @@ test('RS5 execution bridge accepts only a hashed script inside the ChangeSet roo
   if (SYMLINKS_SUPPORTED) {
     const link = join(root, 'escape.R');
     symlinkSync(outside, link);
+    // SEC-001: Symlinks are rejected before path traversal check
     assert.throws(() => resolveResultStudioScriptOverride({
       override: { changeSetId: 'cs_bridge', path: link, sha256: sha256(readFileSync(outside)) },
       plugin: { language: 'r' }, projectId: 'p_1', dbModule,
-    }), /materialized_script_outside_changeset/);
+    }), /materialized_script_symlink_rejected/);
   }
 });
