@@ -52,23 +52,23 @@
 
 ## 4. 实现策略
 
-### 4.1 代码落点
-- **`src/ide-tools/`** — 新建目录，按工具组分子目录：
-  - `src/ide-tools/file.js` — 文件操作实现
-  - `src/ide-tools/terminal.js` — 终端实现（基于 `node-pty`）
-  - `src/ide-tools/editor.js` — 编辑器操作（Phase 2）
-  - `src/ide-tools/search.js` — 搜索（Phase 2）
-  - `src/ide-tools/git.js` — Git 操作（Phase 3）
-  - `src/ide-tools/safe-path.js` — 路径白名单与校验（统一入口）
-  - `src/ide-tools/audit-log.js` — 操作审计日志
-- **`core/r-server/mcp/registry.js`** — 扩展 `listTools()` / `callTool()`，按现有 skill_* 三件套模式接入 IDE 工具
-- **`src/preload.js`** — 不动；MCP 工具通过 r-server HTTP `/mcp` 暴露，不走 contextBridge
-- **`test/`** — 定向测试 `test/ide-tools-file.test.mjs`、`test/ide-tools-terminal.test.mjs`、`test/ide-tools-safe-path.test.mjs`
+### 4.1 代码落点（Phase 1 实际落点，已交付）
+- **`core/r-server/mcp/ide-tools/`** — 新建目录（MCP server 跑在 r-server 进程里）：
+  - `path-allowlist.js` — 路径白名单（cwd + tmpdir + ~/.biof3/logs）+ deny 名单（.git/.ssh/node_modules）
+  - `audit-log.js` — 操作审计写入 ~/.biof3/logs/ide-tools.log
+  - `file.js` — 7 个文件操作 MCP 工具
+  - `terminal.js` — 5 个终端 MCP 工具（node-pty）
+  - `index.js` — 入口 + 自动审计包装
+- **`core/r-server/mcp/registry.js`** — `listTools()` 合并 IDE 工具；`callTool()` 在 skill_* 之后路由 `ide_*`
+- **`src/preload.js`** — 不动；MCP 工具通过 r-server stdio 暴露，不走 contextBridge
+- **`test/`** — 4 个定向测试文件，33 个测试全部通过
+- Phase 2 落点：`core/r-server/mcp/ide-tools/editor.js` + `search.js`
+- Phase 3 落点：`core/r-server/mcp/ide-tools/git.js`
 
 ### 4.2 复用的现有约束
 - 不新建 executor / Job / Workflow，只复用 MCP `callTool()` 入口
-- 操作审计写入既有 `backend-health.js` 复用 `~/.biof3/logs/` 目录
-- 路径白名单基于 `core/shared-backend/path-safe.js`（已存在）扩展，不重复实现
+- 操作审计复用 `~/.biof3/logs/` 目录（与既有 `backend-health.js` 一致）
+- 路径白名单基于 `core/shared-backend/path-safe.js` 的 `safeJoinUnder` 扩展，不重复实现
 - Plugin loader / capability bundles 不改动；IDE 工具是**第一方**能力，不是第三方插件
 
 ### 4.3 测试范围纪律
@@ -132,3 +132,30 @@
 - 不与 Skill / Result Studio 平行实现重复能力（约束）
 - 遵循测试范围纪律：定向优先，全量留给发布前 / CI（约束）
 - 遵循单工作包串行：Phase 1 收口后才启动 Phase 2（约束）
+
+---
+
+## 10. Phase 1 收口记录（2026-08-14）
+
+**实现提交**：见 git log（registry.js + ide-tools/* + 4 个测试文件）
+**测试证据**：
+- `test/ide-tools-path-allowlist.test.mjs` — 11/11 通过
+- `test/ide-tools-file.test.mjs` — 12/12 通过
+- `test/ide-tools-terminal.test.mjs` — 6/6 通过（含真实 PTY roundtrip）
+- `test/ide-tools-registry.test.mjs` — 4/4 通过
+- 相关回归 28 个测试文件 199/199 通过
+
+**Phase 1 验收门**：
+- [x] MCP `listTools()` 返回至少 12 个 `ide_*` 工具
+- [x] 33 个 IDE 工具定向测试全部通过
+- [x] 路径白名单测试覆盖：白名单内允许、白名单外拒绝、相对路径拒绝、deny 段拒绝
+- [x] 操作审计写入 `~/.biof3/logs/ide-tools.log`（测试期间验证过）
+- [x] `npm run docs:check` PASS
+
+**Phase 2 启动条件**（未达）：
+- [ ] Monaco 编辑器已有可工作的文件入口（frontend/src/components/editor/* 存在 + 可用）
+- [ ] 或：复用 SimpleChat 内置输入框作为编辑器入口（fallback）
+
+**Phase 3 启动条件**（未达）：
+- [ ] 评估 `simple-git` vs `git` 命令包装的取舍
+- [ ] 决定依赖是否进 `package.json`（需单独 PR）
