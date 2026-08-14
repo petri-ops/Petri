@@ -1,0 +1,137 @@
+/* ============================================================
+   TableRenderer — compact HTML table for ResultCard body.
+
+   Pairs with TableRenderer.tsx which renders payload cells that
+   already passed the type-guard. The body host stays inside
+   ResultCard so it inherits padding + variant tint from the
+   card chrome (no double-frame).
+
+   Visual rules:
+   - Aligns with `--biof3-*` design tokens from styles/custom.css.
+   - Sticky-ish header via `position: sticky` only when there is
+     enough vertical room (`.body` already scrolls when its
+     parent overflows; here we keep a static header to stay
+     compatible with the existing card body contract).
+   - Zebra rows + hover bg + thin cell borders.
+   - Numeric cells right-align; null cells render a muted dash.
+   - Scroll on horizontal overflow only; never reflow the card.
+   ============================================================ */
+
+.wrapper {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  /* Defer vertical scroll to ResultCard body; the table itself
+     grows as tall as its content. */
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--biof3-text);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  /* Collapse with the card chrome — border only between rows,
+     no outer frame to avoid double-line with ResultCard.card. */
+  background: transparent;
+}
+
+.caption {
+  /* Visually hidden but available to assistive tech. */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.thead {
+  /* Static header — no sticky positioning to keep the contract
+     identical with the existing ResultCard body layout. The
+     background stops zebra stripes from showing through the
+     header row. */
+  background: var(--biof3-bg-subtle);
+}
+
+.headerCell {
+  text-align: left;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--biof3-text-secondary);
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--biof3-border);
+  /* Wrap long header text but never break words mid-character. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+
+.bodyRow {
+  /* Subtle zebra without breaking hover affordance. */
+  background: transparent;
+}
+
+.bodyRow:nth-child(even) {
+  background: var(--biof3-bg-subtle);
+}
+
+.bodyRow:hover {
+  background: var(--biof3-bg-hover, color-mix(in srgb, var(--biof3-text) 6%, transparent));
+}
+
+.cell {
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--biof3-border-subtle, var(--biof3-border));
+  color: var(--biof3-text);
+  /* Numbers render more cleanly with tabular figures. */
+  font-variant-numeric: tabular-nums;
+  vertical-align: top;
+  /* Long values scroll horizontally rather than wrapping
+     individual cells — keeps rows readable. */
+  white-space: nowrap;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cellNumeric {
+  text-align: right;
+  /* Tabular figures + proportional alignment for numeric data. */
+  font-variant-numeric: tabular-nums;
+}
+
+.cellNull {
+  color: var(--biof3-text-tertiary);
+  text-align: center;
+  font-style: italic;
+}
+
+.fallback {
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px dashed var(--biof3-border);
+  border-radius: 6px;
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text-secondary);
+  font-family: var(--biof3-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 11px;
+  line-height: 1.45;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.fallbackNote {
+  margin: 0 0 6px;
+  font-size: 11px;
+  color: var(--biof3-text-tertiary);
+  font-family: var(--biof3-font-sans, inherit);
+  font-style: normal;
+}
