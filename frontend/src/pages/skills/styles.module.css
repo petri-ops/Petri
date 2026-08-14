@@ -1,0 +1,902 @@
+/**
+ * Skills 页面样式
+ * 沿用 BioF3 design tokens（--biof3-* 变量）
+ */
+
+/* ============================================================
+   页面容器
+   ============================================================ */
+
+.skillsPage {
+  min-height: calc(100vh - var(--biof3-titlebar-height));
+  padding: 20px 24px;
+  background: var(--biof3-bg-surface);
+}
+
+/* ============================================================
+   页面标题区
+   ============================================================ */
+
+.pageHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.pageIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--biof3-accent-bg);
+  color: var(--biof3-accent);
+  flex-shrink: 0;
+}
+
+.pageTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--biof3-text);
+  letter-spacing: -0.01em;
+}
+
+.pageStats {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--biof3-text-secondary);
+}
+
+.statsBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--biof3-bg-canvas);
+  border: 1px solid var(--biof3-border);
+}
+
+/* ============================================================
+   搜索与筛选
+   ============================================================ */
+
+.searchContainer {
+  margin-bottom: 20px;
+}
+
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.searchInputWrapper {
+  position: relative;
+  flex: 1;
+  max-width: 320px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--biof3-text-tertiary);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  height: 36px;
+  padding: 0 36px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 9px;
+  background: var(--biof3-bg-canvas);
+  color: var(--biof3-text);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.searchInput::placeholder {
+  color: var(--biof3-text-tertiary);
+}
+
+.searchInput:focus {
+  border-color: var(--biof3-accent);
+  box-shadow: 0 0 0 3px var(--biof3-accent-bg);
+}
+
+.clearButton {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--biof3-text-tertiary);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.clearButton:hover {
+  background: var(--biof3-bg-canvas);
+  color: var(--biof3-text-secondary);
+}
+
+.sourceFilters {
+  display: flex;
+  gap: 8px;
+}
+
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 8px;
+  background: var(--biof3-bg-surface);
+  color: var(--biof3-text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.filterChip:hover {
+  border-color: var(--biof3-accent);
+  color: var(--biof3-text);
+}
+
+.filterChipActive {
+  border-color: var(--biof3-accent);
+  background: var(--biof3-accent-bg);
+  color: var(--biof3-accent);
+}
+
+.filterCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--biof3-bg-canvas);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.filterChipActive .filterCount {
+  background: var(--biof3-accent);
+  color: white;
+}
+
+.categoryRow {
+  overflow-x: auto;
+}
+
+.categoryScroll {
+  display: flex;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.categoryChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 7px;
+  background: var(--biof3-bg-surface);
+  color: var(--biof3-text-secondary);
+  font-size: 11.5px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.categoryChip:hover {
+  border-color: var(--biof3-accent);
+  color: var(--biof3-text);
+}
+
+.categoryChipActive {
+  border-color: var(--biof3-accent);
+  background: var(--biof3-accent-bg);
+  color: var(--biof3-accent);
+}
+
+/* ============================================================
+   技能卡片网格
+   ============================================================ */
+
+.skillsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.skillsEmpty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--biof3-text-tertiary);
+}
+
+.emptyIcon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--biof3-bg-canvas);
+  margin-bottom: 12px;
+}
+
+.emptyTitle {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--biof3-text-secondary);
+}
+
+.emptyText {
+  margin: 0;
+  font-size: 12px;
+}
+
+/* ============================================================
+   技能卡片
+   ============================================================ */
+
+.skillCard {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 12px;
+  background: var(--biof3-bg-canvas);
+  transition: border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.skillCard:hover {
+  border-color: var(--biof3-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.cardTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--biof3-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardVersion {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--biof3-text-tertiary);
+  background: var(--biof3-bg-surface);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.sourceBadge {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.sourceBuiltin {
+  background: rgba(67, 209, 174, 0.15);
+  color: var(--biof3-accent);
+}
+
+.sourceInstalled {
+  background: rgba(99, 102, 241, 0.15);
+  color: #6366f1;
+}
+
+.sourceMarketplace {
+  background: rgba(251, 191, 36, 0.15);
+  color: #f59e0b;
+}
+
+.cardDescription {
+  margin: 0 0 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--biof3-text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.tag {
+  font-size: 10.5px;
+  color: var(--biof3-text-tertiary);
+  background: var(--biof3-bg-surface);
+  padding: 3px 8px;
+  border-radius: 5px;
+}
+
+.tagMore {
+  font-size: 10.5px;
+  color: var(--biof3-text-tertiary);
+  padding: 3px 4px;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--biof3-border);
+}
+
+.categoryLabel,
+.pluginCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--biof3-text-tertiary);
+}
+
+.cardActions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.detailButton,
+.executeButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.detailButton {
+  flex: 1;
+  border: 1px solid var(--biof3-border);
+  background: var(--biof3-bg-surface);
+  color: var(--biof3-text-secondary);
+}
+
+.detailButton:hover {
+  border-color: var(--biof3-accent);
+  color: var(--biof3-text);
+}
+
+.executeButton {
+  flex: 1;
+  border: 1px solid var(--biof3-accent);
+  background: var(--biof3-accent);
+  color: white;
+}
+
+.executeButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.executeButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   详情弹窗
+   ============================================================ */
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  animation: backdropFadeIn 0.2s ease;
+}
+
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modalContent {
+  width: 90%;
+  max-width: 600px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--biof3-bg-surface);
+  border: 1px solid var(--biof3-border);
+  border-radius: 16px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+  animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--biof3-border);
+  flex-shrink: 0;
+}
+
+.modalTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--biof3-text);
+}
+
+.modalVersion {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--biof3-text-tertiary);
+  background: var(--biof3-bg-canvas);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--biof3-text-tertiary);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.closeButton:hover {
+  background: var(--biof3-bg-canvas);
+  color: var(--biof3-text);
+}
+
+.modalBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.detailSection {
+  margin-bottom: 24px;
+}
+
+.detailSection:last-child {
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--biof3-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.description {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--biof3-text-secondary);
+}
+
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.categoryBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--biof3-accent-bg);
+  color: var(--biof3-accent);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.pluginList {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.pluginLabel {
+  font-size: 11px;
+  color: var(--biof3-text-tertiary);
+  margin-right: 4px;
+}
+
+.pluginBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--biof3-bg-canvas);
+  border: 1px solid var(--biof3-border);
+  font-size: 11px;
+  color: var(--biof3-text-secondary);
+}
+
+.pluginOptional {
+  border-style: dashed;
+  opacity: 0.8;
+}
+
+.emptyText {
+  margin: 0;
+  font-size: 12px;
+  color: var(--biof3-text-tertiary);
+  font-style: italic;
+}
+
+/* 参数表单 */
+.paramForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.requiredNote {
+  margin: 0 0 8px;
+  font-size: 11px;
+  color: var(--biof3-accent);
+  font-weight: 500;
+}
+
+.paramField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.paramLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--biof3-text);
+}
+
+.paramDescription {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--biof3-text-tertiary);
+}
+
+.paramControl {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.select,
+.textInput,
+.numberInput {
+  flex: 1;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 8px;
+  background: var(--biof3-bg-canvas);
+  color: var(--biof3-text);
+  font-size: 12.5px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.select:focus,
+.textInput:focus,
+.numberInput:focus {
+  border-color: var(--biof3-accent);
+}
+
+.select {
+  cursor: pointer;
+}
+
+.paramDefault {
+  font-size: 10.5px;
+  color: var(--biof3-text-tertiary);
+  white-space: nowrap;
+}
+
+/* Toggle switch */
+.toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggleSlider {
+  width: 40px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--biof3-border);
+  transition: background 0.2s ease;
+}
+
+.toggleSlider::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.2s ease;
+}
+
+.toggle input:checked + .toggleSlider {
+  background: var(--biof3-accent);
+}
+
+.toggle input:checked + .toggleSlider::before {
+  transform: translateX(18px);
+}
+
+/* 输出列表 */
+.outputGroupTitle {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--biof3-text-secondary);
+}
+
+.outputList {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.outputItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--biof3-bg-canvas);
+  font-size: 12px;
+}
+
+.outputItem > svg {
+  flex-shrink: 0;
+  color: var(--biof3-text-tertiary);
+  margin-top: 1px;
+}
+
+.outputLabel {
+  font-weight: 500;
+  color: var(--biof3-text);
+  white-space: nowrap;
+}
+
+.outputDesc {
+  color: var(--biof3-text-secondary);
+  margin-left: 4px;
+}
+
+/* 弹窗底部 */
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--biof3-border);
+  flex-shrink: 0;
+}
+
+.cancelButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 9px;
+  background: var(--biof3-bg-surface);
+  color: var(--biof3-text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+  border-color: var(--biof3-text-tertiary);
+  color: var(--biof3-text);
+}
+
+.executeButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Loading spinner */
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================
+   加载状态
+   ============================================================ */
+
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--biof3-text-tertiary);
+}
+
+.loadingSpinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--biof3-border);
+  border-top-color: var(--biof3-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 12px;
+}
+
+.loadingText {
+  font-size: 13px;
+}
+
+/* ============================================================
+   响应式
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .skillsPage {
+    padding: 16px;
+  }
+
+  .searchRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchInputWrapper {
+    max-width: none;
+  }
+
+  .sourceFilters {
+    flex-wrap: wrap;
+  }
+
+  .skillsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .modalContent {
+    width: 95%;
+    max-height: 90vh;
+  }
+}
