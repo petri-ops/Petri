@@ -32,6 +32,15 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // 代码提交 e6421e0 与台账登记 f624d76 拆分，提交信息未带 UI-###；
   // 台账已在 f624d76 以 UI-106 登记（合并后改号 UI-129）。不重写共享历史。
   'e6421e07fdf4337944bd7f186926aeeb082049c2',
+  // 2026-08-14 Skills UI/frontend pages 不可变实现提交：subject `feat(skills)` 未带 UI-###；
+  // 台账已由本次 UI-AUDIT-FIX 补登为 UI-157（in_progress）。不重写共享历史。
+  'e6bf72ff74480f0b98cfcbbc839268b95d2800c8',
+  // 2026-08-14 Copilot UX 不可变实现提交：subject `feat(copilot)` 未带 UI-###；
+  // 台账已由本次 UI-AUDIT-FIX 补登为 UI-158（in_progress）。不重写共享历史。
+  '446bfa8f6fb2d23d908ce9358d35c25d4e853ebb',
+  // 2026-08-14 Workspace UI plumbing 不可变实现提交：subject `feat(frontend)` 未带 UI-###；
+  // 台账已由本次 UI-AUDIT-FIX 补登为 UI-159（in_progress）。不重写共享历史。
+  '3000a069171bb6404719ddd797d1b6e64e92d53c',
 ])
 // These immutable implementation commits have an explicit later canonical
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
@@ -59,6 +68,15 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // devah 的 origin/main 不可变提交 e6421e0：窗口控件代码提交，台账由
   // 后续 f624d76 单独登记（UI-106→合并后 UI-129）。豁免同提交台账要求。
   'e6421e07fdf4337944bd7f186926aeeb082049c2',
+  // 2026-08-14 Skills UI/frontend pages 不可变实现提交：台账已由
+  // 后续 UI-AUDIT-FIX 补登为 UI-157（in_progress）。豁免同提交台账要求。
+  'e6bf72ff74480f0b98cfcbbc839268b95d2800c8',
+  // 2026-08-14 Copilot UX 不可变实现提交：台账已由
+  // 后续 UI-AUDIT-FIX 补登为 UI-158（in_progress）。豁免同提交台账要求。
+  '446bfa8f6fb2d23d908ce9358d35c25d4e853ebb',
+  // 2026-08-14 Workspace UI plumbing 不可变实现提交：台账已由
+  // 后续 UI-AUDIT-FIX 补登为 UI-159（in_progress）。豁免同提交台账要求。
+  '3000a069171bb6404719ddd797d1b6e64e92d53c',
 ])
 const UI_ID_PATTERN = /\bUI-\d{3}\b/g
 
