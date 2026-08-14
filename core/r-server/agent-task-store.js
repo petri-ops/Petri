@@ -10,6 +10,170 @@ const Database = require('better-sqlite3');
 const config = require('./config');
 const logger = require('./logger');
 
+// Retry policy configuration by error type
+const RETRY_POLICY = {
+  network_timeout: { maxRetries: 3, backoff: 'exponential', baseDelay: 1000 },
+  rate_limit: { maxRetries: 5, backoff: 'linear', delay: 5000 },
+  model_overloaded: { maxRetries: 3, backoff: 'exponential', baseDelay: 2000 },
+  internal_error: { maxRetries: 2, backoff: 'constant', delay: 1000 },
+};
+
+// Retry statistics
+const retryStats = {
+  totalRetries: 0,
+  successfulRetries: 0,
+  failedRetries: 0,
+  byErrorType: {
+    network_timeout: { attempts: 0, successes: 0 },
+    rate_limit: { attempts: 0, successes: 0 },
+    model_overloaded: { attempts: 0, successes: 0 },
+    internal_error: { attempts: 0, successes: 0 },
+  },
+};
+
+/**
+ * Detect error type from error message
+ * @param {string|Error} error
+ * @returns {string|null}
+ */
+function detectErrorType(error) {
+  const message = String(error?.message || error || '').toLowerCase();
+  if (message.includes('timeout') || message.includes('timed out') || message.includes('network')) {
+    return 'network_timeout';
+  }
+  if (message.includes('rate limit') || message.includes('rate_limit') || message.includes('too many requests')) {
+    return 'rate_limit';
+  }
+  if (message.includes('overloaded') || message.includes('model busy') || message.includes('server busy')) {
+    return 'model_overloaded';
+  }
+  if (message.includes('internal') || message.includes('500') || message.includes('server error')) {
+    return 'internal_error';
+  }
+  return null;
+}
+
+/**
+ * Calculate delay with exponential backoff and jitter
+ * @param {number} attempt - Current attempt number (0-indexed)
+ * @param {object} policy - Retry policy for this error type
+ * @returns {number} Delay in milliseconds
+ */
+function calculateBackoffDelay(attempt, policy) {
+  let baseDelay;
+
+  if (policy.backoff === 'exponential') {
+    baseDelay = policy.baseDelay * Math.pow(2, attempt);
+  } else if (policy.backoff === 'linear') {
+    baseDelay = policy.delay;
+  } else {
+    baseDelay = policy.delay || policy.baseDelay || 1000;
+  }
+
+  // Add jitter (±25%) to prevent thundering herd
+  const jitter = baseDelay * 0.25 * (Math.random() * 2 - 1);
+  return Math.floor(baseDelay + jitter);
+}
+
+/**
+ * Check if an error is retryable
+ * @param {string|Error} error
+ * @returns {boolean}
+ */
+function isRetryableError(error) {
+  return detectErrorType(error) !== null;
+}
+
+/**
+ * Get retry policy for an error
+ * @param {string|Error} error
+ * @returns {object|null}
+ */
+function getRetryPolicy(error) {
+  const errorType = detectErrorType(error);
+  return errorType ? RETRY_POLICY[errorType] : null;
+}
+
+/**
+ * Check if more retries are allowed for an error
+ * @param {number} currentRetryCount
+ * @param {string|Error} error
+ * @returns {boolean}
+ */
+function canRetry(currentRetryCount, error) {
+  const policy = getRetryPolicy(error);
+  return policy !== null && currentRetryCount < policy.maxRetries;
+}
+
+/**
+ * Get next retry delay in milliseconds
+ * @param {number} currentRetryCount
+ * @param {string|Error} error
+ * @returns {number}
+ */
+function getNextRetryDelay(currentRetryCount, error) {
+  const policy = getRetryPolicy(error);
+  if (!policy) return 0;
+  return calculateBackoffDelay(currentRetryCount, policy);
+}
+
+/**
+ * Calculate next retry timestamp
+ * @param {number} currentRetryCount
+ * @param {string|Error} error
+ * @returns {Date}
+ */
+function getNextRetryTime(currentRetryCount, error) {
+  const delay = getNextRetryDelay(currentRetryCount, error);
+  return new Date(Date.now() + delay);
+}
+
+/**
+ * Record retry attempt in statistics
+ * @param {string} errorType
+ * @param {boolean} succeeded
+ */
+function recordRetryAttempt(errorType, succeeded) {
+  retryStats.totalRetries++;
+  if (succeeded) {
+    retryStats.successfulRetries++;
+  } else {
+    retryStats.failedRetries++;
+  }
+  if (retryStats.byErrorType[errorType]) {
+    retryStats.byErrorType[errorType].attempts++;
+    if (succeeded) {
+      retryStats.byErrorType[errorType].successes++;
+    }
+  }
+}
+
+/**
+ * Get retry statistics
+ * @returns {object}
+ */
+function getRetryStats() {
+  return {
+    ...retryStats,
+    retrySuccessRate:
+      retryStats.totalRetries > 0
+        ? (retryStats.successfulRetries / retryStats.totalRetries) * 100
+        : 0,
+  };
+}
+
+/**
+ * Reset retry statistics
+ */
+function resetRetryStats() {
+  retryStats.totalRetries = 0;
+  retryStats.successfulRetries = 0;
+  retryStats.failedRetries = 0;
+  for (const errorType of Object.keys(retryStats.byErrorType)) {
+    retryStats.byErrorType[errorType] = { attempts: 0, successes: 0 };
+  }
+}
+
 const db = new Database(config.dbPath);
 db.pragma('journal_mode = WAL');
 db.pragma('busy_timeout = 5000');
@@ -24,11 +188,16 @@ db.exec(`
     finished_at TEXT,
     error TEXT,
     user_id TEXT,
-    agent_status TEXT
+    agent_status TEXT,
+    retry_count INTEGER DEFAULT 0,
+    retry_error_type TEXT,
+    next_retry_at TEXT,
+    max_retries INTEGER DEFAULT 0
   );
 
   CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
   CREATE INDEX IF NOT EXISTS idx_tasks_created ON tasks(created_at);
+  CREATE INDEX IF NOT EXISTS idx_tasks_next_retry ON tasks(next_retry_at) WHERE status = 'retry_pending';
 
   CREATE TABLE IF NOT EXISTS task_events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,10 +210,14 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_task_events_task_seq ON task_events(task_id, seq);
 `);
 
-// Existing databases may predate the Agent-loop columns.
+// Existing databases may predate the Agent-loop columns and retry columns.
 for (const statement of [
   'ALTER TABLE tasks ADD COLUMN user_id TEXT',
   'ALTER TABLE tasks ADD COLUMN agent_status TEXT',
+  'ALTER TABLE tasks ADD COLUMN retry_count INTEGER DEFAULT 0',
+  'ALTER TABLE tasks ADD COLUMN retry_error_type TEXT',
+  'ALTER TABLE tasks ADD COLUMN next_retry_at TEXT',
+  'ALTER TABLE tasks ADD COLUMN max_retries INTEGER DEFAULT 0',
 ]) {
   try {
     db.exec(statement);
@@ -69,7 +242,8 @@ const stmts = {
     VALUES (?, 'agent_loop', ?, 'running', ?, ?, 'running')
   `),
   get: db.prepare(
-    `SELECT id, params, status, created_at, finished_at, error, user_id, agent_status
+    `SELECT id, params, status, created_at, finished_at, error, user_id, agent_status,
+            retry_count, retry_error_type, next_retry_at, max_retries
      FROM tasks WHERE id = ? AND type = 'agent_loop'`
   ),
   insertEvent: db.prepare(`
@@ -81,8 +255,15 @@ const stmts = {
      WHERE task_id = ? AND seq > ? ORDER BY seq ASC LIMIT ?`
   ),
   listRunning: db.prepare(
-    `SELECT id, params, status, created_at, finished_at, error, user_id, agent_status
+    `SELECT id, params, status, created_at, finished_at, error, user_id, agent_status,
+            retry_count, retry_error_type, next_retry_at, max_retries
      FROM tasks WHERE type = 'agent_loop' AND status = 'running'`
+  ),
+  listRetryPending: db.prepare(
+    `SELECT id, params, status, created_at, finished_at, error, user_id, agent_status,
+            retry_count, retry_error_type, next_retry_at, max_retries
+     FROM tasks WHERE type = 'agent_loop' AND status = 'retry_pending'
+     AND next_retry_at <= ? ORDER BY next_retry_at ASC`
   ),
   updateStatus: db.prepare(
     `UPDATE tasks SET agent_status = ?, status = ?, error = ?, finished_at = ?
@@ -91,6 +272,17 @@ const stmts = {
   requestCancel: db.prepare(
     `UPDATE tasks SET agent_status = 'cancel_requested'
      WHERE id = ? AND type = 'agent_loop' AND status = 'running'`
+  ),
+  updateRetryInfo: db.prepare(
+    `UPDATE tasks
+     SET retry_count = ?, retry_error_type = ?, next_retry_at = ?, max_retries = ?,
+         status = 'retry_pending', agent_status = 'retry_pending', error = ?
+     WHERE id = ? AND type = 'agent_loop'`
+  ),
+  clearRetryInfo: db.prepare(
+    `UPDATE tasks
+     SET retry_count = 0, retry_error_type = NULL, next_retry_at = NULL, max_retries = 0
+     WHERE id = ? AND type = 'agent_loop'`
   ),
 };
 
@@ -116,6 +308,10 @@ function getAgentTask(taskId) {
     error: row.error,
     userId: row.user_id || null,
     agentStatus: row.agent_status || null,
+    retryCount: row.retry_count || 0,
+    retryErrorType: row.retry_error_type || null,
+    nextRetryAt: row.next_retry_at || null,
+    maxRetries: row.max_retries || 0,
     // Route compatibility while the persisted SQLite columns remain snake_case.
     user_id: row.user_id || null,
     agent_status: row.agent_status || null,
@@ -171,6 +367,10 @@ function getRunningChildAgentTasks(parentTaskId) {
     error: row.error,
     userId: row.user_id || null,
     agentStatus: row.agent_status || null,
+    retryCount: row.retry_count || 0,
+    retryErrorType: row.retry_error_type || null,
+    nextRetryAt: row.next_retry_at || null,
+    maxRetries: row.max_retries || 0,
   })).filter((task) => task.params?.kind === 'subagent' && task.params?.parentTaskId === parentTaskId);
 }
 
@@ -235,6 +435,101 @@ function markAgentTaskCancelled(taskId) {
   );
 }
 
+/**
+ * Schedule a task for retry based on error type
+ * @param {string} taskId
+ * @param {string|Error} error
+ * @returns {boolean} true if retry was scheduled, false if max retries exceeded
+ */
+function scheduleAgentTaskRetry(taskId, error) {
+  const errorType = detectErrorType(error);
+  const policy = getRetryPolicy(error);
+
+  if (!policy) {
+    logger.warn(`Task ${taskId}: Non-retryable error, marking as failed`);
+    markAgentTaskFailed(taskId, error);
+    return false;
+  }
+
+  const task = getAgentTask(taskId);
+  const currentRetryCount = task?.retryCount || 0;
+
+  if (currentRetryCount >= policy.maxRetries) {
+    logger.warn(`Task ${taskId}: Max retries (${policy.maxRetries}) exceeded`);
+    markAgentTaskFailed(taskId, `Max retries exceeded: ${error}`);
+    recordRetryAttempt(errorType, false);
+    return false;
+  }
+
+  const nextRetryCount = currentRetryCount + 1;
+  const nextRetryAt = getNextRetryTime(currentRetryCount, error);
+  const errorMessage = String(error?.message || error || 'Unknown error');
+
+  stmts.updateRetryInfo.run(
+    nextRetryCount,
+    errorType,
+    nextRetryAt.toISOString(),
+    policy.maxRetries,
+    `Retry ${nextRetryCount}/${policy.maxRetries}: ${errorMessage}`,
+    taskId
+  );
+
+  logger.info(
+    `Task ${taskId}: Scheduled retry ${nextRetryCount}/${policy.maxRetries} at ${nextRetryAt.toISOString()} (error: ${errorType})`
+  );
+  recordRetryAttempt(errorType, false);
+
+  return true;
+}
+
+/**
+ * Get tasks that are ready for retry
+ * @returns {Array}
+ */
+function getRetryableTasks() {
+  const now = new Date().toISOString();
+  return stmts.listRetryPending.all(now).map((row) => ({
+    taskId: row.id,
+    params: tryParse(row.params),
+    status: row.status,
+    createdAt: row.created_at,
+    finishedAt: row.finished_at,
+    error: row.error,
+    userId: row.user_id || null,
+    agentStatus: row.agent_status || null,
+    retryCount: row.retry_count || 0,
+    retryErrorType: row.retry_error_type || null,
+    nextRetryAt: row.next_retry_at || null,
+    maxRetries: row.max_retries || 0,
+  }));
+}
+
+/**
+ * Reset task for retry execution
+ * @param {string} taskId
+ */
+function resetTaskForRetry(taskId) {
+  stmts.clearRetryInfo.run(taskId);
+  stmts.updateStatus.run('running', 'running', null, null, taskId);
+}
+
+/**
+ * Check if a task should be retried
+ * @param {string} taskId
+ * @returns {boolean}
+ */
+function shouldRetryTask(taskId) {
+  const task = getAgentTask(taskId);
+  if (!task) return false;
+  if (task.status !== 'retry_pending') return false;
+
+  const errorType = task.retryErrorType;
+  const policy = errorType ? RETRY_POLICY[errorType] : null;
+
+  if (!policy) return false;
+  return task.retryCount < policy.maxRetries;
+}
+
 function tryParse(value) {
   if (!value) return null;
   try {
@@ -256,4 +551,18 @@ module.exports = {
   cancelAgentTaskCascade,
   isAgentTaskCancellationRequested,
   markAgentTaskCancelled,
+  // Retry strategy exports
+  RETRY_POLICY,
+  detectErrorType,
+  isRetryableError,
+  getRetryPolicy,
+  canRetry,
+  getNextRetryDelay,
+  getNextRetryTime,
+  scheduleAgentTaskRetry,
+  getRetryableTasks,
+  resetTaskForRetry,
+  shouldRetryTask,
+  getRetryStats,
+  resetRetryStats,
 };

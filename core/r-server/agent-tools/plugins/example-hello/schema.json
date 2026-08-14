@@ -1,0 +1,9 @@
+{
+  "contractVersion": "1.0.0",
+  "category": "plugin",
+  "sideEffect": "none",
+  "riskTier": "R0",
+  "resources": [],
+  "estimatedDurationMs": 100,
+  "cancellable": false
+}
