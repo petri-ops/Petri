@@ -419,6 +419,146 @@
       "truthDomain": "agent-concurrency-design",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "DESKTOP-EVAL-20260814",
+      "path": "docs/BioF3-Desktop-Evaluation-Report-2026-08-14.md",
+      "kind": "audit",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "desktop-evaluation",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "GATEWAY-DESIGN",
+      "path": "docs/architecture/gateway-design.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "backend-gateway-architecture",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "PIPELINE-API",
+      "path": "docs/architecture/pipeline-api.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "truthDomain": "pipeline-orchestration-design",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "IDE-MCP-TOOLS-DESIGN",
+      "path": "docs/ide-research/mcp-ide-tools-design.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "truthDomain": "ide-mcp-tools-research",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "IDE-MONACO-RESEARCH",
+      "path": "docs/ide-research/monaco-integration-research.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "truthDomain": "monaco-editor-integration-research",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "IDE-TRANSFORMATION",
+      "path": "docs/ide-transformation-plan.md",
+      "kind": "roadmap",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "ide-development-roadmap",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "ide",
+        "monaco",
+        "editor",
+        "transformation"
+      ]
+    },
+    {
+      "id": "PARALLEL-DEVELOPMENT",
+      "path": "docs/parallel-development-guide.md",
+      "kind": "governance",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "parallel-development-strategy",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive"
+    },
+    {
+      "id": "SKILLS-ARCHITECTURE",
+      "path": "docs/skills-architecture.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "skills-layer-architecture",
+      "entrypoint": null,
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "skills",
+        "architecture",
+        "layer",
+        "plugin"
+      ]
+    },
+    {
+      "id": "SKILLS-REGISTRY",
+      "path": "docs/skills-registry.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "skills-registry-discovery",
+      "entrypoint": null,
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "skills",
+        "registry",
+        "discovery",
+        "marketplace"
+      ]
+    },
+    {
+      "id": "SKILLS-SCHEMA",
+      "path": "docs/skills-schema.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "skills-schema-definition",
+      "entrypoint": null,
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "skills",
+        "schema",
+        "manifest",
+        "definition"
+      ]
+    },
+    {
+      "id": "SKILLS-WORKFLOW-INTEGRATION",
+      "path": "docs/skills-workflow-integration.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "skills-workflow-integration",
+      "entrypoint": null,
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "skills",
+        "workflow",
+        "integration",
+        "agent-workflow"
+      ]
     }
   ]
 }
