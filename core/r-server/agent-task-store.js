@@ -195,10 +195,6 @@ db.exec(`
     max_retries INTEGER DEFAULT 0
   );
 
-  CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
-  CREATE INDEX IF NOT EXISTS idx_tasks_created ON tasks(created_at);
-  CREATE INDEX IF NOT EXISTS idx_tasks_next_retry ON tasks(next_retry_at) WHERE status = 'retry_pending';
-
   CREATE TABLE IF NOT EXISTS task_events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     task_id TEXT NOT NULL,
@@ -207,10 +203,12 @@ db.exec(`
     payload TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
-  CREATE INDEX IF NOT EXISTS idx_task_events_task_seq ON task_events(task_id, seq);
 `);
 
-// Existing databases may predate the Agent-loop columns and retry columns.
+// Existing databases may predate the Agent-loop columns and retry columns,
+// and predate the indexes that reference those columns. We must ALTER first
+// (so the columns exist) before any CREATE INDEX that touches them, and
+// tolerate each statement failing on already-present schema/columns.
 for (const statement of [
   'ALTER TABLE tasks ADD COLUMN user_id TEXT',
   'ALTER TABLE tasks ADD COLUMN agent_status TEXT',
@@ -218,10 +216,20 @@ for (const statement of [
   'ALTER TABLE tasks ADD COLUMN retry_error_type TEXT',
   'ALTER TABLE tasks ADD COLUMN next_retry_at TEXT',
   'ALTER TABLE tasks ADD COLUMN max_retries INTEGER DEFAULT 0',
+  'CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status)',
+  'CREATE INDEX IF NOT EXISTS idx_tasks_created ON tasks(created_at)',
+  'CREATE INDEX IF NOT EXISTS idx_tasks_next_retry ON tasks(next_retry_at) WHERE status = \'retry_pending\'',
+  'CREATE INDEX IF NOT EXISTS idx_task_events_task_seq ON task_events(task_id, seq)',
 ]) {
   try {
     db.exec(statement);
-  } catch {}
+  } catch (err) {
+    // Statement-level failure must not abort module load. A failing ALTER
+    // means the column already exists; a failing CREATE INDEX means the
+    // column it depends on is still missing. Log so the failure is visible
+    // instead of silently swallowed.
+    logger.warn(`[agent-task-store] schema step skipped: ${statement} (${err && err.message})`);
+  }
 }
 
 const interrupted = db
