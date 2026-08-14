@@ -474,7 +474,7 @@
       "id": "G0-IDE-MCP-TOOLS",
       "path": "docs/g0-ide-mcp-tools-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "agent-ide-mcp-tools",
       "entrypoint": "docs/README.md",
