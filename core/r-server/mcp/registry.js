@@ -26,6 +26,260 @@ const { resolveProjectRunLayout } = require('../../shared-backend/project-run-la
 const { createExecutionProvenance, attachProvenanceToResult } = require('../../shared-backend/execution-provenance');
 const { collectExecutionInputs, writeArtifactManifest } = require('../../shared-backend/artifact-manifest');
 
+// Skill Registry & Runtime 导入（延迟加载避免循环依赖）
+let _skillRegistry = null;
+let _skillRuntimeFactory = null;
+function getSkillRegistry() {
+  if (!_skillRegistry) {
+    try {
+      const { SkillRegistry } = require('../../shared-backend/skill-registry');
+      _skillRegistry = new SkillRegistry();
+    } catch (e) {
+      console.warn('[mcp-registry] SkillRegistry require failed:', e.message);
+      return null;
+    }
+  }
+  return _skillRegistry;
+}
+function getSkillRuntimeFactory() {
+  if (!_skillRuntimeFactory) {
+    try {
+      const { createSkillRuntime } = require('../../shared-backend/skill-runtime');
+      _skillRuntimeFactory = createSkillRuntime;
+    } catch (e) {
+      console.warn('[mcp-registry] SkillRuntime require failed:', e.message);
+      return null;
+    }
+  }
+  return _skillRuntimeFactory;
+}
+
+// ── Skill MCP 工具定义 ────────────────────────────────────────────────────────
+
+/**
+ * Skill 相关 MCP 工具列表
+ */
+function getSkillToolDefinitions() {
+  return [
+    {
+      name: 'skill_discover',
+      description: 'Discover and list all available Skills in the system. Supports filtering by category, source, and search keyword.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          category: {
+            type: 'string',
+            description: 'Filter by skill category (e.g., "bioinformatics", "visualization")',
+          },
+          source: {
+            type: 'string',
+            enum: ['built-in', 'installed', 'marketplace'],
+            description: 'Filter by skill source',
+          },
+          search: {
+            type: 'string',
+            description: 'Search keyword to match against skill name, description, or tags',
+          },
+        },
+      },
+    },
+    {
+      name: 'skill_get',
+      description: 'Get detailed information about a specific Skill including its prompts, parameters, and capabilities.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'Skill ID (e.g., "bioinformatics-sequence-analysis")',
+          },
+        },
+        required: ['id'],
+      },
+    },
+    {
+      name: 'skill_execute',
+      description: 'Execute a Skill with given parameters. Returns execution result including artifacts and outputs.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'Skill ID to execute',
+          },
+          params: {
+            type: 'object',
+            description: 'Execution parameters matching the Skill\'s parameter schema',
+          },
+          context: {
+            type: 'object',
+            description: 'Execution context (user context, workflow variant, etc.)',
+            properties: {
+              workflowName: { type: 'string', description: 'Workflow variant to execute' },
+              userContext: { type: 'object', description: 'User context information' },
+            },
+          },
+        },
+        required: ['id'],
+      },
+    },
+  ];
+}
+
+/**
+ * Skill discover 实现
+ */
+async function _skillDiscover(args = {}) {
+  const registry = getSkillRegistry();
+  if (!registry) {
+    return {
+      content: [{ type: 'text', text: JSON.stringify({ error: 'SkillRegistry not available' }) }],
+      isError: true,
+    };
+  }
+
+  try {
+    let skills = registry.discover();
+
+    // 按 source 过滤
+    if (args.source) {
+      skills = skills.filter(s => s.source === args.source);
+    }
+
+    // 按 category 过滤
+    if (args.category) {
+      const cat = args.category.toLowerCase();
+      skills = skills.filter(s =>
+        s.category.toLowerCase() === cat ||
+        s.category.toLowerCase().startsWith(cat + '/')
+      );
+    }
+
+    // 按 search 关键词过滤
+    if (args.search) {
+      const q = args.search.toLowerCase();
+      skills = skills.filter(s =>
+        s.id.toLowerCase().includes(q) ||
+        s.name.toLowerCase().includes(q) ||
+        s.description.toLowerCase().includes(q) ||
+        s.tags.some(tag => tag.toLowerCase().includes(q))
+      );
+    }
+
+    // 返回不含 prompts 详情的列表
+    const result = skills.map(skill => ({
+      id: skill.id,
+      name: skill.name,
+      version: skill.version,
+      source: skill.source,
+      category: skill.category,
+      tags: skill.tags,
+      description: skill.description,
+      capabilities: skill.capabilities,
+      plugins: skill.plugins,
+      parameters: {
+        required: skill.parameters.required,
+        optional: Object.keys(skill.parameters.optional),
+      },
+      outputs: skill.outputs,
+      metadata: skill.metadata,
+    }));
+
+    return {
+      content: [{ type: 'text', text: JSON.stringify({ skills: result, total: result.length }, null, 2) }],
+      isError: false,
+    };
+  } catch (e) {
+    console.error('[mcp-registry] skill_discover error:', e);
+    return {
+      content: [{ type: 'text', text: JSON.stringify({ error: e.message }) }],
+      isError: true,
+    };
+  }
+}
+
+/**
+ * Skill get 实现
+ */
+async function _skillGet(args = {}) {
+  const registry = getSkillRegistry();
+  if (!registry) {
+    return {
+      content: [{ type: 'text', text: JSON.stringify({ error: 'SkillRegistry not available' }) }],
+      isError: true,
+    };
+  }
+
+  try {
+    const skill = registry.get(args.id);
+    if (!skill) {
+      return {
+        content: [{ type: 'text', text: JSON.stringify({ error: `Skill not found: ${args.id}` }) }],
+        isError: true,
+      };
+    }
+
+    // 返回完整信息（含 prompts）
+    return {
+      content: [{ type: 'text', text: JSON.stringify(skill, null, 2) }],
+      isError: false,
+    };
+  } catch (e) {
+    console.error('[mcp-registry] skill_get error:', e);
+    return {
+      content: [{ type: 'text', text: JSON.stringify({ error: e.message }) }],
+      isError: true,
+    };
+  }
+}
+
+/**
+ * Skill execute 实现
+ */
+async function _skillExecute(args = {}) {
+  const registry = getSkillRegistry();
+  const createRuntime = getSkillRuntimeFactory();
+  if (!registry || !createRuntime) {
+    return {
+      content: [{ type: 'text', text: JSON.stringify({ error: 'Skill runtime not available' }) }],
+      isError: true,
+    };
+  }
+
+  try {
+    const skill = registry.get(args.id);
+    if (!skill) {
+      return {
+        content: [{ type: 'text', text: JSON.stringify({ error: `Skill not found: ${args.id}` }) }],
+        isError: true,
+      };
+    }
+
+    // 创建 SkillRuntime 实例
+    const runtime = createRuntime(skill, {
+      registry,
+    });
+
+    // 执行
+    const result = await runtime.execute(args.params || {}, {
+      workflowName: args.context?.workflowName,
+      userContext: args.context?.userContext,
+    });
+
+    // 返回执行结果
+    return {
+      content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      isError: result.status === 'failed',
+    };
+  } catch (e) {
+    console.error('[mcp-registry] skill_execute error:', e);
+    return {
+      content: [{ type: 'text', text: JSON.stringify({ error: e.message }) }],
+      isError: true,
+    };
+  }
+}
+
 // 路径解析（dev/pack 两种模式）
 // 下沉后 r-server 自己 require 自己，路径变简单：
 //   dev: __dirname = r-server/mcp → resolveRSserver = r-server 根
@@ -210,6 +464,28 @@ function _createMcpExecutionContext({
 }
 
 /**
+ * IDE MCP 工具分发（Phase 1：文件 + 终端）。
+ * 加载失败时降级到 unknown_tool 形式。
+ */
+async function _callIdeTool(name, args) {
+  try {
+    const { callIdeTool } = require('./ide-tools');
+    const result = await callIdeTool(name, args || {});
+    // 把内部 { ok, ... } 输出转换为 MCP 标准 { content, isError }
+    const text = JSON.stringify(result);
+    return {
+      content: [{ type: 'text', text }],
+      isError: result && result.ok === false,
+    };
+  } catch (e) {
+    return {
+      content: [{ type: 'text', text: `ide_tool_error: ${e.message}` }],
+      isError: true,
+    };
+  }
+}
+
+/**
  * Phase 3: 解析 MCP/Agent 工具的物理运行目录，物理主键统一使用 tool_job.id。
  *   - 有 projectId + toolJobId → resolveProjectRunLayout（项目沙盒，客户端只提交 projectId）
  *   - 否则 → 全局 tool-jobs/<toolJobId>（与 R/Python HTTP executor 同根、同身份）
@@ -246,7 +522,26 @@ async function listTools() {
   } catch (e) {
     console.warn('[mcp-registry] refresh plugins before listTools failed:', e.message);
   }
-  return pluginLoader.listToolsForMCP();
+
+  // 合并插件工具、Skill 工具与 IDE MCP 工具
+  const pluginTools = pluginLoader.listToolsForMCP();
+  const skillTools = getSkillToolDefinitions();
+  const ideTools = getIdeToolDefinitionsSafe();
+  return [...skillTools, ...ideTools, ...pluginTools];
+}
+
+// IDE 工具加载封装：失败时降级为空数组（不阻塞 listTools）
+let _ideTools = null;
+function getIdeToolDefinitionsSafe() {
+  if (_ideTools !== null) return _ideTools;
+  try {
+    const { getIdeToolDefinitions } = require('./ide-tools');
+    _ideTools = getIdeToolDefinitions();
+  } catch (e) {
+    console.warn('[mcp-registry] IDE tools load failed:', e.message);
+    _ideTools = [];
+  }
+  return _ideTools;
 }
 
 function _inferArtifactType(item, filename) {
@@ -895,9 +1190,56 @@ function resolveResultStudioScriptOverride({ override, plugin, projectId, dbModu
   if (!project || !project.workspace_path) throw new Error('project_not_found');
   const changeSetId = String(override && override.changeSetId || '');
   if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(changeSetId)) throw new Error('change_set_id_invalid');
-  const allowedRoot = fs.realpathSync(path.join(project.workspace_path, '.biof3', 'revision', changeSetId));
-  const resolved = fs.realpathSync(String(override && override.path || ''));
-  if (resolved !== allowedRoot && !resolved.startsWith(`${allowedRoot}${path.sep}`)) {
+
+  const inputPath = String(override && override.path || '');
+
+  // SEC-001: Symlink attack prevention - detect symlinks before realpathSync
+  let lstat;
+  try {
+    lstat = fs.lstatSync(inputPath);
+  } catch {
+    throw new Error('materialized_script_not_accessible');
+  }
+  if (lstat.isSymbolicLink()) {
+    throw new Error('materialized_script_symlink_rejected');
+  }
+
+  // SEC-001: Timeout-protected realpathSync using child_process with timeout
+  const SAFE_REALPATH_TIMEOUT_MS = 5000;
+  const { spawnSync } = require('child_process');
+
+  const realpathResult = spawnSync(
+    process.execPath,
+    ['-e', `try{console.log(require('fs').realpathSync('${inputPath.replace(/'/g, "\\'")}'))}catch(e){process.exit(1)}`],
+    { timeout: SAFE_REALPATH_TIMEOUT_MS, encoding: 'utf8' }
+  );
+  if (realpathResult.status !== 0 || realpathResult.error) {
+    throw new Error('realpath_timeout');
+  }
+  const resolved = realpathResult.stdout.trim();
+
+  // SEC-001: Path traversal validation after resolution
+  const allowedRoot = path.join(project.workspace_path, '.biof3', 'revision', changeSetId);
+  let allowedRootResolved;
+  try {
+    const allowedLstat = fs.lstatSync(allowedRoot);
+    if (allowedLstat.isSymbolicLink()) {
+      throw new Error('changeset_root_symlink_rejected');
+    }
+    const allowedRealpathResult = spawnSync(
+      process.execPath,
+      ['-e', `try{console.log(require('fs').realpathSync('${allowedRoot.replace(/'/g, "\\'")}'))}catch(e){process.exit(1)}`],
+      { timeout: SAFE_REALPATH_TIMEOUT_MS, encoding: 'utf8' }
+    );
+    if (allowedRealpathResult.status !== 0 || allowedRealpathResult.error) {
+      throw new Error('changeset_root_realpath_timeout');
+    }
+    allowedRootResolved = allowedRealpathResult.stdout.trim();
+  } catch {
+    throw new Error('changeset_root_not_accessible');
+  }
+
+  if (resolved !== allowedRootResolved && !resolved.startsWith(`${allowedRootResolved}${path.sep}`)) {
     throw new Error('materialized_script_outside_changeset');
   }
   const expectedExtension = plugin.language === 'python' ? '.py' : '.R';
@@ -919,6 +1261,23 @@ async function callTool(name, args, opts = {}) {
   const userId = (opts && opts.userId) || 'agent';
   const projectId = (opts && opts.projectId) || null;
   const toolJobId = (opts && opts.toolJobId) || null;
+
+  // Skill 工具路由
+  if (name === 'skill_discover') {
+    return _skillDiscover(args);
+  }
+  if (name === 'skill_get') {
+    return _skillGet(args);
+  }
+  if (name === 'skill_execute') {
+    return _skillExecute(args);
+  }
+
+  // IDE MCP 工具路由（P0：文件 + 终端）
+  if (name && name.startsWith('ide_')) {
+    return _callIdeTool(name, args);
+  }
+
   // 插件分支
   const plugin = pluginLoader.getPlugin(name);
   if (plugin) {
