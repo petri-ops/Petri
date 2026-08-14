@@ -1,0 +1,23 @@
+{
+  "type": "function",
+  "function": {
+    "name": "hello_world",
+    "description": "A simple hello world plugin that returns a greeting message. This is an example plugin demonstrating the plugin loading system.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name to greet"
+        },
+        "language": {
+          "type": "string",
+          "description": "The language for the greeting",
+          "enum": ["en", "zh", "ja"],
+          "default": "en"
+        }
+      },
+      "required": ["name"]
+    }
+  }
+}
