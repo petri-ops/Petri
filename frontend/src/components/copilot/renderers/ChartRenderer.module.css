@@ -18,10 +18,20 @@
      the card body without overflowing horizontally; the
      surrounding wrapper clips nothing intentionally — text
      labels above bars can render outside the plot box.
+   - P2 interaction + a11y layer (UI-AGENTWB-005):
+     * .tooltip lives next to the <svg> with pointer-events:none
+       so it never intercepts clicks on data points.
+     * .barSelected / .dotSelected emphasize stroke for the
+       selected point; the stroke color uses --biof3-text so it
+       stays visible in both light and dark themes.
+     * .legendButton is a real <button>; .legendButtonHidden
+       dims the swatch + label to communicate "hidden" state
+       without removing the legend entry.
    ============================================================ */
 
 .wrapper {
   display: block;
+  position: relative;
   width: 100%;
   max-width: 100%;
   font-size: 12px;
@@ -51,9 +61,24 @@
   fill-opacity: 0.78;
   stroke: var(--biof3-accent, var(--biof3-text));
   stroke-width: 0.5;
+  /* P2: cursor change signals that bars are now interactive. */
+  cursor: pointer;
+  transition: fill-opacity 120ms ease, stroke-width 120ms ease;
 }
 
-.bar:hover {
+.bar:hover,
+.bar:focus {
+  fill-opacity: 1;
+  outline: none;
+}
+
+/* P2: selected bar stroke emphasis. Selected stroke is
+   visibly thicker and uses --biof3-text instead of --biof3-
+   accent so it stays legible when the bar fill is the same
+   hue. */
+.barSelected {
+  stroke: var(--biof3-text);
+  stroke-width: 2;
   fill-opacity: 1;
 }
 
@@ -78,6 +103,20 @@
   stroke-width: 1.4;
   /* Vector effect keeps dot strokes sharp at smaller scales. */
   vector-effect: non-scaling-stroke;
+  cursor: pointer;
+  transition: stroke-width 120ms ease, r 120ms ease;
+}
+
+.dot:hover,
+.dot:focus {
+  outline: none;
+}
+
+/* P2: selected dot stroke emphasis (radius is also bumped
+   via the inline SVG `r` attribute — handled in TSX). */
+.dotSelected {
+  stroke: var(--biof3-text);
+  stroke-width: 2.2;
 }
 
 .tickLabel {
@@ -88,14 +127,115 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* P2: legend now lives outside the <svg> as real <button>s so
+   screen readers can announce and keyboard users can reach
+   each entry. The swatch + label follow the same token as
+   before; layout switches from absolute <g translate> to a
+   flex row that wraps. */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-top: 8px;
+}
+
+.legendButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 999px;
+  background: var(--biof3-bg-surface);
+  color: var(--biof3-text-secondary);
+  font: inherit;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease,
+    opacity 120ms ease;
+}
+
+.legendButton:hover,
+.legendButton:focus {
+  background: var(--biof3-bg-subtle);
+  color: var(--biof3-text);
+  outline: none;
+}
+
+.legendButton:focus-visible {
+  outline: 2px solid var(--biof3-accent, var(--biof3-text));
+  outline-offset: 1px;
+}
+
 .legendSwatch {
-  fill: var(--biof3-accent, var(--biof3-text));
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--biof3-accent, var(--biof3-text));
   fill-opacity: 0.78;
 }
 
+/* P2: a hidden series gets a dim swatch + strikethrough label
+   so users can tell at a glance which series are off. The
+   button itself stays enabled so they can re-show the series
+   in one click. */
+.legendButtonHidden {
+  opacity: 0.55;
+}
+
+.legendButtonHidden .legendSwatch {
+  background: var(--biof3-border);
+  fill-opacity: 0.5;
+}
+
+.legendButtonHidden .legendText {
+  text-decoration: line-through;
+}
+
 .legendText {
-  font-size: 10px;
+  font-size: 11px;
   fill: var(--biof3-text-secondary);
+  color: inherit;
+}
+
+/* P2: tooltip that appears on hover/focus of a data point.
+   Lives outside the <svg> so screen readers can announce it
+   without parsing the graphic. Pointer-events:none prevents
+   the tooltip from intercepting clicks on the data points. */
+.tooltip {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--biof3-border);
+  border-radius: 6px;
+  background: var(--biof3-bg-surface);
+  color: var(--biof3-text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  font-size: 11px;
+  line-height: 1.2;
+  pointer-events: none;
+  max-width: 60%;
+}
+
+.tooltipSeries {
+  font-weight: 600;
+}
+
+.tooltipX {
+  color: var(--biof3-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.tooltipValue {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--biof3-text);
 }
 
 .fallback {
