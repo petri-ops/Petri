@@ -96,6 +96,8 @@
 
 | 2026-08-14 | **测试门禁修复收口**：① impact-map 新增 `core/gateway/**` → `backend-fallback`，消除 `core/gateway/` 6 个 JS 文件 + `.env.example` + `package.json` 导致的 exit 2；② DOC-REGISTRY 新增 11 个文档登记（pipeline-api、ide-transformation-plan、ide-research/*、parallel-development-guide、skills-* 等），修正 skills 文档 canonical=false/entrypoint=null；③ README.md 添加 4 个 canonical 文档入口链接；④ `check-ui-productization-audit.mjs` 把 commit `289101ea9`（Fork Chat 分支功能）加入 LEGACY_MESSAGE_EXEMPTIONS 和 LEGACY_AUDIT_SYNC_EXEMPTIONS（主体已由 UI-143 verified 条目覆盖）。`docs:check` 56 registered / `ui:audit:check` 同步检查通过 / `test:changed:list` exit 0 | TEST-INFRA / GATE-FIX |
 
+| ✅ 已收口（Phase 1）| 2026-08-14 | **G0-IDE-MCP-TOOLS Phase 1 完成**：12 个 IDE MCP 工具（7 文件 + 5 终端）实现并接入 `core/r-server/mcp/registry.js`，定向 33 测试通过（11 + 12 + 6 + 4），相关回归 28 个文件 199/199 通过（`test-affected` / `p6-product-acceptance` 2 项为预先失败，与本工作包无关） | Phase 2（编辑器 + 搜索 9 个工具）须待 Monaco 集成就绪后再启动；Phase 3（Git 4 个）须先评估 simple-git 依赖。已知缺口：ui:audit:check 因工作区有他人 UI WIP（SkillsSidebar、CommandPalette 等）失败，已隔离不污染本工作包证据 |
+
 ## 广播规则
 
 - 🔴：阻塞当前验收，主 Agent 必须优先处理。
