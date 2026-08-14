@@ -135,9 +135,11 @@
 
 ---
 
-## 10. Phase 1 收口记录（2026-08-14）
+## 10. Phase 1 + 1.5 收口记录
 
-**实现提交**：见 git log（registry.js + ide-tools/* + 4 个测试文件）
+### Phase 1 收口（2026-08-14）
+
+**实现提交**：见 git log（registry.js + ide-tools/{file,terminal,path-allowlist,audit-log,index} + 4 个测试文件）
 **测试证据**：
 - `test/ide-tools-path-allowlist.test.mjs` — 11/11 通过
 - `test/ide-tools-file.test.mjs` — 12/12 通过
@@ -152,10 +154,42 @@
 - [x] 操作审计写入 `~/.biof3/logs/ide-tools.log`（测试期间验证过）
 - [x] `npm run docs:check` PASS
 
+### Phase 1.5 收口（2026-08-14）
+
+**新增工具**（2 个 + 2 个资源）：
+- `ide_file_search_text` — ripgrep 包装（--json 输出解析、context、filePattern、maxResults 1000）
+- `ide_file_diff` — diff 包装（unified + normal 两种格式，maxLines 5000，hunks + summary）
+
+**新增 MCP Resources**（2 个）：
+- `ide://projects` — 枚举 cwd 父目录下所有项目（含 hasPackageJson / hasGit 标记）
+- `ide://git-status?path=<path>` — git status --porcelain=v1 -b 包装（branch + staged/unstaged/untracked）
+
+**MCP 协议接入**：
+- registry.js: 新增 `listIdeMcpResources()` + `readIdeMcpResource(uri)` 导出
+- server.js: `resources/list` 与 `resources/read` 方法接 IDE 资源；MCP `contents[]` 标准格式
+
+**测试证据**（新增 19 个 + 4 个新文件）：
+- `test/ide-tools-search.test.mjs` — 7/7 通过
+- `test/ide-tools-diff.test.mjs` — 5/5 通过（首轮 2 fail，已修 normal 解析）
+- `test/ide-tools-resources.test.mjs` — 7/7 通过
+- `test/ide-tools-registry-resources.test.mjs` — 4/4 通过
+- **总计 56/56 通过**（33 Phase 1 + 23 Phase 1.5）
+- 端到端 MCP stdio 测试：`resources/read ide://projects` 返回 4 个项目列表
+
+**Phase 1.5 验收门**：
+- [x] MCP `listTools()` 返回 14 个 `ide_*` 工具（7 文件 + 5 终端 + 1 search + 1 diff）
+- [x] MCP `resources/list` 返回 2 个 IDE 资源
+- [x] MCP `resources/read ide://projects` 返回正确 JSON
+- [x] MCP `resources/read ide://git-status?path=<p>` 在白名单内可用 / 白名单外拒绝
+- [x] `npm run docs:check` PASS
+- [x] 56/56 IDE 工具定向测试通过
+- [x] 222/225 回归测试通过（3 跳过，0 失败；test-affected / p6-product-acceptance 为预先失败，与本工作包无关）
+
 **Phase 2 启动条件**（未达）：
 - [ ] Monaco 编辑器已有可工作的文件入口（frontend/src/components/editor/* 存在 + 可用）
 - [ ] 或：复用 SimpleChat 内置输入框作为编辑器入口（fallback）
 
-**Phase 3 启动条件**（未达）：
-- [ ] 评估 `simple-git` vs `git` 命令包装的取舍
-- [ ] 决定依赖是否进 `package.json`（需单独 PR）
+**Phase 3 启动条件**（已部分缓和）：
+- [x] git CLI 可用性已验证（git 2.50.1 + ripgrep 15.1.0）
+- [ ] 评估是否仍需 `simple-git` vs 继续 CLI 包装
+- [ ] 决定 `simple-git` 是否进 `package.json`（需单独 PR）

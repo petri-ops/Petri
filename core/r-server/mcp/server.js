@@ -147,8 +147,38 @@ async function handleMessage(line) {
         await handleToolsCall(id, params);
         break;
       case 'resources/list':
-        // 暂不实现 resources
-        sendResponse(id, { resources: [] });
+        {
+          const resources = registry.listIdeMcpResources
+            ? registry.listIdeMcpResources()
+            : [];
+          sendResponse(id, { resources });
+        }
+        break;
+      case 'resources/read':
+        {
+          if (!params || !params.uri) {
+            sendError(id, -32602, 'Missing required param: uri');
+            break;
+          }
+          const result = registry.readIdeMcpResource
+            ? registry.readIdeMcpResource(params.uri)
+            : { ok: false, error: 'ide resources not available' };
+          // MCP 约定：resources/read 返回 contents[]，每个 item 含 uri + mimeType + text|blob
+          if (result && result.ok) {
+            sendResponse(id, {
+              contents: [
+                {
+                  uri: result.uri || params.uri,
+                  mimeType: result.mimeType || 'application/json',
+                  text: result.text || '',
+                },
+              ],
+            });
+          } else {
+            // 资源读取失败仍走错误码
+            sendError(id, -32602, result && result.error ? result.error : 'resource read failed');
+          }
+        }
         break;
       case 'prompts/list':
         // 暂不实现 prompts
