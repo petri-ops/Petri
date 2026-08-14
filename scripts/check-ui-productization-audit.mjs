@@ -22,6 +22,9 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // UI-108/UI-109. P7 was later deferred and the immutable implementation
   // checkpoint is reconciled explicitly in the 2026-08-03 audit record.
   '2298c968f7afa289a1c257e2fc8ba8d608bad1ed',
+  // feat(chat): Fork Chat 分支功能实现；subject 无 UI-###（feat(chat): 而非 UI-WAVE0:），body 有 UI-143
+  // UI-143 在表中已有 verified 条目（feat/ui-wave0，W-05/C-02 路由化），289101e 在 feat/ui-wave0 基础上扩展 fork 功能
+  '289101ea90073f7da5e685617c21fecd6dad7e1f',
   // UX1H implementation landed before the target row was reconciled from
   // unit-only evidence to the current in_progress + Electron evidence state.
   '7995ee945b0221e2507e1cce11414849a942ac5d',
@@ -49,6 +52,10 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // The initial UX1H implementation is reconciled by the current UI-126 row
   // and acceptance evidence; do not rewrite the already-local implementation commit.
   '7995ee945b0221e2507e1cce11414849a942ac5d',
+  // feat(chat): Fork Chat 分支功能在 feat/ui-wave0（UI-143 verified）之后扩展；
+  // 台账 UI-143 条目已存在（feat/ui-wave0，W-05/C-02），289101e 为增量扩展，
+  // 按 feat/ui-wave0 同一 UI-WAVE0 工作流归属登记，不单独占新 UI 条目
+  '289101ea90073f7da5e685617c21fecd6dad7e1f',
   // devah 的 origin/main 不可变提交 e6421e0：窗口控件代码提交，台账由
   // 后续 f624d76 单独登记（UI-106→合并后 UI-129）。豁免同提交台账要求。
   'e6421e07fdf4337944bd7f186926aeeb082049c2',

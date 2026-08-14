@@ -9,6 +9,10 @@
 3. [`COLLABORATION.md`](./COLLABORATION.md) — 团队协作约定：分支策略、合并前门禁、禁止对 main 强制推送、双机并行协调。
 4. [`DOC-REGISTRY.json`](./DOC-REGISTRY.json) — 非归档 Markdown 的机器可读目录与 canonical truth 注册表。
 5. [`AUDIT-LOG.md`](./AUDIT-LOG.md) — 每次 Agent 会话优先处理的审计广播台。
+6. [`parallel-development-guide.md`](./parallel-development-guide.md) — 多模块并行开发的冲突风险管控策略；独立模块大胆并行，跨层接口变更必须串行。
+7. [`architecture/gateway-design.md`](./architecture/gateway-design.md) — Backend Gateway 架构设计；统一入口、路由分发与断路器。
+8. [`ide-transformation-plan.md`](./ide-transformation-plan.md) — BioF3 IDE 改造计划；Monaco Editor 集成、MCP 工具与编辑器能力扩展路线图。
+9. [`BioF3-Desktop-Evaluation-Report-2026-08-14.md`](./BioF3-Desktop-Evaluation-Report-2026-08-14.md) — Desktop 评测报告；2026-08-14 评估记录与改进建议。
 
 ## 长期核心指引
 
@@ -34,6 +38,10 @@
 ## 当前有效专项规范
 
 - [`codex-style-workbench-direction.md`](./codex-style-workbench-direction.md) — UI 产品方向。
+- [`skills-architecture.md`](./skills-architecture.md) — Skills 层四层架构设计（Skills → Workflows → Plugins → Capabilities）。
+- [`skills-schema.md`](./skills-schema.md) — Skill Manifest Schema 标准定义。
+- [`skills-registry.md`](./skills-registry.md) — Skills 注册与发现机制。
+- [`skills-workflow-integration.md`](./skills-workflow-integration.md) — Skills 与现有 Plugin/Workflow 系统的集成。
 - [`macos-oss-auto-update.md`](./macos-oss-auto-update.md) — macOS 构建、OSS 发布与更新。
 - [`plugin-artifact-schema.md`](./plugin-artifact-schema.md) — Plugin/Artifact 兼容契约。
 - [`runtime-version-baseline.md`](./runtime-version-baseline.md) — R/Python 运行时精确版本契约（双端一致，约束所有插件 ABI 与 builtAgainst）。
