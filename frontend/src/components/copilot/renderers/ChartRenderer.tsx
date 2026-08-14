@@ -24,11 +24,37 @@
 //     polyline + node dots. Auto-scale to data min/max so the
 //     placeholder chart stays readable across small payloads.
 //
-// This renderer is intentionally a pure presentational
-// component; no interactivity, no axes tooltip, no zoom (P2+
-// can layer those via context).
+// P2 interaction + a11y layer (2026-08-15, UI-AGENTWB-005):
+//   - Hover/focus on a data point shows a <div> tooltip with
+//     series name + x label + numeric value. Default absolute
+//     values (no percentage switch in P2 — that toggle was
+//     explicitly out of scope).
+//   - Legend entries are <button>s; clicking toggles the
+//     series' UI visibility (UI-only, no data deletion).
+//     Toggle state is component-local (useState): a fresh
+//     chart always starts with all series visible.
+//   - Clicking a data point selects it (stroke emphasis);
+//     clicking the same point again clears the selection.
+//     Hover never overrides the selected stroke — once a point
+//     is selected, hovering other points only swaps the
+//     tooltip text but never replaces the stroke emphasis.
+//   - <svg> carries a <desc> element with the full series
+//     summary so SR users can hear "Bar chart with 2 series:
+//     control (10, 12, 14, 16), treated (8, 10, 12, 14)
+//     across labels ..." instead of just "Chart: bar".
+//   - Every data point (<rect>/<circle>) carries an aria-label
+//     ("{series} at {x}: {value}") + tabIndex={0} + aria-selected.
+//   - Legend <button>s carry aria-pressed for the toggle state.
+//   - Fail-soft fallback path is unchanged: 5 kinds of malformed
+//     payloads still render <pre data-testid="result-renderer-
+//     chart-fallback"> with no interaction layer.
+//
+// This renderer is intentionally a pure presentational component
+// that owns its own ephemeral interaction state via useState (no
+// reducer, no zustand, no new dependency).
 // ============================================================
 
+import { useCallback, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { ResultNode } from '../types';
 import styles from './ChartRenderer.module.css';
@@ -133,14 +159,279 @@ function yScale(value: number, min: number, max: number): number {
   return y1 - ratio * (y1 - y0);
 }
 
-function renderBarChart(payload: BarPayload, title: string): ReactNode {
+function joinWithAnd(items: string[]): string {
+  if (items.length === 0) return '';
+  if (items.length === 1) return items[0] ?? '';
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
+}
+
+function buildChartSummary(payload: ChartPayload): string {
+  // Build a single human-readable sentence that lists every
+  // series with its numeric values + the chart's x axis labels.
+  // Goes inside <desc> so screen readers announce the full
+  // content instead of just "Chart: bar".
+  const labels = payload.kind === 'bar' ? payload.labels : payload.xLabels;
+  const labelClause = joinWithAnd(labels.map((l) => `'${l}'`));
+  const seriesClause = payload.series
+    .map(
+      (s) =>
+        `${s.name} (${s.values.map((v) => String(v)).join(', ')})`,
+    )
+    .join('; ');
+  return `${payload.kind === 'bar' ? 'Bar' : 'Line'} chart with ${
+    payload.series.length
+  } series: ${seriesClause} across labels ${labelClause}`;
+}
+
+type SelectedPoint = { seriesIdx: number; pointIdx: number } | null;
+
+export function ChartRenderer({ node }: { node: ResultNode }) {
+  const payload = node.payload;
+
+  if (!isChartPayload(payload)) {
+    return (
+      <div
+        data-testid="result-renderer-chart-fallback"
+        data-result-id={node.id}
+        role="region"
+        aria-label={`${node.title}（图表数据无效，已降级为 JSON）`}
+      >
+        <p className={styles.fallbackNote}>
+          图表数据格式无法解析，已降级为原始 JSON（fail-soft）：
+        </p>
+        <pre className={styles.fallback}>{tryStringify(payload)}</pre>
+      </div>
+    );
+  }
+
+  return <ChartRendererValid node={node} payload={payload} />;
+}
+
+function ChartRendererValid({
+  node,
+  payload,
+}: {
+  node: ResultNode;
+  payload: ChartPayload;
+}) {
+  const kind = payload.kind;
+  const title = `${node.title} (${kind})`;
+
+  // All interaction state is local to the renderer so a fresh
+  // chart always starts with all series visible and no selection.
+  const [hiddenSeries, setHiddenSeries] = useState<Set<number>>(
+    () => new Set<number>(),
+  );
+  const [selectedPoint, setSelectedPoint] = useState<SelectedPoint>(null);
+  const [hoverPoint, setHoverPoint] = useState<SelectedPoint>(null);
+
+  const toggleSeries = useCallback((seriesIdx: number) => {
+    setHiddenSeries((prev) => {
+      const next = new Set(prev);
+      if (next.has(seriesIdx)) {
+        next.delete(seriesIdx);
+      } else {
+        next.add(seriesIdx);
+      }
+      return next;
+    });
+  }, []);
+
+  const handlePointClick = useCallback(
+    (seriesIdx: number, pointIdx: number) => {
+      setSelectedPoint((prev) => {
+        if (
+          prev !== null &&
+          prev.seriesIdx === seriesIdx &&
+          prev.pointIdx === pointIdx
+        ) {
+          return null;
+        }
+        return { seriesIdx, pointIdx };
+      });
+    },
+    [],
+  );
+
+  const handlePointEnter = useCallback(
+    (seriesIdx: number, pointIdx: number) => {
+      setHoverPoint({ seriesIdx, pointIdx });
+    },
+    [],
+  );
+
+  const handlePointLeave = useCallback(() => {
+    setHoverPoint(null);
+  }, []);
+
+  // Tooltip data is derived from hoverPoint so the tooltip
+  // simply disappears when nothing is hovered/focused.
+  const tooltipData = useMemo(() => {
+    if (hoverPoint === null) return null;
+    const { seriesIdx, pointIdx } = hoverPoint;
+    if (seriesIdx < 0 || seriesIdx >= payload.series.length) return null;
+    const s = payload.series[seriesIdx];
+    if (!s) return null;
+    const value = s.values[pointIdx];
+    if (value === undefined) return null;
+    const labels =
+      payload.kind === 'bar' ? payload.labels : payload.xLabels;
+    const xLabel = labels[pointIdx] ?? '';
+    return {
+      seriesName: s.name,
+      xLabel,
+      value,
+    };
+  }, [hoverPoint, payload]);
+
+  return (
+    <div
+      className={styles.wrapper}
+      data-testid="result-renderer-chart"
+      data-result-id={node.id}
+      data-chart-kind={kind}
+      data-series-count={
+        payload.series.length /* series/label count lives in JSON for full audit */
+      }
+      data-hidden-series-count={hiddenSeries.size}
+      role="img"
+      aria-label={`Chart: ${kind}`}
+    >
+      <svg
+        className={styles.svg}
+        viewBox={`0 0 ${VIEWBOX_W} ${VIEWBOX_H}`}
+        preserveAspectRatio="xMidYMid meet"
+        focusable="false"
+      >
+        <desc data-testid="result-renderer-chart-desc">
+          {buildChartSummary(payload)}
+        </desc>
+        {kind === 'bar'
+          ? renderBarChart(payload, title, {
+              hiddenSeries,
+              selectedPoint,
+              onPointClick: handlePointClick,
+              onPointEnter: handlePointEnter,
+              onPointLeave: handlePointLeave,
+            })
+          : renderLineChart(payload, title, {
+              hiddenSeries,
+              selectedPoint,
+              onPointClick: handlePointClick,
+              onPointEnter: handlePointEnter,
+              onPointLeave: handlePointLeave,
+            })}
+      </svg>
+      {/* Hover/focus tooltip lives outside the <svg> so screen
+          readers do not treat it as part of the graphic. Pointer
+          events disabled — the tooltip never intercepts clicks. */}
+      {tooltipData !== null && (
+        <div
+          className={styles.tooltip}
+          data-testid="result-renderer-chart-tooltip"
+          data-series-name={tooltipData.seriesName}
+          data-x-label={tooltipData.xLabel}
+          data-value={tooltipData.value}
+          role="status"
+          aria-live="polite"
+        >
+          <span className={styles.tooltipSeries}>
+            {tooltipData.seriesName}
+          </span>
+          <span className={styles.tooltipX}>{tooltipData.xLabel}</span>
+          <span className={styles.tooltipValue}>{tooltipData.value}</span>
+        </div>
+      )}
+      <Legend
+        payload={payload}
+        hiddenSeries={hiddenSeries}
+        onToggle={toggleSeries}
+      />
+    </div>
+  );
+}
+
+function Legend({
+  payload,
+  hiddenSeries,
+  onToggle,
+}: {
+  payload: ChartPayload;
+  hiddenSeries: Set<number>;
+  onToggle: (seriesIdx: number) => void;
+}) {
+  // Render legend as DOM <button>s outside the <svg> so each
+  // entry is a real keyboard-accessible toggle, not a <text>
+  // inside the graphic.
+  return (
+    <div
+      className={styles.legend}
+      data-testid="result-renderer-chart-legend"
+      role="group"
+      aria-label="Chart series toggle"
+    >
+      {payload.series.map((s, idx) => {
+        const hidden = hiddenSeries.has(idx);
+        return (
+          <button
+            key={`legend-btn-${idx}`}
+            type="button"
+            className={`${styles.legendButton}${hidden ? ` ${styles.legendButtonHidden}` : ''}`}
+            data-testid={`result-renderer-chart-legend-${idx}`}
+            data-series-name={s.name}
+            data-hidden={hidden ? 'true' : 'false'}
+            aria-pressed={hidden}
+            aria-label={`${hidden ? 'Show' : 'Hide'} series ${s.name}`}
+            onClick={() => onToggle(idx)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onToggle(idx);
+              }
+            }}
+          >
+            <span className={styles.legendSwatch} aria-hidden="true" />
+            <span className={styles.legendText}>{s.name}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+type InteractionHandlers = {
+  hiddenSeries: Set<number>;
+  selectedPoint: SelectedPoint;
+  onPointClick: (seriesIdx: number, pointIdx: number) => void;
+  onPointEnter: (seriesIdx: number, pointIdx: number) => void;
+  onPointLeave: () => void;
+};
+
+function isPointSelected(
+  selected: SelectedPoint,
+  seriesIdx: number,
+  pointIdx: number,
+): boolean {
+  return (
+    selected !== null &&
+    selected.seriesIdx === seriesIdx &&
+    selected.pointIdx === pointIdx
+  );
+}
+
+function pointAriaLabel(seriesName: string, xLabel: string, value: number): string {
+  return `${seriesName} at ${xLabel}: ${value}`;
+}
+
+function renderBarChart(
+  payload: BarPayload,
+  title: string,
+  handlers: InteractionHandlers,
+): ReactNode {
   const { labels, series } = payload;
   const { x0, x1, y0, y1 } = plotBox();
 
-  // Each series shares the same X slots; every series is drawn
-  // as a side-by-side group of bars. Auto-scale Y across ALL
-  // series values so the largest bar in any series reaches the
-  // top of the plot area.
   const allValues = series.flatMap((s) => s.values);
   const [min, max] = range(allValues);
   const slotCount = labels.length;
@@ -171,9 +462,16 @@ function renderBarChart(payload: BarPayload, title: string): ReactNode {
         return series.map((s, seriesIdx) => {
           const value = s.values[slotIdx];
           if (value === undefined) return null;
+          const isHidden = handlers.hiddenSeries.has(seriesIdx);
+          if (isHidden) return null;
           const bx = slotX + seriesIdx * barWidth;
           const by = yScale(value, min, max);
           const bh = y1 - by;
+          const selected = isPointSelected(
+            handlers.selectedPoint,
+            seriesIdx,
+            slotIdx,
+          );
           return (
             <g key={`bar-${slotIdx}-${seriesIdx}`}>
               <rect
@@ -181,8 +479,26 @@ function renderBarChart(payload: BarPayload, title: string): ReactNode {
                 y={by}
                 width={Math.max(barWidth - 1, 1)}
                 height={Math.max(bh, 0)}
-                className={styles.bar}
+                className={`${styles.bar}${selected ? ` ${styles.barSelected}` : ''}`}
                 rx={1.5}
+                role="button"
+                tabIndex={0}
+                aria-label={pointAriaLabel(s.name, label, value)}
+                aria-selected={selected}
+                data-testid={`result-renderer-chart-bar-${seriesIdx}-${slotIdx}`}
+                onClick={() => handlers.onPointClick(seriesIdx, slotIdx)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handlers.onPointClick(seriesIdx, slotIdx);
+                  }
+                }}
+                onMouseEnter={() =>
+                  handlers.onPointEnter(seriesIdx, slotIdx)
+                }
+                onMouseLeave={handlers.onPointLeave}
+                onFocus={() => handlers.onPointEnter(seriesIdx, slotIdx)}
+                onBlur={handlers.onPointLeave}
               >
                 <title>{`${label} · ${s.name}: ${value}`}</title>
               </rect>
@@ -214,10 +530,19 @@ function renderBarChart(payload: BarPayload, title: string): ReactNode {
           </text>
         );
       })}
-      {/* Legend with single-color series squares + names */}
-      <g transform={`translate(${x0}, ${VIEWBOX_H - 16})`}>
+      {/* In-SVG legend text mirrors the interactive DOM <button>
+          legend. The DOM buttons carry the real a11y + keyboard
+          behaviour; these <text>s keep series names discoverable
+          inside the <svg> so screen readers that walk the
+          graphic still see them. Marked aria-hidden so SR does
+          not double-announce. */}
+      <g
+        transform={`translate(${x0}, ${VIEWBOX_H - 16})`}
+        aria-hidden="true"
+        data-testid="result-renderer-chart-legend-svg"
+      >
         {series.map((s, idx) => (
-          <g key={`legend-${idx}`} transform={`translate(${idx * 110}, 0)`}>
+          <g key={`legend-svg-${idx}`} transform={`translate(${idx * 110}, 0)`}>
             <rect
               x={0}
               y={-8}
@@ -237,7 +562,11 @@ function renderBarChart(payload: BarPayload, title: string): ReactNode {
   );
 }
 
-function renderLineChart(payload: LinePayload, title: string): ReactNode {
+function renderLineChart(
+  payload: LinePayload,
+  title: string,
+  handlers: InteractionHandlers,
+): ReactNode {
   const { xLabels, series } = payload;
   const { x0, x1, y0, y1 } = plotBox();
 
@@ -265,6 +594,13 @@ function renderLineChart(payload: LinePayload, title: string): ReactNode {
         className={styles.axis}
       />
       {series.map((s, seriesIdx) => {
+        const isHidden = handlers.hiddenSeries.has(seriesIdx);
+        if (isHidden) {
+          // Render nothing for a hidden series so its polyline
+          // and dots are not visible at all. Its legend button
+          // remains so the user can re-enable it.
+          return null;
+        }
         const points = s.values.map((v, idx) => {
           const px = x0 + idx * dx;
           const py = yScale(v, min, max);
@@ -278,17 +614,42 @@ function renderLineChart(payload: LinePayload, title: string): ReactNode {
               className={styles.line}
               fill="none"
             />
-            {points.map((p, idx) => (
-              <circle
-                key={`dot-${seriesIdx}-${idx}`}
-                cx={p.px}
-                cy={p.py}
-                r={2.5}
-                className={styles.dot}
-              >
-                <title>{`${p.label} · ${s.name}: ${p.v}`}</title>
-              </circle>
-            ))}
+            {points.map((p, idx) => {
+              const selected = isPointSelected(
+                handlers.selectedPoint,
+                seriesIdx,
+                idx,
+              );
+              return (
+                <circle
+                  key={`dot-${seriesIdx}-${idx}`}
+                  cx={p.px}
+                  cy={p.py}
+                  r={selected ? 4.5 : 2.5}
+                  className={`${styles.dot}${selected ? ` ${styles.dotSelected}` : ''}`}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={pointAriaLabel(s.name, p.label, p.v)}
+                  aria-selected={selected}
+                  data-testid={`result-renderer-chart-dot-${seriesIdx}-${idx}`}
+                  onClick={() => handlers.onPointClick(seriesIdx, idx)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handlers.onPointClick(seriesIdx, idx);
+                    }
+                  }}
+                  onMouseEnter={() =>
+                    handlers.onPointEnter(seriesIdx, idx)
+                  }
+                  onMouseLeave={handlers.onPointLeave}
+                  onFocus={() => handlers.onPointEnter(seriesIdx, idx)}
+                  onBlur={handlers.onPointLeave}
+                >
+                  <title>{`${p.label} · ${s.name}: ${p.v}`}</title>
+                </circle>
+              );
+            })}
           </g>
         );
       })}
@@ -306,10 +667,19 @@ function renderLineChart(payload: LinePayload, title: string): ReactNode {
           </text>
         );
       })}
-      {/* Legend */}
-      <g transform={`translate(${x0}, ${VIEWBOX_H - 16})`}>
+      {/* In-SVG legend text mirrors the interactive DOM <button>
+          legend. The DOM buttons carry the real a11y + keyboard
+          behaviour; these <text>s keep series names discoverable
+          inside the <svg> so screen readers that walk the
+          graphic still see them. Marked aria-hidden so SR does
+          not double-announce. */}
+      <g
+        transform={`translate(${x0}, ${VIEWBOX_H - 16})`}
+        aria-hidden="true"
+        data-testid="result-renderer-chart-legend-svg"
+      >
         {series.map((s, idx) => (
-          <g key={`legend-${idx}`} transform={`translate(${idx * 110}, 0)`}>
+          <g key={`legend-svg-${idx}`} transform={`translate(${idx * 110}, 0)`}>
             <rect
               x={0}
               y={-8}
@@ -326,53 +696,5 @@ function renderLineChart(payload: LinePayload, title: string): ReactNode {
       </g>
       <title>{title}</title>
     </g>
-  );
-}
-
-export function ChartRenderer({ node }: { node: ResultNode }) {
-  const payload = node.payload;
-
-  if (!isChartPayload(payload)) {
-    return (
-      <div
-        data-testid="result-renderer-chart-fallback"
-        data-result-id={node.id}
-        role="region"
-        aria-label={`${node.title}（图表数据无效，已降级为 JSON）`}
-      >
-        <p className={styles.fallbackNote}>
-          图表数据格式无法解析，已降级为原始 JSON（fail-soft）：
-        </p>
-        <pre className={styles.fallback}>{tryStringify(payload)}</pre>
-      </div>
-    );
-  }
-
-  const kind = payload.kind;
-  const title = `${node.title} (${kind})`;
-
-  return (
-    <div
-      className={styles.wrapper}
-      data-testid="result-renderer-chart"
-      data-result-id={node.id}
-      data-chart-kind={kind}
-      data-series-count={
-        payload.series.length /* series/label count lives in JSON for full audit */
-      }
-      role="img"
-      aria-label={`Chart: ${kind}`}
-    >
-      <svg
-        className={styles.svg}
-        viewBox={`0 0 ${VIEWBOX_W} ${VIEWBOX_H}`}
-        preserveAspectRatio="xMidYMid meet"
-        focusable="false"
-      >
-        {kind === 'bar'
-          ? renderBarChart(payload, title)
-          : renderLineChart(payload, title)}
-      </svg>
-    </div>
   );
 }
