@@ -82,7 +82,12 @@ export type IconName =
   | 'help-circle'
   | 'alert-circle'
   | 'alert-triangle'
-  | 'git-branch';
+  | 'git-branch'
+  | 'command'
+  | 'layers'
+  | 'play'
+  | 'info'
+  | 'table';
 
 interface IconProps {
   name: IconName;
@@ -561,6 +566,42 @@ const paths: Record<IconName, React.ReactNode> = {
       <circle cx="18" cy="6" r="3" />
       <circle cx="6" cy="18" r="3" />
       <path d="M18 9a9 9 0 0 1-9 9" />
+    </>
+  ),
+  // Command — keyboard command icon
+  command: (
+    <>
+      <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z" />
+    </>
+  ),
+  // Layers — stacked layers for skills count
+  layers: (
+    <>
+      <polygon points="12 2 2 7 12 12 22 7 12 2" />
+      <polyline points="2 17 12 22 22 17" />
+      <polyline points="2 12 12 17 22 12" />
+    </>
+  ),
+  // Play — execute/start action
+  play: (
+    <>
+      <polygon points="5 3 19 12 5 21 5 3" />
+    </>
+  ),
+  // Info — information icon
+  info: (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="16" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12.01" y2="8" />
+    </>
+  ),
+  // Table — table icon for tabular output
+  table: (
+    <>
+      <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4" />
+      <line x1="3" y1="9" x2="21" y2="9" />
+      <line x1="3" y1="15" x2="21" y2="15" />
     </>
   ),
 };

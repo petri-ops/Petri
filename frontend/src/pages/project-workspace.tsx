@@ -733,6 +733,8 @@ export function ProjectWorkspace(): React.ReactElement {
 
   const handleShowPlugins = useCallback(() => updateWorkspaceMode('plugins'), [updateWorkspaceMode]);
 
+  const handleNavigateToSkills = useCallback(() => navigate('/skills'), [navigate]);
+
   const handleOpenRightTerminal = useCallback(() => {
     openRightPanel('terminal');
   }, [openRightPanel]);
@@ -1692,6 +1694,7 @@ export function ProjectWorkspace(): React.ReactElement {
     handleShowScheduled,
     handleShowPlugins,
     handleShowSettings,
+    handleNavigateToSkills,
     switchToProject,
     handleSwitchConversation,
     toggleProjectExpand,

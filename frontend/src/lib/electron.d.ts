@@ -111,6 +111,62 @@ declare global {
           Array<{ id: string; currentVersion: string; latestVersion: string }>
         >;
       };
+      // G0-RS: Skills discovery & execution bridge
+      skills: {
+        discover: () => Promise<{
+          ok: boolean;
+          skills?: Array<{
+            id: string;
+            name: string;
+            version: string;
+            description: string;
+            category: string;
+            source: 'built-in' | 'installed' | 'marketplace';
+            tags: string[];
+            capabilities?: string[];
+            parameters: {
+              required: string[];
+              optional: Record<string, {
+                type: 'select' | 'number' | 'string' | 'boolean' | 'file';
+                description: string;
+                options?: string[];
+                default?: unknown;
+                min?: number;
+                max?: number;
+                step?: number;
+                accept?: string;
+                pattern?: string;
+              }>;
+            };
+            plugins: { required: string[]; optional: string[] };
+            outputs?: { primary: Array<{
+              id: string; type: string; label: string;
+              description?: string; format?: string; columns?: string[];
+            }>; secondary: Array<{
+              id: string; type: string; label: string;
+              description?: string; format?: string; columns?: string[];
+            }> };
+          }>;
+          error?: string;
+        }>;
+        execute: (
+          skillId: string,
+          params: Record<string, unknown>
+        ) => Promise<{ ok: boolean; executionId?: string; error?: string }>;
+        getExecution: (executionId: string) => Promise<{
+          ok: boolean;
+          execution?: {
+            executionId: string;
+            skillId: string;
+            status: 'pending' | 'running' | 'completed' | 'failed';
+            startedAt?: string;
+            completedAt?: string;
+            result?: unknown;
+            error?: string;
+          };
+          error?: string;
+        }>;
+      };
       // M2-9：content-plugin 文档桥（docs.tsx 运行时拉取已装教程插件）
       contentPlugins: {
         list: () => Promise<

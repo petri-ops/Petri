@@ -41,6 +41,7 @@ export interface LeftPanelContext {
   handleShowScheduled: () => void;
   handleShowPlugins: () => void;
   handleShowSettings: () => void;
+  handleNavigateToSkills: () => void;
 
   // Project / conversation switching
   switchToProject: (id: string) => void;
@@ -85,6 +86,15 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
           >
             <Icon name="settings" size={15} />
             <span>设置</span>
+          </button>
+          <button
+            type="button"
+            className={styles.leftQuickAction}
+            onClick={ctx.handleNavigateToSkills}
+            title="Skills"
+          >
+            <Icon name="puzzle" size={15} />
+            <span>Skills</span>
           </button>
         </div>
       </div>

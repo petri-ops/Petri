@@ -1,11 +1,20 @@
 // M1-1 后端就绪感知层 — 全局 Context + 5s 轮询
 // 挂在 App 根，下游用 useBackendStatus() 消费。
 // r-server 不通时由摘要概览显示降级提示。
+//
+// Phase 3 增强：添加 Gateway (3002) 健康检查聚合
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import type { BackendStatus } from '@/lib/electron';
+import type { GatewayHealthStatus } from '@/lib/gateway-client';
+
+// 增强的后端状态类型
+export interface EnhancedBackendStatus extends BackendStatus {
+  gatewayUp: boolean;
+  gatewayHealth?: GatewayHealthStatus;
+}
 
 // 初始态：检测中
-const INITIAL_STATUS: BackendStatus = {
+const INITIAL_STATUS: EnhancedBackendStatus = {
   rRuntime: false,
   pyRuntime: false,
   rServerUp: false,
@@ -14,9 +23,10 @@ const INITIAL_STATUS: BackendStatus = {
   isReady: false,
   downReason: '',
   loaded: false,
+  gatewayUp: false,
 };
 
-const Ctx = createContext<BackendStatus>(INITIAL_STATUS);
+const Ctx = createContext<EnhancedBackendStatus>(INITIAL_STATUS);
 
 async function probeHealth(url: string): Promise<boolean> {
   const controller = new AbortController();
@@ -30,17 +40,48 @@ async function probeHealth(url: string): Promise<boolean> {
   }
 }
 
-async function readBackendStatus(): Promise<BackendStatus | null> {
+async function probeGatewayHealth(): Promise<GatewayHealthStatus> {
+  try {
+    const response = await fetch('http://127.0.0.1:3005/health', {
+      signal: AbortSignal.timeout(3000),
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return {
+        gateway: true,
+        ...data,
+      };
+    }
+    return { gateway: false, error: `HTTP ${response.status}` };
+  } catch (e) {
+    return {
+      gateway: false,
+      error: e instanceof Error ? e.message : 'Connection failed',
+    };
+  }
+}
+
+async function readBackendStatus(): Promise<EnhancedBackendStatus | null> {
   const desktopStatus = await window.biof3Desktop?.backend?.status();
-  if (desktopStatus) return desktopStatus;
+  if (desktopStatus) {
+    // 添加 Gateway 探测
+    const gatewayHealth = await probeGatewayHealth();
+    return {
+      ...desktopStatus,
+      gatewayUp: gatewayHealth.gateway,
+      gatewayHealth,
+    };
+  }
   // Vite's renderer-only development mode has no preload bridge. Probe the
   // same local services so the real workspace UI remains available for visual
   // regression and accessibility acceptance; packaged builds never use this.
   if (!import.meta.env.DEV) return null;
-  const [rServerUp, pyServerUp] = await Promise.all([
+  const [rServerUp, pyServerUp, gatewayUp] = await Promise.all([
     probeHealth('http://127.0.0.1:3001/api/health'),
     probeHealth('http://127.0.0.1:3004/api/health'),
+    probeHealth('http://127.0.0.1:3005/health'),
   ]);
+  const gatewayHealth = await probeGatewayHealth();
   return {
     rRuntime: rServerUp,
     pyRuntime: pyServerUp,
@@ -50,10 +91,12 @@ async function readBackendStatus(): Promise<BackendStatus | null> {
     isReady: rServerUp,
     downReason: rServerUp ? null : '本地分析服务尚未就绪',
     loaded: true,
+    gatewayUp,
+    gatewayHealth,
   };
 }
 
-export function useBackendStatus(): BackendStatus {
+export function useBackendStatus(): EnhancedBackendStatus {
   return useContext(Ctx);
 }
 
@@ -62,7 +105,7 @@ export function BackendStatusProvider({
 }: {
   children: React.ReactNode;
 }): React.ReactElement {
-  const [status, setStatus] = useState<BackendStatus>(INITIAL_STATUS);
+  const [status, setStatus] = useState<EnhancedBackendStatus>(INITIAL_STATUS);
   const [loaded, setLoaded] = useState(false);
 
   const tick = useCallback(async () => {
