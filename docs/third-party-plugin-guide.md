@@ -248,6 +248,145 @@ Plugin SDK + fixture + artifact truth 接入。
 
 ---
 
+
+## 8.1 Skills 层（领域最佳实践封装）
+
+> 本节介绍 Plugin 之上的 Skills 抽象层：把"如何做"的知识（Prompt 模板、恢复策略、UI 提示）从 Plugin 里抽出来，使 Plugin 继续专注"能做"。
+>
+> 详细架构设计见 [`docs/architecture/skills-architecture.md`](./architecture/skills-architecture.md)。
+
+### 8.1.1 Skills 与 Plugins 的关系
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  Skills 层 (L4) — "如何做"                                   │
+│    Prompt 模板 / 恢复策略 / 用户交互模式 / 必填参数提示        │
+├──────────────────────────────────────────────────────────────┤
+│  Plugins 层 (L2) — "能做"                                    │
+│    DESeq2 / volcano-plot / clusterProfiler 等具体工具        │
+└──────────────────────────────────────────────────────────────┘
+```
+
+- **Plugin** 继续独立可用：通过 `run_tool` 直接调用，所有现有功能不受影响
+- **Skill** 是一组 Plugin + 领域知识的组合：声明 Plugin 依赖、Prompt、恢复策略
+- **向后兼容**：现有 Plugin 不需要任何改动；可选地声明为某个 Skill 的依赖
+
+### 8.1.2 Skill Manifest 示例
+
+存储在 `resources/skills/<skill-id>/skill.json`：
+
+```json
+{
+  "skillManifestVersion": 1,
+  "id": "deg-analysis-standard",
+  "name": "标准差异表达分析",
+  "version": "1.0.0",
+  "description": "从原始计数矩阵到火山图的完整 DEG 分析流程",
+  "category": "bioinformatics/ngs",
+  "tags": ["deg", "rna-seq", "deseq2"],
+  "source": "built-in",
+  "capabilities": ["r-enrichment"],
+  "plugins": {
+    "required": ["expression-qc", "deseq2", "volcano-plot"],
+    "optional": ["go-kegg", "gsea"]
+  },
+  "parameters": {
+    "required": ["dataset", "group_column"],
+    "optional": {
+      "method": {
+        "type": "select",
+        "options": ["deseq2", "edger", "limma"],
+        "default": "deseq2"
+      },
+      "padj_threshold": {
+        "type": "number",
+        "default": 0.05,
+        "min": 0,
+        "max": 1
+      }
+    }
+  },
+  "recovery_strategies": [
+    {
+      "when": "sample_group_mismatch",
+      "do": "尝试自动检测分组或请求用户确认",
+      "fallback": "提供分组模板让用户填写",
+      "recoverable": true
+    }
+  ]
+}
+```
+
+### 8.1.3 Plugin 转 Skill 的步骤
+
+如果你已有 Plugin，希望升级为 Skill 的依赖：
+
+1. 在 `resources/skills/<skill-id>/skill.json` 声明对 Plugin 的依赖：
+
+   ```json
+   "plugins": {
+     "required": ["<your-plugin-id>"]
+   }
+   ```
+
+2. 提供 Prompt 模板（在 `resources/skills/<skill-id>/prompts/` 下）：
+
+   ```
+   resources/skills/<skill-id>/
+   ├── skill.json
+   ├── prompts/
+   │   ├── system.md
+   │   └── user/
+   │       └── standard.md
+   └── README.md
+   ```
+
+3. 定义参数契约（`parameters.required` / `parameters.optional`），与 Plugin 的 `tool-definition.json` 输入对齐。
+
+4. 定义恢复策略（`recovery_strategies`），把 Plugin 的 `failureModes` 升级为更上层的恢复意图。
+
+5. 在 `resources/skills/manifest.json` 登记 Skill：
+
+   ```json
+   {
+     "skills": {
+       "<skill-id>": {
+         "id": "<skill-id>",
+         "version": "1.0.0",
+         "source": "built-in",
+         "kind": "skill",
+         "category": "bioinformatics/ngs",
+         "plugins": { "required": ["<your-plugin-id>"] }
+       }
+     }
+   }
+   ```
+
+### 8.1.4 通过 MCP 使用 Skills
+
+Skills 通过 MCP 暴露给 Agent：
+
+| MCP 工具 | 用途 |
+|---|---|
+| `list_skills` | 列出所有 Skills，支持 category/tag/source 筛选 |
+| `get_skill` | 获取 Skill 完整定义 |
+| `search_skills` | 关键词搜索 Skills |
+| `execute_skill` | 执行 Skill |
+| `can_execute_skill` | 检查 Skill 当前是否可执行 |
+
+详细 API 与示例见 [`docs/architecture/skills-architecture.md`](./architecture/skills-architecture.md) §5。
+
+### 8.1.5 关键实现位置
+
+| 模块 | 文件 |
+|---|---|
+| Skills SDK | `core/shared-backend/skills-sdk.js` |
+| Workflow Engine | `core/shared-backend/workflow-engine.js` |
+| Skill Registry | `core/shared-backend/skill-registry.js` |
+| Skill Schema | `core/shared-backend/skill-schema.js` |
+| Skill Runtime | `core/shared-backend/skill-runtime.js` |
+| 示例 Skills | `resources/skills/deg-analysis-standard/`、`go-enrichment-analysis/` |
+
 ## 9. 接入检查清单
 
 - [ ] `resources/built-in-plugins/<id>/` 目录建好，`id` 三处一致（目录/脚本/manifest key）。

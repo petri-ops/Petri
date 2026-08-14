@@ -64,4 +64,8 @@ module.exports = {
   // config-helper 也暴露（执行器/storage 内部改读它，Step 2）
   configHelper,
   aiUsageHelper,
+  // Phase 2: Tool Registry (Gateway 数据源)
+  toolRegistry: require('./tool-registry'),
+  // Phase 1: Skill Registry (Skills 层注册与发现)
+  skillRegistry: require('./skill-registry'),
 };

@@ -13,6 +13,7 @@
 const R_SERVER_HEALTH = `http://localhost:${process.env.R_SERVER_PORT || 3001}/api/health`;
 const PY_SERVER_HEALTH = `http://localhost:${process.env.PY_SERVER_PORT || 3004}/api/health`;
 const PLUMBER_HEALTH = `http://localhost:${process.env.PLUMBER_PORT || 8787}/health`;
+const GATEWAY_HEALTH = `http://localhost:${process.env.GATEWAY_PORT || 3005}/health`;
 
 /**
  * 探测一个 URL 是否可达且返回 2xx。1.5s 超时，失败返回 false（不抛）。
@@ -56,7 +57,7 @@ function mergeRuntimeStatusWithConfiguredHomes(runtimeStatus, env = process.env)
  * 聚合后端状态。
  * @param {object} opts
  * @param {object} opts.runtimeStatus - getRuntimeStatus() 返回的 { r:{installed}, python:{installed} }
- * @param {object} opts.procs - { rServer, pyServer, plumber }，每个为 spawn 返回的 ChildProcess 或 null
+ * @param {object} opts.procs - { gateway, rServer, pyServer, plumber }，每个为 spawn 返回的 ChildProcess 或 null
  * @param {function?:} opts.probeHealth - 可注入的 r-server health 探测（测试用）
  * @param {function?:} opts.probePy - 可注入的 py-server health 探测（测试用）
  * @param {function?:} opts.probePlumber - 可注入的 plumber 探测（测试用）
@@ -65,15 +66,18 @@ async function getBackendStatus({ runtimeStatus, procs, probeHealth, probePy, pr
   const rRuntime = !!runtimeStatus?.r?.installed;
   const pyRuntime = !!runtimeStatus?.python?.installed;
 
+  const gatewayAlive = isProcAlive(procs?.gateway);
   const rServerAlive = isProcAlive(procs?.rServer);
   const pyServerAlive = isProcAlive(procs?.pyServer);
   const plumberAlive = isProcAlive(procs?.plumber);
 
+  const probeG = () => probeUrl(GATEWAY_HEALTH);
   const probeH = probeHealth || (() => probeUrl(R_SERVER_HEALTH));
   const probeP = probePy || (() => probeUrl(PY_SERVER_HEALTH));
   const probePl = probePlumber || (() => probeUrl(PLUMBER_HEALTH));
 
   // 只在进程存活时才探测（进程已死则直接 false，省一次网络往返）
+  const gatewayUp = gatewayAlive && (await probeG());
   const rServerUp = rRuntime && rServerAlive && (await probeH());
   const pyServerUp = pyRuntime && pyServerAlive && (await probeP());
   const plumberUp = plumberAlive && (await probePl());
@@ -90,7 +94,7 @@ async function getBackendStatus({ runtimeStatus, procs, probeHealth, probePy, pr
     downReason = 'R 后端未就绪，点此诊断';
   }
 
-  return { rRuntime, pyRuntime, rServerUp, pyServerUp, plumberUp, isReady, downReason };
+  return { rRuntime, pyRuntime, gatewayUp, rServerUp, pyServerUp, plumberUp, isReady, downReason };
 }
 
 module.exports = { getBackendStatus, mergeRuntimeStatusWithConfiguredHomes, probeUrl };
