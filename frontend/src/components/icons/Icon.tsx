@@ -78,7 +78,11 @@ export type IconName =
   | 'square-stack'
   | 'minus'
   | 'restore'
-  | 'more-horizontal';
+  | 'more-horizontal'
+  | 'help-circle'
+  | 'alert-circle'
+  | 'alert-triangle'
+  | 'git-branch';
 
 interface IconProps {
   name: IconName;
@@ -524,6 +528,39 @@ const paths: Record<IconName, React.ReactNode> = {
       <circle cx="6" cy="12" r="1.75" />
       <circle cx="12" cy="12" r="1.75" />
       <circle cx="18" cy="12" r="1.75" />
+    </>
+  ),
+  // Help circle — help/question
+  'help-circle': (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </>
+  ),
+  // Alert circle — error/info
+  'alert-circle': (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </>
+  ),
+  // Alert triangle — warning
+  'alert-triangle': (
+    <>
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </>
+  ),
+  // Git branch — fork conversation (Lucide git-branch)
+  'git-branch': (
+    <>
+      <line x1="6" y1="3" x2="6" y2="15" />
+      <circle cx="18" cy="6" r="3" />
+      <circle cx="6" cy="18" r="3" />
+      <path d="M18 9a9 9 0 0 1-9 9" />
     </>
   ),
 };

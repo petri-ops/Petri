@@ -23,6 +23,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   createConversation as apiCreateConversation,
+  forkConversation as apiForkConversation,
   listConversations,
   type ConversationSummary,
 } from '@/components/copilot/copilotConversationsClient';
@@ -70,6 +71,9 @@ export interface UseConversationsResult {
    *  summary or null on failure. Optimistically prepends to the
    *  shared cache so the sidebar updates immediately. */
   create: (title?: string) => Promise<ConversationSummary | null>;
+  /** Fork an existing conversation, creating a new one with all messages copied.
+   *  Returns the new conversation summary with parent_id set. */
+  fork: (conversationId: string, title?: string) => Promise<ConversationSummary | null>;
 }
 
 export function useConversations(
@@ -145,8 +149,6 @@ export function useConversations(
       if (!projectId) return null;
       const created = await apiCreateConversation(title, undefined, projectId);
       if (created) {
-        // Optimistic prepend — the sidebar should reflect the new
-        // conversation immediately, even before the next refresh.
         const next = [created, ...(sharedCache.get(projectId) || [])];
         sharedCache.set(projectId, next);
         if (currentRef.current === projectId) setList(next);
@@ -156,7 +158,21 @@ export function useConversations(
     [projectId]
   );
 
-  return { list, loading, error, refresh, create };
+  const fork = useCallback(
+    async (conversationId: string, title?: string): Promise<ConversationSummary | null> => {
+      if (!projectId) return null;
+      const forked = await apiForkConversation(conversationId, title);
+      if (forked) {
+        const next = [forked, ...(sharedCache.get(projectId) || [])];
+        sharedCache.set(projectId, next);
+        if (currentRef.current === projectId) setList(next);
+      }
+      return forked;
+    },
+    [projectId]
+  );
+
+  return { list, loading, error, refresh, create, fork };
 }
 
 function normalizeProjectIds(

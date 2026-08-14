@@ -5,6 +5,24 @@
 // ============================================================
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+
+/**
+ * Slash command definitions
+ */
+export interface SlashCommand {
+  id: string;
+  label: string;
+  description: string;
+  shortcut: string | null;
+}
+
+export const SLASH_COMMANDS: SlashCommand[] = [
+  { id: 'new', label: '新建对话', description: '开始一个新的对话', shortcut: null },
+  { id: 'clear', label: '清空对话', description: '清除当前对话历史', shortcut: null },
+  { id: 'model', label: '切换模型', description: '选择 AI 模型', shortcut: null },
+  { id: 'export', label: '导出对话', description: '导出当前对话为 Markdown', shortcut: null },
+  { id: 'help', label: '帮助', description: '显示所有命令', shortcut: null },
+];
 import {
   ackRunTool,
   retryToolSummary,
@@ -15,6 +33,7 @@ import {
 } from './copilotClient';
 import {
   getConversationMessages,
+  forkConversation,
   type ConversationMessage,
 } from './copilotConversationsClient';
 import { useCopilotContext } from '@/lib/copilotContextProvider';
@@ -86,10 +105,11 @@ import {
   type ConversationPendingApproval,
   type ConversationLoopState,
 } from './conversationRunStore';
+import { useErrorFormatter } from './useErrorFormatter';
 import { deriveLoopDisplay, loopDecisionLabel } from '@/lib/loop-client';
 import { useDurableConversationLoop } from '@/hooks/useDurableConversationLoop';
 import './simple-chat.css';
-import { Icon } from '@/components/icons/Icon';
+import { Icon, type IconName } from '@/components/icons/Icon';
 import { HighlightedCode } from '@/components/ui/CodeHighlight';
 import { tools as staticTools } from '@/pages/_data';
 import { INITIAL_NAV_STATE, stepHistoryNavigation } from './chatHistoryNav';
@@ -201,6 +221,64 @@ type ApprovalRepairState =
   | { status: 'skipped'; message: string }
   | { status: 'error'; message: string };
 
+interface ExamplePrompt {
+  icon: IconName;
+  title: string;
+  description: string;
+  prompt: string;
+}
+
+const DEFAULT_EXAMPLE_PROMPTS: ExamplePrompt[] = [
+  {
+    icon: 'bar-chart',
+    title: '分析单细胞数据',
+    description: '上传你的表达矩阵，我来帮你做降维可视化',
+    prompt: '帮我分析这个单细胞RNA数据集',
+  },
+  {
+    icon: 'folder',
+    title: '解释项目结构',
+    description: '了解代码库的设计与组织方式',
+    prompt: '解释一下这个项目的代码结构',
+  },
+  {
+    icon: 'zap',
+    title: '快速开始',
+    description: '查看 AI 能帮你做什么',
+    prompt: 'BioF3 Desktop 能帮我完成哪些任务？',
+  },
+];
+
+interface ExamplePromptsProps {
+  prompts: ExamplePrompt[];
+  onSelect: (prompt: string) => void;
+}
+
+function ExamplePrompts({ prompts, onSelect }: ExamplePromptsProps): React.ReactElement {
+  return (
+    <div className="sc-example-prompts">
+      {prompts.map((item, index) => (
+        <button
+          type="button"
+          key={index}
+          className="sc-example-card"
+          onClick={() => onSelect(item.prompt)}
+          title="点击使用"
+          aria-label={item.title}
+        >
+          <div className="sc-example-icon">
+            <Icon name={item.icon} size={18} />
+          </div>
+          <div className="sc-example-content">
+            <span className="sc-example-title">{item.title}</span>
+            <span className="sc-example-desc">{item.description}</span>
+          </div>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // ChatModelPreset type + DEFAULT_CHAT_MODEL_PRESETS live in
 // `@/hooks/useAiSettings` — Plan 1.6 §4.5 [HIGH] type dedup.
 
@@ -249,8 +327,23 @@ export function SimpleChat({
   const [modelSupplierKey, setModelSupplierKey] = useState<string | null>(null);
   const [accessMenuOpen, setAccessMenuOpen] = useState(false);
   const [accessMode, setAccessMode] = useState<'full' | 'read'>('full');
+  const [forking, setForking] = useState(false);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Slash command state
+  const [slashOpen, setSlashOpen] = useState(false);
+  const [slashQuery, setSlashQuery] = useState('');
+  const [slashFocusedIndex, setSlashFocusedIndex] = useState(0);
+  const slashPanelRef = useRef<HTMLDivElement>(null);
+  const slashListRef = useRef<HTMLDivElement>(null);
+  // Filtered commands based on query
+  const filteredCommands = useMemo(() => {
+    if (!slashQuery) return SLASH_COMMANDS;
+    const q = slashQuery.toLowerCase();
+    return SLASH_COMMANDS.filter(
+      (cmd) => cmd.id.includes(q) || cmd.label.toLowerCase().includes(q) || cmd.description.toLowerCase().includes(q)
+    );
+  }, [slashQuery]);
   // T83: keep a ref to the latest messages so `regenerate` can send with the
   // stripped history synchronously (before React re-renders the state update).
   const messagesRef = useRef<SimpleMessage[]>(messages);
@@ -300,6 +393,9 @@ export function SimpleChat({
     activePreset: activeModel,
     setActive: setActiveModelId,
   } = useAiSettings();
+
+  // Error formatter hook for user-friendly error display
+  const { formatError, getTechnicalDetails } = useErrorFormatter();
 
   // Resolve file references only after a message is fully settled —
   // streaming deltas would otherwise hammer the resolver and we never want
@@ -619,10 +715,22 @@ export function SimpleChat({
   }, [conversationId, projectId]);
 
   const onInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
-    saveConversationDraft(projectId, conversationId, e.target.value);
+    const value = e.target.value;
+    setInput(value);
+    saveConversationDraft(projectId, conversationId, value);
     historyNavRef.current = INITIAL_NAV_STATE;
     resizeTextarea(e.target);
+
+    // Slash command detection
+    if (value.startsWith('/')) {
+      const query = value.slice(1);
+      setSlashQuery(query);
+      setSlashOpen(true);
+      setSlashFocusedIndex(0);
+    } else {
+      setSlashOpen(false);
+      setSlashQuery('');
+    }
   };
 
   // 自动聚焦输入框：新加载/刷新后无需先点一下才能打字。macOS 上窗口被程序化
@@ -783,6 +891,21 @@ export function SimpleChat({
     window.setTimeout(() => setRefreshing(false), 700);
   }, [refreshing]);
 
+  // Fork: create a new conversation with all messages copied from the current one.
+  const handleFork = useCallback(async () => {
+    if (!conversationId || forking) return;
+    setForking(true);
+    try {
+      const forked = await forkConversation(conversationId);
+      if (forked) {
+        await refreshConversations();
+        onConversationChange(forked.id);
+      }
+    } finally {
+      setForking(false);
+    }
+  }, [conversationId, forking, refreshConversations, onConversationChange]);
+
   // AGENT-CONCURRENCY: run the current prompt as an independent sub-agent task
   // while the primary conversation loop is busy — the user is never blocked.
   const runInBackground = useCallback(() => {
@@ -924,6 +1047,39 @@ export function SimpleChat({
   }, [accessMode, approvalRepair.status, approvePending, pendingApproval, streaming]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Handle slash command navigation
+    if (slashOpen) {
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSlashFocusedIndex((prev) => Math.max(0, prev - 1));
+        return;
+      }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSlashFocusedIndex((prev) => Math.min(filteredCommands.length - 1, prev + 1));
+        return;
+      }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const cmd = filteredCommands[slashFocusedIndex];
+        if (cmd) executeSlashCommand(cmd.id);
+        return;
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setSlashOpen(false);
+        setSlashQuery('');
+        return;
+      }
+      // If user types something other than part of query (like space after /), close panel
+      if (e.key === ' ' && input === '/') {
+        e.preventDefault();
+        setSlashOpen(false);
+        setSlashQuery('');
+        return;
+      }
+    }
+
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       const direction = e.key === 'ArrowUp' ? 'up' : 'down';
       // 历史源：本会话已发送的用户消息，最新在前（反序）。
@@ -989,8 +1145,72 @@ export function SimpleChat({
     setQueuedPrompts([]);
   }, [onConversationChange]);
 
-  // Expose via ref-like pattern through props is not needed here;
-  // parent controls conversationId directly.
+  // Slash command handler
+  const executeSlashCommand = useCallback((commandId: string) => {
+    switch (commandId) {
+      case 'new':
+        void newConversation();
+        break;
+      case 'clear':
+        setMessages([]);
+        clearConversationDraft(projectId, conversationId);
+        break;
+      case 'model':
+        setModelMenuOpen((current) => current ? null : 'model');
+        break;
+      case 'export': {
+        const markdown = displayMessages
+          .map((m) => `### ${m.role === 'user' ? '用户' : 'AI'}\n\n${m.content}\n`)
+          .join('\n---\n\n');
+        const blob = new Blob([`# 对话导出\n\n> 导出时间: ${new Date().toLocaleString()}\n\n---\n\n${markdown}`], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `conversation-${Date.now()}.md`;
+        a.click();
+        URL.revokeObjectURL(url);
+        break;
+      }
+      case 'help':
+        setSlashQuery('');
+        break;
+    }
+    // Close panel and clear input
+    setSlashOpen(false);
+    setSlashQuery('');
+    setInput('');
+    historyNavRef.current = INITIAL_NAV_STATE;
+    clearConversationDraft(projectId, conversationId);
+    if (taRef.current) taRef.current.style.height = 'auto';
+  }, [newConversation, projectId, conversationId, displayMessages]);
+
+  // Close slash panel on outside click
+  useEffect(() => {
+    if (!slashOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (slashPanelRef.current && !slashPanelRef.current.contains(e.target as Node)) {
+        setSlashOpen(false);
+        setSlashQuery('');
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [slashOpen]);
+
+  // Handle example prompt selection
+  const handleExampleSelect = useCallback((prompt: string) => {
+    setInput(prompt);
+    saveConversationDraft(projectId, conversationId, prompt);
+    taRef.current?.focus();
+  }, [projectId, conversationId]);
+
+  // Determine which example prompts to show (context-aware)
+  const examplePrompts = useMemo(() => {
+    // For now, return default prompts; can be extended for context awareness
+    return DEFAULT_EXAMPLE_PROMPTS;
+  }, []);
+
+  const examplePromptsToShow = displayMessages.length === 0 ? examplePrompts : [];
 
   const accessModeLabel = accessMode === 'full' ? '完全访问' : '只读模式';
   const modelGroups = modelPresets.reduce<Array<{
@@ -1049,6 +1269,9 @@ export function SimpleChat({
               </div>
               <p>开始新的对话</p>
               <span>在下方输入框中提问</span>
+              {examplePromptsToShow.length > 0 && (
+                <ExamplePrompts prompts={examplePromptsToShow} onSelect={handleExampleSelect} />
+              )}
             </div>
           )}
           {displayMessages.map((m, i) => {
@@ -1094,6 +1317,18 @@ export function SimpleChat({
                         <HighlightedCode code={code} language={language} />
                       )) : undefined}
                     />
+                    {m.error && m.role === 'assistant' && (() => {
+                      const formatted = formatError(m.content);
+                      const techDetails = getTechnicalDetails(m.content);
+                      return (
+                        <ErrorBanner
+                          message={formatted.userMessage}
+                          severity={formatted.severity}
+                          showDetails={formatted.showDetails}
+                          technicalDetails={techDetails}
+                        />
+                      );
+                    })()}
                     {m.role === 'assistant' && m.summaryUnavailable && m.retryToolJobId && summaryRetryState[m.retryToolJobId] !== 'done' && (() => {
                       const tj = m.retryToolJobId!;
                       const attempts = summaryRetryAttempts[tj] ?? 0;
@@ -1186,6 +1421,36 @@ export function SimpleChat({
           className="sc-input-area"
           style={{ ['--sc-composer-width' as string]: `${composerWidth}px` }}
         >
+          {/* Slash command panel */}
+          {slashOpen && (
+            <div className="sc-slash-panel" ref={slashPanelRef}>
+              <div className="sc-slash-header">
+                <span className="sc-slash-title">命令</span>
+                <span className="sc-slash-hint">↑↓ 导航 · Enter 执行 · Esc 关闭</span>
+              </div>
+              <div className="sc-slash-list" ref={slashListRef}>
+                {filteredCommands.length === 0 ? (
+                  <div className="sc-slash-empty">未找到匹配命令</div>
+                ) : (
+                  filteredCommands.map((cmd, index) => (
+                    <button
+                      key={cmd.id}
+                      type="button"
+                      className={`sc-slash-item ${index === slashFocusedIndex ? 'sc-slash-item-focused' : ''}`}
+                      onClick={() => executeSlashCommand(cmd.id)}
+                      onMouseEnter={() => setSlashFocusedIndex(index)}
+                    >
+                      <span className="sc-slash-item-label">{cmd.label}</span>
+                      <span className="sc-slash-item-desc">{cmd.description}</span>
+                    </button>
+                  ))
+                )}
+              </div>
+              {slashQuery === '' && filteredCommands.length > 0 && (
+                <div className="sc-slash-help-hint">输入 / 或命令名称搜索</div>
+              )}
+            </div>
+          )}
           <div className="sc-composer">
             <div className="sc-composer-body">
               <textarea
@@ -1219,6 +1484,18 @@ export function SimpleChat({
                 >
                   <Icon name="refresh" size={16} className={refreshing ? 'sc-icon-spin' : undefined} />
                 </button>
+                {conversationId && (
+                  <button
+                    type="button"
+                    className="sc-composer-icon-btn"
+                    title="创建分支（复制当前对话到新会话）"
+                    aria-label="创建分支"
+                    disabled={forking}
+                    onClick={() => void handleFork()}
+                  >
+                    <Icon name="git-branch" size={16} />
+                  </button>
+                )}
                 <div className="sc-access-picker">
                   <button
                     type="button"
@@ -1534,6 +1811,45 @@ export function compactStageConclusion(content: string, maxLength = 240): string
     : normalized;
   if (firstSentence.length <= maxLength) return firstSentence;
   return `${firstSentence.slice(0, Math.max(1, maxLength - 1)).trimEnd()}…`;
+}
+
+interface ErrorBannerProps {
+  message: string;
+  severity: 'error' | 'warning' | 'info';
+  showDetails: boolean;
+  technicalDetails?: string;
+}
+
+function ErrorBanner({ message, severity, showDetails, technicalDetails }: ErrorBannerProps): React.ReactElement {
+  const [detailsExpanded, setDetailsExpanded] = useState(false);
+
+  const severityClass = `sc-error-${severity}`;
+  const iconName: IconName = severity === 'error' ? 'alert-circle' : severity === 'warning' ? 'alert-triangle' : 'help-circle';
+
+  return (
+    <div className={`sc-error-banner ${severityClass}`} role="alert">
+      <div className="sc-error-header">
+        <Icon name={iconName} size={16} />
+        <span className="sc-error-message">{message}</span>
+      </div>
+      {showDetails && technicalDetails && (
+        <button
+          type="button"
+          className="sc-error-toggle"
+          onClick={() => setDetailsExpanded((prev) => !prev)}
+          aria-expanded={detailsExpanded}
+        >
+          {detailsExpanded ? '收起详情' : '查看详情'}
+          <Icon name={detailsExpanded ? 'chevron-up' : 'chevron-down'} size={12} />
+        </button>
+      )}
+      {showDetails && detailsExpanded && technicalDetails && (
+        <details className="sc-error-details" open>
+          <pre className="sc-error-details-content">{technicalDetails}</pre>
+        </details>
+      )}
+    </div>
+  );
 }
 
 function ToolActivityList({

@@ -32,6 +32,8 @@ export interface LeftPanelContext {
   renameConversation: (conversationId: string, title: string) => Promise<boolean>;
   archiveProject: (projectId: string) => Promise<boolean>;
   archiveConversation: (conversationId: string) => Promise<boolean>;
+  /** Fork an existing conversation and switch to the new one */
+  forkConversation: (conversationId: string, title?: string) => Promise<ConversationSummary | null>;
 
   // Workspace routing
   workspaceMode: WorkspaceMode;
@@ -302,6 +304,7 @@ function ConversationItem({ conversation, projectId, ctx, isCurrent }: {
   const [title, setTitle] = React.useState(conversation.title);
   const conversationRun = useConversationRun(conversation.id);
   const isRunning = conversationRun?.status === 'running';
+  const hasBranch = Boolean(conversation.parent_id);
 
   React.useEffect(() => setTitle(conversation.title), [conversation.title]);
 
@@ -319,7 +322,7 @@ function ConversationItem({ conversation, projectId, ctx, isCurrent }: {
 
   return (
     <li
-      className={`${styles.convItem} ${isCurrent && conversation.id === ctx.activeConvId ? styles.convItemActive : ''}`}
+      className={`${styles.convItem} ${isCurrent && conversation.id === ctx.activeConvId ? styles.convItemActive : ''} ${hasBranch ? styles.convItemBranch : ''}`}
       onClick={() => {
         if (!isCurrent) ctx.switchToProject(projectId);
         ctx.handleSwitchConversation(conversation.id);
@@ -327,6 +330,8 @@ function ConversationItem({ conversation, projectId, ctx, isCurrent }: {
     >
       {isRunning ? (
         <span className={styles.convRunningDot} title="正在后台处理" aria-label="正在后台处理" />
+      ) : hasBranch ? (
+        <span className={styles.convBranchIndicator} title={`分支自 ${conversation.parent_id}`} aria-label="分支对话">⤴</span>
       ) : (
         <Icon name="message-circle" size={12} />
       )}
@@ -360,18 +365,31 @@ function ConversationItem({ conversation, projectId, ctx, isCurrent }: {
         </button>
       )}
       {!editing && (
-        <button
-          type="button"
-          className={styles.convItemTrashBtn}
-          onClick={(event) => {
-            event.stopPropagation();
-            void ctx.archiveConversation(conversation.id);
-          }}
-          title={isRunning ? '会话正在后台处理，完成后可移入回收站' : '移入回收站'}
-          disabled={isRunning}
-        >
-          <Icon name="trash" size={11} />
-        </button>
+        <>
+          <button
+            type="button"
+            className={styles.convItemForkBtn}
+            onClick={(event) => {
+              event.stopPropagation();
+              void ctx.forkConversation(conversation.id);
+            }}
+            title="创建分支"
+          >
+            <Icon name="git-branch" size={11} />
+          </button>
+          <button
+            type="button"
+            className={styles.convItemTrashBtn}
+            onClick={(event) => {
+              event.stopPropagation();
+              void ctx.archiveConversation(conversation.id);
+            }}
+            title={isRunning ? '会话正在后台处理，完成后可移入回收站' : '移入回收站'}
+            disabled={isRunning}
+          >
+            <Icon name="trash" size={11} />
+          </button>
+        </>
       )}
     </li>
   );
