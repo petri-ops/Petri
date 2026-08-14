@@ -46,6 +46,27 @@ const isDevMode =
   process.argv.includes("--dev") ||
   process.env.ELECTRON_IS_DEV === "1" ||
   process.env.NODE_ENV === "development";
+
+/**
+ * File-type whitelist for the file:open-path IPC channel (SEC-002).
+ * Only extensions in this set can be opened via shell.openPath.
+ */
+const ALLOWED_OPEN_EXTENSIONS = Object.freeze([
+  // Text & data
+  ".txt", ".md", ".json", ".jsonc", ".csv", ".tsv", ".xml", ".html", ".htm",
+  ".css", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs",
+  ".yaml", ".yml", ".toml", ".ini", ".cfg", ".conf", ".env",
+  ".log", ".sh", ".bash", ".zsh", ".fish", ".ps1", ".bat", ".cmd",
+  ".py", ".r", ".R", ".sql", ".graphql", ".vue", ".svelte",
+  // Images (commonly previewed)
+  ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".ico", ".bmp",
+  // Documents & archives
+  ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+  ".zip", ".tar", ".gz", ".bz2", ".xz", ".rar",
+  // Genomics / BioF3 domain
+  ".h5ad", ".loom", ".mtx", ".h5", ".rds", ".rdata",
+  ".maf", ".vcf", ".bed", ".gtf", ".gff", ".fasta", ".fa", ".fastq", ".fq",
+]);
 const rendererDevUrl =
   process.env.BIOF3_RENDERER_DEV_URL || "http://localhost:3000";
 
@@ -458,6 +479,7 @@ function setupDesktopEnv(backendPorts) {
   process.env.R_SERVER_PORT = String(backendPorts.r);
   process.env.PY_SERVER_PORT = String(backendPorts.python);
   process.env.PLUMBER_PORT = String(backendPorts.plumber);
+  process.env.GATEWAY_PORT = String(backendPorts.gateway);
   if (backendPorts.renderer) {
     process.env.BIOF3_RENDERER_PORT = String(backendPorts.renderer);
     process.env.BIOF3_RENDERER_ORIGIN = `http://localhost:${backendPorts.renderer}`;
@@ -515,19 +537,73 @@ function reserveAvailablePort(preferredPort) {
 }
 
 async function selectBackendPorts() {
+  const gateway = await reserveAvailablePort(3005);
   const r = await reserveAvailablePort(3001);
   const python = await reserveAvailablePort(3004);
   const plumber = await reserveAvailablePort(8787);
   const renderer = isDevMode ? null : await reserveAvailablePort(3002);
+  if (gateway !== 3005) console.warn(`[desktop] port 3005 occupied; using ${gateway} for gateway`);
   if (r !== 3001) console.warn(`[desktop] port 3001 occupied; using ${r} for r-server`);
   if (python !== 3004) console.warn(`[desktop] port 3004 occupied; using ${python} for py-server`);
   if (plumber !== 8787) console.warn(`[desktop] port 8787 occupied; using ${plumber} for plumber`);
   if (renderer && renderer !== 3002) console.warn(`[desktop] port 3002 occupied; using ${renderer} for renderer`);
-  return { r, python, plumber, renderer };
+  return { gateway, r, python, plumber, renderer };
+}
+
+// ── 启动 Backend Gateway（统一入口协调层）───────────────────────
+/**
+ * 启动 Gateway（统一入口，路由到 r-server/py-server）。
+ * Gateway 协调层聚合健康检查、统一工具注册表和跨语言任务路由。
+ * @param {string} reason - 调用来源
+ * @returns {{ ok: boolean, error?: string, pid?: number }}
+ */
+function startGateway(reason = "boot") {
+  const gatewayPath = resolveCore("gateway", "server.js");
+  if (!fs.existsSync(gatewayPath)) {
+    console.warn("[desktop] gateway not found, skipping:", gatewayPath);
+    return { ok: false, error: "gateway script not found" };
+  }
+
+  try {
+    gatewayProc = spawn(NODE_BIN, [gatewayPath], {
+      env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" },
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+  } catch (e) {
+    console.error("[desktop] gateway spawn failed:", e.message);
+    gatewayProc = null;
+    return { ok: false, error: e.message };
+  }
+
+  _createLogStream("gateway");
+  gatewayProc.stdout.on("data", (d) => {
+    const text = d.toString().trim();
+    if (text) {
+      console.log(`[gateway] ${text}`);
+      _writeLog("gateway", `[gateway] ${text}`);
+    }
+  });
+  gatewayProc.stderr.on("data", (d) => {
+    const text = d.toString().trim();
+    if (text) {
+      console.error(`[gateway] ${text}`);
+      _writeLog("gateway", `[gateway:ERR] ${text}`);
+    }
+  });
+  gatewayProc.on("exit", (code) => {
+    console.log(`[desktop] gateway exited: ${code}`);
+    gatewayProc = null;
+  });
+
+  console.log(
+    `[desktop] gateway spawned (pid=${gatewayProc.pid}) on :${process.env.GATEWAY_PORT} — reason=${reason}`,
+  );
+  return { ok: true, pid: gatewayProc.pid };
 }
 
 // ── 启动 r-server（子进程 spawn，避免原生模块 V8 版本冲突）─────
 let rServerProc = null;
+let gatewayProc = null;
 const rServerSupervisor = createOwnedBackendSupervisor({
   name: "r-server",
   spawnProcess: () => {
@@ -892,6 +968,8 @@ async function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       webviewTag: true,
+      sandbox: true,
+      webSecurity: true,
     },
   });
 
@@ -1293,6 +1371,12 @@ function setupCsp() {
     const scriptSrc = isDevMode
       ? "script-src 'self' 'unsafe-inline'; "
       : "script-src 'self'; ";
+    // dev mode also allows 127.0.0.1:* so renderer health probes to
+    // gateway(:3005) / py-server(:3004) / r-server(:3001) hit BOTH
+    // `localhost` and `127.0.0.1` forms without CSP violations.
+    const localNet = isDevMode
+      ? "http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* "
+      : "http://localhost:* ws://localhost:* ";
     callback({
       responseHeaders: {
         ...details.responseHeaders,
@@ -1301,8 +1385,8 @@ function setupCsp() {
             scriptSrc +
             "style-src 'self' 'unsafe-inline'; " +
             "img-src 'self' data: blob: http://localhost:* ; " +
-            "connect-src 'self' http://localhost:* ws://localhost:* ; " +
-            "frame-src 'self' http://localhost:* ; " +
+            "connect-src 'self' " + localNet + "; " +
+            "frame-src 'self' " + localNet + "; " +
             "font-src 'self' data: ; " +
             "worker-src 'self' blob: ; " +
             "object-src 'none';",
@@ -1312,7 +1396,7 @@ function setupCsp() {
   });
   console.log(
     isDevMode
-      ? "[desktop] CSP dev mode (Vite React refresh inline preamble allowed)"
+      ? "[desktop] CSP dev mode (Vite React refresh inline preamble allowed; 127.0.0.1:* whitelisted)"
       : "[desktop] CSP hardened (unsafe-eval disabled)",
   );
 }
@@ -1341,6 +1425,7 @@ function setupRuntimeIpc() {
       return await getBackendStatus({
         runtimeStatus: mergeRuntimeStatusWithConfiguredHomes(getRuntimeStatus()),
         procs: {
+          gateway: gatewayProc,
           rServer: rServerProc,
           pyServer: pyServerProc,
           plumber: plumberProc,
@@ -1520,6 +1605,13 @@ function setupFileDialogIpc() {
       }
       if (!fs.existsSync(targetPath)) {
         return { ok: false, error: "path does not exist" };
+      }
+      const ext = path.extname(targetPath).toLowerCase();
+      if (ext && !ALLOWED_OPEN_EXTENSIONS.includes(ext)) {
+        return {
+          ok: false,
+          error: `file type '${ext}' is not allowed to be opened; supported types: ${ALLOWED_OPEN_EXTENSIONS.join(", ")}`,
+        };
       }
       const error = await shell.openPath(targetPath);
       return error ? { ok: false, error } : { ok: true };
@@ -1784,6 +1876,15 @@ function setupTerminalIpc() {
       const logDir = _getLogDir();
       const processes = [
         {
+          id: "gateway",
+          label: "Backend Gateway",
+          command: `${NODE_BIN} ${resolveCore("gateway", "server.js")}`,
+          status: gatewayProc && !gatewayProc.killed ? "running" : "stopped",
+          pid: gatewayProc?.pid || null,
+          logPath: path.join(logDir, "gateway.log"),
+          output: _readLogTail(path.join(logDir, "gateway.log")),
+        },
+        {
           id: "r-server",
           label: "R 后端",
           command: `${NODE_BIN} ${resolveCore("r-server", "server.js")}`,
@@ -2009,7 +2110,9 @@ async function main() {
 
   // 1. 启动后端服务
   // r-server 常驻；py-server 也在应用启动时预热，减少首次使用等待。
+  // Gateway 协调层统一入口，在 r-server 之后启动。
   await startRServer();
+  await startGateway();
   // plumber 仍按需启停 — 只在 FigCode 重绘时通过 IPC plumber:start 触发
 
   // 2. 加载已安装插件
@@ -2066,7 +2169,7 @@ app.on("activate", () => {
 app.on("before-quit", () => {
   _clearPlumberIdleTimer();
   rServerSupervisor.shutdown("app-quit");
-  for (const proc of [pyServerProc, plumberProc]) {
+  for (const proc of [gatewayProc, pyServerProc, plumberProc]) {
     if (proc) {
       try {
         proc.kill();

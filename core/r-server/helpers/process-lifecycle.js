@@ -228,6 +228,22 @@ async function recoverStaleActiveJobs({
   return recovered;
 }
 
+/**
+ * Marks stale jobs as failed without sending signals.
+ *
+ * By design, this function does NOT kill processes because the process lifecycle
+ * manager cannot safely associate a stale job record with its target process.
+ * The job record may be orphaned, the PID may have been reused, or the process
+ * may belong to a different job due to fork/exec patterns. Sending SIGKILL to
+ * an unrelated process would be a safety violation. Instead, we mark the job
+ * record as failed and rely on the next lifecycle sweep or manual intervention.
+ *
+ * @param {Object} params
+ * @param {import('better-sqlite3').Database} params.db
+ * @param {number} params.cutoff - Timestamp threshold for stale detection
+ * @param {Function} [params.now] - Time provider (defaults to Date.now)
+ * @param {number[]} [params.ownedJobIds] - Job IDs to exclude from marking
+ */
 async function markUnownedStaleJobs({ db, cutoff, now = Date.now, ownedJobIds = [] }) {
   const owned = [...new Set(Array.from(ownedJobIds, (jobId) => String(jobId)))];
   const excludeOwned = owned.length > 0
