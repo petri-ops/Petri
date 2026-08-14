@@ -1,11 +1,11 @@
 /**
  * core/r-server/mcp/ide-tools/index.js
  *
- * IDE MCP 工具集入口（Phase 1 + Phase 1.5）。
- * Tools: 17 个 ide_* 工具
+ * IDE MCP 工具集入口（Phase 1 + Phase 1.5 + Phase 3）。
+ * Tools: 18 个 ide_* 工具
  *   - Phase 1: file (7) + terminal (5)
  *   - Phase 1.5: search (1) + diff (1)
- *   - Phase 2/3: editor / git 等在此扩展
+ *   - Phase 3: git (4) — git_diff / git_log / git_show / git_blame
  *
  * Resources: 2 个只读数据源（resources/list + resources/read）
  *   - ide://projects
@@ -25,6 +25,10 @@ const { fileToolDefinitions, HANDLERS: FILE_HANDLERS } = require('./file');
 const { terminalToolDefinitions, HANDLERS: TERMINAL_HANDLERS } = require('./terminal');
 const { searchToolDefinitions, HANDLERS: SEARCH_HANDLERS } = require('./search');
 const { diffToolDefinitions, HANDLERS: DIFF_HANDLERS } = require('./diff');
+const { gitDiffToolDefinitions, HANDLERS: GIT_DIFF_HANDLERS } = require('./git-diff');
+const { gitLogToolDefinitions, HANDLERS: GIT_LOG_HANDLERS } = require('./git-log');
+const { gitShowToolDefinitions, HANDLERS: GIT_SHOW_HANDLERS } = require('./git-show');
+const { gitBlameToolDefinitions, HANDLERS: GIT_BLAME_HANDLERS } = require('./git-blame');
 const {
   getIdeResourceDefinitions: getResDefs,
   readIdeResource: readRes,
@@ -36,6 +40,10 @@ const ALL_HANDLERS = {
   ...TERMINAL_HANDLERS,
   ...SEARCH_HANDLERS,
   ...DIFF_HANDLERS,
+  ...GIT_DIFF_HANDLERS,
+  ...GIT_LOG_HANDLERS,
+  ...GIT_SHOW_HANDLERS,
+  ...GIT_BLAME_HANDLERS,
 };
 
 function getIdeToolDefinitions() {
@@ -44,6 +52,10 @@ function getIdeToolDefinitions() {
     ...terminalToolDefinitions(),
     ...searchToolDefinitions(),
     ...diffToolDefinitions(),
+    ...gitDiffToolDefinitions(),
+    ...gitLogToolDefinitions(),
+    ...gitShowToolDefinitions(),
+    ...gitBlameToolDefinitions(),
   ];
 }
 

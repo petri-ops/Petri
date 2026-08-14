@@ -45,7 +45,7 @@ G0-RS-P0 资格与证据纠偏
 
 当前重新排序：UX1A～UX1H、`G0-RS-TL1 / UI-120`、`UX1G-1`、`UX1G-2 / UI-123`、`AGENT-CONCURRENCY / UI-140`、UI-141 与 UI-142 均已按各自证据边界完成；当前无 active 工作包，RS-P7 继续 deferred。
 
-`G0-IDE-MCP-TOOLS Phase 1 + 1.5` 已于 2026-08-14 收口（`docs/g0-ide-mcp-tools-plan.md` §11）：14 个 `ide_*` 工具 + 2 个 MCP Resources（`ide://projects` + `ide://git-status`），56 个定向测试 + 222/225 回归通过；整包 `implemented_unverified`，不进 `qualificationEligible`。Phase 2（Monaco 编辑器 9 个工具）继续 `deferred`；Phase 3（Git CLI 4 个工具：diff/log/show/blame）启动门已开，将在独立小工作包完成。
+`G0-IDE-MCP-TOOLS Phase 1 + 1.5 + 3` 已于 2026-08-14 收口（`docs/g0-ide-mcp-tools-plan.md` §11 + §Phase 3 收口）：总计 18 个 `ide_*` 工具（7 文件 + 5 终端 + 1 search + 1 diff + 4 git）+ 2 个 MCP Resources（`ide://projects` + `ide://git-status`），78/78 定向测试全 PASS；Phase 3 复用 Phase 1.5 `diff.js` 的 `parseUnifiedHunks` 并通过 `core/r-server/mcp/ide-tools/diff-helpers.js` 共享，未引入 `simple-git` 依赖。整包 `implemented_unverified`，不进 `qualificationEligible`。Phase 2（Monaco 编辑器 9 个工具）继续 `deferred`。
 
 `G0-RS-P0`～`G0-RS-P3` 已依次收口；P4 Core 已形成 18/18 离线实现检查点并保持 `implemented_unverified`。P3 建立 `ResultStudioContextEnvelope v1` 与 `contextToken`：artifact/family、job、revision（含 current 与 ordinal）、脚本相对路径与 sha256、参数摘要、插件可编辑参数与声明动作、selection、validation、reproducibility 全部由后端从 SQLite/`tool_jobs`/插件 descriptor 重新投影，前端 activeArtifact 只作线索。模型可见 schema 新增 7 个工具（注册表共 32 个），6 个 `*_in_context` 工具的参数中不含 toolJobId/artifactId/revisionId/artifactFamilyId/selectionId；写操作强制校验 token，陈旧上下文返回 `context_token_stale`，intent 指向别的 Revision 返回 `context_intent_mismatch`，"归因只能到 Job"与跨项目 revision 一律 fail-closed。公开进度固定为「理解意图 → 判断影响 → 执行/重算 → 验证 → 候选可比较」五阶段，不展示隐藏推理链。证据为 `acceptance/g0-result-studio/rs-p3-agent-context.json`（20/20，non-qualifying）。
 

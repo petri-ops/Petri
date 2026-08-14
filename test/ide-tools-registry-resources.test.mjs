@@ -41,11 +41,11 @@ test('readIdeMcpResource rejects out-of-allowlist git-status path', () => {
   assert.match(res.error, /allowlist|safe|resolve under/);
 });
 
-test('listTools still includes all 14 ide_* tools after Phase 1.5 extension', async () => {
+test('listTools still includes all 18 ide_* tools after Phase 1.5 + Phase 3 extension', async () => {
   const tools = await registry.listTools();
   const ideTools = tools.filter((t) => t.name.startsWith('ide_'));
-  // 7 file + 5 terminal + 1 search + 1 diff = 14
-  assert.equal(ideTools.length, 14, `expected 14 ide_* tools, got ${ideTools.length}: ${ideTools.map((t) => t.name).join(',')}`);
+  // 7 file + 5 terminal + 1 search + 1 diff + 4 git = 18
+  assert.equal(ideTools.length, 18, `expected 18 ide_* tools, got ${ideTools.length}: ${ideTools.map((t) => t.name).join(',')}`);
   for (const expected of [
     'ide_file_diff',
     'ide_file_search_text',

@@ -202,9 +202,41 @@
 - **Phase 1（文件 7 + 终端 5）** — `qualified`，2026-08-14 实现+测试一次通过
 - **Phase 1.5（search 1 + diff 1 + resources 2）** — `qualified`，2026-08-14 实现+测试一次通过（首轮 diff 解析器 2 fail，已修；其余直通过）
 - **Phase 2（Monaco 编辑器 + 9 个工具）** — `deferred` 直至 `frontend/src/components/editor/*` 有可工作入口
-- **Phase 3（Git CLI 4 个工具：diff / log / show / blame）** — `deferred` 但启动门已开；2026-08-14 已验证 `git` CLI 路径
-- **整体包状态**：`qualified for Phase 1 + 1.5；Phase 2/3 deferred`，由独立实现检查点 + 测试 evidence 支撑
+- **Phase 3（Git CLI 4 个工具：diff / log / show / blame）** — `qualified`（2026-08-14），全部封装系统 `git` CLI；未引入 `simple-git` 依赖
+- **Phase 2（Monaco 编辑器 + 9 个工具）** — 继续 `deferred`；待 `frontend/src/components/editor/*` 有可工作入口或 IDE-Transformation 后启动
+- **整体包状态**：`qualified for Phase 1 + 1.5 + 3；Phase 2 deferred`；由独立实现检查点 + 测试 evidence 支撑
 - **资格边界**：`implemented_unverified` — 不进 `qualificationEligible`，不外推到 Provider 调用、packaged Electron、其他 OS
+
+### Phase 3 收口（2026-08-14）
+
+**实现提交**：见 git log（4 个 git-*.js 工具文件 + diff-helpers.js + index.js 集成 + 4 个测试 + impact-map.json）
+
+**新增工具**（4 个，总计 18 个 `ide_*` 工具）：
+- `ide_git_diff` — `git diff [-u]`，统一走 `diff-helpers.parseUnifiedHunks`；可指 staged；maxLines hard cap 5000
+- `ide_git_log` — `git log` 解析 `%H%x00%h%x00%an%x00%aI%x00%s`；`limit` 默认 20，hard cap 200；可选 `-- <file>` 过滤
+- `ide_git_show` — `git show`；先用 `git rev-parse --verify` 校验 commit 引用，避免 shell 注入
+- `ide_git_blame` — `git blame --line-porcelain`，返回 `{lineNumber, sha, shortSha, author, isoDate, content}`；hard cap 10000 行
+
+**复用与依赖**：
+- 复用 `core/r-server/mcp/ide-tools/diff.js` 的 `parseUnifiedHunks`（未修改 Phase 1.5 文件）；新文件 `diff-helpers.js` 复用 + 复制 5 行 `summarize`（避免动 frozen 代码）
+- 全部走 `core/r-server/mcp/ide-tools/path-allowlist.js` 白名单（cwd / os.tmpdir() / ~/.biof3/logs）
+- 全部经 `git rev-parse --git-dir` 验证仓库存在
+
+**测试证据**（4 新文件 / 22 个测试 + Phase 1.5 期望数从 14 → 18）：
+- `test/ide-tools-git-diff.test.mjs` — 5/5
+- `test/ide-tools-git-log.test.mjs` — 5/5
+- `test/ide-tools-git-show.test.mjs` — 6/6（含 SHA 注入校验用例）
+- `test/ide-tools-git-blame.test.mjs` — 6/6
+- **IDE 工具总计 78/78 通过**（33 Phase 1 + 23 Phase 1.5 + 22 Phase 3）
+
+**Phase 3 验收门**：
+- [x] 4 个 `ide_git_*` 工具 spawnSync 实际 git CLI 正常运行
+- [x] 22 个 Phase 3 测试全部通过
+- [x] Phase 1+1.5 旧 56 个测试仍全部通过
+- [x] Phase 1.5 registry-resources 期望从 14 → 18（数字断言更新）
+- [x] 78/78 IDE 工具定向测试全 PASS
+- [x] `npm run docs:check` PASS（58 registered）
+- [x] `npm run ui:audit:check` PASS（120 UI 编号）
 
 ## 12. 当前 active 范围（2026-08-14）
 

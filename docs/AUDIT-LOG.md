@@ -101,7 +101,7 @@
 
 | ✅ 已收口（Phase 1.5）| 2026-08-14 | **G0-IDE-MCP-TOOLS Phase 1.5 完成**：新增 `ide_file_search_text` (ripgrep 包装) + `ide_file_diff` (Apple diff 包装)；新增 2 个 MCP Resources (`ide://projects`, `ide://git-status`)，registry + server.js 接入 `resources/list` + `resources/read`。总计 56 个 IDE 工具定向测试通过（Phase 1 33 + Phase 1.5 23），222/225 回归测试通过（test-affected / p6-product-acceptance 2 项为预先失败，与本工作包无关） | Phase 2（编辑器 + 搜索 9 个工具）须待 Monaco 集成就绪后再启动；Phase 3（Git 4 个 CLI 工具）启动门已缓和（git + rg CLI 已验证可用），可考虑以 CLI 包装代替 simple-git 依赖 |
 
-| ✅ 已收口（工作包收口）| 2026-08-14 | **G0-IDE-MCP-TOOLS 工作包收口**（`docs/g0-ide-mcp-tools-plan.md` §11）：Phase 1 (12 tools) + Phase 1.5 (2 tools + 2 resources) 均 `qualified`；Phase 2 (Monaco 编辑器 9 tools) 因 Monaco 未集成仍 `deferred`；Phase 3 (Git CLI 4 tools: diff/log/show/blame) 启动门已开，将在独立小工作包完成。下一步唯一 active：Phase 3 Git CLI 包装（不引入 `simple-git` 依赖）。整体包 `implemented_unverified`，不进 `qualificationEligible` | Phase 2 重开条件：Monaco 集成 + frontend/src/components/editor/* 可用入口 |
+| ✅ 已收口（工作包收口）| 2026-08-14 | **G0-IDE-MCP-TOOLS 工作包收口**（`docs/g0-ide-mcp-tools-plan.md` §11 + §Phase 3 收口）：Phase 1 (12 tools) + Phase 1.5 (2 tools + 2 resources) + Phase 3 (4 git tools) 均 `qualified`；总计 18 个 `ide_*` 工具，78/78 定向测试全 PASS。Phase 2 (Monaco 编辑器 9 tools) 仍 `deferred`。整体包 `implemented_unverified`，不进 `qualificationEligible`，不引入 `simple-git` 依赖 | Phase 2 重开条件：Monaco 集成 + frontend/src/components/editor/* 可用入口 |
 
 ## 广播规则
 
