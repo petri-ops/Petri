@@ -19,6 +19,7 @@ import {
 } from './toolActivity';
 import { fetchLoopRuns } from '@/lib/loop-client';
 import type { LoopPhaseEvent, LoopIterationEvent, LoopRunCompact } from '@/lib/loop-client';
+import { formatErrorForUser } from './errorMessages';
 
 export interface ConversationPendingApproval {
   ackToken: string;
@@ -250,11 +251,12 @@ export function startConversationRun(options: StartConversationRunOptions): bool
   const finish = (status: 'done' | 'error', error?: Error) => {
     if (runs.get(conversationId)?.status !== 'running') return;
     const completedAt = Date.now();
+    const formattedError = error ? formatErrorForUser(error) : null;
     replaceRun(conversationId, (current) => ({
       ...current,
       status,
-      assistantContent: error
-        ? `⚠️ ${error.message || '请求失败'}`
+      assistantContent: error && formattedError
+        ? formattedError.userMessage
         : current.assistantContent,
       assistantPending: false,
       assistantError: status === 'error',
@@ -591,10 +593,11 @@ export function startSubAgentTask(options: StartSubAgentTaskOptions): void {
   const finishSub = (status: 'done' | 'error', error?: Error) => {
     if (!currentTaskId) return;
     if (subTaskRuns.get(currentTaskId)?.status !== 'running') return;
+    const formattedError = error ? formatErrorForUser(error) : null;
     replaceSubTask(currentTaskId, (c) => ({
       ...c,
       status,
-      assistantContent: error ? `⚠️ ${error.message || '请求失败'}` : c.assistantContent,
+      assistantContent: error && formattedError ? formattedError.userMessage : c.assistantContent,
       assistantPending: false,
       assistantError: status === 'error',
       processingDurationMs: Math.max(0, Date.now() - c.startedAt),
@@ -727,10 +730,11 @@ function subscribeSubAgentResumed(
   const finish = (status: 'done' | 'error', error?: Error) => {
     const cur = subTaskRuns.get(taskId);
     if (!cur || cur.status !== 'running') return;
+    const formattedError = error ? formatErrorForUser(error) : null;
     replaceSubTask(taskId, (c) => ({
       ...c,
       status,
-      assistantContent: error ? `⚠️ ${error.message || '请求失败'}` : c.assistantContent,
+      assistantContent: error && formattedError ? formattedError.userMessage : c.assistantContent,
       assistantPending: false,
       assistantError: status === 'error',
       processingDurationMs: Math.max(0, Date.now() - c.startedAt),

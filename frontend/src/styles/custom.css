@@ -68,6 +68,7 @@
   --biof3-on-solid: #ffffff;
   --biof3-warning-bg: var(--biof3-status-warning-bg);
   --biof3-warning-text: var(--biof3-status-warning-fg);
+  --biof3-warning: var(--biof3-status-warning);
   --biof3-danger-bg: var(--biof3-status-error-bg);
   --biof3-border: #e2e8f0;
   --biof3-border-strong: #cbd5e1;
@@ -173,6 +174,7 @@
   --biof3-on-solid: #0b1220;
   --biof3-warning-bg: var(--biof3-status-warning-bg);
   --biof3-warning-text: var(--biof3-status-warning-fg);
+  --biof3-warning: var(--biof3-status-warning);
   --biof3-danger-bg: var(--biof3-status-error-bg);
   --biof3-border: #243149;
   --biof3-border-strong: #324466;
