@@ -78,7 +78,11 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 后续 UI-AUDIT-FIX 补登为 UI-159（in_progress）。豁免同提交台账要求。
   '3000a069171bb6404719ddd797d1b6e64e92d53c',
 ])
-const UI_ID_PATTERN = /\bUI-\d{3}\b/g
+// UI-### issue ids: numeric series (UI-001..UI-999) and the named
+// AGENTWB namespace (UI-AGENTWB-001..UI-AGENTWB-999) used by the
+// Agent Workbench enhancement plan. Both must appear in commit
+// subjects or in the matching audit row.
+const UI_ID_PATTERN = /\bUI-(?:\d{3}|AGENTWB-\d{3})\b/g
 
 function git(args, options = {}) {
   return execFileSync('git', args, {
