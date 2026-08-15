@@ -4,6 +4,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { SkillCard } from './SkillCard';
 import { SkillDetail } from './SkillDetail';
@@ -49,6 +50,9 @@ export default function SkillsPage(): React.ReactElement {
   const [executingSkillId, setExecutingSkillId] = useState<string | null>(null);
 
   const stats = computeStats(skills);
+
+  const navigate = useNavigate();
+  const handleReturnHome = useCallback(() => navigate('/'), [navigate]);
 
   const handleViewDetail = useCallback((skill: Skill) => {
     setSelectedSkill(skill);
@@ -100,6 +104,15 @@ export default function SkillsPage(): React.ReactElement {
         <div className={styles.loadingState}>
           <Icon name="alert-circle" size={24} />
           <span className={styles.loadingText}>{error}</span>
+          <button
+            type="button"
+            className={styles.retryBtn}
+            onClick={handleReturnHome}
+            title="返回首页"
+          >
+            <Icon name="arrow-left" size={14} />
+            <span>返回首页</span>
+          </button>
         </div>
       </div>
     );
