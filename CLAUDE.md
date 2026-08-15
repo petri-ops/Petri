@@ -6,13 +6,13 @@
 
 ## 启动顺序
 
-1. 上方 `@AGENTS.md` 会在 Claude Code 启动时自动导入唯一工程指令；完整遵守其内容。
+1. 上方 `@AGENTS.md` 会在 Claude Code 启动时自动导入唯一工程指令；完整遵守其内容。`AGENTS.md` 当前阶段纪律段（"G0 长期开发期"）是最高优先级约束，所有 Agent 必须遵守。
 2. 会话开始先读 [`docs/AUDIT-LOG.md`](./docs/AUDIT-LOG.md)，优先处理活跃的红色阻塞与绿色待合并项。
 3. 核对 Git 状态、最近提交和实际证据，再从以下 canonical 入口恢复当前状态：
-   - [`docs/README.md`](./docs/README.md)
-   - [`docs/next-steps-roadmap.md`](./docs/next-steps-roadmap.md)
-   - [`docs/project-workspace-handoff.md`](./docs/project-workspace-handoff.md)
-   - [`docs/DOC-REGISTRY.json`](./docs/DOC-REGISTRY.json) 登记的当前唯一 active 工作包
+ - [`docs/README.md`](./docs/README.md)
+ - [`docs/next-steps-roadmap.md`](./docs/next-steps-roadmap.md)
+ - [`docs/project-workspace-handoff.md`](./docs/project-workspace-handoff.md)
+ - [`docs/DOC-REGISTRY.json`](./docs/DOC-REGISTRY.json) 登记的当前唯一 active 工作包
 4. 创建或修改计划、选择验收范围、阶段收口、归档或处理 Worktree 时，使用 `$biof3-project-governance`。Claude Code 通过 [`.claude/skills/biof3-project-governance`](./.claude/skills/biof3-project-governance) 发现它；canonical 实体仍是 [`.agents/skills/biof3-project-governance/SKILL.md`](./.agents/skills/biof3-project-governance/SKILL.md)。
 
 ## 一致性边界

@@ -3,7 +3,7 @@
 **日期**：2026-08-15
 **分支**：main（ahead 26 commits / 0 uncommitted，未 push）
 **状态**：✅ 6/6 步骤 PASS（dev Electron 边界内 4 工作包二次实机 + 三轴对齐）
-**qualificationEligible 推荐**：false（保持原状 — 详见第 8 节）
+**qualificationEligible 推荐**：G0 开发期常态 · 不外推 packaged/Provider/GA（详见第 8 节）
 **对应工作包**：
 - UI-AGENTWB-004（A4 SimpleChat 注入桥，`verified` → `dev Electron 边界内 verified`，新增 dev 实机覆盖）
 - UI-AGENTWB-005（P1.3 Chart / Image 渲染器，`in_progress` → `dev Electron 边界内 verified`）
@@ -232,7 +232,7 @@ npm run test:files --prefix frontend -- \
 - 「最近处理记录」追加 T-AW-014 ✅ 已 verified 笔录 1 条；
 - 「当前待处理项」无变更（4 工作包本就未列入；CONTRACT-DRIFT-001 / DIST-STALENESS 仍生效）。
 
-`qualificationEligible` **保持 false**：
+`qualificationEligible` **G0 开发期常态 · 不外推 packaged/Provider/GA**：
 - packaged 仍未 Provider / GA 矩阵覆盖；
 - dev Electron 边界内 verified 不外推到 packaged 之外；
 - T-AW-013 / T-AW-014 仅补全 4 工作包证据等级为「前端 + dev + packaged 三轴」，不构成 qualifying bundle。
@@ -258,4 +258,4 @@ npm run test:files --prefix frontend -- \
 
 ---
 
-**结论**：T-AW-014 完成 dev Electron 边界内 4 工作包二次实机核对，6/6 步骤 PASS。UI-AGENTWB-005/006/007 由 `in_progress` 升 `dev Electron 边界内 verified`，UI-AGENTWB-004 扩展 dev 实机覆盖。`qualificationEligible` 维持 false（packaged 仍未 Provider / GA；dev Electron 不外推）。报告与 audit 同步更新，未触动任何 src / renderer / bridge 代码，未跑全量门禁。
+**结论**：T-AW-014 完成 dev Electron 边界内 4 工作包二次实机核对，6/6 步骤 PASS。UI-AGENTWB-005/006/007 由 `in_progress` 升 `dev Electron 边界内 verified`，UI-AGENTWB-004 扩展 dev 实机覆盖。`qualificationEligible` 为 G0 开发期常态 · 不外推 packaged/Provider/GA（G1+ 阶段事项）。报告与 audit 同步更新，未触动任何 src / renderer / bridge 代码，未跑全量门禁。
