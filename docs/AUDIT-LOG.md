@@ -4,7 +4,7 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-12（UI-037 已完成 Windows 开发态 Electron 的双会话并行、离开视图续跑、持久化隔离与同会话防重入闭环；既有验收记录保持不变）
+最后更新：2026-08-15（T-AW-013 packaged Electron 第三轴实机核对 6/6 PASS；A4 / P2 / P1.5 / UI-AGENTWB-007 证据等级升级为「前端 + dev + packaged 三轴」；🟢契约偏差 CONTRACT-DRIFT-001 已挂 ui-productization-audit.md 行 244 脚注；🟢建议 release-pipeline 加 dist staleness check；qualificationEligible 维持 false）
 
 ## 当前待处理项
 
@@ -29,9 +29,19 @@
 
 | 🟡延期 | 2026-08-10 | **Windows 代码签名缺失（任务 #55）**：`electron-builder.yml` 仅 macOS 配置 afterSign，Windows 段无证书/签名配置；当前 Windows 安装包为未签名 NSIS（`dist/BioF3 Setup 0.0.1-rc.7.exe`）。未签名包在 Windows SmartScreen/Defender 下会触发未知发布者警告，属发布门禁缺口，非功能缺陷 | 阻塞于**代码签名证书**：需发布负责人提供 EV/标准代码签名证书并配置 `electron-builder.yml` win 段 afterSign/证书路径。证书到位前不得伪造 `release-contract.json` 的 windows-x64.supported 翻转——当前 `supported` 仍诚实保持 false（reason 已写明"制品存在且通过验证，仅缺签名/公证"）。用户裁决：标记 deferred，待证书到位再闭环 |
 | 🟡延期 | 2026-08-10 | **i18n 资源抽离未做（任务 #91）**：全仓无 react-i18next/i18n 框架，用户可见字符串散落于组件（grep 命中多为 `Intl.`/locale 巧合，非 i18n 体系）。抽离需引入 i18n 框架、建立语言资源文件、改造所有文案调用点，属较大前端架构决策 | 阻塞于**产品/架构决策**：是否国际化、支持哪些语言、采用 react-i18next 还是自研轻量方案。决策前不强行抽离（避免半吊子框架增加维护成本）。用户裁决：标记 deferred，待产品明确国际化范围后再立项 |
-当前无 🔴 阻塞项（macOS R/Python 运行时 OSS 404 已于 2026-08-09 修复收口，两端均 200 + 端到端验证通过）；没有 🟢 待合并项。`UI-124 / MODEL-ANTHROPIC-NATIVE` 已按 `docs/ui-productization-audit.md`「key-unavailable 例外」纪律收口；`G0-SDC-1 / G0-SDC-2` 已于 2026-08-06 以 fixture + 门禁脚本收口，canonical evidence 为 `acceptance/g0-scientific-data-contract/sdc1-complete.json` 与 `sdc2-semantic-binder.json`。待 `BIOTEST_ANTHROPIC_KEY` 可用时新开 audit 跑 live 模式补充实机 evidence（不触发回退）。
+| 🟢契约偏差 | 2026-08-15 | **T-AW-013 CONTRACT-DRIFT-001：ui-productization-audit.md 行 244 resultNodes 描述偏向 brief，与实际 renderer 源码 4 处不一致**：(1) table 实际合同 `columns: string[]` / `rows: Array<Array<cell>>`（brief 写的 object-of-cells 走 fallback）；(2) chart 实际合同 `kind: "bar"|"line"` + `series: [{name,values:number[]}]`（brief 写的 `chartType` + `series:[{name,color}]` + `data: number[][]`）；(3) `variant: "dataframe"` 不在 `ALLOWED_VARIANTS = ['default','success','warning','error','info']`（见 `types.ts` line 24、`extraRenderers.tsx` line 121 守卫），整组 resultNodes 被 parser reject；(4) TextRenderer 单分支（`renderers/TextRenderer.tsx` line 26-41），无 `result-renderer-text-fallback` testid，畸形 payload 落到 `result-renderer-text` + 字符串化 JSON dump | 已挂 ui-productization-audit.md 行 244 CONTRACT-DRIFT-001 脚注。修复方向：后续笔录**引用 src 文件位置 + 复制 renderer 注释里的合同**，不再泛泛描述。下次 P1.* / A* / UI-AGENTWB-* 笔录必须以 renderer 源码为准；P2 / P1.5 / A4 / UI-AGENTWB-007 既在 4 个 in_progress 工作包内仅在收口转 verified 时统一刷新笔录 |
+
+| 🟢建议 | 2026-08-15 | **T-AW-013 DIST-STALENESS：dist/mac-arm64/BioF3.app 内嵌 asar 来自 2026-08-14 15:32 build**，早于 P1.1 / P1.2 / P1.3 / P1.5 / P2 / A4 / UI-AGENTWB-007 全部 commit；`src/preload.js` 缺 `window.biof3.agentWorkbenchFlags` 桥接，`src/main.js` 缺 `--agent-workbench-flags=` CLI 解析。worker 用 `npx asar pack` + `npm run build:spa` 重 pack 完成三轴验证（原 asar 备份 `/tmp/app.asar.backup`，主 Agent 已还原出厂 dist） | 建议 release-pipeline 加 dist staleness check：每次 `npm run build:mac` / `build:win` 前比较 `dist/*/Resources/app.asar` mtime 与 `src/` + `frontend/src/` 最新 commit 时间，若 mtime < 最新 commit mtime 则 fail-closed 提示重新 build。本条不阻塞开发，但与 P7 / 发布流水线强相关，必须在 release-pipeline 收口前实现 |
+
+当前无 🔴 阻塞项（macOS R/Python 运行时 OSS 404 已于 2026-08-09 修复收口，两端均 200 + 端到端验证通过）；🟢 两条已登记（CONTRACT-DRIFT-001 + DIST-STALENESS，详见上方「当前待处理项」表），均不阻塞当前唯一 active 工作包（Agent Workbench 系列）的单工作包串行纪律。`UI-124 / MODEL-ANTHROPIC-NATIVE` 已按 `docs/ui-productization-audit.md`「key-unavailable 例外」纪律收口；`G0-SDC-1 / G0-SDC-2` 已于 2026-08-06 以 fixture + 门禁脚本收口，canonical evidence 为 `acceptance/g0-scientific-data-contract/sdc1-complete.json` 与 `sdc2-semantic-binder.json`。待 `BIOTEST_ANTHROPIC_KEY` 可用时新开 audit 跑 live 模式补充实机 evidence（不触发回退）。
 
 ## 最近处理记录
+
+| 2026-08-15 | **T-AW-013 Agent Workbench packaged Electron 实机核对已收口**：dist/mac-arm64/BioF3.app 启动 + CDP attach + 4 个 renderer + CSV(EF BB BF BOM)/MD(文本分隔) + fallback 全链路 6/6 步骤通过；4 个 in_progress 工作包（A4 / P2 / P1.5 / UI-AGENTWB-007）证据等级从「前端单测 + 治理门」升为「前端 + dev Electron + packaged Electron 三轴」，`qualificationEligible` 维持 false（Provider / GA 链路未覆盖）。报告 `docs/t-aw-013-packaged-verification-2026-08-15.md` | T-AW-013 / AGENT-WORKBENCH-3RD-AXIS
+
+| 2026-08-15 | **T-AW-013 契约偏差 4 处已登记**：(1) table `variant:"dataframe"` 不在 `ALLOWED_VARIANTS`（parser 整组 reject）；(2) table `columns:[{key,label}]`/`rows:[{...}]` 实际合同为 `columns:string[]`/`rows:Array<Array<cell>>`；(3) chart `chartType`/`data:number[][]` 实际合同为 `kind`/`series:[{name,values}]`；(4) brief 的 `result-renderer-text-fallback` testid 不存在（TextRenderer 单分支）。`docs/ui-productization-audit.md` 行 244 笔录未引用实际 renderer source | T-AW-013 / CONTRACT-DRIFT
+
+| 2026-08-15 | **T-AW-013 真实发现：dist/mac-arm64/BioF3.app 内嵌 asar 来自 2026-08-14 15:32 build**，早于 P1.1/P1.2/P1.3/P1.5/P2/A4/UI-AGENTWB-007 全部 commit；`src/preload.js` 缺 `window.biof3.agentWorkbenchFlags` 桥接，`src/main.js` 缺 `--agent-workbench-flags=` CLI 解析。worker 用 `npx asar pack`（5s）+ `npm run build:spa`（3.5s）重 pack 完成三轴验证（未走完整 electron-builder）。原 asar 备份于 `/tmp/app.asar.backup` 可恢复；建议下一步在 release-pipeline 加 staleness check | T-AW-013 / DIST-STALENESS
 
 | 日期 | 结果 | 检查点 |
 | --- | --- | --- |

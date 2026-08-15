@@ -631,6 +631,26 @@
         "result-card",
         "extra-renderers"
       ]
+    },
+    {
+      "id": "AGENT-WORKBENCH-T-AW-013",
+      "path": "docs/t-aw-013-packaged-verification-2026-08-15.md",
+      "kind": "audit",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "agent-workbench-t-aw-013-packaged-verification",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "agent",
+        "workbench",
+        "t-aw-013",
+        "packaged",
+        "verification",
+        "cdp",
+        "csv-md",
+        "result-card"
+      ]
     }
   ]
 }
