@@ -10,6 +10,31 @@
 
 const { contextBridge, ipcRenderer } = require('electron');
 
+const AGENT_WORKBENCH_FLAG_CHANNEL = 'biof3:agent-workbench-flags';
+const AGENT_WORKBENCH_FLAGS = { extraRenderers: false };
+
+ipcRenderer.on(AGENT_WORKBENCH_FLAG_CHANNEL, (_event, payload) => {
+  if (!payload || typeof payload.extraRenderers !== 'boolean') return;
+  AGENT_WORKBENCH_FLAGS.extraRenderers = payload.extraRenderers;
+});
+
+contextBridge.exposeInMainWorld('biof3', {
+  agentWorkbenchFlags: {
+    get extraRenderers() {
+      return AGENT_WORKBENCH_FLAGS.extraRenderers;
+    },
+    set: (value) => ipcRenderer.invoke(AGENT_WORKBENCH_FLAG_CHANNEL, value === true),
+    onChange: (callback) => {
+      if (typeof callback !== 'function') return () => {};
+      const listener = (_event, payload) => {
+        if (payload && typeof payload.extraRenderers === 'boolean') callback(payload.extraRenderers);
+      };
+      ipcRenderer.on(AGENT_WORKBENCH_FLAG_CHANNEL, listener);
+      return () => ipcRenderer.removeListener(AGENT_WORKBENCH_FLAG_CHANNEL, listener);
+    },
+  },
+});
+
 ipcRenderer.on('app:soft-refresh', () => {
   try {
     window.dispatchEvent(new CustomEvent('biof3:soft-refresh'));

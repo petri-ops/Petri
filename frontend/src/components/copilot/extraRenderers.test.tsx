@@ -8,13 +8,14 @@
 // ============================================================
 
 import React from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   AssistantResultNodes,
   EXTRA_RENDERERS_STORAGE_KEY,
   parseAssistantResultNodes,
   readExtraRenderersFlag,
+  resolveInitialFlag,
   useExtraRenderersFlag,
 } from './extraRenderers';
 import type { ResultNode } from './types';
@@ -23,6 +24,7 @@ import { registerDefaultRenderers } from './renderers';
 afterEach(() => {
   cleanup();
   window.localStorage.removeItem(EXTRA_RENDERERS_STORAGE_KEY);
+  delete (window as { biof3?: unknown }).biof3;
 });
 
 function makeNode(overrides: Partial<ResultNode> = {}): ResultNode {
@@ -100,13 +102,70 @@ describe('readExtraRenderersFlag / useExtraRenderersFlag', () => {
     expect(readExtraRenderersFlag()).toBe(false);
   });
 
-  it('the React hook reports the current flag value', () => {
+  // ── UI-AGENTWB-007 — 分层读取优先级 ─────────────────────────
+  // bridge (window.biof3.agentWorkbenchFlags.extraRenderers) >
+  // localStorage > 默认 false
+
+  it('resolveInitialFlag prefers the bridge value over a contradictory localStorage key', () => {
     window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, 'true');
+    (window as { biof3?: unknown }).biof3 = {
+      agentWorkbenchFlags: { extraRenderers: false },
+    };
+    expect(resolveInitialFlag()).toBe(false);
+  });
+
+  it('resolveInitialFlag uses the localStorage fallback when the bridge is absent', () => {
+    window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, 'true');
+    expect(resolveInitialFlag()).toBe(true);
+  });
+
+  it('resolveInitialFlag defaults to false when no bridge and no localStorage exist', () => {
+    expect(resolveInitialFlag()).toBe(false);
+  });
+
+  it('resolveInitialFlag treats bridge=true as the source of truth even when localStorage=false', () => {
+    window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, '');
+    (window as { biof3?: unknown }).biof3 = {
+      agentWorkbenchFlags: { extraRenderers: true },
+    };
+    expect(resolveInitialFlag()).toBe(true);
+  });
+
+  it('the React hook re-reads the flag when the bridge broadcasts a change', () => {
+    let current = false;
+    const listeners: Array<(value: boolean) => void> = [];
+    (window as { biof3?: unknown }).biof3 = {
+      agentWorkbenchFlags: {
+        get extraRenderers() {
+          return current;
+        },
+        set: async (value: boolean) => {
+          current = value === true;
+          listeners.forEach((cb) => cb(current));
+          return { ok: true, extraRenderers: current };
+        },
+        onChange: (cb: (value: boolean) => void) => {
+          listeners.push(cb);
+          return () => {
+            const idx = listeners.indexOf(cb);
+            if (idx >= 0) listeners.splice(idx, 1);
+          };
+        },
+      },
+    };
+
     function Probe() {
       const flag = useExtraRenderersFlag();
       return <div data-testid="probe">{flag ? 'on' : 'off'}</div>;
     }
     render(<Probe />);
+    expect(screen.getByTestId('probe').textContent).toBe('off');
+
+    // Bridge flips to on; hook should re-read via the onChange callback.
+    act(() => {
+      current = true;
+      listeners.forEach((cb) => cb(true));
+    });
     expect(screen.getByTestId('probe').textContent).toBe('on');
   });
 

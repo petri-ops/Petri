@@ -24,6 +24,23 @@ const path = require("path");
 const fs = require("fs");
 const nodeNet = require("net");
 const { spawn, spawnSync } = require("child_process");
+
+const AGENT_WORKBENCH_FLAG_CHANNEL = "biof3:agent-workbench-flags";
+const AGENT_WORKBENCH_FLAG_NAME = "extraRenderers";
+
+function parseAgentWorkbenchFlags(argv = process.argv, env = process.env) {
+  const cliValue = argv.find((arg) => arg.startsWith("--agent-workbench-flags="));
+  const raw = cliValue
+    ? cliValue.slice("--agent-workbench-flags=".length)
+    : String(env.BIOF3_AGENT_WORKBENCH_FLAGS || "");
+  const enabled = raw
+    .split(",")
+    .map((value) => value.trim())
+    .includes(AGENT_WORKBENCH_FLAG_NAME);
+  return { extraRenderers: enabled };
+}
+
+const agentWorkbenchFlags = parseAgentWorkbenchFlags();
 const { createOwnedBackendSupervisor } = require("./owned-backend-supervisor");
 const { createMacOssUpdater } = require("./macos-oss-updater");
 const { redactSensitiveText } = require("./diagnostic-redaction");
@@ -883,6 +900,13 @@ function startContentSync() {
 // ── 主窗口 ─────────────────────────────────────────────────────
 let mainWindow = null;
 
+function publishAgentWorkbenchFlags() {
+  if (!mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isDestroyed()) return;
+  mainWindow.webContents.send(AGENT_WORKBENCH_FLAG_CHANNEL, {
+    extraRenderers: agentWorkbenchFlags.extraRenderers === true,
+  });
+}
+
 // BioF3 owns local backend ports and must run as a single application
 // instance. A repeated launch focuses the existing window instead of starting
 // another R/Python service stack.
@@ -1079,6 +1103,7 @@ async function createWindow() {
   // 页面加载完成
   mainWindow.webContents.on("did-finish-load", () => {
     console.log("[renderer] page loaded");
+    publishAgentWorkbenchFlags();
   });
 
   // macOS 焦点诊断。开发启动器通过 LaunchServices 获取 GUI 会话；这里只
@@ -1124,6 +1149,15 @@ async function createWindow() {
   };
   windowForEvents.on("maximize", () => publishMaximizedState(true));
   windowForEvents.on("unmaximize", () => publishMaximizedState(false));
+}
+
+function setupAgentWorkbenchFlagsIpc() {
+  ipcMain.handle(AGENT_WORKBENCH_FLAG_CHANNEL, (event, value) => {
+    if (event?.sender !== mainWindow?.webContents) return { ok: false, extraRenderers: agentWorkbenchFlags.extraRenderers, error: 'unauthorized' };
+    agentWorkbenchFlags.extraRenderers = value === true;
+    publishAgentWorkbenchFlags();
+    return { ok: true, extraRenderers: agentWorkbenchFlags.extraRenderers };
+  });
 }
 
 // ── IPC：窗口控制（配合 frame:false 自定义标题栏）──────────────
@@ -2126,6 +2160,7 @@ async function main() {
 
   // 5. 设置 IPC
   setupWindowIpc();
+  setupAgentWorkbenchFlagsIpc();
   setupAiSettingsIpc();
   setupComputeSettingsIpc();
   setupPluginIpc();

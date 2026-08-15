@@ -1,0 +1,95 @@
+.section {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--biof3-border, var(--biof3-border-color, #2a3545));
+  border-radius: 10px;
+  background: var(--biof3-bg-subtle, rgba(127, 127, 127, 0.06));
+}
+
+.heading h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--biof3-text, inherit);
+}
+
+.heading p,
+.description,
+.featureLabel small {
+  margin: 4px 0 0;
+  color: var(--biof3-text-tertiary, inherit);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.featureRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.featureLabel {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  color: var(--biof3-text, inherit);
+  cursor: pointer;
+}
+
+.featureLabel > span {
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.toggleControl {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  flex: 0 0 auto;
+}
+
+.toggle {
+  width: 36px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--biof3-accent, #4f9cf9);
+  cursor: pointer;
+}
+
+.toggle:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.toggleControl:hover .toggle {
+  outline: 2px solid color-mix(in srgb, var(--biof3-accent, #4f9cf9) 35%, transparent);
+  outline-offset: 2px;
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--biof3-accent, #4f9cf9);
+  outline-offset: 2px;
+}
+
+.description {
+  min-width: 3em;
+  text-align: right;
+}
+
+@media (max-width: 560px) {
+  .featureRow {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .toggleControl {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .description {
+    text-align: left;
+  }
+}

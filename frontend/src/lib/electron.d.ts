@@ -306,6 +306,13 @@ declare global {
         NODE_ENV?: string;
       };
     };
+    biof3?: {
+      agentWorkbenchFlags: {
+        readonly extraRenderers: boolean;
+        set: (value: boolean) => Promise<{ ok: boolean; extraRenderers: boolean; error?: string }>;
+        onChange: (callback: (value: boolean) => void) => () => void;
+      };
+    };
   }
 }
 

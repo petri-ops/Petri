@@ -21,7 +21,7 @@
 // ============================================================
 
 import React from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   EXTRA_RENDERERS_STORAGE_KEY,
@@ -38,6 +38,7 @@ import { registerDefaultRenderers } from './renderers';
 afterEach(() => {
   cleanup();
   window.localStorage.removeItem(EXTRA_RENDERERS_STORAGE_KEY);
+  delete (window as { biof3?: unknown }).biof3;
 });
 
 function makeAssistantMessage(meta: Record<string, unknown> | null | undefined): ConversationMessage {
@@ -195,5 +196,60 @@ describe('SimpleChat A4 bridge — restoreSimpleMessage + render branch', () => 
     render(<SimpleChatMessageBody message={{ content: 'w', resultNodes: sm.resultNodes }} />);
     const wrapper = screen.getByTestId('sc-extra-result-nodes');
     expect(wrapper.querySelectorAll('article').length).toBe(2);
+  });
+
+  // ── UI-AGENTWB-007 — bridge 优先 + Settings dispatchEvent 同步 ──
+
+  it('bridge extraRenderers=true wins over a contradictory localStorage key', () => {
+    window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, '');
+    const listeners: Array<(value: boolean) => void> = [];
+    (window as { biof3?: unknown }).biof3 = {
+      agentWorkbenchFlags: {
+        get extraRenderers() {
+          return true;
+        },
+        set: async () => ({ ok: true, extraRenderers: true }),
+        onChange: (cb: (value: boolean) => void) => {
+          listeners.push(cb);
+          return () => {
+            const idx = listeners.indexOf(cb);
+            if (idx >= 0) listeners.splice(idx, 1);
+          };
+        },
+      },
+    };
+
+    const nodes = [makeNode({ id: 'a', title: 'Bridge On' })];
+    render(<SimpleChatMessageBody message={{ content: 'wrapper', resultNodes: nodes }} />);
+
+    // Bridge says on, localStorage says off → bridge wins, card mounts.
+    expect(screen.getByTestId('sc-extra-result-nodes')).toBeTruthy();
+    expect(screen.getByText('Bridge On')).toBeTruthy();
+
+    // Cleanup listeners to avoid leaking between tests.
+    listeners.length = 0;
+  });
+
+  it('a storage event dispatched from the Settings panel flips the hook without a remount', () => {
+    function FlagProbe(): React.ReactElement {
+      const flag = useExtraRenderersFlag();
+      return <div data-testid="flag-probe">{flag ? 'on' : 'off'}</div>;
+    }
+
+    render(<FlagProbe />);
+    expect(screen.getByTestId('flag-probe').textContent).toBe('off');
+
+    // Simulate the Settings panel flipping the toggle: write localStorage
+    // and dispatch the same StorageEvent the panel emits via notifyStorage.
+    act(() => {
+      window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, 'true');
+      window.dispatchEvent(
+        new StorageEvent('storage', {
+          key: EXTRA_RENDERERS_STORAGE_KEY,
+          newValue: 'true',
+        }),
+      );
+    });
+    expect(screen.getByTestId('flag-probe').textContent).toBe('on');
   });
 });

@@ -16,6 +16,7 @@ import { useAutoUpdate } from '@/hooks/useAutoUpdate';
 import type { ComputeSettings } from '@/lib/electron';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 import { useRuntimeResourceSnapshot } from '@/hooks/useRuntimeResourceSnapshot';
+import { ExperimentalFeaturesSection } from '@/components/settings/ExperimentalFeaturesSection';
 import { deleteProject, listProjects, setProjectStatus } from '@/lib/project-store';
 import type { Project } from '@/lib/project-types';
 import {
@@ -47,18 +48,19 @@ interface Props {
   onClose: () => void;
 }
 
-type SettingsSection = 'general' | 'models' | 'compute' | 'usage' | 'maintenance';
+type SettingsSection = 'general' | 'models' | 'compute' | 'usage' | 'experimental' | 'maintenance';
 
 const SETTINGS_SECTIONS: Array<{
   id: SettingsSection;
   label: string;
   description: string;
-  icon: 'settings' | 'brain' | 'cpu' | 'wrench';
+  icon: 'settings' | 'brain' | 'cpu' | 'wrench' | 'flag';
 }> = [
   { id: 'general', label: '常规', description: '外观与应用偏好', icon: 'settings' },
   { id: 'models', label: '模型接口', description: 'URL、模型与 Key', icon: 'brain' },
   { id: 'compute', label: '计算与数据', description: '执行位置与存储', icon: 'cpu' },
   { id: 'usage', label: '用量与资源', description: '成本、缓存与机器状态', icon: 'cpu' },
+  { id: 'experimental', label: '实验特性', description: 'Agent 工作台等实验开关', icon: 'flag' },
   { id: 'maintenance', label: '隐私与维护', description: '反馈、诊断与更新', icon: 'wrench' },
 ];
 
@@ -1476,6 +1478,16 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
             <ExportDiagnostic />
           </div>
         </div>
+          </section>
+        )}
+
+        {activeSection === 'experimental' && (
+          <section className="biof3-settings-section">
+            <div className="biof3-settings-section__heading">
+              <h3>实验特性</h3>
+              <p>这些开关在开发态已验证，但默认关闭；打开前请确认你的使用场景。</p>
+            </div>
+            <ExperimentalFeaturesSection bridge={window.biof3?.agentWorkbenchFlags} />
           </section>
         )}
         </div>
