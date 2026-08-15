@@ -5,9 +5,9 @@
 //
 // This module owns the A4 contract surface only:
 //   1. A feature flag hook (`useExtraRenderersFlag`) that resolves
-//      `window.biof3.agentWorkbenchFlags.extraRenderers` first, then the
-//      localStorage key for the standalone development SPA, and defaults to
-//      **off** when neither source enables it.
+//      `window.biof3.agentWorkbenchFlags.getExtraRenderers()` first, then
+//      the localStorage key for the standalone development SPA, and
+//      defaults to **off** when neither source enables it.
 //   2. A tolerant `parseAssistantResultNodes` parser that turns
 //      a raw `message.meta.resultNodes` payload into a typed
 //      `ResultNode[] | null`. Any shape error collapses to
@@ -46,13 +46,19 @@ const ALLOWED_VARIANTS: ReadonlyArray<ResultCardVariant> = [
  * Read the feature flag synchronously. Lives outside React so the
  * caller can pick a default without forcing a re-render on every
  * keystroke inside the storage event loop.
+ *
+ * The bridge exposes `getExtraRenderers()` as a synchronous method
+ * rather than a property because Electron 30's `contextBridge` freezes
+ * getter accessors on the renderer side, which would otherwise pin the
+ * value to a one-time snapshot taken at first access. Calling the method
+ * on every read returns the live value held in the preload closure.
  */
 export function resolveInitialFlag(): boolean {
   if (typeof window === 'undefined') return false;
 
   const bridgeFlags = window.biof3?.agentWorkbenchFlags;
-  if (bridgeFlags && typeof bridgeFlags.extraRenderers === 'boolean') {
-    return bridgeFlags.extraRenderers;
+  if (bridgeFlags && typeof bridgeFlags.getExtraRenderers === 'function') {
+    return bridgeFlags.getExtraRenderers() === true;
   }
 
   try {

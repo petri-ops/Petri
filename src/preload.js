@@ -20,9 +20,13 @@ ipcRenderer.on(AGENT_WORKBENCH_FLAG_CHANNEL, (_event, payload) => {
 
 contextBridge.exposeInMainWorld('biof3', {
   agentWorkbenchFlags: {
-    get extraRenderers() {
-      return AGENT_WORKBENCH_FLAGS.extraRenderers;
-    },
+    // contextBridge freezes getters on the renderer side and rebinds them
+    // to a frozen snapshot of the snapshot taken at first access — using a
+    // plain getter causes `window.biof3.agentWorkbenchFlags.extraRenderers`
+    // to permanently read `false` even after the user flips the toggle in
+    // packaged Electron. Expose a synchronous method instead so each call
+    // returns the live value from the closure.
+    getExtraRenderers: () => AGENT_WORKBENCH_FLAGS.extraRenderers,
     set: (value) => ipcRenderer.invoke(AGENT_WORKBENCH_FLAG_CHANNEL, value === true),
     onChange: (callback) => {
       if (typeof callback !== 'function') return () => {};

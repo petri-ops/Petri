@@ -200,14 +200,12 @@ describe('SimpleChat A4 bridge — restoreSimpleMessage + render branch', () => 
 
   // ── UI-AGENTWB-007 — bridge 优先 + Settings dispatchEvent 同步 ──
 
-  it('bridge extraRenderers=true wins over a contradictory localStorage key', () => {
+  it('bridge getExtraRenderers()=true wins over a contradictory localStorage key', () => {
     window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, '');
     const listeners: Array<(value: boolean) => void> = [];
     (window as { biof3?: unknown }).biof3 = {
       agentWorkbenchFlags: {
-        get extraRenderers() {
-          return true;
-        },
+        getExtraRenderers: () => true,
         set: async () => ({ ok: true, extraRenderers: true }),
         onChange: (cb: (value: boolean) => void) => {
           listeners.push(cb);

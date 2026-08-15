@@ -58,9 +58,7 @@ function makeBridge(initial: boolean, setResult: { ok: boolean; extraRenderers: 
     return { ...setResult, extraRenderers: setResult.ok ? value : current };
   });
   const bridge = {
-    get extraRenderers() {
-      return current;
-    },
+    getExtraRenderers: () => current,
     set: setSpy,
     onChange: (cb: (value: boolean) => void) => {
       listeners.push(cb);
