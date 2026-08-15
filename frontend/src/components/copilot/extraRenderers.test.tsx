@@ -103,13 +103,16 @@ describe('readExtraRenderersFlag / useExtraRenderersFlag', () => {
   });
 
   // ── UI-AGENTWB-007 — 分层读取优先级 ─────────────────────────
-  // bridge (window.biof3.agentWorkbenchFlags.extraRenderers) >
+  // bridge (window.biof3.agentWorkbenchFlags.getExtraRenderers()) >
   // localStorage > 默认 false
+  // 备注：bridge 暴露的是同步方法而非 getter — contextBridge 会把
+  // getter 物化成 frozen snapshot，导致 renderer 端永远读到 false；
+  // 这里 mock 成 `getExtraRenderers: () => boolean` 与新的 preload 契约对齐。
 
   it('resolveInitialFlag prefers the bridge value over a contradictory localStorage key', () => {
     window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, 'true');
     (window as { biof3?: unknown }).biof3 = {
-      agentWorkbenchFlags: { extraRenderers: false },
+      agentWorkbenchFlags: { getExtraRenderers: () => false },
     };
     expect(resolveInitialFlag()).toBe(false);
   });
@@ -126,7 +129,7 @@ describe('readExtraRenderersFlag / useExtraRenderersFlag', () => {
   it('resolveInitialFlag treats bridge=true as the source of truth even when localStorage=false', () => {
     window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, '');
     (window as { biof3?: unknown }).biof3 = {
-      agentWorkbenchFlags: { extraRenderers: true },
+      agentWorkbenchFlags: { getExtraRenderers: () => true },
     };
     expect(resolveInitialFlag()).toBe(true);
   });
@@ -136,9 +139,7 @@ describe('readExtraRenderersFlag / useExtraRenderersFlag', () => {
     const listeners: Array<(value: boolean) => void> = [];
     (window as { biof3?: unknown }).biof3 = {
       agentWorkbenchFlags: {
-        get extraRenderers() {
-          return current;
-        },
+        getExtraRenderers: () => current,
         set: async (value: boolean) => {
           current = value === true;
           listeners.forEach((cb) => cb(current));

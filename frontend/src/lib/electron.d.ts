@@ -308,7 +308,7 @@ declare global {
     };
     biof3?: {
       agentWorkbenchFlags: {
-        readonly extraRenderers: boolean;
+        getExtraRenderers: () => boolean;
         set: (value: boolean) => Promise<{ ok: boolean; extraRenderers: boolean; error?: string }>;
         onChange: (callback: (value: boolean) => void) => () => void;
       };
