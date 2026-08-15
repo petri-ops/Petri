@@ -497,6 +497,12 @@ function setupDesktopEnv(backendPorts) {
   process.env.PY_SERVER_PORT = String(backendPorts.python);
   process.env.PLUMBER_PORT = String(backendPorts.plumber);
   process.env.GATEWAY_PORT = String(backendPorts.gateway);
+  // Gateway health probes and proxies use the full URL, not the port alone.
+  // Without these, gateway defaults to dead :3003/:3004 and reports 503
+  // even when r-server/py-server themselves are healthy. See §P1-CFG-1.
+  process.env.R_SERVER_URL = `http://127.0.0.1:${backendPorts.r}`;
+  process.env.PY_SERVER_URL = `http://127.0.0.1:${backendPorts.python}`;
+  process.env.GATEWAY_URL = `http://127.0.0.1:${backendPorts.gateway}`;
   if (backendPorts.renderer) {
     process.env.BIOF3_RENDERER_PORT = String(backendPorts.renderer);
     process.env.BIOF3_RENDERER_ORIGIN = `http://localhost:${backendPorts.renderer}`;
