@@ -1,6 +1,6 @@
 # BioF3 Desktop UI 产品化审计台账
 
-最后更新：2026-08-15（T-AW-014 dev Electron 边界内 4 工作包二次实机核对收口 — UI-AGENTWB-005/006/007 由 in_progress 升 dev Electron 边界内 verified；UI-AGENTWB-004 由 A5 verified 扩展 dev Electron 实机；详见本文件 §4 + §最近变更日志 + 行 244 契约偏差脚注 + docs/agent-workbench-dev-electron-verification-2026-08-15.md）
+最后更新：2026-08-15（T-AW-014 dev Electron 边界内 4 工作包二次实机核对收口 — UI-AGENTWB-005/006/007 由 in_progress 升 dev Electron 边界内 verified；UI-AGENTWB-004 由 A5 verified 扩展 dev Electron 实机；详见本文件 §4 + §最近变更日志 + 行 244 契约偏差脚注 + docs/agent-workbench-dev-electron-verification-2026-08-15.md；qualificationEligible 为 G0 开发期常态 · 不外推 packaged/Provider/GA）
 状态：**Stage 1 验收完成（31/31 verified）；UI-031～UI-035、UI-054～UI-064 已完成真实 Provider、长任务、取消恢复及明暗主题实机验收；UI-036～UI-048 的既有验收状态见下表**
 
 本文件是 [`docs/v1-productization-roadmap.md`](./v1-productization-roadmap.md) Stage 1 的唯一 UI 问题清单。它记录真实可复现问题，不用来收集没有目标层级的泛化审美意见。

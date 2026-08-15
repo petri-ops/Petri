@@ -7,6 +7,26 @@
 BioF3 Desktop = Electron 桌面应用 + Vite SPA 前端 + MCP Server
 本地化 AI 陪伴的全组学学习与实战平台
 
+## 当前阶段纪律（最高优先级 · G0 长期开发期）
+
+**项目当前长期处于 G0 开发期，不是发布期**。`docs/next-steps-roadmap.md` 已写明：
+
+- `v0.0.1-rc.7` 是当前 OSS 线上工程候选版，**不是 GA / 正式发布版**
+- `qualificationEligible: false` 是 G0 开发期的**常态事实**，不是缺陷、不是待办、不是下次校验需推动的事
+- `Result Studio` 长期保持 `implemented_unverified / experimental`，RS-P7 deferred
+- 真实 `Provider` 矩阵、`packaged Electron` 公证/签名、`OSS` 远程接手、`GA` 公证流水均属 G1+ 阶段，**当前阶段不校验、不实现、不视为缺口**
+
+**Agent 纪律**：
+
+1. **不得**主动建议或启动 `Provider / 公证 / GA / 远程发布 / dist staleness` 等 G1+ 工作 —— 这些是 G1+ 工作，不是当前 active 工作包候选
+2. **不得**在收口报告、closeout 笔录、AUDIT-LOG 或 ui-productization-audit.md 反复写 "`qualificationEligible` 维持 false" / "未做 Provider" / "未做 GA" —— 这些是 G1+ 阶段事项，按当前阶段纪律是**不外推**而不是"待办"
+3. **不得**把"`dev Electron / packaged Electron 三轴对齐"`描述为"待完成" —— 当前 G0 已收口的开发态 + packaged 实机核对是当前阶段的合理证据等级；`qualificationEligible` 升 `true` 需 G1+ 阶段
+4. 收口笔录用语：直接写"G0 开发期常态 · 不外推 packaged/Provider/GA" 一句即可，**不**列举未做项
+5. UI-AGENTWB-### 等前端工作包的状态标头：`dev Electron 边界内 verified` / `packaged 边界内 verified` 即为**当前阶段最高证据等级**，不需要补 G1+ 阶段才有的 Provider / GA
+6. 用户若未明确裁决启动 G1+ 阶段，**禁止**主 Agent 主动提出"是否要做 Provider / GA / release-pipeline"
+
+**变更 G1+ 阶段纪律需用户显式裁决**：用户当前已裁决"长期处于 G0 开发期"（2026-08-15），任何提前进入 G1+ 的提议都视作越权，必须先回到此节确认。
+
 ## 技术栈
 
 | 层级 | 技术 | 入口文件 |
