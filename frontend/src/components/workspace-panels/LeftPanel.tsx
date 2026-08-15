@@ -87,15 +87,6 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
             <Icon name="settings" size={15} />
             <span>设置</span>
           </button>
-          <button
-            type="button"
-            className={styles.leftQuickAction}
-            onClick={ctx.handleNavigateToSkills}
-            title="Skills"
-          >
-            <Icon name="puzzle" size={15} />
-            <span>Skills</span>
-          </button>
         </div>
       </div>
     </aside>
@@ -108,7 +99,7 @@ export function LeftPanel({ ctx }: LeftPanelProps): React.ReactElement {
 
 function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   const items: Array<{
-    key: WorkspaceMode;
+    key: WorkspaceMode | 'skills';
     mode: WorkspaceMode | null;
     label: string;
     icon: Parameters<typeof Icon>[0]['name'];
@@ -130,6 +121,14 @@ function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
       icon: 'puzzle',
       onClick: ctx.handleShowPlugins,
       title: '插件',
+    },
+    {
+      key: 'skills',
+      mode: null,
+      label: 'Skills',
+      icon: 'sparkles',
+      onClick: ctx.handleNavigateToSkills,
+      title: 'Skills',
     },
   ];
 

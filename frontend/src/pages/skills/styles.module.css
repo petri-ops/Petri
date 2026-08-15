@@ -869,6 +869,30 @@
   font-size: 13px;
 }
 
+.retryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--biof3-text);
+  background: var(--biof3-bg-surface);
+  border: 1px solid var(--biof3-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.retryBtn:hover {
+  background: var(--biof3-hover);
+  border-color: var(--biof3-accent);
+  color: var(--biof3-accent);
+}
+
 /* ============================================================
    响应式
    ============================================================ */

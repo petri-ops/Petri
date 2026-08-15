@@ -2,7 +2,7 @@
 // 路由出口 + 首次启动引导
 
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { DesktopOnboarding } from '@/components/desktop/DesktopOnboarding';
 import { TitleBar } from '@/components/desktop/TitleBar';
 import { WorkspacePanelsProvider } from '@/components/desktop/WorkspacePanelsContext';
@@ -10,8 +10,6 @@ import { BackendStatusProvider } from '@/components/backend/BackendStatusProvide
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { biof3Events, subscribeBioF3Event } from '@/lib/events';
 import { CommandPalette, useCommandPalette } from '@/components/copilot/CommandPalette';
-import { SkillsSidebar, type Skill } from '@/components/desktop/SkillsSidebar';
-import { useSkillStore } from '@/hooks/useSkillStore';
 import HomePage from '@/pages/home';
 // NOTE: Legacy pages (tools, admin, docs, figcode, single-cell, spatial) have been removed
 // as the desktop application now uses the Agent-based workflow through ProjectWorkspace.
@@ -57,44 +55,22 @@ export default function App(): React.ReactElement {
   // Command palette state and controls
   const { isOpen, open, close } = useCommandPalette();
 
-  // Skills sidebar state
-  const [isSkillsSidebarExpanded, setSkillsSidebarExpanded] = useState(false);
-  const { skills } = useSkillStore({ autoLoad: false });
-  const navigate = useNavigate();
-
-  // Transform skills for SkillsSidebar
-  const sidebarSkills: Skill[] = skills.map((s) => ({
-    id: s.id,
-    name: s.name,
-    description: s.description,
-    category: s.category,
-    icon: 'zap',
-  }));
-
-  const handleSkillClick = (skillId: string) => {
-    navigate(`/skills?skill=${skillId}`);
-  };
-
   return (
     <BackendStatusProvider>
       <WorkspacePanelsProvider>
         <TitleBar />
-        <SkillsSidebar
-          expanded={isSkillsSidebarExpanded}
-          onToggle={() => setSkillsSidebarExpanded((v) => !v)}
-          onSkillClick={handleSkillClick}
-          skills={sidebarSkills}
-        />
         <CopilotContextProvider>
           <main
             className="biof3-spa-main"
             style={{
               marginTop: 0,
               paddingTop: 'var(--biof3-titlebar-height)',
-              marginLeft: isSkillsSidebarExpanded ? '280px' : '44px',
               transition: 'margin-left 0.25s ease',
             }}
           >
+            {/* dev mode passes through here just like production: deep-linkable
+                /project/:id/<mode> and /skills routes are intentionally reachable.
+                Only the dev-home skip-auto-navigate logic lives in pages/home.tsx. */}
             <Routes>
               {/* Desktop Agent-based workflow */}
               <Route path="/" element={<HomePage />} />
