@@ -4,9 +4,10 @@
 // ResultCardRenderer pipeline introduced in P1.1 / P1.2 / P1.3.
 //
 // This module owns the A4 contract surface only:
-//   1. A feature flag hook (`useExtraRenderersFlag`) that reads
-//      `localStorage.getItem('biof3.simplechat.extraRenderers')`
-//      and defaults to **off**, so existing users see zero change.
+//   1. A feature flag hook (`useExtraRenderersFlag`) that resolves
+//      `window.biof3.agentWorkbenchFlags.extraRenderers` first, then the
+//      localStorage key for the standalone development SPA, and defaults to
+//      **off** when neither source enables it.
 //   2. A tolerant `parseAssistantResultNodes` parser that turns
 //      a raw `message.meta.resultNodes` payload into a typed
 //      `ResultNode[] | null`. Any shape error collapses to
@@ -46,15 +47,23 @@ const ALLOWED_VARIANTS: ReadonlyArray<ResultCardVariant> = [
  * caller can pick a default without forcing a re-render on every
  * keystroke inside the storage event loop.
  */
-export function readExtraRenderersFlag(): boolean {
-  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
-    return false;
+export function resolveInitialFlag(): boolean {
+  if (typeof window === 'undefined') return false;
+
+  const bridgeFlags = window.biof3?.agentWorkbenchFlags;
+  if (bridgeFlags && typeof bridgeFlags.extraRenderers === 'boolean') {
+    return bridgeFlags.extraRenderers;
   }
+
   try {
     return window.localStorage.getItem(LS_KEY) === 'true';
   } catch {
     return false;
   }
+}
+
+export function readExtraRenderersFlag(): boolean {
+  return resolveInitialFlag();
 }
 
 /**
@@ -67,8 +76,14 @@ export function useExtraRenderersFlag(): boolean {
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
     const refresh = () => setFlag(readExtraRenderersFlag());
+    const unsubscribe = window.biof3?.agentWorkbenchFlags?.onChange?.(refresh);
     window.addEventListener('focus', refresh);
-    return () => window.removeEventListener('focus', refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener('storage', refresh);
+      unsubscribe?.();
+    };
   }, []);
   return flag;
 }
