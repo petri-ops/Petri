@@ -651,6 +651,23 @@
         "csv-md",
         "result-card"
       ]
+    },
+    {
+      "path": "docs/agent-workbench-dev-electron-verification-2026-08-15.md",
+      "kind": "audit",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "agent-workbench-dev-electron-verification",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "agent",
+        "workbench",
+        "dev-electron",
+        "verification",
+        "verified"
+      ],
+      "id": "AUDIT-AGENT-WB-DEV-ELECTRON-VERIFICATION-2026-08-15"
     }
   ]
 }
