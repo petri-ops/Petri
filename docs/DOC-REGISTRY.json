@@ -668,6 +668,22 @@
         "verified"
       ],
       "id": "AUDIT-AGENT-WB-DEV-ELECTRON-VERIFICATION-2026-08-15"
+    },
+    {
+      "id": "AGENT-INTERACTION-EVAL-20260814",
+      "path": "docs/planning/agent-interaction-evaluation.md",
+      "kind": "planning",
+      "status": "reference",
+      "canonical": false,
+      "truthDomain": "agent-interaction-evaluation",
+      "entrypoint": "docs/DOC-REGISTRY.json",
+      "archivePolicy": "retain_stable_path",
+      "title": "Agent interaction evaluation — AI Agent 交互评估（5cafe0a）",
+      "owner": "agent",
+      "registeredAt": "2026-08-16",
+      "linkedCommits": ["5cafe0a"],
+      "notes": "从仓库根迁移到 docs/planning/；修复 managedRoots=['docs'] 登记违反。",
+      "tags": ["agent", "interaction", "evaluation", "5cafe0a", "relocated-from-root"]
     }
   ]
 }
