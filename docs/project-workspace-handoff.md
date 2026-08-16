@@ -93,6 +93,15 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 - 不外推：packaged / dist / notarization / Provider / P7 / GA / E1-d/E1-e G1+ / dist staleness G1+ / i18n / 不重新激活 BLOCK-2/BLOCK-3/BLOCK-4/BLOCK-5。
 - 不动：`preload.js` / `electron.d.ts`（UI-159 涉及 electron.d.ts 是 ADDITIVE 扩展，已在 commit `3000a06` 落地，本工作包不修改）/ `desktopBridge.ts` / 4 page / `core/shared-backend/*` / `agent-tools/`。
 - 原理：playwright MCP 已注册（`plugin-playwright-playwright`），主 agent 可通过 `browser_navigate` 远程连接 dev Electron BrowserWindow。
+
+**2026-08-16 21:35 用户裁决"关闭 BLOCK-6 保留 in_progress"**：
+- **工具边界受限**：playwright MCP / WebFetch 跑在隔离 sandbox 不能访问 localhost（实测 `browser_navigate http://localhost:3100/` 返 `ERR_CONNECTION_REFUSED`；WebFetch 返 "Cannot fetch from localhost"）；macOS shell 退出杀 child process（实测 Vite 后台跑 30s 内 alive，shell 退出后 vite 死）
+- **主 agent 无法独立完成 dev Electron 实机核查**
+- DOC-REGISTRY `BLOCK-6-UI-158-UI-159-VERIFICATION` `status: active → superseded` + `cancelReason` 记录工具边界
+- BLOCK-6 plan 保留为 future reference（canonical plan 仍存在）
+- UI-158 / UI-159 状态保持 `in_progress` 字样不变（按 audit 行 402 治理纪律"仅当真实 dev Electron 实机过目后才可考虑 verified"）
+- **当前无 active 工作包**
+- 未来用户启动 dev Electron 实机并提供截图 / console.log 后，可重新启动 BLOCK-6.1（实际 dev Electron 实机）
 - 不外推：Provider (`P-07`) / packaged / dist / notarization / GA 资格 / dist staleness / Worktree 创建（沿用 main）/ 新 Skills 业务能力 / Chart a11y P2。
 - 主 agent 直接 owner（不委派 `luna_worker`，IPC 桥契约 + 实机启动属跨模块边界判断）。当前仅 PHASE 0 前置工作（plan + registry + canonical 同步）已完成；PHASE 0 摸底执行由主 agent 在用户裁决"继续"后启动。
 - 验证起点：`npm run docs:check` 65 registered PASS（+1）；`npm run ui:audit:check` 131 PASS；`npm run docs:reconcile` 0 issues。
