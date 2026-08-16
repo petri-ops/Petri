@@ -921,8 +921,18 @@
       "id": "BLOCK-7-UI-161-VERIFICATION",
       "path": "docs/block-7-ui-161-verification-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
+      "truthDomain": "block-7-ui-161-verification",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "BLOCK-7-UI-161-VERIFICATION-CLOSEOUT",
+      "path": "docs/block-7-ui-161-verification-closeout.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": false,
       "truthDomain": "block-7-ui-161-verification",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path"
