@@ -1,4 +1,22 @@
 #!/usr/bin/env node
+/**
+ * scripts/check-ui-productization-audit.mjs — UI 实现与审计台账同步门禁
+ *
+ * 检查 `docs/ui-productization-audit.md` 与 Git 历史的同步性：
+ *   1. 工作区含 UI 改动但未同步 `ui-productization-audit.md` → FAIL
+ *   2. UI 提交 subject 未带 UI-### issue id（允许白名单豁免）→ FAIL
+ *   3. 实现同步但未通过 git 提交同步台账 → FAIL
+ *
+ * 退出码契约（GATES-1 文档化，2026-08-16）：
+ *   0   PASS — UI 实现与审计台账已同步；Git 历史已有 UI 编号实现证据
+ *   1   FAIL — UI 改动未同步台账 / submission issue id 缺失 / 台账不同步
+ *   2   保留 — 当前未触发；为未来"白名单冲突 / 分类冲突"扩展预留
+ *       （如新加 hasUnmappedSurface 之类的检测分支时使用 2；本阶段不启用）
+ *
+ * 同步文档：`docs/document-governance.md` §4.5"门禁退出码契约"。
+ * 该契约为本工作包 DOC-GOVERNANCE-GATES / GATES-1 阶段固化本，不在本阶段内
+ * 改动 `process.exit()` 行为。
+ */
 
 import { execFileSync } from 'node:child_process'
 
@@ -89,6 +107,45 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
 // subjects or in the matching audit row.
 const UI_ID_PATTERN = /\bUI-(?:\d{3}|AGENTWB-\d{3})\b/g
 
+// hooks/ is a UI-adjacent React state surface but the historical gate
+// surfaced its drift as `isUiSurface` failures that required manual
+// LEGACY_*_EXEMPTIONS overrides. Per DOC-GOVERNANCE-GATES / GATES-0
+// (2026-08-16), hooks/ files are declared explicitly out of scope for
+// the UI ledger gate. The whitelist below enumerates the current
+// hooks/ root + the known top-level hook files so future additions are
+// intentional: any file under `frontend/src/hooks/` is treated as
+// non-UI surface and must not trigger `ui:audit:check` fail-closed.
+//
+// Rationale (W3 audit §2 row 4): hook commits such as `e6bf72f`
+// (useSkillStore), `446bfa8` (useErrorFormatter), and `3000a06`
+// (conversationRunStore) historically relied on LEGACY exemptions
+// because `isUiSurface` did not match the hooks path. The whitelist
+// collapses that workaround into an explicit rule rather than
+// maintaining per-commit exemptions.
+const UI_AUDIT_HOOKS_WHITELIST = Object.freeze({
+  // Directory prefix: any file under this root is excluded from the UI surface check.
+  directoryPrefix: 'frontend/src/hooks/',
+  // Top-level hook files (also covered by the prefix; listed explicitly for
+  // audit reviewers and to anchor the contract on the 2026-08-16 hook set).
+  files: Object.freeze([
+    'frontend/src/hooks/useAiSettings.ts',
+    'frontend/src/hooks/useAutoUpdate.ts',
+    'frontend/src/hooks/useConversationJobs.ts',
+    'frontend/src/hooks/useConversations.ts',
+    'frontend/src/hooks/useDurableConversationLoop.ts',
+    'frontend/src/hooks/useHarnessWorkflowStatus.ts',
+    'frontend/src/hooks/usePluginStore.ts',
+    'frontend/src/hooks/useResizableColumns.ts',
+    'frontend/src/hooks/useRightPanelTabs.ts',
+    'frontend/src/hooks/useRuntimeResourceSnapshot.ts',
+    'frontend/src/hooks/useSkillStore.ts',
+    'frontend/src/hooks/useTerminalSession.ts',
+    'frontend/src/hooks/useWorkspaceLayout.ts',
+    'frontend/src/hooks/useWorkspacePanels.ts',
+    'frontend/src/hooks/useWorkspaceRouting.ts',
+  ]),
+})
+
 function git(args, options = {}) {
   return execFileSync('git', args, {
     cwd: process.cwd(),
@@ -102,6 +159,12 @@ function lines(value) {
 }
 
 function isUiSurface(file) {
+  // hooks/ is explicitly out of scope per UI_AUDIT_HOOKS_WHITELIST (GATES-0).
+  // Files under this prefix are React state surfaces whose changes do not
+  // require a `docs/ui-productization-audit.md` row.
+  if (file.startsWith(UI_AUDIT_HOOKS_WHITELIST.directoryPrefix)) {
+    return false
+  }
   return (
     file === 'frontend/src/App.tsx' ||
     file.startsWith('frontend/src/components/') ||
