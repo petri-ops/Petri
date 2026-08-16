@@ -36,7 +36,7 @@
         "gates",
         "scripts"
       ],
-      "notes": "用户裁决 2026-08-16 启动。Single work package serial 下当前唯一 active 工作包。详见 plan §1。"
+      "notes": "\u7528\u6237\u88c1\u51b3 2026-08-16 \u542f\u52a8\u3002Single work package serial \u4e0b\u5f53\u524d\u552f\u4e00 active \u5de5\u4f5c\u5305\u3002\u8be6\u89c1 plan \u00a71\u3002"
     },
     {
       "id": "DOC-INDEX",
@@ -610,20 +610,20 @@
       "phases": [
         {
           "id": "P1",
-          "name": "快速见效增强",
-          "duration": "2-3 人周",
+          "name": "\u5feb\u901f\u89c1\u6548\u589e\u5f3a",
+          "duration": "2-3 \u4eba\u5468",
           "milestone": "M1"
         },
         {
           "id": "P2",
-          "name": "核心功能",
-          "duration": "8-12 人周",
+          "name": "\u6838\u5fc3\u529f\u80fd",
+          "duration": "8-12 \u4eba\u5468",
           "milestone": "M3-M4"
         },
         {
           "id": "P3",
-          "name": "高级能力",
-          "duration": "12-16 人周",
+          "name": "\u9ad8\u7ea7\u80fd\u529b",
+          "duration": "12-16 \u4eba\u5468",
           "milestone": "M5-M6"
         }
       ]
@@ -693,13 +693,13 @@
       "truthDomain": "agent-interaction-evaluation",
       "entrypoint": "docs/DOC-REGISTRY.json",
       "archivePolicy": "retain_stable_path",
-      "title": "Agent interaction evaluation — AI Agent 交互评估（5cafe0a）",
+      "title": "Agent interaction evaluation \u2014 AI Agent \u4ea4\u4e92\u8bc4\u4f30\uff085cafe0a\uff09",
       "owner": "agent",
       "registeredAt": "2026-08-16",
       "linkedCommits": [
         "5cafe0a"
       ],
-      "notes": "从仓库根迁移到 docs/planning/；修复 managedRoots=['docs'] 登记违反。",
+      "notes": "\u4ece\u4ed3\u5e93\u6839\u8fc1\u79fb\u5230 docs/planning/\uff1b\u4fee\u590d managedRoots=['docs'] \u767b\u8bb0\u8fdd\u53cd\u3002",
       "tags": [
         "agent",
         "interaction",
@@ -718,7 +718,9 @@
       "entrypoint": "docs/document-governance.md",
       "archivePolicy": "retain_stable_path",
       "registeredAt": "2026-08-16",
-      "linkedCommits": [],
+      "linkedCommits": [
+        "1049ac5"
+      ],
       "tags": [
         "schema",
         "gates-2",
@@ -726,7 +728,7 @@
         "machine-readable",
         "validation"
       ],
-      "notes": "DOC-GOVERNANCE-GATES / GATES-2 (2026-08-16) 阶段产物。3 个 JSON Schema (docs-governance-report / ui-audit-report / test-affected-report) 的 markdown 索引；actual .schema.json 文件不登记 (path 有效性约束仍为 docs/*.md)。schemaVersion=1 由 scripts/lib/gate-report-schema.mjs 守门 (Ajv 6.x 优先，缺失时降级 draft-07 子集)。"
+      "notes": "DOC-GOVERNANCE-GATES / GATES-2 (2026-08-16) \u9636\u6bb5\u4ea7\u7269\u30023 \u4e2a JSON Schema (docs-governance-report / ui-audit-report / test-affected-report) \u7684 markdown \u7d22\u5f15\uff1bactual .schema.json \u6587\u4ef6\u4e0d\u767b\u8bb0 (path \u6709\u6548\u6027\u7ea6\u675f\u4ecd\u4e3a docs/*.md)\u3002schemaVersion=1 \u7531 scripts/lib/gate-report-schema.mjs \u5b88\u95e8 (Ajv 6.x \u4f18\u5148\uff0c\u7f3a\u5931\u65f6\u964d\u7ea7 draft-07 \u5b50\u96c6)\u3002"
     }
   ]
 }
