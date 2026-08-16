@@ -84,6 +84,17 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 - 不动：`preload.js` 5 方法签名 / `electron.d.ts` / 4 page / `desktopBridge.ts` / `core/shared-backend/*` / `agent-tools/`。
 - 不做：dev Electron 实机复核（候选 2/3 留 BLOCK-6+）。
 
+### 3.0.15 已启动工作包：BLOCK-9.1-MAIN-JS-SPLIT（2026-08-16 BLOCK-9 收口后用户裁决"继续"启动）
+
+- 状态：`active`（2026-08-16 23:50）；DOC-REGISTRY 新增 `BLOCK-9.1-MAIN-JS-SPLIT` `kind=work-package / status=active / canonical=true / truthDomain=block-9-1-main-js-split / archivePolicy=retain_stable_path / entrypoint=docs/README.md`；plan canonical `docs/block-9-1-main-js-split-plan.md` 已落地。
+- 目标：按用户裁决"继续"基于 senior-engineer-review-2026-08-16.md §2.4 P1 启动 main.js 拆分重构。main.js 2450 → ~200 行装配器；17 IPC setup 函数 + setupDesktopEnv 716 行拆到 `src/ipc/<domain>.js`。
+- 原则：不修改行为（只搬代码）/ 不引入新依赖 / 保留向后兼容 / 不破坏测试 / 不外推。
+- 边界：不拆 setupSkillsIpc（BLOCK-2/3/4/5 改动过跨包边界）/ 不拆 setupAgentWorkbenchFlagsIpc（历史特殊 argv）/ 不拆 setupCsp（与 createWindow 强耦合）。
+- 5 PHASE：PHASE 0 架构调研（worker）/ PHASE 1 拆低风险 setup / PHASE 2 拆中风险 setup / PHASE 3 setupTerminalIpc / PHASE 4 setupDesktopEnv / PHASE 5 closeout。
+- 完成语义：main.js 2450 → ~200 行 + 15+ src/ipc/<domain>.js + chf0-critical 测试通过 + 既有 vitest 0 失败 / 0 改动。
+- 不外推：BLOCK-9.2 SimpleChat 2153 / BLOCK-9.3 plugin-manager 1457 / BLOCK-9.4 DesktopSettingsPanel 1515 / BLOCK-9.5 useSkillStore 743 / BLOCK-9.6 IPC channel 常量集中 5 项 + packaged / dist / Provider / P7 / GA / E1-d/E1-e G1+ / dist staleness G1+ / i18n / 不重新激活 BLOCK-2/3/4/5/6/7/8/9。
+- 不动：preload.js / electron.d.ts / desktopBridge.ts / frontend/src/ / core/shared-backend/* / agent-tools/ / setupSkillsIpc。
+
 ### 3.0.14 已收口工作包：BLOCK-9-MEGA-FILE-REFACTOR（2026-08-16 用户裁决"按照你的建议来"启动当日 4 PHASE 全部收口）
 
 - 状态：`active → completed`（2026-08-16 23:38）；DOC-REGISTRY `BLOCK-9-MEGA-FILE-REFACTOR` `status=completed / linkedCommits=[d87a0f8, e78567c, 1c14f49, c1e2bd5] / qualificationEligible=false`；新增 `BLOCK-9-MEGA-FILE-REFACTOR-CLOSEOUT` `kind=reference / status=completed / canonical=false`（closeout 报告）；closeout 报告 `docs/block-9-mega-file-refactor-closeout.md`。
