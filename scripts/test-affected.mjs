@@ -1,4 +1,27 @@
 #!/usr/bin/env node
+/**
+ * scripts/test-affected.mjs — 基于 `test/impact-map.json` 的最小充分测试范围选择器
+ *
+ * 提供 `npm run test:changed:list`（--json）和 `npm run test:changed`（--run）两个
+ * 入口；前者只输出计划，后者按计划执行影响范围内的测试与门禁。
+ *
+ * 退出码契约（GATES-1 文档化，2026-08-16）：
+ *   0   PASS — 计划可执行 / 全部测试 / 门禁通过
+ *   1   FAIL — 实际执行失败（某 node test / 门禁子命令非 0 退出）
+ *   2   分类冲突 — 改动文件无法被 `test/impact-map.json` 任一规则匹配
+ *       （即 `plan.unknown.length > 0`），或 impact-map 自身解析/校验失败、
+ *       或运行期 catch 异常。**2 不是 fail-closed**：仅说明当前改动没有
+ *       impact-map 规则覆盖，需补 rule 或添加"未分类但可忽略"声明；
+ *       绝不代表业务代码 / 工作包"未通过"测试。
+ *
+ * 同步文档：`docs/document-governance.md` §4.5"门禁退出码契约"。
+ * 该契约为本工作包 DOC-GOVERNANCE-GATES / GATES-1 阶段固化本，不在本阶段内
+ * 改动 `process.exit()` 行为；如未来升级退出码语义须同步 §4.5。
+ *
+ * 注：plan 文档 `docs/doc-governance-gates-plan.md` §2.2 文件名引用
+ * `test-impact-map.mjs` 是历史笔误；实际物理文件为 `scripts/test-affected.mjs`，
+ * 由 `package.json` 的 `test:changed:list` / `test:changed` 引用。
+ */
 
 import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
@@ -93,12 +116,23 @@ function parseArgs(argv) {
 }
 
 function printPlan(plan, json) {
-  if (json) { console.log(JSON.stringify(plan, null, 2)); return; }
+  if (json) {
+    console.log(JSON.stringify(plan, null, 2));
+    if (plan.unknown.length) {
+      console.error(`[test:changed] 分类冲突：${plan.unknown.length} 个改动文件未被 test/impact-map.json 任一规则覆盖；exit 2 表示需要补 rule，**不是** fail-closed。`);
+      console.error(`[test:changed] 未映射文件：${plan.unknown.join(', ')}`);
+    }
+    return;
+  }
   console.log(`[test:changed] changed=${plan.changedFiles.length} nodeTests=${plan.tests.length} syntax=${plan.syntax.length}`);
   plan.tests.forEach((file) => console.log(`  test ${file}`));
   plan.frontendRelated.forEach((file) => console.log(`  frontend-related ${file}`));
   if (plan.commands.length) console.log(`  gates ${plan.commands.join(', ')}`);
-  if (plan.unknown.length) console.error(`  unmapped ${plan.unknown.join(', ')}`);
+  if (plan.unknown.length) {
+    console.error(`  unmapped ${plan.unknown.join(', ')}`);
+    console.error(`[test:changed] 分类冲突：${plan.unknown.length} 个改动文件未被 test/impact-map.json 任一规则覆盖；exit 2 表示需要补 rule，**不是** fail-closed。`);
+    console.error('[test:changed] 处理方式：补 rule / 在 impact-map.json 添加 patterns / 把文件加入已忽略前缀（dist/、release/）。');
+  }
 }
 
 function runProcess(command, args) { return spawnSync(command, args, { cwd: ROOT, stdio: 'inherit' }).status ?? 1; }
@@ -114,6 +148,14 @@ export function runPlan(plan) {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))) {
-  try { const args = parseArgs(process.argv.slice(2)); const plan = resolveImpact(collectChangedFiles({ base: args.base, explicit: args.explicit })); printPlan(plan, args.json); process.exitCode = args.run ? runPlan(plan) : (plan.unknown.length ? 2 : 0); }
-  catch (error) { console.error(`[test:changed] ${error.message}`); process.exitCode = 2; }
+  try {
+    const args = parseArgs(process.argv.slice(2));
+    const plan = resolveImpact(collectChangedFiles({ base: args.base, explicit: args.explicit }));
+    printPlan(plan, args.json);
+    process.exitCode = args.run ? runPlan(plan) : (plan.unknown.length ? 2 : 0);
+  } catch (error) {
+    console.error(`[test:changed] 分类冲突（工具错误）：${error.message}`);
+    console.error('[test:changed] exit 2 表示 test/impact-map.json 解析 / 校验失败或 plan 生成异常；**不是** fail-closed。');
+    process.exitCode = 2;
+  }
 }
