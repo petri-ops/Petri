@@ -1,8 +1,8 @@
 # BioF3 Harness Engine Spec v1
 
-> 状态：Harness Phase 1–6 基础规范已完成。当前 UI/模型阶段只保持回归；Stage 3 继续复用本规范，不从本文件推断当前优先级。
+> 状态：Harness Phase 1–6 / Phase 7 / HRT-0~7 / HLE-C0~C5 已分别收口（见 [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md)、[`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md)、[`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)）。本规范保持 v1 草图为锚点不再更新；后续治理以收口计划为准。
 
-最后更新：2026-07-11
+最后更新：2026-08-16（GATES-4 batch 2：顶部状态句跟进 Phase 7 / HRT / HLE 收口）
 
 这份文档定义 BioF3 的“Prompt 工程 / Harness 工程”底座。
 

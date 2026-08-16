@@ -1,5 +1,8 @@
 # Stage 3 M1 Capability Provisioning 审计报告
 
+> **吸收声明**（2026-08-16 GATES-4 batch 2）：本审计为 Stage 3 收口前的只读审计；Stage 3 已收口（详见 [`ui-productization-audit.md`](../../ui-productization-audit.md) Stage 3 段）；本文件保留为追溯。
+
+
 > 审计类型：**只读代码审计**（不改动任何代码）
 > 审计日期：2026-07-17
 > 审计对象：工作区未提交的 Stage 3 M1 代码

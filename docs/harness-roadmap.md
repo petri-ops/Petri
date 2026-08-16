@@ -1,10 +1,10 @@
 # BioF3 Harness Roadmap v1
 
-> 状态：Phase 1–6 是分析流程 Harness 的完成记录；2026-07-19 起进入 Phase 7「通用基础工具与运行控制面」。不再把增加标准流程数量当作 Harness 完善度。
+> 状态：Phase 1–6 + Phase 7 已分别收口；后续由 HRT-v1（`harness-loop-engineering-plan.md`）/ HLE-C0~C5（`harness-loop-production-closure-plan.md`）/ Phase 7 收口（`harness-phase7-completion-plan.md`）分别落地。本文保持 2026-07-21 之前快照；不再用于当前推进决策。
 
 > **⚠️ vendor 工作流已退役（2026-07-16）**：本文多处「vendor lock 已同步 / Core 检查点 `xxxxxxx`，Desktop `yyyyyyy`」是**旧双仓库（Core submodule + Desktop）工作流的历史完成记录**。核心已内联为仓库内 `core/`，不再有 submodule / `.vendor-lock` / vendor 同步（见 [`dependency-decoupling-checkpoint.md`](./dependency-decoupling-checkpoint.md)）。阅读时把这些 commit 视为历史，忽略"同步 vendor"类步骤——现在改 Core 就是改 `core/`，随 Desktop 一起提交。
 
-最后更新：2026-07-21
+最后更新：2026-08-16（GATES-4 batch 2：顶部状态句指向收口计划）
 
 这份路线图回答三个问题：
 

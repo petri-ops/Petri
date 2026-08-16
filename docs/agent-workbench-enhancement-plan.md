@@ -566,6 +566,21 @@ interface ExecutionProgress {
 
 ## 5. Phase 1：快速见效增强（2-3 人周）
 
+### 5.0.5 ID 命名互引（2026-08-16 GATES-4 batch 2）
+
+本计划 §5 P1.1 / P1.2 / P1.3 验收标准在文档早期使用 A1 / A2 / A3 / A4 内部编号；2026-08-15 实机验证后已统一为 `UI-AGENTWB-###` 编号体系。三份实机收口报告为本计划 P1.* 验收的最新证据：
+
+| 内部 ID | UI 编号 | 收口报告 |
+| --- | --- | --- |
+| A4 | `UI-AGENTWB-007` | [`agent-workbench-p1-a5-verification-2026-08-15.md`](./agent-workbench-p1-a5-verification-2026-08-15.md) |
+| A5 | `UI-AGENTWB-003` / `UI-AGENTWB-004` | [`agent-workbench-p1-a5-verification-2026-08-15.md`](./agent-workbench-p1-a5-verification-2026-08-15.md) |
+| P1.3 | `UI-AGENTWB-005` / `UI-AGENTWB-006` / `UI-AGENTWB-007` | [`agent-workbench-dev-electron-verification-2026-08-15.md`](./agent-workbench-dev-electron-verification-2026-08-15.md) |
+| T-AW-013 | `UI-AGENTWB-007` 三轴升级 | [`t-aw-013-packaged-verification-2026-08-15.md`](./t-aw-013-packaged-verification-2026-08-15.md) |
+
+`qualificationEligible: false` 是 G0 开发期常态事实，本表 `verified` 仅在各自边界内成立；不外推 packaged / Provider / P7 / GA。
+
+
+
 **目标**：在现有 `SimpleChat` / `ResultStudioSurface` / `ProjectWorkspace` 之上**挂载** 4 个可选能力，默认全部关闭，由 `AGENT_WORKBENCH_FLAGS` 单独控制。
 
 ### 5.0 Phase 1 依赖的现有组件（必须先理解）

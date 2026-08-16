@@ -1,5 +1,8 @@
 # UI-035、UI-054～UI-064 真实验收记录
 
+> **吸收声明**（2026-08-16 GATES-4 batch 2）：本记录为 Stage 2 收口时的真实验收证据；后续 UI 编号（UI-100+）以 [`ui-productization-audit.md`](../../ui-productization-audit.md) 为唯一台账；本文件保留为 Stage 2 历史。
+
+
 日期：2026-07-23
 
 主模块：W-03 Agent 会话与 W-06 项目文件工作台
