@@ -142,6 +142,11 @@ import {
   type OfficePreviewModel,
 } from '@/lib/office-file-preview';
 import styles from './project-workspace.module.css';
+import type { ActiveWorkspaceFile } from './project-workspace/types';
+import { isCsvFile, isPdfFile, isHtmlFile, isJsonFile, withReportTheme, detectOfficeKind, fallbackKindForExtension, formatSize } from './project-workspace/helpers';
+
+// Re-export for backward compatibility — consumers still import from the page.
+export type { ActiveWorkspaceFile } from './project-workspace/types';
 
 const markdownSanitizeSchema = {
   ...defaultSchema,
@@ -153,16 +158,6 @@ const markdownSanitizeSchema = {
   },
 };
 
-
-interface ActiveWorkspaceFile {
-  path: string;
-  name: string;
-  url: string;
-  size?: number;
-}
-
-
-export type { ActiveWorkspaceFile };
 export type { ActiveArtifact, JobStats } from '@/components/workspace-panels/ResultView';
 
 export type RightPanelMode = 'home' | 'results' | 'files' | 'terminal' | 'browser' | 'chat' | 'analyze';
@@ -2535,64 +2530,7 @@ function WorkspaceFilePreview({
   );
 }
 
-function isCsvFile(name?: string): boolean {
-  const ext = fileExtension(name);
-  return ext === 'csv' || ext === 'tsv';
-}
 
-function isPdfFile(name?: string): boolean {
-  return fileExtension(name) === 'pdf';
-}
-
-function isHtmlFile(name?: string): boolean {
-  const ext = fileExtension(name);
-  return ext === 'html' || ext === 'htm';
-}
-
-function withReportTheme(url: string, theme: 'light' | 'dark'): string {
-  if (!url) return url;
-  const separator = url.includes('?') ? '&' : '?';
-  return `${url}${separator}theme=${theme}`;
-}
-
-function isJsonFile(name?: string): boolean {
-  return fileExtension(name) === 'json' || fileExtension(name) === 'jsonl';
-}
-
-function detectOfficeKind(name?: string): OfficePreviewKind | null {
-  if (!name) return null;
-  const ext = name.split('.').pop()?.toLowerCase() || '';
-  switch (ext) {
-    case 'docx':
-    case 'docm':
-    case 'dotx':
-      return 'docx';
-    case 'xlsx':
-    case 'xlsm':
-    case 'xltx':
-    case 'xlsb':
-      return 'xlsx';
-    case 'pptx':
-    case 'pptm':
-    case 'ppsx':
-    case 'potx':
-      return 'pptx';
-    case 'odt':
-      return 'odt';
-    case 'ods':
-      return 'ods';
-    case 'odp':
-      return 'odp';
-    case 'pages':
-      return 'pages';
-    case 'numbers':
-      return 'numbers';
-    case 'keynote':
-      return 'keynote';
-    default:
-      return null;
-  }
-}
 
 function BinaryPreviewCard({
   file,
@@ -2637,29 +2575,6 @@ function BinaryPreviewCard({
   );
 }
 
-function fallbackKindForExtension(ext: string): OfficePreviewKind {
-  switch (ext) {
-    case 'rdata':
-      return 'rdata';
-    case 'rds':
-      return 'rds';
-    case 'h5ad':
-      return 'h5ad';
-    case 'loom':
-      return 'loom';
-    case 'h5':
-    case 'hdf5':
-      return 'hdf5';
-    case 'mtx':
-      return 'mtx';
-    case 'rtf':
-      return 'rtf';
-    case 'epub':
-      return 'epub';
-    default:
-      return 'binary';
-  }
-}
 
 function OfficePreviewPane({
   preview,
@@ -3199,15 +3114,4 @@ export function EmptyResult({
   );
 }
 
-// ============================================================
-// Utils
-// ============================================================
-
-function formatSize(bytes: number): string {
-  if (!bytes) return '—';
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
-}
 
