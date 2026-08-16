@@ -84,6 +84,18 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 - 不动：`preload.js` 5 方法签名 / `electron.d.ts` / 4 page / `desktopBridge.ts` / `core/shared-backend/*` / `agent-tools/`。
 - 不做：dev Electron 实机复核（候选 2/3 留 BLOCK-6+）。
 
+### 3.0.12 已启动工作包：BLOCK-8-UI-132-VERIFICATION（2026-08-16 用户裁决"接下来要做什么呢"启动，当前唯一 active）
+
+- 状态：`planning → active`（2026-08-16 用户裁决当日启动）；DOC-REGISTRY 新增 `BLOCK-8-UI-132-VERIFICATION` `kind=work-package / status=active / canonical=true / truthDomain=block-8-ui-132-verification / archivePolicy=retain_stable_path`；plan canonical `docs/block-8-ui-132-verification-plan.md` 已落地（约 100 行 / 7 § / 4 PHASE）。
+- 目标：按用户裁决"接下来要做什么呢" + 选项 "BLOCK-8 UI-132 dev CSP 静态化（推荐）" 启动 **UI-132 (行 239 in_progress) 静态收口**。
+- **PHASE 0 摸底发现 — entry 描述与实际代码不一致**：entry 描述的两个改动的**目标都已 100% 落地**但 entry 没同步状态（同 BLOCK-7 UI-161 同类盲点）。① main.js setupCsp dev-CSP `connect-src` / `frame-src` 放开 `http://127.0.0.1:*` 和 `ws://127.0.0.1:*` 已在 commit `3240a09 fix(desktop): Inject R_SERVER_URL/PY_SERVER_URL/GATEWAY_URL for gateway (P1-CFG-1)` 落地（L1418-1422 + L1443 CSP dev mode 日志 "127.0.0.1:* whitelisted"）；② main.js R_SERVER_URL/PY_SERVER_URL/GATEWAY_URL 用 `127.0.0.1` 注入 3 个 URL（L507-509）同期落地；③ styles/custom.css `--biof3-warning: var(--biof3-status-warning)` 明色主题（L71）+ 暗色主题（L181）早在 commit `3000a06 feat(frontend): Workspace UI plumbing` + `f3b5c42 refactor(css): migrate all CSS token references from --ifm-* to --biof3-*` 落地。
+- 路径选择：沿用 BLOCK-7 Vite-only + 静态 grep 综合验证路径（UI-132 不依赖 IPC 桥 + UI-132 改动是纯代码静态层）。
+- UI-132 4 项静态验证：① main.js setupCsp dev mode 放开 / ② main.js R_SERVER_URL 等 3 URL 注入 / ③ styles/custom.css `--biof3-warning` 明色主题 / ④ styles/custom.css `--biof3-warning` 暗色主题。
+- 4 PHASE：PHASE 1 静态 grep 4 项 + git log 退化检查 / PHASE 2 Vite build + 产物 grep / PHASE 3 theme-token-contract test + tsc 0 / PHASE 4 audit 收口 + 4 canonical 同步 + closeout 报告。
+- 完成语义：UI-132 (行 239 in_progress) → verified（仅当全部 PASS）；4 治理门 GREEN。
+- 不外推：packaged / dist / notarization / Provider / P7 / GA / E1-d/E1-e G1+ / dist staleness G1+ / i18n / 不重新激活 BLOCK-2/3/4/5/6/7。
+- 不动：`preload.js` / `electron.d.ts` / `desktopBridge.ts` / 4 page / `core/shared-backend/*` / `agent-tools/`。
+
 ### 3.0.11 已启动工作包：BLOCK-7-UI-161-VERIFICATION（2026-08-16 用户裁决"Block-7 是啥 开搞"启动，当前唯一 active）
 
 - 状态：`planning → active`（2026-08-16 用户裁决当日启动）；DOC-REGISTRY 新增 `BLOCK-7-UI-161-VERIFICATION` `kind=work-package / status=active / canonical=true / truthDomain=block-7-ui-161-verification / archivePolicy=retain_stable_path`；plan canonical `docs/block-7-ui-161-verification-plan.md` 已落地（约 100 行 / 7 § / 4 PHASE）。
