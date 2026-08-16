@@ -726,6 +726,14 @@ export function useSkillStore(
 // Test-only helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
+// BLOCK-4 PHASE 2 G5: Test-only selector exposing the module-level
+// `_progressUnsubs` Map size, used to assert that the useEffect cleanup
+// in useSkillStore clears all wakeup subscriptions on unmount. Internal
+// module state stays private; this getter is the only test-facing surface.
+export function __getProgressUnsubsSize(): number {
+  return _progressUnsubs.size;
+}
+
 export function __resetSkillStoreCacheForTests(): void {
   _cache = { skills: [], loaded: false, lastFetched: 0 };
   _inflight = null;
