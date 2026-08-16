@@ -864,6 +864,16 @@
       "truthDomain": "block-4-ipc-bridge-polish",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "BLOCK-5-IPC-BRIDGE-FINALIZE",
+      "path": "docs/block-5-ipc-bridge-finalize-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-5-ipc-bridge-finalize",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
     }
   ]
 }
