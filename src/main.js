@@ -1136,103 +1136,7 @@ function setupWindowIpc() {
 // ── IPC：M2-3 可选错误遥测（V3）─────────────────────────────────
 // 默认关闭；用户在设置页主动开启后才会上报。payload 仅含 category/version/摘要。
 // ── IPC：插件管理 ──────────────────────────────────────────────
-function setupPluginIpc() {
-  ipcMain.handle("plugin:list-installed", async () => {
-    try {
-      const { getInstalledPlugins } = require("./plugin-manager");
-      return getInstalledPlugins();
-    } catch (e) {
-      return [];
-    }
-  });
 
-  ipcMain.handle("plugin:list-remote", async () => {
-    try {
-      const { getRemoteManifest } = require("./plugin-manager");
-      return await getRemoteManifest();
-    } catch (e) {
-      return { plugins: {} };
-    }
-  });
-
-  ipcMain.handle("plugin:install", async (event, pluginId) => {
-    try {
-      const { installPlugin } = require("./plugin-manager");
-      // 下载进度通过 event.sender.send 实时推给渲染进程
-      const onProgress = (ratio, received, total) => {
-        try {
-          event.sender.send("plugin:install-progress", {
-            pluginId,
-            ratio,
-            received,
-            total,
-          });
-        } catch {}
-      };
-      await installPlugin(pluginId, onProgress);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
-
-  ipcMain.handle("plugin:uninstall", async (event, pluginId) => {
-    try {
-      const { uninstallPlugin } = require("./plugin-manager");
-      await uninstallPlugin(pluginId);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
-
-  ipcMain.handle("plugin:check-updates", async () => {
-    try {
-      const { checkUpdates } = require("./plugin-manager");
-      return await checkUpdates();
-    } catch (e) {
-      return [];
-    }
-  });
-
-  // ── M2-9：content-plugin 文档桥 ──────────────────────────────
-  // docs.tsx 运行时通过这些 IPC 拉取已装 content-plugin 的文档树与正文
-  ipcMain.handle("content-plugin:list", async () => {
-    try {
-      const { listAllContentPlugins } = require("./plugin-manager");
-      return listAllContentPlugins();
-    } catch (e) {
-      console.warn("[desktop] content-plugin:list failed:", e.message);
-      return [];
-    }
-  });
-
-  ipcMain.handle("content-plugin:list-docs", async (_event, pluginId) => {
-    try {
-      const { listContentPluginDocs } = require("./plugin-manager");
-      return listContentPluginDocs(pluginId);
-    } catch (e) {
-      console.warn("[desktop] content-plugin:list-docs failed:", e.message);
-      return [];
-    }
-  });
-
-  ipcMain.handle(
-    "content-plugin:read",
-    async (_event, pluginId, relativePath) => {
-      try {
-        const { readContentPluginDoc } = require("./plugin-manager");
-        return {
-          ok: true,
-          content: readContentPluginDoc(pluginId, relativePath),
-        };
-      } catch (e) {
-        console.warn("[desktop] content-plugin:read failed:", e.message);
-        return { ok: false, error: e.message };
-      }
-    },
-  );
-}
 
 // ── M1-2：CSP 加固 ─────────────────────────────────────────────
 // 禁用 unsafe-eval，限制资源来源。connect-src 放开 localhost:* 覆盖
@@ -1275,164 +1179,10 @@ function setupCsp() {
 }
 
 // ── IPC：Runtime 状态查询 ──────────────────────────────────────
-function setupRuntimeIpc() {
-  ipcMain.handle("runtime:status", async () => {
-    try {
-      const { getRuntimeStatus } = require("./plugin-manager");
-      const { mergeRuntimeStatusWithConfiguredHomes } = require("./backend-health");
-      return mergeRuntimeStatusWithConfiguredHomes(getRuntimeStatus());
-    } catch (e) {
-      return { r: { installed: false }, python: { installed: false } };
-    }
-  });
-
-  // M1-1：后端就绪感知层——聚合 runtime:status + health 探测 + 子进程存活
-  // 渲染进程通过 window.biof3Desktop.backend.status() 调用，5s 轮询
-  ipcMain.handle("backend:status", async () => {
-    try {
-      const { getRuntimeStatus } = require("./plugin-manager");
-      const {
-        getBackendStatus,
-        mergeRuntimeStatusWithConfiguredHomes,
-      } = require("./backend-health");
-      return await getBackendStatus({
-        runtimeStatus: mergeRuntimeStatusWithConfiguredHomes(getRuntimeStatus()),
-        procs: {
-          gateway: gatewayProc,
-          rServer: rServerProc,
-          pyServer: pyServerProc,
-          plumber: plumberProc,
-        },
-      });
-    } catch (e) {
-      // 契约：必须回全字段。缺 rRuntime/pyRuntime 会让渲染进程把
-      // undefined 误读成"运行时确认缺失"，从而错弹首次配置引导页。
-      // 查询失败属于"状态未知"，用 null 显式表达，前端只在 === false
-      // 时才判定缺失。
-      return {
-        rRuntime: null,
-        pyRuntime: null,
-        rServerUp: false,
-        pyServerUp: false,
-        plumberUp: false,
-        isReady: false,
-        downReason: "状态查询失败: " + e.message,
-      };
-    }
-  });
-}
-
 // ── IPC：M2-7 按需启停 py-server / plumber ──────────────────────
 // 前端在用 Python 工具前调 biof3Desktop.py.start()，用完调 .stop()；
 // plumber 在重绘前调 .start()。未调用时 5min idle 自动 stop。
-function setupBackendLifecycleIpc() {
-  ipcMain.handle("py:start", async () => {
-    try {
-      return startPyServer("ipc");
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
-
-  ipcMain.handle("py:stop", async () => {
-    try {
-      return stopPyServer("ipc");
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
-
-  ipcMain.handle("plumber:start", async () => {
-    try {
-      return startPlumber("ipc");
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
-
-  ipcMain.handle("plumber:stop", async () => {
-    try {
-      return stopPlumber("ipc");
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
-}
-
 // ── IPC：macOS 小团队更新（OSS 清单 + 已校验 DMG）─────────────
-function setupAutoUpdateIpc() {
-  if (process.platform !== "darwin" || isDevMode || !app.isPackaged) {
-    ipcMain.handle("updater:check", async () => ({
-      ok: false,
-      error: "auto-update is available in packaged macOS builds only",
-    }));
-    ipcMain.handle("updater:download", async () => ({
-      ok: false,
-      error: "auto-update disabled",
-    }));
-    ipcMain.handle("updater:install", async () => ({
-      ok: false,
-      error: "auto-update disabled",
-    }));
-    return;
-  }
-
-  let _updateInfo = null;
-  const updater = createMacOssUpdater({
-    currentVersion: app.getVersion(),
-    downloadsDir: app.getPath("downloads"),
-    fetchImpl: (url, options) => net.fetch(url, options),
-    openPath: (target) => shell.openPath(target),
-    onProgress: (progress) => {
-      if (mainWindow) {
-        mainWindow.webContents.send("updater:download-progress", progress);
-      }
-    },
-  });
-
-  ipcMain.handle("updater:check", async () => {
-    try {
-      const result = await updater.check();
-      _updateInfo = result.info || null;
-      if (mainWindow) {
-        mainWindow.webContents.send(
-          result.hasUpdate
-            ? "updater:update-available"
-            : "updater:update-not-available",
-          _updateInfo,
-        );
-      }
-      return { ok: true, hasUpdate: result.hasUpdate, info: _updateInfo };
-    } catch (e) {
-      console.error("[updater] check failed:", e.message);
-      return { ok: false, error: e.message };
-    }
-  });
-
-  ipcMain.handle("updater:download", async () => {
-    try {
-      await updater.download();
-      if (mainWindow) mainWindow.webContents.send("updater:update-downloaded");
-      return { ok: true };
-    } catch (e) {
-      console.error("[updater] download failed:", e.message);
-      if (mainWindow) mainWindow.webContents.send("updater:error", e.message);
-      return { ok: false, error: e.message };
-    }
-  });
-
-  ipcMain.handle("updater:install", async () => {
-    try {
-      await updater.install();
-      return { ok: true };
-    } catch (e) {
-      console.error("[updater] open installer failed:", e.message);
-      if (mainWindow) mainWindow.webContents.send("updater:error", e.message);
-      return { ok: false, error: e.message };
-    }
-  });
-}
-
 // ── IPC：文件对话框（preload 暴露的 files.saveDialog/openDialog）─────────
 // ── IPC：诊断日志导出 / 数据备份（M2-8）─────────────────────────
 function setupDiagnosticIpc() {
@@ -2055,11 +1805,16 @@ async function main() {
   setupHarnessCapabilitiesIpc();
   setupFileDialogIpc({ mainWindow });
   setupDataManagementIpc();
+  // BLOCK-9.1 PHASE 2: mid-risk setup functions with dependency injection
+  const { setupRuntimeIpc } = require("./ipc/runtime-status");
+  const { setupBackendLifecycleIpc } = require("./ipc/backend-lifecycle");
+  const { setupPluginIpc } = require("./ipc/plugin");
+  const { setupAutoUpdateIpc } = require("./ipc/auto-update");
   setupPluginIpc();
-  setupRuntimeIpc();
-  setupBackendLifecycleIpc();
+  setupRuntimeIpc({ gatewayProc, rServerProc, pyServerProc, plumberProc });
+  setupBackendLifecycleIpc({ startPyServer, stopPyServer, startPlumber, stopPlumber });
   setupTerminalIpc();
-  setupAutoUpdateIpc();
+  setupAutoUpdateIpc({ mainWindow });
   setupDiagnosticIpc();
   if (typeof setupFigcodeIpc === "function") {
     setupFigcodeIpc();
