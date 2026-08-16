@@ -254,11 +254,16 @@ function _startPolling(
         ) {
           clearInterval(interval);
           _pollIntervals.delete(executionId);
+          // BLOCK-3 P2 A1: 终态同步清 onProgress 订阅，避免多 execution 切换后
+          // 残留 wakeup callback 继续接收 progress 事件触发重复 IPC。
+          _unsubscribeProgressWakeup(executionId);
         }
       }
     } catch {
       clearInterval(interval);
       _pollIntervals.delete(executionId);
+      // BLOCK-3 P2 A1: 异常路径同样清 onProgress 订阅
+      _unsubscribeProgressWakeup(executionId);
     }
   }, 2000);
 
