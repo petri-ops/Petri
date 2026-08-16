@@ -63,7 +63,7 @@ W5 报告 B 类降级候选：
 ### GATES-1：baseline exit code 契约化（来自 W3 §4.2）
 
 1. `scripts/docs-governance.mjs` 与 `scripts/check-ui-productization-audit.mjs` 明确文档化退出码语义：0=PASS / 1=FAIL / 2=分类冲突。
-2. `scripts/test-impact-map.mjs`（`npm run test:changed:list`）退出 2 时输出"分类冲突"诊断消息（不是 fail-closed）。
+2. `scripts/test-affected.mjs`（`npm run test:changed:list`；注：plan 早期版本笔误为 `test-impact-map.mjs`，2026-08-16 GATES-1 修正）退出 2 时输出"分类冲突"诊断消息（不是 fail-closed）。
 3. `package.json` 脚本不改 exit 行为；契约化以脚本注释 + 文档化同步完成。
 
 ### GATES-2：`--report` JSON 输出模式（来自 W3 §4.3）
