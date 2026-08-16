@@ -48,7 +48,7 @@ UI-161 entry §最后段明确写道："不接 IPC / 不动 preload / main / wor
 
 **A. IPC 桥接通（核心 gap）**
 
-【PHASE 0 摸底后修订】**`frontend/src/lib/electron.d.ts` L114-150 已是 source-of-truth**（已声明 `skills.{discover, execute, getExecution}` + onProgress），无需修改；`desktopBridge.ts` 已通过 `getBridge('skills')` 自动派生类型，无需修改。真实缺口仅在 main 进程 + preload 暴露：
+【PHASE 0 摸底后修订 / PHASE 1 实际落地（commit `2d81377` P1-1.3）】**`frontend/src/lib/electron.d.ts` L114-218（含 L207-218 onProgress 完整字段）已通过 ADDITIVE +2 字段扩展为 source-of-truth**（PHASE 1 落地新增 `cancel(executionId)` + `onProgress(callback)` 字段声明 +12 行 + JSDoc 注释），无需后续重写；`desktopBridge.ts` 已通过 `getBridge('skills')` 自动派生类型，无需修改。真实缺口仅在 main 进程 + preload 暴露：
 
 - `src/main.js`：新增 `ipcMain.handle('skills:discover')` / `'skills:execute'` / `'skills:getExecution'` 三个 handler；内部委托 `core/shared-backend/skills-sdk.js` 单例（行 77 `class SkillsSDK` + 行 232 `executeSkill` + 行 311 `executeSkillTool`）+ 装配 `core/shared-backend/workflow-engine.js`（行 566 `cancel` + `getExecution`）；**进度推送**用 `webContents.send('skills:progress', ...)`（订阅 SDK 内部或包装 SkillRuntime diff `execCtx.checkpoints[]`）
 - `src/preload.js`：在第二份 `contextBridge.exposeInMainWorld('biof3Desktop', {...})` 对象（行 61 起）补 `skills` 子块，对齐 `electron.d.ts` 声明：`discover()` / `execute(skillId, params)` / `getExecution(executionId)` / `onProgress(callback)` / `cancel(executionId)`；**注意**：world 名是 `biof3Desktop`（与 electron.d.ts 一致），不是 `desktopBridge`（plan 初稿命名错误）
@@ -120,7 +120,7 @@ UI-161 entry §最后段明确写道："不接 IPC / 不动 preload / main / wor
 **目标**：把 `useSkillStore` 真实接到 `workflow-engine.js`。
 
 执行项（顺序；**经 PHASE 0 摸底对齐**）：
-1. **`src/preload.js`**（最小改动 ~15 行）：在第二份 `contextBridge.exposeInMainWorld('biof3Desktop', {...})` 对象（行 61 起）补 `skills` 子块，对齐 `frontend/src/lib/electron.d.ts` L114-150 已声明契约：`discover()` / `execute(skillId, params)` / `getExecution(executionId)` / `onProgress(callback)` / `cancel(executionId)`。底层对应 `ipcRenderer.invoke('skills:discover')` 等
+1. **`src/preload.js`**（最小改动 ~15 行）：在第二份 `contextBridge.exposeInMainWorld('biof3Desktop', {...})` 对象（行 61 起）补 `skills` 子块，对齐 `frontend/src/lib/electron.d.ts` L114-218（含 L207-218 onProgress 完整字段）已声明契约：`discover()` / `execute(skillId, params)` / `getExecution(executionId)` / `onProgress(callback)` / `cancel(executionId)`。底层对应 `ipcRenderer.invoke('skills:discover')` 等
 2. **`src/main.js`**（~80 行）：顶部 `require('skills-sdk')` 单例装配 + `WorkflowEngine` 注入；注册 3 个 `ipcMain.handle('skills:discover'/'execute'/'getExecution')` + 1 个 `ipcMain.handle('skills:cancel')`；进度推送用 `webContents.send('skills:progress', { executionId, progress, checkpoints })` —— 通过包装 `SkillRuntime`（`core/shared-backend/skill-runtime.js` 行 188 已具备 `cancel(executionId)`）后 `setInterval(1000)` diff `execCtx.checkpoints[]` 合成（`workflow-engine.js` 零 EventEmitter）
 3. **`frontend/src/hooks/useSkillStore.ts`**（改 1 处 ~10 行）：把 `_startPolling`（行 581 附近，2 秒 polling）替换为订阅 `window.biof3Desktop.skills.onProgress(callback)`；回调内调 `_notify()` + 写 store。store 其余实现不变（已自动通过 `getBridge('skills')` 走真实 IPC）
 4. **`frontend/src/hooks/useSkillStore.test.ts`**（**新文件** ~200 行）：镜像 `frontend/src/hooks/usePluginStore.test.ts`（195 行模板，9 tests）；用 `vi.stubGlobal('biof3Desktop', { skills: { discover: vi.fn(), execute: vi.fn(), getExecution: vi.fn(), onProgress: vi.fn(), cancel: vi.fn() } })`；每测试调用 `__resetSkillStoreCacheForTests()`（`useSkillStore.ts` L580 已导出）重置缓存
@@ -265,7 +265,21 @@ UI-161 entry §最后段明确写道："不接 IPC / 不动 preload / main / wor
 ## 7. 关联
 
 | 文档 | 关系 |
-| --- | --- |
+| --- | 
+
+---
+
+## PHASE 6 H1 修复（2026-08-16 BLOCK-5-IPC-BRIDGE-FINALIZE）
+
+按 PHASE 6 只读代码质量审核报告 §10.3 H1 项，本节 §3.1.A 内 `electron.d.ts L114-150` 措辞**已在 BLOCK-5 PHASE 1 修订**：
+
+- L51 / L123 两处 `L114-150` → `L114-218`（含 L207-218 onProgress 完整字段）
+- L51 措辞新增 "PHASE 1 实际落地（commit `2d81377` P1-1.3）" + "ADDITIVE +2 字段扩展为 source-of-truth" + "+12 行 + JSDoc 注释"
+
+**为什么 PHASE 1 落地后没及时同步 plan**：PHASE 1 提交 `2d81377` + commit `0be5483 docs(ui-157)` 修订 §3.1.A 时已记录 "+12 ADDITIVE" 措辞（phase-1-bridge.md §1.3 + §5.1 主 agent 裁决 Option A 段），但 plan 主体保留旧措辞。BLOCK-5 PHASE 1 修复此遗漏。
+
+**未触碰**：plan 总体结构、§3.1.A 后续段、§4 PHASE 划分、其他章节。
+--- |
 | `docs/doc-governance-gates-plan.md` | 前序 WP plan 模板来源（同 § 结构） |
 | `docs/doc-governance-gates-closeout.md` | 前序 WP closeout 模板来源 |
 | `docs/ui-productization-audit.md` 第 113 行 | UI-157 主条目（PHASE 4 修改） |
