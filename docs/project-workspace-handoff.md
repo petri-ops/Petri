@@ -1,6 +1,6 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-08-16
+最后更新：2026-08-16（DOC-GOVERNANCE-GATES 工作包收口同步）
 
 ## 1. 恢复顺序
 
@@ -37,14 +37,15 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 - `npm run test:changed:list` 当前因存量 `scripts/*.mjs` 分类规则重叠 fail-closed；本轮已用显式定向测试覆盖改动，不能把它表述为 `test:changed` 通过。
 - UI-140 / `AGENT-CONCURRENCY` 已完成。A-1～A-6 在开发态 Electron 通过；DeepSeek `deepseek-v4-flash` 经 Clash Verge 规则恢复连通，真实主任务、排队续发、4 个并发 sub-agent 与第 5 个 `503 user_limit` 均有记录；renderer 重载按 conversation/project 恢复且控制台 0 error。`acceptance/agent-concurrency/ui140-electron.json` 精确绑定 `6adeaa9` 与 15 个 source hashes，UI-140 在该开发态边界为 verified。
 
-### 3.0.5 当前 active 工作包：DOC-GOVERNANCE-GATES（2026-08-16 用户裁决启动）
+### 3.0.5 已收口工作包：DOC-GOVERNANCE-GATES（2026-08-16 用户裁决启动同日收口）
 
+- 状态：`completed / implemented`（2026-08-16 用户裁决启动同日收口）；DOC-REGISTRY `DOC-GOVERNANCE-GATES` `active → completed`；新增 `DOC-GOVERNANCE-GATES-CLOSEOUT` reference 登记项；`truthDomain: docs-governance-gates-closeout`。
+- 8 commit 已 push 至 origin/main：`a363105` / `aea70a6` / `c552100` / `1b7ce3e` / `76e0f75` / `c1ce38c` / `1049ac5` / `d4822ea`。
 - 范围：`scripts/docs-governance.mjs` / `scripts/check-ui-productization-audit.mjs` 门禁硬化（hooks/ 白名单 / exit code 契约化 / `--report` JSON 输出）、DOC-REGISTRY 扩展字段规范化、剩余 12 项 docs 治理债修复（v1-productization-roadmap / macos-oss-auto-update / stage4-stable-release-checklist / harness-* 顶部状态 / codex-style-workbench-direction / agent-workbench-enhancement-plan §5 ID 互引 / Skills 4 份 README 入口图 / W5 B 类 4 个 archive 文件首段吸收声明）。
 - 不修改 UI 组件（`frontend/src/**`）、不修改 Electron 主进程（`src/main.js` / `preload.js` / `plugin-manager.js`）、不修改核心后端（`core/**`）、不修改 acceptance evidence、不外推 Provider / packaged / GA。
-- 与 Block-2 / Block-6 UI 实机复核项（UI-157 / UI-161）解耦——UI 复核继续走 `ui:audit:check` 路径；本工作包不阻塞也不被它们阻塞。
-- 按 single work package serial 纪律：**任何新 UI 工作包 / 新主代码工作包须等本工作包收口后才能启动**。
-- Plan canonical：`docs/doc-governance-gates-plan.md`（DOC-REGISTRY 已登记 62 项；truthDomain=`docs-governance-gates`；`status: active`）；证据位置见 plan §6；阶段门禁 GATES-0～GATES-4 见 plan §2-§4。
-- 启动条件：用户裁决 ✅；`npm run docs:check` 当前 62 registered PASS；`npm run ui:audit:check` 当前 PASS；工作树领先 origin/main 2 commit 已 push。
+- 与 Block-2 / Block-6 UI 实机复核项（UI-157 / UI-161）解耦——UI 复核继续走 `ui:audit:check` 路径；本工作包不阻塞也不被它们阻塞；本工作包收口后下一块候选仍为 Block-2 UI-157 / Block-6 UI-161 既有 in_progress 复核项。
+- 收口记录 canonical：`docs/doc-governance-gates-closeout.md`（含 1-8 收口判定 + 证据清单）；Plan canonical `docs/doc-governance-gates-plan.md` 保留（`archivePolicy: retain_stable_path`）。
+- 验证：`npm run docs:check` 64 registered PASS；`npm run ui:audit:check` 131 PASS；`npm run docs:reconcile` 0 issues / 0 manual review / 0 validation issues；GATES-2 `--report` JSON 模式 3 脚本 schema 校验通过。
 
 ### 3.1 已收口主线：G0-RS-UX1H Async Tool Surface（2026-08-09 收口）
 
