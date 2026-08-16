@@ -4,7 +4,9 @@
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-07-26.md)。
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 
-最后更新：2026-08-16 22:30
+最后更新：2026-08-16 23:38（BLOCK-9-MEGA-FILE-REFACTOR 工作包收口登记 —— 4 PHASE 全部完成 + UI-162/163/164 全部 verified + 4 commit 落地 + 6 个 consumer 0 改动 + 不外推 BLOCK-9.1~9.6 6 项 + 当前无 active 工作包）
+
+- ✅ 2026-08-16 23:38 BLOCK-9-MEGA-FILE-REFACTOR 工作包收口（用户裁决"按照你的建议来"启动当日 4 PHASE 全部完成）。4 commit 落地：d87a0f8 PHASE 0 启动 + 评审报告永久化 / e78567c PHASE 1 _data.ts 2157 → 3 文件 / 1c14f49 PHASE 2 buildPreviewTable 抽 lib/file-preview/ / c1e2bd5 PHASE 3 project-workspace.tsx 3213 → 3114 + 8 helpers + types 抽离。3 项重构（基于 senior-engineer-review-2026-08-16.md P0/P1 5 项中的 3 项）：① 拆 _data.ts 2157 → 3 文件（registry/categories/inventory + 兼容；实际无 demo 字段） / ② 抽 buildPreviewTable 解决 ResultView + project-workspace 重复 / ③ 拆 project-workspace.tsx 保守拆分（types + helpers；组件链依赖复杂未拆子组件）。UI-162/163/164 全部 verified。验证：tsc 0 / vitest 75 文件 630 tests PASS / 4 治理门 GREEN / 6 个 consumer 0 改动 / 不变量守住。不外推：BLOCK-9.1 main.js 2450 / BLOCK-9.2 SimpleChat 2153 / BLOCK-9.3 plugin-manager 1457 / BLOCK-9.4 DesktopSettingsPanel 1515 / BLOCK-9.5 useSkillStore 743 / BLOCK-9.6 IPC channel 常量集中 6 项 + packaged / dist / Provider / P7 / GA / E1-d/E1-e G1+ / dist staleness G1+ / i18n / 不重新激活 BLOCK-2/3/4/5/6/7/8。当前无 active 工作包。细节见 docs/block-9-mega-file-refactor-closeout.md。
 
 ## 当前待处理项
 

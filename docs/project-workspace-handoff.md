@@ -84,6 +84,22 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 - 不动：`preload.js` 5 方法签名 / `electron.d.ts` / 4 page / `desktopBridge.ts` / `core/shared-backend/*` / `agent-tools/`。
 - 不做：dev Electron 实机复核（候选 2/3 留 BLOCK-6+）。
 
+### 3.0.14 已收口工作包：BLOCK-9-MEGA-FILE-REFACTOR（2026-08-16 用户裁决"按照你的建议来"启动当日 4 PHASE 全部收口）
+
+- 状态：`active → completed`（2026-08-16 23:38）；DOC-REGISTRY `BLOCK-9-MEGA-FILE-REFACTOR` `status=completed / linkedCommits=[d87a0f8, e78567c, 1c14f49, c1e2bd5] / qualificationEligible=false`；新增 `BLOCK-9-MEGA-FILE-REFACTOR-CLOSEOUT` `kind=reference / status=completed / canonical=false`（closeout 报告）；closeout 报告 `docs/block-9-mega-file-refactor-closeout.md`。
+- 4 PHASE 全部完成：
+  - **PHASE 0**（启动 + 评审报告永久化）：commit `d87a0f8`
+  - **PHASE 1**（拆 `_data.ts` 2157 → 3 文件）：commit `e78567c`，UI-162 verified
+  - **PHASE 2**（抽 `buildPreviewTable` 到 `lib/file-preview/`）：commit `1c14f49`，UI-163 verified
+  - **PHASE 3**（拆 `project-workspace.tsx` 3213 → 3114 + 8 helpers + types 抽离）：commit `c1e2bd5`，UI-164 verified
+- 3 项重构（基于评审报告 P0/P1 5 项中的 3 项）：
+  1. **拆 `_data.ts` 2157 → 3 文件**（registry/categories/inventory + 兼容；实际无 demo 字段）
+  2. **抽 `buildPreviewTable` 到 `lib/file-preview/`** 解决 ResultView + project-workspace 重复
+  3. **拆 `project-workspace.tsx` 3213 → 3114 + 8 helpers + types 抽离**（保守拆分，组件链依赖复杂未拆子组件）
+- 验证：tsc 0 / vitest 75 文件 630 tests PASS / 4 治理门 GREEN / 6 个 consumer 0 改动 / 不变量守住
+- 不外推：main.js 2450 / SimpleChat.tsx 2153 / plugin-manager 1457 / DesktopSettingsPanel 1515 / useSkillStore 743 / IPC channel 常量集中 6 项（BLOCK-9.1~9.6）+ packaged / dist / Provider / P7 / GA / E1-d/E1-e G1+ / dist staleness G1+ / i18n / 不重新激活 BLOCK-2/3/4/5/6/7/8
+- 不动：preload.js / electron.d.ts / desktopBridge.ts / 4 page / core/shared-backend/* / agent-tools/
+
 ### 3.0.13 已启动工作包：BLOCK-9-MEGA-FILE-REFACTOR（2026-08-16 用户裁决"按照你的建议来"启动，当前唯一 active）
 
 - 状态：`planning → active`（2026-08-16 用户裁决当日启动）；DOC-REGISTRY 新增 `BLOCK-9-MEGA-FILE-REFACTOR` `kind=work-package / status=active / canonical=true / truthDomain=block-9-mega-file-refactor / archivePolicy=retain_stable_path` + 新增 `SENIOR-ENGINEER-REVIEW-2026-08-16` `kind=reference / status=completed`（评审报告永久化）；plan canonical `docs/block-9-mega-file-refactor-plan.md` 已落地（约 130 行 / 6 § / 4 PHASE）；评审依据 `docs/senior-engineer-review-2026-08-16.md`。
