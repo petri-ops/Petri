@@ -1021,6 +1021,16 @@
       "truthDomain": "block-9-1-main-js-split",
       "entrypoint": "docs/block-9-1-main-js-split-plan.md",
       "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "BLOCK-9.2-MEGA-FILE-REFACTOR",
+      "path": "docs/block-9-2-mega-file-refactor-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-9-2-mega-file-refactor",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
     }
   ]
 }
