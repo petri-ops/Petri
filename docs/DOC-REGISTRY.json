@@ -816,11 +816,28 @@
       "id": "BLOCK-3-IPC-BRIDGE-HARDENING",
       "path": "docs/block-3-ipc-bridge-hardening-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-3-ipc-bridge-hardening",
       "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
+      "archivePolicy": "retain_stable_path",
+      "linkedCommits": [
+        "786a8d6 docs(ui-157): start BLOCK-3-IPC-BRIDGE-HARDENING work package",
+        "7ec27cc docs(sync): BLOCK-3-IPC-BRIDGE-HARDENING 启动同步 2 canonical 文档",
+        "a2c4232 feat(skills-bridge): BLOCK-3 PHASE 1 P1 必修 + P2 边界修复（main.js）",
+        "97f1b10 fix(skills-bridge): BLOCK-3 PHASE 2 A1 useSkillStore 终态清 onProgress + G1-G4 测试补",
+        "c9391ba test(skills-bridge): BLOCK-3 PHASE 2 G6 main.js 9→4 状态映射单测"
+      ]
+    },
+    {
+      "id": "BLOCK-3-IPC-BRIDGE-HARDENING-CLOSEOUT",
+      "path": "docs/block-3-ipc-bridge-hardening-closeout.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "block-3-ipc-bridge-hardening",
+      "archivePolicy": "retain_stable_path",
+      "entrypoint": "docs/README.md"
     }
   ]
 }
