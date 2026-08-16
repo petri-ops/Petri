@@ -1,6 +1,6 @@
 # BioF3 Desktop 文档入口
 
-最后更新：2026-08-11
+最后更新：2026-08-16
 
 ## 项目治理入口
 
@@ -11,8 +11,7 @@
 5. [`AUDIT-LOG.md`](./AUDIT-LOG.md) — 每次 Agent 会话优先处理的审计广播台。
 6. [`parallel-development-guide.md`](./parallel-development-guide.md) — 多模块并行开发的冲突风险管控策略；独立模块大胆并行，跨层接口变更必须串行。
 7. [`architecture/gateway-design.md`](./architecture/gateway-design.md) — Backend Gateway 架构设计；统一入口、路由分发与断路器。
-8. [`ide-transformation-plan.md`](./ide-transformation-plan.md) — BioF3 IDE 改造计划；Monaco Editor 集成、MCP 工具与编辑器能力扩展路线图。
-9. [`BioF3-Desktop-Evaluation-Report-2026-08-14.md`](./BioF3-Desktop-Evaluation-Report-2026-08-14.md) — Desktop 评测报告；2026-08-14 评估记录与改进建议。
+8. [`BioF3-Desktop-Evaluation-Report-2026-08-14.md`](./BioF3-Desktop-Evaluation-Report-2026-08-14.md) — Desktop 评测报告；2026-08-14 评估记录与改进建议。
 
 ## 长期核心指引
 
@@ -25,7 +24,7 @@
 7. [`g0-rs0-result-studio-audit.md`](./g0-rs0-result-studio-audit.md) — G0-RS0 现状审计与架构 ADR；Result Studio 的复用/新增边界、契约缺陷与 Git 风险矩阵的唯一裁决记录。
 8. [`g0-rs-ux1h-async-tool-surface.md`](./g0-rs-ux1h-async-tool-surface.md) — 2026-08-09 已按非资格边界收口的 Async Tool Surface 工作包；UI-126 已于 2026-08-12 经 Windows 开发态 Electron 实机复核升为 `verified`，仍不外推 Provider/packaged 资格。
 9. [`agent-concurrency-design.md`](./agent-concurrency-design.md) — 2026-08-11 已完成的 Agent Concurrency 工作包；A-1～A-6 开发态 Electron evidence 精确绑定实现提交 `6adeaa9`。
-10. [`g0-ide-mcp-tools-plan.md`](./g0-ide-mcp-tools-plan.md) — 2026-08-14 启动的 IDE MCP 工具集工作包；为 Agent 暴露 `ide_file_*` / `ide_terminal_*` 等 21 个 MCP 工具（分 Phase 1/2/3 推进），仅面向 Agent 通道，不重复既有面向 UI 的 `file:*` IPC。
+10. [`g0-ide-mcp-tools-plan.md`](./g0-ide-mcp-tools-plan.md) — 2026-08-14 启动的 IDE MCP 工具集工作包；为 Agent 暴露 `ide_file_*` / `ide_terminal_*` 等 18 个 `ide_*` MCP 工具（分 Phase 1/2/3 推进），仅面向 Agent 通道，不重复既有面向 UI 的 `file:*` IPC。
 11. [`agent-workbench-enhancement-plan.md`](./agent-workbench-enhancement-plan.md) — Agent Workbench 增强计划（参考文档，已登记）。
 12. [`agent-workbench-p1-a5-verification-2026-08-15.md`](./agent-workbench-p1-a5-verification-2026-08-15.md) — 2026-08-15 已按开发态 Electron 边界完成的 A5 验证与收口报告；UI-AGENTWB-003 / UI-AGENTWB-004 转 `verified`，双 flag（on/off）链 + §X.2 兼容性测试矩阵 5 项 PASS；不外推 packaged / Provider / P7 / GA。
 13. [`t-aw-013-packaged-verification-2026-08-15.md`](./t-aw-013-packaged-verification-2026-08-15.md) — 2026-08-15 已按 packaged Electron 边界完成的 T-AW-013 实机核对；6/6 步骤（CDP attach + bridge 同步方法 + 4 renderer + CSV BOM `EF BB BF` 字节级 + Markdown `| --- |` 分隔 + fallback 0 下载按钮）通过；A4 / P2 / P1.5 / UI-AGENTWB-007 证据等级升级为「前端 + dev Electron + packaged Electron 三轴」；4 处契约偏差已在 `ui-productization-audit.md` 行 244 CONTRACT-DRIFT-001 脚注登记；`qualificationEligible` 维持 false（Provider / GA 链路未覆盖）。

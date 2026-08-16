@@ -40,14 +40,6 @@
       "archivePolicy": "archive_after_completion"
     },
     {
-      "id": "BRANCH-HANDOFF",
-      "path": "docs/archive/checkpoints/branch-handoff.md",
-      "kind": "handoff",
-      "status": "archived",
-      "canonical": false,
-      "archivePolicy": "archive_after_completion"
-    },
-    {
       "id": "UI-WORKBENCH-DIRECTION",
       "path": "docs/codex-style-workbench-direction.md",
       "kind": "vision",
@@ -452,23 +444,27 @@
     },
     {
       "id": "IDE-MCP-TOOLS-DESIGN",
-      "path": "docs/ide-research/mcp-ide-tools-design.md",
+      "path": "docs/archive/ide-transformation-retired/ide-research/mcp-ide-tools-design.md",
       "kind": "reference",
-      "status": "reference",
+      "status": "archived",
       "canonical": false,
-      "truthDomain": "ide-mcp-tools-research",
       "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
+      "archivePolicy": "archive_after_completion",
+      "supersededBy": [
+        "G0-IDE-MCP-TOOLS"
+      ]
     },
     {
       "id": "IDE-MONACO-RESEARCH",
-      "path": "docs/ide-research/monaco-integration-research.md",
+      "path": "docs/archive/ide-transformation-retired/ide-research/monaco-integration-research.md",
       "kind": "reference",
-      "status": "reference",
+      "status": "archived",
       "canonical": false,
-      "truthDomain": "monaco-editor-integration-research",
       "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
+      "archivePolicy": "archive_after_completion",
+      "supersededBy": [
+        "G0-IDE-MCP-TOOLS"
+      ]
     },
     {
       "id": "G0-IDE-MCP-TOOLS",
@@ -488,18 +484,20 @@
     },
     {
       "id": "IDE-TRANSFORMATION",
-      "path": "docs/ide-transformation-plan.md",
+      "path": "docs/archive/ide-transformation-retired/ide-transformation-plan.md",
       "kind": "roadmap",
-      "status": "planned",
-      "canonical": true,
-      "truthDomain": "ide-development-roadmap",
+      "status": "archived",
+      "canonical": false,
       "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path",
+      "archivePolicy": "archive_after_completion",
       "tags": [
         "ide",
         "monaco",
         "editor",
         "transformation"
+      ],
+      "supersededBy": [
+        "G0-IDE-MCP-TOOLS"
       ]
     },
     {
@@ -681,9 +679,17 @@
       "title": "Agent interaction evaluation — AI Agent 交互评估（5cafe0a）",
       "owner": "agent",
       "registeredAt": "2026-08-16",
-      "linkedCommits": ["5cafe0a"],
+      "linkedCommits": [
+        "5cafe0a"
+      ],
       "notes": "从仓库根迁移到 docs/planning/；修复 managedRoots=['docs'] 登记违反。",
-      "tags": ["agent", "interaction", "evaluation", "5cafe0a", "relocated-from-root"]
+      "tags": [
+        "agent",
+        "interaction",
+        "evaluation",
+        "5cafe0a",
+        "relocated-from-root"
+      ]
     }
   ]
 }

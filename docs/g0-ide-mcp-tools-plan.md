@@ -6,7 +6,7 @@
 **truthDomain**: agent-ide-mcp-tools
 **Owner**: BioF3 Desktop Agent Team
 **依赖前置**:
-- `docs/ide-research/mcp-ide-tools-design.md` — 设计文档（已存在，2026-08-14）
+- `docs/archive/ide-transformation-retired/ide-research/mcp-ide-tools-design.md` — 设计文档（已存在，2026-08-14；2026-08-16 已 superseded 归档）
 - `docs/skills-architecture.md` — Skills 四层架构（已存在）
 - `core/r-server/mcp/registry.js` — MCP 注册中心（已存在，已注册 skill_* 三件套）
 - `src/main.js` IPC 处理器（已存在 file:open-dialog / file:save-dialog 等面向 UI 的通道）
@@ -16,7 +16,7 @@
 
 ## 1. 目标
 
-把 [`docs/ide-research/mcp-ide-tools-design.md`](./ide-research/mcp-ide-tools-design.md) 中定义的 IDE MCP 工具集从"研究文档"推进到"可被 Agent 调用"的实现状态。本工作包**仅面向 Agent 通道**（通过 MCP `listTools()` / `callTool()` 暴露给 LLM），**不重复**已有 `file:open-dialog` 等面向 UI 的 IPC。
+把 [`docs/archive/ide-transformation-retired/ide-research/mcp-ide-tools-design.md`](./archive/ide-transformation-retired/ide-research/mcp-ide-tools-design.md) 中定义的 IDE MCP 工具集从"研究文档"推进到"可被 Agent 调用"的实现状态。本工作包**仅面向 Agent 通道**（通过 MCP `listTools()` / `callTool()` 暴露给 LLM），**不重复**已有 `file:open-dialog` 等面向 UI 的 IPC。
 
 最终交付：
 - 一组 IDE 工具进入 MCP `listTools()` 输出
