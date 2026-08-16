@@ -672,7 +672,7 @@
     {
       "id": "AGENT-INTERACTION-EVAL-20260814",
       "path": "docs/planning/agent-interaction-evaluation.md",
-      "kind": "planning",
+      "kind": "reference",
       "status": "reference",
       "canonical": false,
       "truthDomain": "agent-interaction-evaluation",
