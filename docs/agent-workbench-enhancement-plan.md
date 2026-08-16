@@ -1,5 +1,4 @@
 # BioF3 Agent 工作台增强计划
-# BioF3 Agent 工作台增强计划
 
 > 文档版本：v1.1（增量增强版）
 > 创建日期：2026-08-14
@@ -124,7 +123,7 @@ BioF3 **不能**变成"AI 随意写脚本、随意生成结果"的产品。必�
 
 ### 1.4 与 IDE 改造计划的区别
 
-本计划**不是**将 BioF3 改造成传统 IDE（如 `docs/ide-transformation-plan.md` 所述的 Monaco Editor 集成、文件树导航等），也**不是**通过新建"Codex 工作台"页面替换现有 `ProjectWorkspace`，而是专注于在现有 UI 之上**扩展**：
+本计划**不是**将 BioF3 改造成传统 IDE（如 `docs/archive/ide-transformation-retired/ide-transformation-plan.md` 所述的 Monaco Editor 集成、文件树导航等；该计划于 2026-08-16 superseded 并归档），也**不是**通过新建"Codex 工作台"页面替换现有 `ProjectWorkspace`，而是专注于在现有 UI 之上**扩展**：
 
 | 维度 | IDE 改造方向（归档） | Agent 工作台增强（本计划） |
 |------|---------------------|---------------------------|
@@ -134,7 +133,7 @@ BioF3 **不能**变成"AI 随意写脚本、随意生成结果"的产品。必�
 | 目标用户 | 开发者 | 生信分析家 |
 | 可视化 | 通用代码高亮 | 生信图表、表格、日志 |
 
-> **说明**：`docs/ide-transformation-plan.md` 和 `docs/ide-research/` 目录建议后续归档，因为它们代表了一个已放弃的方向。
+> **说明**：`docs/ide-transformation-plan.md` 和 `docs/ide-research/` 目录已 superseded 归档到 `docs/archive/ide-transformation-retired/`（2026-08-16），它们代表了一个已放弃的方向。
 
 ---
 
@@ -1464,35 +1463,15 @@ Phase 3: ░░░░░░░░░░░░░░░░░░░░░░░�
 
 ### 11.1 待归档文档
 
-以下文档代表已放弃的 IDE 改造方向，建议后续归档到 `docs/archive/`：
+以下文档已于 2026-08-16 superseded 并归档（commit 即将提交）：
 
-| 文件 | 建议操作 | 原因 |
-|------|----------|------|
-| `docs/ide-transformation-plan.md` | 归档 | IDE 改造计划已取消 |
-| `docs/ide-research/mcp-ide-tools-design.md` | 归档 | 面向 IDE 的研究 |
-| `docs/ide-research/monaco-integration-research.md` | 归档 | Monaco Editor 研究 |
+| 文件 | 状态 | 原因 |
+|------|------|------|
+| `docs/archive/ide-transformation-retired/ide-transformation-plan.md` | `archived` / superseded by `G0-IDE-MCP-TOOLS` | IDE 改造计划已取消 |
+| `docs/archive/ide-transformation-retired/ide-research/mcp-ide-tools-design.md` | `archived` / superseded by `G0-IDE-MCP-TOOLS` | 面向 IDE 的研究 |
+| `docs/archive/ide-transformation-retired/ide-research/monaco-integration-research.md` | `archived` / superseded by `G0-IDE-MCP-TOOLS` | Monaco Editor 研究 |
 
-**归档操作**（后续执行）：
-
-```bash
-# 创建归档目录（如果不存在）
-mkdir -p docs/archive/ide-transformation-retired
-
-# 移动文件
-git mv docs/ide-transformation-plan.md docs/archive/ide-transformation-retired/
-git mv docs/ide-research docs/archive/ide-transformation-retired/
-
-# 提交
-git add -A
-git commit -m "docs: archive IDE transformation plan (retired direction)
-
-The Agent Workbench Enhancement Plan (docs/agent-workbench-enhancement-plan.md)
-replaces the IDE transformation direction. Monaco Editor integration and
-traditional IDE features are not part of the BioF3 roadmap.
-
-See docs/codex-style-workbench-direction.md for the new direction.
-"
-```
+归档操作已完成（`git mv`），DOC-REGISTRY 同步把三个登记项 `status` 从 `planned` / `reference` 改为 `archived`，并把路径指向 `docs/archive/ide-transformation-retired/`。归档方向由 `docs/codex-style-workbench-direction.md` 与本计划共同确认。
 
 ### 11.2 文档更新
 
