@@ -1,6 +1,6 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-08-11
+最后更新：2026-08-16（DOC-GOVERNANCE-GATES 工作包收口同步）
 
 ## 当前结论
 
@@ -132,7 +132,7 @@ Harness Loop Engineering v1 与 Result Studio 引擎基础继续复用。G0 Livi
 9. [`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md)：前置已满足、等待按 LF1/LF7 依赖启动的数据契约轨。
 10. [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md)：已完成的 HLE-0～HLE-6 基线、验收与跨 Agent 接手协议。
 11. [`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md)：已完成的 HLE 生产接线、真实验收与状态纠偏记录。
-12. [`doc-governance-gates-plan.md`](./doc-governance-gates-plan.md)：2026-08-16 用户裁决启动的当前唯一 `active` 工作包；治理门禁硬化与剩余 12 项治理债；不修改 UI/主代码/Provider/packaged/GA。
+12. [`doc-governance-gates-plan.md`](./doc-governance-gates-plan.md) + [`doc-governance-gates-closeout.md`](./doc-governance-gates-closeout.md)：2026-08-16 用户裁决启动、同日 GATES-0~GATES-4 五阶段全部完成并收口的治理工程工作包；治理门禁硬化与剩余 12 项治理债；不修改 UI/主代码/Provider/packaged/GA。
 ## 2026-08-14 → 2026-08-16 同步笔录
 
 > 本节为 2026-08-16 文档治理收口同步（worker-C）追加，仅在上方「当前结论」段后追加一段同步状态；不重写或外推原文中已收口阶段的实施细节与边界。
@@ -145,7 +145,7 @@ Harness Loop Engineering v1 与 Result Studio 引擎基础继续复用。G0 Livi
 - **Block-5 · GOV-AUDIT-VERIFICATION**（5 commit）— T-AW-013（packaged 三轴验证）+ T-AW-014（dev Electron 边界内 4 工作包二次实机复核）已按各自边界收口，并在 `docs/AUDIT-LOG.md` 留有同收口径登记；含 6 份 planning 文档治理收口。
 - **Block-6 · G0-LONGTERM-DEV + HOTFIXES**（3 commit）— `UI-161`（Skills 入口回收至 LeftPanel、移除 `SkillsSidebar`）等仍以 `in_progress` 提交，目前正在做实机复核；本轮未升 `verified`，记录点保留在 `docs/AUDIT-LOG.md`。
 - **5 个 `wb/` 命名空间分支已 push**：`agent-workbench`、`backend-skills`、`copilot-gateway`、`docs-evaluation`、`g0-ide-mcp-tools`；均为命名空间分支，不与主分支并行开新 active 工作包。
-- **DOC-GOVERNANCE-GATES 工作包启动**（2026-08-16 用户裁决）：本节首次出现 active 工作包登记，与 6 个 Block 收口并列；范围限于 `scripts/docs-governance.mjs` / `scripts/check-ui-productization-audit.mjs` 门禁硬化、DOC-REGISTRY 扩展字段规范化与剩余治理债修复；按 single work package serial 纪律，**任何新 UI 工作包 / 新主代码工作包须等本工作包收口后才能启动**；Block-2/Block-6 实机复核项（UI-157/UI-161）不依赖本工作包、可独立推进。Plan ID `DOC-GOVERNANCE-GATES`、canonical `docs/doc-governance-gates-plan.md`、DOC-REGISTRY 已登记 62 项。详见 plan §1-§9。
+- **DOC-GOVERNANCE-GATES 工作包已收口**（2026-08-16 用户裁决启动同日收口）：8 commit 全 push 至 origin/main；GATES-0 hook 白名单、GATES-1 退出码契约文档化、GATES-2 `--report` JSON 输出 + 3 JSON Schema + 共享 helper、GATES-3 DOC-REGISTRY 扩展字段规范化、GATES-4 8 份 docs + 4 份 archive 文件首段吸收声明全部完成。DOC-REGISTRY `DOC-GOVERNANCE-GATES` 已 `active → completed`，新增 `DOC-GOVERNANCE-GATES-CLOSEOUT` reference 登记项。收口记录见 [`doc-governance-gates-closeout.md`](./doc-governance-gates-closeout.md)。`npm run docs:check` 64 registered PASS、`npm run ui:audit:check` 131 PASS、`npm run docs:reconcile` 0 issues。按 single work package serial 纪律，本工作包收口后下一块候选仍为 Block-2 UI-157 / Block-6 UI-161 既有 in_progress 复核项，须经用户显式裁决启动新工作包。
 - **当前阶段纪律**：`qualificationEligible: false` 是 G0 开发期常态事实，不构成缺陷、不是待办、不是下一次校验需推动的事；G1+ 阶段事项（`Provider` 矩阵、`packaged Electron` 公证/签名、`OSS` 远程接手、`GA` 公证流水、`dist staleness`）按当前阶段属于**不外推**而不是"待完成"。上一段已收口阶段的边界保持不变。
 - **单工作包串行纪律下「下一块候选」**：Block-2 的 `UI-157`（Skills IPC 桥实机收口）与 Block-6 的 `UI-161`（实机复核升 `verified`）属于当前 G0 边界内未完成的实机复核项；不主动启动新工作包，新工作包必须由用户显式裁决后才能由主 Agent 登记到 `docs/DOC-REGISTRY.json`。
 - **本节与 worker-A 的 `docs/AUDIT-LOG.md` closeout 登记、worker-B 的 `agent-interaction-evaluation.md` 迁移独立同步**：本节不动 `docs/AUDIT-LOG.md`、不动 `agent-interaction-evaluation.md`、不动 `docs/DOC-REGISTRY.json`、不动 `docs/README.md`，仅作为上方 canonical 文档的同步附录。

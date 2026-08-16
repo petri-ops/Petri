@@ -1,8 +1,8 @@
 # DOC-GOVERNANCE-GATES：文档治理门禁工程化
 
-最后更新：2026-08-16
+最后更新：2026-08-16（已收口）
 
-状态：`active / planned`（2026-08-16 用户裁决启动）
+状态：`completed / implemented`（2026-08-16 用户裁决启动同日 GATES-0~GATES-4 五阶段全部完成并收口）
 
 Plan ID：`DOC-GOVERNANCE-GATES`
 

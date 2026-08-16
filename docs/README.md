@@ -1,6 +1,6 @@
 # BioF3 Desktop 文档入口
 
-最后更新：2026-08-16
+最后更新：2026-08-16（DOC-GOVERNANCE-GATES 工作包收口同步）
 
 ## 项目治理入口
 
@@ -17,7 +17,7 @@
 
 
 1. [`scientific-intelligence-os-vision.md`](./scientific-intelligence-os-vision.md) — BioF3 长期产品愿景、当前定位、阶段跃迁条件与禁止跨阶段建设规则。它约束方向，但不替代当前工作包。
-2. [`doc-governance-gates-plan.md`](./doc-governance-gates-plan.md) — 2026-08-16 用户裁决启动的当前唯一 `active` 工作包；`scripts/docs-governance.mjs` / `scripts/check-ui-productization-audit.mjs` 门禁硬化、JSON `--report` 输出、DOC-REGISTRY 扩展字段规范化与剩余 12 项治理债修复；不修改 UI/主代码/Provider。
+2. [`doc-governance-gates-plan.md`](./doc-governance-gates-plan.md) — 2026-08-16 用户裁决启动、同日 GATES-0~GATES-4 五阶段全部完成并收口的治理工程工作包；`scripts/docs-governance.mjs` / `scripts/check-ui-productization-audit.mjs` 门禁硬化、JSON `--report` 输出、DOC-REGISTRY 扩展字段规范化与剩余 12 项治理债修复；不修改 UI/主代码/Provider。收口记录见 [`doc-governance-gates-closeout.md`](./doc-governance-gates-closeout.md)。
 3. [`g0-living-foundation-plan.md`](./g0-living-foundation-plan.md) — 当前永久 G0 可信基础层主线；LF12 原始核心资格保持 maintained，Result Studio 产品支持声明暂停，P7 deferred。
 4. [`g0-lf12-baseline-qualification-plan.md`](./g0-lf12-baseline-qualification-plan.md) — 已完成的 G0 Baseline v1 资格认证、证据边界与永久维护契约。
 5. [`g0-scientific-data-contract-plan.md`](./g0-scientific-data-contract-plan.md) — SDC-0 / SDC-1-A / SDC-1 / SDC-2 已完成；SDC-3～SDC-7 deferred。
