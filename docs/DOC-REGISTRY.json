@@ -999,10 +999,27 @@
       "id": "BLOCK-9.1-MAIN-JS-SPLIT",
       "path": "docs/block-9-1-main-js-split-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-9-1-main-js-split",
       "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "linkedCommits": [
+        "fa8353a",
+        "f63185b",
+        "2d94732",
+        "aed7498",
+        "2493587"
+      ]
+    },
+    {
+      "id": "BLOCK-9.1-MAIN-JS-SPLIT-CLOSEOUT",
+      "path": "docs/block-9-1-main-js-split-closeout.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "block-9-1-main-js-split",
+      "entrypoint": "docs/block-9-1-main-js-split-plan.md",
       "archivePolicy": "retain_stable_path"
     }
   ]
