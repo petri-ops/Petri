@@ -811,6 +811,16 @@
         "5c98ca8"
       ],
       "entrypoint": "docs/README.md"
+    },
+    {
+      "id": "BLOCK-3-IPC-BRIDGE-HARDENING",
+      "path": "docs/block-3-ipc-bridge-hardening-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-3-ipc-bridge-hardening",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
     }
   ]
 }
