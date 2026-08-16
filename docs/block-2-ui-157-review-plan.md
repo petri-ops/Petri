@@ -48,10 +48,12 @@ UI-161 entry §最后段明确写道："不接 IPC / 不动 preload / main / wor
 
 **A. IPC 桥接通（核心 gap）**
 
-- `src/preload.js` 暴露 Skills 相关的 `invoke` / `on`：`invoke('skills:list')` / `invoke('skills:invoke', payload)` / `invoke('skills:status', skillId)` / `on('skills:progress', cb)`（最小集）
-- `src/main.js` 路由以上 IPC 到 `core/shared-backend/workflow-engine.js` 暴露的契约面（不修改 engine 内部，仅消费其已有 exports）
-- `frontend/src/lib/desktopBridge.ts` 暴露对应 TypeScript 客户端方法（`skillsList()` / `skillsInvoke()` 等）
-- `frontend/src/hooks/useSkillStore.ts` 把当前的 mock/fixture 路径改为走真实 `desktopBridge` 调用
+【PHASE 0 摸底后修订】**`frontend/src/lib/electron.d.ts` L114-150 已是 source-of-truth**（已声明 `skills.{discover, execute, getExecution}` + onProgress），无需修改；`desktopBridge.ts` 已通过 `getBridge('skills')` 自动派生类型，无需修改。真实缺口仅在 main 进程 + preload 暴露：
+
+- `src/main.js`：新增 `ipcMain.handle('skills:discover')` / `'skills:execute'` / `'skills:getExecution'` 三个 handler；内部委托 `core/shared-backend/skills-sdk.js` 单例（行 77 `class SkillsSDK` + 行 232 `executeSkill` + 行 311 `executeSkillTool`）+ 装配 `core/shared-backend/workflow-engine.js`（行 566 `cancel` + `getExecution`）；**进度推送**用 `webContents.send('skills:progress', ...)`（订阅 SDK 内部或包装 SkillRuntime diff `execCtx.checkpoints[]`）
+- `src/preload.js`：在第二份 `contextBridge.exposeInMainWorld('biof3Desktop', {...})` 对象（行 61 起）补 `skills` 子块，对齐 `electron.d.ts` 声明：`discover()` / `execute(skillId, params)` / `getExecution(executionId)` / `onProgress(callback)` / `cancel(executionId)`；**注意**：world 名是 `biof3Desktop`（与 electron.d.ts 一致），不是 `desktopBridge`（plan 初稿命名错误）
+- `frontend/src/hooks/useSkillStore.ts`：改 1 行：`_startPolling` (2s polling) → 订阅 `window.biof3Desktop.skills.onProgress(...)` 替代；其余 store 实现保持不变（已自动通过 `getBridge('skills')` 走真实 IPC）
+- **不动**：`electron.d.ts`、`desktopBridge.ts`、4 个 page（SkillDetail/SkillCard/SkillSearch/skills/index）、UI-161 任何 token
 
 **B. UI-161 清理核对（不重复实现）**
 
@@ -117,13 +119,17 @@ UI-161 entry §最后段明确写道："不接 IPC / 不动 preload / main / wor
 
 **目标**：把 `useSkillStore` 真实接到 `workflow-engine.js`。
 
-执行项（顺序）：
-1. **`src/main.js`**：新增 IPC 处理器 `ipcMain.handle('skills:list', ...)` / `skills:invoke` / `skills:status` / `skills:cancel`，内部委托 `core/shared-backend/workflow-engine.js` 暴露的方法
-2. **`src/preload.js`**：`contextBridge.exposeInMainWorld` 新增 `window.desktopBridge.skillsList()` 等 4 个方法
-3. **`frontend/src/lib/desktopBridge.ts`**：补全对应 TypeScript 类型与方法签名
-4. **`frontend/src/hooks/useSkillStore.ts`**：把当前的 fixture 数据替换为 `await desktopBridge.skillsList()`；`invokeSkill(id, payload)` 改走真实 IPC
-5. **`frontend/src/pages/skills/index.tsx`** / `SkillDetail.tsx` / `SkillCard.tsx`：把对 store 的消费保持不变（store 改实现，UI 不变）
-6. 写最小测试：`frontend/src/hooks/useSkillStore.test.ts`（mock desktopBridge，验证 store 调用 IPC）
+执行项（顺序；**经 PHASE 0 摸底对齐**）：
+1. **`src/preload.js`**（最小改动 ~15 行）：在第二份 `contextBridge.exposeInMainWorld('biof3Desktop', {...})` 对象（行 61 起）补 `skills` 子块，对齐 `frontend/src/lib/electron.d.ts` L114-150 已声明契约：`discover()` / `execute(skillId, params)` / `getExecution(executionId)` / `onProgress(callback)` / `cancel(executionId)`。底层对应 `ipcRenderer.invoke('skills:discover')` 等
+2. **`src/main.js`**（~80 行）：顶部 `require('skills-sdk')` 单例装配 + `WorkflowEngine` 注入；注册 3 个 `ipcMain.handle('skills:discover'/'execute'/'getExecution')` + 1 个 `ipcMain.handle('skills:cancel')`；进度推送用 `webContents.send('skills:progress', { executionId, progress, checkpoints })` —— 通过包装 `SkillRuntime`（`core/shared-backend/skill-runtime.js` 行 188 已具备 `cancel(executionId)`）后 `setInterval(1000)` diff `execCtx.checkpoints[]` 合成（`workflow-engine.js` 零 EventEmitter）
+3. **`frontend/src/hooks/useSkillStore.ts`**（改 1 处 ~10 行）：把 `_startPolling`（行 581 附近，2 秒 polling）替换为订阅 `window.biof3Desktop.skills.onProgress(callback)`；回调内调 `_notify()` + 写 store。store 其余实现不变（已自动通过 `getBridge('skills')` 走真实 IPC）
+4. **`frontend/src/hooks/useSkillStore.test.ts`**（**新文件** ~200 行）：镜像 `frontend/src/hooks/usePluginStore.test.ts`（195 行模板，9 tests）；用 `vi.stubGlobal('biof3Desktop', { skills: { discover: vi.fn(), execute: vi.fn(), getExecution: vi.fn(), onProgress: vi.fn(), cancel: vi.fn() } })`；每测试调用 `__resetSkillStoreCacheForTests()`（`useSkillStore.ts` L580 已导出）重置缓存
+5. **完全不动**：`electron.d.ts`（已 source-of-truth）/ `desktopBridge.ts`（已通过 `getBridge('skills')` 自动派生）/ 4 个 page（仅 consume store）/ UI-161 任何 token / `core/shared-backend/*`（仅消费其既有 exports，不改）
+
+**PHASE 0 已验证约束**：
+- preload.js 行 21-50 第一份 expose `'biof3'` 仅 `agentWorkbenchFlags`；行 61-246 第二份 expose `'biof3Desktop'` 含 9 个桌面桥（isDesktop / window / app / aiSettings / computeSettings / harnessCapabilities / plugins / contentPlugins / terminal / updater），**唯独缺 skills**
+- main.js 行 1161-1842 含 ~40 个 `ipcMain.handle`，但 0 个 `skills:*`；`require(...workflow-engine.js/skills-sdk.js)` 也是 0 命中
+- `useSkillStore.ts` 行 173 已 `const bridge = getBridge('skills')`，行 175 返回 `'skills bridge unavailable'`（这就是 UI-161 retry 按钮"skills bridge unavailable" 文案来源）
 
 输出：
 - `git add` + commit `feat(skills-bridge): UI-157 IPC bridge connecting useSkillStore to workflow-engine`
