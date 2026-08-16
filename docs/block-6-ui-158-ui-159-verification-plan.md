@@ -1,7 +1,7 @@
 # BLOCK-6 UI-158 + UI-159 实机复核工作包
 
 **最后更新**：2026-08-16
-**状态**：`active`（2026-08-16 用户裁决"可以继续"启动 BLOCK-6 推翻 P1-T-A 跳过决策）
+**状态**：`superseded`（2026-08-16 21:35 用户裁决"关闭 BLOCK-6 保留 in_progress"——工具边界受限：playwright MCP / WebFetch 跑在隔离 sandbox 不能访问 localhost，macOS shell 退出杀 child process；主 agent 无法独立完成 dev Electron 实机；UI-158 / UI-159 状态保持 in_progress 不升级；plan 保留为 future reference）
 **Plan ID**：`BLOCK-6-UI-158-UI-159-VERIFICATION`
 
 ---
@@ -78,6 +78,24 @@ UI-158 / UI-159 是 `docs/ui-productization-audit.md` 行 114-115 两条历史 c
 - 不重新激活 BLOCK-2/BLOCK-3/BLOCK-4/BLOCK-5（均已 `completed`）
 - 不动 preload.js / electron.d.ts / desktopBridge.ts / 4 page / core/shared-backend/* / agent-tools/（UI-159 涉及 electron.d.ts 是 ADDITIVE 扩展，不在本工作包范围内）
 
+
+
+---
+
+## 7. 取消原因（2026-08-16 21:35 用户裁决）
+
+**用户裁决**：关闭 BLOCK-6 保留 in_progress。
+
+**工具边界**：
+- playwright MCP `plugin-playwright-playwright` 运行在隔离 sandbox（实测 `browser_navigate http://localhost:3100/` 返 `ERR_CONNECTION_REFUSED`）
+- WebFetch 隔离 server 声明 "Cannot fetch from localhost (localhost:3100)"
+- macOS shell 退出时 child process 会被一同杀死（实测 Vite 后台跑 30s 内 alive，shell 退出后 vite 死）
+
+**结论**：主 agent 无法独立完成 dev Electron 实机核查——dev Electron 启动 + 截图需用户手动操作 app 后提供截图 / console.log。
+
+**保留 plan 为 future reference**：
+- UI-158 / UI-159 状态保持 `in_progress` 字样不变（按 audit 行 402 治理纪律"仅当真实 dev Electron 实机过目后才可考虑 verified"）
+- 未来用户启动 dev Electron 实机并提供截图 / console.log 后，可重新启动 BLOCK-6.1（实际 dev Electron 实机）——结构、6 截图、验证 checklist 均已规划
 ---
 
 ## 6. 下一块候选
