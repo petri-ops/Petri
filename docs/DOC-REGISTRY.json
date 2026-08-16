@@ -843,8 +843,24 @@
       "id": "BLOCK-4-IPC-BRIDGE-POLISH",
       "path": "docs/block-4-ipc-bridge-polish-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
+      "truthDomain": "block-4-ipc-bridge-polish",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "linkedCommits": [
+        "91ea1be docs(ui-157): start BLOCK-4-IPC-BRIDGE-POLISH work package",
+        "1130b7a docs(sync): BLOCK-4-IPC-BRIDGE-POLISH 启动同步 2 canonical 文档",
+        "8c627ab feat(skills-bridge): BLOCK-4 PHASE 1 PHASE 6 剩余 11 项收口",
+        "5d4009a test(skills-bridge): BLOCK-4 PHASE 2 G5 unmount 验 _progressUnsubs 清空"
+      ]
+    },
+    {
+      "id": "BLOCK-4-IPC-BRIDGE-POLISH-CLOSEOUT",
+      "path": "docs/block-4-ipc-bridge-polish-closeout.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": false,
       "truthDomain": "block-4-ipc-bridge-polish",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path"
