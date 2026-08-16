@@ -83,6 +83,16 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 - 不外推：E1-d（每个 execution 独立 setTimeout 链）/ E1-e（runtime.batchGetExecutionStatus）（G1+ 架构改动）/ Provider / packaged / GA / UI-157 verified / 重新激活 BLOCK-2/BLOCK-3/BLOCK-4。
 - 不动：`preload.js` 5 方法签名 / `electron.d.ts` / 4 page / `desktopBridge.ts` / `core/shared-backend/*` / `agent-tools/`。
 - 不做：dev Electron 实机复核（候选 2/3 留 BLOCK-6+）。
+
+### 3.0.10 已启动工作包：BLOCK-6-UI-158-UI-159-VERIFICATION（2026-08-16 用户裁决"可以继续"启动，当前唯一 active）
+
+- 状态：`planning → active`（2026-08-16 用户裁决当日启动）；DOC-REGISTRY 新增 `BLOCK-6-UI-158-UI-159-VERIFICATION` `kind=work-package / status=active / canonical=true / truthDomain=block-6-ui-158-ui-159-verification / archivePolicy=retain_stable_path`；plan canonical `docs/block-6-ui-158-ui-159-verification-plan.md` 已落地（89 行 / 6 §）。
+- 目标：按用户裁决"可以继续"启动 **UI-158 + UI-159 dev Electron 实机复核**（推翻 P1-T-A「跳过实机、走 Vite mock 验收路径」决策，按 audit 行 402 治理纪律"仅当真实 dev Electron 实机过目后才可考虑 verified"）。
+- 4 PHASE：PHASE 1 dev Electron 启动 + playwright MCP `plugin-playwright-playwright` `browser_navigate` 远程连接 + 首屏截图 / PHASE 2 UI-158 CommandPalette 实机验证（3 截图：关闭 / 打开 / 搜索中）/ PHASE 3 UI-159 Workspace UI plumbing 实机验证（3 截图：首页 / Skills 页面 / Workspace 页面）/ PHASE 4 evidence 收集 + 收口 + `in_progress → verified`。
+- 6 截图：UI-158 3 张（关闭 / 打开 / 搜索中）+ UI-159 3 张（首页 / Skills 页面 / Workspace 页面）。
+- 不外推：packaged / dist / notarization / Provider / P7 / GA / E1-d/E1-e G1+ / dist staleness G1+ / i18n / 不重新激活 BLOCK-2/BLOCK-3/BLOCK-4/BLOCK-5。
+- 不动：`preload.js` / `electron.d.ts`（UI-159 涉及 electron.d.ts 是 ADDITIVE 扩展，已在 commit `3000a06` 落地，本工作包不修改）/ `desktopBridge.ts` / 4 page / `core/shared-backend/*` / `agent-tools/`。
+- 原理：playwright MCP 已注册（`plugin-playwright-playwright`），主 agent 可通过 `browser_navigate` 远程连接 dev Electron BrowserWindow。
 - 不外推：Provider (`P-07`) / packaged / dist / notarization / GA 资格 / dist staleness / Worktree 创建（沿用 main）/ 新 Skills 业务能力 / Chart a11y P2。
 - 主 agent 直接 owner（不委派 `luna_worker`，IPC 桥契约 + 实机启动属跨模块边界判断）。当前仅 PHASE 0 前置工作（plan + registry + canonical 同步）已完成；PHASE 0 摸底执行由主 agent 在用户裁决"继续"后启动。
 - 验证起点：`npm run docs:check` 65 registered PASS（+1）；`npm run ui:audit:check` 131 PASS；`npm run docs:reconcile` 0 issues。
