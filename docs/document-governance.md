@@ -1,6 +1,6 @@
 # BioF3 项目与文档生命周期规范
 
-最后更新：2026-07-24
+最后更新：2026-08-16
 
 规范编号：`GOV-DOC-1`
 
@@ -82,6 +82,54 @@ Canonical 文档还必须声明唯一 `truthDomain`。处于 `active` 或 `plann
 - `archive_when_superseded`：出现正式替代者并完成引用迁移后可归档。
 - `manual_review`：历史状态或依赖不够明确，必须人工核对。
 
+
+
+### 3.1 扩展字段填法与一致性约束
+
+以下字段都是 **optional**，但一经填写就必须遵守本节给出的时机约束与一致性约束。注册表 schema 校验在 `scripts/docs-governance.mjs` 的 `validateDocumentRegistry` 内执行；任何与本节冲突的写法都会在 `npm run docs:check` 报错，提交前必须修复。
+
+#### 3.1.1 `registeredAt`
+
+- 类型：ISO-8601 date string（`YYYY-MM-DD`）。
+- 填写时机：登记项第一次被加入 `docs/DOC-REGISTRY.json` 时填写；登记项存在一天后再补记会被视为重写历史。
+- 一致性约束：`registeredAt` 日期不得晚于当前 Git 仓库中该路径的首次提交（`git log --diff-filter=A --format=%as -- <path>`）；不晚于当前日期。
+- 用途：审计可追溯；若文档迁移后路径变更，需保留原始 `registeredAt` 日期并通过 `notes` 字段追加迁移说明。
+
+#### 3.1.2 `linkedCommits`
+
+- 类型：`string[]`，元素为完整或 7 字符短 SHA。
+- 填写时机：登记项涉及的关键收口 commit（例如收口 PR 的 merge commit、收口笔录 commit）落库后填写。每条登记项的 `linkedCommits` 总数 ≤ 5；超过 5 条需在 `notes` 中指向汇总台账。
+- 一致性约束：每个 SHA 必须存在于仓库 Git 历史（`git cat-file -t <sha>`）；不得写入未推送的 commit。在文档迁移、状态变更或重新收口时同步追加，不得删除既有 `linkedCommits` 条目（除非该 commit 被 force-push 撤回）。
+
+#### 3.1.3 `tags`
+
+- 类型：`string[]`，元素为小写 kebab-case 标识，长度 2–24。
+- 填写时机：用于跨登记项的主题检索与过滤；新增 tags 需与至少 1 个现有登记项复用（避免造词）。tags 不替代 `kind` / `status`；同一登记项 tags 数量 ≤ 6。
+- 一致性约束：tags 集合包含 `archived` 或 `superseded` 状态登记项时，仍保留历史检索价值；不得在状态变更时删除 tags。
+
+#### 3.1.4 `supersededBy`
+
+- 类型：可选 `string[]`（元素为登记项 id）。
+- 填写时机：仅在登记项进入 `superseded` 状态且候选替代登记项已落地（pathExists + schema PASS）后填写，不得提前；进入 `archived` 状态时仍可保留，作为追溯指针。
+- 一致性约束：
+  - 数组每个元素必须存在于注册表（`DOC-REGISTRY.json` 当前 `documents[]` 中）。
+  - 数组中至少 1 个元素的 status 必须是 `active` / `planned` / `reference` / `completed`（保证替代者真正存在）。
+  - 同 id 不得同时存在 `supersedes` 双向链（避免 A→B 且 B→A 循环）。
+  - `supersededBy` 与 `supersedes` 字段类型完全不同：前者是"被替代"的去向，后者是"主动替代"的来向；允许同时存在但作用不同。
+- 脚本校验：`validateDocumentRegistry` 会检查 `supersededBy` 类型为数组、元素已注册；若任一元素 status 为 `archived` / `superseded` 自身则报错。
+
+#### 3.1.5 `notes`
+
+- 类型：自由文本，≤ 240 字符。
+- 填写时机：补充注册项或历史背景的简短说明，例如迁移路径、状态变更原因、scope 边界。长说明必须用专属文档（如 `docs/...` 或 `acceptance/...`）而不是挤进 `notes`。
+- 一致性约束：不得在 `notes` 中写入与 `kind` / `status` / `canonical` / `truthDomain` 重复或冲突的事实；冲突时以这些字段为准。不得把 `notes` 当作"待办"使用（待办走 AUDIT-LOG，不入注册表）。
+
+#### 3.1.6 字段一致性联动
+
+- `canonical` 字段一旦从 `true` 改为 `false`，同一条目下的 `truthDomain` 字段必须删除（已在 P2 收口强制执行）。
+- `status` 字段为 `archived` 或 `superseded` 时，条目不得保留 `truthDomain`（脚本侧 GATES-3 强制校验）；如需保留历史分组，使用 `tags`。
+- `id` 字段一经登记不得修改；若登记项需换 id，必须新建条目并把旧条目改为 `superseded` 状态指向新条目。
+
 ## 4. 生命周期
 
 ### 4.1 创建
@@ -122,6 +170,29 @@ Canonical 文档还必须声明唯一 `truthDomain`。处于 `active` 或 `plann
 - `docs:reconcile` 只生成候选，不自动移动、删除或改写文件。
 - 禁止按时间批量归档，禁止在未知 WIP 存在时大范围整理。
 - 完成但仍被稳定引用的 Harness、Plugin、G0 规范保持 `completed/reference + retain_stable_path`，不为追求目录整洁破坏链接。
+
+### 4.5 门禁退出码契约
+
+`docs/` 治理栈的 3 个常驻门禁脚本（`scripts/docs-governance.mjs` /
+`scripts/check-ui-productization-audit.mjs` / `scripts/test-affected.mjs` —
+`npm run test:changed:list` 实际入口）共享同一套退出码契约，2026-08-16
+经 DOC-GOVERNANCE-GATES / GATES-1 阶段固化：
+
+| 退出码 | 语义 | 触发场景 | 处理动作 |
+| --- | --- | --- | --- |
+| `0` | PASS | 校验通过 / 状态报告正常输出 / 全部测试通过 | 视作收口 |
+| `1` | FAIL | 校验发现问题（注册缺失、路径失效、入口断链、canonical 冲突）；UI 实现未同步台账；node test / 门禁子命令非 0 退出 | 必须修复后才能宣称收口 |
+| `2` | 分类冲突 | CLI 调用冲突（同时传入多个互斥模式）；`test:changed` 改动文件未被 `test/impact-map.json` 任一规则匹配；`test-affected.mjs` 解析 / 校验异常；UI 门禁保留 2 给未来"白名单冲突"扩展 | **不是 fail-closed**：补 rule / 加 patterns / 修 CLI 调用，绝不代表业务代码或工作包"未通过" |
+
+`2` 的语义在过去常被误解为 fail-closed。本契约明确把"分类冲突"与
+"实际 FAIL"拆开：`2` 只描述工具调用 / 分类层的歧义，与 `docs/` 治理栈
+是否在当前工作包内"未通过契约"无关。所有 `2` 路径必须输出明确"分类冲突"
+诊断消息，并在 stderr 提示处理方式（见 `scripts/test-affected.mjs`
+`printPlan` 与底部 `catch` 分支）。
+
+收口前后，所有 `npm run docs:check` / `npm run ui:audit:check` / `npm run
+test:changed:list` 调用方必须按上述契约解释退出码；任何把 `2` 视作"工作包
+未通过"的描述在收口笔录中都会被纠正。
 
 ## 5. 当前渐进治理策略
 

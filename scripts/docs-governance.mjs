@@ -1,4 +1,25 @@
 #!/usr/bin/env node
+/**
+ * scripts/docs-governance.mjs — `docs/` 注册、覆盖、冲突门禁主入口
+ *
+ * 子命令：
+ *   --status     默认；输出注册数量、状态、类型、未注册文件与契约问题
+ *   --check      注册缺失 / 路径失效 / 入口断链 / canonical 冲突时非 0 退出
+ *   --reconcile  只读报告：孤立文档、归档候选、稳定保留项、冲突；不写文件
+ *   --write-report  与 --reconcile 一起把报告写到 acceptance/...
+ *
+ * 退出码契约（GATES-1 文档化，2026-08-16）：
+ *   0   PASS — 校验通过 / 状态报告正常输出
+ *   1   FAIL — 校验发现问题（注册缺失、路径失效、入口断链、canonical 冲突等）
+ *   2   分类冲突 — CLI 调用冲突（同时传入多个互斥模式）或未捕获的运行期错误
+ *       注意：2 不是 fail-closed；仅提示调用方修正参数 / 修复工具自身 bug，
+ *       **不**代表 docs/ 治理栈在你的工作包里有"未通过的契约"。
+ *
+ * 同步文档：`docs/document-governance.md` §4.5"门禁退出码契约"。
+ * 该契约为本工作包 DOC-GOVERNANCE-GATES / GATES-1 阶段固化本，不在本阶段内
+ * 改动 `process.exit()` 行为；如未来升级退出码语义须同步 §4.5 并联动
+ * `package.json` 脚本。
+ */
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -247,6 +268,23 @@ export async function validateDocumentRegistry(registry, options = {}) {
       issues.push(issue('ACCEPTANCE_REFS_INVALID', 'acceptanceRefs must be an array when present.', id || null, repoPath));
     }
 
+    // GATES-3: truthDomain must not be retained on archived / superseded entries.
+    // P2 closeout already removed truthDomain from IDE-TRANSFORMATION et al; this rule
+    // makes the invariant explicit so future regressions fail docs:check loudly.
+    if (
+      document.truthDomain !== undefined
+      && document.truthDomain !== null
+      && (typeof document.truthDomain !== 'string' || document.truthDomain.trim() !== '')
+      && ['archived', 'superseded'].includes(document.status)
+    ) {
+      issues.push(issue(
+        'TRUTH_DOMAIN_RETAINED_ON_RETIRED',
+        `truthDomain must be removed when status is ${document.status}; use tags for historical grouping instead.`,
+        id || null,
+        repoPath,
+      ));
+    }
+
     normalizedDocuments.push({ ...document, id, path: repoPath });
   }
 
@@ -256,6 +294,65 @@ export async function validateDocumentRegistry(registry, options = {}) {
       if (!idOwners.has(supersededId)) {
         issues.push(issue('SUPERSEDED_ID_MISSING', `supersedes references unknown id ${supersededId}.`, document.id || null, document.path));
       }
+    }
+  }
+
+  // GATES-3: supersededBy is now an optional array of registered document ids.
+  // Validated in a second pass so order of appearance in the registry does not
+  // matter; mirrors the existing supersedes post-pass style.
+  const livingStatuses = new Set(['active', 'planned', 'completed', 'reference']);
+  for (const document of normalizedDocuments) {
+    if (document.supersededBy === undefined || document.supersededBy === null) continue;
+    if (!Array.isArray(document.supersededBy)) {
+      issues.push(issue(
+        'SUPERSEDED_BY_INVALID',
+        'supersededBy must be an array of registered document ids when present.',
+        document.id || null,
+        document.path,
+      ));
+      continue;
+    }
+    if (document.supersededBy.length === 0) {
+      issues.push(issue(
+        'SUPERSEDED_BY_EMPTY',
+        'supersededBy must contain at least one registered document id when present.',
+        document.id || null,
+        document.path,
+      ));
+      continue;
+    }
+    let hasLivingTarget = false;
+    document.supersededBy.forEach((targetId, index) => {
+      if (typeof targetId !== 'string' || targetId.trim() === '') {
+        issues.push(issue(
+          'SUPERSEDED_BY_ELEMENT_INVALID',
+          `supersededBy[${index}] must be a non-empty registered document id.`,
+          document.id || null,
+          document.path,
+        ));
+        return;
+      }
+      if (!idOwners.has(targetId)) {
+        issues.push(issue(
+          'SUPERSEDED_BY_UNKNOWN_ID',
+          `supersededBy[${index}] references unknown id ${targetId}.`,
+          document.id || null,
+          document.path,
+        ));
+        return;
+      }
+      const targetDoc = registry.documents.find((entry) => entry && entry.id === targetId);
+      if (targetDoc && livingStatuses.has(targetDoc.status)) {
+        hasLivingTarget = true;
+      }
+    });
+    if (hasLivingTarget === false) {
+      issues.push(issue(
+        'SUPERSEDED_BY_NO_LIVING_TARGET',
+        'supersededBy must reference at least one living document (active / planned / completed / reference).',
+        document.id || null,
+        document.path,
+      ));
     }
   }
 
