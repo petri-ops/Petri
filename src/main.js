@@ -2091,6 +2091,200 @@ function setupTerminalIpc() {
   });
 }
 
+// ── IPC：Skills 工作流页面（UI-157 PHASE 1 桥接）─────────────────
+// 委托 core/shared-backend/skills-sdk.js 的 SkillsSDK 单例，
+// 同时维护一份 executionId → SkillRuntime 引用 + 最近一次 checkpoint
+// 快照，通过 setInterval(1000) diff 合成 skills:progress 推送。
+// （workflow-engine.js / skill-runtime.js 零 EventEmitter，
+//   合成 progress 必须在 main 进程侧做。）
+let skillsSDK = null;
+const _activeSkillRuntimes = new Map(); // executionId → SkillRuntime
+const _lastCheckpointCount = new Map(); // executionId → number
+let _skillsProgressTimer = null;
+
+function _getSkillsSDK() {
+  if (skillsSDK) return skillsSDK;
+  try {
+    const sdkMod = require(resolveCore("shared-backend", "skills-sdk.js"));
+    const engineMod = require(resolveCore("shared-backend", "workflow-engine.js"));
+    const { createSkillsSDK, createDefaultSDK } = sdkMod;
+    const { createWorkflowEngine } = engineMod;
+    // 优先用 createDefaultSDK 触发一次发现；再注入 workflowEngine
+    const base = createDefaultSDK ? createDefaultSDK() : createSkillsSDK();
+    const sdk = base;
+    sdk.workflowEngine = createWorkflowEngine({ sdk: base });
+    skillsSDK = sdk;
+    console.log("[desktop] skills SDK initialized");
+    return skillsSDK;
+  } catch (e) {
+    console.warn("[desktop] skills SDK init failed:", e.message);
+    return null;
+  }
+}
+
+function _publishSkillProgress(executionId, payload) {
+  if (!mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isDestroyed()) return;
+  mainWindow.webContents.send("skills:progress", { executionId, ...payload });
+}
+
+function _startSkillsProgressPoller() {
+  if (_skillsProgressTimer) return;
+  _skillsProgressTimer = setInterval(() => {
+    for (const [executionId, runtime] of _activeSkillRuntimes.entries()) {
+      try {
+        const execCtx = typeof runtime.getExecutionStatus === "function"
+          ? runtime.getExecutionStatus(executionId)
+          : null;
+        if (!execCtx) continue;
+        const checkpoints = Array.isArray(execCtx.checkpoints) ? execCtx.checkpoints : [];
+        const lastCount = _lastCheckpointCount.get(executionId) || 0;
+        if (checkpoints.length !== lastCount) {
+          _lastCheckpointCount.set(executionId, checkpoints.length);
+          _publishSkillProgress(executionId, {
+            status: execCtx.status,
+            checkpoints: checkpoints.slice(),
+          });
+        }
+        // 终态自清
+        if (["complete", "failed", "cancelled"].includes(execCtx.status)) {
+          _activeSkillRuntimes.delete(executionId);
+          _lastCheckpointCount.delete(executionId);
+        }
+      } catch {}
+    }
+  }, 1000);
+}
+
+function setupSkillsIpc() {
+  // 规整化 bridge 返回值，保证前端 contract 严格 `{ ok, ... }`
+  ipcMain.handle("skills:discover", async () => {
+    try {
+      const sdk = _getSkillsSDK();
+      if (!sdk) return { ok: false, error: "skills SDK unavailable" };
+      const skills = sdk.listSkills();
+      return { ok: true, skills };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle("skills:execute", async (_event, skillId, params) => {
+    try {
+      const sdk = _getSkillsSDK();
+      if (!sdk) return { ok: false, error: "skills SDK unavailable" };
+      const runtimeMod = require(resolveCore("shared-backend", "skill-runtime.js"));
+      const { createSkillRuntime } = runtimeMod;
+      // 取得 manifest
+      const skill = sdk.getSkill(skillId);
+      if (!skill) return { ok: false, error: `Skill not found: ${skillId}` };
+      const runtime = createSkillRuntime(skill, {
+        registry: sdk.registry,
+        pluginManager: sdk.pluginManager,
+        workflowRuntime: sdk.workflowEngine,
+        capabilityProvisioning: sdk.capabilityProvisioning,
+      });
+      // 启动后台执行（不 await），把 runtime 登记到 _activeSkillRuntimes
+      // 让 poller 能通过 getExecutionStatus 拉快照
+      const executionId = `sre_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      const paramsObj = (params && typeof params === "object") ? params : {};
+      const promise = runtime.execute(paramsObj, { executionId })
+        .then((result) => {
+          // 终态时显式 publish 一次最终快照
+          const status = result && result.success ? "complete" : "failed";
+          _publishSkillProgress(executionId, {
+            status,
+            checkpoints: [],
+            result: result ? result.result : null,
+            error: result && !result.success ? (result.error?.message || String(result.error)) : null,
+          });
+          return result;
+        })
+        .catch((err) => {
+          _publishSkillProgress(executionId, {
+            status: "failed",
+            checkpoints: [],
+            error: err && err.message ? err.message : String(err),
+          });
+          throw err;
+        });
+      promise.catch(() => {}); // 阻止未捕获 rejection
+      _activeSkillRuntimes.set(executionId, runtime);
+      _lastCheckpointCount.set(executionId, 0);
+      _startSkillsProgressPoller();
+      return { ok: true, executionId };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle("skills:getExecution", async (_event, executionId) => {
+    try {
+      if (!executionId) return { ok: false, error: "executionId required" };
+      const runtime = _activeSkillRuntimes.get(executionId);
+      if (!runtime) {
+        return { ok: false, error: `Unknown execution: ${executionId}` };
+      }
+      const execCtx = runtime.getExecutionStatus(executionId);
+      if (!execCtx) {
+        return { ok: false, error: `Execution not found: ${executionId}` };
+      }
+      return {
+        ok: true,
+        execution: {
+          executionId: execCtx.executionId,
+          skillId: execCtx.skillId,
+          status: _mapSkillRuntimeStatus(execCtx.status),
+          startedAt: execCtx.startedAt,
+          completedAt: execCtx.completedAt,
+          result: execCtx.result,
+          error: execCtx.error
+            ? (execCtx.error.message || String(execCtx.error))
+            : undefined,
+        },
+      };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle("skills:cancel", async (_event, executionId) => {
+    try {
+      if (!executionId) return { ok: false, cancelled: false, error: "executionId required" };
+      const runtime = _activeSkillRuntimes.get(executionId);
+      if (!runtime) {
+        return { ok: false, cancelled: false, error: `Unknown execution: ${executionId}` };
+      }
+      runtime.cancel(executionId);
+      // 终态自清在下一个 poller tick 自然发生
+      return { ok: true, cancelled: true };
+    } catch (e) {
+      return { ok: false, cancelled: false, error: e.message };
+    }
+  });
+}
+
+function _mapSkillRuntimeStatus(s) {
+  // SkillRuntime 状态 → useSkillStore/electron.d.ts 声明的 4 态
+  switch (s) {
+    case "created":
+    case "validating_params":
+    case "checking_dependencies":
+      return "pending";
+    case "running":
+    case "paused":
+    case "recovering":
+      return "running";
+    case "complete":
+      return "completed";
+    case "failed":
+      return "failed";
+    case "cancelled":
+      return "failed"; // 简化为 failed 终止态
+    default:
+      return "running";
+  }
+}
+
 // ── IPC：Harness Capability Provisioning — Stage 3 M1 ─────────
 // 只读：让设置页"计算与数据"分类展示 Harness 自备了哪些运行时/包。
 // 写入动作（provision/remove）由 Harness 编排层内部完成，不通过前端 IPC
@@ -2182,6 +2376,7 @@ async function main() {
   setupDataManagementIpc();
   setupTelemetryIpc();
   setupHarnessCapabilitiesIpc();
+  setupSkillsIpc();
 
   // 6. 创建窗口
   // M1-2：CSP 加固——禁用 unsafe-eval，限制资源来源到 self + localhost（后端/SSE/dev server）

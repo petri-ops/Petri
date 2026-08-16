@@ -166,6 +166,18 @@ declare global {
           };
           error?: string;
         }>;
+        // PHASE 1 A：cancel + onProgress 桥接（G0 UI-157 IPC 桥接通；2026-08-16）
+        cancel: (executionId: string) => Promise<{ ok: boolean; cancelled?: boolean; error?: string }>;
+        /** 订阅 SkillsSDK 进度推送。Callback 收到 main.js 通过 webContents.send('skills:progress') 推送的 payload；返回 unsubscribe 函数。 */
+        onProgress: (callback: (payload: {
+          executionId: string;
+          status?: 'pending' | 'running' | 'completed' | 'failed';
+          checkpoints?: unknown[];
+          result?: unknown;
+          error?: string;
+          startedAt?: string;
+          completedAt?: string;
+        }) => void) => () => void;
       };
       // M2-9：content-plugin 文档桥（docs.tsx 运行时拉取已装教程插件）
       contentPlugins: {

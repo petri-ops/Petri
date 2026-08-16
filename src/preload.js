@@ -211,6 +211,25 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     },
   },
 
+  // G0 UI-157：Skills 发现 / 执行 / 进度桥（对齐 frontend/src/lib/electron.d.ts L114-169）
+  // 主进程 SkillsSDK 单例负责真正调用 core/shared-backend/skills-sdk.js；
+  // progress 通过 ipcRenderer.on('skills:progress') 推送（替代 useSkillStore 旧 2s 轮询）
+  skills: {
+    discover: () => ipcRenderer.invoke('skills:discover'),
+    execute: (skillId, params) =>
+      ipcRenderer.invoke('skills:execute', skillId, params ?? {}),
+    getExecution: (executionId) =>
+      ipcRenderer.invoke('skills:getExecution', executionId),
+    cancel: (executionId) =>
+      ipcRenderer.invoke('skills:cancel', executionId),
+    onProgress: (callback) => {
+      if (typeof callback !== 'function') return () => {};
+      const handler = (_event, payload) => callback(payload);
+      ipcRenderer.on('skills:progress', handler);
+      return () => ipcRenderer.removeListener('skills:progress', handler);
+    },
+  },
+
   // macOS 小团队更新（OSS 清单 + DMG）
   updater: {
     check: () => ipcRenderer.invoke('updater:check'),

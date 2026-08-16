@@ -270,6 +270,61 @@ function _stopAllPolling(): void {
   _pollIntervals.clear();
 }
 
+// PHASE 1 G0 UI-157：event-driven wakeup（取代单纯 2s polling）。
+// 订阅主进程 webContents.send('skills:progress') 推送，过滤到当前
+// executionId 时立即调一次 bridge.getExecution() 拉完整 snapshot。
+// 与 _startPolling 并行运行（polling 2s 是真值兜底，wakeup 把感知延迟从
+// ≤2s 降到 ≤100ms；终态时清理订阅避免泄漏）。
+const _progressUnsubs: Map<string, () => void> = new Map();
+
+function _subscribeProgressWakeup(
+  executionId: string,
+  onUpdate: (execution: SkillExecution) => void
+): void {
+  if (_progressUnsubs.has(executionId)) return;
+  const bridge = getBridge('skills');
+  if (!bridge || typeof bridge.onProgress !== 'function') return;
+  const unsubscribe = bridge.onProgress((payload: { executionId?: string }) => {
+    if (payload?.executionId !== executionId) return;
+    void (async () => {
+      try {
+        const result = await bridge.getExecution(executionId);
+        if (result.ok && result.execution) {
+          onUpdate({
+            executionId: result.execution.executionId,
+            skillId: result.execution.skillId,
+            status: result.execution.status,
+            startedAt: result.execution.startedAt
+              ? new Date(result.execution.startedAt)
+              : undefined,
+            completedAt: result.execution.completedAt
+              ? new Date(result.execution.completedAt)
+              : undefined,
+            result: result.execution.result,
+            error: result.execution.error,
+          });
+        }
+      } catch {
+        /* 静默兜底：polling 仍会按 2s 节奏兜底真值 */
+      }
+    })();
+  });
+  _progressUnsubs.set(executionId, unsubscribe);
+}
+
+function _unsubscribeProgressWakeup(executionId: string): void {
+  const unsub = _progressUnsubs.get(executionId);
+  if (unsub) {
+    unsub();
+    _progressUnsubs.delete(executionId);
+  }
+}
+
+function _stopAllProgressWakeups(): void {
+  _progressUnsubs.forEach((unsub) => unsub());
+  _progressUnsubs.clear();
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Public hook
 // ─────────────────────────────────────────────────────────────────────────────
@@ -378,10 +433,11 @@ export function useSkillStore(
     };
   }, [autoLoad, forceRefresh]);
 
-  // Cleanup polling on unmount
+  // Cleanup polling + progress wakeup subscriptions on unmount
   useEffect(() => {
     return () => {
       _stopAllPolling();
+      _stopAllProgressWakeups();
     };
   }, []);
 
@@ -497,8 +553,16 @@ export function useSkillStore(
             return next;
           });
 
-          // Start polling for status updates
+          // Start polling for status updates (2s polling is truth-source fallback)
           _startPolling(realId, (updated) => {
+            setExecutions((prev) => {
+              const next = new Map(prev);
+              next.set(realId, updated);
+              return next;
+            });
+          });
+          // PHASE 1 G0 UI-157：subscribe event-driven wakeup (~100ms latency)
+          _subscribeProgressWakeup(realId, (updated) => {
             setExecutions((prev) => {
               const next = new Map(prev);
               next.set(realId, updated);
@@ -582,4 +646,5 @@ export function __resetSkillStoreCacheForTests(): void {
   _inflight = null;
   _subscribers.clear();
   _stopAllPolling();
+  _stopAllProgressWakeups();
 }
