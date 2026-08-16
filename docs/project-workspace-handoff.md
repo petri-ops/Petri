@@ -84,6 +84,17 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 - 不动：`preload.js` 5 方法签名 / `electron.d.ts` / 4 page / `desktopBridge.ts` / `core/shared-backend/*` / `agent-tools/`。
 - 不做：dev Electron 实机复核（候选 2/3 留 BLOCK-6+）。
 
+### 3.0.11 已启动工作包：BLOCK-7-UI-161-VERIFICATION（2026-08-16 用户裁决"Block-7 是啥 开搞"启动，当前唯一 active）
+
+- 状态：`planning → active`（2026-08-16 用户裁决当日启动）；DOC-REGISTRY 新增 `BLOCK-7-UI-161-VERIFICATION` `kind=work-package / status=active / canonical=true / truthDomain=block-7-ui-161-verification / archivePolicy=retain_stable_path`；plan canonical `docs/block-7-ui-161-verification-plan.md` 已落地（约 100 行 / 7 § / 4 PHASE）。
+- 目标：按用户裁决"Block-7 是啥 开搞"启动 **UI-161 既有 in_progress 实机复核**（按 audit 行 402 治理纪律"仅当真实 dev Electron 实机过目后才可考虑 verified"）。**路径选择**：Vite-only + 静态 grep 综合验证（不同于 BLOCK-6 强行 dev Electron 实机失败路径）。
+- UI-161 与 UI-157 / UI-158 / UI-159 关键区别：UI-161 是**纯 UI 表面 + 静态 token 补全**（LeftPanel/QuickActions/SkillsSidebar 删除/pages/skills error 按钮/styles/custom.css 4 token），**不依赖 IPC 桥接通**。Vite preview 渲染 + 静态 grep 综合验证可证 UI-161 完整性。
+- UI-161 6 项清理（已 commit `01c5e0b`，BLOCK-2 PHASE 2 已 5/5 PASS）：① LeftPanel.tsx QuickActions Skills（sparkles + handleNavigateToSkills）/ ② LeftPanel.tsx footer 删除 Skills 冗余 / ③ App.tsx 移除 SkillsSidebar + import + marginLeft / ④ 删除 SkillsSidebar.tsx + .module.css / ⑤ pages/skills/index.tsx error 状态"返回首页"按钮 / ⑥ styles/custom.css 4 token。
+- 4 PHASE：PHASE 1 静态 grep 6 项 + git log `01c5e0b..HEAD` 空确认 / PHASE 2 Vite build + preview 3110 + curl + grep 产物 / PHASE 3 theme-token-contract test + tsc 0 + ui:audit:check / PHASE 4 audit 收口 + 4 canonical 同步 + closeout 报告。
+- 完成语义：UI-161 `in_progress → verified`（仅当全部 PASS）；4 治理门 GREEN；不变量守住 UI-157 仍 in_progress / UI-158/UI-159 仍 in_progress（仅 UI-161 verified）。
+- 不外推：packaged / dist / notarization / Provider / P7 / GA / E1-d/E1-e G1+ / dist staleness G1+ / i18n / 不重新激活 BLOCK-2/3/4/5/6。
+- 不动：`preload.js` / `electron.d.ts` / `desktopBridge.ts` / 4 page / `core/shared-backend/*` / `agent-tools/`。
+
 ### 3.0.10 已启动工作包：BLOCK-6-UI-158-UI-159-VERIFICATION（2026-08-16 用户裁决"可以继续"启动，当前唯一 active）
 
 - 状态：`planning → active`（2026-08-16 用户裁决当日启动）；DOC-REGISTRY 新增 `BLOCK-6-UI-158-UI-159-VERIFICATION` `kind=work-package / status=active / canonical=true / truthDomain=block-6-ui-158-ui-159-verification / archivePolicy=retain_stable_path`；plan canonical `docs/block-6-ui-158-ui-159-verification-plan.md` 已落地（89 行 / 6 §）。

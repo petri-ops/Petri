@@ -916,6 +916,16 @@
       "truthDomain": "block-6-ui-158-ui-159-verification",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "BLOCK-7-UI-161-VERIFICATION",
+      "path": "docs/block-7-ui-161-verification-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-7-ui-161-verification",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
     }
   ]
 }
