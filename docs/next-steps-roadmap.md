@@ -1,6 +1,6 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-08-16（DOC-GOVERNANCE-GATES 工作包收口同步）
+最后更新：2026-08-16（DOC-GOVERNANCE-GATES 工作包收口 + BLOCK-2-UI-157-REVIEW 工作包同日用户裁决启动 — 当前唯一 active 工作包）
 
 ## 当前结论
 
@@ -146,6 +146,8 @@ Harness Loop Engineering v1 与 Result Studio 引擎基础继续复用。G0 Livi
 - **Block-6 · G0-LONGTERM-DEV + HOTFIXES**（3 commit）— `UI-161`（Skills 入口回收至 LeftPanel、移除 `SkillsSidebar`）等仍以 `in_progress` 提交，目前正在做实机复核；本轮未升 `verified`，记录点保留在 `docs/AUDIT-LOG.md`。
 - **5 个 `wb/` 命名空间分支已 push**：`agent-workbench`、`backend-skills`、`copilot-gateway`、`docs-evaluation`、`g0-ide-mcp-tools`；均为命名空间分支，不与主分支并行开新 active 工作包。
 - **DOC-GOVERNANCE-GATES 工作包已收口**（2026-08-16 用户裁决启动同日收口）：8 commit 全 push 至 origin/main；GATES-0 hook 白名单、GATES-1 退出码契约文档化、GATES-2 `--report` JSON 输出 + 3 JSON Schema + 共享 helper、GATES-3 DOC-REGISTRY 扩展字段规范化、GATES-4 8 份 docs + 4 份 archive 文件首段吸收声明全部完成。DOC-REGISTRY `DOC-GOVERNANCE-GATES` 已 `active → completed`，新增 `DOC-GOVERNANCE-GATES-CLOSEOUT` reference 登记项。收口记录见 [`doc-governance-gates-closeout.md`](./doc-governance-gates-closeout.md)。`npm run docs:check` 64 registered PASS、`npm run ui:audit:check` 131 PASS、`npm run docs:reconcile` 0 issues。按 single work package serial 纪律，本工作包收口后下一块候选仍为 Block-2 UI-157 / Block-6 UI-161 既有 in_progress 复核项，须经用户显式裁决启动新工作包。
+
+- **BLOCK-2-UI-157-REVIEW 工作包已启动**（2026-08-16 用户裁决当日启动）：plan [`block-2-ui-157-review-plan.md`](./block-2-ui-157-review-plan.md)（283 行 / 9 §）已落地；DOC-REGISTRY 新增 `BLOCK-2-UI-157-REVIEW` `kind=work-package / status=active / canonical=true / truthDomain=block-2-ui-157-review`；`docs/README.md` 长期核心指引新增条目 3。专收口 `docs/ui-productization-audit.md` 第 113 行 UI-157 (Skills UI 页面 P1/W-04) `in_progress` 状态。核心 gap：不可变提交 `e6bf72f` 含 9 UI 文件 + workflow-engine.js + useSkillStore.ts，但 IPC 桥完全未接通（`preload.js` / `desktopBridge.ts` grep "skill" 0 命中）。UI-161 不可变提交 `01c5e0b` 已落地 Skills 入口归位 + 死 SkillsSidebar 删除 + retry 按钮 + 4 token 补全，但其 IPC 桥跨包接桥显式留白给本工作包。6 PHASE：0 摸底 / 1 IPC 桥接通（main + preload + bridge + store 四层补齐 `skills:list` / `skills:invoke` / `skills:status` / `skills:progress`，仅消费 workflow-engine.js 既有 export）/ 2 UI-161 清理核对 / 3 实机 dev Electron 4 截图存 `acceptance/SKILLS-IPC/` / 4 UI-157 in_progress → verified / 5 closeout。`npm run docs:check` 65 registered PASS（+1）；`npm run ui:audit:check` 131 PASS；`npm run docs:reconcile` 0 issues。不外推 Provider / packaged / GA / Chart a11y P2 / Worktree。下一动作进入 PHASE 0 摸底（git show e6bf72f / 01c5e0b + workflow-engine.js exports 摸底）。
 - **当前阶段纪律**：`qualificationEligible: false` 是 G0 开发期常态事实，不构成缺陷、不是待办、不是下一次校验需推动的事；G1+ 阶段事项（`Provider` 矩阵、`packaged Electron` 公证/签名、`OSS` 远程接手、`GA` 公证流水、`dist staleness`）按当前阶段属于**不外推**而不是"待完成"。上一段已收口阶段的边界保持不变。
 - **单工作包串行纪律下「下一块候选」**：Block-2 的 `UI-157`（Skills IPC 桥实机收口）与 Block-6 的 `UI-161`（实机复核升 `verified`）属于当前 G0 边界内未完成的实机复核项；不主动启动新工作包，新工作包必须由用户显式裁决后才能由主 Agent 登记到 `docs/DOC-REGISTRY.json`。
 - **本节与 worker-A 的 `docs/AUDIT-LOG.md` closeout 登记、worker-B 的 `agent-interaction-evaluation.md` 迁移独立同步**：本节不动 `docs/AUDIT-LOG.md`、不动 `agent-interaction-evaluation.md`、不动 `docs/DOC-REGISTRY.json`、不动 `docs/README.md`，仅作为上方 canonical 文档的同步附录。
