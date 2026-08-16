@@ -1,5 +1,8 @@
 # BioF3 Codex 式 AI 生信工作台方向文档
 
+> **快照声明**（2026-08-16 GATES-4）：本文件为 2026-07-08 历史快照；当前方向以 [`agent-workbench-enhancement-plan.md`](./agent-workbench-enhancement-plan.md) §1.4 增量增强口径为准；本文件保留为追溯记录。
+
+
 ## 1. 总目标
 
 BioF3 的下一阶段方向是：
