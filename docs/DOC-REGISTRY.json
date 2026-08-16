@@ -82,7 +82,7 @@
       "id": "BLOCK-2-UI-157-REVIEW",
       "path": "docs/block-2-ui-157-review-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-2-ui-157-review",
       "entrypoint": "docs/README.md",
@@ -97,10 +97,13 @@
       "registeredAt": "2026-08-16",
       "linkedCommits": [
         "e6bf72f",
-        "01c5e0b"
+        "01c5e0b",
+        "2d81377",
+        "0be5483",
+        "7e010a4",
+        "5c98ca8"
       ]
     },
-
     {
       "id": "DOC-INDEX",
       "path": "docs/README.md",
@@ -792,6 +795,22 @@
         "validation"
       ],
       "notes": "DOC-GOVERNANCE-GATES / GATES-2 (2026-08-16) 阶段产物。3 个 JSON Schema (docs-governance-report / ui-audit-report / test-affected-report) 的 markdown 索引；actual .schema.json 文件不登记 (path 有效性约束仍为 docs/*.md)。schemaVersion=1 由 scripts/lib/gate-report-schema.mjs 守门 (Ajv 6.x 优先，缺失时降级 draft-07 子集)。"
+    },
+    {
+      "id": "BLOCK-2-UI-157-REVIEW-CLOSEOUT",
+      "path": "docs/block-2-ui-157-review-closeout.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "block-2-ui-157-review-closeout",
+      "archivePolicy": "retain_stable_path",
+      "linkedCommits": [
+        "2d81377",
+        "0be5483",
+        "7e010a4",
+        "5c98ca8"
+      ],
+      "entrypoint": "docs/README.md"
     }
   ]
 }
