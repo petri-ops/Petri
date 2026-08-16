@@ -22,6 +22,7 @@ import { getProject, listProjectJobs, listDatasetsByProject, listProjects, updat
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 import { tools as staticTools } from '@/pages/_data';
+import { buildPreviewTable } from '@/lib/file-preview/buildPreviewTable';
 import type { Tool } from '@/pages/_data';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { HighlightedCode, codeLanguageForFile } from '@/components/ui/CodeHighlight';
@@ -2387,7 +2388,7 @@ function WorkspaceFilePreview({
       .then((body) => {
         if (cancelled) return;
         if (isCsv) {
-          setPreviewData(buildWorkspacePreviewTable(body, file.name));
+          setPreviewData(buildPreviewTable(body, file.name, { maxRows: 200 }));
           setStatus('ready');
           return;
         }
@@ -2532,16 +2533,6 @@ function WorkspaceFilePreview({
       {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
     </div>
   );
-}
-
-function buildWorkspacePreviewTable(text: string, fileName: string): string[][] {
-  const lower = fileName.toLowerCase();
-  const sep = lower.endsWith('.tsv') || text.includes('\t') ? '\t' : ',';
-  return text
-    .split(/\r?\n/)
-    .filter((line) => line.trim().length > 0)
-    .slice(0, 200)
-    .map((line) => line.split(sep).map((cell) => cell.replace(/^"|"$/g, '').trim()));
 }
 
 function isCsvFile(name?: string): boolean {
