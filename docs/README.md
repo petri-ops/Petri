@@ -1,6 +1,6 @@
 # BioF3 Desktop 文档入口
 
-最后更新：2026-08-17（BLOCK-9.1-MAIN-JS-SPLIT 收口 5 PHASE 全部落地 + 12 src/ipc/ + 2 src/main/ 共享层）
+最后更新：2026-08-17（BLOCK-9.2-MEGA-FILE-REFACTOR 启动 + 5 个非文件级巨型文件拆分工作包开搞）
 
 ## 项目治理入口
 
@@ -39,7 +39,8 @@
 12. [`g0-ide-mcp-tools-plan.md`](./g0-ide-mcp-tools-plan.md) — 2026-08-14 启动的 IDE MCP 工具集工作包；为 Agent 暴露 `ide_file_*` / `ide_terminal_*` 等 18 个 `ide_*` MCP 工具（分 Phase 1/2/3 推进），仅面向 Agent 通道，不重复既有面向 UI 的 `file:*` IPC。
     - [`block-9-1-main-js-split-closeout.md`](./block-9-1-main-js-split-closeout.md) — 2026-08-17 BLOCK-9.1 main.js 拆分 5 PHASE 全部落地（2450 → 1066 行 = -1384 行 / -56.5%）；12 个 src/ipc/ + 2 个 src/main/ 共享层；4 治理门 GREEN；不外推
 13. [`agent-workbench-enhancement-plan.md`](./agent-workbench-enhancement-plan.md) — Agent Workbench 增强计划（参考文档，已登记）。
-14. [`agent-workbench-p1-a5-verification-2026-08-15.md`](./agent-workbench-p1-a5-verification-2026-08-15.md) — 2026-08-15 已按开发态 Electron 边界完成的 A5 验证与收口报告；UI-AGENTWB-003 / UI-AGENTWB-004 转 `verified`，双 flag（on/off）链 + §X.2 兼容性测试矩阵 5 项 PASS；不外推 packaged / Provider / P7 / GA。
+14. [`agent-workbench-p1-a5-verification-2026-08-15.md`](./agent-workbench-p1-a5-verification-2026-08-15.md) 
+13. [`block-9-2-mega-file-refactor-plan.md`](./block-9-2-mega-file-refactor-plan.md) — 2026-08-17 BLOCK-9.1 收口后用户裁决"可以开搞了"启动的非文件级巨型文件拆分重构工作包；基于 [`senior-engineer-review-2026-08-16.md`](./senior-engineer-review-2026-08-16.md) §3 5 项；拆 5 个文件 plugin-manager 1457 + SimpleChat 2153 + ResultView 1662 + DesktopSettingsPanel 1515 + useSkillStore 743；纯代码组织变更 0 业务逻辑差异；PHASE 0 是架构调研 worker 委派；不外推 G1+— 2026-08-15 已按开发态 Electron 边界完成的 A5 验证与收口报告；UI-AGENTWB-003 / UI-AGENTWB-004 转 `verified`，双 flag（on/off）链 + §X.2 兼容性测试矩阵 5 项 PASS；不外推 packaged / Provider / P7 / GA。
 15. [`t-aw-013-packaged-verification-2026-08-15.md`](./t-aw-013-packaged-verification-2026-08-15.md) — 2026-08-15 已按 packaged Electron 边界完成的 T-AW-013 实机核对；6/6 步骤（CDP attach + bridge 同步方法 + 4 renderer + CSV BOM `EF BB BF` 字节级 + Markdown `| --- |` 分隔 + fallback 0 下载按钮）通过；A4 / P2 / P1.5 / UI-AGENTWB-007 证据等级升级为「前端 + dev Electron + packaged Electron 三轴」；4 处契约偏差已在 `ui-productization-audit.md` 行 244 CONTRACT-DRIFT-001 脚注登记；`qualificationEligible` 维持 false（Provider / GA 链路未覆盖）。
 16. [`agent-workbench-dev-electron-verification-2026-08-15.md`](./agent-workbench-dev-electron-verification-2026-08-15.md) — 2026-08-15 T-AW-014 dev Electron 边界内 4 工作包二次实机核对收口；UI-AGENTWB-005/006/007 由 `in_progress` 升 `dev Electron 边界内 verified`，UI-AGENTWB-004 由 A5 verified 扩展 dev 实机覆盖；三路径核对 6/6 步骤（CLI flag + Settings toggle + bridge.set off → reload DOM=0）通过；A4 5 路径 + P1.5 CSV/MD BOM 字节级 + P2 chart 8 rect a11y 全 PASS；target-file 7 文件 95/95 测试通过；`qualificationEligible` 维持 false（dev Electron 不外推 Provider / GA）。
 ## 当前开发必读
