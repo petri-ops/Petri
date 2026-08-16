@@ -1,6 +1,6 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-08-16 18:15（BLOCK-2-UI-157-REVIEW 工作包 PHASE 0/1/2/4/5 收口完成；PHASE 3 实机按用户裁决 P1-T-A 跳过 Vite-only mock 路径；UI-157 + UI-161 保持 `in_progress`；4 commit 落地；DOC-REGISTRY `active → completed`；closeout `docs/block-2-ui-157-review-closeout.md`）
+最后更新：2026-08-16 19:15（BLOCK-3-IPC-BRIDGE-HARDENING 工作包启动 —— 收口 BLOCK-2 PHASE 6 审核 12 项 Major 中的 11 项 P1 必修 + P2 强烈建议；4 PHASE：PHASE 0 复用 PHASE 6 报告 / PHASE 1 P1 必修主 agent 直做 / PHASE 2 P2 worker 委派 / PHASE 3-4 audit + closeout；不外推 packaged/Provider/P7/GA/UI-157 verified；DOC-REGISTRY 新增 BLOCK-3-IPC-BRIDGE-HARDENING status=active）
 
 ## 1. 恢复顺序
 
@@ -54,6 +54,15 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 - 核心 gap（已摸清）：不可变提交 `e6bf72f` 含 9 个 UI 文件 + `core/shared-backend/workflow-engine.js` + `frontend/src/hooks/useSkillStore.ts`，但 **IPC 桥完全未接通**（`src/preload.js` 与 `frontend/src/lib/desktopBridge.ts` grep `skill` 0 命中，store 仍走 fixture）。UI-161 不可变提交 `01c5e0b` 已落地 Skills 入口归位 + 死 SkillsSidebar 删除 + retry 按钮 + 4 token 补全（5 项核对 OK），但其 IPC 桥跨包接桥显式留白给本工作包（"不接 IPC / 不动 preload / main / workflow-engine——那是 UI-157 工作包范围，跨包接桥违反「单工作包串行」纪律"）。
 - 6 PHASE：PHASE 0 摸底（git show + grep + tsc + ui:audit:check + docs:check） / PHASE 1 IPC 桥接通（main + preload + bridge + store 四层补齐 `skills:list` / `skills:invoke` / `skills:status` / `skills:progress`，仅消费 workflow-engine.js 既有 export，不改 engine 内部） / PHASE 2 UI-161 5 项清理核对 / PHASE 3 实机 dev Electron 4 截图存 `acceptance/SKILLS-IPC/` / PHASE 4 UI-157 in_progress → verified（仅在实机证据充分时） / PHASE 5 closeout（roadmap / handoff / registry 同步）。
 - **2026-08-16 18:15 收口结果**：PHASE 0 摸底 4 子代理 + 主 agent 综合 + 修正 B 报告 2 处错误断言 / PHASE 1 IPC 桥接通 4 commit (`2d81377` feat + `0be5483` docs + `7e010a4` docs(audit) + `5c98ca8` docs PHASE 2 verify) / PHASE 2 UI-161 5/5 PASS / PHASE 3 实机**搁置**（用户 P1-T-A 裁决 Vite-only 跳过 dev Electron）/ PHASE 4 audit 末尾收口笔录已追加 / PHASE 5 closeout `docs/block-2-ui-157-review-closeout.md`（11 节 + 7 不变量 + 4 治理门 GREEN）。**UI-157 + UI-161 保持 `in_progress`**（按 audit 行 402 治理纪律缺实机证据）。DOC-REGISTRY `BLOCK-2-UI-157-REVIEW` `active → completed` + 新增 `BLOCK-2-UI-157-REVIEW-CLOSEOUT` reference entry。本工作包收口后**不主动启动**新工作包；下一块候选 (UI-158/UI-159 实机 / Block-6 UI-161 / Windows 代码签名 / i18n / release-pipeline dist staleness) 等用户显式裁决。
+
+### 3.0.7 已启动工作包：BLOCK-3-IPC-BRIDGE-HARDENING（2026-08-16 用户裁决启动，当前唯一 active）
+
+- 状态：`planning` → `active`（2026-08-16 用户裁决当日启动）；DOC-REGISTRY 新增 `BLOCK-3-IPC-BRIDGE-HARDENING` `kind=work-package / status=active / canonical=true / truthDomain=block-3-ipc-bridge-hardening / archivePolicy=retain_stable_path`；plan canonical `docs/block-3-ipc-bridge-hardening-plan.md` 已落地（222 行 / 7 § / 4 PHASE / 11 项修复）。
+- 目标：收口 BLOCK-2-UI-157-REVIEW PHASE 6 只读代码质量审核（`agent-transcripts/phase-6-code-audit.md` 1001 行 / 12 节）发现的 12 项 Major 中的 11 项 P1 必修 + P2 强烈建议。
+- 4 PHASE：PHASE 0 复用 PHASE 6 报告（不重新摸底）/ PHASE 1 P1 必修主 agent 直做（main.js 4 IPC handler sender 守门 + 1 行 9→4 状态映射） / PHASE 2 P2 修复 worker 委派（5 项内存/错误 + 5 项测试补） / PHASE 3 audit + PHASE 4 closeout。
+- 11 项修复：P1 安全 B1/F1（sender 守门）/ P1 契约 C1（poller 9→4 映射）/ P2 内存 A1+A2+A3（终态清理 / poller 停止 / execute 同步）/ P2 错误 B2（_publishSkillProgress try/catch）/ P2 测试 G1+G2+G3+G4+G6（wakeup 链路 + execute 失败 + callback 抛错 + cancel 失败 + main.js 9→4 单测）。**跳过 E1** 100 并行 execution 性能（G0 边界不触发）。
+- 不外推 Provider / packaged / GA / UI-157 verified（按 audit 行 402 治理纪律仍缺真实 dev Electron 实机证据）/ Chart a11y P2 / Worktree。
+- 不动 `preload.js` / `electron.d.ts` / 4 page / `desktopBridge.ts` / `core/shared-backend/*` / `agent-tools/`。
 - 不外推：Provider (`P-07`) / packaged / dist / notarization / GA 资格 / dist staleness / Worktree 创建（沿用 main）/ 新 Skills 业务能力 / Chart a11y P2。
 - 主 agent 直接 owner（不委派 `luna_worker`，IPC 桥契约 + 实机启动属跨模块边界判断）。当前仅 PHASE 0 前置工作（plan + registry + canonical 同步）已完成；PHASE 0 摸底执行由主 agent 在用户裁决"继续"后启动。
 - 验证起点：`npm run docs:check` 65 registered PASS（+1）；`npm run ui:audit:check` 131 PASS；`npm run docs:reconcile` 0 issues。
