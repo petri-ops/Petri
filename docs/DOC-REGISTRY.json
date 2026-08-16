@@ -889,6 +889,16 @@
       "truthDomain": "block-5-ipc-bridge-finalize",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "BLOCK-6-UI-158-UI-159-VERIFICATION",
+      "path": "docs/block-6-ui-158-ui-159-verification-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-6-ui-158-ui-159-verification",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
     }
   ]
 }
