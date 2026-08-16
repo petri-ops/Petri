@@ -2101,6 +2101,10 @@ function setupTerminalIpc() {
 // 快照，通过 setInterval(1000) diff 合成 skills:progress 推送。
 // （workflow-engine.js / skill-runtime.js 零 EventEmitter，
 //   合成 progress 必须在 main 进程侧做。）
+// BLOCK-4 H3：SkillRuntime 9 状态 → UI 4 状态（pending/running/completed/failed）
+//   状态映射表见 src/_mapSkillRuntimeStatus.js（独立模块，便于 plain Node 单测）；
+//   cancelled 简化为 failed（4 状态枚举硬约束）；UI 区分"取消"vs"失败"由
+//   下游组件按 status + cancelledFlag 渲染。
 let skillsSDK = null;
 const _activeSkillRuntimes = new Map(); // executionId → SkillRuntime
 const _lastCheckpointCount = new Map(); // executionId → number
@@ -2111,9 +2115,14 @@ function _getSkillsSDK() {
   try {
     const sdkMod = require(resolveCore("shared-backend", "skills-sdk.js"));
     const engineMod = require(resolveCore("shared-backend", "workflow-engine.js"));
+    // BLOCK-4 C2 注释：createDefaultSDK 是 skills-sdk.js 顶层高层封装（可能含发现 +
+    // registry 默认植入），createSkillsSDK 是低层工厂（纯 construct 不预填）。
+    // 当前优先用 createDefaultSDK（已在 v1.0 PHASE 1 验证）；createSkillsSDK 是 fallback。
+    // 两个函数的最终"基线 SDK 实例"都基于 CoreSDK；但 pluginManager / workflowEngine
+    // 等扩展字段由本函数手工注入（见下文 `sdk.workflowEngine = ...`），与 core 内部
+    // 工件无关。
     const { createSkillsSDK, createDefaultSDK } = sdkMod;
     const { createWorkflowEngine } = engineMod;
-    // 优先用 createDefaultSDK 触发一次发现；再注入 workflowEngine
     const base = createDefaultSDK ? createDefaultSDK() : createSkillsSDK();
     const sdk = base;
     sdk.workflowEngine = createWorkflowEngine({ sdk: base });

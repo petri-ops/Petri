@@ -282,6 +282,10 @@ function _stopAllPolling(): void {
 // ≤2s 降到 ≤100ms；终态时清理订阅避免泄漏）。
 const _progressUnsubs: Map<string, () => void> = new Map();
 
+// 自动派生自 d.ts onProgress 回调参数的真实类型（BLOCK-4 D1）
+type SkillsBridge = NonNullable<ReturnType<typeof getBridge<'skills'>>>;
+type SkillsProgressPayload = Parameters<SkillsBridge['onProgress']>[0] extends (p: infer P) => any ? P : never;
+
 function _subscribeProgressWakeup(
   executionId: string,
   onUpdate: (execution: SkillExecution) => void
@@ -289,8 +293,15 @@ function _subscribeProgressWakeup(
   if (_progressUnsubs.has(executionId)) return;
   const bridge = getBridge('skills');
   if (!bridge || typeof bridge.onProgress !== 'function') return;
-  const unsubscribe = bridge.onProgress((payload: { executionId?: string }) => {
-    if (payload?.executionId !== executionId) return;
+  const unsubscribe = bridge.onProgress((payload: SkillsProgressPayload) => {
+    // BLOCK-4 B4: payload 缺 executionId 时 console.warn 便于诊断
+    if (!payload || typeof payload !== 'object') {
+      if (typeof console !== 'undefined' && console.warn) {
+        console.warn('[useSkillStore] skills:progress payload missing or not object:', payload);
+      }
+      return;
+    }
+    if (payload.executionId !== executionId) return;
     void (async () => {
       try {
         const result = await bridge.getExecution(executionId);
@@ -315,6 +326,17 @@ function _subscribeProgressWakeup(
     })();
   });
   _progressUnsubs.set(executionId, unsubscribe);
+}
+
+// BLOCK-4 E2: deep-equal 比较，避免无变化 re-render；返回 true 表示有变化
+function _executionsChanged(prev: SkillExecution, next: SkillExecution): boolean {
+  if (prev === next) return false;
+  if (prev.status !== next.status) return true;
+  if (prev.completedAt?.getTime() !== next.completedAt?.getTime()) return true;
+  if (prev.error !== next.error) return true;
+  if (prev.result !== next.result) return true;
+  if (prev.startedAt?.getTime() !== next.startedAt?.getTime()) return true;
+  return false;
 }
 
 function _unsubscribeProgressWakeup(executionId: string): void {
@@ -372,6 +394,10 @@ export interface UseSkillStoreResult {
   ) => Promise<ExecuteResult>;
   /** Get a specific execution record by ID. */
   getExecution: (executionId: string) => SkillExecution | undefined;
+  /** BLOCK-4 G4 顺手补：Cancel a running execution by ID. */
+  cancel: (
+    executionId: string
+  ) => Promise<{ ok: boolean; cancelled?: boolean; error?: string }>;
   /** Invalidate cache and force reload on next use. */
   invalidateCache: () => void;
 }
@@ -535,7 +561,12 @@ export function useSkillStore(
         startedAt: new Date(),
       };
 
+      // BLOCK-4 E2: setExecutions 内部 deep-equal 比较，避免无变化 re-render
       setExecutions((prev) => {
+        const existing = prev.get(executionId);
+        if (existing && !_executionsChanged(existing, optimisticExecution)) {
+          return prev; // skip 跳过 re-render
+        }
         const next = new Map(prev);
         next.set(executionId, optimisticExecution);
         return next;
@@ -547,20 +578,29 @@ export function useSkillStore(
         if (result.ok && result.executionId) {
           // Update with real execution ID if different
           const realId = result.executionId;
+          const runningExec: SkillExecution = {
+            ...optimisticExecution,
+            executionId: realId,
+            status: 'running',
+          };
           setExecutions((prev) => {
             const next = new Map(prev);
             next.delete(executionId);
-            next.set(realId, {
-              ...optimisticExecution,
-              executionId: realId,
-              status: 'running',
-            });
+            const existing = next.get(realId);
+            if (existing && !_executionsChanged(existing, runningExec)) {
+              return prev;
+            }
+            next.set(realId, runningExec);
             return next;
           });
 
           // Start polling for status updates (2s polling is truth-source fallback)
           _startPolling(realId, (updated) => {
             setExecutions((prev) => {
+              const existing = prev.get(realId);
+              if (existing && !_executionsChanged(existing, updated)) {
+                return prev;
+              }
               const next = new Map(prev);
               next.set(realId, updated);
               return next;
@@ -569,6 +609,10 @@ export function useSkillStore(
           // PHASE 1 G0 UI-157：subscribe event-driven wakeup (~100ms latency)
           _subscribeProgressWakeup(realId, (updated) => {
             setExecutions((prev) => {
+              const existing = prev.get(realId);
+              if (existing && !_executionsChanged(existing, updated)) {
+                return prev;
+              }
               const next = new Map(prev);
               next.set(realId, updated);
               return next;
@@ -578,28 +622,38 @@ export function useSkillStore(
           return { ok: true, executionId: realId };
         } else {
           // Mark as failed
+          const failedExec: SkillExecution = {
+            ...optimisticExecution,
+            status: 'failed',
+            completedAt: new Date(),
+            error: result.error ?? 'Execution failed',
+          };
           setExecutions((prev) => {
+            const existing = prev.get(executionId);
+            if (existing && !_executionsChanged(existing, failedExec)) {
+              return prev;
+            }
             const next = new Map(prev);
-            next.set(executionId, {
-              ...optimisticExecution,
-              status: 'failed',
-              completedAt: new Date(),
-              error: result.error ?? 'Execution failed',
-            });
+            next.set(executionId, failedExec);
             return next;
           });
           return { ok: false, error: result.error };
         }
       } catch (err) {
         const error = err instanceof Error ? err.message : String(err);
+        const failedExec: SkillExecution = {
+          ...optimisticExecution,
+          status: 'failed',
+          completedAt: new Date(),
+          error,
+        };
         setExecutions((prev) => {
+          const existing = prev.get(executionId);
+          if (existing && !_executionsChanged(existing, failedExec)) {
+            return prev;
+          }
           const next = new Map(prev);
-          next.set(executionId, {
-            ...optimisticExecution,
-            status: 'failed',
-            completedAt: new Date(),
-            error,
-          });
+          next.set(executionId, failedExec);
           return next;
         });
         return { ok: false, error };
@@ -613,6 +667,31 @@ export function useSkillStore(
       return executions.get(executionId);
     },
     [executions]
+  );
+
+  // BLOCK-4 G4 顺手补：store 内部 cancel action（PHASE 6 G4 报告"无 store.cancel() action"）
+  const cancel = useCallback(
+    async (executionId: string): Promise<{ ok: boolean; cancelled?: boolean; error?: string }> => {
+      const bridge = getBridge('skills');
+      if (!bridge || typeof bridge.cancel !== 'function') {
+        return { ok: false, error: 'skills bridge unavailable' };
+      }
+      try {
+        const result = await bridge.cancel(executionId);
+        // 成功 cancel 同步清本地 wakeup 订阅（防止后续 progress 事件还写入 store）
+        if (result.ok && result.cancelled !== false) {
+          _unsubscribeProgressWakeup(executionId);
+        }
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err.message : String(err);
+        if (typeof console !== 'undefined' && console.warn) {
+          console.warn('[useSkillStore] cancel failed:', error);
+        }
+        return { ok: false, error };
+      }
+    },
+    []
   );
 
   const invalidateCache = useCallback(() => {
@@ -638,6 +717,7 @@ export function useSkillStore(
     search,
     execute,
     getExecution,
+    cancel,
     invalidateCache,
   };
 }

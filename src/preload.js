@@ -211,20 +211,30 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     },
   },
 
-  // G0 UI-157：Skills 发现 / 执行 / 进度桥（对齐 frontend/src/lib/electron.d.ts L114-169）
+  // BLOCK-4: 对齐 frontend/src/lib/electron.d.ts L114-218（PHASE 1 落地后 d.ts
+  // 扩展为 ADDITIVE +2 字段 cancel + onProgress，C3 修正原注释 L114-169 偏差）
   // 主进程 SkillsSDK 单例负责真正调用 core/shared-backend/skills-sdk.js；
   // progress 通过 ipcRenderer.on('skills:progress') 推送（替代 useSkillStore 旧 2s 轮询）
   skills: {
     discover: () => ipcRenderer.invoke('skills:discover'),
     execute: (skillId, params) =>
-      ipcRenderer.invoke('skills:execute', skillId, params ?? {}),
+      ipcRenderer.invoke('skills:execute', String(skillId ?? ''), params && typeof params === 'object' ? params : {}),
     getExecution: (executionId) =>
-      ipcRenderer.invoke('skills:getExecution', executionId),
+      ipcRenderer.invoke('skills:getExecution', String(executionId ?? '')),
     cancel: (executionId) =>
-      ipcRenderer.invoke('skills:cancel', executionId),
+      ipcRenderer.invoke('skills:cancel', String(executionId ?? '')),
     onProgress: (callback) => {
       if (typeof callback !== 'function') return () => {};
-      const handler = (_event, payload) => callback(payload);
+      // BLOCK-4 B5: callback 抛错 try/catch 隔离，避免污染后续 progress 事件链
+      const handler = (_event, payload) => {
+        try {
+          callback(payload);
+        } catch (e) {
+          if (typeof console !== 'undefined' && console.error) {
+            console.error('[preload] skills:progress callback error:', e && e.message);
+          }
+        }
+      };
       ipcRenderer.on('skills:progress', handler);
       return () => ipcRenderer.removeListener('skills:progress', handler);
     },
