@@ -268,65 +268,12 @@ const BASE_PY_PACKAGES = new Set([
 ]);
 
 // ── 系统检测：开发模式下找系统安装的 R / Python ────────────────
-function _detectSystemR() {
-  const { execFileSync } = require("child_process");
-  try {
-    const candidates = getRuntimeBinCandidates("r", process.platform);
-    for (const cmd of candidates) {
-      try {
-        const rHome = execFileSync(cmd, ["-e", "cat(R.home())"], {
-          encoding: "utf-8",
-          timeout: 5000,
-        }).trim();
-        if (rHome && fs.existsSync(rHome)) return rHome;
-      } catch {}
-    }
-  } catch {}
-  const commonPaths =
-    process.platform === "win32"
-      ? ["C:\\Program Files\\R", "C:\\Program Files (x86)\\R"]
-      : [
-          "/Library/Frameworks/R.framework/Resources",
-          "/usr/local/lib/R",
-          "/opt/homebrew/lib/R",
-        ];
-  for (const p of commonPaths) {
-    const binName = process.platform === "win32" ? "Rscript.exe" : "Rscript";
-    if (fs.existsSync(path.join(p, "bin", binName))) return p;
-    if (process.platform === "win32" && fs.existsSync(p)) {
-      try {
-        for (const entry of fs.readdirSync(p, { withFileTypes: true })) {
-          if (!entry.isDirectory()) continue;
-          const candidate = path.join(p, entry.name);
-          if (fs.existsSync(path.join(candidate, "bin", binName))) return candidate;
-        }
-      } catch {}
-    }
-  }
-  return null;
-}
+// _detectSystemR / _detectSystemPython / resolveRuntime were
+// moved to src/main/env-coordinator.js by BLOCK-9.1 PHASE 3.
+// setupDesktopEnv lives there now and uses them.
+// (Intentionally not re-exported from main.js — there's no
+// other consumer in src/main.js after the extraction.)
 
-function _detectSystemPython() {
-  const { execFileSync } = require("child_process");
-  try {
-    const candidates = getRuntimeBinCandidates("python", process.platform);
-    for (const cmd of candidates) {
-      try {
-        const pyHome = execFileSync(
-          cmd,
-          ["-c", "import sys; print(sys.prefix)"],
-          {
-            encoding: "utf-8",
-            timeout: 5000,
-          },
-        ).trim();
-        if (pyHome && getPythonRuntimeExecutable(pyHome, process.platform))
-          return pyHome;
-      } catch {}
-    }
-  } catch {}
-  return null;
-}
 
 // ── 环境变量（桌面版模式）──────────────────────────────────────
 
@@ -334,133 +281,6 @@ function _detectSystemPython() {
 //   1. 用户安装的独立 Runtime（~/Documents/BioF3-Local/runtimes/{R|Python}）— 最高优先
 //   2. 开发模式：检测系统 R/Python（仅 dev，打包模式不检测，保持独立）
 //   3. 都没有 → 返回 null，R/Python 功能不可用，提示从插件商店安装
-function resolveRuntime(lang, userDataDir) {
-  const runtimeName = lang === "r" ? "R" : "Python";
-
-  // 1. 用户安装的独立 Runtime
-  const userRuntime = path.join(userDataDir, "runtimes", runtimeName);
-  if (lang === "python") {
-    if (getPythonRuntimeExecutable(userRuntime, process.platform)) {
-      return userRuntime;
-    }
-  } else if (
-    getRuntimeBinCandidates(lang, process.platform).some((candidate) =>
-      fs.existsSync(path.join(userRuntime, "bin", candidate)),
-    )
-  ) {
-    return userRuntime;
-  }
-
-  // 2. 开发模式：检测系统 R/Python（仅 dev，打包模式不检测，保持独立）
-  if (IS_DEV) {
-    if (lang === "r") {
-      const sysR = _detectSystemR();
-      if (sysR) return sysR;
-    } else {
-      const sysPy = _detectSystemPython();
-      if (sysPy) return sysPy;
-    }
-  }
-
-  return null;
-}
-
-function setupDesktopEnv(backendPorts) {
-  process.env.BIOF3_DESKTOP = "1";
-  process.env.BIOF3_SITE_DIR = resolveResource("build");
-
-  // 用户数据目录（先确定，resolveRuntime 要用）
-  const userDataDir =
-    process.env.BIOF3_LOCAL_DATA_DIR ||
-    path.join(app.getPath("documents"), "BioF3-Local");
-  process.env.BIOF3_LOCAL_DATA_DIR = userDataDir;
-  process.env.BIOF3_LOCAL_RESULTS_DIR = path.join(userDataDir, "results");
-  process.env.BIOF3_LOCAL_UPLOADS_DIR = path.join(userDataDir, "uploads");
-  process.env.BIOF3_TEMP_DIR = path.join(userDataDir, "tmp");
-  process.env.BIOF3_PY_TEMP_DIR = path.join(userDataDir, "tmp", "py");
-  process.env.BIOF3_DB_PATH = path.join(userDataDir, "biof3.db");
-
-  // 确保目录存在
-  for (const dir of [
-    userDataDir,
-    process.env.BIOF3_LOCAL_RESULTS_DIR,
-    process.env.BIOF3_LOCAL_UPLOADS_DIR,
-    process.env.BIOF3_TEMP_DIR,
-    process.env.BIOF3_PY_TEMP_DIR,
-    path.join(userDataDir, "plugins"),
-    path.join(userDataDir, "runtimes"),
-    path.join(userDataDir, "logs"),
-  ]) {
-    try {
-      fs.mkdirSync(dir, { recursive: true });
-    } catch {}
-  }
-
-  // R/Python Runtime 解析（三级优先）
-  const rHome = resolveRuntime("r", userDataDir);
-  if (rHome) {
-    process.env.BIOF3_R_HOME = rHome;
-    console.log("[desktop] R runtime:", rHome);
-  } else {
-    console.warn(
-      '[desktop] R runtime not installed — install "R 运行时" from plugin store',
-    );
-  }
-
-  const pyHome = resolveRuntime("python", userDataDir);
-  if (pyHome) {
-    process.env.BIOF3_PY_HOME = pyHome;
-    console.log("[desktop] Python runtime:", pyHome);
-  } else {
-    console.warn(
-      '[desktop] Python runtime not installed — install "Python 运行时" from plugin store',
-    );
-  }
-
-  process.env.R_SERVER_PORT = String(backendPorts.r);
-  process.env.PY_SERVER_PORT = String(backendPorts.python);
-  process.env.PLUMBER_PORT = String(backendPorts.plumber);
-  process.env.GATEWAY_PORT = String(backendPorts.gateway);
-  // Gateway health probes and proxies use the full URL, not the port alone.
-  // Without these, gateway defaults to dead :3003/:3004 and reports 503
-  // even when r-server/py-server themselves are healthy. See §P1-CFG-1.
-  process.env.R_SERVER_URL = `http://127.0.0.1:${backendPorts.r}`;
-  process.env.PY_SERVER_URL = `http://127.0.0.1:${backendPorts.python}`;
-  process.env.GATEWAY_URL = `http://127.0.0.1:${backendPorts.gateway}`;
-  if (backendPorts.renderer) {
-    process.env.BIOF3_RENDERER_PORT = String(backendPorts.renderer);
-    process.env.BIOF3_RENDERER_ORIGIN = `http://localhost:${backendPorts.renderer}`;
-  }
-  const trustedRendererOrigins = new Set(
-    String(process.env.BIOF3_TRUSTED_DESKTOP_ORIGINS || '')
-      .split(',')
-      .map((value) => value.trim())
-      .filter(Boolean),
-  );
-  if (isDevMode) {
-    try {
-      trustedRendererOrigins.add(new URL(rendererDevUrl).origin);
-    } catch {}
-  }
-  if (backendPorts.renderer) {
-    trustedRendererOrigins.add(`http://localhost:${backendPorts.renderer}`);
-    trustedRendererOrigins.add(`http://127.0.0.1:${backendPorts.renderer}`);
-  }
-  process.env.BIOF3_TRUSTED_DESKTOP_ORIGINS = [...trustedRendererOrigins].join(',');
-  // Child servers run in separate Node processes and cannot see Electron's
-  // in-memory plugin registry. Give them the exact packaged/dev built-in root
-  // so HTTP execution resolves the same plugin metadata as MCP (including
-  // requiresBundle declarations).
-  process.env.BIOF3_BUILT_IN_PLUGINS_DIR = getBuiltInPluginsDir({
-    isPackaged: !IS_DEV,
-    projectRoot: PROJECT_ROOT,
-    resourcesPath: process.resourcesPath,
-  });
-
-  // 计算执行配置：默认本地优先；若用户已保存远端集群配置，则一并注入
-  _applyComputeSettings(_loadComputeSettings());
-}
-
 function reserveAvailablePort(preferredPort) {
   return new Promise((resolve, reject) => {
     const tryListen = (port) => {
@@ -1734,6 +1554,8 @@ function setupSkillsIpc() {
 // ── 应用生命周期 ───────────────────────────────────────────────
 async function main() {
   const backendPorts = await selectBackendPorts();
+  // BLOCK-9.1 PHASE 3: setupDesktopEnv moved to src/main/env-coordinator.js
+  const { setupDesktopEnv } = require("./main/env-coordinator");
   setupDesktopEnv(backendPorts);
 
   // M1-4 (H3)：启动 r-server 前跑 db migration，防升级 schema 错乱。
