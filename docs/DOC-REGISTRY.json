@@ -961,11 +961,19 @@
       "id": "BLOCK-9-MEGA-FILE-REFACTOR",
       "path": "docs/block-9-mega-file-refactor-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-9-mega-file-refactor",
       "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path"
+      "archivePolicy": "retain_stable_path",
+      "linkedCommits": [
+        "d87a0f8",
+        "e78567c",
+        "1c14f49",
+        "c1e2bd5"
+      ],
+      "qualificationEligible": false,
+      "cancelledReason": null
     },
     {
       "id": "SENIOR-ENGINEER-REVIEW-2026-08-16",
@@ -975,6 +983,16 @@
       "canonical": false,
       "truthDomain": "biof3-code-quality",
       "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "BLOCK-9-MEGA-FILE-REFACTOR-CLOSEOUT",
+      "path": "docs/block-9-mega-file-refactor-closeout.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "block-9-mega-file-refactor",
+      "entrypoint": "docs/block-9-mega-file-refactor-plan.md",
       "archivePolicy": "retain_stable_path"
     }
   ]
