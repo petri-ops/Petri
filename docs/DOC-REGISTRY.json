@@ -956,6 +956,26 @@
       "truthDomain": "block-8-ui-132-verification",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "BLOCK-9-MEGA-FILE-REFACTOR",
+      "path": "docs/block-9-mega-file-refactor-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-9-mega-file-refactor",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "SENIOR-ENGINEER-REVIEW-2026-08-16",
+      "path": "docs/senior-engineer-review-2026-08-16.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "biof3-code-quality",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
     }
   ]
 }

@@ -84,6 +84,19 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 - 不动：`preload.js` 5 方法签名 / `electron.d.ts` / 4 page / `desktopBridge.ts` / `core/shared-backend/*` / `agent-tools/`。
 - 不做：dev Electron 实机复核（候选 2/3 留 BLOCK-6+）。
 
+### 3.0.13 已启动工作包：BLOCK-9-MEGA-FILE-REFACTOR（2026-08-16 用户裁决"按照你的建议来"启动，当前唯一 active）
+
+- 状态：`planning → active`（2026-08-16 用户裁决当日启动）；DOC-REGISTRY 新增 `BLOCK-9-MEGA-FILE-REFACTOR` `kind=work-package / status=active / canonical=true / truthDomain=block-9-mega-file-refactor / archivePolicy=retain_stable_path` + 新增 `SENIOR-ENGINEER-REVIEW-2026-08-16` `kind=reference / status=completed`（评审报告永久化）；plan canonical `docs/block-9-mega-file-refactor-plan.md` 已落地（约 130 行 / 6 § / 4 PHASE）；评审依据 `docs/senior-engineer-review-2026-08-16.md`。
+- 目标：按用户裁决"按照你的建议来"基于高级软件工程师评审报告启动**巨型文件拆分重构**。3 项重构（基于评审报告 P0/P1 5 项中的 3 项；P1 剩余 2 项 + P2 3 项 + P3 1 项 = 6 项留后续工作包 BLOCK-9.1/9.2/9.3/9.4/9.5/9.6）：
+  1. **拆 `_data.ts` 2157 → 5 文件**（P0：`registry.ts` 接口 + `categories.ts` 分类数组 + `inventory.ts` 工具数组 + `demos/` 每个工具一个 demo + `pages/_data.ts` re-export 兼容）
+  2. **抽 `buildPreviewTable` 到 `lib/file-preview/`**（P1：解决 `ResultView.tsx` + `SimpleChat.tsx` 重复定义；高级工程师原则：任何文件被 ≥2 处使用必须抽到 lib/）
+  3. **拆 `project-workspace.tsx` 3222 → 4 文件**（P0：`FileTree/` 文件树子模块 + `FilePreview/` 文件预览（含 7 个工具函数）+ `OfficePreview/` Office 渲染 + `index.tsx` 路由 + 布局 + 兼容入口）
+- 原则：不修改行为（只搬代码，0 业务逻辑变更）/ 不引入新依赖 / 保留向后兼容原 import 路径 / 不破坏测试 / 不外推。
+- 4 PHASE：PHASE 1 拆 `_data.ts` / PHASE 2 抽 `buildPreviewTable` / PHASE 3 拆 `project-workspace.tsx` / PHASE 4 审计 + closeout。
+- 完成语义：`_data.ts` 2157 → 5 文件 + `buildPreviewTable` 抽到 `lib/file-preview/` + `project-workspace.tsx` 3222 → 4 文件 + 4 治理门 GREEN + 既有 vitest 0 失败 / 0 改动 + 不变量守住。
+- 不外推：P1 剩余 2 项（main.js / SimpleChat.tsx）+ P2 3 项 + P3 1 项 / packaged / dist / Provider / P7 / GA / E1-d/E1-e G1+ / dist staleness G1+ / i18n / 不重新激活 BLOCK-2/3/4/5/6/7/8。
+- 不动：`preload.js` / `electron.d.ts` / `desktopBridge.ts` / 4 page / `core/shared-backend/*` / `agent-tools/`。
+
 ### 3.0.12 已启动工作包：BLOCK-8-UI-132-VERIFICATION（2026-08-16 用户裁决"接下来要做什么呢"启动，当前唯一 active）
 
 - 状态：`planning → active`（2026-08-16 用户裁决当日启动）；DOC-REGISTRY 新增 `BLOCK-8-UI-132-VERIFICATION` `kind=work-package / status=active / canonical=true / truthDomain=block-8-ui-132-verification / archivePolicy=retain_stable_path`；plan canonical `docs/block-8-ui-132-verification-plan.md` 已落地（约 100 行 / 7 § / 4 PHASE）。
