@@ -79,6 +79,29 @@
       "notes": "DOC-GOVERNANCE-GATES 工作包（2026-08-16 启动同日收口）canonical 收口记录；GATES-0~GATES-4 五阶段全部完成；docs:check 63 / ui:audit:check 131 / docs:reconcile 0 issues。详见 closeout §1-§8。"
     },
     {
+      "id": "BLOCK-2-UI-157-REVIEW",
+      "path": "docs/block-2-ui-157-review-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-2-ui-157-review",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "ui",
+        "skills",
+        "ipc",
+        "verified-target"
+      ],
+      "notes": "用户裁决 2026-08-16 启动。专为收口 ui-productization-audit.md 中 UI-157 (Skills UI 页面 P1/W-04) 的 in_progress 状态：① 接通 useSkillStore ↔ core/shared-backend/workflow-engine.js 之间的 IPC 桥（UI-161 显式留白的跨包接桥工作）；② 核对 UI-161 既有清理（commit 01c5e0b）未回退；③ 真实 dev Electron 实机启动 + 走查 /skills 路由；④ UI-157 in_progress → verified。6 个 PHASE（0 摸底 / 1 IPC 桥 / 2 UI-161 核对 / 3 实机 / 4 audit 更新 / 5 closeout）。不外推 Provider/packaged/GA/Chart a11y P2/Worktree。Single work package serial 纪律：当前 active 工作包。详见 plan §1-§9。",
+      "registeredAt": "2026-08-16",
+      "linkedCommits": [
+        "e6bf72f",
+        "01c5e0b"
+      ]
+    },
+
+    {
       "id": "DOC-INDEX",
       "path": "docs/README.md",
       "kind": "governance",

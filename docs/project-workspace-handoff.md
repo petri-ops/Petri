@@ -1,6 +1,6 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-08-16（DOC-GOVERNANCE-GATES 工作包收口同步）
+最后更新：2026-08-16（DOC-GOVERNANCE-GATES 工作包收口 + BLOCK-2-UI-157-REVIEW 工作包同日用户裁决启动 — 当前唯一 active 工作包）
 
 ## 1. 恢复顺序
 
@@ -46,6 +46,16 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 - 与 Block-2 / Block-6 UI 实机复核项（UI-157 / UI-161）解耦——UI 复核继续走 `ui:audit:check` 路径；本工作包不阻塞也不被它们阻塞；本工作包收口后下一块候选仍为 Block-2 UI-157 / Block-6 UI-161 既有 in_progress 复核项。
 - 收口记录 canonical：`docs/doc-governance-gates-closeout.md`（含 1-8 收口判定 + 证据清单）；Plan canonical `docs/doc-governance-gates-plan.md` 保留（`archivePolicy: retain_stable_path`）。
 - 验证：`npm run docs:check` 64 registered PASS；`npm run ui:audit:check` 131 PASS；`npm run docs:reconcile` 0 issues / 0 manual review / 0 validation issues；GATES-2 `--report` JSON 模式 3 脚本 schema 校验通过。
+
+### 3.0.6 已启动工作包：BLOCK-2-UI-157-REVIEW（2026-08-16 用户裁决启动，当前唯一 active）
+
+- 状态：`planning` → `active`（2026-08-16 用户裁决当日启动）；DOC-REGISTRY 新增 `BLOCK-2-UI-157-REVIEW` `kind=work-package / status=active / canonical=true / truthDomain=block-2-ui-157-review / archivePolicy=retain_stable_path`；plan canonical `docs/block-2-ui-157-review-plan.md`（283 行 / 9 §）已落地。
+- 目标：收口 `docs/ui-productization-audit.md` 第 113 行 UI-157（Skills UI 页面 P1/W-04）`in_progress` 状态 → `verified`。
+- 核心 gap（已摸清）：不可变提交 `e6bf72f` 含 9 个 UI 文件 + `core/shared-backend/workflow-engine.js` + `frontend/src/hooks/useSkillStore.ts`，但 **IPC 桥完全未接通**（`src/preload.js` 与 `frontend/src/lib/desktopBridge.ts` grep `skill` 0 命中，store 仍走 fixture）。UI-161 不可变提交 `01c5e0b` 已落地 Skills 入口归位 + 死 SkillsSidebar 删除 + retry 按钮 + 4 token 补全（5 项核对 OK），但其 IPC 桥跨包接桥显式留白给本工作包（"不接 IPC / 不动 preload / main / workflow-engine——那是 UI-157 工作包范围，跨包接桥违反「单工作包串行」纪律"）。
+- 6 PHASE：PHASE 0 摸底（git show + grep + tsc + ui:audit:check + docs:check） / PHASE 1 IPC 桥接通（main + preload + bridge + store 四层补齐 `skills:list` / `skills:invoke` / `skills:status` / `skills:progress`，仅消费 workflow-engine.js 既有 export，不改 engine 内部） / PHASE 2 UI-161 5 项清理核对 / PHASE 3 实机 dev Electron 4 截图存 `acceptance/SKILLS-IPC/` / PHASE 4 UI-157 in_progress → verified（仅在实机证据充分时） / PHASE 5 closeout（roadmap / handoff / registry 同步）。
+- 不外推：Provider (`P-07`) / packaged / dist / notarization / GA 资格 / dist staleness / Worktree 创建（沿用 main）/ 新 Skills 业务能力 / Chart a11y P2。
+- 主 agent 直接 owner（不委派 `luna_worker`，IPC 桥契约 + 实机启动属跨模块边界判断）。当前仅 PHASE 0 前置工作（plan + registry + canonical 同步）已完成；PHASE 0 摸底执行由主 agent 在用户裁决"继续"后启动。
+- 验证起点：`npm run docs:check` 65 registered PASS（+1）；`npm run ui:audit:check` 131 PASS；`npm run docs:reconcile` 0 issues。
 
 ### 3.1 已收口主线：G0-RS-UX1H Async Tool Surface（2026-08-09 收口）
 
