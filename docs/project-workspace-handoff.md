@@ -63,6 +63,16 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 - 11 项修复：P1 安全 B1/F1（sender 守门）/ P1 契约 C1（poller 9→4 映射）/ P2 内存 A1+A2+A3（终态清理 / poller 停止 / execute 同步）/ P2 错误 B2（_publishSkillProgress try/catch）/ P2 测试 G1+G2+G3+G4+G6（wakeup 链路 + execute 失败 + callback 抛错 + cancel 失败 + main.js 9→4 单测）。**跳过 E1** 100 并行 execution 性能（G0 边界不触发）。
 - 不外推 Provider / packaged / GA / UI-157 verified（按 audit 行 402 治理纪律仍缺真实 dev Electron 实机证据）/ Chart a11y P2 / Worktree。
 - 不动 `preload.js` / `electron.d.ts` / 4 page / `desktopBridge.ts` / `core/shared-backend/*` / `agent-tools/`。
+
+### 3.0.8 已启动工作包：BLOCK-4-IPC-BRIDGE-POLISH（2026-08-16 用户裁决"按你的节奏来"启动，当前唯一 active）
+
+- 状态：`planning → active`（2026-08-16 用户裁决当日启动）；DOC-REGISTRY 新增 `BLOCK-4-IPC-BRIDGE-POLISH` `kind=work-package / status=active / canonical=true / truthDomain=block-4-ipc-bridge-polish / archivePolicy=retain_stable_path`；plan canonical `docs/block-4-ipc-bridge-polish-plan.md` 已落地（123 行 / 5 §）。
+- 目标：收口 BLOCK-2-UI-157-REVIEW PHASE 6 只读代码质量审核剩余 **Minor 15 + Nit 4 + 1 收尾**中的 12 项跨 3 文件可修项。
+- 4 PHASE：PHASE 1 主 agent 直做 10 项代码改动（src/preload.js + src/_mapSkillRuntimeStatus.js + src/main.js + frontend/src/hooks/useSkillStore.ts 4 文件 / ~+50 / ~−10）/ PHASE 2 worker 测试补（G5 useSkillStore.test.ts unmount 验 _progressUnsubs + _mapSkillRuntimeStatus.test.mjs default → failed + null 守卫）/ PHASE 3 audit 收口 / PHASE 4 closeout。
+- 12 项：① A5 preload.js 5 方法 `String(executionId ?? '')` 防御；② B3 `_mapSkillRuntimeStatus` default `running → failed` + 显式 null 守卫；③ B4 wakeup payload 缺 executionId `console.warn` 调试；④ B5 preload.js onProgress callback try/catch；⑤ C2 `_getSkillsSDK` createDefaultSDK vs createSkillsSDK 加注释；⑥ C3 preload.js 注释 `L114-169 → L114-218`；⑦ D1 useSkillStore payload 自动派生 d.ts 完整类型；⑧ E2 setExecutions 内部 deep-equal 避免无变化 re-render；⑨ G5 test 7 验证 unmount 后 `_progressUnsubs.size === 0`；⑩ H3 main.js 顶部注释加 9→4 状态映射行号；⑪+⑫ G6 二次扩展 `cancelled → failed` 区分 UI 文案 vs status + PHASE 2 worker 同步更新 _mapSkillRuntimeStatus.test.mjs 14 个 default case。
+- 跳过：E1（100 并行 execution 性能 G0 边界外留 BLOCK-5+）/ E3 / F2 / F3 / H1 / H2（H1/H2 BLOCK-2 plan/closeout 修订错过窗口）。
+- 不外推：Provider / packaged / GA / UI-157 verified / 重新激活 BLOCK-2 / BLOCK-3 / E1 poller 性能。
+- 不动：`preload.js` 5 方法签名 / `electron.d.ts` / 4 page / `desktopBridge.ts` / `core/shared-backend/*` / `agent-tools/` / `docs/block-2-ui-157-review-plan.md` / `docs/block-2-ui-157-review-closeout.md`（H1/H2 跳过）。
 - 不外推：Provider (`P-07`) / packaged / dist / notarization / GA 资格 / dist staleness / Worktree 创建（沿用 main）/ 新 Skills 业务能力 / Chart a11y P2。
 - 主 agent 直接 owner（不委派 `luna_worker`，IPC 桥契约 + 实机启动属跨模块边界判断）。当前仅 PHASE 0 前置工作（plan + registry + canonical 同步）已完成；PHASE 0 摸底执行由主 agent 在用户裁决"继续"后启动。
 - 验证起点：`npm run docs:check` 65 registered PASS（+1）；`npm run ui:audit:check` 131 PASS；`npm run docs:reconcile` 0 issues。
