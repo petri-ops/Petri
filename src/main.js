@@ -2124,7 +2124,22 @@ function _getSkillsSDK() {
 
 function _publishSkillProgress(executionId, payload) {
   if (!mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isDestroyed()) return;
-  mainWindow.webContents.send("skills:progress", { executionId, ...payload });
+  try {
+    mainWindow.webContents.send("skills:progress", { executionId, ...payload });
+  } catch (e) {
+    // BLOCK-3 P2 B2: webContents.send 抛错（如主窗口正关闭）不应冒泡到 poller tick
+    if (typeof console !== "undefined" && console.warn) {
+      console.warn(`[desktop] skills progress publish failed for ${executionId}:`, e && e.message);
+    }
+  }
+}
+
+function _stopSkillsProgressPollerIfIdle() {
+  // BLOCK-3 P2 A2: 最后一个 execution 终止后停止 poller，避免空转
+  if (_skillsProgressTimer && _activeSkillRuntimes.size === 0) {
+    clearInterval(_skillsProgressTimer);
+    _skillsProgressTimer = null;
+  }
 }
 
 function _startSkillsProgressPoller() {
@@ -2141,7 +2156,7 @@ function _startSkillsProgressPoller() {
         if (checkpoints.length !== lastCount) {
           _lastCheckpointCount.set(executionId, checkpoints.length);
           _publishSkillProgress(executionId, {
-            status: execCtx.status,
+            status: _mapSkillRuntimeStatus(execCtx.status),
             checkpoints: checkpoints.slice(),
           });
         }
@@ -2152,12 +2167,21 @@ function _startSkillsProgressPoller() {
         }
       } catch {}
     }
+    // BLOCK-3 P2 A2: 每 tick 检查是否需要停止
+    _stopSkillsProgressPollerIfIdle();
   }, 1000);
+}
+
+function _resolveSkillsIpcWindow(event) {
+  // BLOCK-3 P1 B1/F1: 守 sender，对齐 setupAgentWorkbenchFlagsIpc L1162 模式
+  if (!mainWindow || mainWindow.isDestroyed()) return null;
+  return event?.sender === mainWindow.webContents ? mainWindow : null;
 }
 
 function setupSkillsIpc() {
   // 规整化 bridge 返回值，保证前端 contract 严格 `{ ok, ... }`
-  ipcMain.handle("skills:discover", async () => {
+  ipcMain.handle("skills:discover", async (event) => {
+    if (!_resolveSkillsIpcWindow(event)) return { ok: false, error: "unauthorized" };
     try {
       const sdk = _getSkillsSDK();
       if (!sdk) return { ok: false, error: "skills SDK unavailable" };
@@ -2168,7 +2192,8 @@ function setupSkillsIpc() {
     }
   });
 
-  ipcMain.handle("skills:execute", async (_event, skillId, params) => {
+  ipcMain.handle("skills:execute", async (event, skillId, params) => {
+    if (!_resolveSkillsIpcWindow(event)) return { ok: false, error: "unauthorized" };
     try {
       const sdk = _getSkillsSDK();
       if (!sdk) return { ok: false, error: "skills SDK unavailable" };
@@ -2197,6 +2222,11 @@ function setupSkillsIpc() {
             result: result ? result.result : null,
             error: result && !result.success ? (result.error?.message || String(result.error)) : null,
           });
+          // BLOCK-3 P2 A3: 终态 publish 后立即清理 activeRuntimes，
+          // 不再等下个 poller tick（最坏情况节省 1s）
+          _activeSkillRuntimes.delete(executionId);
+          _lastCheckpointCount.delete(executionId);
+          _stopSkillsProgressPollerIfIdle();
           return result;
         })
         .catch((err) => {
@@ -2205,6 +2235,10 @@ function setupSkillsIpc() {
             checkpoints: [],
             error: err && err.message ? err.message : String(err),
           });
+          // BLOCK-3 P2 A3: 失败终态同样立即清理
+          _activeSkillRuntimes.delete(executionId);
+          _lastCheckpointCount.delete(executionId);
+          _stopSkillsProgressPollerIfIdle();
           throw err;
         });
       promise.catch(() => {}); // 阻止未捕获 rejection
@@ -2217,7 +2251,8 @@ function setupSkillsIpc() {
     }
   });
 
-  ipcMain.handle("skills:getExecution", async (_event, executionId) => {
+  ipcMain.handle("skills:getExecution", async (event, executionId) => {
+    if (!_resolveSkillsIpcWindow(event)) return { ok: false, error: "unauthorized" };
     try {
       if (!executionId) return { ok: false, error: "executionId required" };
       const runtime = _activeSkillRuntimes.get(executionId);
@@ -2247,7 +2282,8 @@ function setupSkillsIpc() {
     }
   });
 
-  ipcMain.handle("skills:cancel", async (_event, executionId) => {
+  ipcMain.handle("skills:cancel", async (event, executionId) => {
+    if (!_resolveSkillsIpcWindow(event)) return { ok: false, cancelled: false, error: "unauthorized" };
     try {
       if (!executionId) return { ok: false, cancelled: false, error: "executionId required" };
       const runtime = _activeSkillRuntimes.get(executionId);
