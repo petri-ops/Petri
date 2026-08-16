@@ -68,26 +68,6 @@ const isDevMode =
   process.env.ELECTRON_IS_DEV === "1" ||
   process.env.NODE_ENV === "development";
 
-/**
- * File-type whitelist for the file:open-path IPC channel (SEC-002).
- * Only extensions in this set can be opened via shell.openPath.
- */
-const ALLOWED_OPEN_EXTENSIONS = Object.freeze([
-  // Text & data
-  ".txt", ".md", ".json", ".jsonc", ".csv", ".tsv", ".xml", ".html", ".htm",
-  ".css", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs",
-  ".yaml", ".yml", ".toml", ".ini", ".cfg", ".conf", ".env",
-  ".log", ".sh", ".bash", ".zsh", ".fish", ".ps1", ".bat", ".cmd",
-  ".py", ".r", ".R", ".sql", ".graphql", ".vue", ".svelte",
-  // Images (commonly previewed)
-  ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".ico", ".bmp",
-  // Documents & archives
-  ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
-  ".zip", ".tar", ".gz", ".bz2", ".xz", ".rar",
-  // Genomics / BioF3 domain
-  ".h5ad", ".loom", ".mtx", ".h5", ".rds", ".rdata",
-  ".maf", ".vcf", ".bed", ".gtf", ".gff", ".fasta", ".fa", ".fastq", ".fq",
-]);
 const rendererDevUrl =
   process.env.BIOF3_RENDERER_DEV_URL || "http://localhost:3000";
 
@@ -156,66 +136,6 @@ function _readLogTail(filePath, maxLines = 120) {
   } catch {
     return "";
   }
-}
-
-const DEFAULT_COMPUTE_SETTINGS = {
-  computeMode: "local",
-  remoteComputeUrl: "",
-  remoteComputeToken: "",
-  remoteComputeName: "",
-};
-
-function _getSettingsDir() {
-  return (
-    process.env.BIOF3_LOCAL_DATA_DIR ||
-    path.join(app.getPath("documents"), "BioF3-Local")
-  );
-}
-
-function _getComputeSettingsFile() {
-  return path.join(_getSettingsDir(), "compute-settings.json");
-}
-
-function _normalizeComputeSettings(input = {}) {
-  const raw = input && typeof input === "object" ? input : {};
-  const computeMode = String(raw.computeMode || raw.compute_mode || "local").toLowerCase();
-  const normalizedMode = computeMode === "remote" ? "remote" : "local";
-  return {
-    ...DEFAULT_COMPUTE_SETTINGS,
-    computeMode: normalizedMode,
-    remoteComputeUrl: String(raw.remoteComputeUrl || raw.remote_compute_url || "").trim(),
-    remoteComputeToken: String(raw.remoteComputeToken || raw.remote_compute_token || ""),
-    remoteComputeName: String(raw.remoteComputeName || raw.remote_compute_name || "").trim(),
-  };
-}
-
-function _loadComputeSettings() {
-  try {
-    const filePath = _getComputeSettingsFile();
-    if (!fs.existsSync(filePath)) return { ...DEFAULT_COMPUTE_SETTINGS };
-    return _normalizeComputeSettings(JSON.parse(fs.readFileSync(filePath, "utf8")));
-  } catch {
-    return { ...DEFAULT_COMPUTE_SETTINGS };
-  }
-}
-
-function _saveComputeSettings(settings) {
-  const normalized = _normalizeComputeSettings(settings);
-  const dir = _getSettingsDir();
-  try {
-    fs.mkdirSync(dir, { recursive: true });
-  } catch {}
-  fs.writeFileSync(_getComputeSettingsFile(), JSON.stringify(normalized, null, 2));
-  return normalized;
-}
-
-function _applyComputeSettings(settings) {
-  const normalized = _normalizeComputeSettings(settings);
-  process.env.BIOF3_COMPUTE_MODE = normalized.computeMode;
-  process.env.BIOF3_REMOTE_COMPUTE_URL = normalized.remoteComputeUrl;
-  process.env.BIOF3_REMOTE_COMPUTE_TOKEN = normalized.remoteComputeToken;
-  process.env.BIOF3_REMOTE_COMPUTE_NAME = normalized.remoteComputeName;
-  return normalized;
 }
 
 // ── 路径解析（开发模式 vs 打包模式）────────────────────────────
@@ -1212,100 +1132,9 @@ function setupWindowIpc() {
 }
 
 // ── IPC：AI 设置 ───────────────────────────────────────────────
-function setupAiSettingsIpc() {
-  ipcMain.handle("ai-settings:get", async () => {
-    try {
-      const { getAiSettings } = require(
-        resolveCore("r-server", "helpers", "ai-settings.js"),
-      );
-      return getAiSettings();
-    } catch (e) {
-      return {};
-    }
-  });
-
-  ipcMain.handle("ai-settings:save", async (event, settings) => {
-    try {
-      const { saveAiSettings } = require(
-        resolveCore("r-server", "helpers", "ai-settings.js"),
-      );
-      saveAiSettings(settings);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
-
-  ipcMain.handle("ai-settings:get-credential", async (event, credentialId) => {
-    try {
-      const { getApiKey } = require(
-        resolveCore("r-server", "helpers", "ai-settings.js"),
-      );
-      const apiKey = getApiKey(String(credentialId || ""));
-      return { ok: true, apiKey };
-    } catch (e) {
-      return { ok: false, apiKey: "", error: e.message };
-    }
-  });
-
-  ipcMain.handle("ai-settings:test", async (event, providerOrProfile, apiKey) => {
-    try {
-      const { testApiKey } = require(
-        resolveCore("r-server", "helpers", "ai-settings.js"),
-      );
-      return await testApiKey(providerOrProfile, apiKey);
-    } catch (e) {
-      return { ok: false, message: e.message };
-    }
-  });
-
-  ipcMain.handle("ai-settings:list-models", async (event, providerOrProfile, apiKey) => {
-    try {
-      const { listAvailableModels } = require(
-        resolveCore("r-server", "helpers", "ai-settings.js"),
-      );
-      return await listAvailableModels(providerOrProfile, apiKey);
-    } catch (e) {
-      return { ok: false, models: [], message: e.message };
-    }
-  });
-}
-
 // ── IPC：计算执行配置 ─────────────────────────────────────────
-function setupComputeSettingsIpc() {
-  ipcMain.handle("compute-settings:get", async () => {
-    try {
-      return _loadComputeSettings();
-    } catch (e) {
-      return { ...DEFAULT_COMPUTE_SETTINGS, error: e.message };
-    }
-  });
-
-  ipcMain.handle("compute-settings:save", async (_event, settings) => {
-    try {
-      const normalized = _saveComputeSettings(settings);
-      _applyComputeSettings(normalized);
-      return { ok: true, settings: normalized, restartRequired: true };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
-}
-
 // ── IPC：M2-3 可选错误遥测（V3）─────────────────────────────────
 // 默认关闭；用户在设置页主动开启后才会上报。payload 仅含 category/version/摘要。
-function setupTelemetryIpc() {
-  ipcMain.handle("telemetry:report", async (_event, payload) => {
-    try {
-      const { reportError } = require("./telemetry");
-      return await reportError(payload);
-    } catch (e) {
-      // 遥测自身异常绝不能影响业务——静默
-      return { ok: false, reason: "internal" };
-    }
-  });
-}
-
 // ── IPC：插件管理 ──────────────────────────────────────────────
 function setupPluginIpc() {
   ipcMain.handle("plugin:list-installed", async () => {
@@ -1605,94 +1434,6 @@ function setupAutoUpdateIpc() {
 }
 
 // ── IPC：文件对话框（preload 暴露的 files.saveDialog/openDialog）─────────
-function setupFileDialogIpc() {
-  ipcMain.handle("file:save-dialog", async (event, defaultName) => {
-    if (!mainWindow) return null;
-    try {
-      const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
-        defaultPath: defaultName,
-      });
-      return canceled ? null : filePath;
-    } catch (e) {
-      console.error("[desktop] save dialog failed:", e.message);
-      return null;
-    }
-  });
-
-  ipcMain.handle("file:open-dialog", async (event, optionsOrFilters) => {
-    if (!mainWindow) return null;
-    try {
-      const isOptions =
-        optionsOrFilters &&
-        typeof optionsOrFilters === "object" &&
-        !Array.isArray(optionsOrFilters);
-      const filters = isOptions ? optionsOrFilters.filters : optionsOrFilters;
-      const properties =
-        isOptions && optionsOrFilters.openDirectory
-          ? ["openDirectory", "createDirectory"]
-          : ["openFile"];
-      const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
-        filters: Array.isArray(filters) ? filters : [],
-        properties,
-      });
-      return canceled ? null : filePaths[0];
-    } catch (e) {
-      console.error("[desktop] open dialog failed:", e.message);
-      return null;
-    }
-  });
-
-  ipcMain.handle("file:open-path", async (_event, targetPath) => {
-    try {
-      if (!targetPath || typeof targetPath !== "string") {
-        return { ok: false, error: "invalid path" };
-      }
-      if (!fs.existsSync(targetPath)) {
-        return { ok: false, error: "path does not exist" };
-      }
-      const ext = path.extname(targetPath).toLowerCase();
-      if (ext && !ALLOWED_OPEN_EXTENSIONS.includes(ext)) {
-        return {
-          ok: false,
-          error: `file type '${ext}' is not allowed to be opened; supported types: ${ALLOWED_OPEN_EXTENSIONS.join(", ")}`,
-        };
-      }
-      const error = await shell.openPath(targetPath);
-      return error ? { ok: false, error } : { ok: true };
-    } catch (e) {
-      console.error("[desktop] open path failed:", e.message);
-      return { ok: false, error: e.message };
-    }
-  });
-
-  ipcMain.handle("file:open-workspace-file", async (_event, workspacePath, relativePath) => {
-    try {
-      if (
-        typeof workspacePath !== "string" ||
-        typeof relativePath !== "string" ||
-        !workspacePath ||
-        !relativePath ||
-        path.isAbsolute(relativePath)
-      ) {
-        return { ok: false, error: "invalid workspace file path" };
-      }
-      const realRoot = fs.realpathSync(workspacePath);
-      const realTarget = fs.realpathSync(path.resolve(realRoot, relativePath));
-      if (realTarget !== realRoot && !realTarget.startsWith(realRoot + path.sep)) {
-        return { ok: false, error: "file is outside the project workspace" };
-      }
-      if (!fs.statSync(realTarget).isFile()) {
-        return { ok: false, error: "target is not a file" };
-      }
-      const error = await shell.openPath(realTarget);
-      return error ? { ok: false, error } : { ok: true };
-    } catch (e) {
-      console.error("[desktop] open workspace file failed:", e.message);
-      return { ok: false, error: e.message };
-    }
-  });
-}
-
 // ── IPC：诊断日志导出 / 数据备份（M2-8）─────────────────────────
 function setupDiagnosticIpc() {
   // 诊断包只收集脱敏日志、最小系统信息和插件摘要。数据库、设置、
@@ -1819,90 +1560,6 @@ function setupDiagnosticIpc() {
 // ── IPC：数据目录管理（卸载数据保留）──────────────────────────
 // 用户可能在操作系统卸载应用后仍想保留 ~/Documents/BioF3-Local/ 数据，
 // 或主动清理。这里提供查看数据目录大小 + 在文件管理器中打开的能力。
-function setupDataManagementIpc() {
-  // 递归计算目录大小（字节）
-  function getDirSize(dir) {
-    if (!fs.existsSync(dir)) return 0;
-    let total = 0;
-    const walk = (d) => {
-      try {
-        for (const entry of fs.readdirSync(d, { withFileTypes: true })) {
-          const full = path.join(d, entry.name);
-          if (entry.isSymbolicLink()) continue; // 跳过符号链接避免循环
-          if (entry.isDirectory()) walk(full);
-          else if (entry.isFile()) {
-            try {
-              total += fs.statSync(full).size;
-            } catch {}
-          }
-        }
-      } catch {}
-    };
-    walk(dir);
-    return total;
-  }
-
-  // 返回数据目录路径 + 各子目录大小（runtimes / plugins / results / uploads / logs / db）
-  ipcMain.handle("data:info", async () => {
-    try {
-      const dataDir = process.env.BIOF3_LOCAL_DATA_DIR;
-      if (!dataDir) return { ok: false, error: "数据目录未配置" };
-      const breakdown = {};
-      const subdirs = [
-        "runtimes",
-        "plugins",
-        "results",
-        "uploads",
-        "logs",
-        "tmp",
-      ];
-      for (const sub of subdirs) {
-        const subPath = path.join(dataDir, sub);
-        if (fs.existsSync(subPath)) breakdown[sub] = getDirSize(subPath);
-      }
-      // biof3.db 单独算
-      const dbPath = path.join(dataDir, "biof3.db");
-      if (fs.existsSync(dbPath)) {
-        try {
-          breakdown["biof3.db"] = fs.statSync(dbPath).size;
-        } catch {}
-      }
-      // ai-settings.json 等
-      const aiPath = path.join(dataDir, "ai-settings.json");
-      if (fs.existsSync(aiPath)) {
-        try {
-          breakdown["ai-settings.json"] = fs.statSync(aiPath).size;
-        } catch {}
-      }
-      const computePath = path.join(dataDir, "compute-settings.json");
-      if (fs.existsSync(computePath)) {
-        try {
-          breakdown["compute-settings.json"] = fs.statSync(computePath).size;
-        } catch {}
-      }
-      const total = Object.values(breakdown).reduce((a, b) => a + b, 0);
-      return { ok: true, dataDir, total, breakdown };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
-
-  // 在系统文件管理器中打开数据目录
-  ipcMain.handle("data:open-dir", async () => {
-    try {
-      const dataDir = process.env.BIOF3_LOCAL_DATA_DIR;
-      if (!dataDir) return { ok: false, error: "数据目录未配置" };
-      if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true });
-      }
-      await shell.openPath(dataDir);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
-}
-
 // ── IPC：终端/日志面板 ───────────────────────────────────────
 function setupTerminalIpc() {
   let shellProc = null;
@@ -2324,17 +1981,6 @@ function setupSkillsIpc() {
 // 只读：让设置页"计算与数据"分类展示 Harness 自备了哪些运行时/包。
 // 写入动作（provision/remove）由 Harness 编排层内部完成，不通过前端 IPC
 // 直接触发，以保持 D8 透明进度和 C-03 安全确认边界。
-function setupHarnessCapabilitiesIpc() {
-  ipcMain.handle("harness-capabilities:list", async () => {
-    try {
-      const cp = require(resolveCore("shared-backend", "capability-provisioning.js"));
-      return { ok: true, capabilities: cp.listProvisionedCapabilities() };
-    } catch (e) {
-      return { ok: false, capabilities: [], error: e.message };
-    }
-  });
-}
-
 // ── 应用生命周期 ───────────────────────────────────────────────
 async function main() {
   const backendPorts = await selectBackendPorts();
@@ -2396,21 +2042,28 @@ async function main() {
   // 5. 设置 IPC
   setupWindowIpc();
   setupAgentWorkbenchFlagsIpc();
+  // BLOCK-9.1 PHASE 1: low-risk setup functions moved to src/ipc/*.js
+  const { setupTelemetryIpc } = require("./ipc/telemetry");
+  const { setupHarnessCapabilitiesIpc } = require("./ipc/harness-capabilities");
+  const { setupComputeSettingsIpc } = require("./ipc/compute-settings");
+  const { setupAiSettingsIpc } = require("./ipc/ai-settings");
+  const { setupFileDialogIpc } = require("./ipc/file-dialog");
+  const { setupDataManagementIpc } = require("./ipc/data-management");
   setupAiSettingsIpc();
   setupComputeSettingsIpc();
+  setupTelemetryIpc();
+  setupHarnessCapabilitiesIpc();
+  setupFileDialogIpc({ mainWindow });
+  setupDataManagementIpc();
   setupPluginIpc();
   setupRuntimeIpc();
   setupBackendLifecycleIpc();
-  setupFileDialogIpc();
   setupTerminalIpc();
   setupAutoUpdateIpc();
   setupDiagnosticIpc();
   if (typeof setupFigcodeIpc === "function") {
     setupFigcodeIpc();
   }
-  setupDataManagementIpc();
-  setupTelemetryIpc();
-  setupHarnessCapabilitiesIpc();
   setupSkillsIpc();
 
   // 6. 创建窗口

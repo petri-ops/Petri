@@ -198,7 +198,7 @@ test('window IPC registers exact controls and toggles maximize state', async () 
     'window:maximize',
     'window:close',
   ]);
-  assert.deepEqual(registrations.handle.map(({ channel }) => channel), ['window:isMaximized']);
+  assert.deepEqual(registrations.handle.map(({ channel }) => channel), ['window:isMaximized', 'app:relaunch']);
 
   const calls = [];
   let maximized = false;
