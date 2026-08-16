@@ -1,6 +1,6 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-08-16 19:15（BLOCK-3-IPC-BRIDGE-HARDENING 工作包启动 —— 收口 BLOCK-2 PHASE 6 审核 12 项 Major 中的 11 项 P1 必修 + P2 强烈建议；4 PHASE：PHASE 0 复用 PHASE 6 报告 / PHASE 1 P1 必修主 agent 直做 / PHASE 2 P2 worker 委派 / PHASE 3-4 audit + closeout；不外推 packaged/Provider/P7/GA/UI-157 verified；DOC-REGISTRY 新增 BLOCK-3-IPC-BRIDGE-HARDENING status=active）
+最后更新：2026-08-16 20:45（BLOCK-5-IPC-BRIDGE-FINALIZE 工作包启动 —— 按用户裁决"1-4 搞完"启动 4 候选中的 1（E1 poller 性能）+ 4（H1/H2 BLOCK-2 文档修订）；E1-b execute 立即 publish pending + E1-c 终态立即停 poller + H1 plan §3.1.A 修订 + H2 closeout R8/R9/R10 补充 = 4 项微调；候选 2/3 dev Electron 实机留 BLOCK-6+；DOC-REGISTRY 新增 BLOCK-5-IPC-BRIDGE-FINALIZE status=active）
 
 ## 1. 恢复顺序
 
@@ -73,6 +73,16 @@ Stage 1、Stage 2、Stage 3 均已完成出口验收。Stage 4 macOS arm64 RC �
 - 跳过：E1（100 并行 execution 性能 G0 边界外留 BLOCK-5+）/ E3 / F2 / F3 / H1 / H2（H1/H2 BLOCK-2 plan/closeout 修订错过窗口）。
 - 不外推：Provider / packaged / GA / UI-157 verified / 重新激活 BLOCK-2 / BLOCK-3 / E1 poller 性能。
 - 不动：`preload.js` 5 方法签名 / `electron.d.ts` / 4 page / `desktopBridge.ts` / `core/shared-backend/*` / `agent-tools/` / `docs/block-2-ui-157-review-plan.md` / `docs/block-2-ui-157-review-closeout.md`（H1/H2 跳过）。
+
+### 3.0.9 已启动工作包：BLOCK-5-IPC-BRIDGE-FINALIZE（2026-08-16 用户裁决"1-4 搞完"启动，当前唯一 active）
+
+- 状态：`planning → active`（2026-08-16 用户裁决当日启动）；DOC-REGISTRY 新增 `BLOCK-5-IPC-BRIDGE-FINALIZE` `kind=work-package / status=active / canonical=true / truthDomain=block-5-ipc-bridge-finalize / archivePolicy=retain_stable_path`；plan canonical `docs/block-5-ipc-bridge-finalize-plan.md` 已落地。
+- 目标：按用户裁决"1-4 搞完"合并 4 候选中的 **1（E1 poller 性能）+ 4（H1/H2 BLOCK-2 文档修订）**——共 3 项微调。**候选 2/3（UI-158/UI-159/UI-161 dev Electron 实机）** 留 BLOCK-6+ 工作包（需 dev Electron 启动 + CDP attach，BLOCK-5 不依赖外部环境）。
+- 4 PHASE：PHASE 1 主 agent 直做 3 项微调（src/main.js E1-b/E1-c ~+5 / −2 + plan/closeout H1/H2 修订 ~+20 / −5）/ PHASE 2 worker 测试补 = 候选 B 跳过（PHASE 6 报告 E1 G0 边界内 OK；不强行加测试避免破坏 main.js 边界）/ PHASE 3 audit 收口 / PHASE 4 closeout。
+- 3 项收口：① **E1-b** `execute()` 后立即 publish 初始 `status: 'pending'`（避免 poller 1s 延迟）；② **E1-c** 终态 publish 后立即 `_stopSkillsProgressPollerIfIdle()`（避免 1s tick 空转）；③ **H1** plan §3.1.A 内措辞修订（electron.d.ts ADDITIVE +2 字段）；④ **H2** closeout 末尾 R8（sender 守门）/ R9（终态清理缺失）/ R10（poller 停止机制缺失）三遗留风险追加。
+- 不外推：E1-d（每个 execution 独立 setTimeout 链）/ E1-e（runtime.batchGetExecutionStatus）（G1+ 架构改动）/ Provider / packaged / GA / UI-157 verified / 重新激活 BLOCK-2/BLOCK-3/BLOCK-4。
+- 不动：`preload.js` 5 方法签名 / `electron.d.ts` / 4 page / `desktopBridge.ts` / `core/shared-backend/*` / `agent-tools/`。
+- 不做：dev Electron 实机复核（候选 2/3 留 BLOCK-6+）。
 - 不外推：Provider (`P-07`) / packaged / dist / notarization / GA 资格 / dist staleness / Worktree 创建（沿用 main）/ 新 Skills 业务能力 / Chart a11y P2。
 - 主 agent 直接 owner（不委派 `luna_worker`，IPC 桥契约 + 实机启动属跨模块边界判断）。当前仅 PHASE 0 前置工作（plan + registry + canonical 同步）已完成；PHASE 0 摸底执行由主 agent 在用户裁决"继续"后启动。
 - 验证起点：`npm run docs:check` 65 registered PASS（+1）；`npm run ui:audit:check` 131 PASS；`npm run docs:reconcile` 0 issues。
