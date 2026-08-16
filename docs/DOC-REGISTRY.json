@@ -838,6 +838,16 @@
       "truthDomain": "block-3-ipc-bridge-hardening",
       "archivePolicy": "retain_stable_path",
       "entrypoint": "docs/README.md"
+    },
+    {
+      "id": "BLOCK-4-IPC-BRIDGE-POLISH",
+      "path": "docs/block-4-ipc-bridge-polish-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-4-ipc-bridge-polish",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path"
     }
   ]
 }
