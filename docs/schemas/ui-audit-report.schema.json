@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://biof3.local/schemas/ui-audit-report.schema.json",
+  "title": "ui-audit report",
+  "description": "Machine-readable JSON report emitted by `scripts/check-ui-productization-audit.mjs --report <path>`. Schema version 1. Not the default human-readable text output.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "script",
+    "mode",
+    "exitCode",
+    "summary",
+    "failures",
+    "knownUiIds"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1,
+      "description": "Gate report schema version. Locked to 1 for GATES-2."
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp at which the report was produced."
+    },
+    "script": {
+      "type": "string",
+      "const": "scripts/check-ui-productization-audit.mjs",
+      "description": "Script that produced the report."
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["report"],
+      "description": "Output mode. Always 'report' for `--report` invocations."
+    },
+    "exitCode": {
+      "type": "integer",
+      "enum": [0, 1, 2],
+      "description": "Exit code produced by the run. 0=PASS, 1=FAIL, 2=classification conflict. The ui-audit script reserves 2 for future white-list conflicts; current invocations emit 0 or 1."
+    },
+    "reportPath": {
+      "type": "string",
+      "description": "Absolute filesystem path the report was written to. Omitted when write failed."
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "result",
+        "failures",
+        "knownUiIds",
+        "baselineAvailable",
+        "baselineShort"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["PASS", "FAIL", "CLASSIFICATION_CONFLICT"],
+          "description": "Overall classification of the run."
+        },
+        "result": {
+          "type": "string",
+          "enum": ["pass", "fail", "classification_conflict"],
+          "description": "Lower-case machine-friendly equivalent of status."
+        },
+        "failures": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of failures detected."
+        },
+        "knownUiIds": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of UI-### issue ids discovered in the commit log."
+        },
+        "baselineAvailable": {
+          "type": "boolean",
+          "description": "Whether the ENFORCEMENT_BASELINE commit is reachable from HEAD."
+        },
+        "baselineShort": {
+          "type": "string",
+          "description": "Short SHA prefix of the baseline commit (first 7 chars)."
+        }
+      }
+    },
+    "failures": {
+      "type": "array",
+      "description": "Failure messages produced by the run. Empty array when none.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "message"],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": ["UI_AUDIT_SYNC", "UI_ID_MISSING", "WORKTREE_UI"],
+            "description": "Stable failure code. UI_AUDIT_SYNC = commit modified UI surface without syncing audit ledger. UI_ID_MISSING = commit message lacks UI-### issue id. WORKTREE_UI = working tree contains UI changes without synced audit ledger."
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable failure message."
+          },
+          "commit": {
+            "type": ["string", "null"],
+            "description": "Short commit SHA (first 7 chars) when the failure is tied to a commit."
+          }
+        }
+      }
+    },
+    "knownUiIds": {
+      "type": "array",
+      "description": "Distinct UI-### issue ids discovered in the commit log, sorted ascending.",
+      "items": {
+        "type": "string",
+        "pattern": "^UI(?:-AGENTWB)?-\\d{3}$"
+      },
+      "uniqueItems": true
+    }
+  }
+}

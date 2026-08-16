@@ -14,7 +14,13 @@
  *       impact-map 规则覆盖，需补 rule 或添加"未分类但可忽略"声明；
  *       绝不代表业务代码 / 工作包"未通过"测试。
  *
- * 同步文档：`docs/document-governance.md` §4.5"门禁退出码契约"。
+ * `--report` JSON 输出模式（GATES-2 文档化，2026-08-16）：
+ *   与 `--json` / `--run` 并行的可选模式；通过 `--report <path>` 触发，输出
+ *   机器可读 JSON，由 `docs/schemas/test-affected-report.schema.json` 强校验。
+ *   写盘失败 / schema 校验失败 → exit 2（分类冲突）。与 `--json` 同源 plan。
+ *   现有 `--json` / `--run` 行为**不变**。
+ *
+ * 同步文档：`docs/document-governance.md` §4.5"门禁退出码契约" + GATES-2 §3.2"JSON 输出契约"。
  * 该契约为本工作包 DOC-GOVERNANCE-GATES / GATES-1 阶段固化本，不在本阶段内
  * 改动 `process.exit()` 行为；如未来升级退出码语义须同步 §4.5。
  *
@@ -25,8 +31,10 @@
 
 import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, resolve, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { GATE_REPORT_SCHEMA_VERSION, validateReport } from './lib/gate-report-schema.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const MAP = JSON.parse(readFileSync(resolve(ROOT, 'test/impact-map.json'), 'utf8'));
@@ -147,15 +155,107 @@ export function runPlan(plan) {
   return 0;
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))) {
+/**
+ * GATES-2 `--report` JSON output mode. Emits a deterministic JSON report
+ * conforming to `docs/schemas/test-affected-report.schema.json`, using the
+ * same plan machinery as `--json`. Exit codes follow the existing
+ * 0/1/2 contract:
+ *   0 — schema-valid report written; plan has no unknown files
+ *   1 — schema-valid report written; --run failed (only if --run also passed)
+ *   2 — classification conflict (path invalid, write failed, schema failed,
+ *       or plan has unknown files)
+ */
+function runReportMode(reportPathRaw, base) {
+  const reportPath = isAbsolute(reportPathRaw) ? reportPathRaw : resolve(process.cwd(), reportPathRaw);
+  let plan;
   try {
-    const args = parseArgs(process.argv.slice(2));
-    const plan = resolveImpact(collectChangedFiles({ base: args.base, explicit: args.explicit }));
-    printPlan(plan, args.json);
-    process.exitCode = args.run ? runPlan(plan) : (plan.unknown.length ? 2 : 0);
+    plan = resolveImpact(collectChangedFiles({ base }));
   } catch (error) {
-    console.error(`[test:changed] 分类冲突（工具错误）：${error.message}`);
-    console.error('[test:changed] exit 2 表示 test/impact-map.json 解析 / 校验失败或 plan 生成异常；**不是** fail-closed。');
+    console.error(`[test:changed:report] 分类冲突 — plan generation failed: ${error.message}`);
     process.exitCode = 2;
+    return;
+  }
+  const isFailure = plan.unknown.length > 0;
+  const status = isFailure ? 'CLASSIFICATION_CONFLICT' : 'PASS';
+  const exitCode = isFailure ? 2 : 0;
+
+  const report = {
+    schemaVersion: GATE_REPORT_SCHEMA_VERSION,
+    generatedAt: new Date().toISOString(),
+    script: 'scripts/test-affected.mjs',
+    mode: 'report',
+    exitCode,
+    summary: {
+      status,
+      result: isFailure ? 'classification_conflict' : 'pass',
+      changedFiles: plan.changedFiles.length,
+      tests: plan.tests.length,
+      commands: plan.commands.length,
+      frontendRelated: plan.frontendRelated.length,
+      syntax: plan.syntax.length,
+      unknown: plan.unknown.length,
+    },
+    plan: {
+      changedFiles: plan.changedFiles,
+      tests: plan.tests,
+      commands: plan.commands,
+      frontendRelated: plan.frontendRelated,
+      syntax: plan.syntax,
+      unknown: plan.unknown,
+      reasons: plan.reasons,
+    },
+  };
+
+  const validation = validateReport('scripts/test-affected.mjs', report);
+  if (!validation.valid) {
+    console.error('[test:changed:report] 分类冲突 — produced JSON does not match schema:');
+    for (const err of validation.errors) {
+      console.error(`  - ${err.path} ${err.keyword}: ${err.message}`);
+    }
+    process.exitCode = 2;
+    return;
+  }
+
+  try {
+    mkdirSync(dirname(reportPath), { recursive: true });
+    writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+  } catch (error) {
+    console.error(`[test:changed:report] 分类冲突 — failed to write report to ${reportPath}: ${error.message}`);
+    process.exitCode = 2;
+    return;
+  }
+  report.reportPath = reportPath;
+  if (isFailure) {
+    console.error(`[test:changed:report] CLASSIFICATION_CONFLICT (${plan.unknown.length} unmapped files); report written to ${reportPath}`);
+    process.exitCode = 2;
+    return;
+  }
+  console.log(`[test:changed:report] PASS (changed=${plan.changedFiles.length}, tests=${plan.tests.length}); report written to ${reportPath}`);
+  process.exitCode = 0;
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))) {
+  const argv = process.argv.slice(2);
+  const reportIdx = argv.indexOf('--report');
+  if (reportIdx >= 0) {
+    const reportPathRaw = argv[reportIdx + 1];
+    if (!reportPathRaw || reportPathRaw.startsWith('--')) {
+      console.error('--report requires a non-empty output path argument.');
+      process.exitCode = 2;
+    } else {
+      const base = parseArgs(argv).base;
+      runReportMode(reportPathRaw, base);
+    }
+  } else {
+    try {
+      const args = parseArgs(argv);
+      const plan = resolveImpact(collectChangedFiles({ base: args.base, explicit: args.explicit }));
+      printPlan(plan, args.json);
+      process.exitCode = args.run ? runPlan(plan) : (plan.unknown.length ? 2 : 0);
+    } catch (error) {
+      console.error(`[test:changed] 分类冲突（工具错误）：${error.message}`);
+      console.error('[test:changed] exit 2 表示 test/impact-map.json 解析 / 校验失败或 plan 生成异常；**不是** fail-closed。');
+      process.exitCode = 2;
+    }
   }
 }

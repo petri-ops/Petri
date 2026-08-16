@@ -13,12 +13,25 @@
  *   2   保留 — 当前未触发；为未来"白名单冲突 / 分类冲突"扩展预留
  *       （如新加 hasUnmappedSurface 之类的检测分支时使用 2；本阶段不启用）
  *
- * 同步文档：`docs/document-governance.md` §4.5"门禁退出码契约"。
+ * `--report` JSON 输出模式（GATES-2 文档化，2026-08-16）：
+ *   与默认人类可读行输出并行的可选模式；通过 `--report <path>` 触发，输出
+ *   机器可读 JSON，由 `docs/schemas/ui-audit-report.schema.json` 强校验。
+ *   写盘失败 / schema 校验失败 → exit 2（分类冲突）。
+ *   现有 `process.exit(1)` / 直接执行行为**不变**；只有显式传入 `--report`
+ *   才进入新模式。
+ *
+ * 同步文档：`docs/document-governance.md` §4.5"门禁退出码契约" + GATES-2 §3.2"JSON 输出契约"。
  * 该契约为本工作包 DOC-GOVERNANCE-GATES / GATES-1 阶段固化本，不在本阶段内
  * 改动 `process.exit()` 行为。
  */
 
 import { execFileSync } from 'node:child_process'
+import fs from 'node:fs/promises'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { GATE_REPORT_SCHEMA_VERSION, validateReport } from './lib/gate-report-schema.mjs'
+
+const SCRIPT_PATH = fileURLToPath(import.meta.url)
 
 const AUDIT_PATH = 'docs/ui-productization-audit.md'
 const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
@@ -196,39 +209,68 @@ function baselineIsAvailable() {
   }
 }
 
-const failures = []
+/**
+ * Run the UI audit check and return a structured result. The legacy
+ * top-level module body also runs for backward compatibility with `npm run
+ * ui:audit:check` — it inlines the same logic and pushes the same string
+ * failures to `failures` so the existing `process.exit(1)` path is
+ * preserved verbatim. `runUiAudit()` exists for the GATES-2 `--report`
+ * mode and for any future caller that wants a structured payload.
+ *
+ * Each entry in `structuredFailures` is `{code, message, commit|null}`.
+ * Codes are stable identifiers so downstream consumers can rely on them.
+ */
+function runUiAudit() {
+  const failures = []
+  const structuredFailures = []
 
-if (baselineIsAvailable()) {
-  const commits = lines(git(['rev-list', '--reverse', `${ENFORCEMENT_BASELINE}..HEAD`]))
+  if (baselineIsAvailable()) {
+    const commits = lines(git(['rev-list', '--reverse', `${ENFORCEMENT_BASELINE}..HEAD`]))
 
-  for (const commit of commits) {
-    const files = lines(git(['diff-tree', '--no-commit-id', '--name-only', '-r', commit]))
-    if (!files.some(isUiSurface)) continue
+    for (const commit of commits) {
+      const files = lines(git(['diff-tree', '--no-commit-id', '--name-only', '-r', commit]))
+      if (!files.some(isUiSurface)) continue
 
-    const message = git(['show', '-s', '--format=%s%n%b', commit])
-    const subject = message.split('\n', 1)[0] ?? ''
-    const shortCommit = commit.slice(0, 7)
+      const message = git(['show', '-s', '--format=%s%n%b', commit])
+      const subject = message.split('\n', 1)[0] ?? ''
+      const shortCommit = commit.slice(0, 7)
 
-    if (isChoreCommit(subject)) continue
+      if (isChoreCommit(subject)) continue
 
-    if (!files.includes(AUDIT_PATH) && !LEGACY_AUDIT_SYNC_EXEMPTIONS.has(commit)) {
-      failures.push(`${shortCommit}: UI 改动没有同步 ${AUDIT_PATH}`)
-    }
-    if (uiIds(message).length === 0 && !LEGACY_MESSAGE_EXEMPTIONS.has(commit)) {
-      failures.push(`${shortCommit}: UI 提交信息缺少 UI-### 问题编号`)
+      if (!files.includes(AUDIT_PATH) && !LEGACY_AUDIT_SYNC_EXEMPTIONS.has(commit)) {
+        const text = `${shortCommit}: UI 改动没有同步 ${AUDIT_PATH}`
+        failures.push(text)
+        structuredFailures.push({ code: 'UI_AUDIT_SYNC', message: text, commit: shortCommit })
+      }
+      if (uiIds(message).length === 0 && !LEGACY_MESSAGE_EXEMPTIONS.has(commit)) {
+        const text = `${shortCommit}: UI 提交信息缺少 UI-### 问题编号`
+        failures.push(text)
+        structuredFailures.push({ code: 'UI_ID_MISSING', message: text, commit: shortCommit })
+      }
     }
   }
-} else {
-  console.warn(`[ui-audit] 未找到执行基线 ${ENFORCEMENT_BASELINE.slice(0, 7)}，跳过历史提交检查`)
+
+  const trackedChanges = lines(git(['diff', '--name-only', 'HEAD']))
+  const untrackedChanges = lines(git(['ls-files', '--others', '--exclude-standard']))
+  const worktreeFiles = [...new Set([...trackedChanges, ...untrackedChanges])]
+
+  if (worktreeFiles.some(isUiSurface) && !trackedChanges.includes(AUDIT_PATH)) {
+    const text = `当前工作区包含 UI 改动，但没有同步 ${AUDIT_PATH}`
+    failures.push(text)
+    structuredFailures.push({ code: 'WORKTREE_UI', message: text, commit: null })
+  }
+
+  const knownIds = uiIds(git(['log', '--format=%s%n%b']))
+  return {
+    failures,
+    structuredFailures,
+    knownIds,
+    baselineAvailable: baselineIsAvailable(),
+  }
 }
 
-const trackedChanges = lines(git(['diff', '--name-only', 'HEAD']))
-const untrackedChanges = lines(git(['ls-files', '--others', '--exclude-standard']))
-const worktreeFiles = [...new Set([...trackedChanges, ...untrackedChanges])]
-
-if (worktreeFiles.some(isUiSurface) && !trackedChanges.includes(AUDIT_PATH)) {
-  failures.push(`当前工作区包含 UI 改动，但没有同步 ${AUDIT_PATH}`)
-}
+const uiAuditResult = runUiAudit()
+const failures = uiAuditResult.failures
 
 if (failures.length > 0) {
   console.error('[ui-audit] UI 实现与审计台账不同步：')
@@ -237,5 +279,87 @@ if (failures.length > 0) {
   process.exit(1)
 }
 
-const knownIds = uiIds(git(['log', '--format=%s%n%b']))
+const knownIds = uiAuditResult.knownIds
 console.log(`[ui-audit] 同步检查通过；Git 历史已有 ${knownIds.length} 个带实现证据的 UI 问题编号`)
+
+/**
+ * GATES-2 `--report` JSON output mode. Emits a deterministic JSON report
+ * conforming to `docs/schemas/ui-audit-report.schema.json`. Exit codes:
+ *   0 — schema-valid report written; check passed
+ *   1 — schema-valid report written; check failed
+ *   2 — classification conflict (path invalid, write failed, schema failed)
+ *
+ * This branch only runs when the script is executed directly and the user
+ * passed `--report <path>`. The legacy execution path above remains
+ * untouched for `npm run ui:audit:check` and adhoc invocations.
+ */
+async function runReportMode(reportPathRaw) {
+  const reportPath = path.resolve(reportPathRaw)
+  const result = runUiAudit()
+  const isFailure = result.structuredFailures.length > 0
+  const status = isFailure ? 'FAIL' : 'PASS'
+  const exitCode = isFailure ? 1 : 0
+
+  const report = {
+    schemaVersion: GATE_REPORT_SCHEMA_VERSION,
+    generatedAt: new Date().toISOString(),
+    script: 'scripts/check-ui-productization-audit.mjs',
+    mode: 'report',
+    exitCode,
+    summary: {
+      status,
+      result: isFailure ? 'fail' : 'pass',
+      failures: result.structuredFailures.length,
+      knownUiIds: result.knownIds.length,
+      baselineAvailable: result.baselineAvailable,
+      baselineShort: ENFORCEMENT_BASELINE.slice(0, 7),
+    },
+    failures: result.structuredFailures,
+    knownUiIds: result.knownIds.slice().sort(),
+  }
+
+  const validation = validateReport('scripts/check-ui-productization-audit.mjs', report)
+  if (!validation.valid) {
+    console.error('[ui-audit:report] 分类冲突 — produced JSON does not match schema:')
+    for (const err of validation.errors) {
+      console.error(`  - ${err.path} ${err.keyword}: ${err.message}`)
+    }
+    process.exitCode = 2
+    return
+  }
+
+  try {
+    const parentDir = path.dirname(reportPath)
+    await fs.mkdir(parentDir, { recursive: true })
+    await fs.writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, 'utf8')
+  } catch (error) {
+    console.error(`[ui-audit:report] 分类冲突 — failed to write report to ${reportPath}: ${error.message}`)
+    process.exitCode = 2;
+    return
+  }
+  report.reportPath = reportPath
+  if (isFailure) {
+    console.error(`[ui-audit:report] FAIL (${result.structuredFailures.length} failure(s)); report written to ${reportPath}`)
+    process.exitCode = 1
+    return
+  }
+  console.log(`[ui-audit:report] PASS (${result.knownIds.length} UI-### ids); report written to ${reportPath}`)
+  process.exitCode = 0
+}
+
+if (path.resolve(process.argv[1] ?? '') === SCRIPT_PATH) {
+  const argv = process.argv.slice(2)
+  const reportIdx = argv.indexOf('--report')
+  if (reportIdx >= 0) {
+    const reportPathRaw = argv[reportIdx + 1]
+    if (!reportPathRaw || reportPathRaw.startsWith('--')) {
+      console.error('--report requires a non-empty output path argument.')
+      process.exitCode = 2
+    } else {
+      runReportMode(reportPathRaw).catch((error) => {
+        console.error(`[ui-audit:report] 分类冲突 — ${error.message}`)
+        process.exitCode = 2
+      })
+    }
+  }
+}
