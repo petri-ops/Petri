@@ -1,5 +1,8 @@
 # Model Provider 调用链审计（MODEL-1）
 
+> **吸收声明**（2026-08-16 GATES-4 batch 2）：本审计为只读审计记录，已被当前 G0 阶段纪律 `qualificationEligible:false` 与 [`next-steps-roadmap.md`](../../next-steps-roadmap.md) §"后续决策入口"（x64 Runtime、Provider 矩阵为 P7+ 候选）吸收；本文件保留为追溯。
+
+
 更新：2026-07-17
 
 主模块：`P-07 模型网关与 AI Provider`

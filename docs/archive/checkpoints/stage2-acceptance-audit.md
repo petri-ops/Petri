@@ -1,5 +1,8 @@
 # Stage 2 模型层验收前审计报告
 
+> **吸收声明**（2026-08-16 GATES-4 batch 2）：本审计为 Stage 2 收口前的只读审计；Stage 2 已收口（详见 [`ui-productization-audit.md`](../../ui-productization-audit.md) Stage 2 段）；本文件保留为追溯。
+
+
 > 审计类型：**只读代码审计**（不改动任何代码）
 > 审计日期：2026-07-17
 > 审计范围：roadmap 第 4.3 节"Stage 2 出口验收清单" 6 项 + 第 8 节"当前立即执行项" 5 项

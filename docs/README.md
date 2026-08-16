@@ -43,10 +43,12 @@
 ## 当前有效专项规范
 
 - [`codex-style-workbench-direction.md`](./codex-style-workbench-direction.md) — UI 产品方向。
-- [`skills-architecture.md`](./architecture/skills-architecture.md) — Skills 层四层架构设计（Skills → Workflows → Plugins → Capabilities）。
-- [`skills-schema.md`](./skills-schema.md) — Skill Manifest Schema 标准定义。
-- [`skills-registry.md`](./skills-registry.md) — Skills 注册与发现机制。
-- [`skills-workflow-integration.md`](./skills-workflow-integration.md) — Skills 与现有 Plugin/Workflow 系统的集成。
+- **Skills 子文档入口图**（2026-08-16 GATES-4 batch 2 增补）：
+  - **入口** [`skills-architecture.md`](./architecture/skills-architecture.md) — Skills 层四层架构设计（Skills → Workflows → Plugins → Capabilities），唯一 canonical=true。
+  - 设计稿 [`skills-schema.md`](./skills-schema.md) — Skill Manifest Schema 标准定义（canonical=false，待 supersede）。
+  - 设计稿 [`skills-registry.md`](./skills-registry.md) — Skills 注册与发现机制（canonical=false，待 supersede）。
+  - 设计稿 [`skills-workflow-integration.md`](./skills-workflow-integration.md) — Skills 与现有 Plugin/Workflow 系统的集成（canonical=false，待 supersede）。
+  - 三份设计稿由 `skills-architecture.md` §3 引用；阅读时以架构入口为锚点。
 - [`macos-oss-auto-update.md`](./macos-oss-auto-update.md) — macOS 构建、OSS 发布与更新。
 - [`plugin-artifact-schema.md`](./plugin-artifact-schema.md) — Plugin/Artifact 兼容契约。
 - [`runtime-version-baseline.md`](./runtime-version-baseline.md) — R/Python 运行时精确版本契约（双端一致，约束所有插件 ABI 与 builtAgainst）。
