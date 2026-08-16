@@ -3,6 +3,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import {
   useSkillStore,
   __resetSkillStoreCacheForTests,
+  __getProgressUnsubsSize,
   type Skill,
 } from '@/hooks/useSkillStore';
 
@@ -420,5 +421,37 @@ describe('useSkillStore', () => {
     expect(afterCancel?.status).toBe('running');
 
     warnSpy.mockRestore();
+  });
+
+  // BLOCK-4 PHASE 2 G5: unmount must clear _progressUnsubs via useEffect cleanup
+  it('G5: unmount clears _progressUnsubs via useEffect cleanup', async () => {
+    const handles = installBridge();
+    const { result, unmount } = renderHook(() => useSkillStore());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    // Sanity: no wakeup subscriptions registered before execute
+    expect(__getProgressUnsubsSize()).toBe(0);
+
+    await act(async () => {
+      await result.current.execute('deg-analysis', {});
+    });
+
+    // execute() with result.ok + result.executionId must have registered
+    // exactly one wakeup subscription via _subscribeProgressWakeup.
+    expect(handles.onProgress).toHaveBeenCalled();
+    expect(__getProgressUnsubsSize()).toBeGreaterThanOrEqual(1);
+
+    // Unmount triggers the useEffect cleanup at line 467-473:
+    //   return () => {
+    //     _stopAllPolling();
+    //     _stopAllProgressWakeups();
+    //   };
+    // _stopAllProgressWakeups() iterates the Map, calls each unsub,
+    // then clears the Map → _progressUnsubs.size === 0.
+    unmount();
+
+    await waitFor(() => {
+      expect(__getProgressUnsubsSize()).toBe(0);
+    });
   });
 });
