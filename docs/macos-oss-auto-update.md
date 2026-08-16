@@ -1,6 +1,6 @@
 # macOS OSS 自动更新
 
-最后更新：2026-07-19
+最后更新：2026-08-16（GATES-4 单行修订：rc.6 历史标注 + 当前基线 rc.7 指针）
 
 ## 固定配置
 
@@ -101,7 +101,7 @@ Clash Verge 已固定为规则模式：阿里云 OSS 域名直连，OpenAI/Codex
 
 ## 2026-07-19 rc.6 发布与升级验收
 
-- main、`origin/main` 与不可变标签 `v0.0.1-rc.6` 的发布提交一致（`907b695`）。
+- main、`origin/main` 与不可变标签 `v0.0.1-rc.6` 的发布提交一致（`907b695`；rc.6 历史节点；当前 OSS 基线为 `v0.0.1-rc.7`，发布提交 `ab519fa`，见 `releases/v0.0.1-rc.7.md`）。
 - 上传顺序为 arm64 DMG → x64 DMG → SHA-256 清单 → `latest-mac.yml`，脚本输出 `complete`。
 - 匿名清单指向 `0.0.1-rc.6`；人工 SHA-256 与本地最终产物一致。
 - 使用正式更新器从 `rc.4`/arm64 视角返回 `hasUpdate=true`，选择 `BioF3-0.0.1-rc.6-arm64.dmg`。
