@@ -869,8 +869,23 @@
       "id": "BLOCK-5-IPC-BRIDGE-FINALIZE",
       "path": "docs/block-5-ipc-bridge-finalize-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
+      "truthDomain": "block-5-ipc-bridge-finalize",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "linkedCommits": [
+        "6a42592 docs(ui-157): start BLOCK-5-IPC-BRIDGE-FINALIZE work package",
+        "861cf1f docs(sync): BLOCK-5-IPC-BRIDGE-FINALIZE 启动同步 2 canonical 文档",
+        "2f7136f feat+docs(skills-bridge): BLOCK-5 PHASE 1 E1-b + H1/H2 收口"
+      ]
+    },
+    {
+      "id": "BLOCK-5-IPC-BRIDGE-FINALIZE-CLOSEOUT",
+      "path": "docs/block-5-ipc-bridge-finalize-closeout.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": false,
       "truthDomain": "block-5-ipc-bridge-finalize",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path"
