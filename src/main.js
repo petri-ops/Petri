@@ -92,51 +92,11 @@ process.stderr?.on?.("error", (err) => {
 });
 
 // ── 日志收集（诊断包用）──────────────────────────────────────
-// 子进程 stdout/stderr 同时写入 logs/ 下的滚动日志文件
-const _logStreams = {}; // { r-server: WriteStream, py-server: WriteStream, main: WriteStream }
-
-function _getLogDir() {
-  const dir = process.env.BIOF3_LOCAL_DATA_DIR
-    ? path.join(process.env.BIOF3_LOCAL_DATA_DIR, "logs")
-    : path.join(app.getPath("documents"), "BioF3-Local", "logs");
-  try {
-    fs.mkdirSync(dir, { recursive: true });
-  } catch {}
-  return dir;
-}
-
-function _createLogStream(name) {
-  const dir = _getLogDir();
-  const file = path.join(dir, `${name}.log`);
-  const stream = fs.createWriteStream(file, { flags: "a" });
-  _logStreams[name] = stream;
-  // 写入分隔线标记新会话
-  stream.write(`\n=== ${new Date().toISOString()} — session start ===\n`);
-  return stream;
-}
-
-function _writeLog(name, text) {
-  const stream = _logStreams[name];
-  if (stream) {
-    try {
-      stream.write(text + "\n");
-    } catch {}
-  }
-}
-
-function _readLogTail(filePath, maxLines = 120) {
-  try {
-    if (!fs.existsSync(filePath)) return "";
-    const raw = fs.readFileSync(filePath, "utf8");
-    const lines = raw.split(/\r?\n/);
-    return lines
-      .slice(Math.max(0, lines.length - maxLines))
-      .join("\n")
-      .trim();
-  } catch {
-    return "";
-  }
-}
+// _logStreams + _getLogDir + _createLogStream + _writeLog +
+// _readLogTail moved to src/main/backend-proc-manager.js by
+// BLOCK-9.1 PHASE 4. They are imported back as needed by
+// setupDiagnosticIpc / setupTerminalIpc via parameter injection.
+// (No remaining consumer in src/main.js after the extraction.)
 
 // ── 路径解析（开发模式 vs 打包模式）────────────────────────────
 // 去 submodule 后（core 内嵌）：
@@ -315,301 +275,6 @@ async function selectBackendPorts() {
   if (plumber !== 8787) console.warn(`[desktop] port 8787 occupied; using ${plumber} for plumber`);
   if (renderer && renderer !== 3002) console.warn(`[desktop] port 3002 occupied; using ${renderer} for renderer`);
   return { gateway, r, python, plumber, renderer };
-}
-
-// ── 启动 Backend Gateway（统一入口协调层）───────────────────────
-/**
- * 启动 Gateway（统一入口，路由到 r-server/py-server）。
- * Gateway 协调层聚合健康检查、统一工具注册表和跨语言任务路由。
- * @param {string} reason - 调用来源
- * @returns {{ ok: boolean, error?: string, pid?: number }}
- */
-function startGateway(reason = "boot") {
-  const gatewayPath = resolveCore("gateway", "server.js");
-  if (!fs.existsSync(gatewayPath)) {
-    console.warn("[desktop] gateway not found, skipping:", gatewayPath);
-    return { ok: false, error: "gateway script not found" };
-  }
-
-  try {
-    gatewayProc = spawn(NODE_BIN, [gatewayPath], {
-      env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" },
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-  } catch (e) {
-    console.error("[desktop] gateway spawn failed:", e.message);
-    gatewayProc = null;
-    return { ok: false, error: e.message };
-  }
-
-  _createLogStream("gateway");
-  gatewayProc.stdout.on("data", (d) => {
-    const text = d.toString().trim();
-    if (text) {
-      console.log(`[gateway] ${text}`);
-      _writeLog("gateway", `[gateway] ${text}`);
-    }
-  });
-  gatewayProc.stderr.on("data", (d) => {
-    const text = d.toString().trim();
-    if (text) {
-      console.error(`[gateway] ${text}`);
-      _writeLog("gateway", `[gateway:ERR] ${text}`);
-    }
-  });
-  gatewayProc.on("exit", (code) => {
-    console.log(`[desktop] gateway exited: ${code}`);
-    gatewayProc = null;
-  });
-
-  console.log(
-    `[desktop] gateway spawned (pid=${gatewayProc.pid}) on :${process.env.GATEWAY_PORT} — reason=${reason}`,
-  );
-  return { ok: true, pid: gatewayProc.pid };
-}
-
-// ── 启动 r-server（子进程 spawn，避免原生模块 V8 版本冲突）─────
-let rServerProc = null;
-let gatewayProc = null;
-const rServerSupervisor = createOwnedBackendSupervisor({
-  name: "r-server",
-  spawnProcess: () => {
-    const rServerPath = resolveCore("r-server", "server.js");
-    const child = spawn(NODE_BIN, [rServerPath], {
-      env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" },
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-
-    _createLogStream("r-server");
-    child.stdout.on("data", (d) => {
-      const text = d.toString().trim();
-      if (text) {
-        console.log(`[r-server] ${text}`);
-        _writeLog("r-server", `[r-server] ${text}`);
-      }
-    });
-    child.stderr.on("data", (d) => {
-      const text = d.toString().trim();
-      if (text) {
-        console.error(`[r-server] ${text}`);
-        _writeLog("r-server", `[r-server:ERR] ${text}`);
-      }
-    });
-    return child;
-  },
-  onProcessChange: (child) => {
-    rServerProc = child;
-  },
-  log: console.log,
-  warn: console.warn,
-});
-
-function startRServer(reason = "boot") {
-  // Runtime 未安装时跳过启动（不崩溃，前端会提示安装）
-  if (!process.env.BIOF3_R_HOME || !fs.existsSync(process.env.BIOF3_R_HOME)) {
-    console.warn("[desktop] r-server skipped — R runtime not installed");
-    return { ok: false, error: "R runtime not installed" };
-  }
-
-  const rServerPath = resolveCore("r-server", "server.js");
-  if (!fs.existsSync(rServerPath)) {
-    console.error("[desktop] r-server not found:", rServerPath);
-    return { ok: false, error: "r-server script not found" };
-  }
-
-  const result = rServerSupervisor.start(reason);
-
-  if (result.ok && !result.alreadyRunning) {
-    console.log(
-      `[desktop] r-server spawned (pid=${result.pid}) on :${process.env.R_SERVER_PORT} — reason=${reason}`,
-    );
-  }
-  return result;
-}
-
-// ── 启动 py-server（子进程 spawn，应用启动即热）───────────────
-let pyServerProc = null;
-
-/**
- * 启动 py-server（若已运行则不重复 spawn）。
- * @param {string} reason - 调用来源（'ipc' / 'manual' 等，仅日志）
- * @returns {{ ok: boolean, alreadyRunning?: boolean, error?: string, pid?: number }}
- */
-function startPyServer(reason = "ipc") {
-  // 已在运行，直接返回
-  if (pyServerProc && !pyServerProc.killed) {
-    return { ok: true, alreadyRunning: true, pid: pyServerProc.pid };
-  }
-
-  // Runtime 未安装时跳过启动（不崩溃，前端会提示安装）
-  if (!process.env.BIOF3_PY_HOME || !fs.existsSync(process.env.BIOF3_PY_HOME)) {
-    console.warn("[desktop] py-server skipped — Python runtime not installed");
-    return { ok: false, error: "Python runtime not installed" };
-  }
-
-  const pyServerPath = resolveCore("py-server", "server.js");
-  if (!fs.existsSync(pyServerPath)) {
-    console.error("[desktop] py-server not found:", pyServerPath);
-    return { ok: false, error: "py-server script not found" };
-  }
-
-  try {
-    pyServerProc = spawn(NODE_BIN, [pyServerPath], {
-      env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" },
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-  } catch (e) {
-    console.error("[desktop] py-server spawn failed:", e.message);
-    pyServerProc = null;
-    return { ok: false, error: e.message };
-  }
-
-  _createLogStream("py-server");
-  pyServerProc.stdout.on("data", (d) => {
-    const text = d.toString().trim();
-    if (text) {
-      console.log(`[py-server] ${text}`);
-      _writeLog("py-server", `[py-server] ${text}`);
-    }
-  });
-  pyServerProc.stderr.on("data", (d) => {
-    const text = d.toString().trim();
-    if (text) {
-      console.error(`[py-server] ${text}`);
-      _writeLog("py-server", `[py-server:ERR] ${text}`);
-    }
-  });
-  pyServerProc.on("exit", (code) => {
-    console.log(`[desktop] py-server exited: ${code}`);
-    pyServerProc = null;
-  });
-
-  console.log(
-    `[desktop] py-server spawned (pid=${pyServerProc.pid}) on :${process.env.PY_SERVER_PORT} — reason=${reason}`,
-  );
-  return { ok: true, pid: pyServerProc.pid };
-}
-
-/**
- * 停止 py-server（kill 子进程，清 idle 计时）。
- * @param {string} reason - 调用来源（'ipc' / 'idle-timeout' / 'shutdown' 等）
- * @returns {{ ok: boolean, wasRunning?: boolean }}
- */
-function stopPyServer(reason = "ipc") {
-  if (!pyServerProc || pyServerProc.killed) {
-    pyServerProc = null;
-    return { ok: true, wasRunning: false };
-  }
-  try {
-    pyServerProc.kill();
-    console.log(`[desktop] py-server stopped — reason=${reason}`);
-  } catch (e) {
-    console.error("[desktop] py-server stop failed:", e.message);
-  }
-  // 注意：exit handler 会把 pyServerProc 置 null，这里不重复清
-  return { ok: true, wasRunning: true };
-}
-
-// ── 启动 R plumber replot 服务（按需启停）──────────────────────
-// M2-7：plumber 改为 lazy——仅在重绘时通过 IPC plumber:start 启动。
-let plumberProc = null;
-let plumberIdleTimer = null;
-const PLUMBER_IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5 分钟无调用自动停
-
-function _clearPlumberIdleTimer() {
-  if (plumberIdleTimer) {
-    clearTimeout(plumberIdleTimer);
-    plumberIdleTimer = null;
-  }
-}
-
-function _resetPlumberIdleTimer() {
-  _clearPlumberIdleTimer();
-  plumberIdleTimer = setTimeout(() => {
-    console.log("[desktop] plumber idle timeout (5min), stopping");
-    stopPlumber("idle-timeout");
-  }, PLUMBER_IDLE_TIMEOUT_MS);
-}
-
-/**
- * 启动 plumber（若已运行则不重复 spawn）。
- * @param {string} reason - 调用来源（仅日志）
- * @returns {{ ok: boolean, alreadyRunning?: boolean, error?: string, pid?: number }}
- */
-function startPlumber(reason = "ipc") {
-  if (plumberProc && !plumberProc.killed) {
-    _resetPlumberIdleTimer();
-    return { ok: true, alreadyRunning: true, pid: plumberProc.pid };
-  }
-
-  if (!process.env.BIOF3_R_HOME || !fs.existsSync(process.env.BIOF3_R_HOME)) {
-    console.warn("[desktop] plumber skipped — R runtime not installed");
-    return { ok: false, error: "R runtime not installed" };
-  }
-
-  const rBin = path.join(
-    process.env.BIOF3_R_HOME,
-    "bin",
-    getRuntimeBinName("r", process.platform),
-  );
-  if (!fs.existsSync(rBin)) {
-    console.warn("[desktop] Rscript not found, plumber skipped:", rBin);
-    return { ok: false, error: "Rscript not found" };
-  }
-
-  // plumber 脚本路径（r-server 里有 replot 服务脚本）
-  const plumberScript = resolveCore("r-server", "replot.R");
-  if (!fs.existsSync(plumberScript)) {
-    console.warn("[desktop] plumber script not found, replot disabled");
-    return { ok: false, error: "plumber script not found" };
-  }
-
-  try {
-    plumberProc = spawn(rBin, [plumberScript, "--port", process.env.PLUMBER_PORT], {
-      env: { ...process.env, R_HOME: process.env.BIOF3_R_HOME },
-      stdio: "pipe",
-    });
-  } catch (e) {
-    console.error("[desktop] plumber spawn failed:", e.message);
-    plumberProc = null;
-    return { ok: false, error: e.message };
-  }
-
-  plumberProc.stdout.on("data", (d) =>
-    console.log("[plumber]", d.toString().trim()),
-  );
-  plumberProc.stderr.on("data", (d) =>
-    console.error("[plumber]", d.toString().trim()),
-  );
-  plumberProc.on("exit", (code) => {
-    console.log(`[desktop] plumber exited: ${code}`);
-    plumberProc = null;
-    _clearPlumberIdleTimer();
-  });
-
-  _resetPlumberIdleTimer();
-  console.log(`[desktop] plumber started on :${process.env.PLUMBER_PORT} — reason=${reason}`);
-  return { ok: true, pid: plumberProc.pid };
-}
-
-/**
- * 停止 plumber。
- * @param {string} reason - 调用来源
- * @returns {{ ok: boolean, wasRunning?: boolean }}
- */
-function stopPlumber(reason = "ipc") {
-  _clearPlumberIdleTimer();
-  if (!plumberProc || plumberProc.killed) {
-    plumberProc = null;
-    return { ok: true, wasRunning: false };
-  }
-  try {
-    plumberProc.kill();
-    console.log(`[desktop] plumber stopped — reason=${reason}`);
-  } catch (e) {
-    console.error("[desktop] plumber stop failed:", e.message);
-  }
-  return { ok: true, wasRunning: true };
 }
 
 // ── 加载已安装插件 ─────────────────────────────────────────────
@@ -1005,322 +670,11 @@ function setupCsp() {
 // ── IPC：macOS 小团队更新（OSS 清单 + 已校验 DMG）─────────────
 // ── IPC：文件对话框（preload 暴露的 files.saveDialog/openDialog）─────────
 // ── IPC：诊断日志导出 / 数据备份（M2-8）─────────────────────────
-function setupDiagnosticIpc() {
-  // 诊断包只收集脱敏日志、最小系统信息和插件摘要。数据库、设置、
-  // 对话、结果与凭据文件均不得进入诊断包。
-  ipcMain.handle("diagnostic:export", async (event, targetPath) => {
-    try {
-      const logDir = _getLogDir();
-      const { createWriteStream } = fs;
-      const zlib = require("zlib");
-
-      // M2-8 备份/导出闭环：默认保存对话框提示用户选导出路径
-      let outPath = targetPath;
-      if (!outPath && mainWindow) {
-        const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-        const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
-          title: "导出诊断日志",
-          defaultPath: `biof3-diagnostic-${ts}.zip`,
-          filters: [{ name: "ZIP", extensions: ["zip"] }],
-        });
-        if (canceled) return { ok: false, error: "cancelled" };
-        outPath = filePath;
-      }
-      if (!outPath) return { ok: false, error: "no output path" };
-
-      // 先 flush 日志流
-      for (const s of Object.values(_logStreams)) {
-        try {
-          s.write("");
-        } catch {}
-      }
-
-      // 收集系统信息
-      const sysInfo = {
-        platform: process.platform,
-        arch: process.arch,
-        electronVersion: process.versions.electron,
-        nodeVersion: process.versions.node,
-        appVersion: app.getVersion(),
-        isPackaged: app.isPackaged,
-        timestamp: new Date().toISOString(),
-        rRuntimeConfigured: !!process.env.BIOF3_R_HOME,
-        pythonRuntimeConfigured: !!process.env.BIOF3_PY_HOME,
-      };
-
-      // 用简单的方式打包：逐文件写入 zip（避免额外依赖）
-      // 如果有 archiver 就用，没有就用 tar.gz
-      let usedArchiver = false;
-      try {
-        // archiver v8 is ESM-only; Electron's Node 20 cannot require() it.
-        const { ZipArchive } = await import("archiver");
-        const output = createWriteStream(outPath);
-        const archive = new ZipArchive({ zlib: { level: 6 } });
-        output.on("close", () => {});
-        archive.pipe(output);
-
-        // 添加日志文件
-        for (const name of ["r-server", "py-server"]) {
-          const logFile = path.join(logDir, `${name}.log`);
-          if (fs.existsSync(logFile)) {
-            archive.append(
-              redactSensitiveText(fs.readFileSync(logFile, "utf8")),
-              { name: `${name}.log` },
-            );
-          }
-        }
-        // 添加系统信息
-        archive.append(JSON.stringify(sysInfo, null, 2), {
-          name: "system-info.json",
-        });
-        // 添加 installed plugins
-        try {
-          const { getInstalledPlugins } = require("./plugin-manager");
-          archive.append(JSON.stringify(getInstalledPlugins(), null, 2), {
-            name: "installed-plugins.json",
-          });
-        } catch {}
-
-        archive.append(
-          "This diagnostic package excludes databases, settings, conversations, results, and credential files.\n",
-          { name: "privacy.txt" },
-        );
-
-        await archive.finalize();
-        usedArchiver = true;
-      } catch {
-        // archiver 不可用 — 用 tar.gz fallback
-      }
-
-      if (!usedArchiver) {
-        // fallback: 写一个简单的 .txt 包（日志拼接 + 系统信息）
-        const lines = [];
-        lines.push("=== BioF3 Diagnostic Package ===");
-        lines.push(JSON.stringify(sysInfo, null, 2));
-        lines.push("");
-        for (const name of ["r-server", "py-server"]) {
-          const logFile = path.join(logDir, `${name}.log`);
-          lines.push(`\n=== ${name}.log ===`);
-          try {
-            lines.push(
-              redactSensitiveText(fs.readFileSync(logFile, "utf8").slice(-5000)),
-            );
-          } catch {
-            lines.push("(log file not found)");
-          }
-        }
-        try {
-          const { getInstalledPlugins } = require("./plugin-manager");
-          lines.push("\n=== installed-plugins.json ===");
-          lines.push(JSON.stringify(getInstalledPlugins(), null, 2));
-        } catch {}
-        lines.push("\n=== privacy ===");
-        lines.push("诊断包不包含数据库、设置、对话、结果或凭据文件。");
-        fs.writeFileSync(outPath, lines.join("\n"));
-      }
-
-      return { ok: true, path: outPath };
-    } catch (e) {
-      console.error("[diagnostic] export failed:", e.message);
-      return { ok: false, error: e.message };
-    }
-  });
-}
 
 // ── IPC：数据目录管理（卸载数据保留）──────────────────────────
 // 用户可能在操作系统卸载应用后仍想保留 ~/Documents/BioF3-Local/ 数据，
 // 或主动清理。这里提供查看数据目录大小 + 在文件管理器中打开的能力。
 // ── IPC：终端/日志面板 ───────────────────────────────────────
-function setupTerminalIpc() {
-  let shellProc = null;
-  let disposeShellData = null;
-  let disposeShellExit = null;
-
-  const sendTerminalEvent = (channel, payload) => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send(channel, payload);
-    }
-  };
-
-  ipcMain.handle("terminal:snapshot", async () => {
-    try {
-      const logDir = _getLogDir();
-      const processes = [
-        {
-          id: "gateway",
-          label: "Backend Gateway",
-          command: `${NODE_BIN} ${resolveCore("gateway", "server.js")}`,
-          status: gatewayProc && !gatewayProc.killed ? "running" : "stopped",
-          pid: gatewayProc?.pid || null,
-          logPath: path.join(logDir, "gateway.log"),
-          output: _readLogTail(path.join(logDir, "gateway.log")),
-        },
-        {
-          id: "r-server",
-          label: "R 后端",
-          command: `${NODE_BIN} ${resolveCore("r-server", "server.js")}`,
-          status: rServerProc && !rServerProc.killed ? "running" : "stopped",
-          pid: rServerProc?.pid || null,
-          logPath: path.join(logDir, "r-server.log"),
-          output: _readLogTail(path.join(logDir, "r-server.log")),
-        },
-        {
-          id: "py-server",
-          label: "Python 后端",
-          command: `${NODE_BIN} ${resolveCore("py-server", "server.js")}`,
-          status: pyServerProc && !pyServerProc.killed ? "running" : "stopped",
-          pid: pyServerProc?.pid || null,
-          logPath: path.join(logDir, "py-server.log"),
-          output: _readLogTail(path.join(logDir, "py-server.log")),
-        },
-        {
-          id: "plumber",
-          label: "R plumber",
-          // 展示串（不执行）——但必须与 startPlumber 实际 spawn 的路径一致，
-          // 否则排查时会误以为 Windows 上找的是无后缀的 Rscript。
-          command: process.env.BIOF3_R_HOME
-            ? `${path.join(
-                process.env.BIOF3_R_HOME,
-                "bin",
-                getRuntimeBinName("r", process.platform),
-              )} ${resolveCore("r-server", "replot.R")} --port 8787`
-            : `${getRuntimeBinName("r", process.platform)} replot.R --port 8787`,
-          status: plumberProc && !plumberProc.killed ? "running" : "stopped",
-          pid: plumberProc?.pid || null,
-          logPath: path.join(logDir, "plumber.log"),
-          output: _readLogTail(path.join(logDir, "plumber.log")),
-        },
-      ];
-      return {
-        ok: true,
-        logDir,
-        dataDir: process.env.BIOF3_LOCAL_DATA_DIR || null,
-        processes,
-      };
-    } catch (e) {
-      return { ok: false, error: e.message, processes: [] };
-    }
-  });
-
-  ipcMain.handle("terminal:open-log-dir", async () => {
-    try {
-      const logDir = _getLogDir();
-      if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
-      const error = await shell.openPath(logDir);
-      return error ? { ok: false, error } : { ok: true, path: logDir };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
-
-  ipcMain.handle("terminal:open-shell", async (_event, targetPath) => {
-    try {
-      const cwd =
-        typeof targetPath === "string" && targetPath.trim()
-          ? targetPath.trim()
-          : process.env.BIOF3_LOCAL_DATA_DIR || PROJECT_ROOT;
-      const plan = getOpenShellPlan(cwd, process.platform);
-      if (plan.type === "osascript") {
-        spawn(plan.command, plan.args, {
-          detached: plan.detached,
-          stdio: plan.stdio,
-        }).unref();
-        return { ok: true, path: cwd };
-      }
-      if (plan.type === "cmd") {
-        spawn(plan.command, plan.args, {
-          detached: plan.detached,
-          stdio: plan.stdio,
-          windowsHide: plan.windowsHide,
-        }).unref();
-        return { ok: true, path: cwd };
-      }
-      for (const terminal of plan.candidates) {
-        try {
-          spawn(terminal, plan.args, {
-            detached: plan.detached,
-            stdio: plan.stdio,
-          }).unref();
-          return { ok: true, path: cwd };
-        } catch {}
-      }
-      return { ok: false, error: "未找到可用的系统终端" };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
-
-  ipcMain.handle("terminal:session-start", async (_event, targetPath) => {
-    try {
-      if (shellProc) {
-        return { ok: true, pid: shellProc.pid, reused: true };
-      }
-      const requestedCwd =
-        typeof targetPath === "string" && targetPath.trim()
-          ? targetPath.trim()
-          : "";
-      const cwd =
-        requestedCwd && fs.existsSync(requestedCwd)
-          ? requestedCwd
-          : process.env.BIOF3_LOCAL_DATA_DIR || PROJECT_ROOT;
-      const { shellPath, args } = getSessionShellSpec(process.env, process.platform);
-      const pty = require("node-pty");
-      shellProc = pty.spawn(shellPath, args, {
-        name: "xterm-256color",
-        cols: 100,
-        rows: 28,
-        cwd,
-        env: { ...process.env, TERM: "xterm-256color", COLORTERM: "truecolor" },
-      });
-      disposeShellData = shellProc.onData((data) =>
-        sendTerminalEvent("terminal:data", data),
-      );
-      disposeShellExit = shellProc.onExit(({ exitCode, signal }) => {
-        sendTerminalEvent("terminal:exit", { code: exitCode, signal });
-        disposeShellData?.dispose();
-        disposeShellExit?.dispose();
-        disposeShellData = null;
-        disposeShellExit = null;
-        shellProc = null;
-      });
-      return { ok: true, pid: shellProc.pid, cwd, shell: shellPath };
-    } catch (e) {
-      shellProc = null;
-      return { ok: false, error: e.message };
-    }
-  });
-
-  ipcMain.handle("terminal:session-write", async (_event, input) => {
-    if (!shellProc) {
-      return { ok: false, error: "终端会话未启动" };
-    }
-    const text = typeof input === "string" ? input : "";
-    if (text.length > 32_768) return { ok: false, error: "输入内容过长" };
-    shellProc.write(text);
-    return { ok: true };
-  });
-
-  ipcMain.handle("terminal:session-resize", async (_event, dimensions) => {
-    if (!shellProc) return { ok: false, error: "终端会话未启动" };
-    const cols = Math.max(2, Math.min(500, Number(dimensions?.cols) || 80));
-    const rows = Math.max(1, Math.min(200, Number(dimensions?.rows) || 24));
-    shellProc.resize(cols, rows);
-    return { ok: true };
-  });
-
-  ipcMain.handle("terminal:session-stop", async () => {
-    if (!shellProc) return { ok: true, wasRunning: false };
-    shellProc.kill();
-    shellProc = null;
-    return { ok: true, wasRunning: true };
-  });
-
-  app.once("before-quit", () => {
-    try {
-      shellProc?.kill();
-    } catch {}
-  });
-}
 
 // ── IPC：Skills 工作流页面（UI-157 PHASE 1 桥接）─────────────────
 // 委托 core/shared-backend/skills-sdk.js 的 SkillsSDK 单例，
@@ -1598,9 +952,24 @@ async function main() {
   // 1. 启动后端服务
   // r-server 常驻；py-server 也在应用启动时预热，减少首次使用等待。
   // Gateway 协调层统一入口，在 r-server 之后启动。
+  // BLOCK-9.1 PHASE 4: startRServer/startGateway/startPyServer moved
+  // to src/main/backend-proc-manager.js. main.js orchestrates via
+  // named imports.
+  const {
+    startRServer,
+    startGateway,
+    startPyServer,
+    stopPyServer,
+    startPlumber,
+    stopPlumber,
+    getProcs,
+    getLogDir,
+    flushLogs,
+    readLogTail,
+  } = require("./main/backend-proc-manager");
   await startRServer();
   await startGateway();
-  // plumber 仍按需启停 — 只在 FigCode 重绘时通过 IPC plumber:start 触发
+  // plumber 仍按需启停 - 只在 FigCode 重绘时通过 IPC plumber:start 触发
 
   // 2. 加载已安装插件
   await loadInstalledPlugins();
@@ -1633,11 +1002,22 @@ async function main() {
   const { setupPluginIpc } = require("./ipc/plugin");
   const { setupAutoUpdateIpc } = require("./ipc/auto-update");
   setupPluginIpc();
-  setupRuntimeIpc({ gatewayProc, rServerProc, pyServerProc, plumberProc });
+  // Capture procs as a snapshot — IPC handlers fetch a fresh
+  // snapshot at invocation time via getProcs() from backend-proc-manager.
+  const _procsSnapshot = getProcs();
+  setupRuntimeIpc(_procsSnapshot);
   setupBackendLifecycleIpc({ startPyServer, stopPyServer, startPlumber, stopPlumber });
-  setupTerminalIpc();
+  // BLOCK-9.1 PHASE 4: high-risk setup functions with log/proc injection
+  const { setupTerminalIpc } = require("./ipc/terminal");
+  const { setupDiagnosticIpc } = require("./ipc/diagnostic");
+  setupTerminalIpc({
+    mainWindow,
+    getProcs,
+    getLogDir,
+    readLogTail,
+  });
   setupAutoUpdateIpc({ mainWindow });
-  setupDiagnosticIpc();
+  setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs });
   if (typeof setupFigcodeIpc === "function") {
     setupFigcodeIpc();
   }
@@ -1668,8 +1048,14 @@ app.on("activate", () => {
 });
 
 app.on("before-quit", () => {
-  _clearPlumberIdleTimer();
+  // BLOCK-9.1 PHASE 4: backend proc handles moved to
+  // src/main/backend-proc-manager.js. Import them here for the
+  // before-quit shutdown sequence.
+  const { getProcs } = require("./main/backend-proc-manager");
+  const { rServerSupervisor, stopPlumber } = require("./main/backend-proc-manager");
+  stopPlumber("app-quit");
   rServerSupervisor.shutdown("app-quit");
+  const { gatewayProc, pyServerProc, plumberProc } = getProcs();
   for (const proc of [gatewayProc, pyServerProc, plumberProc]) {
     if (proc) {
       try {
