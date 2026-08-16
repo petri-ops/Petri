@@ -16,23 +16,28 @@
 
 function _mapSkillRuntimeStatus(s) {
   // SkillRuntime 状态 → useSkillStore/electron.d.ts 声明的 4 态
+  // BLOCK-4 B3: 显式 null 守卫（避免类型穿透）+ default → "failed"（更保守）
+  if (!s || typeof s !== 'string') return 'failed';
   switch (s) {
-    case "created":
-    case "validating_params":
-    case "checking_dependencies":
-      return "pending";
-    case "running":
-    case "paused":
-    case "recovering":
-      return "running";
-    case "complete":
-      return "completed";
-    case "failed":
-      return "failed";
-    case "cancelled":
-      return "failed"; // 简化为 failed 终止态
+    case 'created':
+    case 'validating_params':
+    case 'checking_dependencies':
+      return 'pending';
+    case 'running':
+    case 'paused':
+    case 'recovering':
+      return 'running';
+    case 'complete':
+      return 'completed';
+    case 'failed':
+      return 'failed';
+    case 'cancelled':
+      // UI 文案区分"已取消"vs"失败"由下游组件按 status+cancelledFlag 渲染；
+      // status 仍为 'failed'（4 状态枚举硬约束）
+      return 'failed';
     default:
-      return "running";
+      // 未知状态保守返回 failed（PHASE 6 B3 修复），避免 UI 错认为 running
+      return 'failed';
   }
 }
 

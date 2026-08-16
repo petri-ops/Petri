@@ -66,22 +66,22 @@ test("G6: 'cancelled' maps to 'failed' (PHASE 1 简化规则)", () => {
   assert.equal(_mapSkillRuntimeStatus("cancelled"), "failed");
 });
 
-// ── default fallback：未知状态走 'running'（与 PHASE 1 main.js 行为一致） ──
+// ── default fallback：未知状态走 'failed'（BLOCK-4 B3 修复，更保守） ──
 
-test("G6: unknown status falls back to 'running'", () => {
-  assert.equal(_mapSkillRuntimeStatus("some_future_state"), "running");
+test("G6: unknown status falls back to 'failed' (BLOCK-4 B3)", () => {
+  assert.equal(_mapSkillRuntimeStatus("some_future_state"), "failed");
 });
 
-test("G6: empty string falls back to 'running'", () => {
-  assert.equal(_mapSkillRuntimeStatus(""), "running");
+test("G6: empty string falls back to 'failed' (BLOCK-4 B3)", () => {
+  assert.equal(_mapSkillRuntimeStatus(""), "failed");
 });
 
-test("G6: null falls back to 'running'", () => {
-  assert.equal(_mapSkillRuntimeStatus(null), "running");
+test("G6: null falls back to 'failed' (BLOCK-4 B3)", () => {
+  assert.equal(_mapSkillRuntimeStatus(null), "failed");
 });
 
-test("G6: undefined falls back to 'running'", () => {
-  assert.equal(_mapSkillRuntimeStatus(undefined), "running");
+test("G6: undefined falls back to 'failed' (BLOCK-4 B3)", () => {
+  assert.equal(_mapSkillRuntimeStatus(undefined), "failed");
 });
 
 // ── 全 9 状态枚举覆盖 + 1 default（共 10 断言，PHASE 2 G6 验收要求） ──
