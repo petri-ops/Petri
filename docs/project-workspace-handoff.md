@@ -363,3 +363,20 @@ UI Stage 1：
 - `docs/development-module-map.md`
 - `docs/codex-style-workbench-direction.md`
 - `.claude/ui-refactor-plan.md`
+## 10. 2026-08-14 → 2026-08-16 同步笔录
+
+> 本节为 2026-08-16 文档治理收口同步（worker-C）追加；只在上方 §1～§9 已收口主线之外新增一段同步状态，不重写或外推原有已收口阶段的实施细节与边界。
+
+- **聚类形态**：本轮截至 2026-08-16 的本地 29 个最近 commit 已由审计 worker 聚类为 6 个 Block；当前阶段纪律要求按 Block 跟进，不引入新的活动 canonical 计划。
+- **Block-1 · AGENT-WB**（10 commit）— 已收口。`UI-AGENTWB-###` 系列在 dev Electron + packaged 三轴边界内均 `verified`，详见 `docs/AUDIT-LOG.md` T-AW-013/014 二次实机收口登记。
+- **Block-2 · SKILLS + WIRING + COPILOT**（7 commit）— 部分收口；`UI-157`（Skills IPC 桥）、`UI-158`、`UI-159` 仍处 `in_progress`，等待实机复核升 `verified`。
+- **Block-3 · G0-IDE-MCP-TOOLS**（5 commit）— Phase 1 + 1.5 + 3 已按 `docs/g0-ide-mcp-tools-plan.md` §11 + Phase 3 收口 `qualified`（78/78 定向测试 PASS），Phase 2（Monaco 编辑器 9 工具）继续 `deferred`。
+- **Block-4 · R-SERVER-FIX**（1 commit）— `/api/ai/agent` 路由修复及治理漂移收口已落地；本轮仍缺补强定向测试，留待下一次受影响范围触发时一并验证。
+- **Block-5 · GOV-AUDIT-VERIFICATION**（5 commit）— T-AW-013（packaged 三轴验证）+ T-AW-014（dev Electron 边界内 4 工作包二次实机复核）已按各自边界收口，并在 `docs/AUDIT-LOG.md` 留有同收口径登记；含 6 份 planning 文档治理收口。
+- **Block-6 · G0-LONGTERM-DEV + HOTFIXES**（3 commit）— `UI-161`（Skills 入口回收至 LeftPanel、移除 `SkillsSidebar`）等仍以 `in_progress` 提交，目前正在做实机复核；本轮未升 `verified`，记录点保留在 `docs/AUDIT-LOG.md`。
+- **5 个 `wb/` 命名空间分支已 push**：`agent-workbench`、`backend-skills`、`copilot-gateway`、`docs-evaluation`、`g0-ide-mcp-tools`；均为命名空间分支，不与主分支并行开新 active 工作包。
+- **当前恢复检查点不变**：仍以 §3.0 中 2026-08-11 复核的 `npm run dev` 现场为最新 active 现场；本轮未替换或刷新现场描述，待受影响范围触发时再核对。
+- **当前阶段纪律**：`qualificationEligible: false` 是 G0 开发期常态事实，不构成缺陷、不是待办、不是下一次校验需推动的事；G1+ 阶段事项（`Provider` 矩阵、`packaged Electron` 公证/签名、`OSS` 远程接手、`GA` 公证流水、`dist staleness`）按当前阶段属于**不外推**而不是"待完成"。已收口阶段的边界保持不变。
+- **单工作包串行纪律下「下一块候选」**：Block-2 的 `UI-157`（Skills IPC 桥实机收口）与 Block-6 的 `UI-161`（实机复核升 `verified`）属于当前 G0 边界内未完成的实机复核项；不主动启动新工作包，新工作包必须由用户显式裁决后才能由主 Agent 登记到 `docs/DOC-REGISTRY.json`。
+- **本节与 worker-A 的 `docs/AUDIT-LOG.md` closeout 登记、worker-B 的 `agent-interaction-evaluation.md` 迁移独立同步**：本节不动 `docs/AUDIT-LOG.md`、不动 `agent-interaction-evaluation.md`、不动 `docs/DOC-REGISTRY.json`、不动 `docs/README.md`，仅作为上方 §1～§9 的同步附录。
+
