@@ -1,0 +1,134 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://biof3.local/schemas/docs-governance-report.schema.json",
+  "title": "docs-governance report",
+  "description": "Machine-readable JSON report emitted by `scripts/docs-governance.mjs --report <path>`. Schema version 1. Not the default status text output.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "script",
+    "mode",
+    "exitCode",
+    "summary",
+    "counts",
+    "issues"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1,
+      "description": "Gate report schema version. Locked to 1 for GATES-2."
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp at which the report was produced."
+    },
+    "script": {
+      "type": "string",
+      "const": "scripts/docs-governance.mjs",
+      "description": "Script that produced the report. Stable identifier for downstream consumers."
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["report"],
+      "description": "Output mode. Always 'report' for `--report` invocations."
+    },
+    "exitCode": {
+      "type": "integer",
+      "enum": [0, 1, 2],
+      "description": "Exit code produced by the run. 0=PASS, 1=FAIL, 2=classification conflict."
+    },
+    "reportPath": {
+      "type": "string",
+      "description": "Absolute filesystem path the report was written to. Omitted when write failed."
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "registered",
+        "managedMarkdown",
+        "validationIssues",
+        "result"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["PASS", "FAIL", "CLASSIFICATION_CONFLICT"],
+          "description": "Overall classification of the run."
+        },
+        "registered": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total documents registered in DOC-REGISTRY.json."
+        },
+        "managedMarkdown": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total Markdown files discovered under the configured coverage roots."
+        },
+        "validationIssues": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of validation issues discovered."
+        },
+        "result": {
+          "type": "string",
+          "enum": ["pass", "fail", "classification_conflict"],
+          "description": "Lower-case machine-friendly equivalent of status."
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "byStatus",
+        "byKind"
+      ],
+      "properties": {
+        "byStatus": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 },
+          "description": "Documents grouped by status. Keys are stable document status enum values."
+        },
+        "byKind": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 },
+          "description": "Documents grouped by kind. Keys are stable document kind enum values."
+        }
+      }
+    },
+    "issues": {
+      "type": "array",
+      "description": "Validation issues produced by the registry validator. Empty array when none.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "message"],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Stable issue code (e.g. KIND_INVALID, DUPLICATE_TRUTH_DOMAIN)."
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable message describing the issue."
+          },
+          "documentId": {
+            "type": ["string", "null"],
+            "description": "Affected document id when applicable."
+          },
+          "path": {
+            "type": ["string", "null"],
+            "description": "Affected repo-relative path when applicable."
+          }
+        }
+      }
+    }
+  }
+}

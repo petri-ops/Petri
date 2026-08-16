@@ -1,0 +1,160 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://biof3.local/schemas/test-affected-report.schema.json",
+  "title": "test-affected report",
+  "description": "Machine-readable JSON report emitted by `scripts/test-affected.mjs --report <path>`. Schema version 1. Wraps the existing `--json` plan output plus metadata so the report is self-describing.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "script",
+    "mode",
+    "exitCode",
+    "summary",
+    "plan"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1,
+      "description": "Gate report schema version. Locked to 1 for GATES-2."
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp at which the report was produced."
+    },
+    "script": {
+      "type": "string",
+      "const": "scripts/test-affected.mjs",
+      "description": "Script that produced the report."
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["report"],
+      "description": "Output mode. Always 'report' for `--report` invocations."
+    },
+    "exitCode": {
+      "type": "integer",
+      "enum": [0, 1, 2],
+      "description": "Exit code produced by the run. 0=PASS, 1=FAIL, 2=classification conflict (changed files not covered by impact-map rules)."
+    },
+    "reportPath": {
+      "type": "string",
+      "description": "Absolute filesystem path the report was written to. Omitted when write failed."
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "result",
+        "changedFiles",
+        "tests",
+        "commands",
+        "frontendRelated",
+        "syntax",
+        "unknown"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["PASS", "FAIL", "CLASSIFICATION_CONFLICT"],
+          "description": "Overall classification of the run."
+        },
+        "result": {
+          "type": "string",
+          "enum": ["pass", "fail", "classification_conflict"],
+          "description": "Lower-case machine-friendly equivalent of status."
+        },
+        "changedFiles": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total changed files in the working set."
+        },
+        "tests": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total node test files in the plan."
+        },
+        "commands": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total gate commands in the plan."
+        },
+        "frontendRelated": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total frontend-related files in the plan."
+        },
+        "syntax": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total Node source files requiring `node --check`."
+        },
+        "unknown": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of changed files not covered by any impact-map rule. Drives the exit-2 classification conflict signal."
+        }
+      }
+    },
+    "plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "changedFiles",
+        "tests",
+        "commands",
+        "frontendRelated",
+        "syntax",
+        "unknown",
+        "reasons"
+      ],
+      "properties": {
+        "changedFiles": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Sorted list of changed file paths."
+        },
+        "tests": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Sorted list of node test files selected by the impact map."
+        },
+        "commands": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["docs-check", "ui-audit", "harness-check", "frontend-check", "frontend-all"]
+          },
+          "description": "Gate commands selected by the impact map, in execution order."
+        },
+        "frontendRelated": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Frontend-related files needing `npm run test:related`."
+        },
+        "syntax": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Node source files requiring `node --check`."
+        },
+        "unknown": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Changed files not covered by any impact-map rule. Drives exit-2 classification conflict."
+        },
+        "reasons": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "description": "Map of file path to list of impact-map rule ids that matched it."
+        }
+      }
+    }
+  }
+}

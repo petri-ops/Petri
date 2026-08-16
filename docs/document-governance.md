@@ -130,6 +130,47 @@ Canonical 文档还必须声明唯一 `truthDomain`。处于 `active` 或 `plann
 - `status` 字段为 `archived` 或 `superseded` 时，条目不得保留 `truthDomain`（脚本侧 GATES-3 强制校验）；如需保留历史分组，使用 `tags`。
 - `id` 字段一经登记不得修改；若登记项需换 id，必须新建条目并把旧条目改为 `superseded` 状态指向新条目。
 
+### 3.2 JSON 输出契约（`--report` 模式）
+
+`docs/` 治理栈的 3 个常驻门禁脚本（`scripts/docs-governance.mjs` /
+`scripts/check-ui-productization-audit.mjs` / `scripts/test-affected.mjs`）在
+`DOC-GOVERNANCE-GATES / GATES-2`（2026-08-16）阶段统一提供 `--report <path>`
+JSON 输出模式，与既有 `--status` / `--check` / `--reconcile` / `--json` / `--run`
+互不冲突。
+
+详细规则、schema 索引与同步引用见 [`docs/schemas/README.md`](./schemas/README.md)。
+
+#### 3.2.1 公共字段语义
+
+| 字段 | 类型 | 含义 |
+| --- | --- | --- |
+| `schemaVersion` | `integer`（const 1） | GATES-2 锁定为 1；扩展字段在 v2 引入 |
+| `generatedAt` | ISO-8601 string | 报告产出时间 |
+| `script` | string (const) | 产生报告的脚本路径；稳定标识 |
+| `mode` | `"report"` | 始终为 `report` |
+| `exitCode` | `0 \| 1 \| 2` | 进程退出码，与 §4.5 契约一致 |
+| `summary.status` | `PASS \| FAIL \| CLASSIFICATION_CONFLICT` | 业务分类 |
+| `summary.result` | `pass \| fail \| classification_conflict` | 小写机器友好等价 |
+| `reportPath` | absolute path | 落盘路径；写失败时省略 |
+
+各脚本的 `issues` / `failures` / `plan` 字段定义见各自 schema。
+
+#### 3.2.2 强制约束
+
+- `--report <path>` 必须出现在 argv 中且下一 token 必须是非空、非 `--` 前缀的路径。
+- 写盘前 **必须** schema 校验通过；写入失败或 schema 失败 → exit 2（分类冲突）。
+- `--report` 与 `--status` / `--check` / `--reconcile` 互斥（仅对 `docs-governance` 适用）。
+- 报告产出永远走共享 helper `scripts/lib/gate-report-schema.mjs` 的 `validateReport()`；
+  优先使用 Ajv 6.x（已 transitive devDep），缺失时降级为内置 draft-07 子集。
+- 报告内容**不得**包含绝对用户家目录、密码、token 等敏感字段；如需引用路径须是仓库相对路径。
+
+#### 3.2.3 同步引用
+
+- canonical schema 索引：[`docs/schemas/README.md`](./schemas/README.md)
+- 计划：[`docs/doc-governance-gates-plan.md` §2 GATES-2](./doc-governance-gates-plan.md)
+- skill：`$biof3-project-governance` 的"Run the deterministic controls"
+- 退出码定义：本文件 §4.5
+
 ## 4. 生命周期
 
 ### 4.1 创建
@@ -205,13 +246,28 @@ LF12 已完成首次核心资格裁决。2026-07-25 产品复核确认 RS9 的 R
 ## 6. 门禁命令
 
 ```bash
+# docs/ 治理栈（默认人类可读）
 npm run docs:status
 npm run docs:reconcile
 npm run docs:check
+
+# 机器可读 JSON 报告（GATES-2 阶段入侵，--report 模式）
+node scripts/docs-governance.mjs --report /tmp/docs-report.json
+node scripts/check-ui-productization-audit.mjs --report /tmp/ui-report.json
+node scripts/test-affected.mjs --report /tmp/test-report.json
 ```
 
 - `docs:status`：查看注册数量、状态、类型、未注册文件和契约问题。
 - `docs:reconcile`：查看孤立文档、归档候选、稳定保留项和冲突，不写文件。
 - `docs:check`：作为提交和根检查门禁；注册缺失、路径失效、入口断链或 canonical 冲突时失败。
 
-根 `npm run check` 包含 `docs:check`。这保证 Agent 不能在添加孤立计划后仍把项目宣称为已收口。
+`--report <path>` JSON 输出模式（GATES-2 / 2026-08-16 加固）：
+
+- 与 `--status` / `--check` / `--reconcile` 互斥，输出机器可读 JSON，落盘前必须
+  schema 校验通过；写失败 / schema 失败 → exit 2（分类冲突）。
+- 字段语义与 schema 索引见 §3.2 与 [`docs/schemas/README.md`](./schemas/README.md)。
+- 与 `ui:audit:check` / `test:changed:list` pipeline 联动：CI / sub-agent 可直接
+  消费 JSON 报告，无需 reparse stdout。
+
+根 `npm run check` 包含 `docs:check` 与 `ui:audit:check`，但**不**自动触发 `--report`。
+`--report` 仅在调用方显式传入 path 时启用，避免污染常规 gate 输出。

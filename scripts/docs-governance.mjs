@@ -15,7 +15,15 @@
  *       注意：2 不是 fail-closed；仅提示调用方修正参数 / 修复工具自身 bug，
  *       **不**代表 docs/ 治理栈在你的工作包里有"未通过的契约"。
  *
- * 同步文档：`docs/document-governance.md` §4.5"门禁退出码契约"。
+ * `--report` JSON 输出模式（GATES-2 文档化，2026-08-16）：
+ *   与 `--status` / `--check` / `--reconcile` 互斥的并行模式；通过
+ *   `--report <path>` 触发，输出机器可读 JSON，由 `docs/schemas/docs-governance-report.schema.json`
+ *   强校验，写盘失败 / schema 校验失败 → exit 2（分类冲突）。
+ *   退出码语义与现有契约一致：report 模式下的 exit 0/1/2 仍走 0=PASS / 1=FAIL / 2=分类冲突。
+ *   报告 `summary.status` 反映业务分类（PASS / FAIL / CLASSIFICATION_CONFLICT），
+ *   `exitCode` 反映 `process.exitCode`。
+ *
+ * 同步文档：`docs/document-governance.md` §4.5"门禁退出码契约" + GATES-2 §3.2"JSON 输出契约"。
  * 该契约为本工作包 DOC-GOVERNANCE-GATES / GATES-1 阶段固化本，不在本阶段内
  * 改动 `process.exit()` 行为；如未来升级退出码语义须同步 §4.5 并联动
  * `package.json` 脚本。
@@ -25,6 +33,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { GATE_REPORT_SCHEMA_VERSION, validateReport } from './lib/gate-report-schema.mjs';
 
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
 const DEFAULT_ROOT = path.resolve(path.dirname(SCRIPT_PATH), '..');
@@ -449,6 +458,110 @@ function printIssueList(issues) {
   }
 }
 
+function countByStatus(documents) {
+  const counts = {};
+  for (const document of documents) {
+    const key = document.status ?? '<missing>';
+    counts[key] = (counts[key] ?? 0) + 1;
+  }
+  return counts;
+}
+
+function countByKind(documents) {
+  const counts = {};
+  for (const document of documents) {
+    const key = document.kind ?? '<missing>';
+    counts[key] = (counts[key] ?? 0) + 1;
+  }
+  return counts;
+}
+
+/**
+ * GATES-2 `--report` mode runner. Produces a deterministic JSON report
+ * conforming to `docs/schemas/docs-governance-report.schema.json`.
+ *
+ * Exit codes (per `docs/document-governance.md` §4.5):
+ *   0  — schema-valid report written; validation passed
+ *   1  — schema-valid report written; registry validation found issues
+ *   2  — classification conflict (path invalid, write failed, schema failed)
+ *
+ * The report is written BEFORE exit; on exit 2 the partial report is still
+ * emitted for diagnosis, but `summary.status` is `CLASSIFICATION_CONFLICT`.
+ */
+async function runReportMode(reportPathRaw) {
+  const reportPath = path.resolve(reportPathRaw);
+  let registry;
+  let issues;
+  let managed;
+  try {
+    registry = await loadDocumentRegistry(DEFAULT_ROOT);
+    issues = await validateDocumentRegistry(registry, { rootDir: DEFAULT_ROOT });
+    managed = await collectManagedMarkdown(DEFAULT_ROOT, registry.coverage);
+  } catch (error) {
+    console.error(`[docs:report] 分类冲突 — registry/validation failure: ${error.message}`);
+    process.exitCode = 2;
+    return;
+  }
+
+  const isFailure = issues.length > 0;
+  const status = isFailure ? 'FAIL' : 'PASS';
+  const result = isFailure ? 'fail' : 'pass';
+  const exitCode = isFailure ? 1 : 0;
+  const report = {
+    schemaVersion: GATE_REPORT_SCHEMA_VERSION,
+    generatedAt: new Date().toISOString(),
+    script: 'scripts/docs-governance.mjs',
+    mode: 'report',
+    exitCode,
+    summary: {
+      status,
+      registered: registry.documents.length,
+      managedMarkdown: managed.length,
+      validationIssues: issues.length,
+      result,
+    },
+    counts: {
+      byStatus: countByStatus(registry.documents),
+      byKind: countByKind(registry.documents),
+    },
+    issues: issues.map((item) => ({
+      code: item.code,
+      message: item.message,
+      documentId: item.documentId ?? null,
+      path: item.path ?? null,
+    })),
+  };
+
+  const validation = validateReport('scripts/docs-governance.mjs', report);
+  if (!validation.valid) {
+    console.error('[docs:report] 分类冲突 — produced JSON does not match schema:');
+    for (const err of validation.errors) {
+      console.error(`  - ${err.path} ${err.keyword}: ${err.message}`);
+    }
+    process.exitCode = 2;
+    return;
+  }
+
+  try {
+    const parentDir = path.dirname(reportPath);
+    await fs.mkdir(parentDir, { recursive: true });
+    await fs.writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+  } catch (error) {
+    console.error(`[docs:report] 分类冲突 — failed to write report to ${reportPath}: ${error.message}`);
+    process.exitCode = 2;
+    return;
+  }
+
+  report.reportPath = reportPath;
+  if (isFailure) {
+    console.error(`[docs:report] FAIL (${issues.length} validation issue(s)); report written to ${reportPath}`);
+    process.exitCode = 1;
+    return;
+  }
+  console.log(`[docs:report] PASS (${registry.documents.length} registered, ${managed.length} managed); report written to ${reportPath}`);
+  process.exitCode = 0;
+}
+
 async function runCli() {
   const args = new Set(process.argv.slice(2));
   const modes = ['--status', '--check', '--reconcile'].filter((mode) => args.has(mode));
@@ -457,7 +570,29 @@ async function runCli() {
     process.exitCode = 2;
     return;
   }
+  if (args.has('--report') && modes.length > 0) {
+    console.error('--report is mutually exclusive with --status, --check, --reconcile.');
+    process.exitCode = 2;
+    return;
+  }
   const mode = modes[0] ?? '--status';
+
+  // GATES-2: `--report <path>` JSON output mode. Activated before
+  // registry loading so we can fail-closed (exit 2) on path misuse.
+  // The path argument is taken literally from the next argv token; no
+  // shell expansion, no auto-resolution outside the user's intent.
+  if (args.has('--report')) {
+    const reportIdx = process.argv.indexOf('--report');
+    const reportPathRaw = process.argv[reportIdx + 1];
+    if (!reportPathRaw || reportPathRaw.startsWith('--')) {
+      console.error('--report requires a non-empty output path argument.');
+      process.exitCode = 2;
+      return;
+    }
+    await runReportMode(reportPathRaw);
+    return;
+  }
+
   const registry = await loadDocumentRegistry(DEFAULT_ROOT);
   const issues = await validateDocumentRegistry(registry, { rootDir: DEFAULT_ROOT });
 
