@@ -2258,6 +2258,12 @@ function setupSkillsIpc() {
       _activeSkillRuntimes.set(executionId, runtime);
       _lastCheckpointCount.set(executionId, 0);
       _startSkillsProgressPoller();
+      // BLOCK-5 E1-b: 立即 publish 初始 status: 'pending'（避免 poller 首次 tick
+      //  1s 延迟；前端可立即在 store 标记为 running 状态）
+      _publishSkillProgress(executionId, {
+        status: 'pending',
+        checkpoints: [],
+      });
       return { ok: true, executionId };
     } catch (e) {
       return { ok: false, error: e.message };

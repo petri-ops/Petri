@@ -150,7 +150,22 @@ PHASE 0 摸底时主 agent 说 "`electron.d.ts` 已是 source-of-truth"——**�
 按"单工作包串行"纪律，BLOCK-2-UI-157-REVIEW 收口后**不主动启动新工作包**。下一块候选（按既有 in_progress 复核项 + 后续可能新工作包）：
 
 | 候选 | 触发条件 |
-|---|---|
+|---|
+
+---
+
+## PHASE 6 H2 修复（2026-08-16 BLOCK-5-IPC-BRIDGE-FINALIZE）：追加遗留风险 R8 / R9 / R10
+
+按 PHASE 6 只读代码质量审核报告 §10.3 H2 项，本 closeout 末尾追加 3 项遗漏遗留风险：
+
+- **R8（sender 守门缺失）**：PHASE 1 commit `2d81377` 时 main.js 4 IPC handler 无 sender 守门（对比 `AGENT_WORKBENCH_FLAG_CHANNEL` L1162 已守门）；**已在 BLOCK-3-IPC-BRIDGE-HARDENING PHASE 1 commit `a2c4232` 修复**（4 handler 加 `_resolveSkillsIpcWindow(event)` 守门对齐既有安全基线）
+- **R9（终态清理缺失）**：PHASE 1 commit `2d81377` 时 useSkillStore 终态未主动清理 onProgress 订阅；**已在 BLOCK-3 PHASE 2 commit `97f1b10` 修复**（`_startPolling` 终态分支同步调 `_unsubscribeProgressWakeup` + 异常路径同样清）
+- **R10（poller 停止机制缺失）**：PHASE 1 commit `2d81377` 时 main.js `_startSkillsProgressPoller` 启动后无停止机制；**已在 BLOCK-3 PHASE 1 commit `a2c4232` 修复**（`_stopSkillsProgressPollerIfIdle()` 在 `_activeSkillRuntimes.size === 0` 时 clearInterval）
+
+**R6（9→4 状态映射 + cancelled → failed 简化）** 已在原 closeout 登记；R7（UI-157 verified 待 PHASE 3）亦在原 closeout 末尾登记。
+
+**为什么 PHASE 1 落地后没及时同步 closeout**：3 项遗留风险在 PHASE 1 commit 时未被发现（PHASE 6 才识别），BLOCK-5 PHASE 1 修复此遗漏并显式登记 R8/R9/R10 三条 + 关联到 BLOCK-3 修复 commit。
+---|
 | PHASE 3 补跑实机 + UI-157 `in_progress → verified` | 用户裁决 widen 范围启用真 Electron |
 | Block-2 UI-158 / UI-159 实机复核 | 用户裁决启动新工作包 |
 | Block-6 UI-161 既有 in_progress 复核 | 用户裁决启动新工作包 |
