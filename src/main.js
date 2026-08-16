@@ -44,6 +44,10 @@ const agentWorkbenchFlags = parseAgentWorkbenchFlags();
 const { createOwnedBackendSupervisor } = require("./owned-backend-supervisor");
 const { createMacOssUpdater } = require("./macos-oss-updater");
 const { redactSensitiveText } = require("./diagnostic-redaction");
+// BLOCK-3 PHASE 2 G6: _mapSkillRuntimeStatus 提取到独立模块以便单测
+// （main.js 在 module-eval 阶段读 app.isPackaged 等 Electron-only 状态，
+//  无法被 plain Node 干净 require）。共享实现见 src/_mapSkillRuntimeStatus.js。
+const { _mapSkillRuntimeStatus } = require("./_mapSkillRuntimeStatus");
 const {
   getNodeLocator,
   getRuntimeBinCandidates,
@@ -2299,27 +2303,7 @@ function setupSkillsIpc() {
   });
 }
 
-function _mapSkillRuntimeStatus(s) {
-  // SkillRuntime 状态 → useSkillStore/electron.d.ts 声明的 4 态
-  switch (s) {
-    case "created":
-    case "validating_params":
-    case "checking_dependencies":
-      return "pending";
-    case "running":
-    case "paused":
-    case "recovering":
-      return "running";
-    case "complete":
-      return "completed";
-    case "failed":
-      return "failed";
-    case "cancelled":
-      return "failed"; // 简化为 failed 终止态
-    default:
-      return "running";
-  }
-}
+// _mapSkillRuntimeStatus 已提取到 src/_mapSkillRuntimeStatus.js（G6 单测需要）。
 
 // ── IPC：Harness Capability Provisioning — Stage 3 M1 ─────────
 // 只读：让设置页"计算与数据"分类展示 Harness 自备了哪些运行时/包。
