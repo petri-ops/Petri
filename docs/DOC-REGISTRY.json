@@ -894,8 +894,25 @@
       "id": "BLOCK-6-UI-158-UI-159-VERIFICATION",
       "path": "docs/block-6-ui-158-ui-159-verification-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "canonical": true,
+      "status": "superseded",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "cancelReason": "2026-08-16 用户裁决 \"关闭 BLOCK-6 保留 in_progress\"：工具边界受限（playwright MCP / WebFetch 跑在隔离 sandbox 不能访问 localhost；macOS shell 退出杀 child process，Vite/Electron 后台不可持续），主 agent 无法独立完成 dev Electron 实机。BLOCK-6 plan 保留为 future reference，但 UI-158 / UI-159 状态保持 in_progress 不升级。",
+      "archiveReason": "2026-08-16 用户裁决 \"关闭 BLOCK-6 保留 in_progress\"：工具边界受限（playwright MCP / WebFetch 隔离 sandbox 不能访问 localhost；macOS shell 退出杀 child process；主 agent 无 GUI 能力）。BLOCK-6 plan 保留为 future reference；UI-158 / UI-159 状态保持 in_progress 不升级。",
+      "tags": [
+        "historical",
+        "cancelled-by-tool-boundary",
+        "ui-158-ui-159-verification",
+        "future-reference"
+      ]
+    },
+    {
+      "id": "BLOCK-6-UI-158-UI-159-VERIFICATION-CLOSEOUT",
+      "path": "docs/block-6-ui-158-ui-159-verification-closeout.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": false,
       "truthDomain": "block-6-ui-158-ui-159-verification",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path"
