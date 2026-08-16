@@ -21,6 +21,7 @@ import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 import { tools as staticTools } from '@/pages/_data';
 import type { Tool } from '@/pages/_data';
+import { buildPreviewTable } from '@/lib/file-preview/buildPreviewTable';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { HighlightedCode, codeLanguageForFile } from '@/components/ui/CodeHighlight';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
@@ -260,15 +261,6 @@ function workflowStageLabel(stage: string): string {
     verify: '校验产物',
     report: '生成报告',
   }[stage] || stage;
-}
-
-function buildPreviewTable(text: string, fileName: string): string[][] {
-  const sep = fileName.toLowerCase().endsWith('.tsv') || text.includes('\t') ? '\t' : ',';
-  return text
-    .split('\n')
-    .filter((line) => line.trim())
-    .slice(0, 40)
-    .map((line) => line.split(sep).map((cell) => cell.replace(/^"|"$/g, '').trim()));
 }
 
 function ResultArtifactShell({
