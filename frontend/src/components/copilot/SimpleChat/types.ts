@@ -1,0 +1,194 @@
+// ============================================================
+// types.ts — SimpleChat shared types + slash commands + system opener
+//
+// Extracted from SimpleChat.tsx by BLOCK-9.2 PHASE 4. Pure data + type
+// declarations; no React component logic lives here so no React-specific
+// runtime imports needed (types are erased by the compiler).
+// ============================================================
+
+import { restoreResultEditProgressEvents } from '../copilotClient';
+import type { ResultEditProgressEvent } from '../copilotClient';
+import type { ToolActivityItem } from '../toolActivity';
+import { restoreToolActivities } from '../toolActivity';
+import { resolveToolSummaryPresentation } from '../toolSummaryPresentation';
+import { parseAssistantResultNodes } from '../extraRenderers';
+import type { ConversationMessage } from '../copilotConversationsClient';
+import type { ResultNode } from '../types';
+import type { ConversationLoopState } from '../conversationRunStore';
+import type { ConversationPendingApproval } from '../conversationRunStore';
+
+/**
+ * Slash command definitions
+ */
+export interface SlashCommand {
+  id: string;
+  label: string;
+  description: string;
+  shortcut: string | null;
+}
+
+export const SLASH_COMMANDS: SlashCommand[] = [
+  { id: 'new', label: '新建对话', description: '开始一个新的对话', shortcut: null },
+  { id: 'clear', label: '清空对话', description: '清除当前对话历史', shortcut: null },
+  { id: 'model', label: '切换模型', description: '选择 AI 模型', shortcut: null },
+  { id: 'export', label: '导出对话', description: '导出当前对话为 Markdown', shortcut: null },
+  { id: 'help', label: '帮助', description: '显示所有命令', shortcut: null },
+];
+
+/**
+ * Files that cannot be inlined in the right Files panel trigger the system
+ * opener alongside the in-app preview. Office/iWork files that we now parse
+ * (docx/xlsx/pptx/odt/ods/odp) and simple text/code files are intentionally
+ * excluded so the user only sees one window per click. R / scanpy data
+ * formats (rds, RData, h5ad, h5, hdf5, loom, mtx) are excluded because no
+ * default macOS app can open them — auto-opening would just pop the
+ * "Choose Application" dialog, which is more disruptive than helpful. Users
+ * who actually want to open them in RStudio / scanpy can still use the
+ * "Open with system app" button in the preview card.
+ */
+const SYSTEM_OPEN_FILE_EXTENSIONS = new Set([
+  'doc', 'dot', 'xls', 'xlt', 'ppt', 'pps', 'pot',
+  'pages', 'numbers', 'keynote',
+  'rtf', 'epub', 'tif', 'tiff', 'heic', 'heif',
+]);
+
+export function shouldOpenWithSystemApp(name: string): boolean {
+  const extension = name.split('.').pop()?.toLowerCase() || '';
+  return SYSTEM_OPEN_FILE_EXTENSIONS.has(extension);
+}
+
+export interface SimpleMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  pending?: boolean;
+  error?: boolean;
+  ts?: string;
+  toolActivities?: ToolActivityItem[];
+  processingDurationMs?: number;
+  statusMessage?: string;
+  summaryUnavailable?: boolean;
+  retryToolJobId?: string;
+  progressUpdates?: Array<{ iteration: number; content: string }>;
+  resultEditProgress?: ResultEditProgressEvent[];
+  /** HLE-C4R: live durable-loop projection for the running assistant turn. */
+  loop?: ConversationLoopState | null;
+  /** T83: model used to produce this assistant message (per-message). */
+  modelName?: string;
+  /**
+   * UI-AGENTWB-004: A4 bridge — typed list of ResultNodes parsed from
+   * `meta.resultNodes`. Populated only when the optional payload is a
+   * well-formed array of well-formed nodes; otherwise left undefined so
+   * the assistant message falls through to the existing markdown path
+   * without any visible error.
+   */
+  resultNodes?: ResultNode[];
+}
+
+export function restoreSimpleMessage(message: ConversationMessage): SimpleMessage {
+  const meta = message.meta || {};
+  const toolActivities = restoreToolActivities(meta.toolActivities);
+  const finalization = meta.finalization && typeof meta.finalization === 'object'
+    ? meta.finalization as Record<string, unknown>
+    : null;
+  const incident = meta.incident && typeof meta.incident === 'object';
+  const presentation = resolveToolSummaryPresentation({
+    assistantContent: message.content,
+    assistantError: message.role === 'assistant' && Boolean(incident),
+    summaryFailureReason: typeof finalization?.failureReason === 'string'
+      ? finalization.failureReason
+      : undefined,
+    toolActivities,
+  });
+  return {
+    role: message.role === 'system' ? 'assistant' : message.role,
+    content: presentation.content,
+    error: presentation.error,
+    summaryUnavailable: presentation.summaryUnavailable,
+    retryToolJobId: presentation.retryToolJobId,
+    ts: message.ts,
+    toolActivities,
+    progressUpdates: restoreProgressUpdates(meta.progressUpdates),
+    resultEditProgress: restoreResultEditProgressEvents(meta.resultEditProgress),
+    processingDurationMs: typeof meta.processingDurationMs === 'number'
+      ? meta.processingDurationMs
+      : undefined,
+    resultNodes: parseAssistantResultNodes(meta.resultNodes) ?? undefined,
+  };
+}
+
+export interface AgentProgressUpdate {
+  iteration: number;
+  content: string;
+}
+
+export function restoreProgressUpdates(value: unknown): Array<{ iteration: number; content: string }> {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, 50).flatMap((item, index) => {
+    if (!item || typeof item !== 'object') return [];
+    const raw = item as Record<string, unknown>;
+    const content = typeof raw.content === 'string' ? raw.content.trim().slice(0, 4000) : '';
+    if (!content) return [];
+    return [{
+      iteration: typeof raw.iteration === 'number' ? raw.iteration : index + 1,
+      content,
+    }];
+  });
+}
+
+export interface ExamplePrompt {
+  icon: import('@/components/icons/Icon').IconName;
+  title: string;
+  description: string;
+  prompt: string;
+}
+
+export const DEFAULT_EXAMPLE_PROMPTS: ExamplePrompt[] = [
+  {
+    icon: 'bar-chart',
+    title: '分析单细胞数据',
+    description: '上传你的表达矩阵，我来帮你做降维可视化',
+    prompt: '帮我分析这个单细胞RNA数据集',
+  },
+  {
+    icon: 'folder',
+    title: '解释项目结构',
+    description: '了解代码库的设计与组织方式',
+    prompt: '解释一下这个项目的代码结构',
+  },
+  {
+    icon: 'zap',
+    title: '快速开始',
+    description: '查看 AI 能帮你做什么',
+    prompt: 'BioF3 Desktop 能帮我完成哪些任务？',
+  },
+];
+
+export interface ExamplePromptsProps {
+  prompts: ExamplePrompt[];
+  onSelect: (prompt: string) => void;
+}
+
+export interface SimpleChatHandle {
+  newConversation: () => void;
+}
+
+export interface SimpleChatProps {
+  projectId: string;
+  conversationId: string | null;
+  onConversationChange: (id: string | null) => void;
+  inputHeight?: number;
+  /**
+   * Whether this instance handles the copilotAsk event. Exactly one mounted
+   * instance may, so it defaults to false and the owner opts in explicitly.
+   */
+  ownsCopilotAsk?: boolean;
+}
+
+export type PendingApproval = ConversationPendingApproval;
+
+export interface ErrorBannerProps {
+  message: string;
+  severity: 'error' | 'warning' | 'info';
+  showDetails: boolean;
+  technicalDetails?: string;
+}
