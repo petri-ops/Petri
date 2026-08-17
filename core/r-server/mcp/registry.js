@@ -26,6 +26,7 @@ const { createExecutionContext } = require('../../shared-backend/execution-conte
 const { resolveProjectRunLayout } = require('../../shared-backend/project-run-layout');
 const { createExecutionProvenance, attachProvenanceToResult } = require('../../shared-backend/execution-provenance');
 const { collectExecutionInputs, writeArtifactManifest } = require('../../shared-backend/artifact-manifest');
+const { validateToolArgs, McpValidationError } = require('./_validate-tool-args');
 
 // Skill Registry & Runtime 导入（延迟加载避免循环依赖）
 let _skillRegistry = null;
@@ -1319,6 +1320,45 @@ async function callTool(name, args, opts = {}) {
   // 插件分支
   const plugin = pluginLoader.getPlugin(name);
   if (plugin) {
+    // PL-001: callTool 入口在 _runPluginScript 之前对 args 跑 inputSchema 校验
+    // 极简 validator (无 ajv) 覆盖 required / type / minimum / maximum / enum
+    // 错误统一为 McpValidationError，返回 MCP 标准 isError 响应
+    try {
+      const inputSchema = pluginLoader.getInputSchema(name);
+      const validation = validateToolArgs(name, inputSchema, args);
+      if (!validation.ok) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `mcp_input_validation_failed: ${validation.errors
+                .map((e) => `${e.path || '<root>'}: ${e.message}`)
+                .join('; ')}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    } catch (validatorError) {
+      if (validatorError instanceof McpValidationError) {
+        return {
+          content: [{ type: 'text', text: validatorError.message }],
+          isError: true,
+        };
+      }
+      // 校验器自身异常 → fail-closed：拒绝调用并记录
+      console.error('[mcp-registry] input validator crashed:', validatorError);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `mcp_input_validator_crashed: ${validatorError.message || 'unknown'}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
     let scriptPath = pluginLoader.getScriptForTool(name);
     if (opts && opts.resultStudioMaterializedScript) {
       try {

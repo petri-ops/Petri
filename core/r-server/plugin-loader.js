@@ -99,6 +99,28 @@ function getScriptForTool(toolId) {
 }
 
 /**
+ * 获取插件的 MCP inputSchema（PL-001 配套）。
+ * 工具入口在 _runPluginScript 之前调用 validateToolArgs(name, schema, args)，
+ * 该函数从 tool-definition.json 的 inputs[] 派生出 JSON Schema，
+ * 包含 type / required / minimum / maximum / enum。
+ *
+ * 插件 inputs[] 中每个元素的扩展字段：
+ *   - type: 'number' | 'integer' | 'string' | 'enum'
+ *   - min / max: 数值边界（number / integer 类型时生效）
+ *   - enum: string[]（type='enum' 时必填）
+ *   - required: boolean
+ *   - default: 默认值
+ *
+ * @param {string} toolId - 工具 ID
+ * @returns {object|null} - JSON Schema { type: 'object', properties: {...}, required: [...] }
+ */
+function getInputSchema(toolId) {
+  const def = getToolDefinition(toolId);
+  if (!def || !Array.isArray(def.inputs)) return null;
+  return _inputsToInputSchema(def.inputs);
+}
+
+/**
  * 获取插件的工具定义（tool-definition.json）。
  */
 function getToolDefinition(pluginId) {
@@ -378,10 +400,28 @@ function _inputsToInputSchema(inputs) {
   const required = [];
   for (const inp of inputs || []) {
     if (!inp || !inp.id) continue;
-    const schema = { type: inp.type === 'number' ? 'number' : 'string' };
+    // 支持 number / integer / enum / string / boolean / file / directory
+    let schemaType;
+    if (inp.type === 'number' || inp.type === 'integer') {
+      schemaType = inp.type;
+    } else if (inp.type === 'enum') {
+      schemaType = 'string';
+    } else {
+      schemaType = 'string';
+    }
+    const schema = { type: schemaType };
     if (inp.label) schema.description = inp.label;
     if (inp.hint) schema.description = (schema.description ? schema.description + '。' : '') + inp.hint;
     if (inp.default !== undefined) schema.default = inp.default;
+    // PL-001 配套：number / integer 边界
+    if (typeof inp.min === 'number') schema.minimum = inp.min;
+    if (typeof inp.max === 'number') schema.maximum = inp.max;
+    // enum 取值
+    if (inp.type === 'enum' && Array.isArray(inp.enum)) {
+      schema.enum = inp.enum;
+    } else if (Array.isArray(inp.enum)) {
+      schema.enum = inp.enum;
+    }
     properties[inp.id] = schema;
     if (inp.required) required.push(inp.id);
   }
@@ -678,6 +718,7 @@ module.exports = {
   getPlugin,
   isPluginInstalled,
   getScriptForTool,
+  getInputSchema,
   getToolDefinition,
   computePluginFingerprint,
   normalizePluginManifest,
