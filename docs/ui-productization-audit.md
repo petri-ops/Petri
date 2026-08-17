@@ -453,3 +453,54 @@ npm run check
 | ID | 状态 | 级别 | 主模块 | 关注点 | 页面/状态 | 问题摘要 | 证据 | 目标批次 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | UI-ATTCH-001 | in_progress | P2 | W-03 | C-01 | Agent 聊天 / 输入框 | 聊天输入框新增拖拽/粘贴/预览图片功能：①拖拽添加支持将图片或文档拖入消息输入框，拖拽时显示蓝色虚线边框视觉反馈；②复制粘贴支持 Ctrl+V / Cmd+V 粘贴图片，粘贴图片转为 base64 dataUrl；③图片预览点击预览按钮或预览图标可以全屏预览图片，支持放大/缩小/重置缩放、ESC 关闭、点击遮罩关闭；④文档拖拽后显示文件名称和图标 | frontend/src/components/copilot/SimpleChat.tsx (新增 attachments/handleDragOver/handleDragLeave/handleDrop/handlePaste/useCallback 等)、frontend/src/components/copilot/SimpleChat.tsx (新增 ImagePreviewModal 组件)、frontend/src/components/copilot/simple-chat.css (新增 .sc-composer-dragging / .sc-attachments / .sc-attachment / .sc-attachment-preview-btn / .sc-preview-overlay 等样式) | UI-ATTCH |
+
+## BLOCK-10-AUDIT-CLOSEOUT 收口（2026-08-18）
+
+**收口范围**（来自 `docs/code-audit-closeout-plan.md` v0.2）：8 份独立审计报告（错误处理 / 安全 / 契约 / 架构 / 可观测性 / Plugin schema / r-server HTTP / 性能）共 25 项修复单元。
+
+**13 项已修复**（11 Critical + 2 High + 0 P0 Major）：
+
+| ID | 类别 | 修复位置 | commit |
+|----|------|----------|--------|
+| C-001 | Critical | `src/preload.js` 添加 branch + result namespace | `1c0ebf0` |
+| C-002 | Critical | `src/ipc/result-handlers.js` validTypes 扩展 + createFromConversation 改 'conversation_export' | `1c0ebf0` |
+| S-001 | Critical | `core/r-server/agent-tools/agent-tool-policy.js` 收紧 run_tool / workspace_exec capability | `128b3d4` |
+| S-002 | High | `core/r-server/agent-tools/result-context-binding.js` contextToken 过期校验 | `128b3d4` |
+| S-003 | High | `core/r-server/helpers/agent-execution-policy.js` 替换基于正则的推断 | `128b3d4` |
+| S-004 | High | `src/ipc/branch-handlers.js` / `result-handlers.js` / `ai-settings.js` / `plugin.js` 加 sender 守门 | `4f9a10f` |
+| S-005 | High | `core/r-server/agent-tools/workspace-tools.js` 替换关键字黑名单 | `4f9a10f` |
+| S-006 | High | `core/r-server/agent-task-store.js` retry_stats user_id 不可空 | `4f9a10f` |
+| S-007 | High | `src/ipc/diagnostic.js` 修复可写任意目录 | `4f9a10f` |
+| PR-001 | Critical | SQLite append-only 表归档 + cleanup 任务 | `a09f706` |
+| OB-004 | Major | `core/shared-backend/error-log.js` 默认路径可写 + logError 调用点扩展 | `1fedf9c` |
+| OB-005 partial | Major | `src/mcp-server.js` health endpoint shape 修正 | `1fedf9c` |
+| PL-001 | Critical | `core/r-server/mcp/registry.js` callTool 入口加 inputSchema 校验 + `_validate-tool-args.js` | `b79c472` |
+
+**12 项不外推**（按 G0 阶段纪律 / governance 治理）：
+
+- G1+ 阶段事项：packaged Electron / Provider 矩阵 / GA / 公证 / dist staleness / notarization / P7
+- 架构层面 56+ singleton 拆分（A-001..A-010）→ 单独工作包 BLOCK-10-ARCHITECTURE 候选
+- 全链路可观测性体系化（OB-001 console→logger 全量替换 / OB-003 metrics 端点 / OB-007 跨进程 unhandledRejection）→ observability-work-package 候选
+- Agent Loop 事件类型命名规范化（C-012）→ 独立工作包（与 Result Studio 体系耦合）
+- 三套重试策略合并（E-009）+ RetryClassifier / RetryBudget / RetryExecutor → 错误处理体系化重设计
+- r-server 大文件 26+ 端点拆分（A-002 / A-005 routes/result-studio.js 1800 + routes/harness.js 1366）→ BLOCK-10-ARCHITECTURE 候选
+- SSE 三处协议细节统一（Mi-002 / Mi-003 / Mi-004）+ SSE keepalive（PR-004）→ SSE 治理
+- E-017 main 进程 backend exit IPC notification 完整版（仅 r-server 进程级 partial 落地）→ BLOCK-10-ARCHITECTURE
+- E-018 rServerSupervisor restart IPC 通知 + DB/HTTP 句柄刷新 → BLOCK-10-ARCHITECTURE
+- E-019 full SQLite 双 connection 统一 → BLOCK-10-ARCHITECTURE
+- OB-001 / OB-002 / OB-003 完整可观测性 → observability-work-package
+- PR-006 backend exit IPC 完整版 / PR-012 desktop main 打开 biof3.db 共享问题 → BLOCK-10-ARCHITECTURE
+- C-001-rserver / C-002-rserver / M-001 / M-003 → BLOCK-10-ARCHITECTURE
+
+**累计**：8 commits / 31 tests / ~740 行 net + / 4 治理门 GREEN / Node test 0 退化 / 0 新依赖。
+
+**收口笔录**：
+
+- 不外推 G1+ / 不重新激活 BLOCK-2/3/4/5/6/7/8/9/9.1/9.2
+- PHASE 4 closeout 收口预计 3 commits / docs-only（DONE: PHASE 4-1 DOC-REGISTRY active → completed + 8 linkedCommits）
+- 当前无 active 工作包
+- 后续候选：BLOCK-10-ARCHITECTURE / observability-work-package / SSE / RetryClassifier / Result Studio 事件类型规范
+- ROCED TO MAINTAIN STATE:
+  - `qualificationEligible: false` 是 G0 长期开发期常态事实，不外推
+  - 不在收口笔录写"未做 Provider / 未做 packaged / 未做 GA"——按治理纪律
+  - 不在 closeout 报告列举未做项——按 AGENTS.md 当前阶段纪律
