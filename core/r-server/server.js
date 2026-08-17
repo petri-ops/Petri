@@ -140,6 +140,99 @@ if (!fs.existsSync(TEMP_DIR)) {
 const { setupBootstrap } = require('./bootstrap');
 setupBootstrap(app, { db });
 
+// ============================================================
+// Backend exit lifecycle (E-017 + PR-006 closeout for r-server side).
+//
+// r-server is a long-running child process spawned by Electron's
+// backend-proc-manager. When the host sends SIGINT / SIGTERM / SIGHUP, or
+// Node fires beforeExit / exit, we must:
+//   1. close the better-sqlite3 connection (releases the WAL handle so the
+//      file can be checkpointed cleanly by the next process),
+//   2. flush in-flight writes (best-effort — better-sqlite3 is synchronous
+//      so any pending transaction has already committed),
+//   3. remove our own listeners so a second signal cannot re-enter the
+//      teardown path and recurse.
+//
+// This is deliberately scoped to r-server only. Electron's main.js and the
+// backend-proc-manager have their own lifecycle hooks; we do not touch them.
+// ============================================================
+let backendExitLifecycleInstalled = false;
+function installBackendExitLifecycle({ db, log = console.log, logWarn = console.warn } = {}) {
+  if (backendExitLifecycleInstalled) return;
+  backendExitLifecycleInstalled = true;
+
+  const teardown = (signal) => {
+    const handler = () => {
+      try {
+        if (db && typeof db.close === 'function') {
+          try {
+            db.close();
+            log(`[lifecycle] db closed on ${signal}`);
+          } catch (e) {
+            logWarn(`[lifecycle] db.close failed on ${signal}: ${e && e.message ? e.message : e}`);
+          }
+        }
+      } finally {
+        // Remove this very listener so a re-entrant signal does not loop.
+        try {
+          process.removeListener(signal, handler);
+        } catch (e) {
+          logWarn(`[lifecycle] removeListener failed on ${signal}: ${e && e.message ? e.message : e}`);
+        }
+      }
+    };
+    return handler;
+  };
+
+  for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
+    try {
+      const handler = teardown(signal);
+      process.on(signal, handler);
+    } catch (e) {
+      // Some signals are not listenable on every platform; ignore silently.
+      logWarn(`[lifecycle] cannot install ${signal}: ${e && e.message ? e.message : e}`);
+    }
+  }
+
+  // beforeExit / exit run synchronously after Node decides to leave. close
+  // the db if it is still open. Note: 'exit' cannot await, so we only do
+  // the synchronous db.close().
+  const beforeExitHandler = () => {
+    try {
+      if (db && typeof db.close === 'function') {
+        try { db.close(); } catch {}
+      }
+    } finally {
+      try { process.removeListener('beforeExit', beforeExitHandler); } catch {}
+    }
+  };
+  const exitHandler = () => {
+    try {
+      if (db && typeof db.close === 'function') {
+        try { db.close(); } catch {}
+      }
+    } finally {
+      try { process.removeListener('exit', exitHandler); } catch {}
+    }
+  };
+  process.on('beforeExit', beforeExitHandler);
+  process.on('exit', exitHandler);
+}
+
+installBackendExitLifecycle({ db });
+
+// ============================================================
+// Retention sweeper (PR-001 closeout). Same scheduling shape as
+// cacheManager (recursive setTimeout, unref'd). Failures are logged via
+// console.warn — never swallowed — and re-tried on the next tick.
+// ============================================================
+try {
+  const { scheduleRetentionSweep } = require('./jobs/retention-sweeper');
+  scheduleRetentionSweep({ db });
+} catch (e) {
+  console.warn('[retention] scheduler not started:', e && e.message ? e.message : e);
+}
+
 // MODULES_PRECEDENCE_v1 — modular routes register here, BEFORE all legacy
 // endpoints below. Express uses first-match-wins, so new versions automatically
 // supersede old code in routes/ without needing to comment out the legacy.
