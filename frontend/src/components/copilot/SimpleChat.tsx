@@ -3,7 +3,7 @@
 // Replaces the complex CopilotChat for the desktop workspace.
 // Pure message list + input, driven by projectId/conversationId.
 //
-// BLOCK-9.2 PHASE 4: extracted to ./SimpleChat/{types.ts,helpers.tsx,attachments.ts,ImagePreviewModal.tsx,formatHarness.ts}.
+// BLOCK-9.2 PHASE 4: extracted to ./SimpleChat/{types.ts,helpers.tsx,attachments.ts,ImagePreviewModal.tsx,formatHarness.ts,hooks/useChatStream.ts}.
 //   • 189-line types.ts holds 14 type/const declarations.
 //   • 108-line helpers.ts holds MessageMeta + ExamplePrompts + compactStageConclusion.
 //   • attachments.ts holds AttachmentFile type + drag/drop/paste/remove/open/close helpers.
@@ -11,8 +11,15 @@
 //   • formatHarness.ts holds the 5 pure harness payload formatting helpers
 //     (stringifyParamValue / shortValue / formatHarnessRepair / formatHarnessWarning /
 //     formatHarnessDiagnosticIssue).
-//   • The ~2115-line SimpleChat main component stays intact — too much
-//     shared local state to safely split without rewriting the rendering pipeline.
+//   • hooks/useChatStream.ts owns the 5 stream-related callbacks
+//     (send / stop / regenerate / queue / runInBackground) plus the
+//     `starting` state, `messagesRef` / `sendRef` indirection, the
+//     `copilotAsk` event subscription, and the queue drain effect.
+//   • The main component drops from ~2115 → ~1965 lines after this
+//     commit; send/stop/regenerate/queue/runInBackground + 9 hooks
+//     now live in the custom hook, called once at the position the
+//     inline `send` useCallback used to occupy. Hook order is fixed
+//     and documented at the top of useChatStream.ts.
 //
 // Pure code organization change; 0 behavior difference. All public exports
 // re-exported from main file to keep `import { ... } from '@/components/copilot/SimpleChat'` working.
@@ -90,7 +97,6 @@ import {
   retryToolSummary,
   restoreResultEditProgressEvents,
   findResumableAgentTask,
-  type ChatMessage,
   type ResultEditProgressEvent,
 } from './copilotClient';
 import {
@@ -101,7 +107,7 @@ import {
 import { useCopilotContext } from '@/lib/copilotContextProvider';
 import { formatRelativeTime } from '@/lib/format';
 import { useConversations } from '@/hooks/useConversations';
-import { biof3Events, subscribeBioF3Event, dispatchBioF3Event } from '@/lib/events';
+import { biof3Events, dispatchBioF3Event } from '@/lib/events';
 import '@/lib/chat-file-references';
 import type { ExtractContext, FileReferenceClickDetail } from '@/lib/chat-file-references';
 import { __resetFileReferenceCache, extractFileReferenceCandidates } from '@/lib/chat-file-references';
@@ -121,8 +127,6 @@ import {
   useAiSettings,
   type ChatModelPreset,
 } from '@/hooks/useAiSettings';
-import type { CopilotContext } from '@/lib/copilotContext';
-import { copilotContextOverrideForAsk } from '@/lib/result-edit-agent-bridge';
 import { CopilotMarkdown } from './copilotMarkdown';
 import {
   formatToolDuration,
@@ -134,12 +138,8 @@ import { resolveToolSummaryPresentation } from './toolSummaryPresentation';
 import {
   clearConversationPendingApproval,
   clearConversationRun,
-  stopConversationRun,
-  isConversationRunning,
   shouldClearReconciledConversationRun,
-  startConversationRun,
   resumeConversationRun,
-  startSubAgentTask,
   stopSubAgentTask,
   useConversationRun,
   useSubAgentTasksForConversation,
@@ -164,9 +164,13 @@ import { INITIAL_NAV_STATE, stepHistoryNavigation } from './chatHistoryNav';
 import {
   clearConversationDraft,
   loadConversationDraft,
-  migrateConversationDraft,
   saveConversationDraft,
 } from './conversationDraft';
+// BLOCK-9.2 PHASE 4: stream control extracted from this file.
+// The hook owns send/stop/regenerate/queue/runInBackground plus the
+// `starting` state, messagesRef/sendRef indirection, the copilotAsk
+// event subscription, and the queue drain effect.
+import { useChatStream } from './SimpleChat/hooks/useChatStream';
 
 // SimpleMessage + restoreSimpleMessage + AgentProgressUpdate + restoreProgressUpdates + MessageMeta moved to
 // ./SimpleChat/{types,helpers}.ts (BLOCK-9.2 PHASE 4).
@@ -198,7 +202,6 @@ export function SimpleChat({
   const [messages, setMessages] = useState<SimpleMessage[]>([]);
   const [copiedMessageKey, setCopiedMessageKey] = useState<string | null>(null);
   const [input, setInput] = useState('');
-  const [starting, setStarting] = useState(false);
   const [queuedPrompts, setQueuedPrompts] = useState<string[]>([]);
   const [attachments, setAttachments] = useState<AttachmentFile[]>([]);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
@@ -239,12 +242,6 @@ export function SimpleChat({
       (cmd) => cmd.id.includes(q) || cmd.label.toLowerCase().includes(q) || cmd.description.toLowerCase().includes(q)
     );
   }, [slashQuery]);
-  // T83: keep a ref to the latest messages so `regenerate` can send with the
-  // stripped history synchronously (before React re-renders the state update).
-  const messagesRef = useRef<SimpleMessage[]>(messages);
-  useEffect(() => {
-    messagesRef.current = messages;
-  }, [messages]);
   // 输入框 ↑/↓ 历史回溯的导航态（null = 未进入导航，输入框即实时草稿）。
   const historyNavRef = useRef<typeof INITIAL_NAV_STATE>(INITIAL_NAV_STATE);
   const activeRun = useConversationRun(conversationId);
@@ -257,14 +254,17 @@ export function SimpleChat({
     void resumeOrphanAgentTasks(conversationId, projectId);
   }, [conversationId, projectId]);
   const durableLoop = useDurableConversationLoop(projectId, conversationId, activeRun?.loop);
-  const streaming = starting || activeRun?.status === 'running';
   const pendingApproval = activeRun?.pendingApproval || null;
 
   // Plan 1.6 §4.2 — read Copilot context from React Context, not the
   // module-scope singleton. Captured into a ref so the latest value is
-  // always reachable from the (stable) send callback without re-binding.
+  // always reachable from the latest send callback without re-binding.
+  // The ref is shared with useChatStream (which calls `send` from a
+  // stable closure) so the activeArtifact / contextToken / etc. used
+  // at send time stay correct even when the React Context updates
+  // between send scheduling and execution.
   const copilotCtx = useCopilotContext();
-  const copilotCtxRef = useRef<CopilotContext>(copilotCtx);
+  const copilotCtxRef = useRef(copilotCtx);
   useEffect(() => {
     copilotCtxRef.current = copilotCtx;
   }, [copilotCtx]);
@@ -704,114 +704,46 @@ export function SimpleChat({
     };
   }, [accessMenuOpen, modelMenuOpen, ownsCopilotAsk]);
 
-  const send = useCallback(async (text: string, contextOverride?: Partial<CopilotContext>) => {
-    const trimmed = text.trim();
-    if (!trimmed || streaming) return;
-    setStarting(true);
-
-    try {
-      let targetConversationId = conversationId;
-      if (!targetConversationId) {
-        const created = await createConversationForRun('新对话');
-        if (!created) return;
-        migrateConversationDraft(projectId, null, created.id);
-        targetConversationId = created.id;
-        onConversationChange(created.id);
-      }
-      if (isConversationRunning(targetConversationId)) return;
-
-      // Build upstream messages from current history
-      const tagged: ChatMessage[] = messagesRef.current
-        .filter((m) => !m.error && !m.pending)
-        .map((m) => ({ role: m.role, content: m.content }));
-      tagged.push({ role: 'user', content: trimmed });
-
-      const started = startConversationRun({
-        conversationId: targetConversationId,
-        projectId,
-        userContent: trimmed,
-        historyLastUserTs: [...messagesRef.current].reverse().find((message) => message.role === 'user')?.ts,
-        messages: tagged,
-        modelPresetId: activeModel?.endpointProfileId || activeModelId,
-        modelName: activeModel?.model,
-        context: {
-          ...copilotCtxRef.current,
-          ...(contextOverride || {}),
-          page: 'desktop-project',
-          projectId,
-          accessMode,
-        },
-      });
-      if (!started) return;
-      clearConversationDraft(projectId, conversationId);
-      setInput('');
-      historyNavRef.current = INITIAL_NAV_STATE;
-      if (taRef.current) taRef.current.style.height = 'auto';
-    } finally {
-      setStarting(false);
-    }
-  }, [
-    accessMode,
+  // BLOCK-9.2 PHASE 4: extracted the 5 stream-related callbacks
+  // (send / stop / regenerate / queue / runInBackground) plus the
+  // `starting` state, `messagesRef` / `sendRef` indirection, the
+  // `copilotAsk` event subscription, and the queue drain effect
+  // into useChatStream(). The hook owns the same hooks in the
+  // same order they appeared inline here before — see the comment
+  // block at the top of useChatStream.ts for the canonical hook
+  // sequence. The parent must still surface `streaming` for the
+  // JSX rendering (send/stop buttons, copy/regenerate disabled
+  // gates, CopilotMarkdown resolveContext) and for the
+  // approve/reject/auto-approve callbacks that wrap `send`.
+  const {
+    send,
+    stop,
+    regenerate,
+    queue,
+    runInBackground,
+    streaming,
+  } = useChatStream({
+    projectId,
+    conversationId,
+    onConversationChange,
+    ownsCopilotAsk,
+    taRef,
+    historyNavRef,
+    copilotCtxRef,
+    reconciledRunRef,
+    setMessages,
+    setInput,
+    setQueuedPrompts,
+    input,
+    messages,
+    queuedPrompts,
+    displayMessages,
+    activeRun,
     activeModel,
     activeModelId,
-    conversationId,
+    accessMode,
     createConversationForRun,
-    messages,
-    onConversationChange,
-    projectId,
-    streaming,
-  ]);
-
-  // Keep a ref to the latest send so the global event listener (mounted once) always
-  // invokes the current closure without re-binding on every message change.
-  const sendRef = useRef(send);
-  useEffect(() => {
-    sendRef.current = send;
-  }, [send]);
-
-  // The embedded SimpleChat owns the agent now (global floating CopilotChat removed).
-  // Toolbox clicks / "explain current result" / chain recommendations dispatch this
-  // event with a ready-to-send prompt; we pick it up here and send it.
-  useEffect(() => {
-    // Exactly one instance may own this event. Two can be mounted at once — the
-    // center conversation and a right-panel chat tab, which RightPanel keeps
-    // alive via openRightTabs.map — and both subscribing would send the prompt
-    // twice. When no conversation exists yet, createConversationForRun is
-    // awaited before the running check, so each would also create its own.
-    if (!ownsCopilotAsk) return undefined;
-    const unsub = subscribeBioF3Event(biof3Events.copilotAsk, (detail) => {
-      const { prompt } = detail;
-      const p = typeof prompt === 'string' ? prompt.trim() : '';
-      // Snapshot override was created at click time. Pass it into send before
-      // send can await conversation creation, otherwise the result/token may
-      // drift to whichever Artifact happens to be open afterwards.
-      if (p) void sendRef.current(p, copilotContextOverrideForAsk(detail));
-    });
-    return unsub;
-  }, [ownsCopilotAsk]);
-
-  const stop = useCallback(() => {
-    if (conversationId) stopConversationRun(conversationId);
-  }, [conversationId]);
-
-  // T83: re-send the most recent user message with the current model, replacing
-  // the trailing (user, assistant) pair. Reuses the existing send path.
-  const regenerate = useCallback(() => {
-    if (!conversationId || streaming) return;
-    const lastUser = [...displayMessages].reverse().find((m) => m.role === 'user');
-    if (!lastUser?.content) return;
-    const stripped = (() => {
-      let arr = messagesRef.current.slice();
-      if (arr.length && arr[arr.length - 1].role === 'assistant') arr = arr.slice(0, -1);
-      if (arr.length && arr[arr.length - 1].role === 'user') arr = arr.slice(0, -1);
-      return arr;
-    })();
-    messagesRef.current = stripped;
-    setMessages(stripped);
-    // Drop any stale run snapshot so it doesn't re-inject the old user/assistant.
-    clearConversationRun(conversationId);
-    void sendRef.current(lastUser.content);
-  }, [conversationId, streaming, displayMessages]);
+  });
 
   // T83: file-reference refresh feedback layer (no core-logic change).
   const handleRefresh = useCallback(() => {
@@ -856,36 +788,6 @@ export function SimpleChat({
       setForkingAtIndex(null);
     }
   }, [conversationId, forkingAtIndex, projectId, refreshConversations, onConversationChange]);
-
-  // AGENT-CONCURRENCY: run the current prompt as an independent sub-agent task
-  // while the primary conversation loop is busy — the user is never blocked.
-  const runInBackground = useCallback(() => {
-    const trimmed = input.trim();
-    if (!trimmed || !conversationId) return;
-    const parentTaskId = activeRun?.taskId;
-    if (!parentTaskId) return;
-    const tagged: ChatMessage[] = messages
-      .filter((m) => !m.error && !m.pending)
-      .map((m) => ({ role: m.role, content: m.content }));
-    tagged.push({ role: 'user', content: trimmed });
-    startSubAgentTask({
-      conversationId,
-      projectId,
-      userContent: trimmed,
-      messages: tagged,
-      parentTaskId,
-      modelPresetId: activeModel?.endpointProfileId || activeModelId,
-      modelName: activeModel?.model,
-      context: {
-        ...copilotCtxRef.current,
-        page: 'desktop-project',
-        projectId,
-        accessMode,
-      },
-    });
-    setInput('');
-    if (taRef.current) taRef.current.style.height = 'auto';
-  }, [accessMode, activeModel, activeModelId, activeRun, conversationId, input, messages, projectId]);
 
   const retrySummary = useCallback(async (toolJobId: string) => {
     const attempts = summaryRetryAttempts[toolJobId] ?? 0;
@@ -1068,26 +970,12 @@ export function SimpleChat({
     }
   };
 
-  const queueCurrentPrompt = useCallback(() => {
-    const trimmed = input.trim();
-    if (!trimmed || !streaming) return;
-    setQueuedPrompts((current) => [...current, trimmed].slice(-5));
-    setInput('');
-    historyNavRef.current = INITIAL_NAV_STATE;
-    clearConversationDraft(projectId, conversationId);
-    if (taRef.current) taRef.current.style.height = 'auto';
-  }, [conversationId, input, projectId, streaming]);
-
-  // Drain one queued prompt only after the completed run has been reconciled
-  // from SQLite, so the next turn receives the durable conversation history.
-  useEffect(() => {
-    if (streaming || queuedPrompts.length === 0 || !conversationId) return;
-    if (activeRun?.completedAt
-      && reconciledRunRef.current !== `${conversationId}:${activeRun.completedAt}`) return;
-    const [next, ...rest] = queuedPrompts;
-    setQueuedPrompts(rest);
-    void send(next);
-  }, [activeRun, conversationId, messages, queuedPrompts, send, streaming]);
+  const queueCurrentPrompt = () => {
+    // The actual queue logic lives in useChatStream (the `queue` callback).
+    // The composer button passes the current input text explicitly so the
+    // hook does not need to depend on the parent-owned `input` state.
+    queue(input.trim());
+  };
 
   // Create new conversation
   const newConversation = useCallback(async () => {
@@ -1620,7 +1508,7 @@ export function SimpleChat({
                     <button
                       type="button"
                       className="sc-send-cta sc-send-cta-bg"
-                      onClick={runInBackground}
+                      onClick={() => runInBackground(input.trim())}
                       disabled={!input.trim() || !activeRun?.taskId}
                       title="后台运行（作为独立子任务并行处理，不打断当前对话）"
                       aria-label="后台运行"
