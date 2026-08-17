@@ -41,10 +41,13 @@ const {
 /**
  * Set up result-related IPC handlers
  */
-function setupResultIpc() {
+function setupResultIpc(options = {}) {
+  // BLOCK-10 S-004: assertTrustedSender helper, additive alongside BLOCK-3.
+  const { createSenderGuard } = require('./_sender-guard');
+  const assertSender = createSenderGuard(options.mainWindow);
   // ── Result CRUD ────────────────────────────────────────────
 
-  ipcMain.handle('result:create', async (_, {
+  ipcMain.handle('result:create', async (event, {
     projectId,
     type,
     name,
@@ -52,6 +55,7 @@ function setupResultIpc() {
     config,
     sourceBranchId,
   }) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       if (!projectId || !type || !name || data === undefined) {
         return { ok: false, error: 'projectId, type, name, and data are required' };
@@ -78,7 +82,7 @@ function setupResultIpc() {
 
   // Phase 3: Create result with automatic branch binding
   // Automatically uses the active branch as sourceBranchId
-  ipcMain.handle('result:createWithBranch', async (_, {
+  ipcMain.handle('result:createWithBranch', async (event, {
     projectId,
     type,
     name,
@@ -86,6 +90,7 @@ function setupResultIpc() {
     config,
     sourceBranchId,
   }) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       if (!projectId || !type || !name || data === undefined) {
         return { ok: false, error: 'projectId, type, name, and data are required' };
@@ -120,7 +125,8 @@ function setupResultIpc() {
     }
   });
 
-  ipcMain.handle('result:get', async (_, { id }) => {
+  ipcMain.handle('result:get', async (event, { id }) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       if (!id) {
         return { ok: false, error: 'id is required' };
@@ -135,7 +141,8 @@ function setupResultIpc() {
     }
   });
 
-  ipcMain.handle('result:list', async (_, { projectId, options }) => {
+  ipcMain.handle('result:list', async (event, { projectId, options }) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       if (!projectId) {
         return { ok: false, error: 'projectId is required' };
@@ -147,7 +154,8 @@ function setupResultIpc() {
     }
   });
 
-  ipcMain.handle('result:update', async (_, { id, updates }) => {
+  ipcMain.handle('result:update', async (event, { id, updates }) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       if (!id) {
         return { ok: false, error: 'id is required' };
@@ -165,7 +173,8 @@ function setupResultIpc() {
     }
   });
 
-  ipcMain.handle('result:delete', async (_, { id }) => {
+  ipcMain.handle('result:delete', async (event, { id }) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       if (!id) {
         return { ok: false, error: 'id is required' };
@@ -182,7 +191,8 @@ function setupResultIpc() {
 
   // ── Project Results (full objects) ──────────────────────────
 
-  ipcMain.handle('result:byProject', async (_, { projectId, options }) => {
+  ipcMain.handle('result:byProject', async (event, { projectId, options }) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       if (!projectId) {
         return { ok: false, error: 'projectId is required' };
@@ -196,12 +206,13 @@ function setupResultIpc() {
 
   // ── Result Versions ─────────────────────────────────────────
 
-  ipcMain.handle('result:version:create', async (_, {
+  ipcMain.handle('result:version:create', async (event, {
     resultId,
     data,
     config,
     createdByBranchId,
   }) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       if (!resultId || data === undefined) {
         return { ok: false, error: 'resultId and data are required' };
@@ -224,7 +235,8 @@ function setupResultIpc() {
     }
   });
 
-  ipcMain.handle('result:version:get', async (_, { id }) => {
+  ipcMain.handle('result:version:get', async (event, { id }) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       if (!id) {
         return { ok: false, error: 'id is required' };
@@ -240,7 +252,8 @@ function setupResultIpc() {
   });
 
   // Phase 4: Get version by resultId and version number
-  ipcMain.handle('result:version:getByNumber', async (_, { resultId, version }) => {
+  ipcMain.handle('result:version:getByNumber', async (event, { resultId, version }) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       if (!resultId || version === undefined) {
         return { ok: false, error: 'resultId and version are required' };
@@ -256,7 +269,8 @@ function setupResultIpc() {
     }
   });
 
-  ipcMain.handle('result:version:list', async (_, { resultId, limit, offset }) => {
+  ipcMain.handle('result:version:list', async (event, { resultId, limit, offset }) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       if (!resultId) {
         return { ok: false, error: 'resultId is required' };
@@ -280,11 +294,12 @@ function setupResultIpc() {
    * @param {boolean} [options.includeMessages=true] - Include full message history
    * @param {boolean} [options.generateSummary=true] - Generate AI-free summary
    */
-  ipcMain.handle('result:createFromConversation', async (_, {
+  ipcMain.handle('result:createFromConversation', async (event, {
     projectId,
     branchId,
     options = {},
   }) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       if (!projectId) {
         return { ok: false, error: 'projectId is required' };

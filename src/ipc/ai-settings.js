@@ -25,8 +25,12 @@ function resolveCore(...parts) {
   return path.join(resolveCoreRoot(), ...parts);
 }
 
-function setupAiSettingsIpc() {
-  ipcMain.handle("ai-settings:get", async () => {
+function setupAiSettingsIpc(options = {}) {
+  // BLOCK-10 S-004: assertTrustedSender helper, additive alongside BLOCK-3.
+  const { createSenderGuard } = require("./_sender-guard");
+  const assertSender = createSenderGuard(options.mainWindow);
+  ipcMain.handle("ai-settings:get", async (event) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       const { getAiSettings } = require(
         resolveCore("r-server", "helpers", "ai-settings.js"),
@@ -38,6 +42,7 @@ function setupAiSettingsIpc() {
   });
 
   ipcMain.handle("ai-settings:save", async (event, settings) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       const { saveAiSettings } = require(
         resolveCore("r-server", "helpers", "ai-settings.js"),
@@ -50,6 +55,7 @@ function setupAiSettingsIpc() {
   });
 
   ipcMain.handle("ai-settings:get-credential", async (event, credentialId) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       const { getApiKey } = require(
         resolveCore("r-server", "helpers", "ai-settings.js"),
@@ -62,6 +68,7 @@ function setupAiSettingsIpc() {
   });
 
   ipcMain.handle("ai-settings:test", async (event, providerOrProfile, apiKey) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       const { testApiKey } = require(
         resolveCore("r-server", "helpers", "ai-settings.js"),
@@ -73,6 +80,7 @@ function setupAiSettingsIpc() {
   });
 
   ipcMain.handle("ai-settings:list-models", async (event, providerOrProfile, apiKey) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       const { listAvailableModels } = require(
         resolveCore("r-server", "helpers", "ai-settings.js"),
