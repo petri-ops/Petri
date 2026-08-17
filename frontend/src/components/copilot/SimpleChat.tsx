@@ -1,28 +1,64 @@
 // ============================================================
-// SimpleChat — lightweight conversation-only chat component
+// SimpleChat — lightweight conversation-only chat component.
 // Replaces the complex CopilotChat for the desktop workspace.
 // Pure message list + input, driven by projectId/conversationId.
+//
+// BLOCK-9.2 PHASE 4: types + helpers extracted to ./SimpleChat/{types.ts,helpers.ts}.
+//   • 189-line types.ts holds 14 type/const declarations.
+//   • 108-line helpers.ts holds MessageMeta + ExamplePrompts + compactStageConclusion.
+//   • The ~1387-line SimpleChat main component stays intact — too much
+//     shared local state to safely split without rewriting the rendering pipeline.
+//
+// Pure code organization change; 0 behavior difference. All public exports
+// re-exported from main file to keep `import { ... } from '@/components/copilot/SimpleChat'` working.
 // ============================================================
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 
-/**
- * Slash command definitions
- */
-export interface SlashCommand {
-  id: string;
-  label: string;
-  description: string;
-  shortcut: string | null;
-}
+// ── BLOCK-9.2 PHASE 4: types + helpers re-exports for backward compat ──
+import {
+  SLASH_COMMANDS,
+  shouldOpenWithSystemApp,
+  restoreSimpleMessage,
+  restoreProgressUpdates,
+  type SlashCommand,
+  type SimpleMessage,
+  type AgentProgressUpdate,
+  type ExamplePrompt,
+  type ExamplePromptsProps,
+  type SimpleChatHandle,
+  type SimpleChatProps,
+  type ErrorBannerProps,
+  type PendingApproval,
+} from './SimpleChat/types';
+import {
+  DEFAULT_EXAMPLE_PROMPTS,
+  MessageMeta,
+  ExamplePrompts,
+  compactStageConclusion,
+} from './SimpleChat/helpers';
 
-export const SLASH_COMMANDS: SlashCommand[] = [
-  { id: 'new', label: '新建对话', description: '开始一个新的对话', shortcut: null },
-  { id: 'clear', label: '清空对话', description: '清除当前对话历史', shortcut: null },
-  { id: 'model', label: '切换模型', description: '选择 AI 模型', shortcut: null },
-  { id: 'export', label: '导出对话', description: '导出当前对话为 Markdown', shortcut: null },
-  { id: 'help', label: '帮助', description: '显示所有命令', shortcut: null },
-];
+// Re-export helpers (so `import { restoreSimpleMessage } from './SimpleChat'` keeps working)
+export {
+  SLASH_COMMANDS,
+  shouldOpenWithSystemApp,
+  restoreSimpleMessage,
+  compactStageConclusion,
+  DEFAULT_EXAMPLE_PROMPTS,
+  MessageMeta,
+  ExamplePrompts,
+};
+export type {
+  SlashCommand,
+  SimpleMessage,
+  AgentProgressUpdate,
+  ExamplePrompt,
+  ExamplePromptsProps,
+  SimpleChatHandle,
+  SimpleChatProps,
+  ErrorBannerProps,
+};
+
 import {
   ackRunTool,
   retryToolSummary,
@@ -44,27 +80,8 @@ import '@/lib/chat-file-references';
 import type { ExtractContext, FileReferenceClickDetail } from '@/lib/chat-file-references';
 import { __resetFileReferenceCache, extractFileReferenceCandidates } from '@/lib/chat-file-references';
 
-/**
- * Files that cannot be inlined in the right Files panel trigger the system
- * opener alongside the in-app preview. Office/iWork files that we now parse
- * (docx/xlsx/pptx/odt/ods/odp) and simple text/code files are intentionally
- * excluded so the user only sees one window per click. R / scanpy data
- * formats (rds, RData, h5ad, h5, hdf5, loom, mtx) are excluded because no
- * default macOS app can open them — auto-opening would just pop the
- * "Choose Application" dialog, which is more disruptive than helpful. Users
- * who actually want to open them in RStudio / scanpy can still use the
- * "Open with system app" button in the preview card.
- */
-const SYSTEM_OPEN_FILE_EXTENSIONS = new Set([
-  'doc', 'dot', 'xls', 'xlt', 'ppt', 'pps', 'pot',
-  'pages', 'numbers', 'keynote',
-  'rtf', 'epub', 'tif', 'tiff', 'heic', 'heif',
-]);
+// SYSTEM_OPEN_FILE_EXTENSIONS + shouldOpenWithSystemApp moved to ./SimpleChat/types.ts (BLOCK-9.2 PHASE 4).
 
-export function shouldOpenWithSystemApp(name: string): boolean {
-  const extension = name.split('.').pop()?.toLowerCase() || '';
-  return SYSTEM_OPEN_FILE_EXTENSIONS.has(extension);
-}
 import {
   fetchHarnessToolManifest,
   repairHarnessParams,
@@ -126,108 +143,9 @@ import {
   saveConversationDraft,
 } from './conversationDraft';
 
-interface SimpleMessage {
-  role: 'user' | 'assistant';
-  content: string;
-  pending?: boolean;
-  error?: boolean;
-  ts?: string;
-  toolActivities?: ToolActivityItem[];
-  processingDurationMs?: number;
-  statusMessage?: string;
-  summaryUnavailable?: boolean;
-  retryToolJobId?: string;
-  progressUpdates?: Array<{ iteration: number; content: string }>;
-  resultEditProgress?: ResultEditProgressEvent[];
-  /** HLE-C4R: live durable-loop projection for the running assistant turn. */
-  loop?: ConversationLoopState | null;
-  /** T83: model used to produce this assistant message (per-message). */
-  modelName?: string;
-  /**
-   * UI-AGENTWB-004: A4 bridge — typed list of ResultNodes parsed from
-   * `meta.resultNodes`. Populated only when the optional payload is a
-   * well-formed array of well-formed nodes; otherwise left undefined so
-   * the assistant message falls through to the existing markdown path
-   * without any visible error.
-   */
-  resultNodes?: ResultNode[];
-}
+// SimpleMessage + restoreSimpleMessage + AgentProgressUpdate + restoreProgressUpdates + MessageMeta moved to
+// ./SimpleChat/{types,helpers}.ts (BLOCK-9.2 PHASE 4).
 
-export function restoreSimpleMessage(message: ConversationMessage): SimpleMessage {
-  const meta = message.meta || {};
-  const toolActivities = restoreToolActivities(meta.toolActivities);
-  const finalization = meta.finalization && typeof meta.finalization === 'object'
-    ? meta.finalization as Record<string, unknown>
-    : null;
-  const incident = meta.incident && typeof meta.incident === 'object';
-  const presentation = resolveToolSummaryPresentation({
-    assistantContent: message.content,
-    assistantError: message.role === 'assistant' && Boolean(incident),
-    summaryFailureReason: typeof finalization?.failureReason === 'string'
-      ? finalization.failureReason
-      : undefined,
-    toolActivities,
-  });
-  return {
-    role: message.role === 'system' ? 'assistant' : message.role,
-    content: presentation.content,
-    error: presentation.error,
-    summaryUnavailable: presentation.summaryUnavailable,
-    retryToolJobId: presentation.retryToolJobId,
-    ts: message.ts,
-    toolActivities,
-    progressUpdates: restoreProgressUpdates(meta.progressUpdates),
-    resultEditProgress: restoreResultEditProgressEvents(meta.resultEditProgress),
-    processingDurationMs: typeof meta.processingDurationMs === 'number'
-      ? meta.processingDurationMs
-      : undefined,
-    resultNodes: parseAssistantResultNodes(meta.resultNodes) ?? undefined,
-  };
-}
-
-interface AgentProgressUpdate {
-  iteration: number;
-  content: string;
-}
-
-function restoreProgressUpdates(value: unknown): Array<{ iteration: number; content: string }> {
-  if (!Array.isArray(value)) return [];
-  return value.slice(0, 50).flatMap((item, index) => {
-    if (!item || typeof item !== 'object') return [];
-    const raw = item as Record<string, unknown>;
-    const content = typeof raw.content === 'string' ? raw.content.trim().slice(0, 4000) : '';
-    if (!content) return [];
-    return [{
-      iteration: typeof raw.iteration === 'number' ? raw.iteration : index + 1,
-      content,
-    }];
-  });
-}
-
-/**
- * T83 — small header shown on every AI message: `模型名 · 回复时间`.
- * Time is progressively formatted (刚刚 → HH:MM → MM-DD HH:MM) via a 30s
- * timer so an open conversation ages the labels without a full re-render.
- */
-function MessageMeta({ modelName, ts }: { modelName?: string; ts?: string }): React.ReactElement | null {
-  const [, setTick] = useState(0);
-  useEffect(() => {
-    const timer = window.setInterval(() => setTick((n) => n + 1), 30000);
-    return () => window.clearInterval(timer);
-  }, []);
-  if (!ts) return null;
-  const time = formatRelativeTime(ts);
-  if (!time) return null;
-  return (
-    <div className="sc-msg-meta" aria-label="回复信息">
-      {modelName && <span className="sc-msg-meta-model">{modelName}</span>}
-      {modelName && <span className="sc-msg-meta-sep" aria-hidden="true">·</span>}
-      <span className="sc-msg-meta-time">{time}</span>
-    </div>
-  );
-}
-
-type PendingApproval = ConversationPendingApproval;
 
 type ApprovalRepairState =
   | { status: 'idle' }
@@ -236,82 +154,9 @@ type ApprovalRepairState =
   | { status: 'skipped'; message: string }
   | { status: 'error'; message: string };
 
-interface ExamplePrompt {
-  icon: IconName;
-  title: string;
-  description: string;
-  prompt: string;
-}
-
-const DEFAULT_EXAMPLE_PROMPTS: ExamplePrompt[] = [
-  {
-    icon: 'bar-chart',
-    title: '分析单细胞数据',
-    description: '上传你的表达矩阵，我来帮你做降维可视化',
-    prompt: '帮我分析这个单细胞RNA数据集',
-  },
-  {
-    icon: 'folder',
-    title: '解释项目结构',
-    description: '了解代码库的设计与组织方式',
-    prompt: '解释一下这个项目的代码结构',
-  },
-  {
-    icon: 'zap',
-    title: '快速开始',
-    description: '查看 AI 能帮你做什么',
-    prompt: 'BioF3 Desktop 能帮我完成哪些任务？',
-  },
-];
-
-interface ExamplePromptsProps {
-  prompts: ExamplePrompt[];
-  onSelect: (prompt: string) => void;
-}
-
-function ExamplePrompts({ prompts, onSelect }: ExamplePromptsProps): React.ReactElement {
-  return (
-    <div className="sc-example-prompts">
-      {prompts.map((item, index) => (
-        <button
-          type="button"
-          key={index}
-          className="sc-example-card"
-          onClick={() => onSelect(item.prompt)}
-          title="点击使用"
-          aria-label={item.title}
-        >
-          <div className="sc-example-icon">
-            <Icon name={item.icon} size={18} />
-          </div>
-          <div className="sc-example-content">
-            <span className="sc-example-title">{item.title}</span>
-            <span className="sc-example-desc">{item.description}</span>
-          </div>
-        </button>
-      ))}
-    </div>
-  );
-}
-
-// ChatModelPreset type + DEFAULT_CHAT_MODEL_PRESETS live in
-// `@/hooks/useAiSettings` — Plan 1.6 §4.5 [HIGH] type dedup.
-
-export interface SimpleChatHandle {
-  newConversation: () => void;
-}
-
-interface SimpleChatProps {
-  projectId: string;
-  conversationId: string | null;
-  onConversationChange: (id: string | null) => void;
-  inputHeight?: number;
-  /**
-   * Whether this instance handles the copilotAsk event. Exactly one mounted
-   * instance may, so it defaults to false and the owner opts in explicitly.
-   */
-  ownsCopilotAsk?: boolean;
-}
+// ExamplePrompt interface + DEFAULT_EXAMPLE_PROMPTS + ExamplePromptsProps + ExamplePrompts moved to
+// ./SimpleChat/{types,helpers}.ts (BLOCK-9.2 PHASE 4).
+// SimpleChatHandle + SimpleChatProps moved to ./SimpleChat/types.ts (BLOCK-9.2 PHASE 4).
 
 export function SimpleChat({
   projectId,
@@ -1822,27 +1667,7 @@ export function ResultEditProgressList({
   );
 }
 
-export function compactStageConclusion(content: string, maxLength = 240): string {
-  const normalized = String(content || '')
-    .trim()
-    .replace(/^(?:好的?|可以)[，,：:]\s*/u, '')
-    .replace(/\s+/gu, ' ');
-  if (!normalized) return '';
-
-  const sentenceEnd = normalized.search(/[。！？]/u);
-  const firstSentence = sentenceEnd >= 0
-    ? normalized.slice(0, sentenceEnd + 1)
-    : normalized;
-  if (firstSentence.length <= maxLength) return firstSentence;
-  return `${firstSentence.slice(0, Math.max(1, maxLength - 1)).trimEnd()}…`;
-}
-
-interface ErrorBannerProps {
-  message: string;
-  severity: 'error' | 'warning' | 'info';
-  showDetails: boolean;
-  technicalDetails?: string;
-}
+// compactStageConclusion + ErrorBannerProps moved to ./SimpleChat/{helpers,types}.ts (BLOCK-9.2 PHASE 4).
 
 function ErrorBanner({ message, severity, showDetails, technicalDetails }: ErrorBannerProps): React.ReactElement {
   const [detailsExpanded, setDetailsExpanded] = useState(false);
