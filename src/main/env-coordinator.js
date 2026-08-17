@@ -35,7 +35,7 @@ const path = require("path");
 const fs = require("fs");
 const { app } = require("electron");
 const { getBuiltInPluginsDir } = require("../platform-compat");
-const { _applyComputeSettings, _loadComputeSettings } = require("./compute-settings");
+const { _applyComputeSettings, _loadComputeSettings } = require("../ipc/compute-settings");
 
 // Re-define IS_DEV locally (mirror of main.js logic)
 // In main.js IS_DEV = !app.isPackaged. We keep the same rule.
@@ -69,8 +69,8 @@ const rendererDevUrl =
 // The implementations are verbatim copies from main.js (PHASE 3
 // extraction: same algorithms, same fallback order).
 
-const { getRuntimeBinCandidates, getPythonRuntimeExecutable } =
-  require("../platform-compat");
+const { getRuntimeBinCandidates } = require("../platform-compat");
+const { getPythonRuntimeExecutable } = require("../../core/shared-backend/runtime-paths");
 
 function _detectSystemRLocal() {
   const { execFileSync } = require("child_process");
