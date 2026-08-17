@@ -62,6 +62,10 @@ declare global {
         close: () => void;
         isMaximized: () => Promise<boolean>;
         onMaximizeChanged: (callback: (isMaximized: boolean) => void) => () => void;
+        /** Mac fullscreen support */
+        isFullScreen: () => Promise<boolean>;
+        toggleFullScreen: () => void;
+        onFullScreenChanged: (callback: (isFullScreen: boolean) => void) => () => void;
       };
       /** 应用级控制 —— 装完运行时后需整体重启（BIOF3_R_HOME 在 main 启动时固化）。 */
       app: {
@@ -310,6 +314,194 @@ declare global {
         ) => () => void;
         onUpdateDownloaded: (cb: () => void) => () => void;
         onError: (cb: (msg: string) => void) => () => void;
+      };
+      // Phase 1: Branch Tab UI - conversation branch management
+      branch: {
+        create: (params: { projectId: string; name: string; parentBranchId?: string }) => Promise<{
+          id: string;
+          projectId: string;
+          name: string;
+          parentBranchId: string | null;
+          createdAt: number;
+          updatedAt: number;
+          isActive: boolean;
+        }>;
+        list: (params: { projectId: string }) => Promise<Array<{
+          id: string;
+          projectId: string;
+          name: string;
+          parentBranchId: string | null;
+          createdAt: number;
+          updatedAt: number;
+          isActive: boolean;
+        }>>;
+        switch: (params: { branchId: string }) => Promise<void>;
+        delete: (params: { branchId: string }) => Promise<void>;
+        rename: (params: { branchId: string; newName: string }) => Promise<void>;
+        getActive: (params: { projectId: string }) => Promise<{
+          id: string;
+          projectId: string;
+          name: string;
+          parentBranchId: string | null;
+          createdAt: number;
+          updatedAt: number;
+          isActive: boolean;
+        } | null>;
+      };
+      // Phase 2: Result Studio - shared results across branches
+      // Phase 4: Added conversation_export type and createFromConversation
+      result: {
+        create: (params: {
+          projectId: string;
+          type: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
+          name: string;
+          data: unknown;
+          config?: Record<string, unknown>;
+          sourceBranchId?: string;
+        }) => Promise<{
+          id: string;
+          projectId: string;
+          type: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
+          name: string;
+          data: unknown;
+          config?: Record<string, unknown>;
+          sourceBranchId: string | null;
+          createdAt: number;
+          updatedAt: number;
+        }>;
+        get: (params: { id: string }) => Promise<{
+          id: string;
+          projectId: string;
+          type: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
+          name: string;
+          data: unknown;
+          config?: Record<string, unknown>;
+          sourceBranchId: string | null;
+          createdAt: number;
+          updatedAt: number;
+        } | null>;
+        list: (params: {
+          projectId: string;
+          options?: {
+            type?: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
+            limit?: number;
+            offset?: number;
+            sortBy?: 'updatedAt' | 'createdAt' | 'name';
+            sortDir?: 'asc' | 'desc';
+          };
+        }) => Promise<Array<{
+          id: string;
+          projectId: string;
+          type: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
+          name: string;
+          sourceBranchId: string | null;
+          updatedAt: number;
+        }>>;
+        update: (params: {
+          id: string;
+          updates: {
+            name?: string;
+            data?: unknown;
+            config?: Record<string, unknown>;
+          };
+        }) => Promise<{
+          id: string;
+          projectId: string;
+          type: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
+          name: string;
+          data: unknown;
+          config?: Record<string, unknown>;
+          sourceBranchId: string | null;
+          createdAt: number;
+          updatedAt: number;
+        } | null>;
+        delete: (params: { id: string }) => Promise<void>;
+        byProject: (params: {
+          projectId: string;
+          options?: {
+            type?: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
+            limit?: number;
+            offset?: number;
+          };
+        }) => Promise<Array<{
+          id: string;
+          projectId: string;
+          type: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
+          name: string;
+          data: unknown;
+          config?: Record<string, unknown>;
+          sourceBranchId: string | null;
+          createdAt: number;
+          updatedAt: number;
+        }>>;
+        // Phase 4: Export conversation to result
+        createFromConversation: (params: {
+          projectId: string;
+          branchId: string;
+          options?: {
+            name?: string;
+            includeMessages?: boolean;
+            generateSummary?: boolean;
+          };
+        }) => Promise<{
+          id: string;
+          projectId: string;
+          type: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
+          name: string;
+          data: unknown;
+          config?: Record<string, unknown>;
+          sourceBranchId: string | null;
+          createdAt: number;
+          updatedAt: number;
+        }>;
+        version: {
+          create: (params: {
+            resultId: string;
+            data: unknown;
+            config?: Record<string, unknown>;
+            createdByBranchId?: string;
+          }) => Promise<{
+            id: string;
+            resultId: string;
+            version: number;
+            data: unknown;
+            config?: Record<string, unknown>;
+            createdAt: number;
+            createdByBranchId: string | null;
+          }>;
+          get: (params: { id: string }) => Promise<{
+            id: string;
+            resultId: string;
+            version: number;
+            data: unknown;
+            config?: Record<string, unknown>;
+            createdAt: number;
+            createdByBranchId: string | null;
+          } | null>;
+          // Phase 4: Get version by resultId and version number
+          getByNumber: (params: { resultId: string; version: number }) => Promise<{
+            id: string;
+            resultId: string;
+            version: number;
+            data: unknown;
+            config?: Record<string, unknown>;
+            createdAt: number;
+            createdByBranchId: string | null;
+          } | null>;
+          list: (params: {
+            resultId: string;
+            limit?: number;
+            offset?: number;
+          }) => Promise<Array<{
+            id: string;
+            resultId: string;
+            version: number;
+            data: unknown;
+            config?: Record<string, unknown>;
+            createdAt: number;
+            createdByBranchId: string | null;
+          }>>;
+        };
       };
     };
     process?: {

@@ -19,6 +19,7 @@ const {
   dialog,
   session,
   net,
+  Menu,
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
@@ -402,6 +403,12 @@ async function createWindow() {
     // on Windows/Linux it draws the square WindowControls.
     frame: false,
     backgroundColor: "#1f2330",
+    // Mac fullscreen support: enable native fullscreen behavior
+    // fullscreenable: true allows the green button and Cmd+Ctrl+F to enter true fullscreen
+    // simpleFullScreen: false uses the native macOS fullscreen transition (hides menu bar)
+    fullscreenable: true,
+    fullscreen: false,
+    simpleFullScreen: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -564,6 +571,18 @@ async function createWindow() {
   };
   windowForEvents.on("maximize", () => publishMaximizedState(true));
   windowForEvents.on("unmaximize", () => publishMaximizedState(false));
+
+  // Mac fullscreen event handlers — sync state to renderer for UI consistency
+  windowForEvents.on("enter-full-screen", () => {
+    if (!windowForEvents.isDestroyed() && windowForEvents.webContents && !windowForEvents.webContents.isDestroyed()) {
+      windowForEvents.webContents.send("window:fullscreen-changed", true);
+    }
+  });
+  windowForEvents.on("leave-full-screen", () => {
+    if (!windowForEvents.isDestroyed() && windowForEvents.webContents && !windowForEvents.webContents.isDestroyed()) {
+      windowForEvents.webContents.send("window:fullscreen-changed", false);
+    }
+  });
 }
 
 function setupAgentWorkbenchFlagsIpc() {
@@ -600,6 +619,18 @@ function setupWindowIpc() {
   ipcMain.handle("window:isMaximized", (event) => {
     const targetWindow = resolveWindowForSender(event);
     return targetWindow ? targetWindow.isMaximized() === true : false;
+  });
+
+  // Fullscreen IPC (Mac fullscreen support)
+  ipcMain.handle("window:isFullScreen", (event) => {
+    const targetWindow = resolveWindowForSender(event);
+    return targetWindow ? targetWindow.isFullScreen() : false;
+  });
+  ipcMain.on("window:toggleFullScreen", (event) => {
+    const targetWindow = resolveWindowForSender(event);
+    if (targetWindow) {
+      targetWindow.setFullScreen(!targetWindow.isFullScreen());
+    }
   });
 
   // 重启应用 —— 装完 R/Python 运行时后必须整体重启才生效：
@@ -990,12 +1021,16 @@ async function main() {
   const { setupAiSettingsIpc } = require("./ipc/ai-settings");
   const { setupFileDialogIpc } = require("./ipc/file-dialog");
   const { setupDataManagementIpc } = require("./ipc/data-management");
+  const { setupBranchIpc } = require("./ipc/branch-handlers");
+  const { setupResultIpc } = require("./ipc/result-handlers");
   setupAiSettingsIpc();
   setupComputeSettingsIpc();
   setupTelemetryIpc();
   setupHarnessCapabilitiesIpc();
   setupFileDialogIpc({ mainWindow });
   setupDataManagementIpc();
+  setupBranchIpc();
+  setupResultIpc();
   // BLOCK-9.1 PHASE 2: mid-risk setup functions with dependency injection
   const { setupRuntimeIpc } = require("./ipc/runtime-status");
   const { setupBackendLifecycleIpc } = require("./ipc/backend-lifecycle");
@@ -1064,3 +1099,77 @@ app.on("before-quit", () => {
     }
   }
 });
+
+// ── Application Menu with Fullscreen Support ──────────────────
+function setupAppMenu() {
+  if (process.platform !== "darwin") return;
+
+  const template = [
+    {
+      label: app.name,
+      submenu: [
+        { role: "about" },
+        { type: "separator" },
+        {
+          label: "Enter Full Screen",
+          accelerator: "Cmd+Ctrl+F",
+          click: () => {
+            const win = BrowserWindow.getFocusedWindow();
+            if (win) {
+              win.setFullScreen(!win.isFullScreen());
+            }
+          },
+        },
+        { type: "separator" },
+        { role: "services" },
+        { type: "separator" },
+        { role: "hide" },
+        { role: "hideOthers" },
+        { role: "unhide" },
+        { type: "separator" },
+        { role: "quit" },
+      ],
+    },
+    {
+      label: "Edit",
+      submenu: [
+        { role: "undo" },
+        { role: "redo" },
+        { type: "separator" },
+        { role: "cut" },
+        { role: "copy" },
+        { role: "paste" },
+        { role: "selectAll" },
+      ],
+    },
+    {
+      label: "View",
+      submenu: [
+        { role: "reload" },
+        { role: "forceReload" },
+        { role: "toggleDevTools" },
+        { type: "separator" },
+        { role: "resetZoom" },
+        { role: "zoomIn" },
+        { role: "zoomOut" },
+        { type: "separator" },
+        { role: "togglefullscreen" },
+      ],
+    },
+    {
+      label: "Window",
+      submenu: [
+        { role: "minimize" },
+        { role: "zoom" },
+        { type: "separator" },
+        { role: "front" },
+      ],
+    },
+  ];
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
+}
+
+// Initialize application menu
+setupAppMenu();
