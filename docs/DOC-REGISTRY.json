@@ -1049,6 +1049,16 @@
       "truthDomain": "block-9-2-mega-file-refactor",
       "entrypoint": "docs/block-9-2-mega-file-refactor-plan.md",
       "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "BLOCK-9.2-PHASE-5-DECISION",
+      "path": "docs/block-9-2-phase-5-useSkillStore-decision.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "block-9-2-mega-file-refactor",
+      "entrypoint": "docs/block-9-2-mega-file-refactor-plan.md",
+      "archivePolicy": "retain_stable_path"
     }
   ]
 }
