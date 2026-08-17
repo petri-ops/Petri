@@ -257,6 +257,36 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
     },
   },
 
+  // PHASE 1: Branch Tab UI — branch namespace 1:1 镜像 electron.d.ts L319-350
+  //（不暴露 branch-handlers.js 里的 project/message 通道；d.ts 契约仅含以下 6 个）
+  branch: {
+    create: (params) => ipcRenderer.invoke('branch:create', params),
+    list: (params) => ipcRenderer.invoke('branch:list', params),
+    switch: (params) => ipcRenderer.invoke('branch:switch', params),
+    delete: (params) => ipcRenderer.invoke('branch:delete', params),
+    rename: (params) => ipcRenderer.invoke('branch:rename', params),
+    getActive: (params) => ipcRenderer.invoke('branch:active', params),
+  },
+
+  // PHASE 1: Result Studio — result namespace 1:1 镜像 electron.d.ts L353-505
+  //（validTypes 在 result-handlers.js 已包含 conversation_export：见 C-002 修复）
+  result: {
+    create: (params) => ipcRenderer.invoke('result:create', params),
+    get: (params) => ipcRenderer.invoke('result:get', params),
+    list: (params) => ipcRenderer.invoke('result:list', params),
+    update: (params) => ipcRenderer.invoke('result:update', params),
+    delete: (params) => ipcRenderer.invoke('result:delete', params),
+    byProject: (params) => ipcRenderer.invoke('result:byProject', params),
+    createFromConversation: (params) =>
+      ipcRenderer.invoke('result:createFromConversation', params),
+    version: {
+      create: (params) => ipcRenderer.invoke('result:version:create', params),
+      get: (params) => ipcRenderer.invoke('result:version:get', params),
+      getByNumber: (params) => ipcRenderer.invoke('result:version:getByNumber', params),
+      list: (params) => ipcRenderer.invoke('result:version:list', params),
+    },
+  },
+
   // macOS 小团队更新（OSS 清单 + DMG）
   updater: {
     check: () => ipcRenderer.invoke('updater:check'),

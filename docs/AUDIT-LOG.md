@@ -51,7 +51,29 @@
 **UI-170 / 171 / 172 审计 entry 写入** `docs/ui-productization-audit.md`（desktop refactor / result view refactor / plugin-manager refactor 三条 entry）。
 
 **当前 active 工作包**：BLOCK-9.2（PHASE 4 进行中）。**不外推** packaged / Provider / GA / P7 / dist staleness G1+ / 不重新激活 BLOCK-9/9.1/8/7/6/5/4/3/2 / 不外推 UI-157/158/159 实机 / 不动 agent-tools/* / agent-transcripts/* | BLOCK-9.2-MEGA-FILE-REFACTOR / PHASE-1+2+3-CLOSEOUT |
+| 2026-08-17 | **BLOCK-10-AUDIT-CLOSEOUT PHASE 1 收口（P0 用户可见 critical C-001 + C-002 修复）**：依据 `docs/code-audit-closeout-plan.md` §PHASE 1（仅 2 项修复范围），1 个 commit 落地（C-001 IPC bridge namespace + C-002 result:create conversation_export 类型契约一致性）。
 
+**C-001 修复**：`src/preload.js` 顶层新增 2 个 namespace，**精确按 `electron.d.ts:319-505` 已声明方法 1:1 暴露**，不动现有 16 个 namespace 任何 key 名：
+- `biof3Desktop.branch` (L260-269)：6 方法 create/list/switch/delete/rename/getActive → `branch:create` / `branch:list` / `branch:switch` / `branch:delete` / `branch:rename` / `branch:active`
+- `biof3Desktop.result` (L271-288)：7 方法 create/get/list/update/delete/byProject/createFromConversation + `result.version` 子 namespace 4 方法 create/get/getByNumber/list → `result:create` / `result:get` / `result:list` / `result:update` / `result:delete` / `result:byProject` / `result:createFromConversation` + `result:version:create` / `result:version:get` / `result:version:getByNumber` / `result:version:list`
+- 渲染端 `branchBridge.ts:21 getBridge('branch')` + `resultBridge.ts:55 getBridge('result')` 不再返回 null；Branch Tab / Result Studio 不再抛 "bridge not available"
+
+**C-002 修复**：`src/ipc/result-handlers.js` 2 处：
+- L59 `validTypes` 数组追加 `'conversation_export'`（原 5 项 → 6 项）→ `result:create({type:'conversation_export'})` 不再被 validTypes 拒
+- L352 `createFromConversation` `createResult(..., 'text', ...)` 改为 `'conversation_export'`，与 `electron.d.ts:356-357` union + `result.types.ts:12` 对齐
+
+**DB migration collateral（必要的修复伴随）**：`src/migrations/007_result_conversation_export_type.sql` — C-002 修复让 IPC 层接受 `conversation_export`，但 `results.type` 列的 CHECK 约束仅含原 5 项，DB 仍会拒。12-step SQLite table-rebuild 扩展 CHECK 集合为 6 项；遵循 Global Constraints（无 INSERT OR REPLACE / PRAGMA / AUTOINCREMENT / BEGIN/COMMIT）；migration-runner 自动在 transaction 内跑。新 DB 上由 006 先 CREATE results 后 007 再 rebuild。
+
+**3 个新测试**（共 9 PASS）：
+- `test/preload-branch-result-namespaces.test.mjs`（3 tests）：vm harness 执行 `src/preload.js`，断言 `biof3Desktop.branch` 6 方法 + `biof3Desktop.result` 7 方法 + `result.version` 4 方法全部映射到正确 channel；不变性守住（18 个原 namespace 全部保留 + branch/result 新增）
+- `test/result-handlers-valid-types.test.mjs`（2 tests）：C-002 validTypes 含 `conversation_export`；createFromConversation createResult 实参是 `'conversation_export'` 而非 `'text'`
+- `test/migration-007-conversation-export.test.mjs`（4 tests）：migration 007 不含禁词 + CHECK 含 `conversation_export` + 12-step rebuild 完整 + 依赖 006 先建表
+
+**验证矩阵**：tsc 0 / docs:check PASS（98 doc）/ chf0-critical **33/33 PASS** / 9 个新测试 **9/9 PASS** / vitest（result-studio 18 文件 160 tests + desktopBridge 9 + events 5 + result-artifact 8 + result-manifest 6 + result-studio-interaction-client 1 = **189/189 PASS**）。不变性守住：`frontend/src/lib/electron.d.ts` 0 diff / `frontend/src/lib/desktopBridge.ts` 0 diff / 4 page 0 diff / `core/shared-backend/*` 全部 0 diff / `core/r-server/mcp/branch-context.js` 0 diff（注：branchBridge/resultBridge/types/branch-context 是先前 git status 中的 `??` 未追踪文件，非本工作包改动）。**pre-existing drift（不属于本工作包）**：`test/window-controls.test.mjs:201` 断言 `['window:minimize','window:maximize','window:close']` 缺 `window:toggleFullScreen`（git stash 验证 pre-existing），不影响本 PHASE 1 范围。
+
+**不变量守住**：`src/preload.js` 顶层 16 个已有 namespace 0 改动（仅新增 branch + result）/ `frontend/src/lib/electron.d.ts` 0 diff / `frontend/src/lib/desktopBridge.ts` 0 diff / 4 page（BranchTabs / ResultStudio / 等）0 diff / `core/shared-backend/*` 全部 0 diff / `agent-tools/*` 0 diff / `agent-transcripts/*` 0 diff。
+
+**范围严格**：仅 C-001 + C-002，未触碰 PHASE 2/3/4 任何发现（PR-001 SQLite 归档 / E-017 backend exit handler / S-001..S-007 / C-001-rserver moduleGate 等均不外推）。**当前 active 工作包**：BLOCK-10-AUDIT-CLOSEOUT（PHASE 2 待启动；PHASE 1 已收口） | BLOCK-10-AUDIT-CLOSEOUT / PHASE-1-CLOSEOUT |
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
