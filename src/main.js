@@ -573,16 +573,35 @@ async function createWindow() {
   windowForEvents.on("unmaximize", () => publishMaximizedState(false));
 
   // Mac fullscreen event handlers — sync state to renderer for UI consistency
-  windowForEvents.on("enter-full-screen", () => {
-    if (!windowForEvents.isDestroyed() && windowForEvents.webContents && !windowForEvents.webContents.isDestroyed()) {
-      windowForEvents.webContents.send("window:fullscreen-changed", true);
-    }
-  });
-  windowForEvents.on("leave-full-screen", () => {
-    if (!windowForEvents.isDestroyed() && windowForEvents.webContents && !windowForEvents.webContents.isDestroyed()) {
-      windowForEvents.webContents.send("window:fullscreen-changed", false);
-    }
-  });
+  // On macOS frameless windows, manually hide the Dock when entering fullscreen
+  // to achieve true fullscreen behavior (no menu bar, no Dock).
+  if (process.platform === "darwin") {
+    windowForEvents.on("enter-full-screen", () => {
+      // Hide Dock and menu bar on macOS for true fullscreen
+      app.dock?.hide();
+      if (!windowForEvents.isDestroyed() && windowForEvents.webContents && !windowForEvents.webContents.isDestroyed()) {
+        windowForEvents.webContents.send("window:fullscreen-changed", true);
+      }
+    });
+    windowForEvents.on("leave-full-screen", () => {
+      // Restore Dock when exiting fullscreen
+      app.dock?.show();
+      if (!windowForEvents.isDestroyed() && windowForEvents.webContents && !windowForEvents.webContents.isDestroyed()) {
+        windowForEvents.webContents.send("window:fullscreen-changed", false);
+      }
+    });
+  } else {
+    windowForEvents.on("enter-full-screen", () => {
+      if (!windowForEvents.isDestroyed() && windowForEvents.webContents && !windowForEvents.webContents.isDestroyed()) {
+        windowForEvents.webContents.send("window:fullscreen-changed", true);
+      }
+    });
+    windowForEvents.on("leave-full-screen", () => {
+      if (!windowForEvents.isDestroyed() && windowForEvents.webContents && !windowForEvents.webContents.isDestroyed()) {
+        windowForEvents.webContents.send("window:fullscreen-changed", false);
+      }
+    });
+  }
 }
 
 function setupAgentWorkbenchFlagsIpc() {
