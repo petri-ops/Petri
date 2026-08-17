@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { useWorkspacePanelsContext } from './WorkspacePanelsContext';
 import { getBridge } from '@/lib/desktopBridge';
+import { BranchTabsWrapper } from '@/components/branch/BranchTabsWrapper';
 import styles from './TitleBar.module.css';
 
 /**
@@ -95,6 +96,7 @@ function useDesktopWindowControls(): {
   isMaximized: boolean;
   minimize: () => void;
   toggleMaximize: () => void;
+  toggleFullScreen: () => void;
   close: () => void;
   onTitleBarDoubleClick: (event: React.MouseEvent<HTMLElement>) => void;
 } {
@@ -152,6 +154,7 @@ function useDesktopWindowControls(): {
     isMaximized,
     minimize: () => desktopWindow?.minimize?.(),
     toggleMaximize: () => desktopWindow?.maximize?.(),
+    toggleFullScreen: () => desktopWindow?.toggleFullScreen?.(),
     close: () => desktopWindow?.close?.(),
     onTitleBarDoubleClick: (event) => {
       // Only the drag region (header surface) should trigger maximize; clicking
@@ -186,6 +189,11 @@ export function TitleBar(): React.ReactElement {
     onSelectResult,
   } = panels.titleBar;
 
+  // Get conversations from WorkspacePanels context (set by ProjectWorkspace)
+  const conversations = panels.titleBar.conversations || [];
+  const activeConvId = panels.titleBar.activeConvId;
+  const onSelectConversation = panels.titleBar.onSelectConversation;
+  const [convDropdownOpen, setConvDropdownOpen] = useState(false);
   const [resultMenuOpen, setResultMenuOpen] = useState(false);
   const resultTriggerRef = useRef<HTMLButtonElement>(null);
   const resultMenuItemsRef = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -324,6 +332,16 @@ export function TitleBar(): React.ReactElement {
                     strokeWidth={2.2}
                   />
                 </button>
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className={styles.macTrafficBtn}
+                  onClick={win.toggleFullScreen}
+                  aria-label="全屏"
+                  title="全屏"
+                >
+                  <Icon name="expand" size={11} strokeWidth={2.2} />
+                </button>
               </>
             ) : (
               <div className={styles.trafficPlaceholder} aria-hidden="true" />
@@ -349,6 +367,57 @@ export function TitleBar(): React.ReactElement {
           <Icon name="folder" size={15} />
           <span className={styles.centerTitleText}>{displayTitle}</span>
         </div>
+        <BranchTabsWrapper />
+        {/* Conversation selector — between branch tabs and result picker */}
+        {conversations.length > 0 && (
+          <div className={styles.convSelector}>
+            <button
+              type="button"
+              className={styles.convSelectorBtn}
+              onClick={() => setConvDropdownOpen((o) => !o)}
+              title="切换会话"
+              aria-label="切换会话"
+              aria-expanded={convDropdownOpen}
+            >
+              <Icon name="message-circle" size={13} />
+              <span className={styles.convSelectorText}>
+                {conversations.find(c => c.id === activeConvId)?.title?.slice(0, 12) ||
+                 conversations[0]?.title?.slice(0, 12) ||
+                 '会话'}
+              </span>
+              <Icon name={convDropdownOpen ? 'chevron-up' : 'chevron-down'} size={11} />
+            </button>
+            {convDropdownOpen && (
+              <>
+                <button
+                  type="button"
+                  className={styles.convSelectorOverlay}
+                  onClick={() => setConvDropdownOpen(false)}
+                  aria-label="关闭会话列表"
+                />
+                <div className={styles.convSelectorDropdown}>
+                  {conversations.map((conv) => (
+                    <button
+                      key={conv.id}
+                      type="button"
+                      className={styles.convSelectorItem}
+                      onClick={() => {
+                        onSelectConversation?.(conv.id);
+                        setConvDropdownOpen(false);
+                      }}
+                    >
+                      <Icon name={conv.parent_id ? 'git-branch' : 'message-circle'} size={12} />
+                      <span>{conv.title || '无标题会话'}</span>
+                      {conv.parent_id && (
+                        <span className={styles.convSelectorBadge}>分支</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
         {activeResult && (
           <div className={styles.resultPicker}>
             <button

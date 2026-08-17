@@ -78,6 +78,7 @@ export type IconName =
   | 'square-stack'
   | 'minus'
   | 'restore'
+  | 'expand'
   | 'more-horizontal'
   | 'help-circle'
   | 'alert-circle'
@@ -526,6 +527,15 @@ const paths: Record<IconName, React.ReactNode> = {
     <>
       <rect x="3" y="8" width="13" height="13" rx="2" />
       <path d="M8 3h13a2 2 0 0 1 2 2v13" />
+    </>
+  ),
+  // Expand — fullscreen icon (arrows pointing to corners)
+  expand: (
+    <>
+      <polyline points="15 3 21 3 21 9" />
+      <polyline points="9 21 3 21 3 15" />
+      <line x1="21" y1="3" x2="14" y2="10" />
+      <line x1="3" y1="21" x2="10" y2="14" />
     </>
   ),
   'more-horizontal': (
