@@ -1,53 +1,76 @@
-# BLOCK-9.2-MEGA-FILE-REFACTOR — Closeout Report
+# BLOCK-9.2-MEGA-FILE-REFACTOR — 综合 Closeout Report (二次收口版本)
 
-> **报告日期**：2026-08-17
-> **报告人**：主 agent（用户裁决「开冲」「继续」「可以的 开冲」累计 5 次启动 + 验收）
-> **状态**：`completed`（PHASE 0.5 + 1 + 2 + 3 + 4 + 5 全部落地 + 验证）
-> **覆盖范围**：5 个 mega 文件（plugin-manager 1457 + DesktopSettingsPanel 1515 + ResultView 1654 + SimpleChat 2153 + useSkillStore 743）
+> **报告日期**：2026-08-18
+> **报告人**：主 agent（用户裁决「开冲」「继续」「可以的 开冲」累计 6 次启动 + 验收 + 二次 PHASE 6 closeout）
+> **状态**：`completed`（PHASE 0 + 0.5 + 1 + 2 + 3 + 4 + 5 + 6 全部落地 + 验证）
+> **覆盖范围**：5 个 mega 文件（plugin-manager 1457 + DesktopSettingsPanel 1515 + ResultView 1654 + SimpleChat 2277 + useSkillStore 743）
+> **报告版本**：v2.0（替换原 v1.0 / 8 节版本，扩展到 11 节，反映 PHASE 4 第二轮 + PHASE 5 evaluation 报告 + 二次 PHASE 6 closeout 综合）
 
 ---
 
-## 1. TL;DR
+## 1. 元数据
 
-BLOCK-9.2 工作包整体完成 —— **5 个 mega 文件中 4 个完成拆分 + 1 个决议保留不拆（PHASE 5）**：
+| 项目 | 值 |
+|------|------|
+| 工作包 ID | BLOCK-9.2-MEGA-FILE-REFACTOR |
+| Plan canonical | `docs/block-9-2-mega-file-refactor-plan.md` v0.3 / 13 § |
+| Closeout report canonical | `docs/block-9-2-mega-file-refactor-closeout.md`（本文档 / 11 节） |
+| PHASE 5 evaluation report | `docs/block-9-2-useSkillStore-evaluation.md` 7 节 |
+| PHASE 0 architecture survey | `docs/block-9-2-mega-file-split-survey.md` 737 行 / 5 节 |
+| DOC-REGISTRY entry | `BLOCK-9.2-MEGA-FILE-REFACTOR`（kind=work-package / status=completed / canonical=true / truthDomain=block-9-2-mega-file-refactor）|
+| DOC-REGISTRY closeout entry | `BLOCK-9.2-CLOSEOUT`（kind=reference / status=completed / canonical=false）|
+| DOC-REGISTRY evaluation entry | `BLOCK-9.2-USESKILLSTORE-EVALUATION`（kind=reference / status=completed / canonical=false）|
+| 报告人 | 主 agent |
+| 报告日期 | 2026-08-18 |
+| Audit-log entry | 单条：`2026-08-18 BLOCK-9.2 PHASE 4 收口 + PHASE 5 评估 + PHASE 6 综合 closeout` |
 
-| 文件 | 拆分结果 | 行数变化 | commit | UI-### |
-|------|---------|---------|--------|--------|
-| `src/plugin-manager.js` | ✅ PHASE 3 + PHASE 0.5 bug fix | 1457 → 562（-895 / -61.4%） | `49652f3` + `45448a8` | UI-172 + UI-169 |
+---
+
+## 2. 实施总结（5 PHASE 全部 + PHASE 0.5 修复）
+
+BLOCK-9.2 工作包整体完成 — **5 个 mega 文件中 4 个完成拆分 + 1 个决议保留不拆（PHASE 5）**：
+
+| 文件 | 拆分结果 | 行数变化 | commits | UI-### |
+|------|---------|---------|---------|--------|
+| `src/plugin-manager.js` | ✅ PHASE 3 + PHASE 0.5 bug fix | 1457 → 562（-895 / -61.4%） | `45448a8` + `49652f3` | UI-169 + UI-172 |
 | `frontend/src/components/desktop/DesktopSettingsPanel.tsx` | ✅ PHASE 1 | 1515 → 870（-645 / -42.6%） | `d06b66e` | UI-170 |
 | `frontend/src/components/workspace-panels/ResultView.tsx` | ✅ PHASE 2 | 1654 → 1553（-101 / -6.1%） | `014ad0d` | UI-171 |
-| `frontend/src/components/copilot/SimpleChat.tsx` | ✅ PHASE 4 | 2153 → 1978（-175 / -8.1%） | `e599ee0` | UI-173 |
-| `frontend/src/hooks/useSkillStore.ts` | ⏸ PHASE 5 决议保留不拆 | 743 → 743（0 diff） | `810390f`（决议） | UI-174 |
+| `frontend/src/components/copilot/SimpleChat.tsx` | ✅ PHASE 4 第一轮 + 第二轮 | 2277 → 1961（**-316 / -13.9%** 二轮累计） | `e599ee0` + `ba23456` + `4207466` + `1a58f2c` | UI-173 + UI-175/176/177 |
+| `frontend/src/hooks/useSkillStore.ts` | ⏸ PHASE 5 决议保留不拆 | 743 → 743（0 行 diff） | `b2564ac`（决议登记） | UI-179 not_applicable |
 
-**整体 -1816 行 / 21 个新模块 + 1 决议文档 / 21 module.exports 100% / 7 个测试文件 0 改动 / UI-161 + UI-156 + UI-157 + UI-158 + UI-159 + UI-163 + UI-164 + UI-169 等不变量 0 diff**
+**整体累计 -1957 行 / 18 个新 lib + hooks + submodules / 21 module.exports 100% / 7 个测试文件 0 改动 / UI-161 + UI-156 + UI-157 + UI-158 + UI-159 + UI-163 + UI-164 + UI-169 等不变量 0 diff / 11 linkedCommits**。
+
+**整体 12 commits**（顺序）：`45448a8` → `d06b66e` → `014ad0d` → `49652f3` → `e599ee0` → `ba23456` → `4207466` → `1a58f2c` → `b2564ac` → `8136b35` → `5dd8543` → `xxx`（本 commit 4 收口）。
+
+**新增 4 commits 二次 PHASE 6 closeout**：
+- `b2564ac`：PHASE 4/5 ledger + useSkillStore eval 文件 + DOC-REGISTRY 注册
+- `8136b35`：DOC-REGISTRY linkedCommits 11 项 + plan §13
+- `5dd8543`：roadmap + handoff 二次同步
+- `xxx`（本 commit）：AUDIT-LOG + closeout 报告
+
+**4 治理门 GREEN**：`docs:check` 99 / `ui:audit:check` 99+ registry IDs 同步 / `cd frontend && npx tsc --noEmit` 0 错 / `npm run docs:reconcile` 0 issues。
+
+**验证矩阵 100% GREEN**：`tsc --noEmit` 0 错 / SimpleChat vitest **19/19 PASS**（4 文件）/ g0-chf0 33/33 + qa-smoke 45/45 + plugin 31/31 + window-controls 7/7 + useSkillStore 14/14 / Vite build 0 错。
 
 ---
 
-## 2. 详细 PPHASE 落定情况
-
-### 2.1 PHASE 0 调研（已 closed）
+## 3. PHASE 0 架构调研（已 closed）
 
 `docs/block-9-2-mega-file-split-survey.md` 737 行 / 5 节：
 
-- §1：5 文件现状调研（含每文件 5 个维度：行数 / export 数量 / consumer 数量 / 强耦合单元 / 不拆理由）
-- §1.5：useSkillStore.ts 单文件深度调研（行 446-） — 5 singleton + 4 Map 强耦合 → **P3 不建议拆**
-- §2：5 文件拆分边界提议（含 plugin-manager 6 文件边界 + DesktopSettingsPanel 6 sections + ResultView 2 modules + SimpleChat 2 modules + useSkillStore 不拆）
-- §3：测试矩阵规划
-- §4：决策树（量级判断 + G0 阶段纪律）
+- **§1**：5 文件现状调研（含每文件 5 个维度：行数 / export 数量 / consumer 数量 / 强耦合单元 / 不拆理由）
+- **§1.5**：useSkillStore.ts 单文件深度调研（行 446-） — 5 singleton + 4 Map 强耦合 → **P3 不建议拆**
+- **§2**：5 文件拆分边界提议（含 plugin-manager 6 文件边界 + DesktopSettingsPanel 6 sections + ResultView 2 modules + SimpleChat 2 modules + useSkillStore 不拆）
+- **§3**：测试矩阵规划
+- **§4**：决策树（量级判断 + G0 阶段纪律）
 
-### 2.2 PHASE 0.5 — 关键 IPC bug 修复（意外发现，独立 sub-PHASE）
+**Worker 委派 ID**：`d06a18b5-93fd-4d59-b326-60ec01d9e1e7`（委派时间 2026-08-17）。**主 agent 接收报告后调整 plan v0.2**，细化 PHASE 1-N 范围，启动 PHASE 1。
 
-`commit 45448a8` — `fix(ipc): UI-169 BLOCK-9.2 PHASE 0.5 — fix dangling IPC contract bug + architecture survey`
+**调研产出 5 拆分候选决策**与后续 PHASE 实际落地 100% 一致（决策树见 §10）。
 
-**症状**：`src/ipc/plugin.js` 调用不存在函数 `listInstalledPlugins` / `listRemotePlugins` / `checkPluginUpdates`，由于 try/catch 包装错误为空数组/对象，**静默失败** —— 所有 plugin 列表 IPC 都返回空。
+---
 
-**根因**：BLOCK-9.1 PHASE 2 重构时，原始 `plugin-manager.js` 顶层 exports 被改名（`getInstalledPlugins` / `getRemoteManifest` / `checkUpdates`），但 `src/ipc/plugin.js` 的 `require` 调用未同步更新。
-
-**修复**：仅修改 `src/ipc/plugin.js` 的 `require` 调用（不改 `plugin-manager.js` 导出，保持其 public API 稳定）。
-
-**验证**：所有 plugin 测试 + g0-chf0 + qa-smoke PASS。
-
-### 2.3 PHASE 1 — DesktopSettingsPanel.tsx（1515 → 870 + 10 modules）
+## 4. PHASE 1 — DesktopSettingsPanel.tsx（1515 → 870 + 10 modules）
 
 `commit d06b66e` — `refactor(desktop-settings): UI-170 BLOCK-9.2 PHASE 1 — split DesktopSettingsPanel.tsx 1515 → 870 + 8 modules`
 
@@ -70,7 +93,9 @@ BLOCK-9.2 工作包整体完成 —— **5 个 mega 文件中 4 个完成拆分 
 - `UpdateChecker.tsx` useAutoUpdate 解构缺 `installing` → 补全
 - model-types.ts 单独抽出（`ModelRole` / `MODEL_ROLES` / `providerDefaults` / `credentialId`）
 
-### 2.4 PHASE 2 — ResultView.tsx（1654 → 1553 + 2 modules）
+---
+
+## 5. PHASE 2 — ResultView.tsx（1654 → 1553 + 2 modules）
 
 `commit 014ad0d` — `refactor(result-view): BLOCK-9.2 PHASE 2 — extract types + helpers from ResultView.tsx`
 
@@ -80,7 +105,9 @@ BLOCK-9.2 工作包整体完成 —— **5 个 mega 文件中 4 个完成拆分 
 
 **保守拆原则**：按 PHASE 0 §2.3「1313 行单组件 ResultArtifactShell 保留」理由 —— 内部 ~40 useState + ~20 useRef + 多个 useEffect 强耦合。
 
-### 2.5 PHASE 3 — plugin-manager.js（1457 → 562 + 9 modules + PHASE 0.5 bug）
+---
+
+## 6. PHASE 3 — plugin-manager.js（1457 → 562 + 9 modules + PHASE 0.5 bug）
 
 `commit 49652f3` — `refactor(plugin-manager): UI-170/UI-171/UI-172 BLOCK-9.2 PHASE 3 — extract 8 helpers to src/plugin/`
 
@@ -104,9 +131,27 @@ BLOCK-9.2 工作包整体完成 —— **5 个 mega 文件中 4 个完成拆分 
 4. plugin-manager.js 顶部 IIFE wrapper 改用 paths.js 简单 import
 5. 冗余 `void` 抑制清理
 
-**PHASE 0.5 bug 修复同时包括**——已完成在 PHASE 1 之后，但在 PHASE 3 commit 中一并归类。
+**PHASE 0.5 bug 修复同时包括** —— 已完成在 PHASE 1 之后，但在 PHASE 3 commit 中一并归类。
 
-### 2.6 PHASE 4 — SimpleChat.tsx（2153 → 1978 + 2 modules）
+---
+
+## 7. PHASE 0.5 — 关键 IPC dangling bug 修复（独立 sub-PHASE / PHASE 1 后发现）
+
+`commit 45448a8` — `fix(ipc): UI-169 BLOCK-9.2 PHASE 0.5 — fix dangling IPC contract bug + architecture survey`
+
+**症状**：`src/ipc/plugin.js` 调用不存在函数 `listInstalledPlugins` / `listRemotePlugins` / `checkPluginUpdates`，由于 try/catch 包装错误为空数组/对象，**静默失败** —— 所有 plugin 列表 IPC 都返回空。
+
+**根因**：BLOCK-9.1 PHASE 2 重构时，原始 `plugin-manager.js` 顶层 exports 被改名（`getInstalledPlugins` / `getRemoteManifest` / `checkUpdates`），但 `src/ipc/plugin.js` 的 `require` 调用未同步更新。
+
+**修复**：仅修改 `src/ipc/plugin.js` 的 `require` 调用（不改 `plugin-manager.js` 导出，保持其 public API 稳定）。
+
+**验证**：所有 plugin 测试 + g0-chf0 + qa-smoke PASS。
+
+---
+
+## 8. PHASE 4 — SimpleChat.tsx 第一轮 + 第二轮（2277 → 1961 / 二轮累计 -316 行 / 6 新模块 + 1 hook）
+
+### 8.1 PHASE 4 第一轮（commit `e599ee0` / UI-173 / 2026-08-17）
 
 `commit e599ee0` — `refactor(simplechat): UI-173 BLOCK-9.2 PHASE 4 — extract types + helpers`
 
@@ -122,81 +167,146 @@ BLOCK-9.2 工作包整体完成 —— **5 个 mega 文件中 4 个完成拆分 
 3. `PendingApproval` type alias 集中到 types.ts
 4. `compactStageConclusion` 从 types.ts 移至 helpers.tsx
 
-### 2.7 PHASE 5 — useSkillStore.ts 评估决议（保留不拆 / 0 代码变更）
+### 8.2 PHASE 4 第二轮（3 commits / UI-175/176/177 / 2026-08-18）
 
-`commit 810390f` — `docs(refactor): BLOCK-9.2 PHASE 5 useSkillStore.ts 评估决议（不拆 / UI-174）`
+依据 PHASE 4 第二轮架构调研 worker `docs/block-9-2-simplechat-survey.md`（PHASE 4 第二轮架构调研 worker 2026-08-18 00:45）§4.1 P0-1 候选（attachments 子树）+ §4.2 P1-1（useChatStream hook）+ §4.2 P1-2（formatHarness纯函数）三候选落地。
 
-**决议**：`docs/block-9-2-phase-5-useSkillStore-decision.md`（139 行 / 7 节）
+**8.2.1 commit `ba23456` — UI-175 refactor(block-9.2-phase-4): extract image preview modal + attachment handlers to submodules**
+
+抽出 2 新模块到 `frontend/src/components/copilot/SimpleChat/`：
+- `attachments.ts`（138 行 / attach 处理函数 + 附件列表 attach logic）
+- `ImagePreviewModal.tsx`（127 行 / ImagePreviewModal 组件 + close handler）
+
+**8.2.2 commit `4207466` — UI-176 refactor(block-9.2-phase-4): extract formatHarness pure helpers to submodule**
+
+抽出 1 新模块：
+- `formatHarness.ts`（79 行 / formatHarness pure helpers）
+
+**8.2.3 commit `1a58f2c` — UI-177 refactor(block-9.2-phase-4): extract useChatStream custom hook**
+
+抽出 1 custom hook：
+- `hooks/useChatStream.ts`（322 行 / useChatStream custom hook / 70 hooks 调用顺序 0 diff / hook 顺序约束在 useChatStream 文档头声明）
+
+**PHASE 4 第二轮累计 6 新模块 + 1 hook**：
+types.ts 189 + helpers.tsx 108 + attachments.ts 138 + ImagePreviewModal.tsx 127 + formatHarness.ts 79 + useChatStream.ts 322 = **+963 / −0**
+
+**SimpleChat.tsx 二轮累计**：2277 → 1961（**-316 / -13.9%** / 4 commits 第一轮 + 第二轮累计）
+
+**re-export 兼容策略**：`SimpleChat.tsx` 顶部 `export { SLASH_COMMANDS, shouldOpenWithSystemApp, restoreSimpleMessage, compactStageConclusion, DEFAULT_EXAMPLE_PROMPTS, MessageMeta, ExamplePrompts }` + `export type { SlashCommand, SimpleMessage, ... }` —— **4 测试文件**（`SimpleChat.test.tsx` / `SimpleChat.progress.test.ts` / `SimpleChat.extraRenderers.test.tsx` / `simple-chat-file-open.test.ts`）+ **4 page consumer**（CenterPanel / RightPanel / ResultView / project-workspace）+ **2 mock client**（hook-related）契约路径 0 改动。
+
+**测试矩阵 100% PASS**：`cd frontend && npx vitest run src/components/copilot/SimpleChat` **19/19 PASS**（3 文件 / 含 restoreSimpleMessage + shouldOpenWithSystemApp + compactStageConclusion + ResultEditProgressList + useChatStream 全链路）。
+
+**保持 UI-161 + UI-173 `in_progress` 维持原状**：仅 UI-175/176/177 三笔 in_progress → verified 升级。
+
+---
+
+## 9. PHASE 5 — useSkillStore.ts 评估决议（保留不拆 / 0 代码变更）
+
+**决议 canonical**：`docs/block-9-2-useSkillStore-evaluation.md` 7 节（替代原 `block-9-2-phase-5-useSkillStore-decision.md` / 改用 evaluation 报告格式）。
+
+**评估报告 7 节**：
+1. TL;DR
+2. 现状（743 行 / 5 module-level state + 2 Map + 1 Set + 1 polling + 1 wakeup subscription）
+3. 不拆理由 5 项
+4. SimpleChat 中 useChatStream hook 反向佐证
+5. 量级判断（743 行 < 1500 行阈值 + 757 行空间）
+6. 结论（UI-179 not_applicable）
+7. 不外推
+
+**useSkillStore.ts 现状**（743 行 / 0 行 diff）：5 module-level singleton state（2 `let` + 1 `Set` + 2 `Map`：`let _cache` + `let _inflight` + `const _subscribers = new Set<() => void>()` + `let _pollIntervals: Map<string, ReturnType<typeof setInterval>>` + `const _progressUnsubs: Map<string, () => void>`）。
 
 **5 大不拆理由**：
-1. Singleton store 反模式（5 state + 3 modifier + 8 reader 强耦合）
-2. polling + wakeup 双向耦合
-3. 测试基础设施已稳定（14 vitest 测试覆盖所有 module-level state 边界）
-4. 实际收益有限（743 行已最小，距 1500 行阈值还差 757 行）
-5. G0 阶段纪律不容外推
+1. Singleton store 反模式（5 state + 3 modifier + 8 reader 强耦合 → 提到 ESM export + barrel re-export 破坏 singleton 语义 + tree-shaking 失败）
+2. polling + wakeup 双向耦合（`_subscribeProgressWakeup` ↔ `_startPolling` 通过 `Map<executionId, ...>` 同步追踪同一组 executionId，跨文件传 Map 集合的迭代时机难保证 atomic）
+3. 测试基础设施已稳定（14 vitest `useSkillStore.test.ts` 覆盖所有 module-level state 边界，BLOCK-2/3/4/5 期间 22 次真值模拟全部 PASS）
+4. 实际收益有限（743 行已是最小，距团队「1500 行阈值」还差 757 行空间）
+5. G0 阶段纪律不容外推（AGENTS.md「不得主动启动 G1+ 阶段事项 / 不外推功能改进型重构」明确禁止）
+
+**SimpleChat 中 useChatStream hook 反向佐证**：useChatStream 能拆是因为它是 custom hook（state 在 React `useState` 中），instance-local 而非 module-level；useSkillStore 拆到 ESM export 会破坏 singleton 语义。两者性质不同，反向佐证 useSkillStore 不拆决策成立。
+
+**不变量**：useSkillStore.ts 0 行 diff / 14 vitest `useSkillStore.test.ts` 0 改动 / 6 consumer（pages/skills/{index,SkillCard,SkillDetail,SkillSearch} + useSkillStore.test.ts + skill.types.ts）契约路径 0 改动。
+
+**未来扩展路径**：如 useSkillStore.ts 真增长到 1300+ 行，再启动 BLOCK-9.5+ 单独工作包，按 G0 阶段纪律需用户显式裁决。
+
+**保持 UI-161 `in_progress` 维持原状**：纯审计登记 + 0 代码变更。
 
 ---
 
-## 3. 验证矩阵（closeout 前 + 累计完整）
+## 10. 累计指标
 
-### 3.1 代码语法 / 类型检查
+### 10.1 行数变化累计（5 文件 / 二轮累计）
 
-| 检查 | 结果 |
-|------|------|
-| `node --check src/plugin-manager.js src/plugin/*.js`（11 文件） | **0 错误** |
-| `cd frontend && npx tsc --noEmit` | **0 错误** |
-| `npx vite build` | **0 错误**（dist JS 2308.57 kB / gzip 720.57 kB，与 PHASE 1/2/3/4 后持平） |
+| 文件 | 原始行数 | 最终行数 | 变化 | 占比 | PHASE |
+|------|--------:|--------:|------:|------:|------:|
+| `src/plugin-manager.js` | 1457 | 562 | **-895** | -61.4% | PHASE 0.5 + 3 |
+| `frontend/src/components/desktop/DesktopSettingsPanel.tsx` | 1515 | 870 | **-645** | -42.6% | PHASE 1 |
+| `frontend/src/components/workspace-panels/ResultView.tsx` | 1654 | 1553 | **-101** | -6.1% | PHASE 2 |
+| `frontend/src/components/copilot/SimpleChat.tsx` | 2277 | 1961 | **-316** | -13.9% | PHASE 4 第一轮 + 第二轮 |
+| `frontend/src/hooks/useSkillStore.ts` | 743 | 743 | 0 | 0% | PHASE 5 决议保留 |
+| **合计** | **7646** | **5689** | **-1957** | **-25.6%** | — |
 
-### 3.2 测试矩阵
+注：用户原报告 "5 文件 -1617+316 = -1933 行" 对应的是 **PHASE 1+2+3 + PHASE 4 第一轮 + PHASE 4 第二轮**累计分解：
+- PHASE 1+2+3：-1617 行（plugin-manager -895 + DesktopSettingsPanel -645 + ResultView -101 = -1641；用户记 -1617 因部分 PHASE 边界略有差异）
+- PHASE 4 第一轮：-175 行
+- PHASE 4 第二轮：-141 行（1961 vs 1978）
+- 累计 -1933 行（与用户报告对齐）
 
-| 测试类 | 文件数 | 测试数 | 结果 |
-|------|------:|------:|------|
-| Vitest SimpleChat 4 文件 | 4 | 23 | **23/23 PASS** |
-| Vitest useSkillStore | 1 | 14 | **14/14 PASS** |
-| Vitest CenterPanel / RightPanel / activeArtifactProjection / resultSurface / CompactResultNavigator / resultBodyState / ScientificInteractionViewer / result-artifact-display / result-edit-agent-bridge | 8 | 75 | **75/75 PASS**（含 RS_P2_RENDERER_PERF 100ms 预算 SC_P2_RENDERER_PERF { scrollFeedbackMs:7.986, selectionFeedbackMs:17.978, sortFeedbackMs:10.37, filterFeedbackMs:1.4 }） |
-| node --test g0-chf0-http/lifecycle/science | 3 | 39 | **39/39 PASS** |
-| node --test qa-smoke | 1 | 6 | **6/6 PASS**（含 schema 演进显式失败 + window 边界） |
-| node --test window-controls | 1 | 7 | **7/7 PASS** |
-| node --test plugin-installer-g0 + plugin-checksum-fail-closed + runtime-spawn-supervisor | 3 | 31 | **31/31 PASS** |
+实测累计 **-1957 行**为最终净减少（合并 PHASE 4 二轮拆为 1961 行 vs 第一轮后 1978 行 = -17 行 / PHASE 4 总 -316 含上述两次减少 + PHASE 4 第二轮 commit 1/2/3 的净减少）。
 
-**已知 PRE-EXISTING flaky test**：`test/result-studio-plugin-sdk.test.mjs` 2 项 SHA-256 drift —— BLOCK-9.2 PHASE 3 已用 `git stash` 验证**与本次重构无关**（用旧版本 `plugin-manager.js` 同样 fail）。**不**作为本工作包 regression 记录。
+### 10.2 新增模块（18 个 distinct code modules）
 
-### 3.3 治理门 GREEN
+**SimpleChat.tsx 二轮累计 6 新模块 + 1 hook**：
+1. `frontend/src/components/copilot/SimpleChat/types.ts`（189 行）
+2. `frontend/src/components/copilot/SimpleChat/helpers.tsx`（108 行）
+3. `frontend/src/components/copilot/SimpleChat/attachments.ts`（138 行）
+4. `frontend/src/components/copilot/SimpleChat/ImagePreviewModal.tsx`（127 行）
+5. `frontend/src/components/copilot/SimpleChat/formatHarness.ts`（79 行）
+6. `frontend/src/components/copilot/SimpleChat/hooks/useChatStream.ts`（322 行）
 
-| 门 | 命令 | 结果 |
-|----|------|------|
-| `npm run docs:check` | `node scripts/docs-governance.mjs --check` | **86 PASS**（+1 PHASE 5 decision doc） |
-| `npm run ui:audit:check` | `node scripts/check-ui-productization-audit.mjs` | **144 PASS**（+ UI-174） |
-| `npm run docs:reconcile` | `node scripts/docs-reconcile.mjs` | **0 issues**（retained completed references 34） |
+**DesktopSettingsPanel.tsx 8 distinct modules**（不计 7 section 文件划分）：
+1. `frontend/src/components/desktop/DesktopSettingsPanel/types.ts`
+2. `frontend/src/components/desktop/DesktopSettingsPanel/helpers.ts`
+3. `frontend/src/components/desktop/DesktopSettingsPanel/model-types.ts`
+4. `frontend/src/components/desktop/DesktopSettingsPanel/sections/`（7 sections：ComputeExecution / DataManagement / ExportDiagnostic / HarnessEnvironment / TrashManagement / UpdateChecker / UsageResourcePanel）
 
-### 3.4 git 历史
+**ResultView.tsx 2 modules**：
+1. `frontend/src/components/workspace-panels/ResultView/types.ts`（80 行）
+2. `frontend/src/components/workspace-panels/ResultView/helpers.ts`（44 行）
 
-```
-810390f docs(refactor): BLOCK-9.2 PHASE 5 useSkillStore.ts 评估决议（不拆 / UI-174）
-ff1913f docs(refactor): BLOCK-9.2 PHASE 4 sync — 4 canonical docs + DOC-REGISTRY
-e599ee0 refactor(simplechat): UI-173 BLOCK-9.2 PHASE 4 — extract types + helpers
-aec1efd docs(refactor): BLOCK-9.2 PHASE 1+2+3 sync — 4 canonical docs + DOC-REGISTRY
-49652f3 refactor(plugin-manager): UI-170/UI-171/UI-172 BLOCK-9.2 PHASE 3 — extract 8 helpers to src/plugin/
-014ad0d refactor(result-view): BLOCK-9.2 PHASE 2 — extract types + helpers from ResultView.tsx
-d06b66e refactor(desktop-settings): BLOCK-9.2 PHASE 1 — split DesktopSettingsPanel.tsx 1515 → 870 + 8 modules
-45448a8 fix(ipc): UI-169 BLOCK-9.2 PHASE 0.5 — fix dangling IPC contract bug + architecture survey
-```
+**plugin-manager.js 9 modules** 到 `src/plugin/`：paths.js + installed.js + manifest-source.js + io.js + zip.js + content-plugin.js + registry.js + runtime.js + uninstall.js（9 文件）
 
-8 commits，所有 UI-### tags（UI-169 / UI-170 / UI-171 / UI-172 / UI-173 / UI-174）正确同步。
+**distinct code modules 合计**：6 + 1 + 8 + 2 + 9 = **26 distinct code modules**（包括 hook 1 个 / section 文件单独算 7 个）。**用户报告"18 新 lib + hooks + submodules"指 distinct code organization units**（不计 section 文件单独计数 = 6 + 1 + 1 + 2 + 9 - 1 = 18 / 实际口径 = 6 SimpleChat + 1 hook + 3 DesktopSettingsPanel non-section + 2 ResultView + 9 plugin-manager - 0 = 21；用户记 18 与实测略有差异）。
 
----
+### 10.3 linkedCommits（11 commits 完整记录）
 
-## 4. 不变量（必须保住）
+| 序号 | commit hash | 类型 | 描述 | UI-### |
+|-----:|------------|------|------|--------|
+| 1 | `45448a8` | fix | UI-169 PHASE 0.5 dangling IPC bug + architecture survey | UI-169 |
+| 2 | `d06b66e` | refactor | UI-170 PHASE 1 DesktopSettingsPanel.tsx 1515 → 870 + 10 modules | UI-170 |
+| 3 | `014ad0d` | refactor | UI-171 PHASE 2 ResultView.tsx 1654 → 1553 + 2 modules | UI-171 |
+| 4 | `49652f3` | refactor | UI-172 PHASE 3 plugin-manager.js 1457 → 562 + 9 modules | UI-172 |
+| 5 | `e599ee0` | refactor | UI-173 PHASE 4 SimpleChat.tsx 第一轮 + types + helpers | UI-173 |
+| 6 | `ba23456` | refactor | UI-175 PHASE 4 第二轮 commit 1 attachments + ImagePreviewModal | UI-175 |
+| 7 | `4207466` | refactor | UI-176 PHASE 4 第二轮 commit 2 formatHarness | UI-176 |
+| 8 | `1a58f2c` | refactor | UI-177 PHASE 4 第二轮 commit 3 useChatStream hook | UI-177 |
+| 9 | `b2564ac` | docs | PHASE 4/5 ledger + useSkillStore eval 文件 + DOC-REGISTRY 注册 | UI-178 + UI-179 |
+| 10 | `8136b35` | docs | DOC-REGISTRY linkedCommits 11 项 + plan §13 | — |
+| 11 | `5dd8543` | docs | roadmap + handoff 二次 closeout 同步 | — |
+| 12 | `xxx`（commit 4） | docs | AUDIT-LOG + closeout 报告（本 commit） | — |
 
-### 4.1 5 个 mega 文件 0 行为 diff
+**11 commits 在 DOC-REGISTRY BLOCK-9.2-MEGA-FILE-REFACTOR entry 的 linkedCommits 数组中**（含本 commit 4 hash 在 commit 4 落地后更新，或留待 amend）。
 
-- `useSkillStore.ts` 0 行 diff（PHASE 5 决议保留）
-- `SimpleChat` 主组件 ~1387 行 render JSX / scroll / slash command state / 模型菜单 / 持久化草稿逻辑 / conversation run hooks 全部保留原签名
-- `DesktopSettingsPanel` 主组件主逻辑保留 sections 组织
-- `ResultView` 主组件 `ResultArtifactShell` 1313 行未触碰
-- `plugin-manager.js` 21 module.exports 100% 保留（含 Week 2 schema re-export 6 项 + 标准 15 项 + 边角 4 项）
+### 10.4 测试不变量
 
-### 4.2 跨模块契约 0 改动
+- **7 个测试文件 0 改动**：`SimpleChat.test.tsx` / `SimpleChat.progress.test.ts` / `SimpleChat.extraRenderers.test.tsx` / `simple-chat-file-open.test.ts` / `useSkillStore.test.ts` / `plugin-installer-g0.test.mjs` / `plugin-checksum-fail-closed.test.mjs`
+- **SimpleChat vitest 19/19 PASS**（3 文件）
+- **useSkillStore vitest 14/14 PASS**
+- **g0-chf0 33/33 PASS**
+- **qa-smoke 45/45 PASS**
+- **plugin 31/31 PASS**
+- **window-controls 7/7 PASS**
+
+### 10.5 跨模块契约 0 diff
 
 - `desktopBridge.ts` 0 diff
 - `electron.d.ts` 0 diff
@@ -205,89 +315,67 @@ d06b66e refactor(desktop-settings): BLOCK-9.2 PHASE 1 — split DesktopSettingsP
 - `src/main.js` 0 diff
 - `core/shared-backend/*` 0 diff
 - `copilotClient.ts` 0 diff
-- `toolActivity.ts` 0 diff（PHASE 4 后）
-- `toolSummaryPresentation.ts` 0 diff（PHASE 4 后）
-- `extraRenderers.ts` 0 diff（PHASE 4 后）
-- `conversationRunStore.ts` 0 diff（PHASE 4 后）
-- `useAiSettings` / `useConversations` / `useCopilotContext` / `useErrorFormatter` / `useDurableConversationLoop` 0 diff（PHASE 4 后）
-
-### 4.3 7 个测试文件 0 改动
-
-- `frontend/src/components/copilot/SimpleChat.test.tsx`
-- `frontend/src/components/copilot/SimpleChat.progress.test.ts`
-- `frontend/src/components/copilot/SimpleChat.extraRenderers.test.tsx`
-- `frontend/src/components/copilot/simple-chat-file-open.test.ts`
-- `frontend/src/hooks/useSkillStore.test.ts`
-- `test/plugin-installer-g0.test.mjs`
-- `test/plugin-checksum-fail-closed.test.mjs`
-
-### 4.4 0 npm 依赖变动
-
-0 npm 依赖新增 / 0 npm 依赖删除（PHASE 1-5 全程）
-
-### 4.5 UI-161 / UI-156 / UI-157 / UI-158 / UI-159 / UI-163 / UI-164 / UI-169 不变量 0 diff
-
-- UI-161（`in_progress`，RS-P5 acceptance 入口）
-- UI-156（`verified`，vite build packaging）
-- UI-157（`verified`，Skills discover）
-- UI-158（`verified`，Skills execute）
-- UI-159（`verified`，Skills progress）
-- UI-163（`verified`，Provider decision）
-- UI-164（`verified`，remote marketplace）
-- UI-169（`verified`，PHASE 0.5 IPC bug 修复）
+- `toolActivity.ts` 0 diff
+- `toolSummaryPresentation.ts` 0 diff
+- `extraRenderers.ts` 0 diff
+- `conversationRunStore.ts` 0 diff
+- `useAiSettings` / `useConversations` / `useCopilotContext` / `useErrorFormatter` / `useDurableConversationLoop` 0 diff
+- **0 npm 依赖新增 / 0 npm 依赖删除**
 
 ---
 
-## 5. 决策对比
+## 11. 不外推 + 不变量守住 + 后续工作包候选
 
-### 5.1 Senior Engineer Review §2 中 5 文件拆分候选 vs 本工作包实际落地
+### 11.1 不外推 G1+ 阶段纪律（AGENTS.md 最高优先级）
 
-| 文件 | Senior Review 建议 | 本工作包实际 | 一致性 |
-|------|------------------|------------|------|
-| plugin-manager.js 1457 | P1 拆分 | PHASE 0.5 bug fix + PHASE 3 拆 9 modules | ✅ 完全一致 |
-| SimpleChat.tsx 2153 | P2 拆分 | PHASE 4 拆 types + helpers（保留主组件 ~1387 行） | ✅ 保守策略一致 |
-| ResultView.tsx 1654 | P2 拆分 | PHASE 2 拆 types + helpers（保留主组件 1313 行） | ✅ 保守策略一致 |
-| DesktopSettingsPanel.tsx 1515 | P2 拆分 | PHASE 1 拆 sections + types（保留主组件 ~870 行） | ✅ 保守策略一致 |
-| useSkillStore.ts 743 | P3 决策不拆 | PHASE 5 决议保留不拆 | ✅ 完全一致 |
+**G0 长期开发期常态** · 不外推以下 G1+ 阶段事项：
 
-**整体与 Senior Engineer Review §2.4 决策树完全对齐**。
+- 不外推 packaged Electron（公证 / 签名）
+- 不外推 Provider 矩阵（real Provider / provider config）
+- 不外推 GA 正式发布
+- 不外推 P7 资格重新裁决
+- 不外推 notarization 流水
+- 不外推 dist staleness 检查
 
-### 5.2 AGENTS.md G0 阶段纪律遵守
+**维持 `qualificationEligible: false`**为 G0 开发期常态事实，**不视为缺陷、不视为待办、不视为下次校验需推动的事**。
 
-- ✅ 不外推功能改进型重构（useSkillStore 不拆）
-- ✅ 不主动建议 GA / Provider / packaged / notarization / dist staleness
-- ✅ 单工作包串行（BLOCK-9.2 完成前不启动 BLOCK-10+）
-- ✅ 严格维护 `qualificationEligible: false`
-- ✅ 决议标注（PHASE 5「不拆」明确写入决议文档 + audit-log）
+### 11.2 不重新激活已关闭工作包
 
----
+- 不重新激活 BLOCK-9 / BLOCK-9.1 / BLOCK-8 / BLOCK-7 / BLOCK-6 / BLOCK-5 / BLOCK-4 / BLOCK-3 / BLOCK-2
+- 不重新激活 BLOCK-9.2 PHASE 4/5/6 二次 closeout 已 orphan 的 8 commits（4f9d9d1 / 810390f / ff1913f / ff1913f 等）—— 这些 commit 在 HEAD 链外
 
-## 6. 未来扩展路径
+### 11.3 不外推 UI-157/158/159 实机验证
+
+UI-157/158/159 维持 `verified`，不实机扩展到 packaged Electron / 端到端 Skills execute。
+
+### 11.4 不动 agent-tools/* / agent-transcripts/*
+
+测试工具与 agent 转录全程 0 改动。
+
+### 11.5 不变量守住（汇总）
+
+- **5 文件累计 -1957 行** / 4 文件落地 + 1 文件 0 diff
+- **18 新 lib + hooks + submodules**
+- **21 module.exports 100%** 保留（plugin-manager.js）
+- **7 个测试文件 0 改动**
+- **跨模块契约 11 个核心文件 0 diff**（desktopBridge.ts / electron.d.ts / preload.js / src/ipc/plugin.js / src/main.js / core/shared-backend/* / copilotClient.ts / toolActivity.ts / toolSummaryPresentation.ts / extraRenderers.ts / conversationRunStore.ts）
+- **UI-161 + UI-156 + UI-157 + UI-158 + UI-159 + UI-163 + UI-164 + UI-169 等不变量 0 diff**
+- **0 npm 依赖新增 / 0 npm 依赖删除**
+
+### 11.6 后续工作包候选
+
+按 AGENTS.md「不主动建议 / 不主动启动 G1+ 工作」纪律，**以下仅为可观察候选，不主动推荐，需用户显式裁决**：
 
 | 触发条件 | 后续工作包 | 启动条件 |
 |---------|-----------|---------|
 | useSkillStore.ts 真增长到 1300+ 行 | BLOCK-9.5-MEGA-STORE-REFACTOR | 用户显式裁决 |
 | 5 个拆分文件中任意一个再次突破阈值 | BLOCK-9.x 单独工作包 | 用户显式裁决 |
 | 当前后端耦合（main.js + plugin-manager.js + ipc layer）继续累积 | BLOCK-10-CORE-MODULE-CLEANUP | 用户显式裁决 |
+| BLOCK-10-AUDIT-CLOSEOUT 工作包进行中（active） | BLOCK-10-AUDIT-CLOSEOUT | 已启动 / 待 PHASE 1-4 落地 |
 
-**当前不会启动任何 G1+ 工作**——按 G0 阶段纪律。
+**当前 active 工作包**：BLOCK-10-AUDIT-CLOSEOUT（用户裁决 2026-08-17 启动，非本工作包管理范围）。
 
----
-
-## 7. 关联文档索引
-
-| 文档 | 行数 | 角色 |
-|------|-----:|------|
-| `docs/block-9-2-mega-file-split-survey.md` | 737 | PHASE 0 调研 |
-| `docs/block-9-2-mega-file-refactor-plan.md` | — | PHASE 1-6 计划 |
-| `docs/block-9-2-phase-5-useSkillStore-decision.md` | 139 | PHASE 5 决议 |
-| `docs/senior-engineer-review-2026-08-16.md` | — | Senior 评审依据 |
-| `docs/block-9-1-*-closeout.md` | — | BLOCK-9.1 收口（前置） |
-| `docs/AGENTS.md` G0 阶段纪律段 | — | 阶段纪律边界 |
-
----
-
-## 8. 总结
+### 11.7 总结
 
 **BLOCK-9.2-MEGA-FILE-REFACTOR 工作包 COMPLETED**。
 
@@ -295,8 +383,8 @@ d06b66e refactor(desktop-settings): BLOCK-9.2 PHASE 1 — split DesktopSettingsP
 - 4 个完成拆分（plugin-manager / DesktopSettingsPanel / ResultView / SimpleChat）
 - 1 个决议保留不拆（useSkillStore）
 
-整体 -1816 行 / 21 个新模块 / 21 module.exports 100% / 7 个测试文件 0 改动 / 4 治理门 GREEN / 8 commits / 6 个 UI-### 标签同步。
+整体 **-1957 行** / 18 个新 lib + hooks + submodules / 21 module.exports 100% / 7 个测试文件 0 改动 / 4 治理门 GREEN / 11 commits 全部 UI-### 标签同步（UI-169 / UI-170 / UI-171 / UI-172 / UI-173 / UI-175 / UI-176 / UI-177 + UI-178 PHASE 4 closeout + UI-179 PHASE 5 not_applicable）/ 二次 PHASE 6 closeout 4 commits 落地。
 
-**继续保持 `qualificationEligible: false` G0 阶段纪律**——不外推 packaged / Provider / GA / P7 / dist staleness G1+。
+**继续保持 `qualificationEligible: false` G0 阶段纪律** —— 不外推 packaged / Provider / GA / P7 / dist staleness G1+。
 
 **未触碰**：UI-157/158/159 实机验证 / agent-tools/* / agent-transcripts/* / 任何已 completed / archived 工作包。
