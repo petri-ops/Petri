@@ -1294,6 +1294,78 @@
       ],
       "notes": "2026-08-17 Agent Harness 后端架构调研报告（非前端 UI）；与 AGENT-HARNESS-ARCHITECTURE-AUDIT-2026-08-17 配套 — survey 含后端 14 sub-process / IPC 链路 / shared-backend 拓扑详细分析",
       "registeredAt": "2026-08-17"
+    },
+    {
+      "id": "BLOCK-10-PHASE0-SURVEY",
+      "path": "docs/block-10-ph0-survey.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "agent-harness-audit-closeout",
+      "entrypoint": "docs/code-audit-closeout-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-10",
+        "phase-0",
+        "research-report",
+        "G0"
+      ],
+      "notes": "PHASE 0 调研报告：25 项修复单元详细清单 / 同根组合 / 跨包边界 / 阶段归属 / 工作量估算 / 修复顺序建议。被 code-audit-closeout-plan.md §1-§3 / §10 / §14 引用作为 PHASE 0 修复基线。",
+      "registeredAt": "2026-08-18"
+    },
+    {
+      "id": "BLOCK-10-PHASE0-FIX-ORDER",
+      "path": "docs/block-10-ph0-fix-order.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "agent-harness-audit-closeout",
+      "entrypoint": "docs/code-audit-closeout-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-10",
+        "phase-0",
+        "research-report",
+        "G0"
+      ],
+      "notes": "PHASE 0 修复顺序 DAG + commit 拆分 + PHASE 划分 + 关键路径 + 可并行 ID。被 code-audit-closeout-plan.md §4 / §14 引用作为 PHASE 0 commit 拆分依据。",
+      "registeredAt": "2026-08-18"
+    },
+    {
+      "id": "BLOCK-10-PHASE0-TEST-MATRIX",
+      "path": "docs/block-10-ph0-test-matrix.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "agent-harness-audit-closeout",
+      "entrypoint": "docs/code-audit-closeout-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-10",
+        "phase-0",
+        "research-report",
+        "G0"
+      ],
+      "notes": "PHASE 0 测试覆盖矩阵：现有测试 / 25 项测试需求 / 新测试文件建议 / 验证门限。被 code-audit-closeout-plan.md §5 引用作为 PHASE 0 测试需求基线。",
+      "registeredAt": "2026-08-18"
+    },
+    {
+      "id": "BLOCK-10-PHASE0-RISKS",
+      "path": "docs/block-10-ph0-risks.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "agent-harness-audit-closeout",
+      "entrypoint": "docs/code-audit-closeout-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-10",
+        "phase-0",
+        "research-report",
+        "G0"
+      ],
+      "notes": "PHASE 0 风险登记表：风险矩阵 / 跨包冲突 / 性能 / 安全 / 兼容性 / 不外推 G1+。被 code-audit-closeout-plan.md §6 / §14 引用作为 PHASE 0 风险登记依据。",
+      "registeredAt": "2026-08-18"
     }
   ]
 }
