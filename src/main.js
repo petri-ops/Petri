@@ -573,19 +573,15 @@ async function createWindow() {
   windowForEvents.on("unmaximize", () => publishMaximizedState(false));
 
   // Mac fullscreen event handlers — sync state to renderer for UI consistency
-  // On macOS frameless windows, manually hide the Dock when entering fullscreen
-  // to achieve true fullscreen behavior (no menu bar, no Dock).
+  // On macOS frameless windows, use simpleFullScreen mode which automatically
+  // hides the Dock and menu bar for true fullscreen behavior.
   if (process.platform === "darwin") {
-    windowForEvents.on("enter-full-screen", () => {
-      // Hide Dock and menu bar on macOS for true fullscreen
-      app.dock?.hide();
+    windowForEvents.on("enter-simple-full-screen", () => {
       if (!windowForEvents.isDestroyed() && windowForEvents.webContents && !windowForEvents.webContents.isDestroyed()) {
         windowForEvents.webContents.send("window:fullscreen-changed", true);
       }
     });
-    windowForEvents.on("leave-full-screen", () => {
-      // Restore Dock when exiting fullscreen
-      app.dock?.show();
+    windowForEvents.on("leave-simple-full-screen", () => {
       if (!windowForEvents.isDestroyed() && windowForEvents.webContents && !windowForEvents.webContents.isDestroyed()) {
         windowForEvents.webContents.send("window:fullscreen-changed", false);
       }
@@ -648,7 +644,13 @@ function setupWindowIpc() {
   ipcMain.on("window:toggleFullScreen", (event) => {
     const targetWindow = resolveWindowForSender(event);
     if (targetWindow) {
-      targetWindow.setFullScreen(!targetWindow.isFullScreen());
+      // For frameless windows on macOS, use simpleFullScreen mode which
+      // automatically hides the Dock and menu bar
+      if (process.platform === "darwin") {
+        targetWindow.setSimpleFullScreen(!targetWindow.isSimpleFullScreen());
+      } else {
+        targetWindow.setFullScreen(!targetWindow.isFullScreen());
+      }
     }
   });
 
@@ -1135,7 +1137,11 @@ function setupAppMenu() {
           click: () => {
             const win = BrowserWindow.getFocusedWindow();
             if (win) {
-              win.setFullScreen(!win.isFullScreen());
+              if (process.platform === "darwin") {
+                win.setSimpleFullScreen(!win.isSimpleFullScreen());
+              } else {
+                win.setFullScreen(!win.isFullScreen());
+              }
             }
           },
         },
