@@ -95,7 +95,6 @@ function getFallbackTitle(pathname: string): string {
 function useDesktopWindowControls(): {
   isMaximized: boolean;
   minimize: () => void;
-  toggleMaximize: () => void;
   toggleFullScreen: () => void;
   close: () => void;
   onTitleBarDoubleClick: (event: React.MouseEvent<HTMLElement>) => void;
@@ -153,17 +152,14 @@ function useDesktopWindowControls(): {
   return {
     isMaximized,
     minimize: () => desktopWindow?.minimize?.(),
-    toggleMaximize: () => desktopWindow?.maximize?.(),
     toggleFullScreen: () => desktopWindow?.toggleFullScreen?.(),
     close: () => desktopWindow?.close?.(),
     onTitleBarDoubleClick: (event) => {
-      // Only the drag region (header surface) should trigger maximize; clicking
-      // a no-drag child (tool buttons, traffic lights, tabs) must not.
       const target = event.target as Element | null;
       if (target?.closest?.('button, a, input, select, textarea, [role="button"]')) {
         return;
       }
-      desktopWindow?.maximize?.();
+      desktopWindow?.toggleFullScreen?.();
     },
   };
 }
@@ -317,20 +313,6 @@ export function TitleBar(): React.ReactElement {
                   title="最小化"
                 >
                   <Icon name="minus" size={11} strokeWidth={2.4} />
-                </button>
-                <button
-                  type="button"
-                  tabIndex={-1}
-                  className={styles.macTrafficBtn}
-                  onClick={win.toggleMaximize}
-                  aria-label={win.isMaximized ? '还原窗口' : '最大化窗口'}
-                  title={win.isMaximized ? '还原' : '最大化'}
-                >
-                  <Icon
-                    name={win.isMaximized ? 'square-stack' : 'square'}
-                    size={win.isMaximized ? 10 : 11}
-                    strokeWidth={2.2}
-                  />
                 </button>
                 <button
                   type="button"
