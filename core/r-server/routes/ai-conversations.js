@@ -136,15 +136,14 @@ module.exports = function mountConversations(app) {
   });
 
   // POST /api/ai/conversations/:id/fork — create a new conversation from an existing one
+  // Optional body.untilIndex: if provided (0-based), only copy messages up to that index (inclusive).
   app.post('/api/ai/conversations/:id/fork', express.json({limit: '8kb'}), async (req, res) => {
     const userId = req.user && req.user.id;
     if (!userId) return res.status(401).json({status:'error', error:'未授权'});
     try {
-      // Get the source conversation
       const source = await adb.prepare('SELECT * FROM copilot_conversations WHERE id=? AND user_id=?').get(req.params.id, userId);
       if (!source) return res.status(404).json({status:'error', error:'not_found'});
 
-      // Create new conversation with branch metadata
       const forkId = _newConvId();
       const now = new Date().toISOString();
       const title = String((req.body && req.body.title) || source.title + ' (分支)').slice(0, 100);
@@ -155,19 +154,20 @@ module.exports = function mountConversations(app) {
       await adb.prepare('INSERT INTO copilot_conversations(id, user_id, title, status, last_page, project_id, parent_id, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?)')
         .run(forkId, userId, title, 'active', lastPage, projectId, parentId, now, now);
 
-      // Copy messages from source conversation to forked conversation
+      // Copy messages — optionally limited by untilIndex (0-based, inclusive).
+      // When not specified, all messages are copied (existing behaviour).
+      const untilIndex = (req.body && typeof req.body.untilIndex === 'number') ? Math.max(0, Math.floor(req.body.untilIndex)) : null;
       const messages = await adb.prepare('SELECT role, content, meta_json FROM copilot_messages WHERE conversation_id=? ORDER BY ts ASC').all(req.params.id);
-      if (messages && messages.length > 0) {
+      const messagesToCopy = (untilIndex !== null && untilIndex < messages.length) ? messages.slice(0, untilIndex + 1) : messages;
+      if (messagesToCopy.length > 0) {
         const stmt = adb.prepare('INSERT INTO copilot_messages(id, conversation_id, role, content, meta_json, ts) VALUES (?,?,?,?,?,?)');
-        for (const msg of messages) {
+        for (const msg of messagesToCopy) {
           const msgId = 'msg_' + require('uuid').v4().slice(0, 12);
           stmt.run(msgId, forkId, msg.role, msg.content, msg.meta_json, now);
         }
       }
 
-      // Update message count
-      const messageCount = messages ? messages.length : 0;
-      await adb.prepare('UPDATE copilot_conversations SET message_count=? WHERE id=?').run(messageCount, forkId);
+      await adb.prepare('UPDATE copilot_conversations SET message_count=? WHERE id=?').run(messagesToCopy.length, forkId);
 
       res.json({
         status: 'ok',
@@ -177,7 +177,7 @@ module.exports = function mountConversations(app) {
           status: 'active',
           last_page: lastPage,
           project_id: projectId,
-          message_count: messageCount,
+          message_count: messagesToCopy.length,
           created_at: now,
           updated_at: now,
           parent_id: parentId,

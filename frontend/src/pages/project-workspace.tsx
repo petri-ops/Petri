@@ -869,10 +869,11 @@ export function ProjectWorkspace(): React.ReactElement {
   const forkConversationInTree = useCallback(async (conversationId: string, title?: string) => {
     const forked = await forkConversation(conversationId, title);
     if (!forked) return null;
+    updateWorkspaceMode('chat');
     await Promise.all([refreshConversations(), refreshOtherConversations()]);
     setActiveConvId(forked.id);
     return forked;
-  }, [refreshConversations, refreshOtherConversations]);
+  }, [updateWorkspaceMode, refreshConversations, refreshOtherConversations]);
 
   // Toggle project expansion in left panel
   const toggleProjectExpand = useCallback((pid: string) => {
@@ -1012,6 +1013,14 @@ export function ProjectWorkspace(): React.ReactElement {
         rightTab === 'browser' && browserCanGoForward
           ? () => dispatchBioF3Event(biof3Events.browserForward)
           : null,
+      // Conversations for TitleBar selector
+      conversations: conversations.map(c => ({
+        id: c.id,
+        title: c.title,
+        parent_id: c.parent_id ?? null,
+      })),
+      activeConvId,
+      onSelectConversation: handleSwitchConversation,
     });
     return () => {
       updateTitleBar({
@@ -1077,6 +1086,17 @@ export function ProjectWorkspace(): React.ReactElement {
     const unsub = subscribeBioF3Event(biof3Events.softRefresh, handler);
     return unsub;
   }, [fetchData, refreshConversationJobs, refreshConversations]);
+
+  // Listen for conversation fork events from SimpleChat (RightPanel or CenterPanel)
+  // to refresh the LeftPanel conversation list after a branch is created.
+  useEffect(() => {
+    const handler = async (_detail: { newConversationId: string; projectId: string }) => {
+      updateWorkspaceMode('chat');
+      await Promise.all([refreshConversations(), refreshOtherConversations()]);
+    };
+    const unsub = subscribeBioF3Event(biof3Events.conversationForked, handler);
+    return unsub;
+  }, [updateWorkspaceMode, refreshConversations, refreshOtherConversations]);
 
   useEffect(() => {
     if (workspaceMode === 'search') {
@@ -1630,6 +1650,7 @@ export function ProjectWorkspace(): React.ReactElement {
     openRightPanel,
     switchToProject,
     navigate,
+    handleSwitchConversation,
     setActiveConvId,
     setActiveJobId,
     setActiveArtifact,

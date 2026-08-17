@@ -50,7 +50,20 @@ export const biof3Events = {
   /** Fired by the shared TitleBar; listened by BrowserPanel */
   browserBack: 'biof3:browser-back',
   browserForward: 'biof3:browser-forward',
+
+  /**
+   * Fired by SimpleChat when a conversation is forked (via "创建分支" button).
+   * project-workspace subscribes and refreshes the conversation list + other projects.
+   */
+  conversationForked: 'biof3:conversation-forked',
 } as const;
+
+export interface ConversationForkedDetail {
+  /** ID of the newly forked conversation */
+  newConversationId: string;
+  /** Project ID of the forked conversation */
+  projectId: string;
+}
 
 // ---------------------------------------------------------------------------
 // Typed helpers
@@ -114,6 +127,7 @@ export type BioF3EventMap = {
   [biof3Events.copilotAsk]: CopilotAskDetail;
   [biof3Events.browserBack]: undefined;
   [biof3Events.browserForward]: undefined;
+  [biof3Events.conversationForked]: ConversationForkedDetail;
 };
 
 /** Dispatch a typed event on window */

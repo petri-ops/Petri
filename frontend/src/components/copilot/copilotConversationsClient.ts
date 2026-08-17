@@ -155,20 +155,26 @@ export async function dismissTopicShift(id: string): Promise<boolean> {
 }
 
 /**
- * Fork an existing conversation — creates a new conversation with all messages copied.
- * Returns the new conversation summary including parent_id.
+ * Fork an existing conversation — creates a new conversation with messages copied.
+ * @param id - source conversation id
+ * @param title - optional new conversation title
+ * @param untilIndex - optional 0-based message index; if provided, only messages up to that index (inclusive) are copied.
  */
 export async function forkConversation(
   id: string,
-  title?: string
+  title?: string,
+  untilIndex?: number
 ): Promise<ConversationSummary | null> {
   try {
+    const body: Record<string, unknown> = {};
+    if (title !== undefined) body.title = title;
+    if (untilIndex !== undefined) body.untilIndex = untilIndex;
     const resp = await fetch(
       getApiPrefix() + '/ai/conversations/' + encodeURIComponent(id) + '/fork',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-        body: JSON.stringify({ title }),
+        body: JSON.stringify(body),
       }
     );
     if (!resp.ok) return null;

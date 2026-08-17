@@ -52,7 +52,15 @@ export default function SkillsPage(): React.ReactElement {
   const stats = computeStats(skills);
 
   const navigate = useNavigate();
-  const handleReturnHome = useCallback(() => navigate('/'), [navigate]);
+  const handleReturnHome = useCallback(() => {
+    // Use history.back() to return to the previous page (e.g. project Copilot),
+    // rather than navigating to "/" which may redirect to a recent result view.
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      navigate('/');
+    }
+  }, [navigate]);
 
   const handleViewDetail = useCallback((skill: Skill) => {
     setSelectedSkill(skill);
@@ -121,6 +129,15 @@ export default function SkillsPage(): React.ReactElement {
   return (
     <div className={styles.skillsPage}>
       <header className={styles.pageHeader}>
+        <button
+          type="button"
+          className={styles.backBtn}
+          onClick={handleReturnHome}
+          title="返回首页"
+          aria-label="返回首页"
+        >
+          <Icon name="arrow-left" size={16} />
+        </button>
         <div className={styles.pageIcon}>
           <Icon name="command" size={22} />
         </div>

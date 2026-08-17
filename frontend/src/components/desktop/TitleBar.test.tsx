@@ -18,6 +18,9 @@ function makeBridge(overrides: Partial<DesktopWindow> = {}): DesktopBridge {
     close: vi.fn(),
     isMaximized: vi.fn().mockResolvedValue(false),
     onMaximizeChanged: vi.fn(() => vi.fn()),
+    isFullScreen: vi.fn().mockResolvedValue(false),
+    toggleFullScreen: vi.fn(),
+    onFullScreenChanged: vi.fn(() => vi.fn()),
     ...overrides,
   };
   return {
