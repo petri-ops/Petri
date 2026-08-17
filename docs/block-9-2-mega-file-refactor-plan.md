@@ -249,3 +249,10 @@
 ---
 
 **不变量**：本计划文件为 BLOCK-9.2 工作包唯一 active canonical 计划 v0.2，PHASE 1 收口后调整为 v0.3。
+
+## 13. 关联收口文档（PHASE 4 第二轮 commit 3 落地后追加）
+
+- [`docs/block-9-2-mega-file-refactor-closeout.md`](block-9-2-mega-file-refactor-closeout.md) — BLOCK-9.2-MEGA-FILE-REFACTOR 工作包完整 closeout（11 节 / TL;DR + 5 PHASE + 累计指标 + 不变量 + 不外推）
+- [`docs/block-9-2-useSkillStore-evaluation.md`](block-9-2-useSkillStore-evaluation.md) — PHASE 5 useSkillStore.ts 评估决议（7 节 / 5 大不拆理由 + useChatStream hook 反向佐证 + UI-179 not_applicable）
+
+**PHASE 4 第二轮 commit 3**（`1a58f2c`）落地后，PHASE 4 closeout + PHASE 5 evaluation 登记完成；2026-08-18 PHASE 6 二次收口 4 commits `b2564ac` + 本节关联文档 commit + DOC-REGISTRY 完整 closeout 同步 + AUDIT-LOG + closeout 报告全部完成。BLOCK-9.2-MEGA-FILE-REFACTOR 工作包 COMPLETED。
