@@ -12,7 +12,10 @@
 
 const { ipcMain } = require("electron");
 
-function setupPluginIpc() {
+function setupPluginIpc(options = {}) {
+  // BLOCK-10 S-004: assertTrustedSender helper, additive alongside BLOCK-3.
+  const { createSenderGuard } = require("./_sender-guard");
+  const assertSender = createSenderGuard(options.mainWindow);
   // BLOCK-9.2 PHASE 0.5: fixed dangling IPC contract bug inherited
   // from BLOCK-9.1 PHASE 2. The original main.js (2d94732^) used
   // `getInstalledPlugins` from plugin-manager; the worker that
@@ -20,7 +23,8 @@ function setupPluginIpc() {
   // to `listInstalledPlugins` (which doesn't exist), causing the
   // try/catch to silently swallow the error and return `[]`.
   // Restored to the actual export names from plugin-manager.
-  ipcMain.handle("plugin:list-installed", async () => {
+  ipcMain.handle("plugin:list-installed", async (event) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       const { getInstalledPlugins } = require("../plugin-manager");
       return getInstalledPlugins();
@@ -30,7 +34,8 @@ function setupPluginIpc() {
     }
   });
 
-  ipcMain.handle("plugin:list-remote", async () => {
+  ipcMain.handle("plugin:list-remote", async (event) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       const { getRemoteManifest } = require("../plugin-manager");
       return await getRemoteManifest();
@@ -40,7 +45,8 @@ function setupPluginIpc() {
     }
   });
 
-  ipcMain.handle("plugin:check-updates", async () => {
+  ipcMain.handle("plugin:check-updates", async (event) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       const { checkUpdates } = require("../plugin-manager");
       return await checkUpdates();
@@ -50,7 +56,8 @@ function setupPluginIpc() {
     }
   });
 
-  ipcMain.handle("plugin:install", async (_event, pluginId) => {
+  ipcMain.handle("plugin:install", async (event, pluginId) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       const { installPlugin } = require("../plugin-manager");
       return await installPlugin(pluginId);
@@ -59,7 +66,8 @@ function setupPluginIpc() {
     }
   });
 
-  ipcMain.handle("plugin:uninstall", async (_event, pluginId) => {
+  ipcMain.handle("plugin:uninstall", async (event, pluginId) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       const { uninstallPlugin } = require("../plugin-manager");
       return await uninstallPlugin(pluginId);
@@ -70,7 +78,8 @@ function setupPluginIpc() {
 
   // ── M2-9：content-plugin 文档桥 ──────────────────────────────
   // docs.tsx 运行时通过这些 IPC 拉取已装 content-plugin 的文档树与正文
-  ipcMain.handle("content-plugin:list", async () => {
+  ipcMain.handle("content-plugin:list", async (event) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       const { listAllContentPlugins } = require("../plugin-manager");
       return listAllContentPlugins();
@@ -80,7 +89,8 @@ function setupPluginIpc() {
     }
   });
 
-  ipcMain.handle("content-plugin:list-docs", async (_event, pluginId) => {
+  ipcMain.handle("content-plugin:list-docs", async (event, pluginId) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       const { listContentPluginDocs } = require("../plugin-manager");
       return listContentPluginDocs(pluginId);
@@ -92,7 +102,8 @@ function setupPluginIpc() {
 
   ipcMain.handle(
     "content-plugin:read",
-    async (_event, pluginId, relativePath) => {
+    async (event, pluginId, relativePath) => {
+      const deny = assertSender(event); if (deny) return deny;
       try {
         const { readContentPluginDoc } = require("../plugin-manager");
         return {

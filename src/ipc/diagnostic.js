@@ -20,18 +20,30 @@ const path = require("path");
 const { ipcMain, app, dialog } = require("electron");
 
 function setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs } = {}) {
-  ipcMain.handle("diagnostic:export", async (event, targetPath) => {
+  // BLOCK-10 S-004: assertTrustedSender helper, additive alongside BLOCK-3.
+  const { createSenderGuard } = require("./_sender-guard");
+  // BLOCK-10 S-007 / BLOCK-3 invariant: capture a live getter so the guard
+  // tracks window replacement (app.on('activate') recreates mainWindow).
+  const assertSender = createSenderGuard(typeof mainWindow === "function" ? mainWindow : () => mainWindow);
+  ipcMain.handle("diagnostic:export", async (event, requestedTargetPath) => {
+    const deny = assertSender(event); if (deny) return deny;
     try {
       const logDir = getLogDir();
       const { createWriteStream } = fs;
       const zlib = require("zlib");
       const { redactSensitiveText } = require("./diagnostic-redaction");
 
-      // M2-8 备份/导出闭环：默认保存对话框提示用户选导出路径
-      let outPath = targetPath;
-      if (!outPath && mainWindow) {
+      // BLOCK-10 S-007: 路径强约束 — diagnostic:export 永远走 user-chosen
+      // 保存对话框,绝不接受 renderer 注入的 targetPath。这避免一个被入侵的
+      // webview 通过这条 IPC 写入到任意位置。
+      let outPath = null;
+      if (!mainWindow || (typeof mainWindow === "function" ? mainWindow() : mainWindow)?.isDestroyed?.()) {
+        return { ok: false, error: "no window available for save dialog" };
+      }
+      {
+        const win = typeof mainWindow === "function" ? mainWindow() : mainWindow;
         const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-        const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
+        const { canceled, filePath } = await dialog.showSaveDialog(win, {
           title: "导出诊断日志",
           defaultPath: `biof3-diagnostic-${ts}.zip`,
           filters: [{ name: "ZIP", extensions: ["zip"] }],
@@ -39,6 +51,9 @@ function setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs } = {}) {
         if (canceled) return { ok: false, error: "cancelled" };
         outPath = filePath;
       }
+      // requestedTargetPath is ignored by design; keep parameter so the IPC
+      // signature remains stable for callers.
+      void requestedTargetPath;
       if (!outPath) return { ok: false, error: "no output path" };
 
       // 先 flush 日志流

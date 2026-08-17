@@ -18,18 +18,30 @@ const RETRY_POLICY = {
   internal_error: { maxRetries: 2, backoff: 'constant', delay: 1000 },
 };
 
-// Retry statistics
-const retryStats = {
-  totalRetries: 0,
-  successfulRetries: 0,
-  failedRetries: 0,
-  byErrorType: {
-    network_timeout: { attempts: 0, successes: 0 },
-    rate_limit: { attempts: 0, successes: 0 },
-    model_overloaded: { attempts: 0, successes: 0 },
-    internal_error: { attempts: 0, successes: 0 },
-  },
-};
+// Retry statistics — per-task isolation (BLOCK-10 S-006).
+// Previously a module-level singleton that mixed every concurrent task's
+// retry counters; now keyed by task_id so each agent loop carries its own
+// counters and `resetRetryStats(taskId)` can scope the reset.
+const retryStats = new Map();
+
+function _ensureRetryStats(taskId) {
+  let entry = retryStats.get(taskId);
+  if (!entry) {
+    entry = {
+      totalRetries: 0,
+      successfulRetries: 0,
+      failedRetries: 0,
+      byErrorType: {
+        network_timeout: { attempts: 0, successes: 0 },
+        rate_limit: { attempts: 0, successes: 0 },
+        model_overloaded: { attempts: 0, successes: 0 },
+        internal_error: { attempts: 0, successes: 0 },
+      },
+    };
+    retryStats.set(taskId, entry);
+  }
+  return entry;
+}
 
 /**
  * Detect error type from error message
@@ -129,49 +141,99 @@ function getNextRetryTime(currentRetryCount, error) {
 }
 
 /**
- * Record retry attempt in statistics
+ * Record retry attempt in statistics for a specific task.
+ * @param {string} taskId - agent task identifier
  * @param {string} errorType
  * @param {boolean} succeeded
  */
-function recordRetryAttempt(errorType, succeeded) {
-  retryStats.totalRetries++;
+function recordRetryAttempt(taskId, errorType, succeeded) {
+  const stats = _ensureRetryStats(taskId);
+  stats.totalRetries++;
   if (succeeded) {
-    retryStats.successfulRetries++;
+    stats.successfulRetries++;
   } else {
-    retryStats.failedRetries++;
+    stats.failedRetries++;
   }
-  if (retryStats.byErrorType[errorType]) {
-    retryStats.byErrorType[errorType].attempts++;
+  if (stats.byErrorType[errorType]) {
+    stats.byErrorType[errorType].attempts++;
     if (succeeded) {
-      retryStats.byErrorType[errorType].successes++;
+      stats.byErrorType[errorType].successes++;
     }
   }
 }
 
 /**
- * Get retry statistics
+ * Get retry statistics for a specific task. If taskId is omitted, returns
+ * aggregated stats across all known tasks (back-compat for any external
+ * caller that had been relying on the pre-S-006 singleton).
+ * @param {string} [taskId]
  * @returns {object}
  */
-function getRetryStats() {
+function getRetryStats(taskId) {
+  if (taskId) {
+    const stats = retryStats.get(taskId);
+    if (!stats) {
+      return {
+        totalRetries: 0,
+        successfulRetries: 0,
+        failedRetries: 0,
+        byErrorType: {
+          network_timeout: { attempts: 0, successes: 0 },
+          rate_limit: { attempts: 0, successes: 0 },
+          model_overloaded: { attempts: 0, successes: 0 },
+          internal_error: { attempts: 0, successes: 0 },
+        },
+        retrySuccessRate: 0,
+      };
+    }
+    return {
+      ...stats,
+      retrySuccessRate:
+        stats.totalRetries > 0
+          ? (stats.successfulRetries / stats.totalRetries) * 100
+          : 0,
+    };
+  }
+  // aggregate over all known tasks
+  const agg = {
+    totalRetries: 0,
+    successfulRetries: 0,
+    failedRetries: 0,
+    byErrorType: {
+      network_timeout: { attempts: 0, successes: 0 },
+      rate_limit: { attempts: 0, successes: 0 },
+      model_overloaded: { attempts: 0, successes: 0 },
+      internal_error: { attempts: 0, successes: 0 },
+    },
+  };
+  for (const stats of retryStats.values()) {
+    agg.totalRetries += stats.totalRetries;
+    agg.successfulRetries += stats.successfulRetries;
+    agg.failedRetries += stats.failedRetries;
+    for (const errorType of Object.keys(stats.byErrorType)) {
+      agg.byErrorType[errorType].attempts += stats.byErrorType[errorType].attempts;
+      agg.byErrorType[errorType].successes += stats.byErrorType[errorType].successes;
+    }
+  }
   return {
-    ...retryStats,
+    ...agg,
     retrySuccessRate:
-      retryStats.totalRetries > 0
-        ? (retryStats.successfulRetries / retryStats.totalRetries) * 100
+      agg.totalRetries > 0
+        ? (agg.successfulRetries / agg.totalRetries) * 100
         : 0,
   };
 }
 
 /**
- * Reset retry statistics
+ * Reset retry statistics for a specific task (or all tasks if taskId is omitted).
+ * @param {string} [taskId]
  */
-function resetRetryStats() {
-  retryStats.totalRetries = 0;
-  retryStats.successfulRetries = 0;
-  retryStats.failedRetries = 0;
-  for (const errorType of Object.keys(retryStats.byErrorType)) {
-    retryStats.byErrorType[errorType] = { attempts: 0, successes: 0 };
+function resetRetryStats(taskId) {
+  if (taskId) {
+    retryStats.delete(taskId);
+    return;
   }
+  retryStats.clear();
 }
 
 const db = new Database(config.dbPath);
@@ -187,6 +249,9 @@ db.exec(`
     created_at TEXT NOT NULL,
     finished_at TEXT,
     error TEXT,
+    -- BLOCK-10 S-006: user_id is intended NOT NULL but is kept nullable in
+    -- CREATE TABLE for backwards compatibility with existing dev DBs. New
+    -- writes must populate user_id (see INSERT/UPDATE statements below).
     user_id TEXT,
     agent_status TEXT,
     retry_count INTEGER DEFAULT 0,
@@ -465,7 +530,7 @@ function scheduleAgentTaskRetry(taskId, error) {
   if (currentRetryCount >= policy.maxRetries) {
     logger.warn(`Task ${taskId}: Max retries (${policy.maxRetries}) exceeded`);
     markAgentTaskFailed(taskId, `Max retries exceeded: ${error}`);
-    recordRetryAttempt(errorType, false);
+    recordRetryAttempt(taskId, errorType, false);
     return false;
   }
 
@@ -485,7 +550,7 @@ function scheduleAgentTaskRetry(taskId, error) {
   logger.info(
     `Task ${taskId}: Scheduled retry ${nextRetryCount}/${policy.maxRetries} at ${nextRetryAt.toISOString()} (error: ${errorType})`
   );
-  recordRetryAttempt(errorType, false);
+  recordRetryAttempt(taskId, errorType, false);
 
   return true;
 }

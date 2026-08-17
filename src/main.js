@@ -1044,20 +1044,20 @@ async function main() {
   const { setupDataManagementIpc } = require("./ipc/data-management");
   const { setupBranchIpc } = require("./ipc/branch-handlers");
   const { setupResultIpc } = require("./ipc/result-handlers");
-  setupAiSettingsIpc();
+  setupAiSettingsIpc({ mainWindow: () => mainWindow });
   setupComputeSettingsIpc();
   setupTelemetryIpc();
   setupHarnessCapabilitiesIpc();
   setupFileDialogIpc({ mainWindow });
   setupDataManagementIpc();
-  setupBranchIpc();
-  setupResultIpc();
+  setupBranchIpc({ mainWindow: () => mainWindow });
+  setupResultIpc({ mainWindow: () => mainWindow });
   // BLOCK-9.1 PHASE 2: mid-risk setup functions with dependency injection
   const { setupRuntimeIpc } = require("./ipc/runtime-status");
   const { setupBackendLifecycleIpc } = require("./ipc/backend-lifecycle");
   const { setupPluginIpc } = require("./ipc/plugin");
   const { setupAutoUpdateIpc } = require("./ipc/auto-update");
-  setupPluginIpc();
+  setupPluginIpc({ mainWindow: () => mainWindow });
   // Capture procs as a snapshot — IPC handlers fetch a fresh
   // snapshot at invocation time via getProcs() from backend-proc-manager.
   const _procsSnapshot = getProcs();

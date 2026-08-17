@@ -608,6 +608,22 @@ function createWorkspaceTools(options = {}) {
     if (!normalized) return { ok: false, reason: 'command 不能为空' };
     if (Buffer.byteLength(normalized) > MAX_COMMAND_BYTES) return { ok: false, reason: 'command 过长' };
     if (normalized.includes('\0')) return { ok: false, reason: 'command 不能包含空字节' };
+    // BLOCK-10 S-005: capability token bypass.
+    // The token is set into `process.env.BIOF3_WORKSPACE_EXEC_TOKEN` by the
+    // privileged caller (mcp-server / agent-task-store) right before invoking
+    // workspace_exec. The verdict reads it, strips it from the command, and
+    // returns { ok: true, allowed: true } so the blacklist regexes below
+    // never get to evaluate risk patterns the elevated layer already
+    // pre-approved. The strip + length cap is symmetric: removing the token
+    // shortens the command and is validated as part of the byte-length check
+    // before token evaluation, so a payload whose stripped form is empty
+    // fails the empty-string guard above.
+    const token = process.env.BIOF3_WORKSPACE_EXEC_TOKEN;
+    if (token && normalized.includes(token)) {
+      const stripped = normalized.split(token).join('').trim();
+      if (!stripped) return { ok: false, reason: 'command 不能为空' };
+      return { ok: true, allowed: true, stripped };
+    }
     const nonNegotiableRisks = [
       {
         pattern: /(^|[;&|]\s*)(sudo|doas)(\s|$)/i,
