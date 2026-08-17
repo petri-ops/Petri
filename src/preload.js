@@ -88,6 +88,23 @@ contextBridge.exposeInMainWorld('biof3Desktop', {
       ipcRenderer.on('window:maximize-changed', listener);
       return () => ipcRenderer.removeListener('window:maximize-changed', listener);
     },
+    // Mac fullscreen support
+    isFullScreen: () => {
+      try {
+        return Promise.resolve(ipcRenderer.invoke('window:isFullScreen')).then(
+          (value) => value === true,
+        );
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    },
+    toggleFullScreen: () => ipcRenderer.send('window:toggleFullScreen'),
+    onFullScreenChanged: (callback) => {
+      if (typeof callback !== 'function') return () => {};
+      const listener = (_event, isFullScreen) => callback(isFullScreen === true);
+      ipcRenderer.on('window:fullscreen-changed', listener);
+      return () => ipcRenderer.removeListener('window:fullscreen-changed', listener);
+    },
   },
 
   // 应用级控制 — 装完运行时后需整体重启（BIOF3_R_HOME 在 main 启动时固化，
