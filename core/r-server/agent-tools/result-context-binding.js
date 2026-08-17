@@ -68,12 +68,43 @@ function projectResultStudioToolContext(context = {}) {
  * `[REDACTED]` is therefore not a presented token and is replaced by the
  * click-time bound token. This preserves capability binding without exposing
  * the opaque token to the model.
+ *
+ * BLOCK-10 S-002 fail-closed cross-check (minimal): when an explicit
+ * presented token is valid AND the activeArtifact in ctx carries a triple
+ * (jobId, name, revisionId), any of those identifiers supplied on the args
+ * MUST match the active triple. A mismatch indicates the presented token
+ * was issued for a different artifact (replay or prompt-injection attack),
+ * so we drop the presented token and fall through to the click-time
+ * bound token path. If neither path yields a token, the existing
+ * `context_token_stale` guard downstream still rejects. No new error code.
  */
 function bindResultStudioContextToken(name, args = {}, ctx = {}) {
   const safeArgs = args && typeof args === 'object' && !Array.isArray(args) ? args : {};
   if (!CONTEXT_BOUND_TOOLS.has(name)) return safeArgs;
   const presentedToken = trimmed(safeArgs.contextToken);
-  if (validContextToken(presentedToken)) return safeArgs;
+  if (validContextToken(presentedToken)) {
+    // S-002 cross-check: ensure presented token's target triple matches
+    // the click-time bound activeArtifact. Mismatch ⇒ ignore presented
+    // token and fall through to the ctx.bind path.
+    const active = ctx && ctx.activeArtifact && typeof ctx.activeArtifact === 'object'
+      ? ctx.activeArtifact
+      : null;
+    if (active && active.jobId && active.name) {
+      const tripleKeys = ['jobId', 'name', 'revisionId'];
+      const mismatch = tripleKeys.some((key) => {
+        const argVal = safeArgs[key];
+        if (argVal === undefined) return false;
+        return trimmed(String(argVal)) !== trimmed(String(active[key] || ''));
+      });
+      if (mismatch) {
+        const stripped = { ...safeArgs };
+        delete stripped.contextToken;
+        if (!validContextToken(ctx.resultStudioContextToken)) return stripped;
+        return { ...stripped, contextToken: trimmed(ctx.resultStudioContextToken) };
+      }
+    }
+    return safeArgs;
+  }
   if (Object.prototype.hasOwnProperty.call(safeArgs, 'contextToken')
       && presentedToken !== '[REDACTED]') return safeArgs;
   if (!validContextToken(ctx.resultStudioContextToken)) return safeArgs;

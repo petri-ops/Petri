@@ -20,6 +20,7 @@ const {
   isSafeFlatFilename,
   reconcileArtifactTruth,
 } = require('../helpers/artifact-truth');
+const { checkAllowedDownstream } = require('../agent-tools/agent-tool-policy');
 const { createResultArchive } = require('../helpers/result-archive');
 const { createExecutionContext } = require('../../shared-backend/execution-context');
 const { resolveProjectRunLayout } = require('../../shared-backend/project-run-layout');
@@ -953,7 +954,20 @@ async function _runPluginScript(
       if (spawnCmd.env) runEnv = spawnCmd.env;
     }
 
-    // 4. 执行
+    // 4. 执行 — BLOCK-10 S-001: enforce plugin → downstream side-effect
+    // policy at the execFile boundary. Plugins may only spawn their
+    // declared runner (Rscript / python); chaining into `shell` is
+    // refused here so a malicious plugin cannot bypass commandVerdict.
+    const downstream = plugin && plugin.language === 'r'
+      ? 'r-runner'
+      : (plugin && plugin.language === 'python') ? 'python-runner' : 'shell';
+    if (!checkAllowedDownstream({ allowedDownstream: ['r-runner', 'python-runner'] }, downstream)) {
+      return resolve({
+        ok: false,
+        error: 'policy_denied',
+        message: 'Plugin execution path is not whitelisted for downstream side effects.',
+      });
+    }
     const startedAt = new Date().toISOString();
     execFile(
       runCmd[0],
