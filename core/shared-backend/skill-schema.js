@@ -1344,14 +1344,3 @@ if (typeof module !== 'undefined' && module.exports) {
   };
 }
 
-// ES module export (if needed)
-export {
-  SkillSchema,
-  validateSkillManifest,
-  applySkillDefaults,
-  PARAM_TYPES,
-  SOURCE_TYPES,
-  OUTPUT_TYPES,
-  ERROR_CODES,
-  SKILL_SCHEMA
-};
