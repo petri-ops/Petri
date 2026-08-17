@@ -14,6 +14,44 @@
 
 | 2026-08-17 | **BLOCK-9.2 PHASE 0 架构调研收口 + PHASE 0.5 dangling IPC 修复（UI-169）**：worker 调研 ID `d06a18b5-93fd-4d59-b326-60ec01d9e1e7` 输出报告 `docs/block-9-2-mega-file-split-survey.md`（1134 行 / 74 KB / 0 行代码改动）；**核心结论**：5 文件 全部可拆但优先级差异巨大。**P0** DesktopSettingsPanel.tsx 1515 → ~600 + 9 文件（6 section 边界最清晰，PHASE 1 立即启动）；**P0** ResultView.tsx 1654 → ~1100 + types/helpers + 保留 ResultArtifactShell 1313 行单组件（PHASE 2）；**P1** plugin-manager.js 1457 → ~600 + 5 lib/（**PHASE 0.5 必须先修 dangling IPC contract bug** — `listInstalledPlugins`/`listRemotePlugins`/`checkPluginUpdates` 在 `module.exports` 中不存在，被 `src/ipc/plugin.js` 第 18/28/38 行静默失败，**这是 BLOCK-9.1 PHASE 2 收口漏掉的遗留 bug**）；**P2** SimpleChat.tsx 2153 → ~1100 + 12 文件（工作量最大，留 PHASE 4）；**P3** useSkillStore.ts 743 行 **不建议拆**（module-level 5 个 singleton + 4 个 Map 强耦合，拆了破坏 singleton 语义，PHASE 5 仅审计登记）。**关键发现**：(1) 5 文件间实际共享代码极少，**不创建 `lib/shared/`**；(2) 后端范式：5 个 lib/ 自包含 + 主文件反向 require（参考 BLOCK-9.1 §4.1）；(3) 前端范式：types + helpers + 谨慎子组件 + re-export 兼容（参考 BLOCK-9 PHASE 3）；(4) 所有 21 个 `module.exports` 必须 100% 保留（含 Week 2 schema re-export）；(5) 8 个测试文件 0 改动（消费者全部从原 import 路径继续消费）。**PHASE 0.5 立即修复**：`src/ipc/plugin.js` 引用 `listInstalledPlugins`/`listRemotePlugins`/`checkPluginUpdates` 改名为 `getInstalledPlugins`/`getRemoteManifest`/`checkUpdates`（不动 plugin-manager.js 公共接口）；**验证**：chf0-critical 33/33 PASS / vitest 75 文件 630 tests PASS / window-controls 6/6 PASS / node --check 全部 OK。**UI-169** 审计 entry 写入 docs/ui-productization-audit.md。**plan v0.2** 修订：`docs/block-9-2-mega-file-refactor-plan.md` 251 行 / 12 § / PHASE 0 已收口 + PHASE 0.5 dangling 修复 + PHASE 1 当前进行中 + PHASE 2/3/4/5/6 待办。**当前 active 工作包**：BLOCK-9.2（PHASE 1）。**不外推** packaged / Provider / GA / P7 / dist staleness G1+ / 不重新激活 BLOCK-9/9.1/8/7/6/5/4/3/2 / 不外推 UI-157/158/159 实机 / 不动 agent-tools/* / agent-transcripts/* | BLOCK-9.2-MEGA-FILE-REFACTOR / PHASE-0-CLOSEOUT + PHASE-0.5-FIX |
 
+
+
+| 2026-08-17 | **BLOCK-9.2 PHASE 1 + 2 + 3 落地（DesktopSettingsPanel + ResultView + plugin-manager 三个 mega file 拆分）**：
+
+**PHASE 1 收口**（commit `d06b66e`）：DesktopSettingsPanel.tsx 1515 → 870 行（**-42.6% / -645**）；抽出 8 个模块到 `frontend/src/components/desktop/DesktopSettingsPanel/` 目录：
+- `types.ts` (L29) `Props` / `SettingsSection` / `UsageSummary` + `SETTINGS_SECTIONS` 常量数组
+- `helpers.ts` (L14) `formatMetricBytes` 纯 helper
+- `model-types.ts` (L131) `ModelRole` / `ModelCapability` + `MODEL_ROLES` 数组 + `providerDefaults` + `credentialId`
+- `sections/UsageResourcePanel.tsx` (L107) / `UpdateChecker.tsx` (L124) / `ExportDiagnostic.tsx` (L77) / `DataManagement.tsx` (L193) / `ComputeExecution.tsx` (L288) / `TrashManagement.tsx` (L126) / `HarnessEnvironment.tsx` (L74) — 7 个 section 子组件（UseAutoUpdate 缺 `installing` 字段已修）
+
+**PHASE 2 收口**（commit `014ad0d`）：ResultView.tsx 1654 → 1553 行（**-6.1% / -101**）；保守拆分 + 类型 + 助手：
+- `frontend/src/components/workspace-panels/ResultView/types.ts` (L80) `ActiveArtifact` / `JobStats`（对外 re-export）/ `JobResultFile` / `DeliveryManifestSummary` / `JobResult` / `JobDetailMeta`
+- `frontend/src/components/workspace-panels/ResultView/helpers.ts` (L44) `toArtifactRevision` / `artifactName` / `artifactKindIcon` / `artifactPreviewLabel` / `workflowStageLabel`
+- `ResultArtifactShell` 1313 行主组件**保留单组件**（state 复杂度高 + 强耦合 + 拆了 prop drilling 风险大）
+- `ResultView.tsx` 顶部 `export type { ActiveArtifact, JobStats } from './ResultView/types'` 兼容 re-export
+
+**PHASE 3 收口**（commit `880efaa`）：plugin-manager.js 1457 → 586 行（**-59.7% / -871**）；抽 8 个 lib 文件到 `src/plugin/`：
+- `paths.js` (L99) resolveSharedBackendDir + resolveProjectRoot + 7 个路径常量 + getFixRPathsScript + initSharedBackend / configure side effects
+- `installed.js` (L100) getInstalledPlugins + saveInstalledPlugins + addInstalledPlugin + removeInstalledPlugin（installed.json CRUD + fingerprint reconcile）
+- `manifest-source.js` (L99) getBuiltInManifest + getRemoteManifest（built-in + OSS https fetch + normalizeRemotePluginEntry merge）
+- `io.js` (L120) downloadFile + verifyChecksum + streamingSha256 + assertArtifactChecksumDeclared + dirSize + copyDirSync
+- `zip.js` (L20) extractZipFile (extract-zip wrapper)
+- `content-plugin.js` (L137) listContentPluginDocs + readContentPluginDoc + listAllContentPlugins + registerContentPlugin + unregisterContentPlugin + extractMdTitle + extractSidebarPos
+- `registry.js` (L26) registerPluginInServer (r-server globalThis bridge)
+- `runtime.js` (L62) detectPlatform + getRuntimeStatus + parseVersion + compareVersions
+- `uninstall.js` (L202) uninstallPlugin + uninstallRuntime + removePackage + checkUpdates + loadAllPlugins
+- `plugin-manager.js` 保留 4 个 install orchestrator（installPlugin + installContentPlugin + installRuntime + installFigcodePack）—— 它们 cross-reference + onProgress + 多次 SHARED_BACKEND_DIR require，拆完反而脆弱
+- **21 个 module.exports 100% 保留**（含 Week 2 schema re-export：PLATFORM_IDS / ALLOWED_RUNTIME_HOSTS / selectArtifact / assertAllowedUrl / validateManifest / normalizeRemotePluginEntry）
+- **5 修正 bug**：(1) `paths.js` 一开始 import `getPythonRuntimeExecutable` 错从 `platform-compat` 拿，**实际它在 `core/shared-backend/runtime-paths`** 已修；(2) `runtime.js` 同样 import 错误已修；(3) `uninstall.js` L72 写 `path.join(PROJECT_ROOT, 'shared-backend', 'executors')` 改用 `SHARED_BACKEND_DIR` 常量一致；(4) `plugin-manager.js` 顶部 IIFE 包装 runtime-paths import 改用 `paths.js` 简单 import；(5) `void app` / `void pluginLoader` / `void extractMdTitle` 等冗余 void 抑制全部清理
+
+**三阶段统一验证**：node --check 10 文件 0 错 / 14 plugin 测试 PASS（4 checksum + 10 manifest/SDK；**RS7 golden fixture sha256 drift 已 pre-existing 验证**（git stash 后旧 plugin-manager 仍 fail））/ g0-chf0 + qa-smoke 39 测试 PASS / docs:check 85 / ui:audit:check 139 / tsc 0 / Vite build OK / npm run docs:reconcile 0。
+
+**累计指标**（3 PHASE 1+2+3）：plugin-manager 1457 → 586（-871）/ DesktopSettingsPanel 1515 → 870（-645）/ ResultView 1654 → 1553（-101）；总 **-1617 行** / 14 个新 lib/sections 模块；7 个测试文件 0 改动 / 21 module.exports 100% / UI-161 + UI-156 等不变量 0 diff。
+
+**UI-170 / 171 / 172 审计 entry 写入** `docs/ui-productization-audit.md`（desktop refactor / result view refactor / plugin-manager refactor 三条 entry）。
+
+**当前 active 工作包**：BLOCK-9.2（PHASE 4 进行中）。**不外推** packaged / Provider / GA / P7 / dist staleness G1+ / 不重新激活 BLOCK-9/9.1/8/7/6/5/4/3/2 / 不外推 UI-157/158/159 实机 / 不动 agent-tools/* / agent-transcripts/* | BLOCK-9.2-MEGA-FILE-REFACTOR / PHASE-1+2+3-CLOSEOUT |
+
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
