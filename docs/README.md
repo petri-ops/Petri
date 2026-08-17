@@ -1,6 +1,6 @@
 # BioF3 Desktop 文档入口
 
-最后更新：2026-08-17（BLOCK-9.2-MEGA-FILE-REFACTOR PHASE 1+2+3+4 已落地：DesktopSettingsPanel 1515 → 870 + ResultView 1654 → 1553 + plugin-manager 1457 → 586 + SimpleChat.tsx 2153 → 1975；4 PHASE 累计 -1795 行；UI-170/171/172/173 verified；PHASE 5/6 待办）
+最后更新：2026-08-17（BLOCK-9.2-MEGA-FILE-REFACTOR PHASE 1+2+3+4 已落地 + PHASE 5 决策不拆 useSkillStore.ts：DesktopSettingsPanel 1515 → 870 + ResultView 1654 → 1553 + plugin-manager 1457 → 586 + SimpleChat.tsx 2153 → 1975；4 PHASE 拆分 + PHASE 5 决议文档；UI-170/171/172/173 verified + UI-174 PHASE 5 决议；PHASE 6 audit + closeout 待办）
 
 ## 项目治理入口
 
