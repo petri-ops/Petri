@@ -141,128 +141,27 @@ import {
 import styles from '@/pages/project-workspace.module.css';
 import { fileExtension, isImageFile, isTextFile, isMarkdownFile, workspaceFileUrlFor, formatPreviewText } from '@/lib/previewFileUtils';
 
-function toArtifactRevision(input: unknown): ArtifactRevision | null {
-  if (!input || typeof input !== 'object') return null;
-  const candidate = input as Partial<ArtifactRevision>;
-  if (typeof candidate.revisionId !== 'string') return null;
-  if (!Number.isInteger(candidate.revisionOrdinal) || (candidate.revisionOrdinal as number) < 1) return null;
-  return candidate as ArtifactRevision;
-}
-export interface ActiveArtifact {
-  jobId: string;
-  toolId: string;
-  name: string;
-  type: string;
-  label?: string;
-  url?: string;
-  revisionId?: string | null;
-  /**
-   * 1-based ordinal within the artifact family, for showing a real "v2"
-   * instead of a truncated Revision ID. The interaction endpoint already
-   * returns it on `revision` (routes/result-studio.js:559); the client used
-   * to read only `manifest` and discard it.
-   */
-  revisionOrdinal?: number | null;
-  artifactFamilyId?: string | null;
-  semanticKind?: ResultArtifactKind;
-  entityType?: string | null;
-  idField?: string | null;
-  selectionDurable?: boolean;
-  interactionCapabilities?: InteractionCapability[];
-  selection?: ArtifactSelection | null;
-  selectionId?: string | null;
-  truthStatus?: 'valid' | 'degraded' | 'blocked' | null;
-  conclusion?: string | null;
-  availabilityStatus?: 'checking' | 'available' | 'unavailable';
-  availabilityReason?: string | null;
-}
-export interface JobStats {
-  running: number;
-  failed: number;
-  done: number;
-  pending: number;
-}
 
-interface JobResultFile {
-  name: string;
-  type: string;
-  label?: string;
-  title?: string;
-  filename?: string;
-  url?: string;
-  preview?: boolean;
-  download?: boolean;
-}
+// ── BLOCK-9.2 PHASE 2: types + helpers extracted to ./ResultView/{types,helpers} ──
+import {
+  toArtifactRevision,
+  artifactName,
+  artifactKindIcon,
+  artifactPreviewLabel,
+  workflowStageLabel,
+} from './ResultView/helpers';
+import type {
+  ActiveArtifact,
+  JobStats,
+  JobResultFile,
+  DeliveryManifestSummary,
+  JobResult,
+  JobDetailMeta,
+} from './ResultView/types';
 
-interface DeliveryManifestSummary {
-  status: 'valid' | 'degraded' | 'blocked';
-  manifestHash?: string;
-  artifacts?: Array<{ reproducibility?: { status?: 'available' | 'verified' | 'unavailable' } }>;
-  summary?: {
-    conclusion?: string;
-    whatWasDone?: string;
-    cautions?: string[];
-  };
-}
-
-interface JobResult {
-  artifacts?: JobResultFile[];
-  files?: JobResultFile[];
-  tool?: {
-    id?: string;
-    version?: string | null;
-    language?: string | null;
-  };
-  outputs?: unknown;
-  manifest?: unknown;
-  stdout?: string;
-  summary?: unknown;
-  deliveryManifest?: DeliveryManifestSummary;
-}
-
-interface JobDetailMeta {
-  params?: Record<string, unknown>;
-  ackStatus?: string | null;
-  projectId?: string | null;
-}
-
-function artifactName(file: JobResultFile): string {
-  return file.name || file.filename || '';
-}
-
-function artifactKindIcon(kind: ResultArtifactKind): IconName {
-  if (kind === 'report') return 'book';
-  if (kind === 'plot') return 'svg';
-  if (kind === 'table') return 'bar-chart';
-  if (kind === 'text') return 'file';
-  if (kind === 'data') return 'database';
-  return 'file';
-}
-
-function artifactPreviewLabel(artifact: ResultArtifactRecord): string {
-  const kind = classifyArtifact(artifact);
-  if (artifact.preview === false) return '文件';
-  if (kind === 'report') return 'HTML';
-  if (kind === 'plot') return '图像';
-  if (kind === 'table') return '表格';
-  if (kind === 'text') return '文本';
-  if (kind === 'data') return '数据';
-  return '文件';
-}
-
-function workflowStageLabel(stage: string): string {
-  return {
-    inspect: '检查输入',
-    infer: '识别结构',
-    select: '选择工具',
-    repair: '修复参数',
-    confirm: '等待确认',
-    run: '运行分析',
-    verify: '校验产物',
-    report: '生成报告',
-  }[stage] || stage;
-}
-
+// Re-export compatibility: CenterPanel.tsx + project-workspace.tsx + 多 consumer
+// continue to import { ActiveArtifact, JobStats } from "@/components/workspace-panels/ResultView".
+export type { ActiveArtifact, JobStats } from './ResultView/types';
 function ResultArtifactShell({
   project,
   conversationId,
