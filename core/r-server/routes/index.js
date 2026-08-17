@@ -8,6 +8,17 @@
 
 module.exports = async function registerRoutes(app) {
   const routes = [
+    ['Health', () => {
+      const db = require('../db').getDatabase();
+      const version = require('../package.json').version;
+      app.get('/api/health', (_req, res) => {
+        let dbOk = false;
+        try {
+          dbOk = Boolean(db.prepare('SELECT 1').get());
+        } catch {}
+        res.json({ status: 'ok', timestamp: new Date().toISOString(), version, db_ok: dbOk });
+      });
+    }],
     // Web-only 路由已移除（desktop 前端/copilot 不调用）：ai-report、ai-review、
     // analytics、admin-ops、admin-compute、admin-users、observability。
     // G0-RS-P4R baseline capture; self-disables unless BIOF3_PERF_PROBE=1.
