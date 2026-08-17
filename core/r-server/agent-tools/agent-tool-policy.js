@@ -46,23 +46,53 @@ function deny(reason, error, message, extra = {}) {
 
 function effectiveOperation(name, args, contract) {
   if ((name === 'workspace_write' || name === 'workspace_replace') && args && args.dryRun === true) {
-    return { mutating: false, delegatedApproval: false };
+    return { mutating: false, delegatedApproval: false, allowedDownstream: [] };
   }
   if (name === 'run_tool') {
     if (READ_ONLY_RUN_TOOL_OPS.has(args && args.op)) {
-      return { mutating: false, delegatedApproval: false };
+      // Plugin tool read-only ops must not chain into shell-execution side effects.
+      return { mutating: false, delegatedApproval: false, allowedDownstream: [] };
     }
     if (args && args.op === 'run') {
-      return { mutating: true, delegatedApproval: true };
+      // BLOCK-10 S-001 minimal fix: when a plugin tool run is delegated
+      // for execution, declare the downstream side effects it may legally
+      // invoke. We deliberately keep this conservative — shell is the
+      // primary attack surface (plugin → Rscript/Python bin → /bin/sh).
+      // Plugins are not allowed to chain into `shell` or `workspace_exec`
+      // directly via policy; the plugin runner enforces this via
+      // checkAllowedDownstream() before execFile().
+      return {
+        mutating: true,
+        delegatedApproval: true,
+        allowedDownstream: ['r-runner', 'python-runner'],
+      };
     }
   }
   if (name === 'plan' && READ_ONLY_PLAN_OPS.has(args && args.op)) {
-    return { mutating: false, delegatedApproval: false };
+    return { mutating: false, delegatedApproval: false, allowedDownstream: [] };
   }
   return {
     mutating: MUTATING_SIDE_EFFECTS.has(contract && contract.sideEffect),
     delegatedApproval: false,
+    // Non-plugin operations never chain — they are leaf side effects.
+    allowedDownstream: [],
   };
+}
+
+/**
+ * BLOCK-10 S-001 single-line gate: refuse a downstream call when the
+ * declared operation does not whitelist it. Callers should consult this
+ * before invoking execFile() / spawn() inside plugin runners.
+ *
+ * @param {{allowedDownstream?: string[]}|null|undefined} operation - result of effectiveOperation()
+ * @param {string} downstream - canonical side-effect token, e.g. 'shell' / 'r-runner' / 'python-runner'
+ * @returns {boolean} true when the downstream call is permitted
+ */
+function checkAllowedDownstream(operation, downstream) {
+  if (!operation || typeof operation !== 'object') return false;
+  const allowed = Array.isArray(operation.allowedDownstream) ? operation.allowedDownstream : [];
+  if (allowed.length === 0) return false;
+  return allowed.includes(downstream);
 }
 
 function preflightDenial(preflight) {
@@ -167,4 +197,5 @@ module.exports = {
   decideAgentToolCall,
   effectiveOperation,
   isProtectedScientificSource,
+  checkAllowedDownstream,
 };
