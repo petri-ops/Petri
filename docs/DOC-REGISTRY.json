@@ -1082,6 +1082,16 @@
       "archivePolicy": "retain_stable_path"
     },
     {
+      "id": "BLOCK-9.2-USESKILLSTORE-EVALUATION",
+      "path": "docs/block-9-2-useSkillStore-evaluation.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "block-9-2-mega-file-refactor",
+      "entrypoint": "docs/block-9-2-mega-file-refactor-plan.md",
+      "archivePolicy": "retain_stable_path"
+    },
+    {
       "id": "BRANCH-DATA-MODEL",
       "path": "docs/branch-data-model.md",
       "kind": "reference",
