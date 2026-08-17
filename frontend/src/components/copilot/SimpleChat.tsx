@@ -3,12 +3,15 @@
 // Replaces the complex CopilotChat for the desktop workspace.
 // Pure message list + input, driven by projectId/conversationId.
 //
-// BLOCK-9.2 PHASE 4: extracted to ./SimpleChat/{types.ts,helpers.ts,attachments.ts,ImagePreviewModal.tsx}.
+// BLOCK-9.2 PHASE 4: extracted to ./SimpleChat/{types.ts,helpers.tsx,attachments.ts,ImagePreviewModal.tsx,formatHarness.ts}.
 //   • 189-line types.ts holds 14 type/const declarations.
 //   • 108-line helpers.ts holds MessageMeta + ExamplePrompts + compactStageConclusion.
 //   • attachments.ts holds AttachmentFile type + drag/drop/paste/remove/open/close helpers.
 //   • ImagePreviewModal.tsx holds the image preview modal component (~110 lines).
-//   • The ~1657-line SimpleChat main component stays intact — too much
+//   • formatHarness.ts holds the 5 pure harness payload formatting helpers
+//     (stringifyParamValue / shortValue / formatHarnessRepair / formatHarnessWarning /
+//     formatHarnessDiagnosticIssue).
+//   • The ~2115-line SimpleChat main component stays intact — too much
 //     shared local state to safely split without rewriting the rendering pipeline.
 //
 // Pure code organization change; 0 behavior difference. All public exports
@@ -50,6 +53,13 @@ import {
   closeImagePreview,
 } from './SimpleChat/attachments';
 import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
+import {
+  stringifyParamValue,
+  shortValue,
+  formatHarnessRepair,
+  formatHarnessWarning,
+  formatHarnessDiagnosticIssue,
+} from './SimpleChat/formatHarness';
 
 // Re-export helpers (so `import { restoreSimpleMessage } from './SimpleChat'` keeps working)
 export {
@@ -101,7 +111,6 @@ import { __resetFileReferenceCache, extractFileReferenceCandidates } from '@/lib
 import {
   fetchHarnessToolManifest,
   repairHarnessParams,
-  type HarnessDiagnosticIssue,
   type HarnessNextAction,
   type HarnessRunDiagnostics,
   type HarnessParamRepair,
@@ -1927,57 +1936,6 @@ function ToolActivityList({
       })}
     </div>
   );
-}
-
-function stringifyParamValue(value: unknown): string {
-  if (typeof value === 'string') return value;
-  if (value == null) return '';
-  try {
-    return JSON.stringify(value);
-  } catch {
-    return String(value);
-  }
-}
-
-function shortValue(value: unknown): string {
-  const text = stringifyParamValue(value);
-  return text.length > 64 ? `${text.slice(0, 61)}…` : text;
-}
-
-function formatHarnessRepair(item: Record<string, unknown>): string {
-  const code = String(item.code || '');
-  const inputId = String(item.inputId || '参数');
-  if (code === 'file_input_prefilled') {
-    return `已为 ${inputId} 选择候选文件：${shortValue(item.value)}`;
-  }
-  if (code === 'column_alias_mapped') {
-    return `已识别 ${inputId} 的关键列别名：${shortValue(item.mappings)}`;
-  }
-  if (code === 'number_param_clamped') {
-    return item.confirmationRequired
-      ? `建议将 ${inputId} 从 ${shortValue(item.from)} 调整为 ${shortValue(item.to)}（需确认）`
-      : `已将 ${inputId} 从 ${shortValue(item.from)} 调整为 ${shortValue(item.to)}`;
-  }
-  if (code === 'number_default_filled') {
-    return `已补齐 ${inputId} 默认值：${shortValue(item.to)}`;
-  }
-  return `${inputId}: ${shortValue(item)}`;
-}
-
-function formatHarnessWarning(item: Record<string, unknown>): string {
-  const code = String(item.code || '');
-  const inputId = String(item.inputId || '参数');
-  if (code === 'missing_required_columns') {
-    return `${inputId} 可能缺少必要列：${shortValue(item.missing)}`;
-  }
-  return `${inputId}: ${shortValue(item)}`;
-}
-
-function formatHarnessDiagnosticIssue(issue: HarnessDiagnosticIssue): string {
-  const inputId = issue.inputId ? `${String(issue.inputId)}：` : '';
-  const message = String(issue.message || issue.code || '诊断问题');
-  const detail = issue.detail ? `（${String(issue.detail)}）` : '';
-  return `${inputId}${message}${detail}`;
 }
 
 function ApprovalCard({
