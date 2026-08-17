@@ -1262,7 +1262,7 @@
       "id": "BLOCK-10-AUDIT-CLOSEOUT",
       "path": "docs/code-audit-closeout-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "agent-harness-audit-closeout",
       "entrypoint": "docs/README.md",
@@ -1275,7 +1275,17 @@
         "G0"
       ],
       "notes": "用户裁决 2026-08-17 启动。收口 8 份 2026-08-17 Agent Harness 独立只读审计报告（archived in DOC-REGISTRY as 9 audit references）：error-handling / security / contract / architecture / observability / plugin-schema / rserver-http / perf-resource；共 90+ finding ID 收口 25 个修复单元（11C + 5H + 9 最高 ROI Major）。4 PHASE：P0 用户可见（C-001 branch/result IPC bridge + C-002 result:create conversation_export）→ P1 安全/资源（S-001..S-007 + PR-001 + PR-006 + E-017 + E-018 + E-019 + OB-004 + OB-005）→ P2 契约（PL-001 MCP inputSchema 极简 validator 不引入 ajv）→ P4 audit + closeout。7 组同根修复统一（E-017/PR-006/OB-005 + E-018/PR-005 + E-019/PR-011 + S-004 + C-001 + OB-004 + result-studio interaction）。不外推 packaged/Provider/GA/P7/notarization/dist staleness G1+；不重启 BLOCK-2..9.2；不引入新 npm 依赖；不破坏 preload.js 顶层 16 个 namespace / electron.d.ts / desktopBridge.ts。详见 plan §1-§9。",
-      "registeredAt": "2026-08-17"
+      "registeredAt": "2026-08-17",
+      "linkedCommits": [
+        "1c0ebf0",
+        "128b3d4",
+        "4f9a10f",
+        "a09f706",
+        "1fedf9c",
+        "36c2789",
+        "32ed9e9",
+        "b79c472"
+      ]
     },
     {
       "id": "AGENT-HARNESS-ARCHITECTURE-SURVEY-2026-08-17",
