@@ -41,9 +41,13 @@ async function startMcpServer() {
     try {
       return await callTool(name, args);
     } catch (e) {
+      const log = require(path.join(coreRoot, 'shared-backend', 'logger'));
+      const code = e?.code || 'unknown';
+      const message = e?.message || String(e);
+      log.error('mcp_tool_error', { event: 'mcp_tool_error', tool: name, code, message });
       // MCP 约定：工具错误返回 isError 内容，而非抛异常
       return {
-        content: [{ type: 'text', text: `Error: ${e.message}` }],
+        content: [{ type: 'text', text: `Error: ${message}` }],
         isError: true,
       };
     }
