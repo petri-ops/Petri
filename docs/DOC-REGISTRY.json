@@ -1031,6 +1031,16 @@
       "truthDomain": "block-9-2-mega-file-refactor",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "BLOCK-9.2-SURVEY",
+      "path": "docs/block-9-2-mega-file-split-survey.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": false,
+      "truthDomain": "block-9-2-mega-file-refactor",
+      "entrypoint": "docs/block-9-2-mega-file-refactor-plan.md",
+      "archivePolicy": "retain_stable_path"
     }
   ]
 }

@@ -13,10 +13,17 @@
 const { ipcMain } = require("electron");
 
 function setupPluginIpc() {
+  // BLOCK-9.2 PHASE 0.5: fixed dangling IPC contract bug inherited
+  // from BLOCK-9.1 PHASE 2. The original main.js (2d94732^) used
+  // `getInstalledPlugins` from plugin-manager; the worker that
+  // extracted setupPluginIpc into src/ipc/plugin.js renamed it
+  // to `listInstalledPlugins` (which doesn't exist), causing the
+  // try/catch to silently swallow the error and return `[]`.
+  // Restored to the actual export names from plugin-manager.
   ipcMain.handle("plugin:list-installed", async () => {
     try {
-      const { listInstalledPlugins } = require("../plugin-manager");
-      return listInstalledPlugins();
+      const { getInstalledPlugins } = require("../plugin-manager");
+      return getInstalledPlugins();
     } catch (e) {
       console.warn("[desktop] plugin:list-installed failed:", e.message);
       return [];
@@ -25,18 +32,18 @@ function setupPluginIpc() {
 
   ipcMain.handle("plugin:list-remote", async () => {
     try {
-      const { listRemotePlugins } = require("../plugin-manager");
-      return await listRemotePlugins();
+      const { getRemoteManifest } = require("../plugin-manager");
+      return await getRemoteManifest();
     } catch (e) {
       console.warn("[desktop] plugin:list-remote failed:", e.message);
-      return [];
+      return { plugins: {} };
     }
   });
 
   ipcMain.handle("plugin:check-updates", async () => {
     try {
-      const { checkPluginUpdates } = require("../plugin-manager");
-      return await checkPluginUpdates();
+      const { checkUpdates } = require("../plugin-manager");
+      return await checkUpdates();
     } catch (e) {
       console.warn("[desktop] plugin:check-updates failed:", e.message);
       return [];
